@@ -1,0 +1,64 @@
+#   QWProgs-DM
+#   Copyright (C) 2004  [MAD]ApxuTekTop
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#
+#   $Id: Makefile.dl.in,v 1.1.1.1 2005/09/24 12:44:58 disconn3ct Exp $
+
+CC=@CC@
+RM=@RM@
+MKDEP=@MKDEP@
+INSTALLDIR=$(PREFIX)/sbin
+
+MODULE=qwprogs.so
+
+CFLAGS=-g -Wall -O2 -fPIC
+LDFLAGS=-shared -Wl,-soname,$(MODULE)
+INCFLAGS=-I../include
+
+LIBS=@LIBS@
+
+SOURCES=bg_lib.c buttons.c client.c combat.c doors.c g_cmd.c g_main.c \
+	g_mem.c g_spawn.c g_syscalls.c g_utils.c items.c mathlib.c misc.c \
+	plats.c player.c q_shared.c server.c spectate.c subs.c triggers.c \
+	weapons.c world.c
+OBJECTS=$(SOURCES:.c=.o)
+
+
+all:		build
+
+depend:
+			$(MKDEP) $(INCFLAGS) $(SOURCES)
+
+build:		.depend $(MODULE)
+
+install:	build
+			../install-sh -c -m 755 $(MODULE) $(INSTALLDIR)
+
+clean:
+			$(RM) -f $(OBJECTS) $(MODULE) *~ .depend
+
+distclean:	clean
+			$(RM) -f *.orig *.rej *.tmp Makefile.dl
+
+
+.c.o:
+			$(CC) $(CFLAGS) $(INCFLAGS) -c $<
+
+.depend:	depend
+
+$(MODULE):	$(OBJECTS)
+			$(CC) $(LDFLAGS) -o $(MODULE) $(OBJECTS) $(LIBS)

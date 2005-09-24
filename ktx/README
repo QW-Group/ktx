@@ -1,0 +1,16 @@
+Do not use double in mods, qvm does not support it.
+
+Do not modify progdefs.h and g_public.h.
+
+Use PROG_TO_EDICT, EDICT_TO_PROG for working with (gedict_t)->s.v entity
+fields (like .owner, .enemy).
+
+Map entities are described in g_spawn.c in tables:
+field_t         fields[]
+spawn_t         spawns[]
+
+Missile spawn requires g_globalvars.newmis set.
+
+dont use string arrys in one structure with other types ( q3asm place strings in different segment )
+
+dont use map command with redirectcmd & executecmd

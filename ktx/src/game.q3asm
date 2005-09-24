@@ -1,0 +1,24 @@
+-o qwprogs
+g_main
+g_syscalls
+bg_lib
+buttons
+client
+combat
+doors
+g_cmd
+g_mem
+g_spawn
+g_utils
+items
+mathlib
+misc
+plats
+player
+q_shared
+server
+spectate
+subs
+triggers
+weapons
+world

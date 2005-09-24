@@ -1,0 +1,87 @@
+#   QWProgs-DM
+#   Copyright (C) 2004  [MAD]ApxuTekTop
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#
+#   $Id: Makefile.in,v 1.1.1.1 2005/09/24 12:44:38 disconn3ct Exp $
+
+RM=@RM@
+@SET_MAKE@
+
+SRCDIR=src
+INCDIR=include
+PREFIX=@prefix@
+
+MAKEDL=$(MAKE) -f Makefile.dl
+MAKEQVM=$(MAKE) -f Makefile.vm
+
+
+all:		build
+
+dl:			build-dl
+
+vm:			build-vm
+
+
+build:		build-dl build-vm
+
+build-dl:
+			cd $(SRCDIR); $(MAKEDL) build
+
+build-vm:
+			cd $(SRCDIR); $(MAKEQVM) build
+
+
+install:	install-dl install-vm
+
+install-dl:
+			cd $(SRCDIR); $(MAKEDL) PREFIX=$(PREFIX) install
+
+install-vm:
+			cd $(SRCDIR); $(MAKEQVM) PREFIX=$(PREFIX) install
+
+
+clean:		clean-local clean-include clean-dl clean-vm
+
+clean-local:
+			$(RM) -f *~
+			$(RM) -rf autom4te.cache
+
+clean-include:
+			cd $(INCDIR); $(RM) -f *~
+
+clean-dl:
+			cd $(SRCDIR); $(MAKEDL) clean
+
+clean-vm:
+			cd $(SRCDIR); $(MAKEQVM) clean
+
+
+distclean:	distclean-local distclean-include distclean-dl distclean-vm
+
+distclean-local:
+			$(RM) -f *~ *.orig *.rej *.tmp
+			$(RM) -f Makefile config.log config.status
+			$(RM) -rf autom4te.cache
+
+distclean-include:
+			cd $(INCDIR); $(RM) -f *~ *.orig *.rej *.tmp
+
+distclean-dl:
+			cd $(SRCDIR); $(MAKEDL) distclean
+
+distclean-vm:
+			cd $(SRCDIR); $(MAKEQVM) distclean

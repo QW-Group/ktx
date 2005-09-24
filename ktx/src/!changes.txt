@@ -1,0 +1,141 @@
+2007-09-12
+ 7. i changed a bit k_freeze localinfo, so if 'localinfo k_freeze 1' this let us
+	freeze level _right_ after level spawn, in native Kteams or ktpro trains or plats
+    will move one time,	even k_freeze is set
+
+2007-09-09
+ 6. mmm, quote from ktpro
+	//aerowalk map support 
+	//imo it is greatest map for 1/1, maybe with quad it will be also good for 2/2 ?:)
+	localinfo add_q_aerowalk 1 //adds quad on aerowalk
+
+2007-09-06
+ 3. mostly added ktpro timing feature
+
+	//timing/full laged players manipulation
+	localinfo allow_timing 1         //allow modside manipulatuion
+	localinfo timing_players_time 1  //6 seconds default
+
+	localinfo timing_players_action 3   //only info and glow
+                                  		//bit mask - you must add values to define proper action
+                                  		//1 - info, 2 - glow, 4 - invincible, 8 - autokpause
+                                  		//so if you want make invincible and glow 
+                                  		//it should be: 2 + 4 = 6
+
+	TODO: check code about client connect during mod is paused i.e. k_pause != 0
+
+ 	->s.v.nextthink trouble
+
+ 4. localinfo k_remove_end_hurt 1 //remove hurt trigger on map end
+
+ 5. //mod can remove gibs after 2 seconds so players can not use gibs filter
+	localinfo k_short_gib 1
+
+2007-08-29
+ 1. added 'dmm1' 'dmm2' 'dmm3' 'dmm4' 'dmm5' command.
+	'dm' is just show dmm.
+
+	'dmm6' 'dmm7' 'dmm8' is unsupported!!!
+
+ 2.	heh, if u an admin, ktpro XonX usermode command
+ 	set localinfo k_fallbunny 0, always,
+ 	so I introduce 'k_umfallbunny', which is just control which value
+ 	must be set to 'k_fallbunny' after XonX (u are must be admin too).
+
+2007-08-28 day
+'official' command removed due to '4on4' existence
+
+2007-08-28 night %)
+added 1on1 2on2 3on3 4on4 10on10 and ffa commands
+
+for example 1on1 on dm6 will setup some predefined stuff for this
+command and exec this files:
+	"exec configs/usermodes/default.cfg\n"
+	"exec configs/usermodes/dm6.cfg\n"
+	"exec configs/usermodes/1on1/default.cfg\n"
+	"exec configs/usermodes/1on1/dm6.cfg\n"
+
+and some localinfos
+
+'k_free_mode'
+
+for 1on1 / 2on2 / 4on4 and ffa commands manipulation
+0 - noone, 1 - admins, 2 elected admins too
+3 - only real real judges, 4 - elected judges too
+5 - all players
+
+hmm, I didn't understand how k_free_mode affect this commands in ktpro,
+so implement how i think this must be, it is like some sort of access control
+
+'k_allowed_free_modes'  //for possible 1on1 2on2 etc commands
+//you have to add all needed values like in fpd for allowing what you want:
+//1on1 = 1, 2on2 = 2, 3on3 = 4, 4on4 = 8, 10on10 = 16, ffa = 32
+//localinfo k_allowed_free_modes 63 means that all modes are allowed
+//63 = 1 + 2 + 4 + 8 + 16 + 32
+
+2007-08-27
+all maps, even native eXmY dm1-dm6 start and end, uses `cmd cc <value>`, only
+few impulse commands exist, like weapon changing and some spectator stuff.
+
+TODO: remove latest impulses except weapon and so on.
+
+better code for stuffing maps and commands
+
+added setinfo 'ss' like in ktpro
+quote from ktpro
+ss - used to control the speed at which aliases are stuffed to you when connecting
+--          to a KTeams Pro server, default value is 4 which means one alias every
+            0.04 seconds, the smallest possible value is 1 and only integer values are 
+            accepted
+            
+                     example: setinfo ss 1
+                     
+                     this will cause the server to stuff you one alias every 0.01 seconds
+
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	if u don't know, u can use `check_maps` at server console for generating
+	stuff like this in the server localinfo
+
+	localinfo 1000 ukooldm1
+	localinfo 1001 ukooldm2
+	localinfo 1002 ukooldm3
+
+	so u may not do this manually, just put this command some where
+	in the server config file. Oh, and this is MVDSV feature.
+
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
+2007-08-10
+custom maps are now uses `cmd cm <value>` instead of impulses, this is remove quantity limit
+of maps
+---------------------------
+2007-08-06
+shownick: using 'k_nick' setinfo from client as nick
+		  using 'ln' setinfo to change the position of the display of shownick
+		  centerprint cleared after 0.8 second, mb let player customize this time?
+---------------------------
+2007-08-04
+shownick: added powerups and weapon
+TODO: use k_nick info from client as nick and clear
+		centerprint after 1 second
+
+---------------------------
+2007-08-03
+added shownick
+TODO: show powerups and best weapon and use k_nick info from client as nick and clear
+		centerprint after 1 second
+
+---------------------------
+2007-08-01
+added simple auto server demo recording
+---------------------------
+2007-07-29
+some simple support for VIP, currently it is only for gaining admin rights :P
+
+---------------------------
+2007-07-26
+brokenankle worked now
+
+TODO: it just blok +jump for one frame, so this can be ezly escaped via cheatish client,
+	  so current implementation(Kteams 2.21 and i think ktpro too) is suck,
+	  but as for me i prefer disable brokenankle at all

@@ -1,0 +1,1424 @@
+// match.c
+
+#include "g_local.h"
+
+void NextLevel ();
+void StopTimer ( int removeDemo );
+void EndMatch ( float skip_log );
+void BotForceStart ();
+void CheckAll();
+
+float CountALLPlayers ()
+{
+	gedict_t	*p;
+	float		num = 0;
+
+	p = find( world, FOFCLSN, "player" );
+	while ( p ) {
+		if ( !strnull( p->s.v.netname ) )
+			num++;
+		p = find ( p, FOFCLSN, "player" );
+	}
+	return num;
+}
+
+float CountPlayers()
+{
+	gedict_t	*p;
+	float		num = 0;
+
+	p = find( world, FOFCLSN, "player" );
+	while ( p ) {
+		if ( !strnull( p->s.v.netname ) && p->k_accepted == 2 )
+			num++;
+		p = find ( p, FOFCLSN, "player" );
+	}
+	return num;
+}
+
+float CountRPlayers()
+{
+	gedict_t	*p;
+	float		num = 0;
+
+	p = find( world, FOFCLSN, "player" );
+	while ( p ) {
+		if ( !strnull( p->s.v.netname ) && p->k_accepted == 2 && p->ready )
+			num++;
+		p = find ( p, FOFCLSN, "player" );
+	}
+	return num;
+}
+
+float CountTeams()
+{
+	gedict_t	*p, *p2;
+	float		num;
+	char		*s1, *s2;
+
+	num = 0;
+	p = find ( world, FOFCLSN, "player" );
+	while( p ) {
+		if( !strnull( p->s.v.netname ) && p->k_accepted == 2 )
+			p->k_flag = 0;
+
+		p = find ( p, FOFCLSN, "player" );
+	}
+
+	p = find ( world, FOFCLSN, "player" );
+	while( p ) {
+		if( !strnull( p->s.v.netname ) && !p->k_flag && p->k_accepted == 2 ) {
+			p->k_flag = 1;
+
+			s1 = ezinfokey ( p, "team" );
+			if( !strnull( s1 ) ) {
+				num++;
+
+				p2 = find ( p, FOFCLSN, "player" );
+				while( p2 ) {
+					s1 = ezinfokey ( p, "team" );
+					s2 = ezinfokey ( p2, "team" );
+					if( streq( s1, s2 ) )
+						p2->k_flag = 1;
+					p2 = find ( p2, FOFCLSN, "player" );
+				}
+			}
+		}
+		p = find ( p, FOFCLSN, "player" );
+	}
+	return num;
+}
+
+float CountRTeams()
+{
+	gedict_t	*p, *p2;
+	float		num;
+	char		*s1, *s2;
+
+	num = 0;
+	p = find ( world, FOFCLSN, "player" );
+	while( p ) {
+		if( !strnull( p->s.v.netname ) && p->k_accepted == 2 )
+			p->k_flag = 0;
+
+		p = find ( p, FOFCLSN, "player" );
+	}
+
+	p = find ( world, FOFCLSN, "player" );
+	while( p ) {
+		if( !strnull( p->s.v.netname ) && !p->k_flag && p->ready && p->k_accepted == 2 ) {
+			p->k_flag = 1;
+
+			s1 = ezinfokey ( p, "team" );
+			if( !strnull( s1 ) ) {
+				num++;
+
+				p2 = find ( p, FOFCLSN, "player" );
+				while( p2 ) {
+					s1 = ezinfokey ( p, "team" );
+					s2 = ezinfokey ( p2, "team" );
+					if( streq( s1, s2 ) )
+						p2->k_flag = 1;
+					p2 = find ( p2, FOFCLSN, "player" );
+				}
+			}
+		}
+		p = find ( p, FOFCLSN, "player" );
+	}
+	return num;
+}
+
+// check count of members in each team i'm guess
+// and return 0 if at least one team has less members than 'memcnt'
+// else return 1 (even we have more mebers than memcnt, dunno is this bug <- FIXME)
+
+float CheckMembers ( float memcnt )
+{
+	gedict_t	*p, *p2;
+	float		f1;
+	char		*s1, *s2;
+
+	p = find ( world, FOFCLSN, "player" );
+	while( p ) {
+		if( !strnull( p->s.v.netname ) && p->k_accepted == 2 )
+			p->k_flag = 0;
+
+		p = find ( p, FOFCLSN, "player" );
+	}
+
+	p = find ( world, FOFCLSN, "player" );
+	while( p ) {
+		if( !strnull( p->s.v.netname ) && !p->k_flag && p->ready && p->k_accepted == 2 ) {
+			p->k_flag = 1;
+			f1 = 1;
+			s1 = ezinfokey ( p, "team" );
+
+			if( !strnull ( s1 ) ) {
+				p2 = find ( p, FOFCLSN, "player" );
+
+				while( p2 ) {
+					s1 = ezinfokey ( p, "team" );
+					s2 = ezinfokey ( p2, "team" );
+
+					if( streq( s1, s2 ) ) {
+						p2->k_flag = 1;
+						f1++;
+					}
+					p2 = find ( p2, FOFCLSN, "player" );
+				}
+			}
+
+			if ( f1 < memcnt )
+				return 0;
+		}
+
+		p = find ( p, FOFCLSN, "player" );
+	}
+	return 1;
+}
+
+void EndMatch ( float skip_log )
+{
+	gedict_t	*p, *p2;
+
+	char *tmp, *tmp2;
+	float f1, f2, sumfrags = 0, maxfrags, maxdeaths, maxfriend, maxeffi;
+
+	if( match_over )
+		return;
+
+// s: zero the flag
+	k_sudden_death = 0;
+	tmp = ezinfokey( world, "k_host" );
+	if( !strnull( tmp ) )
+		trap_cvar_set( "hostname", tmp );
+	match_over = 1;
+	k_berzerk = 0;
+	trap_lightstyle(0, "m");
+	f1 = atoi( ezinfokey ( world, "fpd" ) );
+	f1 = f1 - ((int)f1 & 64);
+	localcmd("serverinfo fpd %d\n", (int)f1);
+	localcmd("sv_spectalk 1\n");
+	G_bprint( 2, "The match is over\n");
+	G_dprint("RESULT");
+
+	if( skip_log )
+		G_dprint("%%stopped\n");
+	else {
+		p = find( world, FOFCLSN, "player" );
+		while( p ) 
+		{
+			if( !strnull( p->s.v.netname ) && p->k_accepted == 2 )
+			{
+				G_dprint("%%%s", p->s.v.netname);
+				G_dprint("%%t%%%s", ezinfokey(p, "team"));
+				G_dprint("%%fr%%%d", (int)p->s.v.frags);
+				p->ready = 0;
+// take away powerups so scoreboard looks normal
+// FIXME: make this clean, 7864320 200 ?
+				p->s.v.items = p->s.v.items - ((int)p->s.v.items & 7864320);
+				p->s.v.effects = p->s.v.effects - ((int)p->s.v.effects & 200);
+				p->invisible_finished = 0;
+				p->invincible_finished = 0;
+				p->super_damage_finished = 0;
+				p->radsuit_finished = 0;
+			}
+
+			p = find ( p, FOFCLSN, "player" );
+		}
+
+		G_dprint("%%fl%%%d", (int)fraglimit);
+		G_dprint("%%tl%%%d", (int)timelimit);
+		G_dprint("%%map%%%s\n", g_globalvars.mapname);
+
+        if( atoi( ezinfokey( world, "k_duel" ) ) && teamplay ) {
+// Summing up the frags to calculate team percentages
+			p = find ( world, FOFCLSN, "player" );
+			while( p ) {
+				if( !strnull ( p->s.v.netname ) 
+					&& ( !strnull( ezinfokey (p, "team") ) && p->k_accepted == 2 ) )
+					sumfrags += p->s.v.frags;
+
+				p = find ( p, FOFCLSN, "player" );
+			}
+
+			p = find ( world, FOFCLSN, "ghost" );
+			while( p ) {
+				sumfrags += p->s.v.frags;
+
+				p = find ( p, FOFCLSN, "ghost" );
+			}
+// End of summing
+			G_bprint(2, "\nÔåáí óãïòåó: æòáçó  ðåòãåîôáçå\nžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n");
+			p = find ( world, FOFCLSN, "player" );
+			while( p ) {
+				if( !strnull ( p->s.v.netname ) && !p->ready
+					 && ( !strnull( ezinfokey (p, "team") ) && p->k_accepted == 2 ) ) {
+					p2 = p;
+					f1 = 0;
+					G_bprint(2, "%s‘: ", ezinfokey ( p, "team" ) );
+					while ( p2 ) {
+						tmp = ezinfokey(p, "team");
+						tmp2 = ezinfokey(p2, "team");
+						if( streq( tmp, tmp2 ) ) {
+							f1 += p2->s.v.frags;
+							p2->ready = 1;
+						}
+						p2 = find ( p2, FOFCLSN, "player" );
+					}
+					f2 = 0;
+					p2 = find( world, FOFCLSN, "ghost" );
+					while( p2 ) {
+						if( !p2->ready ) {
+							// FIXME: is this work ??????????????
+							tmp2 = ezinfokey(world, va("%d", (int)p2->k_teamnum)); // oh, dark magic?
+							tmp  = ezinfokey(p, "team");
+							if ( streq( tmp, tmp2 ) ) {
+								f2 += p2->s.v.frags;
+								p2->ready = 1;
+							}
+						}
+
+						p2 = find ( p2, FOFCLSN, "ghost" );
+					}
+
+					G_bprint( 2, "%d", (int) f1 );
+
+					if( f2 )
+						G_bprint( 2, tmp, " + (%d) = %d", (int)f2, (int)(f1+f2) );
+
+					// effi, FIXME: make it looooks better %)
+					G_bprint(2, " %f%%\n", ((sumfrags > 0)? ((f1 + f2)/sumfrags * 100) : 0));
+				}
+
+				p = find ( p, FOFCLSN, "player" );
+			}
+		}
+
+		G_bprint(2, "\n");
+
+		p = find ( world, FOFCLSN, "player" );
+		while( p ) {
+			p->ready = 1;
+			p = find ( p, FOFCLSN, "player" );
+		}
+
+// Player statistics printout here
+
+// Probably low enough for a start value :)
+		maxfrags = -99999;
+
+		maxdeaths = 0;
+		maxfriend = 0;
+		maxeffi = 0;
+
+		f1 = CountTeams();
+
+		G_bprint(2, "Ðìáùåò óôáôéóôéãó:\nÆòáçó (òáîë) ");
+        if( !atoi ( ezinfokey ( world, "k_duel" ) ) && f1 && teamplay )
+			G_bprint(2, "æòéåîäëéììó ");
+		G_bprint(2, " åææéãéåîãù\nžžžžžžžžžžžžžžžžžžžžžžž");
+        if( !atoi( ezinfokey ( world, "k_duel" ) ) && f1 && teamplay )
+			G_bprint(2, "žžžžžžžžžžžž");
+		G_bprint(2, "Ÿ\n");
+
+		p = find ( world, FOFCLSN, "player" );
+		while( p ) {
+			if( !strnull ( p->s.v.netname ) && p->k_accepted == 2 && p->ready ) {
+				p2 = p;
+				while ( p2 ) {
+					tmp = ezinfokey(p, "team");
+					tmp2 = ezinfokey(p2, "team");
+					if( streq ( tmp, tmp2 ) ) {
+						G_bprint(2, "%s‘ %s: %d (%d) ", tmp2, p2->s.v.netname, (int)p2->s.v.frags
+									, (int)(p2->s.v.frags - p2->deaths) );
+
+                        if( !atoi( ezinfokey ( world, "k_duel" ) ) && f1 && teamplay )
+							G_bprint(2, "%d ", (int)p2->friendly);
+
+						if(p2->s.v.frags < 1)
+							p2->efficiency = 0;
+						else
+							p2->efficiency = p2->s.v.frags / (p2->s.v.frags + p2->deaths) * 100;
+
+//						tmp = ftos(p2.efficiency);
+//						if(floor(p2.efficiency) == p2.efficiency) G_bprint(2, " ");
+//						else G_bprint(2, "");
+//						G_bprint(2, tmp, "%\n");
+// FIXME: make it looks better
+						G_bprint(2, "%3.1f%%\n", p2->efficiency);
+
+						if (maxfrags < p2->s.v.frags)
+							maxfrags = p2->s.v.frags;
+						if (maxdeaths < p2->deaths)
+							maxdeaths = p2->deaths;
+						if (maxfriend < p2->friendly)
+							maxfriend = p2->friendly;
+						if (maxeffi < p2->efficiency)
+							maxeffi = p2->efficiency;
+						p2->ready = 0;
+					}
+
+					p2 = find ( p2, FOFCLSN, "player" );
+				}
+			}
+
+			p = find ( p, FOFCLSN, "player" );
+		}
+
+        if( !atoi( ezinfokey (world, "k_duel" ) ) ) {
+// Print the high score table
+			G_bprint(2, "\n%s ôïð óãïòåòó:\nFrags      : ", g_globalvars.mapname);
+			f1 = 0;
+			p = find ( world, FOFCLSN, "player" );
+			while( p ) {
+				if( !strnull ( p->s.v.netname ) && p->k_accepted == 2 )
+					if( p->s.v.frags == maxfrags ) {
+						if ( f1 )
+							G_bprint(2, "             ");
+						f1 = 1;
+						G_bprint(2, "%s %d‘\n", p->s.v.netname, (int)maxfrags);
+					}
+
+				p = find ( p, FOFCLSN, "player" );
+			}
+
+
+			G_bprint(2, "Deaths     : ");
+			f1 = 0;
+			p = find ( world, FOFCLSN, "player" );
+			while( p ) {
+				if( !strnull ( p->s.v.netname ) && p->k_accepted == 2 )
+					if( p->deaths == maxdeaths ) {
+						if ( f1 )
+							G_bprint(2, "             ");
+						f1 = 1;
+						G_bprint(2, "%s %d‘\n", p->s.v.netname, (int)maxdeaths);
+					}
+
+				p = find ( p, FOFCLSN, "player" );
+			}
+
+			if(maxfriend) {
+				G_bprint(2, "Friendkills: ");
+
+				f1 = 0;
+				p = find ( world, FOFCLSN, "player" );
+				while( p ) {
+					if( !strnull ( p->s.v.netname ) && p->k_accepted == 2 )
+						if( p->friendly == maxfriend ) {
+							if ( f1 )
+								G_bprint(2, "             ");
+							f1 = 1;
+							G_bprint(2, "%s %d‘\n", p->s.v.netname, (int)maxfriend);
+						}
+
+					p = find ( p, FOFCLSN, "player" );
+				}
+			}
+
+			G_bprint(2, "Efficiency : ");
+			f1 = 0;
+			p = find ( world, FOFCLSN, "player" );
+			while( p ) {
+				if( !strnull ( p->s.v.netname ) && p->k_accepted == 2 )
+					if( p->efficiency == maxeffi ) {
+						if ( f1 )
+							G_bprint(2, "             ");
+						f1 = 1;
+						G_bprint(2, "%s %3.1f%%‘\n", p->s.v.netname, maxeffi);
+					}
+
+				p = find ( p, FOFCLSN, "player" );
+			}
+		}
+
+		G_bprint(2, "\n");
+	}
+
+	p = find( world, FOFCLSN, "ghost" );
+	while( p ) {
+		ent_remove( p );
+		p = find( p, FOFCLSN, "ghost" );
+	}
+
+	StopTimer( skip_log ); // WARNING: if we are skip log, we are also delete demo
+
+	for( f1 = 666; k_teamid >= f1 ; f1++ )
+		localcmd("localinfo %d \"\"\n", (int)f1); //removing key
+
+	for( f1 = 1; k_userid >= f1; f1++ )
+		localcmd("localinfo %d \"\"\n", (int)f1); //removing key
+
+	NextLevel();
+}
+
+void TimerThink ()
+// Called every second during a match. cnt = minutes, cnt2 = seconds left.
+// Tells the g_globalvars.time every now and then.
+{
+	char *tmp, *tmp2;
+	gedict_t	*p;
+	float f1, f2, f3, f4, k_overtime , k_exttime, player1scores, player2scores, player1found;
+
+	player1found = f1 = 0;
+
+
+//	G_bprint(2, "left %2d:%2d\n", (int)self->cnt, (int)self->cnt2);
+
+
+	// moved out the score checking every second to every minute only.  And if someone
+	// types scores it recalculates it for them.
+
+	if( k_sudden_death )
+		return;      
+
+	if( k_pause ) {
+		self->s.v.nextthink = g_globalvars.time + 1;
+		return;
+	}
+
+	if( self->k_teamnum < g_globalvars.time && !k_checkx ) {
+		k_checkx = 1; // global which set to true when some time spend after match start
+	}
+
+	if( !f1 )
+		f1 = CountPlayers();
+
+	if( !f1 ) {
+		EndMatch( 1 );
+		return;
+	}
+
+	( self->cnt2 )--;
+
+    if( k_berzerkenabled ){
+        f1 = k_berzerkenabled;
+		f2 = floor(f1 / 60);
+		f1 = f1 - (f2 * 60);
+		f2++;
+
+		if( self->cnt2 == f1 && self->cnt == f2 ) {
+			G_bprint(2, "BERZERK!!!!\n");
+			trap_lightstyle ( 0, "ob" );
+			k_berzerk = 1;
+
+			p = find ( world, FOFCLSN, "player" );
+			while( p ) {
+				if( !strnull ( p->s.v.netname ) && p->s.v.health > 0 ) {
+					p->s.v.items = (int)p->s.v.items | (4194304 | 1048576); // FIXME wtf?
+					p->super_time = 1;
+					p->super_damage_finished = g_globalvars.time + 3600;
+					p->invincible_time = 1;
+					p->invincible_finished = g_globalvars.time + 2;
+					p->k_666 = 1;
+				}
+
+				p = find ( p, FOFCLSN, "player" );
+			}
+		}
+	}
+
+	if( !self->cnt2 ) 
+	{
+		self->cnt2 = 60;
+		self->cnt  -= 1;
+
+//		if ( self->cnt < 0 )
+//				self->cnt = 0;
+
+		localcmd("serverinfo status \"%d min left\"\n", (int)self->cnt);
+
+		if( k_showscores && k_nochange == 0 )
+		{
+			// Calculate the Scores every 60 seconds.
+			k_scores1 = 0;
+			k_scores2 = 0;
+
+			p = find ( world, FOFCLSN, "player" );
+			while( p ) 
+			{
+				if( !strnull ( p->s.v.netname ) && p->k_accepted == 2 ) 
+				{
+					f1++;
+					tmp  = ezinfokey(world, "k_team1");
+					tmp2 = ezinfokey(p, "team");
+
+					if( streq( tmp, tmp2 ) )
+						k_scores1 += p->s.v.frags;
+					else 
+						k_scores2 += p->s.v.frags;
+				}
+
+				p = find ( p, FOFCLSN, "player" );
+			}
+
+			p = find( world, FOFCLSN, "ghost" );
+			while( p ) 
+			{
+				tmp2 = ezinfokey( world, va("%d", (int)p->k_teamnum) );
+				tmp  = ezinfokey( world, "k_team1" );
+				if( streq( tmp, tmp2 ) )
+					k_scores1 += p->s.v.frags;
+				else
+					k_scores2 += p->s.v.frags;
+
+				p = find ( p, FOFCLSN, "ghost" );
+			}
+
+		}
+
+		if( !self->cnt )
+		{
+			k_overtime = atoi( ezinfokey( world, "k_overtime" ) );
+			
+			// If 0 no overtime, 1 g_globalvars.time, 2 sudden death
+			// And if its neither then well we exit
+			if( k_overtime )
+			{
+				f3 = CountTeams();
+				f4 = CountPlayers();
+				k_exttime = atoi( ezinfokey ( world, "k_exttime" ) );
+				
+                // Overtime.
+				// Ok we have now decided that the game is ending,
+				// 	so decide overtime wise here what to do.
+				// Check to see if duel first
+
+				if( f4 == 2 && f4 < 3)
+				{
+					p = find ( world, FOFCLSN, "player" );
+					while( p ) 
+					{
+						if( !strnull ( p->s.v.netname ) && player1found == 0 ) 
+						{
+                            player1scores = p->s.v.frags;
+							player1found = 1;					
+						}
+						else
+						{
+                            player2scores = p->s.v.frags;
+						}
+
+						p = find ( p, FOFCLSN, "player" );
+					}
+					
+					// In player1scores and player2scores we have scores(lol?)
+					if( player1scores == player2scores )
+					{
+						G_bprint(3, "time over, the game is a draw\n");
+						if( k_overtime == 1 ) {
+							// Ok its increase time
+							self->cnt =  k_exttime;
+							self->cnt2 = 60;
+
+							G_bprint(2, "%d‘ minute%s overtime follows\n", 
+									(int)k_exttime, ((k_exttime != 1) ? "'s" : ""));
+							self->s.v.nextthink = g_globalvars.time + 1;
+
+							return;	
+						} else {
+							G_bprint(2, "Sudden death ïöåòôéíå âåçéîó\n");
+						// added timer removal at sudden death beginning
+							k_sudden_death = 1;
+
+							p = find ( world, FOFCLSN, "timer");
+							while( p ) {
+								p->s.v.nextthink = g_globalvars.time + 0.1;
+								p->s.v.think = ( func_t ) SUB_Remove;
+
+								p = find(p, FOFCLSN, "timer");
+							}
+							return;
+						}
+					}
+				}
+				// Or it can be a team game.
+				// Handle a 2v2 or above team game
+				else if( f3 == 2 && f4 > 2 && k_scores1 == k_scores2 )
+				{
+					G_bprint(3, "time over, the game is a draw\n");
+					if( k_overtime == 1 ) {
+						// Ok its increase time
+						self->cnt =  k_exttime;
+						self->cnt2 = 60;
+
+						G_bprint(2, "%d‘ minute%s overtime follows\n", 
+								(int)k_exttime, ((k_exttime != 1) ? "'s" : ""));
+						self->s.v.nextthink = g_globalvars.time + 1;
+
+						return;	
+					} else {
+						G_bprint(2, "Sudden death ïöåòôéíå âåçéîó\n");
+						// added timer removal at sudden death beginning
+						k_sudden_death = 1;
+
+						p = find ( world, FOFCLSN, "timer");
+						while( p ) {
+							p->s.v.nextthink = g_globalvars.time + 0.1;
+							p->s.v.think = ( func_t ) SUB_Remove;
+
+							p = find(p, FOFCLSN, "timer");
+						}
+						return;
+					}
+				}
+			}
+
+			EndMatch( 0 );
+
+			return;
+		}
+
+		G_bprint(2, "%d‘ minute%s remaining\n", (int)self->cnt, ((self->cnt != 1) ? "'s" : ""));
+
+		self->s.v.nextthink = g_globalvars.time + 1;
+
+		if( k_showscores ) {
+			if( k_scores1 == k_scores2 ) {
+				G_bprint(2, "The game is currently a tie\n");
+			} else if( k_scores1 != k_scores2 ) {
+				f1 = k_scores1 - k_scores2;
+				G_bprint(2, "Ôåáí %s‘ leads by %d frag%s\n",
+								ezinfokey ( world, ( f1 > 0 ? "k_team1" : "k_team2" ) ),
+								abs( (int)f1 ), ( f1 == 1 ? "" : "s") );
+			}
+		}
+		return;
+	}
+
+	if( self->cnt2 == 20 || self->cnt2 == 40 )
+		CheckAll();
+
+	if( self->cnt == 1 && ( self->cnt2 == 30 || self->cnt2 == 15 || self->cnt2 <= 10 ) ) {
+
+/*
+// tick sound if remaining time < 6 seconds
+		if(self->cnt2 < 6) {
+			p = find ( world, FOFCLSN, "player" );
+			while( p ) {
+			if(!strnull ( p->s.v.netname ))
+				stuffcmd (p, "play buttons/switch04.wav\n");
+			p = find ( p, FOFCLSN, "player" );
+                        }
+		}
+*/
+		G_bprint(2, "%d‘ second%s\n", (int)self->cnt2, ( self->cnt2 != 1? "s" : "" ) );
+	}
+
+	self->s.v.nextthink = g_globalvars.time + 1;
+}
+
+void StartMatch ()
+// Reset player frags and start the timer.
+{
+	gedict_t *p, *old, *old2;
+	char *tmp, *s1;
+	float f1, f2;
+
+	k_standby = 0;
+	k_checkx = 0;
+	k_userid = 1;
+	k_teamid = 666;
+	k_nochange = 0;	
+	localcmd("localinfo 1 \"\"\n");
+	localcmd("localinfo 666 \"\"\n");
+	f1 = atoi( ezinfokey( world, "k_pow" ) );
+	f2 = atoi( ezinfokey( world, "k_dm2mod" ) );
+	p = findradius(world, VEC_ORIGIN, 999999);
+
+    // Check to see if berzerk is set.
+    if( atoi( ezinfokey( world, "k_bzk" ) ) ) {
+        k_berzerkenabled = atoi ( ezinfokey( world, "k_btime" ) );
+    } else {
+        k_berzerkenabled = 0;
+    }
+
+	while( p ) {
+		old = findradius(p, VEC_ORIGIN, 999999);;
+//going for the if content record..
+		if( deathmatch > 3 ) {
+			if(streq( p->s.v.classname, "rocket" ) || streq( p->s.v.classname, "grenade" ) || streq( p->s.v.classname, "trigger_changelevel" )
+				|| streq( p->s.v.classname, "weapon_nailgun" ) || streq( p->s.v.classname, "weapon_supernailgun" )
+				|| streq( p->s.v.classname, "weapon_supershotgun" ) || streq( p->s.v.classname, "weapon_rocketlauncher" )
+				|| streq( p->s.v.classname, "weapon_grenadelauncher" ) || streq( p->s.v.classname, "weapon_lightning" )
+				|| ( !f1 && (  streq( p->s.v.classname, "item_artifact_invulnerability" )
+				            || streq( p->s.v.classname, "item_artifact_super_damage" )
+				            || streq( p->s.v.classname, "item_artifact_envirosuit" )
+				            || streq( p->s.v.classname, "item_artifact_invisibility")
+							)
+					)
+			  )
+				ent_remove( p );
+		} else {
+			if(streq( p->s.v.classname, "rocket" ) || streq( p->s.v.classname, "grenade" ) || streq( p->s.v.classname, "trigger_changelevel" )
+				|| ( (deathmatch == 2 && f2) &&
+				     (   streq( p->s.v.classname, "item_armor1" )
+					  || streq( p->s.v.classname, "item_armor2" )
+					  || streq( p->s.v.classname, "item_armorInv")
+                     )
+				   )
+				|| (!f1 && (   streq( p->s.v.classname, "item_artifact_invulnerability" )
+				            || streq( p->s.v.classname, "item_artifact_super_damage" )
+				            || streq( p->s.v.classname, "item_artifact_envirosuit" )
+				            || streq( p->s.v.classname, "item_artifact_invisibility")
+						   )
+				   )
+			  )
+				ent_remove( p );
+		}
+		p = old;
+	}
+
+	G_dprint("MATCH STARTED");
+
+	match_in_progress = 2;
+
+	p = find ( world, FOFCLSN, "player" );
+	while( p ) {
+		if( !strnull ( p->s.v.netname ) ) {
+			tmp = ezinfokey(p, "team"); // used below
+			G_dprint("%%%s%%t%%%s", p->s.v.netname, tmp);
+
+			p->k_teamnum = 0;
+
+			if( !strnull( tmp ) ) {
+				f1 = 665;
+
+				while( k_teamid > f1 && !p->k_teamnum ) {
+					f1++;
+					s1 = ezinfokey(world, va("%d", (int)f1));
+					tmp = ezinfokey(p, "team");
+					if( streq( tmp, s1 ) )
+						p->k_teamnum = f1;
+				}
+
+				if( !p->k_teamnum ) {
+					f1++;
+					p->k_teamnum = k_teamid = f1;
+					localcmd( "localinfo %d \"%s\"\n", (int)f1, ezinfokey( p, "team" ) );
+				}
+			} 
+			else
+				p->k_teamnum = 666;
+			p->friendly = p->deaths = p->s.v.frags = 0;
+			old = self;
+			self = p;
+			SetChangeParms();
+			PutClientInServer();
+			self = old;
+		}
+		p = find ( p, FOFCLSN, "player" );
+	}
+
+	G_dprint("\n");
+
+	G_bprint(2, "The match has begun!\n");
+
+	localcmd( "sv_spectalk %d\n", (int)(f2 = atoi( ezinfokey(world, "k_spectalk" ) ) ) );
+
+	f1 = atoi( ezinfokey( world, "fpd" ) );
+	f1 = f1 - ((int)f1 & 64) + (f2 * 64);
+	localcmd( "serverinfo fpd %d\n", (int)f1 );
+
+	k_vbreak     = 0;
+	k_berzerk    = 0;
+	k_showscores = 0;
+
+	self->k_teamnum = g_globalvars.time + 3;  //dirty i know, but why waste space?
+											  // FIXME: waste space, but be clean
+	self->cnt = timelimit;
+	self->cnt2 = 60;
+	localcmd("serverinfo status \"%d min left\"\n", (int)timelimit);
+
+	self->s.v.think = ( func_t ) TimerThink;
+	self->s.v.nextthink = g_globalvars.time + 1;
+
+	localcmd( "localinfo k_host \"%s\"\n", ezinfokey(world, "hostname") );
+
+	f1 = CountRTeams();
+	f2 = CountPlayers();
+
+    if( f1 == 2 && f2 > 2 )
+    {
+		k_showscores = 1;
+		f2 = 0;
+		old = world;
+
+		p = find ( world, FOFCLSN, "player" );
+		while( p && !f2 ) {
+			if( !strnull ( p->s.v.netname ) ) {
+				localcmd("localinfo k_team1 \"%s\"\n", ezinfokey(p, "team"));
+				f2 = 1;
+				old = p;
+			}
+
+			p = find ( p, FOFCLSN, "player" );
+	    }
+
+		while( p  && f2 ) {
+			if( !strnull ( p->s.v.netname ) ) {
+				tmp = ezinfokey(p, "team");
+				s1 = ezinfokey(old, "team");
+				if( strneq(tmp, s1) ) {
+					localcmd("localinfo k_team2 \"%s\"\n", tmp);
+					old2 = p;
+					f2 = 0;
+				}
+			}
+
+			p = find ( p, FOFCLSN, "player" );
+		}
+
+		localcmd("serverinfo hostname \"%s (%s vs. %s)\"\n", ezinfokey(world, "hostname")
+									, ezinfokey(old, "team"), ezinfokey(old2, "team"));
+	}
+}
+
+void TimerStartThink ()
+// Called every second during the countdown.
+{
+	gedict_t *p;
+	float num, f1, f2, f3;
+
+	self->cnt2 -= 1;
+
+	if( self->cnt2 == 1 ) {
+		k_standby = 1;
+
+		p = find ( world, FOFCLSN, "player" );
+		while( p ) {
+			if( !strnull ( p->s.v.netname ) ) {
+				//set to ghost, 1 second before matchstart
+				p->s.v.takedamage = 0;
+				p->s.v.solid      = 0;
+				p->s.v.movetype   = 0;
+				p->s.v.modelindex = 0;
+				p->s.v.model      = "";
+			}
+
+			p = find ( p, FOFCLSN, "player" );
+		}
+	}
+    else if( !self->cnt2 ) {
+		WriteByte(2, 26);
+		WriteString(2, "");                      
+		f2 = atoi( ezinfokey( world, "k_lockmin" ) );
+		f3 = atoi( ezinfokey( world, "k_lockmax" ) );
+		f1 = CountRTeams();
+
+		num = atoi( ezinfokey( world, "k_membercount" ) );
+		if( !num )
+			num = 1;
+		else
+			num = CheckMembers( num );
+
+		if( f1 < f2 || f1 > f3 || !num ) {
+			G_bprint(2, "Illegal number of teams or players\naborting...\n");
+
+			StopTimer( 1 );
+
+			return;
+		}
+
+		StartMatch();
+
+		return;
+	}
+
+	num = floor(self->cnt2 / 10);
+	WriteByte(2, 26);
+	WriteShort(2, 49930);   // \nC
+	WriteShort(2, 62959);   // ou
+	WriteShort(2, 62702);   // nt
+	WriteShort(2, 61412);   // do
+	WriteShort(2, 61175);   // wn
+	WriteShort(2, 8250);    // :
+	if( num )
+		WriteByte(2, num + 146);
+	num = self->cnt2 - num * 10;
+	WriteByte(2, num + 146);
+	WriteShort(2, 2570); // 0x0A0A = \n\n
+	WriteByte(2, 10);
+//deathmatch  x
+	WriteShort(2, 25924);
+	WriteShort(2, 29793);
+	WriteShort(2, 28008);
+	WriteShort(2, 29793);
+	WriteShort(2, 26723);
+	WriteShort(2, 8224);
+	WriteByte(2, deathmatch + 146);
+//(teamplay    x)
+	if(teamplay) {
+		WriteByte(2, 10);
+		WriteShort(2, 25940);
+		WriteShort(2, 28001);
+		WriteShort(2, 27760);
+		WriteShort(2, 31073);
+		WriteShort(2, 8224);
+		WriteShort(2, 8224);
+		WriteByte(2, teamplay + 146);
+	}
+//(timelimit  xx)
+	if(timelimit) {
+		WriteShort(2, 21514);
+		WriteShort(2, 28009);
+		WriteShort(2, 27749);
+		WriteShort(2, 28009);
+		WriteShort(2, 29801);
+		WriteShort(2, 8224);
+		f1 = timelimit;
+		num = floor(f1 / 10);
+		f1 = f1 - (num * 10);
+		if ( num )
+			WriteByte(2, num + 146);
+		else
+			WriteByte(2, 32);
+		WriteByte(2, f1 + 146);
+	}
+//(fraglimit xxx)
+	if(fraglimit) {
+		WriteShort(2, 17930);
+		WriteShort(2, 24946);
+		WriteShort(2, 27751);
+		WriteShort(2, 28009);
+		WriteShort(2, 29801);
+		WriteByte(2, 32);
+		f1 = fraglimit;
+		num = floor(f1 / 100);
+		f1 = f1 - (num * 100);
+		if( num )
+			WriteByte(2, num + 146);
+		else
+			WriteByte(2, 32);
+		num = floor(f1 / 10);
+		f1 = f1 - (num * 10);
+		WriteByte(2, num + 146);
+		WriteByte(2, f1 + 146);
+	}
+// overtime printout, supports sudden death display
+// overtime xx
+	f1 = atoi( ezinfokey( world, "k_overtime" ) );
+	if( f1 ) {
+		WriteShort(2, 20234);
+		WriteShort(2, 25974);
+		WriteShort(2, 29810);
+		WriteShort(2, 28009);
+		WriteShort(2, 8293);
+		WriteShort(2, 8224);
+		if( f1 == 1 ) {
+			f1 = atoi( ezinfokey( world, "k_exttime" ) );
+			num = floor(f1 / 10);
+			f1 = f1 - (num * 10);
+			if( num )
+				WriteByte(2, num + 146);
+			else
+				WriteByte(2, 32);
+			WriteByte(2, f1 + 146);
+		} else
+			WriteShort(2, 58611);
+	}
+	WriteByte(2, 10);
+	f1 = atoi( ezinfokey( world, "k_pow" ) );
+	if( f1 )
+	{
+		WriteShort(2, 59895);
+		WriteShort(2, 59636);
+	}
+	else
+		WriteShort(2, 61422);
+
+	if( f1 == 2 )
+		WriteString(2, " powerups (jammed)");
+	else
+		WriteString(2, " powerups");
+
+// countdown printouts end here
+
+	if( self->cnt2 < 6 )
+	{
+		p = find (world, FOFCLSN, "player");
+		while( p )
+		{
+			if( !strnull ( p->s.v.netname ) ) 
+				stuffcmd (p, "play buttons/switch04.wav\n");
+
+			p = find (p, FOFCLSN, "player");
+		}
+	}
+
+	self->s.v.nextthink = g_globalvars.time + 1;
+}
+
+void StartTimer ()
+// Spawns the timer and starts the countdown.
+{
+	gedict_t *timer, *ptmp;
+	float f1;
+	int iFpd;
+
+	k_force = 0;
+	timer = find ( world, FOFCLSN, "idlebot");
+	if( timer )
+		ent_remove( timer );
+
+	timer = find ( world, FOFCLSN, "timer");
+	while( timer ) {
+		ptmp = timer;
+		timer = find(timer, FOFCLSN, "timer");
+		ent_remove( ptmp );
+	}
+
+	G_bprint(2, "Spawnmodel: ");
+	f1 = atoi( ezinfokey( world, "k_spw" ) );
+	if( f1 == 2 )
+		G_bprint(2, "Ëïíâáô Ôåáíó òåóðá÷îó\n"); // komabt teams respawns
+	else if( f1 == 1 )
+		G_bprint(2, "ËÔ Óðá÷îÓáæåôù\n");	// kt spawnsafety
+	else
+		G_bprint(2, "Îïòíáì Ñ× òåóðá÷îó\n"); // normal
+
+// changed to print only if other than default
+
+	f1 = atoi( ezinfokey( world, "k_frp" ) );
+	if( f1 ) {
+// Output the Fairpack setting here
+		G_bprint(2, "Fairpacks setting: ");
+		if( f1 == 1 )
+			G_bprint(2, "âåóô ÷åáðïî\n"); // best weapon
+		else
+			G_bprint(2, "ìáóô ÷åáðïî æéòåä\n"); // last weapon fired
+	}
+
+// print qizmo ( FPD ) settings
+	iFpd = atoi( ezinfokey( world, "fpd" ) );
+	if( iFpd & 170 ) {
+		G_bprint(2, "QiZmo:");
+		if( iFpd & 2 )
+			G_bprint(2, " ôéíåò"); // timer
+		if( iFpd & 8 )
+			G_bprint(2, " ìáç");   // lag
+		if( iFpd & 32 )
+			G_bprint(2, " åîåíù"); // enemy
+		if( iFpd & 128 )
+			G_bprint(2, " ðïéîô"); // point
+
+		G_bprint(2, " disabled\n");
+	}
+
+	timer = find ( world, FOFCLSN, "player" );
+	while( timer ) {
+		if( !strnull( timer->s.v.netname ) )
+			stuffcmd(timer, "play items/protect2.wav\n");
+
+		timer = find( timer, FOFCLSN, "player" );
+	}
+
+	timer = spawn();
+	timer->s.v.owner = EDICT_TO_PROG( world );
+	timer->s.v.classname = "timer";
+	timer->cnt = 0;
+	if( atoi( ezinfokey( world, "k_count" ) ) )
+        timer->cnt2 = atoi( ezinfokey( world, "k_count" ) );
+    else
+        timer->cnt2 = 3; // at the least we want a 3 second countdown
+	timer->cnt2 = timer->cnt2 + 1;
+    timer->s.v.nextthink = g_globalvars.time + 0.1;
+	timer->s.v.think = ( func_t ) TimerStartThink;
+	match_in_progress = 1;
+	localcmd( "serverinfo status Countdown\n" );
+
+	if ( atoi( ezinfokey( world, "demo_tmp_record" ) ) )
+		localcmd( "easyrecord\n" ); // FIXME: TODO: make this more like ktpro
+}
+
+void StopTimer ( int removeDemo )
+// Whenever a countdown or match stops, remove the timer and reset everything.
+{
+	gedict_t *t, *p;
+
+	k_force = 0;
+	match_in_progress = 0;
+
+	if ( k_standby )
+	{
+		// Stops the bug where players are set to ghosts 1 second to go and countdown aborts.
+		// standby flag needs clearing (sturm)
+		k_standby = 0;
+
+		p = find ( world, FOFCLSN, "player" );
+		while( p ) 
+		{
+			if( !strnull ( p->s.v.netname ) )
+			{
+				p->s.v.takedamage = 2;
+				p->s.v.solid      = 3;
+				p->s.v.movetype   = 3;
+				setmodel (p, "progs/player.mdl");
+			}
+
+			p = find ( p, FOFCLSN, "player" );
+		}
+	}
+
+	t = find ( world, FOFCLSN, "timer" );
+	while( t ) {
+		t->s.v.nextthink = g_globalvars.time + 0.1;
+		t->s.v.think = ( func_t ) SUB_Remove;
+
+		t = find( t, FOFCLSN, "timer" );
+	}
+
+	if ( removeDemo && !strnull( cvar_string( "serverdemo" ) ) )
+		localcmd("cancel\n");  // demo is recording and must be removed, do it
+
+	localcmd("serverinfo status Standby\n");
+}
+
+void IdlebotThink ()
+{
+	gedict_t *p;
+	float f1, f2, f3;
+
+	self->attack_finished = self->attack_finished - 1;
+	f1 = CountPlayers();
+	f2 = CountRPlayers();
+	f3 = f1 / 2;
+	if( f3 > f2 || f1 < 2 ) {
+		G_bprint(3, "console: bah! chickening out?\n");
+		G_bprint(2, "server disables the idle bot\n");
+
+		ent_remove( self ) ;
+
+		return;
+	}
+
+	if(self->attack_finished < 1) {
+		BotForceStart();
+
+		ent_remove( self );
+
+		return;
+	} else {
+		f1 = floor(self->attack_finished / 5);
+		if( self->attack_finished < 5 || (f1 * 5) == self->attack_finished ) {
+			if( self->attack_finished == 1 ) {
+				p = find ( world, FOFCLSN, "player" );
+				while( p ) {
+					if( !strnull ( p->s.v.netname ) && !p->ready )
+						G_sprint(p, 3, "console: 1 second to go ready\n");
+
+					p = find ( p, FOFCLSN, "player" );
+				}
+			} else {
+				p = find ( world, FOFCLSN, "player" );
+				while( p ) {
+					if( !strnull ( p->s.v.netname ) && !p->ready )
+						G_sprint(p, 3, "console: %d seconds to go ready\n", (int)self->attack_finished);
+
+					p = find ( p, FOFCLSN, "player" );
+				}
+			}
+		}
+	}
+
+	self->s.v.nextthink = g_globalvars.time + 1;
+}
+
+void IdlebotCheck ()
+{
+	gedict_t *p;
+	float f1, f2, f3;
+
+	if( match_in_progress )
+		return;
+	f1 = CountPlayers();
+	f2 = CountRPlayers();
+	f3 = f1 / 2;
+	if( f2 >= f3 && f1 > 1 ) {
+//50% or more of the players are ready! go-go-go
+		p = find ( world, FOFCLSN, "idlebot" );
+		if( p )
+			return;
+		else {
+			p = spawn();
+			p->s.v.classname = "idlebot";
+			p->s.v.think = (func_t) IdlebotThink;
+			p->s.v.nextthink = g_globalvars.time + 1;
+
+			f1 = atoi( ezinfokey(world, "k_idletime") );
+			p->attack_finished = f1;
+			G_bprint(2, "\nserver activates the idle bot\n");
+
+			p = find ( world, FOFCLSN, "player" );
+			while( p ) {
+				if( !strnull ( p->s.v.netname ) && !p->ready )
+					G_sprint(p, 3, "console: %d seconds to go ready\n", (int)f1);
+
+				p = find ( p, FOFCLSN, "player" );
+			}
+		}
+	} else {
+
+		p = find ( world, FOFCLSN, "idlebot");
+		if( p ) {
+			G_bprint(3, "console: bah! chickening out?\n");
+			G_bprint(2, "server disables the idle bot\n");
+
+			ent_remove( p );
+		}
+	}
+}
+
+void PlayerReady ()
+// Called by a player to inform that (s)he is ready for a match.
+{
+	gedict_t *p;
+	float nready, f1, k_lockmin, k_lockmax;
+	char *tmp, *s1, *s2;
+
+	if( intermission_running || match_in_progress == 2 )
+			return;
+	if( self->ready ) {
+		G_sprint(self, 2, "Type break to unready yourself\n");
+		return;
+	}
+	k_lockmin = atoi( ezinfokey( world, "k_lockmin" ) );
+	k_lockmax = atoi( ezinfokey( world, "k_lockmax" ) );
+
+    if( k_force && !atoi( ezinfokey( world, "k_duel" ) ) ) {
+		nready = 0;
+		p = find ( world, FOFCLSN, "player" );
+		while( p ) {
+			if( !strnull ( p->s.v.netname ) && p->ready ) {
+				s1 = ezinfokey(self, "team");
+				s2 = ezinfokey(p, "team");
+
+				if( streq( s1, s2 ) && !strnull( s1 ) )
+					nready = 1;
+			}
+
+			p = find ( p, FOFCLSN, "player" );
+		}
+
+		if( !nready ) {
+			G_sprint(self, 2, "Join an existing team!\n");
+			return;
+		}
+	}
+	self->ready = 1;
+	self->k_vote = 0;
+	self->s.v.effects = self->s.v.effects - ((int)self->s.v.effects & 64);
+	self->k_teamnum = 0;
+	G_bprint(2, "%s is ready %s‘\n", self->s.v.netname, ezinfokey(self, "team"));
+	nready = 0;
+	p = find ( world, FOFCLSN, "player" );
+	while( p ) {
+		if( !strnull ( p->s.v.netname ) && p->ready )
+			nready++;
+
+		p = find ( p, FOFCLSN, "player" );
+	}
+
+	f1 = CountRTeams();
+	if( f1 < k_lockmin ) { // FIXME: compact it
+		tmp = va("%d", (int)(k_lockmin - f1));
+		G_bprint(2, tmp);
+		G_bprint(2, " íïòå ôåáí");
+		if( (k_lockmin - f1) != 1 )
+			G_bprint(2, "ó");
+		G_bprint(2, " òåñõéòåä\n");
+
+		return;
+	}
+	if( f1 > k_lockmax ) { // FIXME: compact it
+		G_bprint(2, "Çåô òéä ïæ ");
+		tmp = va("%d", (int)(f1 - k_lockmax));
+		G_bprint(2, tmp);
+		G_bprint(2, " ôåáí");
+		if( (f1 - k_lockmax) != 1 )
+			G_bprint(2, "ó");
+		G_bprint(2, "!\n");
+
+		return;
+	}
+
+	k_attendees = CountPlayers();
+	f1 = atoi( ezinfokey( world, "k_membercount" ) );
+	if( CheckMembers( f1 ) ) {
+		if( nready == k_attendees && nready >= 2 && !k_force ) {
+			G_bprint(2, "All players ready\nTimer started\n");
+
+			StartTimer();
+			if( atoi( ezinfokey( world, "k_idletime" ) ) ) {
+				p = find ( world, FOFCLSN, "idlebot" );
+				if( p )
+					ent_remove( p );
+			}
+
+			return;
+		}
+	} else if( nready == k_attendees && nready >=2 && !k_force ) {
+		G_bprint(2, "Óåòöåò ÷áîôó áô ìåáóô %d ðìáùåòó éî åáãè ôåáí\nWaiting...\n", 
+						atoi( ezinfokey( world, "k_membercount" ) ) );
+		return;
+	}
+
+	if( atoi( ezinfokey( world, "k_idletime" ) ) && !k_force )
+		IdlebotCheck();
+}
+
+void PlayerBreak ()
+{
+	gedict_t *p;
+	float f1, f2;
+
+	if( !self->ready )
+		return;
+
+	if( !match_in_progress ) {
+		self->ready = 0;
+		G_bprint(2, "%s is not ready\n", self->s.v.netname);
+		if( atoi( ezinfokey( world, "k_sready" ) ) )
+			self->s.v.effects = self->s.v.effects + 64; // FIXME: hmm clean this
+
+		return;
+	}
+
+	if( match_in_progress == 1 ) {
+		p = find ( world, FOFCLSN, "timer");
+		if(p->cnt2 > 1) {
+			self->ready = 0;
+			G_bprint(2, "%s stops the countdown\n", self->s.v.netname);
+			if( atoi( ezinfokey( world, "k_sready" ) ) )
+				self->s.v.effects = self->s.v.effects + 64;
+
+			StopTimer( 1 );
+		}
+		return;
+	}
+
+	if( self->k_vote ) {
+		G_bprint(2, "%s ÷éôèäòá÷ó ", self->s.v.netname);
+		if( streq( ezinfokey( self, "gender" ), "f" ) )
+				G_bprint(2, "èåò ");
+		else
+				G_bprint(2, "èéó ");
+		G_bprint(3, "vote\n");
+		self->k_vote = 0;
+		k_vbreak--;
+
+		return;
+	}
+	G_bprint(3, "%s votes for stopping the match\n", self->s.v.netname);
+	self->k_vote = 1;
+	k_vbreak++;
+	f1 = CountPlayers();
+	f2 = (floor(f1 / 2)) + 1;
+	if( k_vbreak >= f2 ) {
+		G_bprint(2, "Match stopped by majority vote\n");
+		EndMatch( 1 );
+
+		return;
+	}
+}
