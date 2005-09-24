@@ -168,12 +168,12 @@ cmd_t cmds[] = {
 	{ "time30",     (func_t) TimeSet,                30.0f   , CF_PLAYER      },
 	{ "berzerk",    (func_t) ToggleBerzerk,             0    , CF_PLAYER      },
 	                                             
-	{ "ksound1",    (func_t) TeamSay,   (int)("ktsound1.wav"), CF_PLAYER      },
-	{ "ksound2",    (func_t) TeamSay,   (int)("ktsound2.wav"), CF_PLAYER      },
-	{ "ksound3",    (func_t) TeamSay,   (int)("ktsound3.wav"), CF_PLAYER      },
-	{ "ksound4",    (func_t) TeamSay,   (int)("ktsound4.wav"), CF_PLAYER      },
-	{ "ksound5",    (func_t) TeamSay,   (int)("ktsound5.wav"), CF_PLAYER      },
-	{ "ksound6",    (func_t) TeamSay,   (int)("ktsound6.wav"), CF_PLAYER      },
+//	{ "ksound1",    (func_t) TeamSay,   (int)("ktsound1.wav"), CF_PLAYER      },
+//	{ "ksound2",    (func_t) TeamSay,   (int)("ktsound2.wav"), CF_PLAYER      },
+//	{ "ksound3",    (func_t) TeamSay,   (int)("ktsound3.wav"), CF_PLAYER      },
+//	{ "ksound4",    (func_t) TeamSay,   (int)("ktsound4.wav"), CF_PLAYER      },
+//	{ "ksound5",    (func_t) TeamSay,   (int)("ktsound5.wav"), CF_PLAYER      },
+//	{ "ksound6",    (func_t) TeamSay,   (int)("ktsound6.wav"), CF_PLAYER      },
 	                                           
 	{ "qizmo",      (func_t) ShowQizmo,               0    , CF_PLAYER      },
 	                                           
@@ -200,12 +200,12 @@ cmd_t cmds[] = {
 	{ "deathmsg",   (func_t) Deathmsg,                0    , CF_BOTH_ADMIN  },
     { "rpickup",    (func_t) RandomPickup,            0    , CF_BOTH_ADMIN  },
 
-    { "1on1",       (func_t) UserMode,        (int)("1on1"), CF_PLAYER | CF_SPC_ADMIN },
-    { "2on2",       (func_t) UserMode,        (int)("2on2"), CF_PLAYER | CF_SPC_ADMIN },
-    { "3on3",       (func_t) UserMode,        (int)("3on3"), CF_PLAYER | CF_SPC_ADMIN },
-    { "4on4",       (func_t) UserMode,        (int)("4on4"), CF_PLAYER | CF_SPC_ADMIN },
-    { "10on10",     (func_t) UserMode,      (int)("10on10"), CF_PLAYER | CF_SPC_ADMIN },
-    { "ffa",        (func_t) UserMode,         (int)("ffa"), CF_PLAYER | CF_SPC_ADMIN },
+//    { "1on1",       (func_t) UserMode,        (int)("1on1"), CF_PLAYER | CF_SPC_ADMIN },
+//    { "2on2",       (func_t) UserMode,        (int)("2on2"), CF_PLAYER | CF_SPC_ADMIN },
+//    { "3on3",       (func_t) UserMode,        (int)("3on3"), CF_PLAYER | CF_SPC_ADMIN },
+//    { "4on4",       (func_t) UserMode,        (int)("4on4"), CF_PLAYER | CF_SPC_ADMIN },
+//    { "10on10",     (func_t) UserMode,      (int)("10on10"), CF_PLAYER | CF_SPC_ADMIN },
+//    { "ffa",        (func_t) UserMode,         (int)("ffa"), CF_PLAYER | CF_SPC_ADMIN },
 
     { "unpause",    (func_t) VoteUnpause,             0    , CF_PLAYER      },
 

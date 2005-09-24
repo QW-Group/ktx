@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.1.1.1 2005/09/24 12:45:01 disconn3ct Exp $
+ *  $Id: client.c,v 1.2 2005/09/24 15:34:37 disconn3ct Exp $
  */
 
 //===========================================================================
@@ -427,13 +427,18 @@ Take the players to the intermission spot
 void execute_changelevel()
 {
 	gedict_t       *pos;
-
+	int temp;
+	
 	intermission_running = 1;
 
 // enforce a wait time before allowing changelevel
-	intermission_exittime = g_globalvars.time + 1 +
-							max( 1, atoi( ezinfokey( world, "demo_scoreslength" ) ) );
-
+        temp=atoi( ezinfokey( world, "demo_scoreslength" ) );
+        if (temp < 1) {
+            temp = 1;
+        }
+	
+	intermission_exittime = g_globalvars.time + 1 + temp;
+	
 	pos = FindIntermission();
 
 // play intermission music
