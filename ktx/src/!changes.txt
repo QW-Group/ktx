@@ -1,4 +1,5 @@
-2007-09-12
+WTF with dates here?
+
  7. i changed a bit k_freeze localinfo, so if 'localinfo k_freeze 1' this let us
 	freeze level _right_ after level spawn, in native Kteams or ktpro trains or plats
     will move one time,	even k_freeze is set
