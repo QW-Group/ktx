@@ -1,16 +1,32 @@
-WTF with dates here?
+2005-09-26
+ 8. practice mode, quote from ktpro
+	localinfo srv_practice_mode		0
 
+	localinfo lock_practice         0  //0 - no lock (after last client disconnect from server
+                                       //server will return to no practice mode
+                                       //1 - normal lock - every one with properly rights
+                                       //(from allow_toggle_practice) can turn off practice mode
+                                       //2 - server is locked in practice mode
+
+	localinfo allow_toggle_practice 5  //0 - noone, 1 - admins, 2 elected admins too
+                                   	   //3 - only real real judges, 4 - elected judges too
+                                       //5 - all players
+
+ 9. fixed qw or kteams bug where some sounds may instantly canceled (overwriten via others)
+    I'm not check all code, just what i found.
+
+2005-09-12
  7. i changed a bit k_freeze localinfo, so if 'localinfo k_freeze 1' this let us
 	freeze level _right_ after level spawn, in native Kteams or ktpro trains or plats
     will move one time,	even k_freeze is set
 
-2007-09-09
+2005-09-09
  6. mmm, quote from ktpro
 	//aerowalk map support 
 	//imo it is greatest map for 1/1, maybe with quad it will be also good for 2/2 ?:)
 	localinfo add_q_aerowalk 1 //adds quad on aerowalk
 
-2007-09-06
+2005-09-06
  3. mostly added ktpro timing feature
 
 	//timing/full laged players manipulation
@@ -32,7 +48,7 @@ WTF with dates here?
  5. //mod can remove gibs after 2 seconds so players can not use gibs filter
 	localinfo k_short_gib 1
 
-2007-08-29
+2005-08-29
  1. added 'dmm1' 'dmm2' 'dmm3' 'dmm4' 'dmm5' command.
 	'dm' is just show dmm.
 
@@ -43,10 +59,10 @@ WTF with dates here?
  	so I introduce 'k_umfallbunny', which is just control which value
  	must be set to 'k_fallbunny' after XonX (u are must be admin too).
 
-2007-08-28 day
+2005-08-28 day
 'official' command removed due to '4on4' existence
 
-2007-08-28 night %)
+2005-08-28 night %)
 added 1on1 2on2 3on3 4on4 10on10 and ffa commands
 
 for example 1on1 on dm6 will setup some predefined stuff for this
@@ -74,7 +90,7 @@ so implement how i think this must be, it is like some sort of access control
 //localinfo k_allowed_free_modes 63 means that all modes are allowed
 //63 = 1 + 2 + 4 + 8 + 16 + 32
 
-2007-08-27
+2005-08-27
 all maps, even native eXmY dm1-dm6 start and end, uses `cmd cc <value>`, only
 few impulse commands exist, like weapon changing and some spectator stuff.
 
@@ -106,35 +122,35 @@ ss - used to control the speed at which aliases are stuffed to you when connecti
 
 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ---------------------------
-2007-08-10
+2005-08-10
 custom maps are now uses `cmd cm <value>` instead of impulses, this is remove quantity limit
 of maps
 ---------------------------
-2007-08-06
+2005-08-06
 shownick: using 'k_nick' setinfo from client as nick
 		  using 'ln' setinfo to change the position of the display of shownick
 		  centerprint cleared after 0.8 second, mb let player customize this time?
 ---------------------------
-2007-08-04
+2005-08-04
 shownick: added powerups and weapon
 TODO: use k_nick info from client as nick and clear
 		centerprint after 1 second
 
 ---------------------------
-2007-08-03
+2005-08-03
 added shownick
 TODO: show powerups and best weapon and use k_nick info from client as nick and clear
 		centerprint after 1 second
 
 ---------------------------
-2007-08-01
+2005-08-01
 added simple auto server demo recording
 ---------------------------
-2007-07-29
+2005-07-29
 some simple support for VIP, currently it is only for gaining admin rights :P
 
 ---------------------------
-2007-07-26
+2005-07-26
 brokenankle worked now
 
 TODO: it just blok +jump for one frame, so this can be ezly escaped via cheatish client,
