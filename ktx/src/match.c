@@ -1232,6 +1232,11 @@ void IdlebotCheck ()
 
 	if( match_in_progress )
 		return;
+
+	// no idele bot in practice mode
+	if ( k_practice ) // #practice mode#
+		return;
+
 	f1 = CountPlayers();
 	f2 = CountRPlayers();
 	f3 = f1 / 2;
@@ -1260,7 +1265,7 @@ void IdlebotCheck ()
 		}
 	} else {
 
-		p = find ( world, FOFCLSN, "idlebot");
+		p = find ( world, FOFCLSN, "idlebot" );
 		if( p ) {
 			G_bprint(3, "console: bah! chickening out?\n");
 			G_bprint(2, "server disables the idle bot\n");
@@ -1279,6 +1284,12 @@ void PlayerReady ()
 
 	if( intermission_running || match_in_progress == 2 )
 			return;
+
+	if (k_practice) { // #practice mode#
+		G_sprint(self, 2, "%s\n", redtext("Server in practice mode"));
+		return;
+	}
+
 	if( self->ready ) {
 		G_sprint(self, 2, "Type break to unready yourself\n");
 		return;

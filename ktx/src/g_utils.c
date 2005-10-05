@@ -20,10 +20,27 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.1.1.1 2005/09/24 12:45:04 disconn3ct Exp $
+ *  $Id: g_utils.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
  */
 
 #include "g_local.h"
+
+#define MAX_STRINGS 16
+
+#ifdef Q3_VM
+
+// ignore size :/
+int vsnprintf(char  * str, size_t size, const char * fmt, va_list list)
+{
+	return vsprintf(str, fmt, list);
+}
+#else
+
+#ifdef _WIN32
+#define vsnprintf _vsnprintf
+#endif
+
+#endif
 
 
 int NUM_FOR_EDICT( gedict_t * e )
@@ -319,10 +336,6 @@ FIXME: make this buffer size safe someday
 ============
 */
 
-#define MAX_STRINGS 16
-#ifdef _WIN32
-#define vsnprintf _vsnprintf
-#endif
 char	*va(char *format, ...)
 {
 	va_list		argptr;
@@ -364,12 +377,6 @@ char *redtext(const char *format, ...)
 		return string[index++];
 	}
 }
-
-#undef MAX_STRINGS
-#ifdef _WIN32
-#undef vsnprintf
-#endif
-
 
 /*
 ==============
@@ -464,7 +471,7 @@ void setmodel( gedict_t * ed, char *model )
 	trap_setmodel( NUM_FOR_EDICT( ed ), model );
 }
 
-void sound( gedict_t * ed, int channel, char *samp, int vol, float att )
+void sound( gedict_t * ed, int channel, char *samp, float vol, float att )
 {
 	trap_sound( NUM_FOR_EDICT( ed ), channel, samp, vol, att );
 }
@@ -516,7 +523,6 @@ void infokey( gedict_t * ed, char *key, char *valbuff, int sizebuff )
 	trap_infokey( NUM_FOR_EDICT( ed ), key, valbuff, sizebuff );
 }
 
-#define MAX_STRINGS 16
 char *ezinfokey( gedict_t * ed, char *key )
 {
 	static char		string[MAX_STRINGS][1024];
@@ -528,7 +534,6 @@ char *ezinfokey( gedict_t * ed, char *key )
 
 	return string[index++];
 }
-#undef MAX_STRINGS
 
 void WriteEntity( int to, gedict_t * ed )
 {
@@ -590,7 +595,6 @@ float cvar( const char *var )
 	return trap_cvar ( var );
 }
 
-#define MAX_STRINGS 16
 char *cvar_string( const char *var )
 {
 	static char		string[MAX_STRINGS][1024];
@@ -602,7 +606,6 @@ char *cvar_string( const char *var )
 
 	return string[index++];
 }
-#undef MAX_STRINGS
 
 void cvar_set( const char *var, const char *val )
 {

@@ -39,4 +39,5 @@
 	float server_is_2_3x;	// if true, fix the jump bug via QC
 	float current_maxfps;	// current value of serverinfo maxfps
 
+	int   k_practice;		// is server in practice mode
 #endif

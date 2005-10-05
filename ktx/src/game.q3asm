@@ -1,4 +1,4 @@
--o qwprogs
+-o ../../qwprogs
 g_main
 g_syscalls
 bg_lib
@@ -22,3 +22,12 @@ subs
 triggers
 weapons
 world
+admin
+captain
+commands
+globals
+maps
+match
+motd
+vip
+vote

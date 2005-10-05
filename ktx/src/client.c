@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.2 2005/09/24 15:34:37 disconn3ct Exp $
+ *  $Id: client.c,v 1.3 2005/10/05 18:50:03 qqshka Exp $
  */
 
 //===========================================================================
@@ -427,18 +427,13 @@ Take the players to the intermission spot
 void execute_changelevel()
 {
 	gedict_t       *pos;
-	int temp;
-	
+
 	intermission_running = 1;
 
 // enforce a wait time before allowing changelevel
-        temp=atoi( ezinfokey( world, "demo_scoreslength" ) );
-        if (temp < 1) {
-            temp = 1;
-        }
-	
-	intermission_exittime = g_globalvars.time + 1 + temp;
-	
+	intermission_exittime = g_globalvars.time + 1 +
+							max( 1, atoi( ezinfokey( world, "demo_scoreslength" ) ) );
+
 	pos = FindIntermission();
 
 // play intermission music
@@ -1312,7 +1307,7 @@ void WaterMove()
 	}
 }
 
-// #ifdef KTEAMS
+
 void CheckWaterJump()
 {
 	vec3_t          start, end;
@@ -1350,7 +1345,7 @@ void CheckWaterJump()
 		}
 	}
 }
-// #endif
+
 
 ////////////////
 // GlobalParams:
@@ -1439,24 +1434,42 @@ void ClientDisconnect()
 
 	f1 = CountALLPlayers();
 
-	if( !f1 && !atoi( ezinfokey( world, "k_master" ) )
-		    && !atoi( ezinfokey( world, "k_lockmap" ) ) )
+	if( !f1
+		&& (
+			 (    !atoi( ezinfokey( world, "k_master" ) )
+			   && !atoi( ezinfokey( world, "k_lockmap" ) ) 
+			 )
+			 || ( !atoi( ezinfokey( world, "lock_practice" ) ) && k_practice )
+	       )
+	  )
 	{
 		char *s;
+		int old_k_practice = k_practice;
 
-	// Check if issued to execute reset.cfg (sturm)
+		if ( k_pause ) {
+			G_bprint(2, "No players left, unpausing.\n");
+			ModPause ( 0 ); // no players left, unpause server if paused
+		}
+
+		if ( !atoi( ezinfokey( world, "lock_practice" ) ) && k_practice )  // #practice mode#
+			SetPractice( 0, NULL ); // return server to normal mode but not reload map yet
+
+		if( match_in_progress )
+			EndMatch( 1 ); // skip demo, make some other stuff
+
+		// Check if issued to execute reset.cfg (sturm)
         if( atoi( ezinfokey( world, "k_autoreset" ) ) )
 			localcmd("exec configs/reset.cfg\n");
 
         s = ezinfokey( world, "k_defmap" );
 
-        if( !strnull( s ) && strneq( s, g_globalvars.mapname ) ) {
+		// force reload current map in practice mode even k_defmap is set or not
+        if ( !atoi( ezinfokey( world, "lock_practice" ) ) && old_k_practice )
+			s = g_globalvars.mapname; // FIXME: k_defmap may not exist on server disk, so we reload current map
+									  //        but we may check if k_defmap exist and reload to it, right?
 
-			if( match_in_progress )
-				EndMatch( 1 ); // skip demo, make some other stuff
-
+        if( !strnull( s ) )
             localcmd("map %s\n", s);
-		}
 	}
 }
 
@@ -1679,8 +1692,7 @@ void CheckPowerups()
 				G_sprint( self, PRINT_HIGH,
 					  "Ring of Shadows magic is fading\n" );
 				stuffcmd( self, "bf\n" );
-				sound( self, CHAN_AUTO, "items/inv2.wav", 1,
-					    ATTN_NORM );
+				sound( self, CHAN_AUTO, "items/inv2.wav", 1, ATTN_NORM );
 				self->invisible_time = g_globalvars.time + 1;
 			}
 
@@ -1719,8 +1731,7 @@ void CheckPowerups()
 				G_sprint( self, PRINT_HIGH,
 					  "Protection is almost burned out\n" );
 				stuffcmd( self, "bf\n" );
-				sound( self, CHAN_AUTO, "items/protect2.wav", 1,
-					    ATTN_NORM );
+				sound( self, CHAN_AUTO, "items/protect2.wav", 1, ATTN_NORM );
 				self->invincible_time = g_globalvars.time + 1;
 			}
 
@@ -1775,8 +1786,7 @@ void CheckPowerups()
 					G_sprint( self, PRINT_HIGH,
 						  "Quad Damage is wearing off\n" );
 				stuffcmd( self, "bf\n" );
-				sound( self, CHAN_AUTO, "items/damage2.wav", 1,
-					    ATTN_NORM );
+				sound( self, CHAN_AUTO, "items/damage2.wav", 1, ATTN_NORM );
 				self->super_time = g_globalvars.time + 1;
 			}
 
@@ -1829,8 +1839,7 @@ void CheckPowerups()
 				G_sprint( self, PRINT_HIGH,
 					  "Air supply in Biosuit expiring\n" );
 				stuffcmd( self, "bf\n" );
-				sound( self, CHAN_AUTO, "items/suit2.wav", 1,
-					    ATTN_NORM );
+				sound( self, CHAN_AUTO, "items/suit2.wav", 1, ATTN_NORM );
 				self->rad_time = g_globalvars.time + 1;
 			}
 

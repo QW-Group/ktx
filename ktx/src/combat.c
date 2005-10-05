@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.1.1.1 2005/09/24 12:45:02 disconn3ct Exp $
+ *  $Id: combat.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -297,19 +297,20 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		return;
 
 // do the damage
-#ifdef KTEAMS
-	if ( match_in_progress == 2 || !strcmp( attacker->s.v.classname, "teledeath" ) )
-#endif
+
+	if ( match_in_progress == 2 || !strcmp( attacker->s.v.classname, "teledeath" ) 
+		 || ( k_practice && strneq( targ->s.v.classname, "player" ) ) // #practice mode#
+	   )
 		targ->s.v.health -= take;
 
 	if ( targ->s.v.health <= 0 )
 	{
 		Killed( targ, attacker );
-#ifdef KTEAMS
+
         // KTEAMS: check if sudden death is the case
         if (k_sudden_death && !strcmp( targ->s.v.classname, "player" ) ) 
             EndMatch(0);
-#endif
+
 		return;
 	}
 // react to the damage

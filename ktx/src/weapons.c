@@ -20,18 +20,17 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.1.1.1 2005/09/24 12:45:07 disconn3ct Exp $
+ *  $Id: weapons.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
  */
 
 #include "g_local.h"
 
-#ifdef KTEAMS
-void StartTimer();
+
 void ReportMe();
 void AdminImpBot();
 float CaptainImpulses();
 void CaptainPickPlayer();
-#endif
+
 
 // called by SP_worldspawn
 void W_Precache()
@@ -1610,7 +1609,9 @@ void SuperDamageSound()
 		if ( self->super_sound < g_globalvars.time )
 		{
 			self->super_sound = g_globalvars.time + 1;
-			sound( self, CHAN_BODY, "items/damage3.wav", 1, ATTN_NORM );
+// like ktpro
+//			sound( self, CHAN_BODY, "items/damage3.wav", 1, ATTN_NORM );
+			sound( self, CHAN_AUTO, "items/damage3.wav", 1, ATTN_NORM );
 		}
 	}
 	return;

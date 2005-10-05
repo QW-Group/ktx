@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.1.1.1 2005/09/24 12:44:56 disconn3ct Exp $
+ *  $Id: g_local.h,v 1.2 2005/10/05 18:50:30 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -37,6 +37,13 @@
 #include "player.h"
 
 #define FOFCLSN ( FOFS ( s.v.classname ) )
+
+#ifndef min
+#define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
+#ifndef max
+#define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
 
 #define bound(a,b,c) ((a) >= (c) ? (a) : \
 					(b) < (a) ? (a) : (b) > (c) ? (c) : (b))
@@ -107,7 +114,7 @@ void    	setorigin( gedict_t * ed, float origin_x, float origin_y, float origin_
 void    	setsize( gedict_t * ed, float min_x, float min_y, float min_z, float max_x,
 		 float max_y, float max_z );
 void    	setmodel( gedict_t * ed, char *model );
-void    	sound( gedict_t * ed, int channel, char *samp, int vol, float att );
+void    	sound( gedict_t * ed, int channel, char *samp, float vol, float att );
 gedict_t 	*checkclient(  );
 void    	traceline( float v1_x, float v1_y, float v1_z, float v2_x, float v2_y, float v2_z,
 		   int nomonst, gedict_t * ed );
@@ -222,7 +229,8 @@ void            spawn_tdeath( vec3_t org, gedict_t * death_owner );
 // commands.c
 typedef struct cmd_s {
 	char    *name;
-	func_t	f;
+//	func_t	f;
+	void ( *f )();
 	float	arg;
 	int		cf_flags;
 } cmd_t;
@@ -245,6 +253,8 @@ void Init_cmds(void);
 float StuffDeltaTime(int iDelta);
 
 #define STUFFCMDS_PER_PORTION	(1)
+
+void SetPractice(int srv_practice_mode, const char *mapname);
 
 // vip.c
 
@@ -302,6 +312,8 @@ extern	char *newcomer;        // stores name of last player who joined
 extern	float server_is_2_3x;	// if true, fix the jump bug via QC
 extern	float current_maxfps;	// current value of serverinfo maxfps
 
+extern	int   k_practice;		// is server in practice mode
+
 #endif
 
 
@@ -309,7 +321,7 @@ extern	float current_maxfps;	// current value of serverinfo maxfps
 
 #define	OFS_NULL		0
 #define	OFS_RETURN		1
-#define	OFS_PARM0		4		// leave 3 ofs for each parm to hold vectors
+#define	OFS_PARM0		4		/* leave 3 ofs for each parm to hold vectors */
 #define	OFS_PARM1		7
 #define	OFS_PARM2		10
 #define	OFS_PARM3		13

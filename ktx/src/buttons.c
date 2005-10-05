@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: buttons.c,v 1.1.1.1 2005/09/24 12:45:00 disconn3ct Exp $
+ *  $Id: buttons.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -64,10 +64,9 @@ void button_blocked()
 
 void button_fire()
 {
-#ifdef KTEAMS
-    if( match_in_progress != 2 )
-        return;
-#endif
+	if( !k_practice ) // #practice mode#
+   	if( match_in_progress != 2 )
+       	return;
 
 	if ( self->state == STATE_UP || self->state == STATE_TOP )
 		return;
@@ -82,10 +81,9 @@ void button_fire()
 
 void button_use()
 {
-#ifdef KTEAMS
+	if( !k_practice ) // #practice mode#
     if( match_in_progress != 2 )
         return;
-#endif
 
 	self->s.v.enemy = EDICT_TO_PROG( activator );
 	button_fire();
@@ -93,10 +91,9 @@ void button_use()
 
 void button_touch()
 {
-#ifdef KTEAMS
+	if( !k_practice ) // #practice mode#
     if( match_in_progress != 2 )
         return;
-#endif
 
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
@@ -108,10 +105,9 @@ void button_touch()
 
 void button_killed()
 {
-#ifdef KTEAMS
+	if( !k_practice ) // #practice mode#
     if( match_in_progress != 2 )
         return;
-#endif
 
 	self->s.v.enemy = EDICT_TO_PROG( damage_attacker );
 	self->s.v.health = self->s.v.max_health;

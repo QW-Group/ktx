@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.1.1.1 2005/09/24 12:45:05 disconn3ct Exp $
+ *  $Id: spectate.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
  */
 
 // spectate.c

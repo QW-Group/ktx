@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.1.1.1 2005/09/24 12:45:04 disconn3ct Exp $
+ *  $Id: items.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1363,10 +1363,13 @@ void powerup_touch()
 	if ( other->s.v.health <= 0 )
 		return;
 
-#ifdef KTEAMS
-        if ( match_in_progress != 2 || !atoi( ezinfokey( world, "k_pow" ) ) )
-            return;
-#endif
+	if ( !k_practice ) // #practice mode#
+	if ( match_in_progress != 2 )
+		return;
+
+    if (!atoi( ezinfokey( world, "k_pow" ) ) )
+        return;
+
 
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
 
@@ -1378,9 +1381,15 @@ void powerup_touch()
 	else
 		self->s.v.nextthink = g_globalvars.time + 60;
 
+	// all powerups respawn after 30 seconds in practice mode
+	if ( k_practice ) // #practice mode#
+		self->s.v.nextthink = g_globalvars.time + 30;
+
 	self->s.v.think = ( func_t ) SUB_regen;
 
-	sound( other, CHAN_VOICE, self->s.v.noise, 1, ATTN_NORM );
+// like ktpro
+//	sound( other, CHAN_VOICE, self->s.v.noise, 1, ATTN_NORM );
+	sound( other, CHAN_ITEM, self->s.v.noise, 1, ATTN_NORM );
 	stuffcmd( other, "bf\n" );
 	self->s.v.solid = SOLID_NOT;
 	other->s.v.items = ( ( int ) other->s.v.items ) | ( ( int ) self->s.v.items );

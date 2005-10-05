@@ -379,6 +379,7 @@ void ReadyThink ()
 
     p2 = PROG_TO_EDICT( self->s.v.owner );
 
+	// forcestart breaked via break command
     if( streq( p2->s.v.classname, "player" ) && !(p2->ready) )
     {
         k_force = 0;
@@ -389,6 +390,7 @@ void ReadyThink ()
         return;
     }
 
+	// forcestart breaked via forcebreak command
     if( strneq( p2->s.v.classname, "player" ) && !k_force )
     {
         G_bprint(2, "%s interrupts countdown\n", p2->s.v.netname );
@@ -463,6 +465,12 @@ void AdminForceStart ()
 
     if( match_in_progress || self->k_admin != 2 )
         return;
+
+	// no forcestart in practice mode
+	if (k_practice) {
+		G_sprint(self, 2, "%s\n", redtext("Server in practice mode"));
+		return;
+	}
 
     if( streq( self->s.v.classname, "player" ) && !self->ready )
     {

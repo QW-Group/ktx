@@ -97,6 +97,8 @@ void VotePickup();
 void VoteUnpause();
 void UserMode(float umode);
 
+void TogglePractice();
+
 // spec
 void ShowCamHelp();
 
@@ -105,111 +107,111 @@ void TimeDown(float t);
 void TimeUp(float t);
 void TimeSet(float t);
 
-
 cmd_t cmds[] = {
 
-	{ "commands",   (func_t) ShowCmds,			        0    , CF_BOTH        },
-	{ "scores",     (func_t) PrintScores,		        0    , CF_BOTH        },
-	{ "stats",      (func_t) PlayerStats,               0    , CF_BOTH        },
-	{ "options",    (func_t) ShowOpts,                  0    , CF_PLAYER      },
-	{ "ready",      (func_t) PlayerReady,               0    , CF_PLAYER      },
-	{ "break",      (func_t) PlayerBreak,               0    , CF_PLAYER      },
-	{ "status",     (func_t) ModStatus,                 0    , CF_BOTH        },
-	{ "status2",    (func_t) ModStatus2,                0    , CF_BOTH        },
-	{ "who",        (func_t) PlayerStatus,              0    , CF_BOTH        },
-	{ "whoskin",    (func_t) PlayerStatusS,             0    , CF_BOTH        },
-	{ "whonot",     (func_t) PlayerStatusN,             0    , CF_BOTH        },
-	{ "whovote",    (func_t) ModStatusVote,             0    , CF_BOTH        },
-	{ "spawn",      (func_t) ToggleRespawns,            0    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "powerups",   (func_t) TogglePowerups,            0    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "discharge",  (func_t) ToggleDischarge,           0    , CF_PLAYER      },
-	{ "dm",         (func_t) ShowDMM,                   0    , CF_PLAYER      },
-	{ "dmm1",       (func_t) ChangeDM,                  1    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "dmm2",       (func_t) ChangeDM,                  2    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "dmm3",       (func_t) ChangeDM,                  3    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "dmm4",       (func_t) ChangeDM,                  4    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "dmm5",       (func_t) ChangeDM,                  5    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "tp",         (func_t) ChangeTP,                  0    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "timedown1",  (func_t) TimeDown,				  1.0f   , CF_PLAYER | CF_SPC_ADMIN },
-	{ "timeup1",    (func_t) TimeUp,				  1.0f   , CF_PLAYER | CF_SPC_ADMIN },
-	{ "timedown",   (func_t) TimeDown,				  5.0f   , CF_PLAYER | CF_SPC_ADMIN },
-	{ "timeup",     (func_t) TimeUp,				  5.0f   , CF_PLAYER | CF_SPC_ADMIN },
-	{ "fallbunny",  (func_t) ToggleFallBunny,           0    , CF_BOTH_ADMIN  },
-	{ "fragsdown",  (func_t) FragsDown,                 0    , CF_PLAYER      },
-	{ "fragsup",    (func_t) FragsUp,                   0    , CF_PLAYER      },
-	{ "dropquad",   (func_t) ToggleDropQuad,            0    , CF_PLAYER      },
-	{ "dropring",   (func_t) ToggleDropRing,            0    , CF_PLAYER      },
-	{ "droppack",   (func_t) ToggleDropPack,            0    , CF_PLAYER      },
+	{ "commands",    ShowCmds,			        0    , CF_BOTH        },
+	{ "scores",      PrintScores,		        0    , CF_BOTH        },
+	{ "stats",       PlayerStats,               0    , CF_BOTH        },
+	{ "options",     ShowOpts,                  0    , CF_PLAYER      },
+	{ "ready",       PlayerReady,               0    , CF_PLAYER      },
+	{ "break",       PlayerBreak,               0    , CF_PLAYER      },
+	{ "status",      ModStatus,                 0    , CF_BOTH        },
+	{ "status2",     ModStatus2,                0    , CF_BOTH        },
+	{ "who",         PlayerStatus,              0    , CF_BOTH        },
+	{ "whoskin",     PlayerStatusS,             0    , CF_BOTH        },
+	{ "whonot",      PlayerStatusN,             0    , CF_BOTH        },
+	{ "whovote",     ModStatusVote,             0    , CF_BOTH        },
+	{ "spawn",       ToggleRespawns,            0    , CF_PLAYER | CF_SPC_ADMIN },
+	{ "powerups",    TogglePowerups,            0    , CF_PLAYER | CF_SPC_ADMIN },
+	{ "discharge",   ToggleDischarge,           0    , CF_PLAYER      },
+	{ "dm",          ShowDMM,                   0    , CF_PLAYER      },
+	{ "dmm1",        ChangeDM,                  1    , CF_PLAYER | CF_SPC_ADMIN },
+	{ "dmm2",        ChangeDM,                  2    , CF_PLAYER | CF_SPC_ADMIN },
+	{ "dmm3",        ChangeDM,                  3    , CF_PLAYER | CF_SPC_ADMIN },
+	{ "dmm4",        ChangeDM,                  4    , CF_PLAYER | CF_SPC_ADMIN },
+	{ "dmm5",        ChangeDM,                  5    , CF_PLAYER | CF_SPC_ADMIN },
+	{ "tp",          ChangeTP,                  0    , CF_PLAYER | CF_SPC_ADMIN },
+	{ "timedown1",   TimeDown,				  1.0f   , CF_PLAYER | CF_SPC_ADMIN },
+	{ "timeup1",     TimeUp,				  1.0f   , CF_PLAYER | CF_SPC_ADMIN },
+	{ "timedown",    TimeDown,				  5.0f   , CF_PLAYER | CF_SPC_ADMIN },
+	{ "timeup",      TimeUp,				  5.0f   , CF_PLAYER | CF_SPC_ADMIN },
+	{ "fallbunny",   ToggleFallBunny,           0    , CF_BOTH_ADMIN  },
+	{ "fragsdown",   FragsDown,                 0    , CF_PLAYER      },
+	{ "fragsup",     FragsUp,                   0    , CF_PLAYER      },
+	{ "dropquad",    ToggleDropQuad,            0    , CF_PLAYER      },
+	{ "dropring",    ToggleDropRing,            0    , CF_PLAYER      },
+	{ "droppack",    ToggleDropPack,            0    , CF_PLAYER      },
 	                                             
-    { "silence",    (func_t) ToggleSpecTalk,            0    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "reset",      (func_t) ResetOptions,              0    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "report",     (func_t) ReportMe,                  0    , CF_PLAYER      },
-	{ "rules",      (func_t) ShowRules,                 0    , CF_PLAYER      },
-	{ "lock",       (func_t) ChangeLock,                0    , CF_PLAYER      },
-	{ "maps",       (func_t) ShowMaps,                  0    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "spawn666",   (func_t) ToggleRespawn666,          0    , CF_PLAYER      },
-	{ "admin",      (func_t) ReqAdmin,                  0    , CF_BOTH        },
-	{ "forcestart", (func_t) AdminForceStart,           0    , CF_BOTH_ADMIN  },
-	{ "forcebreak", (func_t) AdminForceBreak,           0    , CF_BOTH_ADMIN  },
-	{ "forcepause", (func_t) AdminForcePause,           0    , CF_BOTH_ADMIN  },
-	{ "pickup",     (func_t) VotePickup,                0    , CF_PLAYER      },
-	{ "prewar",     (func_t) TogglePreWar,              0    , CF_BOTH_ADMIN  },
-	{ "lockmap",    (func_t) ToggleMapLock,             0    , CF_BOTH_ADMIN  },
-	{ "master",     (func_t) ToggleMaster,              0    , CF_BOTH_ADMIN  },
-	{ "speed",      (func_t) ToggleSpeed,               0    , CF_PLAYER      },
-	{ "fairpacks",  (func_t) ToggleFairPacks,           0    , CF_PLAYER      },
-	{ "about",      (func_t) ShowVersion,               0    , CF_BOTH        },
-	{ "shownick",   (func_t) ShowNick,                  0    , CF_PLAYER      },
-	{ "time5",      (func_t) TimeSet,		  	 	  5.0f   , CF_PLAYER      },
-	{ "time10",     (func_t) TimeSet,		  	     10.0f   , CF_PLAYER      },
-	{ "time15",     (func_t) TimeSet,		  	     15.0f   , CF_PLAYER      },
-	{ "time20",     (func_t) TimeSet,                20.0f   , CF_PLAYER      },
-	{ "time25",     (func_t) TimeSet,                25.0f   , CF_PLAYER      },
-	{ "time30",     (func_t) TimeSet,                30.0f   , CF_PLAYER      },
-	{ "berzerk",    (func_t) ToggleBerzerk,             0    , CF_PLAYER      },
+    { "silence",     ToggleSpecTalk,            0    , CF_PLAYER | CF_SPC_ADMIN },
+	{ "reset",       ResetOptions,              0    , CF_PLAYER | CF_SPC_ADMIN },
+	{ "report",      ReportMe,                  0    , CF_PLAYER      },
+	{ "rules",       ShowRules,                 0    , CF_PLAYER      },
+	{ "lock",        ChangeLock,                0    , CF_PLAYER      },
+	{ "maps",        ShowMaps,                  0    , CF_PLAYER | CF_SPC_ADMIN },
+	{ "spawn666",    ToggleRespawn666,          0    , CF_PLAYER      },
+	{ "admin",       ReqAdmin,                  0    , CF_BOTH        },
+	{ "forcestart",  AdminForceStart,           0    , CF_BOTH_ADMIN  },
+	{ "forcebreak",  AdminForceBreak,           0    , CF_BOTH_ADMIN  },
+	{ "forcepause",  AdminForcePause,           0    , CF_BOTH_ADMIN  },
+	{ "pickup",      VotePickup,                0    , CF_PLAYER      },
+	{ "prewar",      TogglePreWar,              0    , CF_BOTH_ADMIN  },
+	{ "lockmap",     ToggleMapLock,             0    , CF_BOTH_ADMIN  },
+	{ "master",      ToggleMaster,              0    , CF_BOTH_ADMIN  },
+	{ "speed",       ToggleSpeed,               0    , CF_PLAYER      },
+	{ "fairpacks",   ToggleFairPacks,           0    , CF_PLAYER      },
+	{ "about",       ShowVersion,               0    , CF_BOTH        },
+	{ "shownick",    ShowNick,                  0    , CF_PLAYER      },
+	{ "time5",       TimeSet,		  	 	  5.0f   , CF_PLAYER      },
+	{ "time10",      TimeSet,		  	     10.0f   , CF_PLAYER      },
+	{ "time15",      TimeSet,		  	     15.0f   , CF_PLAYER      },
+	{ "time20",      TimeSet,                20.0f   , CF_PLAYER      },
+	{ "time25",      TimeSet,                25.0f   , CF_PLAYER      },
+	{ "time30",      TimeSet,                30.0f   , CF_PLAYER      },
+	{ "berzerk",     ToggleBerzerk,             0    , CF_PLAYER      },
 	                                             
-//	{ "ksound1",    (func_t) TeamSay,   (int)("ktsound1.wav"), CF_PLAYER      },
-//	{ "ksound2",    (func_t) TeamSay,   (int)("ktsound2.wav"), CF_PLAYER      },
-//	{ "ksound3",    (func_t) TeamSay,   (int)("ktsound3.wav"), CF_PLAYER      },
-//	{ "ksound4",    (func_t) TeamSay,   (int)("ktsound4.wav"), CF_PLAYER      },
-//	{ "ksound5",    (func_t) TeamSay,   (int)("ktsound5.wav"), CF_PLAYER      },
-//	{ "ksound6",    (func_t) TeamSay,   (int)("ktsound6.wav"), CF_PLAYER      },
+	{ "ksound1",     TeamSay,   			    1    , CF_PLAYER      },
+	{ "ksound2",     TeamSay,   			    2    , CF_PLAYER      },
+	{ "ksound3",     TeamSay,   			    3    , CF_PLAYER      },
+	{ "ksound4",     TeamSay,   			    4    , CF_PLAYER      },
+	{ "ksound5",     TeamSay,   			    5    , CF_PLAYER      },
+	{ "ksound6",     TeamSay,   			    6    , CF_PLAYER      },
 	                                           
-	{ "qizmo",      (func_t) ShowQizmo,               0    , CF_PLAYER      },
-	                                           
-	{ "messages",   (func_t) ShowMessages,            0    , CF_PLAYER      },
-	{ "killer",     (func_t) SendKillerMsg,           0    , CF_PLAYER      },
-	{ "victim",     (func_t) SendVictimMsg,           0    , CF_PLAYER      },
-	{ "newcomer",   (func_t) SendNewcomerMsg,         0    , CF_PLAYER      },
-	                                           
-	{ "qlag",       (func_t) ToggleQLag,              0    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "qenemy",     (func_t) ToggleQEnemy,            0    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "qpoint",     (func_t) ToggleQPoint,            0    , CF_PLAYER | CF_SPC_ADMIN },
-
-    { "kick",       (func_t) AdminKick,               0    , CF_BOTH_ADMIN  },
-    { "y",          (func_t) YesKick,                 0    , CF_BOTH_ADMIN  },
-    { "n",          (func_t) DontKick,                0    , CF_BOTH_ADMIN  },
-    { "list",       (func_t) ListWhoNot,              0    , CF_PLAYER      },
-    { "overtime",   (func_t) ChangeOvertime,          0    , CF_PLAYER | CF_SPC_ADMIN },
-    { "overtimeup", (func_t) ChangeOvertimeUp,        0    , CF_PLAYER | CF_SPC_ADMIN },
-    { "elect",      (func_t) VoteAdmin,               0    , CF_BOTH        },
-    { "yes",        (func_t) VoteYes,                 0    , CF_PLAYER      },
-    { "no",         (func_t) VoteNo,                  0    , CF_PLAYER      },
-    { "captain",    (func_t) BecomeCaptain,           0    , CF_PLAYER      },
-    { "freeze",     (func_t) ToggleFreeze,            0    , CF_PLAYER      },
-	{ "deathmsg",   (func_t) Deathmsg,                0    , CF_BOTH_ADMIN  },
-    { "rpickup",    (func_t) RandomPickup,            0    , CF_BOTH_ADMIN  },
-
-//    { "1on1",       (func_t) UserMode,        (int)("1on1"), CF_PLAYER | CF_SPC_ADMIN },
-//    { "2on2",       (func_t) UserMode,        (int)("2on2"), CF_PLAYER | CF_SPC_ADMIN },
-//    { "3on3",       (func_t) UserMode,        (int)("3on3"), CF_PLAYER | CF_SPC_ADMIN },
-//    { "4on4",       (func_t) UserMode,        (int)("4on4"), CF_PLAYER | CF_SPC_ADMIN },
-//    { "10on10",     (func_t) UserMode,      (int)("10on10"), CF_PLAYER | CF_SPC_ADMIN },
-//    { "ffa",        (func_t) UserMode,         (int)("ffa"), CF_PLAYER | CF_SPC_ADMIN },
-
-    { "unpause",    (func_t) VoteUnpause,             0    , CF_PLAYER      },
-
-    { "cam",        (func_t) ShowCamHelp,             0    , CF_SPECTATOR   }
+	{ "qizmo",       ShowQizmo,                 0    , CF_PLAYER      },
+	                                             
+	{ "messages",    ShowMessages,              0    , CF_PLAYER      },
+	{ "killer",      SendKillerMsg,             0    , CF_PLAYER      },
+	{ "victim",      SendVictimMsg,             0    , CF_PLAYER      },
+	{ "newcomer",    SendNewcomerMsg,           0    , CF_PLAYER      },
+	                                             
+	{ "qlag",        ToggleQLag,                0    , CF_PLAYER | CF_SPC_ADMIN },
+	{ "qenemy",      ToggleQEnemy,              0    , CF_PLAYER | CF_SPC_ADMIN },
+	{ "qpoint",      ToggleQPoint,              0    , CF_PLAYER | CF_SPC_ADMIN },
+	                                          
+    { "kick",        AdminKick,                 0    , CF_BOTH_ADMIN  },
+    { "y",           YesKick,                   0    , CF_BOTH_ADMIN  },
+    { "n",           DontKick,                  0    , CF_BOTH_ADMIN  },
+    { "list",        ListWhoNot,                0    , CF_PLAYER      },
+    { "overtime",    ChangeOvertime,            0    , CF_PLAYER | CF_SPC_ADMIN },
+    { "overtimeup",  ChangeOvertimeUp,          0    , CF_PLAYER | CF_SPC_ADMIN },
+    { "elect",       VoteAdmin,                 0    , CF_BOTH        },
+    { "yes",         VoteYes,                   0    , CF_PLAYER      },
+    { "no",          VoteNo,                    0    , CF_PLAYER      },
+    { "captain",     BecomeCaptain,             0    , CF_PLAYER      },
+    { "freeze",      ToggleFreeze,              0    , CF_PLAYER      },
+	{ "deathmsg",    Deathmsg,                  0    , CF_BOTH_ADMIN  },
+    { "rpickup",     RandomPickup,              0    , CF_BOTH_ADMIN  },
+    
+    { "1on1",        UserMode,                  1	 , CF_PLAYER | CF_SPC_ADMIN },
+    { "2on2",        UserMode,                  2	 , CF_PLAYER | CF_SPC_ADMIN },
+    { "3on3",        UserMode,                  3	 , CF_PLAYER | CF_SPC_ADMIN },
+    { "4on4",        UserMode,                  4	 , CF_PLAYER | CF_SPC_ADMIN },
+    { "10on10",      UserMode,                  5	 , CF_PLAYER | CF_SPC_ADMIN },
+    { "ffa",         UserMode,                  6	 , CF_PLAYER | CF_SPC_ADMIN },
+    
+    { "unpause",     VoteUnpause,               0    , CF_PLAYER      },
+    { "practice",    TogglePractice,            0    , CF_PLAYER | CF_SPC_ADMIN },
+    
+    { "cam",         ShowCamHelp,               0    , CF_SPECTATOR   }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -250,7 +252,7 @@ int DoCommand(int icmd)
 	if (cmds[icmd].arg)
 		( ( void ( * )(float) ) ( cmds[icmd].f ) ) ( cmds[icmd].arg );
 	else
-		( ( void ( * )() ) ( cmds[icmd].f ) ) ();
+		( cmds[icmd].f )  ();
 
 	return icmd;
 }
@@ -1676,7 +1678,7 @@ void TeamSay(float fsndname)
 	gedict_t *p;
 	char *t1, *t2;
 
-	char *sndname = *(char **) &fsndname; // oh, thanks Tonik %)
+	char *sndname = va("ktsound%d.wav", (int)fsndname);
 
     p = find( world, FOFCLSN, "player" );
 	while( p ) {
@@ -2288,7 +2290,7 @@ int um_cnt = sizeof (um_list) / sizeof (um_list[0]);
 
 void UserMode(float umode)
 {
-	char *um = *(char**) &umode; // oh, thanks Tonik %)
+	char *um;
 	int k_free_mode = atoi( ezinfokey( world, "k_free_mode" ) );
 	int k_allowed_free_modes = atoi( ezinfokey( world, "k_allowed_free_modes" ) );
 	int i;
@@ -2301,8 +2303,15 @@ void UserMode(float umode)
 		return;
 	}
 
-	if ( strnull( um ) )
-		return;
+	switch ((int)umode) {
+		case 1: um = "1on1";   break;
+		case 2: um = "2on2";   break;
+		case 3: um = "3on3";   break;
+		case 4: um = "4on4";   break;
+		case 5: um = "10on10"; break;
+		case 6: um = "ffa";    break;
+		default: G_Error ("UserMode: unknown mode");
+	}
 
 //for 1on1 / 2on2 / 4on4 and ffa commands manipulation
 //0 - noone, 1 - admins, 2 elected admins too
@@ -2428,7 +2437,7 @@ void VoteUnpause ()
 		return;
 
 	if( self->k_voteUnpause ) {
-		G_sprint(self, 2, "You are already voted\n"); // FIXME: voted voting, spell check plzzz
+		G_sprint(self, 2, "You are already voted\n"); // FIXME: voted or voting, spell check plzzz
 		return;
 	}
 
@@ -2462,5 +2471,77 @@ void VoteUnpause ()
 	G_bprint(2, "%s %s\n", self->s.v.netname, redtext("votes for unpause!"));
     if ( f1 < f2 )
 		G_bprint(2, "%d more vote%s needed\n", (int)(f2 - f1),  ( (int)(f2 - f1) == 1 ? "" : "s") );
+}
+
+// ok, a bit complicated
+// this routine may change map if srv_practice_mode == 0 and mapname is not NULL
+void SetPractice(int srv_practice_mode, const char *mapname)
+{
+	if ( match_in_progress )
+		G_Error ("SetPractice: match_in_progress");
+
+	k_practice = srv_practice_mode;
+	localcmd("localinfo srv_practice_mode %d\n", srv_practice_mode);
+
+	if ( k_practice )
+		G_bprint(2, "%s\n", redtext("Server in practice mode"));
+	else {
+		G_bprint(2, "%s\n", redtext("Server in normal mode"));
+		if ( mapname )
+			localcmd("map %s\n", ( strnull( mapname ) ? g_globalvars.mapname : mapname ) );
+	}
+}
+
+void TogglePractice()
+{
+	int srv_practice_mode     = atoi( ezinfokey( world, "srv_practice_mode" ) );
+	int lock_practice         = atoi( ezinfokey( world, "lock_practice" ) );
+	int allow_toggle_practice = atoi( ezinfokey( world, "allow_toggle_practice" ) );
+
+	if ( match_in_progress )
+		return;
+
+	if( (atoi( ezinfokey( world, "k_master" ) ) && self->k_admin != 2)
+		|| lock_practice == 2 /* server locked in current practice mode */
+		|| (lock_practice != 0 && lock_practice != 1) /* unknown lock type, ignore command */
+	  ) {
+		G_sprint(self, 3, "console: command is locked\n");
+		return;
+	}
+
+	if ( k_force || find ( world, FOFCLSN, "idlebot" ) )
+		return;  // cmon, no practice if forcestart or idlebot active
+
+//0 - noone, 1 - admins, 2 elected admins too
+//3 - only real real judges, 4 - elected judges too
+//5 - all players
+
+// implement how i think this must be, it is like some sort of access control
+
+	switch ( allow_toggle_practice ) {
+		case 0:	G_sprint(self, 2, "%s can use this command\n", redtext("noone"));
+				return;
+		case 1:
+		case 2:	if ( self->k_admin != 2 ) {
+					G_sprint(self, 2, "you must be an %s\n", redtext("admin"));
+					return;
+				}
+				break;
+		case 3:
+		case 4:	if ( self->k_admin != 2 ) {
+					G_sprint(self, 2, "%s is not implemented in this mode\n", redtext("judges"));
+					G_sprint(self, 2, "you must be an %s\n", redtext("admin"));
+					return;
+				}
+				break;
+		case 5:
+				break;
+		default:
+				G_sprint(self, 2, "server is misconfigured, command %s\n", redtext("skipped"));
+				return;
+	}
+
+// ok u have access
+	SetPractice( !k_practice, "" ); // reload current map if needed
 }
 

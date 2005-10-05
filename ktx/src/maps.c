@@ -183,6 +183,8 @@ char *GetMapName(int imp)
 	return "";
 }
 
+void ModPause (int pause);
+
 void SelectMap()
 {
 	float f1, f2, f3;
@@ -265,6 +267,9 @@ void SelectMap()
 		G_bprint(2, "Admin veto\n");
 	else
 		G_bprint(2, "Majority votes for mapchange.\n");
+
+	if ( k_pause )
+		ModPause ( 0 );
 
 	localcmd("map %s\n", GetMapName( self->cmd_selectMap ));
 }

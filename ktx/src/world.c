@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.1.1.1 2005/09/24 12:45:07 disconn3ct Exp $
+ *  $Id: world.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -311,13 +311,16 @@ void SP_worldspawn()
    		gedict_t	*swp = self;
 
 		self = spawn();
-		setorigin( self, -912.5f, -898.875f, 248.0f );
+		setorigin( self, -912.5f, -898.875f, 248.0f ); // oh, ktpro like
 		self->s.v.owner = EDICT_TO_PROG( world );
 		self->s.v.classname = "item_artifact_super_damage";
 		SP_item_artifact_super_damage();
 
 		self = swp; // restore self
 	}
+
+	if ( atoi( ezinfokey( world, "srv_practice_mode" ) ) ) // #practice mode#
+		SetPractice( atoi( ezinfokey( world, "srv_practice_mode" ) ), NULL ); // may not reload map
 
 	Init_cmds();
 }

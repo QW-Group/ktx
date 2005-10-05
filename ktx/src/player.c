@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.1.1.1 2005/09/24 12:45:05 disconn3ct Exp $
+ *  $Id: player.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -653,6 +653,8 @@ void player_axpain6()
 
 void player_pain( struct gedict_s *attacker, float take )
 {
+//	G_bprint(2, "player_pain\n");
+
 	if ( self->s.v.weaponframe )
 		return;
 

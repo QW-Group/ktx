@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: doors.c,v 1.1.1.1 2005/09/24 12:45:02 disconn3ct Exp $
+ *  $Id: doors.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -202,12 +202,12 @@ void door_use()
 
 void door_trigger_touch()
 {
-#ifdef KTEAMS
 // return if countdown or map frozen
+	if( !k_practice ) // #practice mode#
 	if( match_in_progress == 1 
-		|| ( !match_in_progress && atoi( ezinfokey( world, "k_freeze" ) ) ) )
-			 return;
-#endif
+		|| ( !match_in_progress && atoi( ezinfokey( world, "k_freeze" ) ) )
+	  )
+		 return;
 
 	if ( other->s.v.health <= 0 )
 		return;
@@ -227,10 +227,9 @@ void door_killed()
 {
 	gedict_t       *oself;
 
-#ifdef KTEAMS
+	if( !k_practice ) // #practice mode#
 	if( match_in_progress != 2 ) 
        return;
-#endif
 
 	oself = self;
 	self = PROG_TO_EDICT( self->s.v.owner );
@@ -253,12 +252,12 @@ void door_touch()
 {
 	char           *msg;
 
-#ifdef KTEAMS
 // return if countdown or map frozen
-	if( match_in_progress == 1 ||
-		( !match_in_progress && atoi( ezinfokey( world, "k_freeze" ) ) ) ) 
+	if( !k_practice ) // #practice mode#
+	if( match_in_progress == 1
+		|| ( !match_in_progress && atoi( ezinfokey( world, "k_freeze" ) ) )
+	  ) 
 		return;
-#endif
 
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
@@ -660,10 +659,9 @@ void fd_secret_use( gedict_t * attacker, float take )
 {
 	float           temp;
 
-#ifdef KTEAMS
+	if( !k_practice ) // #practice mode#
 	if( match_in_progress != 2 )
         return;
-#endif
 
 	self->s.v.health = 10000;
 
@@ -810,12 +808,12 @@ Prints messages
 */
 void secret_touch()
 {
-#ifdef KTEAMS
 // return if countdown or map frozen
-	if( match_in_progress == 1 ||
-		( !match_in_progress && atoi( ezinfokey( world, "k_freeze" ) ) ) )
+	if( !k_practice ) // #practice mode#
+	if( match_in_progress == 1
+		|| ( !match_in_progress && atoi( ezinfokey( world, "k_freeze" ) ) )
+	  )
 		return;
-#endif
 
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
@@ -892,10 +890,10 @@ void SP_func_door_secret()
 	setmodel( self, self->s.v.model );
 	setorigin( self, PASSVEC3( self->s.v.origin ) );
 
-	self->s.v.touch = ( func_t ) secret_touch;
+	self->s.v.touch   = ( func_t ) secret_touch;
 	self->s.v.blocked = ( func_t ) secret_blocked;
 	self->speed = 50;
-	self->s.v.use = ( func_t ) fd_secret_use;
+	self->s.v.use     = ( func_t ) fd_secret_use;
 	if ( !self->s.v.targetname
 	     || ( int ) ( self->s.v.spawnflags ) & SECRET_YES_SHOOT )
 	{

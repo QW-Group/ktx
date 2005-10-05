@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: plats.c,v 1.1.1.1 2005/09/24 12:45:05 disconn3ct Exp $
+ *  $Id: plats.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -107,12 +107,12 @@ void plat_go_up()
 
 void plat_center_touch()
 {
-#ifdef KTEAMS
     // return if countdown or map frozen
-	if( match_in_progress == 1 ||
-		( !match_in_progress && atoi( ezinfokey( world, "k_freeze" ) ) ) )
+	if( !k_practice ) // #practice mode#
+	if( match_in_progress == 1
+		|| ( !match_in_progress && atoi( ezinfokey( world, "k_freeze" ) ) )
+	  )
 		return;
-#endif
 
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
@@ -130,12 +130,12 @@ void plat_center_touch()
 
 void plat_outside_touch()
 {
-#ifdef KTEAMS
     // return if countdown or map frozen
-	if( match_in_progress == 1 ||
-		( !match_in_progress && atoi( ezinfokey( world, "k_freeze" ) ) ) )
+	if( !k_practice ) // #practice mode#
+	if( match_in_progress == 1
+		|| ( !match_in_progress && atoi( ezinfokey( world, "k_freeze" ) ) )
+	  )
 		return;
-#endif
 
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
@@ -302,7 +302,8 @@ void train_wait()
 
     // make trains stop if frozen
 	if( match_in_progress == 2
-		||	( !atoi( ezinfokey( world, "k_freeze" ) ) && !match_in_progress )
+		|| ( !atoi( ezinfokey( world, "k_freeze" ) ) && !match_in_progress )
+		|| k_practice  // #practice mode#
 	  )
 		self->s.v.think = ( func_t ) train_next;
 }
