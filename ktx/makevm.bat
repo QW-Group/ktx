@@ -1,5 +1,5 @@
 @echo off
-
+rem look %SRC%\game.q3asm where qwprogs.qvm locate
 set CC=lcc
 set Q3ASM=q3asm
 set CFLAGS=-DQ3_VM -S -Wf-target=bytecode -Wf-g
