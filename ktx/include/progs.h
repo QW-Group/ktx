@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.2 2005/10/05 18:50:30 qqshka Exp $
+ *  $Id: progs.h,v 1.3 2005/10/21 20:19:05 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -183,6 +183,7 @@ typedef struct gedict_s {
 	int	  vip;				// store vip level/flags here
 	int   cmd_selectMap;	// store cmd cm <value> here
 	int   k_spectator;		// true if spectator
+	int   k_player;		    // true if player
 // --> timing
 	float k_lastPostThink;  // last time PlayerPostThink or SpectatorThink was called
 	float k_timingWarnTime; // time of last client is timing warning
@@ -192,6 +193,31 @@ typedef struct gedict_s {
 	int   k_timingMovetype; // .... so we can restore
 // <-- timing
 	int   k_voteUnpause;    // store here vote for unpause, for particular player
+// --> stats
+// h_xxx hits
+// a_xxx all attacks
+	int   h_axe;	// :]
+	int   a_axe;
+	int   h_sg;
+	int   a_sg;
+	int   h_ssg;
+	int   a_ssg;
+	int   h_ng;
+	int   a_ng;
+	int   h_sng;
+	int   a_sng;
+	int   h_gl;
+	int   a_gl;
+	int   h_rl;
+	int   a_rl;
+	int   h_lg;
+	int   a_lg;
+	int   wp_stats;			// show wp_stats or not
+	float wp_stats_time;    // used to force centerprint is off at desired time
+// <-- stats
+
+	int   need_clearCP;		// if this true, clear center print at certain cases
 #endif
 
 } gedict_t;
+

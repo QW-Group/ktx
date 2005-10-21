@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.2 2005/10/05 18:50:30 qqshka Exp $
+ *  $Id: g_local.h,v 1.3 2005/10/21 20:19:20 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -80,6 +80,23 @@ void            G_Error( const char *fmt, ... );
 
 #define PASSVEC3(x) (x[0]),(x[1]),(x[2])
 #define SetVector(v,x,y,z) (v[0]=x,v[1]=y,v[2]=z)
+
+// bg_lib.c
+
+#if defined( Q3_VM ) || defined( _WIN32 )
+// other cases must have native support
+
+int vsnprintf(char *buffer, size_t count, const char *format, va_list argptr);
+int snprintf(char *buffer, size_t count, char const *format, ...);
+
+#endif
+
+#if defined( __linux__ ) || defined( _WIN32 ) || defined( Q3_VM )
+
+size_t strlcat(char *dst, char *src, size_t siz);
+
+#endif
+
 //g_utils.c
 float           g_random( void );
 float           crandom( void );
