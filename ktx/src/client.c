@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.3 2005/10/05 18:50:03 qqshka Exp $
+ *  $Id: client.c,v 1.4 2005/10/21 20:20:54 qqshka Exp $
  */
 
 //===========================================================================
@@ -1492,6 +1492,90 @@ void BackFromLag()
 	}
 }
 
+#define S_AXE   ( 1<<0 )
+#define S_SG    ( 1<<1 )
+#define S_SSG   ( 1<<2 )
+#define S_NG    ( 1<<3 )
+#define S_SNG   ( 1<<4 )
+#define S_GL    ( 1<<5 )
+#define S_RL    ( 1<<6 )
+#define S_LG    ( 1<<7 )
+
+#define S_ALL   ( S_AXE | S_SG | S_SSG | S_NG | S_SNG | S_GL | S_RL | S_LG )
+
+#define S_DEF   ( S_GL | S_RL | S_LG ) /* default */
+
+void Print_Wp_Stats( )
+{
+	char buf[1024] = {0};
+
+	int  i;
+	int _wps = S_ALL & atoi( ezinfokey ( self, "wps" ) );
+	int  wps = ( _wps ? _wps : S_DEF ); // if wps is not set - show S_DEF weapons
+
+	gedict_t *e = self; // stats of whom we want to show
+
+	float axe = wps & S_AXE ? 100.0 * e->h_axe / max(1, e->a_axe) : 0;
+	float sg  = wps & S_SG  ? 100.0 * e->h_sg  / max(1, e->a_sg) : 0;
+	float ssg = wps & S_SSG ? 100.0 * e->h_ssg / max(1, e->a_ssg) : 0;
+	float ng  = wps & S_NG  ? 100.0 * e->h_ng  / max(1, e->a_ng) : 0;
+	float sng = wps & S_SNG ? 100.0 * e->h_sng / max(1, e->a_sng) : 0;
+#if 0 /* percentage */
+	float gl  = wps & S_GL  ? 100.0 * e->h_gl  / max(1, e->a_gl) : 0;
+	float rl  = wps & S_RL  ? 100.0 * e->h_rl  / max(1, e->a_rl) : 0;
+#else /* just count of direct hits */
+	float gl  = wps & S_GL  ? e->h_gl : 0;
+	float rl  = wps & S_RL  ? e->h_rl : 0;
+#endif
+	float lg  = wps & S_LG  ? 100.0 * e->h_lg  / max(1, e->a_lg) : 0;
+
+
+	if ( !axe && !sg && !ssg && !ng && !sng && !gl && !rl && !lg )
+		return; // sanity
+
+	i = bound(0, atoi ( ezinfokey( self, "lw" ) ), sizeof(buf)-1 );
+	memset( (void*)buf, (int)'\n', i);
+	buf[i] = 0;
+
+	if ( rl || lg || gl ) {
+		if ( rl )
+			strlcat(buf, (rl  ? va("%s%s:%.0f", (*buf ? " " : ""), redtext("rl"),  rl) : ""), sizeof(buf));
+		if ( lg )
+			strlcat(buf, (lg  ? va("%s%s:%.1f", (*buf ? " " : ""), redtext("lg") , lg) : ""), sizeof(buf));
+		if ( gl )
+			strlcat(buf, (gl  ? va("%s%s:%.0f", (*buf ? " " : ""), redtext("gl") , gl) : ""), sizeof(buf));
+
+		strlcat(buf, "\n", sizeof(buf));
+	}
+
+	if ( axe || sg || ssg ) {
+		if ( axe )
+			strlcat(buf, (axe ? va("%s:%.1f", redtext("axe"),  axe) : ""), sizeof(buf));
+		if ( sg )
+			strlcat(buf, (sg  ? va("%s%s:%.1f", (*buf ? " " : ""), redtext("sg") , sg) : ""), sizeof(buf));
+    	if ( ssg )
+			strlcat(buf, (ssg ? va("%s%s:%.1f", (*buf ? " " : ""), redtext("ssg") , ssg) : ""), sizeof(buf));
+
+		strlcat(buf, "\n", sizeof(buf));
+	}
+
+	if ( ng || sng ) {
+		 if ( ng )
+			strlcat(buf, (ng  ? va("%s:%.1f", redtext("ng"), ng) : "" ), sizeof(buf));
+		 if ( sng )
+			strlcat(buf, (sng ? va("%s%s:%.1f", (*buf ? " " : ""), redtext("sng"), sng) : ""), sizeof(buf));
+
+		strlcat(buf, "\n", sizeof(buf));
+	}
+
+	if ( strnull( buf ) )
+		return; // sanity
+
+	self->need_clearCP  = 1;
+	self->wp_stats_time = g_globalvars.time + 0.8;
+
+	G_centerprint( self, "%s",  buf );
+}
 
 ////////////////
 // GlobalParams:
@@ -1516,6 +1600,9 @@ void PlayerPreThink()
 
 	if ( self->k_timingWarnTime )
 		BackFromLag();
+
+	if ( self->wp_stats && self->wp_stats_time && self->wp_stats_time <= g_globalvars.time )
+		Print_Wp_Stats ();
 
 // ILLEGALFPS[
 
@@ -1594,7 +1681,7 @@ void PlayerPreThink()
 	if ( intermission_running )
 	{
 		IntermissionThink();	// otherwise a button could be missed between
-		return;		// the think tics
+		return;					// the think tics
 	}
 
 	if ( self->s.v.view_ofs[0] == 0 && self->s.v.view_ofs[1] == 0
@@ -1890,10 +1977,14 @@ void PlayerPostThink()
         return;
     }
 */
-
-	if ( self->shownick_time && self->shownick_time <= g_globalvars.time )
-	{
+	if (self->shownick_time && self->shownick_time <= g_globalvars.time )
 		self->shownick_time = 0;
+	if (self->wp_stats_time && self->wp_stats_time <= g_globalvars.time )
+		self->wp_stats_time = 0;
+
+	if ( self->need_clearCP && !self->shownick_time && !self->wp_stats_time )
+	{
+		self->need_clearCP = 0;
 		G_centerprint(self, ""); // clear center print
 	}
 

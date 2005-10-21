@@ -1,3 +1,27 @@
+2005-10-21
+ 10. Added +wp_stats command, which show how effectively u use weapons.
+	 Eff calculated like 100 * hits / AllShots, except gl and rl for which calculated
+	 just direct hits.
+
+	 Use 'lw' setinfo to change the position of the command.
+
+     Using 'wps' setinfo u can customize which weapons u want to be displayed:
+	  	  1 - axe
+	  	  2 - sg
+	  	  4 - ssg
+	  	  8 - ng
+	 	 16 - sng
+	 	 32 - gl
+	 	 64 - rl
+		128 - lg
+	 So if u want only rl + lg u must set 'wps' to 192 ( 64 + 128 ).
+
+	 If 'wps' is not specified or 0 then rl + lg + gl will be displayed.
+
+	 Oh, and weapons splitted in groups, rl + lg + gl is first line, axe + sg + ssg is second
+	 and ng + sng is last line. So if u set 'wps' to show rl + axe then +wp_stats will show
+	 two lines.
+
 2005-09-26
  8. practice mode, quote from ktpro
 	localinfo srv_practice_mode		0

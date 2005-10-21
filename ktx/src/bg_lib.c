@@ -56,7 +56,10 @@ static char* med3(char *, char *, char *, cmp_t *);
 static void	 swapfunc(char *, char *, int, int);
 
 #ifndef min
-#define min(a, b)	(a) < (b) ? a : b
+#define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
+#ifndef max
+#define max(a,b) ((a) > (b) ? (a) : (b))
 #endif
 
 /*
@@ -1332,4 +1335,107 @@ int sprintf( char *str, const char *fmt, ... )
 	va_end (argptr);
 	return ret;
 }
+#endif
+
+#ifdef Q3_VM
+
+// ignore count :(
+int vsnprintf(char *buffer, size_t count, const char *format, va_list argptr)
+{
+	int ret;
+
+	if (!count)
+		return 0;
+
+	ret = vsprintf(buffer, format, argptr);
+	buffer[count - 1] = 0;
+
+	return ret;
+}
+
+// ignore count :(
+int snprintf(char *buffer, size_t count, char const *format, ...)
+{
+	int ret;
+	va_list argptr;
+
+	if (!count)
+		return 0;
+
+	va_start(argptr, format);
+	ret = vsnprintf(buffer, count, format, argptr); // which is ignore count :(
+	buffer[count - 1] = 0;
+	va_end(argptr);
+
+	return ret;
+}
+
+#else // Q3_VM
+
+#ifdef _WIN32
+
+// ripped from VVD code
+
+int vsnprintf(char *buffer, size_t count, const char *format, va_list argptr)
+{
+	int ret;
+	if (!count)
+		return 0;
+
+	ret = _vsnprintf(buffer, count, format, argptr);
+	buffer[count - 1] = 0;
+
+	return ret;
+}
+
+
+int snprintf(char *buffer, size_t count, char const *format, ...)
+{
+	int ret;
+	va_list argptr;
+
+	if (!count)
+		return 0;
+
+	va_start(argptr, format);
+	ret = _vsnprintf(buffer, count, format, argptr);
+	buffer[count - 1] = 0;
+	va_end(argptr);
+
+	return ret;
+}
+
+#endif // _WIN32
+
+#endif // Q3_VM
+
+#if defined( __linux__ ) || defined( _WIN32 ) || defined( Q3_VM )
+
+size_t strlcat(char *dst, char *src, size_t siz)
+{
+	register char *d = dst;
+	register const char *s = src;
+	register size_t n = siz;
+	size_t dlen;
+
+	/* Find the end of dst and adjust bytes left but don't go past end */
+	while (n-- != 0 && *d != '\0')
+		d++;
+	dlen = d - dst;
+	n = siz - dlen;
+
+	if (n == 0)
+		return(dlen + strlen(s));
+	while (*s != '\0') {
+		if (n != 1) {
+			*d++ = *s;
+			n--;
+		}
+		s++;
+	}
+	*d = '\0';
+
+	return(dlen + (s - src));       /* count does not include NUL */
+}
+
 #endif

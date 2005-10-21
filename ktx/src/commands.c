@@ -96,6 +96,7 @@ void ToggleSpeed();
 void VotePickup();
 void VoteUnpause();
 void UserMode(float umode);
+void Wp_Stats(float on);
 
 void TogglePractice();
 
@@ -210,6 +211,8 @@ cmd_t cmds[] = {
     
     { "unpause",     VoteUnpause,               0    , CF_PLAYER      },
     { "practice",    TogglePractice,            0    , CF_PLAYER | CF_SPC_ADMIN },
+    { "+wp_stats",   Wp_Stats,                  1    , CF_PLAYER      },
+    { "-wp_stats",   Wp_Stats,                  0    , CF_PLAYER      },
     
     { "cam",         ShowCamHelp,               0    , CF_SPECTATOR   }
 };
@@ -2057,9 +2060,6 @@ void ShowNick()
 			if (dist <= radius)
 				goto ok;
 
-			// FIXME: is it ok to use PM_TraceLine here?
-			// physent list might not have been built yet...
-
 			VectorSubtract (vieworg, entorg, v);
 			VectorNormalize (v);
 			VectorMA (entorg, radius, v, end);
@@ -2139,7 +2139,7 @@ ok:
 	else if ( itms & IT_SUPER_SHOTGUN )    s2 = va(" %s:%d", redtext("ssg"),(int)bp->s.v.ammo_shells);
 	else if ( itms & IT_NAILGUN )          s2 = va(" %s:%d", redtext("ng"), (int)bp->s.v.ammo_nails);
 	else if ( itms & IT_SHOTGUN )          s2 = va(" %s:%d", redtext("sg"), (int)bp->s.v.ammo_shells);
-	else if ( itms & IT_AXE )              s2 = redtext(" axe!");
+	else if ( itms & IT_AXE )              s2 = redtext(" axe!"); // just in case :]
 	else
 		s2 = "";
 
@@ -2157,6 +2157,7 @@ ok:
 						 s1, redtext("h"), (int)bp->s.v.health, s2,
 								( strnull( kn ) ? bp->s.v.netname : kn ));
 
+	self->need_clearCP  = 1;
 	self->shownick_time = g_globalvars.time + 0.8; // clear centerprint at this time
 }
 
@@ -2543,5 +2544,13 @@ void TogglePractice()
 
 // ok u have access
 	SetPractice( !k_practice, "" ); // reload current map if needed
+}
+
+void Wp_Stats(float on)
+{
+	self->wp_stats = (int)on;
+
+	if ( on )
+		self->wp_stats_time = g_globalvars.time; // force show
 }
 

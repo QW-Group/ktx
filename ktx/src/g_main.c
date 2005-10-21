@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
+ *  $Id: g_main.c,v 1.3 2005/10/21 20:20:54 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -102,6 +102,7 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		self->vip = G_FLOAT( OFS_PARM0 ); // mvdsv store vip here, valid only at this moment
 
 		self->k_spectator = arg0;
+		self->k_player    = !arg0;
 
 		if ( arg0 )
 			SpectatorConnect();

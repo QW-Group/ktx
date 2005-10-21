@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
+ *  $Id: weapons.c,v 1.3 2005/10/21 20:20:54 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -63,6 +63,8 @@ void W_FireAxe()
 	vec3_t          source, dest;
 	vec3_t          org;
 
+	self->a_axe++;
+
 	makevectors( self->s.v.v_angle );
 
 	VectorCopy( self->s.v.origin, source );
@@ -81,6 +83,9 @@ void W_FireAxe()
 
 	if ( PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.takedamage )
 	{
+		if ( PROG_TO_EDICT( g_globalvars.trace_ent )->k_player )
+			self->h_axe++;
+
 		PROG_TO_EDICT( g_globalvars.trace_ent )->axhitme = 1;
 		SpawnBlood( org, 20 );
 		if ( deathmatch > 3 )
@@ -304,10 +309,19 @@ void TraceAttack( float damage, vec3_t dir )
 
 	if ( PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.takedamage )
 	{
+		if ( PROG_TO_EDICT( g_globalvars.trace_ent )->k_player ) {
+			if ((int)self->s.v.weapon == IT_SHOTGUN)
+				self->h_sg++;
+			else if ((int)self->s.v.weapon == IT_SUPER_SHOTGUN)
+				self->h_ssg++;
+			else
+			 ; // hmmm, make error?
+		}
 		blood_count = blood_count + 1;
 		VectorCopy( org, blood_org );	//  blood_org = org;
 		AddMultiDamage( PROG_TO_EDICT( g_globalvars.trace_ent ), damage );
-	} else
+	}
+	else
 	{
 		puff_count = puff_count + 1;
 	}
@@ -368,6 +382,9 @@ W_FireShotgun
 void W_FireShotgun()
 {
 	vec3_t          dir;
+	int				bullets = 6;
+
+	self->a_sg += bullets;
 
 	sound( self, CHAN_WEAPON, "weapons/guncock.wav", 1, ATTN_NORM );
 
@@ -383,7 +400,7 @@ void W_FireShotgun()
 
 	//dir = aim (self, 100000);
 	aim( dir );
-	FireBullets( 6, dir, 0.04, 0.04, 0 );
+	FireBullets( bullets, dir, 0.04, 0.04, 0 );
 }
 
 /*
@@ -394,12 +411,15 @@ W_FireSuperShotgun
 void W_FireSuperShotgun()
 {
 	vec3_t          dir;
+	int				bullets = 14;
 
 	if ( self->s.v.currentammo == 1 )
 	{
 		W_FireShotgun();
 		return;
 	}
+	self->a_ssg += bullets;
+
 	sound( self, CHAN_WEAPON, "weapons/shotgn2.wav", 1, ATTN_NORM );
 	g_globalvars.msg_entity = EDICT_TO_PROG( self );
 
@@ -413,7 +433,7 @@ void W_FireSuperShotgun()
 
 	//dir = aim (self, 100000);
 	aim( dir );
-	FireBullets( 14, dir, 0.14, 0.08, 0 );
+	FireBullets( bullets, dir, 0.14, 0.08, 0 );
 }
 
 /*
@@ -461,6 +481,11 @@ void T_MissileTouch()
 
 	damg = 100 + g_random() * 20;
 
+	if ( other->s.v.takedamage ) {
+		if ( other->k_player )
+			PROG_TO_EDICT( self->s.v.owner )->h_rl++;
+	}
+
 	if ( other->s.v.health )
 	{
 		other->deathtype = "rocket";
@@ -495,6 +520,8 @@ W_FireRocket
 
 void W_FireRocket()
 {
+	self->a_rl++;
+
 #ifdef KTEAMS
     if ( match_in_progress == 2 )
 #endif
@@ -545,6 +572,9 @@ LIGHTNING
 
 void LightningHit( gedict_t * from, float damage )
 {
+	if ( PROG_TO_EDICT( g_globalvars.trace_ent )->k_player )
+		self->h_lg++;
+
 	trap_WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
 	trap_WriteByte( MSG_MULTICAST, TE_LIGHTNINGBLOOD );
 	trap_WriteCoord( MSG_MULTICAST, g_globalvars.trace_endpos[0] );
@@ -616,11 +646,8 @@ void W_FireLightning()
 	float           cells;
 	vec3_t          tmp;
 
-#ifdef KTEAMS
+
     if ( self->s.v.ammo_cells < 1 || match_in_progress == 1 )
-#else
-	if ( self->s.v.ammo_cells < 1 )
-#endif
 	{
 		self->s.v.weapon = W_BestWeapon();
 		W_SetCurrentAmmo();
@@ -628,11 +655,7 @@ void W_FireLightning()
 	}
 
 // explode if under water
-#ifdef KTEAMS
     if ( self->s.v.waterlevel > 1 && match_in_progress == 2 )
-#else
-	if ( self->s.v.waterlevel > 1)
-#endif
 	{
 		if ( deathmatch > 3 )
 		{
@@ -646,10 +669,10 @@ void W_FireLightning()
 				cells = self->s.v.ammo_cells;
 				self->s.v.ammo_cells = 0;
 				W_SetCurrentAmmo();
-#ifdef KTEAMS
+
                 if ( !atoi( ezinfokey( world, "k_dis" ) ) ) 
                     return;
-#endif
+
 				T_RadiusDamage( self, self, 35 * cells, world, "" );
 				return;
 			}
@@ -658,14 +681,16 @@ void W_FireLightning()
 			cells = self->s.v.ammo_cells;
 			self->s.v.ammo_cells = 0;
 			W_SetCurrentAmmo();
-#ifdef KTEAMS
+
             if ( !atoi( ezinfokey( world, "k_dis" ) ) )
                 return;
-#endif
+
 			T_RadiusDamage( self, self, 35 * cells, world, "" );
 			return;
 		}
 	}
+
+	self->a_lg++;
 
 	if ( self->t_width < g_globalvars.time )
 	{
@@ -675,9 +700,7 @@ void W_FireLightning()
 	g_globalvars.msg_entity = EDICT_TO_PROG( self );
 	trap_WriteByte( MSG_ONE, SVC_SMALLKICK );
 
-#ifdef KTEAMS
     if ( match_in_progress == 2 )
-#endif
 		if ( deathmatch != 4 )
 			self->s.v.currentammo = self->s.v.ammo_cells = self->s.v.ammo_cells - 1;
 
@@ -732,6 +755,12 @@ void GrenadeTouch()
 {
 	if ( other == PROG_TO_EDICT( self->s.v.owner ) )
 		return;		// don't explode on owner
+	
+	if ( other->s.v.takedamage ) {
+		if ( other->k_player )
+			PROG_TO_EDICT( self->s.v.owner )->h_gl++;
+	}
+
 	if ( other->s.v.takedamage == DAMAGE_AIM )
 	{
 		GrenadeExplode();
@@ -750,9 +779,9 @@ W_FireGrenade
 */
 void W_FireGrenade()
 {
-#ifdef KTEAMS
+	self->a_gl++;
+
     if ( match_in_progress == 2 )
-#endif
 		if ( deathmatch != 4 )
 			self->s.v.currentammo = self->s.v.ammo_rockets = self->s.v.ammo_rockets - 1;
 
@@ -876,6 +905,9 @@ void spike_touch()
 // hit something that bleeds
 	if ( other->s.v.takedamage )
 	{
+		if ( other->k_player )
+			PROG_TO_EDICT( self->s.v.owner )->h_ng++;
+
 		spawn_touchblood( 9 );
 		other->deathtype = "nail";
 		T_Damage( other, self, PROG_TO_EDICT( self->s.v.owner ), 9 );
@@ -922,6 +954,9 @@ void superspike_touch()
 // hit something that bleeds
 	if ( other->s.v.takedamage )
 	{
+		if ( other->k_player )
+			PROG_TO_EDICT( self->s.v.owner )->h_sng++;
+
 		spawn_touchblood( 18 );
 		other->deathtype = "supernail";
 		T_Damage( other, self, PROG_TO_EDICT( self->s.v.owner ), 18 );
@@ -943,13 +978,12 @@ void W_FireSuperSpikes()
 {
 	vec3_t          dir, tmp;
 
-// gedict_t*    old;
+	self->a_sng++;
 
 	sound( self, CHAN_WEAPON, "weapons/spike2.wav", 1, ATTN_NORM );
 	self->attack_finished = g_globalvars.time + 0.2;
-#ifdef KTEAMS
+
     if ( match_in_progress == 2 )
-#endif
 		if ( deathmatch != 4 )
 			self->s.v.currentammo = self->s.v.ammo_nails = self->s.v.ammo_nails - 2;
 	aim( dir );		//dir = aim (self, 1000);
@@ -968,37 +1002,32 @@ void W_FireSpikes( float ox )
 {
 	vec3_t          dir, tmp;
 
-// gedict_t*    old;
-
 	makevectors( self->s.v.v_angle );
 
-#ifdef KTEAMS
     if( match_in_progress != 1 )
-#endif
 		if ( self->s.v.ammo_nails >= 2 && self->s.v.weapon == IT_SUPER_NAILGUN )
 		{
 			W_FireSuperSpikes();
 			return;
 		}
 
-#ifdef KTEAMS
+
     if ( self->s.v.ammo_nails < 1 || match_in_progress == 1 )
-#else
-	if ( self->s.v.ammo_nails < 1 )
-#endif
 	{
 		self->s.v.weapon = W_BestWeapon();
 		W_SetCurrentAmmo();
 		return;
 	}
+	
+	self->a_ng++;
 
 	sound( self, CHAN_WEAPON, "weapons/rocket1i.wav", 1, ATTN_NORM );
 	self->attack_finished = g_globalvars.time + 0.2;
-#ifdef KTEAMS
+
     if ( match_in_progress == 2 )
-#endif
 		if ( deathmatch != 4 )
 			self->s.v.currentammo = self->s.v.ammo_nails = self->s.v.ammo_nails - 1;
+
 	aim( dir );		// dir = aim (self, 1000);
 	VectorScale( g_globalvars.v_right, ox, tmp );
 	VectorAdd( tmp, self->s.v.origin, tmp );

@@ -20,27 +20,13 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
+ *  $Id: g_utils.c,v 1.3 2005/10/21 20:20:54 qqshka Exp $
  */
 
 #include "g_local.h"
 
 #define MAX_STRINGS 16
 
-#ifdef Q3_VM
-
-// ignore size :/
-int vsnprintf(char  * str, size_t size, const char * fmt, va_list list)
-{
-	return vsprintf(str, fmt, list);
-}
-#else
-
-#ifdef _WIN32
-#define vsnprintf _vsnprintf
-#endif
-
-#endif
 
 
 int NUM_FOR_EDICT( gedict_t * e )
