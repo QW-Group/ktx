@@ -177,28 +177,280 @@ float CheckMembers ( float memcnt )
 	return 1;
 }
 
+void TeamsStats ( )
+{
+	gedict_t	*p, *p2;
+	float		f1, f2;
+	char		*tmp, *tmp2;
+	int			sumfrags = 0, wasPrint = 0;
+
+	// Summing up the frags to calculate team percentages
+	p = find ( world, FOFCLSN, "player" );
+	while( p ) {
+		p->ready = 0; // clear mark
+
+		if( !strnull ( p->s.v.netname )
+			&& ( !strnull( ezinfokey (p, "team") ) && p->k_accepted == 2 ) )
+			sumfrags += p->s.v.frags;
+
+		p = find ( p, FOFCLSN, "player" );
+	}
+
+	p = find ( world, FOFCLSN, "ghost" );
+	while( p ) {
+		p->ready = 0; // clear mark
+		sumfrags += p->s.v.frags;
+
+		p = find ( p, FOFCLSN, "ghost" );
+	}
+	// End of summing
+
+	G_bprint(2, "\n%s: %s\n"
+				"Ÿ\n", redtext("Team scores"),
+													     redtext("frags  percentage"));
+
+//	get one player and search all his mates, mark served players via ->ready field 
+//  ghosts is served too
+
+	p = find ( world, FOFCLSN, "player" );
+	while( p ) {
+		if( !strnull ( p->s.v.netname ) && !p->ready
+			 && ( !strnull( ezinfokey (p, "team") ) && p->k_accepted == 2 ) ) {
+
+			f1 = 0; // frags from normal players
+
+			p2 = p;
+			while ( p2 ) {
+				tmp = ezinfokey(p, "team");
+				tmp2 = ezinfokey(p2, "team");
+				if( streq( tmp, tmp2 ) ) {
+					f1 += p2->s.v.frags;
+					p2->ready = 1; // set mark
+				}
+
+				p2 = find ( p2, FOFCLSN, "player" );
+			}
+
+			f2 = 0; // frags from ghost players
+
+			p2 = find( world, FOFCLSN, "ghost" );
+			while( p2 ) {
+				if( !p2->ready ) {
+					tmp2 = ezinfokey(world, va("%d", (int)p2->k_teamnum));
+					tmp  = ezinfokey(p, "team");
+					if ( streq( tmp, tmp2 ) ) {
+						f2 += p2->s.v.frags;
+						p2->ready = 1; // set mark
+					}
+				}
+
+				p2 = find ( p2, FOFCLSN, "ghost" );
+			}
+
+			G_bprint(2, "%s‘: %d", ezinfokey ( p, "team" ), (int) f1 );
+
+			if( f2 )
+				G_bprint( 2, tmp, " + (%d) = %d", (int)f2, (int)(f1+f2) );
+
+			// effi
+			G_bprint(2, "  %.1f%%\n", ((sumfrags > 0)? ((f1 + f2)/sumfrags * 100) : 0));
+
+			wasPrint = 1;
+		}
+
+		p = find ( p, FOFCLSN, "player" );
+	}
+
+	if ( wasPrint )
+		G_bprint(2, "Ÿ\n");
+}
+
+float maxfrags, maxdeaths, maxfriend, maxeffi;
+
+// Players statistics printout here
+// FIXME: TODO: need serve ghosted players too!!!
+void PlayersStats ()
+{
+	gedict_t	*p, *p2;
+	float		f1;
+	char		*tmp, *tmp2;
+	int			tp, first, needline;
+
+	p = find ( world, FOFCLSN, "player" );
+	while( p ) {
+		p->ready = 0; // clear mark
+		p = find ( p, FOFCLSN, "player" );
+	}
+
+	// Probably low enough for a start value :)
+	maxfrags = -999999;
+
+	maxeffi = maxfriend = maxdeaths = 0;
+
+	f1 = CountTeams();
+
+	tp = !atoi ( ezinfokey ( world, "k_duel" ) ) && f1 && teamplay;
+
+	G_bprint(2, "%s:\n"
+				"%s (%s) %s %s\n"
+				"Ÿ\n", redtext("Player statistics"),
+				redtext( "Frags"), redtext( "rank"), ( tp ? redtext("friendkills "): "" ), redtext( "efficiency" ));
+
+	p = find ( world, FOFCLSN, "player" );
+	while( p ) {
+		if( !strnull ( p->s.v.netname ) && p->k_accepted == 2 && !p->ready ) {
+
+			first = 1;
+			p2 = p;
+			while ( p2 ) {
+				// sort by team
+				tmp = ezinfokey(p, "team");
+				tmp2 = ezinfokey(p2, "team");
+
+				if( streq ( tmp, tmp2 ) ) {
+
+					if ( first ) {
+						first = 0;
+						if ( tp )
+							G_bprint(2, "Team %s‘:\n", tmp );
+					}
+
+					if(p2->s.v.frags < 1)
+						p2->efficiency = 0;
+					else
+						p2->efficiency = p2->s.v.frags / (p2->s.v.frags + p2->deaths) * 100;
+
+					needline = find ( p2, FOFCLSN, "player" ) && find ( p, FOFCLSN, "player" );
+
+					G_bprint(2, "\x87 %s:\n"
+								"  %d (%d) %s%.1f%%\n"
+								"%s", p2->s.v.netname,
+								(int)p2->s.v.frags,	(int)(p2->s.v.frags - p2->deaths),
+								( tp ? va("%d ", (int)p2->friendly ) : "" ),
+								p2->efficiency,
+								( needline ? "Ÿ\n" : "" ) );
+
+					if (maxfrags < p2->s.v.frags)
+						maxfrags = p2->s.v.frags;
+					if (maxdeaths < p2->deaths)
+						maxdeaths = p2->deaths;
+					if (maxfriend < p2->friendly)
+						maxfriend = p2->friendly;
+					if (maxeffi < p2->efficiency)
+						maxeffi = p2->efficiency;
+					p2->ready = 1; // set mark
+				}
+
+				p2 = find ( p2, FOFCLSN, "player" );
+
+				if ( !p2 )
+					G_bprint(2, "\n"); // split players from different teams via \n
+			}
+		}
+
+		p = find ( p, FOFCLSN, "player" );
+	}
+}
+
+// Print the high score table
+void TopStats ( )
+{
+	gedict_t	*p;
+	float		f1;
+
+	G_bprint(2, "%s‘ %s:\n"
+				"Ÿ\n"
+				"      Frags: ", g_globalvars.mapname, redtext("top scorers"));
+
+	f1 = 0;
+	p = find ( world, FOFCLSN, "player" );
+	while( p ) {
+		if( !strnull ( p->s.v.netname ) && p->k_accepted == 2 )
+			if( p->s.v.frags == maxfrags ) {
+				G_bprint(2, "%s%s %d‘\n", (f1 ? "             " : ""),
+										   p->s.v.netname, (int)maxfrags);
+				f1 = 1;
+			}
+
+		p = find ( p, FOFCLSN, "player" );
+	}
+
+
+	G_bprint(2, "     Deaths: ");
+	f1 = 0;
+	p = find ( world, FOFCLSN, "player" );
+	while( p ) {
+		if( !strnull ( p->s.v.netname ) && p->k_accepted == 2 )
+			if( p->deaths == maxdeaths ) {
+				G_bprint(2, "%s%s %d‘\n", (f1 ? "             " : ""),
+										 p->s.v.netname, (int)maxdeaths);
+				f1 = 1;
+			}
+
+		p = find ( p, FOFCLSN, "player" );
+	}
+
+	if(maxfriend) {
+		G_bprint(2, "Friendkills: ");
+
+		f1 = 0;
+		p = find ( world, FOFCLSN, "player" );
+		while( p ) {
+			if( !strnull ( p->s.v.netname ) && p->k_accepted == 2 )
+				if( p->friendly == maxfriend ) {
+					G_bprint(2, "%s%s %d‘\n", (f1 ? "             " : ""),
+											  p->s.v.netname, (int)maxfriend);
+					f1 = 1;
+				}
+
+			p = find ( p, FOFCLSN, "player" );
+		}
+	}
+
+	G_bprint(2, " Efficiency: ");
+	f1 = 0;
+	p = find ( world, FOFCLSN, "player" );
+	while( p ) {
+		if( !strnull ( p->s.v.netname ) && p->k_accepted == 2 )
+			if( p->efficiency == maxeffi ) {
+				G_bprint(2, "%s%s %.1f%%‘\n", (f1 ? "             " : ""),
+											  p->s.v.netname, maxeffi);
+				f1 = 1;
+			}
+
+		p = find ( p, FOFCLSN, "player" );
+	}
+
+	G_bprint(2, "Ÿ\n");
+}
+
 void EndMatch ( float skip_log )
 {
 	gedict_t	*p, *p2;
 
+	int fpd = atoi( ezinfokey ( world, "fpd" ) );
 	char *tmp, *tmp2;
-	float f1, f2, sumfrags = 0, maxfrags, maxdeaths, maxfriend, maxeffi;
+	float f1, f2;
 
 	if( match_over )
 		return;
 
+	match_over = 1;
+
 // s: zero the flag
-	k_sudden_death = 0;
+	k_berzerk = k_sudden_death = 0;
+
 	tmp = ezinfokey( world, "k_host" );
 	if( !strnull( tmp ) )
 		trap_cvar_set( "hostname", tmp );
-	match_over = 1;
-	k_berzerk = 0;
+
 	trap_lightstyle(0, "m");
-	f1 = atoi( ezinfokey ( world, "fpd" ) );
-	f1 = f1 - ((int)f1 & 64);
-	localcmd("serverinfo fpd %d\n", (int)f1);
+
+	fpd = fpd & ~64;
+	localcmd("serverinfo fpd %d\n", fpd);
+
 	localcmd("sv_spectalk 1\n");
+
 	G_bprint( 2, "The match is over\n");
 	G_dprint("RESULT");
 
@@ -213,11 +465,10 @@ void EndMatch ( float skip_log )
 				G_dprint("%%%s", p->s.v.netname);
 				G_dprint("%%t%%%s", ezinfokey(p, "team"));
 				G_dprint("%%fr%%%d", (int)p->s.v.frags);
-				p->ready = 0;
-// take away powerups so scoreboard looks normal
-// FIXME: make this clean, 7864320 200 ?
-				p->s.v.items = p->s.v.items - ((int)p->s.v.items & 7864320);
-				p->s.v.effects = p->s.v.effects - ((int)p->s.v.effects & 200);
+
+				// take away powerups so scoreboard looks normal
+				p->s.v.items = (int)p->s.v.items & ~(IT_INVISIBILITY | IT_INVULNERABILITY | IT_SUIT | IT_QUAD);
+				p->s.v.effects = (int)p->s.v.effects & ~(EF_DIMLIGHT | EF_BLUE | EF_RED );
 				p->invisible_finished = 0;
 				p->invincible_finished = 0;
 				p->super_damage_finished = 0;
@@ -231,209 +482,13 @@ void EndMatch ( float skip_log )
 		G_dprint("%%tl%%%d", (int)timelimit);
 		G_dprint("%%map%%%s\n", g_globalvars.mapname);
 
-        if( atoi( ezinfokey( world, "k_duel" ) ) && teamplay ) {
-// Summing up the frags to calculate team percentages
-			p = find ( world, FOFCLSN, "player" );
-			while( p ) {
-				if( !strnull ( p->s.v.netname ) 
-					&& ( !strnull( ezinfokey (p, "team") ) && p->k_accepted == 2 ) )
-					sumfrags += p->s.v.frags;
+		PlayersStats ();
 
-				p = find ( p, FOFCLSN, "player" );
-			}
+        if( !atoi( ezinfokey (world, "k_duel" ) ) )
+			TopStats ();
 
-			p = find ( world, FOFCLSN, "ghost" );
-			while( p ) {
-				sumfrags += p->s.v.frags;
-
-				p = find ( p, FOFCLSN, "ghost" );
-			}
-// End of summing
-			G_bprint(2, "\nÔåáí óãïòåó: æòáçó  ğåòãåîôáçå\nŸ\n");
-			p = find ( world, FOFCLSN, "player" );
-			while( p ) {
-				if( !strnull ( p->s.v.netname ) && !p->ready
-					 && ( !strnull( ezinfokey (p, "team") ) && p->k_accepted == 2 ) ) {
-					p2 = p;
-					f1 = 0;
-					G_bprint(2, "%s‘: ", ezinfokey ( p, "team" ) );
-					while ( p2 ) {
-						tmp = ezinfokey(p, "team");
-						tmp2 = ezinfokey(p2, "team");
-						if( streq( tmp, tmp2 ) ) {
-							f1 += p2->s.v.frags;
-							p2->ready = 1;
-						}
-						p2 = find ( p2, FOFCLSN, "player" );
-					}
-					f2 = 0;
-					p2 = find( world, FOFCLSN, "ghost" );
-					while( p2 ) {
-						if( !p2->ready ) {
-							// FIXME: is this work ??????????????
-							tmp2 = ezinfokey(world, va("%d", (int)p2->k_teamnum)); // oh, dark magic?
-							tmp  = ezinfokey(p, "team");
-							if ( streq( tmp, tmp2 ) ) {
-								f2 += p2->s.v.frags;
-								p2->ready = 1;
-							}
-						}
-
-						p2 = find ( p2, FOFCLSN, "ghost" );
-					}
-
-					G_bprint( 2, "%d", (int) f1 );
-
-					if( f2 )
-						G_bprint( 2, tmp, " + (%d) = %d", (int)f2, (int)(f1+f2) );
-
-					// effi, FIXME: make it looooks better %)
-					G_bprint(2, " %f%%\n", ((sumfrags > 0)? ((f1 + f2)/sumfrags * 100) : 0));
-				}
-
-				p = find ( p, FOFCLSN, "player" );
-			}
-		}
-
-		G_bprint(2, "\n");
-
-		p = find ( world, FOFCLSN, "player" );
-		while( p ) {
-			p->ready = 1;
-			p = find ( p, FOFCLSN, "player" );
-		}
-
-// Player statistics printout here
-
-// Probably low enough for a start value :)
-		maxfrags = -99999;
-
-		maxdeaths = 0;
-		maxfriend = 0;
-		maxeffi = 0;
-
-		f1 = CountTeams();
-
-		G_bprint(2, "Ğìáùåò óôáôéóôéãó:\nÆòáçó (òáîë) ");
-        if( !atoi ( ezinfokey ( world, "k_duel" ) ) && f1 && teamplay )
-			G_bprint(2, "æòéåîäëéììó ");
-		G_bprint(2, " åææéãéåîãù\n");
-        if( !atoi( ezinfokey ( world, "k_duel" ) ) && f1 && teamplay )
-			G_bprint(2, "");
-		G_bprint(2, "Ÿ\n");
-
-		p = find ( world, FOFCLSN, "player" );
-		while( p ) {
-			if( !strnull ( p->s.v.netname ) && p->k_accepted == 2 && p->ready ) {
-				p2 = p;
-				while ( p2 ) {
-					tmp = ezinfokey(p, "team");
-					tmp2 = ezinfokey(p2, "team");
-					if( streq ( tmp, tmp2 ) ) {
-						G_bprint(2, "%s‘ %s: %d (%d) ", tmp2, p2->s.v.netname, (int)p2->s.v.frags
-									, (int)(p2->s.v.frags - p2->deaths) );
-
-                        if( !atoi( ezinfokey ( world, "k_duel" ) ) && f1 && teamplay )
-							G_bprint(2, "%d ", (int)p2->friendly);
-
-						if(p2->s.v.frags < 1)
-							p2->efficiency = 0;
-						else
-							p2->efficiency = p2->s.v.frags / (p2->s.v.frags + p2->deaths) * 100;
-
-//						tmp = ftos(p2.efficiency);
-//						if(floor(p2.efficiency) == p2.efficiency) G_bprint(2, " ");
-//						else G_bprint(2, "");
-//						G_bprint(2, tmp, "%\n");
-// FIXME: make it looks better
-						G_bprint(2, "%3.1f%%\n", p2->efficiency);
-
-						if (maxfrags < p2->s.v.frags)
-							maxfrags = p2->s.v.frags;
-						if (maxdeaths < p2->deaths)
-							maxdeaths = p2->deaths;
-						if (maxfriend < p2->friendly)
-							maxfriend = p2->friendly;
-						if (maxeffi < p2->efficiency)
-							maxeffi = p2->efficiency;
-						p2->ready = 0;
-					}
-
-					p2 = find ( p2, FOFCLSN, "player" );
-				}
-			}
-
-			p = find ( p, FOFCLSN, "player" );
-		}
-
-        if( !atoi( ezinfokey (world, "k_duel" ) ) ) {
-// Print the high score table
-			G_bprint(2, "\n%s ôïğ óãïòåòó:\nFrags      : ", g_globalvars.mapname);
-			f1 = 0;
-			p = find ( world, FOFCLSN, "player" );
-			while( p ) {
-				if( !strnull ( p->s.v.netname ) && p->k_accepted == 2 )
-					if( p->s.v.frags == maxfrags ) {
-						if ( f1 )
-							G_bprint(2, "             ");
-						f1 = 1;
-						G_bprint(2, "%s %d‘\n", p->s.v.netname, (int)maxfrags);
-					}
-
-				p = find ( p, FOFCLSN, "player" );
-			}
-
-
-			G_bprint(2, "Deaths     : ");
-			f1 = 0;
-			p = find ( world, FOFCLSN, "player" );
-			while( p ) {
-				if( !strnull ( p->s.v.netname ) && p->k_accepted == 2 )
-					if( p->deaths == maxdeaths ) {
-						if ( f1 )
-							G_bprint(2, "             ");
-						f1 = 1;
-						G_bprint(2, "%s %d‘\n", p->s.v.netname, (int)maxdeaths);
-					}
-
-				p = find ( p, FOFCLSN, "player" );
-			}
-
-			if(maxfriend) {
-				G_bprint(2, "Friendkills: ");
-
-				f1 = 0;
-				p = find ( world, FOFCLSN, "player" );
-				while( p ) {
-					if( !strnull ( p->s.v.netname ) && p->k_accepted == 2 )
-						if( p->friendly == maxfriend ) {
-							if ( f1 )
-								G_bprint(2, "             ");
-							f1 = 1;
-							G_bprint(2, "%s %d‘\n", p->s.v.netname, (int)maxfriend);
-						}
-
-					p = find ( p, FOFCLSN, "player" );
-				}
-			}
-
-			G_bprint(2, "Efficiency : ");
-			f1 = 0;
-			p = find ( world, FOFCLSN, "player" );
-			while( p ) {
-				if( !strnull ( p->s.v.netname ) && p->k_accepted == 2 )
-					if( p->efficiency == maxeffi ) {
-						if ( f1 )
-							G_bprint(2, "             ");
-						f1 = 1;
-						G_bprint(2, "%s %3.1f%%‘\n", p->s.v.netname, maxeffi);
-					}
-
-				p = find ( p, FOFCLSN, "player" );
-			}
-		}
-
-		G_bprint(2, "\n");
+        if( !atoi( ezinfokey( world, "k_duel" ) ) && teamplay )
+			TeamsStats ();
 	}
 
 	p = find( world, FOFCLSN, "ghost" );
