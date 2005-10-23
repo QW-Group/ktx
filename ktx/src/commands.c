@@ -96,6 +96,7 @@ void ToggleSpeed();
 void VotePickup();
 void VoteUnpause();
 void UserMode(float umode);
+void Wp_Reset (float noforce);
 void Wp_Stats(float on);
 
 void TogglePractice();
@@ -211,6 +212,7 @@ cmd_t cmds[] = {
     
     { "unpause",     VoteUnpause,               0    , CF_PLAYER      },
     { "practice",    TogglePractice,            0    , CF_PLAYER | CF_SPC_ADMIN },
+    { "wp_reset",    Wp_Reset,                  1    , CF_PLAYER      },
     { "+wp_stats",   Wp_Stats,                  1    , CF_PLAYER      },
     { "-wp_stats",   Wp_Stats,                  0    , CF_PLAYER      },
     
@@ -2544,6 +2546,17 @@ void TogglePractice()
 
 // ok u have access
 	SetPractice( !k_practice, "" ); // reload current map if needed
+}
+
+// allow reset weapon stats in prewar
+void Wp_Reset ( float noforce )
+{
+	if ( noforce && match_in_progress )
+		return;
+
+	self->h_axe = self->a_axe = self->h_sg = self->a_sg = self->h_ssg = self->a_ssg = 0;
+	self->h_ng  = self->a_ng  = self->h_sng= self->a_sng= self->h_gl  = self->a_gl  = 0;
+	self->h_rl  = self->a_rl  = self->h_lg = self->a_lg = 0;
 }
 
 void Wp_Stats(float on)

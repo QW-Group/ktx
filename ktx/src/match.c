@@ -7,6 +7,7 @@ void StopTimer ( int removeDemo );
 void EndMatch ( float skip_log );
 void BotForceStart ();
 void CheckAll();
+void Wp_Reset (float noforce);
 
 float CountALLPlayers ()
 {
@@ -764,6 +765,7 @@ void TimerThink ()
 	self->s.v.nextthink = g_globalvars.time + 1;
 }
 
+
 void StartMatch ()
 // Reset player frags and start the timer.
 {
@@ -859,6 +861,7 @@ void StartMatch ()
 			p->friendly = p->deaths = p->s.v.frags = 0;
 			old = self;
 			self = p;
+			Wp_Reset ( 0 ); // force reset weapon stats
 			SetChangeParms();
 			PutClientInServer();
 			self = old;
