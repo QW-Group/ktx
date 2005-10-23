@@ -1,3 +1,9 @@
+2005-10-23
+ 11. Added wp_reset command which reset weapons stats :)
+	 Did't work after match start.
+
+ 12. Information after match is much more like ktpro now.
+
 2005-10-21
  10. Added +wp_stats command, which show how effectively u use weapons.
 	 Eff calculated like 100 * hits / AllShots, except gl and rl for which calculated
