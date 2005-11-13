@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.3 2005/10/21 20:20:54 qqshka Exp $
+ *  $Id: g_utils.c,v 1.4 2005/11/13 18:45:03 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -600,3 +600,99 @@ void cvar_set( const char *var, const char *val )
 
 	trap_cvar_set( var, val );
 }
+
+// i'm tired of this shit, so implement this
+// return team of edict, edict may has "player" or "ghost" classname
+char *getteam( gedict_t * ed )
+{
+	static char		string[MAX_STRINGS][1024];
+	static int		index = 0;
+	char 			*team;
+
+	index %= MAX_STRINGS;
+
+	if ( streq(ed->s.v.classname, "player") )
+		team = ezinfokey(ed, "team");
+	else if ( streq(ed->s.v.classname, "ghost") )
+		team = ezinfokey(world, va("%d", (int)ed->k_teamnum));
+	else
+		G_Error("getteam: wrong classname %s", ed->s.v.classname);
+
+	string[index][0] = 0;
+	strlcat( string[index], team, sizeof( string[0] ) );
+
+	return string[index++];
+}
+
+char *getname( gedict_t * ed )
+{
+	static char		string[MAX_STRINGS][1024];
+	static int		index = 0;
+	char 			*name;
+
+	index %= MAX_STRINGS;
+
+	if ( streq(ed->s.v.classname, "player") )
+		name = ed->s.v.netname;
+	else if ( streq(ed->s.v.classname, "ghost") )
+		name = ezinfokey(world, va("%d", (int)ed->cnt2));
+	else
+		G_Error("getname: wrong classname %s", ed->s.v.classname);
+
+	string[index][0] = 0;
+	strlcat( string[index], name, sizeof( string[0] ) );
+
+	return string[index++];
+}
+
+// this help me walk from both players and ghosts, made code more simple
+// int from = 0;
+// gedict_t *p ;
+// p = find_plr(world, &from);
+// while ( p ) {
+// ... some code ...
+// p = find_plr(world, &from);
+// }
+
+// only accepted players have classname "player" now
+
+gedict_t *find_plr( gedict_t * start, int *from )
+{
+	gedict_t *next = find(start, FOFCLSN, *from ? "ghost" : "player" );
+
+	if ( !next && !*from ) {
+		*from = 1;
+		next = find(start, FOFCLSN, "ghost");
+	}
+
+	return next;
+}
+
+char *armor_type( int items )
+{
+	static char		string[MAX_STRINGS][4];
+	static int		index = 0;
+	char 			*at;
+
+	index %= MAX_STRINGS;
+
+	if(	     items & IT_ARMOR1 )
+		at = "ga";
+	else if( items & IT_ARMOR2 )
+		at = "ya";
+	else if( items & IT_ARMOR3 )
+		at = "ra";
+	else
+		at = "0";
+
+	string[index][0] = 0;
+	strlcat( string[index], at, sizeof( string[0] ) );
+
+	return string[index++];
+}
+
+qboolean isghost( gedict_t *ed )
+{
+	return (streq(ed->s.v.classname, "ghost") ? true : false);
+}
+

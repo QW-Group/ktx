@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
+ *  $Id: items.c,v 1.3 2005/11/13 18:45:03 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -305,6 +305,8 @@ void health_touch()
 			return;
 		if ( !T_Heal( other, self->healamount, 1 ) )
 			return;
+
+		other->ps.mh++;
 	} else
 	{
 		if ( !T_Heal( other, self->healamount, 0 ) )
@@ -376,6 +378,7 @@ void armor_touch()
 {
 	float           type = 0, value = 0;
 	int             bit = 0;
+	int				*armor = NULL;
 
 	if ( other->s.v.health <= 0 )
 		return;
@@ -393,18 +396,21 @@ void armor_touch()
 
 	if ( !strcmp( self->s.v.classname, "item_armor1" ) )
 	{
+		armor = &(other->ps.ga);
 		type = 0.3;
 		value = 100;
 		bit = IT_ARMOR1;
 	}
 	if ( !strcmp( self->s.v.classname, "item_armor2" ) )
 	{
+		armor = &(other->ps.ya);
 		type = 0.6;
 		value = 150;
 		bit = IT_ARMOR2;
 	}
 	if ( !strcmp( self->s.v.classname, "item_armorInv" ) )
 	{
+		armor = &(other->ps.ra);
 		type = 0.8;
 		value = 200;
 		bit = IT_ARMOR3;
@@ -412,10 +418,13 @@ void armor_touch()
 	if ( other->s.v.armortype * other->s.v.armorvalue >= type * value )
 		return;
 
+	if ( armor )
+		(*armor)++;
+
 	other->s.v.armortype = type;
 	other->s.v.armorvalue = value;
 	other->s.v.items +=
-	    -( ( int ) other->s.v.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) ) + bit;
+		-( ( int ) other->s.v.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) ) + bit;
 
 	self->s.v.solid = SOLID_NOT;
 	self->s.v.model = "";
@@ -1404,18 +1413,22 @@ void powerup_touch()
 
 	if ( !strcmp( self->s.v.classname, "item_artifact_invulnerability" ) )
 	{
+		other->ps.pent++;
 		other->invincible_time = 1;
 		other->invincible_finished = g_globalvars.time + 30;
 	}
 
 	if ( streq( self->s.v.classname, "item_artifact_invisibility" ) )
 	{
+		other->ps.ring++;
 		other->invisible_time = 1;
 		other->invisible_finished = g_globalvars.time + 30;
 	}
 
 	if ( streq( self->s.v.classname, "item_artifact_super_damage" ) )
 	{
+		other->ps.quad++;
+
 		if ( deathmatch == 4 )
 		{
 			other->s.v.armortype = 0;
@@ -1701,23 +1714,20 @@ void DropBackpack()
 {
 	gedict_t       *item;
 
-#ifdef KTEAMS
     float f1;
 
     f1 = atoi( ezinfokey( world, "k_frp" ) );
 
     if ( match_in_progress != 2 || !atoi( ezinfokey( world, "dp" ) ) )
         return;
-#endif
 
-    if (       ! ( self->s.v.ammo_shells + self->s.v.ammo_nails + self->s.v.ammo_rockets +
- 			 self->s.v.ammo_cells )
+
+    if ( ! ( self->s.v.ammo_shells + self->s.v.ammo_nails + self->s.v.ammo_rockets +
+			 self->s.v.ammo_cells 
+		   )
             && ! ( (int)self->s.v.weapon & IT_DROPPABLE_WEAPONS)
-#ifdef KTEAMS
-            && ! ( f1 == 2 && ( (int)self->lastwepfired & IT_DROPPABLE_WEAPONS ) ) )
-#else
-            )
-#endif
+            && ! ( f1 == 2 && ( (int)self->lastwepfired & IT_DROPPABLE_WEAPONS ) ) 
+	   )
 		return; // nothing in it
 
 

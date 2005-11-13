@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.3 2005/10/21 20:20:54 qqshka Exp $
+ *  $Id: g_main.c,v 1.4 2005/11/13 18:45:03 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -73,8 +73,10 @@ This must be the very first function compiled into the .q3vm file
 int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int arg5,
 	    int arg6, int arg7, int arg8, int arg9, int arg10, int arg11 )
 {
-        int api_ver;
+    int api_ver;
+
 	ClearGlobals();
+	
 	switch ( command )
 	{
 	case GAME_INIT:
@@ -277,11 +279,13 @@ void G_EdictTouch()
 	other = PROG_TO_EDICT( g_globalvars.other );
 	if ( self->s.v.touch )
 	{
-/*#ifdef DEBUG
+/*
+#ifdef DEBUG
 	        if(self->s.v.classname && other->s.v.classname)
 	        	if(!strcmp(self->s.v.classname,"player")||!strcmp(other->s.v.classname,"player"))
-	         G_dprint( "touch %s <-> %s\n", self->s.v.classname,other->s.v.classname);
-#endif*/
+	         G_bprint(2, "touch %s <-> %s\n", self->s.v.classname,other->s.v.classname);
+#endif
+*/
 		( ( void ( * )() ) ( self->s.v.touch ) ) ();
 	} else
 	{

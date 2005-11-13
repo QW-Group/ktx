@@ -56,8 +56,6 @@ void SMOTDThink()
 
 void MOTDThinkX()
 {
-
-
 // Kl33n3X check against Llamas
 
 // qqshka: removed
@@ -99,6 +97,7 @@ void MOTDStuff()
 			so->k_accepted = 1;
 
 	// If the game is running already then . . .
+	// guess is player can enter/re-enter the game if server locked or not
 	if( match_in_progress )
 	{
 		kick         = 0;
@@ -216,11 +215,13 @@ void MOTDStuff()
 				localcmd("localinfo %d \"\"\n", (int)f2);
 				G_bprint(2, "%s rejoins the game %s‘\n", so->s.v.netname, ezinfokey(so, "team"));
 
-				so->fraggie = p->s.v.frags;
-				so->deaths = p->deaths;
-				so->friendly = p->friendly;
+				so->fraggie   = p->s.v.frags;
+				so->deaths    = p->deaths;
+				so->friendly  = p->friendly;
 				so->k_teamnum = p->k_teamnum;
 
+				so->ps        = p->ps; // restore player stats
+				
 				ent_remove( p );
 			} 
 			else 
@@ -256,14 +257,14 @@ void MOTDStuff()
 	else 
 	{
 		G_bprint(2, "%s entered the game\n", so->s.v.netname);
-
-// FIXME: but why below lines not executed if match in progress???
-// take away admin status, terminate elect and kick modes
-		so->k_admin   = 0;
-		so->k_kicking = 0;
-		so->k_vote2   = 0;
-		so->k_captain = 0;
 	}
+
+	// take away admin status, terminate elect and kick modes
+
+	so->k_kicking = 0;
+	so->k_vote2   = 0;
+	so->k_captain = 0;
+//	so->k_admin   = 0; // this set in DecodeLevelParms()
 
 	so->s.v.frags = so->fraggie;
 	newcomer = so->s.v.netname;

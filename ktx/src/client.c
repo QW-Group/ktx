@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.4 2005/10/21 20:20:54 qqshka Exp $
+ *  $Id: client.c,v 1.5 2005/11/13 18:45:03 qqshka Exp $
  */
 
 //===========================================================================
@@ -221,6 +221,9 @@ void SP_info_intermission()
 	VectorCopy( self->mangle, self->s.v.angles );	//self.angles = self.mangle;      
 }
 
+// generally, this must be called before level will changed
+// but now, we call this before player respawned too
+
 void SetChangeParms()
 {
 	if( match_in_progress == 2 ) 
@@ -250,8 +253,11 @@ void SetChangeParms()
 	g_globalvars.parm11 = self->k_admin;
 	g_globalvars.parm12 = self->k_accepted;
 	g_globalvars.parm13 = self->k_stuff;
+
+//	G_bprint(2, "SCP: ad:%d\n", (int)self->k_admin);
 }
 
+// this called before player connected, so he get default params
 
 void SetNewParms( void )
 {
@@ -281,7 +287,11 @@ void SetNewParms( void )
 	g_globalvars.parm11 = 0;
 	g_globalvars.parm12 = 0;
 	g_globalvars.parm13 = 0;
+
+//	G_bprint(2, "SNP\n");
 }
+
+// called from PutClientInServer
 
 void DecodeLevelParms()
 {
@@ -295,13 +305,16 @@ void DecodeLevelParms()
 	self->s.v.weapon 		= g_globalvars.parm8;
 	self->s.v.armortype 	= g_globalvars.parm9 * 0.01;
 
+//	G_bprint(2, "DLP1 ad:%d ac:%d s:%d\n", (int)self->k_admin, (int)self->k_accepted, (int)self->k_stuff);
 
 	self->k_admin = g_globalvars.parm11;
 
-    if( g_globalvars.parm12 ) 
+    if( g_globalvars.parm12 ) // why?
         self->k_accepted = g_globalvars.parm12;
 	
     self->k_stuff = g_globalvars.parm13;
+
+//	G_bprint(2, "DLP2 ad:%d ac:%d s:%d\n", (int)g_globalvars.parm11, (int)g_globalvars.parm12, (int)g_globalvars.parm13);
 }
 
 /*
@@ -526,10 +539,12 @@ void            set_suicide_frame();
 // called by ClientKill and DeadThink
 void respawn()
 {
+//	G_bprint(2, "respawn()\n");
+
 	// make a copy of the dead body for appearances sake
 	CopyToBodyQue( self );
 	// set default spawn parms
-	SetNewParms();
+	SetChangeParms();
 	// respawn              
 	PutClientInServer();
 }
@@ -832,6 +847,8 @@ void PutClientInServer()
 	int             items;
 	char            s[20];
 
+//	G_bprint(2, "PutClientInServer()\n");
+
 	self->s.v.classname = "player";
 	self->s.v.health = 100;
 	self->s.v.takedamage = DAMAGE_AIM;
@@ -847,6 +864,8 @@ void PutClientInServer()
 	self->invisible_finished = 0;
 	self->invincible_finished = 0;
 	self->s.v.effects = 0;
+	self->spawn_time = g_globalvars.time;
+
 
 #ifdef KTEAMS
 // the spawn falling damage bug workaround
@@ -893,12 +912,18 @@ void PutClientInServer()
 	player_stand1();
 
 #ifdef KTEAMS
-    if (deathmatch /*|| coop FIXME: remove??? */)
+    if (  1 /* deathmatch */ /*|| coop FIXME: remove??? */)
     {
 
 	// FIXME: stupid way
 
+		// do not accept player ez only in case of match.
+		// player may be kicked in MOTD stuff while pass some checks.
+		// if not kicked, player will be "spawned" in PlayerPostThink(),
+		// just look code -> if(self->k_accepted == 1)
+
 		if( !self->k_accepted && match_in_progress == 2 ) {
+			self->s.v.classname = "player_na"; // player not accepted
 			self->s.v.takedamage = 0;
 			self->s.v.solid = 0;
 			self->s.v.movetype = 0;
@@ -906,6 +931,7 @@ void PutClientInServer()
 			self->s.v.model = "";
     	} 
     	else {
+		// if just prewar or even countdown - accept player immediately
         	self->k_accepted = 2;
         	self->s.v.takedamage = 2;
         	self->s.v.solid = 3;
@@ -1356,6 +1382,7 @@ void ClientDisconnect()
 	gedict_t *ghost;
 	float f1, f2;
 
+	// normal disconnect, not some sort of punish
 	if( self->k_accepted == 2 ) {
 		set_suicide_frame();
 
@@ -1382,14 +1409,17 @@ void ClientDisconnect()
 			ghost = spawn();
 			ghost->s.v.owner = EDICT_TO_PROG( world );
 			ghost->s.v.classname = "ghost";
-			ghost->cnt2 = f1;
+			ghost->cnt2      = f1;
 			ghost->k_teamnum = self->k_teamnum;
 			ghost->s.v.frags = self->s.v.frags;
-			ghost->deaths = self->deaths;
-			ghost->friendly = self->friendly;
-			ghost->ready = 0;
+			ghost->deaths    = self->deaths;
+			ghost->friendly  = self->friendly;
+			ghost->ready     = 0;
+
+			ghost->ps        = self->ps; // save player stats
 
 			localcmd("localinfo %d \"%s\"\n", (int)f1, self->s.v.netname);
+			trap_executecmd();
 		}
 	} else if( match_in_progress == 2 && !self->k_accepted ) {
 		self->s.v.takedamage = 0;
@@ -1413,8 +1443,10 @@ void ClientDisconnect()
 		AbortElect();
 	}
 
+	self->k_accepted = 0;
 	self->ready = 0;
 	self->s.v.classname = "";
+
 
 // s: added conditional function call here
 	if( self->k_kicking )
@@ -1515,19 +1547,19 @@ void Print_Wp_Stats( )
 
 	gedict_t *e = self; // stats of whom we want to show
 
-	float axe = wps & S_AXE ? 100.0 * e->h_axe / max(1, e->a_axe) : 0;
-	float sg  = wps & S_SG  ? 100.0 * e->h_sg  / max(1, e->a_sg) : 0;
-	float ssg = wps & S_SSG ? 100.0 * e->h_ssg / max(1, e->a_ssg) : 0;
-	float ng  = wps & S_NG  ? 100.0 * e->h_ng  / max(1, e->a_ng) : 0;
-	float sng = wps & S_SNG ? 100.0 * e->h_sng / max(1, e->a_sng) : 0;
+	float axe = wps & S_AXE ? 100.0 * e->ps.h_axe / max(1, e->ps.a_axe) : 0;
+	float sg  = wps & S_SG  ? 100.0 * e->ps.h_sg  / max(1, e->ps.a_sg) : 0;
+	float ssg = wps & S_SSG ? 100.0 * e->ps.h_ssg / max(1, e->ps.a_ssg) : 0;
+	float ng  = wps & S_NG  ? 100.0 * e->ps.h_ng  / max(1, e->ps.a_ng) : 0;
+	float sng = wps & S_SNG ? 100.0 * e->ps.h_sng / max(1, e->ps.a_sng) : 0;
 #if 0 /* percentage */
-	float gl  = wps & S_GL  ? 100.0 * e->h_gl  / max(1, e->a_gl) : 0;
-	float rl  = wps & S_RL  ? 100.0 * e->h_rl  / max(1, e->a_rl) : 0;
+	float gl  = wps & S_GL  ? 100.0 * e->ps.h_gl  / max(1, e->ps.a_gl) : 0;
+	float rl  = wps & S_RL  ? 100.0 * e->ps.h_rl  / max(1, e->ps.a_rl) : 0;
 #else /* just count of direct hits */
-	float gl  = wps & S_GL  ? e->h_gl : 0;
-	float rl  = wps & S_RL  ? e->h_rl : 0;
+	float gl  = wps & S_GL  ? e->ps.h_gl : 0;
+	float rl  = wps & S_RL  ? e->ps.h_rl : 0;
 #endif
-	float lg  = wps & S_LG  ? 100.0 * e->h_lg  / max(1, e->a_lg) : 0;
+	float lg  = wps & S_LG  ? 100.0 * e->ps.h_lg  / max(1, e->ps.a_lg) : 0;
 
 
 	if ( !axe && !sg && !ssg && !ng && !sng && !gl && !rl && !lg )
@@ -2052,22 +2084,26 @@ void PlayerPostThink()
 	if(self->k_accepted == 1) {
 		vec3_t v;
 
+		self->s.v.classname = "player";
 		self->k_accepted = 2;
-		self->s.v.takedamage = 2;
-		self->s.v.solid = 3;
-		self->s.v.movetype = 3;
-		setmodel (self, "progs/player.mdl");
-		modelindex_player = self->s.v.modelindex;
-		player_stand1 ();
 
-		makevectors(self->s.v.angles);
+		if ( !intermission_running ) {
+			self->s.v.takedamage = 2;
+			self->s.v.solid = 3;
+			self->s.v.movetype = 3;
+			setmodel (self, "progs/player.mdl");
+			modelindex_player = self->s.v.modelindex;
+			player_stand1 ();
 
-		VectorMA (self->s.v.origin, 20, g_globalvars.v_forward, v);
+			makevectors(self->s.v.angles);
 
-		spawn_tfog(v);
-		// FIXME:
-//		play_teleport();
-		spawn_tdeath (self->s.v.origin, self);
+			VectorMA (self->s.v.origin, 20, g_globalvars.v_forward, v);
+
+			spawn_tfog(v);
+			// FIXME:
+//			play_teleport();
+			spawn_tdeath (self->s.v.origin, self);
+		}
 	}
 	if( k_pause ) {
 		ImpulseCommands();
@@ -2356,10 +2392,13 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				{	// normal kill, Kteams version
 					logfrag (attacker, targ);
 					attacker->s.v.frags += 1;
-#ifdef KTEAMS
 					targ->deaths += 1;          //team
+
 					attacker->victim = targ->s.v.netname;
 					targ->killer = attacker->s.v.netname;
+
+					if ( targ->spawn_time + 1 > g_globalvars.time )
+						attacker->ps.spawn_frags++;
 
 					rnum = attacker->s.v.weapon;
 
@@ -2552,10 +2591,15 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 					logfrag (attacker, targ);
 					attacker->s.v.frags += 1;
 					targ->deaths += 1;		//team
+
 					attacker->victim = targ->s.v.netname;
 					targ->killer = attacker->s.v.netname;
-#endif
+
+					if ( targ->spawn_time + 1 > g_globalvars.time )
+						attacker->ps.spawn_frags++;
+
 	   				rnum = attacker->s.v.weapon;
+
 					if ( streq( targ->deathtype, "nail" ) )
 					{
 						deathstring = " was nailed by ";

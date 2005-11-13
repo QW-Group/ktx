@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.3 2005/10/21 20:19:20 qqshka Exp $
+ *  $Id: g_local.h,v 1.4 2005/11/13 18:45:48 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -160,6 +160,14 @@ void		WriteCoord( int to, float data );
 float		cvar( const char *var );
 char		*cvar_string( const char *var );
 void        cvar_set( const char *var, const char *val );
+
+char		*getteam( gedict_t * ed );
+char		*getname( gedict_t * ed );
+gedict_t	*find_plr( gedict_t * start, int *from );
+
+char		*armor_type( int items );
+
+qboolean	isghost( gedict_t *ed );
 
 void    	disableupdates( gedict_t * ed, float time );
 
@@ -321,6 +329,7 @@ extern	float lock;         // stores whether players can join when a game is alr
 extern	float match_in_progress;    // if a match has begun
 extern	float match_over;       // boolean - whether or not the match stats have been printed at end of game
 extern	char *newcomer;        // stores name of last player who joined
+extern	int   k_overtime;		// is overtime is going on
 
 // WTF ? in kt_defs.qc it exist
 //	float intermission_running;

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.3 2005/10/21 20:19:05 qqshka Exp $
+ *  $Id: progs.h,v 1.4 2005/11/13 18:45:48 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -47,6 +47,50 @@ typedef struct shared_edict_s {
 struct gedict_s;
 typedef void (*th_die_func_t)();
 typedef void (*th_pain_func_t)(struct gedict_s *, float);
+
+
+// store player statistic here, like taken armors etc...
+typedef struct player_stats_s {
+
+// h_xxx hits
+// a_xxx all attacks
+	int   h_axe;	// :]
+	int   a_axe;
+	int   h_sg;
+	int   a_sg;
+	int   h_ssg;
+	int   a_ssg;
+	int   h_ng;
+	int   a_ng;
+	int   h_sng;
+	int   a_sng;
+	int   h_gl;
+	int   a_gl;
+	int   h_rl;
+	int   a_rl;
+	int   h_lg;
+	int   a_lg;
+
+	int   ra; //    red armors taken count
+	int   ya; // yellow armors taken count
+	int   ga; //  green armors taken count
+	int   mh; //  mega healths taken count
+	int   quad; // taken count
+	int   pent; // taken count
+	int   ring; // taken count
+
+	float    dmg_t; // damage taken
+	float    dmg_g; // damage given
+
+	int		ot_a;	 // overtime armor value
+//	float	ot_at;   // overtime armor type
+	int     ot_items;// overtime items
+	int		ot_h;	 // overtime health
+
+	int		spawn_frags;
+
+} player_stats_t;
+
 
 //typedef (void(*)(gedict_t *)) one_edict_func;
 typedef struct gedict_s {
@@ -129,6 +173,7 @@ typedef struct gedict_s {
 
 	float	cnt2;            // NOT_SURE: cnt2 = seconds left?
 	float	dead_time;       // time at which player last died - used in autorespawn
+	float	spawn_time;		 // time at which player last spawned
 	float	deaths;          // number of times player died
 	float	efficiency;      // stores player efficiency rating
 	float	fraggie;         // NOT_SURE: used to return frags to rejoining players?
@@ -194,26 +239,11 @@ typedef struct gedict_s {
 // <-- timing
 	int   k_voteUnpause;    // store here vote for unpause, for particular player
 // --> stats
-// h_xxx hits
-// a_xxx all attacks
-	int   h_axe;	// :]
-	int   a_axe;
-	int   h_sg;
-	int   a_sg;
-	int   h_ssg;
-	int   a_ssg;
-	int   h_ng;
-	int   a_ng;
-	int   h_sng;
-	int   a_sng;
-	int   h_gl;
-	int   a_gl;
-	int   h_rl;
-	int   a_rl;
-	int   h_lg;
-	int   a_lg;
 	int   wp_stats;			// show wp_stats or not
 	float wp_stats_time;    // used to force centerprint is off at desired time
+
+	player_stats_t ps;		// store player statistic here, like taken armors etc...
+
 // <-- stats
 
 	int   need_clearCP;		// if this true, clear center print at certain cases

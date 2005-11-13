@@ -96,7 +96,7 @@ void ToggleSpeed();
 void VotePickup();
 void VoteUnpause();
 void UserMode(float umode);
-void Wp_Reset (float noforce);
+void Wp_Reset ();
 void Wp_Stats(float on);
 
 void TogglePractice();
@@ -212,7 +212,7 @@ cmd_t cmds[] = {
     
     { "unpause",     VoteUnpause,               0    , CF_PLAYER      },
     { "practice",    TogglePractice,            0    , CF_PLAYER | CF_SPC_ADMIN },
-    { "wp_reset",    Wp_Reset,                  1    , CF_PLAYER      },
+    { "wp_reset",    Wp_Reset,                  0    , CF_PLAYER      },
     { "+wp_stats",   Wp_Stats,                  1    , CF_PLAYER      },
     { "-wp_stats",   Wp_Stats,                  0    , CF_PLAYER      },
     
@@ -1034,24 +1034,14 @@ void VotePickup()
 void ReportMe()
 {
 	gedict_t *p;
-	char *t1, *t2 /*, *h */, *at /* , *av */, *wt /* , *wa */, *pa1, *pa2;
+	char *t1, *t2 , *wt, *pa1, *pa2;
 	float f1, flag = 0;
 
 	if( !strnull( ezinfokey(self, "k_nick") ) )
 		flag = 1;
 
-
-//	pa1 = "¨";
-//	pa2 = "): ";
-	pa1 = "";    // qqshka: look better, IMO
+	pa1 = "";
 	pa2 = ": ";
-
-	if(	(int)self->s.v.items & 8192 )
-		at = "ga:";
-	if( (int)self->s.v.items & 16384 )
-		at = "ya:";
-	if( (int)self->s.v.items & 32768 )
-		at = "ra:";
 
 	wt = "axe:";
 	f1 = 0;
@@ -1100,7 +1090,8 @@ void ReportMe()
 					G_sprint(p, 3, "%s%s%s", pa1, self->s.v.netname, pa2);
 
 				if( self->s.v.armorvalue )
-					G_sprint(p, 3, "%s%d", at, (int)self->s.v.armorvalue);
+					G_sprint(p, 3, "%s:%d", armor_type((int)self->s.v.items),
+									 (int)self->s.v.armorvalue);
 				else
 					G_sprint(p, 3, "a:0");
 
@@ -1275,6 +1266,7 @@ void ChangeDM(float dmm)
 	G_bprint(2, "Deathmatch %c\n", DMM_NUM);
 }
 
+// FIXME: TODO: block command in ffa mode
 void ChangeTP()
 {
 	char *tmp;
@@ -1291,14 +1283,15 @@ void ChangeTP()
 		return;
 	}
 
+	teamplay = bound (1, teamplay, 3);
+
 	teamplay++;
 
 	if ( teamplay == 4 )
-		teamplay = 0;
+		teamplay = 1;
 
 	cvar_set("teamplay", va("%d", (int)teamplay));
-	if( teamplay == 0 )      tmp = "’";
-	else if( teamplay == 1 ) tmp = "“";
+	if( teamplay == 1 ) tmp = "“";
 	else if( teamplay == 2 ) tmp = "”";
 	else tmp = "•";
 
@@ -1560,27 +1553,6 @@ void ToggleBerzerk()
 	G_bprint(2, "ÂåòÚåòë íïäå on\n");
 }
 
-#ifdef VWEP_TEST
-void ToggleVwep ()
-{
-    float tmp;
-
-    if ( match_in_progress )
-        return;
-    if ( atoi ( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-        G_sprint(self, 3, "console: command is locked\n");
-        return;
-    }
-    tmp = stof(ezinfokey(world, "vwep"));
-    if(tmp != 0) {
-        localcmd("localinfo vwep 0\n");
-        G_bprint(2, "vwep íïäå off\nrequires map restart\n");   //TODO: change vwep for red text version
-        return;
-    }
-    localcmd("localinfo vwep 1\n");
-    G_bprint(2, "vwep íïäå on\nrequires map restart\n");
-}
-#endif
 
 void ToggleSpecTalk()
 {
@@ -1771,7 +1743,7 @@ void PrintScores()
 		if( f1 )
 			G_sprint(self, 2, "%d‘ full minute%s", (int)f1, ( f1 > 1 ? "s" : ""));
 		else
-			G_sprint(self, 2, "%d‘ second%", (int)f2, ( f2 > 1 ? "s" : ""));
+			G_sprint(self, 2, "%d‘ second%s", (int)f2, ( f2 > 1 ? "s" : ""));
 
 		G_sprint(self, 2, " left\n");
 	}
@@ -2128,9 +2100,8 @@ ok:
 	if ( *pups )
 		pups = va("%s\n", pups);
 
-	if      ( itms & IT_ARMOR1 ) s1 = va("%s:%d ", redtext("ga"), (int)bp->s.v.armorvalue);
-	else if ( itms & IT_ARMOR2 ) s1 = va("%s:%d ", redtext("ya"), (int)bp->s.v.armorvalue);
-	else if ( itms & IT_ARMOR3 ) s1 = va("%s:%d ", redtext("ra"), (int)bp->s.v.armorvalue);
+	if ((int)bp->s.v.armorvalue)
+		s1 = va("%s:%d ", redtext( armor_type( itms ) ), (int)bp->s.v.armorvalue);
 	else
 		s1 = "";
 
@@ -2169,33 +2140,35 @@ ok:
 // I ripped this from ktpro
 
 // common settings for all user modes
-const char common_um_init[] =			
-	"localinfo k_new_mode 0\n" 			// UNKNOWN ktpro                                                 
-	"localinfo k_fast_mode 0\n"			// UNKNOWN ktpro                                                 
-	"localinfo matrix 0\n"              // UNKNOWN ktpro                                                 
-	"localinfo k_safe_rj 0\n"           // UNKNOWN ktpro                                                 
-	                                                                                                     
-	"localinfo spec_info 1\n"			// TODO not implemented yet                                      
-										// allow spectators receive took info during game                
-                                   		// (they have to use "moreinfo" command to set proper level)     
-	"localinfo spec_info_notlock 1\n"	// allow all spectators receive it (0 = only admins)             
-	"localinfo k_midair 0\n"			// not implemented                                               
-	"localinfo k_instagib 0\n"			// not implemented                                               
-	                                                                                                     
-	"localinfo k_no_lg 0\n"				// TODO not implemented                                          
-	                                                                                                     
-	"fraglimit 0\n"						// fraglimit %)                                                  
-	"localinfo k_666 0\n"				// respawn 666                                                   
-	"localinfo dp 1\n"					// drop pack                                                     
-	"localinfo dq 0\n"					// drop quad                                                     
-	"localinfo dr 0\n"					// drop ring                                                     
-	"localinfo k_frp 0\n"				// fairpacks                                                     
-	"localinfo k_spectalk 0\n"			// silence                                                       
-	"localinfo k_dis 1\n"				// discharge on                                                  
-	"localinfo k_lockmin 2\n"			// minimum number of teams in game                               
-	"localinfo k_bzk 0\n"				// berzerk                                                       
-	"localinfo k_spw 0\n"				// affect spawn type                                             
-	"localinfo k_new_spw 0\n";			// ktpro feature                                                 
+const char common_um_init[] =
+	"localinfo k_new_mode 0\n" 			// UNKNOWN ktpro
+	"localinfo k_fast_mode 0\n"			// UNKNOWN ktpro
+	"localinfo matrix 0\n"              // UNKNOWN ktpro
+	"localinfo k_safe_rj 0\n"           // UNKNOWN ktpro
+
+	"localinfo spec_info 1\n"			// TODO not implemented yet
+										// allow spectators receive took info during game
+                                   		// (they have to use "moreinfo" command to set proper level)
+	"localinfo spec_info_notlock 1\n"	// allow all spectators receive it (0 = only admins)
+	"localinfo k_midair 0\n"			// not implemented
+	"localinfo k_instagib 0\n"			// not implemented
+
+	"localinfo k_no_lg 0\n"				// TODO not implemented
+
+	"fraglimit 0\n"						// fraglimit %)
+	"localinfo k_666 0\n"				// respawn 666
+	"localinfo dp 1\n"					// drop pack
+	"localinfo dq 0\n"					// drop quad
+	"localinfo dr 0\n"					// drop ring
+	"localinfo k_frp 0\n"				// fairpacks
+	"localinfo k_spectalk 0\n"			// silence
+	"localinfo k_dis 1\n"				// discharge on
+	"localinfo k_lockmin 2\n"			// minimum number of teams in game
+	"localinfo k_bzk 0\n"				// berzerk
+	"localinfo k_spw 0\n"				// affect spawn type
+	"localinfo k_new_spw 0\n"			// ktpro feature
+
+	"localinfo k_duel 0\n";				// qqshka: turn off duel mode, by default
 
 const char _1on1_um_init[] =
 	"timelimit 10\n"					//
@@ -2204,7 +2177,9 @@ const char _1on1_um_init[] =
 	"localinfo k_deathmatch 3\n"		// TODO not implemented
 	"localinfo k_membercount 1\n"		// minimum number of players in each team
 	"localinfo k_overtime 2\n"			// overtime type
-	"localinfo k_pow 0\n";				// powerups
+	"localinfo k_pow 0\n"				// powerups
+
+	"localinfo k_duel 1\n";				// qqshka: duel mode, easy determine is this tp or duel
 
 const char _2on2_um_init[] =
 	"floodprot 9 1 1\n"					//
@@ -2262,7 +2237,7 @@ const char ffa_um_init[] =
 	"localinfo dq 1\n"
 	"localinfo dr 1\n"
 	"localinfo k_pow 1\n"
-	"localinfo k_dis 0\n";	// hmm, really?
+	"localinfo k_dis 0\n";	// FIXME: hmm, really?
 
 
 #define UM_1ON1		( 1<<0  )
@@ -2377,6 +2352,37 @@ void UserMode(float umode)
 	localcmd("exec configs/usermodes/%s.cfg\n", g_globalvars.mapname);
 	localcmd("exec configs/usermodes/%s/default.cfg\n", um);
 	localcmd("exec configs/usermodes/%s/%s.cfg\n", um, g_globalvars.mapname);
+	
+	trap_executecmd ();
+
+	// about k_duel
+	if ( streq(um, "1on1") ) {
+		if ( !atoi( ezinfokey( world, "k_duel" ) ) ) {
+			G_bprint(2, "server is misconfigured, k_duel forced to be 1\n");
+			localcmd("localinfo k_duel 1\n"); // oh yes, we really need this
+		}
+	}
+	else{
+		if ( atoi( ezinfokey( world, "k_duel" ) ) ) {
+			G_bprint(2, "server is misconfigured, k_duel forced to be 0\n");
+			localcmd("localinfo k_duel 0\n"); // oh yes, we really need this
+		}
+	}
+
+	// about tp
+	if ( streq(um, "1on1") || streq(um, "ffa") ) {
+		if ( cvar( "teamplay" ) ) { // non tp mode, clear tp
+			G_bprint(2, "server is misconfigured, teamplay forced to be 0\n");
+			localcmd("teamplay 0\n"); // oh yes, we really need this
+		}
+	}
+	else if ( streq(um, "2on2") || streq(um, "3on3") || streq(um, "4on4") || streq(um, "10on10") )
+	{// tp mode, so force some tp
+		if ( !(cvar( "teamplay" ) == 1 || cvar( "teamplay" ) == 2 || cvar( "teamplay" ) == 3 ) ) {
+			G_bprint(2, "server is misconfigured, teamplay forced to be 2\n");
+			localcmd("teamplay 2\n"); // oh yes, we really need this
+		}
+	}
 }
 
 void ModPause (int pause);
@@ -2549,14 +2555,16 @@ void TogglePractice()
 }
 
 // allow reset weapon stats in prewar
-void Wp_Reset ( float noforce )
+void Wp_Reset ( )
 {
-	if ( noforce && match_in_progress )
+	if ( match_in_progress )
 		return;
 
-	self->h_axe = self->a_axe = self->h_sg = self->a_sg = self->h_ssg = self->a_ssg = 0;
-	self->h_ng  = self->a_ng  = self->h_sng= self->a_sng= self->h_gl  = self->a_gl  = 0;
-	self->h_rl  = self->a_rl  = self->h_lg = self->a_lg = 0;
+	self->ps.h_axe = self->ps.a_axe = self->ps.h_sg = self->ps.a_sg  = 0;
+	self->ps.h_ssg = self->ps.a_ssg = 0;
+	self->ps.h_ng  = self->ps.a_ng  = self->ps.h_sng= self->ps.a_sng = 0;
+	self->ps.h_gl  = self->ps.a_gl  = 0;
+	self->ps.h_rl  = self->ps.a_rl  = self->ps.h_lg = self->ps.a_lg  = 0;
 }
 
 void Wp_Stats(float on)

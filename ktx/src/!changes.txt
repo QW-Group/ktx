@@ -1,3 +1,24 @@
+2005-11-13
+ 13. Ok, information after match contain not less statistics than Ktpro now, 
+	 added megahealth stats.
+
+	 Spawnfrags, this then u kill somebody with weapon( stomped is exception :] ) and
+	 this somebody was spawned less than second before, mates is not counted as spawnfrags.
+
+	 Players statiscics doesn't contain some advanced information in teamplay mode,
+	 but u can control this via:
+
+		localinfo tp_players_stats		1
+  						// 0 - doesn't show
+		   				// 1 - show some advanced information in players statistics
+		   				//     after match is over, like items, damage taken and given.
+		   				//     only teamplay modes affected by this setting, 
+		   				//     non teamplay modes show this info anyway.
+
+ 14. fixed dm6 and lg plate bug, does't work in QVM :]
+
+ 15. Some bugfixes.
+
 2005-10-23
  11. Added wp_reset command which reset weapons stats :)
 	 Did't work after match start.

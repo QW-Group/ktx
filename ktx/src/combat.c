@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
+ *  $Id: combat.c,v 1.3 2005/11/13 18:45:03 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -274,10 +274,10 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	if ( targ->invincible_finished >= g_globalvars.time )
 	{
-		if ( self->invincible_sound < g_globalvars.time )
+		if ( targ->invincible_sound < g_globalvars.time )
 		{
 			sound( targ, CHAN_ITEM, "items/protect3.wav", 1, ATTN_NORM );
-			self->invincible_sound = g_globalvars.time + 2;
+			targ->invincible_sound = g_globalvars.time + 2;
 		}
 		return;
 	}
@@ -302,6 +302,11 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		 || ( k_practice && strneq( targ->s.v.classname, "player" ) ) // #practice mode#
 	   )
 		targ->s.v.health -= take;
+
+	if ( attacker->k_player && targ->k_player ) {
+		attacker->ps.dmg_g += damage;
+		targ->ps.dmg_t     += damage;
+	}
 
 	if ( targ->s.v.health <= 0 )
 	{

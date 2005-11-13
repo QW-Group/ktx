@@ -207,13 +207,18 @@ void NextClient ()
 
     while( loop )
     {
+		self->k_playertokick = self->k_playertokick ? self->k_playertokick : world;
         self->k_playertokick = find(self->k_playertokick, FOFCLSN, self->kick_ctype);
 
         if( !(self->k_playertokick) )
-            if( streq( self->kick_ctype, "player" ) )
+            if( streq( self->kick_ctype, "player" ) ) {
                 self->kick_ctype = "spectator";
-            else
+				loop++;
+			}
+            else {
                 self->kick_ctype = "player";
+				loop++;
+			}
         else if( !strnull( self->k_playertokick->s.v.netname )
 				&& ( streq ( self->kick_ctype, "spectator" )
 						|| ( streq ( self->kick_ctype, "player" )
@@ -222,9 +227,16 @@ void NextClient ()
 				   )
 			   )
             loop = 0;
+		
+		if ( loop > 3 ) {
+			G_sprint(self, 2, "Can't find anybody to kick\n");
+			ExitKick ( self );
+			return;
+		}
     }
 
-    G_sprint(self, 2, "Kick %s %s?\n", self->kick_ctype, self->k_playertokick->s.v.netname);
+    G_sprint(self, 2, "Kick %s %s?\n", redtext(self->kick_ctype),
+								self->k_playertokick->s.v.netname);
 }
 
 void YesKick ()

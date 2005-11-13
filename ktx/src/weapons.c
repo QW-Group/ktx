@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.3 2005/10/21 20:20:54 qqshka Exp $
+ *  $Id: weapons.c,v 1.4 2005/11/13 18:45:03 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -63,7 +63,7 @@ void W_FireAxe()
 	vec3_t          source, dest;
 	vec3_t          org;
 
-	self->a_axe++;
+	self->ps.a_axe++;
 
 	makevectors( self->s.v.v_angle );
 
@@ -84,7 +84,7 @@ void W_FireAxe()
 	if ( PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.takedamage )
 	{
 		if ( PROG_TO_EDICT( g_globalvars.trace_ent )->k_player )
-			self->h_axe++;
+			self->ps.h_axe++;
 
 		PROG_TO_EDICT( g_globalvars.trace_ent )->axhitme = 1;
 		SpawnBlood( org, 20 );
@@ -311,9 +311,9 @@ void TraceAttack( float damage, vec3_t dir )
 	{
 		if ( PROG_TO_EDICT( g_globalvars.trace_ent )->k_player ) {
 			if ((int)self->s.v.weapon == IT_SHOTGUN)
-				self->h_sg++;
+				self->ps.h_sg++;
 			else if ((int)self->s.v.weapon == IT_SUPER_SHOTGUN)
-				self->h_ssg++;
+				self->ps.h_ssg++;
 			else
 			 ; // hmmm, make error?
 		}
@@ -384,7 +384,7 @@ void W_FireShotgun()
 	vec3_t          dir;
 	int				bullets = 6;
 
-	self->a_sg += bullets;
+	self->ps.a_sg += bullets;
 
 	sound( self, CHAN_WEAPON, "weapons/guncock.wav", 1, ATTN_NORM );
 
@@ -418,7 +418,7 @@ void W_FireSuperShotgun()
 		W_FireShotgun();
 		return;
 	}
-	self->a_ssg += bullets;
+	self->ps.a_ssg += bullets;
 
 	sound( self, CHAN_WEAPON, "weapons/shotgn2.wav", 1, ATTN_NORM );
 	g_globalvars.msg_entity = EDICT_TO_PROG( self );
@@ -483,7 +483,7 @@ void T_MissileTouch()
 
 	if ( other->s.v.takedamage ) {
 		if ( other->k_player )
-			PROG_TO_EDICT( self->s.v.owner )->h_rl++;
+			PROG_TO_EDICT( self->s.v.owner )->ps.h_rl++;
 	}
 
 	if ( other->s.v.health )
@@ -520,7 +520,7 @@ W_FireRocket
 
 void W_FireRocket()
 {
-	self->a_rl++;
+	self->ps.a_rl++;
 
 #ifdef KTEAMS
     if ( match_in_progress == 2 )
@@ -573,7 +573,7 @@ LIGHTNING
 void LightningHit( gedict_t * from, float damage )
 {
 	if ( PROG_TO_EDICT( g_globalvars.trace_ent )->k_player )
-		self->h_lg++;
+		self->ps.h_lg++;
 
 	trap_WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
 	trap_WriteByte( MSG_MULTICAST, TE_LIGHTNINGBLOOD );
@@ -613,9 +613,12 @@ void LightningDamage( vec3_t p1, vec3_t p2, gedict_t * from, float damage )
 		LightningHit( from, damage );
 		if ( streq( self->s.v.classname, "player" ) )
 		{
-			if ( streq( other->s.v.classname, "player" ) )
-				PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.
-				    velocity[2] += 400;
+// qqshka: this shit doesn't work in QVM
+//			if ( streq( other->s.v.classname, "player" ) )
+// 		   make my own
+			gedict_t *gre = PROG_TO_EDICT ( self->s.v.groundentity );
+			if ( gre && streq( gre->s.v.classname, "door" ) )
+				PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.velocity[2] += 400;
 		}
 	}
 	e1 = PROG_TO_EDICT( g_globalvars.trace_ent );
@@ -690,7 +693,7 @@ void W_FireLightning()
 		}
 	}
 
-	self->a_lg++;
+	self->ps.a_lg++;
 
 	if ( self->t_width < g_globalvars.time )
 	{
@@ -758,7 +761,7 @@ void GrenadeTouch()
 	
 	if ( other->s.v.takedamage ) {
 		if ( other->k_player )
-			PROG_TO_EDICT( self->s.v.owner )->h_gl++;
+			PROG_TO_EDICT( self->s.v.owner )->ps.h_gl++;
 	}
 
 	if ( other->s.v.takedamage == DAMAGE_AIM )
@@ -779,7 +782,7 @@ W_FireGrenade
 */
 void W_FireGrenade()
 {
-	self->a_gl++;
+	self->ps.a_gl++;
 
     if ( match_in_progress == 2 )
 		if ( deathmatch != 4 )
@@ -906,7 +909,7 @@ void spike_touch()
 	if ( other->s.v.takedamage )
 	{
 		if ( other->k_player )
-			PROG_TO_EDICT( self->s.v.owner )->h_ng++;
+			PROG_TO_EDICT( self->s.v.owner )->ps.h_ng++;
 
 		spawn_touchblood( 9 );
 		other->deathtype = "nail";
@@ -955,7 +958,7 @@ void superspike_touch()
 	if ( other->s.v.takedamage )
 	{
 		if ( other->k_player )
-			PROG_TO_EDICT( self->s.v.owner )->h_sng++;
+			PROG_TO_EDICT( self->s.v.owner )->ps.h_sng++;
 
 		spawn_touchblood( 18 );
 		other->deathtype = "supernail";
@@ -978,7 +981,7 @@ void W_FireSuperSpikes()
 {
 	vec3_t          dir, tmp;
 
-	self->a_sng++;
+	self->ps.a_sng++;
 
 	sound( self, CHAN_WEAPON, "weapons/spike2.wav", 1, ATTN_NORM );
 	self->attack_finished = g_globalvars.time + 0.2;
@@ -1019,7 +1022,7 @@ void W_FireSpikes( float ox )
 		return;
 	}
 	
-	self->a_ng++;
+	self->ps.a_ng++;
 
 	sound( self, CHAN_WEAPON, "weapons/rocket1i.wav", 1, ATTN_NORM );
 	self->attack_finished = g_globalvars.time + 0.2;
@@ -1602,7 +1605,7 @@ void W_WeaponFrame()
 	ImpulseCommands();
 
 // check for attack
-#ifdef KTEAMS
+
     if ( self->s.v.button0 && !intermission_running )
     {
         if( ( !atoi( ezinfokey( world, "k_prewar" ) ) && match_in_progress != 2 )
@@ -1614,10 +1617,7 @@ void W_WeaponFrame()
             }
             return;
         }
-#else
-	if ( self->s.v.button0 )
-	{
-#endif
+
 		SuperDamageSound();
 		W_Attack();
 	}

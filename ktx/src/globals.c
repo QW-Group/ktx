@@ -32,6 +32,8 @@
 	float match_over;       // boolean - whether or not the match stats have been printed at end of game
 	char *newcomer;        // stores name of last player who joined
 
+	int   k_overtime = 0;  // is overtime is going on
+
 // WTF ? in kt_defs.qc it exist
 //	float intermission_running;
 //	float intermission_exittime;
