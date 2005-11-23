@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.4 2005/11/13 18:45:03 qqshka Exp $
+ *  $Id: g_utils.c,v 1.5 2005/11/23 20:35:08 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -364,6 +364,27 @@ char *redtext(const char *format, ...)
 	}
 }
 
+char *dig3(int d)
+{
+	static char	string[MAX_STRINGS][32];
+	static int		index = 0;
+
+	index %= MAX_STRINGS;
+
+	snprintf(string[index], sizeof( string[0] ), "%d", d);
+	string[index][ sizeof( string[0] ) - 1 ] = '\0';
+
+	{ // convert to digits
+		unsigned char *i = (unsigned char *) (string[index]);
+
+		for ( ; *i; i++ )
+				*i += 98;
+
+	}
+
+	return string[index++];
+}
+
 /*
 ==============
 print functions
@@ -404,6 +425,22 @@ void G_centerprint( gedict_t * ed, const char *fmt, ... )
 
 	trap_CenterPrint( NUM_FOR_EDICT( ed ), text );
 }
+
+// centerprint too all clients
+void G_cp2all(const char *fmt, ... )
+{
+	va_list argptr;
+	char    text[1024];
+
+	va_start( argptr, fmt );
+	vsnprintf (text, sizeof(text), fmt, argptr);
+	text[sizeof(text)-1] = 0;
+	va_end( argptr );
+
+	WriteByte(MSG_ALL, SVC_CENTERPRINT);
+	WriteString(MSG_ALL, text);
+}
+
 
 void G_dprint( const char *fmt, ... )
 {
@@ -595,7 +632,7 @@ char *cvar_string( const char *var )
 
 void cvar_set( const char *var, const char *val )
 {
-	if ( strnull( var ) || strnull( val ) )
+	if ( strnull( var ) || val == NULL )
 		G_Error("cvar_set null");
 
 	trap_cvar_set( var, val );
@@ -696,3 +733,22 @@ qboolean isghost( gedict_t *ed )
 	return (streq(ed->s.v.classname, "ghost") ? true : false);
 }
 
+qboolean isDuel( )
+{
+	return (k_mode == gtDuel ? true : false);
+}
+
+qboolean isTeam( )
+{
+	return (k_mode == gtTeam ? true : false);
+}
+
+qboolean isFFA( )
+{
+	return (k_mode == gtFFA ? true : false);
+}
+
+qboolean isUnknown( )
+{
+	return ((!isDuel() && !isTeam() && !isFFA()) ? true : false);
+}

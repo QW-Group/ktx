@@ -1089,12 +1089,19 @@ void AddInt( char **buf_p, int val, int width, int flags ) {
 	*buf_p = buf;
 }
 
-void AddFloat( char **buf_p, float fval, int width, int prec ) {
+void AddFloat( char **buf_p, float fval, int width, int prec, int flags ) {
 	char	text[32];
 	int		digits;
+	int     prec_len, len;
 	float	signedVal;
 	char	*buf;
 	int		val;
+
+	// set sanity precison
+	if (prec < 0 || prec > 6)
+		prec = 6;
+
+	prec_len = prec ? (prec + 1) : 0;
 
 	// get the sign
 	signedVal = fval;
@@ -1116,9 +1123,12 @@ void AddFloat( char **buf_p, float fval, int width, int prec ) {
 
 	buf = *buf_p;
 
-	while ( digits < width ) {
-		*buf++ = ' ';
-		width--;
+	len = digits;
+	if ( !(flags & LADJUST) ) { // right adjust
+		while ( (len + prec_len ) < width ) {
+			*buf++ = ( flags & ZEROPAD ) ? '0' : ' ';
+			width--;
+		}
 	}
 
 	while ( digits-- ) {
@@ -1127,8 +1137,6 @@ void AddFloat( char **buf_p, float fval, int width, int prec ) {
 
 	*buf_p = buf;
 
-	if (prec < 0)
-		prec = 6;
 	// write the fraction
 	digits = 0;
 	while (digits < prec) {
@@ -1146,10 +1154,19 @@ void AddFloat( char **buf_p, float fval, int width, int prec ) {
 		}
 		*buf_p = buf;
 	}
+
+	if ( flags & LADJUST ) { // left adjust
+		buf = *buf_p;
+		while ( (len + prec_len) < width ) {
+			*buf++ = ( flags & ZEROPAD ) ? '0' : ' ';
+			width--;
+		}
+		*buf_p = buf;
+	}
 }
 
 
-void AddString( char **buf_p, char *string, int width, int prec ) {
+void AddString( char **buf_p, char *string, int width, int prec, int flags ) {
 	int		size;
 	char	*buf;
 
@@ -1173,12 +1190,18 @@ void AddString( char **buf_p, char *string, int width, int prec ) {
 
 	width -= size;
 
+	if ( !(flags & LADJUST) ) { // right adjust
+		while( width-- > 0 )
+			*buf++ = ( flags & ZEROPAD ) ? '0' : ' ';
+	}
+
 	while( size-- ) {
 		*buf++ = *string++;
 	}
 
-	while( width-- > 0 ) {
-		*buf++ = ' ';
+	if ( flags & LADJUST ) { // left adjust
+		while( width-- > 0 )
+			*buf++ = ( flags & ZEROPAD ) ? '0' : ' ';
 	}
 
 	*buf_p = buf;
@@ -1266,7 +1289,7 @@ reswitch:
 			arg++;
 			break;
 		case 'f':
-			AddFloat( &buf_p, *(double *)arg, width, prec );
+			AddFloat( &buf_p, *(double *)arg, width, prec, flags );
 #ifdef __LCC__
 			arg += 1;	// everything is 32 bit in my compiler
 #else
@@ -1274,7 +1297,7 @@ reswitch:
 #endif
 			break;
 		case 's':
-			AddString( &buf_p, (char *)*arg, width, prec );
+			AddString( &buf_p, (char *)*arg, width, prec, flags );
 			arg++;
 			break;
 		case '%':

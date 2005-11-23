@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.4 2005/11/13 18:45:03 qqshka Exp $
+ *  $Id: g_main.c,v 1.5 2005/11/23 20:35:08 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -258,6 +258,7 @@ void G_InitGame( int levelTime, int randomSeed )
 		g_edicts[i + 1].s.v.netname = netnames[i];
 	}
 
+	Init_cmds();
 }
 
 

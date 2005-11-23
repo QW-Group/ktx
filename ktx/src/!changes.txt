@@ -1,3 +1,26 @@
+2005-11-23
+ 17. Countdown printing is look better now.
+	
+2005-11-21
+ 16. I clear some things. Mod in source code have not some standard way to determine
+	 which game type is(tp, duel, ffa), mod check 'teamplay' cvar, 'k_duel' localinfo,
+	 count of players and  count of teams, this is complicated and wrong, so I remove 'k_duel'
+	 and introduce 'k_mode' user created cvar (via 'set' command at the servers cfgs) which
+	 help me unambiguously get current game type.
+	 Usermodes commands like XonX and ffa already have appropriate values(internally), so does't
+	 put this cvar in configs/usermodes/XonX/*.cfg's.
+	 Generally u may forget about this 'k_mode', just put it in server.cfg or whatever.
+
+	 set k_mode 2 // 0 - unknown, mode will try to find appropriate value,
+				  //     do not relay on this.
+				  // 1 - duel
+				  // 2 - team
+				  // 3 - ffa
+
+	 U must understand what 'k_mode' and 'teamplay' linkage somehow.
+
+	 I provide example configuration files in future, so this will be much transparent.
+
 2005-11-13
  13. Ok, information after match contain not less statistics than Ktpro now, 
 	 added megahealth stats.

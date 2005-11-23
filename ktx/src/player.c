@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
+ *  $Id: player.c,v 1.3 2005/11/23 20:35:08 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -101,7 +101,7 @@ void player_run()
 
 void muzzleflash()
 {
-	trap_WriteByte( MSG_MULTICAST, SVC_MUZZLEFLASH );
+	WriteByte( MSG_MULTICAST, SVC_MUZZLEFLASH );
 	WriteEntity( MSG_MULTICAST, self );
 	trap_multicast( PASSVEC3( self->s.v.origin ), MULTICAST_PVS );
 }

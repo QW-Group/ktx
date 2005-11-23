@@ -226,9 +226,9 @@ void BecomeCaptain ()
     if( match_in_progress || intermission_running )
         return;
 
-    if( atoi( ezinfokey( world, "k_duel" ) ) )
+    if( !isTeam() )
     {
-        G_sprint(self, 2, "No team picking in duel mode\n");
+        G_sprint(self, 2, "No team picking in non team mode\n");
         return;
     }
 

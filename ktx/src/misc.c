@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: misc.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
+ *  $Id: misc.c,v 1.3 2005/11/23 20:35:08 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -237,11 +237,11 @@ void barrel_explode()
 	// did say self.owner
 	T_RadiusDamage( self, self, 160, world, "" );
 
-	trap_WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
-	trap_WriteByte( MSG_MULTICAST, TE_EXPLOSION );
-	trap_WriteCoord( MSG_MULTICAST, self->s.v.origin[0] );
-	trap_WriteCoord( MSG_MULTICAST, self->s.v.origin[1] );
-	trap_WriteCoord( MSG_MULTICAST, self->s.v.origin[2] + 32 );
+	WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
+	WriteByte( MSG_MULTICAST, TE_EXPLOSION );
+	WriteCoord( MSG_MULTICAST, self->s.v.origin[0] );
+	WriteCoord( MSG_MULTICAST, self->s.v.origin[1] );
+	WriteCoord( MSG_MULTICAST, self->s.v.origin[2] + 32 );
 
 	trap_multicast( PASSVEC3( self->s.v.origin ), MULTICAST_PHS );
 
@@ -349,12 +349,12 @@ void Laser_Touch()
 		T_Damage( other, self, PROG_TO_EDICT( self->s.v.owner ), 15 );
 	} else
 	{
-		trap_WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
-		trap_WriteByte( MSG_MULTICAST, TE_GUNSHOT );
-		trap_WriteByte( MSG_MULTICAST, 5 );
-		trap_WriteCoord( MSG_MULTICAST, org[0] );
-		trap_WriteCoord( MSG_MULTICAST, org[1] );
-		trap_WriteCoord( MSG_MULTICAST, org[2] );
+		WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
+		WriteByte( MSG_MULTICAST, TE_GUNSHOT );
+		WriteByte( MSG_MULTICAST, 5 );
+		WriteCoord( MSG_MULTICAST, org[0] );
+		WriteCoord( MSG_MULTICAST, org[1] );
+		WriteCoord( MSG_MULTICAST, org[2] );
 
 		trap_multicast( PASSVEC3( org ), MULTICAST_PVS );
 	}

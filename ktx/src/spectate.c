@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
+ *  $Id: spectate.c,v 1.3 2005/11/23 20:35:08 qqshka Exp $
  */
 
 // spectate.c
@@ -222,8 +222,9 @@ void SpectatorImpulseCommand()
 
 		if( !self->suicide_time ) {
 			g_globalvars.msg_entity = EDICT_TO_PROG( self );
-			WriteByte(1, 26);
-			WriteString(1, "\n");
+//			WriteByte(MSG_ONE, 26);
+//			WriteString(MSG_ONE, "\n");
+			G_centerprint (self, "\n");
 		}
 	} else if( self->s.v.impulse == 25 && !(self->k_track) ) {
 		// teleport the spectator to the next spawn point

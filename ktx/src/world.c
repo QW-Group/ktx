@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
+ *  $Id: world.c,v 1.3 2005/11/23 20:35:08 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -321,11 +321,114 @@ void SP_worldspawn()
 
 	if ( atoi( ezinfokey( world, "srv_practice_mode" ) ) ) // #practice mode#
 		SetPractice( atoi( ezinfokey( world, "srv_practice_mode" ) ), NULL ); // may not reload map
-
-	Init_cmds();
 }
 
-int             timelimit, fraglimit, teamplay, deathmatch, framecount;
+// create cvar via 'set' command
+// FIXME: unfortunately with current API I can't check if cvar already exist
+qboolean RegisterCvar ( const char *var )
+{
+
+	if ( !strnull( cvar_string( var ) ) ) {
+		G_dprint("RegisterCvar: \"%s\" already exist, value is \"%s\"\n", var, cvar_string( var ));
+		return false;
+	}
+	else {
+		// FIXME: some hack to check if cvar already exist, this check may give wrong results
+		// thats all i can do with current api
+		char *save = cvar_string( var );
+
+		cvar_set(var, "~SomEHacK~~SomEHacK~");
+		if ( !strnull( cvar_string( var ) ) ) { // ok, cvar exist but was empty
+			cvar_set(var, save); // restore empty string %)
+			G_dprint("RegisterCvar: \"%s\" already exist\n", var);
+			return false;
+		}
+		// but cvar_set may fail, if cvar is ROM for example
+		// so, if cvar is empty and ROM we can't guess is this cvar exist
+	}
+
+	G_dprint("RegisterCvar: \"%s\" registered\n", var);
+	localcmd("set \"%s\" 0\n", var);
+	trap_executecmd ();
+	return true;
+}
+
+void FirstFrame	( )
+{
+	if ( framecount )
+		return;
+
+	trap_executecmd ();
+
+	RegisterCvar("k_mode");
+}
+
+// check if server is misconfigured somehow, made some minimum fixage
+void FixRules ( )
+{
+	gameType_t km = k_mode;
+	int	tp = teamplay;
+	int tl = timelimit;
+	int fl = fraglimit;
+	int dm = deathmatch;
+
+	// we are does't support coop
+	if ( cvar( "coop" ) )
+		trap_cvar_set_float("coop", 0);
+
+	// if unknown teamplay - disable it at all
+	if ( teamplay != 0 && teamplay != 1 && teamplay != 2 && teamplay != 3 )
+		trap_cvar_set_float("teamplay", (teamplay = 0));
+
+	// if unknown deathmatch - set some default value
+	if ( deathmatch != 1 && deathmatch != 2 && deathmatch != 3 && deathmatch != 4
+		 && deathmatch != 5
+	   )
+		trap_cvar_set_float("deathmatch", (deathmatch = 3));
+
+	// if unknown k_mode - set some appropriate value
+	if ( isUnknown() )
+		trap_cvar_set_float("k_mode", (float)( k_mode = teamplay ? gtTeam : gtDuel ));
+
+	// teamplay set, but gametype is not team, disable teamplay in this case
+	if ( teamplay ) {
+		if ( !isTeam() )
+			trap_cvar_set_float("teamplay", (teamplay = 0));
+	}
+	
+	// gametype is team, but teamplay has wrong value, set some default value
+	if ( isTeam() ) {
+		if ( teamplay != 1 && teamplay != 2 && teamplay != 3 )
+			trap_cvar_set_float("teamplay", (teamplay = 2));
+	}
+
+// oldman --> don't allow unlimited timelimit + fraglimit
+    if( timelimit == 0 && fraglimit == 0 )
+    {
+		int k_timetop = bound( 0, atoi( ezinfokey( world, "k_timetop") ), 600 );
+
+		timelimit = k_timetop ? k_timetop : 20;   // sensible default if no max set
+
+        trap_cvar_set_float("timelimit", (float)timelimit);
+    }
+// <-- oldman
+
+	// ok, broadcast changes if any, a bit tech info, but this is misconfigured server
+	// and must not happen on well configured servers, k?
+	if (km != k_mode)
+		G_bprint(2, "%s: k_mode changed to: %d\n", redtext("WARNING"), (int) k_mode);
+	if (tp != teamplay)
+		G_bprint(2, "%s: teamplay changed to: %d\n", redtext("WARNING"), teamplay);
+	if (tl != timelimit)
+		G_bprint(2, "%s: timelimit changed to: %d\n", redtext("WARNING"), timelimit);
+	if (fl != fraglimit)
+		G_bprint(2, "%s: fraglimit changed to: %d\n", redtext("WARNING"), fraglimit);
+	if (dm != deathmatch)
+		G_bprint(2, "%s: deathmatch changed to: %d\n", redtext("WARNING"), deathmatch);
+}
+
+
+int         timelimit, fraglimit, teamplay, deathmatch, framecount;
 
 float		rj;
 
@@ -336,22 +439,18 @@ void CheckTiming();
 
 void StartFrame( int time )
 {
+	if ( !framecount )
+		FirstFrame();
+
     k_maxspeed = cvar( "sv_maxspeed" );
 	timelimit  = cvar( "timelimit" );
 	fraglimit  = cvar( "fraglimit" );
 	teamplay   = cvar( "teamplay" );
 	deathmatch = cvar( "deathmatch" );
 
-// oldman --> don't allow unlimited timelimit + fraglimit
-    if( timelimit == 0 && fraglimit == 0 )
-    {
-		int k_timetop = atoi( ezinfokey( world, "k_timetop") );
+	k_mode	   = cvar( "k_mode" );
 
-		timelimit = k_timetop ? k_timetop : 20;   // sensible default if no max set
-
-        cvar_set("timelimit", va("%d", (int)timelimit));
-    }
-// <-- oldman
+	FixRules ();
 
 	framecount++;
 	framechecks = bound( 0, !atoi( ezinfokey( world, "k_noframechecks" ) ), 1 );

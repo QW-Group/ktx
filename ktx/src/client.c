@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.5 2005/11/13 18:45:03 qqshka Exp $
+ *  $Id: client.c,v 1.6 2005/11/23 20:35:08 qqshka Exp $
  */
 
 //===========================================================================
@@ -450,16 +450,16 @@ void execute_changelevel()
 	pos = FindIntermission();
 
 // play intermission music
-	trap_WriteByte( MSG_ALL, SVC_CDTRACK );
-	trap_WriteByte( MSG_ALL, 3 );
+	WriteByte( MSG_ALL, SVC_CDTRACK );
+	WriteByte( MSG_ALL, 3 );
 
-	trap_WriteByte ( MSG_ALL, SVC_INTERMISSION );
-	trap_WriteCoord( MSG_ALL, pos->s.v.origin[0] );
-	trap_WriteCoord( MSG_ALL, pos->s.v.origin[1] );
-	trap_WriteCoord( MSG_ALL, pos->s.v.origin[2] );
-	trap_WriteAngle( MSG_ALL, pos->mangle[0] );
-	trap_WriteAngle( MSG_ALL, pos->mangle[1] );
-	trap_WriteAngle( MSG_ALL, pos->mangle[2] );
+	WriteByte ( MSG_ALL, SVC_INTERMISSION );
+	WriteCoord( MSG_ALL, pos->s.v.origin[0] );
+	WriteCoord( MSG_ALL, pos->s.v.origin[1] );
+	WriteCoord( MSG_ALL, pos->s.v.origin[2] );
+	WriteAngle( MSG_ALL, pos->mangle[0] );
+	WriteAngle( MSG_ALL, pos->mangle[1] );
+	WriteAngle( MSG_ALL, pos->mangle[2] );
 
 	other = find( world, FOFS( s.v.classname ), "player" );
 	while ( other )

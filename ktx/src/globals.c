@@ -34,12 +34,9 @@
 
 	int   k_overtime = 0;  // is overtime is going on
 
-// WTF ? in kt_defs.qc it exist
-//	float intermission_running;
-//	float intermission_exittime;
-	
 	float server_is_2_3x;	// if true, fix the jump bug via QC
 	float current_maxfps;	// current value of serverinfo maxfps
 
-	int   k_practice;		// is server in practice mode
+	int       k_practice;	// is server in practice mode
+	gameType_t 	  k_mode;   // game type: DUEL, TP, FFA
 #endif

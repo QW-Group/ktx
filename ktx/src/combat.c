@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.3 2005/11/13 18:45:03 qqshka Exp $
+ *  $Id: combat.c,v 1.4 2005/11/23 20:35:08 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -132,7 +132,7 @@ void Killed( gedict_t * targ, gedict_t * attacker )
 	if ( ( ( int ) ( self->s.v.flags ) ) & FL_MONSTER )
 	{
 		g_globalvars.killed_monsters++;
-		trap_WriteByte( MSG_ALL, SVC_KILLEDMONSTER );
+		WriteByte( MSG_ALL, SVC_KILLEDMONSTER );
 	}
 
 	ClientObituary( self, attacker );
@@ -286,11 +286,13 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	infokey( attacker, "team", attackerteam, sizeof( attackerteam ) );
 	infokey( targ, "team", targteam, sizeof( targteam ) );
 
+	// teamplay == 1 don't damage self and mates (armor affected anyway)
 	if ( ( teamplay == 1 ) && !strcmp( targteam, attackerteam ) &&
 	     !strcmp( attacker->s.v.classname, "player" ) && strcmp( attackerteam, "" ) &&
 	     strcmp( inflictor->s.v.classname, "door" ) )
 		return;
 
+	// teamplay == 3 don't damage mates, do damage to self (armor affected anyway)
 	if ( ( teamplay == 3 ) && !strcmp( targteam, attackerteam ) &&
 	     !strcmp( attacker->s.v.classname, "player" ) && strcmp( attackerteam, "" ) &&
 	     targ != attacker && strcmp( inflictor->s.v.classname, "door" ) )

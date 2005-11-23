@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.4 2005/11/13 18:45:48 qqshka Exp $
+ *  $Id: g_local.h,v 1.5 2005/11/23 20:35:33 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -81,6 +81,17 @@ void            G_Error( const char *fmt, ... );
 #define PASSVEC3(x) (x[0]),(x[1]),(x[2])
 #define SetVector(v,x,y,z) (v[0]=x,v[1]=y,v[2]=z)
 
+// some types
+
+typedef enum
+{
+	gtUnknown = 0,
+	gtDuel,
+	gtTeam,
+	gtFFA
+} gameType_t;
+
+
 // bg_lib.c
 
 #if defined( Q3_VM ) || defined( _WIN32 )
@@ -115,10 +126,13 @@ void            makevectors( vec3_t vector );
 
 char			*va(char *format, ...);
 char			*redtext(const char *format, ...);
+char 			*dig3(int d);
 
 void            G_sprint( gedict_t * ed, int level, const char *fmt, ... );
 void            G_bprint( int level, const char *fmt, ... );
 void            G_centerprint( gedict_t * ed, const char *fmt, ... );
+/* centerprint too all clients */
+void 			G_cp2all(const char *fmt, ... );
 void            G_dprint( const char *fmt, ... );
 
 void			localcmd( const char *fmt, ... );
@@ -129,7 +143,7 @@ int				strnull ( const char *s1 );
 void            aim( vec3_t ret );
 void    	setorigin( gedict_t * ed, float origin_x, float origin_y, float origin_z );
 void    	setsize( gedict_t * ed, float min_x, float min_y, float min_z, float max_x,
-		 float max_y, float max_z );
+		 			float max_y, float max_z );
 void    	setmodel( gedict_t * ed, char *model );
 void    	sound( gedict_t * ed, int channel, char *samp, float vol, float att );
 gedict_t 	*checkclient(  );
@@ -168,6 +182,11 @@ gedict_t	*find_plr( gedict_t * start, int *from );
 char		*armor_type( int items );
 
 qboolean	isghost( gedict_t *ed );
+
+qboolean	isDuel( );
+qboolean	isTeam( );
+qboolean	isFFA( );
+qboolean	isUnknown( );
 
 void    	disableupdates( gedict_t * ed, float time );
 
@@ -300,6 +319,7 @@ void			Vip_ShowRights(gedict_t* cl);
 
 
 //global.c
+
 #ifdef KTEAMS
 
 extern	float framechecks;	    // if timedemo/uptime bugs are tolerated
@@ -331,14 +351,11 @@ extern	float match_over;       // boolean - whether or not the match stats have 
 extern	char *newcomer;        // stores name of last player who joined
 extern	int   k_overtime;		// is overtime is going on
 
-// WTF ? in kt_defs.qc it exist
-//	float intermission_running;
-//	float intermission_exittime;
-	
 extern	float server_is_2_3x;	// if true, fix the jump bug via QC
 extern	float current_maxfps;	// current value of serverinfo maxfps
 
 extern	int   k_practice;		// is server in practice mode
+extern  gameType_t 	  k_mode;   // game type: DUEL, TP, FFA
 
 #endif
 

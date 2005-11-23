@@ -740,7 +740,7 @@ void ModPause (int pause)
 
     k_pause = pause;
 
-    WriteByte(2, SVC_SETPAUSE);
+    WriteByte(MSG_ALL, SVC_SETPAUSE);
 
     if( pause )
     {
@@ -752,7 +752,7 @@ void ModPause (int pause)
         k_oldmaxspeed = k_maxspeed;
         cvar_set("sv_maxspeed", "0");
 
-        WriteByte(2, 1); // pause plaque on
+        WriteByte(MSG_ALL, 1); // pause plaque on
 
         e1 = nextent( world );
         while ( e1 )
@@ -771,7 +771,7 @@ void ModPause (int pause)
     }
     else
     {
-        WriteByte(2, 0); // pause plaque off
+        WriteByte(MSG_ALL, 0); // pause plaque off
 
         cvar_set("pausable", va("%d", k_realPausable)); // restore
         cvar_set("sv_maxspeed", va("%d", (int)k_oldmaxspeed));

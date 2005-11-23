@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.4 2005/11/13 18:45:03 qqshka Exp $
+ *  $Id: weapons.c,v 1.5 2005/11/23 20:35:08 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -98,12 +98,12 @@ void W_FireAxe()
 	{			// hit wall
 		sound( self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM );
 
-		trap_WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
-		trap_WriteByte( MSG_MULTICAST, TE_GUNSHOT );
-		trap_WriteByte( MSG_MULTICAST, 3 );
-		trap_WriteCoord( MSG_MULTICAST, org[0] );
-		trap_WriteCoord( MSG_MULTICAST, org[1] );
-		trap_WriteCoord( MSG_MULTICAST, org[2] );
+		WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
+		WriteByte( MSG_MULTICAST, TE_GUNSHOT );
+		WriteByte( MSG_MULTICAST, 3 );
+		WriteCoord( MSG_MULTICAST, org[0] );
+		WriteCoord( MSG_MULTICAST, org[1] );
+		WriteCoord( MSG_MULTICAST, org[2] );
 		trap_multicast( PASSVEC3( org ), MULTICAST_PVS );
 	}
 }
@@ -182,12 +182,12 @@ SpawnBlood
 */
 void SpawnBlood( vec3_t org, float damage )
 {
-	trap_WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
-	trap_WriteByte( MSG_MULTICAST, TE_BLOOD );
-	trap_WriteByte( MSG_MULTICAST, 1 );
-	trap_WriteCoord( MSG_MULTICAST, org[0] );
-	trap_WriteCoord( MSG_MULTICAST, org[1] );
-	trap_WriteCoord( MSG_MULTICAST, org[2] );
+	WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
+	WriteByte( MSG_MULTICAST, TE_BLOOD );
+	WriteByte( MSG_MULTICAST, 1 );
+	WriteCoord( MSG_MULTICAST, org[0] );
+	WriteCoord( MSG_MULTICAST, org[1] );
+	WriteCoord( MSG_MULTICAST, org[2] );
 	trap_multicast( PASSVEC3( org ), MULTICAST_PVS );
 }
 
@@ -256,23 +256,23 @@ void Multi_Finish()
 {
 	if ( puff_count )
 	{
-		trap_WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
-		trap_WriteByte( MSG_MULTICAST, TE_GUNSHOT );
-		trap_WriteByte( MSG_MULTICAST, puff_count );
-		trap_WriteCoord( MSG_MULTICAST, puff_org[0] );
-		trap_WriteCoord( MSG_MULTICAST, puff_org[1] );
-		trap_WriteCoord( MSG_MULTICAST, puff_org[2] );
+		WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
+		WriteByte( MSG_MULTICAST, TE_GUNSHOT );
+		WriteByte( MSG_MULTICAST, puff_count );
+		WriteCoord( MSG_MULTICAST, puff_org[0] );
+		WriteCoord( MSG_MULTICAST, puff_org[1] );
+		WriteCoord( MSG_MULTICAST, puff_org[2] );
 		trap_multicast( PASSVEC3( puff_org ), MULTICAST_PVS );
 	}
 
 	if ( blood_count )
 	{
-		trap_WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
-		trap_WriteByte( MSG_MULTICAST, TE_BLOOD );
-		trap_WriteByte( MSG_MULTICAST, blood_count );
-		trap_WriteCoord( MSG_MULTICAST, blood_org[0] );
-		trap_WriteCoord( MSG_MULTICAST, blood_org[1] );
-		trap_WriteCoord( MSG_MULTICAST, blood_org[2] );
+		WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
+		WriteByte( MSG_MULTICAST, TE_BLOOD );
+		WriteByte( MSG_MULTICAST, blood_count );
+		WriteCoord( MSG_MULTICAST, blood_org[0] );
+		WriteCoord( MSG_MULTICAST, blood_org[1] );
+		WriteCoord( MSG_MULTICAST, blood_org[2] );
 		trap_multicast( PASSVEC3( puff_org ), MULTICAST_PVS );
 	}
 }
@@ -390,7 +390,7 @@ void W_FireShotgun()
 
 	g_globalvars.msg_entity = EDICT_TO_PROG( self );
 
-	trap_WriteByte( MSG_ONE, SVC_SMALLKICK );
+	WriteByte( MSG_ONE, SVC_SMALLKICK );
 
 #ifdef KTEAMS
     if ( match_in_progress == 2 )
@@ -423,7 +423,7 @@ void W_FireSuperShotgun()
 	sound( self, CHAN_WEAPON, "weapons/shotgn2.wav", 1, ATTN_NORM );
 	g_globalvars.msg_entity = EDICT_TO_PROG( self );
 
-	trap_WriteByte( MSG_ONE, SVC_BIGKICK );
+	WriteByte( MSG_ONE, SVC_BIGKICK );
 
 #ifdef KTEAMS
     if ( match_in_progress == 2 )
@@ -502,11 +502,11 @@ void T_MissileTouch()
 	VectorScale( tmp, -8, tmp );
 	VectorAdd( self->s.v.origin, tmp, self->s.v.origin )
 // self->s.v.origin = self->s.v.origin - 8 * normalize(self->s.v.velocity);
-	trap_WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
-	trap_WriteByte( MSG_MULTICAST, TE_EXPLOSION );
-	trap_WriteCoord( MSG_MULTICAST, self->s.v.origin[0] );
-	trap_WriteCoord( MSG_MULTICAST, self->s.v.origin[1] );
-	trap_WriteCoord( MSG_MULTICAST, self->s.v.origin[2] );
+	WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
+	WriteByte( MSG_MULTICAST, TE_EXPLOSION );
+	WriteCoord( MSG_MULTICAST, self->s.v.origin[0] );
+	WriteCoord( MSG_MULTICAST, self->s.v.origin[1] );
+	WriteCoord( MSG_MULTICAST, self->s.v.origin[2] );
 	trap_multicast( PASSVEC3( self->s.v.origin ), MULTICAST_PHS );
 
 	ent_remove( self );
@@ -531,7 +531,7 @@ void W_FireRocket()
 	sound( self, CHAN_WEAPON, "weapons/sgun1.wav", 1, ATTN_NORM );
 
 	g_globalvars.msg_entity = EDICT_TO_PROG( self );
-	trap_WriteByte( MSG_ONE, SVC_SMALLKICK );
+	WriteByte( MSG_ONE, SVC_SMALLKICK );
 
 	newmis = spawn();
 	g_globalvars.newmis = EDICT_TO_PROG( newmis );
@@ -575,11 +575,11 @@ void LightningHit( gedict_t * from, float damage )
 	if ( PROG_TO_EDICT( g_globalvars.trace_ent )->k_player )
 		self->ps.h_lg++;
 
-	trap_WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
-	trap_WriteByte( MSG_MULTICAST, TE_LIGHTNINGBLOOD );
-	trap_WriteCoord( MSG_MULTICAST, g_globalvars.trace_endpos[0] );
-	trap_WriteCoord( MSG_MULTICAST, g_globalvars.trace_endpos[1] );
-	trap_WriteCoord( MSG_MULTICAST, g_globalvars.trace_endpos[2] );
+	WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
+	WriteByte( MSG_MULTICAST, TE_LIGHTNINGBLOOD );
+	WriteCoord( MSG_MULTICAST, g_globalvars.trace_endpos[0] );
+	WriteCoord( MSG_MULTICAST, g_globalvars.trace_endpos[1] );
+	WriteCoord( MSG_MULTICAST, g_globalvars.trace_endpos[2] );
 	trap_multicast( PASSVEC3( g_globalvars.trace_endpos ), MULTICAST_PVS );
 
 	T_Damage( PROG_TO_EDICT( g_globalvars.trace_ent ), from, from, damage );
@@ -701,7 +701,7 @@ void W_FireLightning()
 		self->t_width = g_globalvars.time + 0.6;
 	}
 	g_globalvars.msg_entity = EDICT_TO_PROG( self );
-	trap_WriteByte( MSG_ONE, SVC_SMALLKICK );
+	WriteByte( MSG_ONE, SVC_SMALLKICK );
 
     if ( match_in_progress == 2 )
 		if ( deathmatch != 4 )
@@ -715,15 +715,15 @@ void W_FireLightning()
 			org[1] + g_globalvars.v_forward[1] * 600,
 			org[2] + g_globalvars.v_forward[2] * 600, true, self );
 
-	trap_WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
-	trap_WriteByte( MSG_MULTICAST, TE_LIGHTNING2 );
+	WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
+	WriteByte( MSG_MULTICAST, TE_LIGHTNING2 );
 	WriteEntity( MSG_MULTICAST, self );
-	trap_WriteCoord( MSG_MULTICAST, org[0] );
-	trap_WriteCoord( MSG_MULTICAST, org[1] );
-	trap_WriteCoord( MSG_MULTICAST, org[2] );
-	trap_WriteCoord( MSG_MULTICAST, g_globalvars.trace_endpos[0] );
-	trap_WriteCoord( MSG_MULTICAST, g_globalvars.trace_endpos[1] );
-	trap_WriteCoord( MSG_MULTICAST, g_globalvars.trace_endpos[2] );
+	WriteCoord( MSG_MULTICAST, org[0] );
+	WriteCoord( MSG_MULTICAST, org[1] );
+	WriteCoord( MSG_MULTICAST, org[2] );
+	WriteCoord( MSG_MULTICAST, g_globalvars.trace_endpos[0] );
+	WriteCoord( MSG_MULTICAST, g_globalvars.trace_endpos[1] );
+	WriteCoord( MSG_MULTICAST, g_globalvars.trace_endpos[2] );
 
 	trap_multicast( PASSVEC3( org ), MULTICAST_PHS );
 
@@ -744,11 +744,11 @@ void GrenadeExplode()
 
 	T_RadiusDamage( self, PROG_TO_EDICT( self->s.v.owner ), 120, world, "grenade" );
 
-	trap_WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
-	trap_WriteByte( MSG_MULTICAST, TE_EXPLOSION );
-	trap_WriteCoord( MSG_MULTICAST, self->s.v.origin[0] );
-	trap_WriteCoord( MSG_MULTICAST, self->s.v.origin[1] );
-	trap_WriteCoord( MSG_MULTICAST, self->s.v.origin[2] );
+	WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
+	WriteByte( MSG_MULTICAST, TE_EXPLOSION );
+	WriteCoord( MSG_MULTICAST, self->s.v.origin[0] );
+	WriteCoord( MSG_MULTICAST, self->s.v.origin[1] );
+	WriteCoord( MSG_MULTICAST, self->s.v.origin[2] );
 	trap_multicast( PASSVEC3( self->s.v.origin ), MULTICAST_PHS );
 
 	ent_remove( self );
@@ -792,7 +792,7 @@ void W_FireGrenade()
 
 	g_globalvars.msg_entity = EDICT_TO_PROG( self );
 
-	trap_WriteByte( MSG_ONE, SVC_SMALLKICK );
+	WriteByte( MSG_ONE, SVC_SMALLKICK );
 
 	newmis = spawn();
 	g_globalvars.newmis = EDICT_TO_PROG( newmis );
@@ -916,16 +916,16 @@ void spike_touch()
 		T_Damage( other, self, PROG_TO_EDICT( self->s.v.owner ), 9 );
 	} else
 	{
-		trap_WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
+		WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
 		if ( !strcmp( self->s.v.classname, "wizspike" ) )
-			trap_WriteByte( MSG_MULTICAST, TE_WIZSPIKE );
+			WriteByte( MSG_MULTICAST, TE_WIZSPIKE );
 		else if ( !strcmp( self->s.v.classname, "knightspike" ) )
-			trap_WriteByte( MSG_MULTICAST, TE_KNIGHTSPIKE );
+			WriteByte( MSG_MULTICAST, TE_KNIGHTSPIKE );
 		else
-			trap_WriteByte( MSG_MULTICAST, TE_SPIKE );
-		trap_WriteCoord( MSG_MULTICAST, self->s.v.origin[0] );
-		trap_WriteCoord( MSG_MULTICAST, self->s.v.origin[1] );
-		trap_WriteCoord( MSG_MULTICAST, self->s.v.origin[2] );
+			WriteByte( MSG_MULTICAST, TE_SPIKE );
+		WriteCoord( MSG_MULTICAST, self->s.v.origin[0] );
+		WriteCoord( MSG_MULTICAST, self->s.v.origin[1] );
+		WriteCoord( MSG_MULTICAST, self->s.v.origin[2] );
 		trap_multicast( PASSVEC3( self->s.v.origin ), MULTICAST_PHS );
 	}
 
@@ -965,11 +965,11 @@ void superspike_touch()
 		T_Damage( other, self, PROG_TO_EDICT( self->s.v.owner ), 18 );
 	} else
 	{
-		trap_WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
-		trap_WriteByte( MSG_MULTICAST, TE_SUPERSPIKE );
-		trap_WriteCoord( MSG_MULTICAST, self->s.v.origin[0] );
-		trap_WriteCoord( MSG_MULTICAST, self->s.v.origin[1] );
-		trap_WriteCoord( MSG_MULTICAST, self->s.v.origin[2] );
+		WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
+		WriteByte( MSG_MULTICAST, TE_SUPERSPIKE );
+		WriteCoord( MSG_MULTICAST, self->s.v.origin[0] );
+		WriteCoord( MSG_MULTICAST, self->s.v.origin[1] );
+		WriteCoord( MSG_MULTICAST, self->s.v.origin[2] );
 		trap_multicast( PASSVEC3( self->s.v.origin ), MULTICAST_PHS );
 	}
 
@@ -998,7 +998,7 @@ void W_FireSuperSpikes()
 	setmodel( newmis, "progs/s_spike.mdl" );
 	setsize( newmis, 0, 0, 0, 0, 0, 0 );
 	g_globalvars.msg_entity = EDICT_TO_PROG( self );
-	trap_WriteByte( MSG_ONE, SVC_SMALLKICK );
+	WriteByte( MSG_ONE, SVC_SMALLKICK );
 }
 
 void W_FireSpikes( float ox )
@@ -1038,7 +1038,7 @@ void W_FireSpikes( float ox )
 	launch_spike( tmp, dir );
 
 	g_globalvars.msg_entity = EDICT_TO_PROG( self );
-	trap_WriteByte( MSG_ONE, SVC_SMALLKICK );
+	WriteByte( MSG_ONE, SVC_SMALLKICK );
 }
 
 /*

@@ -529,7 +529,7 @@ void PlayersStats ()
 
 	maxeffi = maxfriend = maxdeaths = 0;
 
-	tp = !atoi ( ezinfokey ( world, "k_duel" ) ) && teamplay;
+	tp = isTeam();
 
 	G_bprint(2, "\n%s:\n"
 				"%s (%s) %s %s\n"
@@ -709,15 +709,15 @@ void EndMatch ( float skip_log )
 		G_dprint("%%tl%%%d", (int)timelimit);
 		G_dprint("%%map%%%s\n", g_globalvars.mapname);
 
-        if( !atoi( ezinfokey( world, "k_duel" ) ) && teamplay )
+        if( isTeam() )
 			SummaryTPStats ();
 
 		PlayersStats ();
 
-        if( !atoi( ezinfokey (world, "k_duel" ) ) )
+        if( !isDuel() ) // top stats only in non duel modes
 			TopStats ();
 
-        if( !atoi( ezinfokey( world, "k_duel" ) ) && teamplay )
+        if( isTeam() )
 			TeamsStats ();
 
 		if ( p = find( world, FOFCLSN, "ghost" ) ) // show legend :)
@@ -878,7 +878,7 @@ void TimerThink ()
 				if( teamplay && f3 != 2 ){
 					; // no overtime in case of less then 2 or more then 2 teams
 				}			
-				else if( atoi ( ezinfokey ( world, "k_duel" ) ) && f4 == 2 )
+				else if( isDuel() && f4 == 2 )
 				{
 					player1scores = player2scores = player1found = 0;
 
@@ -970,12 +970,10 @@ void TimerThink ()
 
 					while( p ) 
 					{
-						if( !strnull ( p->s.v.netname ) && p->k_accepted == 2 ) 
-						{ // save overtime stats
-							p->ps.ot_a	    = (int)p->s.v.armorvalue;
-							p->ps.ot_items	=      p->s.v.items; // float
-							p->ps.ot_h	    = (int)p->s.v.health;
-						}
+					 	// save overtime stats
+						p->ps.ot_a	    = (int)p->s.v.armorvalue;
+						p->ps.ot_items	=      p->s.v.items; // float
+						p->ps.ot_h	    = (int)p->s.v.health;
 
 						p = find ( p, FOFCLSN, "player" );
 					}
@@ -988,7 +986,7 @@ void TimerThink ()
 			return;
 		}
 
-		G_bprint(2, "%d‘ minute%s remaining\n", (int)self->cnt, ((self->cnt != 1) ? "'s" : ""));
+		G_bprint(2, "%s‘ minute%s remaining\n", dig3(self->cnt), ((self->cnt != 1) ? "'s" : ""));
 
 		self->s.v.nextthink = g_globalvars.time + 1;
 
@@ -997,9 +995,9 @@ void TimerThink ()
 				G_bprint(2, "The game is currently a tie\n");
 			} else if( k_scores1 != k_scores2 ) {
 				f1 = k_scores1 - k_scores2;
-				G_bprint(2, "Ôåáí %s‘ leads by %d frag%s\n",
+				G_bprint(2, "Ôåáí %s‘ leads by %s frag%s\n",
 								ezinfokey ( world, ( f1 > 0 ? "k_team1" : "k_team2" ) ),
-								abs( (int)f1 ), ( f1 == 1 ? "" : "s") );
+								dig3(abs( (int)f1 )), ( f1 == 1 ? "" : "s") );
 			}
 		}
 		return;
@@ -1021,7 +1019,7 @@ void TimerThink ()
                         }
 		}
 */
-		G_bprint(2, "%d‘ second%s\n", (int)self->cnt2, ( self->cnt2 != 1? "s" : "" ) );
+		G_bprint(2, "%s‘ second%s\n", dig3(self->cnt2), ( self->cnt2 != 1? "s" : "" ) );
 	}
 
 	self->s.v.nextthink = g_globalvars.time + 1;
@@ -1203,6 +1201,67 @@ void StartMatch ()
 	}
 }
 
+void PrintCountdown( int seconds )
+{
+// Countdown: seconds
+//
+//
+// Deathmatch  x
+// Mode		  D u e l | T e a m | F F A
+// Teamplay    x
+// Timelimit  xx
+// Fraglimit xxx
+// Overtime   xx		Overtime printout, supports sudden death display
+// Powerups   On|Off|Jammed
+
+	char text[1024] = {0};
+	char *mode = "";
+	char *pwr  = "";
+	char *ot   = "";
+
+
+	strlcat(text, va("%s: %2s\n\n\n", redtext("Countdown"), dig3(seconds)), sizeof(text));
+	strlcat(text, va("%s %2s\n", "Deathmatch", dig3(deathmatch)), sizeof(text));
+
+	if( isDuel() )
+		mode = redtext("D u e l");
+	else if ( isTeam() )
+		mode = redtext("T e a m");
+	else if ( isFFA() )
+		mode = redtext("F F A");
+	else
+		mode = redtext("Unknown");
+
+	strlcat(text, va("%s %8s\n", "Mode", mode), sizeof(text));
+	if ( /*isTeam()*/ teamplay )
+		strlcat(text, va("%s %4s\n", "Teamplay", dig3(teamplay)), sizeof(text));
+	if ( timelimit )
+		strlcat(text, va("%s %3s\n", "Timelimit", dig3(timelimit)), sizeof(text));
+	if ( fraglimit )
+		strlcat(text, va("%s %3s\n", "Fraglimit", dig3(fraglimit)), sizeof(text));
+
+	switch ( atoi( ezinfokey( world, "k_overtime" ) ) ) {
+		case 0:  ot = redtext("Off"); break;
+		case 1:  ot = va("%d", atoi( ezinfokey( world, "k_exttime" ) )); break;
+		case 2:  ot = redtext("sd"); break;
+		default: ot	= redtext("Unkn"); break;
+	}
+
+	if ( atoi( ezinfokey( world, "k_overtime" ) ) )
+		strlcat(text, va("%s %4s\n", "Overtime", ot), sizeof(text));
+
+	switch ( atoi( ezinfokey( world, "k_pow" ) ) ) {
+		case 0:  pwr = redtext("Off"); break;
+		case 1:  pwr = redtext( "On"); break;
+		case 2:  pwr = redtext("Jam"); break;
+		default: pwr = redtext("Unkn"); break;
+	}
+
+	strlcat(text, va("%s %4s\n", "Powerups", pwr), sizeof(text));
+
+	G_cp2all(text);
+}
+
 void TimerStartThink ()
 // Called every second during the countdown.
 {
@@ -1229,8 +1288,9 @@ void TimerStartThink ()
 		}
 	}
     else if( !self->cnt2 ) {
-		WriteByte(2, 26);
-		WriteString(2, "");                      
+//		WriteByte(MSG_ALL, 26);
+//		WriteString(MSG_ALL, "");
+		G_cp2all("");
 		f2 = atoi( ezinfokey( world, "k_lockmin" ) );
 		f3 = atoi( ezinfokey( world, "k_lockmax" ) );
 		f1 = CountRTeams();
@@ -1254,114 +1314,7 @@ void TimerStartThink ()
 		return;
 	}
 
-	num = floor(self->cnt2 / 10);
-	WriteByte(2, 26);
-	WriteShort(2, 49930);   // \nC
-	WriteShort(2, 62959);   // ou
-	WriteShort(2, 62702);   // nt
-	WriteShort(2, 61412);   // do
-	WriteShort(2, 61175);   // wn
-	WriteShort(2, 8250);    // :
-	if( num )
-		WriteByte(2, num + 146);
-	num = self->cnt2 - num * 10;
-	WriteByte(2, num + 146);
-	WriteShort(2, 2570); // 0x0A0A = \n\n
-	WriteByte(2, 10);
-//deathmatch  x
-	WriteShort(2, 25924);
-	WriteShort(2, 29793);
-	WriteShort(2, 28008);
-	WriteShort(2, 29793);
-	WriteShort(2, 26723);
-	WriteShort(2, 8224);
-	WriteByte(2, deathmatch + 146);
-//(teamplay    x)
-	if(teamplay) {
-		WriteByte(2, 10);
-		WriteShort(2, 25940);
-		WriteShort(2, 28001);
-		WriteShort(2, 27760);
-		WriteShort(2, 31073);
-		WriteShort(2, 8224);
-		WriteShort(2, 8224);
-		WriteByte(2, teamplay + 146);
-	}
-//(timelimit  xx)
-	if(timelimit) {
-		WriteShort(2, 21514);
-		WriteShort(2, 28009);
-		WriteShort(2, 27749);
-		WriteShort(2, 28009);
-		WriteShort(2, 29801);
-		WriteShort(2, 8224);
-		f1 = timelimit;
-		num = floor(f1 / 10);
-		f1 = f1 - (num * 10);
-		if ( num )
-			WriteByte(2, num + 146);
-		else
-			WriteByte(2, 32);
-		WriteByte(2, f1 + 146);
-	}
-//(fraglimit xxx)
-	if(fraglimit) {
-		WriteShort(2, 17930);
-		WriteShort(2, 24946);
-		WriteShort(2, 27751);
-		WriteShort(2, 28009);
-		WriteShort(2, 29801);
-		WriteByte(2, 32);
-		f1 = fraglimit;
-		num = floor(f1 / 100);
-		f1 = f1 - (num * 100);
-		if( num )
-			WriteByte(2, num + 146);
-		else
-			WriteByte(2, 32);
-		num = floor(f1 / 10);
-		f1 = f1 - (num * 10);
-		WriteByte(2, num + 146);
-		WriteByte(2, f1 + 146);
-	}
-// overtime printout, supports sudden death display
-// overtime xx
-	f1 = atoi( ezinfokey( world, "k_overtime" ) );
-	if( f1 ) {
-		WriteShort(2, 20234);
-		WriteShort(2, 25974);
-		WriteShort(2, 29810);
-		WriteShort(2, 28009);
-		WriteShort(2, 8293);
-		WriteShort(2, 8224);
-		if( f1 == 1 ) {
-			f1 = atoi( ezinfokey( world, "k_exttime" ) );
-			num = floor(f1 / 10);
-			f1 = f1 - (num * 10);
-			if( num )
-				WriteByte(2, num + 146);
-			else
-				WriteByte(2, 32);
-			WriteByte(2, f1 + 146);
-		} else
-			WriteShort(2, 58611);
-	}
-	WriteByte(2, 10);
-	f1 = atoi( ezinfokey( world, "k_pow" ) );
-	if( f1 )
-	{
-		WriteShort(2, 59895);
-		WriteShort(2, 59636);
-	}
-	else
-		WriteShort(2, 61422);
-
-	if( f1 == 2 )
-		WriteString(2, " powerups (jammed)");
-	else
-		WriteString(2, " powerups");
-
-// countdown printouts end here
+	PrintCountdown( self->cnt2 );
 
 	if( self->cnt2 < 6 )
 	{
@@ -1464,6 +1417,9 @@ void StopTimer ( int removeDemo )
 // Whenever a countdown or match stops, remove the timer and reset everything.
 {
 	gedict_t *t, *p;
+
+	if ( match_in_progress == 1 )
+		G_cp2all(""); // clear center print
 
 	k_force = 0;
 	match_in_progress = 0;
@@ -1625,7 +1581,7 @@ void PlayerReady ()
 	k_lockmin = atoi( ezinfokey( world, "k_lockmin" ) );
 	k_lockmax = atoi( ezinfokey( world, "k_lockmax" ) );
 
-    if( k_force && !atoi( ezinfokey( world, "k_duel" ) ) ) {
+    if( k_force && isTeam() ) {
 		nready = 0;
 		p = find ( world, FOFCLSN, "player" );
 		while( p ) {
@@ -1633,8 +1589,10 @@ void PlayerReady ()
 				s1 = ezinfokey(self, "team");
 				s2 = ezinfokey(p, "team");
 
-				if( streq( s1, s2 ) && !strnull( s1 ) )
+				if( streq( s1, s2 ) && !strnull( s1 ) ){
 					nready = 1;
+					break;
+				}
 			}
 
 			p = find ( p, FOFCLSN, "player" );

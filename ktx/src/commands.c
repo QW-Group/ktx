@@ -524,8 +524,8 @@ void ChangeOvertime()
 		return;
 	}
 
-    f1 = atoi( ezinfokey( world, "k_overtime" ) );
-    f2 = atoi( ezinfokey( world, "k_exttime" ) );
+    f1 = bound(0, atoi( ezinfokey( world, "k_overtime" ) ), 2);
+    f2 = bound(0, atoi( ezinfokey( world, "k_exttime" ) ), 999);
 
     if( !f1 )
     {
@@ -739,11 +739,11 @@ void ModStatus ()
 {
 	gedict_t *p;
 
-	G_sprint(self, 2, "Íáøóðååä       %d\n", (int)k_maxspeed);
-	G_sprint(self, 2, "Äåáôèíáôãè     %d   ", (int)deathmatch);
-	G_sprint(self, 2, "Ôåáíðìáù       %d\n", (int)teamplay);
-	G_sprint(self, 2, "Ôéíåìéíéô      %3d ", (int)timelimit);
-	G_sprint(self, 2, "Æòáçìéíéô      %d\n", (int)fraglimit);
+	G_sprint(self, 2, "Íáøóðååä       %-3d\n", (int)k_maxspeed);
+	G_sprint(self, 2, "Äåáôèíáôãè     %-3d ", (int)deathmatch);
+	G_sprint(self, 2, "Ôåáíðìáù       %-3d\n", (int)teamplay);
+	G_sprint(self, 2, "Ôéíåìéíéô      %-3d ", (int)timelimit);
+	G_sprint(self, 2, "Æòáçìéíéô      %-3d\n", (int)fraglimit);
 	PrintToggle1("Ðï÷åòõðó       ", "k_pow");
 	PrintToggle2("Òåóðá÷î ˜˜˜    ", "k_666");
 	PrintToggle1("Äòïð Ñõáä      ", "dq");
@@ -785,24 +785,28 @@ void ModStatus ()
 
 void ModStatus2()
 {
-//	char *tmp;
 	float f1, f2;
+	char *ot = "";
 
 	f1 = atoi( ezinfokey( world, "k_spw" ) );
 	if( f1 == 2 )
-		G_sprint(self, 2, "Ëïíâáô Ôåáíó òåóðá÷îó\n");
+		G_sprint(self, 2, redtext("Kombat Teams Respawns\n"));
 	else if ( f1 == 1 )
-		G_sprint(self, 2, "ËÔ Óðá÷îÓáæåôù\n");
+		G_sprint(self, 2, redtext("KT SpawnSafety\n"));
 	else
-		G_sprint(self, 2, "Îïòíáì Ñ× òåóðá÷îó\n");
+		G_sprint(self, 2, redtext("Normal QW Respawns\n"));
 
-	if( atoi( ezinfokey( world, "k_duel" ) ) )
-		G_sprint(self, 2, "Óåòöåò íïäå: duel\n");
-	else {
-		G_sprint(self, 2, "Óåòöåò íïäå: team\n");
-		G_sprint(self, 2, "Óåòöåò ìïãëéîç: %s\n", 
+	if( isDuel() )
+		G_sprint(self, 2, "%s: duel\n", redtext("Server mode"));
+	else if ( isFFA() )
+		G_sprint(self, 2, "%s:  FFA\n", redtext("Server mode"));
+	else if ( isTeam() ) {
+		G_sprint(self, 2, "%s: team\n", redtext("Server mode"));
+		G_sprint(self, 2, "%s: %s\n", redtext("Server locking"),
 					(!lock ? "off" : (lock == 2 ? "all" : (lock == 1 ? "team" : "unknown"))));
 	}
+	else
+		G_sprint(self, 2, "%s: unknown\n", redtext("Server mode"));
 
 	if( !match_in_progress ) {
 		G_sprint(self, 2, "Ôåáíéîæï (ãõò: %d", (int)CountRTeams());
@@ -814,9 +818,14 @@ void ModStatus2()
 
 	f1 = atoi( ezinfokey( world, "k_overtime" ) );
 	f2 = atoi( ezinfokey( world, "k_exttime" ) );
-	G_sprint(self, 2, "Ïöåòôéíå: %s", ( !f1 ? "off\n" : "" ));
-	G_sprint(self, 2, "%s\n", (f1 == 1 ? va("%d minute%s", (int)f2, (f2 != 1 ? "s" : "")) : 
-										    "sudden death"));
+	
+	switch ( (int)f1) {
+		case 0:  ot = "off"; break;
+		case 1:  ot = va("%d minute%s", (int)f2, (f2 != 1 ? "s" : "")); break;
+		case 2:  ot = "sudden death"; break;
+		default: ot	= "unknown"; break;
+	}
+	G_sprint(self, 2, "%s: %s\n", redtext("Overtime"), ot);
 
 	f1 = atoi( ezinfokey( world, "fpd" ) );
 
@@ -893,7 +902,7 @@ void PlayerStatus()
 						G_sprint(self, 2, " is in team %s\n", tmp);
 				}
 				else
-					G_sprint(self, 3, " is not ready\n"); // FIMXE: level 3 why?
+					G_sprint(self, 2, " is not ready\n");
 			}
 
 			p = find( p, FOFCLSN, "player" );
@@ -1266,20 +1275,20 @@ void ChangeDM(float dmm)
 	G_bprint(2, "Deathmatch %c\n", DMM_NUM);
 }
 
-// FIXME: TODO: block command in ffa mode
 void ChangeTP()
 {
 	char *tmp;
 
 	if ( match_in_progress )
 		return;
+
 	if ( atoi ( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
 		G_sprint(self, 3, "console: command is locked\n");
 		return;
 	}
 
-	if( atoi( ezinfokey( world, "k_duel" ) ) ) {
-		G_sprint(self, 3, "console: duel mode disallows you to change teamplay setting\n");
+	if( !isTeam() ) {
+		G_sprint(self, 3, "console: non team mode disallows you to change teamplay setting\n");
 		return;
 	}
 
@@ -1605,9 +1614,11 @@ void ToggleSpecTalk()
 
 void ShowRules()
 {
-	if( atoi( ezinfokey( world, "k_duel" ) ) )
-		G_sprint(self, 2, "Server is in duelmode.\n");
-	else
+	if( isDuel() )
+		G_sprint(self, 2, "Server is in duel mode.\n");
+	else if ( isFFA() )
+		G_sprint(self, 2, "Server is in FFA mode.\n");
+	else if ( isTeam() )
 		G_sprint(self, 2,
 			"Bind òåðïòô to a key.\n"
 			"Pressing that key will send\n"
@@ -1618,6 +1629,8 @@ void ShowRules()
 			"are óôáôó and åææéãéåîãù.\n\n"
 			"Remember that telefragging a teammate\n"
 			"does not result in frags.\n");
+	else
+		G_sprint(self, 2, "Server is in unknown mode.\n");
 
 	if( atoi( ezinfokey( world, "k_bzk" ) ) != 0 )
 		G_sprint(self, 2,
@@ -1741,20 +1754,20 @@ void PrintScores()
 			f1--;
 
 		if( f1 )
-			G_sprint(self, 2, "%d‘ full minute%s", (int)f1, ( f1 > 1 ? "s" : ""));
+			G_sprint(self, 2, "%s‘ full minute%s", dig3(f1), ( f1 > 1 ? "s" : ""));
 		else
-			G_sprint(self, 2, "%d‘ second%s", (int)f2, ( f2 > 1 ? "s" : ""));
+			G_sprint(self, 2, "%s‘ second%s", dig3(f2), ( f2 > 1 ? "s" : ""));
 
 		G_sprint(self, 2, " left\n");
 	}
 
 	if( k_showscores ) {
 		if( k_scores1 > k_scores2 ) {
-			G_sprint(self, 2, "Ôåáí %s‘ = %d\n", ezinfokey(world, "k_team1"), (int)k_scores1);
-			G_sprint(self, 2, "Ôåáí %s‘ = %d\n", ezinfokey(world, "k_team2"), (int)k_scores2);
+			G_sprint(self, 2, "Ôåáí %s‘ = %s\n", ezinfokey(world, "k_team1"), dig3(k_scores1));
+			G_sprint(self, 2, "Ôåáí %s‘ = %s\n", ezinfokey(world, "k_team2"), dig3(k_scores2));
 		} else {
-			G_sprint(self, 2, "Ôåáí %s‘ = %d\n", ezinfokey(world, "k_team2"), (int)k_scores2);
-			G_sprint(self, 2, "Ôåáí %s‘ = %d\n", ezinfokey(world, "k_team1"), (int)k_scores1);
+			G_sprint(self, 2, "Ôåáí %s‘ = %s\n", ezinfokey(world, "k_team2"), dig3(k_scores2));
+			G_sprint(self, 2, "Ôåáí %s‘ = %s\n", ezinfokey(world, "k_team1"), dig3(k_scores1));
 		}
 	}
 }
@@ -1773,16 +1786,9 @@ void PlayerStats()
 
 	f1 = CountTeams();
 	G_sprint(self, 2, "Ðìáùåò óôáôéóôéãó:\n"
-					  "Æòáçó (òáîë) ");
-	if( !atoi( ezinfokey( world, "k_duel" ) ) && f1 && teamplay )
-		G_sprint(self, 2, "æòéåîäëéììó ");
+					  "Æòáçó (òáîë) %s åææéãéåîãù\n", (isTeam() ? "æòéåîäëéììó " : ""));
 
-	G_sprint(self, 2, " åææéãéåîãù\nžžžžžžžžžžžžžžžžžžžžžžž");
-
-	if( !atoi( ezinfokey( world, "k_duel" ) ) && f1 && teamplay )
-		G_sprint(self, 2, "žžžžžžžžžžžž");
-
-	G_sprint(self, 2, "Ÿ\n");
+	G_sprint(self, 2, "žžžžžžžžžžžžžžžžžžžžžžž%sŸ\n", (isTeam() ? "žžžžžžžžžžžž" : ""));
 
 	p = find( world, FOFCLSN, "player" );
 	while( p ) {
@@ -1797,7 +1803,7 @@ void PlayerStats()
 					G_sprint(self, 2, "%s‘ %s:  %d(%d) ", tmp2, p2->s.v.netname,
 						(int)p2->s.v.frags, (int)(p2->s.v.frags - p2->deaths));
 
-					if( !atoi( ezinfokey(world, "k_duel" ) ) && f1 && teamplay )
+					if( isTeam() )
 						G_sprint(self, 2, "%d ", (int)p2->friendly);
 
 					if(p2->s.v.frags < 1)
@@ -2166,9 +2172,7 @@ const char common_um_init[] =
 	"localinfo k_lockmin 2\n"			// minimum number of teams in game
 	"localinfo k_bzk 0\n"				// berzerk
 	"localinfo k_spw 0\n"				// affect spawn type
-	"localinfo k_new_spw 0\n"			// ktpro feature
-
-	"localinfo k_duel 0\n";				// qqshka: turn off duel mode, by default
+	"localinfo k_new_spw 0\n";			// ktpro feature
 
 const char _1on1_um_init[] =
 	"timelimit 10\n"					//
@@ -2178,8 +2182,7 @@ const char _1on1_um_init[] =
 	"localinfo k_membercount 1\n"		// minimum number of players in each team
 	"localinfo k_overtime 2\n"			// overtime type
 	"localinfo k_pow 0\n"				// powerups
-
-	"localinfo k_duel 1\n";				// qqshka: duel mode, easy determine is this tp or duel
+	"k_mode 1\n";
 
 const char _2on2_um_init[] =
 	"floodprot 9 1 1\n"					//
@@ -2191,7 +2194,8 @@ const char _2on2_um_init[] =
 	"localinfo k_membercount 1\n"		//
 	"localinfo k_overtime 1\n"			// overtime type
 	"localinfo k_exttime 2\n"			// extende time for overtime
-	"localinfo k_pow 1\n";				//
+	"localinfo k_pow 1\n"				//
+	"k_mode 2\n";
 
 const char _3on3_um_init[] =
 	"floodprot 9 1 1\n"
@@ -2203,7 +2207,8 @@ const char _3on3_um_init[] =
 	"localinfo k_membercount 2\n"
 	"localinfo k_pow 1\n"
 	"localinfo k_overtime 1\n"
-	"localinfo k_exttime 5\n";
+	"localinfo k_exttime 5\n"
+	"k_mode 2\n";
 
 const char _4on4_um_init[] =
 	"floodprot 9 1 1\n"
@@ -2215,7 +2220,8 @@ const char _4on4_um_init[] =
 	"localinfo k_membercount 3\n"
 	"localinfo k_pow 1\n"
 	"localinfo k_overtime 1\n"
-	"localinfo k_exttime 5\n";
+	"localinfo k_exttime 5\n"
+	"k_mode 2\n";
 
 const char _10on10_um_init[] =
 	"floodprot 9 1 1\n"
@@ -2227,7 +2233,8 @@ const char _10on10_um_init[] =
 	"localinfo k_membercount 5\n"
 	"localinfo k_pow 1\n"
 	"localinfo k_overtime 1\n"
-	"localinfo k_exttime 5\n";
+	"localinfo k_exttime 5\n"
+	"k_mode 2\n";
 
 const char ffa_um_init[] =
 	"timelimit 20\n"
@@ -2237,7 +2244,8 @@ const char ffa_um_init[] =
 	"localinfo dq 1\n"
 	"localinfo dr 1\n"
 	"localinfo k_pow 1\n"
-	"localinfo k_dis 0\n";	// FIXME: hmm, really?
+	"localinfo k_dis 0\n"	// FIXME: hmm, really?
+	"k_mode 3\n";
 
 
 #define UM_1ON1		( 1<<0  )
@@ -2336,6 +2344,7 @@ void UserMode(float umode)
 	G_bprint(2, "%s %s\n", redtext(um_list[i].displayname), redtext("settings enabled"));
 
 	localcmd( common_um_init );
+	trap_executecmd ();
 
 	if ( self->k_admin == 2 ) // some admin features, may be overwriten by um_list[i].initstring
 	{
@@ -2354,35 +2363,6 @@ void UserMode(float umode)
 	localcmd("exec configs/usermodes/%s/%s.cfg\n", um, g_globalvars.mapname);
 	
 	trap_executecmd ();
-
-	// about k_duel
-	if ( streq(um, "1on1") ) {
-		if ( !atoi( ezinfokey( world, "k_duel" ) ) ) {
-			G_bprint(2, "server is misconfigured, k_duel forced to be 1\n");
-			localcmd("localinfo k_duel 1\n"); // oh yes, we really need this
-		}
-	}
-	else{
-		if ( atoi( ezinfokey( world, "k_duel" ) ) ) {
-			G_bprint(2, "server is misconfigured, k_duel forced to be 0\n");
-			localcmd("localinfo k_duel 0\n"); // oh yes, we really need this
-		}
-	}
-
-	// about tp
-	if ( streq(um, "1on1") || streq(um, "ffa") ) {
-		if ( cvar( "teamplay" ) ) { // non tp mode, clear tp
-			G_bprint(2, "server is misconfigured, teamplay forced to be 0\n");
-			localcmd("teamplay 0\n"); // oh yes, we really need this
-		}
-	}
-	else if ( streq(um, "2on2") || streq(um, "3on3") || streq(um, "4on4") || streq(um, "10on10") )
-	{// tp mode, so force some tp
-		if ( !(cvar( "teamplay" ) == 1 || cvar( "teamplay" ) == 2 || cvar( "teamplay" ) == 3 ) ) {
-			G_bprint(2, "server is misconfigured, teamplay forced to be 2\n");
-			localcmd("teamplay 2\n"); // oh yes, we really need this
-		}
-	}
 }
 
 void ModPause (int pause);

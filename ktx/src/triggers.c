@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: triggers.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
+ *  $Id: triggers.c,v 1.3 2005/11/23 20:35:08 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -64,7 +64,7 @@ void multi_trigger()
 		if ( strneq( PROG_TO_EDICT( self->s.v.enemy )->s.v.classname, "player" ) )
 			return;
 		g_globalvars.found_secrets = g_globalvars.found_secrets + 1;
-		trap_WriteByte( MSG_ALL, SVC_FOUNDSECRET );
+		WriteByte( MSG_ALL, SVC_FOUNDSECRET );
 	}
 
 	if ( self->s.v.noise )
@@ -337,11 +337,11 @@ void spawn_tfog( vec3_t org )
 	s->s.v.nextthink = g_globalvars.time + 0.2;
 	s->s.v.think = ( func_t ) play_teleport;
 
-	trap_WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
-	trap_WriteByte( MSG_MULTICAST, TE_TELEPORT );
-	trap_WriteCoord( MSG_MULTICAST, org[0] );
-	trap_WriteCoord( MSG_MULTICAST, org[1] );
-	trap_WriteCoord( MSG_MULTICAST, org[2] );
+	WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
+	WriteByte( MSG_MULTICAST, TE_TELEPORT );
+	WriteCoord( MSG_MULTICAST, org[0] );
+	WriteCoord( MSG_MULTICAST, org[1] );
+	WriteCoord( MSG_MULTICAST, org[2] );
 	trap_multicast( PASSVEC3( org ), MULTICAST_PHS );
 }
 
