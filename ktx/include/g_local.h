@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.5 2005/11/23 20:35:33 qqshka Exp $
+ *  $Id: g_local.h,v 1.6 2005/12/01 21:51:34 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -117,6 +117,7 @@ void            ent_remove( gedict_t * t );
 gedict_t       *nextent( gedict_t * ent );
 gedict_t       *find( gedict_t * start, int fieldoff, char *str );
 gedict_t       *findradius( gedict_t * start, vec3_t org, float rad );
+gedict_t 	   *findradius2( gedict_t * start, vec3_t org, float rad );
 void            normalize( vec3_t value, vec3_t newvalue );
 float           vlen( vec3_t value1 );
 float           vectoyaw( vec3_t value1 );
@@ -127,6 +128,7 @@ void            makevectors( vec3_t vector );
 char			*va(char *format, ...);
 char			*redtext(const char *format, ...);
 char 			*dig3(int d);
+char			*dig3s(const char *format, ...);
 
 void            G_sprint( gedict_t * ed, int level, const char *fmt, ... );
 void            G_bprint( int level, const char *fmt, ... );
@@ -162,6 +164,8 @@ void    	logfrag( gedict_t * killer, gedict_t * killee );
 void    	infokey( gedict_t * ed, char *key, char *valbuff, int sizebuff );
 
 char		*ezinfokey( gedict_t * ed, char *key );
+int			iKey( gedict_t * ed, char *key );
+float		fKey( gedict_t * ed, char *key );
 
 void    	WriteEntity( int to, gedict_t * ed );
 
@@ -187,6 +191,7 @@ qboolean	isDuel( );
 qboolean	isTeam( );
 qboolean	isFFA( );
 qboolean	isUnknown( );
+void		GhostFlag(gedict_t *p);
 
 void    	disableupdates( gedict_t * ed, float time );
 
@@ -230,7 +235,7 @@ extern float    intermission_exittime;
 extern int      modelindex_eyes, modelindex_player;
 
 void            SetChangeParms();
-void            SetNewParms();
+void            SetNewParms( qboolean from_vmMain );
 void            ClientConnect();
 void            PutClientInServer();
 void            ClientDisconnect();
@@ -279,12 +284,13 @@ typedef struct cmd_s {
 	int		cf_flags;
 } cmd_t;
 
-#define CF_PLAYER			( 1  ) /* command valid for players */
+#define CF_PLAYER			( 1<<0  ) /* command valid for players */
 #define CF_SPECTATOR		( 1<<1  ) /* command valid for specs */
 #define CF_BOTH				( CF_PLAYER | CF_SPECTATOR ) /* command valid for both: specs and players */
 #define CF_PLR_ADMIN		( 1<<2  ) /* client is player, so this command require admin rights */
 #define CF_SPC_ADMIN		( 1<<3  ) /* client is spectator, so this command require admin rights */
 #define CF_BOTH_ADMIN		( CF_PLR_ADMIN | CF_SPC_ADMIN ) /* this command require admin rights, any way */
+#define CF_MATCHLESS		( 1<<4  ) /* command valid for matchLess mode */
 
 extern cmd_t cmds[];
 
@@ -355,6 +361,7 @@ extern	float server_is_2_3x;	// if true, fix the jump bug via QC
 extern	float current_maxfps;	// current value of serverinfo maxfps
 
 extern	int   k_practice;		// is server in practice mode
+extern	int   k_matchLess;	    // is server in matchLess mode
 extern  gameType_t 	  k_mode;   // game type: DUEL, TP, FFA
 
 #endif

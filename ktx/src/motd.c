@@ -107,9 +107,12 @@ void MOTDStuff()
 		so->deaths   = 0;
 		so->friendly = 0;
 
-		if( lock == 2 )
+		if( lock == 2 ) { // kick anyway
 			kick = 1;
-		else if( lock == 1 )
+
+			G_sprint(so, 2, "Match in progress, server locked\n");
+		}
+		else if( lock == 1 ) // kick if team is not set properly
 		{
 			kick = 1;
 
@@ -137,14 +140,16 @@ void MOTDStuff()
 						p = find(p, FOFCLSN, "ghost");
 				}
 			}
+			
+			if ( kick )
+				G_sprint(so, 2, "Set your team before connecting\n");
 		}
 
-		if( lock == 1 && kick == 1 )
-			G_sprint(so, 2, "Set your team before connecting\n");
-		else 
+		if( !k_matchLess ) // ignore in matchLess mode
+		if( !kick ) // kick is exclusive 
 		{
 			f2 = CountPlayers();
-			if( f2 >= k_attendees && atoi( ezinfokey(world, "k_exclusive") ) ) 
+			if( f2 >= k_attendees && iKey(world, "k_exclusive") ) 
 			{
 				G_sprint(so, 2, "Sorry, all teams are full\n");
 				kick = 1;
@@ -154,12 +159,9 @@ void MOTDStuff()
 		if( kick ) 
 		{
 			so->k_accepted = 0;
-			if( lock == 2 )
-				G_sprint(so, 2, "Match in progress, server locked\n");
-
 			so->s.v.classname = "";
 
-            stuffcmd(so, "wait;wait;wait;wait;wait;wait;wait;disconnect\n"); // FIXME: stupid way
+            stuffcmd(so, "disconnect\n"); // FIXME: stupid way
 
 			ent_remove( self );
 
@@ -167,12 +169,17 @@ void MOTDStuff()
 		}
 	}
 
-	if( match_in_progress == 2 )
+	if( k_matchLess ) { // no ghost and team check in matchLess mode
+		so->k_teamnum = 0;
+		G_bprint(2, "%s entered the game\n", so->s.v.netname);
+	}
+	else if( match_in_progress == 2 )
 	{
 		f2 = 1;
 		f3 = 0;
 
-		while( f2 < k_userid && !f3 )
+
+		while( f2 < k_userid && !f3 ) // search for ghost for this player (localinfo)
 		{
 			t = ezinfokey(world, va("%d", (int) f2));
 			if( streq( t, so->s.v.netname ))
@@ -181,14 +188,14 @@ void MOTDStuff()
 				f2++;
 		}
 
-		if( f2 == k_userid )
+		if( f2 == k_userid ) // ghost not found (localinfo)
 		{
 			G_bprint(2, "%s arrives late %s‘\n", so->s.v.netname, ezinfokey(so, "team"));
 		} 
-		else 
+		else // ghost probably found (localinfo)
 		{
 			p = find(world, FOFCLSN, "ghost");
-			while( p && f3 ) 
+			while( p && f3 ) // search ghost entity
 			{
 				if( p->cnt2 == f2 )
 					f3 = 0;
@@ -196,7 +203,7 @@ void MOTDStuff()
 					p = find(p, FOFCLSN, "ghost");
 			}
 
-			if( p ) 
+			if( p ) // found ghost entity
 			{
 				t2 = ezinfokey(world, va("%d", (int)p->k_teamnum));
 				t  = ezinfokey(so, "team");
@@ -205,7 +212,7 @@ void MOTDStuff()
 					so->k_accepted = 0;
 					G_sprint(so, 2, "Please join your old team and reconnect\n");
 					so->s.v.classname = "";
-                    stuffcmd(so, "wait;wait;wait;wait;wait;wait;wait;disconnect\n"); // FIXME: stupid way
+                    stuffcmd(so, "disconnect\n"); // FIXME: stupid way
 
 					ent_remove( self );
 
@@ -223,8 +230,8 @@ void MOTDStuff()
 				so->ps        = p->ps; // restore player stats
 				
 				ent_remove( p );
-			} 
-			else 
+			}
+			else // ghost entity not found
 			{
 				localcmd("localinfo %d \"\"\n", (int)f2);
 				G_bprint(2, "%s reenters the game without stats\n", so->s.v.netname);
@@ -259,7 +266,7 @@ void MOTDStuff()
 		G_bprint(2, "%s entered the game\n", so->s.v.netname);
 	}
 
-	// take away admin status, terminate elect and kick modes
+	// terminate elect and kick modes
 
 	so->k_kicking = 0;
 	so->k_vote2   = 0;

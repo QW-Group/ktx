@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.3 2005/11/13 18:45:03 qqshka Exp $
+ *  $Id: items.c,v 1.4 2005/12/01 21:50:07 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -200,6 +200,8 @@ Sets the clipping size and plants the object on the floor
 */
 void StartItem()
 {
+//	G_bprint(2, "StartItem: %s\n", self->s.v.classname);
+
 	self->s.v.nextthink = g_globalvars.time + 0.2;	// items start after other solids
 	self->s.v.think = ( func_t ) PlaceItem;
 }

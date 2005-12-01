@@ -111,18 +111,18 @@ void TimeSet(float t);
 
 cmd_t cmds[] = {
 
-	{ "commands",    ShowCmds,			        0    , CF_BOTH        },
-	{ "scores",      PrintScores,		        0    , CF_BOTH        },
-	{ "stats",       PlayerStats,               0    , CF_BOTH        },
+	{ "commands",    ShowCmds,			        0    , CF_BOTH | CF_MATCHLESS },
+	{ "scores",      PrintScores,		        0    , CF_BOTH | CF_MATCHLESS },
+	{ "stats",       PlayerStats,               0    , CF_BOTH | CF_MATCHLESS },
 	{ "options",     ShowOpts,                  0    , CF_PLAYER      },
-	{ "ready",       PlayerReady,               0    , CF_PLAYER      },
-	{ "break",       PlayerBreak,               0    , CF_PLAYER      },
-	{ "status",      ModStatus,                 0    , CF_BOTH        },
-	{ "status2",     ModStatus2,                0    , CF_BOTH        },
+	{ "ready",       PlayerReady,               0    , CF_PLAYER },
+	{ "break",       PlayerBreak,               0    , CF_PLAYER | CF_MATCHLESS },
+	{ "status",      ModStatus,                 0    , CF_BOTH | CF_MATCHLESS },
+	{ "status2",     ModStatus2,                0    , CF_BOTH | CF_MATCHLESS },
 	{ "who",         PlayerStatus,              0    , CF_BOTH        },
-	{ "whoskin",     PlayerStatusS,             0    , CF_BOTH        },
+	{ "whoskin",     PlayerStatusS,             0    , CF_BOTH | CF_MATCHLESS },
 	{ "whonot",      PlayerStatusN,             0    , CF_BOTH        },
-	{ "whovote",     ModStatusVote,             0    , CF_BOTH        },
+	{ "whovote",     ModStatusVote,             0    , CF_BOTH | CF_MATCHLESS },
 	{ "spawn",       ToggleRespawns,            0    , CF_PLAYER | CF_SPC_ADMIN },
 	{ "powerups",    TogglePowerups,            0    , CF_PLAYER | CF_SPC_ADMIN },
 	{ "discharge",   ToggleDischarge,           0    , CF_PLAYER      },
@@ -147,9 +147,9 @@ cmd_t cmds[] = {
     { "silence",     ToggleSpecTalk,            0    , CF_PLAYER | CF_SPC_ADMIN },
 	{ "reset",       ResetOptions,              0    , CF_PLAYER | CF_SPC_ADMIN },
 	{ "report",      ReportMe,                  0    , CF_PLAYER      },
-	{ "rules",       ShowRules,                 0    , CF_PLAYER      },
+	{ "rules",       ShowRules,                 0    , CF_PLAYER | CF_MATCHLESS },
 	{ "lock",        ChangeLock,                0    , CF_PLAYER      },
-	{ "maps",        ShowMaps,                  0    , CF_PLAYER | CF_SPC_ADMIN },
+	{ "maps",        ShowMaps,                  0    , CF_PLAYER | CF_SPC_ADMIN | CF_MATCHLESS},
 	{ "spawn666",    ToggleRespawn666,          0    , CF_PLAYER      },
 	{ "admin",       ReqAdmin,                  0    , CF_BOTH        },
 	{ "forcestart",  AdminForceStart,           0    , CF_BOTH_ADMIN  },
@@ -161,7 +161,7 @@ cmd_t cmds[] = {
 	{ "master",      ToggleMaster,              0    , CF_BOTH_ADMIN  },
 	{ "speed",       ToggleSpeed,               0    , CF_PLAYER      },
 	{ "fairpacks",   ToggleFairPacks,           0    , CF_PLAYER      },
-	{ "about",       ShowVersion,               0    , CF_BOTH        },
+	{ "about",       ShowVersion,               0    , CF_BOTH | CF_MATCHLESS },
 	{ "shownick",    ShowNick,                  0    , CF_PLAYER      },
 	{ "time5",       TimeSet,		  	 	  5.0f   , CF_PLAYER      },
 	{ "time10",      TimeSet,		  	     10.0f   , CF_PLAYER      },
@@ -180,10 +180,10 @@ cmd_t cmds[] = {
 	                                           
 	{ "qizmo",       ShowQizmo,                 0    , CF_PLAYER      },
 	                                             
-	{ "messages",    ShowMessages,              0    , CF_PLAYER      },
-	{ "killer",      SendKillerMsg,             0    , CF_PLAYER      },
-	{ "victim",      SendVictimMsg,             0    , CF_PLAYER      },
-	{ "newcomer",    SendNewcomerMsg,           0    , CF_PLAYER      },
+	{ "messages",    ShowMessages,              0    , CF_PLAYER | CF_MATCHLESS },
+	{ "killer",      SendKillerMsg,             0    , CF_PLAYER | CF_MATCHLESS },
+	{ "victim",      SendVictimMsg,             0    , CF_PLAYER | CF_MATCHLESS },
+	{ "newcomer",    SendNewcomerMsg,           0    , CF_PLAYER | CF_MATCHLESS },
 	                                             
 	{ "qlag",        ToggleQLag,                0    , CF_PLAYER | CF_SPC_ADMIN },
 	{ "qenemy",      ToggleQEnemy,              0    , CF_PLAYER | CF_SPC_ADMIN },
@@ -213,10 +213,10 @@ cmd_t cmds[] = {
     { "unpause",     VoteUnpause,               0    , CF_PLAYER      },
     { "practice",    TogglePractice,            0    , CF_PLAYER | CF_SPC_ADMIN },
     { "wp_reset",    Wp_Reset,                  0    , CF_PLAYER      },
-    { "+wp_stats",   Wp_Stats,                  1    , CF_PLAYER      },
-    { "-wp_stats",   Wp_Stats,                  0    , CF_PLAYER      },
+    { "+wp_stats",   Wp_Stats,                  1    , CF_PLAYER | CF_MATCHLESS },
+    { "-wp_stats",   Wp_Stats,                  0    , CF_PLAYER | CF_MATCHLESS },
     
-    { "cam",         ShowCamHelp,               0    , CF_SPECTATOR   }
+    { "cam",         ShowCamHelp,               0    , CF_SPECTATOR | CF_MATCHLESS  }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -228,6 +228,7 @@ int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
 // return -2 if wrong class
 // return -3 if access denied
 // return -4 if function is wrong
+// return -5 if cmd does't allowed in matchLess mode
 //
 
 int DoCommand(int icmd)
@@ -237,6 +238,9 @@ int DoCommand(int icmd)
 
 	if ( !( icmd >= 0 && icmd < cmds_cnt ) )
 		return -1;
+
+	if ( k_matchLess && !(cmds[icmd].cf_flags & CF_MATCHLESS) )
+		return -5; // cmd does't allowed in matchLess mode
 
 	if ( spc ) { // spec
 		if ( !(cmds[icmd].cf_flags & CF_SPECTATOR) )
@@ -283,9 +287,33 @@ float StuffDeltaTime(int iDelta)
 	return 0.01f * (float)iDelta;
 }
 
+// just check is this cmd valid for class of this player
+// admin rights skipped here
+qboolean isValidCmdForClass( int icmd, qboolean isSpec )
+{
+	if ( icmd < 0 || icmd >= cmds_cnt )
+		return false;
+
+	if ( k_matchLess && !(cmds[icmd].cf_flags & CF_MATCHLESS) )
+		return false; // cmd does't allowed in matchLess mode
+
+	// split class
+	if ( isSpec ) { // spec
+		if ( !(cmds[icmd].cf_flags & CF_SPECTATOR) )
+			return false; // cmd not for spec
+	}
+	else { // player
+		if ( !(cmds[icmd].cf_flags & CF_PLAYER) )
+			return false; // cmd not for player
+	}
+
+	return true;
+}
+
 void StuffModCommands()
 {
-	int i, limit, spc = PROG_TO_EDICT( self->s.v.owner )->k_spectator;
+	int i, limit;
+	qboolean spc = PROG_TO_EDICT( self->s.v.owner )->k_spectator;
 	char *name;
 	float dt = StuffDeltaTime( atoi ( ezinfokey( PROG_TO_EDICT( self->s.v.owner ), "ss" ) ) );
 
@@ -304,21 +332,9 @@ void StuffModCommands()
 
 		name = cmds[i].name;
 
-		if ( spc ) { // spec
-			if ( !(cmds[i].cf_flags & CF_SPECTATOR) ) {
-//				G_bprint(2, "sp skip: %s\n", name);
-
-				limit++;
-				continue; // cmd not for spec
-			}
-		}
-		else { // player
-			if ( !(cmds[i].cf_flags & CF_PLAYER) ) {
-//				G_bprint(2, "pl skip: %s\n", name);
-
-				limit++;
-				continue; // cmd not for player
-			}
+		if ( !isValidCmdForClass( i, spc ) ) {
+			limit++;
+			continue; // cmd does't valid for this class of player or matchless mode does't have this command
 		}
 
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias %s cmd cc %d\n", name, (int)i);
@@ -452,8 +468,35 @@ void SShowCmds()
 	}
 }
 
+void NewShowCmds ()
+{
+	int i;
+	char *name;
+
+	G_sprint(self, 2, "Valid commands for %s is:\n", 
+				( self->k_spectator ? redtext("spectator") : redtext("player") ));
+
+	for( i = 0; i >= 0 && i < cmds_cnt; i++ ) {
+
+		name = cmds[i].name;
+
+		if ( !isValidCmdForClass( i, self->k_spectator ) )
+			continue; // cmd does't valid for this class of player or matchless mode does't have this command
+
+		G_sprint(self, 2, "%s\n", redtext(name));
+		
+	}
+}
+
 void ShowCmds()
 {
+	// FIXME: complete this some day
+	if ( k_matchLess )
+	{
+		NewShowCmds ();
+		return;
+	}
+
 	if ( self->k_spectator )
 		SShowCmds();
 	else 
@@ -642,20 +685,22 @@ void SendMessage(char *name)
 {
 	gedict_t *p;
 
-	if ( strnull( name ) )
-		G_Error( "SendMessage null" );
+	if ( !strnull( name ) ) {
 
-	p = find( world, FOFCLSN, "player" );
-	while( ( p && strneq( p->s.v.netname, name ) ) || p == self )
-		p = find( p, FOFCLSN, "player" );
+		p = find( world, FOFCLSN, "player" );
+		while( ( p && strneq( p->s.v.netname, name ) ) || p == self )
+			p = find( p, FOFCLSN, "player" );
+    
+		if( p ) {
+			G_bprint(3, "%s: %s", self->s.v.netname, ezinfokey(self, "premsg"));
+			G_bprint(3, name);
+			G_bprint(3,"%s\n", ezinfokey(self, "postmsg"));
 
-	if( p ) {
-		G_bprint(3, "%s: %s", self->s.v.netname, ezinfokey(self, "premsg"));
-		G_bprint(3, name);
-		G_bprint(3,"%s\n", ezinfokey(self, "postmsg"));
+			return;
+		}
 	}
-	else
-		stuffcmd(self, "echo No name to display\n");
+
+	G_sprint(self, 2, "No name to display\n");
 }
 
 void ShowMaps()
@@ -776,9 +821,9 @@ void ModStatus ()
 		else {
 			p = find(world, FOFCLSN, "timer");
 			if ( p )
-				G_sprint(self, 2, "Match in progress\n"
-								  "%d‘ full minute%s left\n",
-									(int)p->cnt - 1, ( p->cnt != 1 ? "s": ""));
+				G_sprint(self, 2, "Match in progress\n"
+								  "%s‘ full minute%s left\n",
+									dig3(p->cnt - 1), ( p->cnt != 1 ? "s": ""));
 		}
 	}
 }
@@ -1320,8 +1365,8 @@ void TimeDown(float t)
 
 	timelimit = timelimit - t;
 
-	if ( timelimit < 5 )
-		timelimit = 5;
+	if ( timelimit < 3 )
+		timelimit = 3;
 
 	cvar_set("timelimit", va("%d", (int)timelimit));
 
@@ -1342,7 +1387,6 @@ void TimeUp(float t)
 
 	timelimit = timelimit + t;
 
-	top = atoi( ezinfokey( world, "k_timetop" ) );
 	if( timelimit > top )
 		timelimit = top;
 
@@ -1353,9 +1397,6 @@ void TimeUp(float t)
 
 void TimeSet(float t)
 {
-//	char *tmp;
-
-
 	float top;
 
 	if ( match_in_progress )
@@ -1666,24 +1707,15 @@ void ChangeLock()
 void TeamSay(float fsndname)
 {
 	gedict_t *p;
-	char *t1, *t2;
-
 	char *sndname = va("ktsound%d.wav", (int)fsndname);
 
     p = find( world, FOFCLSN, "player" );
 	while( p ) {
 		if( p != self && teamplay && !strnull( p->s.v.netname ) &&
 			 ( atoi( ezinfokey( p, "k_flags" ) ) & 1 ) ) {
-			t1 = ezinfokey(self, "team");
-			t2 = ezinfokey(p, "team");
-
-			if( streq( t1, t2 ) ) {
-				stuffcmd(p, "play ");
-				t1 = ezinfokey(p, "k_sdir");
-
-				if( !strnull( t1 ) )
-					stuffcmd(p, "%s/", t1);
-				stuffcmd(p, "%s\n", sndname);
+			if( streq( ezinfokey(self, "team"), ezinfokey(p, "team") ) ) {
+				char *t1 = ezinfokey(p, "k_sdir");
+				stuffcmd(p, "play %s%s\n", (strnull( t1 ) ? "" : va("%s/", t1)), sndname);
 			}
 		}
 
@@ -1753,12 +1785,17 @@ void PrintScores()
 		else
 			f1--;
 
+#if 1
+		// we can't use dig3 here because of zero padding, so using dig3s
+		G_sprint(self, 2, "%s:%s‘ remaining\n", dig3s("%02d", (int)f1), dig3s("%02d", (int)f2));
+#else
 		if( f1 )
 			G_sprint(self, 2, "%s‘ full minute%s", dig3(f1), ( f1 > 1 ? "s" : ""));
 		else
 			G_sprint(self, 2, "%s‘ second%s", dig3(f2), ( f2 > 1 ? "s" : ""));
 
 		G_sprint(self, 2, " left\n");
+#endif
 	}
 
 	if( k_showscores ) {
@@ -2476,7 +2513,7 @@ void SetPractice(int srv_practice_mode, const char *mapname)
 		G_bprint(2, "%s\n", redtext("Server in practice mode"));
 	else {
 		G_bprint(2, "%s\n", redtext("Server in normal mode"));
-		if ( mapname )
+		if ( mapname ) // mapname may be "" i.e empty, reload current map in this case
 			localcmd("map %s\n", ( strnull( mapname ) ? g_globalvars.mapname : mapname ) );
 	}
 }

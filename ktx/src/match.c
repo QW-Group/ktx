@@ -7,6 +7,7 @@ void StopTimer ( int removeDemo );
 void EndMatch ( float skip_log );
 void BotForceStart ();
 void CheckAll();
+void StartMatch ();
 
 float CountALLPlayers ()
 {
@@ -741,6 +742,26 @@ void EndMatch ( float skip_log )
 	NextLevel();
 }
 
+void SaveOvertimeStats ()
+{
+	gedict_t	*p;
+
+	if ( k_overtime ){
+		p = find ( world, FOFCLSN, "player" );
+
+		while( p ) 
+		{
+		 	// save overtime stats
+			p->ps.ot_a	    = (int)p->s.v.armorvalue;
+			p->ps.ot_items	=      p->s.v.items; // float
+			p->ps.ot_h	    = (int)p->s.v.health;
+
+			p = find ( p, FOFCLSN, "player" );
+		}
+
+	}
+}
+
 void TimerThink ()
 // Called every second during a match. cnt = minutes, cnt2 = seconds left.
 // Tells the g_globalvars.time every now and then.
@@ -750,7 +771,7 @@ void TimerThink ()
 	float f1, f2, f3, f4, k_exttime, player1scores, player2scores, player1found;
 	int k_mb_overtime = 0;
 
-	f1 = 0;
+	f1 = k_matchLess ? 1 : 0;
 
 
 //	G_bprint(2, "left %2d:%2d\n", (int)self->cnt, (int)self->cnt2);
@@ -875,6 +896,9 @@ void TimerThink ()
 				// 	so decide overtime wise here what to do.
 				// Check to see if duel first
 
+				if( k_matchLess ){
+					; // no overtime in matchLess mode
+				}
 				if( teamplay && f3 != 2 ){
 					; // no overtime in case of less then 2 or more then 2 teams
 				}			
@@ -904,6 +928,8 @@ void TimerThink ()
 					if( player1scores == player2scores )
 					{
 						k_overtime = k_mb_overtime;
+
+						SaveOvertimeStats ();
 
 						G_bprint(3, "time over, the game is a draw\n");
 						if( k_overtime == 1 ) {
@@ -938,6 +964,8 @@ void TimerThink ()
 				{
 					k_overtime = k_mb_overtime;
 
+					SaveOvertimeStats ();
+
 					G_bprint(3, "time over, the game is a draw\n");
 					if( k_overtime == 1 ) {
 						// Ok its increase time
@@ -963,21 +991,6 @@ void TimerThink ()
 						}
 						return;
 					}
-				}
-				
-				if ( k_overtime ){
-					p = find ( world, FOFCLSN, "player" );
-
-					while( p ) 
-					{
-					 	// save overtime stats
-						p->ps.ot_a	    = (int)p->s.v.armorvalue;
-						p->ps.ot_items	=      p->s.v.items; // float
-						p->ps.ot_h	    = (int)p->s.v.health;
-
-						p = find ( p, FOFCLSN, "player" );
-					}
-
 				}
 			}
 
@@ -1025,6 +1038,31 @@ void TimerThink ()
 	self->s.v.nextthink = g_globalvars.time + 1;
 }
 
+void StartMatchLess ()
+{
+	gedict_t *timer, *ptmp;
+	gedict_t *p, *swp;
+
+	if ( !k_matchLess )
+		return;
+
+	timer = find ( world, FOFCLSN, "timer");
+	while( timer ) {
+		ptmp = timer;
+		timer = find(timer, FOFCLSN, "timer");
+		ent_remove( ptmp );
+	}
+
+	swp = self;
+
+	self = spawn();
+	self->s.v.owner = EDICT_TO_PROG( world );
+	self->s.v.classname = "timer";
+
+	StartMatch ();
+
+	self = swp;
+}
 
 void StartMatch ()
 // Reset player frags and start the timer.
@@ -1040,48 +1078,54 @@ void StartMatch ()
 	k_nochange = 0;	
 	localcmd("localinfo 1 \"\"\n");
 	localcmd("localinfo 666 \"\"\n");
-	f1 = atoi( ezinfokey( world, "k_pow" ) );
-	f2 = atoi( ezinfokey( world, "k_dm2mod" ) );
-	p = findradius(world, VEC_ORIGIN, 999999);
+	f1 = iKey( world, "k_pow" );
+	f2 = iKey( world, "k_dm2mod" );
 
     // Check to see if berzerk is set.
-    if( atoi( ezinfokey( world, "k_bzk" ) ) ) {
-        k_berzerkenabled = atoi ( ezinfokey( world, "k_btime" ) );
+    if( iKey( world, "k_bzk" ) ) {
+        k_berzerkenabled = iKey( world, "k_btime" );
     } else {
         k_berzerkenabled = 0;
     }
 
+	p = world;
+
 	while( p ) {
-		old = findradius(p, VEC_ORIGIN, 999999);;
+		old = (k_matchLess ? findradius2(p, VEC_ORIGIN, 999999) : findradius(p, VEC_ORIGIN, 999999));
+
 //going for the if content record..
-		if( deathmatch > 3 ) {
-			if(streq( p->s.v.classname, "rocket" ) || streq( p->s.v.classname, "grenade" ) || streq( p->s.v.classname, "trigger_changelevel" )
-				|| streq( p->s.v.classname, "weapon_nailgun" ) || streq( p->s.v.classname, "weapon_supernailgun" )
-				|| streq( p->s.v.classname, "weapon_supershotgun" ) || streq( p->s.v.classname, "weapon_rocketlauncher" )
-				|| streq( p->s.v.classname, "weapon_grenadelauncher" ) || streq( p->s.v.classname, "weapon_lightning" )
-				|| ( !f1 && (  streq( p->s.v.classname, "item_artifact_invulnerability" )
+
+		if (    streq( p->s.v.classname, "rocket" )
+			 || streq( p->s.v.classname, "grenade" )
+			 || streq( p->s.v.classname, "trigger_changelevel" ) 
+		   ) { // this must be removed in any cases
+				ent_remove( p );
+		}
+		else if ( !f1 && (     streq( p->s.v.classname, "item_artifact_invulnerability" )
 				            || streq( p->s.v.classname, "item_artifact_super_damage" )
 				            || streq( p->s.v.classname, "item_artifact_envirosuit" )
 				            || streq( p->s.v.classname, "item_artifact_invisibility")
-							)
-					)
-			  )
+						 )
+				) { // no powerups
+				ent_remove( p );
+		}
+		else if( deathmatch > 3 ) {
+			if(    streq( p->s.v.classname, "weapon_nailgun" )
+				|| streq( p->s.v.classname, "weapon_supernailgun" )
+				|| streq( p->s.v.classname, "weapon_supershotgun" )
+				|| streq( p->s.v.classname, "weapon_rocketlauncher" )
+				|| streq( p->s.v.classname, "weapon_grenadelauncher" )
+				|| streq( p->s.v.classname, "weapon_lightning" )
+			  ) // no weapons for this deathmatches
 				ent_remove( p );
 		} else {
-			if(streq( p->s.v.classname, "rocket" ) || streq( p->s.v.classname, "grenade" ) || streq( p->s.v.classname, "trigger_changelevel" )
-				|| ( (deathmatch == 2 && f2) &&
-				     (   streq( p->s.v.classname, "item_armor1" )
-					  || streq( p->s.v.classname, "item_armor2" )
-					  || streq( p->s.v.classname, "item_armorInv")
-                     )
-				   )
-				|| (!f1 && (   streq( p->s.v.classname, "item_artifact_invulnerability" )
-				            || streq( p->s.v.classname, "item_artifact_super_damage" )
-				            || streq( p->s.v.classname, "item_artifact_envirosuit" )
-				            || streq( p->s.v.classname, "item_artifact_invisibility")
-						   )
-				   )
-			  )
+			if( deathmatch == 2 && f2 &&
+			 							(   streq( p->s.v.classname, "item_armor1" )
+			  	 						 || streq( p->s.v.classname, "item_armor2" )
+			     						 || streq( p->s.v.classname, "item_armorInv")
+                						)
+			
+			  ) // no armors in modified dmm2
 				ent_remove( p );
 		}
 		p = old;
@@ -1094,6 +1138,8 @@ void StartMatch ()
 	trap_executecmd (); // <- this really needed
 
 	p = find ( world, FOFCLSN, "player" );
+
+	if( !k_matchLess ) // skip this while in matchLess mode
 	while( p ) {
 		if( !strnull ( p->s.v.netname ) ) {
 			tmp = ezinfokey(p, "team"); // used below
@@ -1129,7 +1175,8 @@ void StartMatch ()
 			old = self;
 			self = p;
 
-			SetChangeParms();
+//			SetChangeParms();
+			SetNewParms( false );
 			PutClientInServer();
 
 			self = old;
@@ -1139,9 +1186,10 @@ void StartMatch ()
 
 	G_dprint("\n");
 
-	G_bprint(2, "The match has begun!\n");
+	if ( !k_matchLess )
+		G_bprint(2, "The match has begun!\n");
 
-	localcmd( "sv_spectalk %d\n", (int)(f2 = atoi( ezinfokey(world, "k_spectalk" ) ) ) );
+	localcmd( "sv_spectalk %d\n", (int)(f2 = bound(0, iKey(world, "k_spectalk"), 1)) );
 
 	f1 = atoi( ezinfokey( world, "fpd" ) );
 	f1 = f1 - ((int)f1 & 64) + (f2 * 64);
@@ -1165,6 +1213,7 @@ void StartMatch ()
 	f1 = CountRTeams();
 	f2 = CountPlayers();
 
+	if( !k_matchLess ) // skip this in matchLess mode
     if( f1 == 2 && f2 > 2 )
     {
 		k_showscores = 1;
@@ -1288,8 +1337,6 @@ void TimerStartThink ()
 		}
 	}
     else if( !self->cnt2 ) {
-//		WriteByte(MSG_ALL, 26);
-//		WriteString(MSG_ALL, "");
 		G_cp2all("");
 		f2 = atoi( ezinfokey( world, "k_lockmin" ) );
 		f3 = atoi( ezinfokey( world, "k_lockmax" ) );
@@ -1302,7 +1349,8 @@ void TimerStartThink ()
 			num = CheckMembers( num );
 
 		if( f1 < f2 || f1 > f3 || !num ) {
-			G_bprint(2, "Illegal number of teams or players\naborting...\n");
+			G_bprint(2, "Illegal number of teams or players\n"
+						"aborting...\n");
 
 			StopTimer( 1 );
 

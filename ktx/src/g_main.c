@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.5 2005/11/23 20:35:08 qqshka Exp $
+ *  $Id: g_main.c,v 1.6 2005/12/01 21:50:07 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -128,7 +128,7 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		return 1;
 
 	case GAME_SETNEWPARMS:
-		SetNewParms();
+		SetNewParms( true );
 		return 1;
 
 	case GAME_CLIENT_PRETHINK:

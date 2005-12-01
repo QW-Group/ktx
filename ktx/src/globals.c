@@ -23,7 +23,7 @@
 	float k_standby;        // if server is in standy mode
 	float k_sudden_death;	// to mark if sudden death overtime is currently the case
 	float k_teamid = 0;
-	float k_userid = 0;
+	float k_userid = 0;		// somethink like numbers of ghosts + 1
 	float k_vbreak;         // break vote counter
 	float k_velect;         // election vote counter
 	float k_whonottime;     // NOT_SURE: 
@@ -38,5 +38,6 @@
 	float current_maxfps;	// current value of serverinfo maxfps
 
 	int       k_practice;	// is server in practice mode
+	int       k_matchLess;	// is server in matchLess mode
 	gameType_t 	  k_mode;   // game type: DUEL, TP, FFA
 #endif

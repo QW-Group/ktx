@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.3 2005/11/23 20:35:08 qqshka Exp $
+ *  $Id: player.c,v 1.4 2005/12/01 21:50:07 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -466,11 +466,17 @@ void PainSound()
 	if ( self->s.v.health < 0 )
 		return;
 
-	if ( streq( self->s.v.classname, "teledeath" ) )
+	if (    streq( damage_attacker->s.v.classname, "teledeath" )
+/* hm, this imo can't happen at all, because Pain does't called then player dead
+		 || streq( damage_attacker->s.v.classname, "teledeath2" ) // qqshka
+		 || streq( damage_attacker->s.v.classname, "teledeath3" ) // qqshka
+*/
+	   )
 	{
 		sound( self, CHAN_VOICE, "player/teledth1.wav", 1, ATTN_NONE );
 		return;
 	}
+
 // water pain sounds
 	if ( self->s.v.watertype == CONTENT_WATER && self->s.v.waterlevel == 3 )
 	{
@@ -857,7 +863,7 @@ void GibPlayer()
 
 	self->s.v.deadflag = DEAD_DEAD;
 
-	if ( streq( damage_attacker->s.v.classname, "teledeath" ) )
+	if ( streq( damage_attacker->s.v.classname, "teledeath" )	)
 	{
 		sound( self, CHAN_VOICE, "player/teledth1.wav", 1, ATTN_NONE );
 		return;

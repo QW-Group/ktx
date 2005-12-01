@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.4 2005/11/13 18:45:48 qqshka Exp $
+ *  $Id: progs.h,v 1.5 2005/12/01 21:51:34 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -247,6 +247,7 @@ typedef struct gedict_s {
 // <-- stats
 
 	int   need_clearCP;		// if this true, clear center print at certain cases
+	int   k_makeghost;      // if this true make ghost for disconnected player
 #endif
 
 } gedict_t;

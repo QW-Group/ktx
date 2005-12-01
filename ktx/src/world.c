@@ -20,13 +20,14 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.3 2005/11/23 20:35:08 qqshka Exp $
+ *  $Id: world.c,v 1.4 2005/12/01 21:50:07 qqshka Exp $
  */
 
 #include "g_local.h"
 
 #ifdef KTEAMS
 float CountALLPlayers ();
+void  StartMatchLess ();
 #endif
 
 
@@ -288,9 +289,10 @@ void SP_worldspawn()
 
 	match_over = 0;
 	k_standby = 0;
-	lock = 1;
+	lock = k_matchLess ? 0 : 1; // no server lockining in matchLess mode
 	localcmd("serverinfo status Standby\n");
 	localcmd("localinfo sv_spectalk 1\n");
+
 	e = find(world, FOFCLSN, "mapguard");
 	while( e ) {
 		e->s.v.nextthink = g_globalvars.time + 0.1;
@@ -299,11 +301,13 @@ void SP_worldspawn()
 		e = find(e, FOFCLSN, "mapguard");
 	}
 
-	e = spawn();
-	e->s.v.classname = "mapguard";
-	e->s.v.owner = EDICT_TO_PROG( world );
-	e->s.v.think = ( func_t ) CheckDefMap;
-	e->s.v.nextthink = g_globalvars.time + 60;
+	if ( !k_matchLess ) { // no defmap in matchLess mode
+		e = spawn();
+		e->s.v.classname = "mapguard";
+		e->s.v.owner = EDICT_TO_PROG( world );
+		e->s.v.think = ( func_t ) CheckDefMap;
+		e->s.v.nextthink = g_globalvars.time + 60;
+	}
 
 	// spawn quad if map is aerowalk in this case
 	if ( atoi ( ezinfokey(world, "add_q_aerowalk") )
@@ -319,8 +323,9 @@ void SP_worldspawn()
 		self = swp; // restore self
 	}
 
-	if ( atoi( ezinfokey( world, "srv_practice_mode" ) ) ) // #practice mode#
-		SetPractice( atoi( ezinfokey( world, "srv_practice_mode" ) ), NULL ); // may not reload map
+	if ( !k_matchLess ) // skip practice in matchLess mode
+	if ( iKey( world, "srv_practice_mode" ) ) // #practice mode#
+		SetPractice( iKey( world, "srv_practice_mode" ), NULL ); // may not reload map
 }
 
 // create cvar via 'set' command
@@ -353,24 +358,43 @@ qboolean RegisterCvar ( const char *var )
 	return true;
 }
 
+// in the first frame - even world is not spawned yet
 void FirstFrame	( )
 {
-	if ( framecount )
+	if ( framecount != 1 )
 		return;
 
 	trap_executecmd ();
 
 	RegisterCvar("k_mode");
+	RegisterCvar("k_matchless");
+
+	k_matchLess = cvar( "k_matchless" ); // changed only here
 }
+
+// items spawned, but probably not solid yet
+void SecondFrame ( )
+{
+	if ( framecount != 2 )
+		return;
+
+	if ( k_matchLess )
+		StartMatchLess ();
+}
+
 
 // check if server is misconfigured somehow, made some minimum fixage
 void FixRules ( )
 {
 	gameType_t km = k_mode;
-	int	tp = teamplay;
-	int tl = timelimit;
-	int fl = fraglimit;
-	int dm = deathmatch;
+	int k_tt = bound( 0, iKey( world, "k_timetop"), 600 );
+	int	tp   = teamplay;
+	int tl   = timelimit;
+	int fl   = fraglimit;
+	int dm   = deathmatch;
+	int k_minr = bound(0, iKey(world, "k_minrate"), 20000);
+	int k_maxr = bound(0, iKey(world, "k_maxrate"), 20000);	
+
 
 	// we are does't support coop
 	if ( cvar( "coop" ) )
@@ -385,6 +409,13 @@ void FixRules ( )
 		 && deathmatch != 5
 	   )
 		trap_cvar_set_float("deathmatch", (deathmatch = 3));
+
+	if ( k_matchLess ) {
+		if ( !isFFA() )
+			trap_cvar_set_float("k_mode", (float)( k_mode = gtFFA ));
+		if ( teamplay ) // sanity
+			trap_cvar_set_float("teamplay", (teamplay = 0));
+	}
 
 	// if unknown k_mode - set some appropriate value
 	if ( isUnknown() )
@@ -402,16 +433,25 @@ void FixRules ( )
 			trap_cvar_set_float("teamplay", (teamplay = 2));
 	}
 
+	if ( !k_tt ) { // this change does't broadcasted
+		localcmd ("localinfo k_timetop %d\n", (k_tt = 30));// sensible default if no max set
+	}
+
 // oldman --> don't allow unlimited timelimit + fraglimit
-    if( timelimit == 0 && fraglimit == 0 )
-    {
-		int k_timetop = bound( 0, atoi( ezinfokey( world, "k_timetop") ), 600 );
-
-		timelimit = k_timetop ? k_timetop : 20;   // sensible default if no max set
-
-        trap_cvar_set_float("timelimit", (float)timelimit);
+    if( timelimit == 0 && fraglimit == 0 ) {
+        trap_cvar_set_float("timelimit", (float)(timelimit = k_tt));// sensible default if no max set
     }
 // <-- oldman
+
+	if ( !k_minr ) {
+		localcmd ("localinfo k_minrate %d\n", (k_minr = 500));
+	}
+	if ( !k_maxr ) {
+		localcmd ("localinfo k_maxrate %d\n", (k_maxr = 10000));
+	}
+	if ( k_minr > k_maxr ) {
+		localcmd ("localinfo k_minrate %d\n", (k_minr = k_maxr));
+	}
 
 	// ok, broadcast changes if any, a bit tech info, but this is misconfigured server
 	// and must not happen on well configured servers, k?
@@ -425,6 +465,9 @@ void FixRules ( )
 		G_bprint(2, "%s: fraglimit changed to: %d\n", redtext("WARNING"), fraglimit);
 	if (dm != deathmatch)
 		G_bprint(2, "%s: deathmatch changed to: %d\n", redtext("WARNING"), deathmatch);
+
+	if ( framecount == 1 )
+		trap_executecmd ();
 }
 
 
@@ -439,8 +482,13 @@ void CheckTiming();
 
 void StartFrame( int time )
 {
-	if ( !framecount )
+	framecount++;
+
+	if ( framecount == 1 )
 		FirstFrame();
+
+	if ( framecount == 2 )
+		SecondFrame ( );
 
     k_maxspeed = cvar( "sv_maxspeed" );
 	timelimit  = cvar( "timelimit" );
@@ -452,12 +500,12 @@ void StartFrame( int time )
 
 	FixRules ();
 
-	framecount++;
-	framechecks = bound( 0, !atoi( ezinfokey( world, "k_noframechecks" ) ), 1 );
+
+	framechecks = bound( 0, !iKey( world, "k_noframechecks" ), 1 );
 
 // Tonik: note current "serverinfo maxfps" setting
 // (we don't want to do it in every player frame)
-	current_maxfps = atoi( ezinfokey( world, "maxfps" ) );
+	current_maxfps = iKey( world, "maxfps" );
 	if ( !current_maxfps )
 		current_maxfps = 72;	// 2.30 standard
 

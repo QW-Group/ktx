@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.6 2005/11/23 20:35:08 qqshka Exp $
+ *  $Id: client.c,v 1.7 2005/12/01 21:50:07 qqshka Exp $
  */
 
 //===========================================================================
@@ -36,7 +36,6 @@ vec3_t          VEC_HULL2_MIN = { -32, -32, -24 };
 vec3_t          VEC_HULL2_MAX = { 32, 32, 64 };
 int             modelindex_eyes, modelindex_player;
 
-#ifdef KTEAMS
 
 void EndMatch(float skip_log);
 float CountALLPlayers();
@@ -53,15 +52,14 @@ void ExitKick(gedict_t *kicker);
 void play_teleport();
 void ImpulseCommands();
 
-// <-- KTEAMS
 
 void CheckAll ()
 {
 	float player_rate, maxrate=0, minrate=0;
 	gedict_t *p;
 
-	maxrate = atoi(ezinfokey(world, "k_maxrate"));
-	minrate = atoi(ezinfokey(world, "k_minrate"));
+	maxrate = iKey(world, "k_maxrate");
+	minrate = iKey(world, "k_minrate");
 
 	if( maxrate || minrate )
 	{
@@ -72,7 +70,7 @@ void CheckAll ()
 			{
 				// This is used to check a players rate.
 				// If above allowed setting then it sets it to max allowed.
-				player_rate = atoi( ezinfokey( p, "rate" ) );
+				player_rate = iKey( p, "rate" );
 	      		if ( player_rate > maxrate )
 				{
 					G_sprint(p, 2, "\nYour עבפו setting is too high for this server.\n"
@@ -99,10 +97,10 @@ void CheckConnectRate ()
     float player_rate, maxrate=0, minrate=0;
 
 	// This is used to check a players rate.  If above allowed setting then it kicks em off.
-	player_rate = atoi( ezinfokey(self, "rate" ) );
+	player_rate = iKey( self, "rate" );
 	
-	maxrate = atoi( ezinfokey(world, "k_maxrate" ) );
-	minrate = atoi( ezinfokey(world, "k_minrate" ) );
+	maxrate = iKey(world, "k_maxrate" );
+	minrate = iKey(world, "k_minrate" );
 
 	if( maxrate || minrate )
 	{
@@ -121,7 +119,7 @@ void CheckConnectRate ()
 		}
 	}
 }
-#endif
+
 
 void ModPause (int pause);
 
@@ -221,35 +219,46 @@ void SP_info_intermission()
 	VectorCopy( self->mangle, self->s.v.angles );	//self.angles = self.mangle;      
 }
 
+void InGameParams ()
+{
+	g_globalvars.parm1 = 4096 | 1;
+	g_globalvars.parm2 = 100;
+	g_globalvars.parm3 = 0;
+	g_globalvars.parm4 = 25;
+	g_globalvars.parm5 = 0;
+	g_globalvars.parm6 = 0;
+	g_globalvars.parm7 = 0;
+	g_globalvars.parm8 = 1;
+}
+
+void PrewarParams ()
+{
+	g_globalvars.parm1 = 4096 | 1 | 2 | 4 | 8 | 32 | 16 | 64;
+	g_globalvars.parm2 = 100;
+	g_globalvars.parm3 = 0;
+	g_globalvars.parm4 = 100;
+	g_globalvars.parm5 = 200;
+	g_globalvars.parm6 = 100;
+	g_globalvars.parm7 = 100;
+	g_globalvars.parm8 = 32;
+}
+
+
 // generally, this must be called before level will changed
-// but now, we call this before player respawned too
 
 void SetChangeParms()
 {
-	if( match_in_progress == 2 ) 
-    {
-		g_globalvars.parm1 = 1 | 4096;
-		g_globalvars.parm8 = 1;
-		g_globalvars.parm2 = 100;
-		g_globalvars.parm3 = 0;
-		g_globalvars.parm4 = 25;
-		g_globalvars.parm5 = 0;
-		g_globalvars.parm6 = 0;
-		g_globalvars.parm7 = 0;
-	} 
+	// ok, server want to change map
+	// check, if matchless mode is active, set ingame params, we cant
+	// use k_matchLess here beacuse it can be changed during game somehow (via direct server conlose etc)
+	// If matchless mode is not active, set just ordinary prewar stats
+	if( /* match_in_progress == 2 ||*/ cvar( "k_matchless" ) )
+		InGameParams ();
     else 
-    {
-		g_globalvars.parm1 = 4096 | 1 | 2 | 4 | 8 | 32 | 16 | 64;
-		g_globalvars.parm2 = 100;
-		g_globalvars.parm3 = 0;
-		g_globalvars.parm4 = 100;
-		g_globalvars.parm5 = 200;
-		g_globalvars.parm6 = 100;
-		g_globalvars.parm7 = 100;
-		g_globalvars.parm8 = 32;
-	}
-    
-    g_globalvars.parm9 = 0;
+		PrewarParams ();
+
+    g_globalvars.parm9  = 0;
+
 	g_globalvars.parm11 = self->k_admin;
 	g_globalvars.parm12 = self->k_accepted;
 	g_globalvars.parm13 = self->k_stuff;
@@ -259,34 +268,19 @@ void SetChangeParms()
 
 // this called before player connected, so he get default params
 
-void SetNewParms( void )
+// WARNING: if from_vmMain == flase, then self is must be valid
+void SetNewParms( qboolean from_vmMain )
 {
-	if(match_in_progress == 2) 
-    {
-		g_globalvars.parm1 = 1 | 4096;
-		g_globalvars.parm2 = 100;
-		g_globalvars.parm3 = 0;
-		g_globalvars.parm4 = 25;
-		g_globalvars.parm5 = 0;
-		g_globalvars.parm6 = 0;
-		g_globalvars.parm7 = 0;
-		g_globalvars.parm8 = 1;
-	} 
+	if( match_in_progress == 2 || k_matchLess ) 
+		InGameParams ();
     else 
-    {
-		g_globalvars.parm1 = 4096 | 1 | 2 | 4 | 8 | 32 | 16 | 64;
-		g_globalvars.parm2 = 100;
-		g_globalvars.parm3 = 0;
-		g_globalvars.parm4 = 100;
-		g_globalvars.parm5 = 200;
-		g_globalvars.parm6 = 100;
-		g_globalvars.parm7 = 100;
-		g_globalvars.parm8 = 32;
-	}
-	g_globalvars.parm9 = 0;
-	g_globalvars.parm11 = 0;
-	g_globalvars.parm12 = 0;
-	g_globalvars.parm13 = 0;
+		PrewarParams ();
+
+	g_globalvars.parm9  = 0;
+
+	g_globalvars.parm11 = from_vmMain ? 0 : self->k_admin;
+	g_globalvars.parm12 = from_vmMain ? 0 : self->k_accepted;
+	g_globalvars.parm13 = from_vmMain ? 0 : self->k_stuff;
 
 //	G_bprint(2, "SNP\n");
 }
@@ -307,12 +301,14 @@ void DecodeLevelParms()
 
 //	G_bprint(2, "DLP1 ad:%d ac:%d s:%d\n", (int)self->k_admin, (int)self->k_accepted, (int)self->k_stuff);
 
-	self->k_admin = g_globalvars.parm11;
+	if ( g_globalvars.parm11 )
+		self->k_admin = g_globalvars.parm11;
 
-    if( g_globalvars.parm12 ) // why?
+    if( g_globalvars.parm12 )
         self->k_accepted = g_globalvars.parm12;
 	
-    self->k_stuff = g_globalvars.parm13;
+	if ( g_globalvars.parm13 )
+    	self->k_stuff = g_globalvars.parm13;
 
 //	G_bprint(2, "DLP2 ad:%d ac:%d s:%d\n", (int)g_globalvars.parm11, (int)g_globalvars.parm12, (int)g_globalvars.parm13);
 }
@@ -544,7 +540,8 @@ void respawn()
 	// make a copy of the dead body for appearances sake
 	CopyToBodyQue( self );
 	// set default spawn parms
-	SetChangeParms();
+//	SetChangeParms();
+	SetNewParms( false );
 	// respawn              
 	PutClientInServer();
 }
@@ -985,11 +982,8 @@ void PutClientInServer()
 		rj = atof( s );
 	}
 
-#ifdef KTEAMS
+
 	if ( deathmatch == 4 && match_in_progress == 2 )
-#else
-    if (deathmatch == 4)
-#endif
 	{
 		self->s.v.ammo_shells = 0;
 		infokey( world, "axe", s, sizeof( s ) );
@@ -1017,11 +1011,8 @@ void PutClientInServer()
 		self->invincible_finished = g_globalvars.time + 3;
 	}
 
-#ifdef KTEAMS
+
 	if (deathmatch == 5 && match_in_progress == 2)
-#else
-    if (deathmatch == 5)
-#endif
 	{
 		self->s.v.ammo_nails   = 80;
 		self->s.v.ammo_shells  = 30;
@@ -1382,54 +1373,48 @@ void ClientDisconnect()
 	gedict_t *ghost;
 	float f1, f2;
 
-	// normal disconnect, not some sort of punish
+	if( match_in_progress == 2 && self->k_makeghost ) 
+	{
+		G_bprint( PRINT_HIGH, "%s left the game with %.0f frags\n", self->s.v.netname,
+	  					self->s.v.frags );
+
+		sound( self, CHAN_BODY, "player/tornoff2.wav", 1, ATTN_NONE );
+
+		f1 = 1;
+		f2 = 0;
+
+		while( f1 < k_userid && !f2 ) {
+			if( strnull( ezinfokey(world, va("%d", (int)f1) ) ) )
+				f2 = 1;
+			else
+				f1++;
+		}
+
+		if( !f2 )
+			k_userid++;
+
+		ghost = spawn();
+		ghost->s.v.owner = EDICT_TO_PROG( world );
+		ghost->s.v.classname = "ghost";
+		ghost->cnt2      = f1;
+		ghost->k_teamnum = self->k_teamnum;
+		ghost->s.v.frags = self->s.v.frags;
+		ghost->deaths    = self->deaths;
+		ghost->friendly  = self->friendly;
+		ghost->ready     = 0;
+
+		ghost->ps        = self->ps; // save player stats
+
+		localcmd("localinfo %d \"%s\"\n", (int)f1, self->s.v.netname);
+		trap_executecmd();
+	}
+
+	// normal disconnect
 	if( self->k_accepted == 2 ) {
+		
 		set_suicide_frame();
 
-		if( match_in_progress == 2 && self->ready ) 
-		{
-			G_bprint( PRINT_HIGH, "%s left the game with %.0f frags\n", self->s.v.netname,
-		  					self->s.v.frags );
-
-			sound( self, CHAN_BODY, "player/tornoff2.wav", 1, ATTN_NONE );
-
-			f1 = 1;
-			f2 = 0;
-
-			while( f1 < k_userid && !f2 ) {
-				if( strnull( ezinfokey(world, va("%d", (int)f1) ) ) )
-					f2 = 1;
-				else
-					f1++;
-			}
-
-			if( !f2 )
-				k_userid++;
-
-			ghost = spawn();
-			ghost->s.v.owner = EDICT_TO_PROG( world );
-			ghost->s.v.classname = "ghost";
-			ghost->cnt2      = f1;
-			ghost->k_teamnum = self->k_teamnum;
-			ghost->s.v.frags = self->s.v.frags;
-			ghost->deaths    = self->deaths;
-			ghost->friendly  = self->friendly;
-			ghost->ready     = 0;
-
-			ghost->ps        = self->ps; // save player stats
-
-			localcmd("localinfo %d \"%s\"\n", (int)f1, self->s.v.netname);
-			trap_executecmd();
-		}
-	} else if( match_in_progress == 2 && !self->k_accepted ) {
-		self->s.v.takedamage = 0;
-		self->s.v.solid = 0;
-		self->s.v.movetype = 0;
-		self->s.v.modelindex = 0;
-		self->s.v.model = "";
-	}
-	else if( !self->k_accepted )
-	{
+	} else {
 		self->s.v.takedamage = 0;
 		self->s.v.solid = 0;
 		self->s.v.movetype = 0;
@@ -1493,7 +1478,7 @@ void ClientDisconnect()
         if( atoi( ezinfokey( world, "k_autoreset" ) ) )
 			localcmd("exec configs/reset.cfg\n");
 
-        s = ezinfokey( world, "k_defmap" );
+        s = k_matchLess ? "" : ezinfokey( world, "k_defmap" ); // no defmap in matchLess mode
 
 		// force reload current map in practice mode even k_defmap is set or not
         if ( !atoi( ezinfokey( world, "lock_practice" ) ) && old_k_practice )
@@ -1665,6 +1650,7 @@ void PlayerPreThink()
 		if( self->uptimebugpolicy > 3 ) {
 			G_bprint(PRINT_HIGH, "\n%s gets kicked for too long uptime\n", self->s.v.netname);
 			G_sprint(self, PRINT_HIGH, "Reboot your machine to get rid of this bug\n");
+			GhostFlag(self);
 			self->s.v.classname = "";
 			stuffcmd(self, "disconnect\n"); // FIXME: stupid way
 		}
@@ -1696,6 +1682,7 @@ void PlayerPreThink()
 				// kick the player from server!
 				// s: changed the text a bit :)
             	G_bprint(PRINT_HIGH, "%s gets kicked for timedemo cheating\n", self->s.v.netname );
+				GhostFlag(self);
             	self->s.v.classname = "";
             	stuffcmd(self, "disconnect\n"); // FIXME: stupid way
             }
@@ -2040,42 +2027,17 @@ void PlayerPostThink()
 		self->k_msgcount = g_globalvars.time + 1;
 	}
 
-	if( match_in_progress == 2 && self->k_accepted == 2 && self->k_teamnum /* qqshka: && k_checkx */ )
+	if( match_in_progress == 2 && self->k_accepted == 2 && self->k_teamnum )
 	{
 		s1 = ezinfokey(self, "team");
 		s2 = ezinfokey(world, va("%d", (int)self->k_teamnum));
 
 		if( strneq( s1, s2 ) )
 		{
-			G_bprint(2,  "%s gets kicked for changing team\n", self->s.v.netname);
 			self->k_accepted = 0;
-			f1 = 1;
-			f2 = 0;
+			G_bprint(2,  "%s gets kicked for changing team\n", self->s.v.netname);
 
-			while( f1 < k_userid && !f2 )
-			{
-				s1 = ezinfokey(world, va("%d", (int)f1));
-				if( strnull( s1 ) )
-					f2 = 1;
-				else
-					f1++;
-			}
-
-			if( !f2 )
-				k_userid++;
-
-			ghost = spawn();
-			ghost->s.v.owner = EDICT_TO_PROG( world );
-			ghost->s.v.classname = "ghost";
-			ghost->cnt2 = f1;
-			ghost->k_teamnum = self->k_teamnum;
-			ghost->s.v.frags = self->s.v.frags;
-			ghost->deaths = self->deaths;
-			ghost->friendly = self->friendly;
-			ghost->ready = 0;
-
-			localcmd("localinfo %d \"%s\"\n", (int)f1, self->s.v.netname);
-
+			GhostFlag(self);
 			self->s.v.classname = "";
 			stuffcmd(self, "disconnect\n"); // FIXME: stupid way
 			return;

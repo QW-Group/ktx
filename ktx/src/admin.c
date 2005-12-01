@@ -254,7 +254,8 @@ void YesKick ()
             oldtokick = self->k_playertokick;
 
             NextClient();
-
+			
+			GhostFlag(oldtokick);
             oldtokick->s.v.classname = "";
             stuffcmd(oldtokick, "disconnect\n"); // FIXME: stupid way
         }
@@ -265,6 +266,7 @@ void YesKick ()
 
 			// hehe %)
             G_sprint(self, 2, "Say \"bye\" and then type \"disconnect\" next time.\n");
+			GhostFlag(self);
             self->s.v.classname = "";
             stuffcmd(self, "disconnect\n");  // FIXME: stupid way
         }

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.4 2005/11/23 20:35:08 qqshka Exp $
+ *  $Id: combat.c,v 1.5 2005/12/01 21:50:07 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -300,7 +300,10 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 // do the damage
 
-	if ( match_in_progress == 2 || !strcmp( attacker->s.v.classname, "teledeath" ) 
+	if (     match_in_progress == 2
+		 || !strcmp( attacker->s.v.classname, "teledeath" ) 
+		 || !strcmp( attacker->s.v.classname, "teledeath2" ) // qqshka
+		 || !strcmp( attacker->s.v.classname, "teledeath3" ) // qqshka 
 		 || ( k_practice && strneq( targ->s.v.classname, "player" ) ) // #practice mode#
 	   )
 		targ->s.v.health -= take;

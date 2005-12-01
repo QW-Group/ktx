@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.5 2005/11/23 20:35:08 qqshka Exp $
+ *  $Id: g_utils.c,v 1.6 2005/12/01 21:50:07 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -257,6 +257,28 @@ gedict_t *findradius( gedict_t * start, vec3_t org, float rad )
 
 }
 
+// just ignore solid field
+gedict_t *findradius2( gedict_t * start, vec3_t org, float rad )
+{
+	gedict_t *ent;
+	vec3_t  eorg;
+	int     j;
+
+	for ( ent = nextent( start ); ent; ent = nextent( ent ) )
+	{
+//		if ( ent->s.v.solid == SOLID_NOT )
+//			continue;
+		for ( j = 0; j < 3; j++ )
+			eorg[j] = org[j] - ( ent->s.v.origin[j] + ( ent->s.v.mins[j] + ent->s.v.maxs[j] ) * 0.5 );
+		if ( VectorLength( eorg ) > rad )
+			continue;
+		return ent;
+
+	}
+	return NULL;
+
+}
+
 
 /*
 ==============
@@ -379,11 +401,36 @@ char *dig3(int d)
 
 		for ( ; *i; i++ )
 				*i += 98;
-
 	}
 
 	return string[index++];
 }
+
+char *dig3s(const char *format, ...)
+{
+// >>>> like va(...)
+	va_list		argptr;
+	static char	string[MAX_STRINGS][32];
+	static int		index = 0;
+	
+	index %= MAX_STRINGS;
+	va_start (argptr, format);
+	vsnprintf (string[index], sizeof(string[0]), format, argptr);
+	va_end (argptr);
+
+	string[index][ sizeof( string[0] ) - 1 ] = '\0';
+// <<<<
+
+	{ // convert to digits
+		unsigned char *i = (unsigned char *) (string[index]);
+
+		for ( ; *i; i++ )
+				*i += 98;
+	}
+
+	return string[index++];
+}
+
 
 /*
 ==============
@@ -556,6 +603,22 @@ char *ezinfokey( gedict_t * ed, char *key )
 	trap_infokey( NUM_FOR_EDICT( ed ), key, string[index], sizeof( string[0] ) );
 
 	return string[index++];
+}
+
+int  iKey( gedict_t * ed, char *key )
+{
+	char		string[128]; // which size will be best?
+
+	trap_infokey( NUM_FOR_EDICT( ed ), key, string, sizeof( string ) );
+	return atoi( string );
+}
+
+float fKey( gedict_t * ed, char *key )
+{
+	char		string[128]; // which size will be best?
+
+	trap_infokey( NUM_FOR_EDICT( ed ), key, string, sizeof( string ) );
+	return atof( string );
 }
 
 void WriteEntity( int to, gedict_t * ed )
@@ -732,7 +795,7 @@ qboolean isghost( gedict_t *ed )
 {
 	return (streq(ed->s.v.classname, "ghost") ? true : false);
 }
-
+// gametype >>>
 qboolean isDuel( )
 {
 	return (k_mode == gtDuel ? true : false);
@@ -752,3 +815,17 @@ qboolean isUnknown( )
 {
 	return ((!isDuel() && !isTeam() && !isFFA()) ? true : false);
 }
+
+// <<< gametype
+
+void GhostFlag(gedict_t *p)
+{
+	if ( p && p->ready && streq(p->s.v.classname, "player")
+		   && match_in_progress == 2 && !k_matchLess
+	   )
+		p->k_makeghost = 1;
+
+	return;
+}
+
+

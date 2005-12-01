@@ -1,3 +1,19 @@
+2005-12-02
+ 18. Added 'k_matchless' which force mod run as ordynary FFA server.
+
+	 set k_matchless 1 // 1 - mod run as FFA server (Matchless mode)
+	                   // 0 - mod run as usual (Match mode)
+
+	 No admins for now in matchless mode.
+	 Valid commands can be obtained via 'commands' command :]
+
+	 NOTES: Plz, set teamplay to 0 and k_mode to 3 in server.cfg, but mod fix this anyway.
+	        No overtime in matchless mode.
+			U can vote for mapchange via 'break' command.
+			U can vote for mapchange in intermission, hehe.
+
+ 19. Fixed my bug where overtime stats does't saved actual and does't show at match end.
+
 2005-11-23
  17. Countdown printing is look better now.
 	
