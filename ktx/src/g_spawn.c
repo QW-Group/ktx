@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_spawn.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
+ *  $Id: g_spawn.c,v 1.3 2005/12/01 21:56:51 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -221,6 +221,7 @@ spawn_t         spawns[] = {
 	{"info_player_coop", 		SUB_Null},
 	{"info_intermission", 		SP_info_intermission},
 	{"trigger_changelevel", 	SP_trigger_changelevel},
+
 /*QUAKED info_notnull (0 0.5 0) (-4 -4 -4) (4 4 4)
 Used as a positional target for lightning.
 */

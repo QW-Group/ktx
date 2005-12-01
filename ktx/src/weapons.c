@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.5 2005/11/23 20:35:08 qqshka Exp $
+ *  $Id: weapons.c,v 1.6 2005/12/01 21:58:33 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1183,7 +1183,6 @@ void W_Attack()
 {
 	float           r;
 
-#ifdef KTEAMS
 	if ( self->k_accepted != 2 ) {
 		if( g_globalvars.time > self->k_msgcount + 2 ) {
 			self->s.v.classname = "";
@@ -1192,12 +1191,10 @@ void W_Attack()
 		}
 		return;
 	}
-#endif
 
 	if ( !W_CheckNoAmmo() )
 		return;
 
-#ifdef KTEAMS
 	// FIXME: 4096 and 1048576 ?
 	self->lastwepfired = self->s.v.weapon;
 	if (self->k_666 && !(self->s.v.weapon == 4096 || self->s.v.weapon == 1)) {
@@ -1206,7 +1203,6 @@ void W_Attack()
 		self->invincible_finished = 0;
 		self->k_666 = 0;
 	}
-#endif
 
 	makevectors( self->s.v.v_angle );	// calculate forward angle for velocity
 	self->show_hostile = g_globalvars.time + 1;	// wake monsters up
