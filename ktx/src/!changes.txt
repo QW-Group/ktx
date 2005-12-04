@@ -7,7 +7,8 @@
 	 No admins for now in matchless mode.
 	 Valid commands can be obtained via 'commands' command :]
 
-	 NOTES: Plz, set teamplay to 0 and k_mode to 3 in server.cfg, but mod fix this anyway.
+	 NOTES: Plz, set teamplay to 0 and k_mode to 3 in server.cfg in matchless mode,
+			but mod fix this anyway.
 	        No overtime in matchless mode.
 			U can vote for mapchange via 'break' command.
 			U can vote for mapchange in intermission, hehe.

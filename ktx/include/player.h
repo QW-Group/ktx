@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.h,v 1.2 2005/10/05 18:50:30 qqshka Exp $
+ *  $Id: player.h,v 1.3 2005/12/04 17:13:44 qqshka Exp $
  */
 
 void            player_stand1();
@@ -70,12 +70,6 @@ void            player_axpain4();
 void            player_axpain5();
 void            player_axpain6();
 void            player_pain( struct gedict_s *attacker, float take );
-void            player_diea1();
-void            player_dieb1();
-void            player_diec1();
-void            player_died1();
-void            player_diee1();
-void            player_die_ax1();
 void            player_diea1();
 void            player_diea2();
 void            player_diea3();

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.10 2005/12/04 14:08:55 qqshka Exp $
+ *  $Id: client.c,v 1.11 2005/12/04 17:14:26 qqshka Exp $
  */
 
 //===========================================================================
@@ -43,7 +43,7 @@ void IdlebotCheck();
 void CheckAll();
 void CheckConnectRate();
 void PlayerStats();
-void StartDie();
+void PlayerDead();
 void ExitCaptain();
 void CheckFinishCaptain();
 void AbortElect();
@@ -1147,17 +1147,17 @@ void PlayerDeathThink()
 		}
 	}
 
-#ifdef KTEAMS
-//autospawn
+
+// { autospawn
 	if( (g_globalvars.time - self->dead_time) > 5 && match_in_progress ) {
-		self->s.v.deadflag = 3;
+		self->s.v.deadflag = DEAD_RESPAWNABLE;
 		self->s.v.button0 = 0;
 		self->s.v.button1 = 0;
 		self->s.v.button2 = 0;
 		respawn();
 		return;
 	}
-#endif
+// }
 
 // wait for all buttons released
 	if ( self->s.v.deadflag == DEAD_DEAD )
@@ -1734,15 +1734,13 @@ void PlayerPreThink()
 
 	if ( self->s.v.deadflag == DEAD_DYING )
 	{
-#ifdef KTEAMS
         // Sometimes (rarely) the death animation functions in player.qc aren't
         // invoked on death for some reason (couldn't figure out why). This leads to a
         // state when the player stands still after dying and can't respawn or even
         // suicide and has to reconnect. This is checked and fixed here
-        if( (self->dead_time + 0.1) < g_globalvars.time
-				&& self->s.v.frame < 41 || self->s.v.frame > 102)
-            StartDie();
-#endif
+        if( g_globalvars.time > (self->dead_time + 2) )
+            PlayerDead (); // so he can respawn
+
 		return;		// dying, so do nothing
 	}
 

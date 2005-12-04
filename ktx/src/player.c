@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.4 2005/12/01 21:50:07 qqshka Exp $
+ *  $Id: player.c,v 1.5 2005/12/04 17:14:26 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -763,7 +763,7 @@ void DeathSound()
 void PlayerDead()
 {
 	self->s.v.nextthink = -1;
-// allow respawn after a certain g_globalvars.time
+// allow respawn after a certain time
 	self->s.v.deadflag = DEAD_DEAD;
 }
 
@@ -814,7 +814,7 @@ void VelocityForDamage( float dm, vec3_t v )
 void ThrowGib( char *gibname, float dm )
 {
 	gedict_t       *newent;
-	int			    k_short_gib = atoi( ezinfokey(world, "k_short_gib" ) ); // if set - remove faster
+	int			    k_short_gib = iKey(world, "k_short_gib" ); // if set - remove faster
 
 	newent = spawn();
 	VectorCopy( self->s.v.origin, newent->s.v.origin );
@@ -837,7 +837,7 @@ void ThrowHead( char *gibname, float dm )
 {
 	setmodel( self, gibname );
 	self->s.v.frame = 0;
-	self->s.v.nextthink = -1;
+//	self->s.v.nextthink = -1;
 	self->s.v.movetype = MOVETYPE_BOUNCE;
 	self->s.v.takedamage = DAMAGE_NO;
 	self->s.v.solid = SOLID_NOT;
@@ -861,7 +861,7 @@ void GibPlayer()
 		ThrowGib( "progs/gib3.mdl", self->s.v.health );
     }
 
-	self->s.v.deadflag = DEAD_DEAD;
+//	self->s.v.deadflag = DEAD_DEAD;
 
 	if ( streq( damage_attacker->s.v.classname, "teledeath" )	)
 	{
@@ -945,6 +945,7 @@ void PlayerDie()
     if ( self->s.v.health < -40 || streq( self->deathtype, "squish" ) )
 	{
 		GibPlayer();
+		PlayerDead();
 		return;
 	}
 
