@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.8 2005/12/04 13:16:37 disconn3ct Exp $
+ *  $Id: client.c,v 1.9 2005/12/04 13:45:38 qqshka Exp $
  */
 
 //===========================================================================
@@ -1975,13 +1975,7 @@ void            W_WeaponFrame();
 ///////////////
 void PlayerPostThink()
 {
-//   float   mspeed, aspeed;
-//  float   r;
-
-#ifdef KTEAMS
 	char *s1, *s2;
-#endif
-
 
 //dprint ("post think\n");
 
@@ -2005,42 +1999,6 @@ void PlayerPostThink()
 		G_centerprint(self, ""); // clear center print
 	}
 
-#ifdef KTEAMS
-// check if player tried to change team
-	if( k_captains == 2 && self->k_msgcount < g_globalvars.time ) {
-// get the strings to compare
-		s1 = ezinfokey(self, "team");
-
-		if     (self->k_captain == 1 || self->k_picked == 1)
-			s2 = ezinfokey(world, "captteam1");
-		else if(self->k_captain == 2 || self->k_picked == 2)
-			s2 = ezinfokey(world, "captteam2");
-		else
-			s2 = "";
-
-		if( strneq( s1, s2 ) ) {
-			G_sprint(self, 2, "You may ξοτ change team\n");
-			stuffcmd(self, "team \"%s\"\n", s2);
-		}
-		self->k_msgcount = g_globalvars.time + 1;
-	}
-
-	if( match_in_progress == 2 && self->k_accepted == 2 && self->k_teamnum )
-	{
-		s1 = ezinfokey(self, "team");
-		s2 = ezinfokey(world, va("%d", (int)self->k_teamnum));
-
-		if( strneq( s1, s2 ) )
-		{
-			self->k_accepted = 0;
-			G_bprint(2,  "%s gets kicked for changing team\n", self->s.v.netname);
-
-			GhostFlag(self);
-			self->s.v.classname = "";
-			stuffcmd(self, "disconnect\n"); // FIXME: stupid way
-			return;
-		}
-	}
 	if(self->k_accepted == 1) {
 		vec3_t v;
 
@@ -2069,8 +2027,6 @@ void PlayerPostThink()
 		ImpulseCommands();
 		return;
 	}
-//team
-#endif
 
 	if ( self->s.v.view_ofs[0] == 0 && self->s.v.view_ofs[1] == 0
 	     && self->s.v.view_ofs[2] == 0 )
