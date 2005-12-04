@@ -1,7 +1,10 @@
+VM
+CFGS-DOCS
 debug-i386-glibc
 release-i386-glibc
 Debug
 Release
+qwprogs.map
 qwprogs.plg
 qwprogs.suo
 qwprogs.ncb

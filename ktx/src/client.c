@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.9 2005/12/04 13:45:38 qqshka Exp $
+ *  $Id: client.c,v 1.10 2005/12/04 14:08:55 qqshka Exp $
  */
 
 //===========================================================================
@@ -1975,8 +1975,6 @@ void            W_WeaponFrame();
 ///////////////
 void PlayerPostThink()
 {
-	char *s1, *s2;
-
 //dprint ("post think\n");
 
 /* FIXME: really comment?
