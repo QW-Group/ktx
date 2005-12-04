@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.6 2005/12/01 21:50:07 qqshka Exp $
+ *  $Id: g_utils.c,v 1.7 2005/12/04 13:16:37 disconn3ct Exp $
  */
 
 #include "g_local.h"
@@ -707,7 +707,7 @@ char *getteam( gedict_t * ed )
 {
 	static char		string[MAX_STRINGS][1024];
 	static int		index = 0;
-	char 			*team;
+	char 			*team=NULL;
 
 	index %= MAX_STRINGS;
 
@@ -728,7 +728,7 @@ char *getname( gedict_t * ed )
 {
 	static char		string[MAX_STRINGS][1024];
 	static int		index = 0;
-	char 			*name;
+	char 			*name=NULL;
 
 	index %= MAX_STRINGS;
 

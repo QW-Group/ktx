@@ -1376,7 +1376,7 @@ void TimeDown(float t)
 void TimeUp(float t)
 {
 //	char *tmp;
-	float top;
+	float top=0.0;
 
 	if ( match_in_progress )
 		return;
@@ -2313,7 +2313,7 @@ int um_cnt = sizeof (um_list) / sizeof (um_list[0]);
 
 void UserMode(float umode)
 {
-	char *um;
+	char *um=NULL;
 	int k_free_mode = atoi( ezinfokey( world, "k_free_mode" ) );
 	int k_allowed_free_modes = atoi( ezinfokey( world, "k_allowed_free_modes" ) );
 	int i;
@@ -2520,7 +2520,7 @@ void SetPractice(int srv_practice_mode, const char *mapname)
 
 void TogglePractice()
 {
-	int srv_practice_mode     = atoi( ezinfokey( world, "srv_practice_mode" ) );
+//	int srv_practice_mode     = atoi( ezinfokey( world, "srv_practice_mode" ) );
 	int lock_practice         = atoi( ezinfokey( world, "lock_practice" ) );
 	int allow_toggle_practice = atoi( ezinfokey( world, "allow_toggle_practice" ) );
 

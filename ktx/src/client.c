@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.7 2005/12/01 21:50:07 qqshka Exp $
+ *  $Id: client.c,v 1.8 2005/12/04 13:16:37 disconn3ct Exp $
  */
 
 //===========================================================================
@@ -1980,8 +1980,6 @@ void PlayerPostThink()
 
 #ifdef KTEAMS
 	char *s1, *s2;
-	float f1, f2;
-	gedict_t *ghost;
 #endif
 
 

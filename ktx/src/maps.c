@@ -83,7 +83,7 @@ int maps_cnt = sizeof ( maps_list ) / sizeof ( maps_list[0] );
 void StuffCustomMaps()
 {
 	float f1, f2, f3;
-	char *s2;
+	char *s2=NULL;
 	float dt = StuffDeltaTime( atoi ( ezinfokey( PROG_TO_EDICT( self->s.v.owner ), "ss" ) ) );
 
 	if(self->cnt == -1)

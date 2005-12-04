@@ -388,8 +388,8 @@ void AdminImpBot ()
 void ReadyThink ()
 {
     float i1;
-    char *tmp;
-    gedict_t *p, *p2;
+    char *tmp=NULL;
+    gedict_t *p=NULL, *p2=NULL;
 
     p2 = PROG_TO_EDICT( self->s.v.owner );
 

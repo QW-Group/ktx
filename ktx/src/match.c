@@ -339,10 +339,10 @@ void SummaryTPStats ( )
 
 void TeamsStats ( )
 {
-	gedict_t	*p, *p2;
+	gedict_t	*p=NULL, *p2=NULL;
 	float		f1, f2;
-	char		*tmp, *tmp2;
-	int			sumfrags = 0, wasPrint = 0;
+	char		*tmp=NULL, *tmp2=NULL;
+	int		sumfrags = 0, wasPrint = 0;
 
 	// Summing up the frags to calculate team percentages
 	p = find ( world, FOFCLSN, "player" );
@@ -1041,7 +1041,7 @@ void TimerThink ()
 void StartMatchLess ()
 {
 	gedict_t *timer, *ptmp;
-	gedict_t *p, *swp;
+	gedict_t *swp;
 
 	if ( !k_matchLess )
 		return;
@@ -1067,8 +1067,8 @@ void StartMatchLess ()
 void StartMatch ()
 // Reset player frags and start the timer.
 {
-	gedict_t *p, *old, *old2;
-	char *tmp, *s1;
+	gedict_t *p=NULL, *old=NULL, *old2=NULL;
+	char *tmp=NULL, *s1=NULL;
 	float f1, f2;
 
 	k_standby = 0;

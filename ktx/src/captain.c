@@ -78,7 +78,7 @@ void PrintCaptainInTurn ()
 void CheckFinishCaptain ()
 {
     float f1 = 0;
-    gedict_t *p, *lastone, *oldself;
+    gedict_t *p=NULL, *lastone=NULL, *oldself=NULL;
 
     // s: calculate how many players are free
     p = find(world, FOFCLSN, "player");
