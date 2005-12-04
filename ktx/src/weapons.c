@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.7 2005/12/04 13:58:42 qqshka Exp $
+ *  $Id: weapons.c,v 1.8 2005/12/04 20:09:42 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1540,6 +1540,9 @@ void ServerflagsCommand()
 }
 
 
+void kfjump ();
+void krjump ();
+
 /*
 ============
 ImpulseCommands
@@ -1582,6 +1585,11 @@ void ImpulseCommands()
 	else if ( impulse == 12 )
 		CycleWeaponReverseCommand();
 
+	else if ( impulse == 156 )
+		kfjump ();
+
+	else if ( impulse == 164 )
+		krjump ();
 
 	self->s.v.impulse = impulse = 0;
 }
@@ -1598,7 +1606,11 @@ void W_WeaponFrame()
 	if ( g_globalvars.time < self->attack_finished )
 		return;
 
+	// this may call something what fire some weapon, so re-check can we continue or not below
 	ImpulseCommands();
+
+	if ( g_globalvars.time < self->attack_finished )
+		return;
 
 // check for attack
 

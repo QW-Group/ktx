@@ -1,3 +1,22 @@
+2005-12-04
+ 20. Added 'kfjump' and 'krjump' commands. Also added 'tkfjump' and 'trfjump',
+	 which just toggle allowances of first pair of commands.
+	 By default commands is allowed.
+	 Added new cvars:
+
+	 set k_disallow_kfjump 0 // 0 allow kfjump
+							 // 1 disallow
+
+	 set k_disallow_krjump 0 // 0 allow krjump
+							 // 1 disallow
+
+	 krjump differs from Ktpro version. Ktpro version force centerview, imo this is bad idea
+	 because u lost orientation for a moment. Anyway u can use client aliases like this:
+
+	 	alias ktpro_krjump "krjump; centerview"
+
+	 if u really need it.
+
 2005-12-02
  18. Added 'k_matchless' which force mod run as ordynary FFA server.
 

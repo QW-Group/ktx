@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.5 2005/12/04 17:14:26 qqshka Exp $
+ *  $Id: player.c,v 1.6 2005/12/04 20:09:42 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -365,7 +365,7 @@ void player_light1()
 
 	muzzleflash();
 
-	if ( !self->s.v.button0 || intermission_running )
+	if ( !self->s.v.button0 || intermission_running || self->s.v.impulse )
 	{
 		player_run();
 		return;
@@ -387,7 +387,7 @@ void player_light2()
 
 	muzzleflash();
 
-	if ( !self->s.v.button0 || intermission_running )
+	if ( !self->s.v.button0 || intermission_running || self->s.v.impulse )
 	{
 		player_run();
 		return;

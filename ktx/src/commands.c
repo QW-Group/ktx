@@ -98,6 +98,7 @@ void VoteUnpause();
 void UserMode(float umode);
 void Wp_Reset ();
 void Wp_Stats(float on);
+void t_jump (float j_type);
 
 void TogglePractice();
 
@@ -215,8 +216,10 @@ cmd_t cmds[] = {
     { "wp_reset",    Wp_Reset,                  0    , CF_PLAYER      },
     { "+wp_stats",   Wp_Stats,                  1    , CF_PLAYER | CF_MATCHLESS },
     { "-wp_stats",   Wp_Stats,                  0    , CF_PLAYER | CF_MATCHLESS },
+    { "tkfjump",     t_jump,                    1    , CF_PLAYER | CF_SPC_ADMIN },
+    { "tkrjump",     t_jump,                    2    , CF_PLAYER | CF_SPC_ADMIN },
     
-    { "cam",         ShowCamHelp,               0    , CF_SPECTATOR | CF_MATCHLESS  }
+    { "cam",         ShowCamHelp,               0    , CF_SPECTATOR | CF_MATCHLESS }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -278,6 +281,8 @@ void StuffAliases()
 		; // none for spectator
 	else {
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias notready break\n");
+		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias kfjump \"impulse 156;+jump;wait;-jump\"\n");
+		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias krjump \"impulse 164;+jump;wait;-jump\"\n");
 	}
 }
 
@@ -2588,5 +2593,65 @@ void Wp_Stats(float on)
 
 	if ( on )
 		self->wp_stats_time = g_globalvars.time; // force show
+}
+
+void W_WeaponFrame();
+
+void kfjump ()
+{
+	int button0 = self->s.v.button0;
+
+	if ( cvar( "k_disallow_kfjump" ) ) {
+		G_sprint(self, 2, "%s is disabled\n", redtext("kfjump"));
+		return;
+	}
+
+	self->s.v.impulse = 7;		 // select switch to rl
+	self->s.v.button0 = 1;		 // force attack button
+	self->s.v.v_angle[1] += 180; // turn 180
+	W_WeaponFrame ();			 // switch to rl and fire
+	self->s.v.v_angle[1] -= 180; // turn back
+	self->s.v.button0 = button0; // restore button state
+}
+
+void krjump ()
+{
+	int button0 = self->s.v.button0;
+	float va_x = self->s.v.v_angle[0];
+
+	if ( cvar( "k_disallow_krjump" ) ) {
+		G_sprint(self, 2, "%s is disabled\n", redtext("krjump"));
+		return;
+	}
+
+	self->s.v.impulse = 7;		 // select switch to rl
+	self->s.v.button0 = 1;		 // force attack button
+	self->s.v.v_angle[0] = 80;   // look down much as possible, qw block this at 80
+	W_WeaponFrame ();			 // switch to rl and fire
+	self->s.v.v_angle[0] = va_x; // restore
+	self->s.v.button0 = button0; // restore button state
+}
+
+
+extern char *Enables( float f );
+
+void t_jump (float j_type)
+{
+	char *jt, *cv_jt, cjt = j_type == 1 ? 'f' : 'r';
+
+	if ( match_in_progress )
+		return;
+
+	if ( iKey( world, "k_master" ) && self->k_admin < 2 ) {
+		G_sprint(self, 3, "console: command is locked\n");
+		return;
+	}
+
+	jt    = va("k%cjump", cjt);
+	cv_jt = va("k_disallow_k%cjump", cjt);
+
+	trap_cvar_set_float( cv_jt, !cvar( cv_jt ) );
+	G_bprint(2, "%s %s %s\n", self->s.v.netname, redtext( Enables( !cvar( cv_jt ) ) ),
+							  redtext( jt ) );
 }
 
