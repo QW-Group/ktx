@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.6 2005/12/01 21:50:07 qqshka Exp $
+ *  $Id: g_main.c,v 1.7 2005/12/04 13:58:42 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -57,6 +57,7 @@ float           starttime;
 void            G_InitGame( int levelTime, int randomSeed );
 void            StartFrame( int time );
 qboolean        ClientCommand();
+qboolean 		ClientUserInfoChanged();
 void            G_EdictTouch();
 void            G_EdictThink();
 void            G_EdictBlocked();
@@ -174,7 +175,7 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		// params like GAME_CLIENT_COMMAND, but argv(0) always "setinfo" and argc always 3
 
 		self = PROG_TO_EDICT( g_globalvars.self );
-		return 0; //ClientUserInfoChanged();
+		return ClientUserInfoChanged();
 
 	case GAME_SHUTDOWN:
 		return 0;

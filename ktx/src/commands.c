@@ -1358,7 +1358,7 @@ void TimeDown(float t)
 
 	if ( match_in_progress )
 		return;
-	if ( atoi ( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
+	if ( iKey( world, "k_master" ) && self->k_admin < 2 ) {
 		G_sprint(self, 3, "console: command is locked\n");
 		return;
 	}
@@ -1375,17 +1375,17 @@ void TimeDown(float t)
 
 void TimeUp(float t)
 {
-//	char *tmp;
 	float top=0.0;
 
 	if ( match_in_progress )
 		return;
-	if ( atoi ( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
+	if ( iKey( world, "k_master" ) && self->k_admin < 2 ) {
 		G_sprint(self, 3, "console: command is locked\n");
 		return;
 	}
 
 	timelimit = timelimit + t;
+	top = iKey( world, "k_timetop" );
 
 	if( timelimit > top )
 		timelimit = top;
@@ -1408,7 +1408,7 @@ void TimeSet(float t)
 
 	timelimit = t;
 
-	top = atoi( ezinfokey( world, "k_timetop" ) );
+	top = iKey( world, "k_timetop" );
 	if( timelimit > top )
 		timelimit = top;
 
@@ -1982,14 +1982,13 @@ void ToggleFreeze()
 
 float CaptainImpulses()
 {
-// s: return 0 if captain mode is set and no captain things were entered
-	if(k_captains == 2 && self->s.v.impulse != 79) {
-		if(self->s.v.impulse > 16 || !self->k_captain) return 0;
-// s: return 1 if it's a player picker impulse
-		return 1;
-	}
-// s: return 2 if nothing interesting
-	return 2;
+	if( k_captains != 2 )
+		return 2;// s: return 2 if nothing interesting
+
+	if( self->s.v.impulse > 16 || !self->k_captain )
+		return 0;// s: return 0 if captain mode is set and no captain things were entered
+
+	return 1;// s: return 1 if it's a player picker impulse
 }
 
 // qqshka: pointing code stolen from Zquake
@@ -2520,7 +2519,6 @@ void SetPractice(int srv_practice_mode, const char *mapname)
 
 void TogglePractice()
 {
-//	int srv_practice_mode     = atoi( ezinfokey( world, "srv_practice_mode" ) );
 	int lock_practice         = atoi( ezinfokey( world, "lock_practice" ) );
 	int allow_toggle_practice = atoi( ezinfokey( world, "allow_toggle_practice" ) );
 

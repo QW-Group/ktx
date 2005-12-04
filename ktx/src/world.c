@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.4 2005/12/01 21:50:07 qqshka Exp $
+ *  $Id: world.c,v 1.5 2005/12/04 13:58:42 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -433,7 +433,7 @@ void FixRules ( )
 			trap_cvar_set_float("teamplay", (teamplay = 2));
 	}
 
-	if ( !k_tt ) { // this change does't broadcasted
+	if ( k_tt <= 0 ) { // this change does't broadcasted
 		localcmd ("localinfo k_timetop %d\n", (k_tt = 30));// sensible default if no max set
 	}
 

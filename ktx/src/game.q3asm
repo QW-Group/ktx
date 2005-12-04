@@ -7,6 +7,7 @@ client
 combat
 doors
 g_cmd
+g_userinfo
 g_mem
 g_spawn
 g_utils

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.6 2005/12/01 21:58:33 qqshka Exp $
+ *  $Id: weapons.c,v 1.7 2005/12/04 13:58:42 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1184,10 +1184,10 @@ void W_Attack()
 	float           r;
 
 	if ( self->k_accepted != 2 ) {
-		if( g_globalvars.time > self->k_msgcount + 2 ) {
+		if( g_globalvars.time > self->k_msgcount ) {
 			self->s.v.classname = "";
 			stuffcmd( self, "disconnect\n" ); // FIXME: stupid way
-			self->k_msgcount = g_globalvars.time;
+			self->k_msgcount = g_globalvars.time + 1;
 		}
 		return;
 	}
@@ -1347,7 +1347,7 @@ CheatCommand
 */
 void CheatCommand()
 {
-	if ( !atoi( ezinfokey( world, "*cheats" ) ) ) // FIXME: is this working?
+	if ( !iKey( world, "*cheats" ) ) // FIXME: is this working?
 		return;
 
 //      if (deathmatch || coop)
@@ -1533,7 +1533,7 @@ Just for development
 */
 void ServerflagsCommand()
 {
-	if ( !atoi( ezinfokey( world, "*cheats" ) ) ) // FIXME: is this working?
+	if ( !iKey( world, "*cheats" ) ) // FIXME: is this working?
 		return;
 
 	g_globalvars.serverflags = ( int ) ( g_globalvars.serverflags ) * 2 + 1;
@@ -1549,19 +1549,19 @@ ImpulseCommands
 int             impulse;
 void ImpulseCommands()
 {
-    float f1;
+    int capt;
 
 	impulse = self->s.v.impulse;
 
     if (!impulse)
         return;
 
-    f1 = CaptainImpulses();
+    capt = CaptainImpulses();
 
-    if( !f1 ) {
+    if( !capt ) {
 		; // empty
 	}
-    else if( f1 == 1 )
+    else if( capt == 1 )
         CaptainPickPlayer();
 
     else if( self->k_admin == 1 && impulse >= 1 && impulse <= 9 )
@@ -1604,13 +1604,18 @@ void W_WeaponFrame()
 
     if ( self->s.v.button0 && !intermission_running )
     {
-        if( ( !atoi( ezinfokey( world, "k_prewar" ) ) && match_in_progress != 2 )
-                || match_in_progress == 1 || k_captains == 2 ) {
+        if(    ( !iKey( world, "k_prewar" ) && match_in_progress != 2 )
+            || match_in_progress == 1
+			|| k_captains == 2 
+		  ) {
+
             stuffcmd( self, "bf\n" );
-            if( g_globalvars.time > self->k_msgcount + 2 ) {
-				G_sprint( self, 3, "console: you are not allowed to fire\n");
-                self->k_msgcount = g_globalvars.time;
+
+            if( g_globalvars.time > self->k_msgcount ) {
+				G_sprint( self, 2, "console: you are not allowed to fire\n");
+                self->k_msgcount = g_globalvars.time + 1;
             }
+
             return;
         }
 

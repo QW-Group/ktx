@@ -378,7 +378,7 @@ void BeginPicking ()
                 num++;
             }
 
-            p->k_msgcount = g_globalvars.time + 1;
+//            p->k_msgcount = g_globalvars.time + 1; // shut up warning about team changing
         }
 
         p = find(p, FOFCLSN, "player");
