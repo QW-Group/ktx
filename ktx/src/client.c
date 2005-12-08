@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.11 2005/12/04 17:14:26 qqshka Exp $
+ *  $Id: client.c,v 1.12 2005/12/08 21:28:25 qqshka Exp $
  */
 
 //===========================================================================
@@ -353,22 +353,52 @@ gedict_t       *FindIntermission()
 
 void GotoNextMap()
 {
-	char            newmap[64];
+	char            newmap[64] = {0};
+	int i;
 
-#ifdef KTEAMS
 	if( k_velect ) 
         AbortElect();
-#endif
 
-//ZOID: 12-13-96, samelevel is overloaded, only 1 works for same level
-
-	if ( trap_cvar( "samelevel" ) == 1 )	// if samelevel is set, stay on same level
+	if ( trap_cvar( "samelevel" ) /* == 1 */ )	// if samelevel is set, stay on same level
 		trap_changelevel( g_globalvars.mapname );
 	else
 	{
 		// configurable map lists, see if the current map exists as a
 		// serverinfo/localinfo var
-		infokey( world, g_globalvars.mapname, newmap, sizeof( newmap ) );
+		// qqshka, i modified this, so if someone select map not in map list and match is ended
+		// we will select some map from map list, nor just stay on current map.
+		// map list have now next syntax:
+		// localinfo k_ml_0 dm6
+		// localinfo k_ml_1 dm4
+		// localinfo k_ml_2 dm2
+		// so this mean we have rotation of maps dm6 dm4 dm2 dm6 dm4 dm2 ...
+
+		for ( i = 0; i<999; i++){
+			infokey( world, va("k_ml_%d", i), newmap, sizeof( newmap ) );
+
+			if ( strnull( newmap ) ) { // end of list
+				if ( !i )
+					break; // no map list at all
+				// current map not in map list, so select first entry in map list as next map
+				infokey( world, "k_ml_0", newmap, sizeof( newmap ) );
+				break;
+			}
+
+			if ( streq( g_globalvars.mapname, newmap ) ) { // ok map found in map list, select next map
+
+				infokey( world, va("k_ml_%d", i+1), newmap, sizeof( newmap ) );
+
+				if ( strnull( newmap ) ) { // current entry was last - select first entry
+					infokey( world, "k_ml_0", newmap, sizeof( newmap ) );
+					break;
+				}
+
+				break;
+			}
+		}
+
+		if ( !nextmap[0] ) // so we can reload current map at least
+			strcpy( nextmap, g_globalvars.mapname );
 
 		if ( newmap[0] )
 			trap_changelevel( newmap );
@@ -465,13 +495,12 @@ void execute_changelevel()
 		other->s.v.movetype = MOVETYPE_NONE;
 		other->s.v.modelindex = 0;
 
-#ifdef KTEAMS
+
 // KTEAMS: make players invisible
         other->s.v.model = "";
 		// take screenshot if requested
         if( atoi( ezinfokey( other, "k_flags" ) ) & 2 )
 			stuffcmd(other, "wait; wait; wait; wait; wait; wait; screenshot\n");
-#endif
 
 		other = find( other, FOFS( s.v.classname ), "player" );
 	}
@@ -479,15 +508,20 @@ void execute_changelevel()
 
 void changelevel_touch()
 {
-	//gedict_t*    pos;
-
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
+
+// qqshka: does't change level in any case, just do damage and return
+
+	T_Damage( other, self, self, 50000 );
+	return;
+
+/*
 
 // if "noexit" is set, blow up the player trying to leave
 //ZOID, 12-13-96, noexit isn't supported in QW.  Overload samelevel
 //      if ((cvar("noexit") == 1) || ((cvar("noexit") == 2) && (mapname != "start")))
-	if ( ( trap_cvar( "samelevel" ) == 2 )
+	if (      ( trap_cvar( "samelevel" ) == 2 )
 	     || ( ( trap_cvar( "samelevel" ) == 3 )
 		  && ( strneq( g_globalvars.mapname, "start" ) ) ) )
 	{
@@ -498,16 +532,18 @@ void changelevel_touch()
 	G_bprint( PRINT_HIGH, "%s exited the level\n", other->s.v.netname );
 
 	strcpy( nextmap, self->map );
-// nextmap = self.map;
+	
 	activator = other;
 	SUB_UseTargets();
 
 	self->s.v.touch = ( func_t ) SUB_Null;
 
 // we can't move people right now, because touch functions are called
-// in the middle of C movement code, so set a think g_globalvars.time to do it
+// in the middle of C movement code, so set a think time to do it
 	self->s.v.think = ( func_t ) execute_changelevel;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
+
+*/
 }
 
 /*QUAKED trigger_changelevel (0.5 0.5 0.5) ? NO_INTERMISSION
@@ -520,6 +556,79 @@ void SP_trigger_changelevel()
 
 	InitTrigger();
 	self->s.v.touch = ( func_t ) changelevel_touch;
+}
+
+/*
+go to the next level for deathmatch
+*/
+void NextLevel()
+{
+	gedict_t       *o;
+
+	if ( nextmap[0] )
+		return;		// already done
+
+	strcpy( nextmap, g_globalvars.mapname );
+
+	o = spawn();
+	o->map = g_globalvars.mapname;
+	o->s.v.classname = "trigger_changelevel";
+	o->s.v.think = ( func_t ) execute_changelevel;
+	o->s.v.nextthink = g_globalvars.time + 0.1;
+
+/*
+	if ( streq( g_globalvars.mapname, "start" ) )
+	{
+		if ( !trap_cvar( "registered" ) )
+		{
+			strcpy( g_globalvars.mapname, "e1m1" );
+
+		} else if ( !( ( int ) ( g_globalvars.serverflags ) & 1 ) )
+		{
+			strcpy( g_globalvars.mapname, "e1m1" );
+			g_globalvars.serverflags =
+			    ( int ) ( g_globalvars.serverflags ) | 1;
+
+		} else if ( !( ( int ) ( g_globalvars.serverflags ) & 2 ) )
+		{
+			strcpy( g_globalvars.mapname, "e2m1" );
+			g_globalvars.serverflags =
+			    ( int ) ( g_globalvars.serverflags ) | 2;
+
+		} else if ( !( ( int ) ( g_globalvars.serverflags ) & 4 ) )
+		{
+			strcpy( g_globalvars.mapname, "e3m1" );
+			g_globalvars.serverflags =
+			    ( int ) ( g_globalvars.serverflags ) | 4;
+
+		} else if ( !( ( int ) ( g_globalvars.serverflags ) & 8 ) )
+		{
+			strcpy( g_globalvars.mapname, "e4m1" );
+			g_globalvars.serverflags =
+			    ( int ) ( g_globalvars.serverflags ) - 7;
+		}
+
+		o = spawn();
+		o->map = g_globalvars.mapname;
+	} else
+	{
+		// find a trigger changelevel
+		o = find( world, FOFS( s.v.classname ), "trigger_changelevel" );
+		if ( !o )
+		{		// go back to same map if no trigger_changelevel
+			o = spawn();
+			o->map = g_globalvars.mapname;
+		}
+	}
+
+	strcpy( nextmap, o->map );
+
+	if ( o->s.v.nextthink < g_globalvars.time )
+	{
+		o->s.v.think = ( func_t ) execute_changelevel;
+		o->s.v.nextthink = g_globalvars.time + 0.1;
+	}
+*/
 }
 
 /*
@@ -758,10 +867,6 @@ void ClientConnect()
 
 //	if (deathmatch /*|| coop*/ )
 //	G_bprint( PRINT_HIGH, "%s entered the game\n", self->s.v.netname );
-
-// a client connecting during an intermission can cause problems
-// 	if ( intermission_running )
-//		GotoNextMap ();
 
 	// if the guy started connecting during intermission and
 	// thus missed the svc_intermission, we'd better let him know
@@ -1043,68 +1148,6 @@ RULES
 ===============================================================================
 */
 
-/*
-go to the next level for deathmatch
-*/
-void NextLevel()
-{
-	gedict_t       *o;
-
-	if (  nextmap[0] )
-		return;		// already done
-
-	if ( streq( g_globalvars.mapname, "start" ) )
-	{
-		if ( !trap_cvar( "registered" ) )
-		{
-			strcpy( g_globalvars.mapname, "e1m1" );
-
-		} else if ( !( ( int ) ( g_globalvars.serverflags ) & 1 ) )
-		{
-			strcpy( g_globalvars.mapname, "e1m1" );
-			g_globalvars.serverflags =
-			    ( int ) ( g_globalvars.serverflags ) | 1;
-
-		} else if ( !( ( int ) ( g_globalvars.serverflags ) & 2 ) )
-		{
-			strcpy( g_globalvars.mapname, "e2m1" );
-			g_globalvars.serverflags =
-			    ( int ) ( g_globalvars.serverflags ) | 2;
-
-		} else if ( !( ( int ) ( g_globalvars.serverflags ) & 4 ) )
-		{
-			strcpy( g_globalvars.mapname, "e3m1" );
-			g_globalvars.serverflags =
-			    ( int ) ( g_globalvars.serverflags ) | 4;
-
-		} else if ( !( ( int ) ( g_globalvars.serverflags ) & 8 ) )
-		{
-			strcpy( g_globalvars.mapname, "e4m1" );
-			g_globalvars.serverflags =
-			    ( int ) ( g_globalvars.serverflags ) - 7;
-		}
-
-		o = spawn();
-		o->map = g_globalvars.mapname;
-	} else
-	{
-		// find a trigger changelevel
-		o = find( world, FOFS( s.v.classname ), "trigger_changelevel" );
-		if ( !o || streq( g_globalvars.mapname, "start" ) )
-		{		// go back to same map if no trigger_changelevel
-			o = spawn();
-			o->map = g_globalvars.mapname;
-		}
-	}
-
-	strcpy( nextmap, o->map );
-
-	if ( o->s.v.nextthink < g_globalvars.time )
-	{
-		o->s.v.think = ( func_t ) execute_changelevel;
-		o->s.v.nextthink = g_globalvars.time + 0.1;
-	}
-}
 
 /*
 ============
@@ -1116,11 +1159,7 @@ Exit deathmatch games upon conditions
 void CheckRules()
 {
     if ( fraglimit && self->s.v.frags >= fraglimit )
-#ifdef KTEAMS
         EndMatch( 0 );
-#else
-        NextLevel ();
-#endif
 }
 
 //============================================================================

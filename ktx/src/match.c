@@ -1097,7 +1097,7 @@ void StartMatch ()
 
 		if (    streq( p->s.v.classname, "rocket" )
 			 || streq( p->s.v.classname, "grenade" )
-			 || streq( p->s.v.classname, "trigger_changelevel" ) 
+//			 || streq( p->s.v.classname, "trigger_changelevel" ) 
 		   ) { // this must be removed in any cases
 				ent_remove( p );
 		}

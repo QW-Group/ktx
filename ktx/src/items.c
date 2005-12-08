@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.4 2005/12/01 21:50:07 qqshka Exp $
+ *  $Id: items.c,v 1.5 2005/12/08 21:28:25 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1306,8 +1306,7 @@ void sigil_touch()
 	self->s.v.solid = SOLID_NOT;
 	self->s.v.model = "";
 	g_globalvars.serverflags =
-	    ( int ) ( g_globalvars.
-		      serverflags ) | ( ( int ) ( self->s.v.spawnflags ) & 15 );
+	    ( int ) ( g_globalvars.serverflags ) | ( ( int ) ( self->s.v.spawnflags ) & 15 );
 	self->s.v.classname = "";	// so rune doors won't find it
 
 	activator = other;

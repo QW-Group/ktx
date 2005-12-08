@@ -16,7 +16,7 @@
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 #
-#   $Id: Makefile.vm.in,v 1.4 2005/12/04 14:09:49 disconn3ct Exp $
+#   $Id: Makefile.vm.in,v 1.5 2005/12/08 21:31:09 qqshka Exp $
 
 LCC=@LCC@
 Q3ASM=@Q3ASM@
@@ -31,8 +31,7 @@ INCFLAGS=-I../include
 SOURCES=g_main.c bg_lib.c buttons.c client.c combat.c doors.c g_cmd.c \
 	g_mem.c g_spawn.c g_utils.c items.c mathlib.c misc.c plats.c player.c \
 	q_shared.c server.c spectate.c subs.c triggers.c weapons.c world.c \
-	admin.c captain.c commands.c globals.c maps.c match.c motd.c vip.c vote.c \
-	g_userinfo.c
+	admin.c captain.c commands.c globals.c maps.c match.c motd.c vip.c vote.c g_userinfo.c
 OBJECTS=$(SOURCES:.c=.s)
 
 

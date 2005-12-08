@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.8 2005/12/04 20:09:42 qqshka Exp $
+ *  $Id: weapons.c,v 1.9 2005/12/08 21:28:39 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1536,7 +1536,7 @@ void ServerflagsCommand()
 	if ( !iKey( world, "*cheats" ) ) // FIXME: is this working?
 		return;
 
-	g_globalvars.serverflags = ( int ) ( g_globalvars.serverflags ) * 2 + 1;
+//	g_globalvars.serverflags = ( int ) ( g_globalvars.serverflags ) * 2 + 1;
 }
 
 

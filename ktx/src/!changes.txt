@@ -1,3 +1,21 @@
+2005-12-09
+ 21. Map changing is changed.
+
+     If u set 'samelvel' native server cvar to 1 then level will not changed, 
+	 but with map voting u can still change map.
+
+	 Changelevel triggers will _not_ change map in anycase, just do huge damage.
+
+	 WARNING: map list syntax is changed
+	 	qqshka, i modified this, so if someone select map not in map list and match is ended
+	 	we will select some map from map list, nor just stay on current map.
+	 	map list have now next syntax:
+	 	localinfo k_ml_0 dm6
+	 	localinfo k_ml_1 dm4
+	 	localinfo k_ml_2 dm2
+	 	so this mean we have rotation of maps dm6 dm4 dm2 dm6 dm4 dm2 ...
+
+
 2005-12-04
  20. Added 'kfjump' and 'krjump' commands. Also added 'tkfjump' and 'trfjump',
 	 which just toggle allowances of first pair of commands.
