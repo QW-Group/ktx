@@ -99,6 +99,7 @@ void UserMode(float umode);
 void Wp_Reset ();
 void Wp_Stats(float on);
 void t_jump (float j_type);
+void klist ( );
 
 void TogglePractice();
 
@@ -218,6 +219,7 @@ cmd_t cmds[] = {
     { "-wp_stats",   Wp_Stats,                  0    , CF_PLAYER | CF_MATCHLESS },
     { "tkfjump",     t_jump,                    1    , CF_PLAYER | CF_SPC_ADMIN },
     { "tkrjump",     t_jump,                    2    , CF_PLAYER | CF_SPC_ADMIN },
+    { "klist",       klist,                     0    , CF_BOTH | CF_MATCHLESS },
     
     { "cam",         ShowCamHelp,               0    , CF_SPECTATOR | CF_MATCHLESS }
 };
@@ -2653,5 +2655,46 @@ void t_jump (float j_type)
 	trap_cvar_set_float( cv_jt, !cvar( cv_jt ) );
 	G_bprint(2, "%s %s %s\n", self->s.v.netname, redtext( Enables( !cvar( cv_jt ) ) ),
 							  redtext( jt ) );
+}
+
+void klist ( )
+{
+	int i;
+	gedict_t *p = world;
+	char *track;
+
+	for( i = 0, p = world; p = find(p, FOFCLSN, "player"); i++ ) {
+		if ( !i ) {
+			G_sprint(self, 2, "Clients list: %s\n", redtext( "players" ) );
+			G_sprint(self, 2, "%s %s %s %s %s %s\n",
+ 						redtext( "id" ), redtext( "ad" ), redtext( "vip" ),
+						redtext( "hdp" ), redtext( "team" ), redtext( "name" ) );
+		}
+
+		G_sprint(self, 2, "%2d|%2s|%3d|%3s|%4.4s|%s\n", GetUserID( p ),
+						(p->k_admin == 2 ? redtext("A") : ""), p->vip, "off", getteam( p ), getname( p ));
+	}
+
+	if (i)
+		G_sprint(self, 2, "%s %2d found %s\n", redtext("--"), i, redtext("-------------") );
+
+	for( i = 0, p = world; p = find(p, FOFCLSN, "spectator"); i++ ) {
+		if ( !i ) {
+			G_sprint(self, 2, "Clients list: %s\n", redtext( "spectators" ) );
+			G_sprint(self, 2, "%s %s %s %s\n",
+ 						redtext( "id" ), redtext( "ad" ), redtext( "vip" ),
+						redtext( "name" ) );
+		}
+
+		track = TrackWhom( p );
+
+		G_sprint(self, 2, "%2d|%2s|%3d|%s%s\n", GetUserID( p ),
+						(p->k_admin == 2 ? redtext("A") : ""), p->vip, getname( p ),
+						(strnull(track) ? "" : va(" \x8D %s", track)) );
+	}
+
+	if (i)
+		G_sprint(self, 2, "%s %2d found %s\n", redtext("--"), i, redtext("-------------") );
+
 }
 

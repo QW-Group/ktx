@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.6 2005/12/01 21:51:34 qqshka Exp $
+ *  $Id: g_local.h,v 1.7 2005/12/10 19:51:19 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -192,6 +192,8 @@ qboolean	isTeam( );
 qboolean	isFFA( );
 qboolean	isUnknown( );
 void		GhostFlag(gedict_t *p);
+int			GetUserID(gedict_t *p);
+char		*TrackWhom(gedict_t *p);
 
 void    	disableupdates( gedict_t * ed, float time );
 

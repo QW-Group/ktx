@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.5 2005/12/01 21:51:34 qqshka Exp $
+ *  $Id: progs.h,v 1.6 2005/12/10 19:51:19 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -201,7 +201,6 @@ typedef struct gedict_s {
 	float	k_stuff;         // if player has received stuffed aliases
 	float	k_teamnumber;    // team the player is a member of, 1 = team1, 2 = team2
 	float	k_teamnum;       // NOT_SURE:
-	float	k_track;         // NOT_SURE: something to do with spectator tracking code
 	float	k_vote2;         // stores player election vote decision
 	float	k_vote;          // stores player map vote decision
 	char	*kick_ctype;     // if selected player to kick is player or spectator

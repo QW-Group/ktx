@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.12 2005/12/08 21:28:25 qqshka Exp $
+ *  $Id: client.c,v 1.13 2005/12/10 19:51:02 qqshka Exp $
  */
 
 //===========================================================================
@@ -1467,6 +1467,7 @@ void ClientDisconnect()
 		AbortElect();
 	}
 
+	self->k_player = 0;
 	self->k_accepted = 0;
 	self->ready = 0;
 	self->s.v.classname = "";

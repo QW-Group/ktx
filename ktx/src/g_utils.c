@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.7 2005/12/04 13:16:37 disconn3ct Exp $
+ *  $Id: g_utils.c,v 1.8 2005/12/10 19:51:02 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -711,7 +711,7 @@ char *getteam( gedict_t * ed )
 
 	index %= MAX_STRINGS;
 
-	if ( streq(ed->s.v.classname, "player") )
+	if ( streq(ed->s.v.classname, "player") || streq(ed->s.v.classname, "spectator") )
 		team = ezinfokey(ed, "team");
 	else if ( streq(ed->s.v.classname, "ghost") )
 		team = ezinfokey(world, va("%d", (int)ed->k_teamnum));
@@ -732,7 +732,7 @@ char *getname( gedict_t * ed )
 
 	index %= MAX_STRINGS;
 
-	if ( streq(ed->s.v.classname, "player") )
+	if ( streq(ed->s.v.classname, "player") || streq(ed->s.v.classname, "spectator") )
 		name = ed->s.v.netname;
 	else if ( streq(ed->s.v.classname, "ghost") )
 		name = ezinfokey(world, va("%d", (int)ed->cnt2));
@@ -828,4 +828,37 @@ void GhostFlag(gedict_t *p)
 	return;
 }
 
+
+int GetUserID( gedict_t *p )
+{
+	if ( !p || (!p->k_player && !p->k_spectator) )
+		return 0;
+
+	return iKey(p, "*userid");
+}
+
+// get name of player whom spectator 'p' tracking
+// if something wrong returned value is ""
+char *TrackWhom( gedict_t *p )
+{
+	static char		string[MAX_STRINGS][32];
+	static int		index = 0;
+	char 			*name;
+	gedict_t 		*goal = NULL;
+
+	index %= MAX_STRINGS;
+
+	if (  p && p->k_spectator
+			&& (goal = PROG_TO_EDICT( p->s.v.goalentity )) != world
+			&& goal->k_player
+       )
+		name = getname(goal);
+    else
+		name = "";
+
+	string[index][0] = 0;
+	strlcat( string[index], name, sizeof( string[0] ) );
+
+	return string[index++];
+}
 

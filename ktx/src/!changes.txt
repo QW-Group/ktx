@@ -1,3 +1,14 @@
+2005-12-10
+ 22. Remooved some spectator stuff, mostly retard with new servers.
+	 Only one impulse left for spectator, impulse 1, just move between spawn points on the map,
+	 u must not track someone in this case.
+
+ 23. Added 'klist' command, like ktpro. Just show some information about all players and
+	 spectators.
+
+	 Show: id (same as server), vip number, admin status, handicap (currently unsupported),
+		   player name, player team, also for spectator we show which player he track, if any.
+
 2005-12-09
  21. Map changing is changed.
 
