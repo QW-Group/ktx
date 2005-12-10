@@ -554,11 +554,12 @@ void ShowMessages()
 
 void ShowVersion()
 {
-	G_sprint(self, 3, 
+	G_sprint(self, 2, redtext(
 			"\nThis is Kombat Teams 2.21 (QVM version)\n"
-			"by kemiKal, Cenobite, Sturm and Fang.\n\n"
-			"Source, soundbanks, configs etc. at:\n"
-			"http://hosted.barrysworld.com/kteam\n"); // FIXME: really? %)
+			"by kemiKal, Cenobite, Sturm and Fang.\n"
+			"QVM porting and developing by qqshka.\n\n"
+			"Source at:\n"
+			"http://cvs.sourceforge.net/viewcvs.py/mvdsv/ktx/\n"));
 }
 
 void ChangeOvertime()

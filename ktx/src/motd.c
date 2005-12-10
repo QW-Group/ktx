@@ -43,6 +43,7 @@ void PMOTDThink()
 			"€‚\n\n"
 			"Running Ëïíâáô Ôåáíó ²®²± (QVM version)\n"
 			"by kemiKal, Cenobite, Sturm and Fang\n"
+			"QVM porting and developing by qqshka\n"
 			"Type \"ãïííáîäó\" for help", s1, s2 );
 
 	self->s.v.nextthink = g_globalvars.time + 0.7;
