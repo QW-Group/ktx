@@ -1,3 +1,24 @@
+2005-12-16
+ 24. Added handicap support. 'klist' will show it now.
+
+     You can now set a handicap for yourself. Just use 'handicap' to
+     toggle through the possibilities.
+
+     A 75% handicap would mean, that your weapons(and only weapons) would do only
+     75% of their normal damage. So if you play a newbie and don't
+     want to rape him -- while playing normal tho --, this is for you.
+
+	 NOTES: 
+	 	No difference is this teammate or not for handicap.
+	 	U get full damage from self even u use handicap.
+		U can set handicap in intermission in matchless mode.
+
+     'hdptoggle' command added (toggle allow handicap)
+     in server.cfg u can lock it using 'k_lock_hdp'
+
+	 set k_lock_hdp 0 // 0 - allow handicap
+					  // 1 - disalow
+
 2005-12-10
  22. Remooved some spectator stuff, mostly retard with new servers.
 	 Only one impulse left for spectator, impulse 1, just move between spawn points on the map,
