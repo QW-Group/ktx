@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.6 2005/12/10 19:51:19 qqshka Exp $
+ *  $Id: progs.h,v 1.7 2005/12/16 20:09:14 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -88,6 +88,8 @@ typedef struct player_stats_s {
 	int		ot_h;	 // overtime health
 
 	int		spawn_frags;
+
+	int		handicap;
 
 } player_stats_t;
 

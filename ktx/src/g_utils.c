@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.8 2005/12/10 19:51:02 qqshka Exp $
+ *  $Id: g_utils.c,v 1.9 2005/12/16 20:08:56 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -860,5 +860,41 @@ char *TrackWhom( gedict_t *p )
 	strlcat( string[index], name, sizeof( string[0] ) );
 
 	return string[index++];
+}
+
+int GetHandicap( gedict_t *p )
+{
+	int hdc = p->ps.handicap < 1 ? 100 : min( 100, p->ps.handicap );
+
+	if ( cvar( "k_lock_hdp" ) )
+		return 100;
+	else
+		return hdc;
+}
+
+qboolean SetHandicap( gedict_t *p, int nhdc )
+{
+	int hdc = GetHandicap( p );
+
+	nhdc = nhdc < 1 ? 100 : min( 100, nhdc );	
+
+	if ( match_in_progress )
+		return false;
+
+	if ( cvar( "k_lock_hdp" ) ){
+		G_sprint(self, 2, "%s changes are not allowed\n", redtext("handicap"));
+		return false;	
+	}
+
+	if ( nhdc != hdc ){
+		p->ps.handicap = nhdc;
+		if ( nhdc == 100 )
+			G_bprint(2, "%s turns %s off\n", p->s.v.netname, redtext("handicap"));
+		else
+			G_bprint(2, "%s uses %s %d%%\n", p->s.v.netname, redtext("handicap"), nhdc);
+		return true;
+	}
+
+	return false;
 }
 

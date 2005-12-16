@@ -21,6 +21,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "g_local.h"
 
+extern char *Enables( float f );
+extern char *Allows( float f );
+
 void StuffMainMaps();
 
 char *GetMapName(float f2);
@@ -100,6 +103,8 @@ void Wp_Reset ();
 void Wp_Stats(float on);
 void t_jump (float j_type);
 void klist ( );
+void hdptoggle ();
+void handicap ();
 
 void TogglePractice();
 
@@ -220,7 +225,9 @@ cmd_t cmds[] = {
     { "tkfjump",     t_jump,                    1    , CF_PLAYER | CF_SPC_ADMIN },
     { "tkrjump",     t_jump,                    2    , CF_PLAYER | CF_SPC_ADMIN },
     { "klist",       klist,                     0    , CF_BOTH | CF_MATCHLESS },
-    
+    { "hdptoggle",   hdptoggle,                 0    , CF_BOTH_ADMIN },
+    { "handicap",    handicap,                  0    , CF_PLAYER | CF_PARAMS | CF_MATCHLESS },
+
     { "cam",         ShowCamHelp,               0    , CF_SPECTATOR | CF_MATCHLESS }
 };
 
@@ -321,7 +328,7 @@ void StuffModCommands()
 {
 	int i, limit;
 	qboolean spc = PROG_TO_EDICT( self->s.v.owner )->k_spectator;
-	char *name;
+	char *name, *params;
 	float dt = StuffDeltaTime( atoi ( ezinfokey( PROG_TO_EDICT( self->s.v.owner ), "ss" ) ) );
 
 	if(self->cnt == -1)	{
@@ -344,7 +351,9 @@ void StuffModCommands()
 			continue; // cmd does't valid for this class of player or matchless mode does't have this command
 		}
 
-		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias %s cmd cc %d\n", name, (int)i);
+		params = (cmds[i].cf_flags & CF_PARAMS) ? " %1 %2 %3 %4 %5" : "";
+
+		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias %s cmd cc %d%s\n", name, (int)i, params);
 	}
 
 	if( i <= limit /* all commands is stuffed */ )
@@ -373,7 +382,6 @@ void Init_cmds(void)
 	int i = 0;
 
 	for( ; i < cmds_cnt; i++ ) {
-
 		if ( strnull( cmds[i].name ) || !( cmds[i].f ) )
 			G_Error("Init_cmds: null");
 
@@ -2635,9 +2643,6 @@ void krjump ()
 	self->s.v.button0 = button0; // restore button state
 }
 
-
-extern char *Enables( float f );
-
 void t_jump (float j_type)
 {
 	char *jt, *cv_jt, cjt = j_type == 1 ? 'f' : 'r';
@@ -2660,7 +2665,7 @@ void t_jump (float j_type)
 
 void klist ( )
 {
-	int i;
+	int i, hdc;
 	gedict_t *p = world;
 	char *track;
 
@@ -2672,8 +2677,11 @@ void klist ( )
 						redtext( "hdp" ), redtext( "team" ), redtext( "name" ) );
 		}
 
+		hdc = GetHandicap(p);
+
 		G_sprint(self, 2, "%2d|%2s|%3d|%3s|%4.4s|%s\n", GetUserID( p ),
-						(p->k_admin == 2 ? redtext("A") : ""), p->vip, "off", getteam( p ), getname( p ));
+						(p->k_admin == 2 ? redtext("A") : ""), p->vip,
+						(hdc == 100 ? "off" : va("%d%%", hdc)), getteam( p ), getname( p ));
 	}
 
 	if (i)
@@ -2698,4 +2706,43 @@ void klist ( )
 		G_sprint(self, 2, "%s %2d found %s\n", redtext("--"), i, redtext("-------------") );
 
 }
+
+void hdptoggle ()
+{
+	if ( match_in_progress )
+		return;
+
+	if ( iKey( world, "k_master" ) && self->k_admin < 2 ) {
+		G_sprint(self, 3, "console: command is locked\n");
+		return;
+	}
+
+	trap_cvar_set_float( "k_lock_hdp", !cvar( "k_lock_hdp" ) );
+	G_bprint(2, "%s %s %s\n", self->s.v.netname,
+				redtext( Allows( !cvar( "k_lock_hdp" ) ) ), redtext( "handicap" ) );
+}
+
+void handicap ()
+{
+	char arg_3[1024];
+	int hdc = GetHandicap(self);
+
+	if (trap_CmdArgc() == 3) {
+		trap_CmdArgv( 2, arg_3, sizeof( arg_3 ) );
+		hdc = atoi(arg_3);
+	}
+	else if ( hdc > 85 )
+		hdc = 85;
+	else if ( hdc > 70 )
+		hdc = 70;
+	else if ( hdc > 55 )
+		hdc = 55;
+	else if ( hdc > 40 )
+		hdc = 40;
+	else
+		hdc = 100;
+
+	SetHandicap(self, hdc);
+}
+
 

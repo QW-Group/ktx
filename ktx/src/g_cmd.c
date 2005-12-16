@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.3 2005/12/16 20:08:56 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -35,6 +35,7 @@ qboolean 	ClientCommand()
 	char            cmd_command[1024], arg_1[1024];
 
 	self = PROG_TO_EDICT( g_globalvars.self );
+
 	trap_CmdArgv( 0, cmd_command, sizeof( cmd_command ) );
 
 	if ( !strcmp( cmd_command, "kill" ) ) // TODO: put this in 'cc' commands, is this possible?
@@ -52,7 +53,7 @@ qboolean 	ClientCommand()
 		return true;
 	}
 	else if ( !strcmp( cmd_command, "cc" ) ) {
-		if ( trap_CmdArgc() == 2 ) {
+		if ( trap_CmdArgc() >= 2 ) {
 			trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
 			DoCommand ( atoi( arg_1 ) );
 		}

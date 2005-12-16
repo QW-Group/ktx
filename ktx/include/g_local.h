@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.7 2005/12/10 19:51:19 qqshka Exp $
+ *  $Id: g_local.h,v 1.8 2005/12/16 20:09:14 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -194,6 +194,8 @@ qboolean	isUnknown( );
 void		GhostFlag(gedict_t *p);
 int			GetUserID(gedict_t *p);
 char		*TrackWhom(gedict_t *p);
+int			GetHandicap( gedict_t *p );
+qboolean	SetHandicap( gedict_t *p, int nhdc );
 
 void    	disableupdates( gedict_t * ed, float time );
 
@@ -289,10 +291,11 @@ typedef struct cmd_s {
 #define CF_PLAYER			( 1<<0  ) /* command valid for players */
 #define CF_SPECTATOR		( 1<<1  ) /* command valid for specs */
 #define CF_BOTH				( CF_PLAYER | CF_SPECTATOR ) /* command valid for both: specs and players */
-#define CF_PLR_ADMIN		( 1<<2  ) /* client is player, so this command require admin rights */
-#define CF_SPC_ADMIN		( 1<<3  ) /* client is spectator, so this command require admin rights */
+#define CF_PLR_ADMIN		( 1<<2 ) /* client is player, so this command require admin rights */
+#define CF_SPC_ADMIN		( 1<<3 ) /* client is spectator, so this command require admin rights */
 #define CF_BOTH_ADMIN		( CF_PLR_ADMIN | CF_SPC_ADMIN ) /* this command require admin rights, any way */
 #define CF_MATCHLESS		( 1<<4  ) /* command valid for matchLess mode */
+#define CF_PARAMS			( 1<<5) /* command have some params */
 
 extern cmd_t cmds[];
 

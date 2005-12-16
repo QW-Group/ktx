@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.5 2005/12/01 21:50:07 qqshka Exp $
+ *  $Id: combat.c,v 1.6 2005/12/16 20:08:56 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -173,6 +173,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	gedict_t       *oldself;
 	float           save;
 	float           take;
+	int				wp_num;
 
 	//char*  s;
 	char            attackerteam[10], targteam[10];
@@ -180,6 +181,24 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	if ( !targ->s.v.takedamage )
 		return;
+
+	wp_num = attacker->s.v.weapon;
+
+	// #handicap#
+	if ( attacker != targ ) // attack no self
+	if ( attacker->k_player && targ->k_player ) // player attack player
+	if (    streq( targ->deathtype, "nail" )
+ 		 || streq( targ->deathtype, "supernail" )
+		 || streq( targ->deathtype, "grenade" )
+		 || streq( targ->deathtype, "rocket" )
+		 || wp_num == IT_AXE
+		 || wp_num == IT_SHOTGUN
+		 || wp_num == IT_SUPER_SHOTGUN
+		 || wp_num == IT_LIGHTNING
+	   ) {
+		damage *= 0.01f * GetHandicap(attacker);
+	}
+
 
 // used by buttons and triggers to set activator for target firing
 	damage_attacker = attacker;

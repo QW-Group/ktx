@@ -12,6 +12,8 @@
 	 	No difference is this teammate or not for handicap.
 	 	U get full damage from self even u use handicap.
 		U can set handicap in intermission in matchless mode.
+		U can set particular value of handicap via 'handicap' [value]
+			e.g. 'handicap 66' set handicap to 66%, but this is work on ezQuake only.
 
      'hdptoggle' command added (toggle allow handicap)
      in server.cfg u can lock it using 'k_lock_hdp'

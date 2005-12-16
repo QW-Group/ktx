@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.13 2005/12/10 19:51:02 qqshka Exp $
+ *  $Id: client.c,v 1.14 2005/12/16 20:08:56 qqshka Exp $
  */
 
 //===========================================================================
@@ -249,8 +249,8 @@ void PrewarParams ()
 void SetChangeParms()
 {
 	// ok, server want to change map
-	// check, if matchless mode is active, set ingame params, we cant
-	// use k_matchLess here beacuse it can be changed during game somehow (via direct server conlose etc)
+	// check, if matchless mode is active, set ingame params,
+	// we must use k_matchless cvar here beacuse it can be changed during game somehow (via direct server conlose etc)
 	// If matchless mode is not active, set just ordinary prewar stats
 	if( /* match_in_progress == 2 ||*/ cvar( "k_matchless" ) )
 		InGameParams ();
@@ -262,11 +262,12 @@ void SetChangeParms()
 	g_globalvars.parm11 = self->k_admin;
 	g_globalvars.parm12 = self->k_accepted;
 	g_globalvars.parm13 = self->k_stuff;
+	g_globalvars.parm14 = self->ps.handicap;
 
 //	G_bprint(2, "SCP: ad:%d\n", (int)self->k_admin);
 }
 
-// this called before player connected, so he get default params
+// this called before player connected (or respawned), so he get default params
 
 // WARNING: if from_vmMain == flase, then self is must be valid
 void SetNewParms( qboolean from_vmMain )
@@ -281,6 +282,7 @@ void SetNewParms( qboolean from_vmMain )
 	g_globalvars.parm11 = from_vmMain ? 0 : self->k_admin;
 	g_globalvars.parm12 = from_vmMain ? 0 : self->k_accepted;
 	g_globalvars.parm13 = from_vmMain ? 0 : self->k_stuff;
+	g_globalvars.parm14 = from_vmMain ? 0 : self->ps.handicap;
 
 //	G_bprint(2, "SNP\n");
 }
@@ -309,6 +311,9 @@ void DecodeLevelParms()
 	
 	if ( g_globalvars.parm13 )
     	self->k_stuff = g_globalvars.parm13;
+
+	if ( g_globalvars.parm14 )
+    	self->ps.handicap = g_globalvars.parm14;
 
 //	G_bprint(2, "DLP2 ad:%d ac:%d s:%d\n", (int)g_globalvars.parm11, (int)g_globalvars.parm12, (int)g_globalvars.parm13);
 }
@@ -2108,7 +2113,7 @@ void PlayerPostThink()
 			gedict_t *gre = PROG_TO_EDICT ( self->s.v.groundentity );
 
 			// set the flag if needed
-           	if( !atoi( ezinfokey(world, "k_fallbunny" ) ) && self->s.v.waterlevel < 2 )
+           	if( !iKey(world, "k_fallbunny" ) && self->s.v.waterlevel < 2 )
                	self->brokenankle = 1;  // Yes we have just broken it
 
 			self->deathtype = "falling";

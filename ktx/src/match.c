@@ -1142,6 +1142,8 @@ void StartMatch ()
 	if( !k_matchLess ) // skip this while in matchLess mode
 	while( p ) {
 		if( !strnull ( p->s.v.netname ) ) {
+			int hdc;
+
 			tmp = ezinfokey(p, "team"); // used below
 			G_dprint("%%%s%%t%%%s", p->s.v.netname, tmp);
 
@@ -1170,7 +1172,11 @@ void StartMatch ()
 
 			p->friendly = p->deaths = p->s.v.frags = 0;
 
+			hdc = p->ps.handicap; // save player handicap
+
 			memset( (void*) &( p->ps ), 0, sizeof(p->ps) ); // clear player stats
+
+			p->ps.handicap = hdc; // restore player handicap
 
 			old = self;
 			self = p;
