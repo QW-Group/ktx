@@ -1657,6 +1657,10 @@ void PlayerReady ()
 			return;
 		}
 	}
+
+	if ( GetHandicap(self) != 100 )
+		G_sprint(self, 2, "\x87%s you are using handicap!\n", redtext( "WARNING:" ));
+
 	self->ready = 1;
 	self->k_vote = 0;
 	self->s.v.effects = self->s.v.effects - ((int)self->s.v.effects & 64);
@@ -1698,7 +1702,8 @@ void PlayerReady ()
 	f1 = atoi( ezinfokey( world, "k_membercount" ) );
 	if( CheckMembers( f1 ) ) {
 		if( nready == k_attendees && nready >= 2 && !k_force ) {
-			G_bprint(2, "All players ready\nTimer started\n");
+			G_bprint(2, "All players ready\n"
+						"Timer started\n");
 
 			StartTimer();
 			if( atoi( ezinfokey( world, "k_idletime" ) ) ) {
