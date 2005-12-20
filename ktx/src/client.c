@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.14 2005/12/16 20:08:56 qqshka Exp $
+ *  $Id: client.c,v 1.15 2005/12/20 23:40:24 qqshka Exp $
  */
 
 //===========================================================================
@@ -221,7 +221,7 @@ void SP_info_intermission()
 
 void InGameParams ()
 {
-	g_globalvars.parm1 = 4096 | 1;
+	g_globalvars.parm1 = IT_AXE | IT_SHOTGUN;
 	g_globalvars.parm2 = 100;
 	g_globalvars.parm3 = 0;
 	g_globalvars.parm4 = 25;
@@ -233,7 +233,8 @@ void InGameParams ()
 
 void PrewarParams ()
 {
-	g_globalvars.parm1 = 4096 | 1 | 2 | 4 | 8 | 32 | 16 | 64;
+	g_globalvars.parm1 = IT_AXE | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_NAILGUN | IT_SUPER_NAILGUN
+					   | IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER | IT_LIGHTNING;
 	g_globalvars.parm2 = 100;
 	g_globalvars.parm3 = 0;
 	g_globalvars.parm4 = 100;
@@ -987,6 +988,8 @@ void PutClientInServer()
 
 	DecodeLevelParms();
 
+	if ( !( (int)self->s.v.weapon & (int)self->s.v.items ) )
+		self->s.v.weapon = W_BestWeapon();
 	W_SetCurrentAmmo();
 
 	self->attack_finished = g_globalvars.time;
@@ -1030,7 +1033,7 @@ void PutClientInServer()
 		// just look code -> if(self->k_accepted == 1)
 
 		if( !self->k_accepted && match_in_progress == 2 ) {
-			self->s.v.classname = "player_na"; // player not accepted
+			self->s.v.classname = "player_na"; // player not accepted yet
 			self->s.v.takedamage = 0;
 			self->s.v.solid = 0;
 			self->s.v.movetype = 0;
@@ -1085,6 +1088,7 @@ void PutClientInServer()
 
 //	spawn_tdeath( self->s.v.origin, self );
 
+	// FIXME: why here?
 	// Set Rocket Jump Modifiers
 	infokey( world, "rj", s, sizeof( s ) );
 	if ( atof( s ) != 0 ) // can be float, so atof
@@ -1092,37 +1096,33 @@ void PutClientInServer()
 		rj = atof( s );
 	}
 
-
 	if ( deathmatch == 4 && match_in_progress == 2 )
 	{
 		self->s.v.ammo_shells = 0;
-		infokey( world, "axe", s, sizeof( s ) );
-		if ( !atoi( s ) )
+		items = self->s.v.items;
+		if ( !iKey(world, "axe") )
 		{
 			self->s.v.ammo_nails   = 255;
 			self->s.v.ammo_shells  = 255;
 			self->s.v.ammo_rockets = 255;
 			self->s.v.ammo_cells   = 255;
-			self->s.v.items = ( int ) self->s.v.items | IT_NAILGUN;
-			self->s.v.items = ( int ) self->s.v.items | IT_SUPER_NAILGUN;
-			self->s.v.items = ( int ) self->s.v.items | IT_SUPER_SHOTGUN;
-			self->s.v.items = ( int ) self->s.v.items | IT_ROCKET_LAUNCHER;
-//  self.items = self.items | IT_GRENADE_LAUNCHER;
-			self->s.v.items = ( int ) self->s.v.items | IT_LIGHTNING;
+			items |= IT_NAILGUN;
+			items |= IT_SUPER_NAILGUN;
+			items |= IT_SUPER_SHOTGUN;
+			items |= IT_ROCKET_LAUNCHER;
+			items |= IT_GRENADE_LAUNCHER;
+			items |= IT_LIGHTNING;
 		}
-		self->s.v.items -=
-		    ( ( int ) self->s.v.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) ) -
-		    IT_ARMOR3;
+		items -= ( items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) ) - IT_ARMOR3;
 		self->s.v.armorvalue = 200;
 		self->s.v.armortype = 0.8;
 		self->s.v.health = 250;
-		self->s.v.items = ( int ) self->s.v.items | IT_INVULNERABILITY;
+		self->s.v.items = items | IT_INVULNERABILITY;
 		self->invincible_time = 1;
 		self->invincible_finished = g_globalvars.time + 3;
 	}
 
-
-	if (deathmatch == 5 && match_in_progress == 2)
+	if ( deathmatch == 5 && match_in_progress == 2 )
 	{
 		self->s.v.ammo_nails   = 80;
 		self->s.v.ammo_shells  = 30;
@@ -1143,6 +1143,18 @@ void PutClientInServer()
 		self->invincible_time = 1;
 		self->invincible_finished = g_globalvars.time + 3;
 	}
+
+	// remove particular weapons in dmm4
+	if ( deathmatch == 4 && match_in_progress == 2 )
+	{
+		int	k_disallow_weapons = (int)cvar("k_disallow_weapons") & DA_WPNS;
+
+		self->s.v.items = (int)self->s.v.items & ~k_disallow_weapons;
+	}
+
+	if ( !( (int)self->s.v.weapon & (int)self->s.v.items ) )
+		self->s.v.weapon = W_BestWeapon();
+	W_SetCurrentAmmo();
 }
 
 /*
@@ -1572,7 +1584,7 @@ void Print_Wp_Stats( )
 	char buf[1024] = {0};
 
 	int  i;
-	int _wps = S_ALL & atoi( ezinfokey ( self, "wps" ) );
+	int _wps = S_ALL & iKey ( self, "wps" );
 	int  wps = ( _wps ? _wps : S_DEF ); // if wps is not set - show S_DEF weapons
 
 	gedict_t *e = self; // stats of whom we want to show
@@ -2040,6 +2052,7 @@ void PlayerPostThink()
 		G_centerprint(self, ""); // clear center print
 	}
 
+	// ok accept player now
 	if(self->k_accepted == 1) {
 		vec3_t v;
 
@@ -2064,6 +2077,7 @@ void PlayerPostThink()
 			spawn_tdeath (self->s.v.origin, self);
 		}
 	}
+
 	if( k_pause ) {
 		ImpulseCommands();
 		return;

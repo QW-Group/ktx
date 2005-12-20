@@ -1,3 +1,29 @@
+2005-12-21
+ 25. Added 'noweapon [weaponName]' command, wich disallow/allow particular weapon
+	 in dmm4 and only dmm4.
+
+	 Weaponname may be: axe sg ssg ng sng gl rl lg.
+	 Without params 'noweapon' just show info.
+
+	 Appropriate server cvar:
+
+	 worked like fpd, i.e. sum of this values
+	
+	 set k_disallow_weapons 16 //  4096 AXE
+							   //     1 SHOTGUN
+							   //     2 SUPER_SHOTGUN
+							   //     4 NAILGUN
+							   //     8 SUPER_NAILGUN
+							   //    16 GRENADE_LAUNCHER
+							   //    32 ROCKET_LAUNCHER
+							   //    64 LIGHTNING
+
+	 'set k_disallow_weapons 16' - just disallow gl in dmm4, this is
+	 by default if u type XonX command.
+
+	 NOTES: 'noweapon' command is actually an alias, but alias with params, so this is
+            worked ok only on ezQauke.
+
 2005-12-16
  24. Added handicap support. 'klist' will show it now.
 

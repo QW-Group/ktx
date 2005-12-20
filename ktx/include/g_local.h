@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.8 2005/12/16 20:09:14 qqshka Exp $
+ *  $Id: g_local.h,v 1.9 2005/12/20 23:40:39 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -62,6 +62,10 @@
 #define	FOFS(x) ((int)&(((gedict_t *)0)->x))
 int             NUM_FOR_EDICT( gedict_t * e );
 
+
+// possible disallowed weapons
+
+#define DA_WPNS (IT_AXE|IT_SHOTGUN|IT_SUPER_SHOTGUN|IT_NAILGUN|IT_SUPER_NAILGUN|IT_ROCKET_LAUNCHER|IT_GRENADE_LAUNCHER|IT_LIGHTNING)
 
 
 extern gedict_t g_edicts[];

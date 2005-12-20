@@ -105,6 +105,7 @@ void t_jump (float j_type);
 void klist ( );
 void hdptoggle ();
 void handicap ();
+void noweapon ();
 
 void TogglePractice();
 
@@ -227,6 +228,7 @@ cmd_t cmds[] = {
     { "klist",       klist,                     0    , CF_BOTH | CF_MATCHLESS },
     { "hdptoggle",   hdptoggle,                 0    , CF_BOTH_ADMIN },
     { "handicap",    handicap,                  0    , CF_PLAYER | CF_PARAMS | CF_MATCHLESS },
+    { "noweapon",    noweapon,                  0    , CF_PLAYER | CF_PARAMS | CF_SPC_ADMIN },
 
     { "cam",         ShowCamHelp,               0    , CF_SPECTATOR | CF_MATCHLESS }
 };
@@ -2199,6 +2201,8 @@ ok:
 
 // common settings for all user modes
 const char common_um_init[] =
+	"k_disallow_weapons 16\n"			// disallow gl in dmm4 by default
+
 	"localinfo k_new_mode 0\n" 			// UNKNOWN ktpro
 	"localinfo k_fast_mode 0\n"			// UNKNOWN ktpro
 	"localinfo matrix 0\n"              // UNKNOWN ktpro
@@ -2745,4 +2749,90 @@ void handicap ()
 	SetHandicap(self, hdc);
 }
 
+void show_disallowed_weapons( int k_disallow_weapons )
+{
+	char dwp[128] = {0};
+
+	if (k_disallow_weapons & IT_AXE)
+		strlcat(dwp, " axe", sizeof(dwp));
+	if (k_disallow_weapons & IT_SHOTGUN)
+		strlcat(dwp, " sg", sizeof(dwp));
+	if (k_disallow_weapons & IT_SUPER_SHOTGUN)
+		strlcat(dwp, " ssg", sizeof(dwp));
+	if (k_disallow_weapons & IT_NAILGUN)
+		strlcat(dwp, " ng", sizeof(dwp));
+	if (k_disallow_weapons & IT_SUPER_NAILGUN)
+		strlcat(dwp, " sng", sizeof(dwp));
+	if (k_disallow_weapons & IT_GRENADE_LAUNCHER)
+		strlcat(dwp, " gl", sizeof(dwp));
+	if (k_disallow_weapons & IT_ROCKET_LAUNCHER)
+		strlcat(dwp, " rl", sizeof(dwp));
+	if (k_disallow_weapons & IT_LIGHTNING)
+		strlcat(dwp, " lg", sizeof(dwp));
+
+	G_sprint(self, 2, "weapons disallowed:%s\n", 
+				( strnull( dwp ) ? redtext( " none" ) : redtext( dwp ) ) );
+}
+
+void noweapon ()
+{
+	char arg_3[1024];
+	int	k_disallow_weapons = (int)cvar("k_disallow_weapons") & DA_WPNS;
+
+	if ( match_in_progress ) {
+		if ( deathmatch == 4 ) // match started, show info and return
+			show_disallowed_weapons( k_disallow_weapons );
+		return;
+	}
+
+	if ( iKey( world, "k_master" ) && self->k_admin < 2 ) {
+		G_sprint(self, 3, "console: command is locked\n");
+		return;
+	}
+
+	if ( deathmatch != 4 ) {
+		G_sprint(self, 2, "command allowed in %s only\n", redtext("dmm4"));
+		return;
+	}
+
+	if ( trap_CmdArgc() == 2 ) { // no arguments, show info and return
+		show_disallowed_weapons( k_disallow_weapons );
+		return;
+	}
+
+	// one argument
+	if (trap_CmdArgc() == 3) {
+		char *nwp = NULL;
+		int bit = 0;
+
+		trap_CmdArgv( 2, arg_3, sizeof( arg_3 ) );
+
+		if ( streq( nwp = "axe", arg_3 ) )
+			k_disallow_weapons ^= bit = IT_AXE;
+		else if ( streq( nwp = "sg", arg_3 ) )
+			k_disallow_weapons ^= bit = IT_SHOTGUN;
+		else if ( streq( nwp = "ssg", arg_3 ) )
+			k_disallow_weapons ^= bit = IT_SUPER_SHOTGUN;
+		else if ( streq( nwp = "ng", arg_3 ) )
+			k_disallow_weapons ^= bit = IT_NAILGUN;
+		else if ( streq( nwp = "sng", arg_3 ) )
+			k_disallow_weapons ^= bit = IT_SUPER_NAILGUN;
+		else if ( streq( nwp = "gl", arg_3 ) )
+			k_disallow_weapons ^= bit = IT_GRENADE_LAUNCHER;
+		else if ( streq( nwp = "rl", arg_3 ) )
+			k_disallow_weapons ^= bit = IT_ROCKET_LAUNCHER;
+		else if ( streq( nwp = "lg", arg_3 ) )
+			k_disallow_weapons ^= bit = IT_LIGHTNING;
+
+		if ( bit ) {
+			G_bprint(2, "%s %s %s\n", self->s.v.netname,
+				redtext( Allows( !(k_disallow_weapons & bit) ) ), redtext( nwp ) );
+			trap_cvar_set_float( "k_disallow_weapons", k_disallow_weapons );
+		}
+		else {
+			G_sprint(self, 2, "unknown weapon name %s\n", redtext(arg_3));
+		}
+		return;
+	}
+}
 

@@ -210,7 +210,7 @@ void NextClient ()
 		self->k_playertokick = self->k_playertokick ? self->k_playertokick : world;
         self->k_playertokick = find(self->k_playertokick, FOFCLSN, self->kick_ctype);
 
-        if( !(self->k_playertokick) )
+        if( !(self->k_playertokick) ) {
             if( streq( self->kick_ctype, "player" ) ) {
                 self->kick_ctype = "spectator";
 				loop++;
@@ -219,6 +219,7 @@ void NextClient ()
                 self->kick_ctype = "player";
 				loop++;
 			}
+		}
         else if( !strnull( self->k_playertokick->s.v.netname )
 				&& ( streq ( self->kick_ctype, "spectator" )
 						|| ( streq ( self->kick_ctype, "player" )

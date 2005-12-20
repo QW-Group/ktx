@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.9 2005/12/08 21:28:39 qqshka Exp $
+ *  $Id: weapons.c,v 1.10 2005/12/20 23:40:24 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -833,6 +833,7 @@ void W_FireGrenade()
 
 	newmis->s.v.touch = ( func_t ) GrenadeTouch;
 
+/* qqshka zzzzzz
 // set newmis duration
 	if ( deathmatch == 4 )
 	{
@@ -841,6 +842,7 @@ void W_FireGrenade()
 //  self->s.v.health = self->s.v.health - 1;
 		T_Damage( self, self, PROG_TO_EDICT( self->s.v.owner ), 10 );
 	} else
+*/
 		newmis->s.v.nextthink = g_globalvars.time + 2.5;
 
 	newmis->s.v.think = ( func_t ) GrenadeExplode;
@@ -1153,7 +1155,7 @@ float W_BestWeapon()
 
 */
 
-	return IT_AXE;
+	return (it & IT_AXE ? IT_AXE : 0 );
 }
 
 int W_CheckNoAmmo()

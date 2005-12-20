@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.7 2005/12/16 20:08:56 qqshka Exp $
+ *  $Id: world.c,v 1.8 2005/12/20 23:40:24 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -371,6 +371,7 @@ void FirstFrame	( )
 	RegisterCvar("k_disallow_kfjump");
 	RegisterCvar("k_disallow_krjump");
 	RegisterCvar("k_lock_hdp");
+	RegisterCvar("k_disallow_weapons");
 
 	k_matchLess = cvar( "k_matchless" ); // changed only here
 }
