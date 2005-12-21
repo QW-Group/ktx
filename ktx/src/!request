@@ -1,3 +1,15 @@
+BUG: break;reconnect;break... --> map chahnged
+voting percentage:customise && pring (ffa/matchless)
+voting during game (not only intermission)
+per map configs for ffa/matchless (discahrd @ dm3 in ffa is boooring)
+powerups on/off depending on players
+glowing for dropped quad
+messages on took/lost of quad (quaddrop mode on) // same for ring
+fix scores output
+cmd info // compitable with ktpro. at least for wp_stats shifting
+countdown && motd for ffa/matchless
++scores (for all modes include ffa/matchless) // +scores shifting (ktpro compitable)
+
 how we must do with q statistics and dropable quad?
 and same question about ring.
 ----------------------------------------------------
