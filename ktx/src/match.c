@@ -1762,13 +1762,22 @@ void PlayerBreak ()
 				G_bprint(2, "θισ ");
 		G_bprint(3, "vote\n");
 		self->k_vote = 0;
-		k_vbreak--;
+
+		k_vbreak = 0;
+		for( p = world; p = find(p, FOFCLSN, "player"); )  // recount break votes
+			if( p->k_vote )
+				k_vbreak++;
 
 		return;
 	}
 	G_bprint(3, "%s votes for stopping the match\n", self->s.v.netname);
 	self->k_vote = 1;
-	k_vbreak++;
+
+	k_vbreak = 0;
+	for( p = world; p = find(p, FOFCLSN, "player"); ) // recount break votes
+		if( p->k_vote )
+			k_vbreak++;
+
 	f1 = CountPlayers();
 	f2 = (floor(f1 / 2)) + 1;
 	if( k_vbreak >= f2 ) {

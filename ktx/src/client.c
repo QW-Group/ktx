@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.15 2005/12/20 23:40:24 qqshka Exp $
+ *  $Id: client.c,v 1.16 2005/12/21 19:58:06 qqshka Exp $
  */
 
 //===========================================================================
@@ -1426,8 +1426,16 @@ void CheckWaterJump()
 ///////////////
 void ClientDisconnect()
 {
-	gedict_t *ghost;
+	gedict_t *ghost, *p;
 	float f1, f2;
+
+	if ( match_in_progress && self->k_vote ) { // recount break votes
+		self->k_vote = 0;
+		k_vbreak = 0;
+		for( p = world; p = find(p, FOFCLSN, "player"); )
+			if( p->k_vote )
+				k_vbreak++;
+	}
 
 	if( match_in_progress == 2 && self->k_makeghost ) 
 	{
