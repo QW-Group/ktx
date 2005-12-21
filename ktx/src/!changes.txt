@@ -24,6 +24,9 @@
 	 NOTES: 'noweapon' command is actually an alias, but alias with params, so this is
             worked ok only on ezQauke.
 
+ 26. fixed BUG: break;reconnect;break... --> map changed
+	 gLAd noticed me.
+
 2005-12-16
  24. Added handicap support. 'klist' will show it now.
 
