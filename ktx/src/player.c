@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.6 2005/12/04 20:09:42 qqshka Exp $
+ *  $Id: player.c,v 1.7 2005/12/22 20:33:29 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -886,41 +886,20 @@ void StartDie ();
 
 void PlayerDie()
 {
-	char            s[10];
+//	char            s[10];
 
 	self->s.v.items -= ( int ) self->s.v.items & IT_INVISIBILITY;
-	infokey( world, "dq", s, sizeof( s ) );
 
-	if ( atoi( s ) != 0 )
+	if ( iKey(world, "dq") && iKey(world, "k_pow") )
 	{
 		if ( self->super_damage_finished > 0 )
-		{
 			DropQuad( self->super_damage_finished - g_globalvars.time );
-			if ( deathmatch == 4 )
-				G_bprint( PRINT_LOW,
-					  "%s lost an OctaPower with %.0f seconds remaining\n",
-					  self->s.v.netname,
-					  self->super_damage_finished -
-					  g_globalvars.time );
-			else
-				G_bprint( PRINT_LOW,
-					  "%s lost a quad with with %.0f seconds remaining\n",
-					  self->s.v.netname,
-					  self->super_damage_finished -
-					  g_globalvars.time );
-		}
 	}
-	infokey( world, "dr", s, sizeof( s ) );
-	if ( atoi( s ) != 0 )
+
+	if ( iKey(world, "dr") && iKey(world, "k_pow") )
 	{
 		if ( self->invisible_finished > 0 )
-		{
-			G_bprint( PRINT_LOW,
-				  "%s lost a ring with %.0f seconds remaining\n",
-				  self->s.v.netname,
-				  self->invisible_finished - g_globalvars.time );
 			DropRing( self->invisible_finished - g_globalvars.time );
-		}
 	}
 
 	self->invisible_finished = 0;	// don't die as eyes

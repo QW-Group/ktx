@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.16 2005/12/21 19:58:06 qqshka Exp $
+ *  $Id: client.c,v 1.17 2005/12/22 20:33:29 qqshka Exp $
  */
 
 //===========================================================================
@@ -1803,8 +1803,10 @@ void PlayerPreThink()
         // invoked on death for some reason (couldn't figure out why). This leads to a
         // state when the player stands still after dying and can't respawn or even
         // suicide and has to reconnect. This is checked and fixed here
-        if( g_globalvars.time > (self->dead_time + 2) )
+        if( g_globalvars.time > (self->dead_time + 2) ) {
+			set_suicide_frame ();
             PlayerDead (); // so he can respawn
+		}
 
 		return;		// dying, so do nothing
 	}

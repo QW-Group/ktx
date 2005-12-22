@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.5 2005/12/08 21:28:25 qqshka Exp $
+ *  $Id: items.c,v 1.6 2005/12/22 20:33:29 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -38,9 +38,6 @@ void            q_touch();
 
 void q_touch()
 {
-//gedict_t*    stemp;
-//float     best;
-
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
 	if ( other->s.v.health <= 0 )
@@ -65,16 +62,9 @@ void q_touch()
 	other->super_time = 1;
 	other->super_damage_finished = self->cnt;
 
-	if ( deathmatch == 4 )
-		G_bprint( PRINT_LOW,
-			  "%s recovered an OctaPower with %d seconds remaining!\n",
-			  other->s.v.netname,
+	G_bprint( PRINT_HIGH, "%s recovered a %s with %d seconds remaining!\n",
+			  other->s.v.netname, self->s.v.netname,
 			  ( int ) ( other->super_damage_finished - g_globalvars.time ) );
-	else
-		G_bprint( PRINT_LOW, "%s recovered a Quad with %d seconds remaining!\n",
-			  other->s.v.netname,
-			  ( int ) ( other->super_damage_finished - g_globalvars.time ) );
-
 
 	activator = other;
 	SUB_UseTargets();	// fire all targets / killtargets
@@ -84,6 +74,9 @@ void q_touch()
 void DropQuad( float timeleft )
 {
 	gedict_t       *item;
+
+	if (timeleft <= 0 )
+		return;
 
 	item = spawn();
 	VectorCopy( self->s.v.origin, item->s.v.origin );
@@ -96,6 +89,7 @@ void DropQuad( float timeleft )
 	item->s.v.solid = SOLID_TRIGGER;
 	item->s.v.movetype = MOVETYPE_TOSS;
 	item->s.v.noise = "items/damage.wav";
+	item->s.v.effects = (int)item->s.v.effects | EF_BLUE;
 
 	setmodel( item, "progs/quaddama.mdl" );
 	setsize( item, -16, -16, -24, 16, 16, 32 );
@@ -104,6 +98,10 @@ void DropQuad( float timeleft )
 	item->s.v.touch = ( func_t ) q_touch;
 	item->s.v.nextthink = g_globalvars.time + timeleft;	// remove it with the time left on it
 	item->s.v.think = ( func_t ) SUB_Remove;
+	item->s.v.netname =  deathmatch == 4 ? "OctaPower" : "Quad Damage";
+
+	G_bprint( PRINT_HIGH, "%s lost a %s with %.0f seconds remaining\n",
+					  	  self->s.v.netname, item->s.v.netname, timeleft );
 }
 
 
@@ -132,15 +130,9 @@ void r_touch()
 	other->invisible_time = 1;
 	other->invisible_finished = self->cnt;
 
-	G_bprint( PRINT_LOW, "%s recovered a Ring with %d seconds remaining!\n",
-		  other->s.v.netname,
+	G_bprint( PRINT_HIGH, "%s recovered a %s with %d seconds remaining!\n",
+		  other->s.v.netname, self->s.v.netname,
 		  ( int ) ( other->invisible_finished - g_globalvars.time ) );
-	/*s=ftos(rint(other->invisible_finished - time));
-	   trap_BPrint (PRINT_LOW, other->s.v.netname);
-	   trap_BPrint (PRINT_LOW, " recovered a Ring with ");
-	   trap_BPrint (PRINT_LOW, s);
-	   trap_BPrint (PRINT_LOW, " seconds remaining!\n"); */
-
 
 	activator = other;
 	SUB_UseTargets();	// fire all targets / killtargets
@@ -150,6 +142,9 @@ void r_touch()
 void DropRing( float timeleft )
 {
 	gedict_t       *item;
+
+	if ( timeleft <= 0 )
+		return;
 
 	item = spawn();
 	VectorCopy( self->s.v.origin, item->s.v.origin );
@@ -171,6 +166,10 @@ void DropRing( float timeleft )
 	item->s.v.touch = ( func_t ) r_touch;
 	item->s.v.nextthink = g_globalvars.time + timeleft;	// remove after 30 seconds
 	item->s.v.think = ( func_t ) SUB_Remove;
+	item->s.v.netname = "Ring of Shadows";
+
+	G_bprint( PRINT_HIGH, "%s lost a %s with %.0f seconds remaining\n",
+				  		 self->s.v.netname, item->s.v.netname, timeleft);
 }
 
 void PlaceItem()
@@ -1377,7 +1376,7 @@ void powerup_touch()
 	if ( match_in_progress != 2 )
 		return;
 
-    if (!atoi( ezinfokey( world, "k_pow" ) ) )
+    if ( !iKey( world, "k_pow" ) )
         return;
 
 
@@ -1529,7 +1528,7 @@ void SP_item_artifact_super_damage()
 		self->s.v.netname = "Quad Damage";
 	self->s.v.items = IT_QUAD;
 
-	if ( deathmatch && atoi( ezinfokey( world, "k_pow" ) ) )
+	if ( deathmatch && iKey( world, "k_pow" ) )
 		self->s.v.effects = ( int ) self->s.v.effects | EF_BLUE;
 
 	setsize( self, -16, -16, -24, 16, 16, 32 );

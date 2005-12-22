@@ -1,3 +1,14 @@
+2005-12-22
+ 27. Dropped quad now glow.
+
+	 requested from me / gLAd / disc
+
+ 28. I changed a print level of message when quad/ring dropped/tooked, so players who
+	 does't sow pickup messages catch this message. I talk about rules where quad or
+     ring is dropable, and took message goes from dropped item, not from normally respawned item.
+
+	 requested from gLAd / disc
+
 2005-12-21
  25. Added 'noweapon [weaponName]' command, wich disallow/allow particular weapon
 	 in dmm4 and only dmm4.
