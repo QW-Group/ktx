@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.9 2005/12/20 23:40:39 qqshka Exp $
+ *  $Id: g_local.h,v 1.10 2005/12/24 19:03:29 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -61,6 +61,12 @@
 
 #define	FOFS(x) ((int)&(((gedict_t *)0)->x))
 int             NUM_FOR_EDICT( gedict_t * e );
+
+
+// health macros
+
+#define ISLIVE(e) ((e)->s.v.health > 0)
+#define ISDEAD(e) ((e)->s.v.health <= 0)
 
 
 // possible disallowed weapons

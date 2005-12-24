@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: triggers.c,v 1.4 2005/12/01 21:50:07 qqshka Exp $
+ *  $Id: triggers.c,v 1.5 2005/12/24 19:03:10 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -128,7 +128,7 @@ void multi_touch()
 
 /*QUAKED trigger_multiple (.5 .5 .5) ? notouch
 Variable sized repeatable trigger.  Must be targeted at one or more entities.  If "health" is set, the trigger must be killed to activate each g_globalvars.time.
-If "delay" is set, the trigger waits some g_globalvars.time after activating before firing.
+If "delay" is set, the trigger waits some time after activating before firing.
 "wait" : Seconds between triggerings. (.2 default)
 If notouch is set, the trigger is only fired by other entities, not by touching.
 NOTOUCH has been obsoleted by trigger_relay!
@@ -161,7 +161,7 @@ void SP_trigger_multiple()
 
 	InitTrigger();
 
-	if ( self->s.v.health )
+	if ( ISLIVE( self ) )
 	{
 		if ( ( int ) ( self->s.v.spawnflags ) & SPAWNFLAG_NOTOUCH )
 			G_Error( "health and notouch don't make sense\n" );
@@ -353,6 +353,9 @@ void tdeath_touch()
 	if ( other == PROG_TO_EDICT( self->s.v.owner ) )
 		return;
 
+	if ( ISDEAD( other ) )
+		return;
+
 // frag anyone who teleports in on top of an invincible player
 	if ( streq( other->s.v.classname, "player" ) )
 	{
@@ -387,7 +390,7 @@ void tdeath_touch()
 
 	}
 
-	if ( other->s.v.health )
+	if ( ISLIVE( other ) )
 	{
 		self->s.v.classname = "teledeath"; // qqshka - restore classname
 		T_Damage( other, self, self, 50000 );
@@ -442,8 +445,9 @@ void teleport_touch()
 		if ( strneq( other->s.v.classname, "player" ) )
 			return;
 	}
+
 // only teleport living creatures
-	if ( other->s.v.health <= 0 || other->s.v.solid != SOLID_SLIDEBOX )
+	if ( ISDEAD( other ) || other->s.v.solid != SOLID_SLIDEBOX )
 		return;
 
 //team
@@ -471,6 +475,8 @@ void teleport_touch()
 
 // move the player and lock him down for a little while
 // FIXME: hmmm, since "only teleport living creatures" above, this is code never be done, right?
+/* qqshak, i remove this shit
+
 	if ( !other->s.v.health )
 	{
 		VectorCopy( t->s.v.origin, other->s.v.origin );
@@ -487,7 +493,7 @@ void teleport_touch()
 		//other->s.v.velocity = (v_forward * other->s.v.velocity[0]) + (v_forward * other->s.v.velocity[1]);
 		return;
 	}
-
+*/
 	setorigin( other, PASSVEC3( t->s.v.origin ) );
 	VectorCopy( t->mangle, other->s.v.angles );
 // other.angles = t.mangle;
@@ -661,7 +667,7 @@ void trigger_push_touch()
 		other->s.v.velocity[0] = self->speed * self->s.v.movedir[0] * 10;
 		other->s.v.velocity[1] = self->speed * self->s.v.movedir[1] * 10;
 		other->s.v.velocity[2] = self->speed * self->s.v.movedir[2] * 10;
-	} else if ( other->s.v.health > 0 )
+	} else if ( ISLIVE( other ) )
 	{
 //  other->s.v.velocity = self->speed  * self->s.v.movedir * 10;
 		other->s.v.velocity[0] = self->speed * self->s.v.movedir[0] * 10;

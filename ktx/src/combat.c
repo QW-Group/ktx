@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.6 2005/12/16 20:08:56 qqshka Exp $
+ *  $Id: combat.c,v 1.7 2005/12/24 19:03:10 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -179,7 +179,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	char            attackerteam[10], targteam[10];
 
 
-	if ( !targ->s.v.takedamage )
+	if ( !targ->s.v.takedamage || ISDEAD( targ ) )
 		return;
 
 	wp_num = attacker->s.v.weapon;
@@ -324,15 +324,20 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		 || !strcmp( attacker->s.v.classname, "teledeath2" ) // qqshka
 		 || !strcmp( attacker->s.v.classname, "teledeath3" ) // qqshka 
 		 || ( k_practice && strneq( targ->s.v.classname, "player" ) ) // #practice mode#
-	   )
+	   ) {
 		targ->s.v.health -= take;
+
+		if ( !targ->s.v.health )
+			targ->s.v.health = -1; // qqshka, no zero health, heh, imo lessbugs after this
+	}
+
 
 	if ( attacker->k_player && targ->k_player ) {
 		attacker->ps.dmg_g += damage;
 		targ->ps.dmg_t     += damage;
 	}
 
-	if ( targ->s.v.health <= 0 )
+	if ( ISDEAD( targ ) )
 	{
 		Killed( targ, attacker );
 

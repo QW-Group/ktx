@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: plats.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
+ *  $Id: plats.c,v 1.3 2005/12/24 19:03:10 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -117,7 +117,7 @@ void plat_center_touch()
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
 
-	if ( other->s.v.health <= 0 )
+	if ( ISDEAD( other ) )
 		return;
 
 	self = PROG_TO_EDICT( self->s.v.enemy );
@@ -140,7 +140,7 @@ void plat_outside_touch()
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
 
-	if ( other->s.v.health <= 0 )
+	if ( ISDEAD( other ) )
 		return;
 
 //dprint ("plat_outside_touch\n");

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.17 2005/12/22 20:33:29 qqshka Exp $
+ *  $Id: client.c,v 1.18 2005/12/24 19:03:10 qqshka Exp $
  */
 
 //===========================================================================
@@ -43,7 +43,6 @@ void IdlebotCheck();
 void CheckAll();
 void CheckConnectRate();
 void PlayerStats();
-void PlayerDead();
 void ExitCaptain();
 void CheckFinishCaptain();
 void AbortElect();
@@ -51,7 +50,7 @@ void MakeMOTD();
 void ExitKick(gedict_t *kicker);
 void play_teleport();
 void ImpulseCommands();
-
+void StartDie ();
 
 void CheckAll ()
 {
@@ -747,9 +746,9 @@ gedict_t       *SelectSpawnPoint()
 			{
                 if( !(  k_spw == 2 && match_in_progress == 2 && !thing->k_1spawn )
 					   // k_spw == 2 feature, this player will counted
-					   // only in certain time after his last spawn (i.e. while k_1spawn != 0).
+					   // only in certain time after his last spawn (i.e. while k_1spawn == 0).
 					   // k_1spawn is _also_ set after player passed teleport
-					&& thing->s.v.health > 0
+					&& ISLIVE( thing )
 				  ) 
 					pcount++;
 			}
@@ -800,7 +799,7 @@ gedict_t       *SelectSpawnPoint()
 			makevectors( spot->s.v.angles );
 			thing = findradius(world, spot->s.v.origin, 84);
 			while( thing ) {
-				if( streq( thing->s.v.classname, "player" ) && thing->s.v.health > 0 ) {
+				if( streq( thing->s.v.classname, "player" ) && ISLIVE( thing ) ) {
 					VectorMA (thing->s.v.origin, -15.0, g_globalvars.v_up, v1);
 					VectorMA (v1, 160.0, g_globalvars.v_forward, v2);
 
@@ -1303,7 +1302,7 @@ void WaterMove()
 	if ( self->s.v.movetype == MOVETYPE_NOCLIP )
 		return;
 
-	if ( self->s.v.health < 0 )
+	if ( ISDEAD( self ) )
 		return;
 
 	if ( self->s.v.waterlevel != 3 )
@@ -1803,9 +1802,10 @@ void PlayerPreThink()
         // invoked on death for some reason (couldn't figure out why). This leads to a
         // state when the player stands still after dying and can't respawn or even
         // suicide and has to reconnect. This is checked and fixed here
-        if( g_globalvars.time > (self->dead_time + 2) ) {
-			set_suicide_frame ();
-            PlayerDead (); // so he can respawn
+        if( g_globalvars.time > (self->dead_time + 0.1)
+			&& ( self->s.v.frame < 41 || self->s.v.frame > 102 ) // FIXME: hardcoded range or dead frames
+		  ) {
+			StartDie();
 		}
 
 		return;		// dying, so do nothing
@@ -1841,7 +1841,7 @@ Check for turning off powerups
 */
 void CheckPowerups()
 {
-	if ( self->s.v.health <= 0 )
+	if ( ISDEAD( self ) )
 		return;
 
 // invisibility

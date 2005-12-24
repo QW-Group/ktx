@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.10 2005/12/20 23:40:24 qqshka Exp $
+ *  $Id: weapons.c,v 1.11 2005/12/24 19:03:10 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -486,7 +486,7 @@ void T_MissileTouch()
 			PROG_TO_EDICT( self->s.v.owner )->ps.h_rl++;
 	}
 
-	if ( other->s.v.health )
+	if ( ISLIVE( other ) )
 	{
 		other->deathtype = "rocket";
 		T_Damage( other, self, PROG_TO_EDICT( self->s.v.owner ), damg );
@@ -839,7 +839,6 @@ void W_FireGrenade()
 	{
 		newmis->s.v.nextthink = g_globalvars.time + 2.5;
 		self->attack_finished = g_globalvars.time + 1.1;
-//  self->s.v.health = self->s.v.health - 1;
 		T_Damage( self, self, PROG_TO_EDICT( self->s.v.owner ), 10 );
 	} else
 */

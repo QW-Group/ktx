@@ -815,7 +815,7 @@ void TimerThink ()
 
 			p = find ( world, FOFCLSN, "player" );
 			while( p ) {
-				if( !strnull ( p->s.v.netname ) && p->s.v.health > 0 ) {
+				if( !strnull ( p->s.v.netname ) && ISLIVE( p ) ) {
 					p->s.v.items = (int)p->s.v.items | (4194304 | 1048576); // FIXME wtf?
 					p->super_time = 1;
 					p->super_damage_finished = g_globalvars.time + 3600;
@@ -1297,7 +1297,7 @@ void PrintCountdown( int seconds )
 
 	switch ( atoi( ezinfokey( world, "k_overtime" ) ) ) {
 		case 0:  ot = redtext("Off"); break;
-		case 1:  ot = va("%d", atoi( ezinfokey( world, "k_exttime" ) )); break;
+		case 1:  ot = dig3( iKey( world, "k_exttime" ) ); break;
 		case 2:  ot = redtext("sd"); break;
 		default: ot	= redtext("Unkn"); break;
 	}

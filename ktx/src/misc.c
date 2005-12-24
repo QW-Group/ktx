@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: misc.c,v 1.3 2005/11/23 20:35:08 qqshka Exp $
+ *  $Id: misc.c,v 1.4 2005/12/24 19:03:10 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -342,7 +342,7 @@ void Laser_Touch()
 	VectorSubtract( self->s.v.origin, org, org );
 	//org = self->s.v.origin - 8*normalize(self->s.v.velocity);
 
-	if ( other->s.v.health )
+	if ( ISLIVE( other ) )
 	{
 		SpawnBlood( org, 15 );
 		other->deathtype = "laser";

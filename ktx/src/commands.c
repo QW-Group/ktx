@@ -2044,7 +2044,7 @@ void ShowNick()
 		vec3_t	v, v2, v3;
 		float dist, miss, rank;
 
-		if ( p->s.v.health <= 0 )
+		if ( ISDEAD(p) )
 			continue; // ignore dead
 
 		if ( p == self )

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.6 2005/12/22 20:33:29 qqshka Exp $
+ *  $Id: items.c,v 1.7 2005/12/24 19:03:10 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -40,7 +40,7 @@ void q_touch()
 {
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
-	if ( other->s.v.health <= 0 )
+	if ( ISDEAD( other ) )
 		return;
 
 	self->mdl = self->s.v.model;
@@ -114,7 +114,7 @@ void r_touch()
 
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
-	if ( other->s.v.health <= 0 )
+	if ( ISDEAD( other ) )
 		return;
 
 	self->mdl = self->s.v.model;
@@ -218,10 +218,12 @@ HEALTH BOX
 //
 float T_Heal( gedict_t * e, float healamount, float ignore )
 {
-	if ( e->s.v.health <= 0 )
+	if ( ISDEAD( e ) )
 		return 0;
+
 	if ( ( !ignore ) && ( e->s.v.health >= other->s.v.max_health ) )
 		return 0;
+
 	healamount = ceil( healamount );
 
 	e->s.v.health = e->s.v.health + healamount;
@@ -381,8 +383,9 @@ void armor_touch()
 	int             bit = 0;
 	int				*armor = NULL;
 
-	if ( other->s.v.health <= 0 )
+	if ( ISDEAD( other ) )
 		return;
+
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
 
@@ -846,10 +849,10 @@ void ammo_touch()
 	gedict_t       *stemp;
 	float           best;
 
-	if ( strneq( other->s.v.classname, "player" ) )
+	if ( ISDEAD( other ) )
 		return;
-	
-	if ( other->s.v.health <= 0 )
+
+	if ( strneq( other->s.v.classname, "player" ) )
 		return;
 
 #ifdef KTEAMS
@@ -1156,7 +1159,7 @@ void key_touch()
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
 
-	if ( other->s.v.health <= 0 )
+	if ( ISDEAD( other ) )
 		return;
 
 	if ( ( int ) other->s.v.items & ( int ) self->s.v.items )
@@ -1290,7 +1293,8 @@ void sigil_touch()
 
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
-	if ( other->s.v.health <= 0 )
+
+	if ( ISDEAD( other ) )
 		return;
 
 #ifdef KTEAMS
@@ -1369,7 +1373,8 @@ void powerup_touch()
 
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
-	if ( other->s.v.health <= 0 )
+
+	if ( ISDEAD( other ) )
 		return;
 
 	if ( !k_practice ) // #practice mode#
@@ -1570,7 +1575,8 @@ void BackpackTouch()
 
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
-	if ( other->s.v.health <= 0 )
+
+	if ( ISDEAD( other ) )
 		return;
 
 	acount = 0;
@@ -1578,7 +1584,7 @@ void BackpackTouch()
 
 	if ( deathmatch == 4 )
 	{
-		other->s.v.health = other->s.v.health + 10;
+		other->s.v.health += 10;
 		G_sprint( other, PRINT_LOW, "10 additional health\n" );
 		if ( ( other->s.v.health > 250 ) && ( other->s.v.health < 300 ) )
 			sound( other, CHAN_ITEM, "items/protect3.wav", 1, ATTN_NORM );

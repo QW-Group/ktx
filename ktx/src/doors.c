@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: doors.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
+ *  $Id: doors.c,v 1.3 2005/12/24 19:03:10 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -209,7 +209,7 @@ void door_trigger_touch()
 	  )
 		 return;
 
-	if ( other->s.v.health <= 0 )
+	if ( ISDEAD( other ) )
 		return;
 
 	if ( g_globalvars.time < self->attack_finished )
@@ -411,7 +411,7 @@ void LinkDoors()
 	{
 		self->s.v.owner = EDICT_TO_PROG( starte );	// master door
 
-		if ( self->s.v.health )
+		if ( ISLIVE( self ) )
 			starte->s.v.health = self->s.v.health;
 
 		if ( self->s.v.targetname )
@@ -431,7 +431,7 @@ void LinkDoors()
 
 			self = PROG_TO_EDICT( self->s.v.owner );
 
-			if ( self->s.v.health )
+			if ( ISLIVE( self ) )
 				return;
 			if ( self->s.v.targetname )
 				return;
@@ -615,7 +615,7 @@ void SP_func_door()
 
 	self->state = STATE_BOTTOM;
 
-	if ( self->s.v.health )
+	if ( ISLIVE( self ) )
 	{
 		self->s.v.takedamage = DAMAGE_YES;
 		self->th_die = door_killed;

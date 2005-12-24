@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: buttons.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
+ *  $Id: buttons.c,v 1.3 2005/12/24 19:03:10 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -52,7 +52,7 @@ void button_return()
 
 	self->s.v.frame = 0;	// use normal textures
 
-	if ( self->s.v.health )
+	if ( ISLIVE(self) )
 		self->s.v.takedamage = DAMAGE_YES;	// can be shot again
 }
 
@@ -166,7 +166,7 @@ void SP_func_button()
 	self->s.v.blocked = ( func_t ) button_blocked;
 	self->s.v.use = ( func_t ) button_use;
 
-	if ( self->s.v.health )
+	if ( ISLIVE(self) )
 	{
 		self->s.v.max_health = self->s.v.health;
 		self->th_die = button_killed;

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.7 2005/12/22 20:33:29 qqshka Exp $
+ *  $Id: player.c,v 1.8 2005/12/24 19:03:10 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -463,7 +463,7 @@ void PainSound()
 {
 	int             rs;
 
-	if ( self->s.v.health < 0 )
+	if ( ISDEAD( self ) )
 		return;
 
 	if (    streq( damage_attacker->s.v.classname, "teledeath" )
