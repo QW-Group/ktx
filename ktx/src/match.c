@@ -433,7 +433,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 	int   ra, ya, ga;
 	int   mh;
 	int   quad, pent, ring;
-	float h_rl, a_rl, h_lg, a_lg, h_sg, a_sg, h_ssg, a_ssg;
+	float h_rl, a_rl, h_gl, a_gl, h_lg, a_lg, h_sg, a_sg, h_ssg, a_ssg;
 
 	dmg_g = p->ps.dmg_g;
 	dmg_t = p->ps.dmg_t;
@@ -447,6 +447,8 @@ void OnePlayerStats(gedict_t *p, int tp)
 
 	h_rl  = p->ps.h_rl;
 	a_rl  = p->ps.a_rl;
+	h_gl  = p->ps.h_gl;
+	a_gl  = p->ps.a_gl;
 	h_lg  = p->ps.h_lg;
 	a_lg  = p->ps.a_lg;
 	h_sg  = p->ps.h_sg;
@@ -457,10 +459,10 @@ void OnePlayerStats(gedict_t *p, int tp)
 	h_sg  = 100.0 * h_sg  / max(1, a_sg);
 	h_ssg = 100.0 * h_ssg / max(1, a_ssg);
 #if 0 /* percentage */
-//	h_gl  = 100.0 * h_gl  / max(1, a_gl);
+	h_gl  = 100.0 * h_gl  / max(1, a_gl);
 	h_rl  = 100.0 * h_rl  / max(1, a_rl);
 #else /* just count of direct hits */
-//	h_gl  = h_gl;
+	h_gl  = h_gl;
 	h_rl  = h_rl;
 #endif
 	h_lg  = 100.0 * h_lg  / max(1, a_lg);
@@ -476,9 +478,10 @@ void OnePlayerStats(gedict_t *p, int tp)
 
 	if ( !tp || atoi( ezinfokey(world, "tp_players_stats") ) ) {
 		// weapons
-		G_bprint(2, "%s:%s%s%s%s\n", redtext("Wp"),
+		G_bprint(2, "%s:%s%s%s%s%s\n", redtext("Wp"),
 				(h_lg  ? va(" %s%.1f%%", redtext("lg"),   h_lg) : ""),
-				(h_rl  ? va(" %s%.0f",   redtext("rl"),   h_rl) : ""), 
+				(h_rl  ? va(" %s%.0f",   redtext("rl"),   h_rl) : ""),
+				(h_gl  ? va(" %s%.0f",   redtext("gl"),   h_gl) : ""),
 				(h_sg  ? va(" %s%.1f%%", redtext("sg"),   h_sg) : ""),
 				(h_ssg ? va(" %s%.1f%%", redtext("ssg"), h_ssg) : ""));
 		// armors + megahealths

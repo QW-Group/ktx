@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.18 2005/12/24 19:03:10 qqshka Exp $
+ *  $Id: client.c,v 1.19 2005/12/24 21:32:57 qqshka Exp $
  */
 
 //===========================================================================
@@ -1436,7 +1436,7 @@ void ClientDisconnect()
 				k_vbreak++;
 	}
 
-	if( match_in_progress == 2 && self->k_makeghost ) 
+	if( match_in_progress == 2 && ( self->k_makeghost || streq("player", self->s.v.classname) ) )
 	{
 		G_bprint( PRINT_HIGH, "%s left the game with %.0f frags\n", self->s.v.netname,
 	  					self->s.v.frags );

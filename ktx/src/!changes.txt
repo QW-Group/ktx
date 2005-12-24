@@ -1,3 +1,8 @@
+2005-12-25
+ 29. Fixed my'n bug where ghost is not saved after u type disconnect at client console.
+
+ 30. gl direct hits is now showed in end match statistics.
+
 2005-12-22
  27. Dropped quad now glow.
 

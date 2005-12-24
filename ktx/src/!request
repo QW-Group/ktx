@@ -1,4 +1,3 @@
-grenadelauncher direct hits to stats
 localinfo allow_spec_wizard // spec-wzrs r0x
 print ktx:version at serverinfo *progs
 voting percentage:customise && pring (ffa/matchless)
