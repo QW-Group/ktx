@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.19 2005/12/24 21:32:57 qqshka Exp $
+ *  $Id: client.c,v 1.20 2005/12/25 14:31:37 qqshka Exp $
  */
 
 //===========================================================================
@@ -365,7 +365,7 @@ void GotoNextMap()
         AbortElect();
 
 	if ( trap_cvar( "samelevel" ) /* == 1 */ )	// if samelevel is set, stay on same level
-		trap_changelevel( g_globalvars.mapname );
+		changelevel( g_globalvars.mapname );
 	else
 	{
 		// configurable map lists, see if the current map exists as a
@@ -406,9 +406,9 @@ void GotoNextMap()
 			strcpy( nextmap, g_globalvars.mapname );
 
 		if ( newmap[0] )
-			trap_changelevel( newmap );
+			changelevel( newmap );
 		else
-			trap_changelevel( nextmap );
+			changelevel( nextmap );
 	}
 }
 
@@ -1550,7 +1550,7 @@ void ClientDisconnect()
 									  //        but we may check if k_defmap exist and reload to it, right?
 
         if( !strnull( s ) )
-            localcmd("map %s\n", s);
+            changelevel( s );
 	}
 }
 

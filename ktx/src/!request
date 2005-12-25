@@ -2,7 +2,6 @@ localinfo allow_spec_wizard // spec-wzrs r0x
 print ktx:version at serverinfo *progs
 voting percentage:customise && pring (ffa/matchless)
 voting during game (not only intermission)
-per map configs for ffa/matchless (discahrd @ dm3 in ffa is boooring)
 powerups on/off depending on players
 fix scores output
 cmd info // compitable with ktpro. at least for wp_stats shifting

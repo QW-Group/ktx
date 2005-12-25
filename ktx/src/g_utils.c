@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.9 2005/12/16 20:08:56 qqshka Exp $
+ *  $Id: g_utils.c,v 1.10 2005/12/25 14:31:37 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -896,5 +896,20 @@ qboolean SetHandicap( gedict_t *p, int nhdc )
 	}
 
 	return false;
+}
+
+void changelevel( char *name ){
+ 	if ( strnull( name ) )
+		G_Error("changelevel: null");
+
+	cvar_set( "_k_lastmap", g_globalvars.mapname );
+
+	// exec configs/maps/out/mapname.cfg
+	if ( cvar( "k_srvcfgmap" ) && strneq( g_globalvars.mapname, name ) ) {
+		localcmd("exec configs/maps/out/%s.cfg\n", g_globalvars.mapname);
+//		trap_executecmd ();
+	}
+
+	trap_changelevel(name);
 }
 

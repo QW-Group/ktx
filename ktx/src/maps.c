@@ -187,6 +187,7 @@ void ModPause (int pause);
 
 void SelectMap()
 {
+	char *m;
 	float f1, f2, f3;
 	gedict_t *p;
 
@@ -271,5 +272,6 @@ void SelectMap()
 	if ( k_pause )
 		ModPause ( 0 );
 
-	localcmd("map %s\n", GetMapName( self->cmd_selectMap ));
+	if ( !strnull(m = GetMapName( self->cmd_selectMap )) )
+		changelevel( m );
 }

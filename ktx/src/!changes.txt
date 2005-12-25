@@ -3,6 +3,15 @@
 
  30. gl direct hits is now showed in end match statistics.
 
+ 31. Added 'k_srvcfgmap', like it was in ktpro, this cvar just allow per map configuration.
+	 If 'k_srvcfgmap' set to 1 then
+
+	 set k_srvcfgmap 1
+	
+		exec configs/maps/out/mapname.cfg on leaving a map
+		exec configs/maps/default.cfg on enter a map (all maps)
+		exec configs/maps/mapname.cfg on enter a map
+
 2005-12-22
  27. Dropped quad now glow.
 

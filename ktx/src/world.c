@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.8 2005/12/20 23:40:24 qqshka Exp $
+ *  $Id: world.c,v 1.9 2005/12/25 14:31:37 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -88,7 +88,7 @@ void CheckDefMap ()
 		s1 = ezinfokey( world, "k_defmap" );
 
 		if( !strnull( s1 ) && strneq( s1, g_globalvars.mapname ) )
-			localcmd("map %s\n", s1);
+			changelevel( s1 );
 	}
 
 	ent_remove( self );
@@ -99,10 +99,23 @@ void  SP_item_artifact_super_damage();
 
 void SP_worldspawn()
 {
+	char 		*lastmap;
 	char		*s;
 	char 		*tmp;
    	gedict_t	*e;
 
+
+	// exec configs/maps/default.cfg
+	// exec configs/maps/mapname.cfg
+	if (    cvar( "k_srvcfgmap" )
+		 && (    strnull( lastmap = cvar_string("_k_lastmap") ) // server just spawn first time ?
+			  || strneq( lastmap, g_globalvars.mapname )
+			)
+	   ) {
+		localcmd("exec configs/maps/default.cfg\n");
+		localcmd("exec configs/maps/%s.cfg\n", g_globalvars.mapname);
+		trap_executecmd ();
+	}
     
     // Tonik: check if we're running on an 2.3x server
 	tmp = ezinfokey( world, "*version" );
@@ -372,6 +385,8 @@ void FirstFrame	( )
 	RegisterCvar("k_disallow_krjump");
 	RegisterCvar("k_lock_hdp");
 	RegisterCvar("k_disallow_weapons");
+	RegisterCvar("_k_lastmap");	// internal usage
+	RegisterCvar("k_srvcfgmap");
 
 	k_matchLess = cvar( "k_matchless" ); // changed only here
 }

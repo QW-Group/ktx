@@ -2533,7 +2533,7 @@ void SetPractice(int srv_practice_mode, const char *mapname)
 	else {
 		G_bprint(2, "%s\n", redtext("Server in normal mode"));
 		if ( mapname ) // mapname may be "" i.e empty, reload current map in this case
-			localcmd("map %s\n", ( strnull( mapname ) ? g_globalvars.mapname : mapname ) );
+			changelevel( ( strnull( mapname ) ? g_globalvars.mapname : mapname ) );
 	}
 }
 
