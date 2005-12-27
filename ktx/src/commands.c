@@ -294,6 +294,8 @@ void StuffAliases()
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias notready break\n");
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias kfjump \"impulse 156;+jump;wait;-jump\"\n");
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias krjump \"impulse 164;+jump;wait;-jump\"\n");
+		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias kinfo cmd info %%1 %%2\n");
+		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias kuinfo cmd uinfo %%1 %%2\n");
 	}
 }
 
@@ -1109,7 +1111,7 @@ void ReportMe()
 	char *t1, *t2 , *wt, *pa1, *pa2;
 	float f1, flag = 0;
 
-	if( !strnull( ezinfokey(self, "k_nick") ) )
+	if( !strnull( ezinfokey(self, "k_nick") ) || !strnull( ezinfokey(self, "k") ) )
 		flag = 1;
 
 	pa1 = "";
@@ -1156,6 +1158,10 @@ void ReportMe()
 			if( streq( t1, t2 ) ) {
 				if( flag ) {
 					t1 = ezinfokey(self, "k_nick");
+
+					if ( strnull( t1 ) )
+						t1 = ezinfokey(self, "k");
+
 					G_sprint(p, 3, "%s: ", t1);
 				}
 				else
@@ -1730,7 +1736,7 @@ void TeamSay(float fsndname)
     p = find( world, FOFCLSN, "player" );
 	while( p ) {
 		if( p != self && teamplay && !strnull( p->s.v.netname ) &&
-			 ( atoi( ezinfokey( p, "k_flags" ) ) & 1 ) ) {
+			 ( atoi( ezinfokey( p, "kf" ) ) & 1 ) ) {
 			if( streq( ezinfokey(self, "team"), ezinfokey(p, "team") ) ) {
 				char *t1 = ezinfokey(p, "k_sdir");
 				stuffcmd(p, "play %s%s\n", (strnull( t1 ) ? "" : va("%s/", t1)), sndname);
@@ -2177,6 +2183,8 @@ ok:
 		s2 = "";
 
 	kn = ezinfokey( bp, "k_nick" );
+	if ( strnull( kn ) )
+		kn = ezinfokey( bp, "k" );
 
 	i = bound(0, atoi ( ezinfokey( self, "ln" ) ), sizeof(ln)-1 );
 	memset( (void*)ln, (int)'\n', i);

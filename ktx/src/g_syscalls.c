@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_syscalls.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
+ *  $Id: g_syscalls.c,v 1.3 2005/12/27 20:34:07 qqshka Exp $
  */
 
 //#include "g_local.h"
@@ -258,7 +258,7 @@ void trap_setspawnparam( int edn )
 	syscall( G_SETSPAWNPARAMS, edn );
 }
 
-void trap_changelevel( char *name )
+void trap_changelevel( const char *name )
 {
 	syscall( G_CHANGELEVEL, name );
 }

@@ -20,12 +20,10 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.10 2005/12/25 14:31:37 qqshka Exp $
+ *  $Id: g_utils.c,v 1.11 2005/12/27 20:34:07 qqshka Exp $
  */
 
 #include "g_local.h"
-
-#define MAX_STRINGS 16
 
 
 
@@ -588,15 +586,25 @@ void logfrag( gedict_t * killer, gedict_t * killee )
 	trap_logfrag( NUM_FOR_EDICT( killer ), NUM_FOR_EDICT( killee ) );
 }
 
-void infokey( gedict_t * ed, char *key, char *valbuff, int sizebuff )
+// WARNING: this function doest support 'cmd info' keys and this is MUST be so
+char *infokey( gedict_t * ed, char *key, char *valbuff, int sizebuff )
 {
 	trap_infokey( NUM_FOR_EDICT( ed ), key, valbuff, sizebuff );
+
+	return valbuff;
 }
 
 char *ezinfokey( gedict_t * ed, char *key )
 {
 	static char		string[MAX_STRINGS][1024];
 	static int		index = 0;
+
+	if ( ed->k_player || ed->k_spectator ) {
+		char *v = cmdinfo_getkey( ed, key );
+
+		if ( v ) // key supported so does't need to search in userinfo even key is empty ""
+			return v;
+	}
 
 	index %= MAX_STRINGS;
 
@@ -609,6 +617,13 @@ int  iKey( gedict_t * ed, char *key )
 {
 	char		string[128]; // which size will be best?
 
+	if ( ed->k_player || ed->k_spectator ) {
+		char *v = cmdinfo_getkey( ed, key );
+
+		if ( v ) // key supported so does't need to search in userinfo even key is empty ""
+			return atoi( v );
+	}
+
 	trap_infokey( NUM_FOR_EDICT( ed ), key, string, sizeof( string ) );
 	return atoi( string );
 }
@@ -616,6 +631,13 @@ int  iKey( gedict_t * ed, char *key )
 float fKey( gedict_t * ed, char *key )
 {
 	char		string[128]; // which size will be best?
+
+	if ( ed->k_player || ed->k_spectator ) {
+		char *v = cmdinfo_getkey( ed, key );
+
+		if ( v ) // key supported so does't need to search in userinfo even key is empty ""
+			return atof( v );
+	}
 
 	trap_infokey( NUM_FOR_EDICT( ed ), key, string, sizeof( string ) );
 	return atof( string );
@@ -715,8 +737,10 @@ char *getteam( gedict_t * ed )
 		team = ezinfokey(ed, "team");
 	else if ( streq(ed->s.v.classname, "ghost") )
 		team = ezinfokey(world, va("%d", (int)ed->k_teamnum));
-	else
-		G_Error("getteam: wrong classname %s", ed->s.v.classname);
+	else {
+//		G_Error("getteam: wrong classname %s", ed->s.v.classname);
+		team = "";
+	}
 
 	string[index][0] = 0;
 	strlcat( string[index], team, sizeof( string[0] ) );
@@ -766,6 +790,43 @@ gedict_t *find_plr( gedict_t * start, int *from )
 	}
 
 	return next;
+}
+
+gedict_t *player_by_id( int id )
+{
+	gedict_t *p;
+
+	if ( id < 1 )
+		return NULL;
+
+	for ( p = world; p = find( p , FOFCLSN, "player" ); ) {
+		if ( id == GetUserID( p ) )
+			return p;
+	}
+
+	return NULL;
+}
+
+gedict_t *player_by_name( const char *name )
+{
+	gedict_t *p;
+
+	if ( strnull( name ) )
+		return NULL;
+
+	for ( p = world; p = find( p , FOFCLSN, "player" ); ) {
+		if ( streq(p->s.v.netname, name) )
+			return p;
+	}
+
+	return NULL;
+}
+
+gedict_t *player_by_IDorName( const char *IDname )
+{
+	gedict_t *p = player_by_id( atoi( IDname ) );
+
+	return (p ? p : player_by_name( IDname ) );
 }
 
 char *armor_type( int items )
@@ -898,7 +959,8 @@ qboolean SetHandicap( gedict_t *p, int nhdc )
 	return false;
 }
 
-void changelevel( char *name ){
+void changelevel( const char *name )
+{
  	if ( strnull( name ) )
 		G_Error("changelevel: null");
 

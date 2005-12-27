@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.9 2005/12/25 14:31:37 qqshka Exp $
+ *  $Id: world.c,v 1.10 2005/12/27 20:34:07 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -509,6 +509,8 @@ void StartFrame( int time )
 	if ( framecount == 2 )
 		SecondFrame ( );
 
+	rj = max( 0, fKey( world, "rj" ) ); 	// Set Rocket Jump Modifiers
+
     k_maxspeed = cvar( "sv_maxspeed" );
 	timelimit  = cvar( "timelimit" );
 	fraglimit  = cvar( "fraglimit" );
@@ -517,8 +519,8 @@ void StartFrame( int time )
 
 	k_mode	   = cvar( "k_mode" );
 
-	FixRules ();
 
+	FixRules ();
 
 	framechecks = bound( 0, !iKey( world, "k_noframechecks" ), 1 );
 

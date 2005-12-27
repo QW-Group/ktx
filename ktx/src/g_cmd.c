@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.3 2005/12/16 20:08:56 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.4 2005/12/27 20:34:07 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -29,6 +29,8 @@ extern void     trap_CmdArgv( int arg, char *valbuff, int sizebuff );
 
 void            ClientKill();
 void			SelectMap();
+void			cmdinfo ();
+void			cmduinfo ();
 
 qboolean 	ClientCommand()
 {
@@ -57,6 +59,14 @@ qboolean 	ClientCommand()
 			trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
 			DoCommand ( atoi( arg_1 ) );
 		}
+		return true;
+	}
+	else if ( !strcmp( cmd_command, "info" ) ) {
+		cmdinfo ();
+		return true;
+	}
+	else if ( !strcmp( cmd_command, "uinfo" ) ) {
+		cmduinfo ();
 		return true;
 	}
 

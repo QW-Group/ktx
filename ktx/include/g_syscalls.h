@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_syscalls.h,v 1.2 2005/10/05 18:50:30 qqshka Exp $
+ *  $Id: g_syscalls.h,v 1.3 2005/12/27 20:35:12 qqshka Exp $
  */
 
 int     trap_GetApiVersion(  );
@@ -67,7 +67,7 @@ gedict_t*	trap_find( gedict_t* ent,int fofs, char*str );
 
 void    trap_makestatic( int edn );
 void    trap_setspawnparam( int edn );
-void    trap_changelevel( char *name );
+void    trap_changelevel( const char *name );
 int     trap_multicast( float origin_x, float origin_y, float origin_z, int to );
 void    trap_logfrag( int killer, int killee );
 void    trap_infokey( int edn, char *key, char *valbuff, int sizebuff );

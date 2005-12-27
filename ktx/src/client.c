@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.20 2005/12/25 14:31:37 qqshka Exp $
+ *  $Id: client.c,v 1.21 2005/12/27 20:34:07 qqshka Exp $
  */
 
 //===========================================================================
@@ -504,7 +504,7 @@ void execute_changelevel()
 // KTEAMS: make players invisible
         other->s.v.model = "";
 		// take screenshot if requested
-        if( atoi( ezinfokey( other, "k_flags" ) ) & 2 )
+        if( atoi( ezinfokey( other, "kf" ) ) & 2 )
 			stuffcmd(other, "wait; wait; wait; wait; wait; wait; screenshot\n");
 
 		other = find( other, FOFS( s.v.classname ), "player" );
@@ -952,7 +952,7 @@ void PutClientInServer()
 	gedict_t       *spot;
 	vec3_t          v;
 	int             items;
-	char            s[20];
+//	char            s[20];
 
 //	G_bprint(2, "PutClientInServer()\n");
 
@@ -1086,14 +1086,6 @@ void PutClientInServer()
 //	spawn_tfog( v );
 
 //	spawn_tdeath( self->s.v.origin, self );
-
-	// FIXME: why here?
-	// Set Rocket Jump Modifiers
-	infokey( world, "rj", s, sizeof( s ) );
-	if ( atof( s ) != 0 ) // can be float, so atof
-	{
-		rj = atof( s );
-	}
 
 	if ( deathmatch == 4 && match_in_progress == 2 )
 	{

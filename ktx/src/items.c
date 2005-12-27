@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.7 2005/12/24 19:03:10 qqshka Exp $
+ *  $Id: items.c,v 1.8 2005/12/27 20:34:07 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -569,7 +569,6 @@ void weapon_touch()
 	int             hadammo, best, new = 0, old;
 	gedict_t       *stemp;
 	int             leave;
-	char            s[20];
 
 	// For client weapon_switch
 	int             w_switch;
@@ -577,13 +576,11 @@ void weapon_touch()
 	if ( !( ( int ) other->s.v.flags & FL_CLIENT ) )
 		return;
 
-#ifdef KTEAMS
+
 	if (match_in_progress != 2)
         return;
-#endif
-
-	infokey( other, "w_switch", s, sizeof( s ) );
-	w_switch = atoi( s );
+	
+	w_switch = iKey( other, "w_switch" );
 	if ( !w_switch )
 		w_switch = 8;
 
@@ -1555,23 +1552,18 @@ void BackpackTouch()
 	gedict_t       *stemp;
 	float           acount;
 	int             b_switch;
-	char            s[20];
 
-#ifdef KTEAMS
+
     if ( match_in_progress != 2 )
         return;
-#endif
 
 	if ( deathmatch == 4 )
 		if ( other->invincible_time > 0 )
 			return;
-
-	infokey( other, "b_switch", s, sizeof( s ) );
-	b_switch = atoi( s );
+	
+	b_switch = iKey( other, "b_switch" );
 	if ( !b_switch )
 		b_switch = 8;
-
-
 
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;

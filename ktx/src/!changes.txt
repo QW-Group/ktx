@@ -1,3 +1,68 @@
+2005-12-27
+ 32. Modified quote from ktpro docs.
+
+	 In addition to the client-server setinfos you can now set most of
+     such info via KTX. Advantages hereby: no setinfo overflows (or
+     eyes/pmodel mismatch) and other players wont get flooded on info
+     changes.
+     
+     syntax: cmd info [<key> [value]]      ' for setting info
+             cmd uinfo <id/name> [key]     ' for reading others info (id from klist)
+
+     On connect to the server (i.e. once) the alias 'infoset' will be called
+     for players, and 'sinfoset' for spectators.
+
+     ATTENTION, some old setinfos cannot be used with this new method! It's
+     mainly for the info used by the mod itself and some additional stuff.
+     
+     Strictly forbidden values:
+
+      bottomcolor
+      name
+      noaim
+      rate
+      skin
+      spectator
+      team
+      topcolor
+
+     Allowed values (and only this! Not yet supported values marked with // ):
+
+		"b_switch"
+	// 		bw
+    //      b1, b2, b3, b4
+    	"e-mail"
+	//      ev, +ev, -ev
+	//      fs
+	//      ft
+		"gender"
+    	"icq"
+    	"k"
+    	"k_nick"
+	//      ke
+		"kf"
+	//		+kf, -kf
+		"ln"
+	//		ls
+		"lw"
+		"postmsg"
+		"premsg"
+	//		quote	 wtf?
+    //   	ma		 wtf?
+		"ss"
+	//		rb
+    	"w_switch"
+		"k_sdir"
+
+	NOTES: 1) ezQuake users have bonus, they can use 'kinfo' and 'kuinfo' instead of
+		   'cmd info' and 'cmd uinfo' respectively.
+		   Example:
+			'kinfo' will show all u's keys.
+			'kinfo b_switch' will show b_switch key.
+			'kinfo b_switch 1' will set b_switch key to value of 1.
+
+		   2) meaning of keys may differ from ktpro.
+
 2005-12-25
  29. Fixed my'n bug where ghost is not saved after u type disconnect at client console.
 
@@ -47,7 +112,7 @@
 	 by default if u type XonX command.
 
 	 NOTES: 'noweapon' command is actually an alias, but alias with params, so this is
-            worked ok only on ezQauke.
+            worked ok only on ezQuake.
 
  26. fixed BUG: break;reconnect;break... --> map changed
 	 gLAd noticed me.

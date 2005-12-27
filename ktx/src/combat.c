@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.7 2005/12/24 19:03:10 qqshka Exp $
+ *  $Id: combat.c,v 1.8 2005/12/27 20:34:07 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -175,8 +175,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	float           take;
 	int				wp_num;
 
-	//char*  s;
-	char            attackerteam[10], targteam[10];
+	char            *attackerteam, *targteam;
 
 
 	if ( !targ->s.v.takedamage || ISDEAD( targ ) )
@@ -302,27 +301,34 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	}
 // team play damage avoidance
 //ZOID 12-13-96: self.team doesn't work in QW.  Use keys
-	infokey( attacker, "team", attackerteam, sizeof( attackerteam ) );
-	infokey( targ, "team", targteam, sizeof( targteam ) );
+    attackerteam = getteam( attacker );
+	targteam = getteam( targ );
 
 	// teamplay == 1 don't damage self and mates (armor affected anyway)
-	if ( ( teamplay == 1 ) && !strcmp( targteam, attackerteam ) &&
-	     !strcmp( attacker->s.v.classname, "player" ) && strcmp( attackerteam, "" ) &&
-	     strcmp( inflictor->s.v.classname, "door" ) )
+	if ( teamplay == 1
+		 && !strnull( attackerteam )
+		 && streq( targteam, attackerteam )
+		 && streq( attacker->s.v.classname, "player" )
+		 && strneq( inflictor->s.v.classname, "door" )
+	   )
 		return;
 
 	// teamplay == 3 don't damage mates, do damage to self (armor affected anyway)
-	if ( ( teamplay == 3 ) && !strcmp( targteam, attackerteam ) &&
-	     !strcmp( attacker->s.v.classname, "player" ) && strcmp( attackerteam, "" ) &&
-	     targ != attacker && strcmp( inflictor->s.v.classname, "door" ) )
+	if ( teamplay == 3
+		 && !strnull( attackerteam )
+		 && streq( targteam, attackerteam )
+		 && streq( attacker->s.v.classname, "player" )
+		 && strneq( inflictor->s.v.classname, "door" )
+		 && targ != attacker
+	   )
 		return;
 
 // do the damage
 
 	if (     match_in_progress == 2
-		 || !strcmp( attacker->s.v.classname, "teledeath" ) 
-		 || !strcmp( attacker->s.v.classname, "teledeath2" ) // qqshka
-		 || !strcmp( attacker->s.v.classname, "teledeath3" ) // qqshka 
+		 || streq( attacker->s.v.classname, "teledeath" ) 
+		 || streq( attacker->s.v.classname, "teledeath2" ) // qqshka
+		 || streq( attacker->s.v.classname, "teledeath3" ) // qqshka 
 		 || ( k_practice && strneq( targ->s.v.classname, "player" ) ) // #practice mode#
 	   ) {
 		targ->s.v.health -= take;

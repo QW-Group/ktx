@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.7 2005/12/04 13:58:42 qqshka Exp $
+ *  $Id: g_main.c,v 1.8 2005/12/27 20:34:07 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -107,6 +107,8 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		self->k_spectator = arg0;
 		self->k_player    = !arg0;
 
+		cmdinfo_infoset ( self );
+
 		if ( arg0 )
 			SpectatorConnect();
 		else
@@ -122,6 +124,9 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 
 	case GAME_CLIENT_DISCONNECT:
 		self = PROG_TO_EDICT( g_globalvars.self );
+
+		cmdinfo_clear ( self ); // remove all keys for this client on disconnect
+
 		if ( arg0 )
 			SpectatorDisconnect();
 		else

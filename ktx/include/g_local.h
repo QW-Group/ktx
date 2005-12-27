@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.10 2005/12/24 19:03:29 qqshka Exp $
+ *  $Id: g_local.h,v 1.11 2005/12/27 20:35:11 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -54,6 +54,7 @@
 #define DebugTrap(x) G_Error(x)
 #endif
 
+#define MAX_STRINGS 32
 
 #define	MAX_STRING_CHARS	1024	// max length of a string passed to Cmd_TokenizeString
 #define	MAX_STRING_TOKENS	1024	// max tokens resulting from Cmd_TokenizeString
@@ -171,7 +172,7 @@ int     	checkbottom( gedict_t * ed );
 void    	makestatic( gedict_t * ed );
 void    	setspawnparam( gedict_t * ed );
 void    	logfrag( gedict_t * killer, gedict_t * killee );
-void    	infokey( gedict_t * ed, char *key, char *valbuff, int sizebuff );
+char    	*infokey( gedict_t * ed, char *key, char *valbuff, int sizebuff );
 
 char		*ezinfokey( gedict_t * ed, char *key );
 int			iKey( gedict_t * ed, char *key );
@@ -191,7 +192,11 @@ void        cvar_set( const char *var, const char *val );
 
 char		*getteam( gedict_t * ed );
 char		*getname( gedict_t * ed );
+
 gedict_t	*find_plr( gedict_t * start, int *from );
+gedict_t 	*player_by_id( int id );
+gedict_t	*player_by_name( const char *name );
+gedict_t	*player_by_IDorName( const char *IDname );
 
 char		*armor_type( int items );
 
@@ -206,6 +211,8 @@ int			GetUserID(gedict_t *p);
 char		*TrackWhom(gedict_t *p);
 int			GetHandicap( gedict_t *p );
 qboolean	SetHandicap( gedict_t *p, int nhdc );
+void		changelevel( const char *name );
+
 
 void    	disableupdates( gedict_t * ed, float time );
 
@@ -338,6 +345,16 @@ int				Vip_Flags(gedict_t* cl);
 int				Vip_IsFlags(gedict_t* cl, int flags);
 void			Vip_ShowRights(gedict_t* cl);
 
+// g_userinfo.c
+
+typedef struct cmdinfo_s {
+	char    *key;
+} cmdinfo_t;
+
+char	*cmdinfo_getkey( gedict_t *p, char *key );
+int		cmdinfo_setkey( gedict_t *p, char *key, char *value );
+void	cmdinfo_infoset ( gedict_t *p );
+void	cmdinfo_clear ( gedict_t *p );
 
 //global.c
 
