@@ -1002,7 +1002,7 @@ void TimerThink ()
 			return;
 		}
 
-		G_bprint(2, "%s‘ minute%s remaining\n", dig3(self->cnt), ((self->cnt != 1) ? "'s" : ""));
+		G_bprint(2, "%s‘ minute%s remaining\n", dig3(self->cnt), ((self->cnt != 1) ? "s" : ""));
 
 		self->s.v.nextthink = g_globalvars.time + 1;
 
