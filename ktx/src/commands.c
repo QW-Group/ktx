@@ -2340,6 +2340,8 @@ int um_cnt = sizeof (um_list) / sizeof (um_list[0]);
 
 void UserMode(float umode)
 {
+	char buf[1024*4];
+
 	char *um=NULL;
 	int k_free_mode = atoi( ezinfokey( world, "k_free_mode" ) );
 	int k_allowed_free_modes = atoi( ezinfokey( world, "k_allowed_free_modes" ) );
@@ -2407,26 +2409,31 @@ void UserMode(float umode)
 
 	G_bprint(2, "%s %s\n", redtext(um_list[i].displayname), redtext("settings enabled"));
 
-	localcmd( common_um_init );
-	trap_executecmd ();
+	trap_readcmd( common_um_init, buf, sizeof(buf) );
+	G_cprint("%s", buf);
 
 	if ( self->k_admin == 2 ) // some admin features, may be overwriten by um_list[i].initstring
 	{
 		// introduce 'k_umfallbunny', which is just control which value
 		// must be set to 'k_fallbunny' after XonX
 		int k_umfallbunny = bound ( 0, atoi( ezinfokey( world, "k_umfallbunny" ) ), 1);
-		localcmd("localinfo k_fallbunny %d\n", k_umfallbunny);
+		trap_readcmd(va("localinfo k_fallbunny %d\n", k_umfallbunny), buf, sizeof(buf) );
+		G_cprint("%s", buf);
 	}
 
-	localcmd( um_list[i].initstring );
+	trap_readcmd( um_list[i].initstring, buf, sizeof(buf) );
+	G_cprint("%s\n", buf);
 
 	// TODO: IMO possible check existence of each file, so don't spam in logs like "can't find etc..."
-	localcmd("exec configs/usermodes/default.cfg\n");
-	localcmd("exec configs/usermodes/%s.cfg\n", g_globalvars.mapname);
-	localcmd("exec configs/usermodes/%s/default.cfg\n", um);
-	localcmd("exec configs/usermodes/%s/%s.cfg\n", um, g_globalvars.mapname);
-	
-	trap_executecmd ();
+
+	trap_readcmd(va("exec configs/usermodes/default.cfg\n"), buf, sizeof(buf) );
+	G_cprint("%s", buf);
+	trap_readcmd(va("exec configs/usermodes/%s.cfg\n", g_globalvars.mapname), buf, sizeof(buf) );
+	G_cprint("%s", buf);
+	trap_readcmd(va("exec configs/usermodes/%s/default.cfg\n", um), buf, sizeof(buf) );
+	G_cprint("%s", buf);
+	trap_readcmd(va("exec configs/usermodes/%s/%s.cfg\n", um, g_globalvars.mapname), buf, sizeof(buf) );
+	G_cprint("%s", buf);
 }
 
 void ModPause (int pause);

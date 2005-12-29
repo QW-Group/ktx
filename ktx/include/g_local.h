@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.11 2005/12/27 20:35:11 qqshka Exp $
+ *  $Id: g_local.h,v 1.12 2005/12/29 16:42:41 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -146,6 +146,8 @@ void            G_bprint( int level, const char *fmt, ... );
 void            G_centerprint( gedict_t * ed, const char *fmt, ... );
 /* centerprint too all clients */
 void 			G_cp2all(const char *fmt, ... );
+
+void			G_cprint( const char *fmt, ... );
 void            G_dprint( const char *fmt, ... );
 
 void			localcmd( const char *fmt, ... );
