@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.8 2005/12/31 19:05:00 qqshka Exp $
+ *  $Id: progs.h,v 1.9 2005/12/31 23:28:09 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -251,6 +251,7 @@ typedef struct gedict_s {
 	int   k_makeghost;      // if this true make ghost for disconnected player
 
 	float nthink;			// store here regeneration time of some items
+	struct gedict_s *wizard;// for specs, link to the entity which represent wizard
 #endif
 
 } gedict_t;

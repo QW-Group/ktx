@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.4 2005/12/10 19:51:02 qqshka Exp $
+ *  $Id: spectate.c,v 1.5 2005/12/31 23:27:43 qqshka Exp $
  */
 
 // spectate.c
@@ -32,6 +32,27 @@ void AdminImpBot();
 
 void SMakeMOTD();
 void ExitKick(gedict_t *kicker);
+
+float CountALLPlayers ();
+
+int GetSpecWizard ()
+{
+	int k_asw = bound(0, cvar("allow_spec_wizard"), 2);
+
+	if ( match_in_progress || intermission_running )
+		return 0;
+
+	switch ( k_asw ) {
+		case 0:
+				return 0; // wizards not allowed
+		case 1:
+				return (CountALLPlayers () ? 0 : 1); // allowed without players
+		case 2:
+				return 2; // allowed with players in prematch
+	}
+
+	return 0;
+}
 
 
 void ShowCamHelp()
@@ -53,12 +74,17 @@ void SpectatorConnect()
 	Vip_ShowRights( self );
 
 	if( match_in_progress != 2 || iKey(world, "k_ann") )
-		G_bprint( PRINT_MEDIUM, "Spectator %s entered the game\n", self->s.v.netname );
+		G_bprint( PRINT_HIGH, "Spectator %s entered the game\n", self->s.v.netname );
 
 	self->s.v.goalentity = EDICT_TO_PROG( world );	// used for impulse 1 below
 
 	// Added this in for kick code.
 	self->s.v.classname = "spectator";
+
+	if ( match_in_progress != 2 ) {
+		self->wizard = spawn();
+		self->wizard->s.v.classname = "spectator_wizard";
+	}
 
 	// Wait until you do stuffing
 	SMakeMOTD();
@@ -71,7 +97,12 @@ void SpectatorConnect()
 void SpectatorDisconnect()
 {
 	if( match_in_progress != 2 || iKey(world, "k_ann") )
-		G_bprint( PRINT_MEDIUM, "Spectator %s left the game\n", self->s.v.netname );
+		G_bprint( PRINT_HIGH, "Spectator %s left the game\n", self->s.v.netname );
+
+	if ( self->wizard ) {
+		ent_remove( self->wizard );
+		self->wizard = NULL;
+	}
 
 	self->s.v.classname = ""; // Cenobite, so we clear out any specs as they leave
 	self->k_spectator = 0;
@@ -127,6 +158,76 @@ void SpectatorImpulseCommand()
 ///////////////
 void SpectatorThink()
 {
+	gedict_t *wizard = self->wizard;
+
 	if ( self->s.v.impulse )
 		SpectatorImpulseCommand();
+
+	if ( wizard ) {
+		wizard->s.v.angles[0] = -self->s.v.v_angle[0] / 3;
+		wizard->s.v.angles[1] = self->s.v.v_angle[1];
+
+		setorigin( wizard, self->s.v.origin[0], self->s.v.origin[1],
+					 self->s.v.origin[2] + 3*sin(g_globalvars.time*2.5) );
+
+		if ( GetSpecWizard () ) {
+			gedict_t *goal = PROG_TO_EDICT( self->s.v.goalentity );
+
+			if ( goal && goal->k_player ) // tracking player, so turn model off
+				wizard->s.v.model = "";
+			else // turn model on
+				setmodel( wizard, "progs/wizard.mdl" );
+		}
+		else {
+			wizard->s.v.model = ""; // turn model off
+		}
+	}
 }
+
+void remove_specs_wizards ()
+{
+	gedict_t *p;
+
+	for( p = world; p = find( p, FOFCLSN, "spectator" ); )
+		if ( p->wizard ) {
+			ent_remove( p->wizard );
+			p->wizard = NULL;
+		}
+}
+
+void hide_specs_wizards ()
+{
+	gedict_t *p;
+
+	for( p = world; p = find( p, FOFCLSN, "spectator_wizard" ); )
+		p->s.v.model = "";
+}
+
+void show_specs_wizards ()
+{
+	gedict_t *p;
+
+	for( p = world; p = find( p, FOFCLSN, "spectator_wizard" ); )
+		setmodel (p, "progs/wizard.mdl");
+}
+
+void FixSpecWizards ()
+{
+	static int k_asw = -1; // static
+
+	qboolean changed   = false;
+	int 	 k_asw_new = GetSpecWizard ();
+
+	if( k_asw != k_asw_new || framecount == 1 ) { // force on first frame
+		changed = true;
+		k_asw = k_asw_new;
+	}
+
+	if ( changed ) {
+		if ( k_asw )
+			show_specs_wizards ();
+		else
+			hide_specs_wizards ();
+	}
+}
+

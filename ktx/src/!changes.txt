@@ -1,3 +1,11 @@
+2006-01-01
+ 35. Added cvar 'allow_spec_wizard'. ktpro (c)
+	 Spectators may be represented for players as wizards.
+
+	 set allow_spec_wizard 2 // 0 - wizards not allowed
+							 // 1 - allowed without players in prematch
+                        	 // 2 - allowed with players in prematch
+
 2005-12-31
  34. Added dynamic powerups manipulation in matchless mode, depending on count of players.
 

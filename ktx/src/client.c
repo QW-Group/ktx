@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.22 2005/12/31 19:04:22 qqshka Exp $
+ *  $Id: client.c,v 1.23 2005/12/31 23:27:43 qqshka Exp $
  */
 
 //===========================================================================
@@ -1449,7 +1449,7 @@ void MakeGhost ()
 ///////////////
 void ClientDisconnect()
 {
-	float f1, f2;
+	float f1;
 
 	if ( match_in_progress && self->k_vote ) { // recount break votes
 		gedict_t *p;

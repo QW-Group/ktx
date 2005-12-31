@@ -8,6 +8,7 @@ void EndMatch ( float skip_log );
 void BotForceStart ();
 void CheckAll();
 void StartMatch ();
+void remove_specs_wizards ();
 
 float CountALLPlayers ()
 {
@@ -1147,6 +1148,8 @@ void StartMatch ()
 	match_in_progress = 2;
 
 	trap_executecmd (); // <- this really needed
+
+	remove_specs_wizards (); // remove wizards
 
 	p = find ( world, FOFCLSN, "player" );
 

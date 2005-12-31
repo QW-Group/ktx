@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.11 2005/12/31 19:04:22 qqshka Exp $
+ *  $Id: world.c,v 1.12 2005/12/31 23:27:43 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -29,6 +29,8 @@ float CountALLPlayers ();
 void  StartMatchLess ();
 
 void  SUB_regen();
+
+void  FixSpecWizards ();
 
 #define MAX_BODYQUE 4
 gedict_t       *bodyque[MAX_BODYQUE];
@@ -254,6 +256,8 @@ void SP_worldspawn()
 
 	trap_precache_model( "progs/v_light.mdl" );
 
+	trap_precache_model( "progs/wizard.mdl" );
+
 //
 // Setup light animation tables. 'a' is total darkness, 'z' is maxbright.
 //
@@ -388,6 +392,8 @@ void FirstFrame	( )
 	RegisterCvar("k_pow_check_time");
 	RegisterCvar("_k_players"); // internal usage, count of players on last map
 	RegisterCvar("_k_pow_last"); // internal usage, k_pow from last map
+	RegisterCvar("allow_spec_wizard");
+
 
 	k_matchLess = cvar( "k_matchless" ); // changed only here
 }
@@ -593,6 +599,8 @@ void StartFrame( int time )
 	FixRules ();
 
 	FixPowerups ();
+
+	FixSpecWizards ();
 
 	framechecks = bound( 0, !iKey( world, "k_noframechecks" ), 1 );
 
