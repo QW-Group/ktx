@@ -750,18 +750,18 @@ void ShowMaps()
 
 void PrintToggle1( char *tog, char *key )
 {
-	float f1;
+	int i;
 
 	if ( strnull(tog) || strnull(key) )
 		G_Error("PrintToggle1 null");
 
 	G_sprint(self, 2, tog);
 
-	f1 = atoi( ezinfokey( world, key ) );
+	i = streq(key, "k_pow") ? Get_Powerups() : bound(0, iKey( world, key ), 1);
 
-	if( !f1 )
+	if( !i )
 		G_sprint(self, 2, "Off ");
-	else if ( f1 == 1 )
+	else if ( i == 1 )
 		G_sprint(self, 2, "On  ");
 	else
 		G_sprint(self, 2, "Jam ");
@@ -1244,47 +1244,25 @@ void ToggleRespawn666()
 void TogglePowerups()
 {
 	float tmp;
-	gedict_t *p, *old;
 
 	if ( match_in_progress )
 		return;
+
 	if ( atoi( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
 		G_sprint(self, 3, "console: command is locked\n");
 		return;
 	}
 
-	tmp = atoi( ezinfokey( world, "k_pow" ) );
+	tmp = iKey( world, "k_pow" ); // here we are not using Get_Powerups
 
 	G_bprint(2, "Ðï÷åòõðó ");
 
 	if( tmp == 2 ) {
 		G_bprint(2, "disabled\n");
 		localcmd("localinfo k_pow 0\n");
-	    p = findradius(world, VEC_ORIGIN, 999999);
-		while(p) {
-			old = findradius(p, VEC_ORIGIN, 999999);;
-
-			if( streq(p->s.v.classname, "item_artifact_invulnerability" ) )
-				p->s.v.effects = p->s.v.effects - ((int)p->s.v.effects & 128);
-			if( streq(p->s.v.classname, "item_artifact_super_damage" ) )
-				p->s.v.effects = p->s.v.effects - ((int)p->s.v.effects & 64);
-
-			p = old;
-		}
 	} else if( !tmp ) {
 		G_bprint(2, "enabled\n");
 		localcmd("localinfo k_pow 1\n");
-	    p = findradius(world, VEC_ORIGIN, 999999);
-		while(p) {
-			old = findradius(p, VEC_ORIGIN, 999999);;
-
-			if( streq( p->s.v.classname, "item_artifact_invulnerability" ) )
-				p->s.v.effects = (int)p->s.v.effects | 128;
-			if( streq( p->s.v.classname, "item_artifact_super_damage" ) )
-				p->s.v.effects = (int)p->s.v.effects | 64;
-
-			p = old;
-		}
 	} else {
 		G_bprint(2, "enabled (timer jammer)\n");
 		localcmd("localinfo k_pow 2\n");

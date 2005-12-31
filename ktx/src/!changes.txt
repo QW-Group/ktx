@@ -1,3 +1,19 @@
+2005-12-31
+ 34. Added dynamic powerups manipulation in matchless mode, depending on count of players.
+
+	 set k_pow_min_players 3 // this is a count of players required for powerups to be on.
+							 // for example if u set this to 3 - mod will disable powerups if 
+							 // count of players less when 3.
+							 // setting to 0 will disable this feature.
+							 // NOTES: 1) only matchless mode affected by this setting
+							 //        2) if 'k_pow' set to 0, powerups will be disabled anyway
+							 //        3) already tooked powerups does't affected
+
+	 set k_pow_check_time  10 // this just tell mode check 'k_pow_min_players' not every second
+						 	  // but time which u desire, time in seconds, default is 10 seconds.
+
+	 Happy new year :)
+
 2005-12-29
  33. Fixed a bug where some tech info goes to client wheh XonX commands issued,
 	 but u need the latest mvdsv.

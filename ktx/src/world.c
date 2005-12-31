@@ -20,16 +20,15 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.10 2005/12/27 20:34:07 qqshka Exp $
+ *  $Id: world.c,v 1.11 2005/12/31 19:04:22 qqshka Exp $
  */
 
 #include "g_local.h"
 
-#ifdef KTEAMS
 float CountALLPlayers ();
 void  StartMatchLess ();
-#endif
 
+void  SUB_regen();
 
 #define MAX_BODYQUE 4
 gedict_t       *bodyque[MAX_BODYQUE];
@@ -323,14 +322,12 @@ void SP_worldspawn()
 	}
 
 	// spawn quad if map is aerowalk in this case
-	if ( atoi ( ezinfokey(world, "add_q_aerowalk") )
-			&& streq( "aerowalk", g_globalvars.mapname) ) {
+	if ( iKey(world, "add_q_aerowalk") && streq( "aerowalk", g_globalvars.mapname) ) {
    		gedict_t	*swp = self;
 
 		self = spawn();
 		setorigin( self, -912.5f, -898.875f, 248.0f ); // oh, ktpro like
 		self->s.v.owner = EDICT_TO_PROG( world );
-		self->s.v.classname = "item_artifact_super_damage";
 		SP_item_artifact_super_damage();
 
 		self = swp; // restore self
@@ -385,8 +382,12 @@ void FirstFrame	( )
 	RegisterCvar("k_disallow_krjump");
 	RegisterCvar("k_lock_hdp");
 	RegisterCvar("k_disallow_weapons");
-	RegisterCvar("_k_lastmap");	// internal usage
+	RegisterCvar("_k_lastmap");	// internal usage, name of last map
 	RegisterCvar("k_srvcfgmap");
+	RegisterCvar("k_pow_min_players");
+	RegisterCvar("k_pow_check_time");
+	RegisterCvar("_k_players"); // internal usage, count of players on last map
+	RegisterCvar("_k_pow_last"); // internal usage, k_pow from last map
 
 	k_matchLess = cvar( "k_matchless" ); // changed only here
 }
@@ -401,6 +402,75 @@ void SecondFrame ( )
 		StartMatchLess ();
 }
 
+void hide_powerups ( char *classname )
+{
+	gedict_t *p;
+
+	if ( strnull( classname ) )
+		G_Error("hide_items");
+
+	for( p = world; p = find(p, FOFCLSN, classname); ) {
+		p->s.v.solid = SOLID_NOT;
+ 		p->s.v.model = "";
+		if ( p->s.v.think == ( func_t ) SUB_regen ) {
+			p->nthink = p->s.v.nextthink > 0 ? p->s.v.nextthink : 0; // save respawn time
+			p->s.v.nextthink = 0;  // disable item auto respawn
+		}
+	}
+}
+
+void show_powerups ( char *classname )
+{
+	gedict_t *p, *swp;
+
+	if ( strnull( classname ) )
+		G_Error("show_items");
+
+	swp = self; 
+
+	for( p = world; p = find(p, FOFCLSN, classname); ) {
+		self = p; // WARNING
+
+		// spawn item if not yet so
+		if ( strnull( self->s.v.model ) || self->s.v.solid != SOLID_TRIGGER ) {
+			if ( self->s.v.think == ( func_t ) SUB_regen && self->nthink > 0 )
+				self->s.v.nextthink	= self->nthink; // spawn at this time
+			else
+				SUB_regen(); // spawn suddenly
+		}
+	}
+
+	self  = swp;
+}
+
+// serve k_pow and k_pow_min_players
+void FixPowerups ()
+{
+	static int k_pow = -1; // static
+
+	qboolean changed   = false;
+	int 	 k_pow_new = Get_Powerups();
+
+	if( k_pow != k_pow_new || framecount == 1 ) { // force on first frame
+		changed = true;
+		k_pow = k_pow_new;
+	}
+
+	if ( changed ) {
+		if ( k_pow ) { // show powerups for players
+			show_powerups( "item_artifact_invulnerability" );
+			show_powerups( "item_artifact_super_damage" );
+			show_powerups( "item_artifact_envirosuit" );
+			show_powerups( "item_artifact_invisibility" );
+		}
+		else{ // hide powerups from players
+			hide_powerups( "item_artifact_invulnerability" );
+			hide_powerups( "item_artifact_super_damage" );
+			hide_powerups( "item_artifact_envirosuit" );
+			hide_powerups( "item_artifact_invisibility" );
+		}
+	}
+}
 
 // check if server is misconfigured somehow, made some minimum fixage
 void FixRules ( )
@@ -521,6 +591,8 @@ void StartFrame( int time )
 
 
 	FixRules ();
+
+	FixPowerups ();
 
 	framechecks = bound( 0, !iKey( world, "k_noframechecks" ), 1 );
 

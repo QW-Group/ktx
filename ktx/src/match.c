@@ -659,7 +659,8 @@ void EndMatch ( float skip_log )
 {
 	gedict_t	*p;
 
-	int fpd = atoi( ezinfokey ( world, "fpd" ) );
+	int fpd = iKey ( world, "fpd" );
+	int old_match_in_progress = match_in_progress;
 	char *tmp;
 	float f1;
 
@@ -741,6 +742,11 @@ void EndMatch ( float skip_log )
 
 	for( f1 = 1; k_userid >= f1; f1++ )
 		localcmd("localinfo %d \"\"\n", (int)f1); //removing key
+
+	if ( old_match_in_progress == 2 ) {
+		for ( p = world; p = find( p, FOFCLSN, "player" ); )
+			p->ready = 0; // force players be not ready after match is end.
+	}
 
 	NextLevel();
 }
@@ -1081,7 +1087,7 @@ void StartMatch ()
 	k_nochange = 0;	
 	localcmd("localinfo 1 \"\"\n");
 	localcmd("localinfo 666 \"\"\n");
-	f1 = iKey( world, "k_pow" );
+	f1 = Get_Powerups();
 	f2 = iKey( world, "k_dm2mod" );
 
     // Check to see if berzerk is set.
@@ -1104,6 +1110,7 @@ void StartMatch ()
 		   ) { // this must be removed in any cases
 				ent_remove( p );
 		}
+/*
 		else if ( !f1 && (     streq( p->s.v.classname, "item_artifact_invulnerability" )
 				            || streq( p->s.v.classname, "item_artifact_super_damage" )
 				            || streq( p->s.v.classname, "item_artifact_envirosuit" )
@@ -1112,6 +1119,7 @@ void StartMatch ()
 				) { // no powerups
 				ent_remove( p );
 		}
+*/
 		else if( deathmatch > 3 ) {
 			if(    streq( p->s.v.classname, "weapon_nailgun" )
 				|| streq( p->s.v.classname, "weapon_supernailgun" )
@@ -1308,7 +1316,7 @@ void PrintCountdown( int seconds )
 	if ( atoi( ezinfokey( world, "k_overtime" ) ) )
 		strlcat(text, va("%s %4s\n", "Overtime", ot), sizeof(text));
 
-	switch ( atoi( ezinfokey( world, "k_pow" ) ) ) {
+	switch ( Get_Powerups() ) {
 		case 0:  pwr = redtext("Off"); break;
 		case 1:  pwr = redtext( "On"); break;
 		case 2:  pwr = redtext("Jam"); break;
@@ -1738,7 +1746,7 @@ void PlayerBreak ()
 	if( !match_in_progress ) {
 		self->ready = 0;
 		G_bprint(2, "%s is not ready\n", self->s.v.netname);
-		if( atoi( ezinfokey( world, "k_sready" ) ) )
+		if( iKey( world, "k_sready" ) )
 			self->s.v.effects = self->s.v.effects + 64; // FIXME: hmm clean this
 
 		return;

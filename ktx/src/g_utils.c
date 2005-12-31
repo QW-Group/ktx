@@ -20,11 +20,13 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.12 2005/12/29 16:42:17 qqshka Exp $
+ *  $Id: g_utils.c,v 1.13 2005/12/31 19:04:22 qqshka Exp $
  */
 
 #include "g_local.h"
 
+
+float CountPlayers();
 
 
 int NUM_FOR_EDICT( gedict_t * e )
@@ -980,6 +982,8 @@ void changelevel( const char *name )
 		G_Error("changelevel: null");
 
 	cvar_set( "_k_lastmap", g_globalvars.mapname );
+	trap_cvar_set_float( "_k_players", CountPlayers());
+	trap_cvar_set_float( "_k_pow_last", Get_Powerups() );
 
 	// exec configs/maps/out/mapname.cfg
 	if ( cvar( "k_srvcfgmap" ) && strneq( g_globalvars.mapname, name ) ) {
@@ -988,5 +992,52 @@ void changelevel( const char *name )
 	}
 
 	trap_changelevel(name);
+}
+
+int Get_Powerups ()
+{
+	static float k_pow_check = 0;
+	static int   k_pow = 0;
+
+	int k_pow_new         = iKey(world, "k_pow");
+	int k_pow_min_players = bound(0, cvar( "k_pow_min_players"), 999);
+	int k_pow_check_time  = bound(0, cvar( "k_pow_check_time"), 999);
+
+	k_pow_check_time = !k_pow_check_time ? 10 : k_pow_check_time; // default is 10
+
+	if ( !k_pow_new || !k_matchLess || !k_pow_min_players )
+		return k_pow = k_pow_new; // no k_pow_min_players if server in normal match mode
+								  // no powerups if k_pow == 0
+								  // return current value of key 'k_pow' if k_pow_min_players == 0
+
+	if ( k_pow_check > g_globalvars.time )
+		return k_pow; // too soon to re-check, so return result of last check
+
+	// ok, time to re-check if powerups is still actual, or we have lack of players
+
+	// because not all players may connected yet, some work around :|
+	if ( framecount == 1 ) {
+		k_pow_check = g_globalvars.time + 3; // fast re-check. probably time when all players reconnect
+		k_pow_new = max(cvar("_k_players"), CountPlayers()) < k_pow_min_players ? 0 : k_pow_new;
+		k_pow = cvar( "_k_pow_last" ); // restorek_po from last level
+	}else {
+		k_pow_check = g_globalvars.time + k_pow_check_time;
+		k_pow_new = CountPlayers() < k_pow_min_players ? 0 : k_pow_new;
+	}
+
+	if ( k_pow != k_pow_new ) {
+		char *pwr;
+
+		switch ( k_pow_new ) {
+			case 0:  pwr = redtext("Off"); break;
+			case 1:  pwr = redtext("On");  break;
+			case 2:  pwr = redtext("On (Jam)"); break;
+			default: pwr = redtext("Unkn"); break;
+		}
+		
+		G_bprint(2, "Server decide turn %s %s\n", redtext("powerups"), pwr);
+	}
+
+	return (k_pow = k_pow_new);
 }
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.21 2005/12/27 20:34:07 qqshka Exp $
+ *  $Id: client.c,v 1.22 2005/12/31 19:04:22 qqshka Exp $
  */
 
 //===========================================================================
@@ -1411,16 +1411,49 @@ void CheckWaterJump()
 }
 
 
+void MakeGhost ()
+{
+	gedict_t *ghost;
+	float f1 = 1;
+	float f2 = 0;
+
+	while( f1 < k_userid && !f2 ) {
+		if( strnull( ezinfokey(world, va("%d", (int)f1) ) ) )
+			f2 = 1;
+		else
+			f1++;
+	}
+
+	if( !f2 )
+		k_userid++;
+
+	ghost = spawn();
+	ghost->s.v.owner = EDICT_TO_PROG( world );
+	ghost->s.v.classname = "ghost";
+	ghost->cnt2      = f1;
+	ghost->k_teamnum = self->k_teamnum;
+	ghost->s.v.frags = self->s.v.frags;
+	ghost->deaths    = self->deaths;
+	ghost->friendly  = self->friendly;
+	ghost->ready     = 0;
+
+	ghost->ps        = self->ps; // save player stats
+
+	localcmd("localinfo %d \"%s\"\n", (int)f1, self->s.v.netname);
+	trap_executecmd();
+}
+
 ////////////////
 // GlobalParams:
 // self
 ///////////////
 void ClientDisconnect()
 {
-	gedict_t *ghost, *p;
 	float f1, f2;
 
 	if ( match_in_progress && self->k_vote ) { // recount break votes
+		gedict_t *p;
+
 		self->k_vote = 0;
 		k_vbreak = 0;
 		for( p = world; p = find(p, FOFCLSN, "player"); )
@@ -1435,33 +1468,8 @@ void ClientDisconnect()
 
 		sound( self, CHAN_BODY, "player/tornoff2.wav", 1, ATTN_NONE );
 
-		f1 = 1;
-		f2 = 0;
-
-		while( f1 < k_userid && !f2 ) {
-			if( strnull( ezinfokey(world, va("%d", (int)f1) ) ) )
-				f2 = 1;
-			else
-				f1++;
-		}
-
-		if( !f2 )
-			k_userid++;
-
-		ghost = spawn();
-		ghost->s.v.owner = EDICT_TO_PROG( world );
-		ghost->s.v.classname = "ghost";
-		ghost->cnt2      = f1;
-		ghost->k_teamnum = self->k_teamnum;
-		ghost->s.v.frags = self->s.v.frags;
-		ghost->deaths    = self->deaths;
-		ghost->friendly  = self->friendly;
-		ghost->ready     = 0;
-
-		ghost->ps        = self->ps; // save player stats
-
-		localcmd("localinfo %d \"%s\"\n", (int)f1, self->s.v.netname);
-		trap_executecmd();
+		if ( !k_matchLess ) // no ghost in matchless mode
+			MakeGhost ();
 	}
 
 	// normal disconnect

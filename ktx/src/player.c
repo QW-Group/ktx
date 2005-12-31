@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.8 2005/12/24 19:03:10 qqshka Exp $
+ *  $Id: player.c,v 1.9 2005/12/31 19:04:22 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -890,20 +890,20 @@ void PlayerDie()
 
 	self->s.v.items -= ( int ) self->s.v.items & IT_INVISIBILITY;
 
-	if ( iKey(world, "dq") && iKey(world, "k_pow") )
+	if ( iKey(world, "dq") && Get_Powerups() )
 	{
 		if ( self->super_damage_finished > 0 )
-			DropQuad( self->super_damage_finished - g_globalvars.time );
+			DropPowerup( self->super_damage_finished - g_globalvars.time, IT_QUAD );
 	}
 
-	if ( iKey(world, "dr") && iKey(world, "k_pow") )
+	if ( iKey(world, "dr") && Get_Powerups() )
 	{
 		if ( self->invisible_finished > 0 )
-			DropRing( self->invisible_finished - g_globalvars.time );
+			DropPowerup( self->invisible_finished - g_globalvars.time, IT_INVISIBILITY);
 	}
 
 	self->invisible_finished = 0;	// don't die as eyes
-	self->invisible_finished = 0;
+	self->invincible_finished = 0;
 	self->super_damage_finished = 0;
 	self->radsuit_finished = 0;
 

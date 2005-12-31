@@ -20,10 +20,15 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.8 2005/12/27 20:34:07 qqshka Exp $
+ *  $Id: items.c,v 1.9 2005/12/31 19:04:22 qqshka Exp $
  */
 
 #include "g_local.h"
+
+void            SP_item_artifact_invisibility();
+void            SP_item_artifact_super_damage();
+
+
 void SUB_regen()
 {
 	self->s.v.model = self->mdl;	// restore original model
@@ -32,144 +37,32 @@ void SUB_regen()
 	setorigin( self, PASSVEC3( self->s.v.origin ) );
 }
 
-
-
-void            q_touch();
-
-void q_touch()
+void DropPowerup( float timeleft, int powerup )
 {
-	if ( strneq( other->s.v.classname, "player" ) )
-		return;
-	if ( ISDEAD( other ) )
-		return;
-
-	self->mdl = self->s.v.model;
-
-	sound( other, CHAN_VOICE, self->s.v.noise, 1, ATTN_NORM );
-	stuffcmd( other, "bf\n" );
-
-	self->s.v.solid = SOLID_NOT;
-	other->s.v.items = ( ( int ) other->s.v.items ) | IT_QUAD;
-	self->s.v.model = "";
-
-	if ( deathmatch == 4 )
-	{
-		other->s.v.armortype = 0;
-		other->s.v.armorvalue = 0 * 0.01;
-		other->s.v.ammo_cells = 0;
-	}
-// do the apropriate action
-	other->super_time = 1;
-	other->super_damage_finished = self->cnt;
-
-	G_bprint( PRINT_HIGH, "%s recovered a %s with %d seconds remaining!\n",
-			  other->s.v.netname, self->s.v.netname,
-			  ( int ) ( other->super_damage_finished - g_globalvars.time ) );
-
-	activator = other;
-	SUB_UseTargets();	// fire all targets / killtargets
-}
-
-
-void DropQuad( float timeleft )
-{
-	gedict_t       *item;
-
-	if (timeleft <= 0 )
-		return;
-
-	item = spawn();
-	VectorCopy( self->s.v.origin, item->s.v.origin );
-
-	item->s.v.velocity[2] = 300;
-	item->s.v.velocity[0] = -100 + ( g_random() * 200 );
-	item->s.v.velocity[1] = -100 + ( g_random() * 200 );
-
-	item->s.v.flags = FL_ITEM;
-	item->s.v.solid = SOLID_TRIGGER;
-	item->s.v.movetype = MOVETYPE_TOSS;
-	item->s.v.noise = "items/damage.wav";
-	item->s.v.effects = (int)item->s.v.effects | EF_BLUE;
-
-	setmodel( item, "progs/quaddama.mdl" );
-	setsize( item, -16, -16, -24, 16, 16, 32 );
-
-	item->cnt = g_globalvars.time + timeleft;
-	item->s.v.touch = ( func_t ) q_touch;
-	item->s.v.nextthink = g_globalvars.time + timeleft;	// remove it with the time left on it
-	item->s.v.think = ( func_t ) SUB_Remove;
-	item->s.v.netname =  deathmatch == 4 ? "OctaPower" : "Quad Damage";
-
-	G_bprint( PRINT_HIGH, "%s lost a %s with %.0f seconds remaining\n",
-					  	  self->s.v.netname, item->s.v.netname, timeleft );
-}
-
-
-void            r_touch();
-
-void r_touch()
-{
-//gedict_t*    stemp;
-//float     best;
-
-	if ( strneq( other->s.v.classname, "player" ) )
-		return;
-	if ( ISDEAD( other ) )
-		return;
-
-	self->mdl = self->s.v.model;
-
-	sound( other, CHAN_VOICE, self->s.v.noise, 1, ATTN_NORM );
-	stuffcmd( other, "bf\n" );
-
-	self->s.v.solid = SOLID_NOT;
-	other->s.v.items = ( ( int ) other->s.v.items ) | IT_INVISIBILITY;
-	self->s.v.model = "";
-
-// do the apropriate action
-	other->invisible_time = 1;
-	other->invisible_finished = self->cnt;
-
-	G_bprint( PRINT_HIGH, "%s recovered a %s with %d seconds remaining!\n",
-		  other->s.v.netname, self->s.v.netname,
-		  ( int ) ( other->invisible_finished - g_globalvars.time ) );
-
-	activator = other;
-	SUB_UseTargets();	// fire all targets / killtargets
-}
-
-
-void DropRing( float timeleft )
-{
-	gedict_t       *item;
+	gedict_t       *swp = self; // save self
 
 	if ( timeleft <= 0 )
 		return;
+	
+	if ( powerup != IT_QUAD && powerup != IT_INVISIBILITY ) // only this supported
+		return;
 
-	item = spawn();
-	VectorCopy( self->s.v.origin, item->s.v.origin );
-	//item.origin = self.origin;
+	self = spawn(); // WARNING!
 
-	item->s.v.velocity[2] = 300;
-	item->s.v.velocity[0] = -100 + ( g_random() * 200 );
-	item->s.v.velocity[1] = -100 + ( g_random() * 200 );
+	setorigin (self, PASSVEC3( swp->s.v.origin ));
+	self->cnt = g_globalvars.time + timeleft;
 
-	item->s.v.flags = FL_ITEM;
-	item->s.v.solid = SOLID_TRIGGER;
-	item->s.v.movetype = MOVETYPE_TOSS;
-	item->s.v.noise = "items/inv1.wav";
-
-	setmodel( item, "progs/invisibl.mdl" );
-	setsize( item, -16, -16, -24, 16, 16, 32 );
-
-	item->cnt = g_globalvars.time + timeleft;
-	item->s.v.touch = ( func_t ) r_touch;
-	item->s.v.nextthink = g_globalvars.time + timeleft;	// remove after 30 seconds
-	item->s.v.think = ( func_t ) SUB_Remove;
-	item->s.v.netname = "Ring of Shadows";
+	if (powerup == IT_QUAD)
+		SP_item_artifact_super_damage();
+	else if (powerup == IT_INVISIBILITY)
+		SP_item_artifact_invisibility();
+	else
+		G_Error("DropPowerup");
 
 	G_bprint( PRINT_HIGH, "%s lost a %s with %.0f seconds remaining\n",
-				  		 self->s.v.netname, item->s.v.netname, timeleft);
+					  	  swp->s.v.netname, self->s.v.netname, timeleft );
+
+	self = swp;// restore self
 }
 
 void PlaceItem()
@@ -177,7 +70,8 @@ void PlaceItem()
 	self->s.v.solid = SOLID_TRIGGER;
 	self->s.v.movetype = MOVETYPE_TOSS;
 	self->s.v.flags = FL_ITEM;
-	self->mdl = self->s.v.model;
+	self->mdl = strnull( self->s.v.model ) ? self->mdl : self->s.v.model; // save .mdl if .model is not init
+	self->mdl = strnull( self->mdl ) ? "" : self->mdl; // init .mdl with empty string if not set
 
 	SetVector( self->s.v.velocity, 0, 0, 0 );
 	self->s.v.origin[2] += 6;
@@ -188,6 +82,24 @@ void PlaceItem()
 			  self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] );
 		ent_remove( self );
 	}
+
+	// if powerups disabled - hide
+	if ( (int)self->s.v.items & (IT_INVISIBILITY | IT_INVULNERABILITY | IT_SUIT | IT_QUAD) ) {
+		if ( !Get_Powerups() ) {
+			self->s.v.model = "";
+			self->s.v.solid = SOLID_NOT;
+		}
+	}
+}
+
+void PlaceItemIngame()
+{
+	self->s.v.solid = SOLID_TRIGGER;
+	self->s.v.movetype = MOVETYPE_TOSS;
+	self->s.v.flags = FL_ITEM;
+	self->mdl = self->s.v.model;
+
+	SetVector( self->s.v.velocity, 0, 0, 0 );
 }
 
 /*
@@ -200,6 +112,8 @@ Sets the clipping size and plants the object on the floor
 void StartItem()
 {
 //	G_bprint(2, "StartItem: %s\n", self->s.v.classname);
+
+	self->mdl = self->s.v.model; // qqshka - save model ASAP
 
 	self->s.v.nextthink = g_globalvars.time + 0.2;	// items start after other solids
 	self->s.v.think = ( func_t ) PlaceItem;
@@ -1365,8 +1279,10 @@ void            powerup_touch();
 
 void powerup_touch()
 {
-//gedict_t*    stemp;
-//float             best;
+	float *p_cnt = NULL;
+
+	if ( strnull ( self->s.v.classname ) )
+		G_Error("powerup_touch: null classname");
 
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
@@ -1378,16 +1294,15 @@ void powerup_touch()
 	if ( match_in_progress != 2 )
 		return;
 
-    if ( !iKey( world, "k_pow" ) )
+    if ( !Get_Powerups() )
         return;
-
 
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
 
 	self->mdl = self->s.v.model;
 
-	if ( !strcmp( self->s.v.classname, "item_artifact_invulnerability" ) ||
-	     !strcmp( self->s.v.classname, "item_artifact_invisibility" ) )
+	if ( streq( self->s.v.classname, "item_artifact_invulnerability" ) ||
+	     streq( self->s.v.classname, "item_artifact_invisibility" ) )
 		self->s.v.nextthink = g_globalvars.time + 60 * 5;
 	else
 		self->s.v.nextthink = g_globalvars.time + 60;
@@ -1407,13 +1322,13 @@ void powerup_touch()
 	self->s.v.model = "";
 
 // do the apropriate action
-	if ( !strcmp( self->s.v.classname, "item_artifact_envirosuit" ) )
+	if ( streq( self->s.v.classname, "item_artifact_envirosuit" ) )
 	{
 		other->rad_time = 1;
 		other->radsuit_finished = g_globalvars.time + 30;
 	}
 
-	if ( !strcmp( self->s.v.classname, "item_artifact_invulnerability" ) )
+	if ( streq( self->s.v.classname, "item_artifact_invulnerability" ) )
 	{
 		other->ps.pent++;
 		other->invincible_time = 1;
@@ -1425,6 +1340,10 @@ void powerup_touch()
 		other->ps.ring++;
 		other->invisible_time = 1;
 		other->invisible_finished = g_globalvars.time + 30;
+
+		if ( self->cnt > g_globalvars.time ) // is this was a dropped powerup
+			p_cnt = &(other->invisible_finished);
+
 	}
 
 	if ( streq( self->s.v.classname, "item_artifact_super_damage" ) )
@@ -1439,6 +1358,18 @@ void powerup_touch()
 		}
 		other->super_time = 1;
 		other->super_damage_finished = g_globalvars.time + 30;
+
+		if ( self->cnt > g_globalvars.time ) // is this was a dropped powerup
+			p_cnt = &(other->super_damage_finished);
+	}
+
+	if ( p_cnt ) {  // is this was a dropped powerup
+			p_cnt[0] = self->cnt;
+			G_bprint( PRINT_HIGH, "%s recovered a %s with %d seconds remaining!\n",
+			  					other->s.v.netname, self->s.v.netname,
+			  					( int ) ( p_cnt[0] - g_globalvars.time ) );
+
+			SUB_RM_01( self );// remove later
 	}
 
 	activator = other;
@@ -1461,12 +1392,10 @@ void SP_item_artifact_invulnerability()
 	self->s.v.noise = "items/protect.wav";
 	setmodel( self, "progs/invulner.mdl" );
 	self->s.v.netname = "Pentagram of Protection";
-#ifdef KTEAMS
-	if ( deathmatch && atoi( ezinfokey( world, "k_pow" ) ) )
-#else
-    if ( deathmatch )
-#endif
-		self->s.v.effects = ( int ) self->s.v.effects | EF_RED;
+	self->s.v.classname = "item_artifact_invulnerability";
+
+	self->s.v.effects = ( int ) self->s.v.effects | EF_RED;
+
 	self->s.v.items = IT_INVULNERABILITY;
 	setsize( self, -16, -16, -24, 16, 16, 32 );
 	StartItem();
@@ -1485,6 +1414,7 @@ void SP_item_artifact_envirosuit()
 	self->s.v.noise = "items/suit.wav";
 	setmodel( self, "progs/suit.mdl" );
 	self->s.v.netname = "Biosuit";
+	self->s.v.classname = "item_artifact_envirosuit";
 	self->s.v.items = IT_SUIT;
 	setsize( self, -16, -16, -24, 16, 16, 32 );
 	StartItem();
@@ -1496,45 +1426,77 @@ Player is invisible for 30 seconds
 */
 void SP_item_artifact_invisibility()
 {
+	qboolean b_dp = self->cnt > g_globalvars.time; // dropped powerup by player, not normal spawn
+
 	self->s.v.touch = ( func_t ) powerup_touch;
 
-	trap_precache_model( "progs/invisibl.mdl" );
-	trap_precache_sound( "items/inv1.wav" );
-	trap_precache_sound( "items/inv2.wav" );
-	trap_precache_sound( "items/inv3.wav" );
+	if ( !b_dp ) {
+		trap_precache_model( "progs/invisibl.mdl" );
+		trap_precache_sound( "items/inv1.wav" );
+		trap_precache_sound( "items/inv2.wav" );
+		trap_precache_sound( "items/inv3.wav" );
+	}
 	self->s.v.noise = "items/inv1.wav";
 	setmodel( self, "progs/invisibl.mdl" );
 	self->s.v.netname = "Ring of Shadows";
+	self->s.v.classname = "item_artifact_invisibility";
 	self->s.v.items = IT_INVISIBILITY;
 	setsize( self, -16, -16, -24, 16, 16, 32 );
-	StartItem();
-}
 
+	if ( b_dp ) {
+		PlaceItemIngame();
+
+		self->s.v.velocity[2] = 300;
+		self->s.v.velocity[0] = -100 + ( g_random() * 200 );
+		self->s.v.velocity[1] = -100 + ( g_random() * 200 );
+
+		self->s.v.nextthink = self->cnt; // remove it with the time left on it
+		self->s.v.think = ( func_t ) SUB_Remove;
+	}
+	else
+		StartItem();
+}
 
 /*QUAKED item_artifact_super_damage (0 .5 .8) (-16 -16 -24) (16 16 32)
 The next attack from the player will do 4x damage
 */
 void SP_item_artifact_super_damage()
 {
+	qboolean b_dp = self->cnt > g_globalvars.time; // dropped powerup by player, not normal spawn
+
 	self->s.v.touch = ( func_t ) powerup_touch;
 
-	trap_precache_model( "progs/quaddama.mdl" );
-	trap_precache_sound( "items/damage.wav" );
-	trap_precache_sound( "items/damage2.wav" );
-	trap_precache_sound( "items/damage3.wav" );
+	if ( !b_dp ) {
+		trap_precache_model( "progs/quaddama.mdl" );
+		trap_precache_sound( "items/damage.wav" );
+		trap_precache_sound( "items/damage2.wav" );
+		trap_precache_sound( "items/damage3.wav" );
+	}
 	self->s.v.noise = "items/damage.wav";
 	setmodel( self, "progs/quaddama.mdl" );
+	self->s.v.classname = "item_artifact_super_damage";
 	if ( deathmatch == 4 )
 		self->s.v.netname = "OctaPower";
 	else
 		self->s.v.netname = "Quad Damage";
 	self->s.v.items = IT_QUAD;
 
-	if ( deathmatch && iKey( world, "k_pow" ) )
-		self->s.v.effects = ( int ) self->s.v.effects | EF_BLUE;
+	self->s.v.effects = ( int ) self->s.v.effects | EF_BLUE;
 
 	setsize( self, -16, -16, -24, 16, 16, 32 );
-	StartItem();
+
+	if ( b_dp ) { 	
+		PlaceItemIngame();
+
+		self->s.v.velocity[2] = 300;
+		self->s.v.velocity[0] = -100 + ( g_random() * 200 );
+		self->s.v.velocity[1] = -100 + ( g_random() * 200 );
+
+		self->s.v.nextthink = self->cnt; // remove it with the time left on it
+		self->s.v.think = ( func_t ) SUB_Remove;
+	}
+	else
+		StartItem();
 }
 
 /*
@@ -1714,7 +1676,7 @@ void DropBackpack()
 
     float f1;
 
-    f1 = atoi( ezinfokey( world, "k_frp" ) );
+    f1 = iKey( world, "k_frp" );
 
     if ( match_in_progress != 2 || !atoi( ezinfokey( world, "dp" ) ) )
         return;

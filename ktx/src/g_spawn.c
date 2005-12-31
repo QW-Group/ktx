@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_spawn.c,v 1.3 2005/12/01 21:56:51 qqshka Exp $
+ *  $Id: g_spawn.c,v 1.4 2005/12/31 19:04:22 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -127,8 +127,20 @@ typedef struct {
 
 void SUB_Remove()
 {
+//	if (self && self->s.v.classname )
+//		G_bprint(2, "rm: %s\n", self->s.v.classname);
+
 	ent_remove( self );
 }
+
+void SUB_RM_01( gedict_t *ent )
+{
+	if ( ent ) {
+		ent->s.v.nextthink = g_globalvars.time + 0.001f;	// remove later
+		ent->s.v.think = ( func_t ) SUB_Remove;
+	}
+}
+
 
 void SUB_Null()
 {

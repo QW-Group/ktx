@@ -2,7 +2,6 @@ localinfo allow_spec_wizard // spec-wzrs r0x
 print ktx:version at serverinfo *progs
 voting percentage:customise && pring (ffa/matchless)
 voting during game (not only intermission)
-powerups on/off depending on players
 fix scores output
 countdown && motd for ffa/matchless
 +scores (for all modes include ffa/matchless) // +scores shifting (ktpro compitable)

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.12 2005/12/29 16:42:41 qqshka Exp $
+ *  $Id: g_local.h,v 1.13 2005/12/31 19:05:00 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -214,6 +214,7 @@ char		*TrackWhom(gedict_t *p);
 int			GetHandicap( gedict_t *p );
 qboolean	SetHandicap( gedict_t *p, int nhdc );
 void		changelevel( const char *name );
+int			Get_Powerups ();
 
 
 void    	disableupdates( gedict_t * ed, float time );
@@ -245,6 +246,7 @@ qboolean        G_SpawnFloat( const char *key, const char *defaultString, float 
 qboolean        G_SpawnInt( const char *key, const char *defaultString, int *out );
 qboolean        G_SpawnVector( const char *key, const char *defaultString, float *out );
 void            SUB_Remove();
+void			SUB_RM_01( gedict_t *ent );
 void            SUB_Null();
 
 //world.c
@@ -290,8 +292,7 @@ void            T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float
 void            T_BeamDamage( gedict_t * attacker, float damage );
 
 //items
-void            DropQuad( float timeleft );
-void            DropRing( float timeleft );
+void			DropPowerup( float timeleft, int powerup );
 void            DropBackpack();
 
 //triggers.c
