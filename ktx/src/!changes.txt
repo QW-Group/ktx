@@ -16,6 +16,9 @@
 	 localinfo demo_skip_ktffa_record 1 // 1 - skip recording ffa demos
 									    // 0 - does't skip
 
+ 39. MOTD now shown if u connect somewhere in the middle of the game in matchless mode.
+     MOTD shown only one time in matchless mode, this is less annoying.
+
 2006-01-01
  35. Added cvar 'allow_spec_wizard'. ktpro (c)
 	 Spectators may be represented for players as wizards.

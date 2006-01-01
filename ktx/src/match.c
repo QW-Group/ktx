@@ -1469,7 +1469,7 @@ void StartTimer ()
 	timer->s.v.classname = "timer";
 	timer->cnt = 0;
 	if( iKey( world, "k_count" ) > 0 )
-        timer->cnt2 = atoi( ezinfokey( world, "k_count" ) );
+        timer->cnt2 = iKey( world, "k_count" );
     else
         timer->cnt2 = 3; // at the least we want a 3 second countdown
 

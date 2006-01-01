@@ -28,7 +28,11 @@ void PMOTDThink()
 {
 	char *s1, *s2;
 
-	if( self->attack_finished < g_globalvars.time || match_in_progress ) {
+	// remove MOTD in some cases
+	if( self->attack_finished < g_globalvars.time // expired
+    	|| ( !k_matchLess && match_in_progress )  // non matchless and (match has began or countdown)
+	   	|| ( k_matchLess && match_in_progress == 1 ) // matchless and countdown
+	  ) {
 		ent_remove( self );
 		return;
 	}
@@ -54,14 +58,8 @@ void SMOTDThink()
 	PMOTDThink(); // equal motd for player and spectator now
 }
 
-
 void MOTDThinkX()
 {
-// Kl33n3X check against Llamas
-
-// qqshka: removed
-//	stuffcmd( PROG_TO_EDICT( self->s.v.owner ) , "say -d\n");
-
 // check if we are need to stuff aliases, or already done this
 	if( !(PROG_TO_EDICT( self->s.v.owner )->k_stuff) )
 	{
@@ -77,6 +75,10 @@ void MOTDThinkX()
 	self->s.v.think = // select MOTD for spectator or player
 		  ( func_t ) ( PROG_TO_EDICT( self->s.v.owner )->k_spectator ? SMOTDThink : PMOTDThink );
 	self->s.v.nextthink = g_globalvars.time + 0.3;
+
+	 // remove motd if player already stuffed, because them probably sow motd already one time
+	if( k_matchLess && PROG_TO_EDICT( self->s.v.owner )->k_stuff )
+		ent_remove( self );
 }
 
 void MOTDStuff()
@@ -289,7 +291,7 @@ void MakeMOTD()
 	motd->s.v.owner = EDICT_TO_PROG( self );
 	motd->s.v.think = ( func_t ) MOTDStuff;
 	motd->s.v.nextthink = g_globalvars.time + 0.1;
-	motd->attack_finished = g_globalvars.time + 7;
+	motd->attack_finished = g_globalvars.time + ( k_matchLess ? 3 : 7 );
 }
 
 void SMakeMOTD()
