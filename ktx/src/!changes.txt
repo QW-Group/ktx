@@ -6,6 +6,10 @@
 							 // 1 - allowed without players in prematch
                         	 // 2 - allowed with players in prematch
 
+ 36. Added wizard animation, u can control this:
+	 set k_no_wizard_animation 0 // 0 - allows wizards to be animated
+						    	 // 1 - disallow
+
 2005-12-31
  34. Added dynamic powerups manipulation in matchless mode, depending on count of players.
 

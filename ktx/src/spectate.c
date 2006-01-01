@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.5 2005/12/31 23:27:43 qqshka Exp $
+ *  $Id: spectate.c,v 1.6 2006/01/01 15:33:51 qqshka Exp $
  */
 
 // spectate.c
@@ -62,6 +62,17 @@ void ShowCamHelp()
 					  "use [jump] to change target\n", redtext("impulse"), dig3(1));
 }
 
+void wizard_think()
+{
+	if ( !cvar("k_no_wizard_animation") ) // animate if allowed
+		( self->s.v.frame )++;
+
+	if ( self->s.v.frame > 14 || self->s.v.frame < 0 )
+		self->s.v.frame = 0;
+
+	self->s.v.nextthink = g_globalvars.time + 0.1;
+}
+
 
 ////////////////
 // GlobalParams:
@@ -84,6 +95,8 @@ void SpectatorConnect()
 	if ( match_in_progress != 2 ) {
 		self->wizard = spawn();
 		self->wizard->s.v.classname = "spectator_wizard";
+		self->wizard->s.v.think = ( func_t ) wizard_think;
+		self->wizard->s.v.nextthink = g_globalvars.time + 0.1;
 	}
 
 	// Wait until you do stuffing
@@ -164,11 +177,15 @@ void SpectatorThink()
 		SpectatorImpulseCommand();
 
 	if ( wizard ) {
-		wizard->s.v.angles[0] = -self->s.v.v_angle[0] / 3;
+		// set model angles
+		wizard->s.v.angles[0] = -self->s.v.v_angle[0] / 2;
 		wizard->s.v.angles[1] = self->s.v.v_angle[1];
-
-		setorigin( wizard, self->s.v.origin[0], self->s.v.origin[1],
-					 self->s.v.origin[2] + 3*sin(g_globalvars.time*2.5) );
+        // wizard model blinking at spectator screen - so move model behind spec camera a bit		
+		makevectors( self->s.v.v_angle );
+		VectorMA (self->s.v.origin, -32, g_globalvars.v_forward, wizard->s.v.origin);
+		// model bobbing
+		wizard->s.v.origin[2] += sin( g_globalvars.time * 2.5 );
+		setorigin( wizard, PASSVEC3( wizard->s.v.origin ) );
 
 		if ( GetSpecWizard () ) {
 			gedict_t *goal = PROG_TO_EDICT( self->s.v.goalentity );

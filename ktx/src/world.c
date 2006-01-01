@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.12 2005/12/31 23:27:43 qqshka Exp $
+ *  $Id: world.c,v 1.13 2006/01/01 15:33:51 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -393,6 +393,7 @@ void FirstFrame	( )
 	RegisterCvar("_k_players"); // internal usage, count of players on last map
 	RegisterCvar("_k_pow_last"); // internal usage, k_pow from last map
 	RegisterCvar("allow_spec_wizard");
+	RegisterCvar("k_no_wizard_animation"); // disallow wizard animation
 
 
 	k_matchLess = cvar( "k_matchless" ); // changed only here
