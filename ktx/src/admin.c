@@ -633,7 +633,7 @@ void AdminForceBreak ()
     if( k_oldmaxspeed ) // huh???
         cvar_set("sv_maxspeed", va("%d", (int)k_oldmaxspeed));
 
-    G_dprint("%%forcebreak%%%s\n", self->s.v.netname);
+    G_cprint("%%forcebreak%%%s\n", self->s.v.netname);
     G_bprint(2, "%s forces a break!\nMATCH OVER!!\n", self->s.v.netname);
 
     EndMatch( 0 );

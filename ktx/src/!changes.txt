@@ -1,3 +1,21 @@
+2006-01-02
+ 37. Added coundtown in matchless mode.
+
+	 set k_matchless_countdown 1 // use or not auto countdown in match less mode.
+							     // countdown start right after map change.
+							     // this help us wait some time, while players reconnect
+								 // and load some data from HDD etc...
+							     // so all players start in equal condition.
+								 // set this to 0 if u dislike this.
+
+	 NOTES: U can't stop this countdown alone.
+
+ 38. Added 'localinfo demo_skip_ktffa_record'. ktpro (c)
+	 WARNING: now ffa demos can be autorecorded too, u can control this:
+
+	 localinfo demo_skip_ktffa_record 1 // 1 - skip recording ffa demos
+									    // 0 - does't skip
+
 2006-01-01
  35. Added cvar 'allow_spec_wizard'. ktpro (c)
 	 Spectators may be represented for players as wizards.

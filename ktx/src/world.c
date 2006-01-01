@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.13 2006/01/01 15:33:51 qqshka Exp $
+ *  $Id: world.c,v 1.14 2006/01/01 21:28:44 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -348,7 +348,7 @@ qboolean RegisterCvar ( const char *var )
 {
 
 	if ( !strnull( cvar_string( var ) ) ) {
-		G_dprint("RegisterCvar: \"%s\" already exist, value is \"%s\"\n", var, cvar_string( var ));
+//		G_cprint("RegisterCvar: \"%s\" already exist, value is \"%s\"\n", var, cvar_string( var ));
 		return false;
 	}
 	else {
@@ -359,14 +359,14 @@ qboolean RegisterCvar ( const char *var )
 		cvar_set(var, "~SomEHacK~~SomEHacK~");
 		if ( !strnull( cvar_string( var ) ) ) { // ok, cvar exist but was empty
 			cvar_set(var, save); // restore empty string %)
-			G_dprint("RegisterCvar: \"%s\" already exist\n", var);
+//			G_cprint("RegisterCvar: \"%s\" already exist\n", var);
 			return false;
 		}
 		// but cvar_set may fail, if cvar is ROM for example
 		// so, if cvar is empty and ROM we can't guess is this cvar exist
 	}
 
-	G_dprint("RegisterCvar: \"%s\" registered\n", var);
+//	G_cprint("RegisterCvar: \"%s\" registered\n", var);
 	localcmd("set \"%s\" 0\n", var);
 	trap_executecmd ();
 	return true;
@@ -382,6 +382,7 @@ void FirstFrame	( )
 
 	RegisterCvar("k_mode");
 	RegisterCvar("k_matchless");
+	RegisterCvar("k_matchless_countdown");
 	RegisterCvar("k_disallow_kfjump");
 	RegisterCvar("k_disallow_krjump");
 	RegisterCvar("k_lock_hdp");
@@ -394,6 +395,7 @@ void FirstFrame	( )
 	RegisterCvar("_k_pow_last"); // internal usage, k_pow from last map
 	RegisterCvar("allow_spec_wizard");
 	RegisterCvar("k_no_wizard_animation"); // disallow wizard animation
+
 
 
 	k_matchLess = cvar( "k_matchless" ); // changed only here

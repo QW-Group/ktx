@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.8 2005/12/27 20:34:07 qqshka Exp $
+ *  $Id: g_main.c,v 1.9 2006/01/01 21:28:44 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -84,7 +84,7 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 	        api_ver = trap_GetApiVersion();
 		if ( api_ver < GAME_API_VERSION )
 		{
-			G_dprint("Mod requried API_VERSION %d or higher, server have %d\n", GAME_API_VERSION,api_ver);
+			G_cprint("Mod requried API_VERSION %d or higher, server have %d\n", GAME_API_VERSION,api_ver);
 			return 0;
 		}
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.23 2005/12/31 23:27:43 qqshka Exp $
+ *  $Id: client.c,v 1.24 2006/01/01 21:28:44 qqshka Exp $
  */
 
 //===========================================================================
@@ -1706,7 +1706,7 @@ void PlayerPreThink()
 			G_sprint(self, PRINT_HIGH, 
 				"WARNING: QW clients up to 2.30 have a timer related bug which is caused by too"
 				" long uptime. Either reboot your machine or upgrade to QWCL 2.33.\n");
-			G_dprint("%s%%speed%%%f\n", self->s.v.netname, r);
+			G_cprint("%s%%speed%%%f\n", self->s.v.netname, r);
 			if(r > 105)
 				self->uptimebugpolicy += 1;
 		}
@@ -2494,7 +2494,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 					}
 					else {
-						G_dprint ("Unknown death: normal death kt version");
+						G_cprint ("Unknown death: normal death kt version");
 						deathstring = " killed by ";
 						deathstring2 = " ?\n";
 					}
@@ -2659,7 +2659,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 							deathstring2 = "'s shaft\n";
 					}
 					else {
-						G_dprint ("Unknown death: normal death qw native version");
+						G_cprint ("Unknown death: normal death qw native version");
 						deathstring = " killed by ";
 						deathstring2 = " ?\n";
 					}

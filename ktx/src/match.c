@@ -8,6 +8,7 @@ void EndMatch ( float skip_log );
 void BotForceStart ();
 void CheckAll();
 void StartMatch ();
+void StartTimer ();
 void remove_specs_wizards ();
 
 float CountALLPlayers ()
@@ -656,6 +657,8 @@ void TopStats ( )
 	G_bprint(2, "žžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n");
 }
 
+// WARNING: if we are skip log, we are also delete demo
+
 void EndMatch ( float skip_log )
 {
 	gedict_t	*p;
@@ -685,19 +688,19 @@ void EndMatch ( float skip_log )
 	localcmd("sv_spectalk 1\n");
 
 	G_bprint( 2, "The match is over\n");
-	G_dprint("RESULT");
+	G_cprint("RESULT");
 
 	if( skip_log )
-		G_dprint("%%stopped\n");
+		G_cprint("%%stopped\n");
 	else {
 		p = find( world, FOFCLSN, "player" );
 		while( p ) 
 		{
 			if( !strnull( p->s.v.netname ) && p->k_accepted == 2 )
 			{
-				G_dprint("%%%s", p->s.v.netname);
-				G_dprint("%%t%%%s", ezinfokey(p, "team"));
-				G_dprint("%%fr%%%d", (int)p->s.v.frags);
+				G_cprint("%%%s", p->s.v.netname);
+				G_cprint("%%t%%%s", ezinfokey(p, "team"));
+				G_cprint("%%fr%%%d", (int)p->s.v.frags);
 
 				// take away powerups so scoreboard looks normal
 				p->s.v.items = (int)p->s.v.items & ~(IT_INVISIBILITY | IT_INVULNERABILITY | IT_SUIT | IT_QUAD);
@@ -711,9 +714,9 @@ void EndMatch ( float skip_log )
 			p = find ( p, FOFCLSN, "player" );
 		}
 
-		G_dprint("%%fl%%%d", (int)fraglimit);
-		G_dprint("%%tl%%%d", (int)timelimit);
-		G_dprint("%%map%%%s\n", g_globalvars.mapname);
+		G_cprint("%%fl%%%d", (int)fraglimit);
+		G_cprint("%%tl%%%d", (int)timelimit);
+		G_cprint("%%map%%%s\n", g_globalvars.mapname);
 
         if( isTeam() )
 			SummaryTPStats ();
@@ -781,7 +784,7 @@ void TimerThink ()
 	float f1, f2, f3, f4, k_exttime, player1scores, player2scores, player1found;
 	int k_mb_overtime = 0;
 
-	f1 = k_matchLess ? 1 : 0;
+	f1 = k_matchLess ? 1 : 0; // don't stop match if no players left
 
 
 //	G_bprint(2, "left %2d:%2d\n", (int)self->cnt, (int)self->cnt2);
@@ -1050,28 +1053,10 @@ void TimerThink ()
 
 void StartMatchLess ()
 {
-	gedict_t *timer, *ptmp;
-	gedict_t *swp;
-
 	if ( !k_matchLess )
 		return;
 
-	timer = find ( world, FOFCLSN, "timer");
-	while( timer ) {
-		ptmp = timer;
-		timer = find(timer, FOFCLSN, "timer");
-		ent_remove( ptmp );
-	}
-
-	swp = self;
-
-	self = spawn();
-	self->s.v.owner = EDICT_TO_PROG( world );
-	self->s.v.classname = "timer";
-
-	StartMatch ();
-
-	self = swp;
+	StartTimer ();
 }
 
 void StartMatch ()
@@ -1143,46 +1128,48 @@ void StartMatch ()
 		p = old;
 	}
 
-	G_dprint("MATCH STARTED");
+	trap_executecmd (); // <- this really needed
+
+	G_cprint("MATCH STARTED");
 
 	match_in_progress = 2;
-
-	trap_executecmd (); // <- this really needed
 
 	remove_specs_wizards (); // remove wizards
 
 	p = find ( world, FOFCLSN, "player" );
 
-	if( !k_matchLess ) // skip this while in matchLess mode
+
 	while( p ) {
 		if( !strnull ( p->s.v.netname ) ) {
 			int hdc;
 
-			tmp = ezinfokey(p, "team"); // used below
-			G_dprint("%%%s%%t%%%s", p->s.v.netname, tmp);
+			if( !k_matchLess ) { // skip this in matchLess mode
+				tmp = ezinfokey(p, "team"); // used below
+				G_cprint("%%%s%%t%%%s", p->s.v.netname, tmp);
 
-			p->k_teamnum = 0;
+				p->k_teamnum = 0;
 
-			if( !strnull( tmp ) ) {
-				f1 = 665;
+				if( !strnull( tmp ) ) {
+					f1 = 665;
 
-				while( k_teamid > f1 && !p->k_teamnum ) {
-					f1++;
-					s1 = ezinfokey(world, va("%d", (int)f1));
-					tmp = ezinfokey(p, "team");
-					if( streq( tmp, s1 ) )
-						p->k_teamnum = f1;
-				}
+					while( k_teamid > f1 && !p->k_teamnum ) {
+						f1++;
+						s1 = ezinfokey(world, va("%d", (int)f1));
+						tmp = ezinfokey(p, "team");
+						if( streq( tmp, s1 ) )
+							p->k_teamnum = f1;
+					}
 
-				if( !p->k_teamnum ) { // team not found in localinfo, so put it in
-					f1++;
-					p->k_teamnum = k_teamid = f1;
-					localcmd( "localinfo %d \"%s\"\n", (int)f1, ezinfokey( p, "team" ) );
-					trap_executecmd (); // <- this really needed
-				}
-			} 
-			else
-				p->k_teamnum = 666;
+					if( !p->k_teamnum ) { // team not found in localinfo, so put it in
+						f1++;
+						p->k_teamnum = k_teamid = f1;
+						localcmd( "localinfo %d \"%s\"\n", (int)f1, ezinfokey( p, "team" ) );
+						trap_executecmd (); // <- this really needed
+					}
+				} 
+				else
+					p->k_teamnum = 666;
+			}
 
 			p->friendly = p->deaths = p->s.v.frags = 0;
 
@@ -1195,7 +1182,6 @@ void StartMatch ()
 			old = self;
 			self = p;
 
-//			SetChangeParms();
 			SetNewParms( false );
 			PutClientInServer();
 
@@ -1204,9 +1190,9 @@ void StartMatch ()
 		p = find ( p, FOFCLSN, "player" );
 	}
 
-	G_dprint("\n");
+	G_cprint("\n");
 
-	if ( !k_matchLess )
+	if ( !k_matchLess || cvar( "k_matchless_countdown" ) )
 		G_bprint(2, "The match has begun!\n");
 
 	localcmd( "sv_spectalk %d\n", (int)(f2 = bound(0, iKey(world, "k_spectalk"), 1)) );
@@ -1356,8 +1342,14 @@ void TimerStartThink ()
 			p = find ( p, FOFCLSN, "player" );
 		}
 	}
-    else if( !self->cnt2 ) {
+    else if( self->cnt2 <= 0 ) {
 		G_cp2all("");
+
+		if ( k_matchLess ) {
+			StartMatch();
+			return;
+		}
+
 		f2 = atoi( ezinfokey( world, "k_lockmin" ) );
 		f3 = atoi( ezinfokey( world, "k_lockmax" ) );
 		f1 = CountRTeams();
@@ -1399,12 +1391,57 @@ void TimerStartThink ()
 	self->s.v.nextthink = g_globalvars.time + 1;
 }
 
+
+void ShowMatchSettings()
+{
+	int i;
+	char *txt = "";
+
+	switch ( iKey( world, "k_spw" ) ) {
+		case 0: txt = "Normal QW respawns"; break;
+		case 1: txt = "KT SpawnSafety"; break;
+		case 2: txt = "Kombat Teams respawns"; break;
+		default: txt = "!Unknown!"; break;
+	}
+
+	G_bprint(2, "Spawnmodel: %s\n", redtext(txt));
+
+// changed to print only if other than default
+
+	if( i = iKey( world, "k_frp" ) ) {
+		// Output the Fairpack setting here
+		switch ( i ) {
+			case 0: txt = "off"; break;
+			case 1: txt = "best weapon"; break;
+			case 2: txt = "last weapon fired"; break;
+			default: txt = "!Unknown!"; break;
+		}
+
+		G_bprint(2, "Fairpacks setting: %s\n", redtext(txt));
+	}
+
+// print qizmo ( FPD ) settings
+	i = iKey( world, "fpd" );
+	if( i & 170 ) {
+		char buf[256] = {0};
+
+		if( i & 2 )
+			strlcat(buf, " timer", sizeof(buf));
+		if( i & 8 )
+			strlcat(buf, " lag", sizeof(buf));
+		if( i & 32 )
+			strlcat(buf, " enemy", sizeof(buf));
+		if( i & 128 )
+			strlcat(buf, " point", sizeof(buf));
+
+		G_bprint(2, "QiZmo:%s disabled\n", redtext(buf));
+	}
+}
+
 void StartTimer ()
 // Spawns the timer and starts the countdown.
 {
 	gedict_t *timer, *ptmp;
-	float f1;
-	int iFpd;
 
 	k_force = 0;
 	timer = find ( world, FOFCLSN, "idlebot");
@@ -1418,67 +1455,47 @@ void StartTimer ()
 		ent_remove( ptmp );
 	}
 
-	G_bprint(2, "Spawnmodel: ");
-	f1 = atoi( ezinfokey( world, "k_spw" ) );
-	if( f1 == 2 )
-		G_bprint(2, "Ëïíâáô Ôåáíó òåóðá÷îó\n"); // komabt teams respawns
-	else if( f1 == 1 )
-		G_bprint(2, "ËÔ Óðá÷îÓáæåôù\n");	// kt spawnsafety
-	else
-		G_bprint(2, "Îïòíáì Ñ× òåóðá÷îó\n"); // normal
+	if ( !k_matchLess ) {
+		ShowMatchSettings ();
 
-// changed to print only if other than default
-
-	f1 = atoi( ezinfokey( world, "k_frp" ) );
-	if( f1 ) {
-// Output the Fairpack setting here
-		G_bprint(2, "Fairpacks setting: ");
-		if( f1 == 1 )
-			G_bprint(2, "âåóô ÷åáðïî\n"); // best weapon
-		else
-			G_bprint(2, "ìáóô ÷åáðïî æéòåä\n"); // last weapon fired
-	}
-
-// print qizmo ( FPD ) settings
-	iFpd = atoi( ezinfokey( world, "fpd" ) );
-	if( iFpd & 170 ) {
-		G_bprint(2, "QiZmo:");
-		if( iFpd & 2 )
-			G_bprint(2, " ôéíåò"); // timer
-		if( iFpd & 8 )
-			G_bprint(2, " ìáç");   // lag
-		if( iFpd & 32 )
-			G_bprint(2, " åîåíù"); // enemy
-		if( iFpd & 128 )
-			G_bprint(2, " ðïéîô"); // point
-
-		G_bprint(2, " disabled\n");
-	}
-
-	timer = find ( world, FOFCLSN, "player" );
-	while( timer ) {
-		if( !strnull( timer->s.v.netname ) )
-			stuffcmd(timer, "play items/protect2.wav\n");
-
-		timer = find( timer, FOFCLSN, "player" );
+		timer = world;
+		while( timer = find( timer, FOFCLSN, "player" ) )
+			if( !strnull( timer->s.v.netname ) )
+				stuffcmd(timer, "play items/protect2.wav\n");
 	}
 
 	timer = spawn();
 	timer->s.v.owner = EDICT_TO_PROG( world );
 	timer->s.v.classname = "timer";
 	timer->cnt = 0;
-	if( atoi( ezinfokey( world, "k_count" ) ) )
+	if( iKey( world, "k_count" ) > 0 )
         timer->cnt2 = atoi( ezinfokey( world, "k_count" ) );
     else
         timer->cnt2 = 3; // at the least we want a 3 second countdown
-	timer->cnt2 = timer->cnt2 + 1;
-    timer->s.v.nextthink = g_globalvars.time + 0.1;
+
+
+	if ( k_matchLess ) // check if we need countdown in case of matchless
+	if ( !cvar("k_matchless_countdown") )
+		timer->cnt2 = 0;
+
+	( timer->cnt2 )++;
+
+    timer->s.v.nextthink = g_globalvars.time + 0.001;
 	timer->s.v.think = ( func_t ) TimerStartThink;
 	match_in_progress = 1;
 	localcmd( "serverinfo status Countdown\n" );
 
-	if ( atoi( ezinfokey( world, "demo_tmp_record" ) ) )
-		localcmd( "easyrecord\n" ); // FIXME: TODO: make this more like ktpro
+	if ( iKey( world, "demo_tmp_record" ) ) { // FIXME: TODO: make this more like ktpro
+		qboolean record = false;
+
+		if ( isFFA() && iKey( world, "demo_skip_ktffa_record" ) )
+			record = false;
+		else
+			record = true;
+
+		if ( record )
+			localcmd( "easyrecord\n" );
+	}
 }
 
 void StopTimer ( int removeDemo )
@@ -1755,6 +1772,7 @@ void PlayerBreak ()
 		return;
 	}
 
+	if( !k_matchLess ) // u can't stop countdown in matchless mode
 	if( match_in_progress == 1 ) {
 		p = find ( world, FOFCLSN, "timer");
 		if(p->cnt2 > 1) {
@@ -1774,7 +1792,7 @@ void PlayerBreak ()
 				G_bprint(2, "èåò ");
 		else
 				G_bprint(2, "èéó ");
-		G_bprint(3, "vote\n");
+		G_bprint(2, "vote\n");
 		self->k_vote = 0;
 
 		k_vbreak = 0;
@@ -1784,7 +1802,8 @@ void PlayerBreak ()
 
 		return;
 	}
-	G_bprint(3, "%s votes for stopping the match\n", self->s.v.netname);
+
+	G_bprint(2, "%s votes for stopping the match\n", self->s.v.netname);
 	self->k_vote = 1;
 
 	k_vbreak = 0;
@@ -1793,8 +1812,18 @@ void PlayerBreak ()
 			k_vbreak++;
 
 	f1 = CountPlayers();
-	f2 = (floor(f1 / 2)) + 1;
-	if( k_vbreak >= f2 ) {
+
+	// block stop countdown in matchless mode by one player
+	if ( f1 == 1 && k_matchLess && match_in_progress == 1 ) {
+		G_bprint(2, "You can't stop countdown alone\n");
+		return;
+	}
+
+//	f2 = floor(f1 / 2) + 1;
+
+	f2 = f1 * 0.5 ;
+
+	if( k_vbreak > f2 ) {
 		G_bprint(2, "Match stopped by majority vote\n");
 		EndMatch( 1 );
 
