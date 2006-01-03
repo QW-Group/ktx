@@ -1,3 +1,7 @@
+/tracklist command (from ktpro)
+uptime in serverinfo (from ktpro)
+/fpslist command (from ktpro)
+ktpro-like +wp_stats (rl:0 lg:0.0)
 print ktx:version at serverinfo *progs
 voting percentage:customise && pring (ffa/matchless)
 voting during game (not only intermission)
