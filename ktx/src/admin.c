@@ -386,18 +386,53 @@ void AdminImpBot ()
         G_sprint(self, 2, "%d íïòå ôï çï\n", (int)self->k_adminc);
 }
 
+void AdminMatchStart ()
+{
+    gedict_t *p;
+    int i = 0;
+
+    for( p = world; p = find(p, FOFCLSN, "player"); )
+    {
+		if( p->ready && p->k_accepted == 2 ) {
+			i++;
+		}
+		else
+		{
+			G_bprint(2, "%s was kicked by admin forcestart\n", p->s.v.netname);
+			G_sprint(p, 2, "Bye bye! Pay attention next time.\n");
+
+			p->k_accepted = 0;
+			p->s.v.classname = "";
+			stuffcmd(p, "disconnect\n"); // FIXME: stupid way
+		}
+	}
+
+    k_attendees = i;
+
+    if( k_attendees ) {
+        StartTimer();
+	}
+    else
+    {
+        G_bprint(2, "Can't start! More players needed.\n");
+		EndMatch( 1 );
+    }
+}
+
 void ReadyThink ()
 {
     float i1;
-    char *tmp=NULL;
+	char *txt, *gr;
     gedict_t *p=NULL, *p2=NULL;
 
     p2 = PROG_TO_EDICT( self->s.v.owner );
-
-	// forcestart breaked via break command
-    if( streq( p2->s.v.classname, "player" ) && !(p2->ready) )
+	
+    if(    ( p2->k_player && !( p2->ready ) ) // forcestart breaked via break command
+		|| ( p2->k_spectator && !k_force )	// forcestart breaked via forcebreak command (spectator admin)
+	  )
     {
         k_force = 0;
+
         G_bprint(2, "%s interrupts countdown\n", p2->s.v.netname );
 
         ent_remove ( self );
@@ -405,23 +440,27 @@ void ReadyThink ()
         return;
     }
 
-	// forcestart breaked via forcebreak command
-    if( strneq( p2->s.v.classname, "player" ) && !k_force )
-    {
-        G_bprint(2, "%s interrupts countdown\n", p2->s.v.netname );
+	k_attendees = CountPlayers();
+
+	if ( !isCanStart(NULL, true) ) {
+        k_force = 0;
+
+        G_bprint(2, "Forcestart canceled\n");
 
         ent_remove ( self );
 
         return;
-    }
+	}
+
 
     self->attack_finished--;
 
     i1 = self->attack_finished;
 
-    if( !i1 )
+    if( i1 <= 0 )
     {
         k_force = 0;
+
         AdminMatchStart();
 
         ent_remove ( self );
@@ -429,45 +468,14 @@ void ReadyThink ()
         return;
     }
 
-    if(i1 == 1)
-        tmp = "\n“";
-    if(i1 == 2)
-        tmp = "\n”";
-    if(i1 == 3)
-        tmp = "\n•";
-    if(i1 == 4)
-        tmp = "\n–";
-    if(i1 == 5)
-        tmp = "\n—";
-    if(i1 == 6)
-        tmp = "\n˜";
-    if(i1 == 7)
-        tmp = "\n™";
-    if(i1 == 8)
-        tmp = "\nš";
-    if(i1 == 9)
-        tmp = "\n›";
-    if(i1 == 10)
-        tmp = "\n“’";
+	txt = va( "%s second%s to gamestart", dig3( i1 ), ( i1 == 1 ? "" : "s") );
+	gr  = va( "\n%s!", redtext("Go ready") );
 
-    p = find(world, FOFCLSN, "player");
-    while( p )
-    {
-        if( !strnull ( p->s.v.netname ) )
-            G_centerprint(p, "%s second%s to gamestart%s",
-							 tmp, ( i1 == 1 ? "" : "s"), (p->ready ? "" : "\nÇï òåáäù!"));
+    for( p = world; p = find(p, FOFCLSN, "player"); )
+		G_centerprint(p, "%s%s", txt, (p->ready ? "" : gr));
 
-        p = find(p, FOFCLSN, "player");
-    }
-
-    p = find(world, FOFCLSN, "spectator");
-    while( p )
-    {
-        if( !strnull ( p->s.v.netname ) )
-            G_centerprint(p, "%s second%s to gamestart", tmp, ( i1 == 1 ? "" : "s"));
-
-        p = find(p, FOFCLSN, "spectator");
-    }
+    for( p = world; p = find(p, FOFCLSN, "spectator"); )
+		G_centerprint(p, "%s", txt);
 
     self->s.v.nextthink = g_globalvars.time + 1;
 }
@@ -475,14 +483,14 @@ void ReadyThink ()
 void AdminForceStart ()
 {
     gedict_t *mess;
-    float f1, k_lockmin, k_lockmax, f2;
+//    float f1, k_lockmin, k_lockmax, f2;
 //    char *tmp;
 
     if( match_in_progress || self->k_admin != 2 )
         return;
 
 	// no forcestart in practice mode
-	if (k_practice) {
+	if ( k_practice ) {
 		G_sprint(self, 2, "%s\n", redtext("Server in practice mode"));
 		return;
 	}
@@ -493,28 +501,14 @@ void AdminForceStart ()
         return;
     }
 
-    k_lockmin = atoi( ezinfokey( world, "k_lockmin" ) );
-    k_lockmax = atoi( ezinfokey( world, "k_lockmax" ) );
+	k_attendees = CountPlayers();
 
-    f1 = CountRTeams();
+	if ( !isCanStart( self, true ) ) {
+        G_sprint(self, 2, "Can't issue!\n");
+		return;
+	}
 
-    if( f1 < k_lockmin )
-    {
-		f2 = k_lockmin - f1;
-        G_sprint(self, 2, "%d more team%s required.\n", (int)f2, ( f2 != 1 ? "s" : "" ) );
-
-        return;
-    }
-    if( f1 > k_lockmax )
-    {
-		f2 = f1 - k_lockmax;
-        G_sprint(self, 2, "Get rid of %d team%s!\n", (int)f2, ( f2 != 1 ? "s" : "" ) );
-
-        return;
-    }
-
-    f1 = CountPlayers();
-    if( f1 )
+    if( k_attendees )
     {
         G_bprint(2, "%s forces matchstart!\n", self->s.v.netname);
 
@@ -531,83 +525,6 @@ void AdminForceStart ()
         G_sprint(self, 2, "Can't issue! More players needed.\n");
 }
 
-void BotForceStart ()
-{
-    gedict_t *p;
-    float f1;
-
-    G_bprint ( 2, "server is tired of waiting\n"
-				  "match WILL commence!\n" );
-
-    f1 = 0;
-    p = find( world, FOFCLSN, "player" );
-    while( p )
-    {
-        if( !strnull( p->s.v.netname ) )
-        {
-            if( p->ready && p->k_accepted == 2 )
-                f1++;
-            else
-            {
-                p->k_accepted = 0;
-                G_bprint(2, "% was kicked by IDLE BOT\n", p->s.v.netname);
-                G_sprint(p, 2, "Bye bye! Pay attention next time.\n");
-                p->s.v.classname = "";
-                stuffcmd(p, "disconnect\n"); // FIXME: stupid way
-            }
-        }
-
-        p = find(p, FOFCLSN, "player");
-    }
-
-    k_attendees = f1;
-
-    if( k_attendees > 1 )
-        StartTimer();
-    else
-    {
-        G_bprint(2, "Can't start! More players needed.\n");
-		EndMatch( 1 );
-    }
-}
-
-void AdminMatchStart ()
-{
-    gedict_t *p;
-    float f1;
-
-    f1 = 0;
-
-    p = find( world, FOFCLSN, "player" );
-    while( p )
-    {
-        if( !strnull ( p->s.v.netname ) )
-        {
-            if( p->ready && p->k_accepted == 2 )
-                f1++;
-            else
-            {
-                p->k_accepted = 0;
-                G_bprint(2, "%s was kicked by admin forcestart\n", p->s.v.netname);
-                G_sprint(p, 2, "Bye bye! Pay attention next time.\n");
-                p->s.v.classname = "";
-                stuffcmd(p, "disconnect\n"); // FIXME: stupid way
-            }
-        }
-
-        p = find(p, FOFCLSN, "player");
-    }
-
-    k_attendees = f1;
-
-    if( k_attendees )
-        StartTimer();
-    else
-    {
-        G_bprint(2, "Can't start! More players needed.\n");
-		EndMatch( 1 );
-    }
-}
 
 void AdminForceBreak ()
 {
@@ -634,7 +551,8 @@ void AdminForceBreak ()
         cvar_set("sv_maxspeed", va("%d", (int)k_oldmaxspeed));
 
     G_cprint("%%forcebreak%%%s\n", self->s.v.netname);
-    G_bprint(2, "%s forces a break!\nMATCH OVER!!\n", self->s.v.netname);
+    G_bprint(2, "%s forces a break!\n"
+				"MATCH OVER!!\n", self->s.v.netname);
 
     EndMatch( 0 );
 }

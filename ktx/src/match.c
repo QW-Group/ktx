@@ -5,7 +5,7 @@
 void NextLevel ();
 void StopTimer ( int removeDemo );
 void EndMatch ( float skip_log );
-void BotForceStart ();
+void IdlebotForceStart ();
 void CheckAll();
 void StartMatch ();
 void StartTimer ();
@@ -1317,19 +1317,92 @@ void PrintCountdown( int seconds )
 	G_cp2all(text);
 }
 
-void TimerStartThink ()
+qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
+{
+    int k_lockmin     = iKey( world, "k_lockmin" );
+    int k_lockmax     = iKey( world, "k_lockmax" );
+	int k_membercount = iKey( world, "k_membercount" );
+	int i = CountRTeams();
+	int sub, nready;
+	char *txt = "";
+	gedict_t *p;
+
+	if ( !isTeam() ) // no rules limitation in non team game
+		return true;
+
+    if( i < k_lockmin )
+    {
+		sub = k_lockmin - i;
+		txt = va("%d more team%s required!\n", sub, ( sub != 1 ? "s" : "" ));
+
+		if ( s )
+        	G_sprint(s, 2, "%s", txt);
+		else
+        	G_bprint(2, "%s", txt);
+
+        return false;
+    }
+
+    if( i > k_lockmax )
+    {
+		sub = i - k_lockmax;
+		txt = va("Get rid of %d team%s!\n", sub, ( sub != 1 ? "s" : "" ));
+
+		if ( s )
+        	G_sprint(s, 2, "%s", txt);
+		else
+        	G_bprint(2, "%s", txt);
+
+        return false;
+    }
+
+	nready = 0;
+	for( p = world; p = find ( p, FOFCLSN, "player" ); )
+		if( p->ready )
+			nready++;
+
+	if ( !CheckMembers( k_membercount ) ) {
+		if( !forceMembersWarn ) // warn anyway if we want
+		if( nready != k_attendees && !s )
+			return false; // inform not in all cases, less annoying
+
+		txt = va("%s %d %s\n"
+				 "%s\n",
+			 redtext("Server wants at least"), k_membercount, redtext("players in each team"),
+			 redtext("Waiting..."));
+					
+		if ( s )
+        	G_sprint(s, 2, "%s", txt);
+		else
+        	G_bprint(2, "%s", txt);
+
+		return false;
+	}
+
+	return true;
+}
+
 // Called every second during the countdown.
+void TimerStartThink ()
 {
 	gedict_t *p;
-	float num, f1, f2, f3;
+
+	k_attendees = CountPlayers();		
+
+	if( !isCanStart( NULL, true ) ) {
+		G_bprint(2, "Aborting...\n");
+
+		StopTimer( 1 );
+
+		return;
+	}
 
 	self->cnt2 -= 1;
 
 	if( self->cnt2 == 1 ) {
 		k_standby = 1;
 
-		p = find ( world, FOFCLSN, "player" );
-		while( p ) {
+		for( p = world;	p = find ( p, FOFCLSN, "player" ); ) {
 			if( !strnull ( p->s.v.netname ) ) {
 				//set to ghost, 1 second before matchstart
 				p->s.v.takedamage = 0;
@@ -1338,36 +1411,10 @@ void TimerStartThink ()
 				p->s.v.modelindex = 0;
 				p->s.v.model      = "";
 			}
-
-			p = find ( p, FOFCLSN, "player" );
 		}
 	}
     else if( self->cnt2 <= 0 ) {
 		G_cp2all("");
-
-		if ( k_matchLess ) {
-			StartMatch();
-			return;
-		}
-
-		f2 = atoi( ezinfokey( world, "k_lockmin" ) );
-		f3 = atoi( ezinfokey( world, "k_lockmax" ) );
-		f1 = CountRTeams();
-
-		num = atoi( ezinfokey( world, "k_membercount" ) );
-		if( !num )
-			num = 1;
-		else
-			num = CheckMembers( num );
-
-		if( f1 < f2 || f1 > f3 || !num ) {
-			G_bprint(2, "Illegal number of teams or players\n"
-						"aborting...\n");
-
-			StopTimer( 1 );
-
-			return;
-		}
 
 		StartMatch();
 
@@ -1377,16 +1424,8 @@ void TimerStartThink ()
 	PrintCountdown( self->cnt2 );
 
 	if( self->cnt2 < 6 )
-	{
-		p = find (world, FOFCLSN, "player");
-		while( p )
-		{
-			if( !strnull ( p->s.v.netname ) ) 
-				stuffcmd (p, "play buttons/switch04.wav\n");
-
-			p = find (p, FOFCLSN, "player");
-		}
-	}
+		for( p = world;	p = find (p, FOFCLSN, "player"); )
+			stuffcmd (p, "play buttons/switch04.wav\n");
 
 	self->s.v.nextthink = g_globalvars.time + 1;
 }
@@ -1438,53 +1477,8 @@ void ShowMatchSettings()
 	}
 }
 
-void StartTimer ()
-// Spawns the timer and starts the countdown.
+void StartDemoRecord ()
 {
-	gedict_t *timer, *ptmp;
-
-	k_force = 0;
-	timer = find ( world, FOFCLSN, "idlebot");
-	if( timer )
-		ent_remove( timer );
-
-	timer = find ( world, FOFCLSN, "timer");
-	while( timer ) {
-		ptmp = timer;
-		timer = find(timer, FOFCLSN, "timer");
-		ent_remove( ptmp );
-	}
-
-	if ( !k_matchLess ) {
-		ShowMatchSettings ();
-
-		timer = world;
-		while( timer = find( timer, FOFCLSN, "player" ) )
-			if( !strnull( timer->s.v.netname ) )
-				stuffcmd(timer, "play items/protect2.wav\n");
-	}
-
-	timer = spawn();
-	timer->s.v.owner = EDICT_TO_PROG( world );
-	timer->s.v.classname = "timer";
-	timer->cnt = 0;
-	if( iKey( world, "k_count" ) > 0 )
-        timer->cnt2 = iKey( world, "k_count" );
-    else
-        timer->cnt2 = 3; // at the least we want a 3 second countdown
-
-
-	if ( k_matchLess ) // check if we need countdown in case of matchless
-	if ( !cvar("k_matchless_countdown") )
-		timer->cnt2 = 0;
-
-	( timer->cnt2 )++;
-
-    timer->s.v.nextthink = g_globalvars.time + 0.001;
-	timer->s.v.think = ( func_t ) TimerStartThink;
-	match_in_progress = 1;
-	localcmd( "serverinfo status Countdown\n" );
-
 	if ( iKey( world, "demo_tmp_record" ) ) { // FIXME: TODO: make this more like ktpro
 		qboolean record = false;
 
@@ -1498,10 +1492,58 @@ void StartTimer ()
 	}
 }
 
-void StopTimer ( int removeDemo )
-// Whenever a countdown or match stops, remove the timer and reset everything.
+void StartTimer ()
+// Spawns the timer and starts the countdown.
 {
-	gedict_t *t, *p;
+	gedict_t *timer;
+
+	k_force = 0;
+
+	for( timer = world; timer = find(timer, FOFCLSN, "idlebot"); )
+		ent_remove( timer );
+
+	for( timer = world; timer = find(timer, FOFCLSN, "timer"); )
+		ent_remove( timer );
+
+	if ( !k_matchLess ) {
+		ShowMatchSettings ();
+
+		for( timer = world; timer = find(timer, FOFCLSN, "player"); )
+			stuffcmd(timer, "play items/protect2.wav\n");
+	}
+
+	timer = spawn();
+	timer->s.v.owner = EDICT_TO_PROG( world );
+	timer->s.v.classname = "timer";
+	timer->cnt = 0;
+
+	if( iKey( world, "k_count" ) > 0 )
+        timer->cnt2 = iKey( world, "k_count" );
+    else
+        timer->cnt2 = 3; // at the least we want a 3 second countdown
+
+
+	if ( k_matchLess ) // check if we need countdown in case of matchless
+		if ( !cvar("k_matchless_countdown") )
+			timer->cnt2 = 0; // ok - no countdown
+
+	( timer->cnt2 )++;
+
+    timer->s.v.nextthink = g_globalvars.time + 0.001;
+	timer->s.v.think = ( func_t ) TimerStartThink;
+
+	match_in_progress = 1;
+
+	localcmd( "serverinfo status Countdown\n" );
+
+	StartDemoRecord (); // if allowed
+}
+
+// Whenever a countdown or match stops, remove the timer and reset everything.
+// also stop/cancel demo recording
+void StopTimer ( int removeDemo )
+{
+	gedict_t *timer, *p;
 
 	if ( match_in_progress == 1 )
 		G_cp2all(""); // clear center print
@@ -1515,28 +1557,17 @@ void StopTimer ( int removeDemo )
 		// standby flag needs clearing (sturm)
 		k_standby = 0;
 
-		p = find ( world, FOFCLSN, "player" );
-		while( p ) 
+		for( p = world; p = find ( p, FOFCLSN, "player" ); ) 
 		{
-			if( !strnull ( p->s.v.netname ) )
-			{
-				p->s.v.takedamage = 2;
-				p->s.v.solid      = 3;
-				p->s.v.movetype   = 3;
-				setmodel (p, "progs/player.mdl");
-			}
-
-			p = find ( p, FOFCLSN, "player" );
+			p->s.v.takedamage = 2;
+			p->s.v.solid      = 3;
+			p->s.v.movetype   = 3;
+			setmodel (p, "progs/player.mdl");
 		}
 	}
 
-	t = find ( world, FOFCLSN, "timer" );
-	while( t ) {
-		t->s.v.nextthink = g_globalvars.time + 0.1;
-		t->s.v.think = ( func_t ) SUB_Remove;
-
-		t = find( t, FOFCLSN, "timer" );
-	}
+	for( timer = world; timer = find(timer, FOFCLSN, "timer"); )
+		ent_remove( timer );
 
 	if ( removeDemo && !strnull( cvar_string( "serverdemo" ) ) )
 		localcmd("cancel\n");  // demo is recording and must be removed, do it
@@ -1544,50 +1575,91 @@ void StopTimer ( int removeDemo )
 	localcmd("serverinfo status Standby\n");
 }
 
+void IdlebotForceStart ()
+{
+    gedict_t *p;
+    int i;
+
+    G_bprint ( 2, "server is tired of waiting\n"
+				  "match WILL commence!\n" );
+
+    i = 0;
+    for( p = world; p = find(p, FOFCLSN, "player"); )
+    {
+		if( p->ready && p->k_accepted == 2 ) {
+    		i++;
+		}
+		else
+		{
+    		G_bprint(2, "%s was kicked by IDLE BOT\n", p->s.v.netname);
+    		G_sprint(p, 2, "Bye bye! Pay attention next time.\n");
+
+    		p->k_accepted = 0;
+    		p->s.v.classname = "";
+    		stuffcmd(p, "disconnect\n"); // FIXME: stupid way
+		}
+    }
+
+    k_attendees = i;
+
+    if( k_attendees > 1 ) {
+        StartTimer();
+	}
+    else
+    {
+        G_bprint(2, "Can't start! More players needed.\n");
+		EndMatch( 1 );
+    }
+}
+
 void IdlebotThink ()
 {
 	gedict_t *p;
-	float f1, f2, f3;
+	int i;
 
-	self->attack_finished = self->attack_finished - 1;
-	f1 = CountPlayers();
-	f2 = CountRPlayers();
-	f3 = f1 / 2;
-	if( f3 > f2 || f1 < 2 ) {
-		G_bprint(3, "console: bah! chickening out?\n");
-		G_bprint(2, "server disables the idle bot\n");
+	if ( iKey(world, "k_idletime") <= 0 ) {
+		ent_remove( self );
+		return;
+	}
+
+	self->attack_finished -= 1;
+
+	i = CountPlayers();
+
+	if( 0.5f * i > CountRPlayers() || i < 2 ) {
+		G_bprint(2, "console: bah! chickening out?\n"
+					"server disables the %s\n", redtext("idle bot"));
 
 		ent_remove( self ) ;
 
 		return;
 	}
 
-	if(self->attack_finished < 1) {
-		BotForceStart();
+	k_attendees = CountPlayers();
+
+	if ( !isCanStart(NULL, true) ) {
+        G_bprint(2, "%s removed\n", redtext("idle bot"));
+
+        ent_remove ( self );
+
+        return;
+	}
+
+	if( self->attack_finished < 1 ) {
+
+		IdlebotForceStart();
 
 		ent_remove( self );
 
 		return;
+
 	} else {
-		f1 = floor(self->attack_finished / 5);
-		if( self->attack_finished < 5 || (f1 * 5) == self->attack_finished ) {
-			if( self->attack_finished == 1 ) {
-				p = find ( world, FOFCLSN, "player" );
-				while( p ) {
-					if( !strnull ( p->s.v.netname ) && !p->ready )
-						G_sprint(p, 3, "console: 1 second to go ready\n");
+		i = self->attack_finished;
 
-					p = find ( p, FOFCLSN, "player" );
-				}
-			} else {
-				p = find ( world, FOFCLSN, "player" );
-				while( p ) {
-					if( !strnull ( p->s.v.netname ) && !p->ready )
-						G_sprint(p, 3, "console: %d seconds to go ready\n", (int)self->attack_finished);
-
-					p = find ( p, FOFCLSN, "player" );
-				}
-			}
+		if( i < 5 || !(i % 5) ) {
+			for( p = world; p = find ( p, FOFCLSN, "player" ); )
+				if( !p->ready )
+					G_sprint(p, 2, "console: %d second%s to go ready\n", i, ( i == 1 ? "" : "s" ));
 		}
 	}
 
@@ -1597,64 +1669,69 @@ void IdlebotThink ()
 void IdlebotCheck ()
 {
 	gedict_t *p;
-	float f1, f2, f3;
+	int i;
 
-	if( match_in_progress )
+	if ( iKey(world, "k_idletime") <= 0 ) {
+		if ( p = find ( world, FOFCLSN, "idlebot" ) )
+			ent_remove( p );
+		return;
+	}
+
+	i = CountPlayers();
+
+	if( 0.5f * i > CountRPlayers() || i < 2 ) {
+		p = find ( world, FOFCLSN, "idlebot" );
+
+		if( p ) {
+			G_bprint(2, "console: bah! chickening out?\n"
+						"server disables the %s\n", redtext("idle bot"));
+
+			ent_remove( p );
+		}
+
+		return;
+	} 
+
+	if( match_in_progress || intermission_running || k_force )
 		return;
 
 	// no idele bot in practice mode
 	if ( k_practice ) // #practice mode#
 		return;
 
-	f1 = CountPlayers();
-	f2 = CountRPlayers();
-	f3 = f1 / 2;
-	if( f2 >= f3 && f1 > 1 ) {
-//50% or more of the players are ready! go-go-go
-		p = find ( world, FOFCLSN, "idlebot" );
-		if( p )
-			return;
-		else {
-			p = spawn();
-			p->s.v.classname = "idlebot";
-			p->s.v.think = (func_t) IdlebotThink;
-			p->s.v.nextthink = g_globalvars.time + 1;
+	if( p = find ( world, FOFCLSN, "idlebot" ) ) // already have idlebot
+		return;
 
-			f1 = atoi( ezinfokey(world, "k_idletime") );
-			p->attack_finished = f1;
-			G_bprint(2, "\nserver activates the idle bot\n");
+	//50% or more of the players are ready! go-go-go
 
-			p = find ( world, FOFCLSN, "player" );
-			while( p ) {
-				if( !strnull ( p->s.v.netname ) && !p->ready )
-					G_sprint(p, 3, "console: %d seconds to go ready\n", (int)f1);
+	k_attendees = CountPlayers();
 
-				p = find ( p, FOFCLSN, "player" );
-			}
-		}
-	} else {
-
-		p = find ( world, FOFCLSN, "idlebot" );
-		if( p ) {
-			G_bprint(3, "console: bah! chickening out?\n");
-			G_bprint(2, "server disables the idle bot\n");
-
-			ent_remove( p );
-		}
+	if ( !isCanStart( NULL, true ) ) {
+        G_sprint(self, 2, "Can't issue %s!\n", redtext("idle bot"));
+		return;
 	}
+
+	p = spawn();
+	p->s.v.classname = "idlebot";
+	p->s.v.think = (func_t) IdlebotThink;
+	p->s.v.nextthink = g_globalvars.time + 0.001;
+
+	p->attack_finished = max( 3, iKey(world, "k_idletime") );
+
+	G_bprint(2, "\n"
+				"server activates the %s\n", redtext("idle bot"));
 }
 
-void PlayerReady ()
 // Called by a player to inform that (s)he is ready for a match.
+void PlayerReady ()
 {
 	gedict_t *p;
-	float nready, f1, k_lockmin, k_lockmax;
-	char *tmp, *s1, *s2;
+	float nready;
 
 	if( intermission_running || match_in_progress == 2 )
 			return;
 
-	if (k_practice) { // #practice mode#
+	if ( k_practice ) { // #practice mode#
 		G_sprint(self, 2, "%s\n", redtext("Server in practice mode"));
 		return;
 	}
@@ -1663,24 +1740,16 @@ void PlayerReady ()
 		G_sprint(self, 2, "Type break to unready yourself\n");
 		return;
 	}
-	k_lockmin = atoi( ezinfokey( world, "k_lockmin" ) );
-	k_lockmax = atoi( ezinfokey( world, "k_lockmax" ) );
 
     if( k_force && isTeam() ) {
 		nready = 0;
-		p = find ( world, FOFCLSN, "player" );
-		while( p ) {
-			if( !strnull ( p->s.v.netname ) && p->ready ) {
-				s1 = ezinfokey(self, "team");
-				s2 = ezinfokey(p, "team");
-
-				if( streq( s1, s2 ) && !strnull( s1 ) ){
+		for( p = world; p = find ( p, FOFCLSN, "player" ); ) {
+			if( p->ready ) {
+				if( streq( getteam(self), getteam(p) ) && !strnull( getteam(self) ) ){
 					nready = 1;
 					break;
 				}
 			}
-
-			p = find ( p, FOFCLSN, "player" );
 		}
 
 		if( !nready ) {
@@ -1696,63 +1765,40 @@ void PlayerReady ()
 	self->k_vote = 0;
 	self->s.v.effects = self->s.v.effects - ((int)self->s.v.effects & 64);
 	self->k_teamnum = 0;
-	G_bprint(2, "%s is ready %s‘\n", self->s.v.netname, ezinfokey(self, "team"));
+
+	G_bprint(2, "%s %s%s\n", self->s.v.netname, redtext("is ready"),
+							( isTeam() ? va(" %s‘", getteam( self ) ) : "" ) );
+
 	nready = 0;
-	p = find ( world, FOFCLSN, "player" );
-	while( p ) {
-		if( !strnull ( p->s.v.netname ) && p->ready )
+	for( p = world; p = find ( p, FOFCLSN, "player" ); )
+		if( p->ready )
 			nready++;
 
-		p = find ( p, FOFCLSN, "player" );
-	}
-
-	f1 = CountRTeams();
-	if( f1 < k_lockmin ) { // FIXME: compact it
-		tmp = va("%d", (int)(k_lockmin - f1));
-		G_bprint(2, tmp);
-		G_bprint(2, " םןעו פובם");
-		if( (k_lockmin - f1) != 1 )
-			G_bprint(2, "ף");
-		G_bprint(2, " עוסץיעוה\n");
-
-		return;
-	}
-	if( f1 > k_lockmax ) { // FIXME: compact it
-		G_bprint(2, "ַופ עיה ןז ");
-		tmp = va("%d", (int)(f1 - k_lockmax));
-		G_bprint(2, tmp);
-		G_bprint(2, " פובם");
-		if( (f1 - k_lockmax) != 1 )
-			G_bprint(2, "ף");
-		G_bprint(2, "!\n");
-
-		return;
-	}
 
 	k_attendees = CountPlayers();
-	f1 = atoi( ezinfokey( world, "k_membercount" ) );
-	if( CheckMembers( f1 ) ) {
-		if( nready == k_attendees && nready >= 2 && !k_force ) {
-			G_bprint(2, "All players ready\n"
-						"Timer started\n");
 
-			StartTimer();
-			if( atoi( ezinfokey( world, "k_idletime" ) ) ) {
-				p = find ( world, FOFCLSN, "idlebot" );
-				if( p )
-					ent_remove( p );
-			}
+	if ( !isCanStart ( NULL, false ) )
+		return; // rules does't allow us to start match, idlebot ignored because of same reason
 
-			return;
-		}
-	} else if( nready == k_attendees && nready >=2 && !k_force ) {
-		G_bprint(2, "׃ועצוע קבמפף בפ לובףפ %d נלבשועף ימ ובדט פובם\nWaiting...\n", 
-						atoi( ezinfokey( world, "k_membercount" ) ) );
+	if ( k_force )
+		return; // admin forces match - timer will started somewhere else
+
+	if( nready != k_attendees ) { // not all players ready, check idlebot and return
+
+		IdlebotCheck();
+
 		return;
 	}
+	
+	// ok all players ready
 
-	if( atoi( ezinfokey( world, "k_idletime" ) ) && !k_force )
-		IdlebotCheck();
+	if ( nready < 2 ) // only one or less players ready, match is pointless
+		return;
+
+	G_bprint(2, "All players ready\n"
+				"Timer started\n");
+
+	StartTimer();
 }
 
 void PlayerBreak ()
@@ -1760,25 +1806,27 @@ void PlayerBreak ()
 	gedict_t *p;
 	float f1, f2;
 
-	if( !self->ready )
+	if( !self->ready || intermission_running )
 		return;
 
 	if( !match_in_progress ) {
 		self->ready = 0;
-		G_bprint(2, "%s is not ready\n", self->s.v.netname);
+		G_bprint(2, "%s %s\n", self->s.v.netname, redtext("is not ready"));
 		if( iKey( world, "k_sready" ) )
 			self->s.v.effects = self->s.v.effects + 64; // FIXME: hmm clean this
 
 		return;
 	}
 
-	if( !k_matchLess ) // u can't stop countdown in matchless mode
+	if( !k_matchLess ) // u can't stop countdown (but match u can) in matchless mode
 	if( match_in_progress == 1 ) {
 		p = find ( world, FOFCLSN, "timer");
 		if(p->cnt2 > 1) {
 			self->ready = 0;
-			G_bprint(2, "%s stops the countdown\n", self->s.v.netname);
-			if( atoi( ezinfokey( world, "k_sready" ) ) )
+
+			G_bprint(2, "%s %s\n", self->s.v.netname, redtext("stops the countdown"));
+
+			if( iKey( world, "k_sready" ) )
 				self->s.v.effects = self->s.v.effects + 64;
 
 			StopTimer( 1 );
@@ -1787,12 +1835,9 @@ void PlayerBreak ()
 	}
 
 	if( self->k_vote ) {
-		G_bprint(2, "%s קיפטהעבקף ", self->s.v.netname);
-		if( streq( ezinfokey( self, "gender" ), "f" ) )
-				G_bprint(2, "טוע ");
-		else
-				G_bprint(2, "טיף ");
-		G_bprint(2, "vote\n");
+		G_bprint(2, "%s %s %s vote\n", self->s.v.netname, 
+						redtext("withdraws"), redtext(SexStr(self)));
+
 		self->k_vote = 0;
 
 		k_vbreak = 0;
@@ -1803,7 +1848,7 @@ void PlayerBreak ()
 		return;
 	}
 
-	G_bprint(2, "%s votes for stopping the match\n", self->s.v.netname);
+	G_bprint(2, "%s %s\n", self->s.v.netname, redtext("votes for stopping the match"));
 	self->k_vote = 1;
 
 	k_vbreak = 0;
@@ -1815,7 +1860,7 @@ void PlayerBreak ()
 
 	// block stop countdown in matchless mode by one player
 	if ( f1 == 1 && k_matchLess && match_in_progress == 1 ) {
-		G_bprint(2, "You can't stop countdown alone\n");
+		G_sprint(self, 2, "You can't stop countdown alone\n");
 		return;
 	}
 
@@ -1824,7 +1869,7 @@ void PlayerBreak ()
 	f2 = f1 * 0.5 ;
 
 	if( k_vbreak > f2 ) {
-		G_bprint(2, "Match stopped by majority vote\n");
+		G_bprint(2, "%s\n", redtext("Match stopped by majority vote"));
 		EndMatch( 1 );
 
 		return;

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.13 2005/12/31 19:05:00 qqshka Exp $
+ *  $Id: g_local.h,v 1.14 2006/01/04 19:50:58 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -54,7 +54,7 @@
 #define DebugTrap(x) G_Error(x)
 #endif
 
-#define MAX_STRINGS 32
+#define MAX_STRINGS 64
 
 #define	MAX_STRING_CHARS	1024	// max length of a string passed to Cmd_TokenizeString
 #define	MAX_STRING_TOKENS	1024	// max tokens resulting from Cmd_TokenizeString
@@ -195,6 +195,8 @@ void        cvar_set( const char *var, const char *val );
 char		*getteam( gedict_t * ed );
 char		*getname( gedict_t * ed );
 
+char		*SexStr( gedict_t * ed );
+
 gedict_t	*find_plr( gedict_t * start, int *from );
 gedict_t 	*player_by_id( int id );
 gedict_t	*player_by_name( const char *name );
@@ -282,6 +284,10 @@ void            SpawnBlood( vec3_t, float );
 void            W_FireAxe();
 void            W_FireSpikes( float ox );
 void            W_FireLightning();
+
+// match.c
+
+qboolean 		isCanStart ( gedict_t *s, qboolean forceMembersWarn );
 
 //combat 
 extern gedict_t *damage_attacker, *damage_inflictor;

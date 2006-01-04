@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.24 2006/01/01 21:28:44 qqshka Exp $
+ *  $Id: client.c,v 1.25 2006/01/04 19:50:45 qqshka Exp $
  */
 
 //===========================================================================
@@ -1502,7 +1502,7 @@ void ClientDisconnect()
 		ExitKick( self );
 
 	if( self->k_captain ) {
-        G_bprint(2, "A γαπταιξ has left\n");
+        G_bprint(2, "A %s has left\n", redtext("captain"));
 
 		ExitCaptain();
 	}
@@ -1510,7 +1510,7 @@ void ClientDisconnect()
 	if( k_captains == 2 )
 		CheckFinishCaptain();
 
-	if( atoi( ezinfokey( world, "k_idletime" ) ) && !k_force && !match_in_progress )
+	if( iKey( world, "k_idletime" ) > 0 )
 		IdlebotCheck();
 
 	f1 = CountALLPlayers();
@@ -1606,9 +1606,9 @@ void Print_Wp_Stats( )
 	float rl  = wps & S_RL  ? 100.0 * e->ps.h_rl  / max(1, e->ps.a_rl) : 0;
 #else /* just count of direct hits */
 	float gl  = wps & S_GL  ? e->ps.h_gl : 0;
-	float rl  = wps & S_RL  ? e->ps.h_rl : 0;
+	float rl  = wps & S_RL  ? max(0.001, e->ps.h_rl) : 0;
 #endif
-	float lg  = wps & S_LG  ? 100.0 * e->ps.h_lg  / max(1, e->ps.a_lg) : 0;
+	float lg  = wps & S_LG  ? max(0.001, 100.0 * e->ps.h_lg / max(1, e->ps.a_lg)) : 0;
 
 
 	if ( !axe && !sg && !ssg && !ng && !sng && !gl && !rl && !lg )

@@ -1,3 +1,13 @@
+2006-01-04
+ 40. If u customize +wp_stats to show rl or lg they will be shown even effectiveness is zero,
+	 other weapons will not shown untill u get some non zero effectiveness.
+
+ 41. Rewrote a bit ready/break code. So, if u play non team game no more messages like:
+	 "xxx more teams required" or "Get rid of xxx teams!\n" and about members in each team.
+
+	 Set some reasonable values for this localinfos: k_membercount, k_lockmin, k_lockmax
+	 if u issue XonX command.
+
 2006-01-02
  37. Added coundtown in matchless mode.
 

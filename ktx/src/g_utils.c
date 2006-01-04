@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.13 2005/12/31 19:04:22 qqshka Exp $
+ *  $Id: g_utils.c,v 1.14 2006/01/04 19:50:45 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -786,16 +786,34 @@ char *getname( gedict_t * ed )
 	return string[index++];
 }
 
+// :)
+char *SexStr( gedict_t * ed )
+{
+	static char		string[MAX_STRINGS][5];
+	static int		index = 0;
+	char 			*sex="his";
+
+	index %= MAX_STRINGS;
+
+//	if ( !ed->k_player && !ed->k_spectator )
+//		G_Error("SexStr: not client, classname %s", ed->s.v.classname);
+	if( streq( ezinfokey( ed, "gender" ), "f" ) )
+		sex = "her";
+
+	string[index][0] = 0;
+	strlcat( string[index], sex, sizeof( string[0] ) );
+
+	return string[index++];
+}
+
 // this help me walk from both players and ghosts, made code more simple
 // int from = 0;
-// gedict_t *p ;
-// p = find_plr(world, &from);
-// while ( p ) {
+// gedict_t *p = world ;
+// while ( p = find_plr(p, &from) ) {
 // ... some code ...
-// p = find_plr(world, &from);
 // }
 
-// only accepted players have classname "player" now
+// only already accepted players have classname "player" now
 
 gedict_t *find_plr( gedict_t * start, int *from )
 {

@@ -2201,8 +2201,6 @@ const char common_um_init[] =
 	"localinfo k_midair 0\n"			// not implemented
 	"localinfo k_instagib 0\n"			// not implemented
 
-	"localinfo k_no_lg 0\n"				// TODO not implemented
-
 	"fraglimit 0\n"						// fraglimit %)
 	"localinfo k_666 0\n"				// respawn 666
 	"localinfo dp 1\n"					// drop pack
@@ -2214,40 +2212,51 @@ const char common_um_init[] =
 	"localinfo k_lockmin 2\n"			// minimum number of teams in game
 	"localinfo k_bzk 0\n"				// berzerk
 	"localinfo k_spw 0\n"				// affect spawn type
-	"localinfo k_new_spw 0\n";			// ktpro feature
+	"localinfo k_new_spw 0\n"			// ktpro feature
+
+	"localinfo k_membercount 0\n"		// some unlimited values
+	"localinfo k_lockmin 0\n"			// some unlimited values
+	"localinfo k_lockmax 64\n";         // some unlimited values
+
 
 const char _1on1_um_init[] =
-	"timelimit 10\n"					//
-	"teamplay 0\n"						//
+	"timelimit  10\n"					//
+	"teamplay   0\n"					//
 	"deathmatch 3\n"					//
 	"localinfo k_deathmatch 3\n"		// TODO not implemented
-	"localinfo k_membercount 1\n"		// minimum number of players in each team
 	"localinfo k_overtime 2\n"			// overtime type
 	"localinfo k_pow 0\n"				// powerups
+	"localinfo k_membercount 0\n"		// no efect in duel
+	"localinfo k_lockmin 0\n"			// no efect in duel
+	"localinfo k_lockmax 0\n"           // no efect in duel
 	"k_mode 1\n";
 
 const char _2on2_um_init[] =
 	"floodprot 9 1 1\n"					//
 	"localinfo k_fp 1\n"				// TODO not implemented
-	"timelimit 10\n"					//
-	"teamplay 2\n"						//
+	"timelimit  10\n"					//
+	"teamplay   2\n"					//
 	"deathmatch 3\n"					//
 	"localinfo k_deathmatch 3\n"		//
-	"localinfo k_membercount 1\n"		//
 	"localinfo k_overtime 1\n"			// overtime type
 	"localinfo k_exttime 2\n"			// extende time for overtime
 	"localinfo k_pow 1\n"				//
+	"localinfo k_membercount 1\n"		// minimum number of players in each team
+	"localinfo k_lockmin 1\n"			//
+	"localinfo k_lockmax 2\n"           //
 	"k_mode 2\n";
 
 const char _3on3_um_init[] =
 	"floodprot 9 1 1\n"
 	"localinfo k_fp 1\n"
-	"timelimit 20\n"
-	"teamplay 2\n"
+	"timelimit  20\n"
+	"teamplay   2\n"
 	"deathmatch 1\n"
 	"localinfo k_deathmatch 1\n"
-	"localinfo k_membercount 2\n"
 	"localinfo k_pow 1\n"
+	"localinfo k_membercount 2\n"		// minimum number of players in each team
+	"localinfo k_lockmin 1\n"			//
+	"localinfo k_lockmax 2\n"           //
 	"localinfo k_overtime 1\n"
 	"localinfo k_exttime 5\n"
 	"k_mode 2\n";
@@ -2255,12 +2264,14 @@ const char _3on3_um_init[] =
 const char _4on4_um_init[] =
 	"floodprot 9 1 1\n"
 	"localinfo k_fp 1\n"
-	"timelimit 20\n"
-	"teamplay 2\n"
+	"timelimit  20\n"
+	"teamplay   2\n"
 	"deathmatch 1\n"
 	"localinfo k_deathmatch 1\n"
-	"localinfo k_membercount 3\n"
 	"localinfo k_pow 1\n"
+	"localinfo k_membercount 3\n"		// minimum number of players in each team
+	"localinfo k_lockmin 1\n"			//
+	"localinfo k_lockmax 2\n"           //
 	"localinfo k_overtime 1\n"
 	"localinfo k_exttime 5\n"
 	"k_mode 2\n";
@@ -2268,25 +2279,30 @@ const char _4on4_um_init[] =
 const char _10on10_um_init[] =
 	"floodprot 9 1 1\n"
 	"localinfo k_fp 1\n"
-	"timelimit 30\n"
-	"teamplay 2\n"
+	"timelimit  30\n"
+	"teamplay   2\n"
 	"deathmatch 1\n"
 	"localinfo k_deathmatch 1\n"
-	"localinfo k_membercount 5\n"
 	"localinfo k_pow 1\n"
+	"localinfo k_membercount 5\n"		// minimum number of players in each team
+	"localinfo k_lockmin 1\n"			//
+	"localinfo k_lockmax 2\n"           //
 	"localinfo k_overtime 1\n"
 	"localinfo k_exttime 5\n"
 	"k_mode 2\n";
 
 const char ffa_um_init[] =
-	"timelimit 20\n"
-	"teamplay 0\n"
-	"localinfo k_lockmin 0\n"
-	"localinfo k_membercount 1\n"
+	"timelimit  20\n"
+	"teamplay   0\n"
+	"deathmatch 3\n"
+	"localinfo k_deathmatch 3\n"
 	"localinfo dq 1\n"
 	"localinfo dr 1\n"
 	"localinfo k_pow 1\n"
-	"localinfo k_dis 0\n"	// FIXME: hmm, really?
+	"localinfo k_membercount 0\n"		// no effect in ffa
+	"localinfo k_lockmin 0\n"			// no effect in ffa
+	"localinfo k_lockmax 0\n"           // no effect in ffa
+	"localinfo k_dis 1\n"
 	"k_mode 3\n";
 
 

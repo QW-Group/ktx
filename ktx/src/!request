@@ -1,14 +1,13 @@
 /tracklist command (from ktpro)
 uptime in serverinfo (from ktpro)
 /fpslist command (from ktpro)
-ktpro-like +wp_stats (rl:0 lg:0.0)
 print ktx:version at serverinfo *progs
 voting percentage:customise && pring (ffa/matchless)
 voting during game (not only intermission)
 fix scores output
-motd for ffa/matchless
 +scores (for all modes include ffa/matchless) // +scores shifting (ktpro compitable)
 
+----------------------------------------------------
 how we must do with q statistics and dropable quad?
 and same question about ring.
 ----------------------------------------------------
