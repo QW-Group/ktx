@@ -8,6 +8,12 @@
 	 Set some reasonable values for this localinfos: k_membercount, k_lockmin, k_lockmax
 	 if u issue XonX command.
 
+ 42. /tracklist command. ktpro (c)
+
+	 This will display a list of which player (if any) the specs are observing.
+
+	 Command work for specs and players.
+
 2006-01-02
  37. Added coundtown in matchless mode.
 

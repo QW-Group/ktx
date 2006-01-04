@@ -106,6 +106,7 @@ void klist ( );
 void hdptoggle ();
 void handicap ();
 void noweapon ();
+void tracklist ();
 
 void TogglePractice();
 
@@ -230,7 +231,9 @@ cmd_t cmds[] = {
     { "handicap",    handicap,                  0    , CF_PLAYER | CF_PARAMS | CF_MATCHLESS },
     { "noweapon",    noweapon,                  0    , CF_PLAYER | CF_PARAMS | CF_SPC_ADMIN },
 
-    { "cam",         ShowCamHelp,               0    , CF_SPECTATOR | CF_MATCHLESS }
+    { "cam",         ShowCamHelp,               0    , CF_SPECTATOR | CF_MATCHLESS },
+
+    { "tracklist",   tracklist,                 0    , CF_BOTH | CF_MATCHLESS  }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -2843,5 +2846,26 @@ void noweapon ()
 		}
 		return;
 	}
+}
+
+void tracklist ( )
+{
+	int i;
+	gedict_t *p;
+	char *track;
+	char *nt = redtext(" not tracking");
+
+	for( i = 0, p = world; p = find(p, FOFCLSN, "spectator"); i++ ) {
+		if ( !i )
+			G_sprint(self, 2, "%s:\n", redtext( "Trackers list" ) );
+
+		track = TrackWhom( p );
+
+		G_sprint(self, 2, "%15s%s\n", getname( p ),
+							(strnull(track) ? nt : va(" \x8D %s", track)) );
+	}
+
+	if ( !i )
+		G_sprint(self, 2, "No spectators present\n" );
 }
 
