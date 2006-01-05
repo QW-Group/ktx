@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.25 2006/01/04 19:50:45 qqshka Exp $
+ *  $Id: client.c,v 1.26 2006/01/05 11:34:50 disconn3ct Exp $
  */
 
 //===========================================================================
@@ -1619,10 +1619,10 @@ void Print_Wp_Stats( )
 	buf[i] = 0;
 
 	if ( rl || lg || gl ) {
-		if ( rl )
-			strlcat(buf, (rl  ? va("%s%s:%.0f", (*buf ? " " : ""), redtext("rl"),  rl) : ""), sizeof(buf));
 		if ( lg )
 			strlcat(buf, (lg  ? va("%s%s:%.1f", (*buf ? " " : ""), redtext("lg") , lg) : ""), sizeof(buf));
+		if ( rl )
+			strlcat(buf, (rl  ? va("%s%s:%.0f", (*buf ? " " : ""), redtext("rl"),  rl) : ""), sizeof(buf));
 		if ( gl )
 			strlcat(buf, (gl  ? va("%s%s:%.0f", (*buf ? " " : ""), redtext("gl") , gl) : ""), sizeof(buf));
 
