@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.26 2006/01/05 11:34:50 disconn3ct Exp $
+ *  $Id: client.c,v 1.27 2006/01/05 23:01:57 qqshka Exp $
  */
 
 //===========================================================================
@@ -51,6 +51,7 @@ void ExitKick(gedict_t *kicker);
 void play_teleport();
 void ImpulseCommands();
 void StartDie ();
+void ZeroFpsStats ();
 
 void CheckAll ()
 {
@@ -882,12 +883,16 @@ void ClientConnect()
 #ifdef KTEAMS
 
 // ILLEGALFPS[
+
+	// Zibbo's frametime checking code
+	self->uptimebugpolicy = 0;
+	self->real_time = 0;
+
 	// delay on checking/displaying illegal FPS.
-	self->fAverageFrameTime = 0;
-	self->fFrameCount = 0;
 	self->fDisplayIllegalFPS = g_globalvars.time + 10 + g_random() * 5;
-	self->fLowestFrameTime = 0.013; // 1/72
 	self->fIllegalFPSWarnings = 0;
+
+	ZeroFpsStats ();
 // ILLEGALFPS]
 
 	self->fraggie = 0;
@@ -1614,7 +1619,7 @@ void Print_Wp_Stats( )
 	if ( !axe && !sg && !ssg && !ng && !sng && !gl && !rl && !lg )
 		return; // sanity
 
-	i = bound(0, atoi ( ezinfokey( self, "lw" ) ), sizeof(buf)-1 );
+	i = bound(0, iKey( self, "lw" ) , sizeof(buf)-1 );
 	memset( (void*)buf, (int)'\n', i);
 	buf[i] = 0;
 
@@ -1658,6 +1663,16 @@ void Print_Wp_Stats( )
 	G_centerprint( self, "%s",  buf );
 }
 
+void ZeroFpsStats ()
+{
+	// zero these so the average/highest FPS is calculated for each delay period.
+	self->fAverageFrameTime = 0;
+	self->fFrameCount = 0;
+	self->fLowestFrameTime = 0.999;
+	self->fHighestFrameTime = 0.0001f;
+}
+
+
 ////////////////
 // GlobalParams:
 // time
@@ -1674,10 +1689,9 @@ Called every frame before physics are run
 
 void PlayerPreThink()
 {
-//  float   mspeed, aspeed;
-//  float   r;
 #ifdef KTEAMS
 	float   r;
+	qboolean zeroFps = false;
 
 	if ( self->k_timingWarnTime )
 		BackFromLag();
@@ -1690,8 +1704,13 @@ void PlayerPreThink()
 	self->fAverageFrameTime += g_globalvars.frametime;
 	self->fFrameCount += 1;
 
+	self->fCurrentFrameTime = g_globalvars.frametime;
+
 	if( g_globalvars.frametime < self->fLowestFrameTime )
 		self->fLowestFrameTime = g_globalvars.frametime;
+
+	if( g_globalvars.frametime > self->fHighestFrameTime )
+		self->fHighestFrameTime = g_globalvars.frametime;
 	
 	if( self->fDisplayIllegalFPS < g_globalvars.time && framechecks )
 	{
@@ -1700,45 +1719,46 @@ void PlayerPreThink()
 // client uptime check
 // code by Zibbo
 		r = self->fAverageFrameTime * 100 / (g_globalvars.time - self->real_time);
-		self->real_time = g_globalvars.time;
 
-		if(r > 103 && !match_in_progress) {
+		if( r > 103 && !match_in_progress ) {
 			G_sprint(self, PRINT_HIGH, 
 				"WARNING: QW clients up to 2.30 have a timer related bug which is caused by too"
 				" long uptime. Either reboot your machine or upgrade to QWCL 2.33.\n");
+
 			G_cprint("%s%%speed%%%f\n", self->s.v.netname, r);
-			if(r > 105)
+
+			if( r > 105 )
 				self->uptimebugpolicy += 1;
 		}
 
 		if( self->uptimebugpolicy > 3 ) {
 			G_bprint(PRINT_HIGH, "\n%s gets kicked for too long uptime\n", self->s.v.netname);
 			G_sprint(self, PRINT_HIGH, "Reboot your machine to get rid of this bug\n");
+
 			GhostFlag(self);
+
 			self->s.v.classname = "";
 			stuffcmd(self, "disconnect\n"); // FIXME: stupid way
 		}
 // ends here
 
-// delay on checking/displaying illegal FPS.
-// s: changed to 15 for more accurate calculation (lag screws it up)
-		self->fDisplayIllegalFPS = g_globalvars.time + 15;
+
+		fps = ( self->fAverageFrameTime / self->fFrameCount );
+
+		fps = fps ? (1.0f / fps) : 1;
+
+//		G_bprint(2, "%s FPS: %3.1f\n", self->s.v.netname, fps);
 		
-		fps = floor( 72 * 13 / ( self->fAverageFrameTime / self->fFrameCount * 1000 ) );
-		
-		if( fps > current_maxfps )
+		if( fps > current_maxfps + 0.1f ) // 0.1 fps fluctuation is allowed
 		{
-			float peak;
+			float peak = self->fLowestFrameTime ? (1.0f / self->fLowestFrameTime) : 1;
 
 			G_bprint( PRINT_HIGH,
-				"\nWARNING: %s is using the timedemo bug and has abnormally high frame rates, ",
-							self->s.v.netname);
+				"\n"
+				"WARNING: %s is using the timedemo bug and has abnormally high frame rates, "
+				"highest FPS = %3.1f, average FPS = %3.1f!\n",
+							self->s.v.netname, peak, fps);
 							
-			peak = floor( 72 * 13 / ( self->fLowestFrameTime * 1000 ) );
-			G_bprint( PRINT_HIGH, "highest FPS = %3.1f (frametime was ", peak);
-			G_bprint( PRINT_HIGH, "%3.1f), ", self->fLowestFrameTime * 1000);
-			G_bprint( PRINT_HIGH, "average FPS = %3.1f!\n", fps);
-			
 			self->fIllegalFPSWarnings += 1;
 			
             if( self->fIllegalFPSWarnings > 3 )
@@ -1751,12 +1771,21 @@ void PlayerPreThink()
             	stuffcmd(self, "disconnect\n"); // FIXME: stupid way
             }
 		}
-		
-		// zero these so the average/highest FPS is calculated for each delay period.
-		self->fAverageFrameTime = 0;
-		self->fFrameCount = 0;
-		self->fLowestFrameTime = 0.013; // 1/72 ?
+
+		zeroFps = true;
 	}
+
+	// zero these so the average/highest FPS is calculated for each delay period.
+	if (self->fDisplayIllegalFPS < g_globalvars.time || zeroFps ) {
+		self->real_time = g_globalvars.time;
+
+		// delay on checking/displaying illegal FPS.
+		// s: changed to 15 for more accurate calculation (lag screws it up)
+		self->fDisplayIllegalFPS = g_globalvars.time + 15;
+
+		ZeroFpsStats ();
+	}
+
 // ILLEGALFPS]
 #endif
 
@@ -1803,7 +1832,7 @@ void PlayerPreThink()
         // state when the player stands still after dying and can't respawn or even
         // suicide and has to reconnect. This is checked and fixed here
         if( g_globalvars.time > (self->dead_time + 0.1)
-			&& ( self->s.v.frame < 41 || self->s.v.frame > 102 ) // FIXME: hardcoded range or dead frames
+			&& ( self->s.v.frame < 41 || self->s.v.frame > 102 ) // FIXME: hardcoded range of dead frames
 		  ) {
 			StartDie();
 		}

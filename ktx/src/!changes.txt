@@ -1,3 +1,10 @@
+2006-01-06
+ 43. /fpslist command. ktpro (c)
+
+	 Displays a list of the maximum, minimum and average FPS of the players on the server.
+
+	 Statistic is cleared/acummulated every 15 seconds for each player.
+
 2006-01-04
  40. If u customize +wp_stats to show rl or lg they will be shown even effectiveness is zero,
 	 other weapons will not shown untill u get some non zero effectiveness.

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.9 2005/12/31 23:28:09 qqshka Exp $
+ *  $Id: progs.h,v 1.10 2006/01/05 23:02:13 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -207,20 +207,23 @@ typedef struct gedict_s {
 	float	k_vote;          // stores player map vote decision
 	char	*kick_ctype;     // if selected player to kick is player or spectator
 	
-	// Zibbo's frametime checking code
-	float real_time;
-	float uptimebugpolicy;
 	float lastwepfired;
 	
 //	float maxspeed;       // Used to set Maxspeed on a player moved from old qw defs.qc
 
 	float suicide_time;	// can't suicide sooner than this
 
-// ILLEGALFPS[abortelect
+// ILLEGALFPS[
+	// Zibbo's frametime checking code
+	float real_time;
+	float uptimebugpolicy;
+
 	float fAverageFrameTime;
 	float fFrameCount;
 	float fDisplayIllegalFPS;
+	float fCurrentFrameTime;
 	float fLowestFrameTime;
+	float fHighestFrameTime;
 	float fIllegalFPSWarnings;
 // ILLEGALFPS]
 	

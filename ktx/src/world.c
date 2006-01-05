@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.14 2006/01/01 21:28:44 qqshka Exp $
+ *  $Id: world.c,v 1.15 2006/01/05 23:01:57 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -612,6 +612,8 @@ void StartFrame( int time )
 	current_maxfps = iKey( world, "maxfps" );
 	if ( !current_maxfps )
 		current_maxfps = 72;	// 2.30 standard
+
+	current_maxfps = bound(50, current_maxfps, 1981);
 
 	CheckTiming(); // check if client lagged or returned from lag
 

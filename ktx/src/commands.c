@@ -107,6 +107,7 @@ void hdptoggle ();
 void handicap ();
 void noweapon ();
 void tracklist ();
+void fpslist ();
 
 void TogglePractice();
 
@@ -233,7 +234,8 @@ cmd_t cmds[] = {
 
     { "cam",         ShowCamHelp,               0    , CF_SPECTATOR | CF_MATCHLESS },
 
-    { "tracklist",   tracklist,                 0    , CF_BOTH | CF_MATCHLESS  }
+    { "tracklist",   tracklist,                 0    , CF_BOTH | CF_MATCHLESS  },
+    { "fpslist",     fpslist,                   0    , CF_BOTH | CF_MATCHLESS  }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -2867,5 +2869,33 @@ void tracklist ( )
 
 	if ( !i )
 		G_sprint(self, 2, "No spectators present\n" );
+}
+
+void fpslist ( )
+{
+	int i;
+	gedict_t *p;
+	float cur, max, min, avg;
+
+	for( i = 0, p = world; p = find(p, FOFCLSN, "player"); i++ ) {
+		if ( !i ) {
+			G_sprint(self, 2, "Players %s list:\n", redtext("FPS") );
+			G_sprint(self, 2, "           name:(cur \x8f max \x8f min \x8f avg)\n");
+			G_sprint(self, 2, "žžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n");
+		}
+
+		cur = p->fCurrentFrameTime ? ( 1.0f / p->fCurrentFrameTime ) : 0;
+		max = p->fLowestFrameTime ? ( 1.0f / p->fLowestFrameTime ) : 0;
+		min = p->fHighestFrameTime ? ( 1.0f / p->fHighestFrameTime ) : 0;
+
+		avg = p->fFrameCount ? ( p->fAverageFrameTime / p->fFrameCount ) : 0;
+		avg = avg ? (1.0f / avg) : 0;
+
+		G_sprint(self, 2, "%15s: %3.0f \x8f %3.0f \x8f %3.0f \x8f %3.1f\n", getname( p ),
+				cur, max, min, avg);
+	}
+
+	if ( !i )
+		G_sprint(self, 2, "No players present\n" );
 }
 
