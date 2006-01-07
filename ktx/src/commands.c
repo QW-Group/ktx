@@ -2880,8 +2880,8 @@ void fpslist ( )
 	for( i = 0, p = world; p = find(p, FOFCLSN, "player"); i++ ) {
 		if ( !i ) {
 			G_sprint(self, 2, "Players %s list:\n", redtext("FPS") );
-			G_sprint(self, 2, "           name:(cur \x8f max \x8f min \x8f avg)\n");
-			G_sprint(self, 2, "žžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n");
+			G_sprint(self, 2, "         name:(cur \x8f max \x8f min \x8f avg)\n");
+			G_sprint(self, 2, "žžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n");
 		}
 
 		cur = p->fCurrentFrameTime ? ( 1.0f / p->fCurrentFrameTime ) : 0;
@@ -2891,8 +2891,8 @@ void fpslist ( )
 		avg = p->fFrameCount ? ( p->fAverageFrameTime / p->fFrameCount ) : 0;
 		avg = avg ? (1.0f / avg) : 0;
 
-		G_sprint(self, 2, "%15s: %3.0f \x8f %3.0f \x8f %3.0f \x8f %3.1f\n", getname( p ),
-				cur, max, min, avg);
+		G_sprint(self, 2, "%13s: %3d \x8f %3d \x8f %3d \x8f%5.1f\n", getname( p ),
+				Q_rint(cur), Q_rint(max), Q_rint(min), avg);
 	}
 
 	if ( !i )
