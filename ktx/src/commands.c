@@ -2871,6 +2871,7 @@ void tracklist ( )
 		G_sprint(self, 2, "No spectators present\n" );
 }
 
+#define Q_rint(x) ((x) > 0 ? (int)((x) + 0.5) : (int)((x) - 0.5))
 void fpslist ( )
 {
 	int i;
