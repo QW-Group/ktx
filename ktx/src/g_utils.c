@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.14 2006/01/04 19:50:45 qqshka Exp $
+ *  $Id: g_utils.c,v 1.15 2006/01/07 15:37:53 disconn3ct Exp $
  */
 
 #include "g_local.h"
@@ -1053,7 +1053,7 @@ int Get_Powerups ()
 			default: pwr = redtext("Unkn"); break;
 		}
 		
-		G_bprint(2, "Server decide turn %s %s\n", redtext("powerups"), pwr);
+		G_bprint(2, "Server decides turn %s %s\n", redtext("powerups"), pwr);
 	}
 
 	return (k_pow = k_pow_new);
