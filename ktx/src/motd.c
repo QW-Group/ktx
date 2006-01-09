@@ -24,9 +24,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 void StuffModCommands();
 float CountPlayers();
 
+#define MOTD_LINES (15)
+
 void PMOTDThink()
 {
-	char *s1, *s2;
+	int i;
+	char buf[2048] = {0};
+	char *s;
 
 	// remove MOTD in some cases
 	if( self->attack_finished < g_globalvars.time // expired
@@ -37,18 +41,25 @@ void PMOTDThink()
 		return;
 	}
 
-	s1 = ezinfokey(world, "k_motd1");
-	s2 = ezinfokey(world, "k_motd2");
+	for( i = 1; i <= MOTD_LINES; i++) {
+		if ( strnull( s = ezinfokey(world, va("k_motd%d", i)) ) )
+			continue;
+		
+		strlcat(buf, s, sizeof(buf));
+		strlcat(buf, "\n", sizeof(buf));
+	}
 
-	G_centerprint ( PROG_TO_EDICT( self->s.v.owner ),
-			"Welcome to\n\n"
-			"%s\n\n"
-			"%s\n\n"
-			"€‚\n\n"
-			"Running Ëïíâáô Ôåáíó ²®²± (QVM version)\n"
-			"by kemiKal, Cenobite, Sturm and Fang\n"
-			"QVM porting and developing by qqshka\n"
-			"Type \"ãïííáîäó\" for help", s1, s2 );
+ 	// no "welcome" - if k_motd keys is present - because admin may wanna customize this
+	if ( strnull( buf ) )
+		strlcat(buf, "Welcome\n\n", sizeof(buf));
+
+	strlcat(buf, "\n€‚\n\n", sizeof(buf));
+	strlcat(buf, va("Running %s by qqshka\n\n", redtext("KTX")), sizeof(buf));
+	strlcat(buf, va("Based on %s\n", redtext("Kombat teams 2.21")), sizeof(buf));
+	strlcat(buf, "by kemiKal, Cenobite, Sturm and Fang\n\n", sizeof(buf));
+	strlcat(buf, va("Type \"%s\" for help", redtext("commands")), sizeof(buf));
+
+	G_centerprint ( PROG_TO_EDICT( self->s.v.owner ), buf);
 
 	self->s.v.nextthink = g_globalvars.time + 0.7;
 }

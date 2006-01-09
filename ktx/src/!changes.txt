@@ -1,3 +1,12 @@
+2006-01-09
+ 44. I rewrote MOTD a bit, as result up to 15 k_motd localinfos supported.
+	 I mean u can use:
+	 
+	 localinfo k_motd1  "motd line 1"
+	 localinfo k_motd2  "motd line 2"
+	 ...
+	 localinfo k_motd15 "motd line 15"
+
 2006-01-06
  43. /fpslist command. ktpro (c)
 
