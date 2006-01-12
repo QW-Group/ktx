@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.15 2006/01/07 15:37:53 disconn3ct Exp $
+ *  $Id: g_utils.c,v 1.16 2006/01/12 17:58:31 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1037,7 +1037,7 @@ int Get_Powerups ()
 	if ( framecount == 1 ) {
 		k_pow_check = g_globalvars.time + 3; // fast re-check. probably time when all players reconnect
 		k_pow_new = max(cvar("_k_players"), CountPlayers()) < k_pow_min_players ? 0 : k_pow_new;
-		k_pow = cvar( "_k_pow_last" ); // restorek_po from last level
+		k_pow = cvar( "_k_pow_last" ); // restore k_pow from last level
 	}else {
 		k_pow_check = g_globalvars.time + k_pow_check_time;
 		k_pow_new = CountPlayers() < k_pow_min_players ? 0 : k_pow_new;
