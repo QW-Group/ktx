@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.6 2006/01/01 15:33:51 qqshka Exp $
+ *  $Id: spectate.c,v 1.7 2006/01/13 20:51:57 qqshka Exp $
  */
 
 // spectate.c
@@ -82,12 +82,15 @@ void wizard_think()
 ///////////////
 void SpectatorConnect()
 {
+	int diff = (int)(PROG_TO_EDICT(self->s.v.goalentity) - world);
+
+	if ( diff < 0 || diff >= MAX_EDICTS ) // something wrong happen - fixing
+		self->s.v.goalentity = EDICT_TO_PROG( world );
+
 	Vip_ShowRights( self );
 
 	if( match_in_progress != 2 || iKey(world, "k_ann") )
 		G_bprint( PRINT_HIGH, "Spectator %s entered the game\n", self->s.v.netname );
-
-	self->s.v.goalentity = EDICT_TO_PROG( world );	// used for impulse 1 below
 
 	// Added this in for kick code.
 	self->s.v.classname = "spectator";
@@ -176,6 +179,9 @@ void SpectatorThink()
 	if ( self->s.v.impulse )
 		SpectatorImpulseCommand();
 
+	if ( self->wp_stats && self->wp_stats_time && self->wp_stats_time <= g_globalvars.time )
+		Print_Wp_Stats ();
+
 	if ( wizard ) {
 		// set model angles
 		wizard->s.v.angles[0] = -self->s.v.v_angle[0] / 2;
@@ -189,6 +195,15 @@ void SpectatorThink()
 
 		if ( GetSpecWizard () ) {
 			gedict_t *goal = PROG_TO_EDICT( self->s.v.goalentity );
+/*
+			if ( goal == world )
+				G_bprint(2, "st: world\n");
+
+			if (goal)
+				G_bprint(2, "st: %s %d %d\n", goal->s.v.netname, (int)!!goal, (int)goal->k_player);
+			else
+				G_bprint(2, "st: ng\n");
+*/
 
 			if ( goal && goal->k_player ) // tracking player, so turn model off
 				wizard->s.v.model = "";
@@ -198,6 +213,9 @@ void SpectatorThink()
 		else {
 			wizard->s.v.model = ""; // turn model off
 		}
+	}
+	else {
+		G_bprint(2, "st: nw\n");
 	}
 }
 

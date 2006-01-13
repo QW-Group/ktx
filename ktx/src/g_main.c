@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.9 2006/01/01 21:28:44 qqshka Exp $
+ *  $Id: g_main.c,v 1.10 2006/01/13 20:51:57 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -151,6 +151,9 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 			PlayerPostThink();
 		else
 			SpectatorThink();
+
+		BothPostThink ();
+
 		return 1;
 
 	case GAME_EDICT_TOUCH:

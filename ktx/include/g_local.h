@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.14 2006/01/04 19:50:58 qqshka Exp $
+ *  $Id: g_local.h,v 1.15 2006/01/13 20:52:09 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -261,14 +261,18 @@ extern float    intermission_running;
 extern float    intermission_exittime;
 extern int      modelindex_eyes, modelindex_player;
 
+
 void            SetChangeParms();
 void            SetNewParms( qboolean from_vmMain );
 void            ClientConnect();
 void            PutClientInServer();
 void            ClientDisconnect();
 void            PlayerPreThink();
+void			BothPostThink(); // <- called for player and spec
 void            PlayerPostThink();
 void            SuperDamageSound();
+
+void			Print_Wp_Stats();
 
 //spectate.c
 void            SpectatorConnect();

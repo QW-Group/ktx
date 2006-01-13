@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.27 2006/01/05 23:01:57 qqshka Exp $
+ *  $Id: client.c,v 1.28 2006/01/13 20:51:57 qqshka Exp $
  */
 
 //===========================================================================
@@ -1599,7 +1599,8 @@ void Print_Wp_Stats( )
 	int _wps = S_ALL & iKey ( self, "wps" );
 	int  wps = ( _wps ? _wps : S_DEF ); // if wps is not set - show S_DEF weapons
 
-	gedict_t *e = self; // stats of whom we want to show
+	gedict_t *g = self->k_spectator ? PROG_TO_EDICT( self->s.v.goalentity ) : NULL;
+	gedict_t *e = self->k_player ? self : ( g ? g : world ); // stats of whom we want to show
 
 	float axe = wps & S_AXE ? 100.0 * e->ps.h_axe / max(1, e->ps.a_axe) : 0;
 	float sg  = wps & S_SG  ? 100.0 * e->ps.h_sg  / max(1, e->ps.a_sg) : 0;
@@ -1615,13 +1616,21 @@ void Print_Wp_Stats( )
 #endif
 	float lg  = wps & S_LG  ? max(0.001, 100.0 * e->ps.h_lg / max(1, e->ps.a_lg)) : 0;
 
-
-	if ( !axe && !sg && !ssg && !ng && !sng && !gl && !rl && !lg )
-		return; // sanity
-
 	i = bound(0, iKey( self, "lw" ) , sizeof(buf)-1 );
 	memset( (void*)buf, (int)'\n', i);
 	buf[i] = 0;
+
+	if ( e == world || !e->k_player ) { // spec tracking no one
+		G_centerprint( self, "%s%s", buf, redtext("Tracking noone (wp_stats)"));
+
+		self->need_clearCP  = 1;
+		self->wp_stats_time = g_globalvars.time + 0.8;
+
+		return;
+	}
+
+	if ( !axe && !sg && !ssg && !ng && !sng && !gl && !rl && !lg )
+		return; // sanity
 
 	if ( rl || lg || gl ) {
 		if ( lg )
@@ -2060,6 +2069,27 @@ void CheckPowerups()
 
 }
 
+///////////
+// BothPostThink
+//
+// called for players and specs
+//
+//////////
+void BothPostThink ()
+{
+	if (self->shownick_time && self->shownick_time <= g_globalvars.time )
+		self->shownick_time = 0;
+	if (self->wp_stats_time && self->wp_stats_time <= g_globalvars.time )
+		self->wp_stats_time = 0;
+
+	if ( self->need_clearCP && !self->shownick_time && !self->wp_stats_time )
+	{
+		self->need_clearCP = 0;
+		G_centerprint(self, ""); // clear center print
+	}
+}
+
+
 void            W_WeaponFrame();
 
 ////////////////
@@ -2080,16 +2110,6 @@ void PlayerPostThink()
         return;
     }
 */
-	if (self->shownick_time && self->shownick_time <= g_globalvars.time )
-		self->shownick_time = 0;
-	if (self->wp_stats_time && self->wp_stats_time <= g_globalvars.time )
-		self->wp_stats_time = 0;
-
-	if ( self->need_clearCP && !self->shownick_time && !self->wp_stats_time )
-	{
-		self->need_clearCP = 0;
-		G_centerprint(self, ""); // clear center print
-	}
 
 	// ok accept player now
 	if(self->k_accepted == 1) {

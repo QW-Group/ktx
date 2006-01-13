@@ -1,3 +1,9 @@
+2006-01-13
+ 45. +wp_stats working for specs too, like in ktpro.
+
+ 46. Fixed wizard bug, wizard model track player behind then map is changed, but u need
+ 	 latest mvdsv too, mvdsv will be patched too.
+
 2006-01-09
  44. I rewrote MOTD a bit, as result up to 15 k_motd localinfos supported.
 	 I mean u can use:
