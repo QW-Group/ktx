@@ -20,6 +20,8 @@
 
 	 I tune /whovote command output for our needs, and u can use it in matchless mode too.
 
+	 For /pickup /break commands required votes showed as (2) - this mean 2 more votes required.
+
 2006-01-13
  45. +wp_stats working for specs too, like in ktpro.
 
