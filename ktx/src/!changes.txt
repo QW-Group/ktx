@@ -1,3 +1,25 @@
+2006-01-27
+ 47. Ok, i rewrote voting code.
+	 Added particular voting percentage for most votings/election:
+
+	 set k_vp_break   51   // votes percentage for stopping the match voting
+	 set k_vp_admin   51   // votes percentage for admin election
+	 set k_vp_captain 51   // votes percentage for captain election
+	 set k_vp_map     51   // votes percentage for map change voting
+	 set k_vp_pickup  51   // votes percentage for pickup voting
+	
+	 I must notice, percantage is bounded internally between 51% to 100%, so u can
+	 set percentage to 30% but mod bound it to 51%, if this is wrong - let me know.
+
+	 Election voting (captain or admin) need at least two votes.
+
+	 Map voting is blocked for short time after map change, so all players have chance reconnect
+	 and make they choice.
+
+	 Regarding matchless mode, u can vote for map change now in game, not in intermission only.
+
+	 I tune /whovote command output for our needs, and u can use it in matchless mode too.
+
 2006-01-13
  45. +wp_stats working for specs too, like in ktpro.
 

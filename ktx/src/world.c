@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.15 2006/01/05 23:01:57 qqshka Exp $
+ *  $Id: world.c,v 1.16 2006/01/27 20:22:44 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -396,7 +396,11 @@ void FirstFrame	( )
 	RegisterCvar("allow_spec_wizard");
 	RegisterCvar("k_no_wizard_animation"); // disallow wizard animation
 
-
+	RegisterCvar("k_vp_break");   // votes percentage for stopping the match voting
+	RegisterCvar("k_vp_admin");   // votes percentage for admin election
+	RegisterCvar("k_vp_captain"); // votes percentage for captain election
+	RegisterCvar("k_vp_map");     // votes percentage for map change voting
+	RegisterCvar("k_vp_pickup");  // votes percentage for pickup voting
 
 	k_matchLess = cvar( "k_matchless" ); // changed only here
 }
@@ -575,7 +579,6 @@ float		rj;
 
 extern float intermission_exittime;
 
-void ModPause (int pause);
 void CheckTiming();
 
 void StartFrame( int time )
@@ -625,5 +628,8 @@ void StartFrame( int time )
 	if ( intermission_running && g_globalvars.time >= intermission_exittime - 1 
 			&& !strnull( cvar_string( "serverdemo" ) ) )
 		localcmd("stop\n"); // demo is recording, stop it and save
+
+	if ( framecount > 10 )
+		vote_check_all ();
 }
 

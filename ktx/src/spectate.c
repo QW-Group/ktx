@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.7 2006/01/13 20:51:57 qqshka Exp $
+ *  $Id: spectate.c,v 1.8 2006/01/27 20:22:44 qqshka Exp $
  */
 
 // spectate.c
@@ -195,15 +195,6 @@ void SpectatorThink()
 
 		if ( GetSpecWizard () ) {
 			gedict_t *goal = PROG_TO_EDICT( self->s.v.goalentity );
-/*
-			if ( goal == world )
-				G_bprint(2, "st: world\n");
-
-			if (goal)
-				G_bprint(2, "st: %s %d %d\n", goal->s.v.netname, (int)!!goal, (int)goal->k_player);
-			else
-				G_bprint(2, "st: ng\n");
-*/
 
 			if ( goal && goal->k_player ) // tracking player, so turn model off
 				wizard->s.v.model = "";
@@ -213,9 +204,6 @@ void SpectatorThink()
 		else {
 			wizard->s.v.model = ""; // turn model off
 		}
-	}
-	else {
-		G_bprint(2, "st: nw\n");
 	}
 }
 

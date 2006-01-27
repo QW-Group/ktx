@@ -8,7 +8,6 @@ float CountRTeams();
 void AdminMatchStart();
 void StartTimer();
 void StopTimer ( int removeDemo );
-void EndMatch(float skip_log);
 
 void NextClient();
 void ExitKick(gedict_t *kicker);
@@ -169,7 +168,7 @@ void AdminKick ()
 
     if( self->k_captain )
     {
-        G_sprint(self, 2, "Exit γαπταιξ mode first\n");
+        G_sprint(self, 2, "Exit %s mode first\n", redtext("captain"));
         return;
     }
 
@@ -315,7 +314,7 @@ void ReqAdmin ()
     //  admin state=1.5 check for election
     if( self->k_admin == 1.5 )
     {
-        G_sprint(self, 2, "Abort εμεγτion first\n");
+        G_sprint(self, 2, "Abort %sion first\n", redtext("election"));
         return;
     }
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.16 2006/01/12 17:58:31 qqshka Exp $
+ *  $Id: g_utils.c,v 1.17 2006/01/27 20:22:44 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -821,7 +821,21 @@ gedict_t *find_plr( gedict_t * start, int *from )
 
 	if ( !next && !*from ) {
 		*from = 1;
-		next = find(start, FOFCLSN, "ghost");
+		next = find(world, FOFCLSN, "ghost");
+	}
+
+	return next;
+}
+
+// this help me walk from both players and specs, made code more simple
+
+gedict_t *find_plrspc( gedict_t * start, int *from )
+{
+	gedict_t *next = find(start, FOFCLSN, *from ? "spectator" : "player" );
+
+	if ( !next && !*from ) {
+		*from = 1;
+		next = find(world, FOFCLSN, "spectator");
 	}
 
 	return next;
@@ -999,6 +1013,9 @@ void changelevel( const char *name )
  	if ( strnull( name ) )
 		G_Error("changelevel: null");
 
+	if ( k_pause )
+		ModPause ( 0 );
+
 	cvar_set( "_k_lastmap", g_globalvars.mapname );
 	trap_cvar_set_float( "_k_players", CountPlayers());
 	trap_cvar_set_float( "_k_pow_last", Get_Powerups() );
@@ -1057,5 +1074,10 @@ int Get_Powerups ()
 	}
 
 	return (k_pow = k_pow_new);
+}
+
+char *count_s( int cnt )
+{
+	return (cnt == 1 ? "" : "s");
 }
 

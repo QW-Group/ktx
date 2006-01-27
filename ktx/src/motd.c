@@ -117,7 +117,6 @@ void MOTDStuff()
 		kick         = 0;
 		so->ready    = 1;
 		so->k_666    = 0;
-		so->k_vote   = 0;
 		so->deaths   = 0;
 		so->friendly = 0;
 
@@ -282,12 +281,10 @@ void MOTDStuff()
 
 	// terminate elect and kick modes
 
-	so->k_kicking = 0;
-	so->k_vote2   = 0;
-	so->k_captain = 0;
-//	so->k_admin   = 0; // this set in DecodeLevelParms()
+//	so->k_kicking = 0;
+//	so->k_captain = 0;
 
-	so->s.v.frags = so->fraggie;
+	so->s.v.frags = so->fraggie; // restore frags from ghost or in case of captains set player number via his frags
 	newcomer = so->s.v.netname;
 	self->s.v.think = ( func_t ) MOTDThinkX;
 	self->s.v.nextthink = g_globalvars.time + 0.1;

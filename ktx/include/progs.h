@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.10 2006/01/05 23:02:13 qqshka Exp $
+ *  $Id: progs.h,v 1.11 2006/01/27 20:23:02 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -92,6 +92,18 @@ typedef struct player_stats_s {
 	int		handicap;
 
 } player_stats_t;
+
+// store player votes here
+typedef struct vote_s {
+
+	int brk;
+	int elect;
+//	int rpickup;
+	int map;
+	int pickup;
+
+	float elect_block_till;	// block election for this time
+} vote_t;
 
 
 //typedef (void(*)(gedict_t *)) one_edict_func;
@@ -193,18 +205,14 @@ typedef struct gedict_s {
 	float	k_adminc;        // number of digits of admin code still to enter
 	float	k_admin;         // if player is an admin
 	float	k_captain;       // if player is team captain
-//	float	k_domapstuff;    // NOT_SURE: if spec has 'done' map stuff?
 	float	k_flag;          // flagvalue to customise settings such as sounds/autoscreenshot
 	float	k_kicking;       // if player is in kick mode
 	float	k_msgcount;      // NOT_SURE: last time mod printed a message to client?
 	float	k_picked;        // NOT_SURE: 
-	float	k_pickup;        // NOT_SURE: if player wants pickup game or not?
 	float	k_ptime;         // stores player nexttime value when server is paused
 	float	k_stuff;         // if player has received stuffed aliases
 	float	k_teamnumber;    // team the player is a member of, 1 = team1, 2 = team2
 	float	k_teamnum;       // NOT_SURE:
-	float	k_vote2;         // stores player election vote decision
-	float	k_vote;          // stores player map vote decision
 	char	*kick_ctype;     // if selected player to kick is player or spectator
 	
 	float lastwepfired;
@@ -255,6 +263,8 @@ typedef struct gedict_s {
 
 	float nthink;			// store here regeneration time of some items
 	struct gedict_s *wizard;// for specs, link to the entity which represent wizard
+
+	vote_t v;				// player votes stored here
 #endif
 
 } gedict_t;

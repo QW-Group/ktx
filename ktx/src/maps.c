@@ -183,95 +183,60 @@ char *GetMapName(int imp)
 	return "";
 }
 
-void ModPause (int pause);
-
 void SelectMap()
 {
-	char *m;
-	float f1, f2, f3;
+	char     *m;
 	gedict_t *p;
+	int 	 till;
+	qboolean isVoted = false;
 
-	if ( match_in_progress )
+	if( (till = Q_rint( ( k_matchLess ? 15: 7 ) - g_globalvars.time)) > 0  ) {
+		G_sprint(self, 2, "Wait %d second%s!\n", till, count_s(till) );
+		return;
+	}
+
+	if ( k_matchLess && match_in_progress == 2 )
+		; // u can select map in matchLess mode, but not in countdown
+	else if ( match_in_progress )
 		return;
 
 	if ( self->k_spectator && self->k_admin != 2 ) // only admined specs can select map
 		return;
 
-	if ( strnull( GetMapName( self->cmd_selectMap ) ) )
+	if ( strnull( m = GetMapName( self->cmd_selectMap ) ) )
 		return;
 
-	if( ( atoi( ezinfokey( world, "k_lockmap" ) ) || atoi( ezinfokey( world, "k_master" ) ) )
-			&& self->k_admin < 2 ) {
+	if( ( iKey( world, "k_lockmap" ) || iKey( world, "k_master" ) )
+			&& self->k_admin != 2 
+      ) {
 		G_sprint(self, 2, "MAP IS LOCKED!\n"
 						  "You are NOT allowed to change!\n");
 		return;
 	}
 
-	f3 = 0;
-
-	if( !k_vbreak ) {
-		G_bprint(3, "%s suggests map ", self->s.v.netname);
-		k_vbreak = self->cmd_selectMap;
-		self->k_vote = self->cmd_selectMap;
+	if ( self->v.map == self->cmd_selectMap ) {
+		G_sprint(self, 2, "--- your vote is still good ---\n");
+		return;
 	}
-	else {
-		if( k_vbreak == self->cmd_selectMap ) {
-			if( self->k_vote != self->cmd_selectMap ) {
-				f1 = CountPlayers();
 
-				if( f1 < 3 )
-					G_bprint(3, "%s agrees to map ", self->s.v.netname);
-				else
-					G_bprint(3, "%s agrees on map ", self->s.v.netname);
-
-				self->k_vote = self->cmd_selectMap;
-
-			}
-			else {
-				G_sprint(self, 2, "--- your vote is still good ---\n");
-				f3 = 1;
-			}
+	for ( p = world; p = find(p , FOFCLSN, "player"); )
+		if ( p->v.map == self->cmd_selectMap ) {
+			isVoted = true;
+			break;
 		}
-		else {
-			p = find(world, FOFCLSN, "player");
-			while( p ) {
-				p->k_vote = 0;
 
-				p = find(p, FOFCLSN, "player");
-			}
-
-			G_bprint(3, "%s would rather play on ", self->s.v.netname);
-			k_vbreak = self->cmd_selectMap;
-			self->k_vote = self->cmd_selectMap;
-		}
+	if( !get_votes( OV_MAP ) ) {
+		G_bprint(2, "%s %s %s\n", self->s.v.netname, redtext("suggests map"),m);
 	}
-
-	if( !f3 )
-		G_bprint(2, "%s\n", GetMapName( self->cmd_selectMap ));
-
-	f1 = CountPlayers();
-	f2 = ( floor( f1 / 2 ) ) + 1;
-	f1 = 0;
-
-	p = find(world, FOFCLSN, "player");
-	while( p ) {
-		if( !strnull( p->s.v.netname ) && p->k_vote == k_vbreak )
-			f1++;
-
-		p = find(p, FOFCLSN, "player");
+	else if ( isVoted ) {
+		G_bprint(2, "%s %s %s %s %s\n", self->s.v.netname, redtext("agrees"),
+			(CountPlayers() < 3 ? redtext("to") : redtext("on") ), redtext("map"), m);
 	}
-
-	if( f1 < f2 && self->k_admin != 2)
-			return;
-
-	if( self->k_admin == 2 )
-		G_bprint(2, "Admin veto\n");
 	else
-		G_bprint(2, "Majority votes for mapchange.\n");
+		G_bprint(2, "%s %s %s\n", self->s.v.netname, redtext("would rather play on"), m);
 
-	if ( k_pause )
-		ModPause ( 0 );
+	self->v.map = self->cmd_selectMap;
 
-	if ( !strnull(m = GetMapName( self->cmd_selectMap )) )
-		changelevel( m );
+	vote_check_map ();
 }
+

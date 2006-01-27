@@ -4,7 +4,6 @@
 
 void NextLevel ();
 void StopTimer ( int removeDemo );
-void EndMatch ( float skip_log );
 void IdlebotForceStart ();
 void CheckAll();
 void StartMatch ();
@@ -1201,7 +1200,6 @@ void StartMatch ()
 	f1 = f1 - ((int)f1 & 64) + (f2 * 64);
 	localcmd( "serverinfo fpd %d\n", (int)f1 );
 
-	k_vbreak     = 0;
 	k_berzerk    = 0;
 	k_showscores = 0;
 
@@ -1762,12 +1760,12 @@ void PlayerReady ()
 		G_sprint(self, 2, "\x87%s you are using handicap!\n", redtext( "WARNING:" ));
 
 	self->ready = 1;
-	self->k_vote = 0;
+	self->v.brk = 0;
 	self->s.v.effects = self->s.v.effects - ((int)self->s.v.effects & 64);
 	self->k_teamnum = 0;
 
 	G_bprint(2, "%s %s%s\n", self->s.v.netname, redtext("is ready"),
-							( isTeam() ? va(" %s‘", getteam( self ) ) : "" ) );
+							( isTeam() ? va(" \x90%s\x91", getteam( self ) ) : "" ) );
 
 	nready = 0;
 	for( p = world; p = find ( p, FOFCLSN, "player" ); )
@@ -1803,8 +1801,8 @@ void PlayerReady ()
 
 void PlayerBreak ()
 {
+	int votes;
 	gedict_t *p;
-	float f1, f2;
 
 	if( !self->ready || intermission_running )
 		return;
@@ -1834,44 +1832,29 @@ void PlayerBreak ()
 		return;
 	}
 
-	if( self->k_vote ) {
-		G_bprint(2, "%s %s %s vote\n", self->s.v.netname, 
-						redtext("withdraws"), redtext(SexStr(self)));
+	if( self->v.brk ) {
+		self->v.brk = 0;
 
-		self->k_vote = 0;
-
-		k_vbreak = 0;
-		for( p = world; p = find(p, FOFCLSN, "player"); )  // recount break votes
-			if( p->k_vote )
-				k_vbreak++;
+		G_bprint(2, "%s %s %s vote%s\n", self->s.v.netname,
+				redtext("withdraws"), redtext(SexStr(self)),
+				((votes = get_votes_req( OV_BREAK, true )) ? va(" (%d)", votes) : ""));
 
 		return;
 	}
 
-	G_bprint(2, "%s %s\n", self->s.v.netname, redtext("votes for stopping the match"));
-	self->k_vote = 1;
+	self->v.brk = 1;
 
-	k_vbreak = 0;
-	for( p = world; p = find(p, FOFCLSN, "player"); ) // recount break votes
-		if( p->k_vote )
-			k_vbreak++;
+	
+	G_bprint(2, "%s %s%s\n", self->s.v.netname, redtext("votes for stopping the match"),
+				((votes = get_votes_req( OV_BREAK, true )) ? va(" (%d)", votes) : ""));
 
-	f1 = CountPlayers();
 
-	// block stop countdown in matchless mode by one player
-	if ( f1 == 1 && k_matchLess && match_in_progress == 1 ) {
+	// blocking stop countdown in matchless mode by one player
+	if ( CountPlayers() == 1 && k_matchLess && match_in_progress == 1 ) {
 		G_sprint(self, 2, "You can't stop countdown alone\n");
 		return;
 	}
 
-//	f2 = floor(f1 / 2) + 1;
-
-	f2 = f1 * 0.5 ;
-
-	if( k_vbreak > f2 ) {
-		G_bprint(2, "%s\n", redtext("Match stopped by majority vote"));
-		EndMatch( 1 );
-
-		return;
-	}
+	vote_check_break ();
 }
+

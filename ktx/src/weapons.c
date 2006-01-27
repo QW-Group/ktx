@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.11 2005/12/24 19:03:10 qqshka Exp $
+ *  $Id: weapons.c,v 1.12 2006/01/27 20:22:44 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -28,7 +28,6 @@
 
 void ReportMe();
 void AdminImpBot();
-float CaptainImpulses();
 void CaptainPickPlayer();
 
 
@@ -1544,13 +1543,28 @@ void ServerflagsCommand()
 void kfjump ();
 void krjump ();
 
+int CaptainImpulses()
+{
+	if( k_captains != 2 )
+		return 2;// s: return 2 if nothing interesting
+
+	// ok - below possible captain stuff
+
+	if( self->s.v.impulse > 16 || !self->k_captain )
+		return 0;// s: return 0 if captain mode is set and no captain things were entered
+
+	return 1;// s: return 1 if it's a player picker impulse
+}
+
 /*
 ============
 ImpulseCommands
 
 ============
 */
-int             impulse;
+
+int  impulse;
+
 void ImpulseCommands()
 {
     int capt;

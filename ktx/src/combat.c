@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.8 2005/12/27 20:34:07 qqshka Exp $
+ *  $Id: combat.c,v 1.9 2006/01/27 20:22:44 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -28,10 +28,6 @@ void            T_MissileTouch( gedict_t * e1, gedict_t * e2 );
 void            ClientObituary( gedict_t * e1, gedict_t * e2 );
 
 //void(entity inflictor, entity attacker, float damage, entity ignore, string dtype) T_RadiusDamage;
-
-#ifdef KTEAMS
-void EndMatch (float skip_log);
-#endif
 
 //============================================================================
 

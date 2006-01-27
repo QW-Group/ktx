@@ -24,8 +24,6 @@
 	float k_sudden_death;	// to mark if sudden death overtime is currently the case
 	float k_teamid = 0;
 	float k_userid = 0;		// somethink like numbers of ghosts + 1
-	float k_vbreak;         // break vote counter
-	float k_velect;         // election vote counter
 	float k_whonottime;     // NOT_SURE: 
 	float lock = 0;         // stores whether players can join when a game is already in progress
 	float match_in_progress = 0;    // if a match has begun

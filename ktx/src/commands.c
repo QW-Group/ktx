@@ -26,7 +26,6 @@ extern char *Allows( float f );
 
 void StuffMainMaps();
 
-char *GetMapName(float f2);
 void SendMessage(char *name);
 float CountRPlayers();
 float CountPlayers();
@@ -807,48 +806,50 @@ void PrintToggle3(char *tog, char *key)
 
 void ModStatus ()
 {
+	int votes;
 	gedict_t *p;
 
-	G_sprint(self, 2, "Íáøóðååä       %-3d\n", (int)k_maxspeed);
-	G_sprint(self, 2, "Äåáôèíáôãè     %-3d ", (int)deathmatch);
-	G_sprint(self, 2, "Ôåáíðìáù       %-3d\n", (int)teamplay);
-	G_sprint(self, 2, "Ôéíåìéíéô      %-3d ", (int)timelimit);
-	G_sprint(self, 2, "Æòáçìéíéô      %-3d\n", (int)fraglimit);
-	PrintToggle1("Ðï÷åòõðó       ", "k_pow");
-	PrintToggle2("Òåóðá÷î ˜˜˜    ", "k_666");
-	PrintToggle1("Äòïð Ñõáä      ", "dq");
-	PrintToggle2("Äòïð Òéîç      ", "dr");
-	PrintToggle3("Æáéò Âáãëðáãëó ", "k_frp");
-	PrintToggle2("Äòïð Âáãëðáãëó ", "dp");
-	PrintToggle1("Äéóãèáòçå      ", "k_dis");
-	PrintToggle2("Âåòúåòë íïäå   ", "k_bzk");
+	G_sprint(self, 2, "%-14s %-3d\n", redtext("Maxspeed"), (int)k_maxspeed);
+	G_sprint(self, 2, "%-14s %-3d ",  redtext("Deathmatch"), (int)deathmatch);
+	G_sprint(self, 2, "%-14s %-3d\n", redtext("Teamplay"), (int)teamplay);
+	G_sprint(self, 2, "%-14s %-3d ",  redtext("Timelimit"), (int)timelimit);
+	G_sprint(self, 2, "%-14s %-3d\n", redtext("Fraglimit"), (int)fraglimit);
+	PrintToggle1(redtext("Powerups       "), "k_pow");
+	PrintToggle2(va("%s \x98\x98\x98    ", redtext("Respawn")), "k_666");
+	PrintToggle1(redtext("Drop Quad      "), "dq");
+	PrintToggle2(redtext("Drop Ring      "), "dr");
+	PrintToggle3(redtext("Fair Backpacks "), "k_frp");
+	PrintToggle2(redtext("Drop Backpacks "), "dp");
+	PrintToggle1(redtext("Discharge      "), "k_dis");
+	PrintToggle2(redtext("Berzerk mode   "), "k_bzk");
 
 	if( match_in_progress == 1 ) {
 		p = find(world, FOFCLSN, "timer" );
 		G_sprint(self, 2, "The match will start in %d second%s\n",
-						 (int)p->cnt2, ( p->cnt2 != 1 ? "s" : "" ));
+						 (int)p->cnt2, count_s(p->cnt2));
 		return;
 	}
 
-	if( k_velect )
-		G_sprint(self, 2, "Election in progress\n"
-						  "%d‘ votes received\n", (int) k_velect);
+	if( votes = get_votes( OV_ELECT ) )
+		G_sprint(self, 2, "%s election in progress:\x90%d/%d\x91 vote%s\n",
+							 redtext(get_elect_type_str()), votes,
+							 get_votes_req( OV_ELECT, false ), count_s(votes));
 
 	if( k_captains == 2 )
-		G_sprint(self, 2, "Team picking in progress\n");
+		G_sprint(self, 2, "%s in progress\n", redtext("Team picking"));
 
-	if( k_captains >= 1 && k_captains < 2 ) // FIXME: hmmm, may be this mean k_captains == 1 ??? 
-		G_sprint(self, 2, "1‘ captain present\n");
+	if( floor( k_captains ) == 1 ) 
+		G_sprint(self, 2, "\x90\x31\x91 %s present\n", redtext("captain"));
 
 	if( match_in_progress == 2 ) {
-		if( k_sudden_death )
-			G_sprint(self, 2, "Sudden death ïöåòôéíå éî ðòïçòåóó\n");
+		if( k_sudden_death )                
+			G_sprint(self, 2, "%s overtime in progress\n", redtext("Sudden death"));
 		else {
 			p = find(world, FOFCLSN, "timer");
 			if ( p )
 				G_sprint(self, 2, "Match in progress\n"
-								  "%s‘ full minute%s left\n",
-									dig3(p->cnt - 1), ( p->cnt != 1 ? "s": ""));
+								  "\x90%s\x91 full minute%s left\n",
+									dig3(p->cnt - 1), count_s(p->cnt));
 		}
 	}
 }
@@ -915,39 +916,71 @@ void ModStatus2()
 
 void ModStatusVote()
 {
+	qboolean voted = false;
+	int votes, i;
+	int from;
 	gedict_t *p;
-//	char *s1;
-	float f1, f2;
 
-	if( match_in_progress == 2 ) {
-		G_sprint(self, 2, "%d öïôå(ó) æïò óôïððéîç\n", (int)k_vbreak);
-	}
-	else {
-		f1 = 0;
-		f2 = 0;
-		p = find( world, FOFCLSN, "player" );
-		while( p ) {
-			if( !strnull( p->s.v.netname ) ) {
-			 	if( p->k_pickup )
-					f1++;
-				if( p->k_vote == k_vbreak )
-					f2++;
-			}
+	if ( k_matchLess || !match_in_progress )
+	if ( vote_get_maps () >= 0 ) {
+		voted = true;
 
-			p = find( p, FOFCLSN, "player" );
+		G_sprint(self, 2, "%s:\n", redtext("Map voting"));
+		
+		for( i = 0; i < MAX_CLIENTS; i++) {
+			if (!maps_voted[i].map_id)
+				break;
+
+			G_sprint(self, 2, "\x90%s\x91 %2d vote%s\n", GetMapName( maps_voted[i].map_id ),
+								maps_voted[i].map_votes, count_s(maps_voted[i].map_votes) );
+
+			for( from = 0, p = world; p = find_plrspc(p, &from); )
+				if ( p->v.map == maps_voted[i].map_id )
+					G_sprint(self, 2, " %s\n", p->s.v.netname);
 		}
-
-
-		G_sprint(self, 2, "%d öïôå(ó) æïò á ðéãëõð çáíå\n", (int)f1);
-
-		if( k_vbreak )
-			G_sprint(self, 2, "%d öïôå(ó) æïò íáð %s\n", (int)f2, GetMapName( k_vbreak ));
-
-		if( k_velect )
-			G_sprint(self, 2, "%d öïôå(ó) æïò åìåãôéïî\n", (int)k_velect);
 	}
 
-	G_sprint(self, 2, "--------------\n");
+	if( !(get_elect_type() == etCaptain && match_in_progress) ) // does't show captain ellection in game
+	if( votes = get_votes( OV_ELECT ) ) {
+		voted = true;
+
+		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for %s election:\n", votes, 
+			get_votes_req( OV_ELECT, false ), count_s(votes), redtext(get_elect_type_str()) );
+
+		for( from = 0, p = world; p = find_plrspc(p, &from); )
+			if ( p->v.elect )
+				G_sprint(self, 2, "%s%s\n", 
+				((p->k_admin == 1.5 || p->k_captain > 10) ? "\x87" : " " ), p->s.v.netname);
+	}
+
+	if ( !match_in_progress )
+	if ( votes = get_votes( OV_PICKUP )) {
+		voted = true;
+
+		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for a %s game:\n", votes,
+			 get_votes_req( OV_PICKUP, false ), count_s(votes), redtext("pickup"));
+
+		for( from = 0, p = world; p = find_plrspc(p, &from); )
+			if ( p->v.pickup )
+				G_sprint(self, 2, " %s\n", p->s.v.netname);
+	}
+
+	if( k_matchLess || match_in_progress == 2 )
+	if ( votes = get_votes( OV_BREAK ) ) {
+		voted = true;
+
+		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for stopping:\n", votes,
+			get_votes_req( OV_BREAK, false ), count_s(votes));
+
+		for( from = 0, p = world; p = find_plrspc(p, &from); )
+			if ( p->v.brk )
+				G_sprint(self, 2, " %s\n", p->s.v.netname);
+	}
+
+	if ( voted )
+		G_sprint(self, 2, "%s\n", redtext("--------------"));
+	else
+		G_sprint(self, 2, "%s\n", redtext("No election going on"));
 }
 
 void PlayerStatus()
@@ -969,7 +1002,7 @@ void PlayerStatus()
 					if( strnull( tmp ) )
 						G_sprint(self, 2, " is ready\n");
 					else
-						G_sprint(self, 2, " is in team %s\n", tmp);
+						G_sprint(self, 2, " is in team \x90%s\x91\n", tmp);
 				}
 				else
 					G_sprint(self, 2, " is not ready\n");
@@ -1056,8 +1089,7 @@ void ResetOptions()
 
 void VotePickup()
 {
-	gedict_t *p;
-	float f1, f2;
+	int votes;
 
 	if( match_in_progress )
 		return;
@@ -1068,46 +1100,17 @@ void VotePickup()
 	}
 
 	if( atoi( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+		G_sprint(self, 2, "console: command is locked\n");
 		return;
 	}
 
-	self->k_pickup = 1 - self->k_pickup;
+	self->v.pickup = !self->v.pickup;
 
-	G_bprint(2, "%s óáùó %s\n",	self->s.v.netname, (self->k_pickup ? "pickup!!" : "no pickup"));
+	G_bprint(2, "%s %s %s%s\n", self->s.v.netname, 
+					redtext("says"), (self->v.pickup ? "pickup!" : "no pickup"),
+					((votes = get_votes_req( OV_PICKUP, true )) ? va(" (%d)", votes) : ""));
 
-	f1 = 0;
-
-	p = find( world, FOFCLSN, "player" );
-	while( p ) {
-		if( !strnull( p->s.v.netname ) && p->k_pickup )
-			f1++;
-
-		p = find( p, FOFCLSN, "player" );
-	}
-
-	f2 = CountPlayers();
-	f2 = ( floor( f2 / 2 ) ) + 1;
-	if( self->k_admin < 2 ) {
-		if( f1 < f2 )
-			return;
-		G_bprint(3, "console: a pickup game it is then\n");
-	}
-	else
-		G_bprint(3, "console: admin veto for pickup\n");
-
-	p = find( world, FOFCLSN, "player" );
-	while( p ) {
-		if( !strnull( p->s.v.netname ) ) {
-			stuffcmd(p, "break\n"
-						"color 0\n"
-						"team \"\"\n"
-						"skin base\n");
-			p->k_pickup = 0;
-		}
-
-		p = find( p, FOFCLSN, "player" );
-	}
+	vote_check_pickup ();
 }
 
 void ReportMe()
@@ -1985,19 +1988,6 @@ void ToggleFreeze()
 	}
 }
 
-
-
-float CaptainImpulses()
-{
-	if( k_captains != 2 )
-		return 2;// s: return 2 if nothing interesting
-
-	if( self->s.v.impulse > 16 || !self->k_captain )
-		return 0;// s: return 0 if captain mode is set and no captain things were entered
-
-	return 1;// s: return 1 if it's a player picker impulse
-}
-
 // qqshka: pointing code stolen from Zquake
 
 void ShowNick()
@@ -2434,8 +2424,6 @@ void UserMode(float umode)
 	trap_readcmd(va("exec configs/usermodes/%s/%s.cfg\n", um, g_globalvars.mapname), buf, sizeof(buf) );
 	G_cprint("%s", buf);
 }
-
-void ModPause (int pause);
 
 #define UNPAUSEGUARD ( "unpauseGuard" )
 

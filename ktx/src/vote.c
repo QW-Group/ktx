@@ -30,38 +30,28 @@ void BeginPicking();
 // Important if player to be elected disconnects or levelchange happens
 void AbortElect()
 {
+    int from;
 	gedict_t *p;
 
-// k_velect for election vote counter
-	k_velect = 0;
-	p = find(world, FOFCLSN, "player");
-	while( p ) {
-		if( !strnull( p->s.v.netname ) ) {
-			p->k_vote2 = 0;
-
-			if(p->k_admin == 1.5)
-				p->k_admin = 0;
-			if( p->k_captain > 10 ) {
-				p->k_captain = 0;
-				k_captains = floor( k_captains );
-			}
-		}
-
-		p = find(p, FOFCLSN, "player");
-	}
-
-	p = find(world, FOFCLSN, "spectator");
-	while( p )
-	{
-		if( !strnull( p->s.v.netname ) && p->k_admin == 1.5 )
+	for( from = 0, p = world; p = find_plrspc(p, &from); ) {
+		if( p->k_admin == 1.5 ) { // kill not yet elected admin
 			p->k_admin = 0;
 
-		p = find(p, FOFCLSN, "spectator");
+			p->v.elect_block_till = g_globalvars.time + 30; // block election for some time
+		}
+
+		if( p->k_captain > 10 ) { // kill not yet elected captain
+			p->k_captain = 0;
+			k_captains = floor( k_captains );
+
+			p->v.elect_block_till = g_globalvars.time + 30; // block election for some time
+		}
 	}
 
-	p = find(world, FOFCLSN, "electguard");
+	vote_clear( OV_ELECT ); // clear vote
+
 // Kill timeout checker entity
-	if( p && streq( p->s.v.classname, "electguard" ) ) 
+	for( p = world; p = find(p, FOFCLSN, "electguard"); ) 
 		ent_remove( p );
 }
 
@@ -76,13 +66,10 @@ void ElectThink()
 
 void VoteAdmin()
 {
-	gedict_t *electguard;
+	gedict_t *p;
+	int   from, till;
 
-// Check if voteadmin is allowed
-	if( !atoi( ezinfokey( world, "k_allowvoteadmin" ) ) ) {
-		G_sprint(self, 2, "Admin election is not allowed on this server.\n");
-		return;
-	}
+	gedict_t *electguard;
 
 // Can't allow election and code entering for the same person at the same time
 	if( self->k_admin == 1 ) {
@@ -96,32 +83,49 @@ void VoteAdmin()
 	}
 
 	if( self->k_admin == 1.5 ) {
-		G_bprint(2, "%s aborts election!\n", self->s.v.netname);
+		G_bprint(2, "%s %s!\n", self->s.v.netname, redtext("aborts election"));
 		AbortElect();
 		return;
 	}
 
 // Only one election per server because otherwise we wouldn't know how to count
 // "yes"s or "no"s
-	if( k_velect ) {
+	if( get_votes( OV_ELECT ) ) {
 		G_sprint(self, 2, "An election is already in progress\n");
 		return;
 	}
 
-	if( !atoi( ezinfokey( world, "k_admins" ) ) ) {
+// Check if voteadmin is allowed
+	if( !iKey( world, "k_allowvoteadmin" ) ) {
+		G_sprint(self, 2, "Admin election is not allowed on this server.\n");
+		return;
+	}
+
+	if( !iKey( world, "k_admins" ) ) {
 		G_sprint(self, 2, "NO ADMINS ON THIS SERVER!\n");
+		return;
+	}
+
+	if( (till = Q_rint( self->v.elect_block_till - g_globalvars.time)) > 0  ) {
+		G_sprint(self, 2, "Wait %d second%s!\n", till, count_s(till) );
 		return;
 	}
 
 	if( streq( self->s.v.classname, "spectator" ) && match_in_progress )
 		return;
 
-	G_bprint(2, "%s has requested admin rights!\n"
-				"Type yes in console to approve\n", self->s.v.netname);
+	G_bprint(2, "%s has %s rights!\n", self->s.v.netname, redtext("requested admin"));
+
+	for( from = 0, p = world; p = find_plrspc(p, &from); )
+		if ( p != self && p->k_player )
+			G_sprint(p, 2, "Type %s in console to approve\n", redtext("yes"));
+
+	G_sprint(self, 2, "Type %s to abort election\n", redtext("elect"));
+
+    // announce the election
+	self->v.elect = 1;
 
 	self->k_admin = 1.5;
-	k_velect = 1;
-	G_sprint(self, 2, "Type εμεγτ to abort election\n");
 
 	electguard = spawn(); // Check the 1 minute timeout for election
 	electguard->s.v.owner = EDICT_TO_PROG( world );
@@ -132,10 +136,9 @@ void VoteAdmin()
 
 void VoteYes()
 {
-	float f1, f2;
-	gedict_t *p;
+	int votes;
 
-	if( !k_velect )
+	if( !get_votes( OV_ELECT ) )
 		return;
 
 	if( self->k_admin == 1.5 || self->k_captain > 10 ) {
@@ -143,74 +146,346 @@ void VoteYes()
 		return;
 	}
 
-	if( self->k_vote2 ) {
+	if( self->v.elect ) {
 		G_sprint(self, 2, "--- your vote is still good ---\n");
 		return;
 	}
 
 // register the vote
-	k_velect++;
+	self->v.elect = 1;
 
-	G_bprint(2, "%s gives %s vote\n", self->s.v.netname,
-				( streq( ezinfokey(self, "gender"), "f" ) ? "her" : "his" ) );
+	G_bprint(2, "%s gives %s vote\n", self->s.v.netname, SexStr( self ));
 
-	f1 = CountPlayers();
-	f2 = ( floor( f1 / 2 ) ) + 1;
+// calculate how many more votes are needed
+	if ( votes = get_votes_req( OV_ELECT, true ) )
+		G_bprint(2, "\x90%d\x91 more vote%s needed\n", votes, count_s( votes ));
 
-	if( k_velect >= f2 ) {
-		p = find(world, FOFCLSN, "player");
-		while( p->k_admin != 1.5 && p->k_captain < 10 )
-			p = find(p, FOFCLSN, "player");
+	vote_check_elect ();
+}
 
-		if(p->k_admin == 1.5) {
-// s: election was admin election
-			G_bprint(2, "%s ηαιξσ αδνιξ στατυσ!\n", p->s.v.netname);
+void VoteNo()
+{
+	int votes;
+
+// withdraw one's vote
+	if( !get_votes( OV_ELECT ) || self->k_admin == 1.5 || self->k_captain > 10 || !self->v.elect )
+		return;
+
+// unregister the vote
+	self->v.elect = 0;
+
+	G_bprint(2, "%s withdraws %s vote\n", self->s.v.netname, SexStr( self ));
+
+// calculate how many more votes are needed
+	if ( votes  = get_votes_req( OV_ELECT, true ) )
+		G_bprint(2, "\x90%d\x91 more vote%s needed\n", votes, count_s( votes ));
+
+	vote_check_elect ();
+}
+
+// get count of particular votes
+
+int get_votes( int fofs )
+{
+	int from;
+	int votes = 0;
+	gedict_t *p;
+
+	for ( from = 0, p = world; p = find_plrspc(p, &from); )
+		if ( *(int*)((byte*)(&p->v)+fofs) )
+			votes++;
+
+	return votes;
+}
+
+// get count of particular votes and filter by value
+
+int get_votes_by_value( int fofs, int value )
+{
+	int from;
+	int votes = 0;
+	gedict_t *p;
+
+	for ( from = 0, p = world; p = find_plrspc(p, &from); )
+		if ( *((int*)(&(p->v)+fofs)) == value )
+			votes++;
+
+	return votes;
+}
+
+int get_votes_req( int fofs, qboolean diff )
+{
+	float percent;
+	int   votes, vt_req, idx, el_type;
+
+	votes   = get_votes( fofs );
+
+	switch ( fofs ) {
+		case OV_BREAK:  percent = cvar("k_vp_break");  break;
+		case OV_PICKUP: percent = cvar("k_vp_pickup"); break;
+		case OV_MAP:
+					    percent = cvar("k_vp_map");
+						idx = vote_get_maps ();
+						if ( idx >= 0 && !strnull( GetMapName(maps_voted[idx].map_id) ) )
+							votes = maps_voted[idx].map_votes;
+						else
+							votes = 0;
+						break;
+		case OV_ELECT:
+						if ( (el_type = get_elect_type ()) == etAdmin ) {
+							percent = cvar("k_vp_admin");
+							break;
+						}
+						else if ( el_type == etCaptain ) {
+							percent = cvar("k_vp_captain");
+							break;
+						}
+						else {
+							percent = 100; break; // unknown/none election
+							break;
+						}
+	}
+
+	percent = bound(0.51, bound(51, percent, 100)/100, 1); // calc and bound percentage between 50% to 100%
+
+	vt_req  = ceil( percent * CountPlayers() );
+
+	if ( fofs == OV_ELECT )
+		vt_req = max(2, vt_req); // if ellection, at least 2 votes needed
+	else if ( fofs == OV_BREAK && k_matchLess && match_in_progress == 1 )
+		vt_req = max(2, vt_req); // at least 2 votes in this case
+
+	if ( diff )
+		return max(0, vt_req - votes);
+
+	return max(0, vt_req);
+}
+
+int is_admins_vote( int fofs )
+{
+	int from;
+	int votes = 0;
+	gedict_t *p;
+
+	for ( from = 0, p = world; p = find_plrspc(p, &from); )
+		if ( *(int*)((byte*)(&p->v)+fofs) && p->k_admin == 2 )
+			votes++;
+
+	return votes;
+}
+
+void vote_clear( int fofs )
+{
+	int from;
+	gedict_t *p;
+
+	for ( from = 0, p = world; p = find_plrspc(p, &from); )
+		*(int*)((byte*)(&p->v)+fofs) = 0;
+}
+
+
+int get_elect_type ()
+{
+    int from;
+	gedict_t *p;
+
+	for( from = 0, p = world; p = find_plrspc(p, &from); ) {
+		if( p->k_admin == 1.5 ) // elected admin
+			return etAdmin;
+
+		if( p->k_captain > 10 ) // elected captain
+			return etCaptain;
+	}
+
+	return etNone;
+}
+
+char *get_elect_type_str ()
+{
+
+	switch ( get_elect_type () ) {
+		case etNone: 	return "None";
+		case etCaptain:	return "Captain";
+		case etAdmin: 	return "Admin";
+	}
+
+	return "Unknown";
+}
+
+
+int     maps_voted_idx;
+
+votemap_t maps_voted[MAX_CLIENTS];
+
+// fill maps_voted[] with data,
+// return the index in maps_voted[] of most voted map
+// return -1 inf no votes at all or some failures
+// if admin votes for map - map will be treated as most voted
+int vote_get_maps ()
+{
+	int from;
+	int best_idx = -1, i;
+	gedict_t *p;
+
+	memset(maps_voted, 0, sizeof(maps_voted));
+	maps_voted_idx = -1;
+
+	if ( !get_votes( OV_MAP ) )
+		return -1; // no one votes at all
+
+	for( from = 0, p = world; p = find_plrspc(p, &from); ) {
+
+		if ( !p->v.map )
+			continue; // player is not voted
+
+		for ( i = 0; i < MAX_CLIENTS; i++ ) {
+			if ( !maps_voted[i].map_id )
+				break; // empty
+
+			if ( maps_voted[i].map_id == p->v.map )
+				break; // already count votes for this map
+		}
+
+		if ( i >= MAX_CLIENTS )
+			continue; // heh, all slots is full, just for sanity
+
+		maps_voted[i].map_id     = p->v.map;
+		maps_voted[i].map_votes += 1;
+		maps_voted[i].admins    += (( p->k_admin == 2 ) ? 1 : 0);
+
+		// find the most voted map
+		if ( best_idx < 0 || maps_voted[i].map_votes > maps_voted[best_idx].map_votes )
+			best_idx   = i;
+
+		// admin voted maps have priority
+		if ( maps_voted[i].admins > maps_voted[best_idx].admins )
+			best_idx   = i;
+	}
+
+	return (maps_voted_idx = best_idx);
+}
+
+void vote_check_map ()
+{
+	int   vt_req = get_votes_req( OV_MAP, true );
+	char  *m  = "";
+
+	if ( maps_voted_idx < 0 || strnull( m = GetMapName(maps_voted[maps_voted_idx].map_id) ) )
+		return;
+
+	if ( !k_matchLess )
+	if ( match_in_progress )
+		return;
+
+	if ( maps_voted[maps_voted_idx].admins )
+		G_bprint(2, "%s\n", redtext("Admin veto"));
+	else if( !vt_req  )
+		G_bprint(2, "%s votes for mapchange.\n", redtext("Majority"));
+	else
+		return;
+
+	vote_clear( OV_MAP );
+
+	changelevel( m );
+}
+
+void vote_check_break ()
+{
+	if ( !match_in_progress || intermission_running )
+		return;
+
+	if( !get_votes_req( OV_BREAK, true ) ) {
+		vote_clear( OV_BREAK );
+
+		G_bprint(2, "%s\n", redtext("Match stopped by majority vote"));
+
+		EndMatch( 1 );
+
+		return;
+	}
+}
+
+void vote_check_elect ()
+{
+	gedict_t *p;
+	int   from;
+
+	if( !get_votes_req( OV_ELECT, true ) ) {
+
+		for( from = 0, p = world; p = find_plrspc(p, &from); )
+			if ( p->k_admin == 1.5 || p->k_captain > 10 )
+				break;
+
+		if ( !p ) { // nor admin nor captain found - probably bug
+			AbortElect();
+			return;
+		}
+
+		if( !(p->k_spectator && match_in_progress) )
+		if( p->k_admin == 1.5 ) { // s: election was admin election
+			G_bprint(2, "%s %s!\n", p->s.v.netname, redtext("gains admins status"));
 			G_sprint(p, 2, "Please give up admin rights when you're done.\n"
-						   "Type γονναξδσ for info\n");
+						   "Type %s for info\n", redtext("commands"));
 			p->k_admin = 2;
 		}
-		if( p->k_captain > 10 ) {
-// s: election was captain election
-			p->k_captain -= 10;
-			k_captains = floor(k_captains) + 1;
-			G_bprint(2, "%s becomes a captain\n", p->s.v.netname);
 
-// s: if both captains are already elected, start choosing players
+		if( !match_in_progress )
+		if( p->k_captain > 10 ) { // s: election was captain election
+			p->k_captain -= 10;
+			k_captains = floor( k_captains ) + 1;
+
+			G_bprint(2, "%s becomes a %s\n", p->s.v.netname, redtext("captain"));
+
+			// s: if both captains are already elected, start choosing players
 			if( k_captains == 2 )
 				BeginPicking();
 			else
-				G_bprint(2, "One more γαπταιξ should be elected\n");
+				G_bprint(2, "One more %s should be elected\n", redtext("captain"));
 		}
 
 		AbortElect();
 		return;
 	}
-
-// calculate how many more votes are needed
-	self->k_vote2 = 1;
-	f1 = f2 - k_velect;
-
-	G_bprint(2, "%d‘ more vote%s needed\n", (int)f1, ( f1 > 1 ? "s" : "" ));
 }
 
-void VoteNo()
+void vote_check_pickup ()
 {
-	float f1, f2;
+	gedict_t *p;
+	int veto;
 
-// withdraw one's vote
-	if( !k_velect || self->k_admin == 1.5 || !self->k_vote2 )
+	if ( match_in_progress || k_captains )
 		return;
 
-	G_bprint(2, "%s withdraws %s vote\n", self->s.v.netname,
-					( streq( ezinfokey(self, "gender"), "f" ) ? "her" : "his" ) );
+	if ( !get_votes( OV_PICKUP ) )
+		return;
 
-	self->k_vote2 = 0;
-	k_velect--;
+	veto = is_admins_vote( OV_PICKUP );
 
-	f1 = CountPlayers();
-	f2 = ( floor( f1 / 2 ) ) + 1;
-	f1 = f2 - k_velect;
+	if( veto || !get_votes_req( OV_PICKUP, true ) ) {
+		vote_clear( OV_PICKUP );
 
-	G_bprint(2, "%d‘ more vote%s needed\n", (int)f1, ( f1 > 1 ? "s" : "" ));
+		if ( veto )
+			G_bprint(2, "console: admin veto for pickup\n");
+		else
+			G_bprint(2, "console: a pickup game it is then\n");
+
+		for( p = world;	p = find( p, FOFCLSN, "player" ); ) {
+
+			stuffcmd(p, "break\n"
+						"color 0\n"
+						"team \"\"\n"
+						"skin base\n");
+		}
+
+		return;
+	}
+}
+
+void vote_check_all ()
+{
+	vote_check_map ();
+	vote_check_break ();
+	vote_check_elect ();
+	vote_check_pickup ();
 }
 

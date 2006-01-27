@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.15 2006/01/13 20:52:09 qqshka Exp $
+ *  $Id: g_local.h,v 1.16 2006/01/27 20:23:02 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -35,8 +35,6 @@
 #include "g_consts.h"
 #include "g_syscalls.h"
 #include "player.h"
-
-#define FOFCLSN ( FOFS ( s.v.classname ) )
 
 #ifndef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
@@ -61,6 +59,9 @@
 #define	MAX_TOKEN_CHARS		1024	// max length of an individual token
 
 #define	FOFS(x) ((int)&(((gedict_t *)0)->x))
+
+#define FOFCLSN ( FOFS ( s.v.classname ) )
+
 int             NUM_FOR_EDICT( gedict_t * e );
 
 
@@ -198,6 +199,7 @@ char		*getname( gedict_t * ed );
 char		*SexStr( gedict_t * ed );
 
 gedict_t	*find_plr( gedict_t * start, int *from );
+gedict_t	*find_plrspc( gedict_t * start, int *from );
 gedict_t 	*player_by_id( int id );
 gedict_t	*player_by_name( const char *name );
 gedict_t	*player_by_IDorName( const char *IDname );
@@ -217,6 +219,8 @@ int			GetHandicap( gedict_t *p );
 qboolean	SetHandicap( gedict_t *p, int nhdc );
 void		changelevel( const char *name );
 int			Get_Powerups ();
+
+char 		*count_s( int cnt );
 
 
 void    	disableupdates( gedict_t * ed, float time );
@@ -369,6 +373,58 @@ int		cmdinfo_setkey( gedict_t *p, char *key, char *value );
 void	cmdinfo_infoset ( gedict_t *p );
 void	cmdinfo_clear ( gedict_t *p );
 
+// vote.c
+
+typedef struct votemap_s {
+	int		map_id;
+	int		map_votes;
+	int		admins;
+} votemap_t;
+
+extern  votemap_t maps_voted[];
+int 	vote_get_maps ();
+
+
+#define etNone    (0)
+#define etCaptain (1)
+#define etAdmin   (2)
+
+int  	get_elect_type ();
+char 	*get_elect_type_str ();
+
+void	vote_clear( int fofs );
+int		get_votes_req( int fofs, qboolean diff );
+int 	get_votes( int fofs );
+int		get_votes_by_value( int fofs, int value );
+int		is_admins_vote( int fofs );
+
+void	vote_check_map ();
+void	vote_check_break ();
+void	vote_check_elect ();
+void	vote_check_pickup ();
+void 	vote_check_all ();
+
+#define	VOTE_FOFS(x) ((int)&(((vote_t *)0)->x))
+
+#define OV_BREAK ( VOTE_FOFS ( brk ) )
+#define OV_ELECT ( VOTE_FOFS ( elect ) )
+//#define OV_RPICKUP ( VOTE_FOFS ( rpickup ) )
+#define OV_PICKUP ( VOTE_FOFS ( pickup ) )
+#define OV_MAP ( VOTE_FOFS ( map ) )
+
+
+// admin.c
+
+void ModPause (int pause);
+
+// maps.c
+
+char 	*GetMapName(int imp);
+
+// match.c
+
+void	EndMatch ( float skip_log );
+
 //global.c
 
 #ifdef KTEAMS
@@ -393,8 +449,6 @@ extern	float k_standby;        // if server is in standy mode
 extern	float k_sudden_death;	// to mark if sudden death overtime is currently the case
 extern	float k_teamid;
 extern	float k_userid;
-extern	float k_vbreak;         // break vote counter
-extern	float k_velect;         // election vote counter
 extern	float k_whonottime;     // NOT_SURE: 
 extern	float lock;         // stores whether players can join when a game is already in progress
 extern	float match_in_progress;    // if a match has begun

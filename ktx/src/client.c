@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.28 2006/01/13 20:51:57 qqshka Exp $
+ *  $Id: client.c,v 1.29 2006/01/27 20:22:44 qqshka Exp $
  */
 
 //===========================================================================
@@ -37,7 +37,6 @@ vec3_t          VEC_HULL2_MAX = { 32, 32, 64 };
 int             modelindex_eyes, modelindex_player;
 
 
-void EndMatch(float skip_log);
 float CountALLPlayers();
 void IdlebotCheck();
 void CheckAll();
@@ -120,8 +119,6 @@ void CheckConnectRate ()
 	}
 }
 
-
-void ModPause (int pause);
 
 // timing action
 #define TA_INFO			(1<<0)
@@ -362,7 +359,7 @@ void GotoNextMap()
 	char            newmap[64] = {0};
 	int i;
 
-	if( k_velect ) 
+	if( get_votes( OV_ELECT ) ) 
         AbortElect();
 
 	if ( trap_cvar( "samelevel" ) /* == 1 */ )	// if samelevel is set, stay on same level
@@ -719,7 +716,7 @@ gedict_t       *SelectSpawnPoint()
 	int				k_nspots;
 	int				totalspots;
 	int				pcount;
-	int				k_spw = atoi( ezinfokey( world, "k_spw" ) );
+	int				k_spw = iKey( world, "k_spw" );
 
 	totalspots = numspots = 0;
 
@@ -746,8 +743,9 @@ gedict_t       *SelectSpawnPoint()
 			if ( streq( thing->s.v.classname, "player" ) )
 			{
                 if( !(  k_spw == 2 && match_in_progress == 2 && !thing->k_1spawn )
-					   // k_spw == 2 feature, this player will counted
-					   // only in certain time after his last spawn (i.e. while k_1spawn == 0).
+					   // k_spw == 2 feature, if player is spawned not far away and run
+					   // around spot - treat this spot as not valid.
+					   // k_1spawn store this "not far away" time.
 					   // k_1spawn is _also_ set after player passed teleport
 					&& ISLIVE( thing )
 				  ) 
@@ -929,10 +927,9 @@ void ClientConnect()
 
 			while( p && f1 < 16 ) {
 				f1++;
-				p = find(world, FOFCLSN, "player");
 
-				while( p && p->s.v.frags != f1 )
-					p = find(p, FOFCLSN, "player");
+				for( p = world; (p = find(p, FOFCLSN, "player")) && p->s.v.frags != f1; )
+					; // empty
 			}
 
 			// if we found a spot, set the player into it
@@ -1456,16 +1453,6 @@ void ClientDisconnect()
 {
 	float f1;
 
-	if ( match_in_progress && self->k_vote ) { // recount break votes
-		gedict_t *p;
-
-		self->k_vote = 0;
-		k_vbreak = 0;
-		for( p = world; p = find(p, FOFCLSN, "player"); )
-			if( p->k_vote )
-				k_vbreak++;
-	}
-
 	if( match_in_progress == 2 && ( self->k_makeghost || streq("player", self->s.v.classname) ) )
 	{
 		G_bprint( PRINT_HIGH, "%s left the game with %.0f frags\n", self->s.v.netname,
@@ -1500,7 +1487,6 @@ void ClientDisconnect()
 	self->k_accepted = 0;
 	self->ready = 0;
 	self->s.v.classname = "";
-
 
 // s: added conditional function call here
 	if( self->k_kicking )
