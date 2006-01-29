@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.16 2006/01/27 20:22:44 qqshka Exp $
+ *  $Id: world.c,v 1.17 2006/01/29 23:41:18 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -401,6 +401,7 @@ void FirstFrame	( )
 	RegisterCvar("k_vp_captain"); // votes percentage for captain election
 	RegisterCvar("k_vp_map");     // votes percentage for map change voting
 	RegisterCvar("k_vp_pickup");  // votes percentage for pickup voting
+	RegisterCvar("k_vp_rpickup"); // votes percentage for rpickup voting
 
 	k_matchLess = cvar( "k_matchless" ); // changed only here
 }

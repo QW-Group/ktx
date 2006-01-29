@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.16 2006/01/27 20:23:02 qqshka Exp $
+ *  $Id: g_local.h,v 1.17 2006/01/29 23:41:32 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -402,20 +402,25 @@ void	vote_check_map ();
 void	vote_check_break ();
 void	vote_check_elect ();
 void	vote_check_pickup ();
+void	vote_check_rpickup ();
 void 	vote_check_all ();
 
 #define	VOTE_FOFS(x) ((int)&(((vote_t *)0)->x))
 
 #define OV_BREAK ( VOTE_FOFS ( brk ) )
 #define OV_ELECT ( VOTE_FOFS ( elect ) )
-//#define OV_RPICKUP ( VOTE_FOFS ( rpickup ) )
 #define OV_PICKUP ( VOTE_FOFS ( pickup ) )
+#define OV_RPICKUP ( VOTE_FOFS ( rpickup ) )
 #define OV_MAP ( VOTE_FOFS ( map ) )
 
+void 	ElectThink();
+void	AbortElect();
 
 // admin.c
 
-void ModPause (int pause);
+void 	ModPause (int pause);
+void 	BecomeAdmin(gedict_t *p);
+void 	VoteAdmin();
 
 // maps.c
 

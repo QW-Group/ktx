@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.11 2006/01/27 20:23:02 qqshka Exp $
+ *  $Id: progs.h,v 1.12 2006/01/29 23:41:32 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -98,9 +98,9 @@ typedef struct vote_s {
 
 	int brk;
 	int elect;
-//	int rpickup;
 	int map;
 	int pickup;
+	int rpickup;
 
 	float elect_block_till;	// block election for this time
 } vote_t;

@@ -210,7 +210,7 @@ cmd_t cmds[] = {
     { "captain",     BecomeCaptain,             0    , CF_PLAYER      },
     { "freeze",      ToggleFreeze,              0    , CF_PLAYER      },
 	{ "deathmsg",    Deathmsg,                  0    , CF_BOTH_ADMIN  },
-    { "rpickup",     RandomPickup,              0    , CF_BOTH_ADMIN  },
+    { "rpickup",     RandomPickup,              0    , CF_PLAYER | CF_SPC_ADMIN  },
     
     { "1on1",        UserMode,                  1	 , CF_PLAYER | CF_SPC_ADMIN },
     { "2on2",        UserMode,                  2	 , CF_PLAYER | CF_SPC_ADMIN },
@@ -962,6 +962,18 @@ void ModStatusVote()
 
 		for( from = 0, p = world; p = find_plrspc(p, &from); )
 			if ( p->v.pickup )
+				G_sprint(self, 2, " %s\n", p->s.v.netname);
+	}
+
+	if ( !match_in_progress )
+	if ( votes = get_votes( OV_RPICKUP )) {
+		voted = true;
+
+		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for a %s game:\n", votes,
+			 get_votes_req( OV_RPICKUP, false ), count_s(votes), redtext("rpickup"));
+
+		for( from = 0, p = world; p = find_plrspc(p, &from); )
+			if ( p->v.rpickup )
 				G_sprint(self, 2, " %s\n", p->s.v.netname);
 	}
 
@@ -2887,3 +2899,40 @@ void fpslist ( )
 		G_sprint(self, 2, "No players present\n" );
 }
 
+// This is designed for pickup games and creates totally random teams(ish)
+// It creates teams thus :
+// Team red  color  4 skin ""
+// team blue color 13 skin ""
+void RandomPickup ()
+{
+    int votes;
+	
+	if( match_in_progress )
+        return;
+
+	if( k_captains ) {
+		G_sprint(self, 2, "No random pickup when captain stuffing\n");
+		return;
+	}
+
+	if( atoi( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
+		G_sprint(self, 2, "console: command is locked\n");
+		return;
+	}
+
+    // Dont need to bother if less than 4 players
+    if( CountPlayers() < 4 )
+    {
+        G_sprint(self, 2, "You need at least 4 players to do this.\n");
+        return;
+    }
+
+	self->v.rpickup = !self->v.rpickup;
+
+	G_bprint(2, "%s %s!%s\n", self->s.v.netname, 
+			(self->v.rpickup ? redtext("votes for rpickup") :
+							   redtext("withdraws %s rpickup vote", SexStr(self))),
+			((votes = get_votes_req( OV_RPICKUP, true )) ? va(" (%d)", votes) : ""));
+
+	vote_check_rpickup ();
+}

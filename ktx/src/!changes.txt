@@ -1,3 +1,13 @@
+2006-01-30
+ 48. As addon to voting.
+     /rpickup command does't need admin rights now, but admin has veto rights.
+
+	 set k_vp_rpickup  51   // votes percentage for random pickup voting
+
+	 /whovote tuned too.
+
+	 NOTES: /rpickup needs at least 4 votes, excepting admin veto.
+
 2006-01-27
  47. Ok, i rewrote voting code.
 	 Added particular voting percentage for most votings/election:

@@ -23,8 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 float CountPlayers();
 float CountRTeams();
-void AdminForcePause();
-void BeginPicking();
+void  BeginPicking();
 
 // AbortElect is used to terminate the voting
 // Important if player to be elected disconnects or levelchange happens
@@ -62,76 +61,6 @@ void ElectThink()
 	self->s.v.nextthink = -1;
 
 	AbortElect();
-}
-
-void VoteAdmin()
-{
-	gedict_t *p;
-	int   from, till;
-
-	gedict_t *electguard;
-
-// Can't allow election and code entering for the same person at the same time
-	if( self->k_admin == 1 ) {
-		G_sprint(self, 2, "Finish entering the code first\n");
-		return;
-	}
-
-	if( self->k_admin == 2 ) {
-		G_sprint(self, 2, "You are already an admin\n");
-		return;
-	}
-
-	if( self->k_admin == 1.5 ) {
-		G_bprint(2, "%s %s!\n", self->s.v.netname, redtext("aborts election"));
-		AbortElect();
-		return;
-	}
-
-// Only one election per server because otherwise we wouldn't know how to count
-// "yes"s or "no"s
-	if( get_votes( OV_ELECT ) ) {
-		G_sprint(self, 2, "An election is already in progress\n");
-		return;
-	}
-
-// Check if voteadmin is allowed
-	if( !iKey( world, "k_allowvoteadmin" ) ) {
-		G_sprint(self, 2, "Admin election is not allowed on this server.\n");
-		return;
-	}
-
-	if( !iKey( world, "k_admins" ) ) {
-		G_sprint(self, 2, "NO ADMINS ON THIS SERVER!\n");
-		return;
-	}
-
-	if( (till = Q_rint( self->v.elect_block_till - g_globalvars.time)) > 0  ) {
-		G_sprint(self, 2, "Wait %d second%s!\n", till, count_s(till) );
-		return;
-	}
-
-	if( streq( self->s.v.classname, "spectator" ) && match_in_progress )
-		return;
-
-	G_bprint(2, "%s has %s rights!\n", self->s.v.netname, redtext("requested admin"));
-
-	for( from = 0, p = world; p = find_plrspc(p, &from); )
-		if ( p != self && p->k_player )
-			G_sprint(p, 2, "Type %s in console to approve\n", redtext("yes"));
-
-	G_sprint(self, 2, "Type %s to abort election\n", redtext("elect"));
-
-    // announce the election
-	self->v.elect = 1;
-
-	self->k_admin = 1.5;
-
-	electguard = spawn(); // Check the 1 minute timeout for election
-	electguard->s.v.owner = EDICT_TO_PROG( world );
-	electguard->s.v.classname = "electguard";
-	electguard->s.v.think = ( func_t ) ElectThink;
-	electguard->s.v.nextthink = g_globalvars.time + 60;
 }
 
 void VoteYes()
@@ -221,8 +150,9 @@ int get_votes_req( int fofs, qboolean diff )
 	votes   = get_votes( fofs );
 
 	switch ( fofs ) {
-		case OV_BREAK:  percent = cvar("k_vp_break");  break;
-		case OV_PICKUP: percent = cvar("k_vp_pickup"); break;
+		case OV_BREAK:   percent = cvar("k_vp_break");  break;
+		case OV_PICKUP:  percent = cvar("k_vp_pickup"); break;
+		case OV_RPICKUP: percent = cvar("k_vp_rpickup"); break;
 		case OV_MAP:
 					    percent = cvar("k_vp_map");
 						idx = vote_get_maps ();
@@ -254,6 +184,8 @@ int get_votes_req( int fofs, qboolean diff )
 		vt_req = max(2, vt_req); // if ellection, at least 2 votes needed
 	else if ( fofs == OV_BREAK && k_matchLess && match_in_progress == 1 )
 		vt_req = max(2, vt_req); // at least 2 votes in this case
+	else if ( fofs == OV_RPICKUP )
+		vt_req = max(4, vt_req); // at least 4 votes in this case
 
 	if ( diff )
 		return max(0, vt_req - votes);
@@ -423,10 +355,7 @@ void vote_check_elect ()
 
 		if( !(p->k_spectator && match_in_progress) )
 		if( p->k_admin == 1.5 ) { // s: election was admin election
-			G_bprint(2, "%s %s!\n", p->s.v.netname, redtext("gains admins status"));
-			G_sprint(p, 2, "Please give up admin rights when you're done.\n"
-						   "Type %s for info\n", redtext("commands"));
-			p->k_admin = 2;
+			BecomeAdmin( p );
 		}
 
 		if( !match_in_progress )
@@ -448,6 +377,7 @@ void vote_check_elect ()
 	}
 }
 
+// !!! do not confuse rpickup and pickup
 void vote_check_pickup ()
 {
 	gedict_t *p;
@@ -481,11 +411,71 @@ void vote_check_pickup ()
 	}
 }
 
+// !!! do not confuse rpickup and pickup
+void vote_check_rpickup ()
+{
+    int i, tn, pl_cnt, pl_idx;
+	gedict_t *p;
+	int veto;
+
+	if ( match_in_progress || k_captains )
+		return;
+
+	if ( !get_votes( OV_RPICKUP ) )
+		return;
+
+   	// Firstly obtain the number of players we have in total on server
+   	pl_cnt = CountPlayers();
+
+	if ( pl_cnt < 4 )
+		return;
+
+	veto = is_admins_vote( OV_RPICKUP );
+
+	if( veto || !get_votes_req( OV_RPICKUP, true ) ) {
+		vote_clear( OV_RPICKUP );
+
+		for( p = world; p = find(p, FOFCLSN, "player"); )
+			p->k_teamnumber = 0;
+
+		for( tn = 1; pl_cnt > 0; pl_cnt-- ) {
+			pl_idx = Q_rint( g_random() * (pl_cnt - 1) ); // select random player between 0 and pl_cnt
+
+			for( i = 0, p = world; p = find(p, FOFCLSN, "player"); ) {
+				if ( p->k_teamnumber )
+					continue;
+
+				if ( i == pl_idx ) {
+					p->k_teamnumber = tn;
+					tn = (tn == 1 ? 2 : 1); // next random player will be in other team
+
+            		if( p->k_teamnumber == 1 )
+                		stuffcmd(p, "break\ncolor  4\nskin \"\"\nteam red\n");
+            		else
+                		stuffcmd(p, "break\ncolor 13\nskin \"\"\nteam blue\n");
+
+					break;
+				}
+
+				i++;
+			}
+		}
+
+		if ( veto )
+			G_bprint(2, "console: admin veto for %s\n", redtext("random pickup"));
+		else
+    		G_bprint(2, "console: %s game it is then\n", redtext("random pickup"));
+
+		return;
+	}
+}
+
 void vote_check_all ()
 {
 	vote_check_map ();
 	vote_check_break ();
 	vote_check_elect ();
 	vote_check_pickup ();
+	vote_check_rpickup ();
 }
 

@@ -30,8 +30,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // pick the player
 
-void ElectThink();
-void AbortElect();
 float CountPlayers();
 
 void SetPlayerParams (gedict_t *p, gedict_t *cap)

@@ -12,117 +12,7 @@ void StopTimer ( int removeDemo );
 void NextClient();
 void ExitKick(gedict_t *kicker);
 void Deathmsg();
-void RandomPickup();
 
-// This is designed for pickup games and creates totally random teams(ish)
-// It creates teams thus :
-// Team red  color 4  skin base
-// team blue color 13 skin base
-// Does it by finding out how many players should be in each team.  Then it goes through each
-// player and uses a random function.  If the number returned less than .5 it puts it in k_teamnumber 1.
-// It does this until alreadyset = ineachteam.  Once that is done it loops through players and checks if
-// we have found enough players for the team.  If it has then it sets all others to blue.
-// Else it adds next player.  Once we have found enough players then we loop through again setting teams.
-void RandomPickup ()
-{
-    gedict_t *p;
-    float f1=0, ineachteam=0, alreadyset=0;
-
-    if( self->k_admin != 2 )
-    {
-        G_sprint(self, 2, "You are not an admin\n");
-        return;
-    }
-
-    if( match_in_progress )
-        return;
-
-    // Firstly obtain the number of players we have in total on server
-    f1 = CountPlayers();
-
-    // Dont need to bother if less than 4 players
-    if(f1 < 4)
-    {
-        G_sprint(self, 2, "You need at least 4 players to do this.\n");
-        return;
-    }
-
-    // Now we have number in each team.
-    ineachteam = f1/2;
-
-    // loop through players and put in one team or other as you go through.
-    p = find(world, FOFCLSN, "player");
-    while( p )
-    {
-        if( !strnull ( p->s.v.netname ) )
-        {
-            // Make all players have no team/skin/color x
-            stuffcmd(p, "break\ncolor 0\nteam \"\"\nskin base\n");
-
-            // If we have not found enough players then add to first team.
-            if( alreadyset < ineachteam )
-            {
-                if ( g_random() < 0.5 )
-                {
-                    // Make member of team one
-                    p->k_teamnumber = 1;
-                    // Increment number of players set to team 1.
-                    alreadyset++;
-                }
-                else
-                {
-                    // Make member of team two
-                    p->k_teamnumber = 2;
-                }
-            }
-        }
-        p = find(p, FOFCLSN, "player");
-    }
-
-    // We have looped through each players once and should hopefully have enough players.
-    // If not we loop again and find enough players for the first team.
-    if( alreadyset < ineachteam )
-    {
-        p = find(world, FOFCLSN, "player");
-        while( p )
-        {
-            if( !strnull ( p->s.v.netname )  && p->k_teamnumber != 1 )
-            {
-                // If we have not found enough players then add to first team.
-                if( alreadyset < ineachteam )
-                {
-                    // We make this player member of team 1.
-                    p->k_teamnumber = 1;
-
-                    // Increment number of players set to team 1.
-                    alreadyset = alreadyset + 1;
-                }
-            }
-            p = find(p, FOFCLSN, "player");
-        }
-    }
-
-    // We have looped through the players twice so we are guaranteed to have enough players.
-    // We now loop again for the last time and set the teams.
-
-    p = find(world, FOFCLSN, "player");
-    while( p )
-    {
-        if( !strnull ( p->s.v.netname ) )
-        {
-            if( p->k_teamnumber == 1 )
-                stuffcmd(p, "break\ncolor 4\nskin \"\"\nteam red\n");
-            else
-                stuffcmd(p, "break\ncolor 13\nskin \"\"\nteam blue\n");
-
-            // Then we reset what team they are in to avoid problems.
-            p->k_teamnumber = 0;
-        }
-        p = find(p, FOFCLSN, "player");
-    }
-
-    G_bprint(3, "console: random pickup game it is then\n");
-}
 
 // This toggle's between different messages
 void Deathmsg ()
@@ -302,12 +192,15 @@ void ExitKick (gedict_t *kicker)
     }
 }
 
-void BecomeAdmin()
+void BecomeAdmin(gedict_t *p)
 {
-	G_bprint(2, "%s çáéîó áäíéî óôáôõó!\n", self->s.v.netname);
-	G_sprint(self, 2, "Type ãïííáîäó for info\n");
-	self->k_admin = 2;
+	G_bprint(2, "%s %s!\n", p->s.v.netname, redtext("gains admins status"));
+	G_sprint(p, 2, "Please give up admin rights when you're done.\n"
+				   "Type %s for info\n", redtext("commands"));
+	p->k_admin = 2;
 }
+
+// "admin" command
 
 void ReqAdmin ()
 {
@@ -329,12 +222,17 @@ void ReqAdmin ()
         return;
     }
 
+	if( !iKey( world, "k_admins" ) ) {
+		G_sprint(self, 2, "%s on this server!\n", redtext("NO admins"));
+		return;
+	}
+
     if( self->k_admin )
         return;
 
-	if ( Vip_IsFlags( self, VIP_ADMIN ) )
+	if ( Vip_IsFlags( self, VIP_ADMIN ) ) // this VIP does't required pass
     {
-		BecomeAdmin();
+		BecomeAdmin(self);
 		return;
     }
 
@@ -343,7 +241,7 @@ void ReqAdmin ()
     self->k_added  = 0;
 
     // You can now use numbers to enter code
-    G_sprint(self, 2, "Use îõíâåòó or éíðõìóåó to enter code\n");
+    G_sprint(self, 2, "Use %s or %s to enter code\n", redtext("numbers"), redtext("impulses") );
 }
 
 void AdminImpBot ()
@@ -370,19 +268,91 @@ void AdminImpBot ()
 
     if( !self->k_adminc )
     {
-        if( self->k_added == atoi( ezinfokey( world, "k_admincode" ) ) )
+        if( self->k_added == iKey( world, "k_admincode" ) )
         {
-			BecomeAdmin();
+			BecomeAdmin(self);
 			return;
         }
         else
         {
             self->k_admin = 0;
-            G_sprint(self, 2, "Access denied...\n");
+            G_sprint(self, 2, "%s...\n", redtext("Access denied"));
         }
     }
     else
-        G_sprint(self, 2, "%d íïòå ôï çï\n", (int)self->k_adminc);
+        G_sprint(self, 2, "%d %s\n", (int)self->k_adminc, redtext("more to go"));
+}
+
+// "ellect" command
+
+void VoteAdmin()
+{
+	gedict_t *p;
+	int   from, till;
+
+	gedict_t *electguard;
+
+// Can't allow election and code entering for the same person at the same time
+	if( self->k_admin == 1 ) {
+		G_sprint(self, 2, "Finish entering the code first\n");
+		return;
+	}
+
+	if( self->k_admin == 2 ) {
+		G_sprint(self, 2, "You are already an admin\n");
+		return;
+	}
+
+	if( self->k_admin == 1.5 ) {
+		G_bprint(2, "%s %s!\n", self->s.v.netname, redtext("aborts election"));
+		AbortElect();
+		return;
+	}
+
+// Only one election per server because otherwise we wouldn't know how to count
+// "yes"s or "no"s
+	if( get_votes( OV_ELECT ) ) {
+		G_sprint(self, 2, "An election is already in progress\n");
+		return;
+	}
+
+	if( !iKey( world, "k_admins" ) ) {
+		G_sprint(self, 2, "%s on this server!\n", redtext("NO admins"));
+		return;
+	}
+
+// Check if voteadmin is allowed
+	if( !iKey( world, "k_allowvoteadmin" ) ) {
+		G_sprint(self, 2, "Admin election is not allowed on this server.\n");
+		return;
+	}
+
+	if( (till = Q_rint( self->v.elect_block_till - g_globalvars.time)) > 0  ) {
+		G_sprint(self, 2, "Wait %d second%s!\n", till, count_s(till) );
+		return;
+	}
+
+	if( streq( self->s.v.classname, "spectator" ) && match_in_progress )
+		return;
+
+	G_bprint(2, "%s has %s rights!\n", self->s.v.netname, redtext("requested admin"));
+
+	for( from = 0, p = world; p = find_plrspc(p, &from); )
+		if ( p != self && p->k_player )
+			G_sprint(p, 2, "Type %s in console to approve\n", redtext("yes"));
+
+	G_sprint(self, 2, "Type %s to abort election\n", redtext("elect"));
+
+    // announce the election
+	self->v.elect = 1;
+
+	self->k_admin = 1.5;
+
+	electguard = spawn(); // Check the 1 minute timeout for election
+	electguard->s.v.owner = EDICT_TO_PROG( world );
+	electguard->s.v.classname = "electguard";
+	electguard->s.v.think = ( func_t ) ElectThink;
+	electguard->s.v.nextthink = g_globalvars.time + 60;
 }
 
 void AdminMatchStart ()
