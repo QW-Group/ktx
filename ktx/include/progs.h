@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.13 2006/02/04 13:09:42 qqshka Exp $
+ *  $Id: progs.h,v 1.14 2006/02/04 18:45:06 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -267,7 +267,8 @@ typedef struct gedict_s {
 	vote_t v;				// player votes stored here
 
 // { spec stuff
-	int   fav[MAX_CLIENTS]; // here stored players number for appropriate favX_add command
+	int   favx[MAX_CLIENTS]; // here stored players number for appropriate favX_add/Xfav_go commands
+	int   fav[MAX_CLIENTS];  // here stored players number for fav_add/next_fav commands
 // }
 #endif
 

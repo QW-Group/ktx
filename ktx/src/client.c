@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.31 2006/02/04 13:10:00 qqshka Exp $
+ *  $Id: client.c,v 1.32 2006/02/04 18:44:46 qqshka Exp $
  */
 
 //===========================================================================
@@ -50,6 +50,8 @@ void play_teleport();
 void ImpulseCommands();
 void StartDie ();
 void ZeroFpsStats ();
+
+void del_from_specs_favourites(gedict_t *rm);
 
 void CheckAll ()
 {
@@ -1441,6 +1443,8 @@ void MakeGhost ()
 void ClientDisconnect()
 {
 	float f1;
+
+	del_from_specs_favourites( self );
 
 	if( match_in_progress == 2 && ( self->k_makeghost || streq("player", self->s.v.classname) ) )
 	{

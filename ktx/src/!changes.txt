@@ -2,13 +2,35 @@
  49. Added spec features:
 	 /fav1_add ... /fav20_add
 	 /1fav_go ...  /20fav_go
+	 /fav_add
+	 /fav_del
+	 /fav_all_del
+	 /fav_next
+	 /fav_show
 
 	 With the commands "fav1_add", "fav2_add", ... , "fav20_add" you can add the 
 	 player you are currently spectating to the favorite player slot with the
 	 specified number. For example issueing the "fav2_add" command will cause the
 	 player you are currently spectating to be added to slot number 2. You can 
 	 later switch to those players with the "1fav_go", "2fav_go", ... , "20fav_go"
-	 commands. ktpro (c)
+	 commands.
+
+	 With the "fav_add" command you can add one or several players to a favorite's 
+	 list. This is done by issueing the commmand "fav_add" while spectating the 
+	 desired player. You will then be able to switch between your favorites players 
+	 with the the "fav_next" command.
+
+	 With the "fav_del" command u will remove the player you are currently spectating from your
+	 favorite's list (if he was in the list).
+
+	 With the "fav_all_del" command u will remove all players that were in your favorite's list.
+
+ 	 Above commands is ktpro (c).
+
+	 With "fav_show" command u can list your favorite's list.
+
+	 NOTES: fav_next called in ktpro as next_fav, in ktx next_fav is alias for fav_next,
+			added for back compatibility.
 
 	 Oh, and HUGE thx goes to SD-Angel, who brings to me client /track command,
      does't know about this command before :(

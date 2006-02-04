@@ -101,15 +101,20 @@ void UserMode(float umode);
 void Wp_Reset ();
 void Wp_Stats(float on);
 void t_jump (float j_type);
-void klist ( );
+void klist ();
 void hdptoggle ();
 void handicap ();
 void noweapon ();
 void tracklist ();
 void fpslist ();
 
-void fav_add( float fav_num );
-void fav_go( float fav_num );
+void favx_add ( float fav_num );
+void xfav_go ( float fav_num );
+void fav_add ();
+void fav_del ();
+void fav_all_del ();
+void fav_next ();
+void fav_show ();
 
 void TogglePractice();
 
@@ -239,47 +244,51 @@ cmd_t cmds[] = {
     { "tracklist",   tracklist,                 0    , CF_BOTH | CF_MATCHLESS  },
     { "fpslist",     fpslist,                   0    , CF_BOTH | CF_MATCHLESS  },
 
-    { "fav1_add",    fav_add,                   1    , CF_SPECTATOR },
-    { "fav2_add",    fav_add,                   2    , CF_SPECTATOR },
-    { "fav3_add",    fav_add,                   3    , CF_SPECTATOR },
-    { "fav4_add",    fav_add,                   4    , CF_SPECTATOR },
-    { "fav5_add",    fav_add,                   5    , CF_SPECTATOR },
-    { "fav6_add",    fav_add,                   6    , CF_SPECTATOR },
-    { "fav7_add",    fav_add,                   7    , CF_SPECTATOR },
-    { "fav8_add",    fav_add,                   8    , CF_SPECTATOR },
-    { "fav9_add",    fav_add,                   9    , CF_SPECTATOR },
-    { "fav10_add",   fav_add,                  10    , CF_SPECTATOR },
-    { "fav11_add",   fav_add,                  11    , CF_SPECTATOR },
-    { "fav12_add",   fav_add,                  12    , CF_SPECTATOR },
-    { "fav13_add",   fav_add,                  13    , CF_SPECTATOR },
-    { "fav14_add",   fav_add,                  14    , CF_SPECTATOR },
-    { "fav15_add",   fav_add,                  15    , CF_SPECTATOR },
-    { "fav16_add",   fav_add,                  16    , CF_SPECTATOR },
-    { "fav17_add",   fav_add,                  17    , CF_SPECTATOR },
-    { "fav18_add",   fav_add,                  18    , CF_SPECTATOR },
-    { "fav19_add",   fav_add,                  19    , CF_SPECTATOR },
-    { "fav20_add",   fav_add,                  20    , CF_SPECTATOR },
-    { "1fav_go",     fav_go,                    1    , CF_SPECTATOR },
-    { "2fav_go",     fav_go,                    2    , CF_SPECTATOR },
-    { "3fav_go",     fav_go,                    3    , CF_SPECTATOR },
-    { "4fav_go",     fav_go,                    4    , CF_SPECTATOR },
-    { "5fav_go",     fav_go,                    5    , CF_SPECTATOR },
-    { "6fav_go",     fav_go,                    6    , CF_SPECTATOR },
-    { "7fav_go",     fav_go,                    7    , CF_SPECTATOR },
-    { "8fav_go",     fav_go,                    8    , CF_SPECTATOR },
-    { "9fav_go",     fav_go,                    9    , CF_SPECTATOR },
-    { "10fav_go",    fav_go,                   10    , CF_SPECTATOR },
-    { "11fav_go",    fav_go,                   11    , CF_SPECTATOR },
-    { "12fav_go",    fav_go,                   12    , CF_SPECTATOR },
-    { "13fav_go",    fav_go,                   13    , CF_SPECTATOR },
-    { "14fav_go",    fav_go,                   14    , CF_SPECTATOR },
-    { "15fav_go",    fav_go,                   15    , CF_SPECTATOR },
-    { "16fav_go",    fav_go,                   16    , CF_SPECTATOR },
-    { "17fav_go",    fav_go,                   17    , CF_SPECTATOR },
-    { "18fav_go",    fav_go,                   18    , CF_SPECTATOR },
-    { "19fav_go",    fav_go,                   19    , CF_SPECTATOR },
-    { "20fav_go",    fav_go,                   20    , CF_SPECTATOR }
-
+    { "fav1_add",    favx_add,                   1    , CF_SPECTATOR },
+    { "fav2_add",    favx_add,                   2    , CF_SPECTATOR },
+    { "fav3_add",    favx_add,                   3    , CF_SPECTATOR },
+    { "fav4_add",    favx_add,                   4    , CF_SPECTATOR },
+    { "fav5_add",    favx_add,                   5    , CF_SPECTATOR },
+    { "fav6_add",    favx_add,                   6    , CF_SPECTATOR },
+    { "fav7_add",    favx_add,                   7    , CF_SPECTATOR },
+    { "fav8_add",    favx_add,                   8    , CF_SPECTATOR },
+    { "fav9_add",    favx_add,                   9    , CF_SPECTATOR },
+    { "fav10_add",   favx_add,                  10    , CF_SPECTATOR },
+    { "fav11_add",   favx_add,                  11    , CF_SPECTATOR },
+    { "fav12_add",   favx_add,                  12    , CF_SPECTATOR },
+    { "fav13_add",   favx_add,                  13    , CF_SPECTATOR },
+    { "fav14_add",   favx_add,                  14    , CF_SPECTATOR },
+    { "fav15_add",   favx_add,                  15    , CF_SPECTATOR },
+    { "fav16_add",   favx_add,                  16    , CF_SPECTATOR },
+    { "fav17_add",   favx_add,                  17    , CF_SPECTATOR },
+    { "fav18_add",   favx_add,                  18    , CF_SPECTATOR },
+    { "fav19_add",   favx_add,                  19    , CF_SPECTATOR },
+    { "fav20_add",   favx_add,                  20    , CF_SPECTATOR },
+    { "1fav_go",     xfav_go,                   1    , CF_SPECTATOR },
+    { "2fav_go",     xfav_go,                   2    , CF_SPECTATOR },
+    { "3fav_go",     xfav_go,                   3    , CF_SPECTATOR },
+    { "4fav_go",     xfav_go,                   4    , CF_SPECTATOR },
+    { "5fav_go",     xfav_go,                   5    , CF_SPECTATOR },
+    { "6fav_go",     xfav_go,                   6    , CF_SPECTATOR },
+    { "7fav_go",     xfav_go,                   7    , CF_SPECTATOR },
+    { "8fav_go",     xfav_go,                   8    , CF_SPECTATOR },
+    { "9fav_go",     xfav_go,                   9    , CF_SPECTATOR },
+    { "10fav_go",    xfav_go,                  10    , CF_SPECTATOR },
+    { "11fav_go",    xfav_go,                  11    , CF_SPECTATOR },
+    { "12fav_go",    xfav_go,                  12    , CF_SPECTATOR },
+    { "13fav_go",    xfav_go,                  13    , CF_SPECTATOR },
+    { "14fav_go",    xfav_go,                  14    , CF_SPECTATOR },
+    { "15fav_go",    xfav_go,                  15    , CF_SPECTATOR },
+    { "16fav_go",    xfav_go,                  16    , CF_SPECTATOR },
+    { "17fav_go",    xfav_go,                  17    , CF_SPECTATOR },
+    { "18fav_go",    xfav_go,                  18    , CF_SPECTATOR },
+    { "19fav_go",    xfav_go,                  19    , CF_SPECTATOR },
+    { "20fav_go",    xfav_go,                  20    , CF_SPECTATOR },
+    { "fav_add",      fav_add,                   0    , CF_SPECTATOR | CF_MATCHLESS },
+    { "fav_del",      fav_del,                   0    , CF_SPECTATOR | CF_MATCHLESS },
+    { "fav_all_del",  fav_all_del,               0    , CF_SPECTATOR | CF_MATCHLESS },
+    { "fav_next",     fav_next,                  0    , CF_SPECTATOR | CF_MATCHLESS },
+    { "fav_show",     fav_show,                  0    , CF_SPECTATOR | CF_MATCHLESS }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -338,7 +347,7 @@ void StuffAliases()
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias %d impulse %d\n", i, i);
 
 	if ( PROG_TO_EDICT( self->s.v.owner )->k_spectator ) {
-		; // none for spectator
+		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias next_fav fav_next\n");
 	}
 	else {
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias notready break\n");
@@ -2985,7 +2994,134 @@ void RandomPickup ()
 
 // { spec tracking stuff 
 
-void fav_add( float fav_num )
+qboolean fav_del_do(gedict_t *s, gedict_t *p, char *prefix);
+qboolean favx_del_do(gedict_t *s, gedict_t *p, char *prefix);
+
+// this is called from ClientDisconnect - so disconnected players
+// removed from spectators favourites
+void del_from_specs_favourites(gedict_t *rm)
+{
+	int from;
+	gedict_t *p;
+
+	for( from = 1, p = world; p = find_plrspc(p, &from); ) {
+		fav_del_do(p, rm, "auto: ");
+		favx_del_do(p, rm, "auto: ");
+	}
+}
+
+void fav_add( )
+{
+	int fav_num, free_num;
+	gedict_t *goal = PROG_TO_EDICT(self->s.v.goalentity);
+	int diff = (int)(goal - world);
+
+	if ( !goal->k_player || diff < 1 || diff > MAX_CLIENTS ) {
+		G_sprint(self, 2, "fav_add: you are %s player!\n", redtext("not tracking"));
+		return;
+	}
+
+	for ( free_num = -1, fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
+		if ( self->fav[fav_num] == diff ) {
+			G_sprint(self, 2, "fav_add: %s %s added to favourites\n", goal->s.v.netname,
+																	redtext("already"));
+			return;
+		}
+		else if ( free_num < 0 && !self->fav[fav_num] ) { // ok - found free slot
+			free_num = fav_num;
+		}
+
+	fav_num = free_num + 1;
+
+	if ( fav_num < 1 || fav_num > MAX_CLIENTS ) { // must not happen
+		G_sprint(self, 2, "fav_add: oops, all slots busy? Can't add.\n");
+		return;
+	}
+	
+	G_sprint(self, 2, "fav_add: %s added to favourites\n", goal->s.v.netname);
+
+	self->fav[(int)fav_num - 1] = diff;
+}
+
+
+// s - for whom remove
+// p - who removed
+qboolean fav_del_do(gedict_t *s, gedict_t *p, char *prefix)
+{
+	qboolean removed = false;
+	int fav_num;
+
+	if ( !s || !p )
+		return false;
+
+	for ( fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
+		if ( s->fav[fav_num] && (world + s->fav[fav_num]) == p ) {
+			if ( removed == false ) // show info one time
+				G_sprint(s, 2, "%s%s removed from favourites\n", 
+							prefix, (strnull(p->s.v.netname) ? "-someone-" : p->s.v.netname));
+
+			s->fav[fav_num] = 0;
+			removed = true; // does't break, so if this player multiple times in favourites
+							// he will removed anyway, must not happend really
+		}
+
+	return removed;
+}
+
+// s - for whom remove
+// p - who removed
+qboolean favx_del_do(gedict_t *s, gedict_t *p, char *prefix)
+{
+	qboolean removed = false;
+	int fav_num;
+
+	if ( !s || !p )
+		return false;
+
+	for ( fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
+		if ( s->favx[fav_num] && (world + s->favx[fav_num]) == p ) {
+			G_sprint(s, 2, "%s%s removed from \x90slot %2d\x91\n", 
+				prefix, (strnull(p->s.v.netname) ? "-someone-" : p->s.v.netname), fav_num + 1);
+
+			s->favx[fav_num] = 0;
+			removed = true; // does't break, so if this player multiple times in favourites
+							// he will removed anyway
+		}
+
+	return removed;
+}
+
+void fav_del( )
+{
+	gedict_t *goal = PROG_TO_EDICT(self->s.v.goalentity);
+	int diff = (int)(goal - world);
+
+	if ( !goal->k_player || diff < 1 || diff > MAX_CLIENTS ) {
+		G_sprint(self, 2, "fav_del: you are %s player!\n", redtext("not tracking"));
+		return;
+	}
+
+	if ( fav_del_do(self, goal, "fav_del: ") )
+		return;
+
+	G_sprint(self, 2, "fav_del: %s is %s favourites\n", goal->s.v.netname, redtext("not in"));
+}
+
+void fav_all_del( )
+{
+	qboolean deleted = false;
+	int fav_num;
+
+	for ( fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
+		if ( self->fav[fav_num] ) {
+			self->fav[fav_num] = 0;
+			deleted = true;
+		}
+
+	G_sprint(self, 2, "Favourites list %sdeleted\n", (deleted ? "" : redtext("already ")));
+}
+
+void favx_add( float fav_num )
 {
 	gedict_t *goal = PROG_TO_EDICT(self->s.v.goalentity);
 	int diff = (int)(goal - world);
@@ -3000,10 +3136,73 @@ void fav_add( float fav_num )
 	
 	G_sprint(self, 2, "fav add: %s added to \x90slot %d\x91\n", goal->s.v.netname, (int)fav_num);
 
-	self->fav[(int)fav_num - 1] = diff;
+	self->favx[(int)fav_num - 1] = diff;
 }
 
-void fav_go( float fav_num )
+void fav_next( )
+{
+	int pl_num, fav_num, first_fav, desired_fav;
+	gedict_t *goal = PROG_TO_EDICT(self->s.v.goalentity), *p;
+	int diff = (int)(goal - world);
+
+	for ( fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
+		if ( self->fav[fav_num] )
+			break;
+
+	if ( fav_num >= MAX_CLIENTS ) {
+		G_sprint(self, 2, "fav_next: favourites list is %s\n", redtext("empty"));
+		return;
+	}
+
+	desired_fav = -2;
+	first_fav = fav_num; // remember
+
+	if ( !( !goal->k_player || diff < 1 || diff > MAX_CLIENTS ) ) {
+ 		// ok - tracking player, so if goal in favourites switch to the next favourite,
+ 		// if goal not in favourites switch to the first favourite
+		for ( fav_num = first_fav; fav_num < MAX_CLIENTS; fav_num++ )
+			if ( desired_fav == -2 && self->fav[fav_num] == diff ) {
+				desired_fav = -1; // found goal in favourites, search now next fav
+			}
+			else if ( desired_fav == -1 && self->fav[fav_num] ) {
+				desired_fav = fav_num; // found next fav in favourites
+				break;
+			}
+	}
+
+	if ( desired_fav >= 0 )
+		fav_num = desired_fav + 1;
+	else
+		fav_num = first_fav + 1;
+
+	if ( fav_num < 1 || fav_num > MAX_CLIENTS ) {
+		G_sprint(self, 2, "fav_next: internal error, fav_num %d\n", fav_num);
+		return; // sanity - must not happen
+	}
+
+	pl_num = self->fav[fav_num - 1];
+
+	if ( pl_num < 1 || pl_num > MAX_CLIENTS ) {
+		G_sprint(self, 2, "fav_next: internal error, slot %d\n", pl_num);
+		return;
+	}
+
+	p = world + pl_num;
+
+	if ( !p->k_player ) {
+		G_sprint(self, 2, "fav_next: can't find player\n");
+		return;
+	}
+
+	if ( PROG_TO_EDICT( self->s.v.goalentity ) == p ) {
+		G_sprint(self, 2, "fav_next: already observing...\n");
+		return;
+	}
+	
+	stuffcmd( self, "track %d\n", GetUserID( p ) );
+}
+
+void xfav_go( float fav_num )
 {
 	gedict_t *p;
 	int pl_num;
@@ -3011,7 +3210,7 @@ void fav_go( float fav_num )
 	if ( fav_num < 1 || fav_num > MAX_CLIENTS )
 		return;
 
-	pl_num = self->fav[(int)fav_num - 1];
+	pl_num = self->favx[(int)fav_num - 1];
 
 	if ( pl_num < 1 || pl_num > MAX_CLIENTS ) {
 		G_sprint(self, 2, "fav go: \x90slot %d\x91 is not defined\n", (int)fav_num);
@@ -3031,6 +3230,50 @@ void fav_go( float fav_num )
 	}
 	
 	stuffcmd( self, "track %d\n", GetUserID( p ) );
+}
+
+void fav_show( )
+{
+	gedict_t *p;
+	qboolean first, showed = false;
+	int fav_num, diff;
+
+	for ( first = true, fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
+		if ( diff = self->favx[fav_num] ) {
+		    p = world + diff;
+			if ( !p->k_player || strnull( p->s.v.netname ) )
+				continue;
+
+			if ( first ) {
+				G_sprint(self, 2, "%s \x90%s\x91 %s:\n", redtext("Favourites"),
+							redtext("slots based"), redtext("list"));
+				first = false;
+			}
+
+			G_sprint(self, 2, " \x90slot %2d\x91 \x8D %s\n", fav_num + 1, p->s.v.netname);
+			showed = true;
+		}
+
+	if ( showed )
+		G_sprint(self, 2, "\n");
+
+	for ( first = true, fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
+		if ( diff = self->fav[fav_num] ) {
+		    p = world + diff;
+			if ( !p->k_player || strnull( p->s.v.netname ) )
+				continue;
+
+			if ( first ) {
+				G_sprint(self, 2, "%s:\n", redtext("Favourites list"));
+				first = false;
+			}
+
+			G_sprint(self, 2, " %s\n", p->s.v.netname);
+			showed = true;
+		}
+
+	if ( !showed )
+		G_sprint(self, 2, "Favourites list %s or nothing to show\n", redtext("empty"));
 }
 
 // }  spec tracking stuff 
