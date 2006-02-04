@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.17 2006/01/29 23:41:18 qqshka Exp $
+ *  $Id: world.c,v 1.18 2006/02/04 13:10:00 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -102,7 +102,6 @@ void SP_worldspawn()
 {
 	char 		*lastmap;
 	char		*s;
-	char 		*tmp;
    	gedict_t	*e;
 
 
@@ -118,11 +117,6 @@ void SP_worldspawn()
 		trap_executecmd ();
 	}
     
-    // Tonik: check if we're running on an 2.3x server
-	tmp = ezinfokey( world, "*version" );
-	if ( streq( tmp, "2.30") || streq( tmp, "2.33" ) )
-		server_is_2_3x = true;
-
 	G_SpawnString( "classname", "", &s );
 	if ( Q_stricmp( s, "worldspawn" ) )
 	{

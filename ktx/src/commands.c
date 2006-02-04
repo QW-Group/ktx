@@ -108,6 +108,9 @@ void noweapon ();
 void tracklist ();
 void fpslist ();
 
+void fav_add( float fav_num );
+void fav_go( float fav_num );
+
 void TogglePractice();
 
 // spec
@@ -234,7 +237,49 @@ cmd_t cmds[] = {
     { "cam",         ShowCamHelp,               0    , CF_SPECTATOR | CF_MATCHLESS },
 
     { "tracklist",   tracklist,                 0    , CF_BOTH | CF_MATCHLESS  },
-    { "fpslist",     fpslist,                   0    , CF_BOTH | CF_MATCHLESS  }
+    { "fpslist",     fpslist,                   0    , CF_BOTH | CF_MATCHLESS  },
+
+    { "fav1_add",    fav_add,                   1    , CF_SPECTATOR },
+    { "fav2_add",    fav_add,                   2    , CF_SPECTATOR },
+    { "fav3_add",    fav_add,                   3    , CF_SPECTATOR },
+    { "fav4_add",    fav_add,                   4    , CF_SPECTATOR },
+    { "fav5_add",    fav_add,                   5    , CF_SPECTATOR },
+    { "fav6_add",    fav_add,                   6    , CF_SPECTATOR },
+    { "fav7_add",    fav_add,                   7    , CF_SPECTATOR },
+    { "fav8_add",    fav_add,                   8    , CF_SPECTATOR },
+    { "fav9_add",    fav_add,                   9    , CF_SPECTATOR },
+    { "fav10_add",   fav_add,                  10    , CF_SPECTATOR },
+    { "fav11_add",   fav_add,                  11    , CF_SPECTATOR },
+    { "fav12_add",   fav_add,                  12    , CF_SPECTATOR },
+    { "fav13_add",   fav_add,                  13    , CF_SPECTATOR },
+    { "fav14_add",   fav_add,                  14    , CF_SPECTATOR },
+    { "fav15_add",   fav_add,                  15    , CF_SPECTATOR },
+    { "fav16_add",   fav_add,                  16    , CF_SPECTATOR },
+    { "fav17_add",   fav_add,                  17    , CF_SPECTATOR },
+    { "fav18_add",   fav_add,                  18    , CF_SPECTATOR },
+    { "fav19_add",   fav_add,                  19    , CF_SPECTATOR },
+    { "fav20_add",   fav_add,                  20    , CF_SPECTATOR },
+    { "1fav_go",     fav_go,                    1    , CF_SPECTATOR },
+    { "2fav_go",     fav_go,                    2    , CF_SPECTATOR },
+    { "3fav_go",     fav_go,                    3    , CF_SPECTATOR },
+    { "4fav_go",     fav_go,                    4    , CF_SPECTATOR },
+    { "5fav_go",     fav_go,                    5    , CF_SPECTATOR },
+    { "6fav_go",     fav_go,                    6    , CF_SPECTATOR },
+    { "7fav_go",     fav_go,                    7    , CF_SPECTATOR },
+    { "8fav_go",     fav_go,                    8    , CF_SPECTATOR },
+    { "9fav_go",     fav_go,                    9    , CF_SPECTATOR },
+    { "10fav_go",    fav_go,                   10    , CF_SPECTATOR },
+    { "11fav_go",    fav_go,                   11    , CF_SPECTATOR },
+    { "12fav_go",    fav_go,                   12    , CF_SPECTATOR },
+    { "13fav_go",    fav_go,                   13    , CF_SPECTATOR },
+    { "14fav_go",    fav_go,                   14    , CF_SPECTATOR },
+    { "15fav_go",    fav_go,                   15    , CF_SPECTATOR },
+    { "16fav_go",    fav_go,                   16    , CF_SPECTATOR },
+    { "17fav_go",    fav_go,                   17    , CF_SPECTATOR },
+    { "18fav_go",    fav_go,                   18    , CF_SPECTATOR },
+    { "19fav_go",    fav_go,                   19    , CF_SPECTATOR },
+    { "20fav_go",    fav_go,                   20    , CF_SPECTATOR }
+
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -292,8 +337,9 @@ void StuffAliases()
 	for ( i = 1; i <= 16; i++ )
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias %d impulse %d\n", i, i);
 
-	if ( PROG_TO_EDICT( self->s.v.owner )->k_spectator )
+	if ( PROG_TO_EDICT( self->s.v.owner )->k_spectator ) {
 		; // none for spectator
+	}
 	else {
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias notready break\n");
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias kfjump \"impulse 156;+jump;wait;-jump\"\n");
@@ -2936,3 +2982,56 @@ void RandomPickup ()
 
 	vote_check_rpickup ();
 }
+
+// { spec tracking stuff 
+
+void fav_add( float fav_num )
+{
+	gedict_t *goal = PROG_TO_EDICT(self->s.v.goalentity);
+	int diff = (int)(goal - world);
+
+	if ( fav_num < 1 || fav_num > MAX_CLIENTS )
+		return;
+
+	if ( !goal->k_player || diff < 1 || diff > MAX_CLIENTS ) {
+		G_sprint(self, 2, "fav add: you are %s player!\n", redtext("not tracking"));
+		return;
+	}
+	
+	G_sprint(self, 2, "fav add: %s added to \x90slot %d\x91\n", goal->s.v.netname, (int)fav_num);
+
+	self->fav[(int)fav_num - 1] = diff;
+}
+
+void fav_go( float fav_num )
+{
+	gedict_t *p;
+	int pl_num;
+
+	if ( fav_num < 1 || fav_num > MAX_CLIENTS )
+		return;
+
+	pl_num = self->fav[(int)fav_num - 1];
+
+	if ( pl_num < 1 || pl_num > MAX_CLIENTS ) {
+		G_sprint(self, 2, "fav go: \x90slot %d\x91 is not defined\n", (int)fav_num);
+		return;
+	}
+
+	p = world + pl_num;
+
+	if ( !p->k_player ) {
+		G_sprint(self, 2, "fav go: \x90slot %d\x91 can't find player\n", (int)fav_num);
+		return;
+	}
+
+	if ( PROG_TO_EDICT( self->s.v.goalentity ) == p ) {
+		G_sprint(self, 2, "fav go: already observing...\n");
+		return;
+	}
+	
+	stuffcmd( self, "track %d\n", GetUserID( p ) );
+}
+
+// }  spec tracking stuff 
+

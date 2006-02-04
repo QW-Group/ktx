@@ -1,5 +1,8 @@
 uptime in serverinfo (from ktpro)
-print ktx:version at serverinfo *progs
+
+!!!! print ktx:version at serverinfo *progs
+!!!! version in motd
+
 fix scores output
 +scores (for all modes include ffa/matchless) // +scores shifting (ktpro compitable)
 

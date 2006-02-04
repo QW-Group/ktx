@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.12 2006/01/29 23:41:32 qqshka Exp $
+ *  $Id: progs.h,v 1.13 2006/02/04 13:09:42 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -265,6 +265,10 @@ typedef struct gedict_s {
 	struct gedict_s *wizard;// for specs, link to the entity which represent wizard
 
 	vote_t v;				// player votes stored here
+
+// { spec stuff
+	int   fav[MAX_CLIENTS]; // here stored players number for appropriate favX_add command
+// }
 #endif
 
 } gedict_t;

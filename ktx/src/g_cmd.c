@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.4 2005/12/27 20:34:07 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.5 2006/02/04 13:10:00 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -71,7 +71,7 @@ qboolean 	ClientCommand()
 	}
 
 //	if ( trap_CmdArgc() > 1 ) {
-//		char arg_x[1024]
+//		char arg_x[1024];
 //		trap_CmdArgv( 1, arg_x, sizeof( arg_x ) );
 //		G_Printf("ClientCommand %s %s\n",cmd_command, arg_x);
 //	}

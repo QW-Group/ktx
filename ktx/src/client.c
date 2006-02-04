@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.30 2006/01/29 23:41:18 qqshka Exp $
+ *  $Id: client.c,v 1.31 2006/02/04 13:10:00 qqshka Exp $
  */
 
 //===========================================================================
@@ -1266,16 +1266,6 @@ void PlayerJump()
 
 		// player jumping sound
 		sound( self, CHAN_BODY, "player/plyrjmp8.wav", 1, ATTN_NORM );
-
-#ifdef KTEAMS
-		if ( server_is_2_3x ) {
-	        // if and only if running on a 2.30 or 2.33 server,
-	        // fix the jump bug via QC
-	        // newer servers should have an engine-side fix
-	        if (self->s.v.velocity[2] < 0 )
-	            self->s.v.velocity[2] = 0;
-		}
-#endif
 	}
 	else
 		 self->s.v.velocity[2] = -270;

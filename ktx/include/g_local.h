@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.17 2006/01/29 23:41:32 qqshka Exp $
+ *  $Id: g_local.h,v 1.18 2006/02/04 13:09:42 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -461,7 +461,6 @@ extern	float match_over;       // boolean - whether or not the match stats have 
 extern	char *newcomer;        // stores name of last player who joined
 extern	int   k_overtime;		// is overtime is going on
 
-extern	float server_is_2_3x;	// if true, fix the jump bug via QC
 extern	float current_maxfps;	// current value of serverinfo maxfps
 
 extern	int   k_practice;		// is server in practice mode
