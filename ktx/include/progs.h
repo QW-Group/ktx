@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.14 2006/02/04 18:45:06 qqshka Exp $
+ *  $Id: progs.h,v 1.15 2006/02/11 22:12:06 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -251,8 +251,10 @@ typedef struct gedict_s {
 // <-- timing
 	int   k_voteUnpause;    // store here vote for unpause, for particular player
 // --> stats
-	int   wp_stats;			// show wp_stats or not
+	int   wp_stats;			// show +wp_stats or not
 	float wp_stats_time;    // used to force centerprint is off at desired time
+	int   sc_stats;			// show +scores or not
+	float sc_stats_time;    // used to force centerprint is off at desired time
 
 	player_stats_t ps;		// store player statistic here, like taken armors etc...
 

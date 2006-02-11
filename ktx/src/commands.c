@@ -100,6 +100,7 @@ void VoteUnpause();
 void UserMode(float umode);
 void Wp_Reset ();
 void Wp_Stats(float on);
+void Sc_Stats(float on);
 void t_jump (float j_type);
 void klist ();
 void hdptoggle ();
@@ -230,8 +231,8 @@ cmd_t cmds[] = {
     { "unpause",     VoteUnpause,               0    , CF_PLAYER      },
     { "practice",    TogglePractice,            0    , CF_PLAYER | CF_SPC_ADMIN },
     { "wp_reset",    Wp_Reset,                  0    , CF_PLAYER      },
-    { "+wp_stats",   Wp_Stats,                  1    , CF_BOTH | CF_MATCHLESS },
-    { "-wp_stats",   Wp_Stats,                  0    , CF_BOTH | CF_MATCHLESS },
+    { "+wp_stats",   Wp_Stats,                  2    , CF_BOTH | CF_MATCHLESS },
+    { "-wp_stats",   Wp_Stats,                  1    , CF_BOTH | CF_MATCHLESS },
     { "tkfjump",     t_jump,                    1    , CF_PLAYER | CF_SPC_ADMIN },
     { "tkrjump",     t_jump,                    2    , CF_PLAYER | CF_SPC_ADMIN },
     { "klist",       klist,                     0    , CF_BOTH | CF_MATCHLESS },
@@ -244,26 +245,26 @@ cmd_t cmds[] = {
     { "tracklist",   tracklist,                 0    , CF_BOTH | CF_MATCHLESS  },
     { "fpslist",     fpslist,                   0    , CF_BOTH | CF_MATCHLESS  },
 
-    { "fav1_add",    favx_add,                   1    , CF_SPECTATOR },
-    { "fav2_add",    favx_add,                   2    , CF_SPECTATOR },
-    { "fav3_add",    favx_add,                   3    , CF_SPECTATOR },
-    { "fav4_add",    favx_add,                   4    , CF_SPECTATOR },
-    { "fav5_add",    favx_add,                   5    , CF_SPECTATOR },
-    { "fav6_add",    favx_add,                   6    , CF_SPECTATOR },
-    { "fav7_add",    favx_add,                   7    , CF_SPECTATOR },
-    { "fav8_add",    favx_add,                   8    , CF_SPECTATOR },
-    { "fav9_add",    favx_add,                   9    , CF_SPECTATOR },
-    { "fav10_add",   favx_add,                  10    , CF_SPECTATOR },
-    { "fav11_add",   favx_add,                  11    , CF_SPECTATOR },
-    { "fav12_add",   favx_add,                  12    , CF_SPECTATOR },
-    { "fav13_add",   favx_add,                  13    , CF_SPECTATOR },
-    { "fav14_add",   favx_add,                  14    , CF_SPECTATOR },
-    { "fav15_add",   favx_add,                  15    , CF_SPECTATOR },
-    { "fav16_add",   favx_add,                  16    , CF_SPECTATOR },
-    { "fav17_add",   favx_add,                  17    , CF_SPECTATOR },
-    { "fav18_add",   favx_add,                  18    , CF_SPECTATOR },
-    { "fav19_add",   favx_add,                  19    , CF_SPECTATOR },
-    { "fav20_add",   favx_add,                  20    , CF_SPECTATOR },
+    { "fav1_add",    favx_add,                  1    , CF_SPECTATOR },
+    { "fav2_add",    favx_add,                  2    , CF_SPECTATOR },
+    { "fav3_add",    favx_add,                  3    , CF_SPECTATOR },
+    { "fav4_add",    favx_add,                  4    , CF_SPECTATOR },
+    { "fav5_add",    favx_add,                  5    , CF_SPECTATOR },
+    { "fav6_add",    favx_add,                  6    , CF_SPECTATOR },
+    { "fav7_add",    favx_add,                  7    , CF_SPECTATOR },
+    { "fav8_add",    favx_add,                  8    , CF_SPECTATOR },
+    { "fav9_add",    favx_add,                  9    , CF_SPECTATOR },
+    { "fav10_add",   favx_add,                 10    , CF_SPECTATOR },
+    { "fav11_add",   favx_add,                 11    , CF_SPECTATOR },
+    { "fav12_add",   favx_add,                 12    , CF_SPECTATOR },
+    { "fav13_add",   favx_add,                 13    , CF_SPECTATOR },
+    { "fav14_add",   favx_add,                 14    , CF_SPECTATOR },
+    { "fav15_add",   favx_add,                 15    , CF_SPECTATOR },
+    { "fav16_add",   favx_add,                 16    , CF_SPECTATOR },
+    { "fav17_add",   favx_add,                 17    , CF_SPECTATOR },
+    { "fav18_add",   favx_add,                 18    , CF_SPECTATOR },
+    { "fav19_add",   favx_add,                 19    , CF_SPECTATOR },
+    { "fav20_add",   favx_add,                 20    , CF_SPECTATOR },
     { "1fav_go",     xfav_go,                   1    , CF_SPECTATOR },
     { "2fav_go",     xfav_go,                   2    , CF_SPECTATOR },
     { "3fav_go",     xfav_go,                   3    , CF_SPECTATOR },
@@ -284,11 +285,13 @@ cmd_t cmds[] = {
     { "18fav_go",    xfav_go,                  18    , CF_SPECTATOR },
     { "19fav_go",    xfav_go,                  19    , CF_SPECTATOR },
     { "20fav_go",    xfav_go,                  20    , CF_SPECTATOR },
-    { "fav_add",      fav_add,                   0    , CF_SPECTATOR | CF_MATCHLESS },
-    { "fav_del",      fav_del,                   0    , CF_SPECTATOR | CF_MATCHLESS },
-    { "fav_all_del",  fav_all_del,               0    , CF_SPECTATOR | CF_MATCHLESS },
-    { "fav_next",     fav_next,                  0    , CF_SPECTATOR | CF_MATCHLESS },
-    { "fav_show",     fav_show,                  0    , CF_SPECTATOR | CF_MATCHLESS }
+    { "fav_add",      fav_add,                  0    , CF_SPECTATOR | CF_MATCHLESS },
+    { "fav_del",      fav_del,                  0    , CF_SPECTATOR | CF_MATCHLESS },
+    { "fav_all_del",  fav_all_del,              0    , CF_SPECTATOR | CF_MATCHLESS },
+    { "fav_next",     fav_next,                 0    , CF_SPECTATOR | CF_MATCHLESS },
+    { "fav_show",     fav_show,                 0    , CF_SPECTATOR | CF_MATCHLESS },
+    { "+scores",     Sc_Stats,                  2    , CF_BOTH | CF_MATCHLESS },
+    { "-scores",     Sc_Stats,                  1    , CF_BOTH | CF_MATCHLESS }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -1802,87 +1805,40 @@ void TeamSay(float fsndname)
 
 void PrintScores()
 {
-	float f1 = 0, f2;
-	char *tmp, *tmp2;
+	int minutes, seconds;
 	gedict_t *p;
-
 
 	if( match_in_progress != 2 ) {
 		G_sprint(self, 2, "no game - no scores.\n");
 		return;
 	}
-	
-	// Check to see if scores changed from last time you hit scores command.
-	// DO this by checking if k_nochange is 0. 
-	// which is set in ClientObituary in client.qc
-	if( k_showscores && k_nochange == 0 )
-    {
-		k_scores1 = 0;
-		k_scores2 = 0;
 
-		p = find( world, FOFCLSN, "player" );
-		while( p ) {
-			if( !strnull( p->s.v.netname ) && p->k_accepted == 2 ) {
-				f1++;
-				tmp  = ezinfokey(world, "k_team1");
-				tmp2 = ezinfokey(p, "team");
-				if( streq( tmp, tmp2) )
-					k_scores1 += p->s.v.frags;
-				else
-					k_scores2 += p->s.v.frags;
-			}
+	if( k_sudden_death )                
+		G_sprint(self, 2, "Sudden death %s\n", redtext("overtime in progress"));
 
-			p = find( p, FOFCLSN, "player" );
-		}
-
-		p = find(world, FOFCLSN, "ghost");
-		while( p ) {
-			tmp2 = ezinfokey(world, va("%d", (int)p->k_teamnum));
-			tmp  = ezinfokey(world, "k_team1");
-			if( streq (tmp, tmp2) )
-				k_scores1 += p->s.v.frags;
-			else
-				k_scores2 += p->s.v.frags;
-
-			p = find(p, FOFCLSN, "ghost");
-		}
-
-		k_nochange = 1;
-	}
-
-	if( k_sudden_death )
-		G_sprint(self, 2, "Sudden death ïöåòôéíå éî ðòïçòåóó\n");
-
-	p = find(world, FOFCLSN, "timer");
-	if( p ) {
-		f1 = p->cnt;
-		f2 = p->cnt2;
-		if( f2 == 60 )
-			f2 = 0;
+	if( p = find(world, FOFCLSN, "timer") ) {
+		minutes = p->cnt;
+		seconds = p->cnt2;
+		if( seconds == 60 )
+			seconds = 0;
 		else
-			f1--;
+			minutes--;
 
-#if 1
 		// we can't use dig3 here because of zero padding, so using dig3s
-		G_sprint(self, 2, "%s:%s‘ remaining\n", dig3s("%02d", (int)f1), dig3s("%02d", (int)f2));
-#else
-		if( f1 )
-			G_sprint(self, 2, "%s‘ full minute%s", dig3(f1), ( f1 > 1 ? "s" : ""));
-		else
-			G_sprint(self, 2, "%s‘ second%s", dig3(f2), ( f2 > 1 ? "s" : ""));
-
-		G_sprint(self, 2, " left\n");
-#endif
+		G_sprint(self, 2, "\x90%s:%s\x91 remaining\n", 
+							dig3s("%02d", minutes), dig3s("%02d", seconds));
 	}
 
 	if( k_showscores ) {
-		if( k_scores1 > k_scores2 ) {
-			G_sprint(self, 2, "Ôåáí %s‘ = %s\n", ezinfokey(world, "k_team1"), dig3(k_scores1));
-			G_sprint(self, 2, "Ôåáí %s‘ = %s\n", ezinfokey(world, "k_team2"), dig3(k_scores2));
-		} else {
-			G_sprint(self, 2, "Ôåáí %s‘ = %s\n", ezinfokey(world, "k_team2"), dig3(k_scores2));
-			G_sprint(self, 2, "Ôåáí %s‘ = %s\n", ezinfokey(world, "k_team1"), dig3(k_scores1));
-		}
+		int s1 = get_scores1();
+		int s2 = get_scores2();
+		char *t1 = ezinfokey(world, "k_team1");
+		char *t2 = ezinfokey(world, "k_team2");
+
+		G_sprint(self, 2, "%s \x90%s\x91 = %s\n", redtext("Team"),
+								 (s1 > s2 ? t1 : t2), dig3(s1 > s2 ? s1 : s2));
+		G_sprint(self, 2, "%s \x90%s\x91 = %s\n", redtext("Team"),
+								 (s1 > s2 ? t2 : t1), dig3(s1 > s2 ? s2 : s1));
 	}
 }
 
@@ -2060,7 +2016,7 @@ void ToggleFreeze()
 void ShowNick()
 {
 	gedict_t	*p, *bp = NULL;
-	char		*s1, *s2, *pups, *kn, ln[256];
+	char		*s1, *s2, *pups, *kn, buf[256] = {0};
 	float		best;
 	vec3_t		forward, right, up;
 	vec3_t		ang;
@@ -2226,17 +2182,26 @@ ok:
 	if ( strnull( kn ) )
 		kn = ezinfokey( bp, "k" );
 
-	i = bound(0, atoi ( ezinfokey( self, "ln" ) ), sizeof(ln)-1 );
-	memset( (void*)ln, (int)'\n', i);
-	ln[i] = 0;
+	if ( (i = iKey( self, "ln" )) > 0 ) {
+		i = bound(0, i, sizeof(buf)-1 );
+		memset( (void*)buf, (int)'\n', i);
+		buf[i] = 0;
+	}
 
-	G_centerprint( self,	"%s"
-							"%s" // if powerups present \n is too
-						"%s%s:%d%s\n"
-							"%s\n", ln
-								, pups,
+	strlcat(buf, va(	"%s" // if powerups present \n is too
+					"%s%s:%d%s\n"
+						"%s\n" , pups,
 						 s1, redtext("h"), (int)bp->s.v.health, s2,
-								( strnull( kn ) ? bp->s.v.netname : kn ));
+								( strnull( kn ) ? bp->s.v.netname : kn )), sizeof(buf));
+
+	if ( (i = iKey( self, "ln" )) < 0 ) {
+		int offset = strlen(buf);
+		i = bound(0, -i, (int)sizeof(buf) - offset - 1);
+		memset( (void*)(buf + offset), (int)'\n', i);
+		buf[i+offset] = 0;
+	}
+
+	G_centerprint(self, "%s", buf);
 
 	self->need_clearCP  = 1;
 	self->shownick_time = g_globalvars.time + 0.8; // clear centerprint at this time
@@ -2673,10 +2638,18 @@ void Wp_Reset ( )
 
 void Wp_Stats(float on)
 {
-	self->wp_stats = (int)on;
+	on--;
 
-	if ( on )
-		self->wp_stats_time = g_globalvars.time; // force show
+	self->wp_stats = (int)on;
+	self->wp_stats_time = g_globalvars.time; // force show/hide
+}
+
+void Sc_Stats(float on)
+{
+	on--;
+
+	self->sc_stats = (int)on;
+	self->sc_stats_time = g_globalvars.time; // force show/hide
 }
 
 void W_WeaponFrame();

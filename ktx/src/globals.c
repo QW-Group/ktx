@@ -13,13 +13,11 @@
 	float k_checkx = 0;		// global which set to true when some time spend after match start
 	float k_force;          // used in forcing matchstart
 	float k_maxspeed;       // used to store server maxspeed to allow switching by admins
-	float k_nochange = 0;   // used to indicate if scores changed since last time 'scores' command was called
 	float k_oldmaxspeed;    // used to store old value of maxspeed prior to freezing the map
 	float k_pause = 0;
 	float k_pausetime;      // stores time at which server was paused
-	float k_scores1;        // stores team1 combined score
-	float k_scores2;        // stores team2 combined score
 	float k_showscores;     // whether or not should print the scores or not
+	float k_nochange = 0;   // used to indicate if frags changes somehow since last time 'scores' command was called
 	float k_standby;        // if server is in standy mode
 	float k_sudden_death;	// to mark if sudden death overtime is currently the case
 	float k_teamid = 0;

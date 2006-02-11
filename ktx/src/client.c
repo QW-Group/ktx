@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.32 2006/02/04 18:44:46 qqshka Exp $
+ *  $Id: client.c,v 1.33 2006/02/11 22:11:32 qqshka Exp $
  */
 
 //===========================================================================
@@ -1444,6 +1444,8 @@ void ClientDisconnect()
 {
 	float f1;
 
+	k_nochange = 0; // force recalculate frags scores
+
 	del_from_specs_favourites( self );
 
 	if( match_in_progress == 2 && ( self->k_makeghost || streq("player", self->s.v.classname) ) )
@@ -1595,12 +1597,14 @@ void Print_Wp_Stats( )
 #endif
 	float lg  = wps & S_LG  ? max(0.001, 100.0 * e->ps.h_lg / max(1, e->ps.a_lg)) : 0;
 
-	i = bound(0, iKey( self, "lw" ) , sizeof(buf)-1 );
-	memset( (void*)buf, (int)'\n', i);
-	buf[i] = 0;
+	if ( (i = iKey( self, "lw" )) > 0 ) {
+		i = bound(0, i, sizeof(buf)-1 );
+		memset( (void*)buf, (int)'\n', i);
+		buf[i] = 0;
+	}
 
 	if ( e == world || !e->k_player ) { // spec tracking no one
-		G_centerprint( self, "%s%s", buf, redtext("Tracking noone (wp_stats)"));
+		G_centerprint( self, "%s%s", buf, redtext("Tracking noone (+wp_stats)"));
 
 		self->need_clearCP  = 1;
 		self->wp_stats_time = g_globalvars.time + 0.8;
@@ -1642,11 +1646,94 @@ void Print_Wp_Stats( )
 		strlcat(buf, "\n", sizeof(buf));
 	}
 
+	if ( (i = iKey( self, "lw" )) < 0 ) {
+		int offset = strlen(buf);
+		i = bound(0, -i, (int)sizeof(buf) - offset - 1);
+		memset( (void*)(buf + offset), (int)'\n', i);
+		buf[i+offset] = 0;
+	}
+
 	if ( strnull( buf ) )
 		return; // sanity
 
 	self->need_clearCP  = 1;
 	self->wp_stats_time = g_globalvars.time + 0.8;
+
+	G_centerprint( self, "%s",  buf );
+}
+
+void Print_Scores( )
+{
+	char buf[1024] = {0};
+
+	int  i, minutes = 0, seconds = 0, ts, es;
+
+	qboolean sc_ok = false;
+	gedict_t *p, *ed1, *ed2;
+	gedict_t *g = self->k_spectator ? PROG_TO_EDICT( self->s.v.goalentity ) : NULL;
+	gedict_t *e = self->k_player ? self : ( g ? g : world ); // stats of whom we want to show
+
+	if ( (i = iKey( self, "ls" )) > 0 ) {
+		i = bound(0, i, sizeof(buf)-1 );
+		memset( (void*)buf, (int)'\n', i);
+		buf[i] = 0;
+	}
+
+	if ( e == world || !e->k_player ) { // spec tracking noone
+		G_centerprint( self, "%s%s", buf, redtext("Tracking noone (+scores)"));
+
+		self->need_clearCP  = 1;
+		self->sc_stats_time = g_globalvars.time + 0.8;
+
+		return;
+	}
+
+	if( (p = find(world, FOFCLSN, "timer")) && match_in_progress == 2 ) {
+		minutes = p->cnt;
+		seconds = p->cnt2;
+		if( seconds == 60 )
+			seconds = 0;
+		else
+			minutes--;
+
+	}
+
+	strlcat(buf, va("%s:%02d:%02d", redtext("tl"), minutes, seconds), sizeof(buf));
+
+	if( k_showscores ) {
+		int s1 = get_scores1();
+		int s2 = get_scores2();
+		char *t1 = ezinfokey(world, "k_team1");
+		char *t2 = getteam(e);
+
+		ts = streq(t1, t2) ? s1 : s2;
+		es = streq(t1, t2) ? s2 : s1;
+
+		sc_ok = true;
+	}
+	else if ( (ed1 = get_ed_scores1()) && (ed2 = get_ed_scores2()) ) {
+		ts = e->s.v.frags;
+		es = ed1 == e ? ed2->s.v.frags : ed1->s.v.frags;
+
+		sc_ok = true;
+	}
+
+	if ( sc_ok )
+		strlcat(buf, va("  %s:%d  %s:%d  \x90%d\x91", 
+						redtext("t"), ts, redtext("e"), es, (ts-es)), sizeof(buf));
+
+	if ( (i = iKey( self, "ls" )) < 0 ) {
+		int offset = strlen(buf);
+		i = bound(0, -i, (int)sizeof(buf) - offset - 1);
+		memset( (void*)(buf + offset), (int)'\n', i);
+		buf[i+offset] = 0;
+	}
+
+	if ( strnull( buf ) )
+		return; // sanity
+
+	self->need_clearCP  = 1;
+	self->sc_stats_time = g_globalvars.time + 0.8;
 
 	G_centerprint( self, "%s",  buf );
 }
@@ -1683,6 +1770,9 @@ void PlayerPreThink()
 
 	if ( self->k_timingWarnTime )
 		BackFromLag();
+
+	if ( self->sc_stats && self->sc_stats_time && self->sc_stats_time <= g_globalvars.time )
+		Print_Scores ();
 
 	if ( self->wp_stats && self->wp_stats_time && self->wp_stats_time <= g_globalvars.time )
 		Print_Wp_Stats ();
@@ -2056,12 +2146,18 @@ void CheckPowerups()
 //////////
 void BothPostThink ()
 {
-	if (self->shownick_time && self->shownick_time <= g_globalvars.time )
+	if ( self->shownick_time && self->shownick_time <= g_globalvars.time )
 		self->shownick_time = 0;
-	if (self->wp_stats_time && self->wp_stats_time <= g_globalvars.time )
+	if ( self->wp_stats_time && self->wp_stats_time <= g_globalvars.time )
 		self->wp_stats_time = 0;
+	if ( self->sc_stats_time && self->sc_stats_time <= g_globalvars.time )
+		self->sc_stats_time = 0;
 
-	if ( self->need_clearCP && !self->shownick_time && !self->wp_stats_time )
+	if (     self->need_clearCP 
+		 && !self->shownick_time
+         && !self->wp_stats_time
+         && !self->sc_stats_time
+	   )
 	{
 		self->need_clearCP = 0;
 		G_centerprint(self, ""); // clear center print

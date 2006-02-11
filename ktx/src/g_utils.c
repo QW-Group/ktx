@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.17 2006/01/27 20:22:44 qqshka Exp $
+ *  $Id: g_utils.c,v 1.18 2006/02/11 22:11:32 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1080,4 +1080,110 @@ char *count_s( int cnt )
 {
 	return (cnt == 1 ? "" : "s");
 }
+
+// { some scores stuff
+
+// for team games
+int k_scores1 = 0;
+int k_scores2 = 0;
+
+// for ffa and duel
+gedict_t *ed_scores1 = NULL;
+gedict_t *ed_scores2 = NULL;
+
+void ReScores()
+{
+	gedict_t *p;
+	int from;
+	char *team1, *team2;
+
+	// DO this by checking if k_nochange is 0. 
+	// which is set in ClientObituary in client.c
+	if( k_nochange )
+		return;
+
+	// ok - scores potentially changed, recalculate
+
+	k_nochange = 1;
+
+	k_scores1 = 0;
+	k_scores2 = 0;
+
+	if ( k_showscores ) {
+		team1 = ezinfokey( world, "k_team1" );
+
+		for( from = 0, p = world; p = find_plr( p, &from ); ) {
+			team2 = getteam(p);
+
+			if( streq( team1, team2 ) )
+				k_scores1 += p->s.v.frags;
+			else
+				k_scores2 += p->s.v.frags;
+		}
+	}
+
+	ed_scores1 = NULL;
+	ed_scores2 = NULL;
+	
+	if ( ( isDuel() || isFFA() ) && CountPlayers() > 1 ) {
+		// no ghost serving
+		for ( p = world; p = find( p , FOFCLSN, "player" ); ) {
+			if ( !ed_scores1 ) {
+				ed_scores1 = p;
+				continue;
+			}
+
+			if ( !ed_scores2 ) {
+				if ( ed_scores1->s.v.frags < p->s.v.frags ) {
+					ed_scores2 = ed_scores1;
+					ed_scores1 = p;
+				}
+				else {
+					ed_scores2 = p;
+				}
+				continue;
+			}
+
+			if ( ed_scores1->s.v.frags < p->s.v.frags ) {
+				ed_scores2 = ed_scores1;
+				ed_scores1 = p;
+			}
+		}
+
+		if ( !ed_scores1 || !ed_scores2 ) {
+			ed_scores1 = NULL;
+			ed_scores2 = NULL;
+		}
+	}
+}
+
+int get_scores1()
+{
+	ReScores();
+
+	return k_scores1;
+}
+
+int get_scores2()
+{
+	ReScores();
+
+	return k_scores2;
+}
+
+gedict_t *get_ed_scores1()
+{
+	ReScores();
+
+	return ed_scores1;
+}
+
+gedict_t *get_ed_scores2()
+{
+	ReScores();
+
+	return ed_scores2;
+}
+
+// }
 

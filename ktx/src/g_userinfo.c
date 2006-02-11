@@ -97,7 +97,7 @@ cmdinfo_t cinfos[] = {
 	{ "kf" },
 //		+kf, -kf
 	{ "ln" },
-//    { "ls" },
+    { "ls" },
 	{ "lw" },
 	{ "postmsg" },
 	{ "premsg" },

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.8 2006/01/27 20:22:44 qqshka Exp $
+ *  $Id: spectate.c,v 1.9 2006/02/11 22:11:32 qqshka Exp $
  */
 
 // spectate.c
@@ -178,6 +178,9 @@ void SpectatorThink()
 
 	if ( self->s.v.impulse )
 		SpectatorImpulseCommand();
+
+	if ( self->sc_stats && self->sc_stats_time && self->sc_stats_time <= g_globalvars.time )
+		Print_Scores ();
 
 	if ( self->wp_stats && self->wp_stats_time && self->wp_stats_time <= g_globalvars.time )
 		Print_Wp_Stats ();

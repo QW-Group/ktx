@@ -1,3 +1,20 @@
+2006-02-12
+ 50. Added +scores command, generally like in ktpro (c).
+
+	 This will permanently display how much time is left, as well as how many frags
+	 each team has and the difference between them (the frags of the team of the
+     player you are observing are shown as t: , the opponent's frags as e: , the
+	 difference between his and the opponent's team frags is shown in brackets.
+	 You can also bind +scores to a key, so that the remaining time as well as the
+	 scores are only displayed while pressing the key, ktpro (c).
+
+	 ffa ans duel mode support +scores too.
+
+     "ls" key (for cmd info) is now supported.
+
+ 51. "ls", "lw", "ln" keys (for cmd info) now support negative values, but
+	 if u use ezQuake u may prefer use "scr_centershift" cvar instead.
+
 2006-02-04
  49. Added spec features:
 	 /fav1_add ... /fav20_add

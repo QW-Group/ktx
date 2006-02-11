@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.18 2006/02/04 13:09:42 qqshka Exp $
+ *  $Id: g_local.h,v 1.19 2006/02/11 22:12:06 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -222,6 +222,10 @@ int			Get_Powerups ();
 
 char 		*count_s( int cnt );
 
+int			get_scores1();
+int			get_scores2();
+gedict_t	*get_ed_scores1();
+gedict_t	*get_ed_scores2();
 
 void    	disableupdates( gedict_t * ed, float time );
 
@@ -277,6 +281,7 @@ void            PlayerPostThink();
 void            SuperDamageSound();
 
 void			Print_Wp_Stats();
+void			Print_Scores();
 
 //spectate.c
 void            SpectatorConnect();
@@ -443,13 +448,11 @@ extern	float k_captainturn;	// which captain comes in line to pick
 extern	float k_checkx;
 extern	float k_force;          // used in forcing matchstart
 extern	float k_maxspeed;       // used to store server maxspeed to allow switching by admins
-extern	float k_nochange;   // used to indicate if scores changed since last time 'scores' command was called
 extern	float k_oldmaxspeed;    // used to store old value of maxspeed prior to freezing the map
 extern	float k_pause;
 extern	float k_pausetime;      // stores time at which server was paused
-extern	float k_scores1;        // stores team1 combined score
-extern	float k_scores2;        // stores team2 combined score
 extern	float k_showscores;     // whether or not should print the scores or not
+extern	float k_nochange;       // used to indicate if frags changes somehow since last time 'scores' command was called
 extern	float k_standby;        // if server is in standy mode
 extern	float k_sudden_death;	// to mark if sudden death overtime is currently the case
 extern	float k_teamid;

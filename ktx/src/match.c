@@ -778,7 +778,6 @@ void TimerThink ()
 // Called every second during a match. cnt = minutes, cnt2 = seconds left.
 // Tells the g_globalvars.time every now and then.
 {
-	char *tmp, *tmp2;
 	gedict_t	*p;
 	float f1, f2, f3, f4, k_exttime, player1scores, player2scores, player1found;
 	int k_mb_overtime = 0;
@@ -843,6 +842,9 @@ void TimerThink ()
 
 	if( !self->cnt2 ) 
 	{
+		int scores1 = get_scores1();
+		int scores2 = get_scores2();
+
 		self->cnt2 = 60;
 		self->cnt  -= 1;
 
@@ -850,45 +852,6 @@ void TimerThink ()
 //				self->cnt = 0;
 
 		localcmd("serverinfo status \"%d min left\"\n", (int)self->cnt);
-
-		if( k_showscores && k_nochange == 0 )
-		{
-			// Calculate the Scores every 60 seconds.
-			k_scores1 = 0;
-			k_scores2 = 0;
-
-			p = find ( world, FOFCLSN, "player" );
-			while( p ) 
-			{
-				if( !strnull ( p->s.v.netname ) && p->k_accepted == 2 ) 
-				{
-					f1++;
-					tmp  = ezinfokey(world, "k_team1");
-					tmp2 = ezinfokey(p, "team");
-
-					if( streq( tmp, tmp2 ) )
-						k_scores1 += p->s.v.frags;
-					else 
-						k_scores2 += p->s.v.frags;
-				}
-
-				p = find ( p, FOFCLSN, "player" );
-			}
-
-			p = find( world, FOFCLSN, "ghost" );
-			while( p ) 
-			{
-				tmp2 = ezinfokey( world, va("%d", (int)p->k_teamnum) );
-				tmp  = ezinfokey( world, "k_team1" );
-				if( streq( tmp, tmp2 ) )
-					k_scores1 += p->s.v.frags;
-				else
-					k_scores2 += p->s.v.frags;
-
-				p = find ( p, FOFCLSN, "ghost" );
-			}
-
-		}
 
 		if( !self->cnt )
 		{
@@ -943,19 +906,19 @@ void TimerThink ()
 
 						SaveOvertimeStats ();
 
-						G_bprint(3, "time over, the game is a draw\n");
+						G_bprint(2, "time over, the game is a draw\n");
 						if( k_overtime == 1 ) {
 							// Ok its increase time
 							self->cnt =  k_exttime;
 							self->cnt2 = 60;
 
-							G_bprint(2, "%d‘ minute%s overtime follows\n", 
-									(int)k_exttime, ((k_exttime != 1) ? "'s" : ""));
+							G_bprint(2, "\x90%d\x91 minute%s overtime follows\n", 
+									(int)k_exttime, count_s(k_exttime));
 							self->s.v.nextthink = g_globalvars.time + 1;
 
 							return;	
 						} else {
-							G_bprint(2, "Sudden death ïöåòôéíå âåçéîó\n");
+							G_bprint(2, "Sudden death %s\n", redtext("overtime begins"));
 						// added timer removal at sudden death beginning
 							k_sudden_death = 1;
 
@@ -972,25 +935,25 @@ void TimerThink ()
 				}
 				// Or it can be a team game.
 				// Handle a 2v2 or above team game
-				else if( teamplay && f3 == 2 && f4 > 2 && k_scores1 == k_scores2 )
+				else if( teamplay && f3 == 2 && f4 > 2 && scores1 == scores2 )
 				{
 					k_overtime = k_mb_overtime;
 
 					SaveOvertimeStats ();
 
-					G_bprint(3, "time over, the game is a draw\n");
+					G_bprint(2, "time over, the game is a draw\n");
 					if( k_overtime == 1 ) {
 						// Ok its increase time
 						self->cnt =  k_exttime;
 						self->cnt2 = 60;
 
-						G_bprint(2, "%d‘ minute%s overtime follows\n", 
-								(int)k_exttime, ((k_exttime != 1) ? "'s" : ""));
+						G_bprint(2, "\x90%d\x91 minute%s overtime follows\n", 
+								(int)k_exttime, count_s(k_exttime));
 						self->s.v.nextthink = g_globalvars.time + 1;
 
 						return;	
-					} else {
-						G_bprint(2, "Sudden death ïöåòôéíå âåçéîó\n");
+					} else {                      
+						G_bprint(2, "Sudden death %s\n", redtext("overtime begins"));
 						// added timer removal at sudden death beginning
 						k_sudden_death = 1;
 
@@ -1011,18 +974,18 @@ void TimerThink ()
 			return;
 		}
 
-		G_bprint(2, "%s‘ minute%s remaining\n", dig3(self->cnt), ((self->cnt != 1) ? "s" : ""));
+		G_bprint(2, "\x90%s\x91 minute%s remaining\n", dig3(self->cnt), count_s(self->cnt));
 
 		self->s.v.nextthink = g_globalvars.time + 1;
 
 		if( k_showscores ) {
-			if( k_scores1 == k_scores2 ) {
+			if( scores1 == scores2 ) {
 				G_bprint(2, "The game is currently a tie\n");
-			} else if( k_scores1 != k_scores2 ) {
-				f1 = k_scores1 - k_scores2;
-				G_bprint(2, "Ôåáí %s‘ leads by %s frag%s\n",
-								ezinfokey ( world, ( f1 > 0 ? "k_team1" : "k_team2" ) ),
-								dig3(abs( (int)f1 )), ( f1 == 1 ? "" : "s") );
+			} else if( scores1 != scores2 ) {
+				f1 = scores1 - scores2;
+				G_bprint(2, "%s \x90%s\x91 leads by %s frag%s\n",
+						redtext("Team"), ezinfokey ( world, ( f1 > 0 ? "k_team1" : "k_team2" ) ),
+						dig3(abs( (int)f1 )), count_s( f1 ) );
 			}
 		}
 		return;
@@ -1031,21 +994,8 @@ void TimerThink ()
 	if( self->cnt2 == 20 || self->cnt2 == 40 )
 		CheckAll();
 
-	if( self->cnt == 1 && ( self->cnt2 == 30 || self->cnt2 == 15 || self->cnt2 <= 10 ) ) {
-
-/*
-// tick sound if remaining time < 6 seconds
-		if(self->cnt2 < 6) {
-			p = find ( world, FOFCLSN, "player" );
-			while( p ) {
-			if(!strnull ( p->s.v.netname ))
-				stuffcmd (p, "play buttons/switch04.wav\n");
-			p = find ( p, FOFCLSN, "player" );
-                        }
-		}
-*/
-		G_bprint(2, "%s‘ second%s\n", dig3(self->cnt2), ( self->cnt2 != 1? "s" : "" ) );
-	}
+	if( self->cnt == 1 && ( self->cnt2 == 30 || self->cnt2 == 15 || self->cnt2 <= 10 ) )
+		G_bprint(2, "\x90%s\x91 second%s\n", dig3( self->cnt2 ), count_s( self->cnt2 ) );
 
 	self->s.v.nextthink = g_globalvars.time + 1;
 }
