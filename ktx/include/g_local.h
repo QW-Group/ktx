@@ -20,12 +20,12 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.19 2006/02/11 22:12:06 qqshka Exp $
+ *  $Id: g_local.h,v 1.20 2006/02/12 13:00:32 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
 
-// not actual really
+// not actual really: REMOVE ME
 #define KTEAMS
 
 #include "q_shared.h"
@@ -35,6 +35,12 @@
 #include "g_consts.h"
 #include "g_syscalls.h"
 #include "player.h"
+
+#define MOD_VERSION					("1.00")
+#define MOD_NAME					("KTX")
+#define MOD_SERVERINFO_MOD_KEY		("xmod")
+#define MOD_SERVERINFO_BUILD_KEY	("xbuild")
+#define MOD_URL     				("http://cvs.sourceforge.net/viewcvs.py/mvdsv/ktx/")
 
 #ifndef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
@@ -226,6 +232,8 @@ int			get_scores1();
 int			get_scores2();
 gedict_t	*get_ed_scores1();
 gedict_t	*get_ed_scores2();
+
+int			build_number ();
 
 void    	disableupdates( gedict_t * ed, float time );
 

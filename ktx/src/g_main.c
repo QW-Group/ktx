@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.10 2006/01/13 20:51:57 qqshka Exp $
+ *  $Id: g_main.c,v 1.11 2006/02/12 13:00:49 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -268,6 +268,10 @@ void G_InitGame( int levelTime, int randomSeed )
 	}
 
 	Init_cmds();
+
+	// put mod version in serverinfo
+	localcmd( "serverinfo \"%s\" \"%s\"\n", MOD_SERVERINFO_MOD_KEY, MOD_VERSION );
+	localcmd( "serverinfo \"%s\" \"%05d\"\n", MOD_SERVERINFO_BUILD_KEY, build_number() );
 }
 
 

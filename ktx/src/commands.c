@@ -628,12 +628,15 @@ void ShowMessages()
 
 void ShowVersion()
 {
-	G_sprint(self, 2, redtext(
-			"\nThis is Kombat Teams 2.21 (QVM version)\n"
-			"by kemiKal, Cenobite, Sturm and Fang.\n"
-			"QVM porting and developing by qqshka.\n\n"
-			"Source at:\n"
-			"http://cvs.sourceforge.net/viewcvs.py/mvdsv/ktx/\n"));
+	char buf[2048] = {0};
+
+	strlcat(buf, va("Running %s v.%s build:%s by qqshka\n\n", redtext(MOD_NAME),
+				 dig3s(MOD_VERSION), dig3s("%05d", build_number())), sizeof(buf));
+	strlcat(buf, va("Based on %s\n", redtext("Kombat teams 2.21")), sizeof(buf));
+	strlcat(buf, "by kemiKal, Cenobite, Sturm and Fang\n\n", sizeof(buf));
+	strlcat(buf, va("Source at:\n%s", MOD_URL), sizeof(buf));
+
+	G_sprint(self, 2, "%s\n", buf);
 }
 
 void ChangeOvertime()

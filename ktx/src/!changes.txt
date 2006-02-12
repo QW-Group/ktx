@@ -15,6 +15,11 @@
  51. "ls", "lw", "ln" keys (for cmd info) now support negative values, but
 	 if u use ezQuake u may prefer use "scr_centershift" cvar instead.
 
+ 52. Added version stuff.
+
+	 Version now showed in MOTD, /about command and serverinfo as two keys: xmod and xbuild.
+	 Build number also showed in /about command.
+
 2006-02-04
  49. Added spec features:
 	 /fav1_add ... /fav20_add

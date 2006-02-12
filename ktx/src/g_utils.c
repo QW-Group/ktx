@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.18 2006/02/11 22:11:32 qqshka Exp $
+ *  $Id: g_utils.c,v 1.19 2006/02/12 13:00:49 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -396,10 +396,11 @@ char *dig3(int d)
 	snprintf(string[index], sizeof( string[0] ), "%d", d);
 	string[index][ sizeof( string[0] ) - 1 ] = '\0';
 
-	{ // convert to digits
+	{ // convert digits
 		unsigned char *i = (unsigned char *) (string[index]);
 
 		for ( ; *i; i++ )
+			if ( *i >= '0' && *i <= '9' )
 				*i += 98;
 	}
 
@@ -421,10 +422,11 @@ char *dig3s(const char *format, ...)
 	string[index][ sizeof( string[0] ) - 1 ] = '\0';
 // <<<<
 
-	{ // convert to digits
+	{ // convert digits
 		unsigned char *i = (unsigned char *) (string[index]);
 
 		for ( ; *i; i++ )
+			if ( *i >= '0' && *i <= '9' )
 				*i += 98;
 	}
 
@@ -1183,6 +1185,51 @@ gedict_t *get_ed_scores2()
 	ReScores();
 
 	return ed_scores2;
+}
+
+// }
+
+// { version stuff
+
+// stolen from MVDSV, k? :]
+
+static char *date = __DATE__;
+static char *mon[12] =
+    { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+static char mond[12] =
+    { 31,    28,    31,    30,    31,    30,    31,    31,    30,    31,    30,    31 };
+
+// returns days since Feb 12 2006
+int build_number ()
+{
+	int m = 0;
+	int d = 0;
+	int y = 0;
+	static int b = 0;
+
+	if (b != 0)
+		return b;
+
+	for (m = 0; m < 11; m++)
+	{
+		if (    ( date[0+0] && mon[m][0] && date[0+0] == mon[m][0] )
+			 && ( date[0+1] && mon[m][1] && date[0+1] == mon[m][1] )
+			 && ( date[0+2] && mon[m][2] && date[0+2] == mon[m][2] )
+		   )
+			break;
+		d += mond[m];
+	}
+
+	d += atoi( &date[4] ) - 1;
+	y = atoi( &date[7] ) - 1900;
+	b = d + (int)((y - 1) * 365.25);
+
+	if (((y % 4) == 0) && m > 1)
+		b += 1;
+
+	b -= 38393; // Feb 12 2006
+
+	return b;
 }
 
 // }
