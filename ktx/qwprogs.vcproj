@@ -13,8 +13,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\Debug"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory="Debug"
+			IntermediateDirectory="Debug"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -27,10 +27,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Debug/qwprogs.pch"
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile=".\Debug/"
-				ProgramDataBaseFileName=".\Debug/"
+				PrecompiledHeaderFile="Debug/qwprogs.pch"
+				AssemblerListingLocation="Debug/"
+				ObjectFile="Debug/"
+				ProgramDataBaseFileName="Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"
@@ -42,10 +42,10 @@
 				OutputFile="../qwprogs.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ModuleDefinitionFile=".\src\game.def"
+				ModuleDefinitionFile="src\game.def"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\Debug/qwprogs.pdb"
-				ImportLibrary=".\Debug/qwprogs.lib"
+				ProgramDatabaseFile="Debug/qwprogs.pdb"
+				ImportLibrary="Debug/qwprogs.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -53,7 +53,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Debug/qwprogs.tlb"
+				TypeLibraryName="Debug/qwprogs.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -78,39 +78,47 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory="Release"
+			IntermediateDirectory="Release"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2">
+			CharacterSet="2"
+			WholeProgramOptimization="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				InlineFunctionExpansion="1"
+				GlobalOptimizations="TRUE"
+				InlineFunctionExpansion="2"
+				FavorSizeOrSpeed="1"
+				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories="include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;QWPROGS_EXPORTS"
 				StringPooling="TRUE"
+				ExceptionHandling="FALSE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Release/qwprogs.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
-				ProgramDataBaseFileName=".\Release/"
+				PrecompiledHeaderFile="Release/qwprogs.pch"
+				AssemblerListingLocation="Release/"
+				ObjectFile="Release/"
+				ProgramDataBaseFileName="Release/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
-				CompileAs="0"/>
+				CompileAs="1"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile=".\Release/qwprogs.dll"
+				OutputFile="../qwprogs.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ModuleDefinitionFile=".\src\game.def"
-				ProgramDatabaseFile=".\Release/qwprogs.pdb"
-				ImportLibrary=".\Release/qwprogs.lib"
+				ModuleDefinitionFile="src\game.def"
+				ProgramDatabaseFile="Release/qwprogs.pdb"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				OptimizeForWindows98="1"
+				ImportLibrary="Release/qwprogs.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -118,7 +126,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Release/qwprogs.tlb"
+				TypeLibraryName="Release/qwprogs.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -192,7 +200,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\captain.c">
+				RelativePath="src\captain.c">
 			</File>
 			<File
 				RelativePath="src\client.c">
@@ -235,7 +243,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\commands.c">
+				RelativePath="src\commands.c">
 			</File>
 			<File
 				RelativePath="src\doors.c">
@@ -358,7 +366,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\g_userinfo.c">
+				RelativePath="src\g_userinfo.c">
 			</File>
 			<File
 				RelativePath="src\g_utils.c">
@@ -384,7 +392,7 @@
 				RelativePath="src\game.def">
 			</File>
 			<File
-				RelativePath=".\src\globals.c">
+				RelativePath="src\globals.c">
 			</File>
 			<File
 				RelativePath="src\items.c">
@@ -407,10 +415,10 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\maps.c">
+				RelativePath="src\maps.c">
 			</File>
 			<File
-				RelativePath=".\src\match.c">
+				RelativePath="src\match.c">
 			</File>
 			<File
 				RelativePath="src\mathlib.c">
@@ -453,7 +461,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\motd.c">
+				RelativePath="src\motd.c">
 			</File>
 			<File
 				RelativePath="src\plats.c">
@@ -596,10 +604,10 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\vip.c">
+				RelativePath="src\vip.c">
 			</File>
 			<File
-				RelativePath=".\src\vote.c">
+				RelativePath="src\vote.c">
 			</File>
 			<File
 				RelativePath="src\weapons.c">
