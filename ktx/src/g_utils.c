@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.19 2006/02/12 13:00:49 qqshka Exp $
+ *  $Id: g_utils.c,v 1.20 2006/02/22 17:42:22 vvd0 Exp $
  */
 
 #include "g_local.h"
@@ -1192,6 +1192,7 @@ gedict_t *get_ed_scores2()
 // { version stuff
 
 // stolen from MVDSV, k? :]
+// ok :-D //VVD
 
 static char *date = __DATE__;
 static char *mon[12] =

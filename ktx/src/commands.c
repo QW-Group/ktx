@@ -117,6 +117,12 @@ void fav_all_del ();
 void fav_next ();
 void fav_show ();
 
+// VVD pos_save/pos_move commands {
+void Pos_Show ();
+void Pos_Save ();
+void Pos_Move ();
+// VVD }
+
 void TogglePractice();
 
 // spec
@@ -291,7 +297,12 @@ cmd_t cmds[] = {
     { "fav_next",     fav_next,                 0    , CF_SPECTATOR | CF_MATCHLESS },
     { "fav_show",     fav_show,                 0    , CF_SPECTATOR | CF_MATCHLESS },
     { "+scores",     Sc_Stats,                  2    , CF_BOTH | CF_MATCHLESS },
-    { "-scores",     Sc_Stats,                  1    , CF_BOTH | CF_MATCHLESS }
+    { "-scores",     Sc_Stats,                  1    , CF_BOTH | CF_MATCHLESS },
+// VVD pos_save/pos_move commands {
+    { "pos_show",     Pos_Show,                 0    , CF_BOTH | CF_MATCHLESS },
+    { "pos_save",     Pos_Save,                 0    , CF_BOTH | CF_MATCHLESS },
+    { "pos_move",     Pos_Move,                 0    , CF_BOTH | CF_MATCHLESS }
+// VVD }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -2670,14 +2681,16 @@ void kfjump ()
 	self->s.v.button0 = 1;		 // force attack button
 	self->s.v.v_angle[1] += 180; // turn 180
 	W_WeaponFrame ();			 // switch to rl and fire
-	self->s.v.v_angle[1] -= 180; // turn back
+// angle don't changed in server - only in mod //VVD
+//	self->s.v.v_angle[1] -= 180; // turn back
 	self->s.v.button0 = button0; // restore button state
 }
 
 void krjump ()
 {
 	int button0 = self->s.v.button0;
-	float va_x = self->s.v.v_angle[0];
+// angle don't changed in server - only in mod //VVD
+//	float va_x = self->s.v.v_angle[0];
 
 	if ( cvar( "k_disallow_krjump" ) ) {
 		G_sprint(self, 2, "%s is disabled\n", redtext("krjump"));
@@ -2688,7 +2701,8 @@ void krjump ()
 	self->s.v.button0 = 1;		 // force attack button
 	self->s.v.v_angle[0] = 80;   // look down much as possible, qw block this at 80
 	W_WeaponFrame ();			 // switch to rl and fire
-	self->s.v.v_angle[0] = va_x; // restore
+// angle don't changed in server - only in mod //VVD
+//	self->s.v.v_angle[0] = va_x; // restore
 	self->s.v.button0 = button0; // restore button state
 }
 
@@ -3254,3 +3268,62 @@ void fav_show( )
 
 // }  spec tracking stuff 
 
+// VVD pos_save/pos_move commands {
+vec3_t velocity, avelocity, origin, angles, v_angle;
+
+void Pos_Show ()
+{
+	G_sprint(self, 2, "velocity: %.2f %.2f %.2f\n", self->s.v.velocity[0], self->s.v.velocity[1], self->s.v.velocity[2]);
+	G_sprint(self, 2, "avelocity: %.2f %.2f %.2f\n", self->s.v.avelocity[0], self->s.v.avelocity[1], self->s.v.avelocity[2]);
+	G_sprint(self, 2, "origin: %.2f %.2f %.2f\n", self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2]);
+	G_sprint(self, 2, "angles: %.2f %.2f %.2f\n", self->s.v.angles[0], self->s.v.angles[1], self->s.v.angles[2]);
+	G_sprint(self, 2, "v_angle: %.2f %.2f %.2f\n\n", self->s.v.v_angle[0], self->s.v.v_angle[1], self->s.v.v_angle[2]);
+
+	G_sprint(self, 2, "velocity: %.2f %.2f %.2f\n", velocity[0], velocity[1], velocity[2]);
+	G_sprint(self, 2, "avelocity: %.2f %.2f %.2f\n", avelocity[0], avelocity[1], avelocity[2]);
+	G_sprint(self, 2, "origin: %.2f %.2f %.2f\n", origin[0], origin[1], origin[2]);
+	G_sprint(self, 2, "angles: %.2f %.2f %.2f\n", angles[0], angles[1], angles[2]);
+	G_sprint(self, 2, "v_angle: %.2f %.2f %.2f\n",v_angle[0], v_angle[1], v_angle[2]);
+}
+
+void Pos_Save ()
+{
+	velocity[0] = self->s.v.velocity[0];
+	velocity[1] = self->s.v.velocity[1];
+	velocity[2] = self->s.v.velocity[2];
+	avelocity[0] = self->s.v.avelocity[0];
+	avelocity[1] = self->s.v.avelocity[1];
+	avelocity[2] = self->s.v.avelocity[2];
+	origin[0] = self->s.v.origin[0];
+	origin[1] = self->s.v.origin[1];
+	origin[2] = self->s.v.origin[2];
+	angles[0] = self->s.v.angles[0];
+	angles[1] = self->s.v.angles[1];
+	angles[2] = self->s.v.angles[2];
+	v_angle[0] = self->s.v.v_angle[0];
+	v_angle[1] = self->s.v.v_angle[1];
+	v_angle[2] = self->s.v.v_angle[2];
+	G_sprint(self, 2, "Position was saved\n");
+}
+
+// Don't work setting angle. //VVD
+void Pos_Move ()
+{
+	self->s.v.velocity[0] = velocity[0] = 0;
+	self->s.v.velocity[1] = velocity[1] = 0;
+	self->s.v.velocity[2] = velocity[2] = 0;
+	self->s.v.avelocity[0] = avelocity[0] = 0;
+	self->s.v.avelocity[1] = avelocity[1] = 0;
+	self->s.v.avelocity[2] = avelocity[2] = 0;
+	self->s.v.origin[0] = origin[0];
+	self->s.v.origin[1] = origin[1];
+	self->s.v.origin[2] = origin[2];
+/*	self->s.v.angles[0] = angles[0];
+	self->s.v.angles[1] = angles[1];
+	self->s.v.angles[2] = angles[2];*/
+	self->s.v.v_angle[0] = v_angle[0];
+	self->s.v.v_angle[1] = v_angle[1];
+	self->s.v.v_angle[2] = v_angle[2] = 0;
+	G_sprint(self, 2, "Position was restored\n");
+}
+// VVD }
