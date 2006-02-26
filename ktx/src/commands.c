@@ -302,12 +302,20 @@ cmd_t cmds[] = {
     { "autotrack",   AutoTrack,            atBest    , CF_SPECTATOR | CF_MATCHLESS },
     { "auto_pow",    AutoTrack,             atPow    , CF_SPECTATOR | CF_MATCHLESS },
     { "next_best",   next_best,                 0    , CF_SPECTATOR | CF_MATCHLESS },
-    { "next_pow",    next_pow,                  0    , CF_SPECTATOR | CF_MATCHLESS },
+    { "next_pow",    next_pow,                  0    , CF_SPECTATOR | CF_MATCHLESS }
 // VVD pos_save/pos_move commands {
 // qqshka - is this commands usefull for specs and in matchless mode?
+// qqshka - i commented this commands due to:
+// - this commands must be blocked during match
+// - must not be globals, put this in gedict_t structure -> vec3_t velocity, avelocity, origin, angles, v_angle;
+// - u must check if someone occupy point where u want to restore
+// at least this must be fixed.
+//
+/*
     { "pos_show",     Pos_Show,                 0    , CF_BOTH | CF_MATCHLESS },
     { "pos_save",     Pos_Save,                 0    , CF_BOTH | CF_MATCHLESS },
     { "pos_move",     Pos_Move,                 0    , CF_BOTH | CF_MATCHLESS }
+*/
 // VVD }
 };
 
@@ -2687,16 +2695,14 @@ void kfjump ()
 	self->s.v.button0 = 1;		 // force attack button
 	self->s.v.v_angle[1] += 180; // turn 180
 	W_WeaponFrame ();			 // switch to rl and fire
-// angle don't changed in server - only in mod //VVD
-//	self->s.v.v_angle[1] -= 180; // turn back
+	self->s.v.v_angle[1] -= 180; // turn back
 	self->s.v.button0 = button0; // restore button state
 }
 
 void krjump ()
 {
 	int button0 = self->s.v.button0;
-// angle don't changed in server - only in mod //VVD
-//	float va_x = self->s.v.v_angle[0];
+	float va_x = self->s.v.v_angle[0];
 
 	if ( cvar( "k_disallow_krjump" ) ) {
 		G_sprint(self, 2, "%s is disabled\n", redtext("krjump"));
@@ -2707,8 +2713,7 @@ void krjump ()
 	self->s.v.button0 = 1;		 // force attack button
 	self->s.v.v_angle[0] = 80;   // look down much as possible, qw block this at 80
 	W_WeaponFrame ();			 // switch to rl and fire
-// angle don't changed in server - only in mod //VVD
-//	self->s.v.v_angle[0] = va_x; // restore
+	self->s.v.v_angle[0] = va_x; // restore
 	self->s.v.button0 = button0; // restore button state
 }
 
