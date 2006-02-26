@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.15 2006/02/11 22:12:06 qqshka Exp $
+ *  $Id: progs.h,v 1.16 2006/02/26 20:22:56 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -104,6 +104,13 @@ typedef struct vote_s {
 
 	float elect_block_till;	// block election for this time
 } vote_t;
+
+typedef enum
+{
+	atNone = 0,
+	atBest,
+	atPow
+} autoTrackType_t;
 
 
 //typedef (void(*)(gedict_t *)) one_edict_func;
@@ -269,8 +276,10 @@ typedef struct gedict_s {
 	vote_t v;				// player votes stored here
 
 // { spec stuff
-	int   favx[MAX_CLIENTS]; // here stored players number for appropriate favX_add/Xfav_go commands
-	int   fav[MAX_CLIENTS];  // here stored players number for fav_add/next_fav commands
+	int   favx[MAX_CLIENTS];    // here stored players number for appropriate favX_add/Xfav_go commands
+	int   fav[MAX_CLIENTS];     // here stored players number for fav_add/next_fav commands
+	autoTrackType_t autotrack;  // is autotrack or auto_pow
+	int	  autotrack_id;		    // latest autotrack id, store this to detect is user want implicitly turn of autotrack
 // }
 #endif
 
