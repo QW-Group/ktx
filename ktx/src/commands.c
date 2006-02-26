@@ -21,9 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "g_local.h"
 
-extern char *Enables( float f );
-extern char *Allows( float f );
-
 void StuffMainMaps();
 
 void SendMessage(char *name);
@@ -116,6 +113,10 @@ void fav_del ();
 void fav_all_del ();
 void fav_next ();
 void fav_show ();
+void AutoTrack ( float autoTrackType );
+void next_best ();
+void next_pow ();
+
 
 // VVD pos_save/pos_move commands {
 void Pos_Show ();
@@ -298,7 +299,12 @@ cmd_t cmds[] = {
     { "fav_show",     fav_show,                 0    , CF_SPECTATOR | CF_MATCHLESS },
     { "+scores",     Sc_Stats,                  2    , CF_BOTH | CF_MATCHLESS },
     { "-scores",     Sc_Stats,                  1    , CF_BOTH | CF_MATCHLESS },
+    { "autotrack",   AutoTrack,            atBest    , CF_SPECTATOR | CF_MATCHLESS },
+    { "auto_pow",    AutoTrack,             atPow    , CF_SPECTATOR | CF_MATCHLESS },
+    { "next_best",   next_best,                 0    , CF_SPECTATOR | CF_MATCHLESS },
+    { "next_pow",    next_pow,                  0    , CF_SPECTATOR | CF_MATCHLESS },
 // VVD pos_save/pos_move commands {
+// qqshka - is this commands usefull for specs and in matchless mode?
     { "pos_show",     Pos_Show,                 0    , CF_BOTH | CF_MATCHLESS },
     { "pos_save",     Pos_Save,                 0    , CF_BOTH | CF_MATCHLESS },
     { "pos_move",     Pos_Move,                 0    , CF_BOTH | CF_MATCHLESS }
@@ -3264,6 +3270,121 @@ void fav_show( )
 
 	if ( !showed )
 		G_sprint(self, 2, "Favourites list %s or nothing to show\n", redtext("empty"));
+}
+
+void DoAutoTrack( )
+{
+	gedict_t *p, *goal;
+	int id;
+
+	p = NULL;
+
+	if ( self->autotrack == atBest )
+		p = get_ed_best1();
+	else if ( self->autotrack == atPow )
+		p = get_ed_bestPow();
+
+	goal = PROG_TO_EDICT( self->s.v.goalentity );
+
+	// user switch pov while autotrack - this implicitly turn off autotrack
+	if ( self->autotrack_id && self->autotrack_id != GetUserID( goal ) ) {
+		AutoTrack( atNone ); // turn off
+		return;
+	}
+
+	if ( !p )
+		return;
+
+	if ( goal == p )
+		return; // already track this player
+
+	if ( ( self->autotrack_id = id = GetUserID( p ) ) > 0 )
+		stuffcmd( self, "track %d\n", id );
+}
+
+void AutoTrack( float autoTrackType )
+{
+	autoTrackType_t at = self->autotrack; // save auto track type before turn off or switch to other type
+
+	self->autotrack_id = 0; // force reset
+
+	if ( autoTrackType == self->autotrack || autoTrackType == atNone )
+		self->autotrack = atNone; // turn off
+	else
+		self->autotrack = at = autoTrackType; // switch auto track type
+
+	G_sprint(self, 2, "%s %s\n", redtext(at == atBest ? "Autotrack" : 
+			(at == atPow ? "Auto_pow" : "AutoUNKNOWN" )), OnOff(self->autotrack));
+}
+
+void next_best ()
+{
+	gedict_t *b1 = get_ed_best1(), *b2 = get_ed_best2();
+	gedict_t *goal = PROG_TO_EDICT( self->s.v.goalentity ), *to;
+	int id;
+
+	if ( !b1 ) {
+		G_sprint(self, 2, "%s: can't do this now\n", redtext("next_best"));
+		return;
+	}
+
+	b2 = b2 ? b2 : b1;
+
+	to = b1;
+	if ( goal == b1 )
+		to = b2;
+	else if ( goal == b2 )
+		to = b1;
+
+	if ( ( id = GetUserID( to ) ) > 0 )
+		stuffcmd( self, "track %d\n", id );
+}
+
+void next_pow ()
+{
+	gedict_t *goal = PROG_TO_EDICT( self->s.v.goalentity ), *to, *first, *p;
+	qboolean nextBreak = false;
+	int id;
+
+	to = first = NULL;
+
+	for ( p = world; p = find( p , FOFCLSN, "player" ); ) {
+
+		if ( ISDEAD(p) )
+			continue;
+
+		if ( !(    ( p->invincible_finished >= g_globalvars.time )
+				|| ( p->super_damage_finished >= g_globalvars.time )
+				|| ( p->invisible_finished >= g_globalvars.time )
+				|| ( p->radsuit_finished >= g_globalvars.time )
+			  )
+		   )
+			continue;
+
+		if ( nextBreak ) {
+			to = p;
+			break;
+		}
+
+		if ( !first )
+			first = p;
+
+		if ( goal == p ) {
+			nextBreak = true;
+			continue;
+		}
+
+	}
+
+	to = to ? to: first;
+
+	if ( !to ) {
+		G_sprint(self, 2, "%s: can't find poweruped player\n", redtext("next_pow"));
+		return;
+	}
+
+	if ( ( id = GetUserID( to ) ) > 0 )
+		stuffcmd( self, "track %d\n", id );
 }
 
 // }  spec tracking stuff 

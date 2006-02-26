@@ -716,17 +716,6 @@ void AdminForcePause ()
 	ModPause (!k_pause);
 }
 
-char *Enables( float f )
-{
-	return ( f ? "enables" : "disables" );
-}
-
-char *Allows( float f )
-{
-	return ( f ? "allows" : "disallows" );
-}
-
-
 // qqshka
 
 void ToggleFallBunny ()

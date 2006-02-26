@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.12 2006/01/27 20:22:44 qqshka Exp $
+ *  $Id: weapons.c,v 1.13 2006/02/26 20:49:09 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -864,15 +864,12 @@ Used for both the player and the traps
 
 void launch_spike( vec3_t org, vec3_t dir )
 {
-
 	newmis = spawn();
 	g_globalvars.newmis = EDICT_TO_PROG( newmis );
 	newmis->voided = 0;
 	newmis->s.v.owner = EDICT_TO_PROG( self );
 	newmis->s.v.movetype = MOVETYPE_FLYMISSILE;
 	newmis->s.v.solid = SOLID_BBOX;
-
-	vectoangles( dir, newmis->s.v.angles );
 
 	newmis->s.v.touch = ( func_t ) spike_touch;
 	newmis->s.v.classname = "spike";
@@ -882,7 +879,8 @@ void launch_spike( vec3_t org, vec3_t dir )
 	setsize( newmis, 0, 0, 0, 0, 0, 0 );
 	setorigin( newmis, PASSVEC3( org ) );
 	VectorScale( dir, 1000, newmis->s.v.velocity );
-	//newmis->s.v.velocity = dir * 1000;
+
+	vectoangles( newmis->s.v.velocity, newmis->s.v.angles );
 }
 
 void spike_touch()

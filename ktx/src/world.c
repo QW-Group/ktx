@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.18 2006/02/04 13:10:00 qqshka Exp $
+ *  $Id: world.c,v 1.19 2006/02/26 20:49:09 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -596,7 +596,6 @@ void StartFrame( int time )
 
 	k_mode	   = cvar( "k_mode" );
 
-
 	FixRules ();
 
 	FixPowerups ();
@@ -604,6 +603,8 @@ void StartFrame( int time )
 	FixSpecWizards ();
 
 	framechecks = bound( 0, !iKey( world, "k_noframechecks" ), 1 );
+
+	CalculateBestPlayers(); // autotrack stuff
 
 // Tonik: note current "serverinfo maxfps" setting
 // (we don't want to do it in every player frame)

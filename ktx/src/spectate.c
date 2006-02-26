@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.9 2006/02/11 22:11:32 qqshka Exp $
+ *  $Id: spectate.c,v 1.10 2006/02/26 20:49:09 qqshka Exp $
  */
 
 // spectate.c
@@ -28,6 +28,7 @@
 #include "g_local.h"
 
 
+void DoAutoTrack();
 void AdminImpBot();
 
 void SMakeMOTD();
@@ -167,6 +168,7 @@ void SpectatorImpulseCommand()
 	self->s.v.impulse = 0;
 }
 
+
 ////////////////
 // GlobalParams:
 // time
@@ -175,6 +177,9 @@ void SpectatorImpulseCommand()
 void SpectatorThink()
 {
 	gedict_t *wizard = self->wizard;
+
+	if ( self->autotrack )
+		DoAutoTrack();
 
 	if ( self->s.v.impulse )
 		SpectatorImpulseCommand();

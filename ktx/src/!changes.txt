@@ -1,3 +1,50 @@
+2006-02-26
+ 53. Fixed my +scores bug.
+
+ 54. Added next spec commands, generally like in ktpro (c).:
+	 /autotrack
+	 /auto_pow
+	 /next_best
+	 /next_pow
+
+	 With "autotrack", KTX will switch the view to the "mod gueesed best player".
+
+	 With "auto_pow" command mod does automatically switch
+     to the player which took a powerup. The powerups have the following
+     priority: pent, quad, eyes. So if auto_pow switched to a player
+     which took pent and the pent runs out, the mod switches to one of
+     the other powerups, e.g. quad, or (if there isn't another one) it
+     will stay on the current player.	 
+
+	 With "next_best" mod will switch your view between best and second-best player.
+	 KTX tries to determine the best player by checking which powerups or weapons the players
+	 have. In detail the procedure works like this: for every player the following 
+     calculation is made: the mod checks whether the player meets certain criteria 
+     and then adds up the values associated with each matching criterion as well as 
+     his current fragcount. The two players with the highest result will be considered 
+     best and second-best player. Here is a list of the values associated with each 
+     criterion:
+
+	 Pentagram of Protection     3000
+     Quad Damage                 2000
+     any other Powerup           2000
+     Rocket Launcher with ammo   1000
+     Lightning Gun with ammo      500
+     Grenade Launcher with ammo   200
+	 Super Nailgun with ammo      100
+     Super Shotgun with ammo       50
+     
+     For example if a player has Quad Damage, the rocket launcher and 30 frags KTX 
+     will calculate 2000 + 1000 + 30 = 3030 for him. A player with Pentagram and 40 frags
+     would have a score of 3000 + 40 = 3040 and would thus be considered a better player
+	 and the mod would switch to him first (unless another player on the server has an 
+     even higher score). If the 2 players mentioned before are the players with the highest
+     scores on the server, you could use the command "next_best" to switch between those
+     two players.
+
+	 About "next_pow". If there is a poweruped player, this will switch your view between
+	 players until a poweruped player has been found.     
+     
 2006-02-12
  50. Added +scores command, generally like in ktpro (c).
 

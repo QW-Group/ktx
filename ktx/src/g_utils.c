@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.20 2006/02/22 17:42:22 vvd0 Exp $
+ *  $Id: g_utils.c,v 1.21 2006/02/26 20:48:53 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1083,6 +1083,21 @@ char *count_s( int cnt )
 	return (cnt == 1 ? "" : "s");
 }
 
+char *Enables( float f )
+{
+	return ( f ? "enables" : "disables" );
+}
+
+char *Allows( float f )
+{
+	return ( f ? "allows" : "disallows" );
+}
+
+char *OnOff( float f )
+{
+	return ( f ? "on" : "off" );
+}
+
 // { some scores stuff
 
 // for team games
@@ -1130,25 +1145,20 @@ void ReScores()
 	if ( ( isDuel() || isFFA() ) && CountPlayers() > 1 ) {
 		// no ghost serving
 		for ( p = world; p = find( p , FOFCLSN, "player" ); ) {
-			if ( !ed_scores1 ) {
+			if ( !ed_scores1 ) { // set some first player as best player
 				ed_scores1 = p;
 				continue;
 			}
 
-			if ( !ed_scores2 ) {
-				if ( ed_scores1->s.v.frags < p->s.v.frags ) {
-					ed_scores2 = ed_scores1;
-					ed_scores1 = p;
-				}
-				else {
-					ed_scores2 = p;
-				}
-				continue;
-			}
-
-			if ( ed_scores1->s.v.frags < p->s.v.frags ) {
+			if ( ed_scores1->s.v.frags < p->s.v.frags ) { // seems first player is must be second and player 'p' is must be first
 				ed_scores2 = ed_scores1;
 				ed_scores1 = p;
+				continue;
+			}
+
+			if ( !ed_scores2 || ed_scores2->s.v.frags < p->s.v.frags ) { // seemd player 'p' must be second
+				ed_scores2 = p;
+				continue;
 			}
 		}
 
@@ -1231,6 +1241,125 @@ int build_number ()
 	b -= 38393; // Feb 12 2006
 
 	return b;
+}
+
+// }
+
+// { // autotrack stuff
+
+gedict_t *ed_best1 = NULL;
+gedict_t *ed_best2 = NULL;
+gedict_t *ed_bestPow = NULL;
+
+void CalculateBestPlayers()
+{
+	gedict_t *p;
+	int best, best1, best2;
+
+	// ok - best povs potentially changed, recalculate
+
+	best1 = 0;
+	best2 = 0;
+	ed_best1 = NULL;
+	ed_best2 = NULL;
+	ed_bestPow = NULL;
+
+	// autotrack stuff
+	// no ghost serving
+	for ( p = world; p = find( p , FOFCLSN, "player" ); ) {
+
+		if ( ISDEAD(p) )
+			continue;
+
+/*
+	Pentagram of Protection     3000
+	Quad Damage                 2000
+	any other Powerup           2000
+	Rocket Launcher with ammo   1000
+	Lightning Gun with ammo      500
+	Grenade Launcher with ammo   200
+	Super Nailgun with ammo      100
+	Super Shotgun with ammo       50
+*/
+		best = 0;
+		best += ( p->invincible_finished >= g_globalvars.time )   ? 3000 : 0; // pent
+		best += ( p->super_damage_finished >= g_globalvars.time ) ? 2000 : 0; // quad
+		best += (   p->invisible_finished >= g_globalvars.time
+				 || p->radsuit_finished >= g_globalvars.time  )   ? 2000 : 0; // ring or suit
+		best += ( ((int)p->s.v.items & IT_ROCKET_LAUNCHER)
+				 				   && p->s.v.ammo_rockets > 0 )   ? 1000 : 0; // rl with ammo
+		best += ( ((int)p->s.v.items & IT_LIGHTNING)
+				 				   && p->s.v.ammo_cells > 0   )   ?  500 : 0; // lg with ammo
+		best += ( ((int)p->s.v.items & IT_GRENADE_LAUNCHER)
+				 				   && p->s.v.ammo_rockets > 0 )   ?  200 : 0; // gl with ammo
+		best += ( ((int)p->s.v.items & IT_SUPER_NAILGUN)
+				 				   && p->s.v.ammo_nails > 0   )   ?  100 : 0; // sng with ammo
+		best += ( ((int)p->s.v.items & IT_SUPER_SHOTGUN)
+				 				   && p->s.v.ammo_shells > 0  )   ?   50 : 0; // ssg with ammo
+		best += p->s.v.frags;
+	
+		if ( !ed_best1 ) { // select some first player as best
+			ed_best1 = p;
+			best1 = best;
+			continue;
+		}
+
+		if ( best1 < best ) { // seems first player is must be second and player 'p' is must be first
+			ed_best2 = ed_best1;
+			ed_best1 = p;
+			best2 = best1;
+			best1 = best;
+			continue;
+		}
+
+		if ( !ed_best2 || best2 < best ) { // seems player 'p' must be second
+			ed_best2 = p;
+			best2 = best;
+			continue;
+		}
+	}
+
+	// auto_pow stuff
+	// no ghost serving
+	for ( p = world; p = find( p , FOFCLSN, "player" ); ) {
+
+		if ( ISDEAD(p) )
+			continue;
+
+/*
+	Pentagram of Protection    4000
+	Quad Damage                2000
+	Ring                       1000
+	Suit						500
+*/
+		best = 0;
+		best += ( p->invincible_finished >= g_globalvars.time )   ? 4000 : 0; // pent
+		best += ( p->super_damage_finished >= g_globalvars.time ) ? 2000 : 0; // quad
+		best += ( p->invisible_finished >= g_globalvars.time )    ? 1000 : 0; // ring
+		best += ( p->radsuit_finished >= g_globalvars.time )      ?  500 : 0; // suit
+		best += p->s.v.frags;
+	
+		if ( !ed_bestPow || best1 < best ) {
+			ed_bestPow = p;
+			best1 = best;
+			continue;
+		}
+	}
+}
+
+gedict_t *get_ed_best1()
+{
+	return ed_best1;
+}
+
+gedict_t *get_ed_best2()
+{
+	return ed_best2;
+}
+
+gedict_t *get_ed_bestPow()
+{
+	return ed_bestPow;
 }
 
 // }
