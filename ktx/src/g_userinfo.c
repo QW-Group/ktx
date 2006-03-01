@@ -106,7 +106,8 @@ cmdinfo_t cinfos[] = {
 	{ "ss" },
 //		rb
     { "w_switch" },
-	{ "k_sdir" }
+	{ "k_sdir" },
+	{ "wps" }
 };
 
 int cinfos_cnt = sizeof( cinfos ) / sizeof( cinfos[0] );
