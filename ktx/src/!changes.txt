@@ -5,6 +5,8 @@
 
 	 U _can't_ switch this via some localinfo or etc, we does't want holly war. :(
 
+ 56. setinfo "wps" moved to kinfo.
+
 2006-02-26
  53. Fixed my +scores bug.
 
