@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.13 2006/02/26 20:49:09 qqshka Exp $
+ *  $Id: weapons.c,v 1.14 2006/03/02 17:51:09 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -591,6 +591,8 @@ LightningDamage
 */
 void LightningDamage( vec3_t p1, vec3_t p2, gedict_t * from, float damage )
 {
+#if 0 /* qqshka - this code was in original qw from ID, but make code more ktpro'ish :( */
+
 	gedict_t       *e1, *e2;
 	vec3_t          f;
 
@@ -604,6 +606,7 @@ void LightningDamage( vec3_t p1, vec3_t p2, gedict_t * from, float damage )
 	VectorScale( f, 16, f );	//f = f*16;
 
 	e1 = e2 = world;
+#endif
 
 	traceline( PASSVEC3( p1 ), PASSVEC3( p2 ), false, self );
 
@@ -620,6 +623,9 @@ void LightningDamage( vec3_t p1, vec3_t p2, gedict_t * from, float damage )
 				PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.velocity[2] += 400;
 		}
 	}
+
+#if 0  /* qqshka - this code was in original qw from ID, but make code more ktpro'ish :( */
+
 	e1 = PROG_TO_EDICT( g_globalvars.trace_ent );
 
 	//traceline (p1 + f, p2 + f, FALSE, self);
@@ -640,6 +646,8 @@ void LightningDamage( vec3_t p1, vec3_t p2, gedict_t * from, float damage )
 	{
 		LightningHit( from, damage );
 	}
+
+#endif
 }
 
 void W_FireLightning()

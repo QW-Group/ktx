@@ -1,3 +1,10 @@
+2006-03-02 [ver 1.02]
+ 55. Heh, fixed lg code from ID-style to ktpro-style.
+     With ID lg u can hit few tragets(nearby) via one shot (cell).
+	 With ktpro lg u can hit only one target per shot.
+
+	 U _can't_ switch this via some localinfo or etc, we does't want holly war. :(
+
 2006-02-26
  53. Fixed my +scores bug.
 
