@@ -2051,7 +2051,9 @@ void ShowNick()
 	vec3_t		vieworg, entorg;
 	int			itms, i;
 
-	if ( !teamplay )
+	if ( !match_in_progress )
+		;  // allow shownick in prewar anyway
+	else if ( !teamplay )
 		return;
 
 	ang[0] = self->s.v.v_angle[0];
@@ -2088,7 +2090,9 @@ void ShowNick()
 
 		s2 = ezinfokey ( p, "team" );
 
-		if ( strneq( s1, s2 ) )
+		if ( !match_in_progress )
+			;  // allow shownick in prewar anyway
+		else if ( strneq( s1, s2 ) )
 			continue; // ignore non teammaters
 
 
@@ -2216,11 +2220,14 @@ ok:
 		buf[i] = 0;
 	}
 
-	strlcat(buf, va(	"%s" // if powerups present \n is too
-					"%s%s:%d%s\n"
-						"%s\n" , pups,
-						 s1, redtext("h"), (int)bp->s.v.health, s2,
-								( strnull( kn ) ? bp->s.v.netname : kn )), sizeof(buf));
+	if ( !match_in_progress )	// simple shownick in prewar
+		strlcat(buf, va( "%s\n", ( strnull( kn ) ? bp->s.v.netname : kn )), sizeof(buf));
+	else
+		strlcat(buf, va(	"%s" // if powerups present \n is too
+						"%s%s:%d%s\n"
+							"%s\n" , pups,
+						 	s1, redtext("h"), (int)bp->s.v.health, s2,
+									( strnull( kn ) ? bp->s.v.netname : kn )), sizeof(buf));
 
 	if ( (i = iKey( self, "ln" )) < 0 ) {
 		int offset = strlen(buf);
@@ -2242,6 +2249,7 @@ ok:
 
 // common settings for all user modes
 const char common_um_init[] =
+	"maxclients 8\n"
 	"k_disallow_weapons 16\n"			// disallow gl in dmm4 by default
 
 	"localinfo k_new_mode 0\n" 			// UNKNOWN ktpro
@@ -2275,6 +2283,7 @@ const char common_um_init[] =
 
 
 const char _1on1_um_init[] =
+	"maxclients 2\n"
 	"timelimit  10\n"					//
 	"teamplay   0\n"					//
 	"deathmatch 3\n"					//
@@ -2287,6 +2296,7 @@ const char _1on1_um_init[] =
 	"k_mode 1\n";
 
 const char _2on2_um_init[] =
+	"maxclients 4\n"
 	"floodprot 9 1 1\n"					//
 	"localinfo k_fp 1\n"				// TODO not implemented
 	"timelimit  10\n"					//
@@ -2302,6 +2312,7 @@ const char _2on2_um_init[] =
 	"k_mode 2\n";
 
 const char _3on3_um_init[] =
+	"maxclients 6\n"
 	"floodprot 9 1 1\n"
 	"localinfo k_fp 1\n"
 	"timelimit  20\n"
@@ -2317,6 +2328,7 @@ const char _3on3_um_init[] =
 	"k_mode 2\n";
 
 const char _4on4_um_init[] =
+	"maxclients 8\n"
 	"floodprot 9 1 1\n"
 	"localinfo k_fp 1\n"
 	"timelimit  20\n"
@@ -2332,6 +2344,7 @@ const char _4on4_um_init[] =
 	"k_mode 2\n";
 
 const char _10on10_um_init[] =
+	"maxclients 20\n"
 	"floodprot 9 1 1\n"
 	"localinfo k_fp 1\n"
 	"timelimit  30\n"
@@ -2347,6 +2360,7 @@ const char _10on10_um_init[] =
 	"k_mode 2\n";
 
 const char ffa_um_init[] =
+	"maxclients 26\n"
 	"timelimit  20\n"
 	"teamplay   0\n"
 	"deathmatch 3\n"

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.33 2006/02/11 22:11:32 qqshka Exp $
+ *  $Id: client.c,v 1.34 2006/03/03 21:07:36 qqshka Exp $
  */
 
 //===========================================================================
@@ -682,13 +682,12 @@ void ClientKill()
 
     k_nochange = 0;
 
-
-	G_bprint( PRINT_MEDIUM, "%s suicides\n", self->s.v.netname );
+	if ( match_in_progress == 2 ) // qqshka - message only during match
+		G_bprint( PRINT_MEDIUM, "%s suicides\n", self->s.v.netname );
 
 	set_suicide_frame();
 	self->s.v.modelindex = modelindex_player;
 	logfrag( self, self );
-
 
 	if( match_in_progress == 2 )	// KTEAMS
 		self->s.v.frags -= 2;	// extra penalty
@@ -2334,7 +2333,8 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	{
 #ifdef KTEAMS
 			if( match_in_progress != 2 ) {
-				G_bprint(PRINT_MEDIUM, "%s was telefragged\n", targ->s.v.netname);
+// qqshka - no message in prewar
+//				G_bprint(PRINT_MEDIUM, "%s was telefragged\n", targ->s.v.netname);
 				return;
 			}
 
