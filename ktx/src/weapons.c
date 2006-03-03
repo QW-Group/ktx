@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.14 2006/03/02 17:51:09 qqshka Exp $
+ *  $Id: weapons.c,v 1.15 2006/03/03 19:31:20 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -591,7 +591,7 @@ LightningDamage
 */
 void LightningDamage( vec3_t p1, vec3_t p2, gedict_t * from, float damage )
 {
-#if 0 /* qqshka - this code was in original qw from ID, but make code more ktpro'ish :( */
+#if 0 /* qqshka - this code was in original qw from ID, but i make code more ktpro'ish :( */
 
 	gedict_t       *e1, *e2;
 	vec3_t          f;
@@ -619,12 +619,16 @@ void LightningDamage( vec3_t p1, vec3_t p2, gedict_t * from, float damage )
 //			if ( streq( other->s.v.classname, "player" ) )
 // 		   make my own
 			gedict_t *gre = PROG_TO_EDICT ( self->s.v.groundentity );
-			if ( gre && streq( gre->s.v.classname, "door" ) )
+
+			if (    gre 
+				 && gre == PROG_TO_EDICT( g_globalvars.trace_ent )
+				 && streq( gre->s.v.classname, "door" ) 
+			   )
 				PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.velocity[2] += 400;
 		}
 	}
 
-#if 0  /* qqshka - this code was in original qw from ID, but make code more ktpro'ish :( */
+#if 0  /* qqshka - this code was in original qw from ID, but i make code more ktpro'ish :( */
 
 	e1 = PROG_TO_EDICT( g_globalvars.trace_ent );
 
