@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.23 2006/03/03 21:07:54 qqshka Exp $
+ *  $Id: g_local.h,v 1.24 2006/03/04 18:10:37 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -241,6 +241,8 @@ void 		CalculateBestPlayers();
 gedict_t	*get_ed_best1();
 gedict_t	*get_ed_best2();
 gedict_t	*get_ed_bestPow();
+
+void		show_sv_version();
 
 void    	disableupdates( gedict_t * ed, float time );
 

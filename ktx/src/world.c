@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.19 2006/02/26 20:49:09 qqshka Exp $
+ *  $Id: world.c,v 1.20 2006/03/04 18:10:23 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -103,7 +103,6 @@ void SP_worldspawn()
 	char 		*lastmap;
 	char		*s;
    	gedict_t	*e;
-
 
 	// exec configs/maps/default.cfg
 	// exec configs/maps/mapname.cfg

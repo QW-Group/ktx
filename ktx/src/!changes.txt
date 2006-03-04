@@ -1,9 +1,14 @@
+2006-03-04 [ver 1.03]
+ 61. Added printing some mod/server info when connect to server. (require latest mvdsv)
+
 2006-03-03
  57. Fixed lg and plate bug again.
 
  58. /shownick is shown in prewar - but just player name or nick.
 
  59. "Was telefragged" and "sucides" messages does't shown in prewar now.
+
+ 60. Mod set proper maxclients on XonX commands, thx gLAd.
 
 2006-03-02 [ver 1.02]
  55. Heh, fixed lg code from ID-style to ktpro-style.

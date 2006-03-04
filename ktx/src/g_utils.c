@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.21 2006/02/26 20:48:53 qqshka Exp $
+ *  $Id: g_utils.c,v 1.22 2006/03/04 18:10:23 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1363,4 +1363,17 @@ gedict_t *get_ed_bestPow()
 }
 
 // }
+
+void show_sv_version()
+{
+	char *tm;
+
+	if ( !strnull( ezinfokey( self, "*is" ) ) ) // show this only ones at connect time
+		return;
+
+	if ( !strnull( tm = ezinfokey(world, "date_str") ) )
+		G_sprint(self, 2, "DATE: %s\n", tm);
+	G_sprint(self, 2, "MOD: %s v.%s build:%05d\n", MOD_NAME, MOD_VERSION, build_number());
+	G_sprint(self, 2, "SERVER: %s\n", cvar_string( "version" ));
+}
 
