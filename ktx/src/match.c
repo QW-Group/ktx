@@ -477,7 +477,8 @@ void OnePlayerStats(gedict_t *p, int tp)
 			( tp ? va("%d ", (int)p->friendly ) : "" ),
 			p->efficiency);
 
-	if ( !tp || atoi( ezinfokey(world, "tp_players_stats") ) ) {
+// qqshka - force show this always
+//	if ( !tp || atoi( ezinfokey(world, "tp_players_stats") ) ) {
 		// weapons
 		G_bprint(2, "%s:%s%s%s%s%s\n", redtext("Wp"),
 				(h_lg  ? va(" %s%.1f%%", redtext("lg"),   h_lg) : ""),
@@ -500,7 +501,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 				(int)p->ps.ot_h, armor_type((int)p->ps.ot_items), (int)p->ps.ot_a );
 		// spawnfrags
 		G_bprint(2, "  %s: %d‘\n", redtext("SpawnFrags"), p->ps.spawn_frags);
-	}
+//	}
 
 	if ( !tp )
 		G_bprint(2,"Ÿ\n" );

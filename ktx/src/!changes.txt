@@ -1,6 +1,8 @@
 2006-03-04 [ver 1.03]
  61. Added printing some mod/server info when connect to server. (require latest mvdsv)
 
+ 62. Removed localinfo "tp_players_stats". Advanced statistics shown always.
+
 2006-03-03
  57. Fixed lg and plate bug again.
 
