@@ -1,7 +1,5 @@
 uptime in serverinfo (from ktpro)
 
-lg different from ktpro
-
 fix pos_move a bit {
 00:32] <SD-Angel> если телепортировать то делаешь TraceCapsule c src=dst и размерами c объект
 00:32] <SD-Angel> потом чекаешь startsolid и traceent
