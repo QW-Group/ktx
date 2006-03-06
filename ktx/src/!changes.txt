@@ -4,6 +4,9 @@
 
  66. Small fix for lg, wanna belive this is a last.
 
+ 67. /pos_move is tweaked, position occupation is calculated much better, u can't stuck
+	 in plats doors and etc now. With ktpro u can, and this is bad :P
+
 2006-03-05 [ver 1.04]
  63. Probably I fixed spec wizard bug, I made some fix for mod and mvdsv. (require latest mvdsv)
 

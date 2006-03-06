@@ -1,11 +1,5 @@
 uptime in serverinfo (from ktpro)
 
-fix pos_move a bit {
-00:32] <SD-Angel> если телепортировать то делаешь TraceCapsule c src=dst и размерами c объект
-00:32] <SD-Angel> потом чекаешь startsolid и traceent
-00:40] <SD-Angel> для движения соответственно прямую надо задавать
-}
-
 ----------------------------------------------------
 how we must do with q statistics and dropable quad?
 and same question about ring.

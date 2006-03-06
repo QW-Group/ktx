@@ -3459,6 +3459,9 @@ void Pos_Save ()
 	G_sprint(self, 2, "Position %d was saved\n", idx+1);
 }
 
+extern vec3_t	VEC_HULL_MIN;
+extern vec3_t	VEC_HULL_MAX;
+
 void Pos_Move ()
 {
 	char arg_3[1024];
@@ -3488,16 +3491,21 @@ void Pos_Move ()
 	if ( VectorCompare(pos->origin, self->s.v.origin) )
 		return;
 
-	for ( p = world; p = findradius( p, pos->origin, 84 ); )
-		if ( ( streq( p->s.v.classname, "player" )
-/* qqshka - player may stuck in some doors or plats etc... but i dunno how fix this fine 
-		  - this way is not perfect so i comment it
-				 || p->s.v.solid == SOLID_BSP */
-			 ) && p != self 
-		   ) {
-			G_sprint(self, 2, "Can't move, location occupied\n");
-			return;
-		}
+
+	TraceCapsule( PASSVEC3( pos->origin ), PASSVEC3( pos->origin ), false, self,
+				  PASSVEC3(VEC_HULL_MIN), PASSVEC3(VEC_HULL_MAX));
+
+	p = PROG_TO_EDICT( g_globalvars.trace_ent );
+
+//	G_bprint(2, "%s %s %s\n", (p == world ? "w" : "nw"), 
+//				(g_globalvars.trace_startsolid ? "ss" : "nss"), p->s.v.classname);
+
+	if (    g_globalvars.trace_startsolid
+		 || ( p != self && p != world && (p->s.v.solid == SOLID_BSP || p->s.v.solid == SOLID_SLIDEBOX) )
+       ) {
+		G_sprint(self, 2, "Can't move, location occupied\n");
+		return;
+	}
 
 	if ( self->pos_move_time && self->pos_move_time + 1 > g_globalvars.time ) {
 		G_sprint(self, 2, "Only one move per second allowed\n");
