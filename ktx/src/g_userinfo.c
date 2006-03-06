@@ -26,6 +26,8 @@ qboolean 	ClientUserInfoChanged ()
 
 	if ( streq("team", arg_1) )
 		return FixPlayerTeam ( arg_2 );
+	if ( streq("rate", arg_1) )
+		return CheckRate ( self, arg_2 );
 
 	return false;
 }

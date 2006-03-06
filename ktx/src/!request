@@ -1,8 +1,12 @@
 uptime in serverinfo (from ktpro)
 
-00:49] <gLAd> значит так список:
-00:49] <gLAd> 4) визард баг
-00:56] <gLAd> 9) говно пинг :)
+lg different from ktpro
+
+fix pos_move a bit {
+00:32] <SD-Angel> если телепортировать то делаешь TraceCapsule c src=dst и размерами c объект
+00:32] <SD-Angel> потом чекаешь startsolid и traceent
+00:40] <SD-Angel> для движения соответственно прямую надо задавать
+}
 
 ----------------------------------------------------
 how we must do with q statistics and dropable quad?

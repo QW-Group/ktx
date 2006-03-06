@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: triggers.c,v 1.5 2005/12/24 19:03:10 qqshka Exp $
+ *  $Id: triggers.c,v 1.6 2006/03/06 18:11:10 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -331,7 +331,7 @@ void play_teleport()
 
 void spawn_tfog( vec3_t org )
 {
-	s = spawn();
+	s = spawn(); // qqshka: why 's' defined as global?
 	VectorCopy( org, s->s.v.origin );
 // s->s.v.origin = org;
 	s->s.v.nextthink = g_globalvars.time + 0.2;
@@ -475,7 +475,7 @@ void teleport_touch()
 
 // move the player and lock him down for a little while
 // FIXME: hmmm, since "only teleport living creatures" above, this is code never be done, right?
-/* qqshak, i remove this shit
+/* qqshka, i remove this shit
 
 	if ( !other->s.v.health )
 	{

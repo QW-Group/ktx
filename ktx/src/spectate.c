@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.10 2006/02/26 20:49:09 qqshka Exp $
+ *  $Id: spectate.c,v 1.11 2006/03/06 18:11:10 qqshka Exp $
  */
 
 // spectate.c
@@ -89,6 +89,7 @@ void SpectatorConnect()
 		self->s.v.goalentity = EDICT_TO_PROG( world );
 
 	Vip_ShowRights( self );
+	CheckRate(self, "");
 
 	if( match_in_progress != 2 || iKey(world, "k_ann") )
 		G_bprint( PRINT_HIGH, "Spectator %s entered the game\n", self->s.v.netname );
@@ -149,6 +150,14 @@ void SpectatorImpulseCommand()
 		// teleport the spectator to the next spawn point
 		// note that if the spectator is tracking, this doesn't do much
 		goal = PROG_TO_EDICT( self->s.v.goalentity );
+
+		// if track someone - return
+		if ( (int)(goal - world) >= 1 && (int)(goal - world) <= MAX_CLIENTS ) {
+			G_sprint(self, 2, "stop %s first\n", redtext("tracking"));
+			self->s.v.impulse = 0;
+			return;
+		}
+
 		goal = find( goal, FOFS( s.v.classname ), "info_player_deathmatch" );
 
 		if ( !goal )

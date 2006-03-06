@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.24 2006/03/04 18:10:37 qqshka Exp $
+ *  $Id: g_local.h,v 1.25 2006/03/06 18:11:29 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -36,7 +36,7 @@
 #include "g_syscalls.h"
 #include "player.h"
 
-#define MOD_VERSION					("1.03")
+#define MOD_VERSION					("1.05")
 #define MOD_NAME					("KTX")
 #define MOD_SERVERINFO_MOD_KEY		("xmod")
 #define MOD_SERVERINFO_BUILD_KEY	("xbuild")
@@ -286,6 +286,7 @@ extern float    intermission_running;
 extern float    intermission_exittime;
 extern int      modelindex_eyes, modelindex_player;
 
+qboolean		CheckRate (gedict_t *p, char *newrate);
 
 void            SetChangeParms();
 void            SetNewParms( qboolean from_vmMain );

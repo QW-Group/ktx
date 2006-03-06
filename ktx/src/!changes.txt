@@ -1,3 +1,35 @@
+2006-03-06 [ver 1.05]
+ 65. Server localinfo k_maxrate and localinfo k_minrate worked now even in prewar too.
+	 gLAd bug report.
+
+ 66. Small fix for lg, wanna belive this is a last.
+
+2006-03-05 [ver 1.04]
+ 63. Probably I fixed spec wizard bug, I made some fix for mod and mvdsv. (require latest mvdsv)
+
+ 64. Added players commands:
+
+	 /pos_save [number]
+	 /pos_move [number]
+	 /pos_show [number]
+
+	 Where number is from 1 to 5 and interpreted as position slot, number is optional,
+	 if u omit number it will be set to 1, i.e. first position slot.
+
+	 This commands is generally like it was in ktpro.
+
+	 Command "pos_save" - save player position, so u can restore it later with "pos_move",
+	 angles and velocity also saved.
+
+	 Command "pos_move" - move player to the position previously stored via "pos_save".
+
+	 Command "pos_show" - just show some info about saved position, and also about player current
+	 position.
+
+	 Trixers must be happy.
+
+	 Commands in KTX implemented by VVD, i've just tune this out.
+
 2006-03-04 [ver 1.03]
  61. Added printing some mod/server info when connect to server. (require latest mvdsv)
 

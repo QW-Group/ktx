@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.15 2006/03/03 19:31:20 qqshka Exp $
+ *  $Id: weapons.c,v 1.16 2006/03/06 18:11:10 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -740,7 +740,9 @@ void W_FireLightning()
 
 	VectorScale( g_globalvars.v_forward, 4, tmp );
 	VectorAdd( g_globalvars.trace_endpos, tmp, tmp );
-	LightningDamage( self->s.v.origin, tmp, self, 30 );
+// qqshka - not from 'self->s.v.origin' but from 'org'
+//	LightningDamage( self->s.v.origin, tmp, self, 30 );
+	LightningDamage( org, tmp, self, 30 );
 }
 
 //=============================================================================

@@ -57,7 +57,8 @@ void PMOTDThink()
 	strlcat(buf, va("Running %s v.%s by qqshka\n\n", redtext(MOD_NAME),
 					dig3s(MOD_VERSION)), sizeof(buf));
 	strlcat(buf, va("Based on %s\n", redtext("Kombat teams 2.21")), sizeof(buf));
-	strlcat(buf, "by kemiKal, Cenobite, Sturm and Fang\n\n", sizeof(buf));
+// qqshka - this info can be found in /about command
+//	strlcat(buf, "by kemiKal, Cenobite, Sturm and Fang\n\n", sizeof(buf));
 	strlcat(buf, va("Type \"%s\" for help", redtext("commands")), sizeof(buf));
 
 	G_centerprint ( PROG_TO_EDICT( self->s.v.owner ), buf);

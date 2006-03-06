@@ -302,20 +302,11 @@ cmd_t cmds[] = {
     { "autotrack",   AutoTrack,            atBest    , CF_SPECTATOR | CF_MATCHLESS },
     { "auto_pow",    AutoTrack,             atPow    , CF_SPECTATOR | CF_MATCHLESS },
     { "next_best",   next_best,                 0    , CF_SPECTATOR | CF_MATCHLESS },
-    { "next_pow",    next_pow,                  0    , CF_SPECTATOR | CF_MATCHLESS }
+    { "next_pow",    next_pow,                  0    , CF_SPECTATOR | CF_MATCHLESS },
 // VVD pos_save/pos_move commands {
-// qqshka - is this commands usefull for specs and in matchless mode?
-// qqshka - i commented this commands due to:
-// - this commands must be blocked during match
-// - must not be globals, put this in gedict_t structure -> vec3_t velocity, avelocity, origin, angles, v_angle;
-// - u must check if someone occupy point where u want to restore
-// at least this must be fixed.
-//
-/*
-    { "pos_show",     Pos_Show,                 0    , CF_BOTH | CF_MATCHLESS },
-    { "pos_save",     Pos_Save,                 0    , CF_BOTH | CF_MATCHLESS },
-    { "pos_move",     Pos_Move,                 0    , CF_BOTH | CF_MATCHLESS }
-*/
+    { "pos_show",     Pos_Show,                 0    , CF_PLAYER | CF_PARAMS },
+    { "pos_save",     Pos_Save,                 0    , CF_PLAYER | CF_PARAMS },
+    { "pos_move",     Pos_Move,                 0    , CF_PLAYER | CF_PARAMS }
 // VVD }
 };
 
@@ -3409,61 +3400,120 @@ void next_pow ()
 // }  spec tracking stuff 
 
 // VVD pos_save/pos_move commands {
-vec3_t velocity, avelocity, origin, angles, v_angle;
 
 void Pos_Show ()
 {
-	G_sprint(self, 2, "velocity: %.2f %.2f %.2f\n", self->s.v.velocity[0], self->s.v.velocity[1], self->s.v.velocity[2]);
-	G_sprint(self, 2, "avelocity: %.2f %.2f %.2f\n", self->s.v.avelocity[0], self->s.v.avelocity[1], self->s.v.avelocity[2]);
-	G_sprint(self, 2, "origin: %.2f %.2f %.2f\n", self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2]);
-	G_sprint(self, 2, "angles: %.2f %.2f %.2f\n", self->s.v.angles[0], self->s.v.angles[1], self->s.v.angles[2]);
-	G_sprint(self, 2, "v_angle: %.2f %.2f %.2f\n\n", self->s.v.v_angle[0], self->s.v.v_angle[1], self->s.v.v_angle[2]);
+	char arg_3[1024];
+	int idx = 0;
+	pos_t *pos;
 
-	G_sprint(self, 2, "velocity: %.2f %.2f %.2f\n", velocity[0], velocity[1], velocity[2]);
-	G_sprint(self, 2, "avelocity: %.2f %.2f %.2f\n", avelocity[0], avelocity[1], avelocity[2]);
-	G_sprint(self, 2, "origin: %.2f %.2f %.2f\n", origin[0], origin[1], origin[2]);
-	G_sprint(self, 2, "angles: %.2f %.2f %.2f\n", angles[0], angles[1], angles[2]);
-	G_sprint(self, 2, "v_angle: %.2f %.2f %.2f\n",v_angle[0], v_angle[1], v_angle[2]);
+	if ( match_in_progress )
+		return;
+
+	if ( k_pause || intermission_running ) 
+		return;
+
+	// parse /pos_show <number>
+	if (trap_CmdArgc() == 3) {
+		trap_CmdArgv( 2, arg_3, sizeof( arg_3 ) );
+		idx = bound( 0, atoi(arg_3) - 1, MAX_POSITIONS - 1 );
+	}
+
+	pos = &(self->pos[idx]);
+
+	G_sprint(self, 2, "Position: %d\n", idx+1);
+	G_sprint(self, 2, "velocity: %9.2f %9.2f %9.2f\n", PASSVEC3(pos->velocity));
+	G_sprint(self, 2, "  origin: %9.2f %9.2f %9.2f\n", PASSVEC3(pos->origin));
+	G_sprint(self, 2, "  angles: %9.2f %9.2f %9.2f\n", PASSVEC3(pos->angles));
+
+	G_sprint(self, 2, "    Self:\n");
+	G_sprint(self, 2, "velocity: %9.2f %9.2f %9.2f\n", PASSVEC3(self->s.v.velocity));
+	G_sprint(self, 2, "  origin: %9.2f %9.2f %9.2f\n", PASSVEC3(self->s.v.origin));
+	G_sprint(self, 2, "  angles: %9.2f %9.2f %9.2f\n", PASSVEC3(self->s.v.angles));
 }
 
 void Pos_Save ()
 {
-	velocity[0] = self->s.v.velocity[0];
-	velocity[1] = self->s.v.velocity[1];
-	velocity[2] = self->s.v.velocity[2];
-	avelocity[0] = self->s.v.avelocity[0];
-	avelocity[1] = self->s.v.avelocity[1];
-	avelocity[2] = self->s.v.avelocity[2];
-	origin[0] = self->s.v.origin[0];
-	origin[1] = self->s.v.origin[1];
-	origin[2] = self->s.v.origin[2];
-	angles[0] = self->s.v.angles[0];
-	angles[1] = self->s.v.angles[1];
-	angles[2] = self->s.v.angles[2];
-	v_angle[0] = self->s.v.v_angle[0];
-	v_angle[1] = self->s.v.v_angle[1];
-	v_angle[2] = self->s.v.v_angle[2];
-	G_sprint(self, 2, "Position was saved\n");
+	char arg_3[1024];
+	int idx = 0;
+	pos_t *pos;
+
+	if ( match_in_progress )
+		return;
+
+	if ( k_pause || intermission_running ) 
+		return;
+
+	// parse /pos_save <number>
+	if (trap_CmdArgc() == 3) {
+		trap_CmdArgv( 2, arg_3, sizeof( arg_3 ) );
+		idx = bound( 0, atoi(arg_3) - 1, MAX_POSITIONS - 1 );
+	}
+
+	pos = &(self->pos[idx]);
+
+	VectorCopy(self->s.v.velocity, pos->velocity);
+	VectorCopy(self->s.v.origin, pos->origin);
+	VectorCopy(self->s.v.angles, pos->angles);
+
+	G_sprint(self, 2, "Position %d was saved\n", idx+1);
 }
 
-// Don't work setting angle. //VVD
 void Pos_Move ()
 {
-	self->s.v.velocity[0] = velocity[0] = 0;
-	self->s.v.velocity[1] = velocity[1] = 0;
-	self->s.v.velocity[2] = velocity[2] = 0;
-	self->s.v.avelocity[0] = avelocity[0] = 0;
-	self->s.v.avelocity[1] = avelocity[1] = 0;
-	self->s.v.avelocity[2] = avelocity[2] = 0;
-	self->s.v.origin[0] = origin[0];
-	self->s.v.origin[1] = origin[1];
-	self->s.v.origin[2] = origin[2];
-/*	self->s.v.angles[0] = angles[0];
-	self->s.v.angles[1] = angles[1];
-	self->s.v.angles[2] = angles[2];*/
-	self->s.v.v_angle[0] = v_angle[0];
-	self->s.v.v_angle[1] = v_angle[1];
-	self->s.v.v_angle[2] = v_angle[2] = 0;
-	G_sprint(self, 2, "Position was restored\n");
+	char arg_3[1024];
+	int idx = 0;
+	pos_t *pos;
+	gedict_t *p;
+
+	if ( match_in_progress )
+		return;
+
+	if ( k_pause || intermission_running ) 
+		return;
+
+	// parse /pos_move <number>
+	if (trap_CmdArgc() == 3) {
+		trap_CmdArgv( 2, arg_3, sizeof( arg_3 ) );
+		idx = bound( 0, atoi(arg_3) - 1, MAX_POSITIONS - 1 );
+	}
+
+	pos = &(self->pos[idx]);
+
+	if ( VectorCompare(pos->origin, VEC_ORIGIN) ) {
+		G_sprint(self, 2, "Save your position first\n");
+		return;
+	}
+
+	if ( VectorCompare(pos->origin, self->s.v.origin) )
+		return;
+
+	for ( p = world; p = findradius( p, pos->origin, 84 ); )
+		if ( ( streq( p->s.v.classname, "player" )
+/* qqshka - player may stuck in some doors or plats etc... but i dunno how fix this fine 
+		  - this way is not perfect so i comment it
+				 || p->s.v.solid == SOLID_BSP */
+			 ) && p != self 
+		   ) {
+			G_sprint(self, 2, "Can't move, location occupied\n");
+			return;
+		}
+
+	if ( self->pos_move_time && self->pos_move_time + 1 > g_globalvars.time ) {
+		G_sprint(self, 2, "Only one move per second allowed\n");
+		return;
+	}
+
+	spawn_tfog(self->s.v.origin);
+	spawn_tfog(pos->origin);
+
+	VectorCopy(pos->velocity, self->s.v.velocity);
+	setorigin (self, PASSVEC3( pos->origin ) ); // u can't just copy, use setorigin
+	VectorCopy(pos->angles, self->s.v.angles);
+	self->s.v.fixangle = true; // qqshka: this is how angles can be set, preved VVD %)))
+
+	self->pos_move_time = g_globalvars.time;
+
+	G_sprint(self, 2, "Position %d was restored\n", idx+1);
 }
 // VVD }

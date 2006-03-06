@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.34 2006/03/03 21:07:36 qqshka Exp $
+ *  $Id: client.c,v 1.35 2006/03/06 18:11:10 qqshka Exp $
  */
 
 //===========================================================================
@@ -40,7 +40,6 @@ int             modelindex_eyes, modelindex_player;
 float CountALLPlayers();
 void IdlebotCheck();
 void CheckAll();
-void CheckConnectRate();
 void PlayerStats();
 void ExitCaptain();
 void CheckFinishCaptain();
@@ -55,49 +54,20 @@ void del_from_specs_favourites(gedict_t *rm);
 
 void CheckAll ()
 {
-	float player_rate, maxrate=0, minrate=0;
+	int from = 0;
 	gedict_t *p;
 
-	maxrate = iKey(world, "k_maxrate");
-	minrate = iKey(world, "k_minrate");
-
-	if( maxrate || minrate )
-	{
-		p = find(world, FOFCLSN, "player");
-		while( p ) 
-		{
-			if( !strnull( p->s.v.netname ) ) 
-			{
-				// This is used to check a players rate.
-				// If above allowed setting then it sets it to max allowed.
-				player_rate = iKey( p, "rate" );
-	      		if ( player_rate > maxrate )
-				{
-					G_sprint(p, 2, "\nYour עבפו setting is too high for this server.\n"
-								   "Rate set to %d\n", (int)maxrate);
-			
-					stuffcmd(p, "rate %d\n", (int)maxrate );
-				}
-
-	      		if ( player_rate < minrate )
-				{
-					G_sprint(p, 2, "\nYour עבפו setting is too low for this server.\n"
-								   "Rate set to %d\n", (int)minrate);
-					stuffcmd(p, "rate %d\n", (int)minrate );
-				}
-			}
-
-			p = find(p, FOFCLSN, "player");
-		}
-	}
+	for ( p = world; p = find_plrspc(p, &from); )
+		CheckRate( p, "" );
 }
 
-void CheckConnectRate ()
+qboolean CheckRate (gedict_t *p, char *newrate)
 {
+	qboolean ret = false;
     float player_rate, maxrate=0, minrate=0;
 
 	// This is used to check a players rate.  If above allowed setting then it kicks em off.
-	player_rate = iKey( self, "rate" );
+	player_rate = strnull(newrate) ? iKey( p, "rate" ) : atoi(newrate);
 	
 	maxrate = iKey(world, "k_maxrate" );
 	minrate = iKey(world, "k_minrate" );
@@ -106,18 +76,22 @@ void CheckConnectRate ()
 	{
 	    if ( player_rate > maxrate )
 		{
-					G_sprint(self, 2, "\nYour עבפו setting is too high for this server.\n"
-								   "Rate set to %d\n", (int)maxrate);
-					stuffcmd(self, "rate %d\n", (int)maxrate );
+			G_sprint(p, 2, "\nYour עבפו setting is too high for this server.\n"
+						   "Rate set to %d\n", (int)maxrate);
+			stuffcmd(p, "rate %d\n", (int)maxrate );
+			ret = true;
 		}
 
-		if (player_rate < minrate)
+		if ( player_rate < minrate )
 		{
-					G_sprint(self, 2, "\nYour עבפו setting is too low for this server.\n"
-								   "Rate set to %d\n", (int)minrate);
-					stuffcmd(self, "rate %d\n", (int)minrate );
+			G_sprint(p, 2, "\nYour עבפו setting is too low for this server.\n"
+						   "Rate set to %d\n", (int)minrate);
+			stuffcmd(p, "rate %d\n", (int)minrate );
+			ret = true;
 		}
 	}
+
+	return ret;
 }
 
 
@@ -895,7 +869,7 @@ void ClientConnect()
 
 	self->fraggie = 0;
 	MakeMOTD();
-	CheckConnectRate();
+	CheckRate(self, "");
 
 	if( k_captains == 2 ) {
 // in case of team picking, pick player if there's a captain with his/her team

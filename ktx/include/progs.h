@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.16 2006/02/26 20:22:56 qqshka Exp $
+ *  $Id: progs.h,v 1.17 2006/03/06 18:11:29 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -104,6 +104,18 @@ typedef struct vote_s {
 
 	float elect_block_till;	// block election for this time
 } vote_t;
+
+// player position
+
+#define MAX_POSITIONS (5)
+
+typedef struct pos_s {
+
+	vec3_t velocity;
+	vec3_t origin;
+	vec3_t angles;
+
+} pos_t;
 
 typedef enum
 {
@@ -281,6 +293,9 @@ typedef struct gedict_s {
 	autoTrackType_t autotrack;  // is autotrack or auto_pow
 	int	  autotrack_id;		    // latest autotrack id, store this to detect is user want implicitly turn of autotrack
 // }
+
+	pos_t	pos[MAX_POSITIONS];	// for player pos_save / pos_move
+	float	pos_move_time;		// for player pos_save / pos_move
 #endif
 
 } gedict_t;
