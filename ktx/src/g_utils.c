@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.22 2006/03/04 18:10:23 qqshka Exp $
+ *  $Id: g_utils.c,v 1.23 2006/03/08 22:37:06 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -746,7 +746,7 @@ void cvar_set( const char *var, const char *val )
 // return team of edict, edict may has "player" or "ghost" classname
 char *getteam( gedict_t * ed )
 {
-	static char		string[MAX_STRINGS][1024];
+	static char		string[MAX_STRINGS][128];
 	static int		index = 0;
 	char 			*team=NULL;
 
@@ -1375,5 +1375,35 @@ void show_sv_version()
 		G_sprint(self, 2, "DATE: %s\n", tm);
 	G_sprint(self, 2, "MOD: %s v.%s build:%05d\n", MOD_NAME, MOD_VERSION, build_number());
 	G_sprint(self, 2, "SERVER: %s\n", cvar_string( "version" ));
+}
+
+
+char *str_noweapon(int k_disallow_weapons)
+{
+	static char	string[MAX_STRINGS][128];
+	static int		index = 0;
+
+	index %= MAX_STRINGS;
+
+	string[index][0] = 0;
+
+	if (k_disallow_weapons & IT_AXE)
+		strlcat(string[index], " axe", sizeof( string[0] ));
+	if (k_disallow_weapons & IT_SHOTGUN)
+		strlcat(string[index], " sg", sizeof( string[0] ));
+	if (k_disallow_weapons & IT_SUPER_SHOTGUN)
+		strlcat(string[index], " ssg", sizeof( string[0] ));
+	if (k_disallow_weapons & IT_NAILGUN)
+		strlcat(string[index], " ng", sizeof( string[0] ));
+	if (k_disallow_weapons & IT_SUPER_NAILGUN)
+		strlcat(string[index], " sng", sizeof( string[0] ));
+	if (k_disallow_weapons & IT_GRENADE_LAUNCHER)
+		strlcat(string[index], " gl", sizeof( string[0] ));
+	if (k_disallow_weapons & IT_ROCKET_LAUNCHER)
+		strlcat(string[index], " rl", sizeof( string[0] ));
+	if (k_disallow_weapons & IT_LIGHTNING)
+		strlcat(string[index], " lg", sizeof( string[0] ));
+
+	return string[index++];
 }
 

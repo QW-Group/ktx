@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.25 2006/03/06 18:11:29 qqshka Exp $
+ *  $Id: g_local.h,v 1.26 2006/03/08 22:37:23 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -36,7 +36,7 @@
 #include "g_syscalls.h"
 #include "player.h"
 
-#define MOD_VERSION					("1.05")
+#define MOD_VERSION					("1.06")
 #define MOD_NAME					("KTX")
 #define MOD_SERVERINFO_MOD_KEY		("xmod")
 #define MOD_SERVERINFO_BUILD_KEY	("xbuild")
@@ -170,9 +170,10 @@ void    	sound( gedict_t * ed, int channel, char *samp, float vol, float att );
 gedict_t 	*checkclient(  );
 void    	traceline( float v1_x, float v1_y, float v1_z, float v2_x, float v2_y, float v2_z,
 		   int nomonst, gedict_t * ed );
-void 		tracearea( float v1_x, float v1_y, float v1_z, float v2_x, float v2_y, float v2_z, int nomonst, gedict_t * ed ,
+void 		TraceCapsule( float v1_x, float v1_y, float v1_z, float v2_x, float v2_y, float v2_z, int nomonst, gedict_t * ed ,
 			float min_x, float min_y, float min_z, 
 			float max_x, float max_y, float max_z);
+
 void    	stuffcmd( gedict_t * ed, const char *fmt , ...);
 int     	droptofloor( gedict_t * ed );
 int     	walkmove( gedict_t * ed, float yaw, float dist );
@@ -243,6 +244,7 @@ gedict_t	*get_ed_best2();
 gedict_t	*get_ed_bestPow();
 
 void		show_sv_version();
+char		*str_noweapon(int k_disallow_weapons);
 
 void    	disableupdates( gedict_t * ed, float time );
 

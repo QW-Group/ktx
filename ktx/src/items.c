@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.9 2005/12/31 19:04:22 qqshka Exp $
+ *  $Id: items.c,v 1.10 2006/03/08 22:37:06 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -149,8 +149,6 @@ float T_Heal( gedict_t * e, float healamount, float ignore )
 	return 1;
 }
 
-#define   H_ROTTEN  1
-#define   H_MEGA 2
 void            health_touch();
 void            item_megahealth_rot();
 
@@ -201,9 +199,6 @@ void SP_item_health()
 
 void health_touch()
 {
-//   float amount;
-//   char*  s;
-
 	if ( deathmatch == 4 )
 		if ( other->invincible_time > 0 )
 			return;
@@ -1467,10 +1462,12 @@ void SP_item_artifact_super_damage()
 	self->s.v.touch = ( func_t ) powerup_touch;
 
 	if ( !b_dp ) {
+/* need this due to aerowalk customize
 		trap_precache_model( "progs/quaddama.mdl" );
 		trap_precache_sound( "items/damage.wav" );
 		trap_precache_sound( "items/damage2.wav" );
 		trap_precache_sound( "items/damage3.wav" );
+*/
 	}
 	self->s.v.noise = "items/damage.wav";
 	setmodel( self, "progs/quaddama.mdl" );

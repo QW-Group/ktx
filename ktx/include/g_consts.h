@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_consts.h,v 1.3 2005/11/23 20:35:33 qqshka Exp $
+ *  $Id: g_consts.h,v 1.4 2006/03/08 22:37:23 qqshka Exp $
  */
 
 //
@@ -236,3 +236,8 @@
 #define MULTICAST_ALL_R  3	// every client, reliable
 #define MULTICAST_PHS_R  4	// within hearing, reliable
 #define MULTICAST_PVS_R  5	// within sight, reliable
+
+// health flags
+#define   H_ROTTEN  (1)
+#define   H_MEGA    (2)
+

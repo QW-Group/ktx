@@ -1009,53 +1009,22 @@ void StartMatchLess ()
 	StartTimer ();
 }
 
-void StartMatch ()
-// Reset player frags and start the timer.
+// remove some items from map regardind with dmm
+void SM_PrepareMap()
 {
-	gedict_t *p=NULL, *old=NULL, *old2=NULL;
-	char *tmp=NULL, *s1=NULL;
-	float f1, f2;
+	gedict_t *p;
 
-	k_standby = 0;
-	k_checkx = 0;
-	k_userid = 1;
-	k_teamid = 666;
-	k_nochange = 0;	
-	localcmd("localinfo 1 \"\"\n");
-	localcmd("localinfo 666 \"\"\n");
-	f1 = Get_Powerups();
-	f2 = iKey( world, "k_dm2mod" );
+	for( p = world; p = ( k_matchLess ? findradius2(p, VEC_ORIGIN, 999999) :
+					 				    findradius(p, VEC_ORIGIN, 999999) );
+	   ) {
 
-    // Check to see if berzerk is set.
-    if( iKey( world, "k_bzk" ) ) {
-        k_berzerkenabled = iKey( world, "k_btime" );
-    } else {
-        k_berzerkenabled = 0;
-    }
-
-	p = world;
-
-	while( p ) {
-		old = (k_matchLess ? findradius2(p, VEC_ORIGIN, 999999) : findradius(p, VEC_ORIGIN, 999999));
-
-//going for the if content record..
+	// going for the if content record..
 
 		if (    streq( p->s.v.classname, "rocket" )
 			 || streq( p->s.v.classname, "grenade" )
-//			 || streq( p->s.v.classname, "trigger_changelevel" ) 
 		   ) { // this must be removed in any cases
 				ent_remove( p );
 		}
-/*
-		else if ( !f1 && (     streq( p->s.v.classname, "item_artifact_invulnerability" )
-				            || streq( p->s.v.classname, "item_artifact_super_damage" )
-				            || streq( p->s.v.classname, "item_artifact_envirosuit" )
-				            || streq( p->s.v.classname, "item_artifact_invisibility")
-						 )
-				) { // no powerups
-				ent_remove( p );
-		}
-*/
 		else if( deathmatch > 3 ) {
 			if(    streq( p->s.v.classname, "weapon_nailgun" )
 				|| streq( p->s.v.classname, "weapon_supernailgun" )
@@ -1063,10 +1032,21 @@ void StartMatch ()
 				|| streq( p->s.v.classname, "weapon_rocketlauncher" )
 				|| streq( p->s.v.classname, "weapon_grenadelauncher" )
 				|| streq( p->s.v.classname, "weapon_lightning" )
-			  ) // no weapons for this deathmatches
+			  ) { // no weapons for any of this deathmatches (4 or 5)
 				ent_remove( p );
+			}
+			else if ( deathmatch == 4 ) {
+				if(    streq( p->s.v.classname, "item_shells" )
+					|| streq( p->s.v.classname, "item_spikes" )
+					|| streq( p->s.v.classname, "item_rockets" )
+					|| streq( p->s.v.classname, "item_cells" )
+					|| (streq( p->s.v.classname, "item_health" ) && ( int ) p->s.v.spawnflags & H_MEGA)
+			      ) { // no weapon ammo and megahealth for dmm4
+					ent_remove( p );
+				}
+			}
 		} else {
-			if( deathmatch == 2 && f2 &&
+			if( deathmatch == 2 && iKey( world, "k_dm2mod" ) &&
 			 							(   streq( p->s.v.classname, "item_armor1" )
 			  	 						 || streq( p->s.v.classname, "item_armor2" )
 			     						 || streq( p->s.v.classname, "item_armorInv")
@@ -1075,84 +1055,146 @@ void StartMatch ()
 			  ) // no armors in modified dmm2
 				ent_remove( p );
 		}
-		p = old;
 	}
+}
 
+// put clients in server and reset some params
+void SM_PrepareClients()
+{
+	int hdc, i;
+	char *pl_team;
+	gedict_t *p, *old;
+
+	k_teamid = 666;
+	localcmd("localinfo 666 \"\"\n");
 	trap_executecmd (); // <- this really needed
 
-	G_cprint("MATCH STARTED");
+	for( p = world;	p = find ( p, FOFCLSN, "player" ); ) {
+		if( !k_matchLess ) { // skip setup k_teamnum in matchLess mode
+			pl_team = getteam( p );
+			G_cprint("%%%s%%t%%%s", p->s.v.netname, pl_team);
+
+			p->k_teamnum = 0;
+
+			if( !strnull( pl_team ) ) {
+				i = 665;
+
+				while( k_teamid > i && !p->k_teamnum ) {
+					i++;
+
+					if( streq( pl_team, ezinfokey(world, va("%d", i)) ) )
+						p->k_teamnum = i;
+				}
+
+				if( !p->k_teamnum ) { // team not found in localinfo, so put it in
+					i++;
+					p->k_teamnum = k_teamid = i;
+					localcmd( "localinfo %d \"%s\"\n", i, pl_team );
+					trap_executecmd (); // <- this really needed
+				}
+			} 
+			else
+				p->k_teamnum = 666;
+		}
+
+		p->friendly = p->deaths = p->s.v.frags = 0;
+
+		hdc = p->ps.handicap; // save player handicap
+
+		memset( (void*) &( p->ps ), 0, sizeof(p->ps) ); // clear player stats
+
+		p->ps.handicap = hdc; // restore player handicap
+
+		old = self;
+		self = p;
+
+		SetNewParms( false );
+		PutClientInServer();
+
+		self = old;
+	}
+
+	G_cprint("\n");
+}
+
+void SM_PrepareShowscores()
+{
+	gedict_t *p;
+	char *team1 = "", *team2 = "";
+
+	if( k_matchLess ) // skip this in matchLess mode
+		return;
+
+	if ( CountRTeams() != 2 ) // we need 2 teams
+		return;
+
+
+	if ( p = find ( world, FOFCLSN, "player" ) ) 
+		team1 = getteam( p );
+
+	if ( strnull( team1 ) )
+		return;
+
+	while( p = find ( p, FOFCLSN, "player" ) ) {
+		team2 = getteam( p );
+
+		if( strneq( team1, team2 ) )
+			break;
+	}
+
+	if ( strnull( team2 ) )
+		return;
+
+	k_showscores = 1;
+
+	localcmd("localinfo k_team1 \"%s\"\n", team1);
+	localcmd("localinfo k_team2 \"%s\"\n", team2);
+	localcmd("serverinfo hostname \"%s (%s vs. %s)\"\n", 
+					ezinfokey(world, "hostname"), team1, team2);
+}
+
+// Reset player frags and start the timer.
+void StartMatch ()
+{
+	k_berzerk    = 0;
+	k_nochange   = 0;
+	k_showscores = 0;
+	k_standby    = 0;
+	k_checkx     = 0;
+
+	k_userid   = 1;
+	localcmd("localinfo 1 \"\"\n");
+	trap_executecmd (); // <- this really needed
+
+    // Check to see if berzerk is set.
+    if( iKey( world, "k_bzk" ) ) {
+        k_berzerkenabled = iKey( world, "k_btime" );
+    } else {
+        k_berzerkenabled = 0;
+    }
+
+	SM_PrepareMap(); // remove some items from map regardind with dmm
+
+	G_cprint("MATCH STARTED\n");
 
 	match_in_progress = 2;
 
 	remove_specs_wizards (); // remove wizards
 
-	p = find ( world, FOFCLSN, "player" );
-
-
-	while( p ) {
-		if( !strnull ( p->s.v.netname ) ) {
-			int hdc;
-
-			if( !k_matchLess ) { // skip this in matchLess mode
-				tmp = ezinfokey(p, "team"); // used below
-				G_cprint("%%%s%%t%%%s", p->s.v.netname, tmp);
-
-				p->k_teamnum = 0;
-
-				if( !strnull( tmp ) ) {
-					f1 = 665;
-
-					while( k_teamid > f1 && !p->k_teamnum ) {
-						f1++;
-						s1 = ezinfokey(world, va("%d", (int)f1));
-						tmp = ezinfokey(p, "team");
-						if( streq( tmp, s1 ) )
-							p->k_teamnum = f1;
-					}
-
-					if( !p->k_teamnum ) { // team not found in localinfo, so put it in
-						f1++;
-						p->k_teamnum = k_teamid = f1;
-						localcmd( "localinfo %d \"%s\"\n", (int)f1, ezinfokey( p, "team" ) );
-						trap_executecmd (); // <- this really needed
-					}
-				} 
-				else
-					p->k_teamnum = 666;
-			}
-
-			p->friendly = p->deaths = p->s.v.frags = 0;
-
-			hdc = p->ps.handicap; // save player handicap
-
-			memset( (void*) &( p->ps ), 0, sizeof(p->ps) ); // clear player stats
-
-			p->ps.handicap = hdc; // restore player handicap
-
-			old = self;
-			self = p;
-
-			SetNewParms( false );
-			PutClientInServer();
-
-			self = old;
-		}
-		p = find ( p, FOFCLSN, "player" );
-	}
-
-	G_cprint("\n");
+	SM_PrepareClients(); // put clients in server and reset some params
 
 	if ( !k_matchLess || cvar( "k_matchless_countdown" ) )
 		G_bprint(2, "The match has begun!\n");
 
-	localcmd( "sv_spectalk %d\n", (int)(f2 = bound(0, iKey(world, "k_spectalk"), 1)) );
+	{ // spec silence
+		int fpd = iKey( world, "fpd" );
+		int k_spectalk = bound(0, iKey(world, "k_spectalk"), 1);
+		localcmd( "sv_spectalk %d\n", k_spectalk);
 
-	f1 = atoi( ezinfokey( world, "fpd" ) );
-	f1 = f1 - ((int)f1 & 64) + (f2 * 64);
-	localcmd( "serverinfo fpd %d\n", (int)f1 );
-
-	k_berzerk    = 0;
-	k_showscores = 0;
+ 		// remove 64 from fpd and add 64 to fpd if k_spectalk == 1
+		fpd = (fpd & ~64) | (k_spectalk * 64);
+		localcmd( "serverinfo fpd %d\n", fpd );
+	}
 
 	self->k_teamnum = g_globalvars.time + 3;  //dirty i know, but why waste space?
 											  // FIXME: waste space, but be clean
@@ -1163,46 +1205,9 @@ void StartMatch ()
 	self->s.v.think = ( func_t ) TimerThink;
 	self->s.v.nextthink = g_globalvars.time + 1;
 
-	localcmd( "localinfo k_host \"%s\"\n", ezinfokey(world, "hostname") );
+	localcmd( "localinfo k_host \"%s\"\n", ezinfokey(world, "hostname") ); // save host name
 
-	f1 = CountRTeams();
-	f2 = CountPlayers();
-
-	if( !k_matchLess ) // skip this in matchLess mode
-    if( f1 == 2 && f2 > 2 )
-    {
-		k_showscores = 1;
-		f2 = 0;
-		old = world;
-
-		p = find ( world, FOFCLSN, "player" );
-		while( p && !f2 ) {
-			if( !strnull ( p->s.v.netname ) ) {
-				localcmd("localinfo k_team1 \"%s\"\n", ezinfokey(p, "team"));
-				f2 = 1;
-				old = p;
-			}
-
-			p = find ( p, FOFCLSN, "player" );
-	    }
-
-		while( p  && f2 ) {
-			if( !strnull ( p->s.v.netname ) ) {
-				tmp = ezinfokey(p, "team");
-				s1 = ezinfokey(old, "team");
-				if( strneq(tmp, s1) ) {
-					localcmd("localinfo k_team2 \"%s\"\n", tmp);
-					old2 = p;
-					f2 = 0;
-				}
-			}
-
-			p = find ( p, FOFCLSN, "player" );
-		}
-
-		localcmd("serverinfo hostname \"%s (%s vs. %s)\"\n", ezinfokey(world, "hostname")
-									, ezinfokey(old, "team"), ezinfokey(old2, "team"));
-	}
+	SM_PrepareShowscores();
 }
 
 void PrintCountdown( int seconds )
@@ -1217,11 +1222,13 @@ void PrintCountdown( int seconds )
 // Fraglimit xxx
 // Overtime   xx		Overtime printout, supports sudden death display
 // Powerups   On|Off|Jammed
+// Noweapon
 
 	char text[1024] = {0};
 	char *mode = "";
 	char *pwr  = "";
 	char *ot   = "";
+	char *nowp = "";
 
 
 	strlcat(text, va("%s: %2s\n\n\n", redtext("Countdown"), dig3(seconds)), sizeof(text));
@@ -1262,6 +1269,12 @@ void PrintCountdown( int seconds )
 	}
 
 	strlcat(text, va("%s %4s\n", "Powerups", pwr), sizeof(text));
+
+	if (    deathmatch == 4 
+		 && !strnull( nowp = str_noweapon((int)cvar("k_disallow_weapons") & DA_WPNS) )
+	   )
+		strlcat(text, va("\n%s %4s\n", "Noweapon", 
+					redtext(nowp[0] == 32 ? (nowp+1) : nowp)), sizeof(text));
 
 	G_cp2all(text);
 }

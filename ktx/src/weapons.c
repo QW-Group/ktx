@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.16 2006/03/06 18:11:10 qqshka Exp $
+ *  $Id: weapons.c,v 1.17 2006/03/08 22:37:06 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1643,14 +1643,15 @@ void W_WeaponFrame()
 
     if ( self->s.v.button0 && !intermission_running )
     {
+		if ( match_in_progress == 1 )
+			return;
+
         if(    ( !iKey( world, "k_prewar" ) && match_in_progress != 2 )
-            || match_in_progress == 1
 			|| k_captains == 2 
 		  ) {
 
-            stuffcmd( self, "bf\n" );
-
             if( g_globalvars.time > self->k_msgcount ) {
+            	stuffcmd( self, "bf\n" );
 				G_sprint( self, 2, "console: you are not allowed to fire\n");
                 self->k_msgcount = g_globalvars.time + 1;
             }

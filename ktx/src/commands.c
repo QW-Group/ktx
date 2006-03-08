@@ -2382,12 +2382,12 @@ typedef struct usermode_s {
 
 usermode um_list[] =
 {
-	{ "1on1", 	"1 on 1",	_1on1_um_init,		UM_1ON1},
-	{ "2on2",	"2 on 2",	_2on2_um_init,		UM_2ON2},
-	{ "3on3",	"3 on 3",	_3on3_um_init,		UM_3ON3},
-	{ "4on4",	"4 on 4",	_4on4_um_init,		UM_4ON4},
-	{ "10on10",	"10 on 10",	_10on10_um_init,	UM_10ON10},
-	{ "ffa",	"ffa",		ffa_um_init,		UM_FFA}
+	{ "1on1", 	"\x93 on \x93",			_1on1_um_init,		UM_1ON1},
+	{ "2on2",	"\x94 on \x94",			_2on2_um_init,		UM_2ON2},
+	{ "3on3",	"\x95 on \x95",			_3on3_um_init,		UM_3ON3},
+	{ "4on4",	"\x96 on \x96",			_4on4_um_init,		UM_4ON4},
+	{ "10on10",	"\x93\x92 on \x93\x92",	_10on10_um_init,	UM_10ON10},
+	{ "ffa",	"ffa",					ffa_um_init,		UM_FFA}
 };
 
 int um_cnt = sizeof (um_list) / sizeof (um_list[0]);
@@ -2826,24 +2826,7 @@ void handicap ()
 
 void show_disallowed_weapons( int k_disallow_weapons )
 {
-	char dwp[128] = {0};
-
-	if (k_disallow_weapons & IT_AXE)
-		strlcat(dwp, " axe", sizeof(dwp));
-	if (k_disallow_weapons & IT_SHOTGUN)
-		strlcat(dwp, " sg", sizeof(dwp));
-	if (k_disallow_weapons & IT_SUPER_SHOTGUN)
-		strlcat(dwp, " ssg", sizeof(dwp));
-	if (k_disallow_weapons & IT_NAILGUN)
-		strlcat(dwp, " ng", sizeof(dwp));
-	if (k_disallow_weapons & IT_SUPER_NAILGUN)
-		strlcat(dwp, " sng", sizeof(dwp));
-	if (k_disallow_weapons & IT_GRENADE_LAUNCHER)
-		strlcat(dwp, " gl", sizeof(dwp));
-	if (k_disallow_weapons & IT_ROCKET_LAUNCHER)
-		strlcat(dwp, " rl", sizeof(dwp));
-	if (k_disallow_weapons & IT_LIGHTNING)
-		strlcat(dwp, " lg", sizeof(dwp));
+	char *dwp = str_noweapon( k_disallow_weapons );
 
 	G_sprint(self, 2, "weapons disallowed:%s\n", 
 				( strnull( dwp ) ? redtext( " none" ) : redtext( dwp ) ) );

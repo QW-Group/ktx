@@ -1,3 +1,20 @@
+2006-03-09 [ver 1.06]
+ 72. Now tele spawn at map "end" is removed, if u dislike this u can turn this off with
+	 cvar "k_end_tele_spawn".
+
+	 set k_end_tele_spawn 0 // 0 - remove tele spawn at level "end"
+					   		// 1 - don't remove
+
+2006-03-08
+ 69. /rpickup formula changed, thx uzhas.
+
+ 70. noweapon info in countdown.
+
+ 71. Weapon ammo and megahealth does't present in dmm4 now - like in ktpro.
+
+2006-03-07
+ 68. No "you are not allowed to fire" during countdown.
+
 2006-03-06 [ver 1.05]
  65. Server localinfo k_maxrate and localinfo k_minrate worked now even in prewar too.
 	 gLAd bug report.

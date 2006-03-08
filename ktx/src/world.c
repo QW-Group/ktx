@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.20 2006/03/04 18:10:23 qqshka Exp $
+ *  $Id: world.c,v 1.21 2006/03/08 22:37:06 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -214,6 +214,11 @@ void SP_worldspawn()
 	trap_precache_sound( "items/protect2.wav" );
 	trap_precache_sound( "items/protect3.wav" );
 
+// quad sounds - need this due to aerowalk customize
+	trap_precache_sound( "items/damage.wav" );
+	trap_precache_sound( "items/damage2.wav" );
+	trap_precache_sound( "items/damage3.wav" );
+
 
 	trap_precache_model( "progs/player.mdl" );
 	trap_precache_model( "progs/eyes.mdl" );
@@ -250,6 +255,9 @@ void SP_worldspawn()
 	trap_precache_model( "progs/v_light.mdl" );
 
 	trap_precache_model( "progs/wizard.mdl" );
+
+// quad mdl - need this due to aerowalk customize
+	trap_precache_model( "progs/quaddama.mdl" );
 
 //
 // Setup light animation tables. 'a' is total darkness, 'z' is maxbright.
@@ -318,21 +326,36 @@ void SP_worldspawn()
 		e->s.v.nextthink = g_globalvars.time + 60;
 	}
 
+	if ( !k_matchLess ) // skip practice in matchLess mode
+	if ( iKey( world, "srv_practice_mode" ) ) // #practice mode#
+		SetPractice( iKey( world, "srv_practice_mode" ), NULL ); // may not reload map
+}
+
+void Customize_Maps()
+{
+	gedict_t *p;
+
 	// spawn quad if map is aerowalk in this case
 	if ( iKey(world, "add_q_aerowalk") && streq( "aerowalk", g_globalvars.mapname) ) {
    		gedict_t	*swp = self;
 
 		self = spawn();
-		setorigin( self, -912.5f, -898.875f, 248.0f ); // oh, ktpro like
+		setorigin( self, -912.6f, -898.9f, 248.0f ); // oh, ktpro like
 		self->s.v.owner = EDICT_TO_PROG( world );
 		SP_item_artifact_super_damage();
 
 		self = swp; // restore self
 	}
 
-	if ( !k_matchLess ) // skip practice in matchLess mode
-	if ( iKey( world, "srv_practice_mode" ) ) // #practice mode#
-		SetPractice( iKey( world, "srv_practice_mode" ), NULL ); // may not reload map
+	if ( !cvar("k_end_tele_spawn") && streq( "end", g_globalvars.mapname) ) {
+		vec3_t      TS_ORIGIN = { -392, 608, 40 }; // tele spawn
+
+		for( p = world; p = find( p, FOFCLSN, "info_player_deathmatch" ); )
+			if ( VectorCompare(p->s.v.origin, TS_ORIGIN) ) {
+				ent_remove( p );
+				break;
+			}
+	}
 }
 
 // create cvar via 'set' command
@@ -396,6 +419,8 @@ void FirstFrame	( )
 	RegisterCvar("k_vp_pickup");  // votes percentage for pickup voting
 	RegisterCvar("k_vp_rpickup"); // votes percentage for rpickup voting
 
+	RegisterCvar("k_end_tele_spawn"); // don't remove end tele spawn
+
 	k_matchLess = cvar( "k_matchless" ); // changed only here
 }
 
@@ -404,6 +429,8 @@ void SecondFrame ( )
 {
 	if ( framecount != 2 )
 		return;
+
+	Customize_Maps();
 
 	if ( k_matchLess )
 		StartMatchLess ();

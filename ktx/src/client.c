@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.35 2006/03/06 18:11:10 qqshka Exp $
+ *  $Id: client.c,v 1.36 2006/03/08 22:37:06 qqshka Exp $
  */
 
 //===========================================================================
@@ -2399,7 +2399,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
     {
 #ifdef KTEAMS
             // included big part starts to handle optional new death messages :p
-			if( atoi( ezinfokey( world, "k_deathmsg" ) ) ) {
+			if( iKey( world, "k_deathmsg" ) ) {
 #endif
 				if ( targ == attacker )
 				{
@@ -2804,15 +2804,12 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		}
         else if ( streq( targ->deathtype, "falling" ) )
 		{
-#ifdef KTEAMS
-				rnum = atoi( ezinfokey( world, "k_deathmsg" ) );
-				if( g_random() < 0.5 && rnum )
+				if( g_random() < 0.5 && iKey( world, "k_deathmsg" ) )
 					deathstring = " cratered\n";
 				else {
 					if( streq( ezinfokey( targ, "gender" ), "f" ) ) 
                         deathstring = " fell to her death\n";
 					else 
-#endif
                        deathstring = " fell to his death\n";
 				}
 		}

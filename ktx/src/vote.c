@@ -414,9 +414,11 @@ void vote_check_pickup ()
 // !!! do not confuse rpickup and pickup
 void vote_check_rpickup ()
 {
+	float frnd;
     int i, tn, pl_cnt, pl_idx;
 	gedict_t *p;
 	int veto;
+
 
 	if ( match_in_progress || k_captains )
 		return;
@@ -439,7 +441,8 @@ void vote_check_rpickup ()
 			p->k_teamnumber = 0;
 
 		for( tn = 1; pl_cnt > 0; pl_cnt-- ) {
-			pl_idx = Q_rint( g_random() * (pl_cnt - 1) ); // select random player between 0 and pl_cnt
+			frnd = g_random(); // bound is macros - so u _can't_ put g_random inside bound
+			pl_idx = bound(0, (int)( frnd * pl_cnt ), pl_cnt-1 ); // select random player between 0 and pl_cnt
 
 			for( i = 0, p = world; p = find(p, FOFCLSN, "player"); ) {
 				if ( p->k_teamnumber )
