@@ -1,3 +1,14 @@
+2006-03-10 [ver 1.07]
+ 73. /admin command extended. Now u can supply one argumment which will be treated 
+	 as admin password.
+
+	 /admin [pass]
+
+	 So, if u does't supply pass, mod will ask about pass via impulses, 
+	 but if u supply a valid pass mod will grant admin rights immediatelly.
+
+	 NOTE: extension will work if u use ezQuake.
+
 2006-03-09 [ver 1.06]
  72. Now tele spawn at map "end" is removed, if u dislike this u can turn this off with
 	 cvar "k_end_tele_spawn".

@@ -176,7 +176,7 @@ cmd_t cmds[] = {
 	{ "lock",        ChangeLock,                0    , CF_PLAYER      },
 	{ "maps",        ShowMaps,                  0    , CF_PLAYER | CF_SPC_ADMIN | CF_MATCHLESS},
 	{ "spawn666",    ToggleRespawn666,          0    , CF_PLAYER      },
-	{ "admin",       ReqAdmin,                  0    , CF_BOTH        },
+	{ "admin",       ReqAdmin,                  0    , CF_BOTH | CF_PARAMS },
 	{ "forcestart",  AdminForceStart,           0    , CF_BOTH_ADMIN  },
 	{ "forcebreak",  AdminForceBreak,           0    , CF_BOTH_ADMIN  },
 	{ "forcepause",  AdminForcePause,           0    , CF_BOTH_ADMIN  },
@@ -357,6 +357,17 @@ int DoCommand(int icmd)
 	return icmd;
 }
 
+// check if players client support params in aliases
+qboolean isSupport_Params(gedict_t *p)
+{
+	char *clinfo = ezinfokey( p, "*client" );
+
+	if ( !strnull( clinfo ) && strstr(clinfo, "ezQuake") ) // seems only ezQuake support 
+		return true;
+
+	return false;
+}
+
 void StuffAliases()
 {
 // stuffing for numbers, hope no flooding out
@@ -372,8 +383,11 @@ void StuffAliases()
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias notready break\n");
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias kfjump \"impulse 156;+jump;wait;-jump\"\n");
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias krjump \"impulse 164;+jump;wait;-jump\"\n");
-		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias kinfo cmd info %%1 %%2\n");
-		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias kuinfo cmd uinfo %%1 %%2\n");
+
+		if ( isSupport_Params( PROG_TO_EDICT( self->s.v.owner ) ) ) {
+			stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias kinfo cmd info %%1 %%2\n");
+			stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias kuinfo cmd uinfo %%1 %%2\n");
+		}
 	}
 }
 
@@ -409,9 +423,10 @@ qboolean isValidCmdForClass( int icmd, qboolean isSpec )
 void StuffModCommands()
 {
 	int i, limit;
-	qboolean spc = PROG_TO_EDICT( self->s.v.owner )->k_spectator;
 	char *name, *params;
-	float dt = StuffDeltaTime( atoi ( ezinfokey( PROG_TO_EDICT( self->s.v.owner ), "ss" ) ) );
+	qboolean spc = PROG_TO_EDICT( self->s.v.owner )->k_spectator;
+	qboolean support_params = isSupport_Params( PROG_TO_EDICT( self->s.v.owner ) );
+	float dt = StuffDeltaTime( iKey( PROG_TO_EDICT( self->s.v.owner ), "ss" ) );
 
 	if(self->cnt == -1)	{
 		StuffAliases(); // stuff impulses based aliases, or just aliases
@@ -433,7 +448,7 @@ void StuffModCommands()
 			continue; // cmd does't valid for this class of player or matchless mode does't have this command
 		}
 
-		params = (cmds[i].cf_flags & CF_PARAMS) ? " %1 %2 %3 %4 %5" : "";
+		params = ( cmds[i].cf_flags & CF_PARAMS && support_params ) ? " %1 %2 %3 %4 %5" : "";
 
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias %s cmd cc %d%s\n", name, (int)i, params);
 	}

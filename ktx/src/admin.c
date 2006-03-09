@@ -222,6 +222,13 @@ void ReqAdmin ()
         return;
     }
 
+    if( self->k_admin == 1 )
+	{
+        G_sprint(self, 2, "%s code canceled\n", redtext("admin"));
+    	self->k_admin  = 0;
+		return;
+	}
+
 	if( !iKey( world, "k_admins" ) ) {
 		G_sprint(self, 2, "%s on this server!\n", redtext("NO admins"));
 		return;
@@ -235,6 +242,21 @@ void ReqAdmin ()
 		BecomeAdmin(self);
 		return;
     }
+	
+	// parse /admin <pass>
+	if (trap_CmdArgc() == 3) {
+		char arg_3[1024];
+		char *pass = ezinfokey(world, "k_admincode");
+
+		trap_CmdArgv( 2, arg_3, sizeof( arg_3 ) );
+
+		if ( !strnull(pass) && streq(arg_3, pass) )
+			BecomeAdmin(self);
+		else
+            G_sprint(self, 2, "%s...\n", redtext("Access denied"));
+
+		return;
+	}
 
     self->k_admin  = 1;
     self->k_adminc = 6;
