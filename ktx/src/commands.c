@@ -116,13 +116,9 @@ void fav_show ();
 void AutoTrack ( float autoTrackType );
 void next_best ();
 void next_pow ();
-
-
-// VVD pos_save/pos_move commands {
 void Pos_Show ();
 void Pos_Save ();
 void Pos_Move ();
-// VVD }
 
 void TogglePractice();
 
@@ -303,11 +299,9 @@ cmd_t cmds[] = {
     { "auto_pow",    AutoTrack,             atPow    , CF_SPECTATOR | CF_MATCHLESS },
     { "next_best",   next_best,                 0    , CF_SPECTATOR | CF_MATCHLESS },
     { "next_pow",    next_pow,                  0    , CF_SPECTATOR | CF_MATCHLESS },
-// VVD pos_save/pos_move commands {
     { "pos_show",     Pos_Show,                 0    , CF_PLAYER | CF_PARAMS },
     { "pos_save",     Pos_Save,                 0    , CF_PLAYER | CF_PARAMS },
     { "pos_move",     Pos_Move,                 0    , CF_PLAYER | CF_PARAMS }
-// VVD }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -3397,7 +3391,7 @@ void next_pow ()
 
 // }  spec tracking stuff 
 
-// VVD pos_save/pos_move commands {
+// pos_save/pos_move commands {
 
 void Pos_Show ()
 {
@@ -3517,9 +3511,11 @@ void Pos_Move ()
 	setorigin (self, PASSVEC3( pos->origin ) ); // u can't just copy, use setorigin
 	VectorCopy(pos->angles, self->s.v.angles);
 	self->s.v.fixangle = true; // qqshka: this is how angles can be set, preved VVD %)))
+	// VVD: Ya proboval - x3 pochemu ne rabotalo...
+	// Vertical'nyy ugol nepravil'no vostanavlivaetsya. :-(
 
 	self->pos_move_time = g_globalvars.time;
 
 	G_sprint(self, 2, "Position %d was restored\n", idx+1);
 }
-// VVD }
+// pos_save/pos_move commands }
