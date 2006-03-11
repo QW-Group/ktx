@@ -7,6 +7,8 @@
 
  77. Added /motd command - just show motd.
 
+ 78. Fixed /pos_move angles bug, VVD bug report.
+
 2006-03-11 [ver 1.08]
  74. Fixed spawn code, thx wit'ka and gLAd.
 

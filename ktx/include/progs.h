@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.17 2006/03/06 18:11:29 qqshka Exp $
+ *  $Id: progs.h,v 1.18 2006/03/11 23:34:39 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -113,7 +113,7 @@ typedef struct pos_s {
 
 	vec3_t velocity;
 	vec3_t origin;
-	vec3_t angles;
+	vec3_t v_angle;
 
 } pos_t;
 

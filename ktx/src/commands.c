@@ -3422,12 +3422,12 @@ void Pos_Show ()
 	G_sprint(self, 2, "Position: %d\n", idx+1);
 	G_sprint(self, 2, "velocity: %9.2f %9.2f %9.2f\n", PASSVEC3(pos->velocity));
 	G_sprint(self, 2, "  origin: %9.2f %9.2f %9.2f\n", PASSVEC3(pos->origin));
-	G_sprint(self, 2, "  angles: %9.2f %9.2f %9.2f\n", PASSVEC3(pos->angles));
+	G_sprint(self, 2, " v_angle: %9.2f %9.2f %9.2f\n", PASSVEC3(pos->v_angle));
 
 	G_sprint(self, 2, "    Self:\n");
 	G_sprint(self, 2, "velocity: %9.2f %9.2f %9.2f\n", PASSVEC3(self->s.v.velocity));
 	G_sprint(self, 2, "  origin: %9.2f %9.2f %9.2f\n", PASSVEC3(self->s.v.origin));
-	G_sprint(self, 2, "  angles: %9.2f %9.2f %9.2f\n", PASSVEC3(self->s.v.angles));
+	G_sprint(self, 2, " v_angle: %9.2f %9.2f %9.2f\n", PASSVEC3(self->s.v.v_angle));
 }
 
 void Pos_Save ()
@@ -3452,7 +3452,7 @@ void Pos_Save ()
 
 	VectorCopy(self->s.v.velocity, pos->velocity);
 	VectorCopy(self->s.v.origin, pos->origin);
-	VectorCopy(self->s.v.angles, pos->angles);
+	VectorCopy(self->s.v.v_angle, pos->v_angle);
 
 	G_sprint(self, 2, "Position %d was saved\n", idx+1);
 }
@@ -3512,7 +3512,8 @@ void Pos_Move ()
 
 	VectorCopy(pos->velocity, self->s.v.velocity);
 	setorigin (self, PASSVEC3( pos->origin ) ); // u can't just copy, use setorigin
-	VectorCopy(pos->angles, self->s.v.angles);
+	VectorCopy(pos->v_angle, self->s.v.angles);
+	VectorCopy(pos->v_angle, self->s.v.v_angle);
 	self->s.v.fixangle = true; // qqshka: this is how angles can be set
 	self->pos_move_time = g_globalvars.time;
 
