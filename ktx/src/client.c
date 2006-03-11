@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.36 2006/03/08 22:37:06 qqshka Exp $
+ *  $Id: client.c,v 1.37 2006/03/11 23:13:15 qqshka Exp $
  */
 
 //===========================================================================
@@ -686,6 +686,7 @@ gedict_t       *SelectSpawnPoint()
 	gedict_t		*spot;
 	gedict_t		*spots;			// chain of "valid" spots
 	gedict_t		*thing;
+	float			rndspots;
 	int             numspots;		// count of "valid" spots
 	int				k_nspots;
 	int				totalspots;
@@ -729,8 +730,8 @@ gedict_t       *SelectSpawnPoint()
 			thing = findradius( thing, spot->s.v.origin, 84 );
 		}
 
-		if( k_spw && match_in_progress == 2 && self->k_lastspawn == spot)
-			pcount++; // ignore this spot in this case
+		if( k_spw && match_in_progress == 2 && self->k_lastspawn == spot )
+			pcount++; // ignore this spot in this case, protection from spawn twice on the same spot
 
 		if ( !pcount ) // valid spawn spot
 		{
@@ -747,7 +748,6 @@ gedict_t       *SelectSpawnPoint()
 		self->k_1spawn = 200;
 
     k_nspots = totalspots; // remember totalspots
-	totalspots--;
 
 	if ( !numspots )
 	{
@@ -755,7 +755,9 @@ gedict_t       *SelectSpawnPoint()
 
 //  bprint (PRINT_HIGH, "Ackk! All spots are full. Selecting random spawn spot\n");
 
-		totalspots = g_random() * totalspots ;
+		rndspots   = g_random() * totalspots;
+		totalspots = bound(0, rndspots, totalspots-1);
+
 		spot = find( world, FOFS( s.v.classname ), "info_player_deathmatch" );
 		while ( totalspots > 0 )
 		{
@@ -806,17 +808,16 @@ gedict_t       *SelectSpawnPoint()
 	}
 // We now have the number of spots available on the map in numspots
 
-// Generate a random number between 1 and numspots
+// Generate a random number between 0 and numspots
 
-	numspots--;
-
-	numspots = g_random() * numspots;
+	rndspots = g_random() * numspots;
+	numspots = bound(0, rndspots, numspots-1);
 
 	spot = spots;
 	while ( numspots > 0 )
 	{
 		spot = PROG_TO_EDICT( spot->s.v.goalentity );
-		numspots = numspots - 1;
+		numspots--;
 	}
 
 
@@ -1800,7 +1801,7 @@ void PlayerPreThink()
 
 //		G_bprint(2, "%s FPS: %3.1f\n", self->s.v.netname, fps);
 		
-		if( fps > current_maxfps + 0.1f ) // 0.1 fps fluctuation is allowed
+		if( fps > current_maxfps + 1 ) // 1 fps fluctuation is allowed :(
 		{
 			float peak = self->fLowestFrameTime ? (1.0f / self->fLowestFrameTime) : 1;
 

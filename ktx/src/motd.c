@@ -37,6 +37,9 @@ void PMOTDThink()
     	|| ( !k_matchLess && match_in_progress )  // non matchless and (match has began or countdown)
 	   	|| ( k_matchLess && match_in_progress == 1 ) // matchless and countdown
 	  ) {
+		if ( self->attack_finished < g_globalvars.time )
+			G_centerprint ( PROG_TO_EDICT( self->s.v.owner ), "");
+
 		ent_remove( self );
 		return;
 	}
@@ -295,23 +298,26 @@ void MOTDStuff()
 void MakeMOTD()
 {
 	gedict_t *motd;
+	int i = bound(0, cvar("k_motd_time"), 30);
 
 	motd = spawn();
 	motd->s.v.classname = "motd";
 	motd->s.v.owner = EDICT_TO_PROG( self );
 	motd->s.v.think = ( func_t ) MOTDStuff;
 	motd->s.v.nextthink = g_globalvars.time + 0.1;
-	motd->attack_finished = g_globalvars.time + ( k_matchLess ? 3 : 7 );
+	motd->attack_finished = g_globalvars.time + (i ? i : ( k_matchLess ? 3 : 7 ));
 }
 
 void SMakeMOTD()
 {
 	gedict_t *motd;
+	int i = bound(0, cvar("k_motd_time"), 30);
 
 	motd = spawn();
-	motd->s.v.classname = "smotd";
+	motd->s.v.classname = "motd";
 	motd->s.v.owner = EDICT_TO_PROG( self );
 	motd->s.v.think = ( func_t ) MOTDThinkX;
 	motd->s.v.nextthink = g_globalvars.time + 0.1;
-	motd->attack_finished = g_globalvars.time + 7;
+	motd->attack_finished = g_globalvars.time + (i ? i : 7 );
 }
+

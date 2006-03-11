@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.21 2006/03/08 22:37:06 qqshka Exp $
+ *  $Id: world.c,v 1.22 2006/03/11 23:13:16 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -420,6 +420,8 @@ void FirstFrame	( )
 	RegisterCvar("k_vp_rpickup"); // votes percentage for rpickup voting
 
 	RegisterCvar("k_end_tele_spawn"); // don't remove end tele spawn
+
+	RegisterCvar("k_motd_time"); 	  // motd time in seconds
 
 	k_matchLess = cvar( "k_matchless" ); // changed only here
 }

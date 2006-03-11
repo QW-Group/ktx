@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.23 2006/03/08 22:37:06 qqshka Exp $
+ *  $Id: g_utils.c,v 1.24 2006/03/11 23:13:16 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -44,7 +44,7 @@ int NUM_FOR_EDICT( gedict_t * e )
 
 float g_random(  )
 {
-	return ( rand(  ) & 0x7fff ) / ( ( float ) 0x7fff );
+	return ( rand(  ) & 0x7fff ) / ( ( float ) 0x8000 );
 }
 
 float crandom(  )
@@ -1372,9 +1372,9 @@ void show_sv_version()
 		return;
 
 	if ( !strnull( tm = ezinfokey(world, "date_str") ) )
-		G_sprint(self, 2, "DATE: %s\n", tm);
-	G_sprint(self, 2, "MOD: %s v.%s build:%05d\n", MOD_NAME, MOD_VERSION, build_number());
-	G_sprint(self, 2, "SERVER: %s\n", cvar_string( "version" ));
+		G_sprint(self, 2, "Date: %s\n", tm);
+	G_sprint(self, 2, "Mod: %s v.%s build:%05d\n", MOD_NAME, MOD_VERSION, build_number());
+	G_sprint(self, 2, "Server: %s\n", cvar_string( "version" ));
 }
 
 

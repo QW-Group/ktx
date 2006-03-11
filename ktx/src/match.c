@@ -1125,9 +1125,8 @@ void SM_PrepareShowscores()
 	if( k_matchLess ) // skip this in matchLess mode
 		return;
 
-	if ( CountRTeams() != 2 ) // we need 2 teams
+	if ( !isTeam() || CountRTeams() != 2 ) // we need 2 teams
 		return;
-
 
 	if ( p = find ( world, FOFCLSN, "player" ) ) 
 		team1 = getteam( p );

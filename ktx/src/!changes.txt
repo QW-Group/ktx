@@ -1,3 +1,17 @@
+2006-03-12 [ver 1.09]
+ 76. Added cvar "k_motd_time".
+
+	 set k_motd_time 5 // set motd time to 5 seconds
+
+	 U can't turn off motd completely, at least one second.
+
+ 77. Added /motd command - just show motd.
+
+2006-03-11 [ver 1.08]
+ 74. Fixed spawn code, thx wit'ka and gLAd.
+
+ 75. /scores fix. No teams in duel.
+
 2006-03-10 [ver 1.07]
  73. /admin command extended. Now u can supply one argumment which will be treated 
 	 as admin password.

@@ -116,9 +116,14 @@ void fav_show ();
 void AutoTrack ( float autoTrackType );
 void next_best ();
 void next_pow ();
+
+// VVD pos_save/pos_move commands {
 void Pos_Show ();
 void Pos_Save ();
 void Pos_Move ();
+// VVD }
+
+void motd_show ();
 
 void TogglePractice();
 
@@ -288,20 +293,21 @@ cmd_t cmds[] = {
     { "18fav_go",    xfav_go,                  18    , CF_SPECTATOR },
     { "19fav_go",    xfav_go,                  19    , CF_SPECTATOR },
     { "20fav_go",    xfav_go,                  20    , CF_SPECTATOR },
-    { "fav_add",      fav_add,                  0    , CF_SPECTATOR | CF_MATCHLESS },
-    { "fav_del",      fav_del,                  0    , CF_SPECTATOR | CF_MATCHLESS },
-    { "fav_all_del",  fav_all_del,              0    , CF_SPECTATOR | CF_MATCHLESS },
-    { "fav_next",     fav_next,                 0    , CF_SPECTATOR | CF_MATCHLESS },
-    { "fav_show",     fav_show,                 0    , CF_SPECTATOR | CF_MATCHLESS },
+    { "fav_add",     fav_add,                   0    , CF_SPECTATOR | CF_MATCHLESS },
+    { "fav_del",     fav_del,                   0    , CF_SPECTATOR | CF_MATCHLESS },
+    { "fav_all_del", fav_all_del,               0    , CF_SPECTATOR | CF_MATCHLESS },
+    { "fav_next",    fav_next,                  0    , CF_SPECTATOR | CF_MATCHLESS },
+    { "fav_show",    fav_show,                  0    , CF_SPECTATOR | CF_MATCHLESS },
     { "+scores",     Sc_Stats,                  2    , CF_BOTH | CF_MATCHLESS },
     { "-scores",     Sc_Stats,                  1    , CF_BOTH | CF_MATCHLESS },
     { "autotrack",   AutoTrack,            atBest    , CF_SPECTATOR | CF_MATCHLESS },
     { "auto_pow",    AutoTrack,             atPow    , CF_SPECTATOR | CF_MATCHLESS },
     { "next_best",   next_best,                 0    , CF_SPECTATOR | CF_MATCHLESS },
     { "next_pow",    next_pow,                  0    , CF_SPECTATOR | CF_MATCHLESS },
-    { "pos_show",     Pos_Show,                 0    , CF_PLAYER | CF_PARAMS },
-    { "pos_save",     Pos_Save,                 0    , CF_PLAYER | CF_PARAMS },
-    { "pos_move",     Pos_Move,                 0    , CF_PLAYER | CF_PARAMS }
+    { "pos_show",    Pos_Show,                  0    , CF_PLAYER | CF_PARAMS },
+    { "pos_save",    Pos_Save,                  0    , CF_PLAYER | CF_PARAMS },
+    { "pos_move",    Pos_Move,                  0    , CF_PLAYER | CF_PARAMS },
+    { "motd",        motd_show,                 0    , CF_BOTH | CF_MATCHLESS }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -3489,9 +3495,6 @@ void Pos_Move ()
 
 	p = PROG_TO_EDICT( g_globalvars.trace_ent );
 
-//	G_bprint(2, "%s %s %s\n", (p == world ? "w" : "nw"), 
-//				(g_globalvars.trace_startsolid ? "ss" : "nss"), p->s.v.classname);
-
 	if (    g_globalvars.trace_startsolid
 		 || ( p != self && p != world && (p->s.v.solid == SOLID_BSP || p->s.v.solid == SOLID_SLIDEBOX) )
        ) {
@@ -3510,12 +3513,38 @@ void Pos_Move ()
 	VectorCopy(pos->velocity, self->s.v.velocity);
 	setorigin (self, PASSVEC3( pos->origin ) ); // u can't just copy, use setorigin
 	VectorCopy(pos->angles, self->s.v.angles);
-	self->s.v.fixangle = true; // qqshka: this is how angles can be set, preved VVD %)))
-	// VVD: Ya proboval - x3 pochemu ne rabotalo...
-	// Vertical'nyy ugol nepravil'no vostanavlivaetsya. :-(
-
+	self->s.v.fixangle = true; // qqshka: this is how angles can be set
 	self->pos_move_time = g_globalvars.time;
 
 	G_sprint(self, 2, "Position %d was restored\n", idx+1);
 }
 // pos_save/pos_move commands }
+
+// /motd command
+
+void PMOTDThink();
+void SMOTDThink();
+
+void motd_show ()
+{
+	gedict_t *motd;
+	int owner = EDICT_TO_PROG( self );
+
+	if ( !k_matchLess ) // show motd in matchLess mode even match in progress
+	if ( match_in_progress )
+		return;
+
+	for( motd = world; motd = find(motd, FOFCLSN, "motd"); )
+		if ( owner == motd->s.v.owner ) {
+			G_sprint(self, 2, "Already showing motd\n");
+			return;
+		}
+
+	motd = spawn();
+	motd->s.v.classname = "motd";
+	motd->s.v.owner = EDICT_TO_PROG( self );
+	// select MOTD for spectator or player
+	motd->s.v.think = ( func_t ) ( self->k_spectator ? SMOTDThink : PMOTDThink );
+	motd->s.v.nextthink = g_globalvars.time + 0.1;
+	motd->attack_finished = g_globalvars.time + 10;
+}
