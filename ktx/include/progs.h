@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.18 2006/03/11 23:34:39 qqshka Exp $
+ *  $Id: progs.h,v 1.19 2006/03/12 18:29:35 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -263,7 +263,6 @@ typedef struct gedict_s {
 // --> timing
 	float k_lastPostThink;  // last time PlayerPostThink or SpectatorThink was called
 	float k_timingWarnTime; // time of last client is timing warning
-	int   k_timingEffects;  // store here effects which was before detecting player is lagged, so we can restore in to the future
 	int   k_timingTakedmg;  // .... so we can restore
 	int   k_timingSolid;    // .... so we can restore
 	int   k_timingMovetype; // .... so we can restore

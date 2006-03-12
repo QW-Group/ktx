@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.22 2006/03/11 23:13:16 qqshka Exp $
+ *  $Id: world.c,v 1.23 2006/03/12 18:30:31 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -603,6 +603,7 @@ float		rj;
 extern float intermission_exittime;
 
 void CheckTiming();
+void Check_sready();
 
 void StartFrame( int time )
 {
@@ -643,6 +644,7 @@ void StartFrame( int time )
 	current_maxfps = bound(50, current_maxfps, 1981);
 
 	CheckTiming(); // check if client lagged or returned from lag
+	Check_sready(); // k_sready stuff
 
 	if ( !CountALLPlayers() && k_pause ) {
 		G_bprint(2, "No players left, unpausing.\n");

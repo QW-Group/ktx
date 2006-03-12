@@ -1724,7 +1724,6 @@ void PlayerReady ()
 
 	self->ready = 1;
 	self->v.brk = 0;
-	self->s.v.effects = self->s.v.effects - ((int)self->s.v.effects & 64);
 	self->k_teamnum = 0;
 
 	G_bprint(2, "%s %s%s\n", self->s.v.netname, redtext("is ready"),
@@ -1772,9 +1771,8 @@ void PlayerBreak ()
 
 	if( !match_in_progress ) {
 		self->ready = 0;
+
 		G_bprint(2, "%s %s\n", self->s.v.netname, redtext("is not ready"));
-		if( iKey( world, "k_sready" ) )
-			self->s.v.effects = self->s.v.effects + 64; // FIXME: hmm clean this
 
 		return;
 	}
@@ -1786,9 +1784,6 @@ void PlayerBreak ()
 			self->ready = 0;
 
 			G_bprint(2, "%s %s\n", self->s.v.netname, redtext("stops the countdown"));
-
-			if( iKey( world, "k_sready" ) )
-				self->s.v.effects = self->s.v.effects + 64;
 
 			StopTimer( 1 );
 		}

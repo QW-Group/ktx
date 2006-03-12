@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.37 2006/03/11 23:13:15 qqshka Exp $
+ *  $Id: client.c,v 1.38 2006/03/12 18:30:30 qqshka Exp $
  */
 
 //===========================================================================
@@ -133,12 +133,8 @@ void CheckTiming()
 				p->k_timingWarnTime = g_globalvars.time;
 			}
 
-			if ( firstTime ) { // ok we are detect - player lagged, so do something
-				if ( timing_players_action & TA_GLOW ) {
-					p->k_timingEffects = ( int ) p->s.v.effects;
-					p->s.v.effects = ( int ) p->s.v.effects | EF_DIMLIGHT;
-				}
-
+			// ok we are detect - player lagged, so do something, effects is exception
+			if ( firstTime ) {
 				if ( timing_players_action & TA_INVINCIBLE ) {
 					p->k_timingTakedmg = p->s.v.takedamage;
 					p->k_timingSolid   = p->s.v.solid;
@@ -161,6 +157,17 @@ void CheckTiming()
 		else
 			p->k_timingWarnTime = 0;
 
+		// effects stuff
+		if ( p->k_timingWarnTime ) {
+			if ( timing_players_action & TA_GLOW )
+				p->s.v.effects = ( int ) p->s.v.effects | EF_DIMLIGHT;
+		}
+		else {
+			// don't bother if player have quad or pent
+			if ( !p->invincible_finished && !p->super_damage_finished )
+				p->s.v.effects = ( int ) p->s.v.effects & ~EF_DIMLIGHT;
+		}
+
 		p = find( p, FOFCLSN, "player" );
 	}
 
@@ -168,6 +175,27 @@ void CheckTiming()
 		G_bprint(2, "You can vote now for %s\n", redtext( "unpause" ) );
 
 	lasttimed = timed;
+}
+
+
+void Check_sready()
+{
+	int k_sready = iKey( world, "k_sready" );
+	gedict_t *p;
+
+	if ( match_in_progress )
+		return;
+
+	for( p = world; p = find( p, FOFCLSN, "player" ); ) {
+		// player have quad - so EF_BLUE will be set or removed anyway, but ugly blinking, so work around
+		if ( p->super_damage_finished )
+			continue;
+
+		if ( k_sready && !p->ready )
+			p->s.v.effects = ( int ) p->s.v.effects | EF_BLUE;
+		else
+			p->s.v.effects = ( int ) p->s.v.effects & ~EF_BLUE;
+	}
 }
 
 /*
@@ -997,7 +1025,6 @@ void PutClientInServer()
 
 	player_stand1();
 
-#ifdef KTEAMS
     if (  1 /* deathmatch */ /*|| coop FIXME: remove??? */)
     {
 
@@ -1043,7 +1070,7 @@ void PutClientInServer()
 					self->super_damage_finished = g_globalvars.time + 3600;
 				}
 
-				if( atoi( ezinfokey( world, "k_666" ) ) ) {
+				if( iKey( world, "k_666" ) ) {
 					stuffcmd (self, "bf\n");
 					self->invincible_time = 1;
 					self->invincible_finished = g_globalvars.time + 2;
@@ -1055,7 +1082,6 @@ void PutClientInServer()
 
 		}
 	}
-#endif
 
 //	makevectors( self->s.v.angles );
 //	VectorScale( g_globalvars.v_forward, 20, v );
@@ -1523,9 +1549,6 @@ void BackFromLag()
 	if ( timing_players_action & TA_INFO )
 		G_bprint(2, "%s %s\n", self->s.v.netname, redtext( "is back from lag") );
 
-	if ( timing_players_action & TA_GLOW )
-		self->s.v.effects = self->k_timingEffects;
-
 	if ( timing_players_action & TA_INVINCIBLE ) {
 		self->s.v.takedamage = self->k_timingTakedmg;
 		self->s.v.solid 	 = self->k_timingSolid;
@@ -1922,6 +1945,9 @@ Check for turning off powerups
 */
 void CheckPowerups()
 {
+	qboolean qlon = false;
+	qboolean plon = false;
+
 	if ( ISDEAD( self ) )
 		return;
 
@@ -1972,11 +1998,7 @@ void CheckPowerups()
 	if ( self->invincible_finished )
 	{
 // sound and screen flash when items starts to run out
-#ifdef KTEAMS
 		if(self->invincible_finished < g_globalvars.time + 3 && !self->k_666)	//team
-#else
-		if(self->invincible_finished < g_globalvars.time + 3)
-#endif
 		{
 			if ( self->invincible_time == 1 )
 			{
@@ -1999,35 +2021,28 @@ void CheckPowerups()
 			self->s.v.items -= IT_INVULNERABILITY;
 			self->invincible_time = 0;
 			self->invincible_finished = 0;
-#ifdef KTEAMS
 			self->k_666 = 0;		//team
-#endif
 		}
 
-#ifdef KTEAMS
 		if(self->invincible_finished > g_globalvars.time && !self->k_666) // KTeAMS
-#else
-		if ( self->invincible_finished > g_globalvars.time )
-#endif
 		{
+			plon = true;
 			self->s.v.effects = ( int ) self->s.v.effects | EF_DIMLIGHT;
 			self->s.v.effects = ( int ) self->s.v.effects | EF_RED;
 		}
 		else
 		{
-			self->s.v.effects -= ( ( int ) self->s.v.effects & EF_DIMLIGHT );
+			if ( !qlon ) // EF_DIMLIGHT shared between quad and pent
+				self->s.v.effects -= ( ( int ) self->s.v.effects & EF_DIMLIGHT );
 			self->s.v.effects -= ( ( int ) self->s.v.effects & EF_RED );
 		}
 	}
+
 // super damage
 	if ( self->super_damage_finished )
 	{
 // sound and screen flash when items starts to run out
-#ifdef KTEAMS
 		if(self->super_damage_finished < g_globalvars.time + 3 && !k_berzerk)	//team
-#else
-		if ( self->super_damage_finished < g_globalvars.time + 3 )
-#endif
 		{
 			if ( self->super_time == 1 )
 			{
@@ -2049,11 +2064,7 @@ void CheckPowerups()
 			}
 		}
 
-#ifdef KTEAMS
         if(self->super_damage_finished < g_globalvars.time && !k_berzerk)	//team
-#else
-		if ( self->super_damage_finished < g_globalvars.time )
-#endif
 		{		// just stopped
 			self->s.v.items -= IT_QUAD;
 			if ( deathmatch == 4 )
@@ -2069,15 +2080,18 @@ void CheckPowerups()
 
 		if ( self->super_damage_finished > g_globalvars.time )
 		{
+			qlon = true;
 			self->s.v.effects = ( int ) self->s.v.effects | EF_DIMLIGHT;
 			self->s.v.effects = ( int ) self->s.v.effects | EF_BLUE;
 		}
 		else
 		{
-			self->s.v.effects -= ( ( int ) self->s.v.effects & EF_DIMLIGHT );
+			if ( !plon ) // EF_DIMLIGHT shared between quad and pent
+				self->s.v.effects -= ( ( int ) self->s.v.effects & EF_DIMLIGHT );
 			self->s.v.effects -= ( ( int ) self->s.v.effects & EF_BLUE );
 		}
 	}
+
 // suit 
 	if ( self->radsuit_finished )
 	{
