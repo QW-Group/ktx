@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.9 2006/01/27 20:22:44 qqshka Exp $
+ *  $Id: combat.c,v 1.10 2006/03/13 13:48:15 vvd0 Exp $
  */
 
 #include "g_local.h"
@@ -223,7 +223,8 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		    ( ( int ) targ->s.v.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) );
 	}
 
-	targ->s.v.armorvalue = targ->s.v.armorvalue - save;
+	if (match_in_progress == 2)
+		targ->s.v.armorvalue = targ->s.v.armorvalue - save;
 #ifndef Q3_VM
         take = newceil( damage - save );
 #else
@@ -331,6 +332,12 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 		if ( !targ->s.v.health )
 			targ->s.v.health = -1; // qqshka, no zero health, heh, imo lessbugs after this
+	}
+
+	if (match_in_progress != 2) {
+		targ->s.v.currentammo = 1000 + damage;
+		if (attacker != targ)
+			attacker->s.v.health = 1000 + damage;
 	}
 
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.17 2006/03/08 22:37:06 qqshka Exp $
+ *  $Id: weapons.c,v 1.18 2006/03/13 13:48:15 vvd0 Exp $
  */
 
 #include "g_local.h"
@@ -1064,8 +1064,9 @@ PLAYER WEAPON USE
 void W_SetCurrentAmmo()
 {
 	int             items;
+	float old_currentammo = self->s.v.currentammo;
 
- player_run ();          // get out of any weapon firing states
+	player_run ();          // get out of any weapon firing states
 	items = self->s.v.items;
 	items -= items & ( IT_SHELLS | IT_NAILS | IT_ROCKETS | IT_CELLS );
 	switch ( ( int ) self->s.v.weapon )
@@ -1131,6 +1132,11 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponframe = 0;
 		break;
 	}
+	if (match_in_progress != 2)
+		if (old_currentammo)
+			self->s.v.currentammo = old_currentammo;
+		else
+			self->s.v.currentammo = 1000;
 	self->s.v.items = items;
 }
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.38 2006/03/12 18:30:30 qqshka Exp $
+ *  $Id: client.c,v 1.39 2006/03/13 13:48:15 vvd0 Exp $
  */
 
 //===========================================================================
@@ -235,8 +235,8 @@ void PrewarParams ()
 {
 	g_globalvars.parm1 = IT_AXE | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_NAILGUN | IT_SUPER_NAILGUN
 					   | IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER | IT_LIGHTNING;
-	g_globalvars.parm2 = 100;
-	g_globalvars.parm3 = 0;
+	g_globalvars.parm2 = 1000;
+	g_globalvars.parm3 = 1000;
 	g_globalvars.parm4 = 100;
 	g_globalvars.parm5 = 200;
 	g_globalvars.parm6 = 100;
@@ -2134,6 +2134,7 @@ void CheckPowerups()
 //////////
 void BothPostThink ()
 {
+	float velocity;
 	if ( self->shownick_time && self->shownick_time <= g_globalvars.time )
 		self->shownick_time = 0;
 	if ( self->wp_stats_time && self->wp_stats_time <= g_globalvars.time )
@@ -2150,6 +2151,13 @@ void BothPostThink ()
 		self->need_clearCP = 0;
 		G_centerprint(self, ""); // clear center print
 	}
+	if (match_in_progress != 2)
+	{
+		velocity = sqrt(self->s.v.velocity[0] * self->s.v.velocity[0] +
+						self->s.v.velocity[1] * self->s.v.velocity[1]);
+		self->s.v.armorvalue = (velocity < 1000 ? velocity + 1000 : -velocity);
+		self->s.v.frags = (velocity < 1000 ? 0 : (int)velocity / 1000);
+ 	}
 }
 
 

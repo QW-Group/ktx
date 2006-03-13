@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.5 2006/02/04 13:10:00 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.6 2006/03/13 13:48:15 vvd0 Exp $
  */
 
 #include "g_local.h"
@@ -31,6 +31,22 @@ void            ClientKill();
 void			SelectMap();
 void			cmdinfo ();
 void			cmduinfo ();
+
+// VVD: Need for executing commands by 'cmd cc <CMD_NAME> <ARG1> ... <ARGn>',
+// because '<CMD_NAME> <ARG1> ... <ARGn>' work only with last ezQuake qw client.
+// Function only_digits was copied from bind (DNS server) sources.
+int only_digits(const char *s)
+{
+	if (*s == '\0')
+		return (0);
+	while (*s != '\0')
+	{
+		if (!isdigit(*s))
+			return (0);
+		s++;
+	}
+	return (1);
+}
 
 qboolean 	ClientCommand()
 {
@@ -57,7 +73,12 @@ qboolean 	ClientCommand()
 	else if ( !strcmp( cmd_command, "cc" ) ) {
 		if ( trap_CmdArgc() >= 2 ) {
 			trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
-			DoCommand ( atoi( arg_1 ) );
+// VVD: Need for executing commands by 'cmd cc <CMD_NAME> <ARG1> ... <ARGn>',
+// because '<CMD_NAME> <ARG1> ... <ARGn>' work only with last ezQuake qw client.
+			if (only_digits(arg_1))
+				DoCommand ( atoi( arg_1 ) );
+			else
+				DoCommand_Name ( arg_1 );
 		}
 		return true;
 	}

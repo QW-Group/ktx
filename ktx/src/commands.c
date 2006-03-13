@@ -116,12 +116,10 @@ void fav_show ();
 void AutoTrack ( float autoTrackType );
 void next_best ();
 void next_pow ();
-
-// VVD pos_save/pos_move commands {
 void Pos_Show ();
 void Pos_Save ();
 void Pos_Move ();
-// VVD }
+void Pos_Set ();
 
 void motd_show ();
 
@@ -304,9 +302,15 @@ cmd_t cmds[] = {
     { "auto_pow",    AutoTrack,             atPow    , CF_SPECTATOR | CF_MATCHLESS },
     { "next_best",   next_best,                 0    , CF_SPECTATOR | CF_MATCHLESS },
     { "next_pow",    next_pow,                  0    , CF_SPECTATOR | CF_MATCHLESS },
-    { "pos_show",    Pos_Show,                  0    , CF_PLAYER | CF_PARAMS },
-    { "pos_save",    Pos_Save,                  0    , CF_PLAYER | CF_PARAMS },
-    { "pos_move",    Pos_Move,                  0    , CF_PLAYER | CF_PARAMS },
+    { "pos_show",        Pos_Show,              0    , CF_BOTH | CF_PARAMS },
+    { "pos_save",        Pos_Save,              0    , CF_BOTH | CF_PARAMS },
+    { "pos_move",        Pos_Move,              0    , CF_BOTH | CF_PARAMS },
+// VVD: For trick chiters! :-)
+// Need to think out how to limit using Pos_Set for tricking.
+// May be to ban pos_set_velocity?
+    { "pos_set_origin",  Pos_Set,               1    , CF_BOTH | CF_PARAMS },
+    { "pos_set_angles",  Pos_Set,               2    , CF_BOTH | CF_PARAMS },
+//    { "pos_set_velocity",Pos_Set,               3    , CF_BOTH | CF_PARAMS },
     { "motd",        motd_show,                 0    , CF_BOTH | CF_MATCHLESS }
 };
 
@@ -355,6 +359,18 @@ int DoCommand(int icmd)
 		( cmds[icmd].f )  ();
 
 	return icmd;
+}
+// VVD: Need for executing commands by 'cmd cc <CMD_NAME> <ARG1> ... <ARGn>',
+// because '<CMD_NAME> <ARG1> ... <ARGn>' work only with last ezQuake qw client.
+int DoCommand_Name(char *cmd_name)
+{
+	int i;
+	for (i = 0; i < cmds_cnt; ++i) {
+		if (!strcmp(cmds[i].name, cmd_name)) {
+			return DoCommand(i);
+		}
+	}
+	return -1;
 }
 
 // check if players client support params in aliases
@@ -3430,11 +3446,19 @@ void Pos_Show ()
 	G_sprint(self, 2, " v_angle: %9.2f %9.2f %9.2f\n", PASSVEC3(self->s.v.v_angle));
 }
 
+void DoPos_Save (int idx)
+{
+	pos_t *pos = &(self->pos[idx]);
+
+	VectorCopy(self->s.v.velocity, pos->velocity);
+	VectorCopy(self->s.v.origin, pos->origin);
+	VectorCopy(self->s.v.v_angle, pos->v_angle);
+}
+
 void Pos_Save ()
 {
 	char arg_3[1024];
 	int idx = 0;
-	pos_t *pos;
 
 	if ( match_in_progress )
 		return;
@@ -3448,47 +3472,17 @@ void Pos_Save ()
 		idx = bound( 0, atoi(arg_3) - 1, MAX_POSITIONS - 1 );
 	}
 
-	pos = &(self->pos[idx]);
-
-	VectorCopy(self->s.v.velocity, pos->velocity);
-	VectorCopy(self->s.v.origin, pos->origin);
-	VectorCopy(self->s.v.v_angle, pos->v_angle);
-
+	DoPos_Save(idx);
 	G_sprint(self, 2, "Position %d was saved\n", idx+1);
 }
 
 extern vec3_t	VEC_HULL_MIN;
 extern vec3_t	VEC_HULL_MAX;
 
-void Pos_Move ()
+void DoPos_Move (int idx)
 {
-	char arg_3[1024];
-	int idx = 0;
-	pos_t *pos;
 	gedict_t *p;
-
-	if ( match_in_progress )
-		return;
-
-	if ( k_pause || intermission_running ) 
-		return;
-
-	// parse /pos_move <number>
-	if (trap_CmdArgc() == 3) {
-		trap_CmdArgv( 2, arg_3, sizeof( arg_3 ) );
-		idx = bound( 0, atoi(arg_3) - 1, MAX_POSITIONS - 1 );
-	}
-
-	pos = &(self->pos[idx]);
-
-	if ( VectorCompare(pos->origin, VEC_ORIGIN) ) {
-		G_sprint(self, 2, "Save your position first\n");
-		return;
-	}
-
-	if ( VectorCompare(pos->origin, self->s.v.origin) )
-		return;
-
+	pos_t *pos = &(self->pos[idx]);
 
 	TraceCapsule( PASSVEC3( pos->origin ), PASSVEC3( pos->origin ), false, self,
 				  PASSVEC3(VEC_HULL_MIN), PASSVEC3(VEC_HULL_MAX));
@@ -3507,8 +3501,9 @@ void Pos_Move ()
 		return;
 	}
 
-	spawn_tfog(self->s.v.origin);
-	spawn_tfog(pos->origin);
+	// VVD: Don't want tele at pos_move - trick with tele is not good-looking. :-)
+	//spawn_tfog(self->s.v.origin);
+	//spawn_tfog(pos->origin);
 
 	VectorCopy(pos->velocity, self->s.v.velocity);
 	setorigin (self, PASSVEC3( pos->origin ) ); // u can't just copy, use setorigin
@@ -3518,6 +3513,77 @@ void Pos_Move ()
 	self->pos_move_time = g_globalvars.time;
 
 	G_sprint(self, 2, "Position %d was restored\n", idx+1);
+}
+
+void Pos_Move ()
+{
+	char arg_3[1024];
+	int idx = 0;
+	pos_t *pos;
+
+	if ( match_in_progress || k_pause || intermission_running )
+		return;
+
+	// parse /pos_move <number>
+	if (trap_CmdArgc() == 3) {
+		trap_CmdArgv( 2, arg_3, sizeof( arg_3 ) );
+		idx = bound( 0, atoi(arg_3) - 1, MAX_POSITIONS - 1 );
+	}
+
+	pos = &(self->pos[idx]);
+
+	if ( VectorCompare(pos->origin, VEC_ORIGIN) ) {
+		G_sprint(self, 2, "Save your position first\n");
+		return;
+	}
+
+	if ( VectorCompare(pos->origin, self->s.v.origin) )
+		return;
+
+	DoPos_Move(idx);
+	G_sprint(self, 2, "Position %d was restored\n", idx+1);
+}
+// VVD: For trick chiters! :-)
+// Need to think out how to limit using Pos_Set for tricking.
+// May be to ban pos_set_velocity?
+void Pos_Set (float set_type)
+{
+	char arg[1024];
+	float x1, x2, x3;
+	pos_t *pos;
+
+	if ( match_in_progress || k_pause || intermission_running )
+		return;
+
+	if (trap_CmdArgc() != 5) {
+		G_sprint(self, 2, "Usage: pos_set_{origin|angles"/*|velocity*/"} x1 x2 x3\n");
+		return;
+	}
+
+	trap_CmdArgv( 2, arg, sizeof( arg ) );
+	x1 = atof(arg);
+	trap_CmdArgv( 3, arg, sizeof( arg ) );
+	x2 = atof(arg);
+	trap_CmdArgv( 4, arg, sizeof( arg ) );
+	x3 = atof(arg);
+
+	DoPos_Save(MAX_POSITIONS);
+	pos = &(self->pos[MAX_POSITIONS]);
+	switch ((int)set_type)
+	{
+		case 1:
+			VectorSet(pos->origin, x1, x2, x3);
+			break;
+		case 2:
+			VectorSet(pos->v_angles, x1, x2, x3);
+			break;
+		case 3:
+			VectorSet(pos->velocity, x1, x2, x3);
+			break;
+		default:;
+	}
+	DoPos_Move(MAX_POSITIONS);
+	G_sprint(self, 2, "Position was seted\n");
 }
 // pos_save/pos_move commands }
 
