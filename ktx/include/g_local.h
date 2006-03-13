@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.28 2006/03/11 23:13:33 qqshka Exp $
+ *  $Id: g_local.h,v 1.29 2006/03/13 14:17:03 vvd0 Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -361,6 +361,7 @@ extern cmd_t cmds[];
 extern int cmds_cnt; // count of commands in 'cmds'
 
 int DoCommand(int icmd);
+int DoCommand_Name(char *cmd_name);
 
 void Init_cmds(void);
 

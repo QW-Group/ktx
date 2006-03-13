@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: mathlib.h,v 1.3 2006/01/09 18:50:12 qqshka Exp $
+ *  $Id: mathlib.h,v 1.4 2006/03/13 14:17:03 vvd0 Exp $
  */
 
 // mathlib.h
@@ -58,6 +58,7 @@ extern	int nanmask;
 #define VectorAdd(a,b,c)		{c[0]=a[0]+b[0];c[1]=a[1]+b[1];c[2]=a[2]+b[2];}
 #define VectorCopy(a,b)			{b[0]=a[0];b[1]=a[1];b[2]=a[2];}
 #define VectorClear(a)			(a[0]=a[1]=a[2]=0)
+#define VectorSet(v,x,y,z)		(v[0]=(x),v[1]=(y),v[2]=(z))
 
 void VectorMA (vec3_t veca, float scale, vec3_t vecb, vec3_t vecc);
 

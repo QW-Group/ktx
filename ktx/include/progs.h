@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.19 2006/03/12 18:29:35 qqshka Exp $
+ *  $Id: progs.h,v 1.20 2006/03/13 14:17:03 vvd0 Exp $
  */
 
 #include "progdefs.h"
@@ -293,7 +293,7 @@ typedef struct gedict_s {
 	int	  autotrack_id;		    // latest autotrack id, store this to detect is user want implicitly turn of autotrack
 // }
 
-	pos_t	pos[MAX_POSITIONS];	// for player pos_save / pos_move
+	pos_t	pos[MAX_POSITIONS + 1];	// for player pos_save / pos_move
 	float	pos_move_time;		// for player pos_save / pos_move
 #endif
 
