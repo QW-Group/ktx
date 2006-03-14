@@ -3549,8 +3549,9 @@ void Pos_Move ()
 void Pos_Set (float set_type)
 {
 	char arg[1024];
-	float x1, x2, x3;
 	pos_t *pos;
+	vec3_t	*x = NULL;
+	int i;
 
 	if ( match_in_progress || k_pause || intermission_running )
 		return;
@@ -3560,28 +3561,30 @@ void Pos_Set (float set_type)
 		return;
 	}
 
-	trap_CmdArgv( 2, arg, sizeof( arg ) );
-	x1 = atof(arg);
-	trap_CmdArgv( 3, arg, sizeof( arg ) );
-	x2 = atof(arg);
-	trap_CmdArgv( 4, arg, sizeof( arg ) );
-	x3 = atof(arg);
-
-	DoPos_Save(MAX_POSITIONS);
 	pos = &(self->pos[MAX_POSITIONS]);
 	switch ((int)set_type)
 	{
 		case 1:
-			VectorSet(pos->origin, x1, x2, x3);
+			x = &(pos->origin);
 			break;
 		case 2:
-			VectorSet(pos->v_angles, x1, x2, x3);
+			x = &(pos->v_angle);
 			break;
 		case 3:
-			VectorSet(pos->velocity, x1, x2, x3);
+			x = &(pos->velocity);
 			break;
-		default:;
+		default:
+			return;
 	}
+
+	DoPos_Save(MAX_POSITIONS);
+
+	for (i = 0; i < 3; ++i) {
+		trap_CmdArgv( i + 2, arg, sizeof( arg ) );
+		if (strcmp(arg, "*"))
+			(*x)[i] = atof(arg);
+	}
+
 	DoPos_Move(MAX_POSITIONS);
 	G_sprint(self, 2, "Position was seted\n");
 }
