@@ -119,7 +119,7 @@ void next_pow ();
 void Pos_Show ();
 void Pos_Save ();
 void Pos_Move ();
-void Pos_Set ();
+void Pos_Set (float set_type);
 
 void motd_show ();
 
