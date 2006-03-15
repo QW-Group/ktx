@@ -3531,7 +3531,7 @@ void DoPos_Move (int idx)
 	self->s.v.fixangle = true; // qqshka: this is how angles can be set
 	self->pos_move_time = g_globalvars.time;
 
-	G_sprint(self, 2, "Position %d was restored\n", idx+1);
+//	G_sprint(self, 2, "Position %d was restored\n", idx+1);
 }
 
 void Pos_Move ()
