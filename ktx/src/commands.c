@@ -1858,13 +1858,32 @@ void PrintScores()
 	int minutes, seconds;
 	gedict_t *p;
 
-	if( match_in_progress != 2 ) {
-		G_sprint(self, 2, "no game - no scores.\n");
+	if ( intermission_running ) {
+		G_sprint(self, 2, "Intermission\n");
 		return;
 	}
 
-	if( k_sudden_death )                
+	if( !match_in_progress ) {
+		G_sprint(self, 2, "no game - no scores\n");
+		return;
+	}
+
+	if( match_in_progress == 1 ) {
+		G_sprint(self, 2, "Countdown\n");
+		return;
+	}
+
+	if( k_sudden_death ) {
 		G_sprint(self, 2, "Sudden death %s\n", redtext("overtime in progress"));
+	}
+	else {
+		if ( fraglimit && (p = get_ed_scores1()) ) {
+			int diff = fraglimit - p->s.v.frags;
+
+			if ( diff >= 0 )
+				G_sprint(self, 2, "Frags left: \x90%s\x91\n", dig3s("%2d", diff));
+		}
+	}
 
 	if( p = find(world, FOFCLSN, "timer") ) {
 		minutes = p->cnt;

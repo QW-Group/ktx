@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.39 2006/03/13 13:48:15 vvd0 Exp $
+ *  $Id: client.c,v 1.40 2006/03/15 16:49:22 qqshka Exp $
  */
 
 //===========================================================================
@@ -870,6 +870,8 @@ void ClientConnect()
 
 	Vip_ShowRights( self );
 #endif
+
+	k_nochange = 0;
 
 
 //	if (deathmatch /*|| coop*/ )
@@ -2316,10 +2318,10 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
         {
 #ifdef KTEAMS
             if( streq( ezinfokey( targ, "gender" ), "f" )) 
-                G_bprint (PRINT_MEDIUM, "%s electrocutes herself.\n ", targ->s.v.netname);
+                G_bprint (PRINT_MEDIUM, "%s electrocutes herself\n ", targ->s.v.netname);
             else 
 #endif
-                G_bprint (PRINT_MEDIUM, "%s electrocutes himself.\n ", targ->s.v.netname);
+                G_bprint (PRINT_MEDIUM, "%s electrocutes himself\n ", targ->s.v.netname);
 
             targ->s.v.frags -=  1;
             return;
@@ -2420,25 +2422,21 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
     if ( streq( attacker->s.v.classname, "player" ) ) 
     {
-#ifdef KTEAMS
             // included big part starts to handle optional new death messages :p
 			if( iKey( world, "k_deathmsg" ) ) {
-#endif
 				if ( targ == attacker )
 				{
 					// killed self, KTeams version
 					logfrag (attacker, attacker);
 					attacker->s.v.frags -= 1;
 
-					if (targ->deathtype == "grenade")
+					if ( streq( targ->deathtype, "grenade" ) )
                         deathstring = " tries to put the pin back in\n";
-					else if (targ->deathtype == "rocket")
+					else if ( streq( targ->deathtype, "rocket" ) )
 					{
-#ifdef KTEAMS
 						if (rnum < 0.5)
                             deathstring = " discovers blast radius\n";
 						else
-#endif
                             deathstring = " becomes bored with life\n";
 					}
 					else if (targ->s.v.weapon == 64 && targ->s.v.waterlevel > 1)
@@ -2447,15 +2445,13 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
                             deathstring = " discharges into the slime\n";
                         else if (targ->s.v.watertype == CONTENT_LAVA)
                             deathstring = " discharges into the lava\n";
-#ifdef KTEAMS
 						else if (g_random() < 0.5)
-                            deathstring = " heats up the water.\n";
-#endif
+                            deathstring = " heats up the water\n";
 						else
-                            deathstring = " discharges into the water.\n";
+                            deathstring = " discharges into the water\n";
 					}
 					else
-                        deathstring = " becomes bored with life.\n"; // hm, and how it is possible?
+                        deathstring = " becomes bored with life\n"; // hm, and how it is possible?
 
 					G_bprint (PRINT_MEDIUM, "%s%s", targ->s.v.netname, deathstring);
                     return;
@@ -2468,11 +2464,9 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 //                        rnum = rnum * 0.5;	// only use the first two messages
 					if( rnum < 0.25 ) 
 					{
-#ifdef KTEAMS
-                        if( streq( ezinfokey( PROG_TO_EDICT( attacker->s.v.owner ), "gender") , "f" ) ) 
+                        if( streq( ezinfokey( attacker, "gender" ) , "f" ) ) 
                             deathstring = " checks her glasses\n";
 						else 
-#endif
                             deathstring = " checks his glasses\n";
 					}
 					else if( rnum < 0.5 ) 
@@ -2483,9 +2477,8 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
                         deathstring = " mows down a teammate\n";
 					G_bprint (PRINT_MEDIUM, "%s%s", attacker->s.v.netname, deathstring);
 					attacker->s.v.frags -= 1;
-#ifdef KTEAMS
 					attacker->friendly += 1;
-#endif
+
 					//ZOID 12-13-96:  killing a teammate logs as suicide
 					logfrag (attacker, attacker);
 					return;
@@ -2647,7 +2640,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 						else if ( targ->s.v.watertype == -5 )
 							G_bprint (PRINT_MEDIUM," discharges into the lava\n");
 						else
-        					G_bprint (PRINT_MEDIUM," discharges into the water.\n");
+        					G_bprint (PRINT_MEDIUM," discharges into the water\n");
 					}
                     else
 						G_bprint (PRINT_MEDIUM," becomes bored with life\n");

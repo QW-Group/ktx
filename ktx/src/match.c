@@ -1185,7 +1185,8 @@ void StartMatch ()
 	if ( !k_matchLess || cvar( "k_matchless_countdown" ) )
 		G_bprint(2, "The match has begun!\n");
 
-	{ // spec silence
+// spec silence
+	{ 
 		int fpd = iKey( world, "fpd" );
 		int k_spectalk = bound(0, iKey(world, "k_spectalk"), 1);
 		localcmd( "sv_spectalk %d\n", k_spectalk);

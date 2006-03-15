@@ -1,3 +1,8 @@
+2006-03-14 [ver 1.10]
+ 79. /scores extended a bit.
+
+ 80. gl an rl suicide death msgs bug fix, thx gLAd.
+
 2006-03-12 [ver 1.09]
  76. Added cvar "k_motd_time".
 
