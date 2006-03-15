@@ -42,6 +42,7 @@ char *strstr( const char *string, const char *strCharSet );
 char *strncpy( char *strDest, const char *strSource, size_t count );
 int tolower( int c );
 int toupper( int c );
+#define isdigit( c )	( (c) >= '0' && (c) <= '9' )
 
 double atof( const char *string );
 double _atof( const char **stringPtr );
