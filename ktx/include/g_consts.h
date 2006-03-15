@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_consts.h,v 1.4 2006/03/08 22:37:23 qqshka Exp $
+ *  $Id: g_consts.h,v 1.5 2006/03/15 22:16:30 qqshka Exp $
  */
 
 //
@@ -241,3 +241,15 @@
 #define   H_ROTTEN  (1)
 #define   H_MEGA    (2)
 
+// kombat flags
+#define KF_KTSOUNDS    (   1)   // use KTSounds
+#define KF_SCREEN      (   2)   // use autoscreenshot 
+//                     4     	use cfgmap
+//                     8     	female gender if it is set, if not - male
+//                     16    	based on server type called alias (see below)
+//                     32    	don't call on_enter event (every map change)
+#define KF_SPEED       (  64)   // show speed in prewar
+//                     128   	if it is set mod will call menu_in.cfg
+//                     256   	if it is set menu_out.cfg will be not called
+//                     512   	use dmm related map cfg
+//                     (1024)  	do not use stuff sounds

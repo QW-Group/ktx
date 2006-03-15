@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.40 2006/03/15 16:49:22 qqshka Exp $
+ *  $Id: client.c,v 1.41 2006/03/15 22:15:39 qqshka Exp $
  */
 
 //===========================================================================
@@ -505,7 +505,7 @@ void execute_changelevel()
 // KTEAMS: make players invisible
         other->s.v.model = "";
 		// take screenshot if requested
-        if( atoi( ezinfokey( other, "kf" ) ) & 2 )
+        if( iKey( other, "kf" ) & KF_SCREEN )
 			stuffcmd(other, "wait; wait; wait; wait; wait; wait; screenshot\n");
 
 		other = find( other, FOFS( s.v.classname ), "player" );
@@ -2136,7 +2136,6 @@ void CheckPowerups()
 //////////
 void BothPostThink ()
 {
-	float velocity;
 	if ( self->shownick_time && self->shownick_time <= g_globalvars.time )
 		self->shownick_time = 0;
 	if ( self->wp_stats_time && self->wp_stats_time <= g_globalvars.time )
@@ -2153,13 +2152,6 @@ void BothPostThink ()
 		self->need_clearCP = 0;
 		G_centerprint(self, ""); // clear center print
 	}
-	if (match_in_progress != 2)
-	{
-		velocity = sqrt(self->s.v.velocity[0] * self->s.v.velocity[0] +
-						self->s.v.velocity[1] * self->s.v.velocity[1]);
-		self->s.v.armorvalue = (velocity < 1000 ? velocity + 1000 : -velocity);
-		self->s.v.frags = (velocity < 1000 ? 0 : (int)velocity / 1000);
- 	}
 }
 
 
@@ -2281,6 +2273,20 @@ void PlayerPostThink()
 	CheckPowerups();
 
 	W_WeaponFrame();
+
+	if ( !match_in_progress )
+	{
+		if ( iKey( self, "kf" ) & KF_SPEED ) {
+			float velocity = sqrt(self->s.v.velocity[0] * self->s.v.velocity[0] + 
+								self->s.v.velocity[1] * self->s.v.velocity[1]);
+			self->s.v.armorvalue = (velocity < 1000 ? velocity + 1000 : -velocity);
+			self->s.v.frags = (velocity < 1000 ? 0 : (int)velocity / 1000);
+		}
+		else {
+			self->s.v.armorvalue = 1000;
+			self->s.v.frags = 0;
+		}
+ 	}
 }
 
 /*

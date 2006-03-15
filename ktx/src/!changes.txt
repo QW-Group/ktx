@@ -1,3 +1,19 @@
+2006-03-16 [ver 1.11]
+ 81. Now in prewar weapon ammo show which damage u take and health show which damage u give,
+	 armor show horizontal speed, but show speed u must activate via /kinfo kf 64
+
+	 done by VVD.
+
+ 82. VVD added really nice feature, as u know aliases with params supported by ezQuake only,
+	 fuhQuake, mqwcl and Zquake does't support such aliases. So VVD made trik.
+	 I show u example with /admin command which have one optional parammeter.
+
+	 I'm use "/admin CoolPass" in ezQuake, but how about fuhQuake and other clients?
+	 U must use "/cmd cc admin CoolPass" in this cases, this must work in any client.
+
+ 83. Also VVD added "/pos_set_angles" and "/pos_set_origin" commands, but this commands 
+	 need to be tweaked a bit.
+
 2006-03-14 [ver 1.10]
  79. /scores extended a bit.
 

@@ -119,7 +119,7 @@ void next_pow ();
 void Pos_Show ();
 void Pos_Save ();
 void Pos_Move ();
-void Pos_Set (float set_type);
+void Pos_Set ( float set_type );
 
 void motd_show ();
 
@@ -365,6 +365,10 @@ int DoCommand(int icmd)
 int DoCommand_Name(char *cmd_name)
 {
 	int i;
+
+	if ( strnull( cmd_name ) )
+		return -1;
+
 	for (i = 0; i < cmds_cnt; ++i) {
 		if (!strcmp(cmds[i].name, cmd_name)) {
 			return DoCommand(i);
@@ -1841,8 +1845,9 @@ void TeamSay(float fsndname)
 
     p = find( world, FOFCLSN, "player" );
 	while( p ) {
-		if( p != self && teamplay && !strnull( p->s.v.netname ) &&
-			 ( atoi( ezinfokey( p, "kf" ) ) & 1 ) ) {
+		if( p != self && teamplay && !strnull( p->s.v.netname )
+			&& ( iKey( p, "kf" ) & KF_KTSOUNDS ) 
+		   ) {
 			if( streq( ezinfokey(self, "team"), ezinfokey(p, "team") ) ) {
 				char *t1 = ezinfokey(p, "k_sdir");
 				stuffcmd(p, "play %s%s\n", (strnull( t1 ) ? "" : va("%s/", t1)), sndname);
