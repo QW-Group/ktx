@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.31 2006/03/15 22:16:30 qqshka Exp $
+ *  $Id: g_local.h,v 1.32 2006/03/16 20:18:17 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -228,6 +228,7 @@ int			Get_Powerups ();
 
 char 		*count_s( int cnt );
 char		*Enables( float f );
+char		*Enabled( float f );
 char		*Allows( float f );
 char		*OnOff( float f );
 
@@ -245,6 +246,8 @@ gedict_t	*get_ed_bestPow();
 
 void		show_sv_version();
 char		*str_noweapon(int k_disallow_weapons);
+
+void		cvar_toggle_msg( gedict_t *p, char *cvarName, char *msg );
 
 void    	disableupdates( gedict_t * ed, float time );
 
