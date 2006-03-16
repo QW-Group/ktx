@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.42 2006/03/16 20:35:09 qqshka Exp $
+ *  $Id: client.c,v 1.43 2006/03/16 21:48:02 qqshka Exp $
  */
 
 //===========================================================================
@@ -2274,7 +2274,7 @@ void PlayerPostThink()
 
 	W_WeaponFrame();
 
-	if ( !match_in_progress && !intermission_running )
+	if ( !match_in_progress && !match_over )
 	{
 		if ( iKey( self, "kf" ) & KF_SPEED ) {
 			float velocity = sqrt(self->s.v.velocity[0] * self->s.v.velocity[0] + 
