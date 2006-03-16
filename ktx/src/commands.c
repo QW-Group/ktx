@@ -1017,7 +1017,7 @@ void ModStatus2()
 	G_sprint(self, 2, "ΡιΪνο εξενω ςεποςτιξη: %s\n", ( (int)f1 &  32 ? "off" : "on" ));
 	G_sprint(self, 2, "ΡιΪνο ποιξτιξη: %s\n",        ( (int)f1 & 128 ? "off" : "on" ));
 
-	f1 = atoi( ezinfokey( world, "k_deathmsg" ) );
+	f1 = cvar( "k_deathmsg" );
 	G_sprint(self, 2, "Γυστον δεατθνεσσαηεσ: %s\n", ( f1 ? "on" : "off" ));
 
 	f1 = atoi(ezinfokey(world, "k_allowvoteadmin"));

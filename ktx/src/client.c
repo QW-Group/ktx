@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.41 2006/03/15 22:15:39 qqshka Exp $
+ *  $Id: client.c,v 1.42 2006/03/16 20:35:09 qqshka Exp $
  */
 
 //===========================================================================
@@ -2274,7 +2274,7 @@ void PlayerPostThink()
 
 	W_WeaponFrame();
 
-	if ( !match_in_progress )
+	if ( !match_in_progress && !intermission_running )
 	{
 		if ( iKey( self, "kf" ) & KF_SPEED ) {
 			float velocity = sqrt(self->s.v.velocity[0] * self->s.v.velocity[0] + 
@@ -2429,7 +2429,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
     if ( streq( attacker->s.v.classname, "player" ) ) 
     {
             // included big part starts to handle optional new death messages :p
-			if( iKey( world, "k_deathmsg" ) ) {
+			if( cvar( "k_deathmsg" ) ) {
 				if ( targ == attacker )
 				{
 					// killed self, KTeams version
@@ -2626,7 +2626,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				return;
 // included big part ends
 
-			} else { // !atoi( ezinfokey( world, "k_deathmsg" ) )
+			} else { // !cvar( "k_deathmsg" )
 				if ( targ == attacker )
 				{
 					// killed self, native qw version
@@ -2826,7 +2826,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		}
         else if ( streq( targ->deathtype, "falling" ) )
 		{
-				if( g_random() < 0.5 && iKey( world, "k_deathmsg" ) )
+				if( g_random() < 0.5 && cvar( "k_deathmsg" ) )
 					deathstring = " cratered\n";
 				else {
 					if( streq( ezinfokey( targ, "gender" ), "f" ) ) 

@@ -17,8 +17,6 @@ void Deathmsg();
 // This toggle's between different messages
 void Deathmsg ()
 {
-    float tmp;
-
     if( self->k_admin != 2 )
     {
         G_sprint(self, 2, "You are not an admin\n");
@@ -28,20 +26,7 @@ void Deathmsg ()
     if( match_in_progress )
         return;
 
-    tmp = atoi( ezinfokey ( world, "k_deathmsg" ) );
-
-    G_bprint(2, "Γυστον δεατθνεσσαηεσ ");
-
-    if(tmp != 0)
-    {
-        G_bprint(2, "disabled\n");
-        localcmd("localinfo k_deathmsg 0\n");
-    }
-    else
-    {
-        G_bprint(2, "enabled\n");
-        localcmd("localinfo k_deathmsg 1\n");
-    }
+	cvar_toggle_msg( self, "k_deathmsg", redtext("custom deathmessages") );
 }
 
 

@@ -14,6 +14,8 @@
  83. Also VVD added "/pos_set_angles" and "/pos_set_origin" commands, but this commands 
 	 need to be tweaked a bit.
 
+ 84. Fixed small frags bug with show speed code.
+
 2006-03-14 [ver 1.10]
  79. /scores extended a bit.
 

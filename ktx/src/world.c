@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.23 2006/03/12 18:30:31 qqshka Exp $
+ *  $Id: world.c,v 1.24 2006/03/16 20:35:09 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -422,6 +422,11 @@ void FirstFrame	( )
 	RegisterCvar("k_end_tele_spawn"); // don't remove end tele spawn
 
 	RegisterCvar("k_motd_time"); 	  // motd time in seconds
+
+// >>> convert localinfo to set
+	RegisterCvar("k_deathmsg");
+
+// <<<
 
 	k_matchLess = cvar( "k_matchless" ); // changed only here
 }

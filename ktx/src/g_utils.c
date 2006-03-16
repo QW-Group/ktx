@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.24 2006/03/11 23:13:16 qqshka Exp $
+ *  $Id: g_utils.c,v 1.25 2006/03/16 20:35:09 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1088,6 +1088,11 @@ char *Enables( float f )
 	return ( f ? "enables" : "disables" );
 }
 
+char *Enabled( float f )
+{
+	return ( f ? "enabled" : "disabled" );
+}
+
 char *Allows( float f )
 {
 	return ( f ? "allows" : "disallows" );
@@ -1406,4 +1411,20 @@ char *str_noweapon(int k_disallow_weapons)
 
 	return string[index++];
 }
+
+void cvar_toggle_msg( gedict_t *p, char *cvarName, char *msg )
+{
+    int i;
+
+	if ( strnull( cvarName ) )
+		return;
+
+    i = !cvar( cvarName );
+
+	if ( !strnull( msg ) )
+    	G_bprint(2, "%s %s %s\n", p->s.v.netname, Enables( i ), msg);
+
+	trap_cvar_set_float( cvarName, (float)i );
+}
+
 
