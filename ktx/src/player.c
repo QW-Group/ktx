@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.9 2005/12/31 19:04:22 qqshka Exp $
+ *  $Id: player.c,v 1.10 2006/03/17 16:34:52 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -32,12 +32,6 @@ void            bubble_bob();
 
 PLAYER
 
-==============================================================================
-*/
-
-/*
-==============================================================================
-PLAYER
 ==============================================================================
 */
 
@@ -87,12 +81,12 @@ void player_run()
 
 	if ( self->s.v.weapon == IT_AXE )
 	{
-		if ( self->walkframe == 6 )
+		if ( self->walkframe >= 6 )
 			self->walkframe = 0;
 		self->s.v.frame = 0 + self->walkframe;
 	} else
 	{
-		if ( self->walkframe == 6 )
+		if ( self->walkframe >= 6 )
 			self->walkframe = 0;
 		self->s.v.frame = self->s.v.frame + self->walkframe;
 	}
@@ -325,7 +319,7 @@ void player_nail1()
 		return;
 	}
 	self->s.v.weaponframe = self->s.v.weaponframe + 1;
-	if ( self->s.v.weaponframe == 9 )
+	if ( self->s.v.weaponframe >= 9 )
 		self->s.v.weaponframe = 1;
 
 	SuperDamageSound();
@@ -347,7 +341,7 @@ void player_nail2()
 		return;
 	}
 	self->s.v.weaponframe = self->s.v.weaponframe + 1;
-	if ( self->s.v.weaponframe == 9 )
+	if ( self->s.v.weaponframe >= 9 )
 		self->s.v.weaponframe = 1;
 
 	SuperDamageSound();
@@ -371,7 +365,7 @@ void player_light1()
 		return;
 	}
 	self->s.v.weaponframe = self->s.v.weaponframe + 1;
-	if ( self->s.v.weaponframe == 5 )
+	if ( self->s.v.weaponframe >= 5 )
 		self->s.v.weaponframe = 1;
 
 	SuperDamageSound();
@@ -393,7 +387,7 @@ void player_light2()
 		return;
 	}
 	self->s.v.weaponframe = self->s.v.weaponframe + 1;
-	if ( self->s.v.weaponframe == 5 )
+	if ( self->s.v.weaponframe >= 5 )
 		self->s.v.weaponframe = 1;
 
 	SuperDamageSound();
@@ -481,10 +475,10 @@ void PainSound()
 	if ( self->s.v.watertype == CONTENT_WATER && self->s.v.waterlevel == 3 )
 	{
 		DeathBubbles( 1 );
-#ifdef KTEAMS
+
         if ( match_in_progress != 2 )
             return;
-#endif
+
 		if ( g_random() > 0.5 )
 			sound( self, CHAN_VOICE, "player/drown1.wav", 1, ATTN_NORM );
 		else
@@ -495,10 +489,9 @@ void PainSound()
 	if ( self->s.v.watertype == CONTENT_SLIME )
 	{
 // FIX ME       put in some steam here
-#ifdef KTEAMS
         if ( match_in_progress != 2 )
             return;
-#endif
+
 		if ( g_random() > 0.5 )
 			sound( self, CHAN_VOICE, "player/lburn1.wav", 1, ATTN_NORM );
 		else
@@ -508,10 +501,9 @@ void PainSound()
 
 	if ( self->s.v.watertype == CONTENT_LAVA )
 	{
-#ifdef KTEAMS
         if ( match_in_progress != 2 )
             return;
-#endif
+
 		if ( g_random() > 0.5 )
 			sound( self, CHAN_VOICE, "player/lburn1.wav", 1, ATTN_NORM );
 		else
