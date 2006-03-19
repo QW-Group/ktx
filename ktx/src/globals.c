@@ -26,9 +26,9 @@
 	float lock = 0;         // stores whether players can join when a game is already in progress
 	float match_in_progress = 0;    // if a match has begun
 	float match_over;       // boolean - whether or not the match stats have been printed at end of game
-	char *newcomer;        // stores name of last player who joined
+	char *newcomer;         // stores name of last player who joined
 
-	int   k_overtime = 0;  // is overtime is going on
+	int   k_overtime = 0;   // is overtime is going on
 
 	float current_maxfps;	// current value of serverinfo maxfps
 

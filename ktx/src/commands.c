@@ -509,6 +509,16 @@ void Init_cmds(void)
 			cmds[i].cf_flags |= CF_SPECTATOR; // this let simplify cmds[] table
 	}
 }   
+
+qboolean check_master()
+{
+	if( cvar( "k_master" ) && self->k_admin < 2 ) {
+		G_sprint(self, 2, "console: command is locked\n");
+		return true;
+	}
+
+	return false;
+}
     
 void PShowCmds()
 {   
@@ -550,7 +560,7 @@ void PShowCmds()
 		"ïöåòôéíåõğ. change overtime length\n"
 		"ãáğôáéî.... toggle captain election\n");
 		
-		if( atoi( ezinfokey( world, "k_admins" ) ) ) {
+		if( cvar( "k_admins" ) ) {
 			G_sprint(self, 2, "áäíéî...... toggle admin-mode\n");
 			G_sprint(self, 2, "åìåãô...... toggle admin election\n");
 		}
@@ -593,7 +603,7 @@ void SShowCmds()
 			"êïéî....... joins game\n"				// FIXME: intersect with client command
 			"óôáôó...... show playerstats\n");
 
-		if( atoi( ezinfokey( world, "k_admins" ) ) ) {
+		if( cvar( "k_admins" ) ) {
 			G_sprint(self, 2, "áäíéî...... toggle admin-mode\n");
 			G_sprint(self, 2, "åìåãô...... toggle admin election\n");
 		}
@@ -693,68 +703,56 @@ void ShowVersion()
 void ChangeOvertime()
 {
 	float f1, f2;
-//    char *tmp;
 
 	if ( match_in_progress )
 		return;
 
-	if( atoi( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+	if( check_master() )
 		return;
-	}
 
-    f1 = bound(0, atoi( ezinfokey( world, "k_overtime" ) ), 2);
-    f2 = bound(0, atoi( ezinfokey( world, "k_exttime" ) ), 999);
+    f1 = bound(0, cvar( "k_overtime" ), 2);
+    f2 = bound(0, cvar( "k_exttime" ), 999);
 
     if( !f1 )
     {
+		cvar_fset("k_overtime", 1);
+
 		if( !f2 ) 
-		{
-			localcmd("localinfo k_exttime 1\n");
-			f2 = 1;
-		}
+			cvar_fset("k_exttime", (f2 = 1));
 
-		G_bprint(2, "Ïöåòôéíå: time based\n");
-		G_bprint(2, "Ïöåòôéíå ìåîçôè éó %d íéîõôå%s\n", (int)f2, ( f1== 1 ? "": "ó" ));
-
-		localcmd("localinfo k_overtime 1\n");
+		G_bprint(2, "%s: time based\n", redtext("Overtime"));
+		G_bprint(2, "%s: %d minute%s\n", redtext("Overtime length"), (int)f2, count_s(f2));
     }
     else if( f1 == 1 )
 	{
-		G_bprint(2, "Ïöåòôéíå: sudden death\n");
-		localcmd("localinfo k_overtime 2\n");
+		cvar_fset("k_overtime", 2);
+		G_bprint(2, "%s: sudden death\n", redtext("Overtime"));
 	}
     else if( f1 == 2 )
     {
-		G_bprint(2, "Ïöåòôéíå: off\n");
-		localcmd("localinfo k_overtime 0\n");
+		cvar_fset("k_overtime", 0);
+		G_bprint(2, "%s: off\n", redtext("Overtime"));
     }
 }
 
 void ChangeOvertimeUp ()
 {
-	float f1;
-//	char *tmp;
+	int k_exttime = cvar( "k_exttime" );
 
 	if( match_in_progress )
 		return;
 
-	if( atoi( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 )
-	{
-		G_sprint(self, 3, "console: command is locked\n");
+	if( check_master() )
 		return;
-	}
 
-	f1 = atoi( ezinfokey( world, "k_exttime" ) );
+	k_exttime++;
 
-	if ( f1 == 10 )
-		f1 = 1;
-    else
-		f1++;
+	if ( k_exttime >= 11 || k_exttime <= 0 )
+		k_exttime = 1;
 
-	G_bprint(2, "Ïöåòôéíå ìåîçôè óåô ôï %d íéîõôå%s\n", (int)f1, ( f1==1 ? "" : "ó" ) );
+	cvar_fset( "k_exttime", k_exttime );
 
-	localcmd("localinfo k_exttime %d\n", (int)f1);
+	G_bprint(2, "Ïöåòôéíå ìåîçôè óåô ôï %d íéîõôå%s\n", k_exttime, count_s( k_exttime ));
 }
 
 void ListWhoNot()
@@ -791,7 +789,7 @@ void ListWhoNot()
 		while( p ) {
 			if(!strnull( p->s.v.netname ) && !p->ready) {
 				G_bprint(2, "%s%s‘ %s is not ready\n",
-					(p->k_admin == 2 ? " ": ""), ezinfokey(p, "team"), p->s.v.netname);
+					(p->k_admin == 2 ? " ": ""), getteam(p), p->s.v.netname);
 			}
 
 			p = find( p, FOFCLSN, "player" );
@@ -873,7 +871,7 @@ void PrintToggle1( char *tog, char *key )
 
 	G_sprint(self, 2, tog);
 
-	i = streq(key, "k_pow") ? Get_Powerups() : bound(0, iKey( world, key ), 1);
+	i = streq(key, "k_pow") ? Get_Powerups() : bound(0, cvar( key ), 1);
 
 	if( !i )
 		G_sprint(self, 2, "Off ");
@@ -890,7 +888,7 @@ void PrintToggle2( char *tog, char *key )
 
 	G_sprint(self, 2, tog);
 
-	if( atoi( ezinfokey( world, key ) ) )
+	if( cvar( key ) )
 		G_sprint(self, 2, "On\n");
 	else
 		G_sprint(self, 2, "Off\n");
@@ -899,21 +897,23 @@ void PrintToggle2( char *tog, char *key )
 //Ceno
 void PrintToggle3(char *tog, char *key)
 {
-	float f1;
+	int i;
 
 	if ( strnull(tog) || strnull(key) )
 		G_Error("PrintToggle3 null");
 
 	G_sprint(self, 2, tog);
 
-	f1 = atoi( ezinfokey( world, key ) );
+	i = cvar( key );
 
-	if( !f1 )
+	if( !i )
 		G_sprint(self, 2, "Off ");
-	else if( f1 == 1 )
+	else if( i == 1 )
 		G_sprint(self, 2, "On  ");
-	else
+	else if( i == 2 )
 		G_sprint(self, 2, "Lst ");
+	else
+		G_sprint(self, 2, "Unk ");
 }
 
 void ModStatus ()
@@ -968,16 +968,18 @@ void ModStatus ()
 
 void ModStatus2()
 {
-	float f1, f2;
+	int i;
 	char *ot = "";
 
-	f1 = atoi( ezinfokey( world, "k_spw" ) );
-	if( f1 == 2 )
+	i = cvar( "k_spw" );
+	if( i == 2 )
 		G_sprint(self, 2, redtext("Kombat Teams Respawns\n"));
-	else if ( f1 == 1 )
+	else if ( i == 1 )
 		G_sprint(self, 2, redtext("KT SpawnSafety\n"));
-	else
+	else if ( i == 0 )
 		G_sprint(self, 2, redtext("Normal QW Respawns\n"));
+	else
+		G_sprint(self, 2, redtext("Unknown Respawns\n"));
 
 	if( isDuel() )
 		G_sprint(self, 2, "%s: duel\n", redtext("Server mode"));
@@ -991,39 +993,36 @@ void ModStatus2()
 	else
 		G_sprint(self, 2, "%s: unknown\n", redtext("Server mode"));
 
-	if( !match_in_progress ) {
-		G_sprint(self, 2, "Ôåáíéîæï (ãõò: %d", (int)CountRTeams());
-		G_sprint(self, 2, " íéî: %s",    ezinfokey(world, "k_lockmin"));
-		G_sprint(self, 2, " íáø: %s)\n", ezinfokey(world, "k_lockmax"));
-	}
+	if( !match_in_progress )
+		G_sprint(self, 2, "%s (%s: %d %s: %d %s: %d)\n", 
+					redtext("Teaminfo"), redtext("cur"), (int)CountRTeams(),
+					redtext("min"), (int)cvar("k_lockmin"),
+					redtext("max"), (int)cvar("k_lockmax"));
 
-	G_sprint(self, 2, "Óğåãôáìë: %s\n", ( atoi(ezinfokey(world, "k_spectalk")) ? "on" : "off" ));
+	G_sprint(self, 2, "%s: %s\n", redtext("Spectalk"), OnOff( cvar("k_spectalk") ));
 
-	f1 = atoi( ezinfokey( world, "k_overtime" ) );
-	f2 = atoi( ezinfokey( world, "k_exttime" ) );
-	
-	switch ( (int)f1) {
+	i = cvar( "k_exttime" );
+	switch ( (int)cvar( "k_overtime" ) ) {
 		case 0:  ot = "off"; break;
-		case 1:  ot = va("%d minute%s", (int)f2, (f2 != 1 ? "s" : "")); break;
+		case 1:  ot = va("%d minute%s", i, count_s(i)); break;
 		case 2:  ot = "sudden death"; break;
 		default: ot	= "unknown"; break;
 	}
 	G_sprint(self, 2, "%s: %s\n", redtext("Overtime"), ot);
 
-	f1 = atoi( ezinfokey( world, "fpd" ) );
+	i = iKey( world, "fpd" );
 
-	G_sprint(self, 2, "ÑéÚíï ìáç: %s\n",             ( (int)f1 &   8 ? "off" : "on" ));
-	G_sprint(self, 2, "ÑéÚíï ôéíåòó: %s\n",          ( (int)f1 &   2 ? "off" : "on" ));
-	G_sprint(self, 2, "ÑéÚíï åîåíù òåğïòôéîç: %s\n", ( (int)f1 &  32 ? "off" : "on" ));
-	G_sprint(self, 2, "ÑéÚíï ğïéîôéîç: %s\n",        ( (int)f1 & 128 ? "off" : "on" ));
+	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo lag"),             OnOff( i &   8 ));
+	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo timers"),          OnOff( i &   2 ));
+	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo enemy reporting"), OnOff( i &  32 ));
+	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo pointing"),        OnOff( i & 128 ));
 
-	f1 = cvar( "k_deathmsg" );
-	G_sprint(self, 2, "Ãõóôïí äåáôèíåóóáçåó: %s\n", ( f1 ? "on" : "off" ));
+	G_sprint(self, 2, "%s: %s\n", redtext("Custom deathmessages"), OnOff(cvar( "k_deathmsg" )));
 
-	f1 = atoi(ezinfokey(world, "k_allowvoteadmin"));
-	G_sprint(self, 2, "Áäíéî åìåãôéïî: %s\n", ( f1 ? "allowed" : "disallowed" ));
+	G_sprint(self, 2, "%s: %s\n", redtext("Admin election"),
+							 Allowed(cvar( "k_allowvoteadmin" )));
 
-	G_sprint(self, 2, "Ãèåãë æòáíåôéíåó: %s\n", ( framechecks ? "enabled" : "disabled" ));
+	G_sprint(self, 2, "%s: %s\n", redtext("Check frametimes"), Enabled( framechecks ));
 }
 
 void ModStatusVote()
@@ -1122,7 +1121,7 @@ void PlayerStatus()
 				G_sprint(self, 2, p->s.v.netname);
 
 				if(p->ready) {
-					tmp = ezinfokey( p, "team" );
+					tmp = getteam( p );
 					if( strnull( tmp ) )
 						G_sprint(self, 2, " is ready\n");
 					else
@@ -1142,15 +1141,11 @@ void PlayerStatus()
 void PlayerStatusS()
 {
 	gedict_t *p;
-//	char *tmp;
 
-	p = find( world, FOFCLSN, "player" );
-	while( p ) {
+	for( p = world;	p = find( p, FOFCLSN, "player" ); )
 		if( !strnull( p->s.v.netname ) )
 			G_sprint(self, 2, "%s‘ %s\n", ezinfokey(p, "skin"), p->s.v.netname);
 
-		p = find( p, FOFCLSN, "player" );
-	}
 	G_sprint(self, 2, "--------------\n");
 }
 
@@ -1185,17 +1180,15 @@ void PlayerStatusN()
 
 void ResetOptions()
 {
-	char *s1;
+//	char *s1;
 
 	if( match_in_progress )
 		return;
 
-	if(atoi( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+	if( check_master() )
 		return;
-	}
 
-	s1 = ezinfokey(self, "team");
+//	s1 = getteam( self );
 
 #if 1 // TODO: make commented code safe or remove it
 		localcmd("exec configs/reset.cfg\n");
@@ -1218,13 +1211,11 @@ void VotePickup()
 	if( match_in_progress )
 		return;
 
+	if( check_master() )
+		return;
+
 	if( k_captains ) {
 		G_sprint(self, 2, "No pickup when captain stuffing\n");
-		return;
-	}
-
-	if( atoi( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 2, "console: command is locked\n");
 		return;
 	}
 
@@ -1284,8 +1275,8 @@ void ReportMe()
     p = find( world, FOFCLSN, "player" );
 	while( p ) {
 		if( !strnull( p->s.v.netname ) ) {
-			t1 = ezinfokey(self, "team");
-			t2 = ezinfokey(p, "team");
+			t1 = getteam( self );
+			t2 = getteam( p );
 
 			if( streq( t1, t2 ) ) {
 				if( flag ) {
@@ -1324,105 +1315,74 @@ void ReportMe()
 
 void ToggleRespawns()
 {
-	float tmp;
+	int k_spw = bound(0, cvar( "k_spw" ), 2);
 
 	if ( match_in_progress )
 		return;
 
-	if( atoi( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+	if( check_master() )
 		return;
-	}
 
-	tmp = atoi( ezinfokey( world, "k_spw" ) );
+	if ( ++k_spw > 2 )
+		k_spw = 0;
 
-	if( tmp == 2 ) {
+	cvar_fset( "k_spw", k_spw );
+
+	if( k_spw == 0 )
 		G_bprint(2, "Normal QW respawns (avoid spawnfrags)\n");
-		localcmd("localinfo k_spw 0\n");
-	} else if( tmp == 0 ) {
+	else if( k_spw == 1 )
 		G_bprint(2, "KT SpawnSafety\n");
-		localcmd("localinfo k_spw 1\n");
-	} else {
+	else if( k_spw == 2 )
 		G_bprint(2, "Kombat Teams respawns\n");
-		localcmd("localinfo k_spw 2\n");
-	}
+	else
+		G_bprint(2, "Unknown respawns\n");
 }
 
 void ToggleRespawn666()
 {
-	float tmp;
-
 	if( match_in_progress )
 		return;
 
-	if( atoi( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+	if( check_master() )
 		return;
-	}
 
-	tmp = atoi( ezinfokey( world, "k_666" ) );
-
-	G_bprint(2, "Òåóğá÷î ˜˜˜ ");
-
-	if( tmp != 0 ) {
-		G_bprint(2, "disabled\n");
-		localcmd("localinfo k_666 0\n");
-	} else {
-		G_bprint(2, "enabled\n");
-		localcmd("localinfo k_666 1\n");
-	}
+	cvar_toggle_msg( self, "k_666", va("%s \x98\x98\x98", redtext("Respawn")) );
 }
 
 void TogglePowerups()
 {
-	float tmp;
+	int k_pow = bound(0, cvar( "k_pow" ), 2); // here we are not using Get_Powerups
 
 	if ( match_in_progress )
 		return;
 
-	if ( atoi( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+	if( check_master() )
 		return;
-	}
 
-	tmp = iKey( world, "k_pow" ); // here we are not using Get_Powerups
+	if ( ++k_pow > 2 )
+		k_pow = 0;
 
-	G_bprint(2, "Ğï÷åòõğó ");
+	cvar_fset("k_pow", k_pow);
 
-	if( tmp == 2 ) {
-		G_bprint(2, "disabled\n");
-		localcmd("localinfo k_pow 0\n");
-	} else if( !tmp ) {
-		G_bprint(2, "enabled\n");
-		localcmd("localinfo k_pow 1\n");
-	} else {
-		G_bprint(2, "enabled (timer jammer)\n");
-		localcmd("localinfo k_pow 2\n");
-	}
+	if ( !k_pow )
+		G_bprint(2, "%s disabled\n", redtext("Powerups"));
+	else if ( k_pow == 1 )
+		G_bprint(2, "%s enabled\n", redtext("Powerups"));
+	else if ( k_pow == 2 )
+		G_bprint(2, "%s enabled (timer jammer)\n", redtext("Powerups"));
+	else
+		G_bprint(2, "%s unknown\n", redtext("Powerups"));
 }
 
 void ToggleDischarge()
 {
-	float tmp;
-
 	if( match_in_progress )
 		return;
-	if( atoi( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+
+	if( check_master() )
 		return;
-	}
 
-	tmp = atoi( ezinfokey( world, "k_dis" ) );
-
-	G_bprint(2, "Äéóãèáòçåó ");
-
-	if( tmp != 0 ) {
-		G_bprint(2, "disabled\n");
-		localcmd("localinfo k_dis 0\n");
-	} else {
-		G_bprint(2, "enabled\n");
-		localcmd("localinfo k_dis 1\n");
-	}
+	cvar_toggle_msg( self, "k_dis", redtext("discharges") );
 }
 
 #define DMM_NUM		((char)(146) + (char)(deathmatch))
@@ -1437,10 +1397,8 @@ void ChangeDM(float dmm)
 	if ( match_in_progress )
 		return;
 
-	if ( atoi ( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+	if( check_master() )
 		return;
-	}
 
 	if ( deathmatch == (int)dmm ) {
 		G_sprint(self, 2, "%s%c already set\n", redtext("dmm"), DMM_NUM);
@@ -1461,10 +1419,8 @@ void ChangeTP()
 	if ( match_in_progress )
 		return;
 
-	if ( atoi ( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+	if( check_master() )
 		return;
-	}
 
 	if( !isTeam() ) {
 		G_sprint(self, 3, "console: non team mode disallows you to change teamplay setting\n");
@@ -1492,10 +1448,9 @@ void TimeDown(float t)
 
 	if ( match_in_progress )
 		return;
-	if ( iKey( world, "k_master" ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+
+	if( check_master() )
 		return;
-	}
 
 	timelimit = timelimit - t;
 
@@ -1509,44 +1464,43 @@ void TimeDown(float t)
 
 void TimeUp(float t)
 {
-	float top=0.0;
+	int top = 0;
 
 	if ( match_in_progress )
 		return;
-	if ( iKey( world, "k_master" ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+
+	if( check_master() )
 		return;
-	}
 
 	timelimit = timelimit + t;
-	top = iKey( world, "k_timetop" );
+	top = cvar( "k_timetop" );
 
 	if( timelimit > top )
 		timelimit = top;
 
-	cvar_set("timelimit", va("%d", (int)timelimit));
+	cvar_fset( "timelimit", (int)timelimit );
 
 	G_bprint(2, "Íáôãè ìåîçôè óåô ôï %d íéîõôåó\n", (int)timelimit);
 }
 
 void TimeSet(float t)
 {
-	float top;
+	int top;
 
 	if ( match_in_progress )
 		return;
-	if ( atoi ( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+
+	if( check_master() )
 		return;
-	}
 
 	timelimit = t;
 
-	top = iKey( world, "k_timetop" );
+	top = cvar( "k_timetop" );
+
 	if( timelimit > top )
 		timelimit = top;
 
-	cvar_set("timelimit", va("%d", (int)timelimit));
+	cvar_fset( "timelimit", (int)timelimit );
 
 	G_bprint(2, "Íáôãè ìåîçôè óåô ôï %d íéîõôåó\n", (int)timelimit);
 }
@@ -1555,10 +1509,9 @@ void FragsDown()
 {
 	if ( match_in_progress )
 		return;
-	if ( atoi ( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+
+	if( check_master() )
 		return;
-	}
 
 	fraglimit -= 10;
 
@@ -1571,14 +1524,11 @@ void FragsDown()
 
 void FragsUp()
 {
-//	char *tmp;
-
 	if ( match_in_progress )
 		return;
-	if ( atoi ( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+
+	if( check_master() )
 		return;
-	}
 
 	fraglimit += 10;
 
@@ -1591,199 +1541,133 @@ void FragsUp()
 
 void ToggleDropQuad()
 {
-	float dq;
-
 	if ( match_in_progress )
 		return;
-	if ( atoi ( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
-		return;
-	}
 
-	dq = atoi( ezinfokey( world, "dq" ) );
-
-	if(dq != 0) {
-		localcmd("localinfo dq 0\n");
-		G_bprint(2, "ÄòïğÑõáä off\n");
+	if( check_master() )
 		return;
-	}
-	localcmd("localinfo dq 1\n");
-	G_bprint(2, "ÄòïğÑõáä on\n");
+
+	cvar_toggle_msg( self, "dq", redtext("DropQuad") );
 }
 
 void ToggleDropRing()
 {
-	float dr;
-
 	if ( match_in_progress )
 		return;
-	if ( atoi ( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
-		return;
-	}
 
-	dr = atoi( ezinfokey( world, "dr" ) );
-
-	if( dr ) {
-		localcmd("localinfo dr 0\n");
-		G_bprint(2, "ÄòïğÒéîç off\n");
+	if( check_master() )
 		return;
-	}
-	localcmd("localinfo dr 1\n");
-	G_bprint(2, "ÄòïğÒéîç on\n");
+
+	cvar_toggle_msg( self, "dr", redtext("DropRing") );
 }
 
 void ToggleDropPack()
 {
-	float dp;
-
 	if ( match_in_progress )
 		return;
-	if ( atoi ( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
-		return;
-	}
 
-	dp = atoi( ezinfokey( world, "dp" ) );
-
-	if(dp != 0) {
-		localcmd("localinfo dp 0\n");
-		G_bprint(2, "ÄòïğĞáãëó off\n");
+	if( check_master() )
 		return;
-	}
-	localcmd("localinfo dp 1\n");
-	G_bprint(2, "ÄòïğĞáãëó on\n");
+
+	cvar_toggle_msg( self, "dp", redtext("DropPacks") );
 }
 
 void ToggleFairPacks()
 {
-	float f1;
+	int k_frp = bound(0, cvar("k_frp"), 2);
 
     if ( match_in_progress )
 		return;
-	if ( atoi ( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
-		return;
-	}
 
-	f1 = atoi( ezinfokey( world, "k_frp" ) );
+	if( check_master() )
+		return;
 
-	if( !f1)
-	{
-		localcmd("localinfo k_frp 1\n");
-		G_bprint(2, "Æáéòğáãëó enabled - drop best weapon.\n");
-		return;
-	}
-	else if( f1==1 )
-	{
-		localcmd("localinfo k_frp 2\n");
-		G_bprint(2, "Æáéòğáãëó enabled - drop last fired weapon.\n");
-		return;
-	}
-	else if( f1==2 )
-	{
-		localcmd("localinfo k_frp 0\n");
-		G_bprint(2, "Æáéòğáãëó disabled\n");
-		return;
-	}
+	if ( ++k_frp > 2 )
+		k_frp = 0;
+
+	cvar_fset( "k_frp", k_frp );
+
+	if( !k_frp )
+		G_bprint(2, "%s disabled\n", redtext("Fairpacks"));
+	else if( k_frp == 1 )
+		G_bprint(2, "%s enabled - drop best weapon\n", redtext("Fairpacks"));
+	else if( k_frp == 2 )
+		G_bprint(2, "%s enabled - drop last fired weapon\n", redtext("Fairpacks"));
+	else
+		G_bprint(2, "%s - unknown\n", redtext("Fairpacks"));
 }
 
 void ToggleSpeed()
 {
-//	char *s1;
 	gedict_t *p;
 
 	if ( match_in_progress )
 		return;
-	if ( atoi ( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+
+	if( check_master() )
 		return;
-	}
 
 	if( k_maxspeed != 320 )
 		k_maxspeed = 320;
 	else
-		k_maxspeed = atoi( ezinfokey( world, "k_highspeed" ) );
+		k_maxspeed = bound(0, cvar( "k_highspeed" ), 9999);
 
-	G_bprint(2, "Íáøóğååä óåô ôï %d\n", (int)k_maxspeed);
-	cvar_set("sv_maxspeed", va("%d", (int)k_maxspeed));
+	G_bprint(2, "%s %d\n", redtext("Maxspeed set to"), (int)k_maxspeed);
+	cvar_fset("sv_maxspeed", k_maxspeed);
 
-	p = find( world, FOFCLSN, "player" );
-	while( p ) {
+	for( p = world; p = find( p, FOFCLSN, "player" ); )
 		p->maxspeed = k_maxspeed;
-		p = find( p, FOFCLSN, "player" );
-	}
 }
 
 void ToggleBerzerk()
 {
-	float tmp;
-
 	if ( match_in_progress )
 		return;
-	if ( atoi ( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
-		return;
-	}
 
-	tmp = atoi( ezinfokey( world, "k_bzk" ) );
-
-	if( tmp != 0 ) {
-		localcmd("localinfo k_bzk 0\n");
-		G_bprint(2, "ÂåòÚåòë íïäå off\n");
+	if( check_master() )
 		return;
-	}
-	localcmd("localinfo k_bzk 1\n");
-	G_bprint(2, "ÂåòÚåòë íïäå on\n");
+
+	cvar_toggle_msg( self, "k_bzk", redtext("BerZerk mode") );
 }
 
 
 void ToggleSpecTalk()
 {
-	float tmp, tmp2;
-//	char *s1;
+	int k_spectalk = !cvar( "k_spectalk" ), fpd = iKey( world, "fpd" );
 
 	if ( match_in_progress && self->k_admin < 2 )
 		return;
 
-	tmp2 = atoi( ezinfokey( world, "fpd" ) );
-
-	tmp2 = tmp2 - ((int)tmp2 & 64);
+	k_spectalk = bound(0, k_spectalk, 1);
 
 	if( match_in_progress == 2 ) {
-		tmp = atoi( ezinfokey( world, "k_spectalk" ) );
-		G_bprint(2, "Spectalk ");
 
-		if(tmp != 0) {
-			tmp2 = tmp2 + 64;
+		if( k_spectalk )
+			fpd = fpd & ~64;
+		else
+			fpd |= 64;
 
-			localcmd("sv_spectalk 0\n");
-			localcmd("serverinfo fpd %d\n", (int)tmp2);
-			localcmd("localinfo k_spectalk 0\n");
-			G_bprint(2, "off: ğìáùåòó ãáî îï ìïîçåò èåáò óğåãôáôïòó\n");
-			return;
-		}
-		localcmd("sv_spectalk 1\n");
-		localcmd("serverinfo fpd %d\n", (int)tmp2);
-		localcmd("localinfo k_spectalk 1\n");
-		G_bprint(2, "on: ğìáùåòó ãáî îï÷ èåáò óğåãôáôïòó\n");
+		localcmd("serverinfo fpd %d\n", fpd );
+		cvar_fset( "sv_spectalk", k_spectalk );
+		cvar_fset(  "k_spectalk", k_spectalk );
+
+		if( k_spectalk )
+			G_bprint(2, "Spectalk on: %s\n", redtext("players can now hear spectators"));
+		else
+			G_bprint(2, "Spectalk off: %s\n", redtext("players can no longer hear spectators"));
+
 		return;
+
 	} else {
-		if ( atoi ( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-			G_sprint(self, 3, "console: command is locked\n");
+		if( check_master() )
 			return;
-		}
 
-		tmp = atoi( ezinfokey( world, "k_spectalk" ) );
-		G_bprint(2, "Spectalk ");
+		cvar_fset( "k_spectalk", k_spectalk );
 
-		if(tmp != 0) {
-			localcmd("localinfo k_spectalk 0\n");
-			G_bprint(2, "off: ğìáùåòó ãáîîïô èåáò óğåãôáôïòó äõòéîç çáíå\n");
-			return;
-		}
-		localcmd("localinfo k_spectalk 1\n");
-		G_bprint(2, "on: ğìáùåòó ãáî èåáò óğåãôáôïòó äõòéîç çáíå\n");
+		if( k_spectalk )
+			G_bprint(2, "Spectalk on: %s\n", redtext("players can hear spectators during game"));
+		else
+			G_bprint(2, "Spectalk off: %s\n", redtext("players cannot hear spectators during game"));
 	}
 }
 
@@ -1807,12 +1691,12 @@ void ShowRules()
 	else
 		G_sprint(self, 2, "Server is in unknown mode.\n");
 
-	if( atoi( ezinfokey( world, "k_bzk" ) ) != 0 )
+	if( cvar( "k_bzk" ) )
 		G_sprint(self, 2,
 			"\nBERZERK mode is activated!\n"
 			"This means that when only %d seconds\n"
 			"remains of the game, all players\n"
-			"gets QUAD/OCTA powered.\n", atoi( ezinfokey(world, "k_btime") ) );
+			"gets QUAD/OCTA powered.\n", (int)cvar( "k_btime" ) );
 
 	G_sprint(self, 2, "\n");
 }
@@ -1821,10 +1705,9 @@ void ChangeLock()
 {
 	if ( match_in_progress )
 		return;
-	if ( atoi ( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+
+	if( check_master() )
 		return;
-	}
 
 	lock++;
 
@@ -1848,7 +1731,7 @@ void TeamSay(float fsndname)
 		if( p != self && teamplay && !strnull( p->s.v.netname )
 			&& ( iKey( p, "kf" ) & KF_KTSOUNDS ) 
 		   ) {
-			if( streq( ezinfokey(self, "team"), ezinfokey(p, "team") ) ) {
+			if( streq( getteam( self ), getteam( p ) ) ) {
 				char *t1 = ezinfokey(p, "k_sdir");
 				stuffcmd(p, "play %s%s\n", (strnull( t1 ) ? "" : va("%s/", t1)), sndname);
 			}
@@ -1906,8 +1789,8 @@ void PrintScores()
 	if( k_showscores ) {
 		int s1 = get_scores1();
 		int s2 = get_scores2();
-		char *t1 = ezinfokey(world, "k_team1");
-		char *t2 = ezinfokey(world, "k_team2");
+		char *t1 = cvar_string( "_k_team1" );
+		char *t2 = cvar_string( "_k_team2" );
 
 		G_sprint(self, 2, "%s \x90%s\x91 = %s\n", redtext("Team"),
 								 (s1 > s2 ? t1 : t2), dig3(s1 > s2 ? s1 : s2));
@@ -1940,8 +1823,8 @@ void PlayerStats()
 			p2 = p;
 
 			while ( p2 ) {
-				tmp  = ezinfokey(p, "team");
-				tmp2 = ezinfokey(p2, "team");
+				tmp  = getteam( p );
+				tmp2 = getteam( p2 );
 
 				if( streq( tmp, tmp2 ) ) {
 					G_sprint(self, 2, "%s‘ %s:  %d(%d) ", tmp2, p2->s.v.netname,
@@ -1981,108 +1864,67 @@ void PlayerStats()
 
 void ToggleQLag()
 {
-	float f1, f2;
-//	char *s1;
+	int fpd = iKey( world, "fpd" );
 
 	if ( match_in_progress )
 		return;
-	if ( atoi ( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+
+	if( check_master() )
 		return;
-	}
 
-	f1 = atoi( ezinfokey( world, "fpd" ) );
+	fpd ^= 8;
 
-	f2 = f1 - ((int)f1 & 8);
+	localcmd("serverinfo fpd %d\n", fpd);
 
-	if((int)f1 & 8) {
-		localcmd("serverinfo fpd %d\n", (int)f2);
-		G_bprint(2, "ÑéÚíï ìáç óåôôéîçó in effect\n");
-
-		return;
-	} else {
-		f2 = (int)f2 | 8;
-		localcmd("serverinfo fpd %d\n", (int)f2);
-		G_bprint(2, "ÑéÚíï ìáç óåôôéîçó not in effect\n");
-	}
+	G_bprint(2, "%s %s\n", 
+			redtext("QiZmo lag settings"), ( fpd & 8 ? "in effect" : "not in effect" ));
 }
 
 void ToggleQEnemy()
 {
-	float f1, f2;
-//	char *s1;
+	int fpd = iKey( world, "fpd" );
 
 	if ( match_in_progress )
 		return;
-	if ( atoi ( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+
+	if( check_master() )
 		return;
-	}
 
-	f1 = atoi( ezinfokey( world, "fpd" ) );
+	fpd ^= 32;
 
-	f2 = f1 - ((int)f1 & 32);
+	localcmd("serverinfo fpd %d\n", fpd);
 
-	if( (int)f1 & 32) {
-		localcmd("serverinfo fpd %d\n", (int)f2);
-		G_bprint(2, "ÑéÚíï åîåíù òåğïòôéîç allowed\n");
-
-		return;
-	} else {
-		f2 = (int)f2 | 32;
-		localcmd("serverinfo fpd %d\n", (int)f2);
-		G_bprint(2, "ÑéÚíï åîåíù òåğïòôéîç disallowed\n");
-	}
+	G_bprint(2, "%s %s\n", 
+			redtext("QiZmo enemy reporting"), Allowed( fpd & 32 ));
 }
 
 void ToggleQPoint()
 {
-	float f1, f2;
-//	char *s1;
+	int fpd = iKey( world, "fpd" );
 
 	if ( match_in_progress )
 		return;
-	if ( atoi ( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+
+	if( check_master() )
 		return;
-	}
 
-	f1 = atoi( ezinfokey( world, "fpd" ) );
+	fpd ^= 128;
 
-	f2 = f1 - ((int)f1 & 128);
+	localcmd("serverinfo fpd %d\n", fpd);
 
-	if( (int)f1 & 128 ) {
-		localcmd("serverinfo fpd %d\n", (int)f2);
-		G_bprint(2, "ÑéÚíï ğïéîôéîç enabled\n");
-
-		return;
-	} else {
-		f2 =  (int)f2 | 128;
-		localcmd("serverinfo fpd %d\n", (int)f2);
-		G_bprint(2, "ÑéÚíï ğïéîôéîç disabled\n");
-	}
+	G_bprint(2, "%s %s\n", 
+			redtext("QiZmo pointing"), Enabled( fpd & 128 ));
 }
 
 void ToggleFreeze()
 {
-	float f1;
-
 	if ( match_in_progress )
 		return;
-	if( atoi( ezinfokey( world, "k_master" ) ) && self->k_admin != 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+
+	if( check_master() )
 		return;
-	}
 
-	f1 = atoi( ezinfokey( world, "k_freeze" ) );
-
-	if( f1 ) {
-		localcmd("localinfo k_freeze 0\n");
-		G_bprint(2, "%s unfreezes map\n", self->s.v.netname);
-	} else {
-		localcmd("localinfo k_freeze 1\n");
-		G_bprint(2, "%s freezes map\n", self->s.v.netname);
-	}
+	cvar_toggle_msg( self, "k_freeze", redtext(cvar("k_freeze") ? "unfreezes map" : "freezes map") );
 }
 
 // qqshka: pointing code stolen from Zquake
@@ -2113,7 +1955,7 @@ void ShowNick()
 
 	best = -1;
 
-	s1 = ezinfokey ( self, "team" );
+	s1 = getteam( self );
 
 	p = find(world, FOFCLSN, "player");
 
@@ -2134,7 +1976,7 @@ void ShowNick()
 		if ( p->s.v.modelindex != modelindex_player )
 			continue; // ignore non player mdl index (EYES)
 
-		s2 = ezinfokey ( p, "team" );
+		s2 = getteam( p );
 
 		if ( !match_in_progress )
 			;  // allow shownick in prewar anyway
@@ -2298,34 +2140,33 @@ const char common_um_init[] =
 	"maxclients 8\n"
 	"k_disallow_weapons 16\n"			// disallow gl in dmm4 by default
 
-	"localinfo k_new_mode 0\n" 			// UNKNOWN ktpro
-	"localinfo k_fast_mode 0\n"			// UNKNOWN ktpro
-	"localinfo matrix 0\n"              // UNKNOWN ktpro
-	"localinfo k_safe_rj 0\n"           // UNKNOWN ktpro
+//	"localinfo k_new_mode 0\n" 			// UNKNOWN ktpro
+//	"localinfo k_fast_mode 0\n"			// UNKNOWN ktpro
+//	"localinfo matrix 0\n"              // UNKNOWN ktpro
+//	"localinfo k_safe_rj 0\n"           // UNKNOWN ktpro
 
-	"localinfo spec_info 1\n"			// TODO not implemented yet
+//	"localinfo spec_info 1\n"			// TODO not implemented yet
 										// allow spectators receive took info during game
                                    		// (they have to use "moreinfo" command to set proper level)
-	"localinfo spec_info_notlock 1\n"	// allow all spectators receive it (0 = only admins)
-	"localinfo k_midair 0\n"			// not implemented
-	"localinfo k_instagib 0\n"			// not implemented
+//	"localinfo spec_info_notlock 1\n"	// allow all spectators receive it (0 = only admins)
+//	"localinfo k_midair 0\n"			// not implemented
+//	"localinfo k_instagib 0\n"			// not implemented
+//	"localinfo k_new_spw 0\n"			// ktpro feature
 
 	"fraglimit 0\n"						// fraglimit %)
-	"localinfo k_666 0\n"				// respawn 666
-	"localinfo dp 1\n"					// drop pack
-	"localinfo dq 0\n"					// drop quad
-	"localinfo dr 0\n"					// drop ring
-	"localinfo k_frp 0\n"				// fairpacks
-	"localinfo k_spectalk 0\n"			// silence
-	"localinfo k_dis 1\n"				// discharge on
-	"localinfo k_lockmin 2\n"			// minimum number of teams in game
-	"localinfo k_bzk 0\n"				// berzerk
-	"localinfo k_spw 0\n"				// affect spawn type
-	"localinfo k_new_spw 0\n"			// ktpro feature
+	"k_666 0\n"							// respawn 666
+	"dp 1\n"							// drop pack
+	"dq 0\n"							// drop quad
+	"dr 0\n"							// drop ring
+	"k_frp 0\n"							// fairpacks
+	"k_spectalk 0\n"					// silence
+	"k_dis 1\n"							// discharge on
+	"k_bzk 0\n"							// berzerk
+	"k_spw 0\n"							// affect spawn type
 
-	"localinfo k_membercount 0\n"		// some unlimited values
-	"localinfo k_lockmin 0\n"			// some unlimited values
-	"localinfo k_lockmax 64\n";         // some unlimited values
+	"k_membercount 0\n"					// some unlimited values
+	"k_lockmin 0\n"						// some unlimited values
+	"k_lockmax 64\n";         			// some unlimited values
 
 
 const char _1on1_um_init[] =
@@ -2333,76 +2174,71 @@ const char _1on1_um_init[] =
 	"timelimit  10\n"					//
 	"teamplay   0\n"					//
 	"deathmatch 3\n"					//
-	"localinfo k_deathmatch 3\n"		// TODO not implemented
-	"localinfo k_overtime 2\n"			// overtime type
-	"localinfo k_pow 0\n"				// powerups
-	"localinfo k_membercount 0\n"		// no efect in duel
-	"localinfo k_lockmin 0\n"			// no efect in duel
-	"localinfo k_lockmax 0\n"           // no efect in duel
+	"k_overtime 2\n"					// overtime type
+	"k_pow 0\n"							// powerups
+	"k_membercount 0\n"					// no efect in duel
+	"k_lockmin 0\n"						// no efect in duel
+	"k_lockmax 0\n"           			// no efect in duel
 	"k_mode 1\n";
 
 const char _2on2_um_init[] =
 	"maxclients 4\n"
 	"floodprot 9 1 1\n"					//
-	"localinfo k_fp 1\n"				// TODO not implemented
+//	"localinfo k_fp 1\n"				// TODO not implemented
 	"timelimit  10\n"					//
 	"teamplay   2\n"					//
 	"deathmatch 3\n"					//
-	"localinfo k_deathmatch 3\n"		//
-	"localinfo k_overtime 1\n"			// overtime type
-	"localinfo k_exttime 2\n"			// extende time for overtime
-	"localinfo k_pow 1\n"				//
-	"localinfo k_membercount 1\n"		// minimum number of players in each team
-	"localinfo k_lockmin 1\n"			//
-	"localinfo k_lockmax 2\n"           //
+	"k_overtime 1\n"					// overtime type
+	"k_exttime 2\n"						// extende time for overtime
+	"k_pow 1\n"							//
+	"k_membercount 1\n"					// minimum number of players in each team
+	"k_lockmin 1\n"						//
+	"k_lockmax 2\n"           			//
 	"k_mode 2\n";
 
 const char _3on3_um_init[] =
 	"maxclients 6\n"
 	"floodprot 9 1 1\n"
-	"localinfo k_fp 1\n"
+//	"localinfo k_fp 1\n"
 	"timelimit  20\n"
 	"teamplay   2\n"
 	"deathmatch 1\n"
-	"localinfo k_deathmatch 1\n"
-	"localinfo k_pow 1\n"
-	"localinfo k_membercount 2\n"		// minimum number of players in each team
-	"localinfo k_lockmin 1\n"			//
-	"localinfo k_lockmax 2\n"           //
-	"localinfo k_overtime 1\n"
-	"localinfo k_exttime 5\n"
+	"k_pow 1\n"
+	"k_membercount 2\n"					// minimum number of players in each team
+	"k_lockmin 1\n"						//
+	"k_lockmax 2\n"           			//
+	"k_overtime 1\n"
+	"k_exttime 5\n"
 	"k_mode 2\n";
 
 const char _4on4_um_init[] =
 	"maxclients 8\n"
 	"floodprot 9 1 1\n"
-	"localinfo k_fp 1\n"
+//	"localinfo k_fp 1\n"
 	"timelimit  20\n"
 	"teamplay   2\n"
 	"deathmatch 1\n"
-	"localinfo k_deathmatch 1\n"
-	"localinfo k_pow 1\n"
-	"localinfo k_membercount 3\n"		// minimum number of players in each team
-	"localinfo k_lockmin 1\n"			//
-	"localinfo k_lockmax 2\n"           //
-	"localinfo k_overtime 1\n"
-	"localinfo k_exttime 5\n"
+	"k_pow 1\n"
+	"k_membercount 3\n"					// minimum number of players in each team
+	"k_lockmin 1\n"						//
+	"k_lockmax 2\n"           			//
+	"k_overtime 1\n"
+	"k_exttime 5\n"
 	"k_mode 2\n";
 
 const char _10on10_um_init[] =
 	"maxclients 20\n"
 	"floodprot 9 1 1\n"
-	"localinfo k_fp 1\n"
+//	"localinfo k_fp 1\n"
 	"timelimit  30\n"
 	"teamplay   2\n"
 	"deathmatch 1\n"
-	"localinfo k_deathmatch 1\n"
-	"localinfo k_pow 1\n"
-	"localinfo k_membercount 5\n"		// minimum number of players in each team
-	"localinfo k_lockmin 1\n"			//
-	"localinfo k_lockmax 2\n"           //
-	"localinfo k_overtime 1\n"
-	"localinfo k_exttime 5\n"
+	"k_pow 1\n"
+	"k_membercount 5\n"					// minimum number of players in each team
+	"k_lockmin 1\n"						//
+	"k_lockmax 2\n"           			//
+	"k_overtime 1\n"
+	"k_exttime 5\n"
 	"k_mode 2\n";
 
 const char ffa_um_init[] =
@@ -2410,14 +2246,13 @@ const char ffa_um_init[] =
 	"timelimit  20\n"
 	"teamplay   0\n"
 	"deathmatch 3\n"
-	"localinfo k_deathmatch 3\n"
-	"localinfo dq 1\n"
-	"localinfo dr 1\n"
-	"localinfo k_pow 1\n"
-	"localinfo k_membercount 0\n"		// no effect in ffa
-	"localinfo k_lockmin 0\n"			// no effect in ffa
-	"localinfo k_lockmax 0\n"           // no effect in ffa
-	"localinfo k_dis 1\n"
+	"dq 1\n"
+	"dr 1\n"
+	"k_pow 1\n"
+	"k_membercount 0\n"					// no effect in ffa
+	"k_lockmin 0\n"						// no effect in ffa
+	"k_lockmax 0\n"           			// no effect in ffa
+	"k_dis 1\n"
 	"k_mode 3\n";
 
 
@@ -2452,17 +2287,15 @@ void UserMode(float umode)
 	char buf[1024*4];
 
 	char *um=NULL;
-	int k_free_mode = atoi( ezinfokey( world, "k_free_mode" ) );
-	int k_allowed_free_modes = atoi( ezinfokey( world, "k_allowed_free_modes" ) );
+	int k_free_mode = cvar( "k_free_mode" );
+	int k_allowed_free_modes = cvar( "k_allowed_free_modes" );
 	int i;
 
 	if ( match_in_progress )
 		return;
 
-	if( atoi( ezinfokey( world, "k_master" ) ) && self->k_admin != 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+	if( check_master() )
 		return;
-	}
 
 	switch ((int)umode) {
 		case 1: um = "1on1";   break;
@@ -2525,9 +2358,8 @@ void UserMode(float umode)
 	{
 		// introduce 'k_umfallbunny', which is just control which value
 		// must be set to 'k_fallbunny' after XonX
-		int k_umfallbunny = bound ( 0, atoi( ezinfokey( world, "k_umfallbunny" ) ), 1);
-		trap_readcmd(va("localinfo k_fallbunny %d\n", k_umfallbunny), buf, sizeof(buf) );
-		G_cprint("%s", buf);
+		int k_umfallbunny = bound( 0, cvar( "k_umfallbunny" ), 1 );
+		cvar_fset("k_fallbunny", k_umfallbunny);
 	}
 
 	trap_readcmd( um_list[i].initstring, buf, sizeof(buf) );
@@ -2648,7 +2480,7 @@ void SetPractice(int srv_practice_mode, const char *mapname)
 		G_Error ("SetPractice: match_in_progress");
 
 	k_practice = srv_practice_mode;
-	localcmd("localinfo srv_practice_mode %d\n", srv_practice_mode);
+	cvar_fset("srv_practice_mode", srv_practice_mode);
 
 	if ( k_practice )
 		G_bprint(2, "%s\n", redtext("Server in practice mode"));
@@ -2661,14 +2493,16 @@ void SetPractice(int srv_practice_mode, const char *mapname)
 
 void TogglePractice()
 {
-	int lock_practice         = atoi( ezinfokey( world, "lock_practice" ) );
-	int allow_toggle_practice = atoi( ezinfokey( world, "allow_toggle_practice" ) );
+	int lock_practice         = cvar( "lock_practice" );
+	int allow_toggle_practice = cvar( "allow_toggle_practice" );
 
 	if ( match_in_progress )
 		return;
 
-	if( (atoi( ezinfokey( world, "k_master" ) ) && self->k_admin != 2)
-		|| lock_practice == 2 /* server locked in current practice mode */
+	if( check_master() )
+		return;
+
+	if(     lock_practice == 2 /* server locked in current practice mode */
 		|| (lock_practice != 0 && lock_practice != 1) /* unknown lock type, ignore command */
 	  ) {
 		G_sprint(self, 3, "console: command is locked\n");
@@ -2784,10 +2618,8 @@ void t_jump (float j_type)
 	if ( match_in_progress )
 		return;
 
-	if ( iKey( world, "k_master" ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+	if( check_master() )
 		return;
-	}
 
 	jt    = va("k%cjump", cjt);
 	cv_jt = va("k_disallow_k%cjump", cjt);
@@ -2846,10 +2678,8 @@ void hdptoggle ()
 	if ( match_in_progress )
 		return;
 
-	if ( iKey( world, "k_master" ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+	if( check_master() )
 		return;
-	}
 
 	trap_cvar_set_float( "k_lock_hdp", !cvar( "k_lock_hdp" ) );
 	G_bprint(2, "%s %s %s\n", self->s.v.netname,
@@ -2898,10 +2728,8 @@ void noweapon ()
 		return;
 	}
 
-	if ( iKey( world, "k_master" ) && self->k_admin < 2 ) {
-		G_sprint(self, 3, "console: command is locked\n");
+	if( check_master() )
 		return;
-	}
 
 	if ( deathmatch != 4 ) {
 		G_sprint(self, 2, "command allowed in %s only\n", redtext("dmm4"));
@@ -3009,13 +2837,11 @@ void RandomPickup ()
 	if( match_in_progress )
         return;
 
+	if( check_master() )
+		return;
+
 	if( k_captains ) {
 		G_sprint(self, 2, "No random pickup when captain stuffing\n");
-		return;
-	}
-
-	if( atoi( ezinfokey( world, "k_master" ) ) && self->k_admin < 2 ) {
-		G_sprint(self, 2, "console: command is locked\n");
 		return;
 	}
 
@@ -3030,7 +2856,7 @@ void RandomPickup ()
 
 	G_bprint(2, "%s %s!%s\n", self->s.v.netname, 
 			(self->v.rpickup ? redtext("votes for rpickup") :
-							   redtext("withdraws %s rpickup vote", SexStr(self))),
+							   redtext("withdraws %s rpickup vote", g_his(self))),
 			((votes = get_votes_req( OV_RPICKUP, true )) ? va(" (%d)", votes) : ""));
 
 	vote_check_rpickup ();

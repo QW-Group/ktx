@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.11 2006/03/06 18:11:10 qqshka Exp $
+ *  $Id: spectate.c,v 1.12 2006/03/19 23:16:13 qqshka Exp $
  */
 
 // spectate.c
@@ -91,7 +91,7 @@ void SpectatorConnect()
 	Vip_ShowRights( self );
 	CheckRate(self, "");
 
-	if( match_in_progress != 2 || iKey(world, "k_ann") )
+	if( match_in_progress != 2 || cvar("k_ann") )
 		G_bprint( PRINT_HIGH, "Spectator %s entered the game\n", self->s.v.netname );
 
 	// Added this in for kick code.
@@ -114,7 +114,7 @@ void SpectatorConnect()
 ///////////////
 void SpectatorDisconnect()
 {
-	if( match_in_progress != 2 || iKey(world, "k_ann") )
+	if( match_in_progress != 2 || cvar("k_ann") )
 		G_bprint( PRINT_HIGH, "Spectator %s left the game\n", self->s.v.netname );
 
 	if ( self->wizard ) {

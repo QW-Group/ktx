@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.10 2006/03/17 16:34:52 qqshka Exp $
+ *  $Id: player.c,v 1.11 2006/03/19 23:16:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -806,7 +806,7 @@ void VelocityForDamage( float dm, vec3_t v )
 void ThrowGib( char *gibname, float dm )
 {
 	gedict_t       *newent;
-	int			    k_short_gib = iKey(world, "k_short_gib" ); // if set - remove faster
+	int			    k_short_gib = cvar( "k_short_gib" ); // if set - remove faster
 
 	newent = spawn();
 	VectorCopy( self->s.v.origin, newent->s.v.origin );
@@ -878,17 +878,15 @@ void StartDie ();
 
 void PlayerDie()
 {
-//	char            s[10];
-
 	self->s.v.items -= ( int ) self->s.v.items & IT_INVISIBILITY;
 
-	if ( iKey(world, "dq") && Get_Powerups() )
+	if ( cvar( "dq" ) && Get_Powerups() )
 	{
 		if ( self->super_damage_finished > 0 )
 			DropPowerup( self->super_damage_finished - g_globalvars.time, IT_QUAD );
 	}
 
-	if ( iKey(world, "dr") && Get_Powerups() )
+	if ( cvar( "dr" ) && Get_Powerups() )
 	{
 		if ( self->invisible_finished > 0 )
 			DropPowerup( self->invisible_finished - g_globalvars.time, IT_INVISIBILITY);

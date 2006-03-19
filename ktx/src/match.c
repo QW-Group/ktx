@@ -72,14 +72,14 @@ float CountTeams()
 		if( !strnull( p->s.v.netname ) && !p->k_flag && p->k_accepted == 2 ) {
 			p->k_flag = 1;
 
-			s1 = ezinfokey ( p, "team" );
+			s1 = getteam( p );
 			if( !strnull( s1 ) ) {
 				num++;
 
 				p2 = find ( p, FOFCLSN, "player" );
 				while( p2 ) {
-					s1 = ezinfokey ( p, "team" );
-					s2 = ezinfokey ( p2, "team" );
+					s1 = getteam( p );
+					s2 = getteam( p2 );
 					if( streq( s1, s2 ) )
 						p2->k_flag = 1;
 					p2 = find ( p2, FOFCLSN, "player" );
@@ -111,14 +111,14 @@ float CountRTeams()
 		if( !strnull( p->s.v.netname ) && !p->k_flag && p->ready && p->k_accepted == 2 ) {
 			p->k_flag = 1;
 
-			s1 = ezinfokey ( p, "team" );
+			s1 = getteam( p );
 			if( !strnull( s1 ) ) {
 				num++;
 
 				p2 = find ( p, FOFCLSN, "player" );
 				while( p2 ) {
-					s1 = ezinfokey ( p, "team" );
-					s2 = ezinfokey ( p2, "team" );
+					s1 = getteam( p );
+					s2 = getteam( p2 );
 					if( streq( s1, s2 ) )
 						p2->k_flag = 1;
 					p2 = find ( p2, FOFCLSN, "player" );
@@ -153,14 +153,14 @@ float CheckMembers ( float memcnt )
 		if( !strnull( p->s.v.netname ) && !p->k_flag && p->ready && p->k_accepted == 2 ) {
 			p->k_flag = 1;
 			f1 = 1;
-			s1 = ezinfokey ( p, "team" );
+			s1 = getteam( p );
 
 			if( !strnull ( s1 ) ) {
 				p2 = find ( p, FOFCLSN, "player" );
 
 				while( p2 ) {
-					s1 = ezinfokey ( p, "team" );
-					s2 = ezinfokey ( p2, "team" );
+					s1 = getteam( p );
+					s2 = getteam( p2 );
 
 					if( streq( s1, s2 ) ) {
 						p2->k_flag = 1;
@@ -198,27 +198,18 @@ void ShowTeamsBanner ( )
 void SummaryTPStats ( )
 {
 	gedict_t	*p, *p2;
+	int from1, from2;
 	float	dmg_g, dmg_t;
 	int   ra, ya, ga;
 	int   mh;
 	int   quad, pent, ring;
 	float h_rl, a_rl, h_lg, a_lg, h_sg, a_sg, h_ssg, a_ssg;
-	char  *tmp, *tmp2;
-
+	char  *tmp;
 
 	ShowTeamsBanner ();
 
-	p = find ( world, FOFCLSN, "player" );
-	while( p ) {
+	for( from1 = 0, p = world; p = find_plrghst ( p, &from1 ); )
 		p->ready = 0; // clear mark
-		p = find ( p, FOFCLSN, "player" );
-	}
-
-	p = find ( world, FOFCLSN, "ghost" );
-	while( p ) {
-		p->ready = 0; // clear mark
-		p = find ( p, FOFCLSN, "ghost" );
-	}
 
 	G_bprint(2, "\n%s, %s, %s, %s\n", redtext("weapons"), redtext("powerups"),
 									  redtext("armors & mhs"), redtext("damage"));
@@ -227,22 +218,15 @@ void SummaryTPStats ( )
 //	get one player and search all his mates, mark served players via ->ready field 
 //  ghosts is served too
 
-	p = find ( world, FOFCLSN, "player" );
-	while( p ) {
-		if( !strnull ( p->s.v.netname ) && !p->ready
-			 && ( !strnull( ezinfokey (p, "team") ) && p->k_accepted == 2 ) ) {
+	for( from1 = 0, p = world; p = find_plrghst ( p, &from1 ); ) {
+		if( !p->ready && !strnull( tmp = getteam( p ) ) ) {
 
 			dmg_g = dmg_t = ra = ya = ga = mh = quad = pent = ring = 0;
 			h_rl = a_rl = h_lg = a_lg = h_sg = a_sg = h_ssg = a_ssg = 0;
 
-			// stats from normal players
-
-			p2 = p;
-			while ( p2 ) {
+			for( from2 = 0, p2 = world; p2 = find_plrghst ( p2, &from2 ); ) {
 				if( !p2->ready ) {
-					tmp = ezinfokey(p, "team");
-					tmp2 = ezinfokey(p2, "team");
-					if( streq( tmp, tmp2 ) ) {
+					if( streq( tmp, getteam( p2 ) ) ) {
 				    	dmg_g += p2->ps.dmg_g;
 				    	dmg_t += p2->ps.dmg_t;
 				    	ra    += p2->ps.ra;
@@ -265,42 +249,6 @@ void SummaryTPStats ( )
 						p2->ready = 1; // set mark
 					}
 				}
-
-				p2 = find ( p2, FOFCLSN, "player" );
-			}
-
-			// stats from ghost players
-
-			p2 = find( world, FOFCLSN, "ghost" );
-			while( p2 ) {
-				if( !p2->ready ) {
-					tmp  = ezinfokey(p, "team");
-					tmp2 = ezinfokey(world, va("%d", (int)p2->k_teamnum));
-					if ( streq( tmp, tmp2 ) ) {
-				    	dmg_g += p2->ps.dmg_g;
-				    	dmg_t += p2->ps.dmg_t;
-				    	ra    += p2->ps.ra;
-				    	ya    += p2->ps.ya;
-				    	ga    += p2->ps.ga;
-				    	mh    += p2->ps.mh;
-				    	quad  += p2->ps.quad;
-				    	pent  += p2->ps.pent;
-				    	ring  += p2->ps.ring;
-
-						h_rl  += p2->ps.h_rl;
-						a_rl  += p2->ps.a_rl;
-						h_lg  += p2->ps.h_lg;
-						a_lg  += p2->ps.a_lg;
-						h_sg  += p2->ps.h_sg;
-						a_sg  += p2->ps.a_sg;
-						h_ssg += p2->ps.h_ssg;
-						a_ssg += p2->ps.a_ssg;
-
-						p2->ready = 1; // set mark
-					}
-				}
-
-				p2 = find ( p2, FOFCLSN, "ghost" );
 			}
 
 			h_sg  = 100.0 * h_sg  / max(1, a_sg);
@@ -315,7 +263,7 @@ void SummaryTPStats ( )
 			h_lg  = 100.0 * h_lg  / max(1, a_lg);
 
 			// weapons
-			G_bprint(2, "%s‘: %s:%s%s%s%s\n", ezinfokey ( p, "team" ), redtext("Wp"),
+			G_bprint(2, "%s‘: %s:%s%s%s%s\n", getteam( p ), redtext("Wp"),
 						(h_lg  ? va(" %s%.1f%%", redtext("lg"),   h_lg) : ""),
 						(h_rl  ? va(" %s%.0f",   redtext("rl"),   h_rl) : ""), 
 						(h_sg  ? va(" %s%.1f%%", redtext("sg"),   h_sg) : ""),
@@ -330,8 +278,6 @@ void SummaryTPStats ( )
 			G_bprint(2, "%s: %s:%.1f %s:%.1f\n", redtext("  Damage"),
 						redtext("Taken"), dmg_t, redtext("Given"), dmg_g);
 		}
-
-		p = find ( p, FOFCLSN, "player" );
 	}
 
 	G_bprint(2, "žžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n");
@@ -340,29 +286,16 @@ void SummaryTPStats ( )
 
 void TeamsStats ( )
 {
-	gedict_t	*p=NULL, *p2=NULL;
+	gedict_t	*p = NULL, *p2 = NULL;
 	float		f1, f2;
-	char		*tmp=NULL, *tmp2=NULL;
-	int		sumfrags = 0, wasPrint = 0;
+	char		*tmp = NULL;
+	int			sumfrags, wasPrint = 0, from1, from2;
 
 	// Summing up the frags to calculate team percentages
-	p = find ( world, FOFCLSN, "player" );
-	while( p ) {
-		p->ready = 0; // clear mark
-
-		if( !strnull ( p->s.v.netname )
-			&& ( !strnull( ezinfokey (p, "team") ) && p->k_accepted == 2 ) )
-			sumfrags += p->s.v.frags;
-
-		p = find ( p, FOFCLSN, "player" );
-	}
-
-	p = find ( world, FOFCLSN, "ghost" );
-	while( p ) {
-		p->ready = 0; // clear mark
+	sumfrags = 0;
+	for( from1 = 0, p = world; p = find_plrghst ( p, &from1 ); ) {
 		sumfrags += p->s.v.frags;
-
-		p = find ( p, FOFCLSN, "ghost" );
+		p->ready = 0; // clear mark
 	}
 	// End of summing
 
@@ -373,42 +306,23 @@ void TeamsStats ( )
 //	get one player and search all his mates, mark served players via ->ready field 
 //  ghosts is served too
 
-	p = find ( world, FOFCLSN, "player" );
-	while( p ) {
-		if( !strnull ( p->s.v.netname ) && !p->ready
-			 && ( !strnull( ezinfokey (p, "team") ) && p->k_accepted == 2 ) ) {
+	for( from1 = 0, p = world; p = find_plrghst( p, &from1 ); ) {
+		if( !p->ready && !strnull( tmp = getteam( p ) ) ) {
 
 			f1 = 0; // frags from normal players
+			f2 = 0; // frags from ghost players
 
-			p2 = p;
-			while ( p2 ) {
-				tmp = ezinfokey(p, "team");
-				tmp2 = ezinfokey(p2, "team");
-				if( streq( tmp, tmp2 ) ) {
-					f1 += p2->s.v.frags;
+			for( from2 = 0, p2 = world; p2 = find_plrghst( p2, &from2 ); )
+				if( !p2->ready && streq( tmp, getteam( p2 ) ) ) {
+					if ( streq(p2->s.v.classname, "player") )
+						f1 += p2->s.v.frags;
+					else
+						f2 += p2->s.v.frags;
+
 					p2->ready = 1; // set mark
 				}
 
-				p2 = find ( p2, FOFCLSN, "player" );
-			}
-
-			f2 = 0; // frags from ghost players
-
-			p2 = find( world, FOFCLSN, "ghost" );
-			while( p2 ) {
-				if( !p2->ready ) {
-					tmp2 = ezinfokey(world, va("%d", (int)p2->k_teamnum));
-					tmp  = ezinfokey(p, "team");
-					if ( streq( tmp, tmp2 ) ) {
-						f2 += p2->s.v.frags;
-						p2->ready = 1; // set mark
-					}
-				}
-
-				p2 = find ( p2, FOFCLSN, "ghost" );
-			}
-
-			G_bprint(2, "%s‘: %d", ezinfokey ( p, "team" ), (int) f1 );
+			G_bprint(2, "%s‘: %d", getteam( p ), (int) f1 );
 
 			if( f2 )
 				G_bprint( 2, tmp, " + (%d) = %d", (int)f2, (int)(f1+f2) );
@@ -418,8 +332,6 @@ void TeamsStats ( )
 
 			wasPrint = 1;
 		}
-
-		p = find ( p, FOFCLSN, "player" );
 	}
 
 	if ( wasPrint )
@@ -478,7 +390,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 			p->efficiency);
 
 // qqshka - force show this always
-//	if ( !tp || atoi( ezinfokey(world, "tp_players_stats") ) ) {
+//	if ( !tp || cvar( "tp_players_stats" ) ) {
 		// weapons
 		G_bprint(2, "%s:%s%s%s%s%s\n", redtext("Wp"),
 				(h_lg  ? va(" %s%.1f%%", redtext("lg"),   h_lg) : ""),
@@ -524,10 +436,10 @@ void PlayersStats ()
 	int			tp, first, from1, from2;
 
 	from1 = 0;
-	p = find_plr ( world, &from1 );
+	p = find_plrghst ( world, &from1 );
 	while( p ) {
 		p->ready = 0; // clear mark
-		p = find_plr ( p, &from1 );
+		p = find_plrghst ( p, &from1 );
 	}
 
 	// Probably low enough for a start value :)
@@ -543,14 +455,14 @@ void PlayersStats ()
 				redtext( "Frags"), redtext( "rank"), ( tp ? redtext("friendkills "): "" ), redtext( "efficiency" ));
 
 	from1 = 0;
-	p = find_plr ( world, &from1 );
+	p = find_plrghst ( world, &from1 );
 	while( p ) {
 		if( !p->ready ) {
 
 			first = 1;
 
 			from2 = 0;
-			p2 = find_plr ( world, &from2 );
+			p2 = find_plrghst ( world, &from2 );
 			while ( p2 ) {
 				if( !p2->ready ) {
 					// sort by team
@@ -575,14 +487,14 @@ void PlayersStats ()
 					}
 				}
 
-				p2 = find_plr ( p2, &from2 );
+				p2 = find_plrghst ( p2, &from2 );
 
 				if ( !p2 )
 					G_bprint(2, "\n"); // split players from different teams via \n
 			}
 		}
 
-		p = find_plr ( p, &from1 );
+		p = find_plrghst ( p, &from1 );
 	}
 }
 
@@ -598,7 +510,7 @@ void TopStats ( )
 				"      Frags: ", g_globalvars.mapname, redtext("top scorers"));
 
 	from = f1 = 0;
-	p = find_plr ( world, &from );
+	p = find_plrghst ( world, &from );
 	while( p ) {
 		if( p->s.v.frags == maxfrags ) {
 			G_bprint(2, "%s%s%s %d‘\n", (f1 ? "             " : ""),
@@ -606,14 +518,14 @@ void TopStats ( )
 			f1 = 1;
 		}
 
-		p = find_plr ( p, &from );
+		p = find_plrghst ( p, &from );
 	}
 
 
 	G_bprint(2, "     Deaths: ");
 
 	from = f1 = 0;
-	p = find_plr ( world, &from );
+	p = find_plrghst ( world, &from );
 	while( p ) {
 		if( p->deaths == maxdeaths ) {
 			G_bprint(2, "%s%s%s %d‘\n", (f1 ? "             " : ""),
@@ -621,14 +533,14 @@ void TopStats ( )
 			f1 = 1;
 		}
 
-		p = find_plr ( p, &from );
+		p = find_plrghst ( p, &from );
 	}
 
 	if( maxfriend ) {
 		G_bprint(2, "Friendkills: ");
 
 		from = f1 = 0;
-		p = find_plr ( world, &from );
+		p = find_plrghst ( world, &from );
 		while( p ) {
 			if( p->friendly == maxfriend ) {
 				G_bprint(2, "%s%s%s %d‘\n", (f1 ? "             " : ""),
@@ -636,14 +548,14 @@ void TopStats ( )
 				f1 = 1;
 			}
 
-			p = find_plr ( p, &from );
+			p = find_plrghst ( p, &from );
 		}
 	}
 
 	G_bprint(2, " Efficiency: ");
 
 	from = f1 = 0;
-	p = find_plr ( world, &from );
+	p = find_plrghst ( world, &from );
 	while( p ) {
 		if( p->efficiency == maxeffi ) {
 			G_bprint(2, "%s%s%s %.1f%%‘\n", (f1 ? "             " : ""),
@@ -651,7 +563,7 @@ void TopStats ( )
 			f1 = 1;
 		}
 
-		p = find_plr ( p, &from );
+		p = find_plrghst ( p, &from );
 	}
 
 	G_bprint(2, "žžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n");
@@ -676,16 +588,15 @@ void EndMatch ( float skip_log )
 // s: zero the flag
 	k_berzerk = k_sudden_death = 0;
 
-	tmp = ezinfokey( world, "k_host" );
-	if( !strnull( tmp ) )
-		trap_cvar_set( "hostname", tmp );
+	if( !strnull( tmp = cvar_string( "_k_host" ) ) )
+		trap_cvar_set( "hostname", tmp ); // restore host name at match end
 
 	trap_lightstyle(0, "m");
 
 	fpd = fpd & ~64;
 	localcmd("serverinfo fpd %d\n", fpd);
 
-	localcmd("sv_spectalk 1\n");
+	cvar_fset("sv_spectalk", 1);
 
 	G_bprint( 2, "The match is over\n");
 	G_cprint("RESULT");
@@ -699,7 +610,7 @@ void EndMatch ( float skip_log )
 			if( !strnull( p->s.v.netname ) && p->k_accepted == 2 )
 			{
 				G_cprint("%%%s", p->s.v.netname);
-				G_cprint("%%t%%%s", ezinfokey(p, "team"));
+				G_cprint("%%t%%%s", getteam( p ));
 				G_cprint("%%fr%%%d", (int)p->s.v.frags);
 
 				// take away powerups so scoreboard looks normal
@@ -856,7 +767,7 @@ void TimerThink ()
 
 		if( !self->cnt )
 		{
-			k_mb_overtime = atoi( ezinfokey( world, "k_overtime" ) );
+			k_mb_overtime = cvar( "k_overtime" );
 			
 			// If 0 no overtime, 1 overtime, 2 sudden death
 			// And if its neither then well we exit
@@ -864,7 +775,7 @@ void TimerThink ()
 			{
 				f3 = CountTeams();
 				f4 = CountPlayers();
-				k_exttime = atoi( ezinfokey ( world, "k_exttime" ) );
+				k_exttime = cvar( "k_exttime" );
 
 				
                 // Overtime.
@@ -985,7 +896,7 @@ void TimerThink ()
 			} else if( scores1 != scores2 ) {
 				f1 = scores1 - scores2;
 				G_bprint(2, "%s \x90%s\x91 leads by %s frag%s\n",
-						redtext("Team"), ezinfokey ( world, ( f1 > 0 ? "k_team1" : "k_team2" ) ),
+						redtext("Team"), cvar_string ( ( f1 > 0 ? "_k_team1" : "_k_team2" ) ),
 						dig3(abs( (int)f1 )), count_s( f1 ) );
 			}
 		}
@@ -1046,7 +957,7 @@ void SM_PrepareMap()
 				}
 			}
 		} else {
-			if( deathmatch == 2 && iKey( world, "k_dm2mod" ) &&
+			if( deathmatch == 2 && cvar( "k_dm2mod" ) &&
 			 							(   streq( p->s.v.classname, "item_armor1" )
 			  	 						 || streq( p->s.v.classname, "item_armor2" )
 			     						 || streq( p->s.v.classname, "item_armorInv")
@@ -1146,10 +1057,10 @@ void SM_PrepareShowscores()
 
 	k_showscores = 1;
 
-	localcmd("localinfo k_team1 \"%s\"\n", team1);
-	localcmd("localinfo k_team2 \"%s\"\n", team2);
-	localcmd("serverinfo hostname \"%s (%s vs. %s)\"\n", 
-					ezinfokey(world, "hostname"), team1, team2);
+	cvar_set("_k_team1", team1);
+	cvar_set("_k_team2", team2);
+
+	cvar_set("hostname", va("%s (%s vs. %s)", cvar_string("hostname"), team1, team2));
 }
 
 // Reset player frags and start the timer.
@@ -1166,8 +1077,8 @@ void StartMatch ()
 	trap_executecmd (); // <- this really needed
 
     // Check to see if berzerk is set.
-    if( iKey( world, "k_bzk" ) ) {
-        k_berzerkenabled = iKey( world, "k_btime" );
+    if( cvar( "k_bzk" ) ) {
+        k_berzerkenabled = cvar( "k_btime" );
     } else {
         k_berzerkenabled = 0;
     }
@@ -1188,8 +1099,8 @@ void StartMatch ()
 // spec silence
 	{ 
 		int fpd = iKey( world, "fpd" );
-		int k_spectalk = bound(0, iKey(world, "k_spectalk"), 1);
-		localcmd( "sv_spectalk %d\n", k_spectalk);
+		int k_spectalk = bound(0, cvar( "k_spectalk" ), 1);
+		cvar_fset( "sv_spectalk", k_spectalk );
 
  		// remove 64 from fpd and add 64 to fpd if k_spectalk == 1
 		fpd = (fpd & ~64) | (k_spectalk * 64);
@@ -1205,7 +1116,7 @@ void StartMatch ()
 	self->s.v.think = ( func_t ) TimerThink;
 	self->s.v.nextthink = g_globalvars.time + 1;
 
-	localcmd( "localinfo k_host \"%s\"\n", ezinfokey(world, "hostname") ); // save host name
+	cvar_set( "_k_host", cvar_string("hostname") );  // save host name at match start
 
 	SM_PrepareShowscores();
 }
@@ -1251,14 +1162,14 @@ void PrintCountdown( int seconds )
 	if ( fraglimit )
 		strlcat(text, va("%s %3s\n", "Fraglimit", dig3(fraglimit)), sizeof(text));
 
-	switch ( atoi( ezinfokey( world, "k_overtime" ) ) ) {
+	switch ( (int)cvar( "k_overtime" ) ) {
 		case 0:  ot = redtext("Off"); break;
-		case 1:  ot = dig3( iKey( world, "k_exttime" ) ); break;
+		case 1:  ot = dig3( cvar( "k_exttime" ) ); break;
 		case 2:  ot = redtext("sd"); break;
 		default: ot	= redtext("Unkn"); break;
 	}
 
-	if ( atoi( ezinfokey( world, "k_overtime" ) ) )
+	if ( cvar( "k_overtime" ) )
 		strlcat(text, va("%s %4s\n", "Overtime", ot), sizeof(text));
 
 	switch ( Get_Powerups() ) {
@@ -1281,9 +1192,9 @@ void PrintCountdown( int seconds )
 
 qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 {
-    int k_lockmin     = iKey( world, "k_lockmin" );
-    int k_lockmax     = iKey( world, "k_lockmax" );
-	int k_membercount = iKey( world, "k_membercount" );
+    int k_lockmin     = cvar( "k_lockmin" );
+    int k_lockmax     = cvar( "k_lockmax" );
+	int k_membercount = cvar( "k_membercount" );
 	int i = CountRTeams();
 	int sub, nready;
 	char *txt = "";
@@ -1398,7 +1309,7 @@ void ShowMatchSettings()
 	int i;
 	char *txt = "";
 
-	switch ( iKey( world, "k_spw" ) ) {
+	switch ( (int)cvar( "k_spw" ) ) {
 		case 0: txt = "Normal QW respawns"; break;
 		case 1: txt = "KT SpawnSafety"; break;
 		case 2: txt = "Kombat Teams respawns"; break;
@@ -1409,7 +1320,7 @@ void ShowMatchSettings()
 
 // changed to print only if other than default
 
-	if( i = iKey( world, "k_frp" ) ) {
+	if( i = cvar( "k_frp" ) ) {
 		// Output the Fairpack setting here
 		switch ( i ) {
 			case 0: txt = "off"; break;
@@ -1441,10 +1352,10 @@ void ShowMatchSettings()
 
 void StartDemoRecord ()
 {
-	if ( iKey( world, "demo_tmp_record" ) ) { // FIXME: TODO: make this more like ktpro
+	if ( cvar( "demo_tmp_record" ) ) { // FIXME: TODO: make this more like ktpro
 		qboolean record = false;
 
-		if ( isFFA() && iKey( world, "demo_skip_ktffa_record" ) )
+		if ( isFFA() && cvar( "demo_skip_ktffa_record" ) )
 			record = false;
 		else
 			record = true;
@@ -1479,8 +1390,8 @@ void StartTimer ()
 	timer->s.v.classname = "timer";
 	timer->cnt = 0;
 
-	if( iKey( world, "k_count" ) > 0 )
-        timer->cnt2 = iKey( world, "k_count" );
+	if( cvar( "k_count" ) > 0 )
+        timer->cnt2 = cvar( "k_count" );
     else
         timer->cnt2 = 3; // at the least we want a 3 second countdown
 
@@ -1579,7 +1490,7 @@ void IdlebotThink ()
 	gedict_t *p;
 	int i;
 
-	if ( iKey(world, "k_idletime") <= 0 ) {
+	if ( cvar( "k_idletime" ) <= 0 ) {
 		ent_remove( self );
 		return;
 	}
@@ -1633,7 +1544,7 @@ void IdlebotCheck ()
 	gedict_t *p;
 	int i;
 
-	if ( iKey(world, "k_idletime") <= 0 ) {
+	if ( cvar( "k_idletime" ) <= 0 ) {
 		if ( p = find ( world, FOFCLSN, "idlebot" ) )
 			ent_remove( p );
 		return;
@@ -1678,7 +1589,7 @@ void IdlebotCheck ()
 	p->s.v.think = (func_t) IdlebotThink;
 	p->s.v.nextthink = g_globalvars.time + 0.001;
 
-	p->attack_finished = max( 3, iKey(world, "k_idletime") );
+	p->attack_finished = max( 3, cvar( "k_idletime" ) );
 
 	G_bprint(2, "\n"
 				"server activates the %s\n", redtext("idle bot"));
@@ -1795,7 +1706,7 @@ void PlayerBreak ()
 		self->v.brk = 0;
 
 		G_bprint(2, "%s %s %s vote%s\n", self->s.v.netname,
-				redtext("withdraws"), redtext(SexStr(self)),
+				redtext("withdraws"), redtext(g_his(self)),
 				((votes = get_votes_req( OV_BREAK, true )) ? va(" (%d)", votes) : ""));
 
 		return;

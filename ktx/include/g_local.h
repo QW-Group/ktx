@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.32 2006/03/16 20:18:17 qqshka Exp $
+ *  $Id: g_local.h,v 1.33 2006/03/19 23:16:33 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -36,7 +36,7 @@
 #include "g_syscalls.h"
 #include "player.h"
 
-#define MOD_VERSION					("1.11")
+#define MOD_VERSION					("1.12")
 #define MOD_NAME					("KTX")
 #define MOD_SERVERINFO_MOD_KEY		("xmod")
 #define MOD_SERVERINFO_BUILD_KEY	("xbuild")
@@ -57,6 +57,8 @@
 #else
 #define DebugTrap(x) G_Error(x)
 #endif
+
+#define MOTD_LINES (15)
 
 #define MAX_STRINGS 64
 
@@ -198,13 +200,15 @@ void		WriteCoord( int to, float data );
 float		cvar( const char *var );
 char		*cvar_string( const char *var );
 void        cvar_set( const char *var, const char *val );
+void		cvar_fset( const char *var, float val );
 
 char		*getteam( gedict_t * ed );
 char		*getname( gedict_t * ed );
 
-char		*SexStr( gedict_t * ed );
+char		*g_his( gedict_t * ed );
+char		*g_himself( gedict_t * ed );
 
-gedict_t	*find_plr( gedict_t * start, int *from );
+gedict_t	*find_plrghst( gedict_t * start, int *from );
 gedict_t	*find_plrspc( gedict_t * start, int *from );
 gedict_t 	*player_by_id( int id );
 gedict_t	*player_by_name( const char *name );
@@ -230,6 +234,7 @@ char 		*count_s( int cnt );
 char		*Enables( float f );
 char		*Enabled( float f );
 char		*Allows( float f );
+char		*Allowed( float f );
 char		*OnOff( float f );
 
 int			get_scores1();

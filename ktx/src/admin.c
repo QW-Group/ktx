@@ -136,8 +136,7 @@ void YesKick ()
         }
         else if( self->k_playertokick == self )
         {
-            G_bprint(2, "%s kicked %s\n", self->s.v.netname,
-						 ( streq( ezinfokey( self, "gender"),  "f") ? "herself" : "himself" ) );
+            G_bprint(2, "%s kicked %s\n", self->s.v.netname, g_himself( self ));
 
 			// hehe %)
             G_sprint(self, 2, "Say \"bye\" and then type \"disconnect\" next time.\n");
@@ -214,7 +213,7 @@ void ReqAdmin ()
 		return;
 	}
 
-	if( !iKey( world, "k_admins" ) ) {
+	if( !cvar( "k_admins" ) ) {
 		G_sprint(self, 2, "%s on this server!\n", redtext("NO admins"));
 		return;
 	}
@@ -231,7 +230,7 @@ void ReqAdmin ()
 	// parse /admin <pass>
 	if (trap_CmdArgc() == 3) {
 		char arg_3[1024];
-		char *pass = ezinfokey(world, "k_admincode");
+		char *pass = cvar_string( "k_admincode" );
 
 		trap_CmdArgv( 2, arg_3, sizeof( arg_3 ) );
 
@@ -275,7 +274,9 @@ void AdminImpBot ()
 
     if( !self->k_adminc )
     {
-        if( self->k_added == iKey( world, "k_admincode" ) )
+		int iPass = cvar( "k_admincode" );
+
+        if( !iPass && self->k_added == iPass )
         {
 			BecomeAdmin(self);
 			return;
@@ -323,13 +324,13 @@ void VoteAdmin()
 		return;
 	}
 
-	if( !iKey( world, "k_admins" ) ) {
+	if( !cvar( "k_admins" ) ) {
 		G_sprint(self, 2, "%s on this server!\n", redtext("NO admins"));
 		return;
 	}
 
 // Check if voteadmin is allowed
-	if( !iKey( world, "k_allowvoteadmin" ) ) {
+	if( !cvar( "k_allowvoteadmin" ) ) {
 		G_sprint(self, 2, "Admin election is not allowed on this server.\n");
 		return;
 	}
@@ -459,8 +460,6 @@ void ReadyThink ()
 void AdminForceStart ()
 {
     gedict_t *mess;
-//    float f1, k_lockmin, k_lockmax, f2;
-//    char *tmp;
 
     if( match_in_progress || self->k_admin != 2 )
         return;
@@ -524,7 +523,7 @@ void AdminForceBreak ()
     }
 
     if( k_oldmaxspeed ) // huh???
-        cvar_set("sv_maxspeed", va("%d", (int)k_oldmaxspeed));
+        cvar_fset( "sv_maxspeed", k_oldmaxspeed );
 
     G_cprint("%%forcebreak%%%s\n", self->s.v.netname);
     G_bprint(2, "%s forces a break!\n"
@@ -541,11 +540,11 @@ void TogglePreWar ()
     if( self->k_admin != 2 )
         return;
 
-    tmp = atoi( ezinfokey( world, "k_prewar" ) );
+    tmp = cvar( "k_prewar" );
 
     if( tmp )
     {
-        localcmd("localinfo k_prewar 0\n");
+		cvar_fset( "k_prewar", 0 );
 
         if( !match_in_progress )
         {
@@ -566,7 +565,7 @@ void TogglePreWar ()
         return;
     }
 
-    localcmd("localinfo k_prewar 1\n");
+	cvar_fset( "k_prewar", 1 );
 
     if( !match_in_progress )
         G_bprint(2, "Players may fire before match.\n");
@@ -581,11 +580,11 @@ void ToggleMapLock ()
     if( self->k_admin != 2 )
         return;
 
-    tmp = atoi( ezinfokey( world, "k_lockmap" ) );
+    tmp = cvar( "k_lockmap" );
 
     if( tmp )
     {
-        localcmd("localinfo k_lockmap 0\n");
+		cvar_fset( "k_lockmap", 0 );
 
         if( !match_in_progress )
             G_bprint(2, "%s unlocks map.\n", self->s.v.netname);
@@ -595,7 +594,7 @@ void ToggleMapLock ()
         return;
     }
 
-    localcmd("localinfo k_lockmap 1\n");
+	cvar_fset( "k_lockmap", 1 );
 
     if( !match_in_progress )
         G_bprint(2, "%s locks map!\n", self->s.v.netname);
@@ -610,15 +609,16 @@ void ToggleMaster ()
     if( self->k_admin != 2 )
         return;
 
-    f1 = atoi( ezinfokey( world, "k_master" ) );
-    f1 = 1 - f1;
+    f1 = !cvar( "k_master" );
 
     if( f1 )
-        G_bprint(2, "%s sets mastermode!\nPlayers may ξοτ alter settings\n", self->s.v.netname);
+        G_bprint(2, "%s sets mastermode!\n"
+					"Players may %s alter settings\n", self->s.v.netname, redtext("not"));
     else
-        G_bprint(2,"Mastermode disabled\nPlayers can now alter settings\n");
+        G_bprint(2, "Mastermode disabled by %s\n"
+					"Players %s now alter settings\n", self->s.v.netname, redtext("can"));
 
-    localcmd("localinfo k_master %d\n", (int)f1);
+	cvar_fset( "k_master", f1 );
 }
 
 
@@ -727,15 +727,9 @@ void AdminForcePause ()
 
 void ToggleFallBunny ()
 {
-    float f1;
-
     if( self->k_admin != 2 )
         return;
 
-    f1 = !atoi( ezinfokey( world, "k_fallbunny" ) );
-
-    G_bprint(2, "%s %s fallbunny!\n", self->s.v.netname, Enables( f1 ));
-
-    localcmd("localinfo k_fallbunny %d\n", (int)f1);
+	cvar_toggle_msg( self, "k_fallbunny", redtext("fallbunny") );
 }
 

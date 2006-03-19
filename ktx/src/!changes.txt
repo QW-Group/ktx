@@ -1,3 +1,22 @@
+2006-03-19 [ver 1.12]
+ 85. WARNING
+	 WARNING
+	 WARNING: i convert all localinfos to sets, so u need update configs, 
+	 		  u just must search "localinfo" and replace with "set".
+
+	 Only one exceptioan i think, custom map list is still in localinfo, i'm talking something
+	 about like this:
+
+	 localinfo 1000 ukooldm1
+	 localinfo 1001 ukooldm2
+	 localinfo 1002 ukooldm3
+
+	 this still legal, because of mvdsv is doing some things with this localinfos.
+
+	 And, about FFA, localinfo k_ml_0 k_ml_1 ... is converted to set too, u are warned!
+
+	 Btw, this was huge work, bugs is possible.
+
 2006-03-16 [ver 1.11]
  81. Now in prewar weapon ammo show which damage u take and health show which damage u give,
 	 armor show horizontal speed, but show speed u must activate via /kinfo kf 64

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.25 2006/03/16 20:35:09 qqshka Exp $
+ *  $Id: g_utils.c,v 1.26 2006/03/19 23:16:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -742,6 +742,14 @@ void cvar_set( const char *var, const char *val )
 	trap_cvar_set( var, val );
 }
 
+void cvar_fset( const char *var, float val )
+{
+	if ( strnull( var ) )
+		G_Error("cvar_fset null");
+
+	trap_cvar_set_float(var, val);
+}
+
 // i'm tired of this shit, so implement this
 // return team of edict, edict may has "player" or "ghost" classname
 char *getteam( gedict_t * ed )
@@ -752,7 +760,10 @@ char *getteam( gedict_t * ed )
 
 	index %= MAX_STRINGS;
 
-	if ( streq(ed->s.v.classname, "player") || streq(ed->s.v.classname, "spectator") )
+	if ( 	streq(ed->s.v.classname, "player")
+		 || streq(ed->s.v.classname, "player_na") 
+		 || streq(ed->s.v.classname, "spectator")
+	   )
 		team = ezinfokey(ed, "team");
 	else if ( streq(ed->s.v.classname, "ghost") )
 		team = ezinfokey(world, va("%d", (int)ed->k_teamnum));
@@ -775,7 +786,9 @@ char *getname( gedict_t * ed )
 
 	index %= MAX_STRINGS;
 
-	if ( streq(ed->s.v.classname, "player") || streq(ed->s.v.classname, "spectator") )
+	if ( 	streq(ed->s.v.classname, "player")
+		 || streq(ed->s.v.classname, "player_na") 
+		 || streq(ed->s.v.classname, "spectator") )
 		name = ed->s.v.netname;
 	else if ( streq(ed->s.v.classname, "ghost") )
 		name = ezinfokey(world, va("%d", (int)ed->cnt2));
@@ -788,8 +801,8 @@ char *getname( gedict_t * ed )
 	return string[index++];
 }
 
-// :)
-char *SexStr( gedict_t * ed )
+// return "his" or "her" depend on gender of player
+char *g_his( gedict_t * ed )
 {
 	static char		string[MAX_STRINGS][5];
 	static int		index = 0;
@@ -798,9 +811,29 @@ char *SexStr( gedict_t * ed )
 	index %= MAX_STRINGS;
 
 //	if ( !ed->k_player && !ed->k_spectator )
-//		G_Error("SexStr: not client, classname %s", ed->s.v.classname);
+//		G_Error("g_his: not client, classname %s", ed->s.v.classname);
 	if( streq( ezinfokey( ed, "gender" ), "f" ) )
 		sex = "her";
+
+	string[index][0] = 0;
+	strlcat( string[index], sex, sizeof( string[0] ) );
+
+	return string[index++];
+}
+
+// return "himself" or "herself" depend on gender of player
+char *g_himself( gedict_t * ed )
+{
+	static char		string[MAX_STRINGS][9];
+	static int		index = 0;
+	char 			*sex="himself";
+
+	index %= MAX_STRINGS;
+
+//	if ( !ed->k_player && !ed->k_spectator )
+//		G_Error("g_himself: not client, classname %s", ed->s.v.classname);
+	if( streq( ezinfokey( ed, "gender" ), "f" ) )
+		sex = "herself";
 
 	string[index][0] = 0;
 	strlcat( string[index], sex, sizeof( string[0] ) );
@@ -811,13 +844,13 @@ char *SexStr( gedict_t * ed )
 // this help me walk from both players and ghosts, made code more simple
 // int from = 0;
 // gedict_t *p = world ;
-// while ( p = find_plr(p, &from) ) {
+// while ( p = find_plrghst(p, &from) ) {
 // ... some code ...
 // }
 
 // only already accepted players have classname "player" now
 
-gedict_t *find_plr( gedict_t * start, int *from )
+gedict_t *find_plrghst( gedict_t * start, int *from )
 {
 	gedict_t *next = find(start, FOFCLSN, *from ? "ghost" : "player" );
 
@@ -1036,7 +1069,7 @@ int Get_Powerups ()
 	static float k_pow_check = 0;
 	static int   k_pow = 0;
 
-	int k_pow_new         = iKey(world, "k_pow");
+	int k_pow_new         = cvar( "k_pow" ); // sure - here we not using Get_Powerups %)
 	int k_pow_min_players = bound(0, cvar( "k_pow_min_players"), 999);
 	int k_pow_check_time  = bound(0, cvar( "k_pow_check_time"), 999);
 
@@ -1098,6 +1131,11 @@ char *Allows( float f )
 	return ( f ? "allows" : "disallows" );
 }
 
+char *Allowed( float f )
+{
+	return ( f ? "allowed" : "disallowed" );
+}
+
 char *OnOff( float f )
 {
 	return ( f ? "on" : "off" );
@@ -1132,9 +1170,9 @@ void ReScores()
 	k_scores2 = 0;
 
 	if ( k_showscores ) {
-		team1 = ezinfokey( world, "k_team1" );
+		team1 = cvar_string( "_k_team1" );
 
-		for( from = 0, p = world; p = find_plr( p, &from ); ) {
+		for( from = 0, p = world; p = find_plrghst( p, &from ); ) {
 			team2 = getteam(p);
 
 			if( streq( team1, team2 ) )

@@ -36,8 +36,8 @@ void SetPlayerParams (gedict_t *p, gedict_t *cap)
 {
     char *infoteam, *infocolor;
 
-	infoteam  = ezinfokey(world, va("captteam%d", (int)k_captainturn));
-	infocolor = ezinfokey(world, va("captcolor%d", (int)k_captainturn));
+	infoteam  = cvar_string( va("_k_captteam%d", (int)k_captainturn) );
+	infocolor = cvar_string( va("_k_captcolor%d", (int)k_captainturn) );
 	k_captainturn = (k_captainturn == 1 ? 2 : 1);
 
     G_bprint(2, "%s set to team \x90%s\x91\n", p->s.v.netname, infoteam);
@@ -307,9 +307,9 @@ void BeginPicking ()
 		{
 			G_sprint(p, 2, "\nUse %s or %s to choose\n", redtext("numbers"), redtext("impulses"));
 
-			localcmd("localinfo captteam%d \"%s\"\n", (int)p->k_captain, getteam(p));
-			localcmd("localinfo captcolor%d \"%s %s\"\n", (int)p->k_captain,
-								ezinfokey(p, "topcolor"), ezinfokey(p, "bottomcolor"));
+			cvar_set( va("_k_captteam%d", (int)p->k_captain), getteam(p) );
+			cvar_set( va("_k_captcolor%d", (int)p->k_captain), va("%s %s", 
+							ezinfokey(p, "topcolor"), ezinfokey(p, "bottomcolor")));
 		}
 		else
 		{

@@ -84,7 +84,7 @@ void StuffCustomMaps()
 {
 	float f1, f2, f3;
 	char *s2=NULL;
-	float dt = StuffDeltaTime( atoi ( ezinfokey( PROG_TO_EDICT( self->s.v.owner ), "ss" ) ) );
+	float dt = StuffDeltaTime( iKey( PROG_TO_EDICT( self->s.v.owner ), "ss" ) );
 
 	if(self->cnt == -1)
 		self->cnt = 0;
@@ -132,7 +132,7 @@ void StuffCustomMaps()
 void StuffMainMaps()
 {
 	int i, limit;
-	float dt = StuffDeltaTime( atoi ( ezinfokey( PROG_TO_EDICT( self->s.v.owner ), "ss" ) ) );
+	float dt = StuffDeltaTime( iKey( PROG_TO_EDICT( self->s.v.owner ), "ss" ) );
 
 	if(self->cnt == -1)
 		self->cnt = 0;
@@ -206,7 +206,7 @@ void SelectMap()
 	if ( strnull( m = GetMapName( self->cmd_selectMap ) ) )
 		return;
 
-	if( ( iKey( world, "k_lockmap" ) || iKey( world, "k_master" ) )
+	if( ( cvar( "k_lockmap" ) || cvar( "k_master" ) )
 			&& self->k_admin != 2 
       ) {
 		G_sprint(self, 2, "MAP IS LOCKED!\n"

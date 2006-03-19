@@ -24,8 +24,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 void StuffModCommands();
 float CountPlayers();
 
-#define MOTD_LINES (15)
-
 void PMOTDThink()
 {
 	int i;
@@ -45,7 +43,7 @@ void PMOTDThink()
 	}
 
 	for( i = 1; i <= MOTD_LINES; i++) {
-		if ( strnull( s = ezinfokey(world, va("k_motd%d", i)) ) )
+		if ( strnull( s = cvar_string(va("k_motd%d", i)) ) )
 			continue;
 		
 		strlcat(buf, s, sizeof(buf));
@@ -132,32 +130,17 @@ void MOTDStuff()
 		}
 		else if( lock == 1 ) // kick if team is not set properly
 		{
+			int from1;
+
 			kick = 1;
 
-			p = find(world, FOFCLSN, "player");
-			while( p && kick == 1 ) 
-			{
-				t = ezinfokey(so, "team");
-				if( p != so && !strnull( p->s.v.netname ) && streq( ezinfokey(p, "team"), t ) ) 
-					kick = 0; // don't kick, find "player" with equal team?
-				else
-					p = find(p, FOFCLSN, "player");
-			}
+			t = getteam( so );
 
-			if( kick )
-			{
-				p = find(world, FOFCLSN, "ghost");
-				while( p && kick == 1 ) 
-				{
-					t2 = ezinfokey(world, va("%d", (int)p->k_teamnum));
-					t  = ezinfokey(so, "team");
-
-					if( streq( t, t2 ) ) 
-						kick = 0; // don't kick, find "ghost" with equal team?
-					else
-						p = find(p, FOFCLSN, "ghost");
+			for( from1 = 0, p = world; p = find_plrghst( p, &from1 ); )
+				if ( p != so && streq( getteam( p ), t ) ) {
+					kick = 0;  // don't kick, find "player" or "ghost" with equal team
+					break;
 				}
-			}
 			
 			if ( kick )
 				G_sprint(so, 2, "Set your team before connecting\n");
@@ -167,7 +150,7 @@ void MOTDStuff()
 		if( !kick ) // kick is exclusive 
 		{
 			f2 = CountPlayers();
-			if( f2 >= k_attendees && iKey(world, "k_exclusive") ) 
+			if( f2 >= k_attendees && cvar("k_exclusive") ) 
 			{
 				G_sprint(so, 2, "Sorry, all teams are full\n");
 				kick = 1;
@@ -208,7 +191,7 @@ void MOTDStuff()
 
 		if( f2 == k_userid ) // ghost not found (localinfo)
 		{
-			G_bprint(2, "%s arrives late %s‘\n", so->s.v.netname, ezinfokey(so, "team"));
+			G_bprint(2, "%s arrives late %s‘\n", so->s.v.netname, getteam(so));
 		} 
 		else // ghost probably found (localinfo)
 		{
@@ -223,8 +206,8 @@ void MOTDStuff()
 
 			if( p ) // found ghost entity
 			{
-				t2 = ezinfokey(world, va("%d", (int)p->k_teamnum));
-				t  = ezinfokey(so, "team");
+				t2 = getteam( p );
+				t  = getteam( so );
 				if( strneq( t, t2 ) ) 
 				{
 					so->k_accepted = 0;
@@ -238,7 +221,7 @@ void MOTDStuff()
 				}
 
 				localcmd("localinfo %d \"\"\n", (int)f2);
-				G_bprint(2, "%s rejoins the game %s‘\n", so->s.v.netname, ezinfokey(so, "team"));
+				G_bprint(2, "%s rejoins the game %s‘\n", so->s.v.netname, getteam( so ));
 
 				so->fraggie   = p->s.v.frags;
 				so->deaths    = p->deaths;
@@ -256,14 +239,14 @@ void MOTDStuff()
 			}
 		}
 
-		if( !strnull ( ezinfokey(so, "team") ) ) 
+		if( !strnull ( getteam( so ) ) ) 
 		{
 			f1 = 665;
 			while( k_teamid > f1 && !so->k_teamnum ) 
 			{
 				f1++;
 				s1  = ezinfokey(world, va("%d", (int)f1));
-				tmp = ezinfokey(so, "team");
+				tmp = getteam( so );
 				if( streq( tmp, s1 ) )
 					so->k_teamnum = f1;
 			}
@@ -272,7 +255,7 @@ void MOTDStuff()
 			{
 				f1++;
 
-				localcmd("localinfo %d \"%s\"\n", (int)f1, ezinfokey(so, "team"));
+				localcmd("localinfo %d \"%s\"\n", (int)f1, getteam( so ));
 				k_teamid     = f1;
 				so->k_teamnum = f1;
 			}

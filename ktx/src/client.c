@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.43 2006/03/16 21:48:02 qqshka Exp $
+ *  $Id: client.c,v 1.44 2006/03/19 23:16:13 qqshka Exp $
  */
 
 //===========================================================================
@@ -69,8 +69,8 @@ qboolean CheckRate (gedict_t *p, char *newrate)
 	// This is used to check a players rate.  If above allowed setting then it kicks em off.
 	player_rate = strnull(newrate) ? iKey( p, "rate" ) : atoi(newrate);
 	
-	maxrate = iKey(world, "k_maxrate" );
-	minrate = iKey(world, "k_minrate" );
+	maxrate = cvar( "k_maxrate" );
+	minrate = cvar( "k_minrate" );
 
 	if( maxrate || minrate )
 	{
@@ -107,12 +107,12 @@ int lasttimed = 0;
 // check if client lagged or returned from lag
 void CheckTiming()
 {
-	float timing_players_time = bound(0, atoi( ezinfokey( world, "timing_players_time" ) ), 30);
-	int timing_players_action = TA_ALL & atoi( ezinfokey( world, "timing_players_action" ) );
+	float timing_players_time = bound(0, cvar( "timing_players_time" ), 30);
+	int timing_players_action = TA_ALL & (int)cvar( "timing_players_action" );
 	int timed = 0;
 	gedict_t *p;
 
-	if ( !atoi( ezinfokey( world, "allow_timing" ) ) )
+	if ( !cvar( "allow_timing" ) )
 		return;
 
 	timing_players_time = timing_players_time ? timing_players_time : 6; // 6 is default
@@ -180,7 +180,7 @@ void CheckTiming()
 
 void Check_sready()
 {
-	int k_sready = iKey( world, "k_sready" );
+	int k_sready = cvar( "k_sready" );
 	gedict_t *p;
 
 	if ( match_in_progress )
@@ -359,7 +359,7 @@ gedict_t       *FindIntermission()
 
 void GotoNextMap()
 {
-	char            newmap[64] = {0};
+	char            *newmap = "";
 	int i;
 
 	if( get_votes( OV_ELECT ) ) 
@@ -374,28 +374,28 @@ void GotoNextMap()
 		// qqshka, i modified this, so if someone select map not in map list and match is ended
 		// we will select some map from map list, nor just stay on current map.
 		// map list have now next syntax:
-		// localinfo k_ml_0 dm6
-		// localinfo k_ml_1 dm4
-		// localinfo k_ml_2 dm2
+		// set k_ml_0 dm6
+		// set k_ml_1 dm4
+		// set k_ml_2 dm2
 		// so this mean we have rotation of maps dm6 dm4 dm2 dm6 dm4 dm2 ...
 
 		for ( i = 0; i<999; i++){
-			infokey( world, va("k_ml_%d", i), newmap, sizeof( newmap ) );
+			newmap = cvar_string( va("k_ml_%d", i) );
 
 			if ( strnull( newmap ) ) { // end of list
 				if ( !i )
 					break; // no map list at all
 				// current map not in map list, so select first entry in map list as next map
-				infokey( world, "k_ml_0", newmap, sizeof( newmap ) );
+				newmap = cvar_string( "k_ml_0" );
 				break;
 			}
 
 			if ( streq( g_globalvars.mapname, newmap ) ) { // ok map found in map list, select next map
 
-				infokey( world, va("k_ml_%d", i+1), newmap, sizeof( newmap ) );
+				newmap = cvar_string( va("k_ml_%d", i + 1) );
 
 				if ( strnull( newmap ) ) { // current entry was last - select first entry
-					infokey( world, "k_ml_0", newmap, sizeof( newmap ) );
+					newmap = cvar_string( "k_ml_0" );
 					break;
 				}
 
@@ -406,7 +406,7 @@ void GotoNextMap()
 		if ( !nextmap[0] ) // so we can reload current map at least
 			strcpy( nextmap, g_globalvars.mapname );
 
-		if ( newmap[0] )
+		if ( !strnull( newmap ) )
 			changelevel( newmap );
 		else
 			changelevel( nextmap );
@@ -477,7 +477,7 @@ void execute_changelevel()
 
 // enforce a wait time before allowing changelevel
 	intermission_exittime = g_globalvars.time + 1 +
-							max( 1, atoi( ezinfokey( world, "demo_scoreslength" ) ) );
+							max( 1, cvar( "demo_scoreslength" ) );
 
 	pos = FindIntermission();
 
@@ -719,7 +719,7 @@ gedict_t       *SelectSpawnPoint()
 	int				k_nspots;
 	int				totalspots;
 	int				pcount;
-	int				k_spw = iKey( world, "k_spw" );
+	int				k_spw = cvar( "k_spw" );
 
 	totalspots = numspots = 0;
 
@@ -912,14 +912,14 @@ void ClientConnect()
 
 			if( p && p->k_captain ) {
 
-				tmp = ezinfokey(p, "team");
+				tmp = getteam(p);
 
-				if( streq( tmp, ezinfokey(self, "team") ) ) {
+				if( streq( tmp, getteam(self) ) ) {
 					G_sprint(self, 2, "Team picking in progress\n");
-					G_bprint(2, "%s is set to team ò%só\n", self->s.v.netname, tmp);
+					G_bprint(2, "%s is set to team \x90%s\x91\n", self->s.v.netname, tmp);
+
 					// set color, team is already set %)
-					stuffcmd(self, "color %d %d\n",
-						atoi(ezinfokey(p, "topcolor")), atoi(ezinfokey(p, "bottomcolor")));
+					stuffcmd(self, "color %d %d\n", iKey(p, "topcolor"), iKey(p, "bottomcolor"));
 					f1 = 1;
 				}
 				else
@@ -1066,13 +1066,13 @@ void PutClientInServer()
 			//berzerk will not affect players that logs in during berzerk
 			//spawn666 will not affect the first spawn of players connecting to a game in progress
 			if( match_in_progress == 2 ) {
-				if( atoi( ezinfokey( world, "k_bzk" ) ) && k_berzerk ) {
+				if( cvar( "k_bzk" ) && k_berzerk ) {
 					self->s.v.items = (int)self->s.v.items | 4194304;
 					self->super_time = 1;
 					self->super_damage_finished = g_globalvars.time + 3600;
 				}
 
-				if( iKey( world, "k_666" ) ) {
+				if( cvar( "k_666" ) ) {
 					stuffcmd (self, "bf\n");
 					self->invincible_time = 1;
 					self->invincible_finished = g_globalvars.time + 2;
@@ -1096,7 +1096,7 @@ void PutClientInServer()
 	{
 		self->s.v.ammo_shells = 0;
 		items = self->s.v.items;
-		if ( !iKey(world, "axe") )
+		if ( !cvar( "axe" ) )
 		{
 			self->s.v.ammo_nails   = 255;
 			self->s.v.ammo_shells  = 255;
@@ -1498,17 +1498,17 @@ void ClientDisconnect()
 	if( k_captains == 2 )
 		CheckFinishCaptain();
 
-	if( iKey( world, "k_idletime" ) > 0 )
+	if( cvar( "k_idletime" ) > 0 )
 		IdlebotCheck();
 
 	f1 = CountALLPlayers();
 
 	if( !f1
 		&& (
-			 (    !atoi( ezinfokey( world, "k_master" ) )
-			   && !atoi( ezinfokey( world, "k_lockmap" ) ) 
+			 (    !cvar( "k_master" )
+			   && !cvar( "k_lockmap" ) 
 			 )
-			 || ( !atoi( ezinfokey( world, "lock_practice" ) ) && k_practice )
+			 || ( !cvar( "lock_practice" ) && k_practice ) // reload map even k_master or k_lockmap set
 	       )
 	  )
 	{
@@ -1520,20 +1520,20 @@ void ClientDisconnect()
 			ModPause ( 0 ); // no players left, unpause server if paused
 		}
 
-		if ( !atoi( ezinfokey( world, "lock_practice" ) ) && k_practice )  // #practice mode#
+		if ( !cvar( "lock_practice" ) && k_practice )  // #practice mode#
 			SetPractice( 0, NULL ); // return server to normal mode but not reload map yet
 
 		if( match_in_progress )
 			EndMatch( 1 ); // skip demo, make some other stuff
 
 		// Check if issued to execute reset.cfg (sturm)
-        if( atoi( ezinfokey( world, "k_autoreset" ) ) )
+        if( cvar( "k_autoreset" ) )
 			localcmd("exec configs/reset.cfg\n");
 
-        s = k_matchLess ? "" : ezinfokey( world, "k_defmap" ); // no defmap in matchLess mode
+        s = k_matchLess ? "" : cvar_string( "k_defmap" ); // no defmap in matchLess mode
 
 		// force reload current map in practice mode even k_defmap is set or not
-        if ( !atoi( ezinfokey( world, "lock_practice" ) ) && old_k_practice )
+        if ( !cvar( "lock_practice" ) && old_k_practice )
 			s = g_globalvars.mapname; // FIXME: k_defmap may not exist on server disk, so we reload current map
 									  //        but we may check if k_defmap exist and reload to it, right?
 
@@ -1544,7 +1544,7 @@ void ClientDisconnect()
 
 void BackFromLag()
 {
-	int timing_players_action = TA_ALL & atoi( ezinfokey( world, "timing_players_action" ) );
+	int timing_players_action = TA_ALL & (int)cvar( "timing_players_action" );
 
 	self->k_timingWarnTime = 0;
 
@@ -1702,7 +1702,7 @@ void Print_Scores( )
 	if( k_showscores ) {
 		int s1 = get_scores1();
 		int s2 = get_scores2();
-		char *t1 = ezinfokey(world, "k_team1");
+		char *t1 = cvar_string( "_k_team1" );
 		char *t2 = getteam(e);
 
 		ts = streq(t1, t2) ? s1 : s2;
@@ -2251,7 +2251,7 @@ void PlayerPostThink()
 			gedict_t *gre = PROG_TO_EDICT ( self->s.v.groundentity );
 
 			// set the flag if needed
-           	if( !iKey(world, "k_fallbunny" ) && self->s.v.waterlevel < 2 )
+           	if( !cvar( "k_fallbunny" ) && self->s.v.waterlevel < 2 )
                	self->brokenankle = 1;  // Yes we have just broken it
 
 			self->deathtype = "falling";
@@ -2274,7 +2274,7 @@ void PlayerPostThink()
 
 	W_WeaponFrame();
 
-	if ( !match_in_progress && !match_over )
+	if ( !match_in_progress && !match_over && !k_captains )
 	{
 		if ( iKey( self, "kf" ) & KF_SPEED ) {
 			float velocity = sqrt(self->s.v.velocity[0] * self->s.v.velocity[0] + 
@@ -2315,19 +2315,14 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
     
 	rnum = g_random();
 	//ZOID 12-13-96: self.team doesn't work in QW.  Use keys
-	attackerteam = ezinfokey(attacker, "team");
-	targteam     = ezinfokey(targ,     "team");
+	attackerteam = getteam(attacker);
+	targteam     = getteam(targ);
 
     if ( deathmatch > 3 )
     {
         if ( streq( targ->deathtype, "selfwater" ) )
         {
-#ifdef KTEAMS
-            if( streq( ezinfokey( targ, "gender" ), "f" )) 
-                G_bprint (PRINT_MEDIUM, "%s electrocutes herself\n ", targ->s.v.netname);
-            else 
-#endif
-                G_bprint (PRINT_MEDIUM, "%s electrocutes himself\n ", targ->s.v.netname);
+            G_bprint (PRINT_MEDIUM, "%s electrocutes %s\n ", targ->s.v.netname, g_himself(targ));
 
             targ->s.v.frags -=  1;
             return;
@@ -2343,16 +2338,14 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				return;
 			}
 
-			attackerteam2 = ezinfokey( PROG_TO_EDICT( attacker->s.v.owner ), "team");
+			attackerteam2 = getteam( PROG_TO_EDICT( attacker->s.v.owner ) );
 
 			if( teamplay && streq( targteam, attackerteam2 ) && !strnull ( attackerteam2 )
 					&& targ != PROG_TO_EDICT( attacker->s.v.owner ) )
 			{
-				G_bprint(PRINT_MEDIUM, targ->s.v.netname);
-				if( streq( ezinfokey( targ, "gender" ), "f" ) ) 
-                    G_bprint (PRINT_MEDIUM," was telefragged by her teammate\n");
-				else 
-                    G_bprint(PRINT_MEDIUM," was telefragged by his teammate\n");
+                G_bprint(PRINT_MEDIUM,"%s was telefragged by %s teammate\n",
+													 targ->s.v.netname, g_his(targ));
+
 				targ->deaths += 1;
 				return;
 			}
@@ -2469,12 +2462,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 //                    if (coop)
 //                        rnum = rnum * 0.5;	// only use the first two messages
 					if( rnum < 0.25 ) 
-					{
-                        if( streq( ezinfokey( attacker, "gender" ) , "f" ) ) 
-                            deathstring = " checks her glasses\n";
-						else 
-                            deathstring = " checks his glasses\n";
-					}
+                       	deathstring = va(" checks %s glasses\n", g_his(attacker));
 					else if( rnum < 0.5 ) 
 						deathstring = " loses another friend\n";
 					else if ( rnum < 0.75 )
@@ -2657,24 +2645,10 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 							 && !strnull( attackerteam ) )
 				{
 					// teamkill, native qw version
-
-///team
-//0.25 changed to 0.33 and 0.50 changed to 0.66 for kombat teams
 					if( rnum < 0.33 )
 						deathstring = " mows down a teammate\n";
-//				else if(rnum < 0.66) if(ezinfokey(attacker.owner,"gender") == "f") deathstring = " checks her glasses\n";
 					else if( rnum < 0.66 )
-					{
-					 	if( streq( ezinfokey(attacker, "gender"), "f" ) )
-							deathstring = " checks her glasses\n";
-						else
-							deathstring = " checks his glasses\n";
-// shite message - removed by kombat teams
-//                                else if (rnum < 0.75)
-//					deathstring = " gets a frag for the other team\n";
-// removed by kombat teams
-///team
-					}
+						deathstring = va(" checks %s glasses\n", g_his(attacker));
 					else
 						deathstring = " loses another friend\n";
 
@@ -2828,12 +2802,8 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		{
 				if( g_random() < 0.5 && cvar( "k_deathmsg" ) )
 					deathstring = " cratered\n";
-				else {
-					if( streq( ezinfokey( targ, "gender" ), "f" ) ) 
-                        deathstring = " fell to her death\n";
-					else 
-                       deathstring = " fell to his death\n";
-				}
+				else
+					deathstring = va(" fell to %s death\n", g_his(targ));
 		}
         else if ( streq( targ->deathtype, "nail" ) || streq( targ->deathtype, "supernail" ) )
 		{

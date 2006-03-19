@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: plats.c,v 1.3 2005/12/24 19:03:10 qqshka Exp $
+ *  $Id: plats.c,v 1.4 2006/03/19 23:16:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -110,7 +110,7 @@ void plat_center_touch()
     // return if countdown or map frozen
 	if( !k_practice ) // #practice mode#
 	if( match_in_progress == 1
-		|| ( !match_in_progress && atoi( ezinfokey( world, "k_freeze" ) ) )
+		|| ( !match_in_progress && cvar( "k_freeze" ) )
 	  )
 		return;
 
@@ -133,7 +133,7 @@ void plat_outside_touch()
     // return if countdown or map frozen
 	if( !k_practice ) // #practice mode#
 	if( match_in_progress == 1
-		|| ( !match_in_progress && atoi( ezinfokey( world, "k_freeze" ) ) )
+		|| ( !match_in_progress && cvar( "k_freeze" ) )
 	  )
 		return;
 
@@ -302,7 +302,7 @@ void train_wait()
 
     // make trains stop if frozen
 	if( match_in_progress == 2
-		|| ( !atoi( ezinfokey( world, "k_freeze" ) ) && !match_in_progress )
+		|| ( !cvar( "k_freeze" ) && !match_in_progress )
 		|| k_practice  // #practice mode#
 	  )
 		self->s.v.think = ( func_t ) train_next;

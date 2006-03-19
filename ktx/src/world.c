@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.24 2006/03/16 20:35:09 qqshka Exp $
+ *  $Id: world.c,v 1.25 2006/03/19 23:16:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -83,10 +83,10 @@ void CheckDefMap ()
 	char *s1;
 
 	f1 = CountALLPlayers();
-	if( !f1 && !atoi( ezinfokey( world, "k_master" ) )
-			&& !atoi( ezinfokey( world, "k_lockmap" ) ) )
+	if( !f1 && !cvar( "k_master" )
+			&& !cvar( "k_lockmap" ) )
 	{
-		s1 = ezinfokey( world, "k_defmap" );
+		s1 = cvar_string( "k_defmap" );
 
 		if( !strnull( s1 ) && strneq( s1, g_globalvars.mapname ) )
 			changelevel( s1 );
@@ -308,7 +308,6 @@ void SP_worldspawn()
 	k_standby = 0;
 	lock = k_matchLess ? 0 : 1; // no server lockining in matchLess mode
 	localcmd("serverinfo status Standby\n");
-	localcmd("localinfo sv_spectalk 1\n");
 
 	e = find(world, FOFCLSN, "mapguard");
 	while( e ) {
@@ -327,8 +326,8 @@ void SP_worldspawn()
 	}
 
 	if ( !k_matchLess ) // skip practice in matchLess mode
-	if ( iKey( world, "srv_practice_mode" ) ) // #practice mode#
-		SetPractice( iKey( world, "srv_practice_mode" ), NULL ); // may not reload map
+	if ( cvar( "srv_practice_mode" ) ) // #practice mode#
+		SetPractice( cvar( "srv_practice_mode" ), NULL ); // may not reload map
 }
 
 void Customize_Maps()
@@ -336,7 +335,7 @@ void Customize_Maps()
 	gedict_t *p;
 
 	// spawn quad if map is aerowalk in this case
-	if ( iKey(world, "add_q_aerowalk") && streq( "aerowalk", g_globalvars.mapname) ) {
+	if ( cvar("add_q_aerowalk") && streq( "aerowalk", g_globalvars.mapname) ) {
    		gedict_t	*swp = self;
 
 		self = spawn();
@@ -396,6 +395,10 @@ void FirstFrame	( )
 
 	trap_executecmd ();
 
+	RegisterCvar("_k_lastmap");	// internal usage, name of last map
+	RegisterCvar("_k_players"); // internal usage, count of players on last map
+	RegisterCvar("_k_pow_last"); // internal usage, k_pow from last map
+
 	RegisterCvar("k_mode");
 	RegisterCvar("k_matchless");
 	RegisterCvar("k_matchless_countdown");
@@ -403,12 +406,10 @@ void FirstFrame	( )
 	RegisterCvar("k_disallow_krjump");
 	RegisterCvar("k_lock_hdp");
 	RegisterCvar("k_disallow_weapons");
-	RegisterCvar("_k_lastmap");	// internal usage, name of last map
+
 	RegisterCvar("k_srvcfgmap");
 	RegisterCvar("k_pow_min_players");
 	RegisterCvar("k_pow_check_time");
-	RegisterCvar("_k_players"); // internal usage, count of players on last map
-	RegisterCvar("_k_pow_last"); // internal usage, k_pow from last map
 	RegisterCvar("allow_spec_wizard");
 	RegisterCvar("k_no_wizard_animation"); // disallow wizard animation
 
@@ -424,7 +425,71 @@ void FirstFrame	( )
 	RegisterCvar("k_motd_time"); 	  // motd time in seconds
 
 // >>> convert localinfo to set
+//	RegisterCvar("tp_players_stats");
 	RegisterCvar("k_deathmsg");
+	RegisterCvar("k_admincode");
+	RegisterCvar("k_prewar");
+	RegisterCvar("k_lockmap");
+	RegisterCvar("k_master");
+	RegisterCvar("k_fallbunny");
+	RegisterCvar("timing_players_time");
+	RegisterCvar("timing_players_action");
+	RegisterCvar("allow_timing");
+	RegisterCvar("demo_scoreslength");
+	RegisterCvar("k_bzk");
+	RegisterCvar("lock_practice");
+	RegisterCvar("k_autoreset");
+	RegisterCvar("k_defmap");
+	RegisterCvar("k_admins");
+	RegisterCvar("k_overtime");
+	RegisterCvar("k_exttime");
+	RegisterCvar("k_spw");
+	RegisterCvar("k_lockmin");
+	RegisterCvar("k_lockmax");
+	RegisterCvar("k_spectalk");
+	RegisterCvar("k_666");
+	RegisterCvar("k_dis");
+	RegisterCvar("dq");
+	RegisterCvar("dr");
+	RegisterCvar("dp");
+	RegisterCvar("k_frp");
+	RegisterCvar("k_highspeed");
+	RegisterCvar("k_btime");
+	RegisterCvar("k_freeze");
+	RegisterCvar("k_free_mode");
+	RegisterCvar("k_allowed_free_modes");
+	RegisterCvar("k_umfallbunny");
+	RegisterCvar("allow_toggle_practice");
+	RegisterCvar("k_pow");
+	RegisterCvar("k_remove_end_hurt");
+	RegisterCvar("k_allowvoteadmin");
+	RegisterCvar("k_maxrate");
+	RegisterCvar("k_minrate");
+	RegisterCvar("k_sready");
+	RegisterCvar("axe");
+	RegisterCvar("k_idletime");
+	RegisterCvar("k_timetop");
+	RegisterCvar("k_dm2mod");
+	RegisterCvar("k_membercount");
+	RegisterCvar("demo_tmp_record");
+	RegisterCvar("demo_skip_ktffa_record");
+	RegisterCvar("k_count");
+	RegisterCvar("k_exclusive");
+	RegisterCvar("k_short_gib");
+	RegisterCvar("k_ann");
+	RegisterCvar("srv_practice_mode");
+	RegisterCvar("add_q_aerowalk");
+	RegisterCvar("k_noframechecks");
+	RegisterCvar("rj");
+
+
+	RegisterCvar("_k_captteam1"); // internal mod usage
+	RegisterCvar("_k_captcolor1"); // internal mod usage
+	RegisterCvar("_k_captteam2"); // internal mod usage
+	RegisterCvar("_k_captcolor2"); // internal mod usage
+	RegisterCvar("_k_team1"); // internal mod usage
+	RegisterCvar("_k_team2"); // internal mod usage
+	RegisterCvar("_k_host"); // internal mod usage
 
 // <<<
 
@@ -517,13 +582,13 @@ void FixPowerups ()
 void FixRules ( )
 {
 	gameType_t km = k_mode;
-	int k_tt = bound( 0, iKey( world, "k_timetop"), 600 );
+	int k_tt = bound( 0, cvar( "k_timetop" ), 600 );
 	int	tp   = teamplay;
 	int tl   = timelimit;
 	int fl   = fraglimit;
 	int dm   = deathmatch;
-	int k_minr = bound(0, iKey(world, "k_minrate"), 20000);
-	int k_maxr = bound(0, iKey(world, "k_maxrate"), 20000);	
+	int k_minr = bound(0, cvar( "k_minrate" ), 20000);
+	int k_maxr = bound(0, cvar( "k_maxrate" ), 20000);	
 
 
 	// we are does't support coop
@@ -564,23 +629,23 @@ void FixRules ( )
 	}
 
 	if ( k_tt <= 0 ) { // this change does't broadcasted
-		localcmd ("localinfo k_timetop %d\n", (k_tt = 30));// sensible default if no max set
+		cvar_fset( "k_timetop", k_tt = 30 ); // sensible default if no max set
 	}
 
 // oldman --> don't allow unlimited timelimit + fraglimit
     if( timelimit == 0 && fraglimit == 0 ) {
-        trap_cvar_set_float("timelimit", (float)(timelimit = k_tt));// sensible default if no max set
+        cvar_fset( "timelimit", timelimit = k_tt ); // sensible default if no max set
     }
 // <-- oldman
 
 	if ( !k_minr ) {
-		localcmd ("localinfo k_minrate %d\n", (k_minr = 500));
+		cvar_fset( "k_minrate", k_minr = 500 );
 	}
 	if ( !k_maxr ) {
-		localcmd ("localinfo k_maxrate %d\n", (k_maxr = 10000));
+		cvar_fset( "k_maxrate", k_maxr = 10000 );
 	}
 	if ( k_minr > k_maxr ) {
-		localcmd ("localinfo k_minrate %d\n", (k_minr = k_maxr));
+		cvar_fset( "k_minrate", k_minr = k_maxr );
 	}
 
 	// ok, broadcast changes if any, a bit tech info, but this is misconfigured server
@@ -620,7 +685,7 @@ void StartFrame( int time )
 	if ( framecount == 2 )
 		SecondFrame ( );
 
-	rj = max( 0, fKey( world, "rj" ) ); 	// Set Rocket Jump Modifiers
+	rj = max( 0, cvar( "rj" ) ); 	// Set Rocket Jump Modifiers
 
     k_maxspeed = cvar( "sv_maxspeed" );
 	timelimit  = cvar( "timelimit" );
@@ -636,7 +701,7 @@ void StartFrame( int time )
 
 	FixSpecWizards ();
 
-	framechecks = bound( 0, !iKey( world, "k_noframechecks" ), 1 );
+	framechecks = bound( 0, !cvar( "k_noframechecks" ), 1 );
 
 	CalculateBestPlayers(); // autotrack stuff
 

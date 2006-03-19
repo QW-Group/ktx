@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.18 2006/03/13 13:48:15 vvd0 Exp $
+ *  $Id: weapons.c,v 1.19 2006/03/19 23:16:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -684,7 +684,7 @@ void W_FireLightning()
 				self->s.v.ammo_cells = 0;
 				W_SetCurrentAmmo();
 
-                if ( !atoi( ezinfokey( world, "k_dis" ) ) ) 
+                if ( !cvar( "k_dis" ) ) 
                     return;
 
 				T_RadiusDamage( self, self, 35 * cells, world, "" );
@@ -696,7 +696,7 @@ void W_FireLightning()
 			self->s.v.ammo_cells = 0;
 			W_SetCurrentAmmo();
 
-            if ( !atoi( ezinfokey( world, "k_dis" ) ) )
+            if ( !cvar( "k_dis" ) )
                 return;
 
 			T_RadiusDamage( self, self, 35 * cells, world, "" );
@@ -1652,7 +1652,7 @@ void W_WeaponFrame()
 		if ( match_in_progress == 1 )
 			return;
 
-        if(    ( !iKey( world, "k_prewar" ) && match_in_progress != 2 )
+        if(    ( !cvar( "k_prewar" ) && match_in_progress != 2 )
 			|| k_captains == 2 
 		  ) {
 

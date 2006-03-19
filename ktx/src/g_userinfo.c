@@ -37,15 +37,21 @@ qboolean FixPlayerTeam ( char *newteam )
 {
 	char *s1, *s2;
 
+	// captain or potential captain may not change team
+	if ( self->k_captain ) {
+		G_sprint(self, 2, "You may %s change team\n", redtext("not"));
+		stuffcmd(self, "team \"%s\"\n", getteam(self)); // sends this to client - so he get right team too
+		return true;                                                                       
+	}
+
 	if( k_captains == 2 ) {
 		// get the strings to compare
-//		s1 = ezinfokey(self, "team");
 		s1 = newteam;
 
-		if     (self->k_captain == 1 || self->k_picked == 1)
-			s2 = ezinfokey(world, "captteam1");
-		else if(self->k_captain == 2 || self->k_picked == 2)
-			s2 = ezinfokey(world, "captteam2");
+		if     ( self->k_picked == 1 )
+			s2 = cvar_string( "_k_captteam1" );
+		else if( self->k_picked == 2 )
+			s2 = cvar_string( "_k_captteam2" );
 		else
 			s2 = "";
 
@@ -58,7 +64,6 @@ qboolean FixPlayerTeam ( char *newteam )
 
 	if( match_in_progress == 2 && self->k_accepted == 2 && self->k_teamnum )
 	{
-//		s1 = ezinfokey(self, "team");
 		s1 = newteam;
 		s2 = ezinfokey(world, va("%d", (int)self->k_teamnum));
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.10 2006/03/08 22:37:06 qqshka Exp $
+ *  $Id: items.c,v 1.11 2006/03/19 23:16:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1673,9 +1673,9 @@ void DropBackpack()
 
     float f1;
 
-    f1 = iKey( world, "k_frp" );
+    f1 = cvar( "k_frp" );
 
-    if ( match_in_progress != 2 || !atoi( ezinfokey( world, "dp" ) ) )
+    if ( match_in_progress != 2 || !cvar( "dp" ) )
         return;
 
 

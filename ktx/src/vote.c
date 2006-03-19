@@ -83,7 +83,7 @@ void VoteYes()
 // register the vote
 	self->v.elect = 1;
 
-	G_bprint(2, "%s gives %s vote\n", self->s.v.netname, SexStr( self ));
+	G_bprint(2, "%s gives %s vote\n", self->s.v.netname, g_his( self ));
 
 // calculate how many more votes are needed
 	if ( votes = get_votes_req( OV_ELECT, true ) )
@@ -103,7 +103,7 @@ void VoteNo()
 // unregister the vote
 	self->v.elect = 0;
 
-	G_bprint(2, "%s withdraws %s vote\n", self->s.v.netname, SexStr( self ));
+	G_bprint(2, "%s withdraws %s vote\n", self->s.v.netname, g_his( self ));
 
 // calculate how many more votes are needed
 	if ( votes  = get_votes_req( OV_ELECT, true ) )

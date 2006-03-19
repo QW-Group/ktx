@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: triggers.c,v 1.6 2006/03/06 18:11:10 qqshka Exp $
+ *  $Id: triggers.c,v 1.7 2006/03/19 23:16:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -645,7 +645,7 @@ defalt dmg = 5
 */
 void SP_trigger_hurt()
 {
-	if ( streq( "end", g_globalvars.mapname ) && atoi(ezinfokey(world, "k_remove_end_hurt")) ) {
+	if ( streq( "end", g_globalvars.mapname ) && cvar( "k_remove_end_hurt" ) ) {
 		ent_remove ( self );
 		return;
 	}
