@@ -276,7 +276,7 @@ void AdminImpBot ()
     {
 		int iPass = cvar( "k_admincode" );
 
-        if( !iPass && self->k_added == iPass )
+        if( iPass && self->k_added == iPass )
         {
 			BecomeAdmin(self);
 			return;
