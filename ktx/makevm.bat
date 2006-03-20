@@ -8,7 +8,7 @@ set CFLAGS=-DQ3_VM -S -Wf-target=bytecode -Wf-g
 set INCFLAGS=-I..\include
 set SRC=..\src
 
-rem make sure we have a safe environement
+rem make sure we have a safe environment
 set LIBRARY=
 set INCLUDE=
 
