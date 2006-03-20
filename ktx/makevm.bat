@@ -1,5 +1,7 @@
 @echo off
 
+rem $Id: makevm.bat,v 1.5 2006/03/20 13:54:49 vvd0 Exp $
+
 rem NOTE: u must look %SRC%\game.q3asm so u can guess where qwprogs.qvm locate
 
 set CC=lcc
