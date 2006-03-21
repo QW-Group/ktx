@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.26 2006/03/19 23:16:13 qqshka Exp $
+ *  $Id: g_utils.c,v 1.27 2006/03/21 21:36:29 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -105,6 +105,33 @@ gedict_t *nextent( gedict_t * ent )
 gedict_t *find( gedict_t * start, int fieldoff, char *str )
 {
 	return trap_find( start, fieldoff, str );
+}
+
+// find count of "good" edicts
+int find_cnt( int fieldoff, char *str )
+{
+	int cnt;
+	gedict_t *p;
+
+	for ( cnt = 0, p = world; p = find( p, fieldoff, str ); )
+		cnt++;
+
+	return cnt;
+}
+
+gedict_t *find_idx( int idx, int fieldoff, char *str )
+{
+	int cnt;
+	gedict_t *p;
+
+	if ( idx < 0 )
+		return NULL;
+
+	for ( cnt = 0, p = world; p = find( p, fieldoff, str ); cnt++ )
+		if ( cnt == idx )
+			break;
+
+	return p;
 }
 
 

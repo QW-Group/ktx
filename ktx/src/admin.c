@@ -730,6 +730,9 @@ void ToggleFallBunny ()
     if( self->k_admin != 2 )
         return;
 
+    if( match_in_progress )
+        return;
+
 	cvar_toggle_msg( self, "k_fallbunny", redtext("fallbunny") );
 }
 

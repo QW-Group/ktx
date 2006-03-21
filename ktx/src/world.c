@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.25 2006/03/19 23:16:13 qqshka Exp $
+ *  $Id: world.c,v 1.26 2006/03/21 21:36:29 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -382,7 +382,7 @@ qboolean RegisterCvar ( const char *var )
 	}
 
 //	G_cprint("RegisterCvar: \"%s\" registered\n", var);
-	localcmd("set \"%s\" 0\n", var);
+	localcmd("set \"%s\" \"\"\n", var);
 	trap_executecmd ();
 	return true;
 }

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.44 2006/03/19 23:16:13 qqshka Exp $
+ *  $Id: client.c,v 1.45 2006/03/21 21:36:29 qqshka Exp $
  */
 
 //===========================================================================
@@ -319,6 +319,19 @@ void DecodeLevelParms()
 //	G_bprint(2, "DLP2 ad:%d ac:%d s:%d\n", (int)g_globalvars.parm11, (int)g_globalvars.parm12, (int)g_globalvars.parm13);
 }
 
+
+gedict_t *Do_FindIntermission( char *info_name )
+{
+	gedict_t       *spot;
+	int             i;
+
+	i = find_cnt( FOFS( s.v.classname ), info_name );
+	i = ( i ? g_random() * i : -1); // pick a random one
+
+	return (spot = find_idx( i, FOFS( s.v.classname ), info_name ));
+}
+
+
 /*
 ============
 FindIntermission
@@ -326,35 +339,28 @@ FindIntermission
 Returns the entity to view from
 ============
 */
-gedict_t       *FindIntermission()
+gedict_t *FindIntermission()
 {
 	gedict_t       *spot;
-	int             cyc;
 
-// look for info_intermission first
-	spot = find( world, FOFS( s.v.classname ), "info_intermission" );
-	if ( spot )
-	{			// pick a random one
-		cyc = g_random() * 4;
-		while ( cyc > 1 )
-		{
-			spot = find( spot, FOFS( s.v.classname ), "info_intermission" );
-			if ( !spot )
-				spot =
-				    find( world, FOFS( s.v.classname ),
-					  "info_intermission" );
-			cyc = cyc - 1;
-		}
-		return spot;
-	}
-
-// then look for the start position
-	spot = find( world, FOFS( s.v.classname ), "info_player_start" );
-	if ( spot )
+	if ( spot = Do_FindIntermission( "info_intermission" ) )
 		return spot;
 
-	G_Error( "FindIntermission: no spot" );
-	return NULL;
+	if ( spot = Do_FindIntermission( "info_player_start" ) )
+		return spot;
+
+	if ( spot = Do_FindIntermission( "info_player_deathmatch" ) )
+		return spot;
+
+	if ( spot = Do_FindIntermission( "info_player_coop" ) )
+		return spot;
+
+	if ( spot = Do_FindIntermission( "info_player_start2" ) )
+		return spot;
+
+//	G_Error( "FindIntermission: no spot" );
+//	return NULL;
+	return world;
 }
 
 void GotoNextMap()

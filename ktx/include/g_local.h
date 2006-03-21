@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.33 2006/03/19 23:16:33 qqshka Exp $
+ *  $Id: g_local.h,v 1.34 2006/03/21 21:37:27 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -36,7 +36,7 @@
 #include "g_syscalls.h"
 #include "player.h"
 
-#define MOD_VERSION					("1.12")
+#define MOD_VERSION					("1.13")
 #define MOD_NAME					("KTX")
 #define MOD_SERVERINFO_MOD_KEY		("xmod")
 #define MOD_SERVERINFO_BUILD_KEY	("xbuild")
@@ -135,6 +135,8 @@ void            ent_remove( gedict_t * t );
 
 gedict_t       *nextent( gedict_t * ent );
 gedict_t       *find( gedict_t * start, int fieldoff, char *str );
+int				find_cnt( int fieldoff, char *str );
+gedict_t	   *find_idx( int idx, int fieldoff, char *str );
 gedict_t       *findradius( gedict_t * start, vec3_t org, float rad );
 gedict_t 	   *findradius2( gedict_t * start, vec3_t org, float rad );
 void            normalize( vec3_t value, vec3_t newvalue );
