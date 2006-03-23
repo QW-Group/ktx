@@ -181,11 +181,11 @@ int get_votes_req( int fofs, qboolean diff )
 	vt_req  = ceil( percent * CountPlayers() );
 
 	if ( fofs == OV_ELECT )
-		vt_req = max(2, vt_req); // if ellection, at least 2 votes needed
+		vt_req = max(2, vt_req); // if election, at least 2 votes needed
 	else if ( fofs == OV_BREAK && k_matchLess && match_in_progress == 1 )
 		vt_req = max(2, vt_req); // at least 2 votes in this case
 	else if ( fofs == OV_RPICKUP )
-		vt_req = max(4, vt_req); // at least 4 votes in this case
+		vt_req = max(3, vt_req); // at least 3 votes in this case
 
 	if ( diff )
 		return max(0, vt_req - votes);
