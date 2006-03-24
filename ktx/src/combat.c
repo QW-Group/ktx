@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.10 2006/03/13 13:48:15 vvd0 Exp $
+ *  $Id: combat.c,v 1.11 2006/03/24 21:28:27 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -270,6 +270,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		targ->s.v.velocity[1] += dir[1] * damage * 8;
 		targ->s.v.velocity[2] += dir[2] * damage * 8;
 		// Rocket Jump modifiers
+/*
 		if ( ( rj > 1 )
 		     && ( ( streq( attacker->s.v.classname, "player" ) )
 			  && streq( targ->s.v.classname, "player" ) )
@@ -279,7 +280,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			VectorScale( targ->s.v.velocity, damage * 8 * rj,
 				     targ->s.v.velocity );
 		}
-
+*/
 	}
 
 

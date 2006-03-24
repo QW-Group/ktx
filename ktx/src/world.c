@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.26 2006/03/21 21:36:29 qqshka Exp $
+ *  $Id: world.c,v 1.27 2006/03/24 21:28:27 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -111,8 +111,16 @@ void SP_worldspawn()
 			  || strneq( lastmap, g_globalvars.mapname )
 			)
 	   ) {
-		localcmd("exec configs/maps/default.cfg\n");
-		localcmd("exec configs/maps/%s.cfg\n", g_globalvars.mapname);
+		char *cfg_name;
+
+		cfg_name = "configs/maps/default.cfg";
+		if ( can_exec( cfg_name ) )
+			localcmd("exec %s\n", cfg_name);
+
+		cfg_name = va("configs/maps/%s.cfg", g_globalvars.mapname);
+		if ( can_exec( cfg_name ) )
+			localcmd("exec %s\n", cfg_name);
+
 		trap_executecmd ();
 	}
     
@@ -458,7 +466,6 @@ void FirstFrame	( )
 	RegisterCvar("k_freeze");
 	RegisterCvar("k_free_mode");
 	RegisterCvar("k_allowed_free_modes");
-	RegisterCvar("k_umfallbunny");
 	RegisterCvar("allow_toggle_practice");
 	RegisterCvar("k_pow");
 	RegisterCvar("k_remove_end_hurt");
@@ -466,7 +473,6 @@ void FirstFrame	( )
 	RegisterCvar("k_maxrate");
 	RegisterCvar("k_minrate");
 	RegisterCvar("k_sready");
-	RegisterCvar("axe");
 	RegisterCvar("k_idletime");
 	RegisterCvar("k_timetop");
 	RegisterCvar("k_dm2mod");
@@ -480,7 +486,7 @@ void FirstFrame	( )
 	RegisterCvar("srv_practice_mode");
 	RegisterCvar("add_q_aerowalk");
 	RegisterCvar("k_noframechecks");
-	RegisterCvar("rj");
+//	RegisterCvar("rj");
 
 
 	RegisterCvar("_k_captteam1"); // internal mod usage
@@ -668,7 +674,7 @@ void FixRules ( )
 
 int         timelimit, fraglimit, teamplay, deathmatch, framecount;
 
-float		rj;
+//float		rj;
 
 extern float intermission_exittime;
 
@@ -685,7 +691,7 @@ void StartFrame( int time )
 	if ( framecount == 2 )
 		SecondFrame ( );
 
-	rj = max( 0, cvar( "rj" ) ); 	// Set Rocket Jump Modifiers
+//	rj = max( 0, cvar( "rj" ) ); 	// Set Rocket Jump Modifiers
 
     k_maxspeed = cvar( "sv_maxspeed" );
 	timelimit  = cvar( "timelimit" );

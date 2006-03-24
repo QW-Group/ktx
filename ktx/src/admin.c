@@ -32,7 +32,7 @@ void Deathmsg ()
 
 void KickThink ()
 {
-    G_sprint( PROG_TO_EDICT( self->s.v.owner ) , 2, "Your λιγλ mode has timed out.\n");
+    G_sprint( PROG_TO_EDICT( self->s.v.owner ) , 2, "Your λιγλ mode has timed out\n");
     self->s.v.nextthink = -1;
     ExitKick( PROG_TO_EDICT( self->s.v.owner ) );
 }
@@ -60,7 +60,7 @@ void AdminKick ()
         self->k_kicking = 1;
         G_sprint(self, 2, "Kicking process started\n"
 						  "\n"
-						  "Type ω to kick, ξ for next, λιγλ to leave.\n");
+						  "Type ω to kick, ξ for next, λιγλ to leave\n");
 
         self->kick_ctype = "player";
         self->k_playertokick = world;
@@ -139,7 +139,7 @@ void YesKick ()
             G_bprint(2, "%s kicked %s\n", self->s.v.netname, g_himself( self ));
 
 			// hehe %)
-            G_sprint(self, 2, "Say \"bye\" and then type \"disconnect\" next time.\n");
+            G_sprint(self, 2, "Say \"bye\" and then type \"disconnect\" next time\n");
 			GhostFlag(self);
             self->s.v.classname = "";
             stuffcmd(self, "disconnect\n");  // FIXME: stupid way
@@ -197,7 +197,7 @@ void ReqAdmin ()
 
     if( self->k_admin == 2 )
     {
-        G_bprint(2, "%s is no longer an %s.\n", self->s.v.netname, redtext("admin"));
+        G_bprint(2, "%s is no longer an %s\n", self->s.v.netname, redtext("admin"));
 
         if( self->k_kicking )
             ExitKick( self );
@@ -331,7 +331,7 @@ void VoteAdmin()
 
 // Check if voteadmin is allowed
 	if( !cvar( "k_allowvoteadmin" ) ) {
-		G_sprint(self, 2, "Admin election is not allowed on this server.\n");
+		G_sprint(self, 2, "Admin election is not allowed on this server\n");
 		return;
 	}
 
@@ -587,9 +587,9 @@ void ToggleMapLock ()
 		cvar_fset( "k_lockmap", 0 );
 
         if( !match_in_progress )
-            G_bprint(2, "%s unlocks map.\n", self->s.v.netname);
+            G_bprint(2, "%s unlocks map\n", self->s.v.netname);
         else
-            G_sprint(self, 2, "Map unlocked.\n");
+            G_sprint(self, 2, "Map unlocked\n");
 
         return;
     }
@@ -597,9 +597,9 @@ void ToggleMapLock ()
 	cvar_fset( "k_lockmap", 1 );
 
     if( !match_in_progress )
-        G_bprint(2, "%s locks map!\n", self->s.v.netname);
+        G_bprint(2, "%s locks map\n", self->s.v.netname);
     else
-        G_sprint(self, 2, "Map is locked!\n");
+        G_sprint(self, 2, "Map is locked\n");
 }
 
 void ToggleMaster ()

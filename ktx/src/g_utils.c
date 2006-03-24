@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.27 2006/03/21 21:36:29 qqshka Exp $
+ *  $Id: g_utils.c,v 1.28 2006/03/24 21:28:27 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1084,8 +1084,10 @@ void changelevel( const char *name )
 
 	// exec configs/maps/out/mapname.cfg
 	if ( cvar( "k_srvcfgmap" ) && strneq( g_globalvars.mapname, name ) ) {
-		localcmd("exec configs/maps/out/%s.cfg\n", g_globalvars.mapname);
-//		trap_executecmd ();
+		char *cfg_name = va("configs/maps/out/%s.cfg", g_globalvars.mapname);
+
+		if ( can_exec( cfg_name ) )
+			localcmd( "exec %s\n", cfg_name );
 	}
 
 	trap_changelevel(name);
@@ -1492,4 +1494,16 @@ void cvar_toggle_msg( gedict_t *p, char *cvarName, char *msg )
 	trap_cvar_set_float( cvarName, (float)i );
 }
 
+// generally - this check is we can read file - but used for exec command
+qboolean can_exec( char *name )
+{
+	fileHandle_t handle;
+
+	if ( trap_FS_OpenFile( name, &handle, FS_READ_BIN ) >= 0 ) {
+		trap_FS_CloseFile( handle );
+		return true;
+	}
+
+	return false;
+}
 

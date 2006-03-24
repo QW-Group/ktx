@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_syscalls.c,v 1.3 2005/12/27 20:34:07 qqshka Exp $
+ *  $Id: g_syscalls.c,v 1.4 2006/03/24 21:28:27 qqshka Exp $
  */
 
 //#include "g_local.h"
@@ -354,27 +354,27 @@ void    trap_TraceCapsule( float v1_x, float v1_y, float v1_z,
 		 PASSFLOAT( max_x), PASSFLOAT( max_y), PASSFLOAT( max_z));
 }
 
-int trap_FSOpenFile(char*name, fileHandle_t* handle, fsMode_t fmode )
+int trap_FS_OpenFile(char*name, fileHandle_t* handle, fsMode_t fmode )
 {
 	return syscall( G_FSOpenFile, (int)name, (int)handle, fmode );
 }
 
-void trap_FSCloseFile( fileHandle_t handle )
+void trap_FS_CloseFile( fileHandle_t handle )
 {
 	syscall( G_FSCloseFile, handle );
 }
 
-int trap_FSReadFile( char*dest, int quantity, fileHandle_t handle )
+int trap_FS_ReadFile( char*dest, int quantity, fileHandle_t handle )
 {
 	return syscall( G_FSReadFile, (int)dest, quantity, handle );
 }
 
-int trap_FSWriteFile( char*src, int quantity, fileHandle_t handle )
+int trap_FS_WriteFile( char*src, int quantity, fileHandle_t handle )
 {
 	return syscall( G_FSWriteFile, (int)src, quantity, handle );
 }
 
-int trap_FSeekFile( fileHandle_t handle, int offset, int type )
+int trap_FS_SeekFile( fileHandle_t handle, int offset, int type )
 {
 	return syscall( G_FSSeekFile, handle,offset,type );
 }

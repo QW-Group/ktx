@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.11 2006/03/19 23:16:13 qqshka Exp $
+ *  $Id: player.c,v 1.12 2006/03/24 21:28:27 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -767,6 +767,7 @@ void VelocityForDamage( float dm, vec3_t v )
 	{
 		VectorScale( damage_inflictor->s.v.velocity, 0.5, v );
 		VectorSubtract( self->s.v.origin, damage_inflictor->s.v.origin, v2 );
+		VectorNormalize( v2 );
 		VectorScale( v2, 25, v2 );
 		VectorAdd( v, v2, v );
 //  v = 0.5 * damage_inflictor->s.v.velocity;

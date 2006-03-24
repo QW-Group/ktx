@@ -216,7 +216,7 @@ cmd_t cmds[] = {
     { "kick",        AdminKick,                 0    , CF_BOTH_ADMIN  },
     { "y",           YesKick,                   0    , CF_BOTH_ADMIN  },
     { "n",           DontKick,                  0    , CF_BOTH_ADMIN  },
-    { "list",        ListWhoNot,                0    , CF_PLAYER      },
+    { "list",        ListWhoNot,                0    , CF_PLAYER | CF_SPC_ADMIN },
     { "overtime",    ChangeOvertime,            0    , CF_PLAYER | CF_SPC_ADMIN },
     { "overtimeup",  ChangeOvertimeUp,          0    , CF_PLAYER | CF_SPC_ADMIN },
     { "elect",       VoteAdmin,                 0    , CF_BOTH        },
@@ -239,8 +239,8 @@ cmd_t cmds[] = {
     { "wp_reset",    Wp_Reset,                  0    , CF_PLAYER      },
     { "+wp_stats",   Wp_Stats,                  2    , CF_BOTH | CF_MATCHLESS },
     { "-wp_stats",   Wp_Stats,                  1    , CF_BOTH | CF_MATCHLESS },
-    { "tkfjump",     t_jump,                    1    , CF_PLAYER | CF_SPC_ADMIN },
-    { "tkrjump",     t_jump,                    2    , CF_PLAYER | CF_SPC_ADMIN },
+    { "tkfjump",     t_jump,                    1    , CF_BOTH_ADMIN },
+    { "tkrjump",     t_jump,                    2    , CF_BOTH_ADMIN },
     { "klist",       klist,                     0    , CF_BOTH | CF_MATCHLESS },
     { "hdptoggle",   hdptoggle,                 0    , CF_BOTH_ADMIN },
     { "handicap",    handicap,                  0    , CF_PLAYER | CF_PARAMS | CF_MATCHLESS },
@@ -755,50 +755,6 @@ void ChangeOvertimeUp ()
 	G_bprint(2, "Οφεςτινε μεξητθ σετ το %d νιξυτε%s\n", k_exttime, count_s( k_exttime ));
 }
 
-void ListWhoNot()
-{
-	gedict_t *p;
-//	char *tmp;
-	float f1, f2;
-
-	f1 = CountRPlayers();
-	f2 = CountPlayers();
-	if( f1 == f2 ) {
-		G_sprint(self, 2, "All players ready\n");
-		return;
-	}
-
-	if( !match_in_progress )
-    {
-		if( streq(self->s.v.classname, "player") && !self->ready ) 
-		{
-			G_sprint(self, 2, "Ready yourself first\n");
-			return;
-		}	
-
-		if( g_globalvars.time < k_whonottime + 10 )
-		{
-            G_sprint(self, 2, "Only one μιστ in 10 seconds\n");
-			return;
-		}
-		k_whonottime = g_globalvars.time;
-		G_bprint(2, "Players ξοτ ready:\n");
-		G_bprint(3, "\n");
-
-		p = find( world, FOFCLSN, "player" );
-		while( p ) {
-			if(!strnull( p->s.v.netname ) && !p->ready) {
-				G_bprint(2, "%s%s‘ %s is not ready\n",
-					(p->k_admin == 2 ? " ": ""), getteam(p), p->s.v.netname);
-			}
-
-			p = find( p, FOFCLSN, "player" );
-		}
-    }
-	else
-		G_sprint(self, 2, "Game in progress\n");
-}
-
 
 void SendKillerMsg()
 {
@@ -1106,76 +1062,134 @@ void ModStatusVote()
 		G_sprint(self, 2, "%s\n", redtext("No election going on"));
 }
 
+char *OnePlayerStatus( gedict_t *p, gedict_t *e_self )
+{
+	char *team_str = (isTeam() ? va(" \x90%4.4s\x91", getteam( p )) : "");
+
+	e_self = (e_self ? e_self : world);
+
+	return va( "%s%s%s %s%s",
+	 			( p->ready ? "\x86" : "\x87" ),	( p->k_admin == 2 ? "\xC1" : " " ),
+				team_str, getname( p ), ( p == e_self ? redtext( " \x8D you" ) : "" ) );
+}
+
 void PlayerStatus()
 {
+	qboolean found = false;
 	gedict_t *p;
-	char *tmp;
 
-	if( !match_in_progress ) {
-		p = find( world, FOFCLSN, "player" );
-		while( p ) {
-			if( !strnull( p->s.v.netname ) ) {
-				if( p->k_admin == 2 )
-					G_sprint(self, 2, "* ");
-
-				G_sprint(self, 2, p->s.v.netname);
-
-				if(p->ready) {
-					tmp = getteam( p );
-					if( strnull( tmp ) )
-						G_sprint(self, 2, " is ready\n");
-					else
-						G_sprint(self, 2, " is in team \x90%s\x91\n", tmp);
-				}
-				else
-					G_sprint(self, 2, " is not ready\n");
-			}
-
-			p = find( p, FOFCLSN, "player" );
-		}
-		G_sprint(self, 2, "--------------\n");
-	} else
+	if( match_in_progress ) {
 		G_sprint(self, 2, "Game in progress\n");
+		return;
+	}
+	
+	for ( p = world; p = find( p, FOFCLSN, "player" ); ) {
+		if ( !found )
+			G_sprint(self, 2, "Players list:\n"
+							  "\n");
+		G_sprint(self, 2, "%s\n", OnePlayerStatus( p, self ));
+		found = true;
+	}
+			
+	G_sprint(self, 2, "%s\n", (found ? "" : "no players"));
 }
 
 void PlayerStatusS()
 {
+	qboolean found = false;
 	gedict_t *p;
 
-	for( p = world;	p = find( p, FOFCLSN, "player" ); )
-		if( !strnull( p->s.v.netname ) )
-			G_sprint(self, 2, "%s‘ %s\n", ezinfokey(p, "skin"), p->s.v.netname);
-
-	G_sprint(self, 2, "--------------\n");
+	for ( p = world; p = find( p, FOFCLSN, "player" ); ) {
+		if ( !found )
+			G_sprint(self, 2, "Players skins list:\n"
+							  "\n");
+		G_sprint(self, 2, "\x90%10s\x91 %s\n", ezinfokey(p, "skin"), p->s.v.netname);
+		found = true;
+	}
+			
+	G_sprint(self, 2, "%s\n", (found ? "" : "no players"));
 }
 
 void PlayerStatusN()
 {
+	qboolean found = false;
 	gedict_t *p;
-	float f1, f2;
 
-	f1 = CountRPlayers();
-	f2 = CountPlayers();
-	if( f1 == f2 ) {
+	if( match_in_progress ) {
+		G_sprint(self, 2, "Game in progress\n");
+		return;
+	}
+
+	if( CountRPlayers() == CountPlayers() ) {
 		G_sprint(self, 2, "All players ready\n");
 		return;
 	}
 
-	if( match_in_progress )
-		G_sprint(self, 2, "Game in progress\n");
-	else {
-		G_sprint(self, 2, "Players ξοτ ready:\n\n");
-		p = find( world, FOFCLSN, "player" );
-		while( p ) {
-			if( !strnull( p->s.v.netname ) && !p->ready ) {
-				if( p->k_admin == 2 )
-					G_sprint(self, 2, " ");
-				G_sprint(self, 2, "%s is not ready\n", p->s.v.netname);
-			}
+	for ( p = world; p = find( p, FOFCLSN, "player" ); ) {
+		if ( p->ready )
+			continue;
 
-			p = find( p, FOFCLSN, "player" );
-		}
+		if ( !found )
+			G_sprint(self, 2, "Players %s ready:\n"
+						  "\n", redtext("not"));
+
+		G_sprint(self, 2, "%s\n", OnePlayerStatus( p, self ));
+		found = true;
 	}
+			
+	G_sprint(self, 2, "%s\n", (found ? "" : "can't find not ready players"));
+}
+
+// broadcast not ready players
+
+void ListWhoNot()
+{
+	qboolean found = false;
+	gedict_t *p, *p2;
+	int from;
+
+	if( match_in_progress ) {
+		G_sprint(self, 2, "Game in progress\n");
+		return;
+	}
+
+	if( CountRPlayers() == CountPlayers() ) {
+		G_sprint(self, 2, "All players ready\n");
+		return;
+	}
+
+	if( self->k_player && !self->ready ) 
+	{
+		G_sprint(self, 2, "Ready yourself first\n");
+		return;
+	}	
+
+	if( k_whonottime && g_globalvars.time < k_whonottime + 10 )
+	{
+        G_sprint(self, 2, "Only one %s in 10 seconds\n", redtext("list"));
+		return;
+	}
+
+	k_whonottime = g_globalvars.time;
+
+	for ( p = world; p = find( p, FOFCLSN, "player" ); ) {
+		if ( p->ready )
+			continue;
+
+		if ( !found )
+			G_bprint(2, "Players %s ready:\n"
+					    "\n", redtext("not")); // broadcast
+
+		for ( from = 0, p2 = world; p2 = find_plrspc(p2, &from); )
+			G_sprint(p2, 2, "%s\n", OnePlayerStatus( p, p2 ));
+
+		found = true;
+	}
+
+	if ( found )			
+		G_bprint(2, "\n"); // broadcats
+	else
+		G_sprint(self, 2, "can't find not ready players\n"); // self
 }
 
 void ResetOptions()
@@ -1191,7 +1205,12 @@ void ResetOptions()
 //	s1 = getteam( self );
 
 #if 1 // TODO: make commented code safe or remove it
-		localcmd("exec configs/reset.cfg\n");
+	{
+		char *cfg_name = "configs/reset.cfg";
+
+		if ( can_exec( cfg_name ) )
+			localcmd( "exec %s\n", cfg_name );
+	}
 #else
 /*
 	if( self->k_admin != 2 || strnull( s1 ) ) {
@@ -1807,7 +1826,7 @@ void PlayerStats()
 	char *tmp, *tmp2;
 
 	if( match_in_progress != 2 ) {
-		G_sprint(self, 2, "no game - no statistics.\n");
+		G_sprint(self, 2, "no game - no statistics\n");
 		return;
 	}
 
@@ -2174,7 +2193,8 @@ const char _1on1_um_init[] =
 	"timelimit  10\n"					//
 	"teamplay   0\n"					//
 	"deathmatch 3\n"					//
-	"k_overtime 2\n"					// overtime type
+	"k_overtime 1\n"					// overtime type
+	"k_exttime 3\n"						// overtime 3mins
 	"k_pow 0\n"							// powerups
 	"k_membercount 0\n"					// no efect in duel
 	"k_lockmin 0\n"						// no efect in duel
@@ -2183,13 +2203,13 @@ const char _1on1_um_init[] =
 
 const char _2on2_um_init[] =
 	"maxclients 4\n"
-	"floodprot 9 1 1\n"					//
+	"floodprot 10 1 1\n"					//
 //	"localinfo k_fp 1\n"				// TODO not implemented
 	"timelimit  10\n"					//
 	"teamplay   2\n"					//
 	"deathmatch 3\n"					//
 	"k_overtime 1\n"					// overtime type
-	"k_exttime 2\n"						// extende time for overtime
+	"k_exttime 3\n"						// extende time for overtime
 	"k_pow 1\n"							//
 	"k_membercount 1\n"					// minimum number of players in each team
 	"k_lockmin 1\n"						//
@@ -2198,9 +2218,9 @@ const char _2on2_um_init[] =
 
 const char _3on3_um_init[] =
 	"maxclients 6\n"
-	"floodprot 9 1 1\n"
+	"floodprot 10 1 1\n"
 //	"localinfo k_fp 1\n"
-	"timelimit  20\n"
+	"timelimit  15\n"
 	"teamplay   2\n"
 	"deathmatch 1\n"
 	"k_pow 1\n"
@@ -2213,7 +2233,7 @@ const char _3on3_um_init[] =
 
 const char _4on4_um_init[] =
 	"maxclients 8\n"
-	"floodprot 9 1 1\n"
+	"floodprot 10 1 1\n"
 //	"localinfo k_fp 1\n"
 	"timelimit  20\n"
 	"teamplay   2\n"
@@ -2228,9 +2248,9 @@ const char _4on4_um_init[] =
 
 const char _10on10_um_init[] =
 	"maxclients 20\n"
-	"floodprot 9 1 1\n"
+	"floodprot 10 1 1\n"
 //	"localinfo k_fp 1\n"
-	"timelimit  30\n"
+	"timelimit  20\n"
 	"teamplay   2\n"
 	"deathmatch 1\n"
 	"k_pow 1\n"
@@ -2252,7 +2272,8 @@ const char ffa_um_init[] =
 	"k_membercount 0\n"					// no effect in ffa
 	"k_lockmin 0\n"						// no effect in ffa
 	"k_lockmax 0\n"           			// no effect in ffa
-	"k_dis 1\n"
+//	"k_overtime 1\n"
+//	"k_exttime 5\n"
 	"k_mode 3\n";
 
 
@@ -2285,6 +2306,7 @@ int um_cnt = sizeof (um_list) / sizeof (um_list[0]);
 void UserMode(float umode)
 {
 	char buf[1024*4];
+	char *cfg_name;
 
 	char *um=NULL;
 	int k_free_mode = cvar( "k_free_mode" );
@@ -2354,27 +2376,29 @@ void UserMode(float umode)
 	trap_readcmd( common_um_init, buf, sizeof(buf) );
 	G_cprint("%s", buf);
 
-	if ( self->k_admin == 2 ) // some admin features, may be overwriten by um_list[i].initstring
-	{
-		// introduce 'k_umfallbunny', which is just control which value
-		// must be set to 'k_fallbunny' after XonX
-		int k_umfallbunny = bound( 0, cvar( "k_umfallbunny" ), 1 );
-		cvar_fset("k_fallbunny", k_umfallbunny);
-	}
-
 	trap_readcmd( um_list[i].initstring, buf, sizeof(buf) );
 	G_cprint("%s\n", buf);
 
-	// TODO: IMO possible check existence of each file, so don't spam in logs like "can't find etc..."
-
-	trap_readcmd(va("exec configs/usermodes/default.cfg\n"), buf, sizeof(buf) );
-	G_cprint("%s", buf);
-	trap_readcmd(va("exec configs/usermodes/%s.cfg\n", g_globalvars.mapname), buf, sizeof(buf) );
-	G_cprint("%s", buf);
-	trap_readcmd(va("exec configs/usermodes/%s/default.cfg\n", um), buf, sizeof(buf) );
-	G_cprint("%s", buf);
-	trap_readcmd(va("exec configs/usermodes/%s/%s.cfg\n", um, g_globalvars.mapname), buf, sizeof(buf) );
-	G_cprint("%s", buf);
+	cfg_name = "configs/usermodes/default.cfg";
+	if ( can_exec( cfg_name ) ) {
+		trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
+		G_cprint("%s", buf);
+	}
+	cfg_name = va("configs/usermodes/%s.cfg", g_globalvars.mapname);
+	if ( can_exec( cfg_name ) ) {
+		trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
+		G_cprint("%s", buf);
+	}
+	cfg_name = va("configs/usermodes/%s/default.cfg", um);
+	if ( can_exec( cfg_name ) ) {
+		trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
+		G_cprint("%s", buf);
+	}
+	cfg_name = va("configs/usermodes/%s/%s.cfg", um, g_globalvars.mapname);
+	if ( can_exec( cfg_name ) ) {
+		trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
+		G_cprint("%s", buf);
+	}
 }
 
 #define UNPAUSEGUARD ( "unpauseGuard" )

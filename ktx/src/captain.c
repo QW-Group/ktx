@@ -106,6 +106,8 @@ void CheckFinishCaptain ()
 
 		if ( p )
         	SetPlayerParams( lastone, p );
+		else
+        	G_bprint(2, "CheckFinishCaptain: captain not found\n");
 
         pl_free = 0;
     }
@@ -254,6 +256,12 @@ void BecomeCaptain ()
     	}
 	}
 
+    // s: give a number for the captain (1 or 2); a number > 10 means election
+    if(p && p->k_captain == 1)
+        self->k_captain = 12;
+    else
+        self->k_captain = 11;
+
     // announce the election
 	self->v.elect = 1;
 
@@ -266,12 +274,6 @@ void BecomeCaptain ()
 			G_sprint(p, 2, "Type %s in console to approve\n", redtext("yes"));
 
     G_sprint(self, 2, "Type %s to abort election\n", redtext("captain"));
-
-    // s: give a number for the captain (1 or 2); a number > 10 means election
-    if(p && p->k_captain == 1)
-        self->k_captain = 12;
-    else
-        self->k_captain = 11;
 
     // s: spawn the cool dude
     electguard = spawn(); // Check the 1 minute timeout for election
@@ -322,7 +324,7 @@ void BeginPicking ()
 		}
 	}
 
-	k_captainturn = g_random() < 0.5 ? 1 : 2;
+	k_captainturn = (g_random() < 0.5 ? 1 : 2);
 
     PrintCaptainInTurn();
 }

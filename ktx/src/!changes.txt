@@ -1,3 +1,19 @@
+2006-03-24 [ver 1.15]
+ 89. Now if u change team during game u are not kicked but warned.
+
+ 90. /who /whonot /whoskin /list commands look better now.
+     /list command is now available for admined spec.
+
+ 91. Fixed ugly head bounce, when player gibbed.
+
+2006-03-23 [ver 1.14]
+ 88. Fixed some captain related bugs.
+
+2006-03-22 
+ 86. Removed sets: k_umfallbunny, rj, axe.
+
+ 87. /tkfjump and /tkrjump now admin commands only.
+
 2006-03-19 [ver 1.12]
  85. WARNING
 	 WARNING

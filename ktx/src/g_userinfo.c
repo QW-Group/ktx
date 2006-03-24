@@ -39,9 +39,11 @@ qboolean FixPlayerTeam ( char *newteam )
 
 	// captain or potential captain may not change team
 	if ( self->k_captain ) {
-		G_sprint(self, 2, "You may %s change team\n", redtext("not"));
-		stuffcmd(self, "team \"%s\"\n", getteam(self)); // sends this to client - so he get right team too
-		return true;                                                                       
+		if( strneq( getteam( self ), newteam ) ) {
+			G_sprint(self, 2, "You may %s change team\n", redtext("not"));
+			stuffcmd(self, "team \"%s\"\n", getteam(self)); // sends this to client - so he get right team too
+			return true;
+		}
 	}
 
 	if( k_captains == 2 ) {
@@ -69,11 +71,8 @@ qboolean FixPlayerTeam ( char *newteam )
 
 		if( strneq( s1, s2 ) )
 		{
-			self->k_accepted = 0;
-			G_bprint(2,  "%s gets %s for changing team\n", self->s.v.netname, redtext("kicked"));
-			GhostFlag(self);
-			self->s.v.classname = "";
-			stuffcmd(self, "disconnect\n"); // FIXME: stupid way
+			G_sprint(self, 2, "You may %s change team during game\n", redtext("not"));
+			stuffcmd(self, "team \"%s\"\n", getteam(self)); // sends this to client - so he get right team too
 			return true;
 		}
 	}

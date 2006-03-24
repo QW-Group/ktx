@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.45 2006/03/21 21:36:29 qqshka Exp $
+ *  $Id: client.c,v 1.46 2006/03/24 21:28:27 qqshka Exp $
  */
 
 //===========================================================================
@@ -1102,19 +1102,17 @@ void PutClientInServer()
 	{
 		self->s.v.ammo_shells = 0;
 		items = self->s.v.items;
-		if ( !cvar( "axe" ) )
-		{
-			self->s.v.ammo_nails   = 255;
-			self->s.v.ammo_shells  = 255;
-			self->s.v.ammo_rockets = 255;
-			self->s.v.ammo_cells   = 255;
-			items |= IT_NAILGUN;
-			items |= IT_SUPER_NAILGUN;
-			items |= IT_SUPER_SHOTGUN;
-			items |= IT_ROCKET_LAUNCHER;
-			items |= IT_GRENADE_LAUNCHER;
-			items |= IT_LIGHTNING;
-		}
+		self->s.v.ammo_nails   = 255;
+		self->s.v.ammo_shells  = 255;
+		self->s.v.ammo_rockets = 255;
+		self->s.v.ammo_cells   = 255;
+		items |= IT_NAILGUN;
+		items |= IT_SUPER_NAILGUN;
+		items |= IT_SUPER_SHOTGUN;
+		items |= IT_ROCKET_LAUNCHER;
+		items |= IT_GRENADE_LAUNCHER;
+		items |= IT_LIGHTNING;
+
 		items -= ( items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) ) - IT_ARMOR3;
 		self->s.v.armorvalue = 200;
 		self->s.v.armortype = 0.8;
@@ -1533,8 +1531,12 @@ void ClientDisconnect()
 			EndMatch( 1 ); // skip demo, make some other stuff
 
 		// Check if issued to execute reset.cfg (sturm)
-        if( cvar( "k_autoreset" ) )
-			localcmd("exec configs/reset.cfg\n");
+        if( cvar( "k_autoreset" ) ) {
+			char *cfg_name = "configs/reset.cfg";
+
+			if ( can_exec( cfg_name ) )
+				localcmd( "exec %s\n", cfg_name );
+		}
 
         s = k_matchLess ? "" : cvar_string( "k_defmap" ); // no defmap in matchLess mode
 

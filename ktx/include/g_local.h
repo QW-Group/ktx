@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.34 2006/03/21 21:37:27 qqshka Exp $
+ *  $Id: g_local.h,v 1.35 2006/03/24 21:28:46 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -36,7 +36,7 @@
 #include "g_syscalls.h"
 #include "player.h"
 
-#define MOD_VERSION					("1.13")
+#define MOD_VERSION					("1.15")
 #define MOD_NAME					("KTX")
 #define MOD_SERVERINFO_MOD_KEY		("xmod")
 #define MOD_SERVERINFO_BUILD_KEY	("xbuild")
@@ -90,7 +90,7 @@ extern gedict_t *world;
 extern gedict_t *self, *other;
 extern gedict_t *newmis;
 extern int      timelimit, fraglimit, teamplay, deathmatch, framecount;
-extern float	rj;
+//extern float	rj;
 
 #define	EDICT_TO_PROG(e) ((byte *)(e) - (byte *)g_edicts)
 #define PROG_TO_EDICT(e) ((gedict_t *)((byte *)g_edicts + (e)))
@@ -255,6 +255,8 @@ void		show_sv_version();
 char		*str_noweapon(int k_disallow_weapons);
 
 void		cvar_toggle_msg( gedict_t *p, char *cvarName, char *msg );
+
+qboolean	can_exec( char *name );
 
 void    	disableupdates( gedict_t * ed, float time );
 
