@@ -44,7 +44,6 @@ void VoteAdmin();
 void VoteYes();
 void VoteNo();
 void BecomeCaptain ();
-void Deathmsg ();
 void RandomPickup();
 void ShowDMM();
 void ChangeDM(float dmm);
@@ -224,7 +223,6 @@ cmd_t cmds[] = {
     { "no",          VoteNo,                    0    , CF_PLAYER      },
     { "captain",     BecomeCaptain,             0    , CF_PLAYER      },
     { "freeze",      ToggleFreeze,              0    , CF_PLAYER      },
-	{ "deathmsg",    Deathmsg,                  0    , CF_BOTH_ADMIN  },
     { "rpickup",     RandomPickup,              0    , CF_PLAYER | CF_SPC_ADMIN  },
     
     { "1on1",        UserMode,                  1	 , CF_PLAYER | CF_SPC_ADMIN },
@@ -972,8 +970,6 @@ void ModStatus2()
 	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo timers"),          OnOff( i &   2 ));
 	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo enemy reporting"), OnOff( i &  32 ));
 	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo pointing"),        OnOff( i & 128 ));
-
-	G_sprint(self, 2, "%s: %s\n", redtext("Custom deathmessages"), OnOff(cvar( "k_deathmsg" )));
 
 	G_sprint(self, 2, "%s: %s\n", redtext("Admin election"),
 							 Allowed(cvar( "k_allowvoteadmin" )));
@@ -2695,6 +2691,17 @@ void klist ( )
 	if (i)
 		G_sprint(self, 2, "%s %2d found %s\n", redtext("--"), i, redtext("-------------") );
 
+	for( i = 0, p = world; p = find(p, FOFCLSN, "ghost"); i++ ) {
+		if ( !i ) {
+			G_sprint(self, 2, "Clients list: %s\n", redtext( "ghosts" ) );
+			G_sprint(self, 2, "%s %s %s\n",
+						 redtext( "frags" ), redtext( "team" ), redtext( "name" ) );
+		}
+		G_sprint(self, 2, "%5d|%4.4s|%s\n",	(int)p->s.v.frags, getteam( p ), getname( p ));
+	}
+
+	if (i)
+		G_sprint(self, 2, "%s %2d found %s\n", redtext("--"), i, redtext("-------------") );
 }
 
 void hdptoggle ()

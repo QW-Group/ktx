@@ -1,3 +1,21 @@
+2006-03-26 [ver 1.17]
+ 96. Now ghosts is shown via client commands like this: +showscores +showteamscores.
+
+ 97. Command /klist show ghosts too.
+
+2006-03-25 [ver 1.16]
+ 92. Removed "k_deathmsg" and related stuff, now custom death messages is by default.
+
+ 93. Now "stomp death" is more ktpro-like.
+
+ 94. Now teleport sound is instant - no more this 200 ms delay.
+
+ 95. Added "set dmm4_invinc_time" - invincible time for dmm4, set to -1 to disabled invincible.
+
+	 set dmm4_invinc_time 0.5 // this set invincible for 0.5 of second
+	 set dmm4_invinc_time 0   // this set invincible for 2 seconds, since 2 seconds is default
+	 set dmm4_invinc_time -1  // this turn off invincible
+
 2006-03-24 [ver 1.15]
  89. Now if u change team during game u are not kicked but warned.
 

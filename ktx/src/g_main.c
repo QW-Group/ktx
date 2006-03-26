@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.12 2006/03/04 18:10:23 qqshka Exp $
+ *  $Id: g_main.c,v 1.13 2006/03/26 17:19:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -116,6 +116,8 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 			SpectatorConnect();
 		else
 			ClientConnect();
+
+		update_ghosts();
 		
 		return 1;
 
@@ -134,6 +136,9 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 			SpectatorDisconnect();
 		else
 			ClientDisconnect();
+
+		update_ghosts();
+
 		return 1;
 
 	case GAME_SETNEWPARMS:

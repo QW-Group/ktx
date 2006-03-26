@@ -20,13 +20,20 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.28 2006/03/24 21:28:27 qqshka Exp $
+ *  $Id: g_utils.c,v 1.29 2006/03/26 17:19:13 qqshka Exp $
  */
 
 #include "g_local.h"
 
 
 float CountPlayers();
+
+int PASSFLOAT(float x)
+{
+	fi_t rc;
+	rc._float = x;
+	return rc._int;
+}
 
 
 int NUM_FOR_EDICT( gedict_t * e )
@@ -37,7 +44,7 @@ int NUM_FOR_EDICT( gedict_t * e )
 	b = b / sizeof( gedict_t );
 
 	if ( b < 0 || b >= MAX_EDICTS )
-		G_Error( "NUM_FOR_EDICT: bad pointer" );
+		DebugTrap( "NUM_FOR_EDICT: bad pointer" );
 	return b;
 }
 
@@ -702,6 +709,11 @@ void WriteByte( int to, int data )
 void WriteShort( int to, int data )
 {
 	trap_WriteShort( to, data );
+}
+
+void WriteLong( int to, int data )
+{
+	trap_WriteLong( to, data );
 }
 
 void WriteString( int to, char *data )
@@ -1494,7 +1506,7 @@ void cvar_toggle_msg( gedict_t *p, char *cvarName, char *msg )
 	trap_cvar_set_float( cvarName, (float)i );
 }
 
-// generally - this check is we can read file - but used for exec command
+// generally - this check if we can read file - but used for exec command
 qboolean can_exec( char *name )
 {
 	fileHandle_t handle;
@@ -1505,5 +1517,88 @@ qboolean can_exec( char *name )
 	}
 
 	return false;
+}
+
+void ghostClearScores( gedict_t *g )
+{
+	int to = MSG_ALL;
+	int cl_slot = g->ghost_slot;
+
+	if ( strneq( g->s.v.classname, "ghost" ) )
+		return;
+
+	if ( cl_slot < 1 || cl_slot > MAX_CLIENTS )
+		return;
+
+    if ( !strnull( g_edicts[ cl_slot ].s.v.netname ) )
+			return; // slot is busy - does't clear
+
+	g_edicts[ cl_slot ].ghost_slot = 0; // mark it as free
+	cl_slot--;
+
+	WriteByte(to, SVC_UPDATEUSERINFO); // update userinfo
+	WriteByte(to, cl_slot);            // client number
+	WriteLong(to, 0);                  // client userid
+	WriteString(to, "\\name\\");
+}
+
+void ghost2scores( gedict_t *g )
+{
+	int to = MSG_ALL;
+	int cl_slot;
+
+	if ( strneq( g->s.v.classname, "ghost" ) )
+		return;
+
+ 	cl_slot = g->ghost_slot; // try restore
+
+	if ( cl_slot < 1 || cl_slot > MAX_CLIENTS || !strnull( g_edicts[ cl_slot ].s.v.netname ) )
+		cl_slot	= 0; // slot was occupied or wrong
+
+ 	// check is restore possible
+	if ( cl_slot < 1 ) {
+		for( cl_slot = 1; cl_slot <= MAX_CLIENTS; cl_slot++ ) {
+			if ( g_edicts[ cl_slot ].ghost_slot )
+				continue; // some ghost is already uses this slot
+
+        	if ( strnull( g_edicts[ cl_slot ].s.v.netname ) )
+				break;
+		}
+	}
+
+	if ( cl_slot > MAX_CLIENTS )
+		return; // no free slot for ghost
+
+	g_edicts[ cl_slot ].ghost_slot = cl_slot; // mark it as not free
+	g->ghost_slot = cl_slot; // save slot - so we can clear/restore it in future
+
+	cl_slot--;
+
+	WriteByte(to, SVC_UPDATEUSERINFO); // update userinfo
+	WriteByte(to, cl_slot);            // client number
+	WriteLong(to, 0);                  // client userid
+	WriteString(to, va("\\name\\\x83 %s\\team\\%s", getname( g ), getteam( g )));
+
+	WriteByte(to, SVC_UPDATEFRAGS); // update frags
+	WriteByte(to, cl_slot);
+	WriteShort(to, g->s.v.frags);
+
+	WriteByte(to, SVC_UPDATEENTERTIME);				// update time
+	WriteByte(to, cl_slot);  						// client number
+// FIXME: !!! qqshka: - must be WriteFloat but API have not it - so use WriteLong - dunno is this ok
+	WriteLong(to, PASSFLOAT(g_globalvars.time - g->ghost_dt)); // client enter time - here time since player was dropped
+
+	WriteByte(to, SVC_UPDATEPING);      // update ping
+	WriteByte(to, cl_slot);      		// client number
+	WriteShort(to, 0);  				// client ping
+}
+
+void update_ghosts ()
+{
+	gedict_t *p;
+	int from;
+
+	for( from = 1, p = world; p = find_plrghst( p, &from ); )
+		ghost2scores( p );
 }
 

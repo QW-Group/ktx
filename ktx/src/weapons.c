@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.19 2006/03/19 23:16:13 qqshka Exp $
+ *  $Id: weapons.c,v 1.20 2006/03/26 17:19:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1342,13 +1342,13 @@ void W_ChangeWeapon()
 
 	if ( !( ( int ) self->s.v.items & fl ) )
 	{			// don't have the weapon or the ammo
-		G_sprint( self, PRINT_HIGH, "no weapon.\n" );
+		G_sprint( self, PRINT_HIGH, "no weapon\n" );
 		return;
 	}
 
 	if ( am )
 	{			// don't have the ammo
-		G_sprint( self, PRINT_HIGH, "not enough ammo.\n" );
+		G_sprint( self, PRINT_HIGH, "not enough ammo\n" );
 		return;
 	}
 //

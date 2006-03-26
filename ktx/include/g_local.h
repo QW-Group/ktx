@@ -20,13 +20,15 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.35 2006/03/24 21:28:46 qqshka Exp $
+ *  $Id: g_local.h,v 1.36 2006/03/26 17:19:54 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
 
 // not actual really: REMOVE ME
 #define KTEAMS
+//#define DEBUG
+
 
 #include "q_shared.h"
 #include "mathlib.h"
@@ -36,7 +38,7 @@
 #include "g_syscalls.h"
 #include "player.h"
 
-#define MOD_VERSION					("1.15")
+#define MOD_VERSION					("1.17")
 #define MOD_NAME					("KTX")
 #define MOD_SERVERINFO_MOD_KEY		("xmod")
 #define MOD_SERVERINFO_BUILD_KEY	("xbuild")
@@ -111,6 +113,12 @@ typedef enum
 	gtFFA
 } gameType_t;
 
+typedef union fi_s
+{
+	float			_float;
+	int			_int;
+} fi_t;	
+
 // bg_lib.c
 
 #if defined( Q3_VM ) || defined( _WIN32 )
@@ -128,6 +136,9 @@ size_t strlcat(char *dst, char *src, size_t siz);
 #endif
 
 //g_utils.c
+
+int				PASSFLOAT(float x);
+
 float           g_random( void );
 float           crandom( void );
 gedict_t       *spawn( void );
@@ -195,6 +206,7 @@ void    	WriteEntity( int to, gedict_t * ed );
 
 void		WriteByte( int to, int data );
 void		WriteShort( int to, int data );
+void		WriteLong( int to, int data );
 void		WriteString( int to, char *data );
 void		WriteAngle( int to, float data );
 void		WriteCoord( int to, float data );
@@ -257,6 +269,9 @@ char		*str_noweapon(int k_disallow_weapons);
 void		cvar_toggle_msg( gedict_t *p, char *cvarName, char *msg );
 
 qboolean	can_exec( char *name );
+
+void		ghostClearScores( gedict_t *g );
+void		update_ghosts ();
 
 void    	disableupdates( gedict_t * ed, float time );
 

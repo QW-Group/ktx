@@ -220,8 +220,9 @@ void MOTDStuff()
 					return;
 				}
 
-				localcmd("localinfo %d \"\"\n", (int)f2);
+				ghostClearScores( p );
 				G_bprint(2, "%s rejoins the game %s‘\n", so->s.v.netname, getteam( so ));
+				localcmd("localinfo %d \"\"\n", (int)f2);
 
 				so->fraggie   = p->s.v.frags;
 				so->deaths    = p->deaths;
@@ -229,6 +230,8 @@ void MOTDStuff()
 				so->k_teamnum = p->k_teamnum;
 
 				so->ps        = p->ps; // restore player stats
+
+
 				
 				ent_remove( p );
 			}

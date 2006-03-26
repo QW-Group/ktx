@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_syscalls.c,v 1.4 2006/03/24 21:28:27 qqshka Exp $
+ *  $Id: g_syscalls.c,v 1.5 2006/03/26 17:19:13 qqshka Exp $
  */
 
 //#include "g_local.h"
@@ -36,19 +36,6 @@
 
 static int      ( QDECL * syscall ) ( int arg, ... ) =
     ( int ( QDECL * ) ( int, ... ) ) -1;
-
-typedef union fi_s
-{
-	float			_float;
-	int			_int;
-} fi_t;	
-
-int PASSFLOAT(float x)
-{
-	fi_t rc;
-	rc._float = x;
-	return rc._int;
-}
 
 
 

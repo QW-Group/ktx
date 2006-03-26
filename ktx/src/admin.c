@@ -14,22 +14,6 @@ void ExitKick(gedict_t *kicker);
 void Deathmsg();
 
 
-// This toggle's between different messages
-void Deathmsg ()
-{
-    if( self->k_admin != 2 )
-    {
-        G_sprint(self, 2, "You are not an admin\n");
-        return;
-    }
-
-    if( match_in_progress )
-        return;
-
-	cvar_toggle_msg( self, "k_deathmsg", redtext("custom deathmessages") );
-}
-
-
 void KickThink ()
 {
     G_sprint( PROG_TO_EDICT( self->s.v.owner ) , 2, "Your λιγλ mode has timed out\n");

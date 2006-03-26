@@ -20,11 +20,11 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: triggers.c,v 1.7 2006/03/19 23:16:13 qqshka Exp $
+ *  $Id: triggers.c,v 1.8 2006/03/26 17:19:13 qqshka Exp $
  */
 
 #include "g_local.h"
-gedict_t       *stemp, *otemp, *s, *old;
+gedict_t       *stemp, *otemp, *old;
 
 
 void trigger_reactivate()
@@ -308,7 +308,8 @@ TELEPORT TRIGGERS
 #define PLAYER_ONLY  1
 #define SILENT  2
 
-void play_teleport()
+// changed the function for rapid sound so sndspot parameter included
+void play_teleport( gedict_t *sndspot )
 {
 	float           v;
 	char           *tmpstr;
@@ -325,17 +326,15 @@ void play_teleport()
 	else
 		tmpstr = "misc/r_tele5.wav";
 
-	sound( self, CHAN_VOICE, tmpstr, 1, ATTN_NORM );
-	ent_remove( self );
+	sound( sndspot, CHAN_VOICE, tmpstr, 1, ATTN_NORM );
 }
 
 void spawn_tfog( vec3_t org )
 {
-	s = spawn(); // qqshka: why 's' defined as global?
-	VectorCopy( org, s->s.v.origin );
-// s->s.v.origin = org;
+	gedict_t *s = spawn();
+	VectorCopy( org, s->s.v.origin );// s->s.v.origin = org;
 	s->s.v.nextthink = g_globalvars.time + 0.2;
-	s->s.v.think = ( func_t ) play_teleport;
+	s->s.v.think = ( func_t ) SUB_Remove;
 
 	WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
 	WriteByte( MSG_MULTICAST, TE_TELEPORT );
@@ -429,7 +428,7 @@ void spawn_tdeath( vec3_t org, gedict_t * death_owner )
 
 void teleport_touch()
 {
-	gedict_t       *t;
+	gedict_t       *t, *othercopy;
 	vec3_t          org;
 
 	if ( self->s.v.targetname )
@@ -457,6 +456,20 @@ void teleport_touch()
 // activator = other;
 	SUB_UseTargets();
 
+// put a tfog where the player was and play teleporter sound
+// For some odd reason (latency?), no matter if the sound was issued to play
+// at the spot of the entity before it entered the teleporter, it actually
+// plays at the teleporter destination. So we just create a body double of the
+// player at the departure side which stands still, plays the sound and lives
+// for 1/10 of a second, then is removed. All these efforts were needed to get
+// rid of that annoying 2/10 second delay in playing the teleporter sound.
+
+	othercopy = spawn();
+	setorigin( othercopy, PASSVEC3( other->s.v.origin ) );
+	othercopy->s.v.nextthink  = g_globalvars.time + 0.1;
+	othercopy->s.v.think = ( func_t ) SUB_Remove;
+	play_teleport( othercopy );
+
 	//put a tfog where the player was
 	spawn_tfog( other->s.v.origin );
 
@@ -480,6 +493,7 @@ void teleport_touch()
 	if ( !other->s.v.health )
 	{
 		VectorCopy( t->s.v.origin, other->s.v.origin );
+		play_teleport( other );
 		other->s.v.velocity[0] =
 		    ( g_globalvars.v_forward[0] * other->s.v.velocity[0] ) +
 		    ( g_globalvars.v_forward[0] * other->s.v.velocity[1] );
@@ -495,8 +509,9 @@ void teleport_touch()
 	}
 */
 	setorigin( other, PASSVEC3( t->s.v.origin ) );
-	VectorCopy( t->mangle, other->s.v.angles );
-// other.angles = t.mangle;
+	play_teleport( other );
+
+	VectorCopy( t->mangle, other->s.v.angles ); // other.angles = t.mangle;
 	if ( streq( other->s.v.classname, "player" ) )
 	{
 		other->s.v.fixangle = 1;	// turn this way immediately
@@ -504,7 +519,7 @@ void teleport_touch()
 		if ( ( int ) other->s.v.flags & FL_ONGROUND )
 			other->s.v.flags = other->s.v.flags - FL_ONGROUND;
 		VectorScale( g_globalvars.v_forward, 300, other->s.v.velocity );
-//  other->s.v.velocity = v_forward * 300;
+		//  other->s.v.velocity = v_forward * 300;
 	}
 	other->s.v.flags -= ( int ) other->s.v.flags & FL_ONGROUND;
 }

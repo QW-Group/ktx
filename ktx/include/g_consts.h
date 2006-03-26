@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_consts.h,v 1.5 2006/03/15 22:16:30 qqshka Exp $
+ *  $Id: g_consts.h,v 1.6 2006/03/26 17:19:54 qqshka Exp $
  */
 
 //
@@ -198,6 +198,8 @@
 #define	SPAWNFLAG_NOT_DEATHMATCH	2048
 
 // protocol bytes
+
+#define SVC_UPDATEFRAGS	14
 #define SVC_TEMPENTITY 23
 #define SVC_SETPAUSE 24
 #define SVC_CENTERPRINT 26
@@ -210,7 +212,10 @@
 
 #define SVC_SMALLKICK  34
 #define SVC_BIGKICK   35
+#define SVC_UPDATEPING 36
+#define	SVC_UPDATEENTERTIME	37
 #define SVC_MUZZLEFLASH  39
+#define SVC_UPDATEUSERINFO 40
 
 
 #define TE_SPIKE   0

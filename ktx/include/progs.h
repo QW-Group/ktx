@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.20 2006/03/13 14:17:03 vvd0 Exp $
+ *  $Id: progs.h,v 1.21 2006/03/26 17:19:54 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -202,7 +202,7 @@ typedef struct gedict_s {
 	th_die_func_t   th_die;
 	th_pain_func_t  th_pain;
 
-#ifdef KTEAMS
+// below is KTX fields
 
 	float	cnt2;            // NOT_SURE: cnt2 = seconds left?
 	float	dead_time;       // time at which player last died - used in autorespawn
@@ -280,9 +280,10 @@ typedef struct gedict_s {
 
 	int   need_clearCP;		// if this true, clear center print at certain cases
 	int   k_makeghost;      // if this true make ghost for disconnected player
+	int   ghost_slot;		// now ktx put ghost in players scoreboards in one of free slots - store this slot
+	float ghost_dt;         // ghost drop time - time when player dropped
 
 	float nthink;			// store here regeneration time of some items
-	struct gedict_s *wizard;// for specs, link to the entity which represent wizard
 
 	vote_t v;				// player votes stored here
 
@@ -291,11 +292,11 @@ typedef struct gedict_s {
 	int   fav[MAX_CLIENTS];     // here stored players number for fav_add/next_fav commands
 	autoTrackType_t autotrack;  // is autotrack or auto_pow
 	int	  autotrack_id;		    // latest autotrack id, store this to detect is user want implicitly turn of autotrack
+
+	struct gedict_s *wizard;    // for specs, link to the entity which represent wizard
 // }
 
 	pos_t	pos[MAX_POSITIONS + 1];	// for player pos_save / pos_move
 	float	pos_move_time;		// for player pos_save / pos_move
-#endif
-
 } gedict_t;
 

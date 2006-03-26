@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.46 2006/03/24 21:28:27 qqshka Exp $
+ *  $Id: client.c,v 1.47 2006/03/26 17:19:13 qqshka Exp $
  */
 
 //===========================================================================
@@ -45,7 +45,7 @@ void ExitCaptain();
 void CheckFinishCaptain();
 void MakeMOTD();
 void ExitKick(gedict_t *kicker);
-void play_teleport();
+void play_teleport( gedict_t *sndspot );
 void ImpulseCommands();
 void StartDie ();
 void ZeroFpsStats ();
@@ -1065,8 +1065,7 @@ void PutClientInServer()
 			VectorScale( g_globalvars.v_forward, 20, v );
 			VectorAdd( v, self->s.v.origin, v );
 			spawn_tfog( v );
-			// FIXME:
-			//        play_teleport();
+			play_teleport( self );
 			spawn_tdeath( self->s.v.origin, self );
 
 			//berzerk will not affect players that logs in during berzerk
@@ -1091,15 +1090,13 @@ void PutClientInServer()
 		}
 	}
 
-//	makevectors( self->s.v.angles );
-//	VectorScale( g_globalvars.v_forward, 20, v );
-//	VectorAdd( v, self->s.v.origin, v );
-//	spawn_tfog( v );
-
-//	spawn_tdeath( self->s.v.origin, self );
-
 	if ( deathmatch == 4 && match_in_progress == 2 )
 	{
+		float dmm4_invinc_time = cvar("dmm4_invinc_time");
+
+ 		// default is 2, negative value disable invincible
+		dmm4_invinc_time = (dmm4_invinc_time ? bound(0, dmm4_invinc_time, 30) : 2);
+
 		self->s.v.ammo_shells = 0;
 		items = self->s.v.items;
 		self->s.v.ammo_nails   = 255;
@@ -1117,9 +1114,13 @@ void PutClientInServer()
 		self->s.v.armorvalue = 200;
 		self->s.v.armortype = 0.8;
 		self->s.v.health = 250;
-		self->s.v.items = items | IT_INVULNERABILITY;
-		self->invincible_time = 1;
-		self->invincible_finished = g_globalvars.time + 3;
+
+		if ( dmm4_invinc_time > 0 ) {
+			items |= IT_INVULNERABILITY;
+			self->invincible_time = 1;
+			self->invincible_finished = g_globalvars.time + dmm4_invinc_time;
+		}
+		self->s.v.items = items;
 	}
 
 	if ( deathmatch == 5 && match_in_progress == 2 )
@@ -1139,7 +1140,8 @@ void PutClientInServer()
 		self->s.v.armorvalue = 200;
 		self->s.v.armortype = 0.8;
 		self->s.v.health = 200;
-		self->s.v.items = items | IT_INVULNERABILITY;
+		items |= IT_INVULNERABILITY;
+		self->s.v.items = items;
 		self->invincible_time = 1;
 		self->invincible_finished = g_globalvars.time + 3;
 	}
@@ -1437,6 +1439,7 @@ void MakeGhost ()
 	ghost->ready     = 0;
 
 	ghost->ps        = self->ps; // save player stats
+	ghost->ghost_dt  = g_globalvars.time; // save drop time
 
 	localcmd("localinfo %d \"%s\"\n", (int)f1, self->s.v.netname);
 	trap_executecmd();
@@ -2204,8 +2207,7 @@ void PlayerPostThink()
 			VectorMA (self->s.v.origin, 20, g_globalvars.v_forward, v);
 
 			spawn_tfog(v);
-			// FIXME:
-//			play_teleport();
+			play_teleport( self );
 			spawn_tdeath (self->s.v.origin, self);
 		}
 	}
@@ -2269,7 +2271,7 @@ void PlayerPostThink()
 			if ( gre && gre->s.v.takedamage == DAMAGE_AIM )
 			{
 				// we landed on someone's head, hurt him
-				PROG_TO_EDICT ( self->s.v.groundentity )->deathtype = "stomp";
+				gre->deathtype = "stomp";
 				T_Damage (gre, self, self, 10);
 			}
 		} else
@@ -2307,21 +2309,16 @@ called when a player dies
 
 void ClientObituary (gedict_t *targ, gedict_t *attacker)
 {
-	float rnum;
 	char *deathstring,  *deathstring2;
 	char *attackerteam, *targteam;
-
-#ifdef KTEAMS
 	char *attackerteam2;	//team
 
 	// Set it so it should update scores at next attempt.
 	k_nochange = 0;
-#endif
 
     if ( strneq( targ->s.v.classname, "player" ))
 		return;
     
-	rnum = g_random();
 	//ZOID 12-13-96: self.team doesn't work in QW.  Use keys
 	attackerteam = getteam(attacker);
 	targteam     = getteam(targ);
@@ -2339,37 +2336,37 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
     if ( streq( attacker->s.v.classname, "teledeath" ) )
 	{
-#ifdef KTEAMS
-			if( match_in_progress != 2 ) {
+
+		if( match_in_progress != 2 ) {
 // qqshka - no message in prewar
 //				G_bprint(PRINT_MEDIUM, "%s was telefragged\n", targ->s.v.netname);
-				return;
-			}
-
-			attackerteam2 = getteam( PROG_TO_EDICT( attacker->s.v.owner ) );
-
-			if( teamplay && streq( targteam, attackerteam2 ) && !strnull ( attackerteam2 )
-					&& targ != PROG_TO_EDICT( attacker->s.v.owner ) )
-			{
-                G_bprint(PRINT_MEDIUM,"%s was telefragged by %s teammate\n",
-													 targ->s.v.netname, g_his(targ));
-
-				targ->deaths += 1;
-				return;
-			}
-#endif
-            G_bprint (PRINT_MEDIUM, "%s was telefragged by %s\n",
-				targ->s.v.netname, PROG_TO_EDICT( attacker->s.v.owner )->s.v.netname );
-
-            logfrag (PROG_TO_EDICT( attacker->s.v.owner ), targ);
-
-            PROG_TO_EDICT( attacker->s.v.owner )->s.v.frags += 1;
-#ifdef KTEAMS
-			targ->deaths += 1;
-			PROG_TO_EDICT( attacker->s.v.owner )->victim = targ->s.v.netname;
-			targ->killer = PROG_TO_EDICT( attacker->s.v.owner )->s.v.netname;
-#endif
 			return;
+		}
+
+		attackerteam2 = getteam( PROG_TO_EDICT( attacker->s.v.owner ) );
+
+		if( teamplay && streq( targteam, attackerteam2 ) && !strnull ( attackerteam2 )
+				&& targ != PROG_TO_EDICT( attacker->s.v.owner ) )
+		{
+            G_bprint(PRINT_MEDIUM,"%s was telefragged by %s teammate\n",
+													targ->s.v.netname, g_his(targ));
+
+			targ->deaths += 1;
+			return;
+		}
+
+        G_bprint (PRINT_MEDIUM, "%s was telefragged by %s\n",
+			targ->s.v.netname, PROG_TO_EDICT( attacker->s.v.owner )->s.v.netname );
+
+        logfrag (PROG_TO_EDICT( attacker->s.v.owner ), targ);
+
+        PROG_TO_EDICT( attacker->s.v.owner )->s.v.frags += 1;
+
+		targ->deaths += 1;
+		PROG_TO_EDICT( attacker->s.v.owner )->victim = targ->s.v.netname;
+		targ->killer = PROG_TO_EDICT( attacker->s.v.owner )->s.v.netname;
+
+		return;
 	}
 
 	if ( streq( attacker->s.v.classname, "teledeath2" ) )
@@ -2400,10 +2397,10 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		{
 			logfrag (attacker, attacker);
 			attacker->s.v.frags -= 1;
-#ifdef KTEAMS
-			attacker->friendly += 1;		//team
-#endif
+			attacker->friendly += 1;
+
             G_bprint (PRINT_MEDIUM, "%s squished a teammate\n", attacker->s.v.netname);
+
 			return;
 		}
 		else if ( streq( attacker->s.v.classname, "player" ) && attacker != targ )
@@ -2411,11 +2408,10 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			G_bprint (PRINT_MEDIUM, "%s squishes %s\n", attacker->s.v.netname, targ->s.v.netname);
 			logfrag (attacker, targ);
 			attacker->s.v.frags += 1;
-#ifdef KTEAMS
 			targ->deaths += 1;
 			attacker->victim = targ->s.v.netname;
 			targ->killer = attacker->s.v.netname;
-#endif
+
 			return;
 		}
 		else
@@ -2423,395 +2419,252 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			logfrag (targ, targ);
 			targ->s.v.frags -= 1;            // killed self
             G_bprint (PRINT_MEDIUM, "%s was squished\n", targ->s.v.netname);
+
+			return;
+		}
+	}
+
+ 	// ktpro like stomps %)
+	if ( streq( targ->deathtype, "stomp" ) )
+	{
+		if ( isTeam() && streq( targteam, attackerteam )
+				&& !strnull( attackerteam ) && targ != attacker )
+		{
+			logfrag (attacker, attacker);
+			attacker->s.v.frags -= 1;
+			attacker->friendly += 1;
+
+			switch( (int)(g_random() * 2) ) {
+				case 0:  deathstring = " was jumped by "; break;
+				default:  deathstring = " was crushed by "; break;
+			}
+
+			G_bprint (PRINT_MEDIUM,"%s%s%s teammate\n",
+						targ->s.v.netname, deathstring, g_his( targ ));
+
+			return;
+		}
+		else if ( streq( attacker->s.v.classname, "player" ) && attacker != targ )
+		{
+			logfrag (attacker, targ);
+			attacker->s.v.frags += 1;
+			targ->deaths += 1;
+			attacker->victim = targ->s.v.netname;
+			targ->killer = attacker->s.v.netname;
+
+			deathstring2 = "\n";
+
+			switch( (int)(g_random() * 5) ) {
+				case 0:  deathstring = " softens "; deathstring2 = "'s fall\n"; break;
+				case 1:  deathstring = " tried to catch "; break;
+				case 2:  deathstring = " was jumped by "; break;
+				case 3:  deathstring = " was crushed by "; break;
+				default:
+						 G_bprint (PRINT_MEDIUM, "%s stomps %s\n",
+										attacker->s.v.netname, targ->s.v.netname);
+						 return; // !!! return !!!
+			}
+
+			G_bprint (PRINT_MEDIUM,"%s%s%s%s",
+					targ->s.v.netname, deathstring, attacker->s.v.netname, deathstring2);
 			return;
 		}
 	}
 
     if ( streq( attacker->s.v.classname, "player" ) ) 
     {
-            // included big part starts to handle optional new death messages :p
-			if( cvar( "k_deathmsg" ) ) {
-				if ( targ == attacker )
-				{
-					// killed self, KTeams version
-					logfrag (attacker, attacker);
-					attacker->s.v.frags -= 1;
+		if ( targ == attacker )
+		{
+			// killed self
 
-					if ( streq( targ->deathtype, "grenade" ) )
-                        deathstring = " tries to put the pin back in\n";
-					else if ( streq( targ->deathtype, "rocket" ) )
-					{
-						if (rnum < 0.5)
-                            deathstring = " discovers blast radius\n";
-						else
-                            deathstring = " becomes bored with life\n";
-					}
-					else if (targ->s.v.weapon == 64 && targ->s.v.waterlevel > 1)
-					{
-                        if (targ->s.v.watertype == CONTENT_SLIME)
-                            deathstring = " discharges into the slime\n";
-                        else if (targ->s.v.watertype == CONTENT_LAVA)
-                            deathstring = " discharges into the lava\n";
-						else if (g_random() < 0.5)
-                            deathstring = " heats up the water\n";
-						else
-                            deathstring = " discharges into the water\n";
-					}
-					else
-                        deathstring = " becomes bored with life\n"; // hm, and how it is possible?
+			logfrag (attacker, attacker);
+			attacker->s.v.frags -= 1;
 
-					G_bprint (PRINT_MEDIUM, "%s%s", targ->s.v.netname, deathstring);
-                    return;
-				}
-                else if ( ( teamplay == 2 && streq( targteam, attackerteam ) &&
-                            !strnull( attackerteam) ) /* || coop */ )
-				{
-					// teamkill, KTeams version
-//                    if (coop)
-//                        rnum = rnum * 0.5;	// only use the first two messages
-					if( rnum < 0.25 ) 
-                       	deathstring = va(" checks %s glasses\n", g_his(attacker));
-					else if( rnum < 0.5 ) 
-						deathstring = " loses another friend\n";
-					else if ( rnum < 0.75 )
-						deathstring = " gets a frag for the other team\n";
-					else
-                        deathstring = " mows down a teammate\n";
-					G_bprint (PRINT_MEDIUM, "%s%s", attacker->s.v.netname, deathstring);
-					attacker->s.v.frags -= 1;
-					attacker->friendly += 1;
-
-					//ZOID 12-13-96:  killing a teammate logs as suicide
-					logfrag (attacker, attacker);
-					return;
-				}
-				else
-				{	// normal kill, Kteams version
-					logfrag (attacker, targ);
-					attacker->s.v.frags += 1;
-					targ->deaths += 1;          //team
-
-					attacker->victim = targ->s.v.netname;
-					targ->killer = attacker->s.v.netname;
-
-					if ( targ->spawn_time + 1 > g_globalvars.time )
-						attacker->ps.spawn_frags++;
-
-					rnum = attacker->s.v.weapon;
-
-					if ( streq( targ->deathtype, "nail" ) )
-					{
-						if ( g_random() < 0.5 )
-							deathstring = " was body pierced by ";
-						else
-							deathstring = " was nailed by ";
-						deathstring2 = "\n";
-					}
-					else if ( streq( targ->deathtype, "supernail" ) )
-					{
-						rnum = g_random();
-						if ( targ->s.v.health < -40 )
-							deathstring = " was straw-cuttered by ";
-						else if ( rnum < 0.33 )
-							deathstring = " was punctured by ";
-						else if ( rnum < 0.66 )
-							deathstring = " was perforated by ";
-						else
-							deathstring = " was ventilated by ";
-						deathstring2 = "\n";
-					}
-					else if ( streq( targ->deathtype, "grenade" ) )
-					{
-						deathstring = " eats ";
-						deathstring2 = "'s pineapple\n";
-						if ( targ->s.v.health < -40 )
-						{
-							deathstring = " was gibbed by ";
-							deathstring2 = "'s grenade\n";
-						}
-					}
-					else if ( streq( targ->deathtype, "rocket" ) )
-					{
-						if (attacker->super_damage_finished > 0 && targ->s.v.health < -40)
-						{
-							rnum = g_random();
-							if ( rnum < 0.33 )
-								deathstring = " was brutalized by ";
-							else if ( rnum < 0.66 )
-								deathstring = " was smeared by ";
-							else
-							{
-								G_bprint (PRINT_MEDIUM, "%s rips %s a new one\n",
-											attacker->s.v.netname, targ->s.v.netname);
-								return;
-							}
-							deathstring2 = "'s quad rocket\n";
-						}
-						else
-						{
-							if (targ->s.v.health < -40)
-								deathstring = " was gibbed by ";
-							else
-								deathstring = " rides ";
-							deathstring2 = "'s rocket\n";
-						}
-					}
-					else if ( streq( targ->deathtype, "stomp" ) )
-					{
-						deathstring = " was stomped by ";
-						deathstring2 = "\n";
-					}
-					else if ( rnum == 4096 )
-					{
-						deathstring = " was ax-murdered by ";
-						deathstring2 = "\n";
-					}
-					else if ( rnum == 1 )
-					{
-						if (targ->s.v.health < -40)
-						{
-							deathstring = " was lead poisoned by ";
-							deathstring2 = "\n";
-						}
-						else
-						{
-							deathstring = " chewed on ";
-							deathstring2 = "'s boomstick\n";
-						}
-					}
-					else if ( rnum == 2 )
-					{
-						if ( attacker->super_damage_finished > 0 )
-							deathstring = " ate 8 loads of ";
-						else
-							deathstring = " ate 2 loads of ";
-						deathstring2 = "'s buckshot\n";
-					}
-					else if ( rnum == 64 )
-					{
-						deathstring = " accepts ";
-						deathstring2 = "'s shaft\n";
-
-						if ( attacker->s.v.waterlevel > 1 )
-						{
-							if ( g_random() < 0.5 )
-							{
-								deathstring = " drains ";
-								deathstring2 = "'s batteries\n";
-							}
-							else
-								deathstring2 = "'s discharge\n";
-						}
-						else if ( targ->s.v.health < -40 )
-						{
-							deathstring = " gets a natural disaster from ";
-							deathstring2 = "\n";
-						}
-
-					}
-					else {
-						G_cprint ("Unknown death: normal death kt version");
-						deathstring = " killed by ";
-						deathstring2 = " ?\n";
-					}
-
-					G_bprint (PRINT_MEDIUM,"%s%s%s%s",
-							targ->s.v.netname, deathstring, attacker->s.v.netname, deathstring2);
-				}
-
-				return;
-// included big part ends
-
-			} else { // !cvar( "k_deathmsg" )
-				if ( targ == attacker )
-				{
-					// killed self, native qw version
-					logfrag (attacker, attacker);
-					attacker->s.v.frags -= 1;
-					G_bprint (PRINT_MEDIUM, targ->s.v.netname);
-
-					if ( streq( targ->deathtype, "grenade" ) )
-						G_bprint (PRINT_MEDIUM," tries to put the pin back in\n");
-					else if ( streq( targ->deathtype, "rocket" ) )
-						G_bprint (PRINT_MEDIUM," becomes bored with life\n");
-					else if ( targ->s.v.weapon == 64 && targ->s.v.waterlevel > 1 )
-
-					{
-						if ( targ->s.v.watertype == -4 )
-							G_bprint (PRINT_MEDIUM," discharges into the slime\n");
-						else if ( targ->s.v.watertype == -5 )
-							G_bprint (PRINT_MEDIUM," discharges into the lava\n");
-						else
-        					G_bprint (PRINT_MEDIUM," discharges into the water\n");
-					}
-                    else
-						G_bprint (PRINT_MEDIUM," becomes bored with life\n");
-
-					return;
-                }
-				else if ( teamplay == 2 && streq( targteam, attackerteam )
-							 && !strnull( attackerteam ) )
-				{
-					// teamkill, native qw version
-					if( rnum < 0.33 )
-						deathstring = " mows down a teammate\n";
-					else if( rnum < 0.66 )
-						deathstring = va(" checks %s glasses\n", g_his(attacker));
-					else
-						deathstring = " loses another friend\n";
-
-					G_bprint (PRINT_MEDIUM, "%s%s", attacker->s.v.netname, deathstring);
-
-					attacker->s.v.frags -= 1;
-					attacker->friendly += 1;		//team
-					//ZOID 12-13-96:  killing a teammate logs as suicide
-					logfrag (attacker, attacker);
-					return;
-				}
-				else
-				{
-					// normal kill, native qw version
-					logfrag (attacker, targ);
-					attacker->s.v.frags += 1;
-					targ->deaths += 1;		//team
-
-					attacker->victim = targ->s.v.netname;
-					targ->killer = attacker->s.v.netname;
-
-					if ( targ->spawn_time + 1 > g_globalvars.time )
-						attacker->ps.spawn_frags++;
-
-	   				rnum = attacker->s.v.weapon;
-
-					if ( streq( targ->deathtype, "nail" ) )
-					{
-						deathstring = " was nailed by ";
-						deathstring2 = "\n";
-					}
-					else if ( streq( targ->deathtype, "supernail" ) )
-					{
-						deathstring = " was punctured by ";
-						deathstring2 = "\n";
-					}
-					else if ( streq( targ->deathtype, "grenade" ) )
-					{
-						deathstring = " eats ";
-						deathstring2 = "'s pineapple\n";
-						if ( targ->s.v.health < -40 )
-						{
-							deathstring = " was gibbed by ";
-							deathstring2 = "'s grenade\n";
-						}
-					}
-					else if ( streq( targ->deathtype, "rocket") )
-					{
-						if ( attacker->super_damage_finished > 0 && targ->s.v.health < -40 )
-						{
-							rnum = g_random();
-							if ( rnum < 0.3 )
-								deathstring = " was brutalized by ";
-							else if ( rnum < 0.6 )
-								deathstring = " was smeared by ";
-							else
-							{
-								G_bprint (PRINT_MEDIUM, "%s rips %s a new one\n",
-											attacker->s.v.netname, targ->s.v.netname);
-								return;
-							}
-
-       						deathstring2 = "'s quad rocket\n";
-						}
-						else
-                        {
-							deathstring = " rides ";
-							deathstring2 = "'s rocket\n";
-							if ( targ->s.v.health < -40 )
-	                                                {
-								deathstring = " was gibbed by ";
-								deathstring2 = "'s rocket\n" ;
-							}
-						}
-					}
-					else if ( streq( targ->deathtype, "stomp" ) )
-					{
-						deathstring = " was stomped by ";
-						deathstring2 = "\n";
-					}
-					else if ( rnum == IT_AXE )
-					{
-						deathstring = " was ax-murdered by ";
-						deathstring2 = "\n";
-					}
-					else if ( rnum == IT_SHOTGUN )
-					{
-						deathstring = " chewed on ";
-						deathstring2 = "'s boomstick\n";
-					}
-					else if ( rnum == IT_SUPER_SHOTGUN )
-					{
-						deathstring = " ate 2 loads of ";
-						deathstring2 = "'s buckshot\n";
-					}
-					else if ( rnum == IT_LIGHTNING )
-					{
-						deathstring = " accepts ";
-						if (attacker->s.v.waterlevel > 1)
-							deathstring2 = "'s discharge\n";
-						else
-							deathstring2 = "'s shaft\n";
-					}
-					else {
-						G_cprint ("Unknown death: normal death qw native version");
-						deathstring = " killed by ";
-						deathstring2 = " ?\n";
-					}
-
-					G_bprint (PRINT_MEDIUM,"%s%s%s%s",
-							targ->s.v.netname, deathstring, attacker->s.v.netname, deathstring2);
-				}
-				return;
+			if ( streq( targ->deathtype, "grenade" ) ) {
+                deathstring = " tries to put the pin back in\n";
 			}
+			else if ( streq( targ->deathtype, "rocket" ) )
+			{
+				switch( (int)(g_random() * 2) ) {
+					case 0:  deathstring = " discovers blast radius\n"; break;
+					default: deathstring = " becomes bored with life\n"; break;
+				}
+			}
+			else if (targ->s.v.weapon == IT_LIGHTNING && targ->s.v.waterlevel > 1)
+			{
+                if (targ->s.v.watertype == CONTENT_SLIME)
+                    deathstring = " discharges into the slime\n";
+                else if (targ->s.v.watertype == CONTENT_LAVA)
+                    deathstring = " discharges into the lava\n";
+				else {
+					switch( (int)(g_random() * 2) ) {
+						case 0:  deathstring = " heats up the water\n"; break;
+						default: deathstring = " discharges into the water\n"; break;
+					}
+				}
+			}
+			else
+                deathstring = " becomes bored with life\n"; // hm, and how it is possible?
+
+			G_bprint (PRINT_MEDIUM, "%s%s", targ->s.v.netname, deathstring);
+            return;
+		}
+        else if ( ( teamplay == 2 && streq( targteam, attackerteam ) &&
+                  !strnull( attackerteam ) ) )
+		{
+ 			// teamkill
+
+			switch( (int)(g_random() * 4) ) {
+				case 0:  deathstring = va(" checks %s glasses\n", g_his(attacker)); break;
+				case 1:  deathstring = " loses another friend\n"; break;
+				case 2:  deathstring = " gets a frag for the other team\n"; break;
+				default: deathstring = " mows down a teammate\n"; break;
+			}
+
+			G_bprint (PRINT_MEDIUM, "%s%s", attacker->s.v.netname, deathstring);
+			attacker->s.v.frags -= 1;
+			attacker->friendly += 1;
+
+			//ZOID 12-13-96:  killing a teammate logs as suicide
+			logfrag (attacker, attacker);
+			return;
+		}
+		else
+		{	// normal kill, Kteams version
+			logfrag (attacker, targ);
+			attacker->s.v.frags += 1;
+			targ->deaths += 1;          //team				
+
+			attacker->victim = targ->s.v.netname;
+			targ->killer = attacker->s.v.netname;
+
+			if ( targ->spawn_time + 1 > g_globalvars.time )
+				attacker->ps.spawn_frags++;
+
+			deathstring2 = "\n"; // default is "\n"
+
+			if ( streq( targ->deathtype, "nail" ) )
+			{
+				switch( (int)(g_random() * 2) ) {
+					case 0:  deathstring = " was body pierced by "; break;
+					default: deathstring = " was nailed by "; break;
+				}
+			}
+			else if ( streq( targ->deathtype, "supernail" ) )
+			{
+				switch ( (int)(g_random() * 3) ) {
+					case 0:	 deathstring = " was punctured by "; break;
+					case 1:	 deathstring = " was perforated by "; break;
+					default: deathstring = " was ventilated by "; break;
+				}
+
+				if ( targ->s.v.health < -40 ) // quad modifier
+					deathstring = " was straw-cuttered by ";
+			}
+			else if ( streq( targ->deathtype, "grenade" ) )
+			{
+				deathstring = " eats ";
+				deathstring2 = "'s pineapple\n";
+
+				if ( targ->s.v.health < -40 )
+				{
+					deathstring = " was gibbed by ";
+					deathstring2 = "'s grenade\n";
+				}
+			}
+			else if ( streq( targ->deathtype, "rocket" ) )
+			{
+				deathstring = ( targ->s.v.health < -40 ? " was gibbed by " : " rides " );
+				deathstring2 = "'s rocket\n";
+
+				if ( attacker->super_damage_finished > 0 && targ->s.v.health < -40 )
+				{
+					switch ( (int)(g_random() * 3) ) {
+						case 0: deathstring = " was brutalized by "; break;
+						case 1:	deathstring = " was smeared by "; break;
+						default:
+								G_bprint (PRINT_MEDIUM, "%s rips %s a new one\n",
+											attacker->s.v.netname, targ->s.v.netname);
+								return; // !!! return !!!
+					}
+
+					deathstring2 = "'s quad rocket\n";
+				}
+			}
+			else if ( attacker->s.v.weapon == IT_AXE )
+			{
+				deathstring = " was ax-murdered by ";
+			}
+			else if ( attacker->s.v.weapon == IT_SHOTGUN )
+			{
+				deathstring = " chewed on ";
+				deathstring2 = "'s boomstick\n";
+
+				if ( targ->s.v.health < -40 )
+				{
+					deathstring = " was lead poisoned by ";
+					deathstring2 = "\n";
+				}
+			}
+			else if ( attacker->s.v.weapon == IT_SUPER_SHOTGUN )
+			{
+				if ( attacker->super_damage_finished > 0 )
+					deathstring = " ate 8 loads of ";
+				else
+					deathstring = " ate 2 loads of ";
+
+				deathstring2 = "'s buckshot\n";
+			}
+			else if ( attacker->s.v.weapon == IT_LIGHTNING )
+			{
+				deathstring = " accepts ";
+				deathstring2 = "'s shaft\n";
+
+ 				if ( targ->s.v.health < -40 ) // quad modifier
+				{
+					deathstring = " gets a natural disaster from ";
+					deathstring2 = "\n";
+				}
+
+				if ( attacker->s.v.waterlevel > 1 ) // ok - this was discharge
+				{
+					switch( (int)(g_random() * 2) ) {
+						case 0: 
+								 deathstring = " drains ";
+								 deathstring2 = "'s batteries\n"; break;
+						default:
+								 deathstring = " accepts ";
+								 deathstring2 = "'s discharge\n";
+					}
+				}
+			}
+			else {
+				G_cprint ("Unknown death: normal death kt version");
+				deathstring = " killed by ";
+				deathstring2 = " ?\n";
+			}
+
+			G_bprint (PRINT_MEDIUM,"%s%s%s%s",
+					targ->s.v.netname, deathstring, attacker->s.v.netname, deathstring2);
+		}
+
+		return;
 	}
 	else // attacker.classname != "player"
 	{
 		logfrag (targ, targ);
         targ->s.v.frags -= 1;            // killed self
 
-		rnum = targ->s.v.watertype;
-
-		if ( rnum == -3 )
-		{
-			if ( g_random() < 0.5 )
-				deathstring = " sleeps with the fishes\n";
-			else
-				deathstring = " sucks it down\n";
-		}
-		else if ( rnum == -4 )
-		{
-			if ( g_random() < 0.5 )
-				deathstring = " gulped a load of slime\n";
-			else
-				deathstring = " can't exist on slime alone\n";
-		}
-		else if ( rnum == -5 )
-		{
-			if ( targ->s.v.health < -15 )
-				deathstring = " burst into flames\n";
-			else if ( g_random() < 0.5 )
-				deathstring = " turned into hot slag\n";
-			else
-				deathstring = " visits the Volcano God\n";
-		}
-		else if ( streq( attacker->s.v.classname, "explo_box" ) )
+		if ( streq( attacker->s.v.classname, "explo_box" ) )
 		{
 			deathstring = " blew up\n";
 		}
         else if ( streq( targ->deathtype, "falling" ) )
 		{
-				if( g_random() < 0.5 && cvar( "k_deathmsg" ) )
-					deathstring = " cratered\n";
-				else
-					deathstring = va(" fell to %s death\n", g_his(targ));
+			if( g_random() < 0.5 )
+				deathstring = " cratered\n";
+			else
+				deathstring = va(" fell to %s death\n", g_his(targ));
 		}
         else if ( streq( targ->deathtype, "nail" ) || streq( targ->deathtype, "supernail" ) )
 		{
@@ -2833,6 +2686,30 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		{
 //			deathstring = ObituaryForMonster( attacker->s.v.classname );
 			deathstring = " killed by monster? :)\n";
+		}
+		else if ( targ->s.v.watertype == CONTENT_WATER )
+		{
+			switch( (int)(g_random() * 2) ) {
+				case 0:  deathstring = " sleeps with the fishes\n"; break;
+				default: deathstring = " sucks it down\n"; break;
+			}
+		}
+		else if ( targ->s.v.watertype == CONTENT_SLIME )
+		{
+			switch( (int)(g_random() * 2) ) {
+				case 0:  deathstring = " gulped a load of slime\n"; break;
+				default: deathstring = " can't exist on slime alone\n"; break;
+			}
+		}
+		else if ( targ->s.v.watertype == CONTENT_LAVA )
+		{
+			switch( (int)(g_random() * 2) ) {
+				case 0:  deathstring = " turned into hot slag\n"; break;
+				default: deathstring = " visits the Volcano God\n"; break;
+			}
+
+			if ( targ->s.v.health < -15 )
+				deathstring = " burst into flames\n";
 		}
 		else
 		{

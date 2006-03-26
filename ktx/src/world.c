@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.27 2006/03/24 21:28:27 qqshka Exp $
+ *  $Id: world.c,v 1.28 2006/03/26 17:19:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -433,8 +433,6 @@ void FirstFrame	( )
 	RegisterCvar("k_motd_time"); 	  // motd time in seconds
 
 // >>> convert localinfo to set
-//	RegisterCvar("tp_players_stats");
-	RegisterCvar("k_deathmsg");
 	RegisterCvar("k_admincode");
 	RegisterCvar("k_prewar");
 	RegisterCvar("k_lockmap");
@@ -486,6 +484,7 @@ void FirstFrame	( )
 	RegisterCvar("srv_practice_mode");
 	RegisterCvar("add_q_aerowalk");
 	RegisterCvar("k_noframechecks");
+	RegisterCvar("dmm4_invinc_time");
 //	RegisterCvar("rj");
 
 
