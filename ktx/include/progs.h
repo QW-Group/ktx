@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.21 2006/03/26 17:19:54 qqshka Exp $
+ *  $Id: progs.h,v 1.22 2006/03/28 17:52:03 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -279,9 +279,13 @@ typedef struct gedict_s {
 // <-- stats
 
 	int   need_clearCP;		// if this true, clear center print at certain cases
+
+// { ghost stuff
 	int   k_makeghost;      // if this true make ghost for disconnected player
 	int   ghost_slot;		// now ktx put ghost in players scoreboards in one of free slots - store this slot
 	float ghost_dt;         // ghost drop time - time when player dropped
+	int   ghost_clr;		// color of dropped player
+// }
 
 	float nthink;			// store here regeneration time of some items
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.36 2006/03/26 17:19:54 qqshka Exp $
+ *  $Id: g_local.h,v 1.37 2006/03/28 17:52:03 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -38,7 +38,7 @@
 #include "g_syscalls.h"
 #include "player.h"
 
-#define MOD_VERSION					("1.17")
+#define MOD_VERSION					("1.18")
 #define MOD_NAME					("KTX")
 #define MOD_SERVERINFO_MOD_KEY		("xmod")
 #define MOD_SERVERINFO_BUILD_KEY	("xbuild")

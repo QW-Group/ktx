@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.47 2006/03/26 17:19:13 qqshka Exp $
+ *  $Id: client.c,v 1.48 2006/03/28 17:52:24 qqshka Exp $
  */
 
 //===========================================================================
@@ -1429,17 +1429,19 @@ void MakeGhost ()
 		k_userid++;
 
 	ghost = spawn();
-	ghost->s.v.owner = EDICT_TO_PROG( world );
+	ghost->s.v.owner  = EDICT_TO_PROG( world );
 	ghost->s.v.classname = "ghost";
-	ghost->cnt2      = f1;
-	ghost->k_teamnum = self->k_teamnum;
-	ghost->s.v.frags = self->s.v.frags;
-	ghost->deaths    = self->deaths;
-	ghost->friendly  = self->friendly;
-	ghost->ready     = 0;
+	ghost->cnt2       = f1;
+	ghost->k_teamnum  = self->k_teamnum;
+	ghost->s.v.frags  = self->s.v.frags;
+	ghost->deaths     = self->deaths;
+	ghost->friendly   = self->friendly;
+	ghost->ready      = 0;
 
-	ghost->ps        = self->ps; // save player stats
-	ghost->ghost_dt  = g_globalvars.time; // save drop time
+	ghost->ps         = self->ps; // save player stats
+	ghost->ghost_dt   = g_globalvars.time; // save drop time
+	ghost->ghost_clr  = bound(0, iKey(self, "topcolor" ), 13) << 8;
+	ghost->ghost_clr |= bound(0, iKey(self, "bottomcolor" ), 13) ; // save colors
 
 	localcmd("localinfo %d \"%s\"\n", (int)f1, self->s.v.netname);
 	trap_executecmd();

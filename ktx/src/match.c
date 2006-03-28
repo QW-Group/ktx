@@ -1259,6 +1259,7 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 void TimerStartThink ()
 {
 	gedict_t *p;
+	int from;
 
 	k_attendees = CountPlayers();		
 
@@ -1297,7 +1298,7 @@ void TimerStartThink ()
 	PrintCountdown( self->cnt2 );
 
 	if( self->cnt2 < 6 )
-		for( p = world;	p = find (p, FOFCLSN, "player"); )
+		for( from = 0, p = world; p = find_plrspc (p, &from); )
 			stuffcmd (p, "play buttons/switch04.wav\n");
 
 	self->s.v.nextthink = g_globalvars.time + 1;
@@ -1368,6 +1369,7 @@ void StartDemoRecord ()
 void StartTimer ()
 // Spawns the timer and starts the countdown.
 {
+	int from;
 	gedict_t *timer;
 
 	k_force = 0;
@@ -1381,7 +1383,7 @@ void StartTimer ()
 	if ( !k_matchLess ) {
 		ShowMatchSettings ();
 
-		for( timer = world; timer = find(timer, FOFCLSN, "player"); )
+		for( from = 0, timer = world; timer = find_plrspc(timer, &from); )
 			stuffcmd(timer, "play items/protect2.wav\n");
 	}
 

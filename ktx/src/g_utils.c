@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.29 2006/03/26 17:19:13 qqshka Exp $
+ *  $Id: g_utils.c,v 1.30 2006/03/28 17:52:24 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1577,7 +1577,10 @@ void ghost2scores( gedict_t *g )
 	WriteByte(to, SVC_UPDATEUSERINFO); // update userinfo
 	WriteByte(to, cl_slot);            // client number
 	WriteLong(to, 0);                  // client userid
-	WriteString(to, va("\\name\\\x83 %s\\team\\%s", getname( g ), getteam( g )));
+	WriteString(to, va("\\name\\\x83 %s\\team\\%s\\topcolor\\%d\\bottomcolor\\%d",
+			 		getname( g ), getteam( g ),
+			 		bound(0, (g->ghost_clr >> 8) & 0xF, 13),
+			 		bound(0, g->ghost_clr & 0xF, 13)));
 
 	WriteByte(to, SVC_UPDATEFRAGS); // update frags
 	WriteByte(to, cl_slot);
@@ -1590,7 +1593,7 @@ void ghost2scores( gedict_t *g )
 
 	WriteByte(to, SVC_UPDATEPING);      // update ping
 	WriteByte(to, cl_slot);      		// client number
-	WriteShort(to, 0);  				// client ping
+	WriteShort(to, 39);  				// client ping
 }
 
 void update_ghosts ()
