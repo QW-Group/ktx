@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: triggers.c,v 1.8 2006/03/26 17:19:13 qqshka Exp $
+ *  $Id: triggers.c,v 1.9 2006/03/29 17:48:45 vvd0 Exp $
  */
 
 #include "g_local.h"
@@ -606,7 +606,7 @@ void trigger_onlyregistered_touch()
 		return;
 
 	self->attack_finished = g_globalvars.time + 2;
-	if ( trap_cvar( "registered" ) )
+	if ( /*trap_cvar( "registered" )*/ true )
 	{
 		self->s.v.message = "";
 		activator = other;
