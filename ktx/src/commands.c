@@ -121,6 +121,7 @@ void Pos_Move ();
 void Pos_Set ( float set_type );
 
 void motd_show ();
+//void Check_Maps ();
 
 void TogglePractice();
 
@@ -309,7 +310,8 @@ cmd_t cmds[] = {
     { "pos_set_origin",  Pos_Set,               1    , CF_BOTH | CF_PARAMS },
     { "pos_set_angles",  Pos_Set,               2    , CF_BOTH | CF_PARAMS },
 //    { "pos_set_velocity",Pos_Set,               3    , CF_BOTH | CF_PARAMS },
-    { "motd",        motd_show,                 0    , CF_BOTH | CF_MATCHLESS }
+    { "motd",        motd_show,                 0    , CF_BOTH | CF_MATCHLESS }//,
+//	{ "check_maps",	     Check_Maps,            0    , CF_BOTH_ADMIN }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -323,7 +325,15 @@ int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
 // return -4 if function is wrong
 // return -5 if cmd does't allowed in matchLess mode
 //
-
+/*
+// What about:
+#define DO_OUT_OF_RANGE_CMDS			(-1)
+#define DO_WRONG_CLASS					(-2)
+#define DO_ACCESS_DENIED				(-3)
+#define DO_FUNCTION_IS_WRONG			(-4)
+#define DO_CMD_DISALLOWED_MATCHLESS		(-5)
+// ?
+*/
 int DoCommand(int icmd)
 {
 	int spc = self->k_spectator;
@@ -1467,7 +1477,7 @@ void TimeDown(float t)
 	if( check_master() )
 		return;
 
-	timelimit = timelimit - t;
+	timelimit -= t;
 
 	if ( timelimit < 3 )
 		timelimit = 3;
@@ -1487,7 +1497,11 @@ void TimeUp(float t)
 	if( check_master() )
 		return;
 
-	timelimit = timelimit + t;
+	if (t == 5 && timelimit < 5)
+		timelimit = 5;
+	else
+		timelimit += t;
+
 	top = cvar( "k_timetop" );
 
 	if( timelimit > top )
@@ -3294,29 +3308,34 @@ void next_pow ()
 
 // }  spec tracking stuff 
 
-// pos_save/pos_move commands {
 
-void Pos_Show ()
+//================================================
+// pos_show/pos_save/pos_move/pos_set_* commands {
+//================================================
+// common functions
+#define Pos_Disallowed()	(match_in_progress || k_pause || intermission_running)
+// parse pos_show/pos_save/pos_move <number>
+int Pos_Get_idx()
 {
 	char arg_3[1024];
-	int idx = 0;
-	pos_t *pos;
-
-	if ( match_in_progress )
-		return;
-
-	if ( k_pause || intermission_running ) 
-		return;
-
-	// parse /pos_show <number>
 	if (trap_CmdArgc() == 3) {
 		trap_CmdArgv( 2, arg_3, sizeof( arg_3 ) );
-		idx = bound( 0, atoi(arg_3) - 1, MAX_POSITIONS - 1 );
+		return bound( 0, atoi(arg_3) - 1, MAX_POSITIONS - 1 );
 	}
+	return 0;
+}
+// Show functions
+void Pos_Show ()
+{
+	int idx;
+	pos_t *pos;
 
-	pos = &(self->pos[idx]);
+	if ( Pos_Disallowed() ) 
+		return;
 
-	G_sprint(self, 2, "Position: %d\n", idx+1);
+	pos = &(self->pos[idx = Pos_Get_idx()]);
+
+	G_sprint(self, 2, "Position: %d\n", idx + 1);
 	G_sprint(self, 2, "velocity: %9.2f %9.2f %9.2f\n", PASSVEC3(pos->velocity));
 	G_sprint(self, 2, "  origin: %9.2f %9.2f %9.2f\n", PASSVEC3(pos->origin));
 	G_sprint(self, 2, " v_angle: %9.2f %9.2f %9.2f\n", PASSVEC3(pos->v_angle));
@@ -3326,54 +3345,123 @@ void Pos_Show ()
 	G_sprint(self, 2, "  origin: %9.2f %9.2f %9.2f\n", PASSVEC3(self->s.v.origin));
 	G_sprint(self, 2, " v_angle: %9.2f %9.2f %9.2f\n", PASSVEC3(self->s.v.v_angle));
 }
-
-void DoPos_Save (int idx)
-{
-	pos_t *pos = &(self->pos[idx]);
-
-	VectorCopy(self->s.v.velocity, pos->velocity);
-	VectorCopy(self->s.v.origin, pos->origin);
-	VectorCopy(self->s.v.v_angle, pos->v_angle);
-}
-
+// Save
+#define Pos_Save_origin(pos)	VectorCopy(self->s.v.origin, (pos)->origin)
+#define Pos_Save_angles(pos)	VectorCopy(self->s.v.v_angle, (pos)->v_angle)
+#define Pos_Save_velocity(pos)	VectorCopy(self->s.v.velocity, (pos)->velocity)
+// pos_save
 void Pos_Save ()
 {
-	char arg_3[1024];
-	int idx = 0;
+	int idx;
+	pos_t *pos;
 
-	if ( match_in_progress )
+	if ( Pos_Disallowed() ) 
 		return;
 
-	if ( k_pause || intermission_running ) 
-		return;
+	pos = &(self->pos[idx = Pos_Get_idx()]);
 
-	// parse /pos_save <number>
-	if (trap_CmdArgc() == 3) {
-		trap_CmdArgv( 2, arg_3, sizeof( arg_3 ) );
-		idx = bound( 0, atoi(arg_3) - 1, MAX_POSITIONS - 1 );
-	}
+	Pos_Save_origin (pos);
+	Pos_Save_angles (pos);
+	Pos_Save_velocity (pos);
 
-	DoPos_Save(idx);
-	G_sprint(self, 2, "Position %d was saved\n", idx+1);
+	G_sprint(self, 2, "Position %d was saved\n", idx + 1);
 }
 
+// Move & Set functions
 extern vec3_t	VEC_HULL_MIN;
 extern vec3_t	VEC_HULL_MAX;
-
-void DoPos_Move (int idx)
+qboolean Pos_Set_origin (pos_t *pos)
 {
 	gedict_t *p;
-	pos_t *pos = &(self->pos[idx]);
 
-	TraceCapsule( PASSVEC3( pos->origin ), PASSVEC3( pos->origin ), false, self,
-				  PASSVEC3(VEC_HULL_MIN), PASSVEC3(VEC_HULL_MAX));
+	if ( VectorCompare(pos->origin, VEC_ORIGIN) ) {
+		G_sprint(self, 2, "Save your position first\n");
+		return true;
+	}
 
-	p = PROG_TO_EDICT( g_globalvars.trace_ent );
+	if ( VectorCompare(pos->origin, self->s.v.origin) )
+		return true;
 
-	if (    g_globalvars.trace_startsolid
-		 || ( p != self && p != world && (p->s.v.solid == SOLID_BSP || p->s.v.solid == SOLID_SLIDEBOX) )
-       ) {
-		G_sprint(self, 2, "Can't move, location occupied\n");
+    if (!self->k_spectator)
+	{
+		TraceCapsule( PASSVEC3( pos->origin ), PASSVEC3( pos->origin ), false, self,
+					  PASSVEC3(VEC_HULL_MIN), PASSVEC3(VEC_HULL_MAX));
+
+		p = PROG_TO_EDICT( g_globalvars.trace_ent );
+
+		if (    g_globalvars.trace_startsolid
+			 || ( p != self && p != world && (p->s.v.solid == SOLID_BSP || p->s.v.solid == SOLID_SLIDEBOX) )
+	       ) {
+			G_sprint(self, 2, "Can't move, location occupied\n");
+			return true;
+		}
+	}
+
+	// VVD: Don't want tele at pos_move - trick with tele is not good-looking. :-)
+	//spawn_tfog(self->s.v.origin);
+	//spawn_tfog(pos->origin);
+	setorigin (self, PASSVEC3( pos->origin ) ); // u can't just copy, use setorigin
+
+	return false;
+}
+#define Pos_Set_angles(pos)		{ \
+									VectorCopy((pos)->v_angle, self->s.v.angles); \
+									VectorCopy((pos)->v_angle, self->s.v.v_angle); \
+									self->s.v.fixangle = true; \
+								}
+#define Pos_Set_velocity(pos)	VectorCopy((pos)->velocity, self->s.v.velocity)
+
+// pos_move
+void Pos_Move ()
+{
+	int idx;
+	pos_t *pos;
+
+	if ( Pos_Disallowed() ) 
+		return;
+
+	if ( self->pos_move_time && self->pos_move_time + 1 > g_globalvars.time ) {
+		G_sprint(self, 2, "Only one move per second allowed\n");
+		return;
+	}
+	self->pos_move_time = g_globalvars.time;
+
+	pos = &(self->pos[idx = Pos_Get_idx()]);
+
+	if (Pos_Set_origin (pos))
+		return;
+	Pos_Set_angles (pos);
+	Pos_Set_velocity (pos);
+
+	G_sprint(self, 2, "Position %d was restored\n", idx + 1);
+}
+
+// parse arguments for pos_set_*
+void Pos_Parse_Set (vec3_t *x)
+{
+	char arg[1024];
+	int i;
+
+	for (i = 0; i < 3; ++i) {
+		trap_CmdArgv( i + 2, arg, sizeof( arg ) );
+		if (strcmp(arg, "*"))
+			(*x)[i] = atof(arg);
+	}
+}
+
+// pos_set_origin/pos_set_angles/pos_set_velocity
+void Pos_Set (float set_type)
+{
+// VVD: For trick chiters! :-)
+// Need to think out how to limit using Pos_Set for tricking.
+// May be to ban pos_set_velocity?
+	pos_t pos;
+
+	if ( Pos_Disallowed() ) 
+		return;
+
+	if (trap_CmdArgc() != 5) {
+		G_sprint(self, 2, "Usage: pos_set_{origin|angles"/*|velocity*/"} x1 x2 x3\nuse '*' for no changes\n");
 		return;
 	}
 
@@ -3381,95 +3469,35 @@ void DoPos_Move (int idx)
 		G_sprint(self, 2, "Only one move per second allowed\n");
 		return;
 	}
-
-	// VVD: Don't want tele at pos_move - trick with tele is not good-looking. :-)
-	//spawn_tfog(self->s.v.origin);
-	//spawn_tfog(pos->origin);
-
-	VectorCopy(pos->velocity, self->s.v.velocity);
-	setorigin (self, PASSVEC3( pos->origin ) ); // u can't just copy, use setorigin
-	VectorCopy(pos->v_angle, self->s.v.angles);
-	VectorCopy(pos->v_angle, self->s.v.v_angle);
-	self->s.v.fixangle = true; // qqshka: this is how angles can be set
 	self->pos_move_time = g_globalvars.time;
 
-//	G_sprint(self, 2, "Position %d was restored\n", idx+1);
-}
-
-void Pos_Move ()
-{
-	char arg_3[1024];
-	int idx = 0;
-	pos_t *pos;
-
-	if ( match_in_progress || k_pause || intermission_running )
-		return;
-
-	// parse /pos_move <number>
-	if (trap_CmdArgc() == 3) {
-		trap_CmdArgv( 2, arg_3, sizeof( arg_3 ) );
-		idx = bound( 0, atoi(arg_3) - 1, MAX_POSITIONS - 1 );
-	}
-
-	pos = &(self->pos[idx]);
-
-	if ( VectorCompare(pos->origin, VEC_ORIGIN) ) {
-		G_sprint(self, 2, "Save your position first\n");
-		return;
-	}
-
-	if ( VectorCompare(pos->origin, self->s.v.origin) )
-		return;
-
-	DoPos_Move(idx);
-	G_sprint(self, 2, "Position %d was restored\n", idx+1);
-}
-// VVD: For trick chiters! :-)
-// Need to think out how to limit using Pos_Set for tricking.
-// May be to ban pos_set_velocity?
-void Pos_Set (float set_type)
-{
-	char arg[1024];
-	pos_t *pos;
-	vec3_t	*x = NULL;
-	int i;
-
-	if ( match_in_progress || k_pause || intermission_running )
-		return;
-
-	if (trap_CmdArgc() != 5) {
-		G_sprint(self, 2, "Usage: pos_set_{origin|angles"/*|velocity*/"} x1 x2 x3\n");
-		return;
-	}
-
-	pos = &(self->pos[MAX_POSITIONS]);
 	switch ((int)set_type)
 	{
 		case 1:
-			x = &(pos->origin);
+			Pos_Save_origin(&pos);
+			Pos_Parse_Set(&(pos.origin));
+			Pos_Set_origin(&pos);
 			break;
 		case 2:
-			x = &(pos->v_angle);
+			Pos_Save_angles(&pos);
+			Pos_Parse_Set(&(pos.v_angle));
+			Pos_Set_angles(&pos);
 			break;
 		case 3:
-			x = &(pos->velocity);
+			Pos_Save_velocity(&pos);
+			Pos_Parse_Set(&(pos.velocity));
+			Pos_Set_velocity(&pos);
 			break;
 		default:
 			return;
 	}
 
-	DoPos_Save(MAX_POSITIONS);
-
-	for (i = 0; i < 3; ++i) {
-		trap_CmdArgv( i + 2, arg, sizeof( arg ) );
-		if (strcmp(arg, "*"))
-			(*x)[i] = atof(arg);
-	}
-
-	DoPos_Move(MAX_POSITIONS);
 	G_sprint(self, 2, "Position was seted\n");
 }
-// pos_save/pos_move commands }
+//================================================
+// pos_show/pos_save/pos_move/pos_set_* commands }
+//================================================
+
 
 // /motd command
 
@@ -3499,3 +3527,104 @@ void motd_show ()
 	motd->s.v.nextthink = g_globalvars.time + 0.1;
 	motd->attack_finished = g_globalvars.time + 10;
 }
+
+/*
+Check_Maps
+We need to move check_maps command from server to mod.
+But I don't know how to do some things in mod without system functions. :-(
+May be we need to add new functions in QVM protocol.
+*/
+/*
+==================
+SV_Check_maps_f from MVDSV sources
+==================
+*/
+/*extern func_t localinfoChanged;
+void SV_Check_maps_f(void)
+{
+	dir_t d;
+	file_t *list;
+	int i, j, maps_id1;
+	char *s=NULL, *key;
+
+	SV_Check_localinfo_maps_support();
+
+	d = Sys_listdir("id1/maps", ".bsp$", SORT_BY_NAME);
+	list = d.files;
+	for (i = LOCALINFO_MAPS_LIST_START; list->name[0] && i <= LOCALINFO_MAPS_LIST_END; list++)
+	{
+		list->name[strlen(list->name) - 4] = 0;
+		if (!list->name[0]) continue;
+
+		key = va("%d", i);
+		Info_SetValueForKey (localinfo, key, list->name, MAX_LOCALINFO_STRING);
+
+		s = Info_ValueForKey(localinfo, key);
+		if (localinfoChanged)
+		{
+			pr_global_struct->time = sv.time;
+			pr_global_struct->self = 0;
+			G_INT(OFS_PARM0) = PR_SetTmpString(key);
+			G_INT(OFS_PARM1) = PR_SetTmpString(s);
+			G_INT(OFS_PARM2) = PR_SetTmpString(Info_ValueForKey(localinfo, key));
+			PR_ExecuteProgram (localinfoChanged);
+		}
+		i++;
+	}
+	maps_id1 = i - 1;
+
+	d = Sys_listdir("qw/maps", ".bsp$", SORT_BY_NAME);
+	list = d.files;
+	for (; list->name[0] && i <= LOCALINFO_MAPS_LIST_END; list++)
+	{
+		list->name[strlen(list->name) - 4] = 0;
+		if (!list->name[0]) continue;
+
+		for (j = LOCALINFO_MAPS_LIST_START; j <= maps_id1; j++)
+			if (!strncmp(Info_ValueForKey(localinfo, va("%d", j)), list->name, MAX_KEY_STRING))
+				break;
+		if (j <= maps_id1) continue;
+
+		key = va("%d", i);
+		Info_SetValueForKey (localinfo, key, list->name, MAX_LOCALINFO_STRING);
+
+		s = Info_ValueForKey(localinfo, key);
+		if (localinfoChanged)
+		{
+			pr_global_struct->time = sv.time;
+			pr_global_struct->self = 0;
+			G_INT(OFS_PARM0) = PR_SetTmpString(key);
+			G_INT(OFS_PARM1) = PR_SetTmpString(s);
+			G_INT(OFS_PARM2) = PR_SetTmpString(Info_ValueForKey(localinfo, key));
+			PR_ExecuteProgram (localinfoChanged);
+		}
+		i++;
+	}
+
+	for (; i <= LOCALINFO_MAPS_LIST_END; i++)
+	{
+		key = va("%d", i);
+		Info_SetValueForKey (localinfo, key, "", MAX_LOCALINFO_STRING);
+
+		if (localinfoChanged)
+		{
+			pr_global_struct->time = sv.time;
+			pr_global_struct->self = 0;
+			G_INT(OFS_PARM0) = PR_SetTmpString(key);
+			G_INT(OFS_PARM1) = PR_SetTmpString(s);
+			G_INT(OFS_PARM2) = PR_SetTmpString(Info_ValueForKey(localinfo, key));
+			PR_ExecuteProgram (localinfoChanged);
+		}
+	}
+}*/
+/*
+Stub for check_maps
+*/
+/*void Check_Maps ()
+{
+	if (match_in_progress || intermission_running)
+		return;
+
+
+}
+*/
