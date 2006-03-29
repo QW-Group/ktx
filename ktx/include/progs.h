@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.22 2006/03/28 17:52:03 qqshka Exp $
+ *  $Id: progs.h,v 1.23 2006/03/29 17:55:27 vvd0 Exp $
  */
 
 #include "progdefs.h"
@@ -300,7 +300,7 @@ typedef struct gedict_s {
 	struct gedict_s *wizard;    // for specs, link to the entity which represent wizard
 // }
 
-	pos_t	pos[MAX_POSITIONS + 1];	// for player pos_save / pos_move
+	pos_t	pos[MAX_POSITIONS];	// for player pos_save / pos_move
 	float	pos_move_time;		// for player pos_save / pos_move
 } gedict_t;
 
