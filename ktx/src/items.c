@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.11 2006/03/19 23:16:13 qqshka Exp $
+ *  $Id: items.c,v 1.12 2006/04/06 18:58:36 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -432,6 +432,8 @@ float RankForWeapon( float w )
 
 float WeaponCode( float w )
 {
+	if ( w == IT_SHOTGUN )
+		return 2;
 	if ( w == IT_SUPER_SHOTGUN )
 		return 3;
 	if ( w == IT_NAILGUN )
@@ -456,15 +458,37 @@ Deathmatch weapon change rules for picking up a weapon
 .float          ammo_shells, ammo_nails, ammo_rockets, ammo_cells;
 =============
 */
-void Deathmatch_Weapon( float old, float new )
+void Deathmatch_Weapon( int new )
 {
-	float           or, nr;
+	int           or, nr;
 
 // change self.weapon if desired
 	or = RankForWeapon( self->s.v.weapon );
 	nr = RankForWeapon( new );
 	if ( nr < or )
 		self->s.v.weapon = new;
+}
+
+void DoWeaponChange( int new )
+{
+	int w_switch = iKey( self, "w_switch" );
+
+	if ( !w_switch )
+		w_switch = 8;
+
+	if ( WeaponCode( new ) <= w_switch )
+	{
+		if ( ( ( int ) ( self->s.v.flags ) ) & FL_INWATER )
+		{
+			if ( new != IT_LIGHTNING )
+				Deathmatch_Weapon( new );
+		} else
+		{
+			Deathmatch_Weapon( new );
+		}
+	}
+
+	W_SetCurrentAmmo();
 }
 
 /*
@@ -475,30 +499,16 @@ weapon_touch
 float           W_BestWeapon();
 void weapon_touch()
 {
-	int             hadammo, best, new = 0, old;
+	int             hadammo, new = 0;
 	gedict_t       *stemp;
 	int             leave;
-
-	// For client weapon_switch
-	int             w_switch;
 
 	if ( !( ( int ) other->s.v.flags & FL_CLIENT ) )
 		return;
 
-
-	if (match_in_progress != 2)
+	if ( match_in_progress != 2 )
         return;
 	
-	w_switch = iKey( other, "w_switch" );
-	if ( !w_switch )
-		w_switch = 8;
-
-// if the player was using his best weapon, change up to the new one if better          
-	stemp = self;
-	self = other;
-	best = W_BestWeapon();
-	self = stemp;
-
 	if ( deathmatch == 2 || deathmatch == 3 || deathmatch == 5 )
 		leave = 1;
 	else
@@ -511,6 +521,7 @@ void weapon_touch()
 		hadammo = other->s.v.ammo_nails;
 		new = IT_NAILGUN;
 		other->s.v.ammo_nails += 30;
+
 	} else if ( !strcmp( self->s.v.classname, "weapon_supernailgun" ) )
 	{
 		if ( leave && ( ( int ) other->s.v.items & IT_SUPER_NAILGUN ) )
@@ -567,27 +578,12 @@ void weapon_touch()
 	bound_other_ammo();
 
 // change to the weapon
-	old = other->s.v.items;
 	other->s.v.items = ( int ) other->s.v.items | new;
 
 	stemp = self;
 	self = other;
 
-	if ( WeaponCode( new ) <= w_switch )
-	{
-		if ( ( ( int ) ( self->s.v.flags ) ) & FL_INWATER )
-		{
-			if ( new != IT_LIGHTNING )
-			{
-				Deathmatch_Weapon( old, new );
-			}
-		} else
-		{
-			Deathmatch_Weapon( old, new );
-		}
-	}
-
-	W_SetCurrentAmmo();
+	DoWeaponChange( new ); // change to the weapon
 
 	self = stemp;
 
@@ -752,8 +748,8 @@ AMMO
 
 void ammo_touch()
 {
+	int ammo, weapon, best;
 	gedict_t       *stemp;
-	float           best;
 
 	if ( ISDEAD( other ) )
 		return;
@@ -761,45 +757,45 @@ void ammo_touch()
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
 
-#ifdef KTEAMS
-        if (match_in_progress != 2)
-            return;
-#endif
+    if ( match_in_progress != 2 )
+        return;
 
 // if the player was using his best weapon, change up to the new one if better          
 	stemp = self;
 	self = other;
-	best = W_BestWeapon();
+	best = W_BestWeapon(); // save best weapon before update ammo
 	self = stemp;
 
+	ammo = self->aflag;
+	weapon = self->s.v.weapon;
 
 // shotgun
-	if ( self->s.v.weapon == 1 )
+	if ( weapon == 1 )
 	{
 		if ( other->s.v.ammo_shells >= 100 )
 			return;
-		other->s.v.ammo_shells = other->s.v.ammo_shells + self->aflag;
+		other->s.v.ammo_shells += ammo;
 	}
 // spikes
-	if ( self->s.v.weapon == 2 )
+	if ( weapon == 2 )
 	{
 		if ( other->s.v.ammo_nails >= 200 )
 			return;
-		other->s.v.ammo_nails = other->s.v.ammo_nails + self->aflag;
+		other->s.v.ammo_nails += ammo;
 	}
-//      rockets
-	if ( self->s.v.weapon == 3 )
+// rockets
+	if ( weapon == 3 )
 	{
 		if ( other->s.v.ammo_rockets >= 100 )
 			return;
-		other->s.v.ammo_rockets = other->s.v.ammo_rockets + self->aflag;
+		other->s.v.ammo_rockets += ammo;
 	}
-//      cells
-	if ( self->s.v.weapon == 4 )
+// cells
+	if ( weapon == 4 )
 	{
 		if ( other->s.v.ammo_cells >= 100 )
 			return;
-		other->s.v.ammo_cells = other->s.v.ammo_cells + self->aflag;
+		other->s.v.ammo_cells += ammo;
 	}
 
 	bound_other_ammo();
@@ -810,19 +806,23 @@ void ammo_touch()
 	stuffcmd( other, "bf\n" );
 
 // change to a better weapon if appropriate
-
+// before we got ammo we use best weapon - best weapon may change due to ammo, so check this
 	if ( other->s.v.weapon == best )
 	{
 		stemp = self;
 		self = other;
-		self->s.v.weapon = W_BestWeapon();
-		W_SetCurrentAmmo();
+
+		DoWeaponChange( W_BestWeapon() ); // change to the weapon
+
 		self = stemp;
 	}
+
 // if changed current ammo, update it
 	stemp = self;
 	self = other;
+
 	W_SetCurrentAmmo();
+
 	self = stemp;
 
 // remove it in single player, or setup for respawning in deathmatch
@@ -1506,12 +1506,9 @@ PLAYER BACKPACKS
 
 void BackpackTouch()
 {
-	//char*    s;
-	float           best, old, new;
+	float          new;
 	gedict_t       *stemp;
 	float           acount;
-	int             b_switch;
-
 
     if ( match_in_progress != 2 )
         return;
@@ -1519,10 +1516,6 @@ void BackpackTouch()
 	if ( deathmatch == 4 )
 		if ( other->invincible_time > 0 )
 			return;
-	
-	b_switch = iKey( other, "b_switch" );
-	if ( !b_switch )
-		b_switch = 8;
 
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
@@ -1568,20 +1561,16 @@ void BackpackTouch()
 					  other->s.v.netname );
 			}
 		}
-		self = other;
+		self = other; // qqshka - hmm ???
 		return;
 	}
+
 	if ( self->s.v.items )
 		if ( ( ( int ) other->s.v.items & ( int ) self->s.v.items ) == 0 )
-		{
+		{ // new weapon - so print u got it
 			acount = 1;
 			G_sprint( other, PRINT_LOW, "the %s", self->s.v.netname );
 		}
-// if the player was using his best weapon, change up to the new one if better          
-	stemp = self;
-	self = other;
-	best = W_BestWeapon();
-	self = stemp;
 
 // change weapons
 	other->s.v.ammo_shells  = other->s.v.ammo_shells  + self->s.v.ammo_shells;
@@ -1590,9 +1579,7 @@ void BackpackTouch()
 	other->s.v.ammo_cells   = other->s.v.ammo_cells   + self->s.v.ammo_cells;
 
 	new = self->s.v.items;
-	if ( !new )
-		new = other->s.v.weapon;
-	old = other->s.v.items;
+
 	other->s.v.items = ( int ) other->s.v.items | ( int ) self->s.v.items;
 
 	bound_other_ammo();
@@ -1626,9 +1613,10 @@ void BackpackTouch()
 		G_sprint( other, PRINT_LOW, "%.0f cells", self->s.v.ammo_cells );
 	}
 
-	if ( ( deathmatch == 3 || deathmatch == 5 ) & ( ( WeaponCode( new ) == 6 )
-							|| ( WeaponCode( new ) == 7 ) ) 
-							 & ( other->s.v.ammo_rockets <5 ))
+	if (    ( deathmatch == 3 || deathmatch == 5 ) 
+		 && ( WeaponCode( new ) == 6 || WeaponCode( new ) == 7 ) 
+		 && ( other->s.v.ammo_rockets < 5 ) 
+	   )
 		other->s.v.ammo_rockets = 5;
 
 	G_sprint( other, PRINT_LOW, "\n" );
@@ -1637,26 +1625,13 @@ void BackpackTouch()
 	stuffcmd( other, "bf\n" );
 
 	ent_remove( self );
+
+	stemp = self;
 	self = other;
 
-// change to the weapon
+	DoWeaponChange( new ); // change to the weapon
 
-
-	if ( WeaponCode( new ) <= b_switch )
-	{
-		if ( ( ( int ) ( self->s.v.flags ) ) & FL_INWATER )
-		{
-			if ( new != IT_LIGHTNING )
-			{
-				Deathmatch_Weapon( old, new );
-			}
-		} else
-		{
-			Deathmatch_Weapon( old, new );
-		}
-	}
-
-	W_SetCurrentAmmo();
+	self = stemp;
 }
 
 /*

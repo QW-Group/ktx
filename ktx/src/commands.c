@@ -104,6 +104,8 @@ void handicap ();
 void noweapon ();
 void tracklist ();
 void fpslist ();
+void krnd ();
+void agree_on_map ();
 
 void favx_add ( float fav_num );
 void xfav_go ( float fav_num );
@@ -119,6 +121,7 @@ void Pos_Show ();
 void Pos_Save ();
 void Pos_Move ();
 void Pos_Set ( float set_type );
+void lastscores ();
 
 void motd_show ();
 //void Check_Maps ();
@@ -301,6 +304,9 @@ cmd_t cmds[] = {
     { "auto_pow",    AutoTrack,             atPow    , CF_SPECTATOR | CF_MATCHLESS },
     { "next_best",   next_best,                 0    , CF_SPECTATOR | CF_MATCHLESS },
     { "next_pow",    next_pow,                  0    , CF_SPECTATOR | CF_MATCHLESS },
+    { "lastscores",  lastscores,                0    , CF_BOTH },
+    { "rnd",         krnd,                		0    , CF_BOTH | CF_PARAMS },
+    { "agree",       agree_on_map,        		0    , CF_PLAYER | CF_MATCHLESS },
     { "pos_show",        Pos_Show,              0    , CF_BOTH | CF_PARAMS },
     { "pos_save",        Pos_Save,              0    , CF_BOTH | CF_PARAMS },
     { "pos_move",        Pos_Move,              0    , CF_BOTH | CF_PARAMS },
@@ -476,7 +482,7 @@ void StuffModCommands()
 			continue; // cmd does't valid for this class of player or matchless mode does't have this command
 		}
 
-		params = ( cmds[i].cf_flags & CF_PARAMS && support_params ) ? " %1 %2 %3 %4 %5" : "";
+		params = ( cmds[i].cf_flags & CF_PARAMS && support_params ) ? " %0" : "";
 
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias %s cmd cc %d%s\n", name, (int)i, params);
 	}
@@ -1671,10 +1677,7 @@ void ToggleSpecTalk()
 
 	if( match_in_progress == 2 ) {
 
-		if( k_spectalk )
-			fpd = fpd & ~64;
-		else
-			fpd |= 64;
+		fpd = ( k_spectalk ) ? fpd & ~64 : fpd | 64;
 
 		localcmd("serverinfo fpd %d\n", fpd );
 		cvar_fset( "sv_spectalk", k_spectalk );
@@ -2313,31 +2316,43 @@ usermode um_list[] =
 
 int um_cnt = sizeof (um_list) / sizeof (um_list[0]);
 
+// for user call this like UserMode( 1 )
+// for server call like UserMode( -1 )
 void UserMode(float umode)
 {
+	const char *um;
 	char buf[1024*4];
 	char *cfg_name;
+	qboolean sv_invoked = false;
 
-	char *um=NULL;
 	int k_free_mode = cvar( "k_free_mode" );
 	int k_allowed_free_modes = cvar( "k_allowed_free_modes" );
-	int i;
 
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
-	switch ((int)umode) {
-		case 1: um = "1on1";   break;
-		case 2: um = "2on2";   break;
-		case 3: um = "3on3";   break;
-		case 4: um = "4on4";   break;
-		case 5: um = "10on10"; break;
-		case 6: um = "ffa";    break;
-		default: G_Error ("UserMode: unknown mode");
+	if ( umode < 0 ) {
+		sv_invoked = true;
+		umode *= -1;
 	}
+
+	umode = (int)umode - 1;
+
+	if ( umode < 0 || umode >= um_cnt ) {
+		G_bprint(2, "UserMode: unknown mode\n");
+		return;
+	}
+
+	um = um_list[(int)umode].name;
+
+	if ( sv_invoked ) {
+		if ( cvar( "k_master" ) ) {
+			G_bprint(2, "UserMode: sv %s discarded due to k_master\n", um);
+			return;
+		}
+	}
+	else if( check_master() )
+		return;
 
 //for 1on1 / 2on2 / 4on4 and ffa commands manipulation
 //0 - noone, 1 - admins, 2 elected admins too
@@ -2346,48 +2361,56 @@ void UserMode(float umode)
 
 // hmm, I didn't understand how k_free_mode affect this command,
 // so implement how i think this must be, it is like some sort of access control
-
-	switch ( k_free_mode ) {
-		case 0:	G_sprint(self, 2, "%s can use this command\n", redtext("noone"));
-				return;
-		case 1:
-		case 2:	if ( self->k_admin != 2 ) {
-					G_sprint(self, 2, "you must be an %s\n", redtext("admin"));
+	if ( sv_invoked ) {
+		if ( k_free_mode != 5 ) {
+			G_bprint(2, "UserMode: sv %s discarded due to k_free_mode\n", um);
+			return;
+		}
+	}
+	else {
+		switch ( k_free_mode ) {
+			case 0:	G_sprint(self, 2, "%s can use this command\n", redtext("noone"));
 					return;
-				}
-				break;
-		case 3:
-		case 4:	if ( self->k_admin != 2 ) {
-					G_sprint(self, 2, "%s is not implemented in this mode\n", redtext("judges"));
-					G_sprint(self, 2, "you must be an %s\n", redtext("admin"));
+			case 1:
+			case 2:	if ( self->k_admin != 2 ) {
+						G_sprint(self, 2, "you must be an %s\n", redtext("admin"));
+						return;
+					}
+					break;
+			case 3:
+			case 4:	if ( self->k_admin != 2 ) {
+						G_sprint(self, 2, "%s is not implemented in this mode\n", redtext("judges"));
+						G_sprint(self, 2, "you must be an %s\n", redtext("admin"));
+						return;
+					}
+					break;
+			case 5:
+					break;
+			default:
+					G_sprint(self, 2, "server is misconfigured, command %s\n", redtext("skipped"));
 					return;
-				}
-				break;
-		case 5:
-				break;
-		default:
-				G_sprint(self, 2, "server is misconfigured, command %s\n", redtext("skipped"));
-				return;
+		}
 	}
 
 // ok u have access, but is this command really allowed at all?
 
-	for ( i = 0; i < um_cnt; i++ )
-		if ( streq(um, um_list[i].name) && (um_list[i].um_flags & k_allowed_free_modes))
-			break;
+	if ( !(um_list[(int)umode].um_flags & k_allowed_free_modes) ) {
 
-	if ( i >= um_cnt ) {
-		G_sprint(self, 2, "server configuration %s this command\n", redtext("lock"));
+		if ( sv_invoked )
+			G_bprint(2, "UserMode: sv %s discarded due to k_allowed_free_modes\n", um);
+		else
+			G_sprint(self, 2, "server configuration %s this command\n", redtext("lock"));
+
 		return;
 	}
 
-	G_bprint(2, "%s %s\n", redtext(um_list[i].displayname), redtext("settings enabled"));
+	G_bprint(2, "%s %s\n", redtext(um_list[(int)umode].displayname), redtext("settings enabled"));
 
 	trap_readcmd( common_um_init, buf, sizeof(buf) );
 	G_cprint("%s", buf);
 
-	trap_readcmd( um_list[i].initstring, buf, sizeof(buf) );
-	G_cprint("%s\n", buf);
+	trap_readcmd( um_list[(int)umode].initstring, buf, sizeof(buf) );
+	G_cprint("%s", buf);
 
 	cfg_name = "configs/usermodes/default.cfg";
 	if ( can_exec( cfg_name ) ) {
@@ -2409,6 +2432,10 @@ void UserMode(float umode)
 		trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
 		G_cprint("%s", buf);
 	}
+
+	G_cprint("\n");
+
+	cvar_fset("_k_last_xonx", umode+1); // save last XonX command
 }
 
 #define UNPAUSEGUARD ( "unpauseGuard" )
@@ -3526,6 +3553,46 @@ void motd_show ()
 	motd->s.v.think = ( func_t ) ( self->k_spectator ? SMOTDThink : PMOTDThink );
 	motd->s.v.nextthink = g_globalvars.time + 0.1;
 	motd->attack_finished = g_globalvars.time + 10;
+}
+
+void krnd ()
+{
+	int argc, i;
+	char arg_x[1024], buf[2048] = {0};
+
+	if ( match_in_progress ) 
+		return;
+
+	if( check_master() )
+		return;
+
+	if ( ( argc = trap_CmdArgc() ) < 3 ) {
+		G_sprint(self, 2, "usage: rnd <1st 2nd ...>\n");
+		return;
+	}
+	
+	for( buf[0] = '\x90', i = 2; i < argc; i++ ) {
+		trap_CmdArgv( i, arg_x, sizeof( arg_x ) );
+		strlcat(buf, arg_x, sizeof(buf));
+		strlcat(buf, ( i + 1 < argc ? ", " : "\x91" ), sizeof(buf));
+	}
+
+	G_bprint(2, "%s %s %s:\n"
+				"%s\n", redtext("Random select by"), getname( self ), redtext("from"), buf );
+
+	trap_CmdArgv( i_rnd(2, argc-1) , arg_x, sizeof( arg_x ) );
+
+	G_bprint(2, "selected: \x90%s\x91\n", arg_x);
+}
+
+void agree_on_map ( )
+{
+	if ( !k_lastvotedmap )
+		return; // no map voted
+
+	self->cmd_selectMap = k_lastvotedmap; // emulate as we select last voted map
+	SelectMap(); // <- there will be all checks about match_in_progress and etc
+	self->cmd_selectMap = 0;
 }
 
 /*

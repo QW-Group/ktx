@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.30 2006/03/28 17:52:24 qqshka Exp $
+ *  $Id: g_utils.c,v 1.31 2006/04/06 18:58:36 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -57,6 +57,18 @@ float g_random(  )
 float crandom(  )
 {
 	return 2 * ( g_random(  ) - 0.5 );
+}
+
+int i_rnd( int from, int to )
+{
+	float r;
+
+	if ( from >= to )
+		return from;
+
+	r = (int)(from + (1.0 + to - from) * g_random());
+
+	return bound(from, r, to);
 }
 
 gedict_t *spawn(  )
@@ -381,7 +393,7 @@ FIXME: make this buffer size safe someday
 char	*va(char *format, ...)
 {
 	va_list		argptr;
-	static char		string[MAX_STRINGS][1024];
+	static char		string[MAX_STRINGS*2][1024]; // qqshka - brrr
 	static int		index = 0;
 	
 	index %= MAX_STRINGS;
@@ -831,8 +843,10 @@ char *getname( gedict_t * ed )
 		name = ed->s.v.netname;
 	else if ( streq(ed->s.v.classname, "ghost") )
 		name = ezinfokey(world, va("%d", (int)ed->cnt2));
-	else
-		G_Error("getname: wrong classname %s", ed->s.v.classname);
+	else {
+		name = "";
+//		G_Error("getname: wrong classname %s", ed->s.v.classname);
+	}
 
 	string[index][0] = 0;
 	strlcat( string[index], name, sizeof( string[0] ) );
@@ -1094,6 +1108,7 @@ void changelevel( const char *name )
 	trap_cvar_set_float( "_k_players", CountPlayers());
 	trap_cvar_set_float( "_k_pow_last", Get_Powerups() );
 
+/* removed k_srvcfgmap
 	// exec configs/maps/out/mapname.cfg
 	if ( cvar( "k_srvcfgmap" ) && strneq( g_globalvars.mapname, name ) ) {
 		char *cfg_name = va("configs/maps/out/%s.cfg", g_globalvars.mapname);
@@ -1101,6 +1116,7 @@ void changelevel( const char *name )
 		if ( can_exec( cfg_name ) )
 			localcmd( "exec %s\n", cfg_name );
 	}
+*/
 
 	trap_changelevel(name);
 }
@@ -1519,6 +1535,8 @@ qboolean can_exec( char *name )
 	return false;
 }
 
+// { ghosts stuff
+
 void ghostClearScores( gedict_t *g )
 {
 	int to = MSG_ALL;
@@ -1604,4 +1622,128 @@ void update_ghosts ()
 	for( from = 1, p = world; p = find_plrghst( p, &from ); )
 		ghost2scores( p );
 }
+
+// } ghost stuff
+
+// { lastscores stuff
+
+void lastscore_add ()
+{
+	gedict_t *p;
+	int from;
+	int i, s1, s2;
+	int k_ls = bound(0, cvar("__k_ls"), MAX_LASTSCORES-1);
+	char *e1, *e2, t1[128] = {0}, t2[128] = {0}, *name, *timestr;
+	lsType_t lst = lsUnknown;
+
+	e1 = e2 = "";
+	
+	if   ( isDuel() ) {
+		lst = lsDuel;
+
+		for( i = from = 0, p = world; (p = find_plrghst( p, &from )) && i < 2; i++ ) {
+			if ( !i ) { // info about first dueler
+				e1 = getname( p );
+				s1 = p->s.v.frags;
+			}
+			else {	   // about second
+				e2 = getname( p );
+				s2 = p->s.v.frags;
+			}
+		}
+	}
+	else if ( isTeam() && k_showscores ) {
+		lst = lsTeam;
+
+		e1 = cvar_string( "_k_team1" );
+		s1 = get_scores1();
+		e2 = cvar_string( "_k_team2" );
+		s2 = get_scores2();
+
+		// players from first team
+		for( t1[0] = from = 0, p = world; p = find_plrghst( p, &from ); )
+			if ( streq( getteam( p ), e1 ) && !strnull( name = getname( p ) ) )
+				strlcat(t1, va(" %s", name), sizeof(t1));
+
+		// players from second team
+		for( t2[0] = from = 0, p = world; p = find_plrghst( p, &from ); )
+			if ( streq( getteam( p ), e2 ) && !strnull( name = getname( p ) ) )
+				strlcat(t2, va(" %s", name), sizeof(t2));
+	}
+
+	if ( strnull( e1 ) || strnull( e2 ) )
+		lst = lsUnknown;
+
+	if ( lst == lsUnknown ) // sorry but something wrong
+		return;
+
+	if ( !strnull(timestr = ezinfokey(world, "date_str")) )
+		timestr += 4; // qqshka - hud 320x240 fix, :(
+
+	cvar_fset(va("__k_ls_m_%d", k_ls), lst);
+	cvar_set(va("__k_ls_e1_%d", k_ls), e1);
+	cvar_set(va("__k_ls_e2_%d", k_ls), e2);
+	cvar_set(va("__k_ls_t1_%d", k_ls), t1);
+	cvar_set(va("__k_ls_t2_%d", k_ls), t2);
+	cvar_set(va("__k_ls_s_%d", k_ls), va("%3d:%-3d \x8D %-8.8s %13.13s", s1, s2, 
+										g_globalvars.mapname, timestr));
+
+	cvar_fset("__k_ls", ++k_ls % MAX_LASTSCORES);
+}
+
+void lastscores ()
+{
+	int i, j, cnt;
+	int k_ls = bound(0, cvar("__k_ls"), MAX_LASTSCORES-1);
+	char *e1, *e2, *le1, *le2, *t1, *t2, *lt1, *lt2, *sc;
+	lsType_t last = lsUnknown;
+	lsType_t cur  = lsUnknown;
+
+	e1 = e2 = le1 = le2 = t1 = t2 = lt1 = lt2 = "";
+
+	for ( j = k_ls, cnt = i = 0; i < MAX_LASTSCORES; i++,	j = (j+1 >= MAX_LASTSCORES) ? 0: j+1 ) {
+
+		cur = cvar(va("__k_ls_m_%d", j));
+		e1 = cvar_string(va("__k_ls_e1_%d", j));
+		e2 = cvar_string(va("__k_ls_e2_%d", j));
+		t1 = cvar_string(va("__k_ls_t1_%d", j));
+		t2 = cvar_string(va("__k_ls_t2_%d", j));
+		sc = cvar_string(va("__k_ls_s_%d", j));
+
+		if ( cur == lsUnknown || strnull( e1 ) || strnull( e2 ) )
+			continue;
+
+		if (    cur != last // changed game mode
+			 || (strneq(le1 , e1) || strneq(le2 , e2)) // changed teams, duelers
+		   ) {
+			lt1 = lt2 = ""; // show teams members again
+			G_sprint(self, 2, "\x90%s %s %s\x91\n", e1, redtext("vs"), e2);
+		}
+
+		if ( cur == lsTeam ) {
+			if ( strneq(lt1 , t1) )
+				G_sprint(self, 2, " %4.4s:%s\n", e1, t1);
+
+			if ( strneq(lt2 , t2) )
+				G_sprint(self, 2, " %4.4s:%s\n", e2, t2);
+		}
+
+		G_sprint(self, 2, "  %s\n", sc);
+
+		last = cur;
+		le1 = e1;
+		le2 = e2;
+		lt1 = t1;
+		lt2 = t2;
+		cnt++;
+	}
+
+	if ( cnt )
+		G_sprint(self, 2, "\n"
+						  "Lastscores: %d entry%s found\n", cnt, count_s(cnt));
+	else
+		G_sprint(self, 2, "Lastscores data empty\n");
+}
+
+// } lastscores stuff
 

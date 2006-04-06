@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.37 2006/03/28 17:52:03 qqshka Exp $
+ *  $Id: g_local.h,v 1.38 2006/04/06 18:57:27 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -38,7 +38,7 @@
 #include "g_syscalls.h"
 #include "player.h"
 
-#define MOD_VERSION					("1.18")
+#define MOD_VERSION					("1.21")
 #define MOD_NAME					("KTX")
 #define MOD_SERVERINFO_MOD_KEY		("xmod")
 #define MOD_SERVERINFO_BUILD_KEY	("xbuild")
@@ -62,7 +62,9 @@
 
 #define MOTD_LINES (15)
 
-#define MAX_STRINGS 64
+#define MAX_LASTSCORES (30)
+
+#define MAX_STRINGS 128
 
 #define	MAX_STRING_CHARS	1024	// max length of a string passed to Cmd_TokenizeString
 #define	MAX_STRING_TOKENS	1024	// max tokens resulting from Cmd_TokenizeString
@@ -113,6 +115,14 @@ typedef enum
 	gtFFA
 } gameType_t;
 
+typedef enum
+{
+	lsUnknown = 0,
+	lsDuel,
+	lsTeam,
+	lsFFA
+} lsType_t; // lastscores type
+
 typedef union fi_s
 {
 	float			_float;
@@ -141,6 +151,7 @@ int				PASSFLOAT(float x);
 
 float           g_random( void );
 float           crandom( void );
+int				i_rnd( int from, int to );
 gedict_t       *spawn( void );
 void            ent_remove( gedict_t * t );
 
@@ -478,6 +489,7 @@ void 	VoteAdmin();
 // maps.c
 
 char 	*GetMapName(int imp);
+void 	SelectMap();
 
 // match.c
 
@@ -517,6 +529,7 @@ extern	float current_maxfps;	// current value of serverinfo maxfps
 extern	int   k_practice;		// is server in practice mode
 extern	int   k_matchLess;	    // is server in matchLess mode
 extern  gameType_t 	  k_mode;   // game type: DUEL, TP, FFA
+extern	int   k_lastvotedmap;	// last voted map, used for agree command?
 
 #endif
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.28 2006/03/26 17:19:13 qqshka Exp $
+ *  $Id: world.c,v 1.29 2006/04/06 18:58:36 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -96,18 +96,20 @@ void CheckDefMap ()
 }
 
 
-void  SP_item_artifact_super_damage();
+void	SP_item_artifact_super_damage();
+void	UserMode(float umode);
 
 void SP_worldspawn()
 {
-	char 		*lastmap;
+	char 		*lastmap = cvar_string("_k_lastmap");
 	char		*s;
    	gedict_t	*e;
 
+/* removed k_srvcfgmap
 	// exec configs/maps/default.cfg
 	// exec configs/maps/mapname.cfg
 	if (    cvar( "k_srvcfgmap" )
-		 && (    strnull( lastmap = cvar_string("_k_lastmap") ) // server just spawn first time ?
+		 && (    strnull( lastmap ) // server just spawn first time ?
 			  || strneq( lastmap, g_globalvars.mapname )
 			)
 	   ) {
@@ -123,6 +125,9 @@ void SP_worldspawn()
 
 		trap_executecmd ();
 	}
+*/
+	if ( cvar("_k_last_xonx") > 0 && strneq( lastmap, g_globalvars.mapname ) )
+		UserMode( -cvar("_k_last_xonx") ); // auto call XonX command if map switched to another
     
 	G_SpawnString( "classname", "", &s );
 	if ( Q_stricmp( s, "worldspawn" ) )
@@ -398,14 +403,17 @@ qboolean RegisterCvar ( const char *var )
 // in the first frame - even world is not spawned yet
 void FirstFrame	( )
 {
+	int i;
+
 	if ( framecount != 1 )
 		return;
 
 	trap_executecmd ();
 
-	RegisterCvar("_k_lastmap");	// internal usage, name of last map
-	RegisterCvar("_k_players"); // internal usage, count of players on last map
-	RegisterCvar("_k_pow_last"); // internal usage, k_pow from last map
+	RegisterCvar("_k_last_xonx"); // internal usage, save last XonX command
+	RegisterCvar("_k_lastmap");	  // internal usage, name of last map
+	RegisterCvar("_k_players");   // internal usage, count of players on last map
+	RegisterCvar("_k_pow_last");  // internal usage, k_pow from last map
 
 	RegisterCvar("k_mode");
 	RegisterCvar("k_matchless");
@@ -415,7 +423,8 @@ void FirstFrame	( )
 	RegisterCvar("k_lock_hdp");
 	RegisterCvar("k_disallow_weapons");
 
-	RegisterCvar("k_srvcfgmap");
+// removed k_srvcfgmap
+//	RegisterCvar("k_srvcfgmap");
 	RegisterCvar("k_pow_min_players");
 	RegisterCvar("k_pow_check_time");
 	RegisterCvar("allow_spec_wizard");
@@ -495,6 +504,21 @@ void FirstFrame	( )
 	RegisterCvar("_k_team1"); // internal mod usage
 	RegisterCvar("_k_team2"); // internal mod usage
 	RegisterCvar("_k_host"); // internal mod usage
+
+// { lastscores support
+
+	RegisterCvar("__k_ls");  // current lastscore, really internal mod usage
+
+	for ( i = 0; i < MAX_LASTSCORES; i++ ) {
+		RegisterCvar(va("__k_ls_m_%d", i));  // mode, really internal mod usage
+		RegisterCvar(va("__k_ls_e1_%d", i)); // entry team/nick, really internal mod usage
+		RegisterCvar(va("__k_ls_e2_%d", i)); // entry team/nick, really internal mod usage
+		RegisterCvar(va("__k_ls_t1_%d", i)); // nicks, really internal mod usage
+		RegisterCvar(va("__k_ls_t2_%d", i)); // nicks, really internal mod usage
+		RegisterCvar(va("__k_ls_s_%d", i));  // scores, really internal mod usage
+	}
+
+// }
 
 // <<<
 

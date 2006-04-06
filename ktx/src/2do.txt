@@ -23,9 +23,6 @@ TODO: remove latest impulses except weapon and so on.
 собирается куда-то присвоить и потом использовать в дальнейшем?
 надо все проверить %)
 ----------------------------------------------
-messed up play_teleport()
-need instant teleport sound :(
-----------------------------------------------
 k_admins clean this up
 ----------------------------------------------
 forcebreak

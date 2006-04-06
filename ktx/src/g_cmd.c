@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.6 2006/03/13 13:48:15 vvd0 Exp $
+ *  $Id: g_cmd.c,v 1.7 2006/04/06 18:58:36 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -28,7 +28,6 @@
 extern void     trap_CmdArgv( int arg, char *valbuff, int sizebuff );
 
 void            ClientKill();
-void			SelectMap();
 void			cmdinfo ();
 void			cmduinfo ();
 
@@ -53,6 +52,9 @@ qboolean 	ClientCommand()
 	char            cmd_command[1024], arg_1[1024];
 
 	self = PROG_TO_EDICT( g_globalvars.self );
+
+	if ( strnull(self->s.v.classname) )
+		return true; // not connected yet or something
 
 	trap_CmdArgv( 0, cmd_command, sizeof( cmd_command ) );
 

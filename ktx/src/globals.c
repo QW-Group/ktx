@@ -17,6 +17,7 @@
 	float k_pause = 0;
 	float k_pausetime;      // stores time at which server was paused
 	float k_showscores;     // whether or not should print the scores or not
+							// now k_showscores != 0  only in team mode exactly with two teams
 	float k_nochange = 0;   // used to indicate if frags changes somehow since last time 'scores' command was called
 	float k_standby;        // if server is in standy mode
 	float k_sudden_death;	// to mark if sudden death overtime is currently the case
@@ -35,4 +36,5 @@
 	int       k_practice;	// is server in practice mode
 	int       k_matchLess;	// is server in matchLess mode
 	gameType_t 	  k_mode;   // game type: DUEL, TP, FFA
+	int	k_lastvotedmap;		// last voted map, used for agree command?
 #endif

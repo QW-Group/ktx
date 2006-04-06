@@ -9,6 +9,7 @@ void CheckAll();
 void StartMatch ();
 void StartTimer ();
 void remove_specs_wizards ();
+void lastscore_add ();
 
 float CountALLPlayers ()
 {
@@ -575,7 +576,6 @@ void EndMatch ( float skip_log )
 {
 	gedict_t	*p;
 
-	int fpd = iKey ( world, "fpd" );
 	int old_match_in_progress = match_in_progress;
 	char *tmp;
 	float f1;
@@ -593,10 +593,15 @@ void EndMatch ( float skip_log )
 
 	trap_lightstyle(0, "m");
 
-	fpd = fpd & ~64;
-	localcmd("serverinfo fpd %d\n", fpd);
+// spec silence
+	{
+		int fpd = iKey ( world, "fpd" );
 
-	cvar_fset("sv_spectalk", 1);
+		fpd = fpd & ~64;
+		localcmd("serverinfo fpd %d\n", fpd);
+
+		cvar_fset("sv_spectalk", 1);
+	}
 
 	G_bprint( 2, "The match is over\n");
 	G_cprint("RESULT");
@@ -642,6 +647,8 @@ void EndMatch ( float skip_log )
 
 		if ( p = find( world, FOFCLSN, "ghost" ) ) // show legend :)
 			G_bprint(2, "\n\x83 - %s player\n\n", redtext("disconnected"));
+
+		lastscore_add(); // save game result somewhere, so we can show it later
 	}
 
 	p = find( world, FOFCLSN, "ghost" );
@@ -1059,8 +1066,18 @@ void SM_PrepareShowscores()
 
 	cvar_set("_k_team1", team1);
 	cvar_set("_k_team2", team2);
+}
 
-	cvar_set("hostname", va("%s (%s vs. %s)", cvar_string("hostname"), team1, team2));
+void SM_PrepareHostname()
+{
+	char *team1 = cvar_string("_k_team1"), *team2 = cvar_string("_k_team2");
+
+	cvar_set( "_k_host", cvar_string("hostname") );  // save host name at match start
+
+	if ( k_showscores && !strnull( team1 ) && !strnull( team2 ) )
+		cvar_set("hostname", va("%s (%.4s vs. %.4s)\x87", cvar_string("hostname"), team1, team2));
+	else
+		cvar_set("hostname", va("%s\x87", cvar_string("hostname")));
 }
 
 // Reset player frags and start the timer.
@@ -1102,8 +1119,8 @@ void StartMatch ()
 		int k_spectalk = bound(0, cvar( "k_spectalk" ), 1);
 		cvar_fset( "sv_spectalk", k_spectalk );
 
- 		// remove 64 from fpd and add 64 to fpd if k_spectalk == 1
-		fpd = (fpd & ~64) | (k_spectalk * 64);
+		fpd = ( k_spectalk ) ? fpd & ~64 : fpd | 64;
+
 		localcmd( "serverinfo fpd %d\n", fpd );
 	}
 
@@ -1116,9 +1133,9 @@ void StartMatch ()
 	self->s.v.think = ( func_t ) TimerThink;
 	self->s.v.nextthink = g_globalvars.time + 1;
 
-	cvar_set( "_k_host", cvar_string("hostname") );  // save host name at match start
-
 	SM_PrepareShowscores();
+
+	SM_PrepareHostname();
 }
 
 void PrintCountdown( int seconds )

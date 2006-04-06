@@ -11,7 +11,6 @@ void StopTimer ( int removeDemo );
 
 void NextClient();
 void ExitKick(gedict_t *kicker);
-void Deathmsg();
 
 
 void KickThink ()
@@ -163,7 +162,7 @@ void ExitKick (gedict_t *kicker)
 void BecomeAdmin(gedict_t *p)
 {
 	G_bprint(2, "%s %s!\n", p->s.v.netname, redtext("gains admins status"));
-	G_sprint(p, 2, "Please give up admin rights when you're done.\n"
+	G_sprint(p, 2, "Please give up admin rights when you're done\n"
 				   "Type %s for info\n", redtext("commands"));
 	p->k_admin = 2;
 }

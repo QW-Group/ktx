@@ -195,8 +195,10 @@ void SelectMap()
 		return;
 	}
 
-	if ( k_matchLess && match_in_progress == 2 )
-		; // u can select map in matchLess mode, but not in countdown
+	if ( k_matchLess ) {
+		if ( match_in_progress != 2 )
+			return; // u can select map in matchLess mode, but not in countdown
+	}
 	else if ( match_in_progress )
 		return;
 
@@ -235,7 +237,7 @@ void SelectMap()
 	else
 		G_bprint(2, "%s %s %s\n", self->s.v.netname, redtext("would rather play on"), m);
 
-	self->v.map = self->cmd_selectMap;
+	self->v.map = k_lastvotedmap = self->cmd_selectMap;
 
 	vote_check_map ();
 }

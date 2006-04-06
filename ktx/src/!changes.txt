@@ -1,3 +1,26 @@
+2006-04-06 [ver 1.21]
+105. Just changed version and some fixes.
+
+2006-04-04
+104. Added /agree command, u just agrees on/to last voted map.
+
+2006-04-02
+102. Fixed k_spectalk vs fpd bug.
+
+103. Added /rnd <1st 2nd ...> command. ktpro (c)
+	 This will choose one item from a set of items and publically announce which one was
+	 chosen, so this command can be used to find a random map for example.
+
+2006-04-01 [ver 1.20]
+101. Removed k_srvcfgmap, instead of this, XonX command called every time u switch to another map.
+     If u just reload map, XonX command is not invoked. We think this is better than type XonX
+	 every time u cnange map to another, so u can't forget about powerups and etc. So, once
+	 u connect to server, type appropriate XonX command and u can forget about server settings
+	 if u change map and server is _well_ configured.
+
+2006-03-31 [ver 1.19]
+100. Added /lastscores command.
+
 2006-03-28 [ver 1.18]
  98. Save colors for ghosts now, set ping to 39, so average ping is calc a bit better?
 

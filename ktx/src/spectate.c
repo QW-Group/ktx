@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.12 2006/03/19 23:16:13 qqshka Exp $
+ *  $Id: spectate.c,v 1.13 2006/04/06 18:58:36 qqshka Exp $
  */
 
 // spectate.c
@@ -140,6 +140,11 @@ void SpectatorImpulseCommand()
 {
 	gedict_t       *goal;
 
+	if ( strnull(self->s.v.classname) ) {
+		self->s.v.impulse = 0;
+		return;
+	}
+
 	goal = PROG_TO_EDICT( self->s.v.goalentity );
 
 	if( self->k_admin == 1 && self->s.v.impulse >= 1 && self->s.v.impulse <=9 ) 
@@ -153,7 +158,8 @@ void SpectatorImpulseCommand()
 
 		// if track someone - return
 		if ( (int)(goal - world) >= 1 && (int)(goal - world) <= MAX_CLIENTS ) {
-			G_sprint(self, 2, "stop %s first\n", redtext("tracking"));
+// qqshka - heh, not all guys like this warning
+//			G_sprint(self, 2, "stop %s first\n", redtext("tracking"));
 			self->s.v.impulse = 0;
 			return;
 		}
