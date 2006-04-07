@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.23 2006/03/29 17:55:27 vvd0 Exp $
+ *  $Id: progs.h,v 1.24 2006/04/07 21:39:04 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -302,5 +302,8 @@ typedef struct gedict_s {
 
 	pos_t	pos[MAX_POSITIONS];	// for player pos_save / pos_move
 	float	pos_move_time;		// for player pos_save / pos_move
+
+	qboolean was_jump;
+
 } gedict_t;
 

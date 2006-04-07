@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.11 2006/03/24 21:28:27 qqshka Exp $
+ *  $Id: combat.c,v 1.12 2006/04/07 21:38:47 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -336,9 +336,9 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	}
 
 	if (match_in_progress != 2) {
-		targ->s.v.currentammo = 1000 + damage;
+		targ->s.v.currentammo = 1000 + Q_rint(damage);
 		if (attacker != targ)
-			attacker->s.v.health = 1000 + damage;
+			attacker->s.v.health = 1000 + Q_rint(damage);
 	}
 
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.48 2006/03/28 17:52:24 qqshka Exp $
+ *  $Id: client.c,v 1.49 2006/04/07 21:38:47 qqshka Exp $
  */
 
 //===========================================================================
@@ -1269,6 +1269,8 @@ void PlayerJump()
 	self->s.v.flags -= ( ( ( int ) ( self->s.v.flags ) ) & FL_JUMPRELEASED );
 //	self->s.v.button2 = 0;
 
+	self->was_jump = true;
+
 // check the flag and jump if we can
     if ( !self->brokenankle )
 	{
@@ -1276,6 +1278,17 @@ void PlayerJump()
 
 		// player jumping sound
 		sound( self, CHAN_BODY, "player/plyrjmp8.wav", 1, ATTN_NORM );
+
+       	// JUMPBUG[
+        // the engine checks velocity_z and won't perform the jump if it's < zero!
+
+		// qqshka - i know this is shit - but ktpro does it, and probably server engine even ignor this hack
+		// qqshka - but seems new zquake pmove code ported to mvdsv - so this fix is commented
+
+//		if ( self->s.v.velocity[2] < 0 )
+//			self->s.v.velocity[2] = 0;
+
+		// JUMPBUG]
 	}
 	else
 		 self->s.v.velocity[2] = -270;
@@ -1750,6 +1763,65 @@ void Print_Scores( )
 	G_centerprint( self, "%s",  buf );
 }
 
+// qqshka - ripped from ktpro
+
+float v_for_jump (int frametime_ms)
+{
+	if ( cvar("k_no_fps_physics") )
+		return 1;
+
+//	G_bprint(2, "MS: %d\n", frametime_ms);
+
+	if (frametime_ms > 44) 
+		return  1.05;
+	else if (frametime_ms > 38) 
+		return  1.041;
+	else if (frametime_ms > 33) 
+		return  1.035;
+	else if (frametime_ms > 28) 
+		return  1.032;
+	else if (frametime_ms > 24) 
+		return  1.029;
+	else if (frametime_ms > 22) 
+		return  1.025;
+	else if (frametime_ms > 19) 
+		return  1.02;
+	else if (frametime_ms > 18) 
+		return  1.015;
+	else if (frametime_ms > 16) 
+		return  1.01;
+	else if (frametime_ms > 15) 
+		return  1.005;
+	else if (frametime_ms > 14) 
+		return  1;
+	else if (frametime_ms > 13) 
+		return  1;
+	else if (frametime_ms > 12) 
+		return  1;
+	else if (frametime_ms > 11) 
+		return  0.9991;
+	else if (frametime_ms > 10) 
+		return  0.9982;
+	else if (frametime_ms > 9) 
+		return  0.9961;
+	else if (frametime_ms > 8) 
+		return  0.9941;
+	else if (frametime_ms > 7) 
+		return  0.9886;
+	else if (frametime_ms > 6) 
+		return  0.9882;
+	else if (frametime_ms > 5) 
+		return  0.9865;
+	else if (frametime_ms > 4) 
+		return  0.9855;
+	else if (frametime_ms > 3) 
+		return  0.9801;
+	else if (frametime_ms > 2) 
+		return  0.9783;
+	else 
+		return  0.9652;
+}
+
 void ZeroFpsStats ()
 {
 	// zero these so the average/highest FPS is calculated for each delay period.
@@ -1788,6 +1860,11 @@ void PlayerPreThink()
 
 	if ( self->wp_stats && self->wp_stats_time && self->wp_stats_time <= g_globalvars.time )
 		Print_Wp_Stats ();
+
+	if ( self->was_jump ) {
+		self->s.v.velocity[2] *= v_for_jump (self->fCurrentFrameTime * 1000);
+		self->was_jump = false;
+	}
 
 // ILLEGALFPS[
 
@@ -2291,8 +2368,8 @@ void PlayerPostThink()
 		if ( iKey( self, "kf" ) & KF_SPEED ) {
 			float velocity = sqrt(self->s.v.velocity[0] * self->s.v.velocity[0] + 
 								self->s.v.velocity[1] * self->s.v.velocity[1]);
-			self->s.v.armorvalue = (velocity < 1000 ? velocity + 1000 : -velocity);
-			self->s.v.frags = (velocity < 1000 ? 0 : (int)velocity / 1000);
+			self->s.v.armorvalue = (int)(velocity < 1000 ? velocity + 1000 : -velocity);
+			self->s.v.frags = (int)(velocity < 1000 ? 0 : velocity / 1000);
 		}
 		else {
 			self->s.v.armorvalue = 1000;

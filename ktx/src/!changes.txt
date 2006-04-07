@@ -1,3 +1,16 @@
+2006-04-08
+107. Fixed small issue so damage in prewar in statusbar is shown more like it was in ktpro.
+
+2006-04-07
+106. Added "set k_no_fps_physics", players can play with 15 or 300 fps and jumping like with 77.
+	 U _must_ understand, this feauture affect only how high u can jump, but trajectory
+	 will be not the same if u use 77 and 500 fps (if server allow this 500 fps), i think so.
+
+	 set k_no_fps_physics 0 // 0 - fps value does't affect how high u can jump
+							// 1 - fps value affect how high u can jump
+
+	 So, recommended set this to 0.
+
 2006-04-06 [ver 1.21]
 105. Just changed version and some fixes.
 

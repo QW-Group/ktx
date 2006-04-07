@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.29 2006/04/06 18:58:36 qqshka Exp $
+ *  $Id: world.c,v 1.30 2006/04/07 21:38:47 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -495,6 +495,7 @@ void FirstFrame	( )
 	RegisterCvar("k_noframechecks");
 	RegisterCvar("dmm4_invinc_time");
 //	RegisterCvar("rj");
+	RegisterCvar("k_no_fps_physics");
 
 
 	RegisterCvar("_k_captteam1"); // internal mod usage
