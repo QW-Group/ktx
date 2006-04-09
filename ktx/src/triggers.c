@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: triggers.c,v 1.9 2006/03/29 17:48:45 vvd0 Exp $
+ *  $Id: triggers.c,v 1.10 2006/04/09 16:45:19 disconn3ct Exp $
  */
 
 #include "g_local.h"
@@ -514,6 +514,14 @@ void teleport_touch()
 	VectorCopy( t->mangle, other->s.v.angles ); // other.angles = t.mangle;
 	if ( streq( other->s.v.classname, "player" ) )
 	{
+	  if (other->s.v.weapon == IT_HOOK && other->hook_out)
+	  {
+            sound(other, CHAN_WEAPON, "weapons/bounce2.wav", 1, ATTN_NORM);
+            other->on_hook = false;
+            other->hook_out = false;
+            other->s.v.weaponframe = 0;
+            other->attack_finished = g_globalvars.time + 0.75;
+          }
 		other->s.v.fixangle = 1;	// turn this way immediately
 		other->s.v.teleport_time = g_globalvars.time + 0.7;
 		if ( ( int ) other->s.v.flags & FL_ONGROUND )

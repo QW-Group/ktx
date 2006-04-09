@@ -195,7 +195,7 @@ void BecomeCaptain ()
     if( match_in_progress || intermission_running )
         return;
 
-    if( !isTeam() )
+    if( !isTeam() && !isCTF() )
     {
         G_sprint(self, 2, "No team picking in non team mode\n");
         return;
@@ -230,6 +230,17 @@ void BecomeCaptain ()
     {
         G_sprint(self, 2, "Set your team name first\n");
         return;
+    }
+
+    // must be red or blue in ctf
+    if ( isCTF() )
+    {
+      if ( !streq(getteam(self), "blue") && !streq(getteam(self), "red") )
+      {
+        G_sprint( self, 2, "Must be team red or blue for ctf\n" );
+        return;
+      }
+      streq(getteam(self), "blue") ? stuffcmd( self, "color 13\n" ) : stuffcmd( self, "color 4\n" );
     }
 
     // search if a captain already has the same team

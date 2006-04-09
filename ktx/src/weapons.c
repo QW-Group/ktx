@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.21 2006/04/06 18:58:36 qqshka Exp $
+ *  $Id: weapons.c,v 1.22 2006/04/09 16:45:19 disconn3ct Exp $
  */
 
 #include "g_local.h"
@@ -29,7 +29,6 @@
 void ReportMe();
 void AdminImpBot();
 void CaptainPickPlayer();
-
 
 // called by SP_worldspawn
 void W_Precache()
@@ -1126,6 +1125,17 @@ void W_SetCurrentAmmo()
 		items |= IT_CELLS;
 		break;
 
+	case IT_HOOK:
+          self->s.v.currentammo = 0;
+#ifdef CTF_CUSTOM_MODELS
+	  self->s.v.weaponmodel = "progs/v_star.mdl";
+#else
+          self->s.v.weaponmodel = "progs/v_axe.mdl";
+#endif
+	  self->s.v.weaponframe = 0;
+	  break;
+
+
 	default:
 		self->s.v.currentammo = 0;
 		self->s.v.weaponmodel = "";
@@ -1179,7 +1189,7 @@ int W_CheckNoAmmo()
 	if ( self->s.v.currentammo > 0 )
 		return true;
 
-	if ( self->s.v.weapon == IT_AXE )
+	if ( self->s.v.weapon == IT_AXE || self->s.v.weapon == IT_HOOK )
 		return true;
 
 	self->s.v.weapon = W_BestWeapon();
@@ -1228,7 +1238,13 @@ void W_Attack()
 	switch ( ( int ) self->s.v.weapon )
 	{
 	case IT_AXE:
-		self->attack_finished = g_globalvars.time + 0.5;
+    	        if ( self->ctf_flag & CTF_RUNE_HST )
+		{
+	          self->attack_finished = g_globalvars.time + 0.3;
+                  HasteSound( self );
+                }
+	        else
+		  self->attack_finished = g_globalvars.time + 0.5;
 		sound( self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM );
 		r = g_random();
 		if ( r < 0.25 )
@@ -1243,13 +1259,25 @@ void W_Attack()
 
 	case IT_SHOTGUN:
 		player_shot1();
-		self->attack_finished = g_globalvars.time + 0.5;
+                if ( self->ctf_flag & CTF_RUNE_HST )
+		{
+                  self->attack_finished = g_globalvars.time + 0.3;
+                  HasteSound( self );
+                }
+                else
+		  self->attack_finished = g_globalvars.time + 0.5;
 		W_FireShotgun();
 		break;
 
 	case IT_SUPER_SHOTGUN:
 		player_shot1();
-		self->attack_finished = g_globalvars.time + 0.7;
+                if ( self->ctf_flag & CTF_RUNE_HST )
+		{
+                  self->attack_finished = g_globalvars.time + 0.4;
+                  HasteSound( self );
+                }
+                else
+		  self->attack_finished = g_globalvars.time + 0.7;
 		W_FireSuperShotgun();
 		break;
 
@@ -1263,13 +1291,25 @@ void W_Attack()
 
 	case IT_GRENADE_LAUNCHER:
 		player_rocket1();
-		self->attack_finished = g_globalvars.time + 0.6;
+                if ( self->ctf_flag & CTF_RUNE_HST )
+		{
+                  self->attack_finished = g_globalvars.time + 0.3;
+                  HasteSound( self );
+                }
+                else
+		  self->attack_finished = g_globalvars.time + 0.6;
 		W_FireGrenade();
 		break;
 
 	case IT_ROCKET_LAUNCHER:
 		player_rocket1();
-		self->attack_finished = g_globalvars.time + 0.8;
+                if ( self->ctf_flag & CTF_RUNE_HST )
+		{
+                  self->attack_finished = g_globalvars.time + 0.4;
+                  HasteSound( self );
+                }
+                else
+		  self->attack_finished = g_globalvars.time + 0.8;
 		W_FireRocket();
 		break;
 
@@ -1278,6 +1318,15 @@ void W_Attack()
 		sound( self, CHAN_AUTO, "weapons/lstart.wav", 1, ATTN_NORM );
 		player_light1();
 		break;
+
+	case IT_HOOK:
+	  if (self->hook_out)
+	    player_chain3();
+	  else
+	    player_chain1();
+	  self->attack_finished = g_globalvars.time + 0.1;
+	  break;
+
 	}
 }
 
@@ -1334,6 +1383,19 @@ void W_ChangeWeapon()
 		if ( self->s.v.ammo_cells < 1 )
 			am = 1;
 		break;
+
+	case 22:
+	  fl = IT_HOOK;
+          if ( self->s.v.weapon != IT_HOOK )
+	  {
+	    if ( self->hook_out )
+              GrappleReset( self->hook );
+          
+	    self->hook_out = false;
+	    self->on_hook = false;
+          }
+	  break;
+
 	default:
 		break;
 	}
@@ -1608,7 +1670,7 @@ void ImpulseCommands()
     else if( self->k_admin == 1 && impulse >= 1 && impulse <= 9 )
         AdminImpBot();
 
-    else if ( impulse >= 1 && impulse <= 8 )
+    else if ( (impulse >= 1 && impulse <= 8) || impulse == 22 )
 		W_ChangeWeapon();
 
 	else if ( impulse == 9 )
@@ -1690,10 +1752,20 @@ void SuperDamageSound()
 		if ( self->super_sound < g_globalvars.time )
 		{
 			self->super_sound = g_globalvars.time + 1;
-// like ktpro
-//			sound( self, CHAN_BODY, "items/damage3.wav", 1, ATTN_NORM );
-			sound( self, CHAN_AUTO, "items/damage3.wav", 1, ATTN_NORM );
+			// Play 8x sound if quad + strength rune
+                        if ( self->ctf_flag & CTF_RUNE_STR )
+                          sound( self, CHAN_AUTO, "rune/rune22.wav", 1, ATTN_NORM );
+                        else
+			  sound( self, CHAN_AUTO, "items/damage3.wav", 1, ATTN_NORM );
 		}
 	}
+        else if ( self->ctf_flag & CTF_RUNE_STR )
+	{
+          if ( self->super_sound < g_globalvars.time )
+	  {
+            self->super_sound = g_globalvars.time + 1;
+            sound( self, CHAN_AUTO, "rune/rune2.wav", 1, ATTN_NORM );
+	  }
+        }
 	return;
 }

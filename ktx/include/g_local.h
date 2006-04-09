@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.38 2006/04/06 18:57:27 qqshka Exp $
+ *  $Id: g_local.h,v 1.39 2006/04/09 16:45:32 disconn3ct Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -29,6 +29,10 @@
 #define KTEAMS
 //#define DEBUG
 
+// if server has flag/grapple models you can enable them here
+// http://www.quakeworld.us/ult/ctf/pak0.pak  (only 300kb)
+// if not we use old style keys and ax/voreball for grapple
+#define CTF_CUSTOM_MODELS
 
 #include "q_shared.h"
 #include "mathlib.h"
@@ -112,7 +116,8 @@ typedef enum
 	gtUnknown = 0,
 	gtDuel,
 	gtTeam,
-	gtFFA
+	gtFFA,
+        gtCTF
 } gameType_t;
 
 typedef enum
@@ -246,6 +251,7 @@ qboolean	isghost( gedict_t *ed );
 qboolean	isDuel( );
 qboolean	isTeam( );
 qboolean	isFFA( );
+qboolean        isCTF( );
 qboolean	isUnknown( );
 void		GhostFlag(gedict_t *p);
 int			GetUserID(gedict_t *p);
@@ -376,6 +382,18 @@ void            DropBackpack();
 void            spawn_tfog( vec3_t org );
 void            spawn_tdeath( vec3_t org, gedict_t * death_owner );
 
+// runes.c
+void            DropRune();
+void            SpawnRunes();
+void            TossRune();
+void            ResistanceSound( gedict_t *player );
+void            HasteSound( gedict_t *player );
+void            RegenerationSound( gedict_t *player );
+
+// ctf.c
+void            PlayerDropFlag( gedict_t *player );
+void            RegenFlags();
+
 // commands.c
 typedef struct cmd_s {
 	char    *name;
@@ -494,6 +512,11 @@ void 	SelectMap();
 // match.c
 
 void	EndMatch ( float skip_log );
+
+// grapple.c
+void    GrappleThrow();
+void    GrappleService();
+void    GrappleReset(gedict_t *rhook);
 
 //global.c
 

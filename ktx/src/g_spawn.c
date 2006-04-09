@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_spawn.c,v 1.4 2005/12/31 19:04:22 qqshka Exp $
+ *  $Id: g_spawn.c,v 1.5 2006/04/09 16:45:19 disconn3ct Exp $
  */
 
 #include "g_local.h"
@@ -172,6 +172,7 @@ void            SP_air_bubbles();
 void            SP_trap_spikeshooter();
 void            SP_trap_shooter();
 void            SP_func_wall();
+void            SP_func_ctf_wall();
 void            SP_func_illusionary();
 void            SP_func_episodegate();
 void            SP_func_bossgate();
@@ -218,6 +219,8 @@ void            SP_item_artifact_invulnerability();
 void            SP_item_artifact_envirosuit();
 void            SP_item_artifact_invisibility();
 void            SP_item_artifact_super_damage();
+void            SP_item_flag_team1();
+void            SP_item_flag_team2();
 void            SP_item_sigil();
 void            SP_item_key1();
 void            SP_item_key2();
@@ -233,7 +236,7 @@ spawn_t         spawns[] = {
 	{"info_player_coop", 		SUB_Null},
 	{"info_intermission", 		SP_info_intermission},
 	{"trigger_changelevel", 	SP_trigger_changelevel},
-
+       
 /*QUAKED info_notnull (0 0.5 0) (-4 -4 -4) (4 4 4)
 Used as a positional target for lightning.
 */
@@ -314,6 +317,14 @@ Used as a positional target for lightning.
 	{"item_sigil",			SP_item_sigil},
 	{"item_key1",			SP_item_key1},
 	{"item_key2",			SP_item_key2},
+
+// ctf ents
+        {"item_flag_team1",        SP_item_flag_team1},
+        {"item_flag_team2",        SP_item_flag_team2},
+        {"func_ctf_wall",          SP_func_ctf_wall},
+        {"info_player_team1",           SUB_Null},
+        {"info_player_team2",           SUB_Null},
+
 
 //not used ents
 /*QUAKED info_null (0 0.5 0) (-4 -4 -4) (4 4 4)
@@ -639,4 +650,5 @@ void G_SpawnEntitiesFromString( void )
 		G_SpawnGEntityFromSpawnVars();
 		trap_FlushSignon();
 	}
+
 }

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.12 2006/03/24 21:28:27 qqshka Exp $
+ *  $Id: player.c,v 1.13 2006/04/09 16:45:19 disconn3ct Exp $
  */
 
 #include "g_local.h"
@@ -51,7 +51,7 @@ void player_stand1()
 		return;
 	}
 
-	if ( self->s.v.weapon == IT_AXE )
+	if ( self->s.v.weapon == IT_AXE || self->s.v.weapon == IT_HOOK)
 	{
 		if ( self->walkframe >= 12 )
 			self->walkframe = 0;
@@ -79,7 +79,7 @@ void player_run()
 		return;
 	}
 
-	if ( self->s.v.weapon == IT_AXE )
+	if ( self->s.v.weapon == IT_AXE || self->s.v.weapon == IT_HOOK)
 	{
 		if ( self->walkframe >= 6 )
 			self->walkframe = 0;
@@ -98,6 +98,56 @@ void muzzleflash()
 	WriteByte( MSG_MULTICAST, SVC_MUZZLEFLASH );
 	WriteEntity( MSG_MULTICAST, self );
 	trap_multicast( PASSVEC3( self->s.v.origin ), MULTICAST_PVS );
+}
+
+void player_chain1()
+{
+  self->s.v.frame = 137;
+  self->s.v.think = ( func_t ) player_chain2;
+  self->s.v.nextthink = g_globalvars.time + 0.1;
+  self->s.v.weaponframe = 2;
+  GrappleThrow();
+}
+
+void player_chain2()
+{
+  self->s.v.frame = 138;
+  self->s.v.think = ( func_t ) player_chain3;
+  self->s.v.nextthink = g_globalvars.time + 0.1;
+  self->s.v.weaponframe = 3;
+}
+
+void player_chain3()
+{
+  self->s.v.frame = 139;
+  self->s.v.think = ( func_t ) player_chain4;
+  self->s.v.nextthink = g_globalvars.time + 0.1;
+  self->s.v.weaponframe = 3;
+  if (!self->hook_out)
+    player_chain5();
+  else if (vlen(self->s.v.velocity) >= 750)
+    player_chain4();
+}
+
+void player_chain4()
+{
+  // fixme
+  self->s.v.frame = 73; // this is a death frame which causes problems if client uses cl_deadbodyfilter 2
+  self->s.v.think = ( func_t ) player_chain5;
+  self->s.v.nextthink = g_globalvars.time + 0.1;
+  self->s.v.weaponframe = 4;
+  if (!self->hook_out)
+    player_chain5();
+  else if (vlen(self->s.v.velocity) < 750)  
+    player_chain3(); 
+}
+
+void player_chain5()
+{
+  self->s.v.frame = 140;
+  self->s.v.think = ( func_t ) player_run;
+  self->s.v.nextthink = g_globalvars.time + 0.1;
+  self->s.v.weaponframe = 5;
 }
 
 void player_shot1()
@@ -892,6 +942,18 @@ void PlayerDie()
 		if ( self->invisible_finished > 0 )
 			DropPowerup( self->invisible_finished - g_globalvars.time, IT_INVISIBILITY);
 	}
+ 
+        if ( isCTF() )
+	{
+          if ( self->hook_out )
+	  {
+            GrappleReset( self->hook );
+            self->attack_finished = g_globalvars.time + 0.75;
+            self->hook_out = true;
+	  }
+          DropRune();
+          PlayerDropFlag( self );
+        } 
 
 	self->invisible_finished = 0;	// don't die as eyes
 	self->invincible_finished = 0;

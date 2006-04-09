@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.12 2006/04/07 21:38:47 qqshka Exp $
+ *  $Id: combat.c,v 1.13 2006/04/09 16:45:19 disconn3ct Exp $
  */
 
 #include "g_local.h"
@@ -208,6 +208,24 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		else
 			damage = damage * 4;
 	}
+	// ctf strength rune
+        if ( attacker->ctf_flag & CTF_RUNE_STR )
+          damage *= 2;
+          
+        // ctf resistance rune
+        if ( targ->ctf_flag & CTF_RUNE_RES )
+	{
+          damage /= 2;
+          ResistanceSound( targ );
+	}
+
+        // did we hurt enemy flag carrier?
+        if ( (targ->ctf_flag & CTF_FLAG) && 
+             (!streq(getteam(targ), getteam(attacker))) )
+	{
+          attacker->carrier_hurt_time = g_globalvars.time;
+	}
+
 // save damage based on the target's armor level
 
 #ifndef Q3_VM

@@ -52,6 +52,7 @@ void ChangeOvertime();
 void ChangeOvertimeUp();
 void ChangeTP();
 void ToggleFallBunny ();
+void FlagStatus();
 void FragsDown();
 void FragsUp();
 void ListWhoNot();
@@ -235,6 +236,7 @@ cmd_t cmds[] = {
     { "4on4",        UserMode,                  4	 , CF_PLAYER | CF_SPC_ADMIN },
     { "10on10",      UserMode,                  5	 , CF_PLAYER | CF_SPC_ADMIN },
     { "ffa",         UserMode,                  6	 , CF_PLAYER | CF_SPC_ADMIN },
+    { "ctf",         UserMode,                  7        , CF_PLAYER | CF_SPC_ADMIN },
     
     { "unpause",     VoteUnpause,               0    , CF_PLAYER      },
     { "practice",    TogglePractice,            0    , CF_PLAYER | CF_SPC_ADMIN },
@@ -316,7 +318,10 @@ cmd_t cmds[] = {
     { "pos_set_origin",  Pos_Set,               1    , CF_BOTH | CF_PARAMS },
     { "pos_set_angles",  Pos_Set,               2    , CF_BOTH | CF_PARAMS },
 //    { "pos_set_velocity",Pos_Set,               3    , CF_BOTH | CF_PARAMS },
-    { "motd",        motd_show,                 0    , CF_BOTH | CF_MATCHLESS }//,
+// ctf commands
+    { "tossrune",    TossRune,                  0    , CF_PLAYER },
+    { "flagstatus",  FlagStatus,                0    , CF_BOTH },
+    { "motd",        motd_show,                 0    , CF_BOTH | CF_MATCHLESS }
 //	{ "check_maps",	     Check_Maps,            0    , CF_BOTH_ADMIN }
 };
 
@@ -955,6 +960,8 @@ void ModStatus2()
 		G_sprint(self, 2, "%s: duel\n", redtext("Server mode"));
 	else if ( isFFA() )
 		G_sprint(self, 2, "%s:  FFA\n", redtext("Server mode"));
+        else if ( isCTF() )
+	        G_sprint(self, 2, "%s:  CTF\n", redtext("Server mode"));
 	else if ( isTeam() ) {
 		G_sprint(self, 2, "%s: team\n", redtext("Server mode"));
 		G_sprint(self, 2, "%s: %s\n", redtext("Server locking"),
@@ -1189,7 +1196,7 @@ void ListWhoNot()
 			continue;
 
 		if ( !found )
-			G_bprint(2, "Players %s ready:\n"
+		  G_bprint(2, "Players %s ready:\n"
 					    "žžžžžžžžžžžžžžžžžžžžžŸ\n", redtext("not")); // broadcast
 
 		for ( from = 0, p2 = world; p2 = find_plrspc(p2, &from); )
@@ -1707,6 +1714,12 @@ void ShowRules()
 {
 	if( isDuel() )
 		G_sprint(self, 2, "Server is in duel mode.\n");
+        else if ( isCTF() )
+	        G_sprint(self, 2, "Server is in CTF mode.\n"
+                                  "Additional commands\impulses:\n"
+                                  "impulse 22 : Grappling Hook\n"
+                                  "tossrune   : Toss your current rune\n"
+			          "flagstatus : Displays flag information\n");
 	else if ( isFFA() )
 		G_sprint(self, 2, "Server is in FFA mode.\n");
 	else if ( isTeam() )
@@ -1862,9 +1875,10 @@ void PlayerStats()
 					G_sprint(self, 2, "%s‘ %s:  %d(%d) ", tmp2, p2->s.v.netname,
 						(int)p2->s.v.frags, (int)(p2->s.v.frags - p2->deaths));
 
-					if( isTeam() )
+					if( isTeam() || isCTF() )
 						G_sprint(self, 2, "%d ", (int)p2->friendly);
 
+                                        // fixme: efficiencies calculated wrong in ctf because you get "frags" for captures etc which are not actually frags	
 					if(p2->s.v.frags < 1)
 						p2->efficiency = 0;
 					else
@@ -2195,7 +2209,7 @@ const char common_um_init[] =
 	"k_dis 1\n"							// discharge on
 	"k_bzk 0\n"							// berzerk
 	"k_spw 0\n"							// affect spawn type
-
+      
 	"k_membercount 0\n"					// some unlimited values
 	"k_lockmin 0\n"						// some unlimited values
 	"k_lockmax 64\n";         			// some unlimited values
@@ -2227,7 +2241,7 @@ const char _2on2_um_init[] =
 	"k_membercount 1\n"					// minimum number of players in each team
 	"k_lockmin 1\n"						//
 	"k_lockmax 2\n"           			//
-	"k_mode 2\n";
+      	"k_mode 2\n";
 
 const char _3on3_um_init[] =
 	"maxclients 6\n"
@@ -2289,6 +2303,21 @@ const char ffa_um_init[] =
 //	"k_exttime 5\n"
 	"k_mode 3\n";
 
+const char ctf_um_init[] =
+        "maxclients 16\n"
+        "timelimit  20\n"
+        "teamplay   2\n"
+        "deathmatch 3\n"
+        "k_dis 0\n"          
+        "k_pow 1\n"
+        "k_spw 1\n"
+        "k_membercount 0\n"          
+        "k_lockmin 2\n"                                         
+        "k_lockmax 2\n"                                 
+        "k_overtime 1\n"
+        "k_exttime 5\n"
+        "k_mode 4\n";
+
 
 #define UM_1ON1		( 1<<0  )
 #define UM_2ON2		( 1<<1  )
@@ -2296,6 +2325,7 @@ const char ffa_um_init[] =
 #define UM_4ON4		( 1<<3  )
 #define UM_10ON10	( 1<<4  )
 #define UM_FFA		( 1<<5  )
+#define UM_CTF          ( 1<<6  )
 
 typedef struct usermode_s {
 	const char 	  *name;
@@ -2311,7 +2341,8 @@ usermode um_list[] =
 	{ "3on3",	"\x95 on \x95",			_3on3_um_init,		UM_3ON3},
 	{ "4on4",	"\x96 on \x96",			_4on4_um_init,		UM_4ON4},
 	{ "10on10",	"\x93\x92 on \x93\x92",	_10on10_um_init,	UM_10ON10},
-	{ "ffa",	"ffa",					ffa_um_init,		UM_FFA}
+	{ "ffa",	"ffa",					ffa_um_init,		UM_FFA},
+	{ "ctf",        "ctf",                          ctf_um_init,            UM_CTF}
 };
 
 int um_cnt = sizeof (um_list) / sizeof (um_list[0]);
@@ -2327,6 +2358,7 @@ void UserMode(float umode)
 
 	int k_free_mode = cvar( "k_free_mode" );
 	int k_allowed_free_modes = cvar( "k_allowed_free_modes" );
+
 
 	if ( match_in_progress )
 		return;
@@ -2433,9 +2465,9 @@ void UserMode(float umode)
 		G_cprint("%s", buf);
 	}
 
-	G_cprint("\n");
+        G_cprint("\n");
 
-	cvar_fset("_k_last_xonx", umode+1); // save last XonX command
+        cvar_fset("_k_last_xonx", umode+1); // save last XonX command
 }
 
 #define UNPAUSEGUARD ( "unpauseGuard" )
@@ -3565,7 +3597,7 @@ void krnd ()
 
 	if( check_master() )
 		return;
-
+	
 	if ( ( argc = trap_CmdArgc() ) < 3 ) {
 		G_sprint(self, 2, "usage: rnd <1st 2nd ...>\n");
 		return;

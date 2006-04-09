@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.31 2006/04/06 18:58:36 qqshka Exp $
+ *  $Id: g_utils.c,v 1.32 2006/04/09 16:45:19 disconn3ct Exp $
  */
 
 #include "g_local.h"
@@ -1009,9 +1009,14 @@ qboolean isFFA( )
 	return (k_mode == gtFFA ? true : false);
 }
 
+qboolean isCTF( )
+{
+        return (k_mode == gtCTF ? true : false);
+}
+
 qboolean isUnknown( )
 {
-	return ((!isDuel() && !isTeam() && !isFFA()) ? true : false);
+	return ((!isDuel() && !isTeam() && !isFFA() && !isCTF()) ? true : false);
 }
 
 // <<< gametype
@@ -1652,7 +1657,7 @@ void lastscore_add ()
 			}
 		}
 	}
-	else if ( isTeam() && k_showscores ) {
+	else if ( ( isTeam() || isCTF() ) && k_showscores ) {
 		lst = lsTeam;
 
 		e1 = cvar_string( "_k_team1" );

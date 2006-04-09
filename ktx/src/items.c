@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.12 2006/04/06 18:58:36 qqshka Exp $
+ *  $Id: items.c,v 1.13 2006/04/09 16:45:19 disconn3ct Exp $
  */
 
 #include "g_local.h"
@@ -262,12 +262,14 @@ void item_megahealth_rot()
 {
 	other = PROG_TO_EDICT( self->s.v.owner );
 
-	if ( other->s.v.health > other->s.v.max_health )
+	if ( other->s.v.health > other->s.v.max_health ) 
 	{
-		other->s.v.health -= 1;
+	        if ( !other->ctf_flag & CTF_RUNE_RGN )
+		       other->s.v.health -= 1;
 		self->s.v.nextthink = g_globalvars.time + 1;
 		return;
 	}
+
 // it is possible for a player to die and respawn between rots, so don't
 // just blindly subtract the flag off
 	other->s.v.items -= ( int ) other->s.v.items & IT_SUPERHEALTH;
@@ -461,6 +463,9 @@ Deathmatch weapon change rules for picking up a weapon
 void Deathmatch_Weapon( int new )
 {
 	int           or, nr;
+
+	if (self->s.v.weapon == IT_HOOK && self->s.v.button0)
+          return;
 
 // change self.weapon if desired
 	or = RankForWeapon( self->s.v.weapon );
@@ -701,6 +706,7 @@ void SP_weapon_rocketlauncher()
 	if (deathmatch > 3)
 		return;
 #endif
+
 
 	trap_precache_model( "progs/g_rock2.mdl" );
 	setmodel( self, "progs/g_rock2.mdl" );

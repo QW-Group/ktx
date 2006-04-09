@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.24 2006/04/07 21:39:04 qqshka Exp $
+ *  $Id: progs.h,v 1.25 2006/04/09 16:45:32 disconn3ct Exp $
  */
 
 #include "progdefs.h"
@@ -302,6 +302,19 @@ typedef struct gedict_s {
 
 	pos_t	pos[MAX_POSITIONS];	// for player pos_save / pos_move
 	float	pos_move_time;		// for player pos_save / pos_move
+
+        // CTF
+        struct gedict_s *hook;         // grapple
+        qboolean lefty;                // sound stuff
+        qboolean on_hook;              // are we on the grapple?
+        qboolean hook_out;             // is the grapple in flight?
+        int ctf_flag;                  // do we have a rune or flag? 
+        float regen_time;              // time to update health if regen rune
+        float rune_sound_time;         // dont spam rune sounds (1 per second)
+        float carrier_frag_time;       // used for carrier assists
+        float return_flag_time;        // used for flag return assists
+        float rune_notify_time;        // already have a rune spam prevention
+        float carrier_hurt_time;       // time we last hurt enemy carrier
 
 	qboolean was_jump;
 

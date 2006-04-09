@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_consts.h,v 1.6 2006/03/26 17:19:54 qqshka Exp $
+ *  $Id: g_consts.h,v 1.7 2006/04/09 16:45:32 disconn3ct Exp $
  */
 
 //
@@ -109,6 +109,13 @@
 #define IT_SUIT 2097152
 #define IT_QUAD 4194304
 #define IT_HOOK 8388608
+
+/* Could use these so clients can display which rune they have
+#define IT_SIGIL1 (1<<28)
+#define IT_SIGIL2 (1<<29)
+#define IT_SIGIL3 (1<<30)
+#define IT_SIGIL4 (1<<31)
+*/
 
 // point content values
 
@@ -258,3 +265,11 @@
 //                     256   	if it is set menu_out.cfg will be not called
 //                     512   	use dmm related map cfg
 //                     (1024)  	do not use stuff sounds
+
+// CTF
+#define CTF_RUNE_RES    1   // IT_SIGIL1
+#define CTF_RUNE_STR    2   // IT_SIGIL2
+#define CTF_RUNE_HST    4   // IT_SIGIL3
+#define CTF_RUNE_RGN    8   // IT_SIGIL4
+#define CTF_RUNE_MASK  15
+#define CTF_FLAG       16

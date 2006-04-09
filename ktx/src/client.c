@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.49 2006/04/07 21:38:47 qqshka Exp $
+ *  $Id: client.c,v 1.50 2006/04/09 16:45:19 disconn3ct Exp $
  */
 
 //===========================================================================
@@ -164,7 +164,7 @@ void CheckTiming()
 		}
 		else {
 			// don't bother if player have quad or pent
-			if ( !p->invincible_finished && !p->super_damage_finished )
+			if ( !p->invincible_finished && !p->super_damage_finished && (!(p->ctf_flag & CTF_FLAG)) )
 				p->s.v.effects = ( int ) p->s.v.effects & ~EF_DIMLIGHT;
 		}
 
@@ -221,7 +221,10 @@ void SP_info_intermission()
 
 void InGameParams ()
 {
-	g_globalvars.parm1 = IT_AXE | IT_SHOTGUN;
+        if ( isCTF() )
+	  g_globalvars.parm1 = IT_AXE | IT_SHOTGUN | IT_HOOK;
+        else
+          g_globalvars.parm1 = IT_AXE | IT_SHOTGUN;
 	g_globalvars.parm2 = 100;
 	g_globalvars.parm3 = 0;
 	g_globalvars.parm4 = 25;
@@ -233,8 +236,12 @@ void InGameParams ()
 
 void PrewarParams ()
 {
-	g_globalvars.parm1 = IT_AXE | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_NAILGUN | IT_SUPER_NAILGUN
-					   | IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER | IT_LIGHTNING;
+        if ( isCTF() )
+	  g_globalvars.parm1 = IT_AXE | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_NAILGUN | IT_SUPER_NAILGUN
+					   | IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER | IT_LIGHTNING | IT_HOOK;
+        else
+	  g_globalvars.parm1 = IT_AXE | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_NAILGUN | IT_SUPER_NAILGUN
+	     | IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER | IT_LIGHTNING;
 	g_globalvars.parm2 = 1000;
 	g_globalvars.parm3 = 1000;
 	g_globalvars.parm4 = 100;
@@ -301,7 +308,9 @@ void DecodeLevelParms()
 	self->s.v.ammo_cells 	= g_globalvars.parm7;
 	self->s.v.weapon 		= g_globalvars.parm8;
 	self->s.v.armortype 	= g_globalvars.parm9 * 0.01;
-
+	// remove any ctf items from previous level
+        self->ctf_flag = 0;
+       
 //	G_bprint(2, "DLP1 ad:%d ac:%d s:%d\n", (int)self->k_admin, (int)self->k_accepted, (int)self->k_stuff);
 
 	if ( g_globalvars.parm11 )
@@ -700,6 +709,8 @@ void ClientKill()
 	if( match_in_progress == 2 )	// KTEAMS
 		self->s.v.frags -= 2;	// extra penalty
 
+        DropRune();
+        PlayerDropFlag( self );
 	respawn();
 }
 
@@ -715,7 +726,7 @@ SelectSpawnPoint
 Returns the entity to spawn at
 ============
 */
-gedict_t       *SelectSpawnPoint()
+gedict_t       *SelectSpawnPoint( char *spawnname )
 {
 	gedict_t		*spot;
 	gedict_t		*spots;			// chain of "valid" spots
@@ -726,8 +737,8 @@ gedict_t       *SelectSpawnPoint()
 	int				totalspots;
 	int				pcount;
 	int				k_spw = cvar( "k_spw" );
-
-	totalspots = numspots = 0;
+    
+    	totalspots = numspots = 0;
 
 // testinfo_player_start is only found in regioned levels
 	spot = find( world, FOFS( s.v.classname ), "testplayerstart" );
@@ -739,7 +750,7 @@ gedict_t       *SelectSpawnPoint()
 // ok, find all spots that don't have players nearby
 
 	spots = world;
-	spot = find( world, FOFS( s.v.classname ), "info_player_deathmatch" );
+	spot = find( world, FOFS( s.v.classname ), spawnname );
 	while ( spot )
 	{
 		totalspots++;
@@ -774,9 +785,8 @@ gedict_t       *SelectSpawnPoint()
 			numspots++;
 		}
 		// Get the next spot in the chain
-		spot = find( spot, FOFS( s.v.classname ), "info_player_deathmatch" );
+		spot = find( spot, FOFS( s.v.classname ), spawnname );
 	}
-
 
     if( match_in_progress == 2 )
 		self->k_1spawn = 200;
@@ -907,6 +917,7 @@ void ClientConnect()
 	self->fraggie = 0;
 	MakeMOTD();
 	CheckRate(self, "");
+        self->ctf_flag = 0;
 
 	if( k_captains == 2 ) {
 // in case of team picking, pick player if there's a captain with his/her team
@@ -985,7 +996,7 @@ void PutClientInServer()
 	self->invincible_finished = 0;
 	self->s.v.effects = 0;
 	self->spawn_time = g_globalvars.time;
-
+        
 
 #ifdef KTEAMS
 // the spawn falling damage bug workaround
@@ -994,6 +1005,13 @@ void PutClientInServer()
 
 // brokenankle
     self->brokenankle = 0;
+
+// ctf
+    self->on_hook = false;
+    self->hook_out = false;
+    self->maxspeed = cvar("sv_maxspeed");
+    self->regen_time = -1;
+    self->carrier_hurt_time = -1;
 #endif
 
 	self->invincible_time = 0;
@@ -1004,6 +1022,19 @@ void PutClientInServer()
 		self->s.v.weapon = W_BestWeapon();
 	W_SetCurrentAmmo();
 
+        
+        // if flag is not at base update our items so clients can display icon
+        if ( isCTF() && match_in_progress == 2 )
+	{
+          gedict_t *rflag = find( world, FOFCLSN, "item_flag_team1" );
+          gedict_t *bflag = find( world, FOFCLSN, "item_flag_team2" );
+            
+          if ( rflag && rflag->cnt)
+            self->s.v.items = (int) self->s.v.items | IT_KEY2;
+	  if ( bflag && bflag->cnt)
+            self->s.v.items = (int) self->s.v.items | IT_KEY1;
+	}
+
 	self->attack_finished = g_globalvars.time;
 	self->th_pain = player_pain;
 	self->th_die = PlayerDie;
@@ -1011,8 +1042,11 @@ void PutClientInServer()
 	self->s.v.deadflag = DEAD_NO;
 // paustime is set by teleporters to keep the player from moving a while
 	self->pausetime = 0;
-
-	spot = SelectSpawnPoint();
+	
+        if ( isCTF() && self->s.v.frags < 1 && self->deaths < 1)
+          spot = SelectSpawnPoint(streq(getteam(self), "red") ? "info_player_team1" : "info_player_team2" );
+	else
+	  spot = SelectSpawnPoint("info_player_deathmatch");
 	VectorCopy( spot->s.v.origin, self->s.v.origin );
 	self->s.v.origin[2] += 1;
 	VectorCopy( spot->s.v.angles, self->s.v.angles );
@@ -1482,6 +1516,8 @@ void ClientDisconnect()
 		if ( !k_matchLess ) // no ghost in matchless mode
 			MakeGhost ();
 	}
+        DropRune();
+        PlayerDropFlag( self );
 
 	// normal disconnect
 	if( self->k_accepted == 2 ) {
@@ -2019,12 +2055,39 @@ void PlayerPreThink()
 		SetVector( self->s.v.velocity, 0, 0, 0 );
 
 	if ( g_globalvars.time > self->attack_finished && self->s.v.currentammo == 0
-	     && self->s.v.weapon != IT_AXE )
+	     && self->s.v.weapon != IT_AXE && self->s.v.weapon != IT_HOOK )
 	{
 		self->s.v.weapon = W_BestWeapon();
 		W_SetCurrentAmmo();
 	}
 
+	// CTF
+        if ( self->on_hook )
+          GrappleService();
+
+        if ( self->ctf_flag & CTF_RUNE_RGN )
+	{
+          if ( self->regen_time < g_globalvars.time )
+	  {
+            self->regen_time = g_globalvars.time;
+            if ( self->s.v.health < 150 )
+	    {
+              self->s.v.health += 5;
+              if ( self->s.v.health > 150 )
+		self->s.v.health = 150;
+              self->regen_time += 0.5;
+              RegenerationSound( self );
+	    }
+	    if ( self->s.v.armorvalue < 150 && self->s.v.armorvalue > 0 )
+            {
+	      self->s.v.armorvalue += 5;
+	      if ( self->s.v.armorvalue > 150 )
+	        self->s.v.armorvalue = 150;
+	      self->regen_time += 0.5;
+              RegenerationSound( self );
+	    }
+	  }
+	}
 }
 
 /////////////////////////////////////////////////////////////////
@@ -2122,6 +2185,8 @@ void CheckPowerups()
 			self->s.v.effects = ( int ) self->s.v.effects | EF_DIMLIGHT;
 			self->s.v.effects = ( int ) self->s.v.effects | EF_RED;
 		}
+                else if ( self->ctf_flag & CTF_FLAG )
+		        self->s.v.effects -= ( ( int ) self->s.v.effects & EF_RED );
 		else
 		{
 			if ( !qlon ) // EF_DIMLIGHT shared between quad and pent
@@ -2176,6 +2241,8 @@ void CheckPowerups()
 			self->s.v.effects = ( int ) self->s.v.effects | EF_DIMLIGHT;
 			self->s.v.effects = ( int ) self->s.v.effects | EF_BLUE;
 		}
+		else if ( self->ctf_flag & CTF_FLAG )
+		  self->s.v.effects -= ( ( int ) self->s.v.effects & EF_BLUE );             
 		else
 		{
 			if ( !plon ) // EF_DIMLIGHT shared between quad and pent
@@ -2215,7 +2282,6 @@ void CheckPowerups()
 			self->radsuit_finished = 0;
 		}
 	}
-
 }
 
 ///////////
@@ -2620,6 +2686,59 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			if ( targ->spawn_time + 1 > g_globalvars.time )
 				attacker->ps.spawn_frags++;
 
+			// handle various ctf bonuses
+                        if ( isCTF() )
+			{
+                          qboolean carrier_bonus = false;
+                        
+                          // 2 point bonus for killing enemy flag carrier
+                          if ( targ->ctf_flag & CTF_FLAG )
+			  {
+                            attacker->s.v.frags += 2;
+                            attacker->carrier_frag_time = g_globalvars.time;
+                            //G_sprint( attacker, 1, "Enemy flag carrier killed: 2 bonus frags\n" );
+			  }
+                          
+                          // defending carrier from aggressive player
+                          if (( targ->carrier_hurt_time + 4 > g_globalvars.time ) &&
+                              !( attacker->ctf_flag & CTF_FLAG ) )
+			  {
+                            carrier_bonus = true;
+                            attacker->s.v.frags += 2;
+                            // Yes, aggressive is spelled wrong.. but dont want to fix now and break stat parsers
+                            G_bprint( 2, "%s defends %s's flag carrier against an agressive enemy\n",
+                                      attacker->s.v.netname,
+                                      streq( getteam(attacker), "red" ) ? redtext("RED") : redtext("BLUE") );
+			  }  
+
+			  gedict_t *head = findradius( world, targ->s.v.origin, 400 );
+                          while (head)
+			  {                            
+                            if ( streq( head->s.v.classname, "player" ) )
+			    {
+                              if ( (head->ctf_flag & CTF_FLAG) && ( head != attacker) &&
+                                   streq(getteam(head), getteam(attacker)) && !carrier_bonus)
+			      {
+                                attacker->s.v.frags++;
+                                G_bprint( 2, "%s defends %s's flag carrier\n", attacker->s.v.netname,
+                                 streq(getteam(attacker), "red") ? redtext("RED") : redtext("BLUE"));
+                              }
+			    }
+
+                            if ( (streq(getteam(attacker), "red") && 
+				  streq(head->s.v.classname, "item_flag_team1")) ||
+                                 (streq(getteam(attacker), "blue") &&
+                                  streq(head->s.v.classname, "item_flag_team2")) )
+			    {
+                              attacker->s.v.frags += 2;
+                              G_bprint( 2, "%s defends the %s flag\n", 
+                                        attacker->s.v.netname, 
+                                        streq(getteam(attacker), "red") ? redtext("RED") : redtext("BLUE"));
+			    }
+			    head = findradius( head, targ->s.v.origin, 400 );
+			  }
+			}
+
 			deathstring2 = "\n"; // default is "\n"
 
 			if ( streq( targ->deathtype, "nail" ) )
@@ -2673,6 +2792,10 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			else if ( attacker->s.v.weapon == IT_AXE )
 			{
 				deathstring = " was ax-murdered by ";
+			}
+                        else if ( attacker->s.v.weapon == IT_HOOK )
+			{
+			        deathstring = " was hooked by ";
 			}
 			else if ( attacker->s.v.weapon == IT_SHOTGUN )
 			{

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.h,v 1.3 2005/12/04 17:13:44 qqshka Exp $
+ *  $Id: player.h,v 1.4 2006/04/09 16:45:32 disconn3ct Exp $
  */
 
 void            player_stand1();
@@ -47,6 +47,11 @@ void            player_axed1();
 void            player_axed2();
 void            player_axed3();
 void            player_axed4();
+void            player_chain1();
+void            player_chain2();
+void            player_chain3();
+void            player_chain4();
+void            player_chain5();
 void            player_nail1();
 void            player_nail2();
 void            player_light1();

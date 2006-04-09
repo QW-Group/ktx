@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.30 2006/04/07 21:38:47 qqshka Exp $
+ *  $Id: world.c,v 1.31 2006/04/09 16:45:19 disconn3ct Exp $
  */
 
 #include "g_local.h"
@@ -75,7 +75,6 @@ void CopyToBodyQue( gedict_t * ent )
 
 
 gedict_t       *lastspawn;
-
 
 void CheckDefMap ()
 {
@@ -135,7 +134,7 @@ void SP_worldspawn()
 		G_Error( "SP_worldspawn: The first entity isn't 'worldspawn'" );
 	}
 	world->s.v.classname = "worldspawn";
-	lastspawn = world;
+        lastspawn = world;
 	InitBodyQue();
 
 	if ( !Q_stricmp( self->s.v.model, "maps/e1m8.bsp" ) )
@@ -232,6 +231,20 @@ void SP_worldspawn()
 	trap_precache_sound( "items/damage2.wav" );
 	trap_precache_sound( "items/damage3.wav" );
 
+	//ctf
+        trap_precache_sound( "weapons/chain1.wav" );
+        trap_precache_sound( "weapons/chain2.wav" );
+        trap_precache_sound( "weapons/chain3.wav" );
+        trap_precache_sound( "weapons/bounce2.wav" );
+	trap_precache_sound( "misc/flagtk.wav" );
+        trap_precache_sound( "misc/flagcap.wav" );
+        trap_precache_sound( "doors/runetry.wav" );
+        trap_precache_sound( "blob/land1.wav" );
+	trap_precache_sound( "rune/rune1.wav" );
+	trap_precache_sound( "rune/rune2.wav" );
+	trap_precache_sound( "rune/rune22.wav" );
+	trap_precache_sound( "rune/rune3.wav" );
+	trap_precache_sound( "rune/rune4.wav" );
 
 	trap_precache_model( "progs/player.mdl" );
 	trap_precache_model( "progs/eyes.mdl" );
@@ -268,6 +281,22 @@ void SP_worldspawn()
 	trap_precache_model( "progs/v_light.mdl" );
 
 	trap_precache_model( "progs/wizard.mdl" );
+
+#ifdef CTF_CUSTOM_MODELS 
+        trap_precache_model( "progs/v_star.mdl" );
+        trap_precache_model( "progs/bit.mdl" );
+        trap_precache_model( "progs/star.mdl" );
+        trap_precache_model( "progs/flag.mdl" );
+#else
+        trap_precache_model( "progs/v_spike.mdl" );
+        trap_precache_model( "progs/w_g_key.mdl" );
+        trap_precache_model( "progs/w_s_key.mdl" );
+#endif
+
+	trap_precache_model( "progs/end1.mdl" );
+	trap_precache_model( "progs/end2.mdl" );
+	trap_precache_model( "progs/end3.mdl" );
+	trap_precache_model( "progs/end4.mdl" );
 
 // quad mdl - need this due to aerowalk customize
 	trap_precache_model( "progs/quaddama.mdl" );
@@ -497,7 +526,6 @@ void FirstFrame	( )
 //	RegisterCvar("rj");
 	RegisterCvar("k_no_fps_physics");
 
-
 	RegisterCvar("_k_captteam1"); // internal mod usage
 	RegisterCvar("_k_captcolor1"); // internal mod usage
 	RegisterCvar("_k_captteam2"); // internal mod usage
@@ -526,6 +554,7 @@ void FirstFrame	( )
 	k_matchLess = cvar( "k_matchless" ); // changed only here
 }
 
+
 // items spawned, but probably not solid yet
 void SecondFrame ( )
 {
@@ -533,6 +562,9 @@ void SecondFrame ( )
 		return;
 
 	Customize_Maps();
+
+        if ( isCTF() )
+	  SpawnRunes();
 
 	if ( k_matchLess )
 		StartMatchLess ();
@@ -577,6 +609,43 @@ void show_powerups ( char *classname )
 	}
 
 	self  = swp;
+}
+
+// called when switching to/from ctf mode
+void FixCTFItems()
+{
+  gedict_t *e;
+
+  if ( isCTF() )
+  {
+     RegenFlags();
+     SpawnRunes();
+     for ( e = world; e = find( e, FOFCLSN, "player" ); )
+       e->s.v.items = (int) e->s.v.items | IT_HOOK;
+  }
+  else
+  {
+     for ( e = world; e = find( e, FOFCLSN, "player" ); )
+      e->s.v.items -= (int) e->s.v.items & IT_HOOK;
+
+     e = find( world, FOFCLSN, "item_flag_team1" );
+     if ( e )
+     {
+       e->s.v.touch = (func_t) SUB_Null;
+       setmodel( e, "" );
+     }
+
+     e = find( world, FOFCLSN, "item_flag_team2" );
+     if ( e )
+     {
+       e->s.v.touch = (func_t) SUB_Null;
+       setmodel( e, "" );
+     }
+
+     for ( e = world; e = find( e, FOFCLSN, "rune" ); )
+       if ( e )
+         ent_remove( e );
+   }
 }
 
 // serve k_pow and k_pow_min_players
@@ -648,7 +717,7 @@ void FixRules ( )
 
 	// teamplay set, but gametype is not team, disable teamplay in this case
 	if ( teamplay ) {
-		if ( !isTeam() )
+		if ( !isTeam() && !isCTF())
 			trap_cvar_set_float("teamplay", (teamplay = 0));
 	}
 	
@@ -723,7 +792,12 @@ void StartFrame( int time )
 	teamplay   = cvar( "teamplay" );
 	deathmatch = cvar( "deathmatch" );
 
-	k_mode	   = cvar( "k_mode" );
+	gameType_t old_k_mode = k_mode;
+        k_mode = cvar( "k_mode" );         
+
+        // if modes have changed we may need to add/remove flags etc
+        if ( k_mode != old_k_mode && framecount > 1 )
+          FixCTFItems(); 
 
 	FixRules ();
 
