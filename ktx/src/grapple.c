@@ -145,8 +145,9 @@ void RemoveChain()
 //
 void UpdateChain()
 {
+  vec3_t t1, t2, t3;
   vec3_t temp;
-  gedict_t *owner = PROG_TO_EDICT( self->s.v.owner );
+  gedict_t *owner = PROG_TO_EDICT( self->s.v.owner ), *goal, *goal2;
 
   if (!owner->hook_out)
   {
@@ -156,7 +157,6 @@ void UpdateChain()
   }
 
   VectorSubtract(owner->hook->s.v.origin, owner->s.v.origin, temp);
-  vec3_t t1, t2, t3;
   VectorScale(temp, 0.25, t1);
   VectorAdd(t1, owner->s.v.origin, t1);
   VectorScale(temp, 0.50, t2);
@@ -164,8 +164,8 @@ void UpdateChain()
   VectorScale(temp, 0.75, t3);
   VectorAdd(t3, owner->s.v.origin, t3);
   
-  gedict_t *goal = PROG_TO_EDICT(self->s.v.goalentity);
-  gedict_t *goal2 = PROG_TO_EDICT(goal->s.v.goalentity);
+  goal = PROG_TO_EDICT(self->s.v.goalentity);
+  goal2 = PROG_TO_EDICT(goal->s.v.goalentity);
   // These numbers are correct assuming 3 links.
   // 4 links would be *20 *40 *60 and *80
   setorigin (self,  PASSVEC3(t1));
@@ -272,6 +272,7 @@ void GrappleAnchor()
 void GrappleService()
 {
   vec3_t hookVector, hookVelocity;
+  gedict_t *enemy;
 
   // drop the hook if player lets go of fire
   if ( !self->s.v.button0 )
@@ -283,7 +284,7 @@ void GrappleService()
     }
   }
 
-  gedict_t *enemy = PROG_TO_EDICT( self->hook->s.v.enemy );
+  enemy = PROG_TO_EDICT( self->hook->s.v.enemy );
   
   // If hooked to a player, track them directly!
   if ( streq(enemy->s.v.classname, "player") )

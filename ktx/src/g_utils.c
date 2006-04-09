@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.32 2006/04/09 16:45:19 disconn3ct Exp $
+ *  $Id: g_utils.c,v 1.33 2006/04/09 22:36:38 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1011,7 +1011,7 @@ qboolean isFFA( )
 
 qboolean isCTF( )
 {
-        return (k_mode == gtCTF ? true : false);
+	return (k_mode == gtCTF ? true : false);
 }
 
 qboolean isUnknown( )

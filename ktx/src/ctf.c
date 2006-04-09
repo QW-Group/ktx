@@ -95,10 +95,10 @@ void spawn_item_flag()
     VectorCopy( self->s.v.origin, self->s.v.oldorigin );
 
   if ( !isCTF() )
-    {
-      setmodel( self, "" );
-      self->s.v.touch = (func_t) SUB_Null;
-    }
+  {
+    setmodel( self, "" );
+    self->s.v.touch = (func_t) SUB_Null;
+  }
 }
 
 void SP_item_flag_team1()
@@ -198,12 +198,12 @@ void FlagThink()
 
 void FlagTouch()
 {
-  gedict_t *p;
+  gedict_t *p, *owner;
 
-  if (match_in_progress != 2)
+  if ( match_in_progress != 2 )
     return;
 
-  if (!streq( other->s.v.classname, "player" ))
+  if ( !streq( other->s.v.classname, "player" ) )
     return;
 
   if ( other->s.v.health < 1 )
@@ -220,56 +220,61 @@ void FlagTouch()
     {
       if ( other->ctf_flag & CTF_FLAG )
       {
+        gedict_t *cflag = NULL;
+
         // capture
         other->ctf_flag -= ( (int) other->ctf_flag & CTF_FLAG );
-        other->s.v.effects -= ( (int) other->s.v.effects & (EF_FLAG1 | EF_FLAG2));
+        other->s.v.effects -= ( (int) other->s.v.effects & (EF_FLAG1 | EF_FLAG2) );
         
         if ( !other->super_damage_finished && !other->invincible_finished )
           other->s.v.effects -= ( (int) other->s.v.effects & EF_DIMLIGHT );
 
         sound( other, CHAN_VOICE, "misc/flagcap.wav", 1, ATTN_NONE);
-        gedict_t *cflag;
+
         G_bprint( 2, other->s.v.netname );
+
         if ( self->k_teamnumber == 1 )
-	{
+		{
           cflag = find( world, FOFCLSN, "item_flag_team2" );
           G_bprint( 2, " %s the %s flag!\n", redtext("captured"), redtext("BLUE") );
         }
         else
-	{
+		{
           cflag = find( world, FOFCLSN, "item_flag_team1" );
           G_bprint( 2, " %s the %s flag!\n", redtext("captured"), redtext("RED") );
         }
-        if (cflag)
+
+        if ( cflag )
           G_bprint( 2, "The capture took %.1f seconds\n", cflag->cnt2 );
 
         other->s.v.frags += CAPTURE_BONUS;
 	    
         // loop through all players on team to give bonus
-	for ( p = world; p = find ( p, FOFCLSN, "player" ); )
-	{
-          p->s.v.items -= ( (int) p->s.v.items & (IT_KEY1 | IT_KEY2) );
-          if ( streq(getteam(p), getteam(other)) )
-	  {
-            if ( p->return_flag_time + RETURN_ASSIST_TIME > g_globalvars.time )
-	    {
-              p->return_flag_time = -1;
-              p->s.v.frags += RETURN_ASSIST_BONUS;
-              G_bprint( 2, "%s gets an assist for returning his flag!\n", p->s.v.netname );
-	    }
-            if ( p->carrier_frag_time + CARRIER_ASSIST_TIME > g_globalvars.time )
-	    {
-              p->carrier_frag_time = -1;
-              p->s.v.frags += CARRIER_ASSIST_BONUS;
-              G_bprint( 2, "%s gets an assist for fragging the flag carrier!\n", p->s.v.netname );
-	    }
-           
-	    if ( p != other )
-              p->s.v.frags += TEAM_BONUS;
-          }
-          else
-            p->carrier_hurt_time = -1;
-        }      
+		for ( p = world; p = find ( p, FOFCLSN, "player" ); )
+		{
+			p->s.v.items -= ( (int) p->s.v.items & (IT_KEY1 | IT_KEY2) );
+			if ( streq(getteam(p), getteam(other)) )
+	  		{
+				if ( p->return_flag_time + RETURN_ASSIST_TIME > g_globalvars.time )
+	    		{
+					p->return_flag_time = -1;
+					p->s.v.frags += RETURN_ASSIST_BONUS;
+					G_bprint( 2, "%s gets an assist for returning his flag!\n", p->s.v.netname );
+	    		}
+				if ( p->carrier_frag_time + CARRIER_ASSIST_TIME > g_globalvars.time )
+	    		{
+					p->carrier_frag_time = -1;
+					p->s.v.frags += CARRIER_ASSIST_BONUS;
+					G_bprint( 2, "%s gets an assist for fragging the flag carrier!\n", p->s.v.netname );
+	    		}
+	           
+	    		if ( p != other )
+					p->s.v.frags += TEAM_BONUS;
+			}
+			else
+				p->carrier_hurt_time = -1;
+		}
+
         RegenFlags();
         return;
       }
@@ -283,9 +288,10 @@ void FlagTouch()
       RegenFlag( self );
 
       for ( p = world; p = find ( p, FOFCLSN, "player" ); )
-	p->s.v.items -= ( (int) p->s.v.items & (int) self->s.v.items );
+		p->s.v.items -= ( (int) p->s.v.items & (int) self->s.v.items );
 
       G_bprint( 2, other->s.v.netname);
+
       if ( self->k_teamnumber == 1)
         G_bprint( 2, " %s the %s flag!\n", redtext("returned"), redtext("RED") );
       else
@@ -306,7 +312,7 @@ void FlagTouch()
   self->s.v.solid = SOLID_NOT;
   self->s.v.owner = EDICT_TO_PROG( other );
 
-  gedict_t *owner = PROG_TO_EDICT( self->s.v.owner );
+  owner = PROG_TO_EDICT( self->s.v.owner );
 
   G_bprint( 2, other->s.v.netname );
   if ( streq(getteam(other), "red"))
@@ -324,6 +330,7 @@ void FlagTouch()
 
 void PlayerDropFlag( gedict_t *player )
 {
+  gedict_t *flag;
   char *cn;
 
   if (!(player->ctf_flag & CTF_FLAG))
@@ -336,8 +343,8 @@ void PlayerDropFlag( gedict_t *player )
 
   player->ctf_flag -= ( player->ctf_flag & CTF_FLAG );
 
-  gedict_t *flag = find( world, FOFCLSN, cn );
-  if ( flag != world )
+  flag = find( world, FOFCLSN, cn );
+  if ( flag != world ) // FIXME: BUG u must compare with NULL not with world!!!
     DropFlag( flag );
 }
 
@@ -371,11 +378,13 @@ void DropFlag( gedict_t *flag)
 
 void FlagStatus()
 {
+  gedict_t *flag1, *flag2;
+
   if ( !isCTF() )
     return;
 
-  gedict_t *flag1 = find( world, FOFCLSN, "item_flag_team1" );
-  gedict_t *flag2 = find( world, FOFCLSN, "item_flag_team2" );
+  flag1 = find( world, FOFCLSN, "item_flag_team1" );
+  flag2 = find( world, FOFCLSN, "item_flag_team2" );
 
   if (!flag1 || !flag2)
     return;

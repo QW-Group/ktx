@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.13 2006/04/09 16:45:19 disconn3ct Exp $
+ *  $Id: player.c,v 1.14 2006/04/09 22:36:38 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -51,7 +51,7 @@ void player_stand1()
 		return;
 	}
 
-	if ( self->s.v.weapon == IT_AXE || self->s.v.weapon == IT_HOOK)
+	if ( self->s.v.weapon == IT_AXE || self->s.v.weapon == IT_HOOK )
 	{
 		if ( self->walkframe >= 12 )
 			self->walkframe = 0;
@@ -79,7 +79,7 @@ void player_run()
 		return;
 	}
 
-	if ( self->s.v.weapon == IT_AXE || self->s.v.weapon == IT_HOOK)
+	if ( self->s.v.weapon == IT_AXE || self->s.v.weapon == IT_HOOK )
 	{
 		if ( self->walkframe >= 6 )
 			self->walkframe = 0;
@@ -123,9 +123,9 @@ void player_chain3()
   self->s.v.think = ( func_t ) player_chain4;
   self->s.v.nextthink = g_globalvars.time + 0.1;
   self->s.v.weaponframe = 3;
-  if (!self->hook_out)
+  if ( !self->hook_out )
     player_chain5();
-  else if (vlen(self->s.v.velocity) >= 750)
+  else if ( vlen(self->s.v.velocity) >= 750 )
     player_chain4();
 }
 
@@ -136,9 +136,9 @@ void player_chain4()
   self->s.v.think = ( func_t ) player_chain5;
   self->s.v.nextthink = g_globalvars.time + 0.1;
   self->s.v.weaponframe = 4;
-  if (!self->hook_out)
+  if ( !self->hook_out )
     player_chain5();
-  else if (vlen(self->s.v.velocity) < 750)  
+  else if ( vlen(self->s.v.velocity) < 750 )  
     player_chain3(); 
 }
 
@@ -943,17 +943,18 @@ void PlayerDie()
 			DropPowerup( self->invisible_finished - g_globalvars.time, IT_INVISIBILITY);
 	}
  
-        if ( isCTF() )
+	if ( isCTF() )
 	{
-          if ( self->hook_out )
-	  {
-            GrappleReset( self->hook );
-            self->attack_finished = g_globalvars.time + 0.75;
-            self->hook_out = true;
-	  }
-          DropRune();
-          PlayerDropFlag( self );
-        } 
+		if ( self->hook_out )
+		{
+			GrappleReset( self->hook );
+			self->attack_finished = g_globalvars.time + 0.75;
+			self->hook_out = true; // FIXME: for which reason this set to true?
+		}
+
+		DropRune();
+		PlayerDropFlag( self );
+	} 
 
 	self->invisible_finished = 0;	// don't die as eyes
 	self->invincible_finished = 0;

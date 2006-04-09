@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.39 2006/04/09 16:45:32 disconn3ct Exp $
+ *  $Id: g_local.h,v 1.40 2006/04/09 22:37:02 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -117,7 +117,7 @@ typedef enum
 	gtDuel,
 	gtTeam,
 	gtFFA,
-        gtCTF
+	gtCTF
 } gameType_t;
 
 typedef enum
@@ -251,7 +251,7 @@ qboolean	isghost( gedict_t *ed );
 qboolean	isDuel( );
 qboolean	isTeam( );
 qboolean	isFFA( );
-qboolean        isCTF( );
+qboolean	isCTF( );
 qboolean	isUnknown( );
 void		GhostFlag(gedict_t *p);
 int			GetUserID(gedict_t *p);
@@ -518,7 +518,7 @@ void    GrappleThrow();
 void    GrappleService();
 void    GrappleReset(gedict_t *rhook);
 
-//global.c
+// global.c
 
 #ifdef KTEAMS
 

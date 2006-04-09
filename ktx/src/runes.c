@@ -102,8 +102,8 @@ void TossRune()
 
   if ( self->ctf_flag & CTF_RUNE_RGN )
   {
-    DoTossRune( CTF_RUNE_RGN );
     gedict_t *regenrot = spawn();
+	DoTossRune( CTF_RUNE_RGN );
     regenrot->s.v.nextthink = g_globalvars.time + 5;
     regenrot->s.v.think = (func_t) RegenLostRot;
     regenrot->s.v.owner = EDICT_TO_PROG( self );

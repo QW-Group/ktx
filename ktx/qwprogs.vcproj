@@ -246,6 +246,9 @@
 				RelativePath="src\commands.c">
 			</File>
 			<File
+				RelativePath=".\src\ctf.c">
+			</File>
+			<File
 				RelativePath="src\doors.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -395,6 +398,9 @@
 				RelativePath="src\globals.c">
 			</File>
 			<File
+				RelativePath=".\src\grapple.c">
+			</File>
+			<File
 				RelativePath="src\items.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -522,6 +528,9 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;QWPROGS_EXPORTS;$(NoInherit)"/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\runes.c">
 			</File>
 			<File
 				RelativePath="src\server.c">

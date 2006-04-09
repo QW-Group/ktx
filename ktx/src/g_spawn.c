@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_spawn.c,v 1.5 2006/04/09 16:45:19 disconn3ct Exp $
+ *  $Id: g_spawn.c,v 1.6 2006/04/09 22:36:38 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -236,7 +236,7 @@ spawn_t         spawns[] = {
 	{"info_player_coop", 		SUB_Null},
 	{"info_intermission", 		SP_info_intermission},
 	{"trigger_changelevel", 	SP_trigger_changelevel},
-       
+
 /*QUAKED info_notnull (0 0.5 0) (-4 -4 -4) (4 4 4)
 Used as a positional target for lightning.
 */
@@ -319,11 +319,11 @@ Used as a positional target for lightning.
 	{"item_key2",			SP_item_key2},
 
 // ctf ents
-        {"item_flag_team1",        SP_item_flag_team1},
-        {"item_flag_team2",        SP_item_flag_team2},
-        {"func_ctf_wall",          SP_func_ctf_wall},
-        {"info_player_team1",           SUB_Null},
-        {"info_player_team2",           SUB_Null},
+	{"item_flag_team1",		SP_item_flag_team1},
+	{"item_flag_team2",		SP_item_flag_team2},
+	{"func_ctf_wall",		SP_func_ctf_wall},
+	{"info_player_team1",	SUB_Null},
+	{"info_player_team2",	SUB_Null},
 
 
 //not used ents
@@ -650,5 +650,5 @@ void G_SpawnEntitiesFromString( void )
 		G_SpawnGEntityFromSpawnVars();
 		trap_FlushSignon();
 	}
-
 }
+

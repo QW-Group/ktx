@@ -15,6 +15,7 @@ float CountALLPlayers ()
 {
 	gedict_t	*p;
 	float		num = 0;
+
 	p = find( world, FOFCLSN, "player" );
 	while ( p ) {
 		if ( !strnull( p->s.v.netname ) )
@@ -771,7 +772,7 @@ void TimerThink ()
 
 		localcmd("serverinfo status \"%d min left\"\n", (int)self->cnt);
 
-       		if( !self->cnt )
+		if( !self->cnt )
 		{
 			k_mb_overtime = cvar( "k_overtime" );
 			
@@ -1101,8 +1102,8 @@ void StartMatch ()
 
 	SM_PrepareMap(); // remove some items from map regardind with dmm
 	  
-        if (isCTF())
-	     SpawnRunes();
+	if ( isCTF() )
+		SpawnRunes();
 	
 	G_cprint("MATCH STARTED\n");
 
@@ -1170,8 +1171,8 @@ void PrintCountdown( int seconds )
 		mode = redtext("T e a m");
 	else if ( isFFA() )
 		mode = redtext("F F A");
-        else if ( isCTF() )
-	        mode = redtext("C T F");
+	else if ( isCTF() )
+		mode = redtext("C T F");
 	else
 		mode = redtext("Unknown");
 
@@ -1273,25 +1274,26 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 		return false;
 	}
 
-        if ( isCTF() )
+	// FIXME: qqshka, isCanStart must not warn with G_bprint in _all_ cases, but with G_sprint too
+	if ( isCTF() )
 	{
-          // can't really play ctf if map doesn't have flags
-          gedict_t *rflag = find( world, FOFCLSN, "item_flag_team1" );
-          gedict_t *bflag = find( world, FOFCLSN, "item_flag_team2" );
+		// can't really play ctf if map doesn't have flags
+		gedict_t *rflag = find( world, FOFCLSN, "item_flag_team1" );
+		gedict_t *bflag = find( world, FOFCLSN, "item_flag_team2" );
        
-          if (!rflag || !bflag)
-	  {
-	    G_bprint( 2, "This map does not support CTF mode\n" );
-            return false;
-          }  
+		if ( !rflag || !bflag )
+		{
+			G_bprint( 2, "This map does not support CTF mode\n" );
+			return false;
+		}  
 
-	  for( p = world; p = find ( p, FOFCLSN, "player" ); )
-            if ( !streq(getteam(p), "blue") && !streq(getteam(p), "red") )
-	    {
-              p->ready = 0;
-              G_bprint( 2, "All players must be on either team red or blue\n" );
-              return false;
-            }
+		for( p = world; p = find ( p, FOFCLSN, "player" ); )
+			if ( !streq(getteam(p), "blue") && !streq(getteam(p), "red") )
+			{
+				p->ready = 0;
+				G_bprint( 2, "All players must be on either team red or blue\n" );
+				return false;
+			}
 	}
 
 	return true;
@@ -1658,13 +1660,13 @@ void PlayerReady ()
 		return;
 	}
         
-        if ( isCTF() )
+    if ( isCTF() )
 	{
-          if ( !streq(getteam(self), "red") && !streq(getteam(self), "blue") )
-          {
-	    G_sprint( self, 2, "Must be on team red or blue for CTF\n" );
-            return;
-          } 
+		if ( !streq(getteam(self), "red") && !streq(getteam(self), "blue") )
+		{
+			G_sprint( self, 2, "Must be on team red or blue for CTF\n" );
+			return;
+		}
 	}
 
     if( k_force && ( isTeam() || isCTF() )) {
@@ -1691,17 +1693,17 @@ void PlayerReady ()
 	self->v.brk = 0;
 	self->k_teamnum = 0;
 
-        // force red or blue color if ctf
-        if ( isCTF() )
+	// force red or blue color if ctf
+	if ( isCTF() )
 	{
-          if ( streq( getteam(self), "blue" ) )
-            stuffcmd( self, "color 13\n" );
-          else if ( streq( getteam(self), "red" ) )
-            stuffcmd( self, "color 4\n" );
+		if ( streq( getteam(self), "blue" ) )
+			stuffcmd( self, "color 13\n" );
+		else if ( streq( getteam(self), "red" ) )
+			stuffcmd( self, "color 4\n" );
 	}
 
 	G_bprint(2, "%s %s%s\n", self->s.v.netname, redtext("is ready"),
-							( isTeam() || isCTF() ? va(" \x90%s\x91", getteam( self ) ) : "" ) );
+						( ( isTeam() || isCTF() ) ? va(" \x90%s\x91", getteam( self ) ) : "" ) );
 
 	nready = 0;
 	for( p = world; p = find ( p, FOFCLSN, "player" ); )

@@ -1,3 +1,10 @@
+showscores fix for ctf
+----------------------------------------------
+mega sound
+----------------------------------------------
+CycleWeaponCommand
+infinite loop if no weapon
+----------------------------------------------
 timelimit == 0
 make this possible?
 ----------------------------------------------

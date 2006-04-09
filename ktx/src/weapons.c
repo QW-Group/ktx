@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.22 2006/04/09 16:45:19 disconn3ct Exp $
+ *  $Id: weapons.c,v 1.23 2006/04/09 22:36:38 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1126,15 +1126,14 @@ void W_SetCurrentAmmo()
 		break;
 
 	case IT_HOOK:
-          self->s.v.currentammo = 0;
+		self->s.v.currentammo = 0;
 #ifdef CTF_CUSTOM_MODELS
-	  self->s.v.weaponmodel = "progs/v_star.mdl";
+		self->s.v.weaponmodel = "progs/v_star.mdl";
 #else
-          self->s.v.weaponmodel = "progs/v_axe.mdl";
+		self->s.v.weaponmodel = "progs/v_axe.mdl";
 #endif
-	  self->s.v.weaponframe = 0;
-	  break;
-
+		self->s.v.weaponframe = 0;
+		break;
 
 	default:
 		self->s.v.currentammo = 0;
@@ -1142,11 +1141,13 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponframe = 0;
 		break;
 	}
-	if (match_in_progress != 2)
-		if (old_currentammo)
+
+	if ( match_in_progress != 2 )
+		if ( old_currentammo )
 			self->s.v.currentammo = old_currentammo;
 		else
 			self->s.v.currentammo = 1000;
+
 	self->s.v.items = items;
 }
 
@@ -1238,14 +1239,16 @@ void W_Attack()
 	switch ( ( int ) self->s.v.weapon )
 	{
 	case IT_AXE:
-    	        if ( self->ctf_flag & CTF_RUNE_HST )
+        if ( self->ctf_flag & CTF_RUNE_HST )
 		{
-	          self->attack_finished = g_globalvars.time + 0.3;
-                  HasteSound( self );
-                }
-	        else
-		  self->attack_finished = g_globalvars.time + 0.5;
+			self->attack_finished = g_globalvars.time + 0.3;
+			HasteSound( self );
+		}
+	    else
+			self->attack_finished = g_globalvars.time + 0.5;
+
 		sound( self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM );
+
 		r = g_random();
 		if ( r < 0.25 )
 			player_axe1();
@@ -1259,25 +1262,29 @@ void W_Attack()
 
 	case IT_SHOTGUN:
 		player_shot1();
-                if ( self->ctf_flag & CTF_RUNE_HST )
+
+		if ( self->ctf_flag & CTF_RUNE_HST )
 		{
-                  self->attack_finished = g_globalvars.time + 0.3;
-                  HasteSound( self );
-                }
-                else
-		  self->attack_finished = g_globalvars.time + 0.5;
+			self->attack_finished = g_globalvars.time + 0.3;
+			HasteSound( self );
+		}
+		else
+			self->attack_finished = g_globalvars.time + 0.5;
+
 		W_FireShotgun();
 		break;
 
 	case IT_SUPER_SHOTGUN:
 		player_shot1();
-                if ( self->ctf_flag & CTF_RUNE_HST )
+
+        if ( self->ctf_flag & CTF_RUNE_HST )
 		{
-                  self->attack_finished = g_globalvars.time + 0.4;
-                  HasteSound( self );
-                }
-                else
-		  self->attack_finished = g_globalvars.time + 0.7;
+			self->attack_finished = g_globalvars.time + 0.4;
+			HasteSound( self );
+		}
+		else
+			self->attack_finished = g_globalvars.time + 0.7;
+
 		W_FireSuperShotgun();
 		break;
 
@@ -1291,25 +1298,29 @@ void W_Attack()
 
 	case IT_GRENADE_LAUNCHER:
 		player_rocket1();
-                if ( self->ctf_flag & CTF_RUNE_HST )
+
+		if ( self->ctf_flag & CTF_RUNE_HST )
 		{
-                  self->attack_finished = g_globalvars.time + 0.3;
-                  HasteSound( self );
-                }
-                else
-		  self->attack_finished = g_globalvars.time + 0.6;
+			self->attack_finished = g_globalvars.time + 0.3;
+			HasteSound( self );
+		}
+		else
+			self->attack_finished = g_globalvars.time + 0.6;
+
 		W_FireGrenade();
 		break;
 
 	case IT_ROCKET_LAUNCHER:
 		player_rocket1();
-                if ( self->ctf_flag & CTF_RUNE_HST )
+
+		if ( self->ctf_flag & CTF_RUNE_HST )
 		{
-                  self->attack_finished = g_globalvars.time + 0.4;
-                  HasteSound( self );
-                }
-                else
-		  self->attack_finished = g_globalvars.time + 0.8;
+			self->attack_finished = g_globalvars.time + 0.4;
+			HasteSound( self );
+		}
+		else
+			self->attack_finished = g_globalvars.time + 0.8;
+
 		W_FireRocket();
 		break;
 
@@ -1320,13 +1331,13 @@ void W_Attack()
 		break;
 
 	case IT_HOOK:
-	  if (self->hook_out)
-	    player_chain3();
-	  else
-	    player_chain1();
-	  self->attack_finished = g_globalvars.time + 0.1;
-	  break;
+		if ( self->hook_out )
+			player_chain3();
+		else
+			player_chain1();
 
+		self->attack_finished = g_globalvars.time + 0.1;
+		break;
 	}
 }
 
@@ -1385,16 +1396,15 @@ void W_ChangeWeapon()
 		break;
 
 	case 22:
-	  fl = IT_HOOK;
-          if ( self->s.v.weapon != IT_HOOK )
-	  {
-	    if ( self->hook_out )
-              GrappleReset( self->hook );
-          
-	    self->hook_out = false;
-	    self->on_hook = false;
-          }
-	  break;
+		fl = IT_HOOK;
+		if ( self->s.v.weapon != IT_HOOK )
+		{
+			if ( self->hook_out )
+				GrappleReset( self->hook );
+			self->hook_out = false;
+			self->on_hook = false;
+		}
+		break;
 
 	default:
 		break;
@@ -1753,19 +1763,19 @@ void SuperDamageSound()
 		{
 			self->super_sound = g_globalvars.time + 1;
 			// Play 8x sound if quad + strength rune
-                        if ( self->ctf_flag & CTF_RUNE_STR )
-                          sound( self, CHAN_AUTO, "rune/rune22.wav", 1, ATTN_NORM );
-                        else
-			  sound( self, CHAN_AUTO, "items/damage3.wav", 1, ATTN_NORM );
+            if ( self->ctf_flag & CTF_RUNE_STR )
+				sound( self, CHAN_AUTO, "rune/rune22.wav", 1, ATTN_NORM );
+			else
+				sound( self, CHAN_AUTO, "items/damage3.wav", 1, ATTN_NORM );
 		}
 	}
-        else if ( self->ctf_flag & CTF_RUNE_STR )
+	else if ( self->ctf_flag & CTF_RUNE_STR )
 	{
-          if ( self->super_sound < g_globalvars.time )
-	  {
-            self->super_sound = g_globalvars.time + 1;
-            sound( self, CHAN_AUTO, "rune/rune2.wav", 1, ATTN_NORM );
-	  }
-        }
+		if ( self->super_sound < g_globalvars.time )
+		{
+			self->super_sound = g_globalvars.time + 1;
+			sound( self, CHAN_AUTO, "rune/rune2.wav", 1, ATTN_NORM );
+		}
+	}
 	return;
 }

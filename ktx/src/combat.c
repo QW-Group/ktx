@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.13 2006/04/09 16:45:19 disconn3ct Exp $
+ *  $Id: combat.c,v 1.14 2006/04/09 22:36:38 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -208,31 +208,32 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		else
 			damage = damage * 4;
 	}
-	// ctf strength rune
-        if ( attacker->ctf_flag & CTF_RUNE_STR )
-          damage *= 2;
+
+// ctf strength rune
+	if ( attacker->ctf_flag & CTF_RUNE_STR )
+		damage *= 2;
           
-        // ctf resistance rune
-        if ( targ->ctf_flag & CTF_RUNE_RES )
+// ctf resistance rune
+	if ( targ->ctf_flag & CTF_RUNE_RES )
 	{
-          damage /= 2;
-          ResistanceSound( targ );
+		damage /= 2;
+		ResistanceSound( targ );
 	}
 
-        // did we hurt enemy flag carrier?
-        if ( (targ->ctf_flag & CTF_FLAG) && 
-             (!streq(getteam(targ), getteam(attacker))) )
+// did we hurt enemy flag carrier?
+	if ( (targ->ctf_flag & CTF_FLAG) && (!streq(getteam(targ), getteam(attacker))) )
 	{
-          attacker->carrier_hurt_time = g_globalvars.time;
+		attacker->carrier_hurt_time = g_globalvars.time;
 	}
 
 // save damage based on the target's armor level
 
 #ifndef Q3_VM
-        save = newceil( targ->s.v.armortype * damage );
+	save = newceil( targ->s.v.armortype * damage );
 #else
-        save = ceil( targ->s.v.armortype * damage );
+	save = ceil( targ->s.v.armortype * damage );
 #endif
+
 	if ( save >= targ->s.v.armorvalue )
 	{
 		save = targ->s.v.armorvalue;
@@ -243,10 +244,11 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	if (match_in_progress == 2)
 		targ->s.v.armorvalue = targ->s.v.armorvalue - save;
+
 #ifndef Q3_VM
-        take = newceil( damage - save );
+	take = newceil( damage - save );
 #else
-        take = ceil( damage - save );
+	take = ceil( damage - save );
 #endif
 
 // add to the damage total for clients, which will be sent as a single
