@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.32 2006/04/09 22:36:38 qqshka Exp $
+ *  $Id: world.c,v 1.33 2006/04/10 20:48:50 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -231,21 +231,22 @@ void SP_worldspawn()
 	trap_precache_sound( "items/damage2.wav" );
 	trap_precache_sound( "items/damage3.wav" );
 
-// { ctf
-	trap_precache_sound( "weapons/chain1.wav" );
-	trap_precache_sound( "weapons/chain2.wav" );
-	trap_precache_sound( "weapons/chain3.wav" );
-	trap_precache_sound( "weapons/bounce2.wav" );
-	trap_precache_sound( "misc/flagtk.wav" );
-	trap_precache_sound( "misc/flagcap.wav" );
-	trap_precache_sound( "doors/runetry.wav" );
-	trap_precache_sound( "blob/land1.wav" );
-	trap_precache_sound( "rune/rune1.wav" );
-	trap_precache_sound( "rune/rune2.wav" );
-	trap_precache_sound( "rune/rune22.wav" );
-	trap_precache_sound( "rune/rune3.wav" );
-	trap_precache_sound( "rune/rune4.wav" );
-// }
+// ctf
+	if ( k_allowed_free_modes & UM_CTF ) {
+		trap_precache_sound( "weapons/chain1.wav" );
+		trap_precache_sound( "weapons/chain2.wav" );
+		trap_precache_sound( "weapons/chain3.wav" );
+		trap_precache_sound( "weapons/bounce2.wav" );
+		trap_precache_sound( "misc/flagtk.wav" );
+		trap_precache_sound( "misc/flagcap.wav" );
+		trap_precache_sound( "doors/runetry.wav" );
+		trap_precache_sound( "blob/land1.wav" );
+		trap_precache_sound( "rune/rune1.wav" );
+		trap_precache_sound( "rune/rune2.wav" );
+		trap_precache_sound( "rune/rune22.wav" );
+		trap_precache_sound( "rune/rune3.wav" );
+		trap_precache_sound( "rune/rune4.wav" );
+	}
 
 	trap_precache_model( "progs/player.mdl" );
 	trap_precache_model( "progs/eyes.mdl" );
@@ -283,23 +284,26 @@ void SP_worldspawn()
 
 	trap_precache_model( "progs/wizard.mdl" );
 
-#ifdef CTF_CUSTOM_MODELS 
-	trap_precache_model( "progs/v_star.mdl" );
-	trap_precache_model( "progs/bit.mdl" );
-	trap_precache_model( "progs/star.mdl" );
-	trap_precache_model( "progs/flag.mdl" );
-#else
-	trap_precache_model( "progs/v_spike.mdl" );
-	trap_precache_model( "progs/w_g_key.mdl" );
-	trap_precache_model( "progs/w_s_key.mdl" );
-#endif
+	if ( k_ctf_custom_models ) {
+		trap_precache_model( "progs/v_star.mdl" );
+		trap_precache_model( "progs/bit.mdl" );
+		trap_precache_model( "progs/star.mdl" );
+		trap_precache_model( "progs/flag.mdl" );
+	}
+	else
+	{
+		trap_precache_model( "progs/v_spike.mdl" );
+		trap_precache_model( "progs/w_g_key.mdl" );
+		trap_precache_model( "progs/w_s_key.mdl" );
+	}
 
-// { ctf ??????????
-	trap_precache_model( "progs/end1.mdl" );
-	trap_precache_model( "progs/end2.mdl" );
-	trap_precache_model( "progs/end3.mdl" );
-	trap_precache_model( "progs/end4.mdl" );
-// }
+// ctf runes
+	if ( k_allowed_free_modes & UM_CTF ) {
+		trap_precache_model( "progs/end1.mdl" );
+		trap_precache_model( "progs/end2.mdl" );
+		trap_precache_model( "progs/end3.mdl" );
+		trap_precache_model( "progs/end4.mdl" );
+	}
 
 // quad mdl - need this due to aerowalk customize
 	trap_precache_model( "progs/quaddama.mdl" );
@@ -528,6 +532,9 @@ void FirstFrame	( )
 	RegisterCvar("dmm4_invinc_time");
 //	RegisterCvar("rj");
 	RegisterCvar("k_no_fps_physics");
+//{ ctf
+	RegisterCvar("k_ctf_custom_models");
+//}
 
 	RegisterCvar("_k_captteam1"); // internal mod usage
 	RegisterCvar("_k_captcolor1"); // internal mod usage
@@ -554,7 +561,12 @@ void FirstFrame	( )
 
 // <<<
 
-	k_matchLess = cvar( "k_matchless" ); // changed only here
+	// beload globals changed only here
+
+	k_matchLess = cvar( "k_matchless" );
+	k_allowed_free_modes = cvar( "k_allowed_free_modes" );
+	// do not precache models if CTF is not really allowed
+	k_ctf_custom_models = cvar( "k_ctf_custom_models" ) && (k_allowed_free_modes & UM_CTF);
 }
 
 
@@ -691,6 +703,9 @@ void FixRules ( )
 	int k_minr = bound(0, cvar( "k_minrate" ), 20000);
 	int k_maxr = bound(0, cvar( "k_maxrate" ), 20000);	
 
+	// turn CTF off if CTF usermode is not allowed, due to precache_sound or precache_model
+	if ( isCTF() && !( k_allowed_free_modes & UM_CTF ) )
+		cvar_fset("k_mode", (float)( k_mode = gtTeam ));
 
 	// we are does't support coop
 	if ( cvar( "coop" ) )
@@ -724,7 +739,8 @@ void FixRules ( )
 	}
 	
 	// gametype is team, but teamplay has wrong value, set some default value
-	if ( isTeam() ) {
+	// qqshka - CTF need some teamplay too?
+	if ( isTeam() || isCTF() ) {
 		if ( teamplay != 1 && teamplay != 2 && teamplay != 3 )
 			trap_cvar_set_float("teamplay", (teamplay = 2));
 	}

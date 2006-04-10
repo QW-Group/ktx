@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.41 2006/04/10 18:20:37 qqshka Exp $
+ *  $Id: g_local.h,v 1.42 2006/04/10 20:49:08 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -28,11 +28,6 @@
 // not actual really: REMOVE ME
 #define KTEAMS
 //#define DEBUG
-
-// if server has flag/grapple models you can enable them here
-// http://www.quakeworld.us/ult/ctf/pak0.pak  (only 300kb)
-// if not we use old style keys and ax/voreball for grapple
-#define CTF_CUSTOM_MODELS
 
 #include "q_shared.h"
 #include "mathlib.h"
@@ -42,7 +37,7 @@
 #include "g_syscalls.h"
 #include "player.h"
 
-#define MOD_VERSION					("1.21")
+#define MOD_VERSION					("1.22")
 #define MOD_NAME					("KTX")
 #define MOD_SERVERINFO_MOD_KEY		("xmod")
 #define MOD_SERVERINFO_BUILD_KEY	("xbuild")
@@ -554,7 +549,8 @@ extern	int   k_practice;		// is server in practice mode
 extern	int   k_matchLess;	    // is server in matchLess mode
 extern  gameType_t 	  k_mode;   // game type: DUEL, TP, FFA
 extern	int   k_lastvotedmap;	// last voted map, used for agree command?
-
+extern  int k_ctf_custom_models;// use or not custom models
+extern  int k_allowed_free_modes; // reflect appropriate cvar - but changed only at map load
 #endif
 
 

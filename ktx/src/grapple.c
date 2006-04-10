@@ -99,11 +99,10 @@ gedict_t* MakeLink()
   newmis->s.v.owner = EDICT_TO_PROG( self );
   SetVector ( newmis->s.v.avelocity, 200, 200, 200 );
 
-#ifdef CTF_CUSTOM_MODELS
-  setmodel  ( newmis, "progs/bit.mdl" );
-#else
-  setmodel  ( newmis, "progs/spike.mdl" );
-#endif
+  if ( k_ctf_custom_models )
+	setmodel  ( newmis, "progs/bit.mdl" );
+  else
+	setmodel  ( newmis, "progs/spike.mdl" );
 
   setorigin ( newmis, PASSVEC3(self->s.v.origin) );
   setsize   ( newmis, 0, 0, 0, 0, 0, 0 );
@@ -363,11 +362,10 @@ void GrappleThrow()
   newmis->s.v.think     = (func_t) BuildChain;  //  Chain is broken right now
   newmis->s.v.nextthink = g_globalvars.time + 0.1;
 
-#ifdef CTF_CUSTOM_MODELS
-  setmodel ( newmis, "progs/star.mdl" );
-#else
-  setmodel ( newmis, "progs/v_spike.mdl" );
-#endif
+  if ( k_ctf_custom_models )
+	setmodel ( newmis, "progs/star.mdl" );
+  else
+	setmodel ( newmis, "progs/v_spike.mdl" );
 
   setorigin(newmis, self->s.v.origin[0] + g_globalvars.v_forward[0] * 16,
 	            self->s.v.origin[1] + g_globalvars.v_forward[1] * 16,

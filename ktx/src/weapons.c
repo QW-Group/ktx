@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.24 2006/04/10 13:31:06 qqshka Exp $
+ *  $Id: weapons.c,v 1.25 2006/04/10 20:48:50 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1127,11 +1127,12 @@ void W_SetCurrentAmmo()
 
 	case IT_HOOK:
 		self->s.v.currentammo = 0;
-#ifdef CTF_CUSTOM_MODELS
-		self->s.v.weaponmodel = "progs/v_star.mdl";
-#else
-		self->s.v.weaponmodel = "progs/v_axe.mdl";
-#endif
+
+		if ( k_ctf_custom_models )
+			self->s.v.weaponmodel = "progs/v_star.mdl";
+		else
+			self->s.v.weaponmodel = "progs/v_axe.mdl";
+
 		self->s.v.weaponframe = 0;
 		break;
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_consts.h,v 1.7 2006/04/09 16:45:32 disconn3ct Exp $
+ *  $Id: g_consts.h,v 1.8 2006/04/10 20:49:08 qqshka Exp $
  */
 
 //
@@ -273,3 +273,13 @@
 #define CTF_RUNE_RGN    8   // IT_SIGIL4
 #define CTF_RUNE_MASK  15
 #define CTF_FLAG       16
+
+// user modes
+
+#define UM_1ON1		( 1<<0  )
+#define UM_2ON2		( 1<<1  )
+#define UM_3ON3		( 1<<2  )
+#define UM_4ON4		( 1<<3  )
+#define UM_10ON10	( 1<<4  )
+#define UM_FFA		( 1<<5  )
+#define UM_CTF		( 1<<6  )

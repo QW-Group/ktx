@@ -1,5 +1,32 @@
-2006-04-10
+2006-04-11 [ver 1.22]
 108. Fixed bug with infinite loop if u disable all weapons with noweapons and invoke impulse 10.
+
+109. WARlNING: ult, added basic CTF support.
+     Since CTF uses some additional media files (few models and sounds) u may need it too.
+     Grab it here http://www.quakeworld.us/ult/ctf/pak0.pak  (only 300kb).
+	
+	 Added "set k_ctf_custom_models".
+
+	 set k_ctf_custom_models 0 // 0 - do not usage CTF models, use some models from 
+							   //     original quake1 data files.
+							   // 1 - use nice CTF models, u can grab it via link above.
+							   //     If u are server admin, in this case u need put this pak0.pak
+							   //     it KTX directory and allow download models.
+
+	 Server config changes:
+		1) add 64 to "k_allowed_free_modes" to enable ctf, 127 now enables all modes
+		2) "set k_mode 4" if you want server to default to ctf mode and add 64
+		   to "k_allowed_free_modes".
+
+	 NOTES: 
+		1) if u are server admin, and do _not_ want CTF and this files, just do _not_ add 64
+			to "k_allowed_free_modes".
+		2) if u are server admin, and _want_ CTF, just add 64 to "k_allowed_free_modes",
+			put pak0.pak in KTX directory and put "set k_ctf_custom_models 1" in server.cfg.
+		3) CTF is still in developing stage, so i'm not recommend turn it on for now, but u can
+			help us if u find bugs etc...
+
+110. Now MOTD less egocentric :>
 
 2006-04-08
 107. Fixed small issue so damage in prewar in statusbar is shown more like it was in ktpro.

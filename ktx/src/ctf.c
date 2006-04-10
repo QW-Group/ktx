@@ -67,10 +67,8 @@ void SpawnItem( char* classname, float x, float y, float z, float angle )
 
 void spawn_item_flag()
 {
-
-#ifdef CTF_CUSTOM_MODELS
-  setmodel( self, "progs/flag.mdl" );
-#endif
+  if ( k_ctf_custom_models )
+	setmodel( self, "progs/flag.mdl" );
 
   self->s.v.noise = "misc/flagtk.wav";
   self->s.v.noise1 = "doors/runetry.wav";
@@ -108,9 +106,9 @@ void SP_item_flag_team1()
   self->s.v.skin = 0;
   self->s.v.effects = (int) self->s.v.effects | EF_RED;
 
-#ifndef CTF_CUSTOM_MODELS
-  setmodel( self, "progs/w_g_key.mdl" );
-#endif
+
+  if ( !k_ctf_custom_models )
+	setmodel( self, "progs/w_g_key.mdl" );
 
   spawn_item_flag();
 }
@@ -122,9 +120,8 @@ void SP_item_flag_team2()
   self->s.v.skin = 1;
   self->s.v.effects = (int) self->s.v.effects | EF_BLUE;
 
-#ifndef CTF_CUSTOM_MODELS
-  setmodel( self, "progs/w_s_key.mdl" );
-#endif
+  if ( !k_ctf_custom_models )
+	setmodel( self, "progs/w_s_key.mdl" );
 
   spawn_item_flag();
 }

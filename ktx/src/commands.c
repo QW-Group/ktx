@@ -710,8 +710,8 @@ void ShowVersion()
 {
 	char buf[2048] = {0};
 
-	strlcat(buf, va("Running %s v.%s build:%s by qqshka\n\n", redtext(MOD_NAME),
-				 dig3s(MOD_VERSION), dig3s("%05d", build_number())), sizeof(buf));
+	strlcat(buf, va("Running %s v.%s build:%s by %s\n\n", redtext(MOD_NAME), dig3s(MOD_VERSION),
+						dig3s("%05d", build_number()), redtext("KTX dev. team")), sizeof(buf));
 	strlcat(buf, va("Based on %s\n", redtext("Kombat teams 2.21")), sizeof(buf));
 	strlcat(buf, "by kemiKal, Cenobite, Sturm and Fang\n\n", sizeof(buf));
 	strlcat(buf, va("Source at:\n%s", MOD_URL), sizeof(buf));
@@ -2320,14 +2320,6 @@ const char ctf_um_init[] =
 	"k_mode 4\n";
 
 
-#define UM_1ON1		( 1<<0  )
-#define UM_2ON2		( 1<<1  )
-#define UM_3ON3		( 1<<2  )
-#define UM_4ON4		( 1<<3  )
-#define UM_10ON10	( 1<<4  )
-#define UM_FFA		( 1<<5  )
-#define UM_CTF		( 1<<6  )
-
 typedef struct usermode_s {
 	const char 	  *name;
 	const char 	  *displayname;
@@ -2358,8 +2350,6 @@ void UserMode(float umode)
 	qboolean sv_invoked = false;
 
 	int k_free_mode = cvar( "k_free_mode" );
-	int k_allowed_free_modes = cvar( "k_allowed_free_modes" );
-
 
 	if ( match_in_progress )
 		return;
