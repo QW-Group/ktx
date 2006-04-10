@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.40 2006/04/09 22:37:02 qqshka Exp $
+ *  $Id: g_local.h,v 1.41 2006/04/10 18:20:37 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -125,7 +125,8 @@ typedef enum
 	lsUnknown = 0,
 	lsDuel,
 	lsTeam,
-	lsFFA
+	lsFFA,
+	lsCTF
 } lsType_t; // lastscores type
 
 typedef union fi_s

@@ -3656,7 +3656,7 @@ void lastscore_add ()
 		}
 	}
 	else if ( ( isTeam() || isCTF() ) && k_showscores ) {
-		lst = lsTeam;
+		lst = isTeam() ? lsTeam : lsCTF;
 
 		e1 = cvar_string( "_k_team1" );
 		s1 = get_scores1();
@@ -3720,14 +3720,19 @@ void lastscores ()
 			 || (strneq(le1 , e1) || strneq(le2 , e2)) // changed teams, duelers
 		   ) {
 			lt1 = lt2 = ""; // show teams members again
-			G_sprint(self, 2, "\x90%s %s %s\x91\n", e1, redtext("vs"), e2);
+			G_sprint(self, 2, "\x90%s %s %s\x91%s\n", e1, redtext("vs"), e2, 
+									(cur == lsCTF ? redtext(" CTF") : ""));
 		}
 
-		if ( cur == lsTeam ) {
-			if ( strneq(lt1 , t1) )
+		// if team mode show members.
+		// generally show members one time while show scores for each played map,
+		// but if squad changed from previuos map, show members again,
+		// so we know which squad played each map.
+		if ( cur == lsTeam || cur == lsCTF ) {
+			if ( strneq(lt1 , t1) ) // first team
 				G_sprint(self, 2, " %4.4s:%s\n", e1, t1);
 
-			if ( strneq(lt2 , t2) )
+			if ( strneq(lt2 , t2) ) // second team
 				G_sprint(self, 2, " %4.4s:%s\n", e2, t2);
 		}
 
