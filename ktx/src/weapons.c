@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.23 2006/04/09 22:36:38 qqshka Exp $
+ *  $Id: weapons.c,v 1.24 2006/04/10 13:31:06 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1472,12 +1472,12 @@ Go to the next weapon with ammo
 */
 void CycleWeaponCommand()
 {
-	int             it, am;
+	int             i, it, am;
 
 	it = self->s.v.items;
 	impulse = 0;
 
-	while ( 1 )
+	for ( i = 0; i < 20; i++ ) // qqshka, 20 is just from head, but prevent infinite loop
 	{
 		am = 0;
 		switch ( ( int ) self->s.v.weapon )
@@ -1548,12 +1548,12 @@ Go to the prev weapon with ammo
 */
 void CycleWeaponReverseCommand()
 {
-	int             it, am;
+	int             i, it, am;
 
 	it = self->s.v.items;
 	impulse = 0;
 
-	while ( 1 )
+	for ( i = 0; i < 20; i++ ) // qqshka, 20 is just from head, but prevent infinite loop
 	{
 		am = 0;
 		switch ( ( int ) self->s.v.weapon )
