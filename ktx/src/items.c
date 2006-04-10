@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.14 2006/04/09 22:36:38 qqshka Exp $
+ *  $Id: items.c,v 1.15 2006/04/10 17:16:06 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -264,7 +264,7 @@ void item_megahealth_rot()
 
 	if ( other->s.v.health > other->s.v.max_health )
 	{
-		if ( !other->ctf_flag & CTF_RUNE_RGN )
+		if ( !(other->ctf_flag & CTF_RUNE_RGN) )
 			other->s.v.health -= 1;
 
 		self->s.v.nextthink = g_globalvars.time + 1;
@@ -351,7 +351,7 @@ void armor_touch()
 
 	G_sprint( other, PRINT_LOW, "You got armor\n" );
 // armor touch sound
-	sound( other, CHAN_ITEM, "items/armor1.wav", 1, ATTN_NORM );
+	sound( other, CHAN_AUTO, "items/armor1.wav", 1, ATTN_NORM );
 	stuffcmd( other, "bf\n" );
 
 	activator = other;
@@ -578,7 +578,7 @@ void weapon_touch()
 
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
 // weapon touch sound
-	sound( other, CHAN_ITEM, "weapons/pkup.wav", 1, ATTN_NORM );
+	sound( other, CHAN_AUTO, "weapons/pkup.wav", 1, ATTN_NORM );
 	stuffcmd( other, "bf\n" );
 
 	bound_other_ammo();
@@ -1560,7 +1560,7 @@ void BackpackTouch()
 				other->s.v.ammo_cells = 0;
 
 
-				sound( other, CHAN_VOICE, "boss1/sight1.wav", 1, ATTN_NORM );
+				sound( other, CHAN_AUTO, "boss1/sight1.wav", 1, ATTN_NORM );
 				stuffcmd( other, "bf\n" );
 
 				G_bprint( PRINT_HIGH, "%s attains bonus powers!!!\n",
