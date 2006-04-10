@@ -487,7 +487,7 @@ void StuffModCommands()
 			continue; // cmd does't valid for this class of player or matchless mode does't have this command
 		}
 
-		params = ( cmds[i].cf_flags & CF_PARAMS && support_params ) ? " %0" : "";
+		params = ( (cmds[i].cf_flags & CF_PARAMS) && support_params ) ? " %0" : "";
 
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias %s cmd cc %d%s\n", name, (int)i, params);
 	}
@@ -1684,7 +1684,7 @@ void ToggleSpecTalk()
 
 	if( match_in_progress == 2 ) {
 
-		fpd = ( k_spectalk ) ? fpd & ~64 : fpd | 64;
+		fpd = ( k_spectalk ) ? (fpd & ~64) : (fpd | 64);
 
 		localcmd("serverinfo fpd %d\n", fpd );
 		cvar_fset( "sv_spectalk", k_spectalk );
@@ -1924,7 +1924,7 @@ void ToggleQLag()
 	localcmd("serverinfo fpd %d\n", fpd);
 
 	G_bprint(2, "%s %s\n", 
-			redtext("QiZmo lag settings"), ( fpd & 8 ? "in effect" : "not in effect" ));
+			redtext("QiZmo lag settings"), ( (fpd & 8) ? "in effect" : "not in effect" ));
 }
 
 void ToggleQEnemy()

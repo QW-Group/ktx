@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.14 2006/04/09 22:36:38 qqshka Exp $
+ *  $Id: combat.c,v 1.15 2006/04/10 17:14:30 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -312,7 +312,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	{
 		if ( targ->invincible_sound < g_globalvars.time )
 		{
-			sound( targ, CHAN_ITEM, "items/protect3.wav", 1, ATTN_NORM );
+			sound( targ, CHAN_AUTO, "items/protect3.wav", 1, ATTN_NORM );
 			targ->invincible_sound = g_globalvars.time + 2;
 		}
 		return;

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.51 2006/04/09 22:36:37 qqshka Exp $
+ *  $Id: client.c,v 1.52 2006/04/10 17:14:30 qqshka Exp $
  */
 
 //===========================================================================
@@ -1287,11 +1287,9 @@ void PlayerJump()
 		{
 			self->swim_flag = g_globalvars.time + 1;
 			if ( g_random() < 0.5 )
-				sound( self, CHAN_BODY, "misc/water1.wav", 1,
-					    ATTN_NORM );
+				sound( self, CHAN_BODY, "misc/water1.wav", 1, ATTN_NORM );
 			else
-				sound( self, CHAN_BODY, "misc/water2.wav", 1,
-					    ATTN_NORM );
+				sound( self, CHAN_BODY, "misc/water2.wav", 1, ATTN_NORM );
 		}
 
 		return;
@@ -2119,8 +2117,7 @@ void CheckPowerups()
 		if ( self->invisible_sound < g_globalvars.time )
 		{
 			sound( self, CHAN_AUTO, "items/inv3.wav", 0.5, ATTN_IDLE );
-			self->invisible_sound =
-			    g_globalvars.time + ( ( g_random() * 3 ) + 1 );
+			self->invisible_sound = g_globalvars.time + ( ( g_random() * 3 ) + 1 );
 		}
 
 
@@ -2128,8 +2125,7 @@ void CheckPowerups()
 		{
 			if ( self->invisible_time == 1 )
 			{
-				G_sprint( self, PRINT_HIGH,
-					  "Ring of Shadows magic is fading\n" );
+				G_sprint( self, PRINT_HIGH, "Ring of Shadows magic is fading\n" );
 				stuffcmd( self, "bf\n" );
 				sound( self, CHAN_AUTO, "items/inv2.wav", 1, ATTN_NORM );
 				self->invisible_time = g_globalvars.time + 1;
@@ -2163,8 +2159,7 @@ void CheckPowerups()
 		{
 			if ( self->invincible_time == 1 )
 			{
-				G_sprint( self, PRINT_HIGH,
-					  "Protection is almost burned out\n" );
+				G_sprint( self, PRINT_HIGH, "Protection is almost burned out\n" );
 				stuffcmd( self, "bf\n" );
 				sound( self, CHAN_AUTO, "items/protect2.wav", 1, ATTN_NORM );
 				self->invincible_time = g_globalvars.time + 1;
@@ -2212,11 +2207,9 @@ void CheckPowerups()
 			if ( self->super_time == 1 )
 			{
 				if ( deathmatch == 4 )
-					G_sprint( self, PRINT_HIGH,
-						  "OctaPower is wearing off\n" );
+					G_sprint( self, PRINT_HIGH, "OctaPower is wearing off\n" );
 				else
-					G_sprint( self, PRINT_HIGH,
-						  "Quad Damage is wearing off\n" );
+					G_sprint( self, PRINT_HIGH, "Quad Damage is wearing off\n" );
 				stuffcmd( self, "bf\n" );
 				sound( self, CHAN_AUTO, "items/damage2.wav", 1, ATTN_NORM );
 				self->super_time = g_globalvars.time + 1;
@@ -2271,8 +2264,7 @@ void CheckPowerups()
 		{
 			if ( self->rad_time == 1 )
 			{
-				G_sprint( self, PRINT_HIGH,
-					  "Air supply in Biosuit expiring\n" );
+				G_sprint( self, PRINT_HIGH, "Air supply in Biosuit expiring\n" );
 				stuffcmd( self, "bf\n" );
 				sound( self, CHAN_AUTO, "items/suit2.wav", 1, ATTN_NORM );
 				self->rad_time = g_globalvars.time + 1;

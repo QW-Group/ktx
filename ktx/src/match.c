@@ -1122,7 +1122,7 @@ void StartMatch ()
 		int k_spectalk = bound(0, cvar( "k_spectalk" ), 1);
 		cvar_fset( "sv_spectalk", k_spectalk );
 
-		fpd = ( k_spectalk ) ? fpd & ~64 : fpd | 64;
+		fpd = ( k_spectalk ) ? (fpd & ~64) : (fpd | 64);
 
 		localcmd( "serverinfo fpd %d\n", fpd );
 	}

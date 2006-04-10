@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: triggers.c,v 1.11 2006/04/09 22:36:38 qqshka Exp $
+ *  $Id: triggers.c,v 1.12 2006/04/10 17:15:00 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -703,8 +703,7 @@ void trigger_push_touch()
 			if ( other->fly_sound < g_globalvars.time )
 			{
 				other->fly_sound = g_globalvars.time + 1.5;
-				sound( other, CHAN_AUTO, "ambience/windfly.wav", 1,
-					    ATTN_NORM );
+				sound( other, CHAN_AUTO, "ambience/windfly.wav", 1, ATTN_NORM );
 			}
 		}
 	}
