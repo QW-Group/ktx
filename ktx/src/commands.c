@@ -323,7 +323,6 @@ cmd_t cmds[] = {
     { "flagstatus",  FlagStatus,                0    , CF_BOTH },
 // }
     { "motd",        motd_show,                 0    , CF_BOTH | CF_MATCHLESS }
-//	{ "check_maps",	     Check_Maps,            0    , CF_BOTH_ADMIN }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -3629,103 +3628,125 @@ void agree_on_map ( )
 	self->cmd_selectMap = 0;
 }
 
-/*
-Check_Maps
-We need to move check_maps command from server to mod.
-But I don't know how to do some things in mod without system functions. :-(
-May be we need to add new functions in QVM protocol.
-*/
-/*
-==================
-SV_Check_maps_f from MVDSV sources
-==================
-*/
-/*extern func_t localinfoChanged;
-void SV_Check_maps_f(void)
+// { lastscores stuff
+
+void lastscore_add ()
 {
-	dir_t d;
-	file_t *list;
-	int i, j, maps_id1;
-	char *s=NULL, *key;
+	gedict_t *p;
+	int from;
+	int i, s1, s2;
+	int k_ls = bound(0, cvar("__k_ls"), MAX_LASTSCORES-1);
+	char *e1, *e2, t1[128] = {0}, t2[128] = {0}, *name, *timestr;
+	lsType_t lst = lsUnknown;
 
-	SV_Check_localinfo_maps_support();
+	e1 = e2 = "";
+	
+	if   ( isDuel() ) {
+		lst = lsDuel;
 
-	d = Sys_listdir("id1/maps", ".bsp$", SORT_BY_NAME);
-	list = d.files;
-	for (i = LOCALINFO_MAPS_LIST_START; list->name[0] && i <= LOCALINFO_MAPS_LIST_END; list++)
-	{
-		list->name[strlen(list->name) - 4] = 0;
-		if (!list->name[0]) continue;
-
-		key = va("%d", i);
-		Info_SetValueForKey (localinfo, key, list->name, MAX_LOCALINFO_STRING);
-
-		s = Info_ValueForKey(localinfo, key);
-		if (localinfoChanged)
-		{
-			pr_global_struct->time = sv.time;
-			pr_global_struct->self = 0;
-			G_INT(OFS_PARM0) = PR_SetTmpString(key);
-			G_INT(OFS_PARM1) = PR_SetTmpString(s);
-			G_INT(OFS_PARM2) = PR_SetTmpString(Info_ValueForKey(localinfo, key));
-			PR_ExecuteProgram (localinfoChanged);
-		}
-		i++;
-	}
-	maps_id1 = i - 1;
-
-	d = Sys_listdir("qw/maps", ".bsp$", SORT_BY_NAME);
-	list = d.files;
-	for (; list->name[0] && i <= LOCALINFO_MAPS_LIST_END; list++)
-	{
-		list->name[strlen(list->name) - 4] = 0;
-		if (!list->name[0]) continue;
-
-		for (j = LOCALINFO_MAPS_LIST_START; j <= maps_id1; j++)
-			if (!strncmp(Info_ValueForKey(localinfo, va("%d", j)), list->name, MAX_KEY_STRING))
-				break;
-		if (j <= maps_id1) continue;
-
-		key = va("%d", i);
-		Info_SetValueForKey (localinfo, key, list->name, MAX_LOCALINFO_STRING);
-
-		s = Info_ValueForKey(localinfo, key);
-		if (localinfoChanged)
-		{
-			pr_global_struct->time = sv.time;
-			pr_global_struct->self = 0;
-			G_INT(OFS_PARM0) = PR_SetTmpString(key);
-			G_INT(OFS_PARM1) = PR_SetTmpString(s);
-			G_INT(OFS_PARM2) = PR_SetTmpString(Info_ValueForKey(localinfo, key));
-			PR_ExecuteProgram (localinfoChanged);
-		}
-		i++;
-	}
-
-	for (; i <= LOCALINFO_MAPS_LIST_END; i++)
-	{
-		key = va("%d", i);
-		Info_SetValueForKey (localinfo, key, "", MAX_LOCALINFO_STRING);
-
-		if (localinfoChanged)
-		{
-			pr_global_struct->time = sv.time;
-			pr_global_struct->self = 0;
-			G_INT(OFS_PARM0) = PR_SetTmpString(key);
-			G_INT(OFS_PARM1) = PR_SetTmpString(s);
-			G_INT(OFS_PARM2) = PR_SetTmpString(Info_ValueForKey(localinfo, key));
-			PR_ExecuteProgram (localinfoChanged);
+		for( i = from = 0, p = world; (p = find_plrghst( p, &from )) && i < 2; i++ ) {
+			if ( !i ) { // info about first dueler
+				e1 = getname( p );
+				s1 = p->s.v.frags;
+			}
+			else {	   // about second
+				e2 = getname( p );
+				s2 = p->s.v.frags;
+			}
 		}
 	}
-}*/
-/*
-Stub for check_maps
-*/
-/*void Check_Maps ()
-{
-	if (match_in_progress || intermission_running)
+	else if ( ( isTeam() || isCTF() ) && k_showscores ) {
+		lst = lsTeam;
+
+		e1 = cvar_string( "_k_team1" );
+		s1 = get_scores1();
+		e2 = cvar_string( "_k_team2" );
+		s2 = get_scores2();
+
+		// players from first team
+		for( t1[0] = from = 0, p = world; p = find_plrghst( p, &from ); )
+			if ( streq( getteam( p ), e1 ) && !strnull( name = getname( p ) ) )
+				strlcat(t1, va(" %s", name), sizeof(t1));
+
+		// players from second team
+		for( t2[0] = from = 0, p = world; p = find_plrghst( p, &from ); )
+			if ( streq( getteam( p ), e2 ) && !strnull( name = getname( p ) ) )
+				strlcat(t2, va(" %s", name), sizeof(t2));
+	}
+
+	if ( strnull( e1 ) || strnull( e2 ) )
+		lst = lsUnknown;
+
+	if ( lst == lsUnknown ) // sorry but something wrong
 		return;
 
+	if ( !strnull(timestr = ezinfokey(world, "date_str")) )
+		timestr += 4; // qqshka - hud 320x240 fix, :(
 
+	cvar_fset(va("__k_ls_m_%d", k_ls), lst);
+	cvar_set(va("__k_ls_e1_%d", k_ls), e1);
+	cvar_set(va("__k_ls_e2_%d", k_ls), e2);
+	cvar_set(va("__k_ls_t1_%d", k_ls), t1);
+	cvar_set(va("__k_ls_t2_%d", k_ls), t2);
+	cvar_set(va("__k_ls_s_%d", k_ls), va("%3d:%-3d \x8D %-8.8s %13.13s", s1, s2, 
+										g_globalvars.mapname, timestr));
+
+	cvar_fset("__k_ls", ++k_ls % MAX_LASTSCORES);
 }
-*/
+
+void lastscores ()
+{
+	int i, j, cnt;
+	int k_ls = bound(0, cvar("__k_ls"), MAX_LASTSCORES-1);
+	char *e1, *e2, *le1, *le2, *t1, *t2, *lt1, *lt2, *sc;
+	lsType_t last = lsUnknown;
+	lsType_t cur  = lsUnknown;
+
+	e1 = e2 = le1 = le2 = t1 = t2 = lt1 = lt2 = "";
+
+	for ( j = k_ls, cnt = i = 0; i < MAX_LASTSCORES; i++,	j = (j+1 >= MAX_LASTSCORES) ? 0: j+1 ) {
+
+		cur = cvar(va("__k_ls_m_%d", j));
+		e1 = cvar_string(va("__k_ls_e1_%d", j));
+		e2 = cvar_string(va("__k_ls_e2_%d", j));
+		t1 = cvar_string(va("__k_ls_t1_%d", j));
+		t2 = cvar_string(va("__k_ls_t2_%d", j));
+		sc = cvar_string(va("__k_ls_s_%d", j));
+
+		if ( cur == lsUnknown || strnull( e1 ) || strnull( e2 ) )
+			continue;
+
+		if (    cur != last // changed game mode
+			 || (strneq(le1 , e1) || strneq(le2 , e2)) // changed teams, duelers
+		   ) {
+			lt1 = lt2 = ""; // show teams members again
+			G_sprint(self, 2, "\x90%s %s %s\x91\n", e1, redtext("vs"), e2);
+		}
+
+		if ( cur == lsTeam ) {
+			if ( strneq(lt1 , t1) )
+				G_sprint(self, 2, " %4.4s:%s\n", e1, t1);
+
+			if ( strneq(lt2 , t2) )
+				G_sprint(self, 2, " %4.4s:%s\n", e2, t2);
+		}
+
+		G_sprint(self, 2, "  %s\n", sc);
+
+		last = cur;
+		le1 = e1;
+		le2 = e2;
+		lt1 = t1;
+		lt2 = t2;
+		cnt++;
+	}
+
+	if ( cnt )
+		G_sprint(self, 2, "\n"
+						  "Lastscores: %d entry%s found\n", cnt, count_s(cnt));
+	else
+		G_sprint(self, 2, "Lastscores data empty\n");
+}
+
+// } lastscores stuff
+
