@@ -1,5 +1,7 @@
-// Copyright (C) 1999-2000 Id Software, Inc.
-//
+/*
+ * $Id: bg_lib.c,v 1.5 2006/04/11 20:23:20 qqshka Exp $
+ */
+
 // Copyright (C) 1999-2000 Id Software, Inc.
 //
 // bg_lib.c -- standard C library replacement routines used by code
