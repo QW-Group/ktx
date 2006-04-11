@@ -1,3 +1,7 @@
+//
+// $Id: bg_lib.h,v 1.3 2006/04/11 20:42:59 qqshka Exp $
+//
+
 // bg_lib.h -- standard C library replacement routines used by code
 // compiled for the virtual machine
 

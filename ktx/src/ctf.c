@@ -1,3 +1,7 @@
+/*
+ *  $Id: ctf.c,v 1.5 2006/04/11 20:38:33 qqshka Exp $
+ */
+
 #include "g_local.h"
 
 // CTF todo:

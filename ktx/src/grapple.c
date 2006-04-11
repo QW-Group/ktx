@@ -1,8 +1,11 @@
 /*
-Original 'Morning Star' (Grapple Hook) by "Mike" <amichael@asu.alasu.edu> 
-Quakeworld-friendly grapple by Wedge (Steve Bond)
-PureCTF changes by Methabol
-*/
+ * Original 'Morning Star' (Grapple Hook) by "Mike" <amichael@asu.alasu.edu> 
+ * Quakeworld-friendly grapple by Wedge (Steve Bond)
+ * PureCTF changes by Methabol
+ *
+ *
+ *  $Id: grapple.c,v 1.4 2006/04/11 20:38:33 qqshka Exp $
+ */
 
 #include "g_local.h"
 

@@ -1,3 +1,7 @@
+/*
+ *  $Id: runes.c,v 1.3 2006/04/11 20:38:33 qqshka Exp $
+ */
+
 #include "g_local.h"
 
 void RegenLostRot();
