@@ -960,8 +960,11 @@ void ModStatus2()
 		G_sprint(self, 2, "%s: duel\n", redtext("Server mode"));
 	else if ( isFFA() )
 		G_sprint(self, 2, "%s:  FFA\n", redtext("Server mode"));
-	else if ( isCTF() ) // FIXME: qqshka, hmm, what about Server locking ????
+	else if ( isCTF() ) {
 		G_sprint(self, 2, "%s:  CTF\n", redtext("Server mode"));
+		G_sprint(self, 2, "%s: %s\n", redtext("Server locking"),
+					 (!lock ? "off" : (lock == 2 ? "all" : (lock == 1 ? "team" : "unknown"))));
+	}
 	else if ( isTeam() ) {
 		G_sprint(self, 2, "%s: team\n", redtext("Server mode"));
 		G_sprint(self, 2, "%s: %s\n", redtext("Server locking"),
@@ -2313,7 +2316,7 @@ const char ctf_um_init[] =
 	"k_pow 1\n"
 	"k_spw 1\n"
 	"k_membercount 0\n"          
-	"k_lockmin 2\n"                                         
+	"k_lockmin 1\n"                                         
 	"k_lockmax 2\n"                                 
 	"k_overtime 1\n"
 	"k_exttime 5\n"
@@ -2520,7 +2523,7 @@ void VoteUnpause ()
 		return;
 
 	if( self->k_voteUnpause ) {
-		G_sprint(self, 2, "You are already voted\n"); // FIXME: voted or voting, spell check plzzz
+		G_sprint(self, 2, "You have already voted\n");
 		return;
 	}
 

@@ -1101,6 +1101,9 @@ void StartMatch ()
     }
 
 	SM_PrepareMap(); // remove some items from map regardind with dmm
+
+	// FIXME: we only have one ctf mode regardless of number of players unlike 2on2 4on4 etc
+	// Perhaps we should set maxclients = CountPlayers or CountPlayers + 1 if odd?
 	  
 	if ( isCTF() )
 		SpawnRunes();
@@ -1221,6 +1224,7 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 	int sub, nready;
 	char *txt = "";
 	gedict_t *p;
+	qboolean ctfReady = true;
 
 	if ( !isTeam() && !isCTF() ) // no rules limitation in non team game
 		return true;
@@ -1274,7 +1278,6 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 		return false;
 	}
 
-	// FIXME: qqshka, isCanStart must not warn with G_bprint in _all_ cases, but with G_sprint too
 	if ( isCTF() )
 	{
 		// can't really play ctf if map doesn't have flags
@@ -1291,9 +1294,12 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 			if ( !streq(getteam(p), "blue") && !streq(getteam(p), "red") )
 			{
 				p->ready = 0;
-				G_bprint( 2, "All players must be on either team red or blue\n" );
-				return false;
+				G_sprint( p, 2, "You must be on either team red or blue\n" );
+				ctfReady = false;
 			}
+
+		if ( !ctfReady )
+			return false;
 	}
 
 	return true;
@@ -1664,7 +1670,7 @@ void PlayerReady ()
 	{
 		if ( !streq(getteam(self), "red") && !streq(getteam(self), "blue") )
 		{
-			G_sprint( self, 2, "Must be on team red or blue for CTF\n" );
+			G_sprint( self, 2, "You must be on team red or blue for CTF\n" );
 			return;
 		}
 	}

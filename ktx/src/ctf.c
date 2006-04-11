@@ -341,7 +341,7 @@ void PlayerDropFlag( gedict_t *player )
   player->ctf_flag -= ( player->ctf_flag & CTF_FLAG );
 
   flag = find( world, FOFCLSN, cn );
-  if ( flag != world ) // FIXME: BUG u must compare with NULL not with world!!!
+  if ( flag )
     DropFlag( flag );
 }
 
