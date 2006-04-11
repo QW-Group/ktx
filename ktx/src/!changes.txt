@@ -1,7 +1,7 @@
 2006-04-11 [ver 1.22]
 108. Fixed bug with infinite loop if u disable all weapons with noweapons and invoke impulse 10.
 
-109. WARlNING: ult, added basic CTF support.
+109. WARNING: ult, added basic CTF support.
      Since CTF uses some additional media files (few models and sounds) u may need it too.
      Grab it here http://www.quakeworld.us/ult/ctf/pak0.pak  (only 300kb).
 	

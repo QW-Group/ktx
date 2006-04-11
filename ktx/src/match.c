@@ -1104,6 +1104,7 @@ void StartMatch ()
 
 	// FIXME: we only have one ctf mode regardless of number of players unlike 2on2 4on4 etc
 	// Perhaps we should set maxclients = CountPlayers or CountPlayers + 1 if odd?
+	// qqshka: ult, look about k_exclusive in code, generally this looks like what u want
 	  
 	if ( isCTF() )
 		SpawnRunes();
