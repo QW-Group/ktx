@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_userinfo.c,v 1.8 2006/04/11 20:38:33 qqshka Exp $
+ *  $Id: g_userinfo.c,v 1.9 2006/04/13 23:15:11 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -80,15 +80,16 @@ qboolean FixPlayerTeam ( char *newteam )
 		}
 	}
 
-	if( match_in_progress == 2 && self->k_accepted == 2 && self->k_teamnum )
+	// do not allow change team in game / countdown
+	if( match_in_progress /* == 2 && self->k_accepted == 2 && self->k_teamnum */ )
 	{
 		s1 = newteam;
-		s2 = ezinfokey(world, va("%d", (int)self->k_teamnum));
+		s2 = getteam(self);
 
 		if( strneq( s1, s2 ) )
 		{
 			G_sprint(self, 2, "You may %s change team during game\n", redtext("not"));
-			stuffcmd(self, "team \"%s\"\n", getteam(self)); // sends this to client - so he get right team too
+			stuffcmd(self, "team \"%s\"\n", s2); // sends this to client - so he get right team too
 			return true;
 		}
 	}

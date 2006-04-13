@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.37 2006/04/13 04:31:07 ult_ Exp $
+ *  $Id: match.c,v 1.38 2006/04/13 23:15:11 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1304,7 +1304,13 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
        
 		if ( !rflag || !bflag )
 		{
-			G_bprint( 2, "This map does not support CTF mode\n" );
+			txt = "This map does not support CTF mode\n";
+
+			if ( s )
+        		G_sprint(s, 2, "%s", txt);
+			else
+        		G_bprint(2, "%s", txt);
+
 			return false;
 		}  
 
