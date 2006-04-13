@@ -1,5 +1,5 @@
 /*
- *  $Id: ctf.c,v 1.5 2006/04/11 20:38:33 qqshka Exp $
+ *  $Id: ctf.c,v 1.6 2006/04/13 04:31:07 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -7,8 +7,6 @@
 // CTF todo:
 // . disallow color changing
 // . one frame of grapple animation is a dead frame causing blinking problems with cl_deadbodyfilter 2
-// . no out of water discharges in ctf
-// . damage seems high at times ???
 
 // Low priority todo:
 // . end of game stats (efficiency is wrong, etc)
@@ -17,6 +15,8 @@
 // . ctf all id maps
 // . if you tk your flag carrier no +5 bonus if you cap?
 // . option to disable ctf sounds same as models?
+// . grapple refires when exiting a teleporter.. side effect of purectf fast grapple
+// . one blue spawn on ctf8 is in red base.  this is not our fault, but we can fix
 
 // Changes from purectf:
 // . Team damage on by default

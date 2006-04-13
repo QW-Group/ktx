@@ -1,3 +1,9 @@
+2006-04-12
+111. Added new functionality for k_dis.  k_dis 2 enables discharges, but only damages players actually in the liquid.
+	This is default for ctf.
+
+112. Added ctf items to e2m2 and e4m3.  Swedes can thank me later.
+
 2006-04-11 [ver 1.22]
 108. Fixed bug with infinite loop if u disable all weapons with noweapons and invoke impulse 10.
 

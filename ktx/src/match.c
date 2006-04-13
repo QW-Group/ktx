@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.36 2006/04/11 20:38:33 qqshka Exp $
+ *  $Id: match.c,v 1.37 2006/04/13 04:31:07 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -1309,10 +1309,10 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 		}  
 
 		for( p = world; p = find ( p, FOFCLSN, "player" ); )
-			if ( !streq(getteam(p), "blue") && !streq(getteam(p), "red") )
+			if ( p->ready && (!streq(getteam(p), "blue") && !streq(getteam(p), "red")) )
 			{
 				p->ready = 0;
-				G_sprint( p, 2, "You must be on either team red or blue\n" );
+				G_sprint( p, 2, "You must be on team red or blue for CTF\n" );
 				ctfReady = false;
 			}
 

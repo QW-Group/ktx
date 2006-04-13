@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.15 2006/04/10 17:14:30 qqshka Exp $
+ *  $Id: combat.c,v 1.16 2006/04/13 04:31:07 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -454,6 +454,9 @@ void T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage,
 
 				if ( head == attacker )
 					points = points * 0.5;
+				// no out of water discharge damage if k_dis 2
+				else if ( cvar("k_dis") == 2 && inflictor->s.v.weapon == IT_LIGHTNING && !head->s.v.waterlevel )
+					points = 0;
 
 				if ( points > 0 )
 				{

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.64 2006/04/11 20:38:33 qqshka Exp $
+ *  $Id: commands.c,v 1.65 2006/04/13 04:31:07 ult_ Exp $
  */
 
 // commands.c
@@ -2312,7 +2312,7 @@ const char ctf_um_init[] =
 	"timelimit  20\n"
 	"teamplay   2\n"
 	"deathmatch 3\n"
-	"k_dis 0\n"          
+	"k_dis 2\n"						// no out of water discharges in ctf          
 	"k_pow 1\n"
 	"k_spw 1\n"
 	"k_membercount 0\n"          
