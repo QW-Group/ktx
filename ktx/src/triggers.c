@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: triggers.c,v 1.12 2006/04/10 17:15:00 qqshka Exp $
+ *  $Id: triggers.c,v 1.13 2006/04/14 02:11:06 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -516,11 +516,8 @@ void teleport_touch()
 	{
 		if ( other->s.v.weapon == IT_HOOK && other->hook_out )
 		{
-			sound(other, CHAN_WEAPON, "weapons/bounce2.wav", 1, ATTN_NORM);
-			other->on_hook = false;
-			other->hook_out = false;
-			other->s.v.weaponframe = 0;
-			other->attack_finished = g_globalvars.time + 0.75;
+			GrappleReset( other->hook );
+			other->attack_finished = g_globalvars.time + 0.25;
 		}
 
 		other->s.v.fixangle = 1;	// turn this way immediately

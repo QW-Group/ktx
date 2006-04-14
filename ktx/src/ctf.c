@@ -1,5 +1,5 @@
 /*
- *  $Id: ctf.c,v 1.6 2006/04/13 04:31:07 ult_ Exp $
+ *  $Id: ctf.c,v 1.7 2006/04/14 02:11:06 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -15,7 +15,6 @@
 // . ctf all id maps
 // . if you tk your flag carrier no +5 bonus if you cap?
 // . option to disable ctf sounds same as models?
-// . grapple refires when exiting a teleporter.. side effect of purectf fast grapple
 // . one blue spawn on ctf8 is in red base.  this is not our fault, but we can fix
 
 // Changes from purectf:

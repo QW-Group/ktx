@@ -4,7 +4,7 @@
  * PureCTF changes by Methabol
  *
  *
- *  $Id: grapple.c,v 1.4 2006/04/11 20:38:33 qqshka Exp $
+ *  $Id: grapple.c,v 1.5 2006/04/14 02:11:06 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -336,7 +336,7 @@ void GrappleThrow()
   if ( self->hook_out ) // only throw once
     return;
 
-  g_globalvars. msg_entity = EDICT_TO_PROG( self );
+  g_globalvars.msg_entity = EDICT_TO_PROG( self );
   WriteByte( MSG_ONE, SVC_SMALLKICK );
 
   // chain out sound (loops)
@@ -362,7 +362,7 @@ void GrappleThrow()
   SetVector( newmis->s.v.avelocity, 0, 0, -500 );
 
   newmis->s.v.touch     = (func_t) GrappleAnchor;
-  newmis->s.v.think     = (func_t) BuildChain;  //  Chain is broken right now
+  newmis->s.v.think     = (func_t) BuildChain;
   newmis->s.v.nextthink = g_globalvars.time + 0.1;
 
   if ( k_ctf_custom_models )
