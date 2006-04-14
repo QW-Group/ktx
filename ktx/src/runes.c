@@ -1,5 +1,5 @@
 /*
- *  $Id: runes.c,v 1.3 2006/04/11 20:38:33 qqshka Exp $
+ *  $Id: runes.c,v 1.4 2006/04/14 02:08:41 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -18,8 +18,8 @@ void DoDropRune(int rune)
   setorigin( item, PASSVEC3( self->s.v.origin ) );
   item->s.v.classname = "rune";
   item->ctf_flag = rune;
-  item->s.v.velocity[0] = 0;
-  item->s.v.velocity[1] = 0;
+  item->s.v.velocity[0] = i_rnd( -100, 100 );
+  item->s.v.velocity[1] = i_rnd( -100, 100 );
   item->s.v.velocity[2] = 400;
   item->s.v.flags = FL_ITEM;
   item->s.v.solid = SOLID_TRIGGER;
