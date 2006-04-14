@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.65 2006/04/13 04:31:07 ult_ Exp $
+ *  $Id: commands.c,v 1.66 2006/04/14 22:09:38 qqshka Exp $
  */
 
 // commands.c
@@ -2428,6 +2428,26 @@ void UserMode(float umode)
 			G_sprint(self, 2, "server configuration %s this command\n", redtext("lock"));
 
 		return;
+	}
+
+	// We invoke ctf command.
+	// So we need check ready players, and if they have wrong teams, discard ctf command
+	// untill they type break or fix team names.
+	// After ctf mode activated no one can have wrong team and be ready at the same time.
+	if ( !isCTF() && (um_list[(int)umode].um_flags & UM_CTF) ) {
+		gedict_t	*p;
+
+		for( p = world; p = find ( p, FOFCLSN, "player" ); )
+			if ( p->ready && (!streq(getteam(p), "blue") && !streq(getteam(p), "red")) )
+			{
+				if ( sv_invoked )
+					G_bprint(2, "UserMode: sv %s discarded due to ready players have not red or blue team\n", um);
+				else
+					G_sprint(self, 2, "command discarded due to ready players have not red or blue team\n"
+									  "either force they fix team or be not ready\n" );
+
+				return;
+			}
 	}
 
 	G_bprint(2, "%s %s\n", redtext(um_list[(int)umode].displayname), redtext("settings enabled"));

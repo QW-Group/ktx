@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.38 2006/04/13 23:15:11 qqshka Exp $
+ *  $Id: match.c,v 1.39 2006/04/14 22:09:38 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1242,7 +1242,6 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 	int sub, nready;
 	char *txt = "";
 	gedict_t *p;
-	qboolean ctfReady = true;
 
 	if ( !isTeam() && !isCTF() ) // no rules limitation in non team game
 		return true;
@@ -1301,6 +1300,7 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 		// can't really play ctf if map doesn't have flags
 		gedict_t *rflag = find( world, FOFCLSN, "item_flag_team1" );
 		gedict_t *bflag = find( world, FOFCLSN, "item_flag_team2" );
+//		qboolean ctfReady = true;
        
 		if ( !rflag || !bflag )
 		{
@@ -1314,6 +1314,10 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 			return false;
 		}  
 
+/*
+// qqshka: this code allow us to check CTF requrements about teams, but broke forcestart and iddlebot.
+//		   so i make this in other way
+
 		for( p = world; p = find ( p, FOFCLSN, "player" ); )
 			if ( p->ready && (!streq(getteam(p), "blue") && !streq(getteam(p), "red")) )
 			{
@@ -1324,6 +1328,7 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 
 		if ( !ctfReady )
 			return false;
+*/
 	}
 
 	return true;

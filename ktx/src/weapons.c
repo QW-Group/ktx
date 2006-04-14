@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.25 2006/04/10 20:48:50 qqshka Exp $
+ *  $Id: weapons.c,v 1.26 2006/04/14 22:09:38 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1660,7 +1660,7 @@ void ImpulseCommands()
 {
     int capt;
 
-	if ( strnull(self->s.v.classname) ) {
+	if ( strneq(self->s.v.classname, "player") ) {
 		impulse = self->s.v.impulse = 0;
 		return;
 	}

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_userinfo.c,v 1.9 2006/04/13 23:15:11 qqshka Exp $
+ *  $Id: g_userinfo.c,v 1.10 2006/04/14 22:09:38 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -89,6 +89,19 @@ qboolean FixPlayerTeam ( char *newteam )
 		if( strneq( s1, s2 ) )
 		{
 			G_sprint(self, 2, "You may %s change team during game\n", redtext("not"));
+			stuffcmd(self, "team \"%s\"\n", s2); // sends this to client - so he get right team too
+			return true;
+		}
+	}
+
+	if ( !match_in_progress && isCTF() && self->ready ) {
+		// if CTF and player ready allow change team to red or blue
+		s1 = newteam;
+		s2 = getteam(self);
+
+		if( strneq(s1, "red") && strneq(s1, "blue") )
+		{
+			G_sprint(self, 2, "You must be on team red or blue for CTF\n" );
 			stuffcmd(self, "team \"%s\"\n", s2); // sends this to client - so he get right team too
 			return true;
 		}

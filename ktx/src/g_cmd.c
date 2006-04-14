@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.7 2006/04/06 18:58:36 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.8 2006/04/14 22:09:38 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -53,7 +53,7 @@ qboolean 	ClientCommand()
 
 	self = PROG_TO_EDICT( g_globalvars.self );
 
-	if ( strnull(self->s.v.classname) )
+	if ( strneq(self->s.v.classname, "player") && strneq(self->s.v.classname, "spectator") )
 		return true; // not connected yet or something
 
 	trap_CmdArgv( 0, cmd_command, sizeof( cmd_command ) );
