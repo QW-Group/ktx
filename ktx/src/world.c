@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.34 2006/04/13 04:31:07 ult_ Exp $
+ *  $Id: world.c,v 1.35 2006/04/15 22:33:51 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -440,6 +440,25 @@ void Customize_Maps()
 		SpawnItem( "info_player_team2", 2599,   269, -104, 180 );
 		SpawnItem( "info_player_team2", 2630,   430, -104, 180 );
 		SpawnItem( "info_player_team2", 2447,   439, -104, 180 );
+	}
+	else if ( streq( "ctf8", g_globalvars.mapname ) )
+	{
+		// remove some bad spawns from ctf8
+		vec3_t spawn1 = {  1704, -540, 208 }; // blue spawn in red base
+		vec3_t spawn2 = { -1132,  -72, 208 }; // red spawn in blue base
+		// vec3_t spawn3 = {   660,  256, 400 }; // red spawn at quad
+		
+		for( p = world; p = find( p, FOFCLSN, "info_player_team2" ); )
+			if ( VectorCompare( p->s.v.origin, spawn1 ) ) {
+				ent_remove( p );
+				break;
+			}
+
+		for( p = world; p = find( p, FOFCLSN, "info_player_team1" ); )
+			if ( VectorCompare( p->s.v.origin, spawn2 ) ) { 
+				ent_remove( p );
+				break;
+			}
 	}
 }
 
