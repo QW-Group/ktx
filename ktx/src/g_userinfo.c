@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_userinfo.c,v 1.10 2006/04/14 22:09:38 qqshka Exp $
+ *  $Id: g_userinfo.c,v 1.11 2006/04/15 23:17:43 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -122,7 +122,8 @@ cmdinfo_t cinfos[] = {
 //    { "bw" },
 //      b1, b2, b3, b4
     { "e-mail" },
-//      ev, +ev, -ev
+    { "ev" },
+//      +ev, -ev
 //      fs
 //      ft
 	{ "gender" },
@@ -373,6 +374,14 @@ void cmdinfo_infoset ( gedict_t *p )
 		cmdinfo_clear ( p ); // remove all keys
 		cmdinfo_setkey( p, "*is", "1" ); // mark we are call infoset already
 		stuffcmd(p, "%sinfoset\n", p->k_spectator ? "s" : ""); // and call infoset
+		// kick cmd back to server, so we know client get infoset,
+	  	// so we can invoke on_connect and on_enter
+		stuffcmd(p, "wait;wait;wait;cmd ack infoset\n");
+	}
+	else {
+		// kick cmd back to server, so we know client already get infoset,
+	  	// so we can invoke on_connect and on_enter
+		stuffcmd(p, "wait;wait;wait;cmd ack noinfoset\n");
 	}
 }
 

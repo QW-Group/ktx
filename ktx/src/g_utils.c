@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.35 2006/04/10 17:14:30 qqshka Exp $
+ *  $Id: g_utils.c,v 1.36 2006/04/15 23:17:43 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1629,4 +1629,46 @@ void update_ghosts ()
 }
 
 // } ghost stuff
+
+// { events
+
+void on_connect()
+{
+	if ( !(iKey(self, "ev") & EV_ON_CONNECT) ) // client doesn't want on_connect
+		return;
+
+	if ( self->k_player ) {
+		if ( isFFA() )
+			stuffcmd(self, "on_connect_ffa\n");
+		else
+			stuffcmd(self, "on_connect\n");
+	}
+	else {
+		if ( isFFA() )
+			stuffcmd(self, "on_observe_ffa\n");
+		else
+			stuffcmd(self, "on_observe\n");
+	}
+}
+
+void on_enter()
+{
+	if ( iKey(self, "kf") & KF_ON_ENTER ) // client doesn't want on_enter 
+		return;
+
+	if ( self->k_player ) {
+		if ( isFFA() )
+			stuffcmd(self, "on_enter_ffa\n");
+		else
+			stuffcmd(self, "on_enter\n");
+	}
+	else {
+		if ( isFFA() )
+			stuffcmd(self, "on_spec_enter_ffa\n");
+		else
+			stuffcmd(self, "on_spec_enter\n");
+	}
+}
+
+// }
 

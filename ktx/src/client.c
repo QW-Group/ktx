@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.52 2006/04/10 17:14:30 qqshka Exp $
+ *  $Id: client.c,v 1.53 2006/04/15 23:17:43 qqshka Exp $
  */
 
 //===========================================================================
@@ -1246,6 +1246,7 @@ void PlayerDeathThink()
 // { autospawn
 	if( (g_globalvars.time - self->dead_time) > 5 && match_in_progress ) {
 		self->s.v.deadflag = DEAD_RESPAWNABLE;
+		self->wreg_attack = 0;
 		self->s.v.button0 = 0;
 		self->s.v.button1 = 0;
 		self->s.v.button2 = 0;
@@ -1257,13 +1258,13 @@ void PlayerDeathThink()
 // wait for all buttons released
 	if ( self->s.v.deadflag == DEAD_DEAD )
 	{
-		if ( self->s.v.button2 || self->s.v.button1 || self->s.v.button0 )
+		if ( self->s.v.button2 || self->s.v.button1 || self->s.v.button0 || self->wreg_attack )
 			return;
 		self->s.v.deadflag = DEAD_RESPAWNABLE;
 		return;
 	}
 // wait for any button down
-	if ( !self->s.v.button2 && !self->s.v.button1 && !self->s.v.button0 )
+	if ( !self->s.v.button2 && !self->s.v.button1 && !self->s.v.button0 && !self->wreg_attack )
 		return;
 
 	self->s.v.button0 = 0;

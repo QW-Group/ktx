@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.13 2006/03/26 17:19:13 qqshka Exp $
+ *  $Id: g_main.c,v 1.14 2006/04/15 23:17:43 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -50,6 +50,8 @@ field_t         expfields[] = {
 static char     mapname[64];
 static char     worldmodel[64] = "worldmodel";
 static char     netnames[MAX_CLIENTS][32];
+
+static wreg_t   wregs[MAX_CLIENTS][MAX_WREGS];
 
 gameData_t      gamedata =
     { ( edict_t * ) g_edicts, sizeof( gedict_t ), &g_globalvars, expfields , GAME_API_VERSION};
@@ -108,6 +110,9 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		self->k_spectator = arg0;
 		self->k_player    = !arg0;
 
+		self->wreg = wregs[(int)(self - world)-1];
+		memset( self->wreg, 0, sizeof( wreg_t ) * MAX_WREGS ); // clear
+
 		show_sv_version();
 
 		cmdinfo_infoset ( self );
@@ -123,8 +128,12 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 
 	case GAME_PUT_CLIENT_IN_SERVER:
 		self = PROG_TO_EDICT( g_globalvars.self );
+
 		if ( !arg0 )
 			PutClientInServer();
+		else
+			PutSpectatorInServer();
+
 		return 1;
 
 	case GAME_CLIENT_DISCONNECT:
@@ -147,6 +156,10 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 
 	case GAME_CLIENT_PRETHINK:
 		self = PROG_TO_EDICT( g_globalvars.self );
+
+		if ( self->wreg_attack ) // client simulate +attack via "cmd wreg" feature
+			self->s.v.button0 = true;
+
 		if ( !arg0 )
 			PlayerPreThink();
 		return 1;
@@ -154,6 +167,9 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 	case GAME_CLIENT_POSTTHINK:
 		self = PROG_TO_EDICT( g_globalvars.self );
 		self->k_lastPostThink = g_globalvars.time;
+
+		if ( self->wreg_attack ) // client simulate +attack via "cmd wreg" feature
+			self->s.v.button0 = true;
 
 		if ( !arg0 )
 			PlayerPostThink();

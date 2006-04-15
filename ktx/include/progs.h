@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.26 2006/04/09 22:37:02 qqshka Exp $
+ *  $Id: progs.h,v 1.27 2006/04/15 23:17:17 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -104,6 +104,18 @@ typedef struct vote_s {
 
 	float elect_block_till;	// block election for this time
 } vote_t;
+
+// store wregs here
+
+#define MAX_WREGS    (256)
+#define MAX_WREG_IMP (9)
+
+typedef struct wreg_s {
+	qboolean init;
+
+	int attack;
+	int impulse[MAX_WREG_IMP];
+} wreg_t;
 
 // player position
 
@@ -318,6 +330,11 @@ typedef struct gedict_s {
 // }
 
 	qboolean was_jump;
+
+// { wreg
+	qboolean wreg_attack;		   // client simulate +attack via "cmd wreg" feature
+	wreg_t *wreg; // [256]
+// }
 
 } gedict_t;
 

@@ -1,3 +1,7 @@
+2006-04-16
+113. Added support for Reliable Weapons from ktpro.
+	 "cmd wreg [char [+/-]weapon order]" i.e like it was for ktpro (c)
+
 2006-04-12
 111. Added new functionality for k_dis.  k_dis 2 enables discharges, but only damages players actually in the liquid.
 	 This is default for ctf.

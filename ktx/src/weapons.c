@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.26 2006/04/14 22:09:38 qqshka Exp $
+ *  $Id: weapons.c,v 1.27 2006/04/15 23:17:43 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1342,6 +1342,79 @@ void W_Attack()
 	}
 }
 
+qboolean W_CanSwitch( int wp, qboolean warn )
+{
+	int             it, am, fl = 0;
+
+	it = self->s.v.items;
+	am = 0;
+
+	switch ( wp )
+	{
+	case 1:
+		fl = IT_AXE;
+		break;
+	case 2:
+		fl = IT_SHOTGUN;
+		if ( self->s.v.ammo_shells < 1 )
+			am = 1;
+		break;
+	case 3:
+		fl = IT_SUPER_SHOTGUN;
+		if ( self->s.v.ammo_shells < 2 )
+			am = 1;
+		break;
+	case 4:
+		fl = IT_NAILGUN;
+		if ( self->s.v.ammo_nails < 1 )
+			am = 1;
+		break;
+	case 5:
+		fl = IT_SUPER_NAILGUN;
+		if ( self->s.v.ammo_nails < 2 )
+			am = 1;
+		break;
+	case 6:
+		fl = IT_GRENADE_LAUNCHER;
+		if ( self->s.v.ammo_rockets < 1 )
+			am = 1;
+		break;
+	case 7:
+		fl = IT_ROCKET_LAUNCHER;
+		if ( self->s.v.ammo_rockets < 1 )
+			am = 1;
+		break;
+	case 8:
+		fl = IT_LIGHTNING;
+		if ( self->s.v.ammo_cells < 1 )
+			am = 1;
+		break;
+
+	case 22:
+		fl = IT_HOOK;
+		break;
+
+	default:
+		break;
+	}
+
+	if ( !( it & fl ) )
+	{			// don't have the weapon or the ammo
+		if ( warn )
+			G_sprint( self, PRINT_HIGH, "no weapon\n" );
+		return false;
+	}
+
+	if ( am )
+	{			// don't have the ammo
+		if ( warn )
+			G_sprint( self, PRINT_HIGH, "not enough ammo\n" );
+		return false;
+	}
+
+	return true;
+}
+
 /*
 ============
 W_ChangeWeapon
@@ -1413,7 +1486,7 @@ void W_ChangeWeapon()
 
 	impulse = 0;
 
-	if ( !( ( int ) self->s.v.items & fl ) )
+	if ( !( it & fl ) )
 	{			// don't have the weapon or the ammo
 		G_sprint( self, PRINT_HIGH, "no weapon\n" );
 		return;
@@ -1714,6 +1787,12 @@ Called every frame so impulse events can be handled as well as possible
 */
 void W_WeaponFrame()
 {
+	if ( self->spawn_time + 0.05 > g_globalvars.time )
+		return; // discard +attack till 50 ms after respawn, like ktpro 
+
+	if ( self->wreg_attack ) // client simulate +attack via "cmd wreg" feature
+		self->s.v.button0 = true;
+
 	if ( g_globalvars.time < self->attack_finished )
 		return;
 

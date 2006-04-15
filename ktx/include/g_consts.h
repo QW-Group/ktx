@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_consts.h,v 1.8 2006/04/10 20:49:08 qqshka Exp $
+ *  $Id: g_consts.h,v 1.9 2006/04/15 23:17:17 qqshka Exp $
  */
 
 //
@@ -259,12 +259,24 @@
 //                     4     	use cfgmap
 //                     8     	female gender if it is set, if not - male
 //                     16    	based on server type called alias (see below)
-//                     32    	don't call on_enter event (every map change)
+#define KF_ON_ENTER    (  32)   // don't call on_enter event (every map change)
 #define KF_SPEED       (  64)   // show speed in prewar
 //                     128   	if it is set mod will call menu_in.cfg
 //                     256   	if it is set menu_out.cfg will be not called
 //                     512   	use dmm related map cfg
 //                     (1024)  	do not use stuff sounds
+
+// events
+#define EV_ON_CONNECT  (   1)	//  connect
+//                     2     weapon switch
+//                     4     match start
+//                     8     match end
+//                     16    match break
+//                     32    map change
+//                     64    deathmatch mode change
+//                     128   admin
+//                     256   unadmin
+
 
 // CTF
 #define CTF_RUNE_RES    1   // IT_SIGIL1

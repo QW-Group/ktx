@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.14 2006/04/14 22:09:38 qqshka Exp $
+ *  $Id: spectate.c,v 1.15 2006/04/15 23:17:43 qqshka Exp $
  */
 
 // spectate.c
@@ -106,6 +106,20 @@ void SpectatorConnect()
 
 	// Wait until you do stuffing
 	SMakeMOTD();
+}
+
+////////////////
+// GlobalParams:
+// time
+// self
+///////////////
+void PutSpectatorInServer()
+{
+//
+// u can put something usefull here :P
+//
+
+//	G_sprint(self, 2, "Hellow %s\n", getname(self));
 }
 
 ////////////////

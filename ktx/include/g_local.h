@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.42 2006/04/10 20:49:08 qqshka Exp $
+ *  $Id: g_local.h,v 1.43 2006/04/15 23:17:17 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -286,6 +286,13 @@ qboolean	can_exec( char *name );
 void		ghostClearScores( gedict_t *g );
 void		update_ghosts ();
 
+// { events
+
+void		on_enter();
+void		on_connect();
+
+// }
+
 void    	disableupdates( gedict_t * ed, float time );
 
 //
@@ -345,6 +352,7 @@ void			Print_Scores();
 
 //spectate.c
 void            SpectatorConnect();
+void			PutSpectatorInServer();
 void            SpectatorDisconnect();
 void            SpectatorThink();
 
@@ -357,6 +365,7 @@ void            SpawnBlood( vec3_t, float );
 void            W_FireAxe();
 void            W_FireSpikes( float ox );
 void            W_FireLightning();
+qboolean		W_CanSwitch( int wp, qboolean warn );
 
 // match.c
 
