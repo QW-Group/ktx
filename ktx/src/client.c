@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.54 2006/04/16 05:20:47 ult_ Exp $
+ *  $Id: client.c,v 1.55 2006/04/16 15:25:27 qqshka Exp $
  */
 
 //===========================================================================
@@ -260,7 +260,7 @@ void SetChangeParms()
 {
 	// ok, server want to change map
 	// check, if matchless mode is active, set ingame params,
-	// we must use k_matchless cvar here beacuse it can be changed during game somehow (via direct server conlose etc)
+	// we must use k_matchless cvar here because it can be changed during game somehow (via direct server conlose etc)
 	// If matchless mode is not active, set just ordinary prewar stats
 	if( /* match_in_progress == 2 ||*/ cvar( "k_matchless" ) )
 		InGameParams ();

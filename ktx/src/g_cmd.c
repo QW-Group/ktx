@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.9 2006/04/15 23:17:43 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.10 2006/04/16 15:25:27 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -148,40 +148,54 @@ void cmd_ack()
 
 void wreg_usage()
 {
-	G_sprint(self, 2, "usage: cmd wreg [char [+/-]weapon order]\n");
+	G_sprint(self, 2, "usage: cmd wreg [[char] [[+/-]weapon order]]\n");
+}
+
+void wreg_showslot(	wreg_t *w, int slot )
+{
+	int i;
+	char *sign, order[MAX_WREG_IMP+1];
+
+	if ( !w->init ) {
+		G_sprint(self, 2, "slot \"%c\" - unregistered\n", (char)slot);
+		return;
+	}
+
+	sign = "";
+	if (w->attack > 0 )
+		sign = "+";
+	else if (w->attack < 0 )
+		sign = "-";
+
+	for ( order[0] = i = 0; i < MAX_WREG_IMP && w->impulse[i]; i++ )
+		order[i] = '0' + w->impulse[i];
+	order[i] = 0;
+
+	G_sprint(self, 2, "slot \"%c\" - \"%s%s\"\n", (char)slot, sign, order);
 }
 
 void cmd_wreg()
 {
-	int		argc = trap_CmdArgc(), attack = 0, imp[MAX_WREG_IMP], i, j, found;
-	char	arg_1[64], arg_2[64], *tmp = arg_2, *sign, order[MAX_WREG_IMP+1];
+	int		argc = trap_CmdArgc(), attack = 0, imp[MAX_WREG_IMP], i, cnt;
+	char	arg_1[64], arg_2[64], *tmp = arg_2;
 	byte    c;
 	wreg_t  *w;
 
-	if (!self->wreg)
+	if ( !self->wreg )
 		return;
 
 	if ( argc == 1 ) {
+		qboolean found = false;
+
 		G_sprint(self, 2, "list of registered weapons:\n");
 
-		for ( found = i = 0; i < MAX_WREGS; i++ ) {
+		for ( i = 0; i < MAX_WREGS; i++ ) {
 			w = &(self->wreg[i]);
 			if ( !w->init )
 				continue;
 
-			found = 1;
-
-			sign = "";
-			if (w->attack > 0 )
-				sign = "+";
-			else if (w->attack < 0 )
-				sign = "-";
-
-			for ( order[0] = j = 0; j < MAX_WREG_IMP && w->impulse[j]; j++ )
-				order[j] = '0' + w->impulse[j];
-			order[j] = 0;
-
-			G_sprint(self, 2, "%c - %s%s\n", (char)i, sign, order);
+			found = true;
+			wreg_showslot( w, i );
 		}
 
 		if ( !found )
@@ -190,13 +204,7 @@ void cmd_wreg()
 		return;
 	}
 
-	if ( argc != 3 ) {
-		wreg_usage();
-		return; // something wrong
-	}
-
 	trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
-	trap_CmdArgv( 2, arg_2, sizeof( arg_2 ) );
 
 	if ( strnull(arg_1) ) {
 		wreg_usage();
@@ -214,14 +222,44 @@ void cmd_wreg()
 
 	if ( c <= 0 || c > 175 || c >= MAX_WREGS ) {
 		wreg_usage();
-		G_sprint(self, 2, "%s - illegal char!\n", arg_1);
+		G_sprint(self, 2, "\"%c\" - illegal char!\n", (char)c);
 		return;
 	}
 
-	if ( strnull(arg_2) ) {
-		wreg_usage();
-		G_sprint(self, 2, "empty weapon order\n");
+	w = &(self->wreg[c]);
+
+	if ( argc == 2 ) {
+		wreg_showslot( w, c );
 		return;
+	}
+
+	if ( argc != 3 ) {
+		wreg_usage();
+		return; // something wrong
+	}
+
+	trap_CmdArgv( 2, arg_2, sizeof( arg_2 ) );
+
+	if ( strnull(arg_2) ) {
+		if ( w->init ) {
+			w->init = false;
+			G_sprint(self, 2, "slot \"%c\" - unregistered\n", (char)c);
+		}
+		else {
+			wreg_usage();
+			G_sprint(self, 2, "empty weapon order\n");
+		}
+		return;
+	}
+
+	for ( cnt = i = 0; i < MAX_WREGS; i++ ) {
+		if ( !(self->wreg[i].init) )
+			continue;
+
+		if ( ++cnt >= 20 ) {
+			G_sprint(self, 2, "too many wregs, discard registration\n");
+			return;
+		}
 	}
 
 	if ( strlen(arg_2) > 10 ) { // 10 == strlen("+987654321")
@@ -254,7 +292,6 @@ void cmd_wreg()
 	}
 
 	// ok we parse wreg command, and all ok, init it
-	w = &(self->wreg[c]);
 	memset( w, 0, sizeof( wreg_t ) ); // clear
 
 	w->init   = true;
@@ -262,6 +299,8 @@ void cmd_wreg()
 
 	for ( i--; i >= 0 && i < MAX_WREG_IMP; i-- )
 		w->impulse[i] = imp[i];
+
+	G_sprint(self, 2, "slot \"%c\" - registered\n", (char)c);
 }
 
 void cmd_wreg_do( byte c )
@@ -270,13 +309,13 @@ void cmd_wreg_do( byte c )
 	int j;
 	wreg_t *w;
 
-	if (!self->wreg)
+	if ( !self->wreg || c >= MAX_WREGS )
 		return;
 
 	w = &(self->wreg[c]);
 
 	if ( !w->init ) {
-		G_sprint(self, 2, "unregistered wreg char - %c\n", (char)c);
+		G_sprint(self, 2, "unregistered wreg char - \"%c\"\n", (char)c);
 		return;
 	}
 
