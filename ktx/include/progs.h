@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.27 2006/04/15 23:17:17 qqshka Exp $
+ *  $Id: progs.h,v 1.28 2006/04/16 05:20:46 ult_ Exp $
  */
 
 #include "progdefs.h"
@@ -90,6 +90,18 @@ typedef struct player_stats_s {
 	int		spawn_frags;
 
 	int		handicap;
+
+	// ctf stats
+	int caps;		// flag captures
+	int f_defends;  // flag defends
+	int c_defends;	// carrier defends
+	int c_frags;	// frags on enemy carriers
+	int pickups;	// flag pickups
+	int returns;	// flag returns
+	float res_time;	// time with resistance rune
+	float str_time;	// time with strength rune
+	float hst_time;	// time with haste rune
+	float rgn_time;	// time with regen rune
 
 } player_stats_t;
 
@@ -327,6 +339,7 @@ typedef struct gedict_s {
 	float return_flag_time;        // used for flag return assists
 	float rune_notify_time;        // already have a rune spam prevention
 	float carrier_hurt_time;       // time we last hurt enemy carrier
+	float rune_pickup_time;        // time we picked up current rune
 // }
 
 	qboolean was_jump;

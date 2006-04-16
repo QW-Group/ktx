@@ -1,5 +1,5 @@
 /*
- *  $Id: runes.c,v 1.4 2006/04/14 02:08:41 ult_ Exp $
+ *  $Id: runes.c,v 1.5 2006/04/16 05:20:47 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -77,14 +77,22 @@ void DoTossRune( int rune )
 
 void DropRune()
 {
-  if ( self->ctf_flag & CTF_RUNE_RES )
+  if ( self->ctf_flag & CTF_RUNE_RES ) {
     DoDropRune( CTF_RUNE_RES );
-  if ( self->ctf_flag & CTF_RUNE_STR )
+    self->ps.res_time += g_globalvars.time - self->rune_pickup_time;
+  }
+  if ( self->ctf_flag & CTF_RUNE_STR ) {
     DoDropRune( CTF_RUNE_STR );
-  if ( self->ctf_flag & CTF_RUNE_HST )
+    self->ps.str_time += g_globalvars.time - self->rune_pickup_time;
+  }
+  if ( self->ctf_flag & CTF_RUNE_HST ) {
     DoDropRune( CTF_RUNE_HST );
-  if ( self->ctf_flag & CTF_RUNE_RGN )
+    self->ps.hst_time += g_globalvars.time - self->rune_pickup_time;
+  }
+  if ( self->ctf_flag & CTF_RUNE_RGN ) {
     DoDropRune( CTF_RUNE_RGN );
+    self->ps.rgn_time += g_globalvars.time - self->rune_pickup_time;
+  }
 
   self->ctf_flag -= ( self->ctf_flag & (CTF_RUNE_MASK) );
   // self->s.v.items -= ( (int) self->s.v.items & (CTF_RUNE_MASK) );
@@ -92,15 +100,20 @@ void DropRune()
 
 void TossRune()
 {
-  if ( self->ctf_flag & CTF_RUNE_RES )
+  if ( self->ctf_flag & CTF_RUNE_RES ) 
+  {
     DoTossRune( CTF_RUNE_RES );
-
-  if ( self->ctf_flag & CTF_RUNE_STR )
+    self->ps.res_time += g_globalvars.time - self->rune_pickup_time;
+  }
+  if ( self->ctf_flag & CTF_RUNE_STR ) 
+  {
     DoTossRune( CTF_RUNE_STR );
-
+    self->ps.str_time += g_globalvars.time - self->rune_pickup_time;
+  }
   if ( self->ctf_flag & CTF_RUNE_HST )
   {
     DoTossRune( CTF_RUNE_HST );
+    self->ps.hst_time += g_globalvars.time - self->rune_pickup_time;
     self->maxspeed = cvar("sv_maxspeed");
   }
 
@@ -108,6 +121,7 @@ void TossRune()
   {
     gedict_t *regenrot = spawn();
 	DoTossRune( CTF_RUNE_RGN );
+    self->ps.rgn_time += g_globalvars.time - self->rune_pickup_time;
     regenrot->s.v.nextthink = g_globalvars.time + 5;
     regenrot->s.v.think = (func_t) RegenLostRot;
     regenrot->s.v.owner = EDICT_TO_PROG( self );
@@ -174,6 +188,7 @@ void RuneTouch()
   }
  
   other->ctf_flag |= self->ctf_flag;
+  other->rune_pickup_time = g_globalvars.time;
  
   if ( other->ctf_flag & CTF_RUNE_RES )
   {

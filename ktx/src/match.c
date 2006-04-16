@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.39 2006/04/14 22:09:38 qqshka Exp $
+ *  $Id: match.c,v 1.40 2006/04/16 05:20:47 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -222,6 +222,8 @@ void SummaryTPStats ( )
 	int   mh;
 	int   quad, pent, ring;
 	float h_rl, a_rl, h_lg, a_lg, h_sg, a_sg, h_ssg, a_ssg;
+	int caps, pickups, returns, f_defends, c_defends;
+	float res, str, rgn, hst; 
 	char  *tmp;
 
 	ShowTeamsBanner ();
@@ -241,6 +243,8 @@ void SummaryTPStats ( )
 
 			dmg_g = dmg_t = ra = ya = ga = mh = quad = pent = ring = 0;
 			h_rl = a_rl = h_lg = a_lg = h_sg = a_sg = h_ssg = a_ssg = 0;
+			caps = pickups = returns = f_defends = c_defends = 0;
+			res = str = hst = rgn = 0;
 
 			for( from2 = 0, p2 = world; p2 = find_plrghst ( p2, &from2 ); ) {
 				if( !p2->ready ) {
@@ -263,6 +267,16 @@ void SummaryTPStats ( )
 						a_sg  += p2->ps.a_sg;
 						h_ssg += p2->ps.h_ssg;
 						a_ssg += p2->ps.a_ssg;
+
+						caps += p2->ps.caps;
+						pickups += p2->ps.pickups;
+						returns += p2->ps.returns;
+						f_defends += p2->ps.f_defends;
+						c_defends += p2->ps.c_defends;
+						res += p2->ps.res_time;
+						str += p2->ps.str_time;
+						hst += p2->ps.hst_time;
+						rgn += p2->ps.rgn_time;
 
 						p2->ready = 1; // set mark
 					}
@@ -292,6 +306,12 @@ void SummaryTPStats ( )
 			// armors + megahealths
 			G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("Armr&mhs"),
 					redtext("ga"), ga, redtext("ya"), ya, redtext("ra"), ra, redtext("mh"), mh);
+			if ( isCTF() ) {
+				G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("     CTF"),
+					redtext("caps"), caps, redtext("returns"), returns, redtext("fd"), f_defends, redtext("cd"), c_defends);
+				G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f %s:%.0f\n", redtext("   Runes"),
+					redtext("res"), res, redtext("str"), str, redtext("hst"), hst, redtext("rgn"), rgn);
+			}
 			// damage
 			G_bprint(2, "%s: %s:%.1f %s:%.1f\n", redtext("  Damage"),
 						redtext("Taken"), dmg_t, redtext("Given"), dmg_g);
@@ -419,6 +439,13 @@ void OnePlayerStats(gedict_t *p, int tp)
 		// armors + megahealths
 		G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("Armr&mhs"),
 				redtext("ga"), ga, redtext("ya"), ya, redtext("ra"), ra, redtext("mh"), mh);
+		if ( isCTF() )
+		{
+			G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("     CTF"),
+				redtext("caps"), p->ps.caps, redtext("returns"), p->ps.returns, redtext("fd"), p->ps.f_defends, redtext("cd"), p->ps.c_defends );
+			G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f %s:%.0f\n", redtext("   Runes"),
+				redtext("res"), p->ps.res_time, redtext("str"), p->ps.str_time, redtext("hst"), p->ps.hst_time, redtext("rgn"), p->ps.rgn_time);
+		}
 		// damage
 		G_bprint(2, "%s: %s:%.1f %s:%.1f\n", redtext("  Damage"),
 				redtext("Taken"), dmg_t, redtext("Given"), dmg_g);
@@ -465,7 +492,7 @@ void PlayersStats ()
 
 	maxeffi = maxfriend = maxdeaths = 0;
 
-	tp = isTeam();
+	tp = isTeam() || isCTF();
 
 	G_bprint(2, "\n%s:\n"
 				"%s (%s) %s %s\n"
@@ -651,7 +678,24 @@ void EndMatch ( float skip_log )
 		G_cprint("%%tl%%%d", (int)timelimit);
 		G_cprint("%%map%%%s\n", g_globalvars.mapname);
 
-        if( isTeam() )
+		if ( isCTF() ) // if a player ends the game with a rune adjust their rune time
+		{
+			p = find( world, FOFCLSN, "player" );
+			while ( p )
+			{
+				if ( p->ctf_flag & CTF_RUNE_RES )
+					p->ps.res_time += g_globalvars.time - p->rune_pickup_time;
+				else if ( p->ctf_flag & CTF_RUNE_STR )
+					p->ps.str_time += g_globalvars.time - p->rune_pickup_time;
+				else if ( p->ctf_flag & CTF_RUNE_HST )
+					p->ps.hst_time += g_globalvars.time - p->rune_pickup_time;
+				else if ( p->ctf_flag & CTF_RUNE_RGN )
+					p->ps.rgn_time += g_globalvars.time - p->rune_pickup_time;
+				p = find( p, FOFCLSN, "player" );
+			}
+		}		
+
+        if( isTeam() || isCTF() )
 			SummaryTPStats ();
 
 		PlayersStats ();
@@ -659,7 +703,7 @@ void EndMatch ( float skip_log )
         if( !isDuel() ) // top stats only in non duel modes
 			TopStats ();
 
-        if( isTeam() )
+        if( isTeam() || isCTF() )
 			TeamsStats ();
 
 		if ( p = find( world, FOFCLSN, "ghost" ) ) // show legend :)

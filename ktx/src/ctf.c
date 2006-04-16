@@ -1,21 +1,15 @@
 /*
- *  $Id: ctf.c,v 1.7 2006/04/14 02:11:06 ult_ Exp $
+ *  $Id: ctf.c,v 1.8 2006/04/16 05:20:47 ult_ Exp $
  */
 
 #include "g_local.h"
 
 // CTF todo:
 // . disallow color changing
-// . one frame of grapple animation is a dead frame causing blinking problems with cl_deadbodyfilter 2
-
-// Low priority todo:
-// . end of game stats (efficiency is wrong, etc)
-// . updates to spectator autotrack for flags\runes (g_utils.c)
+// . option to disable pents, but leave quads on?
+// . frags and efficiency are wrong at end of game stats due to ctf bonuses
 // . some sort of workaround to be able to add ctf specific armors\weapons\ammo but still be dynamic
 // . ctf all id maps
-// . if you tk your flag carrier no +5 bonus if you cap?
-// . option to disable ctf sounds same as models?
-// . one blue spawn on ctf8 is in red base.  this is not our fault, but we can fix
 
 // Changes from purectf:
 // . Team damage on by default
@@ -248,6 +242,7 @@ void FlagTouch()
           G_bprint( 2, "The capture took %.1f seconds\n", cflag->cnt2 );
 
         other->s.v.frags += CAPTURE_BONUS;
+        other->ps.caps++;
 	    
         // loop through all players on team to give bonus
 		for ( p = world; p = find ( p, FOFCLSN, "player" ); )
@@ -283,6 +278,7 @@ void FlagTouch()
     else if ( self->cnt == FLAG_DROPPED )
     {
       other->s.v.frags += RETURN_BONUS;
+      other->ps.returns++;
       other->return_flag_time = g_globalvars.time;
       sound (other, CHAN_ITEM, self->s.v.noise1, 1, ATTN_NORM);
       RegenFlag( self );
@@ -313,6 +309,7 @@ void FlagTouch()
   self->s.v.owner = EDICT_TO_PROG( other );
 
   owner = PROG_TO_EDICT( self->s.v.owner );
+  owner->ps.pickups++;
 
   G_bprint( 2, other->s.v.netname );
   if ( streq(getteam(other), "red"))
@@ -373,7 +370,7 @@ void DropFlag( gedict_t *flag)
   if ( streq(getteam(p), "red") )
     G_bprint( 2, " %s the %s flag!\n", redtext("lost"), redtext("BLUE") );
   else
-    G_bprint( 2, " %s the %s flag!\n", redtext("lost"), redtext("RED") );
+    G_bprint( 2, " %s the %s flag!\n", redtext("lost"), redtext("RED") );	
 }
 
 void FlagStatus()

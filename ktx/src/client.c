@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.53 2006/04/15 23:17:43 qqshka Exp $
+ *  $Id: client.c,v 1.54 2006/04/16 05:20:47 ult_ Exp $
  */
 
 //===========================================================================
@@ -2698,6 +2698,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				// 2 point bonus for killing enemy flag carrier
 				if ( targ->ctf_flag & CTF_FLAG )
 				{
+					attacker->ps.c_frags++;
 					attacker->s.v.frags += 2;
 					attacker->carrier_frag_time = g_globalvars.time;
 					//G_sprint( attacker, 1, "Enemy flag carrier killed: 2 bonus frags\n" );
@@ -2708,6 +2709,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
     				!( attacker->ctf_flag & CTF_FLAG ) )
 				{
 					carrier_bonus = true;
+					attacker->ps.c_defends++;
 					attacker->s.v.frags += 2;
 					// Yes, aggressive is spelled wrong.. but dont want to fix now and break stat parsers
 					G_bprint( 2, "%s defends %s's flag carrier against an agressive enemy\n",
@@ -2724,6 +2726,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 							 && streq(getteam(head), getteam(attacker)) && !carrier_bonus
 						   )
 						{
+							attacker->ps.c_defends++;
 							attacker->s.v.frags++;
 							G_bprint( 2, "%s defends %s's flag carrier\n", attacker->s.v.netname,
 								streq(getteam(attacker), "red") ? redtext("RED") : redtext("BLUE"));
@@ -2736,6 +2739,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
                                   streq(head->s.v.classname, "item_flag_team2")) 
 					   )
 					{
+						attacker->ps.f_defends++;
 						attacker->s.v.frags += 2;
 						G_bprint( 2, "%s defends the %s flag\n", 
 							attacker->s.v.netname, 
