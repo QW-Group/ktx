@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.66 2006/04/14 22:09:38 qqshka Exp $
+ *  $Id: commands.c,v 1.67 2006/04/16 21:26:24 qqshka Exp $
  */
 
 // commands.c
@@ -422,11 +422,12 @@ void StuffAliases()
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias notready break\n");
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias kfjump \"impulse 156;+jump;wait;-jump\"\n");
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias krjump \"impulse 164;+jump;wait;-jump\"\n");
+	}
 
-		if ( isSupport_Params( PROG_TO_EDICT( self->s.v.owner ) ) ) {
-			stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias kinfo cmd info %%1 %%2\n");
-			stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias kuinfo cmd uinfo %%1 %%2\n");
-		}
+	// stuff to both - player and spec
+	if ( isSupport_Params( PROG_TO_EDICT( self->s.v.owner ) ) ) {
+		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias kinfo cmd info %%1 %%2\n");
+		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias kuinfo cmd uinfo %%1 %%2\n");
 	}
 }
 

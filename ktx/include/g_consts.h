@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_consts.h,v 1.9 2006/04/15 23:17:17 qqshka Exp $
+ *  $Id: g_consts.h,v 1.10 2006/04/16 21:26:46 qqshka Exp $
  */
 
 //
@@ -267,15 +267,15 @@
 //                     (1024)  	do not use stuff sounds
 
 // events
-#define EV_ON_CONNECT  (   1)	//  connect
-//                     2     weapon switch
-//                     4     match start
-//                     8     match end
-//                     16    match break
-//                     32    map change
-//                     64    deathmatch mode change
-//                     128   admin
-//                     256   unadmin
+#define EV_ON_CONNECT		  (   1)	//  connect
+//                     			  2     weapon switch
+#define EV_ON_MATCH_START	  (   4)	// match start
+#define EV_ON_MATCH_END		  (   8)	// match end
+#define EV_ON_MATCH_BREAK	  (  16)	// match break
+//                               32    map change
+//                               64    deathmatch mode change
+#define EV_ON_ADMIN			  ( 128)	// admin
+#define EV_ON_UNADMIN		  ( 256)	// unadmin
 
 
 // CTF

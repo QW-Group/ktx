@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: captain.c,v 1.10 2006/04/11 20:38:33 qqshka Exp $
+ *  $Id: captain.c,v 1.11 2006/04/16 21:26:24 qqshka Exp $
  */
 
 // captain.c
@@ -183,7 +183,7 @@ void BecomeCaptain ()
         }
         else
         {
-            G_bprint(2, "%s is no longer a %s.\n", self->s.v.netname, redtext("captain"));
+            G_bprint(2, "%s is no longer a %s\n", self->s.v.netname, redtext("captain"));
 
             ExitCaptain();
         }

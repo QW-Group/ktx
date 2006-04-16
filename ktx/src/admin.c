@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.23 2006/04/11 20:20:16 qqshka Exp $
+ * $Id: admin.c,v 1.24 2006/04/16 21:26:24 qqshka Exp $
  */
 
 // admin.c
@@ -168,6 +168,8 @@ void BecomeAdmin(gedict_t *p)
 	G_sprint(p, 2, "Please give up admin rights when you're done\n"
 				   "Type %s for info\n", redtext("commands"));
 	p->k_admin = 2;
+
+	on_admin( p );
 }
 
 // "admin" command
@@ -177,7 +179,7 @@ void ReqAdmin ()
     //  admin state=1.5 check for election
     if( self->k_admin == 1.5 )
     {
-        G_sprint(self, 2, "Abort %sion first\n", redtext("election"));
+        G_sprint(self, 2, "Abort %sion first\n", redtext("elect"));
         return;
     }
 
@@ -189,6 +191,9 @@ void ReqAdmin ()
             ExitKick( self );
 
         self->k_admin = 0;
+
+		on_unadmin( self );
+
         return;
     }
 

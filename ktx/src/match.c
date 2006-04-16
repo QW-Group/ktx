@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.40 2006/04/16 05:20:47 ult_ Exp $
+ *  $Id: match.c,v 1.41 2006/04/16 21:26:25 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -614,6 +614,19 @@ void TopStats ( )
 	G_bprint(2, "žžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n");
 }
 
+void EM_on_MatchEndBreak( int isBreak )
+{
+	gedict_t *p;
+	int from;
+
+	for( from = 0, p = world; p = find_plrspc (p, &from); )
+		if ( isBreak )
+			on_match_break( p );
+		else
+			on_match_end( p );
+}
+
+
 // WARNING: if we are skip log, we are also delete demo
 
 void EndMatch ( float skip_log )
@@ -730,6 +743,8 @@ void EndMatch ( float skip_log )
 		for ( p = world; p = find( p, FOFCLSN, "player" ); )
 			p->ready = 0; // force players be not ready after match is end.
 	}
+
+	EM_on_MatchEndBreak( skip_log );
 
 	NextLevel();
 }
@@ -1141,6 +1156,16 @@ void SM_PrepareHostname()
 		cvar_set("hostname", va("%s\x87", cvar_string("hostname")));
 }
 
+void SM_on_MatchStart()
+{
+	gedict_t *p;
+	int from;
+
+	for( from = 0, p = world; p = find_plrspc (p, &from); )
+		on_match_start( p );
+}
+
+
 // Reset player frags and start the timer.
 void StartMatch ()
 {
@@ -1204,6 +1229,8 @@ void StartMatch ()
 	SM_PrepareShowscores();
 
 	SM_PrepareHostname();
+
+	SM_on_MatchStart();
 }
 
 void PrintCountdown( int seconds )

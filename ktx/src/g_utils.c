@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.36 2006/04/15 23:17:43 qqshka Exp $
+ *  $Id: g_utils.c,v 1.37 2006/04/16 21:26:25 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1668,6 +1668,61 @@ void on_enter()
 		else
 			stuffcmd(self, "on_spec_enter\n");
 	}
+}
+
+void on_match_start( gedict_t *p )
+{
+	if ( !(iKey(p, "ev") & EV_ON_MATCH_START) )
+		return;
+
+	if ( p->k_player ) {
+		stuffcmd(p, "on_matchstart\n");
+	}
+	else {
+		stuffcmd(p, "on_spec_matchstart\n");
+	}
+}
+
+void on_match_end( gedict_t *p )
+{
+	if ( !(iKey(p, "ev") & EV_ON_MATCH_END) )
+		return;
+
+	if ( p->k_player ) {
+		stuffcmd(p, "on_matchend\n");
+	}
+	else {
+		stuffcmd(p, "on_spec_matchend\n");
+	}
+}
+
+void on_match_break( gedict_t *p )
+{
+	if ( !(iKey(p, "ev") & EV_ON_MATCH_BREAK) )
+		return;
+
+	if ( p->k_player ) {
+		stuffcmd(p, "on_matchbreak\n");
+	}
+	else {
+		stuffcmd(p, "on_spec_matchbreak\n");
+	}
+}
+
+void on_admin( gedict_t *p )
+{
+	if ( !(iKey(p, "ev") & EV_ON_ADMIN) )
+		return;
+
+	stuffcmd(p, "on_admin\n");
+}
+
+void on_unadmin( gedict_t *p )
+{
+	if ( !(iKey(p, "ev") & EV_ON_UNADMIN) )
+		return;
+
+	stuffcmd(p, "on_unadmin\n");
 }
 
 // }
