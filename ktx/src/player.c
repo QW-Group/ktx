@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.14 2006/04/09 22:36:38 qqshka Exp $
+ *  $Id: player.c,v 1.15 2006/04/16 03:32:39 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -102,52 +102,54 @@ void muzzleflash()
 
 void player_chain1()
 {
-  self->s.v.frame = 137;
-  self->s.v.think = ( func_t ) player_chain2;
-  self->s.v.nextthink = g_globalvars.time + 0.1;
-  self->s.v.weaponframe = 2;
-  GrappleThrow();
+ 	self->s.v.frame = 137;
+	self->s.v.think = ( func_t ) player_chain2;
+ 	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->s.v.weaponframe = 2;
+	GrappleThrow();
 }
 
 void player_chain2()
 {
-  self->s.v.frame = 138;
-  self->s.v.think = ( func_t ) player_chain3;
-  self->s.v.nextthink = g_globalvars.time + 0.1;
-  self->s.v.weaponframe = 3;
+	self->s.v.frame = 138;
+	self->s.v.think = ( func_t ) player_chain3;
+	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->s.v.weaponframe = 3;
 }
 
 void player_chain3()
 {
-  self->s.v.frame = 139;
-  self->s.v.think = ( func_t ) player_chain4;
-  self->s.v.nextthink = g_globalvars.time + 0.1;
-  self->s.v.weaponframe = 3;
-  if ( !self->hook_out )
-    player_chain5();
-  else if ( vlen(self->s.v.velocity) >= 750 )
-    player_chain4();
+	self->s.v.frame = 139;
+	self->s.v.think = ( func_t ) player_chain4;
+	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->s.v.weaponframe = 3;
+	if ( !self->hook_out )
+		player_chain5();
+	else if ( vlen(self->s.v.velocity) >= 750 )
+		player_chain4();
 }
 
 void player_chain4()
 {
-  // fixme
-  self->s.v.frame = 73; // this is a death frame which causes problems if client uses cl_deadbodyfilter 2
-  self->s.v.think = ( func_t ) player_chain5;
-  self->s.v.nextthink = g_globalvars.time + 0.1;
-  self->s.v.weaponframe = 4;
-  if ( !self->hook_out )
-    player_chain5();
-  else if ( vlen(self->s.v.velocity) < 750 )  
-    player_chain3(); 
+	// Original ctf grapple used frame 73 here, but that causes problems with cl_deadbodyfilter 2
+	// Frame 139 is a decent alternative especially given that 73 never looked good anyway
+	// self->s.v.frame = 73;
+	self->s.v.frame = 139;
+	self->s.v.think = ( func_t ) player_chain5;
+	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->s.v.weaponframe = 4;
+	if ( !self->hook_out )
+		player_chain5();
+	else if ( vlen(self->s.v.velocity) < 750 )  
+		player_chain3(); 
 }
 
 void player_chain5()
 {
-  self->s.v.frame = 140;
-  self->s.v.think = ( func_t ) player_run;
-  self->s.v.nextthink = g_globalvars.time + 0.1;
-  self->s.v.weaponframe = 5;
+	self->s.v.frame = 140;
+	self->s.v.think = ( func_t ) player_run;
+	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->s.v.weaponframe = 5;
 }
 
 void player_shot1()
