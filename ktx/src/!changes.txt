@@ -1,3 +1,11 @@
+2006-04-18
+114. Added aliases: on_enter, on_connect, on_matchstart, on_matchend, on_matchbreak,
+				    on_admin, on_unadmin.
+
+	 This aliases turned on/off via "cmd info kf" and via "cmd info ev".
+
+	 I put documentation later, but for now u can read setinfos.txt from ktpro docs.
+
 2006-04-16
 113. Added support for Reliable Weapons from ktpro.
 	 "cmd wreg [[char] [[+/-]weapon order]]" i.e like it was for ktpro (c)

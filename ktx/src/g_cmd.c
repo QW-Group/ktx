@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.10 2006/04/16 15:25:27 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.11 2006/04/17 22:16:17 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -66,6 +66,7 @@ qboolean 	ClientCommand()
 	}
 */
 
+	// ack allowed when even classname is not set
 	if ( !strcmp( cmd_command, "ack" ) ) {
 		cmd_ack();
 		return true;

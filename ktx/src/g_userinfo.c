@@ -14,11 +14,18 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_userinfo.c,v 1.11 2006/04/15 23:17:43 qqshka Exp $
+ *  $Id: g_userinfo.c,v 1.12 2006/04/17 22:16:17 qqshka Exp $
  */
 
 #include "g_local.h"
 
+
+#define isSysKey( key ) ( !strnull(key) && *(key) == '*' )
+extern cmdinfo_t cinfos[];
+extern int cinfos_cnt;
+
+qboolean fromSetInfo; // hack, so i know is key come to me from user setinfo
+					  // or server localinfo, used by cmdinfo_getkey
 
 extern void     trap_CmdArgv( int arg, char *valbuff, int sizebuff );
 
@@ -29,7 +36,7 @@ qboolean FixPlayerTeam ( char *newteam );
 
 qboolean 	ClientUserInfoChanged ()
 {
-	char            arg_0[1024], arg_1[1024], arg_2[1024];
+	char            arg_0[1024], arg_1[1024], arg_2[1024], *old;
 
 	if ( trap_CmdArgc() != 3 )
 		return false; // something wrong
@@ -44,6 +51,21 @@ qboolean 	ClientUserInfoChanged ()
 		return FixPlayerTeam ( arg_2 );
 	if ( streq("rate", arg_1) )
 		return CheckRate ( self, arg_2 );
+
+	// here a hack for support calling handler if some "cmd info" stored in user setinfo
+	if (    (old = cmdinfo_getkey( self, arg_1 )) != NULL // key is supported by "cmd info"
+		 && fromSetInfo // come to me from user setinfo
+	   ) {
+		int i;
+
+		for ( i = 0; i < cinfos_cnt; i++ )
+			if ( streq(cinfos[i].key, arg_1) ) { // call some handler, if set
+				(cinfos[i].f)( self, (old != NULL ? old : ""), arg_2 );
+				break;
+			}
+
+		return false;
+	}
 
 	return false;
 }
@@ -113,38 +135,36 @@ qboolean FixPlayerTeam ( char *newteam )
 //========================================================
 // ktpro like 'cmd info' work around, which partially replace setinfo, which is too short for us
 
-#define isSysKey( key ) ( !strnull(key) && *(key) == '*' )
-
 
 cmdinfo_t cinfos[] = {
-	{ "*is" },		// keys with * is for internal use ONLY
-    { "b_switch" },
+	{ "*is", 0 },		// keys with * is for internal use ONLY
+    { "b_switch", 0 },
 //    { "bw" },
 //      b1, b2, b3, b4
-    { "e-mail" },
-    { "ev" },
+    { "e-mail", 0 },
+    { "ev", info_ev_update },
 //      +ev, -ev
 //      fs
 //      ft
-	{ "gender" },
-    { "icq" },
-    { "k" },
-    { "k_nick" },
+	{ "gender", 0 },
+    { "icq", 0 },
+    { "k", 0 },
+    { "k_nick", 0 },
 //      ke
-	{ "kf" },
+	{ "kf", info_kf_update },
 //		+kf, -kf
-	{ "ln" },
-    { "ls" },
-	{ "lw" },
-	{ "postmsg" },
-	{ "premsg" },
+	{ "ln", 0 },
+    { "ls", 0 },
+	{ "lw", 0 },
+	{ "postmsg", 0 },
+	{ "premsg", 0 },
 //    	quote 	// wtf?
 //   	ma		// wtf?
-	{ "ss" },
+	{ "ss", 0 },
 //		rb
-    { "w_switch" },
-	{ "k_sdir" },
-	{ "wps" }
+    { "w_switch", 0 },
+	{ "k_sdir", 0 },
+	{ "wps", 0 }
 };
 
 int cinfos_cnt = sizeof( cinfos ) / sizeof( cinfos[0] );
@@ -158,6 +178,8 @@ char *cmdinfo_getkey( gedict_t *p, char *key )
 	static int		index = 0;
 
 	int id, i;
+
+	fromSetInfo = false;
 
 	if ( !p )
 		G_Error("cmdinfo_getkey: null");
@@ -187,6 +209,8 @@ char *cmdinfo_getkey( gedict_t *p, char *key )
 				if ( isSysKey( key ) )
 					return "";  // no sys key in native userinfo
 
+				fromSetInfo = true;
+
 				return infokey( p, key, string[index++], sizeof( string ) );
 			}
 		}
@@ -213,6 +237,12 @@ int cmdinfo_setkey( gedict_t *p, char *key, char *value )
 
 	for ( i = 0; i < cinfos_cnt; i++ ) {
 		if ( streq(cinfos[i].key, key) ) {
+			if ( cinfos[i].f ) { // call some handler, if set
+				char *old = cmdinfo_getkey( p, key ); // get old value
+
+				(cinfos[i].f)( p, (old != NULL ? old : ""), value );
+			}
+
 			localcmd("localinfo key_%d_%s \"%s\"\n", id, key, (streq(value, "\\") ? "" : value));
 			return 0;
 		}

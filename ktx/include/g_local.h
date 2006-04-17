@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.44 2006/04/16 21:26:46 qqshka Exp $
+ *  $Id: g_local.h,v 1.45 2006/04/17 22:16:37 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -296,6 +296,9 @@ void		on_match_break( gedict_t *p );
 void		on_admin( gedict_t *p );
 void		on_unadmin( gedict_t *p );
 
+void		info_ev_update( gedict_t *p, char *from, char *to );
+void		info_kf_update( gedict_t *p, char *from, char *to );
+
 // }
 
 void    	disableupdates( gedict_t * ed, float time );
@@ -458,6 +461,7 @@ void			Vip_ShowRights(gedict_t* cl);
 
 typedef struct cmdinfo_s {
 	char    *key;
+	void ( *f )( gedict_t *p, char *from, char *to );
 } cmdinfo_t;
 
 char	*cmdinfo_getkey( gedict_t *p, char *key );
