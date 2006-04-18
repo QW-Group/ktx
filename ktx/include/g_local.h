@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.45 2006/04/17 22:16:37 qqshka Exp $
+ *  $Id: g_local.h,v 1.46 2006/04/18 22:18:08 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -37,7 +37,7 @@
 #include "g_syscalls.h"
 #include "player.h"
 
-#define MOD_VERSION					("1.22")
+#define MOD_VERSION					("1.23")
 #define MOD_NAME					("KTX")
 #define MOD_SERVERINFO_MOD_KEY		("xmod")
 #define MOD_SERVERINFO_BUILD_KEY	("xbuild")
@@ -377,6 +377,8 @@ qboolean		W_CanSwitch( int wp, qboolean warn );
 
 // match.c
 
+float			CountPlayers();
+float			CountRTeams();
 qboolean 		isCanStart ( gedict_t *s, qboolean forceMembersWarn );
 
 //combat 

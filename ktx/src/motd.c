@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: motd.c,v 1.14 2006/04/11 20:38:33 qqshka Exp $
+ *  $Id: motd.c,v 1.15 2006/04/18 22:17:17 qqshka Exp $
  */
 
 // motd.c
@@ -22,7 +22,6 @@
 #include "g_local.h"
 
 void StuffModCommands();
-float CountPlayers();
 
 void PMOTDThink()
 {

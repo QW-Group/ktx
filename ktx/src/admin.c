@@ -1,13 +1,11 @@
 /*
- * $Id: admin.c,v 1.24 2006/04/16 21:26:24 qqshka Exp $
+ * $Id: admin.c,v 1.25 2006/04/18 22:17:17 qqshka Exp $
  */
 
 // admin.c
 
 #include "g_local.h"
 
-float CountPlayers();
-float CountRTeams();
 void AdminMatchStart();
 void StartTimer();
 void StopTimer ( int removeDemo );

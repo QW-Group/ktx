@@ -20,13 +20,10 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.38 2006/04/17 22:16:17 qqshka Exp $
+ *  $Id: g_utils.c,v 1.39 2006/04/18 22:17:17 qqshka Exp $
  */
 
 #include "g_local.h"
-
-
-float CountPlayers();
 
 int PASSFLOAT(float x)
 {
@@ -1106,12 +1103,17 @@ void changelevel( const char *name )
  	if ( strnull( name ) )
 		G_Error("changelevel: null");
 
+/*
 	if ( k_pause )
 		ModPause ( 0 );
+
+	if( match_in_progress )
+		EndMatch( 1 ); // skip demo, make some other stuff
 
 	cvar_set( "_k_lastmap", g_globalvars.mapname );
 	trap_cvar_set_float( "_k_players", CountPlayers());
 	trap_cvar_set_float( "_k_pow_last", Get_Powerups() );
+*/
 
 /* removed k_srvcfgmap
 	// exec configs/maps/out/mapname.cfg

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.14 2006/04/15 23:17:43 qqshka Exp $
+ *  $Id: g_main.c,v 1.15 2006/04/18 22:17:17 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -57,6 +57,7 @@ gameData_t      gamedata =
     { ( edict_t * ) g_edicts, sizeof( gedict_t ), &g_globalvars, expfields , GAME_API_VERSION};
 float           starttime;
 void            G_InitGame( int levelTime, int randomSeed );
+void			G_ShutDown();
 void            StartFrame( int time );
 qboolean        ClientCommand();
 qboolean 		ClientUserInfoChanged();
@@ -210,6 +211,8 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		return ClientUserInfoChanged();
 
 	case GAME_SHUTDOWN:
+		// called before level change/spawn
+		G_ShutDown();
 		return 0;
 
 	case GAME_CONSOLE_COMMAND:
@@ -298,7 +301,30 @@ void G_InitGame( int levelTime, int randomSeed )
 	localcmd( "serverinfo \"%s\" \"%05d\"\n", MOD_SERVERINFO_BUILD_KEY, build_number() );
 }
 
+void G_ShutDown()
+{
+	char *map = g_globalvars.mapname;
 
+	if ( k_pause )
+		ModPause ( 0 );
+
+	if( match_in_progress )
+		EndMatch( 1 ); // skip demo, make some other stuff
+
+	cvar_set( "_k_lastmap", ( strnull( map ) ? "" : map ) );
+	trap_cvar_set_float( "_k_players", CountPlayers());
+	trap_cvar_set_float( "_k_pow_last", Get_Powerups() );
+
+/* removed k_srvcfgmap
+	// exec configs/maps/out/mapname.cfg
+	if ( cvar( "k_srvcfgmap" ) && strneq( g_globalvars.mapname, name ) ) {
+		char *cfg_name = va("configs/maps/out/%s.cfg", g_globalvars.mapname);
+
+		if ( can_exec( cfg_name ) )
+			localcmd( "exec %s\n", cfg_name );
+	}
+*/
+}
 
 
 //===========================================================================

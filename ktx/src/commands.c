@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.67 2006/04/16 21:26:24 qqshka Exp $
+ *  $Id: commands.c,v 1.68 2006/04/18 22:17:17 qqshka Exp $
  */
 
 // commands.c
@@ -25,8 +25,6 @@ void StuffMainMaps();
 
 void SendMessage(char *name);
 float CountRPlayers();
-float CountPlayers();
-float CountRTeams();
 float CountTeams();
 void PlayerReady ();
 void PlayerBreak ();

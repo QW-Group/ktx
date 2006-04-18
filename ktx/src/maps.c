@@ -14,13 +14,10 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: maps.c,v 1.8 2006/04/11 20:38:33 qqshka Exp $
+ *  $Id: maps.c,v 1.9 2006/04/18 22:17:17 qqshka Exp $
  */
 
 #include "g_local.h"
-
-
-float CountPlayers();
 
 char *maps_list[] =
 {

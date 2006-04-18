@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: captain.c,v 1.11 2006/04/16 21:26:24 qqshka Exp $
+ *  $Id: captain.c,v 1.12 2006/04/18 22:17:17 qqshka Exp $
  */
 
 // captain.c
@@ -28,8 +28,6 @@
 // Check if picking should be finished
 
 // pick the player
-
-float CountPlayers();
 
 void SetPlayerParams (gedict_t *p, gedict_t *cap)
 {

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.41 2006/04/16 21:26:25 qqshka Exp $
+ *  $Id: match.c,v 1.42 2006/04/18 22:17:17 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -666,8 +666,7 @@ void EndMatch ( float skip_log )
 	if( skip_log )
 		G_cprint("%%stopped\n");
 	else {
-		p = find( world, FOFCLSN, "player" );
-		while( p ) 
+		for( p = world; p = find ( p, FOFCLSN, "player" ); ) 
 		{
 			if( !strnull( p->s.v.netname ) && p->k_accepted == 2 )
 			{
@@ -683,8 +682,6 @@ void EndMatch ( float skip_log )
 				p->super_damage_finished = 0;
 				p->radsuit_finished = 0;
 			}
-
-			p = find ( p, FOFCLSN, "player" );
 		}
 
 		G_cprint("%%fl%%%d", (int)fraglimit);
@@ -693,8 +690,7 @@ void EndMatch ( float skip_log )
 
 		if ( isCTF() ) // if a player ends the game with a rune adjust their rune time
 		{
-			p = find( world, FOFCLSN, "player" );
-			while ( p )
+			for( p = world; p = find ( p, FOFCLSN, "player" ); ) 
 			{
 				if ( p->ctf_flag & CTF_RUNE_RES )
 					p->ps.res_time += g_globalvars.time - p->rune_pickup_time;
@@ -704,7 +700,6 @@ void EndMatch ( float skip_log )
 					p->ps.hst_time += g_globalvars.time - p->rune_pickup_time;
 				else if ( p->ctf_flag & CTF_RUNE_RGN )
 					p->ps.rgn_time += g_globalvars.time - p->rune_pickup_time;
-				p = find( p, FOFCLSN, "player" );
 			}
 		}		
 
@@ -725,11 +720,8 @@ void EndMatch ( float skip_log )
 		lastscore_add(); // save game result somewhere, so we can show it later
 	}
 
-	p = find( world, FOFCLSN, "ghost" );
-	while( p ) {
+	for( p = world; p = find ( p, FOFCLSN, "ghost" ); ) 
 		ent_remove( p );
-		p = find( p, FOFCLSN, "ghost" );
-	}
 
 	StopTimer( skip_log ); // WARNING: if we are skip log, we are also delete demo
 

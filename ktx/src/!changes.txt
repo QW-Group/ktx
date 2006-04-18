@@ -1,3 +1,6 @@
+2006-04-19 [ver 1.23]
+115. Fixed bug with hostname in matchless mode, thx gLAd.
+
 2006-04-18
 114. Added aliases: on_enter, on_connect, on_matchstart, on_matchend, on_matchbreak,
 				    on_admin, on_unadmin.
@@ -12,6 +15,8 @@
 	 Seems this ktpro feature useless/unpopular now, but added for compatibility with ktpro.
 
 2006-04-12
+ult:
+
 111. Added new functionality for k_dis.  k_dis 2 enables discharges, but only damages players actually in the liquid.
 	 This is default for ctf.
 
