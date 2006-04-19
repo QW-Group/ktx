@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.46 2006/04/18 22:18:08 qqshka Exp $
+ *  $Id: g_local.h,v 1.47 2006/04/19 20:57:29 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -37,7 +37,7 @@
 #include "g_syscalls.h"
 #include "player.h"
 
-#define MOD_VERSION					("1.23")
+#define MOD_VERSION					("1.24")
 #define MOD_NAME					("KTX")
 #define MOD_SERVERINFO_MOD_KEY		("xmod")
 #define MOD_SERVERINFO_BUILD_KEY	("xbuild")
@@ -441,6 +441,36 @@ float StuffDeltaTime(int iDelta);
 #define STUFFCMDS_PER_PORTION	(1)
 
 void SetPractice(int srv_practice_mode, const char *mapname);
+
+// { usrmodes
+
+// um_flags
+
+#define UM_1ON1		( 1<<0  )
+#define UM_2ON2		( 1<<1  )
+#define UM_3ON3		( 1<<2  )
+#define UM_4ON4		( 1<<3  )
+#define UM_10ON10	( 1<<4  )
+#define UM_FFA		( 1<<5  )
+#define UM_CTF		( 1<<6  )
+
+typedef struct usermode_s {
+	const char 	  *name;
+	const char 	  *displayname;
+	const char    *initstring;
+	int		um_flags;
+} usermode;
+
+extern usermode um_list[];
+extern int um_cnt;  // count of entrys in 'um_list'
+
+// for user call this like UserMode( 1 )
+// for server call like UserMode( -1 )
+void UserMode(float umode);
+
+int um_idx_byname(char *name); // return -1 if not found
+
+// }
 
 // vip.c
 

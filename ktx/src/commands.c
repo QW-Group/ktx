@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.68 2006/04/18 22:17:17 qqshka Exp $
+ *  $Id: commands.c,v 1.69 2006/04/19 20:57:13 qqshka Exp $
  */
 
 // commands.c
@@ -2322,13 +2322,6 @@ const char ctf_um_init[] =
 	"k_mode 4\n";
 
 
-typedef struct usermode_s {
-	const char 	  *name;
-	const char 	  *displayname;
-	const char    *initstring;
-	int		um_flags;
-} usermode;
-
 usermode um_list[] =
 {
 	{ "1on1", 	"\x93 on \x93",			_1on1_um_init,		UM_1ON1},
@@ -2342,6 +2335,18 @@ usermode um_list[] =
 
 int um_cnt = sizeof (um_list) / sizeof (um_list[0]);
 
+// return -1 if not found
+int um_idx_byname(char *name)
+{
+	int i;
+
+	for( i = 0; i < um_cnt; i++ )
+		if ( streq( name, um_list[i].name) )
+			return i;
+
+	return -1; // not found
+}
+
 // for user call this like UserMode( 1 )
 // for server call like UserMode( -1 )
 void UserMode(float umode)
@@ -2351,8 +2356,9 @@ void UserMode(float umode)
 	char *cfg_name;
 	qboolean sv_invoked = false;
 
-	int k_free_mode = cvar( "k_free_mode" );
+	int k_free_mode = ( k_matchLess ? 5 : cvar( "k_free_mode" ) );
 
+	if ( !k_matchLess ) // allow for matchless mode
 	if ( match_in_progress )
 		return;
 
@@ -2371,6 +2377,7 @@ void UserMode(float umode)
 	um = um_list[(int)umode].name;
 
 	if ( sv_invoked ) {
+		if ( !k_matchLess ) // allow for matchless mode
 		if ( cvar( "k_master" ) ) {
 			G_bprint(2, "UserMode: sv %s discarded due to k_master\n", um);
 			return;
@@ -2449,7 +2456,8 @@ void UserMode(float umode)
 			}
 	}
 
-	G_bprint(2, "%s %s\n", redtext(um_list[(int)umode].displayname), redtext("settings enabled"));
+	if ( !k_matchLess ) // do not show for matchless mode
+		G_bprint(2, "%s %s\n", redtext(um_list[(int)umode].displayname), redtext("settings enabled"));
 
 	trap_readcmd( common_um_init, buf, sizeof(buf) );
 	G_cprint("%s", buf);

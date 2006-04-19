@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: vote.c,v 1.9 2006/04/18 22:17:17 qqshka Exp $
+ *  $Id: vote.c,v 1.10 2006/04/19 20:57:13 qqshka Exp $
  */
 
 // vote.c: election functions by rc\sturm
@@ -182,6 +182,8 @@ int get_votes_req( int fofs, qboolean diff )
 		vt_req = max(2, vt_req); // if election, at least 2 votes needed
 	else if ( fofs == OV_BREAK && k_matchLess && match_in_progress == 1 )
 		vt_req = max(2, vt_req); // at least 2 votes in this case
+	else if ( fofs == OV_BREAK )
+		vt_req = max(1, vt_req); // at least 1 vote in any case
 	else if ( fofs == OV_RPICKUP )
 		vt_req = max(3, vt_req); // at least 3 votes in this case
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.35 2006/04/15 22:33:51 ult_ Exp $
+ *  $Id: world.c,v 1.36 2006/04/19 20:57:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -96,7 +96,6 @@ void CheckDefMap ()
 
 
 void	SP_item_artifact_super_damage();
-void	UserMode(float umode);
 
 void SP_worldspawn()
 {
@@ -125,6 +124,19 @@ void SP_worldspawn()
 		trap_executecmd ();
 	}
 */
+	// since we remove k_srvcfgmap, we need configure different maps in matchless mode.
+	// doing this by execiting configs like we do for "ffa" command in _non_ matchless mode
+	if ( k_matchLess ) {
+		int um_idx = um_idx_byname("ffa");
+
+		if ( um_idx >= 0 )
+			cvar_fset("_k_last_xonx", um_idx + 1); // force server call "ffa" user mode
+		else {
+			G_bprint(2, "SP_worldspawn: um_idx_byname fail\n"); // shout
+			cvar_fset("_k_last_xonx", 0);
+		}
+	}
+
 	if ( cvar("_k_last_xonx") > 0 && strneq( lastmap, g_globalvars.mapname ) )
 		UserMode( -cvar("_k_last_xonx") ); // auto call XonX command if map switched to another
     
@@ -621,6 +633,8 @@ void FirstFrame	( )
 
 	k_matchLess = cvar( "k_matchless" );
 	k_allowed_free_modes = cvar( "k_allowed_free_modes" );
+	if ( k_matchLess )
+		k_allowed_free_modes |= UM_FFA;
 	// do not precache models if CTF is not really allowed
 	k_ctf_custom_models = cvar( "k_ctf_custom_models" ) && (k_allowed_free_modes & UM_CTF);
 }

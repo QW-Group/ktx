@@ -1,3 +1,9 @@
+2006-04-19 [ver 1.24]
+116. Since we remove "k_srvcfgmap" we need somehow set different settings for different map
+	 in ffa matchless mode. So now in matchless mode "ffa" command invoked by server automatically 
+	 every map change(to another map), but this is does't showed to players, but server admins
+	 must to know about this.
+
 2006-04-19 [ver 1.23]
 115. Fixed bug with hostname in matchless mode, thx gLAd.
 
