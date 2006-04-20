@@ -1,4 +1,4 @@
-2006-04-19 [ver 1.25]
+2006-04-20 [ver 1.25]
 117. Fixed my'n bug with new code about setinfo, thx ult.
 
 2006-04-19 [ver 1.24]
