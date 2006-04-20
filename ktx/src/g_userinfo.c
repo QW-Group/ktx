@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_userinfo.c,v 1.12 2006/04/17 22:16:17 qqshka Exp $
+ *  $Id: g_userinfo.c,v 1.13 2006/04/20 17:42:12 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -59,8 +59,10 @@ qboolean 	ClientUserInfoChanged ()
 		int i;
 
 		for ( i = 0; i < cinfos_cnt; i++ )
-			if ( streq(cinfos[i].key, arg_1) ) { // call some handler, if set
-				(cinfos[i].f)( self, (old != NULL ? old : ""), arg_2 );
+			if ( streq(cinfos[i].key, arg_1) ) {
+				if ( cinfos[i].f )  // call some handler, if set
+					(cinfos[i].f)( self, (old ? old : ""), arg_2 );
+
 				break;
 			}
 
@@ -240,7 +242,7 @@ int cmdinfo_setkey( gedict_t *p, char *key, char *value )
 			if ( cinfos[i].f ) { // call some handler, if set
 				char *old = cmdinfo_getkey( p, key ); // get old value
 
-				(cinfos[i].f)( p, (old != NULL ? old : ""), value );
+				(cinfos[i].f)( p, (old ? old : ""), value );
 			}
 
 			localcmd("localinfo key_%d_%s \"%s\"\n", id, key, (streq(value, "\\") ? "" : value));

@@ -1,3 +1,6 @@
+2006-04-19 [ver 1.25]
+117. Fixed my'n bug with new code about setinfo, thx ult.
+
 2006-04-19 [ver 1.24]
 116. Since we remove "k_srvcfgmap" we need somehow set different settings for different map
 	 in ffa matchless mode. So now in matchless mode "ffa" command invoked by server automatically 
