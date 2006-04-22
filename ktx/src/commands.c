@@ -14,12 +14,14 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.69 2006/04/19 20:57:13 qqshka Exp $
+ *  $Id: commands.c,v 1.70 2006/04/22 14:06:23 qqshka Exp $
  */
 
 // commands.c
 
 #include "g_local.h"
+
+int max_cmd_len = 0;
 
 void StuffMainMaps();
 
@@ -135,192 +137,366 @@ void TimeDown(float t);
 void TimeUp(float t);
 void TimeSet(float t);
 
+// CD - commands descriptions
+
+const char CD_NODESC[] = "no desc";
+
+#define CD_COMMANDS   "show commands list"
+#define CD_SCORES     "print match time/scores"
+#define CD_STATS      "show player stats"
+#define CD_OPTIONS    "match control commands"
+#define CD_READY      "when you feel ready"
+#define CD_BREAK      "unready / vote matchend"
+#define CD_STATUS     "show server settings"
+#define CD_STATUS2    "more server settings"
+#define CD_WHO        "player teamlist"
+#define CD_WHOSKIN    "player skinlist"
+#define CD_WHONOT     "players not ready"
+#define CD_LIST       "whonot to everyone"
+#define CD_WHOVOTE    "info on received votes"
+#define CD_SPAWN      "toggle spawn modes"
+#define CD_POWERUPS   "quad, \x98\x98\x98, ring & suit"
+#define CD_DISCHARGE  "underwater discharges"
+#define CD_DM         "show deathmatch mode"
+#define CD_DMM1       "set deathmatch mode 1"
+#define CD_DMM2       "set deathmatch mode 2"
+#define CD_DMM3       "set deathmatch mode 3"
+#define CD_DMM4       "set deathmatch mode 4"
+#define CD_DMM5       "set deathmatch mode 5"
+#define CD_TP         "change teamplay mode"
+#define CD_TIMEDOWN1  "-1 mins match time"
+#define CD_TIMEUP1    "+1 mins match time"
+#define CD_TIMEDOWN   "-5 mins match time"
+#define CD_TIMEUP     "+5 mins match time"
+#define CD_FALLBUNNY  "toggle fallbunny"
+#define CD_FRAGSDOWN  "-10 fraglimit"
+#define CD_FRAGSUP    "+10 fraglimit"
+#define CD_DROPQUAD   "drop quad when killed"
+#define CD_DROPRING   "drop ring when killed"
+#define CD_DROPPACK   "drop pack when killed"
+#define CD_SILENCE    "toggle spectator talk"
+#define CD_RESET      "set defaults"
+#define CD_REPORT     "simple teamplay report"
+#define CD_RULES      "show game rules"
+#define CD_LOCK       "change locking mode"
+#define CD_MAPS       "list custom maps"
+#define CD_SPAWN666   "2 secs of \x98\x98\x98 on respawn"
+#define CD_ADMIN      "toggle admin-mode"
+#define CD_FORCESTART "force match to start"
+#define CD_FORCEBREAK "force match to end"
+#define CD_FORCEPAUSE "toggle pausemode"
+#define CD_PICKUP     "vote for pickup game"
+#define CD_PREWAR     "playerfire before game"
+#define CD_LOCKMAP    "(un)lock current map"
+#define CD_MASTER     "toggle mastermode"
+#define CD_SPEED      "toggle sv_maxspeed"
+#define CD_FAIRPACKS  "best/last weapon dropped"
+#define CD_ABOUT      "mod's info"
+#define CD_SHOWNICK   "pointed player's info"
+#define CD_TIME5      "set timelimit to 5 mins"
+#define CD_TIME10     "set timelimit to 10 mins"
+#define CD_TIME15     "set timelimit to 15 mins"
+#define CD_TIME20     "set timelimit to 20 mins"
+#define CD_TIME25     "set timelimit to 25 mins"
+#define CD_TIME30     "set timelimit to 30 mins"
+#define CD_BERZERK    "toggle berzerk mode"
+#define CD_KSOUND1    (CD_NODESC) // useless command now
+#define CD_KSOUND2    (CD_NODESC) // useless command now
+#define CD_KSOUND3    (CD_NODESC) // useless command now
+#define CD_KSOUND4    (CD_NODESC) // useless command now
+#define CD_KSOUND5    (CD_NODESC) // useless command now
+#define CD_KSOUND6    (CD_NODESC) // useless command now
+#define CD_QIZMO      "qizmo related commands"
+#define CD_MESSAGES   "fun message commands"
+#define CD_KILLER     "message to killer"
+#define CD_VICTIM     "message to victim"
+#define CD_NEWCOMER   "message to last player joined"
+#define CD_QLAG       "lag settings"
+#define CD_QENEMY     "enemy vicinity reporting"
+#define CD_QPOINT     "point function"
+#define CD_KICK       "toggle kick mode"
+#define CD_Y          "yes kick"
+#define CD_N          "don't kick"
+#define CD_OVERTIME   "toggle overtime mode"
+#define CD_OVERTIMEUP "change overtime length"
+#define CD_ELECT      "toggle admin election"
+#define CD_YES        "give vote"
+#define CD_NO         "withdraws vote"
+#define CD_CAPTAIN    "toggle captain election"
+#define CD_FREEZE     "(un)freeze the map"
+#define CD_RPICKUP    "vote random team pickup"
+#define CD_1ON1       "duel settings"
+#define CD_2ON1       "2 on 2 settings"
+#define CD_3ON1       "3 on 3 settings"
+#define CD_4ON1       "4 on 4 settings"
+#define CD_10ON10     "10 on 10 settings"
+#define CD_FFA        "FFA settings"
+#define CD_CTF        "CTF settings"
+#define CD_UNPAUSE    "vote unpause game"
+#define CD_PRACTICE   "toggle practice mode"
+#define CD_WP_RESET   "clear weapon stats"
+#define CD_PLS_WP_STATS "start print weapon stats"
+#define CD_MNS_WP_STATS (CD_NODESC) // obvious
+#define CD_TKFJUMP      "toggle allow kfjump"
+#define CD_TKRJUMP      "toggle allow krjump"
+#define CD_KLIST        "mod's list of users"
+#define CD_HDPTOGGLE    "toggle allow handicap"
+#define CD_HANDICAP     "toggle handicap level"
+#define CD_NOWEAPON     "toggle allow any weapon"
+#define CD_CAM          "camera help text"
+#define CD_TRACKLIST    "trackers list"
+#define CD_FPSLIST      "fps list"
+#define CD_FAV1_ADD     "add player to slot  1"
+#define CD_FAV2_ADD     "add player to slot  2"
+#define CD_FAV3_ADD     "........etc.........."
+#define CD_FAV4_ADD     (CD_NODESC) // skip
+#define CD_FAV5_ADD     (CD_NODESC) // skip
+#define CD_FAV6_ADD     (CD_NODESC) // skip 
+#define CD_FAV7_ADD     (CD_NODESC) // skip 
+#define CD_FAV8_ADD     (CD_NODESC) // skip 
+#define CD_FAV9_ADD     (CD_NODESC) // skip 
+#define CD_FAV10_ADD    (CD_NODESC) // skip
+#define CD_FAV11_ADD    (CD_NODESC) // skip
+#define CD_FAV12_ADD    (CD_NODESC) // skip
+#define CD_FAV13_ADD    (CD_NODESC) // skip
+#define CD_FAV14_ADD    (CD_NODESC) // skip
+#define CD_FAV15_ADD    (CD_NODESC) // skip
+#define CD_FAV16_ADD    (CD_NODESC) // skip
+#define CD_FAV17_ADD    (CD_NODESC) // skip
+#define CD_FAV18_ADD    (CD_NODESC) // skip
+#define CD_FAV19_ADD    "add player to slot 19"
+#define CD_FAV20_ADD    "add player to slot 20"
+#define CD_1FAV_GO      "set pov to slot  1"
+#define CD_2FAV_GO      "set pov to slot  2"
+#define CD_3FAV_GO      ".......etc........"
+#define CD_4FAV_GO      (CD_NODESC) // skip
+#define CD_5FAV_GO      (CD_NODESC) // skip 
+#define CD_6FAV_GO      (CD_NODESC) // skip 
+#define CD_7FAV_GO      (CD_NODESC) // skip 
+#define CD_8FAV_GO      (CD_NODESC) // skip 
+#define CD_9FAV_GO      (CD_NODESC) // skip 
+#define CD_10FAV_GO     (CD_NODESC) // skip
+#define CD_11FAV_GO     (CD_NODESC) // skip
+#define CD_12FAV_GO     (CD_NODESC) // skip
+#define CD_13FAV_GO     (CD_NODESC) // skip
+#define CD_14FAV_GO     (CD_NODESC) // skip
+#define CD_15FAV_GO     (CD_NODESC) // skip
+#define CD_16FAV_GO     (CD_NODESC) // skip
+#define CD_17FAV_GO     (CD_NODESC) // skip
+#define CD_18FAV_GO     (CD_NODESC) // skip
+#define CD_19FAV_GO     "set pov to slot 19"
+#define CD_20FAV_GO     "set pov to slot 20"
+#define CD_FAV_ADD      "add player to fav list"
+#define CD_FAV_DEL      "remove player from fav list"
+#define CD_FAV_ALL_DEL  "clear fav list"
+#define CD_FAV_NEXT     "set pov to next fav"
+#define CD_FAV_SHOW     "show fav list"
+#define CD_PLS_SCORES   "show match time and score"
+#define CD_MNS_SCORES   (CD_NODESC) // obvious
+#define CD_AUTOTRACK    "auto tracking"
+#define CD_AUTO_POW     "auto tracking powerups"
+#define CD_NEXT_BEST    "set pov to next best player"
+#define CD_NEXT_POW     "set pov to next powerup"
+#define CD_LASTSCORES   "print last games scores"
+#define CD_RND          "select random value"
+#define CD_AGREE        "agree on last map vote"
+#define CD_POS_SHOW     "info about saved position"
+#define CD_POS_SAVE     "save current position"
+#define CD_POS_MOVE     "move to saved position"
+#define CD_POS_ORIGIN   "set position origin"
+#define CD_POS_ANGLES   "set position angles"
+#define CD_POS_VELOCITY "set position velocity"
+#define CD_TOSSRUNE     "drop rune (CTF)"
+#define CD_FLAGSTATUS   "show flags status (CTF)"
+#define CD_MOTD         "show motd"
+
+
 cmd_t cmds[] = {
 
-	{ "commands",    ShowCmds,			        0    , CF_BOTH | CF_MATCHLESS },
-	{ "scores",      PrintScores,		        0    , CF_BOTH | CF_MATCHLESS },
-	{ "stats",       PlayerStats,               0    , CF_BOTH | CF_MATCHLESS },
-	{ "options",     ShowOpts,                  0    , CF_PLAYER      },
-	{ "ready",       PlayerReady,               0    , CF_PLAYER },
-	{ "break",       PlayerBreak,               0    , CF_PLAYER | CF_MATCHLESS },
-	{ "status",      ModStatus,                 0    , CF_BOTH | CF_MATCHLESS },
-	{ "status2",     ModStatus2,                0    , CF_BOTH | CF_MATCHLESS },
-	{ "who",         PlayerStatus,              0    , CF_BOTH        },
-	{ "whoskin",     PlayerStatusS,             0    , CF_BOTH | CF_MATCHLESS },
-	{ "whonot",      PlayerStatusN,             0    , CF_BOTH        },
-	{ "whovote",     ModStatusVote,             0    , CF_BOTH | CF_MATCHLESS },
-	{ "spawn",       ToggleRespawns,            0    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "powerups",    TogglePowerups,            0    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "discharge",   ToggleDischarge,           0    , CF_PLAYER      },
-	{ "dm",          ShowDMM,                   0    , CF_PLAYER      },
-	{ "dmm1",        ChangeDM,                  1    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "dmm2",        ChangeDM,                  2    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "dmm3",        ChangeDM,                  3    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "dmm4",        ChangeDM,                  4    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "dmm5",        ChangeDM,                  5    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "tp",          ChangeTP,                  0    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "timedown1",   TimeDown,				  1.0f   , CF_PLAYER | CF_SPC_ADMIN },
-	{ "timeup1",     TimeUp,				  1.0f   , CF_PLAYER | CF_SPC_ADMIN },
-	{ "timedown",    TimeDown,				  5.0f   , CF_PLAYER | CF_SPC_ADMIN },
-	{ "timeup",      TimeUp,				  5.0f   , CF_PLAYER | CF_SPC_ADMIN },
-	{ "fallbunny",   ToggleFallBunny,           0    , CF_BOTH_ADMIN  },
-	{ "fragsdown",   FragsDown,                 0    , CF_PLAYER      },
-	{ "fragsup",     FragsUp,                   0    , CF_PLAYER      },
-	{ "dropquad",    ToggleDropQuad,            0    , CF_PLAYER      },
-	{ "dropring",    ToggleDropRing,            0    , CF_PLAYER      },
-	{ "droppack",    ToggleDropPack,            0    , CF_PLAYER      },
+	{ "commands",    ShowCmds,			        0    , CF_BOTH | CF_MATCHLESS, CD_COMMANDS },
+	{ "scores",      PrintScores,		        0    , CF_BOTH | CF_MATCHLESS, CD_SCORES },
+	{ "stats",       PlayerStats,               0    , CF_BOTH | CF_MATCHLESS, CD_STATS },
+	{ "options",     ShowOpts,                  0    , CF_PLAYER, CD_OPTIONS },
+	{ "ready",       PlayerReady,               0    , CF_PLAYER, CD_READY },
+	{ "break",       PlayerBreak,               0    , CF_PLAYER | CF_MATCHLESS, CD_BREAK },
+	{ "status",      ModStatus,                 0    , CF_BOTH | CF_MATCHLESS, CD_STATUS },
+	{ "status2",     ModStatus2,                0    , CF_BOTH | CF_MATCHLESS, CD_STATUS2 },
+	{ "who",         PlayerStatus,              0    , CF_BOTH, CD_WHO },
+	{ "whoskin",     PlayerStatusS,             0    , CF_BOTH | CF_MATCHLESS, CD_WHOSKIN },
+	{ "whonot",      PlayerStatusN,             0    , CF_BOTH, CD_WHONOT },
+    { "list",        ListWhoNot,                0    , CF_PLAYER | CF_SPC_ADMIN, CD_LIST },
+	{ "whovote",     ModStatusVote,             0    , CF_BOTH | CF_MATCHLESS, CD_WHOVOTE },
+	{ "spawn",       ToggleRespawns,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_SPAWN },
+	{ "powerups",    TogglePowerups,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_POWERUPS },
+	{ "discharge",   ToggleDischarge,           0    , CF_PLAYER, CD_DISCHARGE },
+	{ "dm",          ShowDMM,                   0    , CF_PLAYER, CD_DM },
+	{ "dmm1",        ChangeDM,                  1    , CF_PLAYER | CF_SPC_ADMIN, CD_DMM1 },
+	{ "dmm2",        ChangeDM,                  2    , CF_PLAYER | CF_SPC_ADMIN, CD_DMM2 },
+	{ "dmm3",        ChangeDM,                  3    , CF_PLAYER | CF_SPC_ADMIN, CD_DMM3 },
+	{ "dmm4",        ChangeDM,                  4    , CF_PLAYER | CF_SPC_ADMIN, CD_DMM4 },
+	{ "dmm5",        ChangeDM,                  5    , CF_PLAYER | CF_SPC_ADMIN, CD_DMM5 },
+	{ "tp",          ChangeTP,                  0    , CF_PLAYER | CF_SPC_ADMIN, CD_TP },
+	{ "timedown1",   TimeDown,				  1.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIMEDOWN1 },
+	{ "timeup1",     TimeUp,				  1.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIMEUP1 },
+	{ "timedown",    TimeDown,				  5.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIMEDOWN },
+	{ "timeup",      TimeUp,				  5.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIMEUP },
+	{ "fallbunny",   ToggleFallBunny,           0    , CF_BOTH_ADMIN, CD_FALLBUNNY },
+	{ "fragsdown",   FragsDown,                 0    , CF_PLAYER, CD_FRAGSDOWN },
+	{ "fragsup",     FragsUp,                   0    , CF_PLAYER, CD_FRAGSUP },
+	{ "dropquad",    ToggleDropQuad,            0    , CF_PLAYER, CD_DROPQUAD },
+	{ "dropring",    ToggleDropRing,            0    , CF_PLAYER, CD_DROPRING },
+	{ "droppack",    ToggleDropPack,            0    , CF_PLAYER, CD_DROPPACK },
 	                                             
-    { "silence",     ToggleSpecTalk,            0    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "reset",       ResetOptions,              0    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "report",      ReportMe,                  0    , CF_PLAYER      },
-	{ "rules",       ShowRules,                 0    , CF_PLAYER | CF_MATCHLESS },
-	{ "lock",        ChangeLock,                0    , CF_PLAYER      },
-	{ "maps",        ShowMaps,                  0    , CF_PLAYER | CF_SPC_ADMIN | CF_MATCHLESS},
-	{ "spawn666",    ToggleRespawn666,          0    , CF_PLAYER      },
-	{ "admin",       ReqAdmin,                  0    , CF_BOTH | CF_PARAMS },
-	{ "forcestart",  AdminForceStart,           0    , CF_BOTH_ADMIN  },
-	{ "forcebreak",  AdminForceBreak,           0    , CF_BOTH_ADMIN  },
-	{ "forcepause",  AdminForcePause,           0    , CF_BOTH_ADMIN  },
-	{ "pickup",      VotePickup,                0    , CF_PLAYER      },
-	{ "prewar",      TogglePreWar,              0    , CF_BOTH_ADMIN  },
-	{ "lockmap",     ToggleMapLock,             0    , CF_BOTH_ADMIN  },
-	{ "master",      ToggleMaster,              0    , CF_BOTH_ADMIN  },
-	{ "speed",       ToggleSpeed,               0    , CF_PLAYER      },
-	{ "fairpacks",   ToggleFairPacks,           0    , CF_PLAYER      },
-	{ "about",       ShowVersion,               0    , CF_BOTH | CF_MATCHLESS },
-	{ "shownick",    ShowNick,                  0    , CF_PLAYER      },
-	{ "time5",       TimeSet,		  	 	  5.0f   , CF_PLAYER      },
-	{ "time10",      TimeSet,		  	     10.0f   , CF_PLAYER      },
-	{ "time15",      TimeSet,		  	     15.0f   , CF_PLAYER      },
-	{ "time20",      TimeSet,                20.0f   , CF_PLAYER      },
-	{ "time25",      TimeSet,                25.0f   , CF_PLAYER      },
-	{ "time30",      TimeSet,                30.0f   , CF_PLAYER      },
-	{ "berzerk",     ToggleBerzerk,             0    , CF_PLAYER      },
+    { "silence",     ToggleSpecTalk,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_SILENCE },
+	{ "reset",       ResetOptions,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_RESET },
+	{ "report",      ReportMe,                  0    , CF_PLAYER, CD_REPORT },
+	{ "rules",       ShowRules,                 0    , CF_PLAYER | CF_MATCHLESS, CD_RULES },
+	{ "lock",        ChangeLock,                0    , CF_PLAYER, CD_LOCK },
+	{ "maps",        ShowMaps,                  0    , CF_PLAYER | CF_SPC_ADMIN | CF_MATCHLESS, CD_MAPS},
+	{ "spawn666",    ToggleRespawn666,          0    , CF_PLAYER, CD_SPAWN666},
+	{ "admin",       ReqAdmin,                  0    , CF_BOTH | CF_PARAMS, CD_ADMIN },
+	{ "forcestart",  AdminForceStart,           0    , CF_BOTH_ADMIN, CD_FORCESTART },
+	{ "forcebreak",  AdminForceBreak,           0    , CF_BOTH_ADMIN, CD_FORCEBREAK },
+	{ "forcepause",  AdminForcePause,           0    , CF_BOTH_ADMIN, CD_FORCEPAUSE },
+	{ "pickup",      VotePickup,                0    , CF_PLAYER, CD_PICKUP },
+	{ "prewar",      TogglePreWar,              0    , CF_BOTH_ADMIN, CD_PREWAR },
+	{ "lockmap",     ToggleMapLock,             0    , CF_BOTH_ADMIN, CD_LOCKMAP },
+	{ "master",      ToggleMaster,              0    , CF_BOTH_ADMIN, CD_MASTER },
+	{ "speed",       ToggleSpeed,               0    , CF_PLAYER, CD_SPEED },
+	{ "fairpacks",   ToggleFairPacks,           0    , CF_PLAYER, CD_FAIRPACKS },
+	{ "about",       ShowVersion,               0    , CF_BOTH | CF_MATCHLESS, CD_ABOUT },
+	{ "shownick",    ShowNick,                  0    , CF_PLAYER, CD_SHOWNICK },
+	{ "time5",       TimeSet,		  	 	  5.0f   , CF_PLAYER, CD_TIME5 },
+	{ "time10",      TimeSet,		  	     10.0f   , CF_PLAYER, CD_TIME10 },
+	{ "time15",      TimeSet,		  	     15.0f   , CF_PLAYER, CD_TIME15 },
+	{ "time20",      TimeSet,                20.0f   , CF_PLAYER, CD_TIME20 },
+	{ "time25",      TimeSet,                25.0f   , CF_PLAYER, CD_TIME25 },
+	{ "time30",      TimeSet,                30.0f   , CF_PLAYER, CD_TIME30 },
+	{ "berzerk",     ToggleBerzerk,             0    , CF_PLAYER, CD_BERZERK },
 	                                             
-	{ "ksound1",     TeamSay,   			    1    , CF_PLAYER      },
-	{ "ksound2",     TeamSay,   			    2    , CF_PLAYER      },
-	{ "ksound3",     TeamSay,   			    3    , CF_PLAYER      },
-	{ "ksound4",     TeamSay,   			    4    , CF_PLAYER      },
-	{ "ksound5",     TeamSay,   			    5    , CF_PLAYER      },
-	{ "ksound6",     TeamSay,   			    6    , CF_PLAYER      },
+	{ "ksound1",     TeamSay,   			    1    , CF_PLAYER, CD_KSOUND1 },
+	{ "ksound2",     TeamSay,   			    2    , CF_PLAYER, CD_KSOUND2 },
+	{ "ksound3",     TeamSay,   			    3    , CF_PLAYER, CD_KSOUND3 },
+	{ "ksound4",     TeamSay,   			    4    , CF_PLAYER, CD_KSOUND4 },
+	{ "ksound5",     TeamSay,   			    5    , CF_PLAYER, CD_KSOUND5 },
+	{ "ksound6",     TeamSay,   			    6    , CF_PLAYER, CD_KSOUND6 },
 	                                           
-	{ "qizmo",       ShowQizmo,                 0    , CF_PLAYER      },
+	{ "qizmo",       ShowQizmo,                 0    , CF_PLAYER, CD_QIZMO },
 	                                             
-	{ "messages",    ShowMessages,              0    , CF_PLAYER | CF_MATCHLESS },
-	{ "killer",      SendKillerMsg,             0    , CF_PLAYER | CF_MATCHLESS },
-	{ "victim",      SendVictimMsg,             0    , CF_PLAYER | CF_MATCHLESS },
-	{ "newcomer",    SendNewcomerMsg,           0    , CF_PLAYER | CF_MATCHLESS },
+	{ "messages",    ShowMessages,              0    , CF_PLAYER | CF_MATCHLESS, CD_MESSAGES },
+	{ "killer",      SendKillerMsg,             0    , CF_PLAYER | CF_MATCHLESS, CD_KILLER },
+	{ "victim",      SendVictimMsg,             0    , CF_PLAYER | CF_MATCHLESS, CD_VICTIM },
+	{ "newcomer",    SendNewcomerMsg,           0    , CF_PLAYER | CF_MATCHLESS, CD_NEWCOMER },
 	                                             
-	{ "qlag",        ToggleQLag,                0    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "qenemy",      ToggleQEnemy,              0    , CF_PLAYER | CF_SPC_ADMIN },
-	{ "qpoint",      ToggleQPoint,              0    , CF_PLAYER | CF_SPC_ADMIN },
+	{ "qlag",        ToggleQLag,                0    , CF_PLAYER | CF_SPC_ADMIN, CD_QLAG },
+	{ "qenemy",      ToggleQEnemy,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_QENEMY },
+	{ "qpoint",      ToggleQPoint,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_QPOINT },
 	                                          
-    { "kick",        AdminKick,                 0    , CF_BOTH_ADMIN  },
-    { "y",           YesKick,                   0    , CF_BOTH_ADMIN  },
-    { "n",           DontKick,                  0    , CF_BOTH_ADMIN  },
-    { "list",        ListWhoNot,                0    , CF_PLAYER | CF_SPC_ADMIN },
-    { "overtime",    ChangeOvertime,            0    , CF_PLAYER | CF_SPC_ADMIN },
-    { "overtimeup",  ChangeOvertimeUp,          0    , CF_PLAYER | CF_SPC_ADMIN },
-    { "elect",       VoteAdmin,                 0    , CF_BOTH        },
-    { "yes",         VoteYes,                   0    , CF_PLAYER      },
-    { "no",          VoteNo,                    0    , CF_PLAYER      },
-    { "captain",     BecomeCaptain,             0    , CF_PLAYER      },
-    { "freeze",      ToggleFreeze,              0    , CF_PLAYER      },
-    { "rpickup",     RandomPickup,              0    , CF_PLAYER | CF_SPC_ADMIN  },
+    { "kick",        AdminKick,                 0    , CF_BOTH_ADMIN, CD_KICK },
+    { "y",           YesKick,                   0    , CF_BOTH_ADMIN, CD_Y },
+    { "n",           DontKick,                  0    , CF_BOTH_ADMIN, CD_N },
+    { "overtime",    ChangeOvertime,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_OVERTIME },
+    { "overtimeup",  ChangeOvertimeUp,          0    , CF_PLAYER | CF_SPC_ADMIN, CD_OVERTIMEUP },
+    { "elect",       VoteAdmin,                 0    , CF_BOTH, CD_ELECT },
+    { "yes",         VoteYes,                   0    , CF_PLAYER, CD_YES },
+    { "no",          VoteNo,                    0    , CF_PLAYER, CD_NO },
+    { "captain",     BecomeCaptain,             0    , CF_PLAYER, CD_CAPTAIN },
+    { "freeze",      ToggleFreeze,              0    , CF_PLAYER, CD_FREEZE },
+    { "rpickup",     RandomPickup,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_RPICKUP },
     
-    { "1on1",        UserMode,                  1	 , CF_PLAYER | CF_SPC_ADMIN },
-    { "2on2",        UserMode,                  2	 , CF_PLAYER | CF_SPC_ADMIN },
-    { "3on3",        UserMode,                  3	 , CF_PLAYER | CF_SPC_ADMIN },
-    { "4on4",        UserMode,                  4	 , CF_PLAYER | CF_SPC_ADMIN },
-    { "10on10",      UserMode,                  5	 , CF_PLAYER | CF_SPC_ADMIN },
-    { "ffa",         UserMode,                  6	 , CF_PLAYER | CF_SPC_ADMIN },
-    { "ctf",         UserMode,                  7    , CF_PLAYER | CF_SPC_ADMIN },
+    { "1on1",        UserMode,                  1	 , CF_PLAYER | CF_SPC_ADMIN, CD_1ON1 },
+    { "2on2",        UserMode,                  2	 , CF_PLAYER | CF_SPC_ADMIN, CD_2ON1 },
+    { "3on3",        UserMode,                  3	 , CF_PLAYER | CF_SPC_ADMIN, CD_3ON1 },
+    { "4on4",        UserMode,                  4	 , CF_PLAYER | CF_SPC_ADMIN, CD_4ON1 },
+    { "10on10",      UserMode,                  5	 , CF_PLAYER | CF_SPC_ADMIN, CD_10ON10 },
+    { "ffa",         UserMode,                  6	 , CF_PLAYER | CF_SPC_ADMIN, CD_FFA },
+    { "ctf",         UserMode,                  7    , CF_PLAYER | CF_SPC_ADMIN, CD_CTF },
     
-    { "unpause",     VoteUnpause,               0    , CF_PLAYER      },
-    { "practice",    TogglePractice,            0    , CF_PLAYER | CF_SPC_ADMIN },
-    { "wp_reset",    Wp_Reset,                  0    , CF_PLAYER      },
-    { "+wp_stats",   Wp_Stats,                  2    , CF_BOTH | CF_MATCHLESS },
-    { "-wp_stats",   Wp_Stats,                  1    , CF_BOTH | CF_MATCHLESS },
-    { "tkfjump",     t_jump,                    1    , CF_BOTH_ADMIN },
-    { "tkrjump",     t_jump,                    2    , CF_BOTH_ADMIN },
-    { "klist",       klist,                     0    , CF_BOTH | CF_MATCHLESS },
-    { "hdptoggle",   hdptoggle,                 0    , CF_BOTH_ADMIN },
-    { "handicap",    handicap,                  0    , CF_PLAYER | CF_PARAMS | CF_MATCHLESS },
-    { "noweapon",    noweapon,                  0    , CF_PLAYER | CF_PARAMS | CF_SPC_ADMIN },
+    { "unpause",     VoteUnpause,               0    , CF_PLAYER, CD_UNPAUSE },
+    { "practice",    TogglePractice,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_PRACTICE },
+    { "wp_reset",    Wp_Reset,                  0    , CF_PLAYER, CD_WP_RESET },
+    { "+wp_stats",   Wp_Stats,                  2    , CF_BOTH | CF_MATCHLESS, CD_PLS_WP_STATS },
+    { "-wp_stats",   Wp_Stats,                  1    , CF_BOTH | CF_MATCHLESS, CD_MNS_WP_STATS },
+    { "tkfjump",     t_jump,                    1    , CF_BOTH_ADMIN, CD_TKFJUMP },
+    { "tkrjump",     t_jump,                    2    , CF_BOTH_ADMIN, CD_TKRJUMP },
+    { "klist",       klist,                     0    , CF_BOTH | CF_MATCHLESS, CD_KLIST },
+    { "hdptoggle",   hdptoggle,                 0    , CF_BOTH_ADMIN, CD_HDPTOGGLE },
+    { "handicap",    handicap,                  0    , CF_PLAYER | CF_PARAMS | CF_MATCHLESS, CD_HANDICAP },
+    { "noweapon",    noweapon,                  0    , CF_PLAYER | CF_PARAMS | CF_SPC_ADMIN, CD_NOWEAPON },
 
-    { "cam",         ShowCamHelp,               0    , CF_SPECTATOR | CF_MATCHLESS },
+    { "cam",         ShowCamHelp,               0    , CF_SPECTATOR | CF_MATCHLESS, CD_CAM },
 
-    { "tracklist",   tracklist,                 0    , CF_BOTH | CF_MATCHLESS  },
-    { "fpslist",     fpslist,                   0    , CF_BOTH | CF_MATCHLESS  },
+    { "tracklist",   tracklist,                 0    , CF_BOTH | CF_MATCHLESS, CD_TRACKLIST },
+    { "fpslist",     fpslist,                   0    , CF_BOTH | CF_MATCHLESS, CD_FPSLIST },
 
-    { "fav1_add",    favx_add,                  1    , CF_SPECTATOR },
-    { "fav2_add",    favx_add,                  2    , CF_SPECTATOR },
-    { "fav3_add",    favx_add,                  3    , CF_SPECTATOR },
-    { "fav4_add",    favx_add,                  4    , CF_SPECTATOR },
-    { "fav5_add",    favx_add,                  5    , CF_SPECTATOR },
-    { "fav6_add",    favx_add,                  6    , CF_SPECTATOR },
-    { "fav7_add",    favx_add,                  7    , CF_SPECTATOR },
-    { "fav8_add",    favx_add,                  8    , CF_SPECTATOR },
-    { "fav9_add",    favx_add,                  9    , CF_SPECTATOR },
-    { "fav10_add",   favx_add,                 10    , CF_SPECTATOR },
-    { "fav11_add",   favx_add,                 11    , CF_SPECTATOR },
-    { "fav12_add",   favx_add,                 12    , CF_SPECTATOR },
-    { "fav13_add",   favx_add,                 13    , CF_SPECTATOR },
-    { "fav14_add",   favx_add,                 14    , CF_SPECTATOR },
-    { "fav15_add",   favx_add,                 15    , CF_SPECTATOR },
-    { "fav16_add",   favx_add,                 16    , CF_SPECTATOR },
-    { "fav17_add",   favx_add,                 17    , CF_SPECTATOR },
-    { "fav18_add",   favx_add,                 18    , CF_SPECTATOR },
-    { "fav19_add",   favx_add,                 19    , CF_SPECTATOR },
-    { "fav20_add",   favx_add,                 20    , CF_SPECTATOR },
-    { "1fav_go",     xfav_go,                   1    , CF_SPECTATOR },
-    { "2fav_go",     xfav_go,                   2    , CF_SPECTATOR },
-    { "3fav_go",     xfav_go,                   3    , CF_SPECTATOR },
-    { "4fav_go",     xfav_go,                   4    , CF_SPECTATOR },
-    { "5fav_go",     xfav_go,                   5    , CF_SPECTATOR },
-    { "6fav_go",     xfav_go,                   6    , CF_SPECTATOR },
-    { "7fav_go",     xfav_go,                   7    , CF_SPECTATOR },
-    { "8fav_go",     xfav_go,                   8    , CF_SPECTATOR },
-    { "9fav_go",     xfav_go,                   9    , CF_SPECTATOR },
-    { "10fav_go",    xfav_go,                  10    , CF_SPECTATOR },
-    { "11fav_go",    xfav_go,                  11    , CF_SPECTATOR },
-    { "12fav_go",    xfav_go,                  12    , CF_SPECTATOR },
-    { "13fav_go",    xfav_go,                  13    , CF_SPECTATOR },
-    { "14fav_go",    xfav_go,                  14    , CF_SPECTATOR },
-    { "15fav_go",    xfav_go,                  15    , CF_SPECTATOR },
-    { "16fav_go",    xfav_go,                  16    , CF_SPECTATOR },
-    { "17fav_go",    xfav_go,                  17    , CF_SPECTATOR },
-    { "18fav_go",    xfav_go,                  18    , CF_SPECTATOR },
-    { "19fav_go",    xfav_go,                  19    , CF_SPECTATOR },
-    { "20fav_go",    xfav_go,                  20    , CF_SPECTATOR },
-    { "fav_add",     fav_add,                   0    , CF_SPECTATOR | CF_MATCHLESS },
-    { "fav_del",     fav_del,                   0    , CF_SPECTATOR | CF_MATCHLESS },
-    { "fav_all_del", fav_all_del,               0    , CF_SPECTATOR | CF_MATCHLESS },
-    { "fav_next",    fav_next,                  0    , CF_SPECTATOR | CF_MATCHLESS },
-    { "fav_show",    fav_show,                  0    , CF_SPECTATOR | CF_MATCHLESS },
-    { "+scores",     Sc_Stats,                  2    , CF_BOTH | CF_MATCHLESS },
-    { "-scores",     Sc_Stats,                  1    , CF_BOTH | CF_MATCHLESS },
-    { "autotrack",   AutoTrack,            atBest    , CF_SPECTATOR | CF_MATCHLESS },
-    { "auto_pow",    AutoTrack,             atPow    , CF_SPECTATOR | CF_MATCHLESS },
-    { "next_best",   next_best,                 0    , CF_SPECTATOR | CF_MATCHLESS },
-    { "next_pow",    next_pow,                  0    , CF_SPECTATOR | CF_MATCHLESS },
-    { "lastscores",  lastscores,                0    , CF_BOTH },
-    { "rnd",         krnd,                		0    , CF_BOTH | CF_PARAMS },
-    { "agree",       agree_on_map,        		0    , CF_PLAYER | CF_MATCHLESS },
-    { "pos_show",        Pos_Show,              0    , CF_BOTH | CF_PARAMS },
-    { "pos_save",        Pos_Save,              0    , CF_BOTH | CF_PARAMS },
-    { "pos_move",        Pos_Move,              0    , CF_BOTH | CF_PARAMS },
+    { "fav1_add",    favx_add,                  1    , CF_SPECTATOR, CD_FAV1_ADD },
+    { "fav2_add",    favx_add,                  2    , CF_SPECTATOR, CD_FAV2_ADD },
+    { "fav3_add",    favx_add,                  3    , CF_SPECTATOR, CD_FAV3_ADD },
+    { "fav4_add",    favx_add,                  4    , CF_SPECTATOR, CD_FAV4_ADD },
+    { "fav5_add",    favx_add,                  5    , CF_SPECTATOR, CD_FAV5_ADD },
+    { "fav6_add",    favx_add,                  6    , CF_SPECTATOR, CD_FAV6_ADD },
+    { "fav7_add",    favx_add,                  7    , CF_SPECTATOR, CD_FAV7_ADD },
+    { "fav8_add",    favx_add,                  8    , CF_SPECTATOR, CD_FAV8_ADD },
+    { "fav9_add",    favx_add,                  9    , CF_SPECTATOR, CD_FAV9_ADD },
+    { "fav10_add",   favx_add,                 10    , CF_SPECTATOR, CD_FAV10_ADD },
+    { "fav11_add",   favx_add,                 11    , CF_SPECTATOR, CD_FAV11_ADD },
+    { "fav12_add",   favx_add,                 12    , CF_SPECTATOR, CD_FAV12_ADD },
+    { "fav13_add",   favx_add,                 13    , CF_SPECTATOR, CD_FAV13_ADD },
+    { "fav14_add",   favx_add,                 14    , CF_SPECTATOR, CD_FAV14_ADD },
+    { "fav15_add",   favx_add,                 15    , CF_SPECTATOR, CD_FAV15_ADD },
+    { "fav16_add",   favx_add,                 16    , CF_SPECTATOR, CD_FAV16_ADD },
+    { "fav17_add",   favx_add,                 17    , CF_SPECTATOR, CD_FAV17_ADD },
+    { "fav18_add",   favx_add,                 18    , CF_SPECTATOR, CD_FAV18_ADD },
+    { "fav19_add",   favx_add,                 19    , CF_SPECTATOR, CD_FAV19_ADD },
+    { "fav20_add",   favx_add,                 20    , CF_SPECTATOR, CD_FAV20_ADD },
+    { "1fav_go",     xfav_go,                   1    , CF_SPECTATOR, CD_1FAV_GO },
+    { "2fav_go",     xfav_go,                   2    , CF_SPECTATOR, CD_2FAV_GO },
+    { "3fav_go",     xfav_go,                   3    , CF_SPECTATOR, CD_3FAV_GO },
+    { "4fav_go",     xfav_go,                   4    , CF_SPECTATOR, CD_4FAV_GO },
+    { "5fav_go",     xfav_go,                   5    , CF_SPECTATOR, CD_5FAV_GO },
+    { "6fav_go",     xfav_go,                   6    , CF_SPECTATOR, CD_6FAV_GO },
+    { "7fav_go",     xfav_go,                   7    , CF_SPECTATOR, CD_7FAV_GO },
+    { "8fav_go",     xfav_go,                   8    , CF_SPECTATOR, CD_8FAV_GO },
+    { "9fav_go",     xfav_go,                   9    , CF_SPECTATOR, CD_9FAV_GO },
+    { "10fav_go",    xfav_go,                  10    , CF_SPECTATOR, CD_10FAV_GO },
+    { "11fav_go",    xfav_go,                  11    , CF_SPECTATOR, CD_11FAV_GO },
+    { "12fav_go",    xfav_go,                  12    , CF_SPECTATOR, CD_12FAV_GO },
+    { "13fav_go",    xfav_go,                  13    , CF_SPECTATOR, CD_13FAV_GO },
+    { "14fav_go",    xfav_go,                  14    , CF_SPECTATOR, CD_14FAV_GO },
+    { "15fav_go",    xfav_go,                  15    , CF_SPECTATOR, CD_15FAV_GO },
+    { "16fav_go",    xfav_go,                  16    , CF_SPECTATOR, CD_16FAV_GO },
+    { "17fav_go",    xfav_go,                  17    , CF_SPECTATOR, CD_17FAV_GO },
+    { "18fav_go",    xfav_go,                  18    , CF_SPECTATOR, CD_18FAV_GO },
+    { "19fav_go",    xfav_go,                  19    , CF_SPECTATOR, CD_19FAV_GO },
+    { "20fav_go",    xfav_go,                  20    , CF_SPECTATOR, CD_20FAV_GO },
+    { "fav_add",     fav_add,                   0    , CF_SPECTATOR | CF_MATCHLESS, CD_FAV_ADD },
+    { "fav_del",     fav_del,                   0    , CF_SPECTATOR | CF_MATCHLESS, CD_FAV_DEL },
+    { "fav_all_del", fav_all_del,               0    , CF_SPECTATOR | CF_MATCHLESS, CD_FAV_ALL_DEL },
+    { "fav_next",    fav_next,                  0    , CF_SPECTATOR | CF_MATCHLESS, CD_FAV_NEXT },
+    { "fav_show",    fav_show,                  0    , CF_SPECTATOR | CF_MATCHLESS, CD_FAV_SHOW },
+    { "+scores",     Sc_Stats,                  2    , CF_BOTH | CF_MATCHLESS, CD_PLS_SCORES },
+    { "-scores",     Sc_Stats,                  1    , CF_BOTH | CF_MATCHLESS, CD_MNS_SCORES },
+    { "autotrack",   AutoTrack,            atBest    , CF_SPECTATOR | CF_MATCHLESS, CD_AUTOTRACK },
+    { "auto_pow",    AutoTrack,             atPow    , CF_SPECTATOR | CF_MATCHLESS, CD_AUTO_POW },
+    { "next_best",   next_best,                 0    , CF_SPECTATOR | CF_MATCHLESS, CD_NEXT_BEST },
+    { "next_pow",    next_pow,                  0    , CF_SPECTATOR | CF_MATCHLESS, CD_NEXT_POW },
+    { "lastscores",  lastscores,                0    , CF_BOTH, CD_LASTSCORES },
+    { "rnd",         krnd,                		0    , CF_BOTH | CF_PARAMS, CD_RND },
+    { "agree",       agree_on_map,        		0    , CF_PLAYER | CF_MATCHLESS, CD_AGREE },
+    { "pos_show",    Pos_Show,                  0    , CF_BOTH | CF_PARAMS, CD_POS_SHOW },
+    { "pos_save",    Pos_Save,                  0    , CF_BOTH | CF_PARAMS, CD_POS_SAVE },
+    { "pos_move",    Pos_Move,                  0    , CF_BOTH | CF_PARAMS, CD_POS_MOVE },
 // VVD: For trick chiters! :-)
 // Need to think out how to limit using Pos_Set for tricking.
-// May be to ban pos_set_velocity?
-    { "pos_set_origin",  Pos_Set,               1    , CF_BOTH | CF_PARAMS },
-    { "pos_set_angles",  Pos_Set,               2    , CF_BOTH | CF_PARAMS },
-//	{ "pos_set_velocity",Pos_Set,               3    , CF_BOTH | CF_PARAMS },
-// { ctf commands
-    { "tossrune",    TossRune,                  0    , CF_PLAYER },
-    { "flagstatus",  FlagStatus,                0    , CF_BOTH },
+// May be to ban pos_velocity?
+    { "pos_origin",  Pos_Set,                   1    , CF_BOTH | CF_PARAMS, CD_POS_ORIGIN },
+    { "pos_angles",  Pos_Set,                   2    , CF_BOTH | CF_PARAMS, CD_POS_ANGLES },
+//	{ "pos_velocity",Pos_Set,                   3    , CF_BOTH | CF_PARAMS, CD_POS_VELOCITY },
+// { CTF commands
+    { "tossrune",    TossRune,                  0    , CF_PLAYER, CD_TOSSRUNE },
+    { "flagstatus",  FlagStatus,                0    , CF_BOTH, CD_FLAGSTATUS },
 // }
-    { "motd",        motd_show,                 0    , CF_BOTH | CF_MATCHLESS }
+    { "motd",        motd_show,                 0    , CF_BOTH | CF_MATCHLESS, CD_MOTD }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -458,6 +634,25 @@ qboolean isValidCmdForClass( int icmd, qboolean isSpec )
 	return true;
 }
 
+// check if this cmd require admin rights
+qboolean isCmdRequireAdmin( int icmd, qboolean isSpec )
+{
+	if ( icmd < 0 || icmd >= cmds_cnt )
+		return false;
+
+	// split class
+	if ( isSpec ) { // spec
+		if ( cmds[icmd].cf_flags & CF_SPC_ADMIN )
+			return true; // cmd require admin rights
+	}
+	else { // player
+		if ( cmds[icmd].cf_flags & CF_PLR_ADMIN )
+			return true; // cmd require admin rights
+	}
+
+	return false;
+}
+
 void StuffModCommands()
 {
 	int i, limit;
@@ -520,6 +715,9 @@ void Init_cmds(void)
 		if ( strnull( cmds[i].name ) || !( cmds[i].f ) )
 			G_Error("Init_cmds: null");
 
+		if ( (int)strlen( cmds[i].name ) > max_cmd_len )
+			max_cmd_len = strlen( cmds[i].name );
+
 		if ( cmds[i].cf_flags & CF_PLR_ADMIN )
 			cmds[i].cf_flags |= CF_PLAYER;    // this let simplify cmds[] table
 
@@ -537,6 +735,8 @@ qboolean check_master()
 
 	return false;
 }
+
+/*
     
 void PShowCmds()
 {   
@@ -585,6 +785,8 @@ void PShowCmds()
 	}
 }
 
+
+
 void SShowCmds()
 {
 	if( self->k_admin == 2 ) {
@@ -627,40 +829,55 @@ void SShowCmds()
 		}
 	}
 }
+*/
 
-void NewShowCmds ()
+void Do_ShowCmds( qboolean adm_req )
 {
-	int i;
-	char *name;
-
-	G_sprint(self, 2, "Valid commands for %s is:\n", 
-				( self->k_spectator ? redtext("spectator") : redtext("player") ));
+	qboolean first = true;
+	int i, l;
+	char *name, dots[64];
 
 	for( i = 0; i >= 0 && i < cmds_cnt; i++ ) {
 
 		name = cmds[i].name;
 
+		if ( strnull(cmds[i].description) || cmds[i].description == CD_NODESC )
+			continue; // command does't have description
+
 		if ( !isValidCmdForClass( i, self->k_spectator ) )
 			continue; // cmd does't valid for this class of player or matchless mode does't have this command
 
-		G_sprint(self, 2, "%s\n", redtext(name));
-		
+		if ( adm_req != isCmdRequireAdmin( i, self->k_spectator ) )
+			continue; 
+
+		l = max_cmd_len - strlen(name);
+		l = bound( 0, l, sizeof(dots)-1 );
+		memset( (void*)dots, (int)'.', l);
+		dots[l] = 0;
+
+		if ( first ) {
+			first = false;
+
+			G_sprint(self, 2, "\n%s commands for %s:\n\n", 
+				( adm_req ? redtext("admin") : redtext("common") ),
+				( self->k_spectator ? redtext("spectator") : redtext("player") ));
+		}
+
+		G_sprint(self, 2, "%s%s %s\n", redtext(name), dots, cmds[i].description);
 	}
 }
 
 void ShowCmds()
 {
-	// FIXME: complete this some day
-	if ( k_matchLess )
-	{
-		NewShowCmds ();
-		return;
-	}
+	Do_ShowCmds( false ); // show common commands
+	Do_ShowCmds( true );  // show admin commands
 
+/*
 	if ( self->k_spectator )
 		SShowCmds();
 	else 
 		PShowCmds();
+*/
 }
 
 void ShowOpts()

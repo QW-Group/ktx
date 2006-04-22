@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.48 2006/04/20 17:42:00 qqshka Exp $
+ *  $Id: g_local.h,v 1.49 2006/04/22 14:06:23 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -416,6 +416,7 @@ typedef struct cmd_s {
 	void ( *f )();
 	float	arg;
 	int		cf_flags;
+	const char *description;
 } cmd_t;
 
 #define CF_PLAYER			( 1<<0  ) /* command valid for players */
