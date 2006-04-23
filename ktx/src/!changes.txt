@@ -1,3 +1,9 @@
+2005-04-23
+119. Temporally removed commands: forcepause, unpause, and removed possibility to autokpause
+	 when someone is timing. I do this because server does't have native pause which i can invoke
+	 from mod, k_pause is ugly hack which never became safe. So wait untill someone made
+	 native server pause and some API for mod.
+
 2005-04-22
 118. I rewrote command "commands" so it looks really nice now :>
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.56 2006/04/18 22:17:17 qqshka Exp $
+ *  $Id: client.c,v 1.57 2006/04/23 12:03:22 qqshka Exp $
  */
 
 //===========================================================================
@@ -145,12 +145,14 @@ void CheckTiming()
 					SetVector( p->s.v.velocity, 0, 0, 0 ); // speed is zeroed and not restored
 				}
 
+#ifndef NO_K_PAUSE
 				if ( timing_players_action & TA_KPAUSE ) {
 					if ( !k_pause ) {
 						G_bprint(2, "Server issues a pause\n");
 						ModPause ( 2 );
 					}
 				}
+#endif
 			}
 
 		}
@@ -881,13 +883,11 @@ gedict_t       *SelectSpawnPoint( char *spawnname )
 ///////////////
 void ClientConnect()
 {
-#ifdef KTEAMS
 	float f1 = 0;
 	gedict_t *p;
 	char *tmp;
 
 	Vip_ShowRights( self );
-#endif
 
 	k_nochange = 0;
 
@@ -899,9 +899,6 @@ void ClientConnect()
 	// thus missed the svc_intermission, we'd better let him know
 	if ( intermission_running )
 		SendIntermissionToClient ();
-
-
-#ifdef KTEAMS
 
 // ILLEGALFPS[
 
@@ -963,7 +960,6 @@ void ClientConnect()
 			}
 		}
 	}
-#endif
 }
 
 ////////////////
@@ -999,8 +995,6 @@ void PutClientInServer()
 	self->s.v.effects = 0;
 	self->spawn_time = g_globalvars.time;
         
-
-#ifdef KTEAMS
 // the spawn falling damage bug workaround
 	self->jump_flag = 0;
 	self->swim_flag = 0;
@@ -1014,7 +1008,6 @@ void PutClientInServer()
 	self->maxspeed = cvar("sv_maxspeed"); // qqshka - ctf stuff, discard haste rune modifier after u die
 	self->regen_time = -1;
 	self->carrier_hurt_time = -1;
-#endif
 
 	self->invincible_time = 0;
 
@@ -1224,10 +1217,8 @@ void PlayerDeathThink()
 // gedict_t*    old_self;
 	float           forward;
 
-#ifdef KTEAMS
     if( k_standby )
         return;
-#endif
 
 	if ( ( ( int ) ( self->s.v.flags ) ) & FL_ONGROUND )
 	{
@@ -1887,7 +1878,6 @@ Called every frame before physics are run
 
 void PlayerPreThink()
 {
-#ifdef KTEAMS
 	float   r;
 	qboolean zeroFps = false;
 
@@ -1993,7 +1983,6 @@ void PlayerPreThink()
 	}
 
 // ILLEGALFPS]
-#endif
 
 
 	if ( intermission_running )
@@ -2006,10 +1995,8 @@ void PlayerPreThink()
 	     && self->s.v.view_ofs[2] == 0 )
 		return;		// intermission or finale
 
-#ifdef KTEAMS
-	if( !self->k_accepted || k_pause)
+	if( !self->k_accepted || k_pause )
 		return;
-#endif
 
 	makevectors( self->s.v.v_angle );	// is this still used
 
@@ -2372,7 +2359,6 @@ void PlayerPostThink()
 	if ( self->s.v.deadflag )
 		return;
 
-#ifdef KTEAMS
 	if( !self->k_accepted && match_in_progress == 2 )
 			return;
 
@@ -2390,18 +2376,15 @@ void PlayerPostThink()
 // clear the flag if we landed
     if( (int)self->s.v.flags & FL_ONGROUND )
 		self->brokenankle = 0;
-#endif
-
 
 // check to see if player landed and play landing sound 
 	if ( ( self->jump_flag < -300 )
 	     && ( ( ( int ) ( self->s.v.flags ) ) & FL_ONGROUND ) )
 	{
-#ifdef KTEAMS
 // Falling often results in 5-5 points of damage through 2 frames.
 // This fixes the bug
         self->s.v.velocity[2] = 0;
-#endif
+
 		if ( self->s.v.watertype == CONTENT_WATER )
 			sound( self, CHAN_BODY, "player/h2ojump.wav", 1, ATTN_NORM );
 		else if ( self->jump_flag < -650 )

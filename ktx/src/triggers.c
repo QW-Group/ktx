@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: triggers.c,v 1.13 2006/04/14 02:11:06 ult_ Exp $
+ *  $Id: triggers.c,v 1.14 2006/04/23 12:03:22 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -225,10 +225,7 @@ void SP_trigger_secret()
 {
 	g_globalvars.total_secrets = g_globalvars.total_secrets + 1;
 	self->wait = -1;
-#ifndef KTEAMS
-	if ( !self->s.v.message )
-		self->s.v.message = "You found a secret area!";
-#endif
+
 	if ( !self->s.v.sounds )
 		self->s.v.sounds = 1;
 
@@ -414,12 +411,8 @@ void spawn_tdeath( vec3_t org, gedict_t * death_owner )
 	setorigin( death, PASSVEC3( org ) );
 
 	death->s.v.touch = ( func_t ) tdeath_touch;
-#ifdef KTEAMS
     // fixes the telefrag bug from previous kteams
 	death->s.v.nextthink = g_globalvars.time + 0.1;
-#else
-	death->s.v.nextthink = g_globalvars.time + 0.2;
-#endif
 	death->s.v.think = ( func_t ) SUB_Remove;
 	death->s.v.owner = EDICT_TO_PROG( death_owner );
 

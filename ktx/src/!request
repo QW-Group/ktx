@@ -1,5 +1,4 @@
 
-discharge cmd fix about k_dis == 2 !!!
 
 kpause - remove it
 
@@ -17,6 +16,9 @@ blood
 23:17] <gLAd> че с пингом
 23:17] <gLAd> помнишь он выше был всё время?
 
+----------------------------------------------------
+discharge cmd fix about k_dis == 2 !!!
+but seems we does't need fix about this
 ----------------------------------------------------
 how we must do with q statistics and dropable quad?
 and same question about ring.

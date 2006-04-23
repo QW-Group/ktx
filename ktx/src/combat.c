@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.16 2006/04/13 04:31:07 ult_ Exp $
+ *  $Id: combat.c,v 1.17 2006/04/23 12:03:22 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -106,10 +106,8 @@ void Killed( gedict_t * targ, gedict_t * attacker )
 	oself = self;
 	self = targ;
 
-#ifdef KTEAMS
 	if ( streq( self->s.v.classname, "player" ) )
         self->dead_time = g_globalvars.time;
-#endif
 
 	if ( self->s.v.health < -99 )
 		self->s.v.health = -99;	// don't let sbar look bad if a player

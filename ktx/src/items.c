@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.15 2006/04/10 17:16:06 qqshka Exp $
+ *  $Id: items.c,v 1.16 2006/04/23 12:03:22 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -206,10 +206,8 @@ void health_touch()
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
 
-#ifdef KTEAMS
 	if (match_in_progress != 2)
         return;
-#endif
 
 	if ( self->healtype == 2 )	// Megahealth?  Ignore max_health...
 	{
@@ -301,10 +299,8 @@ void armor_touch()
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
 
-#ifdef KTEAMS
 	if ( match_in_progress != 2 )
         return;
-#endif
 
 	if ( deathmatch == 4 )
 		if ( other->invincible_time > 0 )
@@ -614,11 +610,6 @@ void weapon_touch()
 
 void SP_weapon_supershotgun()
 {
-#ifndef KTEAMS
-	if (deathmatch > 3)
-		return;
-#endif
-
 	trap_precache_model( "progs/g_shot.mdl" );
 	setmodel( self, "progs/g_shot.mdl" );
 
@@ -636,11 +627,6 @@ void SP_weapon_supershotgun()
 
 void SP_weapon_nailgun()
 {
-#ifndef KTEAMS
-	if (deathmatch > 3)
-		return;
-#endif
-
 	trap_precache_model( "progs/g_nail.mdl" );
 	setmodel( self, "progs/g_nail.mdl" );
 
@@ -658,11 +644,6 @@ void SP_weapon_nailgun()
 
 void SP_weapon_supernailgun()
 {
-#ifndef KTEAMS
-	if (deathmatch > 3)
-		return;
-#endif
-
 	trap_precache_model( "progs/g_nail2.mdl" );
 	setmodel( self, "progs/g_nail2.mdl" );
 
@@ -681,11 +662,6 @@ void SP_weapon_supernailgun()
 
 void SP_weapon_grenadelauncher()
 {
-#ifndef KTEAMS
-	if (deathmatch > 3)
-		return;
-#endif
-
 	trap_precache_model( "progs/g_rock.mdl" );
 	setmodel( self, "progs/g_rock.mdl" );
 
@@ -703,11 +679,6 @@ void SP_weapon_grenadelauncher()
 
 void SP_weapon_rocketlauncher()
 {
-#ifndef KTEAMS
-	if (deathmatch > 3)
-		return;
-#endif
-
 	trap_precache_model( "progs/g_rock2.mdl" );
 	setmodel( self, "progs/g_rock2.mdl" );
 
@@ -726,11 +697,6 @@ void SP_weapon_rocketlauncher()
 
 void SP_weapon_lightning()
 {
-#ifndef KTEAMS
-	if (deathmatch > 3)
-		return;
-#endif
-
 	trap_precache_model( "progs/g_light.mdl" );
 	setmodel( self, "progs/g_light.mdl" );
 
@@ -858,11 +824,6 @@ void ammo_touch()
 
 void SP_item_shells()
 {
-#ifndef KTEAMS
-	if ( deathmatch == 4 )
-		return;
-#endif
-
 	self->s.v.touch = ( func_t ) ammo_touch;
 
 	if ( ( int ) ( self->s.v.spawnflags ) & WEAPON_BIG2 )
@@ -889,11 +850,6 @@ void SP_item_shells()
 
 void SP_item_spikes()
 {
-#ifndef KTEAMS
-	if ( deathmatch == 4 )
-		return;
-#endif
-
 	self->s.v.touch = ( func_t ) ammo_touch;
 
 	if ( ( int ) ( self->s.v.spawnflags ) & WEAPON_BIG2 )
@@ -921,11 +877,6 @@ void SP_item_spikes()
 
 void SP_item_rockets()
 {
-#ifndef KTEAMS
-	if ( deathmatch == 4 )
-		return;
-#endif
-
 	self->s.v.touch = ( func_t ) ammo_touch;
 
 	if ( ( int ) ( self->s.v.spawnflags ) & WEAPON_BIG2 )
@@ -954,11 +905,6 @@ void SP_item_rockets()
 
 void SP_item_cells()
 {
-#ifndef KTEAMS
-	if ( deathmatch == 4 )
-		return;
-#endif
-
 	self->s.v.touch = ( func_t ) ammo_touch;
 
 	if ( ( int ) ( self->s.v.spawnflags ) & WEAPON_BIG2 )
@@ -993,11 +939,6 @@ DO NOT USE THIS!!!! IT WILL BE REMOVED!
 #define WEAPON_BIG  8
 void SP_item_weapon()
 {
-#ifndef KTEAMS
-	if (deathmatch == 4)
-		return;
-#endif
-
 	self->s.v.touch = ( func_t ) ammo_touch;
 
 	if ( ( int ) ( self->s.v.spawnflags ) & WEAPON_SHOTGUN )
@@ -1077,10 +1018,8 @@ void key_touch()
 	if ( ( int ) other->s.v.items & ( int ) self->s.v.items )
 		return;
 
-#ifdef KTEAMS
 	if (match_in_progress != 2)
         return;
-#endif
 
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
 
@@ -1209,10 +1148,8 @@ void sigil_touch()
 	if ( ISDEAD( other ) )
 		return;
 
-#ifdef KTEAMS
     if (match_in_progress != 2)
         return;
-#endif
 
 	G_centerprint( other, "You got the rune!" );
 
@@ -1676,7 +1613,6 @@ void DropBackpack()
 
 	item->s.v.items = self->s.v.weapon;
 
-#ifdef KTEAMS
 // drop best weapon in case of fairpacks 1 (KTEAMS)
         if( f1 == 1 )
         {
@@ -1698,7 +1634,6 @@ void DropBackpack()
         if( f1 == 2 )
             if( (int)self->lastwepfired & IT_DROPPABLE_WEAPONS )
                 item->s.v.items = self->lastwepfired;
-#endif
 
 	if ( item->s.v.items == IT_AXE )
 		item->s.v.netname = "Axe";

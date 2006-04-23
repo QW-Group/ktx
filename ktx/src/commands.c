@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.70 2006/04/22 14:06:23 qqshka Exp $
+ *  $Id: commands.c,v 1.71 2006/04/23 12:03:22 qqshka Exp $
  */
 
 // commands.c
@@ -312,7 +312,6 @@ const char CD_NODESC[] = "no desc";
 
 
 cmd_t cmds[] = {
-
 	{ "commands",    ShowCmds,			        0    , CF_BOTH | CF_MATCHLESS, CD_COMMANDS },
 	{ "scores",      PrintScores,		        0    , CF_BOTH | CF_MATCHLESS, CD_SCORES },
 	{ "stats",       PlayerStats,               0    , CF_BOTH | CF_MATCHLESS, CD_STATS },
@@ -357,7 +356,9 @@ cmd_t cmds[] = {
 	{ "admin",       ReqAdmin,                  0    , CF_BOTH | CF_PARAMS, CD_ADMIN },
 	{ "forcestart",  AdminForceStart,           0    , CF_BOTH_ADMIN, CD_FORCESTART },
 	{ "forcebreak",  AdminForceBreak,           0    , CF_BOTH_ADMIN, CD_FORCEBREAK },
+#ifndef NO_K_PAUSE
 	{ "forcepause",  AdminForcePause,           0    , CF_BOTH_ADMIN, CD_FORCEPAUSE },
+#endif
 	{ "pickup",      VotePickup,                0    , CF_PLAYER, CD_PICKUP },
 	{ "prewar",      TogglePreWar,              0    , CF_BOTH_ADMIN, CD_PREWAR },
 	{ "lockmap",     ToggleMapLock,             0    , CF_BOTH_ADMIN, CD_LOCKMAP },
@@ -411,8 +412,10 @@ cmd_t cmds[] = {
     { "10on10",      UserMode,                  5	 , CF_PLAYER | CF_SPC_ADMIN, CD_10ON10 },
     { "ffa",         UserMode,                  6	 , CF_PLAYER | CF_SPC_ADMIN, CD_FFA },
     { "ctf",         UserMode,                  7    , CF_PLAYER | CF_SPC_ADMIN, CD_CTF },
-    
+
+#ifndef NO_K_PAUSE
     { "unpause",     VoteUnpause,               0    , CF_PLAYER, CD_UNPAUSE },
+#endif
     { "practice",    TogglePractice,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_PRACTICE },
     { "wp_reset",    Wp_Reset,                  0    , CF_PLAYER, CD_WP_RESET },
     { "+wp_stats",   Wp_Stats,                  2    , CF_BOTH | CF_MATCHLESS, CD_PLS_WP_STATS },

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.27 2006/04/15 23:17:43 qqshka Exp $
+ *  $Id: weapons.c,v 1.28 2006/04/23 12:03:22 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -390,9 +390,7 @@ void W_FireShotgun()
 
 	WriteByte( MSG_ONE, SVC_SMALLKICK );
 
-#ifdef KTEAMS
     if ( match_in_progress == 2 )
-#endif
 		if ( deathmatch != 4 )
 			self->s.v.currentammo = --( self->s.v.ammo_shells );
 
@@ -423,9 +421,7 @@ void W_FireSuperShotgun()
 
 	WriteByte( MSG_ONE, SVC_BIGKICK );
 
-#ifdef KTEAMS
     if ( match_in_progress == 2 )
-#endif
 		if ( deathmatch != 4 )
 			self->s.v.currentammo = self->s.v.ammo_shells = self->s.v.ammo_shells - 2;
 
@@ -520,9 +516,7 @@ void W_FireRocket()
 {
 	self->ps.a_rl++;
 
-#ifdef KTEAMS
     if ( match_in_progress == 2 )
-#endif
 		if ( deathmatch != 4 )
 			self->s.v.currentammo = self->s.v.ammo_rockets = self->s.v.ammo_rockets - 1;
 
