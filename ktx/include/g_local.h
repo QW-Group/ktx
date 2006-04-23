@@ -20,14 +20,13 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.49 2006/04/22 14:06:23 qqshka Exp $
+ *  $Id: g_local.h,v 1.50 2006/04/23 12:02:29 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
 
-// not actual really: REMOVE ME
-#define KTEAMS
 //#define DEBUG
+#define NO_K_PAUSE /* k_pause is buggy/unstable, so don't use it */
 
 #include "q_shared.h"
 #include "mathlib.h"
@@ -567,8 +566,6 @@ void    GrappleReset(gedict_t *rhook);
 
 // global.c
 
-#ifdef KTEAMS
-
 extern	float framechecks;	    // if timedemo/uptime bugs are tolerated
 extern	float k_attendees;      // stores number of players on server - used in 'ready' checking
 extern	float k_berzerk;        // boolean - whether or not the game is currently in berzerk time
@@ -602,7 +599,6 @@ extern  gameType_t 	  k_mode;   // game type: DUEL, TP, FFA
 extern	int   k_lastvotedmap;	// last voted map, used for agree command?
 extern  int k_ctf_custom_models;// use or not custom models
 extern  int k_allowed_free_modes; // reflect appropriate cvar - but changed only at map load
-#endif
 
 
 // heh, some hack for mvdsv for grabbing some data
