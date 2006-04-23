@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.71 2006/04/23 12:03:22 qqshka Exp $
+ *  $Id: commands.c,v 1.72 2006/04/23 21:54:30 qqshka Exp $
  */
 
 // commands.c
@@ -125,9 +125,12 @@ void Pos_Set ( float set_type );
 void lastscores ();
 
 void motd_show ();
-//void Check_Maps ();
 
 void TogglePractice();
+
+void infolock ();
+void infospec ();
+void moreinfo ();
 
 // spec
 void ShowCamHelp();
@@ -309,6 +312,9 @@ const char CD_NODESC[] = "no desc";
 #define CD_TOSSRUNE     "drop rune (CTF)"
 #define CD_FLAGSTATUS   "show flags status (CTF)"
 #define CD_MOTD         "show motd"
+#define CD_INFOLOCK     "toggle specinfo perms"
+#define CD_INFOSPEC     "toggle spectator infos"
+#define CD_MOREINFO     "receiving more info"
 
 
 cmd_t cmds[] = {
@@ -499,7 +505,10 @@ cmd_t cmds[] = {
     { "tossrune",    TossRune,                  0    , CF_PLAYER, CD_TOSSRUNE },
     { "flagstatus",  FlagStatus,                0    , CF_BOTH, CD_FLAGSTATUS },
 // }
-    { "motd",        motd_show,                 0    , CF_BOTH | CF_MATCHLESS, CD_MOTD }
+    { "motd",        motd_show,                 0    , CF_BOTH | CF_MATCHLESS, CD_MOTD },
+    { "infolock",    infolock,                  0    , CF_BOTH_ADMIN, CD_INFOLOCK },
+    { "infospec",    infospec,                  0    , CF_PLAYER | CF_SPC_ADMIN, CD_INFOSPEC },
+    { "moreinfo",    moreinfo,                  0    , CF_SPECTATOR | CF_MATCHLESS, CD_MOREINFO }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -1128,6 +1137,9 @@ void ModStatus ()
 	PrintToggle2(redtext("Drop Backpacks "), "dp");
 	PrintToggle1(redtext("Discharge      "), "k_dis");
 	PrintToggle2(redtext("Berzerk mode   "), "k_bzk");
+
+	G_sprint(self, 2, "%-14s %-3.3s ",  redtext("spec info perm"), (mi_adm_only() ? "Adm" : "All"));
+	G_sprint(self, 2, "%-14s %-3.3s\n", redtext("more spec info"), (mi_on() ? "On" : "Off"));
 
 	if( match_in_progress == 1 ) {
 		p = find(world, FOFCLSN, "timer" );
@@ -3994,4 +4006,144 @@ void lastscores ()
 }
 
 // } lastscores stuff
+
+// { spec moreinfo
+
+qboolean mi_on ()
+{
+	return ( (int)cvar("k_spec_info") & MI_ON );
+}
+
+qboolean mi_adm_only ()
+{
+	return ( (int)cvar("k_spec_info") & MI_ADM_ONLY );
+}
+
+#define MI_POW (IT_INVISIBILITY | IT_INVULNERABILITY | IT_SUIT | IT_QUAD)
+#define MI_ARM (IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3)
+#define MI_WPN (IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_NAILGUN | IT_SUPER_NAILGUN \
+		        | IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER | IT_LIGHTNING )
+#define MI_WPN3 (IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER | IT_LIGHTNING)
+
+typedef struct mi_levels_s {
+	int			items;
+	const char  *desc;
+} mi_levels_t;
+
+mi_levels_t mi_levels[] = {
+	{ 0, "Receiving extra infos: \317\346\346" },
+	{ MI_POW | MI_ARM | IT_SUPERHEALTH | IT_ROCKET_LAUNCHER, "Receiving powerups\217ra\217ya\217ga\217rl\217mh" },
+	{ MI_POW | MI_ARM | IT_SUPERHEALTH | MI_WPN3, "Receiving powerups\217armors\217rl\217gl\217lg\217mh" },
+	{ MI_POW | MI_ARM | IT_SUPERHEALTH | MI_WPN, "Receiving pows\217wpns\217arms\217mh"},
+	{ MI_POW, "Receiving only powerups" }
+};
+
+int mi_levels_cnt = sizeof( mi_levels ) / sizeof( mi_levels[0] );
+
+void mi_print( int it, char *msg )
+{
+	gedict_t *p;
+	int from, level;
+	qboolean adm = mi_adm_only ();
+
+	if ( !mi_on() )
+		return; // spec info is turned off
+
+	for( from = 1 /* spec */, p = world; p = find_plrspc (p, &from); ) {
+		if ( adm && p->k_admin != 2 )
+			continue; // configured send only for admins
+
+		level = iKey(p, "mi"); // get spec setup
+
+		if (level < 0)
+			level = 0;
+		if (level > mi_levels_cnt-1 )
+			level = 0;
+
+		if ( !(it & mi_levels[level].items) )
+			continue;
+
+		G_sprint(p, 2, "%s\n", msg);
+	}
+}
+
+void moreinfo()
+{
+	int level;
+
+	if ( !mi_on() ) {
+		G_sprint(self, 2, "Spec info is turned off by server\n");
+		return;
+	}
+
+	level = iKey(self, "mi") + 1;
+
+	if ( level > mi_levels_cnt - 1 )
+		level = 0;
+	if ( level < 0 )
+		level = 0;
+
+	cmdinfo_setkey( self, "mi", va("%d", level) );
+}
+
+void info_mi_update( gedict_t *p, char *from, char *to )
+{
+	int level  = atoi(to);
+	int olevel = atoi(from);
+
+	if ( !mi_on() )
+		return;
+
+	if ( level == olevel )
+		return;
+
+	if ( level > mi_levels_cnt - 1 )
+		level = 0;
+	if ( level < 0 )
+		level = 0;
+
+	G_sprint(p, 2, "%s\n", mi_levels[level].desc);
+}
+
+void infolock ( )
+{
+	int k_spec_info = cvar("k_spec_info");
+
+	if ( match_in_progress ) 
+		return;
+
+	if( check_master() )
+		return;
+
+	if ( self->k_admin != 2 ) {
+		G_sprint(self, 2, "You are not an admin\n");
+		return;
+	}
+
+	k_spec_info ^= MI_ADM_ONLY;
+	cvar_fset("k_spec_info", k_spec_info);
+
+	if ( mi_adm_only() ) 
+		G_bprint(2, "Only %s can receive specinfos\n", redtext("admins"));
+	else 
+		G_bprint(2, "All %s can receive specinfos\n", redtext("spectators"));
+}
+
+void infospec ( )
+{
+	int k_spec_info = cvar("k_spec_info");
+
+	if ( match_in_progress )
+		return;
+
+	if( check_master() )
+		return;
+
+	k_spec_info ^= MI_ON;
+	cvar_fset("k_spec_info", k_spec_info);
+
+	G_bprint(2, "Extra info for spectators %s\n", redtext(OnOff(mi_on())));
+}
+
+// }
 

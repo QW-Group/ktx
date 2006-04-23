@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.16 2006/04/23 12:03:22 qqshka Exp $
+ *  $Id: items.c,v 1.17 2006/04/23 21:54:30 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -217,6 +217,8 @@ void health_touch()
 			return;
 
 		other->ps.mh++;
+
+		mi_print(IT_SUPERHEALTH, va("%s got Megahealth", getname(other)));
 	} else
 	{
 		if ( !T_Heal( other, self->healamount, 0 ) )
@@ -313,22 +315,27 @@ void armor_touch()
 		value = 100;
 		bit = IT_ARMOR1;
 	}
-	if ( !strcmp( self->s.v.classname, "item_armor2" ) )
+	else if ( !strcmp( self->s.v.classname, "item_armor2" ) )
 	{
 		armor = &(other->ps.ya);
 		type = 0.6;
 		value = 150;
 		bit = IT_ARMOR2;
 	}
-	if ( !strcmp( self->s.v.classname, "item_armorInv" ) )
+	else if ( !strcmp( self->s.v.classname, "item_armorInv" ) )
 	{
 		armor = &(other->ps.ra);
 		type = 0.8;
 		value = 200;
 		bit = IT_ARMOR3;
 	}
+	else
+		return;
+
 	if ( other->s.v.armortype * other->s.v.armorvalue >= type * value )
 		return;
+
+	mi_print(bit, va("%s got %s", getname(other), self->s.v.netname));
 
 	if ( armor )
 		(*armor)++;
@@ -344,8 +351,7 @@ void armor_touch()
 		self->s.v.nextthink = g_globalvars.time + 20;
 	self->s.v.think = ( func_t ) SUB_regen;
 
-
-	G_sprint( other, PRINT_LOW, "You got armor\n" );
+	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
 // armor touch sound
 	sound( other, CHAN_AUTO, "items/armor1.wav", 1, ATTN_NORM );
 	stuffcmd( other, "bf\n" );
@@ -362,6 +368,7 @@ void SP_item_armor1()
 	self->s.v.touch = ( func_t ) armor_touch;
 	trap_precache_model( "progs/armor.mdl" );
 	setmodel( self, "progs/armor.mdl" );
+	self->s.v.netname = "Green Armor";
 	self->s.v.skin = 0;
 	setsize( self, -16, -16, 0, 16, 16, 56 );
 	StartItem( self );
@@ -375,6 +382,7 @@ void SP_item_armor2()
 	self->s.v.touch = ( func_t ) armor_touch;
 	trap_precache_model( "progs/armor.mdl" );
 	setmodel( self, "progs/armor.mdl" );
+	self->s.v.netname = "Yellow Armor";
 	self->s.v.skin = 1;
 	setsize( self, -16, -16, 0, 16, 16, 56 );
 	StartItem( self );
@@ -388,6 +396,7 @@ void SP_item_armorInv()
 	self->s.v.touch = ( func_t ) armor_touch;
 	trap_precache_model( "progs/armor.mdl" );
 	setmodel( self, "progs/armor.mdl" );
+	self->s.v.netname = "Red Armor";
 	self->s.v.skin = 2;
 	setsize( self, -16, -16, 0, 16, 16, 56 );
 	StartItem( self );
@@ -498,7 +507,8 @@ void DoWeaponChange( int new )
 weapon_touch
 =============
 */
-float           W_BestWeapon();
+float W_BestWeapon();
+
 void weapon_touch()
 {
 	int             hadammo, new = 0;
@@ -571,6 +581,8 @@ void weapon_touch()
 
 	} else
 		G_Error( "weapon_touch: unknown classname" );
+
+	mi_print(new, va("%s got %s", getname(other), self->s.v.netname));
 
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
 // weapon touch sound
@@ -1217,6 +1229,7 @@ void            powerup_touch();
 
 void powerup_touch()
 {
+	int it = 0;
 	float *p_cnt = NULL;
 
 	if ( strnull ( self->s.v.classname ) )
@@ -1265,15 +1278,13 @@ void powerup_touch()
 		other->rad_time = 1;
 		other->radsuit_finished = g_globalvars.time + 30;
 	}
-
-	if ( streq( self->s.v.classname, "item_artifact_invulnerability" ) )
+	else if ( streq( self->s.v.classname, "item_artifact_invulnerability" ) )
 	{
 		other->ps.pent++;
 		other->invincible_time = 1;
 		other->invincible_finished = g_globalvars.time + 30;
 	}
-
-	if ( streq( self->s.v.classname, "item_artifact_invisibility" ) )
+	else if ( streq( self->s.v.classname, "item_artifact_invisibility" ) )
 	{
 		other->ps.ring++;
 		other->invisible_time = 1;
@@ -1283,8 +1294,7 @@ void powerup_touch()
 			p_cnt = &(other->invisible_finished);
 
 	}
-
-	if ( streq( self->s.v.classname, "item_artifact_super_damage" ) )
+	else if ( streq( self->s.v.classname, "item_artifact_super_damage" ) )
 	{
 		other->ps.quad++;
 
@@ -1300,6 +1310,8 @@ void powerup_touch()
 		if ( self->cnt > g_globalvars.time ) // is this was a dropped powerup
 			p_cnt = &(other->super_damage_finished);
 	}
+	else
+		return;
 
 	if ( p_cnt ) {  // is this was a dropped powerup
 			p_cnt[0] = self->cnt;
@@ -1309,6 +1321,9 @@ void powerup_touch()
 
 			SUB_RM_01( self );// remove later
 	}
+
+	mi_print(self->s.v.items, 
+			va("%s got %s%s", getname(other), (p_cnt ? "dropped " : ""), self->s.v.netname));
 
 	activator = other;
 	SUB_UseTargets();	// fire all targets / killtargets
@@ -1513,6 +1528,8 @@ void BackpackTouch()
 		{ // new weapon - so print u got it
 			acount = 1;
 			G_sprint( other, PRINT_LOW, "the %s", self->s.v.netname );
+
+			mi_print(self->s.v.items, va("%s got backpack with %s", getname(other), self->s.v.netname));
 		}
 
 // change weapons

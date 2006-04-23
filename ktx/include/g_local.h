@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.50 2006/04/23 12:02:29 qqshka Exp $
+ *  $Id: g_local.h,v 1.51 2006/04/23 21:54:09 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -36,7 +36,7 @@
 #include "g_syscalls.h"
 #include "player.h"
 
-#define MOD_VERSION					("1.25")
+#define MOD_VERSION					("1.26")
 #define MOD_NAME					("KTX")
 #define MOD_SERVERINFO_MOD_KEY		("xmod")
 #define MOD_SERVERINFO_BUILD_KEY	("xbuild")
@@ -442,7 +442,7 @@ float StuffDeltaTime(int iDelta);
 
 void SetPractice(int srv_practice_mode, const char *mapname);
 
-// { usrmodes
+// { usermodes
 
 // um_flags
 
@@ -471,6 +471,16 @@ void UserMode(float umode);
 int um_idx_byname(char *name); // return -1 if not found
 
 // }
+
+// { spec more info
+
+qboolean	mi_on();
+qboolean	mi_adm_only();
+void		mi_print( int it, char *msg );
+void		info_mi_update( gedict_t *p, char *from, char *to );
+
+// }
+
 
 // vip.c
 

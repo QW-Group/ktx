@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_consts.h,v 1.11 2006/04/19 20:57:29 qqshka Exp $
+ *  $Id: g_consts.h,v 1.12 2006/04/23 21:54:09 qqshka Exp $
  */
 
 //
@@ -285,4 +285,9 @@
 #define CTF_RUNE_RGN    8   // IT_SIGIL4
 #define CTF_RUNE_MASK  15
 #define CTF_FLAG       16
+
+// spec moreinfo
+
+#define MI_ON            (   1<<0)   // on/off
+#define MI_ADM_ONLY      (   1<<1)   // send info to admined specs only or to normal specs too
 

@@ -1,3 +1,22 @@
+2005-04-24 [ver 1.26]
+120. Added commands: infolock, infospec, moreinfo. ktpro (c)
+
+	 infospec - toggle show spec info to specs ot not.
+	 infolock - toggle send info to admined/all specs.
+	 moreinfo - the spectators can choose to receive additional information about 
+				the game, for example who took which powerup, who took a rocket launcher etc. 
+				There are different settings that determine which information you will receive, 
+				for example "powerups only", "powerups and armors" etc. ktpro (c)
+
+	 NOTE: instead of "moreinfo" u may use "cmd info mi <level>", where level from 0 to 4.
+
+	 Server admins may toggle this via:
+
+	 set k_spec_info 1    //bit mask - you must add values to define proper action
+                          // 1 - spec info showed to specs
+						  // 2 - spec info sended only to admined specs
+						  // so 1+2 = 3 this mean spec info on but sended only to admined specs
+
 2005-04-23
 119. Temporally removed commands: forcepause, unpause, and removed possibility to autokpause
 	 when someone is timing. I do this because server does't have native pause which i can invoke

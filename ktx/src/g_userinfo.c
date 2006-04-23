@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_userinfo.c,v 1.13 2006/04/20 17:42:12 qqshka Exp $
+ *  $Id: g_userinfo.c,v 1.14 2006/04/23 21:54:30 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -140,6 +140,7 @@ qboolean FixPlayerTeam ( char *newteam )
 
 cmdinfo_t cinfos[] = {
 	{ "*is", 0 },		// keys with * is for internal use ONLY
+    { "mi", info_mi_update },		// spec moreinfo
     { "b_switch", 0 },
 //    { "bw" },
 //      b1, b2, b3, b4
