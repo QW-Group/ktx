@@ -1,3 +1,30 @@
+2005-04-25
+121. Added commands: s-p, s-r, s-l. ktpro (c)
+
+	 ------------------
+	 s-p <name/id> txt
+	 ------------------
+	 s-p allows you to talk to a single player/spectator.
+	 s-p message format is: [sender->]: txt
+	 examples: s-p 2 test
+               s-p name test
+
+	 --------
+	 s-r txt
+	 --------
+	 s-r allows you to directly reply to the person who directly spoke with you.
+	 s-r message format is [sender->]: txt
+	 example: s-r test        
+
+	 --------
+	 s-l txt
+	 --------
+	 s-l allows you to talk to the person again you last spoke with.
+	 s-l message format is [sender->]: txt
+	 example: s-l test
+
+	 NOTES: this is a real commands, in ktpro is was "say" command extension/hack.
+
 2005-04-24 [ver 1.26]
 120. Added commands: infolock, infospec, moreinfo. ktpro (c)
 

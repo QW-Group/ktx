@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.28 2006/04/16 05:20:46 ult_ Exp $
+ *  $Id: progs.h,v 1.29 2006/04/24 21:25:21 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -347,6 +347,11 @@ typedef struct gedict_s {
 // { wreg
 	qboolean wreg_attack;		   // client simulate +attack via "cmd wreg" feature
 	wreg_t *wreg; // [256]
+// }
+
+// { communication commands
+	struct gedict_s *s_last_to;    // last direct msg to
+	struct gedict_s *s_last_from;  // last direct msf from
 // }
 
 } gedict_t;

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.15 2006/04/18 22:17:17 qqshka Exp $
+ *  $Id: g_main.c,v 1.16 2006/04/24 21:25:36 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -139,6 +139,8 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 
 	case GAME_CLIENT_DISCONNECT:
 		self = PROG_TO_EDICT( g_globalvars.self );
+
+		s_lr_clear( self );
 
 		cmdinfo_clear ( self ); // remove all keys for this client on disconnect
 

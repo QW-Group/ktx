@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.72 2006/04/23 21:54:30 qqshka Exp $
+ *  $Id: commands.c,v 1.73 2006/04/24 21:25:36 qqshka Exp $
  */
 
 // commands.c
@@ -131,6 +131,9 @@ void TogglePractice();
 void infolock ();
 void infospec ();
 void moreinfo ();
+
+void s_p();
+void s_lr( float l );
 
 // spec
 void ShowCamHelp();
@@ -315,6 +318,9 @@ const char CD_NODESC[] = "no desc";
 #define CD_INFOLOCK     "toggle specinfo perms"
 #define CD_INFOSPEC     "toggle spectator infos"
 #define CD_MOREINFO     "receiving more info"
+#define CD_S_P			"direct player say"
+#define CD_S_L          "continue last s-p u done"
+#define CD_S_R          "reply to last s-p u got"
 
 
 cmd_t cmds[] = {
@@ -508,7 +514,10 @@ cmd_t cmds[] = {
     { "motd",        motd_show,                 0    , CF_BOTH | CF_MATCHLESS, CD_MOTD },
     { "infolock",    infolock,                  0    , CF_BOTH_ADMIN, CD_INFOLOCK },
     { "infospec",    infospec,                  0    , CF_PLAYER | CF_SPC_ADMIN, CD_INFOSPEC },
-    { "moreinfo",    moreinfo,                  0    , CF_SPECTATOR | CF_MATCHLESS, CD_MOREINFO }
+    { "moreinfo",    moreinfo,                  0    , CF_SPECTATOR | CF_MATCHLESS, CD_MOREINFO },
+    { "s-p",         s_p,                       0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_S_P },
+    { "s-l",         s_lr,                      1    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_S_L },
+    { "s-r",         s_lr,                      2    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_S_R }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -3856,7 +3865,7 @@ void krnd ()
 		return;
 	}
 	
-	for( buf[0] = '\x90', i = 2; i < argc; i++ ) {
+	for( buf[0] = '\x90', buf[1] = 0, i = 2; i < argc; i++ ) {
 		trap_CmdArgv( i, arg_x, sizeof( arg_x ) );
 		strlcat(buf, arg_x, sizeof(buf));
 		strlcat(buf, ( i + 1 < argc ? ", " : "\x91" ), sizeof(buf));
@@ -4143,6 +4152,101 @@ void infospec ( )
 	cvar_fset("k_spec_info", k_spec_info);
 
 	G_bprint(2, "Extra info for spectators %s\n", redtext(OnOff(mi_on())));
+}
+
+// }
+
+// { communication commands
+
+void s_common( gedict_t *from, gedict_t *to, char *msg )
+{
+	char *rmsg = redtext(msg);
+
+	if ( from == to )
+		return; // ignore sendinf text to self
+
+	if ( match_in_progress && (from->k_player != to->k_player || from->k_spectator != to->k_spectator) )
+		return; // spec to player or player to spec, disallowed in match
+
+	from->s_last_to = to;
+	to->s_last_from = from;
+
+	G_sprint(to,   2, "[%s->]:%s\n", getname(from), rmsg);
+	G_sprint(from, 2, "[->%s]:%s\n", getname(to),   rmsg);
+}
+
+void s_p()
+{
+	int argc = trap_CmdArgc(), i;
+	gedict_t *p;
+	char arg_3[1024], arg_x[1024], buf[1024];
+
+	if ( argc < 4 ) {
+		G_sprint(self, 2, "usage: s-p id/name txt\n");
+		return;
+	}
+
+	trap_CmdArgv( 2, arg_3, sizeof( arg_3 ) );
+
+	if ( (p = SpecPlayer_by_IDorName( arg_3 )) ) {
+
+		for( buf[0] = 0, i = 3; i < argc; i++ ) {
+			trap_CmdArgv( i, arg_x, sizeof( arg_x ) );
+			strlcat( buf,   " ", sizeof( buf ) );
+			strlcat( buf, arg_x, sizeof( buf ) );
+		}
+
+		s_common( self, p, buf );
+	}
+	else {
+		G_sprint(self, 2, "s-p: client %s not found\n", arg_3);
+		return;
+	}
+}
+
+
+void s_lr( float l )
+{
+	int argc = trap_CmdArgc(), i;
+	gedict_t *p;
+	char arg_x[1024], buf[1024];
+
+	if ( argc < 3 ) {
+		G_sprint(self, 2, "usage: %s txt\n", ( l == 1 ? "s-l" : "s-r" ));
+		return;
+	}
+
+	p = ( l == 1 ? self->s_last_to : self->s_last_from );
+
+	if ( p && GetUserID( p ) ) {
+
+		for( buf[0] = 0, i = 2; i < argc; i++ ) {
+			trap_CmdArgv( i, arg_x, sizeof( arg_x ) );
+			strlcat( buf,   " ", sizeof( buf ) );
+			strlcat( buf, arg_x, sizeof( buf ) );
+		}
+
+		s_common( self, p, buf );
+	}
+	else {
+		G_sprint(self, 2, "%s: client not found\n", ( l == 1 ? "s-l" : "s-r" ));
+		return;
+	}
+}
+
+void s_lr_clear( gedict_t *dsc )
+{
+	int from = 0;
+	gedict_t *p;
+
+	for ( p = world; p = find_plrspc(p, &from); ) {
+
+		if ( p->s_last_to == dsc )
+			p->s_last_to = NULL;
+
+		if ( p->s_last_from == dsc )
+			p->s_last_from = NULL;
+	}
 }
 
 // }

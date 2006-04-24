@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.39 2006/04/18 22:17:17 qqshka Exp $
+ *  $Id: g_utils.c,v 1.40 2006/04/24 21:25:36 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -961,6 +961,50 @@ gedict_t *player_by_IDorName( const char *IDname )
 	gedict_t *p = player_by_id( atoi( IDname ) );
 
 	return (p ? p : player_by_name( IDname ) );
+}
+
+gedict_t *spec_by_id( int id )
+{
+	gedict_t *p;
+
+	if ( id < 1 )
+		return NULL;
+
+	for ( p = world; p = find( p , FOFCLSN, "spectator" ); ) {
+		if ( id == GetUserID( p ) )
+			return p;
+	}
+
+	return NULL;
+}
+
+gedict_t *spec_by_name( const char *name )
+{
+	gedict_t *p;
+
+	if ( strnull( name ) )
+		return NULL;
+
+	for ( p = world; p = find( p , FOFCLSN, "spectator" ); ) {
+		if ( streq(p->s.v.netname, name) )
+			return p;
+	}
+
+	return NULL;
+}
+
+gedict_t *spec_by_IDorName( const char *IDname )
+{
+	gedict_t *p = spec_by_id( atoi( IDname ) );
+
+	return (p ? p : spec_by_name( IDname ) );
+}
+
+gedict_t *SpecPlayer_by_IDorName( const char *IDname )
+{
+	gedict_t *p = player_by_IDorName( IDname );
+
+	return (p ? p : spec_by_IDorName( IDname ));
 }
 
 char *armor_type( int items )

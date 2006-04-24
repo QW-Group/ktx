@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.42 2006/04/18 22:17:17 qqshka Exp $
+ *  $Id: match.c,v 1.43 2006/04/24 21:25:36 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -858,10 +858,10 @@ void TimerThink ()
 				// 	so decide overtime wise here what to do.
 				// Check to see if duel first
 
-				if( k_matchLess ){
+				if( k_matchLess ) {
 					; // no overtime in matchLess mode
 				}
-				if( teamplay && f3 != 2 ){
+				else if( teamplay && f3 != 2 ) {
 					; // no overtime in case of less then 2 or more then 2 teams
 				}			
 				else if( isDuel() && f4 == 2 )

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_userinfo.c,v 1.14 2006/04/23 21:54:30 qqshka Exp $
+ *  $Id: g_userinfo.c,v 1.15 2006/04/24 21:25:36 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -333,8 +333,8 @@ void cmduinfo ()
 
 		trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
 
-		if ( !(p = player_by_IDorName( arg_1 )) ) {
-			G_sprint(self, 2, "player \"%s\" not found\n", arg_1 );
+		if ( !(p = SpecPlayer_by_IDorName( arg_1 )) ) {
+			G_sprint(self, 2, "client \"%s\" not found\n", arg_1 );
 			return;
 		}
 
@@ -358,8 +358,8 @@ void cmduinfo ()
 		trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
 		trap_CmdArgv( 2, arg_2, sizeof( arg_2 ) );
 
-		if ( !(p = player_by_IDorName( arg_1 )) ) {
-			G_sprint(self, 2, "player \"%s\" not found\n", arg_1 );
+		if ( !(p = SpecPlayer_by_IDorName( arg_1 )) ) {
+			G_sprint(self, 2, "client \"%s\" not found\n", arg_1 );
 			return;
 		}
 

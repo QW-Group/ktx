@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.51 2006/04/23 21:54:09 qqshka Exp $
+ *  $Id: g_local.h,v 1.52 2006/04/24 21:25:21 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -238,6 +238,11 @@ gedict_t	*find_plrspc( gedict_t * start, int *from );
 gedict_t 	*player_by_id( int id );
 gedict_t	*player_by_name( const char *name );
 gedict_t	*player_by_IDorName( const char *IDname );
+gedict_t	*spec_by_id( int id );
+gedict_t	*spec_by_name( const char *name );
+gedict_t	*spec_by_IDorName( const char *IDname );
+
+gedict_t	*SpecPlayer_by_IDorName( const char *IDname );
 
 char		*armor_type( int items );
 
@@ -481,6 +486,11 @@ void		info_mi_update( gedict_t *p, char *from, char *to );
 
 // }
 
+// { communication commands
+
+void s_lr_clear( gedict_t *dsc );
+
+// }
 
 // vip.c
 
