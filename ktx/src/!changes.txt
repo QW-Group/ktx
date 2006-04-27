@@ -23,7 +23,7 @@
 	 s-l message format is [sender->]: txt
 	 example: s-l test
 
-	 NOTES: this is a real commands, in ktpro is was "say" command extension/hack.
+	 NOTES: this is a real commands, in ktpro this was "say" command extension/hack.
 
 2005-04-24 [ver 1.26]
 120. Added commands: infolock, infospec, moreinfo. ktpro (c)

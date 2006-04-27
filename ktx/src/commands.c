@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.73 2006/04/24 21:25:36 qqshka Exp $
+ *  $Id: commands.c,v 1.74 2006/04/27 22:40:23 qqshka Exp $
  */
 
 // commands.c
@@ -4041,22 +4041,25 @@ typedef struct mi_levels_s {
 
 mi_levels_t mi_levels[] = {
 	{ 0, "Receiving extra infos: \317\346\346" },
-	{ MI_POW | MI_ARM | IT_SUPERHEALTH | IT_ROCKET_LAUNCHER, "Receiving powerups\217ra\217ya\217ga\217rl\217mh" },
-	{ MI_POW | MI_ARM | IT_SUPERHEALTH | MI_WPN3, "Receiving powerups\217armors\217rl\217gl\217lg\217mh" },
-	{ MI_POW | MI_ARM | IT_SUPERHEALTH | MI_WPN, "Receiving pows\217wpns\217arms\217mh"},
+	{ MI_POW | MI_ARM | IT_SUPERHEALTH | IT_ROCKET_LAUNCHER, "Receiving powerups\217armors\217mh\217rl" },
+	{ MI_POW | MI_ARM | IT_SUPERHEALTH | MI_WPN3, "Receiving powerups\217armors\217mh\217rl\217gl\217lg" },
+	{ MI_POW | MI_ARM | IT_SUPERHEALTH | MI_WPN, "Receiving powerups\217armors\217mh\217weapons"},
 	{ MI_POW, "Receiving only powerups" }
 };
 
 int mi_levels_cnt = sizeof( mi_levels ) / sizeof( mi_levels[0] );
 
-void mi_print( int it, char *msg )
+void mi_print( gedict_t *tooker, int it, char *msg )
 {
+	char *t_team;
 	gedict_t *p;
 	int from, level;
 	qboolean adm = mi_adm_only ();
 
 	if ( !mi_on() )
 		return; // spec info is turned off
+
+	t_team = getteam( tooker );
 
 	for( from = 1 /* spec */, p = world; p = find_plrspc (p, &from); ) {
 		if ( adm && p->k_admin != 2 )
@@ -4072,7 +4075,10 @@ void mi_print( int it, char *msg )
 		if ( !(it & mi_levels[level].items) )
 			continue;
 
-		G_sprint(p, 2, "%s\n", msg);
+		if ( isTeam() || isCTF() )
+			G_sprint(p, 2, "\x84\x90%4.4s\x91 %s\n", t_team, msg);
+		else
+			G_sprint(p, 2, "%s\n", msg);
 	}
 }
 

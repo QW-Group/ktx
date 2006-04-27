@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.17 2006/04/23 21:54:30 qqshka Exp $
+ *  $Id: items.c,v 1.18 2006/04/27 22:40:23 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -218,7 +218,7 @@ void health_touch()
 
 		other->ps.mh++;
 
-		mi_print(IT_SUPERHEALTH, va("%s got Megahealth", getname(other)));
+		mi_print(other, IT_SUPERHEALTH, va("%s got Megahealth", getname(other)));
 	} else
 	{
 		if ( !T_Heal( other, self->healamount, 0 ) )
@@ -335,7 +335,7 @@ void armor_touch()
 	if ( other->s.v.armortype * other->s.v.armorvalue >= type * value )
 		return;
 
-	mi_print(bit, va("%s got %s", getname(other), self->s.v.netname));
+	mi_print(other, bit, va("%s got %s", getname(other), self->s.v.netname));
 
 	if ( armor )
 		(*armor)++;
@@ -582,7 +582,7 @@ void weapon_touch()
 	} else
 		G_Error( "weapon_touch: unknown classname" );
 
-	mi_print(new, va("%s got %s", getname(other), self->s.v.netname));
+	mi_print(other, new, va("%s got %s", getname(other), self->s.v.netname));
 
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
 // weapon touch sound
@@ -1322,7 +1322,7 @@ void powerup_touch()
 			SUB_RM_01( self );// remove later
 	}
 
-	mi_print(self->s.v.items, 
+	mi_print(other, self->s.v.items, 
 			va("%s got %s%s", getname(other), (p_cnt ? "dropped " : ""), self->s.v.netname));
 
 	activator = other;
@@ -1529,7 +1529,7 @@ void BackpackTouch()
 			acount = 1;
 			G_sprint( other, PRINT_LOW, "the %s", self->s.v.netname );
 
-			mi_print(self->s.v.items, va("%s got backpack with %s", getname(other), self->s.v.netname));
+			mi_print(other, self->s.v.items, va("%s got backpack with %s", getname(other), self->s.v.netname));
 		}
 
 // change weapons

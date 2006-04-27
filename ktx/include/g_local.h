@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.52 2006/04/24 21:25:21 qqshka Exp $
+ *  $Id: g_local.h,v 1.53 2006/04/27 22:40:22 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -481,7 +481,7 @@ int um_idx_byname(char *name); // return -1 if not found
 
 qboolean	mi_on();
 qboolean	mi_adm_only();
-void		mi_print( int it, char *msg );
+void		mi_print( gedict_t *tooker, int it, char *msg );
 void		info_mi_update( gedict_t *p, char *from, char *to );
 
 // }
