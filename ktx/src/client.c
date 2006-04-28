@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.57 2006/04/23 12:03:22 qqshka Exp $
+ *  $Id: client.c,v 1.58 2006/04/28 00:50:08 ult_ Exp $
  */
 
 //===========================================================================
@@ -2676,6 +2676,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
             if ( isCTF() )
 			{
 				qboolean carrier_bonus = false;
+				qboolean flagdefended = false;
 				gedict_t *head;
                         
 				// 2 point bonus for killing enemy flag carrier
@@ -2709,6 +2710,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 							 && streq(getteam(head), getteam(attacker)) && !carrier_bonus
 						   )
 						{
+							flagdefended = true;
 							attacker->ps.c_defends++;
 							attacker->s.v.frags++;
 							G_bprint( 2, "%s defends %s's flag carrier\n", attacker->s.v.netname,
@@ -2730,6 +2732,25 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 					}
 
 					head = findradius( head, targ->s.v.origin, 400 );
+				}
+				
+				// Defend bonus if attacker is close to flag even if target is not
+				head = findradius( world, attacker->s.v.origin, 400 );
+				while ( head )
+				{
+					if ( ( streq(head->s.v.classname, "item_flag_team1") && streq(attackerteam, "red" ) ) ||
+						 ( streq(head->s.v.classname, "item_flag_team2") && streq(attackerteam, "blue") ) )
+					{
+						if (!flagdefended)
+						{
+							attacker->ps.f_defends++;
+							attacker->s.v.frags += 2;
+							G_bprint( 2, "%s defends the %s flag\n",
+								attacker->s.v.netname,
+								streq(attackerteam, "red") ? redtext("RED") : redtext("BLUE"));
+						}
+					} 
+					head = findradius( head, attacker->s.v.origin, 400 );
 				}
 			}
 
