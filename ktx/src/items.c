@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.18 2006/04/27 22:40:23 qqshka Exp $
+ *  $Id: items.c,v 1.19 2006/04/28 05:04:10 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -1664,8 +1664,10 @@ void DropBackpack()
 		item->s.v.netname = "Super Nailgun";
 	else if ( item->s.v.items == IT_GRENADE_LAUNCHER )
 		item->s.v.netname = "Grenade Launcher";
-	else if ( item->s.v.items == IT_ROCKET_LAUNCHER )
+	else if ( item->s.v.items == IT_ROCKET_LAUNCHER ) {
 		item->s.v.netname = "Rocket Launcher";
+		self->ps.dropped_rls++;
+	}
 	else if ( item->s.v.items == IT_LIGHTNING )
 		item->s.v.netname = "Thunderbolt";
 	else

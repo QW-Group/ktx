@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.43 2006/04/24 21:25:36 qqshka Exp $
+ *  $Id: match.c,v 1.44 2006/04/28 05:04:10 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -219,7 +219,7 @@ void SummaryTPStats ( )
 	int from1, from2;
 	float	dmg_g, dmg_t;
 	int   ra, ya, ga;
-	int   mh;
+	int   mh, d_rl;
 	int   quad, pent, ring;
 	float h_rl, a_rl, h_lg, a_lg, h_sg, a_sg, h_ssg, a_ssg;
 	int caps, pickups, returns, f_defends, c_defends;
@@ -243,7 +243,7 @@ void SummaryTPStats ( )
 
 			dmg_g = dmg_t = ra = ya = ga = mh = quad = pent = ring = 0;
 			h_rl = a_rl = h_lg = a_lg = h_sg = a_sg = h_ssg = a_ssg = 0;
-			caps = pickups = returns = f_defends = c_defends = 0;
+			caps = pickups = returns = f_defends = c_defends = d_rl = 0;
 			res = str = hst = rgn = 0;
 
 			for( from2 = 0, p2 = world; p2 = find_plrghst ( p2, &from2 ); ) {
@@ -267,6 +267,8 @@ void SummaryTPStats ( )
 						a_sg  += p2->ps.a_sg;
 						h_ssg += p2->ps.h_ssg;
 						a_ssg += p2->ps.a_ssg;
+
+						d_rl += p2->ps.dropped_rls;
 
 						caps += p2->ps.caps;
 						pickups += p2->ps.pickups;
@@ -304,13 +306,13 @@ void SummaryTPStats ( )
 			G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("Powerups"),
 					redtext("Q"), quad, redtext("P"), pent, redtext("R"), ring);
 			// armors + megahealths
-			G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("Armr&mhs"),
-					redtext("ga"), ga, redtext("ya"), ya, redtext("ra"), ra, redtext("mh"), mh);
+			G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d %s:%d\n", redtext("Armr&mhs"),
+					redtext("ga"), ga, redtext("ya"), ya, redtext("ra"), ra, redtext("mh"), mh, redtext("drl"), d_rl);
 			if ( isCTF() ) {
+				G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f %s:%.0f\n", redtext("RuneTime"),
+					redtext("res"), res, redtext("str"), str, redtext("hst"), hst, redtext("rgn"), rgn);
 				G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("     CTF"),
 					redtext("caps"), caps, redtext("returns"), returns, redtext("fd"), f_defends, redtext("cd"), c_defends);
-				G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f %s:%.0f\n", redtext("   Runes"),
-					redtext("res"), res, redtext("str"), str, redtext("hst"), hst, redtext("rgn"), rgn);
 			}
 			// damage
 			G_bprint(2, "%s: %s:%.1f %s:%.1f\n", redtext("  Damage"),
@@ -376,13 +378,13 @@ void TeamsStats ( )
 		G_bprint(2, "ùûûûûûûûûûûûûûûûûûûûûûûûûûûûûûûûûûü\n");
 }
 
-float maxfrags, maxdeaths, maxfriend, maxeffi;
+float maxfrags, maxdeaths, maxfriend, maxeffi, maxcaps, maxdefends;
 
 void OnePlayerStats(gedict_t *p, int tp)
 {
 	float	dmg_g, dmg_t;
 	int   ra, ya, ga;
-	int   mh;
+	int   mh, d_rl;
 	int   quad, pent, ring;
 	float h_rl, a_rl, h_gl, a_gl, h_lg, a_lg, h_sg, a_sg, h_ssg, a_ssg;
 
@@ -418,12 +420,15 @@ void OnePlayerStats(gedict_t *p, int tp)
 #endif
 	h_lg  = 100.0 * h_lg  / max(1, a_lg);
 
+	d_rl = p->ps.dropped_rls;
+
 	if ( tp )
 		G_bprint(2,"ùûûûûûûûûü\n" );
 
 	G_bprint(2, "\x87 %s%s:\n"
 			"  %d (%d) %s%.1f%%\n", ( isghost( p ) ? "\x83" : "" ), getname(p),
-			(int)p->s.v.frags,	(int)(p->s.v.frags - p->deaths),
+			( isCTF() ? (int)(p->s.v.frags - p->ctf_points) : (int)p->s.v.frags), 
+			( isCTF() ? (int)(p->s.v.frags - p->ctf_points - p->deaths) : (int)(p->s.v.frags - p->deaths)),
 			( tp ? va("%d ", (int)p->friendly ) : "" ),
 			p->efficiency);
 
@@ -437,14 +442,14 @@ void OnePlayerStats(gedict_t *p, int tp)
 				(h_sg  ? va(" %s%.1f%%", redtext("sg"),   h_sg) : ""),
 				(h_ssg ? va(" %s%.1f%%", redtext("ssg"), h_ssg) : ""));
 		// armors + megahealths
-		G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("Armr&mhs"),
-				redtext("ga"), ga, redtext("ya"), ya, redtext("ra"), ra, redtext("mh"), mh);
+		G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d %s:%d\n", redtext("Armr&mhs"),
+				redtext("ga"), ga, redtext("ya"), ya, redtext("ra"), ra, redtext("mh"), mh, redtext("drl"), d_rl);
 		if ( isCTF() )
 		{
+			G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f %s:%.0f\n", redtext("RuneTime"),
+				redtext("res"), p->ps.res_time, redtext("str"), p->ps.str_time, redtext("hst"), p->ps.hst_time, redtext("rgn"), p->ps.rgn_time);
 			G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("     CTF"),
 				redtext("caps"), p->ps.caps, redtext("returns"), p->ps.returns, redtext("fd"), p->ps.f_defends, redtext("cd"), p->ps.c_defends );
-			G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f %s:%.0f\n", redtext("   Runes"),
-				redtext("res"), p->ps.res_time, redtext("str"), p->ps.str_time, redtext("hst"), p->ps.hst_time, redtext("rgn"), p->ps.rgn_time);
 		}
 		// damage
 		G_bprint(2, "%s: %s:%.1f %s:%.1f\n", redtext("  Damage"),
@@ -463,14 +468,23 @@ void OnePlayerStats(gedict_t *p, int tp)
 	if ( !tp )
 		G_bprint(2,"ùûûûûûûûûü\n" );
 
-	if (maxfrags < p->s.v.frags)
-		maxfrags = p->s.v.frags;
+	if ( isCTF() ) {
+		if (maxfrags < p->s.v.frags - p->ctf_points)
+			maxfrags = p->s.v.frags - p->ctf_points;
+	}
+	else
+		if (maxfrags < p->s.v.frags)
+			maxfrags = p->s.v.frags;
 	if (maxdeaths < p->deaths)
 		maxdeaths = p->deaths;
 	if (maxfriend < p->friendly)
 		maxfriend = p->friendly;
 	if (maxeffi < p->efficiency)
 		maxeffi = p->efficiency;
+	if (maxcaps < p->ps.caps)
+		maxcaps = p->ps.caps;
+	if (maxdefends < p->ps.f_defends)
+		maxdefends = p->ps.f_defends;
 }
 
 // Players statistics printout here
@@ -490,7 +504,7 @@ void PlayersStats ()
 	// Probably low enough for a start value :)
 	maxfrags = -999999;
 
-	maxeffi = maxfriend = maxdeaths = 0;
+	maxeffi = maxfriend = maxdeaths = maxcaps = maxdefends = 0;
 
 	tp = isTeam() || isCTF();
 
@@ -523,10 +537,20 @@ void PlayersStats ()
 								G_bprint(2, "Team ê%së:\n", tmp );
 						}
 
-						if(p2->s.v.frags < 1)
-							p2->efficiency = 0;
+						if ( isCTF() )
+						{
+							if ( p2->s.v.frags - p2->ctf_points < 1 )
+								p2->efficiency = 0;
+							else
+								p2->efficiency = (p2->s.v.frags - p2->ctf_points) / (p2->s.v.frags - p2->ctf_points + p2->deaths) * 100;
+						}
 						else
-							p2->efficiency = p2->s.v.frags / (p2->s.v.frags + p2->deaths) * 100;
+						{
+							if( p2->s.v.frags < 1 )
+								p2->efficiency = 0;
+							else
+								p2->efficiency = p2->s.v.frags / (p2->s.v.frags + p2->deaths) * 100;
+						}
 
 						OnePlayerStats(p2, tp);
 					}
@@ -557,7 +581,7 @@ void TopStats ( )
 	from = f1 = 0;
 	p = find_plrghst ( world, &from );
 	while( p ) {
-		if( p->s.v.frags == maxfrags ) {
+		if( (!isCTF() && p->s.v.frags == maxfrags) || (isCTF() &&  p->s.v.frags - p->ctf_points == maxfrags)) {
 			G_bprint(2, "%s%s%s ê%dë\n", (f1 ? "             " : ""),
 								( isghost( p ) ? "\x83" : "" ), getname( p ), (int)maxfrags);
 			f1 = 1;
@@ -609,6 +633,39 @@ void TopStats ( )
 		}
 
 		p = find_plrghst ( p, &from );
+	}
+
+	if ( isCTF() )
+	{
+		if ( maxcaps > 0 )
+		{
+			G_bprint(2, "   Captures: ");
+			from = f1 = 0;
+			p = find_plrghst ( world, &from );
+			while( p ) {
+				if ( p->ps.caps == maxcaps ) {
+					G_bprint(2, "%s%s%s ê%dë\n", (f1 ? "             " : ""),
+								( isghost( p ) ? "\x83" : "" ), getname( p ), (int)maxcaps );
+					f1 = 1;
+				}
+				p = find_plrghst ( p, &from );
+			}
+		}
+
+		if ( maxdefends > 0 )
+		{
+			G_bprint(2, "FlagDefends: ");
+			from = f1 = 0;
+			p = find_plrghst ( world, &from );
+			while( p ) {
+				if ( p->ps.f_defends == maxdefends ) {
+					G_bprint(2, "%s%s%s ê%dë\n", (f1 ? "             " : ""),
+						( isghost( p ) ? "\x83" : "" ), getname( p ), (int)maxdefends );
+					f1 = 1;
+				}
+				p = find_plrghst ( p, &from );
+			}
+		}
 	}
 
 	G_bprint(2, "ùûûûûûûûûûûûûûûûûûûûûûûûûûûûûûûûûûü\n");
@@ -701,12 +758,12 @@ void EndMatch ( float skip_log )
 				else if ( p->ctf_flag & CTF_RUNE_RGN )
 					p->ps.rgn_time += g_globalvars.time - p->rune_pickup_time;
 			}
-		}		
-
-        if( isTeam() || isCTF() )
-			SummaryTPStats ();
+		}	
 
 		PlayersStats ();
+	
+        if( isTeam() || isCTF() )
+			SummaryTPStats ();
 
         if( !isDuel() ) // top stats only in non duel modes
 			TopStats ();

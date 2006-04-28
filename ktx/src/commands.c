@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.74 2006/04/27 22:40:23 qqshka Exp $
+ *  $Id: commands.c,v 1.75 2006/04/28 05:04:10 ult_ Exp $
  */
 
 // commands.c
@@ -2116,17 +2116,26 @@ void PlayerStats()
 
 				if( streq( tmp, tmp2 ) ) {
 					G_sprint(self, 2, "ê%së %s:  %d(%d) ", tmp2, p2->s.v.netname,
-						(int)p2->s.v.frags, (int)(p2->s.v.frags - p2->deaths));
+						( !isCTF() ? (int)p2->s.v.frags : (int)(p2->s.v.frags - p2->ctf_points)), 
+						( !isCTF() ? (int)(p2->s.v.frags - p2->deaths) : (int)(p2->s.v.frags - p2->ctf_points - p2->deaths)));
 
 					if( isTeam() || isCTF() )
 						G_sprint(self, 2, "%d ", (int)p2->friendly);
 
-   					// FIXME: efficiencies calculated wrong in ctf because
-					//		  you get "frags" for captures etc which are not actually frags	
-					if( p2->s.v.frags < 1 )
-						p2->efficiency = 0;
+					if ( isCTF() )
+					{
+						if ( p2->s.v.frags - p2->ctf_points < 1 )
+							p2->efficiency = 0;
+						else
+							p2->efficiency = (p2->s.v.frags - p2->ctf_points) / (p2->s.v.frags - p2->ctf_points + p2->deaths) * 100;
+					}
 					else
-						p2->efficiency = p2->s.v.frags / (p2->s.v.frags + p2->deaths) * 100;
+					{
+						if( p2->s.v.frags < 1 )
+							p2->efficiency = 0;
+						else
+							p2->efficiency = p2->s.v.frags / (p2->s.v.frags + p2->deaths) * 100;
+					}
 
 					if( floor( p2->efficiency ) == p2->efficiency)
 							G_sprint(self, 2, "è ");

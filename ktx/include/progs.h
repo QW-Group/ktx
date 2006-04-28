@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.29 2006/04/24 21:25:21 qqshka Exp $
+ *  $Id: progs.h,v 1.30 2006/04/28 05:04:10 ult_ Exp $
  */
 
 #include "progdefs.h"
@@ -90,6 +90,7 @@ typedef struct player_stats_s {
 	int		spawn_frags;
 
 	int		handicap;
+	int		dropped_rls;
 
 	// ctf stats
 	int caps;		// flag captures
@@ -333,6 +334,7 @@ typedef struct gedict_s {
 	qboolean on_hook;              // are we on the grapple?
 	qboolean hook_out;             // is the grapple in flight?
 	int ctf_flag;                  // do we have a rune or flag? 
+	int ctf_points;                // use frags - this to calculate efficiency for ctf
 	float regen_time;              // time to update health if regen rune
 	float rune_sound_time;         // dont spam rune sounds (1 per second)
 	float carrier_frag_time;       // used for carrier assists
