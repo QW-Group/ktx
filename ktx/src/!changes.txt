@@ -1,3 +1,11 @@
+2005-04-27
+ult:
+122. Added new end of game stat: dropped rls
+     Added captures and flag defends to top scores (ctf only)
+     Team stats now displayed after invididual stats (looks better due to long length of individual stats)
+     Enhanced ctf flag defend logic
+     Fixed frags, efficiency, and rank stats for ctf
+
 2005-04-25
 121. Added commands: s-p, s-r, s-l. ktpro (c)
 
