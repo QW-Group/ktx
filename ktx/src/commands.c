@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.75 2006/04/28 05:04:10 ult_ Exp $
+ *  $Id: commands.c,v 1.76 2006/04/29 21:39:40 ult_ Exp $
  */
 
 // commands.c
@@ -2116,18 +2116,18 @@ void PlayerStats()
 
 				if( streq( tmp, tmp2 ) ) {
 					G_sprint(self, 2, "%s‘ %s:  %d(%d) ", tmp2, p2->s.v.netname,
-						( !isCTF() ? (int)p2->s.v.frags : (int)(p2->s.v.frags - p2->ctf_points)), 
-						( !isCTF() ? (int)(p2->s.v.frags - p2->deaths) : (int)(p2->s.v.frags - p2->ctf_points - p2->deaths)));
+						( !isCTF() ? (int)p2->s.v.frags : (int)(p2->s.v.frags - p2->ps.ctf_points)), 
+						( !isCTF() ? (int)(p2->s.v.frags - p2->deaths) : (int)(p2->s.v.frags - p2->ps.ctf_points - p2->deaths)));
 
 					if( isTeam() || isCTF() )
 						G_sprint(self, 2, "%d ", (int)p2->friendly);
 
 					if ( isCTF() )
 					{
-						if ( p2->s.v.frags - p2->ctf_points < 1 )
+						if ( p2->s.v.frags - p2->ps.ctf_points < 1 )
 							p2->efficiency = 0;
 						else
-							p2->efficiency = (p2->s.v.frags - p2->ctf_points) / (p2->s.v.frags - p2->ctf_points + p2->deaths) * 100;
+							p2->efficiency = (p2->s.v.frags - p2->ps.ctf_points) / (p2->s.v.frags - p2->ps.ctf_points + p2->deaths) * 100;
 					}
 					else
 					{

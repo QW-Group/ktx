@@ -1,11 +1,10 @@
 /*
- *  $Id: ctf.c,v 1.9 2006/04/28 05:04:10 ult_ Exp $
+ *  $Id: ctf.c,v 1.10 2006/04/29 21:39:40 ult_ Exp $
  */
 
 #include "g_local.h"
 
 // CTF todo:
-// . disallow color changing
 // . option to disable pents, but leave quads on?
 // . some sort of workaround to be able to add ctf specific armors\weapons\ammo but still be dynamic
 // . ctf all id maps
@@ -241,7 +240,7 @@ void FlagTouch()
 			G_bprint( 2, "The capture took %.1f seconds\n", cflag->cnt2 );
 
         other->s.v.frags += CAPTURE_BONUS;
-		other->ctf_points += CAPTURE_BONUS;
+		other->ps.ctf_points += CAPTURE_BONUS;
         other->ps.caps++;
 	    
         // loop through all players on team to give bonus
@@ -254,7 +253,7 @@ void FlagTouch()
 	    		{
 					p->return_flag_time = -1;
 					p->s.v.frags += RETURN_ASSIST_BONUS;
-					p->ctf_points += RETURN_ASSIST_BONUS;
+					p->ps.ctf_points += RETURN_ASSIST_BONUS;
 					G_bprint( 2, "%s gets an assist for returning his flag!\n", p->s.v.netname );
 	    		}
 				if ( p->carrier_frag_time + CARRIER_ASSIST_TIME > g_globalvars.time )
@@ -268,7 +267,7 @@ void FlagTouch()
 	  			if ( p != other ) 
 				{
 					p->s.v.frags += TEAM_BONUS;
-					p->ctf_points += TEAM_BONUS;
+					p->ps.ctf_points += TEAM_BONUS;
 				}
 			}
 			else
@@ -283,7 +282,7 @@ void FlagTouch()
     else if ( self->cnt == FLAG_DROPPED )
     {
       other->s.v.frags += RETURN_BONUS;
-      other->ctf_points += RETURN_BONUS;
+      other->ps.ctf_points += RETURN_BONUS;
       other->ps.returns++;
       other->return_flag_time = g_globalvars.time;
       sound (other, CHAN_ITEM, self->s.v.noise1, 1, ATTN_NORM);

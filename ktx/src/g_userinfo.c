@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_userinfo.c,v 1.15 2006/04/24 21:25:36 qqshka Exp $
+ *  $Id: g_userinfo.c,v 1.16 2006/04/29 21:39:40 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -33,6 +33,7 @@ extern void     trap_CmdArgv( int arg, char *valbuff, int sizebuff );
 // native setinfo
 
 qboolean FixPlayerTeam ( char *newteam );
+qboolean FixPlayerColor ( char *newcolor );
 
 qboolean 	ClientUserInfoChanged ()
 {
@@ -51,6 +52,8 @@ qboolean 	ClientUserInfoChanged ()
 		return FixPlayerTeam ( arg_2 );
 	if ( streq("rate", arg_1) )
 		return CheckRate ( self, arg_2 );
+	if ( streq("bottomcolor", arg_1) )
+		return FixPlayerColor ( arg_2 );
 
 	// here a hack for support calling handler if some "cmd info" stored in user setinfo
 	if (    (old = cmdinfo_getkey( self, arg_1 )) != NULL // key is supported by "cmd info"
@@ -69,6 +72,19 @@ qboolean 	ClientUserInfoChanged ()
 		return false;
 	}
 
+	return false;
+}
+
+// in ctf we dont want red team players to be blue, etc
+qboolean FixPlayerColor ( char *newcolor )
+{
+	if ( isCTF() )
+	{
+		if ( streq(getteam(self), "red") )
+			stuffcmd( self, "color %d %d\n", iKey(self, "topcolor") == 13 ? 4 : iKey(self, "topcolor"), 4 );
+		else if ( streq(getteam(self), "blue") )
+			stuffcmd( self, "color %d %d\n", iKey(self, "topcolor") == 4 ? 13 : iKey(self, "topcolor"), 13 );
+	}
 	return false;
 }
 
@@ -129,6 +145,7 @@ qboolean FixPlayerTeam ( char *newteam )
 			stuffcmd(self, "team \"%s\"\n", s2); // sends this to client - so he get right team too
 			return true;
 		}
+		stuffcmd(self, "color %d\n", streq(s1, "red") ? 4 : 13); 
 	}
 
 	return false;

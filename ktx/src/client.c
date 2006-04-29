@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.59 2006/04/28 05:04:10 ult_ Exp $
+ *  $Id: client.c,v 1.60 2006/04/29 21:39:40 ult_ Exp $
  */
 
 //===========================================================================
@@ -2454,6 +2454,9 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	attackerteam = getteam(attacker);
 	targteam     = getteam(targ);
 
+	if ( ((int)targ->s.v.items & IT_ROCKET_LAUNCHER) && strneq( attackerteam, targteam ) )
+		attacker->ps.killed_rls++;
+
     if ( deathmatch > 3 )
     {
         if ( streq( targ->deathtype, "selfwater" ) )
@@ -2684,7 +2687,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				{
 					attacker->ps.c_frags++;
 					attacker->s.v.frags += 2;
-					attacker->ctf_points += 2;
+					attacker->ps.ctf_points += 2;
 					attacker->carrier_frag_time = g_globalvars.time;
 					//G_sprint( attacker, 1, "Enemy flag carrier killed: 2 bonus frags\n" );
 				}
@@ -2696,7 +2699,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 					carrier_bonus = true;
 					attacker->ps.c_defends++;
 					attacker->s.v.frags += 2;
-					attacker->ctf_points += 2;
+					attacker->ps.ctf_points += 2;
 					// Yes, aggressive is spelled wrong.. but dont want to fix now and break stat parsers
 					G_bprint( 2, "%s defends %s's flag carrier against an agressive enemy\n",
 						attacker->s.v.netname,
@@ -2714,7 +2717,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 						{
 							attacker->ps.c_defends++;
 							attacker->s.v.frags++;
-							attacker->ctf_points++;
+							attacker->ps.ctf_points++;
 							G_bprint( 2, "%s defends %s's flag carrier\n", attacker->s.v.netname,
 								streq(getteam(attacker), "red") ? redtext("RED") : redtext("BLUE"));
 						}
@@ -2729,7 +2732,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 						flagdefended = true;
 						attacker->ps.f_defends++;
 						attacker->s.v.frags += 2;
-						attacker->ctf_points += 2;
+						attacker->ps.ctf_points += 2;
 						G_bprint( 2, "%s defends the %s flag\n", 
 							attacker->s.v.netname, 
 							streq(getteam(attacker), "red") ? redtext("RED") : redtext("BLUE"));
@@ -2749,7 +2752,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 						{
 							attacker->ps.f_defends++;
 							attacker->s.v.frags += 2;
-							attacker->ctf_points += 2;
+							attacker->ps.ctf_points += 2;
 							G_bprint( 2, "%s defends the %s flag\n",
 								attacker->s.v.netname,
 								streq(attackerteam, "red") ? redtext("RED") : redtext("BLUE"));

@@ -1,3 +1,10 @@
+2006-04-29
+ult:
+123. Added took and killed rl stats
+		took: player took rl and did not already have one
+		killed: killed enemy who had rl (they do not have to be using it)
+	 Players can no longer change bottomcolor during ctf (must be red or blue)
+
 2006-04-27
 ult:
 122. Added new end of game stat: dropped rls

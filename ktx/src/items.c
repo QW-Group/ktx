@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.19 2006/04/28 05:04:10 ult_ Exp $
+ *  $Id: items.c,v 1.20 2006/04/29 21:39:40 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -560,6 +560,8 @@ void weapon_touch()
 		hadammo = other->s.v.ammo_rockets;
 		new = IT_ROCKET_LAUNCHER;
 		other->s.v.ammo_rockets += 5;
+		if ( !((int)other->s.v.items & IT_ROCKET_LAUNCHER) )
+			other->ps.took_rls++;
 
 	} else if ( !strcmp( self->s.v.classname, "weapon_grenadelauncher" ) )
 	{
@@ -1530,6 +1532,8 @@ void BackpackTouch()
 			G_sprint( other, PRINT_LOW, "the %s", self->s.v.netname );
 
 			mi_print(other, self->s.v.items, va("%s got backpack with %s", getname(other), self->s.v.netname));
+			if ( (int) self->s.v.items & IT_ROCKET_LAUNCHER )
+				other->ps.took_rls++;
 		}
 
 // change weapons
