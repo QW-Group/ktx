@@ -1,4 +1,4 @@
-2005-04-27
+2006-04-27
 ult:
 122. Added new end of game stat: dropped rls
      Added captures and flag defends to top scores (ctf only)
@@ -6,7 +6,7 @@ ult:
      Enhanced ctf flag defend logic
      Fixed frags, efficiency, and rank stats for ctf
 
-2005-04-25
+2006-04-25
 121. Added commands: s-p, s-r, s-l. ktpro (c)
 
 	 ------------------
@@ -33,7 +33,7 @@ ult:
 
 	 NOTES: this is a real commands, in ktpro this was "say" command extension/hack.
 
-2005-04-24 [ver 1.26]
+2006-04-24 [ver 1.26]
 120. Added commands: infolock, infospec, moreinfo. ktpro (c)
 
 	 infospec - toggle show spec info to specs ot not.
@@ -52,13 +52,13 @@ ult:
 						  // 2 - spec info sended only to admined specs
 						  // so 1+2 = 3 this mean spec info on but sended only to admined specs
 
-2005-04-23
+2006-04-23
 119. Temporally removed commands: forcepause, unpause, and removed possibility to autokpause
 	 when someone is timing. I do this because server does't have native pause which i can invoke
 	 from mod, k_pause is ugly hack which never became safe. So wait untill someone made
 	 native server pause and some API for mod.
 
-2005-04-22
+2006-04-22
 118. I rewrote command "commands" so it looks really nice now :>
 
 2006-04-20 [ver 1.25]
