@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.45 2006/04/29 21:39:40 ult_ Exp $
+ *  $Id: match.c,v 1.46 2006/04/30 16:53:56 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -484,9 +484,11 @@ void OnePlayerStats(gedict_t *p, int tp)
 		if (maxfrags < p->s.v.frags - p->ps.ctf_points)
 			maxfrags = p->s.v.frags - p->ps.ctf_points;
 	}
-	else
+	else { 
 		if (maxfrags < p->s.v.frags)
 			maxfrags = p->s.v.frags;
+	}
+
 	if (maxdeaths < p->deaths)
 		maxdeaths = p->deaths;
 	if (maxfriend < p->friendly)

@@ -1,4 +1,7 @@
 
+mil: k_allowvotebreak and k_allowvotemap
+
+
 !!!
 blood
 !!!
@@ -15,7 +18,12 @@ blood
 
 ----------------------------------------------------
 discharge cmd fix about k_dis == 2 !!!
-but seems we does't need fix about this
+
+03:42] <ult> regarding !request about k_dis 2,  i purposely didnt add this to discharge command cause i wouldnt want  a dm game to be messed up
+03:42] <ult> ppl wouldnt realize it was wrong at start
+03:42] <qqshka|RIP|RIP> right
+03:42] <qqshka|RIP|RIP> i'm understand this too
+03:43] <qqshka|RIP|RIP> otherwise we need WARN about this at match start - and this is annoying
 ----------------------------------------------------
 how we must do with q statistics and dropable quad?
 and same question about ring.

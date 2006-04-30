@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.76 2006/04/29 21:39:40 ult_ Exp $
+ *  $Id: commands.c,v 1.77 2006/04/30 16:53:56 qqshka Exp $
  */
 
 // commands.c
@@ -134,6 +134,11 @@ void moreinfo ();
 
 void s_p();
 void s_lr( float l );
+void cmdinfo();
+void cmduinfo();
+void cmd_wreg();
+
+void ClientKill();
 
 // spec
 void ShowCamHelp();
@@ -321,6 +326,10 @@ const char CD_NODESC[] = "no desc";
 #define CD_S_P			"direct player say"
 #define CD_S_L          "continue last s-p u done"
 #define CD_S_R          "reply to last s-p u got"
+#define CD_KINFO        "set self params for mod"
+#define CD_KUINFO       "examine someone params"
+#define CD_WREG         "register reliable wpns"
+#define CD_KILL         "invoke suicide"
 
 
 cmd_t cmds[] = {
@@ -517,55 +526,41 @@ cmd_t cmds[] = {
     { "moreinfo",    moreinfo,                  0    , CF_SPECTATOR | CF_MATCHLESS, CD_MOREINFO },
     { "s-p",         s_p,                       0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_S_P },
     { "s-l",         s_lr,                      1    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_S_L },
-    { "s-r",         s_lr,                      2    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_S_R }
+    { "s-r",         s_lr,                      2    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_S_R },
+    { "kinfo",       cmdinfo,                   0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_KINFO },
+    { "kuinfo",      cmduinfo,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_KUINFO },
+    { "wreg",        cmd_wreg,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_WREG },
+    { "kill",        ClientKill,                0    , CF_PLAYER | CF_MATCHLESS, CD_KILL }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
 
-//
-// DoCommand
-//
-// return -1 if command is out of range in 'cmds' array
-// return -2 if wrong class
-// return -3 if access denied
-// return -4 if function is wrong
-// return -5 if cmd does't allowed in matchLess mode
-//
-/*
-// What about:
-#define DO_OUT_OF_RANGE_CMDS			(-1)
-#define DO_WRONG_CLASS					(-2)
-#define DO_ACCESS_DENIED				(-3)
-#define DO_FUNCTION_IS_WRONG			(-4)
-#define DO_CMD_DISALLOWED_MATCHLESS		(-5)
-// ?
-*/
 int DoCommand(int icmd)
 {
 	int spc = self->k_spectator;
 	int adm = (int) self->k_admin;
 
 	if ( !( icmd >= 0 && icmd < cmds_cnt ) )
-		return -1;
+		return DO_OUT_OF_RANGE_CMDS;
 
 	if ( k_matchLess && !(cmds[icmd].cf_flags & CF_MATCHLESS) )
-		return -5; // cmd does't allowed in matchLess mode
+		return DO_CMD_DISALLOWED_MATCHLESS; // cmd does't allowed in matchLess mode
 
 	if ( spc ) { // spec
 		if ( !(cmds[icmd].cf_flags & CF_SPECTATOR) )
-			return -2; // cmd not for spectator
+			return DO_WRONG_CLASS; // cmd not for spectator
 		if ( (cmds[icmd].cf_flags & CF_SPC_ADMIN) && adm != 2 )
-			return -3; // admin rights required
+			return DO_ACCESS_DENIED; // admin rights required
 	}
 	else { // player
 		if ( !(cmds[icmd].cf_flags & CF_PLAYER) )
-			return -2; // cmd not for player
+			return DO_WRONG_CLASS; // cmd not for player
 		if ( (cmds[icmd].cf_flags & CF_PLR_ADMIN) && adm != 2 )
-			return -3; // admin rights required
+			return DO_ACCESS_DENIED; // admin rights required
 	}
 
 	if ( strnull( cmds[icmd].name ) || !( cmds[icmd].f ) )
-		return -4;
+		return DO_FUNCTION_IS_WRONG;
 
 	if (cmds[icmd].arg)
 		( ( void ( * )(float) ) ( cmds[icmd].f ) ) ( cmds[icmd].arg );
@@ -574,21 +569,22 @@ int DoCommand(int icmd)
 
 	return icmd;
 }
-// VVD: Need for executing commands by 'cmd cc <CMD_NAME> <ARG1> ... <ARGn>',
+
+// VVD: Need for executing commands by 'cmd <CMD_NAME> <ARG1> ... <ARGn>',
 // because '<CMD_NAME> <ARG1> ... <ARGn>' work only with last ezQuake qw client.
 int DoCommand_Name(char *cmd_name)
 {
 	int i;
 
 	if ( strnull( cmd_name ) )
-		return -1;
+		return DO_OUT_OF_RANGE_CMDS;
 
-	for (i = 0; i < cmds_cnt; ++i) {
-		if (!strcmp(cmds[i].name, cmd_name)) {
-			return DoCommand(i);
-		}
+	for ( i = 0; i < cmds_cnt; ++i ) {
+		if ( streq(cmds[i].name, cmd_name) )
+			return DoCommand( i );
 	}
-	return -1;
+
+	return DO_OUT_OF_RANGE_CMDS;
 }
 
 // check if players client support params in aliases
@@ -617,12 +613,6 @@ void StuffAliases()
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias notready break\n");
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias kfjump \"impulse 156;+jump;wait;-jump\"\n");
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias krjump \"impulse 164;+jump;wait;-jump\"\n");
-	}
-
-	// stuff to both - player and spec
-	if ( isSupport_Params( PROG_TO_EDICT( self->s.v.owner ) ) ) {
-		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias kinfo cmd info %%1 %%2\n");
-		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias kuinfo cmd uinfo %%1 %%2\n");
 	}
 }
 
@@ -704,7 +694,7 @@ void StuffModCommands()
 
 		params = ( (cmds[i].cf_flags & CF_PARAMS) && support_params ) ? " %0" : "";
 
-		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias %s cmd cc %d%s\n", name, (int)i, params);
+		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias %s cmd %03d%s\n", name, (int)i, params);
 	}
 
 	if( i <= limit /* all commands is stuffed */ )
@@ -3063,12 +3053,12 @@ void hdptoggle ()
 
 void handicap ()
 {
-	char arg_3[1024];
+	char arg_2[1024];
 	int hdc = GetHandicap(self);
 
-	if (trap_CmdArgc() == 3) {
-		trap_CmdArgv( 2, arg_3, sizeof( arg_3 ) );
-		hdc = atoi(arg_3);
+	if ( trap_CmdArgc() == 2 ) {
+		trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
+		hdc = atoi(arg_2);
 	}
 	else if ( hdc > 85 )
 		hdc = 85;
@@ -3094,7 +3084,7 @@ void show_disallowed_weapons( int k_disallow_weapons )
 
 void noweapon ()
 {
-	char arg_3[1024];
+	char arg_2[1024];
 	int	k_disallow_weapons = (int)cvar("k_disallow_weapons") & DA_WPNS;
 
 	if ( match_in_progress ) {
@@ -3111,33 +3101,33 @@ void noweapon ()
 		return;
 	}
 
-	if ( trap_CmdArgc() == 2 ) { // no arguments, show info and return
+	if ( trap_CmdArgc() == 1 ) { // no arguments, show info and return
 		show_disallowed_weapons( k_disallow_weapons );
 		return;
 	}
 
 	// one argument
-	if (trap_CmdArgc() == 3) {
+	if ( trap_CmdArgc() == 2 ) {
 		char *nwp = NULL;
 		int bit = 0;
 
-		trap_CmdArgv( 2, arg_3, sizeof( arg_3 ) );
+		trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
 
-		if ( streq( nwp = "axe", arg_3 ) )
+		if ( streq( nwp = "axe", arg_2 ) )
 			k_disallow_weapons ^= bit = IT_AXE;
-		else if ( streq( nwp = "sg", arg_3 ) )
+		else if ( streq( nwp = "sg", arg_2 ) )
 			k_disallow_weapons ^= bit = IT_SHOTGUN;
-		else if ( streq( nwp = "ssg", arg_3 ) )
+		else if ( streq( nwp = "ssg", arg_2 ) )
 			k_disallow_weapons ^= bit = IT_SUPER_SHOTGUN;
-		else if ( streq( nwp = "ng", arg_3 ) )
+		else if ( streq( nwp = "ng", arg_2 ) )
 			k_disallow_weapons ^= bit = IT_NAILGUN;
-		else if ( streq( nwp = "sng", arg_3 ) )
+		else if ( streq( nwp = "sng", arg_2 ) )
 			k_disallow_weapons ^= bit = IT_SUPER_NAILGUN;
-		else if ( streq( nwp = "gl", arg_3 ) )
+		else if ( streq( nwp = "gl", arg_2 ) )
 			k_disallow_weapons ^= bit = IT_GRENADE_LAUNCHER;
-		else if ( streq( nwp = "rl", arg_3 ) )
+		else if ( streq( nwp = "rl", arg_2 ) )
 			k_disallow_weapons ^= bit = IT_ROCKET_LAUNCHER;
-		else if ( streq( nwp = "lg", arg_3 ) )
+		else if ( streq( nwp = "lg", arg_2 ) )
 			k_disallow_weapons ^= bit = IT_LIGHTNING;
 
 		if ( bit ) {
@@ -3146,7 +3136,7 @@ void noweapon ()
 			trap_cvar_set_float( "k_disallow_weapons", k_disallow_weapons );
 		}
 		else {
-			G_sprint(self, 2, "unknown weapon name %s\n", redtext(arg_3));
+			G_sprint(self, 2, "unknown weapon name %s\n", redtext(arg_2));
 		}
 		return;
 	}
@@ -3647,11 +3637,13 @@ void next_pow ()
 // parse pos_show/pos_save/pos_move <number>
 int Pos_Get_idx()
 {
-	char arg_3[1024];
-	if (trap_CmdArgc() == 3) {
-		trap_CmdArgv( 2, arg_3, sizeof( arg_3 ) );
-		return bound( 0, atoi(arg_3) - 1, MAX_POSITIONS - 1 );
+	char arg_2[1024];
+
+	if ( trap_CmdArgc() == 2 ) {
+		trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
+		return bound( 0, atoi(arg_2) - 1, MAX_POSITIONS - 1 );
 	}
+
 	return 0;
 }
 // Show functions
@@ -3773,8 +3765,9 @@ void Pos_Parse_Set (vec3_t *x)
 	int i;
 
 	for (i = 0; i < 3; ++i) {
-		trap_CmdArgv( i + 2, arg, sizeof( arg ) );
-		if (strcmp(arg, "*"))
+		trap_CmdArgv( i + 1, arg, sizeof( arg ) );
+
+		if ( strneq(arg, "*") )
 			(*x)[i] = atof(arg);
 	}
 }
@@ -3790,8 +3783,9 @@ void Pos_Set (float set_type)
 	if ( Pos_Disallowed() ) 
 		return;
 
-	if (trap_CmdArgc() != 5) {
-		G_sprint(self, 2, "Usage: pos_set_{origin|angles"/*|velocity*/"} x1 x2 x3\nuse '*' for no changes\n");
+	if ( trap_CmdArgc() != 4 ) {
+		G_sprint(self, 2, "Usage: pos_set_{origin|angles"/*|velocity*/"} x1 x2 x3\n"
+						  "use '*' for no changes\n");
 		return;
 	}
 
@@ -3869,21 +3863,23 @@ void krnd ()
 	if( check_master() )
 		return;
 
-	if ( ( argc = trap_CmdArgc() ) < 3 ) {
+	if ( ( argc = trap_CmdArgc() ) < 2 ) {
 		G_sprint(self, 2, "usage: rnd <1st 2nd ...>\n");
 		return;
 	}
 	
-	for( buf[0] = '\x90', buf[1] = 0, i = 2; i < argc; i++ ) {
+	for( buf[0] = 0, i = 1; i < argc; i++ ) {
 		trap_CmdArgv( i, arg_x, sizeof( arg_x ) );
+
 		strlcat(buf, arg_x, sizeof(buf));
-		strlcat(buf, ( i + 1 < argc ? ", " : "\x91" ), sizeof(buf));
+		strlcat(buf, ( i + 1 < argc ? ", " : "" ), sizeof(buf));
 	}
 
 	G_bprint(2, "%s %s %s:\n"
-				"%s\n", redtext("Random select by"), getname( self ), redtext("from"), buf );
+				"\x90%s\x91\n", redtext("Random select by"), getname( self ), redtext("from"),
+					buf );
 
-	trap_CmdArgv( i_rnd(2, argc-1) , arg_x, sizeof( arg_x ) );
+	trap_CmdArgv( i_rnd(1, argc-1) , arg_x, sizeof( arg_x ) );
 
 	G_bprint(2, "selected: \x90%s\x91\n", arg_x);
 }
@@ -4194,19 +4190,20 @@ void s_p()
 {
 	int argc = trap_CmdArgc(), i;
 	gedict_t *p;
-	char arg_3[1024], arg_x[1024], buf[1024];
+	char arg_2[1024], arg_x[1024], buf[1024];
 
-	if ( argc < 4 ) {
+	if ( argc < 3 ) {
 		G_sprint(self, 2, "usage: s-p id/name txt\n");
 		return;
 	}
 
-	trap_CmdArgv( 2, arg_3, sizeof( arg_3 ) );
+	trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
 
-	if ( (p = SpecPlayer_by_IDorName( arg_3 )) ) {
+	if ( (p = SpecPlayer_by_IDorName( arg_2 )) ) {
 
-		for( buf[0] = 0, i = 3; i < argc; i++ ) {
+		for( buf[0] = 0, i = 2; i < argc; i++ ) {
 			trap_CmdArgv( i, arg_x, sizeof( arg_x ) );
+
 			strlcat( buf,   " ", sizeof( buf ) );
 			strlcat( buf, arg_x, sizeof( buf ) );
 		}
@@ -4214,7 +4211,7 @@ void s_p()
 		s_common( self, p, buf );
 	}
 	else {
-		G_sprint(self, 2, "s-p: client %s not found\n", arg_3);
+		G_sprint(self, 2, "s-p: client %s not found\n", arg_2);
 		return;
 	}
 }
@@ -4226,7 +4223,7 @@ void s_lr( float l )
 	gedict_t *p;
 	char arg_x[1024], buf[1024];
 
-	if ( argc < 3 ) {
+	if ( argc < 2 ) {
 		G_sprint(self, 2, "usage: %s txt\n", ( l == 1 ? "s-l" : "s-r" ));
 		return;
 	}
@@ -4235,7 +4232,7 @@ void s_lr( float l )
 
 	if ( p && GetUserID( p ) ) {
 
-		for( buf[0] = 0, i = 2; i < argc; i++ ) {
+		for( buf[0] = 0, i = 1; i < argc; i++ ) {
 			trap_CmdArgv( i, arg_x, sizeof( arg_x ) );
 			strlcat( buf,   " ", sizeof( buf ) );
 			strlcat( buf, arg_x, sizeof( buf ) );
@@ -4261,6 +4258,218 @@ void s_lr_clear( gedict_t *dsc )
 
 		if ( p->s_last_from == dsc )
 			p->s_last_from = NULL;
+	}
+}
+
+// }
+
+// { wreg
+
+void wreg_usage()
+{
+	G_sprint(self, 2, "usage: cmd wreg [[char] [[+/-]weapon order]]\n");
+}
+
+void wreg_showslot(	wreg_t *w, int slot )
+{
+	int i;
+	char *sign, order[MAX_WREG_IMP+1];
+
+	if ( !w->init ) {
+		G_sprint(self, 2, "slot \"%c\" - unregistered\n", (char)slot);
+		return;
+	}
+
+	sign = "";
+	if (w->attack > 0 )
+		sign = "+";
+	else if (w->attack < 0 )
+		sign = "-";
+
+	for ( order[0] = i = 0; i < MAX_WREG_IMP && w->impulse[i]; i++ )
+		order[i] = '0' + w->impulse[i];
+	order[i] = 0;
+
+	G_sprint(self, 2, "slot \"%c\" - \"%s%s\"\n", (char)slot, sign, order);
+}
+
+int only_digits(const char *s);
+
+void cmd_wreg()
+{
+	int		argc = trap_CmdArgc(), attack = 0, imp[MAX_WREG_IMP], i, cnt;
+	char	arg_1[64], arg_2[64], *tmp = arg_2;
+	byte    c;
+	wreg_t  *w;
+
+	if ( !self->wreg )
+		return;
+
+	if ( argc == 1 ) {
+		qboolean found = false;
+
+		G_sprint(self, 2, "list of registered weapons:\n");
+
+		for ( i = 0; i < MAX_WREGS; i++ ) {
+			w = &(self->wreg[i]);
+			if ( !w->init )
+				continue;
+
+			found = true;
+			wreg_showslot( w, i );
+		}
+
+		if ( !found )
+			G_sprint(self, 2, "none\n");
+
+		return;
+	}
+
+	trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
+
+	if ( strnull(arg_1) ) {
+		wreg_usage();
+		G_sprint(self, 2, "empty char\n");
+		return;
+	}
+
+	if ( strlen(arg_1) > 1 ) {
+		wreg_usage();
+		G_sprint(self, 2, "char can be only one byte\n");
+		return;
+	}
+
+	c = arg_1[0];
+
+	if ( c <= 0 || c > 175 || c >= MAX_WREGS ) {
+		wreg_usage();
+		G_sprint(self, 2, "\"%c\" - illegal char!\n", (char)c);
+		return;
+	}
+
+	w = &(self->wreg[c]);
+
+	if ( argc == 2 ) {
+		wreg_showslot( w, c );
+		return;
+	}
+
+	if ( argc != 3 ) {
+		wreg_usage();
+		return; // something wrong
+	}
+
+	trap_CmdArgv( 2, arg_2, sizeof( arg_2 ) );
+
+	if ( strnull(arg_2) ) {
+		if ( w->init ) {
+			memset( w, 0, sizeof( wreg_t ) ); // clear
+			w->init = false;
+			G_sprint(self, 2, "slot \"%c\" - unregistered\n", (char)c);
+		}
+		else {
+			wreg_usage();
+			G_sprint(self, 2, "empty weapon order\n");
+		}
+		return;
+	}
+
+	for ( cnt = i = 0; i < MAX_WREGS; i++ ) {
+		if ( !(self->wreg[i].init) )
+			continue;
+
+		if ( ++cnt >= 20 ) {
+			G_sprint(self, 2, "too many wregs, discard registration\n");
+			return;
+		}
+	}
+
+	if ( strlen(arg_2) > 10 ) { // 10 == strlen("+987654321")
+		wreg_usage();
+		G_sprint(self, 2, "too long weapon order\n");
+		return;
+	}
+
+	if ( tmp[0] == '+' ) {
+		tmp++;
+		attack = 1;
+	}
+	else if ( tmp[0] == '-' ) {
+		tmp++;
+		attack = -1;
+	}
+
+	if ( !strnull( tmp ) && !only_digits( tmp ) ) {
+		wreg_usage();
+		G_sprint(self, 2, "illegal character in weapon order\n");
+		return;
+	}
+
+	for ( i = 0; i < MAX_WREG_IMP && !strnull(tmp); tmp++ ) {
+		if ( tmp[0] == '0' ) // do not confuse with '\0'
+			continue;
+
+		imp[i] = tmp[0] - '0';
+		i++;
+	}
+
+	// ok we parse wreg command, and all ok, init it
+	memset( w, 0, sizeof( wreg_t ) ); // clear
+
+	w->init   = true;
+	w->attack = attack;
+
+	for ( i--; i >= 0 && i < MAX_WREG_IMP; i-- )
+		w->impulse[i] = imp[i];
+
+	G_sprint(self, 2, "slot \"%c\" - registered\n", (char)c);
+}
+
+void cmd_wreg_do( byte c )
+{
+	qboolean warn;
+	int j;
+	wreg_t *w;
+
+	if ( !self->wreg || c >= MAX_WREGS )
+		return;
+
+	w = &(self->wreg[c]);
+
+	if ( !w->init ) {
+		G_sprint(self, 2, "unregistered wreg char - \"%c\"\n", (char)c);
+		return;
+	}
+
+//	G_sprint(self, 2, "wreg char - %c, i - %d %d %d\n", (char)c, w->impulse[0], w->impulse[1], w->impulse[2]);
+
+	if ( w->attack > 0 ) {
+		self->wreg_attack = 1;
+
+		if( self->k_spectator )
+			stuffcmd(self, "+attack\n");
+	}
+	else if ( w->attack < 0 ) {
+		self->wreg_attack = 0;
+
+		if( self->k_spectator )
+			stuffcmd(self, "-attack\n");
+	}
+
+	if( self->k_spectator )
+		return;
+
+	for ( j = 0; j < MAX_WREG_IMP && w->impulse[j]; j++ ) {
+
+		if ( j + 1 >= MAX_WREG_IMP || !w->impulse[j + 1] )
+			warn = true; // warn about no weapon or ammo if this last impulse in array
+		else
+			warn = false;
+
+		if ( W_CanSwitch( w->impulse[j], warn ) ) {
+			self->s.v.impulse = w->impulse[j];
+			return;
+		}
 	}
 }
 

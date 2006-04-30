@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.25 2006/04/18 22:17:17 qqshka Exp $
+ * $Id: admin.c,v 1.26 2006/04/30 16:53:56 qqshka Exp $
  */
 
 // admin.c
@@ -217,13 +217,13 @@ void ReqAdmin ()
     }
 	
 	// parse /admin <pass>
-	if (trap_CmdArgc() == 3) {
-		char arg_3[1024];
+	if ( trap_CmdArgc() == 2 ) {
+		char arg_2[1024];
 		char *pass = cvar_string( "k_admincode" );
 
-		trap_CmdArgv( 2, arg_3, sizeof( arg_3 ) );
+		trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
 
-		if ( !strnull(pass) && streq(arg_3, pass) )
+		if ( !strnull(pass) && strneq(pass, "none") && streq(arg_2, pass) )
 			BecomeAdmin(self);
 		else
             G_sprint(self, 2, "%s...\n", redtext("Access denied"));

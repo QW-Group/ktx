@@ -14,11 +14,12 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_userinfo.c,v 1.16 2006/04/29 21:39:40 ult_ Exp $
+ *  $Id: g_userinfo.c,v 1.17 2006/04/30 16:53:56 qqshka Exp $
  */
 
 #include "g_local.h"
 
+qboolean isSupport_Params(gedict_t *p);
 
 #define isSysKey( key ) ( !strnull(key) && *(key) == '*' )
 extern cmdinfo_t cinfos[];
@@ -283,7 +284,10 @@ void cmdinfo ()
 	if ( argc == 1 || argc > 3 ) { // just show info about all keys and usage
 		int i;
 
-		G_sprint(self, 2, "usage: cmd info [<key> [value] (\"\\\" for removing key)]\n\n");
+		if ( isSupport_Params( self ) )
+			G_sprint(self, 2, "usage: kinfo [<key> [value] (\"\\\" for removing key)]\n\n");
+		else
+			G_sprint(self, 2, "usage: cmd info [<key> [value] (\"\\\" for removing key)]\n\n");
 
 		for ( i = 0; i < cinfos_cnt; i++ ) {
 			
@@ -341,7 +345,11 @@ void cmduinfo ()
 
 	if ( argc == 1 || argc > 3 ) { // just show info about usage
 
-		G_sprint(self, 2, "usage: cmd uinfo <id/name> [key]\n");
+		if ( isSupport_Params( self ) )
+			G_sprint(self, 2, "usage: kuinfo <id/name> [key]\n");
+		else
+			G_sprint(self, 2, "usage: cmd uinfo <id/name> [key]\n");
+
 		return;
 	}
 

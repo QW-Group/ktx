@@ -1,3 +1,16 @@
+2006-04-30 [ver 1.27]
+qq:  
+124. I made some fix to mod, so now fuhQuake/mqwcl users will be happy.
+
+	 As u may know aliases with params supported by ezQuake only. fuhQuake, mqwcl and Zquake
+	 does't support such aliases. ezQuake users may use for example "/rnd dm6 dm4",
+	 other clients users can't do this, they must do "/cmd rnd dm4 dm6" instead, in previous
+	 versions of KTX they must use "/cmd cc rnd dm4 dm6" and this "cc" was ugly and uncompatible
+	 with ktpro.
+
+	 NOTES: kinfo  = /cmd kinfo  = /cmd info,  last saved for compatibility with ktpro
+			kuinfo = /cmd kuinfo = /cmd uinfo, last saved for compatibility with ktpro
+
 2006-04-29
 ult:
 123. Added took and killed rl stats

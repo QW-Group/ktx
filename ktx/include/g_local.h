@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.53 2006/04/27 22:40:22 qqshka Exp $
+ *  $Id: g_local.h,v 1.54 2006/04/30 16:53:55 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -36,7 +36,7 @@
 #include "g_syscalls.h"
 #include "player.h"
 
-#define MOD_VERSION					("1.26")
+#define MOD_VERSION					("1.27")
 #define MOD_NAME					("KTX")
 #define MOD_SERVERINFO_MOD_KEY		("xmod")
 #define MOD_SERVERINFO_BUILD_KEY	("xbuild")
@@ -435,6 +435,16 @@ typedef struct cmd_s {
 extern cmd_t cmds[];
 
 extern int cmds_cnt; // count of commands in 'cmds'
+
+//
+// DoCommand/DoCommand_Name return codes
+// return non-negative value if command success
+// 
+#define DO_OUT_OF_RANGE_CMDS			(-1) // if command is out of range in 'cmds' array
+#define DO_WRONG_CLASS					(-2) // if wrong class
+#define DO_ACCESS_DENIED				(-3) // if access denied
+#define DO_FUNCTION_IS_WRONG			(-4) // if function is wrong
+#define DO_CMD_DISALLOWED_MATCHLESS		(-5) // if cmd does't allowed in matchLess mode
 
 int DoCommand(int icmd);
 int DoCommand_Name(char *cmd_name);
