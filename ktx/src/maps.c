@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: maps.c,v 1.9 2006/04/18 22:17:17 qqshka Exp $
+ *  $Id: maps.c,v 1.10 2006/05/01 14:22:17 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -191,6 +191,11 @@ void SelectMap()
 	}
 
 	if ( k_matchLess ) {
+		if ( cvar("k_no_vote_map") ) {
+			G_sprint(self, 2, "Voting map is %s allowed\n", redtext("not"));
+			return;
+		}
+
 		if ( match_in_progress != 2 )
 			return; // u can select map in matchLess mode, but not in countdown
 	}

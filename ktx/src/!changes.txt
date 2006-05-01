@@ -1,3 +1,14 @@
+2006-05-01
+qq:
+125. Added cvars:
+
+     For matchless mode only!
+
+	 set k_no_vote_break 0 // 0 - players may vote for match break
+						   // 1 - can't
+     set k_no_vote_map   0 // 0 - players may vote for map change
+						   // 1 - can't
+
 2006-04-30 [ver 1.27]
 qq:  
 124. I made some fix to mod, so now fuhQuake/mqwcl users will be happy.
@@ -14,8 +25,9 @@ qq:
 2006-04-29
 ult:
 123. Added took and killed rl stats
-		took: player took rl and did not already have one
-		killed: killed enemy who had rl (they do not have to be using it)
+	   took: player took rl and did not already have one
+	 killed: killed enemy who had rl (they do not have to be using it)
+
 	 Players can no longer change bottomcolor during ctf (must be red or blue)
 
 2006-04-27

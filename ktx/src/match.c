@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.46 2006/04/30 16:53:56 qqshka Exp $
+ *  $Id: match.c,v 1.47 2006/05/01 14:22:17 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1913,6 +1913,12 @@ void PlayerBreak ()
 
 	if( !self->ready || intermission_running )
 		return;
+
+	if ( k_matchLess )
+	if ( cvar("k_no_vote_break") ) {
+		G_sprint(self, 2, "Voting break is %s allowed\n", redtext("not"));
+		return;
+	}
 
 	if( !match_in_progress ) {
 		self->ready = 0;

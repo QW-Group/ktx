@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.37 2006/04/23 21:54:30 qqshka Exp $
+ *  $Id: world.c,v 1.38 2006/05/01 14:22:17 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -598,12 +598,15 @@ void FirstFrame	( )
 	RegisterCvar("add_q_aerowalk");
 	RegisterCvar("k_noframechecks");
 	RegisterCvar("dmm4_invinc_time");
+// removed
 //	RegisterCvar("rj");
 	RegisterCvar("k_no_fps_physics");
 //{ ctf
 	RegisterCvar("k_ctf_custom_models");
 //}
 	RegisterCvar("k_spec_info");
+	RegisterCvar("k_no_vote_break");
+	RegisterCvar("k_no_vote_map");
 
 	RegisterCvar("_k_captteam1"); // internal mod usage
 	RegisterCvar("_k_captcolor1"); // internal mod usage
@@ -630,7 +633,7 @@ void FirstFrame	( )
 
 // <<<
 
-	// beload globals changed only here
+	// below globals changed only here
 
 	k_matchLess = cvar( "k_matchless" );
 	k_allowed_free_modes = cvar( "k_allowed_free_modes" );
