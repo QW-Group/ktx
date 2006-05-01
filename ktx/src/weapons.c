@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.28 2006/04/23 12:03:22 qqshka Exp $
+ *  $Id: weapons.c,v 1.29 2006/05/01 23:11:59 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1221,7 +1221,7 @@ void W_Attack()
 
 	// FIXME: 4096 and 1048576 ?
 	self->lastwepfired = self->s.v.weapon;
-	if (self->k_666 && !(self->s.v.weapon == 4096 || self->s.v.weapon == 1)) {
+	if (self->k_666 == 1 && !(self->s.v.weapon == 4096 || self->s.v.weapon == 1)) {
 		self->s.v.items = self->s.v.items - ((int)self->s.v.items & 1048576);
 		self->invincible_time = 0;
 		self->invincible_finished = 0;

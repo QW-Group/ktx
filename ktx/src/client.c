@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.60 2006/04/29 21:39:40 ult_ Exp $
+ *  $Id: client.c,v 1.61 2006/05/01 23:11:59 qqshka Exp $
  */
 
 //===========================================================================
@@ -994,6 +994,7 @@ void PutClientInServer()
 	self->invincible_finished = 0;
 	self->s.v.effects = 0;
 	self->spawn_time = g_globalvars.time;
+	self->k_666 = 0;
         
 // the spawn falling damage bug workaround
 	self->jump_flag = 0;
@@ -1146,6 +1147,9 @@ void PutClientInServer()
 		self->s.v.health = 250;
 
 		if ( dmm4_invinc_time > 0 ) {
+
+			self->k_666 = (self->k_666 ? self->k_666 : 2); // may be already set by cvar( "k_666" ) )
+
 			items |= IT_INVULNERABILITY;
 			self->invincible_time = 1;
 			self->invincible_finished = g_globalvars.time + dmm4_invinc_time;
@@ -2092,11 +2096,13 @@ Check for turning off powerups
 */
 void CheckPowerups()
 {
-	qboolean qlon = false;
-	qboolean plon = false;
+	qboolean dim = false;
 
 	if ( ISDEAD( self ) )
 		return;
+
+	if ( self->ctf_flag & CTF_FLAG )
+		dim = true;
 
 // invisibility
 	if ( self->invisible_finished )
@@ -2143,7 +2149,7 @@ void CheckPowerups()
 	if ( self->invincible_finished )
 	{
 // sound and screen flash when items starts to run out
-		if(self->invincible_finished < g_globalvars.time + 3 && !self->k_666)	//team
+		if(self->invincible_finished < g_globalvars.time + 3 && (!self->k_666 || self->k_666 == 2))	//team
 		{
 			if ( self->invincible_time == 1 )
 			{
@@ -2170,17 +2176,13 @@ void CheckPowerups()
 
 		if(self->invincible_finished > g_globalvars.time && !self->k_666) // KTeAMS
 		{
-			plon = true;
+			dim = true;
 			self->s.v.effects = ( int ) self->s.v.effects | EF_DIMLIGHT;
 			self->s.v.effects = ( int ) self->s.v.effects | EF_RED;
 		}
-        else if ( self->ctf_flag & CTF_FLAG )
-		{
-	        self->s.v.effects -= ( ( int ) self->s.v.effects & EF_RED );
-		}
 		else
 		{
-			if ( !qlon ) // EF_DIMLIGHT shared between quad and pent
+			if ( !dim ) // EF_DIMLIGHT shared between quad, pent and CTF-flag
 				self->s.v.effects -= ( ( int ) self->s.v.effects & EF_DIMLIGHT );
 			self->s.v.effects -= ( ( int ) self->s.v.effects & EF_RED );
 		}
@@ -2226,17 +2228,13 @@ void CheckPowerups()
 
 		if ( self->super_damage_finished > g_globalvars.time )
 		{
-			qlon = true;
+			dim = true;
 			self->s.v.effects = ( int ) self->s.v.effects | EF_DIMLIGHT;
 			self->s.v.effects = ( int ) self->s.v.effects | EF_BLUE;
 		}
-		else if ( self->ctf_flag & CTF_FLAG )
-		{
-			self->s.v.effects -= ( ( int ) self->s.v.effects & EF_BLUE );
-		}
 		else
 		{
-			if ( !plon ) // EF_DIMLIGHT shared between quad and pent
+			if ( !dim ) // EF_DIMLIGHT shared between quad, pent and CTF-flag
 				self->s.v.effects -= ( ( int ) self->s.v.effects & EF_DIMLIGHT );
 			self->s.v.effects -= ( ( int ) self->s.v.effects & EF_BLUE );
 		}

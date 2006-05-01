@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.20 2006/04/29 21:39:40 ult_ Exp $
+ *  $Id: items.c,v 1.21 2006/05/01 23:11:59 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1282,6 +1282,8 @@ void powerup_touch()
 	}
 	else if ( streq( self->s.v.classname, "item_artifact_invulnerability" ) )
 	{
+		other->k_666 = 0; // qqshka: mark we have native pent
+
 		other->ps.pent++;
 		other->invincible_time = 1;
 		other->invincible_finished = g_globalvars.time + 30;

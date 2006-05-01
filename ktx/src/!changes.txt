@@ -1,3 +1,7 @@
+2006-05-02
+qq:
+126. Fixing pent glowing in dmm4.
+
 2006-05-01
 qq:
 125. Added cvars:
