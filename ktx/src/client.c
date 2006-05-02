@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.61 2006/05/01 23:11:59 qqshka Exp $
+ *  $Id: client.c,v 1.62 2006/05/02 21:32:10 qqshka Exp $
  */
 
 //===========================================================================
@@ -36,7 +36,7 @@ vec3_t          VEC_HULL2_MIN = { -32, -32, -24 };
 vec3_t          VEC_HULL2_MAX = { 32, 32, 64 };
 int             modelindex_eyes, modelindex_player;
 
-
+qboolean can_prewar( qboolean fire );
 float CountALLPlayers();
 void IdlebotCheck();
 void CheckAll();
@@ -1301,6 +1301,9 @@ void PlayerJump()
 //	self->s.v.button2 = 0;
 
 	self->was_jump = true;
+
+	if ( !can_prewar( false ) )
+		self->s.v.velocity[2] = -270;
 
 // check the flag and jump if we can
     if ( !self->brokenankle )

@@ -2,6 +2,12 @@
 qq:
 126. Fixing pent glowing in dmm4.
 
+127. Ok, k_prewar work like it must regarding ktpro docs.
+
+	 set k_prewar 1 // 0 - players can't fire but can jump
+					// 1 - players can fire and jump
+					// 2 - players can fire or jump when ready
+
 2006-05-01
 qq:
 125. Added cvars:

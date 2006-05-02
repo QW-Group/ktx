@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.26 2006/04/30 16:53:56 qqshka Exp $
+ * $Id: admin.c,v 1.27 2006/05/02 21:32:10 qqshka Exp $
  */
 
 // admin.c
@@ -521,45 +521,54 @@ void AdminForceBreak ()
     EndMatch( 0 );
 }
 
+void PlayersStopFire()
+{
+    gedict_t *p;
+
+	for( p = world; p = find(p, FOFCLSN, "player"); ) {
+        stuffcmd(p, "-attack\n");
+		self->wreg_attack = 0;
+	}
+}
+
 void TogglePreWar ()
 {
-    gedict_t *p = world;
-    float tmp;
+    int k_prewar = bound(0, cvar( "k_prewar" ), 2);
 
     if( self->k_admin != 2 )
         return;
 
-    tmp = cvar( "k_prewar" );
+	if ( ++k_prewar > 2 )
+		k_prewar = 0;
 
-    if( tmp )
-    {
-		cvar_fset( "k_prewar", 0 );
+	switch ( k_prewar ) {
+		case  1: if( !match_in_progress )
+					G_bprint(2, "Players may fire before match\n");
+				 else
+					G_sprint(self, 2, "Players may fire before match\n");
 
-        if( !match_in_progress )
-        {
-            G_bprint(2, "Players may ξοτ fire before match!\n");
+				 break;
+		
+		case  2: if ( !match_in_progress ) {
+            		G_bprint(2, "Players may fire and jump when %s\n", redtext("ready"));
+					PlayersStopFire();
+				 }
+				 else
+					G_sprint(self, 2, "Players may fire and jump when %s\n", redtext("ready"));
 
-            p = find(p, FOFCLSN, "player");
-            while( p )
-            {
-                if( !strnull ( p->s.v.netname ) )
-                    stuffcmd(p, "-attack\n");
+				 break;
+		case  0:
+		default: if ( !match_in_progress ) {
+            		G_bprint(2, "Players may %s fire before match\n", redtext("not"));
+					PlayersStopFire();
+				 }
+				 else
+					G_sprint(self, 2, "Players may %s fire before match\n", redtext("not"));
 
-                p = find(p, FOFCLSN, "player");
-            }
-        }
-        else
-            G_sprint(self, 2, "Players may ξοτ fire before match!\n");
+				 break;
+	}
 
-        return;
-    }
-
-	cvar_fset( "k_prewar", 1 );
-
-    if( !match_in_progress )
-        G_bprint(2, "Players may fire before match.\n");
-    else
-        G_sprint(self, 2, "Players may fire before match.\n");
+	cvar_fset( "k_prewar", k_prewar );
 }
 
 void ToggleMapLock ()

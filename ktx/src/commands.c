@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.77 2006/04/30 16:53:56 qqshka Exp $
+ *  $Id: commands.c,v 1.78 2006/05/02 21:32:10 qqshka Exp $
  */
 
 // commands.c
@@ -1231,6 +1231,14 @@ void ModStatus2()
 							 Allowed(cvar( "k_allowvoteadmin" )));
 
 	G_sprint(self, 2, "%s: %s\n", redtext("Check frametimes"), Enabled( framechecks ));
+
+	switch ( (int)cvar("k_prewar") ) {
+		case  1: ot = "players may fire before match"; break;
+		case  2: ot = "players may fire and jump when ready"; break;
+		case  0:
+		default: ot = "players may not fire before match"; break;
+	}
+	G_sprint(self, 2, "%s: %s\n", redtext("Prewar"), ot);
 }
 
 void ModStatusVote()

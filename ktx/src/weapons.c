@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.29 2006/05/01 23:11:59 qqshka Exp $
+ *  $Id: weapons.c,v 1.30 2006/05/02 21:32:10 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1772,6 +1772,62 @@ void ImpulseCommands()
 	self->s.v.impulse = impulse = 0;
 }
 
+void can_prewar_msg( char *msg )
+{
+	if( g_globalvars.time > self->k_msgcount ) {
+		self->k_msgcount = g_globalvars.time + 1;
+
+		stuffcmd( self, "bf\n" );
+		G_sprint( self, 2, "%s\n", msg);
+	}
+}
+
+
+// if fire == false then can_prewar is called for jump
+qboolean can_prewar ( qboolean fire )
+{
+	int k_prewar;
+
+	if ( match_in_progress == 2 )
+		return true;  // u can fire/jump
+
+	k_prewar = cvar( "k_prewar" );
+
+	switch ( k_prewar ) {
+		case  1: goto captains; // probably u can fire/jump
+
+		case  2: if ( self->ready )
+					goto captains; // probably u can jump/fire if ready
+
+				 if ( fire )
+					 can_prewar_msg(redtext("type ready to enable fire"));
+				 else
+					 can_prewar_msg(redtext("type ready to enable jumps"));
+
+				 return false; // u can't fire/jump if _not_ ready
+
+		case  0:
+		default: if ( fire ) {  // u can't fire
+					 can_prewar_msg(redtext("can't fire due to prewar is off"));
+					 return false;
+				 }
+
+				 goto captains;  // probably u can jump
+	}
+
+captains:
+
+	if ( k_captains != 2 )
+		return true; // u can fire/jump
+
+	if ( fire ) {  // u can't fire
+		can_prewar_msg(redtext("can't fire untill in captains mode"));
+		return false;
+	}
+
+	return true; // u can jump
+}
+
 /*
 ============
 W_WeaponFrame
@@ -1800,21 +1856,8 @@ void W_WeaponFrame()
 
     if ( self->s.v.button0 && !intermission_running )
     {
-		if ( match_in_progress == 1 )
+		if ( match_in_progress == 1 || !can_prewar( true ) )
 			return;
-
-        if(    ( !cvar( "k_prewar" ) && match_in_progress != 2 )
-			|| k_captains == 2 
-		  ) {
-
-            if( g_globalvars.time > self->k_msgcount ) {
-            	stuffcmd( self, "bf\n" );
-				G_sprint( self, 2, "console: you are not allowed to fire\n");
-                self->k_msgcount = g_globalvars.time + 1;
-            }
-
-            return;
-        }
 
 		SuperDamageSound();
 		W_Attack();
