@@ -78,7 +78,7 @@ ult:
 2006-04-24 [ver 1.26]
 120. Added commands: infolock, infospec, moreinfo. ktpro (c)
 
-	 infospec - toggle show spec info to specs ot not.
+	 infospec - toggle show spec info to specs or not.
 	 infolock - toggle send info to admined/all specs.
 	 moreinfo - the spectators can choose to receive additional information about 
 				the game, for example who took which powerup, who took a rocket launcher etc. 

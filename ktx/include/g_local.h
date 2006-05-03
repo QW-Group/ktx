@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.54 2006/04/30 16:53:55 qqshka Exp $
+ *  $Id: g_local.h,v 1.55 2006/05/03 11:32:42 vvd0 Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -184,12 +184,15 @@ void            G_dprint( const char *fmt, ... );
 
 void			localcmd( const char *fmt, ... );
 
-int				streq( const char *s1, const char *s2 );
+#define strneq(s1,s2)	(strcmp( (s1) ? (s1) : "", (s2) ? (s2) : "" ))
+#define streq(s1,s2)	(!strneq((s1), (s2)))
+#define strnull(s1)		((s1) ? !*(s1) : true)
+/*int				streq( const char *s1, const char *s2 );
 int				strneq( const char *s1, const char *s2 );
-int				strnull ( const char *s1 );
-void            aim( vec3_t ret );
-void    	setorigin( gedict_t * ed, float origin_x, float origin_y, float origin_z );
-void    	setsize( gedict_t * ed, float min_x, float min_y, float min_z, float max_x,
+int				strnull ( const char *s1 );*/
+void		aim( vec3_t ret );
+void		setorigin( gedict_t * ed, float origin_x, float origin_y, float origin_z );
+void		setsize( gedict_t * ed, float min_x, float min_y, float min_z, float max_x,
 		 			float max_y, float max_z );
 void    	setmodel( gedict_t * ed, char *model );
 void    	sound( gedict_t * ed, int channel, char *samp, float vol, float att );
