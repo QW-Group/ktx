@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.56 2006/05/03 17:42:32 qqshka Exp $
+ *  $Id: g_local.h,v 1.57 2006/05/03 23:37:23 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -460,9 +460,12 @@ extern int cmds_cnt; // count of commands in 'cmds'
 #define DO_ACCESS_DENIED				(-3) // if access denied
 #define DO_FUNCTION_IS_WRONG			(-4) // if function is wrong
 #define DO_CMD_DISALLOWED_MATCHLESS		(-5) // if cmd does't allowed in matchLess mode
+#define DO_FLOOD_PROTECT				(-6) // if command is blocked due to flood protect
 
 int DoCommand(int icmd);
 int DoCommand_Name(char *cmd_name);
+
+qboolean isCmdFlood(gedict_t *p);
 
 void Init_cmds(void);
 
@@ -645,6 +648,16 @@ extern	int   k_lastvotedmap;	// last voted map, used for agree command?
 extern  int k_ctf_custom_models;// use or not custom models
 extern  int k_allowed_free_modes; // reflect appropriate cvar - but changed only at map load
 
+// { cmd flood protection
+
+extern  int   k_cmd_fp_count;    // 10 commands allowed ..
+extern  float k_cmd_fp_per;      // per 4 seconds
+extern  float k_cmd_fp_for;      // skip commands for 5 seconds
+extern  int   k_cmd_fp_kick;     // kick after 4 warings
+extern  int   k_cmd_fp_dontkick; // if 1 - don't use kick
+extern  int   k_cmd_fp_disabled; // if 1 - don't use cmd floodprot
+
+// }
 
 // heh, some hack for mvdsv for grabbing some data
 

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.80 2006/05/03 17:42:18 qqshka Exp $
+ *  $Id: commands.c,v 1.81 2006/05/03 23:37:24 qqshka Exp $
  */
 
 // commands.c
@@ -565,6 +565,9 @@ int DoCommand(int icmd)
 	if ( strnull( cmds[icmd].name ) || !( cmds[icmd].f ) )
 		return DO_FUNCTION_IS_WRONG;
 
+	if ( isCmdFlood( self ) )
+		return DO_FLOOD_PROTECT;
+
 	if (cmds[icmd].arg)
 		( ( void ( * )(float) ) ( cmds[icmd].f ) ) ( cmds[icmd].arg );
 	else
@@ -589,6 +592,65 @@ int DoCommand_Name(char *cmd_name)
 
 	return DO_OUT_OF_RANGE_CMDS;
 }
+
+qboolean isCmdFlood(gedict_t *p)
+{
+	int idx;
+	float cmd_time;
+
+	if ( k_cmd_fp_disabled || p->connect_time + 5 > g_globalvars.time )
+		return false; // cmd flood protect is disabled or skip near connect time due to tons of "cmd info" commands is done
+
+	idx = bound(0, p->fp_c.last_cmd, MAX_FP_CMDS-1);
+	cmd_time = p->fp_c.cmd_time[idx];
+
+	if ( g_globalvars.time < p->fp_c.locked )
+	{
+		G_sprint(p, 2, "command floodprot (%d sec)\n",
+										(int)(p->fp_c.locked - g_globalvars.time));
+		return true; // flooder
+	}
+
+	if ( cmd_time && ( g_globalvars.time - cmd_time < k_cmd_fp_per ) )
+	{
+		G_sprint(p, 2, "You are a command flooder man!\n");
+
+		p->fp_c.locked = g_globalvars.time + k_cmd_fp_for;
+		p->fp_c.warnings += 1;
+
+		if ( !k_cmd_fp_dontkick ) {
+			if ( k_cmd_fp_kick - p->fp_c.warnings > 1 ) {
+				G_sprint(p, 2, "%d warnings to kick\n", k_cmd_fp_kick - p->fp_c.warnings);
+			}
+			else if ( k_cmd_fp_kick - p->fp_c.warnings == 1 ) {
+				G_sprint(p, 2, "next time you will be kicked\n");
+			}
+			else if ( p->fp_c.warnings == k_cmd_fp_kick ) {
+				G_bprint(2,"%s is a command flooooder!!!\n"
+						   "and will be kicked\n", getname(p));
+
+				G_sprint(p, 2, "Go away!\n");
+
+				GhostFlag(p);
+
+				p->s.v.classname = "";
+				stuffcmd(p, "disconnect\n"); // FIXME: stupid way
+			}
+		}
+
+		return true; // flooder
+	}
+
+	p->fp_c.cmd_time[idx] = g_globalvars.time;
+
+	if ( ++idx >= k_cmd_fp_count )
+		idx = 0;
+
+	p->fp_c.last_cmd = idx;
+
+	return false;
+}
+
 
 // check if players client support params in aliases
 qboolean isSupport_Params(gedict_t *p)
@@ -1242,6 +1304,19 @@ void ModStatus2()
 		default: ot = "players may not fire before match"; break;
 	}
 	G_sprint(self, 2, "%s: %s\n", redtext("Prewar"), ot);
+
+	if ( k_cmd_fp_disabled ) 
+		G_sprint(self, 2, "%s: off\n", redtext("Command floodprot"));
+	else {
+		G_sprint(self, 2, "%s: %d commands allowed per %d sec.,"
+						   " skip commands for %d sec., ", redtext("Command floodprot"), 
+								k_cmd_fp_count, (int)k_cmd_fp_per, (int) k_cmd_fp_for);
+
+		if ( k_cmd_fp_dontkick ) 
+			G_sprint(self, 2, "cmdfp kick disabled\n");
+		else
+			G_sprint(self, 2, "kick after %d warn.\n", k_cmd_fp_kick);
+	}
 }
 
 void ModStatusVote()

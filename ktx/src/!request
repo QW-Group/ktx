@@ -1,4 +1,8 @@
 
+23:42] <fnu[Empezar]> 1. /time command doesn't work (apparently this works in ktpro, its supposed to show time?)
+23:42] <fnu[Empezar]> 2. autotrack is broken
+23:42] <fnu[Empezar]> once it switches POV, autotrack is turned off
+
 !!!
 blood
 !!!
@@ -6,14 +10,6 @@ blood
 
 22:30] <gLAd> demolist
 22:30] <gLAd> demoinfo
-----------------------------------------------------
-discharge cmd fix about k_dis == 2 !!!
-
-03:42] <ult> regarding !request about k_dis 2,  i purposely didnt add this to discharge command cause i wouldnt want  a dm game to be messed up
-03:42] <ult> ppl wouldnt realize it was wrong at start
-03:42] <qqshka|RIP|RIP> right
-03:42] <qqshka|RIP|RIP> i'm understand this too
-03:43] <qqshka|RIP|RIP> otherwise we need WARN about this at match start - and this is annoying
 ----------------------------------------------------
 how we must do with q statistics and dropable quad?
 and same question about ring.

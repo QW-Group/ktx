@@ -1,3 +1,16 @@
+2006-05-04
+qq:
+129. Added command floodprot. ktpro (c)
+
+	set k_cmd_fp_count 10   // 10 commands allowed ..
+	set k_cmd_fp_per 4      // per 4 seconds
+	set k_cmd_fp_for 5      // skip commands for 5 seconds
+	set k_cmd_fp_kick 4     // kick after 4 warings
+	set k_cmd_fp_dontkick 0 // if 1 - don't use kick
+	set k_cmd_fp_disabled 0 // if 1 - don't use cmd floodprot
+
+	By default values are: 10, 4, 5, 4, 0, 0, so no need for edditing cfg.
+
 2006-05-03
 vvd:
 128. Added new command sh_speed work like it was in ktpro.

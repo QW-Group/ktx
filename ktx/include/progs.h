@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.31 2006/04/29 21:39:40 ult_ Exp $
+ *  $Id: progs.h,v 1.32 2006/05/03 23:37:23 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -120,6 +120,17 @@ typedef struct vote_s {
 
 	float elect_block_till;	// block election for this time
 } vote_t;
+
+// cmd flood protection
+
+#define MAX_FP_CMDS (10)
+
+typedef struct fp_cmd_s {
+	float locked;
+	float cmd_time[MAX_FP_CMDS];
+	int   last_cmd;
+	int   warnings;
+} fp_cmd_t;
 
 // store wregs here
 
@@ -235,6 +246,7 @@ typedef struct gedict_s {
 	float	cnt2;            // NOT_SURE: cnt2 = seconds left?
 	float	dead_time;       // time at which player last died - used in autorespawn
 	float	spawn_time;		 // time at which player last spawned
+	float	connect_time;	 // time at which player connect
 	float	deaths;          // number of times player died
 	float	efficiency;      // stores player efficiency rating
 	float	fraggie;         // NOT_SURE: used to return frags to rejoining players?
@@ -357,6 +369,8 @@ typedef struct gedict_s {
 	struct gedict_s *s_last_to;    // last direct msg to
 	struct gedict_s *s_last_from;  // last direct msf from
 // }
+
+	fp_cmd_t fp_c; // cmd flood protection
 
 } gedict_t;
 

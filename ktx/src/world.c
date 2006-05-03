@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.38 2006/05/01 14:22:17 qqshka Exp $
+ *  $Id: world.c,v 1.39 2006/05/03 23:37:24 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -607,6 +607,14 @@ void FirstFrame	( )
 	RegisterCvar("k_spec_info");
 	RegisterCvar("k_no_vote_break");
 	RegisterCvar("k_no_vote_map");
+// { cmd flood protection
+	RegisterCvar("k_cmd_fp_count");
+	RegisterCvar("k_cmd_fp_per");
+	RegisterCvar("k_cmd_fp_for");
+	RegisterCvar("k_cmd_fp_kick");
+	RegisterCvar("k_cmd_fp_dontkick");
+	RegisterCvar("k_cmd_fp_disabled");
+// }
 
 	RegisterCvar("_k_captteam1"); // internal mod usage
 	RegisterCvar("_k_captcolor1"); // internal mod usage
@@ -776,6 +784,19 @@ void FixRules ( )
 	int dm   = deathmatch;
 	int k_minr = bound(0, cvar( "k_minrate" ), 20000);
 	int k_maxr = bound(0, cvar( "k_maxrate" ), 20000);	
+
+// { cmd flood protect
+	k_cmd_fp_count = bound(0, cvar("k_cmd_fp_count"), MAX_FP_CMDS);
+	k_cmd_fp_count = (k_cmd_fp_count ? k_cmd_fp_count : min(10, MAX_FP_CMDS));
+	k_cmd_fp_per = bound(0, cvar("k_cmd_fp_per"), 30);
+	k_cmd_fp_per = (k_cmd_fp_per ? k_cmd_fp_per : 4);
+	k_cmd_fp_for = bound(0, cvar("k_cmd_fp_for"), 30);
+	k_cmd_fp_for = (k_cmd_fp_for ? k_cmd_fp_for : 5);
+	k_cmd_fp_kick = bound(0, cvar("k_cmd_fp_kick"), 10);
+	k_cmd_fp_kick = (k_cmd_fp_kick ? k_cmd_fp_kick : 4);
+	k_cmd_fp_dontkick = bound(0, cvar("k_cmd_fp_dontkick"), 1);
+	k_cmd_fp_disabled = bound(0, cvar("k_cmd_fp_disabled"), 1);
+// }
 
 	// turn CTF off if CTF usermode is not allowed, due to precache_sound or precache_model
 	if ( isCTF() && !( k_allowed_free_modes & UM_CTF ) )

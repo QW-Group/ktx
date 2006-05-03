@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: globals.c,v 1.13 2006/04/23 12:03:22 qqshka Exp $
+ *  $Id: globals.c,v 1.14 2006/05/03 23:37:24 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -60,3 +60,13 @@ int k_ctf_custom_models;// if server has flag/grapple models you can enable them
 
 int k_allowed_free_modes; // reflect appropriate cvar - but changed only at map load
 
+// { cmd flood ptotect
+
+int   k_cmd_fp_count;    // 10 commands allowed ..
+float k_cmd_fp_per;      // per 4 seconds
+float k_cmd_fp_for;      // skip commands for 5 seconds
+int   k_cmd_fp_kick;     // kick after 4 warings
+int   k_cmd_fp_dontkick; // if 1 - don't use kick
+int   k_cmd_fp_disabled; // if 1 - don't use cmd floodprot
+
+// }
