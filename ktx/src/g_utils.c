@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.40 2006/04/24 21:25:36 qqshka Exp $
+ *  $Id: g_utils.c,v 1.41 2006/05/03 11:32:43 vvd0 Exp $
  */
 
 #include "g_local.h"
@@ -175,7 +175,7 @@ void aim( vec3_t ret )
 	VectorCopy( g_globalvars.v_forward, ret );
 }
 
-const char    null_str[] = "";
+/*const char    null_str[] = "";
 
 int streq( const char *s1, const char *s2 )
 {
@@ -199,7 +199,7 @@ int strneq( const char *s1, const char *s2 )
 int strnull ( const char *s1 )
 {
 	return (!s1 || !*s1);
-}
+}*/
 
 /*
 =================

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.78 2006/05/02 21:32:10 qqshka Exp $
+ *  $Id: commands.c,v 1.79 2006/05/03 11:32:43 vvd0 Exp $
  */
 
 // commands.c
@@ -122,6 +122,7 @@ void Pos_Show ();
 void Pos_Save ();
 void Pos_Move ();
 void Pos_Set ( float set_type );
+void Sh_Speed ();
 void lastscores ();
 
 void motd_show ();
@@ -516,6 +517,7 @@ cmd_t cmds[] = {
     { "pos_origin",  Pos_Set,                   1    , CF_BOTH | CF_PARAMS, CD_POS_ORIGIN },
     { "pos_angles",  Pos_Set,                   2    , CF_BOTH | CF_PARAMS, CD_POS_ANGLES },
 //	{ "pos_velocity",Pos_Set,                   3    , CF_BOTH | CF_PARAMS, CD_POS_VELOCITY },
+	{ "sh_speed",        Sh_Speed,              0    , CF_BOTH },
 // { CTF commands
     { "tossrune",    TossRune,                  0    , CF_PLAYER, CD_TOSSRUNE },
     { "flagstatus",  FlagStatus,                0    , CF_BOTH, CD_FLAGSTATUS },
@@ -3792,7 +3794,7 @@ void Pos_Set (float set_type)
 		return;
 
 	if ( trap_CmdArgc() != 4 ) {
-		G_sprint(self, 2, "Usage: pos_set_{origin|angles"/*|velocity*/"} x1 x2 x3\n"
+		G_sprint(self, 2, "Usage: pos_{origin|angles"/*|velocity*/"} x1 x2 x3\n"
 						  "use '*' for no changes\n");
 		return;
 	}
@@ -3830,6 +3832,12 @@ void Pos_Set (float set_type)
 // pos_show/pos_save/pos_move/pos_set_* commands }
 //================================================
 
+void Sh_Speed ()
+{
+	int kf = iKey( self, "kf" );
+	stuffcmd(self, "cmd info kf %d\n",
+			(kf & KF_SPEED) ? (kf & ~KF_SPEED) : (kf | KF_SPEED));
+}
 
 // /motd command
 
