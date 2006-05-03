@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.41 2006/05/03 11:32:43 vvd0 Exp $
+ *  $Id: g_utils.c,v 1.42 2006/05/03 17:42:18 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -175,7 +175,7 @@ void aim( vec3_t ret )
 	VectorCopy( g_globalvars.v_forward, ret );
 }
 
-/*const char    null_str[] = "";
+const char    null_str[] = "";
 
 int streq( const char *s1, const char *s2 )
 {
@@ -183,6 +183,7 @@ int streq( const char *s1, const char *s2 )
 		s1 = null_str;
 	if ( !s2 )
 		s2 = null_str;
+
 	return ( !strcmp( s1, s2 ) );
 }
 
@@ -196,10 +197,35 @@ int strneq( const char *s1, const char *s2 )
 	return ( strcmp( s1, s2 ) );
 }
 
-int strnull ( const char *s1 )
+int strnull( const char *s1 )
 {
 	return (!s1 || !*s1);
-}*/
+}
+
+// qqshka - not sure is this a good idea replacing max/min with real function
+
+#ifdef KTX_MIN
+
+float min( float a, float b )
+{
+	return ( a < b ? a : b );
+}
+
+#endif
+
+#ifdef KTX_MAX
+
+float max( float a, float b )
+{
+	return ( a > b ? a : b );
+}
+
+#endif
+
+float bound( float a, float b, float c )
+{
+	return ( a >= c ? a : b < a ? a : b > c ? c : b);
+}
 
 /*
 =================

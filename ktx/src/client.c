@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.62 2006/05/02 21:32:10 qqshka Exp $
+ *  $Id: client.c,v 1.63 2006/05/03 17:42:18 qqshka Exp $
  */
 
 //===========================================================================
@@ -1487,8 +1487,8 @@ void MakeGhost ()
 
 	ghost->ps         = self->ps; // save player stats
 	ghost->ghost_dt   = g_globalvars.time; // save drop time
-	ghost->ghost_clr  = bound(0, iKey(self, "topcolor" ), 13) << 8;
-	ghost->ghost_clr |= bound(0, iKey(self, "bottomcolor" ), 13) ; // save colors
+	ghost->ghost_clr  = (int)bound(0, iKey(self, "topcolor" ), 13) << 8;
+	ghost->ghost_clr |= (int)bound(0, iKey(self, "bottomcolor" ), 13) ; // save colors
 
 	localcmd("localinfo %d \"%s\"\n", (int)f1, self->s.v.netname);
 	trap_executecmd();

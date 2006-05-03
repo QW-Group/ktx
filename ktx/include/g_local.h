@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.55 2006/05/03 11:32:42 vvd0 Exp $
+ *  $Id: g_local.h,v 1.56 2006/05/03 17:42:32 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -42,15 +42,23 @@
 #define MOD_SERVERINFO_BUILD_KEY	("xbuild")
 #define MOD_URL     				("http://cvs.sourceforge.net/viewcvs.py/mvdsv/ktx/")
 
+// qqshka - hmm, seems in C this is macros
+#undef max
+#undef min
+
 #ifndef min
-#define min(a,b) ((a) < (b) ? (a) : (b))
+//#define min(a,b) ((a) < (b) ? (a) : (b))
+float min( float a, float b );
+#define KTX_MIN
 #endif
 #ifndef max
-#define max(a,b) ((a) > (b) ? (a) : (b))
+//#define max(a,b) ((a) > (b) ? (a) : (b))
+float max( float a, float b );
+#define KTX_MAX
 #endif
 
-#define bound(a,b,c) ((a) >= (c) ? (a) : \
-					(b) < (a) ? (a) : (b) > (c) ? (c) : (b))
+float bound( float a, float b, float c );
+//#define bound(a,b,c) ((a) >= (c) ? (a) : (b) < (a) ? (a) : (b) > (c) ? (c) : (b))
 
 #ifdef DEBUG
 #define DebugTrap(x) *(char*)0=x
@@ -184,12 +192,16 @@ void            G_dprint( const char *fmt, ... );
 
 void			localcmd( const char *fmt, ... );
 
+int				streq( const char *s1, const char *s2 );
+int				strneq( const char *s1, const char *s2 );
+int				strnull ( const char *s1 );
+
+/*
 #define strneq(s1,s2)	(strcmp( (s1) ? (s1) : "", (s2) ? (s2) : "" ))
 #define streq(s1,s2)	(!strneq((s1), (s2)))
 #define strnull(s1)		((s1) ? !*(s1) : true)
-/*int				streq( const char *s1, const char *s2 );
-int				strneq( const char *s1, const char *s2 );
-int				strnull ( const char *s1 );*/
+*/
+
 void		aim( vec3_t ret );
 void		setorigin( gedict_t * ed, float origin_x, float origin_y, float origin_z );
 void		setsize( gedict_t * ed, float min_x, float min_y, float min_z, float max_x,

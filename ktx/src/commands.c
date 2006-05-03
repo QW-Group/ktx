@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.79 2006/05/03 11:32:43 vvd0 Exp $
+ *  $Id: commands.c,v 1.80 2006/05/03 17:42:18 qqshka Exp $
  */
 
 // commands.c
@@ -318,6 +318,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_POS_ORIGIN   "set position origin"
 #define CD_POS_ANGLES   "set position angles"
 #define CD_POS_VELOCITY "set position velocity"
+#define CD_SH_SPEED     "toggle use show speed"
 #define CD_TOSSRUNE     "drop rune (CTF)"
 #define CD_FLAGSTATUS   "show flags status (CTF)"
 #define CD_MOTD         "show motd"
@@ -517,7 +518,7 @@ cmd_t cmds[] = {
     { "pos_origin",  Pos_Set,                   1    , CF_BOTH | CF_PARAMS, CD_POS_ORIGIN },
     { "pos_angles",  Pos_Set,                   2    , CF_BOTH | CF_PARAMS, CD_POS_ANGLES },
 //	{ "pos_velocity",Pos_Set,                   3    , CF_BOTH | CF_PARAMS, CD_POS_VELOCITY },
-	{ "sh_speed",        Sh_Speed,              0    , CF_BOTH },
+	{ "sh_speed",    Sh_Speed,                  0    , CF_BOTH, CD_SH_SPEED },
 // { CTF commands
     { "tossrune",    TossRune,                  0    , CF_PLAYER, CD_TOSSRUNE },
     { "flagstatus",  FlagStatus,                0    , CF_BOTH, CD_FLAGSTATUS },
@@ -3834,9 +3835,7 @@ void Pos_Set (float set_type)
 
 void Sh_Speed ()
 {
-	int kf = iKey( self, "kf" );
-	stuffcmd(self, "cmd info kf %d\n",
-			(kf & KF_SPEED) ? (kf & ~KF_SPEED) : (kf | KF_SPEED));
+	stuffcmd(self, "cmd info kf %d\n", (iKey( self, "kf" ) ^ KF_SPEED));
 }
 
 // /motd command
