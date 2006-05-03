@@ -1,6 +1,6 @@
 2006-05-03
 vvd:
-127. Added new command sh_speed work like it was in ktpro.
+128. Added new command sh_speed work like it was in ktpro.
 
 2006-05-02
 qq:
