@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.81 2006/05/03 23:37:24 qqshka Exp $
+ *  $Id: commands.c,v 1.82 2006/05/04 00:01:36 qqshka Exp $
  */
 
 // commands.c
@@ -607,7 +607,7 @@ qboolean isCmdFlood(gedict_t *p)
 	if ( g_globalvars.time < p->fp_c.locked )
 	{
 		G_sprint(p, 2, "command floodprot (%d sec)\n",
-										(int)(p->fp_c.locked - g_globalvars.time));
+										(int)(p->fp_c.locked - g_globalvars.time + 1));
 		return true; // flooder
 	}
 
@@ -616,7 +616,6 @@ qboolean isCmdFlood(gedict_t *p)
 		G_sprint(p, 2, "You are a command flooder man!\n");
 
 		p->fp_c.locked = g_globalvars.time + k_cmd_fp_for;
-		p->fp_c.warnings += 1;
 
 		if ( !k_cmd_fp_dontkick ) {
 			if ( k_cmd_fp_kick - p->fp_c.warnings > 1 ) {
@@ -625,9 +624,10 @@ qboolean isCmdFlood(gedict_t *p)
 			else if ( k_cmd_fp_kick - p->fp_c.warnings == 1 ) {
 				G_sprint(p, 2, "next time you will be kicked\n");
 			}
-			else if ( p->fp_c.warnings == k_cmd_fp_kick ) {
-				G_bprint(2,"%s is a command flooooder!!!\n"
-						   "and will be kicked\n", getname(p));
+			else if ( k_cmd_fp_kick - p->fp_c.warnings < 1 ) {
+				if ( p->k_player || ( p->k_spectator && !match_in_progress ) )
+					G_bprint(2,"%s is a command flooooder!!!\n"
+						   	   "and will be kicked\n", getname(p));
 
 				G_sprint(p, 2, "Go away!\n");
 
@@ -637,6 +637,8 @@ qboolean isCmdFlood(gedict_t *p)
 				stuffcmd(p, "disconnect\n"); // FIXME: stupid way
 			}
 		}
+
+		p->fp_c.warnings += 1;
 
 		return true; // flooder
 	}
