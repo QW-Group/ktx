@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.82 2006/05/04 00:01:36 qqshka Exp $
+ *  $Id: commands.c,v 1.83 2006/05/04 22:30:22 qqshka Exp $
  */
 
 // commands.c
@@ -140,6 +140,8 @@ void cmduinfo();
 void cmd_wreg();
 
 void ClientKill();
+
+void sv_time();
 
 // spec
 void ShowCamHelp();
@@ -332,6 +334,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_KUINFO       "examine someone params"
 #define CD_WREG         "register reliable wpns"
 #define CD_KILL         "invoke suicide"
+#define CD_TIME         "show server time" 
 
 
 cmd_t cmds[] = {
@@ -533,7 +536,8 @@ cmd_t cmds[] = {
     { "kinfo",       cmdinfo,                   0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_KINFO },
     { "kuinfo",      cmduinfo,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_KUINFO },
     { "wreg",        cmd_wreg,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_WREG },
-    { "kill",        ClientKill,                0    , CF_PLAYER | CF_MATCHLESS, CD_KILL }
+    { "kill",        ClientKill,                0    , CF_PLAYER | CF_MATCHLESS, CD_KILL },
+    { "time",        sv_time,                   0    , CF_BOTH | CF_MATCHLESS, CD_TIME }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -4567,3 +4571,10 @@ void cmd_wreg_do( byte c )
 
 // }
 
+void sv_time()
+{
+	char *tm;
+
+	if ( !strnull( tm = ezinfokey(world, "date_str") ) )
+		G_sprint(self, 2, "%s\n", tm);
+}
