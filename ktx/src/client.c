@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.64 2006/05/05 18:36:30 qqshka Exp $
+ *  $Id: client.c,v 1.65 2006/05/05 21:26:34 qqshka Exp $
  */
 
 //===========================================================================
@@ -1272,6 +1272,12 @@ void PlayerDeathThink()
 void PlayerJump()
 {
 	//vec3_t start, end;
+
+	if ( self->spawn_time + 0.05 > g_globalvars.time ) {
+		self->s.v.velocity[2] = -270;  // discard +jump till 50 ms after respawn, like ktpro 
+		self->s.v.flags = (int)self->s.v.flags & ~FL_JUMPRELEASED;
+		return;
+	}
 
 	if ( ( ( int ) ( self->s.v.flags ) ) & FL_WATERJUMP )
 		return;

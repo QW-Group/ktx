@@ -8,6 +8,8 @@ qq:
 
 	 thx mli.
 
+133. Fixing something in jumping code. ("Sassa match start jump bug")
+
 2006-05-05 [ver 1.28]
 qq:
 130. Added command "time", show time at server host.
