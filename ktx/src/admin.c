@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.27 2006/05/02 21:32:10 qqshka Exp $
+ * $Id: admin.c,v 1.28 2006/05/05 18:36:30 qqshka Exp $
  */
 
 // admin.c
@@ -7,8 +7,6 @@
 #include "g_local.h"
 
 void AdminMatchStart();
-void StartTimer();
-void StopTimer ( int removeDemo );
 
 void NextClient();
 void ExitKick(gedict_t *kicker);

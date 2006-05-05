@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.58 2006/05/04 22:30:22 qqshka Exp $
+ *  $Id: g_local.h,v 1.59 2006/05/05 18:36:30 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -399,6 +399,8 @@ qboolean		W_CanSwitch( int wp, qboolean warn );
 float			CountPlayers();
 float			CountRTeams();
 qboolean 		isCanStart ( gedict_t *s, qboolean forceMembersWarn );
+void			StartTimer ();
+void			StopTimer ( int removeDemo );
 
 //combat 
 extern gedict_t *damage_attacker, *damage_inflictor;

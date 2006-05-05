@@ -20,13 +20,12 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.39 2006/05/03 23:37:24 qqshka Exp $
+ *  $Id: world.c,v 1.40 2006/05/05 18:36:31 qqshka Exp $
  */
 
 #include "g_local.h"
 
 float CountALLPlayers ();
-void  StartMatchLess ();
 
 void  SUB_regen();
 
@@ -662,9 +661,6 @@ void SecondFrame ( )
 
 	if ( isCTF() )
 		SpawnRunes();
-
-	if ( k_matchLess )
-		StartMatchLess ();
 }
 
 void hide_powerups ( char *classname )
@@ -942,6 +938,9 @@ void StartFrame( int time )
 	if ( intermission_running && g_globalvars.time >= intermission_exittime - 1 
 			&& !strnull( cvar_string( "serverdemo" ) ) )
 		localcmd("stop\n"); // demo is recording, stop it and save
+
+	if ( k_matchLess && !match_in_progress )
+		StartTimer(); // trying start countdown in matchless mode
 
 	if ( framecount > 10 )
 		vote_check_all ();

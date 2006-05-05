@@ -1,3 +1,13 @@
+2006-05-05
+qq:
+131. Now mod in matchless mode wait players before start match, thx mli.
+
+132. Fixed bug where after no players left and configs/reset.cfg is invoked mod still remember
+	 last XonX command and auto invoke XonX on map change because reset.cfg in most cases
+	 contain some map change, also mod foget about last XonX with "reset" command.
+
+	 thx mli.
+
 2006-05-05 [ver 1.28]
 qq:
 130. Added command "time", show time at server host.

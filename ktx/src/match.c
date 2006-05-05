@@ -14,17 +14,15 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.47 2006/05/01 14:22:17 qqshka Exp $
+ *  $Id: match.c,v 1.48 2006/05/05 18:36:31 qqshka Exp $
  */
 
 #include "g_local.h"
 
 void NextLevel ();
-void StopTimer ( int removeDemo );
 void IdlebotForceStart ();
 void CheckAll();
 void StartMatch ();
-void StartTimer ();
 void remove_specs_wizards ();
 void lastscore_add ();
 
@@ -1058,14 +1056,6 @@ void TimerThink ()
 	self->s.v.nextthink = g_globalvars.time + 1;
 }
 
-void StartMatchLess ()
-{
-	if ( !k_matchLess )
-		return;
-
-	StartTimer ();
-}
-
 // remove some items from map regardind with dmm
 void SM_PrepareMap()
 {
@@ -1474,7 +1464,7 @@ void TimerStartThink ()
 	gedict_t *p;
 	int from;
 
-	k_attendees = CountPlayers();		
+	k_attendees = CountPlayers();
 
 	if( !isCanStart( NULL, true ) ) {
 		G_bprint(2, "Aborting...\n");
@@ -1574,16 +1564,26 @@ void StartDemoRecord ()
 		else
 			record = true;
 
-		if ( record )
+		if ( record ) {
+			if( !strnull( cvar_string( "serverdemo" ) ) )
+				localcmd("cancel\n");  // demo is recording, cancel before new one
+
 			localcmd( "easyrecord\n" );
+		}
 	}
 }
 
-void StartTimer ()
 // Spawns the timer and starts the countdown.
+void StartTimer ()
 {
 	int from;
 	gedict_t *timer;
+
+	if ( match_in_progress || intermission_running || match_over )
+		return;
+
+	if ( k_matchLess && !CountPlayers() )
+		return; // can't start countdown in matchless mode due to no players,
 
 	k_force = 0;
 
@@ -1605,11 +1605,7 @@ void StartTimer ()
 	timer->s.v.classname = "timer";
 	timer->cnt = 0;
 
-	if( cvar( "k_count" ) > 0 )
-        timer->cnt2 = cvar( "k_count" );
-    else
-        timer->cnt2 = 3; // at the least we want a 3 second countdown
-
+    timer->cnt2 = max(3, (int)cvar( "k_count" ));  // at the least we want a 3 second countdown
 
 	if ( k_matchLess ) // check if we need countdown in case of matchless
 		if ( !cvar("k_matchless_countdown") )

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.83 2006/05/04 22:30:22 qqshka Exp $
+ *  $Id: commands.c,v 1.84 2006/05/05 18:36:31 qqshka Exp $
  */
 
 // commands.c
@@ -1552,8 +1552,10 @@ void ResetOptions()
 	{
 		char *cfg_name = "configs/reset.cfg";
 
-		if ( can_exec( cfg_name ) )
+		if ( can_exec( cfg_name ) ) {
+			cvar_fset("_k_last_xonx", 0); // forget last XonX command
 			localcmd( "exec %s\n", cfg_name );
+		}
 	}
 #else
 /*
