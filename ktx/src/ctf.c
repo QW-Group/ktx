@@ -1,5 +1,5 @@
 /*
- *  $Id: ctf.c,v 1.10 2006/04/29 21:39:40 ult_ Exp $
+ *  $Id: ctf.c,v 1.11 2006/05/06 01:20:36 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -48,7 +48,7 @@ void SP_item_flag_team2();
 
 // Allows us to add flags (or other items) to dm maps when ctfing without actually changing bsp
 void G_CallSpawn( gedict_t *ent );
-void SpawnItem( char* classname, float x, float y, float z, float angle )
+void SpawnCTFItem( char* classname, float x, float y, float z, float angle )
 {
   gedict_t *item = spawn();
 
@@ -56,7 +56,7 @@ void SpawnItem( char* classname, float x, float y, float z, float angle )
   setorigin( item, x, y, z );
   item->s.v.angles[0] = 0;
   item->s.v.angles[1] = angle;
-
+ 
   G_CallSpawn( item );
 }
 

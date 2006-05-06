@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.84 2006/05/05 18:36:31 qqshka Exp $
+ *  $Id: commands.c,v 1.85 2006/05/06 01:20:36 ult_ Exp $
  */
 
 // commands.c
@@ -84,6 +84,7 @@ void ToggleDropQuad();
 void ToggleDropRing();
 void ToggleFairPacks();
 void ToggleFreeze();
+void ToggleMidair();
 void TogglePowerups();
 void ToggleQEnemy();
 void ToggleQLag();
@@ -334,6 +335,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_KUINFO       "examine someone params"
 #define CD_WREG         "register reliable wpns"
 #define CD_KILL         "invoke suicide"
+#define CD_MIDAIR		"midair settings"
 #define CD_TIME         "show server time" 
 
 
@@ -537,6 +539,7 @@ cmd_t cmds[] = {
     { "kuinfo",      cmduinfo,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_KUINFO },
     { "wreg",        cmd_wreg,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_WREG },
     { "kill",        ClientKill,                0    , CF_PLAYER | CF_MATCHLESS, CD_KILL },
+    { "mid_air",	 ToggleMidair,              0    , CF_PLAYER, CD_MIDAIR },		
     { "time",        sv_time,                   0    , CF_BOTH | CF_MATCHLESS, CD_TIME }
 };
 
@@ -834,7 +837,7 @@ void PShowCmds()
 		"λιγλ........ toggle kick mode\n"
 		"δεατθνση.... toggle new messages\n"
 		"ςπιγλυπ..... random team pickup\n"
-		       "%s... toggle fallbunny\n", redtext("fallbanny"));
+		       "%s... toggle fallbunny\n", redtext("fallbunny"));
 	} else {
 		G_sprint(self, 2,
 		"αβουτ...... kombat teams info\n"
@@ -883,7 +886,7 @@ void SShowCmds()
 			"λιγλ........ toggle kick mode\n"
 			"δεατθνση.... toggle new messages\n"
 			"ςπιγλυπ..... random team pickup\n"
-		           "%s... toggle fallbunny\n", redtext("fallbanny"));
+		           "%s... toggle fallbunny\n", redtext("fallbunny"));
 		G_sprint(self, 2,
 			"οφεςτινε.... toggle overtime mode\n"
 			"οφεςτινευπ.. change overtime length\n"
@@ -984,7 +987,8 @@ void ShowOpts()
 			"ζαιςπαγλσ.. best/last weapon dropped\n"
 			"δισγθαςηε.. underwater discharges\n"
 			"σιμεξγε.... toggle spectator talk\n"
-			"βεςϊεςλ.... toggle berzerk mode\n");
+			"βεςϊεςλ.... toggle berzerk mode\n"
+			"%s..... toggle midair mode\n", redtext("midair"));
 }
 
 void ShowQizmo()
@@ -1770,6 +1774,10 @@ void ChangeDM(float dmm)
 		return;
 	}
 
+	// if leaving dmm4 force midair off
+	if ( deathmatch == 4 )
+		cvar_set( "k_midair", "0" );
+
 	deathmatch = bound(1, (int)dmm, 5);
 
 	cvar_set("deathmatch", va("%d", (int)deathmatch));
@@ -2532,7 +2540,7 @@ const char common_um_init[] =
 										// allow spectators receive took info during game
                                    		// (they have to use "moreinfo" command to set proper level)
 //	"localinfo spec_info_notlock 1\n"	// allow all spectators receive it (0 = only admins)
-//	"localinfo k_midair 0\n"			// not implemented
+	"k_midair 0\n"			// midair off
 //	"localinfo k_instagib 0\n"			// not implemented
 //	"localinfo k_new_spw 0\n"			// ktpro feature
 
@@ -4569,6 +4577,23 @@ void cmd_wreg_do( byte c )
 			return;
 		}
 	}
+}
+
+void ToggleMidair()
+{
+	if ( match_in_progress )
+		return;
+
+	if( check_master() )
+		return;
+
+	// Can't enable midair unless dmm4 is set first
+	if ( !cvar("k_midair") && deathmatch != 4 ) {
+		G_sprint( self, 2, "Midair requires dmm4\n");
+		return;
+	}
+
+	cvar_toggle_msg( self, "k_midair", redtext("Midair") );
 }
 
 // }

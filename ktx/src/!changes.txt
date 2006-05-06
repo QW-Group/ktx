@@ -1,3 +1,11 @@
+2006-06-05
+ult:
+134. Added midair support.  cvar: k_midair command: mid_air (Needs some testing)
+
+135. Enabled ctf on e1m7, e2m1, and e2m5.
+
+136. Added top stat: quad run.  Shows highest single quad spree for a map.
+
 2006-05-05
 qq:
 131. Now mod in matchless mode wait players before start match, thx mli.

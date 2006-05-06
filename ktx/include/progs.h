@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.32 2006/05/03 23:37:23 qqshka Exp $
+ *  $Id: progs.h,v 1.33 2006/05/06 01:20:36 ult_ Exp $
  */
 
 #include "progdefs.h"
@@ -90,6 +90,8 @@ typedef struct player_stats_s {
 	int		spawn_frags;
 
 	int		handicap;
+
+	// rl stats
 	int		dropped_rls; // number of packs dropped which contain rl 
 	int		killed_rls;  // enemies killed who have rl (even if not currently using it)
 	int		took_rls;    // number of rls you grab if you don't already have one
@@ -106,6 +108,18 @@ typedef struct player_stats_s {
 	float str_time;	// time with strength rune
 	float hst_time;	// time with haste rune
 	float rgn_time;	// time with regen rune
+
+	// midair stats
+	int midairs;	// total number of midairs
+	int midairs_s;	// silver midairs
+	int midairs_g;	// gold midairs
+	int midairs_d;	// diamond midairs
+
+	// spree stats
+	int spree_current;		// number of frags since our last death
+	int spree_current_q;	// number of frags in current quad run
+	int spree_max;			// largest spree throughout game
+	int spree_max_q;		// largest quad spree throughout game
 
 } player_stats_t;
 

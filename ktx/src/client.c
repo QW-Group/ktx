@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.65 2006/05/05 21:26:34 qqshka Exp $
+ *  $Id: client.c,v 1.66 2006/05/06 01:20:36 ult_ Exp $
  */
 
 //===========================================================================
@@ -715,6 +715,13 @@ void ClientKill()
 	DropRune();
 	PlayerDropFlag( self );
 
+	if ( self->ps.spree_current > self->ps.spree_max )    
+		self->ps.spree_max = self->ps.spree_current;        
+	if ( self->ps.spree_current_q > self->ps.spree_max_q )    
+		self->ps.spree_max_q = self->ps.spree_current_q;    
+
+	self->ps.spree_current = self->ps.spree_current_q = 0;    
+
 	respawn();
 }
 
@@ -1125,36 +1132,51 @@ void PutClientInServer()
 	{
 		float dmm4_invinc_time = cvar("dmm4_invinc_time");
 
- 		// default is 2, negative value disable invincible
-		dmm4_invinc_time = (dmm4_invinc_time ? bound(0, dmm4_invinc_time, 30) : 2);
-
-		self->s.v.ammo_shells = 0;
-		items = self->s.v.items;
-		self->s.v.ammo_nails   = 255;
-		self->s.v.ammo_shells  = 255;
-		self->s.v.ammo_rockets = 255;
-		self->s.v.ammo_cells   = 255;
-		items |= IT_NAILGUN;
-		items |= IT_SUPER_NAILGUN;
-		items |= IT_SUPER_SHOTGUN;
-		items |= IT_ROCKET_LAUNCHER;
-		items |= IT_GRENADE_LAUNCHER;
-		items |= IT_LIGHTNING;
-
-		items -= ( items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) ) - IT_ARMOR3;
-		self->s.v.armorvalue = 200;
-		self->s.v.armortype = 0.8;
-		self->s.v.health = 250;
-
-		if ( dmm4_invinc_time > 0 ) {
-
-			self->k_666 = (self->k_666 ? self->k_666 : 2); // may be already set by cvar( "k_666" ) )
-
-			items |= IT_INVULNERABILITY;
-			self->invincible_time = 1;
-			self->invincible_finished = g_globalvars.time + dmm4_invinc_time;
+		if ( cvar("k_midair") )
+		{
+			self->s.v.ammo_shells = 0;
+			self->s.v.ammo_nails = 0;
+			self->s.v.ammo_cells = 0;
+			self->s.v.ammo_rockets = 255;
+			self->s.v.items = IT_AXE | IT_ROCKET_LAUNCHER | IT_ARMOR3;
+			self->s.v.currentammo = 0;
+			self->s.v.armorvalue = 200;
+			self->s.v.armortype = 0.8;
+			self->s.v.health = 250;
 		}
-		self->s.v.items = items;
+		else
+		{
+ 			// default is 2, negative value disable invincible
+			dmm4_invinc_time = (dmm4_invinc_time ? bound(0, dmm4_invinc_time, 30) : 2);
+
+			self->s.v.ammo_shells = 0;
+			items = self->s.v.items;
+			self->s.v.ammo_nails   = 255;
+			self->s.v.ammo_shells  = 255;
+			self->s.v.ammo_rockets = 255;
+			self->s.v.ammo_cells   = 255;
+			items |= IT_NAILGUN;
+			items |= IT_SUPER_NAILGUN;
+			items |= IT_SUPER_SHOTGUN;
+			items |= IT_ROCKET_LAUNCHER;
+			items |= IT_GRENADE_LAUNCHER;
+			items |= IT_LIGHTNING;
+
+			items -= ( items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) ) - IT_ARMOR3;
+			self->s.v.armorvalue = 200;
+			self->s.v.armortype = 0.8;
+			self->s.v.health = 250;
+
+			if ( dmm4_invinc_time > 0 ) {
+
+				self->k_666 = (self->k_666 ? self->k_666 : 2); // may be already set by cvar( "k_666" ) )
+
+				items |= IT_INVULNERABILITY;
+				self->invincible_time = 1;
+				self->invincible_finished = g_globalvars.time + dmm4_invinc_time;
+			}
+			self->s.v.items = items;
+		}
 	}
 
 	if ( deathmatch == 5 && match_in_progress == 2 )
@@ -2465,6 +2487,21 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 	if ( ((int)targ->s.v.items & IT_ROCKET_LAUNCHER) && strneq( attackerteam, targteam ) )
 		attacker->ps.killed_rls++;
+
+	// update spree stats
+	if ( strneq( attackerteam, targteam ) )
+	{
+		attacker->ps.spree_current++;
+		if ( attacker->super_damage_finished > 0 )
+			attacker->ps.spree_current_q++;
+	}
+
+	if ( targ->ps.spree_current > targ->ps.spree_max )
+		targ->ps.spree_max = targ->ps.spree_current;
+	if ( targ->ps.spree_current_q > targ->ps.spree_max_q )
+		targ->ps.spree_max_q = targ->ps.spree_current_q;
+
+	targ->ps.spree_current = targ->ps.spree_current_q = 0;
 
     if ( deathmatch > 3 )
     {

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.40 2006/05/05 18:36:31 qqshka Exp $
+ *  $Id: world.c,v 1.41 2006/05/06 01:20:36 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -390,7 +390,7 @@ void SP_worldspawn()
 		SetPractice( cvar( "srv_practice_mode" ), NULL ); // may not reload map
 }
 
-void SpawnItem( char* classname, float x, float y, float z, float angle );
+void SpawnCTFItem( char* classname, float x, float y, float z, float angle );
 void Customize_Maps()
 {
 	gedict_t *p;
@@ -417,59 +417,109 @@ void Customize_Maps()
 			}
 	}
 
-	// Add ctf items to popular id maps
-	if ( streq( "e2m2", g_globalvars.mapname ) ) 
+	// Add ctf items to id maps
+	if ( k_allowed_free_modes & UM_CTF )
 	{
-		SpawnItem( "item_flag_team1"  , -256, -1952,  300,   0 );
-		SpawnItem( "item_flag_team2"  , 2062,  -176,  240,   0 );
-		SpawnItem( "info_player_team1", -186, -1724,  248,  90 );
-		SpawnItem( "info_player_team1", -266, -1724,  248,  90 );
-		SpawnItem( "info_player_team1", -346, -1724,  248,  90 );
-		SpawnItem( "info_player_team1", -176, -1872,  264,  90 );
-		SpawnItem( "info_player_team1", -256, -1872,  264,  90 );
-		SpawnItem( "info_player_team1", -336, -1872,  264,  90 );
-		SpawnItem( "info_player_team2", 1902,   -76,  200, 180 );
-		SpawnItem( "info_player_team2", 1902,  -176,  200, 180 );
-		SpawnItem( "info_player_team2", 1902,  -276,  200, 180 );
-		SpawnItem( "info_player_team2", 1982,   -76,  200, 180 );
-		SpawnItem( "info_player_team2", 1982,  -176,  200, 180 );
-		SpawnItem( "info_player_team2", 1982,  -276,  200, 180 );
-	}
-	else if ( streq( "e4m3", g_globalvars.mapname ) )
-	{
-		SpawnItem( "item_flag_team1"  , 1182, -1647,  172,   0 );
-		SpawnItem( "item_flag_team2"  , 2200,   544,  -60,   0 );
-		SpawnItem( "info_player_team1", 1232, -1347,  152,  90 );
-		SpawnItem( "info_player_team1", 1232, -1447,  152,  90 );
-		SpawnItem( "info_player_team1", 1232, -1547,  152,  90 );
-		SpawnItem( "info_player_team1", 1132, -1347,  152,  90 );
-		SpawnItem( "info_player_team1", 1132, -1447,  152,  90 );
-		SpawnItem( "info_player_team1", 1132, -1547,  152,  90 );
-		SpawnItem( "info_player_team2", 2240,   -64, -104, 180 );
-		SpawnItem( "info_player_team2", 2244,   110, -104, 180 );
-		SpawnItem( "info_player_team2", 2370,   273, -104, 180 );
-		SpawnItem( "info_player_team2", 2599,   269, -104, 180 );
-		SpawnItem( "info_player_team2", 2630,   430, -104, 180 );
-		SpawnItem( "info_player_team2", 2447,   439, -104, 180 );
-	}
-	else if ( streq( "ctf8", g_globalvars.mapname ) )
-	{
-		// remove some bad spawns from ctf8
-		vec3_t spawn1 = {  1704, -540, 208 }; // blue spawn in red base
-		vec3_t spawn2 = { -1132,  -72, 208 }; // red spawn in blue base
-		// vec3_t spawn3 = {   660,  256, 400 }; // red spawn at quad
-		
-		for( p = world; p = find( p, FOFCLSN, "info_player_team2" ); )
-			if ( VectorCompare( p->s.v.origin, spawn1 ) ) {
-				ent_remove( p );
-				break;
-			}
+		if ( streq( "e1m7", g_globalvars.mapname ) )
+		{
+			SpawnCTFItem( "item_flag_team1"  ,  839,    62,  148,    0 );
+			SpawnCTFItem( "item_flag_team2"  , -532,    57,   32,    0 );
+			SpawnCTFItem( "info_player_team1",  930,   400,  216,  180 );
+			SpawnCTFItem( "info_player_team1",  930,   225,  216,  180 );
+			SpawnCTFItem( "info_player_team1",  930,   100,  216,  180 );
+			SpawnCTFItem( "info_player_team1",  930,  -250,  216,  180 );
+			SpawnCTFItem( "info_player_team2", -532,    57,   56,    0 );
+			SpawnCTFItem( "info_player_team2", -472,   117,   56,    0 );
+			SpawnCTFItem( "info_player_team2", -472,    57,   56,    0 );
+			SpawnCTFItem( "info_player_team2", -472,    -3,   56,    0 );
+		}
+		else if ( streq( "e2m1", g_globalvars.mapname ) )
+		{
+			SpawnCTFItem( "item_flag_team1"  , 1800,   416,  244,  90 );
+			SpawnCTFItem( "item_flag_team2"  , -300,   -25,  -30, 180 );
+			SpawnCTFItem( "info_player_team1", 1836,   570,  248,  90 );
+			SpawnCTFItem( "info_player_team1", 1736,   570,  248,  90 );
+			SpawnCTFItem( "info_player_team1", 1836,   490,  248,  90 );
+			SpawnCTFItem( "info_player_team1", 1736,   490,  248,  90 );
+			SpawnCTFItem( "info_player_team1", 1836,   410,  248,  90 );
+			SpawnCTFItem( "info_player_team1", 1736,   410,  248,  90 );
+			SpawnCTFItem( "info_player_team2",   42,   162,  -40,   0 );
+			SpawnCTFItem( "info_player_team2",  -62,   162,  -40,   0 );
+			SpawnCTFItem( "info_player_team2", -142,   162,  -40,   0 );
+			SpawnCTFItem( "info_player_team2",   42,    82,  -40,   0 );
+			SpawnCTFItem( "info_player_team2",  -62,    82,  -40,   0 );
+			SpawnCTFItem( "info_player_team2", -142,    82,  -40,   0 );
+		}
+		else if ( streq( "e2m2", g_globalvars.mapname ) ) 
+		{
+			SpawnCTFItem( "item_flag_team1"  , -256, -1952,  300,  90 );
+			SpawnCTFItem( "item_flag_team2"  , 2062,  -176,  240,   0 );
+			SpawnCTFItem( "info_player_team1", -186, -1724,  248,  90 );
+			SpawnCTFItem( "info_player_team1", -266, -1724,  248,  90 );
+			SpawnCTFItem( "info_player_team1", -346, -1724,  248,  90 );
+			SpawnCTFItem( "info_player_team1", -176, -1872,  264,  90 );
+			SpawnCTFItem( "info_player_team1", -256, -1872,  264,  90 );
+			SpawnCTFItem( "info_player_team1", -336, -1872,  264,  90 );
+			SpawnCTFItem( "info_player_team2", 1902,   -76,  200, 180 );
+			SpawnCTFItem( "info_player_team2", 1902,  -176,  200, 180 );
+			SpawnCTFItem( "info_player_team2", 1902,  -276,  200, 180 );
+			SpawnCTFItem( "info_player_team2", 1982,   -76,  200, 180 );
+			SpawnCTFItem( "info_player_team2", 1982,  -176,  200, 180 );
+			SpawnCTFItem( "info_player_team2", 1982,  -276,  200, 180 );
+		}
+		else if ( streq( "e2m5", g_globalvars.mapname ) )
+		{
+			SpawnCTFItem( "item_flag_team1"  , -856, -1296, -200,  90 );
+			SpawnCTFItem( "item_flag_team2"  ,-1246,  2944,  -76,   0 );
+			SpawnCTFItem( "info_player_team1", -956, -1146, -216,  90 );
+			SpawnCTFItem( "info_player_team1", -856, -1146, -216,  90 );
+			SpawnCTFItem( "info_player_team1", -756, -1146, -216,  90 );
+			SpawnCTFItem( "info_player_team1", -956, -1246, -232,  90 );
+			SpawnCTFItem( "info_player_team1", -856, -1246, -232,  90 );
+			SpawnCTFItem( "info_player_team1", -756, -1246, -232,  90 );
+			SpawnCTFItem( "info_player_team2",-1056,  3044,  -48,   0 );
+			SpawnCTFItem( "info_player_team2",-1056,  2944,  -48,   0 );
+			SpawnCTFItem( "info_player_team2",-1056,  2844,  -48,   0 );
+			SpawnCTFItem( "info_player_team2",-1200,  3044,  -96,   0 );
+			SpawnCTFItem( "info_player_team2",-1200,  2944,  -96,   0 );
+			SpawnCTFItem( "info_player_team2",-1200,  2844,  -96,   0 );		
+		}
+		else if ( streq( "e4m3", g_globalvars.mapname ) )
+		{
+			SpawnCTFItem( "item_flag_team1"  , 1182, -1647,  172,   0 );
+			SpawnCTFItem( "item_flag_team2"  , 2200,   544,  -60,   0 );
+			SpawnCTFItem( "info_player_team1", 1232, -1347,  152,  90 );
+			SpawnCTFItem( "info_player_team1", 1232, -1447,  152,  90 );
+			SpawnCTFItem( "info_player_team1", 1232, -1547,  152,  90 );
+			SpawnCTFItem( "info_player_team1", 1132, -1347,  152,  90 );
+			SpawnCTFItem( "info_player_team1", 1132, -1447,  152,  90 );
+			SpawnCTFItem( "info_player_team1", 1132, -1547,  152,  90 );
+			SpawnCTFItem( "info_player_team2", 2240,   -64, -104, 180 );
+			SpawnCTFItem( "info_player_team2", 2244,   110, -104, 180 );
+			SpawnCTFItem( "info_player_team2", 2370,   273, -104, 180 );
+			SpawnCTFItem( "info_player_team2", 2599,   269, -104, 180 );
+			SpawnCTFItem( "info_player_team2", 2630,   430, -104, 180 );
+			SpawnCTFItem( "info_player_team2", 2447,   439, -104, 180 );
+		}
+		else if ( streq( "ctf8", g_globalvars.mapname ) )
+		{
+			// remove some bad spawns from ctf8
+			vec3_t spawn1 = {  1704, -540, 208 }; // blue spawn in red base
+			vec3_t spawn2 = { -1132,  -72, 208 }; // red spawn in blue base
+			// vec3_t spawn3 = {   660,  256, 400 }; // red spawn at quad
+			
+			for( p = world; p = find( p, FOFCLSN, "info_player_team2" ); )
+				if ( VectorCompare( p->s.v.origin, spawn1 ) ) {
+					ent_remove( p );
+					break;
+				}
 
-		for( p = world; p = find( p, FOFCLSN, "info_player_team1" ); )
-			if ( VectorCompare( p->s.v.origin, spawn2 ) ) { 
-				ent_remove( p );
-				break;
-			}
+			for( p = world; p = find( p, FOFCLSN, "info_player_team1" ); )
+				if ( VectorCompare( p->s.v.origin, spawn2 ) ) { 
+					ent_remove( p );
+					break;
+				}
+		}
 	}
 }
 
@@ -606,6 +656,8 @@ void FirstFrame	( )
 	RegisterCvar("k_spec_info");
 	RegisterCvar("k_no_vote_break");
 	RegisterCvar("k_no_vote_map");
+	RegisterCvar("k_midair");
+
 // { cmd flood protection
 	RegisterCvar("k_cmd_fp_count");
 	RegisterCvar("k_cmd_fp_per");

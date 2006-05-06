@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.17 2006/04/23 12:03:22 qqshka Exp $
+ *  $Id: combat.c,v 1.18 2006/05/06 01:20:36 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -171,9 +171,15 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	char            *attackerteam, *targteam;
 
+	//midair
+	float playerheight, midheight;
+	qboolean lowheight, midair = false;
 
 	if ( !targ->s.v.takedamage || ISDEAD( targ ) )
 		return;
+
+	if ( cvar("k_midair") )
+		midair = true;
 
 	wp_num = attacker->s.v.weapon;
 
@@ -198,8 +204,10 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 
 // check for quad damage powerup on the attacker
+// midair quad makes rockets fast, but no change to damage
 	if ( ( attacker->super_damage_finished > g_globalvars.time )
-	     && strneq( inflictor->s.v.classname, "door" ) && strneq( targ->deathtype, "stomp" ) )
+	     && strneq( inflictor->s.v.classname, "door" ) && strneq( targ->deathtype, "stomp" )
+		 && !midair )
 	{
 		if ( deathmatch == 4 )
 			damage = damage * 8;
@@ -224,6 +232,30 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		attacker->carrier_hurt_time = g_globalvars.time;
 	}
 
+	if ( midair )
+	{
+		if ( streq( inflictor->s.v.classname, "rocket" ) )
+		{
+			midheight = targ->s.v.origin[2] - inflictor->s.v.oldorigin[2];
+			if ( midheight <= 200 )
+				midheight = 0;
+		}
+		traceline( PASSVEC3(targ->s.v.origin),
+				targ->s.v.origin[0], 
+				targ->s.v.origin[1], 
+				targ->s.v.origin[2] - 2048,
+				true, targ );
+		playerheight = targ->s.v.absmin[2] - g_globalvars.trace_endpos[2];
+
+		if ( playerheight < 42.5 || ((int) targ->s.v.flags & FL_ONGROUND) )
+			lowheight = true;
+		else
+		{
+			damage *= ( 1 + ( playerheight - 42.5 ) / 64 );
+			lowheight = false;
+		}		
+	}
+
 // save damage based on the target's armor level
 
 #ifndef Q3_VM
@@ -231,6 +263,9 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 #else
 	save = ceil( targ->s.v.armortype * damage );
 #endif
+
+	if ( midair && lowheight && !((int)targ->s.v.flags & FL_INWATER) && !targ->axhitme )
+		save *= 0.5;
 
 	if ( save >= targ->s.v.armorvalue )
 	{
@@ -248,6 +283,9 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 #else
 	take = ceil( damage - save );
 #endif
+
+	if ( midair && lowheight && !((int)targ->s.v.flags & FL_INWATER) && !targ->axhitme)
+		take = 0;
 
 // add to the damage total for clients, which will be sent as a single
 // message at the end of the frame
@@ -287,6 +325,10 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		targ->s.v.velocity[0] += dir[0] * damage * 8;
 		targ->s.v.velocity[1] += dir[1] * damage * 8;
 		targ->s.v.velocity[2] += dir[2] * damage * 8;
+
+		if ( midair && lowheight )
+			targ->s.v.velocity[2] += dir[2] * damage * 4;
+
 		// Rocket Jump modifiers
 /*
 		if ( ( rj > 1 )
@@ -315,6 +357,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		}
 		return;
 	}
+
 // team play damage avoidance
 //ZOID 12-13-96: self.team doesn't work in QW.  Use keys
     attackerteam = getteam( attacker );
@@ -354,9 +397,11 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	}
 
 	if (match_in_progress != 2) {
-		targ->s.v.currentammo = 1000 + Q_rint(damage);
-		if (attacker != targ)
-			attacker->s.v.health = 1000 + Q_rint(damage);
+		if ( !midair || (int)targ->s.v.flags & FL_ONGROUND ) {
+			targ->s.v.currentammo = 1000 + Q_rint(damage);
+			if (attacker != targ)
+				attacker->s.v.health = 1000 + Q_rint(damage);
+		}
 	}
 
 
@@ -367,6 +412,39 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	if ( ISDEAD( targ ) )
 	{
+		if ( midair && !lowheight )
+		{
+			if ( match_in_progress == 2 && midheight > 190 )
+			{
+				attacker->ps.midairs++;
+				G_bprint( 2, "%s got ", attacker->s.v.netname );
+
+				if ( midheight > 900 )
+				{
+					attacker->ps.midairs_d++;
+					attacker->s.v.frags += 8;
+					G_bprint( 2, "%s\n", redtext("diam0nd midair") );
+				}
+				else if ( midheight > 500 )
+				{
+					G_bprint( 2, "%s\n", redtext("g0ld midair") );
+					attacker->s.v.frags += 4;
+					attacker->ps.midairs_g++;
+				}
+				else if ( midheight > 380 )
+				{
+					G_bprint( 2, "%s\n", redtext("silver midair") );
+					attacker->s.v.frags += 2;
+					attacker->ps.midairs_s++;
+				}
+				else
+				{
+					G_bprint( 2, "%s\n", redtext("midair") );
+					attacker->s.v.frags++;
+				}
+				G_bprint(2, "%.1f (midheight)\n", midheight);
+			}
+		}
 		Killed( targ, attacker );
 
         // KTEAMS: check if sudden death is the case

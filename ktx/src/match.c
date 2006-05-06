@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.48 2006/05/05 18:36:31 qqshka Exp $
+ *  $Id: match.c,v 1.49 2006/05/06 01:20:36 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -25,6 +25,7 @@ void CheckAll();
 void StartMatch ();
 void remove_specs_wizards ();
 void lastscore_add ();
+void OnePlayerMidairStats();
 
 float CountALLPlayers ()
 {
@@ -383,6 +384,7 @@ void TeamsStats ( )
 }
 
 float maxfrags, maxdeaths, maxfriend, maxeffi, maxcaps, maxdefends;
+int maxspree, maxspree_q;
 
 void OnePlayerStats(gedict_t *p, int tp)
 {
@@ -497,6 +499,10 @@ void OnePlayerStats(gedict_t *p, int tp)
 		maxcaps = p->ps.caps;
 	if (maxdefends < p->ps.f_defends)
 		maxdefends = p->ps.f_defends;
+	if (maxspree < p->ps.spree_max)
+		maxspree = p->ps.spree_max;
+	if (maxspree_q < p->ps.spree_max_q)
+		maxspree_q = p->ps.spree_max_q;
 }
 
 // Players statistics printout here
@@ -517,6 +523,7 @@ void PlayersStats ()
 	maxfrags = -999999;
 
 	maxeffi = maxfriend = maxdeaths = maxcaps = maxdefends = 0;
+	maxspree = maxspree_q = 0;
 
 	tp = isTeam() || isCTF();
 
@@ -564,7 +571,10 @@ void PlayersStats ()
 								p2->efficiency = p2->s.v.frags / (p2->s.v.frags + p2->deaths) * 100;
 						}
 
-						OnePlayerStats(p2, tp);
+						if ( cvar("k_midair") )
+							OnePlayerMidairStats(p2, tp);
+						else
+							OnePlayerStats(p2, tp);
 					}
 				}
 
@@ -647,6 +657,21 @@ void TopStats ( )
 		p = find_plrghst ( p, &from );
 	}
 
+	if ( maxspree_q )
+	{
+		G_bprint( 2, "    QuadRun: ");
+		from = f1 = 0;
+		p = find_plrghst( world, &from );
+		while( p ) {
+			if ( p->ps.spree_max_q == maxspree_q ) {
+					G_bprint(2, "%s%s%s \220%d\221\n", (f1 ? "             " : ""),
+						( isghost( p ) ? "\x83" : "" ), getname( p ), maxspree_q );
+					f1 = 1;
+			}
+			p = find_plrghst( p, &from );
+		}
+	}
+
 	if ( isCTF() )
 	{
 		if ( maxcaps > 0 )
@@ -681,6 +706,36 @@ void TopStats ( )
 	}
 
 	G_bprint(2, "žžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n");
+}
+
+void OnePlayerMidairStats( gedict_t *p, int tp )
+{
+	int midairs, silver, gold, diamond;
+
+	midairs = p->ps.midairs;
+	silver  = p->ps.midairs_s;
+	gold    = p->ps.midairs_g;
+	diamond = p->ps.midairs_d;
+
+	if ( tp )
+		G_bprint(2,"\235\236\236\236\236\236\236\236\236\237\n" );
+
+	// need to fix stats in midair similar to ctf
+
+	G_bprint(2, "\x87 %s%s:\n"
+		 "  %d (%d) %s%.1f%%\n", ( isghost( p ) ? "\x83" : "" ), getname(p),
+		 ( isCTF() ? (int)(p->s.v.frags - p->ps.ctf_points) : (int)p->s.v.frags),
+		 ( isCTF() ? (int)(p->s.v.frags - p->ps.ctf_points - p->deaths) : (int)(p->s.v.frags - p->deaths)),
+		 ( tp ? va("%d ", (int)p->friendly ) : "" ),
+		 p->efficiency);
+
+	G_bprint(2, "%s: %d\n", redtext("Midairs"), midairs);
+	G_bprint(2, "%s: %d\n", redtext(" Silver"), silver);
+	G_bprint(2, "%s: %d\n", redtext("   G0ld"), gold);
+	G_bprint(2, "%s: %d\n", redtext("Diam0nd"), diamond);
+
+	if ( !tp )
+		G_bprint(2,"\235\236\236\236\236\236\236\236\236\237\n" );
 }
 
 void EM_on_MatchEndBreak( int isBreak )
@@ -750,6 +805,11 @@ void EndMatch ( float skip_log )
 				p->invincible_finished = 0;
 				p->super_damage_finished = 0;
 				p->radsuit_finished = 0;
+
+				if ( p->ps.spree_current > p->ps.spree_max )        
+					p->ps.spree_max = p->ps.spree_current;        
+				if ( p->ps.spree_current_q > p->ps.spree_max_q )    
+					p->ps.spree_max_q = p->ps.spree_current_q;    
 			}
 		}
 
@@ -774,15 +834,18 @@ void EndMatch ( float skip_log )
 
 		PlayersStats ();
 	
-        if( isTeam() || isCTF() )
-			SummaryTPStats ();
+		if ( !cvar("k_midair") )
+		{
+        	if( isTeam() || isCTF() )
+				SummaryTPStats ();
 
-        if( !isDuel() ) // top stats only in non duel modes
-			TopStats ();
+        	if( !isDuel() ) // top stats only in non duel modes
+				TopStats ();
+		}
 
         if( isTeam() || isCTF() )
 			TeamsStats ();
-
+		
 		if ( p = find( world, FOFCLSN, "ghost" ) ) // show legend :)
 			G_bprint(2, "\n\x83 - %s player\n\n", redtext("disconnected"));
 
@@ -1241,10 +1304,6 @@ void StartMatch ()
 
 	SM_PrepareMap(); // remove some items from map regardind with dmm
 
-	// FIXME: we only have one ctf mode regardless of number of players unlike 2on2 4on4 etc
-	// Perhaps we should set maxclients = CountPlayers or CountPlayers + 1 if odd?
-	// qqshka: ult, look about k_exclusive in code, generally this looks like what u want
-	  
 	if ( isCTF() )
 		SpawnRunes();
 	
@@ -1322,6 +1381,10 @@ void PrintCountdown( int seconds )
 		mode = redtext("Unknown");
 
 	strlcat(text, va("%s %8s\n", "Mode", mode), sizeof(text));
+
+	if ( cvar("k_midair") )
+		strlcat(text, va("%s %6s\n", "Midair", redtext("On")), sizeof(text));
+
 	if ( /*isTeam()*/ teamplay )
 		strlcat(text, va("%s %4s\n", "Teamplay", dig3(teamplay)), sizeof(text));
 	if ( timelimit )
