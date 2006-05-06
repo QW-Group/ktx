@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.21 2006/05/01 23:11:59 qqshka Exp $
+ *  $Id: items.c,v 1.22 2006/05/06 02:05:39 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -1301,6 +1301,9 @@ void powerup_touch()
 	else if ( streq( self->s.v.classname, "item_artifact_super_damage" ) )
 	{
 		other->ps.quad++;
+		if ( other->ps.spree_current_q > other->ps.spree_max_q )
+			other->ps.spree_max_q = other->ps.spree_current_q;
+		other->ps.spree_current_q = 0;  
 
 		if ( deathmatch == 4 )
 		{
@@ -1490,8 +1493,16 @@ void BackpackTouch()
 
 	if ( deathmatch == 4 )
 	{
-		other->s.v.health += 10;
-		G_sprint( other, PRINT_LOW, "10 additional health\n" );
+		if ( cvar("k_midair") )
+		{
+			other->s.v.health += 15;
+			G_sprint(other, PRINT_LOW, "15 additional health\n" );
+		}
+		else
+		{
+			other->s.v.health += 10;
+			G_sprint( other, PRINT_LOW, "10 additional health\n" );
+		}
 		if ( ( other->s.v.health > 250 ) && ( other->s.v.health < 300 ) )
 			sound( other, CHAN_ITEM, "items/protect3.wav", 1, ATTN_NORM );
 		else
@@ -1504,10 +1515,13 @@ void BackpackTouch()
 		{
 			if ( other->invincible_time != 1 )
 			{
-				other->invincible_time = 1;
-				other->invincible_finished = g_globalvars.time + 30;
-				other->s.v.items =
-				    ( int ) other->s.v.items | IT_INVULNERABILITY;
+				if ( !cvar("k_midair") )
+				{
+					other->invincible_time = 1;
+					other->invincible_finished = g_globalvars.time + 30;
+					other->s.v.items =
+				    	( int ) other->s.v.items | IT_INVULNERABILITY;
+				}
 
 				other->super_time = 1;
 				other->super_damage_finished = g_globalvars.time + 30;

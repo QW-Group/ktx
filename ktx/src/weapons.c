@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.30 2006/05/02 21:32:10 qqshka Exp $
+ *  $Id: weapons.c,v 1.31 2006/05/06 02:05:40 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -534,8 +534,13 @@ void W_FireRocket()
 // set newmis speed     
 	makevectors( self->s.v.v_angle );
 	aim( newmis->s.v.velocity );	// = aim(self, 1000);
-	VectorScale( newmis->s.v.velocity, 1000, newmis->s.v.velocity );
-// newmis->s.v.velocity = newmis->s.v.velocity * 1000;
+	if ( cvar("k_midair") && self->super_damage_finished > g_globalvars.time ) 
+	{
+		VectorScale ( newmis->s.v.velocity, 2000, newmis->s.v.velocity );
+		newmis->s.v.effects = 64;
+	}
+	else
+		VectorScale( newmis->s.v.velocity, 1000, newmis->s.v.velocity );
 
 	vectoangles( newmis->s.v.velocity, newmis->s.v.angles );
 	
@@ -554,6 +559,9 @@ void W_FireRocket()
 	setorigin( newmis, self->s.v.origin[0] + g_globalvars.v_forward[0] * 8,
 			self->s.v.origin[1] + g_globalvars.v_forward[1] * 8,
 			self->s.v.origin[2] + g_globalvars.v_forward[2] * 8 + 16 );
+
+	// midair 
+	VectorCopy( self->s.v.origin, newmis->s.v.oldorigin );
 }
 
 /*
