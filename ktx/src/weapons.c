@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.31 2006/05/06 02:05:40 ult_ Exp $
+ *  $Id: weapons.c,v 1.32 2006/05/06 19:33:27 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -537,7 +537,7 @@ void W_FireRocket()
 	if ( cvar("k_midair") && self->super_damage_finished > g_globalvars.time ) 
 	{
 		VectorScale ( newmis->s.v.velocity, 2000, newmis->s.v.velocity );
-		newmis->s.v.effects = 64;
+		newmis->s.v.effects = EF_BLUE;
 	}
 	else
 		VectorScale( newmis->s.v.velocity, 1000, newmis->s.v.velocity );

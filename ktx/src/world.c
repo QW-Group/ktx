@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.41 2006/05/06 01:20:36 ult_ Exp $
+ *  $Id: world.c,v 1.42 2006/05/06 19:33:27 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -907,6 +907,9 @@ void FixRules ( )
 	if ( k_minr > k_maxr ) {
 		cvar_fset( "k_minrate", k_minr = k_maxr );
 	}
+
+	if ( cvar("k_midair") && deathmatch != 4 )
+		cvar_fset( "k_midair", 0 ); // midair only in dmm4
 
 	// ok, broadcast changes if any, a bit tech info, but this is misconfigured server
 	// and must not happen on well configured servers, k?
