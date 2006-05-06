@@ -20,10 +20,13 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.42 2006/05/03 17:42:18 qqshka Exp $
+ *  $Id: g_utils.c,v 1.43 2006/05/06 01:48:39 qqshka Exp $
  */
 
 #include "g_local.h"
+
+void Sc_Stats(float on);
+
 
 int PASSFLOAT(float x)
 {
@@ -1830,4 +1833,20 @@ void info_kf_update ( gedict_t *p, char *from, char *to )
 }
 
 // }
+
+void refresh_plus_scores ()
+{
+	int from;
+	gedict_t *p, *swp;
+
+	for( from = 0, p = world; p = find_plrspc (p, &from); )
+		if ( p->sc_stats ) {
+			swp = self; // save self
+			self = p;
+
+			Sc_Stats( 2 ); // force refresh
+
+			self = swp; // restore self
+		}
+}
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.33 2006/05/06 01:20:36 ult_ Exp $
+ *  $Id: progs.h,v 1.34 2006/05/06 01:49:05 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -349,9 +349,9 @@ typedef struct gedict_s {
 	int   favx[MAX_CLIENTS];    // here stored players number for appropriate favX_add/Xfav_go commands
 	int   fav[MAX_CLIENTS];     // here stored players number for fav_add/next_fav commands
 	autoTrackType_t autotrack;  // is autotrack or auto_pow
-	int	  autotrack_id;		    // latest autotrack id, store this to detect is user want implicitly turn of autotrack
-
 	struct gedict_s *wizard;    // for specs, link to the entity which represent wizard
+	int   last_goal;            // just store here self->s.v.goal from last spec frame, so we can catch pov switch
+
 // }
 
 	pos_t	pos[MAX_POSITIONS];	// for player pos_save / pos_move

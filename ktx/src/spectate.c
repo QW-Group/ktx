@@ -20,13 +20,16 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.15 2006/04/15 23:17:43 qqshka Exp $
+ *  $Id: spectate.c,v 1.16 2006/05/06 01:48:39 qqshka Exp $
  */
 
 // spectate.c
 
 #include "g_local.h"
 
+
+void Wp_Stats(float on);
+void Sc_Stats(float on);
 
 void DoAutoTrack();
 void AdminImpBot();
@@ -198,6 +201,15 @@ void SpectatorImpulseCommand()
 }
 
 
+void SpecGoalChanged()
+{
+	if ( self->wp_stats )
+		Wp_Stats( 2 ); // force refresh
+	if ( self->sc_stats )
+		Sc_Stats( 2 ); // force refresh
+}
+
+
 ////////////////
 // GlobalParams:
 // time
@@ -206,6 +218,12 @@ void SpectatorImpulseCommand()
 void SpectatorThink()
 {
 	gedict_t *wizard = self->wizard;
+
+	if ( self->last_goal != self->s.v.goalentity ) {
+		SpecGoalChanged();
+
+		self->last_goal = self->s.v.goalentity;
+	}
 
 	if ( self->autotrack )
 		DoAutoTrack();

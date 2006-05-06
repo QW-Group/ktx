@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.59 2006/05/05 18:36:30 qqshka Exp $
+ *  $Id: g_local.h,v 1.60 2006/05/06 01:49:04 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -320,6 +320,8 @@ void		info_kf_update( gedict_t *p, char *from, char *to );
 
 // }
 
+void		refresh_plus_scores ();
+
 void    	disableupdates( gedict_t * ed, float time );
 
 //
@@ -374,7 +376,9 @@ void			BothPostThink(); // <- called for player and spec
 void            PlayerPostThink();
 void            SuperDamageSound();
 
+#define         WP_STATS_UPDATE (0.3f)
 void			Print_Wp_Stats();
+#define         SC_STATS_UPDATE (0.8f)
 void			Print_Scores();
 
 //spectate.c

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.86 2006/05/06 01:48:39 qqshka Exp $
+ *  $Id: commands.c,v 1.87 2006/05/06 01:51:18 qqshka Exp $
  */
 
 // commands.c
@@ -335,7 +335,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_KUINFO       "examine someone params"
 #define CD_WREG         "register reliable wpns"
 #define CD_KILL         "invoke suicide"
-#define CD_MIDAIR		"midair settings"
+#define CD_MIDAIR       "midair settings"
 #define CD_TIME         "show server time" 
 
 
@@ -539,7 +539,7 @@ cmd_t cmds[] = {
     { "kuinfo",      cmduinfo,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_KUINFO },
     { "wreg",        cmd_wreg,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_WREG },
     { "kill",        ClientKill,                0    , CF_PLAYER | CF_MATCHLESS, CD_KILL },
-    { "mid_air",	 ToggleMidair,              0    , CF_PLAYER, CD_MIDAIR },		
+    { "mid_air",     ToggleMidair,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_MIDAIR },
     { "time",        sv_time,                   0    , CF_BOTH | CF_MATCHLESS, CD_TIME }
 };
 
