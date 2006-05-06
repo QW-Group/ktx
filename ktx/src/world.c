@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.42 2006/05/06 19:33:27 qqshka Exp $
+ *  $Id: world.c,v 1.43 2006/05/06 22:33:07 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -615,6 +615,7 @@ void FirstFrame	( )
 	RegisterCvar("k_lockmin");
 	RegisterCvar("k_lockmax");
 	RegisterCvar("k_spectalk");
+	RegisterCvar("k_sayteam_to_spec");
 	RegisterCvar("k_666");
 	RegisterCvar("k_dis");
 	RegisterCvar("dq");
@@ -821,6 +822,45 @@ void FixPowerups ()
 	}
 }
 
+void FixCmdFloodProtect ()
+{
+	k_cmd_fp_count = bound(0, cvar("k_cmd_fp_count"), MAX_FP_CMDS);
+	k_cmd_fp_count = (k_cmd_fp_count ? k_cmd_fp_count : min(10, MAX_FP_CMDS));
+	k_cmd_fp_per = bound(0, cvar("k_cmd_fp_per"), 30);
+	k_cmd_fp_per = (k_cmd_fp_per ? k_cmd_fp_per : 4);
+	k_cmd_fp_for = bound(0, cvar("k_cmd_fp_for"), 30);
+	k_cmd_fp_for = (k_cmd_fp_for ? k_cmd_fp_for : 5);
+	k_cmd_fp_kick = bound(0, cvar("k_cmd_fp_kick"), 10);
+	k_cmd_fp_kick = (k_cmd_fp_kick ? k_cmd_fp_kick : 4);
+	k_cmd_fp_dontkick = bound(0, cvar("k_cmd_fp_dontkick"), 1);
+	k_cmd_fp_disabled = bound(0, cvar("k_cmd_fp_disabled"), 1);
+}
+
+void FixSayTeamToSpecs()
+{
+	int k_sayteam_to_spec = bound(0, cvar("k_sayteam_to_spec"), 3);
+
+	switch ( k_sayteam_to_spec ) {
+		case  0: if ( cvar("sv_sayteam_to_spec") )
+					cvar_fset("sv_sayteam_to_spec", 0);
+				 break;
+		case  1: if ( match_in_progress )
+					cvar_fset("sv_sayteam_to_spec", 1);
+				 else
+					cvar_fset("sv_sayteam_to_spec", 0);
+				 break;
+		case  2: if ( match_in_progress )
+					cvar_fset("sv_sayteam_to_spec", 0);
+				 else
+					cvar_fset("sv_sayteam_to_spec", 1);
+				 break;
+		case  3:
+		default: if ( !cvar("sv_sayteam_to_spec") )
+					cvar_fset("sv_sayteam_to_spec", 1);
+				 break;
+	}
+}
+
 // check if server is misconfigured somehow, made some minimum fixage
 void FixRules ( )
 {
@@ -833,18 +873,10 @@ void FixRules ( )
 	int k_minr = bound(0, cvar( "k_minrate" ), 20000);
 	int k_maxr = bound(0, cvar( "k_maxrate" ), 20000);	
 
-// { cmd flood protect
-	k_cmd_fp_count = bound(0, cvar("k_cmd_fp_count"), MAX_FP_CMDS);
-	k_cmd_fp_count = (k_cmd_fp_count ? k_cmd_fp_count : min(10, MAX_FP_CMDS));
-	k_cmd_fp_per = bound(0, cvar("k_cmd_fp_per"), 30);
-	k_cmd_fp_per = (k_cmd_fp_per ? k_cmd_fp_per : 4);
-	k_cmd_fp_for = bound(0, cvar("k_cmd_fp_for"), 30);
-	k_cmd_fp_for = (k_cmd_fp_for ? k_cmd_fp_for : 5);
-	k_cmd_fp_kick = bound(0, cvar("k_cmd_fp_kick"), 10);
-	k_cmd_fp_kick = (k_cmd_fp_kick ? k_cmd_fp_kick : 4);
-	k_cmd_fp_dontkick = bound(0, cvar("k_cmd_fp_dontkick"), 1);
-	k_cmd_fp_disabled = bound(0, cvar("k_cmd_fp_disabled"), 1);
-// }
+	// cmd flood protect
+	FixCmdFloodProtect();
+
+	FixSayTeamToSpecs(); // k_sayteam_to_spec
 
 	// turn CTF off if CTF usermode is not allowed, due to precache_sound or precache_model
 	if ( isCTF() && !( k_allowed_free_modes & UM_CTF ) )

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_userinfo.c,v 1.17 2006/04/30 16:53:56 qqshka Exp $
+ *  $Id: g_userinfo.c,v 1.18 2006/05/06 22:33:07 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -79,6 +79,9 @@ qboolean 	ClientUserInfoChanged ()
 // in ctf we dont want red team players to be blue, etc
 qboolean FixPlayerColor ( char *newcolor )
 {
+	if ( self->k_spectator )
+		return false;
+
 	if ( isCTF() )
 	{
 		if ( streq(getteam(self), "red") )
@@ -93,6 +96,9 @@ qboolean FixPlayerColor ( char *newcolor )
 qboolean FixPlayerTeam ( char *newteam )
 {
 	char *s1, *s2;
+
+	if ( self->k_spectator )
+		return false;
 
 	// captain or potential captain may not change team
 	if ( self->k_captain ) {

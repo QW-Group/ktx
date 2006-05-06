@@ -1,3 +1,17 @@
+2006-05-07
+qq:
+139. Added new variable "k_sayteam_to_spec".
+	 New variable now available in _latest_ mvdsv, "sv_sayteam_to_spec" which controll send
+	 say_team msgs to specs or not, at the same time mod need some manipulations with this,
+	 for example some admins may wanna turn off sending say_team to specs when match is not in
+	 progress since players may talk about tactics etc, but specs really need say_team during
+	 match. So mod can switch value of "sv_sayteam_to_spec" dependant of is match going on or not.
+
+	 set k_sayteam_to_spec 1 // 0 - sv_sayteam_to_spec always set to 0
+	                         // 1 - set sv_sayteam_to_spec to 0 in non match and to 1 in match
+	                         // 2 - set sv_sayteam_to_spec to 1 in non match and to 0 in match
+	                         // 3 - sv_sayteam_to_spec always set to 1
+
 2006-05-06
 ult:
 134. Added midair support.  cvar: k_midair command: mid_air (Needs some testing)
