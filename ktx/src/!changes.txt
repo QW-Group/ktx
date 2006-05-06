@@ -6,6 +6,14 @@ ult:
 
 136. Added top stat: quad run.  Shows highest single quad spree for a map.
 
+qq:
+137. Probably fixing autotrack bug, need more test.
+
+138. Fixing +wp_stats update time, now 0.3 sec like was in ktpro,
+	 and also switching pov (if u spec) result in instantly update.
+
+	 Aslo same fixage for +scores.
+
 2006-05-05
 qq:
 131. Now mod in matchless mode wait players before start match, thx mli.

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.85 2006/05/06 01:20:36 ult_ Exp $
+ *  $Id: commands.c,v 1.86 2006/05/06 01:48:39 qqshka Exp $
  */
 
 // commands.c
@@ -3627,27 +3627,19 @@ void DoAutoTrack( )
 
 	goal = PROG_TO_EDICT( self->s.v.goalentity );
 
-	// user switch pov while autotrack - this implicitly turn off autotrack
-	if ( self->autotrack_id && self->autotrack_id != GetUserID( goal ) ) {
-		AutoTrack( atNone ); // turn off
-		return;
-	}
-
 	if ( !p )
 		return;
 
 	if ( goal == p )
 		return; // already track this player
 
-	if ( ( self->autotrack_id = id = GetUserID( p ) ) > 0 )
+	if ( ( id = GetUserID( p ) ) > 0 )
 		stuffcmd( self, "track %d\n", id );
 }
 
 void AutoTrack( float autoTrackType )
 {
 	autoTrackType_t at = self->autotrack; // save auto track type before turn off or switch to other type
-
-	self->autotrack_id = 0; // force reset
 
 	if ( autoTrackType == self->autotrack || autoTrackType == atNone )
 		self->autotrack = atNone; // turn off

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.66 2006/05/06 01:20:36 ult_ Exp $
+ *  $Id: client.c,v 1.67 2006/05/06 01:48:39 qqshka Exp $
  */
 
 //===========================================================================
@@ -1699,7 +1699,7 @@ void Print_Wp_Stats( )
 		G_centerprint( self, "%s%s", buf, redtext("Tracking noone (+wp_stats)"));
 
 		self->need_clearCP  = 1;
-		self->wp_stats_time = g_globalvars.time + 0.8;
+		self->wp_stats_time = g_globalvars.time + WP_STATS_UPDATE;
 
 		return;
 	}
@@ -1749,7 +1749,7 @@ void Print_Wp_Stats( )
 		return; // sanity
 
 	self->need_clearCP  = 1;
-	self->wp_stats_time = g_globalvars.time + 0.8;
+	self->wp_stats_time = g_globalvars.time + WP_STATS_UPDATE;
 
 	G_centerprint( self, "%s",  buf );
 }
@@ -1775,7 +1775,7 @@ void Print_Scores( )
 		G_centerprint( self, "%s%s", buf, redtext("Tracking noone (+scores)"));
 
 		self->need_clearCP  = 1;
-		self->sc_stats_time = g_globalvars.time + 0.8;
+		self->sc_stats_time = g_globalvars.time + SC_STATS_UPDATE;
 
 		return;
 	}
@@ -1825,7 +1825,7 @@ void Print_Scores( )
 		return; // sanity
 
 	self->need_clearCP  = 1;
-	self->sc_stats_time = g_globalvars.time + 0.8;
+	self->sc_stats_time = g_globalvars.time + SC_STATS_UPDATE;
 
 	G_centerprint( self, "%s",  buf );
 }
@@ -2480,6 +2480,8 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
     if ( strneq( targ->s.v.classname, "player" ))
 		return;
+
+	refresh_plus_scores ();
     
 	//ZOID 12-13-96: self.team doesn't work in QW.  Use keys
 	attackerteam = getteam(attacker);
