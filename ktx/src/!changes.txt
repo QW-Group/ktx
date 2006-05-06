@@ -1,4 +1,4 @@
-2006-06-05
+2006-05-06
 ult:
 134. Added midair support.  cvar: k_midair command: mid_air (Needs some testing)
 
