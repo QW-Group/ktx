@@ -1,3 +1,13 @@
+2006-05-08
+qq:
+140. Changed/ktpro'ish how mod assign names for demos:
+
+	 duel_dag_vs_zu-zu[dm3] // duel game
+	 team_no!_vs_fom[dm3]   // team game
+	 ctf_no!_vs_fom[dm3]    // ctf game
+	 ffa_10[dm3]            // ffa game, where 10 is count of players
+	 unknown_10[dm3]        // unknown game, where 10 is count of players
+
 2006-05-07
 qq:
 139. Added new variable "k_sayteam_to_spec".

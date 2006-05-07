@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.49 2006/05/06 01:20:36 ult_ Exp $
+ *  $Id: match.c,v 1.50 2006/05/07 23:23:44 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1617,6 +1617,62 @@ void ShowMatchSettings()
 	}
 }
 
+// duel_dag_vs_zu-zu[dm3]
+// team_no!_vs_fom[dm3]
+// ctf_no!_vs_fom[dm3]
+// ffa_10[dm3] // where 10 is count of players
+// unknown_10[dm3] // where 10 is count of players
+
+char *CompilateDemoName ()
+{
+	static char demoname[512];
+
+	int i;
+	gedict_t *p;
+	char *name, *vs;
+
+	if ( isDuel() ) {
+		strlcat( demoname, "duel", sizeof( demoname ) );
+
+		for( vs = "_", p = world; p = find ( p, FOFCLSN, "player" ); ) 
+		{
+			if ( strnull( name = getname( p ) ) )
+				continue;
+
+			strlcat( demoname, vs, sizeof( demoname ) );
+			strlcat( demoname, name, sizeof( demoname ) );
+			vs = "_vs_";
+		}
+	}
+	else if ( isTeam() || isCTF() ) {
+		char teams[MAX_CLIENTS][MAX_TEAM_NAME];
+
+		getteams(teams);
+
+		strlcat( demoname, (isTeam() ? "team": "ctf"), sizeof( demoname ) );
+
+		for( vs = "_", i = 0; i < MAX_CLIENTS; i++ ) 
+		{
+			if ( strnull( teams[i] ) )
+				break;
+
+			strlcat( demoname, vs, sizeof( demoname ) );
+			strlcat( demoname, teams[i], sizeof( demoname ) );
+			vs = "_vs_";
+		}
+	}
+	else if ( isFFA() ) {
+		strlcat( demoname, va("ffa_%d", (int)CountPlayers()), sizeof( demoname ) );
+	}
+	else {
+		strlcat( demoname, va("unknown_%d", (int)CountPlayers()), sizeof( demoname ) );
+	}
+
+	strlcat( demoname, va("[%s]", g_globalvars.mapname), sizeof( demoname ) );
+
+	return demoname;
+}
+
 void StartDemoRecord ()
 {
 	if ( cvar( "demo_tmp_record" ) ) { // FIXME: TODO: make this more like ktpro
@@ -1631,7 +1687,7 @@ void StartDemoRecord ()
 			if( !strnull( cvar_string( "serverdemo" ) ) )
 				localcmd("cancel\n");  // demo is recording, cancel before new one
 
-			localcmd( "easyrecord\n" );
+			localcmd( "easyrecord %s\n", CompilateDemoName() );
 		}
 	}
 }

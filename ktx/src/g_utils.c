@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.43 2006/05/06 01:48:39 qqshka Exp $
+ *  $Id: g_utils.c,v 1.44 2006/05/07 23:23:44 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -825,6 +825,36 @@ void cvar_fset( const char *var, float val )
 		G_Error("cvar_fset null");
 
 	trap_cvar_set_float(var, val);
+}
+
+void getteams(char teams[MAX_CLIENTS][MAX_TEAM_NAME])
+{
+	char *team;
+	int i, j;
+
+	// clear array
+	for ( i = 0; i < MAX_CLIENTS; i++ )
+		teams[i][0] = 0;
+
+	for ( i = 1; i <= MAX_CLIENTS; i++ ) {
+		if ( strneq( g_edicts[i].s.v.classname, "player" ) )
+			continue; // collect only players teams
+
+		team = getteam( &(g_edicts[i]) );
+
+		if ( strnull( team ) )
+			continue; // empty team
+
+		for ( j = 0; j < MAX_CLIENTS; j++ ) {
+			if ( strnull( teams[j] ) ) {
+				strlcat(teams[j], team, MAX_TEAM_NAME); // add new team to array
+				break;
+			}
+
+			if ( streq( teams[j], team ) )
+				break; // team already in array
+		}
+	}
 }
 
 // i'm tired of this shit, so implement this
