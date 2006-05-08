@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.67 2006/05/06 01:48:39 qqshka Exp $
+ *  $Id: client.c,v 1.68 2006/05/08 02:59:53 qqshka Exp $
  */
 
 //===========================================================================
@@ -2720,7 +2720,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			attacker->victim = targ->s.v.netname;
 			targ->killer = attacker->s.v.netname;
 
-			if ( targ->spawn_time + 1 > g_globalvars.time )
+			if ( targ->spawn_time + 2 > g_globalvars.time )
 				attacker->ps.spawn_frags++;
 
 			// handle various ctf bonuses

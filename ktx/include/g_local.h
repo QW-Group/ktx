@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.61 2006/05/07 23:23:44 qqshka Exp $
+ *  $Id: g_local.h,v 1.62 2006/05/08 02:59:53 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -245,7 +245,7 @@ void		cvar_fset( const char *var, float val );
 #define MAX_TEAM_NAME (32)  //  qqshka: 32 - is max len of team name?
 
 //extern char teams[MAX_CLIENTS][MAX_TEAM_NAME];
-void		getteams(char teams[MAX_CLIENTS][MAX_TEAM_NAME]);
+int 		getteams(char teams[MAX_CLIENTS][MAX_TEAM_NAME]);
 char		*getteam( gedict_t * ed );
 char		*getname( gedict_t * ed );
 

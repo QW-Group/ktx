@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.50 2006/05/07 23:23:44 qqshka Exp $
+ *  $Id: match.c,v 1.51 2006/05/08 02:59:53 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -452,6 +452,11 @@ void OnePlayerStats(gedict_t *p, int tp)
 		// armors + megahealths
 		G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("Armr&mhs"),
 				redtext("ga"), ga, redtext("ya"), ya, redtext("ra"), ra, redtext("mh"), mh);
+
+		if ( isTeam() ) // qqshka: no powerups stats for CTF ?
+			G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("Powerups"),
+				redtext("Q"), quad, redtext("P"), pent, redtext("R"), ring);
+
 		if ( isCTF() )
 		{
 			G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f %s:%.0f\n", redtext("RuneTime"),
@@ -1631,6 +1636,8 @@ char *CompilateDemoName ()
 	gedict_t *p;
 	char *name, *vs;
 
+	demoname[0] = 0;
+
 	if ( isDuel() ) {
 		strlcat( demoname, "duel", sizeof( demoname ) );
 
@@ -1646,10 +1653,16 @@ char *CompilateDemoName ()
 	}
 	else if ( isTeam() || isCTF() ) {
 		char teams[MAX_CLIENTS][MAX_TEAM_NAME];
+		int cnt = getteams(teams);
+		int clt = cvar("maxclients"); //CountPlayers();
 
-		getteams(teams);
+		// guess is this XonX
+		if ( clt > 1 && cnt > 1 && !(clt % cnt) )
+			clt /= cnt; // yes
+		else
+			clt = 0; // no
 
-		strlcat( demoname, (isTeam() ? "team": "ctf"), sizeof( demoname ) );
+		strlcat( demoname, (isTeam() ? (clt ? va("%don%d", clt, clt) : "team"): "ctf"), sizeof( demoname ) );
 
 		for( vs = "_", i = 0; i < MAX_CLIENTS; i++ ) 
 		{

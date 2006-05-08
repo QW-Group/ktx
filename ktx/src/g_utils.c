@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.44 2006/05/07 23:23:44 qqshka Exp $
+ *  $Id: g_utils.c,v 1.45 2006/05/08 02:59:53 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -827,7 +827,7 @@ void cvar_fset( const char *var, float val )
 	trap_cvar_set_float(var, val);
 }
 
-void getteams(char teams[MAX_CLIENTS][MAX_TEAM_NAME])
+int getteams(char teams[MAX_CLIENTS][MAX_TEAM_NAME])
 {
 	char *team;
 	int i, j;
@@ -855,6 +855,12 @@ void getteams(char teams[MAX_CLIENTS][MAX_TEAM_NAME])
 				break; // team already in array
 		}
 	}
+
+	for ( j = 0; j < MAX_CLIENTS; j++ )
+		if ( strnull( teams[j] ) )
+			break;
+
+	return j;
 }
 
 // i'm tired of this shit, so implement this

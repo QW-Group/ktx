@@ -3,10 +3,15 @@ qq:
 140. Changed/ktpro'ish how mod assign names for demos:
 
 	 duel_dag_vs_zu-zu[dm3] // duel game
-	 team_no!_vs_fom[dm3]   // team game
+	 2on2_no!_vs_fom[dm3]   // team 2on2 game, same for 3on3 4on4 etc..
+	 team_no!_vs_fom[dm3]   // unknown team game
 	 ctf_no!_vs_fom[dm3]    // ctf game
 	 ffa_10[dm3]            // ffa game, where 10 is count of players
 	 unknown_10[dm3]        // unknown game, where 10 is count of players
+
+141. Added per player powerups stats if team game.
+
+142. Spawnfrag counted now if u kill someone in 2 seconds after he spawn.
 
 2006-05-07
 qq:
