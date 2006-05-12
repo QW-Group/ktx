@@ -1,3 +1,23 @@
+2006-05-11
+qq:
+145. Now "klist" also show not fully connected users, but u need _latest_ mvdsv, seems
+	 only me have such mvdsv atm.
+
+146. Added command "cmd fkick <id1 [id2 [id3 ...]] [reason]>", a bit modified ktpro command.
+
+2006-05-10
+qq:
+144. Added commands "cmd kick" and "mkick" like it was in ktpro.
+
+2006-05-09
+qq:
+143. Changed order of configs in usermodes, now looks like this:
+
+	 "exec configs/usermodes/default.cfg"
+	 "exec configs/usermodes/1on1/default.cfg"
+	 "exec configs/usermodes/dm6.cfg"
+	 "exec configs/usermodes/1on1/dm6.cfg"
+
 2006-05-08
 qq:
 140. Changed/ktpro'ish how mod assign names for demos:
@@ -1045,10 +1065,10 @@ added 1on1 2on2 3on3 4on4 10on10 and ffa commands
 
 for example 1on1 on dm6 will setup some predefined stuff for this
 command and exec this files:
-	"exec configs/usermodes/default.cfg\n"
-	"exec configs/usermodes/dm6.cfg\n"
-	"exec configs/usermodes/1on1/default.cfg\n"
-	"exec configs/usermodes/1on1/dm6.cfg\n"
+	"exec configs/usermodes/default.cfg"
+	"exec configs/usermodes/dm6.cfg"
+	"exec configs/usermodes/1on1/default.cfg"
+	"exec configs/usermodes/1on1/dm6.cfg"
 
 and some localinfos
 

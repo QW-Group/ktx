@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.34 2006/05/06 01:49:05 qqshka Exp $
+ *  $Id: progs.h,v 1.35 2006/05/12 22:18:38 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -270,7 +270,10 @@ typedef struct gedict_s {
 	char	*victim;         // name of player last killed
 
 	struct gedict_s *k_lastspawn;    // NOT_SURE: spot at which player last spawned?
+// { kick mode
 	struct gedict_s *k_playertokick; // player selected to be kicked
+	float	k_kicking;       // if player is in kick mode
+// }
 	float	k_1spawn;        // NOT_SURE: used in kteams respawn code...
 	float	k_666;           // if player has 666 respawn protection
 	float	k_accepted;      // NOT_SURE:
@@ -279,14 +282,12 @@ typedef struct gedict_s {
 	float	k_admin;         // if player is an admin
 	float	k_captain;       // if player is team captain
 	float	k_flag;          // flagvalue to customise settings such as sounds/autoscreenshot
-	float	k_kicking;       // if player is in kick mode
 	float	k_msgcount;      // NOT_SURE: last time mod printed a message to client?
 	float	k_picked;        // NOT_SURE: 
 	float	k_ptime;         // stores player nexttime value when server is paused
 	float	k_stuff;         // if player has received stuffed aliases
 	float	k_teamnumber;    // team the player is a member of, 1 = team1, 2 = team2
 	float	k_teamnum;       // NOT_SURE:
-	char	*kick_ctype;     // if selected player to kick is player or spectator
 	
 	float lastwepfired;
 	

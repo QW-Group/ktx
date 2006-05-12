@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.45 2006/05/08 02:59:53 qqshka Exp $
+ *  $Id: g_utils.c,v 1.46 2006/05/12 22:18:38 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1072,6 +1072,28 @@ gedict_t *SpecPlayer_by_IDorName( const char *IDname )
 	return (p ? p : spec_by_IDorName( IDname ));
 }
 
+gedict_t *SpecPlayer_by_id( int id )
+{
+	gedict_t *p = spec_by_id( id );
+
+	return (p ? p : player_by_id( id ) );
+}
+
+gedict_t *not_connected_by_id( int id )
+{
+	char *statk;
+	gedict_t *p;
+
+	for( p = world + 1; p <= world + MAX_CLIENTS; p++ )
+		if ( (   streq(statk = ezinfokey(p, "*state"), "preconnected")
+			  || streq(statk, "connected")
+			 ) && iKey(p, "*userid") == id  // can't use GetUserID here
+		   )
+			return p;
+
+	return NULL;
+}
+
 char *armor_type( int items )
 {
 	static char		string[MAX_STRINGS][4];
@@ -1886,3 +1908,16 @@ void refresh_plus_scores ()
 		}
 }
 
+int only_digits(const char *s)
+{
+	if ( !s || *s == '\0' )
+		return (0);
+
+	while ( *s != '\0' )
+	{
+		if (!isdigit(*s))
+			return (0);
+		s++;
+	}
+	return (1);
+}

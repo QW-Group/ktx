@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.68 2006/05/08 02:59:53 qqshka Exp $
+ *  $Id: client.c,v 1.69 2006/05/12 22:18:38 qqshka Exp $
  */
 
 //===========================================================================
@@ -44,7 +44,6 @@ void PlayerStats();
 void ExitCaptain();
 void CheckFinishCaptain();
 void MakeMOTD();
-void ExitKick(gedict_t *kicker);
 void play_teleport( gedict_t *sndspot );
 void ImpulseCommands();
 void StartDie ();
@@ -2329,6 +2328,8 @@ void BothPostThink ()
 		self->need_clearCP = 0;
 		G_centerprint(self, ""); // clear center print
 	}
+
+	KickThink ();
 }
 
 

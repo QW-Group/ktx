@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.87 2006/05/06 01:51:18 qqshka Exp $
+ *  $Id: commands.c,v 1.88 2006/05/12 22:18:38 qqshka Exp $
  */
 
 // commands.c
@@ -38,6 +38,8 @@ void TogglePreWar ();
 void ToggleMapLock ();
 void ToggleMaster ();
 void AdminKick ();
+void m_kick ();
+void f_kick ();
 void YesKick ();
 void DontKick ();
 void VoteAdmin();
@@ -144,6 +146,8 @@ void ClientKill();
 
 void sv_time();
 
+void m_kick ();
+
 // spec
 void ShowCamHelp();
 
@@ -230,6 +234,8 @@ const char CD_NODESC[] = "no desc";
 #define CD_QENEMY     "enemy vicinity reporting"
 #define CD_QPOINT     "point function"
 #define CD_KICK       "toggle kick mode"
+#define CD_MKICK      "multi kick"
+#define CD_FKICK      "unconnected kick"
 #define CD_Y          "yes kick"
 #define CD_N          "don't kick"
 #define CD_OVERTIME   "toggle overtime mode"
@@ -421,7 +427,9 @@ cmd_t cmds[] = {
 	{ "qenemy",      ToggleQEnemy,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_QENEMY },
 	{ "qpoint",      ToggleQPoint,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_QPOINT },
 	                                          
-    { "kick",        AdminKick,                 0    , CF_BOTH_ADMIN, CD_KICK },
+    { "kick",        AdminKick,                 0    , CF_BOTH_ADMIN | CF_PARAMS, CD_KICK },
+    { "mkick",       m_kick,                    0    , CF_BOTH_ADMIN | CF_PARAMS, CD_MKICK },
+    { "fkick",       f_kick,                    0    , CF_BOTH_ADMIN | CF_PARAMS, CD_FKICK },
     { "y",           YesKick,                   0    , CF_BOTH_ADMIN, CD_Y },
     { "n",           DontKick,                  0    , CF_BOTH_ADMIN, CD_N },
     { "overtime",    ChangeOvertime,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_OVERTIME },
@@ -2812,12 +2820,12 @@ void UserMode(float umode)
 		trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
 		G_cprint("%s", buf);
 	}
-	cfg_name = va("configs/usermodes/%s.cfg", g_globalvars.mapname);
+	cfg_name = va("configs/usermodes/%s/default.cfg", um);
 	if ( can_exec( cfg_name ) ) {
 		trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
 		G_cprint("%s", buf);
 	}
-	cfg_name = va("configs/usermodes/%s/default.cfg", um);
+	cfg_name = va("configs/usermodes/%s.cfg", g_globalvars.mapname);
 	if ( can_exec( cfg_name ) ) {
 		trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
 		G_cprint("%s", buf);
@@ -3134,6 +3142,30 @@ void klist ( )
 						 redtext( "frags" ), redtext( "team" ), redtext( "name" ) );
 		}
 		G_sprint(self, 2, "%5d|%4.4s|%s\n",	(int)p->s.v.frags, getteam( p ), getname( p ));
+	}
+
+	if (i)
+		G_sprint(self, 2, "%s %2d found %s\n", redtext("--"), i, redtext("-------------") );
+
+	for( i = 0, p = world + 1; p <= world + MAX_CLIENTS; p++ ) {
+		if ( streq(track = ezinfokey(p, "*state"), "zombie") )
+			;
+		else if ( streq(track, "preconnected") || streq(track, "connected") )
+			track = "connecting";
+		else
+			continue; // continue due to player spawned or free or in unknown state
+
+		if ( !i ) {
+			G_sprint(self, 2, "Clients list: %s\n", redtext( "unconnected" ) );
+			G_sprint(self, 2, "%s %-10s %s\n",
+						 redtext( "id" ), redtext( "state" ), redtext( "name" ) );
+		}
+
+		G_sprint(self, 2, "%2d|%-10.10s|%s\n", 
+					iKey(p, "*userid"), // can't use GetUserID here
+					track, (strnull( p->s.v.netname ) ? "!noname!" : p->s.v.netname));
+
+		i++;
 	}
 
 	if (i)
@@ -4391,8 +4423,6 @@ void wreg_showslot(	wreg_t *w, int slot )
 	G_sprint(self, 2, "slot \"%c\" - \"%s%s\"\n", (char)slot, sign, order);
 }
 
-int only_digits(const char *s);
-
 void cmd_wreg()
 {
 	int		argc = trap_CmdArgc(), attack = 0, imp[MAX_WREG_IMP], i, cnt;
@@ -4571,6 +4601,8 @@ void cmd_wreg_do( byte c )
 	}
 }
 
+// }
+
 void ToggleMidair()
 {
 	if ( match_in_progress )
@@ -4587,8 +4619,6 @@ void ToggleMidair()
 
 	cvar_toggle_msg( self, "k_midair", redtext("Midair") );
 }
-
-// }
 
 void sv_time()
 {

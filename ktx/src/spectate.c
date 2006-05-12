@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.16 2006/05/06 01:48:39 qqshka Exp $
+ *  $Id: spectate.c,v 1.17 2006/05/12 22:18:38 qqshka Exp $
  */
 
 // spectate.c
@@ -35,7 +35,6 @@ void DoAutoTrack();
 void AdminImpBot();
 
 void SMakeMOTD();
-void ExitKick(gedict_t *kicker);
 
 float CountALLPlayers ();
 

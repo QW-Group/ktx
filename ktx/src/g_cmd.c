@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.12 2006/04/30 16:53:56 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.13 2006/05/12 22:18:38 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -31,22 +31,6 @@ void			cmdinfo ();
 void			cmduinfo ();
 void			cmd_wreg_do( byte c );
 void			cmd_ack();
-
-// VVD: Need for executing commands by 'cmd <CMD_NAME> <ARG1> ... <ARGn>',
-// because '<CMD_NAME> <ARG1> ... <ARGn>' work only with last ezQuake qw client.
-// Function only_digits was copied from bind (DNS server) sources.
-int only_digits(const char *s)
-{
-	if (*s == '\0')
-		return (0);
-	while (*s != '\0')
-	{
-		if (!isdigit(*s))
-			return (0);
-		s++;
-	}
-	return (1);
-}
 
 qboolean 	ClientCommand()
 {

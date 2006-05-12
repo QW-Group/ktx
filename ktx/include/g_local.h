@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.62 2006/05/08 02:59:53 qqshka Exp $
+ *  $Id: g_local.h,v 1.63 2006/05/12 22:18:38 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -262,6 +262,9 @@ gedict_t	*spec_by_name( const char *name );
 gedict_t	*spec_by_IDorName( const char *IDname );
 
 gedict_t	*SpecPlayer_by_IDorName( const char *IDname );
+gedict_t	*SpecPlayer_by_id( int id );
+
+gedict_t	*not_connected_by_id( int id );
 
 char		*armor_type( int items );
 
@@ -327,6 +330,8 @@ void		info_kf_update( gedict_t *p, char *from, char *to );
 void		refresh_plus_scores ();
 
 void    	disableupdates( gedict_t * ed, float time );
+
+int			only_digits(const char *s);
 
 //
 //  subs.c
@@ -603,6 +608,9 @@ void 	ElectThink();
 void	AbortElect();
 
 // admin.c
+
+void	KickThink ();
+void	ExitKick(gedict_t *kicker);
 
 void 	ModPause (int pause);
 void 	BecomeAdmin(gedict_t *p);
