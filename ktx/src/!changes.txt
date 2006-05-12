@@ -1,3 +1,7 @@
+2006-05-12
+ult:
+147. Several small midair changes to be more like ktpro midair.
+
 2006-05-11
 qq:
 145. Now "klist" also show not fully connected users, but u need _latest_ mvdsv, seems

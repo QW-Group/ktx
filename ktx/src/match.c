@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.51 2006/05/08 02:59:53 qqshka Exp $
+ *  $Id: match.c,v 1.52 2006/05/12 22:54:11 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -453,7 +453,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 		G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("Armr&mhs"),
 				redtext("ga"), ga, redtext("ya"), ya, redtext("ra"), ra, redtext("mh"), mh);
 
-		if ( isTeam() ) // qqshka: no powerups stats for CTF ?
+		if ( isTeam() || isCTF() )
 			G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("Powerups"),
 				redtext("Q"), quad, redtext("P"), pent, redtext("R"), ring);
 
@@ -1416,7 +1416,7 @@ void PrintCountdown( int seconds )
 
 	strlcat(text, va("%s %4s\n", "Powerups", pwr), sizeof(text));
 
-	if (    deathmatch == 4 
+	if (    deathmatch == 4 && !cvar("k_midair")
 		 && !strnull( nowp = str_noweapon((int)cvar("k_disallow_weapons") & DA_WPNS) )
 	   )
 		strlcat(text, va("\n%s %4s\n", "Noweapon", 
@@ -1640,6 +1640,8 @@ char *CompilateDemoName ()
 
 	if ( isDuel() ) {
 		strlcat( demoname, "duel", sizeof( demoname ) );
+		if ( cvar("k_midair") )
+			strlcat( demoname, "_midair", sizeof( demoname ) );
 
 		for( vs = "_", p = world; p = find ( p, FOFCLSN, "player" ); ) 
 		{

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.22 2006/05/06 02:05:39 ult_ Exp $
+ *  $Id: items.c,v 1.23 2006/05/12 22:54:11 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -1486,6 +1486,9 @@ void BackpackTouch()
 		return;
 
 	if ( ISDEAD( other ) )
+		return;
+
+	if ( cvar("k_midair") && other->super_damage_finished > g_globalvars.time )
 		return;
 
 	acount = 0;

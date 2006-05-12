@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.69 2006/05/12 22:18:38 qqshka Exp $
+ *  $Id: client.c,v 1.70 2006/05/12 22:54:11 ult_ Exp $
  */
 
 //===========================================================================
@@ -1241,6 +1241,7 @@ void PlayerDeathThink()
 {
 // gedict_t*    old_self;
 	float           forward;
+	float			respawn_time;
 
     if( k_standby )
         return;
@@ -1260,7 +1261,8 @@ void PlayerDeathThink()
 
 
 // { autospawn
-	if( (g_globalvars.time - self->dead_time) > 5 && match_in_progress ) {
+	respawn_time = cvar("k_midair") ? 2 : 5;
+	if( (g_globalvars.time - self->dead_time) > respawn_time && match_in_progress ) {
 		self->s.v.deadflag = DEAD_RESPAWNABLE;
 		self->wreg_attack = 0;
 		self->s.v.button0 = 0;

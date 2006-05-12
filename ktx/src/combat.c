@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.18 2006/05/06 01:20:36 ult_ Exp $
+ *  $Id: combat.c,v 1.19 2006/05/12 22:54:11 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -172,8 +172,8 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	char            *attackerteam, *targteam;
 
 	//midair
-	float playerheight, midheight;
-	qboolean lowheight, midair = false;
+	float playerheight, midheight = 0;
+	qboolean lowheight = false, midair = false;
 
 	if ( !targ->s.v.takedamage || ISDEAD( targ ) )
 		return;
@@ -237,7 +237,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		if ( streq( inflictor->s.v.classname, "rocket" ) )
 		{
 			midheight = targ->s.v.origin[2] - inflictor->s.v.oldorigin[2];
-			if ( midheight <= 200 )
+			if ( midheight <= 190 )
 				midheight = 0;
 		}
 		traceline( PASSVEC3(targ->s.v.origin),
@@ -245,13 +245,14 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 				targ->s.v.origin[1], 
 				targ->s.v.origin[2] - 2048,
 				true, targ );
+
 		playerheight = targ->s.v.absmin[2] - g_globalvars.trace_endpos[2];
 
-		if ( playerheight < 42.5 || ((int) targ->s.v.flags & FL_ONGROUND) )
+		if ( playerheight < 45 )
 			lowheight = true;
 		else
 		{
-			damage *= ( 1 + ( playerheight - 42.5 ) / 64 );
+			damage *= ( 1 + ( playerheight - 45 ) / 64 );
 			lowheight = false;
 		}		
 	}
@@ -382,6 +383,9 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	   )
 		return;
 
+	if ( midair && self == targ )
+		return;
+
 // do the damage
 
 	if (     match_in_progress == 2
@@ -404,47 +408,44 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		}
 	}
 
-
 	if ( attacker->k_player && targ->k_player ) {
 		attacker->ps.dmg_g += damage;
 		targ->ps.dmg_t     += damage;
 	}
 
+	if ( midair && match_in_progress == 2 && midheight > 190 )
+ 	{
+ 		attacker->ps.midairs++;
+ 		G_bprint( 2, "%s got ", attacker->s.v.netname );
+
+		if ( midheight > 900 )
+ 		{
+ 			attacker->ps.midairs_d++;
+ 			attacker->s.v.frags += 8;
+ 			G_bprint( 2, "%s\n", redtext("diam0nd midair") );
+ 		}
+ 		else if ( midheight > 500 )
+ 		{
+ 			G_bprint( 2, "%s\n", redtext("g0ld midair") );
+ 			attacker->s.v.frags += 4;
+ 			attacker->ps.midairs_g++;
+ 		}
+ 		else if ( midheight > 380 )
+ 		{
+ 			G_bprint( 2, "%s\n", redtext("silver midair") );
+ 			attacker->s.v.frags += 2;
+ 			attacker->ps.midairs_s++;
+ 		}
+ 		else
+ 		{
+ 			G_bprint( 2, "%s\n", redtext("midair") );
+ 			attacker->s.v.frags++;
+ 		}
+ 		G_bprint(2, "%.1f (midheight)\n", midheight);
+ 	}
+
 	if ( ISDEAD( targ ) )
 	{
-		if ( midair && !lowheight )
-		{
-			if ( match_in_progress == 2 && midheight > 190 )
-			{
-				attacker->ps.midairs++;
-				G_bprint( 2, "%s got ", attacker->s.v.netname );
-
-				if ( midheight > 900 )
-				{
-					attacker->ps.midairs_d++;
-					attacker->s.v.frags += 8;
-					G_bprint( 2, "%s\n", redtext("diam0nd midair") );
-				}
-				else if ( midheight > 500 )
-				{
-					G_bprint( 2, "%s\n", redtext("g0ld midair") );
-					attacker->s.v.frags += 4;
-					attacker->ps.midairs_g++;
-				}
-				else if ( midheight > 380 )
-				{
-					G_bprint( 2, "%s\n", redtext("silver midair") );
-					attacker->s.v.frags += 2;
-					attacker->ps.midairs_s++;
-				}
-				else
-				{
-					G_bprint( 2, "%s\n", redtext("midair") );
-					attacker->s.v.frags++;
-				}
-				G_bprint(2, "%.1f (midheight)\n", midheight);
-			}
-		}
 		Killed( targ, attacker );
 
         // KTEAMS: check if sudden death is the case
