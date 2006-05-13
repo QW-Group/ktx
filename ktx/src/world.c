@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.43 2006/05/06 22:33:07 qqshka Exp $
+ *  $Id: world.c,v 1.44 2006/05/13 00:51:22 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -667,6 +667,8 @@ void FirstFrame	( )
 	RegisterCvar("k_cmd_fp_dontkick");
 	RegisterCvar("k_cmd_fp_disabled");
 // }
+
+	RegisterCvar("k_demo_mintime");
 
 	RegisterCvar("_k_captteam1"); // internal mod usage
 	RegisterCvar("_k_captcolor1"); // internal mod usage

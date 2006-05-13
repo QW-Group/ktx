@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.52 2006/05/12 22:54:11 ult_ Exp $
+ *  $Id: match.c,v 1.53 2006/05/13 00:51:22 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -792,7 +792,7 @@ void EndMatch ( float skip_log )
 	G_bprint( 2, "The match is over\n");
 	G_cprint("RESULT");
 
-	if( skip_log )
+	if( /* skip_log */ 0 ) // qqshka: we are not skip match stats now
 		G_cprint("%%stopped\n");
 	else {
 		for( p = world; p = find ( p, FOFCLSN, "player" ); ) 
@@ -898,9 +898,9 @@ void SaveOvertimeStats ()
 	}
 }
 
-void TimerThink ()
 // Called every second during a match. cnt = minutes, cnt2 = seconds left.
-// Tells the g_globalvars.time every now and then.
+// Tells the time every now and then.
+void TimerThink ()
 {
 	gedict_t	*p;
 	float f1, f2, f3, f4, k_exttime, player1scores, player2scores, player1found;
@@ -1314,6 +1314,7 @@ void StartMatch ()
 	
 	G_cprint("MATCH STARTED\n");
 
+	match_start_time  = g_globalvars.time;
 	match_in_progress = 2;
 
 	remove_specs_wizards (); // remove wizards
@@ -1762,6 +1763,10 @@ void StartTimer ()
 void StopTimer ( int removeDemo )
 {
 	gedict_t *timer, *p;
+	int k_demo_mintime = bound(0, cvar("k_demo_mintime"), 3600);
+
+	if ( k_demo_mintime <= 0 )
+		k_demo_mintime = 120; // 120 seconds is default
 
 	if ( match_in_progress == 1 )
 		G_cp2all(""); // clear center print
@@ -1787,8 +1792,13 @@ void StopTimer ( int removeDemo )
 	for( timer = world; timer = find(timer, FOFCLSN, "timer"); )
 		ent_remove( timer );
 
-	if ( removeDemo && !strnull( cvar_string( "serverdemo" ) ) )
+	if (   removeDemo 
+		&& ( !match_start_time || (g_globalvars.time - match_start_time ) < k_demo_mintime )
+		&& !strnull( cvar_string( "serverdemo" ) )
+	   )
 		localcmd("cancel\n");  // demo is recording and must be removed, do it
+
+	match_start_time = 0;
 
 	localcmd("serverinfo status Standby\n");
 }

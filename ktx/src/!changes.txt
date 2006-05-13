@@ -1,3 +1,13 @@
+2006-05-13
+qq:
+148. Added cvar "k_demo_mintime".
+	
+	 set k_demo_mintime 120 // keep server demo even match is broken for some reason
+							// (/break /forcebreak etc) if enough time spend.
+							// In seconds. Default value is 120 seconds.
+
+149. If match is broken stats will be printed anyway now.
+
 2006-05-12
 ult:
 147. Several small midair changes to be more like ktpro midair.

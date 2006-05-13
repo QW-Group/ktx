@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.63 2006/05/12 22:18:38 qqshka Exp $
+ *  $Id: g_local.h,v 1.64 2006/05/13 00:51:22 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -36,11 +36,11 @@
 #include "g_syscalls.h"
 #include "player.h"
 
-#define MOD_VERSION					("1.28")
+#define MOD_VERSION					("1.29")
 #define MOD_NAME					("KTX")
 #define MOD_SERVERINFO_MOD_KEY		("xmod")
 #define MOD_SERVERINFO_BUILD_KEY	("xbuild")
-#define MOD_URL     				("http://cvs.sourceforge.net/viewcvs.py/mvdsv/ktx/")
+#define MOD_URL     				("http://mvdsv.cvs.sourceforge.net/mvdsv/ktx/")
 
 // qqshka - hmm, seems in C this is macros
 #undef max
@@ -651,10 +651,11 @@ extern	float k_sudden_death;	// to mark if sudden death overtime is currently th
 extern	float k_teamid;
 extern	float k_userid;
 extern	float k_whonottime;     // NOT_SURE: 
-extern	float lock;         // stores whether players can join when a game is already in progress
-extern	float match_in_progress;    // if a match has begun
+extern	float lock;             // stores whether players can join when a game is already in progress
+extern	float match_in_progress;// if a match has begun
+extern  float match_start_time;	// time when match has been started
 extern	float match_over;       // boolean - whether or not the match stats have been printed at end of game
-extern	char *newcomer;        // stores name of last player who joined
+extern	char *newcomer;         // stores name of last player who joined
 extern	int   k_overtime;		// is overtime is going on
 
 extern	float current_maxfps;	// current value of serverinfo maxfps

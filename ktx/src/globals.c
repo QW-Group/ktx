@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: globals.c,v 1.14 2006/05/03 23:37:24 qqshka Exp $
+ *  $Id: globals.c,v 1.15 2006/05/13 00:51:22 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -43,6 +43,7 @@ float k_userid = 0;		// somethink like numbers of ghosts + 1
 float k_whonottime;     // NOT_SURE: 
 float lock = 0;         // stores whether players can join when a game is already in progress
 float match_in_progress = 0;    // if a match has begun
+float match_start_time; // time when match has been started
 float match_over;       // boolean - whether or not the match stats have been printed at end of game
 char *newcomer;         // stores name of last player who joined
 
