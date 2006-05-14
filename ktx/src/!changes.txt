@@ -1,3 +1,12 @@
+2006-05-14
+ult:
+150. Stat changes:
+
+     Removed end game health and armor display if not a duel.
+     Fixed all damage stats (these could be way off at times).
+     Added team damage stat.
+     Added individual stat line for frag streak and quad run.     
+
 2006-05-13 [ver 1.29]
 qq:
 148. Added cvar "k_demo_mintime".

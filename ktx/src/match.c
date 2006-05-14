@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.53 2006/05/13 00:51:22 qqshka Exp $
+ *  $Id: match.c,v 1.54 2006/05/14 01:06:19 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -216,7 +216,7 @@ void SummaryTPStats ( )
 {
 	gedict_t	*p, *p2;
 	int from1, from2;
-	float	dmg_g, dmg_t;
+	float	dmg_g, dmg_t, dmg_team;
 	int   ra, ya, ga;
 	int   mh, d_rl, k_rl, t_rl;
 	int   quad, pent, ring;
@@ -231,7 +231,7 @@ void SummaryTPStats ( )
 		p->ready = 0; // clear mark
 
 	G_bprint(2, "\n%s, %s, %s, %s\n", redtext("weapons"), redtext("powerups"),
-									  redtext("armors & mhs"), redtext("damage"));
+									  redtext("armors&mhs"), redtext("damage"));
 	G_bprint(2, "žžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n");
 
 //	get one player and search all his mates, mark served players via ->ready field 
@@ -240,7 +240,7 @@ void SummaryTPStats ( )
 	for( from1 = 0, p = world; p = find_plrghst ( p, &from1 ); ) {
 		if( !p->ready && !strnull( tmp = getteam( p ) ) ) {
 
-			dmg_g = dmg_t = ra = ya = ga = mh = quad = pent = ring = 0;
+			dmg_g = dmg_t = dmg_team = ra = ya = ga = mh = quad = pent = ring = 0;
 			h_rl = a_rl = h_lg = a_lg = h_sg = a_sg = h_ssg = a_ssg = 0;
 			caps = pickups = returns = f_defends = c_defends = d_rl = k_rl = t_rl = 0;
 			res = str = hst = rgn = 0;
@@ -250,6 +250,7 @@ void SummaryTPStats ( )
 					if( streq( tmp, getteam( p2 ) ) ) {
 				    	dmg_g += p2->ps.dmg_g;
 				    	dmg_t += p2->ps.dmg_t;
+						dmg_team += p2->ps.dmg_team;
 				    	ra    += p2->ps.ra;
 				    	ya    += p2->ps.ya;
 				    	ga    += p2->ps.ga;
@@ -320,8 +321,8 @@ void SummaryTPStats ( )
 				G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("      RL"),
 						redtext("Took"), t_rl, redtext("Killed"), k_rl, redtext("Dropped"), d_rl);
 			// damage
-			G_bprint(2, "%s: %s:%.1f %s:%.1f\n", redtext("  Damage"),
-						redtext("Taken"), dmg_t, redtext("Given"), dmg_g);
+			G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f\n", redtext("  Damage"),
+						redtext("Taken"), dmg_t, redtext("Given"), dmg_g, redtext("Tm"), dmg_team);
 		}
 	}
 
@@ -388,7 +389,7 @@ int maxspree, maxspree_q;
 
 void OnePlayerStats(gedict_t *p, int tp)
 {
-	float	dmg_g, dmg_t;
+	float	dmg_g, dmg_t, dmg_team;
 	int   ra, ya, ga;
 	int   mh, d_rl, k_rl, t_rl;
 	int   quad, pent, ring;
@@ -396,6 +397,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 
 	dmg_g = p->ps.dmg_g;
 	dmg_t = p->ps.dmg_t;
+	dmg_team = p->ps.dmg_team;
 	ra    = p->ps.ra;
 	ya    = p->ps.ya;
 	ga    = p->ps.ga;
@@ -469,15 +471,21 @@ void OnePlayerStats(gedict_t *p, int tp)
 			G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("      RL"),
 				redtext("Took"), t_rl, redtext("Killed"), k_rl, redtext("Dropped"), d_rl);
 		// damage
-		G_bprint(2, "%s: %s:%.1f %s:%.1f\n", redtext("  Damage"),
-				redtext("Taken"), dmg_t, redtext("Given"), dmg_g);
-		//  endgame h & a
-		G_bprint(2, "  %s  H&A: H:%d‘A:%s:%d‘\n", redtext("EndGame"),
-				(int)p->s.v.health, armor_type((int)p->s.v.items), (int)p->s.v.armorvalue );
-		// overtime h & a
-		if ( k_overtime )
-			G_bprint(2, "  %s H&A: H:%d‘A:%s:%d‘\n", redtext("OverTime"),
-				(int)p->ps.ot_h, armor_type((int)p->ps.ot_items), (int)p->ps.ot_a );
+		G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f\n", redtext("  Damage"),
+				redtext("Taken"), dmg_t, redtext("Given"), dmg_g, redtext("Tm"), dmg_team);
+		if ( isDuel() )
+		{
+			//  endgame h & a
+			G_bprint(2, "  %s  H&A: H:%d‘A:%s:%d‘\n", redtext("EndGame"),
+					(int)p->s.v.health, armor_type((int)p->s.v.items), (int)p->s.v.armorvalue );
+			// overtime h & a
+			if ( k_overtime )
+				G_bprint(2, "  %s H&A: H:%d‘A:%s:%d‘\n", redtext("OverTime"),
+					(int)p->ps.ot_h, armor_type((int)p->ps.ot_items), (int)p->ps.ot_a );
+		}
+		else
+			G_bprint(2, "%s: %s:%d %s:%d\n", redtext(" Streaks"),
+				redtext("Frag"), p->ps.spree_max, redtext("QuadRun"), p->ps.spree_max_q);
 		// spawnfrags
 		G_bprint(2, "  %s: %d‘\n", redtext("SpawnFrags"), p->ps.spawn_frags);
 //	}

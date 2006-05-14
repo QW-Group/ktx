@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.19 2006/05/12 22:54:11 ult_ Exp $
+ *  $Id: combat.c,v 1.20 2006/05/14 01:06:19 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -168,7 +168,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	float           save;
 	float           take;
 	int				wp_num;
-
+	float			dmg_dealt = 0;
 	char            *attackerteam, *targteam;
 
 	//midair
@@ -275,6 +275,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		targ->s.v.items -=
 		    ( ( int ) targ->s.v.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) );
 	}
+	dmg_dealt += save;
 
 	if (match_in_progress == 2)
 		targ->s.v.armorvalue = targ->s.v.armorvalue - save;
@@ -394,6 +395,8 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		 || streq( attacker->s.v.classname, "teledeath3" ) // qqshka 
 		 || ( k_practice && strneq( targ->s.v.classname, "player" ) ) // #practice mode#
 	   ) {
+
+		dmg_dealt += targ->s.v.health > take ? take : targ->s.v.health;
 		targ->s.v.health -= take;
 
 		if ( !targ->s.v.health )
@@ -408,9 +411,16 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		}
 	}
 
-	if ( attacker->k_player && targ->k_player ) {
-		attacker->ps.dmg_g += damage;
-		targ->ps.dmg_t     += damage;
+	if ( attacker->k_player && targ->k_player ) 
+	{
+		if ( attacker != targ )
+		{
+			targ->ps.dmg_t += dmg_dealt;
+			if ( streq(attackerteam, targteam) )
+				attacker->ps.dmg_team += dmg_dealt;
+			else
+				attacker->ps.dmg_g += dmg_dealt;
+		}
 	}
 
 	if ( midair && match_in_progress == 2 && midheight > 190 )
