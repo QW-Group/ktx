@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.21 2006/05/14 01:53:14 ult_ Exp $
+ *  $Id: combat.c,v 1.22 2006/05/14 03:15:01 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -384,7 +384,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	   )
 		return;
 
-	if ( midair && self == targ )
+	if ( midair && attacker == targ )
 		return;
 
 // do the damage
