@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.17 2006/05/03 23:37:24 qqshka Exp $
+ *  $Id: g_main.c,v 1.18 2006/05/15 00:08:58 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -55,6 +55,7 @@ static wreg_t   wregs[MAX_CLIENTS][MAX_WREGS];
 
 gameData_t      gamedata =
     { ( edict_t * ) g_edicts, sizeof( gedict_t ), &g_globalvars, expfields , GAME_API_VERSION};
+
 float           starttime;
 void            G_InitGame( int levelTime, int randomSeed );
 void			G_ShutDown();
@@ -65,6 +66,8 @@ void            G_EdictTouch();
 void            G_EdictThink();
 void            G_EdictBlocked();
 void            ClearGlobals();
+
+qboolean		ClientSay( qboolean isTeamSay );
 
 /*
 ================
@@ -86,7 +89,12 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 	case GAME_INIT:
         api_ver = trap_GetApiVersion();
 
-		if ( api_ver < GAME_API_VERSION )
+		if ( api_ver == 8 && GAME_API_VERSION == 9 ) {
+			// ok, this allow start mod with API_V9 on server with API_V8
+			// since versions differ only in one thing GAME_CLIENT_SAY
+			gamedata.APIversion = 8;
+		}
+		else if ( api_ver < GAME_API_VERSION )
 		{
 			G_cprint("Mod requried API_VERSION %d or higher, server have %d\n", GAME_API_VERSION,api_ver);
 			return 0;
@@ -223,6 +231,16 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		// called on server console command "mod"
 		// params like GAME_CLIENT_COMMAND, but argv(0) always "mod"
 		return 0;//ConsoleCommand();
+
+	case GAME_CLIENT_SAY:
+		// called on user /say or /say_team
+		// arg0 non zero if say_team
+		// return non zero if say/say_team handled by mod
+		// params like GAME_CLIENT_COMMAND
+
+		return 0;
+// TODO
+//		return ClientSay( arg0 );
 
 	}
 

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.88 2006/05/12 22:18:38 qqshka Exp $
+ *  $Id: commands.c,v 1.89 2006/05/15 00:08:58 qqshka Exp $
  */
 
 // commands.c
@@ -145,8 +145,8 @@ void cmd_wreg();
 void ClientKill();
 
 void sv_time();
-
-void m_kick ();
+void GrenadeMode();
+void ToggleReady();
 
 // spec
 void ShowCamHelp();
@@ -342,7 +342,9 @@ const char CD_NODESC[] = "no desc";
 #define CD_WREG         "register reliable wpns"
 #define CD_KILL         "invoke suicide"
 #define CD_MIDAIR       "midair settings"
-#define CD_TIME         "show server time" 
+#define CD_TIME         "show server time"
+#define CD_GREN_MODE    "grenades mode"
+#define CD_TOGGLEREADY  "just toggle ready"
 
 
 cmd_t cmds[] = {
@@ -548,7 +550,9 @@ cmd_t cmds[] = {
     { "wreg",        cmd_wreg,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_WREG },
     { "kill",        ClientKill,                0    , CF_PLAYER | CF_MATCHLESS, CD_KILL },
     { "mid_air",     ToggleMidair,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_MIDAIR },
-    { "time",        sv_time,                   0    , CF_BOTH | CF_MATCHLESS, CD_TIME }
+    { "time",        sv_time,                   0    , CF_BOTH | CF_MATCHLESS, CD_TIME },
+    { "gren_mode",   GrenadeMode,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_GREN_MODE },
+    { "toggleready", ToggleReady,               0    , CF_PLAYER, CD_TOGGLEREADY }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -1564,10 +1568,9 @@ void ResetOptions()
 	{
 		char *cfg_name = "configs/reset.cfg";
 
-		if ( can_exec( cfg_name ) ) {
-			cvar_fset("_k_last_xonx", 0); // forget last XonX command
+		cvar_fset("_k_last_xonx", 0); // forget last XonX command
+		if ( can_exec( cfg_name ) )
 			localcmd( "exec %s\n", cfg_name );
-		}
 	}
 #else
 /*
@@ -4626,4 +4629,29 @@ void sv_time()
 
 	if ( !strnull( tm = ezinfokey(world, "date_str") ) )
 		G_sprint(self, 2, "%s\n", tm);
+}
+
+void GrenadeMode()
+{
+	if ( match_in_progress )
+		return;
+
+	if( check_master() )
+		return;
+
+	// Can't toggle unless dmm4 is set first
+	if ( deathmatch != 4 ) {
+		G_sprint( self, 2, "gren_mode requires dmm4\n");
+		return;
+	}
+
+	cvar_toggle_msg( self, "k_dmm4_gren_mode", redtext("grenades only explode on direct impact") );
+}
+
+void ToggleReady()
+{
+	if ( self->ready )
+		PlayerBreak();
+	else 
+		PlayerReady();
 }

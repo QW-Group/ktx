@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.32 2006/05/06 19:33:27 qqshka Exp $
+ *  $Id: weapons.c,v 1.33 2006/05/15 00:08:58 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -859,6 +859,9 @@ void W_FireGrenade()
 		newmis->s.v.nextthink = g_globalvars.time + 2.5;
 
 	newmis->s.v.think = ( func_t ) GrenadeExplode;
+
+	if ( deathmatch == 4 && cvar("k_dmm4_gren_mode") )
+		newmis->s.v.think = ( func_t ) SUB_Remove;
 
 	setmodel( newmis, "progs/grenade.mdl" );
 	setsize( newmis, 0, 0, 0, 0, 0, 0 );

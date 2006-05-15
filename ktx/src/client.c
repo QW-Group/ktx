@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.70 2006/05/12 22:54:11 ult_ Exp $
+ *  $Id: client.c,v 1.71 2006/05/15 00:08:58 qqshka Exp $
  */
 
 //===========================================================================
@@ -1591,6 +1591,9 @@ void ClientDisconnect()
 
 	f1 = CountALLPlayers();
 
+	if ( !f1 )
+		cvar_fset("_k_last_xonx", 0); // forget last XonX command
+
 	if( !f1
 		&& (
 			 (    !cvar( "k_master" )
@@ -1618,10 +1621,8 @@ void ClientDisconnect()
         if( cvar( "k_autoreset" ) ) {
 			char *cfg_name = "configs/reset.cfg";
 
-			if ( can_exec( cfg_name ) ) {
-				cvar_fset("_k_last_xonx", 0); // forget last XonX command
+			if ( can_exec( cfg_name ) )
 				localcmd( "exec %s\n", cfg_name );
-			}
 		}
 
         s = k_matchLess ? "" : cvar_string( "k_defmap" ); // no defmap in matchLess mode

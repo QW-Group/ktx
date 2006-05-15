@@ -5,7 +5,21 @@ ult:
      Removed end game health and armor display if not a duel.
      Fixed all damage stats (these could be way off at times).
      Added team damage stat.
-     Added individual stat line for frag streak and quad run.     
+     Added individual stat line for frag streak and quad run.
+
+qq:
+151. Added command "gren_mode". 
+	 Toggle grenades mode: "Grenades explode after a while or on direct impact" vs 
+						   "Grenades only explode on direct impact".
+	 Work only in dmm4.
+
+	 Added cvar "k_dmm4_gren_mode".
+
+	 set k_dmm4_gren_mode 0 // 0 - default
+							// 1 - explode only on direct impact
+
+152. Added command "toggleready". ktpro (c). Just toggle ready.
+	 NOTES: blaps must be happy :>.
 
 2006-05-13 [ver 1.29]
 qq:

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.13 2006/05/12 22:18:38 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.14 2006/05/15 00:08:58 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -113,4 +113,35 @@ void cmd_ack()
 	}
 }
 
+// i dunno where put this. so put here.
+// SAY / SAY_TEAM mod handler
+// {
+
+qboolean ClientSay( qboolean isTeamSay )
+{
+	int i;
+	char arg_x[1024], buf[1024];
+	int argc = trap_CmdArgc();
+
+	self = PROG_TO_EDICT( g_globalvars.self );
+
+	for ( buf[0] = 0, i = 1; i < argc; i++ ) {
+		trap_CmdArgv( i, arg_x, sizeof( arg_x ) );
+
+		if ( i != 1 )
+			strlcat( buf,   " ", sizeof( buf ) );
+		strlcat( buf, arg_x, sizeof( buf ) );
+	}
+
+	if ( self->k_spectator )
+		G_bprint(PRINT_CHAT, "[SPEC] %s: %s\n", 
+					(strnull( self->s.v.netname ) ? "!noname!" : self->s.v.netname), buf);
+	else
+		G_bprint(PRINT_CHAT, "%s: %s\n",
+					(strnull( self->s.v.netname ) ? "!noname!" : self->s.v.netname), buf);
+
+	return true;
+}
+
+// }
 
