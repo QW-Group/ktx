@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.54 2006/05/14 01:06:19 ult_ Exp $
+ *  $Id: match.c,v 1.55 2006/05/16 05:10:54 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -298,31 +298,47 @@ void SummaryTPStats ( )
 #endif
 			h_lg  = 100.0 * h_lg  / max(1, a_lg);
 
+			if ( isCTF() && g_globalvars.time - match_start_time > 0 );
+			{
+				res = ( res / ( g_globalvars.time - match_start_time )) * 100;
+				str = ( str / ( g_globalvars.time - match_start_time )) * 100;
+				hst = ( hst / ( g_globalvars.time - match_start_time )) * 100;
+				rgn = ( rgn / ( g_globalvars.time - match_start_time )) * 100;
+			}
+
 			// weapons
 			G_bprint(2, "%s‘: %s:%s%s%s%s\n", getteam( p ), redtext("Wp"),
 						(h_lg  ? va(" %s%.1f%%", redtext("lg"),   h_lg) : ""),
 						(h_rl  ? va(" %s%.0f",   redtext("rl"),   h_rl) : ""), 
 						(h_sg  ? va(" %s%.1f%%", redtext("sg"),   h_sg) : ""),
 						(h_ssg ? va(" %s%.1f%%", redtext("ssg"), h_ssg) : ""));
+
 			// powerups
 			G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("Powerups"),
 					redtext("Q"), quad, redtext("P"), pent, redtext("R"), ring);
+
 			// armors + megahealths
 			G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("Armr&mhs"),
 					redtext("ga"), ga, redtext("ya"), ya, redtext("ra"), ra, redtext("mh"), mh);
-			if ( isCTF() ) {
-				G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f %s:%.0f\n", redtext("RuneTime"),
+
+			if ( isCTF() ) 
+			{
+				G_bprint(2, "%s: %s:%.0f%% %s:%.0f%% %s:%.0f%% %s:%.0f%%\n", redtext("RuneTime"),
 					redtext("res"), res, redtext("str"), str, redtext("hst"), hst, redtext("rgn"), rgn);
-				G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("     CTF"),
-					redtext("caps"), caps, redtext("returns"), returns, redtext("fd"), f_defends, redtext("cd"), c_defends);
+				G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("     CTF"),
+					redtext("pickups"), pickups, redtext("caps"), caps, redtext("returns"), returns );
+				G_bprint(2, "%s: %s:%d %s:%d\n", redtext(" Defends"),
+					redtext("flag"), f_defends, redtext("carrier"), c_defends );
 			}
+
 			// rl
 			if ( isTeam() ) // rl stats pointless in other modes?
 				G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("      RL"),
 						redtext("Took"), t_rl, redtext("Killed"), k_rl, redtext("Dropped"), d_rl);
+
 			// damage
 			G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f\n", redtext("  Damage"),
-						redtext("Taken"), dmg_t, redtext("Given"), dmg_g, redtext("Tm"), dmg_team);
+						redtext("Tkn"), dmg_t, redtext("Gvn"), dmg_g, redtext("Tm"), dmg_team);
 		}
 	}
 
@@ -394,6 +410,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 	int   mh, d_rl, k_rl, t_rl;
 	int   quad, pent, ring;
 	float h_rl, a_rl, h_gl, a_gl, h_lg, a_lg, h_sg, a_sg, h_ssg, a_ssg;
+	int res, str, hst, rgn;
 
 	dmg_g = p->ps.dmg_g;
 	dmg_t = p->ps.dmg_t;
@@ -432,6 +449,14 @@ void OnePlayerStats(gedict_t *p, int tp)
 	k_rl = p->ps.killed_rls;
 	t_rl = p->ps.took_rls;
 
+	if ( isCTF() && g_globalvars.time - match_start_time > 0 );
+	{
+		res = ( p->ps.res_time / ( g_globalvars.time - match_start_time )) * 100;
+		str = ( p->ps.str_time / ( g_globalvars.time - match_start_time )) * 100;
+		hst = ( p->ps.hst_time / ( g_globalvars.time - match_start_time )) * 100;
+		rgn = ( p->ps.rgn_time / ( g_globalvars.time - match_start_time )) * 100;
+	}
+
 	if ( tp )
 		G_bprint(2,"žžžžžžžžŸ\n" );
 
@@ -451,28 +476,35 @@ void OnePlayerStats(gedict_t *p, int tp)
 				(h_gl  ? va(" %s%.0f",   redtext("gl"),   h_gl) : ""),
 				(h_sg  ? va(" %s%.1f%%", redtext("sg"),   h_sg) : ""),
 				(h_ssg ? va(" %s%.1f%%", redtext("ssg"), h_ssg) : ""));
+
 		// armors + megahealths
 		G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("Armr&mhs"),
 				redtext("ga"), ga, redtext("ya"), ya, redtext("ra"), ra, redtext("mh"), mh);
 
+		// powerups
 		if ( isTeam() || isCTF() )
 			G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("Powerups"),
 				redtext("Q"), quad, redtext("P"), pent, redtext("R"), ring);
 
 		if ( isCTF() )
 		{
-			G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f %s:%.0f\n", redtext("RuneTime"),
-				redtext("res"), p->ps.res_time, redtext("str"), p->ps.str_time, redtext("hst"), p->ps.hst_time, redtext("rgn"), p->ps.rgn_time);
-			G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("     CTF"),
-				redtext("caps"), p->ps.caps, redtext("returns"), p->ps.returns, redtext("fd"), p->ps.f_defends, redtext("cd"), p->ps.c_defends );
+			G_bprint(2, "%s: %s:%d%% %s:%d%% %s:%d%% %s:%d%%\n", redtext("RuneTime"),
+				redtext("res"), res, redtext("str"), str, redtext("hst"), hst, redtext("rgn"), rgn );
+			G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("     CTF"),
+				redtext("pickups"), p->ps.pickups, redtext("caps"), p->ps.caps, redtext("returns"), p->ps.returns );
+			G_bprint(2, "%s: %s:%d %s:%d\n", redtext(" Defends"),
+				redtext("flag"), p->ps.f_defends, redtext("carrier"), p->ps.c_defends );
 		}
+
 		// rl
 		if ( isTeam() )
 			G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("      RL"),
 				redtext("Took"), t_rl, redtext("Killed"), k_rl, redtext("Dropped"), d_rl);
+
 		// damage
 		G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f\n", redtext("  Damage"),
-				redtext("Taken"), dmg_t, redtext("Given"), dmg_g, redtext("Tm"), dmg_team);
+				redtext("Tkn"), dmg_t, redtext("Gvn"), dmg_g, redtext("Tm"), dmg_team);
+
 		if ( isDuel() )
 		{
 			//  endgame h & a
@@ -486,8 +518,10 @@ void OnePlayerStats(gedict_t *p, int tp)
 		else
 			G_bprint(2, "%s: %s:%d %s:%d\n", redtext(" Streaks"),
 				redtext("Frag"), p->ps.spree_max, redtext("QuadRun"), p->ps.spree_max_q);
+
 		// spawnfrags
-		G_bprint(2, "  %s: %d‘\n", redtext("SpawnFrags"), p->ps.spawn_frags);
+		if ( !isCTF() )
+			G_bprint(2, "  %s: %d‘\n", redtext("SpawnFrags"), p->ps.spawn_frags);
 //	}
 
 	if ( !tp )
@@ -668,6 +702,21 @@ void TopStats ( )
 		}
 
 		p = find_plrghst ( p, &from );
+	}
+
+	if ( maxspree )
+	{
+		G_bprint( 2, " FragStreak: ");
+		from = f1 = 0;
+		p = find_plrghst( world, &from );
+		while( p ) {
+			if ( p->ps.spree_max == maxspree ) {
+				G_bprint(2, "%s%s%s \220%d\221\n", (f1 ? "             " : ""),
+					( isghost( p ) ? "\x83" : "" ), getname( p ), maxspree );
+				f1 = 1;
+			}
+			p = find_plrghst( p, &from );
+		}
 	}
 
 	if ( maxspree_q )
