@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.36 2006/05/14 01:06:19 ult_ Exp $
+ *  $Id: progs.h,v 1.37 2006/05/16 04:53:40 ult_ Exp $
  */
 
 #include "progdefs.h"
@@ -96,7 +96,8 @@ typedef struct player_stats_s {
 	int		dropped_rls; // number of packs dropped which contain rl 
 	int		killed_rls;  // enemies killed who have rl (even if not currently using it)
 	int		took_rls;    // number of rls you grab if you don't already have one
-
+	float	rl_time;     // time player has rl
+  
 	// ctf stats
 	int ctf_points; // use frags - this to calculate efficiency for ctf
 	int caps;		// flag captures
@@ -361,10 +362,11 @@ typedef struct gedict_s {
 
 // { CTF
 	struct gedict_s *hook;         // grapple
-	qboolean lefty;                // sound stuff
+	qboolean ctf_sound;            // sound stuff
 	qboolean on_hook;              // are we on the grapple?
 	qboolean hook_out;             // is the grapple in flight?
-	int ctf_flag;                  // do we have a rune or flag? 
+	int ctf_flag;                  // do we have a rune or flag?
+	float ctf_freeze;              // removes jitterness from grapple 
 	float regen_time;              // time to update health if regen rune
 	float rune_sound_time;         // dont spam rune sounds (1 per second)
 	float carrier_frag_time;       // used for carrier assists
