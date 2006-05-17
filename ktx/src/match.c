@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.55 2006/05/16 05:10:54 ult_ Exp $
+ *  $Id: match.c,v 1.56 2006/05/17 20:51:47 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -517,7 +517,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 		}
 		else
 			G_bprint(2, "%s: %s:%d %s:%d\n", redtext(" Streaks"),
-				redtext("Frag"), p->ps.spree_max, redtext("QuadRun"), p->ps.spree_max_q);
+				redtext("Frags"), p->ps.spree_max, redtext("QuadRun"), p->ps.spree_max_q);
 
 		// spawnfrags
 		if ( !isCTF() )
