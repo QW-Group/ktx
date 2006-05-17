@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.14 2006/05/15 00:08:58 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.15 2006/05/17 01:18:03 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -117,28 +117,208 @@ void cmd_ack()
 // SAY / SAY_TEAM mod handler
 // {
 
+int k_say_fp_per = 1, k_say_fp_for = 1, k_say_fp_count = 9;
+
+typedef struct say_fp_level_s {
+
+	int fp_count;
+	int fp_per;
+	int fp_for;
+	char *name;
+
+} say_fp_level_t;
+
+say_fp_level_t say_fp_levels[] = {
+	{ 9, 1, 1, "Low"},
+	{ 4, 1, 5, "Medium" },
+	{ 5, 3, 7, "High" }
+};
+
+int say_fp_levels_cnt = sizeof(say_fp_levels) / sizeof(say_fp_levels[0]);
+
+void FixSayFloodProtect()
+{
+	static int k_fp_last = -1;
+
+	char buf[1024*4];
+
+	int k_fp = bound(1, cvar("k_fp"), say_fp_levels_cnt);
+
+	k_say_fp_count = say_fp_levels[k_fp-1].fp_count;
+	k_say_fp_per   = say_fp_levels[k_fp-1].fp_per;
+	k_say_fp_for   = say_fp_levels[k_fp-1].fp_for;
+
+	if ( k_fp != k_fp_last ) {
+		// qqshka: generally mod ignore server floodprot, but if server not support
+		//         redirect say/say_team to mod, then try use server floodprot, so
+		//		   in most cases this code useless.
+
+		trap_readcmd( va("floodprot %d %d %d\n", 
+						k_say_fp_count, k_say_fp_per, k_say_fp_for), buf, sizeof(buf) );
+		G_cprint("%s", buf);
+	}
+
+	k_fp_last = k_fp;
+}
+
+void fp_toggle ()
+{
+	int k_fp = bound(1, cvar("k_fp"), say_fp_levels_cnt);
+
+	if( check_master() )
+		return;
+
+	if ( self->k_admin != 2 ) {
+		G_sprint(self, 2, "You are not an admin\n");
+		return;
+	}
+
+	if ( ++k_fp > say_fp_levels_cnt )
+		k_fp = 1;
+
+	cvar_fset("k_fp", k_fp);
+
+	FixSayFloodProtect();
+
+	G_bprint( 2, "Floodprot level %s \x90%s %s %s\x91 %6s\n",
+					dig3(k_fp), 
+					dig3(say_fp_levels[k_fp-1].fp_count),
+					dig3(say_fp_levels[k_fp-1].fp_per),
+					dig3(say_fp_levels[k_fp-1].fp_for),
+					say_fp_levels[k_fp-1].name );
+}
+
+qboolean isSayFlood(gedict_t *p)
+{
+	int idx;
+
+	float say_time;
+
+	idx = bound(0, p->fp_s.last_cmd, MAX_FP_CMDS-1);
+	say_time = p->fp_s.cmd_time[idx];
+
+	if ( g_globalvars.time < p->fp_s.locked )
+	{
+		G_sprint(p, PRINT_CHAT, "You can't talk for %d more seconds\n",
+										(int)(p->fp_s.locked - g_globalvars.time + 1));
+		return true; // flooder
+	}
+
+	if ( say_time && ( g_globalvars.time - say_time < k_say_fp_per ) )
+	{
+		G_sprint(p, PRINT_CHAT, "FloodProt: You can't talk for %d seconds.\n", (int)k_say_fp_for);
+
+		p->fp_s.locked = g_globalvars.time + k_say_fp_for;
+
+		p->fp_s.warnings += 1; // collected but unused stat
+
+		return true; // flooder
+	}
+
+	p->fp_s.cmd_time[idx] = g_globalvars.time;
+
+	if ( ++idx >= k_say_fp_count )
+		idx = 0;
+
+	p->fp_s.last_cmd = idx;
+
+	return false;
+}
+
 qboolean ClientSay( qboolean isTeamSay )
 {
-	int i;
-	char arg_x[1024], buf[1024];
-	int argc = trap_CmdArgc();
+	int j;
+	char text[1024] = {0}, *str, *name, *team;
+	int sv_spectalk = cvar("sv_spectalk");
+	int sv_sayteam_to_spec = cvar("sv_sayteam_to_spec");
+	gedict_t *client, *goal;
 
 	self = PROG_TO_EDICT( g_globalvars.self );
 
-	for ( buf[0] = 0, i = 1; i < argc; i++ ) {
-		trap_CmdArgv( i, arg_x, sizeof( arg_x ) );
+	if ( isSayFlood( self ) )
+		return true; // flooder
 
-		if ( i != 1 )
-			strlcat( buf,   " ", sizeof( buf ) );
-		strlcat( buf, arg_x, sizeof( buf ) );
+// { MVDSV
+
+	str = params_str(1, -1);
+
+	name = (strnull( self->s.v.netname ) ? "!noname!" : self->s.v.netname);
+
+	if ( self->k_spectator ) {
+
+		if ( !sv_spectalk || isTeamSay )
+			strlcpy(text, va("[SPEC] %s: %s", name, str), sizeof(text));
+		else
+			strlcpy(text, va("%s: %s", name, str), sizeof(text));
+	}
+	else {
+
+		if ( isTeamSay )
+			strlcpy(text, va("(%s): %s", name, str), sizeof(text));
+		else
+			strlcpy(text, va("%s: %s", name, str), sizeof(text));
 	}
 
-	if ( self->k_spectator )
-		G_bprint(PRINT_CHAT, "[SPEC] %s: %s\n", 
-					(strnull( self->s.v.netname ) ? "!noname!" : self->s.v.netname), buf);
-	else
-		G_bprint(PRINT_CHAT, "%s: %s\n",
-					(strnull( self->s.v.netname ) ? "!noname!" : self->s.v.netname), buf);
+	//bliP: kick fake ->
+	if ( !isTeamSay && cvar("sv_unfake") ) {
+		char *ch;
+
+		for ( ch = text; *ch; ch++ )
+			if ( *ch == 13 ) //bliP: 24/9 kickfake to unfake ->
+				*ch = '#';
+	}
+	//<-
+
+	G_cprint("%s\n", text);
+//	SV_Write_Log(CONSOLE_LOG, 1, text);
+
+	team = ezinfokey(self, "team");
+
+	for ( j = 1, client = &(g_edicts[j]); j <= MAX_CLIENTS; j++, client++ )
+	{
+		//bliP: everyone sees all ->
+		//if (client->state != cs_spawned)
+		//	continue;
+		//<-
+		if ( self->k_spectator && !sv_spectalk )
+			if ( !client->k_spectator )
+				continue;
+
+		if ( isTeamSay )
+		{
+			// the spectator team
+			if ( self->k_spectator )
+			{
+				if ( !client->k_spectator )
+					continue;
+			}
+			else
+			{
+				if ( client->k_spectator )
+				{
+					goal = PROG_TO_EDICT( client->s.v.goalentity );
+
+					if(   !sv_sayteam_to_spec // player can't say_team to spec in this case
+					   || (    (goal != world && goal->k_player) // spec track player
+						   && strneq(team, ezinfokey(goal, "team"))
+						  ) // spec track player on different team
+					   || (   !(goal != world && goal->k_player) // spec _not_ track player
+						   && strneq(team, ezinfokey(client, "team"))
+						  ) // spec do not track player and on different team
+					  )
+					continue;	// on different teams
+				}
+				else if (   self != client // send msg to self anyway
+						 && (!teamplay || strneq(team, ezinfokey(client, "team")))
+						)
+					continue;	// on different teams
+			}
+		}
+
+		G_sprint(client, PRINT_CHAT, "%s\n", text);
+	}
+
+// } MVDSV
 
 	return true;
 }

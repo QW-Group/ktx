@@ -1,3 +1,10 @@
+2006-05-17
+qq:
+153. I'm patch mvdsv so now qvm mods may handle say/say_team internally and
+	 now KTX may handle say/say_team too, but as u understand this require
+	 mvdsv from CVS. In future this allow me add things like
+	 ktpro "/cmd silence", "/cmd mmode", etc.
+
 2006-05-14
 ult:
 150. Stat changes:

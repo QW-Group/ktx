@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.89 2006/05/15 00:08:58 qqshka Exp $
+ *  $Id: commands.c,v 1.90 2006/05/17 01:18:03 qqshka Exp $
  */
 
 // commands.c
@@ -147,6 +147,8 @@ void ClientKill();
 void sv_time();
 void GrenadeMode();
 void ToggleReady();
+
+void fp_toggle ();
 
 // spec
 void ShowCamHelp();
@@ -345,6 +347,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_TIME         "show server time"
 #define CD_GREN_MODE    "grenades mode"
 #define CD_TOGGLEREADY  "just toggle ready"
+#define CD_FP           "change floodprot level"
 
 
 cmd_t cmds[] = {
@@ -552,7 +555,8 @@ cmd_t cmds[] = {
     { "mid_air",     ToggleMidair,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_MIDAIR },
     { "time",        sv_time,                   0    , CF_BOTH | CF_MATCHLESS, CD_TIME },
     { "gren_mode",   GrenadeMode,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_GREN_MODE },
-    { "toggleready", ToggleReady,               0    , CF_PLAYER, CD_TOGGLEREADY }
+    { "toggleready", ToggleReady,               0    , CF_PLAYER, CD_TOGGLEREADY },
+    { "fp",          fp_toggle,                 0    , CF_BOTH_ADMIN, CD_FP }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -2586,8 +2590,8 @@ const char _1on1_um_init[] =
 
 const char _2on2_um_init[] =
 	"maxclients 4\n"
-	"floodprot 10 1 1\n"					//
-//	"localinfo k_fp 1\n"				// TODO not implemented
+	"floodprot 10 1 1\n"				//
+	"localinfo k_fp 1\n"				//
 	"timelimit  10\n"					//
 	"teamplay   2\n"					//
 	"deathmatch 3\n"					//
@@ -2602,7 +2606,7 @@ const char _2on2_um_init[] =
 const char _3on3_um_init[] =
 	"maxclients 6\n"
 	"floodprot 10 1 1\n"
-//	"localinfo k_fp 1\n"
+	"localinfo k_fp 1\n"
 	"timelimit  15\n"
 	"teamplay   2\n"
 	"deathmatch 1\n"
@@ -2617,7 +2621,7 @@ const char _3on3_um_init[] =
 const char _4on4_um_init[] =
 	"maxclients 8\n"
 	"floodprot 10 1 1\n"
-//	"localinfo k_fp 1\n"
+	"localinfo k_fp 1\n"
 	"timelimit  20\n"
 	"teamplay   2\n"
 	"deathmatch 1\n"
@@ -2632,7 +2636,7 @@ const char _4on4_um_init[] =
 const char _10on10_um_init[] =
 	"maxclients 20\n"
 	"floodprot 10 1 1\n"
-//	"localinfo k_fp 1\n"
+	"localinfo k_fp 1\n"
 	"timelimit  20\n"
 	"teamplay   2\n"
 	"deathmatch 1\n"

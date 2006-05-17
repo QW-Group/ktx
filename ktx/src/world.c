@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.45 2006/05/15 00:08:58 qqshka Exp $
+ *  $Id: world.c,v 1.46 2006/05/17 01:18:03 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -30,6 +30,8 @@ float CountALLPlayers ();
 void  SUB_regen();
 
 void  FixSpecWizards ();
+
+void  FixSayFloodProtect();
 
 #define MAX_BODYQUE 4
 gedict_t       *bodyque[MAX_BODYQUE];
@@ -670,6 +672,7 @@ void FirstFrame	( )
 
 	RegisterCvar("k_demo_mintime");
 	RegisterCvar("k_dmm4_gren_mode");
+	RegisterCvar("k_fp"); // say team floodprot
 
 	RegisterCvar("_k_captteam1"); // internal mod usage
 	RegisterCvar("_k_captcolor1"); // internal mod usage
@@ -876,8 +879,10 @@ void FixRules ( )
 	int k_minr = bound(0, cvar( "k_minrate" ), 20000);
 	int k_maxr = bound(0, cvar( "k_maxrate" ), 20000);	
 
-	// cmd flood protect
-	FixCmdFloodProtect();
+
+	FixCmdFloodProtect(); // cmd flood protect
+
+	FixSayFloodProtect(); // say flood protect
 
 	FixSayTeamToSpecs(); // k_sayteam_to_spec
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.64 2006/05/13 00:51:22 qqshka Exp $
+ *  $Id: g_local.h,v 1.65 2006/05/17 01:18:03 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -149,6 +149,7 @@ int snprintf(char *buffer, size_t count, char const *format, ...);
 
 #if defined( __linux__ ) || defined( _WIN32 ) || defined( Q3_VM )
 
+size_t strlcpy(char *dst, char *src, size_t siz);
 size_t strlcat(char *dst, char *src, size_t siz);
 
 #endif
@@ -333,6 +334,8 @@ void    	disableupdates( gedict_t * ed, float time );
 
 int			only_digits(const char *s);
 
+char		*params_str( int from, int to );
+
 //
 //  subs.c
 //
@@ -489,6 +492,8 @@ float StuffDeltaTime(int iDelta);
 #define STUFFCMDS_PER_PORTION	(1)
 
 void SetPractice(int srv_practice_mode, const char *mapname);
+
+qboolean check_master();
 
 // { usermodes
 

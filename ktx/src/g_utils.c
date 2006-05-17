@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.46 2006/05/12 22:18:38 qqshka Exp $
+ *  $Id: g_utils.c,v 1.47 2006/05/17 01:18:03 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1920,4 +1920,32 @@ int only_digits(const char *s)
 		s++;
 	}
 	return (1);
+}
+
+// params_str( 0, -1 ) return all params
+char *params_str( int from, int to )
+{
+	static char		string[MAX_STRINGS][1024];
+	static int		index = 0;
+
+	char arg_x[1024];
+	int i, argc = trap_CmdArgc();
+
+	from = max(0, from);
+	to   = ( to < 0 ? argc-1: min(argc-1, to) );
+
+	if ( !argc || from >= argc || from > to )
+		return "";
+
+	index %= MAX_STRINGS;
+
+	for ( string[index][0] = 0, i = from; i <= to; i++ ) {
+		trap_CmdArgv( i, arg_x, sizeof( arg_x ) );
+
+		if ( i != from )
+			strlcat( string[index], " ", sizeof( string[0] ) );
+		strlcat( string[index], arg_x, sizeof( string[0] ) );
+	}
+
+	return string[index++];
 }
