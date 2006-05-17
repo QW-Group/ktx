@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.30 2006/05/17 20:57:11 oldmanuk Exp $
+ * $Id: admin.c,v 1.31 2006/05/17 21:54:00 qqshka Exp $
  */
 
 // admin.c
@@ -33,7 +33,6 @@ void ExitKick (gedict_t *kicker)
     if ( !kicker->k_kicking )
 		return;
 
-	free(kicker->k_playertokick);
 	kicker->k_playertokick = world;
 	kicker->k_kicking = 0;
 
