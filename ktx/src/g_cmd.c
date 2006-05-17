@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.15 2006/05/17 01:18:03 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.16 2006/05/17 20:11:48 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -232,6 +232,7 @@ qboolean ClientSay( qboolean isTeamSay )
 	int sv_spectalk = cvar("sv_spectalk");
 	int sv_sayteam_to_spec = cvar("sv_sayteam_to_spec");
 	gedict_t *client, *goal;
+	qboolean fake = false;
 
 	self = PROG_TO_EDICT( g_globalvars.self );
 
@@ -269,6 +270,8 @@ qboolean ClientSay( qboolean isTeamSay )
 	}
 	//<-
 
+	fake = ( strchr(text, 13) ? true : false ); // check if string contain $\
+
 	G_cprint("%s\n", text);
 //	SV_Write_Log(CONSOLE_LOG, 1, text);
 
@@ -299,6 +302,7 @@ qboolean ClientSay( qboolean isTeamSay )
 					goal = PROG_TO_EDICT( client->s.v.goalentity );
 
 					if(   !sv_sayteam_to_spec // player can't say_team to spec in this case
+					   || !fake // self say_team does't contain $\ so this is treat as private message
 					   || (    (goal != world && goal->k_player) // spec track player
 						   && strneq(team, ezinfokey(goal, "team"))
 						  ) // spec track player on different team

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_consts.h,v 1.12 2006/04/23 21:54:09 qqshka Exp $
+ *  $Id: g_consts.h,v 1.13 2006/05/17 20:11:48 qqshka Exp $
  */
 
 //
@@ -290,4 +290,9 @@
 
 #define MI_ON            (   1<<0)   // on/off
 #define MI_ADM_ONLY      (   1<<1)   // send info to admined specs only or to normal specs too
+
+// sv_specprint stuff
+#define SPECPRINT_CENTERPRINT   (0x1)
+#define SPECPRINT_SPRINT        (0x2)
+#define SPECPRINT_STUFFCMD      (0x4)
 

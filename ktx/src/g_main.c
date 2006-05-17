@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.19 2006/05/17 01:18:03 qqshka Exp $
+ *  $Id: g_main.c,v 1.20 2006/05/17 20:11:48 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -238,10 +238,7 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		// return non zero if say/say_team handled by mod
 		// params like GAME_CLIENT_COMMAND
 
-//		return 0;
-// TODO
 		return ClientSay( arg0 );
-
 	}
 
 	return 0;

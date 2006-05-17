@@ -14,6 +14,8 @@ qq:
 
 	 Default value for k_fp is 1.
 
+154. Now players mm2 does't shown to specs if not contain "$\".
+
 2006-05-14
 ult:
 150. Stat changes:
