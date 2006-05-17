@@ -5,6 +5,15 @@ qq:
 	 mvdsv from CVS. In future this allow me add things like
 	 ktpro "/cmd silence", "/cmd mmode", etc.
 
+	 Added command "fp" like in ktpro (c), just toggle flood protect levels.
+
+	 U can control flood level via next cvar "k_fp" like in ktpro.
+
+	 set k_fp 1  //floodprot level 1 [9 1 1]: 2 - [4 1 5]: 3 - [5 3 7]
+                 //1 - after 9 messages per 1 second silence for 1 sec. etc
+
+	 Default value for k_fp is 1.
+
 2006-05-14
 ult:
 150. Stat changes:
