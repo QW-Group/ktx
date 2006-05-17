@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.46 2006/05/17 01:18:03 qqshka Exp $
+ *  $Id: world.c,v 1.47 2006/05/17 20:57:12 oldmanuk Exp $
  */
 
 #include "g_local.h"
@@ -395,7 +395,7 @@ void SP_worldspawn()
 void SpawnCTFItem( char* classname, float x, float y, float z, float angle );
 void Customize_Maps()
 {
-	gedict_t *p;
+	gedict_t *p = world;
 
 	// spawn quad if map is aerowalk in this case
 	if ( cvar("add_q_aerowalk") && streq( "aerowalk", g_globalvars.mapname) ) {
@@ -412,7 +412,7 @@ void Customize_Maps()
 	if ( !cvar("k_end_tele_spawn") && streq( "end", g_globalvars.mapname) ) {
 		vec3_t      TS_ORIGIN = { -392, 608, 40 }; // tele spawn
 
-		for( p = world; p = find( p, FOFCLSN, "info_player_deathmatch" ); )
+		while( (p = find( p, FOFCLSN, "info_player_deathmatch" )) )
 			if ( VectorCompare(p->s.v.origin, TS_ORIGIN) ) {
 				ent_remove( p );
 				break;
@@ -509,14 +509,14 @@ void Customize_Maps()
 			vec3_t spawn1 = {  1704, -540, 208 }; // blue spawn in red base
 			vec3_t spawn2 = { -1132,  -72, 208 }; // red spawn in blue base
 			// vec3_t spawn3 = {   660,  256, 400 }; // red spawn at quad
-			
-			for( p = world; p = find( p, FOFCLSN, "info_player_team2" ); )
+
+			while( (p = find( p, FOFCLSN, "info_player_team2" )) )
 				if ( VectorCompare( p->s.v.origin, spawn1 ) ) {
 					ent_remove( p );
 					break;
 				}
 
-			for( p = world; p = find( p, FOFCLSN, "info_player_team1" ); )
+			while( (p = find( p, FOFCLSN, "info_player_team1" )) )
 				if ( VectorCompare( p->s.v.origin, spawn2 ) ) { 
 					ent_remove( p );
 					break;
@@ -724,12 +724,12 @@ void SecondFrame ( )
 
 void hide_powerups ( char *classname )
 {
-	gedict_t *p;
+	gedict_t *p = world;
 
 	if ( strnull( classname ) )
 		G_Error("hide_items");
 
-	for( p = world; p = find(p, FOFCLSN, classname); ) {
+	while( (p = find(p, FOFCLSN, classname)) ) {
 		p->s.v.solid = SOLID_NOT;
  		p->s.v.model = "";
 		if ( p->s.v.think == ( func_t ) SUB_regen ) {
@@ -741,14 +741,14 @@ void hide_powerups ( char *classname )
 
 void show_powerups ( char *classname )
 {
-	gedict_t *p, *swp;
+	gedict_t *p = world, *swp;
 
 	if ( strnull( classname ) )
 		G_Error("show_items");
 
 	swp = self; 
 
-	for( p = world; p = find(p, FOFCLSN, classname); ) {
+	while( (p = find(p, FOFCLSN, classname)) ) {
 		self = p; // WARNING
 
 		// spawn item if not yet so
@@ -766,18 +766,18 @@ void show_powerups ( char *classname )
 // called when switching to/from ctf mode
 void FixCTFItems()
 {
-	gedict_t *e;
+	gedict_t *e = world;
 
 	if ( isCTF() )
 	{
 		RegenFlags();
 		SpawnRunes();
-		for ( e = world; e = find( e, FOFCLSN, "player" ); )
+		while ( (e = find( e, FOFCLSN, "player" )) )
 			e->s.v.items = (int) e->s.v.items | IT_HOOK;
 	}
 	else
 	{
-		for ( e = world; e = find( e, FOFCLSN, "player" ); )
+		while ( (e = find( e, FOFCLSN, "player" )) )
 			e->s.v.items -= (int) e->s.v.items & IT_HOOK;
 
 		e = find( world, FOFCLSN, "item_flag_team1" );
@@ -794,7 +794,7 @@ void FixCTFItems()
 			setmodel( e, "" );
 		}
 
-		for ( e = world; e = find( e, FOFCLSN, "rune" ); )
+		while ( (e = find( e, FOFCLSN, "rune" )) )
 			ent_remove( e );
 	}
 }

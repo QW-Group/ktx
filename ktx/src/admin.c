@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.29 2006/05/12 22:18:38 qqshka Exp $
+ * $Id: admin.c,v 1.30 2006/05/17 20:57:11 oldmanuk Exp $
  */
 
 // admin.c
@@ -33,6 +33,7 @@ void ExitKick (gedict_t *kicker)
     if ( !kicker->k_kicking )
 		return;
 
+	free(kicker->k_playertokick);
 	kicker->k_playertokick = world;
 	kicker->k_kicking = 0;
 
@@ -419,8 +420,8 @@ void AdminImpBot ()
 
 void VoteAdmin()
 {
-	gedict_t *p;
-	int   from, till;
+	gedict_t *p = world;
+	int   from = 0, till;
 
 	gedict_t *electguard;
 
@@ -469,7 +470,7 @@ void VoteAdmin()
 
 	G_bprint(2, "%s has %s rights!\n", self->s.v.netname, redtext("requested admin"));
 
-	for( from = 0, p = world; p = find_plrspc(p, &from); )
+	while( (p = find_plrspc(p, &from)) )
 		if ( p != self && p->k_player )
 			G_sprint(p, 2, "Type %s in console to approve\n", redtext("yes"));
 
@@ -489,10 +490,10 @@ void VoteAdmin()
 
 void AdminMatchStart ()
 {
-    gedict_t *p;
+    gedict_t *p = world;
     int i = 0;
 
-    for( p = world; p = find(p, FOFCLSN, "player"); )
+    while( (p = find(p, FOFCLSN, "player")) )
     {
 		if( p->ready && p->k_accepted == 2 ) {
 			i++;
@@ -572,10 +573,10 @@ void ReadyThink ()
 	txt = va( "%s second%s to gamestart", dig3( i1 ), ( i1 == 1 ? "" : "s") );
 	gr  = va( "\n%s!", redtext("Go ready") );
 
-    for( p = world; p = find(p, FOFCLSN, "player"); )
+    while( (p = find(p, FOFCLSN, "player")) )
 		G_centerprint(p, "%s%s", txt, (p->ready ? "" : gr));
 
-    for( p = world; p = find(p, FOFCLSN, "spectator"); )
+    while( (p = find(p, FOFCLSN, "spectator")) )
 		G_centerprint(p, "%s", txt);
 
     self->s.v.nextthink = g_globalvars.time + 1;
@@ -658,9 +659,9 @@ void AdminForceBreak ()
 
 void PlayersStopFire()
 {
-    gedict_t *p;
+    gedict_t *p = world;
 
-	for( p = world; p = find(p, FOFCLSN, "player"); ) {
+	while( (p = find(p, FOFCLSN, "player")) ) {
         stuffcmd(p, "-attack\n");
 		self->wreg_attack = 0;
 	}

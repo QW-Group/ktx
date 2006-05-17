@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: vote.c,v 1.10 2006/04/19 20:57:13 qqshka Exp $
+ *  $Id: vote.c,v 1.11 2006/05/17 20:57:12 oldmanuk Exp $
  */
 
 // vote.c: election functions by rc\sturm
@@ -27,10 +27,10 @@ void  BeginPicking();
 // Important if player to be elected disconnects or levelchange happens
 void AbortElect()
 {
-    int from;
-	gedict_t *p;
+    int from = 0;
+	gedict_t *p = world;
 
-	for( from = 0, p = world; p = find_plrspc(p, &from); ) {
+	while( (p = find_plrspc(p, &from)) ) {
 		if( p->k_admin == 1.5 ) { // kill not yet elected admin
 			p->k_admin = 0;
 
@@ -48,7 +48,7 @@ void AbortElect()
 	vote_clear( OV_ELECT ); // clear vote
 
 // Kill timeout checker entity
-	for( p = world; p = find(p, FOFCLSN, "electguard"); ) 
+	while( (p = find(p, FOFCLSN, "electguard")) ) 
 		ent_remove( p );
 }
 
@@ -84,7 +84,7 @@ void VoteYes()
 	G_bprint(2, "%s gives %s vote\n", self->s.v.netname, g_his( self ));
 
 // calculate how many more votes are needed
-	if ( votes = get_votes_req( OV_ELECT, true ) )
+	if ( (votes = get_votes_req( OV_ELECT, true )) )
 		G_bprint(2, "\x90%d\x91 more vote%s needed\n", votes, count_s( votes ));
 
 	vote_check_elect ();
@@ -104,7 +104,7 @@ void VoteNo()
 	G_bprint(2, "%s withdraws %s vote\n", self->s.v.netname, g_his( self ));
 
 // calculate how many more votes are needed
-	if ( votes  = get_votes_req( OV_ELECT, true ) )
+	if ( (votes  = get_votes_req( OV_ELECT, true )) )
 		G_bprint(2, "\x90%d\x91 more vote%s needed\n", votes, count_s( votes ));
 
 	vote_check_elect ();
@@ -114,11 +114,11 @@ void VoteNo()
 
 int get_votes( int fofs )
 {
-	int from;
+	int from = 0;
 	int votes = 0;
-	gedict_t *p;
+	gedict_t *p = world;
 
-	for ( from = 0, p = world; p = find_plrspc(p, &from); )
+	while ( (p = find_plrspc(p, &from)) )
 		if ( *(int*)((byte*)(&p->v)+fofs) )
 			votes++;
 
@@ -129,11 +129,11 @@ int get_votes( int fofs )
 
 int get_votes_by_value( int fofs, int value )
 {
-	int from;
+	int from = 0;
 	int votes = 0;
-	gedict_t *p;
+	gedict_t *p = world;
 
-	for ( from = 0, p = world; p = find_plrspc(p, &from); )
+	while ( (p = find_plrspc(p, &from)) )
 		if ( *((int*)(&(p->v)+fofs)) == value )
 			votes++;
 
@@ -195,11 +195,11 @@ int get_votes_req( int fofs, qboolean diff )
 
 int is_admins_vote( int fofs )
 {
-	int from;
+	int from = 0;
 	int votes = 0;
-	gedict_t *p;
+	gedict_t *p = world;
 
-	for ( from = 0, p = world; p = find_plrspc(p, &from); )
+	while ( (p = find_plrspc(p, &from)) )
 		if ( *(int*)((byte*)(&p->v)+fofs) && p->k_admin == 2 )
 			votes++;
 
@@ -208,20 +208,20 @@ int is_admins_vote( int fofs )
 
 void vote_clear( int fofs )
 {
-	int from;
-	gedict_t *p;
+	int from = 0;
+	gedict_t *p = world;
 
-	for ( from = 0, p = world; p = find_plrspc(p, &from); )
+	while ( (p = find_plrspc(p, &from)) )
 		*(int*)((byte*)(&p->v)+fofs) = 0;
 }
 
 
 int get_elect_type ()
 {
-    int from;
-	gedict_t *p;
+    int from = 0;
+	gedict_t *p = world;
 
-	for( from = 0, p = world; p = find_plrspc(p, &from); ) {
+	while( (p = find_plrspc(p, &from)) ) {
 		if( p->k_admin == 1.5 ) // elected admin
 			return etAdmin;
 
@@ -255,9 +255,9 @@ votemap_t maps_voted[MAX_CLIENTS];
 // if admin votes for map - map will be treated as most voted
 int vote_get_maps ()
 {
-	int from;
+	int from = 0;
 	int best_idx = -1, i;
-	gedict_t *p;
+	gedict_t *p = world;
 
 	memset(maps_voted, 0, sizeof(maps_voted));
 	maps_voted_idx = -1;
@@ -265,8 +265,7 @@ int vote_get_maps ()
 	if ( !get_votes( OV_MAP ) )
 		return -1; // no one votes at all
 
-	for( from = 0, p = world; p = find_plrspc(p, &from); ) {
-
+	while( (p = find_plrspc(p, &from)) ) {
 		if ( !p->v.map )
 			continue; // player is not voted
 
@@ -339,12 +338,12 @@ void vote_check_break ()
 
 void vote_check_elect ()
 {
-	gedict_t *p;
-	int   from;
+	gedict_t *p = world;
+	int   from = 0;
 
 	if( !get_votes_req( OV_ELECT, true ) ) {
 
-		for( from = 0, p = world; p = find_plrspc(p, &from); )
+		while( (p = find_plrspc(p, &from)) )
 			if ( p->k_admin == 1.5 || p->k_captain > 10 )
 				break;
 
@@ -380,7 +379,7 @@ void vote_check_elect ()
 // !!! do not confuse rpickup and pickup
 void vote_check_pickup ()
 {
-	gedict_t *p;
+	gedict_t *p = world;
 	int veto;
 
 	if ( match_in_progress || k_captains )
@@ -399,8 +398,7 @@ void vote_check_pickup ()
 		else
 			G_bprint(2, "console: a pickup game it is then\n");
 
-		for( p = world;	p = find( p, FOFCLSN, "player" ); ) {
-
+		while( (p = find( p, FOFCLSN, "player" )) ) {
 			stuffcmd(p, "break\n"
 						"color 0\n"
 						"team \"\"\n"
@@ -415,8 +413,8 @@ void vote_check_pickup ()
 void vote_check_rpickup ()
 {
 	float frnd;
-    int i, tn, pl_cnt, pl_idx;
-	gedict_t *p;
+    int tn, pl_cnt, pl_idx;
+	gedict_t *p = world;
 	int veto;
 
 
@@ -437,14 +435,16 @@ void vote_check_rpickup ()
 	if( veto || !get_votes_req( OV_RPICKUP, true ) ) {
 		vote_clear( OV_RPICKUP );
 
-		for( p = world; p = find(p, FOFCLSN, "player"); )
+		while( (p = find(p, FOFCLSN, "player")) )
 			p->k_teamnumber = 0;
 
 		for( tn = 1; pl_cnt > 0; pl_cnt-- ) {
+			int i = 0;
+
 			frnd = g_random(); // bound is macros - so u _can't_ put g_random inside bound
 			pl_idx = bound(0, (int)( frnd * pl_cnt ), pl_cnt-1 ); // select random player between 0 and pl_cnt
 
-			for( i = 0, p = world; p = find(p, FOFCLSN, "player"); ) {
+			while( (p = find(p, FOFCLSN, "player")) ) {
 				if ( p->k_teamnumber )
 					continue;
 

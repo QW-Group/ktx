@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: motd.c,v 1.15 2006/04/18 22:17:17 qqshka Exp $
+ *  $Id: motd.c,v 1.16 2006/05/17 20:57:12 oldmanuk Exp $
  */
 
 // motd.c
@@ -96,7 +96,7 @@ void MOTDThinkX()
 
 void MOTDStuff()
 {
-	gedict_t *p, *so;
+	gedict_t *p = world, *so;
 	char *t, *t2, *tmp, *s1;
 	float kick, f1, f2, f3;
 
@@ -129,13 +129,13 @@ void MOTDStuff()
 		}
 		else if( lock == 1 ) // kick if team is not set properly
 		{
-			int from1;
+			int from1 = 0;
 
 			kick = 1;
 
 			t = getteam( so );
 
-			for( from1 = 0, p = world; p = find_plrghst( p, &from1 ); )
+			while( (p = find_plrghst( p, &from1 )) )
 				if ( p != so && streq( getteam( p ), t ) ) {
 					kick = 0;  // don't kick, find "player" or "ghost" with equal team
 					break;

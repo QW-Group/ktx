@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.23 2006/05/12 22:54:11 ult_ Exp $
+ *  $Id: items.c,v 1.24 2006/05/17 20:57:11 oldmanuk Exp $
  */
 
 #include "g_local.h"
@@ -1231,7 +1231,6 @@ void            powerup_touch();
 
 void powerup_touch()
 {
-	int it = 0;
 	float *p_cnt = NULL;
 
 	if ( strnull ( self->s.v.classname ) )

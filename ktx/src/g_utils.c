@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.48 2006/05/17 20:11:48 qqshka Exp $
+ *  $Id: g_utils.c,v 1.49 2006/05/17 20:57:11 oldmanuk Exp $
  */
 
 #include "g_local.h"
@@ -129,10 +129,10 @@ gedict_t *find( gedict_t * start, int fieldoff, char *str )
 // find count of "good" edicts
 int find_cnt( int fieldoff, char *str )
 {
-	int cnt;
-	gedict_t *p;
+	int cnt = 0;
+	gedict_t *p = world;
 
-	for ( cnt = 0, p = world; p = find( p, fieldoff, str ); )
+	while ( (p = find( p, fieldoff, str )) )
 		cnt++;
 
 	return cnt;
@@ -140,15 +140,17 @@ int find_cnt( int fieldoff, char *str )
 
 gedict_t *find_idx( int idx, int fieldoff, char *str )
 {
-	int cnt;
-	gedict_t *p;
+	int cnt = 0;
+	gedict_t *p = world;
 
 	if ( idx < 0 )
 		return NULL;
 
-	for ( cnt = 0, p = world; p = find( p, fieldoff, str ); cnt++ )
+	while ( (p = find( p, fieldoff, str )) ) {
 		if ( cnt == idx )
 			break;
+		cnt++;
+	}
 
 	return p;
 }
@@ -993,12 +995,12 @@ gedict_t *find_plrspc( gedict_t * start, int *from )
 
 gedict_t *player_by_id( int id )
 {
-	gedict_t *p;
+	gedict_t *p = world;
 
 	if ( id < 1 )
 		return NULL;
 
-	for ( p = world; p = find( p , FOFCLSN, "player" ); ) {
+	while ( (p = find( p , FOFCLSN, "player" )) ) {
 		if ( id == GetUserID( p ) )
 			return p;
 	}
@@ -1008,12 +1010,12 @@ gedict_t *player_by_id( int id )
 
 gedict_t *player_by_name( const char *name )
 {
-	gedict_t *p;
+	gedict_t *p = world;
 
 	if ( strnull( name ) )
 		return NULL;
 
-	for ( p = world; p = find( p , FOFCLSN, "player" ); ) {
+	while ( (p = find( p , FOFCLSN, "player" )) ) {
 		if ( streq(p->s.v.netname, name) )
 			return p;
 	}
@@ -1030,12 +1032,12 @@ gedict_t *player_by_IDorName( const char *IDname )
 
 gedict_t *spec_by_id( int id )
 {
-	gedict_t *p;
+	gedict_t *p = world;
 
 	if ( id < 1 )
 		return NULL;
 
-	for ( p = world; p = find( p , FOFCLSN, "spectator" ); ) {
+	while ( (p = find( p , FOFCLSN, "spectator" )) ) {
 		if ( id == GetUserID( p ) )
 			return p;
 	}
@@ -1045,12 +1047,12 @@ gedict_t *spec_by_id( int id )
 
 gedict_t *spec_by_name( const char *name )
 {
-	gedict_t *p;
+	gedict_t *p = world;
 
 	if ( strnull( name ) )
 		return NULL;
 
-	for ( p = world; p = find( p , FOFCLSN, "spectator" ); ) {
+	while ( (p = find( p , FOFCLSN, "spectator" )) ) {
 		if ( streq(p->s.v.netname, name) )
 			return p;
 	}
@@ -1348,7 +1350,7 @@ gedict_t *ed_scores2 = NULL;
 
 void ReScores()
 {
-	gedict_t *p;
+	gedict_t *p = world;
 	int from;
 	char *team1, *team2;
 
@@ -1367,7 +1369,7 @@ void ReScores()
 	if ( k_showscores ) {
 		team1 = cvar_string( "_k_team1" );
 
-		for( from = 0, p = world; p = find_plrghst( p, &from ); ) {
+		while( (p = find_plrghst( p, &from )) ) {
 			team2 = getteam(p);
 
 			if( streq( team1, team2 ) )
@@ -1382,7 +1384,7 @@ void ReScores()
 	
 	if ( ( isDuel() || isFFA() ) && CountPlayers() > 1 ) {
 		// no ghost serving
-		for ( p = world; p = find( p , FOFCLSN, "player" ); ) {
+		while ( (p = find( p , FOFCLSN, "player" )) ) {
 			if ( !ed_scores1 ) { // set some first player as best player
 				ed_scores1 = p;
 				continue;
@@ -1491,7 +1493,7 @@ gedict_t *ed_bestPow = NULL;
 
 void CalculateBestPlayers()
 {
-	gedict_t *p;
+	gedict_t *p = world;
 	int best, best1, best2;
 
 	// ok - best povs potentially changed, recalculate
@@ -1504,7 +1506,7 @@ void CalculateBestPlayers()
 
 	// autotrack stuff
 	// no ghost serving
-	for ( p = world; p = find( p , FOFCLSN, "player" ); ) {
+	while ( (p = find( p , FOFCLSN, "player" )) ) {
 
 		if ( ISDEAD(p) )
 			continue;
@@ -1559,7 +1561,7 @@ void CalculateBestPlayers()
 
 	// auto_pow stuff
 	// no ghost serving
-	for ( p = world; p = find( p , FOFCLSN, "player" ); ) {
+	while ( (p = find( p , FOFCLSN, "player" )) ) {
 
 		if ( ISDEAD(p) )
 			continue;
@@ -1757,10 +1759,10 @@ void ghost2scores( gedict_t *g )
 
 void update_ghosts ()
 {
-	gedict_t *p;
+	gedict_t *p = world;
 	int from;
 
-	for( from = 1, p = world; p = find_plrghst( p, &from ); )
+	while ( (p = find_plrghst( p, &from )) )
 		ghost2scores( p );
 }
 
@@ -1897,10 +1899,10 @@ void info_kf_update ( gedict_t *p, char *from, char *to )
 
 void refresh_plus_scores ()
 {
-	int from;
-	gedict_t *p, *swp;
+	int from = 0;
+	gedict_t *p = world, *swp;
 
-	for( from = 0, p = world; p = find_plrspc (p, &from); )
+	while ( (p = find_plrspc (p, &from)) )
 		if ( p->sc_stats ) {
 			swp = self; // save self
 			self = p;
