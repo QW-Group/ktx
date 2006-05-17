@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.90 2006/05/17 01:18:03 qqshka Exp $
+ *  $Id: commands.c,v 1.91 2006/05/17 20:30:38 qqshka Exp $
  */
 
 // commands.c
@@ -432,7 +432,7 @@ cmd_t cmds[] = {
 	{ "qenemy",      ToggleQEnemy,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_QENEMY },
 	{ "qpoint",      ToggleQPoint,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_QPOINT },
 	                                          
-    { "kick",        AdminKick,                 0    , CF_BOTH_ADMIN | CF_PARAMS, CD_KICK },
+    { "kick",        AdminKick,                 0    , CF_BOTH_ADMIN/* FIXME: interference with ezq server kick command | CF_PARAMS */, CD_KICK },
     { "mkick",       m_kick,                    0    , CF_BOTH_ADMIN | CF_PARAMS, CD_MKICK },
     { "fkick",       f_kick,                    0    , CF_BOTH_ADMIN | CF_PARAMS, CD_FKICK },
     { "y",           YesKick,                   0    , CF_BOTH_ADMIN, CD_Y },
