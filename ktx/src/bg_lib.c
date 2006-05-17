@@ -1,5 +1,5 @@
 /*
- * $Id: bg_lib.c,v 1.7 2006/05/17 20:57:11 oldmanuk Exp $
+ * $Id: bg_lib.c,v 1.8 2006/05/17 21:14:36 oldmanuk Exp $
  */
 
 // Copyright (C) 1999-2000 Id Software, Inc.
@@ -294,6 +294,7 @@ int toupper( int c ) {
 #endif
 //#ifndef _MSC_VER
 
+#ifndef __APPLE__
 void *memmove( void *dest, const void *src, size_t count ) {
 	int		i;
 
@@ -308,6 +309,7 @@ void *memmove( void *dest, const void *src, size_t count ) {
 	}
 	return dest;
 }
+#endif
 
 
 #if 0
