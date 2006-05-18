@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.25 2006/05/18 18:45:27 oldmanuk Exp $
+ *  $Id: items.c,v 1.26 2006/05/18 20:07:41 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1545,7 +1545,7 @@ void BackpackTouch()
 	}
 
 	if ( self->s.v.items )
-		if ( ( ( int ) other->s.v.items & ( int ) self->s.v.items ) == 0 )
+		if ( !( ( int ) other->s.v.items & ( int ) self->s.v.items ) )
 		{ // new weapon - so print u got it
 			acount = 1;
 			G_sprint( other, PRINT_LOW, "the %s", self->s.v.netname );

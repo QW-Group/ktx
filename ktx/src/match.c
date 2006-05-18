@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.58 2006/05/18 18:45:27 oldmanuk Exp $
+ *  $Id: match.c,v 1.59 2006/05/18 20:07:41 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1347,6 +1347,8 @@ void SM_on_MatchStart()
 // Reset player frags and start the timer.
 void StartMatch ()
 {
+	char *tm;
+
 	k_berzerk    = 0;
 	k_nochange   = 0;
 	k_showscores = 0;
@@ -1378,8 +1380,11 @@ void StartMatch ()
 
 	SM_PrepareClients(); // put clients in server and reset some params
 
+	if ( !strnull( tm = ezinfokey(world, "date_str") ) )
+		G_bprint(2, "matchdate: %s\n", tm);
+
 	if ( !k_matchLess || cvar( "k_matchless_countdown" ) )
-		G_bprint(2, "The match has begun!\n");
+		G_bprint(2, "%s!\n", redtext("The match has begun"));
 
 // spec silence
 	{ 

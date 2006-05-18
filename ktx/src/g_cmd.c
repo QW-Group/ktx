@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.16 2006/05/17 20:11:48 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.17 2006/05/18 20:07:41 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -270,7 +270,7 @@ qboolean ClientSay( qboolean isTeamSay )
 	}
 	//<-
 
-	fake = ( strchr(text, 13) ? true : false ); // check if string contain $\
+	fake = ( strchr(text, 13) ? true : false ); // check if string contain "$\"
 
 	G_cprint("%s\n", text);
 //	SV_Write_Log(CONSOLE_LOG, 1, text);

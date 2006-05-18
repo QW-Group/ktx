@@ -1,5 +1,5 @@
 /*
- * $Id: bg_lib.c,v 1.8 2006/05/17 21:14:36 oldmanuk Exp $
+ * $Id: bg_lib.c,v 1.9 2006/05/18 20:07:41 qqshka Exp $
  */
 
 // Copyright (C) 1999-2000 Id Software, Inc.
@@ -112,7 +112,11 @@ med3(a, b, c, cmp)
               :(cmp(b, c) > 0 ? b : (cmp(a, c) < 0 ? a : c ));
 }
 
-void qsort(void *a, size_t n, size_t es, cmp_t *cmp)
+void
+qsort(a, n, es, cmp)
+	void *a;
+	size_t n, es;
+	cmp_t *cmp;
 {
 	char *pa, *pb, *pc, *pd, *pl, *pm, *pn;
 	int d, r, swaptype, swap_cnt;
@@ -294,7 +298,6 @@ int toupper( int c ) {
 #endif
 //#ifndef _MSC_VER
 
-#ifndef __APPLE__
 void *memmove( void *dest, const void *src, size_t count ) {
 	int		i;
 
@@ -309,7 +312,6 @@ void *memmove( void *dest, const void *src, size_t count ) {
 	}
 	return dest;
 }
-#endif
 
 
 #if 0

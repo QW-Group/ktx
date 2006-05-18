@@ -1,3 +1,13 @@
+2006-05-18
+qq:
+155. Print match date when game starts: "matchdate: Mon Apr 03 20:02:38 2006".
+
+156. Added command "/dlist [token1 [token2 ...]]", show demo list,
+	 u can access this command via "/cmd dlist" as well. Working as
+	 redirect to mvdsv "/cmd demolist".
+
+157. Added command "/dinfo <demonum>", just redirect to mvdsv "/cmd demoinfo".
+
 2006-05-17
 qq:
 153. I'm patch mvdsv so now qvm mods may handle say/say_team internally and

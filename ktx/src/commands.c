@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.93 2006/05/18 18:45:27 oldmanuk Exp $
+ *  $Id: commands.c,v 1.94 2006/05/18 20:07:41 qqshka Exp $
  */
 
 // commands.c
@@ -149,6 +149,9 @@ void GrenadeMode();
 void ToggleReady();
 
 void fp_toggle ();
+
+void dlist();
+void dinfo();
 
 // spec
 void ShowCamHelp();
@@ -348,6 +351,8 @@ const char CD_NODESC[] = "no desc";
 #define CD_GREN_MODE    "grenades mode"
 #define CD_TOGGLEREADY  "just toggle ready"
 #define CD_FP           "change floodprot level"
+#define CD_DLIST        "show demo list"
+#define CD_DINFO        "show demo info"
 
 
 cmd_t cmds[] = {
@@ -556,7 +561,9 @@ cmd_t cmds[] = {
     { "time",        sv_time,                   0    , CF_BOTH | CF_MATCHLESS, CD_TIME },
     { "gren_mode",   GrenadeMode,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_GREN_MODE },
     { "toggleready", ToggleReady,               0    , CF_PLAYER, CD_TOGGLEREADY },
-    { "fp",          fp_toggle,                 0    , CF_BOTH_ADMIN, CD_FP }
+    { "fp",          fp_toggle,                 0    , CF_BOTH_ADMIN, CD_FP },
+    { "dlist",       dlist,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_DLIST },
+    { "dinfo",       dinfo,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_DINFO }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -4659,3 +4666,14 @@ void ToggleReady()
 	else 
 		PlayerReady();
 }
+
+void dlist()
+{
+	stuffcmd(self, "cmd demolist %s\n", params_str(1, -1));
+}
+
+void dinfo()
+{
+	stuffcmd(self, "cmd demoinfo %s\n", params_str(1, -1));
+}
+
