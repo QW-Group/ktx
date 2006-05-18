@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: triggers.c,v 1.14 2006/04/23 12:03:22 qqshka Exp $
+ *  $Id: triggers.c,v 1.15 2006/05/18 20:58:53 oldmanuk Exp $
  */
 
 #include "g_local.h"
@@ -442,6 +442,11 @@ void teleport_touch()
 	if ( ISDEAD( other ) || other->s.v.solid != SOLID_SLIDEBOX )
 		return;
 
+	t = find( world, FOFS( s.v.targetname ), self->s.v.target );
+	if ( !t )
+		// G_Error( "couldn't find target" );
+		return;
+
 //team
 	other->k_1spawn = 60;
 //team
@@ -465,10 +470,6 @@ void teleport_touch()
 
 	//put a tfog where the player was
 	spawn_tfog( other->s.v.origin );
-
-	t = find( world, FOFS( s.v.targetname ), self->s.v.target );
-	if ( !t )
-		G_Error( "couldn't find target" );
 
 // spawn a tfog flash in front of the destination
 	makevectors( t->mangle );
