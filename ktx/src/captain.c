@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: captain.c,v 1.13 2006/05/17 20:57:11 oldmanuk Exp $
+ *  $Id: captain.c,v 1.14 2006/05/18 18:45:27 oldmanuk Exp $
  */
 
 // captain.c
@@ -65,9 +65,9 @@ void PrintCaptainInTurn ()
 
 void CancelCaptains ()
 {
-    gedict_t *p = world;
+    gedict_t *p;
 
-	while( (p = find(p, FOFCLSN, "player")) )
+	for( p = world; p = find(p, FOFCLSN, "player"); )
 	{
 		if( p->k_captain )
 		{
@@ -84,10 +84,10 @@ void CancelCaptains ()
 void CheckFinishCaptain ()
 {
     int pl_free = 0;
-    gedict_t *p = world, *lastone = NULL;
+    gedict_t *p, *lastone = NULL;
 
     // s: calculate how many players are free
-   	while( (p = find(p, FOFCLSN, "player")) )
+   	for( p = world; p = find(p, FOFCLSN, "player"); )
     {
         if( p->s.v.frags )
         {
@@ -144,7 +144,7 @@ void CaptainPickPlayer ()
 
 void ExitCaptain ()
 {
-    gedict_t *p = world;
+    gedict_t *p;
 
     if( self->k_captain == 1 || self->k_captain == 2 )
     {
@@ -154,7 +154,7 @@ void ExitCaptain ()
         {
             G_bprint(2, "Player picking aborted\n");
 
-            while( (p = find(p, FOFCLSN, "player")) )
+            for( p = world; p = find(p, FOFCLSN, "player"); )
                 if( p->s.v.frags )
                     p->s.v.frags = 0;
         }
@@ -167,8 +167,8 @@ void ExitCaptain ()
 
 void BecomeCaptain ()
 {
-	int from = 0, till;
-    gedict_t *p = world, *electguard;
+	int from, till;
+    gedict_t *p, *electguard;
 
     // s: check if we are being elected or we are a captain already
     if( self->k_captain )
@@ -277,7 +277,7 @@ void BecomeCaptain ()
 
 	G_bprint(2, "%s has %s status!\n", self->s.v.netname, redtext("requested captain"));
 
-	while( (p = find_plrspc(p, &from)) )
+	for( from = 0, p = world; p = find_plrspc(p, &from); )
 		if ( p != self && p->k_player )
 			G_sprint(p, 2, "Type %s in console to approve\n", redtext("yes"));
 
@@ -293,7 +293,7 @@ void BecomeCaptain ()
 
 void BeginPicking ()
 {
-    gedict_t *p = world;
+    gedict_t *p;
     int num;
  
     if( CountPlayers() < 3 )
@@ -311,7 +311,7 @@ void BeginPicking ()
 
 	num = 1;
 
-	while( (p = find(p, FOFCLSN, "player")) )
+	for( p = world; p = find(p, FOFCLSN, "player"); )
     {
 		if( p->k_captain )
 		{

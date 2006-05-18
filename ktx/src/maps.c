@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: maps.c,v 1.11 2006/05/17 20:57:12 oldmanuk Exp $
+ *  $Id: maps.c,v 1.12 2006/05/18 18:45:27 oldmanuk Exp $
  */
 
 #include "g_local.h"
@@ -181,7 +181,7 @@ char *GetMapName(int imp)
 void SelectMap()
 {
 	char     *m;
-	gedict_t *p = world;
+	gedict_t *p;
 	int 	 till;
 	qboolean isVoted = false;
 
@@ -221,7 +221,7 @@ void SelectMap()
 		return;
 	}
 
-	while ( (p = find(p , FOFCLSN, "player")) )
+	for ( p = world; p = find(p , FOFCLSN, "player"); )
 		if ( p->v.map == self->cmd_selectMap ) {
 			isVoted = true;
 			break;
