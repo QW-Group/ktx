@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.73 2006/05/18 18:45:27 oldmanuk Exp $
+ *  $Id: client.c,v 1.74 2006/05/18 19:47:07 oldmanuk Exp $
  */
 
 //===========================================================================
@@ -1176,6 +1176,8 @@ void PutClientInServer()
 			}
 			self->s.v.items = items;
 		}
+		// default to spawning with rl
+		self->s.v.weapon = IT_ROCKET_LAUNCHER;
 	}
 
 	if ( deathmatch == 5 && match_in_progress == 2 )
@@ -1199,6 +1201,8 @@ void PutClientInServer()
 		self->s.v.items = items;
 		self->invincible_time = 1;
 		self->invincible_finished = g_globalvars.time + 3;
+		// default to spawning with rl
+		self->s.v.weapon = IT_ROCKET_LAUNCHER;
 	}
 
 	// remove particular weapons in dmm4
@@ -1209,8 +1213,10 @@ void PutClientInServer()
 		self->s.v.items = (int)self->s.v.items & ~k_disallow_weapons;
 	}
 
+	// drop down to best weapon actually hold
 	if ( !( (int)self->s.v.weapon & (int)self->s.v.items ) )
 		self->s.v.weapon = W_BestWeapon();
+
 	W_SetCurrentAmmo();
 }
 
