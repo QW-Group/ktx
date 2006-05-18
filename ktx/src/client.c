@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.74 2006/05/18 19:47:07 oldmanuk Exp $
+ *  $Id: client.c,v 1.75 2006/05/18 20:15:14 oldmanuk Exp $
  */
 
 //===========================================================================
@@ -2455,6 +2455,20 @@ void PlayerPostThink()
 	CheckPowerups();
 
 	W_WeaponFrame();
+
+#ifdef VWEP_TEST
+    // update vwep frame
+    if(!strnull(ezinfokey(world, "vwep")) && vw_available > 0)
+    {
+        if (self->s.v.health <= 0)
+        {
+            self->s.v.vw_index = 0;
+            self->s.v.vw_frame = 0;
+        }
+        else
+            self->s.v.vw_frame = self->s.v.frame;
+    }
+#endif
 
 	if ( !match_in_progress && !match_over && !k_captains )
 	{

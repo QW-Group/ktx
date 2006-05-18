@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: globals.c,v 1.15 2006/05/13 00:51:22 qqshka Exp $
+ *  $Id: globals.c,v 1.16 2006/05/18 20:15:14 oldmanuk Exp $
  */
 
 #include "g_local.h"
@@ -71,3 +71,8 @@ int   k_cmd_fp_dontkick; // if 1 - don't use kick
 int   k_cmd_fp_disabled; // if 1 - don't use cmd floodprot
 
 // }
+
+#ifdef VWEP_TEST
+int   vw_available; // vwep extension available
+#endif
+

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.48 2006/05/18 18:45:27 oldmanuk Exp $
+ *  $Id: world.c,v 1.49 2006/05/18 20:15:14 oldmanuk Exp $
  */
 
 #include "g_local.h"
@@ -278,6 +278,26 @@ void SP_worldspawn()
 	trap_precache_model( "progs/v_shot2.mdl" );
 	trap_precache_model( "progs/v_nail2.mdl" );
 	trap_precache_model( "progs/v_rock2.mdl" );
+
+#ifdef VWEP_TEST
+	// FIXME: checkextension in mvdsv?
+    // vw_available = checkextension("ZQ_VWEP");
+    vw_available = 1;
+
+    if(!strnull(ezinfokey(world, "vwep")) && vw_available > 0)
+    {
+        // precache our vwep models
+        trap_precache_vwep_model (0, "progs/vwplayer.mdl");  // vwep-enabled player model to use
+        trap_precache_vwep_model (1, "progs/w_axe.mdl");
+        trap_precache_vwep_model (2, "progs/w_shot.mdl");
+        trap_precache_vwep_model (3, "progs/w_shot2.mdl");
+        trap_precache_vwep_model (4, "progs/w_nail.mdl");
+        trap_precache_vwep_model (5, "progs/w_nail2.mdl");
+        trap_precache_vwep_model (6, "progs/w_rock.mdl");
+        trap_precache_vwep_model (7, "progs/w_rock2.mdl");
+        trap_precache_vwep_model (8, "progs/w_light.mdl");
+    }
+#endif
 
 	trap_precache_model( "progs/bolt.mdl" );	// for lightning gun
 	trap_precache_model( "progs/bolt2.mdl" );	// for lightning gun

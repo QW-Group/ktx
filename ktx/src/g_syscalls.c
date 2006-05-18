@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_syscalls.c,v 1.5 2006/03/26 17:19:13 qqshka Exp $
+ *  $Id: g_syscalls.c,v 1.6 2006/05/18 20:15:14 oldmanuk Exp $
  */
 
 //#include "g_local.h"
@@ -101,6 +101,12 @@ void trap_precache_model( char *name )
 {
 	syscall( G_PRECACHE_MODEL, (int) name );
 }
+#ifdef VWEP_TEST
+void trap_precache_vwep_model( int pos, char *name )
+{
+	syscall( G_PRECACHE_VWEP_MODEL, pos, (int) name );
+}
+#endif
 
 void trap_setorigin( int edn, float origin_x, float origin_y, float origin_z )
 {

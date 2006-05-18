@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_public.h,v 1.4 2006/05/15 00:08:57 qqshka Exp $
+ *  $Id: g_public.h,v 1.5 2006/05/18 20:15:14 oldmanuk Exp $
  */
 
 #ifndef __G_PUBLIC_H__
@@ -56,6 +56,9 @@ typedef enum
 	G_REMOVE_ENT,
 	G_PRECACHE_SOUND,
 	G_PRECACHE_MODEL,
+#ifdef VWEP_TEST
+	G_PRECACHE_VWEP_MODEL,
+#endif
 	G_LIGHTSTYLE,
 	G_SETORIGIN,
 	G_SETSIZE,

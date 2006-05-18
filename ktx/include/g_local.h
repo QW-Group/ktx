@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.65 2006/05/17 01:18:03 qqshka Exp $
+ *  $Id: g_local.h,v 1.66 2006/05/18 20:15:14 oldmanuk Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -682,6 +682,10 @@ extern  int   k_cmd_fp_dontkick; // if 1 - don't use kick
 extern  int   k_cmd_fp_disabled; // if 1 - don't use cmd floodprot
 
 // }
+
+#ifdef VWEP_TEST
+extern  int   vw_available; // vwep extension available
+#endif
 
 // heh, some hack for mvdsv for grabbing some data
 

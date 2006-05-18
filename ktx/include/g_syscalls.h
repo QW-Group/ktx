@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_syscalls.h,v 1.3 2005/12/27 20:35:12 qqshka Exp $
+ *  $Id: g_syscalls.h,v 1.4 2006/05/18 20:15:14 oldmanuk Exp $
  */
 
 int     trap_GetApiVersion(  );
@@ -36,6 +36,9 @@ int     trap_spawn(  );
 void    trap_remove( int edn );
 void    trap_precache_sound( char *name );
 void    trap_precache_model( char *name );
+#ifdef VWEP_TEST
+void    trap_precache_vwep_model( int pos, char *name );
+#endif
 void    trap_setorigin( int edn, float origin_x, float origin_y, float origin_z );
 void    trap_setsize( int edn, float min_x, float min_y, float min_z, float max_x,
 		      float max_y, float max_z );
