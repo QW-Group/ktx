@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.38 2006/05/17 01:18:03 qqshka Exp $
+ *  $Id: progs.h,v 1.39 2006/05/19 00:27:06 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -390,6 +390,8 @@ typedef struct gedict_s {
 
 	fp_cmd_t fp_c; // cmd flood protection
 	fp_cmd_t fp_s; // say flood protection
+
+	float tdeath_time;	// when player invoke spawn_tdeath(...), help reduce double telefrags
 
 } gedict_t;
 

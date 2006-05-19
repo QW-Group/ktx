@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.75 2006/05/18 20:15:14 oldmanuk Exp $
+ *  $Id: client.c,v 1.76 2006/05/19 00:27:06 qqshka Exp $
  */
 
 //===========================================================================
@@ -2085,7 +2085,7 @@ void PlayerPreThink()
 	} else
 		self->s.v.flags = ( ( int ) ( self->s.v.flags ) ) | FL_JUMPRELEASED;
 
-// teleporters can force a non-moving pause g_globalvars.time        
+// teleporters can force a non-moving pause time
 	if ( g_globalvars.time < self->pausetime )
 		SetVector( self->s.v.velocity, 0, 0, 0 );
 

@@ -1,3 +1,7 @@
+2006-05-19
+qq:
+158. Probably reduce/fix double telefrags, need testing, can't test this thing alone.
+
 2006-05-18
 qq:
 155. Print match date when game starts: "matchdate: Mon Apr 03 20:02:38 2006".

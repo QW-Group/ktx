@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: triggers.c,v 1.15 2006/05/18 20:58:53 oldmanuk Exp $
+ *  $Id: triggers.c,v 1.16 2006/05/19 00:27:06 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -346,6 +346,11 @@ void tdeath_touch()
 {
 	gedict_t       *other2;
 
+// { ktpro way to reduce double telefrags
+	if ( other->tdeath_time > self->tdeath_time ) 
+		return; // this mean we go through tele after some guy, so we must not be telefragged
+// }
+
 	if ( other == PROG_TO_EDICT( self->s.v.owner ) )
 		return;
 
@@ -394,9 +399,8 @@ void tdeath_touch()
 }
 
 
-void spawn_tdeath( vec3_t org, gedict_t * death_owner )
+void spawn_tdeath( vec3_t org, gedict_t *death_owner )
 {
-
 	gedict_t       *death;
 
 	death = spawn();
@@ -415,6 +419,10 @@ void spawn_tdeath( vec3_t org, gedict_t * death_owner )
 	death->s.v.nextthink = g_globalvars.time + 0.1;
 	death->s.v.think = ( func_t ) SUB_Remove;
 	death->s.v.owner = EDICT_TO_PROG( death_owner );
+
+// { ktpro way to reduce double telefrags
+	death_owner->tdeath_time = death->tdeath_time = g_globalvars.time;
+// }
 
 	g_globalvars.force_retouch = 2;	// make sure even still objects get hit
 }
@@ -442,17 +450,17 @@ void teleport_touch()
 	if ( ISDEAD( other ) || other->s.v.solid != SOLID_SLIDEBOX )
 		return;
 
-	t = find( world, FOFS( s.v.targetname ), self->s.v.target );
-	if ( !t )
-		// G_Error( "couldn't find target" );
-		return;
-
 //team
 	other->k_1spawn = 60;
 //team
 
 // activator = other;
 	SUB_UseTargets();
+
+	t = find( world, FOFS( s.v.targetname ), self->s.v.target );
+	if ( !t )
+		// G_Error( "couldn't find target" );
+		return;
 
 // put a tfog where the player was and play teleporter sound
 // For some odd reason (latency?), no matter if the sound was issued to play
@@ -468,7 +476,7 @@ void teleport_touch()
 	othercopy->s.v.think = ( func_t ) SUB_Remove;
 	play_teleport( othercopy );
 
-	//put a tfog where the player was
+//put a tfog where the player was
 	spawn_tfog( other->s.v.origin );
 
 // spawn a tfog flash in front of the destination
