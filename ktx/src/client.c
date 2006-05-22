@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.76 2006/05/19 00:27:06 qqshka Exp $
+ *  $Id: client.c,v 1.77 2006/05/22 21:07:38 oldmanuk Exp $
  */
 
 //===========================================================================
@@ -2462,11 +2462,11 @@ void PlayerPostThink()
     {
         if (self->s.v.health <= 0)
         {
-            self->s.v.vw_index = 0;
-            self->s.v.vw_frame = 0;
+            self->vw_index = 0;
+            self->vw_frame = 0;
         }
         else
-            self->s.v.vw_frame = self->s.v.frame;
+            self->vw_frame = self->s.v.frame;
     }
 #endif
 

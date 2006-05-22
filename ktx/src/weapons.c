@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.36 2006/05/18 20:15:14 oldmanuk Exp $
+ *  $Id: weapons.c,v 1.37 2006/05/22 21:07:38 oldmanuk Exp $
  */
 
 #include "g_local.h"
@@ -1081,7 +1081,7 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponframe = 0;
 #ifdef VWEP_TEST
         if(vw_available > 0)
-            self->s.v.vw_index = 1;
+            self->vw_index = 1;
 #endif
 		break;
 
@@ -1092,7 +1092,7 @@ void W_SetCurrentAmmo()
 		items |= IT_SHELLS;
 #ifdef VWEP_TEST
         if(vw_available > 0)
-            self->s.v.vw_index = 2;
+            self->vw_index = 2;
 #endif
 		break;
 
@@ -1103,7 +1103,7 @@ void W_SetCurrentAmmo()
 		items |= IT_SHELLS;
 #ifdef VWEP_TEST
         if(vw_available > 0)
-            self->s.v.vw_index = 3;
+            self->vw_index = 3;
 #endif
 		break;
 
@@ -1114,7 +1114,7 @@ void W_SetCurrentAmmo()
 		items |= IT_NAILS;
 #ifdef VWEP_TEST
         if(vw_available > 0)
-            self->s.v.vw_index = 4;
+            self->vw_index = 4;
 #endif
 		break;
 
@@ -1125,7 +1125,7 @@ void W_SetCurrentAmmo()
 		items |= IT_NAILS;
 #ifdef VWEP_TEST
         if(vw_available > 0)
-            self->s.v.vw_index = 5;
+            self->vw_index = 5;
 #endif
 		break;
 
@@ -1136,7 +1136,7 @@ void W_SetCurrentAmmo()
 		items |= IT_ROCKETS;
 #ifdef VWEP_TEST
         if(vw_available > 0)
-            self->s.v.vw_index = 6;
+            self->vw_index = 6;
 #endif
 		break;
 
@@ -1147,7 +1147,7 @@ void W_SetCurrentAmmo()
 		items |= IT_ROCKETS;
 #ifdef VWEP_TEST
         if(vw_available > 0)
-            self->s.v.vw_index = 7;
+            self->vw_index = 7;
 #endif
 		break;
 
@@ -1158,7 +1158,7 @@ void W_SetCurrentAmmo()
 		items |= IT_CELLS;
 #ifdef VWEP_TEST
         if(vw_available > 0)
-            self->s.v.vw_index = 8;
+            self->vw_index = 8;
 #endif
 		break;
 
@@ -1173,7 +1173,7 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponframe = 0;
 #ifdef VWEP_TEST
         if(vw_available > 0)
-            self->s.v.vw_index = 1;
+            self->vw_index = 1;
 #endif
 		break;
 
@@ -1183,7 +1183,7 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponframe = 0;
 #ifdef VWEP_TEST
         if(vw_available > 0)
-            self->s.v.vw_index = 0;
+            self->vw_index = 0;
 #endif
 		break;
 	}

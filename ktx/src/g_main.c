@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.20 2006/05/17 20:11:48 qqshka Exp $
+ *  $Id: g_main.c,v 1.21 2006/05/22 21:07:38 oldmanuk Exp $
  */
 
 #include "g_local.h"
@@ -42,6 +42,10 @@ gedict_t       *self, *other;
 //short shortvar=0xfedc;
 globalvars_t    g_globalvars;
 field_t         expfields[] = {
+#ifdef VWEP_TEST
+	{"vw_index", FOFS( vw_index ), F_FLOAT}	,
+	{"vw_frame", FOFS( vw_frame ), F_FLOAT}	,
+#endif
 	{"maxspeed", FOFS( maxspeed ), F_FLOAT}	,
 	{"gravity", FOFS( gravity ), F_FLOAT},
 	{"isBot", FOFS( isBot ), F_INT},

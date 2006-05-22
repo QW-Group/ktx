@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.39 2006/05/19 00:27:06 qqshka Exp $
+ *  $Id: progs.h,v 1.40 2006/05/22 21:07:38 oldmanuk Exp $
  */
 
 #include "progdefs.h"
@@ -183,7 +183,11 @@ typedef enum
 //typedef (void(*)(gedict_t *)) one_edict_func;
 typedef struct gedict_s {
 	edict_t         s;
-	//custom fields
+//custom fields
+#ifdef VWEP_TEST
+	float   vw_index;
+	float   vw_frame;
+#endif
 	float           maxspeed, gravity;
 	int             isBot;
 	char           *mdl;
