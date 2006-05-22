@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.50 2006/05/18 18:45:27 oldmanuk Exp $
+ *  $Id: g_utils.c,v 1.51 2006/05/22 23:02:20 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -632,6 +632,9 @@ void setmodel( gedict_t * ed, char *model )
 
 void sound( gedict_t * ed, int channel, char *samp, float vol, float att )
 {
+	if ( !samp || !*samp )
+		return; // ignore null sample
+
 	trap_sound( NUM_FOR_EDICT( ed ), channel, samp, vol, att );
 }
 

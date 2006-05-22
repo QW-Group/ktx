@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: doors.c,v 1.4 2006/03/19 23:16:13 qqshka Exp $
+ *  $Id: doors.c,v 1.5 2006/05/22 23:02:20 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -528,10 +528,13 @@ void SP_func_door()
 	}
 	if ( self->s.v.sounds == 0 )
 	{
-		trap_precache_sound( "misc/null.wav" );
-		trap_precache_sound( "misc/null.wav" );
-		self->s.v.noise1 = "misc/null.wav";
-		self->s.v.noise2 = "misc/null.wav";
+//		trap_precache_sound( "misc/null.wav" );
+//		trap_precache_sound( "misc/null.wav" );
+//		self->s.v.noise1 = "misc/null.wav";
+//		self->s.v.noise2 = "misc/null.wav";
+// qqshka: shut up null.wav, have some artefact, we can hear
+		self->s.v.noise1 = "";
+		self->s.v.noise2 = "";
 	}
 	if ( self->s.v.sounds == 1 )
 	{

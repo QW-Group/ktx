@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: plats.c,v 1.4 2006/03/19 23:16:13 qqshka Exp $
+ *  $Id: plats.c,v 1.5 2006/05/22 23:02:20 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -376,10 +376,13 @@ void SP_func_train()
 
 	if ( self->s.v.sounds == 0 )
 	{
-		self->s.v.noise = ( "misc/null.wav" );
-		trap_precache_sound( "misc/null.wav" );
-		self->s.v.noise1 = ( "misc/null.wav" );
-		trap_precache_sound( "misc/null.wav" );
+//		self->s.v.noise = ( "misc/null.wav" );
+///		trap_precache_sound( "misc/null.wav" );
+//		self->s.v.noise1 = ( "misc/null.wav" );
+//		trap_precache_sound( "misc/null.wav" );
+// qqshka: shut up null.wav, have some artefact, we can hear
+		self->s.v.noise  = "";
+		self->s.v.noise1 = "";
 	}
 
 	if ( self->s.v.sounds == 1 )
@@ -425,10 +428,14 @@ void SP_misc_teleporttrain()
 	SetVector( self->s.v.avelocity, 100, 200, 300 );
 	//self->s.v.avelocity = '100 200 300';
 
-	self->s.v.noise = ( "misc/null.wav" );
-	trap_precache_sound( "misc/null.wav" );
-	self->s.v.noise1 = ( "misc/null.wav" );
-	trap_precache_sound( "misc/null.wav" );
+//	self->s.v.noise = ( "misc/null.wav" );
+//	trap_precache_sound( "misc/null.wav" );
+//	self->s.v.noise1 = ( "misc/null.wav" );
+//	trap_precache_sound( "misc/null.wav" );
+// qqshka: shut up null.wav, have some artefact, we can hear
+	self->s.v.noise  = "";
+	self->s.v.noise1 = "";
+
 
 	trap_precache_model( "progs/teleport.mdl" );
 	setmodel( self, "progs/teleport.mdl" );
