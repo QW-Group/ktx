@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.49 2006/05/18 20:15:14 oldmanuk Exp $
+ *  $Id: world.c,v 1.50 2006/05/23 01:17:47 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -680,6 +680,7 @@ void FirstFrame	( )
 	RegisterCvar("k_no_vote_break");
 	RegisterCvar("k_no_vote_map");
 	RegisterCvar("k_midair");
+	RegisterCvar("k_dmgfrags");
 
 // { cmd flood protection
 	RegisterCvar("k_cmd_fp_count");

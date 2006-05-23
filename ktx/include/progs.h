@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.40 2006/05/22 21:07:38 oldmanuk Exp $
+ *  $Id: progs.h,v 1.41 2006/05/23 01:17:47 ult_ Exp $
  */
 
 #include "progdefs.h"
@@ -81,7 +81,8 @@ typedef struct player_stats_s {
 
 	float    dmg_t; // damage taken
 	float    dmg_g; // damage given
-	float    dmg_team;
+	float    dmg_team;  // damage to team
+	int      dmg_frags; // frags awarded from damage (CA)
 
 	int		ot_a;	 // overtime armor value
 //	float	ot_at;   // overtime armor type

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.22 2006/05/14 03:15:01 ult_ Exp $
+ *  $Id: combat.c,v 1.23 2006/05/23 01:17:47 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -167,7 +167,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	gedict_t       *oldself;
 	float           save;
 	float           take;
-	int				wp_num;
+	int				wp_num, dmg_frags;
 	float			dmg_dealt = 0;
 	char            *attackerteam, *targteam;
 
@@ -415,12 +415,18 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	{
 		if ( attacker != targ )
 		{
-			if ( streq(attackerteam, targteam) )
+			if ( streq(attackerteam, targteam) && !isDuel() )
 				attacker->ps.dmg_team += dmg_dealt;
 			else 
 			{
 				attacker->ps.dmg_g += dmg_dealt;
 				targ->ps.dmg_t += dmg_dealt;
+				if ( cvar("k_dmgfrags") )
+				{
+					dmg_frags = attacker->ps.dmg_g / 100;
+					attacker->s.v.frags = attacker->s.v.frags - attacker->ps.dmg_frags + dmg_frags;
+					attacker->ps.dmg_frags = dmg_frags;
+				}
 			}
 		}
 	}

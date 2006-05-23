@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.95 2006/05/20 22:12:17 qqshka Exp $
+ *  $Id: commands.c,v 1.96 2006/05/23 01:17:47 ult_ Exp $
  */
 
 // commands.c
@@ -2576,6 +2576,7 @@ const char common_um_init[] =
 	"k_dis 1\n"							// discharge on
 	"k_bzk 0\n"							// berzerk
 	"k_spw 2\n"							// affect spawn type
+	"k_dmgfrags 0\n"					// damage frags off
       
 	"k_membercount 0\n"					// some unlimited values
 	"k_lockmin 0\n"						// some unlimited values
