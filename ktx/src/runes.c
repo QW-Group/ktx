@@ -1,5 +1,5 @@
 /*
- *  $Id: runes.c,v 1.6 2006/05/16 04:53:41 ult_ Exp $
+ *  $Id: runes.c,v 1.7 2006/05/23 00:31:06 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -234,11 +234,8 @@ void SpawnRunes()
 	gedict_t *oself, *e;
 	oself = self;
 
-	e = find( world, FOFCLSN, "rune" );
-	while ( e ) {
+	for ( e = world; (e = find( e, FOFCLSN, "rune")); )
 		ent_remove( e );
-		e = find( world, FOFCLSN, "rune" );
-	}
 		
 	self = SelectRuneSpawnPoint();
 	DoDropRune( CTF_RUNE_RES );

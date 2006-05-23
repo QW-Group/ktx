@@ -1,5 +1,5 @@
 /*
- *  $Id: ctf.c,v 1.12 2006/05/16 04:53:41 ult_ Exp $
+ *  $Id: ctf.c,v 1.13 2006/05/23 00:31:06 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -85,7 +85,7 @@ void spawn_item_flag()
 	if ( !droptofloor( self ) )
 		ent_remove( self );
 	else
-    	VectorCopy( self->s.v.origin, self->s.v.oldorigin );
+		VectorCopy( self->s.v.origin, self->s.v.oldorigin );
 
 	if ( !isCTF() )
 	{
@@ -242,8 +242,7 @@ void FlagTouch()
 				other->ps.caps++;
 	    
 				// loop through all players on team to give bonus
-				p = find( world, FOFCLSN, "player" );
-				while ( p )
+				for ( p = world; (p = find( p, FOFCLSN, "player")); )
 				{
 					p->s.v.items -= ( (int) p->s.v.items & (IT_KEY1 | IT_KEY2) );
 					if ( streq(getteam(p), getteam(other)) )
@@ -271,9 +270,7 @@ void FlagTouch()
 					}
 					else
 						p->carrier_hurt_time = -1;
-					p = find ( p, FOFCLSN, "player" );
 				}
-
 				RegenFlags();
 				return;
 			}
@@ -288,11 +285,8 @@ void FlagTouch()
 			sound (other, CHAN_ITEM, self->s.v.noise1, 1, ATTN_NORM);
 			RegenFlag( self );
 
-			p = find( world, FOFCLSN, "player" );
-			while ( p ) {
+			for ( p = world; (p = find( p, FOFCLSN, "player")); )
 				p->s.v.items -= ( (int) p->s.v.items & (int) self->s.v.items );
- 				p = find ( p, FOFCLSN, "player" );
-			}
 
 			G_bprint( 2, other->s.v.netname);
 
