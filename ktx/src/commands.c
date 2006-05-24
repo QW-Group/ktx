@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.96 2006/05/23 01:17:47 ult_ Exp $
+ *  $Id: commands.c,v 1.97 2006/05/24 22:47:14 qqshka Exp $
  */
 
 // commands.c
@@ -4657,7 +4657,7 @@ void GrenadeMode()
 		return;
 	}
 
-	cvar_toggle_msg( self, "k_dmm4_gren_mode", redtext("grenades only explode on direct impact") );
+	cvar_toggle_msg( self, "k_dmm4_gren_mode", redtext("grenade mode") );
 }
 
 void ToggleReady()
