@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.32 2006/05/18 18:45:27 oldmanuk Exp $
+ * $Id: admin.c,v 1.33 2006/05/24 22:46:01 qqshka Exp $
  */
 
 // admin.c
@@ -585,7 +585,7 @@ void AdminForceStart ()
 {
     gedict_t *mess;
 
-    if( match_in_progress || self->k_admin != 2 )
+    if( match_in_progress || match_over || self->k_admin != 2 )
         return;
 
 	// no forcestart in practice mode
@@ -596,9 +596,18 @@ void AdminForceStart ()
 
     if( streq( self->s.v.classname, "player" ) && !self->ready )
     {
-        G_sprint(self, 2, "Ready yourself first\n");
-        return;
+		PlayerReady();
+
+		if ( !self->ready ) {
+        	G_sprint(self, 2, "Ready yourself first\n");
+        	return;
+		}
     }
+
+	if( find(world, FOFCLSN, "mess") ) {
+        G_sprint(self, 2, "forcestart already in progress!\n");
+		return;
+	}
 
 	k_attendees = CountPlayers();
 
