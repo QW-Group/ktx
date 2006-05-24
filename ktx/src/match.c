@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.59 2006/05/18 20:07:41 qqshka Exp $
+ *  $Id: match.c,v 1.60 2006/05/24 22:47:36 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -458,7 +458,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 	}
 
 	if ( tp )
-		G_bprint(2,"Ÿ\n" );
+		G_bprint(2,"\235\236\236\236\236\236\236\236\236\237\n" );
 
 	G_bprint(2, "\x87 %s%s:\n"
 			"  %d (%d) %s%.1f%%\n", ( isghost( p ) ? "\x83" : "" ), getname(p),
@@ -508,12 +508,20 @@ void OnePlayerStats(gedict_t *p, int tp)
 		if ( isDuel() )
 		{
 			//  endgame h & a
-			G_bprint(2, "  %s  H&A: H:%d‘A:%s:%d‘\n", redtext("EndGame"),
-					(int)p->s.v.health, armor_type((int)p->s.v.items), (int)p->s.v.armorvalue );
+			G_bprint(2, "  %s  H&A: \220H:%d\221\217", redtext("EndGame"), (int)p->s.v.health);
+			if ( (int)p->s.v.armorvalue )
+				G_bprint(2, "\220A:%s:%d\221\n", armor_type(p->s.v.items), (int)p->s.v.armorvalue);
+			else
+				G_bprint(2, "\220A:0\221\n");
+
 			// overtime h & a
-			if ( k_overtime )
-				G_bprint(2, "  %s H&A: H:%d‘A:%s:%d‘\n", redtext("OverTime"),
-					(int)p->ps.ot_h, armor_type((int)p->ps.ot_items), (int)p->ps.ot_a );
+			if ( k_overtime ) {
+				G_bprint(2, "  %s H&A: \220H:%d\221\217", redtext("OverTime"), (int)p->ps.ot_h);
+				if ( (int)p->ps.ot_a )
+					G_bprint(2, "\220A:%s:%d\221\n", armor_type(p->ps.ot_items), (int)p->ps.ot_a);
+				else
+					G_bprint(2, "\220A:0\221\n");
+			}
 		}
 		else
 			G_bprint(2, "%s: %s:%d %s:%d\n", redtext(" Streaks"),
@@ -521,11 +529,11 @@ void OnePlayerStats(gedict_t *p, int tp)
 
 		// spawnfrags
 		if ( !isCTF() )
-			G_bprint(2, "  %s: %d‘\n", redtext("SpawnFrags"), p->ps.spawn_frags);
+			G_bprint(2, "  %s: \220%d\221\n", redtext("SpawnFrags"), p->ps.spawn_frags);
 //	}
 
 	if ( !tp )
-		G_bprint(2,"Ÿ\n" );
+		G_bprint(2,"\235\236\236\236\236\236\236\236\236\237\n" );
 
 	if ( isCTF() ) {
 		if (maxfrags < p->s.v.frags - p->ps.ctf_points)
