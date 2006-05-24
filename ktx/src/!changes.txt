@@ -1,3 +1,20 @@
+2006-05-25
+qq:
+159. Now "k_remove_end_hurt" also remove trigger_changelevel ( exit thing which
+	 kill u instantly ) on map end, so variable have now additional value.
+
+	 set k_remove_end_hurt 1 // 0 - do not remove hurt/changelevel from map end
+							 // 1 - remove hurt and changelevel triggers
+							 // 2 - remove only hurt trigger, compatibility with krpto
+
+	 Suggested by Drugs-Bunny.
+
+160. Changed output from "/gren_mode" a bit.
+
+161. Ktproish duel end game no-armor output.
+
+162. "/forcestart" bug fix.
+
 2006-05-19
 qq:
 158. Probably reduce/fix double telefrags, need testing, can't test this thing alone.
