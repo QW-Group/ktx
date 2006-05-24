@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.77 2006/05/22 21:07:38 oldmanuk Exp $
+ *  $Id: client.c,v 1.78 2006/05/24 22:46:47 qqshka Exp $
  */
 
 //===========================================================================
@@ -577,6 +577,16 @@ void SP_trigger_changelevel()
 {
 	if ( !self->map )
 		G_Error( "chagnelevel trigger doesn't have map" );
+
+	// qqshka: yeah, treat k_remove_end_hurt as hint to remove some shit from this level,
+	//         not only hurt trigger
+	if (    streq( "end", g_globalvars.mapname )
+		 && cvar( "k_remove_end_hurt" )
+		 && cvar( "k_remove_end_hurt" ) != 2 
+	   ) {
+		ent_remove ( self );
+		return;
+	}
 
 	InitTrigger();
 	self->s.v.touch = ( func_t ) changelevel_touch;
