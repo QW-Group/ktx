@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.101 2006/05/25 18:27:20 qqshka Exp $
+ *  $Id: commands.c,v 1.102 2006/05/25 18:59:20 qqshka Exp $
  */
 
 // commands.c
@@ -2379,9 +2379,7 @@ void ShowNick()
 
 	s1 = getteam( self );
 
-	p = find(world, FOFCLSN, "player");
-
-	for ( ; p ; (p = find(p, FOFCLSN, "player")) )
+	for ( p = world; (p = find(p, FOFCLSN, "player")); )
 	{
 		vec3_t	v, v2, v3;
 		float dist, miss, rank;
@@ -2567,11 +2565,8 @@ const char common_um_init[] =
 //	"localinfo matrix 0\n"              // UNKNOWN ktpro
 //	"localinfo k_safe_rj 0\n"           // UNKNOWN ktpro
 
-//	"localinfo spec_info 1\n"			// TODO not implemented yet
-										// allow spectators receive took info during game
-                                   		// (they have to use "moreinfo" command to set proper level)
-//	"localinfo spec_info_notlock 1\n"	// allow all spectators receive it (0 = only admins)
-	"k_midair 0\n"			// midair off
+	"k_spec_info 1\n"					// allow spectators receive took info during game
+	"k_midair 0\n"						// midair off
 //	"localinfo k_instagib 0\n"			// not implemented
 //	"localinfo k_new_spw 0\n"			// ktpro feature
 
