@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.98 2006/05/25 04:48:48 ult_ Exp $
+ *  $Id: commands.c,v 1.99 2006/05/25 05:05:56 ult_ Exp $
  */
 
 // commands.c
@@ -168,6 +168,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_COMMANDS   "show commands list"
 #define CD_SCORES     "print match time/scores"
 #define CD_STATS      "show player stats"
+#define CD_EFFI       "show player efficiencies"
 #define CD_OPTIONS    "match control commands"
 #define CD_READY      "when you feel ready"
 #define CD_BREAK      "unready / vote matchend"
@@ -359,6 +360,7 @@ cmd_t cmds[] = {
 	{ "commands",    ShowCmds,			        0    , CF_BOTH | CF_MATCHLESS, CD_COMMANDS },
 	{ "scores",      PrintScores,		        0    , CF_BOTH | CF_MATCHLESS, CD_SCORES },
 	{ "stats",       PlayerStats,               0    , CF_BOTH | CF_MATCHLESS, CD_STATS },
+	{ "effi",        PlayerStats,               0    , CF_BOTH | CF_MATCHLESS, CD_EFFI },
 	{ "options",     ShowOpts,                  0    , CF_PLAYER, CD_OPTIONS },
 	{ "ready",       PlayerReady,               0    , CF_PLAYER, CD_READY },
 	{ "break",       PlayerBreak,               0    , CF_PLAYER | CF_MATCHLESS, CD_BREAK },
