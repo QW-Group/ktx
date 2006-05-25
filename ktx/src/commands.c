@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.99 2006/05/25 05:05:56 ult_ Exp $
+ *  $Id: commands.c,v 1.100 2006/05/25 06:35:25 ult_ Exp $
  */
 
 // commands.c
@@ -2206,16 +2206,22 @@ void PrintScores()
 
 void PlayerStats()
 {
-	float f1;
 	gedict_t *p, *p2;
 	char *tmp, *tmp2;
+	int i, pL = 0, tL = 0;
 
 	if( match_in_progress != 2 ) {
 		G_sprint(self, 2, "no game - no statistics\n");
 		return;
 	}
 
-	f1 = CountTeams();
+	for (p = world; (p = find( p, FOFCLSN, "player" )); ) {
+		pL = max(pL, strlen(p->s.v.netname));
+		tL = max(tL, strlen(getteam(p)));
+	}
+	pL = bound( 0, pL, 12 );
+	tL = bound( 0, tL, 4 );
+
 	G_sprint(self, 2, "׀לבשוע ףפבפיףפידף:\n"
 					  "ֶעבחף (עבמכ) %s וזזידיומדש\n", (isTeam() ? "זעיומהכיללף " : ""));
 
@@ -2229,13 +2235,21 @@ void PlayerStats()
 			while ( p2 ) {
 				tmp  = getteam( p );
 				tmp2 = getteam( p2 );
-
 				if( streq( tmp, tmp2 ) ) {
-					G_sprint(self, 2, "%s‘ %s:  %d(%d) ", tmp2, p2->s.v.netname,
+					if ( !isDuel() ) {
+						G_sprint(self, 2, "%.4s‘ ", tmp2);
+						for (i = strlen(tmp2); i < tL; i++)
+							G_sprint(self, 2, " ");
+ 					}
+					G_sprint(self, 2, "%.12s", p2->s.v.netname);
+					for (i = strlen(p2->s.v.netname); i < pL; i++)
+						G_sprint(self, 2, " ");
+
+					G_sprint(self, 2, ": %d(%d) ",
 						( !isCTF() ? (int)p2->s.v.frags : (int)(p2->s.v.frags - p2->ps.ctf_points)), 
 						( !isCTF() ? (int)(p2->s.v.frags - p2->deaths) : (int)(p2->s.v.frags - p2->ps.ctf_points - p2->deaths)));
 
-					if( isTeam() || isCTF() )
+					if( isTeam() )
 						G_sprint(self, 2, "%d ", (int)p2->friendly);
 
 					if ( isCTF() )

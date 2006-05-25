@@ -15,6 +15,11 @@ qq:
 
 162. "/forcestart" bug fix.
 
+ult:
+163. /stats output should line up nicely.
+
+164. Added ktpro /effi command (same output as /stats).
+
 2006-05-19
 qq:
 158. Probably reduce/fix double telefrags, need testing, can't test this thing alone.
