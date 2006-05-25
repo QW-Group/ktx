@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.61 2006/05/25 04:48:48 ult_ Exp $
+ *  $Id: match.c,v 1.62 2006/05/25 21:48:05 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1623,7 +1623,8 @@ void TimerStartThink ()
 				//set to ghost, 1 second before matchstart
 				p->s.v.takedamage = 0;
 				p->s.v.solid      = 0;
-				p->s.v.movetype   = 0;
+// qqshka: ok, does't touch movetype, let see if this ok
+//				p->s.v.movetype   = 0;
 				p->s.v.modelindex = 0;
 				p->s.v.model      = "";
 			}
@@ -1854,7 +1855,8 @@ void StopTimer ( int removeDemo )
 		{
 			p->s.v.takedamage = 2;
 			p->s.v.solid      = 3;
-			p->s.v.movetype   = 3;
+// qqshka: ok, does't touch movetype, let see if this ok
+//			p->s.v.movetype   = 3;
 			setmodel (p, "progs/player.mdl");
 		}
 	}
@@ -2141,7 +2143,7 @@ void PlayerBreak ()
 	if( !k_matchLess ) // u can't stop countdown (but match u can) in matchless mode
 	if( match_in_progress == 1 ) {
 		p = find ( world, FOFCLSN, "timer");
-		if(p->cnt2 > 1) {
+		if( p && p->cnt2 > 1 ) {
 			self->ready = 0;
 
 			G_bprint(2, "%s %s\n", self->s.v.netname, redtext("stops the countdown"));
