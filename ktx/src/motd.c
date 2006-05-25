@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: motd.c,v 1.17 2006/05/18 18:45:27 oldmanuk Exp $
+ *  $Id: motd.c,v 1.18 2006/05/25 04:48:48 ult_ Exp $
  */
 
 // motd.c
@@ -135,7 +135,7 @@ void MOTDStuff()
 
 			t = getteam( so );
 
-			for( from1 = 0, p = world; p = find_plrghst( p, &from1 ); )
+			for( from1 = 0, p = world; (p = find_plrghst( p, &from1 )); )
 				if ( p != so && streq( getteam( p ), t ) ) {
 					kick = 0;  // don't kick, find "player" or "ghost" with equal team
 					break;

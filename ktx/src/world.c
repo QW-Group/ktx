@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.50 2006/05/23 01:17:47 ult_ Exp $
+ *  $Id: world.c,v 1.51 2006/05/25 04:48:48 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -432,7 +432,7 @@ void Customize_Maps()
 	if ( !cvar("k_end_tele_spawn") && streq( "end", g_globalvars.mapname) ) {
 		vec3_t      TS_ORIGIN = { -392, 608, 40 }; // tele spawn
 
-		for( p = world; p = find( p, FOFCLSN, "info_player_deathmatch" ); )
+		for( p = world; (p = find( p, FOFCLSN, "info_player_deathmatch" )); )
 			if ( VectorCompare(p->s.v.origin, TS_ORIGIN) ) {
 				ent_remove( p );
 				break;
@@ -530,13 +530,13 @@ void Customize_Maps()
 			vec3_t spawn2 = { -1132,  -72, 208 }; // red spawn in blue base
 			// vec3_t spawn3 = {   660,  256, 400 }; // red spawn at quad
 			
-			for( p = world; p = find( p, FOFCLSN, "info_player_team2" ); )
+			for( p = world; (p = find( p, FOFCLSN, "info_player_team2" )); )
 				if ( VectorCompare( p->s.v.origin, spawn1 ) ) {
 					ent_remove( p );
 					break;
 				}
 
-			for( p = world; p = find( p, FOFCLSN, "info_player_team1" ); )
+			for( p = world; (p = find( p, FOFCLSN, "info_player_team1" )); )
 				if ( VectorCompare( p->s.v.origin, spawn2 ) ) { 
 					ent_remove( p );
 					break;
@@ -750,7 +750,7 @@ void hide_powerups ( char *classname )
 	if ( strnull( classname ) )
 		G_Error("hide_items");
 
-	for( p = world; p = find(p, FOFCLSN, classname); ) {
+	for( p = world; (p = find(p, FOFCLSN, classname)); ) {
 		p->s.v.solid = SOLID_NOT;
  		p->s.v.model = "";
 		if ( p->s.v.think == ( func_t ) SUB_regen ) {
@@ -769,7 +769,7 @@ void show_powerups ( char *classname )
 
 	swp = self; 
 
-	for( p = world; p = find(p, FOFCLSN, classname); ) {
+	for( p = world; (p = find(p, FOFCLSN, classname)); ) {
 		self = p; // WARNING
 
 		// spawn item if not yet so
@@ -793,12 +793,12 @@ void FixCTFItems()
 	{
 		RegenFlags();
 		SpawnRunes();
-		for ( e = world; e = find( e, FOFCLSN, "player" ); )
+		for ( e = world; (e = find( e, FOFCLSN, "player" )); )
 			e->s.v.items = (int) e->s.v.items | IT_HOOK;
 	}
 	else
 	{
-		for ( e = world; e = find( e, FOFCLSN, "player" ); )
+		for ( e = world; (e = find( e, FOFCLSN, "player" )); )
 			e->s.v.items -= (int) e->s.v.items & IT_HOOK;
 
 		e = find( world, FOFCLSN, "item_flag_team1" );
@@ -815,7 +815,7 @@ void FixCTFItems()
 			setmodel( e, "" );
 		}
 
-		for ( e = world; e = find( e, FOFCLSN, "rune" ); )
+		for ( e = world; (e = find( e, FOFCLSN, "rune" )); )
 			ent_remove( e );
 	}
 }

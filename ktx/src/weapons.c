@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.37 2006/05/22 21:07:38 oldmanuk Exp $
+ *  $Id: weapons.c,v 1.38 2006/05/25 04:48:48 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -1189,11 +1189,12 @@ void W_SetCurrentAmmo()
 	}
 
 	if ( match_in_progress != 2 )
+	{
 		if ( old_currentammo )
 			self->s.v.currentammo = old_currentammo;
 		else
 			self->s.v.currentammo = 1000;
-
+	}
 	self->s.v.items = items;
 }
 

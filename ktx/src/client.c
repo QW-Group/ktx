@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.78 2006/05/24 22:46:47 qqshka Exp $
+ *  $Id: client.c,v 1.79 2006/05/25 04:48:48 ult_ Exp $
  */
 
 //===========================================================================
@@ -56,7 +56,7 @@ void CheckAll ()
 	int from = 0;
 	gedict_t *p;
 
-	for ( p = world; p = find_plrspc(p, &from); )
+	for ( p = world; (p = find_plrspc(p, &from)); )
 		CheckRate( p, "" );
 }
 
@@ -187,7 +187,7 @@ void Check_sready()
 	if ( match_in_progress )
 		return;
 
-	for( p = world; p = find( p, FOFCLSN, "player" ); ) {
+	for( p = world; (p = find( p, FOFCLSN, "player" )); ) {
 		// player have quad - so EF_BLUE will be set or removed anyway, but ugly blinking, so work around
 		if ( p->super_damage_finished )
 			continue;
@@ -355,19 +355,19 @@ gedict_t *FindIntermission()
 {
 	gedict_t       *spot;
 
-	if ( spot = Do_FindIntermission( "info_intermission" ) )
+	if ( (spot = Do_FindIntermission( "info_intermission" )) )
 		return spot;
 
-	if ( spot = Do_FindIntermission( "info_player_start" ) )
+	if ( (spot = Do_FindIntermission( "info_player_start" )) )
 		return spot;
 
-	if ( spot = Do_FindIntermission( "info_player_deathmatch" ) )
+	if ( (spot = Do_FindIntermission( "info_player_deathmatch" )) )
 		return spot;
 
-	if ( spot = Do_FindIntermission( "info_player_coop" ) )
+	if ( (spot = Do_FindIntermission( "info_player_coop" )) )
 		return spot;
 
-	if ( spot = Do_FindIntermission( "info_player_start2" ) )
+	if ( (spot = Do_FindIntermission( "info_player_start2" )) )
 		return spot;
 
 //	G_Error( "FindIntermission: no spot" );

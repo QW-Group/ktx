@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.51 2006/05/22 23:02:20 qqshka Exp $
+ *  $Id: g_utils.c,v 1.52 2006/05/25 04:48:48 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -132,7 +132,7 @@ int find_cnt( int fieldoff, char *str )
 	int cnt;
 	gedict_t *p;
 
-	for ( cnt = 0, p = world; p = find( p, fieldoff, str ); )
+	for ( cnt = 0, p = world; (p = find( p, fieldoff, str )); )
 		cnt++;
 
 	return cnt;
@@ -146,7 +146,7 @@ gedict_t *find_idx( int idx, int fieldoff, char *str )
 	if ( idx < 0 )
 		return NULL;
 
-	for ( cnt = 0, p = world; p = find( p, fieldoff, str ); cnt++ )
+	for ( cnt = 0, p = world; (p = find( p, fieldoff, str )); cnt++ )
 		if ( cnt == idx )
 			break;
 
@@ -1001,7 +1001,7 @@ gedict_t *player_by_id( int id )
 	if ( id < 1 )
 		return NULL;
 
-	for ( p = world; p = find( p , FOFCLSN, "player" ); ) {
+	for ( p = world; (p = find( p , FOFCLSN, "player" )); ) {
 		if ( id == GetUserID( p ) )
 			return p;
 	}
@@ -1016,7 +1016,7 @@ gedict_t *player_by_name( const char *name )
 	if ( strnull( name ) )
 		return NULL;
 
-	for ( p = world; p = find( p , FOFCLSN, "player" ); ) {
+	for ( p = world; (p = find( p , FOFCLSN, "player" )); ) {
 		if ( streq(p->s.v.netname, name) )
 			return p;
 	}
@@ -1038,7 +1038,7 @@ gedict_t *spec_by_id( int id )
 	if ( id < 1 )
 		return NULL;
 
-	for ( p = world; p = find( p , FOFCLSN, "spectator" ); ) {
+	for ( p = world; (p = find( p , FOFCLSN, "spectator" )); ) {
 		if ( id == GetUserID( p ) )
 			return p;
 	}
@@ -1053,7 +1053,7 @@ gedict_t *spec_by_name( const char *name )
 	if ( strnull( name ) )
 		return NULL;
 
-	for ( p = world; p = find( p , FOFCLSN, "spectator" ); ) {
+	for ( p = world; (p = find( p , FOFCLSN, "spectator" )); ) {
 		if ( streq(p->s.v.netname, name) )
 			return p;
 	}
@@ -1370,7 +1370,7 @@ void ReScores()
 	if ( k_showscores ) {
 		team1 = cvar_string( "_k_team1" );
 
-		for( from = 0, p = world; p = find_plrghst( p, &from ); ) {
+		for( from = 0, p = world; (p = find_plrghst( p, &from )); ) {
 			team2 = getteam(p);
 
 			if( streq( team1, team2 ) )
@@ -1385,7 +1385,7 @@ void ReScores()
 	
 	if ( ( isDuel() || isFFA() ) && CountPlayers() > 1 ) {
 		// no ghost serving
-		for ( p = world; p = find( p , FOFCLSN, "player" ); ) {
+		for ( p = world; (p = find( p , FOFCLSN, "player" )); ) {
 			if ( !ed_scores1 ) { // set some first player as best player
 				ed_scores1 = p;
 				continue;
@@ -1507,7 +1507,7 @@ void CalculateBestPlayers()
 
 	// autotrack stuff
 	// no ghost serving
-	for ( p = world; p = find( p , FOFCLSN, "player" ); ) {
+	for ( p = world; (p = find( p , FOFCLSN, "player" )); ) {
 
 		if ( ISDEAD(p) )
 			continue;
@@ -1562,7 +1562,7 @@ void CalculateBestPlayers()
 
 	// auto_pow stuff
 	// no ghost serving
-	for ( p = world; p = find( p , FOFCLSN, "player" ); ) {
+	for ( p = world; (p = find( p , FOFCLSN, "player" )); ) {
 
 		if ( ISDEAD(p) )
 			continue;
@@ -1763,7 +1763,7 @@ void update_ghosts ()
 	gedict_t *p;
 	int from;
 
-	for( from = 1, p = world; p = find_plrghst( p, &from ); )
+	for( from = 1, p = world; (p = find_plrghst( p, &from )); )
 		ghost2scores( p );
 }
 
@@ -1903,7 +1903,7 @@ void refresh_plus_scores ()
 	int from;
 	gedict_t *p, *swp;
 
-	for( from = 0, p = world; p = find_plrspc (p, &from); )
+	for( from = 0, p = world; (p = find_plrspc (p, &from)); )
 		if ( p->sc_stats ) {
 			swp = self; // save self
 			self = p;

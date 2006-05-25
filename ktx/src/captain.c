@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: captain.c,v 1.14 2006/05/18 18:45:27 oldmanuk Exp $
+ *  $Id: captain.c,v 1.15 2006/05/25 04:48:48 ult_ Exp $
  */
 
 // captain.c
@@ -67,7 +67,7 @@ void CancelCaptains ()
 {
     gedict_t *p;
 
-	for( p = world; p = find(p, FOFCLSN, "player"); )
+	for( p = world; (p = find(p, FOFCLSN, "player")); )
 	{
 		if( p->k_captain )
 		{
@@ -87,7 +87,7 @@ void CheckFinishCaptain ()
     gedict_t *p, *lastone = NULL;
 
     // s: calculate how many players are free
-   	for( p = world; p = find(p, FOFCLSN, "player"); )
+   	for( p = world; (p = find(p, FOFCLSN, "player")); )
     {
         if( p->s.v.frags )
         {
@@ -154,7 +154,7 @@ void ExitCaptain ()
         {
             G_bprint(2, "Player picking aborted\n");
 
-            for( p = world; p = find(p, FOFCLSN, "player"); )
+            for( p = world; (p = find(p, FOFCLSN, "player")); )
                 if( p->s.v.frags )
                     p->s.v.frags = 0;
         }
@@ -277,7 +277,7 @@ void BecomeCaptain ()
 
 	G_bprint(2, "%s has %s status!\n", self->s.v.netname, redtext("requested captain"));
 
-	for( from = 0, p = world; p = find_plrspc(p, &from); )
+	for( from = 0, p = world; (p = find_plrspc(p, &from)); )
 		if ( p != self && p->k_player )
 			G_sprint(p, 2, "Type %s in console to approve\n", redtext("yes"));
 
@@ -311,7 +311,7 @@ void BeginPicking ()
 
 	num = 1;
 
-	for( p = world; p = find(p, FOFCLSN, "player"); )
+	for( p = world; (p = find(p, FOFCLSN, "player")); )
     {
 		if( p->k_captain )
 		{

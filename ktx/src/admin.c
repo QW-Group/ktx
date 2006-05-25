@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.33 2006/05/24 22:46:01 qqshka Exp $
+ * $Id: admin.c,v 1.34 2006/05/25 04:48:48 ult_ Exp $
  */
 
 // admin.c
@@ -7,7 +7,7 @@
 #include "g_local.h"
 
 void AdminMatchStart();
-
+void PlayerReady();
 void NextClient();
 void DoKick(gedict_t *victim, gedict_t *kicker);
 
@@ -469,7 +469,7 @@ void VoteAdmin()
 
 	G_bprint(2, "%s has %s rights!\n", self->s.v.netname, redtext("requested admin"));
 
-	for( from = 0, p = world; p = find_plrspc(p, &from); )
+	for( from = 0, p = world; (p = find_plrspc(p, &from)); )
 		if ( p != self && p->k_player )
 			G_sprint(p, 2, "Type %s in console to approve\n", redtext("yes"));
 
@@ -492,7 +492,7 @@ void AdminMatchStart ()
     gedict_t *p;
     int i = 0;
 
-    for( p = world; p = find(p, FOFCLSN, "player"); )
+    for( p = world; (p = find(p, FOFCLSN, "player")); )
     {
 		if( p->ready && p->k_accepted == 2 ) {
 			i++;
@@ -572,10 +572,10 @@ void ReadyThink ()
 	txt = va( "%s second%s to gamestart", dig3( i1 ), ( i1 == 1 ? "" : "s") );
 	gr  = va( "\n%s!", redtext("Go ready") );
 
-    for( p = world; p = find(p, FOFCLSN, "player"); )
+    for( p = world; (p = find(p, FOFCLSN, "player")); )
 		G_centerprint(p, "%s%s", txt, (p->ready ? "" : gr));
 
-    for( p = world; p = find(p, FOFCLSN, "spectator"); )
+    for( p = world; (p = find(p, FOFCLSN, "spectator")); )
 		G_centerprint(p, "%s", txt);
 
     self->s.v.nextthink = g_globalvars.time + 1;
@@ -669,7 +669,7 @@ void PlayersStopFire()
 {
     gedict_t *p;
 
-	for( p = world; p = find(p, FOFCLSN, "player"); ) {
+	for( p = world; (p = find(p, FOFCLSN, "player")); ) {
         stuffcmd(p, "-attack\n");
 		self->wreg_attack = 0;
 	}

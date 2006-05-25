@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.19 2006/05/18 18:45:27 oldmanuk Exp $
+ *  $Id: spectate.c,v 1.20 2006/05/25 04:48:48 ult_ Exp $
  */
 
 // spectate.c
@@ -265,7 +265,7 @@ void remove_specs_wizards ()
 {
 	gedict_t *p;
 
-	for( p = world; p = find( p, FOFCLSN, "spectator" ); )
+	for( p = world; (p = find( p, FOFCLSN, "spectator" )); )
 		if ( p->wizard ) {
 			ent_remove( p->wizard );
 			p->wizard = NULL;
@@ -276,7 +276,7 @@ void hide_specs_wizards ()
 {
 	gedict_t *p;
 
-	for( p = world; p = find( p, FOFCLSN, "spectator_wizard" ); )
+	for( p = world; (p = find( p, FOFCLSN, "spectator_wizard" )); )
 		p->s.v.model = "";
 }
 
@@ -284,7 +284,7 @@ void show_specs_wizards ()
 {
 	gedict_t *p;
 
-	for( p = world; p = find( p, FOFCLSN, "spectator_wizard" ); )
+	for( p = world; (p = find( p, FOFCLSN, "spectator_wizard" )); )
 		setmodel (p, "progs/wizard.mdl");
 }
 

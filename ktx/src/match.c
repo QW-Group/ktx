@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.60 2006/05/24 22:47:36 qqshka Exp $
+ *  $Id: match.c,v 1.61 2006/05/25 04:48:48 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -227,7 +227,7 @@ void SummaryTPStats ( )
 
 	ShowTeamsBanner ();
 
-	for( from1 = 0, p = world; p = find_plrghst ( p, &from1 ); )
+	for( from1 = 0, p = world; (p = find_plrghst ( p, &from1 )); )
 		p->ready = 0; // clear mark
 
 	G_bprint(2, "\n%s, %s, %s, %s\n", redtext("weapons"), redtext("powerups"),
@@ -237,7 +237,7 @@ void SummaryTPStats ( )
 //	get one player and search all his mates, mark served players via ->ready field 
 //  ghosts is served too
 
-	for( from1 = 0, p = world; p = find_plrghst ( p, &from1 ); ) {
+	for( from1 = 0, p = world; (p = find_plrghst ( p, &from1 )); ) {
 		if( !p->ready && !strnull( tmp = getteam( p ) ) ) {
 
 			dmg_g = dmg_t = dmg_team = ra = ya = ga = mh = quad = pent = ring = 0;
@@ -245,7 +245,7 @@ void SummaryTPStats ( )
 			caps = pickups = returns = f_defends = c_defends = d_rl = k_rl = t_rl = 0;
 			res = str = hst = rgn = 0;
 
-			for( from2 = 0, p2 = world; p2 = find_plrghst ( p2, &from2 ); ) {
+			for( from2 = 0, p2 = world; (p2 = find_plrghst ( p2, &from2 )); ) {
 				if( !p2->ready ) {
 					if( streq( tmp, getteam( p2 ) ) ) {
 				    	dmg_g += p2->ps.dmg_g;
@@ -355,7 +355,7 @@ void TeamsStats ( )
 
 	// Summing up the frags to calculate team percentages
 	sumfrags = 0;
-	for( from1 = 0, p = world; p = find_plrghst ( p, &from1 ); ) {
+	for( from1 = 0, p = world; (p = find_plrghst ( p, &from1 )); ) {
 		sumfrags += p->s.v.frags;
 		p->ready = 0; // clear mark
 	}
@@ -368,13 +368,13 @@ void TeamsStats ( )
 //	get one player and search all his mates, mark served players via ->ready field 
 //  ghosts is served too
 
-	for( from1 = 0, p = world; p = find_plrghst( p, &from1 ); ) {
+	for( from1 = 0, p = world; (p = find_plrghst( p, &from1 )); ) {
 		if( !p->ready && !strnull( tmp = getteam( p ) ) ) {
 
 			f1 = 0; // frags from normal players
 			f2 = 0; // frags from ghost players
 
-			for( from2 = 0, p2 = world; p2 = find_plrghst( p2, &from2 ); )
+			for( from2 = 0, p2 = world; (p2 = find_plrghst( p2, &from2 )); )
 				if( !p2->ready && streq( tmp, getteam( p2 ) ) ) {
 					if ( streq(p2->s.v.classname, "player") )
 						f1 += p2->s.v.frags;
@@ -813,7 +813,7 @@ void EM_on_MatchEndBreak( int isBreak )
 	gedict_t *p;
 	int from;
 
-	for( from = 0, p = world; p = find_plrspc (p, &from); )
+	for( from = 0, p = world; (p = find_plrspc (p, &from)); )
 		if ( isBreak )
 			on_match_break( p );
 		else
@@ -860,7 +860,7 @@ void EndMatch ( float skip_log )
 	if( /* skip_log */ 0 ) // qqshka: we are not skip match stats now
 		G_cprint("%%stopped\n");
 	else {
-		for( p = world; p = find ( p, FOFCLSN, "player" ); ) 
+		for( p = world; (p = find ( p, FOFCLSN, "player" )); ) 
 		{
 			if( !strnull( p->s.v.netname ) && p->k_accepted == 2 )
 			{
@@ -889,7 +889,7 @@ void EndMatch ( float skip_log )
 
 		if ( isCTF() ) // if a player ends the game with a rune adjust their rune time
 		{
-			for( p = world; p = find ( p, FOFCLSN, "player" ); ) 
+			for( p = world; (p = find ( p, FOFCLSN, "player" )); ) 
 			{
 				if ( p->ctf_flag & CTF_RUNE_RES )
 					p->ps.res_time += g_globalvars.time - p->rune_pickup_time;
@@ -916,13 +916,13 @@ void EndMatch ( float skip_log )
         if( isTeam() || isCTF() )
 			TeamsStats ();
 		
-		if ( p = find( world, FOFCLSN, "ghost" ) ) // show legend :)
+		if ( (p = find( world, FOFCLSN, "ghost" )) ) // show legend :)
 			G_bprint(2, "\n\x83 - %s player\n\n", redtext("disconnected"));
 
 		lastscore_add(); // save game result somewhere, so we can show it later
 	}
 
-	for( p = world; p = find ( p, FOFCLSN, "ghost" ); ) 
+	for( p = world; (p = find ( p, FOFCLSN, "ghost" )); ) 
 		ent_remove( p );
 
 	StopTimer( skip_log ); // WARNING: if we are skip log, we are also delete demo
@@ -934,7 +934,7 @@ void EndMatch ( float skip_log )
 		localcmd("localinfo %d \"\"\n", (int)f1); //removing key
 
 	if ( old_match_in_progress == 2 ) {
-		for ( p = world; p = find( p, FOFCLSN, "player" ); )
+		for ( p = world; (p = find( p, FOFCLSN, "player" )); )
 			p->ready = 0; // force players be not ready after match is end.
 	}
 
@@ -1194,8 +1194,8 @@ void SM_PrepareMap()
 {
 	gedict_t *p;
 
-	for( p = world; p = ( k_matchLess ? findradius2(p, VEC_ORIGIN, 999999) :
-					 				    findradius(p, VEC_ORIGIN, 999999) );
+	for( p = world; (p = ( k_matchLess ? findradius2(p, VEC_ORIGIN, 999999) :
+					 				     findradius(p, VEC_ORIGIN, 999999) ));
 	   ) {
 
 	// going for the if content record..
@@ -1249,7 +1249,7 @@ void SM_PrepareClients()
 	localcmd("localinfo 666 \"\"\n");
 	trap_executecmd (); // <- this really needed
 
-	for( p = world;	p = find ( p, FOFCLSN, "player" ); ) {
+	for( p = world;	(p = find ( p, FOFCLSN, "player" )); ) {
 		if( !k_matchLess ) { // skip setup k_teamnum in matchLess mode
 			pl_team = getteam( p );
 			G_cprint("%%%s%%t%%%s", p->s.v.netname, pl_team);
@@ -1308,13 +1308,13 @@ void SM_PrepareShowscores()
 	if ( (!isTeam() && !isCTF()) || CountRTeams() != 2 ) // we need 2 teams
 		return;
 
-	if ( p = find ( world, FOFCLSN, "player" ) ) 
+	if ( (p = find ( world, FOFCLSN, "player" )) ) 
 		team1 = getteam( p );
 
 	if ( strnull( team1 ) )
 		return;
 
-	while( p = find ( p, FOFCLSN, "player" ) ) {
+	while( (p = find ( p, FOFCLSN, "player" )) ) {
 		team2 = getteam( p );
 
 		if( strneq( team1, team2 ) )
@@ -1347,7 +1347,7 @@ void SM_on_MatchStart()
 	gedict_t *p;
 	int from;
 
-	for( from = 0, p = world; p = find_plrspc (p, &from); )
+	for( from = 0, p = world; (p = find_plrspc (p, &from)); )
 		on_match_start( p );
 }
 
@@ -1536,7 +1536,7 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
     }
 
 	nready = 0;
-	for( p = world; p = find ( p, FOFCLSN, "player" ); )
+	for( p = world; (p = find ( p, FOFCLSN, "player" )); )
 		if( p->ready )
 			nready++;
 
@@ -1581,7 +1581,7 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 // qqshka: this code allow us to check CTF requrements about teams, but broke forcestart and iddlebot.
 //		   so i make this in other way
 
-		for( p = world; p = find ( p, FOFCLSN, "player" ); )
+		for( p = world; (p = find ( p, FOFCLSN, "player" )); )
 			if ( p->ready && (!streq(getteam(p), "blue") && !streq(getteam(p), "red")) )
 			{
 				p->ready = 0;
@@ -1618,7 +1618,7 @@ void TimerStartThink ()
 	if( self->cnt2 == 1 ) {
 		k_standby = 1;
 
-		for( p = world;	p = find ( p, FOFCLSN, "player" ); ) {
+		for( p = world;	(p = find ( p, FOFCLSN, "player" )); ) {
 			if( !strnull ( p->s.v.netname ) ) {
 				//set to ghost, 1 second before matchstart
 				p->s.v.takedamage = 0;
@@ -1640,7 +1640,7 @@ void TimerStartThink ()
 	PrintCountdown( self->cnt2 );
 
 	if( self->cnt2 < 6 )
-		for( from = 0, p = world; p = find_plrspc (p, &from); )
+		for( from = 0, p = world; (p = find_plrspc (p, &from)); )
 			stuffcmd (p, "play buttons/switch04.wav\n");
 
 	self->s.v.nextthink = g_globalvars.time + 1;
@@ -1663,7 +1663,7 @@ void ShowMatchSettings()
 
 // changed to print only if other than default
 
-	if( i = cvar( "k_frp" ) ) {
+	if( (i = cvar( "k_frp" )) ) {
 		// Output the Fairpack setting here
 		switch ( i ) {
 			case 0: txt = "off"; break;
@@ -1714,7 +1714,7 @@ char *CompilateDemoName ()
 		if ( cvar("k_midair") )
 			strlcat( demoname, "_midair", sizeof( demoname ) );
 
-		for( vs = "_", p = world; p = find ( p, FOFCLSN, "player" ); ) 
+		for( vs = "_", p = world; (p = find ( p, FOFCLSN, "player" )); ) 
 		{
 			if ( strnull( name = getname( p ) ) )
 				continue;
@@ -1792,16 +1792,16 @@ void StartTimer ()
 
 	k_force = 0;
 
-	for( timer = world; timer = find(timer, FOFCLSN, "idlebot"); )
+	for( timer = world; (timer = find(timer, FOFCLSN, "idlebot")); )
 		ent_remove( timer );
 
-	for( timer = world; timer = find(timer, FOFCLSN, "timer"); )
+	for( timer = world; (timer = find(timer, FOFCLSN, "timer")); )
 		ent_remove( timer );
 
 	if ( !k_matchLess ) {
 		ShowMatchSettings ();
 
-		for( from = 0, timer = world; timer = find_plrspc(timer, &from); )
+		for( from = 0, timer = world; (timer = find_plrspc(timer, &from)); )
 			stuffcmd(timer, "play items/protect2.wav\n");
 	}
 
@@ -1850,7 +1850,7 @@ void StopTimer ( int removeDemo )
 		// standby flag needs clearing (sturm)
 		k_standby = 0;
 
-		for( p = world; p = find ( p, FOFCLSN, "player" ); ) 
+		for( p = world; (p = find ( p, FOFCLSN, "player" )); ) 
 		{
 			p->s.v.takedamage = 2;
 			p->s.v.solid      = 3;
@@ -1859,7 +1859,7 @@ void StopTimer ( int removeDemo )
 		}
 	}
 
-	for( timer = world; timer = find(timer, FOFCLSN, "timer"); )
+	for( timer = world; (timer = find(timer, FOFCLSN, "timer")); )
 		ent_remove( timer );
 
 	if (   removeDemo 
@@ -1882,7 +1882,7 @@ void IdlebotForceStart ()
 				  "match WILL commence!\n" );
 
     i = 0;
-    for( p = world; p = find(p, FOFCLSN, "player"); )
+    for( p = world; (p = find(p, FOFCLSN, "player")); )
     {
 		if( p->ready && p->k_accepted == 2 ) {
     		i++;
@@ -1955,7 +1955,7 @@ void IdlebotThink ()
 		i = self->attack_finished;
 
 		if( i < 5 || !(i % 5) ) {
-			for( p = world; p = find ( p, FOFCLSN, "player" ); )
+			for( p = world; (p = find ( p, FOFCLSN, "player" )); )
 				if( !p->ready )
 					G_sprint(p, 2, "console: %d second%s to go ready\n", i, ( i == 1 ? "" : "s" ));
 		}
@@ -1970,7 +1970,7 @@ void IdlebotCheck ()
 	int i;
 
 	if ( cvar( "k_idletime" ) <= 0 ) {
-		if ( p = find ( world, FOFCLSN, "idlebot" ) )
+		if ( (p = find ( world, FOFCLSN, "idlebot" )) )
 			ent_remove( p );
 		return;
 	}
@@ -1997,7 +1997,7 @@ void IdlebotCheck ()
 	if ( k_practice ) // #practice mode#
 		return;
 
-	if( p = find ( world, FOFCLSN, "idlebot" ) ) // already have idlebot
+	if( (p = find ( world, FOFCLSN, "idlebot" )) ) // already have idlebot
 		return;
 
 	//50% or more of the players are ready! go-go-go
@@ -2050,7 +2050,7 @@ void PlayerReady ()
 
     if( k_force && ( isTeam() || isCTF() )) {
 		nready = 0;
-		for( p = world; p = find ( p, FOFCLSN, "player" ); ) {
+		for( p = world; (p = find ( p, FOFCLSN, "player" )); ) {
 			if( p->ready ) {
 				if( streq( getteam(self), getteam(p) ) && !strnull( getteam(self) ) ){
 					nready = 1;
@@ -2085,7 +2085,7 @@ void PlayerReady ()
 						( ( isTeam() || isCTF() ) ? va(" \x90%s\x91", getteam( self ) ) : "" ) );
 
 	nready = 0;
-	for( p = world; p = find ( p, FOFCLSN, "player" ); )
+	for( p = world; (p = find ( p, FOFCLSN, "player" )); )
 		if( p->ready )
 			nready++;
 

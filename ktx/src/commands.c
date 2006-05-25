@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.97 2006/05/24 22:47:14 qqshka Exp $
+ *  $Id: commands.c,v 1.98 2006/05/25 04:48:48 ult_ Exp $
  */
 
 // commands.c
@@ -1245,7 +1245,7 @@ void ModStatus ()
 		return;
 	}
 
-	if( votes = get_votes( OV_ELECT ) )
+	if( (votes = get_votes( OV_ELECT )) )
 		G_sprint(self, 2, "%s election in progress:\x90%d/%d\x91 vote%s\n",
 							 redtext(get_elect_type_str()), votes,
 							 get_votes_req( OV_ELECT, false ), count_s(votes));
@@ -1372,57 +1372,57 @@ void ModStatusVote()
 			G_sprint(self, 2, "\x90%s\x91 %2d vote%s\n", GetMapName( maps_voted[i].map_id ),
 								maps_voted[i].map_votes, count_s(maps_voted[i].map_votes) );
 
-			for( from = 0, p = world; p = find_plrspc(p, &from); )
+			for( from = 0, p = world; (p = find_plrspc(p, &from)); )
 				if ( p->v.map == maps_voted[i].map_id )
 					G_sprint(self, 2, " %s\n", p->s.v.netname);
 		}
 	}
 
 	if( !(get_elect_type() == etCaptain && match_in_progress) ) // does't show captain ellection in game
-	if( votes = get_votes( OV_ELECT ) ) {
+	if( (votes = get_votes( OV_ELECT )) ) {
 		voted = true;
 
 		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for %s election:\n", votes, 
 			get_votes_req( OV_ELECT, false ), count_s(votes), redtext(get_elect_type_str()) );
 
-		for( from = 0, p = world; p = find_plrspc(p, &from); )
+		for( from = 0, p = world; (p = find_plrspc(p, &from)); )
 			if ( p->v.elect )
 				G_sprint(self, 2, "%s%s\n", 
 				((p->k_admin == 1.5 || p->k_captain > 10) ? "\x87" : " " ), p->s.v.netname);
 	}
 
 	if ( !match_in_progress )
-	if ( votes = get_votes( OV_PICKUP )) {
+	if ( (votes = get_votes( OV_PICKUP ))) {
 		voted = true;
 
 		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for a %s game:\n", votes,
 			 get_votes_req( OV_PICKUP, false ), count_s(votes), redtext("pickup"));
 
-		for( from = 0, p = world; p = find_plrspc(p, &from); )
+		for( from = 0, p = world; (p = find_plrspc(p, &from)); )
 			if ( p->v.pickup )
 				G_sprint(self, 2, " %s\n", p->s.v.netname);
 	}
 
 	if ( !match_in_progress )
-	if ( votes = get_votes( OV_RPICKUP )) {
+	if ( (votes = get_votes( OV_RPICKUP ))) {
 		voted = true;
 
 		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for a %s game:\n", votes,
 			 get_votes_req( OV_RPICKUP, false ), count_s(votes), redtext("rpickup"));
 
-		for( from = 0, p = world; p = find_plrspc(p, &from); )
+		for( from = 0, p = world; (p = find_plrspc(p, &from)); )
 			if ( p->v.rpickup )
 				G_sprint(self, 2, " %s\n", p->s.v.netname);
 	}
 
 	if( k_matchLess || match_in_progress == 2 )
-	if ( votes = get_votes( OV_BREAK ) ) {
+	if ( (votes = get_votes( OV_BREAK )) ) {
 		voted = true;
 
 		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for stopping:\n", votes,
 			get_votes_req( OV_BREAK, false ), count_s(votes));
 
-		for( from = 0, p = world; p = find_plrspc(p, &from); )
+		for( from = 0, p = world; (p = find_plrspc(p, &from)); )
 			if ( p->v.brk )
 				G_sprint(self, 2, " %s\n", p->s.v.netname);
 	}
@@ -1454,7 +1454,7 @@ void PlayerStatus()
 		return;
 	}
 	
-	for ( p = world; p = find( p, FOFCLSN, "player" ); ) {
+	for ( p = world; (p = find( p, FOFCLSN, "player" )); ) {
 		if ( !found )
 			G_sprint(self, 2, "Players list:\n"
 							  "žžžžžžžžžžžžžžžžžžžžžŸ\n");
@@ -1470,7 +1470,7 @@ void PlayerStatusS()
 	qboolean found = false;
 	gedict_t *p;
 
-	for ( p = world; p = find( p, FOFCLSN, "player" ); ) {
+	for ( p = world; (p = find( p, FOFCLSN, "player" )); ) {
 		if ( !found )
 			G_sprint(self, 2, "Players skins list:\n"
 							  "žžžžžžžžžžžžžžžžžžžžžŸ\n");
@@ -1496,7 +1496,7 @@ void PlayerStatusN()
 		return;
 	}
 
-	for ( p = world; p = find( p, FOFCLSN, "player" ); ) {
+	for ( p = world; (p = find( p, FOFCLSN, "player" )); ) {
 		if ( p->ready )
 			continue;
 
@@ -1543,7 +1543,7 @@ void ListWhoNot()
 
 	k_whonottime = g_globalvars.time;
 
-	for ( p = world; p = find( p, FOFCLSN, "player" ); ) {
+	for ( p = world; (p = find( p, FOFCLSN, "player" )); ) {
 		if ( p->ready )
 			continue;
 
@@ -1551,7 +1551,7 @@ void ListWhoNot()
 			G_bprint(2, "Players %s ready:\n"
 					    "žžžžžžžžžžžžžžžžžžžžžŸ\n", redtext("not")); // broadcast
 
-		for ( from = 0, p2 = world; p2 = find_plrspc(p2, &from); )
+		for ( from = 0, p2 = world; (p2 = find_plrspc(p2, &from)); )
 			G_sprint(p2, 2, "%s\n", OnePlayerStatus( p, p2 ));
 
 		found = true;
@@ -2014,7 +2014,7 @@ void ToggleSpeed()
 	G_bprint(2, "%s %d\n", redtext("Maxspeed set to"), (int)k_maxspeed);
 	cvar_fset("sv_maxspeed", k_maxspeed);
 
-	for( p = world; p = find( p, FOFCLSN, "player" ); )
+	for( p = world; (p = find( p, FOFCLSN, "player" )); )
 		p->maxspeed = k_maxspeed;
 }
 
@@ -2175,7 +2175,7 @@ void PrintScores()
 		}
 	}
 
-	if( p = find(world, FOFCLSN, "timer") ) {
+	if( (p = find(world, FOFCLSN, "timer")) ) {
 		minutes = p->cnt;
 		seconds = p->cnt2;
 		if( seconds == 60 )
@@ -2372,7 +2372,7 @@ void ShowNick()
 
 	p = find(world, FOFCLSN, "player");
 
-	for ( ; p ; p = find(p, FOFCLSN, "player") )
+	for ( ; p ; (p = find(p, FOFCLSN, "player")) )
 	{
 		vec3_t	v, v2, v3;
 		float dist, miss, rank;
@@ -2808,7 +2808,7 @@ void UserMode(float umode)
 	if ( !isCTF() && (um_list[(int)umode].um_flags & UM_CTF) ) {
 		gedict_t	*p;
 
-		for( p = world; p = find ( p, FOFCLSN, "player" ); )
+		for( p = world; (p = find ( p, FOFCLSN, "player" )); )
 			if ( p->ready && (!streq(getteam(p), "blue") && !streq(getteam(p), "red")) )
 			{
 				if ( sv_invoked )
@@ -3114,7 +3114,7 @@ void klist ( )
 	gedict_t *p = world;
 	char *track;
 
-	for( i = 0, p = world; p = find(p, FOFCLSN, "player"); i++ ) {
+	for( i = 0, p = world; (p = find(p, FOFCLSN, "player")); i++ ) {
 		if ( !i ) {
 			G_sprint(self, 2, "Clients list: %s\n", redtext( "players" ) );
 			G_sprint(self, 2, "%s %s %s %s %s %s\n",
@@ -3132,7 +3132,7 @@ void klist ( )
 	if (i)
 		G_sprint(self, 2, "%s %2d found %s\n", redtext("--"), i, redtext("-------------") );
 
-	for( i = 0, p = world; p = find(p, FOFCLSN, "spectator"); i++ ) {
+	for( i = 0, p = world; (p = find(p, FOFCLSN, "spectator")); i++ ) {
 		if ( !i ) {
 			G_sprint(self, 2, "Clients list: %s\n", redtext( "spectators" ) );
 			G_sprint(self, 2, "%s %s %s %s\n",
@@ -3150,7 +3150,7 @@ void klist ( )
 	if (i)
 		G_sprint(self, 2, "%s %2d found %s\n", redtext("--"), i, redtext("-------------") );
 
-	for( i = 0, p = world; p = find(p, FOFCLSN, "ghost"); i++ ) {
+	for( i = 0, p = world; (p = find(p, FOFCLSN, "ghost")); i++ ) {
 		if ( !i ) {
 			G_sprint(self, 2, "Clients list: %s\n", redtext( "ghosts" ) );
 			G_sprint(self, 2, "%s %s %s\n",
@@ -3298,7 +3298,7 @@ void tracklist ( )
 	char *track;
 	char *nt = redtext(" not tracking");
 
-	for( i = 0, p = world; p = find(p, FOFCLSN, "spectator"); i++ ) {
+	for( i = 0, p = world; (p = find(p, FOFCLSN, "spectator")); i++ ) {
 		if ( !i )
 			G_sprint(self, 2, "%s:\n", redtext( "Trackers list" ) );
 
@@ -3318,7 +3318,7 @@ void fpslist ( )
 	gedict_t *p;
 	float cur, max, min, avg;
 
-	for( i = 0, p = world; p = find(p, FOFCLSN, "player"); i++ ) {
+	for( i = 0, p = world; (p = find(p, FOFCLSN, "player")); i++ ) {
 		if ( !i ) {
 			G_sprint(self, 2, "Players %s list:\n", redtext("FPS") );
 			G_sprint(self, 2, "         name:(cur \x8f max \x8f min \x8f avg)\n");
@@ -3388,7 +3388,7 @@ void del_from_specs_favourites(gedict_t *rm)
 	int from;
 	gedict_t *p;
 
-	for( from = 1, p = world; p = find_plrspc(p, &from); ) {
+	for( from = 1, p = world; (p = find_plrspc(p, &from)); ) {
 		fav_del_do(p, rm, "auto: ");
 		favx_del_do(p, rm, "auto: ");
 	}
@@ -3623,7 +3623,7 @@ void fav_show( )
 	int fav_num, diff;
 
 	for ( first = true, fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
-		if ( diff = self->favx[fav_num] ) {
+		if ( (diff = self->favx[fav_num]) ) {
 		    p = world + diff;
 			if ( !p->k_player || strnull( p->s.v.netname ) )
 				continue;
@@ -3642,7 +3642,7 @@ void fav_show( )
 		G_sprint(self, 2, "\n");
 
 	for ( first = true, fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
-		if ( diff = self->fav[fav_num] ) {
+		if ( (diff = self->fav[fav_num]) ) {
 		    p = world + diff;
 			if ( !p->k_player || strnull( p->s.v.netname ) )
 				continue;
@@ -3728,7 +3728,7 @@ void next_pow ()
 
 	to = first = NULL;
 
-	for ( p = world; p = find( p , FOFCLSN, "player" ); ) {
+	for ( p = world; (p = find( p , FOFCLSN, "player" )); ) {
 
 		if ( ISDEAD(p) )
 			continue;
@@ -3982,7 +3982,7 @@ void motd_show ()
 	if ( match_in_progress )
 		return;
 
-	for( motd = world; motd = find(motd, FOFCLSN, "motd"); )
+	for( motd = world; (motd = find(motd, FOFCLSN, "motd")); )
 		if ( owner == motd->s.v.owner ) {
 			G_sprint(self, 2, "Already showing motd\n");
 			return;
@@ -4045,7 +4045,7 @@ void lastscore_add ()
 {
 	gedict_t *p;
 	int from;
-	int i, s1, s2;
+	int i, s1 = 0, s2 = 0;
 	int k_ls = bound(0, cvar("__k_ls"), MAX_LASTSCORES-1);
 	char *e1, *e2, t1[128] = {0}, t2[128] = {0}, *name, *timestr;
 	lsType_t lst = lsUnknown;
@@ -4075,12 +4075,12 @@ void lastscore_add ()
 		s2 = get_scores2();
 
 		// players from first team
-		for( t1[0] = from = 0, p = world; p = find_plrghst( p, &from ); )
+		for( t1[0] = from = 0, p = world; (p = find_plrghst( p, &from )); )
 			if ( streq( getteam( p ), e1 ) && !strnull( name = getname( p ) ) )
 				strlcat(t1, va(" %s", name), sizeof(t1));
 
 		// players from second team
-		for( t2[0] = from = 0, p = world; p = find_plrghst( p, &from ); )
+		for( t2[0] = from = 0, p = world; (p = find_plrghst( p, &from )); )
 			if ( streq( getteam( p ), e2 ) && !strnull( name = getname( p ) ) )
 				strlcat(t2, va(" %s", name), sizeof(t2));
 	}
@@ -4211,7 +4211,7 @@ void mi_print( gedict_t *tooker, int it, char *msg )
 
 	t_team = getteam( tooker );
 
-	for( from = 1 /* spec */, p = world; p = find_plrspc (p, &from); ) {
+	for( from = 1 /* spec */, p = world; (p = find_plrspc (p, &from)); ) {
 		if ( adm && p->k_admin != 2 )
 			continue; // configured send only for admins
 
@@ -4396,7 +4396,7 @@ void s_lr_clear( gedict_t *dsc )
 	int from = 0;
 	gedict_t *p;
 
-	for ( p = world; p = find_plrspc(p, &from); ) {
+	for ( p = world; (p = find_plrspc(p, &from)); ) {
 
 		if ( p->s_last_to == dsc )
 			p->s_last_to = NULL;
