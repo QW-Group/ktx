@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.100 2006/05/25 06:35:25 ult_ Exp $
+ *  $Id: commands.c,v 1.101 2006/05/25 18:27:20 qqshka Exp $
  */
 
 // commands.c
@@ -2207,7 +2207,7 @@ void PrintScores()
 void PlayerStats()
 {
 	gedict_t *p, *p2;
-	char *tmp, *tmp2;
+	char *tmp;
 	int i, pL = 0, tL = 0;
 
 	if( match_in_progress != 2 ) {
@@ -2215,80 +2215,73 @@ void PlayerStats()
 		return;
 	}
 
-	for (p = world; (p = find( p, FOFCLSN, "player" )); ) {
+	for ( p = world; (p = find( p, FOFCLSN, "player" )); ) {
 		pL = max(pL, strlen(p->s.v.netname));
 		tL = max(tL, strlen(getteam(p)));
 	}
 	pL = bound( 0, pL, 12 );
 	tL = bound( 0, tL, 4 );
 
-	G_sprint(self, 2, "–Ï·˘ÂÚ ÛÙ·ÙÈÛÙÈ„Û:\n"
-					  "∆Ú·ÁÛ (Ú·ÓÎ) %sè ÂÊÊÈ„ÈÂÓ„˘\n", (isTeam() ? "ÊÚÈÂÓ‰ÎÈÏÏÛ " : ""));
+	G_sprint(self, 2, "%s:\n"
+					  "%s (%s) %s\217 %s\n",
+					   redtext("Player statistics"),
+					   redtext("Frags"), redtext("rank"), isTeam() ? redtext("friendkills ") : "",
+					   redtext("efficiency"));
 
-	G_sprint(self, 2, "ùûûûûûûûûûûûûûûûûûûûûûûû%sü\n", (isTeam() ? "ûûûûûûûûûûûû" : ""));
+	G_sprint(self, 2, "\235\236\236\236\236\236\236\236\236\236\236"
+				  	  "\236\236\236\236\236\236\236\236\236\236\236\236\236%s\237\n",
+				  	  (isTeam() ? "\236\236\236\236\236\236\236\236\236\236\236\236" : ""));
 
-	p = find( world, FOFCLSN, "player" );
-	while( p ) {
-		if( !strnull( p->s.v.netname ) && p->k_accepted == 2 && p->ready ) {
-			p2 = p;
+	for ( p = world; (p = find(p, FOFCLSN, "player" )); ) {
+		if( !p->ready )
+			continue; // already served
 
-			while ( p2 ) {
-				tmp  = getteam( p );
-				tmp2 = getteam( p2 );
-				if( streq( tmp, tmp2 ) ) {
-					if ( !isDuel() ) {
-						G_sprint(self, 2, "ê%.4së ", tmp2);
-						for (i = strlen(tmp2); i < tL; i++)
-							G_sprint(self, 2, " ");
- 					}
-					G_sprint(self, 2, "%.12s", p2->s.v.netname);
-					for (i = strlen(p2->s.v.netname); i < pL; i++)
-						G_sprint(self, 2, " ");
+		tmp = getteam( p );
 
-					G_sprint(self, 2, ": %d(%d) ",
-						( !isCTF() ? (int)p2->s.v.frags : (int)(p2->s.v.frags - p2->ps.ctf_points)), 
-						( !isCTF() ? (int)(p2->s.v.frags - p2->deaths) : (int)(p2->s.v.frags - p2->ps.ctf_points - p2->deaths)));
+		for ( p2 = world; (p2 = find(p2, FOFCLSN, "player" )); ) {
+			if( !p2->ready || strneq( tmp, getteam( p2 ) ) )
+				continue; // already served or not on the same team
 
-					if( isTeam() )
-						G_sprint(self, 2, "%d ", (int)p2->friendly);
+			if ( !isDuel() ) { // [team name]
+				G_sprint(self, 2, "\220%.4s\221 ", tmp);
+				for ( i = strlen(tmp); i < tL; i++ )
+					G_sprint(self, 2, " ");
+ 			}
 
-					if ( isCTF() )
-					{
-						if ( p2->s.v.frags - p2->ps.ctf_points < 1 )
-							p2->efficiency = 0;
-						else
-							p2->efficiency = (p2->s.v.frags - p2->ps.ctf_points) / (p2->s.v.frags - p2->ps.ctf_points + p2->deaths) * 100;
-					}
-					else
-					{
-						if( p2->s.v.frags < 1 )
-							p2->efficiency = 0;
-						else
-							p2->efficiency = p2->s.v.frags / (p2->s.v.frags + p2->deaths) * 100;
-					}
+			G_sprint(self, 2, "%.12s", p2->s.v.netname); // player name
+			for ( i = strlen(p2->s.v.netname); i < pL; i++ )
+				G_sprint(self, 2, " ");
 
-					if( floor( p2->efficiency ) == p2->efficiency)
-							G_sprint(self, 2, "è ");
-					else
-						G_sprint(self, 2, "è");
-					G_sprint(self, 2, "%3.1f%%\n", p2->efficiency);
+			G_sprint(self, 2, ": %d(%d) ", // frags(rank)
+				( !isCTF() ? (int)p2->s.v.frags : (int)(p2->s.v.frags - p2->ps.ctf_points)), 
+				( !isCTF() ? (int)(p2->s.v.frags - p2->deaths) : (int)(p2->s.v.frags - p2->ps.ctf_points - p2->deaths)));
 
-					p2->ready = 0;
-				}
+			if( isTeam() ) // friendkills
+				G_sprint(self, 2, "%d ", (int)p2->friendly);
 
-				p2 = find(p2, FOFCLSN, "player");
+			if ( isCTF() )
+			{
+				if ( p2->s.v.frags - p2->ps.ctf_points < 1 )
+					p2->efficiency = 0;
+				else
+					p2->efficiency = (p2->s.v.frags - p2->ps.ctf_points) / (p2->s.v.frags - p2->ps.ctf_points + p2->deaths) * 100;
 			}
+			else
+			{
+				if( p2->s.v.frags < 1 )
+					p2->efficiency = 0;
+				else
+					p2->efficiency = p2->s.v.frags / (p2->s.v.frags + p2->deaths) * 100;
+			}
+
+			G_sprint(self, 2, "\217 %3.1f%%\n", p2->efficiency); // effi
+
+			p2->ready = 0; // mark as served
 		}
-
-		p = find( p, FOFCLSN, "player" );
 	}
 
-	p = find( world, FOFCLSN, "player" );
-	while( p ) {
-		p->ready = 1;
-
-		p = find( p, FOFCLSN, "player" );
-	}
+	for( p = world; (p = find( p, FOFCLSN, "player" )); )
+		p->ready = 1; // because this is a hack, restore ready field
 }
 
 void ToggleQLag()
