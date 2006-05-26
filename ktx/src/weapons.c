@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.39 2006/05/26 16:04:45 vvd0 Exp $
+ *  $Id: weapons.c,v 1.40 2006/05/26 22:44:46 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1452,7 +1452,7 @@ qboolean W_CanSwitch( int wp, qboolean warn )
 		return false;
 	}
 
-	if ( am )
+	if ( am && match_in_progress  )
 	{			// don't have the ammo
 		if ( warn )
 			G_sprint( self, PRINT_HIGH, "not enough ammo\n" );
