@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.38 2006/05/25 04:48:48 ult_ Exp $
+ *  $Id: weapons.c,v 1.39 2006/05/26 16:04:45 vvd0 Exp $
  */
 
 #include "g_local.h"
@@ -662,7 +662,7 @@ void W_FireLightning()
 	vec3_t          tmp;
 
 
-    if ( self->s.v.ammo_cells < 1 || match_in_progress == 1 )
+    if ( (self->s.v.ammo_cells < 1 && match_in_progress == 2) || match_in_progress == 1 )
 	{
 		self->s.v.weapon = W_BestWeapon();
 		W_SetCurrentAmmo();
@@ -1024,14 +1024,15 @@ void W_FireSpikes( float ox )
 	makevectors( self->s.v.v_angle );
 
     if( match_in_progress != 1 )
-		if ( self->s.v.ammo_nails >= 2 && self->s.v.weapon == IT_SUPER_NAILGUN )
+		if ( (self->s.v.ammo_nails >= 2 || match_in_progress != 2) &&
+			self->s.v.weapon == IT_SUPER_NAILGUN )
 		{
 			W_FireSuperSpikes();
 			return;
 		}
 
 
-    if ( self->s.v.ammo_nails < 1 || match_in_progress == 1 )
+    if ( (self->s.v.ammo_nails < 1 && match_in_progress == 2) || match_in_progress == 1 )
 	{
 		self->s.v.weapon = W_BestWeapon();
 		W_SetCurrentAmmo();
@@ -1538,7 +1539,7 @@ void W_ChangeWeapon()
 		return;
 	}
 
-	if ( am )
+	if ( am && match_in_progress )
 	{			// don't have the ammo
 		G_sprint( self, PRINT_HIGH, "not enough ammo\n" );
 		return;

@@ -3,6 +3,13 @@ qq:
 165. Removed player freeze at last countdown second.
      Hope this does't cause some troubles.
 
+vvd:
+166. Now in prewar with sh_speed on (/kinfo kf 64) weapons ammo show vertical speed:
+	 shells		= velocity / 1000;
+	 nails		= velocity % 1000 / 100;
+	 rockets	= velocity %  100 / 10;
+	 cells		= velocity %   10;
+
 2006-05-25
 qq:
 159. Now "k_remove_end_hurt" also remove trigger_changelevel ( exit thing which

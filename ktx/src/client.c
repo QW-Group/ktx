@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.79 2006/05/25 04:48:48 ult_ Exp $
+ *  $Id: client.c,v 1.80 2006/05/26 16:04:45 vvd0 Exp $
  */
 
 //===========================================================================
@@ -2483,10 +2483,15 @@ void PlayerPostThink()
 	if ( !match_in_progress && !match_over && !k_captains )
 	{
 		if ( iKey( self, "kf" ) & KF_SPEED ) {
-			float velocity = sqrt(self->s.v.velocity[0] * self->s.v.velocity[0] + 
-								self->s.v.velocity[1] * self->s.v.velocity[1]);
-			self->s.v.armorvalue = (int)(velocity < 1000 ? velocity + 1000 : -velocity);
-			self->s.v.frags = (int)(velocity < 1000 ? 0 : velocity / 1000);
+			float velocity			= sqrt(self->s.v.velocity[0] * self->s.v.velocity[0] + 
+										   self->s.v.velocity[1] * self->s.v.velocity[1]);
+			float velocity_vert_abs	= fabs(self->s.v.velocity[2]);
+			self->s.v.armorvalue	= (int)(velocity < 1000 ? velocity + 1000 : -velocity);
+			self->s.v.frags			= (int)(velocity) / 1000;
+			self->s.v.ammo_shells 	= (int)(velocity_vert_abs) / 1000;
+			self->s.v.ammo_nails 	= (int)(velocity_vert_abs) % 1000 / 100;
+			self->s.v.ammo_rockets 	= (int)(velocity_vert_abs) %  100 / 10;
+			self->s.v.ammo_cells	= (int)(velocity_vert_abs) %   10;
 		}
 		else {
 			self->s.v.armorvalue = 1000;
