@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.102 2006/05/25 18:59:20 qqshka Exp $
+ *  $Id: commands.c,v 1.103 2006/05/26 00:15:56 ult_ Exp $
  */
 
 // commands.c
@@ -2207,7 +2207,7 @@ void PrintScores()
 void PlayerStats()
 {
 	gedict_t *p, *p2;
-	char *tmp;
+	char *tmp, *stats;
 	int i, pL = 0, tL = 0;
 
 	if( match_in_progress != 2 ) {
@@ -2219,11 +2219,11 @@ void PlayerStats()
 		pL = max(pL, strlen(p->s.v.netname));
 		tL = max(tL, strlen(getteam(p)));
 	}
-	pL = bound( 0, pL, 12 );
+	pL = bound( 0, pL, 10 );
 	tL = bound( 0, tL, 4 );
 
 	G_sprint(self, 2, "%s:\n"
-					  "%s (%s) %s\217 %s\n",
+					  "%s %s %s \217  %s\n",
 					   redtext("Player statistics"),
 					   redtext("Frags"), redtext("rank"), isTeam() ? redtext("friendkills ") : "",
 					   redtext("efficiency"));
@@ -2248,16 +2248,20 @@ void PlayerStats()
 					G_sprint(self, 2, " ");
  			}
 
-			G_sprint(self, 2, "%.12s", p2->s.v.netname); // player name
+			G_sprint(self, 2, "%.10s ", p2->s.v.netname); // player name
 			for ( i = strlen(p2->s.v.netname); i < pL; i++ )
 				G_sprint(self, 2, " ");
 
-			G_sprint(self, 2, ": %d(%d) ", // frags(rank)
-				( !isCTF() ? (int)p2->s.v.frags : (int)(p2->s.v.frags - p2->ps.ctf_points)), 
-				( !isCTF() ? (int)(p2->s.v.frags - p2->deaths) : (int)(p2->s.v.frags - p2->ps.ctf_points - p2->deaths)));
+			stats = va("%d", ( !isCTF() ? (int)p2->s.v.frags : (int)(p2->s.v.frags - p2->ps.ctf_points)));
+			G_sprint(self, 2, "%3s", stats); // frags
 
-			if( isTeam() ) // friendkills
-				G_sprint(self, 2, "%d ", (int)p2->friendly);
+			stats = va("%d", ( !isCTF() ? (int)(p2->s.v.frags - p2->deaths) : (int)(p2->s.v.frags - p2->ps.ctf_points - p2->deaths)));
+			G_sprint(self, 2, "%4s ", stats); // rank
+
+			if ( isTeam() ) { // friendkills
+				stats = va("%d", (int)p2->friendly);
+				G_sprint(self, 2, "%2s ", stats);
+			}
 
 			if ( isCTF() )
 			{
@@ -2273,8 +2277,9 @@ void PlayerStats()
 				else
 					p2->efficiency = p2->s.v.frags / (p2->s.v.frags + p2->deaths) * 100;
 			}
-
-			G_sprint(self, 2, "\217 %3.1f%%\n", p2->efficiency); // effi
+			
+			stats = va("%3.1f", p2->efficiency);
+			G_sprint(self, 2, "\217 %5s%%\n", stats); // effi
 
 			p2->ready = 0; // mark as served
 		}
