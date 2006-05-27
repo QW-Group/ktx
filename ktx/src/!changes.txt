@@ -1,3 +1,10 @@
+2006-05-27 [ver 1.30]
+qq:
+167. Now autotrack does't instantly switch pov after tracked player die, 
+	 wait either 2 seconds or player respawn.
+
+	 thx DyB|Tuna & Empezar
+
 2006-05-26
 qq:
 165. Removed player freeze at last countdown second.
