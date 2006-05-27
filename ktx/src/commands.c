@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.103 2006/05/26 00:15:56 ult_ Exp $
+ *  $Id: commands.c,v 1.104 2006/05/27 13:49:10 qqshka Exp $
  */
 
 // commands.c
@@ -3671,20 +3671,21 @@ void fav_show( )
 
 void DoAutoTrack( )
 {
-	gedict_t *p, *goal;
+	gedict_t *p = NULL, *goal;
 	int id;
-
-	p = NULL;
 
 	if ( self->autotrack == atBest )
 		p = get_ed_best1();
 	else if ( self->autotrack == atPow )
 		p = get_ed_bestPow();
 
-	goal = PROG_TO_EDICT( self->s.v.goalentity );
-
 	if ( !p )
 		return;
+
+	goal = PROG_TO_EDICT( self->s.v.goalentity );
+
+	if ( goal->k_player && ISDEAD( goal ) && g_globalvars.time - goal->dead_time < 2 )
+		return; // do not switch instantly autotrack pov after tracked player die, wait a few seconds or untill them respawn
 
 	if ( goal == p )
 		return; // already track this player
