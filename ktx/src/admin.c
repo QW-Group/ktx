@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.34 2006/05/25 04:48:48 ult_ Exp $
+ * $Id: admin.c,v 1.35 2006/05/28 03:44:28 qqshka Exp $
  */
 
 // admin.c
@@ -10,6 +10,18 @@ void AdminMatchStart();
 void PlayerReady();
 void NextClient();
 void DoKick(gedict_t *victim, gedict_t *kicker);
+
+// is real admin
+qboolean is_real_adm(gedict_t *p)
+{
+	return (p->k_admin & AF_REAL_ADMIN);
+}
+
+// is elected admin
+qboolean is_adm(gedict_t *p)
+{
+	return ( is_real_adm( p ) || (p->k_admin & AF_ADMIN) );
+}
 
 void KickThink ()
 {
@@ -22,8 +34,8 @@ void KickThink ()
 		return;
 	}
 
-	if ( self->k_admin != 2 ) {
-		ExitKick( self ); // no admin now, so cancel kick mode, just for sanity
+	if ( !is_adm( self ) ) {
+		ExitKick( self ); // not admin now, so cancel kick mode, just for sanity
 		return;
 	}
 }
@@ -44,13 +56,7 @@ void AdminKick ()
 {
 	int argc = trap_CmdArgc();
 
-    if( self->k_captain ) // qqshka: why i can't kick if captain?
-    {
-        G_sprint(self, 2, "Exit %s mode first\n", redtext("captain"));
-        return;
-    }
-
-    if( self->k_admin != 2 )
+    if( !is_adm( self ) )
     {
         G_sprint(self, 2, "You are not an admin\n");
         return;
@@ -108,13 +114,7 @@ void m_kick ()
 	char arg_x[1024], buf[1024];
 	int argc = trap_CmdArgc();
 
-    if( self->k_captain ) // qqshka: why i can't kick if captain?
-    {
-        G_sprint(self, 2, "Exit %s mode first\n", redtext("captain"));
-        return;
-    }
-
-    if( self->k_admin != 2 )
+    if( !is_adm( self ) )
     {
         G_sprint(self, 2, "You are not an admin\n");
         return;
@@ -165,13 +165,7 @@ void f_kick ()
 	char arg_x[1024], buf[1024];
 	int argc = trap_CmdArgc();
 
-    if( self->k_captain ) // qqshka: why i can't kick if captain?
-    {
-        G_sprint(self, 2, "Exit %s mode first\n", redtext("captain"));
-        return;
-    }
-
-    if( self->k_admin != 2 )
+    if( !is_adm( self ) )
     {
         G_sprint(self, 2, "You are not an admin\n");
         return;
@@ -295,12 +289,13 @@ void DontKick ()
 	 NextClient();
 }
 
-void BecomeAdmin(gedict_t *p)
+void BecomeAdmin(gedict_t *p, int adm_flags)
 {
 	G_bprint(2, "%s %s!\n", p->s.v.netname, redtext("gains admins status"));
 	G_sprint(p, 2, "Please give up admin rights when you're done\n"
 				   "Type %s for info\n", redtext("commands"));
-	p->k_admin = 2;
+
+	p->k_admin |= adm_flags;
 
 	on_admin( p );
 }
@@ -309,31 +304,31 @@ void BecomeAdmin(gedict_t *p)
 
 void ReqAdmin ()
 {
-    //  admin state=1.5 check for election
-    if( self->k_admin == 1.5 )
+    //  check for election
+    if( is_elected(self, etAdmin) )
     {
         G_sprint(self, 2, "Abort %sion first\n", redtext("elect"));
         return;
     }
 
-    if( self->k_admin == 2 )
+    if( is_adm( self ) )
     {
         G_bprint(2, "%s is no longer an %s\n", self->s.v.netname, redtext("admin"));
 
         if( self->k_kicking )
             ExitKick( self );
 
-        self->k_admin = 0;
+        self->k_admin = 0; // ok, remove all admin flags
 
 		on_unadmin( self );
 
         return;
     }
 
-    if( self->k_admin == 1 )
+    if( self->k_adminc )
 	{
         G_sprint(self, 2, "%s code canceled\n", redtext("admin"));
-    	self->k_admin  = 0;
+    	self->k_adminc = 0;
 		return;
 	}
 
@@ -342,12 +337,9 @@ void ReqAdmin ()
 		return;
 	}
 
-    if( self->k_admin )
-        return;
-
 	if ( Vip_IsFlags( self, VIP_ADMIN ) ) // this VIP does't required pass
     {
-		BecomeAdmin(self);
+		BecomeAdmin(self, AF_REAL_ADMIN);
 		return;
     }
 	
@@ -359,14 +351,13 @@ void ReqAdmin ()
 		trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
 
 		if ( !strnull(pass) && strneq(pass, "none") && streq(arg_2, pass) )
-			BecomeAdmin(self);
+			BecomeAdmin(self, AF_REAL_ADMIN);
 		else
             G_sprint(self, 2, "%s...\n", redtext("Access denied"));
 
 		return;
 	}
 
-    self->k_admin  = 1;
     self->k_adminc = 6;
     self->k_added  = 0;
 
@@ -378,36 +369,36 @@ void AdminImpBot ()
 {
     float coef, i1;
 
-    if( !self->k_adminc )
+    if( self->k_adminc < 1 )
     {
-        self->k_admin = 0;
+        self->k_adminc = 0;
         return;
     }
 
-    i1 = (int)self->k_adminc - 1;
+    i1   = (int)(self->k_adminc -= 1);
     coef = self->s.v.impulse;
 
-    while( i1 )
+    while( i1 > 0 )
     {
-        coef = coef * 10;
+        coef *= 10;
         i1--;
     }
 
-    self->k_added  += coef;
-    self->k_adminc -= 1;
+    self->k_added += coef;
 
-    if( !self->k_adminc )
+    if( self->k_adminc < 1 )
     {
 		int iPass = cvar( "k_admincode" );
 
+        self->k_adminc = 0;
+
         if( iPass && self->k_added == iPass )
         {
-			BecomeAdmin(self);
+			BecomeAdmin(self, AF_REAL_ADMIN);
 			return;
         }
         else
         {
-            self->k_admin = 0;
             G_sprint(self, 2, "%s...\n", redtext("Access denied"));
         }
     }
@@ -425,17 +416,17 @@ void VoteAdmin()
 	gedict_t *electguard;
 
 // Can't allow election and code entering for the same person at the same time
-	if( self->k_admin == 1 ) {
+	if( self->k_adminc ) {
 		G_sprint(self, 2, "Finish entering the code first\n");
 		return;
 	}
 
-	if( self->k_admin == 2 ) {
+	if( is_adm( self ) ) {
 		G_sprint(self, 2, "You are already an admin\n");
 		return;
 	}
 
-	if( self->k_admin == 1.5 ) {
+	if( is_elected( self, etAdmin ) ) {
 		G_bprint(2, "%s %s!\n", self->s.v.netname, redtext("aborts election"));
 		AbortElect();
 		return;
@@ -477,8 +468,7 @@ void VoteAdmin()
 
     // announce the election
 	self->v.elect = 1;
-
-	self->k_admin = 1.5;
+	self->v.elect_type = etAdmin;
 
 	electguard = spawn(); // Check the 1 minute timeout for election
 	electguard->s.v.owner = EDICT_TO_PROG( world );
@@ -585,7 +575,7 @@ void AdminForceStart ()
 {
     gedict_t *mess;
 
-    if( match_in_progress || match_over || self->k_admin != 2 )
+    if( match_in_progress || match_over || !is_adm( self ) )
         return;
 
 	// no forcestart in practice mode
@@ -636,15 +626,13 @@ void AdminForceStart ()
 
 void AdminForceBreak ()
 {
-//    char *tmp;
-
-    if( self->k_admin == 2 && strneq( self->s.v.classname, "player" ) && !match_in_progress )
+    if( is_adm( self ) && strneq( self->s.v.classname, "player" ) && !match_in_progress )
     {
         k_force = 0;
         return;
     }
 
-    if( self->k_admin != 2 || !match_in_progress )
+    if( !is_adm( self ) || !match_in_progress )
         return;
 
     if( strneq( self->s.v.classname, "player" ) && match_in_progress == 1 )
@@ -679,7 +667,7 @@ void TogglePreWar ()
 {
     int k_prewar = bound(0, cvar( "k_prewar" ), 2);
 
-    if( self->k_admin != 2 )
+    if( !is_adm( self ) )
         return;
 
 	if ( ++k_prewar > 2 )
@@ -719,7 +707,7 @@ void ToggleMapLock ()
 {
     float tmp;
 
-    if( self->k_admin != 2 )
+    if( !is_adm( self ) )
         return;
 
     tmp = cvar( "k_lockmap" );
@@ -748,7 +736,7 @@ void ToggleMaster ()
 {
     float f1;
 
-    if( self->k_admin != 2 )
+    if( !is_adm( self ) )
         return;
 
     f1 = !cvar( "k_master" );
@@ -854,7 +842,7 @@ void ModPause (int pause)
 
 void AdminForcePause ()
 {
-    if( self->k_admin != 2 || match_in_progress != 2 )
+    if( !is_adm( self ) || match_in_progress != 2 )
         return;
 
     if( !k_pause )
@@ -869,7 +857,7 @@ void AdminForcePause ()
 
 void ToggleFallBunny ()
 {
-    if( self->k_admin != 2 )
+    if( !is_adm( self ) )
         return;
 
     if( match_in_progress )

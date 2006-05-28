@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: captain.c,v 1.15 2006/05/25 04:48:48 ult_ Exp $
+ *  $Id: captain.c,v 1.16 2006/05/28 03:44:28 qqshka Exp $
  */
 
 // captain.c
@@ -28,6 +28,16 @@
 // Check if picking should be finished
 
 // pick the player
+
+void CancelCaptains ();
+
+int capt_num(gedict_t *p)
+{
+    if( p->k_captain == 1 || p->k_captain == 2 )
+		return p->k_captain;
+
+	return 0;
+}
 
 void SetPlayerParams (gedict_t *p, gedict_t *cap)
 {
@@ -47,37 +57,40 @@ void SetPlayerParams (gedict_t *p, gedict_t *cap)
 				"color \"%s\"\n", infoteam, infocolor);
 
     p->s.v.frags = 0;
-    p->k_picked = cap->k_captain;
+    p->k_picked = capt_num( cap );
 }
 
 void PrintCaptainInTurn ()
 {
     gedict_t *p;
 
-    for( p = world; (p = find(p, FOFCLSN, "player")) && p->k_captain != k_captainturn; )
+    for( p = world; (p = find(p, FOFCLSN, "player")) && capt_num( p ) != k_captainturn; )
         ; // empty
 
 	if ( p )
 		G_bprint(2, "%s is picking\n", p->s.v.netname);
-	else
-		G_Error ("PrintCaptainInTurn null");
+	else {
+		G_bprint(2, "PrintCaptainInTurn: captain not found\n");
+		CancelCaptains ();
+	}
 }
 
 void CancelCaptains ()
 {
     gedict_t *p;
 
+	k_captains = 0;
+
 	for( p = world; (p = find(p, FOFCLSN, "player")); )
 	{
-		if( p->k_captain )
-		{
+		if( capt_num( p ) )
 			G_sprint(p, 2, "You are no longer a %s\n", redtext("captain"));
 
-			p->k_captain = p->k_picked = 0;
-		}
-	}
+		p->k_captain = p->k_picked = 0;
 
-	k_captains = 0;
+		if ( is_elected(p, etCaptain) ) // just for sanity
+			AbortElect();
+	}
 }
 
 
@@ -98,7 +111,7 @@ void CheckFinishCaptain ()
 
     if( pl_free == 1 ) // one free player left
     {
-    	for( p = world; (p = find(p, FOFCLSN, "player")) && p->k_captain != k_captainturn; )
+    	for( p = world; (p = find(p, FOFCLSN, "player")) && capt_num( p ) != k_captainturn; )
         	; // empty
 
 		if ( p )
@@ -119,7 +132,7 @@ void CaptainPickPlayer ()
 {
     gedict_t *p;
 
-    if( self->k_captain != k_captainturn )
+    if( capt_num( self ) != k_captainturn )
     {
         G_sprint(self, 2, "It's %s your turn\n", redtext("not"));
         return;
@@ -146,48 +159,46 @@ void ExitCaptain ()
 {
     gedict_t *p;
 
-    if( self->k_captain == 1 || self->k_captain == 2 )
-    {
-        self->k_captain = 0;
+    if( !capt_num( self ) )
+		return;
 
-        if( k_captains == 2 )
-        {
-            G_bprint(2, "Player picking aborted\n");
+	self->k_captain = 0;
 
-            for( p = world; (p = find(p, FOFCLSN, "player")); )
-                if( p->s.v.frags )
-                    p->s.v.frags = 0;
-        }
+	if( k_captains == 2 )
+	{
+    	G_bprint(2, "Player picking aborted\n");
 
-        k_captains--;
+    	for( p = world; (p = find(p, FOFCLSN, "player")); )
+        	if( p->s.v.frags )
+            	p->s.v.frags = 0;
+	}
 
-        G_bprint(2, "%s captain present\n", (floor( k_captains ) ? "\x90\x31\x91" : redtext("No")));
-    }
+	k_captains--;
+
+	G_bprint(2, "%s captain present\n", (floor( k_captains ) ? "\x90\x31\x91" : redtext("No")));
 }
 
-void BecomeCaptain ()
+void VoteCaptain ()
 {
 	int from, till;
     gedict_t *p, *electguard;
 
     // s: check if we are being elected or we are a captain already
-    if( self->k_captain )
-    {
-        if( self->k_captain > 10 )
-        {
-            G_bprint(2,  "%s %s!\n", self->s.v.netname, redtext("aborts election"));
+	if( is_elected(self, etCaptain) )
+	{
+    	G_bprint(2,  "%s %s!\n", self->s.v.netname, redtext("aborts election"));
 
-            AbortElect();
-        }
-        else
-        {
-            G_bprint(2, "%s is no longer a %s\n", self->s.v.netname, redtext("captain"));
+    	AbortElect();
+		return;
+	}
 
-            ExitCaptain();
-        }
+	if ( capt_num( self ) )
+	{
+    	G_bprint(2, "%s is no longer a %s\n", self->s.v.netname, redtext("captain"));
 
-        return;
-    }
+	    ExitCaptain();
+		return;
+	}
 
     if( match_in_progress || intermission_running )
         return;
@@ -241,7 +252,7 @@ void BecomeCaptain ()
     }
 
     // search if a captain already has the same team
-    for( p = world; (p = find(p, FOFCLSN, "player")) && !p->k_captain; )
+    for( p = world; (p = find(p, FOFCLSN, "player")) && !capt_num( p ); )
 		; // empty
 
 	if ( p ) {
@@ -264,14 +275,9 @@ void BecomeCaptain ()
     	}
 	}
 
-    // s: give a number for the captain (1 or 2); a number > 10 means election
-    if(p && p->k_captain == 1)
-        self->k_captain = 12;
-    else
-        self->k_captain = 11;
-
     // announce the election
 	self->v.elect = 1;
+	self->v.elect_type = etCaptain;	
 
     k_captains += 0.5;
 
@@ -313,12 +319,14 @@ void BeginPicking ()
 
 	for( p = world; (p = find(p, FOFCLSN, "player")); )
     {
-		if( p->k_captain )
+		p->k_picked = 0;
+
+		if( capt_num( p ) )
 		{
 			G_sprint(p, 2, "\nUse %s or %s to choose\n", redtext("numbers"), redtext("impulses"));
 
-			cvar_set( va("_k_captteam%d", (int)p->k_captain), getteam(p) );
-			cvar_set( va("_k_captcolor%d", (int)p->k_captain), va("%s %s", 
+			cvar_set( va("_k_captteam%d",  capt_num( p )), getteam(p) );
+			cvar_set( va("_k_captcolor%d", capt_num( p )), va("%s %s", 
 							ezinfokey(p, "topcolor"), ezinfokey(p, "bottomcolor")));
 		}
 		else
@@ -335,5 +343,25 @@ void BeginPicking ()
 	k_captainturn = (g_random() < 0.5 ? 1 : 2);
 
     PrintCaptainInTurn();
+}
+
+void BecomeCaptain(gedict_t *p)
+{
+	gedict_t *cap = p; // warning, below 'p' is overwriten
+
+	for( p = world; (p = find(p, FOFCLSN, "player")) && !capt_num( p ); )
+		; // empty
+
+	cap->k_captain = ( p && capt_num( p ) == 1 ) ? 2 : 1;
+
+	k_captains = floor( k_captains ) + 1;
+
+	G_bprint(2, "%s becomes a %s\n", cap->s.v.netname, redtext("captain"));
+
+	// s: if both captains are already elected, start choosing players
+	if( k_captains == 2 )
+		BeginPicking();
+	else
+		G_bprint(2, "One more %s should be elected\n", redtext("captain"));
 }
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.21 2006/05/22 21:07:38 oldmanuk Exp $
+ *  $Id: g_main.c,v 1.22 2006/05/28 03:44:28 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -327,6 +327,8 @@ void G_InitGame( int levelTime, int randomSeed )
 void G_ShutDown()
 {
 	char *map = g_globalvars.mapname;
+
+	AbortElect();
 
 	if ( k_pause )
 		ModPause ( 0 );

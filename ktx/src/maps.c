@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: maps.c,v 1.13 2006/05/25 04:48:48 ult_ Exp $
+ *  $Id: maps.c,v 1.14 2006/05/28 03:44:28 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -202,14 +202,14 @@ void SelectMap()
 	else if ( match_in_progress )
 		return;
 
-	if ( self->k_spectator && self->k_admin != 2 ) // only admined specs can select map
+	if ( self->k_spectator && !is_adm(self ) ) // only admined specs can select map
 		return;
 
 	if ( strnull( m = GetMapName( self->cmd_selectMap ) ) )
 		return;
 
-	if( ( cvar( "k_lockmap" ) || cvar( "k_master" ) )
-			&& self->k_admin != 2 
+	if( (    cvar( "k_lockmap" ) || cvar( "k_master" ) )
+		  && !is_adm( self )
       ) {
 		G_sprint(self, 2, "MAP IS LOCKED!\n"
 						  "You are NOT allowed to change!\n");

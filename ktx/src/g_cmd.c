@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.17 2006/05/18 20:07:41 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.18 2006/05/28 03:44:28 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -168,7 +168,7 @@ void fp_toggle ()
 	if( check_master() )
 		return;
 
-	if ( self->k_admin != 2 ) {
+	if ( !is_adm( self ) ) {
 		G_sprint(self, 2, "You are not an admin\n");
 		return;
 	}

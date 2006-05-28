@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.40 2006/05/26 22:44:46 qqshka Exp $
+ *  $Id: weapons.c,v 1.41 2006/05/28 03:44:28 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1761,7 +1761,7 @@ int CaptainImpulses()
 
 	// ok - below possible captain stuff
 
-	if( self->s.v.impulse > 16 || !self->k_captain )
+	if( self->s.v.impulse > 16 || !capt_num( self ) )
 		return 0;// s: return 0 if captain mode is set and no captain things were entered
 
 	return 1;// s: return 1 if it's a player picker impulse
@@ -1798,7 +1798,7 @@ void ImpulseCommands()
     else if( capt == 1 )
         CaptainPickPlayer();
 
-    else if( self->k_admin == 1 && impulse >= 1 && impulse <= 9 )
+    else if( self->k_adminc && impulse >= 1 && impulse <= 9 )
         AdminImpBot();
 
     else if ( (impulse >= 1 && impulse <= 8) || impulse == 22 )

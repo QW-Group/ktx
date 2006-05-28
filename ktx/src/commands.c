@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.104 2006/05/27 13:49:10 qqshka Exp $
+ *  $Id: commands.c,v 1.105 2006/05/28 03:44:28 qqshka Exp $
  */
 
 // commands.c
@@ -45,7 +45,7 @@ void DontKick ();
 void VoteAdmin();
 void VoteYes();
 void VoteNo();
-void BecomeCaptain ();
+void VoteCaptain ();
 void RandomPickup();
 void ShowDMM();
 void ChangeDM(float dmm);
@@ -449,7 +449,7 @@ cmd_t cmds[] = {
     { "elect",       VoteAdmin,                 0    , CF_BOTH, CD_ELECT },
     { "yes",         VoteYes,                   0    , CF_PLAYER, CD_YES },
     { "no",          VoteNo,                    0    , CF_PLAYER, CD_NO },
-    { "captain",     BecomeCaptain,             0    , CF_PLAYER, CD_CAPTAIN },
+    { "captain",     VoteCaptain,               0    , CF_PLAYER, CD_CAPTAIN },
     { "freeze",      ToggleFreeze,              0    , CF_PLAYER, CD_FREEZE },
     { "rpickup",     RandomPickup,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_RPICKUP },
     
@@ -573,7 +573,6 @@ int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
 int DoCommand(int icmd)
 {
 	int spc = self->k_spectator;
-	int adm = (int) self->k_admin;
 
 	if ( !( icmd >= 0 && icmd < cmds_cnt ) )
 		return DO_OUT_OF_RANGE_CMDS;
@@ -584,14 +583,18 @@ int DoCommand(int icmd)
 	if ( spc ) { // spec
 		if ( !(cmds[icmd].cf_flags & CF_SPECTATOR) )
 			return DO_WRONG_CLASS; // cmd not for spectator
-		if ( (cmds[icmd].cf_flags & CF_SPC_ADMIN) && adm != 2 )
+		if ( (cmds[icmd].cf_flags & CF_SPC_ADMIN) && !is_adm(self) ) {
+			G_sprint(self, 2, "You are not an admin\n");
 			return DO_ACCESS_DENIED; // admin rights required
+		}
 	}
 	else { // player
 		if ( !(cmds[icmd].cf_flags & CF_PLAYER) )
 			return DO_WRONG_CLASS; // cmd not for player
-		if ( (cmds[icmd].cf_flags & CF_PLR_ADMIN) && adm != 2 )
+		if ( (cmds[icmd].cf_flags & CF_PLR_ADMIN) && !is_adm(self) ) {
+			G_sprint(self, 2, "You are not an admin\n");
 			return DO_ACCESS_DENIED; // admin rights required
+		}
 	}
 
 	if ( strnull( cmds[icmd].name ) || !( cmds[icmd].f ) )
@@ -838,108 +841,13 @@ void Init_cmds(void)
 
 qboolean check_master()
 {
-	if( cvar( "k_master" ) && self->k_admin < 2 ) {
+	if( cvar( "k_master" ) && !is_adm(self) ) {
 		G_sprint(self, 2, "console: command is locked\n");
 		return true;
 	}
 
 	return false;
 }
-
-/*
-    
-void PShowCmds()
-{   
-	if( self->k_admin == 2 ) {
-		G_sprint(self, 2,
-		"áäíéî....... give up admin rights\n"
-		"ğòå÷áò...... playerfire before game\n"
-		"ìïãëíáğ..... (un)lock current map\n"
-		"æïòãåóôáòô.. force match to start\n"
-		"æïòãåâòåáë.. force match to end\n"
-		"æïòãåğáõóå.. toggle pausemode\n"
-		"íáóôåò...... toggle mastermode\n"
-		"ëéãë........ toggle kick mode\n"
-		"äåáôèíóç.... toggle new messages\n"
-		"òğéãëõğ..... random team pickup\n"
-		       "%s... toggle fallbunny\n", redtext("fallbunny"));
-	} else {
-		G_sprint(self, 2,
-		"áâïõô...... kombat teams info\n"
-		"òõìåó...... show game rules\n"
-		"òåáäù...... when you feel ready\n"
-		"âòåáë...... unready / vote matchend\n"
-		"ïğôéïîó.... match control commands\n"
-		"ñéúíï...... qizmo related commands\n"
-		"íåóóáçåó... fun message commands\n"
-		"óôáôõó..... show server settings\n"
-		"óôáôõó².... more server settings\n"
-		"òåóåô...... set defaults\n"
-		"æòååúå..... (un)freeze the map\n"
-		"íáğó....... list custom maps\n"
-		"÷èï........ player teamlist\n"
-		"÷èïîïô..... players not ready\n"
-		"ìéóô....... whonot to everyone\n"
-		"÷èïóëéî.... player skinlist\n"
-		"÷èïöïôå.... info on received votes\n"
-		"ğéãëõğ..... vote for pickup game\n"
-		"óôáôó...... show playerstats\n"
-		"ïöåòôéíå... toggle overtime mode\n"
-		"ïöåòôéíåõğ. change overtime length\n"
-		"ãáğôáéî.... toggle captain election\n");
-		
-		if( cvar( "k_admins" ) ) {
-			G_sprint(self, 2, "áäíéî...... toggle admin-mode\n");
-			G_sprint(self, 2, "åìåãô...... toggle admin election\n");
-		}
-	}
-}
-
-
-
-void SShowCmds()
-{
-	if( self->k_admin == 2 ) {
-		G_sprint(self, 2, 
-			"áäíéî....... give up admin rights\n"
-			"ğòå÷áò...... playerfire before game\n"
-			"ìïãëíáğ..... (un)lock current map\n"
-			"æïòãåóôáòô.. force match to start\n"
-			"æïòãåâòåáë.. force match to end\n"
-			"æïòãåğáõóå.. toggle pausemode\n"
-			"íáóôåò...... toggle mastermode\n"
-			"ëéãë........ toggle kick mode\n"
-			"äåáôèíóç.... toggle new messages\n"
-			"òğéãëõğ..... random team pickup\n"
-		           "%s... toggle fallbunny\n", redtext("fallbunny"));
-		G_sprint(self, 2,
-			"ïöåòôéíå.... toggle overtime mode\n"
-			"ïöåòôéíåõğ.. change overtime length\n"
-			"you may also use\n"
-			"ôğ  äí  ğï÷åòõğó  óéìåîãå\n"
-			"ôéíåõğ  ôéíåäï÷î  óğá÷î\n"
-			"ñìáç    ñåîåíù    ñğïéîô\n"
-			"òåóåô   íáğó\n");
-	}
-	else {
-		G_sprint(self, 2, 
-			"óôáôõó..... show match settings\n"
-			"óôáôõó².... more match settings\n"
-			"ãáí........ camera help text\n"
-			"÷èï........ player teamlist\n"
-			"÷èïîïô..... players not ready\n"
-			"÷èïóëéî.... player skinlist\n"
-			"÷èïöïôå.... info on received votes\n"
-			"êïéî....... joins game\n"				// FIXME: intersect with client command
-			"óôáôó...... show playerstats\n");
-
-		if( cvar( "k_admins" ) ) {
-			G_sprint(self, 2, "áäíéî...... toggle admin-mode\n");
-			G_sprint(self, 2, "åìåãô...... toggle admin election\n");
-		}
-	}
-}
-*/
 
 void Do_ShowCmds( qboolean adm_req )
 {
@@ -1390,7 +1298,7 @@ void ModStatusVote()
 		for( from = 0, p = world; (p = find_plrspc(p, &from)); )
 			if ( p->v.elect )
 				G_sprint(self, 2, "%s%s\n", 
-				((p->k_admin == 1.5 || p->k_captain > 10) ? "\x87" : " " ), p->s.v.netname);
+				(p->v.elect_type != etNone) ? "\x87" : " ", p->s.v.netname);
 	}
 
 	if ( !match_in_progress )
@@ -1442,7 +1350,7 @@ char *OnePlayerStatus( gedict_t *p, gedict_t *e_self )
 	e_self = (e_self ? e_self : world);
 
 	return va( "%s%s%s %s%s",
-	 			( p->ready ? "\x86" : "\x87" ),	( p->k_admin == 2 ? "\xC1" : " " ),
+	 			( p->ready ? "\x86" : "\x87" ),	( is_adm( p ) ? "\xC1" : " " ),
 				team_str, getname( p ), ( p == e_self ? redtext( " \x8D you" ) : "" ) );
 }
 
@@ -1587,7 +1495,7 @@ void ResetOptions()
 	}
 #else
 /*
-	if( self->k_admin != 2 || strnull( s1 ) ) {
+	if( !is_adm(self) || strnull( s1 ) ) {
 		localcmd("exec configs/reset.cfg\n");
 	} else {
 		localcmd("exec configs/%s.cfg\n", s1); // FIXME: UNSAFE: player can set some dangerous team
@@ -2036,7 +1944,7 @@ void ToggleSpecTalk()
 {
 	int k_spectalk = !cvar( "k_spectalk" ), fpd = iKey( world, "fpd" );
 
-	if ( match_in_progress && self->k_admin < 2 )
+	if ( match_in_progress && !is_adm( self ) )
 		return;
 
 	k_spectalk = bound(0, k_spectalk, 1);
@@ -2778,13 +2686,13 @@ void UserMode(float umode)
 			case 0:	G_sprint(self, 2, "%s can use this command\n", redtext("noone"));
 					return;
 			case 1:
-			case 2:	if ( self->k_admin != 2 ) {
+			case 2:	if ( !is_adm( self ) ) {
 						G_sprint(self, 2, "you must be an %s\n", redtext("admin"));
 						return;
 					}
 					break;
 			case 3:
-			case 4:	if ( self->k_admin != 2 ) {
+			case 4:	if ( !is_adm( self ) ) {
 						G_sprint(self, 2, "%s is not implemented in this mode\n", redtext("judges"));
 						G_sprint(self, 2, "you must be an %s\n", redtext("admin"));
 						return;
@@ -3010,13 +2918,13 @@ void TogglePractice()
 		case 0:	G_sprint(self, 2, "%s can use this command\n", redtext("noone"));
 				return;
 		case 1:
-		case 2:	if ( self->k_admin != 2 ) {
+		case 2:	if ( !is_adm( self ) ) {
 					G_sprint(self, 2, "you must be an %s\n", redtext("admin"));
 					return;
 				}
 				break;
 		case 3:
-		case 4:	if ( self->k_admin != 2 ) {
+		case 4:	if ( !is_adm( self ) ) {
 					G_sprint(self, 2, "%s is not implemented in this mode\n", redtext("judges"));
 					G_sprint(self, 2, "you must be an %s\n", redtext("admin"));
 					return;
@@ -3134,7 +3042,7 @@ void klist ( )
 		hdc = GetHandicap(p);
 
 		G_sprint(self, 2, "%2d|%2s|%3d|%3s|%4.4s|%s\n", GetUserID( p ),
-						(p->k_admin == 2 ? redtext("A") : ""), p->vip,
+						(is_adm( p ) ? redtext("A") : ""), p->vip,
 						(hdc == 100 ? "off" : va("%d%%", hdc)), getteam( p ), getname( p ));
 	}
 
@@ -3152,7 +3060,7 @@ void klist ( )
 		track = TrackWhom( p );
 
 		G_sprint(self, 2, "%2d|%2s|%3d|%s%s\n", GetUserID( p ),
-						(p->k_admin == 2 ? redtext("A") : ""), p->vip, getname( p ),
+						(is_adm( p ) ? redtext("A") : ""), p->vip, getname( p ),
 						(strnull(track) ? "" : va(" \x8D %s", track)) );
 	}
 
@@ -4222,7 +4130,7 @@ void mi_print( gedict_t *tooker, int it, char *msg )
 	t_team = getteam( tooker );
 
 	for( from = 1 /* spec */, p = world; (p = find_plrspc (p, &from)); ) {
-		if ( adm && p->k_admin != 2 )
+		if ( adm && !is_adm( p ) )
 			continue; // configured send only for admins
 
 		level = iKey(p, "mi"); // get spec setup
@@ -4290,7 +4198,7 @@ void infolock ( )
 	if( check_master() )
 		return;
 
-	if ( self->k_admin != 2 ) {
+	if ( !is_adm( self ) ) {
 		G_sprint(self, 2, "You are not an admin\n");
 		return;
 	}

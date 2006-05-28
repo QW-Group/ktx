@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_userinfo.c,v 1.18 2006/05/06 22:33:07 qqshka Exp $
+ *  $Id: g_userinfo.c,v 1.19 2006/05/28 03:44:28 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -101,7 +101,7 @@ qboolean FixPlayerTeam ( char *newteam )
 		return false;
 
 	// captain or potential captain may not change team
-	if ( self->k_captain ) {
+	if ( capt_num( self ) || is_elected(self, etCaptain) ) {
 		if( strneq( getteam( self ), newteam ) ) {
 			G_sprint(self, 2, "You may %s change team\n", redtext("not"));
 			stuffcmd(self, "team \"%s\"\n", getteam(self)); // sends this to client - so he get right team too

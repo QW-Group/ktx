@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.20 2006/05/25 04:48:48 ult_ Exp $
+ *  $Id: spectate.c,v 1.21 2006/05/28 03:44:28 qqshka Exp $
  */
 
 // spectate.c
@@ -163,11 +163,12 @@ void SpectatorImpulseCommand()
 
 	goal = PROG_TO_EDICT( self->s.v.goalentity );
 
-	if( self->k_admin == 1 && self->s.v.impulse >= 1 && self->s.v.impulse <=9 ) 
-	{
+	if( self->k_adminc && self->s.v.impulse >= 1 && self->s.v.impulse <= 9 ) {
+
 		AdminImpBot();
 
-	} else if( self->s.v.impulse == 1 ) {
+	}
+	else if( self->s.v.impulse == 1 ) {
 		// teleport the spectator to the next spawn point
 		// note that if the spectator is tracking, this doesn't do much
 		goal = PROG_TO_EDICT( self->s.v.goalentity );

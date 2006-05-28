@@ -14,14 +14,15 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: vote.c,v 1.13 2006/05/25 04:48:48 ult_ Exp $
+ *  $Id: vote.c,v 1.14 2006/05/28 03:44:28 qqshka Exp $
  */
 
 // vote.c: election functions by rc\sturm
 
 #include "g_local.h"
 
-void  BeginPicking();
+void	BeginPicking();
+void	BecomeCaptain(gedict_t *p);
 
 // AbortElect is used to terminate the voting
 // Important if player to be elected disconnects or levelchange happens
@@ -31,16 +32,11 @@ void AbortElect()
 	gedict_t *p;
 
 	for( from = 0, p = world; (p = find_plrspc(p, &from)); ) {
-		if( p->k_admin == 1.5 ) { // kill not yet elected admin
-			p->k_admin = 0;
+		if ( p->v.elect_type != etNone ) {
+			if ( is_elected(p, etCaptain) )
+				k_captains = floor( k_captains );
 
-			p->v.elect_block_till = g_globalvars.time + 30; // block election for some time
-		}
-
-		if( p->k_captain > 10 ) { // kill not yet elected captain
-			p->k_captain = 0;
-			k_captains = floor( k_captains );
-
+			p->v.elect_type = etNone;
 			p->v.elect_block_till = g_globalvars.time + 30; // block election for some time
 		}
 	}
@@ -68,7 +64,7 @@ void VoteYes()
 	if( !get_votes( OV_ELECT ) )
 		return;
 
-	if( self->k_admin == 1.5 || self->k_captain > 10 ) {
+	if( self->v.elect_type != etNone ) {
 		G_sprint(self, 2, "You cannot vote for yourself\n");
 		return;
 	}
@@ -95,7 +91,7 @@ void VoteNo()
 	int votes;
 
 // withdraw one's vote
-	if( !get_votes( OV_ELECT ) || self->k_admin == 1.5 || self->k_captain > 10 || !self->v.elect )
+	if( !get_votes( OV_ELECT ) || self->v.elect_type != etNone || !self->v.elect )
 		return;
 
 // unregister the vote
@@ -200,7 +196,7 @@ int is_admins_vote( int fofs )
 	gedict_t *p;
 
 	for ( from = 0, p = world; (p = find_plrspc(p, &from)); )
-		if ( *(int*)((byte*)(&p->v)+fofs) && p->k_admin == 2 )
+		if ( *(int*)((byte*)(&p->v)+fofs) && is_adm( p ) )
 			votes++;
 
 	return votes;
@@ -215,6 +211,11 @@ void vote_clear( int fofs )
 		*(int*)((byte*)(&p->v)+fofs) = 0;
 }
 
+// return true if player invoke one of particular election
+qboolean is_elected(gedict_t *p, electType_t et)
+{
+	return (p->v.elect_type == et);
+}
 
 int get_elect_type ()
 {
@@ -222,10 +223,10 @@ int get_elect_type ()
 	gedict_t *p;
 
 	for( from = 0, p = world; (p = find_plrspc(p, &from)); ) {
-		if( p->k_admin == 1.5 ) // elected admin
+		if( is_elected(p, etAdmin) ) // elected admin
 			return etAdmin;
 
-		if( p->k_captain > 10 ) // elected captain
+		if( is_elected(p, etCaptain) ) // elected captain
 			return etCaptain;
 	}
 
@@ -283,7 +284,7 @@ int vote_get_maps ()
 
 		maps_voted[i].map_id     = p->v.map;
 		maps_voted[i].map_votes += 1;
-		maps_voted[i].admins    += (( p->k_admin == 2 ) ? 1 : 0);
+		maps_voted[i].admins    += (is_adm( p ) ? 1 : 0);
 
 		// find the most voted map
 		if ( best_idx < 0 || maps_voted[i].map_votes > maps_voted[best_idx].map_votes )
@@ -345,7 +346,7 @@ void vote_check_elect ()
 	if( !get_votes_req( OV_ELECT, true ) ) {
 
 		for( from = 0, p = world; (p = find_plrspc(p, &from)); )
-			if ( p->k_admin == 1.5 || p->k_captain > 10 )
+			if ( p->v.elect_type != etNone )
 				break;
 
 		if ( !p ) { // nor admin nor captain found - probably bug
@@ -354,23 +355,12 @@ void vote_check_elect ()
 		}
 
 		if( !(p->k_spectator && match_in_progress) )
-		if( p->k_admin == 1.5 ) { // s: election was admin election
-			BecomeAdmin( p );
-		}
+		if( is_elected(p, etAdmin) ) // s: election was admin election
+			BecomeAdmin(p, AF_ADMIN);
 
 		if( !match_in_progress )
-		if( p->k_captain > 10 ) { // s: election was captain election
-			p->k_captain -= 10;
-			k_captains = floor( k_captains ) + 1;
-
-			G_bprint(2, "%s becomes a %s\n", p->s.v.netname, redtext("captain"));
-
-			// s: if both captains are already elected, start choosing players
-			if( k_captains == 2 )
-				BeginPicking();
-			else
-				G_bprint(2, "One more %s should be elected\n", redtext("captain"));
-		}
+		if( is_elected(p, etCaptain) ) // s: election was captain election
+			BecomeCaptain(p);
 
 		AbortElect();
 		return;

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: motd.c,v 1.18 2006/05/25 04:48:48 ult_ Exp $
+ *  $Id: motd.c,v 1.19 2006/05/28 03:44:28 qqshka Exp $
  */
 
 // motd.c
@@ -268,11 +268,6 @@ void MOTDStuff()
 	{
 		G_bprint(2, "%s entered the game\n", so->s.v.netname);
 	}
-
-	// terminate elect and kick modes
-
-//	so->k_kicking = 0;
-//	so->k_captain = 0;
 
 	so->s.v.frags = so->fraggie; // restore frags from ghost or in case of captains set player number via his frags
 	newcomer = so->s.v.netname;

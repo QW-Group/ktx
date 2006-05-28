@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.80 2006/05/26 16:04:45 vvd0 Exp $
+ *  $Id: client.c,v 1.81 2006/05/28 03:44:28 qqshka Exp $
  */
 
 //===========================================================================
@@ -379,9 +379,6 @@ void GotoNextMap()
 {
 	char            *newmap = "";
 	int i;
-
-	if( get_votes( OV_ELECT ) ) 
-        AbortElect();
 
 	if ( trap_cvar( "samelevel" ) /* == 1 */ )	// if samelevel is set, stay on same level
 		changelevel( g_globalvars.mapname );
@@ -899,9 +896,7 @@ gedict_t       *SelectSpawnPoint( char *spawnname )
 ///////////////
 void ClientConnect()
 {
-	float f1 = 0;
 	gedict_t *p;
-	char *tmp;
 
 	Vip_ShowRights( self );
 
@@ -935,45 +930,17 @@ void ClientConnect()
 	self->ctf_flag = 0;
 
 	if( k_captains == 2 ) {
-// in case of team picking, pick player if there's a captain with his/her team
-		p = find(world, FOFCLSN, "player");
-		while( p && !f1 ) {
-
-			while( p && !p->k_captain )
-				p = find(p, FOFCLSN, "player");
-
-			if( p && p->k_captain ) {
-
-				tmp = getteam(p);
-
-				if( streq( tmp, getteam(self) ) ) {
-					G_sprint(self, 2, "Team picking in progress\n");
-					G_bprint(2, "%s is set to team \x90%s\x91\n", self->s.v.netname, tmp);
-
-					// set color, team is already set %)
-					stuffcmd(self, "color %d %d\n", iKey(p, "topcolor"), iKey(p, "bottomcolor"));
-					f1 = 1;
-				}
-				else
-					p = find(p, FOFCLSN, "player");
-			}
-		}
 // in case of team picking, check if there is a free spot for player number 1-16
-		if( !f1 ) {
-			p = self;
+		int i;
 
-			while( p && f1 < 16 ) {
-				f1++;
+		for( i = 1, p = world; p && i <= 16; i++ )
+			for( p = world; (p = find(p, FOFCLSN, "player")) && p->s.v.frags != i; )
+				; // empty
 
-				for( p = world; (p = find(p, FOFCLSN, "player")) && p->s.v.frags != f1; )
-					; // empty
-			}
-
-			// if we found a spot, set the player into it
-			if( !p ) {
-				stuffcmd(self, "color 0\nteam \"\"\nskin \"\"\n");
-				self->fraggie = f1;
-			}
+		// if we found a spot, set the player into it
+		if( !p ) {
+			stuffcmd(self, "color 0\nteam \"\"\nskin \"\"\n");
+			self->fraggie = i-1;
 		}
 	}
 }
@@ -1579,7 +1546,7 @@ void ClientDisconnect()
 	}
 
 // s: added conditional function call here
-	if( self->k_admin == 1.5 || self->k_captain > 10 ) {
+	if( self->v.elect_type != etNone ) {
 		G_bprint(2, "Election aborted\n");
 		AbortElect();
 	}
@@ -1593,7 +1560,7 @@ void ClientDisconnect()
 	if( self->k_kicking )
 		ExitKick( self );
 
-	if( self->k_captain ) {
+	if( capt_num( self ) ) {
         G_bprint(2, "A %s has left\n", redtext("captain"));
 
 		ExitCaptain();

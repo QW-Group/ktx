@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.67 2006/05/27 13:49:40 qqshka Exp $
+ *  $Id: g_local.h,v 1.68 2006/05/28 03:44:28 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -580,10 +580,7 @@ typedef struct votemap_s {
 extern  votemap_t maps_voted[];
 int 	vote_get_maps ();
 
-
-#define etNone    (0)
-#define etCaptain (1)
-#define etAdmin   (2)
+qboolean is_elected(gedict_t *p, electType_t et);
 
 int  	get_elect_type ();
 char 	*get_elect_type_str ();
@@ -614,12 +611,23 @@ void	AbortElect();
 
 // admin.c
 
+// admin flags
+#define AF_ADMIN       (1<<0) // elected admin
+#define AF_REAL_ADMIN  (1<<1) // pass/vip granted admin (real admin in terms of ktpro)
+
+qboolean is_real_adm(gedict_t *p); // is pass/vip granted admin (real admin in terms of ktpro)
+qboolean is_adm(gedict_t *p);      // is elected admin (admin rigths granted by /elect command)
+
 void	KickThink ();
 void	ExitKick(gedict_t *kicker);
 
 void 	ModPause (int pause);
-void 	BecomeAdmin(gedict_t *p);
+void 	BecomeAdmin(gedict_t *p, int adm_flags);
 void 	VoteAdmin();
+
+// captain.c
+
+int capt_num(gedict_t *p);
 
 // maps.c
 
@@ -635,7 +643,7 @@ void    GrappleThrow();
 void    GrappleService();
 void    GrappleReset(gedict_t *rhook);
 
-// global.c
+// globals.c
 
 extern	float framechecks;	    // if timedemo/uptime bugs are tolerated
 extern	float k_attendees;      // stores number of players on server - used in 'ready' checking

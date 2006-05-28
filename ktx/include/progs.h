@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.41 2006/05/23 01:17:47 ult_ Exp $
+ *  $Id: progs.h,v 1.42 2006/05/28 03:44:28 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -126,6 +126,14 @@ typedef struct player_stats_s {
 
 } player_stats_t;
 
+
+typedef enum
+{
+	etNone = 0,
+	etCaptain,
+	etAdmin
+} electType_t;
+
 // store player votes here
 typedef struct vote_s {
 
@@ -135,6 +143,7 @@ typedef struct vote_s {
 	int pickup;
 	int rpickup;
 
+	electType_t elect_type; // election type
 	float elect_block_till;	// block election for this time
 } vote_t;
 
@@ -284,10 +293,10 @@ typedef struct gedict_s {
 	float	k_1spawn;        // NOT_SURE: used in kteams respawn code...
 	float	k_666;           // if player has 666 respawn protection
 	float	k_accepted;      // NOT_SURE:
-	float	k_added;         // NOT_SURE: stores the entered admin code?
-	float	k_adminc;        // number of digits of admin code still to enter
-	float	k_admin;         // if player is an admin
-	float	k_captain;       // if player is team captain
+	int		k_added;         // NOT_SURE: stores the entered admin code?
+	int		k_adminc;        // number of digits of admin code still to enter
+	int 	k_admin;         // if player is an admin, flags
+	int		k_captain;       // if player is team captain
 	float	k_flag;          // flagvalue to customise settings such as sounds/autoscreenshot
 	float	k_msgcount;      // NOT_SURE: last time mod printed a message to client?
 	float	k_picked;        // NOT_SURE: 
