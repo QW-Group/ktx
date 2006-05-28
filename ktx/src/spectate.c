@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.21 2006/05/28 03:44:28 qqshka Exp $
+ *  $Id: spectate.c,v 1.22 2006/05/28 23:16:23 qqshka Exp $
  */
 
 // spectate.c
@@ -133,16 +133,25 @@ void SpectatorDisconnect()
 	if( match_in_progress != 2 || cvar("k_ann") )
 		G_bprint( PRINT_HIGH, "Spectator %s left the game\n", self->s.v.netname );
 
+// s: added conditional function call here
+	if( self->v.elect_type != etNone ) {
+
+		if ( match_in_progress != 2 )
+			G_bprint(2, "Election aborted\n");
+
+		AbortElect();
+	}
+
 	if ( self->wizard ) {
 		ent_remove( self->wizard );
 		self->wizard = NULL;
 	}
 
-	self->s.v.classname = ""; // Cenobite, so we clear out any specs as they leave
-	self->k_spectator = 0;
-
 	if( self->k_kicking )
 		ExitKick( self );
+
+	self->s.v.classname = ""; // Cenobite, so we clear out any specs as they leave
+	self->k_spectator = 0;
 }
 
 /*
