@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.35 2006/05/28 03:44:28 qqshka Exp $
+ * $Id: admin.c,v 1.36 2006/05/28 23:17:18 qqshka Exp $
  */
 
 // admin.c
@@ -68,9 +68,8 @@ void AdminKick ()
 	}
 
 	if ( argc >= 2 ) {
-		int i;
 		gedict_t *p;
-		char arg_2[1024], arg_x[1024], buf[1024];
+		char arg_2[1024], *str;
 
 		trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
 
@@ -79,18 +78,10 @@ void AdminKick ()
 			return;
 		}
 
-		for ( buf[0] = 0, i = 2; i < argc; i++ ) {
-			trap_CmdArgv( i, arg_x, sizeof( arg_x ) );
-
-			if ( i != 2 )
-				strlcat( buf,   " ", sizeof( buf ) );
-			strlcat( buf, arg_x, sizeof( buf ) );
-		}
-
 		DoKick( p, self );
 
-		if ( !strnull(buf) ) // show reason
-			G_bprint(2, "\x90%s\x91\n", buf);
+		if ( !strnull( str = params_str(2, -1) ) ) // show reason
+			G_bprint(2, "\x90%s\x91\n", str);
 
 		return;
 	}
@@ -109,9 +100,9 @@ void AdminKick ()
 // multi kick
 void m_kick ()
 {
-	int i, j, k;
+	int i, k;
 	gedict_t *p;
-	char arg_x[1024], buf[1024];
+	char arg_x[1024], *str;
 	int argc = trap_CmdArgc();
 
     if( !is_adm( self ) )
@@ -145,24 +136,16 @@ void m_kick ()
 	if ( !k )
 		return;
 
-	for ( buf[0] = 0, j = i; i < argc; i++ ) {
-		trap_CmdArgv( i, arg_x, sizeof( arg_x ) );
-
-		if ( i != j )
-			strlcat( buf,   " ", sizeof( buf ) );
-		strlcat( buf, arg_x, sizeof( buf ) );
-	}
-
-	if ( !strnull(buf) ) // show reason
-		G_bprint(2, "\x90%s\x91\n", buf);
+	if ( !strnull( str = params_str(i, -1) ) ) // show reason
+		G_bprint(2, "\x90%s\x91\n", str);
 }
 
 // allow kick not fully connected users
 void f_kick ()
 {
-	int i, j, k;
+	int i, k;
 	gedict_t *p;
-	char arg_x[1024], buf[1024];
+	char arg_x[1024], *str;
 	int argc = trap_CmdArgc();
 
     if( !is_adm( self ) )
@@ -200,16 +183,8 @@ void f_kick ()
 	if ( !k )
 		return;
 
-	for ( buf[0] = 0, j = i; i < argc; i++ ) {
-		trap_CmdArgv( i, arg_x, sizeof( arg_x ) );
-
-		if ( i != j )
-			strlcat( buf,   " ", sizeof( buf ) );
-		strlcat( buf, arg_x, sizeof( buf ) );
-	}
-
-	if ( !strnull(buf) ) // show reason
-		G_bprint(2, "\x90%s\x91\n", buf);
+	if ( !strnull( str = params_str(i, -1) ) ) // show reason
+		G_bprint(2, "\x90%s\x91\n", str);
 }
 
 void NextClient ()
