@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.42 2006/05/28 03:44:28 qqshka Exp $
+ *  $Id: progs.h,v 1.43 2006/05/28 04:26:38 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -200,6 +200,7 @@ typedef struct gedict_s {
 #endif
 	float           maxspeed, gravity;
 	int             isBot;
+	float 			brokenankle; // player can't jump for a while after falling and get damaged
 	char           *mdl;
 	char           *killtarget;
 	int             worldtype;	// 0=medieval 1=metal 2=base
@@ -324,8 +325,7 @@ typedef struct gedict_s {
 	float fHighestFrameTime;
 	float fIllegalFPSWarnings;
 // ILLEGALFPS]
-	
-	float brokenankle;		// player can't jump for a while after falling and get damaged
+
 	float shownick_time;	// used to force centerprint is off at desired time
 	int	  vip;				// store vip level/flags here
 	int   cmd_selectMap;	// store cmd cm <value> here

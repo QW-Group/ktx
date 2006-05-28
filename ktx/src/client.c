@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.81 2006/05/28 03:44:28 qqshka Exp $
+ *  $Id: client.c,v 1.82 2006/05/28 04:26:18 qqshka Exp $
  */
 
 //===========================================================================
@@ -1329,10 +1329,9 @@ void PlayerJump()
         // the engine checks velocity_z and won't perform the jump if it's < zero!
 
 		// qqshka - i know this is shit - but ktpro does it, and probably server engine even ignor this hack
-		// qqshka - but seems new zquake pmove code ported to mvdsv - so this fix is commented
 
-//		if ( self->s.v.velocity[2] < 0 )
-//			self->s.v.velocity[2] = 0;
+		if ( self->s.v.velocity[2] < 0 )
+			self->s.v.velocity[2] = 0;
 
 		// JUMPBUG]
 	}

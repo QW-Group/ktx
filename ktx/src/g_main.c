@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.22 2006/05/28 03:44:28 qqshka Exp $
+ *  $Id: g_main.c,v 1.23 2006/05/28 04:26:18 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -43,12 +43,13 @@ gedict_t       *self, *other;
 globalvars_t    g_globalvars;
 field_t         expfields[] = {
 #ifdef VWEP_TEST
-	{"vw_index", FOFS( vw_index ), F_FLOAT}	,
-	{"vw_frame", FOFS( vw_frame ), F_FLOAT}	,
+	{"vw_index",    FOFS( vw_index ),    F_FLOAT},
+	{"vw_frame",    FOFS( vw_frame ),    F_FLOAT},
 #endif
-	{"maxspeed", FOFS( maxspeed ), F_FLOAT}	,
-	{"gravity", FOFS( gravity ), F_FLOAT},
-	{"isBot", FOFS( isBot ), F_INT},
+	{"maxspeed",    FOFS( maxspeed ),    F_FLOAT},
+	{"gravity",     FOFS( gravity ),     F_FLOAT},
+	{"isBot",       FOFS( isBot ),       F_INT},
+	{"brokenankle", FOFS( brokenankle ), F_FLOAT},
 	{NULL}
 };
 static char     mapname[64];
