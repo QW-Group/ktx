@@ -1,3 +1,18 @@
+2006-05-31
+qq:
+168. "/lock" command renamed to "/lockmode"
+
+169. Now command "/lock" and "/cmd lock" lock server for some short time.
+     Non vip players can't connect during this time. 
+	 Specs not affected by this command.
+
+170. IP BASED VIP change.
+	 Vip with bit 2 - not kickable VIP by elected admins, is working now.
+
+	 NOTES:
+	 1) such VIP can't be kicked by elected admin, real admin still can kick them
+	 2) such VIP can be kicked by forcestart, idlebot, floodprotect, etc...
+
 2006-05-27 [ver 1.30]
 qq:
 167. Now autotrack does't instantly switch pov after tracked player die, 

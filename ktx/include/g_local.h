@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.68 2006/05/28 03:44:28 qqshka Exp $
+ *  $Id: g_local.h,v 1.69 2006/05/30 23:42:06 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -544,18 +544,17 @@ void s_lr_clear( gedict_t *dsc );
 
 // qqshka: hmm, like ktpro
 
-//		 1 - normal VIP (default)
-//		 2 - not kickable VIP by elected admins
-//		 4 - VIP with admin rights
-#define	VIP_ADMIN		(4)
+#define VIP_NORMAL      ( 1) // normal VIP (default)
+#define VIP_NOTKICKABLE ( 2) // not kickable VIP by elected admins
+#define	VIP_ADMIN       ( 4) // VIP with admin rights
 //		 8 - VIP with demo admin rights
 //		16 - VIP with judge rights
 //		32 - VIP with rcon admin rights
 
 
-int				Vip_Flags(gedict_t* cl);
-int				Vip_IsFlags(gedict_t* cl, int flags);
-void			Vip_ShowRights(gedict_t* cl);
+int				VIP(gedict_t* cl);
+int				VIP_IsFlags(gedict_t* cl, int flags);
+void			VIP_ShowRights(gedict_t* cl);
 
 // g_userinfo.c
 
@@ -691,9 +690,12 @@ extern  int   k_cmd_fp_disabled; // if 1 - don't use cmd floodprot
 
 // }
 
+extern  float k_sv_locktime; // some time before non VIP players can't connect, spectators not affected
+
 #ifdef VWEP_TEST
 extern  int   vw_available; // vwep extension available
 #endif
+
 
 // heh, some hack for mvdsv for grabbing some data
 

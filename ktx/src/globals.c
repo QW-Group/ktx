@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: globals.c,v 1.16 2006/05/18 20:15:14 oldmanuk Exp $
+ *  $Id: globals.c,v 1.17 2006/05/30 23:42:06 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -75,4 +75,6 @@ int   k_cmd_fp_disabled; // if 1 - don't use cmd floodprot
 #ifdef VWEP_TEST
 int   vw_available; // vwep extension available
 #endif
+
+float k_sv_locktime; // some time before non VIP players can't connect, spectators not affected
 

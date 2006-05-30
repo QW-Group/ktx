@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.22 2006/05/28 23:16:23 qqshka Exp $
+ *  $Id: spectate.c,v 1.23 2006/05/30 23:42:06 qqshka Exp $
  */
 
 // spectate.c
@@ -90,7 +90,7 @@ void SpectatorConnect()
 	if ( diff < 0 || diff >= MAX_EDICTS ) // something wrong happen - fixing
 		self->s.v.goalentity = EDICT_TO_PROG( world );
 
-	Vip_ShowRights( self );
+	VIP_ShowRights( self );
 	CheckRate(self, "");
 
 	if( match_in_progress != 2 || cvar("k_ann") )

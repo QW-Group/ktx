@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.36 2006/05/28 23:17:18 qqshka Exp $
+ * $Id: admin.c,v 1.37 2006/05/30 23:42:06 qqshka Exp $
  */
 
 // admin.c
@@ -9,7 +9,7 @@
 void AdminMatchStart();
 void PlayerReady();
 void NextClient();
-void DoKick(gedict_t *victim, gedict_t *kicker);
+qboolean DoKick(gedict_t *victim, gedict_t *kicker);
 
 // is real admin
 qboolean is_real_adm(gedict_t *p)
@@ -52,6 +52,50 @@ void ExitKick (gedict_t *kicker)
 		G_sprint(kicker, 2, "Kicking process terminated\n");
 }
 
+qboolean is_can_kick(gedict_t *victim, gedict_t *kicker)
+{
+	if ( VIP_IsFlags(victim, VIP_NOTKICKABLE) && !is_real_adm(kicker) ) {
+		G_sprint(kicker, 2, "You can't kick VIP \x8D %s as elected admin\n", 
+					(strnull( victim->s.v.netname ) ? "!noname!" : victim->s.v.netname));
+		return false;
+	}
+
+	return true;
+}
+
+qboolean DoKick(gedict_t *victim, gedict_t *kicker)
+{
+	if (!victim || !kicker)
+		return false;
+
+	if( victim == kicker )
+	{
+		G_bprint(2, "%s kicked %s\n", getname(kicker), g_himself( kicker ));
+
+		// hehe %)
+		G_sprint(kicker, 2, "Say \"bye\" and then type \"disconnect\" next time\n");
+
+		GhostFlag(kicker);
+		kicker->s.v.classname = "";
+		stuffcmd(kicker, "disconnect\n");  // FIXME: stupid way
+	}
+	else
+	{
+		if ( !is_can_kick(victim, kicker) )
+			return false;
+
+		G_bprint(2, "%s was kicked by %s\n", getname(victim), getname(kicker));
+
+		G_sprint(victim, 2, "You were kicked from the server\n");
+
+		GhostFlag(victim);
+		victim->s.v.classname = "";
+		stuffcmd(victim, "disconnect\n"); // FIXME: stupid way
+	}
+
+	return true;
+}
+
 void AdminKick ()
 {
 	int argc = trap_CmdArgc();
@@ -78,20 +122,17 @@ void AdminKick ()
 			return;
 		}
 
-		DoKick( p, self );
-
-		if ( !strnull( str = params_str(2, -1) ) ) // show reason
+		if ( DoKick( p, self ) && !strnull( str = params_str(2, -1) ) ) // show reason
 			G_bprint(2, "\x90%s\x91\n", str);
 
 		return;
 	}
 
-    self->k_kicking = g_globalvars.time;
-
     G_sprint(self, 2, "Kicking process started\n"
 					  "žžžžžžžžžžžžžžžžžžžžžŸ\n"
 					  "Type \371 to kick, \356 for next, %s to leave\n", redtext("kick"));
 
+    self->k_kicking = g_globalvars.time;
     self->k_playertokick = world;
 
     NextClient();
@@ -129,7 +170,9 @@ void m_kick ()
 			continue;
 		}
 
-		DoKick( p, self );
+		if( !DoKick( p, self ) )
+			continue;
+
 		k++;
 	}
 
@@ -172,11 +215,16 @@ void f_kick ()
 			continue;
 		}
 
+		if ( !is_can_kick(p, self) )
+			continue;
+
+// yeah, we do here kicking too, but in different way
 //		DoKick( p, self );
 		G_bprint(2, "%s was kicked by %s\n", 
 				(strnull( p->s.v.netname ) ? "!noname!" : p->s.v.netname), getname(self));
 
 		localcmd("kick %d\n", atoi(arg_x)); //native sv kick command
+
 		k++;
 	}
 
@@ -190,6 +238,9 @@ void f_kick ()
 void NextClient ()
 {
 	int from = 0;
+
+	if( !self->k_kicking )
+		return;
 
 	self->k_playertokick = (self->k_playertokick ? self->k_playertokick : world);
 	from = ( self->k_playertokick != world && self->k_playertokick->k_spectator );
@@ -212,34 +263,6 @@ void NextClient ()
 								getname(self->k_playertokick));
 }
 
-void DoKick(gedict_t *victim, gedict_t *kicker)
-{
-	if (!victim || !kicker)
-		return;
-
-	if( victim == kicker )
-	{
-		G_bprint(2, "%s kicked %s\n", getname(kicker), g_himself( kicker ));
-
-		// hehe %)
-		G_sprint(kicker, 2, "Say \"bye\" and then type \"disconnect\" next time\n");
-
-		GhostFlag(kicker);
-		kicker->s.v.classname = "";
-		stuffcmd(kicker, "disconnect\n");  // FIXME: stupid way
-	}
-	else
-	{
-		G_bprint(2, "%s was kicked by %s\n", getname(victim), getname(kicker));
-
-		G_sprint(victim, 2, "You were kicked from the server\n");
-
-		GhostFlag(victim);
-		victim->s.v.classname = "";
-		stuffcmd(victim, "disconnect\n"); // FIXME: stupid way
-	}
-}
-
 void YesKick ()
 {
 	if( !self->k_kicking )
@@ -250,10 +273,10 @@ void YesKick ()
 		return;
 	}
 
-	DoKick( self->k_playertokick, self );
+	if( DoKick( self->k_playertokick, self ) && self->k_playertokick == self )
+		return; // selfkick success ;)
 
-	if( self->k_playertokick != self ) // ;)
-		NextClient();
+	NextClient();
 }
 
 void DontKick ()
@@ -261,7 +284,7 @@ void DontKick ()
 	if( !self->k_kicking )
 		return;
 
-	 NextClient();
+	NextClient();
 }
 
 void BecomeAdmin(gedict_t *p, int adm_flags)
@@ -312,7 +335,7 @@ void ReqAdmin ()
 		return;
 	}
 
-	if ( Vip_IsFlags( self, VIP_ADMIN ) ) // this VIP does't required pass
+	if ( VIP_IsFlags( self, VIP_ADMIN ) ) // this VIP does't required pass
     {
 		BecomeAdmin(self, AF_REAL_ADMIN);
 		return;
@@ -841,3 +864,17 @@ void ToggleFallBunny ()
 	cvar_toggle_msg( self, "k_fallbunny", redtext("fallbunny") );
 }
 
+void sv_lock ()
+{
+	int lock_time = 15;
+
+	if ( !k_sv_locktime ) {
+		G_bprint(2, "%s %s for %s seconds\n", 
+				getname(self), redtext("locked server"), dig3(lock_time));
+		k_sv_locktime = g_globalvars.time + lock_time;
+	}
+	else {
+		G_bprint(2, "%s %s\n", getname(self), redtext("unlocked server"));
+		k_sv_locktime = 0;
+	}
+}

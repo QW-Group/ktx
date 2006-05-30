@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.43 2006/05/28 04:26:38 qqshka Exp $
+ *  $Id: progs.h,v 1.44 2006/05/30 23:42:06 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -327,7 +327,6 @@ typedef struct gedict_s {
 // ILLEGALFPS]
 
 	float shownick_time;	// used to force centerprint is off at desired time
-	int	  vip;				// store vip level/flags here
 	int   cmd_selectMap;	// store cmd cm <value> here
 	int   k_spectator;		// true if spectator
 	int   k_player;		    // true if player

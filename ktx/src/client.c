@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.82 2006/05/28 04:26:18 qqshka Exp $
+ *  $Id: client.c,v 1.83 2006/05/30 23:42:06 qqshka Exp $
  */
 
 //===========================================================================
@@ -898,10 +898,24 @@ void ClientConnect()
 {
 	gedict_t *p;
 
-	Vip_ShowRights( self );
+	VIP_ShowRights( self );
 
 	k_nochange = 0;
 
+	if ( k_sv_locktime ) {
+		if ( !VIP(self) ) { // kick non vip in this case
+			int seconds = k_sv_locktime - g_globalvars.time;
+
+			G_sprint(self, 2, "%s: %d second%s\n", 
+						redtext("server is temporary locked"), seconds, count_s(seconds));
+
+			// do not make ghost here
+			self->s.v.classname = "";
+			stuffcmd(self, "disconnect\n"); // FIXME: stupid way
+
+			return;
+		}
+	}
 
 //	if (deathmatch /*|| coop*/ )
 //	G_bprint( PRINT_HIGH, "%s entered the game\n", self->s.v.netname );

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.105 2006/05/28 03:44:28 qqshka Exp $
+ *  $Id: commands.c,v 1.106 2006/05/30 23:42:06 qqshka Exp $
  */
 
 // commands.c
@@ -153,6 +153,8 @@ void fp_toggle ();
 void dlist();
 void dinfo();
 
+void sv_lock ();
+
 // spec
 void ShowCamHelp();
 
@@ -203,7 +205,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_RESET      "set defaults"
 #define CD_REPORT     "simple teamplay report"
 #define CD_RULES      "show game rules"
-#define CD_LOCK       "change locking mode"
+#define CD_LOCKMODE   "change locking mode"
 #define CD_MAPS       "list custom maps"
 #define CD_SPAWN666   "2 secs of \x98\x98\x98 on respawn"
 #define CD_ADMIN      "toggle admin-mode"
@@ -354,6 +356,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_FP           "change floodprot level"
 #define CD_DLIST        "show demo list"
 #define CD_DINFO        "show demo info"
+#define CD_LOCK         "temprorary lock server"
 
 
 cmd_t cmds[] = {
@@ -396,7 +399,7 @@ cmd_t cmds[] = {
 	{ "reset",       ResetOptions,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_RESET },
 	{ "report",      ReportMe,                  0    , CF_PLAYER, CD_REPORT },
 	{ "rules",       ShowRules,                 0    , CF_PLAYER | CF_MATCHLESS, CD_RULES },
-	{ "lock",        ChangeLock,                0    , CF_PLAYER, CD_LOCK },
+	{ "lockmode",    ChangeLock,                0    , CF_PLAYER | CF_SPC_ADMIN, CD_LOCKMODE },
 	{ "maps",        ShowMaps,                  0    , CF_PLAYER | CF_SPC_ADMIN | CF_MATCHLESS, CD_MAPS},
 	{ "spawn666",    ToggleRespawn666,          0    , CF_PLAYER, CD_SPAWN666},
 	{ "admin",       ReqAdmin,                  0    , CF_BOTH | CF_PARAMS, CD_ADMIN },
@@ -565,7 +568,8 @@ cmd_t cmds[] = {
     { "toggleready", ToggleReady,               0    , CF_PLAYER, CD_TOGGLEREADY },
     { "fp",          fp_toggle,                 0    , CF_BOTH_ADMIN, CD_FP },
     { "dlist",       dlist,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_DLIST },
-    { "dinfo",       dinfo,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_DINFO }
+    { "dinfo",       dinfo,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_DINFO },
+    { "lock",        sv_lock,                   0    , CF_BOTH_ADMIN, CD_LOCK }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -1247,6 +1251,12 @@ void ModStatus2()
 		default: ot = "players may not fire before match"; break;
 	}
 	G_sprint(self, 2, "%s: %s\n", redtext("Prewar"), ot);
+
+	if ( k_sv_locktime ) {
+		int seconds = k_sv_locktime - g_globalvars.time;
+		G_sprint(self, 2, "%s: %d second%s\n",
+				 redtext("server is temporary locked"), seconds, count_s(seconds));
+	}
 
 	if ( k_cmd_fp_disabled ) 
 		G_sprint(self, 2, "%s: off\n", redtext("Command floodprot"));
@@ -3042,7 +3052,7 @@ void klist ( )
 		hdc = GetHandicap(p);
 
 		G_sprint(self, 2, "%2d|%2s|%3d|%3s|%4.4s|%s\n", GetUserID( p ),
-						(is_adm( p ) ? redtext("A") : ""), p->vip,
+						(is_adm( p ) ? redtext("A") : ""), VIP( p ),
 						(hdc == 100 ? "off" : va("%d%%", hdc)), getteam( p ), getname( p ));
 	}
 
@@ -3060,7 +3070,7 @@ void klist ( )
 		track = TrackWhom( p );
 
 		G_sprint(self, 2, "%2d|%2s|%3d|%s%s\n", GetUserID( p ),
-						(is_adm( p ) ? redtext("A") : ""), p->vip, getname( p ),
+						(is_adm( p ) ? redtext("A") : ""), VIP( p ), getname( p ),
 						(strnull(track) ? "" : va(" \x8D %s", track)) );
 	}
 
@@ -3085,17 +3095,17 @@ void klist ( )
 		else if ( streq(track, "preconnected") || streq(track, "connected") )
 			track = "connecting";
 		else
-			continue; // continue due to player spawned or free or in unknown state
+			continue; // continue due to player spawned(connected) or free or in unknown state
 
 		if ( !i ) {
 			G_sprint(self, 2, "Clients list: %s\n", redtext( "unconnected" ) );
-			G_sprint(self, 2, "%s %-10s %s\n",
-						 redtext( "id" ), redtext( "state" ), redtext( "name" ) );
+			G_sprint(self, 2, "%s %s %-10s %s\n",
+						 redtext( "id" ), redtext( "vip" ), redtext( "state" ), redtext( "name" ) );
 		}
 
-		G_sprint(self, 2, "%2d|%-10.10s|%s\n", 
+		G_sprint(self, 2, "%2d|%3d|%-10.10s|%s\n", 
 					iKey(p, "*userid"), // can't use GetUserID here
-					track, (strnull( p->s.v.netname ) ? "!noname!" : p->s.v.netname));
+					VIP( p ), track, (strnull( p->s.v.netname ) ? "!noname!" : p->s.v.netname));
 
 		i++;
 	}

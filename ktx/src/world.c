@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.51 2006/05/25 04:48:48 ult_ Exp $
+ *  $Id: world.c,v 1.52 2006/05/30 23:42:06 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -784,6 +784,14 @@ void show_powerups ( char *classname )
 	self  = swp;
 }
 
+void CheckSvUnlock ()
+{
+	if ( k_sv_locktime && k_sv_locktime < g_globalvars.time ) {
+		G_bprint(2, "%s\n", redtext("server unlocked"));
+		k_sv_locktime = 0;
+	}
+}
+
 // called when switching to/from ctf mode
 void FixCTFItems()
 {
@@ -1032,6 +1040,8 @@ void StartFrame( int time )
 	FixSpecWizards ();
 
 	framechecks = bound( 0, !cvar( "k_noframechecks" ), 1 );
+
+	CheckSvUnlock();
 
 	CalculateBestPlayers(); // autotrack stuff
 

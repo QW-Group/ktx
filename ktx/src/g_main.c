@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.23 2006/05/28 04:26:18 qqshka Exp $
+ *  $Id: g_main.c,v 1.24 2006/05/30 23:42:06 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -120,8 +120,6 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		self = PROG_TO_EDICT( g_globalvars.self );
 
 		self->connect_time = g_globalvars.time;
-
-		self->vip = G_FLOAT( OFS_PARM0 ); // mvdsv store vip here, valid only at this moment
 
 		self->k_spectator = arg0;
 		self->k_player    = !arg0;
@@ -229,6 +227,8 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 
 	case GAME_SHUTDOWN:
 		// called before level change/spawn
+		// qqshka: YES, REALLY COOL QVM FEATURE COMPARING TO QC, U CAN CATCH LEVEL CHANGE
+		//         INVOKED FROM SERVER CONSOLE !!!
 		G_ShutDown();
 		return 0;
 
