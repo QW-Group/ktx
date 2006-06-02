@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.53 2006/06/02 21:54:22 qqshka Exp $
+ *  $Id: world.c,v 1.54 2006/06/02 23:42:24 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -390,7 +390,7 @@ void SP_worldspawn()
 		e->s.v.classname = "mapguard";
 		e->s.v.owner = EDICT_TO_PROG( world );
 		e->s.v.think = ( func_t ) CheckDefMap;
-		e->s.v.nextthink = g_globalvars.time + 60;
+		e->s.v.nextthink = g_globalvars.time + ( cvar("_k_worldspawns") == 1 ? 0.5 : 60 );
 	}
 
 	if ( !k_matchLess ) // skip practice in matchLess mode
