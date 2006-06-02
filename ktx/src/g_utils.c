@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.52 2006/05/25 04:48:48 ult_ Exp $
+ *  $Id: g_utils.c,v 1.53 2006/06/02 21:54:22 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1236,28 +1236,6 @@ void changelevel( const char *name )
 {
  	if ( strnull( name ) )
 		G_Error("changelevel: null");
-
-/*
-	if ( k_pause )
-		ModPause ( 0 );
-
-	if( match_in_progress )
-		EndMatch( 1 ); // skip demo, make some other stuff
-
-	cvar_set( "_k_lastmap", g_globalvars.mapname );
-	trap_cvar_set_float( "_k_players", CountPlayers());
-	trap_cvar_set_float( "_k_pow_last", Get_Powerups() );
-*/
-
-/* removed k_srvcfgmap
-	// exec configs/maps/out/mapname.cfg
-	if ( cvar( "k_srvcfgmap" ) && strneq( g_globalvars.mapname, name ) ) {
-		char *cfg_name = va("configs/maps/out/%s.cfg", g_globalvars.mapname);
-
-		if ( can_exec( cfg_name ) )
-			localcmd( "exec %s\n", cfg_name );
-	}
-*/
 
 	trap_changelevel(name);
 }

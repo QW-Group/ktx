@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.83 2006/05/30 23:42:06 qqshka Exp $
+ *  $Id: client.c,v 1.84 2006/06/02 21:54:22 qqshka Exp $
  */
 
 //===========================================================================
@@ -1525,8 +1525,6 @@ void MakeGhost ()
 ///////////////
 void ClientDisconnect()
 {
-	float f1;
-
 	k_nochange = 0; // force recalculate frags scores
 
 	del_from_specs_favourites( self );
@@ -1585,30 +1583,11 @@ void ClientDisconnect()
 	if( cvar( "k_idletime" ) > 0 )
 		IdlebotCheck();
 
-	f1 = CountALLPlayers();
-
-	if ( !f1 )
-		cvar_fset("_k_last_xonx", 0); // forget last XonX command
-
-	if( !f1
-		&& (
-			 (    !cvar( "k_master" )
-			   && !cvar( "k_lockmap" ) 
-			 )
-			 || ( !cvar( "lock_practice" ) && k_practice ) // reload map even k_master or k_lockmap set
-	       )
-	  )
-	{
+	if ( !CountALLPlayers() ) {
 		char *s;
-		int old_k_practice = k_practice;
+		int um_idx;
 
-		if ( k_pause ) {
-			G_bprint(2, "No players left, unpausing.\n");
-			ModPause ( 0 ); // no players left, unpause server if paused
-		}
-
-		if ( !cvar( "lock_practice" ) && k_practice )  // #practice mode#
-			SetPractice( 0, NULL ); // return server to normal mode but not reload map yet
+		cvar_fset("_k_last_xonx", 0); // forget last XonX command
 
 		if( match_in_progress )
 			EndMatch( 1 ); // skip demo, make some other stuff
@@ -1616,20 +1595,27 @@ void ClientDisconnect()
 		// Check if issued to execute reset.cfg (sturm)
         if( cvar( "k_autoreset" ) ) {
 			char *cfg_name = "configs/reset.cfg";
+			char buf[1024*4];
 
-			if ( can_exec( cfg_name ) )
-				localcmd( "exec %s\n", cfg_name );
+			if ( can_exec( cfg_name ) ) {
+				trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
+				G_cprint("%s", buf);
+			}
 		}
 
-        s = k_matchLess ? "" : cvar_string( "k_defmap" ); // no defmap in matchLess mode
+		if ( ( um_idx = um_idx_byname( cvar_string("k_defmode") ) ) >= 0 )
+			UserMode( -(um_idx + 1) ); // force exec configs for default user mode
 
-		// force reload current map in practice mode even k_defmap is set or not
-        if ( !cvar( "lock_practice" ) && old_k_practice )
+		s = "";
+        s = ( k_matchLess ) ? "" : cvar_string( "k_defmap" ); // no defmap in matchLess mode
+		s = ( cvar( "k_master" ) || cvar( "k_lockmap" ) ) ? "" : s; // map locked or not
+
+		// force reload current map in practice mode anyway
+        if ( !cvar( "lock_practice" ) && k_practice )
 			s = g_globalvars.mapname; // FIXME: k_defmap may not exist on server disk, so we reload current map
 									  //        but we may check if k_defmap exist and reload to it, right?
-
-        if( !strnull( s ) )
-            changelevel( s );
+		if( !strnull( s ) )
+			changelevel( s );
 	}
 }
 

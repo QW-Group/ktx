@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.62 2006/05/25 21:48:05 qqshka Exp $
+ *  $Id: match.c,v 1.63 2006/06/02 21:54:22 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -971,7 +971,8 @@ void TimerThink ()
 	float f1, f2, f3, f4, k_exttime, player1scores, player2scores, player1found;
 	int k_mb_overtime = 0;
 
-	f1 = k_matchLess ? 1 : 0; // don't stop match if no players left
+	f1 = k_matchLess ? 1 : 0; // don't stop match if no players, because they may no yet connected (matchless case).
+							  // instead of this, stop match on last player disconnect
 
 
 //	G_bprint(2, "left %2d:%2d\n", (int)self->cnt, (int)self->cnt2);

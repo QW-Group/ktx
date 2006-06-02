@@ -1,6 +1,19 @@
+2006-06-03
+qq:
+171. Added cvar "k_defmode".
+	 Controll which user mode will be set on server startup or last player disconnect.
+	 Also all corresponding configs will be executed.
+
+	 set k_defmode "1on1" // 1on1 - duel
+						  // 2on2 3on3 4on4 10on10 - team modes
+						  // ffa - free for all
+						  // ctf - capture the flag
+
+	 Empezar request
+
 2006-05-31
 qq:
-168. "/lock" command renamed to "/lockmode"
+168. "/lock" command renamed to "/lockmode".
 
 169. Now command "/lock" and "/cmd lock" lock server for some short time.
      Non vip players can't connect during this time. 

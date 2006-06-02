@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.24 2006/05/30 23:42:06 qqshka Exp $
+ *  $Id: g_main.c,v 1.25 2006/06/02 21:54:22 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -331,25 +331,20 @@ void G_ShutDown()
 
 	AbortElect();
 
-	if ( k_pause )
-		ModPause ( 0 );
+	if ( !cvar( "lock_practice" ) && k_practice )  // #practice mode#
+		SetPractice( 0, NULL ); // return server to normal mode
 
-	if( match_in_progress )
+	if ( k_pause ) {
+		G_bprint(2, "No players left, unpausing.\n");
+		ModPause ( 0 ); // no players left, unpause server if paused
+	}
+
+	if ( match_in_progress )
 		EndMatch( 1 ); // skip demo, make some other stuff
 
 	cvar_set( "_k_lastmap", ( strnull( map ) ? "" : map ) );
-	trap_cvar_set_float( "_k_players", CountPlayers());
-	trap_cvar_set_float( "_k_pow_last", Get_Powerups() );
-
-/* removed k_srvcfgmap
-	// exec configs/maps/out/mapname.cfg
-	if ( cvar( "k_srvcfgmap" ) && strneq( g_globalvars.mapname, name ) ) {
-		char *cfg_name = va("configs/maps/out/%s.cfg", g_globalvars.mapname);
-
-		if ( can_exec( cfg_name ) )
-			localcmd( "exec %s\n", cfg_name );
-	}
-*/
+	cvar_fset( "_k_players", CountPlayers());
+	cvar_fset( "_k_pow_last", Get_Powerups() );
 }
 
 

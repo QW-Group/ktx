@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.52 2006/05/30 23:42:06 qqshka Exp $
+ *  $Id: world.c,v 1.53 2006/06/02 21:54:22 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -103,35 +103,21 @@ void SP_worldspawn()
 	char 		*lastmap = cvar_string("_k_lastmap");
 	char		*s;
    	gedict_t	*e;
+	int 		um_idx;
 
-/* removed k_srvcfgmap
-	// exec configs/maps/default.cfg
-	// exec configs/maps/mapname.cfg
-	if (    cvar( "k_srvcfgmap" )
-		 && (    strnull( lastmap ) // server just spawn first time ?
-			  || strneq( lastmap, g_globalvars.mapname )
-			)
-	   ) {
-		char *cfg_name;
+	cvar_fset("_k_worldspawns", (int)cvar("_k_worldspawns") + 1);
 
-		cfg_name = "configs/maps/default.cfg";
-		if ( can_exec( cfg_name ) )
-			localcmd("exec %s\n", cfg_name);
-
-		cfg_name = va("configs/maps/%s.cfg", g_globalvars.mapname);
-		if ( can_exec( cfg_name ) )
-			localcmd("exec %s\n", cfg_name);
-
-		trap_executecmd ();
+	if ( cvar("_k_worldspawns") == 1 ) { // server spawn first map
+		if ( ( um_idx = um_idx_byname( cvar_string("k_defmode") ) ) >= 0 )
+			cvar_fset("_k_last_xonx", um_idx + 1); // force exec configs for default user mode
 	}
-*/
+
 	// since we remove k_srvcfgmap, we need configure different maps in matchless mode.
 	// doing this by execiting configs like we do for "ffa" command in _non_ matchless mode
 	if ( k_matchLess ) {
-		int um_idx = um_idx_byname("ffa");
-
-		if ( um_idx >= 0 )
+		if ( ( um_idx = um_idx_byname("ffa") ) >= 0 ) {
 			cvar_fset("_k_last_xonx", um_idx + 1); // force server call "ffa" user mode
+		}
 		else {
 			G_bprint(2, "SP_worldspawn: um_idx_byname fail\n"); // shout
 			cvar_fset("_k_last_xonx", 0);
@@ -587,10 +573,12 @@ void FirstFrame	( )
 
 	RegisterCvar("_k_last_xonx"); // internal usage, save last XonX command
 	RegisterCvar("_k_lastmap");	  // internal usage, name of last map
+	RegisterCvar("_k_worldspawns"); // internal usage, count of maps server spawned
 	RegisterCvar("_k_players");   // internal usage, count of players on last map
 	RegisterCvar("_k_pow_last");  // internal usage, k_pow from last map
 
 	RegisterCvar("k_mode");
+	RegisterCvar("k_defmode");
 	RegisterCvar("k_matchless");
 	RegisterCvar("k_matchless_countdown");
 	RegisterCvar("k_disallow_kfjump");
@@ -598,8 +586,6 @@ void FirstFrame	( )
 	RegisterCvar("k_lock_hdp");
 	RegisterCvar("k_disallow_weapons");
 
-// removed k_srvcfgmap
-//	RegisterCvar("k_srvcfgmap");
 	RegisterCvar("k_pow_min_players");
 	RegisterCvar("k_pow_check_time");
 	RegisterCvar("allow_spec_wizard");

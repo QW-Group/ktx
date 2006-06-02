@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.106 2006/05/30 23:42:06 qqshka Exp $
+ *  $Id: commands.c,v 1.107 2006/06/02 21:54:22 qqshka Exp $
  */
 
 // commands.c
@@ -1498,10 +1498,18 @@ void ResetOptions()
 #if 1 // TODO: make commented code safe or remove it
 	{
 		char *cfg_name = "configs/reset.cfg";
+		char buf[1024*4];
+		int um_idx;
 
 		cvar_fset("_k_last_xonx", 0); // forget last XonX command
-		if ( can_exec( cfg_name ) )
-			localcmd( "exec %s\n", cfg_name );
+
+		if ( can_exec( cfg_name ) ) {
+			trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
+			G_cprint("%s", buf);
+		}
+
+		if ( ( um_idx = um_idx_byname( cvar_string("k_defmode") ) ) >= 0 )
+			UserMode( -(um_idx + 1) ); // force exec configs for default user mode
 	}
 #else
 /*
@@ -2631,6 +2639,9 @@ int um_cnt = sizeof (um_list) / sizeof (um_list[0]);
 int um_idx_byname(char *name)
 {
 	int i;
+
+	if ( strnull( name ) )
+		return -1; // not found
 
 	for( i = 0; i < um_cnt; i++ )
 		if ( streq( name, um_list[i].name) )
