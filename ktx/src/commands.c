@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.107 2006/06/02 21:54:22 qqshka Exp $
+ *  $Id: commands.c,v 1.108 2006/06/04 00:17:36 qqshka Exp $
  */
 
 // commands.c
@@ -2678,6 +2678,9 @@ void UserMode(float umode)
 	}
 
 	um = um_list[(int)umode].name;
+
+	if ( streq(um, "ffa") && k_matchLess && cvar("k_use_matchless_dir") )
+		um = "matchless"; // use configs/usermodes/matchless instead of configs/usermodes/ffa in matchless mode
 
 	if ( sv_invoked ) {
 		if ( !k_matchLess ) // allow for matchless mode

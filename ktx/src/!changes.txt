@@ -1,3 +1,12 @@
+2006-06-04
+qq:
+172. Added cvar "k_use_matchless_dir".
+
+	 set k_use_matchless_dir 1 // 1 - use configs/usermodes/matchless instead of
+							   //         configs/usermodes/ffa in matchless mode
+
+	 Empezar request
+
 2006-06-03
 qq:
 171. Added cvar "k_defmode".

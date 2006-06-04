@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.54 2006/06/02 23:42:24 qqshka Exp $
+ *  $Id: world.c,v 1.55 2006/06/04 00:17:36 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -581,6 +581,7 @@ void FirstFrame	( )
 	RegisterCvar("k_defmode");
 	RegisterCvar("k_matchless");
 	RegisterCvar("k_matchless_countdown");
+	RegisterCvar("k_use_matchless_dir"); // use configs/usermodes/matchless instead of configs/usermodes/ffa in matchless mode
 	RegisterCvar("k_disallow_kfjump");
 	RegisterCvar("k_disallow_krjump");
 	RegisterCvar("k_lock_hdp");

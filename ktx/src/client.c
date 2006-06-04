@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.84 2006/06/02 21:54:22 qqshka Exp $
+ *  $Id: client.c,v 1.85 2006/06/04 00:17:36 qqshka Exp $
  */
 
 //===========================================================================
@@ -1603,7 +1603,7 @@ void ClientDisconnect()
 			}
 		}
 
-		if ( ( um_idx = um_idx_byname( cvar_string("k_defmode") ) ) >= 0 )
+		if ( ( um_idx = um_idx_byname( k_matchLess ? "ffa" : cvar_string("k_defmode") ) ) >= 0 )
 			UserMode( -(um_idx + 1) ); // force exec configs for default user mode
 
 		s = "";
