@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.64 2006/06/04 01:52:40 qqshka Exp $
+ *  $Id: match.c,v 1.65 2006/06/04 20:05:58 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -389,7 +389,7 @@ void TeamsStats ( )
 			G_bprint(2, "%s‘: %d", getteam( p ), (int) f1 );
 
 			if( f2 )
-				G_bprint( 2, tmp, " + (%d) = %d", (int)f2, (int)(f1+f2) );
+				G_bprint( 2, " + (%d) = %d", (int)f2, (int)(f1+f2) );
 
 			// effi
 			G_bprint(2, "  %.1f%%\n", ((sumfrags > 0)? ((f1 + f2)/sumfrags * 100) : 0));
