@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.37 2006/05/30 23:42:06 qqshka Exp $
+ * $Id: admin.c,v 1.38 2006/06/04 19:42:32 ult_ Exp $
  */
 
 // admin.c
@@ -877,4 +877,29 @@ void sv_lock ()
 		G_bprint(2, "%s %s\n", getname(self), redtext("unlocked server"));
 		k_sv_locktime = 0;
 	}
+}
+
+// convienence command for ctf admins
+// often times you play a game on non-symmetrical map as one color then swap teams and play again to be fair
+void AdminSwapAll()
+{
+	gedict_t *p;
+
+	if ( !is_adm( self ) )
+		return;
+
+	if ( match_in_progress )
+		return;
+
+	if ( !isCTF() )
+		return;
+
+	for( p = world; (p = find(p, FOFCLSN, "player")); ) {
+		if ( streq( getteam(p), "blue" ) )
+        	stuffcmd(p, "team \"red\"\ncolor 4\n");
+		else if ( streq( getteam(p), "red" ) )
+			stuffcmd(p, "team \"blue\"\ncolor 13\n");
+    }
+
+	G_bprint(2, "%s swapped the teams\n", getname( self ) );
 }

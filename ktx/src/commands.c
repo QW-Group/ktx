@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.108 2006/06/04 00:17:36 qqshka Exp $
+ *  $Id: commands.c,v 1.109 2006/06/04 19:42:32 ult_ Exp $
  */
 
 // commands.c
@@ -34,6 +34,7 @@ void ReqAdmin ();
 void AdminForceStart ();
 void AdminForceBreak ();
 void AdminForcePause ();
+void AdminSwapAll ();
 void TogglePreWar ();
 void ToggleMapLock ();
 void ToggleMaster ();
@@ -357,7 +358,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_DLIST        "show demo list"
 #define CD_DINFO        "show demo info"
 #define CD_LOCK         "temprorary lock server"
-
+#define CD_SWAPALL      "swap teams for ctf"
 
 cmd_t cmds[] = {
 	{ "commands",    ShowCmds,			        0    , CF_BOTH | CF_MATCHLESS, CD_COMMANDS },
@@ -408,7 +409,7 @@ cmd_t cmds[] = {
 #ifndef NO_K_PAUSE
 	{ "forcepause",  AdminForcePause,           0    , CF_BOTH_ADMIN, CD_FORCEPAUSE },
 #endif
-	{ "pickup",      VotePickup,                0    , CF_PLAYER, CD_PICKUP },
+	{ "pickup",      VotePickup,                0    , CF_PLAYER, CD_PICKUP }, 
 	{ "prewar",      TogglePreWar,              0    , CF_BOTH_ADMIN, CD_PREWAR },
 	{ "lockmap",     ToggleMapLock,             0    , CF_BOTH_ADMIN, CD_LOCKMAP },
 	{ "master",      ToggleMaster,              0    , CF_BOTH_ADMIN, CD_MASTER },
@@ -550,6 +551,7 @@ cmd_t cmds[] = {
 // { CTF commands
     { "tossrune",    TossRune,                  0    , CF_PLAYER, CD_TOSSRUNE },
     { "flagstatus",  FlagStatus,                0    , CF_BOTH, CD_FLAGSTATUS },
+	{ "swapall",     AdminSwapAll,              0    , CF_BOTH_ADMIN, CD_SWAPALL },
 // }
     { "motd",        motd_show,                 0    , CF_BOTH | CF_MATCHLESS, CD_MOTD },
     { "infolock",    infolock,                  0    , CF_BOTH_ADMIN, CD_INFOLOCK },
@@ -4619,4 +4621,3 @@ void dinfo()
 {
 	stuffcmd(self, "cmd demoinfo %s\n", params_str(1, -1));
 }
-

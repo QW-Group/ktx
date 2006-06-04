@@ -15,6 +15,9 @@ qq:
 175. Teams stats does't show fractional part of weapons effi, save some space
 	 for retards who still uses 320x240 :(
 
+ult:
+176. Added /swapall command for ctf admins.
+
 2006-06-03
 qq:
 171. Added cvar "k_defmode".
