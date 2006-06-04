@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.63 2006/06/02 21:54:22 qqshka Exp $
+ *  $Id: match.c,v 1.64 2006/06/04 01:52:40 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -220,7 +220,7 @@ void SummaryTPStats ( )
 	int   ra, ya, ga;
 	int   mh, d_rl, k_rl, t_rl;
 	int   quad, pent, ring;
-	float h_rl, a_rl, h_lg, a_lg, h_sg, a_sg, h_ssg, a_ssg;
+	float h_rl, a_rl, h_gl, h_lg, a_lg, h_sg, a_sg, h_ssg, a_ssg;
 	int caps, pickups, returns, f_defends, c_defends;
 	float res, str, rgn, hst; 
 	char  *tmp;
@@ -241,7 +241,7 @@ void SummaryTPStats ( )
 		if( !p->ready && !strnull( tmp = getteam( p ) ) ) {
 
 			dmg_g = dmg_t = dmg_team = ra = ya = ga = mh = quad = pent = ring = 0;
-			h_rl = a_rl = h_lg = a_lg = h_sg = a_sg = h_ssg = a_ssg = 0;
+			h_rl = a_rl = h_gl = h_lg = a_lg = h_sg = a_sg = h_ssg = a_ssg = 0;
 			caps = pickups = returns = f_defends = c_defends = d_rl = k_rl = t_rl = 0;
 			res = str = hst = rgn = 0;
 
@@ -261,6 +261,7 @@ void SummaryTPStats ( )
 
 						h_rl  += p2->ps.h_rl;
 						a_rl  += p2->ps.a_rl;
+						h_gl  += p2->ps.h_gl;
 						h_lg  += p2->ps.h_lg;
 						a_lg  += p2->ps.a_lg;
 						h_sg  += p2->ps.h_sg;
@@ -293,7 +294,7 @@ void SummaryTPStats ( )
 //			h_gl  = 100.0 * h_gl  / max(1, a_gl);
 			h_rl  = 100.0 * h_rl  / max(1, a_rl);
 #else /* just count of direct hits */
-//			h_gl  = h_gl;
+			h_gl  = h_gl;
 			h_rl  = h_rl;
 #endif
 			h_lg  = 100.0 * h_lg  / max(1, a_lg);
@@ -307,11 +308,12 @@ void SummaryTPStats ( )
 			}
 
 			// weapons
-			G_bprint(2, "ê%së: %s:%s%s%s%s\n", getteam( p ), redtext("Wp"),
-						(h_lg  ? va(" %s%.1f%%", redtext("lg"),   h_lg) : ""),
+			G_bprint(2, "ê%së: %s:%s%s%s%s%s\n", getteam( p ), redtext("Wp"),
+						(h_lg  ? va(" %s%.0f%%", redtext("lg"),   h_lg) : ""),
 						(h_rl  ? va(" %s%.0f",   redtext("rl"),   h_rl) : ""), 
-						(h_sg  ? va(" %s%.1f%%", redtext("sg"),   h_sg) : ""),
-						(h_ssg ? va(" %s%.1f%%", redtext("ssg"), h_ssg) : ""));
+						(h_gl  ? va(" %s%.0f",   redtext("gl"),   h_gl) : ""), 
+						(h_sg  ? va(" %s%.0f%%", redtext("sg"),   h_sg) : ""),
+						(h_ssg ? va(" %s%.0f%%", redtext("ssg"), h_ssg) : ""));
 
 			// powerups
 			G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("Powerups"),

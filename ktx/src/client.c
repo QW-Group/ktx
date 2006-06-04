@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.85 2006/06/04 00:17:36 qqshka Exp $
+ *  $Id: client.c,v 1.86 2006/06/04 01:52:40 qqshka Exp $
  */
 
 //===========================================================================
@@ -1659,7 +1659,11 @@ void Print_Wp_Stats( )
 	gedict_t *g = self->k_spectator ? PROG_TO_EDICT( self->s.v.goalentity ) : NULL;
 	gedict_t *e = self->k_player ? self : ( g ? g : world ); // stats of whom we want to show
 
+#if 0 /* percentage */
 	float axe = wps & S_AXE ? 100.0 * e->ps.h_axe / max(1, e->ps.a_axe) : 0;
+#else /* just count of direct hits */
+	float axe = wps & S_AXE ? e->ps.h_axe : 0;
+#endif
 	float sg  = wps & S_SG  ? 100.0 * e->ps.h_sg  / max(1, e->ps.a_sg) : 0;
 	float ssg = wps & S_SSG ? 100.0 * e->ps.h_ssg / max(1, e->ps.a_ssg) : 0;
 	float ng  = wps & S_NG  ? 100.0 * e->ps.h_ng  / max(1, e->ps.a_ng) : 0;
@@ -1704,7 +1708,7 @@ void Print_Wp_Stats( )
 
 	if ( axe || sg || ssg ) {
 		if ( axe )
-			strlcat(buf, (axe ? va("%s:%.1f", redtext("axe"),  axe) : ""), sizeof(buf));
+			strlcat(buf, (axe ? va("%s:%.0f", redtext("axe"),  axe) : ""), sizeof(buf));
 		if ( sg )
 			strlcat(buf, (sg  ? va("%s%s:%.1f", (*buf ? " " : ""), redtext("sg") , sg) : ""), sizeof(buf));
     	if ( ssg )

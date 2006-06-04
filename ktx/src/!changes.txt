@@ -7,6 +7,14 @@ qq:
 
 	 Empezar request
 
+173. +wp_stats show total axe hits instead of percentage :]
+
+174. Teams stats now contain gl hits too, was't added in previos versions cos
+	 ktpro does't show this.
+
+175. Teams stats does't show fractional part of weapons effi, save some space
+	 for retards who still uses 320x240 :(
+
 2006-06-03
 qq:
 171. Added cvar "k_defmode".
