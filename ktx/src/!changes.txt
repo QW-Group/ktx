@@ -1,3 +1,19 @@
+2006-06-05
+qq:
+177. Commands s-p, s-l, s-r now not commands, but catched from say, like ktpro,
+	 but latest mvdsv required!!!
+
+178. s-t from ktpro now supported too.
+
+	 s-t allows you to talk to a team, s-t has 3 predefined teams "player", "spectator" and
+	 "admin", but you can also talk to teams present on the server. ktpro (c)
+
+179. Freeze in countdown is restored, but last 0.2 sec instead of 1 sec, like ktpro.
+	 I'm not sure is freeze really required, imo not, but I have report what
+	 if u have some velocity on countdown u will have velocity on first spawn,
+	 i think this is wrong opinion and player just hold/press some buttons
+	 before/after respawn.
+
 2006-06-04
 qq:
 172. Added cvar "k_use_matchless_dir".

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.86 2006/06/04 01:52:40 qqshka Exp $
+ *  $Id: client.c,v 1.87 2006/06/04 23:55:52 qqshka Exp $
  */
 
 //===========================================================================
@@ -2341,6 +2341,7 @@ void PlayerPostThink()
         self.velocity = VEC_ORIGIN;	// don't stray off the intermission spot too far
         return;
     }
+
 */
 
 	// ok accept player now

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.18 2006/05/28 03:44:28 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.19 2006/06/04 23:55:52 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -31,6 +31,10 @@ void			cmdinfo ();
 void			cmduinfo ();
 void			cmd_wreg_do( byte c );
 void			cmd_ack();
+
+void			s_p();
+void			s_lr( float l );
+void			s_t();
 
 qboolean 	ClientCommand()
 {
@@ -227,8 +231,8 @@ qboolean isSayFlood(gedict_t *p)
 
 qboolean ClientSay( qboolean isTeamSay )
 {
-	int j;
-	char text[1024] = {0}, *str, *name, *team;
+	int j, l;
+	char text[1024] = {0}, arg_2[10], *str, *name, *team;
 	int sv_spectalk = cvar("sv_spectalk");
 	int sv_sayteam_to_spec = cvar("sv_sayteam_to_spec");
 	gedict_t *client, *goal;
@@ -238,6 +242,23 @@ qboolean ClientSay( qboolean isTeamSay )
 
 	if ( isSayFlood( self ) )
 		return true; // flooder
+
+	trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
+
+	if ( streq(arg_2, "s-p") ) {
+		s_p();
+		return true;
+	}
+
+	if ( (l = (streq(arg_2, "s-l") ? 1 : 0)) || (l = (streq(arg_2, "s-r") ? 2 : 0)) ) {
+		s_lr( l );
+		return true;
+	}
+
+	if ( streq(arg_2, "s-t") ) {
+		s_t();
+		return true;
+	}
 
 // { MVDSV
 
@@ -326,6 +347,156 @@ qboolean ClientSay( qboolean isTeamSay )
 
 	return true;
 }
+
+// }
+
+// { additional communication commands
+
+void s_common( gedict_t *from, gedict_t *to, char *msg )
+{
+	char *rmsg = redtext(msg);
+
+	if ( from == to )
+		return; // ignore sending text to self
+
+	if ( match_in_progress && (from->k_player != to->k_player || from->k_spectator != to->k_spectator) )
+		return; // spec to player or player to spec, disallowed in match
+
+	from->s_last_to = to;
+	to->s_last_from = from;
+
+	G_sprint(to,   2, "[%s->]: %s\n", getname(from), rmsg);
+	G_sprint(from, 2, "[->%s]: %s\n", getname(to),   rmsg);
+}
+
+void s_p()
+{
+	int argc = trap_CmdArgc();
+	gedict_t *p;
+	char arg_3[1024], *str;
+
+	if ( argc < 4 ) {
+		G_sprint(self, 2, "usage: s-p id/name txt\n");
+		return;
+	}
+
+	trap_CmdArgv( 2, arg_3, sizeof( arg_3 ) );
+
+	if ( (p = SpecPlayer_by_IDorName( arg_3 )) ) {
+		str = params_str(3, -1);
+		s_common( self, p, str );
+	}
+	else {
+		G_sprint(self, 2, "s-p: client %s not found\n", arg_3);
+		return;
+	}
+}
+
+/*
+void s_p_cmd() // just redirect /s-p command to /say
+{
+	stuffcmd(self, "say s-p %s\n", params_str(1, -1));
+}
+*/
+
+void s_lr( float l )
+{
+	int argc = trap_CmdArgc();
+	gedict_t *p;
+	char *str;
+
+	if ( argc < 3 ) {
+		G_sprint(self, 2, "usage: %s txt\n", ( l == 1 ? "s-l" : "s-r" ));
+		return;
+	}
+
+	p = ( l == 1 ? self->s_last_to : self->s_last_from );
+
+	if ( p && GetUserID( p ) ) {
+		str = params_str(2, -1);
+		s_common( self, p, str );
+	}
+	else {
+		G_sprint(self, 2, "%s: client not found\n", ( l == 1 ? "s-l" : "s-r" ));
+		return;
+	}
+}
+
+/*
+void s_lr_cmd( float l ) // just redirect /s-l or /s-r command to /say
+{
+	stuffcmd(self, "say %s %s\n", ( l == 1 ? "s-l" : "s-r" ), params_str(1, -1));
+}
+*/
+
+void s_lr_clear( gedict_t *dsc )
+{
+	int from;
+	gedict_t *p;
+
+	for ( from = 0, p = world; (p = find_plrspc(p, &from)); ) {
+
+		if ( p->s_last_to == dsc )
+			p->s_last_to = NULL;
+
+		if ( p->s_last_from == dsc )
+			p->s_last_from = NULL;
+	}
+}
+
+void s_t()
+{
+	int from, i;
+	int argc = trap_CmdArgc();
+	gedict_t *p;
+	char arg_3[1024], *str, *name;
+
+	if ( argc < 4 ) {
+		G_sprint(self, 2, "usage: s-t team txt\n");
+		return;
+	}
+
+	name = getname(self);
+
+	str = redtext( params_str(3, -1) );
+
+	trap_CmdArgv( 2, arg_3, sizeof( arg_3 ) );
+
+	for ( i = 0, from = 0, p = world; (p = find_plrspc(p, &from)); ) {
+		if ( self == p ) // ignore sending text to self
+			continue;
+
+		if ( match_in_progress && (self->k_player != p->k_player || self->k_spectator != p->k_spectator) )
+			continue; // spec to player or player to spec, disallowed in match
+
+		if ( !(
+			      ( streq(arg_3, "player") && p->k_player )
+			   || ( streq(arg_3, "spectator") && p->k_spectator )
+			   || ( streq(arg_3, "admin") && is_adm( p ) )
+			   || ( streq(arg_3, getteam( p )) )
+		   	  )
+		   )
+			continue;
+
+		//[sender <t:teamname>]: txt
+		G_sprint(p, 2, "[%s <t:%s>]: %s\n", name, arg_3, str);
+		i++;
+	}
+
+	if ( !i ) {
+		G_sprint(self, 2, "s-t: no clients found for team %s\n", arg_3);
+		return;
+	}
+
+	G_sprint(self, 2, "[<t:%s>]: %s\n", arg_3, str);
+}
+
+/*
+void s_t_cmd() // just redirect /s-t command to /say
+{
+	stuffcmd(self, "say s-t %s\n", params_str(1, -1));
+}
+*/
 
 // }
 

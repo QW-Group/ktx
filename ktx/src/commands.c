@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.109 2006/06/04 19:42:32 ult_ Exp $
+ *  $Id: commands.c,v 1.110 2006/06/04 23:55:52 qqshka Exp $
  */
 
 // commands.c
@@ -137,8 +137,9 @@ void infolock ();
 void infospec ();
 void moreinfo ();
 
-void s_p();
-void s_lr( float l );
+void s_p_cmd();
+void s_lr_cmd( float l );
+void s_t_cmd();
 void cmdinfo();
 void cmduinfo();
 void cmd_wreg();
@@ -346,6 +347,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_S_P			"direct player say"
 #define CD_S_L          "continue last s-p u done"
 #define CD_S_R          "reply to last s-p u got"
+#define CD_S_T          "say to group of players"
 #define CD_KINFO        "set self params for mod"
 #define CD_KUINFO       "examine someone params"
 #define CD_WREG         "register reliable wpns"
@@ -360,6 +362,8 @@ const char CD_NODESC[] = "no desc";
 #define CD_LOCK         "temprorary lock server"
 #define CD_SWAPALL      "swap teams for ctf"
 
+void dummy() {}
+
 cmd_t cmds[] = {
 	{ "commands",    ShowCmds,			        0    , CF_BOTH | CF_MATCHLESS, CD_COMMANDS },
 	{ "scores",      PrintScores,		        0    , CF_BOTH | CF_MATCHLESS, CD_SCORES },
@@ -373,7 +377,7 @@ cmd_t cmds[] = {
 	{ "who",         PlayerStatus,              0    , CF_BOTH, CD_WHO },
 	{ "whoskin",     PlayerStatusS,             0    , CF_BOTH | CF_MATCHLESS, CD_WHOSKIN },
 	{ "whonot",      PlayerStatusN,             0    , CF_BOTH, CD_WHONOT },
-    { "list",        ListWhoNot,                0    , CF_PLAYER | CF_SPC_ADMIN, CD_LIST },
+	{ "list",        ListWhoNot,                0    , CF_PLAYER | CF_SPC_ADMIN, CD_LIST },
 	{ "whovote",     ModStatusVote,             0    , CF_BOTH | CF_MATCHLESS, CD_WHOVOTE },
 	{ "spawn",       ToggleRespawns,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_SPAWN },
 	{ "powerups",    TogglePowerups,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_POWERUPS },
@@ -396,7 +400,7 @@ cmd_t cmds[] = {
 	{ "dropring",    ToggleDropRing,            0    , CF_PLAYER, CD_DROPRING },
 	{ "droppack",    ToggleDropPack,            0    , CF_PLAYER, CD_DROPPACK },
 	                                             
-    { "silence",     ToggleSpecTalk,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_SILENCE },
+	{ "silence",     ToggleSpecTalk,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_SILENCE },
 	{ "reset",       ResetOptions,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_RESET },
 	{ "report",      ReportMe,                  0    , CF_PLAYER, CD_REPORT },
 	{ "rules",       ShowRules,                 0    , CF_PLAYER | CF_MATCHLESS, CD_RULES },
@@ -443,135 +447,136 @@ cmd_t cmds[] = {
 	{ "qenemy",      ToggleQEnemy,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_QENEMY },
 	{ "qpoint",      ToggleQPoint,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_QPOINT },
 	                                          
-    { "kick",        AdminKick,                 0    , CF_BOTH_ADMIN/* FIXME: interference with ezq server kick command | CF_PARAMS */, CD_KICK },
-    { "mkick",       m_kick,                    0    , CF_BOTH_ADMIN | CF_PARAMS, CD_MKICK },
-    { "fkick",       f_kick,                    0    , CF_BOTH_ADMIN | CF_PARAMS, CD_FKICK },
-    { "y",           YesKick,                   0    , CF_BOTH_ADMIN, CD_Y },
-    { "n",           DontKick,                  0    , CF_BOTH_ADMIN, CD_N },
-    { "overtime",    ChangeOvertime,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_OVERTIME },
-    { "overtimeup",  ChangeOvertimeUp,          0    , CF_PLAYER | CF_SPC_ADMIN, CD_OVERTIMEUP },
-    { "elect",       VoteAdmin,                 0    , CF_BOTH, CD_ELECT },
-    { "yes",         VoteYes,                   0    , CF_PLAYER, CD_YES },
-    { "no",          VoteNo,                    0    , CF_PLAYER, CD_NO },
-    { "captain",     VoteCaptain,               0    , CF_PLAYER, CD_CAPTAIN },
-    { "freeze",      ToggleFreeze,              0    , CF_PLAYER, CD_FREEZE },
-    { "rpickup",     RandomPickup,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_RPICKUP },
-    
-    { "1on1",        UserMode,                  1	 , CF_PLAYER | CF_SPC_ADMIN, CD_1ON1 },
-    { "2on2",        UserMode,                  2	 , CF_PLAYER | CF_SPC_ADMIN, CD_2ON1 },
-    { "3on3",        UserMode,                  3	 , CF_PLAYER | CF_SPC_ADMIN, CD_3ON1 },
-    { "4on4",        UserMode,                  4	 , CF_PLAYER | CF_SPC_ADMIN, CD_4ON1 },
-    { "10on10",      UserMode,                  5	 , CF_PLAYER | CF_SPC_ADMIN, CD_10ON10 },
-    { "ffa",         UserMode,                  6	 , CF_PLAYER | CF_SPC_ADMIN, CD_FFA },
-    { "ctf",         UserMode,                  7    , CF_PLAYER | CF_SPC_ADMIN, CD_CTF },
+	{ "kick",        AdminKick,                 0    , CF_BOTH_ADMIN/* FIXME: interference with ezq server kick command | CF_PARAMS */, CD_KICK },
+	{ "mkick",       m_kick,                    0    , CF_BOTH_ADMIN | CF_PARAMS, CD_MKICK },
+	{ "fkick",       f_kick,                    0    , CF_BOTH_ADMIN | CF_PARAMS, CD_FKICK },
+	{ "y",           YesKick,                   0    , CF_BOTH_ADMIN, CD_Y },
+	{ "n",           DontKick,                  0    , CF_BOTH_ADMIN, CD_N },
+	{ "overtime",    ChangeOvertime,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_OVERTIME },
+	{ "overtimeup",  ChangeOvertimeUp,          0    , CF_PLAYER | CF_SPC_ADMIN, CD_OVERTIMEUP },
+	{ "elect",       VoteAdmin,                 0    , CF_BOTH, CD_ELECT },
+	{ "yes",         VoteYes,                   0    , CF_PLAYER, CD_YES },
+	{ "no",          VoteNo,                    0    , CF_PLAYER, CD_NO },
+	{ "captain",     VoteCaptain,               0    , CF_PLAYER, CD_CAPTAIN },
+	{ "freeze",      ToggleFreeze,              0    , CF_PLAYER, CD_FREEZE },
+	{ "rpickup",     RandomPickup,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_RPICKUP },
+
+	{ "1on1",        UserMode,                  1	 , CF_PLAYER | CF_SPC_ADMIN, CD_1ON1 },
+	{ "2on2",        UserMode,                  2	 , CF_PLAYER | CF_SPC_ADMIN, CD_2ON1 },
+	{ "3on3",        UserMode,                  3	 , CF_PLAYER | CF_SPC_ADMIN, CD_3ON1 },
+	{ "4on4",        UserMode,                  4	 , CF_PLAYER | CF_SPC_ADMIN, CD_4ON1 },
+	{ "10on10",      UserMode,                  5	 , CF_PLAYER | CF_SPC_ADMIN, CD_10ON10 },
+	{ "ffa",         UserMode,                  6	 , CF_PLAYER | CF_SPC_ADMIN, CD_FFA },
+	{ "ctf",         UserMode,                  7    , CF_PLAYER | CF_SPC_ADMIN, CD_CTF },
 
 #ifndef NO_K_PAUSE
-    { "unpause",     VoteUnpause,               0    , CF_PLAYER, CD_UNPAUSE },
+	{ "unpause",     VoteUnpause,               0    , CF_PLAYER, CD_UNPAUSE },
 #endif
-    { "practice",    TogglePractice,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_PRACTICE },
-    { "wp_reset",    Wp_Reset,                  0    , CF_PLAYER, CD_WP_RESET },
-    { "+wp_stats",   Wp_Stats,                  2    , CF_BOTH | CF_MATCHLESS, CD_PLS_WP_STATS },
-    { "-wp_stats",   Wp_Stats,                  1    , CF_BOTH | CF_MATCHLESS, CD_MNS_WP_STATS },
-    { "tkfjump",     t_jump,                    1    , CF_BOTH_ADMIN, CD_TKFJUMP },
-    { "tkrjump",     t_jump,                    2    , CF_BOTH_ADMIN, CD_TKRJUMP },
-    { "klist",       klist,                     0    , CF_BOTH | CF_MATCHLESS, CD_KLIST },
-    { "hdptoggle",   hdptoggle,                 0    , CF_BOTH_ADMIN, CD_HDPTOGGLE },
-    { "handicap",    handicap,                  0    , CF_PLAYER | CF_PARAMS | CF_MATCHLESS, CD_HANDICAP },
-    { "noweapon",    noweapon,                  0    , CF_PLAYER | CF_PARAMS | CF_SPC_ADMIN, CD_NOWEAPON },
+	{ "practice",    TogglePractice,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_PRACTICE },
+	{ "wp_reset",    Wp_Reset,                  0    , CF_PLAYER, CD_WP_RESET },
+	{ "+wp_stats",   Wp_Stats,                  2    , CF_BOTH | CF_MATCHLESS, CD_PLS_WP_STATS },
+	{ "-wp_stats",   Wp_Stats,                  1    , CF_BOTH | CF_MATCHLESS, CD_MNS_WP_STATS },
+	{ "tkfjump",     t_jump,                    1    , CF_BOTH_ADMIN, CD_TKFJUMP },
+	{ "tkrjump",     t_jump,                    2    , CF_BOTH_ADMIN, CD_TKRJUMP },
+	{ "klist",       klist,                     0    , CF_BOTH | CF_MATCHLESS, CD_KLIST },
+	{ "hdptoggle",   hdptoggle,                 0    , CF_BOTH_ADMIN, CD_HDPTOGGLE },
+	{ "handicap",    handicap,                  0    , CF_PLAYER | CF_PARAMS | CF_MATCHLESS, CD_HANDICAP },
+	{ "noweapon",    noweapon,                  0    , CF_PLAYER | CF_PARAMS | CF_SPC_ADMIN, CD_NOWEAPON },
 
-    { "cam",         ShowCamHelp,               0    , CF_SPECTATOR | CF_MATCHLESS, CD_CAM },
+	{ "cam",         ShowCamHelp,               0    , CF_SPECTATOR | CF_MATCHLESS, CD_CAM },
 
-    { "tracklist",   tracklist,                 0    , CF_BOTH | CF_MATCHLESS, CD_TRACKLIST },
-    { "fpslist",     fpslist,                   0    , CF_BOTH | CF_MATCHLESS, CD_FPSLIST },
+	{ "tracklist",   tracklist,                 0    , CF_BOTH | CF_MATCHLESS, CD_TRACKLIST },
+	{ "fpslist",     fpslist,                   0    , CF_BOTH | CF_MATCHLESS, CD_FPSLIST },
 
-    { "fav1_add",    favx_add,                  1    , CF_SPECTATOR, CD_FAV1_ADD },
-    { "fav2_add",    favx_add,                  2    , CF_SPECTATOR, CD_FAV2_ADD },
-    { "fav3_add",    favx_add,                  3    , CF_SPECTATOR, CD_FAV3_ADD },
-    { "fav4_add",    favx_add,                  4    , CF_SPECTATOR, CD_FAV4_ADD },
-    { "fav5_add",    favx_add,                  5    , CF_SPECTATOR, CD_FAV5_ADD },
-    { "fav6_add",    favx_add,                  6    , CF_SPECTATOR, CD_FAV6_ADD },
-    { "fav7_add",    favx_add,                  7    , CF_SPECTATOR, CD_FAV7_ADD },
-    { "fav8_add",    favx_add,                  8    , CF_SPECTATOR, CD_FAV8_ADD },
-    { "fav9_add",    favx_add,                  9    , CF_SPECTATOR, CD_FAV9_ADD },
-    { "fav10_add",   favx_add,                 10    , CF_SPECTATOR, CD_FAV10_ADD },
-    { "fav11_add",   favx_add,                 11    , CF_SPECTATOR, CD_FAV11_ADD },
-    { "fav12_add",   favx_add,                 12    , CF_SPECTATOR, CD_FAV12_ADD },
-    { "fav13_add",   favx_add,                 13    , CF_SPECTATOR, CD_FAV13_ADD },
-    { "fav14_add",   favx_add,                 14    , CF_SPECTATOR, CD_FAV14_ADD },
-    { "fav15_add",   favx_add,                 15    , CF_SPECTATOR, CD_FAV15_ADD },
-    { "fav16_add",   favx_add,                 16    , CF_SPECTATOR, CD_FAV16_ADD },
-    { "fav17_add",   favx_add,                 17    , CF_SPECTATOR, CD_FAV17_ADD },
-    { "fav18_add",   favx_add,                 18    , CF_SPECTATOR, CD_FAV18_ADD },
-    { "fav19_add",   favx_add,                 19    , CF_SPECTATOR, CD_FAV19_ADD },
-    { "fav20_add",   favx_add,                 20    , CF_SPECTATOR, CD_FAV20_ADD },
-    { "1fav_go",     xfav_go,                   1    , CF_SPECTATOR, CD_1FAV_GO },
-    { "2fav_go",     xfav_go,                   2    , CF_SPECTATOR, CD_2FAV_GO },
-    { "3fav_go",     xfav_go,                   3    , CF_SPECTATOR, CD_3FAV_GO },
-    { "4fav_go",     xfav_go,                   4    , CF_SPECTATOR, CD_4FAV_GO },
-    { "5fav_go",     xfav_go,                   5    , CF_SPECTATOR, CD_5FAV_GO },
-    { "6fav_go",     xfav_go,                   6    , CF_SPECTATOR, CD_6FAV_GO },
-    { "7fav_go",     xfav_go,                   7    , CF_SPECTATOR, CD_7FAV_GO },
-    { "8fav_go",     xfav_go,                   8    , CF_SPECTATOR, CD_8FAV_GO },
-    { "9fav_go",     xfav_go,                   9    , CF_SPECTATOR, CD_9FAV_GO },
-    { "10fav_go",    xfav_go,                  10    , CF_SPECTATOR, CD_10FAV_GO },
-    { "11fav_go",    xfav_go,                  11    , CF_SPECTATOR, CD_11FAV_GO },
-    { "12fav_go",    xfav_go,                  12    , CF_SPECTATOR, CD_12FAV_GO },
-    { "13fav_go",    xfav_go,                  13    , CF_SPECTATOR, CD_13FAV_GO },
-    { "14fav_go",    xfav_go,                  14    , CF_SPECTATOR, CD_14FAV_GO },
-    { "15fav_go",    xfav_go,                  15    , CF_SPECTATOR, CD_15FAV_GO },
-    { "16fav_go",    xfav_go,                  16    , CF_SPECTATOR, CD_16FAV_GO },
-    { "17fav_go",    xfav_go,                  17    , CF_SPECTATOR, CD_17FAV_GO },
-    { "18fav_go",    xfav_go,                  18    , CF_SPECTATOR, CD_18FAV_GO },
-    { "19fav_go",    xfav_go,                  19    , CF_SPECTATOR, CD_19FAV_GO },
-    { "20fav_go",    xfav_go,                  20    , CF_SPECTATOR, CD_20FAV_GO },
-    { "fav_add",     fav_add,                   0    , CF_SPECTATOR | CF_MATCHLESS, CD_FAV_ADD },
-    { "fav_del",     fav_del,                   0    , CF_SPECTATOR | CF_MATCHLESS, CD_FAV_DEL },
-    { "fav_all_del", fav_all_del,               0    , CF_SPECTATOR | CF_MATCHLESS, CD_FAV_ALL_DEL },
-    { "fav_next",    fav_next,                  0    , CF_SPECTATOR | CF_MATCHLESS, CD_FAV_NEXT },
-    { "fav_show",    fav_show,                  0    , CF_SPECTATOR | CF_MATCHLESS, CD_FAV_SHOW },
-    { "+scores",     Sc_Stats,                  2    , CF_BOTH | CF_MATCHLESS, CD_PLS_SCORES },
-    { "-scores",     Sc_Stats,                  1    , CF_BOTH | CF_MATCHLESS, CD_MNS_SCORES },
-    { "autotrack",   AutoTrack,            atBest    , CF_SPECTATOR | CF_MATCHLESS, CD_AUTOTRACK },
-    { "auto_pow",    AutoTrack,             atPow    , CF_SPECTATOR | CF_MATCHLESS, CD_AUTO_POW },
-    { "next_best",   next_best,                 0    , CF_SPECTATOR | CF_MATCHLESS, CD_NEXT_BEST },
-    { "next_pow",    next_pow,                  0    , CF_SPECTATOR | CF_MATCHLESS, CD_NEXT_POW },
-    { "lastscores",  lastscores,                0    , CF_BOTH, CD_LASTSCORES },
-    { "rnd",         krnd,                		0    , CF_BOTH | CF_PARAMS, CD_RND },
-    { "agree",       agree_on_map,        		0    , CF_PLAYER | CF_MATCHLESS, CD_AGREE },
-    { "pos_show",    Pos_Show,                  0    , CF_BOTH | CF_PARAMS, CD_POS_SHOW },
-    { "pos_save",    Pos_Save,                  0    , CF_BOTH | CF_PARAMS, CD_POS_SAVE },
-    { "pos_move",    Pos_Move,                  0    , CF_BOTH | CF_PARAMS, CD_POS_MOVE },
+	{ "fav1_add",    favx_add,                  1    , CF_SPECTATOR, CD_FAV1_ADD },
+	{ "fav2_add",    favx_add,                  2    , CF_SPECTATOR, CD_FAV2_ADD },
+	{ "fav3_add",    favx_add,                  3    , CF_SPECTATOR, CD_FAV3_ADD },
+	{ "fav4_add",    favx_add,                  4    , CF_SPECTATOR, CD_FAV4_ADD },
+	{ "fav5_add",    favx_add,                  5    , CF_SPECTATOR, CD_FAV5_ADD },
+	{ "fav6_add",    favx_add,                  6    , CF_SPECTATOR, CD_FAV6_ADD },
+	{ "fav7_add",    favx_add,                  7    , CF_SPECTATOR, CD_FAV7_ADD },
+	{ "fav8_add",    favx_add,                  8    , CF_SPECTATOR, CD_FAV8_ADD },
+	{ "fav9_add",    favx_add,                  9    , CF_SPECTATOR, CD_FAV9_ADD },
+	{ "fav10_add",   favx_add,                 10    , CF_SPECTATOR, CD_FAV10_ADD },
+	{ "fav11_add",   favx_add,                 11    , CF_SPECTATOR, CD_FAV11_ADD },
+	{ "fav12_add",   favx_add,                 12    , CF_SPECTATOR, CD_FAV12_ADD },
+	{ "fav13_add",   favx_add,                 13    , CF_SPECTATOR, CD_FAV13_ADD },
+	{ "fav14_add",   favx_add,                 14    , CF_SPECTATOR, CD_FAV14_ADD },
+	{ "fav15_add",   favx_add,                 15    , CF_SPECTATOR, CD_FAV15_ADD },
+	{ "fav16_add",   favx_add,                 16    , CF_SPECTATOR, CD_FAV16_ADD },
+	{ "fav17_add",   favx_add,                 17    , CF_SPECTATOR, CD_FAV17_ADD },
+	{ "fav18_add",   favx_add,                 18    , CF_SPECTATOR, CD_FAV18_ADD },
+	{ "fav19_add",   favx_add,                 19    , CF_SPECTATOR, CD_FAV19_ADD },
+	{ "fav20_add",   favx_add,                 20    , CF_SPECTATOR, CD_FAV20_ADD },
+	{ "1fav_go",     xfav_go,                   1    , CF_SPECTATOR, CD_1FAV_GO },
+	{ "2fav_go",     xfav_go,                   2    , CF_SPECTATOR, CD_2FAV_GO },
+	{ "3fav_go",     xfav_go,                   3    , CF_SPECTATOR, CD_3FAV_GO },
+	{ "4fav_go",     xfav_go,                   4    , CF_SPECTATOR, CD_4FAV_GO },
+	{ "5fav_go",     xfav_go,                   5    , CF_SPECTATOR, CD_5FAV_GO },
+	{ "6fav_go",     xfav_go,                   6    , CF_SPECTATOR, CD_6FAV_GO },
+	{ "7fav_go",     xfav_go,                   7    , CF_SPECTATOR, CD_7FAV_GO },
+	{ "8fav_go",     xfav_go,                   8    , CF_SPECTATOR, CD_8FAV_GO },
+	{ "9fav_go",     xfav_go,                   9    , CF_SPECTATOR, CD_9FAV_GO },
+	{ "10fav_go",    xfav_go,                  10    , CF_SPECTATOR, CD_10FAV_GO },
+	{ "11fav_go",    xfav_go,                  11    , CF_SPECTATOR, CD_11FAV_GO },
+	{ "12fav_go",    xfav_go,                  12    , CF_SPECTATOR, CD_12FAV_GO },
+	{ "13fav_go",    xfav_go,                  13    , CF_SPECTATOR, CD_13FAV_GO },
+	{ "14fav_go",    xfav_go,                  14    , CF_SPECTATOR, CD_14FAV_GO },
+	{ "15fav_go",    xfav_go,                  15    , CF_SPECTATOR, CD_15FAV_GO },
+	{ "16fav_go",    xfav_go,                  16    , CF_SPECTATOR, CD_16FAV_GO },
+	{ "17fav_go",    xfav_go,                  17    , CF_SPECTATOR, CD_17FAV_GO },
+	{ "18fav_go",    xfav_go,                  18    , CF_SPECTATOR, CD_18FAV_GO },
+	{ "19fav_go",    xfav_go,                  19    , CF_SPECTATOR, CD_19FAV_GO },
+	{ "20fav_go",    xfav_go,                  20    , CF_SPECTATOR, CD_20FAV_GO },
+	{ "fav_add",     fav_add,                   0    , CF_SPECTATOR | CF_MATCHLESS, CD_FAV_ADD },
+	{ "fav_del",     fav_del,                   0    , CF_SPECTATOR | CF_MATCHLESS, CD_FAV_DEL },
+	{ "fav_all_del", fav_all_del,               0    , CF_SPECTATOR | CF_MATCHLESS, CD_FAV_ALL_DEL },
+	{ "fav_next",    fav_next,                  0    , CF_SPECTATOR | CF_MATCHLESS, CD_FAV_NEXT },
+	{ "fav_show",    fav_show,                  0    , CF_SPECTATOR | CF_MATCHLESS, CD_FAV_SHOW },
+	{ "+scores",     Sc_Stats,                  2    , CF_BOTH | CF_MATCHLESS, CD_PLS_SCORES },
+	{ "-scores",     Sc_Stats,                  1    , CF_BOTH | CF_MATCHLESS, CD_MNS_SCORES },
+	{ "autotrack",   AutoTrack,            atBest    , CF_SPECTATOR | CF_MATCHLESS, CD_AUTOTRACK },
+	{ "auto_pow",    AutoTrack,             atPow    , CF_SPECTATOR | CF_MATCHLESS, CD_AUTO_POW },
+	{ "next_best",   next_best,                 0    , CF_SPECTATOR | CF_MATCHLESS, CD_NEXT_BEST },
+	{ "next_pow",    next_pow,                  0    , CF_SPECTATOR | CF_MATCHLESS, CD_NEXT_POW },
+	{ "lastscores",  lastscores,                0    , CF_BOTH, CD_LASTSCORES },
+	{ "rnd",         krnd,                		0    , CF_BOTH | CF_PARAMS, CD_RND },
+	{ "agree",       agree_on_map,        		0    , CF_PLAYER | CF_MATCHLESS, CD_AGREE },
+	{ "pos_show",    Pos_Show,                  0    , CF_BOTH | CF_PARAMS, CD_POS_SHOW },
+	{ "pos_save",    Pos_Save,                  0    , CF_BOTH | CF_PARAMS, CD_POS_SAVE },
+	{ "pos_move",    Pos_Move,                  0    , CF_BOTH | CF_PARAMS, CD_POS_MOVE },
 // VVD: For trick chiters! :-)
 // Need to think out how to limit using Pos_Set for tricking.
 // May be to ban pos_velocity?
-    { "pos_origin",  Pos_Set,                   1    , CF_BOTH | CF_PARAMS, CD_POS_ORIGIN },
-    { "pos_angles",  Pos_Set,                   2    , CF_BOTH | CF_PARAMS, CD_POS_ANGLES },
+	{ "pos_origin",  Pos_Set,                   1    , CF_BOTH | CF_PARAMS, CD_POS_ORIGIN },
+	{ "pos_angles",  Pos_Set,                   2    , CF_BOTH | CF_PARAMS, CD_POS_ANGLES },
 //	{ "pos_velocity",Pos_Set,                   3    , CF_BOTH | CF_PARAMS, CD_POS_VELOCITY },
 	{ "sh_speed",    Sh_Speed,                  0    , CF_BOTH, CD_SH_SPEED },
 // { CTF commands
-    { "tossrune",    TossRune,                  0    , CF_PLAYER, CD_TOSSRUNE },
-    { "flagstatus",  FlagStatus,                0    , CF_BOTH, CD_FLAGSTATUS },
+	{ "tossrune",    TossRune,                  0    , CF_PLAYER, CD_TOSSRUNE },
+	{ "flagstatus",  FlagStatus,                0    , CF_BOTH, CD_FLAGSTATUS },
 	{ "swapall",     AdminSwapAll,              0    , CF_BOTH_ADMIN, CD_SWAPALL },
 // }
-    { "motd",        motd_show,                 0    , CF_BOTH | CF_MATCHLESS, CD_MOTD },
-    { "infolock",    infolock,                  0    , CF_BOTH_ADMIN, CD_INFOLOCK },
-    { "infospec",    infospec,                  0    , CF_PLAYER | CF_SPC_ADMIN, CD_INFOSPEC },
-    { "moreinfo",    moreinfo,                  0    , CF_SPECTATOR | CF_MATCHLESS, CD_MOREINFO },
-    { "s-p",         s_p,                       0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_S_P },
-    { "s-l",         s_lr,                      1    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_S_L },
-    { "s-r",         s_lr,                      2    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_S_R },
-    { "kinfo",       cmdinfo,                   0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_KINFO },
-    { "kuinfo",      cmduinfo,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_KUINFO },
-    { "wreg",        cmd_wreg,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_WREG },
-    { "kill",        ClientKill,                0    , CF_PLAYER | CF_MATCHLESS, CD_KILL },
-    { "mid_air",     ToggleMidair,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_MIDAIR },
-    { "time",        sv_time,                   0    , CF_BOTH | CF_MATCHLESS, CD_TIME },
-    { "gren_mode",   GrenadeMode,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_GREN_MODE },
-    { "toggleready", ToggleReady,               0    , CF_PLAYER, CD_TOGGLEREADY },
-    { "fp",          fp_toggle,                 0    , CF_BOTH_ADMIN, CD_FP },
-    { "dlist",       dlist,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_DLIST },
-    { "dinfo",       dinfo,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_DINFO },
-    { "lock",        sv_lock,                   0    , CF_BOTH_ADMIN, CD_LOCK }
+	{ "motd",        motd_show,                 0    , CF_BOTH | CF_MATCHLESS, CD_MOTD },
+	{ "infolock",    infolock,                  0    , CF_BOTH_ADMIN, CD_INFOLOCK },
+	{ "infospec",    infospec,                  0    , CF_PLAYER | CF_SPC_ADMIN, CD_INFOSPEC },
+	{ "moreinfo",    moreinfo,                  0    , CF_SPECTATOR | CF_MATCHLESS, CD_MOREINFO },
+	{ "s-p",         dummy,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_S_P },
+	{ "s-l",         dummy,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_S_L },
+	{ "s-r",         dummy,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_S_R },
+	{ "s-t",         dummy,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_S_T },
+	{ "kinfo",       cmdinfo,                   0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_KINFO },
+	{ "kuinfo",      cmduinfo,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_KUINFO },
+	{ "wreg",        cmd_wreg,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_WREG },
+	{ "kill",        ClientKill,                0    , CF_PLAYER | CF_MATCHLESS, CD_KILL },
+	{ "mid_air",     ToggleMidair,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_MIDAIR },
+	{ "time",        sv_time,                   0    , CF_BOTH | CF_MATCHLESS, CD_TIME },
+	{ "gren_mode",   GrenadeMode,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_GREN_MODE },
+	{ "toggleready", ToggleReady,               0    , CF_PLAYER, CD_TOGGLEREADY },
+	{ "fp",          fp_toggle,                 0    , CF_BOTH_ADMIN, CD_FP },
+	{ "dlist",       dlist,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_DLIST },
+	{ "dinfo",       dinfo,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_DINFO },
+	{ "lock",        sv_lock,                   0    , CF_BOTH_ADMIN, CD_LOCK }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -795,9 +800,11 @@ void StuffModCommands()
 
 		name = cmds[i].name;
 
-		if ( !isValidCmdForClass( i, spc ) ) {
+		if ( !isValidCmdForClass( i, spc )  // cmd does't valid for this class of player or matchless mode does't have this command
+			 || cmds[i].f == dummy // cmd have't function, ie u must not stuff alias for this cmd
+		    ) {
 			limit++;
-			continue; // cmd does't valid for this class of player or matchless mode does't have this command
+			continue;
 		}
 
 		params = ( (cmds[i].cf_flags & CF_PARAMS) && support_params ) ? " %0" : "";
@@ -4252,102 +4259,6 @@ void infospec ( )
 	cvar_fset("k_spec_info", k_spec_info);
 
 	G_bprint(2, "Extra info for spectators %s\n", redtext(OnOff(mi_on())));
-}
-
-// }
-
-// { communication commands
-
-void s_common( gedict_t *from, gedict_t *to, char *msg )
-{
-	char *rmsg = redtext(msg);
-
-	if ( from == to )
-		return; // ignore sendinf text to self
-
-	if ( match_in_progress && (from->k_player != to->k_player || from->k_spectator != to->k_spectator) )
-		return; // spec to player or player to spec, disallowed in match
-
-	from->s_last_to = to;
-	to->s_last_from = from;
-
-	G_sprint(to,   2, "[%s->]:%s\n", getname(from), rmsg);
-	G_sprint(from, 2, "[->%s]:%s\n", getname(to),   rmsg);
-}
-
-void s_p()
-{
-	int argc = trap_CmdArgc(), i;
-	gedict_t *p;
-	char arg_2[1024], arg_x[1024], buf[1024];
-
-	if ( argc < 3 ) {
-		G_sprint(self, 2, "usage: s-p id/name txt\n");
-		return;
-	}
-
-	trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
-
-	if ( (p = SpecPlayer_by_IDorName( arg_2 )) ) {
-
-		for( buf[0] = 0, i = 2; i < argc; i++ ) {
-			trap_CmdArgv( i, arg_x, sizeof( arg_x ) );
-
-			strlcat( buf,   " ", sizeof( buf ) );
-			strlcat( buf, arg_x, sizeof( buf ) );
-		}
-
-		s_common( self, p, buf );
-	}
-	else {
-		G_sprint(self, 2, "s-p: client %s not found\n", arg_2);
-		return;
-	}
-}
-
-
-void s_lr( float l )
-{
-	int argc = trap_CmdArgc(), i;
-	gedict_t *p;
-	char arg_x[1024], buf[1024];
-
-	if ( argc < 2 ) {
-		G_sprint(self, 2, "usage: %s txt\n", ( l == 1 ? "s-l" : "s-r" ));
-		return;
-	}
-
-	p = ( l == 1 ? self->s_last_to : self->s_last_from );
-
-	if ( p && GetUserID( p ) ) {
-
-		for( buf[0] = 0, i = 1; i < argc; i++ ) {
-			trap_CmdArgv( i, arg_x, sizeof( arg_x ) );
-			strlcat( buf,   " ", sizeof( buf ) );
-			strlcat( buf, arg_x, sizeof( buf ) );
-		}
-
-		s_common( self, p, buf );
-	}
-	else {
-		G_sprint(self, 2, "%s: client not found\n", ( l == 1 ? "s-l" : "s-r" ));
-		return;
-	}
-}
-
-void s_lr_clear( gedict_t *dsc )
-{
-	int from = 0;
-	gedict_t *p;
-
-	for ( p = world; (p = find_plrspc(p, &from)); ) {
-
-		if ( p->s_last_to == dsc )
-			p->s_last_to = NULL;
-
-		if ( p->s_last_from == dsc )
-			p->s_last_from = NULL;
-	}
 }
 
 // }

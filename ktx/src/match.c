@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.65 2006/06/04 20:05:58 ult_ Exp $
+ *  $Id: match.c,v 1.66 2006/06/04 23:55:52 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1600,6 +1600,29 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 	return true;
 }
 
+void standby_think()
+{
+	gedict_t *p;
+
+	if ( match_in_progress == 1 ) {
+
+		k_standby = 1;
+
+		for( p = world;	(p = find ( p, FOFCLSN, "player" )); ) {
+			if( !strnull ( p->s.v.netname ) ) {
+				//set to ghost, 0.2 second before matchstart
+				p->s.v.takedamage = 0;
+				p->s.v.solid      = 0;
+				p->s.v.movetype   = 0;
+				p->s.v.modelindex = 0;
+				p->s.v.model      = "";
+			}
+		}
+	}
+
+	ent_remove ( self );
+}
+
 // Called every second during the countdown.
 void TimerStartThink ()
 {
@@ -1619,19 +1642,11 @@ void TimerStartThink ()
 	self->cnt2 -= 1;
 
 	if( self->cnt2 == 1 ) {
-		k_standby = 1;
-
-		for( p = world;	(p = find ( p, FOFCLSN, "player" )); ) {
-			if( !strnull ( p->s.v.netname ) ) {
-				//set to ghost, 1 second before matchstart
-				p->s.v.takedamage = 0;
-				p->s.v.solid      = 0;
-// qqshka: ok, does't touch movetype, let see if this ok
-//				p->s.v.movetype   = 0;
-				p->s.v.modelindex = 0;
-				p->s.v.model      = "";
-			}
-		}
+		p = spawn();
+		p->s.v.owner = EDICT_TO_PROG( world );
+		p->s.v.classname = "standby_th";
+		p->s.v.nextthink = g_globalvars.time + 0.8;
+		p->s.v.think = ( func_t ) standby_think;
 	}
     else if( self->cnt2 <= 0 ) {
 		G_cp2all("");
@@ -1802,6 +1817,9 @@ void StartTimer ()
 	for( timer = world; (timer = find(timer, FOFCLSN, "timer")); )
 		ent_remove( timer );
 
+	for( timer = world; (timer = find(timer, FOFCLSN, "standby_th")); )
+		ent_remove( timer );
+
 	if ( !k_matchLess ) {
 		ShowMatchSettings ();
 
@@ -1850,7 +1868,7 @@ void StopTimer ( int removeDemo )
 
 	if ( k_standby )
 	{
-		// Stops the bug where players are set to ghosts 1 second to go and countdown aborts.
+		// Stops the bug where players are set to ghosts 0.2 second to go and countdown aborts.
 		// standby flag needs clearing (sturm)
 		k_standby = 0;
 
@@ -1858,13 +1876,15 @@ void StopTimer ( int removeDemo )
 		{
 			p->s.v.takedamage = 2;
 			p->s.v.solid      = 3;
-// qqshka: ok, does't touch movetype, let see if this ok
-//			p->s.v.movetype   = 3;
+			p->s.v.movetype   = 3;
 			setmodel (p, "progs/player.mdl");
 		}
 	}
 
 	for( timer = world; (timer = find(timer, FOFCLSN, "timer")); )
+		ent_remove( timer );
+
+	for( timer = world; (timer = find(timer, FOFCLSN, "standby_th")); )
 		ent_remove( timer );
 
 	if (   removeDemo 
