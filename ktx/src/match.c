@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.66 2006/06/04 23:55:52 qqshka Exp $
+ *  $Id: match.c,v 1.67 2006/06/07 17:38:55 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1792,7 +1792,7 @@ void StartDemoRecord ()
 			if( !strnull( cvar_string( "serverdemo" ) ) )
 				localcmd("cancel\n");  // demo is recording, cancel before new one
 
-			localcmd( "easyrecord %s\n", CompilateDemoName() );
+			localcmd( "easyrecord \"%s\"\n", CompilateDemoName() );
 		}
 	}
 }
