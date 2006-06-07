@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.87 2006/06/04 23:55:52 qqshka Exp $
+ *  $Id: client.c,v 1.88 2006/06/07 17:17:13 qqshka Exp $
  */
 
 //===========================================================================
@@ -1970,7 +1970,7 @@ void PlayerPreThink()
 
 //		G_bprint(2, "%s FPS: %3.1f\n", self->s.v.netname, fps);
 		
-		if( fps > current_maxfps + 1 ) // 1 fps fluctuation is allowed :(
+		if( fps > current_maxfps + 2 ) // 2 fps fluctuation is allowed :(
 		{
 			float peak = self->fLowestFrameTime ? (1.0f / self->fLowestFrameTime) : 1;
 
