@@ -1,3 +1,8 @@
+2006-06-07
+qq:
+180. fixed auto demo recording bug.
+	 thx 123 & Tuna
+
 2006-06-05
 qq:
 177. Commands s-p, s-l, s-r now not commands, but catched from say, like ktpro,
