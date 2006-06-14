@@ -1,3 +1,10 @@
+2006-06-15
+qq:
+182. Now spectators can see connect/disconnect message about other spectators
+	 independatly from match status.
+
+	 thx smerz
+
 2006-06-14
 qq:
 181. Removed showing vertical speed with sh_speed on.

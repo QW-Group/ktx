@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.23 2006/05/30 23:42:06 qqshka Exp $
+ *  $Id: spectate.c,v 1.24 2006/06/14 21:31:36 qqshka Exp $
  */
 
 // spectate.c
@@ -85,16 +85,18 @@ void wizard_think()
 ///////////////
 void SpectatorConnect()
 {
+	gedict_t *p;
+	int from = ( match_in_progress == 2 && !cvar("k_ann") ) ? 1 : 0;
 	int diff = (int)(PROG_TO_EDICT(self->s.v.goalentity) - world);
+
+	for ( p = world; (p = find_plrspc(p, &from)); )	
+		G_sprint( p, PRINT_HIGH, "Spectator %s entered the game\n", self->s.v.netname  );
 
 	if ( diff < 0 || diff >= MAX_EDICTS ) // something wrong happen - fixing
 		self->s.v.goalentity = EDICT_TO_PROG( world );
 
 	VIP_ShowRights( self );
 	CheckRate(self, "");
-
-	if( match_in_progress != 2 || cvar("k_ann") )
-		G_bprint( PRINT_HIGH, "Spectator %s entered the game\n", self->s.v.netname );
 
 	// Added this in for kick code.
 	self->s.v.classname = "spectator";
@@ -130,8 +132,11 @@ void PutSpectatorInServer()
 ///////////////
 void SpectatorDisconnect()
 {
-	if( match_in_progress != 2 || cvar("k_ann") )
-		G_bprint( PRINT_HIGH, "Spectator %s left the game\n", self->s.v.netname );
+	gedict_t *p;
+	int from = ( match_in_progress == 2 && !cvar("k_ann") ) ? 1 : 0;
+
+	for ( p = world; (p = find_plrspc(p, &from)); )	
+		G_sprint( p, PRINT_HIGH, "Spectator %s left the game\n", self->s.v.netname );
 
 // s: added conditional function call here
 	if( self->v.elect_type != etNone ) {
