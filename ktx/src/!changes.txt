@@ -1,3 +1,12 @@
+2006-06-14
+qq:
+181. Removed showing vertical speed with sh_speed on.
+     Few reasons:
+		1) smart commands like impulse 8 7 6 1 does't work cos u may have zero ammo if have zero speed.
+		2) make ktx code too compilcated for ppl who noob to ktx sources.
+		3) better add some hud to client, ezQuake already have horizontal hud, just add
+		   same for vertical hud.
+
 2006-06-07
 qq:
 180. fixed auto demo recording bug.
