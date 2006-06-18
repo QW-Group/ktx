@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.69 2006/05/30 23:42:06 qqshka Exp $
+ *  $Id: g_local.h,v 1.70 2006/06/18 00:51:41 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -36,7 +36,7 @@
 #include "g_syscalls.h"
 #include "player.h"
 
-#define MOD_VERSION					("1.30")
+#define MOD_VERSION					("1.31")
 #define MOD_NAME					("KTX")
 #define MOD_SERVERINFO_MOD_KEY		("xmod")
 #define MOD_SERVERINFO_BUILD_KEY	("xbuild")
@@ -549,7 +549,7 @@ void s_lr_clear( gedict_t *dsc );
 #define	VIP_ADMIN       ( 4) // VIP with admin rights
 //		 8 - VIP with demo admin rights
 //		16 - VIP with judge rights
-//		32 - VIP with rcon admin rights
+#define VIP_RCON		(32) // VIP with rcon admin rights
 
 
 int				VIP(gedict_t* cl);

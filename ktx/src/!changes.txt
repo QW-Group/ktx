@@ -1,3 +1,16 @@
+2006-06-18 [ver 1.31]
+qq:
+183. New commands: "s-m", "multi", "mmode" like in ktpro.
+	 Read "mvdfeatures.txt" from ktpro docs about this commands.
+
+184. IP BASED VIP change.
+	 Since "/mmode rcon [pass]" now supported, then
+	 VIP with bit 32 - VIP with rcon admin rights, is working now.
+
+	 If u r such vip, u can grant rcon message mode via "/mmode rcon".
+	 If u r know server rcon pass, u can grant rcon message mode via "/mmode rcon pass",
+	 vip rights is not required in last case.
+
 2006-06-15
 qq:
 182. Now spectators can see connect/disconnect message about other spectators

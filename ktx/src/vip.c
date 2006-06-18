@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: vip.c,v 1.3 2006/05/30 23:42:06 qqshka Exp $
+ *  $Id: vip.c,v 1.4 2006/06/18 00:51:42 qqshka Exp $
  */
 
 // vip.c
@@ -61,6 +61,11 @@ void VIP_ShowRights(gedict_t* cl)
 	if ( flags & VIP_ADMIN ) {
 		flags &= ~VIP_ADMIN;
 		rights = va("%s admin", rights);
+	}
+
+	if ( flags & VIP_RCON ) {
+		flags &= ~VIP_RCON;
+		rights = va("%s rcon_adm", rights);
 	}
 
 	if ( strnull( rights ) || flags )

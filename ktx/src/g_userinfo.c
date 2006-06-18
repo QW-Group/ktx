@@ -14,10 +14,12 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_userinfo.c,v 1.19 2006/05/28 03:44:28 qqshka Exp $
+ *  $Id: g_userinfo.c,v 1.20 2006/06/18 00:51:42 qqshka Exp $
  */
 
 #include "g_local.h"
+
+void info_sys_mm_update( gedict_t *p, char *from, char *to );
 
 qboolean isSupport_Params(gedict_t *p);
 
@@ -164,6 +166,11 @@ qboolean FixPlayerTeam ( char *newteam )
 
 cmdinfo_t cinfos[] = {
 	{ "*is", 0 },		// keys with * is for internal use ONLY
+	{ "*mm", info_sys_mm_update },	// for mmode
+	{ "*ml", 0 },					// for mmode last
+	{ "*mp", 0 },					// for mmode player
+	{ "*mt", 0 },					// for mmode team
+	{ "*mu", 0 },					// for mmode multi
     { "mi", info_mi_update },		// spec moreinfo
     { "b_switch", 0 },
 //    { "bw" },
@@ -444,7 +451,7 @@ void cmdinfo_infoset ( gedict_t *p )
 	}
 	else {
 		// kick cmd back to server, so we know client already get infoset,
-	  	// so we can invoke on_connect and on_enter
+	  	// so we can invoke on_enter
 		stuffcmd(p, "wait;wait;wait;cmd ack noinfoset\n");
 	}
 }

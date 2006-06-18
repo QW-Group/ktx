@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_consts.h,v 1.13 2006/05/17 20:11:48 qqshka Exp $
+ *  $Id: g_consts.h,v 1.14 2006/06/18 00:51:41 qqshka Exp $
  */
 
 //
@@ -295,4 +295,12 @@
 #define SPECPRINT_CENTERPRINT   (0x1)
 #define SPECPRINT_SPRINT        (0x2)
 #define SPECPRINT_STUFFCMD      (0x4)
+
+// mmode stuff
+#define MMODE_NONE		(0)
+#define MMODE_PLAYER	(1)
+#define MMODE_TEAM		(2)
+#define MMODE_MULTI		(3)
+#define MMODE_RCON		(4)
+#define MMODE_NAME		(5)
 

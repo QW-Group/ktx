@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.53 2006/06/02 21:54:22 qqshka Exp $
+ *  $Id: g_utils.c,v 1.54 2006/06/18 00:51:42 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -873,12 +873,15 @@ char *getteam( gedict_t * ed )
 	static char		string[MAX_STRINGS][128];
 	static int		index = 0;
 	char 			*team=NULL;
+	int 			num = (int)(ed - g_edicts);
 
 	index %= MAX_STRINGS;
 
-	if ( 	streq(ed->s.v.classname, "player")
+	if (/* 	streq(ed->s.v.classname, "player")
 		 || streq(ed->s.v.classname, "player_na") 
 		 || streq(ed->s.v.classname, "spectator")
+		*/
+		num >= 1 || num <= MAX_CLIENTS
 	   )
 		team = ezinfokey(ed, "team");
 	else if ( streq(ed->s.v.classname, "ghost") )
@@ -899,12 +902,15 @@ char *getname( gedict_t * ed )
 	static char		string[MAX_STRINGS][1024];
 	static int		index = 0;
 	char 			*name=NULL;
+	int 			num = (int)(ed - g_edicts);
 
 	index %= MAX_STRINGS;
 
-	if ( 	streq(ed->s.v.classname, "player")
+	if (/* 	streq(ed->s.v.classname, "player")
 		 || streq(ed->s.v.classname, "player_na") 
-		 || streq(ed->s.v.classname, "spectator") )
+		 || streq(ed->s.v.classname, "spectator") */
+		num >= 1 || num <= MAX_CLIENTS
+	   )
 		name = ed->s.v.netname;
 	else if ( streq(ed->s.v.classname, "ghost") )
 		name = ezinfokey(world, va("%d", (int)ed->cnt2));

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.110 2006/06/04 23:55:52 qqshka Exp $
+ *  $Id: commands.c,v 1.111 2006/06/18 00:51:42 qqshka Exp $
  */
 
 // commands.c
@@ -140,6 +140,8 @@ void moreinfo ();
 void s_p_cmd();
 void s_lr_cmd( float l );
 void s_t_cmd();
+void mmode();
+void multi();
 void cmdinfo();
 void cmduinfo();
 void cmd_wreg();
@@ -348,6 +350,9 @@ const char CD_NODESC[] = "no desc";
 #define CD_S_L          "continue last s-p u done"
 #define CD_S_R          "reply to last s-p u got"
 #define CD_S_T          "say to group of players"
+#define CD_S_M          "multi say" // anyone have better description?
+#define CD_MMODE        "switch message mode"
+#define CD_MULTI        "change/print multi set"
 #define CD_KINFO        "set self params for mod"
 #define CD_KUINFO       "examine someone params"
 #define CD_WREG         "register reliable wpns"
@@ -565,6 +570,9 @@ cmd_t cmds[] = {
 	{ "s-l",         dummy,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_S_L },
 	{ "s-r",         dummy,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_S_R },
 	{ "s-t",         dummy,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_S_T },
+	{ "s-m",         dummy,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_S_M },
+	{ "mmode",       mmode,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_MMODE },
+	{ "multi",       multi,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_MULTI },
 	{ "kinfo",       cmdinfo,                   0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_KINFO },
 	{ "kuinfo",      cmduinfo,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_KUINFO },
 	{ "wreg",        cmd_wreg,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_WREG },
