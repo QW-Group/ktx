@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.54 2006/06/18 00:51:42 qqshka Exp $
+ *  $Id: g_utils.c,v 1.55 2006/06/18 15:35:59 disconn3ct Exp $
  */
 
 #include "g_local.h"
@@ -1602,7 +1602,7 @@ void show_sv_version()
 	G_sprint(self, 2, "Server: %s\n", cvar_string( "version" ));
 
 	if ( (int)cvar( "sv_specprint" ) & SPECPRINT_SPRINT )
-		G_sprint(self, PRINT_CHAT, "\x87\x87\x87WARNING: spectators may sow mm2 messages on this server!\n");
+		G_sprint(self, PRINT_CHAT, "\x87\x87\x87WARNING: spectators may see team messages (mm2) on this server!\n");
 }
 
 
