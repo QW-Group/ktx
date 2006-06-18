@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.42 2006/06/14 20:26:16 qqshka Exp $
+ *  $Id: weapons.c,v 1.43 2006/06/18 15:52:25 disconn3ct Exp $
  */
 
 #include "g_local.h"
@@ -1271,7 +1271,7 @@ void W_Attack()
 	if ( !W_CheckNoAmmo() )
 		return;
 
-	// FIXME: 4096 and 1048576 ?
+	// FIXME: 4096=IT_AXE and 1048576=IT_INVULNERABILITY --> bothdefs.h of mvdsv sources
 	self->lastwepfired = self->s.v.weapon;
 	if (self->k_666 == 1 && !(self->s.v.weapon == 4096 || self->s.v.weapon == 1)) {
 		self->s.v.items = self->s.v.items - ((int)self->s.v.items & 1048576);
