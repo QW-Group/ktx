@@ -1,3 +1,10 @@
+2006-06-19
+qq:
+185. "/fkick" removed. U can use "/cmd kick id/name" or "/mkick id" instead
+	 for not fully connected users too.
+
+	 thx gLAd for idea
+
 2006-06-18 [ver 1.31]
 qq:
 183. New commands: "s-m", "multi", "mmode" like in ktpro.

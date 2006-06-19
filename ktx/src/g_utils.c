@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.55 2006/06/18 15:35:59 disconn3ct Exp $
+ *  $Id: g_utils.c,v 1.56 2006/06/19 20:55:54 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1093,7 +1093,7 @@ gedict_t *not_connected_by_id( int id )
 	char *statk;
 	gedict_t *p;
 
-	for( p = world + 1; p <= world + MAX_CLIENTS; p++ )
+	for( p = g_edicts + 1; p <= g_edicts + MAX_CLIENTS; p++ )
 		if ( (   streq(statk = ezinfokey(p, "*state"), "preconnected")
 			  || streq(statk, "connected")
 			 ) && iKey(p, "*userid") == id  // can't use GetUserID here
@@ -1101,6 +1101,28 @@ gedict_t *not_connected_by_id( int id )
 			return p;
 
 	return NULL;
+}
+
+gedict_t *not_connected_by_name( const char *name )
+{
+	char *statk;
+	gedict_t *p;
+
+	for( p = g_edicts + 1; p <= g_edicts + MAX_CLIENTS; p++ )
+		if ( (   streq(statk = ezinfokey(p, "*state"), "preconnected")
+			  || streq(statk, "connected")
+			 ) && streq(p->s.v.netname, name)
+		   )
+			return p;
+
+	return NULL;
+}
+
+gedict_t *not_connected_by_IDorName( const char *IDname )
+{
+	gedict_t *p = not_connected_by_id( atoi( IDname ) );
+
+	return (p ? p : not_connected_by_name( IDname ) );
 }
 
 char *armor_type( int items )

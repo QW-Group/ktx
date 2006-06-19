@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.68 2006/06/18 15:57:06 disconn3ct Exp $
+ *  $Id: match.c,v 1.69 2006/06/19 20:55:54 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1019,7 +1019,7 @@ void TimerThink ()
 			p = find ( world, FOFCLSN, "player" );
 			while( p ) {
 				if( !strnull ( p->s.v.netname ) && ISLIVE( p ) ) {
-					p->s.v.items = (int)p->s.v.items | (4194304 | 1048576); // FIXME: IT_QUAD=4194304 && 1048576=IT_INVULNERABILITY
+					p->s.v.items = (int)p->s.v.items | (IT_QUAD | IT_INVULNERABILITY);
 					p->super_time = 1;
 					p->super_damage_finished = g_globalvars.time + 3600;
 					p->invincible_time = 1;

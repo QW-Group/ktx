@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.111 2006/06/18 00:51:42 qqshka Exp $
+ *  $Id: commands.c,v 1.112 2006/06/19 20:55:54 qqshka Exp $
  */
 
 // commands.c
@@ -40,7 +40,6 @@ void ToggleMapLock ();
 void ToggleMaster ();
 void AdminKick ();
 void m_kick ();
-void f_kick ();
 void YesKick ();
 void DontKick ();
 void VoteAdmin();
@@ -247,7 +246,6 @@ const char CD_NODESC[] = "no desc";
 #define CD_QPOINT     "point function"
 #define CD_KICK       "toggle kick mode"
 #define CD_MKICK      "multi kick"
-#define CD_FKICK      "unconnected kick"
 #define CD_Y          "yes kick"
 #define CD_N          "don't kick"
 #define CD_OVERTIME   "toggle overtime mode"
@@ -454,7 +452,6 @@ cmd_t cmds[] = {
 	                                          
 	{ "kick",        AdminKick,                 0    , CF_BOTH_ADMIN/* FIXME: interference with ezq server kick command | CF_PARAMS */, CD_KICK },
 	{ "mkick",       m_kick,                    0    , CF_BOTH_ADMIN | CF_PARAMS, CD_MKICK },
-	{ "fkick",       f_kick,                    0    , CF_BOTH_ADMIN | CF_PARAMS, CD_FKICK },
 	{ "y",           YesKick,                   0    , CF_BOTH_ADMIN, CD_Y },
 	{ "n",           DontKick,                  0    , CF_BOTH_ADMIN, CD_N },
 	{ "overtime",    ChangeOvertime,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_OVERTIME },

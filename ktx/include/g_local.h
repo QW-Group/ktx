@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.70 2006/06/18 00:51:41 qqshka Exp $
+ *  $Id: g_local.h,v 1.71 2006/06/19 20:55:54 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -266,6 +266,8 @@ gedict_t	*SpecPlayer_by_IDorName( const char *IDname );
 gedict_t	*SpecPlayer_by_id( int id );
 
 gedict_t	*not_connected_by_id( int id );
+gedict_t	*not_connected_by_name( const char *name );
+gedict_t	*not_connected_by_IDorName( const char *IDname );
 
 char		*armor_type( int items );
 

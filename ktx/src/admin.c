@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.38 2006/06/04 19:42:32 ult_ Exp $
+ * $Id: admin.c,v 1.39 2006/06/19 20:55:54 qqshka Exp $
  */
 
 // admin.c
@@ -117,7 +117,7 @@ void AdminKick ()
 
 		trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
 
-		if ( !(p = SpecPlayer_by_IDorName( arg_2 )) ) {
+		if ( !(p = SpecPlayer_by_IDorName( arg_2 )) && !(p = not_connected_by_IDorName( arg_2 )) ) {
 			G_sprint(self, 2, "kick: client %s not found\n", arg_2);
 			return;
 		}
@@ -165,65 +165,13 @@ void m_kick ()
 		if ( !only_digits(arg_x) )
 			break;
 
-		if ( !(p = SpecPlayer_by_id( atoi(arg_x) )) ) {
+		if ( !(p = SpecPlayer_by_id( atoi(arg_x) )) && !(p = not_connected_by_id( atoi(arg_x) )) ) {
 			G_sprint(self, 2, "mkick: client %s not found\n", arg_x);
 			continue;
 		}
 
 		if( !DoKick( p, self ) )
 			continue;
-
-		k++;
-	}
-
-	if ( !k )
-		return;
-
-	if ( !strnull( str = params_str(i, -1) ) ) // show reason
-		G_bprint(2, "\x90%s\x91\n", str);
-}
-
-// allow kick not fully connected users
-void f_kick ()
-{
-	int i, k;
-	gedict_t *p;
-	char arg_x[1024], *str;
-	int argc = trap_CmdArgc();
-
-    if( !is_adm( self ) )
-    {
-        G_sprint(self, 2, "You are not an admin\n");
-        return;
-    }
-
-	trap_CmdArgv( 1, arg_x, sizeof( arg_x ) );
-
-	if ( argc < 2 || !only_digits(arg_x) ) {
-        G_sprint(self, 2, "fkick <id1 [id2 [id3 ...]] [reason]>\n");
-		return;
-	}
-
-	for ( k = 0, i = 1; i < argc; i++ ) {
-		trap_CmdArgv( i, arg_x, sizeof( arg_x ) );
-
-		if ( !only_digits(arg_x) )
-			break;
-
-		if ( !(p = not_connected_by_id( atoi(arg_x) )) ) {
-			G_sprint(self, 2, "fkick: not connected client %s not found\n", arg_x);
-			continue;
-		}
-
-		if ( !is_can_kick(p, self) )
-			continue;
-
-// yeah, we do here kicking too, but in different way
-//		DoKick( p, self );
-		G_bprint(2, "%s was kicked by %s\n", 
-				(strnull( p->s.v.netname ) ? "!noname!" : p->s.v.netname), getname(self));
-
-		localcmd("kick %d\n", atoi(arg_x)); //native sv kick command
 
 		k++;
 	}
