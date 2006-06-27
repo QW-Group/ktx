@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.71 2006/06/19 20:55:54 qqshka Exp $
+ *  $Id: g_local.h,v 1.72 2006/06/27 00:07:13 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -438,7 +438,7 @@ void            spawn_tdeath( vec3_t org, gedict_t * death_owner );
 
 // runes.c
 void            DropRune();
-void            SpawnRunes();
+void            SpawnRunes( qboolean yes );
 void            TossRune();
 void            ResistanceSound( gedict_t *player );
 void            HasteSound( gedict_t *player );
@@ -446,7 +446,8 @@ void            RegenerationSound( gedict_t *player );
 
 // ctf.c
 void            PlayerDropFlag( gedict_t *player );
-void            RegenFlags();
+void            RegenFlags( qboolean yes );
+void			AddHook( qboolean yes );
 
 // commands.c
 typedef struct cmd_s {

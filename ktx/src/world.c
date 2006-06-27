@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.55 2006/06/04 00:17:36 qqshka Exp $
+ *  $Id: world.c,v 1.56 2006/06/27 00:07:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -662,6 +662,8 @@ void FirstFrame	( )
 	RegisterCvar("k_no_fps_physics");
 //{ ctf
 	RegisterCvar("k_ctf_custom_models");
+	RegisterCvar("k_ctf_hook");
+	RegisterCvar("k_ctf_runes");
 //}
 	RegisterCvar("k_spec_info");
 	RegisterCvar("k_no_vote_break");
@@ -727,7 +729,7 @@ void SecondFrame ( )
 	Customize_Maps();
 
 	if ( isCTF() )
-		SpawnRunes();
+		SpawnRunes( cvar("k_ctf_runes") );
 }
 
 void hide_powerups ( char *classname )
@@ -779,40 +781,38 @@ void CheckSvUnlock ()
 	}
 }
 
-// called when switching to/from ctf mode
+// called when switching to/from ctf mode.
+// btw, this do actual work only then some one change usermod or toggle hook/runes, but not on map change
+// on map change: flag is not spawned here, runes not spawned here too, u must look some other code
 void FixCTFItems()
 {
-	gedict_t *e;
+	static gameType_t old_k_mode = 0;	// static
+	static int k_ctf_runes = 0;			// static
+	static int k_ctf_hook = 0;			// static
 
-	if ( isCTF() )
-	{
-		RegenFlags();
-		SpawnRunes();
-		for ( e = world; (e = find( e, FOFCLSN, "player" )); )
-			e->s.v.items = (int) e->s.v.items | IT_HOOK;
+	if ( framecount == 1 ) { // just init vars at first frame, after this we can determine if such vars changed
+		old_k_mode = k_mode;
+		k_ctf_runes = cvar("k_ctf_runes");
+		k_ctf_hook = cvar("k_ctf_hook");
+
+		return;
 	}
-	else
-	{
-		for ( e = world; (e = find( e, FOFCLSN, "player" )); )
-			e->s.v.items -= (int) e->s.v.items & IT_HOOK;
 
-		e = find( world, FOFCLSN, "item_flag_team1" );
-		if ( e )
-		{
-			e->s.v.touch = (func_t) SUB_Null;
-			setmodel( e, "" );
-		}
+	if ( match_in_progress )
+		return; // some optimization, ok ?
 
-		e = find( world, FOFCLSN, "item_flag_team2" );
-		if ( e )
-		{
-			e->s.v.touch = (func_t) SUB_Null;
-			setmodel( e, "" );
-		}
+	if ( old_k_mode != k_mode )
+		RegenFlags( isCTF() );
 
-		for ( e = world; (e = find( e, FOFCLSN, "rune" )); )
-			ent_remove( e );
-	}
+	if ( old_k_mode != k_mode || k_ctf_runes != cvar("k_ctf_runes") )
+		SpawnRunes( isCTF() && cvar("k_ctf_runes") );
+
+	if ( old_k_mode != k_mode || k_ctf_hook != cvar("k_ctf_hook") )
+		AddHook( isCTF() && cvar("k_ctf_hook") );
+
+	old_k_mode = k_mode;
+	k_ctf_runes = cvar("k_ctf_runes");
+	k_ctf_hook = cvar("k_ctf_hook");
 }
 
 // serve k_pow and k_pow_min_players
@@ -996,15 +996,13 @@ void Check_sready();
 
 void StartFrame( int time )
 {
-	gameType_t old_k_mode = k_mode;
-
 	framecount++;
 
 	if ( framecount == 1 )
 		FirstFrame();
 
 	if ( framecount == 2 )
-		SecondFrame ( );
+		SecondFrame();
 
 //	rj = max( 0, cvar( "rj" ) ); 	// Set Rocket Jump Modifiers
 
@@ -1016,15 +1014,13 @@ void StartFrame( int time )
 
     k_mode = cvar( "k_mode" );         
 
-	// if modes have changed we may need to add/remove flags etc
-	if ( k_mode != old_k_mode && framecount > 1 )
-		FixCTFItems(); 
+	FixCTFItems(); // if modes have changed we may need to add/remove flags etc
 
-	FixRules ();
+	FixRules();
 
-	FixPowerups ();
+	FixPowerups();
 
-	FixSpecWizards ();
+	FixSpecWizards();
 
 	framechecks = bound( 0, !cvar( "k_noframechecks" ), 1 );
 
@@ -1045,7 +1041,7 @@ void StartFrame( int time )
 
 	if ( !CountALLPlayers() && k_pause ) {
 		G_bprint(2, "No players left, unpausing.\n");
-		ModPause ( 0 );
+		ModPause( 0 );
 	}
 
 	if ( intermission_running && g_globalvars.time >= intermission_exittime - 1 
@@ -1056,6 +1052,6 @@ void StartFrame( int time )
 		StartTimer(); // trying start countdown in matchless mode
 
 	if ( framecount > 10 )
-		vote_check_all ();
+		vote_check_all();
 }
 

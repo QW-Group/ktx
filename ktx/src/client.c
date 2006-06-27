@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.89 2006/06/14 20:26:16 qqshka Exp $
+ *  $Id: client.c,v 1.90 2006/06/27 00:07:13 qqshka Exp $
  */
 
 //===========================================================================
@@ -222,10 +222,10 @@ void SP_info_intermission()
 
 void InGameParams ()
 {
-	if ( isCTF() )
-		g_globalvars.parm1 = IT_AXE | IT_SHOTGUN | IT_HOOK;
-    else
-		g_globalvars.parm1 = IT_AXE | IT_SHOTGUN;
+	g_globalvars.parm1 = IT_AXE | IT_SHOTGUN;
+
+	if ( isCTF() && cvar("k_ctf_hook") )
+		g_globalvars.parm1 = (int)g_globalvars.parm1 | IT_HOOK;
 
 	g_globalvars.parm2 = 100;
 	g_globalvars.parm3 = 0;
@@ -238,12 +238,11 @@ void InGameParams ()
 
 void PrewarParams ()
 {
-	if ( isCTF() )
-		g_globalvars.parm1 = IT_AXE | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_NAILGUN | IT_SUPER_NAILGUN
-					| IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER | IT_LIGHTNING | IT_HOOK;
-	else
-		g_globalvars.parm1 = IT_AXE | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_NAILGUN | IT_SUPER_NAILGUN
-					| IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER | IT_LIGHTNING;
+	g_globalvars.parm1 = IT_AXE | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_NAILGUN | IT_SUPER_NAILGUN
+						| IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER | IT_LIGHTNING;
+
+	if ( isCTF() && cvar("k_ctf_hook") )
+		g_globalvars.parm1 = (int)g_globalvars.parm1 | IT_HOOK;
 
 	g_globalvars.parm2 = 1000;
 	g_globalvars.parm3 = 1000;

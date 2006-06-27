@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.69 2006/06/19 20:55:54 qqshka Exp $
+ *  $Id: match.c,v 1.70 2006/06/27 00:07:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1192,10 +1192,13 @@ void TimerThink ()
 	self->s.v.nextthink = g_globalvars.time + 1;
 }
 
-// remove some items from map regardind with dmm
+// remove/add some items from map regardind with dmm and game mode
 void SM_PrepareMap()
 {
 	gedict_t *p;
+
+	if ( isCTF() )
+		SpawnRunes( cvar("k_ctf_runes") );
 
 	for( p = world; (p = ( k_matchLess ? findradius2(p, VEC_ORIGIN, 999999) :
 					 				     findradius(p, VEC_ORIGIN, 999999) ));
@@ -1377,10 +1380,7 @@ void StartMatch ()
         k_berzerkenabled = 0;
     }
 
-	SM_PrepareMap(); // remove some items from map regardind with dmm
-
-	if ( isCTF() )
-		SpawnRunes();
+	SM_PrepareMap(); // remove/add some items from map regardind with dmm and game mode
 	
 	G_cprint("MATCH STARTED\n");
 

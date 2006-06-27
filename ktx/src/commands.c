@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.112 2006/06/19 20:55:54 qqshka Exp $
+ *  $Id: commands.c,v 1.113 2006/06/27 00:07:13 qqshka Exp $
  */
 
 // commands.c
@@ -54,7 +54,14 @@ void ChangeOvertime();
 void ChangeOvertimeUp();
 void ChangeTP();
 void ToggleFallBunny ();
+// { CTF
 void FlagStatus();
+void norunes();
+void nohook();
+void mctf();
+// also: TossRune()
+//       swapall()
+// } CTF
 void FragsDown();
 void FragsUp();
 void ListWhoNot();
@@ -340,6 +347,9 @@ const char CD_NODESC[] = "no desc";
 #define CD_SH_SPEED     "toggle use show speed"
 #define CD_TOSSRUNE     "drop rune (CTF)"
 #define CD_FLAGSTATUS   "show flags status (CTF)"
+#define CD_NOHOOK       "toggle hook (CTF)"
+#define CD_NORUNES      "toggle runes (CTF)"
+#define CD_MCTF         "disable hook+runes (CTF)"
 #define CD_MOTD         "show motd"
 #define CD_INFOLOCK     "toggle specinfo perms"
 #define CD_INFOSPEC     "toggle spectator infos"
@@ -556,6 +566,9 @@ cmd_t cmds[] = {
 	{ "sh_speed",    Sh_Speed,                  0    , CF_BOTH, CD_SH_SPEED },
 // { CTF commands
 	{ "tossrune",    TossRune,                  0    , CF_PLAYER, CD_TOSSRUNE },
+	{ "nohook",      nohook,                    0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOHOOK },
+	{ "norunes",     norunes,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NORUNES },
+	{ "mctf",        mctf,                      0    , CF_PLAYER | CF_SPC_ADMIN, CD_MCTF },
 	{ "flagstatus",  FlagStatus,                0    , CF_BOTH, CD_FLAGSTATUS },
 	{ "swapall",     AdminSwapAll,              0    , CF_BOTH_ADMIN, CD_SWAPALL },
 // }
@@ -1220,6 +1233,8 @@ void ModStatus2()
 		G_sprint(self, 2, "%s:  CTF\n", redtext("Server mode"));
 		G_sprint(self, 2, "%s: %s\n", redtext("Server locking"),
 					 (!lock ? "off" : (lock == 2 ? "all" : (lock == 1 ? "team" : "unknown"))));
+		G_sprint(self, 2, "%s: hook %s, runes %s\n", redtext("CTF settings"),
+							 OnOff(cvar("k_ctf_hook")), OnOff(cvar("k_ctf_runes")));
 	}
 	else if ( isTeam() ) {
 		G_sprint(self, 2, "%s: team\n", redtext("Server mode"));
@@ -2633,7 +2648,9 @@ const char ctf_um_init[] =
 	"k_lockmax 2\n"                                 
 	"k_overtime 1\n"
 	"k_exttime 5\n"
-	"k_mode 4\n";
+	"k_mode 4\n"
+	"k_ctf_hook 1\n"				// hook on
+	"k_ctf_runes 1\n";				// runes on
 
 
 usermode um_list[] =

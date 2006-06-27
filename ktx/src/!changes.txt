@@ -1,3 +1,23 @@
+2006-06-27
+qq:
+186. Some CTF changes.
+
+	 Added modern(q3ish)/modifed CTF mode, i.e. CTF without hook & runes.
+
+	 Players may affect this via commands: "/nohook", "/norunes", "/mctf".
+	 But u need activate CTF mode first via "/ctf" command.
+	 "/nohook" - toggle hook allowability.
+	 "/norunes" - toggle runes allowability.
+	 "/mctf" - just turn off runes & hook, most wanted thing?
+
+	 For server admins:
+	 	set k_ctf_hook  0 // 0 - hook  off, 1  - on
+	 	set k_ctf_runes 0 // 0 - runes off, 1  - on
+
+	 By default, when u type "/ctf" hook & runes is on, if u wanna change this,
+	 u must add k_ctf_hook and k_ctf_runes somewhere in cfgs, i think
+	 configs/usermodes/ctf/default.cfg is good for this purposes.
+
 2006-06-19
 qq:
 185. "/fkick" removed. U can use "/cmd kick id/name" or "/mkick id" instead

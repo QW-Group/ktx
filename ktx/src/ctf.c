@@ -1,5 +1,5 @@
 /*
- *  $Id: ctf.c,v 1.13 2006/05/23 00:31:06 ult_ Exp $
+ *  $Id: ctf.c,v 1.14 2006/06/27 00:07:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -129,6 +129,32 @@ void SP_func_ctf_wall()
 	setmodel( self, self->s.v.model ); 
 }
 
+// add/remove hook item to/from player
+void AddHook( qboolean yes )
+{
+	gedict_t *e, *oself;
+
+	oself = self;
+
+	for ( e = world; (e = find( e, FOFCLSN, "player" )); ) {
+		e->s.v.items = (yes ? ((int) e->s.v.items | IT_HOOK) : ((int) e->s.v.items & ~IT_HOOK));
+
+		self = e; // warning
+
+		if ( self->hook_out )
+			GrappleReset( self->hook );
+		self->hook_out = false;
+		self->on_hook = false;
+
+		if ( !yes && self->s.v.weapon == IT_HOOK ) { // actually remove hook from hands if hold, not just from items
+			self->s.v.weapon = 0;
+			W_SetCurrentAmmo();
+		}
+	}
+
+	self = oself;
+}
+
 void RegenFlag( gedict_t *flag )
 {
 	flag->s.v.movetype = MOVETYPE_TOSS;
@@ -145,15 +171,32 @@ void RegenFlag( gedict_t *flag )
 	flag->s.v.touch = (func_t) FlagTouch;
 }
 
-void RegenFlags()
+// show/hide flag
+void RegenFlags( qboolean yes )
 {
-	gedict_t * flag;
+	gedict_t *flag;
+
 	flag = find( world, FOFCLSN, "item_flag_team1" );
-	if ( flag )
-		RegenFlag( flag );
+
+	if ( flag ) {
+		if ( !yes ) {
+			flag->s.v.touch = (func_t) SUB_Null;
+			setmodel( flag, "" );
+		}
+		else
+			RegenFlag( flag );
+	}
+
 	flag = find( world, FOFCLSN, "item_flag_team2" );
-	if ( flag )
-		RegenFlag( flag );
+
+	if ( flag ) {
+		if ( !yes ) {
+			flag->s.v.touch = (func_t) SUB_Null;
+			setmodel( flag, "" );
+		}
+		else
+			RegenFlag( flag );
+	}
 }
 
 void FlagThink()
@@ -271,7 +314,7 @@ void FlagTouch()
 					else
 						p->carrier_hurt_time = -1;
 				}
-				RegenFlags();
+				RegenFlags( true );
 				return;
 			}
 			return;
@@ -459,4 +502,51 @@ void FlagStatus()
 		default:
 			G_sprint ( self, 2, "\n" );
 	}
+}
+
+void norunes()
+{
+    if( match_in_progress )
+        return;
+
+	if ( !isCTF() ) {
+		G_sprint ( self, 2, "Can't do this in non CTF mode\n" );
+		return;
+	}
+
+	cvar_toggle_msg( self, "k_ctf_runes", redtext("runes") );
+}
+
+void nohook()
+{
+    if( match_in_progress )
+        return;
+
+	if ( !isCTF() ) {
+		G_sprint ( self, 2, "Can't do this in non CTF mode\n" );
+		return;
+	}
+
+	cvar_toggle_msg( self, "k_ctf_hook", redtext("hook") );
+}
+
+void mctf()
+{
+    if( match_in_progress )
+        return;
+
+	if ( !isCTF() ) {
+		G_sprint ( self, 2, "Can't do this in non CTF mode\n" );
+		return;
+	}
+
+	if ( !cvar("k_ctf_hook") && !cvar("k_ctf_runes") ) {
+		G_sprint ( self, 2, "Already done\n" );
+		return;
+	}
+
+	cvar_fset("k_ctf_hook", 0);
+	cvar_fset("k_ctf_runes", 0);
+
+	G_sprint ( self, 2, "%s turn off: %s\n", getname(self), redtext("hook & runes") );
 }

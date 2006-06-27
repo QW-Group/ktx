@@ -1,5 +1,5 @@
 /*
- *  $Id: runes.c,v 1.7 2006/05/23 00:31:06 ult_ Exp $
+ *  $Id: runes.c,v 1.8 2006/06/27 00:07:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -10,7 +10,7 @@ void RuneTouch();
 void RuneResetOwner();
 gedict_t* SelectRuneSpawnPoint();
 
-void DoDropRune(int rune)
+void DoDropRune(int rune, qboolean s)
 {
 	gedict_t *item;
 
@@ -38,6 +38,10 @@ void DoDropRune(int rune)
 	item->s.v.touch = (func_t) RuneTouch;
 	item->s.v.nextthink = g_globalvars.time + 90;
 	item->s.v.think = (func_t) RuneRespawn;
+
+	// qqshka, add spawn sound to rune if rune respawned, not for player dropped from corpse rune
+	if ( s )
+		sound( item, CHAN_VOICE, "items/itembk2.wav", 1, ATTN_NORM );	// play respawn sound
 }
 
 void DoTossRune( int rune )
@@ -78,19 +82,19 @@ void DoTossRune( int rune )
 void DropRune()
 {
 	if ( self->ctf_flag & CTF_RUNE_RES ) {
-		DoDropRune( CTF_RUNE_RES );
+		DoDropRune( CTF_RUNE_RES, false );
 		self->ps.res_time += g_globalvars.time - self->rune_pickup_time;
 	}
 	if ( self->ctf_flag & CTF_RUNE_STR ) {
-		DoDropRune( CTF_RUNE_STR );
+		DoDropRune( CTF_RUNE_STR, false );
 		self->ps.str_time += g_globalvars.time - self->rune_pickup_time;
 	}
 	if ( self->ctf_flag & CTF_RUNE_HST ) {
-		DoDropRune( CTF_RUNE_HST );
+		DoDropRune( CTF_RUNE_HST, false );
 		self->ps.hst_time += g_globalvars.time - self->rune_pickup_time;
 	}
 	if ( self->ctf_flag & CTF_RUNE_RGN ) {
-		DoDropRune( CTF_RUNE_RGN );
+		DoDropRune( CTF_RUNE_RGN, false );
 		self->ps.rgn_time += g_globalvars.time - self->rune_pickup_time;
 	}
 
@@ -157,7 +161,7 @@ void RuneRespawn()
 	int rune = self->ctf_flag;
 	ent_remove( self );
 	self = SelectRuneSpawnPoint();
-	DoDropRune( rune );
+	DoDropRune( rune, true );
 }
 
 void RuneTouch()
@@ -229,22 +233,27 @@ gedict_t* SelectRuneSpawnPoint()
 	return runespawn;
 }
 
-void SpawnRunes()
+// spawn/remove runes
+void SpawnRunes( qboolean yes )
 {
 	gedict_t *oself, *e;
-	oself = self;
 
 	for ( e = world; (e = find( e, FOFCLSN, "rune")); )
 		ent_remove( e );
+
+	if ( !yes )
+		return;
+
+	oself = self;
 		
 	self = SelectRuneSpawnPoint();
-	DoDropRune( CTF_RUNE_RES );
+	DoDropRune( CTF_RUNE_RES, true );
 	self = SelectRuneSpawnPoint();
-	DoDropRune( CTF_RUNE_STR );
+	DoDropRune( CTF_RUNE_STR, true );
 	self =  SelectRuneSpawnPoint();
-	DoDropRune( CTF_RUNE_HST );
+	DoDropRune( CTF_RUNE_HST, true );
 	self = SelectRuneSpawnPoint();
-	DoDropRune( CTF_RUNE_RGN );
+	DoDropRune( CTF_RUNE_RGN, true );
   
 	self = oself;
 }
