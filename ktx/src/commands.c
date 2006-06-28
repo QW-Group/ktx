@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.113 2006/06/27 00:07:13 qqshka Exp $
+ *  $Id: commands.c,v 1.114 2006/06/28 23:46:28 qqshka Exp $
  */
 
 // commands.c
@@ -406,7 +406,7 @@ cmd_t cmds[] = {
 	{ "timeup1",     TimeUp,				  1.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIMEUP1 },
 	{ "timedown",    TimeDown,				  5.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIMEDOWN },
 	{ "timeup",      TimeUp,				  5.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIMEUP },
-	{ "fallbunny",   ToggleFallBunny,           0    , CF_BOTH_ADMIN, CD_FALLBUNNY },
+	{ "fallbunny",   ToggleFallBunny,           0    , CF_PLAYER | CF_SPC_ADMIN, CD_FALLBUNNY },
 	{ "fragsdown",   FragsDown,                 0    , CF_PLAYER, CD_FRAGSDOWN },
 	{ "fragsup",     FragsUp,                   0    , CF_PLAYER, CD_FRAGSUP },
 	{ "dropquad",    ToggleDropQuad,            0    , CF_PLAYER, CD_DROPQUAD },

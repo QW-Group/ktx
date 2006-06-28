@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.39 2006/06/19 20:55:54 qqshka Exp $
+ * $Id: admin.c,v 1.40 2006/06/28 23:46:28 qqshka Exp $
  */
 
 // admin.c
@@ -803,11 +803,11 @@ void AdminForcePause ()
 
 void ToggleFallBunny ()
 {
-    if( !is_adm( self ) )
-        return;
-
     if( match_in_progress )
         return;
+
+	if( check_master() )
+		return;
 
 	cvar_toggle_msg( self, "k_fallbunny", redtext("fallbunny") );
 }

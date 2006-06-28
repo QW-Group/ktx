@@ -1,3 +1,7 @@
+2006-06-29
+qq:
+187. "/fallbanny" does't requires admin rights for players, specs still requires.
+
 2006-06-27
 qq:
 186. Some CTF changes.
