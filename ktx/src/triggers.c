@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: triggers.c,v 1.16 2006/05/19 00:27:06 qqshka Exp $
+ *  $Id: triggers.c,v 1.17 2006/07/08 01:39:10 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -450,6 +450,9 @@ void teleport_touch()
 	if ( ISDEAD( other ) || other->s.v.solid != SOLID_SLIDEBOX )
 		return;
 
+	if ( isRA() && !isWinner( other ) && !isLoser( other ) )
+		return;
+
 //team
 	other->k_1spawn = 60;
 //team
@@ -488,28 +491,6 @@ void teleport_touch()
 	spawn_tfog( org );
 	spawn_tdeath( t->s.v.origin, other );
 
-// move the player and lock him down for a little while
-// FIXME: hmmm, since "only teleport living creatures" above, this is code never be done, right?
-/* qqshka, i remove this shit
-
-	if ( !other->s.v.health )
-	{
-		VectorCopy( t->s.v.origin, other->s.v.origin );
-		play_teleport( other );
-		other->s.v.velocity[0] =
-		    ( g_globalvars.v_forward[0] * other->s.v.velocity[0] ) +
-		    ( g_globalvars.v_forward[0] * other->s.v.velocity[1] );
-		other->s.v.velocity[1] =
-		    ( g_globalvars.v_forward[1] * other->s.v.velocity[0] ) +
-		    ( g_globalvars.v_forward[1] * other->s.v.velocity[1] );
-		other->s.v.velocity[2] =
-		    ( g_globalvars.v_forward[2] * other->s.v.velocity[0] ) +
-		    ( g_globalvars.v_forward[2] * other->s.v.velocity[1] );
-
-		//other->s.v.velocity = (v_forward * other->s.v.velocity[0]) + (v_forward * other->s.v.velocity[1]);
-		return;
-	}
-*/
 	setorigin( other, PASSVEC3( t->s.v.origin ) );
 	play_teleport( other );
 

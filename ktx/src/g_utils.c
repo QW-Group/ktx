@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.56 2006/06/19 20:55:54 qqshka Exp $
+ *  $Id: g_utils.c,v 1.57 2006/07/08 01:39:10 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -877,12 +877,7 @@ char *getteam( gedict_t * ed )
 
 	index %= MAX_STRINGS;
 
-	if (/* 	streq(ed->s.v.classname, "player")
-		 || streq(ed->s.v.classname, "player_na") 
-		 || streq(ed->s.v.classname, "spectator")
-		*/
-		num >= 1 || num <= MAX_CLIENTS
-	   )
+	if ( num >= 1 && num <= MAX_CLIENTS )
 		team = ezinfokey(ed, "team");
 	else if ( streq(ed->s.v.classname, "ghost") )
 		team = ezinfokey(world, va("%d", (int)ed->k_teamnum));
@@ -906,11 +901,7 @@ char *getname( gedict_t * ed )
 
 	index %= MAX_STRINGS;
 
-	if (/* 	streq(ed->s.v.classname, "player")
-		 || streq(ed->s.v.classname, "player_na") 
-		 || streq(ed->s.v.classname, "spectator") */
-		num >= 1 || num <= MAX_CLIENTS
-	   )
+	if ( num >= 1 && num <= MAX_CLIENTS )
 		name = ed->s.v.netname;
 	else if ( streq(ed->s.v.classname, "ghost") )
 		name = ezinfokey(world, va("%d", (int)ed->cnt2));
@@ -938,6 +929,26 @@ char *g_his( gedict_t * ed )
 //		G_Error("g_his: not client, classname %s", ed->s.v.classname);
 	if( streq( ezinfokey( ed, "gender" ), "f" ) )
 		sex = "her";
+
+	string[index][0] = 0;
+	strlcat( string[index], sex, sizeof( string[0] ) );
+
+	return string[index++];
+}
+
+// return "he" or "she" depend on gender of player
+char *g_he( gedict_t * ed )
+{
+	static char		string[MAX_STRINGS][5];
+	static int		index = 0;
+	char 			*sex="he";
+
+	index %= MAX_STRINGS;
+
+//	if ( !ed->k_player && !ed->k_spectator )
+//		G_Error("g_his: not client, classname %s", ed->s.v.classname);
+	if( streq( ezinfokey( ed, "gender" ), "f" ) )
+		sex = "she";
 
 	string[index][0] = 0;
 	strlcat( string[index], sex, sizeof( string[0] ) );
@@ -1179,17 +1190,6 @@ qboolean isUnknown( )
 }
 
 // <<< gametype
-
-void GhostFlag(gedict_t *p)
-{
-	if ( p && p->ready && streq(p->s.v.classname, "player")
-		   && match_in_progress == 2 && !k_matchLess
-	   )
-		p->k_makeghost = 1;
-
-	return;
-}
-
 
 int GetUserID( gedict_t *p )
 {

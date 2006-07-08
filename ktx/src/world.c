@@ -20,12 +20,10 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.56 2006/06/27 00:07:13 qqshka Exp $
+ *  $Id: world.c,v 1.57 2006/07/08 01:39:10 qqshka Exp $
  */
 
 #include "g_local.h"
-
-float CountALLPlayers ();
 
 void  SUB_regen();
 
@@ -56,6 +54,9 @@ void InitBodyQue()
 // respawned elsewhere
 void CopyToBodyQue( gedict_t * ent )
 {
+	if ( ISLIVE( ent ) )
+		return; // no corpse, since here may be frame where player live, so u got standing player model, will looks like bug
+
 	VectorCopy( ent->s.v.angles, bodyque[bodyque_head]->s.v.angles );
 	VectorCopy( ent->s.v.velocity, bodyque[bodyque_head]->s.v.velocity );
 
@@ -63,7 +64,8 @@ void CopyToBodyQue( gedict_t * ent )
 	bodyque[bodyque_head]->s.v.modelindex = ent->s.v.modelindex;
 	bodyque[bodyque_head]->s.v.frame = ent->s.v.frame;
 	bodyque[bodyque_head]->s.v.colormap = ent->s.v.colormap;
-	bodyque[bodyque_head]->s.v.movetype = ent->s.v.movetype;
+	// once i got here MOVETYPE_WALK, so server crashed, probaly here must be always toss movement
+	bodyque[bodyque_head]->s.v.movetype = /* ent->s.v.movetype */ MOVETYPE_TOSS;
 	bodyque[bodyque_head]->s.v.flags = 0;
 
 	setorigin( bodyque[bodyque_head], PASSVEC3( ent->s.v.origin ) );
@@ -82,7 +84,7 @@ void CheckDefMap ()
 	float f1;
 	char *s1;
 
-	f1 = CountALLPlayers();
+	f1 = CountPlayers();
 	if( !f1 && !cvar( "k_master" )
 			&& !cvar( "k_lockmap" ) )
 	{
@@ -138,6 +140,10 @@ void SP_worldspawn()
 
 	if ( !Q_stricmp( self->s.v.model, "maps/e1m8.bsp" ) )
 		trap_cvar_set( "sv_gravity", "100" );
+	else if ( !Q_stricmp( self->s.v.model, "maps/bunmoo3.bsp" ) )
+		trap_cvar_set( "sv_gravity", "150" );
+	else if ( !Q_stricmp( self->s.v.model, "maps/lowgrav.bsp" ) )
+		trap_cvar_set( "sv_gravity", "150" );
 	else
 		trap_cvar_set( "sv_gravity", "800" );
 // the area based ambient sounds MUST be the first precache_sounds
@@ -669,6 +675,7 @@ void FirstFrame	( )
 	RegisterCvar("k_no_vote_break");
 	RegisterCvar("k_no_vote_map");
 	RegisterCvar("k_midair");
+	RegisterCvar("k_rocketarena"); // rocket arena
 	RegisterCvar("k_dmgfrags");
 
 // { cmd flood protection
@@ -1039,7 +1046,7 @@ void StartFrame( int time )
 	CheckTiming(); // check if client lagged or returned from lag
 	Check_sready(); // k_sready stuff
 
-	if ( !CountALLPlayers() && k_pause ) {
+	if ( !CountPlayers() && k_pause ) {
 		G_bprint(2, "No players left, unpausing.\n");
 		ModPause( 0 );
 	}
@@ -1050,6 +1057,9 @@ void StartFrame( int time )
 
 	if ( k_matchLess && !match_in_progress )
 		StartTimer(); // trying start countdown in matchless mode
+
+	if ( isRA() )
+		ra_Frame();
 
 	if ( framecount > 10 )
 		vote_check_all();

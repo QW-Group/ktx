@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.72 2006/06/27 00:07:13 qqshka Exp $
+ *  $Id: g_local.h,v 1.73 2006/07/08 01:39:10 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -251,6 +251,7 @@ char		*getteam( gedict_t * ed );
 char		*getname( gedict_t * ed );
 
 char		*g_his( gedict_t * ed );
+char		*g_he( gedict_t * ed );
 char		*g_himself( gedict_t * ed );
 
 gedict_t	*find_plrghst( gedict_t * start, int *from );
@@ -278,7 +279,6 @@ qboolean	isTeam( );
 qboolean	isFFA( );
 qboolean	isCTF( );
 qboolean	isUnknown( );
-void		GhostFlag(gedict_t *p);
 int			GetUserID(gedict_t *p);
 char		*TrackWhom(gedict_t *p);
 int			GetHandicap( gedict_t *p );
@@ -390,6 +390,8 @@ void			BothPostThink(); // <- called for player and spec
 void            PlayerPostThink();
 void            SuperDamageSound();
 
+gedict_t        *SelectSpawnPoint( char *spawnname );
+
 #define         WP_STATS_UPDATE (0.3f)
 void			Print_Wp_Stats();
 #define         SC_STATS_UPDATE (0.8f)
@@ -433,6 +435,7 @@ void			DropPowerup( float timeleft, int powerup );
 void            DropBackpack();
 
 //triggers.c
+void			play_teleport( gedict_t *sndspot );
 void            spawn_tfog( vec3_t org );
 void            spawn_tdeath( vec3_t org, gedict_t * death_owner );
 
@@ -627,9 +630,38 @@ void 	ModPause (int pause);
 void 	BecomeAdmin(gedict_t *p, int adm_flags);
 void 	VoteAdmin();
 
+void	PlayerStopFire(gedict_t *p);
+
+// arena.c
+
+void		ra_init_que();
+gedict_t	*ra_que_first();
+void		ra_in_que( gedict_t *p );
+void		ra_out_que( gedict_t *p );
+qboolean	ra_isin_que( gedict_t *p );
+int			ra_pos_que( gedict_t *p );
+qboolean	isRA( ); // not game mode, but just modificator of duel
+qboolean	isWinner( gedict_t *p );
+qboolean	isLoser( gedict_t *p );
+gedict_t	*getWinner();
+gedict_t	*getLoser();
+void		ra_ClientDisconnect();
+void		ra_ClientObituary( gedict_t *targ, gedict_t *attacker );
+void		ra_PutClientInServer();
+void		RocketArenaPre();
+void		playallsound( char *playstr );
+qboolean	readytostart();
+void		ra_Frame();
+
+// { ra commands
+void		ra_PrintStats();
+void		ra_PrintPos();
+void		ra_tLine();
+// }
+
 // captain.c
 
-int capt_num(gedict_t *p);
+int		capt_num(gedict_t *p);
 
 // maps.c
 
@@ -699,6 +731,12 @@ extern  float k_sv_locktime; // some time before non VIP players can't connect, 
 extern  int   vw_available; // vwep extension available
 #endif
 
+// { rocket arena
+
+extern  float		time_to_start;	//time to start match
+extern	qboolean	ra_match_fight;	// have winner and loser fighting 
+
+// }
 
 // heh, some hack for mvdsv for grabbing some data
 

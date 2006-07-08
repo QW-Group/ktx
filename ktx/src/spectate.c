@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.24 2006/06/14 21:31:36 qqshka Exp $
+ *  $Id: spectate.c,v 1.25 2006/07/08 01:39:10 qqshka Exp $
  */
 
 // spectate.c
@@ -34,9 +34,7 @@ void Sc_Stats(float on);
 void DoAutoTrack();
 void AdminImpBot();
 
-void SMakeMOTD();
-
-float CountALLPlayers ();
+void MakeMOTD();
 
 int GetSpecWizard ()
 {
@@ -49,7 +47,7 @@ int GetSpecWizard ()
 		case 0:
 				return 0; // wizards not allowed
 		case 1:
-				return (CountALLPlayers () ? 0 : 1); // allowed without players
+				return (CountPlayers () ? 0 : 1); // allowed without players
 		case 2:
 				return 2; // allowed with players in prematch
 	}
@@ -89,6 +87,8 @@ void SpectatorConnect()
 	int from = ( match_in_progress == 2 && !cvar("k_ann") ) ? 1 : 0;
 	int diff = (int)(PROG_TO_EDICT(self->s.v.goalentity) - world);
 
+	self->k_accepted = 1; // spectator has not restriction to connect
+
 	for ( p = world; (p = find_plrspc(p, &from)); )	
 		G_sprint( p, PRINT_HIGH, "Spectator %s entered the game\n", self->s.v.netname  );
 
@@ -109,7 +109,7 @@ void SpectatorConnect()
 	}
 
 	// Wait until you do stuffing
-	SMakeMOTD();
+	MakeMOTD();
 }
 
 ////////////////
@@ -156,6 +156,7 @@ void SpectatorDisconnect()
 		ExitKick( self );
 
 	self->s.v.classname = ""; // Cenobite, so we clear out any specs as they leave
+	self->k_accepted  = 0;
 	self->k_spectator = 0;
 }
 

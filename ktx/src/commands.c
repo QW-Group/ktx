@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.114 2006/06/28 23:46:28 qqshka Exp $
+ *  $Id: commands.c,v 1.115 2006/07/08 01:39:10 qqshka Exp $
  */
 
 // commands.c
@@ -374,6 +374,11 @@ const char CD_NODESC[] = "no desc";
 #define CD_DINFO        "show demo info"
 #define CD_LOCK         "temprorary lock server"
 #define CD_SWAPALL      "swap teams for ctf"
+// { RA
+#define CD_TLINE        "toggle RA line status"
+#define CD_RA_EFFI      "RA players efficiencies"
+#define CD_RA_POS       "RA line position"
+// }
 
 void dummy() {}
 
@@ -594,7 +599,12 @@ cmd_t cmds[] = {
 	{ "fp",          fp_toggle,                 0    , CF_BOTH_ADMIN, CD_FP },
 	{ "dlist",       dlist,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_DLIST },
 	{ "dinfo",       dinfo,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_DINFO },
-	{ "lock",        sv_lock,                   0    , CF_BOTH_ADMIN, CD_LOCK }
+	{ "lock",        sv_lock,                   0    , CF_BOTH_ADMIN, CD_LOCK },
+// { RA
+	{ "tline",       ra_tLine,                  0    , CF_PLAYER, CD_TLINE },
+	{ "ra_effi",     ra_PrintStats,             0    , CF_BOTH, CD_RA_EFFI },
+	{ "ra_pos",      ra_PrintPos,               0    , CF_PLAYER, CD_RA_POS }
+// }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -695,9 +705,6 @@ qboolean isCmdFlood(gedict_t *p)
 
 				G_sprint(p, 2, "Go away!\n");
 
-				GhostFlag(p);
-
-				p->s.v.classname = "";
 				stuffcmd(p, "disconnect\n"); // FIXME: stupid way
 			}
 		}
@@ -2350,7 +2357,7 @@ void ShowNick()
 		if ( p == self )
 			continue; // ignore self
 
-		if ( strnull( p->s.v.netname ) || p->k_accepted != 2 )
+		if ( strnull( p->s.v.netname ) )
 			continue; // ignore not really players
 
 		if ( p->s.v.modelindex != modelindex_player )
@@ -2522,10 +2529,10 @@ const char common_um_init[] =
 
 //	"localinfo k_new_mode 0\n" 			// UNKNOWN ktpro
 //	"localinfo k_fast_mode 0\n"			// UNKNOWN ktpro
-//	"localinfo matrix 0\n"              // UNKNOWN ktpro
 //	"localinfo k_safe_rj 0\n"           // UNKNOWN ktpro
 
 	"k_spec_info 1\n"					// allow spectators receive took info during game
+	"k_rocketarena 0\n"					// rocket arena
 	"k_midair 0\n"						// midair off
 //	"localinfo k_instagib 0\n"			// not implemented
 //	"localinfo k_new_spw 0\n"			// ktpro feature

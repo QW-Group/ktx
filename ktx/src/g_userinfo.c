@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_userinfo.c,v 1.20 2006/06/18 00:51:42 qqshka Exp $
+ *  $Id: g_userinfo.c,v 1.21 2006/07/08 01:39:10 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -130,7 +130,7 @@ qboolean FixPlayerTeam ( char *newteam )
 	}
 
 	// do not allow change team in game / countdown
-	if( match_in_progress /* == 2 && self->k_accepted == 2 && self->k_teamnum */ )
+	if( match_in_progress )
 	{
 		s1 = newteam;
 		s2 = getteam(self);

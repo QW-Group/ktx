@@ -16,7 +16,7 @@
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 #
-#   $Id: Makefile.dl.in,v 1.5 2006/04/09 16:45:19 disconn3ct Exp $
+#   $Id: Makefile.dl.in,v 1.6 2006/07/08 01:39:10 qqshka Exp $
 
 CC=@CC@
 RM=@RM@
@@ -37,7 +37,7 @@ SOURCES=bg_lib.c buttons.c client.c combat.c doors.c g_cmd.c g_main.c \
 	plats.c player.c q_shared.c server.c spectate.c subs.c triggers.c \
 	weapons.c world.c \
 	admin.c captain.c commands.c globals.c maps.c match.c motd.c vip.c vote.c \
-	g_userinfo.c grapple.c runes.c ctf.c
+	g_userinfo.c grapple.c runes.c ctf.c arena.c
 OBJECTS=$(SOURCES:.c=.o)
 
 

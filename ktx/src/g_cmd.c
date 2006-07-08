@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.20 2006/06/18 00:51:42 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.21 2006/07/08 01:39:10 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -46,6 +46,9 @@ qboolean 	ClientCommand()
 	char	cmd_command[1024], arg_1[1024];
 
 	self = PROG_TO_EDICT( g_globalvars.self );
+
+	if ( !self->k_accepted )
+		return true; // cmon, u r zombie or etc...
 
 	trap_CmdArgv( 0, cmd_command, sizeof( cmd_command ) );
 
@@ -244,6 +247,9 @@ qboolean ClientSay( qboolean isTeamSay )
 	qboolean fake = false;
 
 	self = PROG_TO_EDICT( g_globalvars.self );
+
+	if ( !self->k_accepted )
+		return true; // cmon, u r zombie or etc...
 
 	if ( isSayFlood( self ) )
 		return true; // flooder

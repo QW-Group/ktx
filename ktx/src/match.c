@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.70 2006/06/27 00:07:13 qqshka Exp $
+ *  $Id: match.c,v 1.71 2006/07/08 01:39:10 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -27,7 +27,7 @@ void remove_specs_wizards ();
 void lastscore_add ();
 void OnePlayerMidairStats();
 
-float CountALLPlayers ()
+float CountPlayers()
 {
 	gedict_t	*p;
 	float		num = 0;
@@ -41,20 +41,6 @@ float CountALLPlayers ()
 	return num;
 }
 
-float CountPlayers()
-{
-	gedict_t	*p;
-	float		num = 0;
-
-	p = find( world, FOFCLSN, "player" );
-	while ( p ) {
-		if ( !strnull( p->s.v.netname ) && p->k_accepted == 2 )
-			num++;
-		p = find ( p, FOFCLSN, "player" );
-	}
-	return num;
-}
-
 float CountRPlayers()
 {
 	gedict_t	*p;
@@ -62,7 +48,7 @@ float CountRPlayers()
 
 	p = find( world, FOFCLSN, "player" );
 	while ( p ) {
-		if ( !strnull( p->s.v.netname ) && p->k_accepted == 2 && p->ready )
+		if ( !strnull( p->s.v.netname ) && p->ready )
 			num++;
 		p = find ( p, FOFCLSN, "player" );
 	}
@@ -78,15 +64,15 @@ float CountTeams()
 	num = 0;
 	p = find ( world, FOFCLSN, "player" );
 	while( p ) {
-		if( !strnull( p->s.v.netname ) && p->k_accepted == 2 )
+		if( !strnull( p->s.v.netname ) )
 			p->k_flag = 0;
 
 		p = find ( p, FOFCLSN, "player" );
 	}
 
 	p = find ( world, FOFCLSN, "player" );
-	while( p ) { // unaccepted players may have !k_flag so check k_accepted anyway
-		if( !strnull( p->s.v.netname ) && !p->k_flag && p->k_accepted == 2 ) {
+	while( p ) {
+		if( !strnull( p->s.v.netname ) && !p->k_flag ) {
 			p->k_flag = 1;
 
 			s1 = getteam( p );
@@ -117,7 +103,7 @@ float CountRTeams()
 	num = 0;
 	p = find ( world, FOFCLSN, "player" );
 	while( p ) {
-		if( !strnull( p->s.v.netname ) && p->k_accepted == 2 )
+		if( !strnull( p->s.v.netname ) )
 			p->k_flag = 0;
 
 		p = find ( p, FOFCLSN, "player" );
@@ -125,7 +111,7 @@ float CountRTeams()
 
 	p = find ( world, FOFCLSN, "player" );
 	while( p ) {
-		if( !strnull( p->s.v.netname ) && !p->k_flag && p->ready && p->k_accepted == 2 ) {
+		if( !strnull( p->s.v.netname ) && !p->k_flag && p->ready ) {
 			p->k_flag = 1;
 
 			s1 = getteam( p );
@@ -159,7 +145,7 @@ float CheckMembers ( float memcnt )
 
 	p = find ( world, FOFCLSN, "player" );
 	while( p ) {
-		if( !strnull( p->s.v.netname ) && p->k_accepted == 2 )
+		if( !strnull( p->s.v.netname ) )
 			p->k_flag = 0;
 
 		p = find ( p, FOFCLSN, "player" );
@@ -167,7 +153,7 @@ float CheckMembers ( float memcnt )
 
 	p = find ( world, FOFCLSN, "player" );
 	while( p ) {
-		if( !strnull( p->s.v.netname ) && !p->k_flag && p->ready && p->k_accepted == 2 ) {
+		if( !strnull( p->s.v.netname ) && !p->k_flag && p->ready ) {
 			p->k_flag = 1;
 			f1 = 1;
 			s1 = getteam( p );
@@ -864,7 +850,7 @@ void EndMatch ( float skip_log )
 	else {
 		for( p = world; (p = find ( p, FOFCLSN, "player" )); ) 
 		{
-			if( !strnull( p->s.v.netname ) && p->k_accepted == 2 )
+			if( !strnull( p->s.v.netname ) )
 			{
 				G_cprint("%%%s", p->s.v.netname);
 				G_cprint("%%t%%%s", getteam( p ));
@@ -1076,7 +1062,7 @@ void TimerThink ()
 					p = find ( world, FOFCLSN, "player" );
 					while( p ) 
 					{
-						if ( !strnull ( p->s.v.netname ) && p->k_accepted == 2 ) {
+						if ( !strnull ( p->s.v.netname ) ) {
 		
 							if( player1found == 0 ) 
 							{
@@ -1290,6 +1276,9 @@ void SM_PrepareClients()
 		memset( (void*) &( p->ps ), 0, sizeof(p->ps) ); // clear player stats
 
 		p->ps.handicap = hdc; // restore player handicap
+
+		if ( isRA() )
+			continue;
 
 		old = self;
 		self = p;
@@ -1604,7 +1593,7 @@ void standby_think()
 {
 	gedict_t *p;
 
-	if ( match_in_progress == 1 ) {
+	if ( match_in_progress == 1 && !isRA() ) {
 
 		k_standby = 1;
 
@@ -1909,7 +1898,7 @@ void IdlebotForceStart ()
     i = 0;
     for( p = world; (p = find(p, FOFCLSN, "player")); )
     {
-		if( p->ready && p->k_accepted == 2 ) {
+		if( p->ready ) {
     		i++;
 		}
 		else
@@ -1917,8 +1906,6 @@ void IdlebotForceStart ()
     		G_bprint(2, "%s was kicked by IDLE BOT\n", p->s.v.netname);
     		G_sprint(p, 2, "Bye bye! Pay attention next time.\n");
 
-    		p->k_accepted = 0;
-    		p->s.v.classname = "";
     		stuffcmd(p, "disconnect\n"); // FIXME: stupid way
 		}
     }

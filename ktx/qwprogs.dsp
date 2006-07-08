@@ -96,6 +96,14 @@ SOURCE=src/admin.c
 # End Source File
 # Begin Source File
 
+
+
+SOURCE=src/arena.c
+
+# End Source File
+
+# Begin Source File
+
 SOURCE=src/bg_lib.c
 # End Source File
 # Begin Source File

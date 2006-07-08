@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.40 2006/06/28 23:46:28 qqshka Exp $
+ * $Id: admin.c,v 1.41 2006/07/08 01:39:10 qqshka Exp $
  */
 
 // admin.c
@@ -75,8 +75,6 @@ qboolean DoKick(gedict_t *victim, gedict_t *kicker)
 		// hehe %)
 		G_sprint(kicker, 2, "Say \"bye\" and then type \"disconnect\" next time\n");
 
-		GhostFlag(kicker);
-		kicker->s.v.classname = "";
 		stuffcmd(kicker, "disconnect\n");  // FIXME: stupid way
 	}
 	else
@@ -88,8 +86,6 @@ qboolean DoKick(gedict_t *victim, gedict_t *kicker)
 
 		G_sprint(victim, 2, "You were kicked from the server\n");
 
-		GhostFlag(victim);
-		victim->s.v.classname = "";
 		stuffcmd(victim, "disconnect\n"); // FIXME: stupid way
 	}
 
@@ -430,7 +426,7 @@ void AdminMatchStart ()
 
     for( p = world; (p = find(p, FOFCLSN, "player")); )
     {
-		if( p->ready && p->k_accepted == 2 ) {
+		if( p->ready ) {
 			i++;
 		}
 		else
@@ -438,8 +434,6 @@ void AdminMatchStart ()
 			G_bprint(2, "%s was kicked by admin forcestart\n", p->s.v.netname);
 			G_sprint(p, 2, "Bye bye! Pay attention next time.\n");
 
-			p->k_accepted = 0;
-			p->s.v.classname = "";
 			stuffcmd(p, "disconnect\n"); // FIXME: stupid way
 		}
 	}
@@ -599,14 +593,18 @@ void AdminForceBreak ()
     EndMatch( 0 );
 }
 
+void PlayerStopFire(gedict_t *p)
+{
+	stuffcmd(p, "-attack\n");
+	p->wreg_attack = 0;
+}
+
 void PlayersStopFire()
 {
     gedict_t *p;
 
-	for( p = world; (p = find(p, FOFCLSN, "player")); ) {
-        stuffcmd(p, "-attack\n");
-		self->wreg_attack = 0;
-	}
+	for( p = world; (p = find(p, FOFCLSN, "player")); )
+		PlayerStopFire( p );
 }
 
 void TogglePreWar ()

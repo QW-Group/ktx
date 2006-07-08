@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_consts.h,v 1.14 2006/06/18 00:51:41 qqshka Exp $
+ *  $Id: g_consts.h,v 1.15 2006/07/08 01:39:10 qqshka Exp $
  */
 
 //
@@ -303,4 +303,8 @@
 #define MMODE_MULTI		(3)
 #define MMODE_RCON		(4)
 #define MMODE_NAME		(5)
+
+// rocket arena
+#define PLAYERSTATTIME	(0.5f)
+#define MAXIDLETIME		(300) //5 minutes
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.27 2006/05/25 04:48:48 ult_ Exp $
+ *  $Id: items.c,v 1.28 2006/07/08 01:39:10 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -206,7 +206,7 @@ void health_touch()
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
 
-	if (match_in_progress != 2)
+	if ( match_in_progress != 2 || !readytostart() )
         return;
 
 	if ( self->healtype == 2 )	// Megahealth?  Ignore max_health...
@@ -301,7 +301,7 @@ void armor_touch()
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
 
-	if ( match_in_progress != 2 )
+	if ( match_in_progress != 2 || !readytostart() )
         return;
 
 	if ( deathmatch == 4 )
@@ -518,7 +518,7 @@ void weapon_touch()
 	if ( !( ( int ) other->s.v.flags & FL_CLIENT ) )
 		return;
 
-	if ( match_in_progress != 2 )
+	if ( match_in_progress != 2 || !readytostart() )
         return;
 	
 	if ( deathmatch == 2 || deathmatch == 3 || deathmatch == 5 )
@@ -743,7 +743,7 @@ void ammo_touch()
 	if ( strneq( other->s.v.classname, "player" ) )
 		return;
 
-    if ( match_in_progress != 2 )
+    if ( match_in_progress != 2 || !readytostart() )
         return;
 
 // if the player was using his best weapon, change up to the new one if better          
@@ -1032,7 +1032,7 @@ void key_touch()
 	if ( ( int ) other->s.v.items & ( int ) self->s.v.items )
 		return;
 
-	if (match_in_progress != 2)
+	if ( match_in_progress != 2 || !readytostart() )
         return;
 
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
@@ -1162,7 +1162,7 @@ void sigil_touch()
 	if ( ISDEAD( other ) )
 		return;
 
-    if (match_in_progress != 2)
+    if ( match_in_progress != 2 || !readytostart() )
         return;
 
 	G_centerprint( other, "You got the rune!" );
@@ -1243,7 +1243,7 @@ void powerup_touch()
 		return;
 
 	if ( !k_practice ) // #practice mode#
-	if ( match_in_progress != 2 )
+	if ( match_in_progress != 2 || !readytostart() )
 		return;
 
     if ( !Get_Powerups() )
@@ -1485,6 +1485,10 @@ void BackpackTouch()
 		return;
 
 	if ( ISDEAD( other ) )
+		return;
+
+	//crt -- no backpacks in waiting area
+	if ( isRA() && !isWinner( other ) && !isLoser( other ) ) 
 		return;
 
 	if ( cvar("k_midair") && other->super_damage_finished > g_globalvars.time )

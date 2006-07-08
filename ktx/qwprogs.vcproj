@@ -160,6 +160,9 @@
 				RelativePath=".\src\admin.c">
 			</File>
 			<File
+				RelativePath=".\src\arena.c">
+			</File>
+			<File
 				RelativePath="src\bg_lib.c">
 				<FileConfiguration
 					Name="Debug|Win32">

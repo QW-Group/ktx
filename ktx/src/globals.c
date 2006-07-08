@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: globals.c,v 1.17 2006/05/30 23:42:06 qqshka Exp $
+ *  $Id: globals.c,v 1.18 2006/07/08 01:39:10 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -77,4 +77,11 @@ int   vw_available; // vwep extension available
 #endif
 
 float k_sv_locktime; // some time before non VIP players can't connect, spectators not affected
+
+// { rocket arena
+
+float		time_to_start;	// time to start match
+int			ra_match_fight;	// have winner and loser fighting
+	
+// }
 

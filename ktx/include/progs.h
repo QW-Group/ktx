@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.44 2006/05/30 23:42:06 qqshka Exp $
+ *  $Id: progs.h,v 1.45 2006/07/08 01:39:10 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -124,6 +124,10 @@ typedef struct player_stats_s {
 	int spree_max;			// largest spree throughout game
 	int spree_max_q;		// largest quad spree throughout game
 
+	// rocket arena
+	int wins;	//number of wins they have
+	int loses;	//number of loses they have
+
 } player_stats_t;
 
 
@@ -189,6 +193,15 @@ typedef enum
 	atPow
 } autoTrackType_t;
 
+// { rocket arena
+typedef enum
+{
+	raNone = 0,
+	raWinner,
+	raLoser,
+	raQue
+} raPlayerType_t;
+// }
 
 //typedef (void(*)(gedict_t *)) one_edict_func;
 typedef struct gedict_s {
@@ -280,7 +293,6 @@ typedef struct gedict_s {
 	float	connect_time;	 // time at which player connect
 	float	deaths;          // number of times player died
 	float	efficiency;      // stores player efficiency rating
-	float	fraggie;         // NOT_SURE: used to return frags to rejoining players?
 	float	friendly;        // number of times player killed teammates
 	float	ready;           // if a player is ready or not
 	char	*killer;         // name of player who last killed player
@@ -351,7 +363,6 @@ typedef struct gedict_s {
 	int   need_clearCP;		// if this true, clear center print at certain cases
 
 // { ghost stuff
-	int   k_makeghost;      // if this true make ghost for disconnected player
 	int   ghost_slot;		// now ktx put ghost in players scoreboards in one of free slots - store this slot
 	float ghost_dt;         // ghost drop time - time when player dropped
 	int   ghost_clr;		// color of dropped player
@@ -405,6 +416,14 @@ typedef struct gedict_s {
 	fp_cmd_t fp_s; // say flood protection
 
 	float tdeath_time;	// when player invoke spawn_tdeath(...), help reduce double telefrags
+
+// { rocket arena
+	float idletime;		// how long they can idle
+	float lasttime;		// last time idle was checked
+	float laststattime;	// time of last status update
+	float statstate;	// resolution for status bar. FIXME: move to setinfo
+	raPlayerType_t ra_pt; // ra player type
+// }
 
 } gedict_t;
 

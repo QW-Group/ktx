@@ -1,6 +1,6 @@
 @echo off
 
-rem $Id: makevm.bat,v 1.6 2006/04/10 13:28:36 qqshka Exp $
+rem $Id: makevm.bat,v 1.7 2006/07/08 01:39:10 qqshka Exp $
 
 rem NOTE: u must look %SRC%\game.q3asm so u can guess where qwprogs.qvm locate
 
@@ -86,6 +86,8 @@ cd VM
 %CC% %CFLAGS% %INCFLAGS% %SRC%\runes.c
 @if errorlevel 1 goto quit
 %CC% %CFLAGS% %INCFLAGS% %SRC%\grapple.c
+@if errorlevel 1 goto quit
+%CC% %CFLAGS% %INCFLAGS% %SRC%\arena.c
 @if errorlevel 1 goto quit
 
 

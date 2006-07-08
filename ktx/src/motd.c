@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: motd.c,v 1.19 2006/05/28 03:44:28 qqshka Exp $
+ *  $Id: motd.c,v 1.20 2006/07/08 01:39:10 qqshka Exp $
  */
 
 // motd.c
@@ -73,6 +73,18 @@ void SMOTDThink()
 
 void MOTDThinkX()
 {
+	gedict_t *owner = PROG_TO_EDICT( self->s.v.owner );
+
+	// FIXME: server work around, frags are not restored, ie showed as 0, force update frags manually
+	if ( owner->s.v.frags && (int)( owner - world - 1 ) >= 0 && (int)( owner - world - 1 ) < MAX_CLIENTS )
+	{
+		int to = MSG_ALL;
+
+		WriteByte(to, SVC_UPDATEFRAGS); // update frags
+		WriteByte(to, (int)( owner - world - 1 ));
+		WriteShort(to, owner->s.v.frags);
+	}
+
 // check if we are need to stuff aliases, or already done this
 	if( !(PROG_TO_EDICT( self->s.v.owner )->k_stuff) )
 	{
@@ -89,190 +101,9 @@ void MOTDThinkX()
 		  ( func_t ) ( PROG_TO_EDICT( self->s.v.owner )->k_spectator ? SMOTDThink : PMOTDThink );
 	self->s.v.nextthink = g_globalvars.time + 0.3;
 
-	 // remove motd if player already stuffed, because them probably sow motd already one time
+// remove motd if player already stuffed, because them probably sow motd already one time
 	if( k_matchLess && PROG_TO_EDICT( self->s.v.owner )->k_stuff )
 		ent_remove( self );
-}
-
-void MOTDStuff()
-{
-	gedict_t *p, *so;
-	char *t, *t2, *tmp, *s1;
-	float kick, f1, f2, f3;
-
-	so = PROG_TO_EDICT( self->s.v.owner );
-
-	if ( !so )
-		G_Error ("MOTDStuff null");
-
-	so->k_teamnum = 0;
-	so->k_msgcount = g_globalvars.time;
-	so->k_lastspawn = world;
-
-	if( so->k_accepted != 2 )
-			so->k_accepted = 1;
-
-	// If the game is running already then . . .
-	// guess is player can enter/re-enter the game if server locked or not
-	if( match_in_progress )
-	{
-		kick         = 0;
-		so->ready    = 1;
-		so->k_666    = 0;
-		so->deaths   = 0;
-		so->friendly = 0;
-
-		if( lock == 2 ) { // kick anyway
-			kick = 1;
-
-			G_sprint(so, 2, "Match in progress, server locked\n");
-		}
-		else if( lock == 1 ) // kick if team is not set properly
-		{
-			int from1;
-
-			kick = 1;
-
-			t = getteam( so );
-
-			for( from1 = 0, p = world; (p = find_plrghst( p, &from1 )); )
-				if ( p != so && streq( getteam( p ), t ) ) {
-					kick = 0;  // don't kick, find "player" or "ghost" with equal team
-					break;
-				}
-			
-			if ( kick )
-				G_sprint(so, 2, "Set your team before connecting\n");
-		}
-
-		if( !k_matchLess ) // ignore in matchLess mode
-		if( !kick ) // kick is exclusive 
-		{
-			f2 = CountPlayers();
-			if( f2 >= k_attendees && cvar("k_exclusive") ) 
-			{
-				G_sprint(so, 2, "Sorry, all teams are full\n");
-				kick = 1;
-			}
-		}
-
-		if( kick ) 
-		{
-			so->k_accepted = 0;
-			so->s.v.classname = "";
-
-            stuffcmd(so, "disconnect\n"); // FIXME: stupid way
-
-			ent_remove( self );
-
-			return;
-		}
-	}
-
-	if( k_matchLess ) { // no ghost and team check in matchLess mode
-		so->k_teamnum = 0;
-		G_bprint(2, "%s entered the game\n", so->s.v.netname);
-	}
-	else if( match_in_progress == 2 )
-	{
-		f2 = 1;
-		f3 = 0;
-
-
-		while( f2 < k_userid && !f3 ) // search for ghost for this player (localinfo)
-		{
-			t = ezinfokey(world, va("%d", (int) f2));
-			if( streq( t, so->s.v.netname ))
-				f3 = 1;
-			else
-				f2++;
-		}
-
-		if( f2 == k_userid ) // ghost not found (localinfo)
-		{
-			G_bprint(2, "%s arrives late %s‘\n", so->s.v.netname, getteam(so));
-		} 
-		else // ghost probably found (localinfo)
-		{
-			p = find(world, FOFCLSN, "ghost");
-			while( p && f3 ) // search ghost entity
-			{
-				if( p->cnt2 == f2 )
-					f3 = 0;
-				else
-					p = find(p, FOFCLSN, "ghost");
-			}
-
-			if( p ) // found ghost entity
-			{
-				t2 = getteam( p );
-				t  = getteam( so );
-				if( strneq( t, t2 ) ) 
-				{
-					so->k_accepted = 0;
-					G_sprint(so, 2, "Please join your old team and reconnect\n");
-					so->s.v.classname = "";
-                    stuffcmd(so, "disconnect\n"); // FIXME: stupid way
-
-					ent_remove( self );
-
-					return;
-				}
-
-				ghostClearScores( p );
-				G_bprint(2, "%s rejoins the game %s‘\n", so->s.v.netname, getteam( so ));
-				localcmd("localinfo %d \"\"\n", (int)f2);
-
-				so->fraggie   = p->s.v.frags;
-				so->deaths    = p->deaths;
-				so->friendly  = p->friendly;
-				so->k_teamnum = p->k_teamnum;
-
-				so->ps        = p->ps; // restore player stats
-
-
-				
-				ent_remove( p );
-			}
-			else // ghost entity not found
-			{
-				localcmd("localinfo %d \"\"\n", (int)f2);
-				G_bprint(2, "%s reenters the game without stats\n", so->s.v.netname);
-			}
-		}
-
-		if( !strnull ( getteam( so ) ) ) 
-		{
-			f1 = 665;
-			while( k_teamid > f1 && !so->k_teamnum ) 
-			{
-				f1++;
-				s1  = ezinfokey(world, va("%d", (int)f1));
-				tmp = getteam( so );
-				if( streq( tmp, s1 ) )
-					so->k_teamnum = f1;
-			}
-
-			if( !(so->k_teamnum) ) 
-			{
-				f1++;
-
-				localcmd("localinfo %d \"%s\"\n", (int)f1, getteam( so ));
-				k_teamid     = f1;
-				so->k_teamnum = f1;
-			}
-		} else
-			so->k_teamnum = 666;
-	} 
-	else 
-	{
-		G_bprint(2, "%s entered the game\n", so->s.v.netname);
-	}
-
-	so->s.v.frags = so->fraggie; // restore frags from ghost or in case of captains set player number via his frags
-	newcomer = so->s.v.netname;
-	self->s.v.think = ( func_t ) MOTDThinkX;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
 }
 
 void MakeMOTD()
@@ -283,21 +114,21 @@ void MakeMOTD()
 	motd = spawn();
 	motd->s.v.classname = "motd";
 	motd->s.v.owner = EDICT_TO_PROG( self );
-	motd->s.v.think = ( func_t ) MOTDStuff;
+	motd->s.v.think = ( func_t ) MOTDThinkX;
 	motd->s.v.nextthink = g_globalvars.time + 0.1;
 	motd->attack_finished = g_globalvars.time + (i ? i : ( k_matchLess ? 3 : 7 ));
 }
 
-void SMakeMOTD()
+void RemoveMOTD()
 {
 	gedict_t *motd;
-	int i = bound(0, cvar("k_motd_time"), 30);
+	int owner = EDICT_TO_PROG( self );
 
-	motd = spawn();
-	motd->s.v.classname = "motd";
-	motd->s.v.owner = EDICT_TO_PROG( self );
-	motd->s.v.think = ( func_t ) MOTDThinkX;
-	motd->s.v.nextthink = g_globalvars.time + 0.1;
-	motd->attack_finished = g_globalvars.time + (i ? i : 7 );
+	for( motd = world; (motd = find(motd, FOFCLSN, "motd")); ) // self MOTD
+		if ( owner == motd->s.v.owner )
+			ent_remove( motd );
+
+	for( motd = world; (motd = find(motd, FOFCLSN, "motdX")); ) // staffing aliases/maps
+		if ( owner == motd->s.v.owner )
+			ent_remove( motd );
 }
-

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.44 2006/06/19 20:55:54 qqshka Exp $
+ *  $Id: weapons.c,v 1.45 2006/07/08 01:39:10 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -93,8 +93,11 @@ void W_FireAxe()
 			T_Damage( PROG_TO_EDICT( g_globalvars.trace_ent ), self, self,
 				  20 );
 	} else
-	{			// hit wall
-		sound( self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM );
+	{	// hit wall
+
+		//crt - get rid of axe sound for spec
+		if ( !isRA() || ( isWinner( self ) || isLoser( self ) ) )
+			sound( self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM );
 
 		WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
 		WriteByte( MSG_MULTICAST, TE_GUNSHOT );
@@ -672,6 +675,12 @@ void W_FireLightning()
 // explode if under water
     if ( self->s.v.waterlevel > 1 && match_in_progress == 2 )
 	{
+		if ( isRA() ) {
+			self->s.v.ammo_cells = 0;
+			W_SetCurrentAmmo();
+			return;
+		}
+
 		if ( deathmatch > 3 )
 		{
 			if ( g_random() <= 0.5 )
@@ -1259,15 +1268,6 @@ void W_Attack()
 {
 	float           r;
 
-	if ( self->k_accepted != 2 ) {
-		if( g_globalvars.time > self->k_msgcount ) {
-			self->s.v.classname = "";
-			stuffcmd( self, "disconnect\n" ); // FIXME: stupid way
-			self->k_msgcount = g_globalvars.time + 1;
-		}
-		return;
-	}
-
 	if ( !W_CheckNoAmmo() )
 		return;
 
@@ -1293,7 +1293,9 @@ void W_Attack()
 	    else
 			self->attack_finished = g_globalvars.time + 0.5;
 
-		sound( self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM );
+		// crt - no axe sound for spec
+		if ( !isRA() || ( isWinner( self ) || isLoser( self ) ) )
+			sound( self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM );
 
 		r = g_random();
 		if ( r < 0.25 )
@@ -1907,6 +1909,9 @@ void W_WeaponFrame()
 
     if ( self->s.v.button0 && !intermission_running )
     {
+		if ( !readytostart() )
+			return;	
+
 		if ( match_in_progress == 1 || !can_prewar( true ) )
 			return;
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.90 2006/06/27 00:07:13 qqshka Exp $
+ *  $Id: client.c,v 1.91 2006/07/08 01:39:10 qqshka Exp $
  */
 
 //===========================================================================
@@ -37,7 +37,6 @@ vec3_t          VEC_HULL2_MAX = { 32, 32, 64 };
 int             modelindex_eyes, modelindex_player;
 
 qboolean can_prewar( qboolean fire );
-float CountALLPlayers();
 void IdlebotCheck();
 void CheckAll();
 void PlayerStats();
@@ -270,7 +269,7 @@ void SetChangeParms()
     g_globalvars.parm9  = 0;
 
 	g_globalvars.parm11 = self->k_admin;
-	g_globalvars.parm12 = self->k_accepted;
+//	g_globalvars.parm12 = self->k_accepted;
 	g_globalvars.parm13 = self->k_stuff;
 	g_globalvars.parm14 = self->ps.handicap;
 
@@ -290,7 +289,7 @@ void SetNewParms( qboolean from_vmMain )
 	g_globalvars.parm9  = 0;
 
 	g_globalvars.parm11 = from_vmMain ? 0 : self->k_admin;
-	g_globalvars.parm12 = from_vmMain ? 0 : self->k_accepted;
+//	g_globalvars.parm12 = from_vmMain ? 0 : self->k_accepted;
 	g_globalvars.parm13 = from_vmMain ? 0 : self->k_stuff;
 	g_globalvars.parm14 = from_vmMain ? 0 : self->ps.handicap;
 
@@ -318,8 +317,8 @@ void DecodeLevelParms()
 	if ( g_globalvars.parm11 )
 		self->k_admin = g_globalvars.parm11;
 
-    if( g_globalvars.parm12 )
-        self->k_accepted = g_globalvars.parm12;
+//    if( g_globalvars.parm12 )
+//        self->k_accepted = g_globalvars.parm12;
 	
 	if ( g_globalvars.parm13 )
     	self->k_stuff = g_globalvars.parm13;
@@ -679,12 +678,27 @@ void respawn()
 	// make a copy of the dead body for appearances sake
 	CopyToBodyQue( self );
 	// set default spawn parms
-//	SetChangeParms();
 	SetNewParms( false );
 	// respawn              
 	PutClientInServer();
 }
 
+// i put next code in function, since it appear frequently
+void k_respawn( gedict_t *p )
+{
+	gedict_t *swap = self;
+
+	self = p; // warning
+
+	self->s.v.deadflag = DEAD_RESPAWNABLE;
+	self->wreg_attack = 0;
+	self->s.v.button0 = 0;
+	self->s.v.button1 = 0;
+	self->s.v.button2 = 0;
+	respawn();
+
+	self = swap;
+}
 
 /*
 ============
@@ -697,6 +711,11 @@ void ClientKill()
 {
 	if( k_pause || k_standby )
         return;
+
+	if ( isRA() ) {
+		G_sprint (self, PRINT_HIGH, "Can't suicide in RA mode\n");
+		return;
+	}
 
 	if (g_globalvars.time < self->suicide_time) {
 		G_sprint (self, PRINT_HIGH, "Only one suicide in 5 seconds\n");
@@ -727,7 +746,7 @@ void ClientKill()
 
 	self->ps.spree_current = self->ps.spree_current_q = 0;    
 
-	respawn();
+	k_respawn( self );
 }
 
 float CheckSpawnPoint( vec3_t v )
@@ -831,7 +850,7 @@ gedict_t       *SelectSpawnPoint( char *spawnname )
 		if( !match_in_progress || k_spw == 1 || ( k_spw && !k_checkx ) ) {
 			vec3_t	v1, v2;
 
-			makevectors( spot->s.v.angles );
+			makevectors( isRA() ? spot->mangle : spot->s.v.angles ); // stupid ra uses mangles instead of angles
 			thing = findradius(world, spot->s.v.origin, 84);
 			while( thing ) {
 				if( streq( thing->s.v.classname, "player" ) && ISLIVE( thing ) ) {
@@ -887,6 +906,126 @@ gedict_t       *SelectSpawnPoint( char *spawnname )
 	return spot;
 }
 
+qboolean CanConnect()
+{
+	gedict_t *p;
+	char *t;
+	int from, usrid, tmid;
+
+	if ( k_sv_locktime && !VIP( self ) ) { // kick non vip in this case
+		int seconds = k_sv_locktime - g_globalvars.time;
+
+		G_sprint(self, 2, "%s: %d second%s\n", 
+					redtext("server is temporary locked"), seconds, count_s(seconds));
+
+		return false; // _can't_ connect
+	}
+
+	if( !match_in_progress || k_matchLess ) { // no ghost, team, etc... checks in matchLess mode
+		G_bprint(2, "%s entered the game\n", self->s.v.netname);
+		return true; // can connect
+	}
+
+	// If the game is running already then . . .
+	// guess is player can enter/re-enter the game if server locked or not
+
+	if( lock == 2 ) { // kick anyway
+		G_sprint(self, 2, "Match in progress, server locked\n");
+
+		return false; // _can't_ connect
+	}
+	else if( lock == 1 ) // kick if team is not set properly
+	{
+		t = getteam( self );
+
+		for( from = 0, p = world; (p = find_plrghst( p, &from )); )
+			if ( p != self && streq( getteam( p ), t ) )
+				break;  // don't kick, find "player" or "ghost" with equal team
+		
+		if ( !p ) {
+			G_sprint(self, 2, "Set your team before connecting\n");
+			return false; // _can't_ connect
+		}
+	}
+
+	// kick if exclusive 
+	if( CountPlayers() >= k_attendees && cvar("k_exclusive") ) 
+	{
+		G_sprint(self, 2, "Sorry, all teams are full\n");
+		return false; // _can't_ connect
+	}
+
+	if( match_in_progress != 2 ) // actually that match_in_progress == 1
+	{
+		G_bprint(2, "%s entered the game\n", self->s.v.netname);
+		return true; // can connect
+	} 
+
+	for( usrid = 1; usrid < k_userid; usrid++ ) // search for ghost for this player (localinfo)
+		if( streq( ezinfokey(world, va("%d", (int) usrid)), self->s.v.netname ))
+			break;
+
+	if( usrid < k_userid ) // ghost probably found (localinfo)
+	{
+		for( p = world; (p = find(p, FOFCLSN, "ghost")); ) // search ghost entity
+			if( p->cnt2 == usrid )
+				break;
+
+		if( p ) // found ghost entity
+		{
+			if( strneq( getteam( self ), getteam( p ) ) ) 
+			{
+				G_sprint(self, 2, "Please join your old team and reconnect\n");
+				stuffcmd(self, "disconnect\n"); // FIXME: stupid way
+				return false; // _can't_ connect
+			}
+
+			ghostClearScores( p );
+			G_bprint(2, "%s rejoins the game %s‘\n", self->s.v.netname, getteam( self ));
+			localcmd("localinfo %d \"\"\n", usrid); // remove ghost in localinfo
+
+			self->s.v.frags = p->s.v.frags;
+			self->deaths    = p->deaths;
+			self->friendly  = p->friendly;
+			self->k_teamnum = p->k_teamnum;
+
+			self->ps        = p->ps; // restore player stats
+			
+			ent_remove( p ); // remove ghost entity
+		}
+		else // ghost entity not found
+		{
+			localcmd("localinfo %d \"\"\n", usrid); // remove ghost in localinfo
+			G_bprint(2, "%s reenters the game without stats %s‘\n", self->s.v.netname, getteam( self ));
+		}
+	}
+	else // ghost not found (localinfo)
+		G_bprint(2, "%s arrives late %s‘\n", self->s.v.netname, getteam( self ));
+
+	if( !strnull ( t = getteam( self ) ) ) 
+	{
+		for( tmid = 665; tmid < k_teamid && !self->k_teamnum; ) 
+		{
+			tmid++;
+			if( streq( t, ezinfokey(world, va("%d", tmid)) ) )
+				self->k_teamnum = tmid;
+		}
+
+		if( !self->k_teamnum )  // team not found in localinfo, so put it in
+		{
+			tmid++;
+
+			localcmd("localinfo %d \"%s\"\n", tmid, getteam( self ));
+			k_teamid     = tmid;
+			self->k_teamnum = tmid;
+		}
+	}
+	else
+		self->k_teamnum = 666;
+
+	return true;
+}
+
 ////////////////
 // GlobalParams:
 // time
@@ -901,23 +1040,18 @@ void ClientConnect()
 
 	k_nochange = 0;
 
-	if ( k_sv_locktime ) {
-		if ( !VIP(self) ) { // kick non vip in this case
-			int seconds = k_sv_locktime - g_globalvars.time;
+	self->k_lastspawn = world; // to be safe
+	self->k_msgcount = g_globalvars.time;
 
-			G_sprint(self, 2, "%s: %d second%s\n", 
-						redtext("server is temporary locked"), seconds, count_s(seconds));
-
-			// do not make ghost here
-			self->s.v.classname = "";
-			stuffcmd(self, "disconnect\n"); // FIXME: stupid way
-
-			return;
-		}
+	if ( !CanConnect() ) {
+		stuffcmd(self, "disconnect\n"); // FIXME: stupid way
+		return;
 	}
 
-//	if (deathmatch /*|| coop*/ )
-//	G_bprint( PRINT_HIGH, "%s entered the game\n", self->s.v.netname );
+	newcomer = self->s.v.netname;
+
+	self->k_accepted = 1; // ok, we allowed to connect
+	self->ready = (match_in_progress ? 1 : 0);
 
 	// if the guy started connecting during intermission and
 	// thus missed the svc_intermission, we'd better let him know
@@ -937,13 +1071,9 @@ void ClientConnect()
 	ZeroFpsStats ();
 // ILLEGALFPS]
 
-	self->fraggie = 0;
-	MakeMOTD();
 	CheckRate(self, "");
-	self->ctf_flag = 0;
 
-	if( k_captains == 2 ) {
-// in case of team picking, check if there is a free spot for player number 1-16
+	if( k_captains == 2 ) { // in case of team picking, check if there is a free spot for player number 1-16
 		int i;
 
 		for( i = 1, p = world; p && i <= 16; i++ )
@@ -953,9 +1083,14 @@ void ClientConnect()
 		// if we found a spot, set the player into it
 		if( !p ) {
 			stuffcmd(self, "color 0\nteam \"\"\nskin \"\"\n");
-			self->fraggie = i-1;
+			self->s.v.frags = i - 1;
 		}
 	}
+
+	if ( isRA() )
+		ra_in_que( self ); // put cleint in ra queue, so later we can move it to loser or winner
+
+	MakeMOTD();
 }
 
 ////////////////
@@ -970,7 +1105,6 @@ void PutClientInServer()
 	gedict_t       *spot;
 	vec3_t          v;
 	int             items;
-//	char            s[20];
 
 //	G_bprint(2, "PutClientInServer()\n");
 
@@ -1037,12 +1171,20 @@ void PutClientInServer()
 	
 	if ( isCTF() && self->s.v.frags < 1 && self->deaths < 1 )
 		spot = SelectSpawnPoint(streq(getteam(self), "red") ? "info_player_team1" : "info_player_team2" );
+	else if ( isRA() && ( isWinner( self ) || isLoser( self ) ) )
+		spot = SelectSpawnPoint("info_teleport_destination" );
 	else
 		spot = SelectSpawnPoint("info_player_deathmatch");
 
 	VectorCopy( spot->s.v.origin, self->s.v.origin );
 	self->s.v.origin[2] += 1;
-	VectorCopy( spot->s.v.angles, self->s.v.angles );
+
+	if ( isRA() ) {
+		VectorCopy( spot->mangle, self->s.v.angles );
+	}
+	else {
+		VectorCopy( spot->s.v.angles, self->s.v.angles );
+	}
 
 	self->s.v.fixangle = true;
 
@@ -1060,60 +1202,37 @@ void PutClientInServer()
 
 	player_stand1();
 
-    if (  1 /* deathmatch */ /*|| coop FIXME: remove??? */)
-    {
+	makevectors( self->s.v.angles );
+	VectorScale( g_globalvars.v_forward, 20, v );
+	VectorAdd( v, self->s.v.origin, v );
+	spawn_tfog( v );
+	play_teleport( self );
+	spawn_tdeath( self->s.v.origin, self );
 
-	// FIXME: stupid way
+	if ( isRA() ) {
+		ra_PutClientInServer();
 
-		// do not accept player ez only in case of match.
-		// player may be kicked in MOTD stuff while pass some checks.
-		// if not kicked, player will be "spawned" in PlayerPostThink(),
-		// just look code -> if(self->k_accepted == 1)
+		// drop down to best weapon actually hold
+		if ( !( (int)self->s.v.weapon & (int)self->s.v.items ) )
+			self->s.v.weapon = W_BestWeapon();
 
-		if( !self->k_accepted && match_in_progress == 2 ) {
-			self->s.v.classname = "player_na"; // player not accepted yet
-			self->s.v.takedamage = 0;
-			self->s.v.solid = 0;
-			self->s.v.movetype = 0;
-			self->s.v.modelindex = 0;
-			self->s.v.model = "";
-    	} 
-    	else {
-		// if just prewar or even countdown - accept player immediately
-        	self->k_accepted = 2;
-        	self->s.v.takedamage = 2;
-        	self->s.v.solid = 3;
-        	self->s.v.movetype = 3;
-        	setmodel (self, "progs/player.mdl");
-			modelindex_player = self->s.v.modelindex;
-        	player_stand1 ();
+		W_SetCurrentAmmo(); // important shit, not only ammo
+		return;
+	}
 
-			makevectors( self->s.v.angles );
-			VectorScale( g_globalvars.v_forward, 20, v );
-			VectorAdd( v, self->s.v.origin, v );
-			spawn_tfog( v );
-			play_teleport( self );
-			spawn_tdeath( self->s.v.origin, self );
+	if( match_in_progress == 2 ) {
+		if( cvar( "k_bzk" ) && k_berzerk ) {
+			self->s.v.items = (int)self->s.v.items | IT_QUAD;
+			self->super_time = 1;
+			self->super_damage_finished = g_globalvars.time + 3600;
+		}
 
-			//berzerk will not affect players that logs in during berzerk
-			//spawn666 will not affect the first spawn of players connecting to a game in progress
-			if( match_in_progress == 2 ) {
-				if( cvar( "k_bzk" ) && k_berzerk ) {
-					self->s.v.items = (int)self->s.v.items | 4194304;
-					self->super_time = 1;
-					self->super_damage_finished = g_globalvars.time + 3600;
-				}
-
-				if( cvar( "k_666" ) ) {
-					stuffcmd (self, "bf\n");
-					self->invincible_time = 1;
-					self->invincible_finished = g_globalvars.time + 2;
-					self->k_666 = 1;
-					self->s.v.items = (int)self->s.v.items | 1048576;
-				}
-			}
-
-
+		if( cvar( "k_666" ) ) {
+			stuffcmd (self, "bf\n");
+			self->invincible_time = 1;
+			self->invincible_finished = g_globalvars.time + 2;
+			self->k_666 = 1;
+			self->s.v.items = (int)self->s.v.items | IT_INVULNERABILITY;
 		}
 	}
 
@@ -1259,12 +1378,7 @@ void PlayerDeathThink()
 // { autospawn
 	respawn_time = cvar("k_midair") ? 2 : 5;
 	if( (g_globalvars.time - self->dead_time) > respawn_time && match_in_progress ) {
-		self->s.v.deadflag = DEAD_RESPAWNABLE;
-		self->wreg_attack = 0;
-		self->s.v.button0 = 0;
-		self->s.v.button1 = 0;
-		self->s.v.button2 = 0;
-		respawn();
+		k_respawn( self );
 		return;
 	}
 // }
@@ -1277,14 +1391,13 @@ void PlayerDeathThink()
 		self->s.v.deadflag = DEAD_RESPAWNABLE;
 		return;
 	}
+
 // wait for any button down
+	if ( !isRA() ) // stupid tweak from rocket arena
 	if ( !self->s.v.button2 && !self->s.v.button1 && !self->s.v.button0 && !self->wreg_attack )
 		return;
 
-	self->s.v.button0 = 0;
-	self->s.v.button1 = 0;
-	self->s.v.button2 = 0;
-	respawn();
+	k_respawn( self );
 }
 
 
@@ -1336,7 +1449,9 @@ void PlayerJump()
         self->s.v.button2 = 0;
 
 		// player jumping sound
-		sound( self, CHAN_BODY, "player/plyrjmp8.wav", 1, ATTN_NORM );
+		//crt - get rid of jump sound for spec
+		if ( !isRA() || ( isWinner( self ) || isLoser( self ) ) )
+			sound( self, CHAN_BODY, "player/plyrjmp8.wav", 1, ATTN_NORM );
 
        	// JUMPBUG[
         // the engine checks velocity_z and won't perform the jump if it's < zero!
@@ -1514,6 +1629,8 @@ void MakeGhost ()
 	ghost->ghost_clr  = (int)bound(0, iKey(self, "topcolor" ), 13) << 8;
 	ghost->ghost_clr |= (int)bound(0, iKey(self, "bottomcolor" ), 13) ; // save colors
 
+//	G_bprint( PRINT_HIGH, "name num: %d team num %d\n", (int)ghost->cnt2, (int)ghost->k_teamnum);
+  
 	localcmd("localinfo %d \"%s\"\n", (int)f1, self->s.v.netname);
 	trap_executecmd();
 }
@@ -1528,10 +1645,11 @@ void ClientDisconnect()
 
 	del_from_specs_favourites( self );
 
-	if( match_in_progress == 2 && ( self->k_makeghost || streq("player", self->s.v.classname) ) )
+	ra_ClientDisconnect();
+
+	if( match_in_progress == 2 && streq("player", self->s.v.classname) )
 	{
-		G_bprint( PRINT_HIGH, "%s left the game with %.0f frags\n", self->s.v.netname,
-	  					self->s.v.frags );
+		G_bprint( PRINT_HIGH, "%s left the game with %.0f frags\n", self->s.v.netname, self->s.v.frags );
 
 		sound( self, CHAN_BODY, "player/tornoff2.wav", 1, ATTN_NONE );
 
@@ -1543,7 +1661,7 @@ void ClientDisconnect()
 	PlayerDropFlag( self );
 
 	// normal disconnect
-	if( self->k_accepted == 2 ) {
+	if( self->k_accepted ) {
 		
 		set_suicide_frame();
 
@@ -1564,7 +1682,7 @@ void ClientDisconnect()
 	self->k_player = 0;
 	self->k_accepted = 0;
 	self->ready = 0;
-	self->s.v.classname = "";
+	self->s.v.classname = ""; // clear client classname on disconnect
 
 // s: added conditional function call here
 	if( self->k_kicking )
@@ -1582,7 +1700,7 @@ void ClientDisconnect()
 	if( cvar( "k_idletime" ) > 0 )
 		IdlebotCheck();
 
-	if ( !CountALLPlayers() ) {
+	if ( !CountPlayers() ) {
 		char *s;
 		int um_idx;
 
@@ -1955,9 +2073,6 @@ void PlayerPreThink()
 			G_bprint(PRINT_HIGH, "\n%s gets kicked for too long uptime\n", self->s.v.netname);
 			G_sprint(self, PRINT_HIGH, "Reboot your machine to get rid of this bug\n");
 
-			GhostFlag(self);
-
-			self->s.v.classname = "";
 			stuffcmd(self, "disconnect\n"); // FIXME: stupid way
 		}
 // ends here
@@ -1986,8 +2101,6 @@ void PlayerPreThink()
 				// kick the player from server!
 				// s: changed the text a bit :)
             	G_bprint(PRINT_HIGH, "%s gets kicked for timedemo cheating\n", self->s.v.netname );
-				GhostFlag(self);
-            	self->s.v.classname = "";
             	stuffcmd(self, "disconnect\n"); // FIXME: stupid way
             }
 		}
@@ -2019,7 +2132,10 @@ void PlayerPreThink()
 	     && self->s.v.view_ofs[2] == 0 )
 		return;		// intermission or finale
 
-	if( !self->k_accepted || k_pause )
+	if ( isRA() )
+		RocketArenaPre();
+
+	if( k_pause )
 		return;
 
 	makevectors( self->s.v.v_angle );	// is this still used
@@ -2343,31 +2459,6 @@ void PlayerPostThink()
 
 */
 
-	// ok accept player now
-	if(self->k_accepted == 1) {
-		vec3_t v;
-
-		self->s.v.classname = "player";
-		self->k_accepted = 2;
-
-		if ( !intermission_running ) {
-			self->s.v.takedamage = 2;
-			self->s.v.solid = 3;
-			self->s.v.movetype = 3;
-			setmodel (self, "progs/player.mdl");
-			modelindex_player = self->s.v.modelindex;
-			player_stand1 ();
-
-			makevectors(self->s.v.angles);
-
-			VectorMA (self->s.v.origin, 20, g_globalvars.v_forward, v);
-
-			spawn_tfog(v);
-			play_teleport( self );
-			spawn_tdeath (self->s.v.origin, self);
-		}
-	}
-
 	if( k_pause ) {
 		ImpulseCommands();
 		return;
@@ -2379,9 +2470,6 @@ void PlayerPostThink()
 
 	if ( self->s.v.deadflag )
 		return;
-
-	if( !self->k_accepted && match_in_progress == 2 )
-			return;
 
 	if( self->k_1spawn )
 		self->k_1spawn -= 1;
@@ -2482,7 +2570,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	// Set it so it should update scores at next attempt.
 	k_nochange = 0;
 
-    if ( strneq( targ->s.v.classname, "player" ))
+    if ( strneq( targ->s.v.classname, "player" ) )
 		return;
 
 	refresh_plus_scores ();
@@ -2508,6 +2596,11 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		targ->ps.spree_max_q = targ->ps.spree_current_q;
 
 	targ->ps.spree_current = targ->ps.spree_current_q = 0;
+
+	if ( isRA() ) {
+		ra_ClientObituary (targ, attacker);
+		return;
+	}
 
     if ( deathmatch > 3 )
     {

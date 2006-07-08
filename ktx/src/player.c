@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.15 2006/04/16 03:32:39 ult_ Exp $
+ *  $Id: player.c,v 1.16 2006/07/08 01:39:10 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -977,13 +977,12 @@ void PlayerDie()
 	if ( self->s.v.velocity[2] < 10 )
 		self->s.v.velocity[2] = self->s.v.velocity[2] + g_random() * 300;
 
-    if ( self->s.v.health < -40 || streq( self->deathtype, "squish" ) )
+    if ( self->s.v.health < -40 || streq( self->deathtype, "squish" ) || isRA() )
 	{
 		GibPlayer();
 		PlayerDead();
 		return;
 	}
-
 
     if( match_in_progress == 2 )
 		DeathSound();

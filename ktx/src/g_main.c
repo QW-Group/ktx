@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.25 2006/06/02 21:54:22 qqshka Exp $
+ *  $Id: g_main.c,v 1.26 2006/07/08 01:39:10 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -74,6 +74,8 @@ void            ClearGlobals();
 
 qboolean		ClientSay( qboolean isTeamSay );
 
+void			RemoveMOTD();
+
 /*
 ================
 vmMain
@@ -119,6 +121,7 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 	case GAME_CLIENT_CONNECT:
 		self = PROG_TO_EDICT( g_globalvars.self );
 
+		self->s.v.classname = ""; // at least empty classname
 		self->connect_time = g_globalvars.time;
 
 		self->k_spectator = arg0;
@@ -129,12 +132,13 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 
 		show_sv_version();
 
-		cmdinfo_infoset ( self );
-
 		if ( arg0 )
 			SpectatorConnect();
 		else
 			ClientConnect();
+
+		if( self->k_accepted )
+			cmdinfo_infoset ( self );
 
 		update_ghosts();
 		
@@ -143,15 +147,21 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 	case GAME_PUT_CLIENT_IN_SERVER:
 		self = PROG_TO_EDICT( g_globalvars.self );
 
+		if( !self->k_accepted )
+			return 1;
+
 		if ( !arg0 )
 			PutClientInServer();
 		else
 			PutSpectatorInServer();
 
+
 		return 1;
 
 	case GAME_CLIENT_DISCONNECT:
 		self = PROG_TO_EDICT( g_globalvars.self );
+
+		RemoveMOTD(); // remove MOTD entitys
 
 		s_lr_clear( self );
 
@@ -173,6 +183,9 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 	case GAME_CLIENT_PRETHINK:
 		self = PROG_TO_EDICT( g_globalvars.self );
 
+		if( !self->k_accepted )
+			return 1;
+
 		if ( self->wreg_attack ) // client simulate +attack via "cmd wreg" feature
 			self->s.v.button0 = true;
 
@@ -182,6 +195,10 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 
 	case GAME_CLIENT_POSTTHINK:
 		self = PROG_TO_EDICT( g_globalvars.self );
+
+		if( !self->k_accepted )
+			return 1;
+
 		self->k_lastPostThink = g_globalvars.time;
 
 		if ( self->wreg_attack ) // client simulate +attack via "cmd wreg" feature
@@ -223,6 +240,11 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		// params like GAME_CLIENT_COMMAND, but argv(0) always "setinfo" and argc always 3
 
 		self = PROG_TO_EDICT( g_globalvars.self );
+
+		if ( !self->k_accepted )
+			return 0; // cmon, u r zombie or etc...
+					  // allow change even not connected, or disconnected
+
 		return ClientUserInfoChanged();
 
 	case GAME_SHUTDOWN:
@@ -317,6 +339,8 @@ void G_InitGame( int levelTime, int randomSeed )
 	{
 		g_edicts[i + 1].s.v.netname = netnames[i];
 	}
+
+	ra_init_que();
 
 	Init_cmds();
 
