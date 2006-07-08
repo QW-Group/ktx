@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.73 2006/07/08 01:39:10 qqshka Exp $
+ *  $Id: g_local.h,v 1.74 2006/07/08 07:39:34 disconn3ct Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -734,7 +734,7 @@ extern  int   vw_available; // vwep extension available
 // { rocket arena
 
 extern  float		time_to_start;	//time to start match
-extern	qboolean	ra_match_fight;	// have winner and loser fighting 
+extern	int			ra_match_fight;	// have winner and loser fighting
 
 // }
 
