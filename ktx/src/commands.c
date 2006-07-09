@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.116 2006/07/09 22:53:25 qqshka Exp $
+ *  $Id: commands.c,v 1.117 2006/07/09 23:26:03 qqshka Exp $
  */
 
 // commands.c
@@ -2088,7 +2088,7 @@ void TeamSay(float fsndname)
 
     p = find( world, FOFCLSN, "player" );
 	while( p ) {
-		if( p != self && isTeam() && !strnull( p->s.v.netname )
+		if( p != self && (isTeam() || isCTF()) && !strnull( p->s.v.netname )
 			&& ( iKey( p, "kf" ) & KF_KTSOUNDS ) 
 		   ) {
 			if( streq( getteam( self ), getteam( p ) ) ) {
@@ -2324,7 +2324,7 @@ void ShowNick()
 
 	if ( !match_in_progress )
 		;  // allow shownick in prewar anyway
-	else if ( !isTeam() )
+	else if ( !isTeam() && !isCTF() )
 		return;
 
 	ang[0] = self->s.v.v_angle[0];

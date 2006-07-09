@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.92 2006/07/09 22:53:25 qqshka Exp $
+ *  $Id: client.c,v 1.93 2006/07/09 23:26:03 qqshka Exp $
  */
 
 //===========================================================================
@@ -2624,7 +2624,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 		attackerteam2 = getteam( PROG_TO_EDICT( attacker->s.v.owner ) );
 
-		if( isTeam() && streq( targteam, attackerteam2 ) && !strnull ( attackerteam2 )
+		if( (isTeam() || isCTF()) && streq( targteam, attackerteam2 ) && !strnull ( attackerteam2 )
 				&& targ != PROG_TO_EDICT( attacker->s.v.owner ) )
 		{
             G_bprint(PRINT_MEDIUM,"%s was telefragged by %s teammate\n",
@@ -2671,7 +2671,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 	if ( streq( targ->deathtype, "squish" ) )
 	{
-		if ( isTeam() && streq( targteam, attackerteam )
+		if ( (isTeam() || isCTF) && streq( targteam, attackerteam )
 				&& !strnull( attackerteam ) && targ != attacker )
 		{
 			logfrag (attacker, attacker);
@@ -2706,7 +2706,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
  	// ktpro like stomps %)
 	if ( streq( targ->deathtype, "stomp" ) )
 	{
-		if ( isTeam() && streq( targteam, attackerteam )
+		if ( (isTeam() || isCTF()) && streq( targteam, attackerteam )
 				&& !strnull( attackerteam ) && targ != attacker )
 		{
 			logfrag (attacker, attacker);

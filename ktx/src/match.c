@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.72 2006/07/09 22:53:25 qqshka Exp $
+ *  $Id: match.c,v 1.73 2006/07/09 23:26:03 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1052,7 +1052,7 @@ void TimerThink ()
 				if( k_matchLess ) {
 					; // no overtime in matchLess mode
 				}
-				else if( isTeam() && f3 != 2 ) {
+				else if( (isTeam() || isCTF()) && f3 != 2 ) {
 					; // no overtime in case of less then 2 or more then 2 teams
 				}			
 				else if( isDuel() && f4 == 2 )
@@ -1114,7 +1114,7 @@ void TimerThink ()
 				}
 				// Or it can be a team game.
 				// Handle a 2v2 or above team game
-				else if( isTeam() && f3 == 2 && f4 > 2 && scores1 == scores2 )
+				else if( (isTeam() || isCTF()) && f3 == 2 && f4 > 2 && scores1 == scores2 )
 				{
 					k_overtime = k_mb_overtime;
 
@@ -1459,7 +1459,7 @@ void PrintCountdown( int seconds )
 		strlcat(text, va("%s %6s\n", "Midair", redtext("On")), sizeof(text));
 
 	if ( !isRA() ) // useless in RA
-	if ( isTeam() )
+	if ( isTeam() || isCTF() )
 		strlcat(text, va("%s %4s\n", "Teamplay", dig3(teamplay)), sizeof(text));
 	if ( timelimit )
 		strlcat(text, va("%s %3s\n", "Timelimit", dig3(timelimit)), sizeof(text));
