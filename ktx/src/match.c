@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.71 2006/07/08 01:39:10 qqshka Exp $
+ *  $Id: match.c,v 1.72 2006/07/09 22:53:25 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1052,7 +1052,7 @@ void TimerThink ()
 				if( k_matchLess ) {
 					; // no overtime in matchLess mode
 				}
-				else if( teamplay && f3 != 2 ) {
+				else if( isTeam() && f3 != 2 ) {
 					; // no overtime in case of less then 2 or more then 2 teams
 				}			
 				else if( isDuel() && f4 == 2 )
@@ -1089,6 +1089,7 @@ void TimerThink ()
 							// Ok its increase time
 							self->cnt =  k_exttime;
 							self->cnt2 = 60;
+							localcmd("serverinfo status \"%d min left\"\n", (int)self->cnt);
 
 							G_bprint(2, "\x90%d\x91 minute%s overtime follows\n", 
 									(int)k_exttime, count_s(k_exttime));
@@ -1113,7 +1114,7 @@ void TimerThink ()
 				}
 				// Or it can be a team game.
 				// Handle a 2v2 or above team game
-				else if( teamplay && f3 == 2 && f4 > 2 && scores1 == scores2 )
+				else if( isTeam() && f3 == 2 && f4 > 2 && scores1 == scores2 )
 				{
 					k_overtime = k_mb_overtime;
 
@@ -1124,6 +1125,7 @@ void TimerThink ()
 						// Ok its increase time
 						self->cnt =  k_exttime;
 						self->cnt2 = 60;
+						localcmd("serverinfo status \"%d min left\"\n", (int)self->cnt);
 
 						G_bprint(2, "\x90%d\x91 minute%s overtime follows\n", 
 								(int)k_exttime, count_s(k_exttime));
@@ -1435,9 +1437,12 @@ void PrintCountdown( int seconds )
 
 
 	strlcat(text, va("%s: %2s\n\n\n", redtext("Countdown"), dig3(seconds)), sizeof(text));
-	strlcat(text, va("%s %2s\n", "Deathmatch", dig3(deathmatch)), sizeof(text));
+	if ( !isRA() ) // useless in RA
+		strlcat(text, va("%s %2s\n", "Deathmatch", dig3(deathmatch)), sizeof(text));
 
-	if( isDuel() )
+	if ( isRA() )
+		mode = redtext("R A");
+	else if( isDuel() )
 		mode = redtext("D u e l");
 	else if ( isTeam() )
 		mode = redtext("T e a m");
@@ -1453,7 +1458,8 @@ void PrintCountdown( int seconds )
 	if ( cvar("k_midair") )
 		strlcat(text, va("%s %6s\n", "Midair", redtext("On")), sizeof(text));
 
-	if ( /*isTeam()*/ teamplay )
+	if ( !isRA() ) // useless in RA
+	if ( isTeam() )
 		strlcat(text, va("%s %4s\n", "Teamplay", dig3(teamplay)), sizeof(text));
 	if ( timelimit )
 		strlcat(text, va("%s %3s\n", "Timelimit", dig3(timelimit)), sizeof(text));
@@ -1477,7 +1483,8 @@ void PrintCountdown( int seconds )
 		default: pwr = redtext("Unkn"); break;
 	}
 
-	strlcat(text, va("%s %4s\n", "Powerups", pwr), sizeof(text));
+	if ( !isRA() || Get_Powerups() ) // show powerups in RA ?
+		strlcat(text, va("%s %4s\n", "Powerups", pwr), sizeof(text));
 
 	if (    deathmatch == 4 && !cvar("k_midair")
 		 && !strnull( nowp = str_noweapon((int)cvar("k_disallow_weapons") & DA_WPNS) )

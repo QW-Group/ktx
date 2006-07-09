@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.57 2006/07/08 01:39:10 qqshka Exp $
+ *  $Id: g_utils.c,v 1.58 2006/07/09 22:53:25 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1172,6 +1172,11 @@ qboolean isDuel( )
 qboolean isTeam( )
 {
 	return (k_mode == gtTeam ? true : false);
+}
+
+int tp_num()
+{
+	return (isTeam() ? teamplay : 0);
 }
 
 qboolean isFFA( )

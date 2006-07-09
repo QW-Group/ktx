@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.25 2006/07/08 01:39:10 qqshka Exp $
+ *  $Id: combat.c,v 1.26 2006/07/09 22:53:25 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -366,7 +366,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	targteam = getteam( targ );
 
 	// teamplay == 1 don't damage self and mates (armor affected anyway)
-	if ( teamplay == 1
+	if ( tp_num() == 1
 		 && !strnull( attackerteam )
 		 && streq( targteam, attackerteam )
 		 && streq( attacker->s.v.classname, "player" )
@@ -375,7 +375,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		return;
 
 	// teamplay == 3 don't damage mates, do damage to self (armor affected anyway)
-	if ( teamplay == 3
+	if ( tp_num() == 3
 		 && !strnull( attackerteam )
 		 && streq( targteam, attackerteam )
 		 && streq( attacker->s.v.classname, "player" )

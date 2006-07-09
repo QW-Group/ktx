@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.21 2006/07/08 01:39:10 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.22 2006/07/09 22:53:25 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -393,7 +393,7 @@ qboolean ClientSay( qboolean isTeamSay )
 					continue;	// on different teams
 				}
 				else if (   self != client // send msg to self anyway
-						 && (!teamplay || strneq(team, ezinfokey(client, "team")))
+						 && (!isTeam() || strneq(team, ezinfokey(client, "team")))
 						)
 					continue;	// on different teams
 			}

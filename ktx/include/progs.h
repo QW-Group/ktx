@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.45 2006/07/08 01:39:10 qqshka Exp $
+ *  $Id: progs.h,v 1.46 2006/07/09 22:53:01 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -421,7 +421,6 @@ typedef struct gedict_s {
 	float idletime;		// how long they can idle
 	float lasttime;		// last time idle was checked
 	float laststattime;	// time of last status update
-	float statstate;	// resolution for status bar. FIXME: move to setinfo
 	raPlayerType_t ra_pt; // ra player type
 // }
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.74 2006/07/08 07:39:34 disconn3ct Exp $
+ *  $Id: g_local.h,v 1.75 2006/07/09 22:52:47 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -279,6 +279,7 @@ qboolean	isTeam( );
 qboolean	isFFA( );
 qboolean	isCTF( );
 qboolean	isUnknown( );
+int			tp_num();
 int			GetUserID(gedict_t *p);
 char		*TrackWhom(gedict_t *p);
 int			GetHandicap( gedict_t *p );
@@ -735,6 +736,7 @@ extern  int   vw_available; // vwep extension available
 
 extern  float		time_to_start;	//time to start match
 extern	int			ra_match_fight;	// have winner and loser fighting
+extern  int			k_rocketarena;	// is RA active or not, since we must catch changes, we can't use cvar("k_rocketarena")
 
 // }
 

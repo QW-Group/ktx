@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.115 2006/07/08 01:39:10 qqshka Exp $
+ *  $Id: commands.c,v 1.116 2006/07/09 22:53:25 qqshka Exp $
  */
 
 // commands.c
@@ -1044,7 +1044,8 @@ void ChangeOvertimeUp ()
 
 	cvar_fset( "k_exttime", k_exttime );
 
-	G_bprint(2, "Οφεςτινε μεξητθ σετ το %d νιξυτε%s\n", k_exttime, count_s( k_exttime ));
+	G_bprint(2, "%s %d %s%s\n", 
+		redtext("Overtime length set to"), k_exttime, redtext("minute"), redtext(count_s( k_exttime )));
 }
 
 
@@ -1171,7 +1172,7 @@ void ModStatus ()
 
 	G_sprint(self, 2, "%-14s %-3d\n", redtext("Maxspeed"), (int)k_maxspeed);
 	G_sprint(self, 2, "%-14s %-3d ",  redtext("Deathmatch"), (int)deathmatch);
-	G_sprint(self, 2, "%-14s %-3d\n", redtext("Teamplay"), (int)teamplay);
+	G_sprint(self, 2, "%-14s %-3d\n", redtext("Teamplay"), (int)tp_num());
 	G_sprint(self, 2, "%-14s %-3d ",  redtext("Timelimit"), (int)timelimit);
 	G_sprint(self, 2, "%-14s %-3d\n", redtext("Fraglimit"), (int)fraglimit);
 	PrintToggle1(redtext("Powerups       "), "k_pow");
@@ -1740,11 +1741,9 @@ void ToggleDischarge()
 	cvar_toggle_msg( self, "k_dis", redtext("discharges") );
 }
 
-#define DMM_NUM		((char)(146) + (char)(deathmatch))
-
 void ShowDMM()
 {
-	G_sprint(self, 2, "Deathmatch %c\n", DMM_NUM);
+	G_sprint(self, 2, "Deathmatch %s\n", dig3(deathmatch));
 }
 
 void ChangeDM(float dmm)
@@ -1756,7 +1755,7 @@ void ChangeDM(float dmm)
 		return;
 
 	if ( deathmatch == (int)dmm ) {
-		G_sprint(self, 2, "%s%c already set\n", redtext("dmm"), DMM_NUM);
+		G_sprint(self, 2, "%s%s already set\n", redtext("dmm"), dig3(deathmatch));
 		return;
 	}
 
@@ -1768,13 +1767,11 @@ void ChangeDM(float dmm)
 
 	cvar_set("deathmatch", va("%d", (int)deathmatch));
 
-	G_bprint(2, "Deathmatch %c\n", DMM_NUM);
+	G_bprint(2, "Deathmatch %s\n", dig3(deathmatch));
 }
 
 void ChangeTP()
 {
-	char *tmp;
-
 	if ( match_in_progress )
 		return;
 
@@ -1793,12 +1790,9 @@ void ChangeTP()
 	if ( teamplay == 4 )
 		teamplay = 1;
 
-	cvar_set("teamplay", va("%d", (int)teamplay));
-	if( teamplay == 1 ) tmp = "“";
-	else if( teamplay == 2 ) tmp = "”";
-	else tmp = "•";
+	cvar_fset("teamplay", (int)teamplay);
 
-	G_bprint(2, "Teamplay %s\n", tmp);
+	G_bprint(2, "Teamplay %s\n", dig3(teamplay));
 }
 
 void TimeDown(float t)
@@ -2094,7 +2088,7 @@ void TeamSay(float fsndname)
 
     p = find( world, FOFCLSN, "player" );
 	while( p ) {
-		if( p != self && teamplay && !strnull( p->s.v.netname )
+		if( p != self && isTeam() && !strnull( p->s.v.netname )
 			&& ( iKey( p, "kf" ) & KF_KTSOUNDS ) 
 		   ) {
 			if( streq( getteam( self ), getteam( p ) ) ) {
@@ -2330,7 +2324,7 @@ void ShowNick()
 
 	if ( !match_in_progress )
 		;  // allow shownick in prewar anyway
-	else if ( !teamplay )
+	else if ( !isTeam() )
 		return;
 
 	ang[0] = self->s.v.v_angle[0];
@@ -2829,6 +2823,16 @@ void UserMode(float umode)
 		trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
 		G_cprint("%s", buf);
 	}
+
+// { RA hack
+	if ( streq(um, "1on1") ) {
+		cfg_name = va("configs/usermodes/%s/ra/%s.cfg", um, g_globalvars.mapname);
+		if ( can_exec( cfg_name ) ) {
+			trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
+			G_cprint("%s", buf);
+		}
+	}
+// }
 
 	G_cprint("\n");
 

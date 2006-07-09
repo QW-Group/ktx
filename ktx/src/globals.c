@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: globals.c,v 1.18 2006/07/08 01:39:10 qqshka Exp $
+ *  $Id: globals.c,v 1.19 2006/07/09 22:53:25 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -82,6 +82,7 @@ float k_sv_locktime; // some time before non VIP players can't connect, spectato
 
 float		time_to_start;	// time to start match
 int			ra_match_fight;	// have winner and loser fighting
+int			k_rocketarena;	// is RA active or not, since we must catch changes, we can't use cvar("k_rocketarena")
 	
 // }
 

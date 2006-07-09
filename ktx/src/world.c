@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.57 2006/07/08 01:39:10 qqshka Exp $
+ *  $Id: world.c,v 1.58 2006/07/09 22:53:26 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -128,6 +128,11 @@ void SP_worldspawn()
 
 	if ( cvar("_k_last_xonx") > 0 && strneq( lastmap, g_globalvars.mapname ) )
 		UserMode( -cvar("_k_last_xonx") ); // auto call XonX command if map switched to another
+
+// { RA
+	k_rocketarena = cvar( "k_rocketarena" );
+	k_rocketarena = isRA();
+// }
     
 	G_SpawnString( "classname", "", &s );
 	if ( Q_stricmp( s, "worldspawn" ) )
@@ -734,9 +739,6 @@ void SecondFrame ( )
 		return;
 
 	Customize_Maps();
-
-	if ( isCTF() )
-		SpawnRunes( cvar("k_ctf_runes") );
 }
 
 void hide_powerups ( char *classname )
@@ -789,8 +791,6 @@ void CheckSvUnlock ()
 }
 
 // called when switching to/from ctf mode.
-// btw, this do actual work only then some one change usermod or toggle hook/runes, but not on map change
-// on map change: flag is not spawned here, runes not spawned here too, u must look some other code
 void FixCTFItems()
 {
 	static gameType_t old_k_mode = 0;	// static
@@ -811,7 +811,7 @@ void FixCTFItems()
 	if ( old_k_mode != k_mode )
 		RegenFlags( isCTF() );
 
-	if ( old_k_mode != k_mode || k_ctf_runes != cvar("k_ctf_runes") )
+	if ( old_k_mode != k_mode || k_ctf_runes != cvar("k_ctf_runes") || framecount == 2 )
 		SpawnRunes( isCTF() && cvar("k_ctf_runes") );
 
 	if ( old_k_mode != k_mode || k_ctf_hook != cvar("k_ctf_hook") )
@@ -820,6 +820,26 @@ void FixCTFItems()
 	old_k_mode = k_mode;
 	k_ctf_runes = cvar("k_ctf_runes");
 	k_ctf_hook = cvar("k_ctf_hook");
+}
+
+void FixRA()
+{
+	static int old_k_rocketarena = 0;	// static
+
+	if ( framecount == 1 )
+		return; // can't guess here something yet
+
+	if ( framecount == 2 ) {
+		old_k_rocketarena = isRA(); // ok, save RA status after world spawn, and start check status changes on 3-t frame
+		return;
+	}
+
+	// do that even match in progress...
+	if ( old_k_rocketarena != isRA() ) {
+		old_k_rocketarena = isRA();
+		G_bprint(2, "%s: RA settings changed, map will be reloaded\n", redtext("WARNING"));
+		changelevel( g_globalvars.mapname );
+	}
 }
 
 // serve k_pow and k_pow_min_players
@@ -1021,9 +1041,11 @@ void StartFrame( int time )
 
     k_mode = cvar( "k_mode" );         
 
+	FixRules();
+
 	FixCTFItems(); // if modes have changed we may need to add/remove flags etc
 
-	FixRules();
+	FixRA(); // we may need reload map
 
 	FixPowerups();
 

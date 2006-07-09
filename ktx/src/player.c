@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.16 2006/07/08 01:39:10 qqshka Exp $
+ *  $Id: player.c,v 1.17 2006/07/09 22:53:25 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -898,6 +898,8 @@ void ThrowHead( char *gibname, float dm )
 
 void GibPlayer()
 {
+	gedict_t *p;
+
 	ThrowHead( "progs/h_player.mdl", self->s.v.health );
 
     if( match_in_progress == 2 ) {
@@ -908,22 +910,28 @@ void GibPlayer()
 
 //	self->s.v.deadflag = DEAD_DEAD;
 
+	if ( isRA() ) { // in RA mode, player after death will be moved immediately, so sound is trimed, work around...
+		p = spawn();
+		setorigin( p, PASSVEC3( self->s.v.origin ) );
+		p->s.v.nextthink = g_globalvars.time + 0.1;
+		p->s.v.think = ( func_t ) SUB_Remove;
+	}
+	else
+		p = self;
+
 	if ( streq( damage_attacker->s.v.classname, "teledeath" )	)
 	{
-		sound( self, CHAN_VOICE, "player/teledth1.wav", 1, ATTN_NONE );
+		sound( p, CHAN_VOICE, "player/teledth1.wav", 1, ATTN_NONE );
 		return;
 	}
 
 	if ( streq( damage_attacker->s.v.classname, "teledeath2" ) )
 	{
-		sound( self, CHAN_VOICE, "player/teledth1.wav", 1, ATTN_NONE );
+		sound( p, CHAN_VOICE, "player/teledth1.wav", 1, ATTN_NONE );
 		return;
 	}
 
-	if ( g_random() < 0.5 )
-		sound( self, CHAN_VOICE, "player/gib.wav", 1, ATTN_NONE );
-	else
-		sound( self, CHAN_VOICE, "player/udeath.wav", 1, ATTN_NONE );
+	sound( p, CHAN_VOICE, (g_random() < 0.5 ? "player/gib.wav" : "player/udeath.wav"), 1, ATTN_NONE );
 }
 
 

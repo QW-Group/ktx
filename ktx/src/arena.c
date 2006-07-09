@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1997 David 'crt' Wright
  *
- * $Id: arena.c,v 1.1 2006/07/08 01:45:07 qqshka Exp $
+ * $Id: arena.c,v 1.2 2006/07/09 22:53:25 qqshka Exp $
  */
 
 // arena.c - rocket arena stuff
@@ -109,7 +109,7 @@ int ra_pos_que( gedict_t *p )
 // ra is just modificator of duel
 qboolean isRA( )
 {
-	return ( isDuel() && cvar("k_rocketarena") );
+	return ( isDuel() && k_rocketarena );
 }
 
 qboolean isWinner( gedict_t *p )
@@ -202,6 +202,9 @@ void ra_ClientObituary( gedict_t *targ, gedict_t *attacker )
 		return; // so below targ is player
 
 	ra_match_fight = 0;
+
+	if ( !attacker->k_player )
+		attacker = targ; // seems killed self
 
 	if ( (loser = getLoser()) ) // stop them from attacking during countdown
 	{
@@ -391,45 +394,45 @@ qboolean readytostart()
 		return false;
 }
 
-char *TeamSetStatRes( gedict_t *who )
-{
-	if (who->statstate > 7) // 768 
-		return "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
-	else if (who->statstate == 7) // 600 
-		return "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
-	else if (who->statstate == 6) // 480 
-		return "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
-	else if (who->statstate == 5) // 400
-		return "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
-	else if (who->statstate == 4) // 384 
-		return "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
-	else if (who->statstate == 3) // 350 
-		return "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
-	else if (who->statstate == 2) // 300 
-		return "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
-	else if (who->statstate == 1) // 240 
-		return "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
-	// 200 
-	return "\n\n\n\n\n\n\n\n\n\n\n\n";
-}
-
 void PrintStats( gedict_t *who )
 {
-	gedict_t *winner = getWinner(), *loser = getLoser();
+	qboolean show = true;
+	int i, owner = EDICT_TO_PROG( who );
+	char buf[1024] = {0};
+	gedict_t *winner = getWinner(), *loser = getLoser(), *motd;
 
 	if ( !winner || !loser )
 		return;
 
-	who->laststattime = g_globalvars.time + PLAYERSTATTIME;
+	for( motd = world; (motd = find(motd, FOFCLSN, "motd")); )
+		if ( owner == motd->s.v.owner )
+			break; // no centerprint stats while have motd
 
-	G_centerprint(who, "%s%s          %s              ", TeamSetStatRes( who ), getname(winner), getname(loser));
+	if ( (i = iKey( who, "lra" )) > 0 ) {
+		i = bound(0, i, sizeof(buf)-1 );
+		memset( (void*)buf, (int)'\n', i);
+		buf[i] = 0;
+	}
+
+	strlcat(buf, va("%s%s          %s              ", buf, getname(winner), getname(loser)), sizeof(buf));
+
+	if ( (i = iKey( who, "lra" )) < 0 ) {
+		int offset = strlen(buf);
+		i = bound(0, -i, (int)sizeof(buf) - offset - 1);
+		memset( (void*)(buf + offset), (int)'\n', i);
+		buf[i+offset] = 0;
+	}
+
+	if ( !motd && match_in_progress != 1 )
+		G_centerprint(who, "%s", buf);
 
 	if ( winner->s.v.health > 0 )
-		self->s.v.armorvalue = winner->s.v.health;
+		who->s.v.armorvalue = winner->s.v.health;
 	if ( loser->s.v.health > 0 )
-		self->s.v.health = loser->s.v.health;
+		who->s.v.health = loser->s.v.health;
 
 	who->s.v.currentammo = ra_pos_que( who ) + 1;
+	who->laststattime = g_globalvars.time + PLAYERSTATTIME;
 }
 
 void ra_Frame ()
