@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.94 2006/07/10 13:21:43 qqshka Exp $
+ *  $Id: client.c,v 1.95 2006/07/10 14:15:48 ult_ Exp $
  */
 
 //===========================================================================
@@ -2670,7 +2670,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 	if ( streq( targ->deathtype, "squish" ) )
 	{
-		if ( (isTeam() || isCTF) && streq( targteam, attackerteam )
+		if ( (isTeam() || isCTF()) && streq( targteam, attackerteam )
 				&& !strnull( attackerteam ) && targ != attacker )
 		{
 			logfrag (attacker, attacker);
