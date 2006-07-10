@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.73 2006/07/09 23:26:03 qqshka Exp $
+ *  $Id: match.c,v 1.74 2006/07/10 13:21:43 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1091,8 +1091,7 @@ void TimerThink ()
 							self->cnt2 = 60;
 							localcmd("serverinfo status \"%d min left\"\n", (int)self->cnt);
 
-							G_bprint(2, "\x90%d\x91 minute%s overtime follows\n", 
-									(int)k_exttime, count_s(k_exttime));
+							G_bprint(2, "\x90%s\x91 minute%s overtime follows\n", dig3(k_exttime), count_s(k_exttime));
 							self->s.v.nextthink = g_globalvars.time + 1;
 
 							return;	
@@ -1127,8 +1126,7 @@ void TimerThink ()
 						self->cnt2 = 60;
 						localcmd("serverinfo status \"%d min left\"\n", (int)self->cnt);
 
-						G_bprint(2, "\x90%d\x91 minute%s overtime follows\n", 
-								(int)k_exttime, count_s(k_exttime));
+						G_bprint(2, "\x90%s\x91 minute%s overtime follows\n", dig3(k_exttime), count_s(k_exttime));
 						self->s.v.nextthink = g_globalvars.time + 1;
 
 						return;	
@@ -1386,7 +1384,7 @@ void StartMatch ()
 		G_bprint(2, "matchdate: %s\n", tm);
 
 	if ( !k_matchLess || cvar( "k_matchless_countdown" ) )
-		G_bprint(2, "%s!\n", redtext("The match has begun"));
+		G_bprint(2, "%s\n", redtext("The match has begun!"));
 
 // spec silence
 	{ 
@@ -1441,7 +1439,7 @@ void PrintCountdown( int seconds )
 		strlcat(text, va("%s %2s\n", "Deathmatch", dig3(deathmatch)), sizeof(text));
 
 	if ( isRA() )
-		mode = redtext("R A");
+		mode = redtext("RA");
 	else if( isDuel() )
 		mode = redtext("D u e l");
 	else if ( isTeam() )

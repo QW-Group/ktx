@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.93 2006/07/09 23:26:03 qqshka Exp $
+ *  $Id: client.c,v 1.94 2006/07/10 13:21:43 qqshka Exp $
  */
 
 //===========================================================================
@@ -1892,7 +1892,6 @@ void Print_Scores( )
 			seconds = 0;
 		else
 			minutes--;
-
 	}
 
 	strlcat(buf, va("%s:%02d:%02d", redtext("tl"), minutes, seconds), sizeof(buf));
