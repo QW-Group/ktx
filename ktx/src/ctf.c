@@ -1,5 +1,5 @@
 /*
- *  $Id: ctf.c,v 1.14 2006/06/27 00:07:13 qqshka Exp $
+ *  $Id: ctf.c,v 1.15 2006/07/11 05:02:30 ult_ Exp $
  */
 
 #include "g_local.h"
@@ -301,7 +301,7 @@ void FlagTouch()
 						{
 							p->carrier_frag_time = -1;
 							p->s.v.frags += CARRIER_ASSIST_BONUS;
-							p->s.v.frags += CARRIER_ASSIST_BONUS;
+							p->ps.ctf_points += CARRIER_ASSIST_BONUS;
 							G_bprint( 2, "%s gets an assist for fragging the flag carrier!\n", p->s.v.netname );
 						}
 	           
