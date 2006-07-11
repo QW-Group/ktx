@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.41 2006/07/08 01:39:10 qqshka Exp $
+ * $Id: admin.c,v 1.42 2006/07/11 16:09:07 qqshka Exp $
  */
 
 // admin.c
@@ -760,9 +760,7 @@ void ModPause (int pause)
                 e1->pain_finished += f1;
 
                 if(e1->invincible_finished)
-// qqshka: imho wrong   e1->invincible_finished = f1 + e1->pain_finished;
-// FIXME: check this
-				e1->invincible_finished			+= f1;
+					e1->invincible_finished		+= f1;
 
                 if(e1->invisible_finished)
                     e1->invisible_finished		+= f1;
