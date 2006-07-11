@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1997 David 'crt' Wright
  *
- * $Id: arena.c,v 1.2 2006/07/09 22:53:25 qqshka Exp $
+ * $Id: arena.c,v 1.3 2006/07/11 02:30:51 qqshka Exp $
  */
 
 // arena.c - rocket arena stuff
@@ -168,7 +168,7 @@ void ra_ClientDisconnect()
 
 	if ( isWinner( self ) )
 	{
-		G_bprint (PRINT_HIGH, "The winner has left\n");
+		G_bprint (PRINT_HIGH, "The %s has left\n", redtext("winner"));
 		if ( (p = getLoser()) )
 			p->s.v.takedamage = DAMAGE_NO; // no damage to loser since winner is left game
 
@@ -176,14 +176,14 @@ void ra_ClientDisconnect()
 	}
 	else if ( isLoser( self ) )
 	{
-		G_bprint (PRINT_HIGH, "The challenger has left\n");
+		G_bprint (PRINT_HIGH, "The %s has left\n", redtext("challenger"));
 		if ( (p = getWinner()) )
 			p->s.v.takedamage = DAMAGE_NO; // no damage to winner since loser is left game
 
 		ra_match_fight = 0;
 	}
 	else if ( self == ra_que_first() )
-		G_bprint (PRINT_HIGH, "The line leader has left\n");
+		G_bprint (PRINT_HIGH, "The %s has left\n", redtext("line leader"));
 
 	if ( ra_isin_que( self ) ) // in the queue
 		ra_out_que( self );	// remove from queue
@@ -233,7 +233,7 @@ void ra_ClientObituary( gedict_t *targ, gedict_t *attacker )
 		winner->ps.loses += 1;
 		loser->ps.wins   += 1;
 		
-		G_bprint (PRINT_HIGH, "The winner %s has been defeated\n", getname(winner));
+		G_bprint (PRINT_HIGH, "The %s %s has been defeated\n", redtext("winner"), getname(winner));
 
 		if ( targ == attacker )
 		{
@@ -248,7 +248,7 @@ void ra_ClientObituary( gedict_t *targ, gedict_t *attacker )
 		loser->ps.loses += 1;
 		winner->ps.wins += 1;
 
-		G_bprint (PRINT_HIGH, "The challenger %s has failed\n", getname(loser));
+		G_bprint (PRINT_HIGH, "The %s %s has failed\n", redtext("challenger"), getname(loser));
 
 		if ( targ == attacker )
 		{
@@ -278,7 +278,9 @@ void ra_ClientObituary( gedict_t *targ, gedict_t *attacker )
 			}
 			else
 			{
-				G_bprint (PRINT_HIGH, "%s had %d health and %d armor left\n", getname(attacker), ah, aa);
+				G_bprint (PRINT_HIGH, "%s %s \x90%s\x91 %s \x90%s\x91 %s\n",
+					redtext(getname(attacker)), redtext("had"), dig3(ah), redtext("health and"), dig3(aa), 
+								redtext("armor left"));
 
 				if ( ah >= 75 && aa >= 100 )
 					playallsound("play ra/excelent.wav\n");				
@@ -414,7 +416,9 @@ void PrintStats( gedict_t *who )
 		buf[i] = 0;
 	}
 
-	strlcat(buf, va("%s%s          %s              ", buf, getname(winner), getname(loser)), sizeof(buf));
+	strlcat(buf, va("%s%.10s %3d:%3d       %.10s %3d:%3d           ", buf, 
+				getname(winner), (int)winner->s.v.armorvalue, (int)winner->s.v.health,
+				getname(loser),  (int)loser->s.v.armorvalue,  (int)winner->s.v.health), sizeof(buf));
 
 	if ( (i = iKey( who, "lra" )) < 0 ) {
 		int offset = strlen(buf);
@@ -457,21 +461,21 @@ void ra_Frame ()
 		if ( !winner && loser ) { // promote loser since winner not present for some reason
 			winner = loser;
 			loser  = NULL;
-			G_bprint (PRINT_HIGH, "The new winner is %s\n", getname(winner));
+			G_bprint (PRINT_HIGH, "The new %s is %s\n", redtext("winner"), getname(winner));
 			SetWinner( winner );
 			setfullwep( winner ); // because we not resapawn him, set full manually
 		}
     
 		if ( !winner && (winner = ra_que_first()) ) { // still lack of winner
 			ra_out_que( winner );
-			G_bprint (PRINT_HIGH, "The new winner is %s\n", getname(winner));
+			G_bprint (PRINT_HIGH, "The new %s is %s\n", redtext("winner"), getname(winner));
 			SetWinner( winner );
 			k_respawn( winner ); // respawn player
 		}
     
 		if ( !loser && (loser = ra_que_first()) ) { // lack of loser
 			ra_out_que( loser );
-			G_bprint (PRINT_HIGH, "The new challenger is %s\n", getname(loser));
+			G_bprint (PRINT_HIGH, "The new %s is %s\n", redtext("challenger"), getname(loser));
 			SetLoser( loser );
 			k_respawn( loser ); // respawn player
 		}
@@ -545,13 +549,13 @@ void RocketArenaPre()
 			if ( r == 60 )
 			{
 				G_sprint (self, PRINT_HIGH,"You have 1 minute left\n"
-										   "%s to get back in line\n", redtext("tline"));
+										   "%s to get back in line\n", redtext("ra_break"));
 				stuffcmd(self, "play player/axhit1.wav\n");
 			}
 			else if ( r == 30 )
 			{
 				G_sprint (self, PRINT_HIGH,"You have 30 seconds left\n"
-										   "%s to get back in line\n", redtext("tline"));
+										   "%s to get back in line\n", redtext("ra_break"));
 				stuffcmd(self, "play player/axhit1.wav\n");
 			}
 			else if ( r > 0 && r <= 10 )
@@ -620,7 +624,7 @@ void ra_PrintPos()
 
 	if ( (pos = ra_pos_que( self )) < 0 ) {
 		G_sprint (self, PRINT_HIGH,"You are out of line\n"
-								   "%s to return\n", redtext("tline"));
+								   "%s to return\n", redtext("ra_break"));
 		return;
 	}
 
@@ -640,7 +644,7 @@ void ra_PrintPos()
 	}
 }
 
-void ra_tLine()
+void ra_break()
 {
 	if ( !isRA() || isWinner( self ) || isLoser( self ) )
 		return;
@@ -648,7 +652,7 @@ void ra_tLine()
 	if ( ra_isin_que( self ) ) // take OUT of line
 	{
 		G_sprint (self, PRINT_HIGH,"You can have up to a 5 minute break\n"
-								   "%s to get back in line\n", redtext("tline"));	
+								   "%s to get back in line\n", redtext("ra_break"));	
 
 		self->idletime = g_globalvars.time + MAXIDLETIME;
 		ra_out_que( self );

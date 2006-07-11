@@ -14,14 +14,13 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.74 2006/07/10 13:21:43 qqshka Exp $
+ *  $Id: match.c,v 1.75 2006/07/11 02:30:51 qqshka Exp $
  */
 
 #include "g_local.h"
 
 void NextLevel ();
 void IdlebotForceStart ();
-void CheckAll();
 void StartMatch ();
 void remove_specs_wizards ();
 void lastscore_add ();
@@ -951,204 +950,146 @@ void SaveOvertimeStats ()
 	}
 }
 
+void CheckBerzerk( int min, int sec )
+{
+	int bmin, bsec;
+	gedict_t	*p;
+
+	if( !k_berzerkenabled || k_berzerk )
+		return;
+
+	// transform berzerk seconds to minutes and seconds, so we can guess is time to turn berzerk on
+	bmin = k_berzerkenabled / 60;
+	bsec = k_berzerkenabled - bmin * 60;
+	bmin++;
+
+	if( sec != bsec || min != bmin )
+		return;
+
+	G_bprint(2, "%s\n", redtext("BERZERK!!!"));
+	trap_lightstyle ( 0, "ob" );
+	k_berzerk = 1;
+	
+	for( p = world; (p = find( p, FOFCLSN, "player" )); ) {
+		if( !ISLIVE( p ) )
+			continue;
+
+		p->s.v.items = (int)p->s.v.items | (IT_QUAD | IT_INVULNERABILITY);
+		p->super_time = 1;
+		p->super_damage_finished = g_globalvars.time + 3600;
+		p->invincible_time = 1;
+		p->invincible_finished = g_globalvars.time + 2;
+		p->k_666 = 1;
+	}
+}
+
+void CheckOvertime()
+{
+	gedict_t	*timer, *ed1 = get_ed_scores1(), *ed2 = get_ed_scores2();
+	int teams   = CountTeams(), players = CountPlayers();
+	int scores1 = get_scores1(), scores2 = get_scores2();
+	int k_mb_overtime = cvar( "k_overtime" );
+	int k_exttime = bound(1, cvar( "k_exttime" ), 999); // at least some reasonable values
+
+	// If 0 no overtime, 1 overtime, 2 sudden death
+	// And if its neither then well we exit
+	if( !k_mb_overtime || (k_mb_overtime != 1 && k_mb_overtime != 2) )
+	{
+		EndMatch( 0 );
+		return;
+	}
+	
+    // Overtime.
+	// Ok we have now decided that the game is ending, so decide overtime wise here what to do.
+
+	if( k_matchLess ) {
+		k_mb_overtime = 0; // no overtime in matchLess mode
+	}
+	else if( (isTeam() || isCTF()) && teams != 2 ) {
+		k_mb_overtime = 0; // no overtime in case of less then 2 or more then 2 teams
+	}			
+	else if( isDuel() && (ed1 = get_ed_scores1()) && (ed2 = get_ed_scores2()) )
+	{
+		scores1 = ed1->s.v.frags;
+		scores2 = ed2->s.v.frags;
+
+		if ( scores1 != scores2 )
+			k_mb_overtime = 0;
+	}
+	// Or it can be a team game.
+	// Handle a 2v2 or above team game
+	else if( (isTeam() || isCTF()) && teams == 2 && players > 2 )
+	{
+		if ( scores1 != scores2 )
+			k_mb_overtime = 0;
+	}
+	else
+		k_mb_overtime = 0;
+
+	if( !k_mb_overtime )
+	{
+		EndMatch( 0 );
+		return;
+	}
+
+	k_overtime = k_mb_overtime;
+	SaveOvertimeStats ();
+
+	G_bprint(2, "time over, the game is a draw\n");
+
+	if( k_overtime == 1 ) {
+		// Ok its increase time
+		self->cnt  =  k_exttime;
+		self->cnt2 = 60;
+		localcmd("serverinfo status \"%d min left\"\n", (int)self->cnt);
+
+		G_bprint(2, "\x90%s\x91 minute%s overtime follows\n", dig3(k_exttime), count_s(k_exttime));
+		self->s.v.nextthink = g_globalvars.time + 1;
+	}
+	else {
+		G_bprint(2, "Sudden death %s\n", redtext("overtime begins"));
+		k_sudden_death = 1;
+
+		// added timer removal at sudden death beginning
+		for( timer = world; (timer = find(timer, FOFCLSN, "timer")); )
+			ent_remove( timer );
+	}
+}
+
 // Called every second during a match. cnt = minutes, cnt2 = seconds left.
 // Tells the time every now and then.
 void TimerThink ()
 {
-	gedict_t	*p;
-	float f1, f2, f3, f4, k_exttime, player1scores, player2scores, player1found;
-	int k_mb_overtime = 0;
-
-	f1 = k_matchLess ? 1 : 0; // don't stop match if no players, because they may no yet connected (matchless case).
-							  // instead of this, stop match on last player disconnect
-
-
 //	G_bprint(2, "left %2d:%2d\n", (int)self->cnt, (int)self->cnt2);
 
-
-	// moved out the score checking every second to every minute only.  And if someone
-	// types scores it recalculates it for them.
-
-	if( k_sudden_death )
-		return;      
-
-	if( k_pause ) {
-		self->s.v.nextthink = g_globalvars.time + 1;
-		return;
-	}
-
-	if( self->k_teamnum < g_globalvars.time && !k_checkx ) {
-		k_checkx = 1; // global which set to true when some time spend after match start
-	}
-
-	if( !f1 )
-		f1 = CountPlayers();
-
-	if( !f1 ) {
+	if( !k_matchLess && !CountPlayers() ) {
 		EndMatch( 1 );
 		return;
 	}
 
-	( self->cnt2 )--;
+	if( k_sudden_death )
+		return;      
 
-    if( k_berzerkenabled ){
-        f1 = k_berzerkenabled;
-		f2 = floor(f1 / 60);
-		f1 = f1 - (f2 * 60);
-		f2++;
-
-		if( self->cnt2 == f1 && self->cnt == f2 ) {
-			G_bprint(2, "BERZERK!!!!\n");
-			trap_lightstyle ( 0, "ob" );
-			k_berzerk = 1;
-
-			p = find ( world, FOFCLSN, "player" );
-			while( p ) {
-				if( !strnull ( p->s.v.netname ) && ISLIVE( p ) ) {
-					p->s.v.items = (int)p->s.v.items | (IT_QUAD | IT_INVULNERABILITY);
-					p->super_time = 1;
-					p->super_damage_finished = g_globalvars.time + 3600;
-					p->invincible_time = 1;
-					p->invincible_finished = g_globalvars.time + 2;
-					p->k_666 = 1;
-				}
-
-				p = find ( p, FOFCLSN, "player" );
-			}
-		}
+	if( k_pause ) { // wtf, all nextthink fields is set to -1 while paused
+		self->s.v.nextthink = g_globalvars.time + 1;
+		return;
 	}
 
-	if( !self->cnt2 ) 
-	{
-		int scores1 = get_scores1();
-		int scores2 = get_scores2();
+	if( self->k_teamnum < g_globalvars.time && !k_checkx )
+		k_checkx = 1; // global which set to true when some time spend after match start
 
+	( self->cnt2 )--;
+
+	CheckBerzerk( self->cnt, self->cnt2 );
+
+	if( !self->cnt2 ) {
 		self->cnt2 = 60;
 		self->cnt  -= 1;
 
-//		if ( self->cnt < 0 )
-//				self->cnt = 0;
-
 		localcmd("serverinfo status \"%d min left\"\n", (int)self->cnt);
 
-		if( !self->cnt )
-		{
-			k_mb_overtime = cvar( "k_overtime" );
-			
-			// If 0 no overtime, 1 overtime, 2 sudden death
-			// And if its neither then well we exit
-			if( k_mb_overtime )
-			{
-				f3 = CountTeams();
-				f4 = CountPlayers();
-				k_exttime = cvar( "k_exttime" );
-
-				
-                // Overtime.
-				// Ok we have now decided that the game is ending,
-				// 	so decide overtime wise here what to do.
-				// Check to see if duel first
-
-				if( k_matchLess ) {
-					; // no overtime in matchLess mode
-				}
-				else if( (isTeam() || isCTF()) && f3 != 2 ) {
-					; // no overtime in case of less then 2 or more then 2 teams
-				}			
-				else if( isDuel() && f4 == 2 )
-				{
-					player1scores = player2scores = player1found = 0;
-
-					p = find ( world, FOFCLSN, "player" );
-					while( p ) 
-					{
-						if ( !strnull ( p->s.v.netname ) ) {
-		
-							if( player1found == 0 ) 
-							{
-                            	player1scores = p->s.v.frags;
-								player1found = 1;					
-							}
-							else{
-                            	player2scores = p->s.v.frags;
-							}
-						}
-
-						p = find ( p, FOFCLSN, "player" );
-					}
-					
-					// In player1scores and player2scores we have scores(lol?)
-					if( player1scores == player2scores )
-					{
-						k_overtime = k_mb_overtime;
-
-						SaveOvertimeStats ();
-
-						G_bprint(2, "time over, the game is a draw\n");
-						if( k_overtime == 1 ) {
-							// Ok its increase time
-							self->cnt =  k_exttime;
-							self->cnt2 = 60;
-							localcmd("serverinfo status \"%d min left\"\n", (int)self->cnt);
-
-							G_bprint(2, "\x90%s\x91 minute%s overtime follows\n", dig3(k_exttime), count_s(k_exttime));
-							self->s.v.nextthink = g_globalvars.time + 1;
-
-							return;	
-						} else {
-							G_bprint(2, "Sudden death %s\n", redtext("overtime begins"));
-						// added timer removal at sudden death beginning
-							k_sudden_death = 1;
-
-							p = find ( world, FOFCLSN, "timer");
-							while( p ) {
-								p->s.v.nextthink = g_globalvars.time + 0.1;
-								p->s.v.think = ( func_t ) SUB_Remove;
-
-								p = find(p, FOFCLSN, "timer");
-							}
-							return;
-						}
-					}
-				}
-				// Or it can be a team game.
-				// Handle a 2v2 or above team game
-				else if( (isTeam() || isCTF()) && f3 == 2 && f4 > 2 && scores1 == scores2 )
-				{
-					k_overtime = k_mb_overtime;
-
-					SaveOvertimeStats ();
-
-					G_bprint(2, "time over, the game is a draw\n");
-					if( k_overtime == 1 ) {
-						// Ok its increase time
-						self->cnt =  k_exttime;
-						self->cnt2 = 60;
-						localcmd("serverinfo status \"%d min left\"\n", (int)self->cnt);
-
-						G_bprint(2, "\x90%s\x91 minute%s overtime follows\n", dig3(k_exttime), count_s(k_exttime));
-						self->s.v.nextthink = g_globalvars.time + 1;
-
-						return;	
-					} else {                      
-						G_bprint(2, "Sudden death %s\n", redtext("overtime begins"));
-						// added timer removal at sudden death beginning
-						k_sudden_death = 1;
-
-						p = find ( world, FOFCLSN, "timer");
-						while( p ) {
-							p->s.v.nextthink = g_globalvars.time + 0.1;
-							p->s.v.think = ( func_t ) SUB_Remove;
-
-							p = find(p, FOFCLSN, "timer");
-						}
-						return;
-					}
-				}
-			}
-
-			EndMatch( 0 );
-
+		if( !self->cnt ) {
+			CheckOvertime();
 			return;
 		}
 
@@ -1157,20 +1098,18 @@ void TimerThink ()
 		self->s.v.nextthink = g_globalvars.time + 1;
 
 		if( k_showscores ) {
-			if( scores1 == scores2 ) {
-				G_bprint(2, "The game is currently a tie\n");
-			} else if( scores1 != scores2 ) {
-				f1 = scores1 - scores2;
+			int sc = get_scores1() - get_scores2();
+
+			if ( sc ) {
 				G_bprint(2, "%s \x90%s\x91 leads by %s frag%s\n",
-						redtext("Team"), cvar_string ( ( f1 > 0 ? "_k_team1" : "_k_team2" ) ),
-						dig3(abs( (int)f1 )), count_s( f1 ) );
+						redtext("Team"), cvar_string ( ( sc > 0 ? "_k_team1" : "_k_team2" ) ),
+						dig3(abs( (int)sc )), count_s( abs( (int)sc ) ) );
 			}
+			else
+				G_bprint(2, "The game is currently a tie\n");
 		}
 		return;
 	}
-
-	if( self->cnt2 == 20 || self->cnt2 == 40 )
-		CheckAll();
 
 	if( self->cnt == 1 && ( self->cnt2 == 30 || self->cnt2 == 15 || self->cnt2 <= 10 ) )
 		G_bprint(2, "\x90%s\x91 second%s\n", dig3( self->cnt2 ), count_s( self->cnt2 ) );
@@ -1297,7 +1236,7 @@ void SM_PrepareShowscores()
 	gedict_t *p;
 	char *team1 = "", *team2 = "";
 
-	if( k_matchLess ) // skip this in matchLess mode
+	if ( k_matchLess ) // skip this in matchLess mode
 		return;
 
 	if ( (!isTeam() && !isCTF()) || CountRTeams() != 2 ) // we need 2 teams
@@ -1362,12 +1301,8 @@ void StartMatch ()
 	localcmd("localinfo 1 \"\"\n");
 	trap_executecmd (); // <- this really needed
 
-    // Check to see if berzerk is set.
-    if( cvar( "k_bzk" ) ) {
-        k_berzerkenabled = cvar( "k_btime" );
-    } else {
-        k_berzerkenabled = 0;
-    }
+	// Check to see if berzerk is set.
+	k_berzerkenabled = (cvar( "k_bzk" ) ? bound(0, cvar( "k_btime" ), 9999) : 0);
 
 	SM_PrepareMap(); // remove/add some items from map regardind with dmm and game mode
 	
@@ -1710,6 +1645,7 @@ void ShowMatchSettings()
 // team_no!_vs_fom[dm3]
 // ctf_no!_vs_fom[dm3]
 // ffa_10[dm3] // where 10 is count of players
+// ra_10[dm3] // where 10 is count of players
 // unknown_10[dm3] // where 10 is count of players
 
 char *CompilateDemoName ()
@@ -1722,7 +1658,10 @@ char *CompilateDemoName ()
 
 	demoname[0] = 0;
 
-	if ( isDuel() ) {
+	if ( isRA() ) {
+		strlcat( demoname, va("ra_%d", (int)CountPlayers()), sizeof( demoname ) );
+	}
+	else if ( isDuel() ) {
 		strlcat( demoname, "duel", sizeof( demoname ) );
 		if ( cvar("k_midair") )
 			strlcat( demoname, "_midair", sizeof( demoname ) );

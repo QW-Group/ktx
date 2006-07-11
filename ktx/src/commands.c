@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.117 2006/07/09 23:26:03 qqshka Exp $
+ *  $Id: commands.c,v 1.118 2006/07/11 02:30:51 qqshka Exp $
  */
 
 // commands.c
@@ -375,7 +375,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_LOCK         "temprorary lock server"
 #define CD_SWAPALL      "swap teams for ctf"
 // { RA
-#define CD_TLINE        "toggle RA line status"
+#define CD_RA_BREAK     "toggle RA line status"
 #define CD_RA_EFFI      "RA players efficiencies"
 #define CD_RA_POS       "RA line position"
 // }
@@ -601,7 +601,7 @@ cmd_t cmds[] = {
 	{ "dinfo",       dinfo,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_DINFO },
 	{ "lock",        sv_lock,                   0    , CF_BOTH_ADMIN, CD_LOCK },
 // { RA
-	{ "tline",       ra_tLine,                  0    , CF_PLAYER, CD_TLINE },
+	{ "ra_break",    ra_break,                  0    , CF_PLAYER, CD_RA_BREAK },
 	{ "ra_effi",     ra_PrintStats,             0    , CF_BOTH, CD_RA_EFFI },
 	{ "ra_pos",      ra_PrintPos,               0    , CF_PLAYER, CD_RA_POS }
 // }
@@ -1189,8 +1189,8 @@ void ModStatus ()
 
 	if( match_in_progress == 1 ) {
 		p = find(world, FOFCLSN, "timer" );
-		G_sprint(self, 2, "The match will start in %d second%s\n",
-						 (int)p->cnt2, count_s(p->cnt2));
+		if ( p )
+			G_sprint(self, 2, "The match will start in %d second%s\n", (int)p->cnt2, count_s(p->cnt2));
 		return;
 	}
 
@@ -2056,7 +2056,7 @@ void ShowRules()
 			"\nBERZERK mode is activated!\n"
 			"This means that when only %d seconds\n"
 			"remains of the game, all players\n"
-			"gets QUAD/OCTA powered.\n", (int)cvar( "k_btime" ) );
+			"gets QUAD/OCTA powered.\n", (int)bound(0, cvar( "k_btime" ), 9999) );
 
 	G_sprint(self, 2, "\n");
 }

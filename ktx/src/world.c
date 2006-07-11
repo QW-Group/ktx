@@ -20,15 +20,14 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.58 2006/07/09 22:53:26 qqshka Exp $
+ *  $Id: world.c,v 1.59 2006/07/11 02:30:51 qqshka Exp $
  */
 
 #include "g_local.h"
 
 void  SUB_regen();
-
+void  CheckAll();
 void  FixSpecWizards ();
-
 void  FixSayFloodProtect();
 
 #define MAX_BODYQUE 4
@@ -1085,5 +1084,7 @@ void StartFrame( int time )
 
 	if ( framecount > 10 )
 		vote_check_all();
+
+	CheckAll(); // just check some clients params
 }
 

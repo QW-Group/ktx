@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.75 2006/07/09 22:52:47 qqshka Exp $
+ *  $Id: g_local.h,v 1.76 2006/07/11 02:30:51 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -657,7 +657,7 @@ void		ra_Frame();
 // { ra commands
 void		ra_PrintStats();
 void		ra_PrintPos();
-void		ra_tLine();
+void		ra_break();
 // }
 
 // captain.c

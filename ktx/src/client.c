@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.95 2006/07/10 14:15:48 ult_ Exp $
+ *  $Id: client.c,v 1.96 2006/07/11 02:30:51 qqshka Exp $
  */
 
 //===========================================================================
@@ -52,8 +52,14 @@ void del_from_specs_favourites(gedict_t *rm);
 
 void CheckAll ()
 {
+	static float next_check = -1;
 	int from = 0;
 	gedict_t *p;
+
+	if ( next_check > g_globalvars.time )
+		return;
+
+	next_check = g_globalvars.time + 20;
 
 	for ( p = world; (p = find_plrspc(p, &from)); )
 		CheckRate( p, "" );
@@ -1894,7 +1900,10 @@ void Print_Scores( )
 			minutes--;
 	}
 
-	strlcat(buf, va("%s:%02d:%02d", redtext("tl"), minutes, seconds), sizeof(buf));
+	if ( k_sudden_death )
+		strlcat(buf, va("%s:%s", redtext("tl"), redtext("sd")), sizeof(buf));
+	else
+		strlcat(buf, va("%s:%02d:%02d", redtext("tl"), minutes, seconds), sizeof(buf));
 
 	if( k_showscores ) {
 		int s1 = get_scores1();
