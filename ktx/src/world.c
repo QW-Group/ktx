@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.59 2006/07/11 02:30:51 qqshka Exp $
+ *  $Id: world.c,v 1.60 2006/07/11 23:03:46 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -975,7 +975,8 @@ void FixRules ( )
 	}
 
 // oldman --> don't allow unlimited timelimit + fraglimit
-    if( timelimit == 0 && fraglimit == 0 ) {
+// also do not allow some weird timelimit
+    if( (timelimit == 0 && fraglimit == 0) || timelimit > k_tt || timelimit < 0 ) {
         cvar_fset( "timelimit", timelimit = k_tt ); // sensible default if no max set
     }
 // <-- oldman

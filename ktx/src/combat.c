@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.26 2006/07/09 22:53:25 qqshka Exp $
+ *  $Id: combat.c,v 1.27 2006/07/11 23:03:46 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -467,8 +467,16 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		Killed( targ, attacker );
 
         // KTEAMS: check if sudden death is the case
-        if (k_sudden_death && !strcmp( targ->s.v.classname, "player" ) ) 
+        if ( k_sudden_death && streq( targ->s.v.classname, "player" ) ) 
             EndMatch(0);
+
+		// check fraglimit
+		if (	fraglimit
+			&& (   ( targ->s.v.frags >= fraglimit && streq( targ->s.v.classname, "player" ) )
+			 	|| ( attacker->s.v.frags >= fraglimit && streq( attacker->s.v.classname, "player" ) )
+			   )
+		   )
+           	EndMatch(0);
 
 		return;
 	}

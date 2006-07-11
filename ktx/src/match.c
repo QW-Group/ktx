@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.75 2006/07/11 02:30:51 qqshka Exp $
+ *  $Id: match.c,v 1.76 2006/07/11 23:03:46 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1334,7 +1334,7 @@ void StartMatch ()
 
 	self->k_teamnum = g_globalvars.time + 3;  //dirty i know, but why waste space?
 											  // FIXME: waste space, but be clean
-	self->cnt = timelimit;
+	self->cnt = bound(0, timelimit, 9999);
 	self->cnt2 = 60;
 	localcmd("serverinfo status \"%d min left\"\n", (int)timelimit);
 
@@ -1346,6 +1346,9 @@ void StartMatch ()
 	SM_PrepareHostname();
 
 	SM_on_MatchStart();
+
+	if ( !self->cnt )
+		ent_remove( self );
 }
 
 void PrintCountdown( int seconds )
