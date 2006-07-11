@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.76 2006/07/11 23:03:46 qqshka Exp $
+ *  $Id: match.c,v 1.77 2006/07/11 23:29:55 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1002,13 +1002,15 @@ void CheckOvertime()
     // Overtime.
 	// Ok we have now decided that the game is ending, so decide overtime wise here what to do.
 
-	if( k_matchLess ) {
-		k_mb_overtime = 0; // no overtime in matchLess mode
-	}
-	else if( (isTeam() || isCTF()) && teams != 2 ) {
+//	if( k_matchLess ) {
+//		k_mb_overtime = 0; // no overtime in matchLess mode
+//	}
+//	else
+
+	if( (isTeam() || isCTF()) && teams != 2 ) {
 		k_mb_overtime = 0; // no overtime in case of less then 2 or more then 2 teams
 	}			
-	else if( isDuel() && (ed1 = get_ed_scores1()) && (ed2 = get_ed_scores2()) )
+	else if( (isDuel() || isFFA()) && (ed1 = get_ed_scores1()) && (ed2 = get_ed_scores2()) )
 	{
 		scores1 = ed1->s.v.frags;
 		scores2 = ed2->s.v.frags;
