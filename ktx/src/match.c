@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.77 2006/07/11 23:29:55 qqshka Exp $
+ *  $Id: match.c,v 1.78 2006/07/12 02:25:35 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1218,8 +1218,12 @@ void SM_PrepareClients()
 
 		p->ps.handicap = hdc; // restore player handicap
 
-		if ( isRA() )
+		if ( isRA() ) {
+			if ( isWinner( p ) || isLoser( p ) )
+				setfullwep( p );
+
 			continue;
+		}
 
 		old = self;
 		self = p;
@@ -1411,7 +1415,7 @@ void PrintCountdown( int seconds )
 		default: ot	= redtext("Unkn"); break;
 	}
 
-	if ( cvar( "k_overtime" ) )
+	if ( timelimit && cvar( "k_overtime" ) )
 		strlcat(text, va("%s %4s\n", "Overtime", ot), sizeof(text));
 
 	switch ( Get_Powerups() ) {

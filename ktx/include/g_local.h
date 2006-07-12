@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.76 2006/07/11 02:30:51 qqshka Exp $
+ *  $Id: g_local.h,v 1.77 2006/07/12 02:25:35 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -653,6 +653,7 @@ void		RocketArenaPre();
 void		playallsound( char *playstr );
 qboolean	readytostart();
 void		ra_Frame();
+void		setfullwep( gedict_t *anent );
 
 // { ra commands
 void		ra_PrintStats();

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1997 David 'crt' Wright
  *
- * $Id: arena.c,v 1.3 2006/07/11 02:30:51 qqshka Exp $
+ * $Id: arena.c,v 1.4 2006/07/12 02:25:35 qqshka Exp $
  */
 
 // arena.c - rocket arena stuff
@@ -11,7 +11,6 @@
 void k_respawn( gedict_t *p );
 
 void setnowep( gedict_t *anent );
-void setfullwep( gedict_t *anent );
 
 void SetWinner( gedict_t *p );
 void SetLoser( gedict_t *p );
@@ -193,6 +192,7 @@ void ra_ClientDisconnect()
 
 void ra_ClientObituary( gedict_t *targ, gedict_t *attacker )
 {
+	int ah, aa;
 	gedict_t *loser, *winner;
 
 	if ( !isRA() )
@@ -228,6 +228,9 @@ void ra_ClientObituary( gedict_t *targ, gedict_t *attacker )
 		return; // require both
 	}
 
+	ah = attacker->s.v.health;
+	aa = attacker->s.v.armorvalue;
+
 	if ( targ == winner )
 	{
 		winner->ps.loses += 1;
@@ -242,6 +245,7 @@ void ra_ClientObituary( gedict_t *targ, gedict_t *attacker )
 		}
 
 		ra_in_que( winner ); // move to que winner
+		setfullwep( loser );
 	}
 	else if ( targ == loser )
 	{
@@ -257,6 +261,7 @@ void ra_ClientObituary( gedict_t *targ, gedict_t *attacker )
 		}
 
 		ra_in_que( loser ); // move to que loser
+		setfullwep( winner );
 	}
 	else {
 		// just wanna know is that possible somehow
@@ -267,9 +272,6 @@ void ra_ClientObituary( gedict_t *targ, gedict_t *attacker )
 	{
 		if ( attacker != targ )
 		{
-			int ah = attacker->s.v.health;
-			int aa = attacker->s.v.armorvalue;
-
 			if ( ah == 100 && aa == 200 )
 			{
 				G_bprint (PRINT_HIGH, "%s\n", redtext("FLAWLESS Victory!"));
@@ -350,12 +352,13 @@ void setnowep( gedict_t *anent )
 void setfullwep( gedict_t *anent )
 {
 	gedict_t *swap;
+	qboolean add = (match_start_time == g_globalvars.time ? false : true);
 
 // ammo
-	anent->s.v.ammo_nails   = min(200, anent->s.v.ammo_nails   + 80);
-	anent->s.v.ammo_shells  = min(100, anent->s.v.ammo_shells  + 30);
-	anent->s.v.ammo_rockets = min(100, anent->s.v.ammo_rockets + 30);
-	anent->s.v.ammo_cells   = min(100, anent->s.v.ammo_cells   + 30);
+	anent->s.v.ammo_nails   = min(200, (add ? anent->s.v.ammo_nails : 0)   + 80);
+	anent->s.v.ammo_shells  = min(100, (add ? anent->s.v.ammo_shells : 0)  + 30);
+	anent->s.v.ammo_rockets = min(100, (add ? anent->s.v.ammo_rockets : 0) + 30);
+	anent->s.v.ammo_cells   = min(100, (add ? anent->s.v.ammo_cells : 0)   + 30);
 // weapons
 	anent->s.v.items = IT_AXE | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_NAILGUN | IT_SUPER_NAILGUN |
 					   IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER | IT_LIGHTNING;
@@ -452,9 +455,6 @@ void ra_Frame ()
  	winner = getWinner();
 	loser  = getLoser();
 
-//	G_bprint (PRINT_HIGH, "winner %s\n", winner ? getname(winner) : "none");
-//	G_bprint (PRINT_HIGH, "loser  %s\n", loser  ? getname(loser)  : "none");
-
 	if ( !winner || !loser ) {
 		ra_match_fight = 0;
 
@@ -463,7 +463,6 @@ void ra_Frame ()
 			loser  = NULL;
 			G_bprint (PRINT_HIGH, "The new %s is %s\n", redtext("winner"), getname(winner));
 			SetWinner( winner );
-			setfullwep( winner ); // because we not resapawn him, set full manually
 		}
     
 		if ( !winner && (winner = ra_que_first()) ) { // still lack of winner
@@ -506,9 +505,6 @@ void ra_Frame ()
 
 		if ( first )
 			G_bprint (PRINT_HIGH, "%s is next in line\n", getname(first));
-
-		setfullwep( winner );
-		setfullwep( loser );
 
 		winner->s.v.takedamage = DAMAGE_AIM;
 		loser->s.v.takedamage  = DAMAGE_AIM;
