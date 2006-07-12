@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.60 2006/07/11 23:03:46 qqshka Exp $
+ *  $Id: world.c,v 1.61 2006/07/12 23:27:54 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -256,6 +256,8 @@ void SP_worldspawn()
 		trap_precache_sound( "rune/rune3.wav" );
 		trap_precache_sound( "rune/rune4.wav" );
 	}
+
+	ra_Precache(); // only if ra is active
 
 	trap_precache_model( "progs/player.mdl" );
 	trap_precache_model( "progs/eyes.mdl" );

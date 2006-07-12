@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1997 David 'crt' Wright
  *
- * $Id: arena.c,v 1.4 2006/07/12 02:25:35 qqshka Exp $
+ * $Id: arena.c,v 1.5 2006/07/12 23:27:54 qqshka Exp $
  */
 
 // arena.c - rocket arena stuff
@@ -158,6 +158,19 @@ void SetNone( gedict_t *p )
 	p->ra_pt = raNone;
 }
 
+void ra_Precache()
+{
+	if ( !isRA() )
+		return;
+
+	trap_precache_sound("ra/1.wav");
+	trap_precache_sound("ra/2.wav");
+	trap_precache_sound("ra/3.wav");
+	trap_precache_sound("ra/excelent.wav");
+	trap_precache_sound("ra/fight.wav");
+	trap_precache_sound("ra/flawless.wav");
+}
+
 void ra_ClientDisconnect()
 {
 	gedict_t *p = NULL;
@@ -275,8 +288,7 @@ void ra_ClientObituary( gedict_t *targ, gedict_t *attacker )
 			if ( ah == 100 && aa == 200 )
 			{
 				G_bprint (PRINT_HIGH, "%s\n", redtext("FLAWLESS Victory!"));
-				
-				playallsound("play ra/flawless.wav\n");
+				sound (world, CHAN_AUTO + CHAN_NO_PHS_ADD, "ra/flawless.wav", 1, ATTN_NONE);
 			}
 			else
 			{
@@ -285,7 +297,7 @@ void ra_ClientObituary( gedict_t *targ, gedict_t *attacker )
 								redtext("armor left"));
 
 				if ( ah >= 75 && aa >= 100 )
-					playallsound("play ra/excelent.wav\n");				
+					sound (world, CHAN_AUTO + CHAN_NO_PHS_ADD, "ra/excelent.wav", 1, ATTN_NONE);
 			}
 
 			attacker->s.v.frags += 1;
@@ -306,16 +318,6 @@ void ra_PutClientInServer()
 		VectorScale( g_globalvars.v_forward, 300, self->s.v.velocity );
 		setfullwep( self ); // shit for winner or loser
 	}
-}
-
-// actually may stuff command to all clients consoles, not just play some sound
-void playallsound( char *playstr )
-{
-	gedict_t *p;
-	int from;
-
-	for( from = 0, p = world; (p = find_plrspc (p, &from)); )
-		stuffcmd(p, playstr);
 }
 
 void setnowep( gedict_t *anent )
@@ -499,8 +501,7 @@ void ra_Frame ()
 		char *fight = redtext("FIGHT!");
 		gedict_t *first = ra_que_first();
 
-		stuffcmd(winner, "play ra/fight.wav\n");
-		stuffcmd(loser,  "play ra/fight.wav\n");
+		sound (world, CHAN_AUTO + CHAN_NO_PHS_ADD, "ra/fight.wav", 1, ATTN_NONE);
 		G_bprint (PRINT_HIGH, "%s vs. %s\n", getname(winner), getname(loser));
 
 		if ( first )
@@ -519,10 +520,7 @@ void ra_Frame ()
 		last_r = r;
 
 		if ( r <= 3 )
-		{
-			stuffcmd(winner, "play ra/%d.wav\n", r);
-			stuffcmd(loser,  "play ra/%d.wav\n", r);
-		}
+			sound (world, CHAN_AUTO + CHAN_NO_PHS_ADD, va("ra/%d.wav", r), 1, ATTN_NONE);
 
 		G_centerprint (winner, "%s\n\n%d", getname(loser),  r);
 		G_centerprint (loser,  "%s\n\n%d", getname(winner), r);
@@ -547,6 +545,7 @@ void RocketArenaPre()
 				G_sprint (self, PRINT_HIGH,"You have 1 minute left\n"
 										   "%s to get back in line\n", redtext("ra_break"));
 				stuffcmd(self, "play player/axhit1.wav\n");
+
 			}
 			else if ( r == 30 )
 			{

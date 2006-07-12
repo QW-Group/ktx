@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.77 2006/07/12 02:25:35 qqshka Exp $
+ *  $Id: g_local.h,v 1.78 2006/07/12 23:27:54 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -646,11 +646,11 @@ qboolean	isWinner( gedict_t *p );
 qboolean	isLoser( gedict_t *p );
 gedict_t	*getWinner();
 gedict_t	*getLoser();
+void		ra_Precache();
 void		ra_ClientDisconnect();
 void		ra_ClientObituary( gedict_t *targ, gedict_t *attacker );
 void		ra_PutClientInServer();
 void		RocketArenaPre();
-void		playallsound( char *playstr );
 qboolean	readytostart();
 void		ra_Frame();
 void		setfullwep( gedict_t *anent );

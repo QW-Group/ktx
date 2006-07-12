@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.118 2006/07/11 02:30:51 qqshka Exp $
+ *  $Id: commands.c,v 1.119 2006/07/12 23:27:54 qqshka Exp $
  */
 
 // commands.c
@@ -4036,7 +4036,10 @@ void lastscore_add ()
 
 	e1 = e2 = "";
 	
-	if   ( isDuel() ) {
+	if ( isRA() ) {
+		lst = lsUnknown; // i'm dunno how lastscores must look in RA mode
+	}
+	else if   ( isDuel() ) {
 		lst = lsDuel;
 
 		for( i = from = 0, p = world; (p = find_plrghst( p, &from )) && i < 2; i++ ) {
