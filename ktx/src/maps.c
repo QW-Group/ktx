@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: maps.c,v 1.14 2006/05/28 03:44:28 qqshka Exp $
+ *  $Id: maps.c,v 1.15 2006/07/14 23:53:45 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -178,7 +178,7 @@ char *GetMapName(int imp)
 	return "";
 }
 
-void SelectMap()
+void DoSelectMap(int iMap)
 {
 	char     *m;
 	gedict_t *p;
@@ -205,7 +205,7 @@ void SelectMap()
 	if ( self->k_spectator && !is_adm(self ) ) // only admined specs can select map
 		return;
 
-	if ( strnull( m = GetMapName( self->cmd_selectMap ) ) )
+	if ( strnull( m = GetMapName( iMap ) ) )
 		return;
 
 	if( (    cvar( "k_lockmap" ) || cvar( "k_master" ) )
@@ -216,13 +216,13 @@ void SelectMap()
 		return;
 	}
 
-	if ( self->v.map == self->cmd_selectMap ) {
+	if ( self->v.map == iMap ) {
 		G_sprint(self, 2, "--- your vote is still good ---\n");
 		return;
 	}
 
 	for ( p = world; (p = find(p , FOFCLSN, "player")); )
-		if ( p->v.map == self->cmd_selectMap ) {
+		if ( p->v.map == iMap ) {
 			isVoted = true;
 			break;
 		}
@@ -237,8 +237,17 @@ void SelectMap()
 	else
 		G_bprint(2, "%s %s %s\n", self->s.v.netname, redtext("would rather play on"), m);
 
-	self->v.map = k_lastvotedmap = self->cmd_selectMap;
+	self->v.map = k_lastvotedmap = iMap;
 
 	vote_check_map ();
+}
+
+void SelectMap()
+{
+	char	arg_1[1024];
+
+	trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
+
+	DoSelectMap ( atoi( arg_1 ) );
 }
 

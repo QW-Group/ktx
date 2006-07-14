@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.23 2006/07/09 23:26:03 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.24 2006/07/14 23:53:45 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -43,7 +43,7 @@ void			multi_do(int from_arg, qboolean from_mmode); // set up multi set
 
 qboolean 	ClientCommand()
 {
-	char	cmd_command[1024], arg_1[1024];
+	char	cmd_command[1024];
 
 	self = PROG_TO_EDICT( g_globalvars.self );
 
@@ -73,25 +73,6 @@ qboolean 	ClientCommand()
 		cmd_wreg_do( cmd_command[0] );
 		return true;
 	}
-	else if ( !strcmp( cmd_command, "cm" ) ) {
-		if ( trap_CmdArgc() == 2 ) {
-			trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
-			self->cmd_selectMap = atoi( arg_1 );
-			SelectMap ();
-			self->cmd_selectMap = 0;
-		}
-		return true;
-	}
-// { saved for ktpro compatibility
-	else if ( !strcmp( cmd_command, "info" ) ) {
-		cmdinfo ();
-		return true;
-	}
-	else if ( !strcmp( cmd_command, "uinfo" ) ) {
-		cmduinfo ();
-		return true;
-	}
-// }
 	else if (    only_digits( cmd_command ) // strlen(cmd_command) == 3 for now, but I omit this
 		 	  && DoCommand( atoi( cmd_command ) ) != DO_OUT_OF_RANGE_CMDS
 		    )
@@ -823,7 +804,7 @@ void mmode ()
 {
 	qboolean set;
 	gedict_t *p = NULL;
-	int argc = trap_CmdArgc(), id, mmode;
+	int argc = trap_CmdArgc(), id, mmode, till;
 	char arg_2[1024], arg_3[1024], *tname, *rcpass;
 
 	mmode = (argc < 2 ? iKey(self, "*mm") : MMODE_NONE); // try serve "/mmode" cmd without params
@@ -916,6 +897,12 @@ void mmode ()
 
 		case MMODE_RCON:
 			rcpass = cvar_string("rcon_password");
+			till = Q_rint(self->k_adm_lasttime + 5 - g_globalvars.time);
+
+			if( self->k_adm_lasttime && till > 0  ) { // probably must help against brute force
+				G_sprint(self, 2, "Wait %d second%s!\n", till, count_s(till) );
+				return;
+			}
 
 			if ( !(   ( !strnull(arg_3) && strneq("none", rcpass) && streq(arg_3, rcpass) ) // rcon via pass
 				    || VIP_IsFlags(self, VIP_RCON) // rcon via VIP rights
@@ -923,6 +910,7 @@ void mmode ()
 			   ) { // ok, here we really need check access
 				G_cprint("RCON failed from: %s: %s\n", getname(self), ezinfokey(self, "ip"));
 				G_sprint(self, 2, "mmode(rcon): access denied...\n");
+				self->k_adm_lasttime = g_globalvars.time;
 				return;
 			}
 

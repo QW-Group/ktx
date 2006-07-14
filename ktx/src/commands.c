@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.119 2006/07/12 23:27:54 qqshka Exp $
+ *  $Id: commands.c,v 1.120 2006/07/14 23:53:45 qqshka Exp $
  */
 
 // commands.c
@@ -376,13 +376,13 @@ const char CD_NODESC[] = "no desc";
 #define CD_SWAPALL      "swap teams for ctf"
 // { RA
 #define CD_RA_BREAK     "toggle RA line status"
-#define CD_RA_EFFI      "RA players efficiencies"
 #define CD_RA_POS       "RA line position"
 // }
 
 void dummy() {}
 
 cmd_t cmds[] = {
+	{ "cm",			 SelectMap,			        0    , CF_BOTH | CF_MATCHLESS | CF_NOALIAS, CD_NODESC },
 	{ "commands",    ShowCmds,			        0    , CF_BOTH | CF_MATCHLESS, CD_COMMANDS },
 	{ "scores",      PrintScores,		        0    , CF_BOTH | CF_MATCHLESS, CD_SCORES },
 	{ "stats",       PlayerStats,               0    , CF_BOTH | CF_MATCHLESS, CD_STATS },
@@ -556,7 +556,7 @@ cmd_t cmds[] = {
 	{ "auto_pow",    AutoTrack,             atPow    , CF_SPECTATOR | CF_MATCHLESS, CD_AUTO_POW },
 	{ "next_best",   next_best,                 0    , CF_SPECTATOR | CF_MATCHLESS, CD_NEXT_BEST },
 	{ "next_pow",    next_pow,                  0    , CF_SPECTATOR | CF_MATCHLESS, CD_NEXT_POW },
-	{ "lastscores",  lastscores,                0    , CF_BOTH, CD_LASTSCORES },
+	{ "lastscores",  lastscores,                0    , CF_BOTH | CF_MATCHLESS, CD_LASTSCORES },
 	{ "rnd",         krnd,                		0    , CF_BOTH | CF_PARAMS, CD_RND },
 	{ "agree",       agree_on_map,        		0    , CF_PLAYER | CF_MATCHLESS, CD_AGREE },
 	{ "pos_show",    Pos_Show,                  0    , CF_BOTH | CF_PARAMS, CD_POS_SHOW },
@@ -590,6 +590,10 @@ cmd_t cmds[] = {
 	{ "multi",       multi,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_MULTI },
 	{ "kinfo",       cmdinfo,                   0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_KINFO },
 	{ "kuinfo",      cmduinfo,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_KUINFO },
+// { saved for ktpro compatibility
+	{ "info",        cmdinfo,                   0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS | CF_NOALIAS, CD_NODESC },
+	{ "uinfo",       cmduinfo,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS | CF_NOALIAS, CD_NODESC },
+// }
 	{ "wreg",        cmd_wreg,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_WREG },
 	{ "kill",        ClientKill,                0    , CF_PLAYER | CF_MATCHLESS, CD_KILL },
 	{ "mid_air",     ToggleMidair,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_MIDAIR },
@@ -602,7 +606,6 @@ cmd_t cmds[] = {
 	{ "lock",        sv_lock,                   0    , CF_BOTH_ADMIN, CD_LOCK },
 // { RA
 	{ "ra_break",    ra_break,                  0    , CF_PLAYER, CD_RA_BREAK },
-	{ "ra_effi",     ra_PrintStats,             0    , CF_BOTH, CD_RA_EFFI },
 	{ "ra_pos",      ra_PrintPos,               0    , CF_PLAYER, CD_RA_POS }
 // }
 };
@@ -827,6 +830,7 @@ void StuffModCommands()
 
 		if ( !isValidCmdForClass( i, spc )  // cmd does't valid for this class of player or matchless mode does't have this command
 			 || cmds[i].f == dummy // cmd have't function, ie u must not stuff alias for this cmd
+			 || (cmds[i].cf_flags & CF_NOALIAS) // no alias for such command, may be accessed only via /cmd commandname
 		    ) {
 			limit++;
 			continue;
@@ -2159,12 +2163,16 @@ void PrintScores()
 	}
 }
 
-
 void PlayerStats()
 {
 	gedict_t *p, *p2;
 	char *tmp, *stats;
 	int i, pL = 0, tL = 0;
+
+	if ( isRA() ) {
+		ra_PlayerStats();
+		return;
+	}
 
 	if( match_in_progress != 2 ) {
 		G_sprint(self, 2, "no game - no statistics\n");
@@ -2181,12 +2189,12 @@ void PlayerStats()
 	G_sprint(self, 2, "%s:\n"
 					  "%s %s %s \217  %s\n",
 					   redtext("Player statistics"),
-					   redtext("Frags"), redtext("rank"), isTeam() ? redtext("friendkills ") : "",
+					   redtext("Frags"), redtext("rank"), isTeam() ? redtext("friendkills ") : "  ",
 					   redtext("efficiency"));
 
 	G_sprint(self, 2, "\235\236\236\236\236\236\236\236\236\236\236"
-				  	  "\236\236\236\236\236\236\236\236\236\236\236\236\236%s\237\n",
-				  	  (isTeam() ? "\236\236\236\236\236\236\236\236\236\236\236\236" : ""));
+				  	  "\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236%s\237\n",
+				  	  (isTeam() ? "\236\236\236\236\236\236\236\236\236\236" : ""));
 
 	for ( p = world; (p = find(p, FOFCLSN, "player" )); ) {
 		if( !p->ready )
@@ -4018,16 +4026,15 @@ void agree_on_map ( )
 	if ( !k_lastvotedmap )
 		return; // no map voted
 
-	self->cmd_selectMap = k_lastvotedmap; // emulate as we select last voted map
-	SelectMap(); // <- there will be all checks about match_in_progress and etc
-	self->cmd_selectMap = 0;
+	// emulate as we select last voted map
+	DoSelectMap( k_lastvotedmap ); // <- there will be all checks about match_in_progress and etc
 }
 
 // { lastscores stuff
 
 void lastscore_add ()
 {
-	gedict_t *p;
+	gedict_t *p, *ed1 = get_ed_scores1(), *ed2 = get_ed_scores2();
 	int from;
 	int i, s1 = 0, s2 = 0;
 	int k_ls = bound(0, cvar("__k_ls"), MAX_LASTSCORES-1);
@@ -4036,8 +4043,12 @@ void lastscore_add ()
 
 	e1 = e2 = "";
 	
-	if ( isRA() ) {
-		lst = lsUnknown; // i'm dunno how lastscores must look in RA mode
+	if ( ( isRA() || isFFA() ) && ed1 && ed2 ) { // not the best way since get_ed_scores do not serve ghosts, so...
+		lst = (isRA() ? lsRA : lsFFA);
+		e1 = getname( ed1 );
+		s1 = ed1->s.v.frags;
+		e2 = getname( ed2 );
+		s2 = ed2->s.v.frags;
 	}
 	else if   ( isDuel() ) {
 		lst = lsDuel;
@@ -4117,9 +4128,18 @@ void lastscores ()
 		if (    cur != last // changed game mode
 			 || (strneq(le1 , e1) || strneq(le2 , e2)) // changed teams, duelers
 		   ) {
-			lt1 = lt2 = ""; // show teams members again
-			G_sprint(self, 2, "\x90%s %s %s\x91%s\n", e1, redtext("vs"), e2, 
-									(cur == lsCTF ? redtext(" CTF") : ""));
+			char *um_name = "";
+			switch( cur ) {
+				case lsDuel: um_name = redtext("duel"); break;
+				case lsTeam: um_name = redtext("team"); break;
+				case lsFFA:  um_name = redtext("FFA"); break;
+				case lsCTF:  um_name = redtext("CTF"); break;
+				case lsRA:   um_name = redtext("RA"); break;
+				default:     um_name = redtext("unknown"); break;
+			}
+
+			lt1 = lt2 = ""; // force show teams members again
+			G_sprint(self, 2, "\x90%s %s %s\x91 %s\n", e1, redtext("vs"), e2, um_name);
 		}
 
 		// if team mode show members.

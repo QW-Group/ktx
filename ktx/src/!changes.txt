@@ -1,3 +1,22 @@
+2006-07-13
+qq:
+188. Added support for timelimit 0, but u need setup some fraglimit.
+
+189. Overtime now possible in FFA too.
+
+190. SECURE ISSUE
+
+	 Admin code (6 digit k_admincode) can be found via scripts(direct enumeration) in few hours.
+	 So i'm add some fix for that, just adding some waits, so "hacker" will spend much more time to
+	 find out pass.
+
+	 NOTE: I'm strongly recommend use alpha numeric k_admincode, yes u will lost possibility 
+		   to use impulses to enter admin code, but cmon, use /cmd admin pass
+
+	 thx tom
+
+191. Also Rocket Arena is added to KTX, but in stage of beta, so i describe later how to activate it.
+
 2006-06-29
 qq:
 187. "/fallbanny" does't requires admin rights for players, specs still requires.

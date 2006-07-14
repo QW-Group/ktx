@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.46 2006/07/09 22:53:01 qqshka Exp $
+ *  $Id: progs.h,v 1.47 2006/07/14 23:53:45 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -309,6 +309,7 @@ typedef struct gedict_s {
 	int		k_added;         // NOT_SURE: stores the entered admin code?
 	int		k_adminc;        // number of digits of admin code still to enter
 	int 	k_admin;         // if player is an admin, flags
+	float   k_adm_lasttime;	 // store time of last attempt getting admin rights
 	int		k_captain;       // if player is team captain
 	float	k_flag;          // flagvalue to customise settings such as sounds/autoscreenshot
 	float	k_msgcount;      // NOT_SURE: last time mod printed a message to client?
@@ -339,7 +340,6 @@ typedef struct gedict_s {
 // ILLEGALFPS]
 
 	float shownick_time;	// used to force centerprint is off at desired time
-	int   cmd_selectMap;	// store cmd cm <value> here
 	int   k_spectator;		// true if spectator
 	int   k_player;		    // true if player
 // --> timing

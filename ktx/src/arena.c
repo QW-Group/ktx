@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1997 David 'crt' Wright
  *
- * $Id: arena.c,v 1.5 2006/07/12 23:27:54 qqshka Exp $
+ * $Id: arena.c,v 1.6 2006/07/14 23:53:45 qqshka Exp $
  */
 
 // arena.c - rocket arena stuff
@@ -580,34 +580,48 @@ void RocketArenaPre()
 
 // { ra commands
 
-void ra_PrintStat( gedict_t *e )
+void ra_PlayerStats()
 {
-	float ratio = ( ( e->ps.loses + e->ps.wins ) ? ( e->ps.wins * 100.0f ) / ( e->ps.loses + e->ps.wins ) : 0 );
-
-	G_sprint(self, PRINT_HIGH, "%10.10s W:%3d L:%3d S:%5.1f%%\n", getname( e ), e->ps.wins, e->ps.loses, ratio);
-}
-		
-void ra_PrintStats()
-{
-	int from;
 	gedict_t *p;
+	int i, pL = 0;
 
 	if ( !isRA() )
 		return;
 
-	if ( (p = getWinner()) )
-		ra_PrintStat( p );
-
-	if ( (p = getLoser()) )
-		ra_PrintStat( p );
-
-	for( from = 0, p = world; (p = find_plrghst ( p, &from )); ) {
-		if ( isWinner( p ) || isLoser( p ) )
-			continue;
-
-		ra_PrintStat( p );
+	if( match_in_progress != 2 ) {
+		G_sprint(self, 2, "no game - no statistics\n");
+		return;
 	}
-	
+
+	for ( p = world; (p = find( p, FOFCLSN, "player" )); )
+		pL = max(pL, strlen(p->s.v.netname));
+
+	pL = bound( strlen("Name"), pL, 10 );
+
+	G_sprint(self, 2, "%s:\n"
+					  "%.10s", redtext("Player statistics"), redtext("Name"));
+	for ( i = strlen("Name"); i < pL; i++ )
+		G_sprint(self, 2, " "); // dynamically pad name
+	G_sprint(self, 2,  " %s %s %s \217   %s\245\n", redtext("Frags"), redtext("Wins"), redtext("Loses"), redtext("Effi"));
+
+	G_sprint(self, 2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+					  "\236\236\236\236");
+	for ( i = 0; i < pL; i++ )
+		G_sprint(self, 2, "\236"); // dynamically pad name
+	G_sprint(self, 2, "\237\n");
+
+	for ( p = world; (p = find(p, FOFCLSN, "player" )); ) {
+		G_sprint(self, 2, "%.10s", p->s.v.netname); // player name
+		for ( i = strlen(p->s.v.netname); i < pL; i++ )
+			G_sprint(self, 2, " "); // dynamically pad name
+
+		G_sprint(self, 2, " %5d", (int)p->s.v.frags); // Frags
+		G_sprint(self, 2, " %4d", p->ps.wins);        // Wins
+		G_sprint(self, 2, " %5d", p->ps.loses);       // Loses
+
+		p->efficiency = ( ( p->ps.loses + p->ps.wins ) ? ( p->ps.wins * 100.0f ) / ( p->ps.loses + p->ps.wins ) : 0 );
+		G_sprint(self, 2, " \217  %6.1f\n", p->efficiency); // effi
+	}
 }
 
 void ra_PrintPos()

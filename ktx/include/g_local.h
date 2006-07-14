@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.78 2006/07/12 23:27:54 qqshka Exp $
+ *  $Id: g_local.h,v 1.79 2006/07/14 23:53:45 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -128,7 +128,8 @@ typedef enum
 	lsDuel,
 	lsTeam,
 	lsFFA,
-	lsCTF
+	lsCTF,
+	lsRA 	// note no correspoding gameType_t for lsType
 } lsType_t; // lastscores type
 
 typedef union fi_s
@@ -463,14 +464,15 @@ typedef struct cmd_s {
 	const char *description;
 } cmd_t;
 
-#define CF_PLAYER			( 1<<0  ) /* command valid for players */
-#define CF_SPECTATOR		( 1<<1  ) /* command valid for specs */
+#define CF_PLAYER			( 1<<0 ) /* command valid for players */
+#define CF_SPECTATOR		( 1<<1 ) /* command valid for specs */
 #define CF_BOTH				( CF_PLAYER | CF_SPECTATOR ) /* command valid for both: specs and players */
 #define CF_PLR_ADMIN		( 1<<2 ) /* client is player, so this command require admin rights */
 #define CF_SPC_ADMIN		( 1<<3 ) /* client is spectator, so this command require admin rights */
 #define CF_BOTH_ADMIN		( CF_PLR_ADMIN | CF_SPC_ADMIN ) /* this command require admin rights, any way */
-#define CF_MATCHLESS		( 1<<4  ) /* command valid for matchLess mode */
-#define CF_PARAMS			( 1<<5) /* command have some params */
+#define CF_MATCHLESS		( 1<<4 ) /* command valid for matchLess mode */
+#define CF_PARAMS			( 1<<5 ) /* command have some params */
+#define CF_NOALIAS			( 1<<6 ) /* command haven't alias and may be accessed only via /cmd commandname */
 
 extern cmd_t cmds[];
 
@@ -656,7 +658,7 @@ void		ra_Frame();
 void		setfullwep( gedict_t *anent );
 
 // { ra commands
-void		ra_PrintStats();
+void		ra_PlayerStats();
 void		ra_PrintPos();
 void		ra_break();
 // }
@@ -668,6 +670,7 @@ int		capt_num(gedict_t *p);
 // maps.c
 
 char 	*GetMapName(int imp);
+void 	DoSelectMap(int iMap);
 void 	SelectMap();
 
 // match.c

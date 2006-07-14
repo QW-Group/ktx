@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.78 2006/07/12 02:25:35 qqshka Exp $
+ *  $Id: match.c,v 1.79 2006/07/14 23:53:45 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -604,6 +604,10 @@ void PlayersStats ()
 								p2->efficiency = 0;
 							else
 								p2->efficiency = (p2->s.v.frags - p2->ps.ctf_points) / (p2->s.v.frags - p2->ps.ctf_points + p2->deaths) * 100;
+						}
+						else if ( isRA() )
+						{
+							p2->efficiency = ( ( p2->ps.loses + p2->ps.wins ) ? ( p2->ps.wins * 100.0f ) / ( p2->ps.loses + p2->ps.wins ) : 0 );
 						}
 						else
 						{

@@ -1,5 +1,3 @@
-timelimit == 0
-make this possible?
 ----------------------------------------------
 тока что нашел багу, точнее особенность,
 	localcmd( "localinfo xxx yyy\n" );

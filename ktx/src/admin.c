@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.42 2006/07/11 16:09:07 qqshka Exp $
+ * $Id: admin.c,v 1.43 2006/07/14 23:53:45 qqshka Exp $
  */
 
 // admin.c
@@ -289,13 +289,21 @@ void ReqAdmin ()
 	if ( trap_CmdArgc() == 2 ) {
 		char arg_2[1024];
 		char *pass = cvar_string( "k_admincode" );
+		int till = Q_rint(self->k_adm_lasttime + 5 - g_globalvars.time);
+
+		if( self->k_adm_lasttime && till > 0  ) { // probably must help against brute force
+			G_sprint(self, 2, "Wait %d second%s!\n", till, count_s(till) );
+			return;
+		}
 
 		trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
 
 		if ( !strnull(pass) && strneq(pass, "none") && streq(arg_2, pass) )
 			BecomeAdmin(self, AF_REAL_ADMIN);
-		else
+		else {
             G_sprint(self, 2, "%s...\n", redtext("Access denied"));
+			self->k_adm_lasttime = g_globalvars.time;
+		}
 
 		return;
 	}
@@ -331,8 +339,14 @@ void AdminImpBot ()
     if( self->k_adminc < 1 )
     {
 		int iPass = cvar( "k_admincode" );
+		int till = Q_rint(self->k_adm_lasttime + 5 - g_globalvars.time);
 
         self->k_adminc = 0;
+
+		if( self->k_adm_lasttime && till > 0  ) { // probably must help against brute force
+			G_sprint(self, 2, "Wait %d second%s!\n", till, count_s(till) );
+			return;
+		}
 
         if( iPass && self->k_added == iPass )
         {
@@ -342,6 +356,7 @@ void AdminImpBot ()
         else
         {
             G_sprint(self, 2, "%s...\n", redtext("Access denied"));
+			self->k_adm_lasttime = g_globalvars.time;
         }
     }
     else
