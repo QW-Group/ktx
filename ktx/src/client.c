@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.96 2006/07/11 02:30:51 qqshka Exp $
+ *  $Id: client.c,v 1.97 2006/07/15 22:36:13 ult_ Exp $
  */
 
 //===========================================================================
@@ -538,7 +538,8 @@ void changelevel_touch()
 
 // qqshka: does't change level in any case, just do damage and return
 
-	T_Damage( other, self, self, 50000 );
+	if ( !isCTF() ) // ctf has always allowed players to hide in exits, etc 
+		T_Damage( other, self, self, 50000 );
 	return;
 
 /*
