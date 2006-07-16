@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.97 2006/07/15 22:36:13 ult_ Exp $
+ *  $Id: client.c,v 1.98 2006/07/16 01:22:41 qqshka Exp $
  */
 
 //===========================================================================
@@ -936,12 +936,12 @@ qboolean CanConnect()
 	// If the game is running already then . . .
 	// guess is player can enter/re-enter the game if server locked or not
 
-	if( lock == 2 ) { // kick anyway
+	if( cvar("k_lockmode") == 2 ) { // kick anyway
 		G_sprint(self, 2, "Match in progress, server locked\n");
 
 		return false; // _can't_ connect
 	}
-	else if( lock == 1 ) // kick if team is not set properly
+	else if( cvar("k_lockmode") == 1 ) // kick if team is not set properly
 	{
 		t = getteam( self );
 

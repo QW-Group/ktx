@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: globals.c,v 1.19 2006/07/09 22:53:25 qqshka Exp $
+ *  $Id: globals.c,v 1.20 2006/07/16 01:22:42 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -41,7 +41,6 @@ float k_sudden_death;	// to mark if sudden death overtime is currently the case
 float k_teamid = 0;
 float k_userid = 0;		// somethink like numbers of ghosts + 1
 float k_whonottime;     // NOT_SURE: 
-float lock = 0;         // stores whether players can join when a game is already in progress
 float match_in_progress = 0;    // if a match has begun
 float match_start_time; // time when match has been started
 float match_over;       // boolean - whether or not the match stats have been printed at end of game

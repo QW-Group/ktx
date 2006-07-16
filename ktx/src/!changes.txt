@@ -1,3 +1,14 @@
+2006-07-16
+qq:
+192. Added cvar k_lockmode. Just reflect "/lockmode" command.
+
+	 set k_lockmode 1 // 0 - Server locking off
+					  // 1 - Teamlock on - only players in existing teams can connect during game
+					  // 2 - Server locked - players cannot connect during game
+
+	 By default if u type usermode command (1on1 2on2 etc...) k_lockmode will be set to 1.
+	 So no changes in cfgs needed. But sure server admin may change k_lockmode via cfgs.
+
 2006-07-13
 qq:
 188. Added support for timelimit 0, but u need setup some fraglimit.

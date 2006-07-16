@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.120 2006/07/14 23:53:45 qqshka Exp $
+ *  $Id: commands.c,v 1.121 2006/07/16 01:22:41 qqshka Exp $
  */
 
 // commands.c
@@ -1244,14 +1244,14 @@ void ModStatus2()
 	else if ( isCTF() ) {
 		G_sprint(self, 2, "%s:  CTF\n", redtext("Server mode"));
 		G_sprint(self, 2, "%s: %s\n", redtext("Server locking"),
-					 (!lock ? "off" : (lock == 2 ? "all" : (lock == 1 ? "team" : "unknown"))));
+					 (!cvar("k_lockmode") ? "off" : (cvar("k_lockmode") == 2 ? "all" : (cvar("k_lockmode") == 1 ? "team" : "unknown"))));
 		G_sprint(self, 2, "%s: hook %s, runes %s\n", redtext("CTF settings"),
 							 OnOff(cvar("k_ctf_hook")), OnOff(cvar("k_ctf_runes")));
 	}
 	else if ( isTeam() ) {
 		G_sprint(self, 2, "%s: team\n", redtext("Server mode"));
 		G_sprint(self, 2, "%s: %s\n", redtext("Server locking"),
-					(!lock ? "off" : (lock == 2 ? "all" : (lock == 1 ? "team" : "unknown"))));
+					(!cvar("k_lockmode") ? "off" : (cvar("k_lockmode") == 2 ? "all" : (cvar("k_lockmode") == 1 ? "team" : "unknown"))));
 	}
 	else
 		G_sprint(self, 2, "%s: unknown\n", redtext("Server mode"));
@@ -2067,6 +2067,8 @@ void ShowRules()
 
 void ChangeLock()
 {
+	int lock = bound(0, cvar("k_lockmode"), 2);
+
 	if ( match_in_progress )
 		return;
 
@@ -2083,6 +2085,8 @@ void ChangeLock()
 		G_bprint(2, "Σεςφες μογλεδ - players cannot connect during game\n");
 	else if( lock == 1 )
 		G_bprint(2, "Τεανμογλ οξ - only players in existing teams can connect during game\n");
+
+	cvar_fset("k_lockmode", lock);
 }
 
 void TeamSay(float fsndname)
@@ -2553,7 +2557,8 @@ const char common_um_init[] =
       
 	"k_membercount 0\n"					// some unlimited values
 	"k_lockmin 0\n"						// some unlimited values
-	"k_lockmax 64\n";         			// some unlimited values
+	"k_lockmax 64\n"         			// some unlimited values
+	"k_lockmode 1\n";         			// server lockmode
 
 
 const char _1on1_um_init[] =

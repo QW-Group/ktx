@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.79 2006/07/14 23:53:45 qqshka Exp $
+ *  $Id: g_local.h,v 1.80 2006/07/16 01:22:41 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -703,7 +703,6 @@ extern	float k_sudden_death;	// to mark if sudden death overtime is currently th
 extern	float k_teamid;
 extern	float k_userid;
 extern	float k_whonottime;     // NOT_SURE: 
-extern	float lock;             // stores whether players can join when a game is already in progress
 extern	float match_in_progress;// if a match has begun
 extern  float match_start_time;	// time when match has been started
 extern	float match_over;       // boolean - whether or not the match stats have been printed at end of game

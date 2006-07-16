@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.61 2006/07/12 23:27:54 qqshka Exp $
+ *  $Id: world.c,v 1.62 2006/07/16 01:22:42 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -386,7 +386,6 @@ void SP_worldspawn()
 
 	match_over = 0;
 	k_standby = 0;
-	lock = k_matchLess ? 0 : 1; // no server lockining in matchLess mode
 	localcmd("serverinfo status Standby\n");
 
 	e = find(world, FOFCLSN, "mapguard");
@@ -662,7 +661,8 @@ void FirstFrame	( )
 	RegisterCvar("demo_tmp_record");
 	RegisterCvar("demo_skip_ktffa_record");
 	RegisterCvar("k_count");
-	RegisterCvar("k_exclusive");
+	RegisterCvar("k_exclusive"); // stores whether players can join when a game is already in progress
+	RegisterCvar("k_lockmode");
 	RegisterCvar("k_short_gib");
 	RegisterCvar("k_ann");
 	RegisterCvar("srv_practice_mode");
