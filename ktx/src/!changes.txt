@@ -1,3 +1,7 @@
+2006-07-18
+qq:
+194. U can set timelimit 1 or even 0 via "/timedown" now, timelimit 0 require some fraglimit.
+
 2006-07-17
 qq:
 193. Added "/force_spec" command like in ktpro, but we support params.

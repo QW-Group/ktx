@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.122 2006/07/17 01:26:33 qqshka Exp $
+ *  $Id: commands.c,v 1.123 2006/07/17 22:36:08 qqshka Exp $
  */
 
 // commands.c
@@ -1804,7 +1804,7 @@ void ChangeTP()
 
 void TimeDown(float t)
 {
-//	char *tmp;
+	int tl = timelimit;
 
 	if ( match_in_progress )
 		return;
@@ -1812,19 +1812,32 @@ void TimeDown(float t)
 	if( check_master() )
 		return;
 
-	timelimit -= t;
-
-	if ( timelimit < 3 )
+	if (t == 5 && timelimit == 5)
 		timelimit = 3;
+	else if (t == 5 && timelimit == 3)
+		timelimit = 1;
+	else
+		timelimit -= t;
+
+	timelimit = bound(0, timelimit, cvar( "k_timetop" ));
+
+	if ( timelimit <= 0 && fraglimit <= 0 ) {
+		G_sprint(self, 2, "You need some timelimit or fraglimit at least\n");
+		timelimit = tl;
+	}
+
+	if ( tl == timelimit ) {
+		G_sprint(self, 2, "%s still %s\n", redtext("timelimit"), dig3(timelimit));
+		return;
+	}
 
 	cvar_set("timelimit", va("%d", (int)timelimit));
-
-	G_bprint(2, "Νατγθ μεξητθ σετ το %d νιξυτεσ\n", (int)timelimit);
+	G_bprint(2, "%s %s %s%s\n", redtext("Match length set to"), dig3(timelimit), redtext("minute"), redtext(count_s(timelimit)));
 }
 
 void TimeUp(float t)
 {
-	int top = 0;
+	int tl = timelimit;
 
 	if ( match_in_progress )
 		return;
@@ -1832,24 +1845,29 @@ void TimeUp(float t)
 	if( check_master() )
 		return;
 
-	if (t == 5 && timelimit < 5)
+	if (t == 5 && timelimit == 0)
+		timelimit = 1;
+	else if (t == 5 && timelimit == 1)
+		timelimit = 3;
+	else if (t == 5 && timelimit == 3)
 		timelimit = 5;
 	else
 		timelimit += t;
 
-	top = cvar( "k_timetop" );
+	timelimit = bound(0, timelimit, cvar( "k_timetop" ));
 
-	if( timelimit > top )
-		timelimit = top;
+	if ( tl == timelimit ) {
+		G_sprint(self, 2, "%s still %s\n", redtext("timelimit"), dig3(timelimit));
+		return;
+	}
 
 	cvar_fset( "timelimit", (int)timelimit );
-
-	G_bprint(2, "Νατγθ μεξητθ σετ το %d νιξυτεσ\n", (int)timelimit);
+	G_bprint(2, "%s %s %s%s\n", redtext("Match length set to"), dig3(timelimit), redtext("minute"), redtext(count_s(timelimit)));
 }
 
 void TimeSet(float t)
 {
-	int top;
+	int tl = timelimit;
 
 	if ( match_in_progress )
 		return;
@@ -1859,18 +1877,21 @@ void TimeSet(float t)
 
 	timelimit = t;
 
-	top = cvar( "k_timetop" );
+	timelimit = bound(0, timelimit, cvar( "k_timetop" ));
 
-	if( timelimit > top )
-		timelimit = top;
+	if ( tl == timelimit ) {
+		G_sprint(self, 2, "%s still %s\n", redtext("timelimit"), dig3(timelimit));
+		return;
+	}
 
 	cvar_fset( "timelimit", (int)timelimit );
-
-	G_bprint(2, "Νατγθ μεξητθ σετ το %d νιξυτεσ\n", (int)timelimit);
+	G_bprint(2, "%s %s %s%s\n", redtext("Match length set to"), dig3(timelimit), redtext("minute"), redtext(count_s(timelimit)));
 }
 
 void FragsDown()
 {
+	int fl = fraglimit;
+
 	if ( match_in_progress )
 		return;
 
@@ -1879,15 +1900,26 @@ void FragsDown()
 
 	fraglimit -= 10;
 
-	if( fraglimit < 0 )
-		fraglimit = 0;
+	fraglimit = bound(0, fraglimit, 100);
+
+	if ( timelimit <= 0 && fraglimit <= 0 ) {
+		G_sprint(self, 2, "You need some timelimit or fraglimit at least\n");
+		fraglimit = fl;
+	}
+
+	if ( fl == fraglimit ) {
+		G_sprint(self, 2, "%s still %s\n", redtext("fraglimit"), dig3(fraglimit));
+		return;
+	}
 
 	cvar_set("fraglimit", va("%d", (int)(fraglimit)));
-	G_bprint(2, "Ζςαημινιτ σετ το %d\n", (int)(fraglimit));
+	G_bprint(2, "%s %s\n", redtext("Fraglimit set to"), dig3(fraglimit));
 }
 
 void FragsUp()
 {
+	int fl = fraglimit;
+
 	if ( match_in_progress )
 		return;
 
@@ -1896,11 +1928,15 @@ void FragsUp()
 
 	fraglimit += 10;
 
-	if(fraglimit > 100)
-		fraglimit = 100;
+	fraglimit = bound(0, fraglimit, 100);
+
+	if ( fl == fraglimit ) {
+		G_sprint(self, 2, "%s still %s\n", redtext("fraglimit"), dig3(fraglimit));
+		return;
+	}
 
 	cvar_set("fraglimit", va("%d", (int)(fraglimit)));
-	G_bprint(2, "Ζςαημινιτ σετ το %d\n", (int)(fraglimit));
+	G_bprint(2, "%s %s\n", redtext("Fraglimit set to"), dig3(fraglimit));
 }
 
 void ToggleDropQuad()
