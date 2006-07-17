@@ -1,3 +1,14 @@
+2006-07-17
+qq:
+193. Added "/force_spec" command like in ktpro, but we support params.
+	 Examples: 
+	 "/force_spec *" will force spec all not ready players.
+	 "/force_spec someidler" force spec player with name "someidler", but
+	 if "someidler" is already spec, do opposite operation, ie "someidler"
+	 will join server as player.
+	 Also we support retarded "setinfo fs" from ktpro, read ktpro docs about this if u want know more.
+	 Oh, fuh users sure may use "/cmd force_spec [param]".
+
 2006-07-16
 qq:
 192. Added cvar k_lockmode. Just reflect "/lockmode" command.

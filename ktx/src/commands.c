@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.121 2006/07/16 01:22:41 qqshka Exp $
+ *  $Id: commands.c,v 1.122 2006/07/17 01:26:33 qqshka Exp $
  */
 
 // commands.c
@@ -164,6 +164,7 @@ void dlist();
 void dinfo();
 
 void sv_lock ();
+void force_spec();
 
 // spec
 void ShowCamHelp();
@@ -378,6 +379,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_RA_BREAK     "toggle RA line status"
 #define CD_RA_POS       "RA line position"
 // }
+#define CD_FORCE_SPEC   "force spec players"
 
 void dummy() {}
 
@@ -606,8 +608,9 @@ cmd_t cmds[] = {
 	{ "lock",        sv_lock,                   0    , CF_BOTH_ADMIN, CD_LOCK },
 // { RA
 	{ "ra_break",    ra_break,                  0    , CF_PLAYER, CD_RA_BREAK },
-	{ "ra_pos",      ra_PrintPos,               0    , CF_PLAYER, CD_RA_POS }
+	{ "ra_pos",      ra_PrintPos,               0    , CF_PLAYER, CD_RA_POS },
 // }
+	{ "force_spec",  force_spec,                0    , CF_BOTH_ADMIN | CF_PARAMS, CD_FORCE_SPEC }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );

@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.43 2006/07/14 23:53:45 qqshka Exp $
+ * $Id: admin.c,v 1.44 2006/07/17 01:26:33 qqshka Exp $
  */
 
 // admin.c
@@ -862,3 +862,60 @@ void AdminSwapAll()
 
 	G_bprint(2, "%s swapped the teams\n", getname( self ) );
 }
+
+void do_force_spec(gedict_t *p, qboolean spec)
+{
+	G_sprint(p, 2, "You were forced to reconnect as %s by the admin\n", spec ? "spectator" : "player");
+	stuffcmd(p, spec ? "spectator 1\n" : "spectator \"\"\n");
+
+	if ( !strnull( ezinfokey(p, "Qizmo") ) ) 
+		stuffcmd(p, "say ,:dis\nwait;wait;wait; say ,:reconnect\n");
+	else 
+		stuffcmd(p, "disconnect\nwait;wait;reconnect\n");
+}
+
+// ktpro (c)
+void force_spec()
+{
+	qboolean found = false;
+	gedict_t *p = NULL;
+	char *c_fs, arg_2[1024];
+	int i_fs, argc = trap_CmdArgc();
+
+	if ( !is_adm( self ) )
+		return;
+
+	trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
+	c_fs = (argc >= 2 ? arg_2 : ezinfokey(self, "fs"));
+
+	if ( strnull( c_fs ) ) {
+		G_sprint(self, 2, "set setinfo \"fs\" properly\n");
+		G_sprint(self, 2, "to force spec all not ready players\n");
+		G_sprint(self, 2, "type: %s\n", redtext("setinfo fs \"*\""));
+		G_sprint(self, 2, "or: %s to force spec specified player\n", redtext("setinfo fs \"playername\""));
+		G_sprint(self, 2, "or just: %s\n", redtext("/force_spec \"playername\""));
+		return;
+	}
+
+	if ( streq( c_fs, "*") || streq( c_fs, "* ") ) {
+		//ok move all not ready players to specs
+		for( p = world; (p = find(p, FOFCLSN, "player")); ) {
+			if ( p->ready || p == self )
+				continue;
+
+			found = true;
+			do_force_spec(p, true);
+		}
+	}
+	else {
+		p = ( (i_fs = atoi( c_fs ) ) < 0 ? spec_by_id( -i_fs ) : SpecPlayer_by_IDorName( c_fs ));
+		if ( p ) {
+			found = true;
+			do_force_spec(p, !p->k_spectator);
+		}
+	}
+
+	if ( !found ) 
+		G_sprint(self, 2, "can't find specified players\n");
+}
+
