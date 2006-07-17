@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.17 2006/07/09 22:53:25 qqshka Exp $
+ *  $Id: player.c,v 1.18 2006/07/17 02:35:20 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -580,7 +580,6 @@ void PainSound()
 		return;
 	}
 
-
 	rs = ( g_random() * 5 ) + 1;
 
 	self->s.v.noise = "";
@@ -704,6 +703,9 @@ void player_axpain6()
 void player_pain( struct gedict_s *attacker, float take )
 {
 //	G_bprint(2, "player_pain\n");
+
+	if ( match_in_progress != 2 )
+		return; // no pain at all in prewar
 
 	if ( self->s.v.weaponframe )
 		return;
