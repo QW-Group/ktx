@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1997 David 'crt' Wright
  *
- * $Id: arena.c,v 1.6 2006/07/14 23:53:45 qqshka Exp $
+ * $Id: arena.c,v 1.7 2006/07/17 19:23:40 ult_ Exp $
  */
 
 // arena.c - rocket arena stuff
@@ -642,7 +642,7 @@ void ra_PrintPos()
 		return;
 	}
 
-	if ( pos = 1 ) {
+	if ( pos == 1 ) {
 		G_sprint (self, PRINT_HIGH,"There is 1 person ahead of you\n");
 		return;
 	}
