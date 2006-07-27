@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: vote.c,v 1.14 2006/05/28 03:44:28 qqshka Exp $
+ *  $Id: vote.c,v 1.15 2006/07/27 01:02:54 qqshka Exp $
  */
 
 // vote.c: election functions by rc\sturm
@@ -324,7 +324,7 @@ void vote_check_map ()
 
 void vote_check_break ()
 {
-	if ( !match_in_progress || intermission_running )
+	if ( !match_in_progress || intermission_running || match_over )
 		return;
 
 	if( !get_votes_req( OV_BREAK, true ) ) {

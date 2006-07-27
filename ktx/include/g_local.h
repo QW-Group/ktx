@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.80 2006/07/16 01:22:41 qqshka Exp $
+ *  $Id: g_local.h,v 1.81 2006/07/27 01:02:53 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -340,6 +340,8 @@ int			only_digits(const char *s);
 
 char		*params_str( int from, int to );
 
+char		*SD_type_str(); // sudden death type string
+
 //
 //  subs.c
 //
@@ -381,6 +383,9 @@ extern float    intermission_exittime;
 extern int      modelindex_eyes, modelindex_player;
 
 qboolean		CheckRate (gedict_t *p, char *newrate);
+
+int				tiecount();
+void			Check_SD( gedict_t *p );
 
 void            SetChangeParms();
 void            SetNewParms( qboolean from_vmMain );

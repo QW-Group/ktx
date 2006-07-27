@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.59 2006/07/09 23:26:03 qqshka Exp $
+ *  $Id: g_utils.c,v 1.60 2006/07/27 01:02:54 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1966,3 +1966,14 @@ char *params_str( int from, int to )
 
 	return string[index++];
 }
+
+char *SD_type_str()
+{
+	switch ( (int)k_sudden_death ) {
+		case         0:   return "none";
+		case SD_NORMAL:   return "Sudden death";
+		case SD_TIEBREAK: return "tie-break";
+		default:		  return "unknown";
+	}
+}
+

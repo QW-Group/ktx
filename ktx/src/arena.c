@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1997 David 'crt' Wright
  *
- * $Id: arena.c,v 1.7 2006/07/17 19:23:40 ult_ Exp $
+ * $Id: arena.c,v 1.8 2006/07/27 01:02:53 qqshka Exp $
  */
 
 // arena.c - rocket arena stuff
@@ -403,7 +403,6 @@ qboolean readytostart()
 
 void PrintStats( gedict_t *who )
 {
-	qboolean show = true;
 	int i, owner = EDICT_TO_PROG( who );
 	char buf[1024] = {0};
 	gedict_t *winner = getWinner(), *loser = getLoser(), *motd;

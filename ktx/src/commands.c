@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.123 2006/07/17 22:36:08 qqshka Exp $
+ *  $Id: commands.c,v 1.124 2006/07/27 01:02:53 qqshka Exp $
  */
 
 // commands.c
@@ -1001,7 +1001,7 @@ void ShowVersion()
 
 void ChangeOvertime()
 {
-	float f1, f2;
+	int f1, f2;
 
 	if ( match_in_progress )
 		return;
@@ -1009,7 +1009,7 @@ void ChangeOvertime()
 	if( check_master() )
 		return;
 
-    f1 = bound(0, cvar( "k_overtime" ), 2);
+    f1 = bound(0, cvar( "k_overtime" ), 3);
     f2 = bound(0, cvar( "k_exttime" ), 999);
 
     if( !f1 )
@@ -1029,9 +1029,15 @@ void ChangeOvertime()
 	}
     else if( f1 == 2 )
     {
+		cvar_fset("k_overtime", 3);
+		G_bprint(2, "%s: tie-break\n", redtext("Overtime"));
+    }
+    else if( f1 == 3 )
+    {
 		cvar_fset("k_overtime", 0);
 		G_bprint(2, "%s: off\n", redtext("Overtime"));
     }
+
 }
 
 void ChangeOvertimeUp ()
@@ -1214,7 +1220,7 @@ void ModStatus ()
 
 	if( match_in_progress == 2 ) {
 		if( k_sudden_death )                
-			G_sprint(self, 2, "%s overtime in progress\n", redtext("Sudden death"));
+			G_sprint(self, 2, "%s overtime in progress\n", redtext(SD_type_str()));
 		else {
 			p = find(world, FOFCLSN, "timer");
 			if ( p )
@@ -1272,6 +1278,7 @@ void ModStatus2()
 		case 0:  ot = "off"; break;
 		case 1:  ot = va("%d minute%s", i, count_s(i)); break;
 		case 2:  ot = "sudden death"; break;
+		case 3:  ot = va("%d tie-break", tiecount()); break;
 		default: ot	= "unknown"; break;
 	}
 	G_sprint(self, 2, "%s: %s\n", redtext("Overtime"), ot);
@@ -2169,7 +2176,7 @@ void PrintScores()
 	}
 
 	if( k_sudden_death ) {
-		G_sprint(self, 2, "Sudden death %s\n", redtext("overtime in progress"));
+		G_sprint(self, 2, "%s %s\n", SD_type_str(), redtext("overtime in progress"));
 	}
 	else {
 		if ( fraglimit && (p = get_ed_scores1()) ) {
@@ -2684,8 +2691,8 @@ const char ffa_um_init[] =
 	"k_membercount 0\n"					// no effect in ffa
 	"k_lockmin 0\n"						// no effect in ffa
 	"k_lockmax 0\n"           			// no effect in ffa
-//	"k_overtime 1\n"
-//	"k_exttime 5\n"
+	"k_overtime 1\n"
+	"k_exttime 5\n"
 	"k_mode 3\n";
 
 const char ctf_um_init[] =

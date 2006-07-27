@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.27 2006/07/11 23:03:46 qqshka Exp $
+ *  $Id: combat.c,v 1.28 2006/07/27 01:02:53 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -467,8 +467,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		Killed( targ, attacker );
 
         // KTEAMS: check if sudden death is the case
-        if ( k_sudden_death && streq( targ->s.v.classname, "player" ) ) 
-            EndMatch(0);
+		Check_SD( targ );
 
 		// check fraglimit
 		if (	fraglimit
@@ -476,7 +475,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			 	|| ( attacker->s.v.frags >= fraglimit && streq( attacker->s.v.classname, "player" ) )
 			   )
 		   )
-           	EndMatch(0);
+           	EndMatch( 0 );
 
 		return;
 	}
@@ -484,23 +483,6 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	oldself = self;
 	self = targ;
 
-/*SERVER
- if ( (self.flags & FL_MONSTER) && attacker != world)
- {
- // get mad unless of the same class (except for soldiers)
-  if (self != attacker && attacker != self.enemy)
-  {
-   if ( (self->s.v.classname  != attacker->s.v.classname ) 
-   || (self->s.v.classname  == "monster_army" ) )
-   {
-    if (self.enemy->s.v.classname  == "player")
-     self.oldenemy = self.enemy;
-    self.enemy = attacker;
-    FoundTarget ();
-   }
-  }
- }
-*/
 	if ( self->th_pain )
 	{
 		self->th_pain( attacker, take );

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.98 2006/07/16 01:22:41 qqshka Exp $
+ *  $Id: client.c,v 1.99 2006/07/27 01:02:53 qqshka Exp $
  */
 
 //===========================================================================
@@ -753,6 +753,9 @@ void ClientKill()
 
 	self->ps.spree_current = self->ps.spree_current_q = 0;    
 
+	// KTEAMS: check if sudden death is the case
+	Check_SD( self );
+
 	k_respawn( self );
 }
 
@@ -1344,6 +1347,47 @@ RULES
 ===============================================================================
 */
 
+// frag difference to win on tiebreak overtime
+int	tiecount()
+{
+	return ( deathmatch == 4 ? 2 : 3 );
+}
+
+// check sudden death end
+// call this on player death
+void Check_SD( gedict_t *p )
+{
+	if ( !match_in_progress )
+		return;
+
+	if ( !k_sudden_death || !p->k_player )
+		return;
+
+	switch ( (int)k_sudden_death ) {
+		case SD_NORMAL:
+			EndMatch( 0 );
+			return;
+
+		case SD_TIEBREAK: {
+			gedict_t *ed1 = get_ed_scores1(), *ed2 = get_ed_scores2();
+			int sc = get_scores1() - get_scores2();
+
+			if ( (isDuel() || isFFA()) && ed1 && ed2 )
+				sc = ed1->s.v.frags - ed2->s.v.frags;
+
+			if(     ( (isDuel() || isFFA()) && ed1 && ed2 ) // duel or ffa
+				 || ( isTeam() || isCTF() ) // some team
+			  ) {
+				if ( abs( sc ) >= tiecount() )
+					EndMatch( 0 );
+			} // unknown so end match
+			else
+				EndMatch( 0 );
+
+			return;
+		}
+	}
+}
 
 /*
 ============
@@ -1354,6 +1398,9 @@ Exit deathmatch games upon conditions
 */
 void CheckRules()
 {
+	if ( !match_in_progress )
+		return;
+
     if ( fraglimit && self->s.v.frags >= fraglimit )
         EndMatch( 0 );
 }
@@ -1902,7 +1949,7 @@ void Print_Scores( )
 	}
 
 	if ( k_sudden_death )
-		strlcat(buf, va("%s:%s", redtext("tl"), redtext("sd")), sizeof(buf));
+		strlcat(buf, va("%s:%s", redtext("tl"), redtext(k_sudden_death == SD_NORMAL ? "sd" : "tb")), sizeof(buf));
 	else
 		strlcat(buf, va("%s:%02d:%02d", redtext("tl"), minutes, seconds), sizeof(buf));
 

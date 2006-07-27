@@ -1,3 +1,8 @@
+2006-07-27
+qq:
+195. Added tie-break overtime like in ktpro, can be accessed like others overtimes via "/overtime".
+     Server admins may use "set k_overtime 3" in cfgs for such overtime.
+
 2006-07-18
 qq:
 194. U can set timelimit 1 or even 0 via "/timedown" now, timelimit 0 require some fraglimit.

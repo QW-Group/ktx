@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.79 2006/07/14 23:53:45 qqshka Exp $
+ *  $Id: match.c,v 1.80 2006/07/27 01:02:54 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -822,7 +822,7 @@ void EndMatch ( float skip_log )
 	char *tmp;
 	float f1;
 
-	if( match_over )
+	if( match_over || !match_in_progress )
 		return;
 
 	match_over = 1;
@@ -991,13 +991,13 @@ void CheckOvertime()
 {
 	gedict_t	*timer, *ed1 = get_ed_scores1(), *ed2 = get_ed_scores2();
 	int teams   = CountTeams(), players = CountPlayers();
-	int scores1 = get_scores1(), scores2 = get_scores2();
+	int sc = get_scores1() - get_scores2();
 	int k_mb_overtime = cvar( "k_overtime" );
 	int k_exttime = bound(1, cvar( "k_exttime" ), 999); // at least some reasonable values
 
 	// If 0 no overtime, 1 overtime, 2 sudden death
 	// And if its neither then well we exit
-	if( !k_mb_overtime || (k_mb_overtime != 1 && k_mb_overtime != 2) )
+	if( !k_mb_overtime || (k_mb_overtime != 1 && k_mb_overtime != 2 && k_mb_overtime != 3) )
 	{
 		EndMatch( 0 );
 		return;
@@ -1005,6 +1005,9 @@ void CheckOvertime()
 	
     // Overtime.
 	// Ok we have now decided that the game is ending, so decide overtime wise here what to do.
+
+	if ( (isDuel() || isFFA()) && ed1 && ed2 )
+		sc = ed1->s.v.frags - ed2->s.v.frags;
 
 //	if( k_matchLess ) {
 //		k_mb_overtime = 0; // no overtime in matchLess mode
@@ -1014,20 +1017,14 @@ void CheckOvertime()
 	if( (isTeam() || isCTF()) && teams != 2 ) {
 		k_mb_overtime = 0; // no overtime in case of less then 2 or more then 2 teams
 	}			
-	else if( (isDuel() || isFFA()) && (ed1 = get_ed_scores1()) && (ed2 = get_ed_scores2()) )
+	else if(    ( (isDuel() || isFFA()) && ed1 && ed2 ) // duel or ffa
+			 || ( (isTeam() || isCTF()) && teams == 2 && players > 2 ) // Handle a 2v2 or above team game
+	)
 	{
-		scores1 = ed1->s.v.frags;
-		scores2 = ed2->s.v.frags;
-
-		if ( scores1 != scores2 )
-			k_mb_overtime = 0;
-	}
-	// Or it can be a team game.
-	// Handle a 2v2 or above team game
-	else if( (isTeam() || isCTF()) && teams == 2 && players > 2 )
-	{
-		if ( scores1 != scores2 )
-			k_mb_overtime = 0;
+		if (    ( k_mb_overtime == 3 && abs( sc ) > 1 ) // tie-break overtime allowed with one frag difference (c) ktpro
+			 || ( k_mb_overtime != 3 && abs( sc ) > 0 ) // time based or sudden death overtime allowed with zero frag difference
+		   )
+		k_mb_overtime = 0;
 	}
 	else
 		k_mb_overtime = 0;
@@ -1052,9 +1049,16 @@ void CheckOvertime()
 		G_bprint(2, "\x90%s\x91 minute%s overtime follows\n", dig3(k_exttime), count_s(k_exttime));
 		self->s.v.nextthink = g_globalvars.time + 1;
 	}
+	else if ( k_overtime == 2 ) {
+		k_sudden_death = SD_NORMAL;
+	}
 	else {
-		G_bprint(2, "Sudden death %s\n", redtext("overtime begins"));
-		k_sudden_death = 1;
+		k_sudden_death = SD_TIEBREAK;
+	}
+
+	if ( k_sudden_death ) {
+
+		G_bprint(2, "%s %s\n", SD_type_str(), redtext("overtime begins"));
 
 		// added timer removal at sudden death beginning
 		for( timer = world; (timer = find(timer, FOFCLSN, "timer")); )
@@ -1416,6 +1420,7 @@ void PrintCountdown( int seconds )
 		case 0:  ot = redtext("Off"); break;
 		case 1:  ot = dig3( cvar( "k_exttime" ) ); break;
 		case 2:  ot = redtext("sd"); break;
+		case 3:  ot = va("%s %s", dig3(tiecount()),redtext("tb")); break;
 		default: ot	= redtext("Unkn"); break;
 	}
 
