@@ -1,3 +1,9 @@
+2006-07-30
+qq:
+196. Rewrote a bit impulse handling, as result fixed some issue with "/kfjump".
+
+	 "bugreport" by semi
+
 2006-07-27
 qq:
 195. Added tie-break overtime like in ktpro, can be accessed like others overtimes via "/overtime".

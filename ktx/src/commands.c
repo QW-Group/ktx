@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.124 2006/07/27 01:02:53 qqshka Exp $
+ *  $Id: commands.c,v 1.125 2006/07/29 21:13:08 qqshka Exp $
  */
 
 // commands.c
@@ -3106,6 +3106,9 @@ void kfjump ()
 		return;
 	}
 
+	if ( g_globalvars.time < self->attack_finished )
+		return; // sanity
+
 	self->s.v.impulse = 7;		 // select switch to rl
 	self->s.v.button0 = 1;		 // force attack button
 	self->s.v.v_angle[1] += 180; // turn 180
@@ -3123,6 +3126,9 @@ void krjump ()
 		G_sprint(self, 2, "%s is disabled\n", redtext("krjump"));
 		return;
 	}
+
+	if ( g_globalvars.time < self->attack_finished )
+		return; // sanity
 
 	self->s.v.impulse = 7;		 // select switch to rl
 	self->s.v.button0 = 1;		 // force attack button

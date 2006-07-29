@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.45 2006/07/08 01:39:10 qqshka Exp $
+ *  $Id: weapons.c,v 1.46 2006/07/29 21:13:08 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1468,14 +1468,17 @@ W_ChangeWeapon
 
 ============
 */
-void W_ChangeWeapon()
+qboolean W_ChangeWeapon( int wp )
 {
 	int             it, am, fl = 0;
+
+	if ( g_globalvars.time < self->attack_finished )
+		return false;
 
 	it = self->s.v.items;
 	am = 0;
 
-	switch ( impulse )
+	switch ( wp )
 	{
 	case 1:
 		fl = IT_AXE;
@@ -1531,24 +1534,19 @@ void W_ChangeWeapon()
 		break;
 	}
 
-	impulse = 0;
-
-	if ( !( it & fl ) )
-	{			// don't have the weapon or the ammo
+	if ( !( it & fl ) ) // don't have the weapon or the ammo
 		G_sprint( self, PRINT_HIGH, "no weapon\n" );
-		return;
+	else if ( am ) // don't have the ammo
+		G_sprint( self, PRINT_HIGH, "not enough ammo\n" );
+	else {
+	//
+	// set weapon, set ammo
+	//
+		self->s.v.weapon = fl;
+		W_SetCurrentAmmo();
 	}
 
-	if ( am )
-	{			// don't have the ammo
-		G_sprint( self, PRINT_HIGH, "not enough ammo\n" );
-		return;
-	}
-//
-// set weapon, set ammo
-//
-	self->s.v.weapon = fl;
-	W_SetCurrentAmmo();
+	return true;
 }
 
 /*
@@ -1579,7 +1577,6 @@ void CheatCommand()
 	self->s.v.items = ( int ) self->s.v.items | IT_LIGHTNING;
 
 	self->s.v.weapon = IT_ROCKET_LAUNCHER;
-	impulse = 0;
 	W_SetCurrentAmmo();
 */
 }
@@ -1591,12 +1588,14 @@ CycleWeaponCommand
 Go to the next weapon with ammo
 ============
 */
-void CycleWeaponCommand()
+qboolean CycleWeaponCommand()
 {
 	int             i, it, am;
 
+	if ( g_globalvars.time < self->attack_finished )
+		return false;
+
 	it = self->s.v.items;
-	impulse = 0;
 
 	for ( i = 0; i < 20; i++ ) // qqshka, 20 is just from head, but prevent infinite loop
 	{
@@ -1653,10 +1652,11 @@ void CycleWeaponCommand()
 		if ( ( it & ( int ) self->s.v.weapon ) && am == 0 )
 		{
 			W_SetCurrentAmmo();
-			return;
+			return true;
 		}
 	}
 
+	return true;
 }
 
 
@@ -1667,12 +1667,14 @@ CycleWeaponReverseCommand
 Go to the prev weapon with ammo
 ============
 */
-void CycleWeaponReverseCommand()
+qboolean CycleWeaponReverseCommand()
 {
 	int             i, it, am;
 
+	if ( g_globalvars.time < self->attack_finished )
+		return false;
+
 	it = self->s.v.items;
-	impulse = 0;
 
 	for ( i = 0; i < 20; i++ ) // qqshka, 20 is just from head, but prevent infinite loop
 	{
@@ -1728,10 +1730,11 @@ void CycleWeaponReverseCommand()
 		if ( ( it & ( int ) self->s.v.weapon ) && am == 0 )
 		{
 			W_SetCurrentAmmo();
-			return;
+			return true;
 		}
 	}
 
+	return true;
 }
 
 
@@ -1774,20 +1777,15 @@ ImpulseCommands
 ============
 */
 
-int  impulse;
-
 void ImpulseCommands()
 {
-    int capt;
+	qboolean clear = true;
+    int capt, impulse = self->s.v.impulse;
 
-	if ( strneq(self->s.v.classname, "player") ) {
-		impulse = self->s.v.impulse = 0;
-		return;
-	}
+	if ( !self->k_player )
+		self->s.v.impulse = impulse = 0;
 
-	impulse = self->s.v.impulse;
-
-    if (!impulse)
+    if ( !impulse )
         return;
 
     capt = CaptainImpulses();
@@ -1802,19 +1800,19 @@ void ImpulseCommands()
         AdminImpBot();
 
     else if ( (impulse >= 1 && impulse <= 8) || impulse == 22 )
-		W_ChangeWeapon();
+		clear = W_ChangeWeapon( impulse );
 
 	else if ( impulse == 9 )
 		CheatCommand();
 
 	else if ( impulse == 10 )
-		CycleWeaponCommand();
+		clear = CycleWeaponCommand();
 
 	else if ( impulse == 11 )
 		ServerflagsCommand();
 
 	else if ( impulse == 12 )
-		CycleWeaponReverseCommand();
+		clear = CycleWeaponReverseCommand();
 
 	else if ( impulse == 156 )
 		kfjump ();
@@ -1822,7 +1820,8 @@ void ImpulseCommands()
 	else if ( impulse == 164 )
 		krjump ();
 
-	self->s.v.impulse = impulse = 0;
+	if ( clear )
+		self->s.v.impulse = 0;
 }
 
 void can_prewar_msg( char *msg )
@@ -1896,10 +1895,6 @@ void W_WeaponFrame()
 	if ( self->wreg_attack ) // client simulate +attack via "cmd wreg" feature
 		self->s.v.button0 = true;
 
-	if ( g_globalvars.time < self->attack_finished )
-		return;
-
-	// this may call something what fire some weapon, so re-check can we continue or not below
 	ImpulseCommands();
 
 	if ( g_globalvars.time < self->attack_finished )
