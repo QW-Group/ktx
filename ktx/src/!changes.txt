@@ -1,3 +1,17 @@
+2006-08-04
+qq:
+197. Instead of adding "/cmd ban" to mod i've add it to server, and call this "server side bans".
+	 Any mod may be slightly modifed to use server side bans.
+
+	 So if u get mvdsv from cvs and latest ktx, u will have next cmds:
+	 "/cmd ban <uid/nick> <time s m h d> [reason]" timed ban by uid/nick.
+	 Example: "/cmd ban qqshka 10s testban" will ban user with nick qqshka for 10 seconds, and print reason as "testban".
+	 "/cmd banip <ip> <time s m h d>" timed ban by ip.
+	 Example: "/cmd ban 127.0.0.1 10s" will ban ip 127.0.0.1 for 10 seconds.
+	 "/cmd banrem [banid]" remove ban by banid, banlist can be obtained if you omit banid, so banid can be guessed.
+
+	 ezQuake users may omit cmd and just use "/ban", "/banip" and "/banrem".
+
 2006-07-30
 qq:
 196. Rewrote a bit impulse handling, as result fixed some issue with "/kfjump".

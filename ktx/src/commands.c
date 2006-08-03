@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.125 2006/07/29 21:13:08 qqshka Exp $
+ *  $Id: commands.c,v 1.126 2006/08/03 23:06:13 qqshka Exp $
  */
 
 // commands.c
@@ -380,8 +380,12 @@ const char CD_NODESC[] = "no desc";
 #define CD_RA_POS       "RA line position"
 // }
 #define CD_FORCE_SPEC   "force spec players"
+#define CD_BAN          "timed ban by uid/nick"
+#define CD_BANIP        "timed ban by ip"
+#define CD_BANREM       "remove ban / banlist"
 
 void dummy() {}
+void redirect();
 
 cmd_t cmds[] = {
 	{ "cm",			 SelectMap,			        0    , CF_BOTH | CF_MATCHLESS | CF_NOALIAS, CD_NODESC },
@@ -610,7 +614,12 @@ cmd_t cmds[] = {
 	{ "ra_break",    ra_break,                  0    , CF_PLAYER, CD_RA_BREAK },
 	{ "ra_pos",      ra_PrintPos,               0    , CF_PLAYER, CD_RA_POS },
 // }
-	{ "force_spec",  force_spec,                0    , CF_BOTH_ADMIN | CF_PARAMS, CD_FORCE_SPEC }
+	{ "force_spec",  force_spec,                0    , CF_BOTH_ADMIN | CF_PARAMS, CD_FORCE_SPEC },
+// { bans
+	{ "ban",         redirect,                  0    , CF_BOTH_ADMIN | CF_PARAMS | CF_REDIRECT, CD_BAN },
+	{ "banip",       redirect,                  0    , CF_BOTH_ADMIN | CF_PARAMS | CF_REDIRECT, CD_BANIP },
+	{ "banrem",      redirect,                  0    , CF_BOTH_ADMIN | CF_PARAMS | CF_REDIRECT, CD_BANREM }
+// }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -666,8 +675,12 @@ int DoCommand_Name(char *cmd_name)
 		return DO_OUT_OF_RANGE_CMDS;
 
 	for ( i = 0; i < cmds_cnt; ++i ) {
-		if ( streq(cmds[i].name, cmd_name) )
+		if ( streq(cmds[i].name, cmd_name) ) {
+			if (cmds[i].cf_flags & CF_REDIRECT)
+				return DO_OUT_OF_RANGE_CMDS; // imitate we does't found command in redirect case
+
 			return DoCommand( i );
+		}
 	}
 
 	return DO_OUT_OF_RANGE_CMDS;
@@ -730,6 +743,17 @@ qboolean isCmdFlood(gedict_t *p)
 	return false;
 }
 
+void redirect()
+{
+	int i;
+	char	cmd_command[1024];
+
+	trap_CmdArgv( 0, cmd_command, sizeof( cmd_command ) );
+	if ( !only_digits(cmd_command) || !((i = atoi(cmd_command)) >= 0 && i < cmds_cnt) )
+		return; // sanity
+
+	stuffcmd(self, "cmd %s %s\n", cmds[i].name, params_str(1, -1));
+}
 
 // check if players client support params in aliases
 qboolean isSupport_Params(gedict_t *p)

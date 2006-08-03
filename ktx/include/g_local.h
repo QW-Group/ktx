@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.81 2006/07/27 01:02:53 qqshka Exp $
+ *  $Id: g_local.h,v 1.82 2006/08/03 23:06:40 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -478,6 +478,7 @@ typedef struct cmd_s {
 #define CF_MATCHLESS		( 1<<4 ) /* command valid for matchLess mode */
 #define CF_PARAMS			( 1<<5 ) /* command have some params */
 #define CF_NOALIAS			( 1<<6 ) /* command haven't alias and may be accessed only via /cmd commandname */
+#define CF_REDIRECT			( 1<<7 ) /* command will be redirected to server as /cmd commandname */
 
 extern cmd_t cmds[];
 
