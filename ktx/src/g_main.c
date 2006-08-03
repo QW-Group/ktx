@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.26 2006/07/08 01:39:10 qqshka Exp $
+ *  $Id: g_main.c,v 1.27 2006/08/03 21:47:11 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -50,6 +50,7 @@ field_t         expfields[] = {
 	{"gravity",     FOFS( gravity ),     F_FLOAT},
 	{"isBot",       FOFS( isBot ),       F_INT},
 	{"brokenankle", FOFS( brokenankle ), F_FLOAT},
+	{"mod_admin",   FOFS( k_admin ),     F_INT},
 	{NULL}
 };
 static char     mapname[64];
