@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.99 2006/07/27 01:02:53 qqshka Exp $
+ *  $Id: client.c,v 1.100 2006/08/07 01:53:42 qqshka Exp $
  */
 
 //===========================================================================
@@ -2671,6 +2671,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
     if ( streq( attacker->s.v.classname, "teledeath" ) )
 	{
+		gedict_t *attacker_owner = PROG_TO_EDICT( attacker->s.v.owner );
 
 		if( match_in_progress != 2 ) {
 // qqshka - no message in prewar
@@ -2678,28 +2679,32 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			return;
 		}
 
-		attackerteam2 = getteam( PROG_TO_EDICT( attacker->s.v.owner ) );
+		attackerteam2 = getteam( attacker_owner );
 
 		if( (isTeam() || isCTF()) && streq( targteam, attackerteam2 ) && !strnull ( attackerteam2 )
-				&& targ != PROG_TO_EDICT( attacker->s.v.owner ) )
+			&& targ != attacker_owner
+		  )
 		{
-            G_bprint(PRINT_MEDIUM,"%s was telefragged by %s teammate\n",
-													targ->s.v.netname, g_his(targ));
+            G_bprint(PRINT_MEDIUM,"%s was telefragged by %s teammate\n", targ->s.v.netname, g_his(targ));
 
 			targ->deaths += 1;
+			attacker_owner->friendly += 1;
+			if ( cvar("k_tp_tele_death") ) {
+				logfrag (attacker_owner, attacker_owner);
+				attacker_owner->s.v.frags -= 1;
+			}
 			return;
 		}
 
-        G_bprint (PRINT_MEDIUM, "%s was telefragged by %s\n",
-			targ->s.v.netname, PROG_TO_EDICT( attacker->s.v.owner )->s.v.netname );
+        G_bprint (PRINT_MEDIUM, "%s was telefragged by %s\n", targ->s.v.netname, attacker_owner->s.v.netname );
 
-        logfrag (PROG_TO_EDICT( attacker->s.v.owner ), targ);
+        logfrag (attacker_owner, targ);
 
-        PROG_TO_EDICT( attacker->s.v.owner )->s.v.frags += 1;
+        attacker_owner->s.v.frags += 1;
 
 		targ->deaths += 1;
-		PROG_TO_EDICT( attacker->s.v.owner )->victim = targ->s.v.netname;
-		targ->killer = PROG_TO_EDICT( attacker->s.v.owner )->s.v.netname;
+		attacker_owner->victim = targ->s.v.netname;
+		targ->killer = attacker_owner->s.v.netname;
 
 		return;
 	}
@@ -2723,7 +2728,6 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		logfrag (targ, targ);
 		return;
 	}
-
 
 	if ( streq( targ->deathtype, "squish" ) )
 	{

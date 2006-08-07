@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.126 2006/08/03 23:06:13 qqshka Exp $
+ *  $Id: commands.c,v 1.127 2006/08/07 01:53:42 qqshka Exp $
  */
 
 // commands.c
@@ -165,6 +165,9 @@ void dinfo();
 
 void sv_lock ();
 void force_spec();
+void teleteam ();
+void upplayers ( float type );
+void downplayers ( float type );
 
 // spec
 void ShowCamHelp();
@@ -380,9 +383,16 @@ const char CD_NODESC[] = "no desc";
 #define CD_RA_POS       "RA line position"
 // }
 #define CD_FORCE_SPEC   "force spec players"
+// { server side bans
 #define CD_BAN          "timed ban by uid/nick"
 #define CD_BANIP        "timed ban by ip"
 #define CD_BANREM       "remove ban / banlist"
+// }
+#define CD_TELETEAM     "team telefrag behaviour"
+#define CD_UPPLAYERS    "increase maxclients"
+#define CD_DOWNPLAYERS  "decrease maxclients"
+#define CD_UPSPECS      "increase maxspectators"
+#define CD_DOWNSPECS    "decrease maxspectators"
 
 void dummy() {}
 void redirect();
@@ -618,8 +628,13 @@ cmd_t cmds[] = {
 // { bans
 	{ "ban",         redirect,                  0    , CF_BOTH_ADMIN | CF_PARAMS | CF_REDIRECT, CD_BAN },
 	{ "banip",       redirect,                  0    , CF_BOTH_ADMIN | CF_PARAMS | CF_REDIRECT, CD_BANIP },
-	{ "banrem",      redirect,                  0    , CF_BOTH_ADMIN | CF_PARAMS | CF_REDIRECT, CD_BANREM }
+	{ "banrem",      redirect,                  0    , CF_BOTH_ADMIN | CF_PARAMS | CF_REDIRECT, CD_BANREM },
 // }
+	{ "teleteam",    teleteam,                  0    , CF_PLAYER | CF_SPC_ADMIN, CD_TELETEAM },
+	{ "upplayers",   upplayers,                 1    , CF_PLAYER | CF_SPC_ADMIN, CD_UPPLAYERS },
+	{ "downplayers", downplayers,               1    , CF_PLAYER | CF_SPC_ADMIN, CD_DOWNPLAYERS },
+	{ "upspecs",     upplayers,                 2    , CF_PLAYER | CF_SPC_ADMIN, CD_UPSPECS },
+	{ "downspecs",   downplayers,               2    , CF_PLAYER | CF_SPC_ADMIN, CD_DOWNSPECS }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -967,6 +982,34 @@ void ShowCmds()
 */
 }
 
+qboolean check_perm(gedict_t *p, int perm)
+{
+	switch ( perm ) {
+		case 0:	G_sprint(p, 2, "%s can use this command\n", redtext("noone"));
+				return false;
+		case 1:	if ( !is_real_adm( p ) ) {
+					G_sprint(p, 2, "you must be an %s\n", redtext("real admin"));
+					return false;
+				}
+				break;
+		case 2:	if ( !is_adm( p ) ) {
+					G_sprint(p, 2, "you must be an %s\n", redtext("admin"));
+					return false;
+				}
+				break;
+		case 3:
+		case 4:	G_sprint(p, 2, "%s is not implemented in this mode\n", redtext("judges"));
+				return false;
+		case 5:
+				break;
+		default:
+				G_sprint(p, 2, "server is misconfigured, command %s\n", redtext("skipped"));
+				return false;
+	}
+
+	return true;
+}
+
 void ShowOpts()
 {
 	G_sprint(self, 2,
@@ -1223,6 +1266,7 @@ void ModStatus ()
 
 	G_sprint(self, 2, "%-14s %-3.3s ",  redtext("spec info perm"), (mi_adm_only() ? "Adm" : "All"));
 	G_sprint(self, 2, "%-14s %-3.3s\n", redtext("more spec info"), (mi_on() ? "On" : "Off"));
+	G_sprint(self, 2, "%-14s %-3.3s\n", redtext("teleteam"), (cvar("k_tp_tele_death") ? "On" : "Off"));
 
 	if( match_in_progress == 1 ) {
 		p = find(world, FOFCLSN, "timer" );
@@ -2624,6 +2668,9 @@ const char common_um_init[] =
 	"k_bzk 0\n"							// berzerk
 	"k_spw 2\n"							// affect spawn type
 	"k_dmgfrags 0\n"					// damage frags off
+	"k_tp_tele_death 1\n"				// affect frags on team telefrags or not
+	"k_allowcountchange 1\n"			// permissions for upplayers, only real admins
+	"k_maxspectators 4\n"				// some default value
       
 	"k_membercount 0\n"					// some unlimited values
 	"k_lockmin 0\n"						// some unlimited values
@@ -2633,6 +2680,7 @@ const char common_um_init[] =
 
 const char _1on1_um_init[] =
 	"maxclients 2\n"
+	"k_maxclients 2\n"
 	"timelimit  10\n"					//
 	"teamplay   0\n"					//
 	"deathmatch 3\n"					//
@@ -2646,6 +2694,7 @@ const char _1on1_um_init[] =
 
 const char _2on2_um_init[] =
 	"maxclients 4\n"
+	"k_maxclients 4\n"
 	"floodprot 10 1 1\n"				//
 	"localinfo k_fp 1\n"				//
 	"timelimit  10\n"					//
@@ -2661,6 +2710,7 @@ const char _2on2_um_init[] =
 
 const char _3on3_um_init[] =
 	"maxclients 6\n"
+	"k_maxclients 6\n"
 	"floodprot 10 1 1\n"
 	"localinfo k_fp 1\n"
 	"timelimit  15\n"
@@ -2676,6 +2726,7 @@ const char _3on3_um_init[] =
 
 const char _4on4_um_init[] =
 	"maxclients 8\n"
+	"k_maxclients 8\n"
 	"floodprot 10 1 1\n"
 	"localinfo k_fp 1\n"
 	"timelimit  20\n"
@@ -2691,6 +2742,7 @@ const char _4on4_um_init[] =
 
 const char _10on10_um_init[] =
 	"maxclients 20\n"
+	"k_maxclients 20\n"
 	"floodprot 10 1 1\n"
 	"localinfo k_fp 1\n"
 	"timelimit  20\n"
@@ -2706,6 +2758,7 @@ const char _10on10_um_init[] =
 
 const char ffa_um_init[] =
 	"maxclients 26\n"
+	"k_maxclients 26\n"
 	"timelimit  20\n"
 	"teamplay   0\n"
 	"deathmatch 3\n"
@@ -2721,6 +2774,7 @@ const char ffa_um_init[] =
 
 const char ctf_um_init[] =
 	"maxclients 16\n"
+	"k_maxclients 16\n"
 	"timelimit  20\n"
 	"teamplay   2\n"
 	"deathmatch 3\n"
@@ -2820,30 +2874,8 @@ void UserMode(float umode)
 			return;
 		}
 	}
-	else {
-		switch ( k_free_mode ) {
-			case 0:	G_sprint(self, 2, "%s can use this command\n", redtext("noone"));
-					return;
-			case 1:
-			case 2:	if ( !is_adm( self ) ) {
-						G_sprint(self, 2, "you must be an %s\n", redtext("admin"));
-						return;
-					}
-					break;
-			case 3:
-			case 4:	if ( !is_adm( self ) ) {
-						G_sprint(self, 2, "%s is not implemented in this mode\n", redtext("judges"));
-						G_sprint(self, 2, "you must be an %s\n", redtext("admin"));
-						return;
-					}
-					break;
-			case 5:
-					break;
-			default:
-					G_sprint(self, 2, "server is misconfigured, command %s\n", redtext("skipped"));
-					return;
-		}
-	}
+	else if ( !check_perm(self, k_free_mode) )
+		return;
 
 // ok u have access, but is this command really allowed at all?
 
@@ -4669,3 +4701,69 @@ void dinfo()
 {
 	stuffcmd(self, "cmd demoinfo %s\n", params_str(1, -1));
 }
+
+// ktpro (c)
+void teleteam ()
+{
+	int k_tp_tele_death = bound(0, cvar("k_tp_tele_death"), 1);
+
+	if ( match_in_progress )
+		return;
+
+	if( check_master() )
+		return;
+
+	if ( ( k_tp_tele_death = (k_tp_tele_death ? 0 : 1) ) ) 
+		G_bprint(2, "%s turn teamtelefrag %s\n", self->s.v.netname, redtext("affects frags"));
+	else
+		G_bprint(2, "%s turn teamtelefrag does %s\n", self->s.v.netname, redtext("not affect frags"));
+
+	cvar_fset("k_tp_tele_death", k_tp_tele_death);
+}
+
+// ktpro (c)
+void ChangeClientsCount( int type, int value )
+{
+	char *sv_max = "maxclients", *k_max = "k_maxclients";
+	int cl_count = 0;
+
+	if ( match_in_progress )
+		return;
+
+	if( check_master() )
+		return;
+
+	if ( !check_perm(self, cvar("k_allowcountchange")) )
+		return;
+
+	type = bound(1, type, 2); // 1 - players, 2 - specs
+	if ( type == 2 ) {
+		sv_max = "maxspectators";
+		k_max  = "k_maxspectators";
+	}
+
+	if ( cvar( sv_max ) >= cvar( k_max ) && value > 0 ) {
+		G_sprint(self, 2, "%s reached\n", redtext(sv_max));
+		return;
+	}
+
+	cl_count = bound(1, cvar( sv_max ) + value, max(1, cvar( k_max )));
+
+	if ( cvar( sv_max ) == cl_count ) // does't change
+		return;
+
+	cvar_fset(sv_max, cl_count);
+	G_bprint(2, "%s set %s to %d\n", self->s.v.netname, redtext(sv_max), cl_count);
+}
+
+void upplayers ( float type )
+{
+	ChangeClientsCount( type, 1 );
+}
+
+void downplayers ( float type )
+{
+	ChangeClientsCount( type, -1 );
+}
+
+

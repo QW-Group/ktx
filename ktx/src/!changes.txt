@@ -1,3 +1,30 @@
+2006-08-07
+qq:
+199. Added "/upplayers", "/downplayers", "/upspecs", "/downspecs" like in ktpro.
+	 Few server cvars:
+	 set k_allowcountchange 1 // 0 - noone, 1 - reald admins, 2 - elected admins too
+							  // 3, 4 - judges which are not supported so ignoreed 
+							  // 5 - all players
+	 By default is 1.
+
+	 set k_maxclients 8 // just set some limit for "/upplayers"
+	 By default reflect maxclients from XonX command.
+
+	 set k_maxspectators 4 // just set some limit for "/upspecs"
+	 By default reflect maxspectators from XonX command.
+
+	 I think only k_allowcountchange must be set in cfgs if u need such commands.
+
+2006-08-06
+qq:
+198. Added "/teleteam" command, just change team telefrags behaviour, like in ktpro.
+	 For server admins:
+	 set k_tp_tele_death 1 // 0 - frags does't affected by team telefrags
+						   // 1 - frags affected
+
+	 If variable omited in cfgs, then 1 is used, that a difference with ktpro.
+	 I decide use 1 after results of poll on http://quakeworld.nu, so plz don't change it to 0.
+
 2006-08-04
 qq:
 197. Instead of adding "/cmd ban" to mod i've add it to server, and call this "server side bans".

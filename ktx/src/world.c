@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.62 2006/07/16 01:22:42 qqshka Exp $
+ *  $Id: world.c,v 1.63 2006/08/07 01:53:42 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -683,6 +683,12 @@ void FirstFrame	( )
 	RegisterCvar("k_midair");
 	RegisterCvar("k_rocketarena"); // rocket arena
 	RegisterCvar("k_dmgfrags");
+	RegisterCvar("k_tp_tele_death");
+// { upplayers/upspecs
+	RegisterCvar("k_allowcountchange");
+	RegisterCvar("k_maxclients");
+	RegisterCvar("k_maxspectators");
+// }
 
 // { cmd flood protection
 	RegisterCvar("k_cmd_fp_count");
