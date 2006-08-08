@@ -157,10 +157,10 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
-				RelativePath=".\src\admin.c">
+				RelativePath="src\admin.c">
 			</File>
 			<File
-				RelativePath=".\src\arena.c">
+				RelativePath="src\arena.c">
 			</File>
 			<File
 				RelativePath="src\bg_lib.c">
@@ -249,7 +249,7 @@
 				RelativePath="src\commands.c">
 			</File>
 			<File
-				RelativePath=".\src\ctf.c">
+				RelativePath="src\ctf.c">
 			</File>
 			<File
 				RelativePath="src\doors.c">
@@ -401,7 +401,7 @@
 				RelativePath="src\globals.c">
 			</File>
 			<File
-				RelativePath=".\src\grapple.c">
+				RelativePath="src\grapple.c">
 			</File>
 			<File
 				RelativePath="src\items.c">
@@ -533,7 +533,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\runes.c">
+				RelativePath="src\runes.c">
 			</File>
 			<File
 				RelativePath="src\server.c">
