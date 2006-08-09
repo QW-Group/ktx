@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.63 2006/08/07 01:53:42 qqshka Exp $
+ *  $Id: world.c,v 1.64 2006/08/09 03:16:30 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -29,6 +29,7 @@ void  SUB_regen();
 void  CheckAll();
 void  FixSpecWizards ();
 void  FixSayFloodProtect();
+void  FixRules ();
 
 #define MAX_BODYQUE 4
 gedict_t       *bodyque[MAX_BODYQUE];
@@ -101,38 +102,9 @@ void	SP_item_artifact_super_damage();
 
 void SP_worldspawn()
 {
-	char 		*lastmap = cvar_string("_k_lastmap");
-	char		*s;
    	gedict_t	*e;
-	int 		um_idx;
+	char		*s;
 
-	cvar_fset("_k_worldspawns", (int)cvar("_k_worldspawns") + 1);
-
-	if ( cvar("_k_worldspawns") == 1 ) { // server spawn first map
-		if ( ( um_idx = um_idx_byname( cvar_string("k_defmode") ) ) >= 0 )
-			cvar_fset("_k_last_xonx", um_idx + 1); // force exec configs for default user mode
-	}
-
-	// since we remove k_srvcfgmap, we need configure different maps in matchless mode.
-	// doing this by execiting configs like we do for "ffa" command in _non_ matchless mode
-	if ( k_matchLess ) {
-		if ( ( um_idx = um_idx_byname("ffa") ) >= 0 ) {
-			cvar_fset("_k_last_xonx", um_idx + 1); // force server call "ffa" user mode
-		}
-		else {
-			G_bprint(2, "SP_worldspawn: um_idx_byname fail\n"); // shout
-			cvar_fset("_k_last_xonx", 0);
-		}
-	}
-
-	if ( cvar("_k_last_xonx") > 0 && strneq( lastmap, g_globalvars.mapname ) )
-		UserMode( -cvar("_k_last_xonx") ); // auto call XonX command if map switched to another
-
-// { RA
-	k_rocketarena = cvar( "k_rocketarena" );
-	k_rocketarena = isRA();
-// }
-    
 	G_SpawnString( "classname", "", &s );
 	if ( Q_stricmp( s, "worldspawn" ) )
 	{
@@ -241,7 +213,12 @@ void SP_worldspawn()
 	trap_precache_sound( "items/damage3.wav" );
 
 // ctf
-	if ( k_allowed_free_modes & UM_CTF ) {
+#ifdef CTF_RELOADMAP
+	if ( isCTF() ) // precache only if CTF is really on
+#else
+	if ( k_allowed_free_modes & UM_CTF ) // precache if CTF even only possible, does't matter is it on or off currently
+#endif
+	{
 		trap_precache_sound( "weapons/chain1.wav" );
 		trap_precache_sound( "weapons/chain2.wav" );
 		trap_precache_sound( "weapons/chain3.wav" );
@@ -315,6 +292,7 @@ void SP_worldspawn()
 
 	trap_precache_model( "progs/wizard.mdl" );
 
+// ctf
 	if ( k_ctf_custom_models ) {
 		trap_precache_model( "progs/v_star.mdl" );
 		trap_precache_model( "progs/bit.mdl" );
@@ -328,7 +306,7 @@ void SP_worldspawn()
 		trap_precache_model( "progs/w_s_key.mdl" );
 	}
 
-// ctf runes
+// ctf runes, actually may be precached anyway, since come with full quake distro
 	if ( k_allowed_free_modes & UM_CTF ) {
 		trap_precache_model( "progs/end1.mdl" );
 		trap_precache_model( "progs/end2.mdl" );
@@ -575,12 +553,16 @@ qboolean RegisterCvar ( const char *var )
 // in the first frame - even world is not spawned yet
 void FirstFrame	( )
 {
-	int i;
+	char 		*lastmap = cvar_string("_k_lastmap");
+	int 		i, um_idx;
 
 	if ( framecount != 1 )
 		return;
 
+// clear buffer
 	trap_executecmd ();
+
+// register mod cvars
 
 	RegisterCvar("_k_last_xonx"); // internal usage, save last XonX command
 	RegisterCvar("_k_lastmap");	  // internal usage, name of last map
@@ -614,7 +596,6 @@ void FirstFrame	( )
 
 	RegisterCvar("k_motd_time"); 	  // motd time in seconds
 
-// >>> convert localinfo to set
 	RegisterCvar("k_admincode");
 	RegisterCvar("k_prewar");
 	RegisterCvar("k_lockmap");
@@ -726,18 +707,50 @@ void FirstFrame	( )
 
 // }
 
-// <<<
-
-	// below globals changed only here
+// below globals changed only here
 
 	k_matchLess = cvar( "k_matchless" );
-	k_allowed_free_modes = cvar( "k_allowed_free_modes" );
+	k_allowed_free_modes = cvar( "k_allowed_free_modes" ); // must be setup before UserMode(...) call
 	if ( k_matchLess )
 		k_allowed_free_modes |= UM_FFA;
 	// do not precache models if CTF is not really allowed
 	k_ctf_custom_models = cvar( "k_ctf_custom_models" ) && (k_allowed_free_modes & UM_CTF);
-}
 
+// { RA
+	k_rocketarena = (k_rocketarena = cvar( "k_rocketarena" )) && isRA();
+// }
+
+// use k_defmode or reuse last mode from _k_last_xonx
+	cvar_fset("_k_worldspawns", (int)cvar("_k_worldspawns") + 1);
+
+	if ( cvar("_k_worldspawns") == 1 ) { // server spawn first map
+		if ( ( um_idx = um_idx_byname( cvar_string("k_defmode") ) ) >= 0 )
+			cvar_fset("_k_last_xonx", um_idx + 1); // force exec configs for default user mode
+	}
+
+	// since we remove k_srvcfgmap, we need configure different maps in matchless mode.
+	// doing this by execiting configs like we do for "ffa" command in _non_ matchless mode
+	if ( k_matchLess ) {
+		if ( ( um_idx = um_idx_byname("ffa") ) >= 0 ) {
+			cvar_fset("_k_last_xonx", um_idx + 1); // force server call "ffa" user mode
+		}
+		else {
+			G_bprint(2, "FirstFrame: um_idx_byname fail\n"); // shout
+			cvar_fset("_k_last_xonx", 0);
+		}
+	}
+
+	if ( cvar("_k_last_xonx") > 0 && strneq( lastmap, g_globalvars.mapname ) )
+		UserMode( -cvar("_k_last_xonx") ); // auto call XonX command if map switched to another
+
+// fix game rules, if cfgs some how misconfigured
+	FixRules();
+
+#ifdef CTF_RELOADMAP
+	k_ctf = (k_mode == gtCTF); // check is ctf was active at map load
+	k_ctf_custom_models = k_ctf_custom_models && isCTF(); // precache only if CTF is really on
+#endif
+}
 
 // items spawned, but probably not solid yet
 void SecondFrame ( )
@@ -811,6 +824,11 @@ void FixCTFItems()
 
 		return;
 	}
+
+#ifdef CTF_RELOADMAP
+	if (old_k_mode != k_mode && (old_k_mode == gtCTF || k_mode == gtCTF))
+		changelevel( g_globalvars.mapname );
+#endif
 
 	if ( match_in_progress )
 		return; // some optimization, ok ?
@@ -917,24 +935,32 @@ void FixSayTeamToSpecs()
 	}
 }
 
+int skip_fixrules = 0;
+
 // check if server is misconfigured somehow, made some minimum fixage
 void FixRules ( )
 {
-	gameType_t km = k_mode;
+	gameType_t km = k_mode = cvar( "k_mode" );
 	int k_tt = bound( 0, cvar( "k_timetop" ), 600 );
-	int	tp   = teamplay;
-	int tl   = timelimit;
-	int fl   = fraglimit;
-	int dm   = deathmatch;
+	int	tp   = teamplay  = cvar( "teamplay" );
+	int tl   = timelimit = cvar( "timelimit" );
+	int fl   = fraglimit = cvar( "fraglimit" );
+	int dm   = deathmatch = cvar( "deathmatch" );
 	int k_minr = bound(0, cvar( "k_minrate" ), 20000);
 	int k_maxr = bound(0, cvar( "k_maxrate" ), 20000);	
 
+    k_maxspeed = cvar( "sv_maxspeed" );
 
 	FixCmdFloodProtect(); // cmd flood protect
 
 	FixSayFloodProtect(); // say flood protect
 
 	FixSayTeamToSpecs(); // k_sayteam_to_spec
+
+	if ( skip_fixrules > 0 ) {
+		skip_fixrules--;
+		return;
+	}
 
 	// turn CTF off if CTF usermode is not allowed, due to precache_sound or precache_model
 	if ( isCTF() && !( k_allowed_free_modes & UM_CTF ) )
@@ -963,7 +989,7 @@ void FixRules ( )
 
 	// if unknown k_mode - set some appropriate value
 	if ( isUnknown() )
-		trap_cvar_set_float("k_mode", (float)( k_mode = teamplay ? gtTeam : gtDuel ));
+		trap_cvar_set_float("k_mode", (float)( k_mode = (teamplay ? gtTeam : gtDuel) ));
 
 	// teamplay set, but gametype is not team, disable teamplay in this case
 	if ( teamplay ) {
@@ -1036,18 +1062,12 @@ void StartFrame( int time )
 	if ( framecount == 1 )
 		FirstFrame();
 
+	FixRules();
+
 	if ( framecount == 2 )
 		SecondFrame();
 
 //	rj = max( 0, cvar( "rj" ) ); 	// Set Rocket Jump Modifiers
-
-    k_maxspeed = cvar( "sv_maxspeed" );
-	timelimit  = cvar( "timelimit" );
-	fraglimit  = cvar( "fraglimit" );
-	teamplay   = cvar( "teamplay" );
-	deathmatch = cvar( "deathmatch" );
-
-    k_mode = cvar( "k_mode" );         
 
 	FixRules();
 

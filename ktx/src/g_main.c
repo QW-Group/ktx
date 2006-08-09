@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.27 2006/08/03 21:47:11 qqshka Exp $
+ *  $Id: g_main.c,v 1.28 2006/08/09 03:16:30 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -322,9 +322,10 @@ void Com_Printf( const char *msg, ... )
 }
 
 //===================================================================
+
 void G_InitGame( int levelTime, int randomSeed )
 {
-	int             i;
+	int 		i;
 
 	srand( randomSeed );
 	framecount = 0;

@@ -20,13 +20,14 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.82 2006/08/03 23:06:40 qqshka Exp $
+ *  $Id: g_local.h,v 1.83 2006/08/09 03:16:29 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
 
 //#define DEBUG
-#define NO_K_PAUSE /* k_pause is buggy/unstable, so don't use it */
+#define NO_K_PAUSE    /* k_pause is buggy/unstable, so don't use it */
+#define CTF_RELOADMAP /* changing ctf status will force map reload */
 
 #include "q_shared.h"
 #include "mathlib.h"
@@ -721,8 +722,14 @@ extern	int   k_practice;		// is server in practice mode
 extern	int   k_matchLess;	    // is server in matchLess mode
 extern  gameType_t 	  k_mode;   // game type: DUEL, TP, FFA
 extern	int   k_lastvotedmap;	// last voted map, used for agree command?
+// { CTF
 extern  int k_ctf_custom_models;// use or not custom models
 extern  int k_allowed_free_modes; // reflect appropriate cvar - but changed only at map load
+#ifdef CTF_RELOADMAP
+extern  qboolean k_ctf;			// is ctf was active at map load
+#endif
+// }
+
 
 // { cmd flood protection
 

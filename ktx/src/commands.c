@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.127 2006/08/07 01:53:42 qqshka Exp $
+ *  $Id: commands.c,v 1.128 2006/08/09 03:16:30 qqshka Exp $
  */
 
 // commands.c
@@ -2819,6 +2819,8 @@ int um_idx_byname(char *name)
 	return -1; // not found
 }
 
+extern int skip_fixrules;
+
 // for user call this like UserMode( 1 )
 // for server call like UserMode( -1 )
 void UserMode(float umode)
@@ -2889,6 +2891,14 @@ void UserMode(float umode)
 		return;
 	}
 
+#ifdef CTF_RELOADMAP
+
+	if (   ( !isCTF() &&  (um_list[(int)umode].um_flags & UM_CTF) )
+		|| (  isCTF() && !(um_list[(int)umode].um_flags & UM_CTF) )
+	   )
+		skip_fixrules = 2; // skip FixRules for 2 frames, or we get some teamplay warning
+
+#else
 	// We invoke ctf command.
 	// So we need check ready players, and if they have wrong teams, discard ctf command
 	// untill they type break or fix team names.
@@ -2908,6 +2918,7 @@ void UserMode(float umode)
 				return;
 			}
 	}
+#endif
 
 	if ( !k_matchLess ) // do not show for matchless mode
 		G_bprint(2, "%s %s\n", redtext(um_list[(int)umode].displayname), redtext("settings enabled"));

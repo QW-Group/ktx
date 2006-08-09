@@ -1,3 +1,8 @@
+2006-08-09
+qq:
+200. Now CTF files will be downloaded only if server actually in "/ctf" mode,
+	 but not if just support /ctf but in some other mode like 1on1 2on2 etc...
+
 2006-08-07
 qq:
 199. Added "/upplayers", "/downplayers", "/upspecs", "/downspecs" like in ktpro.

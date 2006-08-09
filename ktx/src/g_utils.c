@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.60 2006/07/27 01:02:54 qqshka Exp $
+ *  $Id: g_utils.c,v 1.61 2006/08/09 03:16:30 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1186,12 +1186,23 @@ qboolean isFFA( )
 
 qboolean isCTF( )
 {
+#ifdef CTF_RELOADMAP
+	return k_ctf; // once setup at map load
+#else
 	return (k_mode == gtCTF ? true : false);
+#endif
 }
 
 qboolean isUnknown( )
 {
+#ifdef CTF_RELOADMAP
+	if ( cvar("k_mode") == gtCTF )
+		return false; // zzzz, hack, let FixRules work less or more correctly
+
 	return ((!isDuel() && !isTeam() && !isFFA() && !isCTF()) ? true : false);
+#else
+	return ((!isDuel() && !isTeam() && !isFFA() && !isCTF()) ? true : false);
+#endif
 }
 
 // <<< gametype

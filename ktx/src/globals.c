@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: globals.c,v 1.20 2006/07/16 01:22:42 qqshka Exp $
+ *  $Id: globals.c,v 1.21 2006/08/09 03:16:30 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -54,9 +54,14 @@ int       k_practice;	// is server in practice mode
 int       k_matchLess;	// is server in matchLess mode
 gameType_t 	  k_mode;   // game type: DUEL, TP, FFA
 int	k_lastvotedmap;		// last voted map, used for agree command?
+// { CTF
 int k_ctf_custom_models;// if server has flag/grapple models you can enable them here
 						// http://www.quakeworld.us/ult/ctf/pak0.pak  (only 300kb)
 						// if not we use old style keys and ax/voreball for grapple
+#ifdef CTF_RELOADMAP
+qboolean k_ctf;			// is ctf was active at map load
+#endif
+// }
 
 int k_allowed_free_modes; // reflect appropriate cvar - but changed only at map load
 
