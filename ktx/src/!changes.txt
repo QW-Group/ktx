@@ -1,3 +1,13 @@
+2006-08-13 [ver 1.32]
+qq:
+201. Added "/iplist" command like in ktpro.
+	 Can be controlled via cvar:
+
+	 set k_ip_list 1 // 0 - noone, 1 - reald admins, 2 - elected admins too
+					 // 3, 4 - judges which are not supported so ignoreed 
+					 // 5 - all players
+	 By default is 1.
+
 2006-08-09
 qq:
 200. Now CTF files will be downloaded only if server actually in "/ctf" mode,

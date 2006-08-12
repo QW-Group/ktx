@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.128 2006/08/09 03:16:30 qqshka Exp $
+ *  $Id: commands.c,v 1.129 2006/08/12 22:19:21 qqshka Exp $
  */
 
 // commands.c
@@ -168,6 +168,7 @@ void force_spec();
 void teleteam ();
 void upplayers ( float type );
 void downplayers ( float type );
+void iplist ();
 
 // spec
 void ShowCamHelp();
@@ -393,6 +394,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_DOWNPLAYERS  "decrease maxclients"
 #define CD_UPSPECS      "increase maxspectators"
 #define CD_DOWNSPECS    "decrease maxspectators"
+#define CD_IPLIST       "list clients ips"
 
 void dummy() {}
 void redirect();
@@ -634,7 +636,8 @@ cmd_t cmds[] = {
 	{ "upplayers",   upplayers,                 1    , CF_PLAYER | CF_SPC_ADMIN, CD_UPPLAYERS },
 	{ "downplayers", downplayers,               1    , CF_PLAYER | CF_SPC_ADMIN, CD_DOWNPLAYERS },
 	{ "upspecs",     upplayers,                 2    , CF_PLAYER | CF_SPC_ADMIN, CD_UPSPECS },
-	{ "downspecs",   downplayers,               2    , CF_PLAYER | CF_SPC_ADMIN, CD_DOWNSPECS }
+	{ "downspecs",   downplayers,               2    , CF_PLAYER | CF_SPC_ADMIN, CD_DOWNSPECS },
+	{ "iplist",      iplist,                    0    , CF_BOTH, CD_IPLIST }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -1061,7 +1064,8 @@ void ShowVersion()
 						dig3s("%05d", build_number()), redtext("KTX dev. team")), sizeof(buf));
 	strlcat(buf, va("Based on %s\n", redtext("Kombat teams 2.21")), sizeof(buf));
 	strlcat(buf, "by kemiKal, Cenobite, Sturm and Fang\n\n", sizeof(buf));
-	strlcat(buf, va("Source at:\n%s", MOD_URL), sizeof(buf));
+	strlcat(buf, va("Home page at: %s\n", redtext(MOD_URL)), sizeof(buf));
+	strlcat(buf, va("Source at:\n%s", MOD_SRC_URL), sizeof(buf));
 
 	G_sprint(self, 2, "%s\n", buf);
 }
@@ -2671,6 +2675,7 @@ const char common_um_init[] =
 	"k_tp_tele_death 1\n"				// affect frags on team telefrags or not
 	"k_allowcountchange 1\n"			// permissions for upplayers, only real admins
 	"k_maxspectators 4\n"				// some default value
+	"k_ip_list 1\n"						// permissions for iplist, only real admins
       
 	"k_membercount 0\n"					// some unlimited values
 	"k_lockmin 0\n"						// some unlimited values
@@ -4777,4 +4782,39 @@ void downplayers ( float type )
 	ChangeClientsCount( type, -1 );
 }
 
+char *cl_ip(gedict_t *p)
+{
+	return ezinfokey(p, "ip");
+}
+
+void iplist_one(gedict_t *s, gedict_t *p)
+{
+	G_sprint(s, 2, "%15.15s %s %-18.18s\n", cl_ip( p ), is_adm( p ) ? "A" : " ", p->s.v.netname);
+}
+
+// ktpro (c)
+void iplist ()
+{
+	int from, prev_from;
+	gedict_t *p;
+
+	if ( !check_perm(self, cvar("k_ip_list")) ) {
+		G_sprint(self, 2, "%s %s\n", redtext("Your IP is:"), cl_ip(self));
+		return;
+	}
+
+	for( prev_from = -666, from = 0, p = world; (p = find_plrspc(p, &from)); ) {
+		if ( prev_from != from ) {
+			if ( from == 0 )
+				G_sprint(self, 2, "\234IPs list\234 %s\n", redtext("players:"));
+			else if ( from == 1 )
+				G_sprint(self, 2, "\234IPs list\234 %s\n", redtext("spectators:"));
+			else
+				G_sprint(self, 2, "\234IPs list\234 %s\n", redtext("??? BUG ???"));
+		}
+		prev_from = from;
+
+		iplist_one(self, p);
+	}
+}
 

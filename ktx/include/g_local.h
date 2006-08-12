@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.83 2006/08/09 03:16:29 qqshka Exp $
+ *  $Id: g_local.h,v 1.84 2006/08/12 22:19:20 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -37,11 +37,12 @@
 #include "g_syscalls.h"
 #include "player.h"
 
-#define MOD_VERSION					("1.31")
+#define MOD_VERSION					("1.32")
 #define MOD_NAME					("KTX")
 #define MOD_SERVERINFO_MOD_KEY		("xmod")
 #define MOD_SERVERINFO_BUILD_KEY	("xbuild")
-#define MOD_URL     				("http://mvdsv.cvs.sourceforge.net/mvdsv/ktx/")
+#define MOD_URL    					("http://ktx.quakeworld.nu")
+#define MOD_SRC_URL    				("http://mvdsv.cvs.sourceforge.net/mvdsv/ktx/")
 
 // qqshka - hmm, seems in C this is macros
 #undef max
