@@ -1,3 +1,8 @@
+2006-08-14
+qq:
+202. WARNING WARNING WARNING: "k_maxrate" removed, use "sv_maxrate" instead.
+	 Also mvdsv has "sv_maxdownloadrate", last is just advice.
+
 2006-08-13 [ver 1.32]
 qq:
 201. Added "/iplist" command like in ktpro.

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.100 2006/08/07 01:53:42 qqshka Exp $
+ *  $Id: client.c,v 1.101 2006/08/13 18:14:33 qqshka Exp $
  */
 
 //===========================================================================
@@ -73,7 +73,7 @@ qboolean CheckRate (gedict_t *p, char *newrate)
 	// This is used to check a players rate.  If above allowed setting then it kicks em off.
 	player_rate = atof( strnull(newrate) ? (newrate = ezinfokey(p, "rate" )) : newrate );
 
-	maxrate = cvar( "k_maxrate" );
+	maxrate = cvar( "sv_maxrate" );
 	minrate = cvar( "k_minrate" );
 
 	if( maxrate || minrate )

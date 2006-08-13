@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.65 2006/08/12 22:19:21 qqshka Exp $
+ *  $Id: world.c,v 1.66 2006/08/13 18:14:33 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -632,7 +632,7 @@ void FirstFrame	( )
 	RegisterCvar("k_pow");
 	RegisterCvar("k_remove_end_hurt");
 	RegisterCvar("k_allowvoteadmin");
-	RegisterCvar("k_maxrate");
+//	RegisterCvar("k_maxrate"); -> now using sv_maxrate instead
 	RegisterCvar("k_minrate");
 	RegisterCvar("k_sready");
 	RegisterCvar("k_idletime");
@@ -947,8 +947,8 @@ void FixRules ( )
 	int tl   = timelimit = cvar( "timelimit" );
 	int fl   = fraglimit = cvar( "fraglimit" );
 	int dm   = deathmatch = cvar( "deathmatch" );
-	int k_minr = bound(0, cvar( "k_minrate" ), 20000);
-	int k_maxr = bound(0, cvar( "k_maxrate" ), 20000);	
+	int k_minr = bound(0, cvar( "k_minrate" ), 30000);
+	int k_maxr = bound(0, cvar( "sv_maxrate" ), 30000);	
 
     k_maxspeed = cvar( "sv_maxspeed" );
 
@@ -1020,7 +1020,7 @@ void FixRules ( )
 		cvar_fset( "k_minrate", k_minr = 500 );
 	}
 	if ( !k_maxr ) {
-		cvar_fset( "k_maxrate", k_maxr = 10000 );
+		cvar_fset( "sv_maxrate", k_maxr = 30000 );
 	}
 	if ( k_minr > k_maxr ) {
 		cvar_fset( "k_minrate", k_minr = k_maxr );
