@@ -3,6 +3,13 @@ qq:
 202. WARNING WARNING WARNING: "k_maxrate" removed, use "sv_maxrate" instead.
 	 Also mvdsv has "sv_maxdownloadrate", last is just advice.
 
+203. Captains pickup system changed. If we sign first captain as c1 and second as c2
+	 then old system looks like this: c1 c2 c1 c2 etc...
+	 Now its looks like this: c1 c2 c2 c1 c2 c1 c2 etc...
+	 Which captain start picking actually random, so this can be c2 c1 c1 c2 c1 etc...
+
+	 Requested by tom|3tk and hetman, they notice that more fair...
+
 2006-08-13 [ver 1.32]
 qq:
 201. Added "/iplist" command like in ktpro.

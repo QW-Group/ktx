@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: captain.c,v 1.16 2006/05/28 03:44:28 qqshka Exp $
+ *  $Id: captain.c,v 1.17 2006/08/13 20:22:51 qqshka Exp $
  */
 
 // captain.c
@@ -28,6 +28,8 @@
 // Check if picking should be finished
 
 // pick the player
+
+static int turn_number;
 
 void CancelCaptains ();
 
@@ -45,7 +47,9 @@ void SetPlayerParams (gedict_t *p, gedict_t *cap)
 
 	infoteam  = cvar_string( va("_k_captteam%d", (int)k_captainturn) );
 	infocolor = cvar_string( va("_k_captcolor%d", (int)k_captainturn) );
-	k_captainturn = (k_captainturn == 1 ? 2 : 1);
+	if ( turn_number != 1 ) // captains turn rules: c1 c2 c2 c1 c2 c1 c2 etc... i.e. second captain pick twice at beginning
+		k_captainturn = (k_captainturn == 1 ? 2 : 1);
+	turn_number++;
 
     G_bprint(2, "%s set to team \x90%s\x91\n", p->s.v.netname, infoteam);
 
@@ -340,6 +344,7 @@ void BeginPicking ()
 		}
 	}
 
+	turn_number   = 0;
 	k_captainturn = (g_random() < 0.5 ? 1 : 2);
 
     PrintCaptainInTurn();
