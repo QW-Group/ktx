@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.18 2006/07/17 02:35:20 qqshka Exp $
+ *  $Id: player.c,v 1.19 2006/08/15 19:30:25 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -357,12 +357,24 @@ void player_axed4()
 
 //============================================================================
 
+// this shit present in ktpro, but test does't show why we need this, because 99.9% of time diff is just 0
+void set_idealtime()
+{
+	float diff = self->s.v.ltime - g_globalvars.time;
+
+	if ( diff < -0.05 ) 
+		diff = -0.05;
+	
+	self->s.v.nextthink = self->s.v.ltime = g_globalvars.time + diff + 0.1;
+}
+
 void player_nail1()
 {
 	self->s.v.frame = 103;
 	self->s.v.think = ( func_t ) player_nail2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
+	set_idealtime();
 	muzzleflash();
 
 	if ( !self->s.v.button0 || intermission_running || self->s.v.impulse )
@@ -385,6 +397,7 @@ void player_nail2()
 	self->s.v.think = ( func_t ) player_nail1;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
+	set_idealtime();
 	muzzleflash();
 
 	if ( !self->s.v.button0 || intermission_running || self->s.v.impulse )
@@ -409,6 +422,7 @@ void player_light1()
 	self->s.v.think = ( func_t ) player_light2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
+	set_idealtime();
 	muzzleflash();
 
 	if ( !self->s.v.button0 || intermission_running || self->s.v.impulse )
@@ -431,6 +445,7 @@ void player_light2()
 	self->s.v.think = ( func_t ) player_light1;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
+	set_idealtime();
 	muzzleflash();
 
 	if ( !self->s.v.button0 || intermission_running || self->s.v.impulse )

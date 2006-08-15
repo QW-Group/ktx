@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.46 2006/07/29 21:13:08 qqshka Exp $
+ *  $Id: weapons.c,v 1.47 2006/08/15 19:30:25 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1337,10 +1337,12 @@ void W_Attack()
 		break;
 
 	case IT_NAILGUN:
+		self->s.v.ltime = g_globalvars.time;
 		player_nail1();
 		break;
 
 	case IT_SUPER_NAILGUN:
+		self->s.v.ltime = g_globalvars.time;
 		player_nail1();
 		break;
 
@@ -1375,6 +1377,7 @@ void W_Attack()
 	case IT_LIGHTNING:
 		self->attack_finished = g_globalvars.time + 0.1;
 		sound( self, CHAN_AUTO, "weapons/lstart.wav", 1, ATTN_NORM );
+		self->s.v.ltime = g_globalvars.time;
 		player_light1();
 		break;
 
