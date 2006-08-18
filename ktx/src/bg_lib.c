@@ -1,5 +1,5 @@
 /*
- * $Id: bg_lib.c,v 1.10 2006/05/22 21:05:44 oldmanuk Exp $
+ * $Id: bg_lib.c,v 1.11 2006/08/18 00:50:47 qqshka Exp $
  */
 
 // Copyright (C) 1999-2000 Id Software, Inc.
@@ -253,6 +253,20 @@ char *strchr( const char *string, int c ) {
 	}
 	return (char *)0;
 }
+
+// qqshka: have no example, so do my'n own, dunno good or bad
+char *strrchr( const char *string, int c ) {
+	char *from = ( char * )string + strlen( string );
+
+	while ( from >= string ) {
+		if ( *from == c ) {
+			return from;
+		}
+		from--;
+	}
+	return (char *)0;
+}
+
 
 char *strstr( const char *string, const char *strCharSet ) {
 	while ( *string ) {

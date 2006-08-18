@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.129 2006/08/12 22:19:21 qqshka Exp $
+ *  $Id: commands.c,v 1.130 2006/08/18 00:50:47 qqshka Exp $
  */
 
 // commands.c
@@ -2450,7 +2450,7 @@ void ShowNick()
 	vec3_t		forward, right, up;
 	vec3_t		ang;
 	vec3_t		vieworg, entorg;
-	int			itms, i;
+	int			itms, i, ln;
 
 	if ( !match_in_progress )
 		;  // allow shownick in prewar anyway
@@ -2612,23 +2612,28 @@ ok:
 	kn = ezinfokey( bp, "k_nick" );
 	if ( strnull( kn ) )
 		kn = ezinfokey( bp, "k" );
+	if ( strnull( kn ) )
+		kn = bp->s.v.netname;
 
-	if ( (i = iKey( self, "ln" )) > 0 ) {
+	ln = iKey( self, "ln" );
+	ln = (iKey( self, "ktpl" ) ? abs(ln + 2) : ln); // NOTE: ktpro does't allow negative "ln", muhaha
+
+	if ( (i = ln) > 0 ) {
 		i = bound(0, i, sizeof(buf)-1 );
 		memset( (void*)buf, (int)'\n', i);
 		buf[i] = 0;
 	}
 
-	if ( !match_in_progress )	// simple shownick in prewar
-		strlcat(buf, va( "%s\n", ( strnull( kn ) ? bp->s.v.netname : kn )), sizeof(buf));
+	if ( match_in_progress != 2 )	// simple shownick in prewar
+		strlcat(buf, va( "%s\n", kn ), sizeof(buf));
 	else
 		strlcat(buf, va(	"%s" // if powerups present \n is too
 						"%s%s:%d%s\n"
-							"%s\n" , pups,
+							"%s" , pups,
 						 	s1, redtext("h"), (int)bp->s.v.health, s2,
-									( strnull( kn ) ? bp->s.v.netname : kn )), sizeof(buf));
+									kn), sizeof(buf));
 
-	if ( (i = iKey( self, "ln" )) < 0 ) {
+	if ( (i = ln) < 0 ) {
 		int offset = strlen(buf);
 		i = bound(0, -i, (int)sizeof(buf) - offset - 1);
 		memset( (void*)(buf + offset), (int)'\n', i);

@@ -1,3 +1,23 @@
+2006-08-18
+qq:
+204. Since in ktx u need different values for "ln", "lw", "ls" comparing to ktpro,
+	 I made some work around: added "ktpl" key for "/cmd info".
+	 So, once u setup "/cmd info ktpl 1" then u do not need to tune "ln", "lw", "ls",
+	 they will work equal to ktpro.
+
+205. Added auto executing next alias "ktx_infoset" for player, and "ktx_sinfoset"
+	 for spectator. So u can setup some ktx specific things. "infoset" and "sinfoset"
+	 still supported.
+	
+	 So, regarding change #204 u may setup next alias:
+	 	alias ktx_infoset "/cmd info ktpl 1"
+	 sure if u really need this.
+
+206. "/+wp_stats" layout changed a bit.
+	 If u use "/cmd info ktpl 1" then u will always have only one line for 
+	 all weapons (ktpro style), otherwise line will be wraped (breaked in few lines)
+	 if can't be fully displayed.
+
 2006-08-14
 qq:
 202. WARNING WARNING WARNING: "k_maxrate" removed, use "sv_maxrate" instead.

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_userinfo.c,v 1.23 2006/07/17 01:26:33 qqshka Exp $
+ *  $Id: g_userinfo.c,v 1.24 2006/08/18 00:50:47 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -190,6 +190,7 @@ cmdinfo_t cinfos[] = {
 	{ "ln", 0 },
     { "ls", 0 },
 	{ "lw", 0 },
+	{ "ktpl", 0 }, // zzz, so "ln" "ls" "lw" keys will work like in ktpro
 	{ "postmsg", 0 },
 	{ "premsg", 0 },
 //    	quote 	// wtf?
@@ -446,6 +447,7 @@ void cmdinfo_infoset ( gedict_t *p )
 		cmdinfo_clear ( p ); // remove all keys
 		cmdinfo_setkey( p, "*is", "1" ); // mark we are call infoset already
 		stuffcmd(p, "%sinfoset\n", p->k_spectator ? "s" : ""); // and call infoset
+		stuffcmd(p, "ktx_%sinfoset\n", p->k_spectator ? "s" : ""); // and call ktx_infoset
 		// kick cmd back to server, so we know client get infoset,
 	  	// so we can invoke on_connect and on_enter
 		stuffcmd(p, "wait;wait;wait;cmd ack infoset\n");

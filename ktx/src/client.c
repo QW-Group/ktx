@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.102 2006/08/14 15:48:25 vvd0 Exp $
+ *  $Id: client.c,v 1.103 2006/08/18 00:50:47 qqshka Exp $
  */
 
 //===========================================================================
@@ -1819,11 +1819,22 @@ void BackFromLag()
 
 #define S_DEF   ( S_GL | S_RL | S_LG ) /* default */
 
+void wp_wrap_cat(char *s, char *buf, int size)
+{
+	const int max_line = 40; // 320 / 8 = 40
+	char *n_pos = strrchr(buf, '\n');
+	int s_len = strlen( s ), b_len = strlen( n_pos ? n_pos : buf );
+
+	strlcat(buf, ( s_len + b_len > max_line ) ? "\n" : " ", size);
+	strlcat(buf, s, size);
+}
+
 void Print_Wp_Stats( )
 {
 	char buf[1024] = {0};
 
-	int  i;
+	qboolean ktpl = (iKey( self, "ktpl" ) ? true : false);
+	int  i, lw = iKey( self, "lw" ) + (ktpl ? 12 : 0);
 	int _wps = S_ALL & iKey ( self, "wps" );
 	int  wps = ( _wps ? _wps : S_DEF ); // if wps is not set - show S_DEF weapons
 
@@ -1848,7 +1859,7 @@ void Print_Wp_Stats( )
 #endif
 	float lg  = wps & S_LG  ? max(0.001, 100.0 * e->ps.h_lg / max(1, e->ps.a_lg)) : 0;
 
-	if ( (i = iKey( self, "lw" )) > 0 ) {
+	if ( (i = lw) > 0 ) {
 		i = bound(0, i, sizeof(buf)-1 );
 		memset( (void*)buf, (int)'\n', i);
 		buf[i] = 0;
@@ -1866,38 +1877,44 @@ void Print_Wp_Stats( )
 	if ( !axe && !sg && !ssg && !ng && !sng && !gl && !rl && !lg )
 		return; // sanity
 
-	if ( rl || lg || gl ) {
+	if ( ktpl ) {
 		if ( lg )
-			strlcat(buf, (lg  ? va("%s%s:%.1f", (*buf ? " " : ""), redtext("lg") , lg) : ""), sizeof(buf));
+			strlcat(buf, lg  ? va("%s:%.1f ", redtext("lg"),  lg) : "", sizeof(buf));
 		if ( rl )
-			strlcat(buf, (rl  ? va("%s%s:%.0f", (*buf ? " " : ""), redtext("rl"),  rl) : ""), sizeof(buf));
+			strlcat(buf, rl  ? va("%s:%.0f ", redtext("rl"),  rl) : "", sizeof(buf));
 		if ( gl )
-			strlcat(buf, (gl  ? va("%s%s:%.0f", (*buf ? " " : ""), redtext("gl") , gl) : ""), sizeof(buf));
-
-		strlcat(buf, "\n", sizeof(buf));
-	}
-
-	if ( axe || sg || ssg ) {
+			strlcat(buf, gl  ? va("%s:%.0f ", redtext("gl"),  gl) : "", sizeof(buf));
 		if ( axe )
-			strlcat(buf, (axe ? va("%s:%.0f", redtext("axe"),  axe) : ""), sizeof(buf));
+			strlcat(buf, axe ? va("%s:%.0f ", redtext("axe"),axe) : "", sizeof(buf));
 		if ( sg )
-			strlcat(buf, (sg  ? va("%s%s:%.1f", (*buf ? " " : ""), redtext("sg") , sg) : ""), sizeof(buf));
+			strlcat(buf, sg  ? va("%s:%.1f ", redtext("sg"),  sg) : "", sizeof(buf));
     	if ( ssg )
-			strlcat(buf, (ssg ? va("%s%s:%.1f", (*buf ? " " : ""), redtext("ssg") , ssg) : ""), sizeof(buf));
-
-		strlcat(buf, "\n", sizeof(buf));
+			strlcat(buf, ssg ? va("%s:%.1f ", redtext("ssg"),ssg) : "", sizeof(buf));
+		if ( ng )
+			strlcat(buf, ng  ? va("%s:%.1f ", redtext("ng"),  ng) : "", sizeof(buf));
+		if ( sng )
+			strlcat(buf, sng ? va("%s:%.1f ", redtext("sng"),sng) : "", sizeof(buf));
+	}
+	else {
+		if ( lg )
+			wp_wrap_cat(lg  ? va("%s:%.1f", redtext("lg"),  lg) : "", buf, sizeof(buf));
+		if ( rl )
+			wp_wrap_cat(rl  ? va("%s:%.0f", redtext("rl"),  rl) : "", buf, sizeof(buf));
+		if ( gl )
+			wp_wrap_cat(gl  ? va("%s:%.0f", redtext("gl"),  gl) : "", buf, sizeof(buf));
+		if ( axe )
+			wp_wrap_cat(axe ? va("%s:%.0f", redtext("axe"),axe) : "", buf, sizeof(buf));
+		if ( sg )
+			wp_wrap_cat(sg  ? va("%s:%.1f", redtext("sg"),  sg) : "", buf, sizeof(buf));
+    	if ( ssg )
+			wp_wrap_cat(ssg ? va("%s:%.1f", redtext("ssg"),ssg) : "", buf, sizeof(buf));
+		if ( ng )
+			wp_wrap_cat(ng  ? va("%s:%.1f", redtext("ng"),  ng) : "", buf, sizeof(buf));
+		if ( sng )
+			wp_wrap_cat(sng ? va("%s:%.1f", redtext("sng"),sng) : "", buf, sizeof(buf));
 	}
 
-	if ( ng || sng ) {
-		 if ( ng )
-			strlcat(buf, (ng  ? va("%s:%.1f", redtext("ng"), ng) : "" ), sizeof(buf));
-		 if ( sng )
-			strlcat(buf, (sng ? va("%s%s:%.1f", (*buf ? " " : ""), redtext("sng"), sng) : ""), sizeof(buf));
-
-		strlcat(buf, "\n", sizeof(buf));
-	}
-
-	if ( (i = iKey( self, "lw" )) < 0 ) {
+	if ( (i = lw) < 0 ) {
 		int offset = strlen(buf);
 		i = bound(0, -i, (int)sizeof(buf) - offset - 1);
 		memset( (void*)(buf + offset), (int)'\n', i);
@@ -1917,14 +1934,14 @@ void Print_Scores( )
 {
 	char buf[1024] = {0};
 
-	int  i, minutes = 0, seconds = 0, ts, es;
+	int  i, minutes = 0, seconds = 0, ts, es, ls = iKey( self, "ls" ) + (iKey( self, "ktpl" ) ? 12 : 0);
 
 	qboolean sc_ok = false;
 	gedict_t *p, *ed1, *ed2;
 	gedict_t *g = self->k_spectator ? PROG_TO_EDICT( self->s.v.goalentity ) : NULL;
 	gedict_t *e = self->k_player ? self : ( g ? g : world ); // stats of whom we want to show
 
-	if ( (i = iKey( self, "ls" )) > 0 ) {
+	if ( (i = ls) > 0 ) {
 		i = bound(0, i, sizeof(buf)-1 );
 		memset( (void*)buf, (int)'\n', i);
 		buf[i] = 0;
@@ -1975,7 +1992,7 @@ void Print_Scores( )
 		strlcat(buf, va("  %s:%d  %s:%d  \x90%d\x91", 
 						redtext("t"), ts, redtext("e"), es, (ts-es)), sizeof(buf));
 
-	if ( (i = iKey( self, "ls" )) < 0 ) {
+	if ( (i = ls) < 0 ) {
 		int offset = strlen(buf);
 		i = bound(0, -i, (int)sizeof(buf) - offset - 1);
 		memset( (void*)(buf + offset), (int)'\n', i);
