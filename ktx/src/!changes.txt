@@ -27,6 +27,10 @@ qq:
 
 209. Added "/no_lg" command, for lazy one, and "/no_gl" for smart one :|
 
+210. Now /noweapon command understand numbers like "/noweapon 8" equal to "/noweapon lg".
+
+	 i'me forget who suggest this one, let me know and i've add ur nick here %)	 
+
 2006-08-14
 qq:
 202. WARNING WARNING WARNING: "k_maxrate" removed, use "sv_maxrate" instead.
