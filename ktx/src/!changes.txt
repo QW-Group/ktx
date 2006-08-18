@@ -1,4 +1,4 @@
-2006-08-18
+2006-08-18 [ver 1.33]
 qq:
 204. Since in ktx u need different values for "ln", "lw", "ls" comparing to ktpro,
 	 I made some work around: added "ktpl" key for "/cmd info".
@@ -17,6 +17,15 @@ qq:
 	 If u use "/cmd info ktpl 1" then u will always have only one line for 
 	 all weapons (ktpro style), otherwise line will be wraped (breaked in few lines)
 	 if can't be fully displayed.
+
+207. BUGFIX: settings re-executed on map change even map was the same, nasty bug.
+
+208. Added "/dmgfrags" command, which toggle server cvar "k_dmgfrags"
+	 which was added by ult some time ago. Probably command may be usefull for dmm4 games.
+
+	 set k_dmgfrags 0 // 0 - normal frags, 1 - treat given damage as frags(some formula used)
+
+209. Added "/no_lg" command, for lazy one, and "/no_gl" for smart one :|
 
 2006-08-14
 qq:

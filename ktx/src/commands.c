@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.130 2006/08/18 00:50:47 qqshka Exp $
+ *  $Id: commands.c,v 1.131 2006/08/18 04:45:15 qqshka Exp $
  */
 
 // commands.c
@@ -169,6 +169,9 @@ void teleteam ();
 void upplayers ( float type );
 void downplayers ( float type );
 void iplist ();
+void dmgfrags ();
+void no_lg();
+void no_gl();
 
 // spec
 void ShowCamHelp();
@@ -395,6 +398,10 @@ const char CD_NODESC[] = "no desc";
 #define CD_UPSPECS      "increase maxspectators"
 #define CD_DOWNSPECS    "decrease maxspectators"
 #define CD_IPLIST       "list clients ips"
+#define CD_DMGFRAGS     "toggle damage frags"
+#define CD_NO_LG        "alias for /noweapon lg"
+#define CD_NO_GL		"alias for /noweapon gl"
+
 
 void dummy() {}
 void redirect();
@@ -637,7 +644,10 @@ cmd_t cmds[] = {
 	{ "downplayers", downplayers,               1    , CF_PLAYER | CF_SPC_ADMIN, CD_DOWNPLAYERS },
 	{ "upspecs",     upplayers,                 2    , CF_PLAYER | CF_SPC_ADMIN, CD_UPSPECS },
 	{ "downspecs",   downplayers,               2    , CF_PLAYER | CF_SPC_ADMIN, CD_DOWNSPECS },
-	{ "iplist",      iplist,                    0    , CF_BOTH, CD_IPLIST }
+	{ "iplist",      iplist,                    0    , CF_BOTH, CD_IPLIST },
+	{ "dmgfrags",    dmgfrags,                  0    , CF_PLAYER | CF_SPC_ADMIN, CD_DMGFRAGS },
+	{ "no_lg",       no_lg,                     0    , CF_PLAYER | CF_SPC_ADMIN, CD_NO_LG },
+	{ "no_gl",       no_gl,                     0    , CF_PLAYER | CF_SPC_ADMIN, CD_NO_GL }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -3387,21 +3397,21 @@ void noweapon ()
 
 		trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
 
-		if ( streq( nwp = "axe", arg_2 ) )
+		if ( streq( nwp = "axe", arg_2 ) || streq( "1", arg_2 ) )
 			k_disallow_weapons ^= bit = IT_AXE;
-		else if ( streq( nwp = "sg", arg_2 ) )
+		else if ( streq( nwp = "sg", arg_2 ) || streq( "2", arg_2 ) )
 			k_disallow_weapons ^= bit = IT_SHOTGUN;
-		else if ( streq( nwp = "ssg", arg_2 ) )
+		else if ( streq( nwp = "ssg", arg_2 ) || streq( "3", arg_2 ) )
 			k_disallow_weapons ^= bit = IT_SUPER_SHOTGUN;
-		else if ( streq( nwp = "ng", arg_2 ) )
+		else if ( streq( nwp = "ng", arg_2 ) || streq( "4", arg_2 ) )
 			k_disallow_weapons ^= bit = IT_NAILGUN;
-		else if ( streq( nwp = "sng", arg_2 ) )
+		else if ( streq( nwp = "sng", arg_2 ) || streq( "5", arg_2 ) )
 			k_disallow_weapons ^= bit = IT_SUPER_NAILGUN;
-		else if ( streq( nwp = "gl", arg_2 ) )
+		else if ( streq( nwp = "gl", arg_2 ) || streq( "6", arg_2 ) )
 			k_disallow_weapons ^= bit = IT_GRENADE_LAUNCHER;
-		else if ( streq( nwp = "rl", arg_2 ) )
+		else if ( streq( nwp = "rl", arg_2 ) || streq( "7", arg_2 ) )
 			k_disallow_weapons ^= bit = IT_ROCKET_LAUNCHER;
-		else if ( streq( nwp = "lg", arg_2 ) )
+		else if ( streq( nwp = "lg", arg_2 ) || streq( "8", arg_2 ) )
 			k_disallow_weapons ^= bit = IT_LIGHTNING;
 
 		if ( bit ) {
@@ -3414,6 +3424,16 @@ void noweapon ()
 		}
 		return;
 	}
+}
+
+void no_lg()
+{
+	stuffcmd(self, "cmd noweapon lg\n");
+}
+
+void no_gl()
+{
+	stuffcmd(self, "cmd noweapon gl\n");
 }
 
 void tracklist ( )
@@ -4821,5 +4841,16 @@ void iplist ()
 
 		iplist_one(self, p);
 	}
+}
+
+void dmgfrags ()
+{
+    if( match_in_progress )
+        return;
+
+	if( check_master() )
+		return;
+
+	cvar_toggle_msg( self, "k_dmgfrags", redtext("damage frags") );
 }
 

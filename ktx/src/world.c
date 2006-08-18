@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.66 2006/08/13 18:14:33 qqshka Exp $
+ *  $Id: world.c,v 1.67 2006/08/18 04:45:15 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -553,7 +553,6 @@ qboolean RegisterCvar ( const char *var )
 // in the first frame - even world is not spawned yet
 void FirstFrame	( )
 {
-	char 		*lastmap = cvar_string("_k_lastmap");
 	int 		i, um_idx;
 
 	if ( framecount != 1 )
@@ -741,7 +740,7 @@ void FirstFrame	( )
 		}
 	}
 
-	if ( cvar("_k_last_xonx") > 0 && strneq( lastmap, g_globalvars.mapname ) )
+	if ( cvar("_k_last_xonx") > 0 && strneq( cvar_string("_k_lastmap"), g_globalvars.mapname ) )
 		UserMode( -cvar("_k_last_xonx") ); // auto call XonX command if map switched to another
 
 // fix game rules, if cfgs some how misconfigured

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.80 2006/07/27 01:02:54 qqshka Exp $
+ *  $Id: match.c,v 1.81 2006/08/18 04:45:15 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1371,13 +1371,16 @@ void PrintCountdown( int seconds )
 //
 //
 // Deathmatch  x
-// Mode		  D u e l | T e a m | F F A
+// Mode		  D u e l | T e a m | F F A | C T F | RA
+// Midair     On // optional
 // Teamplay    x
 // Timelimit  xx
 // Fraglimit xxx
 // Overtime   xx		Overtime printout, supports sudden death display
 // Powerups   On|Off|Jammed
+// Dmgfrags   On // optional
 // Noweapon
+
 
 	char text[1024] = {0};
 	char *mode = "";
@@ -1436,6 +1439,9 @@ void PrintCountdown( int seconds )
 
 	if ( !isRA() || Get_Powerups() ) // show powerups in RA ?
 		strlcat(text, va("%s %4s\n", "Powerups", pwr), sizeof(text));
+
+	if ( cvar("k_dmgfrags") )
+		strlcat(text, va("%s %4s\n", "Dmgfrags", redtext("On")), sizeof(text));
 
 	if (    deathmatch == 4 && !cvar("k_midair")
 		 && !strnull( nowp = str_noweapon((int)cvar("k_disallow_weapons") & DA_WPNS) )
