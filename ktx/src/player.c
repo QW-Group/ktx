@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.19 2006/08/15 19:30:25 qqshka Exp $
+ *  $Id: player.c,v 1.20 2006/08/21 17:30:42 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -374,14 +374,15 @@ void player_nail1()
 	self->s.v.think = ( func_t ) player_nail2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
-	set_idealtime();
-	muzzleflash();
-
 	if ( !self->s.v.button0 || intermission_running || self->s.v.impulse )
 	{
 		player_run();
 		return;
 	}
+
+	set_idealtime();
+	muzzleflash();
+
 	self->s.v.weaponframe = self->s.v.weaponframe + 1;
 	if ( self->s.v.weaponframe >= 9 )
 		self->s.v.weaponframe = 1;
@@ -397,14 +398,15 @@ void player_nail2()
 	self->s.v.think = ( func_t ) player_nail1;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
-	set_idealtime();
-	muzzleflash();
-
 	if ( !self->s.v.button0 || intermission_running || self->s.v.impulse )
 	{
 		player_run();
 		return;
 	}
+
+	set_idealtime();
+	muzzleflash();
+
 	self->s.v.weaponframe = self->s.v.weaponframe + 1;
 	if ( self->s.v.weaponframe >= 9 )
 		self->s.v.weaponframe = 1;
@@ -422,14 +424,15 @@ void player_light1()
 	self->s.v.think = ( func_t ) player_light2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
-	set_idealtime();
-	muzzleflash();
-
 	if ( !self->s.v.button0 || intermission_running || self->s.v.impulse )
 	{
 		player_run();
 		return;
 	}
+
+	set_idealtime();
+	muzzleflash();
+
 	self->s.v.weaponframe = self->s.v.weaponframe + 1;
 	if ( self->s.v.weaponframe >= 5 )
 		self->s.v.weaponframe = 1;
@@ -445,14 +448,15 @@ void player_light2()
 	self->s.v.think = ( func_t ) player_light1;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
-	set_idealtime();
-	muzzleflash();
-
 	if ( !self->s.v.button0 || intermission_running || self->s.v.impulse )
 	{
 		player_run();
 		return;
 	}
+
+	set_idealtime();
+	muzzleflash();
+
 	self->s.v.weaponframe = self->s.v.weaponframe + 1;
 	if ( self->s.v.weaponframe >= 5 )
 		self->s.v.weaponframe = 1;

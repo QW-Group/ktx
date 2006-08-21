@@ -4,6 +4,10 @@ qq:
 
 	 thx B1aze
 
+212. Fixing bug, excess muzzleflash.
+
+	 thx B1aze
+
 2006-08-18 [ver 1.33]
 qq:
 204. Since in ktx u need different values for "ln", "lw", "ls" comparing to ktpro,
