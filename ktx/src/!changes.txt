@@ -1,3 +1,9 @@
+2006-08-21
+qq:
+211. Fixing blood amout for axe and sng, now like in ktpro with normal blood level.
+
+	 thx B1aze
+
 2006-08-18 [ver 1.33]
 qq:
 204. Since in ktx u need different values for "ln", "lw", "ls" comparing to ktpro,

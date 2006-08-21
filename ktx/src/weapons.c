@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.47 2006/08/15 19:30:25 qqshka Exp $
+ *  $Id: weapons.c,v 1.48 2006/08/21 15:39:55 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -183,9 +183,12 @@ SpawnBlood
 */
 void SpawnBlood( vec3_t org, float damage )
 {
+	if ( damage < 1 )
+		return;
+
 	WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
 	WriteByte( MSG_MULTICAST, TE_BLOOD );
-	WriteByte( MSG_MULTICAST, 1 );
+	WriteByte( MSG_MULTICAST, damage );
 	WriteCoord( MSG_MULTICAST, org[0] );
 	WriteCoord( MSG_MULTICAST, org[1] );
 	WriteCoord( MSG_MULTICAST, org[2] );
@@ -266,16 +269,7 @@ void Multi_Finish()
 		trap_multicast( PASSVEC3( puff_org ), MULTICAST_PVS );
 	}
 
-	if ( blood_count )
-	{
-		WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
-		WriteByte( MSG_MULTICAST, TE_BLOOD );
-		WriteByte( MSG_MULTICAST, blood_count );
-		WriteCoord( MSG_MULTICAST, blood_org[0] );
-		WriteCoord( MSG_MULTICAST, blood_org[1] );
-		WriteCoord( MSG_MULTICAST, blood_org[2] );
-		trap_multicast( PASSVEC3( puff_org ), MULTICAST_PVS );
-	}
+	SpawnBlood( puff_org, blood_count );
 }
 
 /*
@@ -936,7 +930,7 @@ void spike_touch()
 		if ( other->k_player )
 			PROG_TO_EDICT( self->s.v.owner )->ps.h_ng++;
 
-		spawn_touchblood( 9 );
+		spawn_touchblood( 1 );
 		other->deathtype = "nail";
 		T_Damage( other, self, PROG_TO_EDICT( self->s.v.owner ), 9 );
 	} else
@@ -985,7 +979,7 @@ void superspike_touch()
 		if ( other->k_player )
 			PROG_TO_EDICT( self->s.v.owner )->ps.h_sng++;
 
-		spawn_touchblood( 18 );
+		spawn_touchblood( 2 );
 		other->deathtype = "supernail";
 		T_Damage( other, self, PROG_TO_EDICT( self->s.v.owner ), 18 );
 	} else
