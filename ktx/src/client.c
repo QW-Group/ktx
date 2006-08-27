@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.103 2006/08/18 00:50:47 qqshka Exp $
+ *  $Id: client.c,v 1.104 2006/08/27 01:13:39 qqshka Exp $
  */
 
 //===========================================================================
@@ -1058,7 +1058,7 @@ void ClientConnect()
 		return;
 	}
 
-	newcomer = self->s.v.netname;
+	newcomer = self;
 
 	self->k_accepted = 1; // ok, we allowed to connect
 	self->ready = (match_in_progress ? 1 : 0);

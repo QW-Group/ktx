@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.85 2006/08/18 04:45:15 qqshka Exp $
+ *  $Id: g_local.h,v 1.86 2006/08/27 01:13:39 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -714,7 +714,7 @@ extern	float k_whonottime;     // NOT_SURE:
 extern	float match_in_progress;// if a match has begun
 extern  float match_start_time;	// time when match has been started
 extern	float match_over;       // boolean - whether or not the match stats have been printed at end of game
-extern	char *newcomer;         // stores name of last player who joined
+extern	gedict_t *newcomer;     // stores last player who joined
 extern	int   k_overtime;		// is overtime is going on
 
 extern	float current_maxfps;	// current value of serverinfo maxfps

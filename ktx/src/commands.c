@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.131 2006/08/18 04:45:15 qqshka Exp $
+ *  $Id: commands.c,v 1.132 2006/08/27 01:13:39 qqshka Exp $
  */
 
 // commands.c
@@ -81,7 +81,7 @@ void SendVictimMsg();
 void ShowNick();
 void ShowCmds();
 void ShowMaps();
-void ShowMessages();
+//void ShowMessages();
 void ShowOpts();
 void ShowQizmo();
 void ShowRules();
@@ -481,10 +481,10 @@ cmd_t cmds[] = {
 	                                           
 	{ "qizmo",       ShowQizmo,                 0    , CF_PLAYER, CD_QIZMO },
 	                                             
-	{ "messages",    ShowMessages,              0    , CF_PLAYER | CF_MATCHLESS, CD_MESSAGES },
+//	{ "messages",    ShowMessages,              0    , CF_PLAYER | CF_MATCHLESS, CD_MESSAGES },
 	{ "killer",      SendKillerMsg,             0    , CF_PLAYER | CF_MATCHLESS, CD_KILLER },
 	{ "victim",      SendVictimMsg,             0    , CF_PLAYER | CF_MATCHLESS, CD_VICTIM },
-	{ "newcomer",    SendNewcomerMsg,           0    , CF_PLAYER | CF_MATCHLESS, CD_NEWCOMER },
+	{ "newcomer",    SendNewcomerMsg,           0    , CF_BOTH | CF_MATCHLESS, CD_NEWCOMER },
 	                                             
 	{ "qlag",        ToggleQLag,                0    , CF_PLAYER | CF_SPC_ADMIN, CD_QLAG },
 	{ "qenemy",      ToggleQEnemy,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_QENEMY },
@@ -1057,6 +1057,7 @@ void ShowQizmo()
 			"ρποιξτ..... point function\n");
 }
 
+/*
 // ShowMessages and SendMessage command implementations added
 void ShowMessages()
 {
@@ -1065,6 +1066,7 @@ void ShowMessages()
 			"φιγτιν..... who you last killed\n"
 			"ξεχγονες... last player joined\n");
 }
+*/
 
 void ShowVersion()
 {
@@ -1155,23 +1157,27 @@ void SendVictimMsg()
 
 void SendNewcomerMsg()
 {
-	SendMessage(newcomer);
+	SendMessage(newcomer->s.v.netname);
 }
 
 void SendMessage(char *name)
 {
+	char *s;
 	gedict_t *p;
+	int from;
 
-	if ( !strnull( name ) ) {
+	for( from = 0, p = world; (p = find_plrspc (p, &from)); ) {
+		if ( p == self )
+			continue;
 
-		p = find( world, FOFCLSN, "player" );
-		while( ( p && strneq( p->s.v.netname, name ) ) || p == self )
-			p = find( p, FOFCLSN, "player" );
-    
-		if( p ) {
-			G_bprint(3, "%s: %s", self->s.v.netname, ezinfokey(self, "premsg"));
-			G_bprint(3, name);
-			G_bprint(3,"%s\n", ezinfokey(self, "postmsg"));
+		if ( !strnull( name ) && streq( p->s.v.netname, name ) ) {
+			stuffcmd(self, "say ");
+			if ((s = ezinfokey(self, "premsg")))
+				stuffcmd(self, " %s ", s);
+			stuffcmd(self, "%s", name);
+			if ((s = ezinfokey(self, "postmsg")))
+				stuffcmd(self, " %s", s);
+			stuffcmd(self, "\n");
 
 			return;
 		}

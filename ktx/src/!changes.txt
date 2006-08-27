@@ -1,3 +1,9 @@
+2006-08-27
+qq:
+213. Small fixes for "/newcommer", also command available for specs now.
+
+	 hetman notice
+
 2006-08-21
 qq:
 211. Fixing blood amout for axe and sng, now like in ktpro with normal blood level.

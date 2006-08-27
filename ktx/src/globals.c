@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: globals.c,v 1.21 2006/08/09 03:16:30 qqshka Exp $
+ *  $Id: globals.c,v 1.22 2006/08/27 01:13:39 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -44,7 +44,7 @@ float k_whonottime;     // NOT_SURE:
 float match_in_progress = 0;    // if a match has begun
 float match_start_time; // time when match has been started
 float match_over;       // boolean - whether or not the match stats have been printed at end of game
-char *newcomer;         // stores name of last player who joined
+gedict_t *newcomer = g_edicts;     // stores last player who joined
 
 int   k_overtime = 0;   // is overtime is going on
 
