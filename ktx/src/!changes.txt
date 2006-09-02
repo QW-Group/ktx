@@ -1,6 +1,19 @@
+2006-09-02
+qq:
+214. Added: "/trx_rec", "/trx_play", "/trx_stop".
+	 "/trx_rec" just record few seconds of player model movement in to mod memory,
+	 so u can replay movement via "/trx_play", "/trx_stop" is just stop playback/recording.
+	 Commands have nothing with real demo recording.
+	 U can controll playback speed via "pbspeed" setinfo key, f.e. value 50 will give u
+	 50% speed of original. Not so usefull commands, but can help in some cases.
+	 In slow motion model is jerking, probably need add interpolation (lerping) someday :)
+	 Commands available only during prewar, obvious...
+
+	 idea and partial sources by Tonik
+
 2006-08-27
 qq:
-213. Small fixes for "/newcommer", also command available for specs now.
+213. Small fixes for "/newcomer", also command available for specs now.
 
 	 hetman notice
 

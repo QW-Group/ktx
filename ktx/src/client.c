@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.104 2006/08/27 01:13:39 qqshka Exp $
+ *  $Id: client.c,v 1.105 2006/09/02 02:59:23 qqshka Exp $
  */
 
 //===========================================================================
@@ -2076,6 +2076,7 @@ void ZeroFpsStats ()
 	self->fHighestFrameTime = 0.0001f;
 }
 
+void mv_playback ();
 
 ////////////////
 // GlobalParams:
@@ -2194,6 +2195,7 @@ void PlayerPreThink()
 
 // ILLEGALFPS]
 
+	mv_playback ();
 
 	if ( intermission_running )
 	{
@@ -2511,6 +2513,7 @@ void BothPostThink ()
 
 
 void            W_WeaponFrame();
+void			mv_record ();
 
 ////////////////
 // GlobalParams:
@@ -2594,6 +2597,8 @@ void PlayerPostThink()
 	self->jump_flag = self->s.v.velocity[2];
 
 	CheckPowerups();
+
+	mv_record();
 
 	W_WeaponFrame();
 

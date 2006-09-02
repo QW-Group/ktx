@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.28 2006/08/09 03:16:30 qqshka Exp $
+ *  $Id: g_main.c,v 1.29 2006/09/02 02:59:24 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -58,6 +58,7 @@ static char     worldmodel[64] = "worldmodel";
 static char     netnames[MAX_CLIENTS][32];
 
 static wreg_t   wregs[MAX_CLIENTS][MAX_WREGS];
+static plrfrm_t plrfrms[MAX_CLIENTS][MAX_PLRFRMS];
 
 gameData_t      gamedata =
     { ( edict_t * ) g_edicts, sizeof( gedict_t ), &g_globalvars, expfields , GAME_API_VERSION};
@@ -128,8 +129,11 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		self->k_spectator = arg0;
 		self->k_player    = !arg0;
 
-		self->wreg = wregs[(int)(self - world)-1];
-		memset( self->wreg, 0, sizeof( wreg_t ) * MAX_WREGS ); // clear
+		self->wreg    = wregs[(int)(self-world)-1];
+		self->plrfrms = plrfrms[(int)(self-world)-1];
+
+		memset( self->wreg,    0, sizeof( wreg_t ) * MAX_WREGS );     // clear
+		memset( self->plrfrms, 0, sizeof( plrfrm_t ) * MAX_PLRFRMS ); // clear
 
 		show_sv_version();
 

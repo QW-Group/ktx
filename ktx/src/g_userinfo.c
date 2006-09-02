@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_userinfo.c,v 1.24 2006/08/18 00:50:47 qqshka Exp $
+ *  $Id: g_userinfo.c,v 1.25 2006/09/02 02:59:24 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -200,7 +200,8 @@ cmdinfo_t cinfos[] = {
     { "w_switch", 0 },
 	{ "k_sdir", 0 },
 	{ "wps", 0 },
-	{ "lra", 0 }		// ra status bar modificator
+	{ "lra", 0 },		// ra status bar modificator
+	{ "pbspeed", 0 },	// for /trx_play
 };
 
 int cinfos_cnt = sizeof( cinfos ) / sizeof( cinfos[0] );

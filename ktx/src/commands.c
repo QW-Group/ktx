@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.132 2006/08/27 01:13:39 qqshka Exp $
+ *  $Id: commands.c,v 1.133 2006/09/02 02:59:23 qqshka Exp $
  */
 
 // commands.c
@@ -160,8 +160,8 @@ void ToggleReady();
 
 void fp_toggle ();
 
-void dlist();
-void dinfo();
+void dlist ();
+void dinfo ();
 
 void sv_lock ();
 void force_spec();
@@ -170,8 +170,11 @@ void upplayers ( float type );
 void downplayers ( float type );
 void iplist ();
 void dmgfrags ();
-void no_lg();
-void no_gl();
+void no_lg ();
+void no_gl ();
+void mv_cmd_playback ();
+void mv_cmd_record ();
+void mv_cmd_stop ();
 
 // spec
 void ShowCamHelp();
@@ -401,6 +404,9 @@ const char CD_NODESC[] = "no desc";
 #define CD_DMGFRAGS     "toggle damage frags"
 #define CD_NO_LG        "alias for /noweapon lg"
 #define CD_NO_GL		"alias for /noweapon gl"
+#define CD_TRX_REC      "trick tmp record"
+#define CD_TRX_PLAY     "trick tmp playback"
+#define CD_TRX_STOP     "stop playback/recording"
 
 
 void dummy() {}
@@ -647,7 +653,10 @@ cmd_t cmds[] = {
 	{ "iplist",      iplist,                    0    , CF_BOTH, CD_IPLIST },
 	{ "dmgfrags",    dmgfrags,                  0    , CF_PLAYER | CF_SPC_ADMIN, CD_DMGFRAGS },
 	{ "no_lg",       no_lg,                     0    , CF_PLAYER | CF_SPC_ADMIN, CD_NO_LG },
-	{ "no_gl",       no_gl,                     0    , CF_PLAYER | CF_SPC_ADMIN, CD_NO_GL }
+	{ "no_gl",       no_gl,                     0    , CF_PLAYER | CF_SPC_ADMIN, CD_NO_GL },
+	{ "trx_rec",     mv_cmd_record,             0    , CF_PLAYER, CD_TRX_REC },
+	{ "trx_play",    mv_cmd_playback,           0    , CF_PLAYER, CD_TRX_PLAY },
+	{ "trx_stop",    mv_cmd_stop,               0    , CF_PLAYER, CD_TRX_STOP }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -4859,4 +4868,189 @@ void dmgfrags ()
 
 	cvar_toggle_msg( self, "k_dmgfrags", redtext("damage frags") );
 }
+
+// { movie, for trix record in memory
+// code is partially wroten by Tonik
+
+void mv_stop_record ();
+qboolean mv_is_recording ();
+
+qboolean mv_is_playback ()
+{
+	return self->is_playback;
+}
+
+void mv_stop_playback ()
+{
+	if ( !mv_is_playback() )
+		return;
+
+	if ( self->pb_ent ) {
+		ent_remove( self->pb_ent );
+		self->pb_ent = NULL;
+	}
+
+	G_sprint(self, 2, "playback finished\n");
+	self->pb_frame = 0;
+	self->is_playback = false;
+}
+
+qboolean mv_can_playback ()
+{
+	if ( match_in_progress || intermission_running )
+		return false;
+
+	if ( mv_is_recording() )
+		return false; // sanity
+
+	if ( self->pb_frame >= self->rec_count || self->pb_frame < 0 )
+		return false;
+
+	return true;
+}
+
+void mv_playback ()
+{
+	gedict_t *pb_ent = self->pb_ent;
+	float scale, playback_time;
+	int s, i;
+	plrfrm_t *fc, *ftmp, *fp;
+
+	if ( !mv_is_playback() )
+		return;
+
+	if ( !pb_ent || !mv_can_playback() || self->pb_frame == self->rec_count - 1 ) {
+		mv_stop_playback();
+		return;
+	}
+
+	scale = ( (s = bound(0, iKey(self, "pbspeed"), 100) ) ? s / 100.0f : 1.0f );
+
+	playback_time = (g_globalvars.time - self->pb_start_time) * scale;
+
+	fc = fp = ftmp = &(self->plrfrms[self->pb_frame]);
+
+	for( i = self->pb_frame; i < self->rec_count; i++ ) {
+		ftmp = &(self->plrfrms[(int)min(i+1, self->rec_count-1)]);
+		if ( ftmp->time > playback_time )
+			break;
+		fp = ftmp;
+	}
+
+	i = fp - self->plrfrms;
+
+   	if ( i == self->pb_frame || fp->time > playback_time )
+		return;
+
+	self->pb_frame = i;
+
+	setorigin( pb_ent, PASSVEC3( fp->origin ) );
+	VectorCopy(fp->angles, pb_ent->s.v.angles);
+	pb_ent->s.v.frame    = fp->frame;
+	pb_ent->s.v.effects  = fp->effects;
+	pb_ent->s.v.colormap = fp->colormap;
+}
+
+void mv_cmd_playback ()
+{
+	mv_stop_record();   // stop record first
+	mv_stop_playback(); // stop playback first
+
+	self->pb_frame = 0;
+
+	if ( !mv_can_playback() ) {
+		G_sprint(self, 2, "can't playback now\n");
+		return;
+	}
+
+	G_sprint(self, 2, "playback\n");
+
+	self->pb_ent = spawn ();
+	self->pb_ent->s.v.classname = "pb_ent";
+	setmodel (self->pb_ent, "progs/player.mdl");
+
+	self->pb_start_time = g_globalvars.time;
+	self->is_playback = true;
+}
+
+qboolean mv_is_recording ()
+{
+	return self->is_recording;
+}
+
+void mv_stop_record ()
+{
+	if ( !mv_is_recording() )
+		return;
+
+	G_sprint(self, 2, "recording finished (%d) frames\n", self->rec_count);
+
+	self->is_recording = false;
+}
+
+qboolean mv_can_record ()
+{
+	if ( match_in_progress || intermission_running )
+		return false;
+
+	if ( mv_is_playback() )
+		return false; // sanity
+
+	if ( self->rec_count >= MAX_PLRFRMS || self->rec_count < 0 )
+		return false;
+
+	return true;
+}
+
+void mv_record ()
+{
+	plrfrm_t *f;
+
+	if ( !mv_is_recording() )
+		return;
+
+	if ( !mv_can_record() ) {
+		mv_stop_record();
+		return;
+	}
+
+	f = &(self->plrfrms[self->rec_count]);
+
+	f->time = g_globalvars.time - self->rec_start_time;
+	VectorCopy(self->s.v.origin,  f->origin);
+	VectorCopy(self->s.v.angles,  f->angles);
+//	VectorCopy(self->s.v.v_angle, f->v_angle); // FIXME: usefull ?
+	f->frame    = self->s.v.frame;
+	f->effects  = self->s.v.effects;
+	f->colormap = self->s.v.colormap;
+//	f->modelindex = self.modelindex;
+
+	self->rec_count++;
+}
+
+void mv_cmd_record ()
+{
+	mv_stop_record();   // stop record first
+	mv_stop_playback(); // stop playback first
+
+	self->rec_count = 0;
+
+	if ( !mv_can_record() ) {
+		G_sprint(self, 2, "can't record now\n");
+		return;
+	}
+
+	G_sprint(self, 2, "recording\n");
+
+	self->rec_start_time = g_globalvars.time;
+	self->is_recording = true;
+}
+
+void mv_cmd_stop ()
+{
+	mv_stop_record();   // stop record
+	mv_stop_playback(); // stop playback
+}
+
+// }
 

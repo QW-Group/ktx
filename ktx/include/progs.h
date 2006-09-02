@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.47 2006/07/14 23:53:45 qqshka Exp $
+ *  $Id: progs.h,v 1.48 2006/09/02 02:59:23 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -173,6 +173,24 @@ typedef struct wreg_s {
 	int attack;
 	int impulse[MAX_WREG_IMP];
 } wreg_t;
+
+// {
+
+#define MAX_PLRFRMS (77*15) /* 77 frames for each of 15 seconds */
+
+typedef struct
+{
+	float	time;
+//	float	modelindex;
+	vec3_t	origin;
+	vec3_t	angles;
+	float	frame;
+	float	effects;
+//	vec3_t	v_angle;
+	float	colormap;
+} plrfrm_t;
+
+// }
 
 // player position
 
@@ -422,6 +440,20 @@ typedef struct gedict_s {
 	float lasttime;		// last time idle was checked
 	float laststattime;	// time of last status update
 	raPlayerType_t ra_pt; // ra player type
+// }
+
+// {
+	float pb_start_time; // time when playback starts
+	int pb_frame; // frame which currently must be or already played
+	qboolean is_playback;
+
+	float rec_start_time; // time when record starts
+	int rec_count; // count of recorded frames
+	qboolean is_recording;
+
+	struct gedict_s *pb_ent; // enitity which used to show our model during playback
+
+	plrfrm_t *plrfrms; // [MAX_PLRFRMS] for record trix
 // }
 
 } gedict_t;
