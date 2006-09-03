@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.67 2006/08/18 04:45:15 qqshka Exp $
+ *  $Id: world.c,v 1.68 2006/09/03 01:28:57 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -744,10 +744,14 @@ void FirstFrame	( )
 		UserMode( -cvar("_k_last_xonx") ); // auto call XonX command if map switched to another
 
 // fix game rules, if cfgs some how misconfigured
+#ifdef CTF_RELOADMAP
+	k_ctf = (cvar( "k_mode" ) == gtCTF); // emulate CTF is active so FixRules is silent
+#endif
+
 	FixRules();
 
 #ifdef CTF_RELOADMAP
-	k_ctf = (k_mode == gtCTF); // check is ctf was active at map load
+	k_ctf = (k_mode == gtCTF); // finaly decide is ctf active or not
 	k_ctf_custom_models = k_ctf_custom_models && isCTF(); // precache only if CTF is really on
 #endif
 }
@@ -958,6 +962,7 @@ void FixRules ( )
 	FixSayTeamToSpecs(); // k_sayteam_to_spec
 
 	if ( skip_fixrules > 0 ) {
+//		G_bprint(2, "skip: %d\n", skip_fixrules);
 		skip_fixrules--;
 		return;
 	}
@@ -1064,12 +1069,12 @@ void StartFrame( int time )
 
 	FixRules();
 
-	if ( framecount == 2 )
+	if ( framecount == 2 ) {
 		SecondFrame();
+		FixRules();
+	}
 
 //	rj = max( 0, cvar( "rj" ) ); 	// Set Rocket Jump Modifiers
-
-	FixRules();
 
 	FixCTFItems(); // if modes have changed we may need to add/remove flags etc
 
