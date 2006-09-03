@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_userinfo.c,v 1.25 2006/09/02 02:59:24 qqshka Exp $
+ *  $Id: g_userinfo.c,v 1.26 2006/09/03 02:40:37 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -156,6 +156,9 @@ qboolean FixPlayerTeam ( char *newteam )
 		}
 		stuffcmd(self, "color %d\n", streq(s1, "red") ? 4 : 13); 
 	}
+
+	if ( isCTF() && ( streq(newteam, "red") || streq(newteam, "blue") ) )
+		stuffcmd(self, "auto%s\n", newteam); 
 
 	return false;
 }

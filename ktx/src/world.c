@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.68 2006/09/03 01:28:57 qqshka Exp $
+ *  $Id: world.c,v 1.69 2006/09/03 02:40:37 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -962,7 +962,6 @@ void FixRules ( )
 	FixSayTeamToSpecs(); // k_sayteam_to_spec
 
 	if ( skip_fixrules > 0 ) {
-//		G_bprint(2, "skip: %d\n", skip_fixrules);
 		skip_fixrules--;
 		return;
 	}

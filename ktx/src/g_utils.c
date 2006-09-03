@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.62 2006/09/02 02:59:24 qqshka Exp $
+ *  $Id: g_utils.c,v 1.63 2006/09/03 02:40:37 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1795,18 +1795,27 @@ void update_ghosts ()
 
 void on_connect()
 {
+	char *newteam;
+
 	if ( !(iKey(self, "ev") & EV_ON_CONNECT) ) // client doesn't want on_connect
 		return;
 
 	if ( self->k_player ) {
 		if ( isFFA() )
 			stuffcmd(self, "on_connect_ffa\n");
+		else if ( isCTF() )
+			stuffcmd(self, "on_connect_ctf\n");
 		else
 			stuffcmd(self, "on_connect\n");
+
+		if ( isCTF() && ( streq(newteam = getteam(self), "red") || streq(newteam, "blue") ) )
+			stuffcmd(self, "auto%s\n", newteam); 
 	}
 	else {
 		if ( isFFA() )
 			stuffcmd(self, "on_observe_ffa\n");
+		else if ( isCTF() )
+			stuffcmd(self, "on_observe_ctf\n");
 		else
 			stuffcmd(self, "on_observe\n");
 	}
@@ -1820,12 +1829,16 @@ void on_enter()
 	if ( self->k_player ) {
 		if ( isFFA() )
 			stuffcmd(self, "on_enter_ffa\n");
+		else if ( isCTF() )
+			stuffcmd(self, "on_enter_ctf\n");
 		else
 			stuffcmd(self, "on_enter\n");
 	}
 	else {
 		if ( isFFA() )
 			stuffcmd(self, "on_spec_enter_ffa\n");
+		else if ( isCTF() )
+			stuffcmd(self, "on_spec_enter_ctf\n");
 		else
 			stuffcmd(self, "on_spec_enter\n");
 	}
