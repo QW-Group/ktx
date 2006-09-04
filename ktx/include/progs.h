@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.50 2006/09/04 17:12:34 vvd0 Exp $
+ *  $Id: progs.h,v 1.51 2006/09/04 17:49:56 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -131,7 +131,7 @@ typedef struct player_stats_s {
 	// velocity stats
 	float velocity_max;	// maximum velocity
 	float velocity_sum;	// summary velocity from all frames
-	int frames;			// number of frames
+	int vel_frames;		// number of frames
 
 } player_stats_t;
 
