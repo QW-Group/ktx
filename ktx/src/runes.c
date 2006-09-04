@@ -1,5 +1,5 @@
 /*
- *  $Id: runes.c,v 1.8 2006/06/27 00:07:13 qqshka Exp $
+ *  $Id: runes.c,v 1.9 2006/09/04 01:18:58 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -291,6 +291,43 @@ void RegenerationSound( gedict_t *player )
 			player->rune_sound_time = g_globalvars.time + 1;
 			sound( player, CHAN_BODY, "rune/rune4.wav", 1, ATTN_NORM );
 		}
+	}
+}
+
+void CheckStuffRune()
+{
+	char *rune = "";
+
+	if ( !isCTF() ) {
+		self->items2 = 0; // no runes/sigils in HUD
+
+		if ( self->last_rune && iKey(self, "runes") ) {
+			self->last_rune = NULL;
+			stuffcmd(self, "set rune \"\"\n");
+		}
+
+		return;
+	}
+
+	self->items2 = (self->ctf_flag & CTF_RUNE_MASK) << 5;
+
+	if ( !iKey(self, "runes") )
+		return;
+
+	if ( self->ctf_flag & CTF_RUNE_RES )
+		rune = "res";
+	else if ( self->ctf_flag & CTF_RUNE_STR )
+		rune = "str";
+	else if ( self->ctf_flag & CTF_RUNE_HST )
+		rune = "hst";
+	else if ( self->ctf_flag & CTF_RUNE_RGN )
+		rune = "rgn";
+	else
+		rune = "";
+
+	if ( !self->last_rune || strneq(rune, self->last_rune) ) {
+		self->last_rune = rune;
+		stuffcmd(self, "set rune \"%s\"\n", rune);
 	}
 }
 

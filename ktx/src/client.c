@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.105 2006/09/02 02:59:23 qqshka Exp $
+ *  $Id: client.c,v 1.106 2006/09/04 01:18:58 qqshka Exp $
  */
 
 //===========================================================================
@@ -2512,8 +2512,9 @@ void BothPostThink ()
 }
 
 
-void            W_WeaponFrame();
-void			mv_record ();
+void	W_WeaponFrame();
+void	mv_record ();
+void	CheckStuffRune ();
 
 ////////////////
 // GlobalParams:
@@ -2597,6 +2598,7 @@ void PlayerPostThink()
 	self->jump_flag = self->s.v.velocity[2];
 
 	CheckPowerups();
+	CheckStuffRune();
 
 	mv_record();
 

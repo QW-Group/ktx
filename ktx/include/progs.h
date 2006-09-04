@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.48 2006/09/02 02:59:23 qqshka Exp $
+ *  $Id: progs.h,v 1.49 2006/09/04 01:18:57 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -416,6 +416,8 @@ typedef struct gedict_s {
 	float rune_notify_time;        // already have a rune spam prevention
 	float carrier_hurt_time;       // time we last hurt enemy carrier
 	float rune_pickup_time;        // time we picked up current rune
+	char *last_rune;			   // name of last rune we send to client
+	float	items2;				   // using  ZQ_ITEMS2 extension in mvdsv we can use per client sigils for runes
 // }
 
 	qboolean was_jump;

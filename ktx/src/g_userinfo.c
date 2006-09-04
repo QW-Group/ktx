@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_userinfo.c,v 1.26 2006/09/03 02:40:37 qqshka Exp $
+ *  $Id: g_userinfo.c,v 1.27 2006/09/04 01:18:58 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -205,6 +205,7 @@ cmdinfo_t cinfos[] = {
 	{ "wps", 0 },
 	{ "lra", 0 },		// ra status bar modificator
 	{ "pbspeed", 0 },	// for /trx_play
+	{ "runes", 0 }	// for stuffing "set rune xxx" in CTF
 };
 
 int cinfos_cnt = sizeof( cinfos ) / sizeof( cinfos[0] );

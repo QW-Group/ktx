@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.29 2006/09/02 02:59:24 qqshka Exp $
+ *  $Id: g_main.c,v 1.30 2006/09/04 01:18:58 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -51,6 +51,7 @@ field_t         expfields[] = {
 	{"isBot",       FOFS( isBot ),       F_INT},
 	{"brokenankle", FOFS( brokenankle ), F_FLOAT},
 	{"mod_admin",   FOFS( k_admin ),     F_INT},
+	{"items2",      FOFS( items2 ),      F_FLOAT},
 	{NULL}
 };
 static char     mapname[64];
@@ -123,6 +124,7 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 	case GAME_CLIENT_CONNECT:
 		self = PROG_TO_EDICT( g_globalvars.self );
 
+		self->last_rune = "setme";
 		self->s.v.classname = ""; // at least empty classname
 		self->connect_time = g_globalvars.time;
 

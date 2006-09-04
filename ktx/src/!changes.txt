@@ -1,3 +1,13 @@
+2006-09-04
+qq:
+217. CTF changes: u may use "/cmd info runes 1" so server will automatically
+	 send to u something like "set rune xxx" where xxx is corresponding rune u have.
+	 Useful for tp messages.
+	 Also, i've (with Tonik help) add something to mvdsv, so runes/sigils shown in HUD, but u
+	 need mvdsv from CVS 4sure.
+
+	 siikah request
+
 2006-09-03
 qq:
 215. CTF changes: on_connect, on_observe, on_enter, on_spec_enter now renamed to
