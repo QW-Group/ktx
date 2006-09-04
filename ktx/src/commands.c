@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.133 2006/09/02 02:59:23 qqshka Exp $
+ *  $Id: commands.c,v 1.134 2006/09/04 23:06:31 qqshka Exp $
  */
 
 // commands.c
@@ -4912,7 +4912,7 @@ qboolean mv_can_playback ()
 void mv_playback ()
 {
 	gedict_t *pb_ent = self->pb_ent;
-	float scale, playback_time;
+	float scale;
 	int s, i;
 	plrfrm_t *fc, *ftmp, *fp;
 
@@ -4924,22 +4924,23 @@ void mv_playback ()
 		return;
 	}
 
-	scale = ( (s = bound(0, iKey(self, "pbspeed"), 100) ) ? s / 100.0f : 1.0f );
+	scale = ( (s = bound(0, iKey(self, "pbspeed"), 200) ) ? s / 100.0f : 1.0f );
 
-	playback_time = (g_globalvars.time - self->pb_start_time) * scale;
+	self->pb_time += (g_globalvars.time - self->pb_old_time) * scale;
+	self->pb_old_time = g_globalvars.time;
 
 	fc = fp = ftmp = &(self->plrfrms[self->pb_frame]);
 
-	for( i = self->pb_frame; i < self->rec_count; i++ ) {
-		ftmp = &(self->plrfrms[(int)min(i+1, self->rec_count-1)]);
-		if ( ftmp->time > playback_time )
+	for( i = self->pb_frame + 1; i < self->rec_count; i++ ) {
+		ftmp = &(self->plrfrms[i]);
+		if ( ftmp->time > self->pb_time )
 			break;
 		fp = ftmp;
 	}
 
 	i = fp - self->plrfrms;
 
-   	if ( i == self->pb_frame || fp->time > playback_time )
+   	if ( i == self->pb_frame || fp->time > self->pb_time )
 		return;
 
 	self->pb_frame = i;
@@ -4969,7 +4970,8 @@ void mv_cmd_playback ()
 	self->pb_ent->s.v.classname = "pb_ent";
 	setmodel (self->pb_ent, "progs/player.mdl");
 
-	self->pb_start_time = g_globalvars.time;
+	self->pb_time = 0;
+	self->pb_old_time = g_globalvars.time;
 	self->is_playback = true;
 }
 

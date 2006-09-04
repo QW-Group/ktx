@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.51 2006/09/04 17:49:56 qqshka Exp $
+ *  $Id: progs.h,v 1.52 2006/09/04 23:06:31 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -450,7 +450,8 @@ typedef struct gedict_s {
 // }
 
 // {
-	float pb_start_time; // time when playback starts
+	float pb_time;
+	float pb_old_time;
 	int pb_frame; // frame which currently must be or already played
 	qboolean is_playback;
 
