@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.106 2006/09/04 01:18:58 qqshka Exp $
+ *  $Id: client.c,v 1.107 2006/09/04 16:55:36 vvd0 Exp $
  */
 
 //===========================================================================
@@ -2618,24 +2618,33 @@ void PlayerPostThink()
     }
 #endif
 
-	if ( !match_in_progress && !match_over && !k_captains )
 	{
-		if ( iKey( self, "kf" ) & KF_SPEED ) {
-			float velocity			= sqrt(self->s.v.velocity[0] * self->s.v.velocity[0] + 
-										   self->s.v.velocity[1] * self->s.v.velocity[1]);
-			float velocity_vert_abs = fabs(self->s.v.velocity[2]);
-			self->s.v.armorvalue	= (int)(velocity < 1000 ? velocity + 1000 : -velocity);
-			self->s.v.frags			= (int)(velocity) / 1000;
-			self->s.v.ammo_shells   = 100 + (int)(velocity_vert_abs) / 100000000;
-			self->s.v.ammo_nails    = 100 + (int)(velocity_vert_abs) %   1000000 / 10000;
-			self->s.v.ammo_rockets  = 100 + (int)(velocity_vert_abs) %     10000 / 100;
-			self->s.v.ammo_cells    = 100 + (int)(velocity_vert_abs) %       100;
+		float velocity = sqrt(self->s.v.velocity[0] * self->s.v.velocity[0] + 
+							  self->s.v.velocity[1] * self->s.v.velocity[1]);
+		if ( !match_in_progress && !match_over && !k_captains )
+		{
+			if ( iKey( self, "kf" ) & KF_SPEED ) {
+				float velocity_vert_abs	= fabs(self->s.v.velocity[2]);
+				self->s.v.armorvalue	= (int)(velocity < 1000 ? velocity + 1000 : -velocity);
+				self->s.v.frags			= (int)(velocity) / 1000;
+				self->s.v.ammo_shells   = 100 + (int)(velocity_vert_abs) / 100000000;
+				self->s.v.ammo_nails    = 100 + (int)(velocity_vert_abs) %   1000000 / 10000;
+				self->s.v.ammo_rockets  = 100 + (int)(velocity_vert_abs) %     10000 / 100;
+				self->s.v.ammo_cells    = 100 + (int)(velocity_vert_abs) %       100;
+			}
+			else {
+				self->s.v.armorvalue = 1000;
+				self->s.v.frags = 0;
+			}
+ 		}
+		if( match_in_progress == 2 || k_matchLess )
+		{
+			self->ps.frames++;
+			self->ps.velocity_sum += velocity;
+			if (self->ps.velocity_max < velocity)
+				self->ps.velocity_max = velocity;
 		}
-		else {
-			self->s.v.armorvalue = 1000;
-			self->s.v.frags = 0;
-		}
- 	}
+	}
 }
 
 /*

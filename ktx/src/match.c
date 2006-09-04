@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.81 2006/08/18 04:45:15 qqshka Exp $
+ *  $Id: match.c,v 1.82 2006/09/04 16:55:37 vvd0 Exp $
  */
 
 #include "g_local.h"
@@ -463,6 +463,11 @@ void OnePlayerStats(gedict_t *p, int tp)
 				(h_gl  ? va(" %s%.0f",   redtext("gl"),   h_gl) : ""),
 				(h_sg  ? va(" %s%.1f%%", redtext("sg"),   h_sg) : ""),
 				(h_ssg ? va(" %s%.1f%%", redtext("ssg"), h_ssg) : ""));
+
+		// velocity
+		G_bprint(2, "%s: %s:%.1f %s:%.1f\n", redtext("Speed"),
+				redtext("max"), p->ps.velocity_max,
+				redtext("average"), p->ps.frames > 0 ? p->ps.velocity_sum / p->ps.frames : 0.);
 
 		// armors + megahealths
 		G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("Armr&mhs"),

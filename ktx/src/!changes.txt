@@ -8,6 +8,10 @@ qq:
 
 	 siikah request
 
+VVD:
+218. Added velocity statistics in final statistics print between weapons and armors + megahealths:
+	 and we can to detect all campers now!!! :-D
+
 2006-09-03
 qq:
 215. CTF changes: on_connect, on_observe, on_enter, on_spec_enter now renamed to
