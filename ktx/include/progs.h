@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.49 2006/09/04 01:18:57 qqshka Exp $
+ *  $Id: progs.h,v 1.50 2006/09/04 17:12:34 vvd0 Exp $
  */
 
 #include "progdefs.h"
@@ -127,6 +127,11 @@ typedef struct player_stats_s {
 	// rocket arena
 	int wins;	//number of wins they have
 	int loses;	//number of loses they have
+
+	// velocity stats
+	float velocity_max;	// maximum velocity
+	float velocity_sum;	// summary velocity from all frames
+	int frames;			// number of frames
 
 } player_stats_t;
 
