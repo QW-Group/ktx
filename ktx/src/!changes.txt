@@ -1,3 +1,15 @@
+2006-09-13
+qq:
+219. Spelling fix for "/freeze" command.
+
+	 thx DyB|Tuna
+
+220. CTF changes: fixing a bit CTF respawns, at match start spawn at base (info_player_teamX),
+	 after select normal respawns (info_player_deathmatch).
+	 In previous versions of KTX this may faile in some cases.
+
+	 siikah bug report
+
 2006-09-04
 qq:
 217. CTF changes: u may use "/cmd info runes 1" so server will automatically

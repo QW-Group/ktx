@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.108 2006/09/04 17:49:56 qqshka Exp $
+ *  $Id: client.c,v 1.109 2006/09/12 22:19:41 qqshka Exp $
  */
 
 //===========================================================================
@@ -1179,7 +1179,7 @@ void PutClientInServer()
 // paustime is set by teleporters to keep the player from moving a while
 	self->pausetime = 0;
 	
-	if ( isCTF() && self->s.v.frags < 1 && self->deaths < 1 )
+	if ( isCTF() && match_start_time == g_globalvars.time ) // first spawn in CTF on corresponding base
 		spot = SelectSpawnPoint(streq(getteam(self), "red") ? "info_player_team1" : "info_player_team2" );
 	else if ( isRA() && ( isWinner( self ) || isLoser( self ) ) )
 		spot = SelectSpawnPoint("info_teleport_destination" );

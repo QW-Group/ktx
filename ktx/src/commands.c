@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.134 2006/09/04 23:06:31 qqshka Exp $
+ *  $Id: commands.c,v 1.135 2006/09/12 22:19:41 qqshka Exp $
  */
 
 // commands.c
@@ -2462,7 +2462,7 @@ void ToggleFreeze()
 	if( check_master() )
 		return;
 
-	cvar_toggle_msg( self, "k_freeze", redtext(cvar("k_freeze") ? "unfreezes map" : "freezes map") );
+	cvar_toggle_msg( self, "k_freeze", redtext("map freeze"));
 }
 
 // qqshka: pointing code stolen from Zquake
