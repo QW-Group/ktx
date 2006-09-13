@@ -10,6 +10,11 @@ qq:
 
 	 siikah bug report
 
+221. CTF changes: now "/+scores" show rune if u have, and flags status, also fixed some minor bugs.
+	 Probably that not final version, and layout may be changed somehow.
+
+	 siikah request
+
 2006-09-04
 qq:
 217. CTF changes: u may use "/cmd info runes 1" so server will automatically

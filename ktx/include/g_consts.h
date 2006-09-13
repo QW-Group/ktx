@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_consts.h,v 1.16 2006/07/27 01:02:53 qqshka Exp $
+ *  $Id: g_consts.h,v 1.17 2006/09/13 01:53:05 qqshka Exp $
  */
 
 //
@@ -285,6 +285,11 @@
 #define CTF_RUNE_RGN    8   // IT_SIGIL4
 #define CTF_RUNE_MASK  15
 #define CTF_FLAG       16
+
+#define FLAG_AT_BASE   0
+#define FLAG_CARRIED   1
+#define FLAG_DROPPED   2
+#define FLAG_RETURNED  3 // here only 200ms before going back to FLAG_AT_BASE
 
 // spec moreinfo
 

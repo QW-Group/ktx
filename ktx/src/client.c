@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.109 2006/09/12 22:19:41 qqshka Exp $
+ *  $Id: client.c,v 1.110 2006/09/13 01:53:06 qqshka Exp $
  */
 
 //===========================================================================
@@ -1965,6 +1965,43 @@ void Print_Scores( )
 			minutes--;
 	}
 
+	if ( isCTF() ) {
+		gedict_t *flag1 = find( world, FOFCLSN, "item_flag_team1" );
+		gedict_t *flag2 = find( world, FOFCLSN, "item_flag_team2" );
+		char *r_f = "", *b_f = "", *rune = "";
+
+		if ( flag1 && flag2 ) {
+			switch ( (int) flag1->cnt )
+			{
+				case FLAG_AT_BASE: r_f = " "; break;
+ 	 			case FLAG_CARRIED: r_f = "R"; break;
+				case FLAG_DROPPED: r_f = "\322"; break;
+				default: r_f = " ";
+			}
+
+			switch ( (int) flag2->cnt )
+			{
+				case FLAG_AT_BASE: b_f = " "; break;
+ 	 			case FLAG_CARRIED: b_f = "B"; break;
+				case FLAG_DROPPED: b_f = "\302"; break;
+				default: b_f = " ";
+			}
+
+			if ( e->ctf_flag & CTF_RUNE_RES )
+				rune = "res";
+			else if ( e->ctf_flag & CTF_RUNE_STR )
+				rune = "str";
+			else if ( e->ctf_flag & CTF_RUNE_HST )
+				rune = "hst";
+			else if ( e->ctf_flag & CTF_RUNE_RGN )
+				rune = "rgn";
+			else
+				rune = "   ";
+
+			strlcat(buf, va("%s\205%s\205%s\205", rune, r_f, b_f), sizeof(buf));
+		}
+	}
+
 	if ( k_sudden_death )
 		strlcat(buf, va("%s:%s", redtext("tl"), redtext(k_sudden_death == SD_NORMAL ? "sd" : "tb")), sizeof(buf));
 	else
@@ -2493,9 +2530,9 @@ void BothPostThink ()
 {
 	if ( self->shownick_time && self->shownick_time <= g_globalvars.time )
 		self->shownick_time = 0;
-	if ( self->wp_stats_time && self->wp_stats_time <= g_globalvars.time )
+	if ( !self->wp_stats && self->wp_stats_time && self->wp_stats_time <= g_globalvars.time )
 		self->wp_stats_time = 0;
-	if ( self->sc_stats_time && self->sc_stats_time <= g_globalvars.time )
+	if ( !self->sc_stats && self->sc_stats_time && self->sc_stats_time <= g_globalvars.time )
 		self->sc_stats_time = 0;
 
 	if (     self->need_clearCP 

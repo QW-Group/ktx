@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.63 2006/09/03 02:40:37 qqshka Exp $
+ *  $Id: g_utils.c,v 1.64 2006/09/13 01:53:06 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1933,20 +1933,27 @@ void info_kf_update ( gedict_t *p, char *from, char *to )
 
 // }
 
-void refresh_plus_scores ()
+void cl_refresh_plus_scores (gedict_t *p)
 {
-	int from;
-	gedict_t *p, *swp;
+	gedict_t *swp;
 
-	for( from = 0, p = world; (p = find_plrspc (p, &from)); )
-		if ( p->sc_stats ) {
+	if ( (p->k_player || p->k_spectator) && p->sc_stats ) {
 			swp = self; // save self
 			self = p;
 
 			Sc_Stats( 2 ); // force refresh
 
 			self = swp; // restore self
-		}
+	}
+}
+
+void refresh_plus_scores ()
+{
+	int from;
+	gedict_t *p;
+
+	for( from = 0, p = world; (p = find_plrspc (p, &from)); )
+		cl_refresh_plus_scores( p );
 }
 
 int only_digits(const char *s)

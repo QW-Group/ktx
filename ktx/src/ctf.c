@@ -1,5 +1,5 @@
 /*
- *  $Id: ctf.c,v 1.15 2006/07/11 05:02:30 ult_ Exp $
+ *  $Id: ctf.c,v 1.16 2006/09/13 01:53:06 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -25,11 +25,6 @@
 // . add 64 to k_allowed_free_modes to enable ctf, 127 now enables all modes
 // . set k_mode 4 if you want server to default to ctf mode
  
-#define FLAG_AT_BASE   0
-#define FLAG_CARRIED   1
-#define FLAG_DROPPED   2
-#define FLAG_RETURNED  3 // here only 200ms before going back to FLAG_AT_BASE
-
 #define FLAG_RETURN_TIME     30
 #define CARRIER_ASSIST_TIME  6
 #define RETURN_ASSIST_TIME   4
@@ -283,7 +278,7 @@ void FlagTouch()
 				other->s.v.frags += CAPTURE_BONUS;
 				other->ps.ctf_points += CAPTURE_BONUS;
 				other->ps.caps++;
-	    
+
 				// loop through all players on team to give bonus
 				for ( p = world; (p = find( p, FOFCLSN, "player")); )
 				{
@@ -315,6 +310,10 @@ void FlagTouch()
 						p->carrier_hurt_time = -1;
 				}
 				RegenFlags( true );
+
+				k_nochange = 0;	// Set it so it should update scores at next attempt.
+				refresh_plus_scores ();
+
 				return;
 			}
 			return;
@@ -337,9 +336,15 @@ void FlagTouch()
 				G_bprint( 2, " %s the %s flag!\n", redtext("returned"), redtext("RED") );
 			else
 				G_bprint( 2, " %s the %s flag!\n", redtext("returned"), redtext("BLUE") );
+
+			k_nochange = 0;	// Set it so it should update scores at next attempt.
+			refresh_plus_scores ();
+
 			return;
 		}
 	}
+
+	refresh_plus_scores (); // update players status bar faster
 
 	// Pick up the flag
 	sound( other, CHAN_ITEM, self->s.v.noise, 1, ATTN_NORM );
@@ -418,7 +423,9 @@ void DropFlag( gedict_t *flag)
 	if ( streq(getteam(p), "red") )
 		G_bprint( 2, " %s the %s flag!\n", redtext("lost"), redtext("BLUE") );
 	else
-		G_bprint( 2, " %s the %s flag!\n", redtext("lost"), redtext("RED") );	
+		G_bprint( 2, " %s the %s flag!\n", redtext("lost"), redtext("RED") );
+
+	refresh_plus_scores (); // update players status bar faster
 }
 
 void FlagStatus()

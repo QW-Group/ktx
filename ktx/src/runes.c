@@ -1,5 +1,5 @@
 /*
- *  $Id: runes.c,v 1.9 2006/09/04 01:18:58 qqshka Exp $
+ *  $Id: runes.c,v 1.10 2006/09/13 01:53:06 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -13,6 +13,8 @@ gedict_t* SelectRuneSpawnPoint();
 void DoDropRune(int rune, qboolean s)
 {
 	gedict_t *item;
+
+	cl_refresh_plus_scores( self );
 
 	item = spawn();
 	setorigin( item, PASSVEC3( self->s.v.origin ) );
@@ -47,6 +49,8 @@ void DoDropRune(int rune, qboolean s)
 void DoTossRune( int rune )
 {
 	gedict_t *item;
+
+	cl_refresh_plus_scores( self );
 
 	item = spawn();
 	item->ctf_flag = rune;
@@ -189,6 +193,8 @@ void RuneTouch()
 		}
 		return;
 	}
+
+	cl_refresh_plus_scores( other );
  
 	other->ctf_flag |= self->ctf_flag;
 	other->rune_pickup_time = g_globalvars.time;
