@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.110 2006/09/13 01:53:06 qqshka Exp $
+ *  $Id: client.c,v 1.111 2006/09/14 19:39:09 qqshka Exp $
  */
 
 //===========================================================================
@@ -2003,7 +2003,7 @@ void Print_Scores( )
 	}
 
 	if ( k_sudden_death )
-		strlcat(buf, va("%s:%s", redtext("tl"), redtext(k_sudden_death == SD_NORMAL ? "sd" : "tb")), sizeof(buf));
+		strlcat(buf, va("%s:%-5.5s", redtext("tl"), redtext(k_sudden_death == SD_NORMAL ? "sd" : "tb")), sizeof(buf));
 	else
 		strlcat(buf, va("%s:%02d:%02d", redtext("tl"), minutes, seconds), sizeof(buf));
 
@@ -2026,7 +2026,7 @@ void Print_Scores( )
 	}
 
 	if ( sc_ok )
-		strlcat(buf, va("  %s:%d  %s:%d  \x90%d\x91", 
+		strlcat(buf, va("  %s:%-3d  %s:%-3d  \x90%4d\x91", 
 						redtext("t"), ts, redtext("e"), es, (ts-es)), sizeof(buf));
 
 	if ( (i = ls) < 0 ) {

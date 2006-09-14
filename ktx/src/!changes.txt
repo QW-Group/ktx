@@ -1,3 +1,8 @@
+2006-09-14
+qq:
+222. Command "/+scores" now have fixed width in most of cases, so do not moved from side to side
+	 when frags changes from tenths to handreds.
+
 2006-09-13
 qq:
 219. Spelling fix for "/freeze" command.
