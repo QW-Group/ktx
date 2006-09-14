@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.111 2006/09/14 19:39:09 qqshka Exp $
+ *  $Id: client.c,v 1.112 2006/09/14 22:41:29 qqshka Exp $
  */
 
 //===========================================================================
@@ -1932,7 +1932,7 @@ void Print_Wp_Stats( )
 
 void Print_Scores( )
 {
-	char buf[1024] = {0};
+	char buf[1024] = {0}, *last_va;
 
 	int  i, minutes = 0, seconds = 0, ts, es, ls = iKey( self, "ls" ) + (iKey( self, "ktpl" ) ? 12 : 0);
 
@@ -1998,7 +1998,7 @@ void Print_Scores( )
 			else
 				rune = "   ";
 
-			strlcat(buf, va("%s\205%s\205%s\205", rune, r_f, b_f), sizeof(buf));
+			strlcat(buf, va("%s \205%s\205%s\205 ", rune, r_f, b_f), sizeof(buf));
 		}
 	}
 
@@ -2025,9 +2025,22 @@ void Print_Scores( )
 		sc_ok = true;
 	}
 
-	if ( sc_ok )
-		strlcat(buf, va("  %s:%-3d  %s:%-3d  \x90%4d\x91", 
-						redtext("t"), ts, redtext("e"), es, (ts-es)), sizeof(buf));
+	last_va = "";
+
+	if ( sc_ok ) {
+		if ( isCTF() )
+			strlcat(buf, last_va = va("  \x90%d\x91", ts-es), sizeof(buf));
+		else
+			strlcat(buf, last_va = va("  \364:%d  \345:%d  \x90%d\x91", ts, es, ts-es), sizeof(buf));
+	}
+
+	// add spaces, so line in most cases is don't move from side to side during frags changes
+	if ( (i = (isCTF() ? sizeof("  [-zzzzz]")-1 : sizeof("  t:xxxxx  e:yyyyy  [-zzzzz]")-1 ) - strlen(last_va) ) > 0 ) {
+		int offset = strlen(buf);
+		i = bound(0, i, (int)sizeof(buf) - offset - 1);
+		memset( (void*)(buf + offset), (int)' ', i);
+		buf[i+offset] = 0;
+	}
 
 	if ( (i = ls) < 0 ) {
 		int offset = strlen(buf);
