@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.20 2006/08/21 17:30:42 qqshka Exp $
+ *  $Id: player.c,v 1.21 2006/09/19 22:44:42 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -543,7 +543,7 @@ void PainSound()
 	}
 
 // water pain sounds
-	if ( self->s.v.watertype == CONTENT_WATER && self->s.v.waterlevel == 3 )
+	if ( (self->s.v.watertype == CONTENT_WATER || self->s.v.watertype == CONTENT_SLIME)  && self->s.v.waterlevel == 3 )
 	{
 		DeathBubbles( 1 );
 
