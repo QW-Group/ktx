@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.112 2006/09/14 22:41:29 qqshka Exp $
+ *  $Id: client.c,v 1.113 2006/09/19 22:44:20 qqshka Exp $
  */
 
 //===========================================================================
@@ -2300,9 +2300,8 @@ void PlayerPreThink()
 
 // brokenankle included here
 	if ( self->s.v.button2 || self->brokenankle )
-	{
 		PlayerJump();
-	} else
+	else
 		self->s.v.flags = ( ( int ) ( self->s.v.flags ) ) | FL_JUMPRELEASED;
 
 // teleporters can force a non-moving pause time
