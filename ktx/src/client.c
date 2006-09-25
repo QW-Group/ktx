@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.113 2006/09/19 22:44:20 qqshka Exp $
+ *  $Id: client.c,v 1.114 2006/09/25 22:31:25 qqshka Exp $
  */
 
 //===========================================================================
@@ -2622,7 +2622,7 @@ void PlayerPostThink()
 
 		if ( self->s.v.watertype == CONTENT_WATER )
 			sound( self, CHAN_BODY, "player/h2ojump.wav", 1, ATTN_NORM );
-		else if ( self->jump_flag < -650 )
+		else if ( self->jump_flag < jumpf_flag )
 		{
 			gedict_t *gre = PROG_TO_EDICT ( self->s.v.groundentity );
 
