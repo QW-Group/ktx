@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.48 2006/08/21 15:39:55 qqshka Exp $
+ *  $Id: weapons.c,v 1.49 2006/09/25 22:31:42 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -680,8 +680,7 @@ void W_FireLightning()
 			if ( g_random() <= 0.5 )
 			{
 				self->deathtype = "selfwater";
-				T_Damage( self, self, PROG_TO_EDICT( self->s.v.owner ),
-					  4000 );
+				T_Damage( self, self, PROG_TO_EDICT( self->s.v.owner ), 4000 );
 			} else
 			{
 				cells = self->s.v.ammo_cells;

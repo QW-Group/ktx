@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.69 2006/09/03 02:40:37 qqshka Exp $
+ *  $Id: world.c,v 1.70 2006/09/25 22:31:42 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -391,6 +391,11 @@ void SpawnCTFItem( char* classname, float x, float y, float z, float angle );
 void Customize_Maps()
 {
 	gedict_t *p;
+
+	jumpf_flag = -650;
+
+	if ( streq( "q1dm17", g_globalvars.mapname ) )
+		jumpf_flag = -1000;
 
 	// spawn quad if map is aerowalk in this case
 	if ( cvar("add_q_aerowalk") && streq( "aerowalk", g_globalvars.mapname) ) {

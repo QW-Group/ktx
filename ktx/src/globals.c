@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: globals.c,v 1.22 2006/08/27 01:13:39 qqshka Exp $
+ *  $Id: globals.c,v 1.23 2006/09/25 22:31:42 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -89,4 +89,6 @@ int			ra_match_fight;	// have winner and loser fighting
 int			k_rocketarena;	// is RA active or not, since we must catch changes, we can't use cvar("k_rocketarena")
 	
 // }
+
+int	jumpf_flag; // falling velocity criteria
 
