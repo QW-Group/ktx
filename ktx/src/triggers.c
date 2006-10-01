@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: triggers.c,v 1.17 2006/07/08 01:39:10 qqshka Exp $
+ *  $Id: triggers.c,v 1.18 2006/10/01 14:58:46 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -605,7 +605,7 @@ void trigger_onlyregistered_touch()
 	{
 		if ( self->s.v.message && strneq( self->s.v.message, "" ) )
 		{
-			G_centerprint( other, self->s.v.message );
+			G_centerprint( other, "%s", self->s.v.message );
 			sound( other, CHAN_BODY, "misc/talk.wav", 1, ATTN_NORM );
 		}
 	}

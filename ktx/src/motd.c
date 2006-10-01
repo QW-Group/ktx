@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: motd.c,v 1.20 2006/07/08 01:39:10 qqshka Exp $
+ *  $Id: motd.c,v 1.21 2006/10/01 14:58:46 qqshka Exp $
  */
 
 // motd.c
@@ -61,7 +61,7 @@ void PMOTDThink()
 //	strlcat(buf, "by kemiKal, Cenobite, Sturm and Fang\n\n", sizeof(buf));
 	strlcat(buf, va("Type \"%s\" for help", redtext("commands")), sizeof(buf));
 
-	G_centerprint ( PROG_TO_EDICT( self->s.v.owner ), buf);
+	G_centerprint ( PROG_TO_EDICT( self->s.v.owner ), "%s",  buf);
 
 	self->s.v.nextthink = g_globalvars.time + 0.7;
 }

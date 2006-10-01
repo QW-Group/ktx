@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.135 2006/09/12 22:19:41 qqshka Exp $
+ *  $Id: commands.c,v 1.136 2006/10/01 14:58:46 qqshka Exp $
  */
 
 // commands.c
@@ -1227,7 +1227,7 @@ void PrintToggle1( char *tog, char *key )
 	if ( strnull(tog) || strnull(key) )
 		G_Error("PrintToggle1 null");
 
-	G_sprint(self, 2, tog);
+	G_sprint(self, 2, "%s", tog);
 
 	i = streq(key, "k_pow") ? Get_Powerups() : bound(0, cvar( key ), 1);
 
@@ -1244,7 +1244,7 @@ void PrintToggle2( char *tog, char *key )
 	if ( strnull(tog) || strnull(key) )
 		G_Error("PrintToggle2 null");
 
-	G_sprint(self, 2, tog);
+	G_sprint(self, 2, "%s", tog);
 
 	if( cvar( key ) )
 		G_sprint(self, 2, "On\n");
@@ -1260,7 +1260,7 @@ void PrintToggle3(char *tog, char *key)
 	if ( strnull(tog) || strnull(key) )
 		G_Error("PrintToggle3 null");
 
-	G_sprint(self, 2, tog);
+	G_sprint(self, 2, "%s", tog);
 
 	i = cvar( key );
 
@@ -3275,7 +3275,7 @@ void klist ( )
 		hdc = GetHandicap(p);
 
 		G_sprint(self, 2, "%2d|%2s|%3d|%3s|%4.4s|%s\n", GetUserID( p ),
-						(is_adm( p ) ? redtext("A") : ""), VIP( p ),
+						(is_real_adm( p ) ? redtext("A") : is_adm( p ) ? redtext("a") : ""), VIP( p ),
 						(hdc == 100 ? "off" : va("%d%%", hdc)), getteam( p ), getname( p ));
 	}
 
@@ -3293,7 +3293,7 @@ void klist ( )
 		track = TrackWhom( p );
 
 		G_sprint(self, 2, "%2d|%2s|%3d|%s%s\n", GetUserID( p ),
-						(is_adm( p ) ? redtext("A") : ""), VIP( p ), getname( p ),
+						(is_real_adm( p ) ? redtext("A") : is_adm( p ) ? redtext("a") : ""), VIP( p ), getname( p ),
 						(strnull(track) ? "" : va(" \x8D %s", track)) );
 	}
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.28 2006/07/27 01:02:53 qqshka Exp $
+ *  $Id: combat.c,v 1.29 2006/10/01 14:58:46 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -507,9 +507,9 @@ void T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage,
 
 	while ( head )
 	{
-		//bprint (PRINT_HIGH, head->s.v.classname );
+		//bprint (PRINT_HIGH, "%s", head->s.v.classname );
 		//bprint (PRINT_HIGH, " | ");
-		//bprint (PRINT_HIGH, head.netname);
+		//bprint (PRINT_HIGH, "%s", head.netname);
 		//bprint (PRINT_HIGH, "\n");
 
 		if ( head != ignore )

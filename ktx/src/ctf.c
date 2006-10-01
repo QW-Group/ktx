@@ -1,5 +1,5 @@
 /*
- *  $Id: ctf.c,v 1.16 2006/09/13 01:53:06 qqshka Exp $
+ *  $Id: ctf.c,v 1.17 2006/10/01 14:58:46 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -260,7 +260,7 @@ void FlagTouch()
 
 				sound( other, CHAN_VOICE, "misc/flagcap.wav", 1, ATTN_NONE);
 
-				G_bprint( 2, other->s.v.netname );
+				G_bprint( 2, "%s", other->s.v.netname );
 				if ( self->k_teamnumber == 1 )
 				{
 					cflag = find( world, FOFCLSN, "item_flag_team2" );
@@ -330,7 +330,7 @@ void FlagTouch()
 			for ( p = world; (p = find( p, FOFCLSN, "player")); )
 				p->s.v.items -= ( (int) p->s.v.items & (int) self->s.v.items );
 
-			G_bprint( 2, other->s.v.netname);
+			G_bprint( 2, "%s", other->s.v.netname);
 
 			if ( self->k_teamnumber == 1)
 				G_bprint( 2, " %s the %s flag!\n", redtext("returned"), redtext("RED") );
@@ -364,7 +364,7 @@ void FlagTouch()
 	owner = PROG_TO_EDICT( self->s.v.owner );
 	owner->ps.pickups++;
 
-	G_bprint( 2, other->s.v.netname );
+	G_bprint( 2, "%s", other->s.v.netname );
 	if ( streq(getteam(other), "red"))
 	{
 		G_bprint( 2, " %s the %s flag!\n", redtext("got"), redtext("BLUE") );
@@ -419,7 +419,7 @@ void DropFlag( gedict_t *flag)
 	setsize ( self, -16, -16, 0, 16, 16, 74 );
 	flag->super_time = g_globalvars.time + FLAG_RETURN_TIME;
 
-	G_bprint( 2, p->s.v.netname );
+	G_bprint( 2, "%s", p->s.v.netname );
 	if ( streq(getteam(p), "red") )
 		G_bprint( 2, " %s the %s flag!\n", redtext("lost"), redtext("BLUE") );
 	else

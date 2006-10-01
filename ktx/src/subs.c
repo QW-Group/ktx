@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: subs.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
+ *  $Id: subs.c,v 1.3 2006/10/01 14:58:46 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -256,7 +256,7 @@ void SUB_UseTargets()
 	if ( streq( activator->s.v.classname, "player" ) && self->s.v.message )
 		if ( strneq( self->s.v.message, "" ) )
 		{
-			G_centerprint( activator, self->s.v.message );
+			G_centerprint( activator, "%s", self->s.v.message );
 			if ( !self->s.v.noise )
 				sound( activator, CHAN_VOICE, "misc/talk.wav", 1,
 					    ATTN_NORM );
