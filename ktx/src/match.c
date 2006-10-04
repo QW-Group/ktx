@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.83 2006/09/04 17:49:56 qqshka Exp $
+ *  $Id: match.c,v 1.84 2006/10/04 22:58:02 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1670,6 +1670,8 @@ void ShowMatchSettings()
 	}
 }
 
+extern gameData_t gamedata;
+
 // duel_dag_vs_zu-zu[dm3]
 // team_no!_vs_fom[dm3]
 // ctf_no!_vs_fom[dm3]
@@ -1680,6 +1682,7 @@ void ShowMatchSettings()
 char *CompilateDemoName ()
 {
 	static char demoname[512];
+	char date[128], *fmt;
 
 	int i;
 	gedict_t *p;
@@ -1736,6 +1739,11 @@ char *CompilateDemoName ()
 	}
 
 	strlcat( demoname, va("[%s]", g_globalvars.mapname), sizeof( demoname ) );
+
+	fmt = cvar_string( "k_demoname_date" );
+
+	if ( gamedata.APIversion >= 10 && !strnull( fmt ) && QVMstrftime(date, sizeof(date), fmt, 0) )
+		strlcat( demoname, date, sizeof( demoname ) );
 
 	return demoname;
 }

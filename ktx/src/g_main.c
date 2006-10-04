@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.30 2006/09/04 01:18:58 qqshka Exp $
+ *  $Id: g_main.c,v 1.31 2006/10/04 22:58:02 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -103,6 +103,10 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 			// ok, this allow start mod with API_V9 on server with API_V8
 			// since versions differ only in one thing GAME_CLIENT_SAY
 			gamedata.APIversion = 8;
+		}
+		else if ( api_ver == 9 && GAME_API_VERSION == 10 ) {
+			// ok, this allow start mod with API_V10 on server with API_V9
+			gamedata.APIversion = 9;
 		}
 		else if ( api_ver < GAME_API_VERSION )
 		{

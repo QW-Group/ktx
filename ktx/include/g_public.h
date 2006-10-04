@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_public.h,v 1.5 2006/05/18 20:15:14 oldmanuk Exp $
+ *  $Id: g_public.h,v 1.6 2006/10/04 22:58:01 qqshka Exp $
  */
 
 #ifndef __G_PUBLIC_H__
@@ -31,10 +31,12 @@
 //
 // g_public.h -- game module information visible to server
 
-#define	GAME_API_VERSION	9
+#define	GAME_API_VERSION	10
 
 
 //===============================================================
+
+// !!! new traps comes to end of list !!!
 
 //
 // system traps provided by the main engine
@@ -56,9 +58,6 @@ typedef enum
 	G_REMOVE_ENT,
 	G_PRECACHE_SOUND,
 	G_PRECACHE_MODEL,
-#ifdef VWEP_TEST
-	G_PRECACHE_VWEP_MODEL,
-#endif
 	G_LIGHTSTYLE,
 	G_SETORIGIN,
 	G_SETSIZE,
@@ -132,9 +131,14 @@ typedef enum
 	G_Add_Bot,
 	G_Remove_Bot,
 	G_SetBotUserInfo,
-	G_SetBotCMD
+	G_SetBotCMD,
+	G_QVMstrftime
+#ifdef VWEP_TEST
+	, G_PRECACHE_VWEP_MODEL
+#endif
 } gameImport_t;
 
+// !!! new things comes to end of list !!!
 
 //
 // functions exported by the game subsystem
@@ -149,7 +153,7 @@ typedef enum
 	GAME_SHUTDOWN,	// (void);
 
 	GAME_CLIENT_CONNECT,	 	// ( int clientNum ,int isSpectator);
-	// ( int clientNum, qboolean firstTime, qboolean isBot );
+	// ( int clientNum, qbool firstTime, qbool isBot );
 	// return NULL if the client is allowed to connect, otherwise return
 	// a text string with the reason for denial
 	GAME_PUT_CLIENT_IN_SERVER,

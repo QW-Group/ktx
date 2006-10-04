@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_syscalls.h,v 1.4 2006/05/18 20:15:14 oldmanuk Exp $
+ *  $Id: g_syscalls.h,v 1.5 2006/10/04 22:58:01 qqshka Exp $
  */
 
 int     trap_GetApiVersion(  );
@@ -113,4 +113,6 @@ int 	trap_SetBotUserInfo( int edn, const char* varname, const char* value );
 int 	trap_SetBotCMD( int edn,int msec, float angles_x, float angles_y, float angles_z, 
                                 int forwardmove, int sidemove, int upmove, 
                                 int buttons, int impulse);
+
+int QVMstrftime( char *valbuff, int sizebuff, const char *fmt, int offset );
 

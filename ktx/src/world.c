@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.70 2006/09/25 22:31:42 qqshka Exp $
+ *  $Id: world.c,v 1.71 2006/10/04 22:58:02 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -645,6 +645,7 @@ void FirstFrame	( )
 	RegisterCvar("k_membercount");
 	RegisterCvar("demo_tmp_record");
 	RegisterCvar("demo_skip_ktffa_record");
+	RegisterCvar("k_demoname_date"); // add date to demo name, value is argument for strftime() function
 	RegisterCvar("k_count");
 	RegisterCvar("k_exclusive"); // stores whether players can join when a game is already in progress
 	RegisterCvar("k_lockmode");

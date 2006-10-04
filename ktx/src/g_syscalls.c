@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_syscalls.c,v 1.6 2006/05/18 20:15:14 oldmanuk Exp $
+ *  $Id: g_syscalls.c,v 1.7 2006/10/04 22:58:02 qqshka Exp $
  */
 
 //#include "g_local.h"
@@ -403,5 +403,10 @@ int 	trap_SetBotCMD( int edn,int msec, float angles_x, float angles_y, float ang
 {
         return syscall( G_SetBotCMD, edn, msec, PASSFLOAT( angles_x), PASSFLOAT( angles_y), PASSFLOAT( angles_z), 
                                 forwardmove, sidemove, upmove, buttons, impulse );
+}
+
+int QVMstrftime( char *valbuff, int sizebuff, const char *fmt, int offset )
+{
+	return syscall( G_QVMstrftime, (int)valbuff, sizebuff, (int)fmt, offset );
 }
 
