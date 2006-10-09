@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.52 2006/09/04 23:06:31 qqshka Exp $
+ *  $Id: progs.h,v 1.53 2006/10/09 21:04:14 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -462,6 +462,10 @@ typedef struct gedict_s {
 	struct gedict_s *pb_ent; // enitity which used to show our model during playback
 
 	plrfrm_t *plrfrms; // [MAX_PLRFRMS] for record trix
+// }
+// { for /cmd callalias <alias time>
+	char *callalias;		// store alias name
+	float callalias_time;	// time when we must activate that alias
 // }
 
 } gedict_t;

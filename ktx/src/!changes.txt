@@ -1,3 +1,9 @@
+2006-10-09
+qq:
+224. Added "/cmd callalias <aliasname time>" like it was in ktpro.
+	 Just call some alias after some time. Sure, this command limited work only 15 seconds after connecting,
+	 so u can't use it for items timing :<
+
 2006-10-05
 qq:
 223. New cvar "k_demoname_date", add date to demo name, value of variable is argument for strftime() C function.

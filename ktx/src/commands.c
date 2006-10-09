@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.136 2006/10/01 14:58:46 qqshka Exp $
+ *  $Id: commands.c,v 1.137 2006/10/09 21:04:15 qqshka Exp $
  */
 
 // commands.c
@@ -175,6 +175,7 @@ void no_gl ();
 void mv_cmd_playback ();
 void mv_cmd_record ();
 void mv_cmd_stop ();
+void callalias ();
 
 // spec
 void ShowCamHelp();
@@ -404,9 +405,12 @@ const char CD_NODESC[] = "no desc";
 #define CD_DMGFRAGS     "toggle damage frags"
 #define CD_NO_LG        "alias for /noweapon lg"
 #define CD_NO_GL		"alias for /noweapon gl"
+// {
 #define CD_TRX_REC      "trick tmp record"
 #define CD_TRX_PLAY     "trick tmp playback"
 #define CD_TRX_STOP     "stop playback/recording"
+// }
+#define CD_CALLALIAS    "call alias after few secs"
 
 
 void dummy() {}
@@ -656,7 +660,8 @@ cmd_t cmds[] = {
 	{ "no_gl",       no_gl,                     0    , CF_PLAYER | CF_SPC_ADMIN, CD_NO_GL },
 	{ "trx_rec",     mv_cmd_record,             0    , CF_PLAYER, CD_TRX_REC },
 	{ "trx_play",    mv_cmd_playback,           0    , CF_PLAYER, CD_TRX_PLAY },
-	{ "trx_stop",    mv_cmd_stop,               0    , CF_PLAYER, CD_TRX_STOP }
+	{ "trx_stop",    mv_cmd_stop,               0    , CF_PLAYER, CD_TRX_STOP },
+	{ "callalias",   callalias,                 0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_CALLALIAS }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -5055,4 +5060,56 @@ void mv_cmd_stop ()
 }
 
 // }
+
+// ktpro (c)
+// /cmd callalias <aliasname time>
+void callalias ()
+{
+	const int ca_limit = 15, ca_limit2 = 30;
+	char arg_x[1024];
+	float tm;
+
+	if ( trap_CmdArgc() != 3 ) {
+		G_sprint(self, 2, "usage: cmd callalias <aliasname time>\n");
+		return;
+	}
+
+	if ( self->connect_time + ca_limit < g_globalvars.time ) {
+		G_sprint(self, 2, "you can use \"callalias\" only during %d sec after connect\n", ca_limit);
+		return;
+	}
+
+	trap_CmdArgv( 2, arg_x, sizeof( arg_x ) );
+	tm = fabs( atof(arg_x) );
+
+	if ( tm <= 0 || tm > ca_limit2 ) {
+		G_sprint(self, 2, "calling time can't be longer then %d seconds\n", ca_limit2);
+		return;
+	}
+
+	if ( self->callalias_time ) {
+		G_sprint(self, 2, "you can't install more then 1 alias before previous will execute\n");
+		return;
+	}
+
+	trap_CmdArgv( 1, arg_x, sizeof( arg_x ) );
+	if ( strnull(arg_x) ) {
+		G_sprint(self, 2, "you can't install alias with empty name\n");
+		return;
+	}
+
+	G_sprint(self, 2, "installing %s alias (%.1f)\n", arg_x, tm);
+
+	strlcpy(self->callalias, arg_x, CALLALIAS_SIZE);
+	self->callalias_time = g_globalvars.time + tm;
+}
+
+void check_callalias ()
+{
+	if ( !self->callalias_time || self->callalias_time > g_globalvars.time )
+		return;
+
+	stuffcmd(self, "%s\n", self->callalias);
+	self->callalias_time = 0;
+}
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_consts.h,v 1.17 2006/09/13 01:53:05 qqshka Exp $
+ *  $Id: g_consts.h,v 1.18 2006/10/09 21:04:14 qqshka Exp $
  */
 
 //
@@ -316,4 +316,7 @@
 // k_sudden_death types
 #define SD_NORMAL		(1)
 #define SD_TIEBREAK		(2)
+
+//
+#define CALLALIAS_SIZE  (128)
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.114 2006/09/25 22:31:25 qqshka Exp $
+ *  $Id: client.c,v 1.115 2006/10/09 21:04:15 qqshka Exp $
  */
 
 //===========================================================================
@@ -2532,6 +2532,8 @@ void CheckPowerups()
 	}
 }
 
+void check_callalias ();
+
 ///////////
 // BothPostThink
 //
@@ -2558,6 +2560,8 @@ void BothPostThink ()
 	}
 
 	KickThink ();
+
+	check_callalias ();
 }
 
 
