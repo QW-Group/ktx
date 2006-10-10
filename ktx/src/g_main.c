@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.33 2006/10/10 01:15:26 qqshka Exp $
+ *  $Id: g_main.c,v 1.34 2006/10/10 17:49:32 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -57,7 +57,7 @@ field_t         expfields[] = {
 static char     mapname[64];
 static char     worldmodel[64] = "worldmodel";
 static char     netnames[MAX_CLIENTS][32];
-static char     callalias[MAX_CLIENTS][CALLALIAS_SIZE];
+static char     callalias_buf[MAX_CLIENTS][CALLALIAS_SIZE];
 static char     f_checks[MAX_CLIENTS][F_CHECK_SIZE];
 
 static wreg_t   wregs[MAX_CLIENTS][MAX_WREGS];
@@ -143,7 +143,7 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		memset( self->wreg,    0, sizeof( wreg_t ) * MAX_WREGS );     // clear
 		memset( self->plrfrms, 0, sizeof( plrfrm_t ) * MAX_PLRFRMS ); // clear
 
-		self->callalias = callalias[(int)(self-world)-1];
+		self->callalias = callalias_buf[(int)(self-world)-1];
 		self->callalias[0] = 0;
 		self->f_checkbuf = f_checks[(int)(self-world)-1];
 		self->f_checkbuf[0] = 0;
