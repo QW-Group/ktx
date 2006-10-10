@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.24 2006/07/14 23:53:45 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.25 2006/10/10 01:15:26 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -231,6 +231,15 @@ qboolean ClientSay( qboolean isTeamSay )
 
 	if ( !self->k_accepted )
 		return true; // cmon, u r zombie or etc...
+
+	if ( f_check && self->k_player ) {
+		if ( !self->f_checkbuf )
+			return true; // just in case
+
+		strlcat(self->f_checkbuf, params_str(1, -1), F_CHECK_SIZE);
+		strlcat(self->f_checkbuf, "\n", F_CHECK_SIZE);
+		return true;
+	}
 
 	if ( isSayFlood( self ) )
 		return true; // flooder

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.137 2006/10/09 21:04:15 qqshka Exp $
+ *  $Id: commands.c,v 1.138 2006/10/10 01:15:26 qqshka Exp $
  */
 
 // commands.c
@@ -176,6 +176,7 @@ void mv_cmd_playback ();
 void mv_cmd_record ();
 void mv_cmd_stop ();
 void callalias ();
+void fcheck ();
 
 // spec
 void ShowCamHelp();
@@ -411,6 +412,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_TRX_STOP     "stop playback/recording"
 // }
 #define CD_CALLALIAS    "call alias after few secs"
+#define CD_CHECK        "better f_checks handle"
 
 
 void dummy() {}
@@ -658,10 +660,13 @@ cmd_t cmds[] = {
 	{ "dmgfrags",    dmgfrags,                  0    , CF_PLAYER | CF_SPC_ADMIN, CD_DMGFRAGS },
 	{ "no_lg",       no_lg,                     0    , CF_PLAYER | CF_SPC_ADMIN, CD_NO_LG },
 	{ "no_gl",       no_gl,                     0    , CF_PLAYER | CF_SPC_ADMIN, CD_NO_GL },
+// {
 	{ "trx_rec",     mv_cmd_record,             0    , CF_PLAYER, CD_TRX_REC },
 	{ "trx_play",    mv_cmd_playback,           0    , CF_PLAYER, CD_TRX_PLAY },
 	{ "trx_stop",    mv_cmd_stop,               0    , CF_PLAYER, CD_TRX_STOP },
-	{ "callalias",   callalias,                 0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_CALLALIAS }
+// }
+	{ "callalias",   callalias,                 0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_CALLALIAS },
+	{ "check",       fcheck,                    0    , CF_BOTH | CF_PARAMS, CD_CHECK }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -5112,4 +5117,83 @@ void check_callalias ()
 	stuffcmd(self, "%s\n", self->callalias);
 	self->callalias_time = 0;
 }
+
+// ktpro (c)
+// /cmd check <f_query>
+
+char fcheck_name[128];
+
+void fcheck ()
+{
+	char arg_x[1024];
+	int i;
+
+	if ( match_in_progress )
+		return;
+
+	if ( trap_CmdArgc() != 2 ) {
+		G_sprint(self, 2, "usage: cmd check <f_query>\n"
+						  "for example: cmd check f_version\n");
+		return;
+	}
+
+	if ( f_check ) {
+		G_sprint(self, 2, "Waiting from previous reply\n");
+		return;
+	}
+
+	trap_CmdArgv( 1, arg_x, sizeof( arg_x ) );
+
+	if ( !is_real_adm( self ) ) {
+		if ( strneq(arg_x, "f_version") && strneq(arg_x, "f_modified") && strneq(arg_x,  "f_server") ) {
+			G_sprint(self, 2, "You are not allowed to check \20%s\21\n"
+							  "available checks are: f_version, f_modified and f_server\n", arg_x);
+			return;
+		}
+	}
+
+	for ( i = 1; i <= MAX_CLIENTS; i++ )
+		if ( g_edicts[i].f_checkbuf )
+			g_edicts[i].f_checkbuf[0] = 0; // clear bufs
+
+	f_check = g_globalvars.time + 3;
+	strlcpy(fcheck_name, arg_x, sizeof(fcheck_name)); // remember check name
+
+	G_bprint(2, "%s is checking \20%s\21\n", self->s.v.netname, arg_x);
+	if ( streq(arg_x, "f_version") || streq(arg_x, "f_modified") )
+		G_bprint(3, "%s: %s %d%d\n", self->s.v.netname, arg_x, i_rnd(1, 9999), i_rnd(0, 9999));
+	else
+		G_bprint(3, "%s: %s\n", self->s.v.netname, arg_x);
+}
+
+void check_fcheck ()
+{
+	gedict_t *p;
+	char *nl, *tmp;
+
+	if ( !f_check || f_check > g_globalvars.time )
+		return;
+
+	G_bprint(2, "player's \20%s\21 replies:\n", fcheck_name);
+
+	for( p = world; (p = find(p, FOFCLSN, "player")); ) {
+		if ( strnull( tmp = p->f_checkbuf ) ) {
+			G_bprint(3, "%s did not reply!\n", p->s.v.netname);
+			continue;
+		}
+
+		while ( !strnull( tmp ) ) {
+			if ( ( nl = strchr(tmp, '\n') ) )
+				nl[0] = 0;
+			G_bprint(3, "%s: %s\n", p->s.v.netname, tmp);
+
+			tmp = (nl ? nl+1: NULL);
+		}
+	}
+
+	G_bprint(2, "end of player's \20%s\21 replies\n", fcheck_name);
+
+	f_check = 0;
+}
+
 

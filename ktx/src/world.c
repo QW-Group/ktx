@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.71 2006/10/04 22:58:02 qqshka Exp $
+ *  $Id: world.c,v 1.72 2006/10/10 01:15:26 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1064,6 +1064,7 @@ extern float intermission_exittime;
 
 void CheckTiming();
 void Check_sready();
+void check_fcheck ();
 
 void StartFrame( int time )
 {
@@ -1125,5 +1126,7 @@ void StartFrame( int time )
 		vote_check_all();
 
 	CheckAll(); // just check some clients params
+
+	check_fcheck();
 }
 

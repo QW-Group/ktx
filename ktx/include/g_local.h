@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.88 2006/09/25 22:31:57 qqshka Exp $
+ *  $Id: g_local.h,v 1.89 2006/10/10 01:15:24 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -759,6 +759,8 @@ extern  int			k_rocketarena;	// is RA active or not, since we must catch changes
 // }
 
 extern	int	jumpf_flag; // falling velocity criteria
+
+extern	float f_check; // is we in state of some f_xxx check
 
 // heh, some hack for mvdsv for grabbing some data
 

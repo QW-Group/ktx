@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_consts.h,v 1.18 2006/10/09 21:04:14 qqshka Exp $
+ *  $Id: g_consts.h,v 1.19 2006/10/10 01:15:24 qqshka Exp $
  */
 
 //
@@ -319,4 +319,7 @@
 
 //
 #define CALLALIAS_SIZE  (128)
+
+#define F_CHECK_SIZE    (1024*10) /* FIXME: which size is reason able */
+
 

@@ -1,3 +1,9 @@
+2006-10-10
+qq:
+225. Added "/cmd check [query]" like it was in ktpro. Doubt is that really actual...
+
+	 Term request
+
 2006-10-09
 qq:
 224. Added "/cmd callalias <aliasname time>" like it was in ktpro.

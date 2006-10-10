@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: globals.c,v 1.23 2006/09/25 22:31:42 qqshka Exp $
+ *  $Id: globals.c,v 1.24 2006/10/10 01:15:26 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -91,4 +91,6 @@ int			k_rocketarena;	// is RA active or not, since we must catch changes, we can
 // }
 
 int	jumpf_flag; // falling velocity criteria
+
+float	f_check; // is we in state of some f_xxx check
 
