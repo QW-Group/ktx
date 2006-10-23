@@ -4,7 +4,7 @@
  * PureCTF changes by Methabol
  *
  *
- *  $Id: grapple.c,v 1.6 2006/05/16 04:53:41 ult_ Exp $
+ *  $Id: grapple.c,v 1.7 2006/10/23 16:17:06 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -73,6 +73,7 @@ void GrappleTrack()
 		setorigin( self, PASSVEC3(enemy->s.v.origin) );
 			
 		sound ( self, CHAN_WEAPON, "blob/land1.wav", 1, ATTN_NORM );
+		enemy->deathtype = "hook";
 		T_Damage ( enemy, self, owner, 1 );
 		makevectors ( self->s.v.v_angle );
 		SpawnBlood( enemy->s.v.origin, 1 );
@@ -201,9 +202,10 @@ void GrappleAnchor()
 	// grapples will not stick to them.
 
 	if ( streq(other->s.v.classname, "missile") ||
-		streq(other->s.v.classname, "grenade") ||
-		streq(other->s.v.classname, "spike"  ) ||
-		streq(other->s.v.classname, "hook"   )) 
+		 streq(other->s.v.classname, "rocket")  ||
+		 streq(other->s.v.classname, "grenade") ||
+		 streq(other->s.v.classname, "spike"  ) ||
+		 streq(other->s.v.classname, "hook"   )) 
 			return;
 
 	if ( streq(other->s.v.classname, "player") )
@@ -215,6 +217,7 @@ void GrappleAnchor()
 		sound ( self, CHAN_WEAPON, "player/axhit1.wav", 1, ATTN_NORM );
 
 		// previously 10 damage per hit, but at close range that could be exploited
+		other->deathtype = "hook";
 		T_Damage ( other, self, owner, 1 );
 
 		// make hook invisible since we will be pulling directly
@@ -230,8 +233,10 @@ void GrappleAnchor()
 		// One point of damage inflicted upon impact. Subsequent
 		// damage will only be done to PLAYERS... this way secret
 		// doors and triggers will only be damaged once.
-		if ( other->s.v.takedamage )
+		if ( other->s.v.takedamage ) {
+			other->deathtype = "hook";
 			T_Damage ( other, self, owner, 1 );
+		}
 
 		SetVector( self->s.v.velocity , 0, 0, 0 );
 		SetVector( self->s.v.avelocity, 0, 0, 0 );

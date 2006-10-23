@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.49 2006/09/25 22:31:42 qqshka Exp $
+ *  $Id: weapons.c,v 1.50 2006/10/23 16:17:07 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -86,12 +86,11 @@ void W_FireAxe()
 
 		PROG_TO_EDICT( g_globalvars.trace_ent )->axhitme = 1;
 		SpawnBlood( org, 20 );
+		PROG_TO_EDICT( g_globalvars.trace_ent )->deathtype = "axe";
 		if ( deathmatch > 3 )
-			T_Damage( PROG_TO_EDICT( g_globalvars.trace_ent ), self, self,
-				  75 );
+			T_Damage( PROG_TO_EDICT( g_globalvars.trace_ent ), self, self, 75 );
 		else
-			T_Damage( PROG_TO_EDICT( g_globalvars.trace_ent ), self, self,
-				  20 );
+			T_Damage( PROG_TO_EDICT( g_globalvars.trace_ent ), self, self, 20 );
 	} else
 	{	// hit wall
 
@@ -221,6 +220,7 @@ Collects multiple small damages into a single damage
 */
 gedict_t       *multi_ent;
 float           multi_damage;
+char		   *multi_damage_type;
 
 vec3_t          blood_org;
 float           blood_count;
@@ -233,12 +233,15 @@ void ClearMultiDamage()
 	multi_damage = 0;
 	blood_count = 0;
 	puff_count = 0;
+	multi_damage_type = "";
 }
 
 void ApplyMultiDamage()
 {
 	if ( multi_ent == world )
 		return;
+
+	multi_ent->deathtype = multi_damage_type;
 	T_Damage( multi_ent, self, self, multi_damage );
 }
 
@@ -330,8 +333,7 @@ Used by shotgun, super shotgun, and enemy soldier firing
 Go to the trouble of combining multiple pellets into a single damage call.
 ================
 */
-void FireBullets( float shotcount, vec3_t dir, float spread_x, float spread_y,
-		  float spread_z )
+void FireBullets( float shotcount, vec3_t dir, float spread_x, float spread_y, float spread_z, char *deathtype )
 {
 	vec3_t          direction;
 	vec3_t          src, tmp;
@@ -343,6 +345,7 @@ void FireBullets( float shotcount, vec3_t dir, float spread_x, float spread_y,
 	src[2] = self->s.v.absmin[2] + self->s.v.size[2] * 0.7;
 
 	ClearMultiDamage();
+	multi_damage_type = deathtype;
 
 	traceline( PASSVEC3( src ), src[0] + dir[0] * 2048, src[1] + dir[1] * 2048,
 			src[2] + dir[2] * 2048, false, self );
@@ -393,7 +396,7 @@ void W_FireShotgun()
 
 	//dir = aim (self, 100000);
 	aim( dir );
-	FireBullets( bullets, dir, 0.04, 0.04, 0 );
+	FireBullets( bullets, dir, 0.04, 0.04, 0, "shotgun" );
 }
 
 /*
@@ -424,7 +427,7 @@ void W_FireSuperShotgun()
 
 	//dir = aim (self, 100000);
 	aim( dir );
-	FireBullets( bullets, dir, 0.14, 0.08, 0 );
+	FireBullets( bullets, dir, 0.14, 0.08, 0, "supershotgun" );
 }
 
 /*
@@ -438,23 +441,6 @@ void T_MissileTouch()
 {
 	float           damg;
 	vec3_t          tmp;
-
-// if (deathmatch == 4)
-// {
-// if ( ((other.weapon == 32) || (other.weapon == 16)))
-//  { 
-//   if (g_random() < 0.1)
-//   {
-//    if (other != world)
-//    {
-// //    bprint (PRINT_HIGH, "Got here\n");
-//     other->deathtype = "blaze";
-//     T_Damage (other, self, self->s.v.owner, 1000 );
-//     T_RadiusDamage (self, self->s.v.owner, 1000, other);
-//    }
-//   }
-//  } 
-// }
 
 	if ( other == PROG_TO_EDICT( self->s.v.owner ) )
 		return;		// don't explode on owner
@@ -567,7 +553,7 @@ LIGHTNING
 ===============================================================================
 */
 
-void LightningHit( gedict_t * from, float damage )
+void LightningHit( gedict_t *from, float damage )
 {
 	if ( PROG_TO_EDICT( g_globalvars.trace_ent )->k_player )
 		self->ps.h_lg++;
@@ -579,6 +565,7 @@ void LightningHit( gedict_t * from, float damage )
 	WriteCoord( MSG_MULTICAST, g_globalvars.trace_endpos[2] );
 	trap_multicast( PASSVEC3( g_globalvars.trace_endpos ), MULTICAST_PVS );
 
+	PROG_TO_EDICT( g_globalvars.trace_ent )->deathtype = "lightning";
 	T_Damage( PROG_TO_EDICT( g_globalvars.trace_ent ), from, from, damage );
 }
 
@@ -680,7 +667,7 @@ void W_FireLightning()
 			if ( g_random() <= 0.5 )
 			{
 				self->deathtype = "selfwater";
-				T_Damage( self, self, PROG_TO_EDICT( self->s.v.owner ), 4000 );
+				T_Damage( self, self, self, 4000 );
 			} else
 			{
 				cells = self->s.v.ammo_cells;
@@ -690,7 +677,7 @@ void W_FireLightning()
                 if ( !cvar( "k_dis" ) ) 
                     return;
 
-				T_RadiusDamage( self, self, 35 * cells, world, "" );
+				T_RadiusDamage( self, self, 35 * cells, world, "discharge" );
 				return;
 			}
 		} else
@@ -702,7 +689,7 @@ void W_FireLightning()
             if ( !cvar( "k_dis" ) )
                 return;
 
-			T_RadiusDamage( self, self, 35 * cells, world, "" );
+			T_RadiusDamage( self, self, 35 * cells, world, "discharge" );
 			return;
 		}
 	}
@@ -848,18 +835,7 @@ void W_FireGrenade()
 	vectoangles( newmis->s.v.velocity, newmis->s.v.angles );
 
 	newmis->s.v.touch = ( func_t ) GrenadeTouch;
-
-/* qqshka zzzzzz
-// set newmis duration
-	if ( deathmatch == 4 )
-	{
-		newmis->s.v.nextthink = g_globalvars.time + 2.5;
-		self->attack_finished = g_globalvars.time + 1.1;
-		T_Damage( self, self, PROG_TO_EDICT( self->s.v.owner ), 10 );
-	} else
-*/
-		newmis->s.v.nextthink = g_globalvars.time + 2.5;
-
+	newmis->s.v.nextthink = g_globalvars.time + 2.5;
 	newmis->s.v.think = ( func_t ) GrenadeExplode;
 
 	if ( deathmatch == 4 && cvar("k_dmm4_gren_mode") )

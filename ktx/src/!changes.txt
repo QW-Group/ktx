@@ -1,3 +1,19 @@
+2006-10-23
+qq:
+226. Midair fixes:
+	 1) kickback more like ktpro for small damages ( dmg < 60 )
+	 2) telefrags works now in midair too :|
+	 3) Sort out how u can be killed: axe, rl, water dmg(drown), slime dmg, lava dmg, telefrags.
+		Other damage ignored, for example u can't be squished in midair.
+	 4) Not really midair, but dmm4 thing, after quad is out, set health not to 100, 
+		but no more than 100 ( thx Uzhas )
+
+227. If u use handicap, then kickback for enemy will be like u use full damage.
+
+228. Real admin (pass or ip) can't be kicked by elected admin.
+
+	 tom request
+
 2006-10-10
 qq:
 225. Added "/cmd check [query]" like it was in ktpro. Doubt is that really actual...

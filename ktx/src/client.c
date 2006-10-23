@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.115 2006/10/09 21:04:15 qqshka Exp $
+ *  $Id: client.c,v 1.116 2006/10/23 16:17:05 qqshka Exp $
  */
 
 //===========================================================================
@@ -538,8 +538,10 @@ void changelevel_touch()
 
 // qqshka: does't change level in any case, just do damage and return
 
-	if ( !isCTF() ) // ctf has always allowed players to hide in exits, etc 
+	if ( !isCTF() ) { // ctf has always allowed players to hide in exits, etc 
+		other->deathtype = "changelevel";
 		T_Damage( other, self, self, 50000 );
+	}
 	return;
 
 /*
@@ -551,6 +553,7 @@ void changelevel_touch()
 	     || ( ( trap_cvar( "samelevel" ) == 3 )
 		  && ( strneq( g_globalvars.mapname, "start" ) ) ) )
 	{
+		other->deathtype = "changelevel";
 		T_Damage( other, self, self, 50000 );
 		return;
 	}
@@ -1135,6 +1138,7 @@ void PutClientInServer()
 	self->s.v.effects = 0;
 	self->spawn_time = g_globalvars.time;
 	self->k_666 = 0;
+	self->axhitme = 0;
         
 // the spawn falling damage bug workaround
 	self->jump_flag = 0;
@@ -1556,6 +1560,11 @@ void WaterMove()
 			if ( self->dmg > 15 )
 				self->dmg = 10;
 
+			switch ( (int)self->s.v.watertype ) {
+				case CONTENT_LAVA:  self->deathtype = "lava_dmg";  break; // funny, we can drown in lava ?
+				case CONTENT_SLIME: self->deathtype = "slime_dmg"; break; // and in slime ?
+				default:			self->deathtype = "water_dmg"; break; // and sure we can drown in water
+			}
 			T_Damage( self, world, world, self->dmg );
 			self->pain_finished = g_globalvars.time + 1;
 		}
@@ -1581,15 +1590,16 @@ void WaterMove()
 			else
 				self->dmgtime = g_globalvars.time + 0.2;
 
+			self->deathtype = "lava_dmg";
 			T_Damage( self, world, world, 10 * self->s.v.waterlevel );
 		}
 
 	} else if ( self->s.v.watertype == CONTENT_SLIME )
 	{			// do damage
-		if ( self->dmgtime < g_globalvars.time
-		     && self->radsuit_finished < g_globalvars.time )
+		if ( self->dmgtime < g_globalvars.time && self->radsuit_finished < g_globalvars.time )
 		{
 			self->dmgtime = g_globalvars.time + 1;
+			self->deathtype = "slime_dmg";
 			T_Damage( self, world, world, 4 * self->s.v.waterlevel );
 		}
 	}
@@ -2475,12 +2485,13 @@ void CheckPowerups()
         if(self->super_damage_finished < g_globalvars.time && !k_berzerk)	//team
 		{		// just stopped
 			self->s.v.items -= IT_QUAD;
+			if ( !k_practice ) // #practice mode#
 			if ( deathmatch == 4 )
 			{
 				self->s.v.ammo_cells = 255;
 				self->s.v.armorvalue = 1;
 				self->s.v.armortype = 0.8;
-				self->s.v.health = 100;
+				self->s.v.health = min(100, self->s.v.health);
 			}
 			self->super_damage_finished = 0;
 			self->super_time = 0;
@@ -2617,8 +2628,7 @@ void PlayerPostThink()
 		self->brokenankle = 0;
 
 // check to see if player landed and play landing sound 
-	if ( ( self->jump_flag < -300 )
-	     && ( ( ( int ) ( self->s.v.flags ) ) & FL_ONGROUND ) )
+	if ( ( self->jump_flag < -300 ) && ( ( ( int ) ( self->s.v.flags ) ) & FL_ONGROUND ) )
 	{
 // Falling often results in 5-5 points of damage through 2 frames.
 // This fixes the bug
@@ -2749,18 +2759,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		return;
 	}
 
-    if ( deathmatch > 3 )
-    {
-        if ( streq( targ->deathtype, "selfwater" ) )
-        {
-            G_bprint (PRINT_MEDIUM, "%s electrocutes %s\n ", targ->s.v.netname, g_himself(targ));
-
-            targ->s.v.frags -=  1;
-            return;
-        }
-    }
-
-    if ( streq( attacker->s.v.classname, "teledeath" ) )
+    if ( streq( targ->deathtype, "teledeath" ) )
 	{
 		gedict_t *attacker_owner = PROG_TO_EDICT( attacker->s.v.owner );
 
@@ -2800,7 +2799,8 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		return;
 	}
 
-	if ( streq( attacker->s.v.classname, "teledeath2" ) )
+	// mortal trying telefrag someone who has 666
+	if ( streq( targ->deathtype, "teledeath2" ) )
 	{
 		G_bprint (PRINT_MEDIUM, "Satan's power deflects %s's telefrag\n", targ->s.v.netname);
 
@@ -2810,7 +2810,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	}
 
 	// double 666 telefrag (can happen often in deathmatch 4)
-	if ( streq( attacker->s.v.classname, "teledeath3" ) )
+	if ( streq( targ->deathtype, "teledeath3" ) )
 	{
 		G_bprint (PRINT_MEDIUM, "%s was telefragged by %s's Satan's power\n",
 					targ->s.v.netname, PROG_TO_EDICT ( attacker->s.v.owner)->s.v.netname);
@@ -2920,7 +2920,11 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 					default: deathstring = " becomes bored with life\n"; break;
 				}
 			}
-			else if (targ->s.v.weapon == IT_LIGHTNING && targ->s.v.waterlevel > 1)
+			else if ( streq( targ->deathtype, "selfwater" ) )
+			{
+				deathstring = va(" electrocutes %s\n", g_himself(targ));
+			}
+			else if ( streq( targ->deathtype, "discharge" ) )
 			{
                 if (targ->s.v.watertype == CONTENT_SLIME)
                     deathstring = " discharges into the slime\n";
@@ -2934,7 +2938,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				}
 			}
 			else
-                deathstring = " becomes bored with life\n"; // hm, and how it is possible?
+                deathstring = " somehow becomes bored with life\n"; // hm, and how it is possible?
 
 			G_bprint (PRINT_MEDIUM, "%s%s", targ->s.v.netname, deathstring);
             return;
@@ -3108,15 +3112,15 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 					deathstring2 = "'s quad rocket\n";
 				}
 			}
-			else if ( attacker->s.v.weapon == IT_AXE )
+			else if ( streq( targ->deathtype, "axe" ) )
 			{
 				deathstring = " was ax-murdered by ";
 			}
-            else if ( attacker->s.v.weapon == IT_HOOK )
+            else if ( streq( targ->deathtype, "hook" ) )
 			{
 				deathstring = " was hooked by ";
 			}
-			else if ( attacker->s.v.weapon == IT_SHOTGUN )
+			else if ( streq( targ->deathtype, "shotgun" ) )
 			{
 				deathstring = " chewed on ";
 				deathstring2 = "'s boomstick\n";
@@ -3127,7 +3131,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 					deathstring2 = "\n";
 				}
 			}
-			else if ( attacker->s.v.weapon == IT_SUPER_SHOTGUN )
+			else if ( streq( targ->deathtype, "supershotgun" ) )
 			{
 				if ( attacker->super_damage_finished > 0 )
 					deathstring = " ate 8 loads of ";
@@ -3136,27 +3140,26 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 				deathstring2 = "'s buckshot\n";
 			}
-			else if ( attacker->s.v.weapon == IT_LIGHTNING )
+			else if ( streq( targ->deathtype, "lightning" ) )
 			{
-				deathstring = " accepts ";
-				deathstring2 = "'s shaft\n";
-
- 				if ( targ->s.v.health < -40 ) // quad modifier
-				{
+ 				if ( targ->s.v.health < -40 ) { // quad shaft
 					deathstring = " gets a natural disaster from ";
 					deathstring2 = "\n";
 				}
-
-				if ( attacker->s.v.waterlevel > 1 ) // ok - this was discharge
-				{
-					switch( (int)(g_random() * 2) ) {
-						case 0: 
-								 deathstring = " drains ";
-								 deathstring2 = "'s batteries\n"; break;
-						default:
-								 deathstring = " accepts ";
-								 deathstring2 = "'s discharge\n";
-					}
+				else { // normal shaft in most cases
+					deathstring = " accepts ";
+					deathstring2 = "'s shaft\n";
+				}
+			}
+			else if ( streq( targ->deathtype, "discharge" ) )
+			{
+				switch( (int)(g_random() * 2) ) {
+					case 0: 
+							 deathstring = " drains ";
+							 deathstring2 = "'s batteries\n"; break;
+					default:
+							 deathstring = " accepts ";
+							 deathstring2 = "'s discharge\n";
 				}
 			}
 			else {
@@ -3165,8 +3168,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				deathstring2 = " ?\n";
 			}
 
-			G_bprint (PRINT_MEDIUM,"%s%s%s%s",
-					targ->s.v.netname, deathstring, attacker->s.v.netname, deathstring2);
+			G_bprint (PRINT_MEDIUM,"%s%s%s%s", targ->s.v.netname, deathstring, attacker->s.v.netname, deathstring2);
 		}
 
 		return;
@@ -3176,7 +3178,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		logfrag (targ, targ);
         targ->s.v.frags -= 1;            // killed self
 
-		if ( streq( attacker->s.v.classname, "explo_box" ) )
+		if ( streq( targ->deathtype, "explo_box" ) )
 		{
 			deathstring = " blew up\n";
 		}
@@ -3189,40 +3191,35 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		}
         else if ( streq( targ->deathtype, "nail" ) || streq( targ->deathtype, "supernail" ) )
 		{
-               deathstring = " was spiked\n";
+			deathstring = " was spiked\n";
 		}
 		else if ( streq( targ->deathtype, "laser" ) )
 		{
 			deathstring = " was zapped\n";
 		}
-		else if ( streq( attacker->s.v.classname, "fireball" ) )
+		else if ( streq( targ->deathtype, "fireball" ) )
 		{
 			deathstring = " ate a lavaball\n";
 		}
-		else if ( streq( attacker->s.v.classname, "trigger_changelevel" ) )
+		else if ( streq( targ->deathtype, "changelevel" ) )
 		{
 			deathstring = " tried to leave\n";
 		}
-		else if ( (int)attacker->s.v.flags & FL_MONSTER )
-		{
-//			deathstring = ObituaryForMonster( attacker->s.v.classname );
-			deathstring = " killed by monster? :)\n";
-		}
-		else if ( targ->s.v.watertype == CONTENT_WATER )
+		else if ( streq( targ->deathtype, "water_dmg" ) )
 		{
 			switch( (int)(g_random() * 2) ) {
 				case 0:  deathstring = " sleeps with the fishes\n"; break;
 				default: deathstring = " sucks it down\n"; break;
 			}
 		}
-		else if ( targ->s.v.watertype == CONTENT_SLIME )
+		else if ( streq( targ->deathtype, "slime_dmg" ) )
 		{
 			switch( (int)(g_random() * 2) ) {
 				case 0:  deathstring = " gulped a load of slime\n"; break;
 				default: deathstring = " can't exist on slime alone\n"; break;
 			}
 		}
-		else if ( targ->s.v.watertype == CONTENT_LAVA )
+		else if ( streq( targ->deathtype, "lava_dmg" ) )
 		{
 			switch( (int)(g_random() * 2) ) {
 				case 0:  deathstring = " turned into hot slag\n"; break;
@@ -3231,6 +3228,15 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 			if ( targ->s.v.health < -15 )
 				deathstring = " burst into flames\n";
+		}
+		else if ( streq( targ->deathtype, "trigger_hurt" ) )
+		{
+			deathstring = " died\n";
+		}
+		else if ( (int)attacker->s.v.flags & FL_MONSTER )
+		{
+//			deathstring = ObituaryForMonster( attacker->s.v.classname );
+			deathstring = " killed by monster? :)\n";
 		}
 		else
 		{

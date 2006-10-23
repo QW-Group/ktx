@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.44 2006/07/17 01:26:33 qqshka Exp $
+ * $Id: admin.c,v 1.45 2006/10/23 16:17:05 qqshka Exp $
  */
 
 // admin.c
@@ -52,10 +52,16 @@ void ExitKick (gedict_t *kicker)
 		G_sprint(kicker, 2, "Kicking process terminated\n");
 }
 
+// assuming kicker is admin
 qboolean is_can_kick(gedict_t *victim, gedict_t *kicker)
 {
 	if ( VIP_IsFlags(victim, VIP_NOTKICKABLE) && !is_real_adm(kicker) ) {
 		G_sprint(kicker, 2, "You can't kick VIP \x8D %s as elected admin\n", 
+					(strnull( victim->s.v.netname ) ? "!noname!" : victim->s.v.netname));
+		return false;
+	}
+	if ( is_real_adm(victim) && !is_real_adm(kicker) ) {
+		G_sprint(kicker, 2, "You can't kick real admin \x8D %s as elected admin\n", 
 					(strnull( victim->s.v.netname ) ? "!noname!" : victim->s.v.netname));
 		return false;
 	}

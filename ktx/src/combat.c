@@ -20,14 +20,12 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.29 2006/10/01 14:58:46 qqshka Exp $
+ *  $Id: combat.c,v 1.30 2006/10/23 16:17:06 qqshka Exp $
  */
 
 #include "g_local.h"
 void            T_MissileTouch( gedict_t * e1, gedict_t * e2 );
 void            ClientObituary( gedict_t * e1, gedict_t * e2 );
-
-//void(entity inflictor, entity attacker, float damage, entity ignore, string dtype) T_RadiusDamage;
 
 //============================================================================
 
@@ -147,8 +145,7 @@ void Killed( gedict_t * targ, gedict_t * attacker )
 #ifndef Q3_VM
 float newceil( float f )
 {
-        return ceil(((int)(f*1000.0))/1000.0);
-
+	return ceil(((int)(f*1000.0))/1000.0);
 }
 #endif
 
@@ -167,13 +164,14 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	gedict_t       *oldself;
 	float           save;
 	float           take;
-	int				wp_num, dmg_frags;
-	float			dmg_dealt = 0;
+//	int				wp_num;
+	int				dmg_frags, i, c1 = 8, c2 = 4, hdp;
+	float			dmg_dealt = 0, non_hdp_damage;
 	char            *attackerteam, *targteam;
 
 	//midair
 	float playerheight, midheight = 0;
-	qboolean lowheight = false, midair = false;
+	qboolean lowheight = false, midair = false, inwater = false, do_dmg = false, rl_dmg = false;
 
 	if ( !targ->s.v.takedamage || ISDEAD( targ ) )
 		return;
@@ -181,27 +179,10 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	if ( (int)cvar("k_midair") )
 		midair = true;
 
-	wp_num = attacker->s.v.weapon;
-
-	// #handicap#
-	if ( attacker != targ ) // attack no self
-	if ( attacker->k_player && targ->k_player ) // player attack player
-	if (    streq( targ->deathtype, "nail" )
- 		 || streq( targ->deathtype, "supernail" )
-		 || streq( targ->deathtype, "grenade" )
-		 || streq( targ->deathtype, "rocket" )
-		 || wp_num == IT_AXE
-		 || wp_num == IT_SHOTGUN
-		 || wp_num == IT_SUPER_SHOTGUN
-		 || wp_num == IT_LIGHTNING
-	   ) {
-		damage *= 0.01f * GetHandicap(attacker);
-	}
-
+//	wp_num = attacker->s.v.weapon;
 
 // used by buttons and triggers to set activator for target firing
 	damage_attacker = attacker;
-
 
 // check for quad damage powerup on the attacker
 // midair quad makes rockets fast, but no change to damage
@@ -234,6 +215,8 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	if ( midair )
 	{
+		inwater = ( ((int)targ->s.v.flags & FL_INWATER) && targ->s.v.waterlevel > 1 );
+
 		if ( streq( inflictor->s.v.classname, "rocket" ) )
 		{
 			midheight = targ->s.v.origin[2] - inflictor->s.v.oldorigin[2];
@@ -254,7 +237,40 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		{
 			damage *= ( 1 + ( playerheight - 45 ) / 64 );
 			lowheight = false;
-		}		
+		}
+
+		rl_dmg = ( targ->k_player && streq( targ->deathtype, "rocket" ) );
+
+		if ( !rl_dmg ) {
+			// damage types which ignore "lowheight"
+			do_dmg =   !targ->k_player						   // always do damage to non player, secret doors etc...
+				 	|| streq( targ->deathtype, "axe" )         // always do axe damage
+				 	|| streq( targ->deathtype, "water_dmg" )   // always do water damage
+				 	|| streq( targ->deathtype, "lava_dmg"  )   // always do lava damage
+				 	|| streq( targ->deathtype, "slime_dmg" )   // always do slime damage
+				 	|| streq( targ->deathtype, "teledeath"  )  // always do tele damage
+				 	|| streq( targ->deathtype, "teledeath2" )  // always do tele damage
+				 	|| streq( targ->deathtype, "teledeath3" ); // always do tele damage
+		}
+	}
+
+	non_hdp_damage = damage; // save damage before handicap apply for kickback calculation
+
+	// #handicap#
+	if ( attacker != targ ) // attack no self
+	if ( attacker->k_player && targ->k_player ) // player vs player
+	if ( ( hdp = GetHandicap(attacker) ) != 100 ) // skip checks if hdp == 100
+	if (    streq( targ->deathtype, "nail" )
+ 		 || streq( targ->deathtype, "supernail" )
+		 || streq( targ->deathtype, "grenade" )
+		 || streq( targ->deathtype, "rocket" )
+		 || streq( targ->deathtype, "axe" )
+		 || streq( targ->deathtype, "shotgun" )
+		 || streq( targ->deathtype, "supershotgun" )
+		 || streq( targ->deathtype, "lightning" ) // lg via beam
+		 || streq( targ->deathtype, "discharge" ) // lg discharge, also present "selfwater" lg death type but ignored
+	   ) {                                        // cos it just suicide but here attacker != targ
+		damage *= 0.01f * hdp;
 	}
 
 // save damage based on the target's armor level
@@ -265,19 +281,18 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	save = ceil( targ->s.v.armortype * damage );
 #endif
 
-	if ( midair && lowheight && !((int)targ->s.v.flags & FL_INWATER) && !targ->axhitme )
-		save *= 0.5;
+	if ( midair && lowheight && !inwater && rl_dmg )
+		save *= 0.5; // take half of armor in such case
 
 	if ( save >= targ->s.v.armorvalue )
 	{
 		save = targ->s.v.armorvalue;
 		targ->s.v.armortype = 0;	// lost all armor
-		targ->s.v.items -=
-		    ( ( int ) targ->s.v.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) );
+		targ->s.v.items -= ( ( int ) targ->s.v.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) );
 	}
 	dmg_dealt += save;
 
-	if (match_in_progress == 2)
+	if ( match_in_progress == 2 )
 		targ->s.v.armorvalue = targ->s.v.armorvalue - save;
 
 #ifndef Q3_VM
@@ -286,8 +301,18 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	take = ceil( damage - save );
 #endif
 
-	if ( midair && lowheight && !((int)targ->s.v.flags & FL_INWATER) && !targ->axhitme)
-		take = 0;
+	if ( midair ) {
+		if ( lowheight && !inwater && rl_dmg )
+			take = 0; // no rl dmg in such case
+
+		if ( !rl_dmg && !do_dmg )
+			take = 0; // unknown damage for midair, so do not damage
+
+		if ( rl_dmg && targ == attacker )
+			take = 0; // no self rl damage
+	}
+
+	take = max(0, take); // avoid negative take, if any
 
 // add to the damage total for clients, which will be sent as a single
 // message at the end of the frame
@@ -301,35 +326,24 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	damage_inflictor = inflictor;
 
-
 // figure momentum add
-	if ( ( inflictor != world ) && ( targ->s.v.movetype == MOVETYPE_WALK ) )
+	if ( inflictor != world && targ->s.v.movetype == MOVETYPE_WALK )
 	{
-		dir[0] =
-		    targ->s.v.origin[0] - ( inflictor->s.v.absmin[0] +
-					    inflictor->s.v.absmax[0] ) * 0.5;
-		dir[1] =
-		    targ->s.v.origin[1] - ( inflictor->s.v.absmin[1] +
-					    inflictor->s.v.absmax[1] ) * 0.5;
-		dir[2] =
-		    targ->s.v.origin[2] - ( inflictor->s.v.absmin[2] +
-					    inflictor->s.v.absmax[2] ) * 0.5;
-		VectorNormalize( dir );
-		// Set kickback for smaller weapons
-//Zoid -- use normal NQ kickback
-//  // Read: only if it's not yourself doing the damage
-//  if ( (damage < 60) & ((attacker->s.v.classname  == "player") & (targ->s.v.classname  == "player")) & ( attacker.netname != targ.netname)) 
-//   targ.velocity = targ.velocity + dir * damage * 11;
-//  else                        
-		// Otherwise, these rules apply to rockets and grenades                        
-		// for blast velocity
+		for ( i = 0; i < 3; i++ )
+			dir[i] = targ->s.v.origin[i] - ( inflictor->s.v.absmin[i] + inflictor->s.v.absmax[i] ) * 0.5;
 
-		targ->s.v.velocity[0] += dir[0] * damage * 8;
-		targ->s.v.velocity[1] += dir[1] * damage * 8;
-		targ->s.v.velocity[2] += dir[2] * damage * 8;
+		VectorNormalize( dir );
+
+		if ( midair && non_hdp_damage < 60 && attacker != targ ) {
+			c1 = 11;
+			c2 = 6;
+		}
+
+		for ( i = 0; i < 3; i++ )
+			targ->s.v.velocity[i] += dir[i] * non_hdp_damage * c1;
 
 		if ( midair && lowheight )
-			targ->s.v.velocity[2] += dir[2] * damage * 4;
+			targ->s.v.velocity[2] += dir[2] * non_hdp_damage * c2; // only for z component
 
 		// Rocket Jump modifiers
 /*
@@ -339,12 +353,11 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		     && streq( attacker->s.v.netname, targ->s.v.netname ) )
 		{
 			VectorAdd( targ->s.v.velocity, dir, targ->s.v.velocity );
-			VectorScale( targ->s.v.velocity, damage * 8 * rj,
+			VectorScale( targ->s.v.velocity, non_hdp_damage * 8 * rj,
 				     targ->s.v.velocity );
 		}
 */
 	}
-
 
 // check for godmode or invincibility
 	if ( ( int ) targ->s.v.flags & FL_GODMODE )
@@ -384,12 +397,12 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	   )
 		return;
 
-	if ( midair && attacker == targ )
-		return;
+//	if ( midair && attacker == targ )
+//		return;
 
 // do the damage
 
-	if (     match_in_progress == 2
+	if (    match_in_progress == 2
 		 || streq( attacker->s.v.classname, "teledeath" ) 
 		 || streq( attacker->s.v.classname, "teledeath2" ) // qqshka
 		 || streq( attacker->s.v.classname, "teledeath3" ) // qqshka 
@@ -496,8 +509,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 T_RadiusDamage
 ============
 */
-void T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage,
-		     gedict_t * ignore, char *dtype )
+void T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage, gedict_t * ignore, char *dtype )
 {
 	float           points;
 	gedict_t       *head;
@@ -516,22 +528,11 @@ void T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage,
 		{
 			if ( head->s.v.takedamage )
 			{
-				org[0] =
-				    inflictor->s.v.origin[0] - ( head->s.v.origin[0] +
-								 ( head->s.v.mins[0] +
-								   head->s.v.maxs[0] ) *
-								 0.5 );
-				org[1] =
-				    inflictor->s.v.origin[1] - ( head->s.v.origin[1] +
-								 ( head->s.v.mins[1] +
-								   head->s.v.maxs[1] ) *
-								 0.5 );
-				org[2] =
-				    inflictor->s.v.origin[2] - ( head->s.v.origin[2] +
-								 ( head->s.v.mins[2] +
-								   head->s.v.maxs[2] ) *
-								 0.5 );
+				org[0] = inflictor->s.v.origin[0] - ( head->s.v.origin[0] + ( head->s.v.mins[0] + head->s.v.maxs[0] ) * 0.5 );
+				org[1] = inflictor->s.v.origin[1] - ( head->s.v.origin[1] + ( head->s.v.mins[1] + head->s.v.maxs[1] ) * 0.5 );
+				org[2] = inflictor->s.v.origin[2] - ( head->s.v.origin[2] + ( head->s.v.mins[2] + head->s.v.maxs[2] ) * 0.5 );
 				points = 0.5 * vlen( org );
+
 				if ( points < 0 )
 					points = 0;
 
@@ -548,8 +549,7 @@ void T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage,
 					if ( CanDamage( head, inflictor ) )
 					{
 						head->deathtype = dtype;
-						T_Damage( head, inflictor, attacker,
-							  points );
+						T_Damage( head, inflictor, attacker, points );
 					}
 				}
 			}

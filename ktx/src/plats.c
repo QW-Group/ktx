@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: plats.c,v 1.5 2006/05/22 23:02:20 qqshka Exp $
+ *  $Id: plats.c,v 1.6 2006/10/23 16:17:06 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -278,7 +278,6 @@ void train_blocked()
 
 	self->attack_finished = g_globalvars.time + 0.5;
 	other->deathtype = "squish";
-
 	T_Damage( other, self, self, self->dmg );
 }
 

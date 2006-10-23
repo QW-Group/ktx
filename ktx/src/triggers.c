@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: triggers.c,v 1.18 2006/10/01 14:58:46 qqshka Exp $
+ *  $Id: triggers.c,v 1.19 2006/10/23 16:17:07 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -351,7 +351,9 @@ void tdeath_touch()
 		return; // this mean we go through tele after some guy, so we must not be telefragged
 // }
 
-	if ( other == PROG_TO_EDICT( self->s.v.owner ) )
+	other2 = PROG_TO_EDICT( self->s.v.owner );
+
+	if ( other == other2 )
 		return;
 
 	if ( ISDEAD( other ) )
@@ -361,21 +363,21 @@ void tdeath_touch()
 	if ( streq( other->s.v.classname, "player" ) )
 	{
 		// check if both players have invincible
-		if ( other->invincible_finished > g_globalvars.time &&
-		     PROG_TO_EDICT( self->s.v.owner )->invincible_finished >
-		     g_globalvars.time )
+		if ( other->invincible_finished > g_globalvars.time && other2->invincible_finished > g_globalvars.time )
 		{
 			self->s.v.classname = "teledeath3";
 
 			// remove invincible for both players
-			other->invincible_finished = 0;
-			PROG_TO_EDICT( self->s.v.owner )->invincible_finished = 0;
+			other->invincible_finished = other2->invincible_finished = 0;
 
 			// probably this must kill both players
+			other->deathtype = "teledeath3";
 			T_Damage( other, self, self, 50000 );
-			other2 = PROG_TO_EDICT( self->s.v.owner );
+
 			self->s.v.owner = EDICT_TO_PROG( other );
+			other2->deathtype = "teledeath3";
 			T_Damage( other2, self, self, 50000 );
+
 			self->s.v.owner = EDICT_TO_PROG( other2 ); // qqshka - restore owner
 			self->s.v.classname = "teledeath";         // qqshka - restore classname
 			return; // qqshka
@@ -384,16 +386,17 @@ void tdeath_touch()
 		if ( other->invincible_finished > g_globalvars.time )
 		{
 			self->s.v.classname = "teledeath2";
-			T_Damage( PROG_TO_EDICT( self->s.v.owner ), self, self, 50000 );
+			other2->deathtype = "teledeath2";
+			T_Damage( other2, self, self, 50000 );
 			self->s.v.classname = "teledeath"; // qqshka - restore classname
 			return;
 		}
-
 	}
 
 	if ( ISLIVE( other ) )
 	{
 		self->s.v.classname = "teledeath"; // qqshka - restore classname
+		other->deathtype = "teledeath";
 		T_Damage( other, self, self, 50000 );
 	}
 }
@@ -634,6 +637,7 @@ void hurt_touch()
 	if ( other->s.v.takedamage )
 	{
 		self->s.v.solid = SOLID_NOT;
+		other->deathtype = "trigger_hurt";
 		T_Damage( other, self, self, self->dmg );
 		self->s.v.think = ( func_t ) hurt_on;
 		self->s.v.nextthink = g_globalvars.time + 1;
