@@ -8,6 +8,9 @@ qq:
 	 4) Not really midair, but dmm4 thing, after quad is out, set health not to 100, 
 		but no more than 100 ( thx Uzhas )
 
+	 Oh and I got inspiration to fix that after looking this demo :)
+	 http://ktx.quakeworld.nu/files/tmp/duel_midair_iron_vs_fausto[endif]_07.mvd
+
 227. If u use handicap, then kickback for enemy will be like u use full damage.
 
 228. Real admin (pass or ip) can't be kicked by elected admin.
