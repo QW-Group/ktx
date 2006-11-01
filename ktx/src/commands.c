@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.138 2006/10/10 01:15:26 qqshka Exp $
+ *  $Id: commands.c,v 1.139 2006/11/01 23:04:12 qqshka Exp $
  */
 
 // commands.c
@@ -425,8 +425,8 @@ cmd_t cmds[] = {
 	{ "stats",       PlayerStats,               0    , CF_BOTH | CF_MATCHLESS, CD_STATS },
 	{ "effi",        PlayerStats,               0    , CF_BOTH | CF_MATCHLESS, CD_EFFI },
 	{ "options",     ShowOpts,                  0    , CF_PLAYER, CD_OPTIONS },
-	{ "ready",       PlayerReady,               0    , CF_PLAYER, CD_READY },
-	{ "break",       PlayerBreak,               0    , CF_PLAYER | CF_MATCHLESS, CD_BREAK },
+	{ "ready",       PlayerReady,               0    , CF_BOTH, CD_READY },
+	{ "break",       PlayerBreak,               0    , CF_BOTH | CF_MATCHLESS, CD_BREAK },
 	{ "status",      ModStatus,                 0    , CF_BOTH | CF_MATCHLESS, CD_STATUS },
 	{ "status2",     ModStatus2,                0    , CF_BOTH | CF_MATCHLESS, CD_STATUS2 },
 	{ "who",         PlayerStatus,              0    , CF_BOTH, CD_WHO },
@@ -636,7 +636,7 @@ cmd_t cmds[] = {
 	{ "mid_air",     ToggleMidair,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_MIDAIR },
 	{ "time",        sv_time,                   0    , CF_BOTH | CF_MATCHLESS, CD_TIME },
 	{ "gren_mode",   GrenadeMode,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_GREN_MODE },
-	{ "toggleready", ToggleReady,               0    , CF_PLAYER, CD_TOGGLEREADY },
+	{ "toggleready", ToggleReady,               0    , CF_BOTH, CD_TOGGLEREADY },
 	{ "fp",          fp_toggle,                 0    , CF_BOTH_ADMIN, CD_FP },
 	{ "dlist",       dlist,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_DLIST },
 	{ "dinfo",       dinfo,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_DINFO },
@@ -1650,6 +1650,11 @@ void ResetOptions()
 
 	if( check_master() )
 		return;
+
+	if ( cvar("k_auto_xonx") ) {
+		G_sprint(self, 2, "Command blocked due to k_auto_xonx\n");
+		return;
+	}
 
 //	s1 = getteam( self );
 

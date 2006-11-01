@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.72 2006/10/10 01:15:26 qqshka Exp $
+ *  $Id: world.c,v 1.73 2006/11/01 23:04:12 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -576,6 +576,7 @@ void FirstFrame	( )
 
 	RegisterCvar("k_mode");
 	RegisterCvar("k_defmode");
+	RegisterCvar("k_auto_xonx"); // switch XonX mode dependant on players + specs count
 	RegisterCvar("k_matchless");
 	RegisterCvar("k_matchless_countdown");
 	RegisterCvar("k_use_matchless_dir"); // use configs/usermodes/matchless instead of configs/usermodes/ffa in matchless mode
@@ -818,6 +819,46 @@ void CheckSvUnlock ()
 		G_bprint(2, "%s\n", redtext("server unlocked"));
 		k_sv_locktime = 0;
 	}
+}
+
+// switch XonX mode dependant on players + specs count
+void CheckAutoXonX(qboolean use_time)
+{
+	static int old_count = -666; // static
+	static float last_check_time = 0;
+
+	gedict_t *p;
+	int   from, count, um_idx = -1;
+
+	if ( !cvar("k_auto_xonx") || match_in_progress || k_matchLess 
+		 || (use_time && g_globalvars.time - last_check_time < 7) /* allow users reconnect */ 
+	   )
+		return;
+
+	last_check_time = g_globalvars.time;
+
+	for( count = from = 0, p = world; (p = find_plrspc(p, &from)); )
+		if ( p->k_player || (p->k_spectator && p->ready) )
+			count++;
+
+	if ( count == old_count )
+		return;
+
+	switch( count ) {
+		case 0: case 1: 
+		case 2: case 3: um_idx = um_idx_byname( "1on1" );   break;
+		case 4: case 5:	um_idx = um_idx_byname( "2on2" );   break;
+		case 6: case 7:	um_idx = um_idx_byname( "3on3" );   break;
+		case 8: case 9:	um_idx = um_idx_byname( "4on4" );   break;
+		default:		um_idx = um_idx_byname( "10on10" ); break;
+	}
+
+	if ( um_idx >= 0 && cvar("_k_last_xonx") - 1 != um_idx ) {
+		G_bprint(2, "Server decides to switch user mode\n");
+		UserMode( -(um_idx + 1) );
+	}
+
+	old_count = count;
 }
 
 // called when switching to/from ctf mode.
@@ -1126,6 +1167,8 @@ void StartFrame( int time )
 		vote_check_all();
 
 	CheckAll(); // just check some clients params
+
+	CheckAutoXonX(true); // switch XonX mode dependant on players + specs count
 
 	check_fcheck();
 }

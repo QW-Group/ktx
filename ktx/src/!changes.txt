@@ -1,3 +1,17 @@
+2006-11-02
+qq:
+229. New cvar "k_auto_xonx".
+
+	 set k_auto_xonx 0  // 1 - switch XonX mode dependant on players + specs count, only "ready" specs counted
+						// 0 - do not switch, recommended and default
+
+	 So, if variable set to 1 specs may use "ready/break" commands to let
+	 mod know what they desire to play or not.
+
+	 WARNING: For almost all servers this variable must be set to 0.
+
+	 requested by hmd_lixo
+
 2006-10-23
 qq:
 226. Midair fixes:
@@ -10,6 +24,8 @@ qq:
 
 	 Oh and I got inspiration to fix that after looking this demo :)
 	 http://ktx.quakeworld.nu/files/tmp/duel_midair_iron_vs_fausto[endif]_07.mvd
+
+	 provided by ibh|123
 
 227. If u use handicap, then kickback for enemy will be like u use full damage.
 

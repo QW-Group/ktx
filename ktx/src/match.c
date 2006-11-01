@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.84 2006/10/04 22:58:02 qqshka Exp $
+ *  $Id: match.c,v 1.85 2006/11/01 23:04:12 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -2013,11 +2013,36 @@ void IdlebotCheck ()
 				"server activates the %s\n", redtext("idle bot"));
 }
 
+void CheckAutoXonX(qboolean use_time);
+
 // Called by a player to inform that (s)he is ready for a match.
 void PlayerReady ()
 {
 	gedict_t *p;
+	int   from;
 	float nready;
+
+	if ( self->k_spectator ) {
+
+		if ( !cvar("k_auto_xonx") ) {
+			G_sprint(self, 2, "Command not allowed\n");
+			return;
+		}
+
+		if( self->ready ) {
+			G_sprint(self, 2, "Type break to unready yourself\n");
+			return;
+		}
+
+		self->ready = 1;
+
+		for( from = (match_in_progress ? 1 : 0), p = world; (p = find_plrspc(p, &from)); )
+			G_sprint(p, 2, "%s %s to play\n", self->s.v.netname, redtext("desire"));
+
+		CheckAutoXonX(g_globalvars.time < 10 ? true : false); // forse switch mode asap if possible after some time spend
+		
+		return;
+	}
 
 	if( intermission_running || match_in_progress == 2 )
 			return;
@@ -2111,8 +2136,26 @@ void PlayerReady ()
 
 void PlayerBreak ()
 {
-	int votes;
+	int votes, from;
 	gedict_t *p;
+
+	if ( self->k_spectator ) {
+
+		if ( !cvar("k_auto_xonx") || k_matchLess ) {
+			G_sprint(self, 2, "Command not allowed\n");
+			return;
+		}
+
+		if( !self->ready )
+			return;
+
+		self->ready = 0;
+
+		for( from = (match_in_progress ? 1 : 0), p = world; (p = find_plrspc(p, &from)); )
+			G_sprint(p, 2, "%s %s to play\n", self->s.v.netname, redtext("lost desire"));
+		
+		return;
+	}
 
 	if( !self->ready || intermission_running )
 		return;
