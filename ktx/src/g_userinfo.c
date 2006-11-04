@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_userinfo.c,v 1.27 2006/09/04 01:18:58 qqshka Exp $
+ *  $Id: g_userinfo.c,v 1.28 2006/11/04 00:27:41 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -193,6 +193,7 @@ cmdinfo_t cinfos[] = {
 	{ "ln", 0 },
     { "ls", 0 },
 	{ "lw", 0 },
+	{ "lw_x", 0 },
 	{ "ktpl", 0 }, // zzz, so "ln" "ls" "lw" keys will work like in ktpro
 	{ "postmsg", 0 },
 	{ "premsg", 0 },

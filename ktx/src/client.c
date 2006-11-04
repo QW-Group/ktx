@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.116 2006/10/23 16:17:05 qqshka Exp $
+ *  $Id: client.c,v 1.117 2006/11/04 00:27:41 qqshka Exp $
  */
 
 //===========================================================================
@@ -1844,7 +1844,7 @@ void Print_Wp_Stats( )
 	char buf[1024] = {0};
 
 	qboolean ktpl = (iKey( self, "ktpl" ) ? true : false);
-	int  i, lw = iKey( self, "lw" ) + (ktpl ? 12 : 0);
+	int  i, lw = iKey( self, "lw" ) + (ktpl ? 12 : 0), lw_x = iKey ( self, "lw_x" );
 	int _wps = S_ALL & iKey ( self, "wps" );
 	int  wps = ( _wps ? _wps : S_DEF ); // if wps is not set - show S_DEF weapons
 
@@ -1887,6 +1887,13 @@ void Print_Wp_Stats( )
 	if ( !axe && !sg && !ssg && !ng && !sng && !gl && !rl && !lg )
 		return; // sanity
 
+	if ( (i = lw_x) > 0 ) {
+		int offset = strlen(buf);
+		i = bound(0, i, (int)sizeof(buf) - offset - 1);
+		memset( (void*)(buf + offset), (int)' ', i);
+		buf[i+offset] = 0;
+	}
+
 	if ( ktpl ) {
 		if ( lg )
 			strlcat(buf, lg  ? va("%s:%.1f ", redtext("lg"),  lg) : "", sizeof(buf));
@@ -1922,6 +1929,13 @@ void Print_Wp_Stats( )
 			wp_wrap_cat(ng  ? va("%s:%.1f", redtext("ng"),  ng) : "", buf, sizeof(buf));
 		if ( sng )
 			wp_wrap_cat(sng ? va("%s:%.1f", redtext("sng"),sng) : "", buf, sizeof(buf));
+	}
+
+	if ( (i = lw_x) < 0 ) {
+		int offset = strlen(buf);
+		i = bound(0, -i, (int)sizeof(buf) - offset - 1);
+		memset( (void*)(buf + offset), (int)' ', i);
+		buf[i+offset] = 0;
 	}
 
 	if ( (i = lw) < 0 ) {
