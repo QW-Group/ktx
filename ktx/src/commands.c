@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.139 2006/11/01 23:04:12 qqshka Exp $
+ *  $Id: commands.c,v 1.140 2006/11/06 03:42:00 qqshka Exp $
  */
 
 // commands.c
@@ -1343,15 +1343,7 @@ void ModStatus2()
 	int i;
 	char *ot = "";
 
-	i = cvar( "k_spw" );
-	if( i == 2 )
-		G_sprint(self, 2, redtext("Kombat Teams Respawns\n"));
-	else if ( i == 1 )
-		G_sprint(self, 2, redtext("KT SpawnSafety\n"));
-	else if ( i == 0 )
-		G_sprint(self, 2, redtext("Normal QW Respawns\n"));
-	else
-		G_sprint(self, 2, redtext("Unknown Respawns\n"));
+	G_sprint(self, 2, "%s\n", redtext( respawn_model_name( cvar( "k_spw" ) ) ));
 
 	if( isDuel() )
 		G_sprint(self, 2, "%s: duel\n", redtext("Server mode"));
@@ -1797,7 +1789,7 @@ void ReportMe()
 
 void ToggleRespawns()
 {
-	int k_spw = bound(0, cvar( "k_spw" ), 2);
+	int k_spw = bound(0, cvar( "k_spw" ), 3);
 
 	if ( match_in_progress )
 		return;
@@ -1805,19 +1797,12 @@ void ToggleRespawns()
 	if( check_master() )
 		return;
 
-	if ( ++k_spw > 2 )
+	if ( ++k_spw > 3 )
 		k_spw = 0;
 
 	cvar_fset( "k_spw", k_spw );
 
-	if( k_spw == 0 )
-		G_bprint(2, "Normal QW respawns (avoid spawnfrags)\n");
-	else if( k_spw == 1 )
-		G_bprint(2, "KT SpawnSafety\n");
-	else if( k_spw == 2 )
-		G_bprint(2, "Kombat Teams respawns\n");
-	else
-		G_bprint(2, "Unknown respawns\n");
+	G_bprint(2, "%s\n", respawn_model_name( k_spw ));
 }
 
 void ToggleRespawn666()
@@ -2715,7 +2700,7 @@ const char common_um_init[] =
 	"k_spectalk 0\n"					// silence
 	"k_dis 1\n"							// discharge on
 	"k_bzk 0\n"							// berzerk
-	"k_spw 2\n"							// affect spawn type
+	"k_spw 3\n"							// affect spawn type
 	"k_dmgfrags 0\n"					// damage frags off
 	"k_tp_tele_death 1\n"				// affect frags on team telefrags or not
 	"k_allowcountchange 1\n"			// permissions for upplayers, only real admins

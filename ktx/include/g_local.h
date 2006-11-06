@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.89 2006/10/10 01:15:24 qqshka Exp $
+ *  $Id: g_local.h,v 1.90 2006/11/06 03:41:59 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -344,6 +344,8 @@ int			only_digits(const char *s);
 char		*params_str( int from, int to );
 
 char		*SD_type_str(); // sudden death type string
+
+char		*respawn_model_name( int mdl_num );
 
 //
 //  subs.c

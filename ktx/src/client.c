@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.117 2006/11/04 00:27:41 qqshka Exp $
+ *  $Id: client.c,v 1.118 2006/11/06 03:42:00 qqshka Exp $
  */
 
 //===========================================================================
@@ -728,11 +728,11 @@ void ClientKill()
 	}
 
 	if (g_globalvars.time < self->suicide_time) {
-		G_sprint (self, PRINT_HIGH, "Only one suicide in 5 seconds\n");
+		G_sprint (self, PRINT_HIGH, "Only one suicide in 1 second\n");
 		return;
 	}
 
-	self->suicide_time = g_globalvars.time + 5;
+	self->suicide_time = g_globalvars.time + 1;
 
     k_nochange = 0;
 
@@ -779,52 +779,46 @@ gedict_t       *SelectSpawnPoint( char *spawnname )
 	gedict_t		*spot;
 	gedict_t		*spots;			// chain of "valid" spots
 	gedict_t		*thing;
-	float			rndspots;
 	int             numspots;		// count of "valid" spots
-	int				k_nspots;
 	int				totalspots;
 	int				pcount;
 	int				k_spw = cvar( "k_spw" );
     
-	totalspots = numspots = 0;
-
 // testinfo_player_start is only found in regioned levels
 	spot = find( world, FOFS( s.v.classname ), "testplayerstart" );
 	if ( spot )
 		return spot;
 
-// choose a info_player_deathmatch point
-
 // ok, find all spots that don't have players nearby
 
 	spots = world;
-	spot = find( world, FOFS( s.v.classname ), spawnname );
-	while ( spot )
+	totalspots = numspots = 0;
+
+	for ( spot = world; (spot = find( spot, FOFS( s.v.classname ), spawnname )); )
 	{
 		totalspots++;
-
-		thing = findradius( world, spot->s.v.origin, 84 );
 		pcount = 0;
-		// find count of nearby players for 'spot'
-		while ( thing )
-		{
-			if ( streq( thing->s.v.classname, "player" ) )
-			{
-                if( !(  k_spw == 2 && match_in_progress == 2 && !thing->k_1spawn )
-					   // k_spw == 2 feature, if player is spawned not far away and run
-					   // around spot - treat this spot as not valid.
-					   // k_1spawn store this "not far away" time.
-					   // k_1spawn is _also_ set after player passed teleport
-					&& ISLIVE( thing )
-				  ) 
-					pcount++;
-			}
 
-			thing = findradius( thing, spot->s.v.origin, 84 );
+		// find count of nearby players for 'spot'
+		for ( thing = world; (thing = findradius( thing, spot->s.v.origin, 84 )); )
+		{
+			if ( !thing->k_player || ISDEAD( thing ) || thing == self )
+				continue; // ignore non player, or dead played, or self
+
+		   // k_spw 2 and 3 feature, if player is spawned not far away and run
+		   // around spot - treat this spot as not valid.
+		   // k_1spawn store this "not far away" time.
+		   // k_1spawn is _also_ set after player passed teleport
+            if( !( ( k_spw == 2 || k_spw == 3 ) && match_in_progress == 2 && thing->k_1spawn < g_globalvars.time ) )  {
+//				G_bprint(2, "ignore player: %s\n", thing->s.v.netname);
+				pcount++; // ignore spot
+			}
 		}
 
-		if( k_spw && match_in_progress == 2 && self->k_lastspawn == spot )
+		if( k_spw && match_in_progress == 2 && self->k_lastspawn == spot ) {
+//			G_bprint(2, "ignore spot\n");
 			pcount++; // ignore this spot in this case, protection from spawn twice on the same spot
+		}
 
 		if ( !pcount ) // valid spawn spot
 		{
@@ -832,88 +826,71 @@ gedict_t       *SelectSpawnPoint( char *spawnname )
 			spots = spot;
 			numspots++;
 		}
-		// Get the next spot in the chain
-		spot = find( spot, FOFS( s.v.classname ), spawnname );
 	}
 
-    if( match_in_progress == 2 )
-		self->k_1spawn = 200;
-
-    k_nspots = totalspots; // remember totalspots
+    if( match_in_progress == 2 ) // protect(in some case) player from be spawnfragged for some time
+		self->k_1spawn = g_globalvars.time + 2.6;
 
 	if ( !numspots )
 	{
 		// ack, they are all full, just pick one at random
 
-//  bprint (PRINT_HIGH, "Ackk! All spots are full. Selecting random spawn spot\n");
+//		G_bprint (PRINT_HIGH, "%s\n", "Ackk! All spots are full. Selecting random spawn spot");
 
-		rndspots   = g_random() * totalspots;
-		totalspots = bound(0, rndspots, totalspots-1);
+		if ( !(spot = find_idx( i_rnd(0, totalspots - 1), FOFS( s.v.classname ), spawnname )) ) {
+			totalspots = 1; // proper count is not so important, something going wrong anyway...
 
-		spot = find( world, FOFS( s.v.classname ), "info_player_deathmatch" );
-		while ( totalspots > 0 )
-		{
-			totalspots--;
-			spot = find( spot, FOFS( s.v.classname ), "info_player_deathmatch" );
+			if ( !(spot = Do_FindIntermission( "info_player_deathmatch" )) )
+		    	spot = world;
 		}
 
-		if( k_nspots > 2 && match_in_progress == 2 )
-			self->k_lastspawn = spot;
-
-		if( !match_in_progress || k_spw == 1 || ( k_spw && !k_checkx ) ) {
+		if( !match_in_progress || k_spw == 1 || ( k_spw == 2 && !k_checkx ) ) {
 			vec3_t	v1, v2;
 
 			makevectors( isRA() ? spot->mangle : spot->s.v.angles ); // stupid ra uses mangles instead of angles
-			thing = findradius(world, spot->s.v.origin, 84);
-			while( thing ) {
-				if( streq( thing->s.v.classname, "player" ) && ISLIVE( thing ) ) {
-					VectorMA (thing->s.v.origin, -15.0, g_globalvars.v_up, v1);
-					VectorMA (v1, 160.0, g_globalvars.v_forward, v2);
 
-					traceline( PASSVEC3( v1 ), PASSVEC3( v2 ), false, thing);
-
-					VectorCopy(g_globalvars.trace_endpos, v1);
-					VectorMA (v1, 30.0, g_globalvars.v_forward, v2);
-
-					traceline( PASSVEC3( v1 ), PASSVEC3( v2 ), false, thing);
-
-					if( g_globalvars.trace_fraction < 1 )
-						VectorMA (g_globalvars.trace_endpos, -35.0, g_globalvars.v_forward, v1);
-
-					VectorMA (v1, 15.0, g_globalvars.v_up, v2);
-					setorigin(thing, PASSVEC3( v2 )); // FIXME: wtf is going on?
-
-				} else if( streq( thing->s.v.classname, "teledeath") ) {
-					gedict_t *rm = thing;
-
-					thing = findradius(thing, spot->s.v.origin, 84);
-					ent_remove( rm );
-
+			for( thing = world; (thing = findradius(thing, spot->s.v.origin, 84)); ) {
+ 				if( streq( thing->s.v.classname, "teledeath") ) {
+					ent_remove( thing );
 					continue;
 				}
 
-				thing = findradius(thing, spot->s.v.origin, 84);
+				if ( !thing->k_player || ISDEAD( thing ) || thing == self )
+					continue; // ignore non player, or dead played, or self
+
+				VectorMA (thing->s.v.origin, -15.0, g_globalvars.v_up, v1);
+				VectorMA (v1, 160.0, g_globalvars.v_forward, v2);
+
+				traceline( PASSVEC3( v1 ), PASSVEC3( v2 ), false, thing);
+
+				VectorCopy(g_globalvars.trace_endpos, v1);
+				VectorMA (v1, 30.0, g_globalvars.v_forward, v2);
+
+				traceline( PASSVEC3( v1 ), PASSVEC3( v2 ), false, thing);
+
+				if( g_globalvars.trace_fraction < 1 )
+					VectorMA (g_globalvars.trace_endpos, -35.0, g_globalvars.v_forward, v1);
+
+				VectorMA (v1, 15.0, g_globalvars.v_up, v2);
+				setorigin(thing, PASSVEC3( v2 )); // FIXME: wtf is going on?
 			}
 		}
 
+		if( totalspots > 2 && match_in_progress == 2 )
+			self->k_lastspawn = spot;
+
 		return spot;
 	}
-// We now have the number of spots available on the map in numspots
 
+// We now have the number of spots available on the map in numspots
 // Generate a random number between 0 and numspots
 
-	rndspots = g_random() * numspots;
-	numspots = bound(0, rndspots, numspots-1);
+	numspots = i_rnd(0, numspots - 1);
 
-	spot = spots;
-	while ( numspots > 0 )
-	{
+	for ( spot = spots; numspots > 0; numspots-- )
 		spot = PROG_TO_EDICT( spot->s.v.goalentity );
-		numspots--;
-	}
 
-
-	if( k_nspots > 2 && match_in_progress == 2 ) 
+	if( totalspots > 2 && match_in_progress == 2 ) 
         self->k_lastspawn = spot;
 
 	return spot;
@@ -2174,10 +2151,10 @@ void PlayerPreThink()
 	if ( self->k_timingWarnTime )
 		BackFromLag();
 
-	if ( self->sc_stats && self->sc_stats_time && self->sc_stats_time <= g_globalvars.time )
+	if ( self->sc_stats && self->sc_stats_time && self->sc_stats_time <= g_globalvars.time && match_in_progress != 1 )
 		Print_Scores ();
 
-	if ( self->wp_stats && self->wp_stats_time && self->wp_stats_time <= g_globalvars.time )
+	if ( self->wp_stats && self->wp_stats_time && self->wp_stats_time <= g_globalvars.time && match_in_progress != 1 )
 		Print_Wp_Stats ();
 
 	if ( self->was_jump ) {
@@ -2619,15 +2596,12 @@ void PlayerPostThink()
 		return;
 	}
 
-	if ( self->s.v.view_ofs[0] == 0 && self->s.v.view_ofs[1] == 0
-	     && self->s.v.view_ofs[2] == 0 )
+	if ( self->s.v.view_ofs[0] == 0 && self->s.v.view_ofs[1] == 0 && self->s.v.view_ofs[2] == 0 )
 		return;		// intermission or finale
 
 	if ( self->s.v.deadflag )
 		return;
 
-	if( self->k_1spawn )
-		self->k_1spawn -= 1;
 //team
 
 // WaterMove function call moved here from PlayerPreThink to avoid

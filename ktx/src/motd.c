@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: motd.c,v 1.21 2006/10/01 14:58:46 qqshka Exp $
+ *  $Id: motd.c,v 1.22 2006/11/06 03:42:00 qqshka Exp $
  */
 
 // motd.c
@@ -38,6 +38,13 @@ void PMOTDThink()
 			G_centerprint ( PROG_TO_EDICT( self->s.v.owner ), "");
 
 		ent_remove( self );
+		return;
+	}
+
+	if (    PROG_TO_EDICT( self->s.v.owner )->wp_stats || PROG_TO_EDICT( self->s.v.owner )->sc_stats
+		 || PROG_TO_EDICT( self->s.v.owner )->shownick_time
+	   ) {
+		self->s.v.nextthink = g_globalvars.time + 1;  // do not interference with +wp_stats or +scores and shownick
 		return;
 	}
 

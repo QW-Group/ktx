@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: triggers.c,v 1.19 2006/10/23 16:17:07 qqshka Exp $
+ *  $Id: triggers.c,v 1.20 2006/11/06 03:42:00 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -457,7 +457,8 @@ void teleport_touch()
 		return;
 
 //team
-	other->k_1spawn = 60;
+// protect(in some case) player from be spawnfragged for some time
+	other->k_1spawn = g_globalvars.time + 0.78;
 //team
 
 // activator = other;

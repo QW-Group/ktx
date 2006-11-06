@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.64 2006/09/13 01:53:06 qqshka Exp $
+ *  $Id: g_utils.c,v 1.65 2006/11/06 03:42:00 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -2005,6 +2005,17 @@ char *SD_type_str()
 		case SD_NORMAL:   return "Sudden death";
 		case SD_TIEBREAK: return "tie-break";
 		default:		  return "unknown";
+	}
+}
+
+char *respawn_model_name( int mdl_num )
+{
+	switch ( mdl_num ) {
+		case 0:  return "Normal QW respawns";
+		case 1:  return "KT SpawnSafety";
+		case 2:  return "Kombat Teams respawns";
+		case 3:  return "KTX respawns";
+		default: return "!Unknown!";
 	}
 }
 

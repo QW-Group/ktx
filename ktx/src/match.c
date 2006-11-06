@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.85 2006/11/01 23:04:12 qqshka Exp $
+ *  $Id: match.c,v 1.86 2006/11/06 03:42:00 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1629,14 +1629,7 @@ void ShowMatchSettings()
 	int i;
 	char *txt = "";
 
-	switch ( (int)cvar( "k_spw" ) ) {
-		case 0: txt = "Normal QW respawns"; break;
-		case 1: txt = "KT SpawnSafety"; break;
-		case 2: txt = "Kombat Teams respawns"; break;
-		default: txt = "!Unknown!"; break;
-	}
-
-	G_bprint(2, "Spawnmodel: %s\n", redtext(txt));
+	G_bprint(2, "Spawnmodel: %s\n", redtext( respawn_model_name( cvar( "k_spw" ) ) ));
 
 // changed to print only if other than default
 
