@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_userinfo.c,v 1.28 2006/11/04 00:27:41 qqshka Exp $
+ *  $Id: g_userinfo.c,v 1.29 2006/11/06 18:58:01 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -174,6 +174,7 @@ cmdinfo_t cinfos[] = {
 	{ "*mp", 0 },					// for mmode player
 	{ "*mt", 0 },					// for mmode team
 	{ "*mu", 0 },					// for mmode multi
+	{ "*at", 0 },					// autotrack
     { "mi", info_mi_update },		// spec moreinfo
     { "b_switch", 0 },
 //    { "bw" },

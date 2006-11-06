@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.140 2006/11/06 03:42:00 qqshka Exp $
+ *  $Id: commands.c,v 1.141 2006/11/06 18:58:00 qqshka Exp $
  */
 
 // commands.c
@@ -3854,8 +3854,21 @@ void AutoTrack( float autoTrackType )
 	else
 		self->autotrack = at = autoTrackType; // switch auto track type
 
+	cmdinfo_setkey(self, "*at", va("%d", self->autotrack)); // so we can restore it on level change
+
 	G_sprint(self, 2, "%s %s\n", redtext(at == atBest ? "Autotrack" : 
 			(at == atPow ? "Auto_pow" : "AutoUNKNOWN" )), OnOff(self->autotrack));
+}
+
+void AutoTrackRestore ()
+{
+	autoTrackType_t at = iKey(self, "*at");
+
+	if ( self->k_player )
+		return;
+
+	if ( at != atNone && at != self->autotrack )
+		AutoTrack( at );
 }
 
 void next_best ()

@@ -6,6 +6,10 @@ qq:
 	 So, k_spw 3 IMO best for: 1on1 2on2 3on3 and 4on4.
 	 The main reason of new spawn model was lack of "good" respawn model for 4on4.
 
+232. Spectator bug fix: saving admin status during map change.
+
+233. Spectator bug fix: saving autotrack status during map change.
+
 2006-11-04
 qq:
 230. New setinfo key "lw_x". Used for +wp_stats, just move printed text right or left.

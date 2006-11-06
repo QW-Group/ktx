@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.34 2006/10/10 17:49:32 qqshka Exp $
+ *  $Id: g_main.c,v 1.35 2006/11/06 18:58:01 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -172,7 +172,6 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 			PutClientInServer();
 		else
 			PutSpectatorInServer();
-
 
 		return 1;
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.26 2006/11/06 03:42:00 qqshka Exp $
+ *  $Id: spectate.c,v 1.27 2006/11/06 18:58:01 qqshka Exp $
  */
 
 // spectate.c
@@ -35,6 +35,7 @@ void DoAutoTrack();
 void AdminImpBot();
 
 void MakeMOTD();
+void AutoTrackRestore();
 
 int GetSpecWizard ()
 {
@@ -74,6 +75,33 @@ void wizard_think()
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 }
 
+void SpecDecodeLevelParms()
+{
+/*
+	self->s.v.items			= g_globalvars.parm1;
+	self->s.v.health		= g_globalvars.parm2;
+	self->s.v.armorvalue 	= g_globalvars.parm3;
+	self->s.v.ammo_shells 	= g_globalvars.parm4;
+	self->s.v.ammo_nails 	= g_globalvars.parm5;
+	self->s.v.ammo_rockets 	= g_globalvars.parm6;
+	self->s.v.ammo_cells 	= g_globalvars.parm7;
+	self->s.v.weapon 		= g_globalvars.parm8;
+	self->s.v.armortype 	= g_globalvars.parm9 * 0.01;
+*/
+	if ( g_globalvars.parm11 )
+		self->k_admin = g_globalvars.parm11;
+
+//    if( g_globalvars.parm12 )
+//        self->k_accepted = g_globalvars.parm12;
+	
+	if ( g_globalvars.parm13 )
+    	self->k_stuff = g_globalvars.parm13;
+
+//	if ( g_globalvars.parm14 )
+//    	self->ps.handicap = g_globalvars.parm14;
+}
+
+
 
 ////////////////
 // GlobalParams:
@@ -86,6 +114,8 @@ void SpectatorConnect()
 	gedict_t *p;
 	int from = ( match_in_progress == 2 && !cvar("k_ann") ) ? 1 : 0;
 	int diff = (int)(PROG_TO_EDICT(self->s.v.goalentity) - world);
+
+	SpecDecodeLevelParms();
 
 	self->k_accepted = 1; // spectator has not restriction to connect
 
@@ -119,11 +149,9 @@ void SpectatorConnect()
 ///////////////
 void PutSpectatorInServer()
 {
-//
-// u can put something usefull here :P
-//
-
 //	G_sprint(self, 2, "Hellow %s\n", getname(self));
+
+	AutoTrackRestore();
 }
 
 ////////////////
