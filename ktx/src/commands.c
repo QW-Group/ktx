@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.141 2006/11/06 18:58:00 qqshka Exp $
+ *  $Id: commands.c,v 1.142 2006/11/07 16:32:18 qqshka Exp $
  */
 
 // commands.c
@@ -2874,6 +2874,12 @@ void UserMode(float umode)
 	if ( umode < 0 ) {
 		sv_invoked = true;
 		umode *= -1;
+	}
+	else {
+		if ( cvar("k_auto_xonx") ) {
+			G_sprint(self, 2, "Command blocked due to k_auto_xonx\n");
+			return;
+		}
 	}
 
 	umode = (int)umode - 1;
