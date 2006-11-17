@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.118 2006/11/06 03:42:00 qqshka Exp $
+ *  $Id: client.c,v 1.119 2006/11/17 20:57:15 qqshka Exp $
  */
 
 //===========================================================================
@@ -1935,7 +1935,7 @@ void Print_Scores( )
 {
 	char buf[1024] = {0}, *last_va;
 
-	int  i, minutes = 0, seconds = 0, ts, es, ls = iKey( self, "ls" ) + (iKey( self, "ktpl" ) ? 12 : 0);
+	int  i, minutes = 0, seconds = 0, ts = 0, es = 0, ls = iKey( self, "ls" ) + (iKey( self, "ktpl" ) ? 12 : 0);
 
 	qboolean sc_ok = false;
 	gedict_t *p, *ed1, *ed2;
