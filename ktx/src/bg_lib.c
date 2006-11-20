@@ -1,5 +1,5 @@
 /*
- * $Id: bg_lib.c,v 1.11 2006/08/18 00:50:47 qqshka Exp $
+ * $Id: bg_lib.c,v 1.12 2006/11/20 11:19:04 qqshka Exp $
  */
 
 // Copyright (C) 1999-2000 Id Software, Inc.
@@ -1446,7 +1446,7 @@ int snprintf(char *buffer, size_t count, char const *format, ...)
 
 #endif // Q3_VM
 
-#if defined( __linux__ ) || defined( _WIN32 ) || defined( Q3_VM )
+#if (defined( __linux__ ) || defined( _WIN32 )) && !defined( Q3_VM )
 
 size_t strlcpy(char *dst, char *src, size_t siz)
 {
@@ -1507,3 +1507,4 @@ size_t strlcat(char *dst, char *src, size_t siz)
 }
 
 #endif
+

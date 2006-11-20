@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.90 2006/11/06 03:41:59 qqshka Exp $
+ *  $Id: g_local.h,v 1.91 2006/11/20 11:19:03 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -95,7 +95,7 @@ int             NUM_FOR_EDICT( gedict_t * e );
 
 #define DA_WPNS (IT_AXE|IT_SHOTGUN|IT_SUPER_SHOTGUN|IT_NAILGUN|IT_SUPER_NAILGUN|IT_ROCKET_LAUNCHER|IT_GRENADE_LAUNCHER|IT_LIGHTNING)
 
-
+extern gameData_t gamedata;
 extern gedict_t g_edicts[];
 extern globalvars_t g_globalvars;
 extern gedict_t *world;

@@ -87,9 +87,14 @@ equ     trap_conprint		 -76
 equ     trap_readcmd		 -77
 equ     trap_redirectcmd         -78
 
-equ	trap_AddBot		 -79
-equ	trap_RemoveBot		 -80
-equ	trap_SetBotUserInfo	 -81
-equ	trap_SetBotCMD		 -82
+equ		trap_AddBot		 -79
+equ		trap_RemoveBot		 -80
+equ		trap_SetBotUserInfo	 -81
+equ		trap_SetBotCMD		 -82
 
-equ	QVMstrftime		 -83
+equ		QVMstrftime		 -83
+equ		trap_CmdArgs     -84
+equ		trap_CmdTokenize -85
+equ		strlcpy			 -86
+equ		strlcat			 -87
+

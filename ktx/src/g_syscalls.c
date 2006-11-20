@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_syscalls.c,v 1.7 2006/10/04 22:58:02 qqshka Exp $
+ *  $Id: g_syscalls.c,v 1.8 2006/11/20 11:19:04 qqshka Exp $
  */
 
 //#include "g_local.h"
@@ -331,6 +331,16 @@ int trap_CmdArgc()
 void trap_CmdArgv( int arg, char *valbuff, int sizebuff )
 {
 	syscall( G_CMD_ARGV, arg, (int)valbuff, sizebuff );
+}
+
+void trap_CmdArgs( char *valbuff, int sizebuff )
+{
+	syscall( G_CMD_ARGS, (int)valbuff, sizebuff );
+}
+
+void trap_CmdTokenize( char *str )
+{
+	syscall( G_CMD_TOKENIZE, (int)str );
 }
 
 void    trap_TraceCapsule( float v1_x, float v1_y, float v1_z, 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_syscalls.h,v 1.5 2006/10/04 22:58:01 qqshka Exp $
+ *  $Id: g_syscalls.h,v 1.6 2006/11/20 11:19:03 qqshka Exp $
  */
 
 int     trap_GetApiVersion(  );
@@ -86,6 +86,8 @@ void    trap_FlushSignon(  );
 void    trap_disableupdates( int edn, float time );
 int     trap_CmdArgc(  );
 void    trap_CmdArgv( int arg, char *valbuff, int sizebuff );
+void	trap_CmdArgs( char *valbuff, int sizebuff );
+void	trap_CmdTokenize( char *str );
 void    trap_TraceCapsule( float v1_x, float v1_y, float v1_z, 
 			float v2_x, float v2_y, float v2_z, 
 			int nomonst, int edn ,

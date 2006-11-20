@@ -1,3 +1,9 @@
+2006-11-20
+qq:
+234. Fix "s-p" and similar commands for MQWCL client.
+
+	 WARNING: u need latest mvdsv from CVS, otherwise KTX will not work.
+
 2006-11-06
 qq:
 231. New spawn model - "KTX respawns". Based on "Kombat Teams respawns" but without stupid moving players at match start,

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.86 2006/11/06 03:42:00 qqshka Exp $
+ *  $Id: match.c,v 1.87 2006/11/20 11:19:04 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1662,8 +1662,6 @@ void ShowMatchSettings()
 		G_bprint(2, "QiZmo:%s disabled\n", redtext(buf));
 	}
 }
-
-extern gameData_t gamedata;
 
 // duel_dag_vs_zu-zu[dm3]
 // team_no!_vs_fom[dm3]

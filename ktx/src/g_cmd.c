@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.25 2006/10/10 01:15:26 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.26 2006/11/20 11:19:04 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -221,7 +221,7 @@ qboolean isSayFlood(gedict_t *p)
 qboolean ClientSay( qboolean isTeamSay )
 {
 	int j, l, mmode;
-	char text[1024] = {0}, arg_2[10], *str, *name, *team;
+	char text[1024] = {0}, text2[1024] = {0}, arg_2[64], *str, *name, *team;
 	int sv_spectalk = cvar("sv_spectalk");
 	int sv_sayteam_to_spec = cvar("sv_sayteam_to_spec");
 	gedict_t *client, *goal;
@@ -232,11 +232,26 @@ qboolean ClientSay( qboolean isTeamSay )
 	if ( !self->k_accepted )
 		return true; // cmon, u r zombie or etc...
 
+	if ( gamedata.APIversion >= 11 ) {
+		trap_CmdArgs( str = text, sizeof( text ) );
+		if ( str[0] == '"' && (j = strlen(str)) > 2 ) {
+			str[j-1] = 0;
+			str++;
+			trap_CmdArgv( 0, arg_2, sizeof( arg_2 ) );
+			strlcat(text2, arg_2, sizeof(text2));
+			strlcat(text2,   " ", sizeof(text2));
+			strlcat(text2,   str, sizeof(text2));
+			trap_CmdTokenize(text2);
+		}
+	}
+	else
+		str = params_str(1, -1);
+
 	if ( f_check && self->k_player ) {
 		if ( !self->f_checkbuf )
 			return true; // just in case
 
-		strlcat(self->f_checkbuf, params_str(1, -1), F_CHECK_SIZE);
+		strlcat(self->f_checkbuf,  str, F_CHECK_SIZE);
 		strlcat(self->f_checkbuf, "\n", F_CHECK_SIZE);
 		return true;
 	}
@@ -265,8 +280,6 @@ qboolean ClientSay( qboolean isTeamSay )
 		s_m();
 		return true;
 	}
-
-	str = params_str(1, -1);
 
 	mmode = iKey(self, "*mm");
 	switch ( mmode ) {
