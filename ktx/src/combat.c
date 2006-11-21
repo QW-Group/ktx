@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.31 2006/11/21 06:19:02 qqshka Exp $
+ *  $Id: combat.c,v 1.32 2006/11/21 11:41:20 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -97,7 +97,7 @@ qboolean CanDamage( gedict_t * targ, gedict_t * inflictor )
 Killed
 ============
 */
-void Killed( gedict_t * targ, gedict_t * attacker )
+void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 {
 	gedict_t       *oself;
 
@@ -474,7 +474,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	if ( ISDEAD( targ ) )
 	{
-		Killed( targ, attacker );
+		Killed( targ, attacker, inflictor );
 
         // KTEAMS: check if sudden death is the case
 		Check_SD( targ );

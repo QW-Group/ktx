@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.91 2006/11/20 11:19:03 qqshka Exp $
+ *  $Id: g_local.h,v 1.92 2006/11/21 11:41:19 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -463,6 +463,7 @@ void            RegenerationSound( gedict_t *player );
 void            PlayerDropFlag( gedict_t *player );
 void            RegenFlags( qboolean yes );
 void			AddHook( qboolean yes );
+void			CTF_Obituary( gedict_t *targ, gedict_t *attacker );
 
 // commands.c
 typedef struct cmd_s {

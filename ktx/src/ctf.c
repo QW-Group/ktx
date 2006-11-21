@@ -1,5 +1,5 @@
 /*
- *  $Id: ctf.c,v 1.17 2006/10/01 14:58:46 qqshka Exp $
+ *  $Id: ctf.c,v 1.18 2006/11/21 11:41:20 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -557,3 +557,96 @@ void mctf()
 
 	G_sprint ( self, 2, "%s turn off: %s\n", getname(self), redtext("hook & runes") );
 }
+
+void CTF_Obituary( gedict_t *targ, gedict_t *attacker )
+{
+	qboolean carrier_bonus = false;
+	qboolean flagdefended = false;
+	gedict_t *head;
+	char *attackerteam;
+
+	if ( !isCTF() )
+		return;
+
+	attackerteam = getteam(attacker);
+           
+	// 2 point bonus for killing enemy flag carrier
+	if ( targ->ctf_flag & CTF_FLAG )
+	{
+		attacker->ps.c_frags++;
+		attacker->s.v.frags += 2;
+		attacker->ps.ctf_points += 2;
+		attacker->carrier_frag_time = g_globalvars.time;
+		//G_sprint( attacker, 1, "Enemy flag carrier killed: 2 bonus frags\n" );
+	}
+             
+	// defending carrier from aggressive player
+	if (( targ->carrier_hurt_time + 4 > g_globalvars.time ) &&
+		!( attacker->ctf_flag & CTF_FLAG ) )
+	{
+		carrier_bonus = true;
+		attacker->ps.c_defends++;
+		attacker->s.v.frags += 2;
+		attacker->ps.ctf_points += 2;
+		// Yes, aggressive is spelled wrong.. but dont want to fix now and break stat parsers
+		G_bprint( 2, "%s defends %s's flag carrier against an agressive enemy\n",
+			attacker->s.v.netname,
+			streq( getteam(attacker), "red" ) ? redtext("RED") : redtext("BLUE") );
+	}  
+
+	head = findradius( world, targ->s.v.origin, 400 );
+	while ( head )
+	{                            
+		if ( streq( head->s.v.classname, "player" ) )
+		{
+			if ( (head->ctf_flag & CTF_FLAG) && ( head != attacker )
+				 && streq(getteam(head), getteam(attacker)) && !carrier_bonus
+			   )
+			{
+				attacker->ps.c_defends++;
+				attacker->s.v.frags++;
+				attacker->ps.ctf_points++;
+				G_bprint( 2, "%s defends %s's flag carrier\n", attacker->s.v.netname,
+					streq(getteam(attacker), "red") ? redtext("RED") : redtext("BLUE"));
+			}
+		}
+
+		if ( (streq(getteam(attacker), "red") && 
+			 streq(head->s.v.classname, "item_flag_team1")) ||
+			 (streq(getteam(attacker), "blue") &&
+                     streq(head->s.v.classname, "item_flag_team2")) 
+		   )
+		{
+			flagdefended = true;
+			attacker->ps.f_defends++;
+			attacker->s.v.frags += 2;
+			attacker->ps.ctf_points += 2;
+			G_bprint( 2, "%s defends the %s flag\n", 
+				attacker->s.v.netname, 
+				streq(getteam(attacker), "red") ? redtext("RED") : redtext("BLUE"));
+		}
+
+		head = findradius( head, targ->s.v.origin, 400 );
+	}
+	
+	// Defend bonus if attacker is close to flag even if target is not
+	head = findradius( world, attacker->s.v.origin, 400 );
+	while ( head )
+	{
+		if ( ( streq(head->s.v.classname, "item_flag_team1") && streq(attackerteam, "red" ) ) ||
+			 ( streq(head->s.v.classname, "item_flag_team2") && streq(attackerteam, "blue") ) )
+		{
+			if (!flagdefended)
+			{
+				attacker->ps.f_defends++;
+				attacker->s.v.frags += 2;
+				attacker->ps.ctf_points += 2;
+				G_bprint( 2, "%s defends the %s flag\n",
+					attacker->s.v.netname,
+					streq(attackerteam, "red") ? redtext("RED") : redtext("BLUE"));
+			}
+		} 
+		head = findradius( head, attacker->s.v.origin, 400 );
+	}
+}
+

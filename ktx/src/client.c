@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.120 2006/11/21 06:19:01 qqshka Exp $
+ *  $Id: client.c,v 1.121 2006/11/21 11:41:20 qqshka Exp $
  */
 
 //===========================================================================
@@ -2636,7 +2636,7 @@ void PlayerPostThink()
 			T_Damage( self, world, world, 5 );
 			sound( self, CHAN_VOICE, "player/land2.wav", 1, ATTN_NORM );
 
-			if ( gre && gre->s.v.takedamage == DAMAGE_AIM )
+			if ( gre && gre->s.v.takedamage == DAMAGE_AIM && gre != self )
 			{
 				// we landed on someone's head, hurt him
 				gre->deathtype = "stomp";
@@ -2698,6 +2698,7 @@ void PlayerPostThink()
 	}
 }
 
+
 /*
 ===========
 ClientObituary
@@ -2717,7 +2718,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	if( match_in_progress != 2 )
 		return; // nothing TODO in non match
 
-    if ( strneq( targ->s.v.classname, "player" ) )
+    if ( !targ->k_player )
 		return;
 
 	refresh_plus_scores ();
@@ -2749,34 +2750,11 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		return;
 	}
 
-    if ( streq( targ->deathtype, "teledeath" ) )
-	{
-		if ( (isTeam() || isCTF()) && streq( targteam, attackerteam ) && !strnull( attackerteam ) && targ != attacker )
-		{
-            G_bprint (PRINT_MEDIUM,"%s was telefragged by %s teammate\n", targ->s.v.netname, g_his(targ));
+	targ->deaths += 1; // somehow dead, bump counter
+	if ( (isTeam() || isCTF()) && streq( targteam, attackerteam ) && !strnull( attackerteam ) && targ != attacker )
+		attacker->friendly += 1; // bump teamkills counter
 
-			targ->deaths += 1;
-			attacker->friendly += 1;
-			if ( cvar("k_tp_tele_death") ) {
-				logfrag (attacker, attacker);
-				attacker->s.v.frags -= 1;
-			}
-			return;
-		}
-
-        G_bprint (PRINT_MEDIUM, "%s was telefragged by %s\n", targ->s.v.netname, attacker->s.v.netname );
-
-        logfrag (attacker, targ);
-
-        attacker->s.v.frags += 1;
-
-		targ->deaths += 1;
-		attacker->victim = targ->s.v.netname;
-		targ->killer = attacker->s.v.netname;
-
-		return;
-	}
-
+// { !!! THIS TELEFRAGS TYPES DOES'T HANDLE TEAM KILLS I DUNNO WHY !!!
 	// mortal trying telefrag someone who has 666
 	if ( streq( targ->deathtype, "teledeath2" ) )
 	{
@@ -2796,95 +2774,16 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		logfrag (targ, targ);
 		return;
 	}
+// }
 
-	if ( streq( targ->deathtype, "squish" ) )
-	{
-		if ( (isTeam() || isCTF()) && streq( targteam, attackerteam ) && !strnull( attackerteam ) && targ != attacker )
-		{
-			logfrag (attacker, attacker);
-			attacker->s.v.frags -= 1;
-			attacker->friendly += 1;
-
-            G_bprint (PRINT_MEDIUM, "%s squished a teammate\n", attacker->s.v.netname);
-
-			return;
-		}
-		else if ( streq( attacker->s.v.classname, "player" ) && attacker != targ )
-		{
-			G_bprint (PRINT_MEDIUM, "%s squishes %s\n", attacker->s.v.netname, targ->s.v.netname);
-			logfrag (attacker, targ);
-			attacker->s.v.frags += 1;
-			targ->deaths += 1;
-			attacker->victim = targ->s.v.netname;
-			targ->killer = attacker->s.v.netname;
-
-			return;
-		}
-		else
-		{
-			logfrag (targ, targ);
-			targ->s.v.frags -= 1;            // killed self
-            G_bprint (PRINT_MEDIUM, "%s was squished\n", targ->s.v.netname);
-
-			return;
-		}
-	}
-
- 	// ktpro like stomps %)
-	if ( streq( targ->deathtype, "stomp" ) )
-	{
-		if ( (isTeam() || isCTF()) && streq( targteam, attackerteam )
-				&& !strnull( attackerteam ) && targ != attacker )
-		{
-			logfrag (attacker, attacker);
-			attacker->s.v.frags -= 1;
-			attacker->friendly += 1;
-
-			switch( (int)(g_random() * 2) ) {
-				case 0:  deathstring = " was jumped by "; break;
-				default:  deathstring = " was crushed by "; break;
-			}
-
-			G_bprint (PRINT_MEDIUM,"%s%s%s teammate\n",
-						targ->s.v.netname, deathstring, g_his( targ ));
-
-			return;
-		}
-		else if ( streq( attacker->s.v.classname, "player" ) && attacker != targ )
-		{
-			logfrag (attacker, targ);
-			attacker->s.v.frags += 1;
-			targ->deaths += 1;
-			attacker->victim = targ->s.v.netname;
-			targ->killer = attacker->s.v.netname;
-
-			deathstring2 = "\n";
-
-			switch( (int)(g_random() * 5) ) {
-				case 0:  deathstring = " softens "; deathstring2 = "'s fall\n"; break;
-				case 1:  deathstring = " tried to catch "; break;
-				case 2:  deathstring = " was jumped by "; break;
-				case 3:  deathstring = " was crushed by "; break;
-				default:
-						 G_bprint (PRINT_MEDIUM, "%s stomps %s\n",
-										attacker->s.v.netname, targ->s.v.netname);
-						 return; // !!! return !!!
-			}
-
-			G_bprint (PRINT_MEDIUM,"%s%s%s%s",
-					targ->s.v.netname, deathstring, attacker->s.v.netname, deathstring2);
-			return;
-		}
-	}
-
-    if ( streq( attacker->s.v.classname, "player" ) ) 
+    if ( attacker->k_player )  // so, inside this "if" targ and attacker is players
     {
 		if ( targ == attacker )
 		{
 			// killed self
 
-			logfrag (attacker, attacker);
-			attacker->s.v.frags -= 1;
+			targ->s.v.frags -= 1;
+			logfrag (targ, targ);
 
 			if ( streq( targ->deathtype, "grenade" ) ) {
                 deathstring = " tries to put the pin back in\n";
@@ -2899,6 +2798,10 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			else if ( streq( targ->deathtype, "selfwater" ) )
 			{
 				deathstring = va(" electrocutes %s\n", g_himself(targ));
+			}
+			else if ( streq( targ->deathtype, "squish" ) )
+			{ //similar code present in case where !attacker->k_player
+				deathstring = " was squished\n";
 			}
 			else if ( streq( targ->deathtype, "discharge" ) )
 			{
@@ -2917,12 +2820,40 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
                 deathstring = " somehow becomes bored with life\n"; // hm, and how it is possible?
 
 			G_bprint (PRINT_MEDIUM, "%s%s", targ->s.v.netname, deathstring);
+
             return;
 		}
-        else if ( ( tp_num() == 2 && streq( targteam, attackerteam ) &&
-                  !strnull( attackerteam ) ) )
+        else if ( (isTeam() || isCTF()) && streq( targteam, attackerteam ) && !strnull( attackerteam ) )
 		{
  			// teamkill
+
+			if ( strneq( targ->deathtype, "teledeath" ) || cvar("k_tp_tele_death") ) {
+				// -1 frag always if non "teledeath", and -1 on "teledeath" if allowed
+				attacker->s.v.frags -= 1;
+				logfrag (attacker, attacker); //ZOID 12-13-96:  killing a teammate logs as suicide
+			}
+
+			// some deathtypes have specific death messages
+
+			if ( streq( targ->deathtype, "teledeath" ) ) {
+				G_bprint (PRINT_MEDIUM, "%s was telefragged by %s teammate\n", targ->s.v.netname, g_his(targ));
+				return;
+			}
+			else if ( streq( targ->deathtype, "squish" ) ) {
+				G_bprint (PRINT_MEDIUM, "%s squished a teammate\n", attacker->s.v.netname);
+				return;
+			}
+			else if ( streq( targ->deathtype, "stomp" ) ) {
+				switch( (int)(g_random() * 2) ) {
+					case 0:  deathstring = " was jumped by "; break;
+					default: deathstring = " was crushed by "; break;
+				}
+
+				G_bprint (PRINT_MEDIUM,"%s%s%s teammate\n",	targ->s.v.netname, deathstring, g_his( targ ));
+				return;
+			}
+
+			// basic death messages
 
 			switch( (int)(g_random() * 4) ) {
 				case 0:  deathstring = va(" checks %s glasses\n", g_his(attacker)); break;
@@ -2932,18 +2863,12 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			}
 
 			G_bprint (PRINT_MEDIUM, "%s%s", attacker->s.v.netname, deathstring);
-			attacker->s.v.frags -= 1;
-			attacker->friendly += 1;
-
-			//ZOID 12-13-96:  killing a teammate logs as suicide
-			logfrag (attacker, attacker);
 			return;
 		}
 		else
 		{	// normal kill, Kteams version
-			logfrag (attacker, targ);
 			attacker->s.v.frags += 1;
-			targ->deaths += 1;          //team				
+			logfrag (attacker, targ);
 
 			attacker->victim = targ->s.v.netname;
 			targ->killer = attacker->s.v.netname;
@@ -2951,96 +2876,30 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			if ( targ->spawn_time + 2 > g_globalvars.time )
 				attacker->ps.spawn_frags++;
 
-			// handle various ctf bonuses
-            if ( isCTF() )
-			{
-				qboolean carrier_bonus = false;
-				qboolean flagdefended = false;
-				gedict_t *head;
-                        
-				// 2 point bonus for killing enemy flag carrier
-				if ( targ->ctf_flag & CTF_FLAG )
-				{
-					attacker->ps.c_frags++;
-					attacker->s.v.frags += 2;
-					attacker->ps.ctf_points += 2;
-					attacker->carrier_frag_time = g_globalvars.time;
-					//G_sprint( attacker, 1, "Enemy flag carrier killed: 2 bonus frags\n" );
-				}
-                          
-				// defending carrier from aggressive player
-				if (( targ->carrier_hurt_time + 4 > g_globalvars.time ) &&
-    				!( attacker->ctf_flag & CTF_FLAG ) )
-				{
-					carrier_bonus = true;
-					attacker->ps.c_defends++;
-					attacker->s.v.frags += 2;
-					attacker->ps.ctf_points += 2;
-					// Yes, aggressive is spelled wrong.. but dont want to fix now and break stat parsers
-					G_bprint( 2, "%s defends %s's flag carrier against an agressive enemy\n",
-						attacker->s.v.netname,
-						streq( getteam(attacker), "red" ) ? redtext("RED") : redtext("BLUE") );
-				}  
-
-				head = findradius( world, targ->s.v.origin, 400 );
-				while ( head )
-				{                            
-					if ( streq( head->s.v.classname, "player" ) )
-					{
-						if ( (head->ctf_flag & CTF_FLAG) && ( head != attacker )
-							 && streq(getteam(head), getteam(attacker)) && !carrier_bonus
-						   )
-						{
-							attacker->ps.c_defends++;
-							attacker->s.v.frags++;
-							attacker->ps.ctf_points++;
-							G_bprint( 2, "%s defends %s's flag carrier\n", attacker->s.v.netname,
-								streq(getteam(attacker), "red") ? redtext("RED") : redtext("BLUE"));
-						}
-					}
-
-					if ( (streq(getteam(attacker), "red") && 
-						 streq(head->s.v.classname, "item_flag_team1")) ||
-						 (streq(getteam(attacker), "blue") &&
-                                  streq(head->s.v.classname, "item_flag_team2")) 
-					   )
-					{
-						flagdefended = true;
-						attacker->ps.f_defends++;
-						attacker->s.v.frags += 2;
-						attacker->ps.ctf_points += 2;
-						G_bprint( 2, "%s defends the %s flag\n", 
-							attacker->s.v.netname, 
-							streq(getteam(attacker), "red") ? redtext("RED") : redtext("BLUE"));
-					}
-
-					head = findradius( head, targ->s.v.origin, 400 );
-				}
-				
-				// Defend bonus if attacker is close to flag even if target is not
-				head = findradius( world, attacker->s.v.origin, 400 );
-				while ( head )
-				{
-					if ( ( streq(head->s.v.classname, "item_flag_team1") && streq(attackerteam, "red" ) ) ||
-						 ( streq(head->s.v.classname, "item_flag_team2") && streq(attackerteam, "blue") ) )
-					{
-						if (!flagdefended)
-						{
-							attacker->ps.f_defends++;
-							attacker->s.v.frags += 2;
-							attacker->ps.ctf_points += 2;
-							G_bprint( 2, "%s defends the %s flag\n",
-								attacker->s.v.netname,
-								streq(attackerteam, "red") ? redtext("RED") : redtext("BLUE"));
-						}
-					} 
-					head = findradius( head, attacker->s.v.origin, 400 );
-				}
-			}
+			if ( isCTF() ) // handle various ctf bonuses
+				CTF_Obituary(targ, attacker);
 
 			deathstring2 = "\n"; // default is "\n"
 
-			if ( streq( targ->deathtype, "nail" ) )
+			if ( streq( targ->deathtype, "teledeath" ) ) {
+				deathstring = " was telefragged by ";
+			}
+			else if ( streq( targ->deathtype, "squish" ) )	{
+				G_bprint (PRINT_MEDIUM, "%s squishes %s\n", attacker->s.v.netname, targ->s.v.netname);
+				return;	// !!! return !!!
+			}
+			else if ( streq( targ->deathtype, "stomp" ) )	{
+				switch( (int)(g_random() * 5) ) {
+					case 0:  deathstring = " softens "; deathstring2 = "'s fall\n"; break;
+					case 1:  deathstring = " tried to catch "; break;
+					case 2:  deathstring = " was jumped by "; break;
+					case 3:  deathstring = " was crushed by "; break;
+					default:
+						 	G_bprint (PRINT_MEDIUM, "%s stomps %s\n", attacker->s.v.netname, targ->s.v.netname);
+						 	return; // !!! return !!!
+				}
+			}
+			else if ( streq( targ->deathtype, "nail" ) )
 			{
 				switch( (int)(g_random() * 2) ) {
 					case 0:  deathstring = " was body pierced by "; break;
@@ -3080,8 +2939,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 						case 0: deathstring = " was brutalized by "; break;
 						case 1:	deathstring = " was smeared by "; break;
 						default:
-								G_bprint (PRINT_MEDIUM, "%s rips %s a new one\n",
-											attacker->s.v.netname, targ->s.v.netname);
+								G_bprint (PRINT_MEDIUM, "%s rips %s a new one\n", attacker->s.v.netname, targ->s.v.netname);
 								return; // !!! return !!!
 					}
 
@@ -3151,8 +3009,8 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	}
 	else // attacker.classname != "player"
 	{
-		logfrag (targ, targ);
         targ->s.v.frags -= 1;            // killed self
+		logfrag (targ, targ);
 
 		if ( streq( targ->deathtype, "explo_box" ) )
 		{
@@ -3160,10 +3018,10 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		}
         else if ( streq( targ->deathtype, "falling" ) )
 		{
-			if( g_random() < 0.5 )
-				deathstring = " cratered\n";
-			else
-				deathstring = va(" fell to %s death\n", g_his(targ));
+			switch( (int)(g_random() * 2) ) {
+				case 0:  deathstring = " cratered\n"; break;
+				default: deathstring = va(" fell to %s death\n", g_his(targ)); break;
+			}
 		}
         else if ( streq( targ->deathtype, "nail" ) || streq( targ->deathtype, "supernail" ) )
 		{
@@ -3180,6 +3038,10 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		else if ( streq( targ->deathtype, "changelevel" ) )
 		{
 			deathstring = " tried to leave\n";
+		}
+		else if ( streq( targ->deathtype, "squish" ) )
+		{
+			deathstring = " was squished\n";
 		}
 		else if ( streq( targ->deathtype, "water_dmg" ) )
 		{
