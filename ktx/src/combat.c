@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.30 2006/10/23 16:17:06 qqshka Exp $
+ *  $Id: combat.c,v 1.31 2006/11/21 06:19:02 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -384,6 +384,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		 && streq( targteam, attackerteam )
 		 && streq( attacker->s.v.classname, "player" )
 		 && strneq( inflictor->s.v.classname, "door" )
+		 && strneq( inflictor->s.v.classname, "teledeath" ) // do telefrag damage in tp
 	   )
 		return;
 
@@ -393,19 +394,15 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		 && streq( targteam, attackerteam )
 		 && streq( attacker->s.v.classname, "player" )
 		 && strneq( inflictor->s.v.classname, "door" )
+		 && strneq( inflictor->s.v.classname, "teledeath" ) // do telefrag damage in tp
 		 && targ != attacker
 	   )
 		return;
 
-//	if ( midair && attacker == targ )
-//		return;
-
 // do the damage
 
 	if (    match_in_progress == 2
-		 || streq( attacker->s.v.classname, "teledeath" ) 
-		 || streq( attacker->s.v.classname, "teledeath2" ) // qqshka
-		 || streq( attacker->s.v.classname, "teledeath3" ) // qqshka 
+		 || streq( inflictor->s.v.classname, "teledeath" ) 
 		 || ( k_practice && strneq( targ->s.v.classname, "player" ) ) // #practice mode#
 	   ) {
 

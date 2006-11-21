@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: triggers.c,v 1.20 2006/11/06 03:42:00 qqshka Exp $
+ *  $Id: triggers.c,v 1.21 2006/11/21 06:19:02 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -365,39 +365,31 @@ void tdeath_touch()
 		// check if both players have invincible
 		if ( other->invincible_finished > g_globalvars.time && other2->invincible_finished > g_globalvars.time )
 		{
-			self->s.v.classname = "teledeath3";
-
 			// remove invincible for both players
 			other->invincible_finished = other2->invincible_finished = 0;
 
 			// probably this must kill both players
-			other->deathtype = "teledeath3";
-			T_Damage( other, self, self, 50000 );
+			other2->deathtype = other->deathtype = "teledeath3";
+			T_Damage( other,  self, other2, 50000 );
+			T_Damage( other2, self, other,  50000 );
 
-			self->s.v.owner = EDICT_TO_PROG( other );
-			other2->deathtype = "teledeath3";
-			T_Damage( other2, self, self, 50000 );
-
-			self->s.v.owner = EDICT_TO_PROG( other2 ); // qqshka - restore owner
-			self->s.v.classname = "teledeath";         // qqshka - restore classname
-			return; // qqshka
+			return;
 		}
 
+		// mortal trying telefrag someone who has 666
 		if ( other->invincible_finished > g_globalvars.time )
 		{
-			self->s.v.classname = "teledeath2";
 			other2->deathtype = "teledeath2";
-			T_Damage( other2, self, self, 50000 );
-			self->s.v.classname = "teledeath"; // qqshka - restore classname
+			T_Damage( other2, self, other, 50000 );
+
 			return;
 		}
 	}
 
 	if ( ISLIVE( other ) )
 	{
-		self->s.v.classname = "teledeath"; // qqshka - restore classname
 		other->deathtype = "teledeath";
-		T_Damage( other, self, self, 50000 );
+		T_Damage( other, self, other2, 50000 );
 	}
 }
 

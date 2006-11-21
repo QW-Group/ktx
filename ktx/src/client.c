@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.119 2006/11/17 20:57:15 qqshka Exp $
+ *  $Id: client.c,v 1.120 2006/11/21 06:19:01 qqshka Exp $
  */
 
 //===========================================================================
@@ -1412,7 +1412,7 @@ void PlayerDeathThink()
 
 // { autospawn
 	respawn_time = cvar("k_midair") ? 2 : 5;
-	if( (g_globalvars.time - self->dead_time) > respawn_time && match_in_progress ) {
+	if( (g_globalvars.time - self->dead_time) > respawn_time ) {
 		k_respawn( self );
 		return;
 	}
@@ -2710,10 +2710,12 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 {
 	char *deathstring,  *deathstring2;
 	char *attackerteam, *targteam;
-	char *attackerteam2;	//team
 
 	// Set it so it should update scores at next attempt.
 	k_nochange = 0;
+
+	if( match_in_progress != 2 )
+		return; // nothing TODO in non match
 
     if ( strneq( targ->s.v.classname, "player" ) )
 		return;
@@ -2749,40 +2751,28 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
     if ( streq( targ->deathtype, "teledeath" ) )
 	{
-		gedict_t *attacker_owner = PROG_TO_EDICT( attacker->s.v.owner );
-
-		if( match_in_progress != 2 ) {
-// qqshka - no message in prewar
-//				G_bprint(PRINT_MEDIUM, "%s was telefragged\n", targ->s.v.netname);
-			return;
-		}
-
-		attackerteam2 = getteam( attacker_owner );
-
-		if( (isTeam() || isCTF()) && streq( targteam, attackerteam2 ) && !strnull ( attackerteam2 )
-			&& targ != attacker_owner
-		  )
+		if ( (isTeam() || isCTF()) && streq( targteam, attackerteam ) && !strnull( attackerteam ) && targ != attacker )
 		{
-            G_bprint(PRINT_MEDIUM,"%s was telefragged by %s teammate\n", targ->s.v.netname, g_his(targ));
+            G_bprint (PRINT_MEDIUM,"%s was telefragged by %s teammate\n", targ->s.v.netname, g_his(targ));
 
 			targ->deaths += 1;
-			attacker_owner->friendly += 1;
+			attacker->friendly += 1;
 			if ( cvar("k_tp_tele_death") ) {
-				logfrag (attacker_owner, attacker_owner);
-				attacker_owner->s.v.frags -= 1;
+				logfrag (attacker, attacker);
+				attacker->s.v.frags -= 1;
 			}
 			return;
 		}
 
-        G_bprint (PRINT_MEDIUM, "%s was telefragged by %s\n", targ->s.v.netname, attacker_owner->s.v.netname );
+        G_bprint (PRINT_MEDIUM, "%s was telefragged by %s\n", targ->s.v.netname, attacker->s.v.netname );
 
-        logfrag (attacker_owner, targ);
+        logfrag (attacker, targ);
 
-        attacker_owner->s.v.frags += 1;
+        attacker->s.v.frags += 1;
 
 		targ->deaths += 1;
-		attacker_owner->victim = targ->s.v.netname;
-		targ->killer = attacker_owner->s.v.netname;
+		attacker->victim = targ->s.v.netname;
+		targ->killer = attacker->s.v.netname;
 
 		return;
 	}
@@ -2800,8 +2790,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	// double 666 telefrag (can happen often in deathmatch 4)
 	if ( streq( targ->deathtype, "teledeath3" ) )
 	{
-		G_bprint (PRINT_MEDIUM, "%s was telefragged by %s's Satan's power\n",
-					targ->s.v.netname, PROG_TO_EDICT ( attacker->s.v.owner)->s.v.netname);
+		G_bprint (PRINT_MEDIUM, "%s was telefragged by %s's Satan's power\n", targ->s.v.netname, attacker->s.v.netname);
 
 		targ->s.v.frags -= 1;
 		logfrag (targ, targ);
@@ -2810,8 +2799,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 	if ( streq( targ->deathtype, "squish" ) )
 	{
-		if ( (isTeam() || isCTF()) && streq( targteam, attackerteam )
-				&& !strnull( attackerteam ) && targ != attacker )
+		if ( (isTeam() || isCTF()) && streq( targteam, attackerteam ) && !strnull( attackerteam ) && targ != attacker )
 		{
 			logfrag (attacker, attacker);
 			attacker->s.v.frags -= 1;
