@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.54 2006/10/10 01:15:25 qqshka Exp $
+ *  $Id: progs.h,v 1.55 2006/11/24 12:26:39 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -48,28 +48,27 @@ struct gedict_s;
 typedef void (*th_die_func_t)();
 typedef void (*th_pain_func_t)(struct gedict_s *, float);
 
+typedef enum
+{
+	wpAXE = 0,
+	wpSG,
+	wpSSG,
+	wpNG,
+	wpSNG,
+	wpGL,
+	wpRL,
+	wpLG,
+	wpMAX
+} weaponName_t;
+
+typedef struct wpType_s {
+	int hits;			// hits with this weapon, for SG and SSG this is count of bullets
+	int attacks;		// all attacks with this weapon, for SG and SSG this is count of bullets
+} wpType_t;
 
 // store player statistic here, like taken armors etc...
 typedef struct player_stats_s {
-
-// h_xxx hits
-// a_xxx all attacks
-	int   h_axe;	// :]
-	int   a_axe;
-	int   h_sg;
-	int   a_sg;
-	int   h_ssg;
-	int   a_ssg;
-	int   h_ng;
-	int   a_ng;
-	int   h_sng;
-	int   a_sng;
-	int   h_gl;
-	int   a_gl;
-	int   h_rl;
-	int   a_rl;
-	int   h_lg;
-	int   a_lg;
+	wpType_t wpn[wpMAX];
 
 	int   ra; //    red armors taken count
 	int   ya; // yellow armors taken count

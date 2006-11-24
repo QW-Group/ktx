@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.142 2006/11/07 16:32:18 qqshka Exp $
+ *  $Id: commands.c,v 1.143 2006/11/24 12:26:40 qqshka Exp $
  */
 
 // commands.c
@@ -3180,11 +3180,7 @@ void Wp_Reset ( )
 	if ( match_in_progress )
 		return;
 
-	self->ps.h_axe = self->ps.a_axe = self->ps.h_sg = self->ps.a_sg  = 0;
-	self->ps.h_ssg = self->ps.a_ssg = 0;
-	self->ps.h_ng  = self->ps.a_ng  = self->ps.h_sng= self->ps.a_sng = 0;
-	self->ps.h_gl  = self->ps.a_gl  = 0;
-	self->ps.h_rl  = self->ps.a_rl  = self->ps.h_lg = self->ps.a_lg  = 0;
+	memset(self->ps.wpn, 0, sizeof(self->ps.wpn));
 }
 
 void Wp_Stats(float on)

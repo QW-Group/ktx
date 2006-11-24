@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.87 2006/11/20 11:19:04 qqshka Exp $
+ *  $Id: match.c,v 1.88 2006/11/24 12:26:41 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -244,15 +244,15 @@ void SummaryTPStats ( )
 				    	pent  += p2->ps.pent;
 				    	ring  += p2->ps.ring;
 
-						h_rl  += p2->ps.h_rl;
-						a_rl  += p2->ps.a_rl;
-						h_gl  += p2->ps.h_gl;
-						h_lg  += p2->ps.h_lg;
-						a_lg  += p2->ps.a_lg;
-						h_sg  += p2->ps.h_sg;
-						a_sg  += p2->ps.a_sg;
-						h_ssg += p2->ps.h_ssg;
-						a_ssg += p2->ps.a_ssg;
+						h_rl  += p2->ps.wpn[wpRL].hits;
+						a_rl  += p2->ps.wpn[wpRL].attacks;
+						h_gl  += p2->ps.wpn[wpGL].hits;
+						h_lg  += p2->ps.wpn[wpLG].hits;
+						a_lg  += p2->ps.wpn[wpLG].attacks;
+						h_sg  += p2->ps.wpn[wpSG].hits;
+						a_sg  += p2->ps.wpn[wpSG].attacks;
+						h_ssg += p2->ps.wpn[wpSSG].hits;
+						a_ssg += p2->ps.wpn[wpSSG].attacks;
 
 						d_rl += p2->ps.dropped_rls;
 						k_rl += p2->ps.killed_rls;
@@ -410,16 +410,16 @@ void OnePlayerStats(gedict_t *p, int tp)
 	pent  = p->ps.pent;
 	ring  = p->ps.ring;
 
-	h_rl  = p->ps.h_rl;
-	a_rl  = p->ps.a_rl;
-	h_gl  = p->ps.h_gl;
-	a_gl  = p->ps.a_gl;
-	h_lg  = p->ps.h_lg;
-	a_lg  = p->ps.a_lg;
-	h_sg  = p->ps.h_sg;
-	a_sg  = p->ps.a_sg;
-	h_ssg = p->ps.h_ssg;
-	a_ssg = p->ps.a_ssg;
+	h_rl  = p->ps.wpn[wpRL].hits;
+	a_rl  = p->ps.wpn[wpRL].attacks;
+	h_gl  = p->ps.wpn[wpGL].hits;
+	a_gl  = p->ps.wpn[wpGL].attacks;
+	h_lg  = p->ps.wpn[wpLG].hits;
+	a_lg  = p->ps.wpn[wpLG].attacks;
+	h_sg  = p->ps.wpn[wpSG].hits;
+	a_sg  = p->ps.wpn[wpSG].attacks;
+	h_ssg = p->ps.wpn[wpSSG].hits;
+	a_ssg = p->ps.wpn[wpSSG].attacks;
 
 	h_sg  = 100.0 * h_sg  / max(1, a_sg);
 	h_ssg = 100.0 * h_ssg / max(1, a_ssg);

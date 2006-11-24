@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.73 2006/11/01 23:04:12 qqshka Exp $
+ *  $Id: world.c,v 1.74 2006/11/24 12:26:41 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -997,8 +997,8 @@ void FixRules ( )
 	int tl   = timelimit = cvar( "timelimit" );
 	int fl   = fraglimit = cvar( "fraglimit" );
 	int dm   = deathmatch = cvar( "deathmatch" );
-	int k_minr = bound(0, cvar( "k_minrate" ), 30000);
-	int k_maxr = bound(0, cvar( "sv_maxrate" ), 30000);	
+	int k_minr = bound(0, cvar( "k_minrate" ),  100000);
+	int k_maxr = bound(0, cvar( "sv_maxrate" ), 100000);	
 
     k_maxspeed = cvar( "sv_maxspeed" );
 
@@ -1066,15 +1066,18 @@ void FixRules ( )
     }
 // <-- oldman
 
-	if ( !k_minr ) {
-		cvar_fset( "k_minrate", k_minr = 500 );
-	}
-	if ( !k_maxr ) {
-		cvar_fset( "sv_maxrate", k_maxr = 30000 );
-	}
-	if ( k_minr > k_maxr ) {
-		cvar_fset( "k_minrate", k_minr = k_maxr );
-	}
+// {  rate bounds
+	if ( !k_minr )
+		k_minr = 500; // was wrong/zero setting
+	if ( !k_maxr )
+		k_maxr = 30000; // was wrong/zero setting
+	if ( k_minr > k_maxr )
+		k_minr = k_maxr; // hehe
+	if ( k_minr != cvar( "k_minrate" ) )
+		cvar_fset( "k_minrate", k_minr );
+	if ( k_maxr != cvar( "sv_maxrate" ) )
+		cvar_fset( "sv_maxrate", k_maxr );
+// }
 
 	if ( cvar("k_midair") && deathmatch != 4 )
 		cvar_fset( "k_midair", 0 ); // midair only in dmm4

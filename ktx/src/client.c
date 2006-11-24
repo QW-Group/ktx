@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.121 2006/11/21 11:41:20 qqshka Exp $
+ *  $Id: client.c,v 1.122 2006/11/24 12:26:40 qqshka Exp $
  */
 
 //===========================================================================
@@ -1829,22 +1829,22 @@ void Print_Wp_Stats( )
 	gedict_t *e = self->k_player ? self : ( g ? g : world ); // stats of whom we want to show
 
 #if 0 /* percentage */
-	float axe = wps & S_AXE ? 100.0 * e->ps.h_axe / max(1, e->ps.a_axe) : 0;
+	float axe = wps & S_AXE ? 100.0 * e->ps.wpn[wpAXE].hits / max(1, e->ps.wpn[wpAXE].attacks) : 0;
 #else /* just count of direct hits */
-	float axe = wps & S_AXE ? e->ps.h_axe : 0;
+	float axe = wps & S_AXE ? e->ps.wpn[wpAXE].hits : 0;
 #endif
-	float sg  = wps & S_SG  ? 100.0 * e->ps.h_sg  / max(1, e->ps.a_sg) : 0;
-	float ssg = wps & S_SSG ? 100.0 * e->ps.h_ssg / max(1, e->ps.a_ssg) : 0;
-	float ng  = wps & S_NG  ? 100.0 * e->ps.h_ng  / max(1, e->ps.a_ng) : 0;
-	float sng = wps & S_SNG ? 100.0 * e->ps.h_sng / max(1, e->ps.a_sng) : 0;
+	float sg  = wps & S_SG  ? 100.0 * e->ps.wpn[wpSG].hits  / max(1, e->ps.wpn[wpSG].attacks) : 0;
+	float ssg = wps & S_SSG ? 100.0 * e->ps.wpn[wpSSG].hits / max(1, e->ps.wpn[wpSSG].attacks) : 0;
+	float ng  = wps & S_NG  ? 100.0 * e->ps.wpn[wpNG].hits  / max(1, e->ps.wpn[wpNG].attacks) : 0;
+	float sng = wps & S_SNG ? 100.0 * e->ps.wpn[wpSNG].hits / max(1, e->ps.wpn[wpSNG].attacks) : 0;
 #if 0 /* percentage */
-	float gl  = wps & S_GL  ? 100.0 * e->ps.h_gl  / max(1, e->ps.a_gl) : 0;
-	float rl  = wps & S_RL  ? 100.0 * e->ps.h_rl  / max(1, e->ps.a_rl) : 0;
+	float gl  = wps & S_GL  ? 100.0 * e->ps.wpn[wpGL].hits  / max(1, e->ps.wpn[wpGL].attacks) : 0;
+	float rl  = wps & S_RL  ? 100.0 * e->ps.wpn[wpRL].hits  / max(1, e->ps.wpn[wpRL].attacks) : 0;
 #else /* just count of direct hits */
-	float gl  = wps & S_GL  ? e->ps.h_gl : 0;
-	float rl  = wps & S_RL  ? max(0.001, e->ps.h_rl) : 0;
+	float gl  = wps & S_GL  ? e->ps.wpn[wpGL].hits : 0;
+	float rl  = wps & S_RL  ? max(0.001, e->ps.wpn[wpRL].hits) : 0;
 #endif
-	float lg  = wps & S_LG  ? max(0.001, 100.0 * e->ps.h_lg / max(1, e->ps.a_lg)) : 0;
+	float lg  = wps & S_LG  ? max(0.001, 100.0 * e->ps.wpn[wpLG].hits / max(1, e->ps.wpn[wpLG].attacks)) : 0;
 
 	if ( (i = lw) > 0 ) {
 		i = bound(0, i, sizeof(buf)-1 );
