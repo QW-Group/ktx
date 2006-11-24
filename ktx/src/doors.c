@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: doors.c,v 1.6 2006/10/01 14:58:46 qqshka Exp $
+ *  $Id: doors.c,v 1.7 2006/11/24 17:39:22 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -65,7 +65,7 @@ void            door_fire();
 
 void door_blocked()
 {
-	other->deathtype = "squish";
+	other->deathtype = dtSQUISH;
 	T_Damage( other, self, PROG_TO_EDICT( self->s.v.goalentity ), self->dmg );
 
 // if a door has a negative wait, it would never come back if blocked,
@@ -798,7 +798,7 @@ void secret_blocked()
 	if ( g_globalvars.time < self->attack_finished )
 		return;
 	self->attack_finished = g_globalvars.time + 0.5;
-	other->deathtype = "squish";
+	other->deathtype = dtSQUISH;
 	T_Damage( other, self, self, self->dmg );
 }
 

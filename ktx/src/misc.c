@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: misc.c,v 1.5 2006/10/23 16:17:06 qqshka Exp $
+ *  $Id: misc.c,v 1.6 2006/11/24 17:39:23 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -223,7 +223,7 @@ void fire_fly()
 
 void fire_touch()
 {
-	other->deathtype = "fireball";
+	other->deathtype = dtFIREBALL;
 	T_Damage( other, self, self, 20 );
 	ent_remove( self );
 }
@@ -236,7 +236,7 @@ void barrel_explode()
 	self->s.v.takedamage = DAMAGE_NO;
 	self->s.v.classname = "explo_box";
 	// did say self.owner
-	T_RadiusDamage( self, self, 160, world, "explo_box" );
+	T_RadiusDamage( self, self, 160, world, dtEXPLO_BOX );
 
 	WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
 	WriteByte( MSG_MULTICAST, TE_EXPLOSION );
@@ -346,7 +346,7 @@ void Laser_Touch()
 	if ( ISLIVE( other ) )
 	{
 		SpawnBlood( org, 15 );
-		other->deathtype = "laser";
+		other->deathtype = dtLASER;
 		T_Damage( other, self, PROG_TO_EDICT( self->s.v.owner ), 15 );
 	} else
 	{

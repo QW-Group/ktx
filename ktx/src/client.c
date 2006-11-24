@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.122 2006/11/24 12:26:40 qqshka Exp $
+ *  $Id: client.c,v 1.123 2006/11/24 17:39:19 qqshka Exp $
  */
 
 //===========================================================================
@@ -539,7 +539,7 @@ void changelevel_touch()
 // qqshka: does't change level in any case, just do damage and return
 
 	if ( !isCTF() ) { // ctf has always allowed players to hide in exits, etc 
-		other->deathtype = "changelevel";
+		other->deathtype = dtCHANGELEVEL;
 		T_Damage( other, self, self, 50000 );
 	}
 	return;
@@ -553,7 +553,7 @@ void changelevel_touch()
 	     || ( ( trap_cvar( "samelevel" ) == 3 )
 		  && ( strneq( g_globalvars.mapname, "start" ) ) ) )
 	{
-		other->deathtype = "changelevel";
+		other->deathtype = dtCHANGELEVEL;
 		T_Damage( other, self, self, 50000 );
 		return;
 	}
@@ -1098,6 +1098,7 @@ void PutClientInServer()
 
 //	G_bprint(2, "PutClientInServer()\n");
 
+	self->deathtype = dtNONE;
 	self->s.v.classname = "player";
 	self->s.v.health = 100;
 	self->s.v.takedamage = DAMAGE_AIM;
@@ -1538,9 +1539,9 @@ void WaterMove()
 				self->dmg = 10;
 
 			switch ( (int)self->s.v.watertype ) {
-				case CONTENT_LAVA:  self->deathtype = "lava_dmg";  break; // funny, we can drown in lava ?
-				case CONTENT_SLIME: self->deathtype = "slime_dmg"; break; // and in slime ?
-				default:			self->deathtype = "water_dmg"; break; // and sure we can drown in water
+				case CONTENT_LAVA:  self->deathtype = dtLAVA_DMG;  break; // funny, we can drown in lava ?
+				case CONTENT_SLIME: self->deathtype = dtSLIME_DMG; break; // and in slime ?
+				default:			self->deathtype = dtWATER_DMG; break; // and sure we can drown in water
 			}
 			T_Damage( self, world, world, self->dmg );
 			self->pain_finished = g_globalvars.time + 1;
@@ -1567,7 +1568,7 @@ void WaterMove()
 			else
 				self->dmgtime = g_globalvars.time + 0.2;
 
-			self->deathtype = "lava_dmg";
+			self->deathtype = dtLAVA_DMG;
 			T_Damage( self, world, world, 10 * self->s.v.waterlevel );
 		}
 
@@ -1576,7 +1577,7 @@ void WaterMove()
 		if ( self->dmgtime < g_globalvars.time && self->radsuit_finished < g_globalvars.time )
 		{
 			self->dmgtime = g_globalvars.time + 1;
-			self->deathtype = "slime_dmg";
+			self->deathtype = dtSLIME_DMG;
 			T_Damage( self, world, world, 4 * self->s.v.waterlevel );
 		}
 	}
@@ -2266,8 +2267,6 @@ void PlayerPreThink()
 
 	makevectors( self->s.v.v_angle );	// is this still used
 
-	self->deathtype = "";
-
 	CheckRules();
 
 // FIXME: really?
@@ -2632,14 +2631,14 @@ void PlayerPostThink()
            	if( !cvar( "k_fallbunny" ) && self->s.v.waterlevel < 2 )
                	self->brokenankle = 1;  // Yes we have just broken it
 
-			self->deathtype = "falling";
+			self->deathtype = dtFALL;
 			T_Damage( self, world, world, 5 );
 			sound( self, CHAN_VOICE, "player/land2.wav", 1, ATTN_NORM );
 
 			if ( gre && gre->s.v.takedamage == DAMAGE_AIM && gre != self )
 			{
 				// we landed on someone's head, hurt him
-				gre->deathtype = "stomp";
+				gre->deathtype = dtSTOMP;
 				T_Damage (gre, self, self, 10);
 			}
 		} else
@@ -2698,6 +2697,46 @@ void PlayerPostThink()
 	}
 }
 
+void StatsHandler(gedict_t *targ, gedict_t *attacker)
+{
+	weaponName_t wp;
+	char *attackerteam, *targteam;
+
+	attackerteam = getteam(attacker);
+	targteam     = getteam(targ);
+
+	if ( attacker->k_player ) {
+		if (      dtAXE == targ->deathtype )
+			wp = wpAXE;
+		else if ( dtSG == targ->deathtype )
+			wp = wpSG;
+		else if ( dtSSG == targ->deathtype )
+			wp = wpSSG;
+		else if ( dtNG == targ->deathtype )
+			wp = wpNG;
+		else if ( dtSNG == targ->deathtype )
+			wp = wpSNG;
+		else if ( dtGL == targ->deathtype )
+			wp = wpGL;
+		else if ( dtRL == targ->deathtype )
+			wp = wpRL;
+		else if ( dtLG_BEAM == targ->deathtype || dtLG_DIS == targ->deathtype || dtLG_DIS_SELF == targ->deathtype )
+			wp = wpLG;
+		else
+			wp = wpNONE;
+		
+		if ( targ == attacker ) {
+			; // killed self, nothing interest
+		}
+        else if ( (isTeam() || isCTF()) && streq( targteam, attackerteam ) && !strnull( attackerteam ) ) {
+			// team kill
+		}
+		else {
+			// normal kill
+		}
+	}
+}
+
 
 /*
 ===========
@@ -2745,6 +2784,8 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 	targ->ps.spree_current = targ->ps.spree_current_q = 0;
 
+	StatsHandler(targ, attacker);
+
 	if ( isRA() ) {
 		ra_ClientObituary (targ, attacker);
 		return;
@@ -2756,7 +2797,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 // { !!! THIS TELEFRAGS TYPES DOES'T HANDLE TEAM KILLS I DUNNO WHY !!!
 	// mortal trying telefrag someone who has 666
-	if ( streq( targ->deathtype, "teledeath2" ) )
+	if ( dtTELE2 == targ->deathtype )
 	{
 		G_bprint (PRINT_MEDIUM, "Satan's power deflects %s's telefrag\n", targ->s.v.netname);
 
@@ -2766,7 +2807,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	}
 
 	// double 666 telefrag (can happen often in deathmatch 4)
-	if ( streq( targ->deathtype, "teledeath3" ) )
+	if ( dtTELE3 == targ->deathtype )
 	{
 		G_bprint (PRINT_MEDIUM, "%s was telefragged by %s's Satan's power\n", targ->s.v.netname, attacker->s.v.netname);
 
@@ -2785,25 +2826,25 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			targ->s.v.frags -= 1;
 			logfrag (targ, targ);
 
-			if ( streq( targ->deathtype, "grenade" ) ) {
+			if ( dtGL == targ->deathtype ) {
                 deathstring = " tries to put the pin back in\n";
 			}
-			else if ( streq( targ->deathtype, "rocket" ) )
+			else if ( dtRL == targ->deathtype )
 			{
 				switch( (int)(g_random() * 2) ) {
 					case 0:  deathstring = " discovers blast radius\n"; break;
 					default: deathstring = " becomes bored with life\n"; break;
 				}
 			}
-			else if ( streq( targ->deathtype, "selfwater" ) )
+			else if ( dtLG_DIS_SELF == targ->deathtype )
 			{
 				deathstring = va(" electrocutes %s\n", g_himself(targ));
 			}
-			else if ( streq( targ->deathtype, "squish" ) )
+			else if ( dtSQUISH == targ->deathtype )
 			{ //similar code present in case where !attacker->k_player
 				deathstring = " was squished\n";
 			}
-			else if ( streq( targ->deathtype, "discharge" ) )
+			else if ( dtLG_DIS == targ->deathtype )
 			{
                 if (targ->s.v.watertype == CONTENT_SLIME)
                     deathstring = " discharges into the slime\n";
@@ -2827,7 +2868,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		{
  			// teamkill
 
-			if ( strneq( targ->deathtype, "teledeath" ) || cvar("k_tp_tele_death") ) {
+			if ( dtTELE1 != targ->deathtype || cvar("k_tp_tele_death") ) {
 				// -1 frag always if non "teledeath", and -1 on "teledeath" if allowed
 				attacker->s.v.frags -= 1;
 				logfrag (attacker, attacker); //ZOID 12-13-96:  killing a teammate logs as suicide
@@ -2835,15 +2876,15 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 			// some deathtypes have specific death messages
 
-			if ( streq( targ->deathtype, "teledeath" ) ) {
+			if ( dtTELE1 == targ->deathtype ) {
 				G_bprint (PRINT_MEDIUM, "%s was telefragged by %s teammate\n", targ->s.v.netname, g_his(targ));
 				return;
 			}
-			else if ( streq( targ->deathtype, "squish" ) ) {
+			else if ( dtSQUISH == targ->deathtype ) {
 				G_bprint (PRINT_MEDIUM, "%s squished a teammate\n", attacker->s.v.netname);
 				return;
 			}
-			else if ( streq( targ->deathtype, "stomp" ) ) {
+			else if ( dtSTOMP == targ->deathtype ) {
 				switch( (int)(g_random() * 2) ) {
 					case 0:  deathstring = " was jumped by "; break;
 					default: deathstring = " was crushed by "; break;
@@ -2881,14 +2922,14 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 			deathstring2 = "\n"; // default is "\n"
 
-			if ( streq( targ->deathtype, "teledeath" ) ) {
+			if ( dtTELE1 == targ->deathtype ) {
 				deathstring = " was telefragged by ";
 			}
-			else if ( streq( targ->deathtype, "squish" ) )	{
+			else if ( dtSQUISH == targ->deathtype )	{
 				G_bprint (PRINT_MEDIUM, "%s squishes %s\n", attacker->s.v.netname, targ->s.v.netname);
 				return;	// !!! return !!!
 			}
-			else if ( streq( targ->deathtype, "stomp" ) )	{
+			else if ( dtSTOMP == targ->deathtype )	{
 				switch( (int)(g_random() * 5) ) {
 					case 0:  deathstring = " softens "; deathstring2 = "'s fall\n"; break;
 					case 1:  deathstring = " tried to catch "; break;
@@ -2899,14 +2940,14 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 						 	return; // !!! return !!!
 				}
 			}
-			else if ( streq( targ->deathtype, "nail" ) )
+			else if ( dtNG == targ->deathtype )
 			{
 				switch( (int)(g_random() * 2) ) {
 					case 0:  deathstring = " was body pierced by "; break;
 					default: deathstring = " was nailed by "; break;
 				}
 			}
-			else if ( streq( targ->deathtype, "supernail" ) )
+			else if ( dtSNG == targ->deathtype )
 			{
 				switch ( (int)(g_random() * 3) ) {
 					case 0:	 deathstring = " was punctured by "; break;
@@ -2917,7 +2958,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				if ( targ->s.v.health < -40 ) // quad modifier
 					deathstring = " was straw-cuttered by ";
 			}
-			else if ( streq( targ->deathtype, "grenade" ) )
+			else if ( dtGL == targ->deathtype )
 			{
 				deathstring = " eats ";
 				deathstring2 = "'s pineapple\n";
@@ -2928,7 +2969,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 					deathstring2 = "'s grenade\n";
 				}
 			}
-			else if ( streq( targ->deathtype, "rocket" ) )
+			else if ( dtRL == targ->deathtype )
 			{
 				deathstring = ( targ->s.v.health < -40 ? " was gibbed by " : " rides " );
 				deathstring2 = "'s rocket\n";
@@ -2946,15 +2987,15 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 					deathstring2 = "'s quad rocket\n";
 				}
 			}
-			else if ( streq( targ->deathtype, "axe" ) )
+			else if ( dtAXE == targ->deathtype )
 			{
 				deathstring = " was ax-murdered by ";
 			}
-            else if ( streq( targ->deathtype, "hook" ) )
+            else if ( dtHOOK == targ->deathtype )
 			{
 				deathstring = " was hooked by ";
 			}
-			else if ( streq( targ->deathtype, "shotgun" ) )
+			else if ( dtSG == targ->deathtype )
 			{
 				deathstring = " chewed on ";
 				deathstring2 = "'s boomstick\n";
@@ -2965,7 +3006,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 					deathstring2 = "\n";
 				}
 			}
-			else if ( streq( targ->deathtype, "supershotgun" ) )
+			else if ( dtSSG == targ->deathtype )
 			{
 				if ( attacker->super_damage_finished > 0 )
 					deathstring = " ate 8 loads of ";
@@ -2974,7 +3015,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 				deathstring2 = "'s buckshot\n";
 			}
-			else if ( streq( targ->deathtype, "lightning" ) )
+			else if ( dtLG_BEAM == targ->deathtype )
 			{
  				if ( targ->s.v.health < -40 ) { // quad shaft
 					deathstring = " gets a natural disaster from ";
@@ -2985,7 +3026,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 					deathstring2 = "'s shaft\n";
 				}
 			}
-			else if ( streq( targ->deathtype, "discharge" ) )
+			else if ( dtLG_DIS == targ->deathtype )
 			{
 				switch( (int)(g_random() * 2) ) {
 					case 0: 
@@ -3012,52 +3053,52 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
         targ->s.v.frags -= 1;            // killed self
 		logfrag (targ, targ);
 
-		if ( streq( targ->deathtype, "explo_box" ) )
+		if ( dtEXPLO_BOX == targ->deathtype )
 		{
 			deathstring = " blew up\n";
 		}
-        else if ( streq( targ->deathtype, "falling" ) )
+        else if ( dtFALL == targ->deathtype )
 		{
 			switch( (int)(g_random() * 2) ) {
 				case 0:  deathstring = " cratered\n"; break;
 				default: deathstring = va(" fell to %s death\n", g_his(targ)); break;
 			}
 		}
-        else if ( streq( targ->deathtype, "nail" ) || streq( targ->deathtype, "supernail" ) )
+        else if ( dtNG == targ->deathtype || dtSNG == targ->deathtype )
 		{
 			deathstring = " was spiked\n";
 		}
-		else if ( streq( targ->deathtype, "laser" ) )
+		else if ( dtLASER == targ->deathtype )
 		{
 			deathstring = " was zapped\n";
 		}
-		else if ( streq( targ->deathtype, "fireball" ) )
+		else if ( dtFIREBALL == targ->deathtype )
 		{
 			deathstring = " ate a lavaball\n";
 		}
-		else if ( streq( targ->deathtype, "changelevel" ) )
+		else if ( dtCHANGELEVEL == targ->deathtype )
 		{
 			deathstring = " tried to leave\n";
 		}
-		else if ( streq( targ->deathtype, "squish" ) )
+		else if ( dtSQUISH == targ->deathtype )
 		{
 			deathstring = " was squished\n";
 		}
-		else if ( streq( targ->deathtype, "water_dmg" ) )
+		else if ( dtWATER_DMG == targ->deathtype )
 		{
 			switch( (int)(g_random() * 2) ) {
 				case 0:  deathstring = " sleeps with the fishes\n"; break;
 				default: deathstring = " sucks it down\n"; break;
 			}
 		}
-		else if ( streq( targ->deathtype, "slime_dmg" ) )
+		else if ( dtSLIME_DMG == targ->deathtype )
 		{
 			switch( (int)(g_random() * 2) ) {
 				case 0:  deathstring = " gulped a load of slime\n"; break;
 				default: deathstring = " can't exist on slime alone\n"; break;
 			}
 		}
-		else if ( streq( targ->deathtype, "lava_dmg" ) )
+		else if ( dtLAVA_DMG == targ->deathtype )
 		{
 			switch( (int)(g_random() * 2) ) {
 				case 0:  deathstring = " turned into hot slag\n"; break;
@@ -3067,7 +3108,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			if ( targ->s.v.health < -15 )
 				deathstring = " burst into flames\n";
 		}
-		else if ( streq( targ->deathtype, "trigger_hurt" ) )
+		else if ( dtTRIGGER_HURT == targ->deathtype )
 		{
 			deathstring = " died\n";
 		}

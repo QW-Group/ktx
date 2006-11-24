@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.92 2006/11/21 11:41:19 qqshka Exp $
+ *  $Id: g_local.h,v 1.93 2006/11/24 17:39:18 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -133,6 +133,38 @@ typedef enum
 	lsCTF,
 	lsRA 	// note no correspoding gameType_t for lsType
 } lsType_t; // lastscores type
+
+typedef enum
+{
+	dtNONE = 0,
+	dtAXE,
+	dtSG,
+	dtSSG,
+	dtNG,
+	dtSNG,
+	dtGL,
+	dtRL,
+	dtLG_BEAM,
+	dtLG_DIS, // discharge
+	dtLG_DIS_SELF, // sometimes this sort of discharge happens in dmm > 3
+	dtHOOK,
+	dtCHANGELEVEL,
+	dtLAVA_DMG,
+	dtSLIME_DMG,
+	dtWATER_DMG,
+	dtFALL,
+	dtSTOMP,
+	dtTELE1,
+	dtTELE2,
+	dtTELE3,
+	dtEXPLO_BOX,
+	dtLASER,
+	dtFIREBALL,
+	dtSQUISH,
+	dtTRIGGER_HURT,
+	dtUNKNOWN
+} deathType_t;
+
 
 typedef union fi_s
 {
@@ -439,7 +471,7 @@ extern gedict_t *damage_attacker, *damage_inflictor;
 void            T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker,
 			  float damage );
 void            T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage,
-				gedict_t * ignore, char *dtype );
+				gedict_t * ignore, deathType_t dtype );
 void            T_BeamDamage( gedict_t * attacker, float damage );
 
 //items

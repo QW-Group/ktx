@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.55 2006/11/24 12:26:39 qqshka Exp $
+ *  $Id: progs.h,v 1.56 2006/11/24 17:39:18 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -50,7 +50,8 @@ typedef void (*th_pain_func_t)(struct gedict_s *, float);
 
 typedef enum
 {
-	wpAXE = 0,
+	wpNONE = 0,
+	wpAXE,
 	wpSG,
 	wpSSG,
 	wpNG,
@@ -64,6 +65,15 @@ typedef enum
 typedef struct wpType_s {
 	int hits;			// hits with this weapon, for SG and SSG this is count of bullets
 	int attacks;		// all attacks with this weapon, for SG and SSG this is count of bullets
+
+	int kills;			// kills with this weapon
+	int deaths;			// deaths from this weapon
+	int tkills;			// team kills with this weapon
+	int ekills;			// killed enemys which contain this weapon in inventory
+	int drops;			// number of packs dropped which contain this weapon
+	int tooks;			// took this weapon and does't have this weapon before took (weapon from packs counted too)
+	int ttooks;			// total tooked, even u alredy have this weapon
+
 } wpType_t;
 
 // store player statistic here, like taken armors etc...
@@ -92,11 +102,13 @@ typedef struct player_stats_s {
 
 	int		handicap;
 
+
 	// rl stats
 	int		dropped_rls; // number of packs dropped which contain rl 
 	int		killed_rls;  // enemies killed who have rl (even if not currently using it)
 	int		took_rls;    // number of rls you grab if you don't already have one
 	float	rl_time;     // time player has rl
+
   
 	// ctf stats
 	int ctf_points; // use frags - this to calculate efficiency for ctf
@@ -301,7 +313,7 @@ typedef struct gedict_s {
 	float           swim_flag;	// player swimming sound flag
 	float           air_finished;	// when time > air_finished, start drowning
 	float           bubble_count;	// keeps track of the number of bubbles
-	char           *deathtype;	// keeps track of how the player died
+	int				deathtype;	// keeps track of how the player died
 	float           dmgtime;
 
 	th_die_func_t   th_die;

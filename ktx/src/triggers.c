@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: triggers.c,v 1.21 2006/11/21 06:19:02 qqshka Exp $
+ *  $Id: triggers.c,v 1.22 2006/11/24 17:39:23 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -369,7 +369,7 @@ void tdeath_touch()
 			other->invincible_finished = other2->invincible_finished = 0;
 
 			// probably this must kill both players
-			other2->deathtype = other->deathtype = "teledeath3";
+			other2->deathtype = other->deathtype = dtTELE3;
 			T_Damage( other,  self, other2, 50000 );
 			T_Damage( other2, self, other,  50000 );
 
@@ -379,7 +379,7 @@ void tdeath_touch()
 		// mortal trying telefrag someone who has 666
 		if ( other->invincible_finished > g_globalvars.time )
 		{
-			other2->deathtype = "teledeath2";
+			other2->deathtype = dtTELE2;
 			T_Damage( other2, self, other, 50000 );
 
 			return;
@@ -388,7 +388,7 @@ void tdeath_touch()
 
 	if ( ISLIVE( other ) )
 	{
-		other->deathtype = "teledeath";
+		other->deathtype = dtTELE1;
 		T_Damage( other, self, other2, 50000 );
 	}
 }
@@ -630,7 +630,7 @@ void hurt_touch()
 	if ( other->s.v.takedamage )
 	{
 		self->s.v.solid = SOLID_NOT;
-		other->deathtype = "trigger_hurt";
+		other->deathtype = dtTRIGGER_HURT;
 		T_Damage( other, self, self, self->dmg );
 		self->s.v.think = ( func_t ) hurt_on;
 		self->s.v.nextthink = g_globalvars.time + 1;

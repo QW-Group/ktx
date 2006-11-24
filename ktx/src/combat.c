@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.32 2006/11/21 11:41:20 qqshka Exp $
+ *  $Id: combat.c,v 1.33 2006/11/24 17:39:22 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -187,7 +187,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 // check for quad damage powerup on the attacker
 // midair quad makes rockets fast, but no change to damage
 	if ( ( attacker->super_damage_finished > g_globalvars.time )
-	     && strneq( inflictor->s.v.classname, "door" ) && strneq( targ->deathtype, "stomp" )
+	     && strneq( inflictor->s.v.classname, "door" ) && dtSTOMP != targ->deathtype
 		 && !midair )
 	{
 		if ( deathmatch == 4 )
@@ -239,18 +239,18 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			lowheight = false;
 		}
 
-		rl_dmg = ( targ->k_player && streq( targ->deathtype, "rocket" ) );
+		rl_dmg = ( targ->k_player && dtRL == targ->deathtype );
 
 		if ( !rl_dmg ) {
 			// damage types which ignore "lowheight"
-			do_dmg =   !targ->k_player						   // always do damage to non player, secret doors etc...
-				 	|| streq( targ->deathtype, "axe" )         // always do axe damage
-				 	|| streq( targ->deathtype, "water_dmg" )   // always do water damage
-				 	|| streq( targ->deathtype, "lava_dmg"  )   // always do lava damage
-				 	|| streq( targ->deathtype, "slime_dmg" )   // always do slime damage
-				 	|| streq( targ->deathtype, "teledeath"  )  // always do tele damage
-				 	|| streq( targ->deathtype, "teledeath2" )  // always do tele damage
-				 	|| streq( targ->deathtype, "teledeath3" ); // always do tele damage
+			do_dmg =   !targ->k_player					// always do damage to non player, secret doors etc...
+				 	|| dtAXE == targ->deathtype			// always do axe damage
+				 	|| dtWATER_DMG == targ->deathtype	// always do water damage
+				 	|| dtLAVA_DMG  == targ->deathtype	// always do lava damage
+				 	|| dtSLIME_DMG == targ->deathtype	// always do slime damage
+				 	|| dtTELE1 == targ->deathtype	// always do tele damage
+				 	|| dtTELE2 == targ->deathtype	// always do tele damage
+				 	|| dtTELE3 == targ->deathtype;	// always do tele damage
 		}
 	}
 
@@ -260,16 +260,17 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	if ( attacker != targ ) // attack no self
 	if ( attacker->k_player && targ->k_player ) // player vs player
 	if ( ( hdp = GetHandicap(attacker) ) != 100 ) // skip checks if hdp == 100
-	if (    streq( targ->deathtype, "nail" )
- 		 || streq( targ->deathtype, "supernail" )
-		 || streq( targ->deathtype, "grenade" )
-		 || streq( targ->deathtype, "rocket" )
-		 || streq( targ->deathtype, "axe" )
-		 || streq( targ->deathtype, "shotgun" )
-		 || streq( targ->deathtype, "supershotgun" )
-		 || streq( targ->deathtype, "lightning" ) // lg via beam
-		 || streq( targ->deathtype, "discharge" ) // lg discharge, also present "selfwater" lg death type but ignored
-	   ) {                                        // cos it just suicide but here attacker != targ
+	if (    dtAXE  == targ->deathtype
+ 		 || dtSG   == targ->deathtype
+		 || dtSSG  == targ->deathtype
+		 || dtNG   == targ->deathtype
+		 || dtSNG  == targ->deathtype
+		 || dtGL   == targ->deathtype
+		 || dtRL   == targ->deathtype
+		 || dtLG_BEAM     == targ->deathtype
+		 || dtLG_DIS      == targ->deathtype
+		 || dtLG_DIS_SELF == targ->deathtype // even that impossible
+	   ) {
 		damage *= 0.01f * hdp;
 	}
 
@@ -506,7 +507,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 T_RadiusDamage
 ============
 */
-void T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage, gedict_t * ignore, char *dtype )
+void T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage, gedict_t * ignore, deathType_t dtype )
 {
 	float           points;
 	gedict_t       *head;

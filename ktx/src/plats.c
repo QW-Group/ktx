@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: plats.c,v 1.6 2006/10/23 16:17:06 qqshka Exp $
+ *  $Id: plats.c,v 1.7 2006/11/24 17:39:23 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -161,7 +161,7 @@ void plat_crush()
 {
 //dprint ("plat_crush\n");
 
-	other->deathtype = "squish";
+	other->deathtype = dtSQUISH;
 	T_Damage( other, self, self, 1 );
 
 	if ( self->state == STATE_UP )
@@ -277,7 +277,7 @@ void train_blocked()
 		return;
 
 	self->attack_finished = g_globalvars.time + 0.5;
-	other->deathtype = "squish";
+	other->deathtype = dtSQUISH;
 	T_Damage( other, self, self, self->dmg );
 }
 

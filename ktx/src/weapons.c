@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.51 2006/11/24 12:26:41 qqshka Exp $
+ *  $Id: weapons.c,v 1.52 2006/11/24 17:39:23 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -86,7 +86,7 @@ void W_FireAxe()
 
 		PROG_TO_EDICT( g_globalvars.trace_ent )->axhitme = 1;
 		SpawnBlood( org, 20 );
-		PROG_TO_EDICT( g_globalvars.trace_ent )->deathtype = "axe";
+		PROG_TO_EDICT( g_globalvars.trace_ent )->deathtype = dtAXE;
 		if ( deathmatch > 3 )
 			T_Damage( PROG_TO_EDICT( g_globalvars.trace_ent ), self, self, 75 );
 		else
@@ -220,7 +220,7 @@ Collects multiple small damages into a single damage
 */
 gedict_t       *multi_ent;
 float           multi_damage;
-char		   *multi_damage_type;
+deathType_t		multi_damage_type;
 
 vec3_t          blood_org;
 float           blood_count;
@@ -233,7 +233,7 @@ void ClearMultiDamage()
 	multi_damage = 0;
 	blood_count = 0;
 	puff_count = 0;
-	multi_damage_type = "";
+	multi_damage_type = dtNONE;
 }
 
 void ApplyMultiDamage()
@@ -333,7 +333,7 @@ Used by shotgun, super shotgun, and enemy soldier firing
 Go to the trouble of combining multiple pellets into a single damage call.
 ================
 */
-void FireBullets( float shotcount, vec3_t dir, float spread_x, float spread_y, float spread_z, char *deathtype )
+void FireBullets( float shotcount, vec3_t dir, float spread_x, float spread_y, float spread_z, deathType_t deathtype )
 {
 	vec3_t          direction;
 	vec3_t          src, tmp;
@@ -396,7 +396,7 @@ void W_FireShotgun()
 
 	//dir = aim (self, 100000);
 	aim( dir );
-	FireBullets( bullets, dir, 0.04, 0.04, 0, "shotgun" );
+	FireBullets( bullets, dir, 0.04, 0.04, 0, dtSG );
 }
 
 /*
@@ -427,7 +427,7 @@ void W_FireSuperShotgun()
 
 	//dir = aim (self, 100000);
 	aim( dir );
-	FireBullets( bullets, dir, 0.14, 0.08, 0, "supershotgun" );
+	FireBullets( bullets, dir, 0.14, 0.08, 0, dtSSG );
 }
 
 /*
@@ -465,14 +465,14 @@ void T_MissileTouch()
 
 	if ( ISLIVE( other ) )
 	{
-		other->deathtype = "rocket";
+		other->deathtype = dtRL;
 		T_Damage( other, self, PROG_TO_EDICT( self->s.v.owner ), damg );
 	}
 	// don't do radius damage to the other, because all the damage
 	// was done in the impact
 
 
-	T_RadiusDamage( self, PROG_TO_EDICT( self->s.v.owner ), 120, other, "rocket" );
+	T_RadiusDamage( self, PROG_TO_EDICT( self->s.v.owner ), 120, other, dtRL );
 
 //  sound (self, CHAN_WEAPON, "weapons/r_exp3.wav", 1, ATTN_NORM);
 	normalize( self->s.v.velocity, tmp );
@@ -565,7 +565,7 @@ void LightningHit( gedict_t *from, float damage )
 	WriteCoord( MSG_MULTICAST, g_globalvars.trace_endpos[2] );
 	trap_multicast( PASSVEC3( g_globalvars.trace_endpos ), MULTICAST_PVS );
 
-	PROG_TO_EDICT( g_globalvars.trace_ent )->deathtype = "lightning";
+	PROG_TO_EDICT( g_globalvars.trace_ent )->deathtype = dtLG_BEAM;
 	T_Damage( PROG_TO_EDICT( g_globalvars.trace_ent ), from, from, damage );
 }
 
@@ -666,8 +666,9 @@ void W_FireLightning()
 		{
 			if ( g_random() <= 0.5 )
 			{
-				self->deathtype = "selfwater";
+				self->deathtype = dtLG_DIS_SELF;
 				T_Damage( self, self, self, 4000 );
+				return;
 			} else
 			{
 				cells = self->s.v.ammo_cells;
@@ -677,7 +678,7 @@ void W_FireLightning()
                 if ( !cvar( "k_dis" ) ) 
                     return;
 
-				T_RadiusDamage( self, self, 35 * cells, world, "discharge" );
+				T_RadiusDamage( self, self, 35 * cells, world, dtLG_DIS );
 				return;
 			}
 		} else
@@ -689,7 +690,7 @@ void W_FireLightning()
             if ( !cvar( "k_dis" ) )
                 return;
 
-			T_RadiusDamage( self, self, 35 * cells, world, "discharge" );
+			T_RadiusDamage( self, self, 35 * cells, world, dtLG_DIS );
 			return;
 		}
 	}
@@ -745,7 +746,7 @@ void GrenadeExplode()
 	}
 	self->voided = 1;
 
-	T_RadiusDamage( self, PROG_TO_EDICT( self->s.v.owner ), 120, world, "grenade" );
+	T_RadiusDamage( self, PROG_TO_EDICT( self->s.v.owner ), 120, world, dtGL );
 
 	WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
 	WriteByte( MSG_MULTICAST, TE_EXPLOSION );
@@ -906,7 +907,7 @@ void spike_touch()
 			PROG_TO_EDICT( self->s.v.owner )->ps.wpn[wpNG].hits++;
 
 		spawn_touchblood( 1 );
-		other->deathtype = "nail";
+		other->deathtype = dtNG;
 		T_Damage( other, self, PROG_TO_EDICT( self->s.v.owner ), 9 );
 	} else
 	{
@@ -955,7 +956,7 @@ void superspike_touch()
 			PROG_TO_EDICT( self->s.v.owner )->ps.wpn[wpSNG].hits++;
 
 		spawn_touchblood( 2 );
-		other->deathtype = "supernail";
+		other->deathtype = dtSNG;
 		T_Damage( other, self, PROG_TO_EDICT( self->s.v.owner ), 18 );
 	} else
 	{
