@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_syscalls.c,v 1.8 2006/11/20 11:19:04 qqshka Exp $
+ *  $Id: g_syscalls.c,v 1.9 2006/11/26 19:21:54 qqshka Exp $
  */
 
 //#include "g_local.h"
@@ -231,6 +231,11 @@ int trap_nextent( int n )
 	return syscall( G_NEXTENT, n );
 }
 
+gedict_t* trap_nextclient( gedict_t* ent )
+{
+	return (gedict_t*)syscall( G_NEXTCLIENT, (int)ent );
+}
+
 /*int trap_find( int n,int fofs, char*str )
 {
 	return syscall( G_Find, n, fofs, (int)str );
@@ -240,6 +245,10 @@ gedict_t* trap_find( gedict_t* ent,int fofs, char*str )
 	return (gedict_t*)syscall( G_Find, (int)ent, fofs, (int)str );
 }
 
+gedict_t* trap_findradius( gedict_t* ent, float *org, float rad )
+{
+	return (gedict_t*)syscall( G_FINDRADIUS, (int)ent, (int)org, PASSFLOAT(rad) );
+}
 
 void trap_makestatic( int edn )
 {
@@ -420,3 +429,7 @@ int QVMstrftime( char *valbuff, int sizebuff, const char *fmt, int offset )
 	return syscall( G_QVMstrftime, (int)valbuff, sizebuff, (int)fmt, offset );
 }
 
+void trap_makevectors( float *v )
+{
+	syscall( G_MAKEVECTORS, (int)v );
+}

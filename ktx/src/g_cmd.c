@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.26 2006/11/20 11:19:04 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.27 2006/11/26 19:21:54 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -232,20 +232,16 @@ qboolean ClientSay( qboolean isTeamSay )
 	if ( !self->k_accepted )
 		return true; // cmon, u r zombie or etc...
 
-	if ( gamedata.APIversion >= 11 ) {
-		trap_CmdArgs( str = text, sizeof( text ) );
-		if ( str[0] == '"' && (j = strlen(str)) > 2 ) {
-			str[j-1] = 0;
-			str++;
-			trap_CmdArgv( 0, arg_2, sizeof( arg_2 ) );
-			strlcat(text2, arg_2, sizeof(text2));
-			strlcat(text2,   " ", sizeof(text2));
-			strlcat(text2,   str, sizeof(text2));
-			trap_CmdTokenize(text2);
-		}
+	trap_CmdArgs( str = text, sizeof( text ) );
+	if ( str[0] == '"' && (j = strlen(str)) > 2 ) {
+		str[j-1] = 0;
+		str++;
+		trap_CmdArgv( 0, arg_2, sizeof( arg_2 ) );
+		strlcat(text2, arg_2, sizeof(text2));
+		strlcat(text2,   " ", sizeof(text2));
+		strlcat(text2,   str, sizeof(text2));
+		trap_CmdTokenize(text2);
 	}
-	else
-		str = params_str(1, -1);
 
 	if ( f_check && self->k_player ) {
 		if ( !self->f_checkbuf )

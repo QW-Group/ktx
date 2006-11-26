@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: triggers.c,v 1.22 2006/11/24 17:39:23 qqshka Exp $
+ *  $Id: triggers.c,v 1.23 2006/11/26 19:21:55 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -117,7 +117,7 @@ void multi_touch()
 	if ( self->s.v.movedir[0] != 0 && self->s.v.movedir[1] != 0
 	     && self->s.v.movedir[2] != 0 )
 	{
-		makevectors( other->s.v.angles );
+		trap_makevectors( other->s.v.angles );
 		if ( DotProduct( g_globalvars.v_forward, self->s.v.movedir ) < 0 )
 			return;	// not facing the right way
 	}
@@ -479,7 +479,7 @@ void teleport_touch()
 	spawn_tfog( other->s.v.origin );
 
 // spawn a tfog flash in front of the destination
-	makevectors( t->mangle );
+	trap_makevectors( t->mangle );
 	org[0] = t->s.v.origin[0] + 32 * g_globalvars.v_forward[0];
 	org[1] = t->s.v.origin[1] + 32 * g_globalvars.v_forward[1];
 	org[2] = t->s.v.origin[2] + 32 * g_globalvars.v_forward[2];

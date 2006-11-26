@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.65 2006/11/06 03:42:00 qqshka Exp $
+ *  $Id: g_utils.c,v 1.66 2006/11/26 19:21:54 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -301,13 +301,12 @@ void vectoangles( vec3_t value1, vec3_t ret )
 
 /*
 =================
-PF_findradius
-
 Returns a chain of entities that have origins within a spherical area
 
 findradius (origin, radius)
 =================
 */
+#if 0 // worked, but unused since we have trap_findradius
 gedict_t *findradius( gedict_t * start, vec3_t org, float rad )
 {
 	gedict_t *ent;
@@ -350,8 +349,7 @@ gedict_t *findradius2( gedict_t * start, vec3_t org, float rad )
 	return NULL;
 
 }
-
-
+#endif
 /*
 ==============
 changeyaw
@@ -400,11 +398,12 @@ Writes new values for v_forward, v_up, and v_right based on angles
 makevectors(vector)
 ==============
 */
-
+/* replaced with trap_makevectors
 void makevectors( vec3_t vector )
 {
 	AngleVectors( vector, g_globalvars.v_forward, g_globalvars.v_right, g_globalvars.v_up );
 }
+*/
 
 /*
 ============

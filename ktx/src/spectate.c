@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.27 2006/11/06 18:58:01 qqshka Exp $
+ *  $Id: spectate.c,v 1.28 2006/11/26 19:21:54 qqshka Exp $
  */
 
 // spectate.c
@@ -285,7 +285,7 @@ void SpectatorThink()
 		wizard->s.v.angles[0] = -self->s.v.v_angle[0] / 2;
 		wizard->s.v.angles[1] = self->s.v.v_angle[1];
         // wizard model blinking at spectator screen - so move model behind spec camera a bit		
-		makevectors( self->s.v.v_angle );
+		trap_makevectors( self->s.v.v_angle );
 		VectorMA (self->s.v.origin, -32, g_globalvars.v_forward, wizard->s.v.origin);
 		// model bobbing
 		wizard->s.v.origin[2] += sin( g_globalvars.time * 2.5 );

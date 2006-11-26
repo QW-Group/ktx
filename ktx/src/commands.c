@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.143 2006/11/24 12:26:40 qqshka Exp $
+ *  $Id: commands.c,v 1.144 2006/11/26 19:21:54 qqshka Exp $
  */
 
 // commands.c
@@ -2472,7 +2472,6 @@ void ShowNick()
 	gedict_t	*p, *bp = NULL;
 	char		*s1, *s2, *pups, *kn, buf[256] = {0};
 	float		best;
-	vec3_t		forward, right, up;
 	vec3_t		ang;
 	vec3_t		vieworg, entorg;
 	int			itms, i, ln;
@@ -2486,7 +2485,7 @@ void ShowNick()
 	ang[1] = self->s.v.v_angle[1];
 	ang[2] = 0;
 
-	AngleVectors (ang, forward, right, up);
+	trap_makevectors(ang);
 
 	VectorCopy (self->s.v.origin, vieworg);
 	vieworg[2] += 16 /* was 22 */;	// adjust for view height
@@ -2524,11 +2523,11 @@ void ShowNick()
 		entorg[2] += 30;
 		VectorSubtract (entorg, vieworg, v);
 
-		dist = DotProduct (v, forward);
+		dist = DotProduct (v, g_globalvars.v_forward);
 		if ( dist < 10 )
 			continue;
 
-		VectorScale (forward, dist, v2);
+		VectorScale (g_globalvars.v_forward, dist, v2);
 		VectorSubtract (v2, v, v3);
 		miss = VectorLength (v3);
 		if (miss > 300)
@@ -2559,7 +2558,7 @@ void ShowNick()
 			if ( g_globalvars.trace_fraction == 1 )
 				goto ok;
 
-			VectorMA (entorg, radius, right, end);
+			VectorMA (entorg, radius, g_globalvars.v_right, end);
 			VectorSubtract (vieworg, end, v);
 			VectorNormalize (v);
 			VectorMA (end, radius, v, end);
@@ -2567,7 +2566,7 @@ void ShowNick()
 			if ( g_globalvars.trace_fraction == 1 )
 				goto ok;
 
-			VectorMA (entorg, -radius, right, end);
+			VectorMA (entorg, -radius, g_globalvars.v_right, end);
 			VectorSubtract (vieworg, end, v);
 			VectorNormalize (v);
 			VectorMA (end, radius, v, end);
@@ -2575,7 +2574,7 @@ void ShowNick()
 			if ( g_globalvars.trace_fraction == 1 )
 				goto ok;
 
-			VectorMA (entorg, radius, up, end);
+			VectorMA (entorg, radius, g_globalvars.v_up, end);
 			VectorSubtract (vieworg, end, v);
 			VectorNormalize (v);
 			VectorMA (end, radius, v, end);
@@ -2585,7 +2584,7 @@ void ShowNick()
 
 			// use half the radius, otherwise it's possible to see
 			// through floor in some places
-			VectorMA (entorg, -radius/2, up, end);
+			VectorMA (entorg, -radius/2, g_globalvars.v_up, end);
 			VectorSubtract (vieworg, end, v);
 			VectorNormalize (v);
 			VectorMA (end, radius, v, end);

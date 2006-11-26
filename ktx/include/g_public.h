@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_public.h,v 1.7 2006/11/20 11:19:03 qqshka Exp $
+ *  $Id: g_public.h,v 1.8 2006/11/26 19:21:51 qqshka Exp $
  */
 
 #ifndef __G_PUBLIC_H__
@@ -31,7 +31,7 @@
 //
 // g_public.h -- game module information visible to server
 
-#define	GAME_API_VERSION	11
+#define	GAME_API_VERSION	12
 
 
 //===============================================================
@@ -136,7 +136,9 @@ typedef enum
 	G_CMD_ARGS,
 	G_CMD_TOKENIZE,
 	g_strlcpy,
-	g_strlcat
+	g_strlcat,
+	G_MAKEVECTORS,
+	G_NEXTCLIENT
 #ifdef VWEP_TEST
 	, G_PRECACHE_VWEP_MODEL
 #endif

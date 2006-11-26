@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: doors.c,v 1.7 2006/11/24 17:39:22 qqshka Exp $
+ *  $Id: doors.c,v 1.8 2006/11/26 19:21:54 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -690,7 +690,7 @@ void fd_secret_use( gedict_t * attacker, float take )
 	self->s.v.nextthink = self->s.v.ltime + 0.1;
 
 	temp = 1 - ( ( int ) ( self->s.v.spawnflags ) & SECRET_1ST_LEFT );	// 1 or -1
-	makevectors( self->mangle );
+	trap_makevectors( self->mangle );
 
 	if ( self->t_width == 0 )
 	{

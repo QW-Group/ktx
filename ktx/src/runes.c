@@ -1,5 +1,5 @@
 /*
- *  $Id: runes.c,v 1.10 2006/09/13 01:53:06 qqshka Exp $
+ *  $Id: runes.c,v 1.11 2006/11/26 19:21:54 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -58,7 +58,7 @@ void DoTossRune( int rune )
 
 	setorigin( item, PASSVEC3( self->s.v.origin ) );
 	item->s.v.origin[2] += 24; 
-	makevectors( self->s.v.angles );
+	trap_makevectors( self->s.v.angles );
 	aim( item->s.v.velocity );
 	VectorScale( item->s.v.velocity, 800, item->s.v.velocity);
 	vectoangles( item->s.v.velocity, item->s.v.angles );

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.52 2006/11/24 17:39:23 qqshka Exp $
+ *  $Id: weapons.c,v 1.53 2006/11/26 19:21:55 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -63,7 +63,7 @@ void W_FireAxe()
 
 	self->ps.wpn[wpAXE].attacks++;
 
-	makevectors( self->s.v.v_angle );
+	trap_makevectors( self->s.v.v_angle );
 
 	VectorCopy( self->s.v.origin, source );
 	source[2] += 16;
@@ -157,7 +157,7 @@ void SpawnMeatSpray( vec3_t org, vec3_t vel )
 	missile->s.v.movetype = MOVETYPE_BOUNCE;
 	missile->s.v.solid = SOLID_NOT;
 
-	makevectors( self->s.v.angles );
+	trap_makevectors( self->s.v.angles );
 
 	VectorCopy( vel, missile->s.v.velocity );
 // missile->s.v.velocity = vel;
@@ -338,7 +338,7 @@ void FireBullets( float shotcount, vec3_t dir, float spread_x, float spread_y, f
 	vec3_t          direction;
 	vec3_t          src, tmp;
 
-	makevectors( self->s.v.v_angle );
+	trap_makevectors( self->s.v.v_angle );
 	VectorScale( g_globalvars.v_forward, 10, tmp );
 	VectorAdd( self->s.v.origin, tmp, src );
 	//src = self->s.v.origin + v_forward*10;
@@ -515,7 +515,7 @@ void W_FireRocket()
 	newmis->s.v.solid = SOLID_BBOX;
 
 // set newmis speed     
-	makevectors( self->s.v.v_angle );
+	trap_makevectors( self->s.v.v_angle );
 	aim( newmis->s.v.velocity );	// = aim(self, 1000);
 	if ( cvar("k_midair") && self->super_damage_finished > g_globalvars.time ) 
 	{
@@ -808,7 +808,7 @@ void W_FireGrenade()
 
 // set newmis speed     
 
-	makevectors( self->s.v.v_angle );
+	trap_makevectors( self->s.v.v_angle );
 
 	if ( self->s.v.v_angle[0] )
 	{
@@ -1000,7 +1000,7 @@ void W_FireSpikes( float ox )
 {
 	vec3_t          dir, tmp;
 
-	makevectors( self->s.v.v_angle );
+	trap_makevectors( self->s.v.v_angle );
 
     if( match_in_progress != 1 )
 		if ( self->s.v.ammo_nails >= 2 && self->s.v.weapon == IT_SUPER_NAILGUN )
@@ -1249,7 +1249,7 @@ void W_Attack()
 		self->k_666 = 0;
 	}
 
-	makevectors( self->s.v.v_angle );	// calculate forward angle for velocity
+	trap_makevectors( self->s.v.v_angle );	// calculate forward angle for velocity
 	self->show_hostile = g_globalvars.time + 1;	// wake monsters up
 
 	switch ( ( int ) self->s.v.weapon )

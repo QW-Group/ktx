@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.123 2006/11/24 17:39:19 qqshka Exp $
+ *  $Id: client.c,v 1.124 2006/11/26 19:21:51 qqshka Exp $
  */
 
 //===========================================================================
@@ -800,7 +800,7 @@ gedict_t       *SelectSpawnPoint( char *spawnname )
 		pcount = 0;
 
 		// find count of nearby players for 'spot'
-		for ( thing = world; (thing = findradius( thing, spot->s.v.origin, 84 )); )
+		for ( thing = world; (thing = trap_findradius( thing, spot->s.v.origin, 84 )); )
 		{
 			if ( !thing->k_player || ISDEAD( thing ) || thing == self )
 				continue; // ignore non player, or dead played, or self
@@ -847,9 +847,9 @@ gedict_t       *SelectSpawnPoint( char *spawnname )
 		if( !match_in_progress || k_spw == 1 || ( k_spw == 2 && !k_checkx ) ) {
 			vec3_t	v1, v2;
 
-			makevectors( isRA() ? spot->mangle : spot->s.v.angles ); // stupid ra uses mangles instead of angles
+			trap_makevectors( isRA() ? spot->mangle : spot->s.v.angles ); // stupid ra uses mangles instead of angles
 
-			for( thing = world; (thing = findradius(thing, spot->s.v.origin, 84)); ) {
+			for( thing = world; (thing = trap_findradius(thing, spot->s.v.origin, 84)); ) {
  				if( streq( thing->s.v.classname, "teledeath") ) {
 					ent_remove( thing );
 					continue;
@@ -1194,7 +1194,7 @@ void PutClientInServer()
 
 	player_stand1();
 
-	makevectors( self->s.v.angles );
+	trap_makevectors( self->s.v.angles );
 	VectorScale( g_globalvars.v_forward, 20, v );
 	VectorAdd( v, self->s.v.origin, v );
 	spawn_tfog( v );
@@ -1606,7 +1606,7 @@ void CheckWaterJump()
 	vec3_t          start, end;
 
 // check for a jump-out-of-water
-	makevectors( self->s.v.angles );
+	trap_makevectors( self->s.v.angles );
 	
 	VectorCopy( self->s.v.origin, start );	//start = self->s.v.origin;
 	start[2] = start[2] + 8;
@@ -2265,7 +2265,7 @@ void PlayerPreThink()
 	if( k_pause )
 		return;
 
-	makevectors( self->s.v.v_angle );	// is this still used
+	trap_makevectors( self->s.v.v_angle );	// is this still used
 
 	CheckRules();
 

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.33 2006/11/24 17:39:22 qqshka Exp $
+ *  $Id: combat.c,v 1.34 2006/11/26 19:21:54 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -513,7 +513,7 @@ void T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage, ge
 	gedict_t       *head;
 	vec3_t          org;
 
-	head = findradius( world, inflictor->s.v.origin, damage + 40 );
+	head = trap_findradius( world, inflictor->s.v.origin, damage + 40 );
 
 	while ( head )
 	{
@@ -552,7 +552,7 @@ void T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage, ge
 				}
 			}
 		}
-		head = findradius( head, inflictor->s.v.origin, damage + 40 );
+		head = trap_findradius( head, inflictor->s.v.origin, damage + 40 );
 	}
 }
 
@@ -567,7 +567,7 @@ void T_BeamDamage( gedict_t * attacker, float damage )
 	float           points;
 	gedict_t       *head;
 
-	head = findradius( world, attacker->s.v.origin, damage + 40 );
+	head = trap_findradius( world, attacker->s.v.origin, damage + 40 );
 
 	while ( head )
 	{
@@ -588,6 +588,6 @@ void T_BeamDamage( gedict_t * attacker, float damage )
 					T_Damage( head, attacker, attacker, points );
 			}
 		}
-		head = findradius( head, attacker->s.v.origin, damage + 40 );
+		head = trap_findradius( head, attacker->s.v.origin, damage + 40 );
 	}
 }

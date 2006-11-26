@@ -23,6 +23,7 @@ equ    trap_stuffcmd         -20
 equ    trap_localcmd         -21
 equ    trap_cvar             -22
 equ    trap_cvar_set         -23
+equ    trap_findradius       -24
                              
 equ    trap_walkmove         -25
 equ    trap_droptofloor      -26
@@ -97,4 +98,6 @@ equ		trap_CmdArgs     -84
 equ		trap_CmdTokenize -85
 equ		strlcpy			 -86
 equ		strlcat			 -87
+equ		trap_makevectors -88
+equ		trap_nextclient  -89
 

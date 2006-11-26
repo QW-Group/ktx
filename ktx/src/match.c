@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.88 2006/11/24 12:26:41 qqshka Exp $
+ *  $Id: match.c,v 1.89 2006/11/26 19:21:54 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1140,9 +1140,7 @@ void SM_PrepareMap()
 	if ( isCTF() )
 		SpawnRunes( cvar("k_ctf_runes") );
 
-	for( p = world; (p = ( k_matchLess ? findradius2(p, VEC_ORIGIN, 999999) :
-					 				     findradius(p, VEC_ORIGIN, 999999) ));
-	   ) {
+	for( p = world; (p = nextent(p)); ) {
 
 	// going for the if content record..
 
@@ -1733,7 +1731,7 @@ char *CompilateDemoName ()
 
 	fmt = cvar_string( "k_demoname_date" );
 
-	if ( gamedata.APIversion >= 10 && !strnull( fmt ) && QVMstrftime(date, sizeof(date), fmt, 0) )
+	if ( !strnull( fmt ) && QVMstrftime(date, sizeof(date), fmt, 0) )
 		strlcat( demoname, date, sizeof( demoname ) );
 
 	return demoname;

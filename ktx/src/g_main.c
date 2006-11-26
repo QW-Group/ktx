@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.36 2006/11/20 11:19:04 qqshka Exp $
+ *  $Id: g_main.c,v 1.37 2006/11/26 19:21:54 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -101,6 +101,7 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 	case GAME_INIT:
         api_ver = trap_GetApiVersion();
 
+/* api 12 required at least
 		if ( api_ver == 9 && GAME_API_VERSION == 11 ) {
 			// ok, this allow start mod with API_V11 on server with API_V9
 			gamedata.APIversion = 9;
@@ -109,7 +110,9 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 			// ok, this allow start mod with API_V11 on server with API_V10
 			gamedata.APIversion = 10;
 		}
-		else if ( api_ver < GAME_API_VERSION )
+		else
+*/
+		if ( api_ver < GAME_API_VERSION )
 		{
 			G_cprint("Mod requried API_VERSION %d or higher, server have %d\n", GAME_API_VERSION, api_ver);
 			return 0;

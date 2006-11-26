@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: subs.c,v 1.3 2006/10/01 14:58:46 qqshka Exp $
+ *  $Id: subs.c,v 1.4 2006/11/26 19:21:54 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -37,7 +37,7 @@ void SetMovedir()
 		SetVector( self->s.v.movedir, 0, 0, -1 );
 	else
 	{
-		makevectors( self->s.v.angles );
+		trap_makevectors( self->s.v.angles );
 		VectorCopy( g_globalvars.v_forward, self->s.v.movedir );
 	}
 	SetVector( self->s.v.angles, 0, 0, 0 );

@@ -4,7 +4,7 @@
  * PureCTF changes by Methabol
  *
  *
- *  $Id: grapple.c,v 1.8 2006/11/24 17:39:22 qqshka Exp $
+ *  $Id: grapple.c,v 1.9 2006/11/26 19:21:54 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -75,7 +75,7 @@ void GrappleTrack()
 		sound ( self, CHAN_WEAPON, "blob/land1.wav", 1, ATTN_NORM );
 		enemy->deathtype = dtHOOK;
 		T_Damage ( enemy, self, owner, 1 );
-		makevectors ( self->s.v.v_angle );
+		trap_makevectors ( self->s.v.v_angle );
 		SpawnBlood( enemy->s.v.origin, 1 );
 	}
 
@@ -346,7 +346,7 @@ void GrappleThrow()
 	self->hook            = newmis;
 	newmis->s.v.classname = "hook";
 
-	makevectors ( self->s.v.v_angle );
+	trap_makevectors ( self->s.v.v_angle );
 
 	// Weapon velocitys should not be based on server maxspeed imo
 	// Removing purectf velocity changes ( 2.5 * self->maxspeed )

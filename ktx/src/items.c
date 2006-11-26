@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.28 2006/07/08 01:39:10 qqshka Exp $
+ *  $Id: items.c,v 1.29 2006/11/26 19:21:54 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -854,6 +854,7 @@ void SP_item_shells()
 
 	self->s.v.weapon = 1;
 	self->s.v.netname = "shells";
+	self->s.v.classname = "item_shells";
 
 	setsize( self, 0, 0, 0, 32, 32, 56 );
 	StartItem();
@@ -864,26 +865,27 @@ void SP_item_shells()
 
 void SP_item_spikes()
 {
+	qboolean old_style = streq(self->s.v.classname, "item_weapon");
+
 	self->s.v.touch = ( func_t ) ammo_touch;
 
 	if ( ( int ) ( self->s.v.spawnflags ) & WEAPON_BIG2 )
 	{
 		trap_precache_model( "maps/b_nail1.bsp" );
 		setmodel( self, "maps/b_nail1.bsp" );
-		self->aflag = 50;
+		self->aflag = (old_style ? 40 : 50);
 	} else
 	{
 		trap_precache_model( "maps/b_nail0.bsp" );
 		setmodel( self, "maps/b_nail0.bsp" );
-		self->aflag = 25;
+		self->aflag = (old_style ? 20 : 25);
 	}
 	self->s.v.weapon = 2;
-	self->s.v.netname = "nails";
+	self->s.v.netname = (old_style ? "spikes" : "nails"); // hehe, different message when u pick different nails ammo
+	self->s.v.classname = "item_spikes";
 
 	setsize( self, 0, 0, 0, 32, 32, 56 );
-
 	StartItem();
-
 }
 
 /*QUAKED item_rockets (0 .5 .8) (0 0 0) (32 32 32) big
@@ -906,11 +908,10 @@ void SP_item_rockets()
 	}
 	self->s.v.weapon = 3;
 	self->s.v.netname = "rockets";
+	self->s.v.classname = "item_rockets";
 
 	setsize( self, 0, 0, 0, 32, 32, 56 );
-
 	StartItem();
-
 }
 
 
@@ -935,11 +936,10 @@ void SP_item_cells()
 
 	self->s.v.weapon = 4;
 	self->s.v.netname = "cells";
+	self->s.v.classname = "item_cells";
 
 	setsize( self, 0, 0, 0, 32, 32, 56 );
-
 	StartItem();
-
 }
 
 
@@ -953,62 +953,28 @@ DO NOT USE THIS!!!! IT WILL BE REMOVED!
 #define WEAPON_BIG  8
 void SP_item_weapon()
 {
-	self->s.v.touch = ( func_t ) ammo_touch;
-
 	if ( ( int ) ( self->s.v.spawnflags ) & WEAPON_SHOTGUN )
 	{
-		if ( ( int ) ( self->s.v.spawnflags ) & WEAPON_BIG )
-		{
-			trap_precache_model( "maps/b_shell1.bsp" );
-			setmodel( self, "maps/b_shell1.bsp" );
-			self->aflag = 40;
-		} else
-		{
-			trap_precache_model( "maps/b_shell0.bsp" );
-			setmodel( self, "maps/b_shell0.bsp" );
-			self->aflag = 20;
-		}
-		self->s.v.weapon = 1;
-		self->s.v.netname = "shells";
+		self->s.v.spawnflags = (( ( int ) ( self->s.v.spawnflags ) & WEAPON_BIG ) ? WEAPON_BIG2 : 0);
+		SP_item_shells();
+		return;
 	}
 
 	if ( ( int ) ( self->s.v.spawnflags ) & WEAPON_SPIKES )
 	{
-		if ( ( int ) ( self->s.v.spawnflags ) & WEAPON_BIG )
-		{
-			trap_precache_model( "maps/b_nail1.bsp" );
-			setmodel( self, "maps/b_nail1.bsp" );
-			self->aflag = 40;
-		} else
-		{
-			trap_precache_model( "maps/b_nail0.bsp" );
-			setmodel( self, "maps/b_nail0.bsp" );
-			self->aflag = 20;
-		}
-		self->s.v.weapon = 2;
-		self->s.v.netname = "spikes";
+		self->s.v.spawnflags = (( ( int ) ( self->s.v.spawnflags ) & WEAPON_BIG ) ? WEAPON_BIG2 : 0);
+		SP_item_spikes();
+		return;
 	}
 
 	if ( ( int ) ( self->s.v.spawnflags ) & WEAPON_ROCKET )
 	{
-		if ( ( int ) ( self->s.v.spawnflags ) & WEAPON_BIG )
-		{
-			trap_precache_model( "maps/b_rock1.bsp" );
-			setmodel( self, "maps/b_rock1.bsp" );
-			self->aflag = 10;
-		} else
-		{
-			trap_precache_model( "maps/b_rock0.bsp" );
-			setmodel( self, "maps/b_rock0.bsp" );
-			self->aflag = 5;
-		}
-		self->s.v.weapon = 3;
-		self->s.v.netname = "rockets";
+		self->s.v.spawnflags = (( ( int ) ( self->s.v.spawnflags ) & WEAPON_BIG ) ? WEAPON_BIG2 : 0);
+		SP_item_rockets();
+		return;
 	}
 
-	setsize( self, 0, 0, 0, 32, 32, 56 );
-
-	StartItem();
+	SUB_Remove(); // was unknown item, remove it
 }
 
 /*

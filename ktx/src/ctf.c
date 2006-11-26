@@ -1,5 +1,5 @@
 /*
- *  $Id: ctf.c,v 1.18 2006/11/21 11:41:20 qqshka Exp $
+ *  $Id: ctf.c,v 1.19 2006/11/26 19:21:54 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -594,7 +594,7 @@ void CTF_Obituary( gedict_t *targ, gedict_t *attacker )
 			streq( getteam(attacker), "red" ) ? redtext("RED") : redtext("BLUE") );
 	}  
 
-	head = findradius( world, targ->s.v.origin, 400 );
+	head = trap_findradius( world, targ->s.v.origin, 400 );
 	while ( head )
 	{                            
 		if ( streq( head->s.v.classname, "player" ) )
@@ -626,11 +626,11 @@ void CTF_Obituary( gedict_t *targ, gedict_t *attacker )
 				streq(getteam(attacker), "red") ? redtext("RED") : redtext("BLUE"));
 		}
 
-		head = findradius( head, targ->s.v.origin, 400 );
+		head = trap_findradius( head, targ->s.v.origin, 400 );
 	}
 	
 	// Defend bonus if attacker is close to flag even if target is not
-	head = findradius( world, attacker->s.v.origin, 400 );
+	head = trap_findradius( world, attacker->s.v.origin, 400 );
 	while ( head )
 	{
 		if ( ( streq(head->s.v.classname, "item_flag_team1") && streq(attackerteam, "red" ) ) ||
@@ -646,7 +646,7 @@ void CTF_Obituary( gedict_t *targ, gedict_t *attacker )
 					streq(attackerteam, "red") ? redtext("RED") : redtext("BLUE"));
 			}
 		} 
-		head = findradius( head, attacker->s.v.origin, 400 );
+		head = trap_findradius( head, attacker->s.v.origin, 400 );
 	}
 }
 

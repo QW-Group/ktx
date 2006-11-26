@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_syscalls.h,v 1.6 2006/11/20 11:19:03 qqshka Exp $
+ *  $Id: g_syscalls.h,v 1.7 2006/11/26 19:21:51 qqshka Exp $
  */
 
 int     trap_GetApiVersion(  );
@@ -65,8 +65,10 @@ void    trap_lightstyle( int style, char *val );
 int     trap_checkbottom( int edn );
 int     trap_pointcontents( float origin_x, float origin_y, float origin_z );
 int     trap_nextent( int n );
+gedict_t*	trap_nextclient( gedict_t* ent );
 //int 	trap_find( int n,int fofs, char*str );
 gedict_t*	trap_find( gedict_t* ent,int fofs, char*str );
+gedict_t*	trap_findradius( gedict_t* ent, float *org, float rad );
 
 void    trap_makestatic( int edn );
 void    trap_setspawnparam( int edn );
@@ -117,4 +119,6 @@ int 	trap_SetBotCMD( int edn,int msec, float angles_x, float angles_y, float ang
                                 int buttons, int impulse);
 
 int QVMstrftime( char *valbuff, int sizebuff, const char *fmt, int offset );
+
+void trap_makevectors( float *v );
 
