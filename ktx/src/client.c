@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.124 2006/11/26 19:21:51 qqshka Exp $
+ *  $Id: client.c,v 1.125 2006/11/27 22:47:06 qqshka Exp $
  */
 
 //===========================================================================
@@ -722,6 +722,12 @@ void ClientKill()
 	if( k_pause || k_standby )
         return;
 
+	if ( ISDEAD( self ) )
+		return; // alredy dead
+
+	if ( !self->k_player )
+		return; // not a player
+
 	if ( isRA() ) {
 		G_sprint (self, PRINT_HIGH, "Can't suicide in RA mode\n");
 		return;
@@ -736,16 +742,16 @@ void ClientKill()
 
     k_nochange = 0;
 
-	if ( match_in_progress == 2 ) // qqshka - message only during match
-		G_bprint( PRINT_MEDIUM, "%s suicides\n", self->s.v.netname );
-
+	self->s.v.health = 0;
 	set_suicide_frame();
-	self->s.v.modelindex = modelindex_player;
-	logfrag( self, self );
 
-	if( match_in_progress == 2 )	// KTEAMS
+	if( match_in_progress == 2 ) {
+		G_bprint( PRINT_MEDIUM, "%s suicides\n", self->s.v.netname );
 		self->s.v.frags -= 2;	// extra penalty
+		logfrag( self, self );
+	}
 
+	DropPowerups();
 	DropRune();
 	PlayerDropFlag( self );
 
@@ -920,20 +926,44 @@ qboolean CanConnect()
 	// guess is player can enter/re-enter the game if server locked or not
 
 	if( cvar("k_lockmode") == 2 ) { // kick anyway
-		G_sprint(self, 2, "Match in progress, server locked\n");
+		G_sprint(self, 2, "Match in progress, server locked\n"
+						  "Please reconnect as spectator\n");
 
 		return false; // _can't_ connect
 	}
-	else if( cvar("k_lockmode") == 1 ) // kick if team is not set properly
+	else if( cvar("k_lockmode") == 1 ) // different behavior for team/duel/ffa
 	{
-		t = getteam( self );
-
-		for( from = 0, p = world; (p = find_plrghst( p, &from )); )
-			if ( p != self && streq( getteam( p ), t ) )
-				break;  // don't kick, find "player" or "ghost" with equal team
+		if ( isDuel() || isFFA() ) {
+			 // kick if no ghost with same name as for self
+			for( from = 1, p = world; (p = find_plrghst( p, &from )); )
+				if ( streq( getname( p ), self->s.v.netname ) )
+					break;  // don't kick, find "ghost" with equal name
 		
-		if ( !p ) {
-			G_sprint(self, 2, "Set your team before connecting\n");
+			if ( !p ) {
+				G_sprint(self, 2, "%s in progress, server locked\n"
+								  "Please reconnect as spectator\n", isDuel() ? "Duel" : "Match");
+				return false; // _can't_ connect
+			}
+		}
+		else if ( ( isTeam() || isCTF() ) ) {
+			// kick if no ghost or player with team as for self
+			t = getteam( self );
+
+			for( from = 0, p = world; (p = find_plrghst( p, &from )); )
+				if ( p != self && streq( getteam( p ), t ) )
+					break;  // don't kick, find "player" or "ghost" with equal team
+		
+			if ( !p ) {
+				G_sprint(self, 2, "Match in progress, server locked\n"
+								  "Set your team before connecting\n"
+						  		  "or reconnect as spectator\n");
+				return false; // _can't_ connect
+			}
+		}
+		else {
+			// unknown mode, kick anyway
+			G_sprint(self, 2, "Match in progress, server locked\n"
+					  		  "Please reconnect as spectator\n");
 			return false; // _can't_ connect
 		}
 	}
@@ -941,7 +971,8 @@ qboolean CanConnect()
 	// kick if exclusive 
 	if( CountPlayers() >= k_attendees && cvar("k_exclusive") ) 
 	{
-		G_sprint(self, 2, "Sorry, all teams are full\n");
+		G_sprint(self, 2, "Sorry, server is full\n"
+						  "Please reconnect as spectator\n");
 		return false; // _can't_ connect
 	}
 
@@ -963,7 +994,8 @@ qboolean CanConnect()
 
 		if( p ) // found ghost entity
 		{
-			if( strneq( getteam( self ), getteam( p ) ) ) 
+			// check teams only for team mode
+			if( ( isTeam() || isCTF() ) && strneq( getteam( self ), getteam( p ) ) ) 
 			{
 				G_sprint(self, 2, "Please join your old team and reconnect\n");
 				stuffcmd(self, "disconnect\n"); // FIXME: stupid way
@@ -971,27 +1003,43 @@ qboolean CanConnect()
 			}
 
 			ghostClearScores( p );
-			G_bprint(2, "%s rejoins the game %s‘\n", self->s.v.netname, getteam( self ));
-			localcmd("localinfo %d \"\"\n", usrid); // remove ghost in localinfo
 
+			self->ps        = p->ps; // restore player stats
 			self->s.v.frags = p->s.v.frags;
 			self->deaths    = p->deaths;
 			self->friendly  = p->friendly;
-			self->k_teamnum = p->k_teamnum;
 
-			self->ps        = p->ps; // restore player stats
-			
+			if ( isTeam() || isCTF() ) {
+				self->k_teamnum = p->k_teamnum; // we alredy have team in localinfo
+				G_bprint(2, "%s \220%s\221 %s %d %s%s\n", self->s.v.netname, getteam( self ),
+					redtext("rejoins the game with"), (int)self->s.v.frags, redtext("frag"), redtext(count_s(self->s.v.frags)));
+			}
+			else {
+				self->k_teamnum = 0; // force check is we have team in localinfo or not below
+				G_bprint(2, "%s %s %d %s%s\n", self->s.v.netname, 
+					redtext("rejoins the game with"), (int)self->s.v.frags, redtext("frag"), redtext(count_s(self->s.v.frags)));
+			}
+
+			localcmd("localinfo %d \"\"\n", usrid); // remove ghost in localinfo
 			ent_remove( p ); // remove ghost entity
 		}
 		else // ghost entity not found
 		{
 			localcmd("localinfo %d \"\"\n", usrid); // remove ghost in localinfo
-			G_bprint(2, "%s reenters the game without stats %s‘\n", self->s.v.netname, getteam( self ));
+			if ( isTeam() || isCTF() )
+				G_bprint(2, "%s \220%s\221 %s\n", self->s.v.netname, getteam( self ), redtext("reenters the game without stats"));
+			else
+				G_bprint(2, "%s %s\n", self->s.v.netname, redtext("reenters the game without stats"));
 		}
 	}
-	else // ghost not found (localinfo)
-		G_bprint(2, "%s arrives late %s‘\n", self->s.v.netname, getteam( self ));
+	else { // ghost not found (localinfo)
+		if ( isTeam() || isCTF() )
+			G_bprint(2, "%s \220%s\221 %s\n", self->s.v.netname, getteam( self ), redtext("arrives late"));
+		else
+			G_bprint(2, "%s %s\n", self->s.v.netname, redtext("arrives late"));
+	}
 
+	// check is we have team in localinfo or not	
 	if( !strnull ( t = getteam( self ) ) ) 
 	{
 		for( tmid = 665; tmid < k_teamid && !self->k_teamnum; ) 
@@ -1030,9 +1078,6 @@ void ClientConnect()
 
 	k_nochange = 0;
 
-	self->k_lastspawn = world; // to be safe
-	self->k_msgcount = g_globalvars.time;
-
 	if ( !CanConnect() ) {
 		stuffcmd(self, "disconnect\n"); // FIXME: stupid way
 		return;
@@ -1040,6 +1085,8 @@ void ClientConnect()
 
 	newcomer = self;
 
+	self->k_player = true;
+	self->s.v.classname = "player";
 	self->k_accepted = 1; // ok, we allowed to connect
 	self->ready = (match_in_progress ? 1 : 0);
 
@@ -1067,7 +1114,7 @@ void ClientConnect()
 		int i;
 
 		for( i = 1, p = world; p && i <= 16; i++ )
-			for( p = world; (p = find(p, FOFCLSN, "player")) && p->s.v.frags != i; )
+			for( p = world; (p = find(p, FOFCLSN, "player")) && (p == self || p->s.v.frags != i); )
 				; // empty
 
 		// if we found a spot, set the player into it
@@ -1213,10 +1260,10 @@ void PutClientInServer()
 	}
 
 	if( match_in_progress == 2 ) {
-		if( cvar( "k_bzk" ) && k_berzerk ) {
+		if( k_berzerk ) {
 			self->s.v.items = (int)self->s.v.items | IT_QUAD;
 			self->super_time = 1;
-			self->super_damage_finished = g_globalvars.time + 3600;
+			self->super_damage_finished = g_globalvars.time + 3600*10;
 		}
 
 		if( cvar( "k_666" ) ) {
@@ -1677,6 +1724,23 @@ void MakeGhost ()
 	trap_executecmd();
 }
 
+void set_important_fields(gedict_t *p)
+{
+	p->s.v.takedamage	= DAMAGE_NO;
+	p->s.v.solid		= SOLID_NOT;
+	p->s.v.movetype		= MOVETYPE_NONE;
+	p->s.v.deadflag		= DEAD_DEAD;
+	p->s.v.health		= 0;
+	p->s.v.frame		= 0;
+	p->s.v.modelindex	= 0;
+	p->s.v.model		= "";
+	p->s.v.nextthink	= -1;
+
+	p->k_player			= 0;
+	p->k_accepted		= 0;
+	p->s.v.classname	= ""; // clear client classname on disconnect
+}
+
 ////////////////
 // GlobalParams:
 // self
@@ -1684,6 +1748,11 @@ void MakeGhost ()
 void ClientDisconnect()
 {
 	k_nochange = 0; // force recalculate frags scores
+
+	if ( !self->k_accepted ) {
+		set_important_fields( self ); // set classname == "" and etc
+		return;
+	}
 
 	del_from_specs_favourites( self );
 
@@ -1702,29 +1771,13 @@ void ClientDisconnect()
 	DropRune();
 	PlayerDropFlag( self );
 
-	// normal disconnect
-	if( self->k_accepted ) {
-		
-		set_suicide_frame();
-
-	} else {
-		self->s.v.takedamage = 0;
-		self->s.v.solid = 0;
-		self->s.v.movetype = 0;
-		self->s.v.modelindex = 0;
-		self->s.v.model = "";
-	}
-
 // s: added conditional function call here
 	if( self->v.elect_type != etNone ) {
 		G_bprint(2, "Election aborted\n");
 		AbortElect();
 	}
 
-	self->k_player = 0;
-	self->k_accepted = 0;
-	self->ready = 0;
-	self->s.v.classname = ""; // clear client classname on disconnect
+	set_important_fields( self ); // set classname == "" and etc
 
 // s: added conditional function call here
 	if( self->k_kicking )
@@ -2279,6 +2332,7 @@ void PlayerPreThink()
 
 	if ( self->s.v.deadflag >= DEAD_DEAD )
 	{
+		self->super_damage_finished = 0; // moved from PlayerDie()
 		PlayerDeathThink();
 		return;
 	}
@@ -2452,7 +2506,7 @@ void CheckPowerups()
 	if ( self->super_damage_finished )
 	{
 // sound and screen flash when items starts to run out
-		if(self->super_damage_finished < g_globalvars.time + 3 && !k_berzerk)	//team
+		if(self->super_damage_finished < g_globalvars.time + 3)
 		{
 			if ( self->super_time == 1 )
 			{
@@ -2472,7 +2526,7 @@ void CheckPowerups()
 			}
 		}
 
-        if(self->super_damage_finished < g_globalvars.time && !k_berzerk)	//team
+        if(self->super_damage_finished < g_globalvars.time)
 		{		// just stopped
 			self->s.v.items -= IT_QUAD;
 			if ( !k_practice ) // #practice mode#

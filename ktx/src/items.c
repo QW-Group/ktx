@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.29 2006/11/26 19:21:54 qqshka Exp $
+ *  $Id: items.c,v 1.30 2006/11/27 22:47:06 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -41,7 +41,10 @@ void DropPowerup( float timeleft, int powerup )
 {
 	gedict_t       *swp = self; // save self
 
-	if ( timeleft <= 0 )
+	if ( timeleft <= 0 || match_in_progress != 2 )
+		return;
+
+	if ( powerup == IT_QUAD && k_berzerk )
 		return;
 	
 	if ( powerup != IT_QUAD && powerup != IT_INVISIBILITY ) // only this supported
@@ -63,6 +66,21 @@ void DropPowerup( float timeleft, int powerup )
 					  	  swp->s.v.netname, self->s.v.netname, timeleft );
 
 	self = swp;// restore self
+}
+
+void DropPowerups()
+{
+	if ( cvar( "dq" ) && Get_Powerups() )
+	{
+		if ( self->super_damage_finished > 0 )
+			DropPowerup( self->super_damage_finished - g_globalvars.time, IT_QUAD );
+	}
+
+	if ( cvar( "dr" ) && Get_Powerups() )
+	{
+		if ( self->invisible_finished > 0 )
+			DropPowerup( self->invisible_finished - g_globalvars.time, IT_INVISIBILITY);
+	}
 }
 
 void PlaceItem()
@@ -1214,6 +1232,9 @@ void powerup_touch()
 
     if ( !Get_Powerups() )
         return;
+
+	if ( k_berzerk && streq( self->s.v.classname, "item_artifact_super_damage" ) )
+		return; // woot, u must be BERZERK alredy!
 
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
 

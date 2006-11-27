@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.93 2006/11/24 17:39:18 qqshka Exp $
+ *  $Id: g_local.h,v 1.94 2006/11/27 22:47:06 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -475,7 +475,7 @@ void            T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float
 void            T_BeamDamage( gedict_t * attacker, float damage );
 
 //items
-void			DropPowerup( float timeleft, int powerup );
+void			DropPowerups();
 void            DropBackpack();
 
 //triggers.c

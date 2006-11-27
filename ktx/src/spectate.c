@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.28 2006/11/26 19:21:54 qqshka Exp $
+ *  $Id: spectate.c,v 1.29 2006/11/27 22:47:06 qqshka Exp $
  */
 
 // spectate.c
@@ -117,19 +117,22 @@ void SpectatorConnect()
 
 	SpecDecodeLevelParms();
 
-	self->k_accepted = 1; // spectator has not restriction to connect
+	self->k_spectator = true;
+	self->s.v.classname = "spectator"; // Added this in for kick code
+	self->k_accepted = 1; // spectator has no restriction to connect
 
-	for ( p = world; (p = find_plrspc(p, &from)); )	
+	for ( p = world; (p = find_plrspc(p, &from)); )	{
+		if ( p == self )
+			continue; // does't show msg for self
+
 		G_sprint( p, PRINT_HIGH, "Spectator %s entered the game\n", self->s.v.netname  );
+	}
 
 	if ( diff < 0 || diff >= MAX_EDICTS ) // something wrong happen - fixing
 		self->s.v.goalentity = EDICT_TO_PROG( world );
 
 	VIP_ShowRights( self );
 	CheckRate(self, "");
-
-	// Added this in for kick code.
-	self->s.v.classname = "spectator";
 
 	if ( match_in_progress != 2 ) {
 		self->wizard = spawn();

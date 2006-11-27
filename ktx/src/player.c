@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.24 2006/11/24 17:39:23 qqshka Exp $
+ *  $Id: player.c,v 1.25 2006/11/27 22:47:06 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -960,20 +960,8 @@ void StartDie ();
 
 void PlayerDie()
 {
-	self->s.v.items -= ( int ) self->s.v.items & IT_INVISIBILITY;
+	DropPowerups();
 
-	if ( cvar( "dq" ) && Get_Powerups() )
-	{
-		if ( self->super_damage_finished > 0 )
-			DropPowerup( self->super_damage_finished - g_globalvars.time, IT_QUAD );
-	}
-
-	if ( cvar( "dr" ) && Get_Powerups() )
-	{
-		if ( self->invisible_finished > 0 )
-			DropPowerup( self->invisible_finished - g_globalvars.time, IT_INVISIBILITY);
-	}
- 
 	if ( isCTF() )
 	{
 		if ( self->hook_out )
@@ -987,9 +975,11 @@ void PlayerDie()
 		PlayerDropFlag( self );
 	} 
 
+	self->s.v.items -= ( int ) self->s.v.items & IT_INVISIBILITY;
 	self->invisible_finished = 0;	// don't die as eyes
 	self->invincible_finished = 0;
-	self->super_damage_finished = 0;
+// so we have quad few milleseconds after death
+//	self->super_damage_finished = 0; // moved to prethink, like in ktpro
 	self->radsuit_finished = 0;
 
 	self->s.v.modelindex = modelindex_player;	// don't use eyes
@@ -1054,19 +1044,22 @@ void StartDie ()
 
 void set_suicide_frame()
 {
-// used by kill command and disconnect command
+// used by kill command
 
-	if ( strneq( self->s.v.model, "progs/player.mdl" ) )
-		return;		// allready gibbed
+    if( match_in_progress != 2 ) {  // qqshka: no corpse
+		self->s.v.model = "";
+		self->s.v.modelindex = 0;
+		self->s.v.frame = 0;
+	}
+	else {
+		setmodel( self, "progs/player.mdl" );
+		self->s.v.frame = 60;
+	}
 
-	self->s.v.frame = 60;
 	self->s.v.solid = SOLID_NOT;
 	self->s.v.movetype = MOVETYPE_TOSS;
 	self->s.v.deadflag = DEAD_DEAD;
 	self->s.v.nextthink = -1;
-
-    if( match_in_progress != 2 )
-		self->s.v.model = ""; // qqshka: hmm. no corpse ?
 }
 
 void player_diea1()

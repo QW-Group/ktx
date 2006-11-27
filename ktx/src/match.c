@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.89 2006/11/26 19:21:54 qqshka Exp $
+ *  $Id: match.c,v 1.90 2006/11/27 22:47:06 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -985,7 +985,7 @@ void CheckBerzerk( int min, int sec )
 
 		p->s.v.items = (int)p->s.v.items | (IT_QUAD | IT_INVULNERABILITY);
 		p->super_time = 1;
-		p->super_damage_finished = g_globalvars.time + 3600;
+		p->super_damage_finished = g_globalvars.time + 3600*10;
 		p->invincible_time = 1;
 		p->invincible_finished = g_globalvars.time + 2;
 		p->k_666 = 1;
@@ -1319,7 +1319,7 @@ void StartMatch ()
 	trap_executecmd (); // <- this really needed
 
 	// Check to see if berzerk is set.
-	k_berzerkenabled = (cvar( "k_bzk" ) ? bound(0, cvar( "k_btime" ), 9999) : 0);
+	k_berzerkenabled = (cvar( "k_bzk" ) ? bound(0, cvar( "k_btime" ), 3600*10) : 0);
 
 	SM_PrepareMap(); // remove/add some items from map regardind with dmm and game mode
 	

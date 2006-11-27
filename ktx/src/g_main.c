@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.37 2006/11/26 19:21:54 qqshka Exp $
+ *  $Id: g_main.c,v 1.38 2006/11/27 22:47:06 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -135,9 +135,8 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		self->last_rune = "setme";
 		self->s.v.classname = ""; // at least empty classname
 		self->connect_time = g_globalvars.time;
-
-		self->k_spectator = arg0;
-		self->k_player    = !arg0;
+		self->k_lastspawn = world; // set safe value
+		self->k_msgcount = g_globalvars.time;
 
 		self->wreg    = wregs[(int)(self-world)-1];
 		self->plrfrms = plrfrms[(int)(self-world)-1];
@@ -190,6 +189,11 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 			SpectatorDisconnect();
 		else
 			ClientDisconnect();
+
+// { guarantee this set to some safe values after client disconnect
+		self->s.v.classname = "";
+		self->k_accepted = self->k_spectator = self->k_player = 0;
+// }
 
 		update_ghosts();
 
