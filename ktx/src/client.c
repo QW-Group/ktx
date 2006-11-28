@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.125 2006/11/27 22:47:06 qqshka Exp $
+ *  $Id: client.c,v 1.126 2006/11/28 04:46:51 qqshka Exp $
  */
 
 //===========================================================================
@@ -998,7 +998,6 @@ qboolean CanConnect()
 			if( ( isTeam() || isCTF() ) && strneq( getteam( self ), getteam( p ) ) ) 
 			{
 				G_sprint(self, 2, "Please join your old team and reconnect\n");
-				stuffcmd(self, "disconnect\n"); // FIXME: stupid way
 				return false; // _can't_ connect
 			}
 
