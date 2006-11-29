@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.53 2006/11/26 19:21:55 qqshka Exp $
+ *  $Id: weapons.c,v 1.54 2006/11/29 06:47:18 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -81,7 +81,7 @@ void W_FireAxe()
 
 	if ( PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.takedamage )
 	{
-		if ( PROG_TO_EDICT( g_globalvars.trace_ent )->k_player )
+		if ( PROG_TO_EDICT( g_globalvars.trace_ent )->ct == ctPlayer )
 			self->ps.wpn[wpAXE].hits++;
 
 		PROG_TO_EDICT( g_globalvars.trace_ent )->axhitme = 1;
@@ -307,7 +307,7 @@ void TraceAttack( float damage, vec3_t dir )
 
 	if ( PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.takedamage )
 	{
-		if ( PROG_TO_EDICT( g_globalvars.trace_ent )->k_player ) {
+		if ( PROG_TO_EDICT( g_globalvars.trace_ent )->ct == ctPlayer ) {
 			if ((int)self->s.v.weapon == IT_SHOTGUN)
 				self->ps.wpn[wpSG].hits++;
 			else if ((int)self->s.v.weapon == IT_SUPER_SHOTGUN)
@@ -459,7 +459,7 @@ void T_MissileTouch()
 	damg = 100 + g_random() * 20;
 
 	if ( other->s.v.takedamage ) {
-		if ( other->k_player )
+		if ( other->ct == ctPlayer )
 			PROG_TO_EDICT( self->s.v.owner )->ps.wpn[wpRL].hits++;
 	}
 
@@ -555,7 +555,7 @@ LIGHTNING
 
 void LightningHit( gedict_t *from, float damage )
 {
-	if ( PROG_TO_EDICT( g_globalvars.trace_ent )->k_player )
+	if ( PROG_TO_EDICT( g_globalvars.trace_ent )->ct == ctPlayer )
 		self->ps.wpn[wpLG].hits++;
 
 	WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
@@ -764,7 +764,7 @@ void GrenadeTouch()
 		return;		// don't explode on owner
 	
 	if ( other->s.v.takedamage ) {
-		if ( other->k_player )
+		if ( other->ct == ctPlayer )
 			PROG_TO_EDICT( self->s.v.owner )->ps.wpn[wpGL].hits++;
 	}
 
@@ -903,7 +903,7 @@ void spike_touch()
 // hit something that bleeds
 	if ( other->s.v.takedamage )
 	{
-		if ( other->k_player )
+		if ( other->ct == ctPlayer )
 			PROG_TO_EDICT( self->s.v.owner )->ps.wpn[wpNG].hits++;
 
 		spawn_touchblood( 1 );
@@ -952,7 +952,7 @@ void superspike_touch()
 // hit something that bleeds
 	if ( other->s.v.takedamage )
 	{
-		if ( other->k_player )
+		if ( other->ct == ctPlayer )
 			PROG_TO_EDICT( self->s.v.owner )->ps.wpn[wpSNG].hits++;
 
 		spawn_touchblood( 2 );
@@ -1755,7 +1755,7 @@ void ImpulseCommands()
 	qboolean clear = true;
     int capt, impulse = self->s.v.impulse;
 
-	if ( !self->k_player )
+	if ( self->ct != ctPlayer )
 		self->s.v.impulse = impulse = 0;
 
     if ( !impulse )

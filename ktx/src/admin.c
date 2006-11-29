@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.45 2006/10/23 16:17:05 qqshka Exp $
+ * $Id: admin.c,v 1.46 2006/11/29 06:47:17 qqshka Exp $
  */
 
 // admin.c
@@ -193,7 +193,7 @@ void NextClient ()
 		return;
 
 	self->k_playertokick = (self->k_playertokick ? self->k_playertokick : world);
-	from = ( self->k_playertokick != world && self->k_playertokick->k_spectator );
+	from = ( self->k_playertokick != world && self->k_playertokick->ct == ctSpec );
 	self->k_playertokick = find_plrspc(self->k_playertokick, &from);
 
 	if ( !self->k_playertokick ) {  // try find anyone at least
@@ -209,7 +209,7 @@ void NextClient ()
 	}
 
     G_sprint(self, 2, "Kick %s %s?\n", 
-					redtext(self->k_playertokick->k_player ? "player" : "spectator"),
+					redtext(self->k_playertokick->ct == ctPlayer ? "player" : "spectator"),
 								getname(self->k_playertokick));
 }
 
@@ -424,7 +424,7 @@ void VoteAdmin()
 	G_bprint(2, "%s has %s rights!\n", self->s.v.netname, redtext("requested admin"));
 
 	for( from = 0, p = world; (p = find_plrspc(p, &from)); )
-		if ( p != self && p->k_player )
+		if ( p != self && p->ct == ctPlayer )
 			G_sprint(p, 2, "Type %s in console to approve\n", redtext("yes"));
 
 	G_sprint(self, 2, "Type %s to abort election\n", redtext("elect"));
@@ -479,8 +479,8 @@ void ReadyThink ()
 
     p2 = PROG_TO_EDICT( self->s.v.owner );
 	
-    if(    ( p2->k_player && !( p2->ready ) ) // forcestart breaked via break command
-		|| ( p2->k_spectator && !k_force )	// forcestart breaked via forcebreak command (spectator admin)
+    if(    ( p2->ct == ctPlayer && !( p2->ready ) ) // forcestart breaked via break command
+		|| ( p2->ct == ctSpec && !k_force )	// forcestart breaked via forcebreak command (spectator admin)
 	  )
     {
         k_force = 0;
@@ -917,7 +917,7 @@ void force_spec()
 		p = ( (i_fs = atoi( c_fs ) ) < 0 ? spec_by_id( -i_fs ) : SpecPlayer_by_IDorName( c_fs ));
 		if ( p ) {
 			found = true;
-			do_force_spec(p, !p->k_spectator);
+			do_force_spec(p, p->ct != ctSpec);
 		}
 	}
 

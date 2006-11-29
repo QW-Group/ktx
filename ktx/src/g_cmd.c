@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.27 2006/11/26 19:21:54 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.28 2006/11/29 06:47:17 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -243,7 +243,7 @@ qboolean ClientSay( qboolean isTeamSay )
 		trap_CmdTokenize(text2);
 	}
 
-	if ( f_check && self->k_player ) {
+	if ( f_check && self->ct == ctPlayer ) {
 		if ( !self->f_checkbuf )
 			return true; // just in case
 
@@ -324,7 +324,7 @@ qboolean ClientSay( qboolean isTeamSay )
 
 	name = (strnull( self->s.v.netname ) ? "!noname!" : self->s.v.netname);
 
-	if ( self->k_spectator ) {
+	if ( self->ct == ctSpec ) {
 
 		if ( !sv_spectalk || isTeamSay )
 			strlcpy(text, va("[SPEC] %s: %s", name, str), sizeof(text));
@@ -362,30 +362,30 @@ qboolean ClientSay( qboolean isTeamSay )
 		//if (client->state != cs_spawned)
 		//	continue;
 		//<-
-		if ( self->k_spectator && !sv_spectalk )
-			if ( !client->k_spectator )
+		if ( self->ct == ctSpec && !sv_spectalk )
+			if ( client->ct != ctSpec )
 				continue;
 
 		if ( isTeamSay )
 		{
 			// the spectator team
-			if ( self->k_spectator )
+			if ( self->ct == ctSpec )
 			{
-				if ( !client->k_spectator )
+				if ( client->ct != ctSpec )
 					continue;
 			}
 			else
 			{
-				if ( client->k_spectator )
+				if ( client->ct == ctSpec )
 				{
 					goal = PROG_TO_EDICT( client->s.v.goalentity );
 
 					if(   !sv_sayteam_to_spec // player can't say_team to spec in this case
 					   || !fake // self say_team does't contain $\ so this is treat as private message
-					   || (    (goal != world && goal->k_player) // spec track player
+					   || (    (goal != world && goal->ct == ctPlayer) // spec track player
 						   && strneq(team, ezinfokey(goal, "team"))
 						  ) // spec track player on different team
-					   || (   !(goal != world && goal->k_player) // spec _not_ track player
+					   || (   !(goal != world && goal->ct == ctPlayer) // spec _not_ track player
 						   && strneq(team, ezinfokey(client, "team"))
 						  ) // spec do not track player and on different team
 					  )
@@ -417,7 +417,7 @@ void s_common( gedict_t *from, gedict_t *to, char *msg )
 	if ( from == to )
 		return; // ignore sending text to self
 
-	if ( match_in_progress && (from->k_player != to->k_player || from->k_spectator != to->k_spectator) )
+	if ( match_in_progress && from->ct != to->ct )
 		return; // spec to player or player to spec, disallowed in match
 
 	from->s_last_to = to;
@@ -522,12 +522,12 @@ void s_t_do (char *str, char *tname)
 		if ( self == p ) // ignore sending text to self
 			continue;
 
-		if ( match_in_progress && (self->k_player != p->k_player || self->k_spectator != p->k_spectator) )
+		if ( match_in_progress && self->ct != p->ct )
 			continue; // spec to player or player to spec, disallowed in match
 
 		if ( !(
-			      ( streq(tname, "player") && p->k_player )
-			   || ( streq(tname, "spectator") && p->k_spectator )
+			      ( streq(tname, "player") && p->ct == ctPlayer )
+			   || ( streq(tname, "spectator") && p->ct == ctSpec )
 			   || ( streq(tname, "admin") && is_adm( p ) )
 			   || ( streq(tname, getteam( p )) )
 		   	  )
@@ -587,7 +587,7 @@ void s_m_do (char *str, int m)
 		if ( self == p ) // ignore sending text to self
 			continue;
 
-		if ( match_in_progress && (self->k_player != p->k_player || self->k_spectator != p->k_spectator) )
+		if ( match_in_progress && self->ct != p->ct )
 			continue; // spec to player or player to spec, disallowed in match
 
 		bit = 1 << (int)(p - g_edicts - 1);
@@ -656,7 +656,7 @@ void multi_do(int from_arg, qboolean from_mmode)
 
 			p = &(g_edicts[i+1]);
 
-			if ( !(p->k_player || p->k_spectator) ) 
+			if ( !(p->ct == ctPlayer || p->ct == ctSpec) ) 
 				continue; // not valid
 
 			bit = 1 << i;
@@ -755,7 +755,7 @@ void multi_do(int from_arg, qboolean from_mmode)
 
 			p = &(g_edicts[i+1]);
 
-			if ( !(p->k_player || p->k_spectator) ) 
+			if ( !(p->ct == ctPlayer || p->ct == ctSpec) ) 
 				continue; // not valid
 
 			bit = 1 << i;

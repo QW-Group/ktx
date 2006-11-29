@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.56 2006/11/24 17:39:18 qqshka Exp $
+ *  $Id: progs.h,v 1.57 2006/11/29 06:47:17 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -47,6 +47,13 @@ typedef struct shared_edict_s {
 struct gedict_s;
 typedef void (*th_die_func_t)();
 typedef void (*th_pain_func_t)(struct gedict_s *, float);
+
+typedef enum
+{
+	ctNone = 0,
+	ctPlayer,
+	ctSpec
+} clientType_t;
 
 typedef enum
 {
@@ -240,7 +247,9 @@ typedef enum
 //typedef (void(*)(gedict_t *)) one_edict_func;
 typedef struct gedict_s {
 	edict_t         s;
+
 //custom fields
+
 #ifdef VWEP_TEST
 	float   vw_index;
 	float   vw_frame;
@@ -374,25 +383,23 @@ typedef struct gedict_s {
 // ILLEGALFPS]
 
 	float shownick_time;	// used to force centerprint is off at desired time
-	int   k_spectator;		// true if spectator
-	int   k_player;		    // true if player
-// --> timing
+	clientType_t ct;		// client type for client edicts
+// { timing
 	float k_lastPostThink;  // last time PlayerPostThink or SpectatorThink was called
 	float k_timingWarnTime; // time of last client is timing warning
 	int   k_timingTakedmg;  // .... so we can restore
 	int   k_timingSolid;    // .... so we can restore
 	int   k_timingMovetype; // .... so we can restore
-// <-- timing
+// }
 	int   k_voteUnpause;    // store here vote for unpause, for particular player
-// --> stats
+// { stats
 	int   wp_stats;			// show +wp_stats or not
 	float wp_stats_time;    // used to force centerprint is off at desired time
 	int   sc_stats;			// show +scores or not
 	float sc_stats_time;    // used to force centerprint is off at desired time
 
 	player_stats_t ps;		// store player statistic here, like taken armors etc...
-
-// <-- stats
+// }
 
 	int   need_clearCP;		// if this true, clear center print at certain cases
 

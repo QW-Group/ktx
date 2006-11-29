@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: maps.c,v 1.15 2006/07/14 23:53:45 qqshka Exp $
+ *  $Id: maps.c,v 1.16 2006/11/29 06:47:18 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -202,7 +202,7 @@ void DoSelectMap(int iMap)
 	else if ( match_in_progress )
 		return;
 
-	if ( self->k_spectator && !is_adm(self ) ) // only admined specs can select map
+	if ( self->ct == ctSpec && !is_adm(self ) ) // only admined specs can select map
 		return;
 
 	if ( strnull( m = GetMapName( iMap ) ) )

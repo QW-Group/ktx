@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: captain.c,v 1.17 2006/08/13 20:22:51 qqshka Exp $
+ *  $Id: captain.c,v 1.18 2006/11/29 06:47:17 qqshka Exp $
  */
 
 // captain.c
@@ -288,7 +288,7 @@ void VoteCaptain ()
 	G_bprint(2, "%s has %s status!\n", self->s.v.netname, redtext("requested captain"));
 
 	for( from = 0, p = world; (p = find_plrspc(p, &from)); )
-		if ( p != self && p->k_player )
+		if ( p != self && p->ct == ctPlayer )
 			G_sprint(p, 2, "Type %s in console to approve\n", redtext("yes"));
 
     G_sprint(self, 2, "Type %s to abort election\n", redtext("captain"));

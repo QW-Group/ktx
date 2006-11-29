@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.126 2006/11/28 04:46:51 qqshka Exp $
+ *  $Id: client.c,v 1.127 2006/11/29 06:47:17 qqshka Exp $
  */
 
 //===========================================================================
@@ -725,7 +725,7 @@ void ClientKill()
 	if ( ISDEAD( self ) )
 		return; // alredy dead
 
-	if ( !self->k_player )
+	if ( self->ct != ctPlayer )
 		return; // not a player
 
 	if ( isRA() ) {
@@ -808,7 +808,7 @@ gedict_t       *SelectSpawnPoint( char *spawnname )
 		// find count of nearby players for 'spot'
 		for ( thing = world; (thing = trap_findradius( thing, spot->s.v.origin, 84 )); )
 		{
-			if ( !thing->k_player || ISDEAD( thing ) || thing == self )
+			if ( thing->ct != ctPlayer || ISDEAD( thing ) || thing == self )
 				continue; // ignore non player, or dead played, or self
 
 		   // k_spw 2 and 3 feature, if player is spawned not far away and run
@@ -861,7 +861,7 @@ gedict_t       *SelectSpawnPoint( char *spawnname )
 					continue;
 				}
 
-				if ( !thing->k_player || ISDEAD( thing ) || thing == self )
+				if ( thing->ct != ctPlayer || ISDEAD( thing ) || thing == self )
 					continue; // ignore non player, or dead played, or self
 
 				VectorMA (thing->s.v.origin, -15.0, g_globalvars.v_up, v1);
@@ -1084,7 +1084,7 @@ void ClientConnect()
 
 	newcomer = self;
 
-	self->k_player = true;
+	self->ct = ctPlayer;
 	self->s.v.classname = "player";
 	self->k_accepted = 1; // ok, we allowed to connect
 	self->ready = (match_in_progress ? 1 : 0);
@@ -1388,7 +1388,7 @@ void Check_SD( gedict_t *p )
 	if ( !match_in_progress )
 		return;
 
-	if ( !k_sudden_death || !p->k_player )
+	if ( !k_sudden_death || p->ct != ctPlayer )
 		return;
 
 	switch ( (int)k_sudden_death ) {
@@ -1735,7 +1735,7 @@ void set_important_fields(gedict_t *p)
 	p->s.v.model		= "";
 	p->s.v.nextthink	= -1;
 
-	p->k_player			= 0;
+	p->ct				= ctNone;
 	p->k_accepted		= 0;
 	p->s.v.classname	= ""; // clear client classname on disconnect
 }
@@ -1878,8 +1878,8 @@ void Print_Wp_Stats( )
 	int _wps = S_ALL & iKey ( self, "wps" );
 	int  wps = ( _wps ? _wps : S_DEF ); // if wps is not set - show S_DEF weapons
 
-	gedict_t *g = self->k_spectator ? PROG_TO_EDICT( self->s.v.goalentity ) : NULL;
-	gedict_t *e = self->k_player ? self : ( g ? g : world ); // stats of whom we want to show
+	gedict_t *g = self->ct == ctSpec ? PROG_TO_EDICT( self->s.v.goalentity ) : NULL;
+	gedict_t *e = self->ct == ctPlayer ? self : ( g ? g : world ); // stats of whom we want to show
 
 #if 0 /* percentage */
 	float axe = wps & S_AXE ? 100.0 * e->ps.wpn[wpAXE].hits / max(1, e->ps.wpn[wpAXE].attacks) : 0;
@@ -1905,7 +1905,7 @@ void Print_Wp_Stats( )
 		buf[i] = 0;
 	}
 
-	if ( e == world || !e->k_player ) { // spec tracking no one
+	if ( e == world || e->ct != ctPlayer ) { // spec tracking no one
 		G_centerprint( self, "%s%s", buf, redtext("Tracking noone (+wp_stats)"));
 
 		self->need_clearCP  = 1;
@@ -1992,8 +1992,8 @@ void Print_Scores( )
 
 	qboolean sc_ok = false;
 	gedict_t *p, *ed1, *ed2;
-	gedict_t *g = self->k_spectator ? PROG_TO_EDICT( self->s.v.goalentity ) : NULL;
-	gedict_t *e = self->k_player ? self : ( g ? g : world ); // stats of whom we want to show
+	gedict_t *g = self->ct == ctSpec ? PROG_TO_EDICT( self->s.v.goalentity ) : NULL;
+	gedict_t *e = self->ct == ctPlayer ? self : ( g ? g : world ); // stats of whom we want to show
 
 	if ( (i = ls) > 0 ) {
 		i = bound(0, i, sizeof(buf)-1 );
@@ -2001,7 +2001,7 @@ void Print_Scores( )
 		buf[i] = 0;
 	}
 
-	if ( e == world || !e->k_player ) { // spec tracking noone
+	if ( e == world || e->ct != ctPlayer ) { // spec tracking no one
 		G_centerprint( self, "%s%s", buf, redtext("Tracking noone (+scores)"));
 
 		self->need_clearCP  = 1;
@@ -2758,7 +2758,7 @@ void StatsHandler(gedict_t *targ, gedict_t *attacker)
 	attackerteam = getteam(attacker);
 	targteam     = getteam(targ);
 
-	if ( attacker->k_player ) {
+	if ( attacker->ct == ctPlayer ) {
 		if (      dtAXE == targ->deathtype )
 			wp = wpAXE;
 		else if ( dtSG == targ->deathtype )
@@ -2810,7 +2810,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	if( match_in_progress != 2 )
 		return; // nothing TODO in non match
 
-    if ( !targ->k_player )
+    if ( targ->ct != ctPlayer )
 		return;
 
 	refresh_plus_scores ();
@@ -2870,7 +2870,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	}
 // }
 
-    if ( attacker->k_player )  // so, inside this "if" targ and attacker is players
+    if ( attacker->ct == ctPlayer )  // so, inside this "if" targ and attacker is players
     {
 		if ( targ == attacker )
 		{
@@ -2894,7 +2894,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				deathstring = va(" electrocutes %s\n", g_himself(targ));
 			}
 			else if ( dtSQUISH == targ->deathtype )
-			{ //similar code present in case where !attacker->k_player
+			{ //similar code present in case where !(attacker->ct == ctPlayer)
 				deathstring = " was squished\n";
 			}
 			else if ( dtLG_DIS == targ->deathtype )

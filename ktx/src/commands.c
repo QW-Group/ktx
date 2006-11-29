@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.144 2006/11/26 19:21:54 qqshka Exp $
+ *  $Id: commands.c,v 1.145 2006/11/29 06:47:17 qqshka Exp $
  */
 
 // commands.c
@@ -673,7 +673,7 @@ int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
 
 int DoCommand(int icmd)
 {
-	int spc = self->k_spectator;
+	int spc = self->ct == ctSpec;
 
 	if ( !( icmd >= 0 && icmd < cmds_cnt ) )
 		return DO_OUT_OF_RANGE_CMDS;
@@ -765,7 +765,7 @@ qboolean isCmdFlood(gedict_t *p)
 				G_sprint(p, 2, "next time you will be kicked\n");
 			}
 			else if ( k_cmd_fp_kick - p->fp_c.warnings < 1 ) {
-				if ( p->k_player || ( p->k_spectator && !match_in_progress ) )
+				if ( p->ct == ctPlayer || ( p->ct == ctSpec && !match_in_progress ) )
 					G_bprint(2,"%s is a command flooooder!!!\n"
 						   	   "and will be kicked\n", getname(p));
 
@@ -821,7 +821,7 @@ void StuffAliases()
 	for ( i = 1; i <= 16; i++ )
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias %d impulse %d\n", i, i);
 
-	if ( PROG_TO_EDICT( self->s.v.owner )->k_spectator ) {
+	if ( PROG_TO_EDICT( self->s.v.owner )->ct == ctSpec ) {
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias next_fav fav_next\n");
 	}
 	else {
@@ -883,7 +883,7 @@ void StuffModCommands()
 {
 	int i, limit;
 	char *name, *params;
-	qboolean spc = PROG_TO_EDICT( self->s.v.owner )->k_spectator;
+	qboolean spc = PROG_TO_EDICT( self->s.v.owner )->ct == ctSpec;
 	qboolean support_params = isSupport_Params( PROG_TO_EDICT( self->s.v.owner ) );
 	float dt = StuffDeltaTime( iKey( PROG_TO_EDICT( self->s.v.owner ), "ss" ) );
 
@@ -978,10 +978,10 @@ void Do_ShowCmds( qboolean adm_req )
 		if ( strnull(cmds[i].description) || cmds[i].description == CD_NODESC )
 			continue; // command does't have description
 
-		if ( !isValidCmdForClass( i, self->k_spectator ) )
+		if ( !isValidCmdForClass( i, self->ct == ctSpec ) )
 			continue; // cmd does't valid for this class of player or matchless mode does't have this command
 
-		if ( adm_req != isCmdRequireAdmin( i, self->k_spectator ) )
+		if ( adm_req != isCmdRequireAdmin( i, self->ct == ctSpec ) )
 			continue; 
 
 		l = max_cmd_len - strlen(name);
@@ -994,7 +994,7 @@ void Do_ShowCmds( qboolean adm_req )
 
 			G_sprint(self, 2, "\n%s commands for %s:\n\n", 
 				( adm_req ? redtext("admin") : redtext("common") ),
-				( self->k_spectator ? redtext("spectator") : redtext("player") ));
+				( self->ct == ctSpec ? redtext("spectator") : redtext("player") ));
 		}
 
 		G_sprint(self, 2, "%s%s %s\n", redtext(name), dots, cmds[i].description);
@@ -1005,13 +1005,6 @@ void ShowCmds()
 {
 	Do_ShowCmds( false ); // show common commands
 	Do_ShowCmds( true );  // show admin commands
-
-/*
-	if ( self->k_spectator )
-		SShowCmds();
-	else 
-		PShowCmds();
-*/
 }
 
 qboolean check_perm(gedict_t *p, int perm)
@@ -1599,7 +1592,7 @@ void ListWhoNot()
 		return;
 	}
 
-	if( self->k_player && !self->ready ) 
+	if( self->ct == ctPlayer && !self->ready ) 
 	{
 		G_sprint(self, 2, "Ready yourself first\n");
 		return;
@@ -3561,7 +3554,7 @@ void fav_add( )
 	gedict_t *goal = PROG_TO_EDICT(self->s.v.goalentity);
 	int diff = (int)(goal - world);
 
-	if ( !goal->k_player || diff < 1 || diff > MAX_CLIENTS ) {
+	if ( goal->ct != ctPlayer || diff < 1 || diff > MAX_CLIENTS ) {
 		G_sprint(self, 2, "fav_add: you are %s player!\n", redtext("not tracking"));
 		return;
 	}
@@ -3641,7 +3634,7 @@ void fav_del( )
 	gedict_t *goal = PROG_TO_EDICT(self->s.v.goalentity);
 	int diff = (int)(goal - world);
 
-	if ( !goal->k_player || diff < 1 || diff > MAX_CLIENTS ) {
+	if ( goal->ct != ctPlayer || diff < 1 || diff > MAX_CLIENTS ) {
 		G_sprint(self, 2, "fav_del: you are %s player!\n", redtext("not tracking"));
 		return;
 	}
@@ -3674,7 +3667,7 @@ void favx_add( float fav_num )
 	if ( fav_num < 1 || fav_num > MAX_CLIENTS )
 		return;
 
-	if ( !goal->k_player || diff < 1 || diff > MAX_CLIENTS ) {
+	if ( goal->ct != ctPlayer || diff < 1 || diff > MAX_CLIENTS ) {
 		G_sprint(self, 2, "fav add: you are %s player!\n", redtext("not tracking"));
 		return;
 	}
@@ -3702,7 +3695,7 @@ void fav_next( )
 	desired_fav = -2;
 	first_fav = fav_num; // remember
 
-	if ( !( !goal->k_player || diff < 1 || diff > MAX_CLIENTS ) ) {
+	if ( !( goal->ct != ctPlayer || diff < 1 || diff > MAX_CLIENTS ) ) {
  		// ok - tracking player, so if goal in favourites switch to the next favourite,
  		// if goal not in favourites switch to the first favourite
 		for ( fav_num = first_fav; fav_num < MAX_CLIENTS; fav_num++ )
@@ -3734,7 +3727,7 @@ void fav_next( )
 
 	p = world + pl_num;
 
-	if ( !p->k_player ) {
+	if ( p->ct != ctPlayer ) {
 		G_sprint(self, 2, "fav_next: can't find player\n");
 		return;
 	}
@@ -3764,7 +3757,7 @@ void xfav_go( float fav_num )
 
 	p = world + pl_num;
 
-	if ( !p->k_player ) {
+	if ( p->ct != ctPlayer ) {
 		G_sprint(self, 2, "fav go: \x90slot %d\x91 can't find player\n", (int)fav_num);
 		return;
 	}
@@ -3786,7 +3779,7 @@ void fav_show( )
 	for ( first = true, fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
 		if ( (diff = self->favx[fav_num]) ) {
 		    p = world + diff;
-			if ( !p->k_player || strnull( p->s.v.netname ) )
+			if ( p->ct != ctPlayer || strnull( p->s.v.netname ) )
 				continue;
 
 			if ( first ) {
@@ -3805,7 +3798,7 @@ void fav_show( )
 	for ( first = true, fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
 		if ( (diff = self->fav[fav_num]) ) {
 		    p = world + diff;
-			if ( !p->k_player || strnull( p->s.v.netname ) )
+			if ( p->ct != ctPlayer || strnull( p->s.v.netname ) )
 				continue;
 
 			if ( first ) {
@@ -3836,7 +3829,7 @@ void DoAutoTrack( )
 
 	goal = PROG_TO_EDICT( self->s.v.goalentity );
 
-	if ( goal->k_player && ISDEAD( goal ) && g_globalvars.time - goal->dead_time < 2 )
+	if ( goal->ct == ctPlayer && ISDEAD( goal ) && g_globalvars.time - goal->dead_time < 2 )
 		return; // do not switch instantly autotrack pov after tracked player die, wait a few seconds or untill them respawn
 
 	if ( goal == p )
@@ -3865,7 +3858,7 @@ void AutoTrackRestore ()
 {
 	autoTrackType_t at = iKey(self, "*at");
 
-	if ( self->k_player )
+	if ( self->ct == ctPlayer )
 		return;
 
 	if ( at != atNone && at != self->autotrack )
@@ -4020,7 +4013,7 @@ qboolean Pos_Set_origin (pos_t *pos)
 	if ( VectorCompare(pos->origin, self->s.v.origin) )
 		return true;
 
-    if (!self->k_spectator)
+    if (self->ct == ctPlayer)
 	{
 		TraceCapsule( PASSVEC3( pos->origin ), PASSVEC3( pos->origin ), false, self,
 					  PASSVEC3(VEC_HULL_MIN), PASSVEC3(VEC_HULL_MAX));
@@ -4167,7 +4160,7 @@ void motd_show ()
 	motd->s.v.classname = "motd";
 	motd->s.v.owner = EDICT_TO_PROG( self );
 	// select MOTD for spectator or player
-	motd->s.v.think = ( func_t ) ( self->k_spectator ? SMOTDThink : PMOTDThink );
+	motd->s.v.think = ( func_t ) ( self->ct == ctSpec ? SMOTDThink : PMOTDThink );
 	motd->s.v.nextthink = g_globalvars.time + 0.1;
 	motd->attack_finished = g_globalvars.time + 10;
 }
@@ -4683,17 +4676,17 @@ void cmd_wreg_do( byte c )
 	if ( w->attack > 0 ) {
 		self->wreg_attack = 1;
 
-		if( self->k_spectator )
+		if( self->ct == ctSpec )
 			stuffcmd(self, "+attack\n");
 	}
 	else if ( w->attack < 0 ) {
 		self->wreg_attack = 0;
 
-		if( self->k_spectator )
+		if( self->ct == ctSpec )
 			stuffcmd(self, "-attack\n");
 	}
 
-	if( self->k_spectator )
+	if( self->ct == ctSpec )
 		return;
 
 	for ( j = 0; j < MAX_WREG_IMP && w->impulse[j]; j++ ) {

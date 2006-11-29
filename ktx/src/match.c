@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.90 2006/11/27 22:47:06 qqshka Exp $
+ *  $Id: match.c,v 1.91 2006/11/29 06:47:18 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -2011,7 +2011,7 @@ void PlayerReady ()
 	int   from;
 	float nready;
 
-	if ( self->k_spectator ) {
+	if ( self->ct == ctSpec ) {
 
 		if ( !cvar("k_auto_xonx") ) {
 			G_sprint(self, 2, "Command not allowed\n");
@@ -2128,7 +2128,7 @@ void PlayerBreak ()
 	int votes, from;
 	gedict_t *p;
 
-	if ( self->k_spectator ) {
+	if ( self->ct == ctSpec ) {
 
 		if ( !cvar("k_auto_xonx") || k_matchLess ) {
 			G_sprint(self, 2, "Command not allowed\n");

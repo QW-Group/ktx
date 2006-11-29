@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.29 2006/11/27 22:47:06 qqshka Exp $
+ *  $Id: spectate.c,v 1.30 2006/11/29 06:47:18 qqshka Exp $
  */
 
 // spectate.c
@@ -117,7 +117,7 @@ void SpectatorConnect()
 
 	SpecDecodeLevelParms();
 
-	self->k_spectator = true;
+	self->ct = ctSpec;
 	self->s.v.classname = "spectator"; // Added this in for kick code
 	self->k_accepted = 1; // spectator has no restriction to connect
 
@@ -188,7 +188,7 @@ void SpectatorDisconnect()
 
 	self->s.v.classname = ""; // Cenobite, so we clear out any specs as they leave
 	self->k_accepted  = 0;
-	self->k_spectator = 0;
+	self->ct = ctNone;
 }
 
 /*
@@ -297,7 +297,7 @@ void SpectatorThink()
 		if ( GetSpecWizard () ) {
 			gedict_t *goal = PROG_TO_EDICT( self->s.v.goalentity );
 
-			if ( goal && goal->k_player ) // tracking player, so turn model off
+			if ( goal && goal->ct == ctPlayer ) // tracking player, so turn model off
 				wizard->s.v.model = "";
 			else // turn model on
 				setmodel( wizard, "progs/wizard.mdl" );

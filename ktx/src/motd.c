@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: motd.c,v 1.22 2006/11/06 03:42:00 qqshka Exp $
+ *  $Id: motd.c,v 1.23 2006/11/29 06:47:18 qqshka Exp $
  */
 
 // motd.c
@@ -105,7 +105,7 @@ void MOTDThinkX()
 	}
 
 	self->s.v.think = // select MOTD for spectator or player
-		  ( func_t ) ( PROG_TO_EDICT( self->s.v.owner )->k_spectator ? SMOTDThink : PMOTDThink );
+		  ( func_t ) ( PROG_TO_EDICT( self->s.v.owner )->ct == ctSpec ? SMOTDThink : PMOTDThink );
 	self->s.v.nextthink = g_globalvars.time + 0.3;
 
 // remove motd if player already stuffed, because them probably sow motd already one time

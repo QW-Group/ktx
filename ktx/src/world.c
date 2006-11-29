@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.74 2006/11/24 12:26:41 qqshka Exp $
+ *  $Id: world.c,v 1.75 2006/11/29 06:47:18 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -838,7 +838,7 @@ void CheckAutoXonX(qboolean use_time)
 	last_check_time = g_globalvars.time;
 
 	for( count = from = 0, p = world; (p = find_plrspc(p, &from)); )
-		if ( p->k_player || (p->k_spectator && p->ready) )
+		if ( p->ct == ctPlayer || (p->ct == ctSpec && p->ready) )
 			count++;
 
 	if ( count == old_count )

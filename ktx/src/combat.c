@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.35 2006/11/27 22:47:06 qqshka Exp $
+ *  $Id: combat.c,v 1.36 2006/11/29 06:47:17 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -239,11 +239,11 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			lowheight = false;
 		}
 
-		rl_dmg = ( targ->k_player && dtRL == targ->deathtype );
+		rl_dmg = ( targ->ct == ctPlayer && dtRL == targ->deathtype );
 
 		if ( !rl_dmg ) {
 			// damage types which ignore "lowheight"
-			do_dmg =   !targ->k_player					// always do damage to non player, secret doors etc...
+			do_dmg =   targ->ct != ctPlayer				// always do damage to non player, secret doors etc...
 				 	|| dtAXE == targ->deathtype			// always do axe damage
 				 	|| dtWATER_DMG == targ->deathtype	// always do water damage
 				 	|| dtLAVA_DMG  == targ->deathtype	// always do lava damage
@@ -258,7 +258,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	// #handicap#
 	if ( attacker != targ ) // attack no self
-	if ( attacker->k_player && targ->k_player ) // player vs player
+	if ( attacker->ct == ctPlayer && targ->ct == ctPlayer ) // player vs player
 	if ( ( hdp = GetHandicap(attacker) ) != 100 ) // skip checks if hdp == 100
 	if (    dtAXE  == targ->deathtype
  		 || dtSG   == targ->deathtype
@@ -422,7 +422,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		}
 	}
 
-	if ( attacker->k_player && targ->k_player ) 
+	if ( attacker->ct == ctPlayer && targ->ct == ctPlayer )
 	{
 		if ( attacker != targ )
 		{

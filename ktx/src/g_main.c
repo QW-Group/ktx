@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.38 2006/11/27 22:47:06 qqshka Exp $
+ *  $Id: g_main.c,v 1.39 2006/11/29 06:47:17 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -192,7 +192,8 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 
 // { guarantee this set to some safe values after client disconnect
 		self->s.v.classname = "";
-		self->k_accepted = self->k_spectator = self->k_player = 0;
+		self->ct = ctNone;
+		self->k_accepted = 0;
 // }
 
 		update_ghosts();

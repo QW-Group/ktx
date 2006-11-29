@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="../qwprogs.dll"
-				LinkIncremental="1"
+				LinkIncremental="0"
 				SuppressStartupBanner="TRUE"
 				ModuleDefinitionFile="src\game.def"
 				GenerateDebugInformation="TRUE"

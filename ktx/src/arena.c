@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1997 David 'crt' Wright
  *
- * $Id: arena.c,v 1.8 2006/07/27 01:02:53 qqshka Exp $
+ * $Id: arena.c,v 1.9 2006/11/29 06:47:17 qqshka Exp $
  */
 
 // arena.c - rocket arena stuff
@@ -126,7 +126,7 @@ gedict_t *getWinner()
 	gedict_t *p;
 
 	for( p = g_edicts + 1; p <= g_edicts + MAX_CLIENTS; p++ )
-		if ( p->k_player && isWinner( p ) )
+		if ( p->ct == ctPlayer && isWinner( p ) )
 			return p;
 
 	return NULL;
@@ -137,7 +137,7 @@ gedict_t *getLoser()
 	gedict_t *p;
 
 	for( p = g_edicts + 1; p <= g_edicts + MAX_CLIENTS; p++ )
-		if ( p->k_player && isLoser( p ) )
+		if ( p->ct == ctPlayer && isLoser( p ) )
 			return p;
 
 	return NULL;
@@ -211,12 +211,12 @@ void ra_ClientObituary( gedict_t *targ, gedict_t *attacker )
 	if ( !isRA() )
 		return;
 
-	if ( !targ->k_player )
+	if ( targ->ct != ctPlayer )
 		return; // so below targ is player
 
 	ra_match_fight = 0;
 
-	if ( !attacker->k_player )
+	if ( attacker->ct != ctPlayer )
 		attacker = targ; // seems killed self
 
 	if ( (loser = getLoser()) ) // stop them from attacking during countdown
@@ -281,7 +281,7 @@ void ra_ClientObituary( gedict_t *targ, gedict_t *attacker )
 		G_bprint (PRINT_HIGH, "BUG: ra_ClientObituary unknown targ\n");
 	}
 
-	if ( attacker->k_player )
+	if ( attacker->ct == ctPlayer )
 	{
 		if ( attacker != targ )
 		{

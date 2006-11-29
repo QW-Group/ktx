@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.66 2006/11/26 19:21:54 qqshka Exp $
+ *  $Id: g_utils.c,v 1.67 2006/11/29 06:47:18 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -692,7 +692,7 @@ char *ezinfokey( gedict_t * ed, char *key )
 	static char		string[MAX_STRINGS][1024];
 	static int		index = 0;
 
-	if ( ed->k_player || ed->k_spectator ) {
+	if ( ed->ct == ctPlayer || ed->ct == ctSpec ) {
 		char *v = cmdinfo_getkey( ed, key );
 
 		if ( v ) // key supported so does't need to search in userinfo even key is empty ""
@@ -710,7 +710,7 @@ int  iKey( gedict_t * ed, char *key )
 {
 	char		string[128]; // which size will be best?
 
-	if ( ed->k_player || ed->k_spectator ) {
+	if ( ed->ct == ctPlayer || ed->ct == ctSpec ) {
 		char *v = cmdinfo_getkey( ed, key );
 
 		if ( v ) // key supported so does't need to search in userinfo even key is empty ""
@@ -725,7 +725,7 @@ float fKey( gedict_t * ed, char *key )
 {
 	char		string[128]; // which size will be best?
 
-	if ( ed->k_player || ed->k_spectator ) {
+	if ( ed->ct == ctPlayer || ed->ct == ctSpec ) {
 		char *v = cmdinfo_getkey( ed, key );
 
 		if ( v ) // key supported so does't need to search in userinfo even key is empty ""
@@ -924,7 +924,7 @@ char *g_his( gedict_t * ed )
 
 	index %= MAX_STRINGS;
 
-//	if ( !ed->k_player && !ed->k_spectator )
+//	if ( ed->ct != ctPlayer && ed->ct != ctSpec )
 //		G_Error("g_his: not client, classname %s", ed->s.v.classname);
 	if( streq( ezinfokey( ed, "gender" ), "f" ) )
 		sex = "her";
@@ -944,7 +944,7 @@ char *g_he( gedict_t * ed )
 
 	index %= MAX_STRINGS;
 
-//	if ( !ed->k_player && !ed->k_spectator )
+//	if ( ed->ct != ctPlayer && ed->ct != ctSpec )
 //		G_Error("g_his: not client, classname %s", ed->s.v.classname);
 	if( streq( ezinfokey( ed, "gender" ), "f" ) )
 		sex = "she";
@@ -964,7 +964,7 @@ char *g_himself( gedict_t * ed )
 
 	index %= MAX_STRINGS;
 
-//	if ( !ed->k_player && !ed->k_spectator )
+//	if ( ed->ct != ctPlayer && ed->ct != ctSpec )
 //		G_Error("g_himself: not client, classname %s", ed->s.v.classname);
 	if( streq( ezinfokey( ed, "gender" ), "f" ) )
 		sex = "herself";
@@ -1208,7 +1208,7 @@ qboolean isUnknown( )
 
 int GetUserID( gedict_t *p )
 {
-	if ( !p || (!p->k_player && !p->k_spectator) )
+	if ( !p || (p->ct != ctPlayer && p->ct != ctSpec) )
 		return 0;
 
 	return iKey(p, "*userid");
@@ -1225,9 +1225,9 @@ char *TrackWhom( gedict_t *p )
 
 	index %= MAX_STRINGS;
 
-	if (  p && p->k_spectator
+	if (  p && p->ct == ctSpec
 			&& (goal = PROG_TO_EDICT( p->s.v.goalentity )) != world
-			&& goal->k_player
+			&& goal->ct == ctPlayer
        )
 		name = getname(goal);
     else
@@ -1799,7 +1799,7 @@ void on_connect()
 	if ( !(iKey(self, "ev") & EV_ON_CONNECT) ) // client doesn't want on_connect
 		return;
 
-	if ( self->k_player ) {
+	if ( self->ct == ctPlayer ) {
 		if ( isFFA() )
 			stuffcmd(self, "on_connect_ffa\n");
 		else if ( isCTF() )
@@ -1825,7 +1825,7 @@ void on_enter()
 	if ( iKey(self, "kf") & KF_ON_ENTER ) // client doesn't want on_enter 
 		return;
 
-	if ( self->k_player ) {
+	if ( self->ct == ctPlayer ) {
 		if ( isFFA() )
 			stuffcmd(self, "on_enter_ffa\n");
 		else if ( isCTF() )
@@ -1848,7 +1848,7 @@ void on_match_start( gedict_t *p )
 	if ( !(iKey(p, "ev") & EV_ON_MATCH_START) )
 		return;
 
-	if ( p->k_player ) {
+	if ( p->ct == ctPlayer ) {
 		stuffcmd(p, "on_matchstart\n");
 	}
 	else {
@@ -1861,7 +1861,7 @@ void on_match_end( gedict_t *p )
 	if ( !(iKey(p, "ev") & EV_ON_MATCH_END) )
 		return;
 
-	if ( p->k_player ) {
+	if ( p->ct == ctPlayer ) {
 		stuffcmd(p, "on_matchend\n");
 	}
 	else {
@@ -1874,7 +1874,7 @@ void on_match_break( gedict_t *p )
 	if ( !(iKey(p, "ev") & EV_ON_MATCH_BREAK) )
 		return;
 
-	if ( p->k_player ) {
+	if ( p->ct == ctPlayer ) {
 		stuffcmd(p, "on_matchbreak\n");
 	}
 	else {
@@ -1936,7 +1936,7 @@ void cl_refresh_plus_scores (gedict_t *p)
 {
 	gedict_t *swp;
 
-	if ( (p->k_player || p->k_spectator) && p->sc_stats ) {
+	if ( (p->ct == ctPlayer || p->ct == ctSpec) && p->sc_stats ) {
 			swp = self; // save self
 			self = p;
 

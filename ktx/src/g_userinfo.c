@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_userinfo.c,v 1.29 2006/11/06 18:58:01 qqshka Exp $
+ *  $Id: g_userinfo.c,v 1.30 2006/11/29 06:47:18 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -81,7 +81,7 @@ qboolean 	ClientUserInfoChanged ()
 // in ctf we dont want red team players to be blue, etc
 qboolean FixPlayerColor ( char *newcolor )
 {
-	if ( self->k_spectator )
+	if ( self->ct == ctSpec )
 		return false;
 
 	if ( isCTF() )
@@ -99,7 +99,7 @@ qboolean FixPlayerTeam ( char *newteam )
 {
 	char *s1, *s2;
 
-	if ( self->k_spectator )
+	if ( self->ct == ctSpec )
 		return false;
 
 	// captain or potential captain may not change team
@@ -232,7 +232,7 @@ char *cmdinfo_getkey( gedict_t *p, char *key )
 
 // this is generally GetUserID but we can't use it here, because of infinite recursion
 //{
-	if ( !p->k_player && !p->k_spectator ) // not a player or spectator
+	if ( p->ct != ctPlayer && p->ct != ctSpec ) // not a player or spectator
 		return NULL;
 
 	if ( !( id = atoi(infokey(p, "*userid", cid, sizeof(cid))) ) ) // get user id
@@ -453,8 +453,8 @@ void cmdinfo_infoset ( gedict_t *p )
 		cmdinfo_check_obsolete ( p ); // check keys wich must be moved from userinfo to cmd info
 		cmdinfo_clear ( p ); // remove all keys
 		cmdinfo_setkey( p, "*is", "1" ); // mark we are call infoset already
-		stuffcmd(p, "%sinfoset\n", p->k_spectator ? "s" : ""); // and call infoset
-		stuffcmd(p, "ktx_%sinfoset\n", p->k_spectator ? "s" : ""); // and call ktx_infoset
+		stuffcmd(p, "%sinfoset\n", p->ct == ctSpec ? "s" : ""); // and call infoset
+		stuffcmd(p, "ktx_%sinfoset\n", p->ct == ctSpec ? "s" : ""); // and call ktx_infoset
 		// kick cmd back to server, so we know client get infoset,
 	  	// so we can invoke on_connect and on_enter
 		stuffcmd(p, "wait;wait;wait;cmd ack infoset\n");
