@@ -1,5 +1,5 @@
 /*
- *  $Id: ctf.c,v 1.19 2006/11/26 19:21:54 qqshka Exp $
+ *  $Id: ctf.c,v 1.20 2006/11/30 08:50:07 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -131,7 +131,7 @@ void AddHook( qboolean yes )
 
 	oself = self;
 
-	for ( e = world; (e = find( e, FOFCLSN, "player" )); ) {
+	for ( e = world; (e = find_plr( e )); ) {
 		e->s.v.items = (yes ? ((int) e->s.v.items | IT_HOOK) : ((int) e->s.v.items & ~IT_HOOK));
 
 		self = e; // warning
@@ -280,7 +280,7 @@ void FlagTouch()
 				other->ps.caps++;
 
 				// loop through all players on team to give bonus
-				for ( p = world; (p = find( p, FOFCLSN, "player")); )
+				for ( p = world; (p = find_plr( p )); )
 				{
 					p->s.v.items -= ( (int) p->s.v.items & (IT_KEY1 | IT_KEY2) );
 					if ( streq(getteam(p), getteam(other)) )
@@ -327,7 +327,7 @@ void FlagTouch()
 			sound (other, CHAN_ITEM, self->s.v.noise1, 1, ATTN_NORM);
 			RegenFlag( self );
 
-			for ( p = world; (p = find( p, FOFCLSN, "player")); )
+			for ( p = world; (p = find_plr( p )); )
 				p->s.v.items -= ( (int) p->s.v.items & (int) self->s.v.items );
 
 			G_bprint( 2, "%s", other->s.v.netname);
@@ -351,11 +351,8 @@ void FlagTouch()
 	other->ctf_flag |= CTF_FLAG;
 
 	// give key icon to all players if a flag is taken
-	p = find( world, FOFCLSN, "player");
-	while ( p ) {	
+	for ( p = world; (p = find_plr( p )); )
 		p->s.v.items = (int) p->s.v.items | (int) self->s.v.items;
- 		p = find ( p, FOFCLSN, "player" );
-	}
 
 	self->cnt = FLAG_CARRIED;
 	self->s.v.solid = SOLID_NOT;

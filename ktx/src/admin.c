@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.46 2006/11/29 06:47:17 qqshka Exp $
+ * $Id: admin.c,v 1.47 2006/11/30 08:50:06 qqshka Exp $
  */
 
 // admin.c
@@ -197,9 +197,8 @@ void NextClient ()
 	self->k_playertokick = find_plrspc(self->k_playertokick, &from);
 
 	if ( !self->k_playertokick ) {  // try find anyone at least
-		self->k_playertokick = world;
 		from = 0;
-		self->k_playertokick = find_plrspc(self->k_playertokick, &from);
+		self->k_playertokick = find_plrspc(world, &from);
 	}
 
 	if ( !self->k_playertokick ) {
@@ -374,7 +373,7 @@ void AdminImpBot ()
 void VoteAdmin()
 {
 	gedict_t *p;
-	int   from, till;
+	int   till;
 
 	gedict_t *electguard;
 
@@ -423,7 +422,7 @@ void VoteAdmin()
 
 	G_bprint(2, "%s has %s rights!\n", self->s.v.netname, redtext("requested admin"));
 
-	for( from = 0, p = world; (p = find_plrspc(p, &from)); )
+	for( p = world; (p = find_client( p )); )
 		if ( p != self && p->ct == ctPlayer )
 			G_sprint(p, 2, "Type %s in console to approve\n", redtext("yes"));
 
@@ -445,7 +444,7 @@ void AdminMatchStart ()
     gedict_t *p;
     int i = 0;
 
-    for( p = world; (p = find(p, FOFCLSN, "player")); )
+    for( p = world; (p = find_plr( p )); )
     {
 		if( p->ready ) {
 			i++;
@@ -523,11 +522,11 @@ void ReadyThink ()
 	txt = va( "%s second%s to gamestart", dig3( i1 ), ( i1 == 1 ? "" : "s") );
 	gr  = va( "\n%s!", redtext("Go ready") );
 
-    for( p = world; (p = find(p, FOFCLSN, "player")); )
-		G_centerprint(p, "%s%s", txt, (p->ready ? "" : gr));
-
-    for( p = world; (p = find(p, FOFCLSN, "spectator")); )
-		G_centerprint(p, "%s", txt);
+    for( p = world; (p = find_client( p )); )
+		if ( p->ct == ctPlayer )
+			G_centerprint(p, "%s%s", txt, (p->ready ? "" : gr));
+		else
+			G_centerprint(p, "%s", txt);
 
     self->s.v.nextthink = g_globalvars.time + 1;
 }
@@ -624,7 +623,7 @@ void PlayersStopFire()
 {
     gedict_t *p;
 
-	for( p = world; (p = find(p, FOFCLSN, "player")); )
+	for( p = world; (p = find_plr( p )); )
 		PlayerStopFire( p );
 }
 
@@ -859,7 +858,7 @@ void AdminSwapAll()
 	if ( !isCTF() )
 		return;
 
-	for( p = world; (p = find(p, FOFCLSN, "player")); ) {
+	for( p = world; (p = find_plr( p )); ) {
 		if ( streq( getteam(p), "blue" ) )
         	stuffcmd(p, "team \"red\"\ncolor 4\n");
 		else if ( streq( getteam(p), "red" ) )
@@ -905,7 +904,7 @@ void force_spec()
 
 	if ( streq( c_fs, "*") || streq( c_fs, "* ") ) {
 		//ok move all not ready players to specs
-		for( p = world; (p = find(p, FOFCLSN, "player")); ) {
+		for( p = world; (p = find_plr( p )); ) {
 			if ( p->ready || p == self )
 				continue;
 

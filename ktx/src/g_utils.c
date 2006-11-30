@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.67 2006/11/29 06:47:18 qqshka Exp $
+ *  $Id: g_utils.c,v 1.68 2006/11/30 08:50:07 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -975,6 +975,33 @@ char *g_himself( gedict_t * ed )
 	return string[index++];
 }
 
+gedict_t *find_client( gedict_t *start )
+{
+	for ( ; (start = trap_nextclient(start)); )
+		if ( start->ct == ctPlayer || start->ct == ctSpec )
+			return start;
+
+	return NULL;
+}
+
+gedict_t *find_plr( gedict_t *start )
+{
+	for ( ; (start = trap_nextclient(start)); )
+		if ( start->ct == ctPlayer )
+			return start;
+
+	return NULL;
+}
+
+gedict_t *find_spc( gedict_t *start )
+{
+	for ( ; (start = trap_nextclient(start)); )
+		if ( start->ct == ctSpec )
+			return start;
+
+	return NULL;
+}
+
 // this help me walk from both players and ghosts, made code more simple
 // int from = 0;
 // gedict_t *p = world ;
@@ -982,11 +1009,10 @@ char *g_himself( gedict_t * ed )
 // ... some code ...
 // }
 
-// only already accepted players have classname "player" now
 
 gedict_t *find_plrghst( gedict_t * start, int *from )
 {
-	gedict_t *next = find(start, FOFCLSN, *from ? "ghost" : "player" );
+	gedict_t *next = ( *from ? find(start, FOFCLSN, "ghost") : find_plr( start ) );
 
 	if ( !next && !*from ) {
 		*from = 1;
@@ -1000,11 +1026,11 @@ gedict_t *find_plrghst( gedict_t * start, int *from )
 
 gedict_t *find_plrspc( gedict_t * start, int *from )
 {
-	gedict_t *next = find(start, FOFCLSN, *from ? "spectator" : "player" );
+	gedict_t *next = ( *from ? find_spc( start ) : find_plr( start ) );
 
 	if ( !next && !*from ) {
 		*from = 1;
-		next = find(world, FOFCLSN, "spectator");
+		next = find_spc( world );
 	}
 
 	return next;
@@ -1017,7 +1043,7 @@ gedict_t *player_by_id( int id )
 	if ( id < 1 )
 		return NULL;
 
-	for ( p = world; (p = find( p , FOFCLSN, "player" )); ) {
+	for ( p = world; (p = find_plr( p )); ) {
 		if ( id == GetUserID( p ) )
 			return p;
 	}
@@ -1032,7 +1058,7 @@ gedict_t *player_by_name( const char *name )
 	if ( strnull( name ) )
 		return NULL;
 
-	for ( p = world; (p = find( p , FOFCLSN, "player" )); ) {
+	for ( p = world; (p = find_plr( p )); ) {
 		if ( streq(p->s.v.netname, name) )
 			return p;
 	}
@@ -1054,7 +1080,7 @@ gedict_t *spec_by_id( int id )
 	if ( id < 1 )
 		return NULL;
 
-	for ( p = world; (p = find( p , FOFCLSN, "spectator" )); ) {
+	for ( p = world; (p = find_spc( p )); ) {
 		if ( id == GetUserID( p ) )
 			return p;
 	}
@@ -1069,7 +1095,7 @@ gedict_t *spec_by_name( const char *name )
 	if ( strnull( name ) )
 		return NULL;
 
-	for ( p = world; (p = find( p , FOFCLSN, "spectator" )); ) {
+	for ( p = world; (p = find_spc( p )); ) {
 		if ( streq(p->s.v.netname, name) )
 			return p;
 	}
@@ -1406,7 +1432,7 @@ void ReScores()
 	
 	if ( ( isDuel() || isFFA() ) && CountPlayers() > 1 ) {
 		// no ghost serving
-		for ( p = world; (p = find( p , FOFCLSN, "player" )); ) {
+		for ( p = world; (p = find_plr( p )); ) {
 			if ( !ed_scores1 ) { // set some first player as best player
 				ed_scores1 = p;
 				continue;
@@ -1528,7 +1554,7 @@ void CalculateBestPlayers()
 
 	// autotrack stuff
 	// no ghost serving
-	for ( p = world; (p = find( p , FOFCLSN, "player" )); ) {
+	for ( p = world; (p = find_plr( p )); ) {
 
 		if ( ISDEAD(p) )
 			continue;
@@ -1583,7 +1609,7 @@ void CalculateBestPlayers()
 
 	// auto_pow stuff
 	// no ghost serving
-	for ( p = world; (p = find( p , FOFCLSN, "player" )); ) {
+	for ( p = world; (p = find_plr( p )); ) {
 
 		if ( ISDEAD(p) )
 			continue;
@@ -1948,10 +1974,9 @@ void cl_refresh_plus_scores (gedict_t *p)
 
 void refresh_plus_scores ()
 {
-	int from;
 	gedict_t *p;
 
-	for( from = 0, p = world; (p = find_plrspc (p, &from)); )
+	for( p = world; (p = find_client( p )); )
 		cl_refresh_plus_scores( p );
 }
 

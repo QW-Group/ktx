@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.145 2006/11/29 06:47:17 qqshka Exp $
+ *  $Id: commands.c,v 1.146 2006/11/30 08:50:06 qqshka Exp $
  */
 
 // commands.c
@@ -818,7 +818,7 @@ void StuffAliases()
 // stuffing for numbers, hope no flooding out
 	int i;
 
-	for ( i = 1; i <= 16; i++ )
+	for ( i = 1; i <= MAX_CLIENTS; i++ )
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias %d impulse %d\n", i, i);
 
 	if ( PROG_TO_EDICT( self->s.v.owner )->ct == ctSpec ) {
@@ -1176,9 +1176,8 @@ void SendMessage(char *name)
 {
 	char *s;
 	gedict_t *p;
-	int from;
 
-	for( from = 0, p = world; (p = find_plrspc (p, &from)); ) {
+	for( p = world; (p = find_client( p )); ) {
 		if ( p == self )
 			continue;
 
@@ -1419,7 +1418,6 @@ void ModStatusVote()
 {
 	qboolean voted = false;
 	int votes, i;
-	int from;
 	gedict_t *p;
 
 	if ( k_matchLess || !match_in_progress )
@@ -1435,7 +1433,7 @@ void ModStatusVote()
 			G_sprint(self, 2, "\x90%s\x91 %2d vote%s\n", GetMapName( maps_voted[i].map_id ),
 								maps_voted[i].map_votes, count_s(maps_voted[i].map_votes) );
 
-			for( from = 0, p = world; (p = find_plrspc(p, &from)); )
+			for( p = world; (p = find_client( p )); )
 				if ( p->v.map == maps_voted[i].map_id )
 					G_sprint(self, 2, " %s\n", p->s.v.netname);
 		}
@@ -1448,7 +1446,7 @@ void ModStatusVote()
 		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for %s election:\n", votes, 
 			get_votes_req( OV_ELECT, false ), count_s(votes), redtext(get_elect_type_str()) );
 
-		for( from = 0, p = world; (p = find_plrspc(p, &from)); )
+		for( p = world; (p = find_client( p )); )
 			if ( p->v.elect )
 				G_sprint(self, 2, "%s%s\n", 
 				(p->v.elect_type != etNone) ? "\x87" : " ", p->s.v.netname);
@@ -1461,7 +1459,7 @@ void ModStatusVote()
 		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for a %s game:\n", votes,
 			 get_votes_req( OV_PICKUP, false ), count_s(votes), redtext("pickup"));
 
-		for( from = 0, p = world; (p = find_plrspc(p, &from)); )
+		for( p = world; (p = find_client( p )); )
 			if ( p->v.pickup )
 				G_sprint(self, 2, " %s\n", p->s.v.netname);
 	}
@@ -1473,7 +1471,7 @@ void ModStatusVote()
 		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for a %s game:\n", votes,
 			 get_votes_req( OV_RPICKUP, false ), count_s(votes), redtext("rpickup"));
 
-		for( from = 0, p = world; (p = find_plrspc(p, &from)); )
+		for( p = world; (p = find_client( p )); )
 			if ( p->v.rpickup )
 				G_sprint(self, 2, " %s\n", p->s.v.netname);
 	}
@@ -1485,7 +1483,7 @@ void ModStatusVote()
 		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for stopping:\n", votes,
 			get_votes_req( OV_BREAK, false ), count_s(votes));
 
-		for( from = 0, p = world; (p = find_plrspc(p, &from)); )
+		for( p = world; (p = find_client( p )); )
 			if ( p->v.brk )
 				G_sprint(self, 2, " %s\n", p->s.v.netname);
 	}
@@ -1517,7 +1515,7 @@ void PlayerStatus()
 		return;
 	}
 	
-	for ( p = world; (p = find( p, FOFCLSN, "player" )); ) {
+	for ( p = world; (p = find_plr( p )); ) {
 		if ( !found )
 			G_sprint(self, 2, "Players list:\n"
 							  "\n");
@@ -1533,7 +1531,7 @@ void PlayerStatusS()
 	qboolean found = false;
 	gedict_t *p;
 
-	for ( p = world; (p = find( p, FOFCLSN, "player" )); ) {
+	for ( p = world; (p = find_plr( p )); ) {
 		if ( !found )
 			G_sprint(self, 2, "Players skins list:\n"
 							  "\n");
@@ -1559,7 +1557,7 @@ void PlayerStatusN()
 		return;
 	}
 
-	for ( p = world; (p = find( p, FOFCLSN, "player" )); ) {
+	for ( p = world; (p = find_plr( p )); ) {
 		if ( p->ready )
 			continue;
 
@@ -1580,7 +1578,6 @@ void ListWhoNot()
 {
 	qboolean found = false;
 	gedict_t *p, *p2;
-	int from;
 
 	if( match_in_progress ) {
 		G_sprint(self, 2, "Game in progress\n");
@@ -1606,7 +1603,7 @@ void ListWhoNot()
 
 	k_whonottime = g_globalvars.time;
 
-	for ( p = world; (p = find( p, FOFCLSN, "player" )); ) {
+	for ( p = world; (p = find_plr( p )); ) {
 		if ( p->ready )
 			continue;
 
@@ -1614,14 +1611,14 @@ void ListWhoNot()
 			G_bprint(2, "Players %s ready:\n"
 					    "\n", redtext("not")); // broadcast
 
-		for ( from = 0, p2 = world; (p2 = find_plrspc(p2, &from)); )
+		for ( p2 = world; (p2 = find_client( p2 )); )
 			G_sprint(p2, 2, "%s\n", OnePlayerStatus( p, p2 ));
 
 		found = true;
 	}
 
 	if ( found )			
-		G_bprint(2, "\n"); // broadcats
+		G_bprint(2, "\n"); // broadcast
 	else
 		G_sprint(self, 2, "can't find not ready players\n"); // self
 }
@@ -1739,44 +1736,39 @@ void ReportMe()
 		f1 = self->s.v.ammo_rockets;
 	}
 
-    p = find( world, FOFCLSN, "player" );
-	while( p ) {
-		if( !strnull( p->s.v.netname ) ) {
-			t1 = getteam( self );
-			t2 = getteam( p );
+	t1 = getteam( self );
 
-			if( streq( t1, t2 ) ) {
-				if( flag ) {
-					t1 = ezinfokey(self, "k_nick");
+	for( p = world; (p = find_plr( p )); ) {
+		if( strneq( t1, t2 = getteam( p ) ) )
+			continue;
 
-					if ( strnull( t1 ) )
-						t1 = ezinfokey(self, "k");
+		if( flag ) {
+			t1 = ezinfokey(self, "k_nick");
 
-					G_sprint(p, 3, "%s: ", t1);
-				}
-				else
-					G_sprint(p, 3, "%s%s%s", pa1, self->s.v.netname, pa2);
+			if ( strnull( t1 ) )
+				t1 = ezinfokey(self, "k");
 
-				if( self->s.v.armorvalue )
-					G_sprint(p, 3, "%s:%d", armor_type((int)self->s.v.items),
-									 (int)self->s.v.armorvalue);
-				else
-					G_sprint(p, 3, "a:0");
-
-				G_sprint(p, 3, "  h:%d  %s%d", (int)self->s.v.health, wt, (int)f1);
-
-				if( (int)self->s.v.items & 524288)
-					G_sprint(p, 3, "  …εωεσ…‘");
-				if( (int)self->s.v.items & 1048576)
-					G_sprint(p, 3, "  ……‘");
-				if( (int)self->s.v.items & 4194304)
-					G_sprint(p, 3, "  …ρυαδ‘");
-
-				G_sprint(p, 3, "\n");
-			}
+			G_sprint(p, 3, "%s: ", t1);
 		}
+		else
+			G_sprint(p, 3, "%s%s%s", pa1, self->s.v.netname, pa2);
 
-		p = find( p, FOFCLSN, "player" );
+		if( self->s.v.armorvalue )
+			G_sprint(p, 3, "%s:%d", armor_type((int)self->s.v.items),
+							 (int)self->s.v.armorvalue);
+		else
+			G_sprint(p, 3, "a:0");
+
+		G_sprint(p, 3, "  h:%d  %s%d", (int)self->s.v.health, wt, (int)f1);
+
+		if( (int)self->s.v.items & 524288)
+			G_sprint(p, 3, "  …εωεσ…‘");
+		if( (int)self->s.v.items & 1048576)
+			G_sprint(p, 3, "  ……‘");
+		if( (int)self->s.v.items & 4194304)
+			G_sprint(p, 3, "  …ρυαδ‘");
+
+		G_sprint(p, 3, "\n");
 	}
 }
 
@@ -2112,7 +2104,7 @@ void ToggleSpeed()
 	G_bprint(2, "%s %d\n", redtext("Maxspeed set to"), (int)k_maxspeed);
 	cvar_fset("sv_maxspeed", k_maxspeed);
 
-	for( p = world; (p = find( p, FOFCLSN, "player" )); )
+	for( p = world; (p = find_plr( p )); )
 		p->maxspeed = k_maxspeed;
 }
 
@@ -2230,8 +2222,7 @@ void TeamSay(float fsndname)
 	gedict_t *p;
 	char *sndname = va("ktsound%d.wav", (int)fsndname);
 
-    p = find( world, FOFCLSN, "player" );
-	while( p ) {
+	for( p = world; (p = find_plr(p)); ) {
 		if( p != self && (isTeam() || isCTF()) && !strnull( p->s.v.netname )
 			&& ( iKey( p, "kf" ) & KF_KTSOUNDS ) 
 		   ) {
@@ -2240,8 +2231,6 @@ void TeamSay(float fsndname)
 				stuffcmd(p, "play %s%s\n", (strnull( t1 ) ? "" : va("%s/", t1)), sndname);
 			}
 		}
-
-		p = find( p, FOFCLSN, "player" );
 	}
 }
 
@@ -2319,7 +2308,7 @@ void PlayerStats()
 		return;
 	}
 
-	for ( p = world; (p = find( p, FOFCLSN, "player" )); ) {
+	for ( p = world; (p = find_plr( p )); ) {
 		pL = max(pL, strlen(p->s.v.netname));
 		tL = max(tL, strlen(getteam(p)));
 	}
@@ -2336,13 +2325,13 @@ void PlayerStats()
 				  	  "\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236%s\237\n",
 				  	  (isTeam() ? "\236\236\236\236\236\236\236\236\236\236" : ""));
 
-	for ( p = world; (p = find(p, FOFCLSN, "player" )); ) {
+	for ( p = world; (p = find_plr( p )); ) {
 		if( !p->ready )
 			continue; // already served
 
 		tmp = getteam( p );
 
-		for ( p2 = world; (p2 = find(p2, FOFCLSN, "player" )); ) {
+		for ( p2 = world; (p2 = find_plr( p2 )); ) {
 			if( !p2->ready || strneq( tmp, getteam( p2 ) ) )
 				continue; // already served or not on the same team
 
@@ -2389,7 +2378,7 @@ void PlayerStats()
 		}
 	}
 
-	for( p = world; (p = find( p, FOFCLSN, "player" )); )
+	for( p = world; (p = find_plr( p )); )
 		p->ready = 1; // because this is a hack, restore ready field
 }
 
@@ -2487,7 +2476,7 @@ void ShowNick()
 
 	s1 = getteam( self );
 
-	for ( p = world; (p = find(p, FOFCLSN, "player")); )
+	for ( p = world; (p = find_plr( p )); )
 	{
 		vec3_t	v, v2, v3;
 		float dist, miss, rank;
@@ -2939,7 +2928,7 @@ void UserMode(float umode)
 	if ( !isCTF() && (um_list[(int)umode].um_flags & UM_CTF) ) {
 		gedict_t	*p;
 
-		for( p = world; (p = find ( p, FOFCLSN, "player" )); )
+		for( p = world; (p = find_plr( p )); )
 			if ( p->ready && (!streq(getteam(p), "blue") && !streq(getteam(p), "red")) )
 			{
 				if ( sv_invoked )
@@ -3003,12 +2992,10 @@ void UserMode(float umode)
 
 void VoteUnpauseClean()
 {
-	gedict_t *p = find(world, FOFCLSN, "player");
+	gedict_t *p;
 
-	while( p ) {
+	for( p = world; (p = find_plr( p )); )
 		p->k_voteUnpause = 0; // just for sanity
-		p = find(p, FOFCLSN, "player");
-	}
 
 	ent_remove( self );
 }
@@ -3023,13 +3010,9 @@ void VoteUnpauseThink()
 		return;
 	}
 
-	p = find(world, FOFCLSN, "player");
-	while( p ) {
+	for( p = world; (p = find_plr( p )); )
 		if( p->k_voteUnpause )
 			f1++;
-
-		p = find(p, FOFCLSN, "player");
-	}
 
 	if ( f1 >= f2 ) {
 		G_bprint(2, "Server unpaused the game\n");
@@ -3071,22 +3054,15 @@ void VoteUnpause ()
 		unpauseGuard->s.v.nextthink = g_globalvars.time + 0.5;
 		unpauseGuard->cnt = 60; // Check the 1 minute timeout for vote
 
-		p = find(world, FOFCLSN, "player");
-		while( p ) {
+		for( p = world; (p = find_plr( p )); )
 			p->k_voteUnpause = 0; // reset players
-			p = find(p, FOFCLSN, "player");
-		}
 	}
 
 	self->k_voteUnpause = 1;
 
-	p = find(world, FOFCLSN, "player");
-	while( p ) {
+	for( p = world; (p = find_plr( p )); )
 		if( p->k_voteUnpause )
 			f1++;
-
-		p = find(p, FOFCLSN, "player");
-	}
 
 	G_bprint(2, "%s %s\n", self->s.v.netname, redtext("votes for unpause!"));
     if ( f1 < f2 )
@@ -3258,7 +3234,7 @@ void klist ( )
 	gedict_t *p = world;
 	char *track;
 
-	for( i = 0, p = world; (p = find(p, FOFCLSN, "player")); i++ ) {
+	for( i = 0, p = world; (p = find_plr( p )); i++ ) {
 		if ( !i ) {
 			G_sprint(self, 2, "Clients list: %s\n", redtext( "players" ) );
 			G_sprint(self, 2, "%s %s %s %s %s %s\n",
@@ -3276,7 +3252,7 @@ void klist ( )
 	if (i)
 		G_sprint(self, 2, "%s %2d found %s\n", redtext("--"), i, redtext("-------------") );
 
-	for( i = 0, p = world; (p = find(p, FOFCLSN, "spectator")); i++ ) {
+	for( i = 0, p = world; (p = find_spc( p )); i++ ) {
 		if ( !i ) {
 			G_sprint(self, 2, "Clients list: %s\n", redtext( "spectators" ) );
 			G_sprint(self, 2, "%s %s %s %s\n",
@@ -3452,7 +3428,7 @@ void tracklist ( )
 	char *track;
 	char *nt = redtext(" not tracking");
 
-	for( i = 0, p = world; (p = find(p, FOFCLSN, "spectator")); i++ ) {
+	for( i = 0, p = world; (p = find_spc( p )); i++ ) {
 		if ( !i )
 			G_sprint(self, 2, "%s:\n", redtext( "Trackers list" ) );
 
@@ -3472,7 +3448,7 @@ void fpslist ( )
 	gedict_t *p;
 	float cur, max, min, avg;
 
-	for( i = 0, p = world; (p = find(p, FOFCLSN, "player")); i++ ) {
+	for( i = 0, p = world; (p = find_plr( p )); i++ ) {
 		if ( !i ) {
 			G_sprint(self, 2, "Players %s list:\n", redtext("FPS") );
 			G_sprint(self, 2, "         name:(cur \x8f max \x8f min \x8f avg)\n");
@@ -3539,10 +3515,9 @@ qboolean favx_del_do(gedict_t *s, gedict_t *p, char *prefix);
 // removed from spectators favourites
 void del_from_specs_favourites(gedict_t *rm)
 {
-	int from;
 	gedict_t *p;
 
-	for( from = 1, p = world; (p = find_plrspc(p, &from)); ) {
+	for( p = world; (p = find_spc( p )); ) {
 		fav_del_do(p, rm, "auto: ");
 		favx_del_do(p, rm, "auto: ");
 	}
@@ -3896,7 +3871,7 @@ void next_pow ()
 
 	to = first = NULL;
 
-	for ( p = world; (p = find( p , FOFCLSN, "player" )); ) {
+	for ( p = world; (p = find_plr( p )); ) {
 
 		if ( ISDEAD(p) )
 			continue;
@@ -4386,7 +4361,7 @@ void mi_print( gedict_t *tooker, int it, char *msg )
 {
 	char *t_team;
 	gedict_t *p;
-	int from, level;
+	int level;
 	qboolean adm = mi_adm_only ();
 
 	if ( !mi_on() )
@@ -4394,7 +4369,7 @@ void mi_print( gedict_t *tooker, int it, char *msg )
 
 	t_team = getteam( tooker );
 
-	for( from = 1 /* spec */, p = world; (p = find_plrspc (p, &from)); ) {
+	for( p = world; (p = find_spc ( p )); ) {
 		if ( adm && !is_adm( p ) )
 			continue; // configured send only for admins
 
@@ -4842,7 +4817,7 @@ void iplist_one(gedict_t *s, gedict_t *p)
 // ktpro (c)
 void iplist ()
 {
-	int from, prev_from;
+	int i;
 	gedict_t *p;
 
 	if ( !check_perm(self, cvar("k_ip_list")) ) {
@@ -4850,18 +4825,18 @@ void iplist ()
 		return;
 	}
 
-	for( prev_from = -666, from = 0, p = world; (p = find_plrspc(p, &from)); ) {
-		if ( prev_from != from ) {
-			if ( from == 0 )
-				G_sprint(self, 2, "\234IPs list\234 %s\n", redtext("players:"));
-			else if ( from == 1 )
-				G_sprint(self, 2, "\234IPs list\234 %s\n", redtext("spectators:"));
-			else
-				G_sprint(self, 2, "\234IPs list\234 %s\n", redtext("??? BUG ???"));
-		}
-		prev_from = from;
-
+	for( i = 0, p = world; (p = find_plr( p )); ) {
+		if ( !i )
+			G_sprint(self, 2, "\234IPs list\234 %s\n", redtext("players:"));
 		iplist_one(self, p);
+		i++;
+	}
+
+	for( i = 0, p = world; (p = find_spc( p )); ) {
+		if ( !i )
+			G_sprint(self, 2, "\234IPs list\234 %s\n", redtext("spectators:"));
+		iplist_one(self, p);
+		i++;
 	}
 }
 
@@ -5173,7 +5148,7 @@ void check_fcheck ()
 
 	G_bprint(2, "player's \20%s\21 replies:\n", fcheck_name);
 
-	for( p = world; (p = find(p, FOFCLSN, "player")); ) {
+	for( p = world; (p = find_plr( p )); ) {
 		if ( strnull( tmp = p->f_checkbuf ) ) {
 			G_bprint(3, "%s did not reply!\n", p->s.v.netname);
 			continue;

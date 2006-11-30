@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.91 2006/11/29 06:47:18 qqshka Exp $
+ *  $Id: match.c,v 1.92 2006/11/30 08:50:08 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -31,12 +31,9 @@ float CountPlayers()
 	gedict_t	*p;
 	float		num = 0;
 
-	p = find( world, FOFCLSN, "player" );
-	while ( p ) {
-		if ( !strnull( p->s.v.netname ) )
-			num++;
-		p = find ( p, FOFCLSN, "player" );
-	}
+	for ( p = world; (p = find_plr( p )); )
+		num++;
+
 	return num;
 }
 
@@ -45,89 +42,56 @@ float CountRPlayers()
 	gedict_t	*p;
 	float		num = 0;
 
-	p = find( world, FOFCLSN, "player" );
-	while ( p ) {
-		if ( !strnull( p->s.v.netname ) && p->ready )
+	for ( p = world; (p = find_plr( p )); )
+		if ( p->ready )
 			num++;
-		p = find ( p, FOFCLSN, "player" );
-	}
+
 	return num;
 }
 
 float CountTeams()
 {
 	gedict_t	*p, *p2;
-	float		num;
-	char		*s1, *s2;
+	float		num = 0;
+	char		*s = "";
 
-	num = 0;
-	p = find ( world, FOFCLSN, "player" );
-	while( p ) {
-		if( !strnull( p->s.v.netname ) )
-			p->k_flag = 0;
+	for ( p = world; (p = find_plr( p )); )
+		p->k_flag = 0;
 
-		p = find ( p, FOFCLSN, "player" );
-	}
+	for ( p = world; (p = find_plr( p )); ) {
+		if( p->k_flag || strnull( s = getteam( p ) ) )
+			continue;
 
-	p = find ( world, FOFCLSN, "player" );
-	while( p ) {
-		if( !strnull( p->s.v.netname ) && !p->k_flag ) {
-			p->k_flag = 1;
+		p->k_flag = 1;
+		num++;
 
-			s1 = getteam( p );
-			if( !strnull( s1 ) ) {
-				num++;
-
-				p2 = find ( p, FOFCLSN, "player" );
-				while( p2 ) {
-					s1 = getteam( p );
-					s2 = getteam( p2 );
-					if( streq( s1, s2 ) )
-						p2->k_flag = 1;
-					p2 = find ( p2, FOFCLSN, "player" );
-				}
-			}
-		}
-		p = find ( p, FOFCLSN, "player" );
+		for( p2 = p; (p2 = find_plr( p2 )); )
+			if( streq( s, getteam( p2 ) ) )
+				p2->k_flag = 1;
 	}
 	return num;
 }
 
+// return number of teams where at least one member is ready?
 float CountRTeams()
 {
 	gedict_t	*p, *p2;
-	float		num;
-	char		*s1, *s2;
+	float		num = 0;
+	char		*s = "";
 
-	num = 0;
-	p = find ( world, FOFCLSN, "player" );
-	while( p ) {
-		if( !strnull( p->s.v.netname ) )
-			p->k_flag = 0;
+	for ( p = world; (p = find_plr( p )); )
+		p->k_flag = 0;
 
-		p = find ( p, FOFCLSN, "player" );
-	}
+	for ( p = world; (p = find_plr( p )); ) {
+		if( p->k_flag || !p->ready || strnull( s = getteam( p ) ) )
+			continue;
 
-	p = find ( world, FOFCLSN, "player" );
-	while( p ) {
-		if( !strnull( p->s.v.netname ) && !p->k_flag && p->ready ) {
-			p->k_flag = 1;
+		p->k_flag = 1;
+		num++;
 
-			s1 = getteam( p );
-			if( !strnull( s1 ) ) {
-				num++;
-
-				p2 = find ( p, FOFCLSN, "player" );
-				while( p2 ) {
-					s1 = getteam( p );
-					s2 = getteam( p2 );
-					if( streq( s1, s2 ) )
-						p2->k_flag = 1;
-					p2 = find ( p2, FOFCLSN, "player" );
-				}
-			}
-		}
-		p = find ( p, FOFCLSN, "player" );
+		for( p2 = p; (p2 = find_plr( p2 )); )
+			if( streq( s, getteam( p2 ) ) )
+				p2->k_flag = 1;
 	}
 	return num;
 }
@@ -140,43 +104,27 @@ float CheckMembers ( float memcnt )
 {
 	gedict_t	*p, *p2;
 	float		f1;
-	char		*s1, *s2;
+	char		*s = "";
 
-	p = find ( world, FOFCLSN, "player" );
-	while( p ) {
-		if( !strnull( p->s.v.netname ) )
-			p->k_flag = 0;
+	for ( p = world; (p = find_plr( p )); )
+		p->k_flag = 0;
 
-		p = find ( p, FOFCLSN, "player" );
-	}
+	for( p = world; (p = find_plr( p )); ) {
+		if ( p->k_flag )
+			continue;
 
-	p = find ( world, FOFCLSN, "player" );
-	while( p ) {
-		if( !strnull( p->s.v.netname ) && !p->k_flag && p->ready ) {
-			p->k_flag = 1;
-			f1 = 1;
-			s1 = getteam( p );
+		p->k_flag = 1;
+		f1 = 1;
 
-			if( !strnull ( s1 ) ) {
-				p2 = find ( p, FOFCLSN, "player" );
-
-				while( p2 ) {
-					s1 = getteam( p );
-					s2 = getteam( p2 );
-
-					if( streq( s1, s2 ) ) {
-						p2->k_flag = 1;
-						f1++;
-					}
-					p2 = find ( p2, FOFCLSN, "player" );
+		if( !strnull ( s = getteam( p ) ) )
+			for( p2 = p; (p2 = find_plr( p2 )); )
+				if( streq( s, getteam( p2 ) ) ) {
+					p2->k_flag = 1;
+					f1++;
 				}
-			}
 
-			if ( f1 < memcnt )
-				return 0;
-		}
-
-		p = find ( p, FOFCLSN, "player" );
+		if ( f1 < memcnt )
+			return 0;
 	}
 	return 1;
 }
@@ -807,9 +755,8 @@ void OnePlayerMidairStats( gedict_t *p, int tp )
 void EM_on_MatchEndBreak( int isBreak )
 {
 	gedict_t *p;
-	int from;
 
-	for( from = 0, p = world; (p = find_plrspc (p, &from)); )
+	for( p = world; (p = find_client( p )); )
 		if ( isBreak )
 			on_match_break( p );
 		else
@@ -856,7 +803,7 @@ void EndMatch ( float skip_log )
 	if( /* skip_log */ 0 ) // qqshka: we are not skip match stats now
 		G_cprint("%%stopped\n");
 	else {
-		for( p = world; (p = find ( p, FOFCLSN, "player" )); ) 
+		for( p = world; (p = find_plr( p )); ) 
 		{
 			if( !strnull( p->s.v.netname ) )
 			{
@@ -885,7 +832,7 @@ void EndMatch ( float skip_log )
 
 		if ( isCTF() ) // if a player ends the game with a rune adjust their rune time
 		{
-			for( p = world; (p = find ( p, FOFCLSN, "player" )); ) 
+			for( p = world; (p = find_plr( p )); ) 
 			{
 				if ( p->ctf_flag & CTF_RUNE_RES )
 					p->ps.res_time += g_globalvars.time - p->rune_pickup_time;
@@ -930,7 +877,7 @@ void EndMatch ( float skip_log )
 		localcmd("localinfo %d \"\"\n", (int)f1); //removing key
 
 	if ( old_match_in_progress == 2 ) {
-		for ( p = world; (p = find( p, FOFCLSN, "player" )); )
+		for ( p = world; (p = find_plr( p )); )
 			p->ready = 0; // force players be not ready after match is end.
 	}
 
@@ -944,18 +891,13 @@ void SaveOvertimeStats ()
 	gedict_t	*p;
 
 	if ( k_overtime ){
-		p = find ( world, FOFCLSN, "player" );
-
-		while( p ) 
+		for( p = world; (p = find_plr( p )); )
 		{
 		 	// save overtime stats
 			p->ps.ot_a	    = (int)p->s.v.armorvalue;
 			p->ps.ot_items	=      p->s.v.items; // float
 			p->ps.ot_h	    = (int)p->s.v.health;
-
-			p = find ( p, FOFCLSN, "player" );
 		}
-
 	}
 }
 
@@ -979,7 +921,7 @@ void CheckBerzerk( int min, int sec )
 	trap_lightstyle ( 0, "ob" );
 	k_berzerk = 1;
 	
-	for( p = world; (p = find( p, FOFCLSN, "player" )); ) {
+	for( p = world; (p = find_plr( p )); ) {
 		if( !ISLIVE( p ) )
 			continue;
 
@@ -1193,7 +1135,7 @@ void SM_PrepareClients()
 	localcmd("localinfo 666 \"\"\n");
 	trap_executecmd (); // <- this really needed
 
-	for( p = world;	(p = find ( p, FOFCLSN, "player" )); ) {
+	for( p = world;	(p = find_plr( p )); ) {
 		if( !k_matchLess ) { // skip setup k_teamnum in matchLess mode
 			pl_team = getteam( p );
 			G_cprint("%%%s%%t%%%s", p->s.v.netname, pl_team);
@@ -1259,20 +1201,20 @@ void SM_PrepareShowscores()
 	if ( (!isTeam() && !isCTF()) || CountRTeams() != 2 ) // we need 2 teams
 		return;
 
-	if ( (p = find ( world, FOFCLSN, "player" )) ) 
+	if ( (p = find_plr( world )) ) 
 		team1 = getteam( p );
 
 	if ( strnull( team1 ) )
 		return;
 
-	while( (p = find ( p, FOFCLSN, "player" )) ) {
+	while( (p = find_plr( p )) ) {
 		team2 = getteam( p );
 
 		if( strneq( team1, team2 ) )
 			break;
 	}
 
-	if ( strnull( team2 ) )
+	if ( strnull( team2 ) || streq(team1, team2) )
 		return;
 
 	k_showscores = 1;
@@ -1296,9 +1238,8 @@ void SM_PrepareHostname()
 void SM_on_MatchStart()
 {
 	gedict_t *p;
-	int from;
 
-	for( from = 0, p = world; (p = find_plrspc (p, &from)); )
+	for( p = world; (p = find_client( p )); )
 		on_match_start( p );
 }
 
@@ -1495,7 +1436,7 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
     }
 
 	nready = 0;
-	for( p = world; (p = find ( p, FOFCLSN, "player" )); )
+	for( p = world; (p = find_plr( p )); )
 		if( p->ready )
 			nready++;
 
@@ -1522,7 +1463,6 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 		// can't really play ctf if map doesn't have flags
 		gedict_t *rflag = find( world, FOFCLSN, "item_flag_team1" );
 		gedict_t *bflag = find( world, FOFCLSN, "item_flag_team2" );
-//		qboolean ctfReady = true;
        
 		if ( !rflag || !bflag )
 		{
@@ -1535,22 +1475,6 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 
 			return false;
 		}  
-
-/*
-// qqshka: this code allow us to check CTF requrements about teams, but broke forcestart and iddlebot.
-//		   so i make this in other way
-
-		for( p = world; (p = find ( p, FOFCLSN, "player" )); )
-			if ( p->ready && (!streq(getteam(p), "blue") && !streq(getteam(p), "red")) )
-			{
-				p->ready = 0;
-				G_sprint( p, 2, "You must be on team red or blue for CTF\n" );
-				ctfReady = false;
-			}
-
-		if ( !ctfReady )
-			return false;
-*/
 	}
 
 	return true;
@@ -1564,7 +1488,7 @@ void standby_think()
 
 		k_standby = 1;
 
-		for( p = world;	(p = find ( p, FOFCLSN, "player" )); ) {
+		for( p = world;	(p = find_plr( p )); ) {
 			if( !strnull ( p->s.v.netname ) ) {
 				//set to ghost, 0.2 second before matchstart
 				p->s.v.takedamage = 0;
@@ -1583,7 +1507,6 @@ void standby_think()
 void TimerStartThink ()
 {
 	gedict_t *p;
-	int from;
 
 	k_attendees = CountPlayers();
 
@@ -1615,7 +1538,7 @@ void TimerStartThink ()
 	PrintCountdown( self->cnt2 );
 
 	if( self->cnt2 < 6 )
-		for( from = 0, p = world; (p = find_plrspc (p, &from)); )
+		for( p = world; (p = find_client( p )); )
 			stuffcmd (p, "play buttons/switch04.wav\n");
 
 	self->s.v.nextthink = g_globalvars.time + 1;
@@ -1687,7 +1610,7 @@ char *CompilateDemoName ()
 		if ( cvar("k_midair") )
 			strlcat( demoname, "_midair", sizeof( demoname ) );
 
-		for( vs = "_", p = world; (p = find ( p, FOFCLSN, "player" )); ) 
+		for( vs = "_", p = world; (p = find_plr( p )); ) 
 		{
 			if ( strnull( name = getname( p ) ) )
 				continue;
@@ -1759,7 +1682,6 @@ void StartDemoRecord ()
 // Spawns the timer and starts the countdown.
 void StartTimer ()
 {
-	int from;
 	gedict_t *timer;
 
 	if ( match_in_progress || intermission_running || match_over )
@@ -1782,7 +1704,7 @@ void StartTimer ()
 	if ( !k_matchLess ) {
 		ShowMatchSettings ();
 
-		for( from = 0, timer = world; (timer = find_plrspc(timer, &from)); )
+		for( timer = world; (timer = find_client( timer )); )
 			stuffcmd(timer, "play items/protect2.wav\n");
 	}
 
@@ -1831,7 +1753,7 @@ void StopTimer ( int removeDemo )
 		// standby flag needs clearing (sturm)
 		k_standby = 0;
 
-		for( p = world; (p = find ( p, FOFCLSN, "player" )); ) 
+		for( p = world; (p = find_plr( p )); ) 
 		{
 			p->s.v.takedamage = 2;
 			p->s.v.solid      = 3;
@@ -1866,7 +1788,7 @@ void IdlebotForceStart ()
 				  "match WILL commence!\n" );
 
     i = 0;
-    for( p = world; (p = find(p, FOFCLSN, "player")); )
+    for( p = world; (p = find_plr( p )); )
     {
 		if( p->ready ) {
     		i++;
@@ -1937,7 +1859,7 @@ void IdlebotThink ()
 		i = self->attack_finished;
 
 		if( i < 5 || !(i % 5) ) {
-			for( p = world; (p = find ( p, FOFCLSN, "player" )); )
+			for( p = world; (p = find_plr( p )); )
 				if( !p->ready )
 					G_sprint(p, 2, "console: %d second%s to go ready\n", i, ( i == 1 ? "" : "s" ));
 		}
@@ -2008,7 +1930,6 @@ void CheckAutoXonX(qboolean use_time);
 void PlayerReady ()
 {
 	gedict_t *p;
-	int   from;
 	float nready;
 
 	if ( self->ct == ctSpec ) {
@@ -2025,7 +1946,7 @@ void PlayerReady ()
 
 		self->ready = 1;
 
-		for( from = (match_in_progress ? 1 : 0), p = world; (p = find_plrspc(p, &from)); )
+		for( p = world; (p = (match_in_progress ? find_spc( p ) : find_client( p ))); )
 			G_sprint(p, 2, "%s %s to play\n", self->s.v.netname, redtext("desire"));
 
 		CheckAutoXonX(g_globalvars.time < 10 ? true : false); // forse switch mode asap if possible after some time spend
@@ -2057,7 +1978,7 @@ void PlayerReady ()
 
     if( k_force && ( isTeam() || isCTF() )) {
 		nready = 0;
-		for( p = world; (p = find ( p, FOFCLSN, "player" )); ) {
+		for( p = world; (p = find_plr( p )); ) {
 			if( p->ready ) {
 				if( streq( getteam(self), getteam(p) ) && !strnull( getteam(self) ) ){
 					nready = 1;
@@ -2092,10 +2013,9 @@ void PlayerReady ()
 						( ( isTeam() || isCTF() ) ? va(" \x90%s\x91", getteam( self ) ) : "" ) );
 
 	nready = 0;
-	for( p = world; (p = find ( p, FOFCLSN, "player" )); )
+	for( p = world; (p = find_plr( p )); )
 		if( p->ready )
 			nready++;
-
 
 	k_attendees = CountPlayers();
 
@@ -2125,7 +2045,7 @@ void PlayerReady ()
 
 void PlayerBreak ()
 {
-	int votes, from;
+	int votes;
 	gedict_t *p;
 
 	if ( self->ct == ctSpec ) {
@@ -2140,7 +2060,7 @@ void PlayerBreak ()
 
 		self->ready = 0;
 
-		for( from = (match_in_progress ? 1 : 0), p = world; (p = find_plrspc(p, &from)); )
+		for( p = world; (p = (match_in_progress ? find_spc( p ) : find_client( p ))); )
 			G_sprint(p, 2, "%s %s to play\n", self->s.v.netname, redtext("lost desire"));
 		
 		return;

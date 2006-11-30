@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1997 David 'crt' Wright
  *
- * $Id: arena.c,v 1.9 2006/11/29 06:47:17 qqshka Exp $
+ * $Id: arena.c,v 1.10 2006/11/30 08:50:06 qqshka Exp $
  */
 
 // arena.c - rocket arena stuff
@@ -592,7 +592,7 @@ void ra_PlayerStats()
 		return;
 	}
 
-	for ( p = world; (p = find( p, FOFCLSN, "player" )); )
+	for ( p = world; (p = find_plr( p )); )
 		pL = max(pL, strlen(p->s.v.netname));
 
 	pL = bound( strlen("Name"), pL, 10 );
@@ -609,7 +609,7 @@ void ra_PlayerStats()
 		G_sprint(self, 2, "\236"); // dynamically pad name
 	G_sprint(self, 2, "\237\n");
 
-	for ( p = world; (p = find(p, FOFCLSN, "player" )); ) {
+	for ( p = world; (p = find_plr( p )); ) {
 		G_sprint(self, 2, "%.10s", p->s.v.netname); // player name
 		for ( i = strlen(p->s.v.netname); i < pL; i++ )
 			G_sprint(self, 2, " "); // dynamically pad name

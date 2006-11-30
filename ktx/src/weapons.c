@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.54 2006/11/29 06:47:18 qqshka Exp $
+ *  $Id: weapons.c,v 1.55 2006/11/30 08:50:08 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1737,7 +1737,7 @@ int CaptainImpulses()
 
 	// ok - below possible captain stuff
 
-	if( self->s.v.impulse > 16 || !capt_num( self ) )
+	if( self->s.v.impulse > MAX_CLIENTS || !capt_num( self ) )
 		return 0;// s: return 0 if captain mode is set and no captain things were entered
 
 	return 1;// s: return 1 if it's a player picker impulse

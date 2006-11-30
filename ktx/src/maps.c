@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: maps.c,v 1.16 2006/11/29 06:47:18 qqshka Exp $
+ *  $Id: maps.c,v 1.17 2006/11/30 08:50:07 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -221,7 +221,7 @@ void DoSelectMap(int iMap)
 		return;
 	}
 
-	for ( p = world; (p = find(p , FOFCLSN, "player")); )
+	for ( p = world; (p = find_plr( p )); )
 		if ( p->v.map == iMap ) {
 			isVoted = true;
 			break;

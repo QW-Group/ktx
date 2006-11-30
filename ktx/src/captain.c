@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: captain.c,v 1.18 2006/11/29 06:47:17 qqshka Exp $
+ *  $Id: captain.c,v 1.19 2006/11/30 08:50:06 qqshka Exp $
  */
 
 // captain.c
@@ -68,7 +68,7 @@ void PrintCaptainInTurn ()
 {
     gedict_t *p;
 
-    for( p = world; (p = find(p, FOFCLSN, "player")) && capt_num( p ) != k_captainturn; )
+    for( p = world; (p = find_plr( p )) && capt_num( p ) != k_captainturn; )
         ; // empty
 
 	if ( p )
@@ -85,7 +85,7 @@ void CancelCaptains ()
 
 	k_captains = 0;
 
-	for( p = world; (p = find(p, FOFCLSN, "player")); )
+	for( p = world; (p = find_plr( p )); )
 	{
 		if( capt_num( p ) )
 			G_sprint(p, 2, "You are no longer a %s\n", redtext("captain"));
@@ -104,7 +104,7 @@ void CheckFinishCaptain ()
     gedict_t *p, *lastone = NULL;
 
     // s: calculate how many players are free
-   	for( p = world; (p = find(p, FOFCLSN, "player")); )
+   	for( p = world; (p = find_plr( p )); )
     {
         if( p->s.v.frags )
         {
@@ -115,7 +115,7 @@ void CheckFinishCaptain ()
 
     if( pl_free == 1 ) // one free player left
     {
-    	for( p = world; (p = find(p, FOFCLSN, "player")) && capt_num( p ) != k_captainturn; )
+    	for( p = world; (p = find_plr( p )) && capt_num( p ) != k_captainturn; )
         	; // empty
 
 		if ( p )
@@ -142,7 +142,7 @@ void CaptainPickPlayer ()
         return;
     }
 
-    for( p = world; (p = find(p, FOFCLSN, "player")) && p->s.v.frags != self->s.v.impulse; )
+    for( p = world; (p = find_plr( p )) && p->s.v.frags != self->s.v.impulse; )
         ; // empty
 
     if( !p )
@@ -172,7 +172,7 @@ void ExitCaptain ()
 	{
     	G_bprint(2, "Player picking aborted\n");
 
-    	for( p = world; (p = find(p, FOFCLSN, "player")); )
+    	for( p = world; (p = find_plr( p )); )
         	if( p->s.v.frags )
             	p->s.v.frags = 0;
 	}
@@ -184,7 +184,7 @@ void ExitCaptain ()
 
 void VoteCaptain ()
 {
-	int from, till;
+	int till;
     gedict_t *p, *electguard;
 
     // s: check if we are being elected or we are a captain already
@@ -256,7 +256,7 @@ void VoteCaptain ()
     }
 
     // search if a captain already has the same team
-    for( p = world; (p = find(p, FOFCLSN, "player")) && !capt_num( p ); )
+    for( p = world; (p = find_plr( p )) && !capt_num( p ); )
 		; // empty
 
 	if ( p ) {
@@ -287,7 +287,7 @@ void VoteCaptain ()
 
 	G_bprint(2, "%s has %s status!\n", self->s.v.netname, redtext("requested captain"));
 
-	for( from = 0, p = world; (p = find_plrspc(p, &from)); )
+	for( p = world; (p = find_client( p )); )
 		if ( p != self && p->ct == ctPlayer )
 			G_sprint(p, 2, "Type %s in console to approve\n", redtext("yes"));
 
@@ -321,7 +321,7 @@ void BeginPicking ()
 
 	num = 1;
 
-	for( p = world; (p = find(p, FOFCLSN, "player")); )
+	for( p = world; (p = find_plr( p )); )
     {
 		p->k_picked = 0;
 
@@ -354,7 +354,7 @@ void BecomeCaptain(gedict_t *p)
 {
 	gedict_t *cap = p; // warning, below 'p' is overwriten
 
-	for( p = world; (p = find(p, FOFCLSN, "player")) && !capt_num( p ); )
+	for( p = world; (p = find_plr( p )) && !capt_num( p ); )
 		; // empty
 
 	cap->k_captain = ( p && capt_num( p ) == 1 ) ? 2 : 1;

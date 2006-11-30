@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.30 2006/11/29 06:47:18 qqshka Exp $
+ *  $Id: spectate.c,v 1.31 2006/11/30 08:50:08 qqshka Exp $
  */
 
 // spectate.c
@@ -112,7 +112,6 @@ void SpecDecodeLevelParms()
 void SpectatorConnect()
 {
 	gedict_t *p;
-	int from = ( match_in_progress == 2 && !cvar("k_ann") ) ? 1 : 0;
 	int diff = (int)(PROG_TO_EDICT(self->s.v.goalentity) - world);
 
 	SpecDecodeLevelParms();
@@ -121,12 +120,9 @@ void SpectatorConnect()
 	self->s.v.classname = "spectator"; // Added this in for kick code
 	self->k_accepted = 1; // spectator has no restriction to connect
 
-	for ( p = world; (p = find_plrspc(p, &from)); )	{
-		if ( p == self )
-			continue; // does't show msg for self
-
-		G_sprint( p, PRINT_HIGH, "Spectator %s entered the game\n", self->s.v.netname  );
-	}
+	for ( p = world; (p = ( match_in_progress == 2 && !cvar("k_ann") ) ? find_spc( p ) : find_client( p )); )
+		if ( p != self )  // does't show msg for self
+			G_sprint( p, PRINT_HIGH, "Spectator %s entered the game\n", self->s.v.netname  );
 
 	if ( diff < 0 || diff >= MAX_EDICTS ) // something wrong happen - fixing
 		self->s.v.goalentity = EDICT_TO_PROG( world );
@@ -164,9 +160,8 @@ void PutSpectatorInServer()
 void SpectatorDisconnect()
 {
 	gedict_t *p;
-	int from = ( match_in_progress == 2 && !cvar("k_ann") ) ? 1 : 0;
 
-	for ( p = world; (p = find_plrspc(p, &from)); )	
+	for ( p = world; (p = ( match_in_progress == 2 && !cvar("k_ann") ) ? find_spc( p ) : find_client( p )); )	
 		G_sprint( p, PRINT_HIGH, "Spectator %s left the game\n", self->s.v.netname );
 
 // s: added conditional function call here
@@ -312,7 +307,7 @@ void remove_specs_wizards ()
 {
 	gedict_t *p;
 
-	for( p = world; (p = find( p, FOFCLSN, "spectator" )); )
+	for( p = world; (p = find_spc( p )); )
 		if ( p->wizard ) {
 			ent_remove( p->wizard );
 			p->wizard = NULL;

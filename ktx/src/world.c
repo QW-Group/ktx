@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.75 2006/11/29 06:47:18 qqshka Exp $
+ *  $Id: world.c,v 1.76 2006/11/30 08:50:08 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -828,7 +828,7 @@ void CheckAutoXonX(qboolean use_time)
 	static float last_check_time = 0;
 
 	gedict_t *p;
-	int   from, count, um_idx = -1;
+	int count, um_idx = -1;
 
 	if ( !cvar("k_auto_xonx") || match_in_progress || k_matchLess 
 		 || (use_time && g_globalvars.time - last_check_time < 7) /* allow users reconnect */ 
@@ -837,7 +837,7 @@ void CheckAutoXonX(qboolean use_time)
 
 	last_check_time = g_globalvars.time;
 
-	for( count = from = 0, p = world; (p = find_plrspc(p, &from)); )
+	for( count = 0, p = world; (p = find_client( p )); )
 		if ( p->ct == ctPlayer || (p->ct == ctSpec && p->ready) )
 			count++;
 

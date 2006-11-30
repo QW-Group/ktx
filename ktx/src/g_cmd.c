@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.28 2006/11/29 06:47:17 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.29 2006/11/30 08:50:07 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -493,10 +493,9 @@ void s_lr_cmd( float l ) // just redirect /s-l or /s-r command to /say
 
 void s_lr_clear( gedict_t *dsc )
 {
-	int from;
 	gedict_t *p;
 
-	for ( from = 0, p = world; (p = find_plrspc(p, &from)); ) {
+	for ( p = world; (p = find_client( p )); ) {
 
 		if ( p->s_last_to == dsc )
 			p->s_last_to = NULL;
@@ -508,7 +507,7 @@ void s_lr_clear( gedict_t *dsc )
 
 void s_t_do (char *str, char *tname)
 {
-	int from, i;
+	int i;
 	gedict_t *p;
 	char *name, *ch;
 
@@ -518,7 +517,7 @@ void s_t_do (char *str, char *tname)
 		if ( *ch == 13 ) // kickfake to unfake ->
 			*ch = ' ';
 
-	for ( i = 0, from = 0, p = world; (p = find_plrspc(p, &from)); ) {
+	for ( i = 0, p = world; (p = find_client( p )); ) {
 		if ( self == p ) // ignore sending text to self
 			continue;
 
@@ -573,7 +572,7 @@ void s_t_cmd() // just redirect /s-t command to /say
 
 void s_m_do (char *str, int m)
 {
-	int from, i, bit;
+	int i, bit;
 	gedict_t *p;
 	char *name, *ch;
 
@@ -583,7 +582,7 @@ void s_m_do (char *str, int m)
 		if ( *ch == 13 ) // kickfake to unfake ->
 			*ch = ' ';
 
-	for ( i = 0, from = 0, p = world; (p = find_plrspc(p, &from)); ) {
+	for ( i = 0, p = world; (p = find_client( p )); ) {
 		if ( self == p ) // ignore sending text to self
 			continue;
 

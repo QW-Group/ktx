@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: vote.c,v 1.16 2006/11/29 06:47:18 qqshka Exp $
+ *  $Id: vote.c,v 1.17 2006/11/30 08:50:08 qqshka Exp $
  */
 
 // vote.c: election functions by rc\sturm
@@ -28,10 +28,9 @@ void	BecomeCaptain(gedict_t *p);
 // Important if player to be elected disconnects or levelchange happens
 void AbortElect()
 {
-    int from;
 	gedict_t *p;
 
-	for( from = 0, p = world; (p = find_plrspc(p, &from)); ) {
+	for( p = world; (p = find_client( p )); ) {
 		if ( p->v.elect_type != etNone ) {
 			if ( is_elected(p, etCaptain) )
 				k_captains = floor( k_captains );
@@ -110,11 +109,10 @@ void VoteNo()
 
 int get_votes( int fofs )
 {
-	int from;
 	int votes = 0;
 	gedict_t *p;
 
-	for ( from = 0, p = world; (p = find_plrspc(p, &from)); )
+	for ( p = world; (p = find_client( p )); )
 		if ( *(int*)((byte*)(&p->v)+fofs) )
 			votes++;
 
@@ -125,11 +123,10 @@ int get_votes( int fofs )
 
 int get_votes_by_value( int fofs, int value )
 {
-	int from;
 	int votes = 0;
 	gedict_t *p;
 
-	for ( from = 0, p = world; (p = find_plrspc(p, &from)); )
+	for ( p = world; (p = find_client( p )); )
 		if ( *((int*)(&(p->v)+fofs)) == value )
 			votes++;
 
@@ -191,11 +188,10 @@ int get_votes_req( int fofs, qboolean diff )
 
 int is_admins_vote( int fofs )
 {
-	int from;
 	int votes = 0;
 	gedict_t *p;
 
-	for ( from = 0, p = world; (p = find_plrspc(p, &from)); )
+	for ( p = world; (p = find_client( p )); )
 		if ( *(int*)((byte*)(&p->v)+fofs) && is_adm( p ) )
 			votes++;
 
@@ -204,10 +200,9 @@ int is_admins_vote( int fofs )
 
 void vote_clear( int fofs )
 {
-	int from;
 	gedict_t *p;
 
-	for ( from = 0, p = world; (p = find_plrspc(p, &from)); )
+	for ( p = world; (p = find_client( p )); )
 		*(int*)((byte*)(&p->v)+fofs) = 0;
 }
 
@@ -219,10 +214,9 @@ qboolean is_elected(gedict_t *p, electType_t et)
 
 int get_elect_type ()
 {
-    int from;
 	gedict_t *p;
 
-	for( from = 0, p = world; (p = find_plrspc(p, &from)); ) {
+	for( p = world; (p = find_client( p )); ) {
 		if( is_elected(p, etAdmin) ) // elected admin
 			return etAdmin;
 
@@ -256,7 +250,6 @@ votemap_t maps_voted[MAX_CLIENTS];
 // if admin votes for map - map will be treated as most voted
 int vote_get_maps ()
 {
-	int from;
 	int best_idx = -1, i;
 	gedict_t *p;
 
@@ -266,7 +259,7 @@ int vote_get_maps ()
 	if ( !get_votes( OV_MAP ) )
 		return -1; // no one votes at all
 
-	for( from = 0, p = world; (p = find_plrspc(p, &from)); ) {
+	for( p = world; (p = find_client( p )); ) {
 
 		if ( !p->v.map )
 			continue; // player is not voted
@@ -341,11 +334,10 @@ void vote_check_break ()
 void vote_check_elect ()
 {
 	gedict_t *p;
-	int   from;
 
 	if( !get_votes_req( OV_ELECT, true ) ) {
 
-		for( from = 0, p = world; (p = find_plrspc(p, &from)); )
+		for( p = world; (p = find_client( p )); )
 			if ( p->v.elect_type != etNone )
 				break;
 
@@ -389,7 +381,7 @@ void vote_check_pickup ()
 		else
 			G_bprint(2, "console: a pickup game it is then\n");
 
-		for( p = world;	(p = find( p, FOFCLSN, "player" )); ) {
+		for( p = world;	(p = find_plr( p )); ) {
 
 			stuffcmd(p, "break\n"
 						"color 0\n"
@@ -427,14 +419,14 @@ void vote_check_rpickup ()
 	if( veto || !get_votes_req( OV_RPICKUP, true ) ) {
 		vote_clear( OV_RPICKUP );
 
-		for( p = world; (p = find(p, FOFCLSN, "player")); )
+		for( p = world; (p = find_plr( p )); )
 			p->k_teamnumber = 0;
 
 		for( tn = 1; pl_cnt > 0; pl_cnt-- ) {
 			frnd = g_random(); // bound is macros - so u _can't_ put g_random inside bound
 			pl_idx = bound(0, (int)( frnd * pl_cnt ), pl_cnt-1 ); // select random player between 0 and pl_cnt
 
-			for( i = 0, p = world; (p = find(p, FOFCLSN, "player")); ) {
+			for( i = 0, p = world; (p = find_plr( p )); ) {
 				if ( p->k_teamnumber )
 					continue;
 

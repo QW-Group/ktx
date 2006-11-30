@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.94 2006/11/27 22:47:06 qqshka Exp $
+ *  $Id: g_local.h,v 1.95 2006/11/30 08:50:05 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -165,7 +165,6 @@ typedef enum
 	dtUNKNOWN
 } deathType_t;
 
-
 typedef union fi_s
 {
 	float			_float;
@@ -289,8 +288,12 @@ char		*g_his( gedict_t * ed );
 char		*g_he( gedict_t * ed );
 char		*g_himself( gedict_t * ed );
 
-gedict_t	*find_plrghst( gedict_t * start, int *from );
-gedict_t	*find_plrspc( gedict_t * start, int *from );
+
+gedict_t	*find_client( gedict_t *start );
+gedict_t	*find_plr( gedict_t *start );
+gedict_t	*find_spc( gedict_t *start );
+gedict_t	*find_plrghst( gedict_t *start, int *from );
+gedict_t	*find_plrspc( gedict_t *start, int *from );
 gedict_t 	*player_by_id( int id );
 gedict_t	*player_by_name( const char *name );
 gedict_t	*player_by_IDorName( const char *IDname );

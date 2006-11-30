@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.127 2006/11/29 06:47:17 qqshka Exp $
+ *  $Id: client.c,v 1.128 2006/11/30 08:50:06 qqshka Exp $
  */
 
 //===========================================================================
@@ -53,7 +53,6 @@ void del_from_specs_favourites(gedict_t *rm);
 void CheckAll ()
 {
 	static float next_check = -1;
-	int from = 0;
 	gedict_t *p;
 
 	if ( next_check > g_globalvars.time )
@@ -61,7 +60,7 @@ void CheckAll ()
 
 	next_check = g_globalvars.time + 20;
 
-	for ( p = world; (p = find_plrspc(p, &from)); )
+	for ( p = world; (p = find_client( p )); )
 		CheckRate( p, "" );
 }
 
@@ -121,9 +120,7 @@ void CheckTiming()
 
 	timing_players_time = timing_players_time ? timing_players_time : 6; // 6 is default
 
-	p = find( world, FOFCLSN, "player" );
-
-	while( p ) {
+	for( p = world; (p = find_plr( p )); ) {
 		if( p->k_lastPostThink + timing_players_time < g_globalvars.time ) {
 			int firstTime; // guess is we are already know player is lagged
 			firstTime = !p->k_timingWarnTime;
@@ -173,8 +170,6 @@ void CheckTiming()
 			if ( !p->invincible_finished && !p->super_damage_finished && !(p->ctf_flag & CTF_FLAG) )
 				p->s.v.effects = ( int ) p->s.v.effects & ~EF_DIMLIGHT;
 		}
-
-		p = find( p, FOFCLSN, "player" );
 	}
 
 	if ( lasttimed && !timed && k_pause == 2 )
@@ -192,7 +187,7 @@ void Check_sready()
 	if ( match_in_progress )
 		return;
 
-	for( p = world; (p = find( p, FOFCLSN, "player" )); ) {
+	for( p = world; (p = find_plr( p )); ) {
 		// player have quad - so EF_BLUE will be set or removed anyway, but ugly blinking, so work around
 		if ( p->super_damage_finished )
 			continue;
@@ -495,8 +490,7 @@ void execute_changelevel()
 	intermission_running = 1;
 
 // enforce a wait time before allowing changelevel
-	intermission_exittime = g_globalvars.time + 1 +
-							max( 1, cvar( "demo_scoreslength" ) );
+	intermission_exittime = g_globalvars.time + 1 +	max( 1, cvar( "demo_scoreslength" ) );
 
 	pos = FindIntermission();
 
@@ -512,8 +506,7 @@ void execute_changelevel()
 	WriteAngle( MSG_ALL, pos->mangle[1] );
 	WriteAngle( MSG_ALL, pos->mangle[2] );
 
-	other = find( world, FOFS( s.v.classname ), "player" );
-	while ( other )
+	for( other = world; (other = find_plr( other )); )
 	{
 		other->s.v.takedamage = DAMAGE_NO;
 		other->s.v.solid = SOLID_NOT;
@@ -526,8 +519,6 @@ void execute_changelevel()
 		// take screenshot if requested
         if( iKey( other, "kf" ) & KF_SCREEN )
 			stuffcmd(other, "wait; wait; wait; wait; wait; wait; screenshot\n");
-
-		other = find( other, FOFS( s.v.classname ), "player" );
 	}
 }
 
@@ -780,7 +771,7 @@ SelectSpawnPoint
 Returns the entity to spawn at
 ============
 */
-gedict_t       *SelectSpawnPoint( char *spawnname )
+gedict_t *SelectSpawnPoint( char *spawnname )
 {
 	gedict_t		*spot;
 	gedict_t		*spots;			// chain of "valid" spots
@@ -1112,8 +1103,8 @@ void ClientConnect()
 	if( k_captains == 2 ) { // in case of team picking, check if there is a free spot for player number 1-16
 		int i;
 
-		for( i = 1, p = world; p && i <= 16; i++ )
-			for( p = world; (p = find(p, FOFCLSN, "player")) && (p == self || p->s.v.frags != i); )
+		for( i = 1, p = world; p && i <= MAX_CLIENTS; i++ )
+			for( p = world; (p = find_plr( p )) && (p == self || p->s.v.frags != i); )
 				; // empty
 
 		// if we found a spot, set the player into it
