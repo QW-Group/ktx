@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.29 2006/11/30 08:50:07 qqshka Exp $
+ *  $Id: g_cmd.c,v 1.30 2006/11/30 17:16:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -66,7 +66,7 @@ qboolean 	ClientCommand()
 		return true;
 	}
 
-	if ( strneq(self->s.v.classname, "player") && strneq(self->s.v.classname, "spectator") )
+	if ( self->ct != ctPlayer && self->ct != ctSpec )
 		return true; // not connected yet or something
 
 	if ( cmd_command[0] && !cmd_command[1] ) { // one character command, this is wreg command

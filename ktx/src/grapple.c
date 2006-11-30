@@ -4,7 +4,7 @@
  * PureCTF changes by Methabol
  *
  *
- *  $Id: grapple.c,v 1.9 2006/11/26 19:21:54 qqshka Exp $
+ *  $Id: grapple.c,v 1.10 2006/11/30 17:16:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -50,7 +50,7 @@ void GrappleTrack()
 	gedict_t *owner = PROG_TO_EDICT(self->s.v.owner);
 
 	// Release dead targets
-	if ( streq(enemy->s.v.classname, "player") && enemy->s.v.health <= 0 )
+	if ( enemy->ct == ctPlayer && ISDEAD( enemy ) )
 		owner->on_hook = false;
 
 	// drop the hook if owner is dead or has released the button
@@ -60,7 +60,7 @@ void GrappleTrack()
 		return;
 	}
 
-	if ( streq(enemy->s.v.classname, "player") )
+	if ( enemy->ct == ctPlayer )
 	{
 		if ( !CanDamage(enemy, owner) ) 
 		{
@@ -82,7 +82,7 @@ void GrappleTrack()
 	// If the hook is not attached to the player, constantly copy
 	// the target's velocity. Velocity copying DOES NOT work properly
 	// for a hooked client. 
-	if ( !streq(enemy->s.v.classname, "player") )
+	if ( enemy->ct != ctPlayer )
 		VectorCopy( enemy->s.v.velocity, self->s.v.velocity );
 
 	self->s.v.nextthink = g_globalvars.time + 0.1;
@@ -208,7 +208,7 @@ void GrappleAnchor()
 		 streq(other->s.v.classname, "hook"   )) 
 			return;
 
-	if ( streq(other->s.v.classname, "player") )
+	if ( other->ct == ctPlayer )
 	{
 		// grappling players in prewar is annoying
 		if ( match_in_progress != 2)
@@ -287,7 +287,7 @@ void GrappleService()
 	enemy = PROG_TO_EDICT( self->hook->s.v.enemy );
   
 	// If hooked to a player, track them directly!
-	if ( streq(enemy->s.v.classname, "player") )
+	if ( enemy->ct == ctPlayer )
 	{
 		VectorSubtract( enemy->s.v.origin, self->s.v.origin, hookVector );
 	}

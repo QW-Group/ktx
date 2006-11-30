@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.36 2006/11/29 06:47:17 qqshka Exp $
+ *  $Id: combat.c,v 1.37 2006/11/30 17:16:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -104,7 +104,7 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 	oself = self;
 	self = targ;
 
-	if ( streq( self->s.v.classname, "player" ) )
+	if ( self->ct == ctPlayer )
         self->dead_time = g_globalvars.time;
 
 	if ( self->s.v.health < -99 )
@@ -348,14 +348,10 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 		// Rocket Jump modifiers
 /*
-		if ( ( rj > 1 )
-		     && ( ( streq( attacker->s.v.classname, "player" ) )
-			  && streq( targ->s.v.classname, "player" ) )
-		     && streq( attacker->s.v.netname, targ->s.v.netname ) )
+		if ( rj > 1 && attacker->ct == ctPlayer && targ->ct == ctPlayer && streq( attacker->s.v.netname, targ->s.v.netname ) )
 		{
 			VectorAdd( targ->s.v.velocity, dir, targ->s.v.velocity );
-			VectorScale( targ->s.v.velocity, non_hdp_damage * 8 * rj,
-				     targ->s.v.velocity );
+			VectorScale( targ->s.v.velocity, non_hdp_damage * 8 * rj, targ->s.v.velocity );
 		}
 */
 	}
@@ -383,7 +379,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	if ( tp_num() == 1
 		 && !strnull( attackerteam )
 		 && streq( targteam, attackerteam )
-		 && streq( attacker->s.v.classname, "player" )
+		 && attacker->ct == ctPlayer
 		 && strneq( inflictor->s.v.classname, "door" )
 		 && strneq( inflictor->s.v.classname, "teledeath" ) // do telefrag damage in tp
 	   )
@@ -393,7 +389,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	if ( tp_num() == 3
 		 && !strnull( attackerteam )
 		 && streq( targteam, attackerteam )
-		 && streq( attacker->s.v.classname, "player" )
+		 && attacker->ct == ctPlayer
 		 && strneq( inflictor->s.v.classname, "door" )
 		 && strneq( inflictor->s.v.classname, "teledeath" ) // do telefrag damage in tp
 		 && targ != attacker
@@ -404,7 +400,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	if (    match_in_progress == 2
 		 || streq( inflictor->s.v.classname, "teledeath" ) 
-		 || ( k_practice && strneq( targ->s.v.classname, "player" ) ) // #practice mode#
+		 || ( k_practice && targ->ct != ctPlayer ) // #practice mode#
 	   ) {
 
 		dmg_dealt += targ->s.v.health > take ? take : targ->s.v.health;
@@ -482,8 +478,8 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 		// check fraglimit
 		if (	fraglimit
-			&& (   ( targ->s.v.frags >= fraglimit && streq( targ->s.v.classname, "player" ) )
-			 	|| ( attacker->s.v.frags >= fraglimit && streq( attacker->s.v.classname, "player" ) )
+			&& (   ( targ->s.v.frags >= fraglimit && targ->ct == ctPlayer )
+			 	|| ( attacker->s.v.frags >= fraglimit && attacker->ct == ctPlayer )
 			   )
 		   )
            	EndMatch( 0 );

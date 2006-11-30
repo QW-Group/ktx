@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: triggers.c,v 1.23 2006/11/26 19:21:55 qqshka Exp $
+ *  $Id: triggers.c,v 1.24 2006/11/30 17:16:14 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -61,7 +61,7 @@ void multi_trigger()
 
 	if ( streq( self->s.v.classname, "trigger_secret" ) )
 	{
-		if ( strneq( PROG_TO_EDICT( self->s.v.enemy )->s.v.classname, "player" ) )
+		if ( PROG_TO_EDICT( self->s.v.enemy )->ct != ctPlayer )
 			return;
 		g_globalvars.found_secrets = g_globalvars.found_secrets + 1;
 		WriteByte( MSG_ALL, SVC_FOUNDSECRET );
@@ -110,7 +110,7 @@ void multi_touch()
 
 	if ( !other->s.v.classname )
 		return;
-	if ( strneq( other->s.v.classname, "player" ) )
+	if ( other->ct != ctPlayer )
 		return;
 
 // if the trigger has an angles field, check player's facing direction
@@ -255,8 +255,7 @@ void counter_use()
 
 	if ( self->count != 0 )
 	{
-		if ( streq( activator->s.v.classname, "player" )
-		     && ( ( int ) ( self->s.v.spawnflags ) & SPAWNFLAG_NOMESSAGE ) == 0 )
+		if ( activator->ct == ctPlayer && ( ( int ) ( self->s.v.spawnflags ) & SPAWNFLAG_NOMESSAGE ) == 0 )
 		{
 			if ( self->count >= 4 )
 				G_centerprint( activator, "There are more to go..." );
@@ -270,8 +269,7 @@ void counter_use()
 		return;
 	}
 
-	if ( streq( activator->s.v.classname, "player" )
-	     && ( ( int ) ( self->s.v.spawnflags ) & SPAWNFLAG_NOMESSAGE ) == 0 )
+	if ( activator->ct == ctPlayer && ( ( int ) ( self->s.v.spawnflags ) & SPAWNFLAG_NOMESSAGE ) == 0 )
 		G_centerprint( activator, "Sequence completed!" );
 	self->s.v.enemy = EDICT_TO_PROG( activator );
 	multi_trigger();
@@ -360,7 +358,7 @@ void tdeath_touch()
 		return;
 
 // frag anyone who teleports in on top of an invincible player
-	if ( streq( other->s.v.classname, "player" ) )
+	if ( other->ct == ctPlayer )
 	{
 		// check if both players have invincible
 		if ( other->invincible_finished > g_globalvars.time && other2->invincible_finished > g_globalvars.time )
@@ -437,7 +435,7 @@ void teleport_touch()
 
 	if ( ( int ) ( self->s.v.spawnflags ) & PLAYER_ONLY )
 	{
-		if ( strneq( other->s.v.classname, "player" ) )
+		if ( other->ct != ctPlayer )
 			return;
 	}
 
@@ -491,7 +489,7 @@ void teleport_touch()
 	play_teleport( other );
 
 	VectorCopy( t->mangle, other->s.v.angles ); // other.angles = t.mangle;
-	if ( streq( other->s.v.classname, "player" ) )
+	if ( other->ct == ctPlayer )
 	{
 		if ( other->s.v.weapon == IT_HOOK && other->hook_out )
 		{
@@ -585,7 +583,7 @@ ONLY REGISTERED TRIGGERS
 
 void trigger_onlyregistered_touch()
 {
-	if ( strneq( other->s.v.classname, "player" ) )
+	if ( other->ct != ctPlayer )
 		return;
 	if ( self->attack_finished > g_globalvars.time )
 		return;
@@ -675,7 +673,7 @@ void trigger_push_touch()
 		other->s.v.velocity[1] = self->speed * self->s.v.movedir[1] * 10;
 		other->s.v.velocity[2] = self->speed * self->s.v.movedir[2] * 10;
 
-		if ( streq( other->s.v.classname, "player" ) )
+		if ( other->ct == ctPlayer )
 		{
 			if ( other->fly_sound < g_globalvars.time )
 			{

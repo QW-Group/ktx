@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.55 2006/11/30 08:50:08 qqshka Exp $
+ *  $Id: weapons.c,v 1.56 2006/11/30 17:16:14 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -598,10 +598,10 @@ void LightningDamage( vec3_t p1, vec3_t p2, gedict_t * from, float damage )
 	if ( PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.takedamage )
 	{
 		LightningHit( from, damage );
-		if ( streq( self->s.v.classname, "player" ) )
+		if ( self->ct == ctPlayer )
 		{
 // qqshka: this shit doesn't work in QVM
-//			if ( streq( other->s.v.classname, "player" ) )
+//			if ( other->ct == ctPlayer )
 // 		   make my own
 			gedict_t *gre = PROG_TO_EDICT ( self->s.v.groundentity );
 

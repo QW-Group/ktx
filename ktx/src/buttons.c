@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: buttons.c,v 1.3 2005/12/24 19:03:10 qqshka Exp $
+ *  $Id: buttons.c,v 1.4 2006/11/30 17:16:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -95,7 +95,7 @@ void button_touch()
     if( match_in_progress != 2 )
         return;
 
-	if ( strneq( other->s.v.classname, "player" ) )
+	if ( other->ct != ctPlayer )
 		return;
 
 	self->s.v.enemy = EDICT_TO_PROG( other );

@@ -1,5 +1,5 @@
 /*
- *  $Id: runes.c,v 1.11 2006/11/26 19:21:54 qqshka Exp $
+ *  $Id: runes.c,v 1.12 2006/11/30 17:16:14 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -170,10 +170,10 @@ void RuneRespawn()
 
 void RuneTouch()
 {
-	if ( !streq(other->s.v.classname, "player") )
+	if ( other->ct != ctPlayer )
 		return;
 
-	if ( other->s.v.health < 1 )
+	if ( ISDEAD( other ) )
 		return;
  
 	if ( match_in_progress != 2 )

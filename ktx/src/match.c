@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.92 2006/11/30 08:50:08 qqshka Exp $
+ *  $Id: match.c,v 1.93 2006/11/30 17:16:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -311,7 +311,7 @@ void TeamsStats ( )
 
 			for( from2 = 0, p2 = world; (p2 = find_plrghst( p2, &from2 )); )
 				if( !p2->ready && streq( tmp, getteam( p2 ) ) ) {
-					if ( streq(p2->s.v.classname, "player") )
+					if ( p2->ct == ctPlayer )
 						f1 += p2->s.v.frags;
 					else
 						f2 += p2->s.v.frags;

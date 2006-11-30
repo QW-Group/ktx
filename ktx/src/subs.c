@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: subs.c,v 1.4 2006/11/26 19:21:54 qqshka Exp $
+ *  $Id: subs.c,v 1.5 2006/11/30 17:16:14 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -253,7 +253,7 @@ void SUB_UseTargets()
 //
 // print the message
 //activator->s.v.classname && 
-	if ( streq( activator->s.v.classname, "player" ) && self->s.v.message )
+	if ( activator->ct == ctPlayer && self->s.v.message )
 		if ( strneq( self->s.v.message, "" ) )
 		{
 			G_centerprint( activator, "%s", self->s.v.message );

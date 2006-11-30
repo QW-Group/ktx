@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: spectate.c,v 1.31 2006/11/30 08:50:08 qqshka Exp $
+ *  $Id: spectate.c,v 1.32 2006/11/30 17:16:14 qqshka Exp $
  */
 
 // spectate.c
@@ -197,7 +197,7 @@ void SpectatorImpulseCommand()
 {
 	gedict_t       *goal;
 
-	if ( strneq(self->s.v.classname, "spectator") ) {
+	if ( self->ct != ctSpec ) {
 		self->s.v.impulse = 0;
 		return;
 	}

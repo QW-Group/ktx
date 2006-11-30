@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.47 2006/11/30 08:50:06 qqshka Exp $
+ * $Id: admin.c,v 1.48 2006/11/30 17:16:13 qqshka Exp $
  */
 
 // admin.c
@@ -208,8 +208,7 @@ void NextClient ()
 	}
 
     G_sprint(self, 2, "Kick %s %s?\n", 
-					redtext(self->k_playertokick->ct == ctPlayer ? "player" : "spectator"),
-								getname(self->k_playertokick));
+					redtext(self->k_playertokick->ct == ctPlayer ? "player" : "spectator"),	getname(self->k_playertokick));
 }
 
 void YesKick ()
@@ -417,7 +416,7 @@ void VoteAdmin()
 		return;
 	}
 
-	if( streq( self->s.v.classname, "spectator" ) && match_in_progress )
+	if( self->ct == ctSpec && match_in_progress )
 		return;
 
 	G_bprint(2, "%s has %s rights!\n", self->s.v.netname, redtext("requested admin"));
@@ -544,7 +543,7 @@ void AdminForceStart ()
 		return;
 	}
 
-    if( streq( self->s.v.classname, "player" ) && !self->ready )
+    if( self->ct == ctPlayer && !self->ready )
     {
 		PlayerReady();
 
@@ -586,7 +585,7 @@ void AdminForceStart ()
 
 void AdminForceBreak ()
 {
-    if( is_adm( self ) && strneq( self->s.v.classname, "player" ) && !match_in_progress )
+    if( is_adm( self ) && self->ct != ctPlayer && !match_in_progress )
     {
         k_force = 0;
         return;
@@ -595,7 +594,7 @@ void AdminForceBreak ()
     if( !is_adm( self ) || !match_in_progress )
         return;
 
-    if( strneq( self->s.v.classname, "player" ) && match_in_progress == 1 )
+    if( self->ct != ctPlayer && match_in_progress == 1 )
     {
         k_force = 0;
         StopTimer( 1 );
@@ -753,7 +752,7 @@ void ModPause (int pause)
                 e1->k_ptime = e1->s.v.nextthink;
                 e1->s.v.nextthink = -1;
 
-                if( streq( e1->s.v.classname, "player" ) )
+                if( e1->ct == ctPlayer )
                     e1->maxspeed = 0;
             }
 
@@ -774,7 +773,7 @@ void ModPause (int pause)
         {
             if(e1->s.v.nextthink == -1)
                 e1->s.v.nextthink = f1 + e1->k_ptime;
-            if( streq( e1->s.v.classname, "player" ) )
+            if( e1->ct == ctPlayer )
             {
                 e1->maxspeed = k_oldmaxspeed;
                 e1->pain_finished += f1;

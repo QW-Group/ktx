@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.30 2006/11/27 22:47:06 qqshka Exp $
+ *  $Id: items.c,v 1.31 2006/11/30 17:16:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -221,7 +221,7 @@ void health_touch()
 		if ( other->invincible_time > 0 )
 			return;
 
-	if ( strneq( other->s.v.classname, "player" ) )
+	if ( other->ct != ctPlayer )
 		return;
 
 	if ( match_in_progress != 2 || !readytostart() )
@@ -316,7 +316,7 @@ void armor_touch()
 	if ( ISDEAD( other ) )
 		return;
 
-	if ( strneq( other->s.v.classname, "player" ) )
+	if ( other->ct != ctPlayer )
 		return;
 
 	if ( match_in_progress != 2 || !readytostart() )
@@ -758,7 +758,7 @@ void ammo_touch()
 	if ( ISDEAD( other ) )
 		return;
 
-	if ( strneq( other->s.v.classname, "player" ) )
+	if ( other->ct != ctPlayer )
 		return;
 
     if ( match_in_progress != 2 || !readytostart() )
@@ -1007,7 +1007,7 @@ void key_touch()
 //gedict_t*    stemp;
 //float             best;
 
-	if ( strneq( other->s.v.classname, "player" ) )
+	if ( other->ct != ctPlayer )
 		return;
 
 	if ( ISDEAD( other ) )
@@ -1140,7 +1140,7 @@ void sigil_touch()
 //gedict_t*    stemp;
 //float             best;
 
-	if ( strneq( other->s.v.classname, "player" ) )
+	if ( other->ct != ctPlayer )
 		return;
 
 	if ( ISDEAD( other ) )
@@ -1220,7 +1220,7 @@ void powerup_touch()
 	if ( strnull ( self->s.v.classname ) )
 		G_Error("powerup_touch: null classname");
 
-	if ( strneq( other->s.v.classname, "player" ) )
+	if ( other->ct != ctPlayer )
 		return;
 
 	if ( ISDEAD( other ) )
@@ -1468,7 +1468,7 @@ void BackpackTouch()
 		if ( other->invincible_time > 0 )
 			return;
 
-	if ( strneq( other->s.v.classname, "player" ) )
+	if ( other->ct != ctPlayer )
 		return;
 
 	if ( ISDEAD( other ) )

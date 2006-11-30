@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.128 2006/11/30 08:50:06 qqshka Exp $
+ *  $Id: client.c,v 1.129 2006/11/30 17:16:13 qqshka Exp $
  */
 
 //===========================================================================
@@ -524,7 +524,7 @@ void execute_changelevel()
 
 void changelevel_touch()
 {
-	if ( strneq( other->s.v.classname, "player" ) )
+	if ( other->ct != ctPlayer )
 		return;
 
 // qqshka: does't change level in any case, just do damage and return
@@ -1748,7 +1748,7 @@ void ClientDisconnect()
 
 	ra_ClientDisconnect();
 
-	if( match_in_progress == 2 && streq("player", self->s.v.classname) )
+	if( match_in_progress == 2 && self->ct == ctPlayer )
 	{
 		G_bprint( PRINT_HIGH, "%s left the game with %.0f frags\n", self->s.v.netname, self->s.v.frags );
 
@@ -3092,7 +3092,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 		return;
 	}
-	else // attacker.classname != "player"
+	else // attacker->ct != ctPlayer
 	{
         targ->s.v.frags -= 1;            // killed self
 		logfrag (targ, targ);

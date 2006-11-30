@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: doors.c,v 1.8 2006/11/26 19:21:54 qqshka Exp $
+ *  $Id: doors.c,v 1.9 2006/11/30 17:16:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -259,7 +259,7 @@ void door_touch()
 	  ) 
 		return;
 
-	if ( strneq( other->s.v.classname, "player" ) )
+	if ( other->ct != ctPlayer )
 		return;
 
 	if ( PROG_TO_EDICT( self->s.v.owner )->attack_finished > g_globalvars.time )
@@ -818,7 +818,7 @@ void secret_touch()
 	  )
 		return;
 
-	if ( strneq( other->s.v.classname, "player" ) )
+	if ( other->ct != ctPlayer )
 		return;
 	
 	if ( self->attack_finished > g_globalvars.time )

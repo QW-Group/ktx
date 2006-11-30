@@ -1,5 +1,5 @@
 /*
- *  $Id: ctf.c,v 1.20 2006/11/30 08:50:07 qqshka Exp $
+ *  $Id: ctf.c,v 1.21 2006/11/30 17:16:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -232,7 +232,7 @@ void FlagTouch()
 	if ( match_in_progress != 2 )
 		return;
 
-	if ( !streq( other->s.v.classname, "player" ) )
+	if ( other->ct != ctPlayer )
 		return;
 
 	if ( other->s.v.health < 1 )
@@ -438,7 +438,7 @@ void FlagStatus()
 	if (!flag1 || !flag2)
 		return;
 
-	if ( streq(self->s.v.classname, "spectator") )
+	if ( self->ct == ctSpec )
 	{
 		switch ( (int) flag1->cnt )
 		{
@@ -594,7 +594,7 @@ void CTF_Obituary( gedict_t *targ, gedict_t *attacker )
 	head = trap_findradius( world, targ->s.v.origin, 400 );
 	while ( head )
 	{                            
-		if ( streq( head->s.v.classname, "player" ) )
+		if ( head->ct == ctPlayer )
 		{
 			if ( (head->ctf_flag & CTF_FLAG) && ( head != attacker )
 				 && streq(getteam(head), getteam(attacker)) && !carrier_bonus

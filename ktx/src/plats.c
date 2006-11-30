@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: plats.c,v 1.7 2006/11/24 17:39:23 qqshka Exp $
+ *  $Id: plats.c,v 1.8 2006/11/30 17:16:14 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -114,7 +114,7 @@ void plat_center_touch()
 	  )
 		return;
 
-	if ( strneq( other->s.v.classname, "player" ) )
+	if ( other->ct != ctPlayer )
 		return;
 
 	if ( ISDEAD( other ) )
@@ -137,7 +137,7 @@ void plat_outside_touch()
 	  )
 		return;
 
-	if ( strneq( other->s.v.classname, "player" ) )
+	if ( other->ct != ctPlayer )
 		return;
 
 	if ( ISDEAD( other ) )

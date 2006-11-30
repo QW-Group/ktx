@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.68 2006/11/30 08:50:07 qqshka Exp $
+ *  $Id: g_utils.c,v 1.69 2006/11/30 17:16:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -839,7 +839,7 @@ int getteams(char teams[MAX_CLIENTS][MAX_TEAM_NAME])
 		teams[i][0] = 0;
 
 	for ( i = 1; i <= MAX_CLIENTS; i++ ) {
-		if ( strneq( g_edicts[i].s.v.classname, "player" ) )
+		if ( g_edicts[i].ct != ctPlayer )
 			continue; // collect only players teams
 
 		team = getteam( &(g_edicts[i]) );
