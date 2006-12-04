@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.93 2006/11/30 17:16:13 qqshka Exp $
+ *  $Id: match.c,v 1.94 2006/12/04 19:55:56 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -202,9 +202,9 @@ void SummaryTPStats ( )
 						h_ssg += p2->ps.wpn[wpSSG].hits;
 						a_ssg += p2->ps.wpn[wpSSG].attacks;
 
-						d_rl += p2->ps.dropped_rls;
-						k_rl += p2->ps.killed_rls;
-						t_rl += p2->ps.took_rls;
+						d_rl += p2->ps.wpn[wpRL].drops;
+						k_rl += p2->ps.wpn[wpRL].ekills;
+						t_rl += p2->ps.wpn[wpRL].tooks;
 
 						caps += p2->ps.caps;
 						pickups += p2->ps.pickups;
@@ -380,9 +380,9 @@ void OnePlayerStats(gedict_t *p, int tp)
 #endif
 	h_lg  = 100.0 * h_lg  / max(1, a_lg);
 
-	d_rl = p->ps.dropped_rls;
-	k_rl = p->ps.killed_rls;
-	t_rl = p->ps.took_rls;
+	d_rl = p->ps.wpn[wpRL].drops;
+	k_rl = p->ps.wpn[wpRL].ekills;
+	t_rl = p->ps.wpn[wpRL].tooks;
 
 	if ( isCTF() && g_globalvars.time - match_start_time > 0 );
 	{
@@ -1122,6 +1122,8 @@ void SM_PrepareMap()
 				ent_remove( p );
 		}
 	}
+
+	ClearBodyQue(); // hide corpses
 }
 
 // put clients in server and reset some params

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.76 2006/11/30 08:50:08 qqshka Exp $
+ *  $Id: world.c,v 1.77 2006/12/04 19:55:56 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -74,6 +74,20 @@ void CopyToBodyQue( gedict_t * ent )
 
 	if ( ++bodyque_head >= MAX_BODYQUE )
 		bodyque_head = 0;
+}
+
+void ClearBodyQue()
+{
+	int             i;
+
+	for ( i = 0; i < MAX_BODYQUE; i++ )
+	{
+		bodyque[i]->s.v.model = "";
+		bodyque[i]->s.v.modelindex = 0;
+		bodyque[i]->s.v.frame = 0;
+		bodyque[i]->s.v.movetype = MOVETYPE_NONE;
+	}
+	bodyque_head = 0;
 }
 
 

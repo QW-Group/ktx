@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.57 2006/11/29 06:47:17 qqshka Exp $
+ *  $Id: progs.h,v 1.58 2006/12/04 19:55:56 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -109,14 +109,6 @@ typedef struct player_stats_s {
 
 	int		handicap;
 
-
-	// rl stats
-	int		dropped_rls; // number of packs dropped which contain rl 
-	int		killed_rls;  // enemies killed who have rl (even if not currently using it)
-	int		took_rls;    // number of rls you grab if you don't already have one
-	float	rl_time;     // time player has rl
-
-  
 	// ctf stats
 	int ctf_points; // use frags - this to calculate efficiency for ctf
 	int caps;		// flag captures

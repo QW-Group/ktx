@@ -20,13 +20,15 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.31 2006/11/30 17:16:13 qqshka Exp $
+ *  $Id: items.c,v 1.32 2006/12/04 19:55:56 qqshka Exp $
  */
 
 #include "g_local.h"
 
 void            SP_item_artifact_invisibility();
 void            SP_item_artifact_super_damage();
+
+void TookWeaponHandler( gedict_t *p, int new_wp );
 
 
 void SUB_regen()
@@ -578,8 +580,6 @@ void weapon_touch()
 		hadammo = other->s.v.ammo_rockets;
 		new = IT_ROCKET_LAUNCHER;
 		other->s.v.ammo_rockets += 5;
-		if ( !((int)other->s.v.items & IT_ROCKET_LAUNCHER) )
-			other->ps.took_rls++;
 
 	} else if ( !strcmp( self->s.v.classname, "weapon_grenadelauncher" ) )
 	{
@@ -602,6 +602,7 @@ void weapon_touch()
 	} else
 		G_Error( "weapon_touch: unknown classname" );
 
+	TookWeaponHandler( other, new );
 	mi_print(other, new, va("%s got %s", getname(other), self->s.v.netname));
 
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
@@ -1457,7 +1458,7 @@ PLAYER BACKPACKS
 
 void BackpackTouch()
 {
-	float          new;
+	int				new;
 	gedict_t       *stemp;
 	float           acount;
 
@@ -1534,16 +1535,20 @@ void BackpackTouch()
 		return;
 	}
 
-	if ( self->s.v.items )
-		if ( !( ( int ) other->s.v.items & ( int ) self->s.v.items ) )
+	new = self->s.v.items;
+
+	if ( new ) {
+		TookWeaponHandler( other, new );
+
+		if ( !( ( int ) other->s.v.items & new ) )
 		{ // new weapon - so print u got it
 			acount = 1;
 			G_sprint( other, PRINT_LOW, "the %s", self->s.v.netname );
 
-			mi_print(other, self->s.v.items, va("%s got backpack with %s", getname(other), self->s.v.netname));
-			if ( (int) self->s.v.items & IT_ROCKET_LAUNCHER )
-				other->ps.took_rls++;
+			// FIXME: so specs does't seen this message if player alredy have such weapon, is this BUG?
+			mi_print(other, new, va("%s got backpack with %s", getname(other), self->s.v.netname));
 		}
+	}
 
 // change weapons
 	other->s.v.ammo_shells  = other->s.v.ammo_shells  + self->s.v.ammo_shells;
@@ -1551,9 +1556,7 @@ void BackpackTouch()
 	other->s.v.ammo_rockets = other->s.v.ammo_rockets + self->s.v.ammo_rockets;
 	other->s.v.ammo_cells   = other->s.v.ammo_cells   + self->s.v.ammo_cells;
 
-	new = self->s.v.items;
-
-	other->s.v.items = ( int ) other->s.v.items | ( int ) self->s.v.items;
+	other->s.v.items = ( int ) other->s.v.items | new;
 
 	bound_other_ammo();
 
@@ -1623,9 +1626,8 @@ void DropBackpack()
 
     f1 = cvar( "k_frp" );
 
-    if ( match_in_progress != 2 || !cvar( "dp" ) )
+    if ( match_in_progress != 2 || !cvar( "dp" ) || dtSUICIDE == self->deathtype )
         return;
-
 
     if ( ! ( self->s.v.ammo_shells + self->s.v.ammo_nails + self->s.v.ammo_rockets +
 			 self->s.v.ammo_cells 
@@ -1665,24 +1667,38 @@ void DropBackpack()
             if( (int)self->lastwepfired & IT_DROPPABLE_WEAPONS )
                 item->s.v.items = self->lastwepfired;
 
-	if ( item->s.v.items == IT_AXE )
+	if ( item->s.v.items == IT_AXE ) {
 		item->s.v.netname = "Axe";
-	else if ( item->s.v.items == IT_SHOTGUN )
+		self->ps.wpn[wpAXE].drops++;
+	}
+	else if ( item->s.v.items == IT_SHOTGUN ) {
 		item->s.v.netname = "Shotgun";
-	else if ( item->s.v.items == IT_SUPER_SHOTGUN )
+		self->ps.wpn[wpSG].drops++;
+	}
+	else if ( item->s.v.items == IT_SUPER_SHOTGUN ) {
 		item->s.v.netname = "Double-barrelled Shotgun";
-	else if ( item->s.v.items == IT_NAILGUN )
+		self->ps.wpn[wpSSG].drops++;
+	}
+	else if ( item->s.v.items == IT_NAILGUN ) {
 		item->s.v.netname = "Nailgun";
-	else if ( item->s.v.items == IT_SUPER_NAILGUN )
+		self->ps.wpn[wpNG].drops++;
+	}
+	else if ( item->s.v.items == IT_SUPER_NAILGUN ) {
 		item->s.v.netname = "Super Nailgun";
-	else if ( item->s.v.items == IT_GRENADE_LAUNCHER )
+		self->ps.wpn[wpSNG].drops++;
+	}
+	else if ( item->s.v.items == IT_GRENADE_LAUNCHER ) {
 		item->s.v.netname = "Grenade Launcher";
+		self->ps.wpn[wpGL].drops++;
+	}
 	else if ( item->s.v.items == IT_ROCKET_LAUNCHER ) {
 		item->s.v.netname = "Rocket Launcher";
-		self->ps.dropped_rls++;
+		self->ps.wpn[wpRL].drops++;
 	}
-	else if ( item->s.v.items == IT_LIGHTNING )
+	else if ( item->s.v.items == IT_LIGHTNING ) {
 		item->s.v.netname = "Thunderbolt";
+		self->ps.wpn[wpLG].drops++;
+	}
 	else
 		item->s.v.netname = "";
 

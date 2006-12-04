@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.37 2006/11/30 17:16:13 qqshka Exp $
+ *  $Id: combat.c,v 1.38 2006/12/04 19:55:56 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -104,13 +104,13 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 	oself = self;
 	self = targ;
 
-	if ( self->ct == ctPlayer )
-        self->dead_time = g_globalvars.time;
-
 	if ( self->s.v.health < -99 )
 		self->s.v.health = -99;	// don't let sbar look bad if a player
 
-	if ( self->s.v.movetype == MOVETYPE_PUSH || self->s.v.movetype == MOVETYPE_NONE )
+	if ( self->ct == ctPlayer ) {
+        self->dead_time = g_globalvars.time;
+	}
+	else if ( self->s.v.movetype == MOVETYPE_PUSH || self->s.v.movetype == MOVETYPE_NONE )
 	{			// doors, triggers, etc
 //  if(self->th_die)
 		self->th_die();
@@ -133,13 +133,21 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 	self->s.v.touch = ( func_t ) SUB_Null;
 	self->s.v.effects = 0;
 
-/*SERVER
- monster_death_use();
-*/
 	//if(self->th_die)
 	self->th_die();
 
 	self = oself;
+
+	// KTEAMS: check if sudden death is the case
+	Check_SD( targ );
+
+	// check fraglimit
+	if (	fraglimit
+		&& (   ( targ->s.v.frags >= fraglimit && targ->ct == ctPlayer )
+			|| ( attacker->s.v.frags >= fraglimit && attacker->ct == ctPlayer )
+		   )
+		)
+		EndMatch( 0 );
 }
 
 #ifndef Q3_VM
@@ -176,13 +184,14 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	if ( !targ->s.v.takedamage || ISDEAD( targ ) )
 		return;
 
+// used by buttons and triggers to set activator for target firing
+	damage_attacker = attacker;
+	damage_inflictor = inflictor;
+
 	if ( (int)cvar("k_midair") )
 		midair = true;
 
 //	wp_num = attacker->s.v.weapon;
-
-// used by buttons and triggers to set activator for target firing
-	damage_attacker = attacker;
 
 // check for quad damage powerup on the attacker
 // midair quad makes rockets fast, but no change to damage
@@ -250,7 +259,8 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 				 	|| dtSLIME_DMG == targ->deathtype	// always do slime damage
 				 	|| dtTELE1 == targ->deathtype	// always do tele damage
 				 	|| dtTELE2 == targ->deathtype	// always do tele damage
-				 	|| dtTELE3 == targ->deathtype;	// always do tele damage
+				 	|| dtTELE3 == targ->deathtype	// always do tele damage
+					|| dtSUICIDE == targ->deathtype; // do suicide damage anyway
 		}
 	}
 
@@ -325,8 +335,6 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		targ->s.v.dmg_inflictor = EDICT_TO_PROG( inflictor );
 	}
 
-	damage_inflictor = inflictor;
-
 // figure momentum add
 	if ( inflictor != world && targ->s.v.movetype == MOVETYPE_WALK )
 	{
@@ -356,57 +364,62 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 */
 	}
 
-// check for godmode or invincibility
-	if ( ( int ) targ->s.v.flags & FL_GODMODE )
-		return;
-
-	if ( targ->invincible_finished >= g_globalvars.time )
+// do suicide damage anyway
+	if ( dtSUICIDE != targ->deathtype )
 	{
-		if ( targ->invincible_sound < g_globalvars.time )
+
+// check for godmode or invincibility
+		if ( ( int ) targ->s.v.flags & FL_GODMODE )
+			return;
+
+		if ( targ->invincible_finished >= g_globalvars.time )
 		{
-			sound( targ, CHAN_AUTO, "items/protect3.wav", 1, ATTN_NORM );
-			targ->invincible_sound = g_globalvars.time + 2;
+			if ( targ->invincible_sound < g_globalvars.time )
+			{
+				sound( targ, CHAN_AUTO, "items/protect3.wav", 1, ATTN_NORM );
+				targ->invincible_sound = g_globalvars.time + 2;
+			}
+			return;
 		}
-		return;
-	}
 
 // team play damage avoidance
 //ZOID 12-13-96: self.team doesn't work in QW.  Use keys
-    attackerteam = getteam( attacker );
-	targteam = getteam( targ );
+    	attackerteam = getteam( attacker );
+		targteam = getteam( targ );
 
-	// teamplay == 1 don't damage self and mates (armor affected anyway)
-	if ( tp_num() == 1
-		 && !strnull( attackerteam )
-		 && streq( targteam, attackerteam )
-		 && attacker->ct == ctPlayer
-		 && strneq( inflictor->s.v.classname, "door" )
-		 && strneq( inflictor->s.v.classname, "teledeath" ) // do telefrag damage in tp
-	   )
-		return;
+		// teamplay == 1 don't damage self and mates (armor affected anyway)
+		if ( tp_num() == 1
+		 	&& !strnull( attackerteam )
+		 	&& streq( targteam, attackerteam )
+		 	&& attacker->ct == ctPlayer
+		 	&& strneq( inflictor->s.v.classname, "door" )
+		 	&& strneq( inflictor->s.v.classname, "teledeath" ) // do telefrag damage in tp
+	   	)
+			return;
 
-	// teamplay == 3 don't damage mates, do damage to self (armor affected anyway)
-	if ( tp_num() == 3
-		 && !strnull( attackerteam )
-		 && streq( targteam, attackerteam )
-		 && attacker->ct == ctPlayer
-		 && strneq( inflictor->s.v.classname, "door" )
-		 && strneq( inflictor->s.v.classname, "teledeath" ) // do telefrag damage in tp
-		 && targ != attacker
-	   )
-		return;
+		// teamplay == 3 don't damage mates, do damage to self (armor affected anyway)
+		if ( tp_num() == 3
+			 && !strnull( attackerteam )
+		 	&& streq( targteam, attackerteam )
+		 	&& attacker->ct == ctPlayer
+		 	&& strneq( inflictor->s.v.classname, "door" )
+		 	&& strneq( inflictor->s.v.classname, "teledeath" ) // do telefrag damage in tp
+		 	&& targ != attacker
+	   	)
+			return;
+	}
 
 // do the damage
 
 	if (    match_in_progress == 2
+		 || dtSUICIDE == targ->deathtype // do suicide damage anyway
 		 || streq( inflictor->s.v.classname, "teledeath" ) 
 		 || ( k_practice && targ->ct != ctPlayer ) // #practice mode#
 	   ) {
-
 		dmg_dealt += targ->s.v.health > take ? take : targ->s.v.health;
 		targ->s.v.health -= take;
 
-		if ( !targ->s.v.health )
+		if ( !targ->s.v.health || dtSUICIDE == targ->deathtype )
 			targ->s.v.health = -1; // qqshka, no zero health, heh, imo less bugs after this
 	}
 
@@ -472,18 +485,6 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	if ( ISDEAD( targ ) )
 	{
 		Killed( targ, attacker, inflictor );
-
-        // KTEAMS: check if sudden death is the case
-		Check_SD( targ );
-
-		// check fraglimit
-		if (	fraglimit
-			&& (   ( targ->s.v.frags >= fraglimit && targ->ct == ctPlayer )
-			 	|| ( attacker->s.v.frags >= fraglimit && attacker->ct == ctPlayer )
-			   )
-		   )
-           	EndMatch( 0 );
-
 		return;
 	}
 // react to the damage

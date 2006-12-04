@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.25 2006/11/27 22:47:06 qqshka Exp $
+ *  $Id: player.c,v 1.26 2006/12/04 19:55:56 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -909,7 +909,6 @@ void ThrowHead( char *gibname, float dm )
 {
 	setmodel( self, gibname );
 	self->s.v.frame = 0;
-//	self->s.v.nextthink = -1;
 	self->s.v.movetype = MOVETYPE_BOUNCE;
 	self->s.v.takedamage = DAMAGE_NO;
 	self->s.v.solid = SOLID_NOT;
@@ -935,16 +934,10 @@ void GibPlayer()
 		ThrowGib( "progs/gib3.mdl", self->s.v.health );
     }
 
-//	self->s.v.deadflag = DEAD_DEAD;
-
-	if ( isRA() ) { // in RA mode, player after death will be moved immediately, so sound is trimed, work around...
-		p = spawn();
-		setorigin( p, PASSVEC3( self->s.v.origin ) );
-		p->s.v.nextthink = g_globalvars.time + 0.1;
-		p->s.v.think = ( func_t ) SUB_Remove;
-	}
-	else
-		p = self;
+	p = spawn();
+	setorigin( p, PASSVEC3( self->s.v.origin ) );
+	p->s.v.nextthink = g_globalvars.time + 0.1;
+	p->s.v.think = ( func_t ) SUB_Remove;
 
 	if ( streq( damage_inflictor->s.v.classname, "teledeath" )	)
 	{
@@ -996,7 +989,7 @@ void PlayerDie()
 	if ( self->s.v.velocity[2] < 10 )
 		self->s.v.velocity[2] = self->s.v.velocity[2] + g_random() * 300;
 
-    if ( self->s.v.health < -40 || dtSQUISH == self->deathtype || isRA() )
+    if ( self->s.v.health < -40 || dtSQUISH == self->deathtype || dtSUICIDE == self->deathtype || isRA() )
 	{
 		GibPlayer();
 		PlayerDead();

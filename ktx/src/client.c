@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.129 2006/11/30 17:16:13 qqshka Exp $
+ *  $Id: client.c,v 1.130 2006/12/04 19:55:56 qqshka Exp $
  */
 
 //===========================================================================
@@ -713,7 +713,7 @@ void ClientKill()
 	if( k_pause || k_standby )
         return;
 
-	if ( ISDEAD( self ) )
+	if ( ISDEAD( self ) || !self->s.v.takedamage )
 		return; // alredy dead
 
 	if ( self->ct != ctPlayer )
@@ -731,32 +731,8 @@ void ClientKill()
 
 	self->suicide_time = g_globalvars.time + 1;
 
-    k_nochange = 0;
-
-	self->s.v.health = 0;
-	set_suicide_frame();
-
-	if( match_in_progress == 2 ) {
-		G_bprint( PRINT_MEDIUM, "%s suicides\n", self->s.v.netname );
-		self->s.v.frags -= 2;	// extra penalty
-		logfrag( self, self );
-	}
-
-	DropPowerups();
-	DropRune();
-	PlayerDropFlag( self );
-
-	if ( self->ps.spree_current > self->ps.spree_max )    
-		self->ps.spree_max = self->ps.spree_current;        
-	if ( self->ps.spree_current_q > self->ps.spree_max_q )    
-		self->ps.spree_max_q = self->ps.spree_current_q;    
-
-	self->ps.spree_current = self->ps.spree_current_q = 0;    
-
-	// KTEAMS: check if sudden death is the case
-	Check_SD( self );
-
-	k_respawn( self );
+	self->deathtype = dtSUICIDE;
+	T_Damage( self, self, self, 999999 );
 }
 
 float CheckSpawnPoint( vec3_t v )
@@ -1450,6 +1426,10 @@ void PlayerDeathThink()
 
 // { autospawn
 	respawn_time = cvar("k_midair") ? 2 : 5;
+
+	if ( dtSUICIDE == self->deathtype || isRA() )
+		respawn_time = -999999; // force respawn ASAP if suicides or in RA mode
+
 	if( (g_globalvars.time - self->dead_time) > respawn_time ) {
 		k_respawn( self );
 		return;
@@ -1466,7 +1446,6 @@ void PlayerDeathThink()
 	}
 
 // wait for any button down
-	if ( !isRA() ) // stupid tweak from rocket arena
 	if ( !self->s.v.button2 && !self->s.v.button1 && !self->s.v.button0 && !self->wreg_attack )
 		return;
 
@@ -2741,8 +2720,30 @@ void PlayerPostThink()
 	}
 }
 
+void TookWeaponHandler( gedict_t *p, int new_wp )
+{
+	weaponName_t wp;
+
+	switch ( new_wp ) { // guess which weapon he took
+		case IT_AXE:				wp = wpAXE; break;
+		case IT_SHOTGUN:			wp = wpSG;  break;
+		case IT_SUPER_SHOTGUN:		wp = wpSSG; break;
+		case IT_NAILGUN:			wp = wpNG;  break;
+		case IT_SUPER_NAILGUN:		wp = wpSNG; break;
+		case IT_GRENADE_LAUNCHER:	wp = wpGL;  break;
+		case IT_ROCKET_LAUNCHER:	wp = wpRL;  break;
+		case IT_LIGHTNING:			wp = wpLG;  break;
+		default:					wp = wpNONE;
+	}
+
+	p->ps.wpn[wp].ttooks++; // total weapon tooks
+	if ( !((int)p->s.v.items & new_wp) ) // player does't have this weapon before took
+		p->ps.wpn[wp].tooks++;
+}
+
 void StatsHandler(gedict_t *targ, gedict_t *attacker)
 {
+	int items = targ->s.v.items;
 	weaponName_t wp;
 	char *attackerteam, *targteam;
 
@@ -2750,33 +2751,50 @@ void StatsHandler(gedict_t *targ, gedict_t *attacker)
 	targteam     = getteam(targ);
 
 	if ( attacker->ct == ctPlayer ) {
-		if (      dtAXE == targ->deathtype )
-			wp = wpAXE;
-		else if ( dtSG == targ->deathtype )
-			wp = wpSG;
-		else if ( dtSSG == targ->deathtype )
-			wp = wpSSG;
-		else if ( dtNG == targ->deathtype )
-			wp = wpNG;
-		else if ( dtSNG == targ->deathtype )
-			wp = wpSNG;
-		else if ( dtGL == targ->deathtype )
-			wp = wpGL;
-		else if ( dtRL == targ->deathtype )
-			wp = wpRL;
-		else if ( dtLG_BEAM == targ->deathtype || dtLG_DIS == targ->deathtype || dtLG_DIS_SELF == targ->deathtype )
-			wp = wpLG;
-		else
-			wp = wpNONE;
+		switch ( targ->deathtype ) {
+			case dtAXE: wp = wpAXE; break;
+			case dtSG:  wp = wpSG;  break;
+			case dtSSG: wp = wpSSG; break;
+			case dtNG:  wp = wpNG;  break;
+			case dtSNG: wp = wpSNG; break;
+			case dtGL:  wp = wpGL;  break;
+			case dtRL:  wp = wpRL;  break;
+			case dtLG_BEAM:
+			case dtLG_DIS:
+			case dtLG_DIS_SELF:
+  						wp = wpLG;  break;
+			default:	wp = wpNONE;
+		}
 		
 		if ( targ == attacker ) {
 			; // killed self, nothing interest
 		}
         else if ( (isTeam() || isCTF()) && streq( targteam, attackerteam ) && !strnull( attackerteam ) ) {
 			// team kill
+			attacker->ps.wpn[wp].tkills++;
 		}
 		else {
 			// normal kill
+			attacker->ps.wpn[wp].kills++;
+			targ->ps.wpn[wp].deaths++;
+
+			// hmm, may be add some priority? so if targ have rl and gl bump only wpn[wpRL].ekills ?
+			if ( (items & IT_AXE) )
+				attacker->ps.wpn[wpAXE].ekills++;
+			if ( (items & IT_SHOTGUN) )
+				attacker->ps.wpn[wpSG].ekills++;
+			if ( (items & IT_SUPER_SHOTGUN) )
+				attacker->ps.wpn[wpSSG].ekills++;
+			if ( (items & IT_NAILGUN) )
+				attacker->ps.wpn[wpNG].ekills++;
+			if ( (items & IT_SUPER_NAILGUN) )
+				attacker->ps.wpn[wpSNG].ekills++;
+			if ( (items & IT_GRENADE_LAUNCHER) )
+				attacker->ps.wpn[wpGL].ekills++;
+			if ( (items & IT_ROCKET_LAUNCHER) )
+				attacker->ps.wpn[wpRL].ekills++;
+			if ( (items & IT_LIGHTNING) )
+				attacker->ps.wpn[wpLG].ekills++;
 		}
 	}
 }
@@ -2809,9 +2827,6 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	//ZOID 12-13-96: self.team doesn't work in QW.  Use keys
 	attackerteam = getteam(attacker);
 	targteam     = getteam(targ);
-
-	if ( ((int)targ->s.v.items & IT_ROCKET_LAUNCHER) && strneq( attackerteam, targteam ) )
-		attacker->ps.killed_rls++;
 
 	// update spree stats
 	if ( strneq( attackerteam, targteam ) )
@@ -2867,7 +2882,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		{
 			// killed self
 
-			targ->s.v.frags -= 1;
+			targ->s.v.frags -= (dtSUICIDE == targ->deathtype ? 2 : 1);
 			logfrag (targ, targ);
 
 			if ( dtGL == targ->deathtype ) {
@@ -2900,6 +2915,9 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 						default: deathstring = " discharges into the water\n"; break;
 					}
 				}
+			}
+			else if ( dtSUICIDE == targ->deathtype ) {
+				deathstring = " suicides\n";
 			}
 			else
                 deathstring = " somehow becomes bored with life\n"; // hm, and how it is possible?

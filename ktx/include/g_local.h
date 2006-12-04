@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.95 2006/11/30 08:50:05 qqshka Exp $
+ *  $Id: g_local.h,v 1.96 2006/12/04 19:55:56 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -162,6 +162,7 @@ typedef enum
 	dtFIREBALL,
 	dtSQUISH,
 	dtTRIGGER_HURT,
+	dtSUICIDE, // client use /kill command
 	dtUNKNOWN
 } deathType_t;
 
@@ -414,6 +415,7 @@ void            SUB_Null();
 
 //world.c
 void            CopyToBodyQue( gedict_t * ent );
+void			ClearBodyQue();
 
 // client.c
 
