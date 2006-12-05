@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.58 2006/12/04 19:55:56 qqshka Exp $
+ *  $Id: progs.h,v 1.59 2006/12/05 02:00:46 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -83,17 +83,31 @@ typedef struct wpType_s {
 
 } wpType_t;
 
+typedef enum
+{
+	itNONE = 0,
+	itHEALTH_15,
+	itHEALTH_25,
+	itHEALTH_100,
+	itGA,
+	itYA,
+	itRA,
+	itQUAD,
+	itPENT,
+	itRING,
+	itMAX
+} itemName_t;
+
+typedef struct itType_s {
+	int tooks; // taken count
+//	float time;
+
+} itType_t;
+
 // store player statistic here, like taken armors etc...
 typedef struct player_stats_s {
 	wpType_t wpn[wpMAX];
-
-	int   ra; //    red armors taken count
-	int   ya; // yellow armors taken count
-	int   ga; //  green armors taken count
-	int   mh; //  mega healths taken count
-	int   quad; // taken count
-	int   pent; // taken count
-	int   ring; // taken count
+	itType_t itm[itMAX];
 
 	float    dmg_t; // damage taken
 	float    dmg_g; // damage given

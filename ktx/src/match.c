@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.94 2006/12/04 19:55:56 qqshka Exp $
+ *  $Id: match.c,v 1.95 2006/12/05 02:00:47 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -184,13 +184,13 @@ void SummaryTPStats ( )
 				    	dmg_g += p2->ps.dmg_g;
 				    	dmg_t += p2->ps.dmg_t;
 						dmg_team += p2->ps.dmg_team;
-				    	ra    += p2->ps.ra;
-				    	ya    += p2->ps.ya;
-				    	ga    += p2->ps.ga;
-				    	mh    += p2->ps.mh;
-				    	quad  += p2->ps.quad;
-				    	pent  += p2->ps.pent;
-				    	ring  += p2->ps.ring;
+				    	ra    += p2->ps.itm[itRA].tooks;
+				    	ya    += p2->ps.itm[itYA].tooks;
+				    	ga    += p2->ps.itm[itGA].tooks;
+				    	mh    += p2->ps.itm[itHEALTH_100].tooks;
+				    	quad  += p2->ps.itm[itQUAD].tooks;
+				    	pent  += p2->ps.itm[itPENT].tooks;
+				    	ring  += p2->ps.itm[itRING].tooks;
 
 						h_rl  += p2->ps.wpn[wpRL].hits;
 						a_rl  += p2->ps.wpn[wpRL].attacks;
@@ -350,13 +350,13 @@ void OnePlayerStats(gedict_t *p, int tp)
 	dmg_g = p->ps.dmg_g;
 	dmg_t = p->ps.dmg_t;
 	dmg_team = p->ps.dmg_team;
-	ra    = p->ps.ra;
-	ya    = p->ps.ya;
-	ga    = p->ps.ga;
-	mh    = p->ps.mh;
-	quad  = p->ps.quad;
-	pent  = p->ps.pent;
-	ring  = p->ps.ring;
+	ra    = p->ps.itm[itRA].tooks;
+	ya    = p->ps.itm[itYA].tooks;
+	ga    = p->ps.itm[itGA].tooks;
+	mh    = p->ps.itm[itHEALTH_100].tooks;
+	quad  = p->ps.itm[itQUAD].tooks;
+	pent  = p->ps.itm[itPENT].tooks;
+	ring  = p->ps.itm[itRING].tooks;
 
 	h_rl  = p->ps.wpn[wpRL].hits;
 	a_rl  = p->ps.wpn[wpRL].attacks;
@@ -475,29 +475,14 @@ void OnePlayerStats(gedict_t *p, int tp)
 	if ( !tp )
 		G_bprint(2,"\235\236\236\236\236\236\236\236\236\237\n" );
 
-	if ( isCTF() ) {
-		if (maxfrags < p->s.v.frags - p->ps.ctf_points)
-			maxfrags = p->s.v.frags - p->ps.ctf_points;
-	}
-	else { 
-		if (maxfrags < p->s.v.frags)
-			maxfrags = p->s.v.frags;
-	}
-
-	if (maxdeaths < p->deaths)
-		maxdeaths = p->deaths;
-	if (maxfriend < p->friendly)
-		maxfriend = p->friendly;
-	if (maxeffi < p->efficiency)
-		maxeffi = p->efficiency;
-	if (maxcaps < p->ps.caps)
-		maxcaps = p->ps.caps;
-	if (maxdefends < p->ps.f_defends)
-		maxdefends = p->ps.f_defends;
-	if (maxspree < p->ps.spree_max)
-		maxspree = p->ps.spree_max;
-	if (maxspree_q < p->ps.spree_max_q)
-		maxspree_q = p->ps.spree_max_q;
+	maxfrags   = max((isCTF() ? p->s.v.frags - p->ps.ctf_points : p->s.v.frags), maxfrags);
+	maxdeaths  = max(p->deaths, maxdeaths);
+	maxfriend  = max(p->friendly, maxfriend);
+	maxeffi    = max(p->efficiency, maxeffi);
+	maxcaps    = max(p->ps.caps, maxcaps);
+	maxdefends = max(p->ps.f_defends, maxdefends);
+	maxspree   = max(p->ps.spree_max, maxspree);
+	maxspree_q = max(p->ps.spree_max_q, maxspree_q);
 }
 
 // Players statistics printout here
@@ -819,10 +804,8 @@ void EndMatch ( float skip_log )
 				p->super_damage_finished = 0;
 				p->radsuit_finished = 0;
 
-				if ( p->ps.spree_current > p->ps.spree_max )        
-					p->ps.spree_max = p->ps.spree_current;        
-				if ( p->ps.spree_current_q > p->ps.spree_max_q )    
-					p->ps.spree_max_q = p->ps.spree_current_q;    
+				p->ps.spree_max = max(p->ps.spree_current, p->ps.spree_max);
+				p->ps.spree_max_q = max(p->ps.spree_current_q, p->ps.spree_max_q);
 			}
 		}
 

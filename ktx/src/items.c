@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.32 2006/12/04 19:55:56 qqshka Exp $
+ *  $Id: items.c,v 1.33 2006/12/05 02:00:47 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -236,13 +236,18 @@ void health_touch()
 		if ( !T_Heal( other, self->healamount, 1 ) )
 			return;
 
-		other->ps.mh++;
+		other->ps.itm[itHEALTH_100].tooks++;
 
 		mi_print(other, IT_SUPERHEALTH, va("%s got Megahealth", getname(other)));
 	} else
 	{
 		if ( !T_Heal( other, self->healamount, 0 ) )
 			return;
+
+		switch ((int)self->healamount) {
+			case 15: other->ps.itm[itHEALTH_15].tooks++; break;
+			case 25: other->ps.itm[itHEALTH_25].tooks++; break;
+		}
 	}
 
 	G_sprint( other, PRINT_LOW, "You receive %.0f health\n", self->healamount );
@@ -330,21 +335,21 @@ void armor_touch()
 
 	if ( !strcmp( self->s.v.classname, "item_armor1" ) )
 	{
-		armor = &(other->ps.ga);
+		armor = &(other->ps.itm[itGA].tooks);
 		type = 0.3;
 		value = 100;
 		bit = IT_ARMOR1;
 	}
 	else if ( !strcmp( self->s.v.classname, "item_armor2" ) )
 	{
-		armor = &(other->ps.ya);
+		armor = &(other->ps.itm[itYA].tooks);
 		type = 0.6;
 		value = 150;
 		bit = IT_ARMOR2;
 	}
 	else if ( !strcmp( self->s.v.classname, "item_armorInv" ) )
 	{
-		armor = &(other->ps.ra);
+		armor = &(other->ps.itm[itRA].tooks);
 		type = 0.8;
 		value = 200;
 		bit = IT_ARMOR3;
@@ -1271,13 +1276,13 @@ void powerup_touch()
 	{
 		other->k_666 = 0; // qqshka: mark we have native pent
 
-		other->ps.pent++;
+		other->ps.itm[itPENT].tooks++;
 		other->invincible_time = 1;
 		other->invincible_finished = g_globalvars.time + 30;
 	}
 	else if ( streq( self->s.v.classname, "item_artifact_invisibility" ) )
 	{
-		other->ps.ring++;
+		other->ps.itm[itRING].tooks++;
 		other->invisible_time = 1;
 		other->invisible_finished = g_globalvars.time + 30;
 
@@ -1287,9 +1292,8 @@ void powerup_touch()
 	}
 	else if ( streq( self->s.v.classname, "item_artifact_super_damage" ) )
 	{
-		other->ps.quad++;
-		if ( other->ps.spree_current_q > other->ps.spree_max_q )
-			other->ps.spree_max_q = other->ps.spree_current_q;
+		other->ps.itm[itQUAD].tooks++;
+		other->ps.spree_max_q = max(other->ps.spree_current_q, other->ps.spree_max_q);
 		other->ps.spree_current_q = 0;  
 
 		if ( deathmatch == 4 )

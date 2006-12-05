@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.130 2006/12/04 19:55:56 qqshka Exp $
+ *  $Id: client.c,v 1.131 2006/12/05 02:00:47 qqshka Exp $
  */
 
 //===========================================================================
@@ -2836,11 +2836,8 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			attacker->ps.spree_current_q++;
 	}
 
-	if ( targ->ps.spree_current > targ->ps.spree_max )
-		targ->ps.spree_max = targ->ps.spree_current;
-	if ( targ->ps.spree_current_q > targ->ps.spree_max_q )
-		targ->ps.spree_max_q = targ->ps.spree_current_q;
-
+	targ->ps.spree_max = max(targ->ps.spree_current, targ->ps.spree_max);
+	targ->ps.spree_max_q = max(targ->ps.spree_current_q, targ->ps.spree_max_q);
 	targ->ps.spree_current = targ->ps.spree_current_q = 0;
 
 	StatsHandler(targ, attacker);
