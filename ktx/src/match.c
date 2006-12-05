@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.95 2006/12/05 02:00:47 qqshka Exp $
+ *  $Id: match.c,v 1.96 2006/12/05 18:45:50 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -783,19 +783,15 @@ void EndMatch ( float skip_log )
 	}
 
 	G_bprint( 2, "The match is over\n");
-	G_cprint("RESULT");
 
-	if( /* skip_log */ 0 ) // qqshka: we are not skip match stats now
-		G_cprint("%%stopped\n");
+	if( /* skip_log */ 0 ) { // qqshka: we are not skip match stats now
+		;
+	}
 	else {
 		for( p = world; (p = find_plr( p )); ) 
 		{
 			if( !strnull( p->s.v.netname ) )
 			{
-				G_cprint("%%%s", p->s.v.netname);
-				G_cprint("%%t%%%s", getteam( p ));
-				G_cprint("%%fr%%%d", (int)p->s.v.frags);
-
 				// take away powerups so scoreboard looks normal
 				p->s.v.items = (int)p->s.v.items & ~(IT_INVISIBILITY | IT_INVULNERABILITY | IT_SUIT | IT_QUAD);
 				p->s.v.effects = (int)p->s.v.effects & ~(EF_DIMLIGHT | EF_BLUE | EF_RED );
@@ -808,10 +804,6 @@ void EndMatch ( float skip_log )
 				p->ps.spree_max_q = max(p->ps.spree_current_q, p->ps.spree_max_q);
 			}
 		}
-
-		G_cprint("%%fl%%%d", (int)fraglimit);
-		G_cprint("%%tl%%%d", (int)timelimit);
-		G_cprint("%%map%%%s\n", g_globalvars.mapname);
 
 		if ( isCTF() ) // if a player ends the game with a rune adjust their rune time
 		{
@@ -1123,8 +1115,6 @@ void SM_PrepareClients()
 	for( p = world;	(p = find_plr( p )); ) {
 		if( !k_matchLess ) { // skip setup k_teamnum in matchLess mode
 			pl_team = getteam( p );
-			G_cprint("%%%s%%t%%%s", p->s.v.netname, pl_team);
-
 			p->k_teamnum = 0;
 
 			if( !strnull( pl_team ) ) {
@@ -1171,8 +1161,6 @@ void SM_PrepareClients()
 
 		self = old;
 	}
-
-	G_cprint("\n");
 }
 
 void SM_PrepareShowscores()
@@ -1249,8 +1237,6 @@ void StartMatch ()
 
 	SM_PrepareMap(); // remove/add some items from map regardind with dmm and game mode
 	
-	G_cprint("MATCH STARTED\n");
-
 	match_start_time  = g_globalvars.time;
 	match_in_progress = 2;
 

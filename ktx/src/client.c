@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.131 2006/12/05 02:00:47 qqshka Exp $
+ *  $Id: client.c,v 1.132 2006/12/05 18:45:50 qqshka Exp $
  */
 
 //===========================================================================
@@ -2211,8 +2211,6 @@ void PlayerPreThink()
 				"WARNING: QW clients up to 2.30 have a timer related bug which is caused by too"
 				" long uptime. Either reboot your machine or upgrade to QWCL 2.33.\n");
 
-			G_cprint("%s%%speed%%%f\n", self->s.v.netname, r);
-
 			if( r > 105 )
 				self->uptimebugpolicy += 1;
 		}
@@ -3097,7 +3095,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				}
 			}
 			else {
-				G_cprint ("Unknown death: normal death kt version");
+				G_cprint ("Unknown death: normal death kt version\n");
 				deathstring = " killed by ";
 				deathstring2 = " ?\n";
 			}

@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.48 2006/11/30 17:16:13 qqshka Exp $
+ * $Id: admin.c,v 1.49 2006/12/05 18:45:50 qqshka Exp $
  */
 
 // admin.c
@@ -605,9 +605,7 @@ void AdminForceBreak ()
     if( k_oldmaxspeed ) // huh???
         cvar_fset( "sv_maxspeed", k_oldmaxspeed );
 
-    G_cprint("%%forcebreak%%%s\n", self->s.v.netname);
-    G_bprint(2, "%s forces a break!\n"
-				"MATCH OVER!!\n", self->s.v.netname);
+    G_bprint(2, "%s forces a break!\n", self->s.v.netname);
 
     EndMatch( 0 );
 }
