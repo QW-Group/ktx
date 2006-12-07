@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.69 2006/11/30 17:16:13 qqshka Exp $
+ *  $Id: g_utils.c,v 1.70 2006/12/07 14:15:38 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -540,7 +540,6 @@ void G_cprint( const char *fmt, ... )
 	char    text[1024*4];
 
 	va_start( argptr, fmt );
-	vsprintf( text, fmt, argptr );
 	vsnprintf( text, sizeof(text), fmt, argptr );
 	va_end( argptr );
 
