@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.97 2006/12/08 00:20:59 qqshka Exp $
+ *  $Id: match.c,v 1.98 2006/12/12 01:57:17 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -745,27 +745,6 @@ void OnePlayerMidairStats( gedict_t *p, int tp )
 		G_bprint(2,"\235\236\236\236\236\236\236\236\236\237\n" );
 }
 
-void s2di( const char *fmt, ... )
-{
-	static int i = 0;
-	va_list argptr;
-	char    text[1024], *p;
-
-	va_start( argptr, fmt );
-	vsnprintf( text, sizeof(text), fmt, argptr );
-	va_end( argptr );
-
-	text[sizeof(text)-1] = 0;
-
-	for( p = text; *p; p++ )
-		if ( *p == '$' || *p == ';' )
-			*p = '_'; // does't want "demoinfoadd * $rcon_password"
-
-	// FIXME: SLOW/UNSECURE, better to write in file directly
-	localcmd("demoinfoadd * %s\n", text);
-	trap_executecmd();
-}
-
 char *GetMode() {
 
 	if ( isRA() )
@@ -821,26 +800,51 @@ qboolean itPowerup( itemName_t it )
 	return (it == itQUAD || it == itPENT || it == itRING);
 }
 
+fileHandle_t di_handle;
+
+void s2di( const char *fmt, ... )
+{
+	static int i = 0;
+	va_list argptr;
+	char    text[1024];
+
+	va_start( argptr, fmt );
+	vsnprintf( text, sizeof(text), fmt, argptr );
+	va_end( argptr );
+
+	text[sizeof(text)-1] = 0;
+
+	trap_FS_WriteFile( text, strlen(text), di_handle );
+}
+
 void StatsToFile()
 {
 	gedict_t	*p, *p2;
 	int from1, from2;
 	char *team = "";
 
-	char tmp[1024], buf[1024];
-	int i, j;
+	char date[32], name[256], tmp[1024], buf[1024], *ip = "", *port = "";
+	int i = 0, j;
+
+	if ( strnull( ip = cvar_string( "sv_local_addr" ) ) || strnull( port = strchr(ip, ':') ) || !(i = atoi(port + 1)) )
+		return;
+
+	port[0] = 0;
+	port++;
 
 	if ( strnull( cvar_string( "serverdemo" ) ) || cvar("sv_demotxt") != 2 )
 		return; // does't record demo or does't want stats to be put in file
 
-	if ( !QVMstrftime(tmp, sizeof(tmp), "%Y-%m-%d", 0) )
-		tmp[0] = 0; // bad date
+	snprintf(name, sizeof(name), "demoinfo_%s_%d.txt", ip, i);
+	if ( trap_FS_OpenFile( name, &di_handle, FS_WRITE_BIN ) < 0 )
+		return; // OpenFile is last check, so we does't need CloseFile each "return" above
 
-	localcmd("\n");
+	if ( !QVMstrftime(date, sizeof(date), "%Y-%m-%d", 0) )
+		date[0] = 0; // bad date
 
-	s2di("%s", "<?xml version=\"1.0\"?>");
-	s2di("<match version=\"1\" date=\"%s\" hostname=\"%s\" ip=\"fixme\" port=\"fixme\" mode=\"%s\">", 
-		tmp, cvar_string("hostname"), GetMode());
+	s2di("%s", "<?xml version=\"1.0\"?>\n");
+	s2di("<match version=\"1\" date=\"%s\" hostname=\"%s\" ip=\"%s\" port=\"%d\" mode=\"%s\">\n", 
+		date, striphigh(cvar_string("hostname")), ip, i, GetMode());
 
 // { TEAMS
 
@@ -850,37 +854,37 @@ void StatsToFile()
 	}
 
 	if ( i )
-		s2di("\t<teams%s>", tmp);
+		s2di("\t<teams%s>\n", striphigh(tmp));
 
 	for ( i = 0; i < min(tmStats_cnt, MAX_TM_STATS); i++ ) {
-		s2di("\t\t<team name=\"%s\" frags=\"%d\" deaths=\"%d\" tkills=\"%d\" dmg_tkn=\"%d\" dmg_gvn=\"%d\" dmg_tm=\"%d\">", 
-			tmStats[i].name, tmStats[i].frags + tmStats[i].gfrags, tmStats[i].deaths, tmStats[i].tkills,
+		s2di("\t\t<team name=\"%s\" frags=\"%d\" deaths=\"%d\" tkills=\"%d\" dmg_tkn=\"%d\" dmg_gvn=\"%d\" dmg_tm=\"%d\">\n", 
+			striphigh(tmStats[i].name), tmStats[i].frags + tmStats[i].gfrags, tmStats[i].deaths, tmStats[i].tkills,
 			(int)tmStats[i].dmg_t, (int)tmStats[i].dmg_g, (int)tmStats[i].dmg_team);
 
-		s2di("\t\t\t<weapons>");
+		s2di("\t\t\t<weapons>\n");
 		for ( j = 1; j < wpMAX; j++ )
 			s2di("\t\t\t\t<weapon name=\"%s\" hits=\"%d\" attacks=\"%d\""
 					" kills=\"%d\" deaths=\"%d\" tkills=\"%d\" ekills=\"%d\""
-					" drops=\"%d\" tooks=\"%d\" ttooks=\"%d\"/>",
+					" drops=\"%d\" tooks=\"%d\" ttooks=\"%d\"/>\n",
 					WpName(j), tmStats[i].wpn[j].hits, tmStats[i].wpn[j].attacks,
 					tmStats[i].wpn[j].kills, tmStats[i].wpn[j].deaths, tmStats[i].wpn[j].tkills, tmStats[i].wpn[j].ekills,
 					tmStats[i].wpn[j].drops, tmStats[i].wpn[j].tooks, tmStats[i].wpn[j].ttooks);
-		s2di("\t\t\t</weapons>");
+		s2di("\t\t\t</weapons>\n");
 
-		s2di("\t\t\t<items>");
+		s2di("\t\t\t<items>\n");
 		for ( j = 1; j < itMAX; j++) {
 			if ( itPowerup( j ) )
 				snprintf(buf, sizeof(buf), "%s", " time=\"fixme\"");
 			else
 				buf[0] = 0;
-			s2di("\t\t\t\t<item name=\"%s\" tooks=\"%d\"%s/>", ItName(j), tmStats[i].itm[j].tooks, buf);
+			s2di("\t\t\t\t<item name=\"%s\" tooks=\"%d\"%s/>\n", ItName(j), tmStats[i].itm[j].tooks, buf);
 		}
-		s2di("\t\t\t</items>");
-		s2di("\t\t</team>");
+		s2di("\t\t\t</items>\n");
+		s2di("\t\t</team>\n");
 	}
 
 	if ( i )
-		s2di("\t</teams>");
+		s2di("\t</teams>\n");
 
 // } TEAMS
 
@@ -889,7 +893,7 @@ void StatsToFile()
 	for ( from1 = 0, p = world; (p = find_plrghst ( p, &from1 )); )
 		p->ready = 0; // clear mark
 
-	s2di("\t<players>");
+	s2di("\t<players>\n");
 
 //	get one player and search all his mates, mark served players via ->ready field 
 //  ghosts is served too
@@ -903,39 +907,44 @@ void StatsToFile()
 				continue; // served or on different team
 
 			s2di("\t\t<player name=\"%s\" team=\"%s\" frags=\"%d\" deaths=\"%d\" tkills=\"%d\""
-						" dmg_tkn=\"%d\" dmg_gvn=\"%d\" dmg_tm=\"%d\">",
-					getname(p2), team, (int)p2->s.v.frags, (int)p2->deaths, (int)p2->friendly,
+						" dmg_tkn=\"%d\" dmg_gvn=\"%d\" dmg_tm=\"%d\">\n",
+					striphigh(getname(p2)), striphigh(team), (int)p2->s.v.frags, (int)p2->deaths, (int)p2->friendly,
 					(int)p2->ps.dmg_t, (int)p2->ps.dmg_g, (int)p2->ps.dmg_team);
 
-			s2di("\t\t\t<weapons>");
+			s2di("\t\t\t<weapons>\n");
 			for ( j = 1; j < wpMAX; j++ )
 			s2di("\t\t\t\t<weapon name=\"%s\" hits=\"%d\" attacks=\"%d\""
 					" kills=\"%d\" deaths=\"%d\" tkills=\"%d\" ekills=\"%d\""
-					" drops=\"%d\" tooks=\"%d\" ttooks=\"%d\"/>",
+					" drops=\"%d\" tooks=\"%d\" ttooks=\"%d\"/>\n",
 					WpName(j), p2->ps.wpn[j].hits, p2->ps.wpn[j].attacks,
 					p2->ps.wpn[j].kills, p2->ps.wpn[j].deaths, p2->ps.wpn[j].tkills, p2->ps.wpn[j].ekills,
 					p2->ps.wpn[j].drops, p2->ps.wpn[j].tooks, p2->ps.wpn[j].ttooks);
-			s2di("\t\t\t</weapons>");
+			s2di("\t\t\t</weapons>\n");
 
-			s2di("\t\t\t<items>");
+			s2di("\t\t\t<items>\n");
 			for ( j = 1; j < itMAX; j++) {
 				if ( itPowerup( j ) )
 					snprintf(buf, sizeof(buf), "%s", " time=\"fixme\"");
 				else
 					buf[0] = 0;
-				s2di("\t\t\t\t<item name=\"%s\" tooks=\"%d\"%s/>", ItName(j), p2->ps.itm[j].tooks, buf);
+				s2di("\t\t\t\t<item name=\"%s\" tooks=\"%d\"%s/>\n", ItName(j), p2->ps.itm[j].tooks, buf);
 			}
-			s2di("\t\t\t</items>");
+			s2di("\t\t\t</items>\n");
 
-			s2di("\t\t</player>");
+			s2di("\t\t</player>\n");
 			p2->ready = 1; // set mark
 		}
 	}
 
-	s2di("\t</players>");
+	s2di("\t</players>\n");
 // } PLAYERS
 
-	s2di("</match>");
+	s2di("</match>\n");
+
+	trap_FS_CloseFile( di_handle );
+
+	localcmd("\ndemoinfoadd ** %s\n", name);
+	trap_executecmd();
 }
 
 void EM_on_MatchEndBreak( int isBreak )

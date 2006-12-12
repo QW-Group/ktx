@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.96 2006/12/04 19:55:56 qqshka Exp $
+ *  $Id: g_local.h,v 1.97 2006/12/12 01:57:16 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -216,6 +216,7 @@ char			*va(char *format, ...);
 char			*redtext(const char *format, ...);
 char 			*dig3(int d);
 char			*dig3s(const char *format, ...);
+char			*striphigh(const char *format, ...);
 
 void            G_sprint( gedict_t * ed, int level, const char *fmt, ... );
 void            G_bprint( int level, const char *fmt, ... );

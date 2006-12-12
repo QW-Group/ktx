@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.70 2006/12/07 14:15:38 qqshka Exp $
+ *  $Id: g_utils.c,v 1.71 2006/12/12 01:57:17 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -502,6 +502,31 @@ char *dig3s(const char *format, ...)
 	}
 
 	return string[index++];
+}
+
+char *striphigh(const char *format, ...)
+{
+// >>>> like va(...)
+	va_list		argptr;
+	static char	string[MAX_STRINGS][1024];
+	static int		index = 0;
+	
+	index %= MAX_STRINGS;
+	va_start (argptr, format);
+	vsnprintf (string[index], sizeof(string[0]), format, argptr);
+	va_end (argptr);
+
+	string[index][ sizeof( string[0] ) - 1 ] = '\0';
+// <<<<
+
+	{
+		unsigned char *i = (unsigned char *) string[index];
+
+		for ( ; *i; i++ )
+				*i &= 127;
+
+		return string[index++];
+	}
 }
 
 
