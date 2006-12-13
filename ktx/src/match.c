@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.98 2006/12/12 01:57:17 qqshka Exp $
+ *  $Id: match.c,v 1.99 2006/12/13 23:42:02 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -188,6 +188,7 @@ void CollectTpStats()
 
 			for ( i = itNONE; i < itMAX; i++ ) { // summ each field of items
 				tmStats[tmStats_cnt].itm[i].tooks += p2->ps.itm[i].tooks;
+				tmStats[tmStats_cnt].itm[i].time  += p2->ps.itm[i].time;
 			}
 
 			for ( i = wpNONE; i < wpMAX; i++ ) { // summ each field of weapons
@@ -874,7 +875,7 @@ void StatsToFile()
 		s2di("\t\t\t<items>\n");
 		for ( j = 1; j < itMAX; j++) {
 			if ( itPowerup( j ) )
-				snprintf(buf, sizeof(buf), "%s", " time=\"fixme\"");
+				snprintf(buf, sizeof(buf), " time=\"%d\"", (int)tmStats[i].itm[j].time);
 			else
 				buf[0] = 0;
 			s2di("\t\t\t\t<item name=\"%s\" tooks=\"%d\"%s/>\n", ItName(j), tmStats[i].itm[j].tooks, buf);
@@ -924,7 +925,7 @@ void StatsToFile()
 			s2di("\t\t\t<items>\n");
 			for ( j = 1; j < itMAX; j++) {
 				if ( itPowerup( j ) )
-					snprintf(buf, sizeof(buf), "%s", " time=\"fixme\"");
+					snprintf(buf, sizeof(buf), " time=\"%d\"", (int)p2->ps.itm[j].time);
 				else
 					buf[0] = 0;
 				s2di("\t\t\t\t<item name=\"%s\" tooks=\"%d\"%s/>\n", ItName(j), p2->ps.itm[j].tooks, buf);
@@ -974,6 +975,10 @@ void EM_CorrectStats()
 
 		p->ps.spree_max = max(p->ps.spree_current, p->ps.spree_max);
 		p->ps.spree_max_q = max(p->ps.spree_current_q, p->ps.spree_max_q);
+
+		adjust_pickup_time( &p->q_pickup_time, &p->ps.itm[itQUAD].time );
+		adjust_pickup_time( &p->p_pickup_time, &p->ps.itm[itPENT].time );
+		adjust_pickup_time( &p->r_pickup_time, &p->ps.itm[itRING].time );
 
 		if ( isCTF() ) { // if a player ends the game with a rune adjust their rune time
 
@@ -1114,6 +1119,9 @@ void CheckBerzerk( int min, int sec )
 	for( p = world; (p = find_plr( p )); ) {
 		if( !ISLIVE( p ) )
 			continue;
+
+		adjust_pickup_time( &p->q_pickup_time, &p->ps.itm[itQUAD].time );
+		adjust_pickup_time( &p->p_pickup_time, &p->ps.itm[itPENT].time );
 
 		p->s.v.items = (int)p->s.v.items | (IT_QUAD | IT_INVULNERABILITY);
 		p->super_time = 1;

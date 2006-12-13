@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1997 David 'crt' Wright
  *
- * $Id: arena.c,v 1.10 2006/11/30 08:50:06 qqshka Exp $
+ * $Id: arena.c,v 1.11 2006/12/13 23:42:02 qqshka Exp $
  */
 
 // arena.c - rocket arena stuff
@@ -381,6 +381,10 @@ void setfullwep( gedict_t *anent )
 	anent->invincible_time		 = 0;
 	anent->k_666	   = 0;	// team
 	anent->s.v.effects = 0;
+
+	adjust_pickup_time( &anent->q_pickup_time, &anent->ps.itm[itQUAD].time );
+	adjust_pickup_time( &anent->p_pickup_time, &anent->ps.itm[itPENT].time );
+	adjust_pickup_time( &anent->r_pickup_time, &anent->ps.itm[itRING].time );
 
 	swap = self;
 	self = anent;

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.133 2006/12/13 17:20:24 qqshka Exp $
+ *  $Id: client.c,v 1.134 2006/12/13 23:42:02 qqshka Exp $
  */
 
 //===========================================================================
@@ -1130,6 +1130,8 @@ void PutClientInServer()
 	self->spawn_time = g_globalvars.time;
 	self->k_666 = 0;
 	self->axhitme = 0;
+
+	self->q_pickup_time = self->p_pickup_time = self->r_pickup_time = 0;
         
 // the spawn falling damage bug workaround
 	self->jump_flag = 0;
@@ -1672,6 +1674,10 @@ void MakeGhost ()
 
 	if( !f2 )
 		k_userid++;
+
+	adjust_pickup_time( &self->q_pickup_time, &self->ps.itm[itQUAD].time );
+	adjust_pickup_time( &self->p_pickup_time, &self->ps.itm[itPENT].time );
+	adjust_pickup_time( &self->r_pickup_time, &self->ps.itm[itRING].time );
 
 	ghost = spawn();
 	ghost->s.v.owner  = EDICT_TO_PROG( world );
@@ -2419,6 +2425,8 @@ void CheckPowerups()
 			self->s.v.items -= IT_INVISIBILITY;
 			self->invisible_finished = 0;
 			self->invisible_time = 0;
+
+			adjust_pickup_time( &self->r_pickup_time, &self->ps.itm[itRING].time );
 		}
 		// use the eyes
 		self->s.v.frame = 0;
@@ -2454,6 +2462,8 @@ void CheckPowerups()
 			self->invincible_time = 0;
 			self->invincible_finished = 0;
 			self->k_666 = 0;		//team
+
+			adjust_pickup_time( &self->p_pickup_time, &self->ps.itm[itPENT].time );
 		}
 
 		if(self->invincible_finished > g_globalvars.time && !self->k_666) // KTeAMS
@@ -2507,6 +2517,8 @@ void CheckPowerups()
 			}
 			self->super_damage_finished = 0;
 			self->super_time = 0;
+
+			adjust_pickup_time( &self->q_pickup_time, &self->ps.itm[itQUAD].time );
 		}
 
 		if ( self->super_damage_finished > g_globalvars.time )
@@ -2749,6 +2761,22 @@ void StatsHandler(gedict_t *targ, gedict_t *attacker)
 	attackerteam = getteam(attacker);
 	targteam     = getteam(targ);
 
+	adjust_pickup_time( &targ->q_pickup_time, &targ->ps.itm[itQUAD].time );
+	adjust_pickup_time( &targ->p_pickup_time, &targ->ps.itm[itPENT].time );
+	adjust_pickup_time( &targ->r_pickup_time, &targ->ps.itm[itRING].time );
+
+	// update spree stats
+	if ( strneq( attackerteam, targteam ) )
+	{
+		attacker->ps.spree_current++;
+		if ( attacker->super_damage_finished > 0 )
+			attacker->ps.spree_current_q++;
+	}
+
+	targ->ps.spree_max = max(targ->ps.spree_current, targ->ps.spree_max);
+	targ->ps.spree_max_q = max(targ->ps.spree_current_q, targ->ps.spree_max_q);
+	targ->ps.spree_current = targ->ps.spree_current_q = 0;
+
 	if ( attacker->ct == ctPlayer ) {
 		switch ( targ->deathtype ) {
 			case dtAXE: wp = wpAXE; break;
@@ -2826,18 +2854,6 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	//ZOID 12-13-96: self.team doesn't work in QW.  Use keys
 	attackerteam = getteam(attacker);
 	targteam     = getteam(targ);
-
-	// update spree stats
-	if ( strneq( attackerteam, targteam ) )
-	{
-		attacker->ps.spree_current++;
-		if ( attacker->super_damage_finished > 0 )
-			attacker->ps.spree_current_q++;
-	}
-
-	targ->ps.spree_max = max(targ->ps.spree_current, targ->ps.spree_max);
-	targ->ps.spree_max_q = max(targ->ps.spree_current_q, targ->ps.spree_max_q);
-	targ->ps.spree_current = targ->ps.spree_current_q = 0;
 
 	StatsHandler(targ, attacker);
 

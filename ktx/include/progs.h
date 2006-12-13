@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.59 2006/12/05 02:00:46 qqshka Exp $
+ *  $Id: progs.h,v 1.60 2006/12/13 23:42:02 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -100,7 +100,7 @@ typedef enum
 
 typedef struct itType_s {
 	int tooks; // taken count
-//	float time;
+	float time; // total time u have some item
 
 } itType_t;
 
@@ -405,6 +405,10 @@ typedef struct gedict_s {
 	float sc_stats_time;    // used to force centerprint is off at desired time
 
 	player_stats_t ps;		// store player statistic here, like taken armors etc...
+
+	float q_pickup_time;	// time then u took quad
+	float p_pickup_time;	// time then u took pent
+	float r_pickup_time;	// time then u took ring
 // }
 
 	int   need_clearCP;		// if this true, clear center print at certain cases

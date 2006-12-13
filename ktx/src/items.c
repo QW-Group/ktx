@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.33 2006/12/05 02:00:47 qqshka Exp $
+ *  $Id: items.c,v 1.34 2006/12/13 23:42:02 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1218,6 +1218,14 @@ POWERUPS
 
 void            powerup_touch();
 
+void adjust_pickup_time( float *current, float *total )
+{
+	if ( !current || !*current || !total )
+		return;
+
+	*total += (g_globalvars.time - *current);
+	*current = 0;
+}
 
 void powerup_touch()
 {
@@ -1274,6 +1282,9 @@ void powerup_touch()
 	}
 	else if ( streq( self->s.v.classname, "item_artifact_invulnerability" ) )
 	{
+		adjust_pickup_time( &other->p_pickup_time, &other->ps.itm[itPENT].time );
+		other->p_pickup_time = g_globalvars.time;
+
 		other->k_666 = 0; // qqshka: mark we have native pent
 
 		other->ps.itm[itPENT].tooks++;
@@ -1282,6 +1293,9 @@ void powerup_touch()
 	}
 	else if ( streq( self->s.v.classname, "item_artifact_invisibility" ) )
 	{
+		adjust_pickup_time( &other->r_pickup_time, &other->ps.itm[itRING].time );
+		other->r_pickup_time = g_globalvars.time;
+
 		other->ps.itm[itRING].tooks++;
 		other->invisible_time = 1;
 		other->invisible_finished = g_globalvars.time + 30;
@@ -1292,6 +1306,9 @@ void powerup_touch()
 	}
 	else if ( streq( self->s.v.classname, "item_artifact_super_damage" ) )
 	{
+		adjust_pickup_time( &other->q_pickup_time, &other->ps.itm[itQUAD].time );
+		other->q_pickup_time = g_globalvars.time;
+
 		other->ps.itm[itQUAD].tooks++;
 		other->ps.spree_max_q = max(other->ps.spree_current_q, other->ps.spree_max_q);
 		other->ps.spree_current_q = 0;  

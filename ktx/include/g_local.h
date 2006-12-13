@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.97 2006/12/12 01:57:16 qqshka Exp $
+ *  $Id: g_local.h,v 1.98 2006/12/13 23:42:02 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -472,7 +472,7 @@ qboolean 		isCanStart ( gedict_t *s, qboolean forceMembersWarn );
 void			StartTimer ();
 void			StopTimer ( int removeDemo );
 
-//combat 
+//combat.c
 extern gedict_t *damage_attacker, *damage_inflictor;
 void            T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker,
 			  float damage );
@@ -480,9 +480,11 @@ void            T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float
 				gedict_t * ignore, deathType_t dtype );
 void            T_BeamDamage( gedict_t * attacker, float damage );
 
-//items
+//items.c
 void			DropPowerups();
 void            DropBackpack();
+
+void			adjust_pickup_time( float *current, float *total );
 
 //triggers.c
 void			play_teleport( gedict_t *sndspot );
