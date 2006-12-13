@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.132 2006/12/05 18:45:50 qqshka Exp $
+ *  $Id: client.c,v 1.133 2006/12/13 17:20:24 qqshka Exp $
  */
 
 //===========================================================================
@@ -1205,6 +1205,7 @@ void PutClientInServer()
 	SetVector( self->s.v.view_ofs, 0, 0, 22 );
 	SetVector( self->s.v.velocity, 0, 0, 0 );
 
+	self->walkframe = 0;	
 	player_stand1();
 
 	trap_makevectors( self->s.v.angles );

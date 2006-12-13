@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.26 2006/12/04 19:55:56 qqshka Exp $
+ *  $Id: player.c,v 1.27 2006/12/13 17:20:25 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -88,7 +88,7 @@ void player_run()
 	{
 		if ( self->walkframe >= 6 )
 			self->walkframe = 0;
-		self->s.v.frame = self->s.v.frame + self->walkframe;
+		self->s.v.frame = 6 + self->walkframe;
 	}
 	self->walkframe = self->walkframe + 1;
 }
@@ -147,6 +147,7 @@ void player_chain4()
 void player_chain5()
 {
 	self->s.v.frame = 140;
+	self->walkframe = 0;
 	self->s.v.think = ( func_t ) player_run;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 	self->s.v.weaponframe = 5;
@@ -200,6 +201,7 @@ void player_shot5()
 void player_shot6()
 {
 	self->s.v.frame = 118;
+	self->walkframe = 0;
 	self->s.v.think = ( func_t ) player_run;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -237,6 +239,7 @@ void player_axe3()
 void player_axe4()
 {
 	self->s.v.frame = 122;
+	self->walkframe = 0;
 	self->s.v.think = ( func_t ) player_run;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -274,6 +277,7 @@ void player_axeb3()
 void player_axeb4()
 {
 	self->s.v.frame = 128;
+	self->walkframe = 0;
 	self->s.v.think = ( func_t ) player_run;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -311,6 +315,7 @@ void player_axec3()
 void player_axec4()
 {
 	self->s.v.frame = 134;
+	self->walkframe = 0;
 	self->s.v.think = ( func_t ) player_run;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -348,6 +353,7 @@ void player_axed3()
 void player_axed4()
 {
 	self->s.v.frame = 140;
+	self->walkframe = 0;
 	self->s.v.think = ( func_t ) player_run;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -381,6 +387,7 @@ void player_nail1()
 #endif
 	)
 	{
+		self->walkframe = 0;
 		player_run();
 		return;
 	}
@@ -409,6 +416,7 @@ void player_nail2()
 #endif
 	)
 	{
+		self->walkframe = 0;
 		player_run();
 		return;
 	}
@@ -439,6 +447,7 @@ void player_light1()
 #endif
 	)
 	{
+		self->walkframe = 0;
 		player_run();
 		return;
 	}
@@ -467,6 +476,7 @@ void player_light2()
 #endif
 	)
 	{
+		self->walkframe = 0;
 		player_run();
 		return;
 	}
@@ -533,6 +543,7 @@ void player_rocket5()
 void player_rocket6()
 {
 	self->s.v.frame = 112;
+	self->walkframe = 0;
 	self->s.v.think = ( func_t ) player_run;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -670,6 +681,7 @@ void player_pain5()
 void player_pain6()
 {
 	self->s.v.frame = 40;
+	self->walkframe = 0;
 	self->s.v.think = ( func_t ) player_run;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -720,6 +732,7 @@ void player_axpain5()
 void player_axpain6()
 {
 	self->s.v.frame = 34;
+	self->walkframe = 0;
 	self->s.v.think = ( func_t ) player_run;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 

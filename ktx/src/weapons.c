@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.56 2006/11/30 17:16:14 qqshka Exp $
+ *  $Id: weapons.c,v 1.57 2006/12/13 17:20:25 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1046,10 +1046,51 @@ PLAYER WEAPON USE
 
 void W_SetCurrentAmmo()
 {
+	qboolean need_fix = false;
 	int             items;
 	float old_currentammo = self->s.v.currentammo;
 
-	player_run ();          // get out of any weapon firing states
+// { get out of any weapon firing states
+
+	if ( self->s.v.think == ( func_t )player_stand1 || self->s.v.think == ( func_t )player_run ) {
+		if ( self->s.v.weapon == IT_AXE || self->s.v.weapon == IT_HOOK ) {
+			if ( self->s.v.velocity[0] || self->s.v.velocity[1] ) { // run
+				if ( self->s.v.frame < 0 || self->s.v.frame > 5 )
+					need_fix = true; // wrong axe run frame
+			}
+			else { // stand
+				if ( self->s.v.frame < 17 || self->s.v.frame > 28 )
+					need_fix = true; // wrong axe stand frame
+			}
+		}
+		else {
+			if ( self->s.v.velocity[0] || self->s.v.velocity[1] ) { // run
+				if ( self->s.v.frame < 6 || self->s.v.frame > 11 )
+					need_fix = true; // wrong non axe run frame
+			}
+			else { // stand
+				if ( self->s.v.frame < 12 || self->s.v.frame > 16 )
+					need_fix = true; // wrong non axe stand frame
+			}
+		}
+	}
+	else {
+		need_fix = true; // hm, set proper ->s.v.think
+	}
+
+	if ( need_fix ) {
+		// may change ->s.v.frame
+		self->walkframe = 0;
+		player_run();
+	}
+	else {
+		// does't change ->s.v.frame and ->walkframe, so we does't break current animation sequence on weapon change
+		self->s.v.nextthink = g_globalvars.time + 0.1;
+		self->s.v.weaponframe = 0;
+	}
+
+// }
+
 	items = self->s.v.items;
 	items -= items & ( IT_SHELLS | IT_NAILS | IT_ROCKETS | IT_CELLS );
 	switch ( ( int ) self->s.v.weapon )
