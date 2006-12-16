@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.99 2006/12/13 23:42:02 qqshka Exp $
+ *  $Id: match.c,v 1.100 2006/12/16 03:58:38 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -2161,7 +2161,7 @@ void PlayerReady ()
 		return;
 	}
 
-	if( intermission_running || match_in_progress == 2 )
+	if( intermission_running || match_in_progress == 2 || match_over )
 			return;
 
 	if ( k_practice ) { // #practice mode#
@@ -2273,7 +2273,7 @@ void PlayerBreak ()
 		return;
 	}
 
-	if( !self->ready || intermission_running )
+	if( !self->ready || intermission_running || match_over )
 		return;
 
 	if ( k_matchLess )

@@ -1,3 +1,9 @@
+2006-12-16
+qq:
+235. Fixed k_sready glowing bugs.
+
+	 Jentel4 bug report
+
 2006-11-20
 qq:
 234. Fix "s-p" and similar commands for MQWCL client.

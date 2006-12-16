@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.134 2006/12/13 23:42:02 qqshka Exp $
+ *  $Id: client.c,v 1.135 2006/12/16 03:58:38 qqshka Exp $
  */
 
 //===========================================================================
@@ -184,7 +184,7 @@ void Check_sready()
 	int k_sready = cvar( "k_sready" );
 	gedict_t *p;
 
-	if ( match_in_progress )
+	if ( match_in_progress == 2 || match_over || k_matchLess )
 		return;
 
 	for( p = world; (p = find_plr( p )); ) {
