@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.100 2006/12/16 03:58:38 qqshka Exp $
+ *  $Id: match.c,v 1.101 2006/12/20 01:03:21 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -840,12 +840,12 @@ void StatsToFile()
 	if ( trap_FS_OpenFile( name, &di_handle, FS_WRITE_BIN ) < 0 )
 		return; // OpenFile is last check, so we does't need CloseFile each "return" above
 
-	if ( !QVMstrftime(date, sizeof(date), "%Y-%m-%d", 0) )
+	if ( !QVMstrftime(date, sizeof(date), "%Y-%m-%d %H:%M:%S", 0) )
 		date[0] = 0; // bad date
 
 	s2di("%s", "<?xml version=\"1.0\"?>\n");
-	s2di("<match version=\"1\" date=\"%s\" hostname=\"%s\" ip=\"%s\" port=\"%d\" mode=\"%s\">\n", 
-		date, striphigh(cvar_string("hostname")), ip, i, GetMode());
+	s2di("<match version=\"2\" date=\"%s\" map=\"%s\" hostname=\"%s\" ip=\"%s\" port=\"%d\" mode=\"%s\">\n", 
+		date, g_globalvars.mapname, striphigh(cvar_string("hostname")), ip, i, GetMode());
 
 // { TEAMS
 
