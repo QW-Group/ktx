@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.98 2006/12/13 23:42:02 qqshka Exp $
+ *  $Id: g_local.h,v 1.99 2006/12/20 06:18:34 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -525,6 +525,7 @@ typedef struct cmd_s {
 #define CF_PARAMS			( 1<<5 ) /* command have some params */
 #define CF_NOALIAS			( 1<<6 ) /* command haven't alias and may be accessed only via /cmd commandname */
 #define CF_REDIRECT			( 1<<7 ) /* command will be redirected to server as /cmd commandname */
+#define CF_MATCHLESS_ONLY	( 1<<8 ) /* command valid for matchLess mode _only_ */
 
 extern cmd_t cmds[];
 
@@ -534,12 +535,13 @@ extern int cmds_cnt; // count of commands in 'cmds'
 // DoCommand/DoCommand_Name return codes
 // return non-negative value if command success
 // 
-#define DO_OUT_OF_RANGE_CMDS			(-1) // if command is out of range in 'cmds' array
+#define DO_OUT_OF_RANGE_CMDS			(-1) // if command is out of range in 'cmds' array or not found
 #define DO_WRONG_CLASS					(-2) // if wrong class
 #define DO_ACCESS_DENIED				(-3) // if access denied
 #define DO_FUNCTION_IS_WRONG			(-4) // if function is wrong
 #define DO_CMD_DISALLOWED_MATCHLESS		(-5) // if cmd does't allowed in matchLess mode
 #define DO_FLOOD_PROTECT				(-6) // if command is blocked due to flood protect
+#define DO_CMD_MATCHLESS_ONLY			(-7) // if cmd allowed in matchLess mode _only_
 
 int DoCommand(int icmd);
 int DoCommand_Name(char *cmd_name);

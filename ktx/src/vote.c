@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: vote.c,v 1.17 2006/11/30 08:50:08 qqshka Exp $
+ *  $Id: vote.c,v 1.18 2006/12/20 06:18:35 qqshka Exp $
  */
 
 // vote.c: election functions by rc\sturm
@@ -141,7 +141,7 @@ int get_votes_req( int fofs, qboolean diff )
 	votes   = get_votes( fofs );
 
 	switch ( fofs ) {
-		case OV_BREAK:   percent = cvar("k_vp_break");  break;
+		case OV_BREAK:   percent = cvar(k_matchLess ? "k_vp_map" : "k_vp_break"); break; // in matchless mode there is no /break but /next_map so using "k_vp_map"
 		case OV_PICKUP:  percent = cvar("k_vp_pickup"); break;
 		case OV_RPICKUP: percent = cvar("k_vp_rpickup"); break;
 		case OV_MAP:

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.101 2006/12/20 01:03:21 qqshka Exp $
+ *  $Id: match.c,v 1.102 2006/12/20 06:18:35 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -2277,8 +2277,8 @@ void PlayerBreak ()
 		return;
 
 	if ( k_matchLess )
-	if ( cvar("k_no_vote_break") ) {
-		G_sprint(self, 2, "Voting break is %s allowed\n", redtext("not"));
+	if ( cvar("k_no_vote_map") ) {
+		G_sprint(self, 2, "Voting next map is %s allowed\n", redtext("not"));
 		return;
 	}
 
@@ -2316,7 +2316,7 @@ void PlayerBreak ()
 	self->v.brk = 1;
 
 	
-	G_bprint(2, "%s %s%s\n", self->s.v.netname, redtext("votes for stopping the match"),
+	G_bprint(2, "%s %s%s\n", self->s.v.netname, redtext(k_matchLess ? "votes for next map" : "votes for stopping the match"),
 				((votes = get_votes_req( OV_BREAK, true )) ? va(" (%d)", votes) : ""));
 
 

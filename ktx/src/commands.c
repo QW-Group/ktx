@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.146 2006/11/30 08:50:06 qqshka Exp $
+ *  $Id: commands.c,v 1.147 2006/12/20 06:18:35 qqshka Exp $
  */
 
 // commands.c
@@ -413,6 +413,7 @@ const char CD_NODESC[] = "no desc";
 // }
 #define CD_CALLALIAS    "call alias after few secs"
 #define CD_CHECK        "better f_checks handle"
+#define CD_NEXT_MAP     "vote for next map"
 
 
 void dummy() {}
@@ -426,7 +427,7 @@ cmd_t cmds[] = {
 	{ "effi",        PlayerStats,               0    , CF_BOTH | CF_MATCHLESS, CD_EFFI },
 	{ "options",     ShowOpts,                  0    , CF_PLAYER, CD_OPTIONS },
 	{ "ready",       PlayerReady,               0    , CF_BOTH, CD_READY },
-	{ "break",       PlayerBreak,               0    , CF_BOTH | CF_MATCHLESS, CD_BREAK },
+	{ "break",       PlayerBreak,               0    , CF_BOTH, CD_BREAK },
 	{ "status",      ModStatus,                 0    , CF_BOTH | CF_MATCHLESS, CD_STATUS },
 	{ "status2",     ModStatus2,                0    , CF_BOTH | CF_MATCHLESS, CD_STATUS2 },
 	{ "who",         PlayerStatus,              0    , CF_BOTH, CD_WHO },
@@ -460,7 +461,7 @@ cmd_t cmds[] = {
 	{ "report",      ReportMe,                  0    , CF_PLAYER, CD_REPORT },
 	{ "rules",       ShowRules,                 0    , CF_PLAYER | CF_MATCHLESS, CD_RULES },
 	{ "lockmode",    ChangeLock,                0    , CF_PLAYER | CF_SPC_ADMIN, CD_LOCKMODE },
-	{ "maps",        ShowMaps,                  0    , CF_PLAYER | CF_SPC_ADMIN | CF_MATCHLESS, CD_MAPS},
+	{ "maps",        ShowMaps,                  0    , CF_PLAYER | CF_SPC_ADMIN, CD_MAPS},
 	{ "spawn666",    ToggleRespawn666,          0    , CF_PLAYER, CD_SPAWN666},
 	{ "admin",       ReqAdmin,                  0    , CF_BOTH | CF_PARAMS, CD_ADMIN },
 	{ "forcestart",  AdminForceStart,           0    , CF_BOTH_ADMIN, CD_FORCESTART },
@@ -666,7 +667,8 @@ cmd_t cmds[] = {
 	{ "trx_stop",    mv_cmd_stop,               0    , CF_PLAYER, CD_TRX_STOP },
 // }
 	{ "callalias",   callalias,                 0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_CALLALIAS },
-	{ "check",       fcheck,                    0    , CF_BOTH | CF_PARAMS, CD_CHECK }
+	{ "check",       fcheck,                    0    , CF_BOTH | CF_PARAMS, CD_CHECK },
+	{ "next_map",    PlayerBreak,               0    , CF_PLAYER | CF_MATCHLESS_ONLY, CD_NEXT_MAP }
 };
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
@@ -680,6 +682,9 @@ int DoCommand(int icmd)
 
 	if ( k_matchLess && !(cmds[icmd].cf_flags & CF_MATCHLESS) )
 		return DO_CMD_DISALLOWED_MATCHLESS; // cmd does't allowed in matchLess mode
+
+	if ( !k_matchLess && (cmds[icmd].cf_flags & CF_MATCHLESS_ONLY) )
+		return DO_CMD_MATCHLESS_ONLY; // cmd allowed in matchLess mode _only_
 
 	if ( spc ) { // spec
 		if ( !(cmds[icmd].cf_flags & CF_SPECTATOR) )
@@ -847,6 +852,9 @@ qboolean isValidCmdForClass( int icmd, qboolean isSpec )
 	if ( k_matchLess && !(cmds[icmd].cf_flags & CF_MATCHLESS) )
 		return false; // cmd does't allowed in matchLess mode
 
+	if ( !k_matchLess && (cmds[icmd].cf_flags & CF_MATCHLESS_ONLY) )
+		return false; // cmd allowed in matchLess mode _only_
+
 	// split class
 	if ( isSpec ) { // spec
 		if ( !(cmds[icmd].cf_flags & CF_SPECTATOR) )
@@ -952,6 +960,9 @@ void Init_cmds(void)
 
 		if ( cmds[i].cf_flags & CF_SPC_ADMIN )
 			cmds[i].cf_flags |= CF_SPECTATOR; // this let simplify cmds[] table
+
+		if ( cmds[i].cf_flags & CF_MATCHLESS_ONLY )
+			cmds[i].cf_flags |= CF_MATCHLESS; // this let simplify cmds[] table
 	}
 }   
 
@@ -1480,8 +1491,8 @@ void ModStatusVote()
 	if ( (votes = get_votes( OV_BREAK )) ) {
 		voted = true;
 
-		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for stopping:\n", votes,
-			get_votes_req( OV_BREAK, false ), count_s(votes));
+		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for %s:\n", votes,
+			get_votes_req( OV_BREAK, false ), count_s(votes), (k_matchLess ? "next map" : "stopping"));
 
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.brk )
@@ -2308,6 +2319,9 @@ void PlayerStats()
 		return;
 	}
 
+	for ( p = world; (p = find_plr( p )); )
+		p->k_flag = 0;
+
 	for ( p = world; (p = find_plr( p )); ) {
 		pL = max(pL, strlen(p->s.v.netname));
 		tL = max(tL, strlen(getteam(p)));
@@ -2323,19 +2337,19 @@ void PlayerStats()
 
 	G_sprint(self, 2, "\235\236\236\236\236\236\236\236\236\236\236"
 				  	  "\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236%s\237\n",
-				  	  (isTeam() ? "\236\236\236\236\236\236\236\236\236\236" : ""));
+				  	  ((isTeam() || isCTF()) ? "\236\236\236\236\236\236\236\236\236\236" : ""));
 
 	for ( p = world; (p = find_plr( p )); ) {
-		if( !p->ready )
+		if( p->k_flag )
 			continue; // already served
 
 		tmp = getteam( p );
 
 		for ( p2 = world; (p2 = find_plr( p2 )); ) {
-			if( !p2->ready || strneq( tmp, getteam( p2 ) ) )
+			if( p2->k_flag || strneq( tmp, getteam( p2 ) ) )
 				continue; // already served or not on the same team
 
-			if ( !isDuel() ) { // [team name]
+			if ( isTeam() || isCTF() ) { // [team name]
 				G_sprint(self, 2, "\220%.4s\221 ", tmp);
 				for ( i = strlen(tmp); i < tL; i++ )
 					G_sprint(self, 2, " ");
@@ -2374,12 +2388,12 @@ void PlayerStats()
 			stats = va("%3.1f", p2->efficiency);
 			G_sprint(self, 2, "\217 %5s%%\n", stats); // effi
 
-			p2->ready = 0; // mark as served
+			p2->k_flag = 1; // mark as served
 		}
 	}
 
 	for( p = world; (p = find_plr( p )); )
-		p->ready = 1; // because this is a hack, restore ready field
+		p->k_flag = 0;
 }
 
 void ToggleQLag()

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.77 2006/12/04 19:55:56 qqshka Exp $
+ *  $Id: world.c,v 1.78 2006/12/20 06:18:35 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -610,6 +610,7 @@ void FirstFrame	( )
 	RegisterCvar("k_vp_map");     // votes percentage for map change voting
 	RegisterCvar("k_vp_pickup");  // votes percentage for pickup voting
 	RegisterCvar("k_vp_rpickup"); // votes percentage for rpickup voting
+	RegisterCvar("k_no_vote_map"); // dis allow map voting in matcless mode, also disallow /next_map
 
 	RegisterCvar("k_end_tele_spawn"); // don't remove end tele spawn
 
@@ -679,8 +680,6 @@ void FirstFrame	( )
 	RegisterCvar("k_ctf_runes");
 //}
 	RegisterCvar("k_spec_info");
-	RegisterCvar("k_no_vote_break");
-	RegisterCvar("k_no_vote_map");
 	RegisterCvar("k_midair");
 	RegisterCvar("k_rocketarena"); // rocket arena
 	RegisterCvar("k_dmgfrags");

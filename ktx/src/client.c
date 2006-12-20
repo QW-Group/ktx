@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.135 2006/12/16 03:58:38 qqshka Exp $
+ *  $Id: client.c,v 1.136 2006/12/20 06:18:35 qqshka Exp $
  */
 
 //===========================================================================
@@ -1054,7 +1054,7 @@ void ClientConnect()
 	self->ct = ctPlayer;
 	self->s.v.classname = "player";
 	self->k_accepted = 1; // ok, we allowed to connect
-	self->ready = (match_in_progress ? 1 : 0);
+	self->ready = ((match_in_progress || k_matchLess) ? 1 : 0);
 
 	// if the guy started connecting during intermission and
 	// thus missed the svc_intermission, we'd better let him know

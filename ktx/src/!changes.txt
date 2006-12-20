@@ -1,3 +1,11 @@
+2006-12-20
+qq:
+236. Bug fix for matchless mode, first connected player was not actually ready.
+
+237. New command for matchless mode: /next_map, work like vote for next map,
+	 can be disallowed via k_no_vote_map variable, voting percentage same as for map vote - k_vp_map.
+	 Command /break removed from matchless and variable k_no_vote_break removed too due to /next_map.
+
 2006-12-16
 qq:
 235. Fixed k_sready glowing bugs.
