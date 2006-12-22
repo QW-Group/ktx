@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.102 2006/12/20 06:18:35 qqshka Exp $
+ *  $Id: match.c,v 1.103 2006/12/22 02:44:32 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -805,7 +805,6 @@ fileHandle_t di_handle;
 
 void s2di( const char *fmt, ... )
 {
-	static int i = 0;
 	va_list argptr;
 	char    text[1024];
 

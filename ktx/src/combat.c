@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.38 2006/12/04 19:55:56 qqshka Exp $
+ *  $Id: combat.c,v 1.39 2006/12/22 02:42:31 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -364,6 +364,11 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 */
 	}
 
+// team play damage avoidance
+//ZOID 12-13-96: self.team doesn't work in QW.  Use keys
+   	attackerteam = getteam( attacker );
+	targteam = getteam( targ );
+
 // do suicide damage anyway
 	if ( dtSUICIDE != targ->deathtype )
 	{
@@ -381,11 +386,6 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			}
 			return;
 		}
-
-// team play damage avoidance
-//ZOID 12-13-96: self.team doesn't work in QW.  Use keys
-    	attackerteam = getteam( attacker );
-		targteam = getteam( targ );
 
 		// teamplay == 1 don't damage self and mates (armor affected anyway)
 		if ( tp_num() == 1
