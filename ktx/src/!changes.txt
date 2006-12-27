@@ -10,7 +10,7 @@ qq:
 qq:
 235. Fixed k_sready glowing bugs.
 
-	 Jentel4 bug report
+	 Jente14 bug report
 
 2006-11-20
 qq:
