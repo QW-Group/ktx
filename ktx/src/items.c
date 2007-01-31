@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.34 2006/12/13 23:42:02 qqshka Exp $
+ *  $Id: items.c,v 1.35 2007/01/31 16:53:58 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1487,8 +1487,8 @@ void BackpackTouch()
         return;
 
 	if ( deathmatch == 4 )
-		if ( other->invincible_time > 0 )
-			return;
+		if ( other->invincible_finished )
+			return; // we have pent, ignore pack
 
 	if ( other->ct != ctPlayer )
 		return;
@@ -1500,8 +1500,8 @@ void BackpackTouch()
 	if ( isRA() && !isWinner( other ) && !isLoser( other ) ) 
 		return;
 
-	if ( cvar("k_midair") && other->super_damage_finished > g_globalvars.time )
-		return;
+	if ( cvar("k_midair") && other->super_damage_finished )
+		return; // we have quad, ignore pack
 
 	acount = 0;
 	G_sprint( other, PRINT_LOW, "You get " );
@@ -1524,35 +1524,28 @@ void BackpackTouch()
 			sound( other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM );
 
 		stuffcmd( other, "bf\n" );
-		ent_remove( self );
-
 		if ( other->s.v.health > 299 )
 		{
-			if ( other->invincible_time != 1 )
+			if ( !cvar("k_midair") )
 			{
-				if ( !cvar("k_midair") )
-				{
-					other->invincible_time = 1;
-					other->invincible_finished = g_globalvars.time + 30;
-					other->s.v.items =
-				    	( int ) other->s.v.items | IT_INVULNERABILITY;
-				}
-
-				other->super_time = 1;
-				other->super_damage_finished = g_globalvars.time + 30;
-				other->s.v.items = ( int ) other->s.v.items | IT_QUAD;
-
-				other->s.v.ammo_cells = 0;
-
-
-				sound( other, CHAN_AUTO, "boss1/sight1.wav", 1, ATTN_NORM );
-				stuffcmd( other, "bf\n" );
-
-				G_bprint( PRINT_HIGH, "%s attains bonus powers!!!\n",
-					  other->s.v.netname );
+				other->invincible_time = 1;
+				other->invincible_finished = g_globalvars.time + 30;
+				other->s.v.items = ( int ) other->s.v.items | IT_INVULNERABILITY;
 			}
+
+			other->super_time = 1;
+			other->super_damage_finished = g_globalvars.time + 30;
+			other->s.v.items = ( int ) other->s.v.items | IT_QUAD;
+
+			other->s.v.ammo_cells = 0;
+
+			sound( other, CHAN_AUTO, "boss1/sight1.wav", 1, ATTN_NORM );
+			stuffcmd( other, "bf\n" );
+
+			G_bprint( PRINT_HIGH, "%s attains bonus powers!!!\n", other->s.v.netname );
 		}
-		self = other; // qqshka - hmm ???
+
+		ent_remove( self );
 		return;
 	}
 
