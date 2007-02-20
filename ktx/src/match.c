@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.103 2006/12/22 02:44:32 qqshka Exp $
+ *  $Id: match.c,v 1.104 2007/02/20 23:44:01 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1472,6 +1472,8 @@ void StartMatch ()
 	
 	match_start_time  = g_globalvars.time;
 	match_in_progress = 2;
+	
+	lastTeamLocationTime = -TEAM_LOCATION_UPDATE_TIME; // update on next frame
 
 	remove_specs_wizards (); // remove wizards
 

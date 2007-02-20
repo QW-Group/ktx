@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_userinfo.c,v 1.30 2006/11/29 06:47:18 qqshka Exp $
+ *  $Id: g_userinfo.c,v 1.31 2007/02/20 23:44:01 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -201,6 +201,7 @@ cmdinfo_t cinfos[] = {
 //    	quote 	// wtf?
 //   	ma		// wtf?
 	{ "ss", 0 },
+	{ "ti", 0 },	// specifie use team info or not
 //		rb
     { "w_switch", 0 },
 	{ "k_sdir", 0 },

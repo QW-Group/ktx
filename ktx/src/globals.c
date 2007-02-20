@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: globals.c,v 1.24 2006/10/10 01:15:26 qqshka Exp $
+ *  $Id: globals.c,v 1.25 2007/02/20 23:44:01 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -94,3 +94,4 @@ int	jumpf_flag; // falling velocity criteria
 
 float	f_check; // is we in state of some f_xxx check
 
+float lastTeamLocationTime; // next udate for CheckTeamStatus()

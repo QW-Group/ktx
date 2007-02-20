@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.136 2006/12/20 06:18:35 qqshka Exp $
+ *  $Id: client.c,v 1.137 2007/02/20 23:44:01 qqshka Exp $
  */
 
 //===========================================================================
@@ -2728,6 +2728,67 @@ void PlayerPostThink()
 			if (self->ps.velocity_max < velocity)
 				self->ps.velocity_max = velocity;
 		}
+	}
+}
+
+#define MAX_MEMBERS (10) // max members per team
+
+// clientNums (clnum origin(3 ints) health armor items)+
+void SendTeamInfo(gedict_t *t)
+{
+	int cl, cnt, h, a;
+	gedict_t *p, *s;
+	char *tm;
+
+	s = (t->ct == ctSpec ? PROG_TO_EDICT( t->s.v.goalentity ) : t);
+	if (s->ct != ctPlayer)
+		return;
+
+	tm = getteam( s );
+	
+	for ( cnt = 0, p = world; (p = find_plr( p )); ) {
+		if (cnt >= MAX_MEMBERS)
+			break;
+
+		if ( p == s )
+			continue; // ignore self
+
+		if ( strneq(tm, getteam( p )) )
+			continue; // on different team
+
+		cnt++;
+
+		cl = NUM_FOR_EDICT( p ) - 1;
+		h = bound(0, (int)p->s.v.health, 999);
+		a = bound(0, (int)p->s.v.armorvalue, 999);
+
+		stuffcmd( t, "tinfo %d %d %d %d %d %d %d\n", cl,
+		 (int)p->s.v.origin[0], (int)p->s.v.origin[1], (int)p->s.v.origin[2], h, a, (int)p->s.v.items);
+	}
+}
+
+void CheckTeamStatus( )
+{
+  gedict_t *p;
+
+	if ( !isTeam() && !isCTF() )
+		return; // non team game
+
+	if ( g_globalvars.time - lastTeamLocationTime < TEAM_LOCATION_UPDATE_TIME )
+		return;
+	
+	lastTeamLocationTime = g_globalvars.time;
+
+  for ( p = world; (p = find_client( p )); ) {
+		char *clinfo;
+		int ti;
+
+		if ( (ti = iKey(p, "ti")) < 0 )
+			continue; // user specifie no team info
+
+		// check for ezquake or user specifie use team info even non ezquake client
+		if ( ti > 0 || (!strnull( clinfo = ezinfokey( p, "*client" ) ) && strstr(clinfo, "ezQuake")) )
+			SendTeamInfo( p );
 	}
 }
 

@@ -1,3 +1,14 @@
+2007-02-21
+qq:
+239. Added team overlay ala q3, require/supported by CVS ezquake only, at least atm.
+	 One new setinfo which u not really require, added just in case.
+	 With "setinfo ti -1" mod will not send additional data to u, if u do not use ezquake
+	 mod will not set it anyway.
+	 With "setinfo ti 1" mod will send additional data to even u use non ezquake client,
+	 however that useless if client do not perform something additional with that data.
+	 
+	 Probably I can change mvdsv sources so ktpro(or just any mod) will support same functionality.
+
 2007-01-31
 qq:
 238. Faustov strikes back. He found yet another midair bug. Now with back pack bonus. Fixed.

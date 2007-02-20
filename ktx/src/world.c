@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.78 2006/12/20 06:18:35 qqshka Exp $
+ *  $Id: world.c,v 1.79 2007/02/20 23:44:01 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1121,7 +1121,8 @@ extern float intermission_exittime;
 
 void CheckTiming();
 void Check_sready();
-void check_fcheck ();
+void check_fcheck();
+void CheckTeamStatus();
 
 void StartFrame( int time )
 {
@@ -1183,6 +1184,8 @@ void StartFrame( int time )
 		vote_check_all();
 
 	CheckAll(); // just check some clients params
+	
+	CheckTeamStatus();
 
 	CheckAutoXonX(true); // switch XonX mode dependant on players + specs count
 
