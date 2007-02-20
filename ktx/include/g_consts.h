@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_consts.h,v 1.19 2006/10/10 01:15:24 qqshka Exp $
+ *  $Id: g_consts.h,v 1.20 2007/02/20 23:32:40 qqshka Exp $
  */
 
 //
@@ -322,4 +322,4 @@
 
 #define F_CHECK_SIZE    (1024*10) /* FIXME: which size is reason able */
 
-
+#define TEAM_LOCATION_UPDATE_TIME (1.0) /* 1 second */
