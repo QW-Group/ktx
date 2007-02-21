@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.137 2007/02/20 23:44:01 qqshka Exp $
+ *  $Id: client.c,v 1.138 2007/02/21 17:10:03 qqshka Exp $
  */
 
 //===========================================================================
@@ -3005,8 +3005,11 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 			if ( dtTELE1 != targ->deathtype || cvar("k_tp_tele_death") ) {
 				// -1 frag always if non "teledeath", and -1 on "teledeath" if allowed
-				attacker->s.v.frags -= 1;
-				logfrag (attacker, attacker); //ZOID 12-13-96:  killing a teammate logs as suicide
+				// also relax this rules on first seconds of match
+				if ( g_globalvars.time - match_start_time > 1 ) {
+					attacker->s.v.frags -= 1;
+					logfrag (attacker, attacker); //ZOID 12-13-96:  killing a teammate logs as suicide
+				}
 			}
 
 			// some deathtypes have specific death messages

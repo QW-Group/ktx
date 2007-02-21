@@ -9,6 +9,10 @@ qq:
 	 
 	 Probably I can change mvdsv sources so ktpro(or just any mod) will support same functionality.
 
+240. Team telefrags not results in frags on first second of match, good for dm3.
+
+	 mli request
+  
 2007-01-31
 qq:
 238. Faustov strikes back. He found yet another midair bug. Now with back pack bonus. Fixed.
