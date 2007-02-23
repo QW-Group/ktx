@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.147 2006/12/20 06:18:35 qqshka Exp $
+ *  $Id: commands.c,v 1.148 2007/02/23 02:51:57 qqshka Exp $
  */
 
 // commands.c
@@ -419,10 +419,12 @@ const char CD_NODESC[] = "no desc";
 void dummy() {}
 void redirect();
 
+#define DEF(ptr) ((void (*)())(ptr))
+
 cmd_t cmds[] = {
-	{ "cm",			 SelectMap,			        0    , CF_BOTH | CF_MATCHLESS | CF_NOALIAS, CD_NODESC },
-	{ "commands",    ShowCmds,			        0    , CF_BOTH | CF_MATCHLESS, CD_COMMANDS },
-	{ "scores",      PrintScores,		        0    , CF_BOTH | CF_MATCHLESS, CD_SCORES },
+	{ "cm",          SelectMap,                 0    , CF_BOTH | CF_MATCHLESS | CF_NOALIAS, CD_NODESC },
+	{ "commands",    ShowCmds,                  0    , CF_BOTH | CF_MATCHLESS, CD_COMMANDS },
+	{ "scores",      PrintScores,               0    , CF_BOTH | CF_MATCHLESS, CD_SCORES },
 	{ "stats",       PlayerStats,               0    , CF_BOTH | CF_MATCHLESS, CD_STATS },
 	{ "effi",        PlayerStats,               0    , CF_BOTH | CF_MATCHLESS, CD_EFFI },
 	{ "options",     ShowOpts,                  0    , CF_PLAYER, CD_OPTIONS },
@@ -439,16 +441,16 @@ cmd_t cmds[] = {
 	{ "powerups",    TogglePowerups,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_POWERUPS },
 	{ "discharge",   ToggleDischarge,           0    , CF_PLAYER, CD_DISCHARGE },
 	{ "dm",          ShowDMM,                   0    , CF_PLAYER, CD_DM },
-	{ "dmm1",        ChangeDM,                  1    , CF_PLAYER | CF_SPC_ADMIN, CD_DMM1 },
-	{ "dmm2",        ChangeDM,                  2    , CF_PLAYER | CF_SPC_ADMIN, CD_DMM2 },
-	{ "dmm3",        ChangeDM,                  3    , CF_PLAYER | CF_SPC_ADMIN, CD_DMM3 },
-	{ "dmm4",        ChangeDM,                  4    , CF_PLAYER | CF_SPC_ADMIN, CD_DMM4 },
-	{ "dmm5",        ChangeDM,                  5    , CF_PLAYER | CF_SPC_ADMIN, CD_DMM5 },
+	{ "dmm1",        DEF(ChangeDM),             1    , CF_PLAYER | CF_SPC_ADMIN, CD_DMM1 },
+	{ "dmm2",        DEF(ChangeDM),             2    , CF_PLAYER | CF_SPC_ADMIN, CD_DMM2 },
+	{ "dmm3",        DEF(ChangeDM),             3    , CF_PLAYER | CF_SPC_ADMIN, CD_DMM3 },
+	{ "dmm4",        DEF(ChangeDM),             4    , CF_PLAYER | CF_SPC_ADMIN, CD_DMM4 },
+	{ "dmm5",        DEF(ChangeDM),             5    , CF_PLAYER | CF_SPC_ADMIN, CD_DMM5 },
 	{ "tp",          ChangeTP,                  0    , CF_PLAYER | CF_SPC_ADMIN, CD_TP },
-	{ "timedown1",   TimeDown,				  1.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIMEDOWN1 },
-	{ "timeup1",     TimeUp,				  1.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIMEUP1 },
-	{ "timedown",    TimeDown,				  5.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIMEDOWN },
-	{ "timeup",      TimeUp,				  5.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIMEUP },
+	{ "timedown1",   DEF(TimeDown),           1.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIMEDOWN1 },
+	{ "timeup1",     DEF(TimeUp),             1.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIMEUP1 },
+	{ "timedown",    DEF(TimeDown),           5.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIMEDOWN },
+	{ "timeup",      DEF(TimeUp),             5.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIMEUP },
 	{ "fallbunny",   ToggleFallBunny,           0    , CF_PLAYER | CF_SPC_ADMIN, CD_FALLBUNNY },
 	{ "fragsdown",   FragsDown,                 0    , CF_PLAYER, CD_FRAGSDOWN },
 	{ "fragsup",     FragsUp,                   0    , CF_PLAYER, CD_FRAGSUP },
@@ -477,20 +479,20 @@ cmd_t cmds[] = {
 	{ "fairpacks",   ToggleFairPacks,           0    , CF_PLAYER, CD_FAIRPACKS },
 	{ "about",       ShowVersion,               0    , CF_BOTH | CF_MATCHLESS, CD_ABOUT },
 	{ "shownick",    ShowNick,                  0    , CF_PLAYER, CD_SHOWNICK },
-	{ "time5",       TimeSet,		  	 	  5.0f   , CF_PLAYER, CD_TIME5 },
-	{ "time10",      TimeSet,		  	     10.0f   , CF_PLAYER, CD_TIME10 },
-	{ "time15",      TimeSet,		  	     15.0f   , CF_PLAYER, CD_TIME15 },
-	{ "time20",      TimeSet,                20.0f   , CF_PLAYER, CD_TIME20 },
-	{ "time25",      TimeSet,                25.0f   , CF_PLAYER, CD_TIME25 },
-	{ "time30",      TimeSet,                30.0f   , CF_PLAYER, CD_TIME30 },
+	{ "time5",       DEF(TimeSet),            5.0f   , CF_PLAYER, CD_TIME5 },
+	{ "time10",      DEF(TimeSet),           10.0f   , CF_PLAYER, CD_TIME10 },
+	{ "time15",      DEF(TimeSet),           15.0f   , CF_PLAYER, CD_TIME15 },
+	{ "time20",      DEF(TimeSet),           20.0f   , CF_PLAYER, CD_TIME20 },
+	{ "time25",      DEF(TimeSet),           25.0f   , CF_PLAYER, CD_TIME25 },
+	{ "time30",      DEF(TimeSet),           30.0f   , CF_PLAYER, CD_TIME30 },
 	{ "berzerk",     ToggleBerzerk,             0    , CF_PLAYER, CD_BERZERK },
 	                                             
-	{ "ksound1",     TeamSay,   			    1    , CF_PLAYER, CD_KSOUND1 },
-	{ "ksound2",     TeamSay,   			    2    , CF_PLAYER, CD_KSOUND2 },
-	{ "ksound3",     TeamSay,   			    3    , CF_PLAYER, CD_KSOUND3 },
-	{ "ksound4",     TeamSay,   			    4    , CF_PLAYER, CD_KSOUND4 },
-	{ "ksound5",     TeamSay,   			    5    , CF_PLAYER, CD_KSOUND5 },
-	{ "ksound6",     TeamSay,   			    6    , CF_PLAYER, CD_KSOUND6 },
+	{ "ksound1",     DEF(TeamSay),              1    , CF_PLAYER, CD_KSOUND1 },
+	{ "ksound2",     DEF(TeamSay),              2    , CF_PLAYER, CD_KSOUND2 },
+	{ "ksound3",     DEF(TeamSay),              3    , CF_PLAYER, CD_KSOUND3 },
+	{ "ksound4",     DEF(TeamSay),              4    , CF_PLAYER, CD_KSOUND4 },
+	{ "ksound5",     DEF(TeamSay),              5    , CF_PLAYER, CD_KSOUND5 },
+	{ "ksound6",     DEF(TeamSay),              6    , CF_PLAYER, CD_KSOUND6 },
 	                                           
 	{ "qizmo",       ShowQizmo,                 0    , CF_PLAYER, CD_QIZMO },
 	                                             
@@ -516,23 +518,23 @@ cmd_t cmds[] = {
 	{ "freeze",      ToggleFreeze,              0    , CF_PLAYER, CD_FREEZE },
 	{ "rpickup",     RandomPickup,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_RPICKUP },
 
-	{ "1on1",        UserMode,                  1	 , CF_PLAYER | CF_SPC_ADMIN, CD_1ON1 },
-	{ "2on2",        UserMode,                  2	 , CF_PLAYER | CF_SPC_ADMIN, CD_2ON1 },
-	{ "3on3",        UserMode,                  3	 , CF_PLAYER | CF_SPC_ADMIN, CD_3ON1 },
-	{ "4on4",        UserMode,                  4	 , CF_PLAYER | CF_SPC_ADMIN, CD_4ON1 },
-	{ "10on10",      UserMode,                  5	 , CF_PLAYER | CF_SPC_ADMIN, CD_10ON10 },
-	{ "ffa",         UserMode,                  6	 , CF_PLAYER | CF_SPC_ADMIN, CD_FFA },
-	{ "ctf",         UserMode,                  7    , CF_PLAYER | CF_SPC_ADMIN, CD_CTF },
+	{ "1on1",        DEF(UserMode),             1    , CF_PLAYER | CF_SPC_ADMIN, CD_1ON1 },
+	{ "2on2",        DEF(UserMode),             2    , CF_PLAYER | CF_SPC_ADMIN, CD_2ON1 },
+	{ "3on3",        DEF(UserMode),             3    , CF_PLAYER | CF_SPC_ADMIN, CD_3ON1 },
+	{ "4on4",        DEF(UserMode),             4    , CF_PLAYER | CF_SPC_ADMIN, CD_4ON1 },
+	{ "10on10",      DEF(UserMode),             5	   , CF_PLAYER | CF_SPC_ADMIN, CD_10ON10 },
+	{ "ffa",         DEF(UserMode),             6	   , CF_PLAYER | CF_SPC_ADMIN, CD_FFA },
+	{ "ctf",         DEF(UserMode),             7    , CF_PLAYER | CF_SPC_ADMIN, CD_CTF },
 
 #ifndef NO_K_PAUSE
 	{ "unpause",     VoteUnpause,               0    , CF_PLAYER, CD_UNPAUSE },
 #endif
 	{ "practice",    TogglePractice,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_PRACTICE },
 	{ "wp_reset",    Wp_Reset,                  0    , CF_PLAYER, CD_WP_RESET },
-	{ "+wp_stats",   Wp_Stats,                  2    , CF_BOTH | CF_MATCHLESS, CD_PLS_WP_STATS },
-	{ "-wp_stats",   Wp_Stats,                  1    , CF_BOTH | CF_MATCHLESS, CD_MNS_WP_STATS },
-	{ "tkfjump",     t_jump,                    1    , CF_BOTH_ADMIN, CD_TKFJUMP },
-	{ "tkrjump",     t_jump,                    2    , CF_BOTH_ADMIN, CD_TKRJUMP },
+	{ "+wp_stats",   DEF(Wp_Stats),             2    , CF_BOTH | CF_MATCHLESS, CD_PLS_WP_STATS },
+	{ "-wp_stats",   DEF(Wp_Stats),             1    , CF_BOTH | CF_MATCHLESS, CD_MNS_WP_STATS },
+	{ "tkfjump",     DEF(t_jump),               1    , CF_BOTH_ADMIN, CD_TKFJUMP },
+	{ "tkrjump",     DEF(t_jump),               2    , CF_BOTH_ADMIN, CD_TKRJUMP },
 	{ "klist",       klist,                     0    , CF_BOTH | CF_MATCHLESS, CD_KLIST },
 	{ "hdptoggle",   hdptoggle,                 0    , CF_BOTH_ADMIN, CD_HDPTOGGLE },
 	{ "handicap",    handicap,                  0    , CF_PLAYER | CF_PARAMS | CF_MATCHLESS, CD_HANDICAP },
@@ -543,69 +545,69 @@ cmd_t cmds[] = {
 	{ "tracklist",   tracklist,                 0    , CF_BOTH | CF_MATCHLESS, CD_TRACKLIST },
 	{ "fpslist",     fpslist,                   0    , CF_BOTH | CF_MATCHLESS, CD_FPSLIST },
 
-	{ "fav1_add",    favx_add,                  1    , CF_SPECTATOR, CD_FAV1_ADD },
-	{ "fav2_add",    favx_add,                  2    , CF_SPECTATOR, CD_FAV2_ADD },
-	{ "fav3_add",    favx_add,                  3    , CF_SPECTATOR, CD_FAV3_ADD },
-	{ "fav4_add",    favx_add,                  4    , CF_SPECTATOR, CD_FAV4_ADD },
-	{ "fav5_add",    favx_add,                  5    , CF_SPECTATOR, CD_FAV5_ADD },
-	{ "fav6_add",    favx_add,                  6    , CF_SPECTATOR, CD_FAV6_ADD },
-	{ "fav7_add",    favx_add,                  7    , CF_SPECTATOR, CD_FAV7_ADD },
-	{ "fav8_add",    favx_add,                  8    , CF_SPECTATOR, CD_FAV8_ADD },
-	{ "fav9_add",    favx_add,                  9    , CF_SPECTATOR, CD_FAV9_ADD },
-	{ "fav10_add",   favx_add,                 10    , CF_SPECTATOR, CD_FAV10_ADD },
-	{ "fav11_add",   favx_add,                 11    , CF_SPECTATOR, CD_FAV11_ADD },
-	{ "fav12_add",   favx_add,                 12    , CF_SPECTATOR, CD_FAV12_ADD },
-	{ "fav13_add",   favx_add,                 13    , CF_SPECTATOR, CD_FAV13_ADD },
-	{ "fav14_add",   favx_add,                 14    , CF_SPECTATOR, CD_FAV14_ADD },
-	{ "fav15_add",   favx_add,                 15    , CF_SPECTATOR, CD_FAV15_ADD },
-	{ "fav16_add",   favx_add,                 16    , CF_SPECTATOR, CD_FAV16_ADD },
-	{ "fav17_add",   favx_add,                 17    , CF_SPECTATOR, CD_FAV17_ADD },
-	{ "fav18_add",   favx_add,                 18    , CF_SPECTATOR, CD_FAV18_ADD },
-	{ "fav19_add",   favx_add,                 19    , CF_SPECTATOR, CD_FAV19_ADD },
-	{ "fav20_add",   favx_add,                 20    , CF_SPECTATOR, CD_FAV20_ADD },
-	{ "1fav_go",     xfav_go,                   1    , CF_SPECTATOR, CD_1FAV_GO },
-	{ "2fav_go",     xfav_go,                   2    , CF_SPECTATOR, CD_2FAV_GO },
-	{ "3fav_go",     xfav_go,                   3    , CF_SPECTATOR, CD_3FAV_GO },
-	{ "4fav_go",     xfav_go,                   4    , CF_SPECTATOR, CD_4FAV_GO },
-	{ "5fav_go",     xfav_go,                   5    , CF_SPECTATOR, CD_5FAV_GO },
-	{ "6fav_go",     xfav_go,                   6    , CF_SPECTATOR, CD_6FAV_GO },
-	{ "7fav_go",     xfav_go,                   7    , CF_SPECTATOR, CD_7FAV_GO },
-	{ "8fav_go",     xfav_go,                   8    , CF_SPECTATOR, CD_8FAV_GO },
-	{ "9fav_go",     xfav_go,                   9    , CF_SPECTATOR, CD_9FAV_GO },
-	{ "10fav_go",    xfav_go,                  10    , CF_SPECTATOR, CD_10FAV_GO },
-	{ "11fav_go",    xfav_go,                  11    , CF_SPECTATOR, CD_11FAV_GO },
-	{ "12fav_go",    xfav_go,                  12    , CF_SPECTATOR, CD_12FAV_GO },
-	{ "13fav_go",    xfav_go,                  13    , CF_SPECTATOR, CD_13FAV_GO },
-	{ "14fav_go",    xfav_go,                  14    , CF_SPECTATOR, CD_14FAV_GO },
-	{ "15fav_go",    xfav_go,                  15    , CF_SPECTATOR, CD_15FAV_GO },
-	{ "16fav_go",    xfav_go,                  16    , CF_SPECTATOR, CD_16FAV_GO },
-	{ "17fav_go",    xfav_go,                  17    , CF_SPECTATOR, CD_17FAV_GO },
-	{ "18fav_go",    xfav_go,                  18    , CF_SPECTATOR, CD_18FAV_GO },
-	{ "19fav_go",    xfav_go,                  19    , CF_SPECTATOR, CD_19FAV_GO },
-	{ "20fav_go",    xfav_go,                  20    , CF_SPECTATOR, CD_20FAV_GO },
+	{ "fav1_add",    DEF(favx_add),             1    , CF_SPECTATOR, CD_FAV1_ADD },
+	{ "fav2_add",    DEF(favx_add),             2    , CF_SPECTATOR, CD_FAV2_ADD },
+	{ "fav3_add",    DEF(favx_add),             3    , CF_SPECTATOR, CD_FAV3_ADD },
+	{ "fav4_add",    DEF(favx_add),             4    , CF_SPECTATOR, CD_FAV4_ADD },
+	{ "fav5_add",    DEF(favx_add),             5    , CF_SPECTATOR, CD_FAV5_ADD },
+	{ "fav6_add",    DEF(favx_add),             6    , CF_SPECTATOR, CD_FAV6_ADD },
+	{ "fav7_add",    DEF(favx_add),             7    , CF_SPECTATOR, CD_FAV7_ADD },
+	{ "fav8_add",    DEF(favx_add),             8    , CF_SPECTATOR, CD_FAV8_ADD },
+	{ "fav9_add",    DEF(favx_add),             9    , CF_SPECTATOR, CD_FAV9_ADD },
+	{ "fav10_add",   DEF(favx_add),            10    , CF_SPECTATOR, CD_FAV10_ADD },
+	{ "fav11_add",   DEF(favx_add),            11    , CF_SPECTATOR, CD_FAV11_ADD },
+	{ "fav12_add",   DEF(favx_add),            12    , CF_SPECTATOR, CD_FAV12_ADD },
+	{ "fav13_add",   DEF(favx_add),            13    , CF_SPECTATOR, CD_FAV13_ADD },
+	{ "fav14_add",   DEF(favx_add),            14    , CF_SPECTATOR, CD_FAV14_ADD },
+	{ "fav15_add",   DEF(favx_add),            15    , CF_SPECTATOR, CD_FAV15_ADD },
+	{ "fav16_add",   DEF(favx_add),            16    , CF_SPECTATOR, CD_FAV16_ADD },
+	{ "fav17_add",   DEF(favx_add),            17    , CF_SPECTATOR, CD_FAV17_ADD },
+	{ "fav18_add",   DEF(favx_add),            18    , CF_SPECTATOR, CD_FAV18_ADD },
+	{ "fav19_add",   DEF(favx_add),            19    , CF_SPECTATOR, CD_FAV19_ADD },
+	{ "fav20_add",   DEF(favx_add),            20    , CF_SPECTATOR, CD_FAV20_ADD },
+	{ "1fav_go",     DEF(xfav_go),              1    , CF_SPECTATOR, CD_1FAV_GO },
+	{ "2fav_go",     DEF(xfav_go),              2    , CF_SPECTATOR, CD_2FAV_GO },
+	{ "3fav_go",     DEF(xfav_go),              3    , CF_SPECTATOR, CD_3FAV_GO },
+	{ "4fav_go",     DEF(xfav_go),              4    , CF_SPECTATOR, CD_4FAV_GO },
+	{ "5fav_go",     DEF(xfav_go),              5    , CF_SPECTATOR, CD_5FAV_GO },
+	{ "6fav_go",     DEF(xfav_go),              6    , CF_SPECTATOR, CD_6FAV_GO },
+	{ "7fav_go",     DEF(xfav_go),              7    , CF_SPECTATOR, CD_7FAV_GO },
+	{ "8fav_go",     DEF(xfav_go),              8    , CF_SPECTATOR, CD_8FAV_GO },
+	{ "9fav_go",     DEF(xfav_go),              9    , CF_SPECTATOR, CD_9FAV_GO },
+	{ "10fav_go",    DEF(xfav_go),             10    , CF_SPECTATOR, CD_10FAV_GO },
+	{ "11fav_go",    DEF(xfav_go),             11    , CF_SPECTATOR, CD_11FAV_GO },
+	{ "12fav_go",    DEF(xfav_go),             12    , CF_SPECTATOR, CD_12FAV_GO },
+	{ "13fav_go",    DEF(xfav_go),             13    , CF_SPECTATOR, CD_13FAV_GO },
+	{ "14fav_go",    DEF(xfav_go),             14    , CF_SPECTATOR, CD_14FAV_GO },
+	{ "15fav_go",    DEF(xfav_go),             15    , CF_SPECTATOR, CD_15FAV_GO },
+	{ "16fav_go",    DEF(xfav_go),             16    , CF_SPECTATOR, CD_16FAV_GO },
+	{ "17fav_go",    DEF(xfav_go),             17    , CF_SPECTATOR, CD_17FAV_GO },
+	{ "18fav_go",    DEF(xfav_go),             18    , CF_SPECTATOR, CD_18FAV_GO },
+	{ "19fav_go",    DEF(xfav_go),             19    , CF_SPECTATOR, CD_19FAV_GO },
+	{ "20fav_go",    DEF(xfav_go),             20    , CF_SPECTATOR, CD_20FAV_GO },
 	{ "fav_add",     fav_add,                   0    , CF_SPECTATOR | CF_MATCHLESS, CD_FAV_ADD },
 	{ "fav_del",     fav_del,                   0    , CF_SPECTATOR | CF_MATCHLESS, CD_FAV_DEL },
 	{ "fav_all_del", fav_all_del,               0    , CF_SPECTATOR | CF_MATCHLESS, CD_FAV_ALL_DEL },
 	{ "fav_next",    fav_next,                  0    , CF_SPECTATOR | CF_MATCHLESS, CD_FAV_NEXT },
 	{ "fav_show",    fav_show,                  0    , CF_SPECTATOR | CF_MATCHLESS, CD_FAV_SHOW },
-	{ "+scores",     Sc_Stats,                  2    , CF_BOTH | CF_MATCHLESS, CD_PLS_SCORES },
-	{ "-scores",     Sc_Stats,                  1    , CF_BOTH | CF_MATCHLESS, CD_MNS_SCORES },
-	{ "autotrack",   AutoTrack,            atBest    , CF_SPECTATOR | CF_MATCHLESS, CD_AUTOTRACK },
-	{ "auto_pow",    AutoTrack,             atPow    , CF_SPECTATOR | CF_MATCHLESS, CD_AUTO_POW },
+	{ "+scores",     DEF(Sc_Stats),             2    , CF_BOTH | CF_MATCHLESS, CD_PLS_SCORES },
+	{ "-scores",     DEF(Sc_Stats),             1    , CF_BOTH | CF_MATCHLESS, CD_MNS_SCORES },
+	{ "autotrack",   DEF(AutoTrack),       atBest    , CF_SPECTATOR | CF_MATCHLESS, CD_AUTOTRACK },
+	{ "auto_pow",    DEF(AutoTrack),        atPow    , CF_SPECTATOR | CF_MATCHLESS, CD_AUTO_POW },
 	{ "next_best",   next_best,                 0    , CF_SPECTATOR | CF_MATCHLESS, CD_NEXT_BEST },
 	{ "next_pow",    next_pow,                  0    , CF_SPECTATOR | CF_MATCHLESS, CD_NEXT_POW },
 	{ "lastscores",  lastscores,                0    , CF_BOTH | CF_MATCHLESS, CD_LASTSCORES },
-	{ "rnd",         krnd,                		0    , CF_BOTH | CF_PARAMS, CD_RND },
-	{ "agree",       agree_on_map,        		0    , CF_PLAYER | CF_MATCHLESS, CD_AGREE },
+	{ "rnd",         krnd,                      0    , CF_BOTH | CF_PARAMS, CD_RND },
+	{ "agree",       agree_on_map,              0    , CF_PLAYER | CF_MATCHLESS, CD_AGREE },
 	{ "pos_show",    Pos_Show,                  0    , CF_BOTH | CF_PARAMS, CD_POS_SHOW },
 	{ "pos_save",    Pos_Save,                  0    , CF_BOTH | CF_PARAMS, CD_POS_SAVE },
 	{ "pos_move",    Pos_Move,                  0    , CF_BOTH | CF_PARAMS, CD_POS_MOVE },
 // VVD: For trick chiters! :-)
 // Need to think out how to limit using Pos_Set for tricking.
 // May be to ban pos_velocity?
-	{ "pos_origin",  Pos_Set,                   1    , CF_BOTH | CF_PARAMS, CD_POS_ORIGIN },
-	{ "pos_angles",  Pos_Set,                   2    , CF_BOTH | CF_PARAMS, CD_POS_ANGLES },
-//	{ "pos_velocity",Pos_Set,                   3    , CF_BOTH | CF_PARAMS, CD_POS_VELOCITY },
+	{ "pos_origin",  DEF(Pos_Set),              1    , CF_BOTH | CF_PARAMS, CD_POS_ORIGIN },
+	{ "pos_angles",  DEF(Pos_Set),              2    , CF_BOTH | CF_PARAMS, CD_POS_ANGLES },
+//	{ "pos_velocity", DEF(Pos_Set),                   3    , CF_BOTH | CF_PARAMS, CD_POS_VELOCITY },
 	{ "sh_speed",    Sh_Speed,                  0    , CF_BOTH, CD_SH_SPEED },
 // { CTF commands
 	{ "tossrune",    TossRune,                  0    , CF_PLAYER, CD_TOSSRUNE },
@@ -653,10 +655,10 @@ cmd_t cmds[] = {
 	{ "banrem",      redirect,                  0    , CF_BOTH_ADMIN | CF_PARAMS | CF_REDIRECT, CD_BANREM },
 // }
 	{ "teleteam",    teleteam,                  0    , CF_PLAYER | CF_SPC_ADMIN, CD_TELETEAM },
-	{ "upplayers",   upplayers,                 1    , CF_PLAYER | CF_SPC_ADMIN, CD_UPPLAYERS },
-	{ "downplayers", downplayers,               1    , CF_PLAYER | CF_SPC_ADMIN, CD_DOWNPLAYERS },
-	{ "upspecs",     upplayers,                 2    , CF_PLAYER | CF_SPC_ADMIN, CD_UPSPECS },
-	{ "downspecs",   downplayers,               2    , CF_PLAYER | CF_SPC_ADMIN, CD_DOWNSPECS },
+	{ "upplayers",   DEF(upplayers),            1    , CF_PLAYER | CF_SPC_ADMIN, CD_UPPLAYERS },
+	{ "downplayers", DEF(downplayers),          1    , CF_PLAYER | CF_SPC_ADMIN, CD_DOWNPLAYERS },
+	{ "upspecs",     DEF(upplayers),            2    , CF_PLAYER | CF_SPC_ADMIN, CD_UPSPECS },
+	{ "downspecs",   DEF(downplayers),          2    , CF_PLAYER | CF_SPC_ADMIN, CD_DOWNSPECS },
 	{ "iplist",      iplist,                    0    , CF_BOTH, CD_IPLIST },
 	{ "dmgfrags",    dmgfrags,                  0    , CF_PLAYER | CF_SPC_ADMIN, CD_DMGFRAGS },
 	{ "no_lg",       no_lg,                     0    , CF_PLAYER | CF_SPC_ADMIN, CD_NO_LG },
@@ -670,6 +672,8 @@ cmd_t cmds[] = {
 	{ "check",       fcheck,                    0    , CF_BOTH | CF_PARAMS, CD_CHECK },
 	{ "next_map",    PlayerBreak,               0    , CF_PLAYER | CF_MATCHLESS_ONLY, CD_NEXT_MAP }
 };
+
+#undef DEF
 
 int cmds_cnt = sizeof( cmds ) / sizeof( cmds[0] );
 
@@ -4560,7 +4564,7 @@ void cmd_wreg()
 
 	c = arg_1[0];
 
-	if ( c <= 0 || c > 175 || c >= MAX_WREGS ) {
+	if ( c == 0 || c > 175 || c > MAX_WREGS-2 ) { // zzz, MAX_WREGS-2 so gcc is silent even that wrong
 		wreg_usage();
 		G_sprint(self, 2, "\"%c\" - illegal char!\n", (char)c);
 		return;
@@ -4650,7 +4654,7 @@ void cmd_wreg_do( byte c )
 	int j;
 	wreg_t *w;
 
-	if ( !self->wreg || c >= MAX_WREGS )
+	if ( !self->wreg || c > MAX_WREGS-2 ) // zzz MAX_WREGS-2 so gcc happy, even that wrong
 		return;
 
 	w = &(self->wreg[c]);

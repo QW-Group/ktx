@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.104 2007/02/20 23:44:01 qqshka Exp $
+ *  $Id: match.c,v 1.105 2007/02/23 02:51:57 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -773,6 +773,10 @@ char *WpName( weaponName_t wp )
 		case wpGL:  return "gl";
 		case wpRL:  return "rl";
 		case wpLG:  return "lg";
+
+		// shut up gcc
+		case wpNONE:
+		case wpMAX: return "unknown";
 	}
 
 	return "unknown";
@@ -790,6 +794,10 @@ char *ItName( itemName_t it )
 		case itQUAD:	   return "q";
 		case itPENT:	   return "p";
 		case itRING:	   return "r";
+
+		// shut up gcc
+		case itNONE:
+		case itMAX: return "unknown";
 	}        
 	         
 	return "unknown";
