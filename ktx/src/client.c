@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.138 2007/02/21 17:10:03 qqshka Exp $
+ *  $Id: client.c,v 1.139 2007/02/28 09:04:15 qqshka Exp $
  */
 
 //===========================================================================
@@ -2762,7 +2762,7 @@ void SendTeamInfo(gedict_t *t)
 		h = bound(0, (int)p->s.v.health, 999);
 		a = bound(0, (int)p->s.v.armorvalue, 999);
 
-		stuffcmd( t, "tinfo %d %d %d %d %d %d %d\n", cl,
+		stuffcmd( t, "//tinfo %d %d %d %d %d %d %d\n", cl,
 		 (int)p->s.v.origin[0], (int)p->s.v.origin[1], (int)p->s.v.origin[2], h, a, (int)p->s.v.items);
 	}
 }
