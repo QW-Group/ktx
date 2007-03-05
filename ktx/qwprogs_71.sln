@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 8.00
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qwprogs", "qwprogs.vcproj", "{78438C94-7170-4030-A6B9-D288BF262FE9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qwprogs", "qwprogs_71.vcproj", "{78438C94-7170-4030-A6B9-D288BF262FE9}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
