@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.139 2007/02/28 09:04:15 qqshka Exp $
+ *  $Id: client.c,v 1.140 2007/03/06 06:14:10 qqshka Exp $
  */
 
 //===========================================================================
@@ -1772,7 +1772,7 @@ void ClientDisconnect()
 		IdlebotCheck();
 
 	if ( !CountPlayers() ) {
-		char *s;
+		void Spawn_DefMapChecker( float timeout );
 		int um_idx;
 
 		cvar_fset("_k_last_xonx", 0); // forget last XonX command
@@ -1793,17 +1793,11 @@ void ClientDisconnect()
 
 		if ( ( um_idx = um_idx_byname( k_matchLess ? "ffa" : cvar_string("k_defmode") ) ) >= 0 )
 			UserMode( -(um_idx + 1) ); // force exec configs for default user mode
-
-		s = "";
-        s = ( k_matchLess ) ? "" : cvar_string( "k_defmap" ); // no defmap in matchLess mode
-		s = ( cvar( "k_master" ) || cvar( "k_lockmap" ) ) ? "" : s; // map locked or not
-
-		// force reload current map in practice mode anyway
-        if ( !cvar( "lock_practice" ) && k_practice )
-			s = g_globalvars.mapname; // FIXME: k_defmap may not exist on server disk, so we reload current map
-									  //        but we may check if k_defmap exist and reload to it, right?
-		if( !strnull( s ) )
-			changelevel( s );
+		
+		if ( !cvar( "lock_practice" ) && k_practice )
+			changelevel( g_globalvars.mapname ); // force reload current map in practice mode anyway, ASAP
+		else
+			Spawn_DefMapChecker( 10 ); // delayed map reload, may be skipped due to different settings
 	}
 }
 

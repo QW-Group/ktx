@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.79 2007/02/20 23:44:01 qqshka Exp $
+ *  $Id: world.c,v 1.80 2007/03/06 06:14:11 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -93,16 +93,11 @@ void ClearBodyQue()
 
 gedict_t       *lastspawn;
 
-void CheckDefMap ()
+void CheckDefMap( )
 {
-	float f1;
-	char *s1;
-
-	f1 = CountPlayers();
-	if( !f1 && !cvar( "k_master" )
-			&& !cvar( "k_lockmap" ) )
+	if( !CountPlayers() && !cvar( "k_master" ) && !cvar( "k_lockmap" ) )
 	{
-		s1 = cvar_string( "k_defmap" );
+		char *s1 = cvar_string( "k_defmap" );
 
 		if( !strnull( s1 ) && strneq( s1, g_globalvars.mapname ) )
 			changelevel( s1 );
@@ -111,12 +106,49 @@ void CheckDefMap ()
 	ent_remove( self );
 }
 
+void Spawn_DefMapChecker( float timeout )
+{
+   	gedict_t	*e;
+
+	for( e = world; (e = find(e, FOFCLSN, "mapguard")); )
+		ent_remove( e );
+
+	if ( k_matchLess ) // no defmap in matchLess mode
+		return;
+
+	e = spawn();
+
+	e->s.v.classname = "mapguard";
+	e->s.v.owner = EDICT_TO_PROG( world );
+	e->s.v.think = ( func_t ) CheckDefMap;
+	e->s.v.nextthink = g_globalvars.time + max(0.0001, timeout);
+}
+
+float max_map_uptime = 3600 * 12; // 12 hours
+
+void Check_LongMapUptime()
+{
+	if ( match_in_progress )
+		return; // no no no, not even bother with this during match
+
+	if ( max_map_uptime > g_globalvars.time )
+		return; // seems all ok
+
+	max_map_uptime += (60 * 5); // so if map reloading fail, we repeat it after some time
+
+	if ( CountPlayers() ) { // oh, here players, warn but not reload
+		G_bprint(2, "\x87%s Long map uptime detected, reload map please!\n", redtext( "WARNING:" ));
+		return;
+	}
+
+	G_bprint(2, "Long map uptime, reloading\n");
+	changelevel( g_globalvars.mapname );
+}
 
 void	SP_item_artifact_super_damage();
 
 void SP_worldspawn()
 {
-   	gedict_t	*e;
 	char		*s;
 
 	G_SpawnString( "classname", "", &s );
@@ -380,21 +412,7 @@ void SP_worldspawn()
 	k_standby = 0;
 	localcmd("serverinfo status Standby\n");
 
-	e = find(world, FOFCLSN, "mapguard");
-	while( e ) {
-		e->s.v.nextthink = g_globalvars.time + 0.1;
-		e->s.v.think = ( func_t ) SUB_Remove;
-
-		e = find(e, FOFCLSN, "mapguard");
-	}
-
-	if ( !k_matchLess ) { // no defmap in matchLess mode
-		e = spawn();
-		e->s.v.classname = "mapguard";
-		e->s.v.owner = EDICT_TO_PROG( world );
-		e->s.v.think = ( func_t ) CheckDefMap;
-		e->s.v.nextthink = g_globalvars.time + ( cvar("_k_worldspawns") == 1 ? 0.5 : 60 );
-	}
+	Spawn_DefMapChecker ( cvar("_k_worldspawns") == 1 ? 0.5 : 60 + g_random() * 30 );
 
 	if ( !k_matchLess ) // skip practice in matchLess mode
 	if ( cvar( "srv_practice_mode" ) ) // #practice mode#
@@ -1188,6 +1206,8 @@ void StartFrame( int time )
 	CheckTeamStatus();
 
 	CheckAutoXonX(true); // switch XonX mode dependant on players + specs count
+
+	Check_LongMapUptime(); // reload map after some long up time, so our float time variables are happy
 
 	check_fcheck();
 }

@@ -1,3 +1,9 @@
+2007-03-06
+qq:
+241. Reload map each 12 hours if empty server, warn if here prewar and players.
+
+242. k_defmap changed a bit, map reload delayed for few seconds on last player disconnect.
+
 2007-02-21
 qq:
 239. Added team overlay ala q3, require/supported by CVS ezquake only, at least atm.
