@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.57 2006/12/13 17:20:25 qqshka Exp $
+ *  $Id: weapons.c,v 1.58 2007/03/11 03:49:17 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -437,6 +437,15 @@ ROCKETS
 
 ==============================================================================
 */
+
+void FixQuad(gedict_t *owner)
+{
+	// well, quaded rocket is no more quaded after owner is dead,
+	// at the same time that still allow apply full quad damage to nearby players in case of "quad bore"
+	if ( owner->ct == ctPlayer && ISDEAD( owner ) )
+		owner->super_damage_finished = 0;
+}
+
 void T_MissileTouch()
 {
 	float           damg;
@@ -455,6 +464,8 @@ void T_MissileTouch()
 		ent_remove( self );
 		return;
 	}
+
+	FixQuad(PROG_TO_EDICT( self->s.v.owner ));
 
 	damg = 100 + g_random() * 20;
 
@@ -746,6 +757,8 @@ void GrenadeExplode()
 	}
 	self->voided = 1;
 
+	FixQuad(PROG_TO_EDICT( self->s.v.owner ));
+
 	T_RadiusDamage( self, PROG_TO_EDICT( self->s.v.owner ), 120, world, dtGL );
 
 	WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
@@ -774,8 +787,7 @@ void GrenadeTouch()
 		return;
 	}
 	sound( self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM );	// bounce sound
-	if ( self->s.v.velocity[0] == 0 && self->s.v.velocity[1] == 0
-	     && self->s.v.velocity[2] == 0 )
+	if ( self->s.v.velocity[0] == 0 && self->s.v.velocity[1] == 0 && self->s.v.velocity[2] == 0 )
 		VectorClear( self->s.v.avelocity );
 }
 
@@ -882,7 +894,6 @@ void launch_spike( vec3_t org, vec3_t dir )
 
 void spike_touch()
 {
-//float rand;
 	if ( other == PROG_TO_EDICT( self->s.v.owner ) )
 		return;
 
@@ -900,6 +911,9 @@ void spike_touch()
 		ent_remove( self );
 		return;
 	}
+
+	FixQuad(PROG_TO_EDICT( self->s.v.owner ));
+
 // hit something that bleeds
 	if ( other->s.v.takedamage )
 	{
@@ -925,12 +939,10 @@ void spike_touch()
 	}
 
 	ent_remove( self );
-
 }
 
 void superspike_touch()
 {
-//float rand;
 	if ( other == PROG_TO_EDICT( self->s.v.owner ) )
 		return;
 
@@ -949,6 +961,9 @@ void superspike_touch()
 		ent_remove( self );
 		return;
 	}
+
+	FixQuad(PROG_TO_EDICT( self->s.v.owner ));
+
 // hit something that bleeds
 	if ( other->s.v.takedamage )
 	{
@@ -969,7 +984,6 @@ void superspike_touch()
 	}
 
 	ent_remove( self );
-
 }
 
 void W_FireSuperSpikes()

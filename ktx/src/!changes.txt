@@ -1,3 +1,14 @@
+2007-03-11
+qq:
+243. Well, some quad related "fix". As we all know (do u?) if u have quad and shoot rocket
+	 but accidentally die rocket continue fly, but that no more quaded rocket,
+	 that was true except rocket was still quaded for some short time, that was made
+	 specially, so "quad bores" worked right. But "short time" was't so short :>
+	 That how ktx and ktpro works. But now i've made some fix, so rockets/grenades/spikes
+	 no more quaded after owner death, sure bores still work right.
+
+	 bugfix based on Renzo's report, he was't happy with that quad behaviour
+
 2007-03-06
 qq:
 241. Reload map each 12 hours if empty server, warn if here prewar and players.
