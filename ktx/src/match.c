@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.105 2007/02/23 02:51:57 qqshka Exp $
+ *  $Id: match.c,v 1.106 2007/03/14 18:56:00 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -321,7 +321,7 @@ void TeamsStats ( )
 
 	// Summing up the frags to calculate team percentages
 	for( i = 0; i < min(tmStats_cnt, MAX_TM_STATS); i++ )
-		sumfrags += (tmStats[i].frags + tmStats[i].gfrags);
+		sumfrags += max(0, tmStats[i].frags + tmStats[i].gfrags);
 	// End of summing
 
 	G_bprint(2, "\n%s: %s\n"

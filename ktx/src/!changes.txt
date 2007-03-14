@@ -1,3 +1,9 @@
+2007-03-14
+qq:
+244. Team effi calculated "wrong" if some team have negative frags, fixed now, I hope.
+
+	 thx Renzo
+
 2007-03-11
 qq:
 243. Well, some quad related "fix". As we all know (do u?) if u have quad and shoot rocket
