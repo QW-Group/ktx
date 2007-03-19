@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.148 2007/02/23 02:51:57 qqshka Exp $
+ *  $Id: commands.c,v 1.149 2007/03/19 04:07:45 qqshka Exp $
  */
 
 // commands.c
@@ -345,6 +345,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_PLS_SCORES   "show match time and score"
 #define CD_MNS_SCORES   (CD_NODESC) // obvious
 #define CD_AUTOTRACK    "auto tracking"
+#define CD_AUTOTRACKKTX "auto tracking, ktx version"
 #define CD_AUTO_POW     "auto tracking powerups"
 #define CD_NEXT_BEST    "set pov to next best player"
 #define CD_NEXT_POW     "set pov to next powerup"
@@ -592,7 +593,8 @@ cmd_t cmds[] = {
 	{ "fav_show",    fav_show,                  0    , CF_SPECTATOR | CF_MATCHLESS, CD_FAV_SHOW },
 	{ "+scores",     DEF(Sc_Stats),             2    , CF_BOTH | CF_MATCHLESS, CD_PLS_SCORES },
 	{ "-scores",     DEF(Sc_Stats),             1    , CF_BOTH | CF_MATCHLESS, CD_MNS_SCORES },
-	{ "autotrack",   DEF(AutoTrack),       atBest    , CF_SPECTATOR | CF_MATCHLESS, CD_AUTOTRACK },
+	{ "autotrack",   DEF(AutoTrack),       atKTPRO   , CF_SPECTATOR | CF_MATCHLESS, CD_AUTOTRACK },
+	{ "autotrackktx",DEF(AutoTrack),       atBest    , CF_SPECTATOR | CF_MATCHLESS, CD_AUTOTRACKKTX },
 	{ "auto_pow",    DEF(AutoTrack),        atPow    , CF_SPECTATOR | CF_MATCHLESS, CD_AUTO_POW },
 	{ "next_best",   next_best,                 0    , CF_SPECTATOR | CF_MATCHLESS, CD_NEXT_BEST },
 	{ "next_pow",    next_pow,                  0    , CF_SPECTATOR | CF_MATCHLESS, CD_NEXT_POW },
@@ -3812,10 +3814,14 @@ void DoAutoTrack( )
 	gedict_t *p = NULL, *goal;
 	int id;
 
-	if ( self->autotrack == atBest )
-		p = get_ed_best1();
-	else if ( self->autotrack == atPow )
-		p = get_ed_bestPow();
+	switch ( self->autotrack ) {
+		case atBest:	p = get_ed_best1();		break;	// ktx's autotrack
+		case atPow:		p = get_ed_bestPow();	break;	// powerups autotrack
+		case atKTPRO:	p = ( self->apply_ktpro_autotrack ? get_ed_best1() : NULL ); break; // "ktpro's" autotrack
+
+		case atNone:
+		default: 		return; // unknow or off so ignore
+	}
 
 	if ( !p )
 		return;
@@ -3828,6 +3834,8 @@ void DoAutoTrack( )
 	if ( goal == p )
 		return; // already track this player
 
+	self->apply_ktpro_autotrack	= false; // we going apply track switch, so relax ktpro's autotrack
+
 	if ( ( id = GetUserID( p ) ) > 0 )
 		stuffcmd( self, "track %d\n", id );
 }
@@ -3835,16 +3843,27 @@ void DoAutoTrack( )
 void AutoTrack( float autoTrackType )
 {
 	autoTrackType_t at = self->autotrack; // save auto track type before turn off or switch to other type
+	char *at_txt;
 
 	if ( autoTrackType == self->autotrack || autoTrackType == atNone )
 		self->autotrack = atNone; // turn off
 	else
 		self->autotrack = at = autoTrackType; // switch auto track type
 
+	self->apply_ktpro_autotrack = (self->autotrack == atKTPRO); // select some first best pov if we use ktpro's autotrack too
+
 	cmdinfo_setkey(self, "*at", va("%d", self->autotrack)); // so we can restore it on level change
 
-	G_sprint(self, 2, "%s %s\n", redtext(at == atBest ? "Autotrack" : 
-			(at == atPow ? "Auto_pow" : "AutoUNKNOWN" )), OnOff(self->autotrack));
+	switch ( at ) {
+		case atBest:	at_txt = "Autotrack_ktx";	break; // ktx's autotrack
+		case atPow:		at_txt = "Auto_pow";		break; // powerups autotrack
+		case atKTPRO:	at_txt = "Autotrack";		break; // "ktpro's" autotrack
+
+		case atNone:
+		default: 		at_txt = "AutoUNKNOWN";
+	}
+
+	G_sprint(self, 2, "%s %s\n", redtext(at_txt), OnOff(self->autotrack));
 }
 
 void AutoTrackRestore ()
@@ -3857,6 +3876,68 @@ void AutoTrackRestore ()
 	if ( at != atNone && at != self->autotrack )
 		AutoTrack( at );
 }
+// >> start ktpro compatible autotrack
+
+// When issueing this command, KTeams Pro will switch the view to the next_best 
+// player. The view will then automtically switch to the next_best player when 
+// one of the following events occurs: 
+
+// 1. the first rl in the game is taken
+// 2. the player currently being observed dies
+// 3. any player takes a powerup
+// 4. when the currently observed player has a powerup which runs out and he has 
+//    neither the rocket launcher nor the lightning gun
+
+// will force spec who used ktpro autotrack switch track
+void ktpro_autotrack_mark_spec(gedict_t *spec)
+{
+	if ( spec->autotrack == atKTPRO )
+		spec->apply_ktpro_autotrack = true; // this will be used in DoAutoTrack( )
+}
+
+// will force specs who used ktpro autotrack switch track
+void ktpro_autotrack_mark_all()
+{
+	gedict_t *p;
+
+	for ( p = world; (p = find_spc( p )); )
+		ktpro_autotrack_mark_spec( p );
+}
+
+// first rl was taken, mark specs to switch pov to best player, that may be not even this rl dude :P
+void ktpro_autotrack_on_first_rl (gedict_t *dude)
+{
+	ktpro_autotrack_mark_all(); // hope this switch to rl dude on most tb3 maps in 4on4 mode
+}
+
+// player just died, switch pov to other if spec track this player and used ktpro's autotrack
+void ktpro_autotrack_on_death (gedict_t *dude)
+{
+	gedict_t *p;
+	int goal = EDICT_TO_PROG( dude ); // so we can compare with ->s.v.goal
+
+	for ( p = world; (p = find_spc( p )); )
+		if ( p->s.v.goalentity == goal )
+			ktpro_autotrack_mark_spec( p );
+}
+
+// some powerup taken, mark specs to switch pov to best player, that may be not even this poweruped dude :P
+void ktpro_autotrack_on_powerup_take (gedict_t *dude)
+{
+	ktpro_autotrack_mark_all();
+}
+
+// some powerup out, and he has neither the rocket launcher nor the lightning gun, mark specs to switch pov to best player
+void ktpro_autotrack_on_powerup_out (gedict_t *dude)
+{
+	if ( ((int)dude->s.v.items & IT_ROCKET_LAUNCHER) || ((int)dude->s.v.items & IT_LIGHTNING) )
+		return; // dude have weapon, continue track him, may be add check for ammo?
+
+	ktpro_autotrack_mark_all();
+}
+
+
+// << end  ktpro compatible autotrack 
 
 void next_best ()
 {

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.35 2007/01/31 16:53:58 qqshka Exp $
+ *  $Id: items.c,v 1.36 2007/03/19 04:07:45 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -585,6 +585,13 @@ void weapon_touch()
 		hadammo = other->s.v.ammo_rockets;
 		new = IT_ROCKET_LAUNCHER;
 		other->s.v.ammo_rockets += 5;
+
+		if ( !first_rl_taken ) {
+			extern void ktpro_autotrack_on_first_rl (gedict_t *dude);
+
+			ktpro_autotrack_on_first_rl( other );
+			first_rl_taken = true;
+		}
 
 	} else if ( !strcmp( self->s.v.classname, "weapon_grenadelauncher" ) )
 	{
@@ -1227,6 +1234,8 @@ void adjust_pickup_time( float *current, float *total )
 	*current = 0;
 }
 
+extern void ktpro_autotrack_on_powerup_take (gedict_t *dude);
+
 void powerup_touch()
 {
 	float *p_cnt = NULL;
@@ -1337,8 +1346,9 @@ void powerup_touch()
 			SUB_RM_01( self );// remove later
 	}
 
-	mi_print(other, self->s.v.items, 
-			va("%s got %s%s", getname(other), (p_cnt ? "dropped " : ""), self->s.v.netname));
+	mi_print(other, self->s.v.items, va("%s got %s%s", getname(other), (p_cnt ? "dropped " : ""), self->s.v.netname));
+
+	ktpro_autotrack_on_powerup_take(other);
 
 	activator = other;
 	SUB_UseTargets();	// fire all targets / killtargets
@@ -1541,6 +1551,8 @@ void BackpackTouch()
 
 			sound( other, CHAN_AUTO, "boss1/sight1.wav", 1, ATTN_NORM );
 			stuffcmd( other, "bf\n" );
+
+			ktpro_autotrack_on_powerup_take(other);
 
 			G_bprint( PRINT_HIGH, "%s attains bonus powers!!!\n", other->s.v.netname );
 		}

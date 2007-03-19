@@ -1,3 +1,13 @@
+2007-03-19
+qq:
+245. Autotrack changes. ktproish it. U can switch pov like in ktpro,
+	 also changed pov selection rules, goal is less switches.
+	 Old ktx autotrack can be still accessed with /autotrackktx, if someone need it.
+
+	 TODO: powerups prediction for autotrack, if someone understand what I talk about...
+
+	 sassa was't happy, me too :P
+
 2007-03-14
 qq:
 244. Team effi calculated "wrong" if some team have negative frags, fixed now, I hope.

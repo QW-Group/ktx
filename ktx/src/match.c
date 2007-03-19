@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.106 2007/03/14 18:56:00 qqshka Exp $
+ *  $Id: match.c,v 1.107 2007/03/19 04:07:45 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1475,6 +1475,8 @@ void StartMatch ()
 
 	// Check to see if berzerk is set.
 	k_berzerkenabled = (cvar( "k_bzk" ) ? bound(0, cvar( "k_btime" ), 3600*10) : 0);
+
+	first_rl_taken = false; // no one took rl yet
 
 	SM_PrepareMap(); // remove/add some items from map regardind with dmm and game mode
 	

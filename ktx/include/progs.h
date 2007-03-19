@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.60 2006/12/13 23:42:02 qqshka Exp $
+ *  $Id: progs.h,v 1.61 2007/03/19 04:07:45 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -237,7 +237,8 @@ typedef enum
 {
 	atNone = 0,
 	atBest,
-	atPow
+	atPow,
+	atKTPRO
 } autoTrackType_t;
 
 // { rocket arena
@@ -426,7 +427,8 @@ typedef struct gedict_s {
 // { spec stuff
 	int   favx[MAX_CLIENTS];    // here stored players number for appropriate favX_add/Xfav_go commands
 	int   fav[MAX_CLIENTS];     // here stored players number for fav_add/next_fav commands
-	autoTrackType_t autotrack;  // is autotrack or auto_pow
+	autoTrackType_t autotrack;  // is autotrack or auto_pow or ktpro autorack
+	qboolean apply_ktpro_autotrack; // if we use ktpro's autotrack, that a hint to apply pov switch
 	struct gedict_s *wizard;    // for specs, link to the entity which represent wizard
 	int   last_goal;            // just store here self->s.v.goal from last spec frame, so we can catch pov switch
 

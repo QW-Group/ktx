@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.140 2007/03/06 06:14:10 qqshka Exp $
+ *  $Id: client.c,v 1.141 2007/03/19 04:07:45 qqshka Exp $
  */
 
 //===========================================================================
@@ -2376,6 +2376,8 @@ CheckPowerups
 Check for turning off powerups
 ================
 */
+extern void ktpro_autotrack_on_powerup_out (gedict_t *dude);
+
 void CheckPowerups()
 {
 	qboolean dim = false;
@@ -2395,7 +2397,6 @@ void CheckPowerups()
 			sound( self, CHAN_AUTO, "items/inv3.wav", 0.5, ATTN_IDLE );
 			self->invisible_sound = g_globalvars.time + ( ( g_random() * 3 ) + 1 );
 		}
-
 
 		if ( self->invisible_finished < g_globalvars.time + 3 )
 		{
@@ -2421,6 +2422,8 @@ void CheckPowerups()
 			self->invisible_time = 0;
 
 			adjust_pickup_time( &self->r_pickup_time, &self->ps.itm[itRING].time );
+
+			ktpro_autotrack_on_powerup_out( self );
 		}
 		// use the eyes
 		self->s.v.frame = 0;
@@ -2458,6 +2461,8 @@ void CheckPowerups()
 			self->k_666 = 0;		//team
 
 			adjust_pickup_time( &self->p_pickup_time, &self->ps.itm[itPENT].time );
+
+			ktpro_autotrack_on_powerup_out( self );
 		}
 
 		if(self->invincible_finished > g_globalvars.time && !self->k_666) // KTeAMS
@@ -2513,6 +2518,8 @@ void CheckPowerups()
 			self->super_time = 0;
 
 			adjust_pickup_time( &self->q_pickup_time, &self->ps.itm[itQUAD].time );
+
+			ktpro_autotrack_on_powerup_out( self );
 		}
 
 		if ( self->super_damage_finished > g_globalvars.time )
@@ -2557,6 +2564,8 @@ void CheckPowerups()
 			self->s.v.items -= IT_SUIT;
 			self->rad_time = 0;
 			self->radsuit_finished = 0;
+
+			ktpro_autotrack_on_powerup_out( self );
 		}
 	}
 }
@@ -2889,6 +2898,7 @@ ClientObituary
 called when a player dies
 ============
 */
+extern void ktpro_autotrack_on_death (gedict_t *dude);
 
 void ClientObituary (gedict_t *targ, gedict_t *attacker)
 {
@@ -2911,6 +2921,8 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	targteam     = getteam(targ);
 
 	StatsHandler(targ, attacker);
+
+	ktpro_autotrack_on_death(targ);
 
 	if ( isRA() ) {
 		ra_ClientObituary (targ, attacker);
