@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.39 2006/12/22 02:42:31 qqshka Exp $
+ *  $Id: combat.c,v 1.40 2007/03/24 23:09:40 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -342,6 +342,8 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			dir[i] = targ->s.v.origin[i] - ( inflictor->s.v.absmin[i] + inflictor->s.v.absmax[i] ) * 0.5;
 
 		VectorNormalize( dir );
+
+		dir[2] = ((dtLG_DIS_SELF == targ->deathtype || dtLG_DIS == targ->deathtype) && dir[2] < 0) ? -dir[2] : dir[2];
 
 		if ( midair && non_hdp_damage < 60 && attacker != targ ) {
 			c1 = 11;
