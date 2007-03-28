@@ -1,3 +1,9 @@
+2007-03-28
+qq:
+246. Fixed "sv_demotxt 2", players without team not appear in .txt file.
+
+	 Cokeman report, long long time ago, I finaly got time to fix it
+
 2007-03-19
 qq:
 245. Autotrack changes. ktproish it. U can switch pov like in ktpro,

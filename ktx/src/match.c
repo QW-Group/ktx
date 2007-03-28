@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.107 2007/03/19 04:07:45 qqshka Exp $
+ *  $Id: match.c,v 1.108 2007/03/28 16:13:01 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -907,7 +907,8 @@ void StatsToFile()
 //  ghosts is served too
 
 	for ( from1 = 0, p = world; (p = find_plrghst ( p, &from1 )); ) {
-		if ( p->ready || strnull( team = getteam( p ) ) )
+		team = getteam( p );
+		if ( p->ready /* || strnull( team ) */ )
 			continue; // served or wrong team
 
 		for ( from2 = 0, p2 = world; (p2 = find_plrghst ( p2, &from2 )); ) {
