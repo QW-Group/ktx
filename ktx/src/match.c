@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.109 2007/03/28 23:41:09 qqshka Exp $
+ *  $Id: match.c,v 1.110 2007/03/28 23:44:42 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -393,7 +393,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 	k_rl = p->ps.wpn[wpRL].ekills;
 	t_rl = p->ps.wpn[wpRL].tooks;
 
-	if ( isCTF() && g_globalvars.time - match_start_time > 0 );
+	if ( isCTF() && g_globalvars.time - match_start_time > 0 )
 	{
 		res = ( p->ps.res_time / ( g_globalvars.time - match_start_time )) * 100;
 		str = ( p->ps.str_time / ( g_globalvars.time - match_start_time )) * 100;
