@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.108 2007/03/28 16:13:01 qqshka Exp $
+ *  $Id: match.c,v 1.109 2007/03/28 23:41:09 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -223,7 +223,7 @@ void CollectTpStats()
 		if ( strnull(tmStats[tmStats_cnt].name) )
 			continue; // wtf, empty team?
 
-		if ( isCTF() && g_globalvars.time - match_start_time > 0 );
+		if ( isCTF() && g_globalvars.time - match_start_time > 0 )
 		{
 			tmStats[tmStats_cnt].res = ( tmStats[tmStats_cnt].res / ( g_globalvars.time - match_start_time )) * 100;
 			tmStats[tmStats_cnt].str = ( tmStats[tmStats_cnt].str / ( g_globalvars.time - match_start_time )) * 100;
