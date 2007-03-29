@@ -1,3 +1,9 @@
+2007-03-29
+qq:
+247. Added "/mapcycle" command, just list map cycle/rotation, may be usefull for ffa server.
+
+	 Renzo request
+
 2007-03-28
 qq:
 246. Fixed "sv_demotxt 2", players without team not appear in .txt file.

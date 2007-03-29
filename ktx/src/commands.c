@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.149 2007/03/19 04:07:45 qqshka Exp $
+ *  $Id: commands.c,v 1.150 2007/03/29 01:55:14 qqshka Exp $
  */
 
 // commands.c
@@ -177,6 +177,7 @@ void mv_cmd_record ();
 void mv_cmd_stop ();
 void callalias ();
 void fcheck ();
+void mapcycle ();
 
 // spec
 void ShowCamHelp();
@@ -415,6 +416,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_CALLALIAS    "call alias after few secs"
 #define CD_CHECK        "better f_checks handle"
 #define CD_NEXT_MAP     "vote for next map"
+#define CD_MAPCYCLE     "list map cycle"
 
 
 void dummy() {}
@@ -672,7 +674,8 @@ cmd_t cmds[] = {
 // }
 	{ "callalias",   callalias,                 0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_CALLALIAS },
 	{ "check",       fcheck,                    0    , CF_BOTH | CF_PARAMS, CD_CHECK },
-	{ "next_map",    PlayerBreak,               0    , CF_PLAYER | CF_MATCHLESS_ONLY, CD_NEXT_MAP }
+	{ "next_map",    PlayerBreak,               0    , CF_PLAYER | CF_MATCHLESS_ONLY, CD_NEXT_MAP },
+	{ "mapcycle",    mapcycle,                  0    , CF_BOTH, CD_MAPCYCLE }
 };
 
 #undef DEF
@@ -5267,4 +5270,28 @@ void check_fcheck ()
 	f_check = 0;
 }
 
+void mapcycle ()
+{
+	char var[128], *newmap = "";
+	int i;
 
+	for ( i = 0; i < 999; i++ ) {
+		snprintf(var, sizeof(var), "k_ml_%d", i);
+		if ( strnull( newmap = cvar_string( var ) ) )
+			break;
+
+		if ( !i )
+			G_sprint(self, 2, 	"%s:\n"
+								"%3.3s | %s\n", redtext("Map cycle"), redtext("id"), redtext("name"));
+
+		G_sprint(self, 2, "%3.3d | %s\n", i + 1, newmap);
+	}
+
+	if ( !i ) {
+		G_sprint(self, 2, 	"\n%s: %s\n", redtext("Map cycle"), redtext("empty"));
+		return;
+	}
+
+	if ( trap_cvar( "samelevel" ) )
+		G_sprint(self, 2, 	"\n%s: %s\n", redtext("Map cycle"), redtext("not active"));
+}
