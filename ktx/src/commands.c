@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.150 2007/03/29 01:55:14 qqshka Exp $
+ *  $Id: commands.c,v 1.151 2007/03/29 12:51:26 qqshka Exp $
  */
 
 // commands.c
@@ -675,7 +675,7 @@ cmd_t cmds[] = {
 	{ "callalias",   callalias,                 0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_CALLALIAS },
 	{ "check",       fcheck,                    0    , CF_BOTH | CF_PARAMS, CD_CHECK },
 	{ "next_map",    PlayerBreak,               0    , CF_PLAYER | CF_MATCHLESS_ONLY, CD_NEXT_MAP },
-	{ "mapcycle",    mapcycle,                  0    , CF_BOTH, CD_MAPCYCLE }
+	{ "mapcycle",    mapcycle,                  0    , CF_BOTH | CF_MATCHLESS, CD_MAPCYCLE }
 };
 
 #undef DEF
