@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.80 2007/03/06 06:14:11 qqshka Exp $
+ *  $Id: world.c,v 1.81 2007/03/29 22:45:24 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -722,6 +722,8 @@ void FirstFrame	( )
 	RegisterCvar("k_dmm4_gren_mode");
 	RegisterCvar("k_fp"); // say team floodprot
 
+	RegisterCvar("k_jawnmode"); // jawnmode implementation by Molgrum
+
 	RegisterCvar("_k_captteam1"); // internal mod usage
 	RegisterCvar("_k_captcolor1"); // internal mod usage
 	RegisterCvar("_k_captteam2"); // internal mod usage
@@ -1030,6 +1032,8 @@ void FixRules ( )
 	int dm   = deathmatch = cvar( "deathmatch" );
 	int k_minr = bound(0, cvar( "k_minrate" ),  100000);
 	int k_maxr = bound(0, cvar( "sv_maxrate" ), 100000);	
+
+	k_jawnmode = cvar( "k_jawnmode");
 
     k_maxspeed = cvar( "sv_maxspeed" );
 

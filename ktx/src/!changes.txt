@@ -1,3 +1,33 @@
+2007-03-30
+qq:
+248. I've got patch to ktx from Molgrum which adds Jawnmode by vb.
+	 So to enable this mode u can use "/jawnmode" command, or "set k_jawnmode 1" in server.cfg.
+	 Server warn about this mode during contdown, so u have chance spot it before match starts.
+	 Not all features was added, but list of what included in Molgrum's patch is:
+
+	 - Axe: DMM3 damage raised from 20 to 50.
+	 - GL:  No longer fires random within a few degress of crosshair.
+	 - LG:  DMM4 discharges now always only kill the user,
+       		instead of there being a 50% change you'll discharge normally.
+	 - NG:  Nail speed increased from 1000 to 1800. Nails no longer alternate between
+  	   		coming out 5 units to the left and 5 units to the right of crosshair.
+	- SNG: Nail speed increased from 1000 to 1800.
+	- RL:  Direct hit damage now 110, not random between 100 and 120.
+	- SG:  Pellets are no longer random, and make a plus shape.
+	- SSG: Pellets are no longer random, and make a plus shape.
+	- GA:  Protection now 50% was 30%
+	- YA:  Protection now 67% was 60%
+	- RA:  Protection now 75% was 80%
+	- Fallbunny: Can jump straight after fall.
+	- Fairpacks: Drop last weapon fired instead of weapon held.
+	- Packs: Ammo limited to 1/4 of capacity. Packs are now dropped with players
+         	 issue /kill. No more silly 'DMM3 free rockets' rule.
+	- Packs: Used weapon model of weapon you drop, instead of backpack.
+	- Bodies: Dead bodies removed after death animation, so you can't use them to
+          	  tell when an enemy spawns.
+
+	 based on Molgrum's patch to ktx, and some credits to vb too :>
+
 2007-03-29
 qq:
 247. Added "/mapcycle" command, just list map cycle/rotation, may be usefull for ffa server.

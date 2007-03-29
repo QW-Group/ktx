@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: weapons.c,v 1.58 2007/03/11 03:49:17 qqshka Exp $
+ *  $Id: weapons.c,v 1.59 2007/03/29 22:45:24 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -81,16 +81,21 @@ void W_FireAxe()
 
 	if ( PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.takedamage )
 	{
+		int damage = 20; // default damage is 20
+
 		if ( PROG_TO_EDICT( g_globalvars.trace_ent )->ct == ctPlayer )
 			self->ps.wpn[wpAXE].hits++;
 
-		PROG_TO_EDICT( g_globalvars.trace_ent )->axhitme = 1;
-		SpawnBlood( org, 20 );
-		PROG_TO_EDICT( g_globalvars.trace_ent )->deathtype = dtAXE;
 		if ( deathmatch > 3 )
-			T_Damage( PROG_TO_EDICT( g_globalvars.trace_ent ), self, self, 75 );
-		else
-			T_Damage( PROG_TO_EDICT( g_globalvars.trace_ent ), self, self, 20 );
+			damage = 75;
+		else if ( deathmatch == 3 )
+			damage = k_jawnmode ? 50 : 20; // Jawnmode: 50 axe dmg in dmm3
+
+		PROG_TO_EDICT( g_globalvars.trace_ent )->axhitme = 1;
+		SpawnBlood( org, damage );
+		PROG_TO_EDICT( g_globalvars.trace_ent )->deathtype = dtAXE;
+
+		T_Damage( PROG_TO_EDICT( g_globalvars.trace_ent ), self, self, damage );
 	} else
 	{	// hit wall
 
@@ -336,7 +341,7 @@ Go to the trouble of combining multiple pellets into a single damage call.
 void FireBullets( float shotcount, vec3_t dir, float spread_x, float spread_y, float spread_z, deathType_t deathtype )
 {
 	vec3_t          direction;
-	vec3_t          src, tmp;
+	vec3_t          src, tmp, tmp2;
 
 	trap_makevectors( self->s.v.v_angle );
 	VectorScale( g_globalvars.v_forward, 10, tmp );
@@ -354,10 +359,83 @@ void FireBullets( float shotcount, vec3_t dir, float spread_x, float spread_y, f
 
 	while ( shotcount > 0 )
 	{
-		VectorScale( g_globalvars.v_right, crandom() * spread_x, tmp );
-		VectorAdd( dir, tmp, direction );
-		VectorScale( g_globalvars.v_up, crandom() * spread_y, tmp );
-		VectorAdd( direction, tmp, direction );
+		if ( k_jawnmode )
+		{
+			if (shotcount == 3)
+			{
+				VectorScale( g_globalvars.v_right, spread_x, tmp );
+				VectorClear( tmp2 );
+			}
+			else if (shotcount == 4)
+			{
+				VectorScale( g_globalvars.v_right, -1.0 * spread_x, tmp );
+				VectorClear( tmp2 );
+			}
+			else if (shotcount == 5)
+			{
+				VectorScale( g_globalvars.v_up, spread_y, tmp2 );
+				VectorClear( tmp );
+			}
+			else if (shotcount == 6)
+			{
+				VectorScale( g_globalvars.v_up, -1.0 * spread_y, tmp2 );
+				VectorClear( tmp );
+			}
+			else if (shotcount == 7)
+			{
+				VectorScale( g_globalvars.v_right, 0.5 * spread_x, tmp );
+				VectorClear( tmp2 );
+			}
+			else if (shotcount == 8)
+			{
+				VectorScale( g_globalvars.v_right, -0.5 * spread_x, tmp );
+				VectorClear( tmp2 );
+			}
+			else if (shotcount == 9)
+			{
+				VectorScale( g_globalvars.v_up,    0.5 * spread_y, tmp2 );
+				VectorClear( tmp );
+			}
+			else if (shotcount == 10)
+			{
+				VectorScale( g_globalvars.v_up,   -0.5 * spread_y, tmp2 );
+				VectorClear( tmp );
+			}
+			else if (shotcount == 11) // a
+			{
+				VectorScale( g_globalvars.v_right, 0.5 * spread_x, tmp );
+				VectorScale( g_globalvars.v_up,    0.5 * spread_y, tmp2 );
+			}
+			else if (shotcount == 12) // a
+			{
+				VectorScale( g_globalvars.v_right, 0.5 * spread_x, tmp );
+				VectorScale( g_globalvars.v_up,   -0.5 * spread_y, tmp2 );
+			}
+			else if (shotcount == 13) // a
+			{
+				VectorScale( g_globalvars.v_right, -0.5 * spread_x, tmp );
+				VectorScale( g_globalvars.v_up,     0.5 * spread_y, tmp2 );
+			}
+			else if (shotcount == 14) // a
+			{
+				VectorScale( g_globalvars.v_right, -0.5 * spread_x, tmp );
+				VectorScale( g_globalvars.v_up,    -0.5 * spread_y, tmp2 );
+			}
+			else
+			{
+				VectorClear( tmp );
+				VectorClear( tmp2 );
+			}
+			VectorAdd( dir, tmp, direction );
+			VectorAdd( direction, tmp2, direction );
+		}
+		else
+		{
+			VectorScale( g_globalvars.v_right, crandom() * spread_x, tmp );
+			VectorAdd( dir, tmp, direction );
+			VectorScale( g_globalvars.v_up, crandom() * spread_y, tmp );
+			VectorAdd( direction, tmp, direction );
+		}
 
 //  direction = dir + crandom()*spread[0]*v_right + crandom()*spread[1]*v_up;
 		VectorScale( direction, 2048, tmp );
@@ -467,7 +545,9 @@ void T_MissileTouch()
 
 	FixQuad(PROG_TO_EDICT( self->s.v.owner ));
 
-	damg = 100 + g_random() * 20;
+	// Jawnmode: always 110 dmg on direct hits
+	// - Molgrum
+	damg = 100 + (k_jawnmode ? 10 : g_random() * 20);
 
 	if ( other->s.v.takedamage ) {
 		if ( other->ct == ctPlayer )
@@ -675,7 +755,9 @@ void W_FireLightning()
 
 		if ( deathmatch > 3 )
 		{
-			if ( g_random() <= 0.5 )
+			// Jawnmode: this always kills the player that discharges in dmm4
+			// - Molgrum
+			if ( k_jawnmode || g_random() <= 0.5 )
 			{
 				self->deathtype = dtLG_DIS_SELF;
 				T_Damage( self, self, self, 4000 );
@@ -824,18 +906,25 @@ void W_FireGrenade()
 
 	if ( self->s.v.v_angle[0] )
 	{
+		float r1 = crandom(), r2 = crandom();
+
+		// Jawnmode: disable randomness in grenade aim
+		// - Molgrum
+		if ( k_jawnmode )
+			r1 = r2 = 0;
+
 		newmis->s.v.velocity[0] =
 		    g_globalvars.v_forward[0] * 600 + g_globalvars.v_up[0] * 200 +
-		    crandom() * g_globalvars.v_right[0] * 10 +
-		    crandom() * g_globalvars.v_up[0] * 10;
+		    r1 * g_globalvars.v_right[0] * 10 +
+		    r2 * g_globalvars.v_up[0]    * 10;
 		newmis->s.v.velocity[1] =
 		    g_globalvars.v_forward[1] * 600 + g_globalvars.v_up[1] * 200 +
-		    crandom() * g_globalvars.v_right[1] * 10 +
-		    crandom() * g_globalvars.v_up[1] * 10;
+		    r1 * g_globalvars.v_right[1] * 10 +
+		    r2 * g_globalvars.v_up[1]    * 10;
 		newmis->s.v.velocity[2] =
 		    g_globalvars.v_forward[2] * 600 + g_globalvars.v_up[2] * 200 +
-		    crandom() * g_globalvars.v_right[2] * 10 +
-		    crandom() * g_globalvars.v_up[0] * 10;
+		    r1 * g_globalvars.v_right[2] * 10 +
+		    r2 * g_globalvars.v_up[0]    * 10;
 	} else
 	{
 		aim( newmis->s.v.velocity );	// = aim(self, 10000);
@@ -887,7 +976,10 @@ void launch_spike( vec3_t org, vec3_t dir )
 	setmodel( newmis, "progs/spike.mdl" );
 	setsize( newmis, 0, 0, 0, 0, 0, 0 );
 	setorigin( newmis, PASSVEC3( org ) );
-	VectorScale( dir, 1000, newmis->s.v.velocity );
+
+	// Jawnmode: spikes velocity is 1800 instead of 1000
+	// - Molgrum
+	VectorScale( dir, (k_jawnmode ? 1800 : 1000), newmis->s.v.velocity );
 
 	vectoangles( newmis->s.v.velocity, newmis->s.v.angles );
 }
@@ -1013,6 +1105,11 @@ void W_FireSuperSpikes()
 void W_FireSpikes( float ox )
 {
 	vec3_t          dir, tmp;
+
+	// Jawnmode: ignores alternating nails effect in nailgun
+	// - Molgrum
+	if ( k_jawnmode )
+		ox = 0;
 
 	trap_makevectors( self->s.v.v_angle );
 

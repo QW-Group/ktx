@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.151 2007/03/29 12:51:26 qqshka Exp $
+ *  $Id: commands.c,v 1.152 2007/03/29 22:45:24 qqshka Exp $
  */
 
 // commands.c
@@ -138,6 +138,7 @@ void lastscores ();
 void motd_show ();
 
 void TogglePractice();
+void ToggleJawnMode();
 
 void infolock ();
 void infospec ();
@@ -417,6 +418,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_CHECK        "better f_checks handle"
 #define CD_NEXT_MAP     "vote for next map"
 #define CD_MAPCYCLE     "list map cycle"
+#define CD_JAWNMODE     "toggle jawnmode"
 
 
 void dummy() {}
@@ -675,7 +677,8 @@ cmd_t cmds[] = {
 	{ "callalias",   callalias,                 0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_CALLALIAS },
 	{ "check",       fcheck,                    0    , CF_BOTH | CF_PARAMS, CD_CHECK },
 	{ "next_map",    PlayerBreak,               0    , CF_PLAYER | CF_MATCHLESS_ONLY, CD_NEXT_MAP },
-	{ "mapcycle",    mapcycle,                  0    , CF_BOTH | CF_MATCHLESS, CD_MAPCYCLE }
+	{ "mapcycle",    mapcycle,                  0    , CF_BOTH | CF_MATCHLESS, CD_MAPCYCLE },
+	{ "jawnmode",    ToggleJawnMode,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_JAWNMODE }
 };
 
 #undef DEF
@@ -1274,26 +1277,14 @@ void PrintToggle2( char *tog, char *key )
 		G_sprint(self, 2, "Off\n");
 }
 
-//Ceno
-void PrintToggle3(char *tog, char *key)
+char *get_frp_str ()
 {
-	int i;
-
-	if ( strnull(tog) || strnull(key) )
-		G_Error("PrintToggle3 null");
-
-	G_sprint(self, 2, "%s", tog);
-
-	i = cvar( key );
-
-	if( !i )
-		G_sprint(self, 2, "Off ");
-	else if( i == 1 )
-		G_sprint(self, 2, "On  ");
-	else if( i == 2 )
-		G_sprint(self, 2, "Lst ");
-	else
-		G_sprint(self, 2, "Unk ");
+	switch( get_fair_pack() ) {
+		case  0: return "Off";
+		case  1: return "On";
+		case  2: return "Lst";
+		default: return "Unk";
+	}
 }
 
 void ModStatus ()
@@ -1301,23 +1292,23 @@ void ModStatus ()
 	int votes;
 	gedict_t *p;
 
-	G_sprint(self, 2, "%-14s %-3d\n", redtext("Maxspeed"), (int)k_maxspeed);
-	G_sprint(self, 2, "%-14s %-3d ",  redtext("Deathmatch"), (int)deathmatch);
-	G_sprint(self, 2, "%-14s %-3d\n", redtext("Teamplay"), (int)tp_num());
-	G_sprint(self, 2, "%-14s %-3d ",  redtext("Timelimit"), (int)timelimit);
-	G_sprint(self, 2, "%-14s %-3d\n", redtext("Fraglimit"), (int)fraglimit);
+	G_sprint(self, 2, "%-14.14s %-3d\n", redtext("Maxspeed"), (int)k_maxspeed);
+	G_sprint(self, 2, "%-14.14s %-3d ",  redtext("Deathmatch"), (int)deathmatch);
+	G_sprint(self, 2, "%-14.14s %-3d\n", redtext("Teamplay"), (int)tp_num());
+	G_sprint(self, 2, "%-14.14s %-3d ",  redtext("Timelimit"), (int)timelimit);
+	G_sprint(self, 2, "%-14.14s %-3d\n", redtext("Fraglimit"), (int)fraglimit);
 	PrintToggle1(redtext("Powerups       "), "k_pow");
 	PrintToggle2(va("%s \x98\x98\x98    ", redtext("Respawn")), "k_666");
 	PrintToggle1(redtext("Drop Quad      "), "dq");
 	PrintToggle2(redtext("Drop Ring      "), "dr");
-	PrintToggle3(redtext("Fair Backpacks "), "k_frp");
+	G_sprint(self, 2, "%-14.14s %-3.3s ", redtext("Fair Backpacks"), get_frp_str());
 	PrintToggle2(redtext("Drop Backpacks "), "dp");
 	PrintToggle1(redtext("Discharge      "), "k_dis");
 	PrintToggle2(redtext("Berzerk mode   "), "k_bzk");
 
-	G_sprint(self, 2, "%-14s %-3.3s ",  redtext("spec info perm"), (mi_adm_only() ? "Adm" : "All"));
-	G_sprint(self, 2, "%-14s %-3.3s\n", redtext("more spec info"), (mi_on() ? "On" : "Off"));
-	G_sprint(self, 2, "%-14s %-3.3s\n", redtext("teleteam"), (cvar("k_tp_tele_death") ? "On" : "Off"));
+	G_sprint(self, 2, "%-14.14s %-3.3s ",  redtext("spec info perm"), (mi_adm_only() ? "Adm" : "All"));
+	G_sprint(self, 2, "%-14.14s %-3.3s\n", redtext("more spec info"), (mi_on() ? "On" : "Off"));
+	G_sprint(self, 2, "%-14.14s %-3.3s\n", redtext("teleteam"), (cvar("k_tp_tele_death") ? "On" : "Off"));
 
 	if( match_in_progress == 1 ) {
 		p = find(world, FOFCLSN, "timer" );
@@ -2091,10 +2082,16 @@ void ToggleFairPacks()
 	if( check_master() )
 		return;
 
-	if ( ++k_frp > 2 )
-		k_frp = 0;
+	if( k_jawnmode ) {
+		k_frp = get_fair_pack(); // Jawnmode: hardcoded to 2
+	}
+	else {
 
-	cvar_fset( "k_frp", k_frp );
+		if ( ++k_frp > 2 )
+			k_frp = 0;
+
+		cvar_fset( "k_frp", k_frp );
+	}
 
 	if( !k_frp )
 		G_bprint(2, "%s disabled\n", redtext("Fairpacks"));
@@ -5294,4 +5291,18 @@ void mapcycle ()
 
 	if ( trap_cvar( "samelevel" ) )
 		G_sprint(self, 2, 	"\n%s: %s\n", redtext("Map cycle"), redtext("not active"));
+}
+
+// Toggle jawnmode, implemented by Molgrum
+void ToggleJawnMode()
+{
+	if ( match_in_progress )
+		return;
+
+	if( check_master() )
+		return;
+
+	cvar_toggle_msg( self, "k_jawnmode", redtext("jawnmode") );
+
+	k_jawnmode = cvar("k_jawnmode"); // apply changes ASAP
 }

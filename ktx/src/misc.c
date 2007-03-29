@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: misc.c,v 1.6 2006/11/24 17:39:23 qqshka Exp $
+ *  $Id: misc.c,v 1.7 2007/03/29 22:45:24 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -223,8 +223,12 @@ void fire_fly()
 
 void fire_touch()
 {
-	other->deathtype = dtFIREBALL;
-	T_Damage( other, self, self, 20 );
+	// Jawnmode: no damage from fireall
+	if ( !k_jawnmode ) {
+		other->deathtype = dtFIREBALL;
+		T_Damage( other, self, self, 20 );
+	}
+
 	ent_remove( self );
 }
 

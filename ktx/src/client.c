@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.141 2007/03/19 04:07:45 qqshka Exp $
+ *  $Id: client.c,v 1.142 2007/03/29 22:45:24 qqshka Exp $
  */
 
 //===========================================================================
@@ -1130,6 +1130,7 @@ void PutClientInServer()
 	self->spawn_time = g_globalvars.time;
 	self->k_666 = 0;
 	self->axhitme = 0;
+	self->lastwepfired = 0;
 
 	self->q_pickup_time = self->p_pickup_time = self->r_pickup_time = 0;
         
@@ -1475,10 +1476,16 @@ void PlayerJump()
 		if ( self->swim_flag < g_globalvars.time )
 		{
 			self->swim_flag = g_globalvars.time + 1;
-			if ( g_random() < 0.5 )
-				sound( self, CHAN_BODY, "misc/water1.wav", 1, ATTN_NORM );
-			else
-				sound( self, CHAN_BODY, "misc/water2.wav", 1, ATTN_NORM );
+
+			// Jawnmode: don't play swimming sound to cut older clients without smartjump some slack
+			// - Molgrum
+			if ( !k_jawnmode )
+			{
+				if ( g_random() < 0.5 )
+					sound( self, CHAN_BODY, "misc/water1.wav", 1, ATTN_NORM );
+				else
+					sound( self, CHAN_BODY, "misc/water2.wav", 1, ATTN_NORM );
+			}
 		}
 
 		return;
@@ -2665,7 +2672,7 @@ void PlayerPostThink()
 			gedict_t *gre = PROG_TO_EDICT ( self->s.v.groundentity );
 
 			// set the flag if needed
-           	if( !cvar( "k_fallbunny" ) && self->s.v.waterlevel < 2 )
+           	if( !get_fallbunny() && self->s.v.waterlevel < 2 )
                	self->brokenankle = 1;  // Yes we have just broken it
 
 			self->deathtype = dtFALL;

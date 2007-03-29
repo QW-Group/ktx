@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.36 2007/03/19 04:07:45 qqshka Exp $
+ *  $Id: items.c,v 1.37 2007/03/29 22:45:24 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -336,21 +336,21 @@ void armor_touch()
 	if ( !strcmp( self->s.v.classname, "item_armor1" ) )
 	{
 		armor = &(other->ps.itm[itGA].tooks);
-		type = 0.3;
+		type = (k_jawnmode ? 0.5 : 0.3); // Jawnmode: changed armor protection
 		value = 100;
 		bit = IT_ARMOR1;
 	}
 	else if ( !strcmp( self->s.v.classname, "item_armor2" ) )
 	{
 		armor = &(other->ps.itm[itYA].tooks);
-		type = 0.6;
+		type = (k_jawnmode ? 0.67 : 0.6); // Jawnmode: changed armor protection
 		value = 150;
 		bit = IT_ARMOR2;
 	}
 	else if ( !strcmp( self->s.v.classname, "item_armorInv" ) )
 	{
 		armor = &(other->ps.itm[itRA].tooks);
-		type = 0.8;
+		type = (k_jawnmode ? 0.75 : 0.8); // Jawnmode: changed armor protection
 		value = 200;
 		bit = IT_ARMOR3;
 	}
@@ -1646,14 +1646,19 @@ DropBackpack
 
 void DropBackpack()
 {
-	gedict_t       *item;
+	gedict_t    *item;
+	char 		*model;
 
-    float f1;
+    float		f1;
 
-    f1 = cvar( "k_frp" );
+    f1 = get_fair_pack();
 
-    if ( match_in_progress != 2 || !cvar( "dp" ) || dtSUICIDE == self->deathtype )
+    if ( match_in_progress != 2 || !cvar( "dp" ) )
         return;
+
+	if ( !k_jawnmode ) // Jawnmode: pack dropped in jawn mode independantly from death type
+		if ( dtSUICIDE == self->deathtype )
+			return;
 
     if ( ! ( self->s.v.ammo_shells + self->s.v.ammo_nails + self->s.v.ammo_rockets +
 			 self->s.v.ammo_cells 
@@ -1693,6 +1698,8 @@ void DropBackpack()
             if( (int)self->lastwepfired & IT_DROPPABLE_WEAPONS )
                 item->s.v.items = self->lastwepfired;
 
+	model = "progs/backpack.mdl"; // by default pack, but Jawnmode used weapon model instead of pack model
+
 	if ( item->s.v.items == IT_AXE ) {
 		item->s.v.netname = "Axe";
 		self->ps.wpn[wpAXE].drops++;
@@ -1704,34 +1711,50 @@ void DropBackpack()
 	else if ( item->s.v.items == IT_SUPER_SHOTGUN ) {
 		item->s.v.netname = "Double-barrelled Shotgun";
 		self->ps.wpn[wpSSG].drops++;
+		model = "progs/g_shot.mdl";
 	}
 	else if ( item->s.v.items == IT_NAILGUN ) {
 		item->s.v.netname = "Nailgun";
 		self->ps.wpn[wpNG].drops++;
+		model = "progs/g_nail.mdl";
 	}
 	else if ( item->s.v.items == IT_SUPER_NAILGUN ) {
 		item->s.v.netname = "Super Nailgun";
 		self->ps.wpn[wpSNG].drops++;
+		model = "progs/g_nail2.mdl";
 	}
 	else if ( item->s.v.items == IT_GRENADE_LAUNCHER ) {
 		item->s.v.netname = "Grenade Launcher";
 		self->ps.wpn[wpGL].drops++;
+		model = "progs/g_rock.mdl";
 	}
 	else if ( item->s.v.items == IT_ROCKET_LAUNCHER ) {
 		item->s.v.netname = "Rocket Launcher";
 		self->ps.wpn[wpRL].drops++;
+		model = "progs/g_rock2.mdl";
 	}
 	else if ( item->s.v.items == IT_LIGHTNING ) {
 		item->s.v.netname = "Thunderbolt";
 		self->ps.wpn[wpLG].drops++;
+		model = "progs/g_light.mdl";
 	}
 	else
 		item->s.v.netname = "";
 
-	item->s.v.ammo_shells = self->s.v.ammo_shells;
-	item->s.v.ammo_nails = self->s.v.ammo_nails;
+	item->s.v.ammo_shells  = self->s.v.ammo_shells;
+	item->s.v.ammo_nails   = self->s.v.ammo_nails;
 	item->s.v.ammo_rockets = self->s.v.ammo_rockets;
-	item->s.v.ammo_cells = self->s.v.ammo_cells;
+	item->s.v.ammo_cells   = self->s.v.ammo_cells;
+
+	// Jawnmode: maximum backpack-capacity is 1/4 of player-capacity
+	// - Molgrum
+	if ( k_jawnmode )
+	{
+		item->s.v.ammo_shells  = min(25, item->s.v.ammo_shells);
+		item->s.v.ammo_nails   = min(50, item->s.v.ammo_nails);
+		item->s.v.ammo_rockets = min(25, item->s.v.ammo_rockets);
+		item->s.v.ammo_cells   = min(25, item->s.v.ammo_cells);
+	}
 
 	item->s.v.velocity[2] = 300;
 	item->s.v.velocity[0] = -100 + ( g_random() * 200 );
@@ -1740,7 +1763,7 @@ void DropBackpack()
 	item->s.v.flags = FL_ITEM;
 	item->s.v.solid = SOLID_TRIGGER;
 	item->s.v.movetype = MOVETYPE_TOSS;
-	setmodel( item, "progs/backpack.mdl" );
+	setmodel( item, k_jawnmode ? model : "progs/backpack.mdl" );
 	setsize( item, -16, -16, 0, 16, 16, 56 );
 	item->s.v.touch = ( func_t ) BackpackTouch;
 

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: globals.c,v 1.26 2007/03/19 04:07:45 qqshka Exp $
+ *  $Id: globals.c,v 1.27 2007/03/29 22:45:24 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -50,6 +50,7 @@ int   k_overtime = 0;   // is overtime is going on
 
 float current_maxfps;	// current value of serverinfo maxfps
 
+int       k_jawnmode;	// is server in jawn mode
 int       k_practice;	// is server in practice mode
 int       k_matchLess;	// is server in matchLess mode
 gameType_t 	  k_mode;   // game type: DUEL, TP, FFA

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: player.c,v 1.27 2006/12/13 17:20:25 qqshka Exp $
+ *  $Id: player.c,v 1.28 2007/03/29 22:45:24 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -849,6 +849,11 @@ void PlayerDead()
 	self->s.v.nextthink = -1;
 // allow respawn after a certain time
 	self->s.v.deadflag = DEAD_DEAD;
+
+	// Jawnmode: hide player corpses after animation
+	// - Molgrum
+	if ( k_jawnmode )
+		setmodel( self, "" );
 }
 
 void VelocityForDamage( float dm, vec3_t v )
@@ -1024,28 +1029,35 @@ void PlayerDie()
 // was originally part of PlayerDie() and hasn't been altered
 void StartDie ()
 {
-	float i;
-
 	if ( self->s.v.weapon == IT_AXE )
 	{
 		player_die_ax1();
 		return;
 	}
 
-	// Note that this generates random values in 1..6 range, so player_diee1 is
-	// executed twice as often as other death sequences. Dunno if this should be fixed -- Tonik
-	i = 1 + floor( g_random() * 6 );
-
-	if ( i == 1 )
-		player_diea1();
-	else if ( i == 2 )
-		player_dieb1();
-	else if ( i == 3 )
-		player_diec1();
-	else if ( i == 4 )
-		player_died1();
+	if ( k_jawnmode )
+	{
+		// Jawnmode: exclude diea1 and diec1 so the respawn time is always 900 ms
+		switch( i_rnd(1, 3)) {
+			case  1: player_dieb1(); break;
+			case  2: player_died1(); break;
+			default: player_diee1(); break;
+		}
+	}
 	else
-		player_diee1();
+	{
+		// Note that this generates random values in 1..6 range, so player_diee1 is
+		// executed twice as often as other death sequences. Dunno if this should be fixed -- Tonik
+		int i = 1 + floor( g_random() * 6 );
+
+	    switch( i ) {
+			case  1: player_diea1(); break;
+			case  2: player_dieb1(); break;
+			case  3: player_diec1(); break;
+			case  4: player_died1(); break;
+			default: player_diee1(); break;
+	    }
+	}
 }
 
 void set_suicide_frame()

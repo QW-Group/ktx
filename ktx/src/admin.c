@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.49 2006/12/05 18:45:50 qqshka Exp $
+ * $Id: admin.c,v 1.50 2007/03/29 22:45:24 qqshka Exp $
  */
 
 // admin.c
@@ -812,8 +812,6 @@ void AdminForcePause ()
 	ModPause (!k_pause);
 }
 
-// qqshka
-
 void ToggleFallBunny ()
 {
     if( match_in_progress )
@@ -821,6 +819,11 @@ void ToggleFallBunny ()
 
 	if( check_master() )
 		return;
+
+	if ( k_jawnmode ) {
+		G_sprint(self, 2, "Command blocked because jawnmode is active\n");
+		return;
+	}
 
 	cvar_toggle_msg( self, "k_fallbunny", redtext("fallbunny") );
 }

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_utils.c,v 1.72 2006/12/27 23:56:27 qqshka Exp $
+ *  $Id: g_utils.c,v 1.73 2007/03/29 22:45:24 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -2067,3 +2067,14 @@ char *respawn_model_name( int mdl_num )
 	}
 }
 
+int get_fair_pack()
+{
+	// Jawnmode: always 2 aka last weapon
+	return bound(0, k_jawnmode ? 2 : cvar( "k_frp" ), 2);
+}
+
+int get_fallbunny()
+{
+	// Jawnmode: no broken ankle
+	return k_jawnmode ? 1 : cvar( "k_fallbunny" );
+}

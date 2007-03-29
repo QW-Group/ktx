@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.101 2007/03/19 04:07:45 qqshka Exp $
+ *  $Id: g_local.h,v 1.102 2007/03/29 22:45:23 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -383,6 +383,9 @@ char		*params_str( int from, int to );
 char		*SD_type_str(); // sudden death type string
 
 char		*respawn_model_name( int mdl_num );
+
+int			get_fair_pack();
+int			get_fallbunny();
 
 //
 //  subs.c
@@ -765,6 +768,7 @@ extern	int   k_overtime;		// is overtime is going on
 
 extern	float current_maxfps;	// current value of serverinfo maxfps
 
+extern	int   k_jawnmode;		// is server in jawn mode
 extern	int   k_practice;		// is server in practice mode
 extern	int   k_matchLess;	    // is server in matchLess mode
 extern  gameType_t 	  k_mode;   // game type: DUEL, TP, FFA

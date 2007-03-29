@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.110 2007/03/28 23:44:42 qqshka Exp $
+ *  $Id: match.c,v 1.111 2007/03/29 22:45:24 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1536,6 +1536,7 @@ void PrintCountdown( int seconds )
 // Deathmatch  x
 // Mode		  D u e l | T e a m | F F A | C T F | RA
 // Midair     On // optional
+// Jawnmode   On // optional
 // Teamplay    x
 // Timelimit  xx
 // Fraglimit xxx
@@ -1573,6 +1574,9 @@ void PrintCountdown( int seconds )
 
 	if ( cvar("k_midair") )
 		strlcat(text, va("%s %6s\n", "Midair", redtext("On")), sizeof(text));
+
+	if ( k_jawnmode )
+		strlcat(text, va("%s %4s\n", "Jawnmode", redtext("On")), sizeof(text));
 
 	if ( !isRA() ) // useless in RA
 	if ( isTeam() || isCTF() )
@@ -1773,12 +1777,12 @@ void ShowMatchSettings()
 
 // changed to print only if other than default
 
-	if( (i = cvar( "k_frp" )) ) {
+	if( (i = get_fair_pack()) ) {
 		// Output the Fairpack setting here
 		switch ( i ) {
-			case 0: txt = "off"; break;
-			case 1: txt = "best weapon"; break;
-			case 2: txt = "last weapon fired"; break;
+			case  0: txt = "off"; break;
+			case  1: txt = "best weapon"; break;
+			case  2: txt = "last weapon fired"; break;
 			default: txt = "!Unknown!"; break;
 		}
 
