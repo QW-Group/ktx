@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.111 2007/03/29 22:45:24 qqshka Exp $
+ *  $Id: match.c,v 1.112 2007/03/30 13:00:18 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -422,7 +422,8 @@ void OnePlayerStats(gedict_t *p, int tp)
 				(h_ssg ? va(" %s%.1f%%", redtext("ssg"), h_ssg) : ""));
 
 		// velocity
-		G_bprint(2, "%s: %s:%.1f %s:%.1f\n", redtext("Speed"),
+		if ( isDuel() )
+		G_bprint(2, "%s: %s:%.1f %s:%.1f\n", redtext("   Speed"),
 				redtext("max"), p->ps.velocity_max,
 				redtext("average"), p->ps.vel_frames > 0 ? p->ps.velocity_sum / p->ps.vel_frames : 0.);
 

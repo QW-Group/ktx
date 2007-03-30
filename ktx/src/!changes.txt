@@ -28,6 +28,8 @@ qq:
 
 	 based on Molgrum's patch to ktx, and some credits to vb too :>
 
+249. Removed speed end match stat, show it in duels only.
+
 2007-03-29
 qq:
 247. Added "/mapcycle" command, just list map cycle/rotation, may be usefull for ffa server.
