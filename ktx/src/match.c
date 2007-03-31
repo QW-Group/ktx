@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.113 2007/03/30 15:36:46 qqshka Exp $
+ *  $Id: match.c,v 1.114 2007/03/31 15:43:02 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1540,6 +1540,7 @@ void PrintCountdown( int seconds )
 // Mode		  D u e l | T e a m | F F A | C T F | RA
 // Midair     On // optional
 // Jawnmode   On // optional
+// Airstep    On // optional
 // Teamplay    x
 // Timelimit  xx
 // Fraglimit xxx
@@ -1580,6 +1581,9 @@ void PrintCountdown( int seconds )
 
 	if ( k_jawnmode )
 		strlcat(text, va("%s %4s\n", "Jawnmode", redtext("On")), sizeof(text));
+
+	if ( cvar("pm_airstep") )
+		strlcat(text, va("%s %5s\n", "Airstep", redtext("On")), sizeof(text));
 
 	if ( !isRA() ) // useless in RA
 	if ( isTeam() || isCTF() )

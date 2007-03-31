@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.102 2007/03/29 22:45:23 qqshka Exp $
+ *  $Id: g_local.h,v 1.103 2007/03/31 15:43:01 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -814,6 +814,8 @@ extern	float f_check; // is we in state of some f_xxx check
 extern	float lastTeamLocationTime; // next udate for CheckTeamStatus()
 
 extern	qboolean first_rl_taken; // true when some one alredy took rl
+
+extern	int sv_minping; // used to broadcast changes
 
 // heh, some hack for mvdsv for grabbing some data
 

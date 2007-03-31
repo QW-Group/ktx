@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.152 2007/03/29 22:45:24 qqshka Exp $
+ *  $Id: commands.c,v 1.153 2007/03/31 15:43:02 qqshka Exp $
  */
 
 // commands.c
@@ -179,6 +179,7 @@ void mv_cmd_stop ();
 void callalias ();
 void fcheck ();
 void mapcycle ();
+void airstep();
 
 // spec
 void ShowCamHelp();
@@ -419,6 +420,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_NEXT_MAP     "vote for next map"
 #define CD_MAPCYCLE     "list map cycle"
 #define CD_JAWNMODE     "toggle jawnmode"
+#define CD_AIRSTEP      "toggle airstep"
 
 
 void dummy() {}
@@ -527,8 +529,8 @@ cmd_t cmds[] = {
 	{ "2on2",        DEF(UserMode),             2    , CF_PLAYER | CF_SPC_ADMIN, CD_2ON1 },
 	{ "3on3",        DEF(UserMode),             3    , CF_PLAYER | CF_SPC_ADMIN, CD_3ON1 },
 	{ "4on4",        DEF(UserMode),             4    , CF_PLAYER | CF_SPC_ADMIN, CD_4ON1 },
-	{ "10on10",      DEF(UserMode),             5	   , CF_PLAYER | CF_SPC_ADMIN, CD_10ON10 },
-	{ "ffa",         DEF(UserMode),             6	   , CF_PLAYER | CF_SPC_ADMIN, CD_FFA },
+	{ "10on10",      DEF(UserMode),             5    , CF_PLAYER | CF_SPC_ADMIN, CD_10ON10 },
+	{ "ffa",         DEF(UserMode),             6	 , CF_PLAYER | CF_SPC_ADMIN, CD_FFA },
 	{ "ctf",         DEF(UserMode),             7    , CF_PLAYER | CF_SPC_ADMIN, CD_CTF },
 
 #ifndef NO_K_PAUSE
@@ -678,7 +680,8 @@ cmd_t cmds[] = {
 	{ "check",       fcheck,                    0    , CF_BOTH | CF_PARAMS, CD_CHECK },
 	{ "next_map",    PlayerBreak,               0    , CF_PLAYER | CF_MATCHLESS_ONLY, CD_NEXT_MAP },
 	{ "mapcycle",    mapcycle,                  0    , CF_BOTH | CF_MATCHLESS, CD_MAPCYCLE },
-	{ "jawnmode",    ToggleJawnMode,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_JAWNMODE }
+	{ "jawnmode",    ToggleJawnMode,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_JAWNMODE },
+	{ "airstep",     airstep,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_AIRSTEP }
 };
 
 #undef DEF
@@ -2679,6 +2682,7 @@ ok:
 
 // common settings for all user modes
 const char common_um_init[] =
+	"set pm_airstep 0\n"
 	"maxclients 8\n"
 	"k_disallow_weapons 16\n"			// disallow gl in dmm4 by default
 
@@ -5299,10 +5303,22 @@ void ToggleJawnMode()
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
+	if ( check_master() )
 		return;
 
 	cvar_toggle_msg( self, "k_jawnmode", redtext("jawnmode") );
 
 	k_jawnmode = cvar("k_jawnmode"); // apply changes ASAP
 }
+
+void airstep()
+{
+	if ( match_in_progress )
+		return;
+
+	if ( check_master() )
+		return;
+
+	cvar_toggle_msg( self, "pm_airstep", redtext("pm_airstep") );
+}
+

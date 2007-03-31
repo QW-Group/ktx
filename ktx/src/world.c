@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.81 2007/03/29 22:45:24 qqshka Exp $
+ *  $Id: world.c,v 1.82 2007/03/31 15:43:02 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -764,6 +764,8 @@ void FirstFrame	( )
 	cvar_fset("_k_worldspawns", (int)cvar("_k_worldspawns") + 1);
 
 	if ( cvar("_k_worldspawns") == 1 ) { // server spawn first map
+		sv_minping = cvar("sv_minping"); // remember, so we can broadcast changes
+
 		if ( ( um_idx = um_idx_byname( cvar_string("k_defmode") ) ) >= 0 )
 			cvar_fset("_k_last_xonx", um_idx + 1); // force exec configs for default user mode
 	}
@@ -1129,6 +1131,11 @@ void FixRules ( )
 		G_bprint(2, "%s: fraglimit changed to: %d\n", redtext("WARNING"), fraglimit);
 	if (dm != deathmatch)
 		G_bprint(2, "%s: deathmatch changed to: %d\n", redtext("WARNING"), deathmatch);
+
+	if (sv_minping != cvar("sv_minping")) {
+		sv_minping = cvar("sv_minping"); // remember, so we can broadcast changes
+		G_bprint(2, "%s changed to %d\n", redtext("sv_minping"), sv_minping);
+	}
 
 	if ( framecount == 1 )
 		trap_executecmd ();

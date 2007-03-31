@@ -1,3 +1,17 @@
+2007-03-31
+qq:
+250. In mvdsv was added pm_airstep, "pm_airstep 1" - you able run/jump over stairs, but you loose some speed still.
+	 So in ktx was added "/airstep" command which toggle this setting.
+	 You can notice "Airstep On" during countdown, if this setting enabled.
+
+	 Since this setting alter physics not everyone will happy, but mostly it was added for fun games,
+	 but may be community agreed what that not so bad thing, or otherwise totaly understand what that evil, let see.
+
+	 Btw, 1on1, 2on2 and similar commands turn this setting off, sure if server amin do not modifie cfgs somehow,
+	 so less accidents when u realize wrong server setting after match starts.
+
+251. Minping changes broadcasted now, notice it only today, oops :>
+     
 2007-03-30
 qq:
 248. I've got patch to ktx from Molgrum which adds Jawnmode by vb.
