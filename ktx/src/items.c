@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: items.c,v 1.37 2007/03/29 22:45:24 qqshka Exp $
+ *  $Id: items.c,v 1.38 2007/03/31 10:57:59 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1647,7 +1647,6 @@ DropBackpack
 void DropBackpack()
 {
 	gedict_t    *item;
-	char 		*model;
 
     float		f1;
 
@@ -1698,8 +1697,6 @@ void DropBackpack()
             if( (int)self->lastwepfired & IT_DROPPABLE_WEAPONS )
                 item->s.v.items = self->lastwepfired;
 
-	model = "progs/backpack.mdl"; // by default pack, but Jawnmode used weapon model instead of pack model
-
 	if ( item->s.v.items == IT_AXE ) {
 		item->s.v.netname = "Axe";
 		self->ps.wpn[wpAXE].drops++;
@@ -1711,32 +1708,26 @@ void DropBackpack()
 	else if ( item->s.v.items == IT_SUPER_SHOTGUN ) {
 		item->s.v.netname = "Double-barrelled Shotgun";
 		self->ps.wpn[wpSSG].drops++;
-		model = "progs/g_shot.mdl";
 	}
 	else if ( item->s.v.items == IT_NAILGUN ) {
 		item->s.v.netname = "Nailgun";
 		self->ps.wpn[wpNG].drops++;
-		model = "progs/g_nail.mdl";
 	}
 	else if ( item->s.v.items == IT_SUPER_NAILGUN ) {
 		item->s.v.netname = "Super Nailgun";
 		self->ps.wpn[wpSNG].drops++;
-		model = "progs/g_nail2.mdl";
 	}
 	else if ( item->s.v.items == IT_GRENADE_LAUNCHER ) {
 		item->s.v.netname = "Grenade Launcher";
 		self->ps.wpn[wpGL].drops++;
-		model = "progs/g_rock.mdl";
 	}
 	else if ( item->s.v.items == IT_ROCKET_LAUNCHER ) {
 		item->s.v.netname = "Rocket Launcher";
 		self->ps.wpn[wpRL].drops++;
-		model = "progs/g_rock2.mdl";
 	}
 	else if ( item->s.v.items == IT_LIGHTNING ) {
 		item->s.v.netname = "Thunderbolt";
 		self->ps.wpn[wpLG].drops++;
-		model = "progs/g_light.mdl";
 	}
 	else
 		item->s.v.netname = "";
@@ -1763,7 +1754,7 @@ void DropBackpack()
 	item->s.v.flags = FL_ITEM;
 	item->s.v.solid = SOLID_TRIGGER;
 	item->s.v.movetype = MOVETYPE_TOSS;
-	setmodel( item, k_jawnmode ? model : "progs/backpack.mdl" );
+	setmodel( item, "progs/backpack.mdl" );
 	setsize( item, -16, -16, 0, 16, 16, 56 );
 	item->s.v.touch = ( func_t ) BackpackTouch;
 
