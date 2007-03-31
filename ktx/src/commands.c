@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.153 2007/03/31 15:43:02 qqshka Exp $
+ *  $Id: commands.c,v 1.154 2007/03/31 19:05:40 qqshka Exp $
  */
 
 // commands.c
@@ -5285,7 +5285,7 @@ void mapcycle ()
 			G_sprint(self, 2, 	"%s:\n"
 								"%3.3s | %s\n", redtext("Map cycle"), redtext("id"), redtext("name"));
 
-		G_sprint(self, 2, "%3.3d | %s\n", i + 1, newmap);
+		G_sprint(self, 2, "%3.3d | %s%s\n", i + 1, newmap, streq(newmap, g_globalvars.mapname) ? " \x8D current" : "");
 	}
 
 	if ( !i ) {
