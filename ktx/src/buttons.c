@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: buttons.c,v 1.4 2006/11/30 17:16:13 qqshka Exp $
+ *  $Id: buttons.c,v 1.5 2007/04/07 23:05:13 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -160,7 +160,9 @@ void SP_func_button()
 	SetMovedir();
 
 	self->s.v.movetype = MOVETYPE_PUSH;
-	self->s.v.solid = SOLID_BSP;
+	// if button does't have model ( mapper fault? ),
+	// we must set it to something safe, because with SOLID_BSP and null model server crashed
+	self->s.v.solid = (strnull(self->s.v.model) ? SOLID_NOT : SOLID_BSP);
 	setmodel( self, self->s.v.model );
 
 	self->s.v.blocked = ( func_t ) button_blocked;
