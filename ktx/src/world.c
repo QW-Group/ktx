@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.82 2007/03/31 15:43:02 qqshka Exp $
+ *  $Id: world.c,v 1.83 2007/04/07 17:52:37 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -723,6 +723,8 @@ void FirstFrame	( )
 	RegisterCvar("k_fp"); // say team floodprot
 
 	RegisterCvar("k_jawnmode"); // jawnmode implementation by Molgrum
+
+	RegisterCvar("k_teamoverlay"); // q3 like team overlay
 
 	RegisterCvar("_k_captteam1"); // internal mod usage
 	RegisterCvar("_k_captcolor1"); // internal mod usage

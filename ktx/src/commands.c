@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.154 2007/03/31 19:05:40 qqshka Exp $
+ *  $Id: commands.c,v 1.155 2007/04/07 17:52:37 qqshka Exp $
  */
 
 // commands.c
@@ -180,6 +180,7 @@ void callalias ();
 void fcheck ();
 void mapcycle ();
 void airstep();
+void teamoverlay();
 
 // spec
 void ShowCamHelp();
@@ -421,6 +422,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_MAPCYCLE     "list map cycle"
 #define CD_JAWNMODE     "toggle jawnmode"
 #define CD_AIRSTEP      "toggle airstep"
+#define CD_TEAMOVERLAY  "toggle teamoverlay"
 
 
 void dummy() {}
@@ -681,7 +683,8 @@ cmd_t cmds[] = {
 	{ "next_map",    PlayerBreak,               0    , CF_PLAYER | CF_MATCHLESS_ONLY, CD_NEXT_MAP },
 	{ "mapcycle",    mapcycle,                  0    , CF_BOTH | CF_MATCHLESS, CD_MAPCYCLE },
 	{ "jawnmode",    ToggleJawnMode,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_JAWNMODE },
-	{ "airstep",     airstep,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_AIRSTEP }
+	{ "airstep",     airstep,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_AIRSTEP },
+	{ "teamoverlay", teamoverlay,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_TEAMOVERLAY }
 };
 
 #undef DEF
@@ -5322,3 +5325,13 @@ void airstep()
 	cvar_toggle_msg( self, "pm_airstep", redtext("pm_airstep") );
 }
 
+void teamoverlay()
+{
+	if ( match_in_progress )
+		return;
+
+	if ( check_master() )
+		return;
+
+	cvar_toggle_msg( self, "k_teamoverlay", redtext("teamoverlay") );
+}

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.142 2007/03/29 22:45:24 qqshka Exp $
+ *  $Id: client.c,v 1.143 2007/04/07 17:52:37 qqshka Exp $
  */
 
 //===========================================================================
@@ -2779,7 +2779,8 @@ void SendTeamInfo(gedict_t *t)
 
 void CheckTeamStatus( )
 {
-  gedict_t *p;
+	gedict_t *p;
+	int k_teamoverlay;
 
 	if ( !isTeam() && !isCTF() )
 		return; // non team game
@@ -2789,9 +2790,15 @@ void CheckTeamStatus( )
 	
 	lastTeamLocationTime = g_globalvars.time;
 
-  for ( p = world; (p = find_client( p )); ) {
+	k_teamoverlay = cvar("k_teamoverlay");
+
+	for ( p = world; (p = find_client( p )); ) {
 		char *clinfo;
 		int ti;
+
+		if (!k_teamoverlay) // teamoverlay turned off
+			if (p->ct != ctSpec) // sent overlay to spec only then
+				continue;
 
 		if ( (ti = iKey(p, "ti")) < 0 )
 			continue; // user specifie no team info

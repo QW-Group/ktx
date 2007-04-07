@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.114 2007/03/31 15:43:02 qqshka Exp $
+ *  $Id: match.c,v 1.115 2007/04/07 17:52:37 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -1541,6 +1541,7 @@ void PrintCountdown( int seconds )
 // Midair     On // optional
 // Jawnmode   On // optional
 // Airstep    On // optional
+// TmOverlay  On // optional
 // Teamplay    x
 // Timelimit  xx
 // Fraglimit xxx
@@ -1584,6 +1585,9 @@ void PrintCountdown( int seconds )
 
 	if ( cvar("pm_airstep") )
 		strlcat(text, va("%s %5s\n", "Airstep", redtext("On")), sizeof(text));
+
+	if ( cvar("k_teamoverlay") )
+		strlcat(text, va("%s %3s\n", "TmOverlay", redtext("On")), sizeof(text));
 
 	if ( !isRA() ) // useless in RA
 	if ( isTeam() || isCTF() )

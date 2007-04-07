@@ -1,3 +1,15 @@
+2007-04-07
+qq:
+252. Teamoverlay changes. Now it may be allowed/disallowed in server.
+
+	 Server variable "k_teamoverlay", 1 - allow, note: specs not affected by this variable.
+
+	 Clients can toggle it with "/teamoverlay" command, if turned ON it printend at countdown.
+
+	 In default configuration this setting does't affected by XonX commands,
+	 so u can't reset it with such commands, unless server admin changed configs somehow.
+	 I've made that specially for promotion such feature. I'm BAD.
+
 2007-03-31
 qq:
 250. In mvdsv was added pm_airstep, "pm_airstep 1" - you able run/jump over stairs, but you loose some speed still.
