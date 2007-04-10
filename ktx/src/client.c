@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.143 2007/04/07 17:52:37 qqshka Exp $
+ *  $Id: client.c,v 1.144 2007/04/10 09:51:27 qqshka Exp $
  */
 
 //===========================================================================
@@ -2743,12 +2743,12 @@ void PlayerPostThink()
 
 #define MAX_MEMBERS (10) // max members per team
 
-// clientNums (clnum origin(3 ints) health armor items)+
+// clnum origin(3 ints) health armor items nick
 void SendTeamInfo(gedict_t *t)
 {
 	int cl, cnt, h, a;
 	gedict_t *p, *s;
-	char *tm;
+	char *tm, *nick;
 
 	s = (t->ct == ctSpec ? PROG_TO_EDICT( t->s.v.goalentity ) : t);
 	if (s->ct != ctPlayer)
@@ -2766,14 +2766,20 @@ void SendTeamInfo(gedict_t *t)
 		if ( strneq(tm, getteam( p )) )
 			continue; // on different team
 
+		if ( strnull( nick = ezinfokey(p, "k_nick") ) ) // get nick, if any, do not send name, client can guess it too
+			nick = ezinfokey(p, "k");
+
+		if (nick[0] && nick[1] && nick[2] && nick[3])
+			nick[4] = 0; // truncate nick to 4 symbols
+
 		cnt++;
 
 		cl = NUM_FOR_EDICT( p ) - 1;
 		h = bound(0, (int)p->s.v.health, 999);
 		a = bound(0, (int)p->s.v.armorvalue, 999);
 
-		stuffcmd( t, "//tinfo %d %d %d %d %d %d %d\n", cl,
-		 (int)p->s.v.origin[0], (int)p->s.v.origin[1], (int)p->s.v.origin[2], h, a, (int)p->s.v.items);
+		stuffcmd( t, "//tinfo %d %d %d %d %d %d %d \"%s\"\n", cl,
+		 (int)p->s.v.origin[0], (int)p->s.v.origin[1], (int)p->s.v.origin[2], h, a, (int)p->s.v.items, nick);
 	}
 }
 
