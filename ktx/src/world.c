@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.83 2007/04/07 17:52:37 qqshka Exp $
+ *  $Id: world.c,v 1.84 2007/04/14 10:17:51 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -758,10 +758,6 @@ void FirstFrame	( )
 	// do not precache models if CTF is not really allowed
 	k_ctf_custom_models = cvar( "k_ctf_custom_models" ) && (k_allowed_free_modes & UM_CTF);
 
-// { RA
-	k_rocketarena = (k_rocketarena = cvar( "k_rocketarena" )) && isRA();
-// }
-
 // use k_defmode or reuse last mode from _k_last_xonx
 	cvar_fset("_k_worldspawns", (int)cvar("_k_worldspawns") + 1);
 
@@ -943,6 +939,7 @@ void FixRA()
 		return; // can't guess here something yet
 
 	if ( framecount == 2 ) {
+		k_rocketarena = (k_rocketarena = cvar( "k_rocketarena" )) && isRA();
 		old_k_rocketarena = isRA(); // ok, save RA status after world spawn, and start check status changes on 3-t frame
 		return;
 	}
