@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.85 2007/05/05 00:02:16 qqshka Exp $
+ *  $Id: world.c,v 1.86 2007/05/05 00:04:27 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -455,10 +455,7 @@ void Customize_Maps()
 	if ( streq( "death32c", g_globalvars.mapname ) )
 		for( p = world; (p = find( p, FOFCLSN, "trigger_teleport" )); )
 			if ( streq( "dm220", p->s.v.target ) )
-			{
-				G_bprint(2, "FIX\n");
 				p->s.v.target = "dm6t1";
-			}
 
 	// Add ctf items to id maps
 	if ( k_allowed_free_modes & UM_CTF )
