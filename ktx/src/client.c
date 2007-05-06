@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.144 2007/04/10 09:51:27 qqshka Exp $
+ *  $Id: client.c,v 1.145 2007/05/06 21:06:08 qqshka Exp $
  */
 
 //===========================================================================
@@ -376,49 +376,18 @@ gedict_t *FindIntermission()
 
 void GotoNextMap()
 {
-	char            *newmap = "";
-	int i;
+	extern  char *SelectMapInCycle(char *buf, int buf_size);
+
+	char	newmap[64] = {0};
 
 	if ( trap_cvar( "samelevel" ) /* == 1 */ )	// if samelevel is set, stay on same level
 		changelevel( g_globalvars.mapname );
 	else
 	{
-		// configurable map lists, see if the current map exists as a
-		// serverinfo/localinfo var
-		// qqshka, i modified this, so if someone select map not in map list and match is ended
-		// we will select some map from map list, nor just stay on current map.
-		// map list have now next syntax:
-		// set k_ml_0 dm6
-		// set k_ml_1 dm4
-		// set k_ml_2 dm2
-		// so this mean we have rotation of maps dm6 dm4 dm2 dm6 dm4 dm2 ...
-
-		for ( i = 0; i<999; i++){
-			newmap = cvar_string( va("k_ml_%d", i) );
-
-			if ( strnull( newmap ) ) { // end of list
-				if ( !i )
-					break; // no map list at all
-				// current map not in map list, so select first entry in map list as next map
-				newmap = cvar_string( "k_ml_0" );
-				break;
-			}
-
-			if ( streq( g_globalvars.mapname, newmap ) ) { // ok map found in map list, select next map
-
-				newmap = cvar_string( va("k_ml_%d", i + 1) );
-
-				if ( strnull( newmap ) ) { // current entry was last - select first entry
-					newmap = cvar_string( "k_ml_0" );
-					break;
-				}
-
-				break;
-			}
-		}
+		SelectMapInCycle(newmap, sizeof(newmap));
 
 		if ( !nextmap[0] ) // so we can reload current map at least
-			strcpy( nextmap, g_globalvars.mapname );
+			strlcpy( nextmap, g_globalvars.mapname, sizeof(nextmap) );
 
 		if ( !strnull( newmap ) )
 			changelevel( newmap );
@@ -551,7 +520,7 @@ void changelevel_touch()
 
 	G_bprint( PRINT_HIGH, "%s exited the level\n", other->s.v.netname );
 
-	strcpy( nextmap, self->map );
+	strlcpy( nextmap, self->map, sizeof(nextmap) );
 	
 	activator = other;
 	SUB_UseTargets();
@@ -598,7 +567,7 @@ void NextLevel()
 	if ( nextmap[0] )
 		return;		// already done
 
-	strcpy( nextmap, g_globalvars.mapname );
+	strlcpy( nextmap, g_globalvars.mapname, sizeof(nextmap) );
 
 	o = spawn();
 	o->map = g_globalvars.mapname;
@@ -611,29 +580,29 @@ void NextLevel()
 	{
 		if ( !trap_cvar( "registered" ) )
 		{
-			strcpy( g_globalvars.mapname, "e1m1" );
+			strlcpy( g_globalvars.mapname, "e1m1", sizeof(g_globalvars.mapname) );
 
 		} else if ( !( ( int ) ( g_globalvars.serverflags ) & 1 ) )
 		{
-			strcpy( g_globalvars.mapname, "e1m1" );
+			strlcpy( g_globalvars.mapname, "e1m1", sizeof(g_globalvars.mapname) );
 			g_globalvars.serverflags =
 			    ( int ) ( g_globalvars.serverflags ) | 1;
 
 		} else if ( !( ( int ) ( g_globalvars.serverflags ) & 2 ) )
 		{
-			strcpy( g_globalvars.mapname, "e2m1" );
+			strlcpy( g_globalvars.mapname, "e2m1", sizeof(g_globalvars.mapname) );
 			g_globalvars.serverflags =
 			    ( int ) ( g_globalvars.serverflags ) | 2;
 
 		} else if ( !( ( int ) ( g_globalvars.serverflags ) & 4 ) )
 		{
-			strcpy( g_globalvars.mapname, "e3m1" );
+			strlcpy( g_globalvars.mapname, "e3m1", sizeof(g_globalvars.mapname) );
 			g_globalvars.serverflags =
 			    ( int ) ( g_globalvars.serverflags ) | 4;
 
 		} else if ( !( ( int ) ( g_globalvars.serverflags ) & 8 ) )
 		{
-			strcpy( g_globalvars.mapname, "e4m1" );
+			strlcpy( g_globalvars.mapname, "e4m1", sizeof(g_globalvars.mapname) );
 			g_globalvars.serverflags =
 			    ( int ) ( g_globalvars.serverflags ) - 7;
 		}
@@ -651,7 +620,7 @@ void NextLevel()
 		}
 	}
 
-	strcpy( nextmap, o->map );
+	strlcpy( nextmap, o->map, sizeof(nextmap) );
 
 	if ( o->s.v.nextthink < g_globalvars.time )
 	{

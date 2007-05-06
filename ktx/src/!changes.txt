@@ -1,3 +1,9 @@
+2007-05-07
+qq:
+253. Changes to map cycle system. Now it more correct if ppl voted for map out of map cycle.
+
+	 plast request
+
 2007-04-07
 qq:
 252. Teamoverlay changes. Now it may be allowed/disallowed in server.

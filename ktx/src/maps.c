@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: maps.c,v 1.17 2006/11/30 08:50:07 qqshka Exp $
+ *  $Id: maps.c,v 1.18 2007/05/06 21:06:09 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -251,3 +251,63 @@ void SelectMap()
 	DoSelectMap ( atoi( arg_1 ) );
 }
 
+int IsMapInCycle(char *map)
+{
+	char newmap[128] = {0}, mapid[128] = {0};
+	int i;
+
+	if ( strnull( map ) )
+		return 0;
+
+	for ( i = 0; i < 1000; i++ ) {
+		snprintf(mapid, sizeof(mapid), "k_ml_%d", i);
+		// huge for(), so using trap version instead of lazy but unsafe cvar_string()
+		trap_cvar_string( mapid, newmap, sizeof(newmap) );
+
+		if ( strnull( newmap ) ) // end of list
+			return 0;
+
+		if ( streq( map, newmap ) ) // ok map found in map list
+			return i + 1; // i may be 0, so returning i + 1
+	}
+
+	return 0;
+}
+
+// map list have now next syntax:
+// set k_ml_0 dm6
+// set k_ml_1 dm4
+// set k_ml_2 dm2
+// so this mean we have rotation of maps dm6 dm4 dm2 dm6 dm4 dm2 ...
+
+char *SelectMapInCycle(char *buf, int buf_size)
+{
+	char newmap[128] = {0}, mapid[128] = {0};
+	int i;
+
+	buf[0] = 0;
+
+	if ( (i = IsMapInCycle( g_globalvars.mapname )) ) { // ok map found in map list, select next map
+
+		snprintf( mapid, sizeof(mapid), "k_ml_%d", i >= 1000 ? 0 : i );
+		trap_cvar_string( mapid, newmap, sizeof(newmap) );
+
+	}
+	else { // map not found in map cycle
+		if ( (i = cvar( "_k_last_cycle_map" )) ) { // try to return to map list at proper point
+    
+			snprintf( mapid, sizeof(mapid), "k_ml_%d", i );
+			trap_cvar_string( mapid, newmap, sizeof(newmap) );
+    
+			if( !IsMapInCycle( newmap ) )
+				newmap[0] = 0; // seems map not in current cycle
+		}
+	}
+
+	if ( strnull( newmap ) ) // last resort, trying get first entry in map list
+		trap_cvar_string( "k_ml_0", newmap, sizeof(newmap) );
+
+	strlcpy(buf, newmap, buf_size);
+
+	return buf;
+}

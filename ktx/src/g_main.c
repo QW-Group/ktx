@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.40 2006/12/27 23:56:27 qqshka Exp $
+ *  $Id: g_main.c,v 1.41 2007/05/06 21:06:09 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -376,7 +376,10 @@ void G_InitGame( int levelTime, int randomSeed )
 
 void G_ShutDown()
 {
+	extern int IsMapInCycle(char *map);
+
 	char *map = g_globalvars.mapname;
+	int i;
 
 	AbortElect();
 
@@ -384,8 +387,8 @@ void G_ShutDown()
 		SetPractice( 0, NULL ); // return server to normal mode
 
 	if ( k_pause ) {
-		G_bprint(2, "No players left, unpausing.\n");
-		ModPause ( 0 ); // no players left, unpause server if paused
+		G_bprint(2, "map change, unpausing.\n");
+		ModPause ( 0 );
 	}
 
 	if ( match_in_progress )
@@ -394,6 +397,9 @@ void G_ShutDown()
 	cvar_set( "_k_lastmap", ( strnull( map ) ? "" : map ) );
 	cvar_fset( "_k_players", CountPlayers());
 	cvar_fset( "_k_pow_last", Get_Powerups() );
+
+	if ( (i = IsMapInCycle( map )) )
+		cvar_fset( "_k_last_cycle_map", i );
 }
 
 

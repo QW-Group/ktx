@@ -1,3 +1,8 @@
+04:33] <Renzo> and uh, can you put this somewhere up too so you'd remember
+04:33] <Renzo> cmd uinfo should reveal
+04:33] <Renzo> client, possible qizmo, team and rate
+04:34] <Renzo> there are some other things that can be seen by ktpro like pmodels, w_/b_switch, top/bottomcolor and even noaim
+04:34] <Renzo> but those are irrelevant
 ----------------------------------------------
 тока что нашел багу, точнее особенность,
 	localcmd( "localinfo xxx yyy\n" );

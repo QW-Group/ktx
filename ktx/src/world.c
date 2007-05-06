@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.86 2007/05/05 00:04:27 qqshka Exp $
+ *  $Id: world.c,v 1.87 2007/05/06 21:06:09 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -608,6 +608,8 @@ void FirstFrame	( )
 
 	RegisterCvar("_k_last_xonx"); // internal usage, save last XonX command
 	RegisterCvar("_k_lastmap");	  // internal usage, name of last map
+	RegisterCvar("_k_last_cycle_map");  // internal usage, name of last map in map cycle,
+										// so we can back to map cycle if someone voted for map not in map cycle
 	RegisterCvar("_k_worldspawns"); // internal usage, count of maps server spawned
 	RegisterCvar("_k_players");   // internal usage, count of players on last map
 	RegisterCvar("_k_pow_last");  // internal usage, k_pow from last map
