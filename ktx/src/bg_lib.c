@@ -1,5 +1,5 @@
 /*
- * $Id: bg_lib.c,v 1.12 2006/11/20 11:19:04 qqshka Exp $
+ * $Id: bg_lib.c,v 1.13 2007/06/06 02:09:59 disconn3ct Exp $
  */
 
 // Copyright (C) 1999-2000 Id Software, Inc.
@@ -112,6 +112,7 @@ med3(a, b, c, cmp)
               :(cmp(b, c) > 0 ? b : (cmp(a, c) < 0 ? a : c ));
 }
 
+#if (_MSC_VER && (_MSC_VER < 1400))
 void qsort(void *a, size_t n, size_t es, cmp_t *cmp)
 {
 	char *pa, *pb, *pc, *pd, *pl, *pm, *pn;
@@ -189,6 +190,7 @@ loop:	SWAPINIT(a, es);
 	}
 /*		qsort(pn - r, r / es, es, cmp);*/
 }
+#endif // _MSC_VER && _MSC_VER < 1400
 
 //==================================================================================
 
@@ -308,7 +310,7 @@ int toupper( int c ) {
 #endif
 //#ifndef _MSC_VER
 
-#ifndef __APPLE__
+#if ((!__APPLE__) && (_MSC_VER && (_MSC_VER < 1400)))
 void *memmove( void *dest, const void *src, size_t count ) {
 	int		i;
 
@@ -788,6 +790,7 @@ double tan( double x ) {
 
 static int randSeed = 0;
 
+#if (_MSC_VER && (_MSC_VER < 1400))
 void	srand( unsigned seed ) {
 	randSeed = seed;
 }
@@ -863,6 +866,7 @@ double atof( const char *string ) {
 
 	return value * sign;
 }
+#endif // _MSC_VER && _MSC_VER < 1400
 
 double _atof( const char **stringPtr ) {
 	const char	*string;
@@ -1412,7 +1416,7 @@ int snprintf(char *buffer, size_t count, char const *format, ...)
 #ifdef _WIN32
 
 // ripped from VVD code
-
+#if (_MSC_VER && (_MSC_VER < 1400))
 int vsnprintf(char *buffer, size_t count, const char *format, va_list argptr)
 {
 	int ret;
@@ -1424,7 +1428,7 @@ int vsnprintf(char *buffer, size_t count, const char *format, va_list argptr)
 
 	return ret;
 }
-
+#endif // _MSC_VER && _MSC_VER < 1400
 
 int snprintf(char *buffer, size_t count, char const *format, ...)
 {
@@ -1441,7 +1445,6 @@ int snprintf(char *buffer, size_t count, char const *format, ...)
 
 	return ret;
 }
-
 #endif // _WIN32
 
 #endif // Q3_VM

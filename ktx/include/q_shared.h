@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: q_shared.h,v 1.2 2005/10/05 18:50:30 qqshka Exp $
+ *  $Id: q_shared.h,v 1.3 2007/06/06 02:09:48 disconn3ct Exp $
  */
 
 #ifndef __Q_SHARED_H
@@ -29,9 +29,10 @@
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4305)		// truncation from const double to float
+#pragma warning(disable : 4996)		// MSVS8 warnings about POSIX functions
 #endif
 
 /**********************************************************************
