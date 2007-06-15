@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.104 2007/06/06 02:09:48 disconn3ct Exp $
+ *  $Id: g_local.h,v 1.105 2007/06/15 12:59:02 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -177,9 +177,9 @@ typedef union fi_s
 #if defined( Q3_VM ) || defined( _WIN32 )
 // other cases must have native support
 
-#if (_MSC_VER && (_MSC_VER < 1400))
+#if (defined(Q3_VM) || (_MSC_VER && (_MSC_VER < 1400)))
 int vsnprintf(char *buffer, size_t count, const char *format, va_list argptr);
-#endif // _MSC_VER && _MSC_VER < 1400
+#endif // defined(Q3_VM)) || (_MSC_VER && _MSC_VER < 1400)
 int snprintf(char *buffer, size_t count, char const *format, ...);
 
 #endif
