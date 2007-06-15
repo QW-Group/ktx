@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_syscalls.h,v 1.7 2006/11/26 19:21:51 qqshka Exp $
+ *  $Id: g_syscalls.h,v 1.8 2007/06/15 16:03:55 qqshka Exp $
  */
 
 int     trap_GetApiVersion(  );
@@ -121,4 +121,9 @@ int 	trap_SetBotCMD( int edn,int msec, float angles_x, float angles_y, float ang
 int QVMstrftime( char *valbuff, int sizebuff, const char *fmt, int offset );
 
 void trap_makevectors( float *v );
+
+#if defined( __linux__ ) || defined( _WIN32 ) /* || defined( __APPLE__ ) require?*/
+size_t strlcpy(char *dst, char *src, size_t siz);
+size_t strlcat(char *dst, char *src, size_t siz);
+#endif
 

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.115 2007/04/07 17:52:37 qqshka Exp $
+ *  $Id: match.c,v 1.116 2007/06/15 16:03:56 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -820,7 +820,7 @@ void s2di( const char *fmt, ... )
 	char    text[1024];
 
 	va_start( argptr, fmt );
-	vsnprintf( text, sizeof(text), fmt, argptr );
+	Q_vsnprintf( text, sizeof(text), fmt, argptr );
 	va_end( argptr );
 
 	text[sizeof(text)-1] = 0;

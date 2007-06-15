@@ -163,26 +163,6 @@
 				RelativePath="src\arena.c">
 			</File>
 			<File
-				RelativePath="src\bg_lib.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;QWPROGS_EXPORTS;$(NoInherit)"
-						BasicRuntimeChecks="3"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;QWPROGS_EXPORTS;$(NoInherit)"/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="src\buttons.c">
 				<FileConfiguration
 					Name="Debug|Win32">

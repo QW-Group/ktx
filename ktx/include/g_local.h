@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.105 2007/06/15 12:59:02 qqshka Exp $
+ *  $Id: g_local.h,v 1.106 2007/06/15 16:03:55 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -172,24 +172,30 @@ typedef union fi_s
 	int			_int;
 } fi_t;	
 
+
+#if defined( Q3_VM )
+
 // bg_lib.c
 
-#if defined( Q3_VM ) || defined( _WIN32 )
-// other cases must have native support
-
-#if (defined(Q3_VM) || (_MSC_VER && (_MSC_VER < 1400)))
-int vsnprintf(char *buffer, size_t count, const char *format, va_list argptr);
-#endif // defined(Q3_VM)) || (_MSC_VER && _MSC_VER < 1400)
+int Q_vsnprintf(char *buffer, size_t count, const char *format, va_list argptr);
 int snprintf(char *buffer, size_t count, char const *format, ...);
 
-#endif
+#else
 
-#if defined( __linux__ ) || defined( _WIN32 ) || defined( Q3_VM )
+// native_lib.c
 
-size_t strlcpy(char *dst, char *src, size_t siz);
-size_t strlcat(char *dst, char *src, size_t siz);
+	#if defined( _WIN32 )
 
-#endif
+		int Q_vsnprintf(char *buffer, size_t count, const char *format, va_list argptr);
+		int snprintf(char *buffer, size_t count, char const *format, ...);
+
+	#else
+
+		#define Q_vsnprintf vsnprintf
+
+	#endif // defined( _WIN32 )
+
+#endif // !defined( Q3_VM )
 
 //g_utils.c
 

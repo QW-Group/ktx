@@ -104,10 +104,6 @@ SOURCE=src/arena.c
 
 # Begin Source File
 
-SOURCE=src/bg_lib.c
-# End Source File
-# Begin Source File
-
 SOURCE=src/buttons.c
 # End Source File
 # Begin Source File

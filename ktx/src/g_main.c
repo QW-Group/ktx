@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_main.c,v 1.41 2007/05/06 21:06:09 qqshka Exp $
+ *  $Id: g_main.c,v 1.42 2007/06/15 16:03:55 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -302,7 +302,7 @@ void G_Printf( const char *fmt, ... )
 	char            text[1024];
 
 	va_start( argptr, fmt );
-	vsnprintf( text, sizeof( text ), fmt, argptr );
+	Q_vsnprintf( text, sizeof( text ), fmt, argptr );
 	va_end( argptr );
 
 	trap_DPrintf( text );
@@ -314,7 +314,7 @@ void G_Error( const char *fmt, ... )
 	char            text[1024];
 
 	va_start( argptr, fmt );
-	vsnprintf( text, sizeof( text ), fmt, argptr );
+	Q_vsnprintf( text, sizeof( text ), fmt, argptr );
 	va_end( argptr );
 
 	trap_Error( text );
@@ -326,7 +326,7 @@ void Com_Error( int level, const char *error, ... )
 	char            text[1024];
 
 	va_start( argptr, error );
-	vsnprintf( text, sizeof( text ), error, argptr );
+	Q_vsnprintf( text, sizeof( text ), error, argptr );
 	va_end( argptr );
 
 	G_Error( "%s", text );
@@ -338,7 +338,7 @@ void Com_Printf( const char *msg, ... )
 	char            text[1024];
 
 	va_start( argptr, msg );
-	vsnprintf( text, sizeof( text ), msg, argptr );
+	Q_vsnprintf( text, sizeof( text ), msg, argptr );
 	va_end( argptr );
 
 	G_Printf( "%s", text );

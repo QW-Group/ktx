@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_syscalls.c,v 1.9 2006/11/26 19:21:54 qqshka Exp $
+ *  $Id: g_syscalls.c,v 1.10 2007/06/15 16:03:55 qqshka Exp $
  */
 
 //#include "g_local.h"
@@ -433,3 +433,16 @@ void trap_makevectors( float *v )
 {
 	syscall( G_MAKEVECTORS, (int)v );
 }
+
+#if defined( __linux__ ) || defined( _WIN32 ) /* || defined( __APPLE__ ) require?*/
+size_t strlcpy(char *dst, char *src, size_t siz)
+{
+	return syscall( g_strlcpy, (int)dst, (int)src, (int)siz );
+}
+
+size_t strlcat(char *dst, char *src, size_t siz)
+{
+	return syscall( g_strlcat, (int)dst, (int)src, (int)siz );
+}
+#endif
+

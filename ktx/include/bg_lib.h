@@ -1,5 +1,5 @@
 //
-// $Id: bg_lib.h,v 1.4 2006/08/18 00:50:46 qqshka Exp $
+// $Id: bg_lib.h,v 1.5 2007/06/15 16:03:55 qqshka Exp $
 //
 
 // bg_lib.h -- standard C library replacement routines used by code
@@ -31,8 +31,6 @@ typedef char *  va_list;
 #define ULONG_MAX     0xffffffffUL  /* maximum unsigned long value */
 
 // Misc functions
-typedef int cmp_t(const void *, const void *);
-void qsort(void *a, size_t n, size_t es, cmp_t *cmp);
 void	srand( unsigned seed );
 int		rand( void );
 
@@ -50,9 +48,7 @@ int toupper( int c );
 #define isdigit( c )	( (c) >= '0' && (c) <= '9' )
 
 double atof( const char *string );
-double _atof( const char **stringPtr );
 int atoi( const char *string );
-int _atoi( const char **stringPtr );
 
 int vsprintf( char *buffer, const char *fmt, va_list argptr );
 int sscanf( const char *buffer, const char *fmt, ... );
@@ -63,14 +59,14 @@ void *memset( void *dest, int c, size_t count );
 void *memcpy( void *dest, const void *src, size_t count );
 
 // Math functions
-double ceil( double x );
-double floor( double x );
-double sqrt( double x );
-double sin( double x );
-double cos( double x );
-double atan2( double y, double x );
-double tan( double x );
-int abs( int n );
-double fabs( double x );
-double acos( double x );
+double	ceil( double x );
+double	floor( double x );
+double	sqrt( double x );
+double	sin( double x );
+double	cos( double x );
+double	atan2( double y, double x );
+double	tan( double x );
+int		abs( int n );
+double	fabs( double x );
+double	acos( double x );
 
