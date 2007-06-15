@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.40 2007/03/24 23:09:40 qqshka Exp $
+ *  $Id: combat.c,v 1.41 2007/06/15 16:47:22 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -39,6 +39,8 @@ explosions and melee attacks.
 */
 qboolean CanDamage( gedict_t * targ, gedict_t * inflictor )
 {
+	vec3_t	dif;
+
 // bmodels need special checking because their origin is 0,0,0
 	if ( targ->s.v.movetype == MOVETYPE_PUSH )
 	{
@@ -58,11 +60,11 @@ qboolean CanDamage( gedict_t * targ, gedict_t * inflictor )
 		return false;
 	}
 
-	traceline( PASSVEC3( inflictor->s.v.origin ), PASSVEC3( targ->s.v.origin ),
-			true, self );
+	traceline( PASSVEC3( inflictor->s.v.origin ), PASSVEC3( targ->s.v.origin ),	true, self );
 	if ( g_globalvars.trace_fraction == 1 )
 		return true;
 
+/*
 	traceline( PASSVEC3( inflictor->s.v.origin ),
 			targ->s.v.origin[0] + 15, targ->s.v.origin[1] + 15,
 			targ->s.v.origin[2] + 0, true, self );
@@ -86,7 +88,107 @@ qboolean CanDamage( gedict_t * targ, gedict_t * inflictor )
 			targ->s.v.origin[2] + 0, true, self );
 	if ( g_globalvars.trace_fraction == 1 )
 		return true;
+*/
 
+// 1998-09-16 CanDamage fix by Maddes/Kryten start
+
+	// testing middle of half-size bounding box
+	dif[2] = 0;
+
+	// ...front right
+	dif[1] = targ->s.v.maxs[1] * 0.5;
+	dif[0] = targ->s.v.maxs[0] * 0.5;
+	traceline(PASSVEC3( inflictor->s.v.origin ), 
+		targ->s.v.origin[0] + dif[0], targ->s.v.origin[1] + dif[1], targ->s.v.origin[2] + dif[2], true, self);
+	if ( g_globalvars.trace_fraction == 1 )
+		return true;
+
+	// ...front left
+	dif[0] = targ->s.v.mins[0] * 0.5;
+	traceline(PASSVEC3( inflictor->s.v.origin ),
+		targ->s.v.origin[0] + dif[0], targ->s.v.origin[1] + dif[1], targ->s.v.origin[2] + dif[2], true, self);
+	if ( g_globalvars.trace_fraction == 1 )
+		return true;
+
+	// ...back left
+	dif[1] = targ->s.v.mins[1] * 0.5;
+	traceline(PASSVEC3( inflictor->s.v.origin ),
+		targ->s.v.origin[0] + dif[0], targ->s.v.origin[1] + dif[1], targ->s.v.origin[2] + dif[2], true, self);
+	if ( g_globalvars.trace_fraction == 1 )
+		return true;
+
+	// ...back right
+	dif[0] = targ->s.v.maxs[0] * 0.5;
+	traceline(PASSVEC3( inflictor->s.v.origin ),
+		targ->s.v.origin[0] + dif[0], targ->s.v.origin[1] + dif[1], targ->s.v.origin[2] + dif[2], true, self);
+	if ( g_globalvars.trace_fraction == 1 )
+		return true;
+
+	// testing top of half-sized bounding box
+	dif[2] = targ->s.v.maxs[2] * 0.5;
+
+	// ...front right
+	dif[1] = targ->s.v.maxs[1] * 0.5;
+	dif[0] = targ->s.v.maxs[0] * 0.5;
+	traceline(PASSVEC3( inflictor->s.v.origin ),
+		targ->s.v.origin[0] + dif[0], targ->s.v.origin[1] + dif[1], targ->s.v.origin[2] + dif[2], true, self);
+	if ( g_globalvars.trace_fraction == 1 )
+		return true;
+
+	// ...front left
+	dif[0] = targ->s.v.mins[0] * 0.5;
+	traceline(PASSVEC3( inflictor->s.v.origin ),
+		targ->s.v.origin[0] + dif[0], targ->s.v.origin[1] + dif[1], targ->s.v.origin[2] + dif[2], true, self);
+	if ( g_globalvars.trace_fraction == 1 )
+		return true;
+
+	// ...back left
+	dif[1] = targ->s.v.mins[1] * 0.5;
+	traceline(PASSVEC3( inflictor->s.v.origin ),
+		targ->s.v.origin[0] + dif[0], targ->s.v.origin[1] + dif[1], targ->s.v.origin[2] + dif[2], true, self);
+	if ( g_globalvars.trace_fraction == 1 )
+		return true;
+
+	// ...back right
+	dif[0] = targ->s.v.maxs[0] * 0.5;
+	traceline(PASSVEC3( inflictor->s.v.origin ),
+		targ->s.v.origin[0] + dif[0], targ->s.v.origin[1] + dif[1], targ->s.v.origin[2] + dif[2], true, self);
+	if ( g_globalvars.trace_fraction == 1 )
+		return true;
+
+	// testing bottom of half-sized bounding box
+	dif[2] = targ->s.v.mins[2] * 0.5;
+
+	// ...front right
+	dif[1] = targ->s.v.maxs[1] * 0.5;
+	dif[0] = targ->s.v.maxs[0] * 0.5;
+	traceline(PASSVEC3( inflictor->s.v.origin ),
+		targ->s.v.origin[0] + dif[0], targ->s.v.origin[1] + dif[1], targ->s.v.origin[2] + dif[2], true, self);
+	if ( g_globalvars.trace_fraction == 1 )
+		return true;
+
+	// ...front left
+	dif[0] = targ->s.v.mins[0] * 0.5;
+	traceline(PASSVEC3( inflictor->s.v.origin ),
+		targ->s.v.origin[0] + dif[0], targ->s.v.origin[1] + dif[1], targ->s.v.origin[2] + dif[2], true, self);
+	if ( g_globalvars.trace_fraction == 1 )
+		return true;
+
+	// ...back left
+	dif[1] = targ->s.v.mins[1] * 0.5;
+	traceline(PASSVEC3( inflictor->s.v.origin ),
+		targ->s.v.origin[0] + dif[0], targ->s.v.origin[1] + dif[1], targ->s.v.origin[2] + dif[2], true, self);
+	if ( g_globalvars.trace_fraction == 1 )
+		return true;
+
+	// ...back right
+	dif[0] = targ->s.v.maxs[0] * 0.5;
+	traceline(PASSVEC3( inflictor->s.v.origin ),
+		targ->s.v.origin[0] + dif[0], targ->s.v.origin[1] + dif[1], targ->s.v.origin[2] + dif[2], true, self);
+	if ( g_globalvars.trace_fraction == 1 )
+		return true;
+
+// 1998-09-16 CanDamage fix by Maddes/Kryten end
 
 	return false;
 }
