@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.155 2007/04/07 17:52:37 qqshka Exp $
+ *  $Id: commands.c,v 1.156 2007/06/17 23:14:04 qqshka Exp $
  */
 
 // commands.c
@@ -181,6 +181,7 @@ void fcheck ();
 void mapcycle ();
 void airstep();
 void teamoverlay();
+void ToggleExclusive();
 
 // spec
 void ShowCamHelp();
@@ -423,6 +424,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_JAWNMODE     "toggle jawnmode"
 #define CD_AIRSTEP      "toggle airstep"
 #define CD_TEAMOVERLAY  "toggle teamoverlay"
+#define CD_EXCLUSIVE    "toggle exclusive mode"
 
 
 void dummy() {}
@@ -684,7 +686,8 @@ cmd_t cmds[] = {
 	{ "mapcycle",    mapcycle,                  0    , CF_BOTH | CF_MATCHLESS, CD_MAPCYCLE },
 	{ "jawnmode",    ToggleJawnMode,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_JAWNMODE },
 	{ "airstep",     airstep,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_AIRSTEP },
-	{ "teamoverlay", teamoverlay,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_TEAMOVERLAY }
+	{ "teamoverlay", teamoverlay,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_TEAMOVERLAY },
+	{ "exclusive",   ToggleExclusive,           0    , CF_BOTH_ADMIN, CD_EXCLUSIVE }
 };
 
 #undef DEF
@@ -5334,4 +5337,15 @@ void teamoverlay()
 		return;
 
 	cvar_toggle_msg( self, "k_teamoverlay", redtext("teamoverlay") );
+}
+
+void ToggleExclusive()
+{
+	if ( match_in_progress )
+		return;
+
+	if ( check_master() )
+		return;
+
+	cvar_toggle_msg( self, "k_exclusive", redtext("exclusive mode") );
 }
