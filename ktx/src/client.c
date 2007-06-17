@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.145 2007/05/06 21:06:08 qqshka Exp $
+ *  $Id: client.c,v 1.146 2007/06/17 03:19:41 qqshka Exp $
  */
 
 //===========================================================================
@@ -71,6 +71,9 @@ qboolean CheckRate (gedict_t *p, char *newrate)
 
 	// This is used to check a players rate.  If above allowed setting then it kicks em off.
 	player_rate = atof( strnull(newrate) ? (newrate = ezinfokey(p, "rate" )) : newrate );
+
+	if ( strnull(newrate) )
+		return false; // empty rate is special, with new mvdsv mean maximum allowed, so allow it
 
 	maxrate = cvar( "sv_maxrate" );
 	minrate = cvar( "k_minrate" );
