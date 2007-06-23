@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: client.c,v 1.146 2007/06/17 03:19:41 qqshka Exp $
+ *  $Id: client.c,v 1.147 2007/06/23 17:59:06 qqshka Exp $
  */
 
 //===========================================================================
@@ -2345,6 +2345,8 @@ void PlayerPreThink()
 	    	}
 		}
 	}
+
+	VectorCopy( self->s.v.velocity, self->old_vel );
 }
 
 /////////////////////////////////////////////////////////////////
@@ -2644,8 +2646,31 @@ void PlayerPostThink()
 			gedict_t *gre = PROG_TO_EDICT ( self->s.v.groundentity );
 
 			// set the flag if needed
-           	if( !get_fallbunny() && self->s.v.waterlevel < 2 )
-               	self->brokenankle = 1;  // Yes we have just broken it
+			if ( self->s.v.waterlevel < 2 )
+			{
+				// Jawnmode: fallbunny is always enabled, but with a modification: speed is capped
+				// - Molgrum
+				if ( get_fallbunny() )
+				{
+					if ( k_jawnmode )	// cap only for jawn mode
+					{
+						if ( k_fallbunny_cap )
+						{
+							float vel;
+    
+							self->old_vel[2] = 0;
+							trap_makevectors( self->s.v.v_angle );
+							vel = vlen( self->old_vel ) * ( 1.0 - k_fallbunny_cap / 100.0 );
+    
+							VectorScale( g_globalvars.v_forward, vel, self->s.v.velocity );
+						}
+					}
+				}
+				else
+				{
+					self->brokenankle = 1;  // Yes we have just broken it
+				}
+			}
 
 			self->deathtype = dtFALL;
 			T_Damage( self, world, world, 5 );

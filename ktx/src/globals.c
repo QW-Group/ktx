@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: globals.c,v 1.28 2007/03/31 15:43:02 qqshka Exp $
+ *  $Id: globals.c,v 1.29 2007/06/23 17:59:06 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -50,11 +50,16 @@ int   k_overtime = 0;   // is overtime is going on
 
 float current_maxfps;	// current value of serverinfo maxfps
 
-int       k_jawnmode;	// is server in jawn mode
-int       k_practice;	// is server in practice mode
-int       k_matchLess;	// is server in matchLess mode
+// { jawn mode
+int	k_jawnmode;			// is server in jawn mode
+int	k_fallbunny_cap;	// fallbunny cap procent in jawn mode
+int k_teleport_cap;		// cap for keeping velocity through tele
+// }
+int	k_practice;			// is server in practice mode
+int	k_matchLess;		// is server in matchLess mode
 gameType_t 	  k_mode;   // game type: DUEL, TP, FFA
 int	k_lastvotedmap;		// last voted map, used for agree command?
+
 // { CTF
 int k_ctf_custom_models;// if server has flag/grapple models you can enable them here
 						// http://www.quakeworld.us/ult/ctf/pak0.pak  (only 300kb)

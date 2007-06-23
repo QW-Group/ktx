@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: triggers.c,v 1.24 2006/11/30 17:16:14 qqshka Exp $
+ *  $Id: triggers.c,v 1.25 2007/06/23 17:59:06 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -501,8 +501,27 @@ void teleport_touch()
 		other->s.v.teleport_time = g_globalvars.time + 0.7;
 		if ( ( int ) other->s.v.flags & FL_ONGROUND )
 			other->s.v.flags = other->s.v.flags - FL_ONGROUND;
-		VectorScale( g_globalvars.v_forward, 300, other->s.v.velocity );
-		//  other->s.v.velocity = v_forward * 300;
+
+		// Jawnmode: preserve velocity, I'm copying my own mod's code since i found it interesting to play with
+		// - Molgrum
+		if ( k_jawnmode )
+		{
+			float	vel;
+
+			// Scale the original speed like airstep does
+			other->s.v.velocity[2] = 0;
+			vel = vlen( other->s.v.velocity ) * ( 1.0 - k_teleport_cap / 100.0 );
+			
+			// Only preserve speed above 300
+			vel = max(300, vel);
+			
+			VectorScale( g_globalvars.v_forward, vel, other->s.v.velocity );
+		}
+		else
+		{
+			//  other->s.v.velocity = v_forward * 300;
+			VectorScale( g_globalvars.v_forward, 300, other->s.v.velocity );
+		}
 	}
 	other->s.v.flags -= ( int ) other->s.v.flags & FL_ONGROUND;
 }

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.156 2007/06/17 23:14:04 qqshka Exp $
+ *  $Id: commands.c,v 1.157 2007/06/23 17:59:06 qqshka Exp $
  */
 
 // commands.c
@@ -138,7 +138,12 @@ void lastscores ();
 void motd_show ();
 
 void TogglePractice();
+
+// { jawn mode
 void ToggleJawnMode();
+void setFallbunnyCap();
+void setTeleportCap();
+// }
 
 void infolock ();
 void infospec ();
@@ -422,6 +427,8 @@ const char CD_NODESC[] = "no desc";
 #define CD_NEXT_MAP     "vote for next map"
 #define CD_MAPCYCLE     "list map cycle"
 #define CD_JAWNMODE     "toggle jawnmode"
+#define CD_FALLBUNNYCAP "set fallbunny cap (jawn)"
+#define CD_TELEPORTCAP  "set teleport cap (jawn)"
 #define CD_AIRSTEP      "toggle airstep"
 #define CD_TEAMOVERLAY  "toggle teamoverlay"
 #define CD_EXCLUSIVE    "toggle exclusive mode"
@@ -685,6 +692,8 @@ cmd_t cmds[] = {
 	{ "next_map",    PlayerBreak,               0    , CF_PLAYER | CF_MATCHLESS_ONLY, CD_NEXT_MAP },
 	{ "mapcycle",    mapcycle,                  0    , CF_BOTH | CF_MATCHLESS, CD_MAPCYCLE },
 	{ "jawnmode",    ToggleJawnMode,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_JAWNMODE },
+	{ "fallbunnycap",setFallbunnyCap,           0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_FALLBUNNYCAP },
+	{ "teleportcap", setTeleportCap,            0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_TELEPORTCAP },
 	{ "airstep",     airstep,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_AIRSTEP },
 	{ "teamoverlay", teamoverlay,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_TEAMOVERLAY },
 	{ "exclusive",   ToggleExclusive,           0    , CF_BOTH_ADMIN, CD_EXCLUSIVE }
@@ -5303,20 +5312,6 @@ void mapcycle ()
 		G_sprint(self, 2, 	"\n%s: %s\n", redtext("Map cycle"), redtext("not active"));
 }
 
-// Toggle jawnmode, implemented by Molgrum
-void ToggleJawnMode()
-{
-	if ( match_in_progress )
-		return;
-
-	if ( check_master() )
-		return;
-
-	cvar_toggle_msg( self, "k_jawnmode", redtext("jawnmode") );
-
-	k_jawnmode = cvar("k_jawnmode"); // apply changes ASAP
-}
-
 void airstep()
 {
 	if ( match_in_progress )
@@ -5349,3 +5344,87 @@ void ToggleExclusive()
 
 	cvar_toggle_msg( self, "k_exclusive", redtext("exclusive mode") );
 }
+
+// { jawn mode related
+
+void FixJawnMode()
+{
+	k_jawnmode		= cvar( "k_jawnmode");
+	k_fallbunny_cap	= bound( 0, cvar( "k_fallbunny_cap" ), 100 );
+	k_teleport_cap 	= bound( 0, cvar( "k_teleport_cap" ),  100 );
+}
+
+// Toggle jawnmode, implemented by Molgrum
+void ToggleJawnMode()
+{
+	if ( match_in_progress )
+		return;
+
+	if ( check_master() )
+		return;
+
+	cvar_toggle_msg( self, "k_jawnmode", redtext("jawnmode") );
+
+	FixJawnMode(); // apply changes ASAP
+}
+
+void setFallbunnyCap()
+{
+	char arg[256];
+
+	if ( !k_jawnmode )
+	{
+		G_sprint( self, 2, "%s required to be on\n", redtext("Jawn mode") );
+		return;
+	}
+
+	if ( match_in_progress || trap_CmdArgc() < 1 )
+	{
+		G_sprint( self, 2, "%s is %d%%\n", redtext("Fallbunny cap"), k_fallbunny_cap );
+		return;
+	}
+
+	if ( check_master() )
+		return;
+	
+	trap_CmdArgv( 1, arg, sizeof( arg ) );
+	k_fallbunny_cap = atoi( arg ); // get user input
+	k_fallbunny_cap = bound( 0, k_fallbunny_cap, 100 ); // bound
+	cvar_fset( "k_fallbunny_cap", k_fallbunny_cap ); // set
+
+	FixJawnMode(); // apply changes ASAP
+
+	G_bprint( 2, "%s set %s to %d%%\n", self->s.v.netname, redtext("Fallbunny cap"), k_fallbunny_cap ); // and print
+}
+
+void setTeleportCap()
+{
+	char arg[256];
+
+	if ( !k_jawnmode )
+	{
+		G_sprint( self, 2, "%s required to be on\n", redtext("Jawn mode") );
+		return;
+	}
+
+	if ( match_in_progress || trap_CmdArgc() < 1 )
+	{
+		G_sprint( self, 2, "%s is %d%%\n", redtext("Teleport cap"), k_teleport_cap );
+		return;
+	}
+
+	if ( check_master() )
+		return;
+	
+	trap_CmdArgv( 1, arg, sizeof( arg ) );
+	k_teleport_cap = atoi( arg ); // get user input
+	k_teleport_cap = bound( 0, k_teleport_cap, 100 ); // bound
+	cvar_fset( "k_teleport_cap", k_teleport_cap ); // set
+
+	FixJawnMode(); // apply changes ASAP
+
+	G_bprint( 2, "%s set %s to %d%%\n", self->s.v.netname, redtext("Teleport cap"), k_teleport_cap ); // and print
+}
+
+// }
+

@@ -1,3 +1,14 @@
+2007-06-23
+qq:
+255. Jawn mode changes, and ONLY jawn mode, does't affect gameplay if jawn mode not activated.
+
+	 - preserve speed when walk through tele, use "/teleportcap [value]" 
+	   to set/get appropriate procent. Server variable is "k_teleport_cap" from 0 to 100.
+	 - procent of fallbunny may be controlled via "/fallbunnycap [value]".
+	   Server variable is "k_fallbunny_cap" from 0 to 100.
+
+	 Molgrum's patch, modifed by me
+
 2007-06-18
 qq:
 254. Added admin "/exclusive" command for "k_exclusive" variable.

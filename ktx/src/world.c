@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.87 2007/05/06 21:06:09 qqshka Exp $
+ *  $Id: world.c,v 1.88 2007/06/23 17:59:06 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -730,7 +730,11 @@ void FirstFrame	( )
 	RegisterCvar("k_dmm4_gren_mode");
 	RegisterCvar("k_fp"); // say team floodprot
 
-	RegisterCvar("k_jawnmode"); // jawnmode implementation by Molgrum
+// { jawnmode implementation by Molgrum
+	RegisterCvar("k_jawnmode");
+	RegisterCvar("k_fallbunny_cap");
+	RegisterCvar("k_teleport_cap");
+// }
 
 	RegisterCvar("k_teamoverlay"); // q3 like team overlay
 
@@ -1033,6 +1037,8 @@ int skip_fixrules = 0;
 // check if server is misconfigured somehow, made some minimum fixage
 void FixRules ( )
 {
+	extern void FixJawnMode();
+
 	gameType_t km = k_mode = cvar( "k_mode" );
 	int k_tt = bound( 0, cvar( "k_timetop" ), 600 );
 	int	tp   = teamplay  = cvar( "teamplay" );
@@ -1042,7 +1048,7 @@ void FixRules ( )
 	int k_minr = bound(0, cvar( "k_minrate" ),  100000);
 	int k_maxr = bound(0, cvar( "sv_maxrate" ), 100000);	
 
-	k_jawnmode = cvar( "k_jawnmode");
+	FixJawnMode(); // jawn mode
 
     k_maxspeed = cvar( "sv_maxspeed" );
 

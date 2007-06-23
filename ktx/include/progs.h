@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.61 2007/03/19 04:07:45 qqshka Exp $
+ *  $Id: progs.h,v 1.62 2007/06/23 17:59:05 qqshka Exp $
  */
 
 #include "progdefs.h"
@@ -500,6 +500,8 @@ typedef struct gedict_s {
 // }
 
 	char *f_checkbuf;	// for /cmd check f_xxx
+
+	vec3_t old_vel;			// store pre physicsthink velocity
 
 } gedict_t;
 

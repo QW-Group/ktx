@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.106 2007/06/15 16:03:55 qqshka Exp $
+ *  $Id: g_local.h,v 1.107 2007/06/23 17:59:05 qqshka Exp $
  */
 
 // g_local.h -- local definitions for game module
@@ -776,7 +776,12 @@ extern	int   k_overtime;		// is overtime is going on
 
 extern	float current_maxfps;	// current value of serverinfo maxfps
 
+// { jawn mode
 extern	int   k_jawnmode;		// is server in jawn mode
+extern	int   k_fallbunny_cap;	// fallbunny cap procent in jawn mode
+extern	int   k_teleport_cap;	// cap for keeping velocity through tele
+// }
+
 extern	int   k_practice;		// is server in practice mode
 extern	int   k_matchLess;	    // is server in matchLess mode
 extern  gameType_t 	  k_mode;   // game type: DUEL, TP, FFA
