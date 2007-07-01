@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: commands.c,v 1.157 2007/06/23 17:59:06 qqshka Exp $
+ *  $Id: commands.c,v 1.158 2007/07/01 23:22:25 qqshka Exp $
  */
 
 // commands.c
@@ -615,7 +615,7 @@ cmd_t cmds[] = {
 	{ "auto_pow",    DEF(AutoTrack),        atPow    , CF_SPECTATOR | CF_MATCHLESS, CD_AUTO_POW },
 	{ "next_best",   next_best,                 0    , CF_SPECTATOR | CF_MATCHLESS, CD_NEXT_BEST },
 	{ "next_pow",    next_pow,                  0    , CF_SPECTATOR | CF_MATCHLESS, CD_NEXT_POW },
-	{ "lastscores",  lastscores,                0    , CF_BOTH | CF_MATCHLESS, CD_LASTSCORES },
+	{ "lastscores",  lastscores,                0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_LASTSCORES },
 	{ "rnd",         krnd,                      0    , CF_BOTH | CF_PARAMS, CD_RND },
 	{ "agree",       agree_on_map,              0    , CF_PLAYER | CF_MATCHLESS, CD_AGREE },
 	{ "pos_show",    Pos_Show,                  0    , CF_BOTH | CF_PARAMS, CD_POS_SHOW },
@@ -4377,6 +4377,7 @@ void lastscores ()
 	int i, j, cnt;
 	int k_ls = bound(0, cvar("__k_ls"), MAX_LASTSCORES-1);
 	char *e1, *e2, *le1, *le2, *t1, *t2, *lt1, *lt2, *sc;
+	qboolean extended = (trap_CmdArgc() > 1); // if they specified some params, then use extended version
 	lsType_t last = lsUnknown;
 	lsType_t cur  = lsUnknown;
 
@@ -4415,7 +4416,7 @@ void lastscores ()
 		// generally show members one time while show scores for each played map,
 		// but if squad changed from previuos map, show members again,
 		// so we know which squad played each map.
-		if ( cur == lsTeam || cur == lsCTF ) {
+		if ( extended && ( cur == lsTeam || cur == lsCTF ) ) {
 			if ( strneq(lt1 , t1) ) // first team
 				G_sprint(self, 2, " %4.4s:%s\n", e1, t1);
 

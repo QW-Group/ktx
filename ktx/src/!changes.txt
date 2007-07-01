@@ -6,6 +6,11 @@ qq:
 
 	 Tonik's request
 
+258. Changing "/lastscores" layout. If u specify at least one param (does't matter what u use)
+	 then will be used old version.
+
+	 Renzo's and Co requests
+
 2007-06-23
 qq:
 255. Jawn mode changes, and ONLY jawn mode, does't affect gameplay if jawn mode not activated.
