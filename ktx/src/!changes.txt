@@ -2,6 +2,10 @@
 qq:
 256. Jawn mode changes, we drop weapon model instead of pack now.
 
+257. Stop MOTD if u press fire button.
+
+	 Tonik's request
+
 2007-06-23
 qq:
 255. Jawn mode changes, and ONLY jawn mode, does't affect gameplay if jawn mode not activated.

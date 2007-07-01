@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: motd.c,v 1.23 2006/11/29 06:47:18 qqshka Exp $
+ *  $Id: motd.c,v 1.24 2007/07/01 22:09:21 qqshka Exp $
  */
 
 // motd.c
@@ -33,6 +33,7 @@ void PMOTDThink()
 	if( self->attack_finished < g_globalvars.time // expired
     	|| ( !k_matchLess && match_in_progress )  // non matchless and (match has began or countdown)
 	   	|| ( k_matchLess && match_in_progress == 1 ) // matchless and countdown
+		|| PROG_TO_EDICT( self->s.v.owner )->attack_finished > g_globalvars.time // player fire something, so he wanna play, not reading motd
 	  ) {
 		if ( self->attack_finished < g_globalvars.time )
 			G_centerprint ( PROG_TO_EDICT( self->s.v.owner ), "");
