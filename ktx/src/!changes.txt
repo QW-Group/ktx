@@ -1,3 +1,7 @@
+2007-07-02
+qq:
+256. Jawn mode changes, we drop weapon model instead of pack now.
+
 2007-06-23
 qq:
 255. Jawn mode changes, and ONLY jawn mode, does't affect gameplay if jawn mode not activated.

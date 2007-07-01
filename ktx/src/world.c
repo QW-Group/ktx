@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: world.c,v 1.88 2007/06/23 17:59:06 qqshka Exp $
+ *  $Id: world.c,v 1.89 2007/07/01 20:59:04 qqshka Exp $
  */
 
 #include "g_local.h"
@@ -362,6 +362,14 @@ void SP_worldspawn()
 
 // quad mdl - need this due to aerowalk customize
 	trap_precache_model( "progs/quaddama.mdl" );
+
+// g_models required for jawnmode weapondrops
+	trap_precache_model( "progs/g_shot.mdl" );
+	trap_precache_model( "progs/g_nail.mdl" );
+	trap_precache_model( "progs/g_nail2.mdl" );
+	trap_precache_model( "progs/g_rock.mdl" );
+	trap_precache_model( "progs/g_rock2.mdl" );
+	trap_precache_model( "progs/g_light.mdl" );
 
 //
 // Setup light animation tables. 'a' is total darkness, 'z' is maxbright.
