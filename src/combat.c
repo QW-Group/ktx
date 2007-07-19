@@ -539,7 +539,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	{
 		if ( attacker != targ )
 		{
-			if ( streq(attackerteam, targteam) && !isDuel() )
+			if ( streq(attackerteam, targteam) && !isDuel() && !isFFA() )
 				attacker->ps.dmg_team += dmg_dealt;
 			else 
 			{
