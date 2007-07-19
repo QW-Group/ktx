@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="qwprogs"
 	ProjectGUID="{78438C94-7170-4030-A6B9-D288BF262FE9}"
 	RootNamespace="qwprogs"
@@ -16,13 +16,13 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="Debug"
-			IntermediateDirectory="Debug"
+			OutputDirectory="Debug_80"
+			IntermediateDirectory="Debug_80"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
+			DeleteExtensionsOnClean="*.obj;*.ilk;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.cod;*.sbr;*.dep;*.bsc;*.res;*.manifest;$(TargetPath)"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -49,18 +49,23 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_USRDLL;QWPROGS_EXPORTS"
+				PreprocessorDefinitions="_DEBUG;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;_CRT_DISABLE_PERFCRIT_LOCKS;QWPROGS_EXPORTS"
+				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
+				DefaultCharIsUnsigned="false"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="Debug/qwprogs.pch"
-				AssemblerListingLocation="Debug/"
-				ObjectFile="Debug/"
-				ProgramDataBaseFileName="Debug/"
+				PrecompiledHeaderFile="$(IntDir)\qwprogs.pch"
+				AssemblerOutput="0"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
+				BrowseInformation="0"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
-				CompileAs="0"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -75,13 +80,18 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="../qwprogs.dll"
-				LinkIncremental="0"
+				OutputFile="$(IntDir)\qwprogs.dll"
+				LinkIncremental="2"
 				SuppressStartupBanner="true"
+				GenerateManifest="false"
+				IgnoreAllDefaultLibraries="false"
 				ModuleDefinitionFile="src\game.def"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="Debug/qwprogs.pdb"
-				ImportLibrary="Debug/qwprogs.lib"
+				ProgramDatabaseFile="$(IntDir)\qwprogs.pdb"
+				GenerateMapFile="true"
+				MapFileName="$(IntDir)\qwprogs.map"
+				SubSystem="0"
+				ImportLibrary=""
 				TargetMachine="1"
 			/>
 			<Tool
@@ -89,6 +99,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				EmbedManifest="false"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -111,13 +122,14 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="Release"
-			IntermediateDirectory="Release"
+			OutputDirectory="Release_80"
+			IntermediateDirectory="Release_80"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
+			DeleteExtensionsOnClean="*.obj;*.ilk;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.cod;*.sbr;*.dep;*.bsc;*.res;*.manifest;$(TargetPath)"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -144,22 +156,26 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
+				OmitFramePointers="true"
+				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_USRDLL;QWPROGS_EXPORTS"
+				PreprocessorDefinitions="NDEBUG;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;_CRT_DISABLE_PERFCRIT_LOCKS;QWPROGS_EXPORTS"
 				StringPooling="true"
 				ExceptionHandling="0"
 				RuntimeLibrary="2"
-				EnableFunctionLevelLinking="true"
+				EnableFunctionLevelLinking="false"
+				DefaultCharIsUnsigned="false"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="Release/qwprogs.pch"
-				AssemblerListingLocation="Release/"
-				ObjectFile="Release/"
-				ProgramDataBaseFileName="Release/"
+				PrecompiledHeaderFile="$(IntDir)\qwprogs.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\"
+				BrowseInformation="0"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				CompileAs="1"
-				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -174,15 +190,22 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="../qwprogs.dll"
+				OutputFile="$(IntDir)\qwprogs.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
+				GenerateManifest="false"
+				IgnoreAllDefaultLibraries="false"
 				ModuleDefinitionFile="src\game.def"
-				ProgramDatabaseFile="Release/qwprogs.pdb"
+				ProgramDatabaseFile="$(IntDir)\qwprogs.pdb"
+				GenerateMapFile="true"
+				MapFileName="$(IntDir)\qwprogs.map"
+				SubSystem="0"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				OptimizeForWindows98="1"
-				ImportLibrary="Release/qwprogs.lib"
+				LinkTimeCodeGeneration="1"
+				SetChecksum="true"
+				ImportLibrary=""
 				TargetMachine="1"
 			/>
 			<Tool
@@ -190,6 +213,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				EmbedManifest="false"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
