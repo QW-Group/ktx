@@ -336,21 +336,21 @@ void armor_touch()
 	if ( !strcmp( self->s.v.classname, "item_armor1" ) )
 	{
 		armor = &(other->ps.itm[itGA].tooks);
-		type = (k_jawnmode ? 0.5 : 0.3); // Jawnmode: changed armor protection
+		type = (k_jawnmode ? 0.4 : 0.3); // Jawnmode: changed armor protection
 		value = 100;
 		bit = IT_ARMOR1;
 	}
 	else if ( !strcmp( self->s.v.classname, "item_armor2" ) )
 	{
 		armor = &(other->ps.itm[itYA].tooks);
-		type = (k_jawnmode ? 0.67 : 0.6); // Jawnmode: changed armor protection
+		type = (k_jawnmode ? 0.6 : 0.6); // Jawnmode: changed armor protection
 		value = 150;
 		bit = IT_ARMOR2;
 	}
 	else if ( !strcmp( self->s.v.classname, "item_armorInv" ) )
 	{
 		armor = &(other->ps.itm[itRA].tooks);
-		type = (k_jawnmode ? 0.75 : 0.8); // Jawnmode: changed armor protection
+		type = (k_jawnmode ? 0.8 : 0.8); // Jawnmode: changed armor protection
 		value = 200;
 		bit = IT_ARMOR3;
 	}
