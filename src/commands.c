@@ -2982,7 +2982,7 @@ void UserMode(float umode)
 #endif
 
 	if ( !k_matchLess ) // do not show for matchless mode
-		G_bprint(2, "%s %s\n", redtext(um_list[(int)umode].displayname), redtext("settings enabled"));
+		G_bprint(2, "%s %s %s\n", redtext(um_list[(int)umode].displayname), redtext("settings enabled by"), self->s.v.netname );
 
 	trap_readcmd( common_um_init, buf, sizeof(buf) );
 	G_cprint("%s", buf);
