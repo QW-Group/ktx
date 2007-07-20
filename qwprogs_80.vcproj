@@ -42,7 +42,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName="Debug/qwprogs.tlb"
+				TypeLibraryName="Debug\qwprogs.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -105,12 +105,15 @@
 			<Tool
 				Name="VCManifestTool"
 				EmbedManifest="false"
+				DependencyInformationFile="$(IntDir)\$(TargetName).dep"
+				UpdateFileHashes="true"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
 			/>
 			<Tool
 				Name="VCBscMakeTool"
+				OutputFile="$(OutDir)\$(ProjectName).bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -154,7 +157,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName="Release/qwprogs.tlb"
+				TypeLibraryName="Release\qwprogs.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -221,12 +224,15 @@
 			<Tool
 				Name="VCManifestTool"
 				EmbedManifest="false"
+				DependencyInformationFile="$(IntDir)\$(TargetName).dep"
+				UpdateFileHashes="true"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
 			/>
 			<Tool
 				Name="VCBscMakeTool"
+				OutputFile="$(OutDir)\$(ProjectName).bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -623,7 +629,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\native_lib.c"
+				RelativePath="src\native_lib.c"
 				>
 			</File>
 			<File

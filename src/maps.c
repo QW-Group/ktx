@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: maps.c,v 1.18 2007/05/06 21:06:09 qqshka Exp $
+ *  $Id$
  */
 
 #include "g_local.h"

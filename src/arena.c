@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1997 David 'crt' Wright
  *
- * $Id: arena.c,v 1.12 2007/03/29 22:45:24 qqshka Exp $
+ * $Id$
  */
 
 // arena.c - rocket arena stuff

@@ -16,7 +16,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: mathlib.c,v 1.2 2006/04/11 20:38:33 qqshka Exp $
+ *  $Id$
  */
 
 // mathlib.c -- math primitives

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_spawn.c,v 1.6 2006/04/09 22:36:38 qqshka Exp $
+ *  $Id$
  */
 
 #include "g_local.h"

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_local.h,v 1.107 2007/06/23 17:59:05 qqshka Exp $
+ *  $Id$
  */
 
 // g_local.h -- local definitions for game module

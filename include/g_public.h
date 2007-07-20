@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_public.h,v 1.8 2006/11/26 19:21:51 qqshka Exp $
+ *  $Id$
  */
 
 #ifndef __G_PUBLIC_H__

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: vote.c,v 1.18 2006/12/20 06:18:35 qqshka Exp $
+ *  $Id$
  */
 
 // vote.c: election functions by rc\sturm

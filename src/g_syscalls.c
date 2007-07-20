@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_syscalls.c,v 1.10 2007/06/15 16:03:55 qqshka Exp $
+ *  $Id$
  */
 
 //#include "g_local.h"

@@ -1,5 +1,5 @@
 /*
- * $Id: admin.c,v 1.50 2007/03/29 22:45:24 qqshka Exp $
+ * $Id$
  */
 
 // admin.c

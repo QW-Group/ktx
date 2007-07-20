@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_consts.h,v 1.20 2007/02/20 23:32:40 qqshka Exp $
+ *  $Id$
  */
 
 //

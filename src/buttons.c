@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: buttons.c,v 1.5 2007/04/07 23:05:13 qqshka Exp $
+ *  $Id$
  */
 
 #include "g_local.h"

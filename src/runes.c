@@ -1,5 +1,5 @@
 /*
- *  $Id: runes.c,v 1.12 2006/11/30 17:16:14 qqshka Exp $
+ *  $Id$
  */
 
 #include "g_local.h"

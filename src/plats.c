@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: plats.c,v 1.8 2006/11/30 17:16:14 qqshka Exp $
+ *  $Id$
  */
 
 #include "g_local.h"

@@ -1,5 +1,5 @@
 /*
- * $Id: bg_lib.c,v 1.15 2007/06/15 16:03:55 qqshka Exp $
+ * $Id$
  */
 
 // Copyright (C) 1999-2000 Id Software, Inc.

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: g_cmd.c,v 1.30 2006/11/30 17:16:13 qqshka Exp $
+ *  $Id$
  */
 
 #include "g_local.h"

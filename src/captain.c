@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: captain.c,v 1.19 2006/11/30 08:50:06 qqshka Exp $
+ *  $Id$
  */
 
 // captain.c

@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: match.c,v 1.116 2007/06/15 16:03:56 qqshka Exp $
+ *  $Id$
  */
 
 #include "g_local.h"

@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: combat.c,v 1.41 2007/06/15 16:47:22 qqshka Exp $
+ *  $Id$
  */
 
 #include "g_local.h"

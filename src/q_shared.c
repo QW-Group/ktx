@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: q_shared.c,v 1.2 2005/10/05 18:50:03 qqshka Exp $
+ *  $Id$
  */
 
 // q_shared.c -- stateless support routines that are included in each code dll

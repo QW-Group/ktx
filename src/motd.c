@@ -14,7 +14,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: motd.c,v 1.24 2007/07/01 22:09:21 qqshka Exp $
+ *  $Id$
  */
 
 // motd.c

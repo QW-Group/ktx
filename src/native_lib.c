@@ -1,5 +1,5 @@
 /*
- * $Id: native_lib.c,v 1.1 2007/06/15 18:37:28 qqshka Exp $
+ * $Id$
  */
 
 // native_lib.c -- different OS'es have different lib functions implementation, work around.

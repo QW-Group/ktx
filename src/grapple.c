@@ -4,7 +4,7 @@
  * PureCTF changes by Methabol
  *
  *
- *  $Id: grapple.c,v 1.10 2006/11/30 17:16:13 qqshka Exp $
+ *  $Id$
  */
 
 #include "g_local.h"

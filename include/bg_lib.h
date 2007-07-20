@@ -1,5 +1,5 @@
 //
-// $Id: bg_lib.h,v 1.5 2007/06/15 16:03:55 qqshka Exp $
+// $Id$
 //
 
 // bg_lib.h -- standard C library replacement routines used by code

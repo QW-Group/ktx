@@ -1,6 +1,6 @@
 @echo off
 
-rem $Id: makevm.bat,v 1.7 2006/07/08 01:39:10 qqshka Exp $
+rem $Id$
 
 rem NOTE: u must look %SRC%\game.q3asm so u can guess where qwprogs.qvm locate
 

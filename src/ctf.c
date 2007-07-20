@@ -1,5 +1,5 @@
 /*
- *  $Id: ctf.c,v 1.21 2006/11/30 17:16:13 qqshka Exp $
+ *  $Id$
  */
 
 #include "g_local.h"

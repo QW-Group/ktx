@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: misc.c,v 1.7 2007/03/29 22:45:24 qqshka Exp $
+ *  $Id$
  */
 
 #include "g_local.h"

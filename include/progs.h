@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id: progs.h,v 1.62 2007/06/23 17:59:05 qqshka Exp $
+ *  $Id$
  */
 
 #include "progdefs.h"
