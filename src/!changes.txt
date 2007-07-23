@@ -1,3 +1,8 @@
+2007-07-20
+deurk:
+259: Changing match settings with 1on1, ffa and such commands now dsplays the
+name of player executing the command.
+
 2007-07-02
 qq:
 256. Jawn mode changes, we drop weapon model instead of pack now.
