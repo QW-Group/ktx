@@ -1319,22 +1319,6 @@ void SM_PrepareMap()
 			      ) { // no weapon ammo and megahealth for dmm4
 					ent_remove( p );
 				}
-				if ( cvar("k_instagib" )) {
-					if(    streq( p->s.v.classname, "item_health" )
-						|| streq( p->s.v.classname, "item_armor1")
-						|| streq( p->s.v.classname, "item_armor2")
-						|| streq( p->s.v.classname, "item_armorInv")
-						|| streq( p->s.v.classname, "item_artifact_invulnerability")
-						|| streq( p->s.v.classname, "item_artifact_super_damage")
-						|| streq( p->s.v.classname, "item_artifact_envirosuit")
-						|| streq( p->s.v.classname, "item_artifact_invisibility")
-						|| streq( p->s.v.classname, "item_sigil")
-						|| streq( p->s.v.classname, "item_key1")
-						|| streq( p->s.v.classname, "item_key2")
-				      	) { // no health, armors, powerups or game items for instagib
-						ent_remove( p );
-					}
-				}
 			}
 		} else {
 			if( deathmatch == 2 && cvar( "k_dm2mod" ) &&
@@ -1596,9 +1580,6 @@ void PrintCountdown( int seconds )
 	if ( cvar("k_midair") )
 		strlcat(text, va("%s %6s\n", "Midair", redtext("On")), sizeof(text));
 
-	if ( cvar("k_instagib") )
-		strlcat(text, va("%s %4s\n", "Instagib", redtext("On")), sizeof(text));
-	
 	if ( k_jawnmode )
 		strlcat(text, va("%s %4s\n", "Jawnmode", redtext("On")), sizeof(text));
 
@@ -1640,7 +1621,7 @@ void PrintCountdown( int seconds )
 	if ( cvar("k_dmgfrags") )
 		strlcat(text, va("%s %4s\n", "Dmgfrags", redtext("On")), sizeof(text));
 
-	if (    deathmatch == 4 && !cvar("k_midair") && !cvar("k_instagib")
+	if (    deathmatch == 4 && !cvar("k_midair")
 		 && !strnull( nowp = str_noweapon((int)cvar("k_disallow_weapons") & DA_WPNS) )
 	   )
 		strlcat(text, va("\n%s %4s\n", "Noweapon", 

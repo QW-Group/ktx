@@ -459,9 +459,6 @@ void W_FireShotgun()
 {
 	vec3_t          dir;
 	int				bullets = 6;
-	
-	if ( cvar("k_instagib") )
-		bullets = 1;
 
 	self->ps.wpn[wpSG].attacks += bullets;
 
@@ -477,10 +474,7 @@ void W_FireShotgun()
 
 	//dir = aim (self, 100000);
 	aim( dir );
-	if ( cvar("k_instagib") )
-		FireBullets( bullets, dir, 0, 0, 0, dtSG );
-	else
-		FireBullets( bullets, dir, 0.04, 0.04, 0, dtSG );
+	FireBullets( bullets, dir, 0.04, 0.04, 0, dtSG );
 }
 
 /*
@@ -492,9 +486,6 @@ void W_FireSuperShotgun()
 {
 	vec3_t          dir;
 	int				bullets = 14;
-
-	if ( cvar("k_instagib") )
-		bullets = 1;
 
 	if ( self->s.v.currentammo == 1 )
 	{
@@ -514,10 +505,7 @@ void W_FireSuperShotgun()
 
 	//dir = aim (self, 100000);
 	aim( dir );
-	if ( cvar("k_instagib") )
-		FireBullets( bullets, dir, 0, 0, 0, dtSSG );
-	else
-		FireBullets( bullets, dir, 0.14, 0.08, 0, dtSSG );
+	FireBullets( bullets, dir, 0.14, 0.08, 0, dtSSG );
 }
 
 /*

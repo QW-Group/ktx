@@ -1513,9 +1513,6 @@ void BackpackTouch()
 	if ( cvar("k_midair") && other->super_damage_finished )
 		return; // we have quad, ignore pack
 
-	if ( cvar("k_instagib") && other->invisible_finished )
-		return; // we have ring, ignore pack
-	
 	acount = 0;
 	G_sprint( other, PRINT_LOW, "You get " );
 
@@ -1531,7 +1528,7 @@ void BackpackTouch()
 			other->s.v.health += 10;
 			G_sprint( other, PRINT_LOW, "10 additional health\n" );
 		}
-		if ( ( other->s.v.health > 250 ) && ( other->s.v.health < 300 ) && !cvar("k_instagib") )
+		if ( ( other->s.v.health > 250 ) && ( other->s.v.health < 300 ) )
 			sound( other, CHAN_ITEM, "items/protect3.wav", 1, ATTN_NORM );
 		else
 			sound( other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM );
@@ -1539,22 +1536,16 @@ void BackpackTouch()
 		stuffcmd( other, "bf\n" );
 		if ( other->s.v.health > 299 )
 		{
-			if ( !cvar("k_instagib") ) {
-				if ( !cvar("k_midair")  )
-				{
-					other->invincible_time = 1;
-					other->invincible_finished = g_globalvars.time + 30;
-					other->s.v.items = ( int ) other->s.v.items | IT_INVULNERABILITY;
-				}
-				other->super_time = 1;
-				other->super_damage_finished = g_globalvars.time + 30;
-				other->s.v.items = ( int ) other->s.v.items | IT_QUAD;
-
-			} else {
-				other->invisible_time = 1;
-                other->invisible_finished = g_globalvars.time + 30;
-				other->s.v.items = ( int ) other->s.v.items | IT_INVISIBILITY;
+			if ( !cvar("k_midair") )
+			{
+				other->invincible_time = 1;
+				other->invincible_finished = g_globalvars.time + 30;
+				other->s.v.items = ( int ) other->s.v.items | IT_INVULNERABILITY;
 			}
+
+			other->super_time = 1;
+			other->super_damage_finished = g_globalvars.time + 30;
+			other->s.v.items = ( int ) other->s.v.items | IT_QUAD;
 
 			other->s.v.ammo_cells = 0;
 

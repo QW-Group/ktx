@@ -279,9 +279,9 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	float			dmg_dealt = 0, non_hdp_damage;
 	char            *attackerteam, *targteam;
 
-	//midair and instagib
+	//midair
 	float playerheight, midheight = 0;
-	qboolean lowheight = false, instagib = false, midair = false, inwater = false, do_dmg = false, rl_dmg = false;
+	qboolean lowheight = false, midair = false, inwater = false, do_dmg = false, rl_dmg = false;
 
 	if ( !targ->s.v.takedamage || ISDEAD( targ ) )
 		return;
@@ -292,9 +292,6 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	if ( (int)cvar("k_midair") )
 		midair = true;
-
-	if ( (int)cvar("k_instagib") )
-		instagib = true;
 
 //	wp_num = attacker->s.v.weapon;
 
@@ -523,12 +520,6 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		 || streq( inflictor->s.v.classname, "teledeath" ) 
 		 || ( k_practice && targ->ct != ctPlayer ) // #practice mode#
 	   ) {
-
-		if ( instagib ) {
-			if ( streq( inflictor->s.v.classname, "player" ) )
-				take = 50000;
-		}
-
 		dmg_dealt += targ->s.v.health > take ? take : targ->s.v.health;
 		targ->s.v.health -= take;
 
@@ -594,13 +585,6 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
  		}
  		G_bprint(2, "%.1f (midheight)\n", midheight);
  	}
-
-	if ( instagib && match_in_progress == 2 ) {
-		if ( targ->deathtype == dtSTOMP )
-			attacker->s.v.frags += 3;
-		if ( targ->deathtype == dtAXE )
-			attacker->s.v.frags += 1;
-	}
 
 	if ( ISDEAD( targ ) )
 	{

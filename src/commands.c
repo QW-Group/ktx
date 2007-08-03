@@ -94,7 +94,6 @@ void ToggleDropRing();
 void ToggleFairPacks();
 void ToggleFreeze();
 void ToggleMidair();
-void ToggleInstagib();
 void TogglePowerups();
 void ToggleQEnemy();
 void ToggleQLag();
@@ -391,7 +390,6 @@ const char CD_NODESC[] = "no desc";
 #define CD_WREG         "register reliable wpns"
 #define CD_KILL         "invoke suicide"
 #define CD_MIDAIR       "midair settings"
-#define CD_INSTAGIB     "instagib settings"
 #define CD_TIME         "show server time"
 #define CD_GREN_MODE    "grenades mode"
 #define CD_TOGGLEREADY  "just toggle ready"
@@ -658,7 +656,6 @@ cmd_t cmds[] = {
 	{ "wreg",        cmd_wreg,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_WREG },
 	{ "kill",        ClientKill,                0    , CF_PLAYER | CF_MATCHLESS, CD_KILL },
 	{ "mid_air",     ToggleMidair,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_MIDAIR },
-	{ "insta_gib",   ToggleInstagib,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
 	{ "time",        sv_time,                   0    , CF_BOTH | CF_MATCHLESS, CD_TIME },
 	{ "gren_mode",   GrenadeMode,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_GREN_MODE },
 	{ "toggleready", ToggleReady,               0    , CF_BOTH, CD_TOGGLEREADY },
@@ -1846,12 +1843,6 @@ void TogglePowerups()
 	if ( ++k_pow > 2 )
 		k_pow = 0;
 
-	if (cvar("k_instagib")) {
-		G_bprint(2, "%s are disabled with Instagib\n", redtext("Powerups"));
-		k_pow = 0;
-		return;
-	}
-
 	cvar_fset("k_pow", k_pow);
 
 	if ( !k_pow )
@@ -1893,11 +1884,9 @@ void ChangeDM(float dmm)
 		return;
 	}
 
-	// if leaving dmm4 force midair or instagib off
-	if ( deathmatch == 4 ) {
+	// if leaving dmm4 force midair off
+	if ( deathmatch == 4 )
 		cvar_set( "k_midair", "0" );
-		cvar_set( "k_instagib", "0" );
-	}
 
 	deathmatch = bound(1, (int)dmm, 5);
 
@@ -2719,7 +2708,7 @@ const char common_um_init[] =
 	"k_spec_info 1\n"					// allow spectators receive took info during game
 	"k_rocketarena 0\n"					// rocket arena
 	"k_midair 0\n"						// midair off
-	"k_instagib 0\n"					// instagib off
+//	"localinfo k_instagib 0\n"			// not implemented
 //	"localinfo k_new_spw 0\n"			// ktpro feature
 
 	"fraglimit 0\n"						// fraglimit %)
@@ -4828,46 +4817,7 @@ void ToggleMidair()
 		return;
 	}
 
-	// If midair is enabled, disable instagib
-	if (cvar("k_instagib"))
-		cvar_set("k_instagib", "0");
-	
 	cvar_toggle_msg( self, "k_midair", redtext("Midair") );
-}
-
-void ToggleInstagib()
-{
-	int k_instagib = bound(0, cvar( "k_instagib" ), 2); 
-
-	if ( match_in_progress )
-		return;
-
-	if( check_master() )
-		return;
-
-	// Can't enable instagib unless dmm4 is set first
-	if ( !cvar("k_midair") && deathmatch != 4 ) {
-		G_sprint( self, 2, "Instagib requires dmm4\n");
-		return;
-	}
-
-	// If instagib is enabled, disable midair
-	if (cvar("k_midair"))
-		cvar_set("k_midair", "0");
-	
-	if ( ++k_instagib > 2 )
-		k_instagib = 0;
-
-	cvar_fset("k_instagib", k_instagib);
-
-	if ( !k_instagib )
-		G_bprint(2, "%s disabled\n", redtext("Instagib"));
-	else if ( k_instagib == 1 )
-		G_bprint(2, "%s enabled (SG mode)\n", redtext("Instagib"));
-	else if ( k_instagib == 2 )
-		G_bprint(2, "%s enabled (SSG mode)\n", redtext("Instagib"));
-	else
-		G_bprint(2, "%s unknown\n", redtext("Instagib"));
 }
 
 void sv_time()

@@ -1233,21 +1233,6 @@ void PutClientInServer()
 			self->s.v.armortype = 0.8;
 			self->s.v.health = 250;
 		}
-		else if ( cvar("k_instagib") )
-		{
-			self->s.v.ammo_shells = 999;
-			self->s.v.ammo_nails = 0;
-			self->s.v.ammo_cells = 0;
-			self->s.v.ammo_rockets = 0;
-			if ( cvar("k_instagib") == 1 )
-				self->s.v.items = IT_AXE | IT_SHOTGUN;
-			if ( cvar("k_instagib") == 2 )
-				self->s.v.items = IT_AXE | IT_SUPER_SHOTGUN;
-			self->s.v.currentammo = 0;
-			self->s.v.armorvalue = 0;
-			self->s.v.armortype = 0;
-			self->s.v.health = 250;
-		}
 		else
 		{
  			// default is 2, negative value disable invincible
@@ -1281,13 +1266,8 @@ void PutClientInServer()
 			}
 			self->s.v.items = items;
 		}
-		// default to spawning with rl, except if instagib is on
-		if ( cvar("k_instagib") == 1 )
-			self->s.v.weapon = IT_SHOTGUN;
-		else if ( cvar("k_instagib") == 2 )
-			self->s.v.weapon = IT_SUPER_SHOTGUN;
-		else
-			self->s.v.weapon = IT_ROCKET_LAUNCHER;
+		// default to spawning with rl
+		self->s.v.weapon = IT_ROCKET_LAUNCHER;
 	}
 
 	if ( deathmatch == 5 && match_in_progress == 2 )
@@ -1319,12 +1299,7 @@ void PutClientInServer()
 	if ( deathmatch == 4 && match_in_progress == 2 )
 	{
 		int	k_disallow_weapons = (int)cvar("k_disallow_weapons") & DA_WPNS;
-		// change disallowed weapons if instagib is on
-		if ( cvar("k_instagib") == 1 )
-			k_disallow_weapons = IT_AXE | IT_SG;
-		if ( cvar("k_instagib") == 2 )
-			k_disallow_weapons = IT_AXE | IT_SSG;
-				
+
 		self->s.v.items = (int)self->s.v.items & ~k_disallow_weapons;
 	}
 
@@ -2408,8 +2383,7 @@ void CheckPowerups()
 		{
 			if ( self->invisible_time == 1 )
 			{
-				if ( !cvar("k_instagib") )
-					G_sprint( self, PRINT_HIGH, "Ring of Shadows magic is fading\n" );
+				G_sprint( self, PRINT_HIGH, "Ring of Shadows magic is fading\n" );
 				stuffcmd( self, "bf\n" );
 				sound( self, CHAN_AUTO, "items/inv2.wav", 1, ATTN_NORM );
 				self->invisible_time = g_globalvars.time + 1;
@@ -2425,10 +2399,6 @@ void CheckPowerups()
 		if ( self->invisible_finished < g_globalvars.time )
 		{		// just stopped
 			self->s.v.items -= IT_INVISIBILITY;
-			if ( cvar("k_instagib") ) {
-				G_bprint( PRINT_HIGH, "%s is losing his powers\n", self->s.v.netname );
-				self->s.v.health = min(200, self->s.v.health);
-			}
 			self->invisible_finished = 0;
 			self->invisible_time = 0;
 

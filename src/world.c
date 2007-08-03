@@ -715,7 +715,6 @@ void FirstFrame	( )
 //}
 	RegisterCvar("k_spec_info");
 	RegisterCvar("k_midair");
-	RegisterCvar("k_instagib");
 	RegisterCvar("k_rocketarena"); // rocket arena
 	RegisterCvar("k_dmgfrags");
 	RegisterCvar("k_tp_tele_death");
