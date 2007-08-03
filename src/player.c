@@ -950,6 +950,18 @@ void GibPlayer()
 		ThrowGib( "progs/gib1.mdl", self->s.v.health );
 		ThrowGib( "progs/gib2.mdl", self->s.v.health );
 		ThrowGib( "progs/gib3.mdl", self->s.v.health );
+		ThrowGib( "progs/gib1.mdl", self->s.v.health );
+		ThrowGib( "progs/gib2.mdl", self->s.v.health );
+		ThrowGib( "progs/gib3.mdl", self->s.v.health );
+		ThrowGib( "progs/gib1.mdl", self->s.v.health );
+		ThrowGib( "progs/gib2.mdl", self->s.v.health );
+		ThrowGib( "progs/gib3.mdl", self->s.v.health );
+		ThrowGib( "progs/gib1.mdl", self->s.v.health );
+		ThrowGib( "progs/gib2.mdl", self->s.v.health );
+		ThrowGib( "progs/gib3.mdl", self->s.v.health );
+		ThrowGib( "progs/gib1.mdl", self->s.v.health );
+		ThrowGib( "progs/gib2.mdl", self->s.v.health );
+		ThrowGib( "progs/gib3.mdl", self->s.v.health );
     }
 
 	p = spawn();
