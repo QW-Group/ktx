@@ -1153,7 +1153,7 @@ void FixRules ( )
 	if (dm != deathmatch)
 		G_bprint(2, "%s: deathmatch changed to: %d\n", redtext("WARNING"), deathmatch);
 
-	if (sv_minping != cvar("sv_minping")) {
+	if (sv_minping != (int)cvar("sv_minping")) {
 		sv_minping = cvar("sv_minping"); // remember, so we can broadcast changes
 		G_bprint(2, "%s changed to %d\n", redtext("sv_minping"), sv_minping);
 	}
