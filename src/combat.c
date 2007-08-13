@@ -275,7 +275,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	float           save;
 	float           take;
 //	int				wp_num;
-	int				dmg_frags, i, c1 = 8, c2 = 4, hdp;
+	int				i, c1 = 8, c2 = 4, hdp;
 	float			dmg_dealt = 0, non_hdp_damage;
 	char            *attackerteam, *targteam;
 
@@ -427,6 +427,8 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	take = max(0, take); // avoid negative take, if any
 
+	dmg_dealt += targ->s.v.health > take ? take : targ->s.v.health;
+
 // add to the damage total for clients, which will be sent as a single
 // message at the end of the frame
 // FIXME: remove after combining shotgun blasts?
@@ -472,6 +474,18 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 //ZOID 12-13-96: self.team doesn't work in QW.  Use keys
    	attackerteam = getteam( attacker );
 	targteam = getteam( targ );
+
+	if ( match_in_progress == 2 && (int)cvar("k_dmgfrags") )
+	{
+		if ( attacker->ct == ctPlayer && targ->ct == ctPlayer && attacker != targ
+			 && (isDuel() || isFFA() || strneq(attackerteam, targteam))
+		   )
+		{
+			float dmg_frags = attacker->ps.dmg_frags + dmg_dealt / 100;
+			attacker->s.v.frags = (int)(attacker->s.v.frags + dmg_frags - attacker->ps.dmg_frags);
+			attacker->ps.dmg_frags = dmg_frags;
+		}
+	}
 
 // do suicide damage anyway
 	if ( dtSUICIDE != targ->deathtype )
@@ -520,7 +534,6 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		 || streq( inflictor->s.v.classname, "teledeath" ) 
 		 || ( k_practice && targ->ct != ctPlayer ) // #practice mode#
 	   ) {
-		dmg_dealt += targ->s.v.health > take ? take : targ->s.v.health;
 		targ->s.v.health -= take;
 
 		if ( !targ->s.v.health || dtSUICIDE == targ->deathtype )
@@ -545,12 +558,6 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			{
 				attacker->ps.dmg_g += dmg_dealt;
 				targ->ps.dmg_t += dmg_dealt;
-				if ( (int)cvar("k_dmgfrags") )
-				{
-					dmg_frags = attacker->ps.dmg_g / 100;
-					attacker->s.v.frags = attacker->s.v.frags - attacker->ps.dmg_frags + dmg_frags;
-					attacker->ps.dmg_frags = dmg_frags;
-				}
 			}
 		}
 	}
