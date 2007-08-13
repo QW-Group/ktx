@@ -528,7 +528,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	}
 
 	if (match_in_progress != 2) {
-		if ( !midair || (int)targ->s.v.flags & FL_ONGROUND ) {
+		if ( !midair || ( (int)targ->s.v.flags & FL_ONGROUND ) ) {
 			targ->s.v.currentammo = 1000 + Q_rint(damage);
 			if (attacker != targ)
 				attacker->s.v.health = 1000 + Q_rint(damage);
