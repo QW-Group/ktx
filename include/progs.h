@@ -112,7 +112,9 @@ typedef struct player_stats_s {
 	float    dmg_t; // damage taken
 	float    dmg_g; // damage given
 	float    dmg_team;  // damage to team
+// { k_dmgfrags
 	float    dmg_frags; // frags awarded from damage (CA)
+// }
 
 	int		ot_a;	 // overtime armor value
 //	float	ot_at;   // overtime armor type

@@ -481,9 +481,11 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			 && (isDuel() || isFFA() || strneq(attackerteam, targteam))
 		   )
 		{
-			float dmg_frags = attacker->ps.dmg_frags + dmg_dealt / 100;
-			attacker->s.v.frags = (int)(attacker->s.v.frags + dmg_frags - attacker->ps.dmg_frags);
-			attacker->ps.dmg_frags = dmg_frags;
+			int dmg_frags;
+			attacker->ps.dmg_frags += dmg_dealt; // add dealt
+			dmg_frags = attacker->ps.dmg_frags / 100; // 1 frag = 100 damage
+			attacker->s.v.frags = (int)(attacker->s.v.frags + dmg_frags);
+			attacker->ps.dmg_frags -= dmg_frags * 100;
 		}
 	}
 
