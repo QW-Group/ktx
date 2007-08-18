@@ -1,6 +1,12 @@
+2007-08-19
+qq:
+260. Do not allow empty team in team games.
+
+261. Do not allow duels with more than 2 players. *stone face*
+
 2007-07-20
 deurk:
-259: Changing match settings with 1on1, ffa and such commands now dsplays the
+259. Changing match settings with 1on1, ffa and such commands now dsplays the
 name of player executing the command.
 
 2007-07-02

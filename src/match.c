@@ -1640,13 +1640,49 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 	char *txt = "";
 	gedict_t *p;
 
-	if ( !isTeam() && !isCTF() ) // no rules limitation in non team game
+	// some limits in duel...
+	if ( isDuel() )
+	{
+		sub = CountPlayers() - 2;
+
+		if ( sub > 0 ) // we need two players in duel...
+		{
+			txt = va("Get rid of %d player%s!\n", sub, count_s( sub ));
+    
+			if ( s )
+            	G_sprint(s, 2, "%s", txt);
+			else
+            	G_bprint(2, "%s", txt);
+
+			return false;
+		}
+	}
+
+ 	// no team/members rules limitation in non team game
+	if ( !isTeam() && !isCTF() )
 		return true;
+
+	// below Team or CTF game modes and limits...
+
+	for( p = world; (p = find_plr( p )); )
+	{
+		if ( strnull( getteam(p) ) )
+		{
+			txt = "Get rid of players with empty team\n";
+
+			if ( s )
+        		G_sprint(s, 2, "%s", txt);
+			else
+        		G_bprint(2, "%s", txt);
+
+			return false;
+		}
+	}
 
     if( i < k_lockmin )
     {
 		sub = k_lockmin - i;
-		txt = va("%d more team%s required!\n", sub, ( sub != 1 ? "s" : "" ));
+		txt = va("%d more team%s required!\n", sub, count_s( sub ));
 
 		if ( s )
         	G_sprint(s, 2, "%s", txt);
@@ -1659,7 +1695,7 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
     if( i > k_lockmax )
     {
 		sub = i - k_lockmax;
-		txt = va("Get rid of %d team%s!\n", sub, ( sub != 1 ? "s" : "" ));
+		txt = va("Get rid of %d team%s!\n", sub, count_s( sub ));
 
 		if ( s )
         	G_sprint(s, 2, "%s", txt);
@@ -2188,7 +2224,7 @@ void PlayerReady ()
 		return;
 	}
 
-	if( intermission_running || match_in_progress == 2 || match_over )
+	if ( intermission_running || match_in_progress == 2 || match_over )
 			return;
 
 	if ( k_practice ) { // #practice mode#
@@ -2196,7 +2232,7 @@ void PlayerReady ()
 		return;
 	}
 
-	if( self->ready ) {
+	if ( self->ready ) {
 		G_sprint(self, 2, "Type break to unready yourself\n");
 		return;
 	}
@@ -2210,7 +2246,7 @@ void PlayerReady ()
 		}
 	}
 
-    if( k_force && ( isTeam() || isCTF() )) {
+    if ( k_force && ( isTeam() || isCTF() )) {
 		nready = 0;
 		for( p = world; (p = find_plr( p )); ) {
 			if( p->ready ) {
@@ -2225,6 +2261,12 @@ void PlayerReady ()
 			G_sprint(self, 2, "Join an existing team!\n");
 			return;
 		}
+	}
+
+	// do not allow empty team in team mode, because it cause problems
+	if ( ( isTeam() || isCTF() ) && strnull( getteam(self) ) ) {
+		G_sprint(self, 2, "Set your %s before ready!\n", redtext("team"));
+		return;
 	}
 
 	if ( GetHandicap(self) != 100 )

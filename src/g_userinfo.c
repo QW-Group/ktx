@@ -99,16 +99,33 @@ qboolean FixPlayerTeam ( char *newteam )
 {
 	char *s1, *s2;
 
+	// specs does't have limits
 	if ( self->ct == ctSpec )
 		return false;
+
+	// do not allow change team in game / countdown
+	if( match_in_progress )
+	{
+		s1 = newteam;
+		s2 = getteam(self);
+
+		if( strneq( s1, s2 ) )
+		{
+			G_sprint(self, 2, "You may %s change team during game\n", redtext("not"));
+			stuffcmd(self, "team \"%s\"\n", s2); // sends this to client - so he get right team too
+		}
+
+		return true;
+	}
 
 	// captain or potential captain may not change team
 	if ( capt_num( self ) || is_elected(self, etCaptain) ) {
 		if( strneq( getteam( self ), newteam ) ) {
 			G_sprint(self, 2, "You may %s change team\n", redtext("not"));
 			stuffcmd(self, "team \"%s\"\n", getteam(self)); // sends this to client - so he get right team too
-			return true;
 		}
+
+		return true;
 	}
 
 	if( k_captains == 2 ) {
@@ -129,20 +146,6 @@ qboolean FixPlayerTeam ( char *newteam )
 		}
 	}
 
-	// do not allow change team in game / countdown
-	if( match_in_progress )
-	{
-		s1 = newteam;
-		s2 = getteam(self);
-
-		if( strneq( s1, s2 ) )
-		{
-			G_sprint(self, 2, "You may %s change team during game\n", redtext("not"));
-			stuffcmd(self, "team \"%s\"\n", s2); // sends this to client - so he get right team too
-			return true;
-		}
-	}
-
 	if ( !match_in_progress && isCTF() && self->ready ) {
 		// if CTF and player ready allow change team to red or blue
 		s1 = newteam;
@@ -157,8 +160,15 @@ qboolean FixPlayerTeam ( char *newteam )
 		stuffcmd(self, "color %d\n", streq(s1, "red") ? 4 : 13); 
 	}
 
+	if ( !match_in_progress && ( isTeam() || isCTF() ) && self->ready && strnull( newteam ) ) {
+		// do not allow empty team, because it cause problems
+		G_sprint(self, 2, "Empty %s not allowed\n", redtext("team"));
+		stuffcmd(self, "team \"%s\"\n", getteam(self)); // sends this to client - so he get right team too
+		return true;
+	}
+
 	if ( isCTF() && ( streq(newteam, "red") || streq(newteam, "blue") ) )
-		stuffcmd(self, "auto%s\n", newteam); 
+		stuffcmd(self, "auto%s\n", newteam);
 
 	return false;
 }
