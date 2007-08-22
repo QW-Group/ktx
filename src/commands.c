@@ -483,7 +483,7 @@ cmd_t cmds[] = {
 	{ "lockmode",    ChangeLock,                0    , CF_PLAYER | CF_SPC_ADMIN, CD_LOCKMODE },
 	{ "maps",        ShowMaps,                  0    , CF_PLAYER | CF_SPC_ADMIN, CD_MAPS},
 	{ "spawn666",    ToggleRespawn666,          0    , CF_PLAYER, CD_SPAWN666},
-	{ "admin",       ReqAdmin,                  0    , CF_BOTH | CF_PARAMS, CD_ADMIN },
+	{ "admin",       ReqAdmin,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_ADMIN },
 	{ "forcestart",  AdminForceStart,           0    , CF_BOTH_ADMIN, CD_FORCESTART },
 	{ "forcebreak",  AdminForceBreak,           0    , CF_BOTH_ADMIN, CD_FORCEBREAK },
 #ifndef NO_K_PAUSE
@@ -669,9 +669,9 @@ cmd_t cmds[] = {
 // }
 	{ "force_spec",  force_spec,                0    , CF_BOTH_ADMIN | CF_PARAMS, CD_FORCE_SPEC },
 // { bans
-	{ "ban",         redirect,                  0    , CF_BOTH_ADMIN | CF_PARAMS | CF_REDIRECT, CD_BAN },
-	{ "banip",       redirect,                  0    , CF_BOTH_ADMIN | CF_PARAMS | CF_REDIRECT, CD_BANIP },
-	{ "banrem",      redirect,                  0    , CF_BOTH_ADMIN | CF_PARAMS | CF_REDIRECT, CD_BANREM },
+	{ "ban",         redirect,                  0    , CF_BOTH_ADMIN | CF_MATCHLESS | CF_PARAMS | CF_REDIRECT, CD_BAN },
+	{ "banip",       redirect,                  0    , CF_BOTH_ADMIN | CF_MATCHLESS | CF_PARAMS | CF_REDIRECT, CD_BANIP },
+	{ "banrem",      redirect,                  0    , CF_BOTH_ADMIN | CF_MATCHLESS | CF_PARAMS | CF_REDIRECT, CD_BANREM },
 // }
 	{ "teleteam",    teleteam,                  0    , CF_PLAYER | CF_SPC_ADMIN, CD_TELETEAM },
 	{ "upplayers",   DEF(upplayers),            1    , CF_PLAYER | CF_SPC_ADMIN, CD_UPPLAYERS },

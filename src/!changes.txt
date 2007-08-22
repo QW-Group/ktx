@@ -1,3 +1,8 @@
+2007-08-22
+qq:
+262. I was always agains admins in matchless mode, I changed my mind since we have some issue with aimbot here (Russia, fatherland of cheatzors),
+	 now allowed next commands in matchless mode: "/admin", "/ban", "/banip", "/banrem" gg.
+
 2007-08-19
 qq:
 260. Do not allow empty team in team games.
