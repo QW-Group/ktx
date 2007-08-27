@@ -27,6 +27,12 @@
 void            T_MissileTouch( gedict_t * e1, gedict_t * e2 );
 void            ClientObituary( gedict_t * e1, gedict_t * e2 );
 
+char            * dmg_type[] = { "none", "axe", "sg", "ssg", "ng", "sng", "gl", "rl", "lg_beam", "lg_dis", "lg_dis_self", "hook",
+                 "changelevel", "lava", "slime", "water", "fall", "stomp", "tele1", "tele2", "tele3", "explo_box", "laser", "fireball",
+                 "squish", "trigger", "suicide", "unknown" };
+int             dmg_is_quaded;
+int             dmg_is_splash = 0;
+
 //============================================================================
 
 /*
@@ -231,6 +237,22 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 
 	ClientObituary( self, attacker );
 
+        if ( attacker->super_damage_finished > g_globalvars.time )
+                dmg_is_quaded = 1;
+        else
+                dmg_is_quaded = 0;
+        log_printf(
+                "\t\t\t<event time=\"%f\" tag=\"dth\" at=\"%s\" tg=\"%s\" ty=\"%s\" "
+                "q=\"%d\" al=\"%d\" kh=\"%d\" lt=\"%f\" />\n",
+                g_globalvars.time - match_start_time,
+                attacker->s.v.netname,
+                targ->s.v.netname,
+                dmg_type[targ->deathtype],
+                dmg_is_quaded,
+                (int)targ->s.v.armorvalue,
+                (int)(targ->s.v.origin[2] - attacker->s.v.origin[2]),
+                g_globalvars.time - targ->spawn_time );
+
 	self->s.v.takedamage = DAMAGE_NO;
 	self->s.v.touch = ( func_t ) SUB_Null;
 	self->s.v.effects = 0;
@@ -279,9 +301,9 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	float			dmg_dealt = 0, non_hdp_damage;
 	char            *attackerteam, *targteam;
 
-	//midair
+	//midair and instagib
 	float playerheight, midheight = 0;
-	qboolean lowheight = false, midair = false, inwater = false, do_dmg = false, rl_dmg = false;
+	qboolean lowheight = false, instagib = false, midair = false, inwater = false, do_dmg = false, rl_dmg = false;
 
 	if ( !targ->s.v.takedamage || ISDEAD( targ ) )
 		return;
@@ -293,6 +315,9 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	if ( (int)cvar("k_midair") )
 		midair = true;
 
+	if ( (int)cvar("k_instagib") )
+		instagib = true;
+
 //	wp_num = attacker->s.v.weapon;
 
 // check for quad damage powerup on the attacker
@@ -301,10 +326,13 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	     && strneq( inflictor->s.v.classname, "door" ) && dtSTOMP != targ->deathtype
 		 && !midair )
 	{
+		dmg_is_quaded = 1;
 		if ( deathmatch == 4 )
 			damage = damage * 8;
 		else
 			damage = damage * 4;
+	} else {
+		dmg_is_quaded = 0;
 	}
 
 // ctf strength rune
@@ -439,6 +467,23 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		targ->s.v.dmg_inflictor = EDICT_TO_PROG( inflictor );
 	}
 
+        if ( save ) {
+                if ( streq( inflictor->s.v.classname, "worldspawn" ))
+                        attacker->s.v.netname = "world";
+                if ( streq( attacker->s.v.classname, "(null)" ))
+                        attacker->s.v.netname = "world";
+                log_printf(
+                        "\t\t\t<event time=\"%f\" tag=\"dmg\" at=\"%s\" "
+                        "tg=\"%s\" ty=\"%s\" q=\"%d\" s=\"%d\" val=\"%d\" ab=\"1\"/>\n",
+                        g_globalvars.time - match_start_time,
+                        attacker->s.v.netname,
+                        targ->s.v.netname,
+                        dmg_type[targ->deathtype],
+                        dmg_is_quaded,
+                        dmg_is_splash,
+                        (int)save );
+        }
+
 // figure momentum add
 	if ( inflictor != world && targ->s.v.movetype == MOVETYPE_WALK )
 	{
@@ -536,7 +581,33 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		 || streq( inflictor->s.v.classname, "teledeath" ) 
 		 || ( k_practice && targ->ct != ctPlayer ) // #practice mode#
 	   ) {
+
+		if ( instagib ) {
+			if ( streq( inflictor->s.v.classname, "player" ) )
+				take = 50000;
+		}
+
+		dmg_dealt += targ->s.v.health > take ? take : targ->s.v.health;
 		targ->s.v.health -= take;
+
+                if ( take ) {
+                        if ( streq( inflictor->s.v.classname, "worldspawn" ))
+                                attacker->s.v.netname = "world";
+                        if ( streq( attacker->s.v.classname, "(null)" ))
+                                attacker->s.v.netname = "world";
+
+                        log_printf(
+                                "\t\t\t<event time=\"%f\" tag=\"dmg\" at=\"%s\" tg=\"%s\" ty=\"%s\" "
+                                "q=\"%d\" s=\"%d\" val=\"%d\" ab=\"0\"/>\n",
+                                g_globalvars.time - match_start_time,
+                                attacker->s.v.netname,
+                                targ->s.v.netname,
+                                dmg_type[targ->deathtype],
+                                dmg_is_quaded,
+                                dmg_is_splash,
+                                (int)take );
+                }
+                dmg_is_splash = 0;
 
 		if ( !targ->s.v.health || dtSUICIDE == targ->deathtype )
 			targ->s.v.health = -1; // qqshka, no zero health, heh, imo less bugs after this
@@ -564,7 +635,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		}
 	}
 
-	if ( midair && match_in_progress == 2 && midheight > 190 )
+	if ( midair && match_in_progress == 2 && midheight > 190 && attacker != targ )
  	{
  		attacker->ps.midairs++;
  		G_bprint( 2, "%s got ", attacker->s.v.netname );
@@ -594,6 +665,13 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
  		}
  		G_bprint(2, "%.1f (midheight)\n", midheight);
  	}
+
+	if ( instagib && match_in_progress == 2 ) {
+		if ( targ->deathtype == dtSTOMP )
+			attacker->s.v.frags += 3;
+		if ( targ->deathtype == dtAXE )
+			attacker->s.v.frags += 1;
+	}
 
 	if ( ISDEAD( targ ) )
 	{
@@ -657,6 +735,7 @@ void T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage, ge
 					if ( CanDamage( head, inflictor ) )
 					{
 						head->deathtype = dtype;
+						dmg_is_splash = 1;
 						T_Damage( head, inflictor, attacker, points );
 					}
 				}

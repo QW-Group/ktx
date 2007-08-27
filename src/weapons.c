@@ -45,6 +45,9 @@ void W_Precache()
 	trap_precache_sound( "weapons/grenade.wav" );	// grenade launcher
 	trap_precache_sound( "weapons/bounce.wav" );	// grenade bounce
 	trap_precache_sound( "weapons/shotgn2.wav" );	// super shotgun
+
+	if ( cvar("k_instagib_custom_models") )
+		trap_precache_sound( "weapons/coilgun.wav" );	// player railgun for instagib 
 }
 
 
@@ -459,10 +462,16 @@ void W_FireShotgun()
 {
 	vec3_t          dir;
 	int				bullets = 6;
+	
+	if ( cvar("k_instagib") == 1 )
+		bullets = 1;
 
 	self->ps.wpn[wpSG].attacks += bullets;
 
-	sound( self, CHAN_WEAPON, "weapons/guncock.wav", 1, ATTN_NORM );
+	if ( cvar("k_instagib_custom_models") && cvar("k_instagib") == 1 )
+		sound( self, CHAN_WEAPON, "weapons/coilgun.wav", 1, ATTN_NORM );
+	else
+		sound( self, CHAN_WEAPON, "weapons/guncock.wav", 1, ATTN_NORM );
 
 	g_globalvars.msg_entity = EDICT_TO_PROG( self );
 
@@ -474,7 +483,10 @@ void W_FireShotgun()
 
 	//dir = aim (self, 100000);
 	aim( dir );
-	FireBullets( bullets, dir, 0.04, 0.04, 0, dtSG );
+	if ( cvar("k_instagib") == 1 )
+		FireBullets( bullets, dir, 0, 0, 0, dtSG );
+	else
+		FireBullets( bullets, dir, 0.04, 0.04, 0, dtSG );
 }
 
 /*
@@ -487,6 +499,9 @@ void W_FireSuperShotgun()
 	vec3_t          dir;
 	int				bullets = 14;
 
+	if ( cvar("k_instagib") == 2 )
+		bullets = 1;
+
 	if ( self->s.v.currentammo == 1 )
 	{
 		W_FireShotgun();
@@ -494,7 +509,11 @@ void W_FireSuperShotgun()
 	}
 	self->ps.wpn[wpSSG].attacks += bullets;
 
-	sound( self, CHAN_WEAPON, "weapons/shotgn2.wav", 1, ATTN_NORM );
+	if ( cvar("k_instagib_custom_models") && cvar("k_instagib") == 2 )
+		sound( self, CHAN_WEAPON, "weapons/coilgun.wav", 1, ATTN_NORM );
+	else
+		sound( self, CHAN_WEAPON, "weapons/shotgn2.wav", 1, ATTN_NORM );
+
 	g_globalvars.msg_entity = EDICT_TO_PROG( self );
 
 	WriteByte( MSG_ONE, SVC_BIGKICK );
@@ -505,7 +524,10 @@ void W_FireSuperShotgun()
 
 	//dir = aim (self, 100000);
 	aim( dir );
-	FireBullets( bullets, dir, 0.14, 0.08, 0, dtSSG );
+	if ( cvar("k_instagib") == 2 )
+		FireBullets( bullets, dir, 0, 0, 0, dtSSG );
+	else
+		FireBullets( bullets, dir, 0.14, 0.08, 0, dtSSG );
 }
 
 /*
@@ -1218,7 +1240,10 @@ void W_SetCurrentAmmo()
 
 	case IT_SHOTGUN:
 		self->s.v.currentammo = self->s.v.ammo_shells;
-		self->s.v.weaponmodel = "progs/v_shot.mdl";
+		if ( cvar("k_instagib_custom_models") && cvar("k_instagib") == 1 )
+			self->s.v.weaponmodel = "progs/v_coil.mdl";
+		else
+			self->s.v.weaponmodel = "progs/v_shot.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_SHELLS;
 #ifdef VWEP_TEST
@@ -1229,7 +1254,10 @@ void W_SetCurrentAmmo()
 
 	case IT_SUPER_SHOTGUN:
 		self->s.v.currentammo = self->s.v.ammo_shells;
-		self->s.v.weaponmodel = "progs/v_shot2.mdl";
+		if ( cvar("k_instagib_custom_models") && cvar("k_instagib") == 2 )
+			self->s.v.weaponmodel = "progs/v_coil.mdl";
+		else
+			self->s.v.weaponmodel = "progs/v_shot2.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_SHELLS;
 #ifdef VWEP_TEST

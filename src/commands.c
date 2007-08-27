@@ -94,6 +94,9 @@ void ToggleDropRing();
 void ToggleFairPacks();
 void ToggleFreeze();
 void ToggleMidair();
+void ToggleInstagib();
+void InstagibMode(float instamode);
+void InstagibModeCustom(float instamode);
 void TogglePowerups();
 void ToggleQEnemy();
 void ToggleQLag();
@@ -390,6 +393,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_WREG         "register reliable wpns"
 #define CD_KILL         "invoke suicide"
 #define CD_MIDAIR       "midair settings"
+#define CD_INSTAGIB     "instagib settings"
 #define CD_TIME         "show server time"
 #define CD_GREN_MODE    "grenades mode"
 #define CD_TOGGLEREADY  "just toggle ready"
@@ -656,6 +660,12 @@ cmd_t cmds[] = {
 	{ "wreg",        cmd_wreg,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_WREG },
 	{ "kill",        ClientKill,                0    , CF_PLAYER | CF_MATCHLESS, CD_KILL },
 	{ "mid_air",     ToggleMidair,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_MIDAIR },
+	{ "instagib",    ToggleInstagib,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
+	{ "instagib_fcg",DEF(InstagibModeCustom),   0.0f , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
+	{ "instagib_scg",DEF(InstagibModeCustom),   1.0f , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
+	{ "instagib_sg" ,DEF(InstagibMode),         0.0f , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
+	{ "instagib_ssg",DEF(InstagibMode),         1.0f , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
+	{ "instagib_off",DEF(InstagibMode),         2.0f , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
 	{ "time",        sv_time,                   0    , CF_BOTH | CF_MATCHLESS, CD_TIME },
 	{ "gren_mode",   GrenadeMode,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_GREN_MODE },
 	{ "toggleready", ToggleReady,               0    , CF_BOTH, CD_TOGGLEREADY },
@@ -1099,7 +1109,9 @@ void ShowOpts()
 			"היףדטבעחו.. underwater discharges\n"
 			"ףילומדו.... toggle spectator talk\n"
 			"גועתועכ.... toggle berzerk mode\n"
-			"%s..... toggle midair mode\n", redtext("midair"));
+			"%s..... toggle midair mode\n" 
+			"%s..... toggle grenade mode\n" 
+			"%s..... toggle instagib mode\n", redtext("mid_air"), redtext("gren_mode"), redtext("instagib"));
 }
 
 void ShowQizmo()
@@ -1293,6 +1305,31 @@ void PrintToggle2( char *tog, char *key )
 		G_sprint(self, 2, "On\n");
 	else
 		G_sprint(self, 2, "Off\n");
+}
+
+void PrintToggleInstagib( char *tog, char *key )
+{
+	int i;
+
+	if ( strnull(tog) || strnull(key) )
+		G_Error("PrintToggleInstagib null");
+
+	G_sprint(self, 2, "%s", tog);
+
+	i = streq(key, "k_instagib") ? cvar("k_instagib") : bound(0, cvar( key ), 4);
+
+	if( !i )
+		G_sprint(self, 2, "Off ");
+	else if ( i == 1 )
+		if ( cvar("k_instagib_custom_models") )
+			G_sprint(self, 2, "FCG ");
+		else
+			G_sprint(self, 2, "SG  ");
+	else
+		if ( cvar("k_instagib_custom_models") )
+			G_sprint(self, 2, "SCG ");
+		else
+			G_sprint(self, 2, "SSG ");
 }
 
 char *get_frp_str ()
@@ -1843,6 +1880,11 @@ void TogglePowerups()
 	if ( ++k_pow > 2 )
 		k_pow = 0;
 
+	if ( cvar("k_instagib") ) {
+		G_bprint(2, "%s are disabled with Instagib\n", redtext("Powerups"));
+		return;
+	}
+
 	cvar_fset("k_pow", k_pow);
 
 	if ( !k_pow )
@@ -1884,9 +1926,11 @@ void ChangeDM(float dmm)
 		return;
 	}
 
-	// if leaving dmm4 force midair off
-	if ( deathmatch == 4 )
+	// if leaving dmm4 force midair or instagib off
+	if ( deathmatch == 4 ) {
 		cvar_set( "k_midair", "0" );
+		cvar_set( "k_instagib", "0" );
+	}
 
 	deathmatch = bound(1, (int)dmm, 5);
 
@@ -2565,7 +2609,7 @@ void ShowNick()
 			float	radius;
 
 			radius = 27;
-			if ((int)p->s.v.effects & (EF_BLUE|EF_RED|EF_DIMLIGHT|EF_BRIGHTLIGHT))
+			if ((int)p->s.v.effects & (EF_BLUE|EF_RED|EF_GREEN|EF_DIMLIGHT|EF_BRIGHTLIGHT))
 				radius = 200;
 
 			if (dist <= radius)
@@ -2708,7 +2752,7 @@ const char common_um_init[] =
 	"k_spec_info 1\n"					// allow spectators receive took info during game
 	"k_rocketarena 0\n"					// rocket arena
 	"k_midair 0\n"						// midair off
-//	"localinfo k_instagib 0\n"			// not implemented
+	"k_instagib 0\n"					// instagib off
 //	"localinfo k_new_spw 0\n"			// ktpro feature
 
 	"fraglimit 0\n"						// fraglimit %)
@@ -4817,7 +4861,82 @@ void ToggleMidair()
 		return;
 	}
 
+	// If midair is enabled, disable instagib
+	if (cvar("k_instagib"))
+		cvar_set("k_instagib", "0");
+	
+	if ( cvar("k_dmm4_gren_mode") )
+		cvar_set("k_dmm4_gren_mode", "0"); // If midair is enabled, disable gren_mode
+
 	cvar_toggle_msg( self, "k_midair", redtext("Midair") );
+}
+
+void ToggleInstagib();
+void InstagibMode(float instamode)
+{
+	if ( cvar("k_instagib_custom_models") && instamode ) {
+		G_sprint( self, 2, "SG/SSG modes require k_instagib_custom_models set to 0\n");
+		return;
+	}
+	cvar_fset("k_instagib", instamode );
+	ToggleInstagib();
+}
+
+void InstagibModeCustom(float instamode)
+{
+	if ( !cvar("k_instagib_custom_models") ) {
+		G_sprint( self, 2, "FCG/SCG modes require k_instagib_custom_models set to 1\n");
+		return;
+	}
+	cvar_fset("k_instagib", instamode );
+	ToggleInstagib();
+}
+
+void W_SetCurrentAmmo();
+void ToggleInstagib()
+{
+	
+	int k_instagib = bound(0, cvar( "k_instagib" ), 2); 
+
+	if ( match_in_progress )
+		return;
+
+	if( check_master() )
+		return;
+
+	// Can't enable instagib unless dmm4 is set first
+	if ( !cvar("k_midair") && deathmatch != 4 ) {
+		G_sprint( self, 2, "Instagib requires dmm4\n");
+		return;
+	}
+
+	if ( cvar("k_midair") )
+		cvar_set("k_midair", "0"); // If instagib is enabled, disable midair
+
+	if ( cvar("k_dmm4_gren_mode") )
+		cvar_set("k_dmm4_gren_mode", "0"); // If instagib is enabled, disable gren_mode
+
+	if ( ++k_instagib > 2 )
+		k_instagib = 0;
+
+	cvar_fset("k_instagib", k_instagib);
+
+	if ( !k_instagib )
+		G_bprint(2, "%s disabled\n", redtext("Instagib"));
+	else if ( k_instagib == 1 ) 
+		if ( cvar("k_instagib_custom_models") )
+			G_bprint(2, "%s enabled (Fast Coilgun mode)\n", redtext("Instagib"));
+		else
+			G_bprint(2, "%s enabled (SG mode)\n", redtext("Instagib"));
+	else if ( k_instagib == 2 )
+		if ( cvar("k_instagib_custom_models") )
+			G_bprint(2, "%s enabled (Slow Coilgun mode)\n", redtext("Instagib"));
+		else
+			G_bprint(2, "%s enabled (SSG mode)\n", redtext("Instagib"));
+	else
+		G_bprint(2, "%s unknown\n", redtext("Instagib"));
+	
+	W_SetCurrentAmmo();
 }
 
 void sv_time()

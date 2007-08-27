@@ -1,3 +1,30 @@
+2007-08-27
+deurk:
+263. Instagib mode added. Has to be turned on like midair using either the command instagib 
+	in game or the cvar k_instagib in config file (dmm4 required).
+	4 modes are actually defined: 
+		- FCG instagib (fast coilgun)
+		- SCG instagib (slower cloigun)
+		- SG instagib (fast reload)
+		- SSG instagib (slower reload)
+	Here are some details about this instagib:
+		- If you hit him, enemy gibs.
+		- Only allowed weapons are axe and SG/SSG (depending on instagib mode used).
+		- SG or SSG just fire 1 centered bullet, not several with random deviation.
+		- Stomping an enemy gibs him too.
+		- Picking up backpack gives 10 health. 
+		- Player starts life with 250 health.
+		- If health goes over 300, player gets 30 seconds of invisibility after which health 
+			goes back to 200 to avoid easy multiple bonuses for the same player.
+		- SG/SSG frags gives 1 point, axe gives 2, stomp gives 4.
+		- Extra gibs for more pleasure.
+		- Maps are spawned free of objects.
+
+264. Instagib now supports following commands:
+	instagib/instagib_off/instagib_fcg/instagib_scg/instagib_sg/instagib_ssg
+
+265. Spawnpoints markers are now added during prewar.
+
 2007-08-22
 qq:
 262. I was always agains admins in matchless mode, I changed my mind since we have some issue with aimbot here (Russia, fatherland of cheatzors),
@@ -12,7 +39,7 @@ qq:
 2007-07-20
 deurk:
 259. Changing match settings with 1on1, ffa and such commands now dsplays the
-name of player executing the command.
+	name of player executing the command.
 
 2007-07-02
 qq:

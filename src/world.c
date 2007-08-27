@@ -253,6 +253,11 @@ void SP_worldspawn()
 	trap_precache_sound( "items/protect2.wav" );
 	trap_precache_sound( "items/protect3.wav" );
 
+// Invisibility sounds
+	trap_precache_sound( "items/inv1.wav" );
+	trap_precache_sound( "items/inv2.wav" );
+	trap_precache_sound( "items/inv3.wav" );
+
 // quad sounds - need this due to aerowalk customize
 	trap_precache_sound( "items/damage.wav" );
 	trap_precache_sound( "items/damage2.wav" );
@@ -282,13 +287,16 @@ void SP_worldspawn()
 
 	ra_Precache(); // only if ra is active
 
+	trap_precache_model( "progs/v_coil.mdl" );	
+	trap_precache_sound( "weapons/coilgun.wav" );
+
 	trap_precache_model( "progs/player.mdl" );
 	trap_precache_model( "progs/eyes.mdl" );
 	trap_precache_model( "progs/h_player.mdl" );
 	trap_precache_model( "progs/gib1.mdl" );
 	trap_precache_model( "progs/gib2.mdl" );
 	trap_precache_model( "progs/gib3.mdl" );
-
+	
 	trap_precache_model( "progs/s_bubble.spr" );	// drowning bubbles
 	trap_precache_model( "progs/s_explod.spr" );	// sprite explosion
 
@@ -427,12 +435,15 @@ void SP_worldspawn()
 		SetPractice( cvar( "srv_practice_mode" ), NULL ); // may not reload map
 }
 
+void ShowSpawnPoints();
 void SpawnCTFItem( char* classname, float x, float y, float z, float angle );
 void Customize_Maps()
 {
 	gedict_t *p;
 
 	jumpf_flag = -650;
+
+	ShowSpawnPoints();
 
 	if ( streq( "q1dm17", g_globalvars.mapname ) )
 		jumpf_flag = -1000;
@@ -715,6 +726,8 @@ void FirstFrame	( )
 //}
 	RegisterCvar("k_spec_info");
 	RegisterCvar("k_midair");
+	RegisterCvar("k_instagib");
+	RegisterCvar("k_instagib_custom_models");
 	RegisterCvar("k_rocketarena"); // rocket arena
 	RegisterCvar("k_dmgfrags");
 	RegisterCvar("k_tp_tele_death");
@@ -1140,6 +1153,9 @@ void FixRules ( )
 	if ( cvar("k_midair") && deathmatch != 4 )
 		cvar_fset( "k_midair", 0 ); // midair only in dmm4
 
+	if ( cvar("k_instagib") && deathmatch != 4 )
+		cvar_fset( "k_instagib", 0 ); // instagib only in dmm4
+
 	// ok, broadcast changes if any, a bit tech info, but this is misconfigured server
 	// and must not happen on well configured servers, k?
 	if (km != k_mode)
@@ -1234,7 +1250,7 @@ void StartFrame( int time )
 		vote_check_all();
 
 	CheckAll(); // just check some clients params
-	
+
 	CheckTeamStatus();
 
 	CheckAutoXonX(true); // switch XonX mode dependant on players + specs count

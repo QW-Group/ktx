@@ -493,6 +493,8 @@ void            T_BeamDamage( gedict_t * attacker, float damage );
 
 //items.c
 void			DropPowerups();
+void			ShowSpawnPoints();
+void			HideSpawnPoints();
 void            DropBackpack();
 
 void			adjust_pickup_time( float *current, float *total );
@@ -515,6 +517,13 @@ void            PlayerDropFlag( gedict_t *player );
 void            RegenFlags( qboolean yes );
 void			AddHook( qboolean yes );
 void			CTF_Obituary( gedict_t *targ, gedict_t *attacker );
+
+// logs.c
+void log_open( const char *fmt, ... );
+void log_printf( const char *fmt, ... );
+void log_close(void);
+
+extern fileHandle_t log_handle;
 
 // commands.c
 typedef struct cmd_s {
