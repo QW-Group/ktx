@@ -1679,7 +1679,7 @@ void BackpackTouch()
 		if ( !( ( int ) other->s.v.items & new ) )
 		{ // new weapon - so print u got it
 			acount = 1;
-			G_sprint( other, PRINT_LOW, "the %s", self->s.v.netname );F
+			G_sprint( other, PRINT_LOW, "the %s", self->s.v.netname );
 
 			new_wp = self->s.v.netname;
 

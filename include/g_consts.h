@@ -159,7 +159,8 @@
 // entity effects
 
 #define EF_BRIGHTFIELD 1
-#define EF_MUZZLEFLASH 2
+//#define EF_MUZZLEFLASH 2
+#define EF_GREEN 2
 #define EF_BRIGHTLIGHT 4
 #define EF_DIMLIGHT 8
 #define EF_FLAG1   16
