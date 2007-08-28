@@ -2743,6 +2743,7 @@ ok:
 const char common_um_init[] =
 	"set pm_airstep 0\n"
 	"maxclients 8\n"
+	"k_instagib 0\n"					// instagib off
 	"k_disallow_weapons 16\n"			// disallow gl in dmm4 by default
 
 //	"localinfo k_new_mode 0\n" 			// UNKNOWN ktpro
@@ -2752,7 +2753,7 @@ const char common_um_init[] =
 	"k_spec_info 1\n"					// allow spectators receive took info during game
 	"k_rocketarena 0\n"					// rocket arena
 	"k_midair 0\n"						// midair off
-	"k_instagib 0\n"					// instagib off
+	"k_sspawn 1\n"						// Show spawnpoints
 //	"localinfo k_new_spw 0\n"			// ktpro feature
 
 	"fraglimit 0\n"						// fraglimit %)

@@ -291,7 +291,6 @@ void SP_worldspawn()
 	{
 		trap_precache_model( "progs/v_coil.mdl" );	
 		trap_precache_sound( "weapons/coilgun.wav" );
-		G_Error( "COILGUN LOADED" );
 	}
 
 	trap_precache_model( "progs/player.mdl" );
@@ -447,7 +446,8 @@ void Customize_Maps()
 
 	jumpf_flag = -650;
 
-	ShowSpawnPoints();
+	if ( cvar( "k_sspawn" ))
+		ShowSpawnPoints();
 
 	if ( streq( "q1dm17", g_globalvars.mapname ) )
 		jumpf_flag = -1000;
@@ -704,6 +704,7 @@ void FirstFrame	( )
 //	RegisterCvar("k_maxrate"); -> now using sv_maxrate instead
 	RegisterCvar("k_minrate");
 	RegisterCvar("k_sready");
+	RegisterCvar("k_sspawn");
 	RegisterCvar("k_idletime");
 	RegisterCvar("k_timetop");
 	RegisterCvar("k_dm2mod");

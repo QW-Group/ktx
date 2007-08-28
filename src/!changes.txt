@@ -6,6 +6,9 @@ deurk:
 
 267. Fixed MSVC project files to include logs.c
 
+268. Made spawn points markers display configurable: 
+	cvar k_sspawn (1 by default)
+
 2007-08-27
 deurk:
 263. Instagib mode added. Has to be turned on like midair using either the command instagib 
