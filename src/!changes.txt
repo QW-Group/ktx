@@ -1,3 +1,11 @@
+2007-08-28
+deurk:
+266. Instagib now doesn't load custom models if k_instagib_custom_models is 0
+	or inexistant in server config. DO NOT PUT IT TO 1 BEFORE PAK FILE IS
+	RELEASED.
+
+267. Fixed MSVC project files to include logs.c
+
 2007-08-27
 deurk:
 263. Instagib mode added. Has to be turned on like midair using either the command instagib 

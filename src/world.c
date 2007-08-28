@@ -287,8 +287,12 @@ void SP_worldspawn()
 
 	ra_Precache(); // only if ra is active
 
-	trap_precache_model( "progs/v_coil.mdl" );	
-	trap_precache_sound( "weapons/coilgun.wav" );
+	if ( cvar("k_instagib_custom_models") ) // precache if custom models actived in config, even if instagib not yet activated 
+	{
+		trap_precache_model( "progs/v_coil.mdl" );	
+		trap_precache_sound( "weapons/coilgun.wav" );
+		G_Error( "COILGUN LOADED" );
+	}
 
 	trap_precache_model( "progs/player.mdl" );
 	trap_precache_model( "progs/eyes.mdl" );
