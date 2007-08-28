@@ -567,6 +567,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\logs.c">
+			</File>
+			<File
 				RelativePath="src\maps.c"
 				>
 			</File>

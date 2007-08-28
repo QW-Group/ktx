@@ -407,6 +407,9 @@
 				RelativePath="src\maps.c">
 			</File>
 			<File
+				RelativePath="src\logs.c">
+			</File>
+			<File
 				RelativePath="src\match.c">
 			</File>
 			<File

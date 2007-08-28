@@ -168,6 +168,10 @@ SOURCE=src/items.c
 # End Source File
 # Begin Source File
 
+SOURCE=src/logs.c
+# End Source File
+# Begin Source File
+
 SOURCE=src/maps.c
 # End Source File
 # Begin Source File
