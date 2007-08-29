@@ -25,6 +25,8 @@ void StartMatch ();
 void remove_specs_wizards ();
 void lastscore_add ();
 void OnePlayerMidairStats();
+void StartLogs();
+void StopLogs();
 
 float CountPlayers()
 {
@@ -978,7 +980,7 @@ void EM_CorrectStats()
 	{
 		// take away powerups so scoreboard looks normal
 		p->s.v.items = (int)p->s.v.items & ~(IT_INVISIBILITY | IT_INVULNERABILITY | IT_SUIT | IT_QUAD);
-		p->s.v.effects = (int)p->s.v.effects & ~(EF_DIMLIGHT | EF_BLUE | EF_RED );
+		p->s.v.effects = (int)p->s.v.effects & ~(EF_DIMLIGHT | EF_BLUE | EF_RED | EF_GREEN );
 		p->invisible_finished = 0;
 		p->invincible_finished = 0;
 		p->super_damage_finished = 0;
@@ -1088,6 +1090,8 @@ void EndMatch ( float skip_log )
 	}
 
 	EM_on_MatchEndBreak( skip_log );
+
+	StopLogs();
 
 	NextLevel();
 }
@@ -1319,6 +1323,15 @@ void SM_PrepareMap()
 			      ) { // no weapon ammo and megahealth for dmm4
 					ent_remove( p );
 				}
+				if ( cvar("k_instagib" )) {
+					if(    streq( p->s.v.classname, "item_health" )
+						|| streq( p->s.v.classname, "item_armor1")
+						|| streq( p->s.v.classname, "item_armor2")
+						|| streq( p->s.v.classname, "item_armorInv")
+				      	) { // no health, armors for instagib
+						ent_remove( p );
+					}
+				}
 			}
 		} else {
 			if( deathmatch == 2 && cvar( "k_dm2mod" ) &&
@@ -1463,6 +1476,7 @@ void SM_on_MatchStart()
 }
 
 // Reset player frags and start the timer.
+void HideSpawnPoints();
 void StartMatch ()
 {
 	char *tm;
@@ -1527,6 +1541,10 @@ void StartMatch ()
 
 	SM_on_MatchStart();
 
+	HideSpawnPoints();
+
+	StartLogs();
+
 	if ( !self->cnt )
 		ent_remove( self ); // timelimit == 0, so match will end no due to timelimit but due to fraglimit or something
 }
@@ -1539,6 +1557,7 @@ void PrintCountdown( int seconds )
 // Deathmatch  x
 // Mode		  D u e l | T e a m | F F A | C T F | RA
 // Midair     On // optional
+// Instagib   On // optional
 // Jawnmode   On // optional
 // Airstep    On // optional
 // TmOverlay  On // optional
@@ -1580,6 +1599,9 @@ void PrintCountdown( int seconds )
 	if ( cvar("k_midair") )
 		strlcat(text, va("%s %6s\n", "Midair", redtext("On")), sizeof(text));
 
+	if ( cvar("k_instagib") )
+		strlcat(text, va("%s %4s\n", "Instagib", redtext("On")), sizeof(text));
+	
 	if ( k_jawnmode )
 		strlcat(text, va("%s %4s\n", "Jawnmode", redtext("On")), sizeof(text));
 
@@ -1621,7 +1643,7 @@ void PrintCountdown( int seconds )
 	if ( cvar("k_dmgfrags") )
 		strlcat(text, va("%s %4s\n", "Dmgfrags", redtext("On")), sizeof(text));
 
-	if (    deathmatch == 4 && !cvar("k_midair")
+	if ( deathmatch == 4 && !cvar("k_midair") && !cvar("k_instagib")
 		 && !strnull( nowp = str_noweapon((int)cvar("k_disallow_weapons") & DA_WPNS) )
 	   )
 		strlcat(text, va("\n%s %4s\n", "Noweapon", 
@@ -1632,8 +1654,8 @@ void PrintCountdown( int seconds )
 
 qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 {
-    int k_lockmin     = cvar( "k_lockmin" );
-    int k_lockmax     = cvar( "k_lockmax" );
+	int k_lockmin     = cvar( "k_lockmin" );
+	int k_lockmax     = cvar( "k_lockmax" );
 	int k_membercount = cvar( "k_membercount" );
 	int i = CountRTeams();
 	int sub, nready;
@@ -1685,30 +1707,42 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 		txt = va("%d more team%s required!\n", sub, count_s( sub ));
 
 		if ( s )
-        	G_sprint(s, 2, "%s", txt);
+        		G_sprint(s, 2, "%s", txt);
 		else
-        	G_bprint(2, "%s", txt);
+        		G_bprint(2, "%s", txt);
 
-        return false;
-    }
-
-    if( i > k_lockmax )
-    {
+		return false;
+	}
+	
+	if( i > k_lockmax )
+	{
 		sub = i - k_lockmax;
 		txt = va("Get rid of %d team%s!\n", sub, count_s( sub ));
 
 		if ( s )
-        	G_sprint(s, 2, "%s", txt);
+        		G_sprint(s, 2, "%s", txt);
 		else
-        	G_bprint(2, "%s", txt);
+        		G_bprint(2, "%s", txt);
 
-        return false;
-    }
+        	return false;
+	}
 
 	nready = 0;
 	for( p = world; (p = find_plr( p )); )
 		if( p->ready )
 			nready++;
+
+	if ( isDuel() && nready > 2 ) {
+		sub = nready - 2;
+		txt = va("Get rid of %d player%s!\n", sub, ( sub != 1 ? "s" : "" ));
+
+                if ( s )
+                        G_sprint(s, 2, "%s", txt);
+                else
+                        G_bprint(2, "%s", txt);
+
+	        return false;
+	}
 
 	if ( !CheckMembers( k_membercount ) ) {
 		if( !forceMembersWarn ) // warn anyway if we want
@@ -1721,9 +1755,9 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 			 redtext("Waiting..."));
 					
 		if ( s )
-        	G_sprint(s, 2, "%s", txt);
+        		G_sprint(s, 2, "%s", txt);
 		else
-        	G_bprint(2, "%s", txt);
+        		G_bprint(2, "%s", txt);
 
 		return false;
 	}
@@ -1879,6 +1913,8 @@ char *CompilateDemoName ()
 		strlcat( demoname, "duel", sizeof( demoname ) );
 		if ( cvar("k_midair") )
 			strlcat( demoname, "_midair", sizeof( demoname ) );
+		if ( cvar("k_instagib") )
+			strlcat( demoname, "_instagib", sizeof( demoname ) );
 
 		for( vs = "_", p = world; (p = find_plr( p )); ) 
 		{
