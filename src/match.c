@@ -1707,9 +1707,9 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 		txt = va("%d more team%s required!\n", sub, count_s( sub ));
 
 		if ( s )
-        		G_sprint(s, 2, "%s", txt);
+        	G_sprint(s, 2, "%s", txt);
 		else
-        		G_bprint(2, "%s", txt);
+        	G_bprint(2, "%s", txt);
 
 		return false;
 	}
@@ -1720,9 +1720,9 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 		txt = va("Get rid of %d team%s!\n", sub, count_s( sub ));
 
 		if ( s )
-        		G_sprint(s, 2, "%s", txt);
+        	G_sprint(s, 2, "%s", txt);
 		else
-        		G_bprint(2, "%s", txt);
+        	G_bprint(2, "%s", txt);
 
         	return false;
 	}
@@ -1731,18 +1731,6 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 	for( p = world; (p = find_plr( p )); )
 		if( p->ready )
 			nready++;
-
-	if ( isDuel() && nready > 2 ) {
-		sub = nready - 2;
-		txt = va("Get rid of %d player%s!\n", sub, ( sub != 1 ? "s" : "" ));
-
-                if ( s )
-                        G_sprint(s, 2, "%s", txt);
-                else
-                        G_bprint(2, "%s", txt);
-
-	        return false;
-	}
 
 	if ( !CheckMembers( k_membercount ) ) {
 		if( !forceMembersWarn ) // warn anyway if we want
@@ -1755,9 +1743,9 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 			 redtext("Waiting..."));
 					
 		if ( s )
-        		G_sprint(s, 2, "%s", txt);
+        	G_sprint(s, 2, "%s", txt);
 		else
-        		G_bprint(2, "%s", txt);
+        	G_bprint(2, "%s", txt);
 
 		return false;
 	}
