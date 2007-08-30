@@ -1,3 +1,7 @@
+2007-08-30
+deurk:
+269. Added cvar k_extralog to toggle on/off the detailed ingame xml logs.(WIP)
+
 2007-08-28
 deurk:
 266. Instagib now doesn't load custom models if k_instagib_custom_models is 0

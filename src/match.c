@@ -1498,6 +1498,8 @@ void StartMatch ()
 
 	SM_PrepareMap(); // remove/add some items from map regardind with dmm and game mode
 	
+	HideSpawnPoints();
+
 	match_start_time  = g_globalvars.time;
 	match_in_progress = 2;
 	
@@ -1540,8 +1542,6 @@ void StartMatch ()
 	SM_PrepareTeamsStats();
 
 	SM_on_MatchStart();
-
-	HideSpawnPoints();
 
 	StartLogs();
 
