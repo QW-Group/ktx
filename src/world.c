@@ -752,6 +752,7 @@ void FirstFrame	( )
 	RegisterCvar("k_cmd_fp_disabled");
 // }
 
+	RegisterCvar("k_extralog");
 	RegisterCvar("k_demo_mintime");
 	RegisterCvar("k_dmm4_gren_mode");
 	RegisterCvar("k_fp"); // say team floodprot

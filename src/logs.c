@@ -24,9 +24,12 @@ fileHandle_t log_handle = -1;
 
 void log_close(void)
 {
-        if (log_handle < 0)
+        if (log_handle < 0 )
                 return;
  
+        if ( !cvar("k_extralog")) 
+		return;
+
         trap_FS_CloseFile( log_handle );
         log_handle = -1;
 }
@@ -36,7 +39,10 @@ void log_open( const char *fmt, ... )
         va_list argptr;
         char    text[1024];
  
-        va_start( argptr, fmt );
+        if ( !cvar("k_extralog")) 
+		return;
+
+	va_start( argptr, fmt );
         Q_vsnprintf( text, sizeof(text), fmt, argptr );
         va_end( argptr );
  
@@ -53,7 +59,10 @@ void log_printf( const char *fmt, ... )
 {
         va_list argptr;
         char    text[1024];
- 
+        
+	if ( !cvar("k_extralog")) 
+		return;
+
         if (log_handle < 0)
                 return;
  

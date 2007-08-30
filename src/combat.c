@@ -296,13 +296,14 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	gedict_t       *oldself;
 	float           save;
 	float           take;
+	float		as_rune;
 //	int				wp_num;
 	int				i, c1 = 8, c2 = 4, hdp;
 	float			dmg_dealt = 0, non_hdp_damage;
 	char            *attackerteam, *targteam;
 
 	//midair and instagib
-	float playerheight, midheight = 0;
+	float playerheight, midheight, as_rune = 0;
 	qboolean lowheight = false, instagib = false, midair = false, inwater = false, do_dmg = false, rl_dmg = false;
 
 	if ( !targ->s.v.takedamage || ISDEAD( targ ) )
@@ -352,11 +353,16 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		attacker->carrier_hurt_time = g_globalvars.time;
 	}
 
+	if ( instagib)
+	{
+		midheight = targ->s.v.origin[2] - attacker->s.v.origin[2];
+	}
+
 	if ( midair )
 	{
 		inwater = ( ((int)targ->s.v.flags & FL_INWATER) && targ->s.v.waterlevel > 1 );
 
-		if ( streq( inflictor->s.v.classname, "rocket" ) )
+		if ( streq( inflictor->s.v.classname, "rocket" ))
 		{
 			midheight = targ->s.v.origin[2] - inflictor->s.v.oldorigin[2];
 			if ( midheight <= 190 )
@@ -584,7 +590,16 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 		if ( instagib ) {
 			if ( streq( inflictor->s.v.classname, "player" ) )
-				take = 50000;
+			{
+					take = 50000;
+				if ( midheight > 250 && midheight < 400 ) {
+		 			G_bprint( 2, "%s got himself an %s at %d height!", attacker->s.v.netname, redtext("airshot"), (int)midheight );
+					as_rune += 0.1;
+				} else if ( midheight > 400 ) {
+		 			G_bprint( 2, "%s got himself a great %s at %d height!", attacker->s.v.netname, redtext("airshot"), (int)midheight );
+					as_rune += 1;
+				}
+			}
 		}
 
 		dmg_dealt += targ->s.v.health > take ? take : targ->s.v.health;
