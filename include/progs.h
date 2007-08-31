@@ -159,6 +159,9 @@ typedef struct player_stats_s {
 	float velocity_sum;	// summary velocity from all frames
 	int vel_frames;		// number of frames
 
+	// instagib stats
+	float airshots;		// Total of airshots points
+
 } player_stats_t;
 
 

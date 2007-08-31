@@ -235,7 +235,8 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 		WriteByte( MSG_ALL, SVC_KILLEDMONSTER );
 	}
 
-	ClientObituary( self, attacker );
+	if ( !cvar("k_instagib") )
+		ClientObituary( self, attacker );
 
         if ( attacker->super_damage_finished > g_globalvars.time )
                 dmg_is_quaded = 1;
@@ -590,15 +591,15 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		if ( instagib ) {
 			if ( streq( inflictor->s.v.classname, "player" ) )
 			{
-				take = 50000;
-				if ( midheight > 250 && midheight < 400 ) {
+				take = 5000;
+				if ( midheight >= 250 && midheight < 400 ) {
 		 			G_bprint( 2, "%s got himself an %s at %d height!\n", attacker->s.v.netname, redtext("airshot"), (int)midheight );
 					attacker->ps.airshots += 0.1;
 
-				} else if ( midheight > 400 && midheight < 1000 ) {
+				} else if ( midheight >= 400 && midheight < 1000 ) {
 		 			G_bprint( 2, "%s got himself a great %s at %d height!\n", attacker->s.v.netname, redtext("airshot"), (int)midheight );
 					attacker->ps.airshots += 0.5;
-				} else if (  midheight > 1000 ) {
+				} else if (  midheight >= 1000 ) {
 		 			G_bprint( 2, "%s got himself a extraordinary %s at %d height!\n", 
 						attacker->s.v.netname, redtext("airshot"), (int)midheight );
 					attacker->ps.airshots += 1;

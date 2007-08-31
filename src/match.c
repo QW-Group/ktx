@@ -432,15 +432,16 @@ void OnePlayerStats(gedict_t *p, int tp)
 				redtext("average"), p->ps.vel_frames > 0 ? p->ps.velocity_sum / p->ps.vel_frames : 0.);
 
 		// armors + megahealths
-		G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("Armr&mhs"),
+		if ( !cvar("k_instagib")) 
+			G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("Armr&mhs"),
 				redtext("ga"), ga, redtext("ya"), ya, redtext("ra"), ra, redtext("mh"), mh);
 
 		// powerups
-		if ( isTeam() || isCTF() )
+		if ( isTeam() || isCTF() && !cvar("k_instagib") )
 			G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("Powerups"),
 				redtext("Q"), quad, redtext("P"), pent, redtext("R"), ring);
 
-		if ( isCTF() )
+		if ( isCTF() && !cvar("k_instagib") )
 		{
 			G_bprint(2, "%s: %s:%d%% %s:%d%% %s:%d%% %s:%d%%\n", redtext("RuneTime"),
 				redtext("res"), res, redtext("str"), str, redtext("hst"), hst, redtext("rgn"), rgn );
@@ -451,15 +452,16 @@ void OnePlayerStats(gedict_t *p, int tp)
 		}
 
 		// rl
-		if ( isTeam() )
+		if ( isTeam() && !cvar("k_instagib") )
 			G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("      RL"),
 				redtext("Took"), t_rl, redtext("Killed"), k_rl, redtext("Dropped"), d_rl);
 
 		// damage
-		G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f\n", redtext("  Damage"),
+		if ( !cvar("k_instagib") )
+			G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f\n", redtext("  Damage"),
 				redtext("Tkn"), dmg_t, redtext("Gvn"), dmg_g, redtext("Tm"), dmg_team);
 
-		if ( isDuel() )
+		if ( isDuel() && !cvar("k_instagib") )
 		{
 			//  endgame h & a
 			G_bprint(2, "  %s  H&A: \220H:%d\221\217", redtext("EndGame"), (int)p->s.v.health);
@@ -484,6 +486,12 @@ void OnePlayerStats(gedict_t *p, int tp)
 		// spawnfrags
 		if ( !isCTF() )
 			G_bprint(2, "  %s: \220%d\221\n", redtext("SpawnFrags"), p->ps.spawn_frags);
+
+		if ( cvar("k_instagib") )
+		{
+			G_bprint(2, "  %s: %.1f\n", redtext("AirShots"), p->ps.airshots);
+		}
+
 //	}
 
 	if ( !tp )
