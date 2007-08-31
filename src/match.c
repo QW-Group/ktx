@@ -432,12 +432,12 @@ void OnePlayerStats(gedict_t *p, int tp)
 				redtext("average"), p->ps.vel_frames > 0 ? p->ps.velocity_sum / p->ps.vel_frames : 0.);
 
 		// armors + megahealths
-		if ( !cvar("k_instagib")) 
+		if ( !cvar("k_instagib") ) 
 			G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("Armr&mhs"),
 				redtext("ga"), ga, redtext("ya"), ya, redtext("ra"), ra, redtext("mh"), mh);
 
 		// powerups
-		if ( isTeam() || isCTF() && !cvar("k_instagib") )
+		if ( ( isTeam() || isCTF() ) && !cvar("k_instagib") )
 			G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("Powerups"),
 				redtext("Q"), quad, redtext("P"), pent, redtext("R"), ring);
 
