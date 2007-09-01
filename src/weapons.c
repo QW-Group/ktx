@@ -355,8 +355,14 @@ void FireBullets( float shotcount, vec3_t dir, float spread_x, float spread_y, f
 	ClearMultiDamage();
 	multi_damage_type = deathtype;
 
-	traceline( PASSVEC3( src ), src[0] + dir[0] * 2048, src[1] + dir[1] * 2048,
-			src[2] + dir[2] * 2048, false, self );
+	if ( cvar("k_instagib") )
+		traceline( PASSVEC3( src ), src[0] + dir[0] * 8192, 
+		src[1] + dir[1] * 8192, 
+		src[2] + dir[2] * 8192, false, self );
+	else
+		traceline( PASSVEC3( src ), src[0] + dir[0] * 2048, 
+		src[1] + dir[1] * 2048, 
+		src[2] + dir[2] * 2048, false, self );
 	VectorScale( dir, 4, tmp );
 	VectorSubtract( g_globalvars.trace_endpos, tmp, puff_org );	// puff_org = trace_endpos - dir*4;
 
@@ -441,7 +447,11 @@ void FireBullets( float shotcount, vec3_t dir, float spread_x, float spread_y, f
 		}
 
 //  direction = dir + crandom()*spread[0]*v_right + crandom()*spread[1]*v_up;
-		VectorScale( direction, 2048, tmp );
+		if ( cvar("k_instagib") )
+			VectorScale( direction, 8192, tmp );
+		else
+			VectorScale( direction, 2048, tmp );
+
 		VectorAdd( src, tmp, tmp );
 		traceline( PASSVEC3( src ), PASSVEC3( tmp ), false, self );
 		if ( g_globalvars.trace_fraction != 1.0 )
