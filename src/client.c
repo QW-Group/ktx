@@ -1247,6 +1247,13 @@ void PutClientInServer()
 			self->s.v.armorvalue = 0;
 			self->s.v.armortype = 0;
 			self->s.v.health = 250;
+			if( cvar( "k_666" ) ) {
+				stuffcmd (self, "bf\n");
+				self->invincible_time = 1;
+				self->invincible_finished = g_globalvars.time + 1;
+				self->k_666 = 1;
+				self->s.v.items = (int)self->s.v.items | IT_INVULNERABILITY;
+			}
 		}
 		else
 		{

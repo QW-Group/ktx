@@ -95,8 +95,8 @@ void ToggleFairPacks();
 void ToggleFreeze();
 void ToggleMidair();
 void ToggleInstagib();
-void InstagibMode(float instamode);
-void InstagibModeCustom(float instamode);
+//void InstagibMode(float instamode);
+//void InstagibModeCustom(float instamode);
 void TogglePowerups();
 void ToggleQEnemy();
 void ToggleQLag();
@@ -661,11 +661,11 @@ cmd_t cmds[] = {
 	{ "kill",        ClientKill,                0    , CF_PLAYER | CF_MATCHLESS, CD_KILL },
 	{ "mid_air",     ToggleMidair,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_MIDAIR },
 	{ "instagib",    ToggleInstagib,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
-	{ "instagib_fcg",DEF(InstagibModeCustom),   0.0f , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
-	{ "instagib_scg",DEF(InstagibModeCustom),   1.0f , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
-	{ "instagib_sg" ,DEF(InstagibMode),         0.0f , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
-	{ "instagib_ssg",DEF(InstagibMode),         1.0f , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
-	{ "instagib_off",DEF(InstagibMode),         2.0f , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
+	//{ "instagib_fcg",DEF(InstagibModeCustom),   0.0f , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
+	//{ "instagib_scg",DEF(InstagibModeCustom),   1.0f , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
+	//{ "instagib_sg" ,DEF(InstagibMode),         0.0f , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
+	//{ "instagib_ssg",DEF(InstagibMode),         1.0f , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
+	//{ "instagib_off",DEF(InstagibMode),         2.0f , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
 	{ "time",        sv_time,                   0    , CF_BOTH | CF_MATCHLESS, CD_TIME },
 	{ "gren_mode",   GrenadeMode,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_GREN_MODE },
 	{ "toggleready", ToggleReady,               0    , CF_BOTH, CD_TOGGLEREADY },
@@ -4872,6 +4872,7 @@ void ToggleMidair()
 	cvar_toggle_msg( self, "k_midair", redtext("Midair") );
 }
 
+/*
 void ToggleInstagib();
 void InstagibMode(float instamode)
 {
@@ -4892,6 +4893,7 @@ void InstagibModeCustom(float instamode)
 	cvar_fset("k_instagib", instamode );
 	ToggleInstagib();
 }
+*/
 
 void W_SetCurrentAmmo();
 void ToggleInstagib()

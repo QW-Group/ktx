@@ -1,3 +1,7 @@
+2007-09-01
+deurk
+270. k_666 in instagib mode is just 1 second instead of 2 in other modes.
+
 2007-08-30
 deurk:
 269. Added cvar k_extralog to toggle on/off the detailed ingame xml logs.(WIP)

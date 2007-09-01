@@ -208,12 +208,24 @@ Killed
 void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 {
 	gedict_t       *oself;
+	float playerheight = 0;
 
 	oself = self;
 	self = targ;
 
 	if ( self->s.v.health < -99 )
 		self->s.v.health = -99;	// don't let sbar look bad if a player
+
+	if ( cvar("k_instagib") )
+	{
+		traceline( PASSVEC3(self->s.v.origin),
+				self->s.v.origin[0], 
+				self->s.v.origin[1], 
+				self->s.v.origin[2] - 2048,
+				true, attacker );
+
+		playerheight = self->s.v.absmin[2] - g_globalvars.trace_endpos[2] + 1;
+	}
 
 	if ( self->ct == ctPlayer ) {
         self->dead_time = g_globalvars.time;
@@ -242,6 +254,7 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
                 dmg_is_quaded = 1;
         else
                 dmg_is_quaded = 0;
+
         log_printf(
                 "\t\t\t<event time=\"%f\" tag=\"dth\" at=\"%s\" tg=\"%s\" ty=\"%s\" "
                 "q=\"%d\" al=\"%d\" kh=\"%d\" lt=\"%f\" />\n",
@@ -251,7 +264,7 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
                 dmg_type[targ->deathtype],
                 dmg_is_quaded,
                 (int)targ->s.v.armorvalue,
-                (int)(targ->s.v.origin[2] - attacker->s.v.origin[2]),
+                (int)playerheight,
                 g_globalvars.time - targ->spawn_time );
 
 	self->s.v.takedamage = DAMAGE_NO;
@@ -298,7 +311,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	float           save;
 	float           take;
 //	int				wp_num;
-	int				i, c1 = 8, c2 = 4, hdp;
+	int				i, c1 = 8, c2 = 4, hdp, as_rune;
 	float			dmg_dealt = 0, non_hdp_damage;
 	char            *attackerteam, *targteam;
 
@@ -355,7 +368,13 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	if ( instagib)
 	{
-		midheight = targ->s.v.origin[2] - attacker->s.v.origin[2];
+		traceline( PASSVEC3(targ->s.v.origin),
+				targ->s.v.origin[0], 
+				targ->s.v.origin[1], 
+				targ->s.v.origin[2] - 2048,
+				true, self );
+
+		playerheight = targ->s.v.absmin[2] - g_globalvars.trace_endpos[2] + 1;
 	}
 
 	if ( midair )
@@ -592,17 +611,24 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			if ( streq( inflictor->s.v.classname, "player" ) )
 			{
 				take = 5000;
-				if ( midheight >= 250 && midheight < 400 ) {
-		 			G_bprint( 2, "%s got himself an %s at %d height!\n", attacker->s.v.netname, redtext("airshot"), (int)midheight );
-					attacker->ps.airshots += 0.1;
+				
+				if ( attacker->ps.airshots >= 1 )
+					as_rune = 1;
 
-				} else if ( midheight >= 400 && midheight < 1000 ) {
-		 			G_bprint( 2, "%s got himself a great %s at %d height!\n", attacker->s.v.netname, redtext("airshot"), (int)midheight );
-					attacker->ps.airshots += 0.5;
-				} else if (  midheight >= 1000 ) {
-		 			G_bprint( 2, "%s got himself a extraordinary %s at %d height!\n", 
-						attacker->s.v.netname, redtext("airshot"), (int)midheight );
+				if ( playerheight >= 250 && playerheight < 400 ) {
+		 			G_bprint( 2, "%s got an %s at %d height!\n", attacker->s.v.netname, redtext("airshot"), (int)playerheight );
+					attacker->ps.airshots += 0.1;
+				} else if ( playerheight >= 400 && playerheight < 1000 ) {
+		 			G_bprint( 2, "%s got a great %s at %d height!\n", attacker->s.v.netname, redtext("airshot"), (int)playerheight );
+					attacker->ps.airshots += 0.4;
+				} else if ( playerheight >= 1000 ) {
+		 			G_bprint( 2, "%s got a extraordinary %s at %d height!\n", attacker->s.v.netname, redtext("airshot"), (int)playerheight );
 					attacker->ps.airshots += 1;
+				}
+				if ( attacker->ps.airshots >= 1 && !as_rune)
+				{
+					// attacker->ctf_flag = attacker->ctf_flag | CTF_RUNE_RES; 
+					G_bprint( 2, "%s acquired the %s rune!\n", attacker->s.v.netname, redtext("AirShot Master"));
 				}
 			}
 		}
