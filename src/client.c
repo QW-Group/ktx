@@ -3123,14 +3123,19 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				return;	// !!! return !!!
 			}
 			else if ( dtSTOMP == targ->deathtype )	{
-				switch( (int)(g_random() * 5) ) {
-					case 0:  deathstring = " softens "; deathstring2 = "'s fall\n"; break;
-					case 1:  deathstring = " tried to catch "; break;
-					case 2:  deathstring = " was jumped by "; break;
-					case 3:  deathstring = " was crushed by "; break;
-					default:
-						 	G_bprint (PRINT_MEDIUM, "%s stomps %s\n", attacker->s.v.netname, targ->s.v.netname);
-						 	return; // !!! return !!!
+				if ( cvar("k_instagib") ) {
+					deathstring = " got literally stomped into particles by ";
+					deathstring2 = "!\n";
+				} else {
+					switch( (int)(g_random() * 5) ) {
+						case 0:  deathstring = " softens "; deathstring2 = "'s fall\n"; break;
+						case 1:  deathstring = " tried to catch "; break;
+						case 2:  deathstring = " was jumped by "; break;
+						case 3:  deathstring = " was crushed by "; break;
+						default:
+							 	G_bprint (PRINT_MEDIUM, "%s stomps %s\n", attacker->s.v.netname, targ->s.v.netname);
+							 	return; // !!! return !!!
+					}
 				}
 			}
 			else if ( dtNG == targ->deathtype )
@@ -3182,7 +3187,12 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			}
 			else if ( dtAXE == targ->deathtype )
 			{
-				deathstring = " was ax-murdered by ";
+				if ( !cvar("k_instagib") ) {
+					deathstring = " was ax-murdered by ";
+				} else {
+					deathstring = " got axed to pieces by ";
+					deathstring2 = "!\n";
+				}	
 			}
             else if ( dtHOOK == targ->deathtype )
 			{
@@ -3195,7 +3205,10 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 				if ( targ->s.v.health < -40 )
 				{
-					deathstring = " was lead poisoned by ";
+					if ( !cvar("k_instagib") )
+						deathstring = " was lead poisoned by ";
+					else
+						deathstring = " got gibbed by ";
 					deathstring2 = "\n";
 				}
 			}
@@ -3206,7 +3219,12 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				else
 					deathstring = " ate 2 loads of ";
 
-				deathstring2 = "'s buckshot\n";
+				if ( cvar("k_instagib") ) {
+					deathstring = " got gibbed by ";
+					deathstring2 = "\n";
+				} else {
+					deathstring2 = "'s buckshot\n";
+				}
 			}
 			else if ( dtLG_BEAM == targ->deathtype )
 			{

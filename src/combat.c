@@ -247,8 +247,7 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 		WriteByte( MSG_ALL, SVC_KILLEDMONSTER );
 	}
 
-	if ( !cvar("k_instagib") )
-		ClientObituary( self, attacker );
+	ClientObituary( self, attacker );
 
         if ( attacker->super_damage_finished > g_globalvars.time )
                 dmg_is_quaded = 1;
