@@ -3187,7 +3187,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			}
 			else if ( dtSTOMP == targ->deathtype )	{
 				if ( cvar("k_instagib") ) {
-					deathstring = " got literally stomped into particles by ";
+					deathstring = " was literally stomped into particles by ";
 					deathstring2 = "!\n";
 				} else {
 					switch( (int)(g_random() * 5) ) {
@@ -3253,7 +3253,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				if ( !cvar("k_instagib") ) {
 					deathstring = " was ax-murdered by ";
 				} else {
-					deathstring = " got axed to pieces by ";
+					deathstring = " was axed to pieces by ";
 					deathstring2 = "!\n";
 				}	
 			}
@@ -3271,7 +3271,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 					if ( !cvar("k_instagib") )
 						deathstring = " was lead poisoned by ";
 					else
-						deathstring = " got gibbed by ";
+						deathstring = " was gibbed by ";
 					deathstring2 = "\n";
 				}
 			}
@@ -3283,7 +3283,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 					deathstring = " ate 2 loads of ";
 
 				if ( cvar("k_instagib") ) {
-					deathstring = " got gibbed by ";
+					deathstring = " was gibbed by ";
 					deathstring2 = "\n";
 				} else {
 					deathstring2 = "'s buckshot\n";
