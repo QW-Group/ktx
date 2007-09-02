@@ -1890,7 +1890,13 @@ void DropBackpack()
 		if( (int)self->lastwepfired & IT_DROPPABLE_WEAPONS )
 			item->s.v.items = self->lastwepfired;
 
-	item->mdl = "progs/backpack.mdl";
+	// Jawnmode: unfairpacks in DMM1, only drop current weapon if the player was shooting (idea from Tonik)
+	// - Molgrum
+	if ( k_jawnmode && deathmatch == 1 && self->attack_finished < g_globalvars.time )
+		item->s.v.items = IT_SHOTGUN;
+
+	//item->mdl = "progs/backpack.mdl";
+	setmodel( item, "progs/backpack.mdl" );
 
 	if ( item->s.v.items == IT_AXE ) {
 		item->s.v.netname = "Axe";
@@ -1902,32 +1908,32 @@ void DropBackpack()
 	}
 	else if ( item->s.v.items == IT_SUPER_SHOTGUN ) {
 		item->s.v.netname = "Double-barrelled Shotgun";
-		item->mdl = "progs/g_shot.mdl";
+		//item->mdl = "progs/g_shot.mdl";
 		self->ps.wpn[wpSSG].drops++;
 	}
 	else if ( item->s.v.items == IT_NAILGUN ) {
 		item->s.v.netname = "Nailgun";
-		item->mdl = "progs/g_nail.mdl";
+		//item->mdl = "progs/g_nail.mdl";
 		self->ps.wpn[wpNG].drops++;
 	}
 	else if ( item->s.v.items == IT_SUPER_NAILGUN ) {
 		item->s.v.netname = "Super Nailgun";
-		item->mdl = "progs/g_nail2.mdl";
+		//item->mdl = "progs/g_nail2.mdl";
 		self->ps.wpn[wpSNG].drops++;
 	}
 	else if ( item->s.v.items == IT_GRENADE_LAUNCHER ) {
 		item->s.v.netname = "Grenade Launcher";
-		item->mdl = "progs/g_rock.mdl";
+		//item->mdl = "progs/g_rock.mdl";
 		self->ps.wpn[wpGL].drops++;
 	}
 	else if ( item->s.v.items == IT_ROCKET_LAUNCHER ) {
 		item->s.v.netname = "Rocket Launcher";
-		item->mdl = "progs/g_rock2.mdl";
+		//item->mdl = "progs/g_rock2.mdl";
 		self->ps.wpn[wpRL].drops++;
 	}
 	else if ( item->s.v.items == IT_LIGHTNING ) {
 		item->s.v.netname = "Thunderbolt";
-		item->mdl = "progs/g_light.mdl";
+		//item->mdl = "progs/g_light.mdl";
 		self->ps.wpn[wpLG].drops++;
 	}
 	else
@@ -1995,7 +2001,7 @@ void DropBackpack()
 	item->s.v.flags = FL_ITEM;
 	item->s.v.solid = SOLID_TRIGGER;
 	item->s.v.movetype = MOVETYPE_TOSS;
-	setmodel( item, k_jawnmode ? item->mdl : "progs/backpack.mdl" );
+	//setmodel( item, k_jawnmode ? item->mdl : "progs/backpack.mdl" );
 	setsize( item, -16, -16, 0, 16, 16, 56 );
 	item->s.v.touch = ( func_t ) BackpackTouch;
 

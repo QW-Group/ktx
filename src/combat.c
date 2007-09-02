@@ -511,6 +511,8 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 // figure momentum add
 	if ( inflictor != world && targ->s.v.movetype == MOVETYPE_WALK )
 	{
+		float nailkick;
+
 		for ( i = 0; i < 3; i++ )
 			dir[i] = targ->s.v.origin[i] - ( inflictor->s.v.absmin[i] + inflictor->s.v.absmax[i] ) * 0.5;
 
@@ -523,11 +525,18 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			c2 = 6;
 		}
 
+		// Jawnmode: nails increases kickback
+		// - Molgrum
+		if ( k_jawnmode && streq( inflictor->s.v.classname, "spike" ) )
+			nailkick = 1.2;
+		else
+			nailkick = 1.0;
+
 		for ( i = 0; i < 3; i++ )
-			targ->s.v.velocity[i] += dir[i] * non_hdp_damage * c1;
+			targ->s.v.velocity[i] += dir[i] * non_hdp_damage * c1 * nailkick;
 
 		if ( midair && lowheight )
-			targ->s.v.velocity[2] += dir[2] * non_hdp_damage * c2; // only for z component
+			targ->s.v.velocity[2] += dir[2] * non_hdp_damage * c2 * nailkick; // only for z component
 
 		// Rocket Jump modifiers
 /*

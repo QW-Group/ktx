@@ -1010,6 +1010,16 @@ void PlayerDie()
     if ( self->s.v.health < -40 || dtSQUISH == self->deathtype || dtSUICIDE == self->deathtype || isRA() )
 	{
 		GibPlayer();
+
+		// Jawnmode: respawn has the same delay (900ms) regardless of deathtype gib/normal
+		// - Molgrum
+		if ( k_jawnmode )
+		{
+			self->s.v.nextthink = g_globalvars.time + 0.9;
+			self->s.v.think = ( func_t ) PlayerDead;
+			return;
+		}
+
 		PlayerDead();
 		return;
 	}

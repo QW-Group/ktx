@@ -643,6 +643,18 @@ void NextLevel()
 
 void            set_suicide_frame();
 
+void SP_info_player_deathmatch()
+{
+	gedict_t *spot;
+	int i = 0;
+
+	for ( spot = world; (spot = find( spot, FOFS( s.v.classname ), self->s.v.classname )); i++ )
+	{
+		if ( spot == self )
+			self->cnt = i;
+	}
+}
+
 // called by ClientKill and DeadThink
 void respawn()
 {
@@ -728,6 +740,7 @@ gedict_t *SelectSpawnPoint( char *spawnname )
 	int				totalspots;
 	int				pcount;
 	int				k_spw = cvar( "k_spw" );
+	int				weight_sum = 0;	// used by "fair spawns"
     
 // testinfo_player_start is only found in regioned levels
 	spot = find( world, FOFS( s.v.classname ), "testplayerstart" );
@@ -760,7 +773,7 @@ gedict_t *SelectSpawnPoint( char *spawnname )
 			}
 		}
 
-		if( k_spw && match_in_progress == 2 && self->k_lastspawn == spot ) {
+		if( !k_jawnmode && k_spw && match_in_progress == 2 && self->k_lastspawn == spot ) {
 //			G_bprint(2, "ignore spot\n");
 			pcount++; // ignore this spot in this case, protection from spawn twice on the same spot
 		}
@@ -770,6 +783,10 @@ gedict_t *SelectSpawnPoint( char *spawnname )
 			spot->s.v.goalentity = EDICT_TO_PROG( spots );
 			spots = spot;
 			numspots++;
+
+			// Calculate weight sum (only goes up to 64 spots)
+			if ( totalspots <= 64 )
+				weight_sum += self->spawn_weights[ totalspots - 1 ];
 		}
 	}
 
@@ -830,15 +847,62 @@ gedict_t *SelectSpawnPoint( char *spawnname )
 // We now have the number of spots available on the map in numspots
 // Generate a random number between 0 and numspots
 
-	numspots = i_rnd(0, numspots - 1);
+	// Jawnmode: use new "fair spawns" model
+	// Because of array limits, fall back to old spawn model on maps with more than 64 spots
+	// - Molgrum
+	if ( k_jawnmode && match_in_progress == 2 && totalspots <= 64 )
+	{
+		float    f;
+		gedict_t *spawnp;
+		int      i = 0;
 
-	for ( spot = spots; numspots > 0; numspots-- )
-		spot = PROG_TO_EDICT( spot->s.v.goalentity );
+		// Setup randomization
+		f = i_rnd( 0, weight_sum );
 
-	if( totalspots > 2 && match_in_progress == 2 ) 
-        self->k_lastspawn = spot;
+		// Get a random spawn point
+		for ( spot = spots; i < numspots; i++ )
+		{
+			f = f - self->spawn_weights[ (int)spot->cnt ];
 
-	return spot;
+			// Finished randomizing
+			if ( f < 0 )
+				break;
+
+			// Prevent spawn spot from becoming world
+			if ( PROG_TO_EDICT( spot->s.v.goalentity ) != world )
+				spot = PROG_TO_EDICT( spot->s.v.goalentity );
+		}
+
+		spawnp = spot;
+		spot = spots;
+
+		// Fix weights
+		f = self->spawn_weights[ (int)spawnp->cnt ] / 2;
+		for ( i = 0; i < numspots; i++)
+		{
+			if ( spot == spawnp )
+				self->spawn_weights[ (int)spot->cnt ] -= f;
+			else
+				self->spawn_weights[ (int)spot->cnt ] += ( f / (float)( numspots - 1 ) );
+
+			spot = PROG_TO_EDICT( spot->s.v.goalentity );
+		}
+
+		return spawnp;
+	}
+	else
+	{
+		// Original spawnmodes
+		numspots = i_rnd(0, numspots - 1);
+
+		for ( spot = spots; numspots > 0; numspots-- )
+			spot = PROG_TO_EDICT( spot->s.v.goalentity );
+
+		if( totalspots > 2 && match_in_progress == 2 ) 
+			self->k_lastspawn = spot;
+
+		return spot;
+	}
 }
 
 qboolean CanConnect()
@@ -1011,6 +1075,7 @@ qboolean CanConnect()
 void ClientConnect()
 {
 	gedict_t *p;
+	int i, totalspots;
 
 	VIP_ShowRights( self );
 
@@ -1064,6 +1129,22 @@ void ClientConnect()
 
 	if ( isRA() )
 		ra_in_que( self ); // put cleint in ra queue, so later we can move it to loser or winner
+
+	// Jawnmode: reset spawn weights at server join (can handle max 64 spawn points atm)
+	totalspots = 0;
+
+	// Just count the spots
+	for ( p = world; (p = find( p, FOFS( s.v.classname ), "info_player_deathmatch" )); totalspots++ ) {}
+
+	// Don't use this spawn model for maps with more than 64 spawns (shouldn't even happen)
+	if ( totalspots <= 64 )
+	{
+		i = 0;
+
+		// Set the spawn weights to number of spots
+		for ( p = world; (p = find( p, FOFS( s.v.classname ), "info_player_deathmatch" )); i++ )
+			self->spawn_weights[i] = totalspots;
+	}
 
 	MakeMOTD();
 }
@@ -2682,26 +2763,8 @@ void PlayerPostThink()
 			{
 				// Jawnmode: fallbunny is always enabled, but with a modification: speed is capped
 				// - Molgrum
-				if ( get_fallbunny() )
-				{
-					if ( k_jawnmode )	// cap only for jawn mode
-					{
-						if ( k_fallbunny_cap )
-						{
-							float vel;
-    
-							self->old_vel[2] = 0;
-							trap_makevectors( self->s.v.v_angle );
-							vel = vlen( self->old_vel ) * ( 1.0 - k_fallbunny_cap / 100.0 );
-    
-							VectorScale( g_globalvars.v_forward, vel, self->s.v.velocity );
-						}
-					}
-				}
-				else
-				{
+				if ( !get_fallbunny() )
 					self->brokenankle = 1;  // Yes we have just broken it
-				}
 			}
 
 			self->deathtype = dtFALL;

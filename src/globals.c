@@ -52,8 +52,7 @@ float current_maxfps;	// current value of serverinfo maxfps
 
 // { jawn mode
 int	k_jawnmode;			// is server in jawn mode
-int	k_fallbunny_cap;	// fallbunny cap procent in jawn mode
-int k_teleport_cap;		// cap for keeping velocity through tele
+int k_teleport_cap = 24;	// cap for keeping velocity through tele
 // }
 int	k_practice;			// is server in practice mode
 int	k_matchLess;		// is server in matchLess mode

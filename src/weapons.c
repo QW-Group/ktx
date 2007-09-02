@@ -370,68 +370,114 @@ void FireBullets( float shotcount, vec3_t dir, float spread_x, float spread_y, f
 	{
 		if ( k_jawnmode )
 		{
-			if (shotcount == 3)
+			if ( shotcount == 1 )
 			{
-				VectorScale( g_globalvars.v_right, spread_x, tmp );
-				VectorClear( tmp2 );
-			}
-			else if (shotcount == 4)
-			{
-				VectorScale( g_globalvars.v_right, -1.0 * spread_x, tmp );
-				VectorClear( tmp2 );
-			}
-			else if (shotcount == 5)
-			{
-				VectorScale( g_globalvars.v_up, spread_y, tmp2 );
 				VectorClear( tmp );
+				VectorClear( tmp2 );
+			}
+			else if ( shotcount == 2 )
+			{
+				VectorClear( tmp );
+				VectorClear( tmp2 );
+			}
+			else if ( shotcount == 3 )
+			{
+				VectorClear( tmp );
+				VectorScale( g_globalvars.v_up,     1.00 * spread_y, tmp2 );
+			}
+			else if ( shotcount == 4 )
+			{
+				VectorClear( tmp );
+				VectorScale( g_globalvars.v_up,    -1.00 * spread_y, tmp2 );
+			}
+			else if ( shotcount == 5 )
+			{
+				VectorScale( g_globalvars.v_right,  1.00 * spread_x, tmp );
+				VectorClear( tmp2 );
 			}
 			else if (shotcount == 6)
 			{
-				VectorScale( g_globalvars.v_up, -1.0 * spread_y, tmp2 );
-				VectorClear( tmp );
-			}
-			else if (shotcount == 7)
-			{
-				VectorScale( g_globalvars.v_right, 0.5 * spread_x, tmp );
+				VectorScale( g_globalvars.v_right, -1.00 * spread_x, tmp );
 				VectorClear( tmp2 );
 			}
-			else if (shotcount == 8)
+			else if ( shotcount == 7 )
 			{
-				VectorScale( g_globalvars.v_right, -0.5 * spread_x, tmp );
+				VectorClear( tmp );
+				VectorScale( g_globalvars.v_up,     0.50 * spread_y, tmp2 );
+			}
+			else if ( shotcount == 8 )
+			{
+				VectorClear( tmp );
+				VectorScale( g_globalvars.v_up,    -0.50 * spread_y, tmp2 );
+			}
+			else if ( shotcount == 9 )
+			{
+				VectorScale( g_globalvars.v_right,  0.50 * spread_x, tmp );
 				VectorClear( tmp2 );
 			}
-			else if (shotcount == 9)
+			else if ( shotcount == 10 )
 			{
-				VectorScale( g_globalvars.v_up,    0.5 * spread_y, tmp2 );
+				VectorScale( g_globalvars.v_right, -0.50 * spread_x, tmp );
+				VectorClear( tmp2 );
+			}
+			else if ( shotcount == 11 )
+			{
+				VectorScale( g_globalvars.v_right,  0.50 * spread_x, tmp );
+				VectorScale( g_globalvars.v_up,     0.50 * spread_y, tmp2 );
+			}
+			else if ( shotcount == 12 )
+			{
+				VectorScale( g_globalvars.v_right,  0.50 * spread_x, tmp );
+				VectorScale( g_globalvars.v_up,    -0.50 * spread_y, tmp2 );
+			}
+			else if ( shotcount == 13 )
+			{
+				VectorScale( g_globalvars.v_right, -0.50 * spread_x, tmp );
+				VectorScale( g_globalvars.v_up,    -0.50 * spread_y, tmp2 );
+			}
+			else if ( shotcount == 14 )
+			{
+				VectorScale( g_globalvars.v_right, -0.50 * spread_x, tmp );
+				VectorScale( g_globalvars.v_up,     0.50 * spread_y, tmp2 );
+			}
+			else if ( shotcount == 15 )
+			{
+				VectorScale( g_globalvars.v_right,  0.25 * spread_x, tmp );
+				VectorScale( g_globalvars.v_up,     0.25 * spread_y, tmp2 );
+			}
+			else if ( shotcount == 16 )
+			{
+				VectorScale( g_globalvars.v_right,  0.25 * spread_x, tmp );
+				VectorScale( g_globalvars.v_up,    -0.25 * spread_y, tmp2 );
+			}
+			else if ( shotcount == 17 )
+			{
+				VectorScale( g_globalvars.v_right, -0.25 * spread_x, tmp );
+				VectorScale( g_globalvars.v_up,    -0.25 * spread_y, tmp2 );
+			}
+			else if ( shotcount == 18 )
+			{
+				VectorScale( g_globalvars.v_right, -0.25 * spread_x, tmp );
+				VectorScale( g_globalvars.v_up,     0.25 * spread_y, tmp2 );
+			}
+			else if ( shotcount == 19 )
+			{
+				VectorScale( g_globalvars.v_right, -1.00 * spread_x, tmp );
+				VectorClear( tmp2 );
+			}
+			else if ( shotcount == 20 )
+			{
 				VectorClear( tmp );
+				VectorClear( tmp2 );
 			}
-			else if (shotcount == 10)
+			else if ( shotcount == 21 )
 			{
-				VectorScale( g_globalvars.v_up,   -0.5 * spread_y, tmp2 );
-				VectorClear( tmp );
-			}
-			else if (shotcount == 11) // a
-			{
-				VectorScale( g_globalvars.v_right, 0.5 * spread_x, tmp );
-				VectorScale( g_globalvars.v_up,    0.5 * spread_y, tmp2 );
-			}
-			else if (shotcount == 12) // a
-			{
-				VectorScale( g_globalvars.v_right, 0.5 * spread_x, tmp );
-				VectorScale( g_globalvars.v_up,   -0.5 * spread_y, tmp2 );
-			}
-			else if (shotcount == 13) // a
-			{
-				VectorScale( g_globalvars.v_right, -0.5 * spread_x, tmp );
-				VectorScale( g_globalvars.v_up,     0.5 * spread_y, tmp2 );
-			}
-			else if (shotcount == 14) // a
-			{
-				VectorScale( g_globalvars.v_right, -0.5 * spread_x, tmp );
-				VectorScale( g_globalvars.v_up,    -0.5 * spread_y, tmp2 );
+				VectorScale( g_globalvars.v_right,  1.00 * spread_x, tmp );
+				VectorClear( tmp2 );
 			}
 			else
 			{
+				// No design for this bullet, place it in the middle
 				VectorClear( tmp );
 				VectorClear( tmp2 );
 			}
@@ -507,7 +553,7 @@ W_FireSuperShotgun
 void W_FireSuperShotgun()
 {
 	vec3_t          dir;
-	int				bullets = 14;
+	int				bullets = ( k_jawnmode ? 21 : 14 );
 
 	if ( cvar("k_instagib") == 2 )
 		bullets = 1;
@@ -536,6 +582,12 @@ void W_FireSuperShotgun()
 	aim( dir );
 	if ( cvar("k_instagib") == 2 )
 		FireBullets( bullets, dir, 0, 0, 0, dtSSG );
+	else if ( k_jawnmode )
+	{
+		// Jawnmode: larger SSG spread, higher reload time, more damage
+		// - Molgrum
+		FireBullets( bullets, dir, 0.18, 0.12, 0, dtSSG );
+	}
 	else
 		FireBullets( bullets, dir, 0.14, 0.08, 0, dtSSG );
 }
@@ -1096,7 +1148,7 @@ void superspike_touch()
 
 		spawn_touchblood( 2 );
 		other->deathtype = dtSNG;
-		T_Damage( other, self, PROG_TO_EDICT( self->s.v.owner ), 18 );
+		T_Damage( other, self, PROG_TO_EDICT( self->s.v.owner ), ( k_jawnmode ? 16 : 18 ) );
 	} else
 	{
 		WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );

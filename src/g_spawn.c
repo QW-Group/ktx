@@ -227,11 +227,13 @@ void            SP_item_key2();
 
 void            SP_misc_fireball();
 void            SP_info_intermission();
+void            SP_info_player_deathmatch();
 spawn_t         spawns[] = {
 	// info entities don't do anything at all, but provide positional
 	// information for things controlled by other processes
 	{"info_player_start",		SUB_Null},
 	{"info_player_start2",		SUB_Null},
+	{"info_player_deathmatch", 	SP_info_player_deathmatch},
 	{"info_player_deathmatch", 	SUB_Null},
 	{"info_player_coop", 		SUB_Null},
 	{"info_intermission", 		SP_info_intermission},
