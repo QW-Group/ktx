@@ -3271,7 +3271,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 					if ( !cvar("k_instagib") )
 						deathstring = " was lead poisoned by ";
 					else
-						deathstring = " was gibbed by ";
+						deathstring = " was instagibbed by ";
 					deathstring2 = "\n";
 				}
 			}
@@ -3283,7 +3283,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 					deathstring = " ate 2 loads of ";
 
 				if ( cvar("k_instagib") ) {
-					deathstring = " was gibbed by ";
+					deathstring = " was instagibbed by ";
 					deathstring2 = "\n";
 				} else {
 					deathstring2 = "'s buckshot\n";
