@@ -160,7 +160,7 @@ typedef struct player_stats_s {
 	int vel_frames;		// number of frames
 
 	// instagib stats
-	float airshots;		// Total of airshots points
+	float airgibs;		// Total of airgibs points
 
 } player_stats_t;
 

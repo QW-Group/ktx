@@ -2784,7 +2784,8 @@ void PlayerPostThink()
 	self->jump_flag = self->s.v.velocity[2];
 
 	CheckPowerups();
-	CheckStuffRune();
+	if ( !cvar("k_instagib") )
+		CheckStuffRune();
 
 	mv_record();
 

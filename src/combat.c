@@ -310,7 +310,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	float           save;
 	float           take;
 //	int				wp_num;
-	int				i, c1 = 8, c2 = 4, hdp, as_rune;
+	int				i, c1 = 8, c2 = 4, hdp;
 	float			dmg_dealt = 0, non_hdp_damage;
 	char            *attackerteam, *targteam;
 
@@ -619,24 +619,32 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			if ( streq( inflictor->s.v.classname, "player" ) )
 			{
 				take = 5000;
-				
-				if ( attacker->ps.airshots >= 1 )
-					as_rune = 1;
 
-				if ( playerheight >= 250 && playerheight < 400 ) {
-		 			G_bprint( 2, "%s got an %s at %d height!\n", attacker->s.v.netname, redtext("airshot"), (int)playerheight );
-					attacker->ps.airshots += 0.1;
-				} else if ( playerheight >= 400 && playerheight < 1000 ) {
-		 			G_bprint( 2, "%s got a great %s at %d height!\n", attacker->s.v.netname, redtext("airshot"), (int)playerheight );
-					attacker->ps.airshots += 0.4;
-				} else if ( playerheight >= 1000 ) {
-		 			G_bprint( 2, "%s got a extraordinary %s at %d height!\n", attacker->s.v.netname, redtext("airshot"), (int)playerheight );
-					attacker->ps.airshots += 1;
-				}
-				if ( attacker->ps.airshots >= 1 && !as_rune)
+				if ( ( int ) attacker->s.v.flags & FL_ONGROUND )
 				{
-					// attacker->ctf_flag = attacker->ctf_flag | CTF_RUNE_RES; 
-					G_bprint( 2, "%s acquired the %s rune!\n", attacker->s.v.netname, redtext("AirShot Master"));
+					if ( playerheight >= 250 && playerheight < 400 ) {
+			 			G_bprint( 2, "%s from %s: height %d\n", redtext("AirGib"), attacker->s.v.netname,
+						(int)playerheight );
+						attacker->ps.airgibs += 0.1;
+					} else if ( playerheight >= 400 && playerheight < 1000 ) {
+			 			G_bprint( 2, "%s from %s: height %d\n", redtext("Great AirGib"), attacker->s.v.netname,
+						(int)playerheight );
+						attacker->ps.airgibs += 0.4;
+					} else if ( playerheight >= 1000 ) {
+			 			G_bprint( 2, "%s from %s: height %d\n", redtext("Amazing AirGib"), attacker->s.v.netname,
+						(int)playerheight );
+						attacker->ps.airgibs += 1.0;
+					}
+					
+					G_bprint( 2, "AirGib total: %.1f\n", attacker->ps.airgibs );
+				}
+
+				if ( attacker->ps.airgibs > 1 )
+				{
+					if ( (int)attacker->ctf_flag & CTF_RUNE_RES) {
+						G_bprint( 2, "%s acquired the %s rune!\n", attacker->s.v.netname, redtext("AirGib Master"));
+						attacker->items2 = ( int ) attacker->items2 | (CTF_RUNE_RES << 5);
+					}
 				}
 			}
 		}
