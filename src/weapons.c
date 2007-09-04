@@ -634,6 +634,12 @@ void W_FireSuperShotgun()
 	aim( dir );
 	if ( cvar("k_instagib") == 2 )
 		FireInstaBullet( dir, dtSSG );
+	else if ( k_jawnmode )
+	{
+	        // Jawnmode: larger SSG spread, higher reload time, more damage
+	        // - Molgrum
+	        FireBullets( bullets, dir, 0.18, 0.12, 0, dtSSG );
+	}
 	else
 		FireBullets( bullets, dir, 0.14, 0.08, 0, dtSSG );
 }
