@@ -160,7 +160,7 @@ typedef struct player_stats_s {
 	int vel_frames;		// number of frames
 
 	// instagib stats
-	float airgibs;		// Total of airgibs points
+	int airgibs;		// Total of airgibs points
 
 } player_stats_t;
 
@@ -459,6 +459,8 @@ typedef struct gedict_s {
 	char *last_rune;			   // name of last rune we send to client
 	float	items2;				   // using  ZQ_ITEMS2 extension in mvdsv we can use per client sigils for runes
 // }
+//
+	int airgib_rune; 		// Instagib AirGib Master rune
 
 	qboolean was_jump;
 

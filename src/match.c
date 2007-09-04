@@ -489,7 +489,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 
 		if ( cvar("k_instagib") )
 		{
-			G_bprint(2, "  %s: %.1f\n", redtext("AirGibs"), p->ps.airgibs);
+			G_bprint(2, "  %s: %d\n", redtext("AirGibs"), p->ps.airgibs);
 		}
 
 //	}

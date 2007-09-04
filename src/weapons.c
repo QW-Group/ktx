@@ -335,6 +335,64 @@ void TraceAttack( float damage, vec3_t dir )
 
 /*
 ================
+FireInstaBullet
+
+Used by coilgun for Instagib mode, bullet doesn't stop at first lpayer, it goes through till it hits wall
+================
+*/
+
+/*
+void FireInstaBullet( vec3_t org, vec3_t dir, deathType_t deathtype )
+{
+        traceline(org, org + dir * 8096)
+ 
+        if (trace_ent != player)
+                return;
+ 
+        dodamage(trace_ent)
+        FireInstaBullet( trace_end, dir, deathType_t deathtype )
+} 
+*/
+void FireInstaBullet( vec3_t dir, deathType_t deathtype )
+{
+        vec3_t          direction;
+        vec3_t          src, tmp;
+
+        trap_makevectors( self->s.v.v_angle );
+        VectorScale( g_globalvars.v_forward, 10, tmp );
+        VectorAdd( self->s.v.origin, tmp, src );
+        src[2] = self->s.v.absmin[2] + self->s.v.size[2] * 0.7;
+
+        ClearMultiDamage();
+        multi_damage_type = deathtype;
+
+        traceline( PASSVEC3( src ), src[0] + dir[0] * 8192,
+                src[1] + dir[1] * 8192,
+                src[2] + dir[2] * 8192, false, self );
+        
+	VectorScale( dir, 4, tmp );
+        VectorSubtract( g_globalvars.trace_endpos, tmp, puff_org );     // puff_org = trace_endpos - dir*4;
+
+        VectorScale( g_globalvars.v_right, 0, tmp );
+        VectorAdd( dir, tmp, direction );
+        VectorScale( g_globalvars.v_up, 0, tmp );
+     	VectorAdd( direction, tmp, direction );
+
+       	VectorScale( direction, 8192, tmp );
+
+        VectorAdd( src, tmp, tmp );
+        traceline( PASSVEC3( src ), PASSVEC3( tmp ), false, self );
+        if ( g_globalvars.trace_fraction != 1.0 )
+                TraceAttack( 4, direction );
+	        
+        ApplyMultiDamage();
+        Multi_Finish();
+}
+
+
+
+/*
+================
 FireBullets
 
 Used by shotgun, super shotgun, and enemy soldier firing
@@ -519,9 +577,6 @@ void W_FireShotgun()
 	vec3_t          dir;
 	int				bullets = 6;
 	
-	if ( cvar("k_instagib") == 1 )
-		bullets = 1;
-
 	self->ps.wpn[wpSG].attacks += bullets;
 
 	if ( cvar("k_instagib_custom_models") && cvar("k_instagib") == 1 )
@@ -540,7 +595,7 @@ void W_FireShotgun()
 	//dir = aim (self, 100000);
 	aim( dir );
 	if ( cvar("k_instagib") == 1 )
-		FireBullets( bullets, dir, 0, 0, 0, dtSG );
+		FireInstaBullet( dir, dtSG );
 	else
 		FireBullets( bullets, dir, 0.04, 0.04, 0, dtSG );
 }
@@ -554,9 +609,6 @@ void W_FireSuperShotgun()
 {
 	vec3_t          dir;
 	int				bullets = ( k_jawnmode ? 21 : 14 );
-
-	if ( cvar("k_instagib") == 2 )
-		bullets = 1;
 
 	if ( self->s.v.currentammo == 1 )
 	{
@@ -581,13 +633,7 @@ void W_FireSuperShotgun()
 	//dir = aim (self, 100000);
 	aim( dir );
 	if ( cvar("k_instagib") == 2 )
-		FireBullets( bullets, dir, 0, 0, 0, dtSSG );
-	else if ( k_jawnmode )
-	{
-		// Jawnmode: larger SSG spread, higher reload time, more damage
-		// - Molgrum
-		FireBullets( bullets, dir, 0.18, 0.12, 0, dtSSG );
-	}
+		FireInstaBullet( dir, dtSSG );
 	else
 		FireBullets( bullets, dir, 0.14, 0.08, 0, dtSSG );
 }

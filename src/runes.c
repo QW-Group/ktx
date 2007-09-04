@@ -302,7 +302,15 @@ void RegenerationSound( gedict_t *player )
 
 void CheckStuffRune()
 {
+
 	char *rune = "";
+	
+	if ( cvar("k_instagib") ) {
+		if ( self->airgib_rune ) {
+			self->items2 = ( int ) self->items2 | (CTF_RUNE_RES << 5);
+			return;
+		}
+	}
 
 	if ( !isCTF() ) {
 		self->items2 = 0; // no runes/sigils in HUD
