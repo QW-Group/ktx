@@ -544,7 +544,19 @@ void G_sprint( gedict_t * ed, int level, const char *fmt, ... )
 	Q_vsnprintf( text, sizeof( text ), fmt, argptr );
 	va_end( argptr );
 
-	trap_SPrint( NUM_FOR_EDICT( ed ), level, text );
+	trap_SPrint( NUM_FOR_EDICT( ed ), level, text, 0 );
+}
+
+void G_sprint_flags( gedict_t * ed, int level, int flags, const char *fmt, ... )
+{
+	va_list argptr;
+	char    text[1024];
+
+	va_start( argptr, fmt );
+	Q_vsnprintf( text, sizeof( text ), fmt, argptr );
+	va_end( argptr );
+
+	trap_SPrint( NUM_FOR_EDICT( ed ), level, text, flags );
 }
 
 void G_bprint( int level, const char *fmt, ... )

@@ -427,8 +427,8 @@ void s_common( gedict_t *from, gedict_t *to, char *msg )
 		if ( *ch == 13 ) // kickfake to unfake ->
 			*ch = ' ';
 
-	G_sprint(to,   PRINT_CHAT, "[%s->]: %s\n", getname(from), msg);
-	G_sprint(from, PRINT_CHAT, "[->%s]: %s\n", getname(to),   msg);
+	G_sprint_flags(to,   PRINT_CHAT, SPRINT_IGNOREINDEMO, "[%s->]: %s\n", getname(from), msg);
+	G_sprint_flags(from, PRINT_CHAT, SPRINT_IGNOREINDEMO, "[->%s]: %s\n", getname(to),   msg);
 }
 
 void s_p()

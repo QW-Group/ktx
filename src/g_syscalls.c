@@ -69,9 +69,9 @@ void trap_BPrint( int level, const char *fmt )
 	syscall( G_BPRINT, level, (int) fmt );
 }
 
-void trap_SPrint( int edn, int level, const char *fmt )
+void trap_SPrint( int edn, int level, const char *fmt, int flags )
 {
-	syscall( G_SPRINT, edn, level, (int)fmt );
+	syscall( G_SPRINT, edn, level, (int)fmt, flags );
 }
 void trap_CenterPrint( int edn, const char *fmt )
 {
