@@ -1810,7 +1810,10 @@ void ShowSpawnPoints()
 		p->s.v.flags = FL_ITEM;
 		p->s.v.solid = SOLID_NOT;
 		p->s.v.movetype = MOVETYPE_NONE;
-		setmodel( p, "progs/w_g_key.mdl" );
+		if ( cvar("k_custom_spawn") )
+			setmodel( p, "progs/spawn.mdl" );
+		else
+			setmodel( p, "progs/w_g_key.mdl" );
 		p->s.v.netname = "Spawn Point";
 		p->s.v.classname = "spawnpoint";
 		p->s.v.effects = ( int ) p->s.v.effects | EF_GREEN | EF_RED;

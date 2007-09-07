@@ -2751,7 +2751,6 @@ const char common_um_init[] =
 	"k_spec_info 1\n"					// allow spectators receive took info during game
 	"k_rocketarena 0\n"					// rocket arena
 	"k_midair 0\n"						// midair off
-	"k_sspawn 1\n"						// Show spawnpoints
 //	"localinfo k_new_spw 0\n"			// ktpro feature
 
 	"fraglimit 0\n"						// fraglimit %)
@@ -5193,7 +5192,10 @@ void mv_cmd_playback ()
 
 	self->pb_ent = spawn ();
 	self->pb_ent->s.v.classname = "pb_ent";
-	setmodel (self->pb_ent, "progs/player.mdl");
+	if ( cvar("k_vweapons_models") )
+		setmodel (self->pb_ent, "progs/player_ax.mdl");
+	else
+		setmodel (self->pb_ent, "progs/player.mdl");
 
 	self->pb_time = 0;
 	self->pb_old_time = g_globalvars.time;

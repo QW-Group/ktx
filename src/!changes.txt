@@ -1,3 +1,13 @@
+2007-09-06
+deurk
+271. Added cvar k_custom_spawn to have a n00b friendly arrow for spawn points
+	if cvar is 1. If cvar is 0, gold rune key used instead.
+
+272. Added client independant VWEP! \o/
+	cvar is k_weapons_models and models are needed on server but no code
+	changes is needed for clients. Models have been included in SVN
+	repository and should be installed in mvdsv/id1/progs directory.
+
 2007-09-01
 deurk
 270. k_666 in instagib mode is just 1 second instead of 2 in other modes.

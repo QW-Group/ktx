@@ -292,8 +292,24 @@ void SP_worldspawn()
 		trap_precache_model( "progs/v_coil.mdl" );	
 		trap_precache_sound( "weapons/coilgun.wav" );
 	}
-
+	
+	if ( cvar("k_custom_spawn") )
+		trap_precache_model( "progs/spawn.mdl" );
+	
+	if ( cvar("k_vweapons_models") )
+	{ // 
+		trap_precache_model( "progs/player_ax.mdl" );
+		trap_precache_model( "progs/player_sg.mdl" );
+		trap_precache_model( "progs/player_ss.mdl" );
+		trap_precache_model( "progs/player_ng.mdl" );
+		trap_precache_model( "progs/player_sn.mdl" );
+		trap_precache_model( "progs/player_gl.mdl" );
+		trap_precache_model( "progs/player_rl.mdl" );
+		trap_precache_model( "progs/player_lg.mdl" );
+	}
+	
 	trap_precache_model( "progs/player.mdl" );
+
 	trap_precache_model( "progs/eyes.mdl" );
 	trap_precache_model( "progs/h_player.mdl" );
 	trap_precache_model( "progs/gib1.mdl" );
@@ -705,6 +721,7 @@ void FirstFrame	( )
 	RegisterCvar("k_minrate");
 	RegisterCvar("k_sready");
 	RegisterCvar("k_sspawn");
+	RegisterCvar("k_custom_spawn");
 	RegisterCvar("k_idletime");
 	RegisterCvar("k_timetop");
 	RegisterCvar("k_dm2mod");
@@ -733,6 +750,7 @@ void FirstFrame	( )
 	RegisterCvar("k_midair");
 	RegisterCvar("k_instagib");
 	RegisterCvar("k_instagib_custom_models");
+	RegisterCvar("k_vweapons_models");
 	RegisterCvar("k_rocketarena"); // rocket arena
 	RegisterCvar("k_dmgfrags");
 	RegisterCvar("k_tp_tele_death");

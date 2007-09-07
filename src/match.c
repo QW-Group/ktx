@@ -2060,7 +2060,10 @@ void StopTimer ( int removeDemo )
 			p->s.v.takedamage = 2;
 			p->s.v.solid      = 3;
 			p->s.v.movetype   = 3;
-			setmodel (p, "progs/player.mdl");
+			if ( cvar("k_vweapons_models") )
+				setmodel (p, "progs/player_ax.mdl");
+			else
+				setmodel (p, "progs/player.mdl");
 		}
 	}
 

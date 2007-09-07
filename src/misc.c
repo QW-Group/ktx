@@ -611,8 +611,14 @@ void viewthing()
 {
 	self->s.v.movetype = MOVETYPE_NONE;
 	self->s.v.solid = SOLID_NOT;
-	trap_precache_model( "progs/player.mdl" );
-	setmodel( self, "progs/player.mdl" );
+	if ( cvar("k_vweapons_models") )
+	{
+		trap_precache_model( "progs/player_ax.mdl" );
+		setmodel( self, "progs/player_ax.mdl" );
+	} else {
+		trap_precache_model( "progs/player.mdl" );
+		setmodel( self, "progs/player.mdl" );
+	}
 }
 
 
