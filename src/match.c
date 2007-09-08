@@ -274,6 +274,7 @@ void SummaryTPStats()
 		h_lg  = 100.0 * tmStats[i].wpn[wpLG].hits  / max(1, tmStats[i].wpn[wpLG].attacks);
 
 		// weapons
+		if ( !cvar("k_instagib") ) {
 		G_bprint(2, "%s‘: %s:%s%s%s%s%s\n", tmStats[i].name, redtext("Wp"),
 					(h_lg  ? va(" %s%.0f%%", redtext("lg"),   h_lg) : ""),
 					(h_rl  ? va(" %s%.0f",   redtext("rl"),   h_rl) : ""), 
@@ -290,6 +291,14 @@ void SummaryTPStats()
 		G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("Armr&mhs"),
 				redtext("ga"), tmStats[i].itm[itGA].tooks, redtext("ya"), tmStats[i].itm[itYA].tooks, 
 				redtext("ra"), tmStats[i].itm[itRA].tooks, redtext("mh"), tmStats[i].itm[itHEALTH_100].tooks);
+
+		} else if (( cvar("k_instagib") == 1 ) || ( cvar("k_instagib") == 3 )) {
+			G_bprint(2, "%s‘: %s:%s\n", tmStats[i].name, redtext("Wp"),
+					(h_sg  ? va(" %s%.0f%%", redtext("cg"),   h_sg) : ""));
+		} else {
+			G_bprint(2, "%s‘: %s:%s\n", tmStats[i].name, redtext("Wp"),
+					(h_ssg  ? va(" %s%.0f%%", redtext("cg"),   h_ssg) : ""));
+		}
 
 		if ( isCTF() ) 
 		{
@@ -418,12 +427,20 @@ void OnePlayerStats(gedict_t *p, int tp)
 // qqshka - force show this always
 //	if ( !tp || cvar( "tp_players_stats" ) ) {
 		// weapons
-		G_bprint(2, "%s:%s%s%s%s%s\n", redtext("Wp"),
+		if ( !cvar("k_instagib") )
+			G_bprint(2, "%s:%s%s%s%s%s\n", redtext("Wp"),
 				(h_lg  ? va(" %s%.1f%%", redtext("lg"),   h_lg) : ""),
 				(h_rl  ? va(" %s%.0f",   redtext("rl"),   h_rl) : ""),
 				(h_gl  ? va(" %s%.0f",   redtext("gl"),   h_gl) : ""),
 				(h_sg  ? va(" %s%.1f%%", redtext("sg"),   h_sg) : ""),
 				(h_ssg ? va(" %s%.1f%%", redtext("ssg"), h_ssg) : ""));
+		else
+			if ( (cvar("k_instagib") == 1) || (cvar("k_instagib") == 3) )
+				G_bprint(2, "%s:%s\n", redtext("Wp"),
+					(h_sg  ? va(" %s%.1f%%", redtext("cg"),   h_sg) : ""));
+			else
+				G_bprint(2, "%s:%s\n", redtext("Wp"),
+					(h_ssg  ? va(" %s%.1f%%", redtext("cg"),   h_ssg) : ""));
 
 		// velocity
 		if ( isDuel() )
@@ -479,9 +496,12 @@ void OnePlayerStats(gedict_t *p, int tp)
 					G_bprint(2, "\220A:0\221\n");
 			}
 		}
-		else
+		else if ( !cvar("k_instagib") )
 			G_bprint(2, "%s: %s:%d %s:%d\n", redtext(" Streaks"),
 				redtext("Frags"), p->ps.spree_max, redtext("QuadRun"), p->ps.spree_max_q);
+		else
+			G_bprint(2, "  %s: %d\n", redtext("FragStreaks"),
+				p->ps.spree_max);
 
 		// spawnfrags
 		if ( !isCTF() )
@@ -490,6 +510,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 		if ( cvar("k_instagib") )
 		{
 			G_bprint(2, "  %s: %d\n", redtext("AirGibs"), p->ps.airgibs);
+			G_bprint(2, "  %s: %d\n", redtext("AirGibs Height"), p->ps.airgib_height);
 		}
 
 //	}

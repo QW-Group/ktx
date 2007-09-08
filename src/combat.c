@@ -633,11 +633,13 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 						(int)playerheight );
 					}
 					
-					if ( playerheight > 45 )
-						attacker->ps.airgibs += playerheight;
+					if ( playerheight > 45 ) {
+						attacker->ps.airgib_height += playerheight;
+						attacker->ps.airgibs++;
+					}
 				}
 
-				if ( attacker->ps.airgibs > 2000 )
+				if ( attacker->ps.airgib_height > 2000 )
 				{
 					if ( !(int)attacker->airgib_rune ) {
 						G_bprint( 2, "%s acquired the %s rune!\n", attacker->s.v.netname, redtext("AirGib Master"));

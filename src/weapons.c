@@ -577,7 +577,10 @@ void W_FireShotgun()
 	vec3_t          dir;
 	int				bullets = 6;
 	
-	self->ps.wpn[wpSG].attacks += bullets;
+	if ( cvar("k_instagib") )
+		self->ps.wpn[wpSG].attacks ++;
+	else
+		self->ps.wpn[wpSG].attacks += bullets;
 
 	if ( cvar("k_instagib_custom_models") && cvar("k_instagib") == 1 )
 		sound( self, CHAN_WEAPON, "weapons/coilgun.wav", 1, ATTN_NORM );
@@ -615,7 +618,11 @@ void W_FireSuperShotgun()
 		W_FireShotgun();
 		return;
 	}
-	self->ps.wpn[wpSSG].attacks += bullets;
+
+	if ( cvar("k_instagib") )
+		self->ps.wpn[wpSSG].attacks ++;
+	else
+		self->ps.wpn[wpSSG].attacks += bullets;
 
 	if ( cvar("k_instagib_custom_models") && cvar("k_instagib") == 2 )
 		sound( self, CHAN_WEAPON, "weapons/coilgun.wav", 1, ATTN_NORM );
