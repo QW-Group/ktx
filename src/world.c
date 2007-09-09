@@ -1213,6 +1213,7 @@ void CheckTiming();
 void Check_sready();
 void check_fcheck();
 void CheckTeamStatus();
+void DoMVDAutoTrack( void );
 
 void StartFrame( int time )
 {
@@ -1243,6 +1244,7 @@ void StartFrame( int time )
 	CheckSvUnlock();
 
 	CalculateBestPlayers(); // autotrack stuff
+	DoMVDAutoTrack(); // mvd autotrack stuff
 
 // Tonik: note current "serverinfo maxfps" setting
 // (we don't want to do it in every player frame)

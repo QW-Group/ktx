@@ -3874,6 +3874,42 @@ void fav_show( )
 		G_sprint(self, 2, "Favourites list %s or nothing to show\n", redtext("empty"));
 }
 
+// { // this is used for autotrack which saved in demo
+static gedict_t *autotrack_last = NULL;
+static qboolean autotrack_update = false;
+// }
+
+void DoMVDAutoTrack( void )
+{
+	gedict_t *p = NULL;
+	int id;
+
+	if ( !match_in_progress )
+	{
+		autotrack_update = false; // relax autotrack
+		autotrack_last = NULL;
+		return; // we don't need much in prewar
+	}
+
+	if ( !autotrack_update )
+		return;
+
+	if ( !(p = get_ed_best1()) )
+		return; // can't find best
+
+	if ( autotrack_last && autotrack_last->ct == ctPlayer && ISDEAD( autotrack_last ) && g_globalvars.time - autotrack_last->dead_time < 2 )
+		return; // do not switch instantly autotrack pov after tracked player die, wait a few seconds or untill them respawn
+
+	if ( autotrack_last == p )
+		return; // already track this player
+
+	autotrack_update = false; // we going apply track switch, so relax autotrack
+	autotrack_last = p;
+
+	if ( ( id = GetUserID( p ) ) > 0 )
+		stuffcmd( p, "//at %d\n", id ); // with "properly" haxed server this does't go to player but goes to mvd demo only
+}
+
 void DoAutoTrack( )
 {
 	gedict_t *p = NULL, *goal;
@@ -3965,6 +4001,8 @@ void ktpro_autotrack_mark_all()
 {
 	gedict_t *p;
 
+	autotrack_update = true; // this is for mvd autotrack
+
 	for ( p = world; (p = find_spc( p )); )
 		ktpro_autotrack_mark_spec( p );
 }
@@ -3981,6 +4019,9 @@ void ktpro_autotrack_on_death (gedict_t *dude)
 	gedict_t *p;
 	int goal = EDICT_TO_PROG( dude ); // so we can compare with ->s.v.goal
 
+	if (dude == autotrack_last)
+		autotrack_update = true; // this is for mvd autotrack
+
 	for ( p = world; (p = find_spc( p )); )
 		if ( p->s.v.goalentity == goal )
 			ktpro_autotrack_mark_spec( p );
@@ -3995,10 +4036,18 @@ void ktpro_autotrack_on_powerup_take (gedict_t *dude)
 // some powerup out, and he has neither the rocket launcher nor the lightning gun, mark specs to switch pov to best player
 void ktpro_autotrack_on_powerup_out (gedict_t *dude)
 {
+	gedict_t *p;
+	int goal = EDICT_TO_PROG( dude ); // so we can compare with ->s.v.goal
+
 	if ( ((int)dude->s.v.items & IT_ROCKET_LAUNCHER) || ((int)dude->s.v.items & IT_LIGHTNING) )
 		return; // dude have weapon, continue track him, may be add check for ammo?
 
-	ktpro_autotrack_mark_all();
+	if (dude == autotrack_last)
+		autotrack_update = true; // this is for mvd autotrack
+
+	for ( p = world; (p = find_spc( p )); )
+		if ( p->s.v.goalentity == goal )
+			ktpro_autotrack_mark_spec( p );
 }
 
 

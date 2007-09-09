@@ -1,5 +1,15 @@
+2007-09-09
+qq:
+273. Now autotrack saved in mvd demo (qtv stream as well).
+	 So ez-compatible client able to use it.
+
+274. Bug fix to autotrack, something wrong was done on powerup out.
+	Did't tested, but should work.
+
+	based on sassa's report, thx
+
 2007-09-06
-deurk
+deurk:
 271. Added cvar k_custom_spawn to have a n00b friendly arrow for spawn points
 	if cvar is 1. If cvar is 0, gold rune key used instead.
 
@@ -9,7 +19,7 @@ deurk
 	repository and should be installed in mvdsv/id1/progs directory.
 
 2007-09-01
-deurk
+deurk:
 270. k_666 in instagib mode is just 1 second instead of 2 in other modes.
 
 2007-08-30
