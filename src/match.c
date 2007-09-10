@@ -509,6 +509,11 @@ void OnePlayerStats(gedict_t *p, int tp)
 
 		if ( cvar("k_instagib") )
 		{
+			G_bprint(2, "  %s: %d\n", redtext("CG Gibs"), p->ps.insta_cg_gibs);
+			G_bprint(2, "  %s: %d\n", redtext("Axe Gibs"), p->ps.insta_a_gibs);
+			G_bprint(2, "  %s: %d\n", redtext("Stomp Gibs"), p->ps.insta_s_gibs);
+			G_bprint(2, "  %s: %d\n", redtext("MultiGibs"), p->ps.insta_cg_multigibs);
+			G_bprint(2, "  %s: %d\n", redtext("Max MultiGibs"), p->ps.insta_cg_max_multigibs);
 			G_bprint(2, "  %s: %d\n", redtext("AirGibs"), p->ps.airgibs);
 			G_bprint(2, "  %s: %d\n", redtext("AirGibs Height"), p->ps.airgib_height);
 		}

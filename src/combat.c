@@ -32,6 +32,8 @@ char            * dmg_type[] = { "none", "axe", "sg", "ssg", "ng", "sng", "gl", 
                  "squish", "trigger", "suicide", "unknown" };
 int             dmg_is_quaded;
 int             dmg_is_splash = 0;
+float		frag_time = 0;
+int		multikill = 0;
 
 //============================================================================
 
@@ -254,6 +256,15 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
         else
                 dmg_is_quaded = 0;
 
+	if ( cvar("k_instagib") ) {
+		if ( frag_time < ( g_globalvars.time - match_start_time ) ) {
+			frag_time = g_globalvars.time - match_start_time;
+			multikill = 0;
+		} else {
+			multikill++;
+		}
+	}
+
         log_printf(
                 "\t\t\t<event time=\"%f\" tag=\"dth\" at=\"%s\" tg=\"%s\" ty=\"%s\" "
                 "q=\"%d\" al=\"%d\" kh=\"%d\" lt=\"%f\" />\n",
@@ -312,7 +323,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 //	int				wp_num;
 	int				i, c1 = 8, c2 = 4, hdp;
 	float			dmg_dealt = 0, non_hdp_damage;
-	char            *attackerteam, *targteam;
+	char            *attackerteam, *targteam, *attackername;
 
 	//midair and instagib
 	float playerheight = 0, midheight = 0;
@@ -492,15 +503,16 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	}
 
         if ( save ) {
-                if ( streq( inflictor->s.v.classname, "worldspawn" ))
-                        attacker->s.v.netname = "world";
-                if ( streq( attacker->s.v.classname, "(null)" ))
-                        attacker->s.v.netname = "world";
+                if ( streq( inflictor->s.v.classname, "worldspawn" ) || strnull( attacker->s.v.classname ) )
+                        attackername = "world";
+		else
+                        attackername = attacker->s.v.classname;
+
                 log_printf(
                         "\t\t\t<event time=\"%f\" tag=\"dmg\" at=\"%s\" "
                         "tg=\"%s\" ty=\"%s\" q=\"%d\" s=\"%d\" val=\"%d\" ab=\"1\"/>\n",
                         g_globalvars.time - match_start_time,
-                        attacker->s.v.netname,
+                        attackername,
                         targ->s.v.netname,
                         dmg_type[targ->deathtype],
                         dmg_is_quaded,
@@ -532,7 +544,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		else
 			nailkick = 1.0;
 
-		for ( i = 0; i < 3; i++ )
+		for ( i = 0; i < 3; i++ ) 
 			targ->s.v.velocity[i] += dir[i] * non_hdp_damage * c1 * nailkick;
 
 		if ( midair && lowheight )
@@ -616,7 +628,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	   ) {
 
 		if ( instagib ) {
-			if ( streq( inflictor->s.v.classname, "player" ) )
+			if ( inflictor->ct == ctPlayer )
 			{
 				take = 5000;
 
@@ -649,20 +661,23 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			}
 		}
 
+		if ( cvar("k_instagib") && ( attacker == targ ) )
+			take = 0;
+
 		dmg_dealt += targ->s.v.health > take ? take : targ->s.v.health;
 		targ->s.v.health -= take;
 
                 if ( take ) {
-                        if ( streq( inflictor->s.v.classname, "worldspawn" ))
-                                attacker->s.v.netname = "world";
-                        if ( streq( attacker->s.v.classname, "(null)" ))
-                                attacker->s.v.netname = "world";
+                        if ( streq( inflictor->s.v.classname, "worldspawn" ) || strnull( attacker->s.v.classname ) )
+				attackername = "world";
+			else
+				attackername = attacker->s.v.netname;
 
                         log_printf(
                                 "\t\t\t<event time=\"%f\" tag=\"dmg\" at=\"%s\" tg=\"%s\" ty=\"%s\" "
                                 "q=\"%d\" s=\"%d\" val=\"%d\" ab=\"0\"/>\n",
                                 g_globalvars.time - match_start_time,
-                                attacker->s.v.netname,
+                                attackername,
                                 targ->s.v.netname,
                                 dmg_type[targ->deathtype],
                                 dmg_is_quaded,
@@ -729,10 +744,22 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
  	}
 
 	if ( instagib && match_in_progress == 2 ) {
-		if ( targ->deathtype == dtSTOMP )
+		if ( targ->deathtype == dtSTOMP ) {
 			attacker->s.v.frags += 3;
-		if ( targ->deathtype == dtAXE )
+			attacker->ps.insta_s_gibs++;
+		} else if ( targ->deathtype == dtAXE ) {
 			attacker->s.v.frags += 1;
+			attacker->ps.insta_a_gibs++;
+		} else if ( targ->deathtype == dtSG || targ->deathtype == dtSSG ){
+			if ( multikill ) {
+				G_bprint(2, "%s %s %d players!\n", attacker->s.v.netname, redtext("multigibbed"), multikill + 1);
+				attacker->s.v.frags += ( 1 + multikill * 2 );
+				attacker->ps.insta_cg_multigibs++;
+				if ( (multikill + 1) > attacker->ps.insta_cg_max_multigibs )
+					attacker->ps.insta_cg_max_multigibs = multikill + 1;
+			}
+			attacker->ps.insta_cg_gibs++;
+		}
 	}
 
 	if ( ISDEAD( targ ) )
@@ -798,7 +825,10 @@ void T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage, ge
 					{
 						head->deathtype = dtype;
 						dmg_is_splash = 1;
-						T_Damage( head, inflictor, attacker, points );
+						if ( !cvar("k_instagib") ) 
+							T_Damage( head, inflictor, attacker, points );
+						else if ( head == attacker ) 
+							T_Damage( head, inflictor, attacker, points );
 					}
 				}
 			}

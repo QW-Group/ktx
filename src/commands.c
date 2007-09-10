@@ -95,8 +95,7 @@ void ToggleFairPacks();
 void ToggleFreeze();
 void ToggleMidair();
 void ToggleInstagib();
-//void InstagibMode(float instamode);
-//void InstagibModeCustom(float instamode);
+void ToggleCGKickback();
 void TogglePowerups();
 void ToggleQEnemy();
 void ToggleQLag();
@@ -393,6 +392,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_KILL         "invoke suicide"
 #define CD_MIDAIR       "midair settings"
 #define CD_INSTAGIB     "instagib settings"
+#define CD_CG_KB	"toggle coilgun kickback in instagib"
 #define CD_TIME         "show server time"
 #define CD_GREN_MODE    "grenades mode"
 #define CD_TOGGLEREADY  "just toggle ready"
@@ -660,11 +660,7 @@ cmd_t cmds[] = {
 	{ "kill",        ClientKill,                0    , CF_PLAYER | CF_MATCHLESS, CD_KILL },
 	{ "mid_air",     ToggleMidair,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_MIDAIR },
 	{ "instagib",    ToggleInstagib,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
-	//{ "instagib_fcg",DEF(InstagibModeCustom),   0.0f , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
-	//{ "instagib_scg",DEF(InstagibModeCustom),   1.0f , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
-	//{ "instagib_sg" ,DEF(InstagibMode),         0.0f , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
-	//{ "instagib_ssg",DEF(InstagibMode),         1.0f , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
-	//{ "instagib_off",DEF(InstagibMode),         2.0f , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
+	{ "cg_kb",	 ToggleCGKickback,          0    , CF_PLAYER | CF_SPC_ADMIN, CD_CG_KB },
 	{ "time",        sv_time,                   0    , CF_BOTH | CF_MATCHLESS, CD_TIME },
 	{ "gren_mode",   GrenadeMode,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_GREN_MODE },
 	{ "toggleready", ToggleReady,               0    , CF_BOTH, CD_TOGGLEREADY },
@@ -2742,6 +2738,7 @@ const char common_um_init[] =
 	"set pm_airstep 0\n"
 	"maxclients 8\n"
 	"k_instagib 0\n"					// instagib off
+	"k_cg_kb 1\n"					// coilgun kickback in instagib
 	"k_disallow_weapons 16\n"			// disallow gl in dmm4 by default
 
 //	"localinfo k_new_mode 0\n" 			// UNKNOWN ktpro
@@ -4918,29 +4915,6 @@ void ToggleMidair()
 	cvar_toggle_msg( self, "k_midair", redtext("Midair") );
 }
 
-/*
-void ToggleInstagib();
-void InstagibMode(float instamode)
-{
-	if ( cvar("k_instagib_custom_models") && instamode ) {
-		G_sprint( self, 2, "SG/SSG modes require k_instagib_custom_models set to 0\n");
-		return;
-	}
-	cvar_fset("k_instagib", instamode );
-	ToggleInstagib();
-}
-
-void InstagibModeCustom(float instamode)
-{
-	if ( !cvar("k_instagib_custom_models") ) {
-		G_sprint( self, 2, "FCG/SCG modes require k_instagib_custom_models set to 1\n");
-		return;
-	}
-	cvar_fset("k_instagib", instamode );
-	ToggleInstagib();
-}
-*/
-
 void W_SetCurrentAmmo();
 void ToggleInstagib()
 {
@@ -4984,8 +4958,27 @@ void ToggleInstagib()
 			G_bprint(2, "%s enabled (SSG mode)\n", redtext("Instagib"));
 	else
 		G_bprint(2, "%s unknown\n", redtext("Instagib"));
-	
+
+	if ( k_instagib )
+		cvar_set("k_cg_kb", "1");
+
 	W_SetCurrentAmmo();
+}
+
+void ToggleCGKickback()
+{
+	if ( match_in_progress )
+		return;
+
+	if( check_master() )
+		return;
+
+        if ( !cvar("k_instagib") ) {
+                G_sprint( self, 2, "cg_kb requires Instagib\n");
+                return;
+        }
+
+	cvar_toggle_msg( self, "k_cg_kb", redtext("Coilgun kickback") );
 }
 
 void sv_time()

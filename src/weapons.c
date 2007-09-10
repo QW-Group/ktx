@@ -341,12 +341,38 @@ FireInstaBullet
 Used by coilgun for Instagib mode, bullet doesn't stop at first player, it goes through till it hits wall
 ================
 */
+void T_InstaKickback();
 void FireInstaBullet( vec3_t dir, deathType_t deathtype )
 {
 	vec3_t          src, dst, tmp;
 	int				depth, solid;
 	float			fraction;
 	gedict_t		*ignore;
+
+	if ( cvar("k_cg_kb") ) {
+	        newmis = spawn();
+	        g_globalvars.newmis = EDICT_TO_PROG( newmis );
+	        newmis->s.v.owner = EDICT_TO_PROG( self );
+	        newmis->s.v.movetype = MOVETYPE_FLYMISSILE;
+	        newmis->s.v.solid = SOLID_BBOX;
+		
+		trap_makevectors( self->s.v.v_angle );
+		aim( newmis->s.v.velocity );	// = aim(self, 1000);
+		VectorScale( newmis->s.v.velocity, 1000, newmis->s.v.velocity );
+		vectoangles( newmis->s.v.velocity, newmis->s.v.angles );
+		newmis->s.v.touch = ( func_t ) T_InstaKickback;
+		newmis->voided = 0;
+
+		newmis->s.v.nextthink = g_globalvars.time + 1;
+		newmis->s.v.think = ( func_t ) SUB_Remove;
+		newmis->s.v.classname = "kickback";
+		setmodel( newmis, "" );
+		setsize( newmis, 0, 0, 0, 0, 0, 0 );
+
+		setorigin( newmis, self->s.v.origin[0] + g_globalvars.v_forward[0] * 8,
+			self->s.v.origin[1] + g_globalvars.v_forward[1] * 8,
+			self->s.v.origin[2] + g_globalvars.v_forward[2] * 8 + 16 );
+	}
 
 	ClearMultiDamage();
 	multi_damage_type = deathtype;
@@ -670,6 +696,31 @@ void FixQuad(gedict_t *owner)
 	// at the same time that still allow apply full quad damage to nearby players in case of "quad bore"
 	if ( owner->ct == ctPlayer && ISDEAD( owner ) )
 		owner->super_damage_finished = 0;
+}
+
+void T_InstaKickback()
+{
+	vec3_t          tmp;
+
+	if ( other == PROG_TO_EDICT( self->s.v.owner ) )
+		return;		// don't explode on owner
+
+	if ( self->voided )
+	{
+		return;
+	}
+	self->voided = 1;
+	if ( trap_pointcontents( PASSVEC3( self->s.v.origin ) ) == CONTENT_SKY )
+	{
+		ent_remove( self );
+		return;
+	}
+
+	T_RadiusDamage( self, PROG_TO_EDICT( self->s.v.owner ), 120, other, dtRL );
+	normalize( self->s.v.velocity, tmp );
+	VectorScale( tmp, -8, tmp );
+	VectorAdd( self->s.v.origin, tmp, self->s.v.origin )
+	ent_remove( self );
 }
 
 void T_MissileTouch()
@@ -1625,7 +1676,7 @@ void W_Attack()
 			HasteSound( self );
 		}
 		else
-			self->attack_finished = g_globalvars.time + 0.7;
+			self->attack_finished = g_globalvars.time + ( k_jawnmode ? 0.8 : 0.7 );
 
 		W_FireSuperShotgun();
 		break;
@@ -2210,6 +2261,7 @@ void W_WeaponFrame()
 		SuperDamageSound();
 		W_Attack();
 	}
+
 }
 
 

@@ -162,6 +162,11 @@ typedef struct player_stats_s {
 	// instagib stats
 	int airgibs;		// Number of airgibs
 	int airgib_height;	// Cumulated height  of airgibs
+	int insta_a_gibs;
+	int insta_s_gibs;
+	int insta_cg_gibs;
+	int insta_cg_multigibs;
+	int insta_cg_max_multigibs;
 
 } player_stats_t;
 

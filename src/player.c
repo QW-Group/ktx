@@ -47,6 +47,7 @@ void player_stand1()
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
 	self->s.v.weaponframe = 0;
+	//G_bprint(2, "s.v.velocity: %d, %d\n", (int)self->s.v.velocity[0], (int)self->s.v.velocity[1]);
 	if ( self->s.v.velocity[0] || self->s.v.velocity[1] )
 	{
 		self->walkframe = 0;
@@ -84,6 +85,7 @@ void player_run()
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
 	self->s.v.weaponframe = 0;
+	//G_bprint(2, "s.v.velocity: %d, %d\n", (int)self->s.v.velocity[0], (int)self->s.v.velocity[1]);
 	if ( !self->s.v.velocity[0] && !self->s.v.velocity[1] )
 	{
 		self->walkframe = 0;

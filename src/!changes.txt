@@ -1,3 +1,10 @@
+2007-09-10
+deurk:
+275. Coilgun in instagib now has a toggeable kickback (same as RL without
+	self damage). cvar is k_cg_kb and cmd is cg_kb.
+
+276. Modified Jawnmode SSG reload time to 0.8 as per Molgrum's request.
+
 2007-09-09
 qq:
 273. Now autotrack saved in mvd demo (qtv stream as well).
