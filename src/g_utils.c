@@ -1596,30 +1596,30 @@ void CalculateBestPlayers()
 			continue;
 
 /*
-	Pentagram of Protection     3000
-	Quad Damage                 2000
-	any other Powerup           2000
-	Rocket Launcher with ammo   1000
-	Lightning Gun with ammo      500
-	Grenade Launcher with ammo   200
-	Super Nailgun with ammo      100
-	Super Shotgun with ammo       50
+	Pentagram of Protection     99999
+	Quad Damage                  9000
+	any other Powerup            4000
+	Rocket Launcher with ammo    1500
+	Lightning Gun with ammo       500
+	Grenade Launcher with ammo    200
+	Super Nailgun with ammo       100
+	Super Shotgun with ammo        50
 */
 		best = 0;
-		best += ( p->invincible_finished >= g_globalvars.time )   ? 3000 : 0; // pent
-		best += ( p->super_damage_finished >= g_globalvars.time ) ? 2000 : 0; // quad
+		best += ( p->invincible_finished >= g_globalvars.time )   ? 99999 : 0; // pent
+		best += ( p->super_damage_finished >= g_globalvars.time ) ?  9000 : 0; // quad
 		best += (   p->invisible_finished >= g_globalvars.time
-				 || p->radsuit_finished >= g_globalvars.time  )   ? 2000 : 0; // ring or suit
+				 || p->radsuit_finished >= g_globalvars.time  )   ?  4000 : 0; // ring or suit
 		best += ( ((int)p->s.v.items & IT_ROCKET_LAUNCHER)
-				 				   && p->s.v.ammo_rockets > 0 )   ? 1000 : 0; // rl with ammo
+				 				   && p->s.v.ammo_rockets > 0 )   ?  1500 : 0; // rl with ammo
 		best += ( ((int)p->s.v.items & IT_LIGHTNING)
-				 				   && p->s.v.ammo_cells > 0   )   ?  500 : 0; // lg with ammo
+				 				   && p->s.v.ammo_cells > 0   )   ?   500 : 0; // lg with ammo
 		best += ( ((int)p->s.v.items & IT_GRENADE_LAUNCHER)
-				 				   && p->s.v.ammo_rockets > 0 )   ?  200 : 0; // gl with ammo
+				 				   && p->s.v.ammo_rockets > 0 )   ?   200 : 0; // gl with ammo
 		best += ( ((int)p->s.v.items & IT_SUPER_NAILGUN)
-				 				   && p->s.v.ammo_nails > 0   )   ?  100 : 0; // sng with ammo
+				 				   && p->s.v.ammo_nails > 0   )   ?   100 : 0; // sng with ammo
 		best += ( ((int)p->s.v.items & IT_SUPER_SHOTGUN)
-				 				   && p->s.v.ammo_shells > 0  )   ?   50 : 0; // ssg with ammo
+				 				   && p->s.v.ammo_shells > 0  )   ?    50 : 0; // ssg with ammo
 		best += p->s.v.frags;
 	
 		if ( !ed_best1 ) { // select some first player as best
