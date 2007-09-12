@@ -20,7 +20,6 @@
 
 CC=@CC@
 RM=@RM@
-MKDEP=@MKDEP@
 
 INSTALLDIR=$(PREFIX)/sbin
 
@@ -43,25 +42,19 @@ OBJECTS=$(SOURCES:.c=.o)
 
 all:		build
 
-depend:
-			$(MKDEP) $(INCFLAGS) $(SOURCES)
-
-build:		.depend $(MODULE)
+build:		$(MODULE)
 
 install:	build
 			../install-sh -c -m 755 $(MODULE) $(INSTALLDIR)
 
 clean:
-			$(RM) -f $(OBJECTS) $(MODULE) *~ .depend
+			$(RM) -f $(OBJECTS) $(MODULE) *~
 
 distclean:	clean
 			$(RM) -f *.orig *.rej *.tmp Makefile.dl
 
-
 .c.o:
 			$(CC) $(CFLAGS) $(INCFLAGS) -c $<
-
-.depend:	depend
 
 $(MODULE):	$(OBJECTS)
 			$(CC) $(LDFLAGS) -o $(MODULE) $(OBJECTS) $(LIBS)
