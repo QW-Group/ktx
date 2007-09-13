@@ -270,7 +270,6 @@ typedef struct gedict_s {
 
 #ifdef VWEP_TEST
 	float   vw_index;
-	float   vw_frame;
 #endif
 	float           maxspeed, gravity;
 	int             isBot;

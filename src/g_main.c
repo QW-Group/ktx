@@ -44,7 +44,6 @@ globalvars_t    g_globalvars;
 field_t         expfields[] = {
 #ifdef VWEP_TEST
 	{"vw_index",    FOFS( vw_index ),    F_FLOAT},
-	{"vw_frame",    FOFS( vw_frame ),    F_FLOAT},
 #endif
 	{"maxspeed",    FOFS( maxspeed ),    F_FLOAT},
 	{"gravity",     FOFS( gravity ),     F_FLOAT},

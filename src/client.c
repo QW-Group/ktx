@@ -2853,16 +2853,11 @@ void PlayerPostThink()
 	W_WeaponFrame();
 
 #ifdef VWEP_TEST
-    // update vwep frame
+    // update vwep frame  (FIXME: do we still need this? -- Tonik)
     if(!strnull(ezinfokey(world, "vwep")) && vw_available > 0)
     {
         if (self->s.v.health <= 0)
-        {
             self->vw_index = 0;
-            self->vw_frame = 0;
-        }
-        else
-            self->vw_frame = self->s.v.frame;
     }
 #endif
 
