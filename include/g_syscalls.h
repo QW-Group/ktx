@@ -37,7 +37,7 @@ void    trap_remove( int edn );
 void    trap_precache_sound( char *name );
 void    trap_precache_model( char *name );
 #ifdef VWEP_TEST
-void    trap_precache_vwep_model( int pos, char *name );
+int     trap_precache_vwep_model( char *name );
 #endif
 void    trap_setorigin( int edn, float origin_x, float origin_y, float origin_z );
 void    trap_setsize( int edn, float min_x, float min_y, float min_z, float max_x,

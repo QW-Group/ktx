@@ -335,15 +335,15 @@ void SP_worldspawn()
     if(!strnull(ezinfokey(world, "vwep")) && vw_available > 0)
     {
         // precache our vwep models
-        trap_precache_vwep_model (0, "progs/vwplayer.mdl");  // vwep-enabled player model to use
-        trap_precache_vwep_model (1, "progs/w_axe.mdl");
-        trap_precache_vwep_model (2, "progs/w_shot.mdl");
-        trap_precache_vwep_model (3, "progs/w_shot2.mdl");
-        trap_precache_vwep_model (4, "progs/w_nail.mdl");
-        trap_precache_vwep_model (5, "progs/w_nail2.mdl");
-        trap_precache_vwep_model (6, "progs/w_rock.mdl");
-        trap_precache_vwep_model (7, "progs/w_rock2.mdl");
-        trap_precache_vwep_model (8, "progs/w_light.mdl");
+        trap_precache_vwep_model ("progs/vwplayer.mdl");  // vwep-enabled player model to use
+        trap_precache_vwep_model ("progs/w_axe.mdl");
+        trap_precache_vwep_model ("progs/w_shot.mdl");
+        trap_precache_vwep_model ("progs/w_shot2.mdl");
+        trap_precache_vwep_model ("progs/w_nail.mdl");
+        trap_precache_vwep_model ("progs/w_nail2.mdl");
+        trap_precache_vwep_model ("progs/w_rock.mdl");
+        trap_precache_vwep_model ("progs/w_rock2.mdl");
+        trap_precache_vwep_model ("progs/w_light.mdl");
     }
 #endif
 

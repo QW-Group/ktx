@@ -102,9 +102,9 @@ void trap_precache_model( char *name )
 	syscall( G_PRECACHE_MODEL, (int) name );
 }
 #ifdef VWEP_TEST
-void trap_precache_vwep_model( int pos, char *name )
+int trap_precache_vwep_model( char *name )
 {
-	syscall( G_PRECACHE_VWEP_MODEL, pos, (int) name );
+	return syscall( G_PRECACHE_VWEP_MODEL, (int) name );
 }
 #endif
 
