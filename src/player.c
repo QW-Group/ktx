@@ -1108,6 +1108,10 @@ void GibPlayer()
 {
 	gedict_t *p;
 
+#ifdef VWEP_TEST
+        if(vw_available > 0)
+		self->vw_index = 0;
+#endif
 	ThrowHead( "progs/h_player.mdl", self->s.v.health );
 
     if( match_in_progress == 2 ) {
