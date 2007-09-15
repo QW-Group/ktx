@@ -818,7 +818,8 @@ extern  int   k_cmd_fp_disabled; // if 1 - don't use cmd floodprot
 extern  float k_sv_locktime; // some time before non VIP players can't connect, spectators not affected
 
 #ifdef VWEP_TEST
-extern  int   vw_available; // vwep extension available
+extern  qboolean	vw_available; // vwep extension available
+extern  qboolean	vw_enabled; // vweps enabled
 #endif
 
 // { rocket arena

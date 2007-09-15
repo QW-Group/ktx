@@ -1428,7 +1428,7 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponmodel = "progs/v_axe.mdl";
 		self->s.v.weaponframe = 0;
 #ifdef VWEP_TEST
-        if(vw_available > 0)
+	if (vw_enabled)
             self->vw_index = 1;
 #endif
 		break;
@@ -1442,7 +1442,7 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponframe = 0;
 		items |= IT_SHELLS;
 #ifdef VWEP_TEST
-        if(vw_available > 0)
+	if (vw_enabled)
             self->vw_index = 2;
 #endif
 		break;
@@ -1456,7 +1456,7 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponframe = 0;
 		items |= IT_SHELLS;
 #ifdef VWEP_TEST
-        if(vw_available > 0)
+	if (vw_enabled)
             self->vw_index = 3;
 #endif
 		break;
@@ -1467,7 +1467,7 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponframe = 0;
 		items |= IT_NAILS;
 #ifdef VWEP_TEST
-        if(vw_available > 0)
+	if (vw_enabled)
             self->vw_index = 4;
 #endif
 		break;
@@ -1478,7 +1478,7 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponframe = 0;
 		items |= IT_NAILS;
 #ifdef VWEP_TEST
-        if(vw_available > 0)
+		if (vw_enabled)
             self->vw_index = 5;
 #endif
 		break;
@@ -1489,7 +1489,7 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponframe = 0;
 		items |= IT_ROCKETS;
 #ifdef VWEP_TEST
-        if(vw_available > 0)
+		if (vw_enabled)
             self->vw_index = 6;
 #endif
 		break;
@@ -1500,7 +1500,7 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponframe = 0;
 		items |= IT_ROCKETS;
 #ifdef VWEP_TEST
-        if(vw_available > 0)
+		if (vw_enabled)
             self->vw_index = 7;
 #endif
 		break;
@@ -1511,7 +1511,7 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponframe = 0;
 		items |= IT_CELLS;
 #ifdef VWEP_TEST
-        if(vw_available > 0)
+		if (vw_enabled)
             self->vw_index = 8;
 #endif
 		break;
@@ -1526,7 +1526,7 @@ void W_SetCurrentAmmo()
 
 		self->s.v.weaponframe = 0;
 #ifdef VWEP_TEST
-        if(vw_available > 0)
+		if (vw_enabled)
             self->vw_index = 1;
 #endif
 		break;
@@ -1536,7 +1536,7 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponmodel = "";
 		self->s.v.weaponframe = 0;
 #ifdef VWEP_TEST
-        if(vw_available > 0)
+		if (vw_enabled)
             self->vw_index = 0;
 #endif
 		break;

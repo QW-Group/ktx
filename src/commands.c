@@ -188,6 +188,9 @@ void mapcycle ();
 void airstep();
 void teamoverlay();
 void ToggleExclusive();
+#ifdef VWEP_TEST
+void ToggleVwep();
+#endif
 
 // spec
 void ShowCamHelp();
@@ -435,6 +438,9 @@ const char CD_NODESC[] = "no desc";
 #define CD_AIRSTEP      "toggle airstep"
 #define CD_TEAMOVERLAY  "toggle teamoverlay"
 #define CD_EXCLUSIVE    "toggle exclusive mode"
+#ifdef VWEP_TEST
+#define CD_VWEP			"toggle vweps"
+#endif
 
 
 void dummy() {}
@@ -700,7 +706,10 @@ cmd_t cmds[] = {
 	{ "teleportcap", setTeleportCap,            0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_TELEPORTCAP },
 	{ "airstep",     airstep,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_AIRSTEP },
 	{ "teamoverlay", teamoverlay,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_TEAMOVERLAY },
-	{ "exclusive",   ToggleExclusive,           0    , CF_BOTH_ADMIN, CD_EXCLUSIVE }
+	{ "exclusive",   ToggleExclusive,           0    , CF_BOTH_ADMIN, CD_EXCLUSIVE },
+#ifdef VWEP_TEST
+	{ "vwep",		 ToggleVwep,				0    , CF_PLAYER | CF_SPC_ADMIN, CD_VWEP },
+#endif
 };
 
 #undef DEF
@@ -2736,6 +2745,9 @@ ok:
 // common settings for all user modes
 const char common_um_init[] =
 	"set pm_airstep 0\n"
+#ifdef VWEP_TEST
+//	"set k_vwep 1\n"
+#endif
 	"maxclients 8\n"
 	"k_instagib 0\n"					// instagib off
 	"k_cg_kb 1\n"					// coilgun kickback in instagib
@@ -5494,6 +5506,22 @@ void airstep()
 
 	cvar_toggle_msg( self, "pm_airstep", redtext("pm_airstep") );
 }
+
+#ifdef VWEP_TEST
+void ToggleVwep()
+{
+	if ( match_in_progress )
+		return;
+
+	if ( check_master() )
+		return;
+
+	if (!vw_available || !cvar("k_allow_vwep"))
+		return;
+
+	cvar_toggle_msg( self, "k_vwep", redtext("vwep") );
+}
+#endif
 
 void teamoverlay()
 {

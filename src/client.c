@@ -2852,15 +2852,6 @@ void PlayerPostThink()
 
 	W_WeaponFrame();
 
-#ifdef VWEP_TEST
-    // update vwep frame  (FIXME: do we still need this? -- Tonik)
-    if(!strnull(ezinfokey(world, "vwep")) && vw_available > 0)
-    {
-        if (self->s.v.health <= 0)
-            self->vw_index = 0;
-    }
-#endif
-
 	{
 		float velocity = sqrt(self->s.v.velocity[0] * self->s.v.velocity[0] + 
 							  self->s.v.velocity[1] * self->s.v.velocity[1]);

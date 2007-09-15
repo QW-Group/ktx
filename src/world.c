@@ -332,7 +332,7 @@ void SP_worldspawn()
     // vw_available = checkextension("ZQ_VWEP");
     vw_available = 1;
 
-    if(!strnull(ezinfokey(world, "vwep")) && vw_available > 0)
+    if(cvar("k_allow_vwep") && vw_available)
     {
         // precache our vwep models
         trap_precache_vwep_model ("progs/vwplayer.mdl");  // vwep-enabled player model to use
@@ -344,6 +344,7 @@ void SP_worldspawn()
         trap_precache_vwep_model ("progs/w_rock.mdl");
         trap_precache_vwep_model ("progs/w_rock2.mdl");
         trap_precache_vwep_model ("progs/w_light.mdl");
+        trap_precache_vwep_model ("-");			// null vwep model
     }
 #endif
 
@@ -718,6 +719,10 @@ void FirstFrame	( )
 	RegisterCvar("k_freeze");
 	RegisterCvar("k_free_mode");
 	RegisterCvar("k_allowed_free_modes");
+#ifdef VWEP_TEST
+	RegisterCvarEx("k_allow_vwep", "1");
+	RegisterCvarEx("k_vwep", "1");
+#endif
 	RegisterCvar("allow_toggle_practice");
 	RegisterCvar("k_pow");
 	RegisterCvar("k_remove_end_hurt");
