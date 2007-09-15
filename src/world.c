@@ -1261,6 +1261,7 @@ void StartFrame( int time )
 	{
 //		current_maxfps = 72;	// 2.30 standard
 		current_maxfps = 77;	// year 2007 standard
+		localcmd("serverinfo maxfps %d\n", (int)current_maxfps); // add to serverinfo
 	}
 
 	current_maxfps = bound(50, current_maxfps, 1981);
