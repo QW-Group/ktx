@@ -350,7 +350,6 @@ gedict_t	*get_ed_scores2();
 
 int			build_number ();
 
-void 		CalculateBestPlayers();
 gedict_t	*get_ed_best1();
 gedict_t	*get_ed_best2();
 gedict_t	*get_ed_bestPow();

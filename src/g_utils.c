@@ -1586,7 +1586,6 @@ void CalculateBestPlayers()
 	best2 = 0;
 	ed_best1 = NULL;
 	ed_best2 = NULL;
-	ed_bestPow = NULL;
 
 	// autotrack stuff
 	// no ghost serving
@@ -1642,6 +1641,17 @@ void CalculateBestPlayers()
 			continue;
 		}
 	}
+}
+
+void CalculateBestPowPlayers()
+{
+	gedict_t *p;
+	int best, best1;
+
+	// ok - best povs potentially changed, recalculate
+
+	best1 = 0;
+	ed_bestPow = NULL;
 
 	// auto_pow stuff
 	// no ghost serving
@@ -1673,16 +1683,19 @@ void CalculateBestPlayers()
 
 gedict_t *get_ed_best1()
 {
+	CalculateBestPlayers();
 	return ed_best1;
 }
 
 gedict_t *get_ed_best2()
 {
+	CalculateBestPlayers();
 	return ed_best2;
 }
 
 gedict_t *get_ed_bestPow()
 {
+	CalculateBestPowPlayers();
 	return ed_bestPow;
 }
 

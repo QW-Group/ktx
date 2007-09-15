@@ -1247,7 +1247,6 @@ void StartFrame( int time )
 
 	CheckSvUnlock();
 
-	CalculateBestPlayers(); // autotrack stuff
 	DoMVDAutoTrack(); // mvd autotrack stuff
 
 // Tonik: note current "serverinfo maxfps" setting

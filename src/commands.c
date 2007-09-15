@@ -4033,6 +4033,8 @@ void ktpro_autotrack_on_powerup_take (gedict_t *dude)
 // some powerup out, and he has neither the rocket launcher nor the lightning gun, mark specs to switch pov to best player
 void ktpro_autotrack_on_powerup_out (gedict_t *dude)
 {
+/* qqshka: I turned this out, because sassa think its correct, lets test it...
+
 	gedict_t *p;
 	int goal = EDICT_TO_PROG( dude ); // so we can compare with ->s.v.goal
 
@@ -4045,6 +4047,7 @@ void ktpro_autotrack_on_powerup_out (gedict_t *dude)
 	for ( p = world; (p = find_spc( p )); )
 		if ( p->s.v.goalentity == goal )
 			ktpro_autotrack_mark_spec( p );
+*/
 }
 
 
