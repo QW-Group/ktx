@@ -604,7 +604,7 @@ void Customize_Maps()
 
 // create cvar via 'set' command
 // FIXME: unfortunately with current API I can't check if cvar already exist
-qboolean RegisterCvar ( const char *var )
+qboolean RegisterCvarEx ( const char *var, const char *defaultstr )
 {
 
 	if ( !strnull( cvar_string( var ) ) ) {
@@ -627,11 +627,16 @@ qboolean RegisterCvar ( const char *var )
 	}
 
 //	G_cprint("RegisterCvar: \"%s\" registered\n", var);
-	localcmd("set \"%s\" \"\"\n", var);
+	localcmd("set \"%s\" \"%s\"\n", var, defaultstr);
 	trap_executecmd ();
 	return true;
 }
 
+// like RegisterCvarEx, but uses "" for default value
+qboolean RegisterCvar ( const char *var )
+{
+	return RegisterCvarEx(var, "");
+}
 // in the first frame - even world is not spawned yet
 void FirstFrame	( )
 {
@@ -682,7 +687,7 @@ void FirstFrame	( )
 	RegisterCvar("k_motd_time"); 	  // motd time in seconds
 
 	RegisterCvar("k_admincode");
-	RegisterCvar("k_prewar");
+	RegisterCvarEx("k_prewar", "1");
 	RegisterCvar("k_lockmap");
 	RegisterCvar("k_master");
 	RegisterCvar("k_fallbunny");
