@@ -1253,7 +1253,10 @@ void StartFrame( int time )
 // (we don't want to do it in every player frame)
 	current_maxfps = iKey( world, "maxfps" );
 	if ( !current_maxfps )
-		current_maxfps = 72;	// 2.30 standard
+	{
+//		current_maxfps = 72;	// 2.30 standard
+		current_maxfps = 77;	// year 2007 standard
+	}
 
 	current_maxfps = bound(50, current_maxfps, 1981);
 
