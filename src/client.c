@@ -1968,7 +1968,7 @@ void Print_Wp_Stats( )
 	}
 
 	if ( e == world || e->ct != ctPlayer ) { // spec tracking no one
-		G_centerprint( self, "%s%s", buf, redtext("Tracking noone (+wp_stats)"));
+		G_centerprint( self, "%s%s", buf, redtext("Tracking no one (+wp_stats)"));
 
 		self->need_clearCP  = 1;
 		self->wp_stats_time = g_globalvars.time + WP_STATS_UPDATE;
@@ -2064,7 +2064,7 @@ void Print_Scores( )
 	}
 
 	if ( e == world || e->ct != ctPlayer ) { // spec tracking no one
-		G_centerprint( self, "%s%s", buf, redtext("Tracking noone (+scores)"));
+		G_centerprint( self, "%s%s", buf, redtext("Tracking no one (+scores)"));
 
 		self->need_clearCP  = 1;
 		self->sc_stats_time = g_globalvars.time + SC_STATS_UPDATE;

@@ -2208,7 +2208,7 @@ qboolean can_prewar ( qboolean fire )
 
 		case  0:
 		default: if ( fire ) {  // u can't fire
-					 can_prewar_msg(redtext("can't fire due to prewar is off"));
+					 can_prewar_msg(redtext("can't fire, prewar is disabled"));
 					 return false;
 				 }
 

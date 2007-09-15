@@ -1064,10 +1064,10 @@ void ShowCmds()
 qboolean check_perm(gedict_t *p, int perm)
 {
 	switch ( perm ) {
-		case 0:	G_sprint(p, 2, "%s can use this command\n", redtext("noone"));
+		case 0:	G_sprint(p, 2, "%s can use this command\n", redtext("no one"));
 				return false;
 		case 1:	if ( !is_real_adm( p ) ) {
-					G_sprint(p, 2, "you must be an %s\n", redtext("real admin"));
+					G_sprint(p, 2, "you must be a %s\n", redtext("real admin"));
 					return false;
 				}
 				break;
@@ -2976,7 +2976,7 @@ void UserMode(float umode)
 		return;
 
 //for 1on1 / 2on2 / 4on4 and ffa commands manipulation
-//0 - noone, 1 - admins, 2 elected admins too
+//0 - no one, 1 - admins, 2 elected admins too
 //3 - only real real judges, 4 - elected judges too
 //5 - all players
 
@@ -3203,14 +3203,14 @@ void TogglePractice()
 	if ( k_force || find ( world, FOFCLSN, "idlebot" ) )
 		return;  // cmon, no practice if forcestart or idlebot active
 
-//0 - noone, 1 - admins, 2 elected admins too
+//0 - no one, 1 - admins, 2 elected admins too
 //3 - only real real judges, 4 - elected judges too
 //5 - all players
 
 // implement how i think this must be, it is like some sort of access control
 
 	switch ( allow_toggle_practice ) {
-		case 0:	G_sprint(self, 2, "%s can use this command\n", redtext("noone"));
+		case 0:	G_sprint(self, 2, "%s can use this command\n", redtext("no one"));
 				return;
 		case 1:
 		case 2:	if ( !is_adm( self ) ) {
@@ -5362,18 +5362,18 @@ void callalias ()
 	tm = fabs( atof(arg_x) );
 
 	if ( tm <= 0 || tm > ca_limit2 ) {
-		G_sprint(self, 2, "calling time can't be longer then %d seconds\n", ca_limit2);
+		G_sprint(self, 2, "calling time can't be longer than %d seconds\n", ca_limit2);
 		return;
 	}
 
 	if ( self->callalias_time ) {
-		G_sprint(self, 2, "you can't install more then 1 alias before previous will execute\n");
+		G_sprint(self, 2, "you can't install more than 1 alias before previous will execute\n");
 		return;
 	}
 
 	trap_CmdArgv( 1, arg_x, sizeof( arg_x ) );
 	if ( strnull(arg_x) ) {
-		G_sprint(self, 2, "you can't install alias with empty name\n");
+		G_sprint(self, 2, "you can't install an alias with an empty name\n");
 		return;
 	}
 
