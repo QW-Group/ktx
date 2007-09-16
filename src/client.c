@@ -2525,6 +2525,8 @@ void CheckPowerups()
 			}
 			self->invisible_finished = 0;
 			self->invisible_time = 0;
+			if (vw_enabled)
+				W_SetCurrentAmmo();		// set the correct .vw_index
 
 			adjust_pickup_time( &self->r_pickup_time, &self->ps.itm[itRING].time );
 
