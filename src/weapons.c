@@ -1420,8 +1420,8 @@ void W_SetCurrentAmmo()
 		self->s.v.currentammo = 0;
 		self->s.v.weaponmodel = "progs/v_axe.mdl";
 		self->s.v.weaponframe = 0;
-	if (vw_enabled)
-            self->vw_index = 1;
+		if (vw_enabled)
+            		self->vw_index = 1;
 		break;
 
 	case IT_SHOTGUN:
@@ -1432,8 +1432,8 @@ void W_SetCurrentAmmo()
 			self->s.v.weaponmodel = "progs/v_shot.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_SHELLS;
-	if (vw_enabled)
-            self->vw_index = 2;
+		if (vw_enabled)
+            		self->vw_index = 2;
 		break;
 
 	case IT_SUPER_SHOTGUN:
@@ -1444,8 +1444,8 @@ void W_SetCurrentAmmo()
 			self->s.v.weaponmodel = "progs/v_shot2.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_SHELLS;
-	if (vw_enabled)
-            self->vw_index = 3;
+		if (vw_enabled)
+            		self->vw_index = 3;
 		break;
 
 	case IT_NAILGUN:
@@ -1453,8 +1453,8 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponmodel = "progs/v_nail.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_NAILS;
-	if (vw_enabled)
-            self->vw_index = 4;
+		if (vw_enabled)
+            		self->vw_index = 4;
 		break;
 
 	case IT_SUPER_NAILGUN:
@@ -1463,7 +1463,7 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponframe = 0;
 		items |= IT_NAILS;
 		if (vw_enabled)
-            self->vw_index = 5;
+            		self->vw_index = 5;
 		break;
 
 	case IT_GRENADE_LAUNCHER:
@@ -1472,7 +1472,7 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponframe = 0;
 		items |= IT_ROCKETS;
 		if (vw_enabled)
-            self->vw_index = 6;
+            		self->vw_index = 6;
 		break;
 
 	case IT_ROCKET_LAUNCHER:
@@ -1481,7 +1481,7 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponframe = 0;
 		items |= IT_ROCKETS;
 		if (vw_enabled)
-            self->vw_index = 7;
+            		self->vw_index = 7;
 		break;
 
 	case IT_LIGHTNING:
@@ -1490,7 +1490,7 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponframe = 0;
 		items |= IT_CELLS;
 		if (vw_enabled)
-            self->vw_index = 8;
+            		self->vw_index = 8;
 		break;
 
 	case IT_HOOK:
@@ -1503,18 +1503,18 @@ void W_SetCurrentAmmo()
 
 		self->s.v.weaponframe = 0;
 		if (vw_enabled)
-            self->vw_index = 1;
+	        	self->vw_index = 1;
 		break;
 
 	default:
 		self->s.v.currentammo = 0;
 		self->s.v.weaponmodel = "";
 		self->s.v.weaponframe = 0;
-        self->vw_index = 0;
+        	self->vw_index = 0;
 		break;
 	}
 
-	if (!vw_enabled)
+	if ( !vw_enabled )
 		self->vw_index = 0;
 
 	if ( match_in_progress != 2 )
