@@ -1510,10 +1510,12 @@ void W_SetCurrentAmmo()
 		self->s.v.currentammo = 0;
 		self->s.v.weaponmodel = "";
 		self->s.v.weaponframe = 0;
-		if (vw_enabled)
-            self->vw_index = 0;
+        self->vw_index = 0;
 		break;
 	}
+
+	if (!vw_enabled)
+		self->vw_index = 0;
 
 	if ( match_in_progress != 2 )
 	{
