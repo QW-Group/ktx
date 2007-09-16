@@ -1369,36 +1369,18 @@ void W_SetCurrentAmmo()
 					need_fix = true; // wrong axe run frame
 			}
 			else { // stand
-				if ( cvar("k_vweapons_models") )
-				{
-					if ( self->s.v.frame < 6 || self->s.v.frame > 17 )
-						need_fix = true; // wrong axe stand frame
-				} else {
-					if ( self->s.v.frame < 17 || self->s.v.frame > 28 )
-						need_fix = true; // wrong axe stand frame
-				}
+				if ( self->s.v.frame < 17 || self->s.v.frame > 28 )
+					need_fix = true; // wrong axe stand frame
 			}
 		}
 		else {
 			if ( self->s.v.velocity[0] || self->s.v.velocity[1] ) { // run
-				if ( cvar("k_vweapons_models") )
-				{
-					if ( self->s.v.frame < 0 || self->s.v.frame > 5 )
-						need_fix = true; // wrong non axe run frame
-				} else {
-					if ( self->s.v.frame < 6 || self->s.v.frame > 11 )
-						need_fix = true; // wrong non axe run frame
-				}
+				if ( self->s.v.frame < 6 || self->s.v.frame > 11 )
+					need_fix = true; // wrong non axe run frame
 			}
 			else { // stand
-				if ( cvar("k_vweapons_models") )
-				{
-					if ( self->s.v.frame < 6 || self->s.v.frame > 10)
-						need_fix = true; // wrong non axe stand frame
-				} else {
-					if ( self->s.v.frame < 12 || self->s.v.frame > 16)
-						need_fix = true; // wrong non axe stand frame
-				}
+				if ( self->s.v.frame < 12 || self->s.v.frame > 16)
+					need_fix = true; // wrong non axe stand frame
 			}
 		}
 	}

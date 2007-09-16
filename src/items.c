@@ -1816,7 +1816,8 @@ void ShowSpawnPoints()
 			setmodel( p, "progs/w_g_key.mdl" );
 		p->s.v.netname = "Spawn Point";
 		p->s.v.classname = "spawnpoint";
-		p->s.v.effects = ( int ) p->s.v.effects | EF_GREEN | EF_RED;
+		if ( cvar("k_spawn_glow") )
+			p->s.v.effects = ( int ) p->s.v.effects | EF_GREEN | EF_RED;
 	}
 }
 

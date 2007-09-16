@@ -296,18 +296,6 @@ void SP_worldspawn()
 	if ( cvar("k_custom_spawn") )
 		trap_precache_model( "progs/spawn.mdl" );
 	
-	if ( cvar("k_vweapons_models") )
-	{ // 
-		trap_precache_model( "progs/player_ax.mdl" );
-		trap_precache_model( "progs/player_sg.mdl" );
-		trap_precache_model( "progs/player_ss.mdl" );
-		trap_precache_model( "progs/player_ng.mdl" );
-		trap_precache_model( "progs/player_sn.mdl" );
-		trap_precache_model( "progs/player_gl.mdl" );
-		trap_precache_model( "progs/player_rl.mdl" );
-		trap_precache_model( "progs/player_lg.mdl" );
-	}
-	
 	trap_precache_model( "progs/player.mdl" );
 
 	trap_precache_model( "progs/eyes.mdl" );
@@ -336,14 +324,15 @@ void SP_worldspawn()
     {
         // precache our vwep models
         trap_precache_vwep_model ("progs/vwplayer.mdl");  // vwep-enabled player model to use
-        trap_precache_vwep_model ("progs/w_axe.mdl");
-        trap_precache_vwep_model ("progs/w_shot.mdl");
+        trap_precache_vwep_model ("progs/w_axe.mdl");	// index 2
+        trap_precache_vwep_model ("progs/w_shot.mdl");	// index 3
         trap_precache_vwep_model ("progs/w_shot2.mdl");
         trap_precache_vwep_model ("progs/w_nail.mdl");
         trap_precache_vwep_model ("progs/w_nail2.mdl");
         trap_precache_vwep_model ("progs/w_rock.mdl");
         trap_precache_vwep_model ("progs/w_rock2.mdl");
         trap_precache_vwep_model ("progs/w_light.mdl");
+        trap_precache_vwep_model ("progs/w_coil.mdl");	//index 10
         trap_precache_vwep_model ("-");			// null vwep model
     }
 #endif
@@ -731,6 +720,7 @@ void FirstFrame	( )
 	RegisterCvar("k_minrate");
 	RegisterCvar("k_sready");
 	RegisterCvar("k_sspawn");
+	RegisterCvarEx("k_spawn_glow", "0");
 	RegisterCvar("k_custom_spawn");
 	RegisterCvar("k_idletime");
 	RegisterCvar("k_timetop");
@@ -762,8 +752,6 @@ void FirstFrame	( )
 	RegisterCvar("k_instagib");
 	RegisterCvar("k_instagib_custom_models");
 	RegisterCvar("k_cg_kb");
-	
-	RegisterCvar("k_vweapons_models");
 	
 	RegisterCvar("k_rocketarena"); // rocket arena
 	RegisterCvar("k_dmgfrags");

@@ -34,7 +34,7 @@ vec3_t          VEC_HULL_MAX = { 16, 16, 32 };
 
 vec3_t          VEC_HULL2_MIN = { -32, -32, -24 };
 vec3_t          VEC_HULL2_MAX = { 32, 32, 64 };
-int             modelindex_eyes, modelindex_player;
+int             modelindex_eyes, modelindex_player, vwep_index;
 
 qboolean can_prewar( qboolean fire );
 void IdlebotCheck();
@@ -1249,15 +1249,11 @@ void PutClientInServer()
 
 	self->s.v.fixangle = true;
 
-
 // oh, this is a hack!
 	setmodel( self, "progs/eyes.mdl" );
 	modelindex_eyes = self->s.v.modelindex;
 
-	if ( cvar("k_vweapons_models") )
-		setmodel( self, "progs/player_ax.mdl" );
-	else
-		setmodel( self, "progs/player.mdl" );
+	setmodel( self, "progs/player.mdl" );
 	modelindex_player = self->s.v.modelindex;
 
 	setsize( self, PASSVEC3( VEC_HULL_MIN ), PASSVEC3( VEC_HULL_MAX ) );
@@ -2402,21 +2398,10 @@ void PlayerPreThink()
         // invoked on death for some reason (couldn't figure out why). This leads to a
         // state when the player stands still after dying and can't respawn or even
         // suicide and has to reconnect. This is checked and fixed here
-		if ( cvar("k_vweapons_models") )
-		{
-		        if( g_globalvars.time > (self->dead_time + 0.1)
-				&& ( self->s.v.frame < 24 || self->s.v.frame > 85 ) // FIXME: hardcoded range of dead frames
-			) {
-				StartDie();
-			}
-		}
-		else
-		{
-		        if( g_globalvars.time > (self->dead_time + 0.1)
-				&& ( self->s.v.frame < 41 || self->s.v.frame > 102 ) // FIXME: hardcoded range of dead frames
-			) {
-				StartDie();
-			}
+	        if( g_globalvars.time > (self->dead_time + 0.1)
+			&& ( self->s.v.frame < 41 || self->s.v.frame > 102 ) // FIXME: hardcoded range of dead frames
+		) {
+			StartDie();
 		}
 		
 		return;		// dying, so do nothing
@@ -2474,51 +2459,6 @@ void PlayerPreThink()
 }
 
 /////////////////////////////////////////////////////////////////
-/*
-================
-CheckModel
-
-Check for player model used
-================
-*/
-
-void CheckModel()
-{
-	char *vwepmodel = "";
-
-        switch ( ( int )self->s.v.weapon ) {
-                case IT_AXE:                            
-			vwepmodel = "progs/player_ax.mdl";
-			break;
-                case IT_SHOTGUN:                        
-			vwepmodel = "progs/player_sg.mdl";
-			break;
-                case IT_SUPER_SHOTGUN:          
-			vwepmodel = "progs/player_ss.mdl";
-			break;
-                case IT_NAILGUN:                        
-			vwepmodel = "progs/player_ng.mdl";
-			break;
-                case IT_SUPER_NAILGUN:          
-			vwepmodel = "progs/player_sn.mdl";
-			break;
-                case IT_GRENADE_LAUNCHER:       
-			vwepmodel = "progs/player_gl.mdl";
-			break;
-                case IT_ROCKET_LAUNCHER:        
-			vwepmodel = "progs/player_rl.mdl";
-			break;
-                case IT_LIGHTNING:                      
-			vwepmodel = "progs/player_lg.mdl";
-			break;
-                default:                                        
-			vwepmodel = "progs/player_ax.mdl";
-        }
-	if ( (self->s.v.modelindex != modelindex_eyes)  && cvar("k_vweapons_models") )
-		setmodel( self, vwepmodel );
-
-}
-
 
 /*
 ================
@@ -2582,6 +2522,11 @@ void CheckPowerups()
 		}
 		// use the eyes
 		self->s.v.frame = 0;
+#ifdef VWEP_TEST
+		vw_enabled = vw_available && cvar("k_allow_vwep") && cvar("k_vwep");
+		if ( vw_enabled )
+			self->vw_index = 0;
+#endif
 		self->s.v.modelindex = modelindex_eyes;
 	} else
 		self->s.v.modelindex = modelindex_player;	// don't use eyes
@@ -2845,7 +2790,6 @@ void PlayerPostThink()
 	self->jump_flag = self->s.v.velocity[2];
 
 	CheckPowerups();
-	CheckModel();
 	CheckStuffRune();
 
 	mv_record();

@@ -5249,10 +5249,7 @@ void mv_cmd_playback ()
 
 	self->pb_ent = spawn ();
 	self->pb_ent->s.v.classname = "pb_ent";
-	if ( cvar("k_vweapons_models") )
-		setmodel (self->pb_ent, "progs/player_ax.mdl");
-	else
-		setmodel (self->pb_ent, "progs/player.mdl");
+	setmodel (self->pb_ent, "progs/player.mdl");
 
 	self->pb_time = 0;
 	self->pb_old_time = g_globalvars.time;

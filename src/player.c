@@ -39,15 +39,12 @@ void            player_run();
 
 void player_stand1()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 6;
-	else
-		self->s.v.frame = 17;
+	self->s.v.frame = 17;
 	self->s.v.think = ( func_t ) player_stand1;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
 	self->s.v.weaponframe = 0;
-	//G_bprint(2, "s.v.velocity: %d, %d\n", (int)self->s.v.velocity[0], (int)self->s.v.velocity[1]);
+	
 	if ( self->s.v.velocity[0] || self->s.v.velocity[1] )
 	{
 		self->walkframe = 0;
@@ -59,33 +56,23 @@ void player_stand1()
 	{
 		if ( self->walkframe >= 12 )
 			self->walkframe = 0;
-		if ( cvar("k_vweapons_models") )
-			self->s.v.frame = 6 + self->walkframe;
-		else
-			self->s.v.frame = 17 + self->walkframe;
+		self->s.v.frame = 17 + self->walkframe;
 	} else
 	{
 		if ( self->walkframe >= 5 )
 			self->walkframe = 0;
-		if ( cvar("k_vweapons_models") )
-			self->s.v.frame = 6 + self->walkframe;
-		else
-			self->s.v.frame = 12 + self->walkframe;
+		self->s.v.frame = 12 + self->walkframe;
 	}
 	self->walkframe = self->walkframe + 1;
 }
 
 void player_run()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 0;
-	else
-		self->s.v.frame = 6;
+	self->s.v.frame = 6;
 	self->s.v.think = ( func_t ) player_run;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
 	self->s.v.weaponframe = 0;
-	//G_bprint(2, "s.v.velocity: %d, %d\n", (int)self->s.v.velocity[0], (int)self->s.v.velocity[1]);
 	if ( !self->s.v.velocity[0] && !self->s.v.velocity[1] )
 	{
 		self->walkframe = 0;
@@ -97,15 +84,12 @@ void player_run()
 	{
 		if ( self->walkframe >= 6 )
 			self->walkframe = 0;
-		if ( cvar("k_vweapons_models") )
-			self->s.v.frame = 0 + self->walkframe;
-		else
-			self->s.v.frame = 6 + self->walkframe;
+		self->s.v.frame = 0 + self->walkframe;
 	} else
 	{
 		if ( self->walkframe >= 6 )
 			self->walkframe = 0;
-		self->s.v.frame = 0 + self->walkframe;
+		self->s.v.frame = 6 + self->walkframe;
 	}
 	self->walkframe = self->walkframe + 1;
 }
@@ -119,10 +103,7 @@ void muzzleflash()
 
 void player_chain1()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 104;
-	else
-	 	self->s.v.frame = 137;
+	self->s.v.frame = 137;
 	self->s.v.think = ( func_t ) player_chain2;
  	self->s.v.nextthink = g_globalvars.time + 0.1;
 	self->s.v.weaponframe = 2;
@@ -131,10 +112,7 @@ void player_chain1()
 
 void player_chain2()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 105;
-	else
-		self->s.v.frame = 138;
+	self->s.v.frame = 138;
 	self->s.v.think = ( func_t ) player_chain3;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 	self->s.v.weaponframe = 3;
@@ -142,10 +120,7 @@ void player_chain2()
 
 void player_chain3()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 106;
-	else
-		self->s.v.frame = 139;
+	self->s.v.frame = 139;
 	self->s.v.think = ( func_t ) player_chain4;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 	self->s.v.weaponframe = 3;
@@ -160,10 +135,7 @@ void player_chain4()
 	// Original ctf grapple used frame 73 here, but that causes problems with cl_deadbodyfilter 2
 	// Frame 139 is a decent alternative especially given that 73 never looked good anyway
 	// self->s.v.frame = 73;
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 106;
-	else
-		self->s.v.frame = 139;
+	self->s.v.frame = 139;
 	self->s.v.think = ( func_t ) player_chain5;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 	self->s.v.weaponframe = 4;
@@ -175,10 +147,7 @@ void player_chain4()
 
 void player_chain5()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 107;
-	else
-		self->s.v.frame = 140;
+	self->s.v.frame = 140;
 	self->walkframe = 0;
 	self->s.v.think = ( func_t ) player_run;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
@@ -187,10 +156,7 @@ void player_chain5()
 
 void player_shot1()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 17;
-	else
-		self->s.v.frame = 113;
+	self->s.v.frame = 113;
 	self->s.v.think = ( func_t ) player_shot2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -200,10 +166,7 @@ void player_shot1()
 
 void player_shot2()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 18;
-	else
-		self->s.v.frame = 114;
+	self->s.v.frame = 114;
 	self->s.v.think = ( func_t ) player_shot3;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -212,10 +175,7 @@ void player_shot2()
 
 void player_shot3()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 19;
-	else
-		self->s.v.frame = 115;
+	self->s.v.frame = 115;
 	self->s.v.think = ( func_t ) player_shot4;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -224,10 +184,7 @@ void player_shot3()
 
 void player_shot4()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 20;
-	else
-		self->s.v.frame = 116;
+	self->s.v.frame = 116;
 	self->s.v.think = ( func_t ) player_shot5;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 	self->s.v.weaponframe = 4;
@@ -235,10 +192,7 @@ void player_shot4()
 
 void player_shot5()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 21;
-	else
-		self->s.v.frame = 117;
+	self->s.v.frame = 117;
 	self->s.v.think = ( func_t ) player_shot6;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -247,10 +201,7 @@ void player_shot5()
 
 void player_shot6()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 22;
-	else
-		self->s.v.frame = 118;
+	self->s.v.frame = 118;
 	self->walkframe = 0;
 	self->s.v.think = ( func_t ) player_run;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
@@ -260,10 +211,7 @@ void player_shot6()
 
 void player_axe1()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 86;
-	else
-		self->s.v.frame = 119;
+	self->s.v.frame = 119;
 	self->s.v.think = ( func_t ) player_axe2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -272,10 +220,7 @@ void player_axe1()
 
 void player_axe2()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 87;
-	else
-		self->s.v.frame = 120;
+	self->s.v.frame = 120;
 	self->s.v.think = ( func_t ) player_axe3;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -284,10 +229,7 @@ void player_axe2()
 
 void player_axe3()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 88;
-	else
-		self->s.v.frame = 121;
+	self->s.v.frame = 121;
 	self->s.v.think = ( func_t ) player_axe4;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -297,10 +239,7 @@ void player_axe3()
 
 void player_axe4()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 89;
-	else
-		self->s.v.frame = 122;
+	self->s.v.frame = 122;
 	self->walkframe = 0;
 	self->s.v.think = ( func_t ) player_run;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
@@ -310,10 +249,7 @@ void player_axe4()
 
 void player_axeb1()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 92;
-	else
-		self->s.v.frame = 125;
+	self->s.v.frame = 125;
 	self->s.v.think = ( func_t ) player_axeb2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -322,10 +258,7 @@ void player_axeb1()
 
 void player_axeb2()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 93;
-	else
-		self->s.v.frame = 126;
+	self->s.v.frame = 126;
 	self->s.v.think = ( func_t ) player_axeb3;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -334,10 +267,7 @@ void player_axeb2()
 
 void player_axeb3()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 94;
-	else
-		self->s.v.frame = 127;
+	self->s.v.frame = 127;
 	self->s.v.think = ( func_t ) player_axeb4;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -347,10 +277,7 @@ void player_axeb3()
 
 void player_axeb4()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 95;
-	else
-		self->s.v.frame = 128;
+	self->s.v.frame = 128;
 	self->walkframe = 0;
 	self->s.v.think = ( func_t ) player_run;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
@@ -360,10 +287,7 @@ void player_axeb4()
 
 void player_axec1()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 98;
-	else
-		self->s.v.frame = 131;
+	self->s.v.frame = 131;
 	self->s.v.think = ( func_t ) player_axec2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -372,10 +296,7 @@ void player_axec1()
 
 void player_axec2()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 99;
-	else
-		self->s.v.frame = 132;
+	self->s.v.frame = 132;
 	self->s.v.think = ( func_t ) player_axec3;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -384,10 +305,7 @@ void player_axec2()
 
 void player_axec3()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 100;
-	else
-		self->s.v.frame = 133;
+	self->s.v.frame = 133;
 	self->s.v.think = ( func_t ) player_axec4;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -397,10 +315,7 @@ void player_axec3()
 
 void player_axec4()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 101;
-	else
-		self->s.v.frame = 134;
+	self->s.v.frame = 134;
 	self->walkframe = 0;
 	self->s.v.think = ( func_t ) player_run;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
@@ -410,10 +325,7 @@ void player_axec4()
 
 void player_axed1()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 104;
-	else
-		self->s.v.frame = 137;
+	self->s.v.frame = 137;
 	self->s.v.think = ( func_t ) player_axed2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -422,10 +334,7 @@ void player_axed1()
 
 void player_axed2()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 105;
-	else
-		self->s.v.frame = 138;
+	self->s.v.frame = 138;
 	self->s.v.think = ( func_t ) player_axed3;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -434,10 +343,7 @@ void player_axed2()
 
 void player_axed3()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 106;
-	else
-		self->s.v.frame = 139;
+	elf->s.v.frame = 139;
 	self->s.v.think = ( func_t ) player_axed4;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -447,10 +353,7 @@ void player_axed3()
 
 void player_axed4()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 107;
-	else
-		self->s.v.frame = 140;
+	self->s.v.frame = 140;
 	self->walkframe = 0;
 	self->s.v.think = ( func_t ) player_run;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
@@ -475,10 +378,7 @@ void set_idealtime()
 #define EZQUAKE_BUG // disconnect: sorry i'm too lazy to fix ezQuake's bug since not I did it... i'll remove it when it'll be fixed
 void player_nail1()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 17;
-	else
-		self->s.v.frame = 103;
+	self->s.v.frame = 103;
 	self->s.v.think = ( func_t ) player_nail2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -507,10 +407,7 @@ void player_nail1()
 
 void player_nail2()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 18;
-	else
-		self->s.v.frame = 104;
+	self->s.v.frame = 104;
 	self->s.v.think = ( func_t ) player_nail1;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -541,10 +438,7 @@ void player_nail2()
 
 void player_light1()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 17;
-	else
-		self->s.v.frame = 105;
+	self->s.v.frame = 105;
 	self->s.v.think = ( func_t ) player_light2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -573,10 +467,7 @@ void player_light1()
 
 void player_light2()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 18;
-	else
-		self->s.v.frame = 106;
+	self->s.v.frame = 106;
 	self->s.v.think = ( func_t ) player_light1;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -606,10 +497,7 @@ void player_light2()
 //============================================================================
 void player_rocket1()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 17;
-	else
-		self->s.v.frame = 107;
+	self->s.v.frame = 107;
 	self->s.v.think = ( func_t ) player_rocket2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -619,10 +507,7 @@ void player_rocket1()
 
 void player_rocket2()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 18;
-	else
-		self->s.v.frame = 108;
+	self->s.v.frame = 108;
 	self->s.v.think = ( func_t ) player_rocket3;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -631,10 +516,7 @@ void player_rocket2()
 
 void player_rocket3()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 19;
-	else
-		self->s.v.frame = 109;
+	self->s.v.frame = 109;
 	self->s.v.think = ( func_t ) player_rocket4;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -643,10 +525,7 @@ void player_rocket3()
 
 void player_rocket4()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 20;
-	else
-		self->s.v.frame = 110;
+	self->s.v.frame = 110;
 	self->s.v.think = ( func_t ) player_rocket5;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -655,10 +534,7 @@ void player_rocket4()
 
 void player_rocket5()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 21;
-	else
-		self->s.v.frame = 111;
+	self->s.v.frame = 111;
 	self->s.v.think = ( func_t ) player_rocket6;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -667,10 +543,7 @@ void player_rocket5()
 
 void player_rocket6()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 22;
-	else
-		self->s.v.frame = 112;
+	self->s.v.frame = 112;
 	self->walkframe = 0;
 	self->s.v.think = ( func_t ) player_run;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
@@ -766,10 +639,7 @@ void PainSound()
 
 void player_pain1()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 11;
-	else
-		self->s.v.frame = 35;
+	self->s.v.frame = 35;
 	self->s.v.think = ( func_t ) player_pain2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -779,10 +649,7 @@ void player_pain1()
 
 void player_pain2()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 12;
-	else
-		self->s.v.frame = 36;
+	self->s.v.frame = 36;
 	self->s.v.think = ( func_t ) player_pain3;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -790,10 +657,7 @@ void player_pain2()
 
 void player_pain3()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 13;
-	else
-		self->s.v.frame = 37;
+	self->s.v.frame = 37;
 	self->s.v.think = ( func_t ) player_pain4;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -801,10 +665,7 @@ void player_pain3()
 
 void player_pain4()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 14;
-	else
-		self->s.v.frame = 38;
+	self->s.v.frame = 38;
 	self->s.v.think = ( func_t ) player_pain5;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -812,10 +673,7 @@ void player_pain4()
 
 void player_pain5()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 15;
-	else
-		self->s.v.frame = 39;
+	self->s.v.frame = 39;
 	self->s.v.think = ( func_t ) player_pain6;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -823,10 +681,7 @@ void player_pain5()
 
 void player_pain6()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 16;
-	else
-		self->s.v.frame = 40;
+	self->s.v.frame = 40;
 	self->walkframe = 0;
 	self->s.v.think = ( func_t ) player_run;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
@@ -835,10 +690,7 @@ void player_pain6()
 
 void player_axpain1()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 18;
-	else
-		self->s.v.frame = 29;
+	self->s.v.frame = 29;
 	self->s.v.think = ( func_t ) player_axpain2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -848,10 +700,7 @@ void player_axpain1()
 
 void player_axpain2()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 19;
-	else
-		self->s.v.frame = 30;
+	self->s.v.frame = 30;
 	self->s.v.think = ( func_t ) player_axpain3;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -859,10 +708,7 @@ void player_axpain2()
 
 void player_axpain3()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 20;
-	else
-		self->s.v.frame = 31;
+	self->s.v.frame = 31;
 	self->s.v.think = ( func_t ) player_axpain4;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -870,10 +716,7 @@ void player_axpain3()
 
 void player_axpain4()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 21;
-	else
-		self->s.v.frame = 32;
+	self->s.v.frame = 32;
 	self->s.v.think = ( func_t ) player_axpain5;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -881,10 +724,7 @@ void player_axpain4()
 
 void player_axpain5()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 22;
-	else
-		self->s.v.frame = 33;
+	self->s.v.frame = 33;
 	self->s.v.think = ( func_t ) player_axpain6;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -892,10 +732,7 @@ void player_axpain5()
 
 void player_axpain6()
 {
-	if ( cvar("k_vweapons_models") )
-	 	self->s.v.frame = 23;
-	else
-		self->s.v.frame = 34;
+	self->s.v.frame = 34;
 	self->walkframe = 0;
 	self->s.v.think = ( func_t ) player_run;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
@@ -1251,14 +1088,8 @@ void set_suicide_frame()
 		self->s.v.frame = 0;
 	}
 	else {
-		if ( cvar("k_vweapons_models") )
-		{
-			setmodel( self, "progs/player_ax.mdl" );
-			self->s.v.frame = 26;
-		} else {
-			setmodel( self, "progs/playerx.mdl" );
-			self->s.v.frame = 60;
-		}
+		setmodel( self, "progs/player.mdl" );
+		self->s.v.frame = 60;
 	}
 
 	self->s.v.solid = SOLID_NOT;
@@ -1269,10 +1100,7 @@ void set_suicide_frame()
 
 void player_diea1()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 33;
-	else
-		self->s.v.frame = 50;
+	self->s.v.frame = 50;
 	self->s.v.think = ( func_t ) player_diea2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1280,10 +1108,7 @@ void player_diea1()
 
 void player_diea2()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 34;
-	else
-		self->s.v.frame = 51;
+	self->s.v.frame = 51;
 	self->s.v.think = ( func_t ) player_diea3;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1291,10 +1116,7 @@ void player_diea2()
 
 void player_diea3()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 35;
-	else
-		self->s.v.frame = 52;
+	self->s.v.frame = 52;
 	self->s.v.think = ( func_t ) player_diea4;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1302,10 +1124,7 @@ void player_diea3()
 
 void player_diea4()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 36;
-	else
-		self->s.v.frame = 53;
+	self->s.v.frame = 53;
 	self->s.v.think = ( func_t ) player_diea5;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1313,10 +1132,7 @@ void player_diea4()
 
 void player_diea5()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 37;
-	else
-		self->s.v.frame = 54;
+	self->s.v.frame = 54;
 	self->s.v.think = ( func_t ) player_diea6;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1324,10 +1140,7 @@ void player_diea5()
 
 void player_diea6()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 38;
-	else
-		self->s.v.frame = 55;
+	self->s.v.frame = 55;
 	self->s.v.think = ( func_t ) player_diea7;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1335,10 +1148,7 @@ void player_diea6()
 
 void player_diea7()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 39;
-	else
-		self->s.v.frame = 56;
+	self->s.v.frame = 56;
 	self->s.v.think = ( func_t ) player_diea8;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1346,10 +1156,7 @@ void player_diea7()
 
 void player_diea8()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 40;
-	else
-		self->s.v.frame = 57;
+	self->s.v.frame = 57;
 	self->s.v.think = ( func_t ) player_diea9;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1357,10 +1164,7 @@ void player_diea8()
 
 void player_diea9()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 41;
-	else
-		self->s.v.frame = 58;
+	self->s.v.frame = 58;
 	self->s.v.think = ( func_t ) player_diea10;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1368,10 +1172,7 @@ void player_diea9()
 
 void player_diea10()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 42;
-	else
-		self->s.v.frame = 59;
+	self->s.v.frame = 59;
 	self->s.v.think = ( func_t ) player_diea11;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1379,10 +1180,7 @@ void player_diea10()
 
 void player_diea11()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 43;
-	else
-		self->s.v.frame = 60;
+	self->s.v.frame = 60;
 	self->s.v.think = ( func_t ) player_diea11;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1391,10 +1189,7 @@ void player_diea11()
 
 void player_dieb1()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 44;
-	else
-		self->s.v.frame = 61;
+	self->s.v.frame = 61;
 	self->s.v.think = ( func_t ) player_dieb2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1402,10 +1197,7 @@ void player_dieb1()
 
 void player_dieb2()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 45;
-	else
-		self->s.v.frame = 62;
+	self->s.v.frame = 62;
 	self->s.v.think = ( func_t ) player_dieb3;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1413,10 +1205,7 @@ void player_dieb2()
 
 void player_dieb3()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 46;
-	else
-		self->s.v.frame = 63;
+	self->s.v.frame = 63;
 	self->s.v.think = ( func_t ) player_dieb4;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1424,10 +1213,7 @@ void player_dieb3()
 
 void player_dieb4()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 47;
-	else
-		self->s.v.frame = 64;
+	self->s.v.frame = 64;
 	self->s.v.think = ( func_t ) player_dieb5;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1435,10 +1221,7 @@ void player_dieb4()
 
 void player_dieb5()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 48;
-	else
-		self->s.v.frame = 65;
+	self->s.v.frame = 65;
 	self->s.v.think = ( func_t ) player_dieb6;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1446,10 +1229,7 @@ void player_dieb5()
 
 void player_dieb6()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 49;
-	else
-		self->s.v.frame = 66;
+	self->s.v.frame = 66;
 	self->s.v.think = ( func_t ) player_dieb7;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1457,10 +1237,7 @@ void player_dieb6()
 
 void player_dieb7()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 50;
-	else
-		self->s.v.frame = 67;
+	self->s.v.frame = 67;
 	self->s.v.think = ( func_t ) player_dieb8;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1468,10 +1245,7 @@ void player_dieb7()
 
 void player_dieb8()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 51;
-	else
-		self->s.v.frame = 68;
+	self->s.v.frame = 68;
 	self->s.v.think = ( func_t ) player_dieb9;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1479,10 +1253,7 @@ void player_dieb8()
 
 void player_dieb9()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 52;
-	else
-		self->s.v.frame = 69;
+	self->s.v.frame = 69;
 	self->s.v.think = ( func_t ) player_dieb9;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1491,10 +1262,7 @@ void player_dieb9()
 
 void player_diec1()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 53;
-	else
-		self->s.v.frame = 70;
+	self->s.v.frame = 70;
 	self->s.v.think = ( func_t ) player_diec2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1502,10 +1270,7 @@ void player_diec1()
 
 void player_diec2()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 54;
-	else
-		self->s.v.frame = 71;
+	self->s.v.frame = 71;
 	self->s.v.think = ( func_t ) player_diec3;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1513,10 +1278,7 @@ void player_diec2()
 
 void player_diec3()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 55;
-	else
-		self->s.v.frame = 72;
+	self->s.v.frame = 72;
 	self->s.v.think = ( func_t ) player_diec4;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1524,10 +1286,7 @@ void player_diec3()
 
 void player_diec4()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 56;
-	else
-		self->s.v.frame = 73;
+	self->s.v.frame = 73;
 	self->s.v.think = ( func_t ) player_diec5;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1535,10 +1294,7 @@ void player_diec4()
 
 void player_diec5()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 57;
-	else
-		self->s.v.frame = 74;
+	self->s.v.frame = 74;
 	self->s.v.think = ( func_t ) player_diec6;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1546,10 +1302,7 @@ void player_diec5()
 
 void player_diec6()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 58;
-	else
-		self->s.v.frame = 75;
+	self->s.v.frame = 75;
 	self->s.v.think = ( func_t ) player_diec7;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1557,10 +1310,7 @@ void player_diec6()
 
 void player_diec7()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 59;
-	else
-		self->s.v.frame = 76;
+	self->s.v.frame = 76;
 	self->s.v.think = ( func_t ) player_diec8;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1568,10 +1318,7 @@ void player_diec7()
 
 void player_diec8()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 60;
-	else
-		self->s.v.frame = 77;
+	self->s.v.frame = 77;
 	self->s.v.think = ( func_t ) player_diec9;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1579,10 +1326,7 @@ void player_diec8()
 
 void player_diec9()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 61;
-	else
-		self->s.v.frame = 78;
+	self->s.v.frame = 78;
 	self->s.v.think = ( func_t ) player_diec10;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1590,10 +1334,7 @@ void player_diec9()
 
 void player_diec10()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 62;
-	else
-		self->s.v.frame = 79;
+	self->s.v.frame = 79;
 	self->s.v.think = ( func_t ) player_diec11;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1601,10 +1342,7 @@ void player_diec10()
 
 void player_diec11()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 63;
-	else
-		self->s.v.frame = 80;
+	self->s.v.frame = 80;
 	self->s.v.think = ( func_t ) player_diec12;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1612,10 +1350,7 @@ void player_diec11()
 
 void player_diec12()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 64;
-	else
-		self->s.v.frame = 81;
+	self->s.v.frame = 81;
 	self->s.v.think = ( func_t ) player_diec13;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1623,10 +1358,7 @@ void player_diec12()
 
 void player_diec13()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 65;
-	else
-		self->s.v.frame = 82;
+	self->s.v.frame = 82;
 	self->s.v.think = ( func_t ) player_diec14;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1634,10 +1366,7 @@ void player_diec13()
 
 void player_diec14()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 66;
-	else
-		self->s.v.frame = 83;
+	self->s.v.frame = 83;
 	self->s.v.think = ( func_t ) player_diec15;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1645,10 +1374,7 @@ void player_diec14()
 
 void player_diec15()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 67;
-	else
-		self->s.v.frame = 84;
+	self->s.v.frame = 84;
 	self->s.v.think = ( func_t ) player_diec15;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1657,10 +1383,7 @@ void player_diec15()
 
 void player_died1()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 68;
-	else
-		self->s.v.frame = 85;
+	self->s.v.frame = 85;
 	self->s.v.think = ( func_t ) player_died2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1668,10 +1391,7 @@ void player_died1()
 
 void player_died2()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 69;
-	else
-		self->s.v.frame = 86;
+	self->s.v.frame = 86;
 	self->s.v.think = ( func_t ) player_died3;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1679,10 +1399,7 @@ void player_died2()
 
 void player_died3()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 70;
-	else
-		self->s.v.frame = 87;
+	self->s.v.frame = 87;
 	self->s.v.think = ( func_t ) player_died4;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1690,10 +1407,7 @@ void player_died3()
 
 void player_died4()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 71;
-	else
-		self->s.v.frame = 88;
+	self->s.v.frame = 88;
 	self->s.v.think = ( func_t ) player_died5;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1701,10 +1415,7 @@ void player_died4()
 
 void player_died5()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 72;
-	else
-		self->s.v.frame = 89;
+	self->s.v.frame = 89;
 	self->s.v.think = ( func_t ) player_died6;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1712,10 +1423,7 @@ void player_died5()
 
 void player_died6()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 73;
-	else
-		self->s.v.frame = 90;
+	self->s.v.frame = 90;
 	self->s.v.think = ( func_t ) player_died7;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1723,10 +1431,7 @@ void player_died6()
 
 void player_died7()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 74;
-	else
-		self->s.v.frame = 91;
+	self->s.v.frame = 91;
 	self->s.v.think = ( func_t ) player_died8;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1734,10 +1439,7 @@ void player_died7()
 
 void player_died8()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 75;
-	else
-		self->s.v.frame = 92;
+	self->s.v.frame = 92;
 	self->s.v.think = ( func_t ) player_died9;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1745,10 +1447,7 @@ void player_died8()
 
 void player_died9()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 76;
-	else
-		self->s.v.frame = 93;
+	self->s.v.frame = 93;
 	self->s.v.think = ( func_t ) player_died9;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1757,10 +1456,7 @@ void player_died9()
 
 void player_diee1()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 77;
-	else
-		self->s.v.frame = 94;
+	self->s.v.frame = 94;
 	self->s.v.think = ( func_t ) player_diee2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1768,10 +1464,7 @@ void player_diee1()
 
 void player_diee2()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 78;
-	else
-		self->s.v.frame = 95;
+	self->s.v.frame = 95;
 	self->s.v.think = ( func_t ) player_diee3;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1779,10 +1472,7 @@ void player_diee2()
 
 void player_diee3()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 79;
-	else
-		self->s.v.frame = 96;
+	self->s.v.frame = 96;
 	self->s.v.think = ( func_t ) player_diee4;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
@@ -1790,60 +1480,42 @@ void player_diee3()
 
 void player_diee4()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 80;
-	else
-		self->s.v.frame = 97;
+	self->s.v.frame = 97;
 	self->s.v.think = ( func_t ) player_diee5;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 }
 
 void player_diee5()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 81;
-	else
-		self->s.v.frame = 98;
+	self->s.v.frame = 98;
 	self->s.v.think = ( func_t ) player_diee6;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 }
 
 void player_diee6()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 82;
-	else
-		self->s.v.frame = 99;
+	self->s.v.frame = 99;
 	self->s.v.think = ( func_t ) player_diee7;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 }
 
 void player_diee7()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 83;
-	else
-		self->s.v.frame = 100;
+	self->s.v.frame = 100;
 	self->s.v.think = ( func_t ) player_diee8;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 }
 
 void player_diee8()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 84;
-	else
-		self->s.v.frame = 101;
+	self->s.v.frame = 101;
 	self->s.v.think = ( func_t ) player_diee9;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 }
 
 void player_diee9()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 85;
-	else
-		self->s.v.frame = 102;
+	self->s.v.frame = 102;
 	self->s.v.think = ( func_t ) player_diee9;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 	PlayerDead();
@@ -1851,90 +1523,63 @@ void player_diee9()
 
 void player_die_ax1()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 24;
-	else
-		self->s.v.frame = 41;
+	self->s.v.frame = 41;
 	self->s.v.think = ( func_t ) player_die_ax2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 }
 
 void player_die_ax2()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 25;
-	else
-		self->s.v.frame = 42;
+	self->s.v.frame = 42;
 	self->s.v.think = ( func_t ) player_die_ax3;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 }
 
 void player_die_ax3()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 26;
-	else
-		self->s.v.frame = 43;
+	self->s.v.frame = 43;
 	self->s.v.think = ( func_t ) player_die_ax4;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 }
 
 void player_die_ax4()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 27;
-	else
-		self->s.v.frame = 44;
+	self->s.v.frame = 44;
 	self->s.v.think = ( func_t ) player_die_ax5;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 }
 
 void player_die_ax5()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 28;
-	else
-		self->s.v.frame = 45;
+	self->s.v.frame = 45;
 	self->s.v.think = ( func_t ) player_die_ax6;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 }
 
 void player_die_ax6()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 29;
-	else
-		self->s.v.frame = 46;
+	self->s.v.frame = 46;
 	self->s.v.think = ( func_t ) player_die_ax7;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 }
 
 void player_die_ax7()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 30;
-	else
-		self->s.v.frame = 47;
+	self->s.v.frame = 47;
 	self->s.v.think = ( func_t ) player_die_ax8;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 }
 
 void player_die_ax8()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 31;
-	else
-		self->s.v.frame = 48;
+	self->s.v.frame = 48;
 	self->s.v.think = ( func_t ) player_die_ax9;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 }
 
 void player_die_ax9()
 {
-	if ( cvar("k_vweapons_models") )
-		self->s.v.frame = 32;
-	else
-		self->s.v.frame = 49;
+	self->s.v.frame = 49;
 	self->s.v.think = ( func_t ) player_die_ax9;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
