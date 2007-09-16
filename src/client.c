@@ -646,6 +646,7 @@ void            set_suicide_frame();
 void SP_info_player_deathmatch()
 {
 	gedict_t *spot;
+	vec3_t saved_org;
 	int i = 0;
 
 	for ( spot = world; (spot = find( spot, FOFS( s.v.classname ), self->s.v.classname )); i++ )
@@ -653,6 +654,15 @@ void SP_info_player_deathmatch()
 		if ( spot == self )
 			self->cnt = i;
 	}
+
+// some maps like aerowalk or ztndm* have spawn points hanging some distance
+// above the ground, fix them
+	setsize( self, PASSVEC3( VEC_HULL_MIN ), PASSVEC3( VEC_HULL_MAX ) );
+	VectorCopy (self->s.v.origin, saved_org);
+	droptofloor (self);
+	if (self->s.v.origin[2] < saved_org[2] - 64)
+		setorigin (self, PASSVEC3(saved_org));
+	setsize( self, 0, 0, 0, 0, 0, 0 );
 }
 
 // called by ClientKill and DeadThink
