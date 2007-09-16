@@ -2493,7 +2493,6 @@ void CheckPowerups()
 	if ( self->invisible_finished )
 	{
 // sound and screen flash when items starts to run out
-		self->vw_index = 0;
 		if ( self->invisible_sound < g_globalvars.time )
 		{
 			sound( self, CHAN_AUTO, "items/inv3.wav", 0.5, ATTN_IDLE );
@@ -2528,16 +2527,20 @@ void CheckPowerups()
 			self->invisible_time = 0;
 			if (vw_enabled)
 				W_SetCurrentAmmo();		// set the correct .vw_index
+			self->s.v.modelindex = modelindex_player;	// don't use eyes
 
 			adjust_pickup_time( &self->r_pickup_time, &self->ps.itm[itRING].time );
 
 			ktpro_autotrack_on_powerup_out( self );
 		}
-		// use the eyes
-		self->s.v.frame = 0;
-		self->s.v.modelindex = modelindex_eyes;
-	} else
-		self->s.v.modelindex = modelindex_player;	// don't use eyes
+		else
+		{
+			// use the eyes
+			self->s.v.frame = 0;
+			self->vw_index = 0;
+			self->s.v.modelindex = modelindex_eyes;
+		}
+	}
 
 // invincibility
 
