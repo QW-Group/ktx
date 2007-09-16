@@ -1514,7 +1514,7 @@ void W_SetCurrentAmmo()
 		break;
 	}
 
-	if ( !vw_enabled )
+	if (!vw_enabled || self->invisible_finished )
 		self->vw_index = 0;
 
 	if ( match_in_progress != 2 )
