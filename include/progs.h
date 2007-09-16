@@ -160,13 +160,14 @@ typedef struct player_stats_s {
 	int vel_frames;		// number of frames
 
 	// instagib stats
-	int airgibs;		// Number of airgibs
-	int airgib_height;	// Cumulated height  of airgibs
-	int insta_a_gibs;
-	int insta_s_gibs;
-	int insta_cg_gibs;
-	int insta_cg_multigibs;
-	int insta_cg_max_multigibs;
+	int i_height;	// Cumulated height  of airgibs
+	int i_maxheight;	
+	int i_cggibs;
+	int i_axegibs;
+	int i_stompgibs;
+	int i_multigibs;
+	int i_airgibs;		// Number of airgibs
+	int i_maxmultigibs;
 
 } player_stats_t;
 
@@ -465,7 +466,7 @@ typedef struct gedict_s {
 	float	items2;				   // using  ZQ_ITEMS2 extension in mvdsv we can use per client sigils for runes
 // }
 //
-	int airgib_rune; 		// Instagib AirGib Master rune
+	int i_agmr; 		// Instagib AirGib Master rune
 
 	qboolean was_jump;
 

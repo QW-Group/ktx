@@ -306,7 +306,7 @@ void CheckStuffRune()
 	char *rune = "";
 	
 	if ( cvar("k_instagib") ) {
-		if ( self->airgib_rune ) {
+		if ( self->i_agmr ) {
 			self->items2 = ( int ) self->items2 | (CTF_RUNE_RES << 5);
 			return;
 		}

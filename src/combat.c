@@ -33,7 +33,8 @@ char            * dmg_type[] = { "none", "axe", "sg", "ssg", "ng", "sng", "gl", 
 int             dmg_is_quaded;
 int             dmg_is_splash = 0;
 float		frag_time = 0;
-int		multikill = 0;
+int		insta_multikill = 0;
+int		i_agmr_height = 0;
 
 //============================================================================
 
@@ -209,7 +210,7 @@ Killed
 */
 void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 {
-	gedict_t       *oself;
+	gedict_t       *oself, *head;
 	float playerheight = 0;
 
 	oself = self;
@@ -227,10 +228,72 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 				true, attacker );
 
 		playerheight = self->s.v.absmin[2] - g_globalvars.trace_endpos[2] + 1;
+
+		if ( ( int ) attacker->s.v.flags & FL_ONGROUND )
+		{
+			if ( playerheight >= 250 && playerheight < 400 ) {
+	 			G_bprint( 2, "%s from %s: height %d\n", redtext("AirGib"), attacker->s.v.netname,
+					(int)playerheight );
+			} else if ( playerheight >= 400 && playerheight < 1000 ) {
+	 			G_bprint( 2, "%s from %s: height %d\n", redtext("Great AirGib"), attacker->s.v.netname,
+					(int)playerheight );
+			} else if ( playerheight >= 1000 ) {
+	 			G_bprint( 2, "%s from %s: height %d\n", redtext("Amazing AirGib"), attacker->s.v.netname,
+					(int)playerheight );
+			}
+					
+			if ( playerheight > 45 ) {
+				attacker->ps.i_height += playerheight;
+				if ( playerheight > attacker->ps.i_maxheight )
+					attacker->ps.i_maxheight = playerheight;
+				attacker->ps.i_airgibs++;
+			}
+		}
+
+		if ( targ != attacker )
+		{
+			if ( targ->deathtype == dtAXE )
+			{
+				attacker->ps.i_axegibs++;
+				attacker->s.v.frags += 1;
+			}
+			else if ( targ->deathtype == dtSTOMP )
+			{
+				attacker->ps.i_stompgibs++;
+				attacker->s.v.frags += 3;
+			}
+			else if ( ( targ->deathtype == dtSG) || ( targ->deathtype == dtSSG ) )
+			{
+				attacker->ps.i_cggibs++;
+			}
+		}
+
+		if ( attacker->ps.i_height > 2000 ) {
+			if ( !i_agmr_height ) {
+				i_agmr_height = attacker->ps.i_height;
+				if ( !(int)attacker->i_agmr ) {
+					attacker->i_agmr = 1;
+					attacker->s.v.frags += 5;
+					G_bprint( 2, "%s acquired the %s rune!\n", attacker->s.v.netname, redtext("AirGib Master"));
+				}
+			} else if ( attacker->ps.i_height > i_agmr_height ) {
+				for( head = world; (head = find_client( head )); ) {
+					if ( ( head->ps.i_height == i_agmr_height ) && ( head != attacker ) && ( head->ct == ctPlayer ) ) {
+						head->i_agmr = 0;
+						head->s.v.frags -= 5;
+						attacker->i_agmr = 1;
+						attacker->s.v.frags += 5;
+						G_bprint( 2, "%s took the %s rune from %s!\n", attacker->s.v.netname, 
+							redtext("AirGib Master"), head->s.v.netname);
+					}
+				}				
+				i_agmr_height = attacker->ps.i_height;
+			}
+		}
 	}
 
 	if ( self->ct == ctPlayer ) {
-        self->dead_time = g_globalvars.time;
+	        self->dead_time = g_globalvars.time;
 	}
 	else if ( self->s.v.movetype == MOVETYPE_PUSH || self->s.v.movetype == MOVETYPE_NONE )
 	{			// doors, triggers, etc
@@ -259,9 +322,9 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 	if ( cvar("k_instagib") ) {
 		if ( frag_time < ( g_globalvars.time - match_start_time ) ) {
 			frag_time = g_globalvars.time - match_start_time;
-			multikill = 0;
+			insta_multikill = 0;
 		} else {
-			multikill++;
+			insta_multikill++;
 		}
 	}
 
@@ -327,7 +390,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	//midair and instagib
 	float playerheight = 0, midheight = 0;
-	qboolean lowheight = false, instagib = false, midair = false, inwater = false, do_dmg = false, rl_dmg = false;
+	qboolean lowheight = false, midair = false, inwater = false, do_dmg = false, rl_dmg = false;
 
 	if ( !targ->s.v.takedamage || ISDEAD( targ ) )
 		return;
@@ -338,9 +401,6 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	if ( (int)cvar("k_midair") )
 		midair = true;
-
-	if ( (int)cvar("k_instagib") )
-		instagib = true;
 
 //	wp_num = attacker->s.v.weapon;
 
@@ -376,7 +436,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		attacker->carrier_hurt_time = g_globalvars.time;
 	}
 
-	if ( instagib)
+	if ( cvar("k_instagib"))
 	{
 		traceline( PASSVEC3(targ->s.v.origin),
 				targ->s.v.origin[0], 
@@ -627,42 +687,13 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		 || ( k_practice && targ->ct != ctPlayer ) // #practice mode#
 	   ) {
 
-		if ( instagib ) {
+		if ( cvar("k_instagib") ) {
 			if ( inflictor->ct == ctPlayer )
-			{
 				take = 5000;
 
-				if ( ( int ) attacker->s.v.flags & FL_ONGROUND )
-				{
-					if ( playerheight >= 250 && playerheight < 400 ) {
-			 			G_bprint( 2, "%s from %s: height %d\n", redtext("AirGib"), attacker->s.v.netname,
-						(int)playerheight );
-					} else if ( playerheight >= 400 && playerheight < 1000 ) {
-			 			G_bprint( 2, "%s from %s: height %d\n", redtext("Great AirGib"), attacker->s.v.netname,
-						(int)playerheight );
-					} else if ( playerheight >= 1000 ) {
-			 			G_bprint( 2, "%s from %s: height %d\n", redtext("Amazing AirGib"), attacker->s.v.netname,
-						(int)playerheight );
-					}
-					
-					if ( playerheight > 45 ) {
-						attacker->ps.airgib_height += playerheight;
-						attacker->ps.airgibs++;
-					}
-				}
-
-				if ( attacker->ps.airgib_height > 2000 )
-				{
-					if ( !(int)attacker->airgib_rune ) {
-						G_bprint( 2, "%s acquired the %s rune!\n", attacker->s.v.netname, redtext("AirGib Master"));
-						attacker->airgib_rune = 1;
-					}
-				}
-			}
+			if ( attacker == targ )
+				take = 0;
 		}
-
-		if ( cvar("k_instagib") && ( attacker == targ ) )
-			take = 0;
 
 		dmg_dealt += targ->s.v.health > take ? take : targ->s.v.health;
 		targ->s.v.health -= take;
@@ -742,25 +773,6 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
  		}
  		G_bprint(2, "%.1f (midheight)\n", midheight);
  	}
-
-	if ( instagib && match_in_progress == 2 ) {
-		if ( targ->deathtype == dtSTOMP ) {
-			attacker->s.v.frags += 3;
-			attacker->ps.insta_s_gibs++;
-		} else if ( targ->deathtype == dtAXE ) {
-			attacker->s.v.frags += 1;
-			attacker->ps.insta_a_gibs++;
-		} else if ( targ->deathtype == dtSG || targ->deathtype == dtSSG ){
-			if ( multikill ) {
-				G_bprint(2, "%s %s %d players!\n", attacker->s.v.netname, redtext("multigibbed"), multikill + 1);
-				attacker->s.v.frags += ( 1 + multikill * 2 );
-				attacker->ps.insta_cg_multigibs++;
-				if ( (multikill + 1) > attacker->ps.insta_cg_max_multigibs )
-					attacker->ps.insta_cg_max_multigibs = multikill + 1;
-			}
-			attacker->ps.insta_cg_gibs++;
-		}
-	}
 
 	if ( ISDEAD( targ ) )
 	{

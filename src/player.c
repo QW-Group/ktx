@@ -343,7 +343,7 @@ void player_axed2()
 
 void player_axed3()
 {
-	elf->s.v.frame = 139;
+	self->s.v.frame = 139;
 	self->s.v.think = ( func_t ) player_axed4;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 

@@ -25,7 +25,6 @@
 
 #include "g_local.h"
 
-
 void ReportMe();
 void AdminImpBot();
 void CaptainPickPlayer();
@@ -409,12 +408,24 @@ void FireInstaBullet( vec3_t dir, deathType_t deathtype )
 
 		TraceAttack( 4, dir );
 	    
+		if ( depth > 1 ) {
+			if ( ( cvar("k_instagib") == 1 ) || ( cvar("k_instagib") == 3 ) )
+				self->ps.wpn[wpSG].hits --;
+			else if ( ( cvar("k_instagib") == 2 ) || ( cvar("k_instagib") == 4 ) )
+				self->ps.wpn[wpSSG].hits --;
+			if ( depth > self->ps.i_maxmultigibs )
+				self->ps.i_maxmultigibs = depth;
+		}
+
 		if ( fraction == 1.0 )
 			break; // no obstacle
 
 		if ( solid != SOLID_SLIDEBOX )
 			break; // obstacle not a player/monster, probably something solid like wall or something
 	}
+
+	if ( depth > 1 )
+		self->ps.i_multigibs++;
     
 	ApplyMultiDamage();
 	Multi_Finish();
