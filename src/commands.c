@@ -5517,6 +5517,7 @@ void ToggleVwep()
 		return;
 
 	cvar_toggle_msg( self, "k_vwep", redtext("vwep") );
+	vw_enabled = vw_available && cvar("k_allow_vwep") && cvar("k_vwep");
 }
 #endif
 

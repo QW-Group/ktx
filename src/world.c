@@ -335,6 +335,7 @@ void SP_worldspawn()
         trap_precache_vwep_model ("progs/w_coil.mdl");	//index 10
         trap_precache_vwep_model ("-");			// null vwep model
     }
+	vw_enabled = vw_available && cvar("k_allow_vwep") && cvar("k_vwep");
 #endif
 
 	trap_precache_model( "progs/bolt.mdl" );	// for lightning gun
