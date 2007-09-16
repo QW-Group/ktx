@@ -138,10 +138,8 @@ typedef enum
 	g_strlcpy,
 	g_strlcat,
 	G_MAKEVECTORS,
-	G_NEXTCLIENT
-#ifdef VWEP_TEST
-	, G_PRECACHE_VWEP_MODEL
-#endif
+	G_NEXTCLIENT,
+	G_PRECACHE_VWEP_MODEL,
 } gameImport_t;
 
 // !!! new things comes to end of list !!!

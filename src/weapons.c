@@ -1420,10 +1420,8 @@ void W_SetCurrentAmmo()
 		self->s.v.currentammo = 0;
 		self->s.v.weaponmodel = "progs/v_axe.mdl";
 		self->s.v.weaponframe = 0;
-#ifdef VWEP_TEST
 	if (vw_enabled)
             self->vw_index = 1;
-#endif
 		break;
 
 	case IT_SHOTGUN:
@@ -1434,10 +1432,8 @@ void W_SetCurrentAmmo()
 			self->s.v.weaponmodel = "progs/v_shot.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_SHELLS;
-#ifdef VWEP_TEST
 	if (vw_enabled)
             self->vw_index = 2;
-#endif
 		break;
 
 	case IT_SUPER_SHOTGUN:
@@ -1448,10 +1444,8 @@ void W_SetCurrentAmmo()
 			self->s.v.weaponmodel = "progs/v_shot2.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_SHELLS;
-#ifdef VWEP_TEST
 	if (vw_enabled)
             self->vw_index = 3;
-#endif
 		break;
 
 	case IT_NAILGUN:
@@ -1459,10 +1453,8 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponmodel = "progs/v_nail.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_NAILS;
-#ifdef VWEP_TEST
 	if (vw_enabled)
             self->vw_index = 4;
-#endif
 		break;
 
 	case IT_SUPER_NAILGUN:
@@ -1470,10 +1462,8 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponmodel = "progs/v_nail2.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_NAILS;
-#ifdef VWEP_TEST
 		if (vw_enabled)
             self->vw_index = 5;
-#endif
 		break;
 
 	case IT_GRENADE_LAUNCHER:
@@ -1481,10 +1471,8 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponmodel = "progs/v_rock.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_ROCKETS;
-#ifdef VWEP_TEST
 		if (vw_enabled)
             self->vw_index = 6;
-#endif
 		break;
 
 	case IT_ROCKET_LAUNCHER:
@@ -1492,10 +1480,8 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponmodel = "progs/v_rock2.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_ROCKETS;
-#ifdef VWEP_TEST
 		if (vw_enabled)
             self->vw_index = 7;
-#endif
 		break;
 
 	case IT_LIGHTNING:
@@ -1503,10 +1489,8 @@ void W_SetCurrentAmmo()
 		self->s.v.weaponmodel = "progs/v_light.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_CELLS;
-#ifdef VWEP_TEST
 		if (vw_enabled)
             self->vw_index = 8;
-#endif
 		break;
 
 	case IT_HOOK:
@@ -1518,20 +1502,16 @@ void W_SetCurrentAmmo()
 			self->s.v.weaponmodel = "progs/v_axe.mdl";
 
 		self->s.v.weaponframe = 0;
-#ifdef VWEP_TEST
 		if (vw_enabled)
             self->vw_index = 1;
-#endif
 		break;
 
 	default:
 		self->s.v.currentammo = 0;
 		self->s.v.weaponmodel = "";
 		self->s.v.weaponframe = 0;
-#ifdef VWEP_TEST
 		if (vw_enabled)
             self->vw_index = 0;
-#endif
 		break;
 	}
 

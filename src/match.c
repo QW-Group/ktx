@@ -1678,11 +1678,9 @@ void PrintCountdown( int seconds )
 	if ( cvar("pm_airstep") )
 		strlcat(text, va("%s %5s\n", "Airstep", redtext("On")), sizeof(text));
 
-#ifdef VWEP_TEST
 	vw_enabled = vw_available && cvar("k_allow_vwep") && cvar("k_vwep");
 	if ( vw_enabled )
 		strlcat(text, va("%s %8s\n", "VWep", redtext("On")), sizeof(text));
-#endif
 
 	if ( cvar("k_teamoverlay") )
 		strlcat(text, va("%s %3s\n", "TmOverlay", redtext("On")), sizeof(text));

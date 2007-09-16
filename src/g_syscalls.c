@@ -101,12 +101,10 @@ void trap_precache_model( char *name )
 {
 	syscall( G_PRECACHE_MODEL, (int) name );
 }
-#ifdef VWEP_TEST
 int trap_precache_vwep_model( char *name )
 {
 	return syscall( G_PRECACHE_VWEP_MODEL, (int) name );
 }
-#endif
 
 void trap_setorigin( int edn, float origin_x, float origin_y, float origin_z )
 {

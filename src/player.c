@@ -945,10 +945,7 @@ void GibPlayer()
 {
 	gedict_t *p;
 
-#ifdef VWEP_TEST
-	if (vw_enabled)
-		self->vw_index = 0;
-#endif
+	self->vw_index = 0;
 	ThrowHead( "progs/h_player.mdl", self->s.v.health );
 
     if( match_in_progress == 2 ) {
@@ -1003,9 +1000,8 @@ void PlayerDie()
 	DropBackpack();
 
 	self->s.v.weaponmodel = "";
-#ifdef VWEP_TEST
-	self->vw_index = 9;	// null vwep model
-#endif
+	if (vw_enabled)
+		self->vw_index = 9;	// null vwep model
 
 	SetVector( self->s.v.view_ofs, 0, 0, -8 );
 	self->s.v.deadflag = DEAD_DYING;

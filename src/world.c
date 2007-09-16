@@ -315,7 +315,6 @@ void SP_worldspawn()
 	trap_precache_model( "progs/v_nail2.mdl" );
 	trap_precache_model( "progs/v_rock2.mdl" );
 
-#ifdef VWEP_TEST
 	// FIXME: checkextension in mvdsv?
     // vw_available = checkextension("ZQ_VWEP");
     vw_available = 1;
@@ -336,7 +335,6 @@ void SP_worldspawn()
         trap_precache_vwep_model ("-");			// null vwep model
     }
 	vw_enabled = vw_available && cvar("k_allow_vwep") && cvar("k_vwep");
-#endif
 
 	trap_precache_model( "progs/bolt.mdl" );	// for lightning gun
 	trap_precache_model( "progs/bolt2.mdl" );	// for lightning gun
@@ -709,10 +707,8 @@ void FirstFrame	( )
 	RegisterCvar("k_freeze");
 	RegisterCvar("k_free_mode");
 	RegisterCvar("k_allowed_free_modes");
-#ifdef VWEP_TEST
-	RegisterCvarEx("k_allow_vwep", "1");
+	RegisterCvarEx("k_allow_vwep", "0");
 	RegisterCvarEx("k_vwep", "1");
-#endif
 	RegisterCvar("allow_toggle_practice");
 	RegisterCvar("k_pow");
 	RegisterCvar("k_remove_end_hurt");

@@ -81,10 +81,8 @@ int   k_cmd_fp_disabled; // if 1 - don't use cmd floodprot
 
 // }
 
-#ifdef VWEP_TEST
 qboolean	vw_available; // vwep extension available
 qboolean	vw_enabled; // vweps enabled
-#endif
 
 float k_sv_locktime; // some time before non VIP players can't connect, spectators not affected
 

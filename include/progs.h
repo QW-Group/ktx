@@ -269,9 +269,7 @@ typedef struct gedict_s {
 
 //custom fields
 
-#ifdef VWEP_TEST
-	float   vw_index;
-#endif
+	float           vw_index;
 	float           maxspeed, gravity;
 	int             isBot;
 	float 			brokenankle; // player can't jump for a while after falling and get damaged

@@ -2522,11 +2522,7 @@ void CheckPowerups()
 		}
 		// use the eyes
 		self->s.v.frame = 0;
-#ifdef VWEP_TEST
-		vw_enabled = vw_available && cvar("k_allow_vwep") && cvar("k_vwep");
-		if ( vw_enabled )
-			self->vw_index = 0;
-#endif
+		self->vw_index = 0;
 		self->s.v.modelindex = modelindex_eyes;
 	} else
 		self->s.v.modelindex = modelindex_player;	// don't use eyes
