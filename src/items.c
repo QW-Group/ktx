@@ -1665,6 +1665,7 @@ void BackpackTouch()
 			ktpro_autotrack_on_powerup_take(other);
 
 			G_bprint( PRINT_HIGH, "%s gained bonus powers!!!\n", other->s.v.netname );
+			other->ps.i_rings++;
 		}
 
 		ent_remove( self );

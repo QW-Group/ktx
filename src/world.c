@@ -683,7 +683,7 @@ void FirstFrame	( )
 	RegisterCvar("timing_players_time");
 	RegisterCvar("timing_players_action");
 	RegisterCvar("allow_timing");
-	RegisterCvar("demo_scoreslength");
+	RegisterCvarEx("demo_scoreslength", "10");
 	RegisterCvar("k_bzk");
 	RegisterCvar("lock_practice");
 	RegisterCvar("k_autoreset");
@@ -716,9 +716,9 @@ void FirstFrame	( )
 //	RegisterCvar("k_maxrate"); -> now using sv_maxrate instead
 	RegisterCvar("k_minrate");
 	RegisterCvar("k_sready");
-	RegisterCvar("k_sspawn");
+	RegisterCvarEx("k_sspawn", "1");
 	RegisterCvarEx("k_spawn_glow", "0");
-	RegisterCvar("k_custom_spawn");
+	RegisterCvarEx("k_custom_spawn", "1");
 	RegisterCvar("k_idletime");
 	RegisterCvar("k_timetop");
 	RegisterCvar("k_dm2mod");
@@ -726,7 +726,7 @@ void FirstFrame	( )
 	RegisterCvar("demo_tmp_record");
 	RegisterCvar("demo_skip_ktffa_record");
 	RegisterCvar("k_demoname_date"); // add date to demo name, value is argument for strftime() function
-	RegisterCvar("k_count");
+	RegisterCvarEx("k_count", "10");
 	RegisterCvar("k_exclusive"); // stores whether players can join when a game is already in progress
 	RegisterCvar("k_lockmode");
 	RegisterCvar("k_short_gib");
@@ -746,9 +746,9 @@ void FirstFrame	( )
 	RegisterCvar("k_spec_info");
 	RegisterCvar("k_midair");
 	
-	RegisterCvar("k_instagib");
-	RegisterCvar("k_instagib_custom_models");
-	RegisterCvar("k_cg_kb");
+	RegisterCvarEx("k_instagib", "0");
+	RegisterCvarEx("k_instagib_custom_models", "1");
+	RegisterCvarEx("k_cg_kb", "1");
 	
 	RegisterCvar("k_rocketarena"); // rocket arena
 	RegisterCvar("k_dmgfrags");

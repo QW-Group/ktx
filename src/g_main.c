@@ -43,6 +43,7 @@ gedict_t       *self, *other;
 globalvars_t    g_globalvars;
 field_t         expfields[] = {
 	{"vw_index",    FOFS( vw_index ),    F_FLOAT},
+	{"movement",    FOFS( movement ),    F_VECTOR},
 	{"maxspeed",    FOFS( maxspeed ),    F_FLOAT},
 	{"gravity",     FOFS( gravity ),     F_FLOAT},
 	{"isBot",       FOFS( isBot ),       F_INT},

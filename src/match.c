@@ -25,6 +25,7 @@ void StartMatch ();
 void remove_specs_wizards ();
 void lastscore_add ();
 void OnePlayerMidairStats();
+void OnePlayerInstagibStats();
 void StartLogs();
 void StopLogs();
 
@@ -420,60 +421,6 @@ void OnePlayerStats(gedict_t *p, int tp)
 	if ( tp )
 		G_bprint(2,"\235\236\236\236\236\236\236\236\236\237\n" );
 
-	if ( cvar("k_instagib") ) {
-
-		G_bprint(2, "\x87 %s: %s%s \x87\n", "PLAYER", ( isghost( p ) ? "\x83" : "" ), getname(p));
-			
-			G_bprint(2, "  \220%s\221\n", "SCORES");
-			G_bprint(2, "    %s: %.1f\n", redtext("Global efficiency"), p->efficiency);
-			G_bprint(2, "    %s: %d\n", redtext("Points"), (int)p->s.v.frags);
-			//
-			G_bprint(2, "    %s: %d\n", redtext("Frags"), p->ps.i_cggibs + p->ps.i_axegibs + p->ps.i_stompgibs);
-			if (tp)
-				G_bprint(2, "    %s: %d\n", redtext("Teamkills"), (int)p->friendly);
-			G_bprint(2, "    %s: %d\n", redtext("Deaths"), p->deaths);
-			//
-			G_bprint(2, "    %s: %d\n", redtext("FragStreaks"), p->ps.spree_max);
-			G_bprint(2, "    %s: %d\n", redtext("SpawnFrags"), p->ps.spawn_frags);
-			//
-			G_bprint(2, "  \220%s\221\n", redtext("SPEED"));
-			G_bprint(2, "    %s: %.1f\n", redtext("Max"), p->ps.velocity_max);
-			G_bprint(2, "    %s: %.1f\n", redtext("Average"), 
-				p->ps.vel_frames > 0 ? p->ps.velocity_sum / p->ps.vel_frames : 0.);
-			//
-			G_bprint(2, "  \220%s\221\n", "WEAPONS");
-			if ( (cvar("k_instagib") == 1) || (cvar("k_instagib") == 3) )
-			{
-				G_bprint(2, "    %s: %s", redtext("Coilgun"), (a_sg  ? va("%.1f%%", h_sg) : ""));
-				G_bprint(2, "%s", (a_sg ? "" : "Not used"));
-			}
-			else
-			{
-				G_bprint(2, "    %s: %s", redtext("Coilgun"), (a_ssg  ? va("%.1f%%", h_ssg) : ""));
-				G_bprint(2, "%s", (a_ssg ? "" : "Not used"));
-			}	
-			G_bprint(2, "\n");
-			G_bprint(2, "    %s: %s", redtext("Axe"), (a_ax ? va("%.1f%%", h_ax) : ""));
-			G_bprint(2, "%s", (a_ax ? "" : "Not used"));
-			G_bprint(2, "\n");
-			//
-			G_bprint(2, "  \220%s\221\n", "GIBS");
-			G_bprint(2, "    %s: %d\n", redtext("Coilgun"), p->ps.i_cggibs);
-			G_bprint(2, "    %s: %d\n", redtext("Axe"), p->ps.i_axegibs);
-			G_bprint(2, "    %s: %d\n", redtext("Stomp"), p->ps.i_stompgibs);
-			//
-			G_bprint(2, "  \220%s\221\n", "MULTIGIBS");
-			G_bprint(2, "    %s: %d\n", redtext("Total"), p->ps.i_multigibs);
-			G_bprint(2, "    %s: %d\n", redtext("Max people"), p->ps.i_maxmultigibs);
-			//
-			G_bprint(2, "  \220%s\221\n", "AIRGIBS");
-			G_bprint(2, "    %s: %d\n", redtext("Total"), p->ps.i_airgibs);
-			G_bprint(2, "    %s: %d\n", redtext("Cumulated height"), p->ps.i_height);
-			G_bprint(2, "    %s: %d\n", redtext("Max height"), p->ps.i_maxheight);
-			G_bprint(2, "    %s: %.1f\n", redtext("Average height"), p->ps.i_airgibs > 0 ? p->ps.i_height / p->ps.i_airgibs : 0.);
-			//
-	} else {
-	
 	G_bprint(2, "\x87 %s%s:\n"
 		"  %d (%d) %s%.1f%%\n", ( isghost( p ) ? "\x83" : "" ), getname(p),
 		( isCTF() ? (int)(p->s.v.frags - p->ps.ctf_points) : (int)p->s.v.frags), 
@@ -553,9 +500,6 @@ void OnePlayerStats(gedict_t *p, int tp)
 			G_bprint(2, "  %s: \220%d\221\n", redtext("SpawnFrags"), p->ps.spawn_frags);
 
 //	}
-	
-	} // if not instagib
-
 	if ( !tp )
 		G_bprint(2,"\235\236\236\236\236\236\236\236\236\237\n" );
 
@@ -641,6 +585,8 @@ void PlayersStats ()
 
 						if ( cvar("k_midair") )
 							OnePlayerMidairStats(p2, tp);
+						else if ( cvar("k_instagib") )
+							OnePlayerInstagibStats(p2, tp);
 						else
 							OnePlayerStats(p2, tp);
 					}
@@ -789,6 +735,81 @@ void TopStats ( )
 	}
 
 	G_bprint(2, "žžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n");
+}
+
+
+void OnePlayerInstagibStats( gedict_t *p, int tp )
+{
+	float	dmg_g, dmg_t, dmg_team;
+	int   ring;
+	float h_ax, a_ax, h_sg, a_sg, h_ssg, a_ssg;
+
+	dmg_g = p->ps.dmg_g;
+	dmg_t = p->ps.dmg_t;
+	dmg_team = p->ps.dmg_team;
+	ring  = p->ps.i_rings;
+
+	h_sg  = p->ps.wpn[wpSG].hits;
+	a_sg  = p->ps.wpn[wpSG].attacks;
+	h_ssg = p->ps.wpn[wpSSG].hits;
+	a_ssg = p->ps.wpn[wpSSG].attacks;
+	h_ax  = p->ps.wpn[wpAXE].hits;
+	a_ax  = p->ps.wpn[wpAXE].attacks;
+
+	h_ax  = 100.0 * h_ax  / max(1, a_ax);
+	h_sg  = 100.0 * h_sg  / max(1, a_sg);
+	h_ssg = 100.0 * h_ssg / max(1, a_ssg);
+	
+	G_bprint(2, "\n\x87 %s: %s%s \x87\n", "PLAYER", ( isghost( p ) ? "\x83" : "" ), getname(p));
+
+	G_bprint(2, " \220%s\221\n", "SCORES");
+	G_bprint(2, "  %s: %.1f\n", redtext("Efficiency"), p->efficiency);
+	G_bprint(2, "  %s: %d\n", redtext("Points"), (int)p->s.v.frags);
+//	G_bprint(2, "  %s: %d\n", redtext("Frags"), p->ps.i_cggibs + p->ps.i_axegibs + p->ps.i_stompgibs);
+	if (tp)
+		G_bprint(2, "  %s: %d\n", redtext("Teamkills"), (int)p->friendly);
+	G_bprint(2, "  %s: %d\n", redtext("Deaths"), p->deaths);
+
+	G_bprint(2, "  %s: %d\n", redtext("Streaks"), p->ps.spree_max);
+	G_bprint(2, "  %s: %d\n", redtext("Spawns"), p->ps.spawn_frags);
+
+//	G_bprint(2, " \220%s\221\n", "SPEED");
+//	G_bprint(2, "  %s: %.1f\n", redtext("Maximum"), p->ps.velocity_max);
+//	G_bprint(2, "  %s: %.1f\n", redtext("Average"), 
+//		p->ps.vel_frames > 0 ? p->ps.velocity_sum / p->ps.vel_frames : 0.);
+
+
+	G_bprint(2, " \220%s\221\n", "WEAPONS");
+	if ( (cvar("k_instagib") == 1) )
+	{
+		G_bprint(2, "  %s: %s", redtext("Coilgun"), (a_sg ? va("%.1f%% (%d)", h_sg, p->ps.i_cggibs) : ""));
+		G_bprint(2, "%s", (a_sg ? "" : "n/u"));
+	}
+	else
+	{
+		G_bprint(2, "  %s: %s", redtext("Coilgun"), (a_ssg ? va("%.1f%% (%d)", h_ssg,  p->ps.i_cggibs) : ""));
+		G_bprint(2, "%s", (a_ssg ? "" : "n/u"));
+	}	
+	G_bprint(2, "\n");
+	G_bprint(2, "  %s: %s", redtext("Axe"), (a_ax ? va("%.1f%% (%d)", h_ax, p->ps.i_axegibs) : ""));
+	G_bprint(2, "%s", (a_ax ? "" : "n/u"));
+	G_bprint(2, "\n");
+
+//	G_bprint(2, " \220%s\221\n", "GIBS");
+//	G_bprint(2, "  %s: %d\n", redtext("Coilgun"), p->ps.i_cggibs);
+//	G_bprint(2, "  %s: %d\n", redtext("Axe"), p->ps.i_axegibs);
+//	G_bprint(2, "  %s: %d\n", redtext("Stomps"), p->ps.i_stompgibs);
+
+//	G_bprint(2, " \220%s\221\n", "MULTIGIBS");
+//	G_bprint(2, "  %s: %d\n", redtext("Total Multigibs"), p->ps.i_multigibs);
+//	G_bprint(2, "  %s: %d\n", redtext("Maximum Victims"), p->ps.i_maxmultigibs);
+
+	G_bprint(2, " \220%s\221\n", "AIRGIBS");
+	G_bprint(2, "  %s: %d\n", redtext("Total"), p->ps.i_airgibs);
+//	G_bprint(2, "  %s: %d\n", redtext("Total Height"), p->ps.i_height);
+	G_bprint(2, "  %s: %d\n", redtext("Maximum Height"), p->ps.i_maxheight);
+//	G_bprint(2, "  %s: %.1f\n", redtext("Average Height"), p->ps.i_airgibs ? p->ps.i_height / p->ps.i_airgibs : 0.);
+
 }
 
 void OnePlayerMidairStats( gedict_t *p, int tp )
@@ -1121,9 +1142,9 @@ void EndMatch ( float skip_log )
        	if( isTeam() || isCTF() )
 			CollectTpStats();
 
-		PlayersStats (); // all info about any player
+	PlayersStats (); // all info about any player
 	
-		if ( !cvar("k_midair") )
+	if ( !cvar("k_midair") )
 		{
         	if( isTeam() || isCTF() )
 				SummaryTPStats (); // print summary stats like armos powerups weapons etc..

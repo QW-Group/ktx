@@ -84,12 +84,18 @@ void player_run()
 	{
 		if ( self->walkframe >= 6 )
 			self->walkframe = 0;
-		self->s.v.frame = 0 + self->walkframe;
+		if ( self->movement[0] < 0 )
+			self->s.v.frame = 5 - self->walkframe;
+		else
+			self->s.v.frame = 0 + self->walkframe;
 	} else
 	{
 		if ( self->walkframe >= 6 )
 			self->walkframe = 0;
-		self->s.v.frame = 6 + self->walkframe;
+		if ( self->movement[0] < 0 )
+			self->s.v.frame = 11 - self->walkframe;
+		else
+			self->s.v.frame = 6 + self->walkframe;
 	}
 	self->walkframe = self->walkframe + 1;
 }

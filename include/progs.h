@@ -168,6 +168,7 @@ typedef struct player_stats_s {
 	int i_multigibs;
 	int i_airgibs;		// Number of airgibs
 	int i_maxmultigibs;
+	int i_rings;
 
 } player_stats_t;
 
@@ -294,6 +295,7 @@ typedef struct gedict_s {
 //
 // doors, etc
 //
+	vec3_t		movement;
 	vec3_t          dest, dest1, dest2;
 	vec3_t          pos1, pos2, oldorigin;
 	vec3_t          mangle;
