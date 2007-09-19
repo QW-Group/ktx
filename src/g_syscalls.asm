@@ -100,4 +100,5 @@ equ		strlcpy			 -86
 equ		strlcat			 -87
 equ		trap_makevectors -88
 equ		trap_nextclient  -89
+equ		trap_precache_vwep_model	-90
 
