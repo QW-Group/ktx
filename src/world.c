@@ -718,7 +718,7 @@ void FirstFrame	( )
 	RegisterCvar("k_sready");
 	RegisterCvarEx("k_sspawn", "1");
 	RegisterCvarEx("k_spawn_glow", "0");
-	RegisterCvarEx("k_custom_spawn", "1");
+	RegisterCvarEx("k_custom_spawn", "0");
 	RegisterCvar("k_idletime");
 	RegisterCvar("k_timetop");
 	RegisterCvar("k_dm2mod");
