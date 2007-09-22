@@ -1215,7 +1215,6 @@ void PutClientInServer()
 		self->s.v.weapon = W_BestWeapon();
 	W_SetCurrentAmmo();
 
-        
 	// if flag is not at base update our items so clients can display icon
 	if ( isCTF() && match_in_progress == 2 )
 	{
@@ -1246,10 +1245,12 @@ void PutClientInServer()
 	VectorCopy( spot->s.v.origin, self->s.v.origin );
 	self->s.v.origin[2] += 1;
 
-	if ( isRA() ) {
+	if ( isRA() )
+	{
 		VectorCopy( spot->mangle, self->s.v.angles );
 	}
-	else {
+	else
+	{
 		VectorCopy( spot->s.v.angles, self->s.v.angles );
 	}
 
@@ -1276,7 +1277,8 @@ void PutClientInServer()
 	play_teleport( self );
 	spawn_tdeath( self->s.v.origin, self );
 
-	if ( isRA() ) {
+	if ( isRA() )
+	{
 		ra_PutClientInServer();
 
 		// drop down to best weapon actually hold
@@ -1287,14 +1289,17 @@ void PutClientInServer()
 		return;
 	}
 
-	if( match_in_progress == 2 ) {
-		if( k_berzerk ) {
+	if( match_in_progress == 2 )
+	{
+		if( k_berzerk )
+		{
 			self->s.v.items = (int)self->s.v.items | IT_QUAD;
 			self->super_time = 1;
 			self->super_damage_finished = g_globalvars.time + 3600*10;
 		}
 
-		if( cvar( "k_666" ) ) {
+		if( cvar( "k_666" ) )
+		{
 			stuffcmd (self, "bf\n");
 			self->invincible_time = 1;
 			self->invincible_finished = g_globalvars.time + 2;
@@ -1309,49 +1314,47 @@ void PutClientInServer()
 
 		if ( cvar("k_midair") )
 		{
-			self->s.v.ammo_shells = 0;
-			self->s.v.ammo_nails = 0;
-			self->s.v.ammo_cells = 0;
+			dmm4_invinc_time       = -1; // means off
+
+			self->s.v.ammo_shells  = 0;
+			self->s.v.ammo_nails   = 0;
+			self->s.v.ammo_cells   = 0;
 			self->s.v.ammo_rockets = 255;
-			self->s.v.items = IT_AXE | IT_ROCKET_LAUNCHER | IT_ARMOR3;
-			self->s.v.currentammo = 0;
-			self->s.v.armorvalue = 200;
-			self->s.v.armortype = 0.8;
-			self->s.v.health = 250;
+
+			self->s.v.armorvalue   = 200;
+			self->s.v.armortype    = 0.8;
+			self->s.v.health       = 250;
+
+			items = IT_AXE | IT_ROCKET_LAUNCHER | IT_ARMOR3;
 		}
 		else if ( cvar("k_instagib") )
 		{
-			self->s.v.ammo_shells = 999;
-			self->s.v.ammo_nails = 0;
-			self->s.v.ammo_cells = 0;
+			dmm4_invinc_time       = 1; // means 1s
+
+			self->s.v.ammo_shells  = 999;
+			self->s.v.ammo_nails   = 0;
+			self->s.v.ammo_cells   = 0;
 			self->s.v.ammo_rockets = 0;
-			if ( cvar("k_instagib") == 1 || cvar("k_instagib") == 3 ) 
-				self->s.v.items = IT_AXE | IT_SHOTGUN;
-			else
-				self->s.v.items = IT_AXE | IT_SUPER_SHOTGUN;
-			self->s.v.currentammo = 0;
-			self->s.v.armorvalue = 0;
-			self->s.v.armortype = 0;
-			self->s.v.health = 250;
-			if( cvar( "k_666" ) ) {
-				stuffcmd (self, "bf\n");
-				self->invincible_time = 1;
-				self->invincible_finished = g_globalvars.time + 1;
-				self->k_666 = 1;
-				self->s.v.items = (int)self->s.v.items | IT_INVULNERABILITY;
-			}
+
+			self->s.v.armorvalue   = 0;
+			self->s.v.armortype    = 0;
+			self->s.v.health       = 250;
+
+			items = IT_AXE;
+			items |= ( cvar("k_instagib") == 1 || cvar("k_instagib") == 3 ) ? IT_SHOTGUN : IT_SUPER_SHOTGUN;
 		}
 		else
 		{
- 			// default is 2, negative value disable invincible
-			dmm4_invinc_time = (dmm4_invinc_time ? bound(0, dmm4_invinc_time, 30) : 2);
-
-			self->s.v.ammo_shells = 0;
-			items = self->s.v.items;
 			self->s.v.ammo_nails   = 255;
 			self->s.v.ammo_shells  = 255;
 			self->s.v.ammo_rockets = 255;
 			self->s.v.ammo_cells   = 255;
+
+			self->s.v.armorvalue   = 200;
+			self->s.v.armortype    = 0.8;
+			self->s.v.health       = 250;
+
+			items = self->s.v.items;
 			items |= IT_NAILGUN;
 			items |= IT_SUPER_NAILGUN;
 			items |= IT_SUPER_SHOTGUN;
@@ -1359,28 +1362,29 @@ void PutClientInServer()
 			items |= IT_GRENADE_LAUNCHER;
 			items |= IT_LIGHTNING;
 
-			items -= ( items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) ) - IT_ARMOR3;
-			self->s.v.armorvalue = 200;
-			self->s.v.armortype = 0.8;
-			self->s.v.health = 250;
-
-			if ( dmm4_invinc_time > 0 ) {
-
-				self->k_666 = (self->k_666 ? self->k_666 : 2); // may be already set by cvar( "k_666" ) )
-
-				items |= IT_INVULNERABILITY;
-				self->invincible_time = 1;
-				self->invincible_finished = g_globalvars.time + dmm4_invinc_time;
-			}
-			self->s.v.items = items;
+			items &= ~( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ); // remove all armors
+			items |= IT_ARMOR3; // add red armor
 		}
+
+		// 0 evalutes to 2, negative value disable invincible
+		dmm4_invinc_time = (dmm4_invinc_time ? bound(0, dmm4_invinc_time, 30) : 2);
+
+		if ( dmm4_invinc_time > 0 )
+		{
+			self->k_666 = (self->k_666 ? self->k_666 : 2); // may be already set by cvar( "k_666" ) )
+
+			items |= IT_INVULNERABILITY;
+
+			self->invincible_time = 1;
+			self->invincible_finished = g_globalvars.time + dmm4_invinc_time;
+		}
+
+		self->s.v.items = items;
+
 		// default to spawning with rl, except if instagib is on
-		if ( cvar("k_instagib") ) {
-			if ( cvar("k_instagib") == 1 )
-				self->s.v.weapon = IT_SHOTGUN;
-			else 
-				self->s.v.weapon = IT_SUPER_SHOTGUN;
-		} else
+		if ( cvar("k_instagib") )
+			self->s.v.weapon = cvar("k_instagib") == 1 ? IT_SHOTGUN : IT_SUPER_SHOTGUN;
+		else
 			self->s.v.weapon = IT_ROCKET_LAUNCHER;
 	}
 
@@ -1390,6 +1394,11 @@ void PutClientInServer()
 		self->s.v.ammo_shells  = 30;
 		self->s.v.ammo_rockets = 10;
 		self->s.v.ammo_cells   = 30;
+
+		self->s.v.armorvalue   = 200;
+		self->s.v.armortype    = 0.8;
+		self->s.v.health       = 200;
+
 		items = self->s.v.items;
 		items |= IT_NAILGUN;
 		items |= IT_SUPER_NAILGUN;
@@ -1397,14 +1406,17 @@ void PutClientInServer()
 		items |= IT_ROCKET_LAUNCHER;
 		items |= IT_GRENADE_LAUNCHER;
 		items |= IT_LIGHTNING;
-		items -= ( items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) ) - IT_ARMOR3;
-		self->s.v.armorvalue = 200;
-		self->s.v.armortype = 0.8;
-		self->s.v.health = 200;
+
+		items &= ~( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ); // remove all armors
+		items |= IT_ARMOR3; // add red armor
+
 		items |= IT_INVULNERABILITY;
+		
 		self->s.v.items = items;
+
 		self->invincible_time = 1;
 		self->invincible_finished = g_globalvars.time + 3;
+
 		// default to spawning with rl
 		self->s.v.weapon = IT_ROCKET_LAUNCHER;
 	}
