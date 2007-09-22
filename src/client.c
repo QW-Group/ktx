@@ -3261,12 +3261,15 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			}
 			else if ( dtAXE == targ->deathtype )
 			{
-				if ( !cvar("k_instagib") ) {
-					deathstring = " was ax-murdered by ";
-				} else {
+				if ( cvar("k_instagib") )
+				{
 					deathstring = " was axed to pieces by ";
 					deathstring2 = "!\n";
-				}	
+				}
+				else
+				{
+					deathstring = " was ax-murdered by ";
+				}
 			}
             else if ( dtHOOK == targ->deathtype )
 			{
@@ -3279,10 +3282,10 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 				if ( targ->s.v.health < -40 )
 				{
-					if ( !cvar("k_instagib") )
-						deathstring = " was lead poisoned by ";
-					else
+					if ( cvar("k_instagib") )
 						deathstring = " was instagibbed by ";
+					else
+						deathstring = " was lead poisoned by ";
 					deathstring2 = "\n";
 				}
 			}
