@@ -2788,8 +2788,6 @@ void PlayerPostThink()
 			// set the flag if needed
 			if ( self->s.v.waterlevel < 2 )
 			{
-				// Jawnmode: fallbunny is always enabled, but with a modification: speed is capped
-				// - Molgrum
 				if ( !get_fallbunny() )
 					self->brokenankle = 1;  // Yes we have just broken it
 			}
