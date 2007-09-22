@@ -264,6 +264,8 @@ typedef enum
 } raPlayerType_t;
 // }
 
+#define MAX_SPAWN_WEIGHTS (64)
+
 //typedef (void(*)(gedict_t *)) one_edict_func;
 typedef struct gedict_s {
 	edict_t         s;
@@ -515,8 +517,8 @@ typedef struct gedict_s {
 	char *f_checkbuf;	// for /cmd check f_xxx
 
 	// Jawnmode variables
-	vec3_t old_vel;				// store pre physicsthink velocity
-	float  spawn_weights[64];	// spawn point weights used by "fair respawns"
+	vec3_t old_vel;								// store pre physicsthink velocity
+	float  spawn_weights[MAX_SPAWN_WEIGHTS];	// spawn point weights used by "fair respawns"
 
 } gedict_t;
 

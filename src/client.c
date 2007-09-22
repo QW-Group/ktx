@@ -794,8 +794,8 @@ gedict_t *SelectSpawnPoint( char *spawnname )
 			spots = spot;
 			numspots++;
 
-			// Calculate weight sum (only goes up to 64 spots)
-			if ( totalspots <= 64 )
+			// Calculate weight sum (only goes up to MAX_SPAWN_WEIGHTS spots)
+			if ( totalspots && totalspots <= MAX_SPAWN_WEIGHTS )
 				weight_sum += self->spawn_weights[ totalspots - 1 ];
 		}
 	}
@@ -858,9 +858,9 @@ gedict_t *SelectSpawnPoint( char *spawnname )
 // Generate a random number between 0 and numspots
 
 	// Jawnmode: use new "fair spawns" model
-	// Because of array limits, fall back to old spawn model on maps with more than 64 spots
+	// Because of array limits, fall back to old spawn model on maps with more than MAX_SPAWN_WEIGHTS spots
 	// - Molgrum
-	if ( k_jawnmode && match_in_progress == 2 && totalspots <= 64 )
+	if ( k_jawnmode && match_in_progress == 2 && totalspots <= MAX_SPAWN_WEIGHTS )
 	{
 		float    f;
 		gedict_t *spawnp;
@@ -1140,19 +1140,15 @@ void ClientConnect()
 	if ( isRA() )
 		ra_in_que( self ); // put cleint in ra queue, so later we can move it to loser or winner
 
-	// Jawnmode: reset spawn weights at server join (can handle max 64 spawn points atm)
-	totalspots = 0;
-
+	// Jawnmode: reset spawn weights at server join (can handle max MAX_SPAWN_WEIGHTS spawn points atm)
 	// Just count the spots
-	for ( p = world; (p = find( p, FOFS( s.v.classname ), "info_player_deathmatch" )); totalspots++ ) {}
+	totalspots = find_cnt(FOFS( s.v.classname ), "info_player_deathmatch" );
 
-	// Don't use this spawn model for maps with more than 64 spawns (shouldn't even happen)
-	if ( totalspots <= 64 )
+	// Don't use this spawn model for maps with more than MAX_SPAWN_WEIGHTS spawns (shouldn't even happen)
+	if ( totalspots <= MAX_SPAWN_WEIGHTS )
 	{
-		i = 0;
-
 		// Set the spawn weights to number of spots
-		for ( p = world; (p = find( p, FOFS( s.v.classname ), "info_player_deathmatch" )); i++ )
+		for ( i = 0; i < totalspots; i++ )
 			self->spawn_weights[i] = totalspots;
 	}
 
