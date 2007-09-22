@@ -365,7 +365,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 	int   ra, ya, ga;
 	int   mh, d_rl, k_rl, t_rl;
 	int   quad, pent, ring;
-	float h_ax, a_ax, h_rl, a_rl, h_gl, a_gl, h_lg, a_lg, h_sg, a_sg, h_ssg, a_ssg;
+	float h_ax, a_ax, ph_rl, h_rl, a_rl, ph_gl, h_gl, a_gl, h_lg, a_lg, h_sg, a_sg, h_ssg, a_ssg;
 	int res, str, hst, rgn;
 
 	dmg_g = p->ps.dmg_g;
@@ -395,13 +395,8 @@ void OnePlayerStats(gedict_t *p, int tp)
 	h_ax  = 100.0 * h_ax  / max(1, a_ax);
 	h_sg  = 100.0 * h_sg  / max(1, a_sg);
 	h_ssg = 100.0 * h_ssg / max(1, a_ssg);
-#if 0 /* percentage */
-	h_gl  = 100.0 * h_gl  / max(1, a_gl);
-	h_rl  = 100.0 * h_rl  / max(1, a_rl);
-#else /* just count of direct hits */
-	h_gl  = h_gl;
-	h_rl  = h_rl;
-#endif
+	ph_gl  = 100.0 * h_gl  / max(1, a_gl);
+	ph_rl  = 100.0 * h_rl  / max(1, a_rl);
 	h_lg  = 100.0 * h_lg  / max(1, a_lg);
 
 	d_rl = p->ps.wpn[wpRL].drops;
@@ -433,8 +428,8 @@ void OnePlayerStats(gedict_t *p, int tp)
 		// weapons
 	G_bprint(2, "%s:%s%s%s%s%s\n", redtext("Wp"),
 		(h_lg  ? va(" %s%.1f%%", redtext("lg"),   h_lg) : ""),
-		(h_rl  ? va(" %s%.0f",   redtext("rl"),   h_rl) : ""),
-		(h_gl  ? va(" %s%.0f",   redtext("gl"),   h_gl) : ""),
+		(h_rl  ? va(" %s%.1f%% (%.0f)",   redtext("rl"),   ph_rl, h_rl) : ""),
+		(h_gl  ? va(" %s%.1f%% (%.0f)",   redtext("gl"),   ph_gl, h_gl) : ""),
 		(h_sg  ? va(" %s%.1f%%", redtext("sg"),   h_sg) : ""),
 		(h_ssg ? va(" %s%.1f%%", redtext("ssg"), h_ssg) : ""));
 

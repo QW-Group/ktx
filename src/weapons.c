@@ -832,7 +832,7 @@ void W_FireRocket()
 	newmis->voided = 0;
 
 // set newmis duration
-	newmis->s.v.nextthink = g_globalvars.time + 5;
+	newmis->s.v.nextthink = g_globalvars.time + 10;
 	newmis->s.v.think = ( func_t ) SUB_Remove;
 	newmis->s.v.classname = "rocket";
 
