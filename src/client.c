@@ -2527,8 +2527,9 @@ void CheckPowerups()
 
 		if ( self->invisible_finished < g_globalvars.time )
 		{		// just stopped
-			self->s.v.items -= IT_INVISIBILITY;
-			if ( cvar("k_instagib") ) {
+			self->s.v.items = (int)self->s.v.items & ~IT_INVISIBILITY;
+			if ( cvar("k_instagib") )
+			{
 				G_bprint( PRINT_HIGH, "%s lost his powers\n", self->s.v.netname );
 				self->s.v.health = min(200, self->s.v.health);
 			}
