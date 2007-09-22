@@ -1527,12 +1527,13 @@ void PlayerDeathThink()
 
 
 // { autospawn
-	respawn_time = cvar("k_midair") || cvar("k_instagib") ? 2 : 5;
+	respawn_time = ( cvar("k_midair") || cvar("k_instagib") ) ? 2 : 5;
 
 	if ( dtSUICIDE == self->deathtype || isRA() )
 		respawn_time = -999999; // force respawn ASAP if suicides or in RA mode
 
-	if( (g_globalvars.time - self->dead_time) > respawn_time ) {
+	if( (g_globalvars.time - self->dead_time) > respawn_time )
+	{
 		k_respawn( self );
 		return;
 	}
