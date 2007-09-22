@@ -776,7 +776,6 @@ void FirstFrame	( )
 
 // { jawnmode implementation by Molgrum
 	RegisterCvar("k_jawnmode");
-	RegisterCvar("k_fallbunny_cap");
 	RegisterCvar("k_teleport_cap");
 // }
 
