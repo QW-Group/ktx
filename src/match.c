@@ -766,9 +766,10 @@ void OnePlayerInstagibStats( gedict_t *p, int tp )
 //	G_bprint(2, "  %s: %d\n", redtext("Frags"), p->ps.i_cggibs + p->ps.i_axegibs + p->ps.i_stompgibs);
 	if (tp)
 		G_bprint(2, "  %s: %d\n", redtext("Teamkills"), (int)p->friendly);
-	G_bprint(2, "  %s: %d\n", redtext("Deaths"), p->deaths);
+	G_bprint(2, "  %s: %d\n", redtext("Deaths"), (int)p->deaths);
 
-	G_bprint(2, "  %s: %d\n", redtext("Streaks"), p->ps.spree_max);
+	if ( !isDuel() )
+		G_bprint(2, "  %s: %d\n", redtext("Streaks"), p->ps.spree_max);
 	G_bprint(2, "  %s: %d\n", redtext("Spawns"), p->ps.spawn_frags);
 
 //	G_bprint(2, " \220%s\221\n", "SPEED");
@@ -803,8 +804,8 @@ void OnePlayerInstagibStats( gedict_t *p, int tp )
 //	G_bprint(2, "  %s: %d\n", redtext("Maximum Victims"), p->ps.i_maxmultigibs);
 
 	G_bprint(2, " \220%s\221\n", "AIRGIBS");
-	G_bprint(2, "  %s: %d\n", redtext("Total"), p->ps.i_airgibs);
-//	G_bprint(2, "  %s: %d\n", redtext("Total Height"), p->ps.i_height);
+//	G_bprint(2, "  %s: %d\n", redtext("Total"), p->ps.i_airgibs);
+	G_bprint(2, "  %s: %d\n", redtext("Total Height"), p->ps.i_height);
 	G_bprint(2, "  %s: %d\n", redtext("Maximum Height"), p->ps.i_maxheight);
 //	G_bprint(2, "  %s: %.1f\n", redtext("Average Height"), p->ps.i_airgibs ? p->ps.i_height / p->ps.i_airgibs : 0.);
 

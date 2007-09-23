@@ -1605,12 +1605,12 @@ void W_Attack()
 	switch ( ( int ) self->s.v.weapon )
 	{
 	case IT_AXE:
-        if ( self->ctf_flag & CTF_RUNE_HST )
+        	if ( ( self->ctf_flag & CTF_RUNE_HST ) && ( !cvar("k_instagib")  ) )
 		{
 			self->attack_finished = g_globalvars.time + 0.3;
 			HasteSound( self );
 		}
-	    else
+	    	else
 			self->attack_finished = g_globalvars.time + 0.5;
 
 		// crt - no axe sound for spec
@@ -1631,7 +1631,7 @@ void W_Attack()
 	case IT_SHOTGUN:
 		player_shot1();
 
-		if ( self->ctf_flag & CTF_RUNE_HST )
+        	if ( ( self->ctf_flag & CTF_RUNE_HST ) && ( !cvar("k_instagib")  ) )
 		{
 			self->attack_finished = g_globalvars.time + 0.3;
 			HasteSound( self );
@@ -1645,7 +1645,7 @@ void W_Attack()
 	case IT_SUPER_SHOTGUN:
 		player_shot1();
 
-        if ( self->ctf_flag & CTF_RUNE_HST )
+        	if ( ( self->ctf_flag & CTF_RUNE_HST ) && ( !cvar("k_instagib")  ) )
 		{
 			self->attack_finished = g_globalvars.time + 0.4;
 			HasteSound( self );
@@ -1669,7 +1669,7 @@ void W_Attack()
 	case IT_GRENADE_LAUNCHER:
 		player_rocket1();
 
-		if ( self->ctf_flag & CTF_RUNE_HST )
+        	if ( ( self->ctf_flag & CTF_RUNE_HST ) && ( !cvar("k_instagib")  ) )
 		{
 			self->attack_finished = g_globalvars.time + 0.3;
 			HasteSound( self );
@@ -1683,7 +1683,7 @@ void W_Attack()
 	case IT_ROCKET_LAUNCHER:
 		player_rocket1();
 
-		if ( self->ctf_flag & CTF_RUNE_HST )
+        	if ( ( self->ctf_flag & CTF_RUNE_HST ) && ( !cvar("k_instagib")  ) )
 		{
 			self->attack_finished = g_globalvars.time + 0.4;
 			HasteSound( self );
@@ -2255,13 +2255,13 @@ void SuperDamageSound()
 		{
 			self->super_sound = g_globalvars.time + 1;
 			// Play 8x sound if quad + strength rune
-            if ( self->ctf_flag & CTF_RUNE_STR )
+        		if ( ( self->ctf_flag & CTF_RUNE_HST ) && ( !cvar("k_instagib")  ) )
 				sound( self, CHAN_AUTO, "rune/rune22.wav", 1, ATTN_NORM );
 			else
 				sound( self, CHAN_AUTO, "items/damage3.wav", 1, ATTN_NORM );
 		}
 	}
-	else if ( self->ctf_flag & CTF_RUNE_STR )
+	else if ( ( self->ctf_flag & CTF_RUNE_HST ) && ( !cvar("k_instagib")  ) )
 	{
 		if ( self->super_sound < g_globalvars.time )
 		{
