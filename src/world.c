@@ -735,8 +735,7 @@ void FirstFrame	( )
 	RegisterCvar("add_q_aerowalk");
 	RegisterCvar("k_noframechecks");
 	RegisterCvar("dmm4_invinc_time");
-// removed
-//	RegisterCvar("rj");
+
 	RegisterCvar("k_no_fps_physics");
 //{ ctf
 	RegisterCvar("k_ctf_custom_models");
@@ -1203,8 +1202,6 @@ void FixRules ( )
 
 int         timelimit, fraglimit, teamplay, deathmatch, framecount;
 
-//float		rj;
-
 extern float intermission_exittime;
 
 void CheckTiming();
@@ -1226,8 +1223,6 @@ void StartFrame( int time )
 		SecondFrame();
 		FixRules();
 	}
-
-//	rj = max( 0, cvar( "rj" ) ); 	// Set Rocket Jump Modifiers
 
 	FixCTFItems(); // if modes have changed we may need to add/remove flags etc
 

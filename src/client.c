@@ -3013,6 +3013,100 @@ void StatsHandler(gedict_t *targ, gedict_t *attacker)
 	}
 }
 
+static int	i_agmr_height = 0; // used for instagib, reset to 0 on each map reload...
+
+float Instagib_Obituary( gedict_t *targ, gedict_t *attacker )
+{
+	float playerheight = 0;
+
+	if ( !cvar("k_instagib") || attacker->ct != ctPlayer )
+		return playerheight;
+
+	traceline( PASSVEC3(targ->s.v.origin),
+			targ->s.v.origin[0], 
+			targ->s.v.origin[1], 
+			targ->s.v.origin[2] - 2048,
+			true, targ );
+
+	playerheight = targ->s.v.absmin[2] - g_globalvars.trace_endpos[2] + 1;
+
+	if ( ( int ) attacker->s.v.flags & FL_ONGROUND )
+	{
+		if ( playerheight >= 250 && playerheight < 400 )
+		{
+ 			G_bprint( 2, "%s from %s: height %d\n", redtext("AirGib"), attacker->s.v.netname, (int)playerheight );
+		}
+		else if ( playerheight >= 400 && playerheight < 1000 )
+		{
+ 			G_bprint( 2, "%s from %s: height %d\n", redtext("Great AirGib"), attacker->s.v.netname,	(int)playerheight );
+		}
+		else if ( playerheight >= 1000 )
+		{
+ 			G_bprint( 2, "%s from %s: height %d\n", redtext("Amazing AirGib"), attacker->s.v.netname, (int)playerheight );
+		}
+				
+		if ( playerheight > 45 )
+		{
+			attacker->ps.i_height += playerheight;
+			attacker->ps.i_maxheight = max(attacker->ps.i_maxheight, playerheight);
+			attacker->ps.i_airgibs++;
+		}
+	}
+
+	if ( targ != attacker )
+	{
+		if ( targ->deathtype == dtAXE )
+		{
+			attacker->ps.i_axegibs++;
+			attacker->s.v.frags += 1;
+		}
+		else if ( targ->deathtype == dtSTOMP )
+		{
+			attacker->ps.i_stompgibs++;
+			attacker->s.v.frags += 3;
+		}
+		else if ( ( targ->deathtype == dtSG) || ( targ->deathtype == dtSSG ) )
+		{
+			attacker->ps.i_cggibs++;
+		}
+	}
+
+	if ( attacker->ps.i_height > 2000 )
+	{
+		if ( !i_agmr_height )
+		{
+			if ( !attacker->i_agmr )
+			{
+				i_agmr_height = attacker->ps.i_height;
+
+				attacker->i_agmr = 1;
+				attacker->s.v.frags += 5;
+				G_bprint( 2, "%s acquired the %s rune!\n", attacker->s.v.netname, redtext("AirGib Master"));
+			}
+		}
+		else if ( attacker->ps.i_height > i_agmr_height )
+		{
+			gedict_t	*p;
+
+			for( p = world; (p = find_client( p )); )
+			{
+				if ( p->ct != ctPlayer || p == attacker || !p->i_agmr )
+					continue;
+
+				i_agmr_height = attacker->ps.i_height;
+				    
+				p->i_agmr = 0;
+				p->s.v.frags -= 5;
+				attacker->i_agmr = 1;
+				attacker->s.v.frags += 5;
+				G_bprint( 2, "%s took the %s rune from %s!\n", attacker->s.v.netname, 
+												redtext("AirGib Master"), p->s.v.netname);
+			}				
+		}
+	}
+
+	return playerheight;
+}
 
 /*
 ===========
@@ -3022,9 +3116,13 @@ called when a player dies
 ============
 */
 extern void ktpro_autotrack_on_death (gedict_t *dude);
+extern char	*dmg_type[];
+extern int	dmg_type_cnt;
 
 void ClientObituary (gedict_t *targ, gedict_t *attacker)
 {
+	float playerheight;
+
 	char *deathstring,  *deathstring2;
 	char *attackerteam, *targteam;
 
@@ -3046,6 +3144,19 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	StatsHandler(targ, attacker);
 
 	ktpro_autotrack_on_death(targ);
+
+	playerheight = Instagib_Obituary( targ, attacker );
+
+	log_printf( "\t\t\t<event time=\"%f\" tag=\"dth\" at=\"%s\" tg=\"%s\" ty=\"%s\" "
+				"q=\"%d\" al=\"%d\" kh=\"%d\" lt=\"%f\" />\n",
+				g_globalvars.time - match_start_time,
+				attacker->s.v.netname,
+				targ->s.v.netname,
+				dmg_type[ (int)bound(0, targ->deathtype, dmg_type_cnt-1) ],
+				(int)(attacker->super_damage_finished > g_globalvars.time ? 1 : 0 ),
+				(int)targ->s.v.armorvalue,
+				(int)playerheight,
+				g_globalvars.time - targ->spawn_time );
 
 	if ( isRA() ) {
 		ra_ClientObituary (targ, attacker);

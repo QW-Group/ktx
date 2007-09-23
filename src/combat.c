@@ -24,17 +24,17 @@
  */
 
 #include "g_local.h"
-void            T_MissileTouch( gedict_t * e1, gedict_t * e2 );
-void            ClientObituary( gedict_t * e1, gedict_t * e2 );
+void	T_MissileTouch( gedict_t * e1, gedict_t * e2 );
+void	ClientObituary( gedict_t * e1, gedict_t * e2 );
 
-char            * dmg_type[] = { "none", "axe", "sg", "ssg", "ng", "sng", "gl", "rl", "lg_beam", "lg_dis", "lg_dis_self", "hook",
-                 "changelevel", "lava", "slime", "water", "fall", "stomp", "tele1", "tele2", "tele3", "explo_box", "laser", "fireball",
-                 "squish", "trigger", "suicide", "unknown" };
-int             dmg_is_quaded;
-int             dmg_is_splash = 0;
-float		frag_time = 0;
-int		insta_multikill = 0;
-int		i_agmr_height = 0;
+char	*dmg_type[] = { "none", "axe", "sg", "ssg", "ng", "sng", "gl", "rl", 
+						"lg_beam", "lg_dis", "lg_dis_self", "hook",
+						"changelevel", "lava", "slime", "water", "fall", "stomp",
+						"tele1", "tele2", "tele3", "explo_box", "laser", "fireball",
+						"squish", "trigger", "suicide", "unknown" };
+
+int	dmg_type_cnt = sizeof(dmg_type) / sizeof(dmg_type[0]);
+
 
 //============================================================================
 
@@ -53,7 +53,6 @@ qboolean CanDamage( gedict_t * targ, gedict_t * inflictor )
 // bmodels need special checking because their origin is 0,0,0
 	if ( targ->s.v.movetype == MOVETYPE_PUSH )
 	{
-
 		traceline( PASSVEC3( inflictor->s.v.origin ),
 				0.5 * ( targ->s.v.absmin[0] + targ->s.v.absmax[0] ),
 				0.5 * ( targ->s.v.absmin[1] + targ->s.v.absmax[1] ),
@@ -72,32 +71,6 @@ qboolean CanDamage( gedict_t * targ, gedict_t * inflictor )
 	traceline( PASSVEC3( inflictor->s.v.origin ), PASSVEC3( targ->s.v.origin ),	true, self );
 	if ( g_globalvars.trace_fraction == 1 )
 		return true;
-
-/*
-	traceline( PASSVEC3( inflictor->s.v.origin ),
-			targ->s.v.origin[0] + 15, targ->s.v.origin[1] + 15,
-			targ->s.v.origin[2] + 0, true, self );
-	if ( g_globalvars.trace_fraction == 1 )
-		return true;
-
-	traceline( PASSVEC3( inflictor->s.v.origin ),
-			targ->s.v.origin[0] - 15, targ->s.v.origin[1] - 15,
-			targ->s.v.origin[2] + 0, true, self );
-	if ( g_globalvars.trace_fraction == 1 )
-		return true;
-
-	traceline( PASSVEC3( inflictor->s.v.origin ),
-			targ->s.v.origin[0] - 15, targ->s.v.origin[1] + 15,
-			targ->s.v.origin[2] + 0, true, self );
-	if ( g_globalvars.trace_fraction == 1 )
-		return true;
-
-	traceline( PASSVEC3( inflictor->s.v.origin ),
-			targ->s.v.origin[0] + 15, targ->s.v.origin[1] - 15,
-			targ->s.v.origin[2] + 0, true, self );
-	if ( g_globalvars.trace_fraction == 1 )
-		return true;
-*/
 
 // 1998-09-16 CanDamage fix by Maddes/Kryten start
 
@@ -210,8 +183,7 @@ Killed
 */
 void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 {
-	gedict_t       *oself, *head;
-	float playerheight = 0;
+	gedict_t       *oself;
 
 	oself = self;
 	self = targ;
@@ -219,81 +191,9 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 	if ( self->s.v.health < -99 )
 		self->s.v.health = -99;	// don't let sbar look bad if a player
 
-	if ( cvar("k_instagib") )
+	if ( self->ct == ctPlayer )
 	{
-		traceline( PASSVEC3(self->s.v.origin),
-				self->s.v.origin[0], 
-				self->s.v.origin[1], 
-				self->s.v.origin[2] - 2048,
-				true, attacker );
-
-		playerheight = self->s.v.absmin[2] - g_globalvars.trace_endpos[2] + 1;
-
-		if ( ( int ) attacker->s.v.flags & FL_ONGROUND )
-		{
-			if ( playerheight >= 250 && playerheight < 400 ) {
-	 			G_bprint( 2, "%s from %s: height %d\n", redtext("AirGib"), attacker->s.v.netname,
-					(int)playerheight );
-			} else if ( playerheight >= 400 && playerheight < 1000 ) {
-	 			G_bprint( 2, "%s from %s: height %d\n", redtext("Great AirGib"), attacker->s.v.netname,
-					(int)playerheight );
-			} else if ( playerheight >= 1000 ) {
-	 			G_bprint( 2, "%s from %s: height %d\n", redtext("Amazing AirGib"), attacker->s.v.netname,
-					(int)playerheight );
-			}
-					
-			if ( playerheight > 45 ) {
-				attacker->ps.i_height += playerheight;
-				if ( playerheight > attacker->ps.i_maxheight )
-					attacker->ps.i_maxheight = playerheight;
-				attacker->ps.i_airgibs++;
-			}
-		}
-
-		if ( targ != attacker )
-		{
-			if ( targ->deathtype == dtAXE )
-			{
-				attacker->ps.i_axegibs++;
-				attacker->s.v.frags += 1;
-			}
-			else if ( targ->deathtype == dtSTOMP )
-			{
-				attacker->ps.i_stompgibs++;
-				attacker->s.v.frags += 3;
-			}
-			else if ( ( targ->deathtype == dtSG) || ( targ->deathtype == dtSSG ) )
-			{
-				attacker->ps.i_cggibs++;
-			}
-		}
-
-		if ( attacker->ps.i_height > 2000 ) {
-			if ( !i_agmr_height ) {
-				i_agmr_height = attacker->ps.i_height;
-				if ( !(int)attacker->i_agmr ) {
-					attacker->i_agmr = 1;
-					attacker->s.v.frags += 5;
-					G_bprint( 2, "%s acquired the %s rune!\n", attacker->s.v.netname, redtext("AirGib Master"));
-				}
-			} else if ( attacker->ps.i_height > i_agmr_height ) {
-				for( head = world; (head = find_client( head )); ) {
-					if ( ( head->ps.i_height == i_agmr_height ) && ( head != attacker ) && ( head->ct == ctPlayer ) ) {
-						head->i_agmr = 0;
-						head->s.v.frags -= 5;
-						attacker->i_agmr = 1;
-						attacker->s.v.frags += 5;
-						G_bprint( 2, "%s took the %s rune from %s!\n", attacker->s.v.netname, 
-							redtext("AirGib Master"), head->s.v.netname);
-					}
-				}				
-				i_agmr_height = attacker->ps.i_height;
-			}
-		}
-	}
-
-	if ( self->ct == ctPlayer ) {
-	        self->dead_time = g_globalvars.time;
+        self->dead_time = g_globalvars.time;
 	}
 	else if ( self->s.v.movetype == MOVETYPE_PUSH || self->s.v.movetype == MOVETYPE_NONE )
 	{			// doors, triggers, etc
@@ -313,32 +213,6 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 	}
 
 	ClientObituary( self, attacker );
-
-        if ( attacker->super_damage_finished > g_globalvars.time )
-                dmg_is_quaded = 1;
-        else
-                dmg_is_quaded = 0;
-
-	if ( cvar("k_instagib") ) {
-		if ( frag_time < ( g_globalvars.time - match_start_time ) ) {
-			frag_time = g_globalvars.time - match_start_time;
-			insta_multikill = 0;
-		} else {
-			insta_multikill++;
-		}
-	}
-
-        log_printf(
-                "\t\t\t<event time=\"%f\" tag=\"dth\" at=\"%s\" tg=\"%s\" ty=\"%s\" "
-                "q=\"%d\" al=\"%d\" kh=\"%d\" lt=\"%f\" />\n",
-                g_globalvars.time - match_start_time,
-                attacker->s.v.netname,
-                targ->s.v.netname,
-                dmg_type[targ->deathtype],
-                dmg_is_quaded,
-                (int)targ->s.v.armorvalue,
-                (int)playerheight,
-                g_globalvars.time - targ->spawn_time );
 
 	self->s.v.takedamage = DAMAGE_NO;
 	self->s.v.touch = ( func_t ) SUB_Null;
@@ -362,11 +236,55 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 }
 
 #ifndef Q3_VM
+
+// qvm have some bugs/round problem as i get from SD-Angel, so this trick
+
 float newceil( float f )
 {
 	return ceil(((int)(f*1000.0))/1000.0);
 }
+
+#else
+
+// native use lib ceil function
+
+#define newceil ceil
+
 #endif
+
+// this was part of T_Damage(), but I split it, so less mess
+void MidairDamageBonus(gedict_t *attacker, float midheight)
+{
+	attacker->ps.midairs++;
+	G_bprint( 2, "%s got ", attacker->s.v.netname );
+
+	if ( midheight > 900 )
+	{
+		attacker->ps.midairs_d++;
+		attacker->s.v.frags += 8;
+		G_bprint( 2, "%s\n", redtext("diam0nd midair") );
+	}
+	else if ( midheight > 500 )
+	{
+		G_bprint( 2, "%s\n", redtext("g0ld midair") );
+		attacker->s.v.frags += 4;
+		attacker->ps.midairs_g++;
+	}
+	else if ( midheight > 380 )
+	{
+		G_bprint( 2, "%s\n", redtext("silver midair") );
+		attacker->s.v.frags += 2;
+		attacker->ps.midairs_s++;
+	}
+	else
+	{
+		G_bprint( 2, "%s\n", redtext("midair") );
+		attacker->s.v.frags++;
+	}
+
+	G_bprint(2, "%.1f (midheight)\n", midheight);
+}
+
 
 /*
 ============
@@ -376,14 +294,17 @@ The damage is coming from inflictor, but get mad at attacker
 This should be the only function that ever reduces health.
 ============
 */
+
 gedict_t       *damage_attacker, *damage_inflictor;
+
+static int	dmg_is_splash = 0;
+
 void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float damage )
 {
 	vec3_t          dir;
 	gedict_t       *oldself;
 	float           save;
 	float           take;
-//	int				wp_num;
 	int				i, c1 = 8, c2 = 4, hdp;
 	float			dmg_dealt = 0, non_hdp_damage;
 	char            *attackerteam, *targteam, *attackername;
@@ -392,61 +313,54 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	float playerheight = 0, midheight = 0;
 	qboolean lowheight = false, midair = false, inwater = false, do_dmg = false, rl_dmg = false;
 
+	// can't apply damage to dead
 	if ( !targ->s.v.takedamage || ISDEAD( targ ) )
 		return;
 
-// used by buttons and triggers to set activator for target firing
+	// used by buttons and triggers to set activator for target firing
 	damage_attacker = attacker;
 	damage_inflictor = inflictor;
 
 	if ( (int)cvar("k_midair") )
 		midair = true;
 
-//	wp_num = attacker->s.v.weapon;
-
-// check for quad damage powerup on the attacker
-// midair quad makes rockets fast, but no change to damage
-	if ( ( attacker->super_damage_finished > g_globalvars.time )
+	// check for quad damage powerup on the attacker
+	// midair quad makes rockets fast, but no change to damage
+	if ( attacker->super_damage_finished > g_globalvars.time
 	     && strneq( inflictor->s.v.classname, "door" ) && dtSTOMP != targ->deathtype
-		 && !midair )
-	{
-		dmg_is_quaded = 1;
-		if ( deathmatch == 4 )
-			damage = damage * 8;
-		else
-			damage = damage * 4;
-	} else {
-		dmg_is_quaded = 0;
-	}
+		 && !midair 
+	   )
+		damage *= ( deathmatch == 4 ? 8 : 4 ); // in dmm4 quad is octa actually
 
-// ctf strength rune
+	// ctf strength rune
 	if ( attacker->ctf_flag & CTF_RUNE_STR )
 		damage *= 2;
           
-// ctf resistance rune
+	// ctf resistance rune
 	if ( targ->ctf_flag & CTF_RUNE_RES )
 	{
 		damage /= 2;
 		ResistanceSound( targ );
 	}
 
-// did we hurt enemy flag carrier?
+	// did we hurt enemy flag carrier?
 	if ( (targ->ctf_flag & CTF_FLAG) && (!streq(getteam(targ), getteam(attacker))) )
 	{
 		attacker->carrier_hurt_time = g_globalvars.time;
 	}
 
-	if ( cvar("k_instagib"))
+	if ( midair || cvar("k_instagib") )
 	{
 		traceline( PASSVEC3(targ->s.v.origin),
 				targ->s.v.origin[0], 
 				targ->s.v.origin[1], 
 				targ->s.v.origin[2] - 2048,
-				true, self );
+				true, targ );
 
-		playerheight = targ->s.v.absmin[2] - g_globalvars.trace_endpos[2] + 1;
+		playerheight = targ->s.v.absmin[2] - g_globalvars.trace_endpos[2] + ( cvar("k_instagib") ? 1 : 0 );
 	}
 
+	// get some data before apply damage in mid air mode
 	if ( midair )
 	{
 		inwater = ( ((int)targ->s.v.flags & FL_INWATER) && targ->s.v.waterlevel > 1 );
@@ -457,16 +371,11 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			if ( midheight <= 190 )
 				midheight = 0;
 		}
-		traceline( PASSVEC3(targ->s.v.origin),
-				targ->s.v.origin[0], 
-				targ->s.v.origin[1], 
-				targ->s.v.origin[2] - 2048,
-				true, targ );
-
-		playerheight = targ->s.v.absmin[2] - g_globalvars.trace_endpos[2];
 
 		if ( playerheight < 45 )
+		{
 			lowheight = true;
+		}
 		else
 		{
 			damage *= ( 1 + ( playerheight - 45 ) / 64 );
@@ -509,13 +418,9 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		damage *= 0.01f * hdp;
 	}
 
-// save damage based on the target's armor level
+	// save damage based on the target's armor level
 
-#ifndef Q3_VM
 	save = newceil( targ->s.v.armortype * damage );
-#else
-	save = ceil( targ->s.v.armortype * damage );
-#endif
 
 	if ( midair && lowheight && !inwater && rl_dmg )
 		save *= 0.5; // take half of armor in such case
@@ -531,13 +436,11 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	if ( match_in_progress == 2 )
 		targ->s.v.armorvalue = targ->s.v.armorvalue - save;
 
-#ifndef Q3_VM
 	take = newceil( damage - save );
-#else
-	take = ceil( damage - save );
-#endif
 
-	if ( midair ) {
+	// mid air damage modificators
+	if ( midair )
+	{
 		if ( lowheight && !inwater && rl_dmg )
 			take = 0; // no rl dmg in such case
 
@@ -548,13 +451,23 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			take = 0; // no self rl damage
 	}
 
+	// instagib damage modificators
+	if ( cvar("k_instagib") )
+	{
+		if ( inflictor->ct == ctPlayer )
+			take = 5000;
+
+		if ( attacker == targ )
+			take = 0;
+	}
+
 	take = max(0, take); // avoid negative take, if any
 
 	dmg_dealt += targ->s.v.health > take ? take : targ->s.v.health;
 
-// add to the damage total for clients, which will be sent as a single
-// message at the end of the frame
-// FIXME: remove after combining shotgun blasts?
+	// add to the damage total for clients, which will be sent as a single
+	// message at the end of the frame
+	// FIXME: remove after combining shotgun blasts?
 	if ( ( int ) targ->s.v.flags & FL_CLIENT )
 	{
 		targ->s.v.dmg_take += take;
@@ -562,25 +475,25 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		targ->s.v.dmg_inflictor = EDICT_TO_PROG( inflictor );
 	}
 
-        if ( save ) {
-                if ( streq( inflictor->s.v.classname, "worldspawn" ) || strnull( attacker->s.v.classname ) )
-                        attackername = "world";
+	if ( save )
+	{
+		if ( streq( inflictor->s.v.classname, "worldspawn" ) || strnull( attacker->s.v.classname ) )
+			attackername = "world";
 		else
-                        attackername = attacker->s.v.classname;
+			attackername = attacker->s.v.classname;
 
-                log_printf(
-                        "\t\t\t<event time=\"%f\" tag=\"dmg\" at=\"%s\" "
-                        "tg=\"%s\" ty=\"%s\" q=\"%d\" s=\"%d\" val=\"%d\" ab=\"1\"/>\n",
-                        g_globalvars.time - match_start_time,
-                        attackername,
-                        targ->s.v.netname,
-                        dmg_type[targ->deathtype],
-                        dmg_is_quaded,
-                        dmg_is_splash,
-                        (int)save );
-        }
+		log_printf( "\t\t\t<event time=\"%f\" tag=\"dmg\" at=\"%s\" "
+					"tg=\"%s\" ty=\"%s\" q=\"%d\" s=\"%d\" val=\"%d\" ab=\"1\"/>\n",
+					g_globalvars.time - match_start_time,
+					attackername,
+					targ->s.v.netname,
+					dmg_type[ (int)bound(0, targ->deathtype, dmg_type_cnt-1) ],
+					(int)(attacker->super_damage_finished > g_globalvars.time ? 1 : 0 ),
+					dmg_is_splash,
+					(int)save );
+	}
 
-// figure momentum add
+	// figure momentum add
 	if ( inflictor != world && targ->s.v.movetype == MOVETYPE_WALK )
 	{
 		float nailkick;
@@ -609,19 +522,10 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 		if ( midair && lowheight )
 			targ->s.v.velocity[2] += dir[2] * non_hdp_damage * c2 * nailkick; // only for z component
-
-		// Rocket Jump modifiers
-/*
-		if ( rj > 1 && attacker->ct == ctPlayer && targ->ct == ctPlayer && streq( attacker->s.v.netname, targ->s.v.netname ) )
-		{
-			VectorAdd( targ->s.v.velocity, dir, targ->s.v.velocity );
-			VectorScale( targ->s.v.velocity, non_hdp_damage * 8 * rj, targ->s.v.velocity );
-		}
-*/
 	}
 
-// team play damage avoidance
-//ZOID 12-13-96: self.team doesn't work in QW.  Use keys
+	// team play damage avoidance
+	//ZOID 12-13-96: self.team doesn't work in QW.  Use keys
    	attackerteam = getteam( attacker );
 	targteam = getteam( targ );
 
@@ -639,11 +543,10 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		}
 	}
 
-// do suicide damage anyway
+	// ignore this check for suicide damage
 	if ( dtSUICIDE != targ->deathtype )
 	{
-
-// check for godmode or invincibility
+		// check for godmode or invincibility
 		if ( ( int ) targ->s.v.flags & FL_GODMODE )
 			return;
 
@@ -679,62 +582,58 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			return;
 	}
 
-// do the damage
+	// do the damage
 
 	if (    match_in_progress == 2
 		 || dtSUICIDE == targ->deathtype // do suicide damage anyway
 		 || streq( inflictor->s.v.classname, "teledeath" ) 
 		 || ( k_practice && targ->ct != ctPlayer ) // #practice mode#
-	   ) {
-
-		if ( cvar("k_instagib") ) {
-			if ( inflictor->ct == ctPlayer )
-				take = 5000;
-
-			if ( attacker == targ )
-				take = 0;
-		}
-
-		dmg_dealt += targ->s.v.health > take ? take : targ->s.v.health;
+	   ) 
+	{
 		targ->s.v.health -= take;
 
-                if ( take ) {
-                        if ( streq( inflictor->s.v.classname, "worldspawn" ) || strnull( attacker->s.v.classname ) )
+		if ( take )
+		{
+			if ( streq( inflictor->s.v.classname, "worldspawn" ) || strnull( attacker->s.v.classname ) )
 				attackername = "world";
 			else
 				attackername = attacker->s.v.netname;
 
-                        log_printf(
-                                "\t\t\t<event time=\"%f\" tag=\"dmg\" at=\"%s\" tg=\"%s\" ty=\"%s\" "
-                                "q=\"%d\" s=\"%d\" val=\"%d\" ab=\"0\"/>\n",
-                                g_globalvars.time - match_start_time,
-                                attackername,
-                                targ->s.v.netname,
-                                dmg_type[targ->deathtype],
-                                dmg_is_quaded,
-                                dmg_is_splash,
-                                (int)take );
-                }
-                dmg_is_splash = 0;
+			log_printf( "\t\t\t<event time=\"%f\" tag=\"dmg\" at=\"%s\" tg=\"%s\" ty=\"%s\" "
+						"q=\"%d\" s=\"%d\" val=\"%d\" ab=\"0\"/>\n",
+						g_globalvars.time - match_start_time,
+						attackername,
+						targ->s.v.netname,
+						dmg_type[ (int)bound(0, targ->deathtype, dmg_type_cnt-1) ],
+						(int)(attacker->super_damage_finished > g_globalvars.time ? 1 : 0 ),
+						dmg_is_splash,
+						(int)take );
+		}
 
 		if ( !targ->s.v.health || dtSUICIDE == targ->deathtype )
 			targ->s.v.health = -1; // qqshka, no zero health, heh, imo less bugs after this
 	}
 
-	if (match_in_progress != 2) {
-		if ( !midair || ( (int)targ->s.v.flags & FL_ONGROUND ) ) {
+	// show damage in sbar
+	if (match_in_progress != 2)
+	{
+		if ( !midair || ( (int)targ->s.v.flags & FL_ONGROUND ) )
+		{
 			targ->s.v.currentammo = 1000 + Q_rint(damage);
 			if (attacker != targ)
 				attacker->s.v.health = 1000 + Q_rint(damage);
 		}
 	}
 
+	// update damage stats like: give/taked/team damage
 	if ( attacker->ct == ctPlayer && targ->ct == ctPlayer )
 	{
 		if ( attacker != targ )
 		{
 			if ( streq(attackerteam, targteam) && !isDuel() && !isFFA() )
+			{
 				attacker->ps.dmg_team += dmg_dealt;
+			}
 			else 
 			{
 				attacker->ps.dmg_g += dmg_dealt;
@@ -743,43 +642,18 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		}
 	}
 
+	// mid air bonuses
 	if ( midair && match_in_progress == 2 && midheight > 190 && attacker != targ )
- 	{
- 		attacker->ps.midairs++;
- 		G_bprint( 2, "%s got ", attacker->s.v.netname );
+		MidairDamageBonus(attacker, midheight);
 
-		if ( midheight > 900 )
- 		{
- 			attacker->ps.midairs_d++;
- 			attacker->s.v.frags += 8;
- 			G_bprint( 2, "%s\n", redtext("diam0nd midair") );
- 		}
- 		else if ( midheight > 500 )
- 		{
- 			G_bprint( 2, "%s\n", redtext("g0ld midair") );
- 			attacker->s.v.frags += 4;
- 			attacker->ps.midairs_g++;
- 		}
- 		else if ( midheight > 380 )
- 		{
- 			G_bprint( 2, "%s\n", redtext("silver midair") );
- 			attacker->s.v.frags += 2;
- 			attacker->ps.midairs_s++;
- 		}
- 		else
- 		{
- 			G_bprint( 2, "%s\n", redtext("midair") );
- 			attacker->s.v.frags++;
- 		}
- 		G_bprint(2, "%.1f (midheight)\n", midheight);
- 	}
-
+ 	// if targed killed, do appropriate action and return
 	if ( ISDEAD( targ ) )
 	{
 		Killed( targ, attacker, inflictor );
 		return;
 	}
-// react to the damage
+
+	// react to the damage - call pain function
 	oldself = self;
 	self = targ;
 
@@ -806,11 +680,6 @@ void T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage, ge
 
 	while ( head )
 	{
-		//bprint (PRINT_HIGH, "%s", head->s.v.classname );
-		//bprint (PRINT_HIGH, " | ");
-		//bprint (PRINT_HIGH, "%s", head.netname);
-		//bprint (PRINT_HIGH, "\n");
-
 		if ( head != ignore )
 		{
 			if ( head->s.v.takedamage )
@@ -836,11 +705,20 @@ void T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage, ge
 					if ( CanDamage( head, inflictor ) )
 					{
 						head->deathtype = dtype;
-						dmg_is_splash = 1;
-						if ( !cvar("k_instagib") ) 
+
+						dmg_is_splash = 1; // mark damage as splash
+
+						if ( cvar("k_instagib") ) // in instagib splash applied to inflictor only, for coil jump
+						{
+							if ( head == attacker )
+								T_Damage( head, inflictor, attacker, points );
+						}
+						else
+						{
 							T_Damage( head, inflictor, attacker, points );
-						else if ( head == attacker ) 
-							T_Damage( head, inflictor, attacker, points );
+						}
+
+						dmg_is_splash = 0; // unmark splash
 					}
 				}
 			}
