@@ -446,7 +446,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 			redtext("ga"), ga, redtext("ya"), ya, redtext("ra"), ra, redtext("mh"), mh);
 
 		// powerups
-		if ( ( isTeam() || isCTF() ) )
+		if ( isTeam() || isCTF() )
 			G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("Powerups"),
 				redtext("Q"), quad, redtext("P"), pent, redtext("R"), ring);
 
@@ -487,8 +487,11 @@ void OnePlayerStats(gedict_t *p, int tp)
 					G_bprint(2, "\220A:0\221\n");
 			}
 		}
-		G_bprint(2, "%s: %s:%d %s:%d\n", redtext(" Streaks"),
-			redtext("Frags"), p->ps.spree_max, redtext("QuadRun"), p->ps.spree_max_q);
+		else
+		{
+			G_bprint(2, "%s: %s:%d %s:%d\n", redtext(" Streaks"),
+				redtext("Frags"), p->ps.spree_max, redtext("QuadRun"), p->ps.spree_max_q);
+		}
 
 		// spawnfrags
 		if ( !isCTF() )

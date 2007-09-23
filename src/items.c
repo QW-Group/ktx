@@ -64,12 +64,12 @@ void DropPowerup( float timeleft, int powerup )
 	else
 		G_Error("DropPowerup");
 
-        log_printf(
-                "\t\t\t<event time=\"%f\" act=\"d\" it=\"%s\" pl=\"%s\" val=\"%f\" />\n",
-                g_globalvars.time - match_start_time,
-                self->s.v.classname,
-                swp->s.v.netname,
-                timeleft );
+	log_printf( "\t\t\t<event time=\"%f\" act=\"d\" it=\"%s\" pl=\"%s\" val=\"%f\" />\n",
+				g_globalvars.time - match_start_time,
+				self->s.v.classname,
+				swp->s.v.netname,
+				timeleft );
+
 	G_bprint( PRINT_HIGH, "%s lost a %s with %.0f seconds remaining\n",
 					  	  swp->s.v.netname, self->s.v.netname, timeleft );
 
@@ -158,7 +158,7 @@ HEALTH BOX
 //
 float T_Heal( gedict_t * e, float healamount, float ignore )
 {
-        float real_healamount;
+	float real_healamount;
 
 	if ( ISDEAD( e ) )
 		return 0;
@@ -166,26 +166,27 @@ float T_Heal( gedict_t * e, float healamount, float ignore )
 	if ( ( !ignore ) && ( e->s.v.health >= other->s.v.max_health ) )
 		return 0;
 
+	real_healamount = e->s.v.health; // save health
+
 	healamount = ceil( healamount );
 
 	e->s.v.health = e->s.v.health + healamount;
 	if ( ( !ignore ) && ( e->s.v.health >= other->s.v.max_health ) )
-        {
-                real_healamount = other->s.v.max_health - (e->s.v.health - healamount);
+	{
 		e->s.v.health = other->s.v.max_health;
-        } else {
-                real_healamount = healamount;
-        }
-
-        log_printf(
-                "\t\t\t<event time=\"%f\" act=\"p\" it=\"health_%d\" pl=\"%s\" val=\"%d\"/>\n",
-                g_globalvars.time - match_start_time,
-                (int)healamount,
-                e->s.v.netname,
-                (int)real_healamount );
+	}
 
 	if ( e->s.v.health > 250 )
 		e->s.v.health = 250;
+
+	real_healamount = e->s.v.health - real_healamount; // so heal amount is current - old health
+
+	log_printf( "\t\t\t<event time=\"%f\" act=\"p\" it=\"health_%d\" pl=\"%s\" val=\"%d\"/>\n",
+				g_globalvars.time - match_start_time,
+				(int)healamount,
+				e->s.v.netname,
+				(int)real_healamount );
+
 	return 1;
 }
 
@@ -337,7 +338,7 @@ ARMOR
 void armor_touch()
 {
 	float           type = 0, value = 0;
-        float           real_value = 0;
+	float           real_value = 0;
 	int             bit = 0;
 	int				*armor = NULL;
 
@@ -386,10 +387,10 @@ void armor_touch()
 	if ( armor )
 		(*armor)++;
 
+	real_value = other->s.v.armorvalue;
+
 	other->s.v.armortype = type;
-        real_value = other->s.v.armorvalue;
 	other->s.v.armorvalue = value;
-        real_value = value - real_value;
 	other->s.v.items +=
 		-( ( int ) other->s.v.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) ) + bit;
 
@@ -399,12 +400,13 @@ void armor_touch()
 		self->s.v.nextthink = g_globalvars.time + 20;
 	self->s.v.think = ( func_t ) SUB_regen;
 
-        log_printf(
-                "\t\t\t<event time=\"%f\" act=\"p\" it=\"%s\" pl=\"%s\" val=\"%d\" />\n",
-                g_globalvars.time - match_start_time,
-                self->s.v.classname,
-                other->s.v.netname,
-                (int)real_value);
+	real_value = value - real_value;
+
+	log_printf( "\t\t\t<event time=\"%f\" act=\"p\" it=\"%s\" pl=\"%s\" val=\"%d\" />\n",
+				g_globalvars.time - match_start_time,
+				self->s.v.classname,
+				other->s.v.netname,
+				(int)real_value );
 
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
 // armor touch sound
@@ -566,10 +568,10 @@ float W_BestWeapon();
 
 void weapon_touch()
 {
-	int             hadammo, new = 0;
-	gedict_t       *stemp;
-	int             leave;
-        int     real_ammo = 0;
+	int				hadammo = 0, new = 0;
+	gedict_t		*stemp;
+	int				leave;
+	int				real_ammo = 0;
 
 	if ( !( ( int ) other->s.v.flags & FL_CLIENT ) )
 		return;
@@ -586,32 +588,30 @@ void weapon_touch()
 	{
 		if ( leave && ( ( int ) other->s.v.items & IT_NAILGUN ) )
 			return;
+
 		hadammo = other->s.v.ammo_nails;
 		new = IT_NAILGUN;
 		other->s.v.ammo_nails += 30;
-                real_ammo = other->s.v.ammo_nails;
-
-	} else if ( !strcmp( self->s.v.classname, "weapon_supernailgun" ) )
+	}
+	else if ( !strcmp( self->s.v.classname, "weapon_supernailgun" ) )
 	{
 		if ( leave && ( ( int ) other->s.v.items & IT_SUPER_NAILGUN ) )
 			return;
 
-		hadammo = other->s.v.ammo_rockets;
+		hadammo = other->s.v.ammo_nails;
 		new = IT_SUPER_NAILGUN;
 		other->s.v.ammo_nails += 30;
-                real_ammo = other->s.v.ammo_nails;
-
-	} else if ( !strcmp( self->s.v.classname, "weapon_supershotgun" ) )
+	}
+	else if ( !strcmp( self->s.v.classname, "weapon_supershotgun" ) )
 	{
 		if ( leave && ( ( int ) other->s.v.items & IT_SUPER_SHOTGUN ) )
 			return;
 
-		hadammo = other->s.v.ammo_rockets;
+		hadammo = other->s.v.ammo_shells;
 		new = IT_SUPER_SHOTGUN;
 		other->s.v.ammo_shells += 5;
-		real_ammo = other->s.v.ammo_shells;
-	
-	} else if ( !strcmp( self->s.v.classname, "weapon_rocketlauncher" ) )
+	}
+	else if ( !strcmp( self->s.v.classname, "weapon_rocketlauncher" ) )
 	{
 		if ( leave && ( ( int ) other->s.v.items & IT_ROCKET_LAUNCHER ) )
 			return;
@@ -619,16 +619,16 @@ void weapon_touch()
 		hadammo = other->s.v.ammo_rockets;
 		new = IT_ROCKET_LAUNCHER;
 		other->s.v.ammo_rockets += 5;
-		real_ammo = other->s.v.ammo_rockets;
 
-		if ( !first_rl_taken ) {
+		if ( !first_rl_taken )
+		{
 			extern void ktpro_autotrack_on_first_rl (gedict_t *dude);
 
 			ktpro_autotrack_on_first_rl( other );
 			first_rl_taken = true;
 		}
-
-	} else if ( !strcmp( self->s.v.classname, "weapon_grenadelauncher" ) )
+	}
+	else if ( !strcmp( self->s.v.classname, "weapon_grenadelauncher" ) )
 	{
 		if ( leave && ( ( int ) other->s.v.items & IT_GRENADE_LAUNCHER ) )
 			return;
@@ -636,19 +636,17 @@ void weapon_touch()
 		hadammo = other->s.v.ammo_rockets;
 		new = IT_GRENADE_LAUNCHER;
 		other->s.v.ammo_rockets += 5;
-		real_ammo = other->s.v.ammo_rockets;
-
-	} else if ( !strcmp( self->s.v.classname, "weapon_lightning" ) )
+	}
+	else if ( !strcmp( self->s.v.classname, "weapon_lightning" ) )
 	{
 		if ( leave && ( ( int ) other->s.v.items & IT_LIGHTNING ) )
 			return;
 
-		hadammo = other->s.v.ammo_rockets;
+		hadammo = other->s.v.ammo_cells;
 		new = IT_LIGHTNING;
 		other->s.v.ammo_cells += 15;
-		real_ammo = other->s.v.ammo_cells;
-
-	} else
+	}
+	else
 		G_Error( "weapon_touch: unknown classname" );
 
 	TookWeaponHandler( other, new );
@@ -661,25 +659,24 @@ void weapon_touch()
 
 	bound_other_ammo();
 
-        if ( !strcmp( self->s.v.classname, "weapon_nailgun" ) )
-                real_ammo = other->s.v.ammo_nails + 30 - real_ammo;
-        if ( !strcmp( self->s.v.classname, "weapon_supernailgun" ) )
-                real_ammo = other->s.v.ammo_nails + 30 - real_ammo;
-        if ( !strcmp( self->s.v.classname, "weapon_supershotgun" ) )
-                real_ammo = other->s.v.ammo_shells + 5 - real_ammo;
-        if ( !strcmp( self->s.v.classname, "weapon_rocketlauncher" ) )
-                real_ammo = other->s.v.ammo_rockets + 5 - real_ammo;
-        if ( !strcmp( self->s.v.classname, "weapon_grenadelauncher" ) )
-                real_ammo = other->s.v.ammo_rockets + 5 - real_ammo;
-        if ( !strcmp( self->s.v.classname, "weapon_lightning" ) )
-                real_ammo = other->s.v.ammo_cells + 15 - real_ammo;
+	if ( !strcmp( self->s.v.classname, "weapon_nailgun" ) )
+		real_ammo = other->s.v.ammo_nails - hadammo;
+	else if ( !strcmp( self->s.v.classname, "weapon_supernailgun" ) )
+		real_ammo = other->s.v.ammo_nails - hadammo;
+	else if ( !strcmp( self->s.v.classname, "weapon_supershotgun" ) )
+		real_ammo = other->s.v.ammo_shells - hadammo;
+	else if ( !strcmp( self->s.v.classname, "weapon_rocketlauncher" ) )
+		real_ammo = other->s.v.ammo_rockets - hadammo;
+	else if ( !strcmp( self->s.v.classname, "weapon_grenadelauncher" ) )
+		real_ammo = other->s.v.ammo_rockets - hadammo;
+	else if ( !strcmp( self->s.v.classname, "weapon_lightning" ) )
+		real_ammo = other->s.v.ammo_cells - hadammo;
 
-        log_printf(
-                "\t\t\t<event time=\"%f\" act=\"p\" it=\"%s\" pl=\"%s\" val=\"%d\" />\n",
-                g_globalvars.time - match_start_time,
-                self->s.v.classname,
-                other->s.v.netname,
-                real_ammo );
+	log_printf( "\t\t\t<event time=\"%f\" act=\"p\" it=\"%s\" pl=\"%s\" val=\"%d\" />\n",
+				g_globalvars.time - match_start_time,
+				self->s.v.classname,
+				other->s.v.netname,
+				real_ammo );
 
 // change to the weapon
 	other->s.v.items = ( int ) other->s.v.items | new;
@@ -844,56 +841,55 @@ void ammo_touch()
 	ammo = self->aflag;
 	weapon = self->s.v.weapon;
 
-// shotgun
-	if ( weapon == 1 )
+	if ( weapon == 1 ) // shotgun
 	{
 		if ( other->s.v.ammo_shells >= 100 )
 			return;
-		other->s.v.ammo_shells += ammo;
+
 		real_ammo = other->s.v.ammo_shells;
+		other->s.v.ammo_shells += ammo;
 	}
-// spikes
-	if ( weapon == 2 )
+	else if ( weapon == 2 ) // spikes
 	{
 		if ( other->s.v.ammo_nails >= 200 )
 			return;
-		other->s.v.ammo_nails += ammo;
+
 		real_ammo = other->s.v.ammo_nails;
+		other->s.v.ammo_nails += ammo;
 	}
-// rockets
-	if ( weapon == 3 )
+	else if ( weapon == 3 ) // rockets
 	{
 		if ( other->s.v.ammo_rockets >= 100 )
 			return;
-		other->s.v.ammo_rockets += ammo;
+
 		real_ammo = other->s.v.ammo_rockets;
+		other->s.v.ammo_rockets += ammo;
 	}
-// cells
-	if ( weapon == 4 )
+	else if ( weapon == 4 ) // cells
 	{
 		if ( other->s.v.ammo_cells >= 100 )
 			return;
-		other->s.v.ammo_cells += ammo;
+
 		real_ammo = other->s.v.ammo_cells;
+		other->s.v.ammo_cells += ammo;
 	}
 
 	bound_other_ammo();
 
-        if ( weapon == 1 )
-                real_ammo = other->s.v.ammo_shells + ammo - real_ammo;
-        if ( weapon == 2 )
-                real_ammo = other->s.v.ammo_nails + ammo - real_ammo;
-        if ( weapon == 3 )
-                real_ammo = other->s.v.ammo_rockets + ammo - real_ammo;
-        if ( weapon == 4 )
-                real_ammo = other->s.v.ammo_cells + ammo - real_ammo;
+	if ( weapon == 1 )
+		real_ammo = other->s.v.ammo_shells - real_ammo;
+	else if ( weapon == 2 )
+		real_ammo = other->s.v.ammo_nails - real_ammo;
+	else if ( weapon == 3 )
+		real_ammo = other->s.v.ammo_rockets - real_ammo;
+	else if ( weapon == 4 )
+		real_ammo = other->s.v.ammo_cells - real_ammo;
 
-        log_printf(
-                "\t\t\t<event time=\"%f\" act=\"p\" it=\"%s\" pl=\"%s\" val=\"%d\" />\n",
-                g_globalvars.time - match_start_time,
-                self->s.v.classname,
-                other->s.v.netname,
-                real_ammo );
+	log_printf( "\t\t\t<event time=\"%f\" act=\"p\" it=\"%s\" pl=\"%s\" val=\"%d\" />\n",
+				g_globalvars.time - match_start_time,
+				self->s.v.classname,
+				other->s.v.netname,
+				real_ammo );
 
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
 // ammo touch sound
@@ -1110,12 +1106,11 @@ void key_touch()
 	if ( match_in_progress != 2 || !readytostart() )
         return;
 
-        log_printf(
-                "\t\t\t<event time=\"%f\" act=\"p\" it=\"%s\" pl=\"%s\" val=\"%d\" />\n",
-                g_globalvars.time - match_start_time,
-                self->s.v.classname,
-                other->s.v.netname,
-                0 );
+	log_printf( "\t\t\t<event time=\"%f\" act=\"p\" it=\"%s\" pl=\"%s\" val=\"%d\" />\n",
+				g_globalvars.time - match_start_time,
+				self->s.v.classname,
+				other->s.v.netname,
+				0 );
 
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
 
@@ -1247,12 +1242,11 @@ void sigil_touch()
     if ( match_in_progress != 2 || !readytostart() )
         return;
 
-        log_printf(
-                "\t\t\t<event time=\"%f\" act=\"p\" it=\"%s\" pl=\"%s\" val=\"%d\" />\n",
-                g_globalvars.time - match_start_time,
-                self->s.v.classname,
-                other->s.v.netname,
-                0 );
+	log_printf( "\t\t\t<event time=\"%f\" act=\"p\" it=\"%s\" pl=\"%s\" val=\"%d\" />\n",
+				g_globalvars.time - match_start_time,
+				self->s.v.classname,
+				other->s.v.netname,
+				0 );
 
 	G_centerprint( other, "You got the rune!" );
 
@@ -1439,12 +1433,11 @@ void powerup_touch()
 			SUB_RM_01( self );// remove later
 	}
 
-        log_printf(
-                "\t\t\t<event time=\"%f\" act=\"p\" it=\"%s\" pl=\"%s\" val=\"%f\" />\n",
-                g_globalvars.time - match_start_time,
-                self->s.v.classname,
-                other->s.v.netname,
-                real_time );
+	log_printf( "\t\t\t<event time=\"%f\" act=\"p\" it=\"%s\" pl=\"%s\" val=\"%f\" />\n",
+				g_globalvars.time - match_start_time,
+				self->s.v.classname,
+				other->s.v.netname,
+				real_time );
 
 	mi_print(other, self->s.v.items, va("%s got %s%s", getname(other), (p_cnt ? "dropped " : ""), self->s.v.netname));
 
@@ -1592,7 +1585,7 @@ void BackpackTouch()
 	int		new;
 	gedict_t       *stemp;
 	float           acount, new_shells, new_nails, new_rockets, new_cells;
-	char            * new_wp = "";
+	char            *new_wp = "";
 
     if ( match_in_progress != 2 )
         return;
@@ -1640,7 +1633,15 @@ void BackpackTouch()
 		stuffcmd( other, "bf\n" );
 		if ( other->s.v.health > 299 )
 		{
-			if ( !cvar("k_instagib") ) {
+			if ( cvar("k_instagib") )
+			{
+				other->invisible_time = 1;
+				other->invisible_finished = g_globalvars.time + 30;
+				other->s.v.items = ( int ) other->s.v.items | IT_INVISIBILITY;
+
+			}
+			else
+			{
 				if ( !cvar("k_midair")  )
 				{
 					other->invincible_time = 1;
@@ -1650,11 +1651,6 @@ void BackpackTouch()
 				other->super_time = 1;
 				other->super_damage_finished = g_globalvars.time + 30;
 				other->s.v.items = ( int ) other->s.v.items | IT_QUAD;
-
-			} else {
-				other->invisible_time = 1;
-                		other->invisible_finished = g_globalvars.time + 30;
-				other->s.v.items = ( int ) other->s.v.items | IT_INVISIBILITY;
 			}
 
 			other->s.v.ammo_cells = 0;
@@ -1690,63 +1686,63 @@ void BackpackTouch()
 	}
 
 // change weapons
-	other->s.v.ammo_shells  = other->s.v.ammo_shells  + self->s.v.ammo_shells;
-	new_shells = other->s.v.ammo_shells;
-	other->s.v.ammo_nails   = other->s.v.ammo_nails   + self->s.v.ammo_nails;
-	new_nails = other->s.v.ammo_nails;
-	other->s.v.ammo_rockets = other->s.v.ammo_rockets + self->s.v.ammo_rockets;
+	new_shells  = other->s.v.ammo_shells;
+	new_nails   = other->s.v.ammo_nails;
 	new_rockets = other->s.v.ammo_rockets;
+	new_cells   = other->s.v.ammo_cells;
+
+	other->s.v.ammo_shells  = other->s.v.ammo_shells  + self->s.v.ammo_shells;
+	other->s.v.ammo_nails   = other->s.v.ammo_nails   + self->s.v.ammo_nails;
+	other->s.v.ammo_rockets = other->s.v.ammo_rockets + self->s.v.ammo_rockets;
 	other->s.v.ammo_cells   = other->s.v.ammo_cells   + self->s.v.ammo_cells;
-	new_cells = other->s.v.ammo_cells;
 
 	other->s.v.items = ( int ) other->s.v.items | new;
 
 	bound_other_ammo();
 
-	new_shells -= other->s.v.ammo_shells;
-	new_nails -= other->s.v.ammo_nails;
-	new_rockets -= other->s.v.ammo_rockets;
-	new_cells -= other->s.v.ammo_cells;
+	new_shells  = other->s.v.ammo_shells - new_shells;
+	new_nails   = other->s.v.ammo_nails - new_nails;
+	new_rockets = other->s.v.ammo_rockets - new_rockets;
+	new_cells   = other->s.v.ammo_cells - new_cells;
 
-        log_printf(
-                "\t\t\t<event time=\"%f\" act=\"p\" it=\"bp\" wp=\"%s\" sh=\"%d\" na=\"%d\" ro=\"%d\" ce=\"%d\" pl=\"%s\" />\n",
-                g_globalvars.time - match_start_time,
-                new_wp,
-                (int)self->s.v.ammo_shells,
-                (int)self->s.v.ammo_nails,
-                (int)self->s.v.ammo_rockets,
-                (int)self->s.v.ammo_cells,
-                other->s.v.netname );
+	log_printf( "\t\t\t<event time=\"%f\" act=\"p\" it=\"bp\" wp=\"%s\" sh=\"%d\" na=\"%d\" ro=\"%d\" ce=\"%d\" pl=\"%s\" />\n",
+				g_globalvars.time - match_start_time,
+				new_wp,
+				(int)self->s.v.ammo_shells,
+				(int)self->s.v.ammo_nails,
+				(int)self->s.v.ammo_rockets,
+				(int)self->s.v.ammo_cells,
+				other->s.v.netname );
 
-		if (!strnull(new_wp))
-			log_printf("\t\t\t<event time=\"%f\" act=\"b\" it=\"%s\" pl=\"%s\" val=\"\" />\n",
-			g_globalvars.time - match_start_time,
-			new_wp,
-			other->s.v.netname );			
-		
-		if ((int)new_shells)
-			log_printf("\t\t\t<event time=\"%f\" act=\"b\" it=\"item_shells\" pl=\"%s\" val=\"%d\" />\n",
-			g_globalvars.time - match_start_time,
-			other->s.v.netname,
-			(int)new_shells );
+	if (!strnull(new_wp))
+		log_printf( "\t\t\t<event time=\"%f\" act=\"b\" it=\"%s\" pl=\"%s\" val=\"\" />\n",
+					g_globalvars.time - match_start_time,
+					new_wp,
+					other->s.v.netname );			
 
-		if ((int)new_nails)
-			log_printf("\t\t\t<event time=\"%f\" act=\"b\" it=\"item_spikes\" pl=\"%s\" val=\"%d\" />\n",
-			g_globalvars.time - match_start_time,
-			other->s.v.netname,
-			(int)new_nails );
+	if (new_shells)
+		log_printf( "\t\t\t<event time=\"%f\" act=\"b\" it=\"item_shells\" pl=\"%s\" val=\"%d\" />\n",
+					g_globalvars.time - match_start_time,
+					other->s.v.netname,
+					(int)new_shells );
 
-		if ((int)new_rockets)
-			log_printf("\t\t\t<event time=\"%f\" act=\"b\" it=\"item_rockets\" pl=\"%s\" val=\"%d\" />\n",
-			g_globalvars.time - match_start_time,
-			other->s.v.netname,
-			(int)new_rockets );
+	if (new_nails)
+		log_printf( "\t\t\t<event time=\"%f\" act=\"b\" it=\"item_spikes\" pl=\"%s\" val=\"%d\" />\n",
+					g_globalvars.time - match_start_time,
+					other->s.v.netname,
+					(int)new_nails );
 
-		if ((int)new_cells)
-			log_printf("\t\t\t<event time=\"%f\" act=\"b\" it=\"item_cells\" pl=\"%s\" val=\"%d\" />\n",
-			g_globalvars.time - match_start_time,
-			other->s.v.netname,
-			(int)new_cells );
+	if (new_rockets)
+		log_printf( "\t\t\t<event time=\"%f\" act=\"b\" it=\"item_rockets\" pl=\"%s\" val=\"%d\" />\n",
+					g_globalvars.time - match_start_time,
+					other->s.v.netname,
+					(int)new_rockets );
+
+	if (new_cells)
+		log_printf( "\t\t\t<event time=\"%f\" act=\"b\" it=\"item_cells\" pl=\"%s\" val=\"%d\" />\n",
+					g_globalvars.time - match_start_time,
+					other->s.v.netname,
+					(int)new_cells );
 		
 	if ( self->s.v.ammo_shells )
 	{
@@ -1802,8 +1798,6 @@ void ShowSpawnPoints()
 {
 	gedict_t	*p, *goal;
 	
-	goal = PROG_TO_EDICT( self->s.v.goalentity );
-
 	for ( goal = world; (goal = find( goal, FOFS( s.v.classname ), "info_player_deathmatch" )); )
 	{
 		p = spawn();
@@ -1826,11 +1820,9 @@ void HideSpawnPoints()
 {
 	gedict_t	*p;
 	
-	p = PROG_TO_EDICT( self->s.v.goalentity );
-
 	for ( p = world; (p = find( p, FOFS( s.v.classname ), "spawnpoint" )); )
 	{
-		p->s.v.model = "";
+		ent_remove( p );
 	}
 }
 
@@ -1959,45 +1951,44 @@ void DropBackpack()
 		item->s.v.ammo_cells   = min(25, item->s.v.ammo_cells);
 	}
 
-        log_printf(
-                "\t\t\t<event time=\"%f\" act=\"d\" it=\"bp\" wp=\"%s\" sh=\"%d\" na=\"%d\" ro=\"%d\" ce=\"%d\" pl=\"%s\" />\n",
-                g_globalvars.time - match_start_time,
-                item->s.v.netname,
-                (int)item->s.v.ammo_shells,
-                (int)item->s.v.ammo_nails,
-                (int)item->s.v.ammo_rockets,
-                (int)item->s.v.ammo_cells,
-                self->s.v.netname );
+	log_printf( "\t\t\t<event time=\"%f\" act=\"d\" it=\"bp\" wp=\"%s\" sh=\"%d\" na=\"%d\" ro=\"%d\" ce=\"%d\" pl=\"%s\" />\n",
+				g_globalvars.time - match_start_time,
+				item->s.v.netname,
+				(int)item->s.v.ammo_shells,
+				(int)item->s.v.ammo_nails,
+				(int)item->s.v.ammo_rockets,
+				(int)item->s.v.ammo_cells,
+				self->s.v.netname );
 
-		if (!strnull(item->s.v.netname))
-			log_printf("\t\t\t<event time=\"%f\" act=\"d\" it=\"%s\" pl=\"%s\" val=\"\" />\n",
-			g_globalvars.time - match_start_time,
-			item->s.v.netname,
-			self->s.v.netname );			
-		
-		if ((int)item->s.v.ammo_shells)
-			log_printf("\t\t\t<event time=\"%f\" act=\"d\" it=\"item_shells\" pl=\"%s\" val=\"%d\" />\n",
-			g_globalvars.time - match_start_time,
-			self->s.v.netname,
-			(int)item->s.v.ammo_shells );
+	if (!strnull(item->s.v.netname))
+		log_printf( "\t\t\t<event time=\"%f\" act=\"d\" it=\"%s\" pl=\"%s\" val=\"\" />\n",
+					g_globalvars.time - match_start_time,
+					item->s.v.netname,
+					self->s.v.netname );			
 
-		if ((int)item->s.v.ammo_nails)
-			log_printf("\t\t\t<event time=\"%f\" act=\"d\" it=\"item_spikes\" pl=\"%s\" val=\"%d\" />\n",
-			g_globalvars.time - match_start_time,
-			self->s.v.netname,
-			(int)item->s.v.ammo_nails );
+	if ((int)item->s.v.ammo_shells)
+		log_printf( "\t\t\t<event time=\"%f\" act=\"d\" it=\"item_shells\" pl=\"%s\" val=\"%d\" />\n",
+					g_globalvars.time - match_start_time,
+					self->s.v.netname,
+					(int)item->s.v.ammo_shells );
 
-		if ((int)item->s.v.ammo_rockets)
-			log_printf("\t\t\t<event time=\"%f\" act=\"d\" it=\"item_rockets\" pl=\"%s\" val=\"%d\" />\n",
-			g_globalvars.time - match_start_time,
-			self->s.v.netname,
-			(int)item->s.v.ammo_rockets );
+	if ((int)item->s.v.ammo_nails)
+		log_printf( "\t\t\t<event time=\"%f\" act=\"d\" it=\"item_spikes\" pl=\"%s\" val=\"%d\" />\n",
+					g_globalvars.time - match_start_time,
+					self->s.v.netname,
+					(int)item->s.v.ammo_nails );
 
-		if ((int)item->s.v.ammo_cells)
-			log_printf("\t\t\t<event time=\"%f\" act=\"d\" it=\"item_cells\" pl=\"%s\" val=\"%d\" />\n",
-			g_globalvars.time - match_start_time,
-			self->s.v.netname,
-			(int)item->s.v.ammo_cells );
+	if ((int)item->s.v.ammo_rockets)
+		log_printf( "\t\t\t<event time=\"%f\" act=\"d\" it=\"item_rockets\" pl=\"%s\" val=\"%d\" />\n",
+					g_globalvars.time - match_start_time,
+					self->s.v.netname,
+					(int)item->s.v.ammo_rockets );
+
+	if ((int)item->s.v.ammo_cells)
+		log_printf( "\t\t\t<event time=\"%f\" act=\"d\" it=\"item_cells\" pl=\"%s\" val=\"%d\" />\n",
+					g_globalvars.time - match_start_time,
+					self->s.v.netname,
+					(int)item->s.v.ammo_cells );
 
 	item->s.v.velocity[2] = 300;
 	item->s.v.velocity[0] = -100 + ( g_random() * 200 );
