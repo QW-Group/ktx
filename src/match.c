@@ -925,7 +925,7 @@ void StatsToFile()
 	int from1, from2;
 	char *team = "";
 
-	char date[32], name[256], tmp[1024], buf[1024], *ip = "", *port = "";
+	char date[32] = {0}, name[256] = {0}, tmp[1024] = {0}, buf[1024] = {0}, *ip = "", *port = "";
 	int i = 0, j;
 
 	if ( strnull( ip = cvar_string( "sv_local_addr" ) ) || strnull( port = strchr(ip, ':') ) || !(i = atoi(port + 1)) )

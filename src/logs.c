@@ -21,68 +21,70 @@
 
 fileHandle_t log_handle = -1;
 
-
 void log_close(void)
 {
-        if (log_handle < 0 )
-                return;
- 
-        if ( !cvar("k_extralog")) 
+	if ( log_handle < 0 )
 		return;
 
-        trap_FS_CloseFile( log_handle );
-        log_handle = -1;
+// close does't require this check
+//	if ( !cvar("k_extralog"))
+//		return;
+
+	trap_FS_CloseFile( log_handle );
+	log_handle = -1;
 }
- 
+
 void log_open( const char *fmt, ... )
 {
-        va_list argptr;
-        char    text[1024];
+	va_list argptr;
+	char	text[1024] = {0};
  
-        if ( !cvar("k_extralog")) 
+	if ( !cvar("k_extralog") )
 		return;
 
+	log_close();
+
 	va_start( argptr, fmt );
-        Q_vsnprintf( text, sizeof(text), fmt, argptr );
-        va_end( argptr );
+	Q_vsnprintf( text, sizeof(text), fmt, argptr );
+	va_end( argptr );
+
+	text[sizeof(text)-1] = 0;
  
-        log_close();
- 
-        if ( trap_FS_OpenFile( text, &log_handle, FS_APPEND_BIN ) < 0 )
-        {
-                log_handle = -1;
-                return;
-        }
+	if ( trap_FS_OpenFile( text, &log_handle, FS_APPEND_BIN ) < 0 )
+	{
+		log_handle = -1;
+		return;
+	}
 }
  
 void log_printf( const char *fmt, ... )
 {
-        va_list argptr;
-        char    text[1024];
+	va_list argptr;
+	char	text[1024] = {0};
+
+	if ( log_handle < 0 )
+		return;
         
-	if ( !cvar("k_extralog")) 
+	if ( !cvar("k_extralog") )
 		return;
 
-        if (log_handle < 0)
-                return;
- 
-        va_start( argptr, fmt );
-        Q_vsnprintf( text, sizeof(text), fmt, argptr );
-        va_end( argptr );
- 
-        text[sizeof(text)-1] = 0;
- 
-        trap_FS_WriteFile( text, strlen(text), log_handle );
+	va_start( argptr, fmt );
+	Q_vsnprintf( text, sizeof(text), fmt, argptr );
+	va_end( argptr );
+
+	text[sizeof(text)-1] = 0;
+
+	trap_FS_WriteFile( text, strlen(text), log_handle );
 }
 
 char *GetMode();
 void StartLogs()
 {
-	char date[32], date_c[32], *ip = "", *port = "";
+	char date[32] = {0}, date_c[32] = {0}, *ip = "", *port = "";
 	int i = 0;
 
-        if ( strnull( ip = cvar_string( "sv_local_addr" ) ) || strnull( port = strchr(ip, ':') ) || !(i = atoi(port + 1)) )
-                return;
+	if ( strnull( ip = cvar_string( "sv_local_addr" ) ) || strnull( port = strchr(ip, ':') ) || !(i = atoi(port + 1)) )
+		return;
 
 	port[0] = 0;
 	port++;
