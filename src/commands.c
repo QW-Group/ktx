@@ -393,7 +393,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_KILL         "invoke suicide"
 #define CD_MIDAIR       "midair settings"
 #define CD_INSTAGIB     "instagib settings"
-#define CD_CG_KB	"toggle coilgun kickback in instagib"
+#define CD_CG_KB        "toggle coilgun kickback in instagib"
 #define CD_TIME         "show server time"
 #define CD_GREN_MODE    "grenades mode"
 #define CD_TOGGLEREADY  "just toggle ready"
@@ -662,7 +662,7 @@ cmd_t cmds[] = {
 	{ "kill",        ClientKill,                0    , CF_PLAYER | CF_MATCHLESS, CD_KILL },
 	{ "mid_air",     ToggleMidair,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_MIDAIR },
 	{ "instagib",    ToggleInstagib,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
-	{ "cg_kb",	 ToggleCGKickback,          0    , CF_PLAYER | CF_SPC_ADMIN, CD_CG_KB },
+	{ "cg_kb",       ToggleCGKickback,          0    , CF_PLAYER | CF_SPC_ADMIN, CD_CG_KB },
 	{ "time",        sv_time,                   0    , CF_BOTH | CF_MATCHLESS, CD_TIME },
 	{ "gren_mode",   GrenadeMode,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_GREN_MODE },
 	{ "toggleready", ToggleReady,               0    , CF_BOTH, CD_TOGGLEREADY },
@@ -1302,31 +1302,6 @@ void PrintToggle2( char *tog, char *key )
 		G_sprint(self, 2, "On\n");
 	else
 		G_sprint(self, 2, "Off\n");
-}
-
-void PrintToggleInstagib( char *tog, char *key )
-{
-	int i;
-
-	if ( strnull(tog) || strnull(key) )
-		G_Error("PrintToggleInstagib null");
-
-	G_sprint(self, 2, "%s", tog);
-
-	i = streq(key, "k_instagib") ? cvar("k_instagib") : bound(0, cvar( key ), 4);
-
-	if( !i )
-		G_sprint(self, 2, "Off ");
-	else if ( i == 1 )
-		if ( cvar("k_instagib_custom_models") )
-			G_sprint(self, 2, "FCG ");
-		else
-			G_sprint(self, 2, "SG  ");
-	else
-		if ( cvar("k_instagib_custom_models") )
-			G_sprint(self, 2, "SCG ");
-		else
-			G_sprint(self, 2, "SSG ");
 }
 
 char *get_frp_str ()
@@ -2742,7 +2717,7 @@ const char common_um_init[] =
 //	"set k_vwep 1\n"
 	"maxclients 8\n"
 	"k_instagib 0\n"					// instagib off
-	"k_cg_kb 1\n"					// coilgun kickback in instagib
+	"k_cg_kb 1\n"						// coilgun kickback in instagib
 	"k_disallow_weapons 16\n"			// disallow gl in dmm4 by default
 
 //	"localinfo k_new_mode 0\n" 			// UNKNOWN ktpro
