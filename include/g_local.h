@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id$
+ *  $Id: g_local.h 562 2007-09-24 10:11:18Z d3urk $
  */
 
 // g_local.h -- local definitions for game module
