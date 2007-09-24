@@ -71,6 +71,7 @@ typedef enum
 
 typedef struct wpType_s {
 	int hits;			// hits with this weapon, for SG and SSG this is count of bullets
+	int rhits;			// real hits for this weapon (direct + splash), used for RL and GL only
 	int attacks;		// all attacks with this weapon, for SG and SSG this is count of bullets
 
 	int kills;			// kills with this weapon

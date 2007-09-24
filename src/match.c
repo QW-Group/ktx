@@ -365,7 +365,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 	int   ra, ya, ga;
 	int   mh, d_rl, k_rl, t_rl;
 	int   quad, pent, ring;
-	float h_ax, a_ax, ph_rl, h_rl, a_rl, ph_gl, h_gl, a_gl, h_lg, a_lg, h_sg, a_sg, h_ssg, a_ssg;
+	float h_ax, a_ax, ph_rl, rh_rl, h_rl, a_rl, ph_gl, rh_gl, h_gl, a_gl, h_lg, a_lg, h_sg, a_sg, h_ssg, a_ssg;
 	int res, str, hst, rgn;
 
 	dmg_g = p->ps.dmg_g;
@@ -380,8 +380,10 @@ void OnePlayerStats(gedict_t *p, int tp)
 	ring  = p->ps.itm[itRING].tooks;
 
 	h_rl  = p->ps.wpn[wpRL].hits;
+	rh_rl = p->ps.wpn[wpRL].rhits;
 	a_rl  = p->ps.wpn[wpRL].attacks;
 	h_gl  = p->ps.wpn[wpGL].hits;
+	rh_gl = p->ps.wpn[wpGL].rhits;
 	a_gl  = p->ps.wpn[wpGL].attacks;
 	h_lg  = p->ps.wpn[wpLG].hits;
 	a_lg  = p->ps.wpn[wpLG].attacks;
@@ -395,8 +397,8 @@ void OnePlayerStats(gedict_t *p, int tp)
 	h_ax  = 100.0 * h_ax  / max(1, a_ax);
 	h_sg  = 100.0 * h_sg  / max(1, a_sg);
 	h_ssg = 100.0 * h_ssg / max(1, a_ssg);
-	ph_gl  = 100.0 * h_gl  / max(1, a_gl);
-	ph_rl  = 100.0 * h_rl  / max(1, a_rl);
+	ph_gl  = 100.0 * rh_gl  / max(1, a_gl);
+	ph_rl  = 100.0 * rh_rl  / max(1, a_rl);
 	h_lg  = 100.0 * h_lg  / max(1, a_lg);
 
 	d_rl = p->ps.wpn[wpRL].drops;
@@ -768,8 +770,7 @@ void OnePlayerInstagibStats( gedict_t *p, int tp )
 		G_bprint(2, "  %s: %d\n", redtext("Teamkills"), (int)p->friendly);
 	G_bprint(2, "  %s: %d\n", redtext("Deaths"), (int)p->deaths);
 
-	if ( !isDuel() )
-		G_bprint(2, "  %s: %d\n", redtext("Streaks"), p->ps.spree_max);
+	G_bprint(2, "  %s: %d\n", redtext("Streaks"), p->ps.spree_max);
 	G_bprint(2, "  %s: %d\n", redtext("Spawns"), p->ps.spawn_frags);
 
 //	G_bprint(2, " \220%s\221\n", "SPEED");
@@ -803,10 +804,10 @@ void OnePlayerInstagibStats( gedict_t *p, int tp )
 //	G_bprint(2, "  %s: %d\n", redtext("Total Multigibs"), p->ps.i_multigibs);
 //	G_bprint(2, "  %s: %d\n", redtext("Maximum Victims"), p->ps.i_maxmultigibs);
 
-	G_bprint(2, " \220%s\221\n", "AIRGIBS");
+//	G_bprint(2, " \220%s\221\n", "AIRGIBS");
 //	G_bprint(2, "  %s: %d\n", redtext("Total"), p->ps.i_airgibs);
-	G_bprint(2, "  %s: %d\n", redtext("Total Height"), p->ps.i_height);
-	G_bprint(2, "  %s: %d\n", redtext("Maximum Height"), p->ps.i_maxheight);
+//	G_bprint(2, "  %s: %d\n", redtext("Total Height"), p->ps.i_height);
+//	G_bprint(2, "  %s: %d\n", redtext("Maximum Height"), p->ps.i_maxheight);
 //	G_bprint(2, "  %s: %.1f\n", redtext("Average Height"), p->ps.i_airgibs ? p->ps.i_height / p->ps.i_airgibs : 0.);
 
 }

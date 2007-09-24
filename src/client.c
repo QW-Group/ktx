@@ -2953,7 +2953,7 @@ void StatsHandler(gedict_t *targ, gedict_t *attacker)
 	adjust_pickup_time( &targ->r_pickup_time, &targ->ps.itm[itRING].time );
 
 	// update spree stats
-	if ( strneq( attackerteam, targteam ) )
+	if ( strneq( attackerteam, targteam ) || !isTeam() )
 	{
 		attacker->ps.spree_current++;
 		if ( attacker->super_damage_finished > 0 )
