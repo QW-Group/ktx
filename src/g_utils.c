@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id$
+ *  $Id: g_utils.c 522 2007-09-15 00:32:32Z qqshka $
  */
 
 #include "g_local.h"
@@ -1535,12 +1535,25 @@ static char mond[12] =
     { 31,    28,    31,    30,    31,    30,    31,    31,    30,    31,    30,    31 };
 
 // returns days since Feb 12 2006
+int revision_number ()
+{
+	char *rev = "";
+	char *rev_num = "$Revision$";
+	int i;
+
+	snprintf(rev, ((strlen(rev_num) - 3) - 12), "%s", rev_num + 12);
+	G_bprint(2, "\n-------------- %d\n", (int)rev);
+
+}
+
 int build_number ()
 {
 	int m = 0;
 	int d = 0;
 	int y = 0;
 	static int b = 0;
+
+	//revision_number();
 
 	if (b != 0)
 		return b;
