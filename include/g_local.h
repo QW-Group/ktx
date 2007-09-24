@@ -37,12 +37,13 @@
 #include "g_syscalls.h"
 #include "player.h"
 
-#define MOD_VERSION					("1.34 (dev build)")
-#define MOD_NAME					("KTX")
+#define MOD_VERSION			("1.34 (dev build)")
+#define MOD_NAME			("KTX")
 #define MOD_SERVERINFO_MOD_KEY		("xmod")
 #define MOD_SERVERINFO_BUILD_KEY	("xbuild")
-#define MOD_URL    					("http://ktx.sourceforge.net")
-#define MOD_SRC_URL    				("http://ktx.svn.sourceforge.net/viewvc/ktx/")
+#define MOD_URL    			("http://ktx.sourceforge.net")
+#define MOD_SRC_URL    			("http://ktx.svn.sourceforge.net/viewvc/ktx/")
+#define REV_NUMBER			("$Revision$")
 
 // qqshka - hmm, seems in C this is macros
 #undef max
