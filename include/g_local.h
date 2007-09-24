@@ -37,13 +37,13 @@
 #include "g_syscalls.h"
 #include "player.h"
 
-#define MOD_VERSION			("1.34 (dev build)")
 #define MOD_NAME			("KTX")
+#define MOD_VERSION			("1.34")
+#define MOD_DEV				("-beta")
 #define MOD_SERVERINFO_MOD_KEY		("xmod")
 #define MOD_SERVERINFO_BUILD_KEY	("xbuild")
-#define MOD_URL    			("http://ktx.sourceforge.net")
-#define MOD_SRC_URL    			("http://ktx.svn.sourceforge.net/viewvc/ktx")
-#define REV_NUMBER			("$Revision$")
+#define MOD_URL    			("http://ktx.sf.net")
+#define MOD_SRC_URL    			("http://ktx.svn.sf.net")
 
 // qqshka - hmm, seems in C this is macros
 #undef max
@@ -350,7 +350,6 @@ gedict_t	*get_ed_scores1();
 gedict_t	*get_ed_scores2();
 
 int			build_number ();
-int			revision_number ();
 
 gedict_t	*get_ed_best1();
 gedict_t	*get_ed_best2();

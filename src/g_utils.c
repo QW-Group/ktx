@@ -1528,32 +1528,34 @@ gedict_t *get_ed_scores2()
 // stolen from MVDSV, k? :]
 // ok :-D //VVD
 
-static char *date = __DATE__;
-static char *mon[12] =
-    { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-static char mond[12] =
-    { 31,    28,    31,    30,    31,    30,    31,    31,    30,    31,    30,    31 };
+//static char *date = __DATE__;
+//static char *mon[12] =
+//    { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+//static char mond[12] =
+//    { 31,    28,    31,    30,    31,    30,    31,    31,    30,    31,    30,    31 };
 
-// returns days since Feb 12 2006
-int revision_number ()
+
+// Matches build number with SVN revision number
+int build_number ()
 {
-	char *rev = "";
-	char *rev_num = "$Revision$";
+	char rev[6] = "";
+	char rev_num[] = "$Revision$";
 	int i;
 
-	snprintf(rev, ((strlen(rev_num) - 3) - 12), "%s", rev_num + 12);
-	G_bprint(2, "\n-------------- %d\n", (int)rev);
+	i = strlen(rev_num);
+	snprintf(rev, min(sizeof(rev), ((i -1) - 10)), "%s", rev_num + 10); // 10 is end of string "$Revision: "
+	return atoi(rev);
 
 }
 
+/* // replaced by SVN build number
+// returns days since Feb 12 2006
 int build_number ()
 {
 	int m = 0;
 	int d = 0;
 	int y = 0;
 	static int b = 0;
-
-	//revision_number();
 
 	if (b != 0)
 		return b;
@@ -1579,6 +1581,7 @@ int build_number ()
 
 	return b;
 }
+*/
 
 // }
 
@@ -1723,7 +1726,7 @@ void show_sv_version()
 
 	if ( !strnull( tm = ezinfokey(world, "date_str") ) )
 		G_sprint(self, 2, "Date: %s\n", tm);
-	G_sprint(self, 2, "Mod: %s v.%s build:%05d\n", MOD_NAME, MOD_VERSION, build_number());
+	G_sprint(self, 2, "Mod: %s %s%s, build %d\n", MOD_NAME, MOD_VERSION, MOD_DEV, build_number());
 	G_sprint(self, 2, "Server: %s\n", cvar_string( "version" ));
 
 	if ( (int)cvar( "sv_specprint" ) & SPECPRINT_SPRINT )
