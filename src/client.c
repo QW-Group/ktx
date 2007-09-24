@@ -2448,7 +2448,7 @@ void PlayerPreThink()
 	if ( self->on_hook )
 		GrappleService();
 
-	if ( ( self->ctf_flag & CTF_RUNE_RGN ) && ( !cvar("k_instagib")  ) )
+	if ( self->ctf_flag & CTF_RUNE_RGN )
 	{
 		if ( self->regen_time < g_globalvars.time )
 		{

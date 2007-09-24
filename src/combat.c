@@ -333,11 +333,11 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		damage *= ( deathmatch == 4 ? 8 : 4 ); // in dmm4 quad is octa actually
 
 	// ctf strength rune
-	if ( ( attacker->ctf_flag & CTF_RUNE_STR ) && ( !cvar("k_instagib") ) )
+	if ( attacker->ctf_flag & CTF_RUNE_STR )
 		damage *= 2;
           
 	// ctf resistance rune
-	if ( ( targ->ctf_flag & CTF_RUNE_RES ) && ( !cvar("k_instagib") ) )
+	if ( targ->ctf_flag & CTF_RUNE_RES )
 	{
 		damage /= 2;
 		ResistanceSound( targ );
