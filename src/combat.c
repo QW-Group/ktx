@@ -531,15 +531,16 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	if ( match_in_progress == 2 && (int)cvar("k_dmgfrags") )
 	{
-		if ( attacker->ct == ctPlayer && targ->ct == ctPlayer && attacker != targ
-			 && (isDuel() || isFFA() || strneq(attackerteam, targteam))
-		   )
+		if ( attacker->ct == ctPlayer && targ->ct == ctPlayer && attacker != targ )
 		{
-			int dmg_frags;
-			attacker->ps.dmg_frags += dmg_dealt; // add dealt
-			dmg_frags = attacker->ps.dmg_frags / 100; // 1 frag = 100 damage
-			attacker->s.v.frags = (int)(attacker->s.v.frags + dmg_frags);
-			attacker->ps.dmg_frags -= dmg_frags * 100;
+			if ( isDuel() || isFFA() || strneq(attackerteam, targteam) )
+			{
+				int dmg_frags;
+				attacker->ps.dmg_frags += dmg_dealt; // add dealt
+				dmg_frags = attacker->ps.dmg_frags / 100; // 1 frag = 100 damage
+				attacker->s.v.frags = (int)(attacker->s.v.frags + dmg_frags);
+				attacker->ps.dmg_frags -= dmg_frags * 100;
+			}
 		}
 	}
 
@@ -614,7 +615,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			targ->s.v.health = -1; // qqshka, no zero health, heh, imo less bugs after this
 	}
 
-	if ( targ->ct == ctPlayer && attacker->ct == ctPlayer && attacker != targ )
+	if ( attacker->ct == ctPlayer && targ->ct == ctPlayer && attacker != targ )
 	{
 		if ( take || save )
 		{
@@ -627,7 +628,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	}
 
 	// show damage in sbar
-	if (match_in_progress != 2)
+	if ( match_in_progress != 2 )
 	{
 		if ( !midair || ( (int)targ->s.v.flags & FL_ONGROUND ) )
 		{
@@ -638,19 +639,16 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	}
 
 	// update damage stats like: give/taked/team damage
-	if ( attacker->ct == ctPlayer && targ->ct == ctPlayer )
+	if ( attacker->ct == ctPlayer && targ->ct == ctPlayer && attacker != targ )
 	{
-		if ( attacker != targ )
+		if ( streq(attackerteam, targteam) && !isDuel() && !isFFA() )
 		{
-			if ( streq(attackerteam, targteam) && !isDuel() && !isFFA() )
-			{
-				attacker->ps.dmg_team += dmg_dealt;
-			}
-			else 
-			{
-				attacker->ps.dmg_g += dmg_dealt;
-				targ->ps.dmg_t += dmg_dealt;
-			}
+			attacker->ps.dmg_team += dmg_dealt;
+		}
+		else 
+		{
+			attacker->ps.dmg_g += dmg_dealt;
+			targ->ps.dmg_t += dmg_dealt;
 		}
 	}
 
