@@ -613,12 +613,18 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		if ( !targ->s.v.health || dtSUICIDE == targ->deathtype )
 			targ->s.v.health = -1; // qqshka, no zero health, heh, imo less bugs after this
 	}
-	
-	if ( ( take || save ) && ( attacker != targ ) )
-		if ( targ->deathtype == dtRL )
-			attacker->ps.wpn[wpRL].rhits++;
-		if ( targ->deathtype == dtGL )
-			attacker->ps.wpn[wpGL].rhits++;
+
+	if ( targ->ct == ctPlayer && attacker->ct == ctPlayer && attacker != targ )
+	{
+		if ( take || save )
+		{
+			if ( targ->deathtype == dtRL )
+				attacker->ps.wpn[wpRL].rhits++;
+    
+			if ( targ->deathtype == dtGL )
+				attacker->ps.wpn[wpGL].rhits++;
+		}
+	}
 
 	// show damage in sbar
 	if (match_in_progress != 2)
