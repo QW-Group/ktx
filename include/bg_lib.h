@@ -53,6 +53,9 @@ int atoi( const char *string );
 int vsprintf( char *buffer, const char *fmt, va_list argptr );
 int sscanf( const char *buffer, const char *fmt, ... );
 
+size_t strlcpy(char *dst, char *src, size_t siz);
+size_t strlcat(char *dst, char *src, size_t siz);
+
 // Memory functions
 void *memmove( void *dest, const void *src, size_t count );
 void *memset( void *dest, int c, size_t count );

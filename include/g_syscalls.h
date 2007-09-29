@@ -120,8 +120,3 @@ int QVMstrftime( char *valbuff, int sizebuff, const char *fmt, int offset );
 
 void trap_makevectors( float *v );
 
-#if defined( __linux__ ) || defined( _WIN32 ) /* || defined( __APPLE__ ) require?*/
-size_t strlcpy(char *dst, char *src, size_t siz);
-size_t strlcat(char *dst, char *src, size_t siz);
-#endif
-

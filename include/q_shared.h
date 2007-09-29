@@ -67,6 +67,11 @@
 #include <ctype.h>
 #include <limits.h>
 
+	#if defined( __linux__ ) || defined( _WIN32 ) /* || defined( __APPLE__ ) require?*/
+		size_t strlcpy(char *dst, char *src, size_t siz);
+		size_t strlcat(char *dst, char *src, size_t siz);
+	#endif
+
 #endif
 
 #define	MAX_CLIENTS		32

@@ -1536,7 +1536,7 @@ int build_number ()
 	{
 		char rev_num[] = "$Revision$";
 
-		if (!strncasecmp(rev_num, "$Revision:", sizeof("$Revision:") - 1))
+		if (!Q_stricmpn(rev_num, "$Revision:", sizeof("$Revision:") - 1))
 			b = atoi(rev_num + sizeof("$Revision:") - 1);
 	}
 
