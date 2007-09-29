@@ -1525,63 +1525,23 @@ gedict_t *get_ed_scores2()
 
 // { version stuff
 
-// stolen from MVDSV, k? :]
-// ok :-D //VVD
-
-//static char *date = __DATE__;
-//static char *mon[12] =
-//    { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-//static char mond[12] =
-//    { 31,    28,    31,    30,    31,    30,    31,    31,    30,    31,    30,    31 };
-
-
 // Matches build number with SVN revision number
 int build_number ()
 {
-	char rev[6] = "";
-	char rev_num[] = "$Revision$";
-	int i;
-
-	i = strlen(rev_num);
-	snprintf(rev, min(sizeof(rev), ((i -1) - 10)), "%s", rev_num + 10); // 10 is end of string "$Revision: "
-	return atoi(rev);
-
-}
-
-/* // replaced by SVN build number
-// returns days since Feb 12 2006
-int build_number ()
-{
-	int m = 0;
-	int d = 0;
-	int y = 0;
 	static int b = 0;
 
-	if (b != 0)
+	if (b)
 		return b;
 
-	for (m = 0; m < 11; m++)
 	{
-		if (    ( date[0+0] && mon[m][0] && date[0+0] == mon[m][0] )
-			 && ( date[0+1] && mon[m][1] && date[0+1] == mon[m][1] )
-			 && ( date[0+2] && mon[m][2] && date[0+2] == mon[m][2] )
-		   )
-			break;
-		d += mond[m];
+		char rev_num[] = "$Revision$";
+
+		if (!strncasecmp(rev_num, "$Revision:", sizeof("$Revision:") - 1))
+			b = atoi(rev_num + sizeof("$Revision:") - 1);
 	}
-
-	d += atoi( &date[4] ) - 1;
-	y = atoi( &date[7] ) - 1900;
-	b = d + (int)((y - 1) * 365.25);
-
-	if (((y % 4) == 0) && m > 1)
-		b += 1;
-
-	b -= 38393; // Feb 12 2006
 
 	return b;
 }
-*/
 
 // }
 
