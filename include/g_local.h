@@ -173,31 +173,6 @@ typedef union fi_s
 	int			_int;
 } fi_t;	
 
-
-#if defined( Q3_VM )
-
-// bg_lib.c
-
-int Q_vsnprintf(char *buffer, size_t count, const char *format, va_list argptr);
-int snprintf(char *buffer, size_t count, char const *format, ...);
-
-#else
-
-// native_lib.c
-
-	#if defined( _WIN32 )
-
-		int Q_vsnprintf(char *buffer, size_t count, const char *format, va_list argptr);
-		int snprintf(char *buffer, size_t count, char const *format, ...);
-
-	#else
-
-		#define Q_vsnprintf vsnprintf
-
-	#endif // defined( _WIN32 )
-
-#endif // !defined( Q3_VM )
-
 //g_utils.c
 
 int				PASSFLOAT(float x);

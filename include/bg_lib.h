@@ -53,6 +53,9 @@ int atoi( const char *string );
 int vsprintf( char *buffer, const char *fmt, va_list argptr );
 int sscanf( const char *buffer, const char *fmt, ... );
 
+int Q_vsnprintf(char *buffer, size_t count, const char *format, va_list argptr);
+int snprintf(char *buffer, size_t count, char const *format, ...);
+
 size_t strlcpy(char *dst, char *src, size_t siz);
 size_t strlcat(char *dst, char *src, size_t siz);
 

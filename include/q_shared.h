@@ -68,9 +68,28 @@
 #include <limits.h>
 
 	#if defined( __linux__ ) || defined( _WIN32 ) /* || defined( __APPLE__ ) require?*/
-		size_t strlcpy(char *dst, char *src, size_t siz);
-		size_t strlcat(char *dst, char *src, size_t siz);
+
+	// this is trap/syscalls, for popular functions like cos/sin/tan prototypes
+	// most likely alredy declared in above included headers, but not for below functions,
+	// because they are BSD originated, so we need declare it.
+
+	size_t strlcpy(char *dst, char *src, size_t siz);
+	size_t strlcat(char *dst, char *src, size_t siz);
+
 	#endif
+
+	// native_lib.c
+
+	#if defined( _WIN32 )
+
+	int Q_vsnprintf(char *buffer, size_t count, const char *format, va_list argptr);
+	int snprintf(char *buffer, size_t count, char const *format, ...);
+
+	#else
+
+	#define Q_vsnprintf vsnprintf
+
+	#endif // defined( _WIN32 )
 
 #endif
 
