@@ -116,6 +116,8 @@ int 	trap_SetBotCMD( int edn,int msec, float angles_x, float angles_y, float ang
                                 int forwardmove, int sidemove, int upmove, 
                                 int buttons, int impulse);
 
+void	trap_setpause ( int pause );
+
 int QVMstrftime( char *valbuff, int sizebuff, const char *fmt, int offset );
 
 void trap_makevectors( float *v );

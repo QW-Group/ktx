@@ -630,6 +630,7 @@ qboolean RegisterCvar ( const char *var )
 void FirstFrame	( )
 {
 	int 		i, um_idx;
+	extern int when_to_unpause, pauseduration;
 
 	if ( framecount != 1 )
 		return;
@@ -848,6 +849,8 @@ void FirstFrame	( )
 	k_ctf = (k_mode == gtCTF); // finaly decide is ctf active or not
 	k_ctf_custom_models = k_ctf_custom_models && isCTF(); // precache only if CTF is really on
 #endif
+
+	when_to_unpause = pauseduration = 0;
 }
 
 // items spawned, but probably not solid yet

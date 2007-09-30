@@ -74,6 +74,7 @@ void            G_EdictTouch();
 void            G_EdictThink();
 void            G_EdictBlocked();
 void            ClearGlobals();
+void			PausedTic( int duration );
 
 qboolean		ClientSay( qboolean isTeamSay );
 
@@ -288,6 +289,11 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		// params like GAME_CLIENT_COMMAND
 
 		return ClientSay( arg0 );
+
+	case GAME_PAUSED_TIC:
+		// called every frame when the game is paused
+		PausedTic( arg0 );
+		return 0;
 	}
 
 	return 0;

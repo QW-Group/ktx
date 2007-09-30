@@ -189,6 +189,7 @@ void airstep();
 void teamoverlay();
 void ToggleExclusive();
 void ToggleVwep();
+void TogglePause();
 
 // spec
 void ShowCamHelp();
@@ -436,7 +437,8 @@ const char CD_NODESC[] = "no desc";
 #define CD_AIRSTEP      "toggle airstep"
 #define CD_TEAMOVERLAY  "toggle teamoverlay"
 #define CD_EXCLUSIVE    "toggle exclusive mode"
-#define CD_VWEP			"toggle vweps"
+#define CD_VWEP		"toggle vweps"
+#define CD_PAUSE	"toggle pause"
 
 
 void dummy() {}
@@ -703,7 +705,8 @@ cmd_t cmds[] = {
 	{ "airstep",     airstep,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_AIRSTEP },
 	{ "teamoverlay", teamoverlay,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_TEAMOVERLAY },
 	{ "exclusive",   ToggleExclusive,           0    , CF_BOTH_ADMIN, CD_EXCLUSIVE },
-	{ "vwep",		 ToggleVwep,				0    , CF_PLAYER | CF_SPC_ADMIN, CD_VWEP },
+	{ "vwep",	 ToggleVwep,		    0    , CF_PLAYER | CF_SPC_ADMIN, CD_VWEP },
+	{ "pause",	 TogglePause,		    0    , CF_PLAYER | CF_MATCHLESS | CF_SPC_ADMIN, CD_PAUSE },
 };
 
 #undef DEF
@@ -782,6 +785,9 @@ qboolean isCmdFlood(gedict_t *p)
 
 	if ( k_cmd_fp_disabled || p->connect_time + 5 > g_globalvars.time )
 		return false; // cmd flood protect is disabled or skip near connect time due to tons of "cmd info" commands is done
+
+	if (cvar("sv_paused"))	// FIXME: g_globalvars.time does not increase when paused, so if you
+		return false;		// triggered floodprot you wouldn't be able to unpause
 
 	idx = bound(0, p->fp_c.last_cmd, MAX_FP_CMDS-1);
 	cmd_time = p->fp_c.cmd_time[idx];
@@ -5575,3 +5581,43 @@ void setTeleportCap()
 
 // }
 
+int when_to_unpause;
+int pauseduration;
+
+void PausedTic( int duration )
+{
+    pauseduration = duration;
+
+    if (when_to_unpause && duration >= when_to_unpause)
+    {
+            when_to_unpause = 0;
+            G_bprint (2, "game unpaused\n");
+            trap_setpause (0);
+    }
+}
+
+void TogglePause ()
+{
+	if (match_in_progress != 2 && !k_matchLess)
+		return;
+
+	if( !cvar( "pausable" ) && !is_adm(self) ) {
+		G_sprint(self, 2, "Pause is not allowed.\n");
+		return;
+	}
+
+	if ((int)cvar("sv_paused") & 1) {
+		// pause release is not applied immediately, but after a countdown
+        if (when_to_unpause)
+                 return;  // unpause is pending
+        when_to_unpause = pauseduration + 2000;
+
+		G_bprint(2, "%s unpaused the game (will resume in 2 seconds)\n", self->s.v.netname);
+ 	}
+	else
+	{
+		G_bprint(2, "%s paused the game\n", self->s.v.netname);
+		pauseduration = 0;
+		trap_setpause (1);
+	}
+}

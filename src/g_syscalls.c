@@ -422,6 +422,12 @@ int 	trap_SetBotCMD( int edn,int msec, float angles_x, float angles_y, float ang
                                 forwardmove, sidemove, upmove, buttons, impulse );
 }
 
+void 	trap_setpause( int pause )
+{
+        return syscall( G_SETPAUSE, pause );
+}
+
+
 int QVMstrftime( char *valbuff, int sizebuff, const char *fmt, int offset )
 {
 	return syscall( G_QVMstrftime, (int)valbuff, sizebuff, (int)fmt, offset );
