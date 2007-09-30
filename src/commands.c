@@ -5586,38 +5586,56 @@ int pauseduration;
 
 void PausedTic( int duration )
 {
-    pauseduration = duration;
+	pauseduration = duration;
 
-    if (when_to_unpause && duration >= when_to_unpause)
-    {
-            when_to_unpause = 0;
-            G_bprint (2, "game unpaused\n");
-            trap_setpause (0);
-    }
+	if ( when_to_unpause && duration >= when_to_unpause )
+	{
+		when_to_unpause = pauseduration = 0; // reset our globals
+
+		G_bprint (2, "game unpaused\n");
+		trap_setpause (0);
+	}
 }
 
 void TogglePause ()
 {
-	if (match_in_progress != 2 && !k_matchLess)
-		return;
+	if ( !k_matchLess )
+	{ // NON matchless
+		if ( match_in_progress != 2 )
+			return; // apply TogglePause only during actual game
+	}
 
-	if( !cvar( "pausable" ) && !is_adm(self) ) {
-		G_sprint(self, 2, "Pause is not allowed.\n");
+	// admins may ignore not allowed pause
+	if( !cvar( "pausable" ) && !is_adm(self) )
+	{
+		G_sprint(self, 2, "Pause is not allowed\n");
 		return;
 	}
 
-	if ((int)cvar("sv_paused") & 1) {
+	if ( (int)cvar("sv_paused") & 1 )
+	{
+		// UNPAUSE
+
 		// pause release is not applied immediately, but after a countdown
-        if (when_to_unpause)
-                 return;  // unpause is pending
-        when_to_unpause = pauseduration + 2000;
+		if ( when_to_unpause )
+		{  // unpause is pending alredy
+			int sec = max(0, (when_to_unpause - pauseduration) / 1000);
+
+			G_sprint(self, 2, "Unpause is pending, %d second%s\n", sec, count_s(sec));
+			return;
+		}
+
+		when_to_unpause = pauseduration + 2000; // shedule unpause in 2000 ms
 
 		G_bprint(2, "%s unpaused the game (will resume in 2 seconds)\n", self->s.v.netname);
- 	}
+	}
 	else
 	{
+		// PAUSE
+
+		pauseduration = when_to_unpause = 0; // reset our globals
+
 		G_bprint(2, "%s paused the game\n", self->s.v.netname);
-		pauseduration = 0;
 		trap_setpause (1);
 	}
 }
