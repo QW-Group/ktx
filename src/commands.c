@@ -33,7 +33,6 @@ void PlayerBreak ();
 void ReqAdmin ();
 void AdminForceStart ();
 void AdminForceBreak ();
-void AdminForcePause ();
 void AdminSwapAll ();
 void TogglePreWar ();
 void ToggleMapLock ();
@@ -105,7 +104,6 @@ void ToggleRespawns();
 void ToggleSpecTalk();
 void ToggleSpeed();
 void VotePickup();
-void VoteUnpause();
 void UserMode(float umode);
 void Wp_Reset ();
 void Wp_Stats(float on);
@@ -247,7 +245,6 @@ const char CD_NODESC[] = "no desc";
 #define CD_ADMIN      "toggle admin-mode"
 #define CD_FORCESTART "force match to start"
 #define CD_FORCEBREAK "force match to end"
-#define CD_FORCEPAUSE "toggle pausemode"
 #define CD_PICKUP     "vote for pickup game"
 #define CD_PREWAR     "playerfire before game"
 #define CD_LOCKMAP    "(un)lock current map"
@@ -296,7 +293,6 @@ const char CD_NODESC[] = "no desc";
 #define CD_10ON10     "10 on 10 settings"
 #define CD_FFA        "FFA settings"
 #define CD_CTF        "CTF settings"
-#define CD_UNPAUSE    "vote unpause game"
 #define CD_PRACTICE   "toggle practice mode"
 #define CD_WP_RESET   "clear weapon stats"
 #define CD_PLS_WP_STATS "start print weapon stats"
@@ -437,8 +433,8 @@ const char CD_NODESC[] = "no desc";
 #define CD_AIRSTEP      "toggle airstep"
 #define CD_TEAMOVERLAY  "toggle teamoverlay"
 #define CD_EXCLUSIVE    "toggle exclusive mode"
-#define CD_VWEP		"toggle vweps"
-#define CD_PAUSE	"toggle pause"
+#define CD_VWEP         "toggle vweps"
+#define CD_PAUSE        "toggle pause"
 
 
 void dummy() {}
@@ -493,9 +489,6 @@ cmd_t cmds[] = {
 	{ "admin",       ReqAdmin,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_ADMIN },
 	{ "forcestart",  AdminForceStart,           0    , CF_BOTH_ADMIN, CD_FORCESTART },
 	{ "forcebreak",  AdminForceBreak,           0    , CF_BOTH_ADMIN, CD_FORCEBREAK },
-#ifndef NO_K_PAUSE
-	{ "forcepause",  AdminForcePause,           0    , CF_BOTH_ADMIN, CD_FORCEPAUSE },
-#endif
 	{ "pickup",      VotePickup,                0    , CF_PLAYER, CD_PICKUP }, 
 	{ "prewar",      TogglePreWar,              0    , CF_BOTH_ADMIN, CD_PREWAR },
 	{ "lockmap",     ToggleMapLock,             0    , CF_BOTH_ADMIN, CD_LOCKMAP },
@@ -551,9 +544,6 @@ cmd_t cmds[] = {
 	{ "ffa",         DEF(UserMode),             6	 , CF_PLAYER | CF_SPC_ADMIN, CD_FFA },
 	{ "ctf",         DEF(UserMode),             7    , CF_PLAYER | CF_SPC_ADMIN, CD_CTF },
 
-#ifndef NO_K_PAUSE
-	{ "unpause",     VoteUnpause,               0    , CF_PLAYER, CD_UNPAUSE },
-#endif
 	{ "practice",    TogglePractice,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_PRACTICE },
 	{ "wp_reset",    Wp_Reset,                  0    , CF_PLAYER, CD_WP_RESET },
 	{ "+wp_stats",   DEF(Wp_Stats),             2    , CF_BOTH | CF_MATCHLESS, CD_PLS_WP_STATS },
@@ -705,8 +695,8 @@ cmd_t cmds[] = {
 	{ "airstep",     airstep,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_AIRSTEP },
 	{ "teamoverlay", teamoverlay,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_TEAMOVERLAY },
 	{ "exclusive",   ToggleExclusive,           0    , CF_BOTH_ADMIN, CD_EXCLUSIVE },
-	{ "vwep",	 ToggleVwep,		    0    , CF_PLAYER | CF_SPC_ADMIN, CD_VWEP },
-	{ "pause",	 TogglePause,		    0    , CF_PLAYER | CF_MATCHLESS | CF_SPC_ADMIN, CD_PAUSE },
+	{ "vwep",        ToggleVwep,                0    , CF_PLAYER | CF_SPC_ADMIN, CD_VWEP },
+	{ "pause",       TogglePause,               0    , CF_PLAYER | CF_MATCHLESS | CF_SPC_ADMIN, CD_PAUSE },
 };
 
 #undef DEF
@@ -3058,88 +3048,6 @@ void UserMode(float umode)
 	cvar_fset("_k_last_xonx", umode+1); // save last XonX command
 }
 
-#define UNPAUSEGUARD ( "unpauseGuard" )
-
-
-void VoteUnpauseClean()
-{
-	gedict_t *p;
-
-	for( p = world; (p = find_plr( p )); )
-		p->k_voteUnpause = 0; // just for sanity
-
-	ent_remove( self );
-}
-
-void VoteUnpauseThink()
-{
-	gedict_t *p;
-	float f1 = 0, f2 = floor( (float)CountPlayers() / 2 ) + 1;
-
-	if ( !k_pause ) { // admin unpaused?
-		VoteUnpauseClean();
-		return;
-	}
-
-	for( p = world; (p = find_plr( p )); )
-		if( p->k_voteUnpause )
-			f1++;
-
-	if ( f1 >= f2 ) {
-		G_bprint(2, "Server unpaused the game\n");
-		ModPause( 0 );
-		VoteUnpauseClean();
-		return;
-	}
-
-	if ( self->cnt <= 0 ) {
-		G_bprint(2, "The unpause voting has timed out, aborting\n");
-		VoteUnpauseClean();
-		return;
-	}
-
-	self->s.v.nextthink = g_globalvars.time + 0.5;
-	self->cnt -= 0.5;
-}
-
-void VoteUnpause ()
-{
-	gedict_t *unpauseGuard, *p;
-	float f1 = 0, f2 = floor( (float)CountPlayers() / 2 ) + 1;
-
-	if ( k_pause != 2 )
-		return;
-
-	if( self->k_voteUnpause ) {
-		G_sprint(self, 2, "You have already voted\n");
-		return;
-	}
-
-// one guard per server
-	unpauseGuard = find(world, FOFCLSN, UNPAUSEGUARD );
-	if( !unpauseGuard ) {
-		unpauseGuard = spawn();
-		unpauseGuard->s.v.owner = EDICT_TO_PROG( world );
-		unpauseGuard->s.v.classname = UNPAUSEGUARD;
-		unpauseGuard->s.v.think = ( func_t ) VoteUnpauseThink;
-		unpauseGuard->s.v.nextthink = g_globalvars.time + 0.5;
-		unpauseGuard->cnt = 60; // Check the 1 minute timeout for vote
-
-		for( p = world; (p = find_plr( p )); )
-			p->k_voteUnpause = 0; // reset players
-	}
-
-	self->k_voteUnpause = 1;
-
-	for( p = world; (p = find_plr( p )); )
-		if( p->k_voteUnpause )
-			f1++;
-
-	G_bprint(2, "%s %s\n", self->s.v.netname, redtext("votes for unpause!"));
-    if ( f1 < f2 )
-		G_bprint(2, "%d more vote%s needed\n", (int)(f2 - f1),  ( (int)(f2 - f1) == 1 ? "" : "s") );
-}
-
 // ok, a bit complicated
 // this routine may change map if srv_practice_mode == 0 and mapname is not NULL
 void SetPractice(int srv_practice_mode, const char *mapname)
@@ -4119,7 +4027,7 @@ void next_pow ()
 // pos_show/pos_save/pos_move/pos_set_* commands {
 //================================================
 // common functions
-#define Pos_Disallowed()	(match_in_progress || k_pause || intermission_running)
+#define Pos_Disallowed()	(match_in_progress || intermission_running || cvar( "sv_paused" ))
 // parse pos_show/pos_save/pos_move <number>
 int Pos_Get_idx()
 {

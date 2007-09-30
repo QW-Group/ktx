@@ -26,7 +26,6 @@
 // g_local.h -- local definitions for game module
 
 //#define DEBUG
-#define NO_K_PAUSE    /* k_pause is buggy/unstable, so don't use it */
 #define CTF_RELOADMAP /* changing ctf status will force map reload */
 
 #include "q_shared.h"
@@ -679,7 +678,6 @@ qboolean is_adm(gedict_t *p);      // is elected admin (admin rigths granted by 
 void	KickThink ();
 void	ExitKick(gedict_t *kicker);
 
-void 	ModPause (int pause);
 void 	BecomeAdmin(gedict_t *p, int adm_flags);
 void 	VoteAdmin();
 
@@ -744,8 +742,6 @@ extern	float k_checkx;
 extern	float k_force;          // used in forcing matchstart
 extern	float k_maxspeed;       // used to store server maxspeed to allow switching by admins
 extern	float k_oldmaxspeed;    // used to store old value of maxspeed prior to freezing the map
-extern	float k_pause;
-extern	float k_pausetime;      // stores time at which server was paused
 extern	float k_showscores;     // whether or not should print the scores or not
 extern	float k_nochange;       // used to indicate if frags changes somehow since last time 'scores' command was called
 extern	float k_standby;        // if server is in standy mode

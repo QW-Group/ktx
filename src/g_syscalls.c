@@ -424,7 +424,7 @@ int 	trap_SetBotCMD( int edn,int msec, float angles_x, float angles_y, float ang
 
 void 	trap_setpause( int pause )
 {
-        return syscall( G_SETPAUSE, pause );
+	syscall( G_SETPAUSE, pause );
 }
 
 

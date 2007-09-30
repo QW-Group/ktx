@@ -31,8 +31,6 @@ float k_checkx = 0;		// global which set to true when some time spend after matc
 float k_force;          // used in forcing matchstart
 float k_maxspeed;       // used to store server maxspeed to allow switching by admins
 float k_oldmaxspeed;    // used to store old value of maxspeed prior to freezing the map
-float k_pause = 0;
-float k_pausetime;      // stores time at which server was paused
 float k_showscores;     // whether or not should print the scores or not
 						// now k_showscores != 0  only in team mode exactly with two teams
 float k_nochange = 0;   // used to indicate if frags changes somehow since last time 'scores' command was called

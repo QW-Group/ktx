@@ -390,11 +390,6 @@ void G_ShutDown()
 	if ( !cvar( "lock_practice" ) && k_practice )  // #practice mode#
 		SetPractice( 0, NULL ); // return server to normal mode
 
-	if ( k_pause ) {
-		G_bprint(2, "map change, unpausing.\n");
-		ModPause ( 0 );
-	}
-
 	if ( match_in_progress )
 		EndMatch( 1 ); // skip demo, make some other stuff
 

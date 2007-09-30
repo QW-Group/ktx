@@ -105,17 +105,13 @@ qboolean CheckRate (gedict_t *p, char *newrate)
 #define TA_INFO			(1<<0)
 #define TA_GLOW			(1<<1)
 #define TA_INVINCIBLE	(1<<2)
-#define TA_KPAUSE		(1<<3)
-#define TA_ALL			( TA_INFO | TA_GLOW | TA_INVINCIBLE | TA_KPAUSE )
-
-int lasttimed = 0;
+#define TA_ALL			( TA_INFO | TA_GLOW | TA_INVINCIBLE )
 
 // check if client lagged or returned from lag
 void CheckTiming()
 {
 	float timing_players_time = bound(0, cvar( "timing_players_time" ), 30);
 	int timing_players_action = TA_ALL & (int)cvar( "timing_players_action" );
-	int timed = 0;
 	gedict_t *p;
 
 	if ( !cvar( "allow_timing" ) )
@@ -127,7 +123,6 @@ void CheckTiming()
 		if( p->k_lastPostThink + timing_players_time < g_globalvars.time ) {
 			int firstTime; // guess is we are already know player is lagged
 			firstTime = !p->k_timingWarnTime;
-            timed++;
 
 			// warn and repeat warn after some time
 			if ( firstTime || p->k_timingWarnTime + 20 < g_globalvars.time ){
@@ -148,15 +143,6 @@ void CheckTiming()
 					p->s.v.movetype	   = 0;
 					SetVector( p->s.v.velocity, 0, 0, 0 ); // speed is zeroed and not restored
 				}
-
-#ifndef NO_K_PAUSE
-				if ( timing_players_action & TA_KPAUSE ) {
-					if ( !k_pause ) {
-						G_bprint(2, "Server issues a pause\n");
-						ModPause ( 2 );
-					}
-				}
-#endif
 			}
 
 		}
@@ -174,11 +160,6 @@ void CheckTiming()
 				p->s.v.effects = ( int ) p->s.v.effects & ~EF_DIMLIGHT;
 		}
 	}
-
-	if ( lasttimed && !timed && k_pause == 2 )
-		G_bprint(2, "You can vote now for %s\n", redtext( "unpause" ) );
-
-	lasttimed = timed;
 }
 
 
@@ -704,7 +685,10 @@ Player entered the suicide command
 */
 void ClientKill()
 {
-	if( k_pause || k_standby )
+	if ( cvar( "sv_paused" ) )
+        return; // kill not alowed during pause
+
+	if( k_standby )
         return;
 
 	if ( ISDEAD( self ) || !self->s.v.takedamage )
@@ -2389,9 +2373,6 @@ void PlayerPreThink()
 	if ( isRA() )
 		RocketArenaPre();
 
-	if( k_pause )
-		return;
-
 	trap_makevectors( self->s.v.v_angle );	// is this still used
 
 	CheckRules();
@@ -2747,11 +2728,6 @@ void PlayerPostThink()
     }
 
 */
-
-	if( k_pause ) {
-		ImpulseCommands();
-		return;
-	}
 
 	if ( self->s.v.view_ofs[0] == 0 && self->s.v.view_ofs[1] == 0 && self->s.v.view_ofs[2] == 0 )
 		return;		// intermission or finale

@@ -1331,11 +1331,6 @@ void TimerThink ()
 	if( k_sudden_death )
 		return;      
 
-	if( k_pause ) { // wtf, all nextthink fields is set to -1 while paused
-		self->s.v.nextthink = g_globalvars.time + 1;
-		return;
-	}
-
 	if( self->k_teamnum < g_globalvars.time && !k_checkx )
 		k_checkx = 1; // global which set to true when some time spend after match start
 

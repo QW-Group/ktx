@@ -378,7 +378,6 @@ typedef struct gedict_s {
 	float	k_flag;          // flagvalue to customise settings such as sounds/autoscreenshot
 	float	k_msgcount;      // NOT_SURE: last time mod printed a message to client?
 	float	k_picked;        // NOT_SURE: 
-	float	k_ptime;         // stores player nexttime value when server is paused
 	float	k_stuff;         // if player has received stuffed aliases
 	float	k_teamnumber;    // team the player is a member of, 1 = team1, 2 = team2
 	float	k_teamnum;       // NOT_SURE:
@@ -412,7 +411,7 @@ typedef struct gedict_s {
 	int   k_timingSolid;    // .... so we can restore
 	int   k_timingMovetype; // .... so we can restore
 // }
-	int   k_voteUnpause;    // store here vote for unpause, for particular player
+
 // { stats
 	int   wp_stats;			// show +wp_stats or not
 	float wp_stats_time;    // used to force centerprint is off at desired time

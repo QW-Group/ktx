@@ -1253,11 +1253,6 @@ void StartFrame( int time )
 	CheckTiming(); // check if client lagged or returned from lag
 	Check_sready(); // k_sready stuff
 
-	if ( !CountPlayers() && k_pause ) {
-		G_bprint(2, "No players left, unpausing.\n");
-		ModPause( 0 );
-	}
-
 	if ( intermission_running && g_globalvars.time >= intermission_exittime - 1 
 			&& !strnull( cvar_string( "serverdemo" ) ) )
 		localcmd("stop\n"); // demo is recording, stop it and save
