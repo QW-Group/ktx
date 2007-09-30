@@ -2746,7 +2746,7 @@ const char common_um_init[] =
 	"k_dmgfrags 0\n"					// damage frags off
 	"k_tp_tele_death 1\n"				// affect frags on team telefrags or not
 	"k_allowcountchange 1\n"			// permissions for upplayers, only real admins
-	"k_maxspectators 4\n"				// some default value
+	"k_maxspectators 6\n"				// some default value
 	"k_ip_list 1\n"						// permissions for iplist, only real admins
       
 	"k_membercount 0\n"					// some unlimited values
