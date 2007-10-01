@@ -2713,7 +2713,7 @@ ok:
 
 // common settings for all user modes
 const char common_um_init[] =
-	"set pm_airstep 0\n"
+	"set pm_airstep \"\"\n"
 //	"set k_vwep 1\n"
 	"maxclients 8\n"
 	"k_instagib 0\n"					// instagib off
