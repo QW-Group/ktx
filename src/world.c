@@ -293,7 +293,7 @@ void SP_worldspawn()
 		trap_precache_sound( "weapons/coilgun.wav" );
 	}
 	
-	if ( cvar("k_custom_spawn") )
+	if ( cvar("k_spm_custom_model") )
 		trap_precache_model( "progs/spawn.mdl" );
 	
 	trap_precache_model( "progs/player.mdl" );
@@ -451,7 +451,7 @@ void Customize_Maps()
 
 	jumpf_flag = -650;
 
-	if ( cvar( "k_sspawn" ))
+	if ( cvar( "k_spm_show" ))
 		ShowSpawnPoints();
 
 	if ( streq( "q1dm17", g_globalvars.mapname ) )
@@ -716,14 +716,14 @@ void FirstFrame	( )
 //	RegisterCvar("k_maxrate"); -> now using sv_maxrate instead
 	RegisterCvar("k_minrate");
 	RegisterCvar("k_sready");
-	RegisterCvarEx("k_sspawn", "1");
-	RegisterCvarEx("k_spawn_glow", "0");
-	RegisterCvarEx("k_custom_spawn", "0");
+	RegisterCvarEx("k_spm_show", "1");
+	RegisterCvarEx("k_spm_glow", "0");
+	RegisterCvarEx("k_spm_custom_model", "0");
 	RegisterCvar("k_idletime");
 	RegisterCvar("k_timetop");
 	RegisterCvar("k_dm2mod");
 	RegisterCvar("k_membercount");
-	RegisterCvar("demo_tmp_record");
+	RegisterCvarEx("demo_tmp_record", "0");
 	RegisterCvar("demo_skip_ktffa_record");
 	RegisterCvar("k_demoname_date"); // add date to demo name, value is argument for strftime() function
 	RegisterCvarEx("k_count", "10");

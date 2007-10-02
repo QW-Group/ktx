@@ -1,3 +1,8 @@
+2007-10-02
+deurk:
+276. Changed k_ssapwn to k_spm_show, k_spawn_glow to k_spm_glow and
+	k_custom_spawn to k_spm_custom_model.
+
 2007-09-10
 deurk:
 275. Coilgun in instagib now has a toggeable kickback (same as RL without
