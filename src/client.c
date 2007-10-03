@@ -2989,7 +2989,8 @@ void StatsHandler(gedict_t *targ, gedict_t *attacker)
 	}
 }
 
-static int	i_agmr_height = 0; // used for instagib, reset to 0 on each map reload...
+// Instagib rewards are suspended till I figure out if that would be useful or not -- deurk 
+// static int	i_agmr_height = 0; // used for instagib, reset to 0 on each map reload...
 
 float Instagib_Obituary( gedict_t *targ, gedict_t *attacker )
 {
@@ -3047,6 +3048,7 @@ float Instagib_Obituary( gedict_t *targ, gedict_t *attacker )
 		}
 	}
 
+	/* Instagib rewards are suspended till I figure out if that would be useful or not -- deurk 
 	if ( attacker->ps.i_height > 2000 )
 	{
 		if ( !i_agmr_height )
@@ -3080,6 +3082,7 @@ float Instagib_Obituary( gedict_t *targ, gedict_t *attacker )
 			}				
 		}
 	}
+	*/
 
 	return playerheight;
 }
