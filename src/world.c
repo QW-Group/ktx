@@ -331,7 +331,8 @@ void SP_worldspawn()
         trap_precache_vwep_model ("progs/w_rock.mdl");
         trap_precache_vwep_model ("progs/w_rock2.mdl");
         trap_precache_vwep_model ("progs/w_light.mdl");
-        trap_precache_vwep_model ("progs/w_coil.mdl");	//index 10
+		if ( cvar("k_instagib_custom_models") )
+			trap_precache_vwep_model ("progs/w_coil.mdl");	//index 10
         trap_precache_vwep_model ("-");			// null vwep model
     }
 	vw_enabled = vw_available && cvar("k_allow_vwep") && cvar("k_vwep");
