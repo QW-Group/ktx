@@ -743,6 +743,7 @@ void OnePlayerInstagibStats( gedict_t *p, int tp )
 	float	dmg_g, dmg_t, dmg_team;
 	int   ring;
 	float h_ax, a_ax, h_sg, a_sg, h_ssg, a_ssg;
+	char *stats_text;
 
 	dmg_g = p->ps.dmg_g;
 	dmg_t = p->ps.dmg_t;
@@ -760,55 +761,68 @@ void OnePlayerInstagibStats( gedict_t *p, int tp )
 	h_sg  = 100.0 * h_sg  / max(1, a_sg);
 	h_ssg = 100.0 * h_ssg / max(1, a_ssg);
 	
-	G_bprint(2, "\n\x87 %s: %s%s \x87\n", "PLAYER", ( isghost( p ) ? "\x83" : "" ), getname(p));
+	stats_text = va("\n\x87 %s: %s%s \x87\n", "PLAYER", ( isghost( p ) ? "\x83" : "" ), getname(p));
 
-	G_bprint(2, " \220%s\221\n", "SCORES");
-	G_bprint(2, "  %s: %.1f\n", redtext("Efficiency"), p->efficiency);
-	G_bprint(2, "  %s: %d\n", redtext("Points"), (int)p->s.v.frags);
-//	G_bprint(2, "  %s: %d\n", redtext("Frags"), p->ps.i_cggibs + p->ps.i_axegibs + p->ps.i_stompgibs);
+	stats_text = va("%s \220%s\221\n", stats_text, "SCORES");
+	stats_text = va("%s  %s: %.1f\n", stats_text, redtext("Efficiency"), p->efficiency);
+	stats_text = va("%s  %s: %d\n", stats_text, redtext("Points"), (int)p->s.v.frags);
+	stats_text = va("%s  %s: %d\n", stats_text, redtext("Frags"), p->ps.i_cggibs + p->ps.i_axegibs + p->ps.i_stompgibs);
 	if (tp)
-		G_bprint(2, "  %s: %d\n", redtext("Teamkills"), (int)p->friendly);
-	G_bprint(2, "  %s: %d\n", redtext("Deaths"), (int)p->deaths);
+		stats_text = va("%s  %s: %d\n", stats_text, redtext("Teamkills"), (int)p->friendly);
+	stats_text = va("%s  %s: %d\n", stats_text, redtext("Deaths"), (int)p->deaths);
 
-	G_bprint(2, "  %s: %d\n", redtext("Streaks"), p->ps.spree_max);
-	G_bprint(2, "  %s: %d\n", redtext("Spawns"), p->ps.spawn_frags);
+	stats_text = va("%s  %s: %d\n", stats_text, redtext("Streaks"), p->ps.spree_max);
+	stats_text = va("%s  %s: %d\n", stats_text, redtext("Spawns"), p->ps.spawn_frags);
 
-//	G_bprint(2, " \220%s\221\n", "SPEED");
-//	G_bprint(2, "  %s: %.1f\n", redtext("Maximum"), p->ps.velocity_max);
-//	G_bprint(2, "  %s: %.1f\n", redtext("Average"), 
-//		p->ps.vel_frames > 0 ? p->ps.velocity_sum / p->ps.vel_frames : 0.);
+	stats_text = va("%s \220%s\221\n", stats_text, "SPEED");
+	stats_text = va("%s  %s: %.1f\n", stats_text, redtext("Maximum"), p->ps.velocity_max);
+	stats_text = va("%s  %s: %.1f\n", stats_text, redtext("Average"), 
+		p->ps.vel_frames > 0 ? p->ps.velocity_sum / p->ps.vel_frames : 0.);
 
 
-	G_bprint(2, " \220%s\221\n", "WEAPONS");
+	stats_text = va("%s \220%s\221\n", stats_text, "WEAPONS");
 	if ( (cvar("k_instagib") == 1) )
 	{
-		G_bprint(2, "  %s: %s", redtext("Coilgun"), (a_sg ? va("%.1f%% (%d)", h_sg, p->ps.i_cggibs) : ""));
-		G_bprint(2, "%s", (a_sg ? "" : "n/u"));
+		stats_text = va("%s  %s: %s", stats_text, redtext("Coilgun"), (a_sg ? va("%.1f%% (%d)", h_sg, p->ps.i_cggibs) : ""));
+		stats_text = va("%s%s", stats_text, (a_sg ? "" : "n/u"));
 	}
 	else
 	{
-		G_bprint(2, "  %s: %s", redtext("Coilgun"), (a_ssg ? va("%.1f%% (%d)", h_ssg,  p->ps.i_cggibs) : ""));
-		G_bprint(2, "%s", (a_ssg ? "" : "n/u"));
+		stats_text = va("%s  %s: %s", stats_text, redtext("Coilgun"), (a_ssg ? va("%.1f%% (%d)", h_ssg,  p->ps.i_cggibs) : ""));
+		stats_text = va("%s%s", stats_text, (a_ssg ? "" : "n/u"));
 	}	
-	G_bprint(2, "\n");
-	G_bprint(2, "  %s: %s", redtext("Axe"), (a_ax ? va("%.1f%% (%d)", h_ax, p->ps.i_axegibs) : ""));
-	G_bprint(2, "%s", (a_ax ? "" : "n/u"));
-	G_bprint(2, "\n");
+	stats_text = va("%s\n", stats_text);
+	stats_text = va("%s  %s: %s", stats_text, redtext("Axe"), (a_ax ? va("%.1f%% (%d)", h_ax, p->ps.i_axegibs) : ""));
+	stats_text = va("%s%s", stats_text, (a_ax ? "" : "n/u"));
+	stats_text = va("%s\n", stats_text);
 
-//	G_bprint(2, " \220%s\221\n", "GIBS");
-//	G_bprint(2, "  %s: %d\n", redtext("Coilgun"), p->ps.i_cggibs);
-//	G_bprint(2, "  %s: %d\n", redtext("Axe"), p->ps.i_axegibs);
-//	G_bprint(2, "  %s: %d\n", redtext("Stomps"), p->ps.i_stompgibs);
+	stats_text = va("%s \220%s\221\n", stats_text, "GIBS");
+	stats_text = va("%s  %s: %d\n", stats_text, redtext("Coilgun"), p->ps.i_cggibs);
+	stats_text = va("%s  %s: %d\n", stats_text, redtext("Axe"), p->ps.i_axegibs);
+	stats_text = va("%s  %s: %d\n", stats_text, redtext("Stomps"), p->ps.i_stompgibs);
 
-//	G_bprint(2, " \220%s\221\n", "MULTIGIBS");
-//	G_bprint(2, "  %s: %d\n", redtext("Total Multigibs"), p->ps.i_multigibs);
-//	G_bprint(2, "  %s: %d\n", redtext("Maximum Victims"), p->ps.i_maxmultigibs);
+	stats_text = va("%s \220%s\221\n", stats_text, "MULTIGIBS");
+	stats_text = va("%s  %s: %d\n", stats_text, redtext("Total Multigibs"), p->ps.i_multigibs);
+	stats_text = va("%s  %s: %d\n", stats_text, redtext("Maximum Victims"), p->ps.i_maxmultigibs);
 
-//	G_bprint(2, " \220%s\221\n", "AIRGIBS");
-//	G_bprint(2, "  %s: %d\n", redtext("Total"), p->ps.i_airgibs);
-//	G_bprint(2, "  %s: %d\n", redtext("Total Height"), p->ps.i_height);
-//	G_bprint(2, "  %s: %d\n", redtext("Maximum Height"), p->ps.i_maxheight);
-//	G_bprint(2, "  %s: %.1f\n", redtext("Average Height"), p->ps.i_airgibs ? p->ps.i_height / p->ps.i_airgibs : 0.);
+	stats_text = va("%s \220%s\221\n", stats_text, "AIRGIBS");
+	stats_text = va("%s  %s: %d\n", stats_text, redtext("Total"), p->ps.i_airgibs);
+	stats_text = va("%s  %s: %d\n", stats_text, redtext("Total Height"), p->ps.i_height);
+	stats_text = va("%s  %s: %d\n", stats_text, redtext("Maximum Height"), p->ps.i_maxheight);
+	stats_text = va("%s  %s: %.1f\n", stats_text, redtext("Average Height"), p->ps.i_airgibs ? p->ps.i_height / p->ps.i_airgibs : 0.);
+	G_bprint(2, "%s", stats_text);
+	
+	if ( !tp )
+		G_bprint(2,"žžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n");
+
+	maxfrags   = max((isCTF() ? p->s.v.frags - p->ps.ctf_points : p->s.v.frags), maxfrags);
+	maxdeaths  = max(p->deaths, maxdeaths);
+	maxfriend  = max(p->friendly, maxfriend);
+	maxeffi    = max(p->efficiency, maxeffi);
+	maxcaps    = max(p->ps.caps, maxcaps);
+	maxdefends = max(p->ps.f_defends, maxdefends);
+	maxspree   = max(p->ps.spree_max, maxspree);
+	maxspree_q = max(p->ps.spree_max_q, maxspree_q);
 
 }
 
