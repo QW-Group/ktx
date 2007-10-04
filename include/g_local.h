@@ -39,9 +39,9 @@
 #define MOD_NAME			("KTX")
 #define MOD_VERSION			("1.34")
 #define MOD_DEV				("-beta")
-#define MOD_SERVERINFO_MOD_KEY		("xmod")
-#define MOD_SERVERINFO_BUILD_KEY	("xbuild")
-#define MOD_URL    			("http://ktx.sf.net")
+#define MOD_SERVERINFO_MOD_KEY		("ktxver")
+#define MOD_SERVERINFO_BUILD_KEY	("ktxbuild")
+#define MOD_URL    			("http://ktx.quakeonline.net")
 #define MOD_SRC_URL    			("http://ktx.svn.sf.net")
 
 // qqshka - hmm, seems in C this is macros

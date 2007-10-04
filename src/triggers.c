@@ -651,6 +651,10 @@ void hurt_touch()
 		T_Damage( other, self, self, self->dmg );
 		self->s.v.think = ( func_t ) hurt_on;
 		self->s.v.nextthink = g_globalvars.time + 1;
+		if ( match_in_progress !=2 )
+		{
+			stuffcmd(other, "kill\n");	// stupid but efficient way to not stay stuck in prewar
+		}
 	}
 
 	return;
@@ -667,7 +671,6 @@ void SP_trigger_hurt()
 		ent_remove ( self );
 		return;
 	}
-
 	InitTrigger();
 	self->s.v.touch = ( func_t ) hurt_touch;
 	if ( !self->dmg )
