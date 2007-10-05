@@ -70,8 +70,9 @@ void DropPowerup( float timeleft, int powerup )
 				swp->s.v.netname,
 				timeleft );
 
-	G_bprint( PRINT_HIGH, "%s lost a %s with %.0f seconds remaining\n",
-					  	  swp->s.v.netname, self->s.v.netname, timeleft );
+	mi_print( swp, powerup, va( "%s lost a %s with %.0f seconds remaining\n",
+					  	  swp->s.v.netname, self->s.v.netname, timeleft ));
+
 
 	self = swp;// restore self
 }
@@ -1426,9 +1427,9 @@ void powerup_touch()
 
 	if ( p_cnt ) {  // is this was a dropped powerup
 			p_cnt[0] = self->cnt;
-			G_bprint( PRINT_HIGH, "%s recovered a %s with %d seconds remaining!\n",
+			mi_print( other, self->s.v.items, va( "%s recovered a %s with %d seconds remaining!\n",
 			  					other->s.v.netname, self->s.v.netname,
-			  					( int ) ( p_cnt[0] - g_globalvars.time ) );
+			  					( int ) ( p_cnt[0] - g_globalvars.time ) ));
 			real_time = p_cnt[0] - g_globalvars.time;
 			SUB_RM_01( self );// remove later
 	}
