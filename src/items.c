@@ -70,7 +70,7 @@ void DropPowerup( float timeleft, int powerup )
 				swp->s.v.netname,
 				timeleft );
 
-	mi_print( swp, powerup, va( "%s lost a %s with %.0f seconds remaining\n",
+	mi_print( swp, powerup, va( "%s dropped a %s with %.0f seconds left",
 					  	  swp->s.v.netname, self->s.v.netname, timeleft ));
 
 
@@ -1427,12 +1427,17 @@ void powerup_touch()
 
 	if ( p_cnt ) {  // is this was a dropped powerup
 			p_cnt[0] = self->cnt;
-			mi_print( other, self->s.v.items, va( "%s recovered a %s with %d seconds remaining!\n",
+			mi_print( other, self->s.v.items, va( "%s got a %s with %d seconds left",
 			  					other->s.v.netname, self->s.v.netname,
 			  					( int ) ( p_cnt[0] - g_globalvars.time ) ));
 			real_time = p_cnt[0] - g_globalvars.time;
 			SUB_RM_01( self );// remove later
 	}
+	else
+	{
+		mi_print(other, self->s.v.items, va("%s got %s", getname(other), self->s.v.netname));
+	}
+
 
 	log_printf( "\t\t\t<event time=\"%f\" act=\"p\" it=\"%s\" pl=\"%s\" val=\"%f\" />\n",
 				g_globalvars.time - match_start_time,
@@ -1440,7 +1445,6 @@ void powerup_touch()
 				other->s.v.netname,
 				real_time );
 
-	mi_print(other, self->s.v.items, va("%s got %s%s", getname(other), (p_cnt ? "dropped " : ""), self->s.v.netname));
 
 	ktpro_autotrack_on_powerup_take(other);
 
