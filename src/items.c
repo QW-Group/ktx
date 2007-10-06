@@ -538,9 +538,9 @@ void Deathmatch_Weapon( int new )
 		self->s.v.weapon = new;
 }
 
-void DoWeaponChange( int new )
+void DoWeaponChange( int new, qboolean backpack )
 {
-	int w_switch = iKey( self, "w_switch" );
+	int w_switch = iKey( self, backpack ? "b_switch" : "w_switch" );
 
 	if ( !w_switch )
 		w_switch = 8;
@@ -685,7 +685,7 @@ void weapon_touch()
 	stemp = self;
 	self = other;
 
-	DoWeaponChange( new ); // change to the weapon
+	DoWeaponChange( new, false ); // change to the weapon
 
 	self = stemp;
 
@@ -904,7 +904,7 @@ void ammo_touch()
 		stemp = self;
 		self = other;
 
-		DoWeaponChange( W_BestWeapon() ); // change to the weapon
+		DoWeaponChange( W_BestWeapon(), false ); // change to the weapon
 
 		self = stemp;
 	}
@@ -1794,7 +1794,7 @@ void BackpackTouch()
 	stemp = self;
 	self = other;
 
-	DoWeaponChange( new ); // change to the weapon
+	DoWeaponChange( new, true ); // change to the weapon
 
 	self = stemp;
 }
