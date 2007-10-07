@@ -463,7 +463,12 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	take = max(0, take); // avoid negative take, if any
 
-	dmg_dealt += targ->s.v.health > take ? take : targ->s.v.health;
+	if ( cvar("k_dmgfrags") )
+	{
+		dmg_dealt += take;
+	} else {
+		dmg_dealt += targ->s.v.health > take ? take : targ->s.v.health;
+	}
 
 	// add to the damage total for clients, which will be sent as a single
 	// message at the end of the frame

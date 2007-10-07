@@ -3265,7 +3265,8 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		}
 		else
 		{	// normal kill, Kteams version
-			attacker->s.v.frags += 1;
+			if ( !cvar("k_dmgfrags") )
+				attacker->s.v.frags += 1;
 			logfrag (attacker, targ);
 
 			attacker->victim = targ->s.v.netname;
