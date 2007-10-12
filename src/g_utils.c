@@ -1686,7 +1686,7 @@ void show_sv_version()
 
 	if ( !strnull( tm = ezinfokey(world, "date_str") ) )
 		G_sprint(self, 2, "Date: %s\n", tm);
-	G_sprint(self, 2, "Mod: %s %s%s, build %d\n", MOD_NAME, MOD_VERSION, MOD_DEV, build_number());
+	G_sprint(self, 2, "Mod: %s %s, build %d\n", MOD_NAME, MOD_VERSION, build_number());
 	G_sprint(self, 2, "Server: %s\n", cvar_string( "version" ));
 
 	if ( (int)cvar( "sv_specprint" ) & SPECPRINT_SPRINT )

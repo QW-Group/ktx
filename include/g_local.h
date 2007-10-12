@@ -37,8 +37,7 @@
 #include "player.h"
 
 #define MOD_NAME			("KTX")
-#define MOD_VERSION			("1.34")
-#define MOD_DEV				("-beta")
+#define MOD_VERSION			("1.34b")
 #define MOD_SERVERINFO_MOD_KEY		("ktxver")
 #define MOD_SERVERINFO_BUILD_KEY	("ktxbuild")
 #define MOD_URL    			("http://ktx.quakeonline.net")

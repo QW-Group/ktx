@@ -62,8 +62,8 @@ void PMOTDThink()
 		strlcat(buf, "Welcome\n\n", sizeof(buf));
 
 	strlcat(buf, "\nÄÅÅÅÅÅÇ\n\n", sizeof(buf));
-	strlcat(buf, va("Running %s %s%s (build %s)\nby %s\n\n", redtext(MOD_NAME),
-					dig3s(MOD_VERSION), MOD_DEV, dig3s("%d", build_number()), redtext("KTX development team")), sizeof(buf));
+	strlcat(buf, va("Running %s %s (build %s)\nby %s\n\n", redtext(MOD_NAME),
+					dig3s(MOD_VERSION), dig3s("%d", build_number()), redtext("KTX development team")), sizeof(buf));
 	strlcat(buf, va("Website: %s\n", redtext(MOD_URL)), sizeof(buf));
 	//strlcat(buf, va("Based on %s\n", redtext("Kombat teams 2.21")), sizeof(buf));
 // qqshka - this info can be found in /about command

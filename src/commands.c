@@ -1132,7 +1132,7 @@ void ShowVersion()
 
 	strlcat(buf, "\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236", sizeof(buf));
 	strlcat(buf, "\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n\n", sizeof(buf));
-	strlcat(buf, va("Running %s %s%s (build: %s)\nby %s\n\n", redtext(MOD_NAME), dig3s(MOD_VERSION), MOD_DEV,
+	strlcat(buf, va("Running %s %s (build: %s)\nby %s\n\n", redtext(MOD_NAME), dig3s(MOD_VERSION),
 						dig3s("%d", build_number()), redtext("KTX development team")), sizeof(buf));
 	strlcat(buf, va("Based on %s\n", redtext("Kombat teams 2.21")), sizeof(buf));
 	strlcat(buf, "by kemiKal, Cenobite, Sturm and Fang\n\n", sizeof(buf));
