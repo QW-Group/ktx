@@ -465,9 +465,13 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	if ( cvar("k_dmgfrags") )
 	{
+		// damage dealt _not_ capped by victim's health
 		dmg_dealt += take;
-	} else {
-		dmg_dealt += targ->s.v.health > take ? take : targ->s.v.health;
+	}
+	else
+	{
+		// damage dealt capped by victim's health
+		dmg_dealt += bound( 0, take, targ->s.v.health );
 	}
 
 	// add to the damage total for clients, which will be sent as a single
@@ -652,10 +656,11 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		}
 		else 
 		{
-			attacker->ps.dmg_g += dmg_dealt;
 			if ( dtRL == targ->deathtype )
 				attacker->ps.dmg_g_rl += dmg_dealt;
-			targ->ps.dmg_t += dmg_dealt;
+
+			attacker->ps.dmg_g += dmg_dealt;
+			targ->ps.dmg_t     += dmg_dealt;
 		}
 	}
 
