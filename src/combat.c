@@ -306,7 +306,9 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	float           save;
 	float           take;
 	int				i, c1 = 8, c2 = 4, hdp;
-	float			dmg_dealt = 0, non_hdp_damage;
+	float			dmg_dealt = 0;
+	float			non_hdp_damage; // save damage before handicap apply for kickback calculation
+	float			native_damage = damage; // save damage before apply any modificator
 	char            *attackerteam, *targteam, *attackername;
 
 	//midair and instagib
@@ -461,6 +463,10 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			take = 0;
 	}
 
+	// helps kill player in prewar at "wrong" places
+	if ( match_in_progress != 2 && native_damage > 450 )
+		take = 99999;
+
 	take = max(0, take); // avoid negative take, if any
 
 	if ( cvar("k_dmgfrags") )
@@ -598,6 +604,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		 || dtSUICIDE == targ->deathtype // do suicide damage anyway
 		 || streq( inflictor->s.v.classname, "teledeath" ) 
 		 || ( k_practice && targ->ct != ctPlayer ) // #practice mode#
+		 || take >= 99999 // do such huge damage even in prewar, prewar because indirectly here match_in_progress != 2
 	   ) 
 	{
 		targ->s.v.health -= take;
@@ -624,6 +631,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			targ->s.v.health = -1; // qqshka, no zero health, heh, imo less bugs after this
 	}
 
+	// rl/gl stats
 	if ( attacker->ct == ctPlayer && targ->ct == ctPlayer && attacker != targ )
 	{
 		if ( take || save )
@@ -637,7 +645,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	}
 
 	// show damage in sbar
-	if ( match_in_progress != 2 )
+	if ( match_in_progress != 2 && targ->s.v.health > 0 )
 	{
 		if ( !midair || ( (int)targ->s.v.flags & FL_ONGROUND ) )
 		{

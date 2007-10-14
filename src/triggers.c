@@ -640,24 +640,21 @@ void hurt_on()
 {
 	self->s.v.solid = SOLID_TRIGGER;
 	self->s.v.nextthink = -1;
+	setorigin( self, PASSVEC3( self->s.v.origin ) ); // it matter
 }
 
 void hurt_touch()
 {
-	if ( other->s.v.takedamage )
+	if ( !other->s.v.takedamage )
 	{
-		self->s.v.solid = SOLID_NOT;
-		other->deathtype = dtTRIGGER_HURT;
-		T_Damage( other, self, self, self->dmg );
-		self->s.v.think = ( func_t ) hurt_on;
-		self->s.v.nextthink = g_globalvars.time + 1;
-		if ( match_in_progress !=2 )
-		{
-			stuffcmd(other, "kill\n");	// stupid but efficient way to not stay stuck in prewar
-		}
+		return;
 	}
 
-	return;
+	self->s.v.solid = SOLID_NOT;
+	other->deathtype = dtTRIGGER_HURT;
+	T_Damage( other, self, self, self->dmg );
+	self->s.v.think = ( func_t ) hurt_on;
+	self->s.v.nextthink = g_globalvars.time + 1;
 }
 
 /*QUAKED trigger_hurt (.5 .5 .5) ?
