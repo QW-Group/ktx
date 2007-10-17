@@ -99,6 +99,12 @@ void TogglePowerups();
 void ToggleQEnemy();
 void ToggleQLag();
 void ToggleQPoint();
+/* new FDP bits http://wiki.qwdrama.com/FPD
+void ToggleSkinForcing();
+void ToggleColorForcing();
+void TogglePitchSpeedLimit();
+void ToggleYawSpeedLimit();
+*/
 void ToggleRespawn666();
 void ToggleRespawns();
 void ToggleSpecTalk();
@@ -274,6 +280,12 @@ const char CD_NODESC[] = "no desc";
 #define CD_QLAG       "lag settings"
 #define CD_QENEMY     "enemy vicinity reporting"
 #define CD_QPOINT     "point function"
+/* new FDP bits http://wiki.qwdrama.com/FPD
+#define CD_SFORCING   "skin forcing"
+#define CD_CFORCING   "color forcing"
+#define CD_PITCHSP    "pitch speed limiting"
+#define CD_YAWSP      "yaw speed limiting"
+*/
 #define CD_KICK       "toggle kick mode"
 #define CD_MKICK      "multi kick"
 #define CD_Y          "yes kick"
@@ -522,6 +534,12 @@ cmd_t cmds[] = {
 	{ "qlag",        ToggleQLag,                0    , CF_PLAYER | CF_SPC_ADMIN, CD_QLAG },
 	{ "qenemy",      ToggleQEnemy,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_QENEMY },
 	{ "qpoint",      ToggleQPoint,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_QPOINT },
+/* new FDP bits http://wiki.qwdrama.com/FPD
+	{ "skinforce",   ToggleSkinForcing,         0    , CF_PLAYER | CF_SPC_ADMIN, CD_SFORCING },
+	{ "colorforce",  ToggleColorForcing,        0    , CF_PLAYER | CF_SPC_ADMIN, CD_CFORCING },
+	{ "pitchsl",     TogglePitchSpeedLimit,     0    , CF_PLAYER | CF_SPC_ADMIN, CD_PITCHSP },
+	{ "yawsl",       ToggleYawSpeedLimit,       0    , CF_PLAYER | CF_SPC_ADMIN, CD_YAWSP },
+*/
 	                                          
 	{ "kick",        AdminKick,                 0    , CF_BOTH_ADMIN/* FIXME: interference with ezq server kick command | CF_PARAMS */, CD_KICK },
 	{ "mkick",       m_kick,                    0    , CF_BOTH_ADMIN | CF_PARAMS, CD_MKICK },
@@ -1418,6 +1436,12 @@ void ModStatus2()
 	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo timers"),          OnOff( i &   2 ));
 	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo enemy reporting"), OnOff( i &  32 ));
 	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo pointing"),        OnOff( i & 128 ));
+/* new FDP bits http://wiki.qwdrama.com/FPD
+	G_sprint(self, 2, "%s: %s\n", redtext("Skin forcing"),          OnOff(! (i & 256) ));
+	G_sprint(self, 2, "%s: %s\n", redtext("Color forcing"),         OnOff(! (i & 512) ));
+	G_sprint(self, 2, "%s: %s\n", redtext("Pitch speed limiting"),  OnOff( i & 16384 ));
+	G_sprint(self, 2, "%s: %s\n", redtext("Yaw speed limiting"),    OnOff( i & 32768 ));
+*/
 
 	G_sprint(self, 2, "%s: %s\n", redtext("Admin election"),
 							 Allowed(cvar( "k_allowvoteadmin" )));
@@ -2489,6 +2513,80 @@ void ToggleQPoint()
 	G_bprint(2, "%s %s\n", 
 			redtext("QiZmo pointing"), Enabled( fpd & 128 ));
 }
+
+/* new FDP bits http://wiki.qwdrama.com/FPD
+void ToggleSkinForcing()
+{
+	int fpd = iKey( world, "fpd" );
+
+	if ( match_in_progress )
+		return;
+
+	if( check_master() )
+		return;
+
+	fpd ^= 256;
+
+	localcmd("serverinfo fpd %d\n", fpd);
+
+	G_bprint(2, "%s %s\n", 
+			redtext("Skin forcing"), Enabled( !(fpd & 256) ));
+}
+
+void ToggleColorForcing()
+{
+	int fpd = iKey( world, "fpd" );
+
+	if ( match_in_progress )
+		return;
+
+	if( check_master() )
+		return;
+
+	fpd ^= 512;
+
+	localcmd("serverinfo fpd %d\n", fpd);
+
+	G_bprint(2, "%s %s\n", 
+			redtext("Color forcing"), Enabled( !(fpd & 512) ));
+}
+
+void TogglePitchSpeedLimit()
+{
+	int fpd = iKey( world, "fpd" );
+
+	if ( match_in_progress )
+		return;
+
+	if( check_master() )
+		return;
+
+	fpd ^= 16384;
+
+	localcmd("serverinfo fpd %d\n", fpd);
+
+	G_bprint(2, "%s %s\n", 
+			redtext("Pitch speed limit"), Enabled( fpd & 16384 ));
+}
+
+void ToggleYawSpeedLimit()
+{
+	int fpd = iKey( world, "fpd" );
+
+	if ( match_in_progress )
+		return;
+
+	if( check_master() )
+		return;
+
+	fpd ^= 32768;
+
+	localcmd("serverinfo fpd %d\n", fpd);
+
+	G_bprint(2, "%s %s\n", 
+			redtext("Yaw speed limit"), Enabled( fpd & 32768 ));
+}
+*/
 
 void ToggleFreeze()
 {
