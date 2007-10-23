@@ -1525,7 +1525,7 @@ gedict_t *get_ed_scores2()
 
 // { version stuff
 
-// Matches build number with SVN revision number
+// Matches build number with SVN revision number 
 int build_number ()
 {
 	static int b = 0;
