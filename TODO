@@ -1,0 +1,102 @@
+To be added:
+------------
+- Race mode
+- Slide mode
+- Trick mode (defrag like)
+- Olympics mode
+- Scourge of Armageddon grapple hook model
+- Toggeable grapple hook outside CTF with default OFF
+
+
+To be decided:
+--------------
+- Pause options
+
+/timeout - would freeze the game in 3-2-1 - 'freeze'
+/timein - would unfreeze the game in 10-9-8-7-6-5-3-2-1-'go' fashion
+during timout all gameclocks would be paused. However it would be possible to connect to the server if there is free slots.
+/allowtimeout would toggle this option
+
+/votetimeout - works same way as above, but only if a majority of players types it.
+/votetimein
+/allowvotetimeout
+
+- CTF matchless
+- CTF autoteam
+
+To be fixed:
+------------
+
+
+
+
+
+
+
+
+
+
+OLD STUFF TO BE CHECKED:
+------------------------
+
+04:33] <Renzo> and uh, can you put this somewhere up too so you'd remember
+04:33] <Renzo> cmd uinfo should reveal
+04:33] <Renzo> client, possible qizmo, team and rate
+04:34] <Renzo> there are some other things that can be seen by ktpro like pmodels, w_/b_switch, top/bottomcolor and even noaim
+04:34] <Renzo> but those are irrelevant
+----------------------------------------------
+â®ª  çâ® ­ è¥« ¡ £ã, â®ç­¥¥ ®á®¡¥­­®áâì,
+	localcmd( "localinfo xxx yyy\n" );
+¬ë ­¥ ¯®«ãç¨¬ ¤®áâã¯ ª íâ®© localinfo xxx ¯®ª  ­¥ ­ áâã¯¨â á«¥¤ãîé¨© äà¥©¬,
+­ã ¨«¨ ­¥ ¢ë§®¢¥¬ trap_executecmd()
+
+----------------------------------------------
+TODO: check code about client connect during mod is paused i.e. k_pause != 0
+
+ ->s.v.nextthink trouble
+
+----------------------------------------------
+void ResetOptions()
+need fix some issue, look code for more imfo
+----------------------------------------------
+TODO: remove latest impulses except weapon and so on.
+----------------------------------------------
+ï âãâ ¯®¤ã¬ «,   çâ® ¥á«¨ ªâ® â® à¥§ã«ìâ â ¯®á«¥ ezinfokey
+á®¡¨à ¥âáï ªã¤ -â® ¯à¨á¢®¨âì ¨ ¯®â®¬ ¨á¯®«ì§®¢ âì ¢ ¤ «ì­¥©è¥¬?
+­ ¤® ¢á¥ ¯à®¢¥à¨âì %)
+----------------------------------------------
+k_admins clean this up
+----------------------------------------------
+forcebreak
+forcestart is implemented shitty, clean it up
+----------------------------------------------
+¨­®£¤  ¨¤¥â ¯®¤àï¤ ­¥áª®«ìª® ¯à¨­â®¢ ¨ ãà®¢­¨ ã ­¨å à §­ë¥ å®âï â ¬ ¯® á¬ëá«ã ¤®«¦¥­ ¡ëâì ®¤¨­
+----------------------------------------------
+    p = find(world, FOFCLSN, "player");
+    while( p && p->s.v.frags != self->s.v.impulse)
+        p = find(p, FOFCLSN, "player");
+
+    if(p->s.v.frags != self->s.v.impulse)
+	  ^^^
+	   |
+		¢ QC âãâ ¡ã¤¥â world ¨«¨ ¥é¥ ç¥£®,   ¢ QVM NULL, ­ã   §­ ç¨â crash :(
+
+­ ¤® ¨áª âì ¯®¤®¡­ë¥ èâãª¨
+----------------------------------------------
+
+Spectator coach
+
+!!!
+blood
+!!!
+
+----------------------------------------------------
+how we must do with q statistics and dropable quad?
+and same question about ring.
+----------------------------------------------------
+spawn at different places at map 'end' after teleporting
+----------------------------------------------------
+shownick: centerprint cleared after 0.8 second, mb let player customize this time?
+----------------------------------------------------
+¬®¦¥â ®¯æ¨®­ «ì­® ¯à¨ªàãâ¨âì á®åà ­ïâì áª®à®áâì ¯®á«¥ â¥«¥¯®àâ¨à®¢ ­¨ï?
+----------------------------------------------------
