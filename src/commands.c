@@ -508,7 +508,7 @@ cmd_t cmds[] = {
 	{ "speed",       ToggleSpeed,               0    , CF_PLAYER, CD_SPEED },
 	{ "fairpacks",   ToggleFairPacks,           0    , CF_PLAYER, CD_FAIRPACKS },
 	{ "about",       ShowVersion,               0    , CF_BOTH | CF_MATCHLESS, CD_ABOUT },
-	{ "shownick",    ShowNick,                  0    , CF_PLAYER, CD_SHOWNICK },
+	{ "shownick",    ShowNick,                  0    , CF_PLAYER | CF_PARAMS, CD_SHOWNICK },
 	{ "time5",       DEF(TimeSet),            5.0f   , CF_PLAYER, CD_TIME5 },
 	{ "time10",      DEF(TimeSet),           10.0f   , CF_PLAYER, CD_TIME10 },
 	{ "time15",      DEF(TimeSet),           15.0f   , CF_PLAYER, CD_TIME15 },
@@ -2605,15 +2605,18 @@ void ShowNick()
 {
 	gedict_t	*p, *bp = NULL;
 	char		*s1, *s2, *pups, *kn, buf[256] = {0};
+	char		arg_1[32];
 	float		best;
 	vec3_t		ang;
 	vec3_t		vieworg, entorg;
-	int			itms, i, ln;
+	int			itms, i, ln, version;
 
 	if ( !match_in_progress )
 		;  // allow shownick in prewar anyway
 	else if ( !isTeam() && !isCTF() )
 		return;
+
+	trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
 
 	ang[0] = self->s.v.v_angle[0];
 	ang[1] = self->s.v.v_angle[1];
@@ -2736,6 +2739,33 @@ ok:
 
 	if ( best < 0 || !bp )
 		return;
+
+	version = atoi(arg_1);
+
+	version = bound(0, version, 1);
+
+	switch ( version )
+	{
+		case 1:
+		{
+			int h, a;
+
+			if ( strnull( kn = ezinfokey(bp, "k_nick") ) ) // get nick, if any, do not send name, client can guess it too
+				kn = ezinfokey(bp, "k");
+
+			if (kn[0] && kn[1] && kn[2] && kn[3])
+				kn[4] = 0; // truncate nick to 4 symbols
+
+			i = NUM_FOR_EDICT( bp ) - 1;
+			h = bound(0, (int)bp->s.v.health, 999);
+			a = bound(0, (int)bp->s.v.armorvalue, 999);
+
+			stuffcmd( self, "//sn %d %d %d %d %d %d %d %d \"%s\"\n", version, i,
+		 		(int)bp->s.v.origin[0], (int)bp->s.v.origin[1], (int)bp->s.v.origin[2], h, a, (int)bp->s.v.items, kn );
+
+			return;
+		}
+	}
 
 	itms = (int)bp->s.v.items;
 
