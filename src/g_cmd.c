@@ -225,7 +225,7 @@ qboolean ClientSay( qboolean isTeamSay )
 	int sv_spectalk = cvar("sv_spectalk");
 	int sv_sayteam_to_spec = cvar("sv_sayteam_to_spec");
 	gedict_t *client, *goal;
-	qboolean fake = false;
+	qboolean fake = false, ignore_in_demos;
 
 	self = PROG_TO_EDICT( g_globalvars.self );
 
@@ -398,7 +398,10 @@ qboolean ClientSay( qboolean isTeamSay )
 			}
 		}
 
-		G_sprint(client, PRINT_CHAT, "%s\n", text);
+		// do not put private info in demos: pvivate is team say from player without $\ symbol 
+		ignore_in_demos = self->ct == ctPlayer && isTeamSay && !fake;
+
+		G_sprint_flags(client, PRINT_CHAT, ignore_in_demos ? SPRINT_IGNOREINDEMO : 0, "%s\n", text);
 	}
 
 // } MVDSV
