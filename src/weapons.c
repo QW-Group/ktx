@@ -282,6 +282,31 @@ void Multi_Finish()
 	SpawnBlood( puff_org, blood_count );
 }
 
+void CoilgunTrail( vec3_t endpos )
+{
+	vec3_t 	org;
+	int 	color;
+	
+	VectorCopy( self->s.v.origin, org );	//org = self->s.v.origin + '0 0 16';
+	org[2] += 16;
+
+	//color = int(ezinfokey(self, "railcolor"));
+	//if (color < 1 || color > 7)
+		color = 1;
+
+        WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
+        WriteByte( MSG_MULTICAST, TE_LIGHTNING1 );
+	WriteShort (MSG_MULTICAST, -264 + color);
+        WriteCoord( MSG_MULTICAST, org[0] );
+        WriteCoord( MSG_MULTICAST, org[1] );
+        WriteCoord( MSG_MULTICAST, org[2] );
+        WriteCoord( MSG_MULTICAST, endpos[0] );
+        WriteCoord( MSG_MULTICAST, endpos[1] );
+        WriteCoord( MSG_MULTICAST, endpos[2] );
+
+        trap_multicast( PASSVEC3( org ), MULTICAST_PHS );
+
+}
 /*
 ==============================================================================
 BULLETS
@@ -429,6 +454,7 @@ void FireInstaBullet( vec3_t dir, deathType_t deathtype )
     
 	ApplyMultiDamage();
 	Multi_Finish();
+	CoilgunTrail(src);
 }
 
 
