@@ -290,8 +290,8 @@ void CoilgunTrail( vec3_t endpos )
 	VectorCopy( self->s.v.origin, org );	//org = self->s.v.origin + '0 0 16';
 	org[2] += 16;
 
-	//color = int(ezinfokey(self, "railcolor"));
-	//if (color < 1 || color > 7)
+	color = atoi( ezinfokey( self, "railcolor" ));
+	if ( color < 1 || color > 7)
 		color = 1;
 
         WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
