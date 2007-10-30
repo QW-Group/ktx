@@ -282,7 +282,7 @@ void Multi_Finish()
 	SpawnBlood( puff_org, blood_count );
 }
 
-void CoilgunTrail( vec3_t endpos )
+void CoilgunTrail( vec3_t endpos, int entnum )
 {
 	vec3_t 	org;
 	int 	color;
@@ -294,9 +294,12 @@ void CoilgunTrail( vec3_t endpos )
 	if ( color < 1 || color > 7)
 		color = 1;
 
+	if (entnum < 0 || entnum > MAX_CLIENTS)
+		entnum = 0;
+
         WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
         WriteByte( MSG_MULTICAST, TE_LIGHTNING1 );
-	WriteShort (MSG_MULTICAST, -264 + color);
+	WriteShort (MSG_MULTICAST, -264 + 8*entnum + color);
         WriteCoord( MSG_MULTICAST, org[0] );
         WriteCoord( MSG_MULTICAST, org[1] );
         WriteCoord( MSG_MULTICAST, org[2] );
@@ -454,7 +457,7 @@ void FireInstaBullet( vec3_t dir, deathType_t deathtype )
     
 	ApplyMultiDamage();
 	Multi_Finish();
-	CoilgunTrail(src);
+	CoilgunTrail(src, self - world);
 }
 
 
