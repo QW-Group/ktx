@@ -24,6 +24,7 @@
  */
 
 #include "g_local.h"
+#include "build.num"
 
 void Sc_Stats(float on);
 
@@ -1534,7 +1535,8 @@ int build_number ()
 		return b;
 
 	{
-		char rev_num[] = "$Revision$";
+		
+		char rev_num[] = BUILD_NUMBER;
 
 		if (!Q_stricmpn(rev_num, "$Revision:", sizeof("$Revision:") - 1))
 			b = atoi(rev_num + sizeof("$Revision:") - 1);
@@ -1542,6 +1544,7 @@ int build_number ()
 
 	return b;
 }
+
 
 // }
 

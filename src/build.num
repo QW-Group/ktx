@@ -1,2 +1,3 @@
-#define build_number "$Revision$"
+#define BUILD_NUMBER "$Revision$"
 
+  
