@@ -141,6 +141,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				Description="Update build number"
+				CommandLine="echo -n &apos; &apos; &gt;&gt; build.num"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
