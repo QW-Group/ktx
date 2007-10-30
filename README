@@ -14,3 +14,13 @@ Missile spawn requires g_globalvars.newmis set.
 dont use string arrys in one structure with other types ( q3asm place strings in different segment )
 
 dont use map command with redirectcmd & executecmd
+
+
+
+
+BEFORE RELEASING:
+-----------------
+
+- Update MOD_VERSION in include/g_local.h in trunk 
+- Use "svn cp trunk release/ktx-x.yy-zzzz" in svnroot (x.yy is version, zzzz is current build number + 1)
+- 
