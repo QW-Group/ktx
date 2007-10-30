@@ -517,7 +517,7 @@ typedef struct gedict_s {
 
 	char *f_checkbuf;	// for /cmd check f_xxx
 
-	// Jawnmode variables
+	// Yawnmode variables
 	vec3_t old_vel;								// store pre physicsthink velocity
 	float  spawn_weights[MAX_SPAWN_WEIGHTS];	// spawn point weights used by "fair respawns"
 

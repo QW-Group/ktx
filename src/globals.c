@@ -48,8 +48,8 @@ int   k_overtime = 0;   // is overtime is going on
 
 float current_maxfps;	// current value of serverinfo maxfps
 
-// { jawn mode
-int	k_jawnmode;			// is server in jawn mode
+// { yawn mode
+int	k_yawnmode;			// is server in yawn mode
 int k_teleport_cap = 24;	// cap for keeping velocity through tele
 // }
 int	k_practice;			// is server in practice mode

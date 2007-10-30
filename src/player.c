@@ -857,9 +857,9 @@ void PlayerDead()
 // allow respawn after a certain time
 	self->s.v.deadflag = DEAD_DEAD;
 
-	// Jawnmode: hide player corpses after animation
+	// Yawnmode: hide player corpses after animation
 	// - Molgrum
-	if ( k_jawnmode )
+	if ( k_yawnmode )
 		setmodel( self, "" );
 }
 
@@ -1021,9 +1021,9 @@ void PlayerDie()
 	{
 		GibPlayer();
 
-		// Jawnmode: respawn has the same delay (900ms) regardless of deathtype gib/normal
+		// Yawnmode: respawn has the same delay (900ms) regardless of deathtype gib/normal
 		// - Molgrum
-		if ( k_jawnmode )
+		if ( k_yawnmode )
 		{
 			self->s.v.nextthink = g_globalvars.time + 0.9;
 			self->s.v.think = ( func_t ) PlayerDead;
@@ -1055,9 +1055,9 @@ void StartDie ()
 		return;
 	}
 
-	if ( k_jawnmode )
+	if ( k_yawnmode )
 	{
-		// Jawnmode: exclude diea1 and diec1 so the respawn time is always 900 ms
+		// Yawnmode: exclude diea1 and diec1 so the respawn time is always 900 ms
 		switch( i_rnd(1, 3)) {
 			case  1: player_dieb1(); break;
 			case  2: player_died1(); break;

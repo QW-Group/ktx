@@ -18,9 +18,11 @@ dont use map command with redirectcmd & executecmd
 
 
 
-BEFORE RELEASING:
------------------
-
-- Update MOD_VERSION in include/g_local.h in trunk 
-- Use "svn cp trunk release/ktx-x.yy-zzzz" in svnroot (x.yy is version, zzzz is current build number + 1)
-- 
+RELEASE HOW-TO:
+---------------
+- Commit all changes
+- Use "svn cp trunk release/ktx-x.yy" in svnroot (x.yy is version, add a b after yy if it is beta)
+- Update MOD_VERSION with x.yy in include/g_local.h in release
+- Update MOD_VERSION with x.yzb in include/g_local.h in trunk
+- Add RELEASE-NOTES and CHANGELOG in release
+- Commit

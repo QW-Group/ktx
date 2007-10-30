@@ -359,21 +359,21 @@ void armor_touch()
 	if ( !strcmp( self->s.v.classname, "item_armor1" ) )
 	{
 		armor = &(other->ps.itm[itGA].tooks);
-		type = (k_jawnmode ? 0.4 : 0.3); // Jawnmode: changed armor protection
+		type = (k_yawnmode ? 0.4 : 0.3); // Yawnmode: changed armor protection
 		value = 100;
 		bit = IT_ARMOR1;
 	}
 	else if ( !strcmp( self->s.v.classname, "item_armor2" ) )
 	{
 		armor = &(other->ps.itm[itYA].tooks);
-		type = (k_jawnmode ? 0.6 : 0.6); // Jawnmode: changed armor protection
+		type = (k_yawnmode ? 0.6 : 0.6); // Yawnmode: changed armor protection
 		value = 150;
 		bit = IT_ARMOR2;
 	}
 	else if ( !strcmp( self->s.v.classname, "item_armorInv" ) )
 	{
 		armor = &(other->ps.itm[itRA].tooks);
-		type = (k_jawnmode ? 0.8 : 0.8); // Jawnmode: changed armor protection
+		type = (k_yawnmode ? 0.8 : 0.8); // Yawnmode: changed armor protection
 		value = 200;
 		bit = IT_ARMOR3;
 	}
@@ -1850,7 +1850,7 @@ void DropBackpack()
     if ( match_in_progress != 2 || !cvar( "dp" ) )
         return;
 
-	if ( !k_jawnmode ) // Jawnmode: pack dropped in jawn mode independantly from death type
+	if ( !k_yawnmode ) // Yawnmode: pack dropped in yawn mode independantly from death type
 		if ( dtSUICIDE == self->deathtype )
 			return;
 
@@ -1892,9 +1892,9 @@ void DropBackpack()
 		if( (int)self->lastwepfired & IT_DROPPABLE_WEAPONS )
 			item->s.v.items = self->lastwepfired;
 
-	// Jawnmode: unfairpacks in DMM1, only drop current weapon if the player was shooting (idea from Tonik)
+	// Yawnmode: unfairpacks in DMM1, only drop current weapon if the player was shooting (idea from Tonik)
 	// - Molgrum
-	if ( k_jawnmode && deathmatch == 1 && self->attack_finished < g_globalvars.time )
+	if ( k_yawnmode && deathmatch == 1 && self->attack_finished < g_globalvars.time )
 		item->s.v.items = IT_SHOTGUN;
 
 	//item->mdl = "progs/backpack.mdl";
@@ -1946,9 +1946,9 @@ void DropBackpack()
 	item->s.v.ammo_rockets = self->s.v.ammo_rockets;
 	item->s.v.ammo_cells   = self->s.v.ammo_cells;
 
-	// Jawnmode: maximum backpack-capacity is 1/4 of player-capacity
+	// Yawnmode: maximum backpack-capacity is 1/4 of player-capacity
 	// - Molgrum
-	if ( k_jawnmode )
+	if ( k_yawnmode )
 	{
 		item->s.v.ammo_shells  = min(25, item->s.v.ammo_shells);
 		item->s.v.ammo_nails   = min(50, item->s.v.ammo_nails);
@@ -2002,7 +2002,7 @@ void DropBackpack()
 	item->s.v.flags = FL_ITEM;
 	item->s.v.solid = SOLID_TRIGGER;
 	item->s.v.movetype = MOVETYPE_TOSS;
-	//setmodel( item, k_jawnmode ? item->mdl : "progs/backpack.mdl" );
+	//setmodel( item, k_yawnmode ? item->mdl : "progs/backpack.mdl" );
 	setsize( item, -16, -16, 0, 16, 16, 56 );
 	item->s.v.touch = ( func_t ) BackpackTouch;
 

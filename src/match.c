@@ -1663,7 +1663,7 @@ void PrintCountdown( int seconds )
 // Mode		  D u e l | T e a m | F F A | C T F | RA
 // Midair     On // optional
 // Instagib   On // optional
-// Jawnmode   On // optional
+// Yawnmode   On // optional
 // Airstep    On // optional
 // TmOverlay  On // optional
 // Teamplay    x
@@ -1707,8 +1707,8 @@ void PrintCountdown( int seconds )
 	if ( cvar("k_instagib") )
 		strlcat(text, va("%s %4s\n", "Instagib", redtext("On")), sizeof(text));
 	
-	if ( k_jawnmode )
-		strlcat(text, va("%s %4s\n", "Jawnmode", redtext("On")), sizeof(text));
+	if ( k_yawnmode )
+		strlcat(text, va("%s %4s\n", "Yawnmode", redtext("On")), sizeof(text));
 
 	if ( cvar("pm_airstep") )
 		strlcat(text, va("%s %5s\n", "Airstep", redtext("On")), sizeof(text));

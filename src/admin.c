@@ -720,8 +720,8 @@ void ToggleFallBunny ()
 	if( check_master() )
 		return;
 
-	if ( k_jawnmode ) {
-		G_sprint(self, 2, "Command blocked because jawnmode is active\n");
+	if ( k_yawnmode ) {
+		G_sprint(self, 2, "Command blocked because yawnmode is active\n");
 		return;
 	}
 

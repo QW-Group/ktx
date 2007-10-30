@@ -525,9 +525,9 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			c2 = 6;
 		}
 
-		// Jawnmode: nails increases kickback
+		// Yawnmode: nails increases kickback
 		// - Molgrum
-		if ( k_jawnmode && streq( inflictor->s.v.classname, "spike" ) )
+		if ( k_yawnmode && streq( inflictor->s.v.classname, "spike" ) )
 			nailkick = 1.2;
 		else
 			nailkick = 1.0;

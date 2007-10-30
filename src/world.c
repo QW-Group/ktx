@@ -380,7 +380,7 @@ void SP_worldspawn()
 // quad mdl - need this due to aerowalk customize
 	trap_precache_model( "progs/quaddama.mdl" );
 
-// g_models required for jawnmode weapondrops
+// g_models required for yawnmode weapondrops
 	trap_precache_model( "progs/g_shot.mdl" );
 	trap_precache_model( "progs/g_nail.mdl" );
 	trap_precache_model( "progs/g_nail2.mdl" );
@@ -774,8 +774,8 @@ void FirstFrame	( )
 	RegisterCvar("k_dmm4_gren_mode");
 	RegisterCvar("k_fp"); // say team floodprot
 
-// { jawnmode implementation by Molgrum
-	RegisterCvar("k_jawnmode");
+// { yawnmode implementation by Molgrum
+	RegisterCvar("k_yawnmode");
 	RegisterCvar("k_teleport_cap");
 // }
 
@@ -1080,7 +1080,7 @@ int skip_fixrules = 0;
 // check if server is misconfigured somehow, made some minimum fixage
 void FixRules ( )
 {
-	extern void FixJawnMode();
+	extern void FixYawnMode();
 
 	gameType_t km = k_mode = cvar( "k_mode" );
 	int k_tt = bound( 0, cvar( "k_timetop" ), 600 );
@@ -1091,7 +1091,7 @@ void FixRules ( )
 	int k_minr = bound(0, cvar( "k_minrate" ),  100000);
 	int k_maxr = bound(0, cvar( "sv_maxrate" ), 100000);	
 
-	FixJawnMode(); // jawn mode
+	FixYawnMode(); // yawn mode
 
     k_maxspeed = cvar( "sv_maxspeed" );
 

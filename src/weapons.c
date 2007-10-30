@@ -91,7 +91,7 @@ void W_FireAxe()
 		if ( deathmatch > 3 )
 			damage = 75;
 		else if ( deathmatch == 3 )
-			damage = k_jawnmode ? 50 : 20; // Jawnmode: 50 axe dmg in dmm3
+			damage = k_yawnmode ? 50 : 20; // Yawnmode: 50 axe dmg in dmm3
 
 		PROG_TO_EDICT( g_globalvars.trace_ent )->axhitme = 1;
 		SpawnBlood( org, damage );
@@ -494,7 +494,7 @@ void FireBullets( float shotcount, vec3_t dir, float spread_x, float spread_y, f
 
 	while ( shotcount > 0 )
 	{
-		if ( k_jawnmode )
+		if ( k_yawnmode )
 		{
 			if ( shotcount == 1 )
 			{
@@ -679,7 +679,7 @@ W_FireSuperShotgun
 void W_FireSuperShotgun()
 {
 	vec3_t          dir;
-	int				bullets = ( k_jawnmode ? 21 : 14 );
+	int				bullets = ( k_yawnmode ? 21 : 14 );
 
 	if ( self->s.v.currentammo == 1 )
 	{
@@ -709,9 +709,9 @@ void W_FireSuperShotgun()
 	aim( dir );
 	if ( cvar("k_instagib") == 2 )
 		FireInstaBullet( dir, dtSSG );
-	else if ( k_jawnmode )
+	else if ( k_yawnmode )
 	{
-	        // Jawnmode: larger SSG spread, higher reload time, more damage
+	        // Yawnmode: larger SSG spread, higher reload time, more damage
 	        // - Molgrum
 	        FireBullets( bullets, dir, 0.18, 0.12, 0, dtSSG );
 	}
@@ -781,9 +781,9 @@ void T_MissileTouch()
 
 	FixQuad(PROG_TO_EDICT( self->s.v.owner ));
 
-	// Jawnmode: always 110 dmg on direct hits
+	// Yawnmode: always 110 dmg on direct hits
 	// - Molgrum
-	damg = 100 + (k_jawnmode ? 10 : g_random() * 20);
+	damg = 100 + (k_yawnmode ? 10 : g_random() * 20);
 
 	if ( other->s.v.takedamage ) {
 		if ( other->ct == ctPlayer )
@@ -991,9 +991,9 @@ void W_FireLightning()
 
 		if ( deathmatch > 3 )
 		{
-			// Jawnmode: this always kills the player that discharges in dmm4
+			// Yawnmode: this always kills the player that discharges in dmm4
 			// - Molgrum
-			if ( k_jawnmode || g_random() <= 0.5 )
+			if ( k_yawnmode || g_random() <= 0.5 )
 			{
 				self->deathtype = dtLG_DIS_SELF;
 				T_Damage( self, self, self, 4000 );
@@ -1144,9 +1144,9 @@ void W_FireGrenade()
 	{
 		float r1 = crandom(), r2 = crandom();
 
-		// Jawnmode: disable randomness in grenade aim
+		// Yawnmode: disable randomness in grenade aim
 		// - Molgrum
-		if ( k_jawnmode )
+		if ( k_yawnmode )
 			r1 = r2 = 0;
 
 		newmis->s.v.velocity[0] =
@@ -1213,9 +1213,9 @@ void launch_spike( vec3_t org, vec3_t dir )
 	setsize( newmis, 0, 0, 0, 0, 0, 0 );
 	setorigin( newmis, PASSVEC3( org ) );
 
-	// Jawnmode: spikes velocity is 1800 instead of 1000
+	// Yawnmode: spikes velocity is 1800 instead of 1000
 	// - Molgrum
-	VectorScale( dir, (k_jawnmode ? 1800 : 1000), newmis->s.v.velocity );
+	VectorScale( dir, (k_yawnmode ? 1800 : 1000), newmis->s.v.velocity );
 
 	vectoangles( newmis->s.v.velocity, newmis->s.v.angles );
 }
@@ -1300,7 +1300,7 @@ void superspike_touch()
 
 		spawn_touchblood( 2 );
 		other->deathtype = dtSNG;
-		T_Damage( other, self, PROG_TO_EDICT( self->s.v.owner ), ( k_jawnmode ? 16 : 18 ) );
+		T_Damage( other, self, PROG_TO_EDICT( self->s.v.owner ), ( k_yawnmode ? 16 : 18 ) );
 	} else
 	{
 		WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
@@ -1342,9 +1342,9 @@ void W_FireSpikes( float ox )
 {
 	vec3_t          dir, tmp;
 
-	// Jawnmode: ignores alternating nails effect in nailgun
+	// Yawnmode: ignores alternating nails effect in nailgun
 	// - Molgrum
-	if ( k_jawnmode )
+	if ( k_yawnmode )
 		ox = 0;
 
 	trap_makevectors( self->s.v.v_angle );
@@ -1677,7 +1677,7 @@ void W_Attack()
 			HasteSound( self );
 		}
 		else
-			self->attack_finished = g_globalvars.time + ( k_jawnmode ? 0.8 : 0.7 );
+			self->attack_finished = g_globalvars.time + ( k_yawnmode ? 0.8 : 0.7 );
 
 		W_FireSuperShotgun();
 		break;

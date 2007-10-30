@@ -502,9 +502,9 @@ void teleport_touch()
 		if ( ( int ) other->s.v.flags & FL_ONGROUND )
 			other->s.v.flags = other->s.v.flags - FL_ONGROUND;
 
-		// Jawnmode: preserve velocity, I'm copying my own mod's code since i found it interesting to play with
+		// Yawnmode: preserve velocity, I'm copying my own mod's code since i found it interesting to play with
 		// - Molgrum
-		if ( k_jawnmode )
+		if ( k_yawnmode )
 		{
 			float	vel;
 

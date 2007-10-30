@@ -145,8 +145,8 @@ void motd_show ();
 
 void TogglePractice();
 
-// { jawn mode
-void ToggleJawnMode();
+// { yawn mode
+void ToggleYawnMode();
 void setTeleportCap();
 // }
 
@@ -439,9 +439,9 @@ const char CD_NODESC[] = "no desc";
 #define CD_CHECK        "better f_checks handle"
 #define CD_NEXT_MAP     "vote for next map"
 #define CD_MAPCYCLE     "list map cycle"
-#define CD_JAWNMODE     "toggle jawnmode"
-#define CD_FALLBUNNYCAP "set fallbunny cap (jawn)"
-#define CD_TELEPORTCAP  "set teleport cap (jawn)"
+#define CD_YAWNMODE     "toggle yawnmode"
+#define CD_FALLBUNNYCAP "set fallbunny cap (yawn)"
+#define CD_TELEPORTCAP  "set teleport cap (yawn)"
 #define CD_AIRSTEP      "toggle airstep"
 #define CD_TEAMOVERLAY  "toggle teamoverlay"
 #define CD_EXCLUSIVE    "toggle exclusive mode"
@@ -708,7 +708,7 @@ cmd_t cmds[] = {
 	{ "check",       fcheck,                    0    , CF_BOTH | CF_PARAMS, CD_CHECK },
 	{ "next_map",    PlayerBreak,               0    , CF_PLAYER | CF_MATCHLESS_ONLY, CD_NEXT_MAP },
 	{ "mapcycle",    mapcycle,                  0    , CF_BOTH | CF_MATCHLESS, CD_MAPCYCLE },
-	{ "jawnmode",    ToggleJawnMode,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_JAWNMODE },
+	{ "yawnmode",    ToggleYawnMode,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_YAWNMODE },
 	{ "teleportcap", setTeleportCap,            0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_TELEPORTCAP },
 	{ "airstep",     airstep,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_AIRSTEP },
 	{ "teamoverlay", teamoverlay,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_TEAMOVERLAY },
@@ -2140,8 +2140,8 @@ void ToggleFairPacks()
 	if( check_master() )
 		return;
 
-	if( k_jawnmode ) {
-		k_frp = get_fair_pack(); // Jawnmode: hardcoded to 2
+	if( k_yawnmode ) {
+		k_frp = get_fair_pack(); // Yawnmode: hardcoded to 2
 	}
 	else {
 
@@ -5564,16 +5564,16 @@ void ToggleExclusive()
 	cvar_toggle_msg( self, "k_exclusive", redtext("exclusive mode") );
 }
 
-// { jawn mode related
+// { yawn mode related
 
-void FixJawnMode()
+void FixYawnMode()
 {
-	k_jawnmode		= cvar( "k_jawnmode");
+	k_yawnmode		= cvar( "k_yawnmode");
 	k_teleport_cap 	= bound( 0, cvar( "k_teleport_cap" ),  100 );
 }
 
-// Toggle jawnmode, implemented by Molgrum
-void ToggleJawnMode()
+// Toggle yawnmode, implemented by Molgrum
+void ToggleYawnMode()
 {
 	if ( match_in_progress )
 		return;
@@ -5581,18 +5581,18 @@ void ToggleJawnMode()
 	if ( check_master() )
 		return;
 
-	cvar_toggle_msg( self, "k_jawnmode", redtext("jawnmode") );
+	cvar_toggle_msg( self, "k_yawnmode", redtext("yawnmode") );
 
-	FixJawnMode(); // apply changes ASAP
+	FixYawnMode(); // apply changes ASAP
 }
 
 void setTeleportCap()
 {
 	char arg[256];
 
-	if ( !k_jawnmode )
+	if ( !k_yawnmode )
 	{
-		G_sprint( self, 2, "%s required to be on\n", redtext("Jawn mode") );
+		G_sprint( self, 2, "%s required to be on\n", redtext("Yawn mode") );
 		return;
 	}
 
@@ -5610,7 +5610,7 @@ void setTeleportCap()
 	k_teleport_cap = bound( 0, k_teleport_cap, 100 ); // bound
 	cvar_fset( "k_teleport_cap", k_teleport_cap ); // set
 
-	FixJawnMode(); // apply changes ASAP
+	FixYawnMode(); // apply changes ASAP
 
 	G_bprint( 2, "%s set %s to %d%%\n", self->s.v.netname, redtext("Teleport cap"), k_teleport_cap ); // and print
 }

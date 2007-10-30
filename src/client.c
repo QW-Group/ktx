@@ -767,7 +767,7 @@ gedict_t *SelectSpawnPoint( char *spawnname )
 			}
 		}
 
-		if( !k_jawnmode && k_spw && match_in_progress == 2 && self->k_lastspawn == spot ) {
+		if( !k_yawnmode && k_spw && match_in_progress == 2 && self->k_lastspawn == spot ) {
 //			G_bprint(2, "ignore spot\n");
 			pcount++; // ignore this spot in this case, protection from spawn twice on the same spot
 		}
@@ -841,10 +841,10 @@ gedict_t *SelectSpawnPoint( char *spawnname )
 // We now have the number of spots available on the map in numspots
 // Generate a random number between 0 and numspots
 
-	// Jawnmode: use new "fair spawns" model
+	// Yawnmode: use new "fair spawns" model
 	// Because of array limits, fall back to old spawn model on maps with more than MAX_SPAWN_WEIGHTS spots
 	// - Molgrum
-	if ( k_jawnmode && match_in_progress == 2 && totalspots <= MAX_SPAWN_WEIGHTS )
+	if ( k_yawnmode && match_in_progress == 2 && totalspots <= MAX_SPAWN_WEIGHTS )
 	{
 		float    f;
 		gedict_t *spawnp;
@@ -1124,7 +1124,7 @@ void ClientConnect()
 	if ( isRA() )
 		ra_in_que( self ); // put cleint in ra queue, so later we can move it to loser or winner
 
-	// Jawnmode: reset spawn weights at server join (can handle max MAX_SPAWN_WEIGHTS spawn points atm)
+	// Yawnmode: reset spawn weights at server join (can handle max MAX_SPAWN_WEIGHTS spawn points atm)
 	// Just count the spots
 	totalspots = find_cnt(FOFS( s.v.classname ), "info_player_deathmatch" );
 
@@ -1560,9 +1560,9 @@ void PlayerJump()
 		{
 			self->swim_flag = g_globalvars.time + 1;
 
-			// Jawnmode: don't play swimming sound to cut older clients without smartjump some slack
+			// Yawnmode: don't play swimming sound to cut older clients without smartjump some slack
 			// - Molgrum
-			if ( !k_jawnmode )
+			if ( !k_yawnmode )
 			{
 				if ( g_random() < 0.5 )
 					sound( self, CHAN_BODY, "misc/water1.wav", 1, ATTN_NORM );

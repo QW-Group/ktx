@@ -2073,12 +2073,12 @@ char *respawn_model_name( int mdl_num )
 
 int get_fair_pack()
 {
-	// Jawnmode: always 2 aka last weapon
-	return bound(0, k_jawnmode ? 2 : cvar( "k_frp" ), 2);
+	// Yawnmode: always 2 aka last weapon
+	return bound(0, k_yawnmode ? 2 : cvar( "k_frp" ), 2);
 }
 
 int get_fallbunny()
 {
-	// Jawnmode: no broken ankle
-	return k_jawnmode ? 1 : cvar( "k_fallbunny" );
+	// Yawnmode: no broken ankle
+	return k_yawnmode ? 1 : cvar( "k_fallbunny" );
 }

@@ -223,8 +223,8 @@ void fire_fly()
 
 void fire_touch()
 {
-	// Jawnmode: no damage from fireall
-	if ( !k_jawnmode ) {
+	// Yawnmode: no damage from fireall
+	if ( !k_yawnmode ) {
 		other->deathtype = dtFIREBALL;
 		T_Damage( other, self, self, 20 );
 	}

@@ -37,7 +37,7 @@
 #include "player.h"
 
 #define MOD_NAME			("KTX")
-#define MOD_VERSION			("1.34b")
+#define MOD_VERSION			("1.35b")
 #define MOD_SERVERINFO_MOD_KEY		("ktxver")
 #define MOD_SERVERINFO_BUILD_KEY	("ktxbuild")
 #define MOD_URL    			("http://ktx.quakeonline.net")
@@ -756,9 +756,9 @@ extern	int   k_overtime;		// is overtime is going on
 
 extern	float current_maxfps;	// current value of serverinfo maxfps
 
-// { jawn mode
-extern	int   k_jawnmode;		// is server in jawn mode
-extern	int   k_fallbunny_cap;	// fallbunny cap procent in jawn mode
+// { yawn mode
+extern	int   k_yawnmode;		// is server in yawn mode
+extern	int   k_fallbunny_cap;	// fallbunny cap procent in yawn mode
 extern	int   k_teleport_cap;	// cap for keeping velocity through tele
 // }
 
