@@ -39,7 +39,7 @@ OBJECTS=$(SOURCES:.c=.s)
 all:		build
 
 build:		$(MODULE)
-		echo -n '#define build_number "$$Revision$$"' > build.num
+		echo -n ' ' >> build.num
 
 install:	build
 			../install-sh -c -m 755 $(MODULE) $(INSTALLDIR)
