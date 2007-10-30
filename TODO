@@ -1,3 +1,4 @@
+------------
 To be added:
 ------------
 - Race mode
@@ -8,8 +9,12 @@ To be added:
 - Toggeable grapple hook outside CTF with default OFF
 
 
+
+
+--------------
 To be decided:
 --------------
+
 - Pause options
 
 /timeout - would freeze the game in 3-2-1 - 'freeze'
@@ -24,6 +29,10 @@ during timout all gameclocks would be paused. However it would be possible to co
 - CTF matchless
 - CTF autoteam
 
+
+
+
+------------
 To be fixed:
 ------------
 
