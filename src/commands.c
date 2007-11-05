@@ -861,12 +861,8 @@ void redirect()
 // check if players client support params in aliases
 qboolean isSupport_Params(gedict_t *p)
 {
-	char *clinfo = ezinfokey( p, "*client" );
-
-	if ( !strnull( clinfo ) && strstr(clinfo, "ezQuake") ) // seems only ezQuake support 
-		return true;
-
-	return false;
+	// seems only ezQuake support 
+	return (p->ezquake_version > 0 ? true : false); // have no idea at which point ezquake start support it
 }
 
 void StuffAliases()
