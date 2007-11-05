@@ -218,10 +218,29 @@ qboolean isSayFlood(gedict_t *p)
 	return false;
 }
 
+static int HexToInt(char c)
+{
+	if (isdigit(c))
+		return c - '0';
+	else if (c >= 'a' && c <= 'f')
+		return 10 + c - 'a';
+	else if (c >= 'A' && c <= 'F')
+		return 10 + c - 'A';
+	else
+		return -1;
+}
+
+static qboolean isSupport_ColoredText(gedict_t *p)
+{
+	// seems only ezquake support it atm
+	return (p->ezquake_version < 1754 ? false : true);
+}
+
 qboolean ClientSay( qboolean isTeamSay )
 {
-	int j, l, mmode;
-	char text[1024] = {0}, text2[1024] = {0}, arg_2[64], *str, *name, *team;
+	int j, l, mmode, flags;
+	char text[1024] = {0}, textuncolored[1024] = {0}, text2[1024] = {0}, prefix[128] = {0};
+	char arg_2[64], *str, *clr, *name, *team, *result_msg;
 	int sv_spectalk = cvar("sv_spectalk");
 	int sv_sayteam_to_spec = cvar("sv_sayteam_to_spec");
 	gedict_t *client, *goal;
@@ -322,37 +341,61 @@ qboolean ClientSay( qboolean isTeamSay )
 
 // { MVDSV
 
-	name = (strnull( self->s.v.netname ) ? "!noname!" : self->s.v.netname);
-
-	if ( self->ct == ctSpec ) {
-
-		if ( !sv_spectalk || isTeamSay )
-			strlcpy(text, va("[SPEC] %s: %s", name, str), sizeof(text));
-		else
-			strlcpy(text, va("%s: %s", name, str), sizeof(text));
-	}
-	else {
-
-		if ( isTeamSay )
-			strlcpy(text, va("(%s): %s", name, str), sizeof(text));
-		else
-			strlcpy(text, va("%s: %s", name, str), sizeof(text));
-	}
-
 	//bliP: kick fake ->
 	if ( !isTeamSay && cvar("sv_unfake") ) {
 		char *ch;
 
-		for ( ch = text; *ch; ch++ )
+		for ( ch = str; *ch; ch++ )
 			if ( *ch == 13 ) //bliP: 24/9 kickfake to unfake ->
 				*ch = '#';
 	}
 	//<-
 
-	fake = ( strchr(text, 13) ? true : false ); // check if string contain "$\"
+	// skip ezquake color sequence
+	for (clr = str, j = 0; clr[0]; /* nothing */)
+	{
+		if (clr[0] == '&')
+		{
+			if (clr[1] == 'c' && HexToInt(clr[2]) >= 0 && HexToInt(clr[3]) >= 0 && HexToInt(clr[4]) >= 0)
+			{
+				clr += 5; // skip "&cRGB"
+				continue;
+			}
+			else if (clr[1] == 'r')
+			{
+				clr += 2; // skip "&r"
+				continue;
+			}
+		}
 
-	G_cprint("%s\n", text);
-//	SV_Write_Log(CONSOLE_LOG, 1, text);
+		textuncolored[(int)bound(0, j, sizeof(textuncolored)-1)] = clr[0];
+
+		clr++;
+		j++;
+	}
+
+	textuncolored[(int)bound(0, j, sizeof(textuncolored)-1)] = 0;
+
+	name = (strnull( self->s.v.netname ) ? "!noname!" : self->s.v.netname);
+
+	if ( self->ct == ctSpec )
+	{
+		if ( !sv_spectalk || isTeamSay )
+			snprintf(prefix, sizeof(prefix), "[SPEC] %s:", name);
+		else
+			snprintf(prefix, sizeof(prefix), "%s:", name);
+	}
+	else
+	{
+		if ( isTeamSay )
+			snprintf(prefix, sizeof(prefix), "(%s):", name);
+		else
+			snprintf(prefix, sizeof(prefix), "%s:", name);
+	}
+
+	fake = ( strchr(str, 13) ? true : false ); // check if string contain "$\"
+
+	G_cprint("%s %s\n", prefix, textuncolored);
 
 	team = ezinfokey(self, "team");
 
@@ -398,10 +441,13 @@ qboolean ClientSay( qboolean isTeamSay )
 			}
 		}
 
-		// do not put private info in demos: pvivate is team say from player without $\ symbol 
+		// do not put private info in demos: private is team say from player without $\ symbol 
 		ignore_in_demos = self->ct == ctPlayer && isTeamSay && !fake;
 
-		G_sprint_flags(client, PRINT_CHAT, ignore_in_demos ? SPRINT_IGNOREINDEMO : 0, "%s\n", text);
+		flags			= ( ignore_in_demos ? SPRINT_IGNOREINDEMO : 0 );
+		result_msg		= ( isSupport_ColoredText(client) ? str : textuncolored );
+
+		G_sprint_flags(client, PRINT_CHAT, flags, "%s %s\n", prefix, result_msg);
 	}
 
 // } MVDSV

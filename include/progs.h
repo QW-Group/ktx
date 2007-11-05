@@ -521,5 +521,8 @@ typedef struct gedict_s {
 	vec3_t old_vel;								// store pre physicsthink velocity
 	float  spawn_weights[MAX_SPAWN_WEIGHTS];	// spawn point weights used by "fair respawns"
 
+	// yeah its lame, but better than checking setinfo each time.
+	int ezquake_version;
+
 } gedict_t;
 

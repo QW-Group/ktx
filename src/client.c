@@ -1060,6 +1060,24 @@ qboolean CanConnect()
 	return true;
 }
 
+// yeah its lame, but better than checking setinfo each time.
+static qboolean check_ezquake(gedict_t *p)
+{
+	char *clinfo = ezinfokey( p, "*client" );
+
+	if ( !strnull( clinfo ) && strstr(clinfo, "ezQuake") ) // seems ezQuake
+	{
+		while ( Q_isalpha( clinfo[0] ) )
+			clinfo++;
+
+		p->ezquake_version = atoi(clinfo);
+
+		return true;
+	}
+
+	return false;
+}
+
 ////////////////
 // GlobalParams:
 // time
@@ -1070,6 +1088,8 @@ void ClientConnect()
 {
 	gedict_t *p;
 	int i, totalspots;
+
+	check_ezquake( self );
 
 	VIP_ShowRights( self );
 
