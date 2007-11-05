@@ -60,11 +60,6 @@ OLD STUFF TO BE CHECKED:
 ­ã ¨«¨ ­¥ ¢ë§®¢¥¬ trap_executecmd()
 
 ----------------------------------------------
-TODO: check code about client connect during mod is paused i.e. k_pause != 0
-
- ->s.v.nextthink trouble
-
-----------------------------------------------
 void ResetOptions()
 need fix some issue, look code for more imfo
 ----------------------------------------------
@@ -94,10 +89,6 @@ forcestart is implemented shitty, clean it up
 ----------------------------------------------
 
 Spectator coach
-
-!!!
-blood
-!!!
 
 ----------------------------------------------------
 how we must do with q statistics and dropable quad?
