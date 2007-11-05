@@ -2898,7 +2898,6 @@ void CheckTeamStatus( )
 	k_teamoverlay = cvar("k_teamoverlay");
 
 	for ( p = world; (p = find_client( p )); ) {
-		char *clinfo;
 		int ti;
 
 		if (!k_teamoverlay) // teamoverlay turned off
@@ -2909,7 +2908,7 @@ void CheckTeamStatus( )
 			continue; // user specifie no team info
 
 		// check for ezquake or user specifie use team info even non ezquake client
-		if ( ti > 0 || (!strnull( clinfo = ezinfokey( p, "*client" ) ) && strstr(clinfo, "ezQuake")) )
+		if ( ti > 0 || p->ezquake_version > 0 )
 			SendTeamInfo( p );
 	}
 }
