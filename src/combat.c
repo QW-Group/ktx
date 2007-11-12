@@ -469,14 +469,17 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	take = max(0, take); // avoid negative take, if any
 
-	if (( cvar("k_dmgfrags") && ( targ->invincible_finished >= g_globalvars.time ) ))
+	if ( cvar("k_dmgfrags") )
 	{
-		// damage dealt _not_ capped by victim's health if victim has pent
-		dmg_dealt += take;
-	}
-	else if ( (dtTELE1 == targ->deathtype) || (dtTELE2 == targ->deathtype) || (dtTELE3 == targ->deathtype) )
-	{
-		dmg_dealt = 0;
+		if ( targ->invincible_finished >= g_globalvars.time )
+		{
+			// damage dealt _not_ capped by victim's health if victim has pent
+			dmg_dealt += take;
+		}
+		else if ( (dtTELE1 == targ->deathtype) || (dtTELE2 == targ->deathtype) || (dtTELE3 == targ->deathtype) )
+		{
+			dmg_dealt = 0;
+		}
 	}
 	else
 	{
