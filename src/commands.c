@@ -1918,15 +1918,19 @@ void ChangeDM(float dmm)
 		return;
 	}
 
-	// if leaving dmm4 force midair or instagib off
-	if ( deathmatch == 4 ) {
-		cvar_set( "k_midair", "0" );
-		cvar_set( "k_instagib", "0" );
-	}
-
 	deathmatch = bound(1, (int)dmm, 5);
 
 	cvar_set("deathmatch", va("%d", (int)deathmatch));
+
+	if ( dmm != 4 )				// if leaving dmm4
+	{		
+		cvar_set( "k_midair", "0" );	// force midair off
+		cvar_set( "k_instagib", "0" );	// force instagib off
+	}					
+	else				// if entering dmm4
+	{
+		cvar_set( "timelimit", "3");			// Set match length to 3 minutes
+	}
 
 	G_bprint(2, "Deathmatch %s\n", dig3(deathmatch));
 }
