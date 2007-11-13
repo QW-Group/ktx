@@ -1151,7 +1151,7 @@ void ShowVersion()
 	strlcat(buf, va("Based on %s\n", redtext("Kombat teams 2.21")), sizeof(buf));
 	strlcat(buf, "by kemiKal, Cenobite, Sturm and Fang\n\n", sizeof(buf));
 	strlcat(buf, va("Home Page: %s\n", redtext(MOD_URL)), sizeof(buf));
-	strlcat(buf, va("Source: %s", redtext(MOD_SRC_URL)), sizeof(buf));
+	//strlcat(buf, va("Source: %s", redtext(MOD_SRC_URL)), sizeof(buf));
 	strlcat(buf, "\n\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236", sizeof(buf));
 	strlcat(buf, "\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n", sizeof(buf));
 	

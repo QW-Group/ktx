@@ -40,8 +40,8 @@
 #define MOD_VERSION			("1.35b")
 #define MOD_SERVERINFO_MOD_KEY		("ktxver")
 #define MOD_SERVERINFO_BUILD_KEY	("ktxbuild")
-#define MOD_URL    			("http://ktx.quakeonline.net")
-#define MOD_SRC_URL    			("http://ktx.svn.sf.net")
+#define MOD_URL    			("http://ktx.qw-dev.net")
+//#define MOD_SRC_URL    			("http://ktx.svn.sf.net")
 
 // qqshka - hmm, seems in C this is macros
 #undef max
