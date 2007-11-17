@@ -826,5 +826,5 @@ extern	int sv_minping; // used to broadcast changes
 #define	G_FLOAT(o) ( ((float*)(&g_globalvars))[o])
 
 #define LOCALINFO_MAPS_LIST_START	1000
-#define LOCALINFO_MAPS_LIST_END		1999
+#define LOCALINFO_MAPS_LIST_END		4999
 
