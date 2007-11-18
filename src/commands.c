@@ -4549,7 +4549,7 @@ void lastscores ()
 
 	if ( cnt )
 		G_sprint(self, 2, "\n"
-						  "Lastscores: %d entry%s found\n", cnt, count_s(cnt));
+						  "Lastscores: %d entr%s found\n", cnt, cnt ? "y" : "ies");
 	else
 		G_sprint(self, 2, "Lastscores data empty\n");
 }
