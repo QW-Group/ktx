@@ -505,7 +505,7 @@ void ra_Frame ()
 	if ( !ra_match_fight ) { // ok start ra timer
 		ra_match_fight = 1; // ra countdown
 		last_r = 99999;
-		time_to_start  = g_globalvars.time + 10;
+		time_to_start  = g_globalvars.time + 6;
 	}
 
 	r = Q_rint(time_to_start - g_globalvars.time);
