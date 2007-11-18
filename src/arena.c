@@ -108,7 +108,7 @@ int ra_pos_que( gedict_t *p )
 // ra is just modificator of duel
 qboolean isRA( )
 {
-	return ( isDuel() && k_rocketarena );
+	return ( isDuel() && cvar("k_rocketarena") );
 }
 
 qboolean isWinner( gedict_t *p )
@@ -314,9 +314,19 @@ void ra_PutClientInServer()
 
 	setnowep( self ); // basic shit, even for qued player
 
-	if ( isWinner( self ) || isLoser( self ) ) {
+	if ( isWinner( self ) || isLoser( self ) )
+	{
 		VectorScale( g_globalvars.v_forward, 300, self->s.v.velocity );
 		setfullwep( self ); // shit for winner or loser
+	}
+	else
+	{
+		self->s.v.solid		 = SOLID_NOT;
+		self->s.v.movetype	 = MOVETYPE_NOCLIP;
+		self->vw_index		 = 0;
+		setmodel( self, "" );
+
+		setorigin (self, PASSVEC3( self->s.v.origin ) );
 	}
 }
 

@@ -1771,6 +1771,10 @@ qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 	char *txt = "";
 	gedict_t *p;
 
+	// no limits in RA
+	if ( isRA() )
+		return true;
+
 	// some limits in duel...
 	if ( isDuel() )
 	{

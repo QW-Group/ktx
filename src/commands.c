@@ -194,6 +194,7 @@ void teamoverlay();
 void ToggleExclusive();
 void ToggleVwep();
 void TogglePause();
+void ToggleArena();
 
 // spec
 void ShowCamHelp();
@@ -414,6 +415,7 @@ const char CD_NODESC[] = "no desc";
 // { RA
 #define CD_RA_BREAK     "toggle RA line status"
 #define CD_RA_POS       "RA line position"
+#define CD_ARENA        "toggle rocket arena"
 // }
 #define CD_FORCE_SPEC   "force spec players"
 // { server side bans
@@ -683,6 +685,7 @@ cmd_t cmds[] = {
 // { RA
 	{ "ra_break",    ra_break,                  0    , CF_PLAYER, CD_RA_BREAK },
 	{ "ra_pos",      ra_PrintPos,               0    , CF_PLAYER, CD_RA_POS },
+	{ "arena",       ToggleArena,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_ARENA },
 // }
 	{ "force_spec",  force_spec,                0    , CF_BOTH_ADMIN | CF_PARAMS, CD_FORCE_SPEC },
 // { bans
@@ -3160,16 +3163,6 @@ void UserMode(float umode)
 		trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
 		G_cprint("%s", buf);
 	}
-
-// { RA hack
-	if ( streq(um, "1on1") ) {
-		cfg_name = va("configs/usermodes/%s/ra/%s.cfg", um, g_globalvars.mapname);
-		if ( can_exec( cfg_name ) ) {
-			trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
-			G_cprint("%s", buf);
-		}
-	}
-// }
 
 	G_cprint("\n");
 
@@ -5673,5 +5666,50 @@ void TogglePause ()
 
 		G_bprint(2, "%s paused the game\n", self->s.v.netname);
 		trap_setpause (1);
+	}
+}
+
+void ToggleArena()
+{
+	if ( match_in_progress )
+		return;
+
+	if( check_master() )
+		return;
+
+	if ( !isRA() )
+	{
+		// seems we trying turn RA on.
+		if ( !isDuel() )
+		{
+			G_sprint(self, 2, "Set %s mode first\n", redtext("\x93 on \x93"));
+			return;
+		}
+	}
+
+	cvar_toggle_msg( self, "k_rocketarena", redtext("Rocket Arena") );
+
+	if ( isRA() )
+	{
+	    char buf[1024*4];
+		char *cfg_name;
+
+		char *um = "1on1";
+
+		cfg_name = va("configs/usermodes/%s/ra/default.cfg", um);
+		if ( can_exec( cfg_name ) )
+		{
+			trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
+			G_cprint("%s", buf);
+		}
+
+		cfg_name = va("configs/usermodes/%s/ra/%s.cfg", um, g_globalvars.mapname);
+		if ( can_exec( cfg_name ) )
+		{
+			trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
+			G_cprint("%s", buf);
+		}
+
+		G_cprint("\n");
 	}
 }

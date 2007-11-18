@@ -988,19 +988,20 @@ void FixCTFItems()
 
 void FixRA()
 {
-	static int old_k_rocketarena = 0;	// static
+	static qboolean old_k_rocketarena = false;	// static
 
 	if ( framecount == 1 )
 		return; // can't guess here something yet
 
-	if ( framecount == 2 ) {
-		k_rocketarena = (k_rocketarena = cvar( "k_rocketarena" )) && isRA();
+	if ( framecount == 2 )
+	{
 		old_k_rocketarena = isRA(); // ok, save RA status after world spawn, and start check status changes on 3-t frame
 		return;
 	}
 
 	// do that even match in progress...
-	if ( old_k_rocketarena != isRA() ) {
+	if ( old_k_rocketarena != isRA() )
+	{
 		old_k_rocketarena = isRA();
 		G_bprint(2, "%s: RA settings changed, map will be reloaded\n", redtext("WARNING"));
 		changelevel( g_globalvars.mapname );

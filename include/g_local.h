@@ -795,7 +795,6 @@ extern  qboolean	vw_enabled; // vweps enabled
 
 extern  float		time_to_start;	//time to start match
 extern	int			ra_match_fight;	// have winner and loser fighting
-extern  int			k_rocketarena;	// is RA active or not, since we must catch changes, we can't use cvar("k_rocketarena")
 
 // }
 
