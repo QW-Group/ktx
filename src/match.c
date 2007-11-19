@@ -1403,6 +1403,33 @@ void SM_PrepareMap()
 	for( p = world; (p = nextent(p)); ) {
 
 	// going for the if content record..
+	
+		if ( isRA() ) {
+			if (    streq( p->s.v.classname, "rocket" )
+				|| streq( p->s.v.classname, "grenade" )
+				|| streq( p->s.v.classname, "weapon_nailgun" )
+				|| streq( p->s.v.classname, "weapon_supernailgun" )
+				|| streq( p->s.v.classname, "weapon_supershotgun" )
+				|| streq( p->s.v.classname, "weapon_rocketlauncher" )
+				|| streq( p->s.v.classname, "weapon_grenadelauncher" )
+				|| streq( p->s.v.classname, "weapon_lightning" )
+				|| streq( p->s.v.classname, "item_shells" )
+				|| streq( p->s.v.classname, "item_spikes" )
+				|| streq( p->s.v.classname, "item_rockets" )
+				|| streq( p->s.v.classname, "item_cells" )
+				|| streq( p->s.v.classname, "item_health" )
+				|| streq( p->s.v.classname, "item_armor1")
+				|| streq( p->s.v.classname, "item_armor2")
+				|| streq( p->s.v.classname, "item_armorInv")
+				|| streq( p->s.v.classname, "item_artifact_invulnerability")
+				|| streq( p->s.v.classname, "item_artifact_envirosuit")
+				|| streq( p->s.v.classname, "item_artifact_invisibility")
+				|| streq( p->s.v.classname, "item_artifact_super_damage"))
+
+			{
+				ent_remove( p );
+			}
+		}
 
 		if (    streq( p->s.v.classname, "rocket" )
 			 || streq( p->s.v.classname, "grenade" )
@@ -1433,6 +1460,10 @@ void SM_PrepareMap()
 						|| streq( p->s.v.classname, "item_armor1")
 						|| streq( p->s.v.classname, "item_armor2")
 						|| streq( p->s.v.classname, "item_armorInv")
+						|| streq( p->s.v.classname, "item_artifact_invulnerability")
+						|| streq( p->s.v.classname, "item_artifact_envirosuit")
+						|| streq( p->s.v.classname, "item_artifact_invisibility")
+						|| streq( p->s.v.classname, "item_artifact_super_damage")
 				      	) { // no health, armors for instagib
 						ent_remove( p );
 					}
