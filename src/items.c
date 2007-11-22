@@ -1847,7 +1847,7 @@ void DropBackpack()
 
     f1 = get_fair_pack();
 
-    if ( match_in_progress != 2 || !cvar( "dp" ) || isRA() )
+    if ( match_in_progress != 2 || !cvar( "dp" ) )
         return;
 
 	if ( !k_yawnmode ) // Yawnmode: pack dropped in yawn mode independantly from death type

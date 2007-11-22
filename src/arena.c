@@ -163,6 +163,7 @@ void ra_Precache()
 	if ( !isRA() )
 		return;
 
+	// TODO - precache sounds as server load to avoid map reload
 	trap_precache_sound("ra/1.wav");
 	trap_precache_sound("ra/2.wav");
 	trap_precache_sound("ra/3.wav");
@@ -340,12 +341,12 @@ void setnowep( gedict_t *anent )
 	anent->s.v.ammo_rockets	= 0;
 	anent->s.v.ammo_cells	= 0;
 	anent->s.v.takedamage	= DAMAGE_NO;
-	anent->s.v.items		= IT_AXE;
+	anent->s.v.items		= 0;
 
 	anent->s.v.armorvalue	= 0;
 	anent->s.v.armortype	= 0;
 	anent->s.v.health		= 100;
-	anent->s.v.weapon		= IT_AXE;
+	anent->s.v.weapon		= IT_AXE; //just to NOT have view_svmodel 0 forced on client
 	anent->idletime			= 0;
 	anent->lasttime			= 0;
 	anent->laststattime		= 0;
@@ -437,7 +438,7 @@ void PrintStats( gedict_t *who )
 
 	strlcat(buf, va("%s%.10s %3d:%3d       %.10s %3d:%3d           ", buf, 
 				getname(winner), (int)winner->s.v.armorvalue, (int)winner->s.v.health,
-				getname(loser),  (int)loser->s.v.armorvalue,  (int)winner->s.v.health), sizeof(buf));
+				getname(loser),  (int)loser->s.v.armorvalue,  (int)loser->s.v.health), sizeof(buf));
 
 	if ( (i = iKey( who, "lra" )) < 0 ) {
 		int offset = strlen(buf);
@@ -505,7 +506,7 @@ void ra_Frame ()
 	if ( !ra_match_fight ) { // ok start ra timer
 		ra_match_fight = 1; // ra countdown
 		last_r = 99999;
-		time_to_start  = g_globalvars.time + 6;
+		time_to_start  = g_globalvars.time + 10;
 	}
 
 	r = Q_rint(time_to_start - g_globalvars.time);
