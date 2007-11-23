@@ -255,7 +255,8 @@ void ra_ClientObituary( gedict_t *targ, gedict_t *attacker )
 		if ( targ == attacker )
 		{
 			G_bprint (PRINT_HIGH, "by %s!\n", g_himself(winner));
-			winner->s.v.frags -= 1;
+			// Self death gives the point to the opponent
+			loser->s.v.frags += 1;
 		}
 
 		ra_in_que( winner ); // move to que winner
@@ -271,7 +272,8 @@ void ra_ClientObituary( gedict_t *targ, gedict_t *attacker )
 		if ( targ == attacker )
 		{
 			G_bprint (PRINT_HIGH, "because %s became bored with life!\n", g_he(loser));
-			loser->s.v.frags -= 1;
+			// Self death gives the point to the opponent
+			winner->s.v.frags += 1;
 		}
 
 		ra_in_que( loser ); // move to que loser

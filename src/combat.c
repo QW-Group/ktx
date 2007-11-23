@@ -478,7 +478,8 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		}
 		else if ( (dtTELE1 == targ->deathtype) || (dtTELE2 == targ->deathtype) || (dtTELE3 == targ->deathtype) )
 		{
-			dmg_dealt = 0; // tele does't make dealt damage at all???
+			// tele doesn't count for any dmgfrags damage
+			dmg_dealt = 0; 
 		}
 		else
 		{
