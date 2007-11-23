@@ -518,8 +518,8 @@ void ReadyThink ()
         return;
     }
 
-	txt = va( "%s second%s to gamestart", dig3( i1 ), ( i1 == 1 ? "" : "s") );
-	gr  = va( "\n%s!", redtext("Go ready") );
+	txt = va( "%s second%s left before game starts", dig3( i1 ), ( i1 == 1 ? "" : "s") );
+	gr  = va( "\n%s!", redtext("Get ready") );
 
     for( p = world; (p = find_client( p )); )
 		if ( p->ct == ctPlayer )

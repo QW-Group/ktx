@@ -962,7 +962,7 @@ void StatsToFile()
 	if ( trap_FS_OpenFile( name, &di_handle, FS_WRITE_BIN ) < 0 )
 		return; // OpenFile is last check, so we does't need CloseFile each "return" above
 
-	if ( !QVMstrftime(date, sizeof(date), "%Y-%m-%d %H:%M:%S", 0) )
+	if ( !QVMstrftime(date, sizeof(date), "%Y-%m-%d %H:%M:%S %Z", 0) )
 		date[0] = 0; // bad date
 
 	s2di("%s", "<?xml version=\"1.0\"?>\n");
@@ -1615,7 +1615,7 @@ void SM_on_MatchStart()
 void HideSpawnPoints();
 void StartMatch ()
 {
-	char *tm;
+	char *tm, date[32];
 
 	k_berzerk    = 0;
 	k_nochange   = 0;
@@ -1645,8 +1645,12 @@ void StartMatch ()
 
 	SM_PrepareClients(); // put clients in server and reset some params
 
-	if ( !strnull( tm = ezinfokey(world, "date_str") ) )
-		G_bprint(2, "matchdate: %s\n", tm);
+	if ( !QVMstrftime(date, sizeof(date), "%Y-%m-%d %H:%M:%S %Z", 0) ) {
+		if ( !strnull( tm = ezinfokey(world, "date_str") ) )
+			G_bprint(2, "matchdate: %s\n", tm);
+	} else {
+		G_bprint(2, "matchdate: %s\n", date);
+	}
 
 	if ( !k_matchLess || cvar( "k_matchless_countdown" ) )
 		G_bprint(2, "%s\n", redtext("The match has begun!"));

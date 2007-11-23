@@ -89,9 +89,9 @@ void StartLogs()
 	port[0] = 0;
 	port++;
 
-	if ( !QVMstrftime(date, sizeof(date), "%Y-%m-%d %H:%M:%S", 0) )
+	if ( !QVMstrftime(date, sizeof(date), "%Y-%m-%d %H:%M:%S %Z", 0) )
 		date[0] = 0; // bad date
-	if ( !QVMstrftime(date_c, sizeof(date_c), "%Y%m%d-%H%M%S", 0) )
+	if ( !QVMstrftime(date_c, sizeof(date_c), "%Y%m%d-%H%M%S-%Z", 0) )
 		date_c[0] = 0; // bad date
 
 	log_open("match-%s-%s.log", GetMode(), date_c);
