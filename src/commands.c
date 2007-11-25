@@ -4420,7 +4420,7 @@ void lastscore_add ()
 	int from;
 	int i, s1 = 0, s2 = 0;
 	int k_ls = bound(0, cvar("__k_ls"), MAX_LASTSCORES-1);
-	char *e1, *e2, t1[128] = {0}, t2[128] = {0}, *name, *timestr;
+	char *e1, *e2, t1[128] = {0}, t2[128] = {0}, *name, date[64];
 	lsType_t lst = lsUnknown;
 
 	e1 = e2 = "";
@@ -4471,16 +4471,15 @@ void lastscore_add ()
 	if ( lst == lsUnknown ) // sorry but something wrong
 		return;
 
-	if ( !strnull(timestr = ezinfokey(world, "date_str")) )
-		timestr += 4; // qqshka - hud 320x240 fix, :(
+	if ( !QVMstrftime(date, sizeof(date), "%b %d, %H:%M:%S %Y", 0) )
+		date[0] = 0;
 
 	cvar_fset(va("__k_ls_m_%d", k_ls), lst);
 	cvar_set(va("__k_ls_e1_%d", k_ls), e1);
 	cvar_set(va("__k_ls_e2_%d", k_ls), e2);
 	cvar_set(va("__k_ls_t1_%d", k_ls), t1);
 	cvar_set(va("__k_ls_t2_%d", k_ls), t2);
-	cvar_set(va("__k_ls_s_%d", k_ls), va("%3d:%-3d \x8D %-8.8s %13.13s", s1, s2, 
-										g_globalvars.mapname, timestr));
+	cvar_set(va("__k_ls_s_%d", k_ls), va("%3d:%-3d \x8D %-8.8s %13.13s", s1, s2, g_globalvars.mapname, date));
 
 	cvar_fset("__k_ls", ++k_ls % MAX_LASTSCORES);
 }
@@ -5004,10 +5003,10 @@ void ToggleCGKickback()
 
 void sv_time()
 {
-	char *tm;
+	char date[64];
 
-	if ( !strnull( tm = ezinfokey(world, "date_str") ) )
-		G_sprint(self, 2, "%s\n", tm);
+	if ( QVMstrftime(date, sizeof(date), "%a %b %d, %H:%M:%S %Y", 0) )
+		G_sprint(self, 2, "%s\n", date);
 }
 
 void GrenadeMode()

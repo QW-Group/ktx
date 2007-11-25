@@ -1682,13 +1682,14 @@ gedict_t *get_ed_bestPow()
 
 void show_sv_version()
 {
-	char *tm;
+	char date[64];
 
 	if ( !strnull( ezinfokey( self, "*is" ) ) ) // show this only ones at connect time
 		return;
 
-	if ( !strnull( tm = ezinfokey(world, "date_str") ) )
-		G_sprint(self, 2, "Date: %s\n", tm);
+	if ( QVMstrftime(date, sizeof(date), "%a %b %d, %H:%M:%S %Y", 0) )
+		G_sprint(self, 2, "Date: %s\n", date);
+
 	G_sprint(self, 2, "Mod: %s %s, build %d\n", MOD_NAME, MOD_VERSION, build_number());
 	G_sprint(self, 2, "Server: %s\n", cvar_string( "version" ));
 

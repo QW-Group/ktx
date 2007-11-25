@@ -946,7 +946,7 @@ void StatsToFile()
 	int from1, from2;
 	char *team = "";
 
-	char date[32] = {0}, name[256] = {0}, tmp[1024] = {0}, buf[1024] = {0}, *ip = "", *port = "";
+	char date[64] = {0}, name[256] = {0}, tmp[1024] = {0}, buf[1024] = {0}, *ip = "", *port = "";
 	int i = 0, j;
 
 	if ( strnull( ip = cvar_string( "sv_local_addr" ) ) || strnull( port = strchr(ip, ':') ) || !(i = atoi(port + 1)) )
@@ -1615,7 +1615,7 @@ void SM_on_MatchStart()
 void HideSpawnPoints();
 void StartMatch ()
 {
-	char *tm, date[32];
+	char date[64];
 
 	k_berzerk    = 0;
 	k_nochange   = 0;
@@ -1645,12 +1645,11 @@ void StartMatch ()
 
 	SM_PrepareClients(); // put clients in server and reset some params
 
-	if ( !QVMstrftime(date, sizeof(date), "%Y-%m-%d %H:%M:%S %Z", 0) ) {
-		if ( !strnull( tm = ezinfokey(world, "date_str") ) )
-			G_bprint(2, "matchdate: %s\n", tm);
-	} else {
+	if ( !QVMstrftime(date, sizeof(date), "%Y-%m-%d %H:%M:%S %Z", 0) )
+		date[0] = 0;
+
+	if ( date[0] )
 		G_bprint(2, "matchdate: %s\n", date);
-	}
 
 	if ( !k_matchLess || cvar( "k_matchless_countdown" ) )
 		G_bprint(2, "%s\n", redtext("The match has begun!"));
