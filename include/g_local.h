@@ -418,7 +418,7 @@ void			Check_SD( gedict_t *p );
 void            SetChangeParms();
 void            SetNewParms( qboolean from_vmMain );
 void            ClientConnect();
-void            PutClientInServer();
+void            PutClientInServer(qboolean from_vmMain);
 void            ClientDisconnect();
 void            PlayerPreThink();
 void			BothPostThink(); // <- called for player and spec

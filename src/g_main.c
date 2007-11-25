@@ -169,7 +169,7 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 			return 1;
 
 		if ( !arg0 )
-			PutClientInServer();
+			PutClientInServer( true );
 		else
 			PutSpectatorInServer();
 

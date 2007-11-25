@@ -1540,7 +1540,7 @@ void SM_PrepareClients()
 		self = p;
 
 		SetNewParms( false );
-		PutClientInServer();
+		PutClientInServer( false );
 
 		self = old;
 	}

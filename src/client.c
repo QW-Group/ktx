@@ -656,7 +656,7 @@ void respawn()
 	// set default spawn parms
 	SetNewParms( false );
 	// respawn              
-	PutClientInServer();
+	PutClientInServer( false );
 }
 
 // i put next code in function, since it appear frequently
@@ -1165,14 +1165,12 @@ void ClientConnect()
 // self
 // called after ClientConnect
 ///////////////
-void PutClientInServer()
+void PutClientInServer(qboolean from_vmMain)
 {
 
 	gedict_t       *spot;
 	vec3_t          v;
 	int             items;
-
-//	G_bprint(2, "PutClientInServer()\n");
 
 	self->deathtype = dtNONE;
 	self->s.v.classname = "player";
@@ -1277,8 +1275,15 @@ void PutClientInServer()
 	trap_makevectors( self->s.v.angles );
 	VectorScale( g_globalvars.v_forward, 20, v );
 	VectorAdd( v, self->s.v.origin, v );
-	spawn_tfog( v );
-	play_teleport( self );
+
+	// Play sound and add tele splash always in non RA mode.
+	// In RA mode do that only for winner or loser.
+	if ( !isRA() || isWinner( self ) || isLoser( self ) )
+	{
+		spawn_tfog( v );
+		play_teleport( self );
+	}
+
 	spawn_tdeath( self->s.v.origin, self );
 
 	if ( isRA() )
