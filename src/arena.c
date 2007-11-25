@@ -413,7 +413,7 @@ void setfullwep( gedict_t *anent )
 
 qboolean readytostart()
 {
-	if ( !isRA() || ( time_to_start && g_globalvars.time > time_to_start && getWinner() && getLoser() ) )
+	if ( !isRA() || ( time_to_start && g_globalvars.time >= time_to_start && getWinner() && getLoser() ) )
 		return true;
 	else
 		return false;
@@ -465,7 +465,7 @@ void ra_Frame ()
 {
 	static int last_r;
 
-	int	r;
+	int     r;
 	gedict_t *winner, *loser;
 
 	if ( !isRA() || match_over )
@@ -507,11 +507,11 @@ void ra_Frame ()
 
 	if ( !ra_match_fight ) { // ok start ra timer
 		ra_match_fight = 1; // ra countdown
-		last_r = 99999;
+		last_r = 999999999;
 		time_to_start  = g_globalvars.time + 10;
 	}
 
-	r = Q_rint(time_to_start - g_globalvars.time);
+	r = Q_rint( time_to_start - g_globalvars.time );
 
 	if ( r <= 0 )
 	{
@@ -531,6 +531,9 @@ void ra_Frame ()
 		G_centerprint (loser,  "%s", fight);
 
 		ra_match_fight = 2;
+
+		// rounding suck, so this force readytostart() return true right after FIGHT! is printed
+		time_to_start = g_globalvars.time;
 	}
 	else if ( r != last_r )
 	{
