@@ -1785,6 +1785,13 @@ void ghost2scores( gedict_t *g )
 	int to = MSG_ALL;
 	int cl_slot;
 
+	if ( isRA() )
+	{
+		// Renzo: Disconnected player shouldn't be listed in the scoreboard in RA.
+		// qqshka: Personally I'm not sure how it must be, but folloing Renzo's words atm.
+		return;
+	}
+
 	if ( strneq( g->s.v.classname, "ghost" ) )
 		return;
 
