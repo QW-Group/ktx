@@ -695,7 +695,6 @@ qboolean	isWinner( gedict_t *p );
 qboolean	isLoser( gedict_t *p );
 gedict_t	*getWinner();
 gedict_t	*getLoser();
-void		ra_Precache();
 void		ra_ClientDisconnect();
 void		ra_ClientObituary( gedict_t *targ, gedict_t *attacker );
 void		ra_PutClientInServer();

@@ -285,8 +285,6 @@ void SP_worldspawn()
 		trap_precache_sound( "rune/rune4.wav" );
 	}
 
-	ra_Precache(); // only if ra is active
-
 	if ( cvar("k_instagib_custom_models") ) // precache if custom models actived in config, even if instagib not yet activated 
 	{
 		trap_precache_model( "progs/v_coil.mdl" );	

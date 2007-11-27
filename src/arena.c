@@ -158,20 +158,6 @@ void SetNone( gedict_t *p )
 	p->ra_pt = raNone;
 }
 
-void ra_Precache()
-{
-	if ( !isRA() )
-		return;
-
-	// TODO - precache sounds as server load to avoid map reload
-	trap_precache_sound("ra/1.wav");
-	trap_precache_sound("ra/2.wav");
-	trap_precache_sound("ra/3.wav");
-	trap_precache_sound("ra/excelent.wav");
-	trap_precache_sound("ra/fight.wav");
-	trap_precache_sound("ra/flawless.wav");
-}
-
 void ra_ClientDisconnect()
 {
 	gedict_t *p = NULL;
@@ -291,7 +277,8 @@ void ra_ClientObituary( gedict_t *targ, gedict_t *attacker )
 			if ( ah == 100 && aa == 200 )
 			{
 				G_bprint (PRINT_HIGH, "%s\n", redtext("FLAWLESS Victory!"));
-				sound (world, CHAN_AUTO + CHAN_NO_PHS_ADD, "ra/flawless.wav", 1, ATTN_NONE);
+				// TODO replace RA sounds (but world precached)
+				//sound (world, CHAN_AUTO + CHAN_NO_PHS_ADD, "ra/flawless.wav", 1, ATTN_NONE);
 			}
 			else
 			{
@@ -299,8 +286,11 @@ void ra_ClientObituary( gedict_t *targ, gedict_t *attacker )
 					redtext(getname(attacker)), redtext("had"), dig3(ah), redtext("health and"), dig3(aa), 
 								redtext("armor left"));
 
-				if ( ah >= 75 && aa >= 100 )
-					sound (world, CHAN_AUTO + CHAN_NO_PHS_ADD, "ra/excelent.wav", 1, ATTN_NONE);
+				if ( ah >= 75 && aa >= 100 ) 
+				{
+					// TODO replace RA sounds (but world precached)
+					//sound (world, CHAN_AUTO + CHAN_NO_PHS_ADD, "ra/excelent.wav", 1, ATTN_NONE);
+				}
 			}
 
 			attacker->s.v.frags += 1;
@@ -466,7 +456,7 @@ void ra_Frame ()
 	static int last_r;
 
 	int     r;
-	gedict_t *winner, *loser;
+	gedict_t *winner, *loser, *p;
 
 	if ( !isRA() || match_over )
 		return;
@@ -518,7 +508,8 @@ void ra_Frame ()
 		char *fight = redtext("FIGHT!");
 		gedict_t *first = ra_que_first();
 
-		sound (world, CHAN_AUTO + CHAN_NO_PHS_ADD, "ra/fight.wav", 1, ATTN_NONE);
+		// TODO replace RA sounds (but world precached)
+		//sound (world, CHAN_AUTO + CHAN_NO_PHS_ADD, "ra/fight.wav", 1, ATTN_NONE);
 		G_bprint (PRINT_HIGH, "%s vs. %s\n", getname(winner), getname(loser));
 
 		if ( first )
@@ -539,8 +530,12 @@ void ra_Frame ()
 	{
 		last_r = r;
 
-		if ( r <= 3 )
-			sound (world, CHAN_AUTO + CHAN_NO_PHS_ADD, va("ra/%d.wav", r), 1, ATTN_NONE);
+		if ( r < 6 ) {
+			// TODO replace RA sounds (but world precached)
+			//sound (world, CHAN_AUTO + CHAN_NO_PHS_ADD, va("ra/%d.wav", r), 1, ATTN_NONE);
+			for( p = world; (p = find_client( p )); )
+				stuffcmd (p, "play buttons/switch04.wav\n");
+		}
 
 		G_centerprint (winner, "%s\n\n%d", getname(loser),  r);
 		G_centerprint (loser,  "%s\n\n%d", getname(winner), r);
@@ -565,7 +560,6 @@ void RocketArenaPre()
 				G_sprint (self, PRINT_HIGH,"You have 1 minute left\n"
 										   "%s to get back in line\n", redtext("ra_break"));
 				stuffcmd(self, "play player/axhit1.wav\n");
-
 			}
 			else if ( r == 30 )
 			{
