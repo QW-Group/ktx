@@ -80,6 +80,8 @@ qboolean		ClientSay( qboolean isTeamSay );
 
 void			RemoveMOTD();
 
+static			qboolean check_ezquake(gedict_t *p);
+
 /*
 ================
 vmMain
@@ -147,6 +149,8 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		self->callalias[0] = 0;
 		self->f_checkbuf = f_checks[(int)(self-world)-1];
 		self->f_checkbuf[0] = 0;
+
+		check_ezquake( self );
 
 		show_sv_version();
 
@@ -479,4 +483,24 @@ void G_EdictBlocked()
 void ClearGlobals()
 {
 	damage_attacker = damage_inflictor = activator = self = other = newmis = world;
+}
+
+//===========================================================================
+
+// yeah its lame, but better than checking setinfo each time.
+static qboolean check_ezquake(gedict_t *p)
+{
+	char *clinfo = ezinfokey( p, "*client" );
+
+	if ( !strnull( clinfo ) && strstr(clinfo, "ezQuake") ) // seems ezQuake
+	{
+		while ( Q_isalpha( clinfo[0] ) )
+			clinfo++;
+
+		p->ezquake_version = atoi(clinfo);
+
+		return true;
+	}
+
+	return false;
 }
