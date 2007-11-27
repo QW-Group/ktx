@@ -498,7 +498,7 @@ void ra_Frame ()
 	if ( !ra_match_fight ) { // ok start ra timer
 		ra_match_fight = 1; // ra countdown
 		last_r = 999999999;
-		time_to_start  = g_globalvars.time + 10;
+		time_to_start  = g_globalvars.time + 13;
 	}
 
 	r = Q_rint( time_to_start - g_globalvars.time );
@@ -537,8 +537,10 @@ void ra_Frame ()
 				stuffcmd (p, "play buttons/switch04.wav\n");
 		}
 
-		G_centerprint (winner, "%s\n\n%d", getname(loser),  r);
-		G_centerprint (loser,  "%s\n\n%d", getname(winner), r);
+		if ( r < 11 ) {
+			G_centerprint (winner, "New challenger: %s\n\n%d", getname(loser),  r);
+			G_centerprint (loser,  "Challenge the winner: %s\n\n%d", getname(winner), r);
+		}
 	}
 }
 
