@@ -19,6 +19,8 @@
 
 #include "g_local.h"
 
+void StuffModCommands();
+
 char *maps_list[] =
 {
 	// episode 1
@@ -74,7 +76,6 @@ char *maps_list[] =
 
 int maps_cnt = sizeof ( maps_list ) / sizeof ( maps_list[0] );
 
-
 void StuffCustomMaps()
 {
 	float f1, f2, f3;
@@ -98,21 +99,19 @@ void StuffCustomMaps()
 		if ( strnull( s2 ) )
 			break;
 
-		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias %s-map cmd cm %d\n", s2, (int)f1 + 1);
+		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias %s cmd cm %d\n", s2, (int)f1 + 1);
 	}
 
 	if( strnull ( s2 ) || f1 <= f3 /* i.e. out of reserved range */ )
 	{
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "echo Maps downloaded\n");
 
-        // Tell the world we already have stuffed the commands and map aliases.
-		PROG_TO_EDICT( self->s.v.owner )->k_stuff = 1;
-
-		// no more maps in localinfo so setup for removing entity and return.
-		self->s.v.think = ( func_t ) SUB_Remove;
-		self->s.v.nextthink = g_globalvars.time + 0.1;
-
+		// Finished stuffing custom maps, now stuff commands aliases
+		self->cnt = -1;
+		self->s.v.think = ( func_t ) StuffModCommands;
+		self->s.v.nextthink = g_globalvars.time + dt;
 		return;
+
 	}
 
 	// next time around we'll be starting from the f1 variable.

@@ -977,10 +977,12 @@ void StuffModCommands()
 	{
 		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "echo Commands downloaded\n");
 
-		// no more commands, so setup for stuffing main maps.
-		self->cnt = -1;
-		self->s.v.think = ( func_t ) StuffMainMaps;
-		self->s.v.nextthink = g_globalvars.time + dt;
+        	// Tell the world we already have stuffed the commands and map aliases.
+		PROG_TO_EDICT( self->s.v.owner )->k_stuff = 1;
+
+		// no more maps in localinfo so setup for removing entity and return.
+		self->s.v.think = ( func_t ) SUB_Remove;
+		self->s.v.nextthink = g_globalvars.time + 0.1;
 
 		return;
 	}

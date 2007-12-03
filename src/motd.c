@@ -21,7 +21,7 @@
 
 #include "g_local.h"
 
-void StuffModCommands();
+void StuffMainMaps();
 
 void PMOTDThink()
 {
@@ -102,7 +102,7 @@ void MOTDThinkX()
 		p->s.v.classname = "motdX";
 		p->s.v.owner = self->s.v.owner;
 		p->cnt = -1;
-    	p->s.v.think = ( func_t ) StuffModCommands;
+    	p->s.v.think = ( func_t ) StuffMainMaps;
     	p->s.v.nextthink = g_globalvars.time + 0.1;
 	}
 
