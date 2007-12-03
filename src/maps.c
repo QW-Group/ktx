@@ -98,7 +98,7 @@ void StuffCustomMaps()
 		if ( strnull( s2 ) )
 			break;
 
-		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias %s cmd cm %d\n", s2, (int)f1 + 1);
+		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias %s-map cmd cm %d\n", s2, (int)f1 + 1);
 	}
 
 	if( strnull ( s2 ) || f1 <= f3 /* i.e. out of reserved range */ )
