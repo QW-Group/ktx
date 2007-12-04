@@ -21,8 +21,6 @@
 
 #include "g_local.h"
 
-void StuffMainMaps();
-
 void PMOTDThink()
 {
 	int i;
@@ -94,25 +92,29 @@ void MOTDThinkX()
 		WriteShort(to, owner->s.v.frags);
 	}
 
-// check if we are need to stuff aliases, or already done this
-	if( !(PROG_TO_EDICT( self->s.v.owner )->k_stuff) )
+	// stuff or not to stuff, that the question!
+	if( owner->k_stuff )
 	{
-		gedict_t *p = spawn();
+		if ( k_matchLess ) // remove motd if player already stuffed, because them probably sow motd already one time
+		{
+			ent_remove( self );
+			return;
+		}
+	}
+	else
+	{
+		extern void StuffMaps( gedict_t *p );
+		extern void StuffModCommands( gedict_t *p );
 
-		p->s.v.classname = "motdX";
-		p->s.v.owner = self->s.v.owner;
-		p->cnt = -1;
-    	p->s.v.think = ( func_t ) StuffMainMaps;
-    	p->s.v.nextthink = g_globalvars.time + 0.1;
+		StuffMaps( owner );
+		StuffModCommands( owner );
+		
+		owner->k_stuff = 1;
 	}
 
-	self->s.v.think = // select MOTD for spectator or player
-		  ( func_t ) ( PROG_TO_EDICT( self->s.v.owner )->ct == ctSpec ? SMOTDThink : PMOTDThink );
+	// select MOTD for spectator or player
+	self->s.v.think = ( func_t ) ( owner->ct == ctSpec ? SMOTDThink : PMOTDThink );
 	self->s.v.nextthink = g_globalvars.time + 0.3;
-
-// remove motd if player already stuffed, because them probably sow motd already one time
-	if( k_matchLess && PROG_TO_EDICT( self->s.v.owner )->k_stuff )
-		ent_remove( self );
 }
 
 void MakeMOTD()
@@ -134,10 +136,6 @@ void RemoveMOTD()
 	int owner = EDICT_TO_PROG( self );
 
 	for( motd = world; (motd = find(motd, FOFCLSN, "motd")); ) // self MOTD
-		if ( owner == motd->s.v.owner )
-			ent_remove( motd );
-
-	for( motd = world; (motd = find(motd, FOFCLSN, "motdX")); ) // staffing aliases/maps
 		if ( owner == motd->s.v.owner )
 			ent_remove( motd );
 }

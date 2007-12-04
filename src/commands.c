@@ -23,8 +23,6 @@
 
 int max_cmd_len = 0;
 
-void StuffMainMaps();
-
 void SendMessage(char *name);
 float CountRPlayers();
 float CountTeams();
@@ -868,28 +866,23 @@ qboolean isSupport_Params(gedict_t *p)
 	return (p->ezquake_version > 0 ? true : false); // have no idea at which point ezquake start support it
 }
 
-void StuffAliases()
+void StuffAliases( gedict_t *p )
 {
-// stuffing for numbers, hope no flooding out
 	int i;
 
 	for ( i = 1; i <= MAX_CLIENTS; i++ )
-		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias %d impulse %d\n", i, i);
+		stuffcmd(p, "alias %d impulse %d\n", i, i);
 
-	if ( PROG_TO_EDICT( self->s.v.owner )->ct == ctSpec ) {
-		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias next_fav fav_next\n");
+	if ( p->ct == ctSpec )
+	{
+		stuffcmd(p, "alias next_fav fav_next\n");
 	}
-	else {
-		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias notready break\n");
-		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias kfjump \"impulse 156;+jump;wait;-jump\"\n");
-		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias krjump \"impulse 164;+jump;wait;-jump\"\n");
+	else
+	{
+		stuffcmd(p, "alias notready break\n");
+		stuffcmd(p, "alias kfjump \"impulse 156;+jump;wait;-jump\"\n");
+		stuffcmd(p, "alias krjump \"impulse 164;+jump;wait;-jump\"\n");
 	}
-}
-
-float StuffDeltaTime(int iDelta)
-{
-	iDelta = bound ( 1, ( iDelta ? iDelta : 4 ), 5); // i.e. default is 4
-	return 0.01f * (float)iDelta;
 }
 
 // just check is this cmd valid for class of this player
@@ -937,63 +930,32 @@ qboolean isCmdRequireAdmin( int icmd, qboolean isSpec )
 	return false;
 }
 
-void StuffModCommands()
+void StuffModCommands( gedict_t *p )
 {
-	int i, limit;
+	int i;
 	char *name, *params;
-	qboolean spc = PROG_TO_EDICT( self->s.v.owner )->ct == ctSpec;
-	qboolean support_params = isSupport_Params( PROG_TO_EDICT( self->s.v.owner ) );
-	float dt = StuffDeltaTime( iKey( PROG_TO_EDICT( self->s.v.owner ), "ss" ) );
+	qboolean spc = ( p->ct == ctSpec );
+	qboolean support_params = isSupport_Params( p );
 
-	if(self->cnt == -1)	{
-		StuffAliases(); // stuff impulses based aliases, or just aliases
+	// stuff impulses based aliases, or just aliases
+	StuffAliases( p );
 
-		self->cnt = 0;
-		self->s.v.nextthink = g_globalvars.time + 0.1;
-		return;
-	}
-
-	i = self->cnt;
-	limit = i + STUFFCMDS_PER_PORTION; // # stuffcmd's per portion
-
-	for( ; i <= limit && ( i >= 0 && i < cmds_cnt ); i++ ) {
-
+	for( i = 0; i < cmds_cnt; i++ )
+	{
 		name = cmds[i].name;
 
-		if ( !isValidCmdForClass( i, spc )  // cmd does't valid for this class of player or matchless mode does't have this command
-			 || cmds[i].f == dummy // cmd have't function, ie u must not stuff alias for this cmd
+		if (    !isValidCmdForClass( i, spc )   // cmd does't valid for this class of player or matchless mode does't have this command
+			 || cmds[i].f == dummy				// cmd have't function, ie u must not stuff alias for this cmd
 			 || (cmds[i].cf_flags & CF_NOALIAS) // no alias for such command, may be accessed only via /cmd commandname
-		    ) {
-			limit++;
+		    )
 			continue;
-		}
 
 		params = ( (cmds[i].cf_flags & CF_PARAMS) && support_params ) ? " %0" : "";
 
-		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias %s cmd %03d%s\n", name, (int)i, params);
+		stuffcmd(p, "alias %s cmd %03d%s\n", name, (int)i, params);
 	}
 
-	if( i <= limit /* all commands is stuffed */ )
-	{
-		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "echo Commands downloaded\n");
-
-        	// Tell the world we already have stuffed the commands and map aliases.
-		PROG_TO_EDICT( self->s.v.owner )->k_stuff = 1;
-
-		// no more maps in localinfo so setup for removing entity and return.
-		self->s.v.think = ( func_t ) SUB_Remove;
-		self->s.v.nextthink = g_globalvars.time + 0.1;
-
-		return;
-	}
-
-	// next time around we'll be starting from the i variable which is the next available command.
-	self->cnt = i;
-	
-	// 'dt' sec delay before next stuffing.
-	self->s.v.nextthink = g_globalvars.time + dt;
-	
-	return;
+	G_sprint(p, 2, "Commands downloaded\n" );
 }
 
 void Init_cmds(void)

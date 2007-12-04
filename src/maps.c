@@ -19,8 +19,6 @@
 
 #include "g_local.h"
 
-void StuffModCommands();
-
 char *maps_list[] =
 {
 	// episode 1
@@ -76,84 +74,37 @@ char *maps_list[] =
 
 int maps_cnt = sizeof ( maps_list ) / sizeof ( maps_list[0] );
 
-void StuffCustomMaps()
+void StuffCustomMaps( gedict_t *p )
 {
-	float f1, f2, f3;
-	char *s2=NULL;
-	float dt = StuffDeltaTime( iKey( PROG_TO_EDICT( self->s.v.owner ), "ss" ) );
+	int i;
+	char map_name[128], key[128];
 
-	if(self->cnt == -1)
-		self->cnt = 0;
+	for( i = LOCALINFO_MAPS_LIST_START; i <= LOCALINFO_MAPS_LIST_END; i++ )
+	{
+		snprintf(key, sizeof(key), "%d", i);
+		infokey( world, key, map_name, sizeof(map_name) );
 
-	f1 = self->cnt;
-	f3 = f1 + STUFFCMDS_PER_PORTION;
-	f2 = LOCALINFO_MAPS_LIST_START + self->cnt;
-
-	stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "\n"); // FIXME: mb remove this line?
-	
-	for( ; f1 <= f3 && f2 >= LOCALINFO_MAPS_LIST_START
-				    && f2 <= LOCALINFO_MAPS_LIST_END; f2++, f1++ ) {
-
-		s2 = ezinfokey(world, va("%d", (int)f2));
-
-		if ( strnull( s2 ) )
+		if ( strnull( map_name ) )
 			break;
 
-		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias %s cmd cm %d\n", s2, (int)f1 + 1);
+		stuffcmd(p, "alias %s cmd cm %d\n", map_name, i + (1 - LOCALINFO_MAPS_LIST_START));
 	}
-
-	if( strnull ( s2 ) || f1 <= f3 /* i.e. out of reserved range */ )
-	{
-		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "echo Maps downloaded\n");
-
-		// Finished stuffing custom maps, now stuff commands aliases
-		self->cnt = -1;
-		self->s.v.think = ( func_t ) StuffModCommands;
-		self->s.v.nextthink = g_globalvars.time + dt;
-		return;
-
-	}
-
-	// next time around we'll be starting from the f1 variable.
-	self->cnt = f1;
-	
-	// 'dt' sec delay before next stuffing.
-	self->s.v.nextthink = g_globalvars.time + dt;
-	
-	return;
 }
 
-void StuffMainMaps()
+void StuffMainMaps( gedict_t *p )
 {
-	int i, limit;
-	float dt = StuffDeltaTime( iKey( PROG_TO_EDICT( self->s.v.owner ), "ss" ) );
+	int i;
 
-	if(self->cnt == -1)
-		self->cnt = 0;
+	for( i = 0; i < maps_cnt; i++ )
+		stuffcmd(p, "alias %s cmd cm %d\n", maps_list[i], -(i + 1));
+}
 
-	i = self->cnt;
-	limit = i + STUFFCMDS_PER_PORTION;
-	
-	for( ; i <= limit && ( i >=0 && i < maps_cnt ); i++ )
-		stuffcmd(PROG_TO_EDICT( self->s.v.owner ), "alias %s cmd cm %d\n",
-															maps_list[i], -(i + 1));
+void StuffMaps( gedict_t *p )
+{
+	StuffMainMaps( p );
+	StuffCustomMaps( p );
 
-	if( i <= limit /* done */ )
-	{
-		// no more maps in maps_list[], so setup for stuffing custom maps.
-		self->cnt = -1;
-		self->s.v.think = ( func_t ) StuffCustomMaps;
-		self->s.v.nextthink = g_globalvars.time + dt;
-		return;
-	}
-
-	// next time around we'll be starting from the i variable.
-	self->cnt = i;
-	
-	// 'dt' sec delay before next stuffing.
-	self->s.v.nextthink = g_globalvars.time + dt;
-	
-	return;
+	G_sprint(p, 2, "Maps downloaded\n" );
 }
 
 
@@ -161,14 +112,18 @@ char *GetMapName(int imp)
 {
 	int i;
 
-	if ( imp < 0 ) { // potential from maps_list[]
+	if ( imp < 0 )
+	{
+	 // potential from maps_list[]
 		i = -imp - 1;
 
 		if ( i >= 0 && i < maps_cnt )
 			return maps_list[i];
 	}
-	else { // potential custom map
-		i = LOCALINFO_MAPS_LIST_START + imp - 1;
+	else
+	{
+	 // potential custom map
+		i = imp - (1 - LOCALINFO_MAPS_LIST_START);
 
 	 	if ( i >= LOCALINFO_MAPS_LIST_START && i <= LOCALINFO_MAPS_LIST_END )
 			return ezinfokey(world, va("%d", i));

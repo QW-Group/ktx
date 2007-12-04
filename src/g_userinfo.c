@@ -210,7 +210,7 @@ cmdinfo_t cinfos[] = {
 	{ "premsg", 0 },
 //    	quote 	// wtf?
 //   	ma		// wtf?
-	{ "ss", 0 },
+//	{ "ss", 0 }, // not used anymore
 	{ "ti", 0 },	// specifie use team info or not
 //		rb
     { "w_switch", 0 },
