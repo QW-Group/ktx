@@ -718,6 +718,7 @@ int		capt_num(gedict_t *p);
 char 	*GetMapName(int imp);
 void 	DoSelectMap(int iMap);
 void 	SelectMap();
+void	VoteMap();
 
 // match.c
 

@@ -206,6 +206,7 @@ void TimeSet(float t);
 
 const char CD_NODESC[] = "no desc";
 
+#define CD_VOTEMAP    "alternative map vote system"
 #define CD_COMMANDS   "show commands list"
 #define CD_SCORES     "print match time/scores"
 #define CD_STATS      "show player stats"
@@ -456,6 +457,7 @@ void redirect();
 
 cmd_t cmds[] = {
 	{ "cm",          SelectMap,                 0    , CF_BOTH | CF_MATCHLESS | CF_NOALIAS, CD_NODESC },
+	{ "votemap",     VoteMap,                   0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_VOTEMAP },
 	{ "commands",    ShowCmds,                  0    , CF_BOTH | CF_MATCHLESS, CD_COMMANDS },
 	{ "scores",      PrintScores,               0    , CF_BOTH | CF_MATCHLESS, CD_SCORES },
 	{ "stats",       PlayerStats,               0    , CF_BOTH | CF_MATCHLESS, CD_STATS },

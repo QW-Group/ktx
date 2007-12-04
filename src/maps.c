@@ -132,6 +132,39 @@ char *GetMapName(int imp)
 	return "";
 }
 
+int GetMapNum(char *map)
+{
+	int i;
+	char map_name[128], key[128];
+
+	if ( strnull( map ) )
+		return 0;
+
+	for( i = 0; i < maps_cnt; i++ )
+	{
+		if ( streq( maps_list[i], map ) )
+		{
+			return -(i + 1);
+		}
+	}
+
+	for( i = LOCALINFO_MAPS_LIST_START; i <= LOCALINFO_MAPS_LIST_END; i++ )
+	{
+		snprintf(key, sizeof(key), "%d", i);
+		infokey( world, key, map_name, sizeof(map_name) );
+
+		if ( strnull( map_name ) )
+			break;
+
+		if ( streq( map_name, map ) )
+		{
+			return i + (1 - LOCALINFO_MAPS_LIST_START);
+		}
+	}
+
+	return 0;
+}
+
 void DoSelectMap(int iMap)
 {
 	char     *m;
@@ -203,6 +236,16 @@ void SelectMap()
 	trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
 
 	DoSelectMap ( atoi( arg_1 ) );
+}
+
+
+void VoteMap()
+{
+	char	arg_1[1024];
+
+	trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
+
+	DoSelectMap ( GetMapNum( arg_1 ) );
 }
 
 int IsMapInCycle(char *map)
