@@ -23,9 +23,11 @@ RM=@RM@
 
 INSTALLDIR=$(PREFIX)/sbin
 
+SVNREV = $(shell svnversion -n $(srcdir) | sed -e "s/M//")
+
 MODULE=qwprogs.so
 
-CFLAGS=-g -Wall -O2 -fPIC
+CFLAGS=-g -Wall -O2 -fPIC -DSVNREV="$(SVNREV)"
 LDFLAGS=-shared -Wl,-soname,$(MODULE)
 INCFLAGS=-I../include
 
@@ -39,11 +41,9 @@ SOURCES=native_lib.c buttons.c client.c combat.c doors.c g_cmd.c g_main.c \
 	g_userinfo.c grapple.c runes.c ctf.c arena.c
 OBJECTS=$(SOURCES:.c=.o)
 
-
 all:		build
 
 build:		$(MODULE)
-		echo -n ' ' >> build.num
 
 install:	build
 			../install-sh -c -m 755 $(MODULE) $(INSTALLDIR)

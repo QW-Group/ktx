@@ -24,7 +24,6 @@
  */
 
 #include "g_local.h"
-#include "build.num"
 
 void Sc_Stats(float on);
 
@@ -1530,18 +1529,9 @@ gedict_t *get_ed_scores2()
 int build_number ()
 {
 	static int b = 0;
-
-	if (b)
-		return b;
-
-	{
-		
-		char rev_num[] = BUILD_NUMBER;
-
-		if (!Q_stricmpn(rev_num, "$Revision:", sizeof("$Revision:") - 1))
-			b = atoi(rev_num + sizeof("$Revision:") - 1);
-	}
-
+#ifdef SVNREV
+	b = SVNREV;
+#endif
 	return b;
 }
 

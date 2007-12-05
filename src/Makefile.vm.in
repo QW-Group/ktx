@@ -23,9 +23,11 @@ Q3ASM=@Q3ASM@
 RM=@RM@
 INSTALLDIR=$(PREFIX)/sbin
 
+SVNREV = $(shell svnversion -n $(srcdir) | sed -e "s/M//")
+
 MODULE=qwprogs.qvm
 
-CFLAGS=-DQ3_VM -S -Wf-target=bytecode -Wf-g
+CFLAGS=-DQ3_VM -S -Wf-target=bytecode -Wf-g -DSVNREV="$(SVNREV)"
 INCFLAGS=-I../include
 
 SOURCES=g_main.c bg_lib.c buttons.c client.c combat.c doors.c g_cmd.c \
@@ -35,11 +37,9 @@ SOURCES=g_main.c bg_lib.c buttons.c client.c combat.c doors.c g_cmd.c \
 	g_userinfo.c grapple.c runes.c ctf.c arena.c
 OBJECTS=$(SOURCES:.c=.s)
 
-
 all:		build
 
 build:		$(MODULE)
-		echo -n ' ' >> build.num
 
 install:	build
 			../install-sh -c -m 755 $(MODULE) $(INSTALLDIR)
