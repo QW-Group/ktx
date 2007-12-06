@@ -23,7 +23,7 @@ RM=@RM@
 
 INSTALLDIR=$(PREFIX)/sbin
 
-SVNREV = $(shell svnversion -n $(srcdir) | sed -e "s/M//")
+SVNREV = $(shell svnversion -n $(srcdir) 2>/dev/null | sed -e "s/M//")
 
 MODULE=qwprogs.so
 
