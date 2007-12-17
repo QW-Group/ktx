@@ -1751,7 +1751,7 @@ void PrintCountdown( int seconds )
 	if ( vw_enabled )
 		strlcat(text, va("%s %8s\n", "VWep", redtext("On")), sizeof(text));
 
-	if ( cvar("k_teamoverlay") && tp_num() )
+	if ( cvar("k_teamoverlay") && tp_num() && !(deathmatch == 4) )
 		strlcat(text, va("%s %3s\n", "TmOverlay", redtext("On")), sizeof(text));
 
 	if ( !isRA() ) // useless in RA
@@ -1780,14 +1780,14 @@ void PrintCountdown( int seconds )
 		default: pwr = redtext("Unkn"); break;
 	}
 
-	if ( !isRA() || Get_Powerups() ) // show powerups in RA ?
+	if ( !isRA() && Get_Powerups() )
 		strlcat(text, va("%s %4s\n", "Powerups", pwr), sizeof(text));
 
 	if ( cvar("k_dmgfrags") )
 		strlcat(text, va("%s %4s\n", "Dmgfrags", redtext("On")), sizeof(text));
 
 	if ( deathmatch == 4 && !cvar("k_midair") && !cvar("k_instagib")
-		 && !strnull( nowp = str_noweapon((int)cvar("k_disallow_weapons") & DA_WPNS) )
+		&& !strnull( nowp = str_noweapon((int)cvar("k_disallow_weapons") & DA_WPNS) )
 	   )
 		strlcat(text, va("\n%s %4s\n", "Noweapon", 
 					redtext(nowp[0] == 32 ? (nowp+1) : nowp)), sizeof(text));
