@@ -1751,7 +1751,7 @@ void PrintCountdown( int seconds )
 	if ( vw_enabled )
 		strlcat(text, va("%s %8s\n", "VWep", redtext("On")), sizeof(text));
 
-	if ( cvar("k_teamoverlay") && tp_num() && !(deathmatch == 4) )
+	if ( cvar("k_teamoverlay") && tp_num() && !isDuel() )
 		strlcat(text, va("%s %3s\n", "TmOverlay", redtext("On")), sizeof(text));
 
 	if ( !isRA() ) // useless in RA
