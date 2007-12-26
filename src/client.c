@@ -1650,7 +1650,7 @@ void WaterMove()
 		{
 			self->dmg = self->dmg + 2;
 			if ( self->dmg > 15 )
-				self->dmg = 15; // Fixed maximum water damage...
+				self->dmg = 10;
 
 			switch ( (int)self->s.v.watertype ) {
 				case CONTENT_LAVA:  self->deathtype = dtLAVA_DMG;  break; // funny, we can drown in lava ?
