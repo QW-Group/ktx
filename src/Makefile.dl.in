@@ -49,9 +49,6 @@ all:		build
 
 build:		$(MODULE)
 
-build32:	CC=$(CC) -m32
-			$(MODULE)
-
 install:	build
 			../install-sh -c -m 755 $(MODULE) $(INSTALLDIR)
 
