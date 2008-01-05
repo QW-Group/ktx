@@ -524,5 +524,7 @@ typedef struct gedict_s {
 	// yeah its lame, but better than checking setinfo each time.
 	int ezquake_version;
 
+	qboolean weapon_switch_fix;
+
 } gedict_t;
 

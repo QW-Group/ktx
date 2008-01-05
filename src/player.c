@@ -381,18 +381,13 @@ void set_idealtime()
 	self->s.v.nextthink = self->s.v.ltime = g_globalvars.time + diff + 0.1;
 }
 
-#define EZQUAKE_BUG // disconnect: sorry i'm too lazy to fix ezQuake's bug since not I did it... i'll remove it when it'll be fixed
 void player_nail1()
 {
 	self->s.v.frame = 103;
 	self->s.v.think = ( func_t ) player_nail2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
-	if ( !self->s.v.button0 || intermission_running
-#ifndef EZQUAKE_BUG
-	|| self->s.v.impulse
-#endif
-	)
+	if ( !self->s.v.button0 || intermission_running || ( self->s.v.impulse && self->weapon_switch_fix )	)
 	{
 		self->walkframe = 0;
 		player_run();
@@ -417,11 +412,7 @@ void player_nail2()
 	self->s.v.think = ( func_t ) player_nail1;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
-	if ( !self->s.v.button0 || intermission_running
-#ifndef EZQUAKE_BUG
-	|| self->s.v.impulse
-#endif
-	)
+	if ( !self->s.v.button0 || intermission_running || ( self->s.v.impulse && self->weapon_switch_fix )	)
 	{
 		self->walkframe = 0;
 		player_run();
@@ -448,11 +439,7 @@ void player_light1()
 	self->s.v.think = ( func_t ) player_light2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
-	if ( !self->s.v.button0 || intermission_running
-#ifndef EZQUAKE_BUG
-	|| self->s.v.impulse 
-#endif
-	)
+	if ( !self->s.v.button0 || intermission_running || ( self->s.v.impulse && self->weapon_switch_fix )	)
 	{
 		self->walkframe = 0;
 		player_run();
@@ -477,11 +464,7 @@ void player_light2()
 	self->s.v.think = ( func_t ) player_light1;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
-	if ( !self->s.v.button0 || intermission_running
-#ifndef EZQUAKE_BUG
-	|| self->s.v.impulse 
-#endif
-	)
+	if ( !self->s.v.button0 || intermission_running || ( self->s.v.impulse && self->weapon_switch_fix )	)
 	{
 		self->walkframe = 0;
 		player_run();

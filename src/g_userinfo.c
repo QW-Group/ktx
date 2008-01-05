@@ -174,6 +174,13 @@ qboolean FixPlayerTeam ( char *newteam )
 }
 
 //========================================================
+
+void info_wswfix_update ( gedict_t *p, char *from, char *to )
+{
+	p->weapon_switch_fix = !!atoi( to );
+}
+
+//========================================================
 // ktpro like 'cmd info' work around, which partially replace setinfo, which is too short for us
 
 
@@ -195,7 +202,7 @@ cmdinfo_t cinfos[] = {
     { "fs", 0 }, // for force_spec 
 //      ft
 	{ "gender", 0 },
-    { "icq", 0 },
+//    { "icq", 0 },
     { "k", 0 },
     { "k_nick", 0 },
 //      ke
@@ -213,6 +220,7 @@ cmdinfo_t cinfos[] = {
 //	{ "ss", 0 }, // not used anymore
 	{ "ti", 0 },	// specifie use team info or not
 //		rb
+    { "wswfix", info_wswfix_update }, // weapon switch fix preference
     { "w_switch", 0 },
 	{ "k_sdir", 0 },
 	{ "wps", 0 },
@@ -475,5 +483,8 @@ void cmdinfo_infoset ( gedict_t *p )
 	  	// so we can invoke on_enter
 		stuffcmd(p, "wait;wait;wait;cmd ack noinfoset\n");
 	}
+
+	// this need to be called each time client connects
+	info_wswfix_update( p, "", ezinfokey(p, "wswfix") );
 }
 

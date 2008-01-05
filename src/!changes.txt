@@ -1,6 +1,15 @@
+2008-01-05
+qq:
+278. New setinfo "wswfix" aka weapon switch fix.
+	In QW present some annoying feature regarding lg/ng/sng and weapon switching.
+	When you fire lg (same shit with ng/sng) and willing to switch to some other weapon you need first release fire button,
+	so "setinfo wswfix 1" fix this. Well, this was fixed ages ago, but in ezquake was added some weapon
+	switching feature too (weapon preselect or how its called) and its cause some problems,
+	so disconnect removed (commented out) my code. But seems ones likes it, ello vio.
+
 2007-10-02
 deurk:
-276. Changed k_ssapwn to k_spm_show, k_spawn_glow to k_spm_glow and
+277. Changed k_ssapwn to k_spm_show, k_spawn_glow to k_spm_glow and
 	k_custom_spawn to k_spm_custom_model.
 
 2007-09-10
