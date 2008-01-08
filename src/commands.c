@@ -858,7 +858,7 @@ void redirect()
 	if ( !only_digits(cmd_command) || !((i = atoi(cmd_command)) >= 0 && i < cmds_cnt) )
 		return; // sanity
 
-	stuffcmd(self, "cmd %s %s\n", cmds[i].name, params_str(1, -1));
+	stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "cmd %s %s\n", cmds[i].name, params_str(1, -1));
 }
 
 // check if players client support params in aliases
@@ -873,17 +873,17 @@ void StuffAliases( gedict_t *p )
 	int i;
 
 	for ( i = 1; i <= MAX_CLIENTS; i++ )
-		stuffcmd(p, "alias %d impulse %d\n", i, i);
+		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "alias %d impulse %d\n", i, i);
 
 	if ( p->ct == ctSpec )
 	{
-		stuffcmd(p, "alias next_fav fav_next\n");
+		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "alias next_fav fav_next\n");
 	}
 	else
 	{
-		stuffcmd(p, "alias notready break\n");
-		stuffcmd(p, "alias kfjump \"impulse 156;+jump;wait;-jump\"\n");
-		stuffcmd(p, "alias krjump \"impulse 164;+jump;wait;-jump\"\n");
+		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "alias notready break\n");
+		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "alias kfjump \"impulse 156;+jump;wait;-jump\"\n");
+		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "alias krjump \"impulse 164;+jump;wait;-jump\"\n");
 	}
 }
 
@@ -954,7 +954,7 @@ void StuffModCommands( gedict_t *p )
 
 		params = ( (cmds[i].cf_flags & CF_PARAMS) && support_params ) ? " %0" : "";
 
-		stuffcmd(p, "alias %s cmd %03d%s\n", name, (int)i, params);
+		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "alias %s cmd %03d%s\n", name, (int)i, params);
 	}
 
 	G_sprint(p, 2, "Commands downloaded\n" );
@@ -1215,13 +1215,13 @@ void SendMessage(char *name)
 			continue;
 
 		if ( !strnull( name ) && streq( p->s.v.netname, name ) ) {
-			stuffcmd(self, "say ");
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "say ");
 			if ((s = ezinfokey(self, "premsg")))
-				stuffcmd(self, " %s ", s);
-			stuffcmd(self, "%s", name);
+				stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, " %s ", s);
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "%s", name);
 			if ((s = ezinfokey(self, "postmsg")))
-				stuffcmd(self, " %s", s);
-			stuffcmd(self, "\n");
+				stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, " %s", s);
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "\n");
 
 			return;
 		}
@@ -3479,12 +3479,12 @@ void noweapon ()
 
 void no_lg()
 {
-	stuffcmd(self, "cmd noweapon lg\n");
+	stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "cmd noweapon lg\n");
 }
 
 void no_gl()
 {
-	stuffcmd(self, "cmd noweapon gl\n");
+	stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "cmd noweapon gl\n");
 }
 
 void tracklist ( )
@@ -3778,7 +3778,7 @@ void fav_next( )
 		return;
 	}
 	
-	stuffcmd( self, "track %d\n", GetUserID( p ) );
+	stuffcmd_flags( self, STUFFCMD_IGNOREINDEMO, "track %d\n", GetUserID( p ) );
 }
 
 void xfav_go( float fav_num )
@@ -3808,7 +3808,7 @@ void xfav_go( float fav_num )
 		return;
 	}
 	
-	stuffcmd( self, "track %d\n", GetUserID( p ) );
+	stuffcmd_flags( self, STUFFCMD_IGNOREINDEMO, "track %d\n", GetUserID( p ) );
 }
 
 void fav_show( )
@@ -3919,7 +3919,7 @@ void DoAutoTrack( )
 	self->apply_ktpro_autotrack	= false; // we going apply track switch, so relax ktpro's autotrack
 
 	if ( ( id = GetUserID( p ) ) > 0 )
-		stuffcmd( self, "track %d\n", id );
+		stuffcmd_flags( self, STUFFCMD_IGNOREINDEMO, "track %d\n", id );
 }
 
 void AutoTrack( float autoTrackType )
@@ -4057,7 +4057,7 @@ void next_best ()
 		to = b1;
 
 	if ( ( id = GetUserID( to ) ) > 0 )
-		stuffcmd( self, "track %d\n", id );
+		stuffcmd_flags( self, STUFFCMD_IGNOREINDEMO, "track %d\n", id );
 }
 
 void next_pow ()
@@ -4104,7 +4104,7 @@ void next_pow ()
 	}
 
 	if ( ( id = GetUserID( to ) ) > 0 )
-		stuffcmd( self, "track %d\n", id );
+		stuffcmd_flags( self, STUFFCMD_IGNOREINDEMO, "track %d\n", id );
 }
 
 // }  spec tracking stuff 
@@ -4305,7 +4305,7 @@ void Pos_Set (float set_type)
 
 void Sh_Speed ()
 {
-	stuffcmd(self, "cmd info kf %d\n", (iKey( self, "kf" ) ^ KF_SPEED));
+	stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "cmd info kf %d\n", (iKey( self, "kf" ) ^ KF_SPEED));
 }
 
 // /motd command
@@ -4849,13 +4849,13 @@ void cmd_wreg_do( byte c )
 		self->wreg_attack = 1;
 
 		if( self->ct == ctSpec )
-			stuffcmd(self, "+attack\n");
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "+attack\n");
 	}
 	else if ( w->attack < 0 ) {
 		self->wreg_attack = 0;
 
 		if( self->ct == ctSpec )
-			stuffcmd(self, "-attack\n");
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "-attack\n");
 	}
 
 	if( self->ct == ctSpec )
@@ -5002,12 +5002,12 @@ void ToggleReady()
 
 void dlist()
 {
-	stuffcmd(self, "cmd demolist %s\n", params_str(1, -1));
+	stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "cmd demolist %s\n", params_str(1, -1));
 }
 
 void dinfo()
 {
-	stuffcmd(self, "cmd demoinfo %s\n", params_str(1, -1));
+	stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "cmd demoinfo %s\n", params_str(1, -1));
 }
 
 // ktpro (c)
@@ -5356,7 +5356,7 @@ void check_callalias ()
 	if ( !self->callalias_time || self->callalias_time > g_globalvars.time )
 		return;
 
-	stuffcmd(self, "%s\n", self->callalias);
+	stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "%s\n", self->callalias);
 	self->callalias_time = 0;
 }
 

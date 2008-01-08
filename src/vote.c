@@ -383,7 +383,8 @@ void vote_check_pickup ()
 
 		for( p = world;	(p = find_plr( p )); ) {
 
-			stuffcmd(p, "break\n"
+			stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO,
+						"break\n"
 						"color 0\n"
 						"team \"\"\n"
 						"skin base\n");
@@ -435,9 +436,9 @@ void vote_check_rpickup ()
 					tn = (tn == 1 ? 2 : 1); // next random player will be in other team
 
             		if( p->k_teamnumber == 1 )
-                		stuffcmd(p, "break\ncolor  4\nskin \"\"\nteam red\n");
+                		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "break\ncolor  4\nskin \"\"\nteam red\n");
             		else
-                		stuffcmd(p, "break\ncolor 13\nskin \"\"\nteam blue\n");
+                		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "break\ncolor 13\nskin \"\"\nteam blue\n");
 
 					break;
 				}

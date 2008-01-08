@@ -646,7 +646,19 @@ void stuffcmd( gedict_t * ed, const char *fmt, ... )
 	Q_vsnprintf( text, sizeof( text ), fmt, argptr );
 	va_end( argptr );
 
-	trap_stuffcmd( NUM_FOR_EDICT( ed ), text );
+	trap_stuffcmd( NUM_FOR_EDICT( ed ), text, 0 );
+}
+
+void stuffcmd_flags( gedict_t * ed, int flags, const char *fmt, ... )
+{
+	va_list argptr;
+	char    text[1024];
+
+	va_start( argptr, fmt );
+	Q_vsnprintf( text, sizeof( text ), fmt, argptr );
+	va_end( argptr );
+
+	trap_stuffcmd( NUM_FOR_EDICT( ed ), text, flags );
 }
 
 
@@ -1853,22 +1865,22 @@ void on_connect()
 
 	if ( self->ct == ctPlayer ) {
 		if ( isFFA() )
-			stuffcmd(self, "on_connect_ffa\n");
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "on_connect_ffa\n");
 		else if ( isCTF() )
-			stuffcmd(self, "on_connect_ctf\n");
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "on_connect_ctf\n");
 		else
-			stuffcmd(self, "on_connect\n");
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "on_connect\n");
 
 		if ( isCTF() && ( streq(newteam = getteam(self), "red") || streq(newteam, "blue") ) )
-			stuffcmd(self, "auto%s\n", newteam); 
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "auto%s\n", newteam); 
 	}
 	else {
 		if ( isFFA() )
-			stuffcmd(self, "on_observe_ffa\n");
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "on_observe_ffa\n");
 		else if ( isCTF() )
-			stuffcmd(self, "on_observe_ctf\n");
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "on_observe_ctf\n");
 		else
-			stuffcmd(self, "on_observe\n");
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "on_observe\n");
 	}
 }
 
@@ -1879,19 +1891,19 @@ void on_enter()
 
 	if ( self->ct == ctPlayer ) {
 		if ( isFFA() )
-			stuffcmd(self, "on_enter_ffa\n");
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "on_enter_ffa\n");
 		else if ( isCTF() )
-			stuffcmd(self, "on_enter_ctf\n");
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "on_enter_ctf\n");
 		else
-			stuffcmd(self, "on_enter\n");
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "on_enter\n");
 	}
 	else {
 		if ( isFFA() )
-			stuffcmd(self, "on_spec_enter_ffa\n");
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "on_spec_enter_ffa\n");
 		else if ( isCTF() )
-			stuffcmd(self, "on_spec_enter_ctf\n");
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "on_spec_enter_ctf\n");
 		else
-			stuffcmd(self, "on_spec_enter\n");
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "on_spec_enter\n");
 	}
 }
 
@@ -1901,10 +1913,10 @@ void on_match_start( gedict_t *p )
 		return;
 
 	if ( p->ct == ctPlayer ) {
-		stuffcmd(p, "on_matchstart\n");
+		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "on_matchstart\n");
 	}
 	else {
-		stuffcmd(p, "on_spec_matchstart\n");
+		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "on_spec_matchstart\n");
 	}
 }
 
@@ -1914,10 +1926,10 @@ void on_match_end( gedict_t *p )
 		return;
 
 	if ( p->ct == ctPlayer ) {
-		stuffcmd(p, "on_matchend\n");
+		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "on_matchend\n");
 	}
 	else {
-		stuffcmd(p, "on_spec_matchend\n");
+		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "on_spec_matchend\n");
 	}
 }
 
@@ -1927,10 +1939,10 @@ void on_match_break( gedict_t *p )
 		return;
 
 	if ( p->ct == ctPlayer ) {
-		stuffcmd(p, "on_matchbreak\n");
+		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "on_matchbreak\n");
 	}
 	else {
-		stuffcmd(p, "on_spec_matchbreak\n");
+		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "on_spec_matchbreak\n");
 	}
 }
 
@@ -1939,7 +1951,7 @@ void on_admin( gedict_t *p )
 	if ( !(iKey(p, "ev") & EV_ON_ADMIN) )
 		return;
 
-	stuffcmd(p, "on_admin\n");
+	stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "on_admin\n");
 }
 
 void on_unadmin( gedict_t *p )
@@ -1947,7 +1959,7 @@ void on_unadmin( gedict_t *p )
 	if ( !(iKey(p, "ev") & EV_ON_UNADMIN) )
 		return;
 
-	stuffcmd(p, "on_unadmin\n");
+	stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "on_unadmin\n");
 }
 
 void ev_print( gedict_t *p, int new_ev, int old_ev, int bit, char *msg)

@@ -320,7 +320,7 @@ qboolean ClientSay( qboolean isTeamSay )
 
 		case MMODE_NAME:
 
-			stuffcmd(self, "name \"%s\"\n", str);
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "name \"%s\"\n", str);
 
 			return true;
 
@@ -506,7 +506,7 @@ void s_p()
 /*
 void s_p_cmd() // just redirect /s-p command to /say
 {
-	stuffcmd(self, "say s-p %s\n", params_str(1, -1));
+	stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "say s-p %s\n", params_str(1, -1));
 }
 */
 
@@ -536,7 +536,7 @@ void s_lr( float l )
 /*
 void s_lr_cmd( float l ) // just redirect /s-l or /s-r command to /say
 {
-	stuffcmd(self, "say %s %s\n", ( l == 1 ? "s-l" : "s-r" ), params_str(1, -1));
+	stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "say %s %s\n", ( l == 1 ? "s-l" : "s-r" ), params_str(1, -1));
 }
 */
 
@@ -615,7 +615,7 @@ void s_t()
 /*
 void s_t_cmd() // just redirect /s-t command to /say
 {
-	stuffcmd(self, "say s-t %s\n", params_str(1, -1));
+	stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "say s-t %s\n", params_str(1, -1));
 }
 */
 

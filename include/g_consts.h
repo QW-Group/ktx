@@ -187,6 +187,8 @@
 // trap_SPrint() flags
 #define SPRINT_IGNOREINDEMO   (   1<<0) // do not put such message in mvd demo
 
+// trap_stuffcmd() flags
+#define STUFFCMD_IGNOREINDEMO (   1<<0) // do not put in mvd demo
 
 // multicast sets
 #define MULTICAST_ALL    0	// every client

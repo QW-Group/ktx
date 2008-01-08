@@ -87,7 +87,7 @@ void StuffCustomMaps( gedict_t *p )
 		if ( strnull( map_name ) )
 			break;
 
-		stuffcmd(p, "alias %s cmd cm %d\n", map_name, i + (1 - LOCALINFO_MAPS_LIST_START));
+		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "alias %s cmd cm %d\n", map_name, i + (1 - LOCALINFO_MAPS_LIST_START));
 	}
 }
 
@@ -96,7 +96,7 @@ void StuffMainMaps( gedict_t *p )
 	int i;
 
 	for( i = 0; i < maps_cnt; i++ )
-		stuffcmd(p, "alias %s cmd cm %d\n", maps_list[i], -(i + 1));
+		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "alias %s cmd cm %d\n", maps_list[i], -(i + 1));
 }
 
 void StuffMaps( gedict_t *p )

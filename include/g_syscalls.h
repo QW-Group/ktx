@@ -47,7 +47,7 @@ void    trap_sound( int edn, int channel, char *samp, float vol, float att );
 int     trap_checkclient(  );
 void    trap_traceline( float v1_x, float v1_y, float v1_z, float v2_x, float v2_y,
 			float v2_z, int nomonst, int edn );
-void    trap_stuffcmd( int edn, const char *fmt );
+void    trap_stuffcmd( int edn, const char *fmt, int flags );
 void    trap_localcmd( const char *fmt );
 void 	trap_executecmd();
 void 	trap_readcmd( const char *str, char* buf, int size );

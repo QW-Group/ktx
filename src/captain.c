@@ -56,9 +56,9 @@ void SetPlayerParams (gedict_t *p, gedict_t *cap)
     G_sprint(p, 2, "You were picked by %s\n"
 				   "Time to go ready\n", cap->s.v.netname );
 
-    stuffcmd(p, "break\n"
-				"team \"%s\"\n"
-				"color \"%s\"\n", infoteam, infocolor);
+    stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "break\n"
+									   		 "team \"%s\"\n"
+									   		 "color \"%s\"\n", infoteam, infocolor);
 
     p->s.v.frags = 0;
     p->k_picked = capt_num( cap );
@@ -252,7 +252,7 @@ void VoteCaptain ()
         G_sprint( self, 2, "Must be team red or blue for ctf\n" );
         return;
       }
-      streq(getteam(self), "blue") ? stuffcmd( self, "color 13\n" ) : stuffcmd( self, "color 4\n" );
+      stuffcmd_flags( self, STUFFCMD_IGNOREINDEMO, "color %d\n", (int)(streq(getteam(self), "blue") ? 13 : 4) );
     }
 
     // search if a captain already has the same team
@@ -335,10 +335,11 @@ void BeginPicking ()
 		}
 		else
 		{
-    		stuffcmd(p, "break\n"
-						"color 0\n"
-						"skin \"\"\n"
-						"team \"\"\n");
+    		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO,
+    							"break\n"
+								"color 0\n"
+								"skin \"\"\n"
+								"team \"\"\n");
 			p->s.v.frags = num;
 			num++;
 		}

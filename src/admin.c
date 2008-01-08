@@ -612,7 +612,7 @@ void AdminForceBreak ()
 
 void PlayerStopFire(gedict_t *p)
 {
-	stuffcmd(p, "-attack\n");
+	stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "-attack\n");
 	p->wreg_attack = 0;
 }
 
@@ -760,9 +760,9 @@ void AdminSwapAll()
 
 	for( p = world; (p = find_plr( p )); ) {
 		if ( streq( getteam(p), "blue" ) )
-        	stuffcmd(p, "team \"red\"\ncolor 4\n");
+        	stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "team \"red\"\ncolor 4\n");
 		else if ( streq( getteam(p), "red" ) )
-			stuffcmd(p, "team \"blue\"\ncolor 13\n");
+			stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "team \"blue\"\ncolor 13\n");
     }
 
 	G_bprint(2, "%s swapped the teams\n", getname( self ) );
@@ -771,12 +771,12 @@ void AdminSwapAll()
 void do_force_spec(gedict_t *p, qboolean spec)
 {
 	G_sprint(p, 2, "You were forced to reconnect as %s by the admin\n", spec ? "spectator" : "player");
-	stuffcmd(p, spec ? "spectator 1\n" : "spectator \"\"\n");
+	stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, spec ? "spectator 1\n" : "spectator \"\"\n");
 
 	if ( !strnull( ezinfokey(p, "Qizmo") ) ) 
-		stuffcmd(p, "say ,:dis\nwait;wait;wait; say ,:reconnect\n");
+		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "say ,:dis\nwait;wait;wait; say ,:reconnect\n");
 	else 
-		stuffcmd(p, "disconnect\nwait;wait;reconnect\n");
+		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "disconnect\nwait;wait;reconnect\n");
 }
 
 // ktpro (c)

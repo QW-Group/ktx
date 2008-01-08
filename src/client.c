@@ -84,7 +84,7 @@ qboolean CheckRate (gedict_t *p, char *newrate)
 		{
 			G_sprint(p, 2, "\nYour עבפו setting is too high for this server.\n"
 						   "Rate set to %d\n", (int)maxrate);
-			stuffcmd(p, "rate %d\n", (int)maxrate );
+			stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "rate %d\n", (int)maxrate );
 			ret = true;
 		}
 
@@ -92,7 +92,7 @@ qboolean CheckRate (gedict_t *p, char *newrate)
 		{
 			G_sprint(p, 2, "\nYour עבפו setting is too low for this server.\n"
 						   "Rate set to %d\n", (int)minrate);
-			stuffcmd(p, "rate %d\n", (int)minrate );
+			stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "rate %d\n", (int)minrate );
 			ret = true;
 		}
 	}
@@ -471,7 +471,7 @@ void execute_changelevel()
         other->s.v.model = "";
 		// take screenshot if requested
         if( iKey( other, "kf" ) & KF_SCREEN )
-			stuffcmd(other, "wait; wait; wait; wait; wait; wait; screenshot\n");
+			stuffcmd_flags(other, STUFFCMD_IGNOREINDEMO, "wait; wait; wait; wait; wait; wait; screenshot\n");
 	}
 }
 
@@ -1116,7 +1116,7 @@ void ClientConnect()
 
 		// if we found a spot, set the player into it
 		if( !p ) {
-			stuffcmd(self, "color 0\nteam \"\"\nskin \"\"\n");
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "color 0\nteam \"\"\nskin \"\"\n");
 			self->s.v.frags = i - 1;
 		}
 	}
@@ -2862,7 +2862,7 @@ void SendTeamInfo(gedict_t *t)
 		h = bound(0, (int)p->s.v.health, 999);
 		a = bound(0, (int)p->s.v.armorvalue, 999);
 
-		stuffcmd( t, "//tinfo %d %d %d %d %d %d %d \"%s\"\n", cl,
+		stuffcmd_flags( t, STUFFCMD_IGNOREINDEMO, "//tinfo %d %d %d %d %d %d %d \"%s\"\n", cl,
 		 (int)p->s.v.origin[0], (int)p->s.v.origin[1], (int)p->s.v.origin[2], h, a, (int)p->s.v.items, nick);
 	}
 }

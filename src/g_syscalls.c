@@ -148,9 +148,9 @@ void trap_traceline( float v1_x, float v1_y, float v1_z, float v2_x, float v2_y,
 		 edn );
 }
 
-void trap_stuffcmd( int edn, const char *fmt )
+void trap_stuffcmd( int edn, const char *fmt, int flags )
 {
-	syscall( G_STUFFCMD, edn, (int)fmt );
+	syscall( G_STUFFCMD, edn, (int)fmt, flags );
 }
 
 void trap_localcmd( const char *fmt )

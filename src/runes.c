@@ -317,7 +317,7 @@ void CheckStuffRune()
 
 		if ( self->last_rune && iKey(self, "runes") ) {
 			self->last_rune = NULL;
-			stuffcmd(self, "set rune \"\"\n");
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "set rune \"\"\n");
 		}
 
 		return;
@@ -341,7 +341,7 @@ void CheckStuffRune()
 
 	if ( !self->last_rune || strneq(rune, self->last_rune) ) {
 		self->last_rune = rune;
-		stuffcmd(self, "set rune \"%s\"\n", rune);
+		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "set rune \"%s\"\n", rune);
 	}
 }
 

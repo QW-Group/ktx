@@ -2451,9 +2451,9 @@ void PlayerReady ()
 	if ( isCTF() )
 	{
 		if ( streq( getteam(self), "blue" ) )
-			stuffcmd( self, "color 13\n" );
+			stuffcmd_flags( self, STUFFCMD_IGNOREINDEMO, "color 13\n" );
 		else if ( streq( getteam(self), "red" ) )
-			stuffcmd( self, "color 4\n" );
+			stuffcmd_flags( self, STUFFCMD_IGNOREINDEMO, "color 4\n" );
 	}
 
 	G_bprint(2, "%s %s%s\n", self->s.v.netname, redtext("is ready"),

@@ -236,6 +236,7 @@ void 		TraceCapsule( float v1_x, float v1_y, float v1_z, float v2_x, float v2_y,
 			float max_x, float max_y, float max_z);
 
 void    	stuffcmd( gedict_t * ed, const char *fmt , ...);
+void		stuffcmd_flags( gedict_t * ed, int flags, const char *fmt, ... );
 int     	droptofloor( gedict_t * ed );
 int     	walkmove( gedict_t * ed, float yaw, float dist );
 int     	checkbottom( gedict_t * ed );

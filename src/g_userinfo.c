@@ -87,9 +87,9 @@ qboolean FixPlayerColor ( char *newcolor )
 	if ( isCTF() )
 	{
 		if ( streq(getteam(self), "red") )
-			stuffcmd( self, "color %d %d\n", iKey(self, "topcolor") == 13 ? 4 : iKey(self, "topcolor"), 4 );
+			stuffcmd_flags( self, STUFFCMD_IGNOREINDEMO, "color %d %d\n", iKey(self, "topcolor") == 13 ? 4 : iKey(self, "topcolor"), 4 );
 		else if ( streq(getteam(self), "blue") )
-			stuffcmd( self, "color %d %d\n", iKey(self, "topcolor") == 4 ? 13 : iKey(self, "topcolor"), 13 );
+			stuffcmd_flags( self, STUFFCMD_IGNOREINDEMO, "color %d %d\n", iKey(self, "topcolor") == 4 ? 13 : iKey(self, "topcolor"), 13 );
 	}
 	return false;
 }
@@ -112,7 +112,7 @@ qboolean FixPlayerTeam ( char *newteam )
 		if( strneq( s1, s2 ) )
 		{
 			G_sprint(self, 2, "You may %s change team during game\n", redtext("not"));
-			stuffcmd(self, "team \"%s\"\n", s2); // sends this to client - so he get right team too
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "team \"%s\"\n", s2); // sends this to client - so he get right team too
 		}
 
 		return true;
@@ -122,7 +122,7 @@ qboolean FixPlayerTeam ( char *newteam )
 	if ( capt_num( self ) || is_elected(self, etCaptain) ) {
 		if( strneq( getteam( self ), newteam ) ) {
 			G_sprint(self, 2, "You may %s change team\n", redtext("not"));
-			stuffcmd(self, "team \"%s\"\n", getteam(self)); // sends this to client - so he get right team too
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "team \"%s\"\n", getteam(self)); // sends this to client - so he get right team too
 		}
 
 		return true;
@@ -141,7 +141,7 @@ qboolean FixPlayerTeam ( char *newteam )
 
 		if( strneq( s1, s2 ) ) {
 			G_sprint(self, 2, "You may %s change team\n", redtext("not"));
-			stuffcmd(self, "team \"%s\"\n", s2); // sends this to client - so he get right team too
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "team \"%s\"\n", s2); // sends this to client - so he get right team too
 			return true;
 		}
 	}
@@ -154,21 +154,21 @@ qboolean FixPlayerTeam ( char *newteam )
 		if( strneq(s1, "red") && strneq(s1, "blue") )
 		{
 			G_sprint(self, 2, "You must be on team red or blue for CTF\n" );
-			stuffcmd(self, "team \"%s\"\n", s2); // sends this to client - so he get right team too
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "team \"%s\"\n", s2); // sends this to client - so he get right team too
 			return true;
 		}
-		stuffcmd(self, "color %d\n", streq(s1, "red") ? 4 : 13); 
+		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "color %d\n", streq(s1, "red") ? 4 : 13); 
 	}
 
 	if ( !match_in_progress && ( isTeam() || isCTF() ) && self->ready && strnull( newteam ) ) {
 		// do not allow empty team, because it cause problems
 		G_sprint(self, 2, "Empty %s not allowed\n", redtext("team"));
-		stuffcmd(self, "team \"%s\"\n", getteam(self)); // sends this to client - so he get right team too
+		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "team \"%s\"\n", getteam(self)); // sends this to client - so he get right team too
 		return true;
 	}
 
 	if ( isCTF() && ( streq(newteam, "red") || streq(newteam, "blue") ) )
-		stuffcmd(self, "auto%s\n", newteam);
+		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "auto%s\n", newteam);
 
 	return false;
 }
@@ -472,16 +472,16 @@ void cmdinfo_infoset ( gedict_t *p )
 		cmdinfo_check_obsolete ( p ); // check keys wich must be moved from userinfo to cmd info
 		cmdinfo_clear ( p ); // remove all keys
 		cmdinfo_setkey( p, "*is", "1" ); // mark we are call infoset already
-		stuffcmd(p, "%sinfoset\n", p->ct == ctSpec ? "s" : ""); // and call infoset
-		stuffcmd(p, "ktx_%sinfoset\n", p->ct == ctSpec ? "s" : ""); // and call ktx_infoset
+		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "%sinfoset\n", p->ct == ctSpec ? "s" : ""); // and call infoset
+		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "ktx_%sinfoset\n", p->ct == ctSpec ? "s" : ""); // and call ktx_infoset
 		// kick cmd back to server, so we know client get infoset,
 	  	// so we can invoke on_connect and on_enter
-		stuffcmd(p, "wait;wait;wait;cmd ack infoset\n");
+		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "wait;wait;wait;cmd ack infoset\n");
 	}
 	else {
 		// kick cmd back to server, so we know client already get infoset,
 	  	// so we can invoke on_enter
-		stuffcmd(p, "wait;wait;wait;cmd ack noinfoset\n");
+		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "wait;wait;wait;cmd ack noinfoset\n");
 	}
 
 	// this need to be called each time client connects
