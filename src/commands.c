@@ -458,7 +458,7 @@ void redirect();
 cmd_t cmds[] = {
 	{ "cm",          SelectMap,                 0    , CF_BOTH | CF_MATCHLESS | CF_NOALIAS, CD_NODESC },
 	{ "votemap",     VoteMap,                   0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_VOTEMAP },
-	{ "commands",    ShowCmds,                  0    , CF_BOTH | CF_MATCHLESS, CD_COMMANDS },
+	{ "commands",    ShowCmds,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_COMMANDS },
 	{ "scores",      PrintScores,               0    , CF_BOTH | CF_MATCHLESS, CD_SCORES },
 	{ "stats",       PlayerStats,               0    , CF_BOTH | CF_MATCHLESS, CD_STATS },
 	{ "effi",        PlayerStats,               0    , CF_BOTH | CF_MATCHLESS, CD_EFFI },
@@ -498,7 +498,7 @@ cmd_t cmds[] = {
 	{ "report",      ReportMe,                  0    , CF_PLAYER, CD_REPORT },
 	{ "rules",       ShowRules,                 0    , CF_PLAYER | CF_MATCHLESS, CD_RULES },
 	{ "lockmode",    ChangeLock,                0    , CF_PLAYER | CF_SPC_ADMIN, CD_LOCKMODE },
-	{ "maps",        ShowMaps,                  0    , CF_PLAYER | CF_SPC_ADMIN, CD_MAPS},
+	{ "maps",        ShowMaps,                  0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_MAPS},
 	{ "spawn666",    ToggleRespawn666,          0    , CF_PLAYER, CD_SPAWN666},
 	{ "admin",       ReqAdmin,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_ADMIN },
 	{ "forcestart",  AdminForceStart,           0    , CF_BOTH_ADMIN, CD_FORCESTART },
@@ -997,9 +997,12 @@ void Do_ShowCmds( qboolean adm_req )
 	qboolean first = true;
 	int i, l;
 	char *name, dots[64];
+	char	arg_1[1024];
 
-	for( i = 0; i >= 0 && i < cmds_cnt; i++ ) {
+	trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
 
+	for( i = 0; i >= 0 && i < cmds_cnt; i++ )
+	{
 		name = cmds[i].name;
 
 		if ( strnull(cmds[i].description) || cmds[i].description == CD_NODESC )
@@ -1011,12 +1014,16 @@ void Do_ShowCmds( qboolean adm_req )
 		if ( adm_req != isCmdRequireAdmin( i, self->ct == ctSpec ) )
 			continue; 
 
+		if ( arg_1[0] && !strstr(name, arg_1) )
+			continue;
+
 		l = max_cmd_len - strlen(name);
 		l = bound( 0, l, sizeof(dots)-1 );
 		memset( (void*)dots, (int)'.', l);
 		dots[l] = 0;
 
-		if ( first ) {
+		if ( first )
+		{
 			first = false;
 
 			G_sprint(self, 2, "\n%s commands for %s:\n\n", 
@@ -1228,31 +1235,6 @@ void SendMessage(char *name)
 	}
 
 	G_sprint(self, 2, "No name to display\n");
-}
-
-void ShowMaps()
-{
-	float f1;
-
-	G_sprint(self, 2, "Vote for maps by typing the mapname,\nfor example \"δν΄\".\n");
-
-	if ( strnull ( ezinfokey( world, va("%d", (int)LOCALINFO_MAPS_LIST_START) ) ) )
-		return;
-
-	G_sprint(self, 2, "\n---μιστ οζ γυστον ναπσ\n");
-
-	f1 = LOCALINFO_MAPS_LIST_START;
-
-	for( ; !strnull(ezinfokey(world, va("%d", (int)f1))) && f1 <= LOCALINFO_MAPS_LIST_END; f1++ )
-	{
-		G_sprint(self, 2, "%s%s",
-				ezinfokey( world, va("%d", (int)f1) ), (((int)f1 & 1) ? "\n" : "   "));
-	}
-
-	if( (int)f1 & 1 )
-		G_sprint(self, 2, "\n");
-
-	G_sprint( self, 2, "---εξδ οζ μιστ\n" );
 }
 
 void PrintToggle1( char *tog, char *key )

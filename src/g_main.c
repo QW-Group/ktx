@@ -373,6 +373,8 @@ void G_InitGame( int levelTime, int randomSeed )
 		g_edicts[i + 1].s.v.netname = netnames[i];
 	}
 
+	GetMapList();
+
 	ra_init_que();
 
 	Init_cmds();

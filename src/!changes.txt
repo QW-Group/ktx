@@ -1,3 +1,13 @@
+2008-01-11
+qq:
+279. KTX does't require "/check_maps" any more in cfgs, latest mvdsv required.
+	I say more, REMOVE "/check_maps" from cfgs!!!
+
+280. "/maps" command support param, works like filter, for example "/maps ztn" will show
+	maps which contains "ztn" in name.
+
+281. "/commands" command support param too, works like filter.
+
 2008-01-05
 qq:
 278. New setinfo "wswfix" aka weapon switch fix.

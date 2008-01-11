@@ -100,7 +100,12 @@ int	trap_FS_ReadFile( char*dest, int quantity, fileHandle_t handle );
 int	trap_FS_WriteFile( char*src, int quantity, fileHandle_t handle );
 int	trap_FS_SeekFile( fileHandle_t handle, int offset, int type );
 int	trap_FS_TellFile( fileHandle_t handle );
-int 	trap_FS_GetFileList(  const char *path, const char *extension, char *listbuf, int bufsize );
+
+#define FILELIST_GAMEDIR_ONLY	(1<<0) // if set then search in gamedir only
+#define FILELIST_WITH_PATH		(1<<1) // include path to file
+#define FILELIST_WITH_EXT		(1<<2) // include extension of file
+
+int 	trap_FS_GetFileList(  const char *path, const char *extension, char *listbuf, int bufsize, int flags );
 
 int 	trap_Map_Extension( const char* ext_name, int mapto);
 /*  return:

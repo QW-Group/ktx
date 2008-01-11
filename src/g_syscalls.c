@@ -389,9 +389,9 @@ int trap_FS_SeekFile( fileHandle_t handle, int offset, int type )
 	return syscall( G_FSSeekFile, handle,offset,type );
 }
 
-int 	trap_FS_GetFileList(  const char *path, const char *extension, char *listbuf, int bufsize )
+int 	trap_FS_GetFileList(  const char *path, const char *extension, char *listbuf, int bufsize, int flags )
 {
-	return syscall( G_FSGetFileList, (int)path, (int)extension, (int)listbuf, bufsize);
+	return syscall( G_FSGetFileList, (int)path, (int)extension, (int)listbuf, bufsize, flags);
 }
 
 int trap_Map_Extension( const char* ext_name, int mapto)
