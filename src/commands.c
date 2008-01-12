@@ -202,6 +202,12 @@ void TimeDown(float t);
 void TimeUp(float t);
 void TimeSet(float t);
 
+// { RACE
+void r_ccdel( );
+void r_Xset( float t );
+
+// }
+
 // CD - commands descriptions
 
 const char CD_NODESC[] = "no desc";
@@ -448,6 +454,12 @@ const char CD_NODESC[] = "no desc";
 #define CD_EXCLUSIVE    "toggle exclusive mode"
 #define CD_VWEP         "toggle vweps"
 #define CD_PAUSE        "toggle pause"
+// { RACE
+#define CD_R_SSET       "set race start checkpoint"
+#define CD_R_CSET       "set race checkpoint"
+#define CD_R_ESET       "set race end checkpoint"
+#define CD_R_CCDEL      "remove race current checkpoint"
+// }
 
 
 void dummy() {}
@@ -718,6 +730,12 @@ cmd_t cmds[] = {
 	{ "exclusive",   ToggleExclusive,           0    , CF_BOTH_ADMIN, CD_EXCLUSIVE },
 	{ "vwep",        ToggleVwep,                0    , CF_PLAYER | CF_SPC_ADMIN, CD_VWEP },
 	{ "pause",       TogglePause,               0    , CF_PLAYER | CF_MATCHLESS | CF_SPC_ADMIN, CD_PAUSE },
+// { RACE
+	{ "r_sset",      r_Xset,                    1    , CF_PLAYER, CD_R_SSET },
+	{ "r_cset",      r_Xset,                    2    , CF_PLAYER, CD_R_CSET },
+	{ "r_eset",      r_Xset,                    3    , CF_PLAYER, CD_R_ESET },
+	{ "r_ccdel",     r_ccdel,                   0    , CF_PLAYER, CD_R_CCDEL },
+// }
 };
 
 #undef DEF
@@ -4153,8 +4171,6 @@ void Pos_Save ()
 }
 
 // Move & Set functions
-extern vec3_t	VEC_HULL_MIN;
-extern vec3_t	VEC_HULL_MAX;
 qboolean Pos_Set_origin (pos_t *pos)
 {
 	gedict_t *p;

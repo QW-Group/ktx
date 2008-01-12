@@ -126,6 +126,13 @@ gedict_t *find( gedict_t * start, int fieldoff, char *str )
 	return trap_find( start, fieldoff, str );
 }
 
+// well, this is probably must be most common function for edicts find(), but I "invented" it too late.
+gedict_t *ez_find( gedict_t * start, char *str )
+{
+	return trap_find( start, FOFCLSN, str );
+}
+
+
 // find count of "good" edicts
 int find_cnt( int fieldoff, char *str )
 {

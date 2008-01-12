@@ -1613,6 +1613,8 @@ void SM_on_MatchStart()
 
 // Reset player frags and start the timer.
 void HideSpawnPoints();
+void race_remove_ent( void );
+
 void StartMatch ()
 {
 	char date[64];
@@ -1633,6 +1635,8 @@ void StartMatch ()
 	first_rl_taken = false; // no one took rl yet
 
 	SM_PrepareMap(); // remove/add some items from map regardind with dmm and game mode
+
+	race_remove_ent(); // remove race checkpoints
 	
 	HideSpawnPoints();
 

@@ -383,6 +383,9 @@ void SP_worldspawn()
 // pent mdl - need this for race
 	trap_precache_model( "progs/invulner.mdl" );
 
+// suit was - need this for race
+	trap_precache_sound( "items/suit.wav" );
+
 // g_models required for yawnmode weapondrops
 	trap_precache_model( "progs/g_shot.mdl" );
 	trap_precache_model( "progs/g_nail.mdl" );

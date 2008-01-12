@@ -183,6 +183,7 @@ void            ent_remove( gedict_t * t );
 
 gedict_t       *nextent( gedict_t * ent );
 gedict_t       *find( gedict_t * start, int fieldoff, char *str );
+gedict_t	   *ez_find( gedict_t * start, char *str );
 int				find_cnt( int fieldoff, char *str );
 gedict_t	   *find_idx( int idx, int fieldoff, char *str );
 gedict_t       *findradius( gedict_t * start, vec3_t org, float rad );
@@ -407,6 +408,8 @@ void			ClearBodyQue();
 // client.c
 
 extern vec3_t	VEC_ORIGIN;
+extern vec3_t	VEC_HULL_MIN;
+extern vec3_t	VEC_HULL_MAX;
 extern float    intermission_running;
 extern float    intermission_exittime;
 extern int      modelindex_eyes, modelindex_player;

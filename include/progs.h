@@ -526,5 +526,16 @@ typedef struct gedict_s {
 
 	qboolean weapon_switch_fix;
 
+// { race
+	int race_id; // used by checkpoints, 
+				 // start checkpoint have id = 0,
+				 // intermediate checkpoints have it from 1 to xxx,
+				 // and end checkpoint have id xxx + 1
+	float	race_volume; // how loud to play sound() when you tocuh this checkpoint
+	int		race_effects; // apply this effects when checkpoint is touched
+	int		race_RouteNodeType; // this is actually must be raceRouteNodeType_t 
+								// but unwilling to move type definition out of race.c so using int
+// }
+
 } gedict_t;
 

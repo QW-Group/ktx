@@ -1461,7 +1461,8 @@ void SP_item_artifact_invulnerability()
 {
 	self->s.v.touch = ( func_t ) powerup_touch;
 
-	trap_precache_model( "progs/invulner.mdl" );
+// always precache it, need it for race
+//	trap_precache_model( "progs/invulner.mdl" );
 	trap_precache_sound( "items/protect.wav" );
 	trap_precache_sound( "items/protect2.wav" );
 	trap_precache_sound( "items/protect3.wav" );
@@ -1485,7 +1486,8 @@ void SP_item_artifact_envirosuit()
 	self->s.v.touch = ( func_t ) powerup_touch;
 
 	trap_precache_model( "progs/suit.mdl" );
-	trap_precache_sound( "items/suit.wav" );
+// this is precahed always, because of RACE
+//	trap_precache_sound( "items/suit.wav" );
 	trap_precache_sound( "items/suit2.wav" );
 	self->s.v.noise = "items/suit.wav";
 	setmodel( self, "progs/suit.mdl" );

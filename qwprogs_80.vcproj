@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="qwprogs"
 	ProjectGUID="{78438C94-7170-4030-A6B9-D288BF262FE9}"
 	RootNamespace="qwprogs"
@@ -569,7 +569,8 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="src\logs.c">
+				RelativePath="src\logs.c"
+				>
 			</File>
 			<File
 				RelativePath="src\maps.c"
@@ -711,6 +712,10 @@
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;QWPROGS_EXPORTS;$(NoInherit)"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\race.c"
+				>
 			</File>
 			<File
 				RelativePath="src\runes.c"
