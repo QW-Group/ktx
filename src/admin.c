@@ -768,8 +768,28 @@ void AdminSwapAll()
 	G_bprint(2, "%s swapped the teams\n", getname( self ) );
 }
 
-void do_force_spec(gedict_t *p, qboolean spec)
+// assuming kicker is admin
+qboolean is_can_forcespec(gedict_t *victim, gedict_t *kicker)
 {
+	if ( VIP_IsFlags(victim, VIP_NOTKICKABLE) && !is_real_adm(kicker) ) {
+		G_sprint(kicker, 2, "You can't force_spec VIP \x8D %s as elected admin\n", 
+					(strnull( victim->s.v.netname ) ? "!noname!" : victim->s.v.netname));
+		return false;
+	}
+	if ( is_real_adm(victim) && !is_real_adm(kicker) ) {
+		G_sprint(kicker, 2, "You can't force_spec real admin \x8D %s as elected admin\n", 
+					(strnull( victim->s.v.netname ) ? "!noname!" : victim->s.v.netname));
+		return false;
+	}
+
+	return true;
+}
+
+void do_force_spec(gedict_t *p, gedict_t *admin, qboolean spec)
+{
+	if (!is_can_forcespec(p, admin))
+		return;
+
 	G_sprint(p, 2, "You were forced to reconnect as %s by the admin\n", spec ? "spectator" : "player");
 	stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, spec ? "spectator 1\n" : "spectator \"\"\n");
 
@@ -809,14 +829,14 @@ void force_spec()
 				continue;
 
 			found = true;
-			do_force_spec(p, true);
+			do_force_spec(p, self, true);
 		}
 	}
 	else {
 		p = ( (i_fs = atoi( c_fs ) ) < 0 ? spec_by_id( -i_fs ) : SpecPlayer_by_IDorName( c_fs ));
 		if ( p ) {
 			found = true;
-			do_force_spec(p, p->ct != ctSpec);
+			do_force_spec(p, self, p->ct != ctSpec);
 		}
 	}
 
