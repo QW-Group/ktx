@@ -19,7 +19,7 @@
 
 #include "g_local.h"
 
-char *fixed_maps_list[] =
+static char *fixed_maps_list[] =
 {
 	// episode 1
 	"e1m1",
@@ -72,32 +72,36 @@ char *fixed_maps_list[] =
 	"dm6"
 };
 
-int fixed_maps_cnt = sizeof ( fixed_maps_list ) / sizeof ( fixed_maps_list[0] );
+static int fixed_maps_cnt = sizeof ( fixed_maps_list ) / sizeof ( fixed_maps_list[0] );
 
 //===============================================
 
 #define MAX_MAPS 4096
 
-char	*mapslist[MAX_MAPS] = {0};
-int		maps_cnt = 0;
+static char		*mapslist[MAX_MAPS] = {0};
+static int		maps_cnt = 0;
+
+static char ml_buf[MAX_MAPS * 32] = {0}; // OUCH OUCH!!! btw, 32 is some average len of map name here, with path
 
 void GetMapList(void)
 {
-	char buf[MAX_MAPS * 32] = {0}; // OUCH OUCH!!! btw, 32 is some average len of map name here, with path
+
 	char *s;
 	int i, cnt, l;
+
+	ml_buf[0] = 0;
 
 	if ( mapslist[0] )
 		G_Error( "GetMapList: can't do it twice" );
 
 	// this is reg exp search, so we escape . with \. in extension, however \ must be escaped in C string too so its \\.
-	cnt = trap_FS_GetFileList( "maps", "\\.bsp$", buf, sizeof(buf), 0 );
+	cnt = trap_FS_GetFileList( "maps", "\\.bsp$", ml_buf, sizeof(ml_buf), 0 );
 
 	cnt = bound(0, cnt, MAX_MAPS);
 
-	buf[sizeof(buf)-1] = 0; // well, this is optional, just sanity
+	ml_buf[sizeof(ml_buf)-1] = 0; // well, this is optional, just sanity
 
-	for ( i = 0, s = buf; i < cnt && s < buf + sizeof(buf); i++ )
+	for ( i = 0, s = ml_buf; i < cnt && s < ml_buf + sizeof(ml_buf); i++ )
 	{
 		l = strlen( s );
 
