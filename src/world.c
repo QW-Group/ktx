@@ -363,9 +363,11 @@ void SP_worldspawn()
 	else
 	{
 		trap_precache_model( "progs/v_spike.mdl" );
-		trap_precache_model( "progs/w_g_key.mdl" );
-		trap_precache_model( "progs/w_s_key.mdl" );
 	}
+
+// this used in alot of places, so precache it anyway
+	trap_precache_model( "progs/w_g_key.mdl" );
+	trap_precache_model( "progs/w_s_key.mdl" );
 
 // ctf runes, actually may be precached anyway, since come with full quake distro
 	if ( k_allowed_free_modes & UM_CTF ) {
@@ -377,6 +379,9 @@ void SP_worldspawn()
 
 // quad mdl - need this due to aerowalk customize
 	trap_precache_model( "progs/quaddama.mdl" );
+
+// pent mdl - need this for race
+	trap_precache_model( "progs/invulner.mdl" );
 
 // g_models required for yawnmode weapondrops
 	trap_precache_model( "progs/g_shot.mdl" );
