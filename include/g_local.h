@@ -94,6 +94,9 @@ int             NUM_FOR_EDICT( gedict_t * e );
 
 #define DA_WPNS (IT_AXE|IT_SHOTGUN|IT_SUPER_SHOTGUN|IT_NAILGUN|IT_SUPER_NAILGUN|IT_ROCKET_LAUNCHER|IT_GRENADE_LAUNCHER|IT_LIGHTNING)
 
+extern qboolean	FTE_sv; // is we run on FTE server
+
+
 extern gameData_t gamedata;
 extern gedict_t g_edicts[];
 extern globalvars_t g_globalvars;

@@ -95,7 +95,7 @@ void GetMapList(void)
 		G_Error( "GetMapList: can't do it twice" );
 
 	// this is reg exp search, so we escape . with \. in extension, however \ must be escaped in C string too so its \\.
-	cnt = trap_FS_GetFileList( "maps", "\\.bsp$", ml_buf, sizeof(ml_buf), 0 );
+	cnt = trap_FS_GetFileList( "maps", ( FTE_sv ? ".bsp" : "\\.bsp$" ), ml_buf, sizeof(ml_buf), 0 );
 
 	cnt = bound(0, cnt, MAX_MAPS);
 
@@ -105,7 +105,10 @@ void GetMapList(void)
 	{
 		l = strlen( s );
 
-		if ( !l )
+		if ( FTE_sv )
+			l -= 4; // skip extension
+
+		if ( l <= 0 )
 			break;
 
 		l++; // + nul
