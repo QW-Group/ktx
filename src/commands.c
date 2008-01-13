@@ -205,6 +205,7 @@ void TimeSet(float t);
 // { RACE
 void r_ccdel( );
 void r_Xset( float t );
+void r_changestatus( float t );
 
 // }
 
@@ -459,6 +460,9 @@ const char CD_NODESC[] = "no desc";
 #define CD_R_CSET       "set race checkpoint"
 #define CD_R_ESET       "set race end checkpoint"
 #define CD_R_CCDEL      "remove race current checkpoint"
+#define CD_RREADY       "ready for race"
+#define CD_RBREAK       "not ready for race"
+#define CD_RTOGGLE      "toggle ready status for race"
 // }
 
 
@@ -735,6 +739,10 @@ cmd_t cmds[] = {
 	{ "r_cset",      r_Xset,                    2    , CF_PLAYER, CD_R_CSET },
 	{ "r_eset",      r_Xset,                    3    , CF_PLAYER, CD_R_ESET },
 	{ "r_ccdel",     r_ccdel,                   0    , CF_PLAYER, CD_R_CCDEL },
+	{ "rready",      r_changestatus,            1    , CF_PLAYER, CD_RREADY },
+	{ "rbreak",      r_changestatus,            2    , CF_PLAYER, CD_RBREAK },
+	{ "rtoggle",     r_changestatus,            3    , CF_PLAYER, CD_RTOGGLE },
+
 // }
 };
 

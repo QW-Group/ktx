@@ -82,6 +82,10 @@ void			RemoveMOTD();
 
 static			qboolean check_ezquake(gedict_t *p);
 
+
+qboolean		FTE_sv = false;
+
+
 /*
 ================
 vmMain
@@ -117,6 +121,12 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		{
 			G_cprint("Mod requried API_VERSION %d or higher, server have %d\n", GAME_API_VERSION, api_ver);
 			return 0;
+		}
+
+		if ( strstr( ezinfokey( world, "*version" ), "FTE" ) )
+		{
+			G_cprint("KTX: FTE server detected\n");
+			FTE_sv = true;
 		}
 
 		G_InitGame( arg0, arg1 );
@@ -378,6 +388,8 @@ void G_InitGame( int levelTime, int randomSeed )
 	ra_init_que();
 
 	Init_cmds();
+
+	race_init ();
 
 	// put mod version in serverinfo
 	localcmd( "serverinfo \"%s\" \"%s\"\n", MOD_SERVERINFO_MOD_KEY, MOD_VERSION );

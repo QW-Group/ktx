@@ -738,6 +738,12 @@ void    GrappleThrow();
 void    GrappleService();
 void    GrappleReset(gedict_t *rhook);
 
+// race.c
+
+void	race_init( void );
+void	race_shutdown( char *msg );
+void	race_think( void );
+
 // globals.c
 
 extern	float framechecks;	    // if timedemo/uptime bugs are tolerated

@@ -1276,6 +1276,8 @@ void StartFrame( int time )
 
 	CheckAll(); // just check some clients params
 
+	race_think();
+
 	CheckTeamStatus();
 
 	CheckAutoXonX(true); // switch XonX mode dependant on players + specs count
