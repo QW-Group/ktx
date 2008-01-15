@@ -56,6 +56,14 @@ typedef struct
 // }
 
 	float					timeout;			// timeout of race
+	float					start_time;			// when race was started
+
+// {
+	char					top_nick[64];		// this will probably FUCK QVM
+	int						top_time;
+// }
+
+	int						next_race_time;		// used for centerprint, help us print it not each server frame but more rare, each 100ms or something
 
 	qboolean				warned;				// do we warned why we can't start race
 	int						next_racer;			// this is queue of racers
@@ -75,6 +83,7 @@ race_t			race; // whole race struct
 //============================================
 
 void race_cancel( const char *fmt, ... );
+void race_start( qboolean restart, const char *fmt, ... );
 void race_unready_all(void);
 
 void race_remove_ent( void );
@@ -259,6 +268,16 @@ int race_count_ready_players( void )
 
 //===========================================
 
+int race_time( void )
+{
+	if ( race.status != raceActive )
+		return 0;
+
+	return (g_globalvars.time - race.start_time) * 1000;
+}
+
+//===========================================
+
 void race_blink_think ()
 {
 	// remove "cute" effects
@@ -330,8 +349,25 @@ void race_node_touch()
 		if ( self->race_RouteNodeType == nodeEnd )
 		{
 			// racer touch end node, FINISH!
+			if ( race_time() < race.top_time )
+			{
+				// save nick
+				strlcpy(race.top_nick, other->s.v.netname, sizeof(race.top_nick));
+				// save best time
+				race.top_time = race_time();
 
-			race_cancel( "Race %s\n", redtext( "finished" ) );
+				race_start( true, "Race %s in %sms,\n"
+								  "new top time by %s\n", redtext( "finished" ), dig3( race_time() ), other->s.v.netname );
+			}
+			else if ( race_time() == race.top_time )
+			{
+				race_start( true, "Race %s in %sms, equal top time\n", redtext( "finished" ), dig3( race_time() ) );
+			}
+			else
+			{
+				race_start( true, "Race %s in %sms\n", redtext( "finished" ), dig3( race_time() ) );
+			}
+
 			return;
 		}
 
@@ -345,9 +381,9 @@ void race_node_touch()
 	{
 		// racer touched checkpoint in WRONG order
 		if ( self->race_RouteNodeType == nodeCheckPoint )
-			race_cancel( "Race canceled, %s \220%d\221 in wrong order\n", redtext( name_for_nodeType( self->race_RouteNodeType ) ), self->race_id );
+			race_start( true, "Race restarted, %s \220%d\221 in wrong order\n", redtext( name_for_nodeType( self->race_RouteNodeType ) ), self->race_id );
 		else
-			race_cancel( "Race canceled, %s in wrong order\n", redtext( name_for_nodeType( self->race_RouteNodeType ) ) );
+			race_start( true, "Race restarted, %s in wrong order\n", redtext( name_for_nodeType( self->race_RouteNodeType ) ) );
 
 		return;
 	}
@@ -515,7 +551,7 @@ qboolean race_can_go( qboolean cancel )
 	if ( !race_count_ready_players() )
 	{
 		if ( cancel )
-			race_cancel("Race canceled, no ready players\n");
+			race_cancel( "Race canceled, no ready players\n" );
 
 		return false;
 	}
@@ -524,7 +560,7 @@ qboolean race_can_go( qboolean cancel )
 	if ( !ez_find( world, classname_for_nodeType( nodeStart ) ) )
 	{
 		if ( cancel )
-			race_cancel("Race canceled, no %s\n", name_for_nodeType( nodeStart ) );
+			race_cancel( "Race canceled, no %s\n", name_for_nodeType( nodeStart ) );
 
 		return false;
 	}
@@ -533,7 +569,7 @@ qboolean race_can_go( qboolean cancel )
 	if ( !ez_find( world, classname_for_nodeType( nodeEnd ) ) )
 	{
 		if ( cancel )
-			race_cancel("Race canceled, no %s\n", name_for_nodeType( nodeEnd ) );
+			race_cancel( "Race canceled, no %s\n", name_for_nodeType( nodeEnd ) );
 
 		return false;
 	}
@@ -543,7 +579,7 @@ qboolean race_can_go( qboolean cancel )
 		if ( !race_get_racer() )
 		{
 			if ( cancel )
-				race_cancel("Race canceled, racer not found\n");
+				race_start( true, "Race restarted, racer not found\n" );
 
 			return false;
 		}
@@ -554,7 +590,7 @@ qboolean race_can_go( qboolean cancel )
 		if ( race.timeout < g_globalvars.time )
 		{
 			if ( cancel )
-				race_cancel("Race canceled, timeout\n");
+				race_start( true, "Race restarted, timeout\n" );
 
 			return false;
 		}
@@ -563,16 +599,21 @@ qboolean race_can_go( qboolean cancel )
 	return true;
 }
 
-void race_start( void )
+void race_start( qboolean restart, const char *fmt, ... )
 {
+	va_list argptr;
+	char    text[1024];
+
 	gedict_t *r, *n, *s;
 
-	// can't start
-	if ( !race_can_go( !race.warned ) )
-		return;
+	va_start( argptr, fmt );
+	Q_vsnprintf( text, sizeof( text ), fmt, argptr );
+	va_end( argptr );
+
+	
 
 	// cancel it first, this will clear something what probably was't cleared before
-	race_cancel( "" );
+	race_cancel( text );
 
 	// switch status to coutdown
 	race.status = raceCD;
@@ -580,6 +621,13 @@ void race_start( void )
 	// set countdown timers
 	race.cd_cnt = 4;
 	race.cd_next_think = g_globalvars.time;
+
+	// if this is not restart, then reset best time
+	if ( !restart )
+	{
+		race.top_nick[0] = 0;
+		race.top_time = 999999999;
+	}
 
 	r = race_get_from_line();
 
@@ -649,8 +697,12 @@ void race_think( void )
 	{
 		case raceNone:
 
-		// if there ready players, advance race status to countdown
-		race_start();
+		// can't start
+		if ( !race_can_go( !race.warned ) )
+			return;
+
+		// advance race status to countdown
+		race_start( false, "" );
 
 		return;
 
@@ -669,18 +721,32 @@ void race_think( void )
 		{
 			if ( race.cd_next_think < g_globalvars.time )
 			{
+				char cp_buf[1024] = { 0 };
+
 				gedict_t *racer = race_get_racer();
 
 				// must not never happens because we have race_can_go() above
 				if ( !racer )
 				{
-					race_cancel( "Race canceled, racer vanishes\n" );
+					race_start( true, "Race restarted, racer vanishes\n" );
 					return;
 				}
 
 				// ok, time for next "tick" in coutdown
-				G_cp2all("RACE IN: %d\n"
-						 "RACER: %s", race.cd_cnt, racer->s.v.netname);
+				snprintf( cp_buf, sizeof( cp_buf ),	"Race in: %s\n\n"
+						 							"Racer: %s\n\n", dig3( race.cd_cnt ), racer->s.v.netname );
+
+				if ( !strnull( race.top_nick ) )
+				{
+					char tmp[512] = { 0 };
+
+					snprintf ( tmp, sizeof( tmp ),	"Top time: %sms\n"
+													"Top player: %s\n", dig3( race.top_time ), race.top_nick );
+
+					strlcat( cp_buf, tmp, sizeof( cp_buf ) );
+				}
+
+				G_cp2all( cp_buf );
 
 				race.cd_next_think = g_globalvars.time + 1; // set next think one second later
 				race.cd_cnt--;
@@ -693,7 +759,9 @@ void race_think( void )
 
 		race.status = raceActive; // countdown ends, now we ready for race
 
-		race.timeout = g_globalvars.time + 10;
+		race.start_time		= g_globalvars.time;
+		race.timeout		= g_globalvars.time + 10;
+		race.next_race_time = 500; // do not print race time for first 500 ms, so we can see "Go!"
 
 		return;
 
@@ -702,6 +770,12 @@ void race_think( void )
 		// something wrong
 		if ( !race_can_go( true ) )
 			return;
+
+		if ( race_time() >= race.next_race_time )
+		{
+			race.next_race_time = race_time() + 100; // update race time each 100 ms
+			G_cp2all( "%s", dig3( race_time() ) );
+		}
 
 		return;
 
