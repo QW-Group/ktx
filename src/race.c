@@ -117,6 +117,19 @@ void race_unready_all(void)
 		p->race_ready = 0;
 }
 
+//============================================
+
+gedict_t *race_get_racer( void )
+{
+	gedict_t *p;
+
+	for ( p = world; ( p = find_plr( p ) ); )
+		if ( p->racer )
+			return p;
+
+	return NULL;
+}
+
 //===========================================
 
 // remove all entitys with particular classname
@@ -278,6 +291,30 @@ int race_time( void )
 
 //===========================================
 
+void race_brighten_checkpoints( void )
+{
+	int i;
+	gedict_t *e;
+	gedict_t *racer = race_get_racer();
+
+	if ( !racer )
+		return;
+
+	for ( i = 1; i < nodeMAX; i++ )
+	{
+		char *classname = classname_for_nodeType( i );
+
+		for ( e = world; ( e = ez_find( e, classname ) ); )
+		{
+			e->s.v.effects   = 0; // remove effects
+			e->s.v.nextthink = 0; // stop thinking
+
+			if ( racer->race_id && e->race_id == racer->race_id )
+				e->s.v.effects = EF_DIMLIGHT; // set some light for next checkpoint
+		}
+	}
+}
+
 void race_blink_think ()
 {
 	// remove "cute" effects
@@ -374,6 +411,9 @@ void race_node_touch()
 		race_sprint_checkpoint( other, self );
 
 		other->race_id++; // bump our id, so we can touch next checkpoint
+
+		race_brighten_checkpoints(); // set light on next checkpoint
+
 		return;
 	}
 
@@ -531,20 +571,6 @@ gedict_t *race_set_next_in_line( void )
 
 //============================================
 
-gedict_t *race_get_racer( void )
-{
-	gedict_t *p;
-
-	for ( p = world; ( p = find_plr( p ) ); )
-		if ( p->racer )
-			return p;
-
-	return NULL;
-}
-
-
-//============================================
-
 qboolean race_can_go( qboolean cancel )
 {
 	// can't go on, noone ready
@@ -610,8 +636,6 @@ void race_start( qboolean restart, const char *fmt, ... )
 	Q_vsnprintf( text, sizeof( text ), fmt, argptr );
 	va_end( argptr );
 
-	
-
 	// cancel it first, this will clear something what probably was't cleared before
 	race_cancel( text );
 
@@ -676,6 +700,9 @@ void race_start( qboolean restart, const char *fmt, ... )
 	{
 		G_bprint( 2, "%s is next in line\n", n->s.v.netname );
 	}
+
+	// set light on next checkpoint
+	race_brighten_checkpoints();
 }
 
 
