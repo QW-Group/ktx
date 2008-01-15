@@ -740,9 +740,13 @@ void    GrappleReset(gedict_t *rhook);
 
 // race.c
 
+qboolean isRACE( void );
+
 void	race_init( void );
 void	race_shutdown( char *msg );
 void	race_think( void );
+
+void	race_set_one_player_movetype_and_etc( gedict_t *p );
 
 // globals.c
 

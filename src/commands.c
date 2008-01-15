@@ -207,6 +207,8 @@ void r_ccdel( );
 void r_Xset( float t );
 void r_changestatus( float t );
 
+void r_timeout( );
+
 // }
 
 // CD - commands descriptions
@@ -463,6 +465,8 @@ const char CD_NODESC[] = "no desc";
 #define CD_RREADY       "ready for race"
 #define CD_RBREAK       "not ready for race"
 #define CD_RTOGGLE      "toggle ready status for race"
+#define CD_RTIMEOUT     "set race timeout"
+
 // }
 
 
@@ -735,14 +739,14 @@ cmd_t cmds[] = {
 	{ "vwep",        ToggleVwep,                0    , CF_PLAYER | CF_SPC_ADMIN, CD_VWEP },
 	{ "pause",       TogglePause,               0    , CF_PLAYER | CF_MATCHLESS | CF_SPC_ADMIN, CD_PAUSE },
 // { RACE
-	{ "r_sset",      r_Xset,                    1    , CF_PLAYER, CD_R_SSET },
-	{ "r_cset",      r_Xset,                    2    , CF_PLAYER, CD_R_CSET },
-	{ "r_eset",      r_Xset,                    3    , CF_PLAYER, CD_R_ESET },
-	{ "r_ccdel",     r_ccdel,                   0    , CF_PLAYER, CD_R_CCDEL },
+	{ "r_sset",      r_Xset,                    1    , CF_PLAYER | CF_SPC_ADMIN, CD_R_SSET },
+	{ "r_cset",      r_Xset,                    2    , CF_PLAYER | CF_SPC_ADMIN, CD_R_CSET },
+	{ "r_eset",      r_Xset,                    3    , CF_PLAYER | CF_SPC_ADMIN, CD_R_ESET },
+	{ "r_ccdel",     r_ccdel,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_R_CCDEL },
 	{ "rready",      r_changestatus,            1    , CF_PLAYER, CD_RREADY },
 	{ "rbreak",      r_changestatus,            2    , CF_PLAYER, CD_RBREAK },
 	{ "rtoggle",     r_changestatus,            3    , CF_PLAYER, CD_RTOGGLE },
-
+	{ "rtimeout",    r_timeout,                 0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_RTIMEOUT },
 // }
 };
 

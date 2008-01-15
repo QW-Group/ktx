@@ -1256,9 +1256,19 @@ void PutClientInServer(qboolean from_vmMain)
 	VectorScale( g_globalvars.v_forward, 20, v );
 	VectorAdd( v, self->s.v.origin, v );
 
-	// Play sound and add tele splash always in non RA mode.
+	// Play sound and add tele splash.
 	// In RA mode do that only for winner or loser.
-	if ( !isRA() || isWinner( self ) || isLoser( self ) )
+	// Do NOT do that in RACE.
+	if ( isRACE() )
+	{
+		race_set_one_player_movetype_and_etc( self );
+	}
+	else if ( isRA() && ( isWinner( self ) || isLoser( self ) ) )
+	{
+		spawn_tfog( v );
+		play_teleport( self );
+	}
+	else
 	{
 		spawn_tfog( v );
 		play_teleport( self );

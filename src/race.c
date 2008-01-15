@@ -55,7 +55,8 @@ typedef struct
 	float					cd_next_think;		//
 // }
 
-	float					timeout;			// timeout of race
+	int						timeout_setting;	// just how long timeout
+	float					timeout;			// when timeout of race must occur
 	float					start_time;			// when race was started
 
 // {
@@ -88,7 +89,19 @@ void race_unready_all(void);
 
 void race_remove_ent( void );
 
+void race_set_players_movetype_and_etc( void );
+
 char *classname_for_nodeType( raceRouteNodeType_t nodeType );
+
+//============================================
+
+qboolean isRACE( void )
+{
+	if ( match_in_progress || match_over )
+		return false;
+
+	return !!race.status;
+}
 
 //============================================
 
@@ -528,6 +541,9 @@ void race_cancel( const char *fmt, ... )
 
 	race.status = raceNone;
 	race.warned = true;
+
+	// set proper move type for players
+	race_set_players_movetype_and_etc();
 }
 
 //============================================
@@ -646,6 +662,9 @@ void race_start( qboolean restart, const char *fmt, ... )
 	race.cd_cnt = 4;
 	race.cd_next_think = g_globalvars.time;
 
+	if ( !race.timeout_setting )
+		race.timeout_setting = 20; // default is 20 s
+
 	// if this is not restart, then reset best time
 	if ( !restart )
 	{
@@ -703,6 +722,9 @@ void race_start( qboolean restart, const char *fmt, ... )
 
 	// set light on next checkpoint
 	race_brighten_checkpoints();
+
+	// set proper move type for players
+	race_set_players_movetype_and_etc();
 }
 
 
@@ -712,8 +734,53 @@ void race_start( qboolean restart, const char *fmt, ... )
 //
 //============================================
 
+// well, this set some fields on players which help to not block racer
+void race_set_one_player_movetype_and_etc( gedict_t *p )
+{
+	if ( match_in_progress || match_over )
+		return;
+
+	switch ( race.status )
+	{
+		case raceNone:
+		p->s.v.movetype	= MOVETYPE_WALK;
+		p->s.v.solid 	= SOLID_SLIDEBOX;
+		setmodel( p, "progs/player.mdl" );
+
+		break;
+
+		case raceCD:
+		p->s.v.movetype	= ( p->racer ? MOVETYPE_NONE : MOVETYPE_FLY );
+		p->s.v.solid	= ( p->racer ? SOLID_SLIDEBOX : SOLID_NOT );
+		setmodel( p, ( p->racer ? "progs/player.mdl" : "" ) );
+
+		break;
+
+		case raceActive:
+		p->s.v.movetype	= ( p->racer ? MOVETYPE_WALK : MOVETYPE_FLY );
+		p->s.v.solid	= ( p->racer ? SOLID_SLIDEBOX : SOLID_NOT );
+		setmodel( p, ( p->racer ? "progs/player.mdl" : "" ) );
+
+		break;
+
+		default:
+
+		G_Error( "race_set_one_player_movetype_and_etc: unknown race.status %d", race.status );
+	}
+}
+
+void race_set_players_movetype_and_etc( void )
+{
+ 	gedict_t *p;
+
+	for ( p = world; ( p = find_plr( p ) ); )
+		race_set_one_player_movetype_and_etc( p );
+}
+
 void race_think( void )
 {
+	gedict_t *racer;
+
 	if ( match_in_progress || match_over )
 	{
 		race.status = raceNone;
@@ -743,6 +810,14 @@ void race_think( void )
 		if ( race.cd_next_think >= g_globalvars.time )
 			return;
 
+		racer = race_get_racer();
+		// must not never happens because we have race_can_go() above
+		if ( !racer )
+		{
+			race_start( true, "Race restarted, racer vanishes\n" );
+			return;
+		}
+
 		// countdown still in progress
 		if ( race.cd_cnt > 0 )
 		{
@@ -753,12 +828,6 @@ void race_think( void )
 
 				gedict_t *racer = race_get_racer();
 
-				// must not never happens because we have race_can_go() above
-				if ( !racer )
-				{
-					race_start( true, "Race restarted, racer vanishes\n" );
-					return;
-				}
 
 				// ok, time for next "tick" in coutdown
 				snprintf( cp_buf, sizeof( cp_buf ),	"Race in: %s\n\n"
@@ -792,8 +861,11 @@ void race_think( void )
 		race.status = raceActive; // countdown ends, now we ready for race
 
 		race.start_time		= g_globalvars.time;
-		race.timeout		= g_globalvars.time + 10;
+		race.timeout		= g_globalvars.time + max( 1 , race.timeout_setting );
 		race.next_race_time = 500; // do not print race time for first 500 ms, so we can see "Go!"
+
+		// set proper move type for players
+		race_set_players_movetype_and_etc();
 
 		return;
 
@@ -948,3 +1020,26 @@ void r_changestatus( float t )
 		return;
 	}
 }
+
+void r_timeout( )
+{
+	char	arg_1[64];
+
+	if ( match_in_progress || match_over || race.status )
+		return;
+
+	if ( check_master() )
+		return;
+
+	trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
+
+	race.timeout_setting = atoi( arg_1 );
+
+	if ( race.timeout_setting )
+		race.timeout_setting = 20;
+
+	race.timeout_setting = bound(1, atoi( arg_1 ), 60 * 60 );
+
+	G_bprint(2, "%s set race timeout to %ss\n", self->s.v.netname, dig3( race.timeout_setting ) );
+}
+
