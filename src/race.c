@@ -721,6 +721,7 @@ void race_think( void )
 		{
 			if ( race.cd_next_think < g_globalvars.time )
 			{
+				gedict_t *p;
 				char cp_buf[1024] = { 0 };
 
 				gedict_t *racer = race_get_racer();
@@ -747,6 +748,10 @@ void race_think( void )
 				}
 
 				G_cp2all( cp_buf );
+
+				// FIXME: yeah, nice make some utility for that
+				for( p = world; (p = find_client( p )); )
+					stuffcmd (p, "play buttons/switch04.wav\n");
 
 				race.cd_next_think = g_globalvars.time + 1; // set next think one second later
 				race.cd_cnt--;
