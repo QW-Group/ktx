@@ -465,6 +465,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_RREADY       "ready for race"
 #define CD_RBREAK       "not ready for race"
 #define CD_RTOGGLE      "toggle ready status for race"
+#define CD_RCANCEL      "cancel current race, for racer"
 #define CD_RTIMEOUT     "set race timeout"
 
 // }
@@ -746,6 +747,7 @@ cmd_t cmds[] = {
 	{ "rready",      r_changestatus,            1    , CF_PLAYER, CD_RREADY },
 	{ "rbreak",      r_changestatus,            2    , CF_PLAYER, CD_RBREAK },
 	{ "rtoggle",     r_changestatus,            3    , CF_PLAYER, CD_RTOGGLE },
+	{ "rcancel",     r_changestatus,            4    , CF_PLAYER, CD_RCANCEL },
 	{ "rtimeout",    r_timeout,                 0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_RTIMEOUT },
 // }
 };

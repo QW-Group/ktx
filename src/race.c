@@ -28,9 +28,9 @@ typedef struct
 
 typedef struct
 {
-	char					name[64]; // well SD-Angel tells what I can't use it like this in QVM, only like char *name;
-	int						cnt;				   // how much nodes we actually have, no more than MAX_ROUTE_NODES
-	raceRouteNode_t			node[MAX_ROUTE_NODES]; // nodes of this route, fixed array, yeah I'm lazy
+	char					name[64]; 				// NOTE: this will probably FUCK QVM!!!
+	int						cnt;				   	// how much nodes we actually have, no more than MAX_ROUTE_NODES
+	raceRouteNode_t			node[MAX_ROUTE_NODES];	// nodes of this route, fixed array, yeah I'm lazy
 
 } raceRoute_t;
 
@@ -60,7 +60,7 @@ typedef struct
 	float					start_time;			// when race was started
 
 // {
-	char					top_nick[64];		// this will probably FUCK QVM
+	char					top_nick[64];		// NOTE: this will probably FUCK QVM!!!
 	int						top_time;
 // }
 
@@ -641,6 +641,10 @@ qboolean race_can_go( qboolean cancel )
 	return true;
 }
 
+//
+// qboolean restart:
+// true  - means continue current competition, just select next racer in line, keep best results.
+// false - means start completely new race, reset best result and etc.
 void race_start( qboolean restart, const char *fmt, ... )
 {
 	va_list argptr;
@@ -1011,8 +1015,20 @@ void r_changestatus( float t )
 
 		return;
 
-		case 3: // toggle
+		case 3: // rtoggle
 		set_player_race_ready( self, !self->race_ready );
+
+		return;
+
+		case 4: // rcancel
+
+		if ( !self->racer )
+			return; // FUCK U!
+
+		if ( !race.status )
+			return; // same
+
+		race_start( true, "Race canceled by %s\n", self->s.v.netname );
 
 		return;
 
