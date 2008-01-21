@@ -386,6 +386,12 @@ void SP_worldspawn()
 // suit was - need this for race
 	trap_precache_sound( "items/suit.wav" );
 
+// for race
+	trap_precache_sound( "knight/sword2.wav" );
+	trap_precache_sound( "boss2/idle.wav" );
+	trap_precache_sound( "boss2/sight.wav" );
+	trap_precache_sound( "ambience/thunder1.wav" );
+
 // g_models required for yawnmode weapondrops
 	trap_precache_model( "progs/g_shot.mdl" );
 	trap_precache_model( "progs/g_nail.mdl" );

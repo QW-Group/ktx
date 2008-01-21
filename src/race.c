@@ -401,6 +401,9 @@ void race_node_touch()
 			// racer touch end node, FINISH!
 			if ( race_time() < race.top_time )
 			{
+				// do some sound
+				sound( other, CHAN_ITEM, "boss2/sight.wav", 1, ATTN_NONE );
+
 				// save nick
 				strlcpy(race.top_nick, other->s.v.netname, sizeof(race.top_nick));
 				// save best time
@@ -411,17 +414,30 @@ void race_node_touch()
 			}
 			else if ( race_time() == race.top_time )
 			{
+				// do some sound
+				sound( other, CHAN_ITEM, "boss2/sight.wav", 1, ATTN_NONE );
+
 				race_start( true, "Race %s in %sms, equal top time\n", redtext( "finished" ), dig3( race_time() ) );
 			}
 			else
 			{
+				// do some sound
+				sound( other, CHAN_ITEM, "ambience/thunder1.wav", 1, ATTN_NONE );
+
 				race_start( true, "Race %s in %sms\n", redtext( "finished" ), dig3( race_time() ) );
 			}
 
 			return;
 		}
 
-		race_sprint_checkpoint( other, self );
+		// if its not start checkpoint do something "cute"
+		if ( self->race_id )
+		{
+			// do some sound
+			sound( other, CHAN_ITEM, "knight/sword2.wav", 1, ATTN_NONE );
+
+			race_sprint_checkpoint( other, self );
+		}
 
 		other->race_id++; // bump our id, so we can touch next checkpoint
 
@@ -433,6 +449,10 @@ void race_node_touch()
 	if ( self->race_id > other->race_id )
 	{
 		// racer touched checkpoint in WRONG order
+
+		// do some sound
+		sound( other, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
+
 		if ( self->race_RouteNodeType == nodeCheckPoint )
 			race_start( true, "Race restarted, %s \220%d\221 in wrong order\n", redtext( name_for_nodeType( self->race_RouteNodeType ) ), self->race_id );
 		else
@@ -632,7 +652,12 @@ qboolean race_can_go( qboolean cancel )
 		if ( race.timeout < g_globalvars.time )
 		{
 			if ( cancel )
+			{
+				// do some sound
+				sound( world, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
+
 				race_start( true, "Race restarted, timeout\n" );
+			}
 
 			return false;
 		}
@@ -1027,6 +1052,9 @@ void r_changestatus( float t )
 
 		if ( !race.status )
 			return; // same
+
+		// do some sound
+		sound( self, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
 
 		race_start( true, "Race canceled by %s\n", self->s.v.netname );
 
