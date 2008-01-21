@@ -1400,6 +1400,9 @@ void SM_PrepareMap()
 	if ( isCTF() )
 		SpawnRunes( cvar("k_ctf_runes") );
 
+	// this must be removed in any cases
+	remove_projectiles();
+
 	for( p = world; (p = nextent(p)); ) {
 
 	// going for the if content record..
@@ -1430,13 +1433,7 @@ void SM_PrepareMap()
 			}
 		}
 
-		if (    streq( p->s.v.classname, "rocket" )
-			 || streq( p->s.v.classname, "grenade" )
-			 || streq( p->s.v.classname, "spike" )
-		   ) { // this must be removed in any cases
-				ent_remove( p );
-		}
-		else if( deathmatch > 3 ) {
+		if( deathmatch > 3 ) {
 			if(    streq( p->s.v.classname, "weapon_nailgun" )
 				|| streq( p->s.v.classname, "weapon_supernailgun" )
 				|| streq( p->s.v.classname, "weapon_supershotgun" )

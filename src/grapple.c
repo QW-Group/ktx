@@ -201,8 +201,7 @@ void GrappleAnchor()
 	// classnames below or write code to exclude your new classname so
 	// grapples will not stick to them.
 
-	if ( streq(other->s.v.classname, "missile") ||
-		 streq(other->s.v.classname, "rocket")  ||
+	if ( streq(other->s.v.classname, "rocket")  ||
 		 streq(other->s.v.classname, "grenade") ||
 		 streq(other->s.v.classname, "spike"  ) ||
 		 streq(other->s.v.classname, "hook"   )) 

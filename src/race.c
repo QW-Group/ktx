@@ -8,6 +8,16 @@
 
 typedef enum
 {
+	raceWeaponUnknown = 0,	// this must never happens
+	raceWeaponNo,			// weapon not allowed. NOTE: must be second in this enum!!!
+	raceWeaponAllowed,		// weapon allowed
+	raceWeapon2s,			// weapon allowed after 2s
+	raceWeaponMAX
+
+} raceWeapoMode_t;
+
+typedef enum
+{
 	nodeUnknown = 0,		// this node is fucked by lame coding, I mean this must never happens
 	nodeStart,				// this node is start of race route
 	nodeCheckPoint,			// this node is intermediate
@@ -69,6 +79,8 @@ typedef struct
 	qboolean				warned;				// do we warned why we can't start race
 	int						next_racer;			// this is queue of racers
 
+	raceWeapoMode_t			weapon;				// weapon mode
+
 	raceStatus_t			status;				// race status
 
 } race_t;
@@ -95,12 +107,25 @@ char *classname_for_nodeType( raceRouteNodeType_t nodeType );
 
 //============================================
 
+// this is more like a HOOK, doesn't used internally in race.c but used outside,
+// outside of race.c file we does't need to know in which exact sate we are, but in some cases inside race.c we need to know 
+// is it contdown or active state and this function _doesn't_ help us in such cases. Argh, this comment supposed to make it more clean, but seems I failed.
 qboolean isRACE( void )
 {
 	if ( match_in_progress || match_over )
 		return false;
 
 	return !!race.status;
+}
+
+//===========================================
+
+int race_time( void )
+{
+	if ( race.status != raceActive )
+		return 0; // count time only when race in state raceActive
+
+	return (g_globalvars.time - race.start_time) * 1000;
 }
 
 //============================================
@@ -111,6 +136,8 @@ void race_init( void )
 
 	race.warned = true;
 	race.status = raceNone;
+
+	race.weapon = raceWeaponAllowed;
 }
 
 // clean up, so we can start actual match and there will be no some shit around
@@ -161,6 +188,57 @@ void race_remove_ent( void )
 
 	for ( i = 1; i < nodeMAX; i++ )
 		ent_remove_by_classname( classname_for_nodeType( i ) );
+}
+
+//============================================
+
+char *race_weapon_mode( void )
+{
+	switch ( race.weapon )
+	{
+		case raceWeaponNo:
+		return "no";
+
+		case raceWeaponAllowed:
+		return "allowed";
+
+		case raceWeapon2s:
+		return "after 2s";
+
+		default: G_Error( "race_weapon_mode: wrong race.weapon %d", race.weapon );
+	}
+
+	return ""; // keep compiler silent
+}
+
+qboolean race_weapon_allowed( gedict_t *p )
+{
+	if ( !race.status )
+		return true; // not a race, so allowed
+
+	// below is case of RACE is somehow in progress
+
+	if ( race.status != raceActive )
+		return false; // allowe weapon in active state only
+
+	if ( !p->racer )
+		return false; // not a racer
+
+	switch ( race.weapon )
+	{
+		case raceWeaponNo:
+		return false;
+
+		case raceWeaponAllowed:
+		return true;
+
+		case raceWeapon2s:
+		return ( race_time() >= 2000 ? true : false );
+
+		default: G_Error( "race_weapon_allowed: wrong race.weapon %d", race.weapon );
+	}
+
+	return false; // keep compiler silent
 }
 
 //============================================
@@ -290,16 +368,6 @@ int race_count_ready_players( void )
 			cnt++;
 
 	return cnt;
-}
-
-//===========================================
-
-int race_time( void )
-{
-	if ( race.status != raceActive )
-		return 0;
-
-	return (g_globalvars.time - race.start_time) * 1000;
 }
 
 //===========================================
@@ -754,6 +822,9 @@ void race_start( qboolean restart, const char *fmt, ... )
 
 	// set proper move type for players
 	race_set_players_movetype_and_etc();
+
+	// remove some projectiles
+	remove_projectiles();
 }
 
 
@@ -853,7 +924,7 @@ void race_think( void )
 			if ( race.cd_next_think < g_globalvars.time )
 			{
 				gedict_t *p;
-				char cp_buf[1024] = { 0 };
+				char cp_buf[1024] = { 0 }, tmp[512] = { 0 };
 
 				gedict_t *racer = race_get_racer();
 
@@ -862,10 +933,11 @@ void race_think( void )
 				snprintf( cp_buf, sizeof( cp_buf ),	"Race in: %s\n\n"
 						 							"Racer: %s\n\n", dig3( race.cd_cnt ), racer->s.v.netname );
 
+				snprintf ( tmp, sizeof( tmp ), "Weapon: %s\n", redtext( race_weapon_mode() ) );
+				strlcat( cp_buf, tmp, sizeof( cp_buf ) );
+
 				if ( !strnull( race.top_nick ) )
 				{
-					char tmp[512] = { 0 };
-
 					snprintf ( tmp, sizeof( tmp ),	"Top time: %sms\n"
 													"Top player: %s\n", dig3( race.top_time ), race.top_nick );
 
@@ -1087,3 +1159,18 @@ void r_timeout( )
 	G_bprint(2, "%s set race timeout to %ss\n", self->s.v.netname, dig3( race.timeout_setting ) );
 }
 
+void r_mode( )
+{
+	if ( match_in_progress || match_over || race.status )
+		return;
+
+	if ( check_master() )
+		return;
+
+	race.weapon++;
+
+	if ( race.weapon < raceWeaponNo || race.weapon >= raceWeaponMAX )
+		race.weapon = raceWeaponNo;
+
+	G_bprint(2, "%s set race weapon mode to %s\n", self->s.v.netname, redtext( race_weapon_mode() ) );
+}

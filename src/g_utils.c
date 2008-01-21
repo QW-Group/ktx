@@ -2099,3 +2099,19 @@ int get_fallbunny()
 	// Yawnmode: no broken ankle
 	return k_yawnmode ? 1 : cvar( "k_fallbunny" );
 }
+
+//======================================
+
+void remove_projectiles( void )
+{
+	gedict_t *p;
+
+	for( p = world; ( p = nextent( p ) ); )
+	{
+		if (    streq( p->s.v.classname, "rocket" )
+			 || streq( p->s.v.classname, "grenade" )
+			 || streq( p->s.v.classname, "spike" )
+		   )
+			ent_remove( p );
+	}
+}

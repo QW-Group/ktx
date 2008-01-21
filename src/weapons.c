@@ -2249,7 +2249,7 @@ void W_WeaponFrame()
 
 	ImpulseCommands();
 
-	if ( isRACE() && !self->racer )
+	if ( !race_weapon_allowed( self ) )
 		return;
 
 	if ( g_globalvars.time < self->attack_finished )

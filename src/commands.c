@@ -208,6 +208,7 @@ void r_Xset( float t );
 void r_changestatus( float t );
 
 void r_timeout( );
+void r_mode( );
 
 // }
 
@@ -467,6 +468,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_RTOGGLE      "toggle ready status for race"
 #define CD_RCANCEL      "cancel current race, for racer"
 #define CD_RTIMEOUT     "set race timeout"
+#define CD_RMODE        "set race weapon mode"
 
 // }
 
@@ -749,6 +751,7 @@ cmd_t cmds[] = {
 	{ "rtoggle",     r_changestatus,            3    , CF_PLAYER, CD_RTOGGLE },
 	{ "rcancel",     r_changestatus,            4    , CF_PLAYER, CD_RCANCEL },
 	{ "rtimeout",    r_timeout,                 0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_RTIMEOUT },
+	{ "rmode",       r_mode,                    0    , CF_PLAYER | CF_SPC_ADMIN, CD_RMODE },
 // }
 };
 

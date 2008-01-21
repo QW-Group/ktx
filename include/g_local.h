@@ -374,6 +374,8 @@ char		*respawn_model_name( int mdl_num );
 int			get_fair_pack();
 int			get_fallbunny();
 
+void		remove_projectiles( void );
+
 //
 //  subs.c
 //
@@ -741,6 +743,8 @@ void    GrappleReset(gedict_t *rhook);
 // race.c
 
 qboolean isRACE( void );
+
+qboolean race_weapon_allowed( gedict_t *p );
 
 void	race_init( void );
 void	race_shutdown( char *msg );
