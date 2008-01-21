@@ -1405,9 +1405,8 @@ void SM_PrepareMap()
 	// going for the if content record..
 	
 		if ( isRA() ) {
-			if (    streq( p->s.v.classname, "rocket" )
-				|| streq( p->s.v.classname, "grenade" )
-				|| streq( p->s.v.classname, "weapon_nailgun" )
+			if (
+				   streq( p->s.v.classname, "weapon_nailgun" )
 				|| streq( p->s.v.classname, "weapon_supernailgun" )
 				|| streq( p->s.v.classname, "weapon_supershotgun" )
 				|| streq( p->s.v.classname, "weapon_rocketlauncher" )
@@ -1433,6 +1432,7 @@ void SM_PrepareMap()
 
 		if (    streq( p->s.v.classname, "rocket" )
 			 || streq( p->s.v.classname, "grenade" )
+			 || streq( p->s.v.classname, "spike" )
 		   ) { // this must be removed in any cases
 				ent_remove( p );
 		}
