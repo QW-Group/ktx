@@ -51,6 +51,10 @@ char *strchr( const char *string, int c ) {
 		}
 		string++;
 	}
+
+	if ( !c )
+		return ( char * )string;
+
 	return (char *)0;
 }
 
