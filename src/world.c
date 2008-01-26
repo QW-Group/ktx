@@ -151,6 +151,8 @@ void SP_worldspawn()
 {
 	char		*s;
 
+	race_init ();
+
 	G_SpawnString( "classname", "", &s );
 	if ( Q_stricmp( s, "worldspawn" ) )
 	{
