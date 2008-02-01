@@ -393,6 +393,7 @@ void SP_worldspawn()
 	trap_precache_sound( "boss2/idle.wav" );
 	trap_precache_sound( "boss2/sight.wav" );
 	trap_precache_sound( "ambience/thunder1.wav" );
+	trap_precache_sound( "enforcer/enfire.wav" );
 
 // g_models required for yawnmode weapondrops
 	trap_precache_model( "progs/g_shot.mdl" );

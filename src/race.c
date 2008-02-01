@@ -1206,6 +1206,7 @@ void race_set_players_movetype_and_etc( void )
 void race_think( void )
 {
 	gedict_t *racer;
+	gedict_t *p;
 
 	if ( match_in_progress || match_over )
 	{
@@ -1249,7 +1250,6 @@ void race_think( void )
 		{
 			if ( race.cd_next_think < g_globalvars.time )
 			{
-				gedict_t *p;
 				char cp_buf[1024] = { 0 }, tmp[512] = { 0 };
 
 				gedict_t *racer = race_get_racer();
@@ -1284,6 +1284,10 @@ void race_think( void )
 		}
 
 		G_cp2all("Go!");
+
+		// FIXME: yeah, nice make some utility for that
+		for( p = world; (p = find_client( p )); )
+			stuffcmd (p, "play enforcer/enfire.wav\n");
 
 		race.status = raceActive; // countdown ends, now we ready for race
 
