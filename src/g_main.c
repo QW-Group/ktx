@@ -389,6 +389,8 @@ void G_InitGame( int levelTime, int randomSeed )
 
 	Init_cmds();
 
+	race_init ();
+
 	// put mod version in serverinfo
 	localcmd( "serverinfo \"%s\" \"%s\"\n", MOD_SERVERINFO_MOD_KEY, MOD_VERSION );
 	localcmd( "serverinfo \"%s\" \"%d\"\n", MOD_SERVERINFO_BUILD_KEY, build_number() );

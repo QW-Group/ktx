@@ -102,7 +102,6 @@ race_t			race; // whole race struct
 void race_cancel( const char *fmt, ... );
 void race_start( qboolean restart, const char *fmt, ... );
 void race_unready_all(void);
-void race_add_standart_routes( void );
 
 void race_remove_ent( void );
 
@@ -175,8 +174,6 @@ void race_init( void )
 	race.status = raceNone;
 
 	race.weapon = raceWeaponAllowed;
-
-	race_add_standart_routes();
 }
 
 // clean up, so we can start actual match and there will be no some shit around
