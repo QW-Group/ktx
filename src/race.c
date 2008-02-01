@@ -513,7 +513,7 @@ void ent_remove_by_classname( char *classname )
 // remove all possibile race entitys
 void race_remove_ent( void )
 {
-	int cnt = 0, i;
+	int i;
 
 	for ( i = 1; i < nodeMAX; i++ )
 		ent_remove_by_classname( classname_for_nodeType( i ) );
