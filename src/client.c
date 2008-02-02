@@ -150,14 +150,17 @@ void CheckTiming()
 			p->k_timingWarnTime = 0;
 
 		// effects stuff
-		if ( p->k_timingWarnTime ) {
+		if ( p->k_timingWarnTime )
+		{
 			if ( timing_players_action & TA_GLOW )
+			{
+				// we can't set this in CheckLightEffects() because CheckLightEffects() will not called if client lagged
 				p->s.v.effects = ( int ) p->s.v.effects | EF_DIMLIGHT;
+			}
 		}
-		else {
-			// don't bother if player have quad or pent
-			if ( !p->invincible_finished && !p->super_damage_finished && !(p->ctf_flag & CTF_FLAG) )
-				p->s.v.effects = ( int ) p->s.v.effects & ~EF_DIMLIGHT;
+		else
+		{
+			// moved to CheckLightEffects(), I means CheckLightEffects() will turn EF_DIMLIGHT off
 		}
 	}
 }
@@ -2487,13 +2490,8 @@ extern void ktpro_autotrack_on_powerup_out (gedict_t *dude);
 
 void CheckPowerups()
 {
-	qboolean dim = false;
-
 	if ( ISDEAD( self ) )
 		return;
-
-	if ( self->ctf_flag & CTF_FLAG )
-		dim = true;
 
 // invisibility
 	if ( self->invisible_finished )
@@ -2554,7 +2552,7 @@ void CheckPowerups()
 	if ( self->invincible_finished )
 	{
 // sound and screen flash when items starts to run out
-		if(self->invincible_finished < g_globalvars.time + 3 && (!self->k_666 || self->k_666 == 2))	//team
+		if ( self->invincible_finished < g_globalvars.time + 3 && (!self->k_666 || self->k_666 == 2) )	//team
 		{
 			if ( self->invincible_time == 1 )
 			{
@@ -2582,26 +2580,13 @@ void CheckPowerups()
 
 			ktpro_autotrack_on_powerup_out( self );
 		}
-
-		if(self->invincible_finished > g_globalvars.time && !self->k_666) // KTeAMS
-		{
-			dim = true;
-			self->s.v.effects = ( int ) self->s.v.effects | EF_DIMLIGHT;
-			self->s.v.effects = ( int ) self->s.v.effects | EF_RED;
-		}
-		else
-		{
-			if ( !dim ) // EF_DIMLIGHT shared between quad, pent and CTF-flag
-				self->s.v.effects -= ( ( int ) self->s.v.effects & EF_DIMLIGHT );
-			self->s.v.effects -= ( ( int ) self->s.v.effects & EF_RED );
-		}
 	}
 
 // super damage
 	if ( self->super_damage_finished )
 	{
 // sound and screen flash when items starts to run out
-		if(self->super_damage_finished < g_globalvars.time + 3)
+		if ( self->super_damage_finished < g_globalvars.time + 3 )
 		{
 			if ( self->super_time == 1 )
 			{
@@ -2621,7 +2606,7 @@ void CheckPowerups()
 			}
 		}
 
-        if(self->super_damage_finished < g_globalvars.time)
+        if ( self->super_damage_finished < g_globalvars.time )
 		{		// just stopped
 			self->s.v.items -= IT_QUAD;
 			if ( !k_practice ) // #practice mode#
@@ -2638,19 +2623,6 @@ void CheckPowerups()
 			adjust_pickup_time( &self->q_pickup_time, &self->ps.itm[itQUAD].time );
 
 			ktpro_autotrack_on_powerup_out( self );
-		}
-
-		if ( self->super_damage_finished > g_globalvars.time )
-		{
-			dim = true;
-			self->s.v.effects = ( int ) self->s.v.effects | EF_DIMLIGHT;
-			self->s.v.effects = ( int ) self->s.v.effects | EF_BLUE;
-		}
-		else
-		{
-			if ( !dim ) // EF_DIMLIGHT shared between quad, pent and CTF-flag
-				self->s.v.effects -= ( ( int ) self->s.v.effects & EF_DIMLIGHT );
-			self->s.v.effects -= ( ( int ) self->s.v.effects & EF_BLUE );
 		}
 	}
 
@@ -2685,17 +2657,56 @@ void CheckPowerups()
 
 			ktpro_autotrack_on_powerup_out( self );
 		}
-
-		if ( self->radsuit_finished > g_globalvars.time )
-		{
-			self->s.v.effects = ( int ) self->s.v.effects | EF_GREEN;
-		}
-		else
-		{
-			self->s.v.effects = ( int ) self->s.v.effects & ~EF_GREEN;
-		}
 	}
 }
+
+void CheckLightEffects( void )
+{
+	qboolean dim = false;
+	qboolean brl = false;
+	qboolean r	 = false;
+	qboolean g   = false;
+	qboolean b   = false;
+
+	// remove particular EF_xxx
+
+	self->s.v.effects = (int)self->s.v.effects & ~(EF_DIMLIGHT | EF_BRIGHTLIGHT | EF_BLUE | EF_RED | EF_GREEN);
+
+	// well, EF_xxx may originate from different sources, check it all
+
+	if ( self->ctf_flag & CTF_FLAG )
+		dim = true;
+
+	if ( self->invincible_finished > g_globalvars.time && !self->k_666 ) // KTeAMS
+		r = true;
+
+	if ( self->radsuit_finished > g_globalvars.time )
+		g = true;
+
+	if ( self->racer && !match_in_progress )
+		g = true; // RACE
+
+	if ( self->super_damage_finished > g_globalvars.time )
+		b = true;
+
+	// apply all EF_xxx
+
+	if ( dim )
+		self->s.v.effects = ( int ) self->s.v.effects | EF_DIMLIGHT;
+
+	if ( brl )
+		self->s.v.effects = ( int ) self->s.v.effects | EF_BRIGHTLIGHT;
+
+	if ( r )
+		self->s.v.effects = ( int ) self->s.v.effects | EF_RED;
+
+	if ( g )
+		self->s.v.effects = ( int ) self->s.v.effects | EF_GREEN;
+
+	if ( b )
+		self->s.v.effects = ( int ) self->s.v.effects | EF_BLUE;
+}
+
 
 void check_callalias ();
 
@@ -2804,6 +2815,7 @@ void PlayerPostThink()
 	self->jump_flag = self->s.v.velocity[2];
 
 	CheckPowerups();
+	CheckLightEffects(); // NOTE: guess, must be after CheckPowerups(), so u r warned.
 	CheckStuffRune();
 
 	mv_record();

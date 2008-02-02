@@ -2675,7 +2675,7 @@ void ShowNick()
 			float	radius;
 
 			radius = 27;
-			if ((int)p->s.v.effects & (EF_BLUE|EF_RED|EF_GREEN|EF_DIMLIGHT|EF_BRIGHTLIGHT))
+			if ((int)p->s.v.effects & (EF_DIMLIGHT | EF_BRIGHTLIGHT | EF_BLUE | EF_RED | EF_GREEN))
 				radius = 200;
 
 			if (dist <= radius)

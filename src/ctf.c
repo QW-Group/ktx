@@ -255,9 +255,6 @@ void FlagTouch()
 				other->ctf_flag -= ( (int) other->ctf_flag & CTF_FLAG );
 				other->s.v.effects -= ( (int) other->s.v.effects & (EF_FLAG1 | EF_FLAG2) );
         
-				if ( !other->super_damage_finished && !other->invincible_finished )
-					other->s.v.effects -= ( (int) other->s.v.effects & EF_DIMLIGHT );
-
 				sound( other, CHAN_VOICE, "misc/flagcap.wav", 1, ATTN_NONE);
 
 				G_bprint( 2, "%s", other->s.v.netname );
@@ -365,12 +362,12 @@ void FlagTouch()
 	if ( streq(getteam(other), "red"))
 	{
 		G_bprint( 2, " %s the %s flag!\n", redtext("got"), redtext("BLUE") );
-		owner->s.v.effects = (int) owner->s.v.effects | EF_FLAG2 | EF_DIMLIGHT;
+		owner->s.v.effects = (int) owner->s.v.effects | EF_FLAG2;
 	}
 	else
 	{
 		G_bprint( 2, " %s the %s flag!\n", redtext("got"), redtext("RED") );
-		owner->s.v.effects = (int) owner->s.v.effects | EF_FLAG1 | EF_DIMLIGHT;
+		owner->s.v.effects = (int) owner->s.v.effects | EF_FLAG1;
 	}
 	setmodel( self, "" );
 }
@@ -401,10 +398,6 @@ void DropFlag( gedict_t *flag)
 
 	p->s.v.effects -= ( (int) p->s.v.effects & ( EF_FLAG1 | EF_FLAG2 ));
   
-	if ( !other->super_damage_finished && !other->invincible_finished )
-		other->s.v.effects -= ( (int) other->s.v.effects & EF_DIMLIGHT );
-
-	p->s.v.effects -= ( (int) p->s.v.effects & EF_DIMLIGHT );
 	setorigin( flag, PASSVEC3(p->s.v.origin) );
 	flag->s.v.origin[2] -= 24;
 	flag->cnt = FLAG_DROPPED;

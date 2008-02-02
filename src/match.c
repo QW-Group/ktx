@@ -1090,7 +1090,7 @@ void EM_CorrectStats()
 	{
 		// take away powerups so scoreboard looks normal
 		p->s.v.items = (int)p->s.v.items & ~(IT_INVISIBILITY | IT_INVULNERABILITY | IT_SUIT | IT_QUAD);
-		p->s.v.effects = (int)p->s.v.effects & ~(EF_DIMLIGHT | EF_BLUE | EF_RED | EF_GREEN );
+		p->s.v.effects = (int)p->s.v.effects & ~(EF_DIMLIGHT | EF_BRIGHTLIGHT | EF_BLUE | EF_RED | EF_GREEN);
 		p->invisible_finished = 0;
 		p->invincible_finished = 0;
 		p->super_damage_finished = 0;
