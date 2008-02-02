@@ -738,6 +738,70 @@ void race_blink_node( gedict_t *e )
 	e->s.v.think = ( func_t ) race_blink_think;
 }
 
+//===========================================
+
+void race_VelocityForDamage( float scale, vec3_t dir, vec3_t v )
+{
+	if ( vlen( dir ) > 0 )
+	{
+		vec3_t ang;
+
+		VectorCopy( dir, v );
+
+		VectorNormalize( v );
+
+		vectoangles( v, ang );
+		trap_makevectors( ang );
+
+//		VectorMA( v, crandom() * 0.3, g_globalvars.v_right, v );
+		VectorMA( g_globalvars.v_forward, crandom() * 0.3, g_globalvars.v_right, v );
+		VectorMA( v, crandom() * 0.3, g_globalvars.v_up,    v );
+
+		VectorNormalize( v );
+		VectorScale( v, scale, v );
+	}
+	else
+	{
+		v[0] = 100 * crandom();
+		v[1] = 100 * crandom();
+		v[2] = 20 + 10 * g_random();
+
+		VectorNormalize( v );
+		VectorScale( v, scale, v );
+	}
+
+	return;
+}
+
+void race_meat_touch()
+{
+	sound( self, CHAN_WEAPON, "zombie/z_miss.wav", 1, ATTN_NORM );	// bounce sound
+
+	if ( self->s.v.velocity[0] == 0 && self->s.v.velocity[1] == 0 && self->s.v.velocity[2] == 0 )
+		VectorClear( self->s.v.avelocity );
+}
+
+void race_spawn_meat( gedict_t *player, char *gibname, float vel )
+{
+	gedict_t	*newent;
+
+	newent = spawn();
+
+	VectorCopy( player->s.v.origin, newent->s.v.origin );
+
+	setmodel( newent, gibname );
+	setsize( newent, 0, 0, 0, 0, 0, 0 );
+	race_VelocityForDamage( vel, player->s.v.velocity, newent->s.v.velocity );
+	newent->s.v.movetype		= MOVETYPE_BOUNCE;
+	newent->s.v.solid			= SOLID_TRIGGER; // SOLID_NOT;
+	newent->s.v.avelocity[0]	= g_random() * 600;
+	newent->s.v.avelocity[1]	= g_random() * 600;
+	newent->s.v.avelocity[2]	= g_random() * 600;
+	newent->s.v.think			= ( func_t ) SUB_Remove;
+	newent->s.v.nextthink		= g_globalvars.time + 6 + g_random() * 10;
+
+	newent->s.v.touch			= ( func_t ) race_meat_touch;
+}
 
 //===========================================
 
@@ -793,6 +857,18 @@ void race_node_touch()
 		if ( self->race_RouteNodeType == nodeEnd )
 		{
 			// racer touch end node, FINISH!
+
+			// spawn a bit of meat
+			{
+				float speed = max( 600, vlen( other->s.v.velocity ) );
+				float frac  = bound( 0, 0.8, 1 ); // non random fraction of the speed
+
+				race_spawn_meat( other, "progs/gib1.mdl",     frac * speed + g_random() * (1.0 - frac) * speed );
+				race_spawn_meat( other, "progs/gib2.mdl",     frac * speed + g_random() * (1.0 - frac) * speed );
+				race_spawn_meat( other, "progs/gib3.mdl",     frac * speed + g_random() * (1.0 - frac) * speed );
+				race_spawn_meat( other, "progs/h_player.mdl", frac * speed + g_random() * (1.0 - frac) * speed );
+			}
+
 			if ( race_time() < race.top_time )
 			{
 				// do some sound
