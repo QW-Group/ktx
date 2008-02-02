@@ -1265,10 +1265,13 @@ void PutClientInServer(qboolean from_vmMain)
 	{
 		race_set_one_player_movetype_and_etc( self );
 	}
-	else if ( isRA() && ( isWinner( self ) || isLoser( self ) ) )
+	else if ( isRA() )
 	{
-		spawn_tfog( v );
-		play_teleport( self );
+		if ( isWinner( self ) || isLoser( self ) )
+		{
+			spawn_tfog( v );
+			play_teleport( self );
+		}
 	}
 	else
 	{
