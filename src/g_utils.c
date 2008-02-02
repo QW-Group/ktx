@@ -1575,6 +1575,12 @@ void CalculateBestPlayers()
 	ed_best1 = NULL;
 	ed_best2 = NULL;
 
+	if ( isRACE() )
+	{
+		ed_best1 = race_get_racer();
+		return;
+	}
+
 	// autotrack stuff
 	// no ghost serving
 	for ( p = world; (p = find_plr( p )); ) {
@@ -1640,6 +1646,12 @@ void CalculateBestPowPlayers()
 
 	best1 = 0;
 	ed_bestPow = NULL;
+
+	if ( isRACE() )
+	{
+		ed_bestPow = race_get_racer();
+		return;
+	}
 
 	// auto_pow stuff
 	// no ghost serving

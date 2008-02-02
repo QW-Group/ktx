@@ -4058,6 +4058,11 @@ void ktpro_autotrack_on_powerup_out (gedict_t *dude)
 */
 }
 
+// change pov to racer
+void ktpro_autotrack_on_race_status_changed (void)
+{
+	ktpro_autotrack_mark_all();
+}
 
 // << end  ktpro compatible autotrack 
 

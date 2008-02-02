@@ -742,17 +742,19 @@ void    GrappleReset(gedict_t *rhook);
 
 // race.c
 
-qboolean isRACE( void );
+qboolean 	isRACE( void );
 
-qboolean race_weapon_allowed( gedict_t *p );
+qboolean 	race_weapon_allowed( gedict_t *p );
 
-void	race_init( void );
-void	race_shutdown( char *msg );
-void	race_think( void );
+void		race_init( void );
+void		race_shutdown( char *msg );
+void		race_think( void );
 
-void	race_add_standart_routes( void );
+void		race_add_standart_routes( void );
 
-void	race_set_one_player_movetype_and_etc( gedict_t *p );
+void		race_set_one_player_movetype_and_etc( gedict_t *p );
+
+gedict_t 	*race_get_racer( void );
 
 // globals.c
 

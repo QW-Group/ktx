@@ -1068,6 +1068,7 @@ void race_start( qboolean restart, const char *fmt, ... )
 {
 	va_list argptr;
 	char    text[1024];
+	extern	void ktpro_autotrack_on_race_status_changed (void);
 
 	gedict_t *r, *n, *s;
 
@@ -1151,6 +1152,9 @@ void race_start( qboolean restart, const char *fmt, ... )
 
 	// remove some projectiles
 	remove_projectiles();
+
+	// autotrack - force switch pov to racer
+	ktpro_autotrack_on_race_status_changed();
 }
 
 
