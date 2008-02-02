@@ -2684,6 +2684,15 @@ void CheckPowerups()
 
 			ktpro_autotrack_on_powerup_out( self );
 		}
+
+		if ( self->radsuit_finished > g_globalvars.time )
+		{
+			self->s.v.effects = ( int ) self->s.v.effects | EF_GREEN;
+		}
+		else
+		{
+			self->s.v.effects = ( int ) self->s.v.effects & ~EF_GREEN;
+		}
 	}
 }
 

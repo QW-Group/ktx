@@ -1493,6 +1493,9 @@ void SP_item_artifact_envirosuit()
 	setmodel( self, "progs/suit.mdl" );
 	self->s.v.netname = "Biosuit";
 	self->s.v.classname = "item_artifact_envirosuit";
+
+	self->s.v.effects = ( int ) self->s.v.effects | EF_GREEN;
+
 	self->s.v.items = IT_SUIT;
 	setsize( self, -16, -16, -24, 16, 16, 32 );
 	StartItem();
