@@ -190,9 +190,12 @@ void Check_sready()
 
 =============================================================================
 */
-float           intermission_running;
-float           intermission_exittime;
+float           intermission_running  = 0;
+float           intermission_exittime = 0;
+gedict_t 		*intermission_spot = NULL;
+
 char            nextmap[64] = "";
+
 
 /*QUAKED info_intermission (1 0.5 0.5) (-16 -16 -16) (16 16 16)
 This is the camera point for the intermission.
@@ -408,7 +411,8 @@ to him personally
 */
 void SendIntermissionToClient ()
 {
-	gedict_t *intermission_spot = FindIntermission();
+	if ( !intermission_spot )
+		G_Error( "SendIntermissionToClient: !intermission_spot" );
 
 	g_globalvars.msg_entity = EDICT_TO_PROG( self );
 
@@ -438,26 +442,24 @@ Take the players to the intermission spot
 
 void execute_changelevel()
 {
-	gedict_t       *pos;
-
 	intermission_running = 1;
 
 // enforce a wait time before allowing changelevel
 	intermission_exittime = g_globalvars.time + 1 +	max( 1, cvar( "demo_scoreslength" ) );
 
-	pos = FindIntermission();
+	intermission_spot = FindIntermission();
 
 // play intermission music
 	WriteByte( MSG_ALL, SVC_CDTRACK );
 	WriteByte( MSG_ALL, 3 );
 
 	WriteByte ( MSG_ALL, SVC_INTERMISSION );
-	WriteCoord( MSG_ALL, pos->s.v.origin[0] );
-	WriteCoord( MSG_ALL, pos->s.v.origin[1] );
-	WriteCoord( MSG_ALL, pos->s.v.origin[2] );
-	WriteAngle( MSG_ALL, pos->mangle[0] );
-	WriteAngle( MSG_ALL, pos->mangle[1] );
-	WriteAngle( MSG_ALL, pos->mangle[2] );
+	WriteCoord( MSG_ALL, intermission_spot->s.v.origin[0] );
+	WriteCoord( MSG_ALL, intermission_spot->s.v.origin[1] );
+	WriteCoord( MSG_ALL, intermission_spot->s.v.origin[2] );
+	WriteAngle( MSG_ALL, intermission_spot->mangle[0] );
+	WriteAngle( MSG_ALL, intermission_spot->mangle[1] );
+	WriteAngle( MSG_ALL, intermission_spot->mangle[2] );
 
 	for( other = world; (other = find_plr( other )); )
 	{
@@ -2381,10 +2383,6 @@ void PlayerPreThink()
 		return;					// the think tics
 	}
 
-	if ( self->s.v.view_ofs[0] == 0 && self->s.v.view_ofs[1] == 0
-	     && self->s.v.view_ofs[2] == 0 )
-		return;		// intermission or finale
-
 	if ( isRA() )
 		RocketArenaPre();
 
@@ -2742,19 +2740,13 @@ void PlayerPostThink()
 {
 //dprint ("post think\n");
 
-/* FIXME: really comment?
-
-    if (intermission_running)
+	if ( intermission_running )
     {
-        setorigin (self, intermission_spot.origin);
-        self.velocity = VEC_ORIGIN;	// don't stray off the intermission spot too far
+		setorigin( self, PASSVEC3( intermission_spot->s.v.origin ) );
+        SetVector( self->s.v.velocity, 0, 0, 0 ); 	// don't stray off the intermission spot too far
+
         return;
     }
-
-*/
-
-	if ( self->s.v.view_ofs[0] == 0 && self->s.v.view_ofs[1] == 0 && self->s.v.view_ofs[2] == 0 )
-		return;		// intermission or finale
 
 	if ( self->s.v.deadflag )
 		return;
