@@ -413,7 +413,7 @@ void DropFlag( gedict_t *flag)
 	flag->s.v.solid = SOLID_TRIGGER;
 	flag->s.v.movetype = MOVETYPE_TOSS;
 	setmodel( flag, flag->mdl );
-	setsize ( self, -16, -16, 0, 16, 16, 74 );
+	setsize ( flag, -16, -16, 0, 16, 16, 74 );
 	flag->super_time = g_globalvars.time + FLAG_RETURN_TIME;
 
 	G_bprint( 2, "%s", p->s.v.netname );
