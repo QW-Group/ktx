@@ -290,25 +290,24 @@ void CoilgunTrail( vec3_t endpos, int entnum )
 	VectorCopy( self->s.v.origin, org );	//org = self->s.v.origin + '0 0 16';
 	org[2] += 16;
 
-	color = atoi( ezinfokey( self, "railcolor" ));
-	if ( color < 1 || color > 7)
+	color = iKey( self, "railcolor" );
+	if ( color < 1 || color > 7 )
 		color = 1;
 
-	if (entnum < 0 || entnum > MAX_CLIENTS)
+	if ( entnum < 0 || entnum > MAX_CLIENTS )
 		entnum = 0;
 
-        WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
-        WriteByte( MSG_MULTICAST, TE_LIGHTNING1 );
-	WriteShort (MSG_MULTICAST, -264 + 8*entnum + color);
-        WriteCoord( MSG_MULTICAST, org[0] );
-        WriteCoord( MSG_MULTICAST, org[1] );
-        WriteCoord( MSG_MULTICAST, org[2] );
-        WriteCoord( MSG_MULTICAST, endpos[0] );
-        WriteCoord( MSG_MULTICAST, endpos[1] );
-        WriteCoord( MSG_MULTICAST, endpos[2] );
+	WriteByte(  MSG_MULTICAST, SVC_TEMPENTITY );
+	WriteByte(  MSG_MULTICAST, TE_LIGHTNING1 );
+	WriteShort( MSG_MULTICAST, -264 + 8 * entnum + color );
+	WriteCoord( MSG_MULTICAST, org[0] );
+	WriteCoord( MSG_MULTICAST, org[1] );
+	WriteCoord( MSG_MULTICAST, org[2] );
+	WriteCoord( MSG_MULTICAST, endpos[0] );
+	WriteCoord( MSG_MULTICAST, endpos[1] );
+	WriteCoord( MSG_MULTICAST, endpos[2] );
 
-        trap_multicast( PASSVEC3( org ), MULTICAST_PHS );
-
+	trap_multicast( PASSVEC3( org ), MULTICAST_PHS );
 }
 /*
 ==============================================================================
