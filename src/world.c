@@ -1223,7 +1223,6 @@ int         timelimit, fraglimit, teamplay, deathmatch, framecount;
 extern float intermission_exittime;
 
 void CheckTiming();
-void Check_sready();
 void check_fcheck();
 void CheckTeamStatus();
 void DoMVDAutoTrack( void );
@@ -1269,7 +1268,6 @@ void StartFrame( int time )
 	current_maxfps = bound(50, current_maxfps, 1981);
 
 	CheckTiming(); // check if client lagged or returned from lag
-	Check_sready(); // k_sready stuff
 
 	if ( intermission_running && g_globalvars.time >= intermission_exittime - 1 
 			&& !strnull( cvar_string( "serverdemo" ) ) )

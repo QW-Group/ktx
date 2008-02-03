@@ -165,27 +165,6 @@ void CheckTiming()
 	}
 }
 
-
-void Check_sready()
-{
-	int k_sready = cvar( "k_sready" );
-	gedict_t *p;
-
-	if ( match_in_progress == 2 || match_over || k_matchLess )
-		return;
-
-	for( p = world; (p = find_plr( p )); ) {
-		// player have quad - so EF_BLUE will be set or removed anyway, but ugly blinking, so work around
-		if ( p->super_damage_finished )
-			continue;
-
-		if ( k_sready && !p->ready )
-			p->s.v.effects = ( int ) p->s.v.effects | EF_BLUE;
-		else
-			p->s.v.effects = ( int ) p->s.v.effects & ~EF_BLUE;
-	}
-}
-
 /*
 =============================================================================
 
@@ -2687,6 +2666,9 @@ void CheckLightEffects( void )
 		g = true; // RACE
 
 	if ( self->super_damage_finished > g_globalvars.time )
+		b = true;
+
+	if ( !match_in_progress && !match_over && !k_matchLess && cvar( "k_sready" ) )
 		b = true;
 
 	// apply all EF_xxx
