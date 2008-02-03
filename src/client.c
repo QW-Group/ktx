@@ -2668,7 +2668,7 @@ void CheckLightEffects( void )
 	if ( self->super_damage_finished > g_globalvars.time )
 		b = true;
 
-	if ( !match_in_progress && !match_over && !k_matchLess && cvar( "k_sready" ) )
+	if ( !match_in_progress && !match_over && !k_matchLess && !self->ready && cvar( "k_sready" ) )
 		b = true;
 
 	// apply all EF_xxx
