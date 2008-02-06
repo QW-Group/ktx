@@ -1,0 +1,65 @@
+#   QWProgs-DM
+#   Copyright (C) 2004  [MAD]ApxuTekTop
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#
+#   $Id: Makefile.dl.in 679 2008-01-12 11:03:21Z qqshka $
+
+CC=@CC@
+RM=@RM@
+
+INSTALLDIR=$(PREFIX)/sbin
+
+SVNREV = $(shell svnversion -n $(srcdir) 2>/dev/null | sed -e "s/M//")
+
+MODULE=qwprogs.so
+
+# KTX does't work as 64bit binary, to compile KTX as 32bit on 64bit target platform use next:
+# for gcc its like: make dl FORCE32BITFLAGS=-m32
+FORCE32BITFLAGS=-m32
+
+CFLAGS=-g -Wall -O2 -fPIC -DSVNREV="$(SVNREV)" $(FORCE32BITFLAGS)
+LDFLAGS=-shared -Wl,-soname,$(MODULE) $(FORCE32BITFLAGS)
+INCFLAGS=-I../include
+
+LIBS=@LIBS@
+
+SOURCES=native_lib.c buttons.c client.c combat.c doors.c g_cmd.c g_main.c \
+	g_mem.c g_spawn.c g_syscalls.c g_utils.c items.c mathlib.c misc.c \
+	plats.c player.c q_shared.c server.c spectate.c subs.c triggers.c \
+	weapons.c world.c \
+	admin.c captain.c commands.c globals.c logs.c maps.c match.c motd.c vip.c vote.c \
+	g_userinfo.c grapple.c runes.c ctf.c arena.c race.c
+OBJECTS=$(SOURCES:.c=.o)
+
+all:		build
+
+build:		$(MODULE)
+
+install:	build
+			../install-sh -c -m 755 $(MODULE) $(INSTALLDIR)
+
+clean:
+			$(RM) -f $(OBJECTS) $(MODULE) *~
+
+distclean:	clean
+			$(RM) -f *.orig *.rej *.tmp Makefile.dl
+
+.c.o:
+			$(CC) $(CFLAGS) $(INCFLAGS) -c $<
+
+$(MODULE):	$(OBJECTS)
+			$(CC) $(LDFLAGS) -o $(MODULE) $(OBJECTS) $(LIBS)

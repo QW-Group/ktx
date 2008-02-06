@@ -26,6 +26,7 @@ INCDIR=include
 PREFIX=@prefix@
 
 MAKEDL=$(MAKE) -f Makefile.dl
+MAKEDL32=$(MAKE) -f Makefile.dl32
 MAKEQVM=$(MAKE) -f Makefile.vm
 
 
@@ -33,28 +34,36 @@ all:		build
 
 dl:			build-dl
 
+dl32:			build-dl32
+
 vm:			build-vm
 
 
-build:		build-dl build-vm
+build:		build-dl build-dl32 build-vm
 
 build-dl:
 			cd $(SRCDIR); $(MAKEDL) build
+
+build-dl32:
+			cd $(SRCDIR); $(MAKEDL32) build
 
 build-vm:
 			cd $(SRCDIR); $(MAKEQVM) build
 
 
-install:	install-dl install-vm
+install:	install-dl install-dl32 install-vm
 
 install-dl:
 			cd $(SRCDIR); $(MAKEDL) PREFIX=$(PREFIX) install
+
+install-dl32:
+			cd $(SRCDIR); $(MAKEDL32) PREFIX=$(PREFIX) install
 
 install-vm:
 			cd $(SRCDIR); $(MAKEQVM) PREFIX=$(PREFIX) install
 
 
-clean:		clean-local clean-include clean-dl clean-vm
+clean:		clean-local clean-include clean-dl clean-dl32 clean-vm
 
 clean-local:
 			$(RM) -f *~
@@ -66,11 +75,14 @@ clean-include:
 clean-dl:
 			cd $(SRCDIR); $(MAKEDL) clean
 
+clean-dl32:
+			cd $(SRCDIR); $(MAKEDL32) clean
+
 clean-vm:
 			cd $(SRCDIR); $(MAKEQVM) clean
 
 
-distclean:	distclean-local distclean-include distclean-dl distclean-vm
+distclean:	distclean-local distclean-include distclean-dl distclean-dl32 distclean-vm
 
 distclean-local:
 			$(RM) -f *~ *.orig *.rej *.tmp
@@ -82,6 +94,9 @@ distclean-include:
 
 distclean-dl:
 			cd $(SRCDIR); $(MAKEDL) distclean
+
+distclean-dl32:
+			cd $(SRCDIR); $(MAKEDL32) distclean
 
 distclean-vm:
 			cd $(SRCDIR); $(MAKEQVM) distclean

@@ -3781,7 +3781,7 @@ echo "${ECHO_T}$ac_cv_prog_gcc_traditional" >&6; }
 fi
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile.dl src/Makefile.vm"
+ac_config_files="$ac_config_files Makefile src/Makefile.dl src/Makefile.dl32 src/Makefile.vm"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -4353,6 +4353,7 @@ do
   case $ac_config_target in
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "src/Makefile.dl") CONFIG_FILES="$CONFIG_FILES src/Makefile.dl" ;;
+    "src/Makefile.dl32") CONFIG_FILES="$CONFIG_FILES src/Makefile.dl32" ;;
     "src/Makefile.vm") CONFIG_FILES="$CONFIG_FILES src/Makefile.vm" ;;
 
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
