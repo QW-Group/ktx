@@ -23,4 +23,4 @@ dnl Checks for library functions.
 AC_PROG_GCC_TRADITIONAL
 
 dnl Make the files.
-AC_OUTPUT(Makefile src/Makefile.dl src/Makefile.vm)
+AC_OUTPUT(Makefile src/Makefile.dl src/Makefile.dl32 src/Makefile.vm)
