@@ -2,7 +2,7 @@
 
 rem $Id$
 
-rem NOTE: u must look %SRC%\game.q3asm so u can guess where qwprogs.qvm locate
+rem NOTE: you must look %SRC%\game.q3asm so u can guess where qwprogs.qvm locate
 
 set CC=lcc
 set Q3ASM=q3asm
