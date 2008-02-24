@@ -3958,7 +3958,7 @@ void AutoTrack( float autoTrackType )
 
 	self->apply_ktpro_autotrack = (self->autotrack == atKTPRO); // select some first best pov if we use ktpro's autotrack too
 
-	cmdinfo_setkey(self, "*at", va("%d", self->autotrack)); // so we can restore it on level change
+	SetUserInfo(self, "*at", va("%d", self->autotrack), SETUSERINFO_STAR); // so we can restore it on level change
 
 	switch ( at ) {
 		case atBest:	at_txt = "Autotrack_ktx";	break; // ktx's autotrack
@@ -4630,7 +4630,7 @@ void moreinfo()
 	if ( level < 0 )
 		level = 0;
 
-	cmdinfo_setkey( self, "mi", va("%d", level) );
+	SetUserInfo( self, "mi", va("%d", level), 0 );
 }
 
 void info_mi_update( gedict_t *p, char *from, char *to )

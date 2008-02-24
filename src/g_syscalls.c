@@ -450,3 +450,7 @@ size_t strlcat(char *dst, char *src, size_t siz)
 }
 #endif
 
+int 	trap_SetUserInfo( int edn, const char* varname, const char* value, int flags )
+{
+        return syscall( G_SETUSERINFO, edn, (int)varname, (int)value, flags );
+}

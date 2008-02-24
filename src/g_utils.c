@@ -747,13 +747,6 @@ char *ezinfokey( gedict_t * ed, char *key )
 	static char		string[MAX_STRINGS][1024];
 	static int		index = 0;
 
-	if ( ed->ct == ctPlayer || ed->ct == ctSpec ) {
-		char *v = cmdinfo_getkey( ed, key );
-
-		if ( v ) // key supported so does't need to search in userinfo even key is empty ""
-			return v;
-	}
-
 	index %= MAX_STRINGS;
 
 	trap_infokey( NUM_FOR_EDICT( ed ), key, string[index], sizeof( string[0] ) );
@@ -765,13 +758,6 @@ int  iKey( gedict_t * ed, char *key )
 {
 	char		string[128]; // which size will be best?
 
-	if ( ed->ct == ctPlayer || ed->ct == ctSpec ) {
-		char *v = cmdinfo_getkey( ed, key );
-
-		if ( v ) // key supported so does't need to search in userinfo even key is empty ""
-			return atoi( v );
-	}
-
 	trap_infokey( NUM_FOR_EDICT( ed ), key, string, sizeof( string ) );
 	return atoi( string );
 }
@@ -779,13 +765,6 @@ int  iKey( gedict_t * ed, char *key )
 float fKey( gedict_t * ed, char *key )
 {
 	char		string[128]; // which size will be best?
-
-	if ( ed->ct == ctPlayer || ed->ct == ctSpec ) {
-		char *v = cmdinfo_getkey( ed, key );
-
-		if ( v ) // key supported so does't need to search in userinfo even key is empty ""
-			return atof( v );
-	}
 
 	trap_infokey( NUM_FOR_EDICT( ed ), key, string, sizeof( string ) );
 	return atof( string );
@@ -2126,4 +2105,11 @@ void remove_projectiles( void )
 		   )
 			ent_remove( p );
 	}
+}
+
+//=======================================
+
+void SetUserInfo ( gedict_t *p, const char* varname, const char* value, int flags )
+{
+	trap_SetUserInfo( NUM_FOR_EDICT( p ), varname, value, flags );
 }

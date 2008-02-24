@@ -376,6 +376,8 @@ int			get_fallbunny();
 
 void		remove_projectiles( void );
 
+void		SetUserInfo ( gedict_t *p, const char* varname, const char* value, int flags );
+
 //
 //  subs.c
 //
@@ -624,15 +626,7 @@ void			VIP_ShowRights(gedict_t* cl);
 
 // g_userinfo.c
 
-typedef struct cmdinfo_s {
-	char    *key;
-	void ( *f )( gedict_t *p, char *from, char *to );
-} cmdinfo_t;
-
-char	*cmdinfo_getkey( gedict_t *p, char *key );
-int		cmdinfo_setkey( gedict_t *p, char *key, char *value );
 void	cmdinfo_infoset ( gedict_t *p );
-void	cmdinfo_clear ( gedict_t *p );
 
 // vote.c
 

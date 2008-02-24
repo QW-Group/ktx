@@ -720,8 +720,8 @@ void multi_do(int from_arg, qboolean from_mmode)
 		}
 		
 		if ( k ) {
-			cmdinfo_setkey(self, "*mm", va("%d", MMODE_MULTI));
-			cmdinfo_setkey(self, "*mu", va("%d", m));
+			SetUserInfo(self, "*mm", va("%d", MMODE_MULTI), SETUSERINFO_STAR);
+			SetUserInfo(self, "*mu", va("%d", m), SETUSERINFO_STAR);
 			G_sprint(self, 2, "mmode(multi): %s\n", multi);
 		}
 		else
@@ -783,9 +783,9 @@ void multi_do(int from_arg, qboolean from_mmode)
 		
 		if ( k ) {
 			if ( from_mmode ) // allow set up mmode only from /mmode cmd, not from /multi cmd
-				cmdinfo_setkey(self, "*mm", va("%d", MMODE_MULTI));
+				SetUserInfo(self, "*mm", va("%d", MMODE_MULTI), SETUSERINFO_STAR);
 
-			cmdinfo_setkey(self, "*mu", va("%d", m)); // this must be set in both cases
+			SetUserInfo(self, "*mu", va("%d", m), SETUSERINFO_STAR); // this must be set in both cases
 
 			G_sprint(self, 2, "multi %s: %s\n", arg_1, multi);
 		}
@@ -849,7 +849,7 @@ void info_sys_mm_update( gedict_t *p, char *from, char *to )
 	if ( mm == MMODE_NONE )
 		return;
 
-	cmdinfo_setkey(p, "*ml", va("%d", mm));
+	SetUserInfo(p, "*ml", va("%d", mm), SETUSERINFO_STAR);
 }
 
 char *mmode_str(int mmode)
@@ -900,7 +900,7 @@ void mmode ()
 			}
 */
 
-			cmdinfo_setkey(self, "*mm", va("%d", last));
+			SetUserInfo(self, "*mm", va("%d", last), SETUSERINFO_STAR);
 			G_sprint(self, 2, "last mmode(%s)\n", mmode_str(last));
 			return;
 		}
@@ -923,8 +923,8 @@ void mmode ()
 
 			// check do we need set this values or not
 			if ( ( set = ( mmode != iKey(self, "*mm") || id != iKey(self, "*mp") ) ) ) {
-				cmdinfo_setkey(self, "*mm", va("%d", mmode));
-				cmdinfo_setkey(self, "*mp", va("%d", id));
+				SetUserInfo(self, "*mm", va("%d", mmode), SETUSERINFO_STAR);
+				SetUserInfo(self, "*mp", va("%d", id), SETUSERINFO_STAR);
 			}
 
 			G_sprint(self, 2, "mmode(player)%s: %s\n", (set ? " set": ""), getname( p ));
@@ -937,8 +937,8 @@ void mmode ()
 
 			// check do we need set this values or not
 			if ( ( set = ( mmode != iKey(self, "*mm") || strneq(tname, ezinfokey(self, "*mt")) ) ) ) {
-				cmdinfo_setkey(self, "*mm", va("%d", mmode));
-				cmdinfo_setkey(self, "*mt", va("%s", tname));
+				SetUserInfo(self, "*mm", va("%d", mmode), SETUSERINFO_STAR);
+				SetUserInfo(self, "*mt", va("%s", tname), SETUSERINFO_STAR);
 			}
 
 			G_sprint(self, 2, "mmode(team)%s: %s\n", (set ? " set": ""), tname);
@@ -955,7 +955,7 @@ void mmode ()
 
 			// check do we need set this values or not
 			if ( ( set = ( mmode != iKey(self, "*mm") ) ) )
-				cmdinfo_setkey(self, "*mm", va("%d", mmode));
+				SetUserInfo(self, "*mm", va("%d", mmode), SETUSERINFO_STAR);
 
 			G_sprint(self, 2, "mmode(name)%s\n", (set ? " set": ""));
 
@@ -982,7 +982,7 @@ void mmode ()
 
 			// check do we need set this values or not
 			if ( ( set = ( mmode != iKey(self, "*mm") ) ) )
-				cmdinfo_setkey(self, "*mm", va("%d", mmode));
+				SetUserInfo(self, "*mm", va("%d", mmode), SETUSERINFO_STAR);
 
 			G_sprint(self, 2, "mmode(rcon)%s\n", (set ? " set": ""));
 
@@ -992,7 +992,7 @@ void mmode ()
 		default:
 
 			G_sprint(self, 2, "mmode: off\n");
-			cmdinfo_setkey(self, "*mm", va("%d", MMODE_NONE));
+			SetUserInfo(self, "*mm", va("%d", MMODE_NONE), SETUSERINFO_STAR);
 
 			return;
 	}

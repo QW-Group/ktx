@@ -196,8 +196,6 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 
 		s_lr_clear( self );
 
-		cmdinfo_clear ( self ); // remove all keys for this client on disconnect
-
 		if ( arg0 )
 			SpectatorDisconnect();
 		else
