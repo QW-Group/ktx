@@ -2109,6 +2109,7 @@ void remove_projectiles( void )
 
 //=======================================
 
+// WARNING: this trap uses Cmd_TokenizeString() in server, so use with care.
 void SetUserInfo ( gedict_t *p, const char* varname, const char* value, int flags )
 {
 	trap_SetUserInfo( NUM_FOR_EDICT( p ), varname, value, flags );
