@@ -1158,12 +1158,12 @@ void EndMatch ( float skip_log )
 		;
 	}
 	else {
-       	if( isTeam() || isCTF() )
+		if( isTeam() || isCTF() )
 			CollectTpStats();
 
-	PlayersStats (); // all info about any player
+		PlayersStats (); // all info about any player
 	
-	if ( !cvar("k_midair") )
+		if ( !cvar("k_midair") )
 		{
         	if( isTeam() || isCTF() )
 				SummaryTPStats (); // print summary stats like armos powerups weapons etc..
@@ -1172,7 +1172,7 @@ void EndMatch ( float skip_log )
 				TopStats (); // print top frags tkills deaths...
 		}
 
-        if( isTeam() || isCTF() )
+		if( isTeam() || isCTF() )
 			TeamsStats (); // print basic info like frags for each team
 		
 		if ( (p = find( world, FOFCLSN, "ghost" )) ) // show legend :)
