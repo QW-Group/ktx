@@ -4407,6 +4407,19 @@ void agree_on_map ( )
 
 // { lastscores stuff
 
+char *lastscores2str( lsType_t lst )
+{
+	switch( lst ) {
+		case lsDuel: return "duel";
+		case lsTeam: return "team";
+		case lsFFA:  return "FFA";
+		case lsCTF:  return "CTF";
+		case lsRA:   return "RA";
+	}
+
+	return "unknown";
+}
+
 void lastscore_add ()
 {
 	gedict_t *p, *ed1 = get_ed_scores1(), *ed2 = get_ed_scores2();
@@ -4475,6 +4488,20 @@ void lastscore_add ()
 	cvar_set(va("__k_ls_s_%d", k_ls), va("%3d:%-3d \x8D %-8.8s %13.13s", s1, s2, g_globalvars.mapname, date));
 
 	cvar_fset("__k_ls", ++k_ls % MAX_LASTSCORES);
+
+	// this is a HACK for QTV, ok EZTV
+	{
+		char qtvdate[128];
+		gedict_t *cl = find_client( world );
+
+		if ( !QVMstrftime(qtvdate, sizeof(qtvdate), "%Y%m%d%H%M%S", 0) )
+			qtvdate[0] = 0;
+
+		if ( cl && !strnull( qtvdate ) )
+		{
+			stuffcmd(cl, "//finalscores \"%s\" \"%s\" \"%s\" \"%s\" %d \"%s\" %d\n", qtvdate, lastscores2str(lst), g_globalvars.mapname, e1, s1, e2, s2);
+		}
+	}
 }
 
 void lastscores ()
@@ -4503,18 +4530,8 @@ void lastscores ()
 		if (    cur != last // changed game mode
 			 || (strneq(le1 , e1) || strneq(le2 , e2)) // changed teams, duelers
 		   ) {
-			char *um_name = "";
-			switch( cur ) {
-				case lsDuel: um_name = redtext("duel"); break;
-				case lsTeam: um_name = redtext("team"); break;
-				case lsFFA:  um_name = redtext("FFA"); break;
-				case lsCTF:  um_name = redtext("CTF"); break;
-				case lsRA:   um_name = redtext("RA"); break;
-				default:     um_name = redtext("unknown"); break;
-			}
-
 			lt1 = lt2 = ""; // force show teams members again
-			G_sprint(self, 2, "\x90%s %s %s\x91 %s\n", e1, redtext("vs"), e2, um_name);
+			G_sprint(self, 2, "\x90%s %s %s\x91 %s\n", e1, redtext("vs"), e2, redtext( lastscores2str( cur ) ));
 		}
 
 		// if team mode show members.
