@@ -4491,10 +4491,10 @@ void lastscore_add ()
 
 	// this is a HACK for QTV, ok EZTV
 	{
-		char qtvdate[128];
+		char qtvdate[64];
 		gedict_t *cl = find_client( world );
 
-		if ( !QVMstrftime(qtvdate, sizeof(qtvdate), "%Y%m%d%H%M%S", 0) )
+		if ( !QVMstrftime(qtvdate, sizeof(qtvdate), "%b %d, %H:%M", 0) )
 			qtvdate[0] = 0;
 
 		if ( cl && !strnull( qtvdate ) )
