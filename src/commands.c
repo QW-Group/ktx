@@ -4415,6 +4415,7 @@ char *lastscores2str( lsType_t lst )
 		case lsFFA:  return "FFA";
 		case lsCTF:  return "CTF";
 		case lsRA:   return "RA";
+		default:	 return "unknown";
 	}
 
 	return "unknown";
