@@ -3916,7 +3916,10 @@ void DoMVDAutoTrack( void )
 	autotrack_last = p;
 
 	if ( ( id = GetUserID( p ) ) > 0 )
-		stuffcmd( p, "//at %d\n", id ); // with "properly" haxed server this does't go to player but goes to mvd demo only
+	{
+		// with "properly" haxed server this does't go to player but goes to mvd demo only
+		stuffcmd_flags(p, STUFFCMD_DEMOONLY, "//at %d\n", id );
+	}
 }
 
 void DoAutoTrack( )

@@ -29,6 +29,9 @@ void    trap_DPrintf( const char *fmt );
 void 	trap_conprint( const char *fmt );
 
 void    trap_BPrint( int level, const char *fmt );
+
+// trap_SPrint() flags
+#define SPRINT_IGNOREINDEMO   (   1<<0) // do not put such message in mvd demo
 void    trap_SPrint( int edn, int level, const char *fmt, int flags );
 void    trap_CenterPrint( int edn, const char *fmt );
 void    trap_Error( const char *fmt );
@@ -47,6 +50,9 @@ void    trap_sound( int edn, int channel, char *samp, float vol, float att );
 int     trap_checkclient(  );
 void    trap_traceline( float v1_x, float v1_y, float v1_z, float v2_x, float v2_y,
 			float v2_z, int nomonst, int edn );
+
+#define STUFFCMD_IGNOREINDEMO (   1<<0) // do not put in mvd demo
+#define STUFFCMD_DEMOONLY     (   1<<1) // put in mvd demo only
 void    trap_stuffcmd( int edn, const char *fmt, int flags );
 void    trap_localcmd( const char *fmt );
 void 	trap_executecmd();

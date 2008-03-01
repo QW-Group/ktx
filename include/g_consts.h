@@ -184,12 +184,6 @@
 #define PRINT_HIGH   2		// critical messages
 #define PRINT_CHAT   3		// also goes to chat console
 
-// trap_SPrint() flags
-#define SPRINT_IGNOREINDEMO   (   1<<0) // do not put such message in mvd demo
-
-// trap_stuffcmd() flags
-#define STUFFCMD_IGNOREINDEMO (   1<<0) // do not put in mvd demo
-
 // multicast sets
 #define MULTICAST_ALL    0	// every client
 #define MULTICAST_PHS    1	// within hearing
