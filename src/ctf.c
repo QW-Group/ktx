@@ -229,6 +229,7 @@ void FlagTouch()
 {
 	gedict_t *p, *owner;
 
+	if( !k_practice )
 	if ( match_in_progress != 2 )
 		return;
 
@@ -341,6 +342,9 @@ void FlagTouch()
 		}
 	}
 
+	if ( strneq(getteam(other), "red") && strneq(getteam(other), "blue"))
+		return;
+
 	refresh_plus_scores (); // update players status bar faster
 
 	// Pick up the flag
@@ -359,7 +363,7 @@ void FlagTouch()
 	owner->ps.pickups++;
 
 	G_bprint( 2, "%s", other->s.v.netname );
-	if ( streq(getteam(other), "red"))
+	if ( streq(getteam(other), "red") )
 	{
 		G_bprint( 2, " %s the %s flag!\n", redtext("got"), redtext("BLUE") );
 		owner->s.v.effects = (int) owner->s.v.effects | EF_FLAG2;
@@ -525,6 +529,19 @@ void nohook()
 	}
 
 	cvar_toggle_msg( self, "k_ctf_hook", redtext("hook") );
+}
+
+void noga()
+{
+	if( match_in_progress )
+		return;
+
+	if ( !isCTF() ) {
+		G_sprint ( self, 2, "Can't do this in non CTF mode\n" );
+		return;
+	}
+
+	cvar_toggle_msg( self, "k_ctf_ga", redtext("green armor") );
 }
 
 void mctf()

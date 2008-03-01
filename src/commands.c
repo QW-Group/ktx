@@ -55,6 +55,7 @@ void ToggleFallBunny ();
 void FlagStatus();
 void norunes();
 void nohook();
+void noga();
 void mctf();
 // also: TossRune()
 //       swapall()
@@ -397,6 +398,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_FLAGSTATUS   "show flags status (CTF)"
 #define CD_NOHOOK       "toggle hook (CTF)"
 #define CD_NORUNES      "toggle runes (CTF)"
+#define CD_NOGA         "toggle green armor on spawn (CTF)"
 #define CD_MCTF         "disable hook+runes (CTF)"
 #define CD_MOTD         "show motd"
 #define CD_INFOLOCK     "toggle specinfo perms"
@@ -677,6 +679,7 @@ cmd_t cmds[] = {
 	{ "tossrune",    TossRune,                  0    , CF_PLAYER, CD_TOSSRUNE },
 	{ "nohook",      nohook,                    0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOHOOK },
 	{ "norunes",     norunes,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NORUNES },
+	{ "noga",        noga,                      0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOGA },
 	{ "mctf",        mctf,                      0    , CF_PLAYER | CF_SPC_ADMIN, CD_MCTF },
 	{ "flagstatus",  FlagStatus,                0    , CF_BOTH, CD_FLAGSTATUS },
 	{ "swapall",     AdminSwapAll,              0    , CF_BOTH_ADMIN, CD_SWAPALL },
@@ -1390,8 +1393,8 @@ void ModStatus2()
 		G_sprint(self, 2, "%s:  CTF\n", redtext("Server mode"));
 		G_sprint(self, 2, "%s: %s\n", redtext("Server locking"),
 					 (!cvar("k_lockmode") ? "off" : (cvar("k_lockmode") == 2 ? "all" : (cvar("k_lockmode") == 1 ? "team" : "unknown"))));
-		G_sprint(self, 2, "%s: hook %s, runes %s\n", redtext("CTF settings"),
-							 OnOff(cvar("k_ctf_hook")), OnOff(cvar("k_ctf_runes")));
+		G_sprint(self, 2, "%s: hook %s, runes %s, ga %s\n", redtext("CTF settings"),
+					OnOff(cvar("k_ctf_hook")), OnOff(cvar("k_ctf_runes")), OnOff(cvar("k_ctf_ga")));
 	}
 	else if ( isTeam() ) {
 		G_sprint(self, 2, "%s: team\n", redtext("Server mode"));
@@ -1936,7 +1939,7 @@ void ChangeTP()
 	if( check_master() )
 		return;
 
-	if( !isTeam() ) {
+	if( !isTeam() && !isCTF() ) {
 		G_sprint(self, 3, "console: non team mode disallows you to change teamplay setting\n");
 		return;
 	}
@@ -2969,8 +2972,8 @@ const char ffa_um_init[] =
 const char ctf_um_init[] =
 	"maxclients 16\n"
 	"k_maxclients 16\n"
-	"timelimit  20\n"
-	"teamplay   2\n"
+	"timelimit 20\n"
+	"teamplay 2\n"
 	"deathmatch 3\n"
 	"k_dis 2\n"						// no out of water discharges in ctf          
 	"k_pow 1\n"
@@ -2982,7 +2985,8 @@ const char ctf_um_init[] =
 	"k_exttime 5\n"
 	"k_mode 4\n"
 	"k_ctf_hook 1\n"				// hook on
-	"k_ctf_runes 1\n";				// runes on
+	"k_ctf_runes 1\n"				// runes on
+	"k_ctf_ga 1\n";					// green armor on
 
 
 usermode um_list[] =

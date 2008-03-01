@@ -192,10 +192,6 @@ void SP_info_intermission()
 void InGameParams ()
 {
 	g_globalvars.parm1 = IT_AXE | IT_SHOTGUN;
-
-	if ( isCTF() && cvar("k_ctf_hook") )
-		g_globalvars.parm1 = (int)g_globalvars.parm1 | IT_HOOK;
-
 	g_globalvars.parm2 = 100;
 	g_globalvars.parm3 = 0;
 	g_globalvars.parm4 = 25;
@@ -209,10 +205,6 @@ void PrewarParams ()
 {
 	g_globalvars.parm1 = IT_AXE | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_NAILGUN | IT_SUPER_NAILGUN
 						| IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER | IT_LIGHTNING;
-
-	if ( isCTF() && cvar("k_ctf_hook") )
-		g_globalvars.parm1 = (int)g_globalvars.parm1 | IT_HOOK;
-
 	g_globalvars.parm2 = 1000;
 	g_globalvars.parm3 = 1000;
 	g_globalvars.parm4 = 100;
@@ -1405,6 +1397,21 @@ void PutClientInServer(qboolean from_vmMain)
 
 		// default to spawning with rl
 		self->s.v.weapon = IT_ROCKET_LAUNCHER;
+	}
+
+	// regardless of dmm add hook if ctf.. could play instagib ctf etc
+	if ( isCTF() )
+	{
+		if ( cvar("k_ctf_hook") )
+		{
+			self->s.v.items = (int)self->s.v.items | IT_HOOK;
+		}
+		if ( cvar("k_ctf_ga") && deathmatch < 4 && match_in_progress == 2 )
+		{
+			self->s.v.armorvalue = 50;
+			self->s.v.armortype = 0.3;
+			self->s.v.items = (int)self->s.v.items | IT_ARMOR1; // add green armor
+		}
 	}
 
 	// remove particular weapons in dmm4

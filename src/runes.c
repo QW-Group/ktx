@@ -176,6 +176,7 @@ void RuneTouch()
 	if ( ISDEAD( other ) )
 		return;
  
+	if( !k_practice )
 	if ( match_in_progress != 2 )
 		return;
 
