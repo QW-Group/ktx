@@ -526,6 +526,8 @@ typedef struct gedict_s {
 
 	qboolean weapon_switch_fix;
 
+	weaponName_t fired_this_frame; // weapon fired this frame
+
 // { race
 	int 		race_id; 		// used by checkpoints, 
 				 				// start checkpoint have id = 0,

@@ -2734,6 +2734,20 @@ void	W_WeaponFrame();
 void	mv_record ();
 void	CheckStuffRune ();
 
+void DemoWeaponStats( gedict_t *p )
+{
+	if ( p->fired_this_frame <= wpNONE || p->fired_this_frame >= wpMAX )
+	{
+		p->fired_this_frame = wpNONE;
+		return;
+	}
+
+	stuffcmd_flags( p, STUFFCMD_DEMOONLY, "//wps %d %s %d %d\n", NUM_FOR_EDICT( p ) - 1, 
+				WpName(p->fired_this_frame), p->ps.wpn[p->fired_this_frame].attacks, p->ps.wpn[p->fired_this_frame].hits );
+
+	p->fired_this_frame = wpNONE;
+}
+
 ////////////////
 // GlobalParams:
 // time
@@ -2742,6 +2756,8 @@ void	CheckStuffRune ();
 void PlayerPostThink()
 {
 //dprint ("post think\n");
+
+	DemoWeaponStats( self ); // we call this two times in PlayerPostThink(), this is a first time
 
 	if ( intermission_running )
     {
@@ -2804,16 +2820,19 @@ void PlayerPostThink()
 	self->jump_flag = self->s.v.velocity[2];
 
 	CheckPowerups();
-	CheckLightEffects(); // NOTE: guess, must be after CheckPowerups(), so u r warned.
+	CheckLightEffects(); // NOTE: guess, this must be after CheckPowerups(), so u r warned.
 	CheckStuffRune();
 
 	mv_record();
 
 	W_WeaponFrame();
 
+	DemoWeaponStats( self ); // we call this two times in PlayerPostThink(), this is a second time
+
 	{
 		float velocity = sqrt(self->s.v.velocity[0] * self->s.v.velocity[0] + 
 							  self->s.v.velocity[1] * self->s.v.velocity[1]);
+
 		if ( !match_in_progress && !match_over && !k_captains )
 		{
 			if ( iKey( self, "kf" ) & KF_SPEED ) {
@@ -2830,6 +2849,7 @@ void PlayerPostThink()
 				self->s.v.frags = 0;
 			}
  		}
+
 		if( match_in_progress == 2 )
 		{
 			self->ps.vel_frames++;

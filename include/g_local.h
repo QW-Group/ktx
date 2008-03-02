@@ -468,6 +468,8 @@ qboolean 		isCanStart ( gedict_t *s, qboolean forceMembersWarn );
 void			StartTimer ();
 void			StopTimer ( int removeDemo );
 
+char			*WpName( weaponName_t wp );
+
 //combat.c
 extern gedict_t *damage_attacker, *damage_inflictor;
 void            T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker,

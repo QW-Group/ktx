@@ -63,6 +63,8 @@ void W_FireAxe()
 	vec3_t          source, dest;
 	vec3_t          org;
 
+	self->fired_this_frame = wpAXE;
+
 	self->ps.wpn[wpAXE].attacks++;
 
 	trap_makevectors( self->s.v.v_angle );
@@ -363,12 +365,13 @@ void FireInstaBullet( vec3_t dir, deathType_t deathtype )
 	float			fraction;
 	gedict_t		*ignore;
 
-	if ( cvar("k_cg_kb") ) {
-	        newmis = spawn();
-	        g_globalvars.newmis = EDICT_TO_PROG( newmis );
-	        newmis->s.v.owner = EDICT_TO_PROG( self );
-	        newmis->s.v.movetype = MOVETYPE_FLYMISSILE;
-	        newmis->s.v.solid = SOLID_BBOX;
+	if ( cvar("k_cg_kb") )
+	{
+        newmis = spawn();
+        g_globalvars.newmis = EDICT_TO_PROG( newmis );
+        newmis->s.v.owner = EDICT_TO_PROG( self );
+        newmis->s.v.movetype = MOVETYPE_FLYMISSILE;
+        newmis->s.v.solid = SOLID_BBOX;
 		
 		trap_makevectors( self->s.v.v_angle );
 		aim( newmis->s.v.velocity );	// = aim(self, 1000);
@@ -634,6 +637,8 @@ void W_FireShotgun()
 {
 	vec3_t          dir;
 	int				bullets = 6;
+
+	self->fired_this_frame = wpSG;
 	
 	if ( cvar("k_instagib") )
 		self->ps.wpn[wpSG].attacks ++;
@@ -676,6 +681,8 @@ void W_FireSuperShotgun()
 		W_FireShotgun();
 		return;
 	}
+
+	self->fired_this_frame = wpSSG;
 
 	if ( cvar("k_instagib") )
 		self->ps.wpn[wpSSG].attacks ++;
@@ -775,9 +782,12 @@ void T_MissileTouch()
 	// - Molgrum
 	damg = 100 + (k_yawnmode ? 10 : g_random() * 20);
 
-	if ( other->s.v.takedamage ) {
+	if ( other->s.v.takedamage )
+	{
 		if ( other->ct == ctPlayer )
+		{
 			PROG_TO_EDICT( self->s.v.owner )->ps.wpn[wpRL].hits++;
+		}
 	}
 
 	if ( ISLIVE( other ) )
@@ -814,6 +824,8 @@ W_FireRocket
 
 void W_FireRocket()
 {
+	self->fired_this_frame = wpRL;
+
 	self->ps.wpn[wpRL].attacks++;
 
     if ( match_in_progress == 2 )
@@ -1014,6 +1026,8 @@ void W_FireLightning()
 		}
 	}
 
+	self->fired_this_frame = wpLG;
+
 	self->ps.wpn[wpLG].attacks++;
 
 	if ( self->t_width < g_globalvars.time )
@@ -1106,6 +1120,8 @@ W_FireGrenade
 */
 void W_FireGrenade()
 {
+	self->fired_this_frame = wpGL;
+
 	self->ps.wpn[wpGL].attacks++;
 
     if ( match_in_progress == 2 )
@@ -1308,6 +1324,8 @@ void W_FireSuperSpikes()
 {
 	vec3_t          dir, tmp;
 
+	self->fired_this_frame = wpSNG;
+
 	self->ps.wpn[wpSNG].attacks++;
 
 	sound( self, CHAN_WEAPON, "weapons/spike2.wav", 1, ATTN_NORM );
@@ -1340,12 +1358,13 @@ void W_FireSpikes( float ox )
 	trap_makevectors( self->s.v.v_angle );
 
     if( match_in_progress != 1 )
+    {
 		if ( self->s.v.ammo_nails >= 2 && self->s.v.weapon == IT_SUPER_NAILGUN )
 		{
 			W_FireSuperSpikes();
 			return;
 		}
-
+	}
 
     if ( self->s.v.ammo_nails < 1 || match_in_progress == 1 )
 	{
@@ -1353,6 +1372,8 @@ void W_FireSpikes( float ox )
 		W_SetCurrentAmmo();
 		return;
 	}
+
+	self->fired_this_frame = wpNG;
 	
 	self->ps.wpn[wpNG].attacks++;
 
@@ -1626,7 +1647,7 @@ void W_Attack()
 			self->attack_finished = g_globalvars.time + 0.3;
 			HasteSound( self );
 		}
-	    	else
+    	else
 			self->attack_finished = g_globalvars.time + 0.5;
 
 		// crt - no axe sound for spec
