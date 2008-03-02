@@ -66,7 +66,7 @@ void DoTossRune( int rune )
 	item->s.v.flags = FL_ITEM;
 	item->s.v.solid = SOLID_TRIGGER;
 	item->s.v.movetype = MOVETYPE_TOSS;
-  
+
 	if ( rune & CTF_RUNE_RES )
 		setmodel( item, "progs/end1.mdl" );
 	else if ( rune & CTF_RUNE_STR )
@@ -133,7 +133,7 @@ void TossRune()
 		regenrot->s.v.nextthink = g_globalvars.time + 5;
 		regenrot->s.v.think = (func_t) RegenLostRot;
 		regenrot->s.v.owner = EDICT_TO_PROG( self );
-	}   
+	}
 
 	self->ctf_flag -= ( self->ctf_flag & (CTF_RUNE_MASK) );
 	//self->s.v.items -= ( (int) self->s.v.items & (CTF_RUNE_MASK) );
@@ -161,7 +161,7 @@ void RuneResetOwner()
 }
 
 void RuneRespawn()
-{  
+{
 	int rune = self->ctf_flag;
 	ent_remove( self );
 	self = SelectRuneSpawnPoint();
@@ -175,31 +175,32 @@ void RuneTouch()
 
 	if ( ISDEAD( other ) )
 		return;
- 
+
 	if( !k_practice )
 	if ( match_in_progress != 2 )
 		return;
 
 	if ( other == PROG_TO_EDICT ( self->s.v.owner ) )
 		return;
-  
-	self->s.v.nextthink = g_globalvars.time + 90;
 
-	if ( other->ctf_flag & CTF_RUNE_MASK ) 
+	if ( self->s.v.think == (func_t) RuneRespawn )
+		self->s.v.nextthink = g_globalvars.time + 90;
+
+	if ( other->ctf_flag & CTF_RUNE_MASK )
 	{
 		if ( g_globalvars.time > other->rune_notify_time )
 		{
-			other->rune_notify_time = g_globalvars.time + 10;   
+			other->rune_notify_time = g_globalvars.time + 10;
 			G_sprint( other, 1, "You already have a rune. Use \"%s\" to drop\n", redtext("tossrune") );
 		}
 		return;
 	}
 
 	cl_refresh_plus_scores( other );
- 
+
 	other->ctf_flag |= self->ctf_flag;
 	other->rune_pickup_time = g_globalvars.time;
- 
+
 	if ( other->ctf_flag & CTF_RUNE_RES )
 	{
 		// other->s.v.items = (int) other->s.v.items | IT_SIGIL1;
@@ -217,7 +218,7 @@ void RuneTouch()
 		other->maxspeed *= 1.25;
 		// other->s.v.items = (int) other->s.v.items | CTF_RUNE_HST;
 		G_sprint( other, 2, "You got the %s rune\n", redtext("haste") );
-  	}
+	}
 
 	if ( other->ctf_flag & CTF_RUNE_RGN )
 	{
@@ -234,7 +235,7 @@ gedict_t* SelectSpawnPoint();
 gedict_t* SelectRuneSpawnPoint()
 {
 	gedict_t *runespawn;
-  
+
 	// we'll just use the player spawn point selector for runes as well
 	runespawn = SelectSpawnPoint( "info_player_deathmatch" );
 	return runespawn;
@@ -261,7 +262,7 @@ void SpawnRunes( qboolean yes )
 	DoDropRune( CTF_RUNE_HST, true );
 	self = SelectRuneSpawnPoint();
 	DoDropRune( CTF_RUNE_RGN, true );
-  
+
 	self = oself;
 }
 
@@ -274,7 +275,7 @@ void ResistanceSound( gedict_t *player )
 			player->rune_sound_time = g_globalvars.time + 1;
 			sound( player, CHAN_BODY, "rune/rune1.wav", 1, ATTN_NORM );
 		}
-	}  
+	}
 }
 
 void HasteSound( gedict_t *player )
@@ -303,7 +304,6 @@ void RegenerationSound( gedict_t *player )
 
 void CheckStuffRune()
 {
-
 	char *rune = "";
 	
 	if ( cvar("k_instagib") ) {
