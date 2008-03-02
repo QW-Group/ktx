@@ -1944,11 +1944,11 @@ void ChangeTP()
 		return;
 	}
 
-	teamplay = bound (1, teamplay, 3);
+	teamplay = bound (1, teamplay, 4);
 
 	teamplay++;
 
-	if ( teamplay == 4 )
+	if ( teamplay == 5 )
 		teamplay = 1;
 
 	cvar_fset("teamplay", (int)teamplay);
@@ -2973,14 +2973,14 @@ const char ctf_um_init[] =
 	"maxclients 16\n"
 	"k_maxclients 16\n"
 	"timelimit 20\n"
-	"teamplay 2\n"
+	"teamplay 4\n"
 	"deathmatch 3\n"
-	"k_dis 2\n"						// no out of water discharges in ctf          
+	"k_dis 2\n"						// no out of water discharges in ctf
 	"k_pow 1\n"
 	"k_spw 1\n"
-	"k_membercount 0\n"          
-	"k_lockmin 1\n"                                         
-	"k_lockmax 2\n"                                 
+	"k_membercount 0\n"
+	"k_lockmin 1\n"
+	"k_lockmax 2\n"
 	"k_overtime 1\n"
 	"k_exttime 5\n"
 	"k_mode 4\n"

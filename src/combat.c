@@ -310,6 +310,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	float			non_hdp_damage; // save damage before handicap apply for kickback calculation
 	float			native_damage = damage; // save damage before apply any modificator
 	char            *attackerteam, *targteam, *attackername;
+	qboolean		tp4teamdmg = false;
 
 	//midair and instagib
 	float playerheight = 0, midheight = 0;
@@ -322,6 +323,9 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	// used by buttons and triggers to set activator for target firing
 	damage_attacker = attacker;
 	damage_inflictor = inflictor;
+
+	attackerteam = getteam( attacker );
+	targteam = getteam( targ );
 
 	if ( (int)cvar("k_midair") )
 		midair = true;
@@ -337,7 +341,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	// ctf strength rune
 	if ( attacker->ctf_flag & CTF_RUNE_STR )
 		damage *= 2;
-          
+
 	// ctf resistance rune
 	if ( targ->ctf_flag & CTF_RUNE_RES )
 	{
@@ -346,10 +350,14 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	}
 
 	// did we hurt enemy flag carrier?
-	if ( (targ->ctf_flag & CTF_FLAG) && (!streq(getteam(targ), getteam(attacker))) )
+	if ( (targ->ctf_flag & CTF_FLAG) && (!streq(targteam, attackerteam))  )
 	{
 		attacker->carrier_hurt_time = g_globalvars.time;
 	}
+
+	// in teamplay 4 we do no armor or health damage to teammates, but do apply velocity changes
+	if ( tp_num() == 4 && streq(targteam, attackerteam) && targ != attacker )
+		tp4teamdmg = true;
 
 	if ( midair || cvar("k_instagib") )
 	{
@@ -427,17 +435,19 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	if ( midair && lowheight && !inwater && rl_dmg )
 		save *= 0.5; // take half of armor in such case
 
-	if ( save >= targ->s.v.armorvalue )
+	if ( !tp4teamdmg )
 	{
-		save = targ->s.v.armorvalue;
-		targ->s.v.armortype = 0;	// lost all armor
-		targ->s.v.items -= ( ( int ) targ->s.v.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) );
+		if ( save >= targ->s.v.armorvalue )
+		{
+			save = targ->s.v.armorvalue;
+			targ->s.v.armortype = 0;	// lost all armor
+			targ->s.v.items -= ( ( int ) targ->s.v.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) );
+		}
+		dmg_dealt += save;
+
+		if ( match_in_progress == 2 )
+			targ->s.v.armorvalue = targ->s.v.armorvalue - save;
 	}
-	dmg_dealt += save;
-
-	if ( match_in_progress == 2 )
-		targ->s.v.armorvalue = targ->s.v.armorvalue - save;
-
 	take = newceil( damage - save );
 
 	// mid air damage modificators
@@ -490,7 +500,8 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	else
 	{
 		// damage dealt capped by victim's health
-		dmg_dealt += bound( 0, take, targ->s.v.health );
+		if ( !tp4teamdmg )
+			dmg_dealt += bound( 0, take, targ->s.v.health );
 	}
 
 	// add to the damage total for clients, which will be sent as a single
@@ -510,6 +521,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		else
 			attackername = attacker->s.v.classname;
 
+		if ( !tp4teamdmg )
 		log_printf( "\t\t\t<event time=\"%f\" tag=\"dmg\" at=\"%s\" "
 					"tg=\"%s\" ty=\"%s\" q=\"%d\" s=\"%d\" val=\"%d\" ab=\"1\"/>\n",
 					g_globalvars.time - match_start_time,
@@ -552,11 +564,11 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			targ->s.v.velocity[2] += dir[2] * non_hdp_damage * c2 * nailkick; // only for z component
 	}
 
+	if ( tp4teamdmg )
+		return;
+
 	// team play damage avoidance
 	//ZOID 12-13-96: self.team doesn't work in QW.  Use keys
-   	attackerteam = getteam( attacker );
-	targteam = getteam( targ );
-
 	if ( match_in_progress == 2 && (int)cvar("k_dmgfrags") )
 	{
 		if ( attacker->ct == ctPlayer && targ->ct == ctPlayer && attacker != targ )
@@ -601,7 +613,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 		// teamplay == 3 don't damage mates, do damage to self (armor affected anyway)
 		if ( tp_num() == 3
-			 && !strnull( attackerteam )
+		 	&& !strnull( attackerteam )
 		 	&& streq( targteam, attackerteam )
 		 	&& attacker->ct == ctPlayer
 		 	&& strneq( inflictor->s.v.classname, "door" )
