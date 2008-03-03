@@ -2734,18 +2734,30 @@ void	W_WeaponFrame();
 void	mv_record ();
 void	CheckStuffRune ();
 
+void MVD_WPStatsMark( gedict_t *p, weaponName_t wp )
+{
+	if ( wp <= wpNONE || wp >= wpMAX )
+		return;
+
+	p->wpstats_mask |= ( 1 << wp );
+}
+
 void DemoWeaponStats( gedict_t *p )
 {
-	if ( p->fired_this_frame <= wpNONE || p->fired_this_frame >= wpMAX )
-	{
-		p->fired_this_frame = wpNONE;
+	int i;
+
+	if ( !p->wpstats_mask )
 		return;
+
+	for ( i = wpNONE + 1; i < wpMAX; i++ )
+	{
+		if ( !( p->wpstats_mask & ( 1 << i ) ) )
+			continue;
+
+		stuffcmd_flags( p, STUFFCMD_DEMOONLY, "//wps %d %s %d %d\n", NUM_FOR_EDICT( p ) - 1, WpName( i ), p->ps.wpn[ i ].attacks, p->ps.wpn[ i ].hits );
 	}
 
-	stuffcmd_flags( p, STUFFCMD_DEMOONLY, "//wps %d %s %d %d\n", NUM_FOR_EDICT( p ) - 1, 
-				WpName(p->fired_this_frame), p->ps.wpn[p->fired_this_frame].attacks, p->ps.wpn[p->fired_this_frame].hits );
-
-	p->fired_this_frame = wpNONE;
+	p->wpstats_mask = 0;
 }
 
 ////////////////
@@ -2757,7 +2769,7 @@ void PlayerPostThink()
 {
 //dprint ("post think\n");
 
-	DemoWeaponStats( self ); // we call this two times in PlayerPostThink(), this is a first time
+	DemoWeaponStats( self );
 
 	if ( intermission_running )
     {
@@ -2826,8 +2838,6 @@ void PlayerPostThink()
 	mv_record();
 
 	W_WeaponFrame();
-
-	DemoWeaponStats( self ); // we call this two times in PlayerPostThink(), this is a second time
 
 	{
 		float velocity = sqrt(self->s.v.velocity[0] * self->s.v.velocity[0] + 

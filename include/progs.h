@@ -426,6 +426,10 @@ typedef struct gedict_s {
 	float r_pickup_time;	// time then u took ring
 // }
 
+// { mvd demo weapon stats
+	int   wpstats_mask;     // bit mask, like ( 1 << wpSG | 1 << wpLG ), tell us which weapon stats need to be sent to demo at some point
+// }
+
 	int   need_clearCP;		// if this true, clear center print at certain cases
 
 // { ghost stuff
@@ -525,8 +529,6 @@ typedef struct gedict_s {
 	int ezquake_version;
 
 	qboolean weapon_switch_fix;
-
-	weaponName_t fired_this_frame; // weapon fired this frame
 
 // { race
 	int 		race_id; 		// used by checkpoints, 

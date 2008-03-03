@@ -63,7 +63,7 @@ void W_FireAxe()
 	vec3_t          source, dest;
 	vec3_t          org;
 
-	self->fired_this_frame = wpAXE;
+	MVD_WPStatsMark( self, wpAXE );
 
 	self->ps.wpn[wpAXE].attacks++;
 
@@ -88,7 +88,10 @@ void W_FireAxe()
 		int damage = 20; // default damage is 20
 
 		if ( PROG_TO_EDICT( g_globalvars.trace_ent )->ct == ctPlayer )
+		{
+			MVD_WPStatsMark( self, wpAXE );
 			self->ps.wpn[wpAXE].hits++;
+		}
 
 		if ( deathmatch > 3 )
 			damage = 75;
@@ -333,9 +336,15 @@ void TraceAttack( float damage, vec3_t dir )
 	{
 		if ( PROG_TO_EDICT( g_globalvars.trace_ent )->ct == ctPlayer ) {
 			if ((int)self->s.v.weapon == IT_SHOTGUN)
+			{
+				MVD_WPStatsMark( self, wpSG );
 				self->ps.wpn[wpSG].hits++;
+			}
 			else if ((int)self->s.v.weapon == IT_SUPER_SHOTGUN)
+			{
+				MVD_WPStatsMark( self, wpSSG );
 				self->ps.wpn[wpSSG].hits++;
+			}
 			else
 			 ; // hmmm, make error?
 		}
@@ -426,11 +435,20 @@ void FireInstaBullet( vec3_t dir, deathType_t deathtype )
 
 		TraceAttack( 4, dir );
 	    
-		if ( depth > 1 ) {
+		// this is something like "fix" for one bullet hit more than one player?
+		if ( depth > 1 )
+		{
 			if ( ( cvar("k_instagib") == 1 ) || ( cvar("k_instagib") == 3 ) )
-				self->ps.wpn[wpSG].hits --;
+			{
+				MVD_WPStatsMark( self, wpSG );
+				self->ps.wpn[wpSG].hits--;
+			}
 			else if ( ( cvar("k_instagib") == 2 ) || ( cvar("k_instagib") == 4 ) )
-				self->ps.wpn[wpSSG].hits --;
+			{
+				MVD_WPStatsMark( self, wpSSG );
+				self->ps.wpn[wpSSG].hits--;
+			}
+
 			if ( depth > self->ps.i_maxmultigibs )
 				self->ps.i_maxmultigibs = depth;
 		}
@@ -638,7 +656,7 @@ void W_FireShotgun()
 	vec3_t          dir;
 	int				bullets = 6;
 
-	self->fired_this_frame = wpSG;
+	MVD_WPStatsMark( self, wpSG );
 	
 	if ( cvar("k_instagib") )
 		self->ps.wpn[wpSG].attacks ++;
@@ -682,7 +700,7 @@ void W_FireSuperShotgun()
 		return;
 	}
 
-	self->fired_this_frame = wpSSG;
+	MVD_WPStatsMark( self, wpSSG );
 
 	if ( cvar("k_instagib") )
 		self->ps.wpn[wpSSG].attacks ++;
@@ -786,6 +804,7 @@ void T_MissileTouch()
 	{
 		if ( other->ct == ctPlayer )
 		{
+			MVD_WPStatsMark( PROG_TO_EDICT( self->s.v.owner ), wpRL );
 			PROG_TO_EDICT( self->s.v.owner )->ps.wpn[wpRL].hits++;
 		}
 	}
@@ -824,7 +843,7 @@ W_FireRocket
 
 void W_FireRocket()
 {
-	self->fired_this_frame = wpRL;
+	MVD_WPStatsMark( self, wpRL );
 
 	self->ps.wpn[wpRL].attacks++;
 
@@ -885,7 +904,10 @@ LIGHTNING
 void LightningHit( gedict_t *from, float damage )
 {
 	if ( PROG_TO_EDICT( g_globalvars.trace_ent )->ct == ctPlayer )
+	{
+		MVD_WPStatsMark( self, wpLG );
 		self->ps.wpn[wpLG].hits++;
+	}
 
 	WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
 	WriteByte( MSG_MULTICAST, TE_LIGHTNINGBLOOD );
@@ -1026,7 +1048,7 @@ void W_FireLightning()
 		}
 	}
 
-	self->fired_this_frame = wpLG;
+	MVD_WPStatsMark( self, wpLG );
 
 	self->ps.wpn[wpLG].attacks++;
 
@@ -1098,9 +1120,13 @@ void GrenadeTouch()
 	if ( other == PROG_TO_EDICT( self->s.v.owner ) )
 		return;		// don't explode on owner
 	
-	if ( other->s.v.takedamage ) {
+	if ( other->s.v.takedamage )
+	{
 		if ( other->ct == ctPlayer )
+		{
+			MVD_WPStatsMark( PROG_TO_EDICT( self->s.v.owner ), wpGL );
 			PROG_TO_EDICT( self->s.v.owner )->ps.wpn[wpGL].hits++;
+		}
 	}
 
 	if ( other->s.v.takedamage == DAMAGE_AIM )
@@ -1120,7 +1146,7 @@ W_FireGrenade
 */
 void W_FireGrenade()
 {
-	self->fired_this_frame = wpGL;
+	MVD_WPStatsMark( self, wpGL );
 
 	self->ps.wpn[wpGL].attacks++;
 
@@ -1252,12 +1278,16 @@ void spike_touch()
 	if ( other->s.v.takedamage )
 	{
 		if ( other->ct == ctPlayer )
+		{
+			MVD_WPStatsMark( PROG_TO_EDICT( self->s.v.owner ), wpNG );
 			PROG_TO_EDICT( self->s.v.owner )->ps.wpn[wpNG].hits++;
+		}
 
 		spawn_touchblood( 1 );
 		other->deathtype = dtNG;
 		T_Damage( other, self, PROG_TO_EDICT( self->s.v.owner ), 9 );
-	} else
+	}
+	else
 	{
 		WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
 		if ( !strcmp( self->s.v.classname, "wizspike" ) )
@@ -1302,12 +1332,16 @@ void superspike_touch()
 	if ( other->s.v.takedamage )
 	{
 		if ( other->ct == ctPlayer )
+		{
+			MVD_WPStatsMark( PROG_TO_EDICT( self->s.v.owner ), wpSNG );
 			PROG_TO_EDICT( self->s.v.owner )->ps.wpn[wpSNG].hits++;
+		}
 
 		spawn_touchblood( 2 );
 		other->deathtype = dtSNG;
 		T_Damage( other, self, PROG_TO_EDICT( self->s.v.owner ), ( k_yawnmode ? 16 : 18 ) );
-	} else
+	}
+	else
 	{
 		WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
 		WriteByte( MSG_MULTICAST, TE_SUPERSPIKE );
@@ -1324,7 +1358,7 @@ void W_FireSuperSpikes()
 {
 	vec3_t          dir, tmp;
 
-	self->fired_this_frame = wpSNG;
+	MVD_WPStatsMark( self, wpSNG );
 
 	self->ps.wpn[wpSNG].attacks++;
 
@@ -1373,7 +1407,7 @@ void W_FireSpikes( float ox )
 		return;
 	}
 
-	self->fired_this_frame = wpNG;
+	MVD_WPStatsMark( self, wpNG );
 	
 	self->ps.wpn[wpNG].attacks++;
 

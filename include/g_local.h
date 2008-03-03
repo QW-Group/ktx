@@ -443,6 +443,8 @@ void			Print_Wp_Stats();
 #define         SC_STATS_UPDATE (0.8f)
 void			Print_Scores();
 
+void			MVD_WPStatsMark( gedict_t *p, weaponName_t wp );
+
 //spectate.c
 void            SpectatorConnect();
 void			PutSpectatorInServer();
