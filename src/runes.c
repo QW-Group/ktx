@@ -342,7 +342,7 @@ void CheckStuffRune()
 
 	if ( !self->last_rune || strneq(rune, self->last_rune) ) {
 		self->last_rune = rune;
-		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "set rune %s\n", rune);
+		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "set rune \"%s\"\n", rune);
 	}
 }
 
