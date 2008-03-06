@@ -2745,9 +2745,12 @@ void MVD_WPStatsMark( gedict_t *p, weaponName_t wp )
 void DemoWeaponStats( gedict_t *p )
 {
 	int i;
+	qboolean wpsx;
 
 	if ( !p->wpstats_mask )
 		return;
+
+	wpsx = iKey( p, "wpsx" );
 
 	for ( i = wpNONE + 1; i < wpMAX; i++ )
 	{
@@ -2755,6 +2758,10 @@ void DemoWeaponStats( gedict_t *p )
 			continue;
 
 		stuffcmd_flags( p, STUFFCMD_DEMOONLY, "//wps %d %s %d %d\n", NUM_FOR_EDICT( p ) - 1, WpName( i ), p->ps.wpn[ i ].attacks, p->ps.wpn[ i ].hits );
+
+		// this will send info to client
+		if ( wpsx )
+			stuffcmd_flags( p, STUFFCMD_IGNOREINDEMO, "//wps %d %s %d %d\n", NUM_FOR_EDICT( p ) - 1, WpName( i ), p->ps.wpn[ i ].attacks, p->ps.wpn[ i ].hits );
 	}
 
 	p->wpstats_mask = 0;

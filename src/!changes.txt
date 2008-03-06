@@ -1,3 +1,9 @@
+2008-03-06
+qq:
+282. New setinfo "wpsx". If set to 1 then KTX send weapon stats to client, so client
+	able to show it in some artistics way. Obviously, supported by ezquake only, look "+cl_wp_stats" in ezquake.
+	Ah, and does't work for specs, not sure I willing add support for specs, too much CPU effort for nothing.
+
 2008-01-11
 qq:
 279. KTX does't require "/check_maps" any more in cfgs, latest mvdsv required.
