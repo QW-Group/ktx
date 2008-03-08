@@ -101,7 +101,18 @@ void SpecDecodeLevelParms()
 //    	self->ps.handicap = g_globalvars.parm14;
 }
 
+qboolean SpecCanConnect( gedict_t *spec )
+{
+	extern qboolean nospecs_canconnect( gedict_t *spec );
 
+	if ( !nospecs_canconnect( spec ) )
+	{
+		G_sprint( spec, 2, "%s mode, you can't connect\n", redtext("No spectators") );
+		return false;
+	}
+
+	return true;
+}
 
 ////////////////
 // GlobalParams:
@@ -113,6 +124,12 @@ void SpectatorConnect()
 {
 	gedict_t *p;
 	int diff = (int)(PROG_TO_EDICT(self->s.v.goalentity) - world);
+
+	if ( !SpecCanConnect( self ) )
+	{
+		stuffcmd(self, "disconnect\n"); // FIXME: stupid way
+		return;
+	}
 
 	SpecDecodeLevelParms();
 

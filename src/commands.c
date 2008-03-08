@@ -195,6 +195,8 @@ void ToggleVwep();
 void TogglePause();
 void ToggleArena();
 
+void nospecs ();
+
 // spec
 void ShowCamHelp();
 
@@ -476,8 +478,10 @@ const char CD_NODESC[] = "no desc";
 #define CD_RCANCEL      "cancel current race, for racer"
 #define CD_RTIMEOUT     "set race timeout"
 #define CD_RMODE        "set race weapon mode"
-
 // }
+
+#define CD_NOSPECS      "allow/disallow spectators"
+
 
 
 void dummy() {}
@@ -763,6 +767,7 @@ cmd_t cmds[] = {
 	{ "rtimeout",    r_timeout,                 0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_RTIMEOUT },
 	{ "rmode",       r_mode,                    0    , CF_PLAYER | CF_SPC_ADMIN, CD_RMODE },
 // }
+	{ "nospecs",     nospecs,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOSPECS },
 };
 
 #undef DEF

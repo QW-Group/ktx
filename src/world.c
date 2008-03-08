@@ -582,6 +582,8 @@ void FirstFrame	( )
 	RegisterCvar("_k_players");   // internal usage, count of players on last map
 	RegisterCvar("_k_pow_last");  // internal usage, k_pow from last map
 
+	RegisterCvar("_k_nospecs");  // internal usage, will reject spectators connection
+
 	RegisterCvar("k_mode");
 	RegisterCvar("k_defmode");
 	RegisterCvar("k_auto_xonx"); // switch XonX mode dependant on players + specs count
@@ -604,6 +606,7 @@ void FirstFrame	( )
 	RegisterCvar("k_vp_map");     // votes percentage for map change voting
 	RegisterCvar("k_vp_pickup");  // votes percentage for pickup voting
 	RegisterCvar("k_vp_rpickup"); // votes percentage for rpickup voting
+	RegisterCvar("k_vp_nospecs"); // votes percentage for nospecs voting
 	RegisterCvar("k_no_vote_map"); // dis allow map voting in matcless mode, also disallow /next_map
 
 	RegisterCvar("k_end_tele_spawn"); // don't remove end tele spawn
@@ -1146,6 +1149,8 @@ void check_fcheck();
 void CheckTeamStatus();
 void DoMVDAutoTrack( void );
 
+void FixNoSpecs( void );
+
 void StartFrame( int time )
 {
 	framecount++;
@@ -1159,6 +1164,8 @@ void StartFrame( int time )
 		SecondFrame();
 		FixRules();
 	}
+
+	FixNoSpecs(); // of no players left turn off "no spectators" mode
 
 	FixCTFItems(); // if modes have changed we may need to add/remove flags etc
 

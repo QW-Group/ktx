@@ -190,6 +190,7 @@ typedef struct vote_s {
 	int map;
 	int pickup;
 	int rpickup;
+	int nospecs;
 
 	electType_t elect_type; // election type
 	float elect_block_till;	// block election for this time

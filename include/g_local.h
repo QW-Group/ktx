@@ -668,6 +668,7 @@ void 	vote_check_all ();
 #define OV_PICKUP ( VOTE_FOFS ( pickup ) )
 #define OV_RPICKUP ( VOTE_FOFS ( rpickup ) )
 #define OV_MAP ( VOTE_FOFS ( map ) )
+#define OV_NOSPECS ( VOTE_FOFS ( nospecs ) )
 
 void 	ElectThink();
 void	AbortElect();

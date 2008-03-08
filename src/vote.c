@@ -165,6 +165,10 @@ int get_votes_req( int fofs, qboolean diff )
 							percent = 100; break; // unknown/none election
 							break;
 						}
+
+						break;
+
+		case OV_NOSPECS: percent = cvar("k_vp_nospecs"); break;
 	}
 
 	percent = bound(0.51, bound(51, percent, 100)/100, 1); // calc and bound percentage between 50% to 100%
@@ -179,6 +183,8 @@ int get_votes_req( int fofs, qboolean diff )
 		vt_req = max(1, vt_req); // at least 1 vote in any case
 	else if ( fofs == OV_RPICKUP )
 		vt_req = max(3, vt_req); // at least 3 votes in this case
+	else if ( fofs == OV_NOSPECS )
+		vt_req = max(2, vt_req); // at least 2 votes in this case
 
 	if ( diff )
 		return max(0, vt_req - votes);
@@ -402,7 +408,6 @@ void vote_check_rpickup ()
 	gedict_t *p;
 	int veto;
 
-
 	if ( match_in_progress || k_captains )
 		return;
 
@@ -456,6 +461,115 @@ void vote_check_rpickup ()
 	}
 }
 
+// { no specs feature
+
+void FixNoSpecs( void )
+{
+	// turn off "no specs" mode if there no players left
+	if ( g_globalvars.time > 10 && !match_in_progress && !CountPlayers() && cvar("_k_nospecs") )
+	{
+		G_bprint(2,	"%s mode turned off\n", redtext("No spectators"));
+		cvar_set("_k_nospecs", "0");
+	}
+}
+
+#define ALLOWED_NOSPECS_VIPS ( VIP_NOTKICKABLE | VIP_ADMIN | VIP_RCON )
+
+qboolean nospecs_canconnect( gedict_t *spec )
+{
+	if ( cvar("_k_nospecs") )
+	{
+		// some VIPS able to connect anyway
+		if ( !( VIP( spec ) & ALLOWED_NOSPECS_VIPS ) )
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+void vote_check_nospecs ()
+{
+	int veto;
+
+	if ( match_in_progress || intermission_running || match_over )
+		return;
+
+	if ( !get_votes( OV_NOSPECS ) )
+		return;
+
+	veto = is_admins_vote( OV_NOSPECS );
+
+	if( veto || !get_votes_req( OV_NOSPECS, true ) )
+	{
+		vote_clear( OV_NOSPECS );
+
+		// set no specs mode
+		cvar_fset("_k_nospecs", !cvar("_k_nospecs"));
+
+		if ( veto )
+			G_bprint(2, "%s\n", redtext("No spectators mode %s by admin veto", OnOff(cvar("_k_nospecs"))));
+		else
+			G_bprint(2, "%s\n", redtext("No spectators mode %s by majority vote", OnOff(cvar("_k_nospecs"))));
+
+		// kick specs
+		if ( cvar("_k_nospecs") )
+		{
+			gedict_t *spec;
+
+			for ( spec = world; (spec = find_spc( spec )); )
+			{
+				if ( VIP( spec ) & ALLOWED_NOSPECS_VIPS )
+					continue; // don't kick this VIP
+    
+				if ( is_real_adm(spec) )
+					continue; // don't kick real admin
+    
+				stuffcmd(spec, "disconnect\n");  // FIXME: stupid way
+			}
+		}
+
+		return;
+	}
+}
+
+void nospecs( )
+{
+    int votes;
+	
+	if ( match_in_progress )
+	{
+        G_sprint(self, 2, "%s mode %s\n", redtext("No spectators"), OnOff(cvar("_k_nospecs")));
+        return;
+	}
+
+	if ( check_master() )
+		return;
+
+	// admin may turn this status alone on server...
+	if ( !is_adm( self ) )
+	{
+		// Dont need to bother if less than 2 players
+		if ( CountPlayers() < 2 )
+		{
+			G_sprint(self, 2, "You need at least 2 players to do this.\n");
+			return;
+		}
+	}
+
+	self->v.nospecs = !self->v.nospecs;
+
+	G_bprint(2, "%s %s!%s\n", self->s.v.netname, 
+			(self->v.nospecs ? redtext("votes for nospecs %s", OnOff(!cvar("_k_nospecs"))) : 
+							   redtext("withdraws %s nospecs vote", g_his(self))),
+			((votes = get_votes_req( OV_NOSPECS, true )) ? va(" (%d)", votes) : ""));
+
+	vote_check_nospecs ();
+}
+
+// }
+
 void vote_check_all ()
 {
 	vote_check_map ();
@@ -463,5 +577,6 @@ void vote_check_all ()
 	vote_check_elect ();
 	vote_check_pickup ();
 	vote_check_rpickup ();
+	vote_check_nospecs ();
 }
 
