@@ -9,6 +9,8 @@ qq:
 	Admined spectator will be kicked too when "No spectators" mode activated, unless
 	this spec is VIP with rights listed above, or this spec is REAL admin.
 
+	Server admins may tune vote percentage with "k_vp_nospecs".
+
 2008-03-06
 qq:
 282. New setinfo "wpsx". If set to 1 then KTX send weapon stats to client, so client
