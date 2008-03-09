@@ -317,7 +317,7 @@ void SP_worldspawn()
 
 	// FIXME: checkextension in mvdsv?
     // vw_available = checkextension("ZQ_VWEP");
-    vw_available = 1;
+    vw_available = (FTE_sv ? 0 : 1);
 
     if(cvar("k_allow_vwep") && vw_available)
     {
