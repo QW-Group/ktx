@@ -210,11 +210,11 @@ void GrappleAnchor()
 	if ( other->ct == ctPlayer )
 	{
 		// grappling players in prewar is annoying
-		if ( match_in_progress != 2)
+		if ( match_in_progress != 2 || (tp_num() == 4 && streq(getteam(other), getteam(owner))) )
+		{
+			GrappleReset( self );
 			return;
-
-		if ( tp_num() == 4 && streq(getteam(other), getteam(owner)) )
-			return;
+		}
 
 		sound ( self, CHAN_WEAPON, "player/axhit1.wav", 1, ATTN_NORM );
 
