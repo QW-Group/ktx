@@ -1511,12 +1511,13 @@ void SP_item_artifact_invisibility()
 
 	self->s.v.touch = ( func_t ) powerup_touch;
 
-	if ( !b_dp ) {
-		trap_precache_model( "progs/invisibl.mdl" );
-		trap_precache_sound( "items/inv1.wav" );
-		trap_precache_sound( "items/inv2.wav" );
-		trap_precache_sound( "items/inv3.wav" );
-	}
+	// already precached for instagib bonus
+	//if ( !b_dp ) {
+	//	trap_precache_model( "progs/invisibl.mdl" );
+	//	trap_precache_sound( "items/inv1.wav" );
+	//	trap_precache_sound( "items/inv2.wav" );
+	//	trap_precache_sound( "items/inv3.wav" );
+	//}
 	self->s.v.noise = "items/inv1.wav";
 	setmodel( self, "progs/invisibl.mdl" );
 	self->s.v.netname = "Ring of Shadows";

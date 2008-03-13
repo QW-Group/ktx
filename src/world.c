@@ -404,6 +404,9 @@ void SP_worldspawn()
 	trap_precache_model( "progs/g_rock2.mdl" );
 	trap_precache_model( "progs/g_light.mdl" );
 
+// for instagib bonus
+	trap_precache_model( "progs/invisibl.mdl" );
+
 //
 // Setup light animation tables. 'a' is total darkness, 'z' is maxbright.
 //
