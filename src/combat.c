@@ -350,14 +350,19 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	}
 
 	// did we hurt enemy flag carrier?
-	if ( (targ->ctf_flag & CTF_FLAG) && (!streq(targteam, attackerteam))  )
+	if ( (targ->ctf_flag & CTF_FLAG) && (!streq(targteam, attackerteam)) )
 	{
 		attacker->carrier_hurt_time = g_globalvars.time;
 	}
 
-	// in teamplay 4 we do no armor or health damage to teammates, but do apply velocity changes
-	if ( tp_num() == 4 && streq(targteam, attackerteam) && targ != attacker )
+	// in teamplay 4 we do no armor or health damage to teammates (unless telefrag), but do apply velocity changes
+	if ( tp_num() == 4 && streq(targteam, attackerteam) && targ != attacker &&
+		dtTELE1 != targ->deathtype &&
+		dtTELE2 != targ->deathtype &&
+		dtTELE3 != targ->deathtype )
+	{
 		tp4teamdmg = true;
+	}
 
 	if ( midair || cvar("k_instagib") )
 	{
