@@ -1866,7 +1866,7 @@ qboolean W_ChangeWeapon( int wp )
 {
 	int             it, am, fl = 0;
 
-	if ( g_globalvars.time < self->attack_finished )
+	if ( g_globalvars.time < self->attack_finished && wp != 22 )
 		return false;
 
 	it = self->s.v.items;
