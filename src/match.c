@@ -301,11 +301,14 @@ void SummaryTPStats()
 					(h_ssg  ? va(" %s%.0f%%", redtext("cg"),   h_ssg) : ""));
 		}
 
-		if ( isCTF() ) 
+		if ( isCTF() )
 		{
-			G_bprint(2, "%s: %s:%.0f%% %s:%.0f%% %s:%.0f%% %s:%.0f%%\n", redtext("RuneTime"),
-				redtext("res"), tmStats[i].res, redtext("str"), tmStats[i].str,
-				redtext("hst"), tmStats[i].hst, redtext("rgn"), tmStats[i].rgn);
+			if ( cvar("k_ctf_runes") )
+			{
+				G_bprint(2, "%s: %s:%.0f%% %s:%.0f%% %s:%.0f%% %s:%.0f%%\n", redtext("RuneTime"),
+					redtext("res"), tmStats[i].res, redtext("str"), tmStats[i].str,
+					redtext("hst"), tmStats[i].hst, redtext("rgn"), tmStats[i].rgn);
+			}
 			G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("     CTF"),
 				redtext("pickups"), tmStats[i].pickups, redtext("caps"), tmStats[i].caps, redtext("returns"), tmStats[i].returns );
 			G_bprint(2, "%s: %s:%d %s:%d\n", redtext(" Defends"),
@@ -459,8 +462,11 @@ void OnePlayerStats(gedict_t *p, int tp)
 
 		if ( isCTF() )
 		{
-			G_bprint(2, "%s: %s:%d%% %s:%d%% %s:%d%% %s:%d%%\n", redtext("RuneTime"),
-				redtext("res"), res, redtext("str"), str, redtext("hst"), hst, redtext("rgn"), rgn );
+			if ( cvar("k_ctf_runes") )
+			{
+				G_bprint(2, "%s: %s:%d%% %s:%d%% %s:%d%% %s:%d%%\n", redtext("RuneTime"),
+					redtext("res"), res, redtext("str"), str, redtext("hst"), hst, redtext("rgn"), rgn );
+			}
 			G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("     CTF"),
 				redtext("pickups"), p->ps.pickups, redtext("caps"), p->ps.caps, redtext("returns"), p->ps.returns );
 			G_bprint(2, "%s: %s:%d %s:%d\n", redtext(" Defends"),
