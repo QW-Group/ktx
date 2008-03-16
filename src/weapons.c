@@ -2001,6 +2001,10 @@ qboolean CycleWeaponCommand()
 			break;
 
 		case IT_AXE:
+			self->s.v.weapon = IT_HOOK;
+			break;
+
+		case IT_HOOK:
 			self->s.v.weapon = IT_SHOTGUN;
 			if ( self->s.v.ammo_shells < 1 )
 				am = 1;
@@ -2112,6 +2116,10 @@ qboolean CycleWeaponReverseCommand()
 			break;
 
 		case IT_SHOTGUN:
+			self->s.v.weapon = IT_HOOK;
+			break;
+
+		case IT_HOOK:
 			self->s.v.weapon = IT_AXE;
 			break;
 
