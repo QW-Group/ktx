@@ -1825,6 +1825,41 @@ void ShowSpawnPoints()
 		if ( cvar("k_spm_glow") )
 			p->s.v.effects = ( int ) p->s.v.effects | EF_GREEN | EF_RED;
 	}
+	if ( isCTF() )
+	{
+		for ( goal = world; (goal = find( goal, FOFS( s.v.classname ), "info_player_team1" )); )
+		{
+			p = spawn();
+			setorigin( p, goal->s.v.origin[0], goal->s.v.origin[1], goal->s.v.origin[2] + 16 );
+			p->s.v.flags = FL_ITEM;
+			p->s.v.solid = SOLID_NOT;
+			p->s.v.movetype = MOVETYPE_NONE;
+			if ( cvar("k_spm_custom_model") )
+				setmodel( p, "progs/spawn.mdl" );
+			else
+				setmodel( p, "progs/w_g_key.mdl" );
+			p->s.v.netname = "Spawn Point";
+			p->s.v.classname = "spawnpoint";
+			if ( cvar("k_spm_glow") )
+				p->s.v.effects = ( int ) p->s.v.effects | EF_RED;
+		}
+		for ( goal = world; (goal = find( goal, FOFS( s.v.classname ), "info_player_team2" )); )
+		{
+			p = spawn();
+			setorigin( p, goal->s.v.origin[0], goal->s.v.origin[1], goal->s.v.origin[2] + 16 );
+			p->s.v.flags = FL_ITEM;
+			p->s.v.solid = SOLID_NOT;
+			p->s.v.movetype = MOVETYPE_NONE;
+			if ( cvar("k_spm_custom_model") )
+				setmodel( p, "progs/spawn.mdl" );
+			else
+				setmodel( p, "progs/w_g_key.mdl" );
+			p->s.v.netname = "Spawn Point";
+			p->s.v.classname = "spawnpoint";
+			if ( cvar("k_spm_glow") )
+				p->s.v.effects = ( int ) p->s.v.effects | EF_BLUE;
+		}
+	}
 }
 
 void HideSpawnPoints()
