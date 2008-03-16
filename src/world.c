@@ -470,9 +470,6 @@ void Customize_Maps()
 
 	jumpf_flag = -650;
 
-	if ( cvar( "k_spm_show" ))
-		ShowSpawnPoints();
-
 	if ( streq( "q1dm17", g_globalvars.mapname ) )
 		jumpf_flag = -1000;
 
@@ -509,24 +506,33 @@ void Customize_Maps()
 	{
 		if ( streq( "ctf8", g_globalvars.mapname ) )
 		{
-			// remove some bad spawns from ctf8
+			// fix/remove some bad spawns from ctf8
 			vec3_t spawn1 = {  1704, -540, 208 }; // blue spawn in red base
 			vec3_t spawn2 = { -1132,  -72, 208 }; // red spawn in blue base
-			// vec3_t spawn3 = {   660,  256, 400 }; // red spawn at quad
+			vec3_t spawn3 = {   660,  256, 40 };  // red spawn at quad
 			
 			for( p = world; (p = find( p, FOFCLSN, "info_player_team2" )); )
 				if ( VectorCompare( p->s.v.origin, spawn1 ) ) {
-					ent_remove( p );
+					p->s.v.classname = "info_player_team1";
 					break;
 				}
 
 			for( p = world; (p = find( p, FOFCLSN, "info_player_team1" )); )
 				if ( VectorCompare( p->s.v.origin, spawn2 ) ) { 
+					p->s.v.classname = "info_player_team2";
+					break;
+				}
+
+			for( p = world; (p = find( p, FOFCLSN, "info_player_team1" )); )
+				if ( VectorCompare( p->s.v.origin, spawn3 ) ) { 
 					ent_remove( p );
 					break;
 				}
 		}
 	}
+
+		if ( cvar( "k_spm_show" ))
+			ShowSpawnPoints();
 }
 
 // create cvar via 'set' command
