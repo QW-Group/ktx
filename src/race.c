@@ -1199,8 +1199,13 @@ void race_start( qboolean restart, const char *fmt, ... )
 	// mark him as racer
 	r->racer = true;
 
-	// clear velocity
+	// make sure not hooked onto something at previous spot
+	if ( r->hook_out )
+		GrappleReset( r->hook );
+	r->hook_out = false;
+	r->on_hook = false;
 
+	// clear velocity
 	SetVector( r->s.v.velocity, 0, 0, 0 );
 
 	// set proper angles
