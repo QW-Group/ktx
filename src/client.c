@@ -2274,10 +2274,10 @@ void PlayerPreThink()
 	if ( self->k_timingWarnTime )
 		BackFromLag();
 
-	if ( self->sc_stats && self->sc_stats_time && self->sc_stats_time <= g_globalvars.time && match_in_progress != 1 )
+	if ( self->sc_stats && self->sc_stats_time && self->sc_stats_time <= g_globalvars.time && match_in_progress != 1 && !isRACE() )
 		Print_Scores ();
 
-	if ( self->wp_stats && self->wp_stats_time && self->wp_stats_time <= g_globalvars.time && match_in_progress != 1 )
+	if ( self->wp_stats && self->wp_stats_time && self->wp_stats_time <= g_globalvars.time && match_in_progress != 1 && !isRACE() )
 		Print_Wp_Stats ();
 
 	if ( self->was_jump ) {
