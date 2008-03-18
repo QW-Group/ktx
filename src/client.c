@@ -662,19 +662,24 @@ Player entered the suicide command
 void ClientKill()
 {
 	if ( cvar( "sv_paused" ) )
-        return; // kill not alowed during pause
+		return; // kill not allowed during pause
 
 	if( k_standby )
-        return;
+		return;
 
 	if ( ISDEAD( self ) || !self->s.v.takedamage )
-		return; // alredy dead
+		return; // already dead
 
 	if ( self->ct != ctPlayer )
 		return; // not a player
 
 	if ( isRA() ) {
 		G_sprint (self, PRINT_HIGH, "Can't suicide in RA mode\n");
+		return;
+	}
+
+	if ( isCTF() && match_in_progress == 2 && g_globalvars.time - match_start_time < 10 ) {
+		G_sprint (self, PRINT_HIGH, "Can't suicide during first 10 seconds of CTF match\n");
 		return;
 	}
 
