@@ -1875,7 +1875,11 @@ qboolean W_ChangeWeapon( int wp )
 	switch ( wp )
 	{
 	case 1:
-		fl = IT_AXE;
+		// ctf shortcut for newbs: selecting axe when you already have it switches to grapple
+		if ( isCTF() && self->s.v.weapon == IT_AXE && cvar("k_ctf_hook") )
+			fl = IT_HOOK;
+		else
+			fl = IT_AXE;
 		break;
 	case 2:
 		fl = IT_SHOTGUN;
