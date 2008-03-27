@@ -1178,18 +1178,6 @@ void PutClientInServer(qboolean from_vmMain)
 		self->s.v.weapon = W_BestWeapon();
 	W_SetCurrentAmmo();
 
-	// if flag is not at base update our items so clients can display icon
-	if ( isCTF() && match_in_progress == 2 )
-	{
-		gedict_t *rflag = find( world, FOFCLSN, "item_flag_team1" );
-		gedict_t *bflag = find( world, FOFCLSN, "item_flag_team2" );
-            
-		if ( rflag && rflag->cnt)
-			self->s.v.items = (int) self->s.v.items | IT_KEY2;
-		if ( bflag && bflag->cnt)
-			self->s.v.items = (int) self->s.v.items | IT_KEY1;
-	}
-
 	self->attack_finished = g_globalvars.time;
 	self->th_pain = player_pain;
 	self->th_die = PlayerDie;

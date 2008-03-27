@@ -6,16 +6,12 @@
 
 // CTF todo:
 // . option to disable pents, but leave quads on?
-// . some sort of workaround to be able to add ctf specific armors\weapons\ammo but still be dynamic
-// . ctf all id maps
+// . ability to drop backpacks of ammo to teammates
 
 // Changes from purectf:
-// . Team damage on by default
-// . No longer spawn with 50 green armor
 // . Close range grapple exploit removed
 // . Grapple speed stays consistent regardless of sv_maxspeed
-// . Status bar removed
-// . Clients can use key icons to display flag status same way as old ctf status bar
+// . Status bar removed use +scores instead
 // . Physics are the same as those found on dm servers (you can accel jump, etc)
 // . Spawns are now random (except initial spawn in your base) with default spawnsafety mode
 // . Untouched runes respawn at 90 seconds instead of 120 (happens if in lava or falls through level, etc)
@@ -24,7 +20,7 @@
 // Server config changes:
 // . add 64 to k_allowed_free_modes to enable ctf, 127 now enables all modes
 // . set k_mode 4 if you want server to default to ctf mode
- 
+
 #define FLAG_RETURN_TIME     30
 #define CARRIER_ASSIST_TIME  6
 #define RETURN_ASSIST_TIME   4
@@ -33,6 +29,7 @@
 #define TEAM_BONUS           10
 #define CARRIER_ASSIST_BONUS 2
 #define RETURN_ASSIST_BONUS  1
+#define CARRIER_DEFEND_TIME  4
 
 void DropFlag( gedict_t *flag );
 void PlaceFlag();
@@ -51,7 +48,7 @@ void SpawnCTFItem( char* classname, float x, float y, float z, float angle )
 	setorigin( item, x, y, z );
 	item->s.v.angles[0] = 0;
 	item->s.v.angles[1] = angle;
- 
+
 	G_CallSpawn( item );
 }
 
@@ -221,7 +218,7 @@ void FlagThink()
 		self->cnt = FLAG_AT_BASE;
 		return;
 	}
-  
+
 	self->cnt2 += 0.1;
 }
 
@@ -255,7 +252,7 @@ void FlagTouch()
 				// capture
 				other->ctf_flag -= ( (int) other->ctf_flag & CTF_FLAG );
 				other->s.v.effects -= ( (int) other->s.v.effects & (EF_FLAG1 | EF_FLAG2) );
-        
+
 				sound( other, CHAN_VOICE, "misc/flagcap.wav", 1, ATTN_NONE);
 
 				G_bprint( 2, "%s", other->s.v.netname );
@@ -268,7 +265,7 @@ void FlagTouch()
 				{
 					cflag = find( world, FOFCLSN, "item_flag_team1" );
 					G_bprint( 2, " %s the %s flag!\n", redtext("captured"), redtext("RED") );
- 				}
+				}
 
 				if ( cflag ) 
 					G_bprint( 2, "The capture took %.1f seconds\n", cflag->cnt2 );
@@ -297,7 +294,7 @@ void FlagTouch()
 							p->ps.ctf_points += CARRIER_ASSIST_BONUS;
 							G_bprint( 2, "%s gets an assist for fragging the flag carrier!\n", p->s.v.netname );
 						}
-	           
+
 						if ( p != other ) 
 						{
 							p->s.v.frags += TEAM_BONUS;
@@ -325,9 +322,6 @@ void FlagTouch()
 			sound (other, CHAN_ITEM, self->s.v.noise1, 1, ATTN_NORM);
 			RegenFlag( self );
 
-			for ( p = world; (p = find_plr( p )); )
-				p->s.v.items -= ( (int) p->s.v.items & (int) self->s.v.items );
-
 			G_bprint( 2, "%s", other->s.v.netname);
 
 			if ( self->k_teamnumber == 1)
@@ -351,9 +345,7 @@ void FlagTouch()
 	sound( other, CHAN_ITEM, self->s.v.noise, 1, ATTN_NORM );
 	other->ctf_flag |= CTF_FLAG;
 
-	// give key icon to all players if a flag is taken
-	for ( p = world; (p = find_plr( p )); )
-		p->s.v.items = (int) p->s.v.items | (int) self->s.v.items;
+	other->s.v.items = (int) other->s.v.items | (int) self->s.v.items;
 
 	self->cnt = FLAG_CARRIED;
 	self->s.v.solid = SOLID_NOT;
@@ -401,7 +393,8 @@ void DropFlag( gedict_t *flag)
 	gedict_t *p = PROG_TO_EDICT( flag->s.v.owner );
 
 	p->s.v.effects -= ( (int) p->s.v.effects & ( EF_FLAG1 | EF_FLAG2 ));
-  
+	p->s.v.items -= ( (int) p->s.v.items & (int) self->s.v.items );
+
 	setorigin( flag, PASSVEC3(p->s.v.origin) );
 	flag->s.v.origin[2] -= 24;
 	flag->cnt = FLAG_DROPPED;
@@ -418,6 +411,12 @@ void DropFlag( gedict_t *flag)
 		G_bprint( 2, " %s the %s flag!\n", redtext("lost"), redtext("BLUE") );
 	else
 		G_bprint( 2, " %s the %s flag!\n", redtext("lost"), redtext("RED") );
+
+	for ( p = world; (p = find_plr( p )); )
+	{
+		if ( strneq(getteam(p), getteam(other)) )
+			p->carrier_hurt_time = -1;
+	}
 
 	refresh_plus_scores (); // update players status bar faster
 }
@@ -472,7 +471,7 @@ void FlagStatus()
 		flag1 = flag2;
 		flag2 = swap;
 	}
-  
+
 	switch ( (int) flag1->cnt )
 	{
 		case FLAG_AT_BASE:
@@ -507,8 +506,8 @@ void FlagStatus()
 
 void norunes()
 {
-    if( match_in_progress )
-        return;
+	if( match_in_progress )
+		return;
 
 	if ( !isCTF() ) {
 		G_sprint ( self, 2, "Can't do this in non CTF mode\n" );
@@ -520,8 +519,8 @@ void norunes()
 
 void nohook()
 {
-    if( match_in_progress )
-        return;
+	if( match_in_progress )
+		return;
 
 	if ( !isCTF() ) {
 		G_sprint ( self, 2, "Can't do this in non CTF mode\n" );
@@ -546,8 +545,8 @@ void noga()
 
 void mctf()
 {
-    if( match_in_progress )
-        return;
+	if( match_in_progress )
+		return;
 
 	if ( !isCTF() ) {
 		G_sprint ( self, 2, "Can't do this in non CTF mode\n" );
@@ -576,7 +575,7 @@ void CTF_Obituary( gedict_t *targ, gedict_t *attacker )
 		return;
 
 	attackerteam = getteam(attacker);
-           
+
 	// 2 point bonus for killing enemy flag carrier
 	if ( targ->ctf_flag & CTF_FLAG )
 	{
@@ -586,9 +585,9 @@ void CTF_Obituary( gedict_t *targ, gedict_t *attacker )
 		attacker->carrier_frag_time = g_globalvars.time;
 		//G_sprint( attacker, 1, "Enemy flag carrier killed: 2 bonus frags\n" );
 	}
-             
+
 	// defending carrier from aggressive player
-	if (( targ->carrier_hurt_time + 4 > g_globalvars.time ) &&
+	if (( targ->carrier_hurt_time + CARRIER_DEFEND_TIME > g_globalvars.time ) &&
 		!( attacker->ctf_flag & CTF_FLAG ) )
 	{
 		carrier_bonus = true;
@@ -599,11 +598,11 @@ void CTF_Obituary( gedict_t *targ, gedict_t *attacker )
 		G_bprint( 2, "%s defends %s's flag carrier against an agressive enemy\n",
 			attacker->s.v.netname,
 			streq( getteam(attacker), "red" ) ? redtext("RED") : redtext("BLUE") );
-	}  
+	}
 
 	head = trap_findradius( world, targ->s.v.origin, 400 );
 	while ( head )
-	{                            
+	{
 		if ( head->ct == ctPlayer )
 		{
 			if ( (head->ctf_flag & CTF_FLAG) && ( head != attacker )
@@ -618,10 +617,10 @@ void CTF_Obituary( gedict_t *targ, gedict_t *attacker )
 			}
 		}
 
-		if ( (streq(getteam(attacker), "red") && 
-			 streq(head->s.v.classname, "item_flag_team1")) ||
+		if ( (streq(getteam(attacker), "red") &&
+			  streq(head->s.v.classname, "item_flag_team1")) ||
 			 (streq(getteam(attacker), "blue") &&
-                     streq(head->s.v.classname, "item_flag_team2")) 
+			  streq(head->s.v.classname, "item_flag_team2")) 
 		   )
 		{
 			flagdefended = true;
@@ -652,7 +651,7 @@ void CTF_Obituary( gedict_t *targ, gedict_t *attacker )
 					attacker->s.v.netname,
 					streq(attackerteam, "red") ? redtext("RED") : redtext("BLUE"));
 			}
-		} 
+		}
 		head = trap_findradius( head, attacker->s.v.origin, 400 );
 	}
 }
