@@ -391,6 +391,7 @@ void PlayerDropFlag( gedict_t *player )
 void DropFlag( gedict_t *flag)
 {
 	gedict_t *p = PROG_TO_EDICT( flag->s.v.owner );
+	gedict_t *p1;
 
 	p->s.v.effects -= ( (int) p->s.v.effects & ( EF_FLAG1 | EF_FLAG2 ));
 	p->s.v.items -= ( (int) p->s.v.items & (int) self->s.v.items );
@@ -412,10 +413,10 @@ void DropFlag( gedict_t *flag)
 	else
 		G_bprint( 2, " %s the %s flag!\n", redtext("lost"), redtext("RED") );
 
-	for ( p = world; (p = find_plr( p )); )
+	for ( p1 = world; (p1 = find_plr( p1 )); )
 	{
-		if ( strneq(getteam(p), getteam(other)) )
-			p->carrier_hurt_time = -1;
+		if ( strneq(getteam(p), getteam(p1)) )
+			p1->carrier_hurt_time = -1;
 	}
 
 	refresh_plus_scores (); // update players status bar faster
