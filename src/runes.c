@@ -17,7 +17,7 @@ void DoDropRune(int rune, qboolean s)
 	cl_refresh_plus_scores( self );
 
 	item = spawn();
-	setorigin( item, PASSVEC3( self->s.v.origin ) );
+	setorigin( item, self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] - 24);
 	item->s.v.classname = "rune";
 	item->ctf_flag = rune;
 	item->s.v.velocity[0] = i_rnd( -100, 100 );
@@ -55,17 +55,26 @@ void DoTossRune( int rune )
 	item = spawn();
 	item->ctf_flag = rune;
 	item->s.v.classname = "rune";
-
-	setorigin( item, PASSVEC3( self->s.v.origin ) );
-	item->s.v.origin[2] += 24; 
-	trap_makevectors( self->s.v.angles );
-	aim( item->s.v.velocity );
-	VectorScale( item->s.v.velocity, 800, item->s.v.velocity);
-	vectoangles( item->s.v.velocity, item->s.v.angles );
-	item->s.v.velocity[2] = -item->s.v.velocity[2];
 	item->s.v.flags = FL_ITEM;
 	item->s.v.solid = SOLID_TRIGGER;
 	item->s.v.movetype = MOVETYPE_TOSS;
+
+	trap_makevectors( self->s.v.v_angle );
+
+	if ( self->s.v.v_angle[0] )
+	{
+		item->s.v.velocity[0] = g_globalvars.v_forward[0] * 300 + g_globalvars.v_up[0] * 200;
+		item->s.v.velocity[1] = g_globalvars.v_forward[1] * 300 + g_globalvars.v_up[1] * 200;
+		item->s.v.velocity[2] = g_globalvars.v_forward[2] * 300 + g_globalvars.v_up[2] * 200;
+	}
+	else
+	{
+		aim( item->s.v.velocity );
+		VectorScale( item->s.v.velocity, 300, item->s.v.velocity );
+		item->s.v.velocity[2] = 200;
+	}
+	SetVector( item->s.v.avelocity, 300, 300, 300 );
+	vectoangles( item->s.v.velocity, item->s.v.angles );
 
 	if ( rune & CTF_RUNE_RES )
 		setmodel( item, "progs/end1.mdl" );
@@ -75,7 +84,8 @@ void DoTossRune( int rune )
 		setmodel( item, "progs/end3.mdl" );
 	else if ( rune & CTF_RUNE_RGN )
 		setmodel( item, "progs/end4.mdl" );
- 
+	
+	setorigin( item, self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] - 24);
 	setsize( item, -16, -16, 0, 16, 16, 56 );
 	item->s.v.owner = EDICT_TO_PROG( self );
 	item->s.v.touch = (func_t) RuneTouch;
