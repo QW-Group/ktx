@@ -193,6 +193,8 @@ void ToggleVwep();
 void TogglePause();
 void ToggleArena();
 
+void Spawn666Time();
+
 void nospecs ();
 
 // spec
@@ -478,6 +480,8 @@ const char CD_NODESC[] = "no desc";
 
 #define CD_NOSPECS      "allow/disallow spectators"
 
+#define CD_SPAWN666TIME "set spawn pent time (dmm4 atm)"
+
 
 
 void dummy() {}
@@ -762,6 +766,7 @@ cmd_t cmds[] = {
 	{ "rmode",       r_mode,                    0    , CF_PLAYER | CF_SPC_ADMIN, CD_RMODE },
 // }
 	{ "nospecs",     nospecs,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOSPECS },
+	{ "spawn666time",Spawn666Time,              0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_SPAWN666TIME },
 };
 
 #undef DEF
@@ -5691,4 +5696,38 @@ void ToggleArena()
 
 		G_cprint("\n");
 	}
+}
+
+void Spawn666Time()
+{
+	char arg_2[1024];
+	float dmm4_invinc_time;
+
+	if( check_master() )
+		return;
+
+	if ( deathmatch != 4 )
+	{
+		G_sprint(self, 2, "command allowed in %s only\n", redtext("dmm4"));
+		return;
+	}
+
+	// no arguments, show info and return
+	if ( match_in_progress || trap_CmdArgc() == 1 )
+	{
+		dmm4_invinc_time = cvar("dmm4_invinc_time");
+		dmm4_invinc_time = dmm4_invinc_time ? bound(0, dmm4_invinc_time, DMM4_INVINCIBLE_MAX) : DMM4_INVINCIBLE_DEFAULT;
+
+		G_sprint(self, 2, "%s is %.1fs\n", redtext("spawn invincible time"), dmm4_invinc_time);
+		return;
+	}
+
+	trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
+
+	dmm4_invinc_time = bound(0, atof( arg_2 ), DMM4_INVINCIBLE_DEFAULT);
+
+	G_bprint(2, "%s set %s to %.1fs\n", self->s.v.netname, redtext("spawn invincible time"), dmm4_invinc_time);
+
+	// to actualy disable dmm4_invinc_time we need set it to negative value
+	trap_cvar_set_float( "dmm4_invinc_time", dmm4_invinc_time ? dmm4_invinc_time : -1 );
 }

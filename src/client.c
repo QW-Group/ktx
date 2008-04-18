@@ -1317,8 +1317,8 @@ void PutClientInServer(qboolean from_vmMain)
 			items |= IT_ARMOR3; // add red armor
 		}
 
-		// 0 evalutes to 2, negative value disable invincible
-		dmm4_invinc_time = (dmm4_invinc_time ? bound(0, dmm4_invinc_time, 30) : 2);
+		// 0 evalutes to DMM4_INVINCIBLE_DEFAULT, negative value disable invincible
+		dmm4_invinc_time = (dmm4_invinc_time ? bound(0, dmm4_invinc_time, DMM4_INVINCIBLE_MAX) : DMM4_INVINCIBLE_DEFAULT);
 
 		if ( dmm4_invinc_time > 0 )
 		{

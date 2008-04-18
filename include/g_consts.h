@@ -324,3 +324,6 @@
 #define F_CHECK_SIZE    (1024*10) /* FIXME: which size is reason able */
 
 #define TEAM_LOCATION_UPDATE_TIME (1.0) /* 1 second */
+
+#define DMM4_INVINCIBLE_DEFAULT (2.0)
+#define DMM4_INVINCIBLE_MAX (30.0)
