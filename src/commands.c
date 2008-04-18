@@ -5718,7 +5718,7 @@ void Spawn666Time()
 		dmm4_invinc_time = cvar("dmm4_invinc_time");
 		dmm4_invinc_time = dmm4_invinc_time ? bound(0, dmm4_invinc_time, DMM4_INVINCIBLE_MAX) : DMM4_INVINCIBLE_DEFAULT;
 
-		G_sprint(self, 2, "%s is %.1fs\n", redtext("spawn invincible time"), dmm4_invinc_time);
+		G_sprint(self, 2, "%s is %.1fs\n", redtext("spawn invincibility time"), dmm4_invinc_time);
 		return;
 	}
 
@@ -5726,7 +5726,7 @@ void Spawn666Time()
 
 	dmm4_invinc_time = bound(0, atof( arg_2 ), DMM4_INVINCIBLE_DEFAULT);
 
-	G_bprint(2, "%s set %s to %.1fs\n", self->s.v.netname, redtext("spawn invincible time"), dmm4_invinc_time);
+	G_bprint(2, "%s set %s to %.1fs\n", self->s.v.netname, redtext("spawn invincibility time"), dmm4_invinc_time);
 
 	// to actualy disable dmm4_invinc_time we need set it to negative value
 	trap_cvar_set_float( "dmm4_invinc_time", dmm4_invinc_time ? dmm4_invinc_time : -1 );
