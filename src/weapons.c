@@ -1663,12 +1663,6 @@ void W_Attack()
 		return;
 
 	self->lastwepfired = self->s.v.weapon;
-	if (self->k_666 == 1 && !(self->s.v.weapon == IT_AXE || self->s.v.weapon == IT_SHOTGUN)) {
-		self->s.v.items = self->s.v.items - ((int)self->s.v.items & IT_INVULNERABILITY);
-		self->invincible_time = 0;
-		self->invincible_finished = 0;
-		self->k_666 = 0;
-	}
 
 	trap_makevectors( self->s.v.v_angle );	// calculate forward angle for velocity
 	self->show_hostile = g_globalvars.time + 1;	// wake monsters up

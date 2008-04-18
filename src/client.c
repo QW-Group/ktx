@@ -1150,7 +1150,6 @@ void PutClientInServer(qboolean from_vmMain)
 	self->invincible_finished = 0;
 	self->s.v.effects = 0;
 	self->spawn_time = g_globalvars.time;
-	self->k_666 = 0;
 	self->axhitme = 0;
 	self->lastwepfired = 0;
 
@@ -1260,25 +1259,6 @@ void PutClientInServer(qboolean from_vmMain)
 		return;
 	}
 
-	if( match_in_progress == 2 )
-	{
-		if( k_berzerk )
-		{
-			self->s.v.items = (int)self->s.v.items | IT_QUAD;
-			self->super_time = 1;
-			self->super_damage_finished = g_globalvars.time + 3600*10;
-		}
-
-		if( cvar( "k_666" ) )
-		{
-			stuffcmd (self, "bf\n");
-			self->invincible_time = 1;
-			self->invincible_finished = g_globalvars.time + 2;
-			self->k_666 = 1;
-			self->s.v.items = (int)self->s.v.items | IT_INVULNERABILITY;
-		}
-	}
-
 	if ( deathmatch == 4 && match_in_progress == 2 )
 	{
 		float dmm4_invinc_time = cvar("dmm4_invinc_time");
@@ -1342,8 +1322,6 @@ void PutClientInServer(qboolean from_vmMain)
 
 		if ( dmm4_invinc_time > 0 )
 		{
-			self->k_666 = (self->k_666 ? self->k_666 : 2); // may be already set by cvar( "k_666" ) )
-
 			items |= IT_INVULNERABILITY;
 
 			self->invincible_time = 1;
@@ -2531,7 +2509,7 @@ void CheckPowerups()
 	if ( self->invincible_finished )
 	{
 // sound and screen flash when items starts to run out
-		if ( self->invincible_finished < g_globalvars.time + 3 && (!self->k_666 || self->k_666 == 2) )	//team
+		if ( self->invincible_finished < g_globalvars.time + 3 )
 		{
 			if ( self->invincible_time == 1 )
 			{
@@ -2553,7 +2531,6 @@ void CheckPowerups()
 			self->s.v.items -= IT_INVULNERABILITY;
 			self->invincible_time = 0;
 			self->invincible_finished = 0;
-			self->k_666 = 0;		//team
 
 			adjust_pickup_time( &self->p_pickup_time, &self->ps.itm[itPENT].time );
 
@@ -2656,7 +2633,7 @@ void CheckLightEffects( void )
 	if ( self->ctf_flag & CTF_FLAG )
 		dim = true;
 
-	if ( self->invincible_finished > g_globalvars.time && !self->k_666 ) // KTeAMS
+	if ( self->invincible_finished > g_globalvars.time )
 		r = true;
 
 	if ( self->radsuit_finished > g_globalvars.time )

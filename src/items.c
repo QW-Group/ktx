@@ -46,9 +46,6 @@ void DropPowerup( float timeleft, int powerup )
 	if ( timeleft <= 0 || match_in_progress != 2 )
 		return;
 
-	if ( powerup == IT_QUAD && k_berzerk )
-		return;
-	
 	if ( powerup != IT_QUAD && powerup != IT_INVISIBILITY ) // only this supported
 		return;
 
@@ -1344,9 +1341,6 @@ void powerup_touch()
     if ( !Get_Powerups() )
         return;
 
-	if ( k_berzerk && streq( self->s.v.classname, "item_artifact_super_damage" ) )
-		return; // woot, u must be BERZERK alredy!
-
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
 
 	self->mdl = self->s.v.model;
@@ -1381,8 +1375,6 @@ void powerup_touch()
 	{
 		adjust_pickup_time( &other->p_pickup_time, &other->ps.itm[itPENT].time );
 		other->p_pickup_time = g_globalvars.time;
-
-		other->k_666 = 0; // qqshka: mark we have native pent
 
 		other->ps.itm[itPENT].tooks++;
 		other->invincible_time = 1;

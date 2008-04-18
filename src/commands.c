@@ -84,7 +84,6 @@ void ShowOpts();
 void ShowQizmo();
 void ShowRules();
 void ShowVersion();
-void ToggleBerzerk();
 void ToggleDischarge();
 void ToggleDropPack();
 void ToggleDropQuad();
@@ -104,7 +103,6 @@ void ToggleColorForcing();
 void TogglePitchSpeedLimit();
 void ToggleYawSpeedLimit();
 */
-void ToggleRespawn666();
 void ToggleRespawns();
 void ToggleSpecTalk();
 void ToggleSpeed();
@@ -263,7 +261,6 @@ const char CD_NODESC[] = "no desc";
 #define CD_RULES      "show game rules"
 #define CD_LOCKMODE   "change locking mode"
 #define CD_MAPS       "list custom maps"
-#define CD_SPAWN666   "2 secs of \x98\x98\x98 on respawn"
 #define CD_ADMIN      "toggle admin-mode"
 #define CD_FORCESTART "force match to start"
 #define CD_FORCEBREAK "force match to end"
@@ -281,7 +278,6 @@ const char CD_NODESC[] = "no desc";
 #define CD_TIME20     "set timelimit to 20 mins"
 #define CD_TIME25     "set timelimit to 25 mins"
 #define CD_TIME30     "set timelimit to 30 mins"
-#define CD_BERZERK    "toggle berzerk mode"
 #define CD_KSOUND1    (CD_NODESC) // useless command now
 #define CD_KSOUND2    (CD_NODESC) // useless command now
 #define CD_KSOUND3    (CD_NODESC) // useless command now
@@ -533,7 +529,6 @@ cmd_t cmds[] = {
 	{ "rules",       ShowRules,                 0    , CF_PLAYER | CF_MATCHLESS, CD_RULES },
 	{ "lockmode",    ChangeLock,                0    , CF_PLAYER | CF_SPC_ADMIN, CD_LOCKMODE },
 	{ "maps",        ShowMaps,                  0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_MAPS},
-	{ "spawn666",    ToggleRespawn666,          0    , CF_PLAYER, CD_SPAWN666},
 	{ "admin",       ReqAdmin,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_ADMIN },
 	{ "forcestart",  AdminForceStart,           0    , CF_BOTH_ADMIN, CD_FORCESTART },
 	{ "forcebreak",  AdminForceBreak,           0    , CF_BOTH_ADMIN, CD_FORCEBREAK },
@@ -551,7 +546,6 @@ cmd_t cmds[] = {
 	{ "time20",      DEF(TimeSet),           20.0f   , CF_PLAYER, CD_TIME20 },
 	{ "time25",      DEF(TimeSet),           25.0f   , CF_PLAYER, CD_TIME25 },
 	{ "time30",      DEF(TimeSet),           30.0f   , CF_PLAYER, CD_TIME30 },
-	{ "berzerk",     ToggleBerzerk,             0    , CF_PLAYER, CD_BERZERK },
 	                                             
 	{ "ksound1",     DEF(TeamSay),              1    , CF_PLAYER, CD_KSOUND1 },
 	{ "ksound2",     DEF(TeamSay),              2    , CF_PLAYER, CD_KSOUND2 },
@@ -1137,11 +1131,9 @@ void ShowOpts()
 			"σπαχξ...... change spawntype\n"
 			"σπεεδ...... toggle sv_maxspeed\n"
 			"ποχεςυπσ... quad, , ring & suit\n"
-			"σπαχξ¶¶¶... 2 secs of  on respawn\n"
 			"ζαιςπαγλσ.. best/last weapon dropped\n"
 			"δισγθαςηε.. underwater discharges\n"
 			"σιμεξγε.... toggle spectator talk\n"
-			"βεςϊεςλ.... toggle berzerk mode\n"
 			"%s..... toggle midair mode\n" 
 			"%s..... toggle grenade mode\n" 
 			"%s..... toggle instagib mode\n", redtext("mid_air"), redtext("gren_mode"), redtext("instagib"));
@@ -1340,13 +1332,11 @@ void ModStatus ()
 	G_sprint(self, 2, "%-14.14s %-3d ",  redtext("Timelimit"), (int)timelimit);
 	G_sprint(self, 2, "%-14.14s %-3d\n", redtext("Fraglimit"), (int)fraglimit);
 	PrintToggle1(redtext("Powerups       "), "k_pow");
-	PrintToggle2(va("%s \x98\x98\x98    ", redtext("Respawn")), "k_666");
+	PrintToggle2(redtext("Discharge      "), "k_dis");
 	PrintToggle1(redtext("Drop Quad      "), "dq");
 	PrintToggle2(redtext("Drop Ring      "), "dr");
 	G_sprint(self, 2, "%-14.14s %-3.3s ", redtext("Fair Backpacks"), get_frp_str());
 	PrintToggle2(redtext("Drop Backpacks "), "dp");
-	PrintToggle1(redtext("Discharge      "), "k_dis");
-	PrintToggle2(redtext("Berzerk mode   "), "k_bzk");
 
 	G_sprint(self, 2, "%-14.14s %-3.3s ",  redtext("spec info perm"), (mi_adm_only() ? "Adm" : "All"));
 	G_sprint(self, 2, "%-14.14s %-3.3s\n", redtext("more spec info"), (mi_on() ? "On" : "Off"));
@@ -1849,17 +1839,6 @@ void ToggleRespawns()
 	G_bprint(2, "%s\n", respawn_model_name( k_spw ));
 }
 
-void ToggleRespawn666()
-{
-	if( match_in_progress )
-		return;
-
-	if( check_master() )
-		return;
-
-	cvar_toggle_msg( self, "k_666", va("%s \x98\x98\x98", redtext("Respawn")) );
-}
-
 void TogglePowerups()
 {
 	int k_pow = bound(0, cvar( "k_pow" ), 2); // here we are not using Get_Powerups
@@ -2184,18 +2163,6 @@ void ToggleSpeed()
 		p->maxspeed = k_maxspeed;
 }
 
-void ToggleBerzerk()
-{
-	if ( match_in_progress )
-		return;
-
-	if( check_master() )
-		return;
-
-	cvar_toggle_msg( self, "k_bzk", redtext("BerZerk mode") );
-}
-
-
 void ToggleSpecTalk()
 {
 	int k_spectalk = !cvar( "k_spectalk" ), fpd = iKey( world, "fpd" );
@@ -2247,24 +2214,13 @@ void ShowRules()
 		G_sprint(self, 2, "Server is in FFA mode.\n");
 	else if ( isTeam() )
 		G_sprint(self, 2,
-			"Bind ςεποςτ to a key.\n"
-			"Pressing that key will send\n"
-			"your status to your teammates.\n"
+			"Server is in team mode.\n"
 			"Typing σγοςεσ during game\n"
 			"will print time left and teamscores.\n"
 			"Also available during game\n"
-			"are στατσ and εζζιγιεξγω.\n\n"
-			"Remember that telefragging a teammate\n"
-			"does not result in frags.\n");
+			"are στατσ and εζζιγιεξγω.\n");
 	else
 		G_sprint(self, 2, "Server is in unknown mode.\n");
-
-	if( cvar( "k_bzk" ) )
-		G_sprint(self, 2,
-			"\nBERZERK mode is activated!\n"
-			"This means that when only %d seconds\n"
-			"remains of the game, all players\n"
-			"gets QUAD/OCTA powered.\n", (int)bound(0, cvar( "k_btime" ), 9999) );
 
 	G_sprint(self, 2, "\n");
 }
@@ -2859,14 +2815,12 @@ const char common_um_init[] =
 //	"localinfo k_new_spw 0\n"			// ktpro feature
 
 	"fraglimit 0\n"						// fraglimit %)
-	"k_666 0\n"							// respawn 666
 	"dp 1\n"							// drop pack
 	"dq 0\n"							// drop quad
 	"dr 0\n"							// drop ring
 	"k_frp 0\n"							// fairpacks
 	"k_spectalk 0\n"					// silence
 	"k_dis 1\n"							// discharge on
-	"k_bzk 0\n"							// berzerk
 	"k_spw 3\n"							// affect spawn type
 	"k_dmgfrags 0\n"					// damage frags off
 	"k_tp_tele_death 1\n"				// affect frags on team telefrags or not

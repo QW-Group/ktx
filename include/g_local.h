@@ -759,8 +759,6 @@ gedict_t 	*race_get_racer( void );
 
 extern	float framechecks;	    // if timedemo/uptime bugs are tolerated
 extern	float k_attendees;      // stores number of players on server - used in 'ready' checking
-extern	float k_berzerk;        // boolean - whether or not the game is currently in berzerk time
-extern	float k_berzerkenabled; // actually stores the amount of berzerk time at the end of match
 extern	float k_captains;	    // number of captains
 extern	float k_captainturn;	// which captain comes in line to pick
 extern	float k_checkx;

@@ -1139,7 +1139,7 @@ void EndMatch ( float skip_log )
 	match_over = 1;
 
 // s: zero the flag
-	k_berzerk = k_sudden_death = 0;
+	k_sudden_death = 0;
 
 	if( !strnull( tmp = cvar_string( "_k_host" ) ) )
 		trap_cvar_set( "hostname", tmp ); // restore host name at match end
@@ -1224,42 +1224,6 @@ void SaveOvertimeStats ()
 			p->ps.ot_items	=      p->s.v.items; // float
 			p->ps.ot_h	    = (int)p->s.v.health;
 		}
-	}
-}
-
-void CheckBerzerk( int min, int sec )
-{
-	int bmin, bsec;
-	gedict_t	*p;
-
-	if( !k_berzerkenabled || k_berzerk )
-		return;
-
-	// transform berzerk seconds to minutes and seconds, so we can guess is time to turn berzerk on
-	bmin = k_berzerkenabled / 60;
-	bsec = k_berzerkenabled - bmin * 60;
-	bmin++;
-
-	if( sec != bsec || min != bmin )
-		return;
-
-	G_bprint(2, "%s\n", redtext("BERZERK!!!"));
-	trap_lightstyle ( 0, "ob" );
-	k_berzerk = 1;
-	
-	for( p = world; (p = find_plr( p )); ) {
-		if( !ISLIVE( p ) )
-			continue;
-
-		adjust_pickup_time( &p->q_pickup_time, &p->ps.itm[itQUAD].time );
-		adjust_pickup_time( &p->p_pickup_time, &p->ps.itm[itPENT].time );
-
-		p->s.v.items = (int)p->s.v.items | (IT_QUAD | IT_INVULNERABILITY);
-		p->super_time = 1;
-		p->super_damage_finished = g_globalvars.time + 3600*10;
-		p->invincible_time = 1;
-		p->invincible_finished = g_globalvars.time + 2;
-		p->k_666 = 1;
 	}
 }
 
@@ -1360,8 +1324,6 @@ void TimerThink ()
 		k_checkx = 1; // global which set to true when some time spend after match start
 
 	( self->cnt2 )--;
-
-	CheckBerzerk( self->cnt, self->cnt2 );
 
 	if( !self->cnt2 ) {
 		self->cnt2 = 60;
@@ -1624,7 +1586,6 @@ void StartMatch ()
 {
 	char date[64];
 
-	k_berzerk    = 0;
 	k_nochange   = 0;
 	k_showscores = 0;
 	k_standby    = 0;
@@ -1633,9 +1594,6 @@ void StartMatch ()
 	k_userid   = 1;
 	localcmd("localinfo 1 \"\"\n");
 	trap_executecmd (); // <- this really needed
-
-	// Check to see if berzerk is set.
-	k_berzerkenabled = (cvar( "k_bzk" ) ? bound(0, cvar( "k_btime" ), 3600*10) : 0);
 
 	first_rl_taken = false; // no one took rl yet
 

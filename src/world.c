@@ -631,7 +631,6 @@ void FirstFrame	( )
 	RegisterCvar("timing_players_action");
 	RegisterCvar("allow_timing");
 	RegisterCvarEx("demo_scoreslength", "10");
-	RegisterCvar("k_bzk");
 	RegisterCvar("lock_practice");
 	RegisterCvar("k_autoreset");
 	RegisterCvar("k_defmap");
@@ -643,14 +642,12 @@ void FirstFrame	( )
 	RegisterCvar("k_lockmax");
 	RegisterCvar("k_spectalk");
 	RegisterCvar("k_sayteam_to_spec");
-	RegisterCvar("k_666");
 	RegisterCvar("k_dis");
 	RegisterCvar("dq");
 	RegisterCvar("dr");
 	RegisterCvar("dp");
 	RegisterCvar("k_frp");
 	RegisterCvar("k_highspeed");
-	RegisterCvar("k_btime");
 	RegisterCvar("k_freeze");
 	RegisterCvar("k_free_mode");
 	RegisterCvar("k_allowed_free_modes");

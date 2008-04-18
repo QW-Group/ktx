@@ -23,8 +23,6 @@
 
 float framechecks;	    // if timedemo/uptime bugs are tolerated
 float k_attendees;      // stores number of players on server - used in 'ready' checking
-float k_berzerk;        // boolean - whether or not the game is currently in berzerk time
-float k_berzerkenabled; // actually stores the amount of berzerk time at the end of match
 float k_captains;	    // number of captains
 float k_captainturn;	// which captain comes in line to pick
 float k_checkx = 0;		// global which set to true when some time spend after match start

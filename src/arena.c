@@ -382,7 +382,6 @@ void setfullwep( gedict_t *anent )
 	anent->invisible_time		 = 0;
 	anent->invincible_finished	 = 0;
 	anent->invincible_time		 = 0;
-	anent->k_666	   = 0;	// team
 	anent->s.v.effects = 0;
 	anent->lastwepfired = 0;
 

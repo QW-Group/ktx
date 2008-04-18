@@ -370,7 +370,6 @@ typedef struct gedict_s {
 	float	k_kicking;       // if player is in kick mode
 // }
 	float	k_1spawn;        // NOT_SURE: used in kteams respawn code...
-	float	k_666;           // if player has 666 respawn protection
 	float	k_accepted;      // NOT_SURE:
 	int		k_added;         // NOT_SURE: stores the entered admin code?
 	int		k_adminc;        // number of digits of admin code still to enter
