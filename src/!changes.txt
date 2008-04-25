@@ -2,6 +2,8 @@
 qq:
 286. "k_dm2mod" is obsolete server setting now. Acting like k_dm2mod is always 1.
 
+287. "/noitems" command, toggle permissibility of items in game, actually it "k_noitems" server variable.
+
 2008-04-18
 qq:
 284. Removing "/spawn666" and "/berzerk" features, so "k_666" "k_bzk" "k_btime" is obsolete server settings now.

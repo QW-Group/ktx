@@ -195,7 +195,9 @@ void ToggleArena();
 
 void Spawn666Time();
 
-void nospecs ();
+void nospecs();
+
+void noitems();
 
 // spec
 void ShowCamHelp();
@@ -479,6 +481,8 @@ const char CD_NODESC[] = "no desc";
 // }
 
 #define CD_NOSPECS      "allow/disallow spectators"
+
+#define CD_NOITEMS      "allow/disallow items in game"
 
 #define CD_SPAWN666TIME "set spawn pent time (dmm4 atm)"
 
@@ -766,6 +770,7 @@ cmd_t cmds[] = {
 	{ "rmode",       r_mode,                    0    , CF_PLAYER | CF_SPC_ADMIN, CD_RMODE },
 // }
 	{ "nospecs",     nospecs,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOSPECS },
+	{ "noitems",     noitems,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOITEMS },
 	{ "spawn666time",Spawn666Time,              0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_SPAWN666TIME },
 };
 
@@ -2811,6 +2816,8 @@ const char common_um_init[] =
 	"k_disallow_weapons 16\n"			// disallow gl in dmm4 by default
 
 	"dmm4_invinc_time \"\""				// reset to default
+
+	"k_noitems \"\""					// reset to default
 
 //	"localinfo k_new_mode 0\n" 			// UNKNOWN ktpro
 //	"localinfo k_fast_mode 0\n"			// UNKNOWN ktpro
@@ -5732,4 +5739,15 @@ void Spawn666Time()
 
 	// to actualy disable dmm4_invinc_time we need set it to negative value
 	trap_cvar_set_float( "dmm4_invinc_time", dmm4_invinc_time ? dmm4_invinc_time : -1 );
+}
+
+void noitems()
+{
+	if ( match_in_progress )
+		return;
+
+	if ( check_master() )
+		return;
+
+	cvar_toggle_msg( self, "k_noitems", redtext("noitems mode") );
 }

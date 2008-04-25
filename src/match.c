@@ -1375,7 +1375,8 @@ void SM_PrepareMap()
 	{
 		// going for the if content record..
 		if (   isRA()
-			|| ( deathmatch == 4 && cvar("k_instagib" ) )
+			|| ( deathmatch == 4 && cvar("k_instagib") )
+			|| cvar("k_noitems")
 		   )
 		{
 			if (
@@ -1662,6 +1663,7 @@ void PrintCountdown( int seconds )
 //
 // Deathmatch  x
 // Mode		  D u e l | T e a m | F F A | C T F | RA
+// NoItems    On // optional
 // Midair     On // optional
 // Instagib   On // optional
 // Yawnmode   On // optional
@@ -1701,6 +1703,9 @@ void PrintCountdown( int seconds )
 		mode = redtext("Unknown");
 
 	strlcat(text, va("%s %8s\n", "Mode", mode), sizeof(text));
+
+	if ( cvar("k_noitems") )
+		strlcat(text, va("%s %5s\n", "NoItems", redtext("On")), sizeof(text));
 
 	if ( cvar("k_midair") )
 		strlcat(text, va("%s %6s\n", "Midair", redtext("On")), sizeof(text));

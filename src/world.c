@@ -593,6 +593,8 @@ void FirstFrame	( )
 
 	RegisterCvar("_k_nospecs");  // internal usage, will reject spectators connection
 
+	RegisterCvar("k_noitems");
+
 	RegisterCvar("k_mode");
 	RegisterCvar("k_defmode");
 	RegisterCvar("k_auto_xonx"); // switch XonX mode dependant on players + specs count
