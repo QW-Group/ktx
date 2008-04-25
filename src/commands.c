@@ -2810,6 +2810,8 @@ const char common_um_init[] =
 	"k_cg_kb 1\n"						// coilgun kickback in instagib
 	"k_disallow_weapons 16\n"			// disallow gl in dmm4 by default
 
+	"dmm4_invinc_time \"\""				// reset to default
+
 //	"localinfo k_new_mode 0\n" 			// UNKNOWN ktpro
 //	"localinfo k_fast_mode 0\n"			// UNKNOWN ktpro
 //	"localinfo k_safe_rj 0\n"           // UNKNOWN ktpro
