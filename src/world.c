@@ -665,7 +665,6 @@ void FirstFrame	( )
 	RegisterCvarEx("k_spm_custom_model", "0");
 	RegisterCvar("k_idletime");
 	RegisterCvar("k_timetop");
-	RegisterCvar("k_dm2mod");
 	RegisterCvar("k_membercount");
 	RegisterCvarEx("demo_tmp_record", "0");
 	RegisterCvar("demo_skip_ktffa_record");

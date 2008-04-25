@@ -1371,11 +1371,13 @@ void SM_PrepareMap()
 	// this must be removed in any cases
 	remove_projectiles();
 
-	for( p = world; (p = nextent(p)); ) {
-
-	// going for the if content record..
-	
-		if ( isRA() ) {
+	for( p = world; (p = nextent(p)); )
+	{
+		// going for the if content record..
+		if (   isRA()
+			|| ( deathmatch == 4 && cvar("k_instagib" ) )
+		   )
+		{
 			if (
 				   streq( p->s.v.classname, "weapon_nailgun" )
 				|| streq( p->s.v.classname, "weapon_supernailgun" )
@@ -1394,55 +1396,53 @@ void SM_PrepareMap()
 				|| streq( p->s.v.classname, "item_artifact_invulnerability")
 				|| streq( p->s.v.classname, "item_artifact_envirosuit")
 				|| streq( p->s.v.classname, "item_artifact_invisibility")
-				|| streq( p->s.v.classname, "item_artifact_super_damage"))
-
+				|| streq( p->s.v.classname, "item_artifact_super_damage")
+			   )
 			{
 				ent_remove( p );
+				continue;
 			}
 		}
 
-		if( deathmatch > 3 ) {
-			if(    streq( p->s.v.classname, "weapon_nailgun" )
+		if ( deathmatch == 2 )
+		{
+			if (   streq( p->s.v.classname, "item_armor1" )
+			    || streq( p->s.v.classname, "item_armor2" )
+			    || streq( p->s.v.classname, "item_armorInv")
+			   )
+			{
+				ent_remove( p );
+				continue;
+			}
+		}
+
+		if ( deathmatch >= 4 )
+		{
+			if (   streq( p->s.v.classname, "weapon_nailgun" )
 				|| streq( p->s.v.classname, "weapon_supernailgun" )
 				|| streq( p->s.v.classname, "weapon_supershotgun" )
 				|| streq( p->s.v.classname, "weapon_rocketlauncher" )
 				|| streq( p->s.v.classname, "weapon_grenadelauncher" )
 				|| streq( p->s.v.classname, "weapon_lightning" )
-			  ) { // no weapons for any of this deathmatches (4 or 5)
+			   )
+			{ // no weapons for any of this deathmatches (4 or 5)
 				ent_remove( p );
+				continue;
 			}
-			else if ( deathmatch == 4 ) {
-				if(    streq( p->s.v.classname, "item_shells" )
+			
+			if ( deathmatch == 4 )
+			{
+				if (   streq( p->s.v.classname, "item_shells" )
 					|| streq( p->s.v.classname, "item_spikes" )
 					|| streq( p->s.v.classname, "item_rockets" )
 					|| streq( p->s.v.classname, "item_cells" )
-					|| (streq( p->s.v.classname, "item_health" ) && ( int ) p->s.v.spawnflags & H_MEGA)
-			      ) { // no weapon ammo and megahealth for dmm4
+					|| (streq( p->s.v.classname, "item_health" ) && (( int ) p->s.v.spawnflags & H_MEGA))
+			       )
+				{ // no weapon ammo and megahealth for dmm4
 					ent_remove( p );
-				}
-				if ( cvar("k_instagib" )) {
-					if(    streq( p->s.v.classname, "item_health" )
-						|| streq( p->s.v.classname, "item_armor1")
-						|| streq( p->s.v.classname, "item_armor2")
-						|| streq( p->s.v.classname, "item_armorInv")
-						|| streq( p->s.v.classname, "item_artifact_invulnerability")
-						|| streq( p->s.v.classname, "item_artifact_envirosuit")
-						|| streq( p->s.v.classname, "item_artifact_invisibility")
-						|| streq( p->s.v.classname, "item_artifact_super_damage")
-				      	) { // no health, armors for instagib
-						ent_remove( p );
-					}
+					continue;
 				}
 			}
-		} else {
-			if( deathmatch == 2 && cvar( "k_dm2mod" ) &&
-			 							(   streq( p->s.v.classname, "item_armor1" )
-			  	 						 || streq( p->s.v.classname, "item_armor2" )
-			     						 || streq( p->s.v.classname, "item_armorInv")
-                						)
-			
-			  ) // no armors in modified dmm2
-				ent_remove( p );
 		}
 	}
 
