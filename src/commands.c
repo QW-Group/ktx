@@ -3859,6 +3859,7 @@ void fav_show( )
 // { // this is used for autotrack which saved in demo
 static gedict_t *autotrack_last = NULL;
 static qboolean autotrack_update = false;
+static char *autotrack_reason = "";
 // }
 
 void DoMVDAutoTrack( void )
@@ -3870,6 +3871,7 @@ void DoMVDAutoTrack( void )
 	{
 		autotrack_update = false; // relax autotrack
 		autotrack_last = NULL;
+		autotrack_reason = "";
 		return; // we don't need much in prewar
 	}
 
@@ -3885,14 +3887,16 @@ void DoMVDAutoTrack( void )
 	if ( autotrack_last == p )
 		return; // already track this player
 
-	autotrack_update = false; // we going apply track switch, so relax autotrack
-	autotrack_last = p;
-
 	if ( ( id = GetUserID( p ) ) > 0 )
 	{
 		// with "properly" haxed server this does't go to player but goes to mvd demo only
+		stuffcmd_flags(p, STUFFCMD_DEMOONLY, "//at_dbg %s\n",  autotrack_reason);
 		stuffcmd_flags(p, STUFFCMD_DEMOONLY, "//at %d\n", id );
 	}
+
+	autotrack_update = false; // we going apply track switch, so relax autotrack
+	autotrack_last = p;
+	autotrack_reason = "";
 }
 
 void DoAutoTrack( )
@@ -3982,11 +3986,12 @@ void ktpro_autotrack_mark_spec(gedict_t *spec)
 }
 
 // will force specs who used ktpro autotrack switch track
-void ktpro_autotrack_mark_all()
+void ktpro_autotrack_mark_all(char *reason)
 {
 	gedict_t *p;
 
 	autotrack_update = true; // this is for mvd autotrack
+	autotrack_reason = reason;
 
 	for ( p = world; (p = find_spc( p )); )
 		ktpro_autotrack_mark_spec( p );
@@ -3995,7 +4000,7 @@ void ktpro_autotrack_mark_all()
 // first rl was taken, mark specs to switch pov to best player, that may be not even this rl dude :P
 void ktpro_autotrack_on_first_rl (gedict_t *dude)
 {
-	ktpro_autotrack_mark_all(); // hope this switch to rl dude on most tb3 maps in 4on4 mode
+	ktpro_autotrack_mark_all( "first_rl" ); // hope this switch to rl dude on most tb3 maps in 4on4 mode
 }
 
 // player just died, switch pov to other if spec track this player and used ktpro's autotrack
@@ -4005,7 +4010,10 @@ void ktpro_autotrack_on_death (gedict_t *dude)
 	int goal = EDICT_TO_PROG( dude ); // so we can compare with ->s.v.goal
 
 	if (dude == autotrack_last)
+	{
 		autotrack_update = true; // this is for mvd autotrack
+		autotrack_reason = "death";
+	}
 
 	for ( p = world; (p = find_spc( p )); )
 		if ( p->s.v.goalentity == goal )
@@ -4015,7 +4023,7 @@ void ktpro_autotrack_on_death (gedict_t *dude)
 // some powerup taken, mark specs to switch pov to best player, that may be not even this poweruped dude :P
 void ktpro_autotrack_on_powerup_take (gedict_t *dude)
 {
-	ktpro_autotrack_mark_all();
+	ktpro_autotrack_mark_all( "powerup_take" );
 }
 
 // some powerup out, and he has neither the rocket launcher nor the lightning gun, mark specs to switch pov to best player
@@ -4030,7 +4038,10 @@ void ktpro_autotrack_on_powerup_out (gedict_t *dude)
 		return; // dude have weapon, continue track him, may be add check for ammo?
 
 	if (dude == autotrack_last)
+	{
 		autotrack_update = true; // this is for mvd autotrack
+		autotrack_reason = "powerup_out";
+	}
 
 	for ( p = world; (p = find_spc( p )); )
 		if ( p->s.v.goalentity == goal )
@@ -4041,7 +4052,7 @@ void ktpro_autotrack_on_powerup_out (gedict_t *dude)
 // change pov to racer
 void ktpro_autotrack_on_race_status_changed (void)
 {
-	ktpro_autotrack_mark_all();
+	ktpro_autotrack_mark_all( "race_status_changed" );
 }
 
 // << end  ktpro compatible autotrack 
