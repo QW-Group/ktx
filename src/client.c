@@ -2633,7 +2633,7 @@ void CheckLightEffects( void )
 	if ( self->ctf_flag & CTF_FLAG )
 		dim = true;
 
-	if ( self->invincible_finished > g_globalvars.time )
+	if ( self->invincible_finished > g_globalvars.time && deathmatch != 4 )
 		r = true;
 
 	if ( self->radsuit_finished > g_globalvars.time )
