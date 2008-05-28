@@ -178,8 +178,11 @@ void SpectatorDisconnect()
 {
 	gedict_t *p;
 
-	for ( p = world; (p = ( match_in_progress == 2 && !cvar("k_ann") ) ? find_spc( p ) : find_client( p )); )	
-		G_sprint( p, PRINT_HIGH, "Spectator %s left the game\n", self->s.v.netname );
+	if ( self->k_accepted )
+	{
+		for ( p = world; (p = ( match_in_progress == 2 && !cvar("k_ann") ) ? find_spc( p ) : find_client( p )); )	
+			G_sprint( p, PRINT_HIGH, "Spectator %s left the game\n", self->s.v.netname );
+	}
 
 // s: added conditional function call here
 	if( self->v.elect_type != etNone ) {
