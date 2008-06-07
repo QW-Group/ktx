@@ -785,12 +785,8 @@ gedict_t *SelectSpawnPoint( char *spawnname )
 
 			trap_makevectors( isRA() ? spot->mangle : spot->s.v.angles ); // stupid ra uses mangles instead of angles
 
-			for( thing = world; (thing = trap_findradius(thing, spot->s.v.origin, 84)); ) {
- 				if( streq( thing->s.v.classname, "teledeath") ) {
-					ent_remove( thing );
-					continue;
-				}
-
+			for( thing = world; (thing = trap_findradius(thing, spot->s.v.origin, 84)); )
+			{
 				if ( thing->ct != ctPlayer || ISDEAD( thing ) || thing == self )
 					continue; // ignore non player, or dead played, or self
 

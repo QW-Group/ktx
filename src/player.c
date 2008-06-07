@@ -948,7 +948,7 @@ void GibPlayer()
 	p->s.v.nextthink = g_globalvars.time + 0.1;
 	p->s.v.think = ( func_t ) SUB_Remove;
 
-	if ( streq( damage_inflictor->s.v.classname, "teledeath" )	)
+	if ( TELEDEATH( self )	)
 	{
 		sound( p, CHAN_VOICE, "player/teledth1.wav", 1, ATTN_NONE );
 		return;

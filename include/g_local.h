@@ -501,6 +501,8 @@ void			play_teleport( gedict_t *sndspot );
 
 void            teleport_player(gedict_t *player, vec3_t origin, vec3_t angles, int flags);
 
+#define TELEDEATH(e) ((e)->deathtype == dtTELE1 || (e)->deathtype == dtTELE2 || (e)->deathtype == dtTELE3)
+
 // runes.c
 void            DropRune();
 void            SpawnRunes( qboolean yes );

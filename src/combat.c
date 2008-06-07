@@ -356,10 +356,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	}
 
 	// in teamplay 4 we do no armor or health damage to teammates (unless telefrag), but do apply velocity changes
-	if ( tp_num() == 4 && streq(targteam, attackerteam) && targ != attacker &&
-		dtTELE1 != targ->deathtype &&
-		dtTELE2 != targ->deathtype &&
-		dtTELE3 != targ->deathtype )
+	if ( tp_num() == 4 && streq(targteam, attackerteam) && targ != attacker && !TELEDEATH(targ) )
 	{
 		tp4teamdmg = true;
 	}
@@ -612,7 +609,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		 	&& streq( targteam, attackerteam )
 		 	&& attacker->ct == ctPlayer
 		 	&& strneq( inflictor->s.v.classname, "door" )
-		 	&& strneq( inflictor->s.v.classname, "teledeath" ) // do telefrag damage in tp
+		 	&& !TELEDEATH( targ ) // do telefrag damage in tp
 	   	)
 			return;
 
@@ -622,7 +619,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		 	&& streq( targteam, attackerteam )
 		 	&& attacker->ct == ctPlayer
 		 	&& strneq( inflictor->s.v.classname, "door" )
-		 	&& strneq( inflictor->s.v.classname, "teledeath" ) // do telefrag damage in tp
+		 	&& !TELEDEATH( targ ) // do telefrag damage in tp
 		 	&& targ != attacker
 	   	)
 			return;
@@ -632,7 +629,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	if (    match_in_progress == 2
 		 || dtSUICIDE == targ->deathtype // do suicide damage anyway
-		 || streq( inflictor->s.v.classname, "teledeath" ) 
+		 || TELEDEATH( targ )
 		 || ( k_practice && targ->ct != ctPlayer ) // #practice mode#
 		 || take >= 99999 // do such huge damage even in prewar, prewar because indirectly here match_in_progress != 2
 	   ) 
