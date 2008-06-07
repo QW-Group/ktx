@@ -1,3 +1,11 @@
+2008-06-07
+qq:
+288. I'm rewrote teleporting code, should fix some bugs. Probably added new, required testing.
+
+289. Added "/giveme" command, useful only if "sv_cheats 1" enabled, just give you quad/pent/ring/suit.
+	 Use it like "/giveme q 10", this should give you quad for 10 seconds.
+	 Useful for testing double pent telefrags :P
+
 2008-04-25
 qq:
 286. "k_dm2mod" is obsolete server setting now. Acting like k_dm2mod is always 1.

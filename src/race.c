@@ -1217,8 +1217,7 @@ void race_start( qboolean restart, const char *fmt, ... )
 	setorigin( r, PASSVEC3( s->s.v.origin ) );
 
 	// telefrag anyone at this origin
-	play_teleport( r );
-	spawn_tdeath( r->s.v.origin, r );
+	teleport_player( r, r->s.v.origin, r->s.v.angles, TFLAGS_SND_DST );
 
 	if ( n != r )
 	{

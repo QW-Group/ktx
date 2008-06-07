@@ -339,7 +339,7 @@ void spawn_tfog( vec3_t org )
 	trap_multicast( PASSVEC3( org ), MULTICAST_PHS );
 }
 
-
+/*
 void tdeath_touch()
 {
 	gedict_t       *other2;
@@ -419,11 +419,181 @@ void spawn_tdeath( vec3_t org, gedict_t *death_owner )
 
 	g_globalvars.force_retouch = 2;	// make sure even still objects get hit
 }
+*/
+
+void teleport_player(gedict_t *player, vec3_t origin, vec3_t angles, int flags)
+{
+	gedict_t		*p, *p2;
+	deathType_t		dt = dtNONE;
+
+// protect(in some case) player from be spawnfragged for some time
+	player->k_1spawn = g_globalvars.time + 0.78;
+
+// put a tfog where the player was and play teleporter sound
+// For some odd reason (latency?), no matter if the sound was issued to play
+// at the spot of the entity before it entered the teleporter, it actually
+// plays at the teleporter destination. So we just create a body double of the
+// player at the departure side which stands still, plays the sound and lives
+// for 1/10 of a second, then is removed. All these efforts were needed to get
+// rid of that annoying 2/10 second delay in playing the teleporter sound.
+
+	// play sound where the player was
+	if ( flags & TFLAGS_SND_SRC )
+	{
+		gedict_t	*othercopy = spawn();
+
+		setorigin( othercopy, PASSVEC3( player->s.v.origin ) );
+		othercopy->s.v.nextthink  = g_globalvars.time + 0.1;
+		othercopy->s.v.think = ( func_t ) SUB_Remove;
+		play_teleport( othercopy );
+	}
+
+	//put a tfog where the player was
+	if ( flags & TFLAGS_FOG_SRC )
+	{
+		spawn_tfog( player->s.v.origin );
+	}
+
+	trap_makevectors( angles );
+
+	// spawn a tfog flash in front of the destination
+	if ( flags & TFLAGS_FOG_DST )
+	{
+		vec3_t			fog_org;
+
+		VectorMA (origin, (flags & TFLAGS_FOG_DST_SPAWN) ? 20 : 32, g_globalvars.v_forward, fog_org);
+		spawn_tfog( fog_org );
+	}
+
+//	spawn_tdeath( origin, player );
+
+	setorigin( player, PASSVEC3( origin ) );
+
+	// play sound at destination
+	if ( flags & TFLAGS_SND_DST )
+	{
+		play_teleport( player );
+	}
+
+	VectorCopy( angles, player->s.v.angles ); // player.angles = angles;
+
+	if ( player->ct == ctPlayer )
+	{
+		if ( player->s.v.weapon == IT_HOOK && player->hook_out )
+		{
+			GrappleReset( player->hook );
+			player->attack_finished = g_globalvars.time + 0.25;
+		}
+
+		player->s.v.fixangle = 1;	// turn this way immediately
+		player->s.v.teleport_time = g_globalvars.time + 0.7;
+
+		if ( flags & TFLAGS_VELOCITY_ADJUST )
+		{
+			// Yawnmode: preserve velocity, I'm copying my own mod's code since i found it interesting to play with
+			// - Molgrum
+			if ( k_yawnmode )
+			{
+				float	vel;
+
+				// Scale the original speed like airstep does
+				player->s.v.velocity[2] = 0;
+				vel = vlen( player->s.v.velocity ) * ( 1.0 - k_teleport_cap / 100.0 );
+				
+				// Only preserve speed above 300
+				vel = max(300, vel);
+				
+				VectorScale( g_globalvars.v_forward, vel, player->s.v.velocity );
+			}
+			else
+			{
+				//  player->s.v.velocity = v_forward * 300;
+				VectorScale( g_globalvars.v_forward, 300, player->s.v.velocity );
+			}
+		}
+	}
+
+	player->s.v.flags -= ( int ) player->s.v.flags & FL_ONGROUND;
+
+	// perform telefragging code
+	p2 = NULL;
+    for( p = world; (p = find_plr( p )); )
+    {
+		if ( p == player )
+			continue; // ignore self
+
+		if ( ISDEAD( p ) )
+			continue; // alredy dead
+
+		if (	player->s.v.absmin[0] > p->s.v.absmax[0]
+			 || player->s.v.absmin[1] > p->s.v.absmax[1]
+			 || player->s.v.absmin[2] > p->s.v.absmax[2]
+			 || player->s.v.absmax[0] < p->s.v.absmin[0]
+			 || player->s.v.absmax[1] < p->s.v.absmin[1]
+			 || player->s.v.absmax[2] < p->s.v.absmin[2]
+		)
+		{
+/*
+			G_bprint(2, "%s do not intersects\n", p->s.v.netname);
+			G_bprint(2, "%.1f %.1f\n", player->s.v.absmin[0] , p->s.v.absmax[0]);
+			G_bprint(2, "%.1f %.1f\n", player->s.v.absmin[1] , p->s.v.absmax[1]);
+			G_bprint(2, "%.1f %.1f\n", player->s.v.absmin[2] , p->s.v.absmax[2]);
+			G_bprint(2, "%.1f %.1f\n", player->s.v.absmax[0] , p->s.v.absmin[0]);
+			G_bprint(2, "%.1f %.1f\n", player->s.v.absmax[1] , p->s.v.absmin[1]);
+			G_bprint(2, "%.1f %.1f\n", player->s.v.absmax[2] , p->s.v.absmin[2]);
+*/
+			continue; // bboxes not intersects
+		}
+
+//		G_bprint(2, "%s intersects\n", p->s.v.netname);
+
+		// frag anyone who teleports in on top of an invincible player
+		if ( p->ct == ctPlayer )
+		{
+			if ( p->invincible_finished > g_globalvars.time )
+			{
+				if ( player->invincible_finished > g_globalvars.time )
+				{
+					// both players have invincible
+					p->invincible_finished = 0; // remove invincible
+					p->deathtype = dt = dtTELE3;
+					p2 = p; // remember
+					T_Damage( p, player, player, 50000 );
+
+					continue;
+				}
+				else
+				{
+					// mortal trying telefrag someone who has 666, gib mortal instead
+					dt = dtTELE2;
+					p2 = p; // remember
+
+					continue;
+				}
+			}
+
+		}
+
+		if ( ISLIVE( p ) )
+		{
+			p->deathtype = dtTELE1;
+			T_Damage( p, player, player, 50000 );
+		}
+	}
+
+	if ( p2 && dt != dtNONE )
+	{
+		// gib self
+		player->invincible_finished = 0; // remove invincible
+		player->deathtype = dt;
+		T_Damage( player, p2, p2, 50000 );
+	}
+}
+
 
 void teleport_touch()
 {
-	gedict_t       *t, *othercopy;
-	vec3_t          org;
+	gedict_t       *t;
 
 	if ( self->s.v.targetname )
 	{
@@ -446,84 +616,18 @@ void teleport_touch()
 	if ( isRA() && !isWinner( other ) && !isLoser( other ) )
 		return;
 
-//team
-// protect(in some case) player from be spawnfragged for some time
-	other->k_1spawn = g_globalvars.time + 0.78;
-//team
-
 // activator = other;
 	SUB_UseTargets();
 
 	t = find( world, FOFS( s.v.targetname ), self->s.v.target );
 	if ( !t )
+	{
 		// G_Error( "couldn't find target" );
 		return;
-
-// put a tfog where the player was and play teleporter sound
-// For some odd reason (latency?), no matter if the sound was issued to play
-// at the spot of the entity before it entered the teleporter, it actually
-// plays at the teleporter destination. So we just create a body double of the
-// player at the departure side which stands still, plays the sound and lives
-// for 1/10 of a second, then is removed. All these efforts were needed to get
-// rid of that annoying 2/10 second delay in playing the teleporter sound.
-
-	othercopy = spawn();
-	setorigin( othercopy, PASSVEC3( other->s.v.origin ) );
-	othercopy->s.v.nextthink  = g_globalvars.time + 0.1;
-	othercopy->s.v.think = ( func_t ) SUB_Remove;
-	play_teleport( othercopy );
-
-//put a tfog where the player was
-	spawn_tfog( other->s.v.origin );
-
-// spawn a tfog flash in front of the destination
-	trap_makevectors( t->mangle );
-	org[0] = t->s.v.origin[0] + 32 * g_globalvars.v_forward[0];
-	org[1] = t->s.v.origin[1] + 32 * g_globalvars.v_forward[1];
-	org[2] = t->s.v.origin[2] + 32 * g_globalvars.v_forward[2];
-
-	spawn_tfog( org );
-	spawn_tdeath( t->s.v.origin, other );
-
-	setorigin( other, PASSVEC3( t->s.v.origin ) );
-	play_teleport( other );
-
-	VectorCopy( t->mangle, other->s.v.angles ); // other.angles = t.mangle;
-	if ( other->ct == ctPlayer )
-	{
-		if ( other->s.v.weapon == IT_HOOK && other->hook_out )
-		{
-			GrappleReset( other->hook );
-			other->attack_finished = g_globalvars.time + 0.25;
-		}
-
-		other->s.v.fixangle = 1;	// turn this way immediately
-		other->s.v.teleport_time = g_globalvars.time + 0.7;
-		if ( ( int ) other->s.v.flags & FL_ONGROUND )
-			other->s.v.flags = other->s.v.flags - FL_ONGROUND;
-
-		// Yawnmode: preserve velocity, I'm copying my own mod's code since i found it interesting to play with
-		// - Molgrum
-		if ( k_yawnmode )
-		{
-			float	vel;
-
-			// Scale the original speed like airstep does
-			other->s.v.velocity[2] = 0;
-			vel = vlen( other->s.v.velocity ) * ( 1.0 - k_teleport_cap / 100.0 );
-			
-			// Only preserve speed above 300
-			vel = max(300, vel);
-			
-			VectorScale( g_globalvars.v_forward, vel, other->s.v.velocity );
-		}
-		else
-		{
-			//  other->s.v.velocity = v_forward * 300;
-			VectorScale( g_globalvars.v_forward, 300, other->s.v.velocity );
-		}
 	}
-	other->s.v.flags -= ( int ) other->s.v.flags & FL_ONGROUND;
+
+	teleport_player( other, t->s.v.origin, t->mangle,
+			 TFLAGS_FOG_SRC | TFLAGS_FOG_DST | TFLAGS_SND_SRC | TFLAGS_SND_DST | TFLAGS_VELOCITY_ADJUST );
 }
 
 /*QUAKED info_teleport_destination (.5 .5 .5) (-8 -8 -8) (8 8 32)

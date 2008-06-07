@@ -218,6 +218,8 @@ void r_mode( );
 void r_route( );
 void r_print( );
 
+void giveme( );
+
 // }
 
 // CD - commands descriptions
@@ -485,6 +487,8 @@ const char CD_NODESC[] = "no desc";
 #define CD_NOITEMS      "allow/disallow items in game"
 
 #define CD_SPAWN666TIME "set spawn pent time (dmm4 atm)"
+
+#define CD_GIVEME       (CD_NODESC) // skip
 
 
 
@@ -772,6 +776,7 @@ cmd_t cmds[] = {
 	{ "nospecs",     nospecs,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOSPECS },
 	{ "noitems",     noitems,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOITEMS },
 	{ "spawn666time",Spawn666Time,              0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_SPAWN666TIME },
+	{ "giveme",      giveme,                    0    , CF_PLAYER | CF_PARAMS, CD_GIVEME },
 };
 
 #undef DEF
@@ -4218,9 +4223,6 @@ qboolean Pos_Set_origin (pos_t *pos)
 		}
 	}
 
-	// VVD: Don't want tele at pos_move - trick with tele is not good-looking. :-)
-	//spawn_tfog(self->s.v.origin);
-	//spawn_tfog(pos->origin);
 	setorigin (self, PASSVEC3( pos->origin ) ); // u can't just copy, use setorigin
 
 	return false;
@@ -5762,3 +5764,73 @@ void noitems()
 
 	cvar_toggle_msg( self, "k_noitems", redtext("noitems mode") );
 }
+
+void giveme_usage(void)
+{
+	G_sprint(self, 2, "giveme <q|p|r|s> [seconds]\n");
+}
+
+void giveme()
+{
+	char arg_2[128];
+	char arg_3[128];
+	char *got = "BUG";
+	float seconds;
+
+	if ( strnull( ezinfokey(world, "*cheats") ) )
+	{
+		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->s.v.netname);
+		return; // FU!
+	}
+
+	// no arguments, show info and return
+	if ( trap_CmdArgc() == 1 )
+	{
+		giveme_usage();
+		return;
+	}
+
+	trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
+	trap_CmdArgv( 2, arg_3, sizeof( arg_3 ) );
+
+	seconds = max(0, atof(arg_3));
+	if (!seconds)
+		seconds = 30;	
+
+	if ( streq(arg_2, "q") )
+	{
+		self->super_time = 1;
+		self->super_damage_finished = g_globalvars.time + seconds;
+		self->s.v.items = (int)self->s.v.items | IT_QUAD;
+		got = "quad";
+	}
+	else if ( streq(arg_2, "p") )
+	{
+		self->invincible_time = 1;
+		self->invincible_finished = g_globalvars.time + seconds;
+		self->s.v.items = (int)self->s.v.items | IT_INVULNERABILITY;
+		got = "pent";
+	}
+	else if ( streq(arg_2, "r") )
+	{
+		self->invisible_time = 1;
+		self->invisible_finished = g_globalvars.time + seconds;
+		self->s.v.items = (int)self->s.v.items | IT_INVISIBILITY;
+		got = "ring";
+	}
+	else if ( streq(arg_2, "s") )
+	{
+		self->rad_time = 1;
+		self->radsuit_finished = g_globalvars.time + seconds;
+		self->s.v.items = (int)self->s.v.items | IT_SUIT;
+		got = "suit";
+	}
+	else
+	{
+		giveme_usage();
+		return;
+	}
+
+	G_sprint(self, 2, "You got %s for %.1fs\n", got, seconds );
+}
+

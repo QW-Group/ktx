@@ -489,9 +489,17 @@ void            DropBackpack();
 void			adjust_pickup_time( float *current, float *total );
 
 //triggers.c
+
 void			play_teleport( gedict_t *sndspot );
-void            spawn_tfog( vec3_t org );
-void            spawn_tdeath( vec3_t org, gedict_t * death_owner );
+
+#define			TFLAGS_FOG_SRC				(1<<0)
+#define			TFLAGS_FOG_DST				(1<<1)
+#define			TFLAGS_FOG_DST_SPAWN		(1<<2)
+#define			TFLAGS_SND_SRC				(1<<3)
+#define			TFLAGS_SND_DST				(1<<4)
+#define			TFLAGS_VELOCITY_ADJUST		(1<<5)
+
+void            teleport_player(gedict_t *player, vec3_t origin, vec3_t angles, int flags);
 
 // runes.c
 void            DropRune();

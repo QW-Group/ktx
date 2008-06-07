@@ -43,7 +43,6 @@ void PlayerStats();
 void ExitCaptain();
 void CheckFinishCaptain();
 void MakeMOTD();
-void play_teleport( gedict_t *sndspot );
 void ImpulseCommands();
 void StartDie ();
 void ZeroFpsStats ();
@@ -1130,8 +1129,8 @@ void PutClientInServer(qboolean from_vmMain)
 {
 
 	gedict_t       *spot;
-	vec3_t          v;
 	int             items;
+	int             tele_flags;
 
 	self->deathtype = dtNONE;
 	self->s.v.classname = "player";
@@ -1221,12 +1220,13 @@ void PutClientInServer(qboolean from_vmMain)
 	player_stand1();
 
 	trap_makevectors( self->s.v.angles );
-	VectorScale( g_globalvars.v_forward, 20, v );
-	VectorAdd( v, self->s.v.origin, v );
 
 	// Play sound and add tele splash.
 	// In RA mode do that only for winner or loser.
 	// Do NOT do that in RACE.
+
+	tele_flags = TFLAGS_FOG_DST_SPAWN;
+
 	if ( isRACE() )
 	{
 		race_set_one_player_movetype_and_etc( self );
@@ -1235,17 +1235,13 @@ void PutClientInServer(qboolean from_vmMain)
 	{
 		if ( isWinner( self ) || isLoser( self ) )
 		{
-			spawn_tfog( v );
-			play_teleport( self );
+			tele_flags |= TFLAGS_FOG_DST | TFLAGS_SND_DST;
 		}
 	}
 	else
 	{
-		spawn_tfog( v );
-		play_teleport( self );
+		tele_flags |= TFLAGS_FOG_DST | TFLAGS_SND_DST;
 	}
-
-	spawn_tdeath( self->s.v.origin, self );
 
 	if ( isRA() )
 	{
@@ -1256,6 +1252,9 @@ void PutClientInServer(qboolean from_vmMain)
 			self->s.v.weapon = W_BestWeapon();
 
 		W_SetCurrentAmmo(); // important shit, not only ammo
+
+		teleport_player( self, self->s.v.origin, self->s.v.angles, tele_flags );
+
 		return;
 	}
 
@@ -1398,6 +1397,8 @@ void PutClientInServer(qboolean from_vmMain)
 		self->s.v.weapon = W_BestWeapon();
 
 	W_SetCurrentAmmo();
+
+	teleport_player( self, self->s.v.origin, self->s.v.angles, tele_flags );
 }
 
 /*
