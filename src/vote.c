@@ -169,6 +169,7 @@ int get_votes_req( int fofs, qboolean diff )
 						break;
 
 		case OV_NOSPECS: percent = cvar("k_vp_nospecs"); break;
+		case OV_COOP:    percent = cvar("k_vp_coop"); break;
 	}
 
 	percent = bound(0.51, bound(51, percent, 100)/100, 1); // calc and bound percentage between 50% to 100%
@@ -185,6 +186,8 @@ int get_votes_req( int fofs, qboolean diff )
 		vt_req = max(3, vt_req); // at least 3 votes in this case
 	else if ( fofs == OV_NOSPECS )
 		vt_req = max(2, vt_req); // at least 2 votes in this case
+	else if ( fofs == OV_COOP )
+		vt_req = max(1, vt_req); // at least 1 votes in this case
 
 	if ( diff )
 		return max(0, vt_req - votes);
@@ -570,6 +573,65 @@ void nospecs( )
 
 // }
 
+// { votecoop
+void vote_check_coop ()
+{
+	int veto;
+
+	if ( ( deathmatch && match_in_progress ) || intermission_running || match_over )
+		return;
+
+	if ( !get_votes( OV_COOP ) )
+		return;
+
+	veto = is_admins_vote( OV_COOP );
+
+	if( veto || !get_votes_req( OV_COOP, true ) )
+	{
+		vote_clear( OV_COOP );
+
+		// toggle coop mode
+		cvar_fset( "coop", coop = !cvar("coop") );
+		// set appropriate deathmatch
+		cvar_fset( "deathmatch", deathmatch = !coop );
+
+		if ( veto )
+			G_bprint( 2, "%s\n", redtext("Coop mode %s by admin veto", OnOff(cvar("coop"))) );
+		else
+			G_bprint( 2, "%s\n", redtext("Coop mode %s by majority vote", OnOff(cvar("coop"))) );
+
+		// and reload map
+		changelevel( coop ? "start" : g_globalvars.mapname );
+			
+		return;
+	}
+}
+
+void votecoop( )
+{
+    int votes;
+
+	if ( deathmatch && match_in_progress )
+	{
+        G_sprint(self, 2, "Match in progress and deathmatch is non zero, you can't vote for coop\n");
+        return;
+	}
+
+	if ( check_master() )
+		return;
+
+	self->v.coop = !self->v.coop;
+
+	G_bprint(2, "%s %s!%s\n", self->s.v.netname, 
+			(self->v.coop ? redtext("votes for coop %s", OnOff(!cvar("coop"))) : 
+							redtext("withdraws %s coop vote", g_his(self))),
+			((votes = get_votes_req( OV_COOP, true )) ? va(" (%d)", votes) : ""));
+
+	vote_check_coop ();
+}
+
+// }
+
 void vote_check_all ()
 {
 	vote_check_map ();
@@ -578,5 +640,6 @@ void vote_check_all ()
 	vote_check_pickup ();
 	vote_check_rpickup ();
 	vote_check_nospecs ();
+	vote_check_coop ();
 }
 

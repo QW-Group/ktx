@@ -1,3 +1,16 @@
+2008-06-27
+qq:
+290. Added coop support, well, not yet tested.
+	 You can turn it on with "/votecoop" command, this turn "coop 1" and "deathmatch 0"
+	 and load "start" map, server start acts like in pseudo matchless mode,
+	 to revert it back use "/votecoop" again.
+	 Server admins may tune vote percentage with "k_vp_coop".
+
+291. "/giveme" cheat command extended.
+	 "/giveme runes" - give all runes, not ctf ones, but for complete sinleplayer, you know...
+	 "/giveme rune [1|2|3|4]" - give particular rune
+	 "/giveme norunes" - remove all runes
+
 2008-06-07
 qq:
 288. I'm rewrote teleporting code, should fix some bugs. Probably added new, required testing.

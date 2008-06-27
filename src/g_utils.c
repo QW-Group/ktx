@@ -77,6 +77,9 @@ gedict_t *spawn(  )
 
 	if ( !t || t == world )
 		DebugTrap( "spawn return world\n" );
+
+	t->spawn_time = g_globalvars.time;
+
 	return t;
 }
 
@@ -362,6 +365,11 @@ gedict_t *findradius2( gedict_t * start, vec3_t org, float rad )
 changeyaw
 
 This was a major timewaster in progs, so it was converted to C
+
+Turns towards self.ideal_yaw at self.yaw_speed
+Sets the global variable current_yaw
+Called every 0.1 sec by monsters
+
 ==============
 */
 void changeyaw( gedict_t * ent )
@@ -826,6 +834,24 @@ int walkmove( gedict_t * ed, float yaw, float dist )
 	activator= saveactivator;
 	return retv;
 }
+
+int movetogoal( float dist )
+{
+	gedict_t*saveself,*saveother,*saveactivator;
+	int retv;
+
+	saveself	= self ;
+	saveother	= other;
+	saveactivator = activator;
+
+	retv = trap_movetogoal( dist );
+
+	self 	= saveself;
+	other	= saveother;
+	activator= saveactivator;
+	return retv;
+}
+
 
 float cvar( const char *var )
 {
@@ -1354,7 +1380,7 @@ int Get_Powerups ()
 
 	k_pow_check_time = !k_pow_check_time ? 10 : k_pow_check_time; // default is 10
 
-	if ( !k_pow_new || !k_matchLess || !k_pow_min_players )
+	if ( !k_pow_new || !k_matchLess || !k_pow_min_players || !deathmatch )
 		return k_pow = k_pow_new; // no k_pow_min_players if server in normal match mode
 								  // no powerups if k_pow == 0
 								  // return current value of key 'k_pow' if k_pow_min_players == 0
@@ -2114,3 +2140,4 @@ void SetUserInfo ( gedict_t *p, const char* varname, const char* value, int flag
 {
 	trap_SetUserInfo( NUM_FOR_EDICT( p ), varname, value, flags );
 }
+

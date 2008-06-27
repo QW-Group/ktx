@@ -1156,11 +1156,13 @@ void EndMatch ( float skip_log )
 		cvar_fset("sv_spectalk", 1);
 	}
 
-	G_bprint( 2, "The match is over\n");
+	if ( deathmatch )
+		G_bprint( 2, "The match is over\n");
 
 	EM_CorrectStats();
 
-	if( /* skip_log */ 0 ) { // qqshka: we are not skip match stats now
+	if ( /* skip_log || */ !deathmatch )
+	{
 		;
 	}
 	else {
@@ -1455,7 +1457,7 @@ void SM_PrepareClients()
 {
 	int hdc, i;
 	char *pl_team;
-	gedict_t *p, *old;
+	gedict_t *p;
 
 	k_teamid = 666;
 	localcmd("localinfo 666 \"\"\n");
@@ -1505,13 +1507,11 @@ void SM_PrepareClients()
 			continue;
 		}
 
-		old = self;
-		self = p;
+		// ignore k_respawn() in case of coop
+		if ( !deathmatch )
+			continue;
 
-		SetNewParms( false );
-		PutClientInServer( false );
-
-		self = old;
+		k_respawn( p, false );
 	}
 }
 
@@ -1616,11 +1616,14 @@ void StartMatch ()
 	if ( !QVMstrftime(date, sizeof(date), "%Y-%m-%d %H:%M:%S %Z", 0) )
 		date[0] = 0;
 
-	if ( date[0] )
-		G_bprint(2, "matchdate: %s\n", date);
-
-	if ( !k_matchLess || cvar( "k_matchless_countdown" ) )
-		G_bprint(2, "%s\n", redtext("The match has begun!"));
+	if ( deathmatch )
+	{
+		if ( date[0] )
+			G_bprint(2, "matchdate: %s\n", date);
+    
+		if ( !k_matchLess || cvar( "k_matchless_countdown" ) )
+			G_bprint(2, "%s\n", redtext("The match has begun!"));
+	}
 
 // spec silence
 	{ 
@@ -2128,8 +2131,8 @@ void StartTimer ()
 
     timer->cnt2 = max(3, (int)cvar( "k_count" ));  // at the least we want a 3 second countdown
 
-	if ( k_matchLess ) // check if we need countdown in case of matchless
-		if ( !cvar("k_matchless_countdown") )
+	if ( k_matchLess ) // check if we need countdown in case of matchless or coop
+		if ( !cvar("k_matchless_countdown") || !deathmatch )
 			timer->cnt2 = 0; // ok - no countdown
 
 	( timer->cnt2 )++;

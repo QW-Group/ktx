@@ -24,17 +24,24 @@
  */
 
 #include "g_local.h"
-void	T_MissileTouch( gedict_t * e1, gedict_t * e2 );
+
 void	ClientObituary( gedict_t * e1, gedict_t * e2 );
 
-char	*dmg_type[] = { "none", "axe", "sg", "ssg", "ng", "sng", "gl", "rl", 
-						"lg_beam", "lg_dis", "lg_dis_self", "hook",
-						"changelevel", "lava", "slime", "water", "fall", "stomp",
-						"tele1", "tele2", "tele3", "explo_box", "laser", "fireball",
-						"squish", "trigger", "suicide", "unknown" };
+#define DEATHTYPE( _dt_, _dt_str_ ) #_dt_str_,
+char *deathtype_strings[] =
+{
 
-int	dmg_type_cnt = sizeof(dmg_type) / sizeof(dmg_type[0]);
+	#include "deathtype.h"
 
+};
+#undef DEATHTYPE
+
+const int deathtype_strings_cnt = sizeof(deathtype_strings) / sizeof(deathtype_strings[0]);
+
+char *death_type( deathType_t dt )
+{
+	return deathtype_strings[ (int)bound( 0, dt, deathtype_strings_cnt - 1 ) ];
+}
 
 //============================================================================
 
@@ -197,19 +204,27 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 	}
 	else if ( self->s.v.movetype == MOVETYPE_PUSH || self->s.v.movetype == MOVETYPE_NONE )
 	{			// doors, triggers, etc
-//  if(self->th_die)
-		self->th_die();
+		if ( self->th_die )
+			self->th_die();
+
 		self = oself;
 		return;
 	}
 
 	self->s.v.enemy = EDICT_TO_PROG( attacker );
 
-// bump the monster counter
+	// bump the monster counter
 	if ( ( ( int ) ( self->s.v.flags ) ) & FL_MONSTER )
 	{
 		g_globalvars.killed_monsters++;
 		WriteByte( MSG_ALL, SVC_KILLEDMONSTER );
+
+		// in coop, killing a monster gives you a frag
+		if ( coop )
+		{
+			if ( attacker->ct == ctPlayer )
+				attacker->s.v.frags++;
+		}
 	}
 
 	ClientObituary( self, attacker );
@@ -218,8 +233,10 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 	self->s.v.touch = ( func_t ) SUB_Null;
 	self->s.v.effects = 0;
 
-	//if(self->th_die)
-	self->th_die();
+	monster_death_use();
+
+	if ( self->th_die )
+		self->th_die();
 
 	self = oself;
 
@@ -529,7 +546,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 					g_globalvars.time - match_start_time,
 					attackername,
 					targ->s.v.netname,
-					dmg_type[ (int)bound(0, targ->deathtype, dmg_type_cnt-1) ],
+					death_type( targ->deathtype ),
 					(int)(attacker->super_damage_finished > g_globalvars.time ? 1 : 0 ),
 					dmg_is_splash,
 					(int)save );
@@ -636,6 +653,8 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	{
 		targ->s.v.health -= take;
 
+//		G_bprint( 2, "%s %f\n", targ->s.v.classname, targ->s.v.health );
+
 		if ( take )
 		{
 			if ( streq( inflictor->s.v.classname, "worldspawn" ) || strnull( attacker->s.v.classname ) )
@@ -648,7 +667,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 						g_globalvars.time - match_start_time,
 						attackername,
 						targ->s.v.netname,
-						dmg_type[ (int)bound(0, targ->deathtype, dmg_type_cnt-1) ],
+						death_type( targ->deathtype ),
 						(int)(attacker->super_damage_finished > g_globalvars.time ? 1 : 0 ),
 						dmg_is_splash,
 						(int)take );
@@ -672,12 +691,14 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	}
 
 	// show damage in sbar
-	if ( match_in_progress != 2 && targ->s.v.health > 0 )
+	if ( match_in_progress != 2 && ISLIVE( targ ) && !k_matchLess )
 	{
 		if ( !midair || ( (int)targ->s.v.flags & FL_ONGROUND ) )
 		{
-			targ->s.v.currentammo = 1000 + Q_rint(damage);
-			if (attacker != targ)
+			if ( targ->ct == ctPlayer )			
+				targ->s.v.currentammo = 1000 + Q_rint(damage);
+
+			if ( attacker != targ && attacker->ct == ctPlayer)
 				attacker->s.v.health = 1000 + Q_rint(damage);
 		}
 	}
@@ -713,6 +734,11 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	// react to the damage - call pain function
 	oldself = self;
 	self = targ;
+
+  	if ( (int)self->s.v.flags & FL_MONSTER )
+  	{
+		GetMadAtAttacker( attacker );
+  	}
 
 	if ( self->th_pain )
 	{

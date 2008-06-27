@@ -72,18 +72,20 @@ void t_movetarget()
 
 //dprint ("t_movetarget\n");
 	self->movetarget = find( world, FOFS( s.v.targetname ), other->s.v.target );
+	if ( !self->movetarget ) // NOTE: this is a damn difference with qc
+		self->movetarget = world;
 	self->s.v.goalentity = EDICT_TO_PROG( self->movetarget );
 
 	VectorSubtract( self->movetarget->s.v.origin, self->s.v.origin, tmpv );
 	self->s.v.ideal_yaw = vectoyaw( tmpv );
-	if ( !self->movetarget )
+	if ( !self->movetarget || self->movetarget == world )
 	{
 		self->pausetime = g_globalvars.time + 999999;
-//  self.th_stand (); //monster code
+		if ( self->th_stand )
+			self->th_stand(); //monster code
 		return;
 	}
 }
-
 
 
 void movetarget_f()

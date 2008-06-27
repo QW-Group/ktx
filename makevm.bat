@@ -93,7 +93,42 @@ cd VM
 @if errorlevel 1 goto quit
 %CC% %CFLAGS% %INCFLAGS% %SRC%\race.c
 @if errorlevel 1 goto quit
-
+%CC% %CFLAGS% %INCFLAGS% %SRC%\sp_ai.c
+@if errorlevel 1 goto quit
+%CC% %CFLAGS% %INCFLAGS% %SRC%\sp_boss.c
+@if errorlevel 1 goto quit
+%CC% %CFLAGS% %INCFLAGS% %SRC%\sp_client.c
+@if errorlevel 1 goto quit
+%CC% %CFLAGS% %INCFLAGS% %SRC%\sp_demon.c
+@if errorlevel 1 goto quit
+%CC% %CFLAGS% %INCFLAGS% %SRC%\sp_dog.c
+@if errorlevel 1 goto quit
+%CC% %CFLAGS% %INCFLAGS% %SRC%\sp_enforcer.c
+@if errorlevel 1 goto quit
+%CC% %CFLAGS% %INCFLAGS% %SRC%\sp_fish.c
+@if errorlevel 1 goto quit
+%CC% %CFLAGS% %INCFLAGS% %SRC%\sp_hknight.c
+@if errorlevel 1 goto quit
+%CC% %CFLAGS% %INCFLAGS% %SRC%\sp_knight.c
+@if errorlevel 1 goto quit
+%CC% %CFLAGS% %INCFLAGS% %SRC%\sp_monsters.c
+@if errorlevel 1 goto quit
+%CC% %CFLAGS% %INCFLAGS% %SRC%\sp_ogre.c
+@if errorlevel 1 goto quit
+%CC% %CFLAGS% %INCFLAGS% %SRC%\sp_oldone.c
+@if errorlevel 1 goto quit
+%CC% %CFLAGS% %INCFLAGS% %SRC%\sp_shalrath.c
+@if errorlevel 1 goto quit
+%CC% %CFLAGS% %INCFLAGS% %SRC%\sp_shambler.c
+@if errorlevel 1 goto quit
+%CC% %CFLAGS% %INCFLAGS% %SRC%\sp_soldier.c
+@if errorlevel 1 goto quit
+%CC% %CFLAGS% %INCFLAGS% %SRC%\sp_tarbaby.c
+@if errorlevel 1 goto quit
+%CC% %CFLAGS% %INCFLAGS% %SRC%\sp_wizard.c
+@if errorlevel 1 goto quit
+%CC% %CFLAGS% %INCFLAGS% %SRC%\sp_zombie.c
+@if errorlevel 1 goto quit
 
 
 copy %SRC%\g_syscalls.asm .

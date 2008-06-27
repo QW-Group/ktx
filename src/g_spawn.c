@@ -228,6 +228,24 @@ void            SP_item_key2();
 void            SP_misc_fireball();
 void            SP_info_intermission();
 void            SP_info_player_deathmatch();
+
+void			SP_monster_dog();
+void			SP_monster_demon1();
+void			SP_monster_enforcer();
+void			SP_monster_fish();
+void			SP_monster_hell_knight();
+void			SP_monster_knight();
+void			SP_monster_ogre();
+void			SP_monster_shalrath();
+void			SP_monster_shambler();
+void			SP_monster_army();
+void			SP_monster_tarbaby();
+void			SP_monster_wizard();
+void			SP_monster_zombie();
+void			SP_monster_boss();
+void			SP_monster_oldone();
+void			SP_event_lightning();
+
 spawn_t         spawns[] = {
 	// info entities don't do anything at all, but provide positional
 	// information for things controlled by other processes
@@ -333,22 +351,22 @@ Used as a positional target for lightning.
 Used as a positional target for spotlights, etc.
 */
 	{"info_null",			SUB_Remove},
-	{"monster_ogre",		SUB_Remove},
-	{"monster_demon1",		SUB_Remove},
-	{"monster_shambler",		SUB_Remove},
-	{"monster_knight",		SUB_Remove},
-	{"monster_army",		SUB_Remove},
-	{"monster_wizard",		SUB_Remove},
-	{"monster_dog",			SUB_Remove},
-	{"monster_zombie",		SUB_Remove},
-	{"monster_boss",		SUB_Remove},
-	{"monster_tarbaby",		SUB_Remove},
-	{"monster_hell_knight",		SUB_Remove},
-	{"monster_fish",		SUB_Remove},
-	{"monster_shalrath",		SUB_Remove},
-	{"monster_enforcer",		SUB_Remove},
-	{"monster_oldone",		SUB_Remove},
-	{"event_lightning",		SUB_Remove},
+	{"monster_ogre",		SP_monster_ogre},
+	{"monster_demon1",		SP_monster_demon1},
+	{"monster_shambler",	SP_monster_shambler},
+	{"monster_knight",		SP_monster_knight},
+	{"monster_army",		SP_monster_army},
+	{"monster_wizard",		SP_monster_wizard},
+	{"monster_dog",			SP_monster_dog},
+	{"monster_zombie",		SP_monster_zombie},
+	{"monster_boss",		SP_monster_boss},
+	{"monster_tarbaby",		SP_monster_tarbaby},
+	{"monster_hell_knight",	SP_monster_hell_knight},
+	{"monster_fish",		SP_monster_fish},
+	{"monster_shalrath",	SP_monster_shalrath},
+	{"monster_enforcer",	SP_monster_enforcer},
+	{"monster_oldone",		SP_monster_oldone},
+	{"event_lightning",		SP_event_lightning},
 	{0, 0}
 };
 
@@ -513,8 +531,21 @@ void G_SpawnGEntityFromSpawnVars( void )
 		G_ParseField( spawnVars[i][0], spawnVars[i][1], ent );
 	}
 
-	if ( ( ( int ) ent->s.v.spawnflags & SPAWNFLAG_NOT_DEATHMATCH ) )
+	if ( deathmatch )
 	{
+		if ( ( ( int ) ent->s.v.spawnflags & SPAWNFLAG_NOT_DEATHMATCH ) )
+		{
+//			G_cprint( "%s removed because of SPAWNFLAG_NOT_DEATHMATCH\n", ent->s.v.classname );
+			ent_remove( ent );
+			return;
+		}
+	}
+	else if (   ( skill == 0 && ((int)ent->s.v.spawnflags & SPAWNFLAG_NOT_EASY) )
+			 || ( skill == 1 && ((int)ent->s.v.spawnflags & SPAWNFLAG_NOT_MEDIUM) )
+			 || ( skill >= 2 && ((int)ent->s.v.spawnflags & SPAWNFLAG_NOT_HARD) ) 
+	   )
+	{
+//		G_cprint( "%s removed because of SPAWNFLAG_NOT_XXX\n", ent->s.v.classname );
 		ent_remove( ent );
 		return;
 	}
@@ -525,7 +556,6 @@ void G_SpawnGEntityFromSpawnVars( void )
 		ent_remove( ent );
 		return;
 	}
-//      if(!ent->s.v.classname)ent->s.v.classname="";
 }
 
 

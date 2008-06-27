@@ -140,3 +140,8 @@ void            player_die_ax9();
 void            set_suicide_frame();
 void            PlayerDead();
 void            PlayerDie();
+
+gedict_t		*ThrowGib( char *gibname, float dm );
+void			ThrowHead( char *gibname, float dm );
+
+void			muzzleflash();

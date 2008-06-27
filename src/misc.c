@@ -367,12 +367,13 @@ void Laser_Touch()
 	ent_remove( self );
 }
 
-gedict_t       *newmis;
+gedict_t       *newmis; // FIXME: funny place for such global
+
 void LaunchLaser( vec3_t org, vec3_t vec )
 {
 	//vec3_t  vec;
 
-	if ( !strcmp( self->s.v.classname, "monster_enforcer" ) )
+	if ( streq( self->s.v.classname, "monster_enforcer" ) )
 		sound( self, CHAN_WEAPON, "enforcer/enfire.wav", 1, ATTN_NORM );
 
 	normalize( vec, vec );
@@ -399,16 +400,7 @@ void LaunchLaser( vec3_t org, vec3_t vec )
 	newmis->s.v.touch = ( func_t ) Laser_Touch;
 }
 
-/*
-===============
-launch_spike
-
-Used for both the player and the ogre
-===============
-*/
 void            spike_touch();
-
-void            launch_spike( vec3_t org, vec3_t dir );
 void            superspike_touch();
 
 void spikeshooter_use()
@@ -660,8 +652,7 @@ This bmodel will appear if the episode has allready been completed, so players c
 */
 void SP_func_episodegate()
 {
-	if ( !
-	     ( ( int ) ( g_globalvars.serverflags ) & ( int ) ( self->s.v.spawnflags ) ) )
+	if ( !( ( int ) ( g_globalvars.serverflags ) & ( int ) ( self->s.v.spawnflags ) ) )
 		return;		// can still enter episode
 
 	SetVector( self->s.v.angles, 0, 0, 0 );

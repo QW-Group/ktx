@@ -8,8 +8,6 @@
 
 #include "g_local.h"
 
-void k_respawn( gedict_t *p );
-
 void setnowep( gedict_t *anent );
 
 void SetWinner( gedict_t *p );
@@ -477,14 +475,14 @@ void ra_Frame ()
 			ra_out_que( winner );
 			G_bprint (PRINT_HIGH, "The new %s is %s\n", redtext("winner"), getname(winner));
 			SetWinner( winner );
-			k_respawn( winner ); // respawn player
+			k_respawn( winner, true ); // respawn player
 		}
     
 		if ( !loser && (loser = ra_que_first()) ) { // lack of loser
 			ra_out_que( loser );
 			G_bprint (PRINT_HIGH, "The new %s is %s\n", redtext("challenger"), getname(loser));
 			SetLoser( loser );
-			k_respawn( loser ); // respawn player
+			k_respawn( loser, true ); // respawn player
 		}
 
 		if ( !winner || !loser )

@@ -136,3 +136,5 @@ void trap_makevectors( float *v );
 #define SETUSERINFO_STAR          (1<<0) // allow set star keys
 
 int 	trap_SetUserInfo( int edn, const char* varname, const char* value, int flags );
+
+int     trap_movetogoal( float dist );

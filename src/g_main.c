@@ -82,6 +82,7 @@ void			RemoveMOTD();
 
 static			qboolean check_ezquake(gedict_t *p);
 
+void			SaveLevelStartParams( gedict_t *e );
 
 qboolean		FTE_sv = false;
 
@@ -182,8 +183,12 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		if( !self->k_accepted )
 			return 1;
 
+		SaveLevelStartParams( self );
+
 		if ( !arg0 )
-			PutClientInServer( true );
+		{
+			k_respawn( self, false );
+		}
 		else
 			PutSpectatorInServer();
 
@@ -212,7 +217,7 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 		return 1;
 
 	case GAME_SETNEWPARMS:
-		SetNewParms( true );
+		SetNewParms();
 		return 1;
 
 	case GAME_CLIENT_PRETHINK:

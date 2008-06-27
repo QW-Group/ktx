@@ -204,8 +204,12 @@ int trap_droptofloor( int edn )
 
 int trap_walkmove( int edn, float yaw, float dist )
 {
-	return syscall( G_WALKMOVE, edn, PASSFLOAT( yaw),
-			PASSFLOAT( dist ));
+	return syscall( G_WALKMOVE, edn, PASSFLOAT( yaw), PASSFLOAT( dist ) );
+}
+
+int trap_movetogoal( float dist )
+{
+	return syscall( G_MOVETOGOAL, PASSFLOAT( dist ) );
 }
 
 void trap_lightstyle( int style, char *val )

@@ -33,6 +33,9 @@ void TookWeaponHandler( gedict_t *p, int new_wp );
 
 void SUB_regen()
 {
+	if ( !deathmatch )
+		return;
+
 	self->s.v.model = self->mdl;	// restore original model
 	self->s.v.solid = SOLID_TRIGGER;	// allow it to be touched again
 	sound( self, CHAN_VOICE, "items/itembk2.wav", 1, ATTN_NORM );	// play respawn sound
@@ -577,7 +580,7 @@ void weapon_touch()
 	if ( match_in_progress != 2 || !readytostart() )
         return;
 	
-	if ( deathmatch == 2 || deathmatch == 3 || deathmatch == 5 )
+	if ( deathmatch == 2 || deathmatch == 3 || deathmatch == 5 || coop )
 		leave = 1;
 	else
 		leave = 0;
@@ -1116,8 +1119,11 @@ void key_touch()
 	stuffcmd( other, "bf\n" );
 	other->s.v.items = ( int ) other->s.v.items | ( int ) self->s.v.items;
 
-	self->s.v.solid = SOLID_NOT;
-	self->s.v.model = "";
+	if ( !coop )
+	{
+		self->s.v.solid = SOLID_NOT;
+		self->s.v.model = "";
+	}
 
 	activator = other;
 	SUB_UseTargets();	// fire all targets / killtargets

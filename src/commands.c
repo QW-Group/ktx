@@ -43,6 +43,8 @@ void VoteAdmin();
 void VoteYes();
 void VoteNo();
 void VoteCaptain ();
+void nospecs();
+void votecoop();
 void RandomPickup();
 void ShowDMM();
 void ChangeDM(float dmm);
@@ -194,8 +196,6 @@ void TogglePause();
 void ToggleArena();
 
 void Spawn666Time();
-
-void nospecs();
 
 void noitems();
 
@@ -490,6 +490,8 @@ const char CD_NODESC[] = "no desc";
 
 #define CD_GIVEME       (CD_NODESC) // skip
 
+#define CD_VOTECOOP     "vote for coop on/off"
+
 
 
 void dummy() {}
@@ -776,7 +778,8 @@ cmd_t cmds[] = {
 	{ "nospecs",     nospecs,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOSPECS },
 	{ "noitems",     noitems,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOITEMS },
 	{ "spawn666time",Spawn666Time,              0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_SPAWN666TIME },
-	{ "giveme",      giveme,                    0    , CF_PLAYER | CF_PARAMS, CD_GIVEME },
+	{ "giveme",      giveme,                    0    , CF_PLAYER | CF_MATCHLESS | CF_PARAMS, CD_GIVEME },
+	{ "votecoop",    votecoop,                  0    , CF_PLAYER | CF_MATCHLESS, CD_VOTECOOP },
 };
 
 #undef DEF
@@ -4408,10 +4411,9 @@ char *lastscores2str( lsType_t lst )
 		case lsFFA:  return "FFA";
 		case lsCTF:  return "CTF";
 		case lsRA:   return "RA";
+
 		default:	 return "unknown";
 	}
-
-	return "unknown";
 }
 
 void lastscore_add ()
@@ -5767,7 +5769,10 @@ void noitems()
 
 void giveme_usage(void)
 {
-	G_sprint(self, 2, "giveme <q|p|r|s> [seconds]\n");
+	G_sprint(self, 2, "giveme <q|p|r|s> [seconds]\n"
+					  "giveme rune [1|2|3|4]\n"
+					  "giveme runes\n"
+					  "giveme norunes\n");
 }
 
 void giveme()
@@ -5824,6 +5829,26 @@ void giveme()
 		self->radsuit_finished = g_globalvars.time + seconds;
 		self->s.v.items = (int)self->s.v.items | IT_SUIT;
 		got = "suit";
+	}
+	else if ( streq(arg_2, "rune")  )
+	{
+		int rune = bound( 0, seconds - 1, 3 );
+
+		g_globalvars.serverflags = (int)g_globalvars.serverflags | ( 1 << rune );
+
+		return;
+	}
+	else if ( streq(arg_2, "runes")  )
+	{
+		g_globalvars.serverflags = (int)g_globalvars.serverflags | 15;
+
+		return;
+	}
+	else if ( streq(arg_2, "norunes")  )
+	{
+		g_globalvars.serverflags = (int)g_globalvars.serverflags & ~15;
+
+		return;
 	}
 	else
 	{

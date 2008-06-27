@@ -390,7 +390,33 @@ void tdeath_touch()
 		T_Damage( other, self, other2, 50000 );
 	}
 }
+*/
 
+// { NOTE: retarded code, just so monsters able double telefrag each other, for example "e1m7"
+void tdeath_touch()
+{
+	gedict_t       *other2;
+
+	// should not be used against players
+	if ( other->ct == ctPlayer )
+		return;
+
+	if ( ISDEAD( other ) )
+		return;
+
+// { ktpro way to reduce double telefrags
+	if ( other->tdeath_time > self->tdeath_time ) 
+		return; // this mean we go through tele after some guy, so we must not be telefragged
+// }
+
+	other2 = PROG_TO_EDICT( self->s.v.owner );
+
+	if ( other == other2 )
+		return;
+
+	other->deathtype = dtTELE1;
+	T_Damage( other, self, other2, 50000 );
+}
 
 void spawn_tdeath( vec3_t org, gedict_t *death_owner )
 {
@@ -419,10 +445,11 @@ void spawn_tdeath( vec3_t org, gedict_t *death_owner )
 
 	g_globalvars.force_retouch = 2;	// make sure even still objects get hit
 }
-*/
+// }
 
 void teleport_player(gedict_t *player, vec3_t origin, vec3_t angles, int flags)
 {
+	qboolean		dm = deathmatch;
 	gedict_t		*p, *p2;
 	deathType_t		dt = dtNONE;
 
@@ -464,8 +491,6 @@ void teleport_player(gedict_t *player, vec3_t origin, vec3_t angles, int flags)
 		VectorMA (origin, (flags & TFLAGS_FOG_DST_SPAWN) ? 20 : 32, g_globalvars.v_forward, fog_org);
 		spawn_tfog( fog_org );
 	}
-
-//	spawn_tdeath( origin, player );
 
 	setorigin( player, PASSVEC3( origin ) );
 
@@ -516,14 +541,25 @@ void teleport_player(gedict_t *player, vec3_t origin, vec3_t angles, int flags)
 	player->s.v.flags -= ( int ) player->s.v.flags & FL_ONGROUND;
 
 	// perform telefragging code
+
+	// { NOTE: retarded code, just so monsters able double telefrag each other, for example "e1m7"
+	if ( player->ct != ctPlayer )
+		spawn_tdeath( player->s.v.origin, player );
+	// }
+
 	p2 = NULL;
-    for( p = world; (p = find_plr( p )); )
+	// If 'deathmatch' then use fast find_plr(), if non dm then more slow nextent().
+	// Since 'deathmatch' variable is global and may be changed during next 'for' we use local var 'dm' instead.
+    for( p = world; ( p = ( dm ? find_plr( p ) : nextent( p ) ) ); )
     {
 		if ( p == player )
 			continue; // ignore self
 
 		if ( ISDEAD( p ) )
 			continue; // alredy dead
+
+		if ( p->s.v.solid != SOLID_SLIDEBOX )
+			continue; // not a monster or player
 
 		if (	player->s.v.absmin[0] > p->s.v.absmax[0]
 			 || player->s.v.absmin[1] > p->s.v.absmax[1]
@@ -686,14 +722,33 @@ trigger_setskill
 ==============================================================================
 */
 
+void trigger_skill_touch ()
+{
+	if ( other->ct != ctPlayer )
+		return;
+
+	cvar_set( "skill", self->s.v.message );
+}
+
 /*QUAKED trigger_setskill (.5 .5 .5) ?
 sets skill level to the value of "message".
 Only used on start map.
 */
-void SP_trigger_setskill()
+void SP_trigger_setskill ()
 {
-	ent_remove( self );
+	if ( deathmatch )
+	{
+		ent_remove( self );
+		return;
+	}
+
+	if ( !self->s.v.message )
+		self->s.v.message = "";
+
+	InitTrigger ();
+	self->s.v.touch = ( func_t ) trigger_skill_touch;
 }
+
 
 
 /*
@@ -826,9 +881,7 @@ void SP_trigger_push()
 
 void trigger_monsterjump_touch()
 {
-
-	if ( ( (int)other->s.v.flags & ( FL_MONSTER | FL_FLY | FL_SWIM ) ) !=
-	     FL_MONSTER )
+	if ( ( (int)other->s.v.flags & ( FL_MONSTER | FL_FLY | FL_SWIM ) ) != FL_MONSTER )
 		return;
 
 // set XY even if not on ground, so the jump will clear lips

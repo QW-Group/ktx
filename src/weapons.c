@@ -1943,38 +1943,6 @@ qboolean W_ChangeWeapon( int wp )
 
 /*
 ============
-CheatCommand
-============
-*/
-void CheatCommand()
-{
-	if ( !iKey( world, "*cheats" ) ) // FIXME: is this working?
-		return;
-
-//      if (deathmatch || coop)
-	return;
-/*
-	self->s.v.ammo_rockets = 100;
-	self->s.v.ammo_nails = 200;
-	self->s.v.ammo_shells = 100;
-	self->s.v.items = ( int ) self->s.v.items |
-	    IT_AXE |
-	    IT_SHOTGUN |
-	    IT_SUPER_SHOTGUN |
-	    IT_NAILGUN |
-	    IT_SUPER_NAILGUN |
-	    IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER | IT_KEY1 | IT_KEY2;
-
-	self->s.v.ammo_cells = 200;
-	self->s.v.items = ( int ) self->s.v.items | IT_LIGHTNING;
-
-	self->s.v.weapon = IT_ROCKET_LAUNCHER;
-	W_SetCurrentAmmo();
-*/
-}
-
-/*
-============
 CycleWeaponCommand
 
 Go to the next weapon with ammo
@@ -2137,23 +2105,6 @@ qboolean CycleWeaponReverseCommand()
 	return true;
 }
 
-
-/*
-============
-ServerflagsCommand
-
-Just for development
-============
-*/
-void ServerflagsCommand()
-{
-	if ( !iKey( world, "*cheats" ) ) // FIXME: is this working?
-		return;
-
-//	g_globalvars.serverflags = ( int ) ( g_globalvars.serverflags ) * 2 + 1;
-}
-
-
 void kfjump ();
 void krjump ();
 
@@ -2203,13 +2154,13 @@ void ImpulseCommands()
 		clear = W_ChangeWeapon( impulse );
 
 	else if ( impulse == 9 )
-		CheatCommand();
+		; // removed
 
 	else if ( impulse == 10 )
 		clear = CycleWeaponCommand();
 
 	else if ( impulse == 11 )
-		ServerflagsCommand();
+		; // removed
 
 	else if ( impulse == 12 )
 		clear = CycleWeaponReverseCommand();

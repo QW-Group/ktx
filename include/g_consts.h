@@ -172,7 +172,7 @@
 // Since BROADCAST is never used in QW 1.5, and MULTICAST is used instead,
 // just define BROADCAST as MULTICAST for QW 1.5
 #define MSG_MULTICAST   4
-#define MSG_BROADCAST  #MSG_MULTICAST
+#define MSG_BROADCAST  MSG_MULTICAST
 #define MSG_ONE   1		// reliable to one (msg_entity)
 #define MSG_ALL   2		// reliable to all
 #define MSG_INIT  3		// write to the init string

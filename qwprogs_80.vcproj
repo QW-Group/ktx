@@ -714,7 +714,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\race.c"
+				RelativePath="src\race.c"
 				>
 			</File>
 			<File
@@ -745,6 +745,78 @@
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;QWPROGS_EXPORTS;$(NoInherit)"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\sp_ai.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_boss.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_client.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_demon.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_dog.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_enforcer.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_fish.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_hknight.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_knight.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_monsters.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_ogre.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_oldone.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_shalrath.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_shambler.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_soldier.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_tarbaby.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_wizard.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_zombie.c"
+				>
 			</File>
 			<File
 				RelativePath="src\spectate.c"

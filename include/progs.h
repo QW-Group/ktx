@@ -48,6 +48,10 @@ struct gedict_s;
 typedef void (*th_die_func_t)();
 typedef void (*th_pain_func_t)(struct gedict_s *, float);
 
+// { SP
+typedef void (*th_sp_func_t)();
+// }
+
 typedef enum
 {
 	ctNone = 0,
@@ -191,6 +195,7 @@ typedef struct vote_s {
 	int pickup;
 	int rpickup;
 	int nospecs;
+	int coop;
 
 	electType_t elect_type; // election type
 	float elect_block_till;	// block election for this time
@@ -353,9 +358,30 @@ typedef struct gedict_s {
 
 // below is KTX fields
 
+// { SP
+
+	//
+	// monster ai
+	//
+	th_sp_func_t	th_stand;
+	th_sp_func_t	th_walk;
+	th_sp_func_t	th_run;
+	th_sp_func_t	th_missile;
+	th_sp_func_t	th_melee;
+
+	struct gedict_s *oldenemy;	// mad at this player before taking damage
+
+	float	lefty;
+
+	float	search_time;
+	float	attack_state;
+
+// }
+
 	float	cnt2;            // NOT_SURE: cnt2 = seconds left?
 	float	dead_time;       // time at which player last died - used in autorespawn
-	float	spawn_time;		 // time at which player last spawned
+	float	spawn_time;		 // time at which player last spawned,
+							 // NOTE: ->spawn_time also used in spawn() function, so we know when edict was spawned
 	float	connect_time;	 // time at which player connect
 	float	deaths;          // number of times player died
 	float	efficiency;      // stores player efficiency rating

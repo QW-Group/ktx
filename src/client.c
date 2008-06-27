@@ -177,6 +177,11 @@ gedict_t 		*intermission_spot = NULL;
 
 char            nextmap[64] = "";
 
+void set_nextmap( char *map )
+{
+	strlcpy( nextmap, strnull( map ) ? g_globalvars.mapname : map , sizeof(nextmap) );
+}
+
 
 /*QUAKED info_intermission (1 0.5 0.5) (-16 -16 -16) (16 16 16)
 This is the camera point for the intermission.
@@ -188,8 +193,84 @@ void SP_info_intermission()
 	VectorCopy( self->mangle, self->s.v.angles );	//self.angles = self.mangle;      
 }
 
+typedef struct playerparams_s
+{
+
+	float	parm1;
+	float	parm2;
+	float	parm3;
+	float	parm4;
+	float	parm5;
+	float	parm6;
+	float	parm7;
+	float	parm8;
+	float	parm9;
+	float	parm10;
+	float	parm11;
+	float	parm12;
+	float	parm13;
+	float	parm14;
+	float	parm15;
+	float	parm16;
+
+} playerparams_t;
+
+static playerparams_t player_params[MAX_CLIENTS];
+
+static void LoadLevelStartParams( gedict_t *e )
+{
+	int cl = NUM_FOR_EDICT( e ) - 1;
+
+	if ( cl < 0 || cl >= MAX_CLIENTS )
+		G_Error( "LoadLevelStartParams: wrong client" );
+
+	g_globalvars.parm1  = player_params[cl].parm1;
+	g_globalvars.parm2  = player_params[cl].parm2;
+	g_globalvars.parm3  = player_params[cl].parm3;
+	g_globalvars.parm4  = player_params[cl].parm4;
+	g_globalvars.parm5  = player_params[cl].parm5;
+	g_globalvars.parm6  = player_params[cl].parm6;
+	g_globalvars.parm7  = player_params[cl].parm7;
+	g_globalvars.parm8  = player_params[cl].parm8;
+    g_globalvars.parm9  = player_params[cl].parm9;
+	g_globalvars.parm10 = player_params[cl].parm10;
+	g_globalvars.parm11 = player_params[cl].parm11;
+	g_globalvars.parm12 = player_params[cl].parm12;
+	g_globalvars.parm13 = player_params[cl].parm13;
+	g_globalvars.parm14 = player_params[cl].parm14;
+	g_globalvars.parm15 = player_params[cl].parm15;
+	g_globalvars.parm16 = player_params[cl].parm16;
+}
+
+void SaveLevelStartParams( gedict_t *e )
+{
+	int cl = NUM_FOR_EDICT( e ) - 1;
+
+	if ( cl < 0 || cl >= MAX_CLIENTS )
+		G_Error( "SaveLevelStartParams: wrong client" );
+
+	player_params[cl].parm1  = g_globalvars.parm1;
+	player_params[cl].parm2  = g_globalvars.parm2;
+	player_params[cl].parm3  = g_globalvars.parm3;
+	player_params[cl].parm4  = g_globalvars.parm4;
+	player_params[cl].parm5  = g_globalvars.parm5;
+	player_params[cl].parm6  = g_globalvars.parm6;
+	player_params[cl].parm7  = g_globalvars.parm7;
+	player_params[cl].parm8  = g_globalvars.parm8;
+    player_params[cl].parm9  = g_globalvars.parm9;
+	player_params[cl].parm10 = g_globalvars.parm10;
+	player_params[cl].parm11 = g_globalvars.parm11;
+	player_params[cl].parm12 = g_globalvars.parm12;
+	player_params[cl].parm13 = g_globalvars.parm13;
+	player_params[cl].parm14 = g_globalvars.parm14;
+	player_params[cl].parm15 = g_globalvars.parm15;
+	player_params[cl].parm16 = g_globalvars.parm16;
+}
+
 void InGameParams ()
 {
+	// NOTE: DO NOT USE self THERE
+
 	g_globalvars.parm1 = IT_AXE | IT_SHOTGUN;
 	g_globalvars.parm2 = 100;
 	g_globalvars.parm3 = 0;
@@ -198,10 +279,13 @@ void InGameParams ()
 	g_globalvars.parm6 = 0;
 	g_globalvars.parm7 = 0;
 	g_globalvars.parm8 = 1;
+    g_globalvars.parm9 = 0;
 }
 
 void PrewarParams ()
 {
+	// NOTE: DO NOT USE self THERE
+
 	g_globalvars.parm1 = IT_AXE | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_NAILGUN | IT_SUPER_NAILGUN
 						| IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER | IT_LIGHTNING;
 	g_globalvars.parm2 = 1000;
@@ -211,50 +295,111 @@ void PrewarParams ()
 	g_globalvars.parm6 = 100;
 	g_globalvars.parm7 = 100;
 	g_globalvars.parm8 = 32;
+    g_globalvars.parm9 = 0;
 }
 
+// used before changing map in non deathmatch mode
+void NonDMParams()
+{
+	if ( ISDEAD( self ) )
+	{
+		// NOTE: player will have "empty" backpack if map changin and he/she was dead...
+		//		 Is it feature or bug?
+		InGameParams();
+	}
+	else
+	{
+		// remove items
+		self->s.v.items = (int)self->s.v.items & ~( IT_KEY1 |
+				IT_KEY2 | IT_INVISIBILITY | IT_INVULNERABILITY | IT_SUIT | IT_QUAD | IT_SUPERHEALTH );
 
-// generally, this must be called before level will changed
+		// remove super health
+		self->s.v.health = bound( 50, self->s.v.health, 100 );
 
+		// give some shells
+		self->s.v.ammo_shells = max( 25, self->s.v.ammo_shells );
+
+		if ( !( (int)self->s.v.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) ) )
+			self->s.v.armorvalue = 0;
+
+		g_globalvars.parm1 = self->s.v.items;
+		g_globalvars.parm2 = self->s.v.health;
+		g_globalvars.parm3 = self->s.v.armorvalue;
+		g_globalvars.parm4 = self->s.v.ammo_shells;
+		g_globalvars.parm5 = self->s.v.ammo_nails;
+		g_globalvars.parm6 = self->s.v.ammo_rockets;
+		g_globalvars.parm7 = self->s.v.ammo_cells;
+		g_globalvars.parm8 = self->s.v.weapon;
+        g_globalvars.parm9 = self->s.v.armortype * 100;
+	}
+}
+
+//
+// called ONLY on map reload, self is valid there
+//
 void SetChangeParms()
 {
 	// ok, server want to change map
 	// check, if matchless mode is active, set ingame params,
 	// we must use k_matchless cvar here because it can be changed during game somehow (via direct server conlose etc)
 	// If matchless mode is not active, set just ordinary prewar stats
-	if( /* match_in_progress == 2 ||*/ cvar( "k_matchless" ) )
-		InGameParams ();
-    else 
-		PrewarParams ();
 
-    g_globalvars.parm9  = 0;
+	if ( !deathmatch )
+		NonDMParams();
+	else if ( /* match_in_progress == 2 ||*/ cvar( "k_matchless" ) )
+		InGameParams();
+    else 
+		PrewarParams();
 
 	g_globalvars.parm11 = self->k_admin;
-//	g_globalvars.parm12 = self->k_accepted;
 	g_globalvars.parm13 = self->k_stuff;
 	g_globalvars.parm14 = self->ps.handicap;
-
-//	G_bprint(2, "SCP: ad:%d\n", (int)self->k_admin);
 }
 
-// this called before player connected (or respawned), so he get default params
-
-// WARNING: if from_vmMain == flase, then self is must be valid
-void SetNewParms( qboolean from_vmMain )
+//
+// called ONLY before player connected, self is _NOT_ valid there
+//
+void SetNewParms()
 {
-	if( match_in_progress == 2 || k_matchLess ) 
-		InGameParams ();
+	if ( match_in_progress == 2 || k_matchLess ) 
+		InGameParams();
     else 
-		PrewarParams ();
+		PrewarParams();
 
-	g_globalvars.parm9  = 0;
+	g_globalvars.parm11 = 0;
+	g_globalvars.parm13 = 0;
+	g_globalvars.parm14 = 0;
+}
 
-	g_globalvars.parm11 = from_vmMain ? 0 : self->k_admin;
-//	g_globalvars.parm12 = from_vmMain ? 0 : self->k_accepted;
-	g_globalvars.parm13 = from_vmMain ? 0 : self->k_stuff;
-	g_globalvars.parm14 = from_vmMain ? 0 : self->ps.handicap;
+//
+// used in k_respawn()
+//
+void SetRespawnParms()
+{
+	if ( !deathmatch )
+	{	
+		if ( streq( g_globalvars.mapname, "start" ) )
+			InGameParams(); // take away all stuff on starting new episode
+		else
+			LoadLevelStartParams( self );
+	}
+	else if ( match_in_progress == 2 || k_matchLess )
+		InGameParams();
+    else 
+		PrewarParams();
 
-//	G_bprint(2, "SNP\n");
+	if ( self->connect_time == g_globalvars.time )
+	{
+//		g_globalvars.parm11 contain self->k_admin
+//		g_globalvars.parm13 contain self->k_stuff
+//		g_globalvars.parm14 contain self->ps.handicap
+	}
+	else
+	{
+		g_globalvars.parm11 = 0;
+		g_globalvars.parm13 = 0;
+		g_globalvars.parm14 = 0;
+	}
 }
 
 // called from PutClientInServer
@@ -270,26 +415,16 @@ void DecodeLevelParms()
 	self->s.v.ammo_cells 	= g_globalvars.parm7;
 	self->s.v.weapon 		= g_globalvars.parm8;
 	self->s.v.armortype 	= g_globalvars.parm9 * 0.01;
-	// remove any ctf items from previous level
-	self->ctf_flag = 0;
        
-//	G_bprint(2, "DLP1 ad:%d ac:%d s:%d\n", (int)self->k_admin, (int)self->k_accepted, (int)self->k_stuff);
-
 	if ( g_globalvars.parm11 )
 		self->k_admin = g_globalvars.parm11;
 
-//    if( g_globalvars.parm12 )
-//        self->k_accepted = g_globalvars.parm12;
-	
 	if ( g_globalvars.parm13 )
     	self->k_stuff = g_globalvars.parm13;
 
 	if ( g_globalvars.parm14 )
     	self->ps.handicap = g_globalvars.parm14;
-
-//	G_bprint(2, "DLP2 ad:%d ac:%d s:%d\n", (int)g_globalvars.parm11, (int)g_globalvars.parm12, (int)g_globalvars.parm13);
 }
-
 
 gedict_t *Do_FindIntermission( char *info_name )
 {
@@ -336,24 +471,29 @@ gedict_t *FindIntermission()
 
 void GotoNextMap()
 {
-	extern  char *SelectMapInCycle(char *buf, int buf_size);
-
 	char	newmap[64] = {0};
 
-	if ( trap_cvar( "samelevel" ) /* == 1 */ )	// if samelevel is set, stay on same level
-		changelevel( g_globalvars.mapname );
+	if ( trap_cvar( "samelevel" ) )
+	{
+		// if samelevel is set, stay on same level
+		strlcpy( newmap, g_globalvars.mapname, sizeof(newmap) );
+	}
 	else
 	{
-		SelectMapInCycle(newmap, sizeof(newmap));
+		extern  char *SelectMapInCycle(char *buf, int buf_size);
 
-		if ( !nextmap[0] ) // so we can reload current map at least
-			strlcpy( nextmap, g_globalvars.mapname, sizeof(nextmap) );
-
-		if ( !strnull( newmap ) )
-			changelevel( newmap );
-		else
-			changelevel( nextmap );
+		if ( deathmatch )
+			SelectMapInCycle( newmap, sizeof(newmap) );
 	}
+
+	if ( !strnull( newmap ) )
+		changelevel( newmap );
+	else if ( !strnull( nextmap ) )
+		changelevel( nextmap );
+	else if ( !strnull( g_globalvars.mapname ) )
+		changelevel( g_globalvars.mapname );
+	else
+		changelevel( "start" );
 }
 
 /*
@@ -371,7 +511,10 @@ void IntermissionThink()
 	if ( !self->s.v.button0 && !self->s.v.button1 && !self->s.v.button2 )
 		return;
 
-	GotoNextMap();
+	if ( deathmatch )
+		GotoNextMap();
+	else
+		ExitIntermission();
 }
 
 /*
@@ -455,43 +598,38 @@ void changelevel_touch()
 	if ( other->ct != ctPlayer )
 		return;
 
-// qqshka: does't change level in any case, just do damage and return
+	if ( match_in_progress != 2 )
+		return;
 
-	if ( !isCTF() ) { // ctf has always allowed players to hide in exits, etc 
-		other->deathtype = dtCHANGELEVEL;
-		T_Damage( other, self, self, 50000 );
-	}
-	return;
+	if ( deathmatch )
+	{ 
+		if ( isCTF() )
+		{
+			// ctf has always allowed players to hide in exits, etc 		
+		}
+		else
+		{
+			// TODO: qqshka: I have an idea to teleport players to info_player_deathmatch instead...
+			other->deathtype = dtCHANGELEVEL;
+			T_Damage( other, self, self, 50000 );
+		}
 
-/*
-
-// if "noexit" is set, blow up the player trying to leave
-//ZOID, 12-13-96, noexit isn't supported in QW.  Overload samelevel
-//      if ((cvar("noexit") == 1) || ((cvar("noexit") == 2) && (mapname != "start")))
-	if (      ( trap_cvar( "samelevel" ) == 2 )
-	     || ( ( trap_cvar( "samelevel" ) == 3 )
-		  && ( strneq( g_globalvars.mapname, "start" ) ) ) )
-	{
-		other->deathtype = dtCHANGELEVEL;
-		T_Damage( other, self, self, 50000 );
 		return;
 	}
 
 	G_bprint( PRINT_HIGH, "%s exited the level\n", other->s.v.netname );
 
-	strlcpy( nextmap, self->map, sizeof(nextmap) );
+	set_nextmap( self->map );
 	
 	activator = other;
 	SUB_UseTargets();
 
 	self->s.v.touch = ( func_t ) SUB_Null;
 
-// we can't move people right now, because touch functions are called
-// in the middle of C movement code, so set a think time to do it
+	// we can't move people right now, because touch functions are called
+	// in the middle of C movement code, so set a think time to do it
 	self->s.v.think = ( func_t ) execute_changelevel;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
-
-*/
 }
 
 /*QUAKED trigger_changelevel (0.5 0.5 0.5) ? NO_INTERMISSION
@@ -526,7 +664,7 @@ void NextLevel()
 	if ( nextmap[0] )
 		return;		// already done
 
-	strlcpy( nextmap, g_globalvars.mapname, sizeof(nextmap) );
+	set_nextmap( g_globalvars.mapname );
 
 	o = spawn();
 	o->map = g_globalvars.mapname;
@@ -579,7 +717,7 @@ void NextLevel()
 		}
 	}
 
-	strlcpy( nextmap, o->map, sizeof(nextmap) );
+	set_nextmap( o->map );
 
 	if ( o->s.v.nextthink < g_globalvars.time )
 	{
@@ -621,21 +759,8 @@ void SP_info_player_deathmatch()
 	setsize( self, 0, 0, 0, 0, 0, 0 );
 }
 
-// called by ClientKill and DeadThink
-void respawn()
-{
-//	G_bprint(2, "respawn()\n");
-
-	// make a copy of the dead body for appearances sake
-	CopyToBodyQue( self );
-	// set default spawn parms
-	SetNewParms( false );
-	// respawn              
-	PutClientInServer( false );
-}
-
-// i put next code in function, since it appear frequently
-void k_respawn( gedict_t *p )
+// I'v put next code in function, since it appear frequently
+void k_respawn( gedict_t *p, qboolean body )
 {
 	gedict_t *swap = self;
 
@@ -646,7 +771,15 @@ void k_respawn( gedict_t *p )
 	self->s.v.button0 = 0;
 	self->s.v.button1 = 0;
 	self->s.v.button2 = 0;
-	respawn();
+
+	// make a copy of the dead body for appearances sake
+	if ( body )
+		CopyToBodyQue( self );
+
+	// set default spawn parms
+	SetRespawnParms();
+	// respawn              
+	PutClientInServer();
 
 	self = swap;
 }
@@ -777,7 +910,10 @@ gedict_t *SelectSpawnPoint( char *spawnname )
 			totalspots = 1; // proper count is not so important, something going wrong anyway...
 
 			if ( !(spot = Do_FindIntermission( "info_player_deathmatch" )) )
-		    	spot = world;
+			{
+				if ( !(spot = Do_FindIntermission( "info_player_start" )) )
+		    		spot = world;
+			}
 		}
 
 		if( !match_in_progress || k_spw == 1 || ( k_spw == 2 && !k_checkx ) ) {
@@ -1121,7 +1257,7 @@ void ClientConnect()
 // self
 // called after ClientConnect
 ///////////////
-void PutClientInServer(qboolean from_vmMain)
+void PutClientInServer( void )
 {
 
 	gedict_t       *spot;
@@ -1163,6 +1299,7 @@ void PutClientInServer(qboolean from_vmMain)
 	self->maxspeed = cvar("sv_maxspeed"); // qqshka - ctf stuff, discard haste rune modifier after u die
 	self->regen_time = -1;
 	self->carrier_hurt_time = -1;
+	self->ctf_flag = 0;
 
 	self->invincible_time = 0;
 
@@ -1179,13 +1316,20 @@ void PutClientInServer(qboolean from_vmMain)
 	self->s.v.deadflag = DEAD_NO;
 // paustime is set by teleporters to keep the player from moving a while
 	self->pausetime = 0;
-	
-	if ( isCTF() && match_start_time == g_globalvars.time ) // first spawn in CTF on corresponding base
-		spot = SelectSpawnPoint(streq(getteam(self), "red") ? "info_player_team1" : "info_player_team2" );
-	else if ( isRA() && ( isWinner( self ) || isLoser( self ) ) )
-		spot = SelectSpawnPoint("info_teleport_destination" );
+
+	if ( deathmatch )
+	{
+		if ( isCTF() && match_start_time == g_globalvars.time ) // first spawn in CTF on corresponding base
+			spot = SelectSpawnPoint(streq(getteam(self), "red") ? "info_player_team1" : "info_player_team2" );
+		else if ( isRA() && ( isWinner( self ) || isLoser( self ) ) )
+			spot = SelectSpawnPoint("info_teleport_destination" );
+		else
+			spot = SelectSpawnPoint("info_player_deathmatch");
+	}
 	else
-		spot = SelectSpawnPoint("info_player_deathmatch");
+	{
+		spot = SelectSpawnPoint( coop ? "info_player_coop" : "info_player_start" );
+	}
 
 	VectorCopy( spot->s.v.origin, self->s.v.origin );
 	self->s.v.origin[2] += 1;
@@ -1495,7 +1639,7 @@ void PlayerDeathThink()
 
 	if( (g_globalvars.time - self->dead_time) > respawn_time )
 	{
-		k_respawn( self );
+		k_respawn( self, true );
 		return;
 	}
 // }
@@ -1513,7 +1657,7 @@ void PlayerDeathThink()
 	if ( !self->s.v.button2 && !self->s.v.button1 && !self->s.v.button0 && !self->wreg_attack )
 		return;
 
-	k_respawn( self );
+	k_respawn( self, true );
 }
 
 
@@ -2817,7 +2961,7 @@ void PlayerPostThink()
 		float velocity = sqrt(self->s.v.velocity[0] * self->s.v.velocity[0] + 
 							  self->s.v.velocity[1] * self->s.v.velocity[1]);
 
-		if ( !match_in_progress && !match_over && !k_captains )
+		if ( !match_in_progress && !match_over && !k_captains && !k_matchLess )
 		{
 			if ( iKey( self, "kf" ) & KF_SPEED ) {
 				float velocity_vert_abs	= fabs(self->s.v.velocity[2]);
@@ -3118,8 +3262,6 @@ called when a player dies
 ============
 */
 extern void ktpro_autotrack_on_death (gedict_t *dude);
-extern char	*dmg_type[];
-extern int	dmg_type_cnt;
 
 void ClientObituary (gedict_t *targ, gedict_t *attacker)
 {
@@ -3154,7 +3296,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				g_globalvars.time - match_start_time,
 				attacker->s.v.netname,
 				targ->s.v.netname,
-				dmg_type[ (int)bound(0, targ->deathtype, dmg_type_cnt-1) ],
+				death_type( targ->deathtype ),
 				(int)(attacker->super_damage_finished > g_globalvars.time ? 1 : 0 ),
 				(int)targ->s.v.armorvalue,
 				(int)playerheight,
@@ -3241,7 +3383,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
             return;
 		}
-        else if ( (isTeam() || isCTF()) && streq( targteam, attackerteam ) && !strnull( attackerteam ) )
+        else if ( ( (isTeam() || isCTF()) && streq( targteam, attackerteam ) && !strnull( attackerteam ) ) || coop )
 		{
  			// teamkill
 
@@ -3456,7 +3598,12 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
         targ->s.v.frags -= 1;            // killed self
 		logfrag (targ, targ);
 
-		if ( dtEXPLO_BOX == targ->deathtype )
+		if ( (int)attacker->s.v.flags & FL_MONSTER )
+		{
+			deathstring = ObituaryForMonster( attacker->s.v.classname );
+//			deathstring = " killed by monster? :)\n";
+		}
+		else if ( dtEXPLO_BOX == targ->deathtype )
 		{
 			deathstring = " blew up\n";
 		}
@@ -3514,11 +3661,6 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		else if ( dtTRIGGER_HURT == targ->deathtype )
 		{
 			deathstring = " died\n";
-		}
-		else if ( (int)attacker->s.v.flags & FL_MONSTER )
-		{
-//			deathstring = ObituaryForMonster( attacker->s.v.classname );
-			deathstring = " killed by monster? :)\n";
 		}
 		else
 		{

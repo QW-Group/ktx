@@ -891,7 +891,7 @@ void VelocityForDamage( float dm, vec3_t v )
 	return;			//v;
 }
 
-void ThrowGib( char *gibname, float dm )
+gedict_t *ThrowGib( char *gibname, float dm )
 {
 	gedict_t       *newent;
 	int			    k_short_gib = cvar( "k_short_gib" ); // if set - remove faster
@@ -911,6 +911,8 @@ void ThrowGib( char *gibname, float dm )
 	newent->s.v.nextthink = g_globalvars.time + ( k_short_gib ? 2 : ( 10 + g_random() * 10 ) );
 	newent->s.v.frame = 0;
 	newent->s.v.flags = 0;
+
+	return newent;
 }
 
 void ThrowHead( char *gibname, float dm )

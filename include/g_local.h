@@ -103,7 +103,7 @@ extern globalvars_t g_globalvars;
 extern gedict_t *world;
 extern gedict_t *self, *other;
 extern gedict_t *newmis;
-extern int      timelimit, fraglimit, teamplay, deathmatch, framecount;
+extern int      timelimit, fraglimit, teamplay, deathmatch, framecount, coop, skill;
 //extern float	rj;
 
 #define	EDICT_TO_PROG(e) ((byte *)(e) - (byte *)g_edicts)
@@ -136,37 +136,14 @@ typedef enum
 	lsRA 	// note no correspoding gameType_t for lsType
 } lsType_t; // lastscores type
 
+#define DEATHTYPE( _dt_, _dt_str_ ) _dt_,
 typedef enum
 {
-	dtNONE = 0,
-	dtAXE,
-	dtSG,
-	dtSSG,
-	dtNG,
-	dtSNG,
-	dtGL,
-	dtRL,
-	dtLG_BEAM,
-	dtLG_DIS, // discharge
-	dtLG_DIS_SELF, // sometimes this sort of discharge happens in dmm > 3
-	dtHOOK,
-	dtCHANGELEVEL,
-	dtLAVA_DMG,
-	dtSLIME_DMG,
-	dtWATER_DMG,
-	dtFALL,
-	dtSTOMP,
-	dtTELE1,
-	dtTELE2,
-	dtTELE3,
-	dtEXPLO_BOX,
-	dtLASER,
-	dtFIREBALL,
-	dtSQUISH,
-	dtTRIGGER_HURT,
-	dtSUICIDE, // client use /kill command
-	dtUNKNOWN
+
+	#include "deathtype.h"
+
 } deathType_t;
+#undef DEATHTYPE
 
 typedef union fi_s
 {
@@ -196,7 +173,6 @@ float           vlen( vec3_t value1 );
 float           vectoyaw( vec3_t value1 );
 void            vectoangles( vec3_t value1, vec3_t ret );
 void            changeyaw( gedict_t * ent );
-void            makevectors( vec3_t vector );
 
 char			*va(char *format, ...);
 char			*redtext(const char *format, ...);
@@ -243,6 +219,7 @@ void    	stuffcmd( gedict_t * ed, const char *fmt , ...);
 void		stuffcmd_flags( gedict_t * ed, int flags, const char *fmt, ... );
 int     	droptofloor( gedict_t * ed );
 int     	walkmove( gedict_t * ed, float yaw, float dist );
+int     	movetogoal( float dist );
 int     	checkbottom( gedict_t * ed );
 void    	makestatic( gedict_t * ed );
 void    	setspawnparam( gedict_t * ed );
@@ -417,9 +394,15 @@ void			ClearBodyQue();
 extern vec3_t	VEC_ORIGIN;
 extern vec3_t	VEC_HULL_MIN;
 extern vec3_t	VEC_HULL_MAX;
+extern vec3_t	VEC_HULL2_MIN;
+extern vec3_t	VEC_HULL2_MAX;
 extern float    intermission_running;
 extern float    intermission_exittime;
+extern gedict_t *intermission_spot;
 extern int      modelindex_eyes, modelindex_player;
+
+void			set_nextmap( char *map );
+void			GotoNextMap();
 
 qboolean		CheckRate (gedict_t *p, char *newrate);
 
@@ -427,9 +410,10 @@ int				tiecount();
 void			Check_SD( gedict_t *p );
 
 void            SetChangeParms();
-void            SetNewParms( qboolean from_vmMain );
+void            SetNewParms();
 void            ClientConnect();
-void            PutClientInServer(qboolean from_vmMain);
+void			k_respawn( gedict_t *p, qboolean body );
+void            PutClientInServer( void );
 void            ClientDisconnect();
 void            PlayerPreThink();
 void			BothPostThink(); // <- called for player and spec
@@ -457,10 +441,16 @@ float           W_BestWeapon();
 void            W_Precache();
 void            W_SetCurrentAmmo();
 void            SpawnBlood( vec3_t, float );
+void			SpawnMeatSpray( vec3_t org, vec3_t vel );
 void            W_FireAxe();
 void            W_FireSpikes( float ox );
 void            W_FireLightning();
+void			LightningDamage( vec3_t p1, vec3_t p2, gedict_t * from, float damage );
 qboolean		W_CanSwitch( int wp, qboolean warn );
+
+void			FireBullets( float shotcount, vec3_t dir, float spread_x, float spread_y, float spread_z, deathType_t deathtype );
+
+void            launch_spike( vec3_t org, vec3_t dir );
 
 // match.c
 
@@ -474,6 +464,11 @@ char			*WpName( weaponName_t wp );
 
 //combat.c
 extern gedict_t *damage_attacker, *damage_inflictor;
+
+char			*death_type( deathType_t dt );
+
+qboolean		CanDamage( gedict_t *targ, gedict_t *inflictor );
+
 void            T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker,
 			  float damage );
 void            T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage,
@@ -679,6 +674,7 @@ void 	vote_check_all ();
 #define OV_RPICKUP ( VOTE_FOFS ( rpickup ) )
 #define OV_MAP ( VOTE_FOFS ( map ) )
 #define OV_NOSPECS ( VOTE_FOFS ( nospecs ) )
+#define OV_COOP ( VOTE_FOFS ( coop ) )
 
 void 	ElectThink();
 void	AbortElect();
@@ -857,4 +853,77 @@ extern	int sv_minping; // used to broadcast changes
 #define	RESERVED_OFS	28
 
 #define	G_FLOAT(o) ( ((float*)(&g_globalvars))[o])
+
+// { SP
+
+#define FRAMETIME 0.1
+
+// ANIM() macro idea I got from Tonik
+#define ANIM(name, _frame, _next)		\
+void name () {				\
+	self->s.v.frame = _frame;				\
+	self->s.v.nextthink = g_globalvars.time + FRAMETIME;	\
+	self->s.v.think = ( func_t ) _next; }
+
+// sp_client.c
+void ExitIntermission();
+char *ObituaryForMonster( char *attacker_class );
+
+// sp_dog.c
+float DogCheckAttack();
+
+// sp_demon.c
+float DemonCheckAttack();
+
+// sp_ogre.c
+float OgreCheckAttack();
+
+// sp_shambler.c
+float ShamCheckAttack();
+
+// sp_soldier.c
+float SoldierCheckAttack();
+
+// sp_wizard.c
+float WizardCheckAttack();
+
+// sp_ai.c
+// FIXME: make them static or get rid of globals...
+extern float	enemy_vis, enemy_infront, enemy_range;
+extern float	enemy_yaw;
+
+void FoundTarget();
+
+void GetMadAtAttacker( gedict_t *attacker );
+
+void SUB_AttackFinished( float normal );
+void SUB_CheckRefire( func_t thinkst );
+
+void ai_stand();
+void ai_walk( float dist );
+void ai_run ( float dist );
+void ai_pain( float dist );
+void ai_face();
+void ai_charge( float d );
+void ai_charge_side();
+void ai_forward( float dist );
+void ai_back( float dist );
+void ai_turn();
+void ai_painforward( float dist );
+void ai_melee();
+void ai_melee_side();
+
+// sp_monsters.c
+
+void monster_death_use();
+
+void walkmonster_start();
+void flymonster_start();
+void swimmonster_start();
+
+// }
+
+// misc.c
+
+void LaunchLaser( vec3_t org, vec3_t vec );
 

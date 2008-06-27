@@ -9,7 +9,6 @@
 
 #include "g_local.h"
 
-qboolean CanDamage( gedict_t *targ, gedict_t *inflictor );
 void SpawnBlood( vec3_t dest, float damage );
 void FreezeGravity( gedict_t *p );
 void UnfreezeGravity( gedict_t *p );

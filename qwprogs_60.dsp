@@ -232,6 +232,78 @@ SOURCE=src/weapons.c
 # End Source File
 # Begin Source File
 
+SOURCE=src/sp_ai.c
+# End Source File
+# Begin Source File
+
+SOURCE=src/sp_boss.c
+# End Source File
+# Begin Source File
+
+SOURCE=src/sp_client.c
+# End Source File
+# Begin Source File
+
+SOURCE=src/sp_demon.c
+# End Source File
+# Begin Source File
+
+SOURCE=src/sp_dog.c
+# End Source File
+# Begin Source File
+
+SOURCE=src/sp_enforcer.c
+# End Source File
+# Begin Source File
+
+SOURCE=src/sp_fish.c
+# End Source File
+# Begin Source File
+
+SOURCE=src/sp_hknight.c
+# End Source File
+# Begin Source File
+
+SOURCE=src/sp_knight.c
+# End Source File
+# Begin Source File
+
+SOURCE=src/sp_monsters.c
+# End Source File
+# Begin Source File
+
+SOURCE=src/sp_ogre.c
+# End Source File
+# Begin Source File
+
+SOURCE=src/sp_oldone.c
+# End Source File
+# Begin Source File
+
+SOURCE=src/sp_shalrath.c
+# End Source File
+# Begin Source File
+
+SOURCE=src/sp_shambler.c
+# End Source File
+# Begin Source File
+
+SOURCE=src/sp_soldier.c
+# End Source File
+# Begin Source File
+
+SOURCE=src/sp_tarbaby.c
+# End Source File
+# Begin Source File
+
+SOURCE=src/sp_wizard.c
+# End Source File
+# Begin Source File
+
+SOURCE=src/sp_zombie.c
+# End Source File
+# Begin Source File
+
 SOURCE=src/world.c
 # End Source File
 # End Group

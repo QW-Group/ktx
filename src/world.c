@@ -574,6 +574,7 @@ qboolean RegisterCvar ( const char *var )
 void FirstFrame	( )
 {
 	int 		i, um_idx;
+	qboolean	matchless_was_forced = false;
 
 	if ( framecount != 1 )
 		return;
@@ -618,6 +619,7 @@ void FirstFrame	( )
 	RegisterCvar("k_vp_pickup");  // votes percentage for pickup voting
 	RegisterCvar("k_vp_rpickup"); // votes percentage for rpickup voting
 	RegisterCvar("k_vp_nospecs"); // votes percentage for nospecs voting
+	RegisterCvar("k_vp_coop");    // votes percentage for coop voting
 	RegisterCvar("k_no_vote_map"); // dis allow map voting in matcless mode, also disallow /next_map
 
 	RegisterCvar("k_end_tele_spawn"); // don't remove end tele spawn
@@ -752,6 +754,12 @@ void FirstFrame	( )
 // below globals changed only here
 
 	k_matchLess = cvar( "k_matchless" );
+	if ( !cvar( "deathmatch" ) || cvar( "coop" ) )
+	{
+		k_matchLess = 1; // treat coop or singleplayer as matchLess
+		matchless_was_forced = true;
+	}
+
 	k_allowed_free_modes = cvar( "k_allowed_free_modes" ); // must be setup before UserMode(...) call
 	if ( k_matchLess )
 		k_allowed_free_modes |= UM_FFA;
@@ -787,6 +795,9 @@ void FirstFrame	( )
 #ifdef CTF_RELOADMAP
 	k_ctf = (cvar( "k_mode" ) == gtCTF); // emulate CTF is active so FixRules is silent
 #endif
+
+	if ( matchless_was_forced )
+		trap_cvar_set_float("deathmatch", (deathmatch = 0));
 
 	FixRules();
 
@@ -1035,7 +1046,11 @@ void FixRules ( )
 	int fl   = fraglimit = cvar( "fraglimit" );
 	int dm   = deathmatch = cvar( "deathmatch" );
 	int k_minr = bound(0, cvar( "k_minrate" ),  100000);
-	int k_maxr = bound(0, cvar( "sv_maxrate" ), 100000);	
+	int k_maxr = bound(0, cvar( "sv_maxrate" ), 100000);
+
+	skill = cvar( "skill" );
+
+	coop = cvar( "coop" );
 
 	FixYawnMode(); // yawn mode
 
@@ -1056,18 +1071,24 @@ void FixRules ( )
 	if ( isCTF() && !( k_allowed_free_modes & UM_CTF ) )
 		cvar_fset("k_mode", (float)( k_mode = gtTeam ));
 
-	// we are does't support coop
+	// if we are in coop, then deathmatch should be 0
 	if ( cvar( "coop" ) )
-		trap_cvar_set_float("coop", 0);
+	{
+		if ( deathmatch )
+			trap_cvar_set_float("deathmatch", (deathmatch = 0));
+	}
+	else
+	{
+//		if ( !deathmatch )
+//			trap_cvar_set_float("deathmatch", (deathmatch = 3));
+	}
 
 	// if unknown teamplay - disable it at all
 	if ( teamplay != 0 && teamplay != 1 && teamplay != 2 && teamplay != 3 && teamplay != 4 )
 		trap_cvar_set_float("teamplay", (teamplay = 0));
 
 	// if unknown deathmatch - set some default value
-	if ( deathmatch != 1 && deathmatch != 2 && deathmatch != 3 && deathmatch != 4
-		 && deathmatch != 5
-	   )
+	if ( deathmatch != 0 && deathmatch != 1 && deathmatch != 2 && deathmatch != 3 && deathmatch != 4 && deathmatch != 5 )
 		trap_cvar_set_float("deathmatch", (deathmatch = 3));
 
 	if ( k_matchLess ) {
@@ -1100,9 +1121,21 @@ void FixRules ( )
 
 // oldman --> don't allow unlimited timelimit + fraglimit
 // also do not allow some weird timelimit
-    if( (timelimit == 0 && fraglimit == 0) || timelimit > k_tt || timelimit < 0 ) {
-        cvar_fset( "timelimit", timelimit = k_tt ); // sensible default if no max set
-    }
+	if ( deathmatch )
+	{
+    	if( (timelimit == 0 && fraglimit == 0) || timelimit > k_tt || timelimit < 0 )
+    	{
+        	cvar_fset( "timelimit", timelimit = k_tt ); // sensible default if no max set
+    	}
+	}
+	else
+	{
+		if ( timelimit )
+        	cvar_fset( "timelimit", timelimit = 0 );
+
+		if ( fraglimit )
+        	cvar_fset( "fraglimit", fraglimit = 0 );
+	}
 // <-- oldman
 
 // {  rate bounds
@@ -1147,7 +1180,7 @@ void FixRules ( )
 }
 
 
-int         timelimit, fraglimit, teamplay, deathmatch, framecount;
+int         timelimit, fraglimit, teamplay, deathmatch, framecount, coop, skill;
 
 extern float intermission_exittime;
 

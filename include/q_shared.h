@@ -33,6 +33,7 @@
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4305)		// truncation from const double to float
 #pragma warning(disable : 4996)		// MSVS8 warnings about POSIX functions
+#pragma warning(disable : 4311)		// pointer truncation
 #endif
 
 /**********************************************************************
