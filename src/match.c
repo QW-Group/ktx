@@ -2081,7 +2081,9 @@ void StartDemoRecord ()
 	if ( cvar( "demo_tmp_record" ) ) { // FIXME: TODO: make this more like ktpro
 		qboolean record = false;
 
-		if ( isFFA() && cvar( "demo_skip_ktffa_record" ) )
+		if ( !deathmatch )
+			record = false;
+		else if ( isFFA() && cvar( "demo_skip_ktffa_record" ) )
 			record = false;
 		else
 			record = true;
