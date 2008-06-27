@@ -1151,6 +1151,9 @@ void FixRules ( )
 		cvar_fset( "sv_maxrate", k_maxr );
 // }
 
+	if ( deathmatch )
+		g_globalvars.serverflags = (int)g_globalvars.serverflags & ~15; // remove runes
+
 	if ( cvar("k_midair") && deathmatch != 4 )
 		cvar_fset( "k_midair", 0 ); // midair only in dmm4
 
