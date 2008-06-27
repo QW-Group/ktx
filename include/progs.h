@@ -405,7 +405,11 @@ typedef struct gedict_s {
 	float	k_flag;          // flagvalue to customise settings such as sounds/autoscreenshot
 	float	k_msgcount;      // NOT_SURE: last time mod printed a message to client?
 	float	k_picked;        // NOT_SURE: 
-	float	k_stuff;         // if player has received stuffed aliases
+	int		k_stuff;         // if player has received stuffed aliases|commands
+// k_stuff flags
+#define STUFF_MAPS     (1<<0)
+#define STUFF_COMMANDS (1<<1)
+
 	float	k_teamnumber;    // team the player is a member of, 1 = team1, 2 = team2
 	float	k_teamnum;       // NOT_SURE:
 	

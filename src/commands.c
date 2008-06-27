@@ -207,6 +207,9 @@ void TimeDown(float t);
 void TimeUp(float t);
 void TimeSet(float t);
 
+void cmdslist_dl();
+void mapslist_dl();
+
 // { RACE
 void r_ccdel( );
 void r_Xset( float t );
@@ -492,6 +495,9 @@ const char CD_NODESC[] = "no desc";
 
 #define CD_VOTECOOP     "vote for coop on/off"
 
+#define CD_MAPSLIST_DL  (CD_NODESC) // skip
+#define CD_CMDSLIST_DL  (CD_NODESC) // skip
+
 
 
 void dummy() {}
@@ -501,6 +507,8 @@ void redirect();
 
 cmd_t cmds[] = {
 	{ "cm",          SelectMap,                 0    , CF_BOTH | CF_MATCHLESS | CF_NOALIAS, CD_NODESC },
+	{ "mapslist_dl", mapslist_dl,               0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS | CF_NOALIAS, CD_MAPSLIST_DL },
+	{ "cmdslist_dl", cmdslist_dl,               0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS | CF_NOALIAS, CD_CMDSLIST_DL },
 	{ "votemap",     VoteMap,                   0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_VOTEMAP },
 	{ "commands",    ShowCmds,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_COMMANDS },
 	{ "scores",      PrintScores,               0    , CF_BOTH | CF_MATCHLESS, CD_SCORES },
@@ -994,17 +1002,34 @@ qboolean isCmdRequireAdmin( int icmd, qboolean isSpec )
 	return false;
 }
 
-void StuffModCommands( gedict_t *p )
+void cmdslist_dl()
 {
-	int i;
-	char *name, *params;
-	qboolean spc = ( p->ct == ctSpec );
-	qboolean support_params = isSupport_Params( p );
+	int i, from, to;
+	char *name, *params, arg_2[32];
+	qboolean spc = ( self->ct == ctSpec );
+	qboolean support_params = isSupport_Params( self );
 
-	// stuff impulses based aliases, or just aliases
-	StuffAliases( p );
+	// seems we alredy done that
+	if ( self->k_stuff & STUFF_COMMANDS )
+	{
+		G_sprint( self, 2, "cmdslist alredy stuffed\n" );
+		return;
+	}
 
-	for( i = 0; i < cmds_cnt; i++ )
+	// no arguments
+	if ( trap_CmdArgc() == 1 )
+	{
+		G_sprint( self, 2, "cmdslist without arguments\n" );
+		return;
+	}
+
+	trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
+
+	from = bound( 0, atoi( arg_2 ), cmds_cnt );
+	to   = bound( from, from + MAX_STUFFED_ALIASES_PER_FRAME, cmds_cnt );
+
+	// stuff portion of aliases
+	for ( i = from; i < to; i++ )
 	{
 		name = cmds[i].name;
 
@@ -1012,14 +1037,36 @@ void StuffModCommands( gedict_t *p )
 			 || cmds[i].f == dummy				// cmd have't function, ie u must not stuff alias for this cmd
 			 || (cmds[i].cf_flags & CF_NOALIAS) // no alias for such command, may be accessed only via /cmd commandname
 		    )
+		{
+			to = min( to + 1, cmds_cnt );
 			continue;
+		}
 
 		params = ( (cmds[i].cf_flags & CF_PARAMS) && support_params ) ? " %0" : "";
 
-		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "alias %s cmd %03d%s\n", name, (int)i, params);
+		stuffcmd_flags( self, STUFFCMD_IGNOREINDEMO, "alias %s cmd %03d%s\n", name, (int)i, params );
 	}
 
-	G_sprint(p, 2, "Commands downloaded\n" );
+	if ( i < cmds_cnt )
+	{
+		// request next stuffing
+		stuffcmd_flags( self, STUFFCMD_IGNOREINDEMO, "cmd cmdslist_dl %d\n", i );
+		return;
+	}
+
+	// we done
+	self->k_stuff = self->k_stuff | STUFF_COMMANDS; // add flag
+	G_sprint( self, 2, "Commands downloaded\n" );
+}
+
+void StuffModCommands( gedict_t *p )
+{
+	// stuff impulses based aliases, or just aliases, not that much...
+	StuffAliases( p );
+
+	p->k_stuff = p->k_stuff & ~STUFF_COMMANDS; // remove flag
+
+	stuffcmd_flags( p, STUFFCMD_IGNOREINDEMO, "cmd cmdslist_dl %d\n", 0 );
 }
 
 void Init_cmds(void)

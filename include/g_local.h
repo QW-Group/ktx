@@ -564,9 +564,7 @@ qboolean isCmdFlood(gedict_t *p);
 
 void Init_cmds(void);
 
-float StuffDeltaTime(int iDelta);
-
-#define STUFFCMDS_PER_PORTION	(1)
+void StuffModCommands( gedict_t *p );
 
 void SetPractice(int srv_practice_mode, const char *mapname);
 
@@ -728,6 +726,8 @@ void		ra_break();
 int		capt_num(gedict_t *p);
 
 // maps.c
+
+void	StuffMaps( gedict_t *p );
 
 void	GetMapList(void);
 

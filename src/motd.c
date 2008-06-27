@@ -85,36 +85,28 @@ void MOTDThinkX()
 	// FIXME: server work around, frags are not restored, ie showed as 0, force update frags manually
 	if ( owner->s.v.frags && (int)( owner - world - 1 ) >= 0 && (int)( owner - world - 1 ) < MAX_CLIENTS )
 	{
-		int to = MSG_ALL;
-
-		WriteByte(to, SVC_UPDATEFRAGS); // update frags
-		WriteByte(to, (int)( owner - world - 1 ));
-		WriteShort(to, owner->s.v.frags);
-	}
-
-	// stuff or not to stuff, that the question!
-	if( owner->k_stuff )
-	{
-		if ( k_matchLess ) // remove motd if player already stuffed, because them probably sow motd already one time
-		{
-			ent_remove( self );
-			return;
-		}
-	}
-	else
-	{
-		extern void StuffMaps( gedict_t *p );
-		extern void StuffModCommands( gedict_t *p );
-
-		StuffMaps( owner );
-		StuffModCommands( owner );
-		
-		owner->k_stuff = 1;
+		WriteByte(MSG_ALL, SVC_UPDATEFRAGS); // update frags
+		WriteByte(MSG_ALL, (int)( owner - world - 1 ));
+		WriteShort(MSG_ALL, owner->s.v.frags);
 	}
 
 	// select MOTD for spectator or player
 	self->s.v.think = ( func_t ) ( owner->ct == ctSpec ? SMOTDThink : PMOTDThink );
 	self->s.v.nextthink = g_globalvars.time + 0.3;
+
+	if( owner->k_stuff )
+	{
+		if ( k_matchLess ) // remove motd if player already stuffed, because them probably sow motd already one time
+		{
+			ent_remove( self );
+		}
+	}
+
+	// stuff or not to stuff, that the question!
+	if ( !( owner->k_stuff & STUFF_MAPS ) )
+		StuffMaps( owner );
+	else if	( !( owner->k_stuff & STUFF_COMMANDS ) )
+		StuffModCommands( owner );
 }
 
 void MakeMOTD()

@@ -83,6 +83,23 @@ static int		maps_cnt = 0;
 
 static char ml_buf[MAX_MAPS * 32] = {0}; // OUCH OUCH!!! btw, 32 is some average len of map name here, with path
 
+void AddFixedMaps(void)
+{
+	int i, l;
+
+	if ( mapslist[0] || maps_cnt )
+		G_Error( "AddFixedMaps: can't do it twice" );
+
+	for ( i = 0; i < MAX_MAPS && i < fixed_maps_cnt ; i++ )
+	{
+		l = strlen( fixed_maps_list[i] ) + 1;  // + nul
+		mapslist[i] = G_Alloc( l );		// alloc mem
+		strlcpy( mapslist[i], fixed_maps_list[i], l );	// copy
+
+		maps_cnt++;
+	}
+}
+
 void GetMapList(void)
 {
 
@@ -91,8 +108,11 @@ void GetMapList(void)
 
 	ml_buf[0] = 0;
 
-	if ( mapslist[0] )
+	if ( mapslist[0] || maps_cnt )
 		G_Error( "GetMapList: can't do it twice" );
+
+	if ( !FTE_sv )
+		AddFixedMaps(); // add maps like dm3 dm2 e1m2 etc from paks, FTE doesn't need it.
 
 	// this is reg exp search, so we escape . with \. in extension, however \ must be escaped in C string too so its \\.
 	cnt = trap_FS_GetFileList( "maps", ( FTE_sv ? ".bsp" : "\\.bsp$" ), ml_buf, sizeof(ml_buf), 0 );
@@ -101,7 +121,7 @@ void GetMapList(void)
 
 	ml_buf[sizeof(ml_buf)-1] = 0; // well, this is optional, just sanity
 
-	for ( i = 0, s = ml_buf; i < cnt && s < ml_buf + sizeof(ml_buf); i++ )
+	for ( i = maps_cnt, s = ml_buf; i < cnt && s < ml_buf + sizeof(ml_buf); i++ )
 	{
 		l = strlen( s );
 
@@ -123,7 +143,7 @@ void GetMapList(void)
 		s++;
 	}
 
-	maps_cnt = i;
+	maps_cnt = bound(0, i, MAX_MAPS);
 
 #if 0 // debug
 	G_cprint( "Maps list\n" );
@@ -133,45 +153,63 @@ void GetMapList(void)
 #endif
 }
 
-void StuffCustomMaps( gedict_t *p )
+void mapslist_dl()
 {
-	int i;
+	char arg_2[32];
+	int i, from, to;
 
-	for( i = 0; i < maps_cnt; i++ )
-		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "alias %s cmd cm %d\n", mapslist[i], i + 1);
-}
+	// seems we alredy done that
+	if ( self->k_stuff & STUFF_MAPS )
+	{
+		G_sprint( self, 2, "mapslist alredy stuffed\n" );
+		return;
+	}
 
-void StuffMainMaps( gedict_t *p )
-{
-	int i;
+	// no arguments
+	if ( trap_CmdArgc() == 1 )
+	{
+		G_sprint( self, 2, "mapslist without arguments\n" );
+		return;
+	}
 
-	for( i = 0; i < fixed_maps_cnt; i++ )
-		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "alias %s cmd cm %d\n", fixed_maps_list[i], -(i + 1));
+	trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
+
+	from = bound( 0, atoi( arg_2 ), maps_cnt );
+	to   = bound( from, from + MAX_STUFFED_ALIASES_PER_FRAME, maps_cnt );
+
+	// stuff portion of aliases
+	for ( i = from; i < to; i++ )
+		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "alias %s cmd cm %d\n", mapslist[i], i + 1);
+
+	if ( i < maps_cnt )
+	{
+		// request next stuffing
+		stuffcmd_flags( self, STUFFCMD_IGNOREINDEMO, "cmd mapslist_dl %d\n", i );
+		return;
+	}
+
+	// we done
+	self->k_stuff = self->k_stuff | STUFF_MAPS; // add flag
+	G_sprint( self, 2, "Maps downloaded\n" );
+
+	// request commands
+	if ( !( self->k_stuff & STUFF_COMMANDS ) )
+		StuffModCommands( self );
 }
 
 void StuffMaps( gedict_t *p )
 {
-	StuffMainMaps( p );
-	StuffCustomMaps( p );
+	p->k_stuff = p->k_stuff & ~STUFF_MAPS; // remove flag
 
-	G_sprint(p, 2, "Maps downloaded\n" );
+	stuffcmd_flags( p, STUFFCMD_IGNOREINDEMO, "cmd mapslist_dl %d\n", 0 );
 }
 
 char *GetMapName(int imp)
 {
 	int i;
 
-	if ( imp < 0 )
+	if ( imp > 0 )
 	{
-	 // potential from fixed_maps_list[]
-		i = -(imp + 1);
-
-		if ( i >= 0 && i < fixed_maps_cnt )
-			return fixed_maps_list[i];
-	}
-	else if ( imp > 0 )
-	{
-	 // potential custom map
 		i = imp - 1;
 
 	 	if ( i >= 0 && i < maps_cnt )
@@ -187,14 +225,6 @@ int GetMapNum(char *map)
 
 	if ( strnull( map ) )
 		return 0;
-
-	for( i = 0; i < fixed_maps_cnt; i++ )
-	{
-		if ( streq( fixed_maps_list[i], map ) )
-		{
-			return -(i + 1);
-		}
-	}
 
 	for( i = 0; i < maps_cnt; i++ )
 	{
@@ -300,28 +330,13 @@ void ShowMaps()
 	G_sprint( self, 2, "Vote for maps by typing the mapname,\n"
 					   "for example \"%s\" or use \"%s\".\n", redtext("dm6"), redtext("votemap dm6"));
 
-	for( cnt = i = 0; i < fixed_maps_cnt; i++ )
-	{
-		if ( arg_1[0] && !strstr(fixed_maps_list[i], arg_1) )
-			continue;
-
-		if ( !cnt )
-			G_sprint( self, 2, "\n---List of \"%s\" maps\n", redtext("Id") );
-
-		G_sprint( self, 2, ((cnt & 1) ? "%s\n" : "%-17s "), fixed_maps_list[i]);
-		cnt++;
-	}
-
-	if ( cnt )
-		G_sprint( self, 2, "%s---End of list (%d/%d maps)\n", (cnt & 1) ? "\n" : "", cnt, fixed_maps_cnt);
-
 	for( cnt = i = 0; i < maps_cnt; i++ )
 	{
 		if ( arg_1[0] && !strstr(mapslist[i], arg_1) )
 			continue;
 
 		if ( !cnt )
-			G_sprint( self, 2, "\n---List of \"%s\" maps\n", redtext("Kenya") );
+			G_sprint( self, 2, "\n---List of maps\n" );
 
 		G_sprint( self, 2, ((cnt & 1) ? "%s\n" : "%-17s "), mapslist[i]);
 		cnt++;
