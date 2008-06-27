@@ -531,8 +531,8 @@ void Customize_Maps()
 		}
 	}
 
-		if ( cvar( "k_spm_show" ))
-			ShowSpawnPoints();
+	if ( cvar( "k_spm_show" ) )
+		ShowSpawnPoints();
 }
 
 // create cvar via 'set' command

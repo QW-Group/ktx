@@ -1803,70 +1803,57 @@ void BackpackTouch()
 	self = stemp;
 }
 
+gedict_t *Spawn_OnePoint( vec3_t org, int effects )
+{
+	gedict_t	*p;
+
+	p = spawn();
+	p->s.v.flags = FL_ITEM;
+	p->s.v.solid = SOLID_NOT;
+	p->s.v.movetype = MOVETYPE_NONE;
+	setmodel( p, cvar("k_spm_custom_model") ? "progs/spawn.mdl" : "progs/w_g_key.mdl" );
+	p->s.v.netname = "Spawn Point";
+	p->s.v.classname = "spawnpoint";
+
+	p->s.v.effects = ( int ) p->s.v.effects | effects;
+
+	setorigin( p, PASSVEC3( org ) );
+
+	return p;
+}
+
+void Spawn_SpawnPoints( char *classname, int effects )
+{
+	gedict_t	*e;
+	vec3_t		org;
+
+	for ( e = world; ( e = ez_find( e, classname ) ); )
+	{
+		VectorCopy( e->s.v.origin, org );
+		org[2] += 0; // qqshka: it was 16, but I like more how it looks when it more close to ground
+
+		Spawn_OnePoint( org, effects );
+	}
+}
+
 void ShowSpawnPoints()
 {
-	gedict_t	*p, *goal;
-	
-	for ( goal = world; (goal = find( goal, FOFS( s.v.classname ), "info_player_deathmatch" )); )
-	{
-		p = spawn();
-		setorigin( p, goal->s.v.origin[0], goal->s.v.origin[1], goal->s.v.origin[2] + 16 );
-		p->s.v.flags = FL_ITEM;
-		p->s.v.solid = SOLID_NOT;
-		p->s.v.movetype = MOVETYPE_NONE;
-		if ( cvar("k_spm_custom_model") )
-			setmodel( p, "progs/spawn.mdl" );
-		else
-			setmodel( p, "progs/w_g_key.mdl" );
-		p->s.v.netname = "Spawn Point";
-		p->s.v.classname = "spawnpoint";
-		if ( cvar("k_spm_glow") )
-			p->s.v.effects = ( int ) p->s.v.effects | EF_GREEN | EF_RED;
-	}
+	Spawn_SpawnPoints( "info_player_deathmatch", cvar("k_spm_glow") ? ( EF_GREEN | EF_RED ) : 0 );
+
 	if ( isCTF() )
 	{
-		for ( goal = world; (goal = find( goal, FOFS( s.v.classname ), "info_player_team1" )); )
-		{
-			p = spawn();
-			setorigin( p, goal->s.v.origin[0], goal->s.v.origin[1], goal->s.v.origin[2] + 16 );
-			p->s.v.flags = FL_ITEM;
-			p->s.v.solid = SOLID_NOT;
-			p->s.v.movetype = MOVETYPE_NONE;
-			if ( cvar("k_spm_custom_model") )
-				setmodel( p, "progs/spawn.mdl" );
-			else
-				setmodel( p, "progs/w_g_key.mdl" );
-			p->s.v.netname = "Spawn Point";
-			p->s.v.classname = "spawnpoint";
-			if ( cvar("k_spm_glow") )
-				p->s.v.effects = ( int ) p->s.v.effects | EF_RED;
-		}
-		for ( goal = world; (goal = find( goal, FOFS( s.v.classname ), "info_player_team2" )); )
-		{
-			p = spawn();
-			setorigin( p, goal->s.v.origin[0], goal->s.v.origin[1], goal->s.v.origin[2] + 16 );
-			p->s.v.flags = FL_ITEM;
-			p->s.v.solid = SOLID_NOT;
-			p->s.v.movetype = MOVETYPE_NONE;
-			if ( cvar("k_spm_custom_model") )
-				setmodel( p, "progs/spawn.mdl" );
-			else
-				setmodel( p, "progs/w_g_key.mdl" );
-			p->s.v.netname = "Spawn Point";
-			p->s.v.classname = "spawnpoint";
-			if ( cvar("k_spm_glow") )
-				p->s.v.effects = ( int ) p->s.v.effects | EF_BLUE;
-		}
+		Spawn_SpawnPoints( "info_player_team1", cvar("k_spm_glow") ? EF_RED  : 0 );
+		Spawn_SpawnPoints( "info_player_team2", cvar("k_spm_glow") ? EF_BLUE : 0 );
 	}
 }
 
 void HideSpawnPoints()
 {
-	gedict_t	*p;
-	
-	for ( p = world; (p = find( p, FOFS( s.v.classname ), "spawnpoint" )); )
+	gedict_t	*e;
+
+	for ( e = world; ( e = ez_find( e, "spawnpoint" ) ); )
 	{
-		ent_remove( p );
+		ent_remove( e );
 	}
 }
 
