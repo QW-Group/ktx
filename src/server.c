@@ -71,7 +71,11 @@ void t_movetarget()
 		sound( self, CHAN_VOICE, "ogre/ogdrag.wav", 1, ATTN_IDLE );	// play chainsaw drag sound
 
 //dprint ("t_movetarget\n");
-	self->movetarget = find( world, FOFS( s.v.targetname ), other->s.v.target );
+	if ( other->s.v.target )
+		self->movetarget = find( world, FOFS( s.v.targetname ), other->s.v.target );
+	else
+		self->movetarget = NULL;
+
 	if ( !self->movetarget ) // NOTE: this is a damn difference with qc
 		self->movetarget = world;
 	self->s.v.goalentity = EDICT_TO_PROG( self->movetarget );
