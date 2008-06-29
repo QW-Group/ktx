@@ -83,27 +83,38 @@ static int		maps_cnt = 0;
 
 static char ml_buf[MAX_MAPS * 32] = {0}; // OUCH OUCH!!! btw, 32 is some average len of map name here, with path
 
+// NOTE: we did not check is this map alredy in list or not...
+static void Map_AddMapToList( const char *name )
+{
+	int l;
+
+	if ( strnull( name ) )
+		return; // fu!
+
+	if ( maps_cnt < 0 || maps_cnt >= MAX_MAPS )
+		return; // too many
+
+	l = strlen( name ) + 1;  // + nul
+	mapslist[maps_cnt] = G_Alloc( l );		// alloc mem
+	strlcpy( mapslist[maps_cnt], name, l );	// copy
+
+	maps_cnt++;
+}
+
 void AddFixedMaps(void)
 {
-	int i, l;
+	int i;
 
 	if ( mapslist[0] || maps_cnt )
 		G_Error( "AddFixedMaps: can't do it twice" );
 
 	for ( i = 0; i < MAX_MAPS && i < fixed_maps_cnt ; i++ )
-	{
-		l = strlen( fixed_maps_list[i] ) + 1;  // + nul
-		mapslist[i] = G_Alloc( l );		// alloc mem
-		strlcpy( mapslist[i], fixed_maps_list[i], l );	// copy
-
-		maps_cnt++;
-	}
+		Map_AddMapToList( fixed_maps_list[i] );
 }
 
 void GetMapList(void)
 {
-
-	char *s;
+	char *s, name[32];
 	int i, cnt, l;
 
 	ml_buf[0] = 0;
@@ -121,7 +132,7 @@ void GetMapList(void)
 
 	ml_buf[sizeof(ml_buf)-1] = 0; // well, this is optional, just sanity
 
-	for ( i = maps_cnt, s = ml_buf; i < cnt && s < ml_buf + sizeof(ml_buf); i++ )
+	for ( i = 0, s = ml_buf; i < cnt && s < ml_buf + sizeof(ml_buf); i++ )
 	{
 		l = strlen( s );
 
@@ -132,8 +143,10 @@ void GetMapList(void)
 			break;
 
 		l++; // + nul
-		mapslist[i] = G_Alloc( l );	// alloc mem
-		strlcpy(mapslist[i], s, l );	// copy
+
+		// because of FTE we can't use 's' as is, we need skip extension with this weird strlcpy()
+		strlcpy( name, s, min( sizeof(name), l ) );	// copy
+		Map_AddMapToList( name );
 
 		// find next map name
 		s = strchr(s, 0);
@@ -142,8 +155,6 @@ void GetMapList(void)
 
 		s++;
 	}
-
-	maps_cnt = bound(0, i, MAX_MAPS);
 
 #if 0 // debug
 	G_cprint( "Maps list\n" );
