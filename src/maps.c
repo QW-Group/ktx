@@ -84,7 +84,7 @@ static int		maps_cnt = 0;
 static char ml_buf[MAX_MAPS * 32] = {0}; // OUCH OUCH!!! btw, 32 is some average len of map name here, with path
 
 // NOTE: we did not check is this map alredy in list or not...
-static void Map_AddMapToList( const char *name )
+static void Map_AddMapToList( char *name )
 {
 	int l;
 
