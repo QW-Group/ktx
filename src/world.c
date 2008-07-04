@@ -69,8 +69,7 @@ void CopyToBodyQue( gedict_t * ent )
 	bodyque[bodyque_head]->s.v.flags = 0;
 
 	setorigin( bodyque[bodyque_head], PASSVEC3( ent->s.v.origin ) );
-	setsize( bodyque[bodyque_head], PASSVEC3( ent->s.v.mins ),
-		      PASSVEC3( ent->s.v.maxs ) );
+	setsize( bodyque[bodyque_head], PASSVEC3( ent->s.v.mins ), PASSVEC3( ent->s.v.maxs ) );
 
 	if ( ++bodyque_head >= MAX_BODYQUE )
 		bodyque_head = 0;
@@ -89,9 +88,6 @@ void ClearBodyQue()
 	}
 	bodyque_head = 0;
 }
-
-
-gedict_t       *lastspawn;
 
 void CheckDefMap( )
 {
@@ -159,7 +155,6 @@ void SP_worldspawn()
 		G_Error( "SP_worldspawn: The first entity isn't 'worldspawn'" );
 	}
 	world->s.v.classname = "worldspawn";
-	lastspawn = world;
 	InitBodyQue();
 
 	if ( !Q_stricmp( self->s.v.model, "maps/e1m8.bsp" ) )
@@ -174,10 +169,6 @@ void SP_worldspawn()
 
 // player precaches     
 	W_Precache();		// get weapon precaches
-
-// sounds used from C physics code
-	trap_precache_sound( "demon/dland2.wav" );	// landing thud
-	trap_precache_sound( "misc/h2ohit1.wav" );	// landing splash
 
 // sounds used from C physics code
 	trap_precache_sound( "demon/dland2.wav" );	// landing thud
