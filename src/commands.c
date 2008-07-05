@@ -2905,6 +2905,7 @@ const char common_um_init[] =
 
 
 const char _1on1_um_init[] =
+	"coop 0\n"
 	"maxclients 2\n"
 	"k_maxclients 2\n"
 	"timelimit  10\n"					//
@@ -2919,6 +2920,7 @@ const char _1on1_um_init[] =
 	"k_mode 1\n";
 
 const char _2on2_um_init[] =
+	"coop 0\n"
 	"maxclients 4\n"
 	"k_maxclients 4\n"
 	"floodprot 10 1 1\n"				//
@@ -2935,6 +2937,7 @@ const char _2on2_um_init[] =
 	"k_mode 2\n";
 
 const char _3on3_um_init[] =
+	"coop 0\n"
 	"maxclients 6\n"
 	"k_maxclients 6\n"
 	"floodprot 10 1 1\n"
@@ -2951,6 +2954,7 @@ const char _3on3_um_init[] =
 	"k_mode 2\n";
 
 const char _4on4_um_init[] =
+	"coop 0\n"
 	"maxclients 8\n"
 	"k_maxclients 8\n"
 	"floodprot 10 1 1\n"
@@ -2967,6 +2971,7 @@ const char _4on4_um_init[] =
 	"k_mode 2\n";
 
 const char _10on10_um_init[] =
+	"coop 0\n"
 	"maxclients 20\n"
 	"k_maxclients 20\n"
 	"floodprot 10 1 1\n"
@@ -2983,6 +2988,7 @@ const char _10on10_um_init[] =
 	"k_mode 2\n";
 
 const char ffa_um_init[] =
+//	"coop 0\n" NO WE CAN'T DO IT SO, FFA MATCHLESS USED IN COOP MODE
 	"maxclients 26\n"
 	"k_maxclients 26\n"
 	"timelimit  20\n"
@@ -2999,6 +3005,7 @@ const char ffa_um_init[] =
 	"k_mode 3\n";
 
 const char ctf_um_init[] =
+	"coop 0\n"
 	"maxclients 16\n"
 	"k_maxclients 16\n"
 	"timelimit 20\n"
