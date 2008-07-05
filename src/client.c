@@ -1985,6 +1985,8 @@ void ClientDisconnect()
 	if ( !CountPlayers() ) {
 		void Spawn_DefMapChecker( float timeout );
 		int um_idx;
+		int old_dm = deathmatch; // remember deathmatch before we start reseting.
+								 // I need it to guess native/true matchless mode, not some coop hack
 
 		cvar_fset("_k_last_xonx", 0); // forget last XonX command
 
@@ -2002,7 +2004,7 @@ void ClientDisconnect()
 			}
 		}
 
-		if ( ( um_idx = um_idx_byname( k_matchLess ? "ffa" : cvar_string("k_defmode") ) ) >= 0 )
+		if ( ( um_idx = um_idx_byname( ( k_matchLess && old_dm ) ? "ffa" : cvar_string("k_defmode") ) ) >= 0 )
 			UserMode( -(um_idx + 1) ); // force exec configs for default user mode
 		
 		if ( !cvar( "lock_practice" ) && k_practice )
