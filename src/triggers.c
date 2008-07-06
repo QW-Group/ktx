@@ -326,10 +326,13 @@ void play_teleport( gedict_t *sndspot )
 
 void spawn_tfog( vec3_t org )
 {
-	gedict_t *s = spawn();
-	VectorCopy( org, s->s.v.origin );// s->s.v.origin = org;
-	s->s.v.nextthink = g_globalvars.time + 0.2;
-	s->s.v.think = ( func_t ) SUB_Remove;
+// qqshka: no need for this 
+// {
+//	gedict_t *s = spawn();
+//	VectorCopy( org, s->s.v.origin );// s->s.v.origin = org;
+//	s->s.v.nextthink = g_globalvars.time + 0.2;
+//	s->s.v.think = ( func_t ) SUB_Remove;
+// }
 
 	WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
 	WriteByte( MSG_MULTICAST, TE_TELEPORT );
