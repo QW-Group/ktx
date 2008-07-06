@@ -379,6 +379,7 @@ typedef struct gedict_s {
 	float	attack_state;
 
 	float	monster_desired_spawn_time; // in nightmare mode monster desire respawn at this time after last death
+	vec3_t  oldangles; // for nightmare skill, need remember monster angles before respawn again
 
 // }
 

@@ -489,6 +489,7 @@ void			adjust_pickup_time( float *current, float *total );
 //triggers.c
 
 void			play_teleport( gedict_t *sndspot );
+void			spawn_tfog( vec3_t org );
 
 #define			TFLAGS_FOG_SRC				(1<<0)
 #define			TFLAGS_FOG_DST				(1<<1)

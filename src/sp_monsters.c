@@ -181,6 +181,13 @@ void monster_start_go( monsterType_t mt )
 	if ( !strnull( self->mdl ) )
 		setmodel( self, self->mdl );	// restore original model
 
+	// seems we respawning monster again, use some funky effects
+	if ( self->dead_time )
+	{
+		play_teleport( self );
+		spawn_tfog( self->s.v.origin );
+	}
+
 	if ( self->s.v.target )
 	{
 		self->movetarget = find( world, FOFS( s.v.targetname ), self->s.v.target );
@@ -251,6 +258,7 @@ static common_monster_start( char *model, int flags )
 		self->s.v.model = ""; // turn off model
 		self->s.v.solid = SOLID_NOT;
 		setorigin( self, PASSVEC3( self->s.v.oldorigin ) ); // move monster back to his first spawn origin
+		VectorCopy( self->oldangles, self->s.v.angles ); // restore angles
 	}
 	else
 	{
@@ -259,6 +267,7 @@ static common_monster_start( char *model, int flags )
 		setmodel( self, model ); // set model
 		self->mdl = self->s.v.model; // save model
 		VectorCopy( self->s.v.origin, self->s.v.oldorigin ); // save first spawn origin
+		VectorCopy( self->s.v.angles, self->oldangles ); // save angles
 	}
 
 	// always set FL_MONSTER and possibily add some additional flags
