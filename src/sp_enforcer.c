@@ -314,11 +314,17 @@ void enf_pain( struct gedict_s *attacker, float damage )
 	}
 }
 
+void enf_drop_pack( void )
+{
+	self->s.v.ammo_cells = 5; // drop 5 cells in backpack
+	DropBackpack();
+}
+
 void _enf_die_xxx(void)
 {
 	self->s.v.solid = SOLID_NOT;
-	self->s.v.ammo_cells = 5; // drop 5 cells in backpack
-	DropBackpack();
+
+	enf_drop_pack();
 }
 
 ANIM(enf_die1,  death1,  enf_die2)
@@ -353,6 +359,8 @@ void enf_die ()
 	// check for gib
 	if ( self->s.v.health < -35 )
 	{
+		enf_drop_pack();
+
 		sound( self, CHAN_VOICE, "player/udeath.wav", 1, ATTN_NORM );
 		ThrowHead( "progs/h_mega.mdl", self->s.v.health );
 		ThrowGib( "progs/gib1.mdl", self->s.v.health );

@@ -4,6 +4,10 @@ qq:
 	 Respawn time may be tuned with "k_monster_spawn_time" server variable, default is 20 seconds,
 	 actually spawn time randomized by 0.5 * k_monster_spawn_time, so respawn time is from 20 to 30 seconds.
 
+293. COOP: Drop ammo from soldier, enforcer, ogre even if they gibbed.
+
+294. COOP: Respawn items on nightmare skill.
+
 2008-06-27
 qq:
 290. Added coop support, well, not yet tested.

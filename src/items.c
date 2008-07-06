@@ -33,8 +33,8 @@ void TookWeaponHandler( gedict_t *p, int new_wp );
 
 void SUB_regen()
 {
-	if ( !deathmatch )
-		return;
+	if ( !deathmatch && skill < 3 )
+		return; // do not respawn items in deathmatch 0 except on nightmare skill
 
 	self->s.v.model = self->mdl;	// restore original model
 	self->s.v.solid = SOLID_TRIGGER;	// allow it to be touched again

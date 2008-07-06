@@ -530,11 +530,17 @@ void ogre_pain( gedict_t* attacker, float damage )
 	}
 }
 
+void ogre_drop_pack( void )
+{
+	self->s.v.ammo_rockets = 2; // 2 rox in backpack
+	DropBackpack();
+}
+
 void _ogre_die_xxx( void )
 {
 	self->s.v.solid = SOLID_NOT;
-	self->s.v.ammo_rockets = 2; // 2 rox in backpack
-	DropBackpack();
+
+	ogre_drop_pack();
 }
 ANIM(ogre_die1,  death1,  ogre_die2; )
 ANIM(ogre_die2,  death2,  ogre_die3; )
@@ -567,6 +573,8 @@ void ogre_die()
 	// check for gib
 	if ( self->s.v.health < -80 )
 	{
+		ogre_drop_pack();
+
 		sound( self, CHAN_VOICE, "player/udeath.wav", 1, ATTN_NORM );
 		ThrowHead( "progs/h_ogre.mdl", self->s.v.health );
 		ThrowGib( "progs/gib3.mdl", self->s.v.health );

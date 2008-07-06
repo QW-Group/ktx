@@ -314,11 +314,18 @@ void army_pain( gedict_t* attacker, float damage )
 	}
 }
 
+
+void army_drop_pack( void )
+{
+	self->s.v.ammo_shells = 5; // drop packwith 5 shells
+	DropBackpack();
+}
+
 void army_die_xxx( void )
 {
 	self->s.v.solid = SOLID_NOT;
-	self->s.v.ammo_shells = 5; // drop packwith 5 shells
-	DropBackpack();
+
+	army_drop_pack();
 }
 
 ANIM(army_die1,  death1,  army_die2; )
@@ -350,6 +357,8 @@ void army_die ()
 	// check for gib
 	if ( self->s.v.health < -35 )
 	{
+		army_drop_pack();
+
 		sound( self, CHAN_VOICE, "player/udeath.wav", 1, ATTN_NORM );
 		ThrowHead( "progs/h_guard.mdl", self->s.v.health );
 		ThrowGib( "progs/gib1.mdl", self->s.v.health );
