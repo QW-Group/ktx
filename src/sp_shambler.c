@@ -562,24 +562,20 @@ void SP_monster_shambler()
 		return;
 	}
 
-	trap_precache_model( "progs/shambler.mdl" );
-	trap_precache_model( "progs/s_light.mdl" );
-	trap_precache_model( "progs/h_shams.mdl" );
-	trap_precache_model( "progs/bolt.mdl" );
+	safe_precache_model( "progs/shambler.mdl" );
+	safe_precache_model( "progs/s_light.mdl" );
+	safe_precache_model( "progs/h_shams.mdl" );
+	safe_precache_model( "progs/bolt.mdl" );
 	                     
-	trap_precache_sound( "shambler/sattck1.wav" );
-	trap_precache_sound( "shambler/sboom.wav" );
-	trap_precache_sound( "shambler/sdeath.wav" );
-	trap_precache_sound( "shambler/shurt2.wav" );
-	trap_precache_sound( "shambler/sidle.wav" );
-	trap_precache_sound( "shambler/ssight.wav" );
-	trap_precache_sound( "shambler/melee1.wav" );
-	trap_precache_sound( "shambler/melee2.wav" );
-	trap_precache_sound( "shambler/smack.wav" );
-
-	self->s.v.solid = SOLID_SLIDEBOX;
-	self->s.v.movetype = MOVETYPE_STEP;
-	setmodel( self, "progs/shambler.mdl" );
+	safe_precache_sound( "shambler/sattck1.wav" );
+	safe_precache_sound( "shambler/sboom.wav" );
+	safe_precache_sound( "shambler/sdeath.wav" );
+	safe_precache_sound( "shambler/shurt2.wav" );
+	safe_precache_sound( "shambler/sidle.wav" );
+	safe_precache_sound( "shambler/ssight.wav" );
+	safe_precache_sound( "shambler/melee1.wav" );
+	safe_precache_sound( "shambler/melee2.wav" );
+	safe_precache_sound( "shambler/smack.wav" );
 
 	setsize( self, PASSVEC3( VEC_HULL2_MIN ),  PASSVEC3( VEC_HULL2_MAX ) );
 	self->s.v.health = 600;
@@ -592,5 +588,7 @@ void SP_monster_shambler()
 	self->th_missile = sham_magic1;
 	self->th_pain    = sham_pain;
 
-	walkmonster_start();
+	self->th_respawn = SP_monster_shambler;
+
+	walkmonster_start( "progs/shambler.mdl" );
 }

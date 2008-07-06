@@ -2141,3 +2141,20 @@ void SetUserInfo ( gedict_t *p, const char* varname, const char* value, int flag
 	trap_SetUserInfo( NUM_FOR_EDICT( p ), varname, value, flags );
 }
 
+//=======================================
+
+void safe_precache_model( char *name )
+{
+	if ( framecount > 1 )
+		return;
+
+	trap_precache_model( name );
+}
+
+void safe_precache_sound( char *name )
+{
+	if ( framecount > 1 )
+		return;
+
+	trap_precache_sound( name );
+}

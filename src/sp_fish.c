@@ -330,16 +330,11 @@ void SP_monster_fish()
 		return;
 	}
 
-	trap_precache_model( "progs/fish.mdl" );
+	safe_precache_model( "progs/fish.mdl" );
 
-	trap_precache_sound( "fish/death.wav" );
-	trap_precache_sound( "fish/bite.wav" );
-	trap_precache_sound( "fish/idle.wav" );
-
-	self->s.v.solid    = SOLID_SLIDEBOX;
-	self->s.v.movetype = MOVETYPE_STEP;
-
-	setmodel( self, "progs/fish.mdl" );
+	safe_precache_sound( "fish/death.wav" );
+	safe_precache_sound( "fish/bite.wav" );
+	safe_precache_sound( "fish/idle.wav" );
 
 	setsize( self, -16, -16, -24, 16, 16, 24);
 	self->s.v.health = 25;
@@ -351,6 +346,8 @@ void SP_monster_fish()
 	self->th_pain  = fish_pain;
 	self->th_melee = f_attack1;
 
-	swimmonster_start ();
+	self->th_respawn = SP_monster_fish;
+
+	swimmonster_start( "progs/fish.mdl" );
 }
 

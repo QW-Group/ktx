@@ -438,19 +438,14 @@ void SP_monster_dog()
 		return;
 	}
 
-	trap_precache_model( "progs/h_dog.mdl" );
-	trap_precache_model( "progs/dog.mdl" );
+	safe_precache_model( "progs/h_dog.mdl" );
+	safe_precache_model( "progs/dog.mdl" );
 
-	trap_precache_sound( "dog/dattack1.wav" );
-	trap_precache_sound( "dog/ddeath.wav" );
-	trap_precache_sound( "dog/dpain1.wav" );
-	trap_precache_sound( "dog/dsight.wav" );
-	trap_precache_sound( "dog/idle.wav" );
-
-	self->s.v.solid = SOLID_SLIDEBOX;
-	self->s.v.movetype = MOVETYPE_STEP;
-
-	setmodel( self, "progs/dog.mdl" );
+	safe_precache_sound( "dog/dattack1.wav" );
+	safe_precache_sound( "dog/ddeath.wav" );
+	safe_precache_sound( "dog/dpain1.wav" );
+	safe_precache_sound( "dog/dsight.wav" );
+	safe_precache_sound( "dog/idle.wav" );
 
 	setsize( self, -32, -32, -24, 32, 32, 40 );
 	self->s.v.health = 25;
@@ -463,5 +458,7 @@ void SP_monster_dog()
 	self->th_melee   = dog_atta1;
 	self->th_missile = dog_leap1;
 
-	walkmonster_start();
+	self->th_respawn = SP_monster_dog;
+
+	walkmonster_start( "progs/dog.mdl" );
 }

@@ -355,6 +355,9 @@ void		remove_projectiles( void );
 
 void		SetUserInfo ( gedict_t *p, const char* varname, const char* value, int flags );
 
+void		safe_precache_model( char *name );
+void		safe_precache_sound( char *name );
+
 //
 //  subs.c
 //
@@ -917,9 +920,11 @@ void ai_melee_side();
 
 void monster_death_use();
 
-void walkmonster_start();
-void flymonster_start();
-void swimmonster_start();
+void check_monsters_respawn( void );
+
+void walkmonster_start( char *model );
+void flymonster_start( char *model );
+void swimmonster_start( char *model );
 
 // }
 

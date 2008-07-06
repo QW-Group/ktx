@@ -198,9 +198,11 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 	if ( self->s.v.health < -99 )
 		self->s.v.health = -99;	// don't let sbar look bad if a player
 
+    self->dead_time = g_globalvars.time;
+
 	if ( self->ct == ctPlayer )
 	{
-        self->dead_time = g_globalvars.time;
+		; // empty
 	}
 	else if ( self->s.v.movetype == MOVETYPE_PUSH || self->s.v.movetype == MOVETYPE_NONE )
 	{			// doors, triggers, etc
@@ -216,6 +218,11 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 	// bump the monster counter
 	if ( ( ( int ) ( self->s.v.flags ) ) & FL_MONSTER )
 	{
+		float resp_time = bound( 0, cvar( "k_monster_spawn_time"), 999999 );
+
+		// for nightmare mode
+		self->monster_desired_spawn_time = ( resp_time ? g_globalvars.time + resp_time + resp_time * g_random() * 0.5 : 0 );
+
 		g_globalvars.killed_monsters++;
 		WriteByte( MSG_ALL, SVC_KILLEDMONSTER );
 

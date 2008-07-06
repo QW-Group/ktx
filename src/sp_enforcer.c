@@ -385,25 +385,20 @@ void SP_monster_enforcer()
 		return;
 	}
 
-	trap_precache_model( "progs/enforcer.mdl" );
-	trap_precache_model( "progs/h_mega.mdl" );
-	trap_precache_model( "progs/laser.mdl" );
+	safe_precache_model( "progs/enforcer.mdl" );
+	safe_precache_model( "progs/h_mega.mdl" );
+	safe_precache_model( "progs/laser.mdl" );
 	                
-	trap_precache_sound( "enforcer/death1.wav" );
-	trap_precache_sound( "enforcer/enfire.wav" );
-	trap_precache_sound( "enforcer/enfstop.wav" );
-	trap_precache_sound( "enforcer/idle1.wav" );
-	trap_precache_sound( "enforcer/pain1.wav" );
-	trap_precache_sound( "enforcer/pain2.wav" );
-	trap_precache_sound( "enforcer/sight1.wav" );
-	trap_precache_sound( "enforcer/sight2.wav" );
-	trap_precache_sound( "enforcer/sight3.wav" );
-	trap_precache_sound( "enforcer/sight4.wav" );
-
-	self->s.v.solid = SOLID_SLIDEBOX;
-	self->s.v.movetype = MOVETYPE_STEP;
-
-	setmodel( self, "progs/enforcer.mdl" );
+	safe_precache_sound( "enforcer/death1.wav" );
+	safe_precache_sound( "enforcer/enfire.wav" );
+	safe_precache_sound( "enforcer/enfstop.wav" );
+	safe_precache_sound( "enforcer/idle1.wav" );
+	safe_precache_sound( "enforcer/pain1.wav" );
+	safe_precache_sound( "enforcer/pain2.wav" );
+	safe_precache_sound( "enforcer/sight1.wav" );
+	safe_precache_sound( "enforcer/sight2.wav" );
+	safe_precache_sound( "enforcer/sight3.wav" );
+	safe_precache_sound( "enforcer/sight4.wav" );
 
 	setsize( self, -16, -16, -24, 16, 16, 40);
 	self->s.v.health = 80;
@@ -415,6 +410,8 @@ void SP_monster_enforcer()
 	self->th_die     = enf_die;
 	self->th_missile = enf_atk1;
 
-	walkmonster_start();
+	self->th_respawn = SP_monster_enforcer;
+
+	walkmonster_start( "progs/enforcer.mdl" );
 }
 

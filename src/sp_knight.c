@@ -349,20 +349,15 @@ void SP_monster_knight()
 		return;
 	}
 
-	trap_precache_model( "progs/knight.mdl" );
-	trap_precache_model( "progs/h_knight.mdl" );
+	safe_precache_model( "progs/knight.mdl" );
+	safe_precache_model( "progs/h_knight.mdl" );
 	                
-	trap_precache_sound( "knight/kdeath.wav" );
-	trap_precache_sound( "knight/khurt.wav" );
-	trap_precache_sound( "knight/ksight.wav" );
-	trap_precache_sound( "knight/sword1.wav" );
-	trap_precache_sound( "knight/sword2.wav" );
-	trap_precache_sound( "knight/idle.wav" );
-
-	self->s.v.solid = SOLID_SLIDEBOX;
-	self->s.v.movetype = MOVETYPE_STEP;
-
-	setmodel( self, "progs/knight.mdl" );
+	safe_precache_sound( "knight/kdeath.wav" );
+	safe_precache_sound( "knight/khurt.wav" );
+	safe_precache_sound( "knight/ksight.wav" );
+	safe_precache_sound( "knight/sword1.wav" );
+	safe_precache_sound( "knight/sword2.wav" );
+	safe_precache_sound( "knight/idle.wav" );
 
 	setsize( self, -16, -16, -24, 16, 16, 40);
 	self->s.v.health = 75;
@@ -374,5 +369,7 @@ void SP_monster_knight()
 	self->th_pain  = knight_pain;
 	self->th_die   = knight_die;
 
-	walkmonster_start();
+	self->th_respawn = SP_monster_knight;
+
+	walkmonster_start( "progs/knight.mdl" );
 }

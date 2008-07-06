@@ -653,22 +653,17 @@ void SP_monster_ogre()
 		return;
 	}
 
-	trap_precache_model( "progs/ogre.mdl" );
-	trap_precache_model( "progs/h_ogre.mdl" );
-	trap_precache_model( "progs/grenade.mdl" );
+	safe_precache_model( "progs/ogre.mdl" );
+	safe_precache_model( "progs/h_ogre.mdl" );
+	safe_precache_model( "progs/grenade.mdl" );
 	                     
-	trap_precache_sound( "ogre/ogdrag.wav" );
-	trap_precache_sound( "ogre/ogdth.wav" );
-	trap_precache_sound( "ogre/ogidle.wav" );
-	trap_precache_sound( "ogre/ogidle2.wav" );
-	trap_precache_sound( "ogre/ogpain1.wav" );
-	trap_precache_sound( "ogre/ogsawatk.wav" );
-	trap_precache_sound( "ogre/ogwake.wav" );
-
-	self->s.v.solid = SOLID_SLIDEBOX;
-	self->s.v.movetype = MOVETYPE_STEP;
-
-	setmodel( self, "progs/ogre.mdl" );
+	safe_precache_sound( "ogre/ogdrag.wav" );
+	safe_precache_sound( "ogre/ogdth.wav" );
+	safe_precache_sound( "ogre/ogidle.wav" );
+	safe_precache_sound( "ogre/ogidle2.wav" );
+	safe_precache_sound( "ogre/ogpain1.wav" );
+	safe_precache_sound( "ogre/ogsawatk.wav" );
+	safe_precache_sound( "ogre/ogwake.wav" );
 
 	setsize( self, PASSVEC3( VEC_HULL2_MIN ), PASSVEC3( VEC_HULL2_MAX ) );
 	self->s.v.health = 200;
@@ -681,6 +676,8 @@ void SP_monster_ogre()
 	self->th_missile = ogre_nail1;
 	self->th_pain    = ogre_pain;
 
-	walkmonster_start();
+	self->th_respawn = SP_monster_ogre;
+
+	walkmonster_start( "progs/ogre.mdl" );
 }
 

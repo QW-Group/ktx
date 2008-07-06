@@ -444,26 +444,20 @@ void SP_monster_army()
 		return;
 	}
 
-	trap_precache_model( "progs/soldier.mdl" );
-	trap_precache_model( "progs/h_guard.mdl" );
-	trap_precache_model( "progs/gib1.mdl" );
-	trap_precache_model( "progs/gib2.mdl" );
-	trap_precache_model( "progs/gib3.mdl" );
+	safe_precache_model( "progs/soldier.mdl" );
+	safe_precache_model( "progs/h_guard.mdl" );
+	safe_precache_model( "progs/gib1.mdl" );
+	safe_precache_model( "progs/gib2.mdl" );
+	safe_precache_model( "progs/gib3.mdl" );
 	                     
-	trap_precache_sound( "soldier/death1.wav" );
-	trap_precache_sound( "soldier/idle.wav" );
-	trap_precache_sound( "soldier/pain1.wav" );
-	trap_precache_sound( "soldier/pain2.wav" );
-	trap_precache_sound( "soldier/sattck1.wav" );
-	trap_precache_sound( "soldier/sight1.wav" );
+	safe_precache_sound( "soldier/death1.wav" );
+	safe_precache_sound( "soldier/idle.wav" );
+	safe_precache_sound( "soldier/pain1.wav" );
+	safe_precache_sound( "soldier/pain2.wav" );
+	safe_precache_sound( "soldier/sattck1.wav" );
+	safe_precache_sound( "soldier/sight1.wav" );
 	                     
-	trap_precache_sound( "player/udeath.wav" );		// gib death
-
-
-	self->s.v.solid = SOLID_SLIDEBOX;
-	self->s.v.movetype = MOVETYPE_STEP;
-
-	setmodel( self, "progs/soldier.mdl" );
+	safe_precache_sound( "player/udeath.wav" );		// gib death
 
 	setsize( self, -16, -16, -24 ,16, 16, 40 );
 	self->s.v.health = 30;
@@ -475,5 +469,7 @@ void SP_monster_army()
 	self->th_pain    = army_pain;
 	self->th_die     = army_die;
 
-	walkmonster_start ();
+	self->th_respawn = SP_monster_army;
+
+	walkmonster_start( "progs/soldier.mdl" );
 }

@@ -369,12 +369,16 @@ typedef struct gedict_s {
 	th_sp_func_t	th_missile;
 	th_sp_func_t	th_melee;
 
+	th_sp_func_t	th_respawn; // for nightmare mode
+
 	struct gedict_s *oldenemy;	// mad at this player before taking damage
 
 	float	lefty;
 
 	float	search_time;
 	float	attack_state;
+
+	float	monster_desired_spawn_time; // in nightmare mode monster desire respawn at this time after last death
 
 // }
 

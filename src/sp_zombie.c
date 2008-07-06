@@ -724,27 +724,22 @@ void SP_monster_zombie()
 		return;
 	}
 
-	trap_precache_model( "progs/zombie.mdl" );
-	trap_precache_model( "progs/h_zombie.mdl" );
-	trap_precache_model( "progs/zom_gib.mdl" );
+	safe_precache_model( "progs/zombie.mdl" );
+	safe_precache_model( "progs/h_zombie.mdl" );
+	safe_precache_model( "progs/zom_gib.mdl" );
 	                     
-	trap_precache_sound( "zombie/z_idle.wav" );
-	trap_precache_sound( "zombie/z_idle1.wav" );
-	trap_precache_sound( "zombie/z_shot1.wav" );
-	trap_precache_sound( "zombie/z_gib.wav" );
-	trap_precache_sound( "zombie/z_pain.wav" );
-	trap_precache_sound( "zombie/z_pain1.wav" );
-	trap_precache_sound( "zombie/z_fall.wav" );
-	trap_precache_sound( "zombie/z_miss.wav" );
-	trap_precache_sound( "zombie/z_hit.wav" );
-	trap_precache_sound( "zombie/idle_w2.wav" );
+	safe_precache_sound( "zombie/z_idle.wav" );
+	safe_precache_sound( "zombie/z_idle1.wav" );
+	safe_precache_sound( "zombie/z_shot1.wav" );
+	safe_precache_sound( "zombie/z_gib.wav" );
+	safe_precache_sound( "zombie/z_pain.wav" );
+	safe_precache_sound( "zombie/z_pain1.wav" );
+	safe_precache_sound( "zombie/z_fall.wav" );
+	safe_precache_sound( "zombie/z_miss.wav" );
+	safe_precache_sound( "zombie/z_hit.wav" );
+	safe_precache_sound( "zombie/idle_w2.wav" );
 
-	self->s.v.solid = SOLID_SLIDEBOX;
-	self->s.v.movetype = MOVETYPE_STEP;
-
-	setmodel( self, "progs/zombie.mdl" );
-
-	setsize( self ,-16, -16, -24 ,16, 16, 40 );
+	setsize( self, -16, -16, -24, 16, 16, 40 );
 	self->s.v.health = 60;
 
 	self->th_stand   = zombie_stand1;
@@ -754,13 +749,17 @@ void SP_monster_zombie()
 	self->th_die     = zombie_die;
 	self->th_missile = zombie_missile;
 
+	self->th_respawn = SP_monster_zombie;
+
 	if ( (int)self->s.v.spawnflags & SPAWN_CRUCIFIED )
 	{
+		self->s.v.solid = SOLID_SLIDEBOX;
 		self->s.v.movetype = MOVETYPE_NONE;
+		setmodel( self, "progs/zombie.mdl" );
 		zombie_cruc1();
 	}
 	else
 	{
-		walkmonster_start();
+		walkmonster_start( "progs/zombie.mdl" );
 	}
 }

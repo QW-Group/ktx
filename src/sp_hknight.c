@@ -601,26 +601,21 @@ void SP_monster_hell_knight()
 		return;
 	}
 
-	trap_precache_model( "progs/hknight.mdl" );
-	trap_precache_model( "progs/k_spike.mdl" );
-	trap_precache_model( "progs/h_hellkn.mdl" );
+	safe_precache_model( "progs/hknight.mdl" );
+	safe_precache_model( "progs/k_spike.mdl" );
+	safe_precache_model( "progs/h_hellkn.mdl" );
 
-	trap_precache_sound( "hknight/attack1.wav" );
-	trap_precache_sound( "hknight/death1.wav" );
-	trap_precache_sound( "hknight/pain1.wav" );
-	trap_precache_sound( "hknight/sight1.wav" );
-	trap_precache_sound( "hknight/hit.wav" );
-	trap_precache_sound( "hknight/slash1.wav" );
-	trap_precache_sound( "hknight/idle.wav" );
-	trap_precache_sound( "hknight/grunt.wav" );
+	safe_precache_sound( "hknight/attack1.wav" );
+	safe_precache_sound( "hknight/death1.wav" );
+	safe_precache_sound( "hknight/pain1.wav" );
+	safe_precache_sound( "hknight/sight1.wav" );
+	safe_precache_sound( "hknight/hit.wav" );
+	safe_precache_sound( "hknight/slash1.wav" );
+	safe_precache_sound( "hknight/idle.wav" );
+	safe_precache_sound( "hknight/grunt.wav" );
 
-	trap_precache_sound( "knight/sword1.wav" );
-	trap_precache_sound( "knight/sword2.wav" );
-
-	self->s.v.solid = SOLID_SLIDEBOX;
-	self->s.v.movetype = MOVETYPE_STEP;
-
-	setmodel( self, "progs/hknight.mdl" );
+	safe_precache_sound( "knight/sword1.wav" );
+	safe_precache_sound( "knight/sword2.wav" );
 
 	setsize( self, -16, -16, -24, 16, 16, 40 );
 	self->s.v.health = 250;
@@ -633,5 +628,7 @@ void SP_monster_hell_knight()
 	self->th_pain    = hknight_pain;
 	self->th_die     = hknight_die;
 
-	walkmonster_start();
+	self->th_respawn = SP_monster_hell_knight;
+
+	walkmonster_start( "progs/hknight.mdl" );
 }

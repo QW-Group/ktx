@@ -420,20 +420,15 @@ void SP_monster_demon1()
 		return;
 	}
 
-	trap_precache_model( "progs/demon.mdl" );
-	trap_precache_model( "progs/h_demon.mdl" );
+	safe_precache_model( "progs/demon.mdl" );
+	safe_precache_model( "progs/h_demon.mdl" );
 
-	trap_precache_sound( "demon/ddeath.wav" );
-	trap_precache_sound( "demon/dhit2.wav" );
-	trap_precache_sound( "demon/djump.wav" );
-	trap_precache_sound( "demon/dpain1.wav" );
-	trap_precache_sound( "demon/idle1.wav" );
-	trap_precache_sound( "demon/sight2.wav" );
-
-	self->s.v.solid = SOLID_SLIDEBOX;
-	self->s.v.movetype = MOVETYPE_STEP;
-
-	setmodel( self, "progs/demon.mdl" );
+	safe_precache_sound( "demon/ddeath.wav" );
+	safe_precache_sound( "demon/dhit2.wav" );
+	safe_precache_sound( "demon/djump.wav" );
+	safe_precache_sound( "demon/dpain1.wav" );
+	safe_precache_sound( "demon/idle1.wav" );
+	safe_precache_sound( "demon/sight2.wav" );
 
 	setsize( self, PASSVEC3( VEC_HULL2_MIN ), PASSVEC3( VEC_HULL2_MAX ) );
 	self->s.v.health = 300;
@@ -446,5 +441,7 @@ void SP_monster_demon1()
 	self->th_missile = demon1_jump1;			// jump attack
 	self->th_pain    = demon1_pain;
 
-	walkmonster_start();
+	self->th_respawn = SP_monster_demon1;
+
+	walkmonster_start( "progs/demon.mdl" );
 }

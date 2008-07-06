@@ -719,6 +719,10 @@ void FirstFrame	( )
 
 	RegisterCvar("k_teamoverlay"); // q3 like team overlay
 
+// { SP
+	RegisterCvarEx("k_monster_spawn_time", "20");
+// }
+
 	RegisterCvar("_k_captteam1"); // internal mod usage
 	RegisterCvar("_k_captcolor1"); // internal mod usage
 	RegisterCvar("_k_captteam2"); // internal mod usage
@@ -1245,6 +1249,8 @@ void StartFrame( int time )
 	CheckAll(); // just check some clients params
 
 	race_think();
+
+	check_monsters_respawn();
 
 	CheckTeamStatus();
 

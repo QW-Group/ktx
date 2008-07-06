@@ -2032,6 +2032,7 @@ void DropBackpack()
 	setsize( item, -16, -16, 0, 16, 16, 56 );
 	item->s.v.touch = ( func_t ) BackpackTouch;
 
-	item->s.v.nextthink = g_globalvars.time + 120;	// remove after 2 minutes
+	// remove after 2 minutes, and after 30 seconds if backpack dropped by monster
+	item->s.v.nextthink = g_globalvars.time + ( self->ct == ctPlayer ? 120 : 30 );
 	item->s.v.think = ( func_t ) SUB_Remove;
 }

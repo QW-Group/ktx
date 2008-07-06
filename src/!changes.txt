@@ -1,3 +1,9 @@
+2008-07-06
+qq:
+292. COOP: Monsters now respawn on nightmare skill.
+	 Respawn time may be tuned with "k_monster_spawn_time" server variable, default is 20 seconds,
+	 actually spawn time randomized by 0.5 * k_monster_spawn_time, so respawn time is from 20 to 30 seconds.
+
 2008-06-27
 qq:
 290. Added coop support, well, not yet tested.

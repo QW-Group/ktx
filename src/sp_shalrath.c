@@ -296,21 +296,17 @@ void SP_monster_shalrath ()
 		return;
 	}
 
-	trap_precache_model( "progs/shalrath.mdl" );
-	trap_precache_model( "progs/h_shal.mdl" );
-	trap_precache_model( "progs/v_spike.mdl" );
+	safe_precache_model( "progs/shalrath.mdl" );
+	safe_precache_model( "progs/h_shal.mdl" );
+	safe_precache_model( "progs/v_spike.mdl" );
 	                     
-	trap_precache_sound( "shalrath/attack.wav" );
-	trap_precache_sound( "shalrath/attack2.wav" );
-	trap_precache_sound( "shalrath/death.wav" );
-	trap_precache_sound( "shalrath/idle.wav" );
-	trap_precache_sound( "shalrath/pain.wav" );
-	trap_precache_sound( "shalrath/sight.wav" );
+	safe_precache_sound( "shalrath/attack.wav" );
+	safe_precache_sound( "shalrath/attack2.wav" );
+	safe_precache_sound( "shalrath/death.wav" );
+	safe_precache_sound( "shalrath/idle.wav" );
+	safe_precache_sound( "shalrath/pain.wav" );
+	safe_precache_sound( "shalrath/sight.wav" );
 
-	self->s.v.solid = SOLID_SLIDEBOX;
-	self->s.v.movetype = MOVETYPE_STEP;
-
-	setmodel( self, "progs/shalrath.mdl" );
 	setsize( self, PASSVEC3( VEC_HULL2_MIN ), PASSVEC3( VEC_HULL2_MAX ) );
 	self->s.v.health = 400;
 
@@ -321,5 +317,7 @@ void SP_monster_shalrath ()
 	self->th_pain    = shalrath_pain;
 	self->th_missile = shal_attack1;
 
-	walkmonster_start();
+	self->th_respawn = SP_monster_shalrath;
+
+	walkmonster_start( "progs/shalrath.mdl" );
 }

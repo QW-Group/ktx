@@ -421,24 +421,19 @@ void SP_monster_wizard()
 		return;
 	}
 
-	trap_precache_model( "progs/wizard.mdl" );
-	trap_precache_model( "progs/h_wizard.mdl" );
-	trap_precache_model( "progs/w_spike.mdl" );
+	safe_precache_model( "progs/wizard.mdl" );
+	safe_precache_model( "progs/h_wizard.mdl" );
+	safe_precache_model( "progs/w_spike.mdl" );
 	                     
-	trap_precache_sound( "wizard/hit.wav" );		// used by c code
-	trap_precache_sound( "wizard/wattack.wav" );
-	trap_precache_sound( "wizard/wdeath.wav" );
-	trap_precache_sound( "wizard/widle1.wav" );
-	trap_precache_sound( "wizard/widle2.wav" );
-	trap_precache_sound( "wizard/wpain.wav" );
-	trap_precache_sound( "wizard/wsight.wav" );
+	safe_precache_sound( "wizard/hit.wav" );		// used by c code
+	safe_precache_sound( "wizard/wattack.wav" );
+	safe_precache_sound( "wizard/wdeath.wav" );
+	safe_precache_sound( "wizard/widle1.wav" );
+	safe_precache_sound( "wizard/widle2.wav" );
+	safe_precache_sound( "wizard/wpain.wav" );
+	safe_precache_sound( "wizard/wsight.wav" );
 
-	self->s.v.solid = SOLID_SLIDEBOX;
-	self->s.v.movetype = MOVETYPE_STEP;
-
-	setmodel( self, "progs/wizard.mdl" );
-
-	setsize( self ,-16, -16, -24 ,16, 16, 40 );
+	setsize( self, -16, -16, -24, 16, 16, 40 );
 	self->s.v.health = 80;
 
 	self->th_stand   = wiz_stand1;
@@ -448,5 +443,7 @@ void SP_monster_wizard()
 	self->th_pain    = wiz_pain;
 	self->th_die     = wiz_die;
 
-	flymonster_start();
+	self->th_respawn = SP_monster_wizard;
+
+	flymonster_start( "progs/wizard.mdl" );
 }

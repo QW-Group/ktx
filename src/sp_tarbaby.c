@@ -285,17 +285,12 @@ void SP_monster_tarbaby()
 		return;
 	}
 
-	trap_precache_model( "progs/tarbaby.mdl" );
+	safe_precache_model( "progs/tarbaby.mdl" );
 	                     
-	trap_precache_sound( "blob/death1.wav" );
-	trap_precache_sound( "blob/hit1.wav" );
-	trap_precache_sound( "blob/land1.wav" );
-	trap_precache_sound( "blob/sight1.wav" );
-
-	self->s.v.solid = SOLID_SLIDEBOX;
-	self->s.v.movetype = MOVETYPE_STEP;
-
-	setmodel( self, "progs/tarbaby.mdl" );
+	safe_precache_sound( "blob/death1.wav" );
+	safe_precache_sound( "blob/hit1.wav" );
+	safe_precache_sound( "blob/land1.wav" );
+	safe_precache_sound( "blob/sight1.wav" );
 
 	setsize( self, -16, -16, -24 ,16, 16, 40 );
 	self->s.v.health = 80;
@@ -307,6 +302,8 @@ void SP_monster_tarbaby()
 	self->th_melee   = tbaby_jump1;
 	self->th_die     = tbaby_die1;
 
-	walkmonster_start();
+	self->th_respawn = SP_monster_tarbaby;
+
+	walkmonster_start( "progs/tarbaby.mdl" );
 }
 
