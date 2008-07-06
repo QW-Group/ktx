@@ -188,7 +188,7 @@ void monster_start_go( monsterType_t mt )
 	self->oldenemy = NULL;
 	self->lefty = 0;
 	self->search_time = 0;
-	self->attack_state;
+	self->attack_state = 0;
 
 	if ( mt == mtWalk )
 	{
@@ -290,7 +290,7 @@ void swimmonster_start_go()
 	monster_start_go( mtSwim );
 }
 
-static common_monster_start( char *model, int flags )
+static void common_monster_start( char *model, int flags )
 {
 	self->s.v.flags = (int)self->s.v.flags & ~FL_ONGROUND;
 
