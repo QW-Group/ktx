@@ -373,10 +373,15 @@ void SP_worldspawn()
 // quad mdl - need this due to aerowalk customize
 	trap_precache_model( "progs/quaddama.mdl" );
 
-// pent mdl - need this for race
+// pent mdl - need this for race and coop
 	trap_precache_model( "progs/invulner.mdl" );
 
-// suit was - need this for race
+// pent sounds - need for coop
+	trap_precache_sound( "items/protect.wav" );
+	trap_precache_sound( "items/protect2.wav" );
+	trap_precache_sound( "items/protect3.wav" );
+
+// suit wav - need this for race
 	trap_precache_sound( "items/suit.wav" );
 
 // for race

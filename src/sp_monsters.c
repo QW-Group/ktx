@@ -31,6 +31,51 @@
 //		<code>
 // }
 
+//============================================================================
+
+void MonsterDropPowerups()
+{
+	int i;
+
+	if ( skill < 3 )
+		return; // skill 3 or more required
+
+	if ( !Get_Powerups() )
+		return;
+
+	if ( g_random() > 0.15 )
+		return; // 15% possibility to drop some powerup
+
+	i = i_rnd( 0, 5 );
+
+	switch ( i )
+	{
+		case 0:
+
+		if ( /* cvar( "dp" ) && */ 1 )
+			DropPowerup( 30, IT_INVULNERABILITY );
+
+		break;
+
+		case 1:
+
+		if ( /* cvar( "dr" ) && */ 1 )
+			DropPowerup( 30, IT_INVISIBILITY );
+
+		break;
+
+		// more chances for quad compared to pent and ring
+
+		default:
+
+		if ( /* cvar( "dq" ) && */ 1 )
+			DropPowerup( 30, IT_QUAD );
+
+		break;
+	}
+}
+
+//============================================================================
 
 /*
 ================
@@ -74,6 +119,8 @@ void monster_death_use ()
 {
 	if ( !( ( int )self->s.v.flags & FL_MONSTER ) )
 		return; // not a monster
+
+	MonsterDropPowerups();
 
 	// fall to ground
 	self->s.v.flags = (int)self->s.v.flags & ~( FL_FLY | FL_SWIM);

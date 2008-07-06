@@ -479,6 +479,7 @@ void            T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float
 void            T_BeamDamage( gedict_t * attacker, float damage );
 
 //items.c
+void			DropPowerup( float timeleft, int powerup );
 void			DropPowerups();
 void			ShowSpawnPoints();
 void			HideSpawnPoints();

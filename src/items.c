@@ -27,6 +27,7 @@
 
 void            SP_item_artifact_invisibility();
 void            SP_item_artifact_super_damage();
+void			SP_item_artifact_invulnerability();
 
 void TookWeaponHandler( gedict_t *p, int new_wp );
 
@@ -49,7 +50,7 @@ void DropPowerup( float timeleft, int powerup )
 	if ( timeleft <= 0 || match_in_progress != 2 )
 		return;
 
-	if ( powerup != IT_QUAD && powerup != IT_INVISIBILITY ) // only this supported
+	if ( powerup != IT_QUAD && powerup != IT_INVISIBILITY && powerup != IT_INVULNERABILITY ) // only this supported
 		return;
 
 	self = spawn(); // WARNING!
@@ -57,10 +58,12 @@ void DropPowerup( float timeleft, int powerup )
 	setorigin (self, PASSVEC3( swp->s.v.origin ));
 	self->cnt = g_globalvars.time + timeleft;
 
-	if (powerup == IT_QUAD)
+	if ( powerup == IT_QUAD )
 		SP_item_artifact_super_damage();
-	else if (powerup == IT_INVISIBILITY)
+	else if ( powerup == IT_INVISIBILITY )
 		SP_item_artifact_invisibility();
+	else if ( powerup == IT_INVULNERABILITY )
+		SP_item_artifact_invulnerability();
 	else
 		G_Error("DropPowerup");
 
@@ -70,9 +73,8 @@ void DropPowerup( float timeleft, int powerup )
 				swp->s.v.netname,
 				timeleft );
 
-	mi_print( swp, powerup, va( "%s dropped a %s with %.0f seconds left",
-					  	  swp->s.v.netname, self->s.v.netname, timeleft ));
-
+	if ( swp->ct == ctPlayer )
+		mi_print( swp, powerup, va( "%s dropped a %s with %.0f seconds left", swp->s.v.netname, self->s.v.netname, timeleft ));
 
 	self = swp;// restore self
 }
@@ -1457,13 +1459,16 @@ Player is invulnerable for 30 seconds
 */
 void SP_item_artifact_invulnerability()
 {
+	qboolean b_dp = self->cnt > g_globalvars.time; // dropped powerup by player, not normal spawn
+
 	self->s.v.touch = ( func_t ) powerup_touch;
 
-// always precache it, need it for race
+// always precache it, need it for race and coop
 //	trap_precache_model( "progs/invulner.mdl" );
-	trap_precache_sound( "items/protect.wav" );
-	trap_precache_sound( "items/protect2.wav" );
-	trap_precache_sound( "items/protect3.wav" );
+//	trap_precache_sound( "items/protect.wav" );
+//	trap_precache_sound( "items/protect2.wav" );
+//	trap_precache_sound( "items/protect3.wav" );
+
 	self->s.v.noise = "items/protect.wav";
 	setmodel( self, "progs/invulner.mdl" );
 	self->s.v.netname = "Pentagram of Protection";
@@ -1473,7 +1478,19 @@ void SP_item_artifact_invulnerability()
 
 	self->s.v.items = IT_INVULNERABILITY;
 	setsize( self, -16, -16, -24, 16, 16, 32 );
-	StartItem();
+
+	if ( b_dp ) {
+		PlaceItemIngame();
+
+		self->s.v.velocity[2] = 300;
+		self->s.v.velocity[0] = -100 + ( g_random() * 200 );
+		self->s.v.velocity[1] = -100 + ( g_random() * 200 );
+
+		self->s.v.nextthink = self->cnt; // remove it with the time left on it
+		self->s.v.think = ( func_t ) SUB_Remove;
+	}
+	else
+		StartItem();
 }
 
 /*QUAKED item_artifact_envirosuit (0 .5 .8) (-16 -16 -24) (16 16 32)
@@ -1509,13 +1526,14 @@ void SP_item_artifact_invisibility()
 
 	self->s.v.touch = ( func_t ) powerup_touch;
 
-	// already precached for instagib bonus
-	//if ( !b_dp ) {
-	//	trap_precache_model( "progs/invisibl.mdl" );
-	//	trap_precache_sound( "items/inv1.wav" );
-	//	trap_precache_sound( "items/inv2.wav" );
-	//	trap_precache_sound( "items/inv3.wav" );
-	//}
+	if ( !b_dp ) {
+/*  already precached for instagib bonus and coop
+		trap_precache_model( "progs/invisibl.mdl" );
+		trap_precache_sound( "items/inv1.wav" );
+		trap_precache_sound( "items/inv2.wav" );
+		trap_precache_sound( "items/inv3.wav" );
+*/
+	}
 	self->s.v.noise = "items/inv1.wav";
 	setmodel( self, "progs/invisibl.mdl" );
 	self->s.v.netname = "Ring of Shadows";
@@ -1547,7 +1565,7 @@ void SP_item_artifact_super_damage()
 	self->s.v.touch = ( func_t ) powerup_touch;
 
 	if ( !b_dp ) {
-/* need this due to aerowalk customize
+/* need this due to aerowalk customize and coop
 		trap_precache_model( "progs/quaddama.mdl" );
 		trap_precache_sound( "items/damage.wav" );
 		trap_precache_sound( "items/damage2.wav" );
