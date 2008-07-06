@@ -669,7 +669,7 @@ void fd_secret_use( gedict_t * attacker, float take )
 	self->s.v.health = 10000;
 
 	// exit if still moving around...
-	if ( !VectorCompare( self->s.v.origin, self->oldorigin ) )
+	if ( !VectorCompare( self->s.v.origin, self->s.v.oldorigin ) )
 		return;
 
 	self->s.v.message = 0;	// no more message
@@ -904,7 +904,7 @@ void SP_func_door_secret()
 		self->s.v.takedamage = DAMAGE_YES;
 		self->th_pain = fd_secret_use;
 	}
-	VectorCopy( self->s.v.origin, self->oldorigin );
+	VectorCopy( self->s.v.origin, self->s.v.oldorigin );
 // self.oldorigin = self.origin;
 	if ( self->wait == 0 )
 		self->wait = 5;	// 5 seconds before closing

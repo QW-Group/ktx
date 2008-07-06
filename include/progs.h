@@ -307,7 +307,7 @@ typedef struct gedict_s {
 //
 	vec3_t		movement;
 	vec3_t          dest, dest1, dest2;
-	vec3_t          pos1, pos2, oldorigin;
+	vec3_t          pos1, pos2;
 	vec3_t          mangle;
 	float           t_length, t_width, height;
 	float           wait;	// time from firing to restarting
