@@ -25,7 +25,7 @@ INSTALLDIR=$(PREFIX)/sbin
 
 SVNREV = $(shell svnversion -n $(srcdir) 2>/dev/null | sed -e "s/M//")
 
-MODULE=qwprogs.qvm
+MODULE=../qwprogs.qvm
 
 CFLAGS=-DQ3_VM -S -Wf-target=bytecode -Wf-g -DSVNREV="$(SVNREV)"
 INCFLAGS=-I../include
