@@ -905,8 +905,8 @@ void LightningHit( gedict_t *from, float damage )
 {
 	if ( PROG_TO_EDICT( g_globalvars.trace_ent )->ct == ctPlayer )
 	{
-		MVD_WPStatsMark( self, wpLG );
-		self->ps.wpn[wpLG].hits++;
+		MVD_WPStatsMark( from, wpLG );
+		from->ps.wpn[wpLG].hits++;
 	}
 
 	WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
@@ -925,36 +925,18 @@ void LightningHit( gedict_t *from, float damage )
 LightningDamage
 =================
 */
-void LightningDamage( vec3_t p1, vec3_t p2, gedict_t * from, float damage )
+void LightningDamage( vec3_t p1, vec3_t p2, gedict_t *from, float damage )
 {
-#if 0 /* qqshka - this code was in original qw from ID, but i make code more ktpro'ish :( */
-
-	gedict_t       *e1, *e2;
-	vec3_t          f;
-
-
-	VectorSubtract( p2, p1, f );	// f = p2 - p1;
-	VectorNormalize( f );	// normalize (f);
-
-	f[0] = 0 - f[1];
-	f[1] = f[0];
-	f[2] = 0;
-	VectorScale( f, 16, f );	//f = f*16;
-
-	e1 = e2 = world;
-#endif
-
-	traceline( PASSVEC3( p1 ), PASSVEC3( p2 ), false, self );
+	traceline( PASSVEC3( p1 ), PASSVEC3( p2 ), false, from );
 
 	if ( PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.takedamage )
 	{
 		LightningHit( from, damage );
-		if ( self->ct == ctPlayer )
+
+		// this code cause "dm6 secret door bug"
+		if ( from->ct == ctPlayer )
 		{
-// qqshka: this shit doesn't work in QVM
-//			if ( other->ct == ctPlayer )
-// 		   make my own
-			gedict_t *gre = PROG_TO_EDICT ( self->s.v.groundentity );
+			gedict_t *gre = PROG_TO_EDICT ( from->s.v.groundentity );
 
 			if (    gre 
 				 && gre == PROG_TO_EDICT( g_globalvars.trace_ent )
@@ -963,31 +945,6 @@ void LightningDamage( vec3_t p1, vec3_t p2, gedict_t * from, float damage )
 				PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.velocity[2] += 400;
 		}
 	}
-
-#if 0  /* qqshka - this code was in original qw from ID, but i make code more ktpro'ish :( */
-
-	e1 = PROG_TO_EDICT( g_globalvars.trace_ent );
-
-	//traceline (p1 + f, p2 + f, FALSE, self);
-	traceline( p1[0] + f[0], p1[1] + f[1], p1[2] + f[2], p2[0] + f[0],
-			p2[1] + f[1], p2[2] + f[2], false, self );
-	if ( PROG_TO_EDICT( g_globalvars.trace_ent ) != e1
-	     && PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.takedamage )
-	{
-		LightningHit( from, damage );
-	}
-	e2 = PROG_TO_EDICT( g_globalvars.trace_ent );
-
-	traceline( p1[0] - f[0], p1[1] - f[1], p1[2] - f[2], p2[0] - f[0],
-			p2[1] - f[1], p2[2] - f[2], false, self );
-	if ( PROG_TO_EDICT( g_globalvars.trace_ent ) != e1
-	     && PROG_TO_EDICT( g_globalvars.trace_ent ) != e2
-	     && PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.takedamage )
-	{
-		LightningHit( from, damage );
-	}
-
-#endif
 }
 
 void W_FireLightning()
