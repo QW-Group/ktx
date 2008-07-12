@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="qwprogs"
 	ProjectGUID="{78438C94-7170-4030-A6B9-D288BF262FE9}"
 	RootNamespace="qwprogs"
@@ -141,8 +141,6 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				Description="Update build number"
-				CommandLine="echo -n &apos; &apos; &gt;&gt; build.num"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -746,6 +744,78 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\sp_ai.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_boss.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_client.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_demon.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_dog.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_enforcer.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_fish.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_hknight.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_knight.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_monsters.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_ogre.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_oldone.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_shalrath.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_shambler.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_soldier.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_tarbaby.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_wizard.c"
+				>
+			</File>
+			<File
+				RelativePath="src\sp_zombie.c"
+				>
+			</File>
+			<File
 				RelativePath="src\spectate.c"
 				>
 				<FileConfiguration
@@ -877,78 +947,6 @@
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;QWPROGS_EXPORTS;$(NoInherit)"
 					/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="src\sp_ai.c"
-				>
-			</File>
-			<File
-				RelativePath="src\sp_boss.c"
-				>
-			</File>
-			<File
-				RelativePath="src\sp_client.c"
-				>
-			</File>
-			<File
-				RelativePath="src\sp_demon.c"
-				>
-			</File>
-			<File
-				RelativePath="src\sp_dog.c"
-				>
-			</File>
-			<File
-				RelativePath="src\sp_enforcer.c"
-				>
-			</File>
-			<File
-				RelativePath="src\sp_fish.c"
-				>
-			</File>
-			<File
-				RelativePath="src\sp_hknight.c"
-				>
-			</File>
-			<File
-				RelativePath="src\sp_knight.c"
-				>
-			</File>
-			<File
-				RelativePath="src\sp_monsters.c"
-				>
-			</File>
-			<File
-				RelativePath="src\sp_ogre.c"
-				>
-			</File>
-			<File
-				RelativePath="src\sp_oldone.c"
-				>
-			</File>
-			<File
-				RelativePath="src\sp_shalrath.c"
-				>
-			</File>
-			<File
-				RelativePath="src\sp_shambler.c"
-				>
-			</File>
-			<File
-				RelativePath="src\sp_soldier.c"
-				>
-			</File>
-			<File
-				RelativePath="src\sp_tarbaby.c"
-				>
-			</File>
-			<File
-				RelativePath="src\sp_wizard.c"
-				>
-			</File>
-			<File
-				RelativePath="src\sp_zombie.c"
-				>
 			</File>
 		</Filter>
 		<Filter
