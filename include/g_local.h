@@ -358,6 +358,8 @@ void		SetUserInfo ( gedict_t *p, const char* varname, const char* value, int fla
 void		safe_precache_model( char *name );
 void		safe_precache_sound( char *name );
 
+char		*cl_ip( gedict_t *p );
+
 //
 //  subs.c
 //

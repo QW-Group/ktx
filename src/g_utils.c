@@ -2158,3 +2158,10 @@ void safe_precache_sound( char *name )
 
 	trap_precache_sound( name );
 }
+
+//=======================================
+
+char *cl_ip(gedict_t *p)
+{
+	return ezinfokey(p, "ip");
+}

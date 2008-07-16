@@ -78,10 +78,13 @@ qboolean DoKick(gedict_t *victim, gedict_t *kicker)
 	{
 		G_bprint(2, "%s kicked %s\n", getname(kicker), g_himself( kicker ));
 
-		// hehe %)
+		// hehe
 		G_sprint(kicker, 2, "Say \"bye\" and then type \"disconnect\" next time\n");
 
 		stuffcmd(kicker, "disconnect\n");  // FIXME: stupid way
+
+		if ( !FTE_sv )
+			localcmd( "addip %s ban +300\n", cl_ip( victim ) ); // BAN for 300 seconds
 	}
 	else
 	{
@@ -93,6 +96,9 @@ qboolean DoKick(gedict_t *victim, gedict_t *kicker)
 		G_sprint(victim, 2, "You were kicked from the server\n");
 
 		stuffcmd(victim, "disconnect\n"); // FIXME: stupid way
+
+		if ( !FTE_sv )
+			localcmd( "addip %s ban +300\n", cl_ip( victim ) ); // BAN for 300 seconds
 	}
 
 	return true;

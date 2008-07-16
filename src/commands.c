@@ -5169,11 +5169,6 @@ void downplayers ( float type )
 	ChangeClientsCount( type, -1 );
 }
 
-char *cl_ip(gedict_t *p)
-{
-	return ezinfokey(p, "ip");
-}
-
 void iplist_one(gedict_t *s, gedict_t *p)
 {
 	G_sprint(s, 2, "%15.15s %s %-18.18s\n", cl_ip( p ), is_adm( p ) ? "A" : " ", p->s.v.netname);
