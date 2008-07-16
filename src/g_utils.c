@@ -2105,6 +2105,18 @@ char *respawn_model_name( int mdl_num )
 	}
 }
 
+char *respawn_model_name_short( int mdl_num )
+{
+	switch ( mdl_num ) {
+		case 0:  return "QW";
+		case 1:  return "KTS";
+		case 2:  return "KT";
+		case 3:  return "KTX";
+		default: return "???";
+	}
+}
+
+
 int get_fair_pack()
 {
 	// Yawnmode: always 2 aka last weapon

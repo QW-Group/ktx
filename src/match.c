@@ -1666,6 +1666,7 @@ void PrintCountdown( int seconds )
 //
 // Deathmatch  x
 // Mode		  D u e l | T e a m | F F A | C T F | RA
+// Spawnmodel KTX | bla bla bla
 // NoItems    On // optional
 // Midair     On // optional
 // Instagib   On // optional
@@ -1706,6 +1707,8 @@ void PrintCountdown( int seconds )
 		mode = redtext("Unknown");
 
 	strlcat(text, va("%s %8s\n", "Mode", mode), sizeof(text));
+
+	strlcat(text, va("%s %4s\n", "Respawns", respawn_model_name_short( cvar( "k_spw" ) )), sizeof(text));
 
 	if ( cvar("k_noitems") )
 		strlcat(text, va("%s %5s\n", "NoItems", redtext("On")), sizeof(text));
@@ -1964,7 +1967,7 @@ void ShowMatchSettings()
 	int i;
 	char *txt = "";
 
-	G_bprint(2, "Spawnmodel: %s\n", redtext( respawn_model_name( cvar( "k_spw" ) ) ));
+//	G_bprint(2, "Spawnmodel: %s\n", redtext( respawn_model_name( cvar( "k_spw" ) ) ));
 
 // changed to print only if other than default
 

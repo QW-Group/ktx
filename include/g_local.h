@@ -347,6 +347,7 @@ char		*params_str( int from, int to );
 char		*SD_type_str(); // sudden death type string
 
 char		*respawn_model_name( int mdl_num );
+char		*respawn_model_name_short( int mdl_num );
 
 int			get_fair_pack();
 int			get_fallbunny();
