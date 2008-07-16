@@ -84,7 +84,7 @@ qboolean DoKick(gedict_t *victim, gedict_t *kicker)
 		stuffcmd(kicker, "disconnect\n");  // FIXME: stupid way
 
 		if ( !FTE_sv )
-			localcmd( "addip %s ban +300\n", cl_ip( victim ) ); // BAN for 300 seconds
+			localcmd( "addip %s ban +30\n", cl_ip( victim ) ); // BAN for 30 seconds
 	}
 	else
 	{
@@ -98,7 +98,7 @@ qboolean DoKick(gedict_t *victim, gedict_t *kicker)
 		stuffcmd(victim, "disconnect\n"); // FIXME: stupid way
 
 		if ( !FTE_sv )
-			localcmd( "addip %s ban +300\n", cl_ip( victim ) ); // BAN for 300 seconds
+			localcmd( "addip %s ban +30\n", cl_ip( victim ) ); // BAN for 30 seconds
 	}
 
 	return true;
