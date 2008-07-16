@@ -401,8 +401,8 @@ void OnePlayerStats(gedict_t *p, int tp)
 	h_ax  = 100.0 * h_ax  / max(1, a_ax);
 	h_sg  = 100.0 * h_sg  / max(1, a_sg);
 	h_ssg = 100.0 * h_ssg / max(1, a_ssg);
-	ph_gl  = 100.0 * rh_gl  / max(1, a_gl);
-	ph_rl  = 100.0 * rh_rl  / max(1, a_rl);
+	ph_gl  = 100.0 * h_gl  / max(1, a_gl);
+	ph_rl  = 100.0 * h_rl  / max(1, a_rl);
 	h_lg  = 100.0 * h_lg  / max(1, a_lg);
 
 	d_rl = p->ps.wpn[wpRL].drops;
@@ -434,14 +434,14 @@ void OnePlayerStats(gedict_t *p, int tp)
 		// weapons
 	G_bprint(2, "%s:%s%s%s%s%s\n", redtext("Wp"),
 		(h_lg  ? va(" %s%.1f%%", redtext("lg"), h_lg) : ""),
-		(h_rl  ? va(" %s%.1f%%", redtext("rl"), ph_rl) : ""),
-		(h_gl  ? va(" %s%.1f%%", redtext("gl"), ph_gl) : ""),
+		(ph_rl ? va(" %s%.1f%%", redtext("rl"), ph_rl) : ""),
+		(ph_gl ? va(" %s%.1f%%", redtext("gl"), ph_gl) : ""),
 		(h_sg  ? va(" %s%.1f%%", redtext("sg"), h_sg) : ""),
 		(h_ssg ? va(" %s%.1f%%", redtext("ssg"), h_ssg) : ""));
 		
 		// rockets detail (for RENZO :<)
 		G_bprint(2, "%s: %s:%.1f %s:%.0f\n", redtext("RL skill"),
-			redtext("ad"), dmg_g_rl ? ( dmg_g_rl / rh_rl ) : 0. , redtext("dh"), h_rl ? h_rl : 0.);
+			redtext("ad"), rh_rl ? ( dmg_g_rl / rh_rl ) : 0. , redtext("dh"), h_rl ? h_rl : 0.);
 
 		// velocity
 		if ( isDuel() )
