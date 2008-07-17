@@ -1666,7 +1666,7 @@ void PrintCountdown( int seconds )
 //
 // Deathmatch  x
 // Mode		  D u e l | T e a m | F F A | C T F | RA
-// Spawnmodel KTX | bla bla bla
+// Spawnmodel KTX | bla bla bla // optional
 // NoItems    On // optional
 // Midair     On // optional
 // Instagib   On // optional
@@ -1708,7 +1708,8 @@ void PrintCountdown( int seconds )
 
 	strlcat(text, va("%s %8s\n", "Mode", mode), sizeof(text));
 
-	strlcat(text, va("%s %4s\n", "Respawns", respawn_model_name_short( cvar( "k_spw" ) )), sizeof(text));
+	if ( cvar( "k_spw" ) != 3 )
+		strlcat(text, va("%s %4s\n", "Respawns", respawn_model_name_short( cvar( "k_spw" ) )), sizeof(text));
 
 	if ( cvar("k_noitems") )
 		strlcat(text, va("%s %5s\n", "NoItems", redtext("On")), sizeof(text));
