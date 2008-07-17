@@ -1708,7 +1708,7 @@ void PrintCountdown( int seconds )
 
 	strlcat(text, va("%s %8s\n", "Mode", mode), sizeof(text));
 
-	if ( cvar( "k_spw" ) != 3 )
+//	if ( cvar( "k_spw" ) != 3 )
 		strlcat(text, va("%s %4s\n", "Respawns", respawn_model_name_short( cvar( "k_spw" ) )), sizeof(text));
 
 	if ( cvar("k_noitems") )
