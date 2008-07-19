@@ -76,6 +76,7 @@ typedef enum
 typedef struct wpType_s {
 	int hits;			// hits with this weapon, for SG and SSG this is count of bullets
 	int rhits;			// real hits for this weapon (direct + splash), used for RL and GL only
+	int vhits;			// virtual hits for this weapon (direct + splash, do not care about pent and such), used for RL and GL only
 	int attacks;		// all attacks with this weapon, for SG and SSG this is count of bullets
 
 	int kills;			// kills with this weapon
@@ -116,7 +117,7 @@ typedef struct player_stats_s {
 
 	float    dmg_t; // damage taken
 	float    dmg_g; // damage given
-	float    dmg_g_rl; // damage given via RL
+	float    dmg_g_rl; // virtual given rl damage
 	float    dmg_team;  // damage to team
 // { k_dmgfrags
 	float    dmg_frags; // frags awarded from damage (CA)

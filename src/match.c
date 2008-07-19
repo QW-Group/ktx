@@ -368,7 +368,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 	int   ra, ya, ga;
 	int   mh, d_rl, k_rl, t_rl;
 	int   quad, pent, ring;
-	float h_ax, a_ax, ph_rl, rh_rl, h_rl, a_rl, ph_gl, rh_gl, h_gl, a_gl, h_lg, a_lg, h_sg, a_sg, h_ssg, a_ssg;
+	float h_ax, a_ax, ph_rl, rh_rl, vh_rl, h_rl, a_rl, ph_gl, rh_gl, vh_gl, h_gl, a_gl, h_lg, a_lg, h_sg, a_sg, h_ssg, a_ssg;
 	int res, str, hst, rgn;
 
 	dmg_g = p->ps.dmg_g;
@@ -385,9 +385,11 @@ void OnePlayerStats(gedict_t *p, int tp)
 
 	h_rl  = p->ps.wpn[wpRL].hits;
 	rh_rl = p->ps.wpn[wpRL].rhits;
+	vh_rl = p->ps.wpn[wpRL].vhits;
 	a_rl  = p->ps.wpn[wpRL].attacks;
 	h_gl  = p->ps.wpn[wpGL].hits;
 	rh_gl = p->ps.wpn[wpGL].rhits;
+	vh_gl = p->ps.wpn[wpGL].vhits;
 	a_gl  = p->ps.wpn[wpGL].attacks;
 	h_lg  = p->ps.wpn[wpLG].hits;
 	a_lg  = p->ps.wpn[wpLG].attacks;
@@ -401,8 +403,8 @@ void OnePlayerStats(gedict_t *p, int tp)
 	h_ax  = 100.0 * h_ax  / max(1, a_ax);
 	h_sg  = 100.0 * h_sg  / max(1, a_sg);
 	h_ssg = 100.0 * h_ssg / max(1, a_ssg);
-	ph_gl  = 100.0 * h_gl  / max(1, a_gl);
-	ph_rl  = 100.0 * h_rl  / max(1, a_rl);
+	ph_gl = 100.0 * vh_gl / max(1, a_gl);
+	ph_rl = 100.0 * vh_rl / max(1, a_rl);
 	h_lg  = 100.0 * h_lg  / max(1, a_lg);
 
 	d_rl = p->ps.wpn[wpRL].drops;
@@ -439,9 +441,9 @@ void OnePlayerStats(gedict_t *p, int tp)
 		(h_sg  ? va(" %s%.1f%%", redtext("sg"), h_sg) : ""),
 		(h_ssg ? va(" %s%.1f%%", redtext("ssg"), h_ssg) : ""));
 		
-		// rockets detail (for RENZO :<)
+		// rockets detail
 		G_bprint(2, "%s: %s:%.1f %s:%.0f\n", redtext("RL skill"),
-			redtext("ad"), rh_rl ? ( dmg_g_rl / rh_rl ) : 0. , redtext("dh"), h_rl ? h_rl : 0.);
+			redtext("ad"), vh_rl ? ( dmg_g_rl / vh_rl ) : 0. , redtext("dh"), h_rl);
 
 		// velocity
 		if ( isDuel() )

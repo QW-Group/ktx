@@ -330,7 +330,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	float           save;
 	float           take;
 	int				i, c1 = 8, c2 = 4, hdp;
-	float			dmg_dealt = 0;
+	float			dmg_dealt = 0, virtual_take = 0;
 	float			non_hdp_damage; // save damage before handicap apply for kickback calculation
 	float			native_damage = damage; // save damage before apply any modificator
 	char            *attackerteam, *targteam, *attackername;
@@ -461,19 +461,21 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	if ( midair && lowheight && !inwater && rl_dmg )
 		save *= 0.5; // take half of armor in such case
 
-	if ( !tp4teamdmg )
-	{
-		if ( save >= targ->s.v.armorvalue )
-		{
-			save = targ->s.v.armorvalue;
-			targ->s.v.armortype = 0;	// lost all armor
-			targ->s.v.items -= ( ( int ) targ->s.v.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) );
-		}
-		dmg_dealt += save;
+	if ( tp4teamdmg )
+		save = 0; // we do not touch armor
 
-		if ( match_in_progress == 2 )
-			targ->s.v.armorvalue = targ->s.v.armorvalue - save;
+	if ( save >= targ->s.v.armorvalue )
+	{
+		save = targ->s.v.armorvalue;
+		targ->s.v.armortype = 0;	// lost all armor
+		targ->s.v.items -= ( ( int ) targ->s.v.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) );
 	}
+
+	dmg_dealt += save;
+
+	if ( match_in_progress == 2 )
+		targ->s.v.armorvalue = targ->s.v.armorvalue - save;
+
 	take = newceil( damage - save );
 
 	// mid air damage modificators
@@ -503,31 +505,70 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	if ( match_in_progress != 2 && native_damage > 450 )
 		take = 99999;
 
+	// team play damage avoidance and godmode or invincibility check
+
+	virtual_take = max(0, take); // virtual_take used for calculating dmg_dealt only in case of k_dmgfrags
+
+	// ignore this checks for suicide damage
+	if ( dtSUICIDE != targ->deathtype )
+	{
+		if ( ( int ) targ->s.v.flags & FL_GODMODE )
+		{
+			take = 0; // what if god was one of us
+		}
+		else if ( targ->invincible_finished >= g_globalvars.time )
+		{
+			if ( targ->invincible_sound < g_globalvars.time )
+			{
+				sound( targ, CHAN_AUTO, "items/protect3.wav", 1, ATTN_NORM );
+				targ->invincible_sound = g_globalvars.time + 2;
+			}
+
+			take = 0;
+		}
+		else if ( ( tp_num() == 1 || ( tp_num() == 3 && targ != attacker ) )
+		 	&& !strnull( attackerteam )
+		 	&& streq( targteam, attackerteam )
+		 	&& attacker->ct == ctPlayer
+		 	&& strneq( inflictor->s.v.classname, "door" )
+		 	&& !TELEDEATH( targ ) // do telefrag damage in tp
+	   	)
+	   	{
+			// teamplay == 1 don't damage self and mates (armor affected anyway)
+			// teamplay == 3 don't damage mates, do damage to self (armor affected anyway)
+
+			take = 0;	   	
+	   	}
+	   	else if ( tp4teamdmg )
+	   	{
+			take = 0; // we do not touch health	   	
+	   	}
+	}
+
 	take = max(0, take); // avoid negative take, if any
 
 	if ( cvar("k_dmgfrags") )
 	{
-		if ( targ->invincible_finished >= g_globalvars.time )
-		{
-			// damage dealt _not_ capped by victim's health if victim has pent
-			dmg_dealt += take;
-		}
-		else if ( (dtTELE1 == targ->deathtype) || (dtTELE2 == targ->deathtype) || (dtTELE3 == targ->deathtype) )
+		if ( TELEDEATH( targ ) )
 		{
 			// tele doesn't count for any dmgfrags damage
 			dmg_dealt = 0; 
 		}
+		else if ( targ->invincible_finished >= g_globalvars.time )
+		{
+			// damage dealt _not_ capped by victim's health if victim has pent
+			dmg_dealt += virtual_take;
+		}
 		else
 		{
 			// damage dealt capped by victim's health
-			dmg_dealt += bound( 0, take, targ->s.v.health );
+			dmg_dealt += bound( 0, virtual_take, targ->s.v.health );
 		}
 	}
 	else
 	{
 		// damage dealt capped by victim's health
-		if ( !tp4teamdmg )
-			dmg_dealt += bound( 0, take, targ->s.v.health );
+		dmg_dealt += bound( 0, take, targ->s.v.health );
 	}
 
 	// add to the damage total for clients, which will be sent as a single
@@ -547,7 +588,6 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		else
 			attackername = attacker->s.v.classname;
 
-		if ( !tp4teamdmg )
 		log_printf( "\t\t\t<event time=\"%f\" tag=\"dmg\" at=\"%s\" "
 					"tg=\"%s\" ty=\"%s\" q=\"%d\" s=\"%d\" val=\"%d\" ab=\"1\"/>\n",
 					g_globalvars.time - match_start_time,
@@ -590,11 +630,6 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			targ->s.v.velocity[2] += dir[2] * non_hdp_damage * c2 * nailkick; // only for z component
 	}
 
-	if ( tp4teamdmg )
-		return;
-
-	// team play damage avoidance
-	//ZOID 12-13-96: self.team doesn't work in QW.  Use keys
 	if ( match_in_progress == 2 && (int)cvar("k_dmgfrags") )
 	{
 		if ( attacker->ct == ctPlayer && targ->ct == ctPlayer && attacker != targ )
@@ -608,45 +643,6 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 				attacker->ps.dmg_frags -= dmg_frags * 100;
 			}
 		}
-	}
-
-	// ignore this check for suicide damage
-	if ( dtSUICIDE != targ->deathtype )
-	{
-		// check for godmode or invincibility
-		if ( ( int ) targ->s.v.flags & FL_GODMODE )
-			return;
-
-		if ( targ->invincible_finished >= g_globalvars.time )
-		{
-			if ( targ->invincible_sound < g_globalvars.time )
-			{
-				sound( targ, CHAN_AUTO, "items/protect3.wav", 1, ATTN_NORM );
-				targ->invincible_sound = g_globalvars.time + 2;
-			}
-			return;
-		}
-
-		// teamplay == 1 don't damage self and mates (armor affected anyway)
-		if ( tp_num() == 1
-		 	&& !strnull( attackerteam )
-		 	&& streq( targteam, attackerteam )
-		 	&& attacker->ct == ctPlayer
-		 	&& strneq( inflictor->s.v.classname, "door" )
-		 	&& !TELEDEATH( targ ) // do telefrag damage in tp
-	   	)
-			return;
-
-		// teamplay == 3 don't damage mates, do damage to self (armor affected anyway)
-		if ( tp_num() == 3
-		 	&& !strnull( attackerteam )
-		 	&& streq( targteam, attackerteam )
-		 	&& attacker->ct == ctPlayer
-		 	&& strneq( inflictor->s.v.classname, "door" )
-		 	&& !TELEDEATH( targ ) // do telefrag damage in tp
-		 	&& targ != attacker
-	   	)
-			return;
 	}
 
 	// do the damage
@@ -684,19 +680,6 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			targ->s.v.health = -1; // qqshka, no zero health, heh, imo less bugs after this
 	}
 
-	// rl/gl stats
-	if ( attacker->ct == ctPlayer && targ->ct == ctPlayer && attacker != targ )
-	{
-		if ( take || save )
-		{
-			if ( targ->deathtype == dtRL )
-				attacker->ps.wpn[wpRL].rhits++;
-    
-			if ( targ->deathtype == dtGL )
-				attacker->ps.wpn[wpGL].rhits++;
-		}
-	}
-
 	// show damage in sbar
 	if ( match_in_progress != 2 && ISLIVE( targ ) && !k_matchLess )
 	{
@@ -713,17 +696,42 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	// update damage stats like: give/taked/team damage
 	if ( attacker->ct == ctPlayer && targ->ct == ctPlayer && attacker != targ )
 	{
-		if ( streq(attackerteam, targteam) && !isDuel() && !isFFA() )
+		// damage
+
+		if ( tp_num() && streq(attackerteam, targteam) )
 		{
 			attacker->ps.dmg_team += dmg_dealt;
 		}
 		else 
 		{
-			if ( dtRL == targ->deathtype )
-				attacker->ps.dmg_g_rl += dmg_dealt;
-
 			attacker->ps.dmg_g += dmg_dealt;
 			targ->ps.dmg_t     += dmg_dealt;
+		}
+
+		// real hits
+
+		if ( take || save )
+		{
+			if ( dtRL == targ->deathtype )
+				attacker->ps.wpn[wpRL].rhits++;
+
+			if ( dtGL == targ->deathtype )
+				attacker->ps.wpn[wpGL].rhits++;
+		}
+
+		// virtual hits
+
+		if ( virtual_take || save )
+		{
+			if ( dtRL == targ->deathtype )
+			{
+				attacker->ps.wpn[wpRL].vhits++;
+				// virtual given rl damage
+				attacker->ps.dmg_g_rl += ( virtual_take + save );
+			}
+
+			if ( dtGL == targ->deathtype )
+				attacker->ps.wpn[wpGL].vhits++;
 		}
 	}
 
