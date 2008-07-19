@@ -168,7 +168,7 @@ void race_init( void )
 {
 	memset( &race, 0, sizeof( race ) );
 
-	race.timeout_setting = 20; // default is 20 sec
+	race.timeout_setting = 60; // default is 60 sec
 
 	race.warned = true;
 	race.status = raceNone;
@@ -1371,7 +1371,8 @@ void race_think( void )
 
 		// FIXME: yeah, nice make some utility for that
 		for( p = world; (p = find_client( p )); )
-			stuffcmd (p, "play enforcer/enfire.wav\n");
+			//stuffcmd (p, "play enforcer/enfire.wav\n");
+			stuffcmd (p, "play weapons/pkup.wav\n");  // I like this one better -- deurk.
 
 		race.status = raceActive; // countdown ends, now we ready for race
 
