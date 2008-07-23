@@ -548,6 +548,7 @@ typedef struct cmd_s {
 #define CF_NOALIAS			( 1<<6 ) /* command haven't alias and may be accessed only via /cmd commandname */
 #define CF_REDIRECT			( 1<<7 ) /* command will be redirected to server as /cmd commandname */
 #define CF_MATCHLESS_ONLY	( 1<<8 ) /* command valid for matchLess mode _only_ */
+#define CF_CONNECTION_FLOOD ( 1<<9 ) /* allow flood at connection time, say first 30 seconds */
 
 extern cmd_t cmds[];
 

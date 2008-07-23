@@ -507,8 +507,8 @@ void redirect();
 
 cmd_t cmds[] = {
 	{ "cm",          SelectMap,                 0    , CF_BOTH | CF_MATCHLESS | CF_NOALIAS, CD_NODESC },
-	{ "mapslist_dl", mapslist_dl,               0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS | CF_NOALIAS, CD_MAPSLIST_DL },
-	{ "cmdslist_dl", cmdslist_dl,               0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS | CF_NOALIAS, CD_CMDSLIST_DL },
+	{ "mapslist_dl", mapslist_dl,               0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS | CF_NOALIAS | CF_CONNECTION_FLOOD, CD_MAPSLIST_DL },
+	{ "cmdslist_dl", cmdslist_dl,               0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS | CF_NOALIAS | CF_CONNECTION_FLOOD, CD_CMDSLIST_DL },
 	{ "votemap",     VoteMap,                   0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_VOTEMAP },
 	{ "commands",    ShowCmds,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_COMMANDS },
 	{ "scores",      PrintScores,               0    , CF_BOTH | CF_MATCHLESS, CD_SCORES },
@@ -827,8 +827,14 @@ int DoCommand(int icmd)
 	if ( strnull( cmds[icmd].name ) || !( cmds[icmd].f ) )
 		return DO_FUNCTION_IS_WRONG;
 
-	if ( isCmdFlood( self ) )
+	if ( (cmds[icmd].cf_flags & CF_CONNECTION_FLOOD) && self->connect_time + 30 > g_globalvars.time )
+	{
+		; // ignore flood check for first 30 seconds after connect, for commands marked with CF_CONNECTION_FLOOD flag
+	}
+	else if ( isCmdFlood( self ) )
+	{
 		return DO_FLOOD_PROTECT;
+	}
 
 	if (cmds[icmd].arg)
 		( ( void ( * )(float) ) ( cmds[icmd].f ) ) ( cmds[icmd].arg );
