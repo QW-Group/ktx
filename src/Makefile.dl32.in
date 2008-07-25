@@ -58,7 +58,7 @@ clean:
 			$(RM) -f $(OBJECTS) $(MODULE) *~
 
 distclean:	clean
-			$(RM) -f *.orig *.rej *.tmp Makefile.dl
+			$(RM) -f *.orig *.rej *.tmp Makefile.dl32
 
 .c.o:
 			$(CC) $(CFLAGS) $(INCFLAGS) -c $<
