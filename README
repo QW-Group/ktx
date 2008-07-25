@@ -11,7 +11,7 @@ spawn_t         spawns[]
 
 Missile spawn requires g_globalvars.newmis set.
 
-dont use string arrys in one structure with other types ( q3asm place strings in different segment )
+dont use string arrays in one structure with other types ( q3asm place strings in different segment )
 
 dont use map command with redirectcmd & executecmd
 
