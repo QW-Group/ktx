@@ -747,7 +747,7 @@ void TopStats ( )
 		}
 	}
 
-	G_bprint(2, "žžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n");
+	G_bprint(2, "\nžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n");
 }
 
 
