@@ -1,14 +1,12 @@
 ------------
 To be added:
 ------------
-- HELLO!
-- Race mode
+X Race mode
 - Slide mode
 - Trick mode (defrag like)
 - Olympics mode
 - Scourge of Armageddon grapple hook model
 - Toggeable grapple hook outside CTF with default OFF
-- Ignore this test message
 
 
 --------------
@@ -40,7 +38,6 @@ To be fixed:
 --------------
 To be removed:
 --------------
-- yawnmode?
 
 
 
