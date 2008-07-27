@@ -37,7 +37,7 @@
 #include "player.h"
 
 #define MOD_NAME			("KTX")
-#define MOD_VERSION			("1.35-RC1")
+#define MOD_VERSION			("1.35 release")
 #define MOD_SERVERINFO_MOD_KEY		("ktxver")
 #define MOD_SERVERINFO_BUILD_KEY	("ktxbuild")
 #define MOD_URL    			("http://ktx.qw-dev.net")
