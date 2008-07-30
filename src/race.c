@@ -1450,7 +1450,7 @@ void r_Xset( float t )
 	race_route_now_custom();  // mark this is a custom route now
 }
 
-void r_ccdel( )
+void r_cdel( )
 {
 	gedict_t				*e;
 	int						cnt, id;

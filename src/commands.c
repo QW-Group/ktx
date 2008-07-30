@@ -211,7 +211,7 @@ void cmdslist_dl();
 void mapslist_dl();
 
 // { RACE
-void r_ccdel( );
+void r_cdel( );
 void r_Xset( float t );
 void r_changestatus( float t );
 
@@ -474,7 +474,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_R_SSET       "set race start checkpoint"
 #define CD_R_CSET       "set race checkpoint"
 #define CD_R_ESET       "set race end checkpoint"
-#define CD_R_CCDEL      "remove race current checkpoint"
+#define CD_R_CDEL       "remove race current checkpoint"
 #define CD_R_ROUTE      "load predefined routes for map"
 #define CD_R_PRINT      "show race route info"
 #define CD_RREADY       "ready for race"
@@ -773,7 +773,7 @@ cmd_t cmds[] = {
 	{ "r_sset",      DEF(r_Xset),               1    , CF_PLAYER | CF_SPC_ADMIN, CD_R_SSET },
 	{ "r_cset",      DEF(r_Xset),               2    , CF_PLAYER | CF_SPC_ADMIN, CD_R_CSET },
 	{ "r_eset",      DEF(r_Xset),               3    , CF_PLAYER | CF_SPC_ADMIN, CD_R_ESET },
-	{ "r_ccdel",     r_ccdel,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_R_CCDEL },
+	{ "r_cdel",      r_cdel,                    0    , CF_PLAYER | CF_SPC_ADMIN, CD_R_CDEL },
 	{ "r_route",     r_route,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_R_ROUTE },
 	{ "r_print",     r_print,                   0    , CF_BOTH, CD_R_PRINT },
 	{ "rready",      DEF(r_changestatus),       1    , CF_PLAYER, CD_RREADY },
