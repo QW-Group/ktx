@@ -2873,6 +2873,7 @@ const char common_um_init[] =
 	"samelevel 1\n"
 //	"set k_vwep 1\n"
 	"maxclients 8\n"
+	"k_yawnmode 0\n"
 	"k_instagib 0\n"					// instagib off
 	"k_cg_kb 1\n"						// coilgun kickback in instagib
 	"k_disallow_weapons 16\n"			// disallow gl in dmm4 by default
