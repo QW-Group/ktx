@@ -953,13 +953,14 @@ void W_FireLightning()
 	float           cells;
 	vec3_t          tmp;
 
-
     if ( self->s.v.ammo_cells < 1 || match_in_progress == 1 )
 	{
 		self->s.v.weapon = W_BestWeapon();
 		W_SetCurrentAmmo();
 		return;
 	}
+
+	trap_makevectors( self->s.v.v_angle );
 
 // explode if under water
     if ( self->s.v.waterlevel > 1 && match_in_progress == 2 )
@@ -1023,7 +1024,6 @@ void W_FireLightning()
 
 	VectorCopy( self->s.v.origin, org );	//org = self->s.v.origin + '0 0 16';
 	org[2] += 16;
-
 
 	traceline( PASSVEC3( org ), org[0] + g_globalvars.v_forward[0] * 600,
 			org[1] + g_globalvars.v_forward[1] * 600,
