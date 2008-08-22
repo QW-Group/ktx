@@ -1830,46 +1830,6 @@ void WaterMove()
 	}
 }
 
-
-void CheckWaterJump()
-{
-	vec3_t          start, end;
-
-// check for a jump-out-of-water
-	trap_makevectors( self->s.v.angles );
-	
-	VectorCopy( self->s.v.origin, start );	//start = self->s.v.origin;
-	start[2] = start[2] + 8;
-	g_globalvars.v_forward[2] = 0;
-
-	VectorNormalize( g_globalvars.v_forward );
-	VectorScale( g_globalvars.v_forward, 24, end );
-	VectorAdd( start, end, end );	//end = start + v_forward*24;
-
-	traceline( PASSVEC3( start ), PASSVEC3( end ), true, self );
-
-	if ( g_globalvars.trace_fraction < 1 )
-	{			// solid at waist
-		start[2] = start[2] + self->s.v.maxs[2] - 8;
-		VectorScale( g_globalvars.v_forward, 24, end );
-		VectorAdd( start, end, end );	//end = start + v_forward*24;
-		VectorScale( g_globalvars.trace_plane_normal, -50, self->s.v.movedir );	//self->s.v.movedir = trace_plane_normal * -50;
-
-		traceline( PASSVEC3( start ), PASSVEC3( end ), true, self );
-
-		if ( g_globalvars.trace_fraction == 1 )
-		{		// open at eye level
-			self->s.v.flags = ( ( int ) ( self->s.v.flags ) ) | FL_WATERJUMP;
-			self->s.v.velocity[2] = 225;
-			self->s.v.flags -=
-			    ( ( ( int ) ( self->s.v.flags ) ) & FL_JUMPRELEASED );
-			self->s.v.teleport_time = g_globalvars.time + 2;	// safety net
-			return;
-		}
-	}
-}
-
-
 void MakeGhost ()
 {
 	gedict_t *ghost;
@@ -2498,11 +2458,6 @@ void PlayerPreThink()
 
 // FIXME: really?
 //	WaterMove();
-
-/*
- if (self->s.v.waterlevel == 2)
-  CheckWaterJump ();
-*/
 
 	if ( self->s.v.deadflag >= DEAD_DEAD )
 	{
