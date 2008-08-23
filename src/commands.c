@@ -3932,30 +3932,50 @@ static qboolean autotrack_update = false;
 static char *autotrack_reason = "";
 // }
 
+// relax autotrack attempts
+static void ResetMVDAutoTrack( gedict_t *p )
+{
+	autotrack_update = false;
+	autotrack_last   = (p && p->ct == ctPlayer) ? p : NULL;
+	autotrack_reason = "";
+}
+
 void DoMVDAutoTrack( void )
 {
 	gedict_t *p = NULL;
 	int id;
 
+	if ( !autotrack_update )
+		return; // autotrack was not requested
+
+#if 0
+	// no we don't need it
 	if ( !match_in_progress )
 	{
-		autotrack_update = false; // relax autotrack
-		autotrack_last = NULL;
-		autotrack_reason = "";
+		ResetMVDAutoTrack( p );
 		return; // we don't need much in prewar
 	}
-
-	if ( !autotrack_update )
-		return;
+#endif
 
 	if ( !(p = get_ed_best1()) )
+	{
+		ResetMVDAutoTrack( p );
 		return; // can't find best
+	}
 
+	// do not switch instantly autotrack pov after tracked player die, wait a few seconds or untill them respawn
 	if ( autotrack_last && autotrack_last->ct == ctPlayer && ISDEAD( autotrack_last ) && g_globalvars.time - autotrack_last->dead_time < 2 )
-		return; // do not switch instantly autotrack pov after tracked player die, wait a few seconds or untill them respawn
+	{
+		// no, we do not reset it, we need repeat autotrack apply after some time...
+		//ResetMVDAutoTrack( p );
+		return;
+	}
 
 	if ( autotrack_last == p )
+	{
+		ResetMVDAutoTrack( p );
 		return; // already track this player
+	}
 
 	if ( ( id = GetUserID( p ) ) > 0 )
 	{
@@ -3964,9 +3984,13 @@ void DoMVDAutoTrack( void )
 		stuffcmd_flags(p, STUFFCMD_DEMOONLY, "//at %d\n", id );
 	}
 
-	autotrack_update = false; // we going apply track switch, so relax autotrack
-	autotrack_last = p;
-	autotrack_reason = "";
+	ResetMVDAutoTrack( p );
+}
+
+// relax ktpro's autotrack
+static void ResetNormalAutoTrack( gedict_t *cl )
+{
+	cl->apply_ktpro_autotrack = false;
 }
 
 void DoAutoTrack( )
@@ -3974,30 +3998,46 @@ void DoAutoTrack( )
 	gedict_t *p = NULL, *goal;
 	int id;
 
-	switch ( self->autotrack ) {
+	switch ( self->autotrack )
+	{
 		case atBest:	p = get_ed_best1();		break;	// ktx's autotrack
 		case atPow:		p = get_ed_bestPow();	break;	// powerups autotrack
 		case atKTPRO:	p = ( self->apply_ktpro_autotrack ? get_ed_best1() : NULL ); break; // "ktpro's" autotrack
 
 		case atNone:
-		default: 		return; // unknow or off so ignore
+		default:
+		{
+			ResetNormalAutoTrack( self );
+ 			return; // unknow or off so ignore
+		}
 	}
 
 	if ( !p )
+	{
+		ResetNormalAutoTrack( self );
 		return;
+	}
 
-	goal = PROG_TO_EDICT( self->s.v.goalentity );
+    goal = PROG_TO_EDICT( self->s.v.goalentity );
 
+	// do not switch instantly autotrack pov after tracked player die, wait a few seconds or untill them respawn
 	if ( goal->ct == ctPlayer && ISDEAD( goal ) && g_globalvars.time - goal->dead_time < 2 )
-		return; // do not switch instantly autotrack pov after tracked player die, wait a few seconds or untill them respawn
+	{
+		// no, we do not reset it here since we need repeat autotrack apply later
+		//ResetNormalAutoTrack( self );
+		return;
+	}
 
 	if ( goal == p )
+	{
+		ResetNormalAutoTrack( self );
 		return; // already track this player
-
-	self->apply_ktpro_autotrack	= false; // we going apply track switch, so relax ktpro's autotrack
+	}
 
 	if ( ( id = GetUserID( p ) ) > 0 )
 		stuffcmd_flags( self, STUFFCMD_IGNOREINDEMO, "track %d\n", id );
+
+	ResetNormalAutoTrack( self );
 }
 
 void AutoTrack( float autoTrackType )
