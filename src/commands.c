@@ -4164,7 +4164,7 @@ void ktpro_autotrack_on_powerup_predict (gedict_t *dude)
 // some powerup taken, mark specs to switch pov to best player, that may be not even this poweruped dude :P
 void ktpro_autotrack_on_powerup_take (gedict_t *dude)
 {
-	ktpro_autotrack_mark_all( "powerup_take", dude );
+	ktpro_autotrack_mark_all( "powerup_take", /*dude*/ NULL ); // we can't use "dude", since quad may overwrite pent
 }
 
 // some powerup out, and he has neither the rocket launcher nor the lightning gun, mark specs to switch pov to best player
