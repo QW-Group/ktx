@@ -483,6 +483,7 @@ typedef struct gedict_s {
 	int   fav[MAX_CLIENTS];     // here stored players number for fav_add/next_fav commands
 	autoTrackType_t autotrack;  // is autotrack or auto_pow or ktpro autorack
 	qboolean apply_ktpro_autotrack; // if we use ktpro's autotrack, that a hint to apply pov switch
+	struct gedict_s *autotrack_hint; // per spectator autotrack hint, this helps switch pov more precise
 	struct gedict_s *wizard;    // for specs, link to the entity which represent wizard
 	int   last_goal;            // just store here self->s.v.goal from last spec frame, so we can catch pov switch
 

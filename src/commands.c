@@ -3928,6 +3928,7 @@ void fav_show( )
 
 // { // this is used for autotrack which saved in demo
 static gedict_t *autotrack_last = NULL;
+static gedict_t *autotrack_hint = NULL;
 static qboolean autotrack_update = false;
 static char *autotrack_reason = "";
 // }
@@ -3935,9 +3936,10 @@ static char *autotrack_reason = "";
 // relax autotrack attempts
 static void ResetMVDAutoTrack( gedict_t *p )
 {
-	autotrack_update = false;
-	autotrack_last   = (p && p->ct == ctPlayer) ? p : NULL;
-	autotrack_reason = "";
+	autotrack_update	= false;
+	autotrack_last		= (p && p->ct == ctPlayer) ? p : NULL;
+	autotrack_hint		= NULL;
+	autotrack_reason	= "";
 }
 
 void DoMVDAutoTrack( void )
@@ -3948,6 +3950,9 @@ void DoMVDAutoTrack( void )
 	if ( !autotrack_update )
 		return; // autotrack was not requested
 
+	if ( autotrack_hint && autotrack_hint->ct == ctPlayer && ISLIVE( autotrack_hint ) )
+		p = autotrack_hint; // we have hint to whom we should switch
+
 #if 0
 	// no we don't need it
 	if ( !match_in_progress )
@@ -3957,7 +3962,8 @@ void DoMVDAutoTrack( void )
 	}
 #endif
 
-	if ( !(p = get_ed_best1()) )
+	// search best only in case when we do not have hint above "autotrack_hint"
+	if ( !p && !(p = get_ed_best1()) )
 	{
 		ResetMVDAutoTrack( p );
 		return; // can't find best
@@ -3991,6 +3997,7 @@ void DoMVDAutoTrack( void )
 static void ResetNormalAutoTrack( gedict_t *cl )
 {
 	cl->apply_ktpro_autotrack = false;
+	cl->autotrack_hint = NULL;
 }
 
 void DoAutoTrack( )
@@ -4002,7 +4009,19 @@ void DoAutoTrack( )
 	{
 		case atBest:	p = get_ed_best1();		break;	// ktx's autotrack
 		case atPow:		p = get_ed_bestPow();	break;	// powerups autotrack
-		case atKTPRO:	p = ( self->apply_ktpro_autotrack ? get_ed_best1() : NULL ); break; // "ktpro's" autotrack
+		case atKTPRO:
+		{	// "ktpro's" autotrack
+			if ( self->apply_ktpro_autotrack )
+			{
+				// do not try switch pov to dead player even we have it as hint
+				if ( self->autotrack_hint && self->autotrack_hint->ct == ctPlayer && ISLIVE( self->autotrack_hint ) )
+					p = self->autotrack_hint;
+				else
+					p = get_ed_best1();
+			}
+
+			break;
+		}
 
 		case atNone:
 		default:
@@ -4089,28 +4108,32 @@ void AutoTrackRestore ()
 //    neither the rocket launcher nor the lightning gun
 
 // will force spec who used ktpro autotrack switch track
-void ktpro_autotrack_mark_spec(gedict_t *spec)
+static void ktpro_autotrack_mark_spec(gedict_t *spec, gedict_t *dude)
 {
 	if ( spec->autotrack == atKTPRO )
+	{
 		spec->apply_ktpro_autotrack = true; // this will be used in DoAutoTrack( )
+		spec->autotrack_hint = dude; // in some cases dude == NULL, its OK
+	}
 }
 
 // will force specs who used ktpro autotrack switch track
-void ktpro_autotrack_mark_all(char *reason)
+static void ktpro_autotrack_mark_all(char *reason, gedict_t *dude)
 {
 	gedict_t *p;
 
 	autotrack_update = true; // this is for mvd autotrack
+	autotrack_hint   = dude; // in some cases dude == NULL, its OK
 	autotrack_reason = reason;
 
 	for ( p = world; (p = find_spc( p )); )
-		ktpro_autotrack_mark_spec( p );
+		ktpro_autotrack_mark_spec( p, dude );
 }
 
 // first rl was taken, mark specs to switch pov to best player, that may be not even this rl dude :P
 void ktpro_autotrack_on_first_rl (gedict_t *dude)
 {
-	ktpro_autotrack_mark_all( "first_rl" ); // hope this switch to rl dude on most tb3 maps in 4on4 mode
+	ktpro_autotrack_mark_all( "first_rl", dude ); // hope this switch to rl dude on most tb3 maps in 4on4 mode
 }
 
 // player just died, switch pov to other if spec track this player and used ktpro's autotrack
@@ -4122,18 +4145,26 @@ void ktpro_autotrack_on_death (gedict_t *dude)
 	if (dude == autotrack_last)
 	{
 		autotrack_update = true; // this is for mvd autotrack
+		autotrack_hint   = NULL; // yeah, we have no idea whom will be tracked
 		autotrack_reason = "death";
 	}
 
 	for ( p = world; (p = find_spc( p )); )
 		if ( p->s.v.goalentity == goal )
-			ktpro_autotrack_mark_spec( p );
+			ktpro_autotrack_mark_spec( p, NULL );
+}
+
+// change pov to someone who most close to powerup, right before powerup spawned, atm it 2 seconds.
+// players which too far to powerup not counted.
+void ktpro_autotrack_on_powerup_predict (gedict_t *dude)
+{
+	ktpro_autotrack_mark_all( "powerup_predict", dude );
 }
 
 // some powerup taken, mark specs to switch pov to best player, that may be not even this poweruped dude :P
 void ktpro_autotrack_on_powerup_take (gedict_t *dude)
 {
-	ktpro_autotrack_mark_all( "powerup_take" );
+	ktpro_autotrack_mark_all( "powerup_take", dude );
 }
 
 // some powerup out, and he has neither the rocket launcher nor the lightning gun, mark specs to switch pov to best player
@@ -4150,19 +4181,20 @@ void ktpro_autotrack_on_powerup_out (gedict_t *dude)
 	if (dude == autotrack_last)
 	{
 		autotrack_update = true; // this is for mvd autotrack
+		autotrack_hint   = NULL; // yeah, we have no idea whom will be tracked
 		autotrack_reason = "powerup_out";
 	}
 
 	for ( p = world; (p = find_spc( p )); )
 		if ( p->s.v.goalentity == goal )
-			ktpro_autotrack_mark_spec( p );
+			ktpro_autotrack_mark_spec( p, NULL );
 */
 }
 
 // change pov to racer
 void ktpro_autotrack_on_race_status_changed (void)
 {
-	ktpro_autotrack_mark_all( "race_status_changed" );
+	ktpro_autotrack_mark_all( "race_status_changed", NULL );
 }
 
 // << end  ktpro compatible autotrack 
