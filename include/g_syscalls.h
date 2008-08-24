@@ -28,7 +28,9 @@ qboolean trap_GetEntityToken( char *token, int size );
 void    trap_DPrintf( const char *fmt );
 void 	trap_conprint( const char *fmt );
 
-void    trap_BPrint( int level, const char *fmt );
+#define BPRINT_IGNOREINDEMO  (1<<0) // broad cast print will be not put in demo
+#define BPRINT_IGNORECLIENTS (1<<1) // broad cast print will not be seen by clients, but may be seen in demo
+void    trap_BPrint( int level, const char *fmt, int flags );
 
 // trap_SPrint() flags
 #define SPRINT_IGNOREINDEMO   (   1<<0) // do not put such message in mvd demo

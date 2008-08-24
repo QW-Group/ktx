@@ -583,7 +583,19 @@ void G_bprint( int level, const char *fmt, ... )
 	Q_vsnprintf( text, sizeof( text ), fmt, argptr );
 	va_end( argptr );
 
-	trap_BPrint( level, text );
+	trap_BPrint( level, text, 0 );
+}
+
+void G_bprint_flags( int level, int flags, const char *fmt, ... )
+{
+	va_list argptr;
+	char    text[1024];
+
+	va_start( argptr, fmt );
+	Q_vsnprintf( text, sizeof( text ), fmt, argptr );
+	va_end( argptr );
+
+	trap_BPrint( level, text, flags );
 }
 
 void G_cprint( const char *fmt, ... )

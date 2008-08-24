@@ -110,7 +110,23 @@ void cmd_ack()
 // SAY / SAY_TEAM mod handler
 // {
 
-int k_say_fp_per = 1, k_say_fp_for = 1, k_say_fp_count = 9;
+static int k_say_fp_per      = 1, k_say_fp_for      = 1, k_say_fp_count      = 9;// for players
+static int k_say_fp_per_spec = 1, k_say_fp_for_spec = 1, k_say_fp_count_spec = 9; // for specs
+
+static int get_k_say_fp_per( gedict_t *p )
+{
+	return p->ct == ctPlayer ? k_say_fp_per : k_say_fp_per_spec;
+}
+
+static int get_k_say_fp_for( gedict_t *p )
+{
+	return p->ct == ctPlayer ? k_say_fp_for : k_say_fp_for_spec;
+}
+
+static int get_k_say_fp_count( gedict_t *p )
+{
+	return p->ct == ctPlayer ? k_say_fp_count : k_say_fp_count_spec;
+}
 
 typedef struct say_fp_level_s {
 
@@ -135,12 +151,20 @@ void FixSayFloodProtect()
 
 	char buf[1024*4];
 
-	int k_fp = bound(1, cvar("k_fp"), say_fp_levels_cnt);
+	int k_fp      = bound(1, cvar("k_fp"),      say_fp_levels_cnt); // player
+	int k_fp_spec = bound(1, cvar("k_fp_spec"), say_fp_levels_cnt); // spec
 
+	// player
 	k_say_fp_count = say_fp_levels[k_fp-1].fp_count;
 	k_say_fp_per   = say_fp_levels[k_fp-1].fp_per;
 	k_say_fp_for   = say_fp_levels[k_fp-1].fp_for;
 
+	// spec
+	k_say_fp_count_spec = say_fp_levels[k_fp_spec-1].fp_count;
+	k_say_fp_per_spec   = say_fp_levels[k_fp_spec-1].fp_per;
+	k_say_fp_for_spec   = say_fp_levels[k_fp_spec-1].fp_for;
+
+	// retarded/backward compatibility
 	if ( k_fp != k_fp_last ) {
 		// qqshka: generally mod ignore server floodprot, but if server not support
 		//         redirect say/say_team to mod, then try use server floodprot, so
@@ -154,9 +178,11 @@ void FixSayFloodProtect()
 	k_fp_last = k_fp;
 }
 
-void fp_toggle ()
+void fp_toggle ( float type )
 {
-	int k_fp = bound(1, cvar("k_fp"), say_fp_levels_cnt);
+	char *k_fp_name = ( type == 1 ? "k_fp" : "k_fp_spec" );
+
+	int k_fp = bound(1, cvar(k_fp_name), say_fp_levels_cnt);
 
 	if( check_master() )
 		return;
@@ -169,11 +195,12 @@ void fp_toggle ()
 	if ( ++k_fp > say_fp_levels_cnt )
 		k_fp = 1;
 
-	cvar_fset("k_fp", k_fp);
+	cvar_fset(k_fp_name, k_fp);
 
 	FixSayFloodProtect();
 
-	G_bprint( 2, "Floodprot level %s \x90%s %s %s\x91 %6s\n",
+	G_bprint( 2, "%s level %s \x90%s %s %s\x91 %6s\n",
+					type == 1 ? "floodprot" : "spec floodprot",
 					dig3(k_fp), 
 					dig3(say_fp_levels[k_fp-1].fp_count),
 					dig3(say_fp_levels[k_fp-1].fp_per),
@@ -197,11 +224,11 @@ qboolean isSayFlood(gedict_t *p)
 		return true; // flooder
 	}
 
-	if ( say_time && ( g_globalvars.time - say_time < k_say_fp_per ) )
+	if ( say_time && ( g_globalvars.time - say_time < get_k_say_fp_per( p ) ) )
 	{
-		G_sprint(p, PRINT_CHAT, "FloodProt: You can't talk for %d seconds.\n", (int)k_say_fp_for);
+		G_sprint(p, PRINT_CHAT, "FloodProt: You can't talk for %d seconds.\n", (int)get_k_say_fp_for( p ));
 
-		p->fp_s.locked = g_globalvars.time + k_say_fp_for;
+		p->fp_s.locked = g_globalvars.time + get_k_say_fp_for( p );
 
 		p->fp_s.warnings += 1; // collected but unused stat
 
@@ -210,7 +237,7 @@ qboolean isSayFlood(gedict_t *p)
 
 	p->fp_s.cmd_time[idx] = g_globalvars.time;
 
-	if ( ++idx >= k_say_fp_count )
+	if ( ++idx >= get_k_say_fp_count( p ) )
 		idx = 0;
 
 	p->fp_s.last_cmd = idx;
@@ -244,7 +271,7 @@ qboolean ClientSay( qboolean isTeamSay )
 	int sv_spectalk = cvar("sv_spectalk");
 	int sv_sayteam_to_spec = cvar("sv_sayteam_to_spec");
 	gedict_t *client, *goal;
-	qboolean fake = false, ignore_in_demos;
+	qboolean fake = false, ignore_in_demos, spec_talk = false;
 
 	self = PROG_TO_EDICT( g_globalvars.self );
 
@@ -381,16 +408,27 @@ qboolean ClientSay( qboolean isTeamSay )
 	if ( self->ct == ctSpec )
 	{
 		if ( !sv_spectalk || isTeamSay )
+		{
+			// such messages seen only for specs,
+			// we handle it specially for demos, so when you watch demo you can see that specs talked
+			spec_talk = true;
 			snprintf(prefix, sizeof(prefix), "[SPEC] %s:", name);
+		}
 		else
+		{
 			snprintf(prefix, sizeof(prefix), "%s:", name);
+		}
 	}
 	else
 	{
 		if ( isTeamSay )
+		{
 			snprintf(prefix, sizeof(prefix), "(%s):", name);
+		}
 		else
+		{
 			snprintf(prefix, sizeof(prefix), "%s:", name);
+		}
 	}
 
 	fake = ( strchr(str, 13) ? true : false ); // check if string contain "$\"
@@ -398,6 +436,9 @@ qboolean ClientSay( qboolean isTeamSay )
 	G_cprint("%s %s\n", prefix, textuncolored);
 
 	team = ezinfokey(self, "team");
+
+	if ( spec_talk ) // this should go to demo only
+		G_bprint_flags(PRINT_CHAT, BPRINT_IGNORECLIENTS, "%s %s\n", prefix, str);
 
 	for ( j = 1, client = &(g_edicts[j]); j <= MAX_CLIENTS; j++, client++ )
 	{
@@ -442,7 +483,7 @@ qboolean ClientSay( qboolean isTeamSay )
 		}
 
 		// do not put private info in demos: private is team say from player without $\ symbol 
-		ignore_in_demos = self->ct == ctPlayer && isTeamSay && !fake;
+		ignore_in_demos = ( self->ct == ctPlayer && isTeamSay && !fake || spec_talk );
 
 		flags			= ( ignore_in_demos ? SPRINT_IGNOREINDEMO : 0 );
 		result_msg		= ( isSupport_ColoredText(client) ? str : textuncolored );

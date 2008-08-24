@@ -715,7 +715,8 @@ void FirstFrame	( )
 	RegisterCvar("k_extralog");
 	RegisterCvar("k_demo_mintime");
 	RegisterCvar("k_dmm4_gren_mode");
-	RegisterCvar("k_fp"); // say team floodprot
+	RegisterCvarEx("k_fp", "1"); // say floodprot for players
+	RegisterCvarEx("k_fp_spec", "3"); // say floodprot for spectators
 
 // { yawnmode implementation by Molgrum
 	RegisterCvar("k_yawnmode");

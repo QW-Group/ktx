@@ -183,6 +183,7 @@ char			*striphigh(const char *format, ...);
 void            G_sprint( gedict_t * ed, int level, const char *fmt, ... );
 void            G_sprint_flags( gedict_t * ed, int level, int flags, const char *fmt, ... );
 void            G_bprint( int level, const char *fmt, ... );
+void            G_bprint_flags( int level, int flags, const char *fmt, ... );
 void            G_centerprint( gedict_t * ed, const char *fmt, ... );
 /* centerprint too all clients */
 void 			G_cp2all(const char *fmt, ... );

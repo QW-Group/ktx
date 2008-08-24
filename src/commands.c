@@ -168,7 +168,7 @@ void sv_time();
 void GrenadeMode();
 void ToggleReady();
 
-void fp_toggle ();
+void fp_toggle ( float type );
 
 void dlist ();
 void dinfo ();
@@ -428,7 +428,8 @@ const char CD_NODESC[] = "no desc";
 #define CD_TIME         "show server time"
 #define CD_GREN_MODE    "grenades mode"
 #define CD_TOGGLEREADY  "just toggle ready"
-#define CD_FP           "change floodprot level"
+#define CD_FP           "change floodprot level for players"
+#define CD_FP_SPEC      "change floodprot level for specs"
 #define CD_DLIST        "show demo list"
 #define CD_DINFO        "show demo info"
 #define CD_LOCK         "temprorary lock server"
@@ -729,7 +730,8 @@ cmd_t cmds[] = {
 	{ "time",        sv_time,                   0    , CF_BOTH | CF_MATCHLESS, CD_TIME },
 	{ "gren_mode",   GrenadeMode,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_GREN_MODE },
 	{ "toggleready", ToggleReady,               0    , CF_BOTH, CD_TOGGLEREADY },
-	{ "fp",          fp_toggle,                 0    , CF_BOTH_ADMIN, CD_FP },
+	{ "fp",          fp_toggle,                 1    , CF_BOTH_ADMIN, CD_FP },
+	{ "fp_spec",     fp_toggle,                 2    , CF_BOTH_ADMIN, CD_FP_SPEC },
 	{ "dlist",       dlist,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_DLIST },
 	{ "dinfo",       dinfo,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_DINFO },
 	{ "lock",        sv_lock,                   0    , CF_BOTH_ADMIN, CD_LOCK },
@@ -2878,6 +2880,10 @@ const char common_um_init[] =
 	"k_cg_kb 1\n"						// coilgun kickback in instagib
 	"k_disallow_weapons 16\n"			// disallow gl in dmm4 by default
 
+	"floodprot 10 1 1\n"
+	"k_fp 1\n"
+	"k_fp_spec 3\n"
+
 	"dmm4_invinc_time \"\""				// reset to default
 
 	"k_noitems \"\""					// reset to default
@@ -2930,8 +2936,6 @@ const char _2on2_um_init[] =
 	"coop 0\n"
 	"maxclients 4\n"
 	"k_maxclients 4\n"
-	"floodprot 10 1 1\n"				//
-	"localinfo k_fp 1\n"				//
 	"timelimit  10\n"					//
 	"teamplay   2\n"					//
 	"deathmatch 3\n"					//
@@ -2947,8 +2951,6 @@ const char _3on3_um_init[] =
 	"coop 0\n"
 	"maxclients 6\n"
 	"k_maxclients 6\n"
-	"floodprot 10 1 1\n"
-	"localinfo k_fp 1\n"
 	"timelimit  15\n"
 	"teamplay   2\n"
 	"deathmatch 1\n"
@@ -2964,8 +2966,6 @@ const char _4on4_um_init[] =
 	"coop 0\n"
 	"maxclients 8\n"
 	"k_maxclients 8\n"
-	"floodprot 10 1 1\n"
-	"localinfo k_fp 1\n"
 	"timelimit  20\n"
 	"teamplay   2\n"
 	"deathmatch 1\n"
@@ -2981,8 +2981,6 @@ const char _10on10_um_init[] =
 	"coop 0\n"
 	"maxclients 20\n"
 	"k_maxclients 20\n"
-	"floodprot 10 1 1\n"
-	"localinfo k_fp 1\n"
 	"timelimit  20\n"
 	"teamplay   2\n"
 	"deathmatch 1\n"
