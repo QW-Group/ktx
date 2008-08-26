@@ -4131,7 +4131,7 @@ static void ktpro_autotrack_mark_all(char *reason, gedict_t *dude)
 // first rl was taken, mark specs to switch pov to best player, that may be not even this rl dude :P
 void ktpro_autotrack_on_first_rl (gedict_t *dude)
 {
-	ktpro_autotrack_mark_all( "first_rl", dude ); // hope this switch to rl dude on most tb3 maps in 4on4 mode
+	ktpro_autotrack_mark_all( "first_rl", /*dude*/ NULL ); // can't use dued, this may overwrite pent or quad
 }
 
 // player just died, switch pov to other if spec track this player and used ktpro's autotrack
@@ -4156,6 +4156,16 @@ void ktpro_autotrack_on_death (gedict_t *dude)
 // players which too far to powerup not counted.
 void ktpro_autotrack_on_powerup_predict (gedict_t *dude)
 {
+	gedict_t *p = get_ed_bestPow();
+
+	// do not allow powerup predict if there still some powruped player running around,
+	// we apply it to quad and pent only, ring and suit are ignored
+	if ( p )
+	{
+		if ( p->invincible_finished || p->super_damage_finished )
+			return;
+	}
+
 	ktpro_autotrack_mark_all( "powerup_predict", dude );
 }
 
