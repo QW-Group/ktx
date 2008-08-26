@@ -268,6 +268,8 @@ void SpecGoalChanged()
 		Wp_Stats( 2 ); // force refresh
 	if ( self->sc_stats )
 		Sc_Stats( 2 ); // force refresh
+
+	WS_OnSpecPovChange( self ); // refresh "new weapon stats"
 }
 
 

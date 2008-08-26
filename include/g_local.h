@@ -434,7 +434,11 @@ void			Print_Wp_Stats();
 #define         SC_STATS_UPDATE (0.8f)
 void			Print_Scores();
 
-void			MVD_WPStatsMark( gedict_t *p, weaponName_t wp );
+// { "new weapon stats"
+void			WS_Mark( gedict_t *p, weaponName_t wp );
+void			WS_Reset( gedict_t *p );
+void			WS_OnSpecPovChange( gedict_t *s );
+// }
 
 //spectate.c
 void            SpectatorConnect();

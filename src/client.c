@@ -2802,7 +2802,9 @@ void	W_WeaponFrame();
 void	mv_record ();
 void	CheckStuffRune ();
 
-void MVD_WPStatsMark( gedict_t *p, weaponName_t wp )
+// ====================================
+// {  new weapon stats WS_
+void WS_Mark( gedict_t *p, weaponName_t wp )
 {
 	if ( wp <= wpNONE || wp >= wpMAX )
 		return;
@@ -2810,13 +2812,64 @@ void MVD_WPStatsMark( gedict_t *p, weaponName_t wp )
 	p->wpstats_mask |= ( 1 << wp );
 }
 
-void DemoWeaponStats( gedict_t *p )
+// force reset "new weapon stats"
+void WS_Reset( gedict_t *p )
 {
 	int i;
+
+	for ( i = wpNONE + 1; i < wpMAX; i++ )
+		WS_Mark( p, i );
+}
+
+// spec changed pov, we need update him with new stats
+void WS_OnSpecPovChange( gedict_t *s )
+{
+	int i;
+	gedict_t *p;
+
+	if ( s->ct != ctSpec )
+		return; // someone joking BADLY! U R NOT A SPEC!
+
+	p = PROG_TO_EDICT( s->s.v.goalentity );
+	if ( p->ct != ctPlayer )
+		return; // spec tracking whatever but not a player
+
+	if ( !iKey( s, "wpsx" ) )
+		return; // spec not interesting in new weapon stats
+
+	for ( i = wpNONE + 1; i < wpMAX; i++ )
+	{
+		// send it to spec, do not put it in demos
+		stuffcmd_flags( s, STUFFCMD_IGNOREINDEMO, "//wps %d %s %d %d\n", NUM_FOR_EDICT( p ) - 1, WpName( i ), p->ps.wpn[ i ].attacks, p->ps.wpn[ i ].hits );
+	}
+}
+
+void WS_CheckUpdate( gedict_t *p )
+{
+	int i, j, trackers_cnt;
 	qboolean wpsx;
+	gedict_t *trackers[MAX_CLIENTS], *s;
 
 	if ( !p->wpstats_mask )
 		return;
+
+	i = EDICT_TO_PROG( p );
+	trackers_cnt = 0;
+	memset(trackers, 0, sizeof(trackers));
+
+	for ( s = world; (s = find_spc(s)); )
+	{
+		if ( trackers_cnt >= MAX_CLIENTS ) // should not be the case
+			G_Error("WS_CheckUpdate: trackers_cnt >= MAX_CLIENTS");
+
+		if ( i != s->s.v.goalentity )
+			continue; // spec do not track this player
+
+		if ( !iKey( s, "wpsx" ) )
+			continue; // spec not interesting in new weapon stats
+
+		trackers[trackers_cnt++] = s; //  remember this spec
+	}
 
 	wpsx = iKey( p, "wpsx" );
 
@@ -2825,15 +2878,18 @@ void DemoWeaponStats( gedict_t *p )
 		if ( !( p->wpstats_mask & ( 1 << i ) ) )
 			continue;
 
-		stuffcmd_flags( p, STUFFCMD_DEMOONLY, "//wps %d %s %d %d\n", NUM_FOR_EDICT( p ) - 1, WpName( i ), p->ps.wpn[ i ].attacks, p->ps.wpn[ i ].hits );
+		// if client not interesting in new weapon stats, then put it in demo only
+		stuffcmd_flags( p, wpsx ? 0 : STUFFCMD_DEMOONLY, "//wps %d %s %d %d\n", NUM_FOR_EDICT( p ) - 1, WpName( i ), p->ps.wpn[ i ].attacks, p->ps.wpn[ i ].hits );
 
-		// this will send info to client
-		if ( wpsx )
-			stuffcmd_flags( p, STUFFCMD_IGNOREINDEMO, "//wps %d %s %d %d\n", NUM_FOR_EDICT( p ) - 1, WpName( i ), p->ps.wpn[ i ].attacks, p->ps.wpn[ i ].hits );
+		// send it to specs, do not put it in demos
+		for ( j = 0; j < trackers_cnt; j++ )
+			stuffcmd_flags( trackers[j], STUFFCMD_IGNOREINDEMO, "//wps %d %s %d %d\n", NUM_FOR_EDICT( p ) - 1, WpName( i ), p->ps.wpn[ i ].attacks, p->ps.wpn[ i ].hits );
 	}
 
 	p->wpstats_mask = 0;
 }
+// } end of new weapon stats
+// ====================================
 
 ////////////////
 // GlobalParams:
@@ -2844,7 +2900,7 @@ void PlayerPostThink()
 {
 //dprint ("post think\n");
 
-	DemoWeaponStats( self );
+	WS_CheckUpdate( self );
 
 	if ( intermission_running )
     {

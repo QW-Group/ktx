@@ -1497,8 +1497,7 @@ void SM_PrepareClients()
 
 		memset( (void*) &( p->ps ), 0, sizeof(p->ps) ); // clear player stats
 
-		for ( i = wpNONE + 1; i < wpMAX; i++ )
-			MVD_WPStatsMark( p, i ); // force reset mvd weapon stats
+		WS_Reset( p ); // force reset "new weapon stats"
 
 		p->ps.handicap = hdc; // restore player handicap
 
