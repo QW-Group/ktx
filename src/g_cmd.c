@@ -411,7 +411,7 @@ qboolean ClientSay( qboolean isTeamSay )
 		{
 			// such messages seen only for specs,
 			// we handle it specially for demos, so when you watch demo you can see that specs talked
-			spec_talk = true;
+			spec_talk = cvar("k_keepspectalkindemos");
 			snprintf(prefix, sizeof(prefix), "[SPEC] %s:", name);
 		}
 		else

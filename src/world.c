@@ -641,6 +641,7 @@ void FirstFrame	( )
 	RegisterCvar("k_lockmin");
 	RegisterCvar("k_lockmax");
 	RegisterCvar("k_spectalk");
+	RegisterCvarEx("k_keepspectalkindemos", "0");
 	RegisterCvar("k_sayteam_to_spec");
 	RegisterCvar("k_dis");
 	RegisterCvar("dq");
