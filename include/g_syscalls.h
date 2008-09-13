@@ -30,6 +30,8 @@ void 	trap_conprint( const char *fmt );
 
 #define BPRINT_IGNOREINDEMO  (1<<0) // broad cast print will be not put in demo
 #define BPRINT_IGNORECLIENTS (1<<1) // broad cast print will not be seen by clients, but may be seen in demo
+#define BPRINT_QTVONLY       (1<<2) // if broad cast print goes to demo, then it will be only qtv sream, but not file
+#define BPRINT_IGNORECONSOLE (1<<3) // broad cast print will not be put in server console
 void    trap_BPrint( int level, const char *fmt, int flags );
 
 // trap_SPrint() flags

@@ -411,7 +411,7 @@ qboolean ClientSay( qboolean isTeamSay )
 		{
 			// such messages seen only for specs,
 			// we handle it specially for demos, so when you watch demo you can see that specs talked
-			spec_talk = cvar("k_keepspectalkindemos");
+			spec_talk = true;
 			snprintf(prefix, sizeof(prefix), "[SPEC] %s:", name);
 		}
 		else
@@ -438,7 +438,12 @@ qboolean ClientSay( qboolean isTeamSay )
 	team = ezinfokey(self, "team");
 
 	if ( spec_talk ) // this should go to demo only
-		G_bprint_flags(PRINT_CHAT, BPRINT_IGNORECLIENTS, "%s %s\n", prefix, str);
+	{
+		// if k_keepspectalkindemos == 0 then this goes to qtv mvd stream only
+		flags = BPRINT_IGNORECONSOLE | BPRINT_IGNORECLIENTS | ( cvar("k_keepspectalkindemos") ? 0 : BPRINT_QTVONLY );
+
+		G_bprint_flags(PRINT_CHAT, flags, "%s %s\n", prefix, str);
+	}
 
 	for ( j = 1, client = &(g_edicts[j]); j <= MAX_CLIENTS; j++, client++ )
 	{
