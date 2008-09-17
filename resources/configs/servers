@@ -1,0 +1,9 @@
+#!/bin/bash
+
+./port1 > /dev/null &
+sleep 1
+./port2 > /dev/null &
+sleep 1
+./port3 > /dev/null &
+sleep 1
+./portffa > /dev/null &
