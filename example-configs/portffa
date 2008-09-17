@@ -1,0 +1,5 @@
+#!/bin/sh
+while true ; do
+  ./mvdsv -game ffa -port 27500 +logrcon +logplayers +exec ffa.cfg +map dm2
+done
+#end of script
