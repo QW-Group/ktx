@@ -1,6 +1,0 @@
-#!/bin/sh
-
-if [ $1 != 0 ] ; then
-   exit
- fi
-gzip -9 $2/$3

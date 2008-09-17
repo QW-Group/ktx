@@ -1,5 +1,0 @@
-#!/bin/sh
-while true ; do
-  ./mvdsv -game ktx -port 28002 +logrcon +logplayers +exec port2.cfg
-done
-#end of script
