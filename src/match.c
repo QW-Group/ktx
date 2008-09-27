@@ -487,11 +487,11 @@ void OnePlayerStats(gedict_t *p, int tp)
 		if ( isDuel() )
 		{
 			//  endgame h & a
-			G_bprint(2, "  %s  H&A: \220H:%d\221\217", redtext("EndGame"), (int)p->s.v.health);
+			G_bprint(2, " %s: %s: %d %s: ", redtext("EndGame"), redtext("H"), (int)p->s.v.health), redtext("A");
 			if ( (int)p->s.v.armorvalue )
-				G_bprint(2, "\220A:%s:%d\221\n", armor_type(p->s.v.items), (int)p->s.v.armorvalue);
+				G_bprint(2, "%s:%d\n", armor_type(p->s.v.items), (int)p->s.v.armorvalue);
 			else
-				G_bprint(2, "\220A:0\221\n");
+				G_bprint(2, "0\n");
 
 			// overtime h & a
 			if ( k_overtime ) {
@@ -510,7 +510,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 
 		// spawnfrags
 		if ( !isCTF() )
-			G_bprint(2, "  %s: \220%d\221\n", redtext("SpawnFrags"), p->ps.spawn_frags);
+			G_bprint(2, "  %s: %d\n", redtext("SpawnFrags"), p->ps.spawn_frags);
 
 //	}
 	if ( !tp )
