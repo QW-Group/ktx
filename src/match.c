@@ -487,7 +487,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 		if ( isDuel() )
 		{
 			//  endgame h & a
-			G_bprint(2, " %s: %s: %d %s: ", redtext("EndGame"), redtext("H"), (int)p->s.v.health), redtext("A");
+			G_bprint(2, " %s: %s:%d %s:", redtext("EndGame"), redtext("H"), (int)p->s.v.health, redtext("A"));
 			if ( (int)p->s.v.armorvalue )
 				G_bprint(2, "%s:%d\n", armor_type(p->s.v.items), (int)p->s.v.armorvalue);
 			else
@@ -495,11 +495,11 @@ void OnePlayerStats(gedict_t *p, int tp)
 
 			// overtime h & a
 			if ( k_overtime ) {
-				G_bprint(2, "  %s H&A: \220H:%d\221\217", redtext("OverTime"), (int)p->ps.ot_h);
+				G_bprint(2, " %s: %s:%d %s:", redtext("OverTime"), redtext("H"), (int)p->ps.ot_h, redtext("A"));
 				if ( (int)p->ps.ot_a )
-					G_bprint(2, "\220A:%s:%d\221\n", armor_type(p->ps.ot_items), (int)p->ps.ot_a);
+					G_bprint(2, "%s:%d\n", armor_type(p->ps.ot_items), (int)p->ps.ot_a);
 				else
-					G_bprint(2, "\220A:0\221\n");
+					G_bprint(2, "0\n");
 			}
 		}
 		else
