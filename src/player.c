@@ -1040,10 +1040,12 @@ void StartDie ()
 		return;
 	}
 
-	if ( k_yawnmode )
+//	if ( k_yawnmode )
+// qqshka: this way it better
+	if ( 1 )
 	{
 		// Yawnmode: exclude diea1 and diec1 so the respawn time is always 900 ms
-		switch( i_rnd(1, 3)) {
+		switch( i_rnd(1, 3) ) {
 			case  1: player_dieb1(); break;
 			case  2: player_died1(); break;
 			default: player_diee1(); break;
