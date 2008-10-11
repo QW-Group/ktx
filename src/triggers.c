@@ -514,7 +514,9 @@ void teleport_player(gedict_t *player, vec3_t origin, vec3_t angles, int flags)
 		}
 
 		player->s.v.fixangle = 1;	// turn this way immediately
-		player->s.v.teleport_time = g_globalvars.time + 0.7;
+
+// <Tonik> qqshka|Tara, teleport_time these days is used by waterjump code
+//		player->s.v.teleport_time = g_globalvars.time + 0.7;
 
 		if ( flags & TFLAGS_VELOCITY_ADJUST )
 		{
