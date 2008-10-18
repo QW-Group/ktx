@@ -777,7 +777,7 @@ void T_InstaKickback()
 
 void T_MissileTouch()
 {
-//	float           damg;
+	float           damg;
 	vec3_t          tmp;
 
 	if ( other == PROG_TO_EDICT( self->s.v.owner ) )
@@ -800,7 +800,7 @@ void T_MissileTouch()
 	// - Molgrum
 //	damg = 100 + (k_yawnmode ? 10 : g_random() * 20);
 // qqshka: this way it better
-//	damg = 110;
+	damg = 110;
 
 	if ( other->s.v.takedamage )
 	{
@@ -811,17 +811,16 @@ void T_MissileTouch()
 		}
 	}
 
-//	if ( ISLIVE( other ) )
-//	{
-//		other->deathtype = dtRL;
-//		T_Damage( other, self, PROG_TO_EDICT( self->s.v.owner ), damg );
-//	}
+	if ( ISLIVE( other ) )
+	{
+		other->deathtype = dtRL;
+		T_Damage( other, self, PROG_TO_EDICT( self->s.v.owner ), damg );
+	}
 	// don't do radius damage to the other, because all the damage
 	// was done in the impact
 
 
-//	T_RadiusDamage( self, PROG_TO_EDICT( self->s.v.owner ), 120, other, dtRL );
-	T_RadiusDamage( self, PROG_TO_EDICT( self->s.v.owner ), 120, world, dtRL );
+	T_RadiusDamage( self, PROG_TO_EDICT( self->s.v.owner ), 120, other, dtRL );
 
 //  sound (self, CHAN_WEAPON, "weapons/r_exp3.wav", 1, ATTN_NORM);
 	normalize( self->s.v.velocity, tmp );
