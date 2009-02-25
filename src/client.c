@@ -126,7 +126,7 @@ void CheckTiming()
 			// warn and repeat warn after some time
 			if ( firstTime || p->k_timingWarnTime + 20 < g_globalvars.time ){
 			    if ( timing_players_action & TA_INFO )
-					G_bprint(2, "\x87%s %s is timing!\n", redtext( "WARNING:" ), p->s.v.netname);
+					G_bprint(2, "\x87%s %s is timing out!\n", redtext( "WARNING:" ), p->s.v.netname);
 
 				p->k_timingWarnTime = g_globalvars.time;
 			}
