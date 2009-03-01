@@ -95,8 +95,12 @@ void CheckDefMap( )
 	{
 		char *s1 = cvar_string( "k_defmap" );
 
+		// reload map to default one if we are not on it alredy, in case of intermission reload anyway
+
 		if( !strnull( s1 ) && strneq( s1, g_globalvars.mapname ) )
 			changelevel( s1 );
+		else if ( intermission_running )
+			changelevel( g_globalvars.mapname );
 	}
 
 	ent_remove( self );
