@@ -94,9 +94,9 @@ void StartLogs()
 	if ( !QVMstrftime(date_c, sizeof(date_c), "%Y%m%d-%H%M%S-%Z", 0) )
 		date_c[0] = 0; // bad date
 
-	log_open("match-%s-%s.log", GetMode(), date_c);
+	log_open("%s/match-%s-%s.log", cvar_string("sv_demodir"), GetMode(), date_c);
 	log_printf("%s", "<?xml version=\"1.0\"?>\n");
-	log_printf("%s", "<ezqstats version=\"1\">\n");
+	log_printf("%s", "<ktx-extralog version=\"1\">\n");
 	log_printf("\t<match date=\"%s\" map=\"%s\" hostname=\"%s\" ip=\"%s\" port=\"%d\" mode=\"%s\">\n", 
 		date, g_globalvars.mapname, striphigh(cvar_string("hostname")), ip, i, GetMode());
 	log_printf("\t\t<events>\n");	
@@ -106,7 +106,7 @@ void StopLogs()
 {
 	log_printf("\t\t</events>\n" );
 	log_printf("\t</match>\n" );
-	log_printf("</ezqstats>\n" );
+	log_printf("</ktx-extralog>\n" );
 	log_close();
 }
 

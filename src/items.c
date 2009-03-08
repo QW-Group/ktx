@@ -1799,6 +1799,7 @@ void BackpackTouch()
 				(int)self->s.v.ammo_cells,
 				other->s.v.netname );
 
+	/*   // To be uncommented if details of each item dropped is necessary
 	if (!strnull(new_wp))
 		log_printf( "\t\t\t<event time=\"%f\" act=\"b\" it=\"%s\" pl=\"%s\" val=\"\" />\n",
 					g_globalvars.time - match_start_time,
@@ -1828,6 +1829,7 @@ void BackpackTouch()
 					g_globalvars.time - match_start_time,
 					other->s.v.netname,
 					(int)new_cells );
+	*/
 		
 	if ( self->s.v.ammo_shells )
 	{
@@ -2067,6 +2069,7 @@ void DropBackpack()
 				(int)item->s.v.ammo_cells,
 				self->s.v.netname );
 
+	/*   // To be uncommented if details of each item dropped is necessary
 	if (!strnull(item->s.v.netname))
 		log_printf( "\t\t\t<event time=\"%f\" act=\"d\" it=\"%s\" pl=\"%s\" val=\"\" />\n",
 					g_globalvars.time - match_start_time,
@@ -2096,6 +2099,7 @@ void DropBackpack()
 					g_globalvars.time - match_start_time,
 					self->s.v.netname,
 					(int)item->s.v.ammo_cells );
+	*/
 
 	item->s.v.velocity[2] = 300;
 	item->s.v.velocity[0] = -100 + ( g_random() * 200 );

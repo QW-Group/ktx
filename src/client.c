@@ -3282,6 +3282,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 	char *deathstring,  *deathstring2;
 	char *attackerteam, *targteam;
+	char *attackername;
 
 	// Set it so it should update scores at next attempt.
 	k_nochange = 0;
@@ -3303,11 +3304,23 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	ktpro_autotrack_on_death(targ);
 
 	playerheight = Instagib_Obituary( targ, attacker );
+	if (( targ->deathtype == dtWATER_DMG )
+		|| ( targ->deathtype == dtEXPLO_BOX )
+		|| ( targ->deathtype == dtFALL )
+		|| ( targ->deathtype == dtSQUISH )
+		|| ( targ->deathtype == dtCHANGELEVEL )
+		|| ( targ->deathtype == dtFIREBALL )
+		|| ( targ->deathtype == dtSLIME_DMG )
+		|| ( targ->deathtype == dtLAVA_DMG )
+		|| ( targ->deathtype == dtTRIGGER_HURT ) )
+		attackername = "world";
+	else
+		attackername = attacker->s.v.netname;
 
 	log_printf( "\t\t\t<event time=\"%f\" tag=\"dth\" at=\"%s\" tg=\"%s\" ty=\"%s\" "
 				"q=\"%d\" al=\"%d\" kh=\"%d\" lt=\"%f\" />\n",
 				g_globalvars.time - match_start_time,
-				attacker->s.v.netname,
+				attackername,
 				targ->s.v.netname,
 				death_type( targ->deathtype ),
 				(int)(attacker->super_damage_finished > g_globalvars.time ? 1 : 0 ),
