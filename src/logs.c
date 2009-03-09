@@ -94,7 +94,8 @@ void StartLogs()
 	if ( !QVMstrftime(date_c, sizeof(date_c), "%Y%m%d-%H%M%S-%Z", 0) )
 		date_c[0] = 0; // bad date
 
-	log_open("%s/match-%s-%s.log", cvar_string("sv_demodir"), GetMode(), date_c);
+	log_open("%s", cvar_string("extralogname"));
+	// log_open("%s/match-%s-%s.log", cvar_string("sv_demodir"), GetMode(), date_c);
 	log_printf("%s", "<?xml version=\"1.0\"?>\n");
 	log_printf("%s", "<ktx-extralog version=\"1\">\n");
 	log_printf("\t<match date=\"%s\" map=\"%s\" hostname=\"%s\" ip=\"%s\" port=\"%d\" mode=\"%s\">\n", 
