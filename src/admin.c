@@ -12,252 +12,259 @@ void NextClient();
 qboolean DoKick(gedict_t *victim, gedict_t *kicker);
 
 // is real admin
-qboolean is_real_adm(gedict_t *p)
+qboolean
+is_real_adm(gedict_t *p)
 {
 	return (p->k_admin & AF_REAL_ADMIN);
 }
 
 // is elected admin
-qboolean is_adm(gedict_t *p)
+qboolean
+is_adm(gedict_t *p)
 {
-	return ( is_real_adm( p ) || (p->k_admin & AF_ADMIN) );
+	return (is_real_adm(p) || (p->k_admin & AF_ADMIN));
 }
 
-void KickThink ()
+void
+KickThink()
 {
-    if( !self->k_kicking )
+	if (!self->k_kicking)
 		return;
 
-	if ( self->k_kicking + 60 < g_globalvars.time ) { // Check the 1 minute timeout for kick mode
-		G_sprint( self, 2, "Your %s mode has timed out\n", redtext("kick"));
-		ExitKick( self );
+	// Check the 1 minute timeout for kick mode
+	if (self->k_kicking + 60 < g_globalvars.time) {
+		G_sprint(self, 2, "Your %s mode has timed out\n", redtext("kick"));
+		ExitKick(self);
 		return;
 	}
 
-	if ( !is_adm( self ) ) {
-		ExitKick( self ); // not admin now, so cancel kick mode, just for sanity
+	if (!is_adm(self)) {
+		// not admin now, so cancel kick mode, just for sanity
+		ExitKick(self);
 		return;
 	}
 }
 
-void ExitKick (gedict_t *kicker)
+void
+ExitKick(gedict_t *kicker)
 {
-    if ( !kicker->k_kicking )
+	if (!kicker->k_kicking)
 		return;
 
 	kicker->k_playertokick = world;
 	kicker->k_kicking = 0;
 
-	if( !strnull( kicker->s.v.classname ) )
+	if (!strnull(kicker->s.v.classname))
 		G_sprint(kicker, 2, "Kicking process terminated\n");
 }
 
 // assuming kicker is admin
-qboolean is_can_kick(gedict_t *victim, gedict_t *kicker)
+qboolean
+is_can_kick(gedict_t *victim, gedict_t *kicker)
 {
-	if ( VIP_IsFlags(victim, VIP_NOTKICKABLE) && !is_real_adm(kicker) ) {
-		G_sprint(kicker, 2, "You can't kick VIP \x8D %s as elected admin\n", 
-					(strnull( victim->s.v.netname ) ? "!noname!" : victim->s.v.netname));
-		return false;
-	}
-	if ( is_real_adm(victim) && !is_real_adm(kicker) ) {
-		G_sprint(kicker, 2, "You can't kick real admin \x8D %s as elected admin\n", 
-					(strnull( victim->s.v.netname ) ? "!noname!" : victim->s.v.netname));
-		return false;
+	if (VIP_IsFlags(victim, VIP_NOTKICKABLE) && !is_real_adm(kicker)) {
+		G_sprint(kicker, 2, "You can't kick VIP \x8D %s as elected admin\n",
+			(strnull(victim->s.v.netname) ? "!noname!" : victim->s.v.netname));
+		return (false);
 	}
 
-	return true;
+	if (is_real_adm(victim) && !is_real_adm(kicker)) {
+		G_sprint(kicker, 2, "You can't kick real admin \x8D %s as elected admin\n",
+			(strnull(victim->s.v.netname) ? "!noname!" : victim->s.v.netname));
+		return (false);
+	}
+
+	return (true);
 }
 
-qboolean DoKick(gedict_t *victim, gedict_t *kicker)
+qboolean
+DoKick(gedict_t *victim, gedict_t *kicker)
 {
 	if (!victim || !kicker)
-		return false;
+		return (false);
 
-	if( victim == kicker )
-	{
-		G_bprint(2, "%s kicked %s\n", getname(kicker), g_himself( kicker ));
-
-		// hehe
+	if (victim == kicker) {
+		G_bprint(2, "%s kicked %s\n", getname(kicker), g_himself(kicker));
 		G_sprint(kicker, 2, "Say \"bye\" and then type \"disconnect\" next time\n");
+		stuffcmd(kicker, "disconnect\n"); // FIXME: stupid way
 
-		stuffcmd(kicker, "disconnect\n");  // FIXME: stupid way
-
-		if ( !FTE_sv )
-			localcmd( "addip %s ban +30\n", cl_ip( victim ) ); // BAN for 30 seconds
+		if (!FTE_sv)
+			localcmd("addip %s ban +30\n", cl_ip(victim)); // BAN for 30 seconds
 	}
 	else
 	{
-		if ( !is_can_kick(victim, kicker) )
-			return false;
+		if (!is_can_kick(victim, kicker))
+			return (false);
 
 		G_bprint(2, "%s was kicked by %s\n", getname(victim), getname(kicker));
-
 		G_sprint(victim, 2, "You were kicked from the server\n");
-
 		stuffcmd(victim, "disconnect\n"); // FIXME: stupid way
 
-		if ( !FTE_sv )
-			localcmd( "addip %s ban +30\n", cl_ip( victim ) ); // BAN for 30 seconds
+		if (!FTE_sv)
+			localcmd("addip %s ban +30\n", cl_ip(victim)); // BAN for 30 seconds
 	}
 
-	return true;
+	return (true);
 }
 
-void AdminKick ()
+void
+AdminKick()
 {
 	int argc = trap_CmdArgc();
 
-    if( !is_adm( self ) )
-    {
-        G_sprint(self, 2, "You are not an admin\n");
-        return;
-    }
-
-    if( self->k_kicking ) {
-        ExitKick( self );
+	if (!is_adm(self)) {
+		G_sprint(self, 2, "You are not an admin\n");
 		return;
 	}
 
-	if ( argc >= 2 ) {
+	if (self->k_kicking) {
+		ExitKick(self);
+		return;
+	}
+
+	if (argc >= 2) {
 		gedict_t *p;
 		char arg_2[1024], *str;
 
-		trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
+		trap_CmdArgv(1, arg_2, sizeof (arg_2));
 
-		if ( !(p = SpecPlayer_by_IDorName( arg_2 )) && !(p = not_connected_by_IDorName( arg_2 )) ) {
+		if (!(p = SpecPlayer_by_IDorName(arg_2)) && !(p = not_connected_by_IDorName(arg_2))) {
 			G_sprint(self, 2, "kick: client %s not found\n", arg_2);
 			return;
 		}
 
-		if ( DoKick( p, self ) && !strnull( str = params_str(2, -1) ) ) // show reason
+		if (DoKick(p, self) && !strnull(str = params_str(2, -1))) // show reason
 			G_bprint(2, "\x90%s\x91\n", str);
 
 		return;
 	}
 
-    G_sprint(self, 2, "Kicking process started\n"
-					  "žžžžžžžžžžžžžžžžžžžžžŸ\n"
-					  "Type \371 to kick, \356 for next, %s to leave\n", redtext("kick"));
-
-    self->k_kicking = g_globalvars.time;
-    self->k_playertokick = world;
-
-    NextClient();
+	G_sprint(self, 2, "Kicking process started\n"
+		"žžžžžžžžžžžžžžžžžžžžžŸ\n"
+		"Type \371 to kick, \356 for next, %s to leave\n", redtext("kick"));
+	self->k_kicking = g_globalvars.time;
+	self->k_playertokick = world;
+	NextClient();
 }
 
 // multi kick
-void m_kick ()
+void
+m_kick()
 {
 	int i, k;
 	gedict_t *p;
 	char arg_x[1024], *str;
 	int argc = trap_CmdArgc();
 
-    if( !is_adm( self ) )
-    {
-        G_sprint(self, 2, "You are not an admin\n");
-        return;
-    }
-
-	trap_CmdArgv( 1, arg_x, sizeof( arg_x ) );
-
-	if ( argc < 2 || !only_digits(arg_x) ) {
-        G_sprint(self, 2, "mkick <id1 [id2 [id3 ...]] [reason]>\n");
+	if (!is_adm(self)) {
+		G_sprint(self, 2, "You are not an admin\n");
 		return;
 	}
 
-	for ( k = 0, i = 1; i < argc; i++ ) {
-		trap_CmdArgv( i, arg_x, sizeof( arg_x ) );
+	trap_CmdArgv(1, arg_x, sizeof (arg_x));
 
-		if ( !only_digits(arg_x) )
+	if (argc < 2 || !only_digits(arg_x)) {
+		G_sprint(self, 2, "mkick <id1 [id2 [id3 ...]] [reason]>\n");
+		return;
+	}
+
+	for (k = 0, i = 1; i < argc; i++) {
+		trap_CmdArgv(i, arg_x, sizeof (arg_x));
+
+		if (!only_digits(arg_x))
 			break;
 
-		if ( !(p = SpecPlayer_by_id( atoi(arg_x) )) && !(p = not_connected_by_id( atoi(arg_x) )) ) {
+		if (!(p = SpecPlayer_by_id(atoi(arg_x))) && !(p = not_connected_by_id(atoi(arg_x)))) {
 			G_sprint(self, 2, "mkick: client %s not found\n", arg_x);
 			continue;
 		}
 
-		if( !DoKick( p, self ) )
+		if (!DoKick(p, self))
 			continue;
 
 		k++;
 	}
 
-	if ( !k )
+	if (!k)
 		return;
 
-	if ( !strnull( str = params_str(i, -1) ) ) // show reason
+	if (!strnull(str = params_str(i, -1))) // show reason
 		G_bprint(2, "\x90%s\x91\n", str);
 }
 
-void NextClient ()
+void
+NextClient()
 {
 	int from = 0;
 
-	if( !self->k_kicking )
+	if (!self->k_kicking)
 		return;
 
 	self->k_playertokick = (self->k_playertokick ? self->k_playertokick : world);
-	from = ( self->k_playertokick != world && self->k_playertokick->ct == ctSpec );
+	from = (self->k_playertokick != world && self->k_playertokick->ct == ctSpec);
 	self->k_playertokick = find_plrspc(self->k_playertokick, &from);
 
-	if ( !self->k_playertokick ) {  // try find anyone at least
+	if (!self->k_playertokick) {  // try find anyone at least
 		from = 0;
 		self->k_playertokick = find_plrspc(world, &from);
 	}
 
-	if ( !self->k_playertokick ) {
+	if (!self->k_playertokick) {
 		G_sprint(self, 2, "Can't find anybody to kick\n");
-		ExitKick ( self );
+		ExitKick(self);
 		return;
 	}
 
-    G_sprint(self, 2, "Kick %s %s?\n", 
-					redtext(self->k_playertokick->ct == ctPlayer ? "player" : "spectator"),	getname(self->k_playertokick));
+	G_sprint(self, 2, "Kick %s %s?\n",
+		redtext(self->k_playertokick->ct == ctPlayer ? "player" : "spectator"),
+		getname(self->k_playertokick));
 }
 
-void YesKick ()
+void
+YesKick()
 {
-	if( !self->k_kicking )
+	if (!self->k_kicking)
 		return;
 
-	if ( !self->k_playertokick || strnull(self->k_playertokick->s.v.classname) ) {
-        NextClient();
+	if (!self->k_playertokick || strnull(self->k_playertokick->s.v.classname)) {
+		NextClient();
 		return;
 	}
 
-	if( DoKick( self->k_playertokick, self ) && self->k_playertokick == self )
+	if (DoKick(self->k_playertokick, self) && self->k_playertokick == self)
 		return; // selfkick success ;)
 
 	NextClient();
 }
 
-void DontKick ()
+void
+DontKick()
 {
-	if( !self->k_kicking )
+	if (!self->k_kicking)
 		return;
 
 	NextClient();
 }
 
-void BecomeAdmin(gedict_t *p, int adm_flags)
+void
+BecomeAdmin(gedict_t *p, int adm_flags)
 {
 	G_bprint(2, "%s %s!\n", p->s.v.netname, redtext("gains admins status"));
 	G_sprint(p, 2, "Please give up admin rights when you're done\n"
-				   "Type %s for info\n", redtext("commands"));
+		"Type %s for info\n", redtext("commands"));
 
 	p->k_admin |= adm_flags;
 
-	on_admin( p );
+	on_admin(p);
 }
 
 // "admin" command
 
-void ReqAdmin ()
+void
+ReqAdmin()
 {
     //  check for election
-    if( is_elected(self, etAdmin) )
+    if (is_elected(self, etAdmin))
     {
         G_sprint(self, 2, "Abort %sion first\n", redtext("elect"));
         return;
