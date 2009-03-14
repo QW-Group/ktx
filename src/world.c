@@ -25,15 +25,21 @@
 
 #include "g_local.h"
 
+#define	MAX_BODYQUE 4
+
 void  SUB_regen();
 void  CheckAll();
 void  FixSpecWizards();
 void  FixSayFloodProtect();
 void  FixRules();
+void SP_item_artifact_super_damage();
 
-#define	MAX_BODYQUE 4
 gedict_t *bodyque[MAX_BODYQUE];
+
 int bodyque_head;
+float max_map_uptime = 3600 * 12; // 12 hours
+
+
 
 void
 InitBodyQue()
@@ -59,7 +65,9 @@ void
 CopyToBodyQue(gedict_t * ent)
 {
 	if (ISLIVE(ent))
-		return; // no corpse, since here may be frame where player live, so u got standing player model, will looks like bug
+		// no corpse, since here may be frame where player live,
+		// so u got standing player model, will looks like bug
+		return;
 
 	VectorCopy(ent->s.v.angles, bodyque[bodyque_head]->s.v.angles);
 	VectorCopy(ent->s.v.velocity, bodyque[bodyque_head]->s.v.velocity);
@@ -69,7 +77,7 @@ CopyToBodyQue(gedict_t * ent)
 	bodyque[bodyque_head]->s.v.frame = ent->s.v.frame;
 	bodyque[bodyque_head]->s.v.colormap = ent->s.v.colormap;
 	// once i got here MOVETYPE_WALK, so server crashed, probaly here must be always toss movement
-	bodyque[bodyque_head]->s.v.movetype = /* ent->s.v.movetype */ MOVETYPE_TOSS;
+	bodyque[bodyque_head]->s.v.movetype = MOVETYPE_TOSS;
 	bodyque[bodyque_head]->s.v.flags = 0;
 
 	setorigin(bodyque[bodyque_head], PASSVEC3(ent->s.v.origin));
@@ -79,29 +87,29 @@ CopyToBodyQue(gedict_t * ent)
 		bodyque_head = 0;
 }
 
-void ClearBodyQue()
+void
+ClearBodyQue()
 {
-	int             i;
+	int i;
 
-	for (i = 0; i < MAX_BODYQUE; i++)
-	{
+	for (i = 0; i < MAX_BODYQUE; i++) {
 		bodyque[i]->s.v.model = "";
 		bodyque[i]->s.v.modelindex = 0;
 		bodyque[i]->s.v.frame = 0;
 		bodyque[i]->s.v.movetype = MOVETYPE_NONE;
 	}
+
 	bodyque_head = 0;
 }
 
-void CheckDefMap()
+void
+CheckDefMap()
 {
-	if(!CountPlayers() && !cvar("k_master") && !cvar("k_lockmap"))
-	{
+	if (!CountPlayers() && !cvar("k_master") && !cvar("k_lockmap")) {
 		char *s1 = cvar_string("k_defmap");
 
 		// reload map to default one if we are not on it alredy, in case of intermission reload anyway
-
-		if(!strnull(s1) && strneq(s1, g_globalvars.mapname))
+		if (!strnull(s1) && strneq(s1, g_globalvars.mapname))
 			changelevel(s1);
 		else if (intermission_running)
 			changelevel(g_globalvars.mapname);
@@ -110,27 +118,26 @@ void CheckDefMap()
 	ent_remove(self);
 }
 
-void Spawn_DefMapChecker(float timeout)
+void
+Spawn_DefMapChecker(float timeout)
 {
-   	gedict_t	*e;
+	gedict_t *e;
 
-	for(e = world; (e = find(e, FOFCLSN, "mapguard"));)
+	for (e = world; (e = find(e, FOFCLSN, "mapguard")); )
 		ent_remove(e);
 
 	if (k_matchLess) // no defmap in matchLess mode
 		return;
 
 	e = spawn();
-
 	e->s.v.classname = "mapguard";
 	e->s.v.owner = EDICT_TO_PROG(world);
 	e->s.v.think = (func_t) CheckDefMap;
 	e->s.v.nextthink = g_globalvars.time + max(0.0001, timeout);
 }
 
-float max_map_uptime = 3600 * 12; // 12 hours
-
-void Check_LongMapUptime()
+void
+Check_LongMapUptime()
 {
 	if (match_in_progress)
 		return; // no no no, not even bother with this during match
@@ -149,19 +156,19 @@ void Check_LongMapUptime()
 	changelevel(g_globalvars.mapname);
 }
 
-void	SP_item_artifact_super_damage();
 
-void SP_worldspawn()
+void
+SP_worldspawn()
 {
-	char		*s;
+	char *s;
 
 	race_add_standart_routes();
-
 	G_SpawnString("classname", "", &s);
-	if (Q_stricmp(s, "worldspawn"))
-	{
+
+	if (Q_stricmp(s, "worldspawn")) {
 		G_Error("SP_worldspawn: The first entity isn't 'worldspawn'");
 	}
+
 	world->s.v.classname = "worldspawn";
 	InitBodyQue();
 
@@ -173,19 +180,20 @@ void SP_worldspawn()
 		trap_cvar_set("sv_gravity", "150");
 	else
 		trap_cvar_set("sv_gravity", "800");
-// the area based ambient sounds MUST be the first precache_sounds
 
-// player precaches     
+	// the area based ambient sounds MUST be the first precache_sounds
+
+	// player precaches
 	W_Precache();		// get weapon precaches
 
-// sounds used from C physics code
+	// sounds used from C physics code
 	trap_precache_sound("demon/dland2.wav");	// landing thud
 	trap_precache_sound("misc/h2ohit1.wav");	// landing splash
 
-// setup precaches allways needed
+	// setup precaches allways needed
 	trap_precache_sound("items/itembk2.wav");	// item respawn sound
 	trap_precache_sound("player/plyrjmp8.wav");	// player jump
-	trap_precache_sound("player/land.wav");	// player landing
+	trap_precache_sound("player/land.wav");		// player landing
 	trap_precache_sound("player/land2.wav");	// player hurt landing
 	trap_precache_sound("player/drown1.wav");	// drowning pain
 	trap_precache_sound("player/drown2.wav");	// drowning pain
@@ -193,7 +201,7 @@ void SP_worldspawn()
 	trap_precache_sound("player/gasp2.wav");	// taking breath
 	trap_precache_sound("player/h2odeath.wav");	// drowning death
 
-	trap_precache_sound("misc/talk.wav");	// talk
+	trap_precache_sound("misc/talk.wav");		// talk
 	trap_precache_sound("player/teledth1.wav");	// telefrag
 	trap_precache_sound("misc/r_tele1.wav");	// teleport sounds
 	trap_precache_sound("misc/r_tele2.wav");
@@ -203,19 +211,18 @@ void SP_worldspawn()
 	trap_precache_sound("weapons/lock4.wav");	// ammo pick up
 	trap_precache_sound("weapons/pkup.wav");	// weapon up
 	trap_precache_sound("items/armor1.wav");	// armor up
-	trap_precache_sound("weapons/lhit.wav");	//lightning
-	trap_precache_sound("weapons/lstart.wav");	//lightning start
+	trap_precache_sound("weapons/lhit.wav");	// lightning
+	trap_precache_sound("weapons/lstart.wav");	// lightning start
 	trap_precache_sound("items/damage3.wav");
 
-	trap_precache_sound("misc/power.wav");	//lightning for boss
+	trap_precache_sound("misc/power.wav");		// lightning for boss
 
-// player gib sounds
-	trap_precache_sound("player/gib.wav");	// player gib sound
+	// player gib sounds
+	trap_precache_sound("player/gib.wav");		// player gib sound
 	trap_precache_sound("player/udeath.wav");	// player gib sound
 	trap_precache_sound("player/tornoff2.wav");	// gib sound
 
-// player pain sounds
-
+	// player pain sounds
 	trap_precache_sound("player/pain1.wav");
 	trap_precache_sound("player/pain2.wav");
 	trap_precache_sound("player/pain3.wav");
@@ -223,17 +230,16 @@ void SP_worldspawn()
 	trap_precache_sound("player/pain5.wav");
 	trap_precache_sound("player/pain6.wav");
 
-// player death sounds
+	// player death sounds
 	trap_precache_sound("player/death1.wav");
 	trap_precache_sound("player/death2.wav");
 	trap_precache_sound("player/death3.wav");
 	trap_precache_sound("player/death4.wav");
 	trap_precache_sound("player/death5.wav");
-
 	trap_precache_sound("boss1/sight1.wav");
 
-// ax sounds    
-	trap_precache_sound("weapons/ax1.wav");	// ax swoosh
+	// ax sounds
+	trap_precache_sound("weapons/ax1.wav");		// ax swoosh
 	trap_precache_sound("player/axhit1.wav");	// ax hit meat
 	trap_precache_sound("player/axhit2.wav");	// ax hit world
 
@@ -246,31 +252,31 @@ void SP_worldspawn()
 	trap_precache_sound("player/lburn1.wav");	// lava burn
 	trap_precache_sound("player/lburn2.wav");	// lava burn
 
-	trap_precache_sound("misc/water1.wav");	// swimming
-	trap_precache_sound("misc/water2.wav");	// swimming
+	trap_precache_sound("misc/water1.wav");		// swimming
+	trap_precache_sound("misc/water2.wav");		// swimming
 
-// Invulnerability sounds
+	// Invulnerability sounds
 	trap_precache_sound("items/protect.wav");
 	trap_precache_sound("items/protect2.wav");
 	trap_precache_sound("items/protect3.wav");
 
-// Invisibility sounds
+	// Invisibility sounds
 	trap_precache_sound("items/inv1.wav");
 	trap_precache_sound("items/inv2.wav");
 	trap_precache_sound("items/inv3.wav");
 
-// quad sounds - need this due to aerowalk customize
+	// quad sounds - need this due to aerowalk customize
 	trap_precache_sound("items/damage.wav");
 	trap_precache_sound("items/damage2.wav");
 	trap_precache_sound("items/damage3.wav");
 
 // ctf
 #ifdef CTF_RELOADMAP
-	if (isCTF()) // precache only if CTF is really on
+	if (isCTF()) { // precache only if CTF is really on
 #else
-	if (k_allowed_free_modes & UM_CTF) // precache if CTF even only possible, does't matter is it on or off currently
+	// precache if CTF even only possible, does't matter is it on or off currently
+	if (k_allowed_free_modes & UM_CTF) {
 #endif
-	{
 		trap_precache_sound("weapons/chain1.wav");
 		trap_precache_sound("weapons/chain2.wav");
 		trap_precache_sound("weapons/chain3.wav");
@@ -286,15 +292,15 @@ void SP_worldspawn()
 		trap_precache_sound("rune/rune4.wav");
 	}
 
-	if (cvar("k_instagib_custom_models")) // precache if custom models actived in config, even if instagib not yet activated 
-	{
-		trap_precache_model("progs/v_coil.mdl");	
+	// precache if custom models actived in config, even if instagib not yet activated
+	if (cvar("k_instagib_custom_models")) {
+		trap_precache_model("progs/v_coil.mdl");
 		trap_precache_sound("weapons/coilgun.wav");
 	}
-	
+
 	if (cvar("k_spm_custom_model"))
 		trap_precache_model("progs/spawn.mdl");
-	
+
 	trap_precache_model("progs/player.mdl");
 
 	trap_precache_model("progs/eyes.mdl");
@@ -302,7 +308,7 @@ void SP_worldspawn()
 	trap_precache_model("progs/gib1.mdl");
 	trap_precache_model("progs/gib2.mdl");
 	trap_precache_model("progs/gib3.mdl");
-	
+
 	trap_precache_model("progs/s_bubble.spr");	// drowning bubbles
 	trap_precache_model("progs/s_explod.spr");	// sprite explosion
 
@@ -315,30 +321,30 @@ void SP_worldspawn()
 	trap_precache_model("progs/v_rock2.mdl");
 
 	// FIXME: checkextension in mvdsv?
-    // vw_available = checkextension("ZQ_VWEP");
-    vw_available = (FTE_sv ? 0 : 1);
+	// vw_available = checkextension("ZQ_VWEP");
+	vw_available = (FTE_sv ? 0 : 1);
 
-    if(cvar("k_allow_vwep") && vw_available)
-    {
-        // precache our vwep models
-        trap_precache_vwep_model ("progs/vwplayer.mdl");  // vwep-enabled player model to use
-        trap_precache_vwep_model ("progs/w_axe.mdl");	// index 2
-        trap_precache_vwep_model ("progs/w_shot.mdl");	// index 3
-        trap_precache_vwep_model ("progs/w_shot2.mdl");
-        trap_precache_vwep_model ("progs/w_nail.mdl");
-        trap_precache_vwep_model ("progs/w_nail2.mdl");
-        trap_precache_vwep_model ("progs/w_rock.mdl");
-        trap_precache_vwep_model ("progs/w_rock2.mdl");
-        trap_precache_vwep_model ("progs/w_light.mdl");
+	if (cvar("k_allow_vwep") && vw_available) {
+		// precache our vwep models
+		trap_precache_vwep_model("progs/vwplayer.mdl");	// vwep-enabled player model to use
+		trap_precache_vwep_model("progs/w_axe.mdl");	// index 2
+		trap_precache_vwep_model("progs/w_shot.mdl");	// index 3
+		trap_precache_vwep_model("progs/w_shot2.mdl");
+		trap_precache_vwep_model("progs/w_nail.mdl");
+		trap_precache_vwep_model("progs/w_nail2.mdl");
+		trap_precache_vwep_model("progs/w_rock.mdl");
+		trap_precache_vwep_model("progs/w_rock2.mdl");
+ 		trap_precache_vwep_model("progs/w_light.mdl");
 		if (cvar("k_instagib_custom_models"))
-			trap_precache_vwep_model ("progs/w_coil.mdl");	//index 10
-        trap_precache_vwep_model ("-");			// null vwep model
-    }
+			trap_precache_vwep_model("progs/w_coil.mdl"); // index 10
+		trap_precache_vwep_model("-");			// null vwep model
+	}
+	
 	vw_enabled = vw_available && cvar("k_allow_vwep") && cvar("k_vwep");
 
-	trap_precache_model("progs/bolt.mdl");	// for lightning gun
-	trap_precache_model("progs/bolt2.mdl");	// for lightning gun
-	trap_precache_model("progs/bolt3.mdl");	// for boss shock
+	trap_precache_model("progs/bolt.mdl");		// for lightning gun
+	trap_precache_model("progs/bolt2.mdl");		// for lightning gun
+	trap_precache_model("progs/bolt3.mdl");		// for boss shock
 	trap_precache_model("progs/lavaball.mdl");	// for testing
 
 	trap_precache_model("progs/missile.mdl");
@@ -347,14 +353,11 @@ void SP_worldspawn()
 	trap_precache_model("progs/s_spike.mdl");
 
 	trap_precache_model("progs/backpack.mdl");
-
 	trap_precache_model("progs/zom_gib.mdl");
-
 	trap_precache_model("progs/v_light.mdl");
-
 	trap_precache_model("progs/wizard.mdl");
 
-// ctf
+	// ctf
 	if (k_ctf_custom_models) {
 		trap_precache_model("progs/v_star.mdl");
 		trap_precache_model("progs/bit.mdl");
