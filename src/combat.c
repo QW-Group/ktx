@@ -25,7 +25,7 @@
 
 #include "g_local.h"
 
-void	ClientObituary( gedict_t * e1, gedict_t * e2 );
+void ClientObituary(gedict_t * e1, gedict_t * e2);
 
 #define DEATHTYPE( _dt_, _dt_str_ ) #_dt_str_,
 char *deathtype_strings[] =
