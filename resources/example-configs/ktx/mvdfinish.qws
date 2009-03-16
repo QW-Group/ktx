@@ -1,6 +1,9 @@
 #!/bin/sh
 
 if [ $1 != 0 ] ; then
-   exit
- fi
-gzip -9 $2/$3
+	exit
+fi
+
+gzip -9 $2/$3.mvd
+#gzip -9 $2/$3.txt
+#gzip -9 $2/$3.xml
