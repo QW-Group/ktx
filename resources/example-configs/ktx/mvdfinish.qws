@@ -4,6 +4,15 @@ if [ $1 != 0 ] ; then
 	exit
 fi
 
-gzip -9 $2/$3.mvd
-#gzip -9 $2/$3.txt
-#gzip -9 $2/$3.xml
+if [ -f $2/$3.mvd ]
+then
+	gzip -9 $2/$3.mvd
+fi
+if [ -f $2/$3.txt ]
+then
+	gzip -9 $2/$3.txt
+fi
+if [ -f $2/$3.xml ]
+then
+	gzip -9 $2/$3.xml
+fi
