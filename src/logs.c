@@ -95,18 +95,76 @@ void StartLogs()
 		date_c[0] = 0; // bad date
 
 	log_open("%s", cvar_string("extralogname"));
-	log_printf("%s", "<?xml version=\"1.0\"?>\n");
-	log_printf("%s", "<ktx-extralog version=\"1\">\n");
-	log_printf("\t<match date=\"%s\" map=\"%s\" hostname=\"%s\" ip=\"%s\" port=\"%d\" mode=\"%s\">\n", 
-		date, g_globalvars.mapname, striphigh(cvar_string("hostname")), ip, i, GetMode());
+	log_printf("%s", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n");
+
+	log_printf("%s", "<!DOCTYPE KTXLOG [\n");
+	log_printf("%s", "<!ELEMENT KTXLOG (DESCRIPTION,EVENTS)>\n");
+	log_printf("%s", "<!ELEMENT DESCRIPTION (#PCDATA)>\n");
+	log_printf("%s", "<!ELEMENT EVENTS (DAMAGE*,PICKMI*,PICKBP*,DROPBP*,DROPPU*,DEATH*)>\n");
+	log_printf("%s", "<!ELEMENT DAMAGE (#PCDATA)>\n");
+	log_printf("%s", "<!ELEMENT PICKMI (#PCDATA)>\n");
+	log_printf("%s", "<!ELEMENT PICKBP (#PCDATA)>\n");
+	log_printf("%s", "<!ELEMENT DROPBP (#PCDATA)>\n");
+	log_printf("%s", "<!ELEMENT DROPPU (#PCDATA)>\n");
+	log_printf("%s", "<!ELEMENT DEATH (#PCDATA)>\n");
+	log_printf("%s", "<!ATTLIST KTXLOG VERSION CDATA \"0.1\">\n");
+	log_printf("%s", "<!ATTLIST DESCRIPTION TIMESTAMP CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DESCRIPTION HOSTNAME CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DESCRIPTION IP CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DESCRIPTION PORT CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DESCRIPTION MAP CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DESCRIPTION MODE CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DAMAGE TIME CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DAMAGE ATTACKER CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DAMAGE TARGET CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DAMAGE TYPE CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DAMAGE QUAD (0|1) #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DAMAGE SPLASH (0|1) #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DAMAGE VALUE CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DAMAGE ARMOR (0|1) #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST PICKMI TIME CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST PICKMI ITEM CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST PICKMI PLAYER CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST PICKMI VALUE CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST PICKBP TIME CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST PICKBP WEAPON CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST PICKBP SHELLS CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST PICKBP NAILS CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST PICKBP ROCKETS CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST PICKBP CELLS CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST PICKBP PLAYER CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DROPBP TIME CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DROPBP WEAPON CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DROPBP SHELLS CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DROPBP NAILS CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DROPBP ROCKETS CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DROPBP CELLS CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DROPBP PLAYER CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DROPPU TIME CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DROPPU ITEM	CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DROPPU PLAYER CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DROPPU TIMELEFT CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DEATH TIME CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DEATH ATTACKER CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DEATH TARGET CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DEATH TYPE CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DEATH QUAD (0|1) #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DEATH ARMORLEFT CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DEATH KILLHEIGHT CDATA #REQUIRED>\n");
+	log_printf("%s", "<!ATTLIST DEATH LIFETIME CDATA #REQUIRED>\n");
+	log_printf("%s", "]>\n");
+
+	log_printf("%s", "<ktxlog version=\"%s\">\n", MOD_VERSION);
+	log_printf("\t<description timestamp=\"%s\" hostname=\"%s\" ip=\"%s\" port=\"%d\" map=\"%s\" mode=\"%s\">\n", 
+		date, striphigh(cvar_string("hostname")), ip, i, g_globalvars.mapname, GetMode());
 	log_printf("\t\t<events>\n");	
 }
 
 void StopLogs()
 {
 	log_printf("\t\t</events>\n" );
-	log_printf("\t</match>\n" );
-	log_printf("</ktx-extralog>\n" );
+	log_printf("\t</description>\n" );
+	log_printf("</ktxlog>\n" );
 	log_close();
 }
 

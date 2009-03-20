@@ -598,8 +598,8 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		else
 			attackername = attacker->s.v.classname;
 
-		log_printf( "\t\t\t<event time=\"%f\" tag=\"dmg\" at=\"%s\" "
-					"tg=\"%s\" ty=\"%s\" q=\"%d\" s=\"%d\" val=\"%d\" ab=\"1\"/>\n",
+		log_printf( "\t\t\t<damage time=\"%f\" attacker=\"%s\" "
+					"target=\"%s\" type=\"%s\" quad=\"%d\" splash=\"%d\" value=\"%d\" armor=\"1\"/>\n",
 					g_globalvars.time - match_start_time,
 					attackername,
 					targ->s.v.netname,
@@ -685,8 +685,8 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			else
 				attackername = attacker->s.v.netname;
 
-			log_printf( "\t\t\t<event time=\"%f\" tag=\"dmg\" at=\"%s\" tg=\"%s\" ty=\"%s\" "
-						"q=\"%d\" s=\"%d\" val=\"%d\" ab=\"0\"/>\n",
+			log_printf( "\t\t\t<damage time=\"%f\" attacker=\"%s\" target=\"%s\" type=\"%s\" "
+						"quad=\"%d\" splash=\"%d\" value=\"%d\" armor=\"0\"/>\n",
 						g_globalvars.time - match_start_time,
 						attackername,
 						targ->s.v.netname,

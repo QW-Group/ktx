@@ -3317,8 +3317,8 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	else
 		attackername = attacker->s.v.netname;
 
-	log_printf( "\t\t\t<event time=\"%f\" tag=\"dth\" at=\"%s\" tg=\"%s\" ty=\"%s\" "
-				"q=\"%d\" al=\"%d\" kh=\"%d\" lt=\"%f\" />\n",
+	log_printf( "\t\t\t<death time=\"%f\" attacker=\"%s\" target=\"%s\" type=\"%s\" "
+				"quad=\"%d\" armorleft=\"%d\" killheight=\"%d\" lifetime=\"%f\" />\n",
 				g_globalvars.time - match_start_time,
 				attackername,
 				targ->s.v.netname,

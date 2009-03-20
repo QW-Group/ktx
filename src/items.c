@@ -123,7 +123,7 @@ void DropPowerup( float timeleft, int powerup )
 	else
 		G_Error("DropPowerup");
 
-	log_printf( "\t\t\t<event time=\"%f\" act=\"d\" it=\"%s\" pl=\"%s\" val=\"%f\" />\n",
+	log_printf( "\t\t\t<droppu time=\"%f\" item=\"%s\" player=\"%s\" timeleft=\"%f\" />\n",
 				g_globalvars.time - match_start_time,
 				self->s.v.classname,
 				swp->s.v.netname,
@@ -240,7 +240,7 @@ float T_Heal( gedict_t * e, float healamount, float ignore )
 
 	real_healamount = e->s.v.health - real_healamount; // so heal amount is current - old health
 
-	log_printf( "\t\t\t<event time=\"%f\" act=\"p\" it=\"health_%d\" pl=\"%s\" val=\"%d\"/>\n",
+	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"health_%d\" player=\"%s\" value=\"%d\"/>\n",
 				g_globalvars.time - match_start_time,
 				(int)healamount,
 				e->s.v.netname,
@@ -461,7 +461,7 @@ void armor_touch()
 
 	real_value = value - real_value;
 
-	log_printf( "\t\t\t<event time=\"%f\" act=\"p\" it=\"%s\" pl=\"%s\" val=\"%d\" />\n",
+	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%d\" />\n",
 				g_globalvars.time - match_start_time,
 				self->s.v.classname,
 				other->s.v.netname,
@@ -731,7 +731,7 @@ void weapon_touch()
 	else if ( !strcmp( self->s.v.classname, "weapon_lightning" ) )
 		real_ammo = other->s.v.ammo_cells - hadammo;
 
-	log_printf( "\t\t\t<event time=\"%f\" act=\"p\" it=\"%s\" pl=\"%s\" val=\"%d\" />\n",
+	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%d\" />\n",
 				g_globalvars.time - match_start_time,
 				self->s.v.classname,
 				other->s.v.netname,
@@ -944,7 +944,7 @@ void ammo_touch()
 	else if ( weapon == 4 )
 		real_ammo = other->s.v.ammo_cells - real_ammo;
 
-	log_printf( "\t\t\t<event time=\"%f\" act=\"p\" it=\"%s\" pl=\"%s\" val=\"%d\" />\n",
+	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%d\" />\n",
 				g_globalvars.time - match_start_time,
 				self->s.v.classname,
 				other->s.v.netname,
@@ -1165,7 +1165,7 @@ void key_touch()
 	if ( match_in_progress != 2 || !readytostart() )
         return;
 
-	log_printf( "\t\t\t<event time=\"%f\" act=\"p\" it=\"%s\" pl=\"%s\" val=\"%d\" />\n",
+	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%d\" />\n",
 				g_globalvars.time - match_start_time,
 				self->s.v.classname,
 				other->s.v.netname,
@@ -1304,7 +1304,7 @@ void sigil_touch()
     if ( match_in_progress != 2 || !readytostart() )
         return;
 
-	log_printf( "\t\t\t<event time=\"%f\" act=\"p\" it=\"%s\" pl=\"%s\" val=\"%d\" />\n",
+	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%d\" />\n",
 				g_globalvars.time - match_start_time,
 				self->s.v.classname,
 				other->s.v.netname,
@@ -1497,7 +1497,7 @@ void powerup_touch()
 	}
 
 
-	log_printf( "\t\t\t<event time=\"%f\" act=\"p\" it=\"%s\" pl=\"%s\" val=\"%f\" />\n",
+	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%f\" />\n",
 				g_globalvars.time - match_start_time,
 				self->s.v.classname,
 				other->s.v.netname,
@@ -1790,7 +1790,7 @@ void BackpackTouch()
 	new_rockets = other->s.v.ammo_rockets - new_rockets;
 	new_cells   = other->s.v.ammo_cells - new_cells;
 
-	log_printf( "\t\t\t<event time=\"%f\" act=\"p\" it=\"bp\" wp=\"%s\" sh=\"%d\" na=\"%d\" ro=\"%d\" ce=\"%d\" pl=\"%s\" />\n",
+	log_printf( "\t\t\t<pickbp time=\"%f\" weapon=\"%s\" shells=\"%d\" nails=\"%d\" rockets=\"%d\" cells=\"%d\" player=\"%s\" />\n",
 				g_globalvars.time - match_start_time,
 				new_wp,
 				(int)self->s.v.ammo_shells,
@@ -1799,38 +1799,6 @@ void BackpackTouch()
 				(int)self->s.v.ammo_cells,
 				other->s.v.netname );
 
-	/*   // To be uncommented if details of each item dropped is necessary
-	if (!strnull(new_wp))
-		log_printf( "\t\t\t<event time=\"%f\" act=\"b\" it=\"%s\" pl=\"%s\" val=\"\" />\n",
-					g_globalvars.time - match_start_time,
-					new_wp,
-					other->s.v.netname );			
-
-	if (new_shells)
-		log_printf( "\t\t\t<event time=\"%f\" act=\"b\" it=\"item_shells\" pl=\"%s\" val=\"%d\" />\n",
-					g_globalvars.time - match_start_time,
-					other->s.v.netname,
-					(int)new_shells );
-
-	if (new_nails)
-		log_printf( "\t\t\t<event time=\"%f\" act=\"b\" it=\"item_spikes\" pl=\"%s\" val=\"%d\" />\n",
-					g_globalvars.time - match_start_time,
-					other->s.v.netname,
-					(int)new_nails );
-
-	if (new_rockets)
-		log_printf( "\t\t\t<event time=\"%f\" act=\"b\" it=\"item_rockets\" pl=\"%s\" val=\"%d\" />\n",
-					g_globalvars.time - match_start_time,
-					other->s.v.netname,
-					(int)new_rockets );
-
-	if (new_cells)
-		log_printf( "\t\t\t<event time=\"%f\" act=\"b\" it=\"item_cells\" pl=\"%s\" val=\"%d\" />\n",
-					g_globalvars.time - match_start_time,
-					other->s.v.netname,
-					(int)new_cells );
-	*/
-		
 	if ( self->s.v.ammo_shells )
 	{
 		if ( acount )
@@ -2060,7 +2028,7 @@ void DropBackpack()
 		item->s.v.ammo_cells   = min(25, item->s.v.ammo_cells);
 	}
 
-	log_printf( "\t\t\t<event time=\"%f\" act=\"d\" it=\"bp\" wp=\"%s\" sh=\"%d\" na=\"%d\" ro=\"%d\" ce=\"%d\" pl=\"%s\" />\n",
+	log_printf( "\t\t\t<dropbp time=\"%f\" weapon=\"%s\" shells=\"%d\" nails=\"%d\" rockets=\"%d\" cells=\"%d\" player=\"%s\" />\n",
 				g_globalvars.time - match_start_time,
 				item->s.v.netname,
 				(int)item->s.v.ammo_shells,
@@ -2068,38 +2036,6 @@ void DropBackpack()
 				(int)item->s.v.ammo_rockets,
 				(int)item->s.v.ammo_cells,
 				self->s.v.netname );
-
-	/*   // To be uncommented if details of each item dropped is necessary
-	if (!strnull(item->s.v.netname))
-		log_printf( "\t\t\t<event time=\"%f\" act=\"d\" it=\"%s\" pl=\"%s\" val=\"\" />\n",
-					g_globalvars.time - match_start_time,
-					item->s.v.netname,
-					self->s.v.netname );			
-
-	if ((int)item->s.v.ammo_shells)
-		log_printf( "\t\t\t<event time=\"%f\" act=\"d\" it=\"item_shells\" pl=\"%s\" val=\"%d\" />\n",
-					g_globalvars.time - match_start_time,
-					self->s.v.netname,
-					(int)item->s.v.ammo_shells );
-
-	if ((int)item->s.v.ammo_nails)
-		log_printf( "\t\t\t<event time=\"%f\" act=\"d\" it=\"item_spikes\" pl=\"%s\" val=\"%d\" />\n",
-					g_globalvars.time - match_start_time,
-					self->s.v.netname,
-					(int)item->s.v.ammo_nails );
-
-	if ((int)item->s.v.ammo_rockets)
-		log_printf( "\t\t\t<event time=\"%f\" act=\"d\" it=\"item_rockets\" pl=\"%s\" val=\"%d\" />\n",
-					g_globalvars.time - match_start_time,
-					self->s.v.netname,
-					(int)item->s.v.ammo_rockets );
-
-	if ((int)item->s.v.ammo_cells)
-		log_printf( "\t\t\t<event time=\"%f\" act=\"d\" it=\"item_cells\" pl=\"%s\" val=\"%d\" />\n",
-					g_globalvars.time - match_start_time,
-					self->s.v.netname,
-					(int)item->s.v.ammo_cells );
-	*/
 
 	item->s.v.velocity[2] = 300;
 	item->s.v.velocity[0] = -100 + ( g_random() * 200 );
