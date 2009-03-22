@@ -81,6 +81,7 @@ char *GetMode();
 void StartLogs()
 {
 	char date[64] = {0}, date_c[64] = {0}, *ip = "", *port = "";
+	char host[64] = "";
 	int i = 0;
 
 	if ( strnull( ip = cvar_string( "sv_local_addr" ) ) || strnull( port = strchr(ip, ':') ) || !(i = atoi(port + 1)) )
@@ -154,9 +155,11 @@ void StartLogs()
 	log_printf("%s", "<!ATTLIST DEATH LIFETIME CDATA #REQUIRED>\n");
 	log_printf("%s", "]>\n");
 
-	log_printf("%s", "<ktxlog version=\"%s\">\n", MOD_VERSION);
+	strlcpy(host, cvar_string("hostname"), strlen(cvar_string("hostname")));
+
+	log_printf("<ktxlog version=\"0.1\">\n");
 	log_printf("\t<description timestamp=\"%s\" hostname=\"%s\" ip=\"%s\" port=\"%d\" map=\"%s\" mode=\"%s\">\n", 
-		date, striphigh(cvar_string("hostname")), ip, i, g_globalvars.mapname, GetMode());
+		date, striphigh(host), ip, i, g_globalvars.mapname, GetMode());
 	log_printf("\t\t<events>\n");	
 }
 
