@@ -3131,7 +3131,7 @@ void UserMode(float umode)
 		if ( sv_invoked )
 			G_bprint(2, "UserMode: sv %s discarded due to k_allowed_free_modes\n", um);
 		else
-			G_sprint(self, 2, "server configuration %s this command\n", redtext("lock"));
+			G_sprint(self, 2, "Server %s this command\n", redtext("disallows"));
 
 		return;
 	}
