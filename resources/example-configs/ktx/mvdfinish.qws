@@ -1,18 +1,28 @@
 #!/bin/sh
 
+# Do you want to compress any of the following? (yes/no)
+MVD=no
+TXT=no
+XML=no
+
+# What archiver do you want to use? (add options too)
+ARCHIVER="gzip -9"
+
+
+# Do not touch below this line if you don't know what you are doing.
+
 if [ $1 != 0 ] ; then
 	exit
 fi
-
-if [ -f $2/$3.mvd ]
+if [ -f $2/$3.mvd ] && [ ${MVD} = yes ]
 then
-	gzip -9 $2/$3.mvd
+	${ARCHIVER} $2/$3.mvd
 fi
-if [ -f $2/$3.txt ]
+if [ -f $2/$3.txt ] && [ ${TXT} = yes ]
 then
-	gzip -9 $2/$3.txt
+	${ARCHIVER} $2/$3.txt
 fi
-if [ -f $2/$3.xml ]
+if [ -f $2/$3.xml ] && [ ${XML} = yes ]
 then
-	gzip -9 $2/$3.xml
+	${ARCHIVER} $2/$3.xml
 fi
