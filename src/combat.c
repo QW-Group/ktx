@@ -596,7 +596,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		)
 				attackername = "world";
 		else
-			attackername = attacker->s.v.classname;
+			attackername = attacker->s.v.netname;
 
 		log_printf( "\t\t\t<damage time=\"%f\" attacker=\"%s\" "
 					"target=\"%s\" type=\"%s\" quad=\"%d\" splash=\"%d\" value=\"%d\" armor=\"1\"/>\n",
