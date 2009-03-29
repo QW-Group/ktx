@@ -102,6 +102,7 @@ void SUB_regen_powerups()
 void DropPowerup( float timeleft, int powerup )
 {
 	gedict_t       *swp = self; // save self
+	char *playername;
 
 	if ( timeleft <= 0 || match_in_progress != 2 )
 		return;
@@ -123,10 +124,12 @@ void DropPowerup( float timeleft, int powerup )
 	else
 		G_Error("DropPowerup");
 
+	playername = swp->s.v.netname;
+
 	log_printf( "\t\t\t<droppu time=\"%f\" item=\"%s\" player=\"%s\" timeleft=\"%f\" />\n",
 				g_globalvars.time - match_start_time,
 				self->s.v.classname,
-				swp->s.v.netname,
+				cleantext(playername),
 				timeleft );
 
 	if ( swp->ct == ctPlayer )
@@ -218,6 +221,7 @@ HEALTH BOX
 float T_Heal( gedict_t * e, float healamount, float ignore )
 {
 	float real_healamount;
+	char *playername;
 
 	if ( ISDEAD( e ) )
 		return 0;
@@ -240,10 +244,12 @@ float T_Heal( gedict_t * e, float healamount, float ignore )
 
 	real_healamount = e->s.v.health - real_healamount; // so heal amount is current - old health
 
+	playername = e->s.v.netname;
+
 	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"health_%d\" player=\"%s\" value=\"%d\"/>\n",
 				g_globalvars.time - match_start_time,
 				(int)healamount,
-				e->s.v.netname,
+				cleantext(playername),
 				(int)real_healamount );
 
 	return 1;
@@ -399,7 +405,8 @@ void armor_touch()
 	float           type = 0, value = 0;
 	float           real_value = 0;
 	int             bit = 0;
-	int				*armor = NULL;
+	int		*armor = NULL;
+	char		*playername;
 
 	if ( ISDEAD( other ) )
 		return;
@@ -461,10 +468,12 @@ void armor_touch()
 
 	real_value = value - real_value;
 
+	playername = other->s.v.netname;
+
 	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%d\" />\n",
 				g_globalvars.time - match_start_time,
 				self->s.v.classname,
-				other->s.v.netname,
+				cleantext(playername),
 				(int)real_value );
 
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
@@ -627,10 +636,11 @@ float W_BestWeapon();
 
 void weapon_touch()
 {
-	int				hadammo = 0, new = 0;
-	gedict_t		*stemp;
-	int				leave;
-	int				real_ammo = 0;
+	int		hadammo = 0, new = 0;
+	gedict_t	*stemp;
+	int		leave;
+	int		real_ammo = 0;
+	char		*playername;
 
 	if ( !( ( int ) other->s.v.flags & FL_CLIENT ) )
 		return;
@@ -731,10 +741,12 @@ void weapon_touch()
 	else if ( !strcmp( self->s.v.classname, "weapon_lightning" ) )
 		real_ammo = other->s.v.ammo_cells - hadammo;
 
+	playername = other->s.v.netname;
+
 	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%d\" />\n",
 				g_globalvars.time - match_start_time,
 				self->s.v.classname,
-				other->s.v.netname,
+				cleantext(playername),
 				real_ammo );
 
 // change to the weapon
@@ -878,9 +890,10 @@ AMMO
 
 void ammo_touch()
 {
-	int ammo, weapon, best;
-	int real_ammo = 0;
-	gedict_t       *stemp;
+	int 		ammo, weapon, best;
+	int		real_ammo = 0;
+	gedict_t	*stemp;
+	char		*playername;
 
 	if ( ISDEAD( other ) )
 		return;
@@ -944,10 +957,12 @@ void ammo_touch()
 	else if ( weapon == 4 )
 		real_ammo = other->s.v.ammo_cells - real_ammo;
 
+	playername = other->s.v.netname;
+
 	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%d\" />\n",
 				g_globalvars.time - match_start_time,
 				self->s.v.classname,
-				other->s.v.netname,
+				cleantext(playername),
 				real_ammo );
 
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
@@ -1152,6 +1167,7 @@ void key_touch()
 {
 //gedict_t*    stemp;
 //float             best;
+	char	*playername;
 
 	if ( other->ct != ctPlayer )
 		return;
@@ -1165,10 +1181,12 @@ void key_touch()
 	if ( match_in_progress != 2 || !readytostart() )
         return;
 
+	playername = other->s.v.netname;
+
 	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%d\" />\n",
 				g_globalvars.time - match_start_time,
 				self->s.v.classname,
-				other->s.v.netname,
+				cleantext(playername),
 				0 );
 
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
@@ -1294,6 +1312,7 @@ void sigil_touch()
 {
 //gedict_t*    stemp;
 //float             best;
+	char	*playername;
 
 	if ( other->ct != ctPlayer )
 		return;
@@ -1304,10 +1323,12 @@ void sigil_touch()
     if ( match_in_progress != 2 || !readytostart() )
         return;
 
+	playername = other->s.v.netname;
+
 	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%d\" />\n",
 				g_globalvars.time - match_start_time,
 				self->s.v.classname,
-				other->s.v.netname,
+				cleantext(playername),
 				0 );
 
 	G_centerprint( other, "You got the rune!" );
@@ -1386,8 +1407,9 @@ extern void ktpro_autotrack_on_powerup_take (gedict_t *dude);
 
 void powerup_touch()
 {
-	float *p_cnt = NULL;
-	float real_time = 30;
+	float	*p_cnt = NULL;
+	float	real_time = 30;
+	char	*playername;
 
 	if ( strnull ( self->s.v.classname ) )
 		G_Error("powerup_touch: null classname");
@@ -1496,11 +1518,12 @@ void powerup_touch()
 		mi_print(other, self->s.v.items, va("%s got %s", getname(other), self->s.v.netname));
 	}
 
+	playername = other->s.v.netname;
 
 	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%f\" />\n",
 				g_globalvars.time - match_start_time,
 				self->s.v.classname,
-				other->s.v.netname,
+				cleantext(playername),
 				real_time );
 
 
@@ -1668,9 +1691,10 @@ PLAYER BACKPACKS
 void BackpackTouch()
 {
 	int		new;
-	gedict_t       *stemp;
+	gedict_t	*stemp;
 	float           acount, new_shells, new_nails, new_rockets, new_cells;
 	char            *new_wp = "";
+	char		*playername;
 
     if ( match_in_progress != 2 )
         return;
@@ -1790,6 +1814,8 @@ void BackpackTouch()
 	new_rockets = other->s.v.ammo_rockets - new_rockets;
 	new_cells   = other->s.v.ammo_cells - new_cells;
 
+	playername = other->s.v.netname;
+
 	log_printf( "\t\t\t<pickbp time=\"%f\" weapon=\"%s\" shells=\"%d\" nails=\"%d\" rockets=\"%d\" cells=\"%d\" player=\"%s\" />\n",
 				g_globalvars.time - match_start_time,
 				new_wp,
@@ -1797,7 +1823,7 @@ void BackpackTouch()
 				(int)self->s.v.ammo_nails,
 				(int)self->s.v.ammo_rockets,
 				(int)self->s.v.ammo_cells,
-				other->s.v.netname );
+				cleantext(playername) );
 
 	if ( self->s.v.ammo_shells )
 	{
@@ -1913,9 +1939,10 @@ DropBackpack
 
 void DropBackpack()
 {
-	gedict_t    *item;
 
-    float		f1;
+    gedict_t	*item;
+    float	f1;
+    char	*playername;
 
     f1 = get_fair_pack();
 
@@ -2028,6 +2055,8 @@ void DropBackpack()
 		item->s.v.ammo_cells   = min(25, item->s.v.ammo_cells);
 	}
 
+	playername = self->s.v.netname;
+
 	log_printf( "\t\t\t<dropbp time=\"%f\" weapon=\"%s\" shells=\"%d\" nails=\"%d\" rockets=\"%d\" cells=\"%d\" player=\"%s\" />\n",
 				g_globalvars.time - match_start_time,
 				item->s.v.netname,
@@ -2035,7 +2064,7 @@ void DropBackpack()
 				(int)item->s.v.ammo_nails,
 				(int)item->s.v.ammo_rockets,
 				(int)item->s.v.ammo_cells,
-				self->s.v.netname );
+				cleantext(playername) );
 
 	item->s.v.velocity[2] = 300;
 	item->s.v.velocity[0] = -100 + ( g_random() * 200 );

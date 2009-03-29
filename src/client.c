@@ -3282,7 +3282,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 	char *deathstring,  *deathstring2;
 	char *attackerteam, *targteam;
-	char *attackername;
+	char *attackername, *victimname;
 
 	// Set it so it should update scores at next attempt.
 	k_nochange = 0;
@@ -3316,12 +3316,13 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		attackername = "world";
 	else
 		attackername = attacker->s.v.netname;
+		victimname = targ->s.v.netname;
 
 	log_printf( "\t\t\t<death time=\"%f\" attacker=\"%s\" target=\"%s\" type=\"%s\" "
 				"quad=\"%d\" armorleft=\"%d\" killheight=\"%d\" lifetime=\"%f\" />\n",
 				g_globalvars.time - match_start_time,
-				attackername,
-				targ->s.v.netname,
+				cleantext(attackername),
+				cleantext(victimname),
 				death_type( targ->deathtype ),
 				(int)(attacker->super_damage_finished > g_globalvars.time ? 1 : 0 ),
 				(int)targ->s.v.armorvalue,

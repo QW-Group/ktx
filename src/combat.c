@@ -333,7 +333,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	float			dmg_dealt = 0, virtual_take = 0;
 	float			non_hdp_damage; // save damage before handicap apply for kickback calculation
 	float			native_damage = damage; // save damage before apply any modificator
-	char            *attackerteam, *targteam, *attackername;
+	char            *attackerteam, *targteam, *attackername, *victimname;
 	qboolean		tp4teamdmg = false;
 
 	//midair and instagib
@@ -597,12 +597,13 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 				attackername = "world";
 		else
 			attackername = attacker->s.v.netname;
+			victimname = targ->s.v.netname;
 
 		log_printf( "\t\t\t<damage time=\"%f\" attacker=\"%s\" "
 					"target=\"%s\" type=\"%s\" quad=\"%d\" splash=\"%d\" value=\"%d\" armor=\"1\"/>\n",
 					g_globalvars.time - match_start_time,
-					attackername,
-					targ->s.v.netname,
+					cleantext(attackername),
+					cleantext(victimname),
 					death_type( targ->deathtype ),
 					(int)(attacker->super_damage_finished > g_globalvars.time ? 1 : 0 ),
 					dmg_is_splash,
@@ -684,12 +685,13 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 				attackername = "world";
 			else
 				attackername = attacker->s.v.netname;
+				victimname = targ->s.v.netname;
 
 			log_printf( "\t\t\t<damage time=\"%f\" attacker=\"%s\" target=\"%s\" type=\"%s\" "
 						"quad=\"%d\" splash=\"%d\" value=\"%d\" armor=\"0\"/>\n",
 						g_globalvars.time - match_start_time,
-						attackername,
-						targ->s.v.netname,
+						cleantext(attackername),
+						cleantext(victimname),
 						death_type( targ->deathtype ),
 						(int)(attacker->super_damage_finished > g_globalvars.time ? 1 : 0 ),
 						dmg_is_splash,

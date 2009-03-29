@@ -472,6 +472,32 @@ char *redtext(const char *format, ...)
 	}
 }
 
+char *cleantext(const char *format, ...)
+{
+// >>>> like va(...)
+	va_list		argptr;
+	static char	string[MAX_STRINGS][1024];
+	static int		index = 0;
+	
+	index %= MAX_STRINGS;
+	va_start (argptr, format);
+	Q_vsnprintf (string[index], sizeof(string[0]), format, argptr);
+	va_end (argptr);
+
+	string[index][ sizeof( string[0] ) - 1 ] = '\0';
+// <<<<
+
+	{ // convert to red
+		unsigned char *i = (unsigned char *) string[index];
+
+		for ( ; *i; i++ )
+			if ( *i < 32 || (*i > 126 && *i < 160) || *i > 254)
+				*i = 95;
+
+		return string[index++];
+	}
+}
+
 char *dig3(int d)
 {
 	static char	string[MAX_STRINGS][32];
