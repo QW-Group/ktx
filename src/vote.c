@@ -512,9 +512,9 @@ void vote_check_nospecs ()
 		cvar_fset("_k_nospecs", !cvar("_k_nospecs"));
 
 		if ( veto )
-			G_bprint(2, "%s\n", redtext("No spectators mode %s by admin veto", OnOff(cvar("_k_nospecs"))));
+			G_bprint(2, "%s\n", redtext(va("No spectators mode %s by admin veto", OnOff(cvar("_k_nospecs")))));
 		else
-			G_bprint(2, "%s\n", redtext("No spectators mode %s by majority vote", OnOff(cvar("_k_nospecs"))));
+			G_bprint(2, "%s\n", redtext(va("No spectators mode %s by majority vote", OnOff(cvar("_k_nospecs")))));
 
 		// kick specs
 		if ( cvar("_k_nospecs") )
@@ -564,8 +564,8 @@ void nospecs( )
 	self->v.nospecs = !self->v.nospecs;
 
 	G_bprint(2, "%s %s!%s\n", self->s.v.netname, 
-			(self->v.nospecs ? redtext("votes for nospecs %s", OnOff(!cvar("_k_nospecs"))) : 
-							   redtext("withdraws %s nospecs vote", g_his(self))),
+			(self->v.nospecs ? redtext(va("votes for nospecs %s", OnOff(!cvar("_k_nospecs")))) : 
+							   redtext(va("withdraws %s nospecs vote", g_his(self)))),
 			((votes = get_votes_req( OV_NOSPECS, true )) ? va(" (%d)", votes) : ""));
 
 	vote_check_nospecs ();
@@ -596,9 +596,9 @@ void vote_check_coop ()
 		cvar_fset( "deathmatch", deathmatch = !coop );
 
 		if ( veto )
-			G_bprint( 2, "%s\n", redtext("Coop mode %s by admin veto", OnOff(cvar("coop"))) );
+			G_bprint( 2, "%s\n", redtext(va("Coop mode %s by admin veto", OnOff(cvar("coop")))) );
 		else
-			G_bprint( 2, "%s\n", redtext("Coop mode %s by majority vote", OnOff(cvar("coop"))) );
+			G_bprint( 2, "%s\n", redtext(va("Coop mode %s by majority vote", OnOff(cvar("coop")))) );
 
 		// and reload map
 		changelevel( coop ? "start" : g_globalvars.mapname );
@@ -623,8 +623,8 @@ void votecoop( )
 	self->v.coop = !self->v.coop;
 
 	G_bprint(2, "%s %s!%s\n", self->s.v.netname, 
-			(self->v.coop ? redtext("votes for coop %s", OnOff(!cvar("coop"))) : 
-							redtext("withdraws %s coop vote", g_his(self))),
+			(self->v.coop ? redtext(va("votes for coop %s", OnOff(!cvar("coop")))) : 
+							redtext(va("withdraws %s coop vote", g_his(self)))),
 			((votes = get_votes_req( OV_COOP, true )) ? va(" (%d)", votes) : ""));
 
 	vote_check_coop ();

@@ -81,7 +81,6 @@ char *GetMode();
 void StartLogs()
 {
 	char date[64] = {0}, date_c[64] = {0}, *ip = "", *port = "";
-	char host[64] = "";
 	int i = 0;
 
 	if ( strnull( ip = cvar_string( "sv_local_addr" ) ) || strnull( port = strchr(ip, ':') ) || !(i = atoi(port + 1)) )
@@ -99,8 +98,6 @@ void StartLogs()
 	log_printf("%s", "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n");
 	log_printf("%s", "<ktxlog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://qw-dev.net/attachments/download/177/ktxlog_0.1.xsd\">\n");
 
-	strlcpy(host, cvar_string("hostname"), strlen(cvar_string("hostname")));
-
 	log_printf(
 		"<ktxlog>\n"
 		"\t<version>0.1</version>\n"
@@ -115,7 +112,7 @@ void StartLogs()
 		"\t\t<mode>%s</mode>\n"
 		"\t</match_info>\n",
 		date,
-		striphigh(host),
+		striphigh(cvar_string("hostname")),
 		ip,
 		i,
 		g_globalvars.mapname,

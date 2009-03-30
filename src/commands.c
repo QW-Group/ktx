@@ -1237,7 +1237,7 @@ void ShowVersion()
 
 	strlcat(buf, "\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236", sizeof(buf));
 	strlcat(buf, "\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n\n", sizeof(buf));
-	strlcat(buf, va("Running %s %s (build: %s)\nby %s\n\n", redtext(MOD_NAME), dig3s(MOD_VERSION),
+	strlcat(buf, va("Running %s %s (build: %s)\nby %s\n\n", redtext(MOD_NAME), dig3s("%s", MOD_VERSION),
 						dig3s("%d", build_number()), redtext("KTX development team")), sizeof(buf));
 	strlcat(buf, va("Based on %s\n", redtext("Kombat teams 2.21")), sizeof(buf));
 	strlcat(buf, "by kemiKal, Cenobite, Sturm and Fang\n\n", sizeof(buf));
@@ -3167,9 +3167,9 @@ void UserMode(float umode)
 
 	if ( !k_matchLess ) { // do not show for matchless mode
 		if ( sv_invoked )
-			G_bprint(2, "%s %s\n", redtext(um_list[(int)umode].displayname), redtext("settings enabled") );
+			G_bprint(2, "%s %s\n", redtext(va("%s", um_list[(int)umode].displayname)), redtext("settings enabled") );
 		else
-			G_bprint(2, "%s %s %s\n", redtext(um_list[(int)umode].displayname), redtext("settings enabled by"), self->s.v.netname );
+			G_bprint(2, "%s %s %s\n", redtext(va("%s", um_list[(int)umode].displayname)), redtext("settings enabled by"), self->s.v.netname );
 	}
 
 	trap_readcmd( common_um_init, buf, sizeof(buf) );
@@ -3635,7 +3635,7 @@ void RandomPickup ()
 
 	G_bprint(2, "%s %s!%s\n", self->s.v.netname, 
 			(self->v.rpickup ? redtext("votes for rpickup") :
-							   redtext("withdraws %s rpickup vote", g_his(self))),
+							   redtext(va("withdraws %s rpickup vote", g_his(self)))),
 			((votes = get_votes_req( OV_RPICKUP, true )) ? va(" (%d)", votes) : ""));
 
 	vote_check_rpickup ();

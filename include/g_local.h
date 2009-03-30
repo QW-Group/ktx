@@ -175,11 +175,11 @@ void            vectoangles( vec3_t value1, vec3_t ret );
 void            changeyaw( gedict_t * ent );
 
 char		*va(char *format, ...);
-char		*redtext(const char *format, ...);
-char		*cleantext(const char *format, ...);
+char		*redtext(char *format);
+char		*cleantext(char *format);
 char 		*dig3(int d);
 char		*dig3s(const char *format, ...);
-char		*striphigh(const char *format, ...);
+char		*striphigh(char *format);
 
 void            G_sprint( gedict_t * ed, int level, const char *fmt, ... );
 void            G_sprint_flags( gedict_t * ed, int level, int flags, const char *fmt, ... );

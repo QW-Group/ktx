@@ -446,19 +446,14 @@ char	*va(char *format, ...)
 	return string[index++];
 }
 
-char *redtext(const char *format, ...)
+char *redtext(char *format)
 {
 // >>>> like va(...)
-	va_list		argptr;
 	static char	string[MAX_STRINGS][1024];
 	static int		index = 0;
 	
 	index %= MAX_STRINGS;
-	va_start (argptr, format);
-	Q_vsnprintf (string[index], sizeof(string[0]), format, argptr);
-	va_end (argptr);
-
-	string[index][ sizeof( string[0] ) - 1 ] = '\0';
+	strlcpy(string[index], format ? format : "", sizeof(string[0]));
 // <<<<
 
 	{ // convert to red
@@ -472,19 +467,14 @@ char *redtext(const char *format, ...)
 	}
 }
 
-char *cleantext(const char *format, ...)
+char *cleantext(char *format)
 {
 // >>>> like va(...)
-	va_list		argptr;
 	static char	string[MAX_STRINGS][1024];
 	static int		index = 0;
 	
 	index %= MAX_STRINGS;
-	va_start (argptr, format);
-	Q_vsnprintf (string[index], sizeof(string[0]), format, argptr);
-	va_end (argptr);
-
-	string[index][ sizeof( string[0] ) - 1 ] = '\0';
+	strlcpy(string[index], format ? format : "", sizeof(string[0]));
 // <<<<
 
 	{ // convert to red
@@ -545,19 +535,14 @@ char *dig3s(const char *format, ...)
 	return string[index++];
 }
 
-char *striphigh(const char *format, ...)
+char *striphigh(char *format)
 {
 // >>>> like va(...)
-	va_list		argptr;
 	static char	string[MAX_STRINGS][1024];
 	static int		index = 0;
 	
 	index %= MAX_STRINGS;
-	va_start (argptr, format);
-	Q_vsnprintf (string[index], sizeof(string[0]), format, argptr);
-	va_end (argptr);
-
-	string[index][ sizeof( string[0] ) - 1 ] = '\0';
+	strlcpy(string[index], format ? format : "", sizeof(string[0]));
 // <<<<
 
 	{
