@@ -126,11 +126,27 @@ void DropPowerup( float timeleft, int powerup )
 
 	playername = swp->s.v.netname;
 
+	/*
 	log_printf( "\t\t\t<droppu time=\"%f\" item=\"%s\" player=\"%s\" timeleft=\"%f\" />\n",
 				g_globalvars.time - match_start_time,
 				self->s.v.classname,
 				cleantext(playername),
 				timeleft );
+	*/
+	log_printf(
+		"\t\t<event>\n"
+		"\t\t\t<drop_powerup>\n"
+		"\t\t\t\t<time>%f</time>\n"
+		"\t\t\t\t<item>%s</item>\n"
+		"\t\t\t\t<player>%s</player>\n"
+		"\t\t\t\t<timeleft>%f</timeleft>\n"
+		"\t\t\t</drop_powerup>\n"
+		"\t\t</event>\n",
+		g_globalvars.time - match_start_time,
+		self->s.v.classname,
+		cleantext(playername),
+		timeleft
+	);
 
 	if ( swp->ct == ctPlayer )
 		mi_print( swp, powerup, va( "%s dropped a %s with %.0f seconds left", swp->s.v.netname, self->s.v.netname, timeleft ));
@@ -246,11 +262,27 @@ float T_Heal( gedict_t * e, float healamount, float ignore )
 
 	playername = e->s.v.netname;
 
+	/*
 	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"health_%d\" player=\"%s\" value=\"%d\"/>\n",
 				g_globalvars.time - match_start_time,
 				(int)healamount,
 				cleantext(playername),
 				(int)real_healamount );
+	*/
+	log_printf(
+		"\t\t<event>\n"
+		"\t\t\t<pick_mapitem>\n"
+		"\t\t\t\t<time>%f</time>\n"
+		"\t\t\t\t<item>health_%d</item>\n"
+		"\t\t\t\t<player>%s</player>\n"
+		"\t\t\t\t<value>%d</value>\n"
+		"\t\t\t</pick_mapitem>\n"
+		"\t\t</event>\n",
+		g_globalvars.time - match_start_time,
+		(int)healamount,
+		cleantext(playername),
+		(int)real_healamount
+	);
 
 	return 1;
 }
@@ -470,11 +502,27 @@ void armor_touch()
 
 	playername = other->s.v.netname;
 
+	/*
 	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%d\" />\n",
 				g_globalvars.time - match_start_time,
 				self->s.v.classname,
 				cleantext(playername),
 				(int)real_value );
+	*/
+	log_printf(
+		"\t\t<event>\n"
+		"\t\t\t<pick_mapitem>\n"
+		"\t\t\t\t<time>%f</time>\n"
+		"\t\t\t\t<item>%s</item>\n"
+		"\t\t\t\t<player>%s</player>\n"
+		"\t\t\t\t<value>%d</value>\n"
+		"\t\t\t</pick_mapitem>\n"
+		"\t\t</event>\n",
+		g_globalvars.time - match_start_time,
+		self->s.v.classname,
+		cleantext(playername),
+		(int)real_value
+	);
 
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
 // armor touch sound
@@ -743,11 +791,27 @@ void weapon_touch()
 
 	playername = other->s.v.netname;
 
+	/*
 	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%d\" />\n",
 				g_globalvars.time - match_start_time,
 				self->s.v.classname,
 				cleantext(playername),
 				real_ammo );
+	*/
+	log_printf(
+		"\t\t<event>\n"
+		"\t\t\t<pick_mapitem>\n"
+		"\t\t\t\t<time>%f</time>\n"
+		"\t\t\t\t<item>%s</item>\n"
+		"\t\t\t\t<player>%s</player>\n"
+		"\t\t\t\t<value>%d</value>\n"
+		"\t\t\t</pick_mapitem>\n"
+		"\t\t</event>\n",
+		g_globalvars.time - match_start_time,
+		self->s.v.classname,
+		cleantext(playername),
+		real_ammo
+	);
 
 // change to the weapon
 	other->s.v.items = ( int ) other->s.v.items | new;
@@ -959,11 +1023,27 @@ void ammo_touch()
 
 	playername = other->s.v.netname;
 
+	/*
 	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%d\" />\n",
 				g_globalvars.time - match_start_time,
 				self->s.v.classname,
 				cleantext(playername),
 				real_ammo );
+	*/
+	log_printf(
+		"\t\t<event>\n"
+		"\t\t\t<pick_mapitem>\n"
+		"\t\t\t\t<time>%f</time>\n"
+		"\t\t\t\t<item>%s</item>\n"
+		"\t\t\t\t<player>%s</player>\n"
+		"\t\t\t\t<value>%d</value>\n"
+		"\t\t\t</pick_mapitem>\n"
+		"\t\t</event>\n",
+		g_globalvars.time - match_start_time,
+		self->s.v.classname,
+		cleantext(playername),
+		real_ammo
+	);
 
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
 // ammo touch sound
@@ -1183,11 +1263,27 @@ void key_touch()
 
 	playername = other->s.v.netname;
 
+	/*
 	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%d\" />\n",
 				g_globalvars.time - match_start_time,
 				self->s.v.classname,
 				cleantext(playername),
 				0 );
+	*/
+	log_printf(
+		"\t\t<event>\n"
+		"\t\t\t<pick_mapitem>\n"
+		"\t\t\t\t<time>%f</time>\n"
+		"\t\t\t\t<item>%s</item>\n"
+		"\t\t\t\t<player>%s</player>\n"
+		"\t\t\t\t<value>%d</value>\n"
+		"\t\t\t</pick_mapitem>\n"
+		"\t\t</event>\n",
+		g_globalvars.time - match_start_time,
+		self->s.v.classname,
+		cleantext(playername),
+		0
+	);
 
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
 
@@ -1325,11 +1421,27 @@ void sigil_touch()
 
 	playername = other->s.v.netname;
 
+	/*
 	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%d\" />\n",
 				g_globalvars.time - match_start_time,
 				self->s.v.classname,
 				cleantext(playername),
 				0 );
+	*/
+	log_printf(
+		"\t\t<event>\n"
+		"\t\t\t<pick_mapitem>\n"
+		"\t\t\t\t<time>%f</time>\n"
+		"\t\t\t\t<item>%s</item>\n"
+		"\t\t\t\t<player>%s</player>\n"
+		"\t\t\t\t<value>%d</value>\n"
+		"\t\t\t</pick_mapitem>\n"
+		"\t\t</event>\n",
+		g_globalvars.time - match_start_time,
+		self->s.v.classname,
+		cleantext(playername),
+		0
+	);
 
 	G_centerprint( other, "You got the rune!" );
 
@@ -1520,11 +1632,27 @@ void powerup_touch()
 
 	playername = other->s.v.netname;
 
+	/*
 	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%f\" />\n",
 				g_globalvars.time - match_start_time,
 				self->s.v.classname,
 				cleantext(playername),
 				real_time );
+	*/
+	log_printf(
+		"\t\t<event>\n"
+		"\t\t\t<pick_powerup>\n"
+		"\t\t\t\t<time>%f</time>\n"
+		"\t\t\t\t<item>%s</item>\n"
+		"\t\t\t\t<player>%s</player>\n"
+		"\t\t\t\t<timeleft>%f</timeleft>\n"
+		"\t\t\t</pick_powerup>\n"
+		"\t\t</event>\n",
+		g_globalvars.time - match_start_time,
+		self->s.v.classname,
+		cleantext(playername),
+		real_time
+	);
 
 
 	ktpro_autotrack_on_powerup_take(other);
@@ -1816,6 +1944,7 @@ void BackpackTouch()
 
 	playername = other->s.v.netname;
 
+	/*
 	log_printf( "\t\t\t<pickbp time=\"%f\" weapon=\"%s\" shells=\"%d\" nails=\"%d\" rockets=\"%d\" cells=\"%d\" player=\"%s\" />\n",
 				g_globalvars.time - match_start_time,
 				new_wp,
@@ -1824,6 +1953,27 @@ void BackpackTouch()
 				(int)self->s.v.ammo_rockets,
 				(int)self->s.v.ammo_cells,
 				cleantext(playername) );
+	*/
+	log_printf(
+		"\t\t<event>\n"
+		"\t\t\t<pick_backpack>\n"
+		"\t\t\t\t<time>%f</time>\n"
+		"\t\t\t\t<weapon>%s</weapon>\n"
+		"\t\t\t\t<shells>%d</shells>\n"
+		"\t\t\t\t<nails>%d</nails>\n"
+		"\t\t\t\t<rockets>%d</rockets>\n"
+		"\t\t\t\t<cells>%d</cells>\n"
+		"\t\t\t\t<player>%s</player>\n"
+		"\t\t\t</pick_backpack>\n"
+		"\t\t</event>\n",
+		g_globalvars.time - match_start_time,
+		new_wp,
+		(int)self->s.v.ammo_shells,
+		(int)self->s.v.ammo_nails,
+		(int)self->s.v.ammo_rockets,
+		(int)self->s.v.ammo_cells,
+		cleantext(playername)
+	);
 
 	if ( self->s.v.ammo_shells )
 	{
@@ -2057,6 +2207,7 @@ void DropBackpack()
 
 	playername = self->s.v.netname;
 
+	/*
 	log_printf( "\t\t\t<dropbp time=\"%f\" weapon=\"%s\" shells=\"%d\" nails=\"%d\" rockets=\"%d\" cells=\"%d\" player=\"%s\" />\n",
 				g_globalvars.time - match_start_time,
 				item->s.v.netname,
@@ -2065,6 +2216,27 @@ void DropBackpack()
 				(int)item->s.v.ammo_rockets,
 				(int)item->s.v.ammo_cells,
 				cleantext(playername) );
+	*/
+	log_printf(
+		"\t\t<event>\n"
+		"\t\t\t<drop_backpack>\n"
+		"\t\t\t\t<time>%f</time>\n"
+		"\t\t\t\t<weapon>%s</weapon>\n"
+		"\t\t\t\t<shells>%d</shells>\n"
+		"\t\t\t\t<nails>%d</nails>\n"
+		"\t\t\t\t<rockets>%d</rockets>\n"
+		"\t\t\t\t<cells>%d</cells>\n"
+		"\t\t\t\t<player>%s</player>\n"
+		"\t\t\t</drop_backpack>\n"
+		"\t\t</event>\n",
+		g_globalvars.time - match_start_time,
+		item->s.v.netname,
+		(int)item->s.v.ammo_shells,
+		(int)item->s.v.ammo_nails,
+		(int)item->s.v.ammo_rockets,
+		(int)item->s.v.ammo_cells,
+		cleantext(playername)
+	);
 
 	item->s.v.velocity[2] = 300;
 	item->s.v.velocity[0] = -100 + ( g_random() * 200 );

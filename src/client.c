@@ -3318,6 +3318,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		attackername = attacker->s.v.netname;
 		victimname = targ->s.v.netname;
 
+	/*
 	log_printf( "\t\t\t<death time=\"%f\" attacker=\"%s\" target=\"%s\" type=\"%s\" "
 				"quad=\"%d\" armorleft=\"%d\" killheight=\"%d\" lifetime=\"%f\" />\n",
 				g_globalvars.time - match_start_time,
@@ -3328,6 +3329,29 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				(int)targ->s.v.armorvalue,
 				(int)playerheight,
 				g_globalvars.time - targ->spawn_time );
+	*/
+	log_printf(
+		"\t\t<event>\n"
+		"\t\t\t<death>\n"
+		"\t\t\t\t<time>%f</time>\n"
+		"\t\t\t\t<attacker>%s</attacker>\n"
+		"\t\t\t\t<target>%s</target>\n"
+		"\t\t\t\t<type>%s</type>\n"
+		"\t\t\t\t<quad>%d</quad>\n"
+		"\t\t\t\t<armorleft>%d</armorleft>\n"
+		"\t\t\t\t<killheight>%d</killheight>\n"
+		"\t\t\t\t<lifetime>%f</lifetime>\n"
+		"\t\t\t</death>\n"
+		"\t\t</event>\n",
+		g_globalvars.time - match_start_time,
+		cleantext(attackername),
+		cleantext(victimname),
+		death_type( targ->deathtype ),
+		(int)(attacker->super_damage_finished > g_globalvars.time ? 1 : 0 ),
+		(int)targ->s.v.armorvalue,
+		(int)playerheight,
+		g_globalvars.time - targ->spawn_time
+	);
 
 	if ( isRA() ) {
 		ra_ClientObituary (targ, attacker);

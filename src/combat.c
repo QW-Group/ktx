@@ -599,6 +599,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			attackername = attacker->s.v.netname;
 			victimname = targ->s.v.netname;
 
+		/*
 		log_printf( "\t\t\t<damage time=\"%f\" attacker=\"%s\" "
 					"target=\"%s\" type=\"%s\" quad=\"%d\" splash=\"%d\" value=\"%d\" armor=\"1\"/>\n",
 					g_globalvars.time - match_start_time,
@@ -608,6 +609,28 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 					(int)(attacker->super_damage_finished > g_globalvars.time ? 1 : 0 ),
 					dmg_is_splash,
 					(int)save );
+		*/
+		log_printf(
+			"\t\t<event>\n"
+			"\t\t\t<damage>\n"
+			"\t\t\t\t<time>%f</time>\n"
+			"\t\t\t\t<attacker>%s</attacker>\n"
+			"\t\t\t\t<target>%s</target>\n"
+			"\t\t\t\t<type>%s</type>\n"
+			"\t\t\t\t<quad>%d</quad>\n"
+			"\t\t\t\t<splash>%d</splash>\n"
+			"\t\t\t\t<value>%d</value>\n"
+			"\t\t\t\t<armor>1</armor>\n"
+			"\t\t\t</damage>\n"
+			"\t\t</event>\n",
+			g_globalvars.time - match_start_time,
+			cleantext(attackername),
+			cleantext(victimname),
+			death_type( targ->deathtype ),
+			(int)(attacker->super_damage_finished > g_globalvars.time ? 1 : 0 ),
+			dmg_is_splash,
+			(int)save
+		);
 	}
 
 	// figure momentum add
@@ -687,6 +710,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 				attackername = attacker->s.v.netname;
 				victimname = targ->s.v.netname;
 
+			/*
 			log_printf( "\t\t\t<damage time=\"%f\" attacker=\"%s\" target=\"%s\" type=\"%s\" "
 						"quad=\"%d\" splash=\"%d\" value=\"%d\" armor=\"0\"/>\n",
 						g_globalvars.time - match_start_time,
@@ -696,6 +720,28 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 						(int)(attacker->super_damage_finished > g_globalvars.time ? 1 : 0 ),
 						dmg_is_splash,
 						(int)take );
+			*/
+			log_printf(
+				"\t\t<event>\n"
+				"\t\t\t<damage>\n"
+				"\t\t\t\t<time>%f</time>\n"
+				"\t\t\t\t<attacker>%s</attacker>\n"
+				"\t\t\t\t<target>%s</target>\n"
+				"\t\t\t\t<type>%s</type>\n"
+				"\t\t\t\t<quad>%d</quad>\n"
+				"\t\t\t\t<splash>%d</splash>\n"
+				"\t\t\t\t<value>%d</value>\n"
+				"\t\t\t\t<armor>0</armor>\n"
+				"\t\t\t</damage>\n"
+				"\t\t</event>\n",
+				g_globalvars.time - match_start_time,
+				cleantext(attackername),
+				cleantext(victimname),
+				death_type( targ->deathtype ),
+				(int)(attacker->super_damage_finished > g_globalvars.time ? 1 : 0 ),
+				dmg_is_splash,
+				(int)save
+			);
 		}
 
 		if ( !targ->s.v.health || dtSUICIDE == targ->deathtype )
