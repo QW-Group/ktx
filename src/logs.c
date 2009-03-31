@@ -95,7 +95,6 @@ void StartLogs()
 	log_printf("%s%s%s", "<ktxlog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"", cvar_string("k_extralog_xsd_uri"), "\">\n");
 
 	log_printf(
-		"<ktxlog>\n"
 		"\t<version>0.1</version>\n"
 	);
 	log_printf(
