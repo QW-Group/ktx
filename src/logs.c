@@ -77,6 +77,7 @@ char *GetMode();
 void StartLogs()
 {
 	char date[64] = {0}, date_c[64] = {0}, *ip = "", *port = "";
+	char host[64];
 	int i = 0;
 
 	if ( strnull( ip = cvar_string( "sv_local_addr" ) ) || strnull( port = strchr(ip, ':') ) || !(i = atoi(port + 1)) )
@@ -97,6 +98,9 @@ void StartLogs()
 	log_printf(
 		"\t<version>0.1</version>\n"
 	);
+
+	strlcpy(host, cvar_string("hostname"), strlen(cvar_string("hostname")));
+
 	log_printf(
 		"\t<match_info>\n"
 		"\t\t<timestamp>%s</timestamp>\n"
@@ -107,7 +111,7 @@ void StartLogs()
 		"\t\t<mode>%s</mode>\n"
 		"\t</match_info>\n",
 		date,
-		striphigh(cvar_string("hostname")),
+		striphigh(host),
 		ip,
 		i,
 		g_globalvars.mapname,
