@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<!-- definition of simple elements -->
+	<xs:simpleType name="maxed_integer">
+		<xs:restriction base="xs:nonNegativeInteger">
+			<xs:minInclusive value="0"/>
+			<xs:maxInclusive value="200"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="iptype">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="([0-9])+.([0-9])+.([0-9])+.([0-9])+"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="modetype">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="FFA|duel|2on2|3on3|4on4"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="porttype">
+		<xs:restriction base="xs:nonNegativeInteger">
+			<xs:minInclusive value="0"/>
+			<xs:maxInclusive value="65535"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<!-- definition of attributes -->
+	<!-- definition of complex elements -->
+	<xs:complexType name="deathtype">
+		<xs:sequence>
+			<xs:element name="time" type="xs:decimal"/>
+			<xs:element name="attacker" type="xs:string"/>
+			<xs:element name="target" type="xs:string"/>
+			<xs:element name="type" type="xs:string"/>
+			<xs:element name="quad" type="xs:boolean"/>
+			<xs:element name="armorleft" type="maxed_integer"/>
+			<xs:element name="killheight" type="xs:nonNegativeInteger"/>
+			<xs:element name="lifetime" type="xs:decimal"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="damagetype">
+		<xs:sequence>
+			<xs:element name="time" type="xs:decimal"/>
+			<xs:element name="attacker" type="xs:string"/>
+			<xs:element name="target" type="xs:string"/>
+			<xs:element name="type" type="xs:string"/>
+			<xs:element name="quad" type="xs:boolean"/>
+			<xs:element name="splash" type="xs:boolean"/>
+			<xs:element name="value" type="xs:nonNegativeInteger"/>
+			<xs:element name="armor" type="xs:boolean"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="poweruptype">
+		<xs:sequence>
+			<xs:element name="time" type="xs:decimal"/>
+			<xs:element name="item" type="xs:string"/>
+			<xs:element name="player" type="xs:string"/>
+			<xs:element name="timeleft" type="xs:decimal"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="mapitemtype">
+		<xs:sequence>
+			<xs:element name="time" type="xs:decimal"/>
+			<xs:element name="item" type="xs:string"/>
+			<xs:element name="player" type="xs:string"/>
+			<xs:element name="value" type="maxed_integer"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="backpacktype">
+		<xs:sequence>
+			<xs:element name="time" type="xs:decimal"/>
+			<xs:element name="weapon" type="xs:string"/>
+			<xs:element name="shells" type="maxed_integer"/>
+			<xs:element name="nails" type="maxed_integer"/>
+			<xs:element name="rockets" type="maxed_integer"/>
+			<xs:element name="cells" type="maxed_integer"/>
+			<xs:element name="player" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- definition of root structure -->
+	<xs:element name="ktxlog">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="version" type="xs:decimal"/>
+				<xs:element name="match_info">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="timestamp" type="xs:string"/>
+							<xs:element name="hostname" type="xs:string"/>
+							<xs:element name="ip" type="iptype"/>
+							<xs:element name="port" type="porttype"/>
+							<xs:element name="map" type="xs:string"/>
+							<xs:element name="mode" type="modetype"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="events">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="event"  maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:choice>
+										<xs:element name="pick_mapitem" type="mapitemtype"/>
+										<xs:element name="pick_backpack" type="backpacktype"/>
+										<xs:element name="drop_backpack" type="backpacktype"/>
+										<xs:element name="pick_powerup" type="poweruptype"/>
+										<xs:element name="drop_powerup" type="poweruptype"/>
+										<xs:element name="damage" type="damagetype"/>
+										<xs:element name="death" type="deathtype"/>
+									</xs:choice>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

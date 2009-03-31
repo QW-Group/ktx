@@ -26,10 +26,6 @@ void log_close(void)
 	if ( log_handle < 0 )
 		return;
 
-// close does't require this check
-//	if ( !cvar("k_extralog"))
-//		return;
-
 	trap_FS_CloseFile( log_handle );
 	log_handle = -1;
 }
@@ -96,7 +92,7 @@ void StartLogs()
 
 	log_open("%s", cvar_string("extralogname"));
 	log_printf("%s", "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n");
-	log_printf("%s", "<ktxlog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://qw-dev.net/attachments/download/177/ktxlog_0.1.xsd\">\n");
+	log_printf("%s%s%s", "<ktxlog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"", cvar_string("k_extralog_xsd_uri"), "\">\n");
 
 	log_printf(
 		"<ktxlog>\n"
