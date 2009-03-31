@@ -14,7 +14,7 @@
 	</xs:simpleType>
 	<xs:simpleType name="modetype">
 		<xs:restriction base="xs:string">
-			<xs:pattern value="FFA|duel|2on2|3on3|4on4"/>
+			<xs:pattern value="FFA|duel|team"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="porttype">
