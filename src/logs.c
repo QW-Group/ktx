@@ -93,7 +93,7 @@ void StartLogs()
 
 	log_open("%s", cvar_string("extralogname"));
 	log_printf("%s", "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n");
-	log_printf("%s%s%s", "<ktxlog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"", cvar_string("k_extralog_xsd_uri"), "\">\n");
+	log_printf("<ktxlog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"%s\">\n", cvar_string("k_extralog_xsd_uri"));
 
 	log_printf(
 		"\t<version>0.1</version>\n"
