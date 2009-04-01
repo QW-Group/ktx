@@ -99,7 +99,8 @@ void StartLogs()
 		"\t<version>0.1</version>\n"
 	);
 
-	strlcpy(host, cvar_string("hostname"), strlen(cvar_string("hostname")));
+	strlcpy(host, cvar_string("hostname"), sizeof(host));
+	host[strlen(host)] = '\0';
 
 	log_printf(
 		"\t<match_info>\n"
