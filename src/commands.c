@@ -5086,7 +5086,6 @@ void ToggleMidair()
 void W_SetCurrentAmmo();
 void ToggleInstagib()
 {
-	
 	int k_instagib = bound(0, cvar( "k_instagib" ), 2); 
 
 	if ( match_in_progress )
@@ -5096,7 +5095,8 @@ void ToggleInstagib()
 		return;
 
 	// Can't enable instagib unless dmm4 is set first
-	if ( !cvar("k_midair") && deathmatch != 4 ) {
+	if ( !cvar("k_midair") && deathmatch != 4 )
+	{
 		G_sprint( self, 2, "Instagib requires dmm4\n");
 		return;
 	}
@@ -5116,19 +5116,27 @@ void ToggleInstagib()
 	cvar_fset("k_instagib", k_instagib);
 
 	if ( !k_instagib )
+	{
 		G_bprint(2, "%s disabled\n", redtext("Instagib"));
-	else if ( k_instagib == 1 ) 
+	}
+	else if ( k_instagib == 1 )
+	{
 		if ( cvar("k_instagib_custom_models") )
 			G_bprint(2, "%s enabled (Fast Coilgun mode)\n", redtext("Instagib"));
 		else
 			G_bprint(2, "%s enabled (SG mode)\n", redtext("Instagib"));
+	}
 	else if ( k_instagib == 2 )
+	{
 		if ( cvar("k_instagib_custom_models") )
 			G_bprint(2, "%s enabled (Slow Coilgun mode)\n", redtext("Instagib"));
 		else
 			G_bprint(2, "%s enabled (SSG mode)\n", redtext("Instagib"));
+	}
 	else
+	{
 		G_bprint(2, "%s unknown\n", redtext("Instagib"));
+	}
 
 	if ( k_instagib )
 		cvar_set("k_cg_kb", "1");

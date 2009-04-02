@@ -1661,10 +1661,12 @@ void W_Attack()
 			HasteSound( self );
 		}
 		else
-			if (cvar("k_instagib") == 1)
+		{
+			if ( cvar("k_instagib") == 1 )
 				self->attack_finished = g_globalvars.time + 0.7;
 			else
 				self->attack_finished = g_globalvars.time + 0.5;
+		}
 
 		W_FireShotgun();
 		break;
@@ -1678,10 +1680,12 @@ void W_Attack()
 			HasteSound( self );
 		}
 		else
-			if (cvar("k_instagib") == 2)
+		{
+			if ( cvar("k_instagib") == 2 )
 				self->attack_finished = g_globalvars.time + 1.2;
 			else
 				self->attack_finished = g_globalvars.time + ( k_yawnmode ? 0.8 : 0.7 );
+		}
 
 		W_FireSuperShotgun();
 		break;
