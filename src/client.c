@@ -1419,8 +1419,6 @@ void PutClientInServer( void )
 		}
 		else if ( cvar("k_instagib") )
 		{
-			dmm4_invinc_time       = 1; // means 1s
-
 			self->s.v.ammo_shells  = 999;
 			self->s.v.ammo_nails   = 0;
 			self->s.v.ammo_cells   = 0;

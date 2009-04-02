@@ -5107,6 +5107,9 @@ void ToggleInstagib()
 	if ( cvar("k_dmm4_gren_mode") )
 		cvar_set("k_dmm4_gren_mode", "0"); // If instagib is enabled, disable gren_mode
 
+	if ( k_instagib == 0 )
+		cvar_fset("dmm4_invinc_time", 1.0f); // default invic respawn time is 1s in instagib 
+
 	if ( ++k_instagib > 2 )
 		k_instagib = 0;
 
