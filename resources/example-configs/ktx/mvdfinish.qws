@@ -1,28 +1,60 @@
-#!/bin/sh
+#!/bin/bash
 
-# Do you want to compress any of the following? (yes/no)
-MVD=no
-TXT=no
-XML=no
+# Do you want to use compression? (yes/no)
+COMPRESS=no
 
-# What archiver do you want to use? (add options too)
-ARCHIVER="gzip -9"
+# What archiver do you want to use? (gzip, bzip2, zip)
+ARCHIVER=gzip
 
 
 # Do not touch below this line if you don't know what you are doing.
 
+
 if [ $1 != 0 ] ; then
 	exit
 fi
-if [ -f $2/$3.mvd ] && [ ${MVD} = yes ]
-then
-	${ARCHIVER} $2/$3.mvd
+
+
+# Compression code for gzip/bzip2/zip
+
+if [ ${COMPRESS} = yes ]
+	then
+	if [ -f $2/$3.mvd ]
+		then
+		if [ ${ARCHIVER} = gzip ]
+		then
+			tar -czf $2/$3.gz $2/"$3".*
+		fi
+                if [ ${ARCHIVER} = bzip2 ]
+                then
+                        tar -cjf $2/$3.bz2 $2/"$3".*
+                fi
+                if [ ${ARCHIVER} = zip ]
+                then
+                        zip -9 $2/$3.zip $2/"$3".*
+                fi
+	fi
 fi
-if [ -f $2/$3.txt ] && [ ${TXT} = yes ]
-then
-	${ARCHIVER} $2/$3.txt
-fi
-if [ -f $2/$3.xml ] && [ ${XML} = yes ]
-then
-	${ARCHIVER} $2/$3.xml
+
+
+# Cleanup code, let's remove .mvd .xml .txt if we compressed it
+
+if [ ${COMPRESS} = yes ]
+	then
+	if [ ${ARCHIVER} != gzip ] && [ ${ARCHIVER} != bzip2 ] && [ ${ARCHIVER} != zip ]
+		then
+		exit
+	fi
+	if [ -f $2/$3.mvd ]
+		then
+		rm -f $2/"$3".mvd
+	fi
+	if [ -f $2/$3.xml ]
+		then
+		rm -f $2/"$3".xml
+	fi
+	if [ -f $2/$3.txt ]
+		then
+		rm -f $2/"$3".txt
+	fi
 fi
