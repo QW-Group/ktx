@@ -9,8 +9,8 @@ ARCHIVER=gzip
 
 # Do not touch below this line if you don't know what you are doing.
 
-
-if [ $1 != 0 ] ; then
+if [ $1 != 0 ]
+then
 	exit
 fi
 
@@ -18,21 +18,21 @@ fi
 # Compression code for gzip/bzip2/zip
 
 if [ ${COMPRESS} = yes ]
-	then
+then
 	if [ -f $2/$3.mvd ]
-		then
+	then
 		if [ ${ARCHIVER} = gzip ]
 		then
 			tar -czf $2/$3.gz $2/"$3".*
 		fi
-                if [ ${ARCHIVER} = bzip2 ]
-                then
-                        tar -cjf $2/$3.bz2 $2/"$3".*
-                fi
-                if [ ${ARCHIVER} = zip ]
-                then
-                        zip -9 $2/$3.zip $2/"$3".*
-                fi
+		if [ ${ARCHIVER} = bzip2 ]
+		then
+			tar -cjf $2/$3.bz2 $2/"$3".*
+		fi
+		if [ ${ARCHIVER} = zip ]
+		then
+			zip -9 $2/$3.zip $2/"$3".*
+		fi
 	fi
 fi
 
@@ -40,21 +40,21 @@ fi
 # Cleanup code, let's remove .mvd .xml .txt if we compressed it
 
 if [ ${COMPRESS} = yes ]
-	then
+then
 	if [ ${ARCHIVER} != gzip ] && [ ${ARCHIVER} != bzip2 ] && [ ${ARCHIVER} != zip ]
-		then
+	then
 		exit
 	fi
 	if [ -f $2/$3.mvd ]
-		then
+	then
 		rm -f $2/"$3".mvd
 	fi
 	if [ -f $2/$3.xml ]
-		then
+	then
 		rm -f $2/"$3".xml
 	fi
 	if [ -f $2/$3.txt ]
-		then
+	then
 		rm -f $2/"$3".txt
 	fi
 fi
