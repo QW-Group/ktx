@@ -5174,9 +5174,6 @@ void sv_time()
 
 void GrenadeMode()
 {
-	int bit = 0;
-        int k_disallow_weapons = (int)cvar("k_disallow_weapons") & DA_WPNS;
-	
 	if ( match_in_progress )
 		return;
 
@@ -5184,7 +5181,8 @@ void GrenadeMode()
 		return;
 
 	// Can't toggle unless dmm4 is set first
-	if ( deathmatch != 4 ) {
+	if ( deathmatch != 4 )
+	{
 		G_sprint( self, 2, "gren_mode requires dmm4\n");
 		return;
 	}
@@ -5193,8 +5191,8 @@ void GrenadeMode()
 
 	if (cvar("k_dmm4_gren_mode"))
 	{
-		k_disallow_weapons ^= bit = IT_GRENADE_LAUNCHER;
-		trap_cvar_set_float( "k_disallow_weapons", k_disallow_weapons );
+		// disallow any weapon except gl
+		trap_cvar_set_float( "k_disallow_weapons", DA_WPNS & ~IT_GRENADE_LAUNCHER );
 	}
 }
 
