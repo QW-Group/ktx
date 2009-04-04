@@ -1417,6 +1417,19 @@ void PutClientInServer( void )
 
 			items = IT_AXE | IT_ROCKET_LAUNCHER | IT_ARMOR3;
 		}
+		if ( cvar("k_dmm4_gren_mode") )
+		{
+			self->s.v.ammo_shells  = 0;
+			self->s.v.ammo_nails   = 0;
+			self->s.v.ammo_cells   = 0;
+			self->s.v.ammo_rockets = 255;
+
+			self->s.v.armorvalue   = 0;
+			self->s.v.armortype    = 0;
+			self->s.v.health       = 250;
+
+			items = IT_GRENADE_LAUNCHER;
+		}
 		else if ( cvar("k_instagib") )
 		{
 			self->s.v.ammo_shells  = 999;
@@ -1467,9 +1480,11 @@ void PutClientInServer( void )
 
 		self->s.v.items = items;
 
-		// default to spawning with rl, except if instagib is on
+		// default to spawning with rl, except if instagib or gren_mode is on
 		if ( cvar("k_instagib") )
 			self->s.v.weapon = cvar("k_instagib") == 1 ? IT_SHOTGUN : IT_SUPER_SHOTGUN;
+		else if ( cvar("k_dmm4_gren_mode") )
+			self->s.v.weapon = IT_GRENADE_LAUNCHER;
 		else
 			self->s.v.weapon = IT_ROCKET_LAUNCHER;
 	}
@@ -3316,18 +3331,6 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		attackername = attacker->s.v.netname;
 		victimname = targ->s.v.netname;
 
-	/*
-	log_printf( "\t\t\t<death time=\"%f\" attacker=\"%s\" target=\"%s\" type=\"%s\" "
-				"quad=\"%d\" armorleft=\"%d\" killheight=\"%d\" lifetime=\"%f\" />\n",
-				g_globalvars.time - match_start_time,
-				cleantext(attackername),
-				cleantext(victimname),
-				death_type( targ->deathtype ),
-				(int)(attacker->super_damage_finished > g_globalvars.time ? 1 : 0 ),
-				(int)targ->s.v.armorvalue,
-				(int)playerheight,
-				g_globalvars.time - targ->spawn_time );
-	*/
 	log_printf(
 		"\t\t<event>\n"
 		"\t\t\t<death>\n"

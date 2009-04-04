@@ -5174,6 +5174,9 @@ void sv_time()
 
 void GrenadeMode()
 {
+	int bit = 0;
+        int k_disallow_weapons = (int)cvar("k_disallow_weapons") & DA_WPNS;
+	
 	if ( match_in_progress )
 		return;
 
@@ -5187,6 +5190,12 @@ void GrenadeMode()
 	}
 
 	cvar_toggle_msg( self, "k_dmm4_gren_mode", redtext("grenade mode") );
+
+	if (cvar("k_dmm4_gren_mode"))
+	{
+		k_disallow_weapons ^= bit = IT_GRENADE_LAUNCHER;
+		trap_cvar_set_float( "k_disallow_weapons", k_disallow_weapons );
+	}
 }
 
 void ToggleReady()
