@@ -694,6 +694,8 @@ void FirstFrame	( )
 	RegisterCvar("k_spec_info");
 	RegisterCvar("k_midair");
 	
+	RegisterCvarEx("k_nightmare_pu", "0");
+	RegisterCvarEx("k_nightmare_pu_droprate", "0.15");
 	RegisterCvarEx("k_instagib", "0");
 	RegisterCvarEx("k_instagib_custom_models", "0");
 	RegisterCvarEx("k_cg_kb", "1");

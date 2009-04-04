@@ -43,8 +43,8 @@ void MonsterDropPowerups()
 	if ( !Get_Powerups() )
 		return;
 
-	if ( g_random() > 0.15 )
-		return; // 15% possibility to drop some powerup
+	if ( g_random() > cvar("k_nightmare_pu_droprate") )
+		return;
 
 	i = i_rnd( 0, 5 );
 
@@ -120,7 +120,8 @@ void monster_death_use ()
 	if ( !( ( int )self->s.v.flags & FL_MONSTER ) )
 		return; // not a monster
 
-	MonsterDropPowerups();
+	if ( cvar("k_nightmare_pu"))
+		MonsterDropPowerups();
 
 	// fall to ground
 	self->s.v.flags = (int)self->s.v.flags & ~( FL_FLY | FL_SWIM);

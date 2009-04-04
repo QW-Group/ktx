@@ -191,6 +191,7 @@ void mapcycle ();
 void airstep();
 void teamoverlay();
 void ToggleExclusive();
+void ToggleNewCoopNm();
 void ToggleVwep();
 void TogglePause();
 void ToggleArena();
@@ -424,6 +425,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_KILL         "invoke suicide"
 #define CD_MIDAIR       "midair settings"
 #define CD_INSTAGIB     "instagib settings"
+#define CD_INSTAGIB     "instagib settings"
 #define CD_CG_KB        "toggle coilgun kickback in instagib"
 #define CD_TIME         "show server time"
 #define CD_GREN_MODE    "grenades mode"
@@ -495,6 +497,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_GIVEME       (CD_NODESC) // skip
 
 #define CD_VOTECOOP     "vote for coop on/off"
+#define CD_COOPNMPU	"new nightmare mode (pu drops) on/off"
 
 #define CD_MAPSLIST_DL  (CD_NODESC) // skip
 #define CD_CMDSLIST_DL  (CD_NODESC) // skip
@@ -790,6 +793,7 @@ cmd_t cmds[] = {
 	{ "spawn666time",Spawn666Time,              0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_SPAWN666TIME },
 	{ "giveme",      giveme,                    0    , CF_PLAYER | CF_MATCHLESS | CF_PARAMS, CD_GIVEME },
 	{ "votecoop",    votecoop,                  0    , CF_PLAYER | CF_MATCHLESS, CD_VOTECOOP },
+	{ "coop_nm_pu",	 ToggleNewCoopNm,           0    , CF_PLAYER | CF_MATCHLESS, CD_COOPNMPU },
 };
 
 #undef DEF
@@ -5710,6 +5714,18 @@ void ToggleExclusive()
 	cvar_toggle_msg( self, "k_exclusive", redtext("exclusive mode") );
 }
 
+void ToggleNewCoopNm()
+{
+	if ( match_in_progress )
+		return;
+
+	if ( check_master() )
+		return;
+
+	cvar_toggle_msg( self, "k_nightmare_pu", redtext("New Nightmare mode (drops powerups)") );
+}
+
+// { yawn mode related
 // { yawn mode related
 
 void FixYawnMode()
