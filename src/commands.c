@@ -2884,9 +2884,9 @@ const char common_um_init[] =
 	"k_fp 1\n"
 	"k_fp_spec 3\n"
 
-	"dmm4_invinc_time \"\""				// reset to default
+	"dmm4_invinc_time \"\"\n"				// reset to default
 
-	"k_noitems \"\""					// reset to default
+	"k_noitems \"\"\n"					// reset to default
 
 //	"localinfo k_new_mode 0\n" 			// UNKNOWN ktpro
 //	"localinfo k_fast_mode 0\n"			// UNKNOWN ktpro
