@@ -1417,19 +1417,6 @@ void PutClientInServer( void )
 
 			items = IT_AXE | IT_ROCKET_LAUNCHER | IT_ARMOR3;
 		}
-		if ( cvar("k_dmm4_gren_mode") )
-		{
-			self->s.v.ammo_shells  = 0;
-			self->s.v.ammo_nails   = 0;
-			self->s.v.ammo_cells   = 0;
-			self->s.v.ammo_rockets = 255;
-
-			self->s.v.armorvalue   = 0;
-			self->s.v.armortype    = 0;
-			self->s.v.health       = 250;
-
-			items = IT_GRENADE_LAUNCHER;
-		}
 		else if ( cvar("k_instagib") )
 		{
 			self->s.v.ammo_shells  = 999;
