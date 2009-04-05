@@ -1501,7 +1501,8 @@ void SM_PrepareClients()
 
 		p->ps.handicap = hdc; // restore player handicap
 
-		if ( isRA() ) {
+		if ( isRA() )
+		{
 			if ( isWinner( p ) || isLoser( p ) )
 				setfullwep( p );
 
@@ -1510,6 +1511,10 @@ void SM_PrepareClients()
 
 		// ignore k_respawn() in case of coop
 		if ( !deathmatch )
+			continue;
+
+		// ignore  k_respawn() in case of CA
+		if ( isCA() )
 			continue;
 
 		k_respawn( p, false );
@@ -1666,7 +1671,7 @@ void PrintCountdown( int seconds )
 //
 //
 // Deathmatch  x
-// Mode		  D u e l | T e a m | F F A | C T F | RA
+// Mode		  D u e l | T e a m | F F A | C T F | RA | CA
 // Spawnmodel KTX | bla bla bla // optional
 // NoItems    On // optional
 // Midair     On // optional
@@ -1696,6 +1701,8 @@ void PrintCountdown( int seconds )
 
 	if ( isRA() )
 		mode = redtext("RA");
+	else if ( isCA() )
+		mode = redtext("CA");
 	else if( isDuel() )
 		mode = redtext("D u e l");
 	else if ( isTeam() )

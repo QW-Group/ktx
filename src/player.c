@@ -1002,7 +1002,9 @@ void PlayerDie()
 	if ( self->s.v.velocity[2] < 10 )
 		self->s.v.velocity[2] = self->s.v.velocity[2] + g_random() * 300;
 
-    if ( self->s.v.health < -40 || dtSQUISH == self->deathtype || dtSUICIDE == self->deathtype || isRA() )
+	self->ca_alive = false;
+
+    if ( self->s.v.health < -40 || dtSQUISH == self->deathtype || dtSUICIDE == self->deathtype || isRA() || isCA() )
 	{
 		GibPlayer();
 

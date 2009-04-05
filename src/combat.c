@@ -344,6 +344,18 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	if ( !targ->s.v.takedamage || ISDEAD( targ ) )
 		return;
 
+	// ignore almost all damage in CA while coutdown
+	if ( isCA() && match_in_progress && ra_match_fight != 2 )
+	{
+		if ( !( 	dtTELE1 == targ->deathtype	// always do tele damage
+				 || dtTELE2 == targ->deathtype	// always do tele damage
+				 || dtTELE3 == targ->deathtype	// always do tele damage
+				 || dtSUICIDE == targ->deathtype // do suicide damage anyway
+			  )
+		)
+			return;
+	}
+
 	// used by buttons and triggers to set activator for target firing
 	damage_attacker = attacker;
 	damage_inflictor = inflictor;

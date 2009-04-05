@@ -222,8 +222,14 @@ void r_mode( );
 void r_route( );
 void r_print( );
 
-void giveme( );
+// }
 
+// { CHEATS
+void giveme( );
+// }
+
+// { Clan Arena
+void ToggleCArena();
 // }
 
 // CD - commands descriptions
@@ -440,6 +446,9 @@ const char CD_NODESC[] = "no desc";
 #define CD_RA_BREAK     "toggle RA line status"
 #define CD_RA_POS       "RA line position"
 #define CD_ARENA        "toggle rocket arena"
+// }
+// { Clan Arena
+#define CD_CARENA       "toggle clan arena"
 // }
 #define CD_FORCE_SPEC   "force spec players"
 // { server side bans
@@ -742,6 +751,9 @@ cmd_t cmds[] = {
 	{ "ra_break",    ra_break,                  0    , CF_PLAYER, CD_RA_BREAK },
 	{ "ra_pos",      ra_PrintPos,               0    , CF_PLAYER, CD_RA_POS },
 	{ "arena",       ToggleArena,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_ARENA },
+// }
+// { Clan Arena
+	{ "carena",      ToggleCArena,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_CARENA },
 // }
 	{ "force_spec",  force_spec,                0    , CF_BOTH_ADMIN | CF_PARAMS, CD_FORCE_SPEC },
 // { bans
@@ -2896,6 +2908,8 @@ const char common_um_init[] =
 //	"localinfo k_fast_mode 0\n"			// UNKNOWN ktpro
 //	"localinfo k_safe_rj 0\n"           // UNKNOWN ktpro
 
+	"k_clan_arena 0\n"					// disable Clan Arena by default
+
 	"k_spec_info 1\n"					// allow spectators receive took info during game
 	"k_rocketarena 0\n"					// rocket arena
 	"k_midair 0\n"						// midair off
@@ -3202,6 +3216,8 @@ void UserMode(float umode)
 		trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
 		G_cprint("%s", buf);
 	}
+
+	apply_CA_settings();
 
 	G_cprint("\n");
 

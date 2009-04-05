@@ -304,6 +304,10 @@ SOURCE=src/sp_zombie.c
 # End Source File
 # Begin Source File
 
+SOURCE=src/clan_arena.c
+# End Source File
+# Begin Source File
+
 SOURCE=src/world.c
 # End Source File
 # End Group

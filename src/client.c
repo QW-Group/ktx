@@ -810,6 +810,13 @@ void ClientKill()
 		return;
 	}
 
+/*
+	if ( isCA() && match_in_progress && ra_match_fight != 2 ) {
+		G_sprint (self, PRINT_HIGH, "Can't suicide in CA mode while coutdown\n");
+		return;
+	}
+*/
+
 	if ( isCTF() && match_in_progress == 2 && g_globalvars.time - match_start_time < 10 ) {
 		G_sprint (self, PRINT_HIGH, "Can't suicide during first 10 seconds of CTF match\n");
 		return;
@@ -1524,6 +1531,11 @@ void PutClientInServer( void )
 		}
 	}
 
+	if ( isCA() )
+	{
+		CA_PutClientInServer();
+	}
+
 	// remove particular weapons in dmm4
 	if ( deathmatch == 4 && match_in_progress == 2 )
 	{
@@ -1634,7 +1646,7 @@ void PlayerDeathThink()
 // { autospawn
 	respawn_time = ( cvar("k_midair") || cvar("k_instagib") ) ? 2 : 5;
 
-	if ( dtSUICIDE == self->deathtype || isRA() )
+	if ( dtSUICIDE == self->deathtype || isRA() || isCA() )
 		respawn_time = -999999; // force respawn ASAP if suicides or in RA mode
 
 	if( (g_globalvars.time - self->dead_time) > respawn_time )
@@ -3289,6 +3301,9 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 	if( match_in_progress != 2 )
 		return; // nothing TODO in non match
+
+	if ( isCA() && ra_match_fight != 2 )
+		return; // nothing TODO in CA mode while coutdown
 
     if ( targ->ct != ctPlayer )
 		return;

@@ -260,6 +260,10 @@
 				>
 			</File>
 			<File
+				RelativePath="src\clan_arena.c"
+				>
+			</File>
+			<File
 				RelativePath="src\arena.c"
 				>
 			</File>

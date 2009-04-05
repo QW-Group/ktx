@@ -647,6 +647,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="src\clan_arena.c"
+				>
+			</File>
+			<File
 				RelativePath="src\sp_ai.c"
 				>
 			</File>

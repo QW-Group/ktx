@@ -703,6 +703,9 @@ void FirstFrame	( )
 	RegisterCvar("k_rocketarena"); // rocket arena
 	RegisterCvar("k_dmgfrags");
 	RegisterCvar("k_tp_tele_death");
+// { Clan Arena
+	RegisterCvarEx("k_clan_arena", "0");
+// }
 // { upplayers/upspecs
 	RegisterCvar("k_allowcountchange");
 	RegisterCvar("k_maxclients");
@@ -1256,6 +1259,9 @@ void StartFrame( int time )
 
 	if ( isRA() )
 		ra_Frame();
+
+	if ( isCA() )
+		CA_Frame();
 
 	if ( framecount > 10 )
 		vote_check_all();

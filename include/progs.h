@@ -536,6 +536,10 @@ typedef struct gedict_s {
 	raPlayerType_t ra_pt; // ra player type
 // }
 
+// { Clan Arena
+	qboolean ca_alive;
+// }
+
 // {
 	float pb_time;
 	float pb_old_time;

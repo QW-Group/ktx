@@ -735,6 +735,13 @@ void		ra_PrintPos();
 void		ra_break();
 // }
 
+// clan_arena.c
+
+qboolean	isCA();
+void		apply_CA_settings(void);
+void		CA_Frame(void);
+void		CA_PutClientInServer(void);
+
 // captain.c
 
 int		capt_num(gedict_t *p);
