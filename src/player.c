@@ -964,6 +964,8 @@ void StartDie ();
 
 void PlayerDie()
 {
+	self->ca_alive = false;
+
 	DropPowerups();
 
 	if ( isCTF() )
@@ -1001,8 +1003,6 @@ void PlayerDie()
 	self->s.v.movetype = MOVETYPE_TOSS;
 	if ( self->s.v.velocity[2] < 10 )
 		self->s.v.velocity[2] = self->s.v.velocity[2] + g_random() * 300;
-
-	self->ca_alive = false;
 
     if ( self->s.v.health < -40 || dtSQUISH == self->deathtype || dtSUICIDE == self->deathtype || isRA() || isCA() )
 	{

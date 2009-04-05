@@ -334,6 +334,12 @@ void TeamsStats ( )
 {
 	int	i, sumfrags = 0, wasPrint = 0;
 
+	if ( isCA() )
+	{
+		CA_TeamsStats();
+		return;
+	}
+
 	// Summing up the frags to calculate team percentages
 	for( i = 0; i < min(tmStats_cnt, MAX_TM_STATS); i++ )
 		sumfrags += max(0, tmStats[i].frags + tmStats[i].gfrags);
@@ -1183,7 +1189,7 @@ void EndMatch ( float skip_log )
 		}
 
 		if( isTeam() || isCTF() )
-			TeamsStats (); // print basic info like frags for each team
+				TeamsStats (); // print basic info like frags for each team
 		
 		if ( (p = find( world, FOFCLSN, "ghost" )) ) // show legend :)
 			G_bprint(2, "\n\x83 - %s player\n\n", redtext("disconnected"));
@@ -1657,6 +1663,8 @@ void StartMatch ()
 
 	SM_PrepareTeamsStats();
 
+	SM_PrepareCA();
+
 	SM_on_MatchStart();
 
 	StartLogs();
@@ -1715,6 +1723,9 @@ void PrintCountdown( int seconds )
 		mode = redtext("Unknown");
 
 	strlcat(text, va("%s %8s\n", "Mode", mode), sizeof(text));
+
+	if ( isCA() )
+		strlcat(text, va("%s %8s\n", "Wins", dig3(CA_wins_required())), sizeof(text));
 
 //	if ( cvar( "k_spw" ) != 3 )
 		strlcat(text, va("%s %4s\n", "Respawns", respawn_model_name_short( cvar( "k_spw" ) )), sizeof(text));
@@ -1784,8 +1795,8 @@ void PrintCountdown( int seconds )
 
 qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
 {
-	int k_lockmin     = cvar( "k_lockmin" );
-	int k_lockmax     = cvar( "k_lockmax" );
+	int k_lockmin     = ( isCA() ) ? 2 : cvar( "k_lockmin" );
+	int k_lockmax     = ( isCA() ) ? 2 : cvar( "k_lockmax" );
 	int k_membercount = cvar( "k_membercount" );
 	int i = CountRTeams();
 	int sub, nready;

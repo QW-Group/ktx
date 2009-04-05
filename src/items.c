@@ -337,12 +337,15 @@ void SP_item_health()
 
 void health_touch()
 {
+	if ( other->ct != ctPlayer )
+		return;
+
+	if ( ISDEAD( other ) )
+		return;
+
 	if ( deathmatch == 4 )
 		if ( other->invincible_time > 0 )
 			return;
-
-	if ( other->ct != ctPlayer )
-		return;
 
 	if ( match_in_progress != 2 || !readytostart() )
         return;
@@ -690,7 +693,10 @@ void weapon_touch()
 	int		real_ammo = 0;
 	char		*playername;
 
-	if ( !( ( int ) other->s.v.flags & FL_CLIENT ) )
+	if ( ISDEAD( other ) )
+		return;
+
+	if ( other->ct != ctPlayer )
 		return;
 
 	if ( match_in_progress != 2 || !readytostart() )
@@ -1416,7 +1422,7 @@ void sigil_touch()
 	if ( ISDEAD( other ) )
 		return;
 
-    if ( match_in_progress != 2 || !readytostart() )
+	if ( match_in_progress != 2 || !readytostart() )
         return;
 
 	playername = other->s.v.netname;

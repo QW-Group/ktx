@@ -967,7 +967,8 @@ void W_FireLightning()
 // explode if under water
     if ( self->s.v.waterlevel > 1 && match_in_progress == 2 )
 	{
-		if ( isRA() ) {
+		if ( isRA() || isCA() )
+		{
 			self->s.v.ammo_cells = 0;
 			W_SetCurrentAmmo();
 			return;
@@ -2228,7 +2229,10 @@ void W_WeaponFrame()
     if ( self->s.v.button0 && !intermission_running )
     {
 		if ( !readytostart() )
-			return;	
+			return;	// RA restrictions
+
+		if ( !CA_can_fire( self ) )
+			return;	// CA restrictions
 
 		if ( match_in_progress == 1 || !can_prewar( true ) )
 			return;
@@ -2236,7 +2240,6 @@ void W_WeaponFrame()
 		SuperDamageSound();
 		W_Attack();
 	}
-
 }
 
 

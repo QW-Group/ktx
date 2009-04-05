@@ -2400,16 +2400,24 @@ void PrintScores()
 							dig3s("%02d", minutes), dig3s("%02d", seconds));
 	}
 
-	if( k_showscores ) {
-		int s1 = get_scores1();
-		int s2 = get_scores2();
-		char *t1 = cvar_string( "_k_team1" );
-		char *t2 = cvar_string( "_k_team2" );
+	if( k_showscores )
+	{
+		if ( isCA() )
+		{
+			CA_PrintScores();
+		}
+		else
+		{
+			int s1 = get_scores1();
+			int s2 = get_scores2();
+			char *t1 = cvar_string( "_k_team1" );
+			char *t2 = cvar_string( "_k_team2" );
 
-		G_sprint(self, 2, "%s \x90%s\x91 = %s\n", redtext("Team"),
-								 (s1 > s2 ? t1 : t2), dig3(s1 > s2 ? s1 : s2));
-		G_sprint(self, 2, "%s \x90%s\x91 = %s\n", redtext("Team"),
-								 (s1 > s2 ? t2 : t1), dig3(s1 > s2 ? s2 : s1));
+			G_sprint(self, 2, "%s \x90%s\x91 = %s\n", redtext("Team"),
+									 (s1 > s2 ? t1 : t2), dig3(s1 > s2 ? s1 : s2));
+			G_sprint(self, 2, "%s \x90%s\x91 = %s\n", redtext("Team"),
+									 (s1 > s2 ? t2 : t1), dig3(s1 > s2 ? s2 : s1));
+		}
 	}
 }
 

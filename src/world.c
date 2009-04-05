@@ -705,6 +705,7 @@ void FirstFrame	( )
 	RegisterCvar("k_tp_tele_death");
 // { Clan Arena
 	RegisterCvarEx("k_clan_arena", "0");
+	RegisterCvarEx("k_clan_arena_rounds", "9");
 // }
 // { upplayers/upspecs
 	RegisterCvar("k_allowcountchange");

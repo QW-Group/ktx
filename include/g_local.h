@@ -82,13 +82,6 @@ float bound( float a, float b, float c );
 
 int             NUM_FOR_EDICT( gedict_t * e );
 
-
-// health macros
-
-#define ISLIVE(e) ((e)->s.v.health > 0)
-#define ISDEAD(e) ((e)->s.v.health <= 0)
-
-
 // possible disallowed weapons
 
 #define DA_WPNS (IT_AXE|IT_SHOTGUN|IT_SUPER_SHOTGUN|IT_NAILGUN|IT_SUPER_NAILGUN|IT_ROCKET_LAUNCHER|IT_GRENADE_LAUNCHER|IT_LIGHTNING)
@@ -478,6 +471,9 @@ extern gedict_t *damage_attacker, *damage_inflictor;
 
 char			*death_type( deathType_t dt );
 
+qboolean		ISLIVE( gedict_t *e );
+qboolean		ISDEAD( gedict_t *e );
+
 qboolean		CanDamage( gedict_t *targ, gedict_t *inflictor );
 
 void            T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker,
@@ -738,9 +734,14 @@ void		ra_break();
 // clan_arena.c
 
 qboolean	isCA();
+int			CA_wins_required(void);
+void		SM_PrepareCA(void);
 void		apply_CA_settings(void);
+void		CA_PrintScores(void);
+void		CA_TeamsStats(void);
 void		CA_Frame(void);
 void		CA_PutClientInServer(void);
+qboolean	CA_can_fire( gedict_t *p );
 
 // captain.c
 

@@ -45,6 +45,21 @@ char *death_type( deathType_t dt )
 
 //============================================================================
 
+qboolean ISLIVE( gedict_t *e )
+{
+	if ( !e )
+		return false;
+
+	return (e->s.v.health > 0 && e->ca_alive);
+}
+
+qboolean ISDEAD( gedict_t *e )
+{
+	return !ISLIVE( e );
+}
+
+//============================================================================
+
 /*
 ============
 CanDamage
@@ -354,7 +369,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			  )
 		)
 			return;
-	}
+	}	
 
 	// used by buttons and triggers to set activator for target firing
 	damage_attacker = attacker;
@@ -392,7 +407,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	}
 
 	// in teamplay 4 we do no armor or health damage to teammates (unless telefrag), but do apply velocity changes
-	if ( tp_num() == 4 && streq(targteam, attackerteam) && targ != attacker && !TELEDEATH(targ) )
+	if ( tp_num() == 4 && streq(targteam, attackerteam) && ( isCA() || targ != attacker ) && !TELEDEATH(targ) )
 	{
 		tp4teamdmg = true;
 	}
@@ -586,7 +601,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	// add to the damage total for clients, which will be sent as a single
 	// message at the end of the frame
 	// FIXME: remove after combining shotgun blasts?
-	if ( ( int ) targ->s.v.flags & FL_CLIENT )
+	if ( targ->ct == ctPlayer )
 	{
 		targ->s.v.dmg_take += take;
 		targ->s.v.dmg_save += save;

@@ -1047,7 +1047,7 @@ qboolean CanConnect()
 
 		return false; // _can't_ connect
 	}
-	else if( cvar("k_lockmode") == 1 ) // different behavior for team/duel/ffa
+	else if( cvar("k_lockmode") == 1 || isCA() ) // different behavior for team/duel/ffa
 	{
 		if ( isDuel() || isFFA() ) {
 			 // kick if no ghost with same name as for self
@@ -1082,6 +1082,15 @@ qboolean CanConnect()
 					  		  "Please reconnect as spectator\n");
 			return false; // _can't_ connect
 		}
+	}
+
+	// don't allow empty team in any case
+	if ( isTeam() && strnull( getteam( self ) ) )
+	{
+		G_sprint(self, 2, "Match in progress,\n"
+						  "Set your team before connecting\n"
+				  		  "or reconnect as spectator\n");
+		return false; // _can't_ connect
 	}
 
 	// kick if exclusive 
@@ -1271,6 +1280,7 @@ void PutClientInServer( void )
 	int             items;
 	int             tele_flags;
 
+	self->ca_alive = true; // CA_PutClientInServer() should change it properly
 	self->deathtype = dtNONE;
 	self->s.v.classname = "player";
 	self->s.v.health = 100;

@@ -398,24 +398,13 @@ void setfullwep( gedict_t *anent )
 	self = swap;
 }
 
-// { shared between RA and CA
-
 qboolean readytostart()
 {
-	if ( isRA() )
-	{
-		return ( time_to_start && g_globalvars.time >= time_to_start && getWinner() && getLoser() );
-	}
+	if ( !isRA() )
+		return true;
 
-	if ( isCA() )
-	{
-		return ( ra_match_fight == 2 && time_to_start && g_globalvars.time >= time_to_start );
-	}
-
-	return true;
+	return ( time_to_start && g_globalvars.time >= time_to_start && getWinner() && getLoser() );
 }
-
-// }
 
 void PrintStats( gedict_t *who )
 {
