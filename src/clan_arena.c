@@ -33,6 +33,7 @@ qboolean isCA( )
 static char ca_settings[] =
 	"k_clan_arena_rounds 9\n"
 	"teamplay 4\n"
+	"deathmatch 4\n"
 	"k_overtime 0\n"
 	"k_spw 1\n"
 	"k_dmgfrags 1\n"
@@ -221,7 +222,7 @@ void CA_Frame(void)
 			}
 		case 1: // Only one team alive
 			{
-				G_bprint(2, "%s \x90%s\x91 wins round_num\n", redtext("Team"), cvar_string(va("_k_team%d", alive_team)));
+				G_bprint(2, "%s \x90%s\x91 wins round\n", redtext("Team"), cvar_string(va("_k_team%d", alive_team)));
 				if ( alive_team == 1 )
 				{
 					team1_score++;
@@ -268,6 +269,11 @@ void CA_Frame(void)
 		// TODO replace RA sounds (but world precached)
 		//sound (world, CHAN_AUTO + CHAN_NO_PHS_ADD, "ra/fight.wav", 1, ATTN_NONE);
 		G_cp2all("%s", fight);
+
+		for( p = world; (p = find_plr( p )); )
+		{
+			k_respawn( p, false );
+		}
 
 		ra_match_fight = 2;
 
