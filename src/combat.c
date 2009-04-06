@@ -50,7 +50,10 @@ qboolean ISLIVE( gedict_t *e )
 	if ( !e )
 		return false;
 
-	return (e->s.v.health > 0 && e->ca_alive);
+	if ( e->ct == ctPlayer )
+		return (e->s.v.health > 0 && e->ca_alive);
+
+	return e->s.v.health > 0;
 }
 
 qboolean ISDEAD( gedict_t *e )
