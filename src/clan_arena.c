@@ -4,7 +4,7 @@
 
 #include "g_local.h"
 
-static int round;
+static int round_num;
 static int team1_score;
 static int team2_score;
 
@@ -14,7 +14,7 @@ void SM_PrepareCA(void)
 		return;
 
 	team1_score = team2_score = 0;
-	round = 1;
+	round_num = 1;
 }
 
 int CA_wins_required(void)
@@ -216,12 +216,12 @@ void CA_Frame(void)
 		case 0: // DRAW, both teams are dead
 			{
 				G_bprint(2, "%s\n", redtext("draw"));
-				round++;
+				round_num++;
 				ra_match_fight = 0;
 			}
 		case 1: // Only one team alive
 			{
-				G_bprint(2, "%s \x90%s\x91 wins round\n", redtext("Team"), cvar_string(va("_k_team%d", alive_team)));
+				G_bprint(2, "%s \x90%s\x91 wins round_num\n", redtext("Team"), cvar_string(va("_k_team%d", alive_team)));
 				if ( alive_team == 1 )
 				{
 					team1_score++;
@@ -230,7 +230,7 @@ void CA_Frame(void)
 				{
 					team2_score++;				
 				}
-				round++;
+				round_num++;
 				ra_match_fight = 0;
 			}
 		default: break; // both teams alive
