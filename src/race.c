@@ -481,6 +481,76 @@ void race_add_standart_routes( void )
 
 		race_route_add_end();
 	}
+	else if ( streq( g_globalvars.mapname, "slide1" ) )
+	{
+		if ( !race_route_add_start() )
+			return; // we are full
+
+		race_add_route_node(   64.7, -3428.5,  3352.0, 1.8, 89.0, nodeStart );
+		race_add_route_node( -956.0, -1172.0, -3880.0,   0,    0, nodeEnd );
+
+		race_set_route_name( "Slide 1", "start\215end" );
+		race_set_route_timeout( 40 );
+		race_set_route_weapon_mode( raceWeaponNo );
+
+		race_route_add_end();
+	}
+	else if ( streq( g_globalvars.mapname, "slide2" ) )
+	{
+		if ( !race_route_add_start() )
+			return; // we are full
+
+		race_add_route_node( -1607.9, 2380.0, 2736.0, 3.4, -89.0, nodeStart );
+		race_add_route_node(  1821.8, -714.4,  920.0,   0,     0, nodeEnd );
+
+		race_set_route_name( "Slide 2", "start\215end" );
+		race_set_route_timeout( 40 );
+		race_set_route_weapon_mode( raceWeaponNo );
+
+		race_route_add_end();
+	}
+	else if ( streq( g_globalvars.mapname, "slide4" ) )
+	{
+		if ( !race_route_add_start() )
+			return; // we are full
+
+		race_add_route_node( 3555.7,  3547.5, 3736.0, 0, -180.0, nodeStart );
+		race_add_route_node( 3124.3, -2785.6, -616.0, 0,      0, nodeEnd );
+
+		race_set_route_name( "Slide 4", "start\215end" );
+		race_set_route_timeout( 40 );
+		race_set_route_weapon_mode( raceWeaponNo );
+
+		race_route_add_end();
+	}
+	else if ( streq( g_globalvars.mapname, "slide5" ) )
+	{
+		if ( !race_route_add_start() )
+			return; // we are full
+
+		race_add_route_node( 2367.0, 3364.4, 3224.0, 1.1, -90.4, nodeStart );
+		race_add_route_node( 1597.9,  185.8, -1256.0,  0,     0, nodeEnd );
+
+		race_set_route_name( "Slide 5", "start\215end" );
+		race_set_route_timeout( 40 );
+		race_set_route_weapon_mode( raceWeaponNo );
+
+		race_route_add_end();
+	}
+	else if ( streq( g_globalvars.mapname, "slide7" ) )
+	{
+		if ( !race_route_add_start() )
+			return; // we are full
+
+		race_add_route_node(  194.0,    0.0,  2072.0, 6.0, 0, nodeStart );
+		race_add_route_node( 2903.6, 2239.3, -3272.0,   0, 0, nodeEnd );
+
+		race_set_route_name( "Slide 7", "start\215end" );
+		race_set_route_timeout( 40 );
+		race_set_route_weapon_mode( raceWeaponNo );
+
+		race_route_add_end();
+	}
 }
 
 //============================================
