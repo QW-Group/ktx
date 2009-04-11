@@ -471,8 +471,8 @@ void race_add_standart_routes( void )
 		race_add_route_node(  217.3, -1188.5, 112.0, 3.4, 43.0, nodeStart );
 		race_add_route_node( 1359.7,  -427.7,  40.0,   0,    0, nodeCheckPoint );
 		race_add_route_node( 1108.6, -1316.2, 256.0,   0,    0, nodeCheckPoint );
-		race_add_route_node( 1015.9,  -867.3, 256.0,   0,    0, nodeCheckPoint );
 		race_add_route_node(  813.4, -1081.0, 256.0,   0,    0, nodeCheckPoint );
+		race_add_route_node( 1015.9,  -867.3, 256.0,   0,    0, nodeCheckPoint );
 		race_add_route_node( 1632.2,  -160.4, 168.0,   0,    0, nodeEnd );
 
 		race_set_route_name( "≥ßÛ tubeèrun", "mh\215rlèra\215glècircle\215ra" );
