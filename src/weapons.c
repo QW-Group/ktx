@@ -352,7 +352,7 @@ void TraceAttack( float damage, vec3_t dir, qboolean send_effects )
 		VectorCopy( org, blood_org );	//  blood_org = org;
 		AddMultiDamage( PROG_TO_EDICT( g_globalvars.trace_ent ), damage );
 		if( send_effects )
-			SpawnBlood( org, damage );
+			SpawnBlood( org, 1 );
 	}
 	else
 	{
