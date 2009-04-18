@@ -683,6 +683,7 @@ void FirstFrame	( )
 	RegisterCvar("add_q_aerowalk");
 	RegisterCvar("k_noframechecks");
 	RegisterCvar("dmm4_invinc_time");
+	RegisterCvarEx("k_classic_shotgun", "1");
 
 	RegisterCvar("k_no_fps_physics");
 //{ ctf

@@ -324,7 +324,7 @@ BULLETS
 TraceAttack
 ================
 */
-void TraceAttack( float damage, vec3_t dir )
+void TraceAttack( float damage, vec3_t dir, qboolean send_effects )
 {
 	vec3_t          org, tmp;
 
@@ -351,10 +351,22 @@ void TraceAttack( float damage, vec3_t dir )
 		blood_count = blood_count + 1;
 		VectorCopy( org, blood_org );	//  blood_org = org;
 		AddMultiDamage( PROG_TO_EDICT( g_globalvars.trace_ent ), damage );
+		if( send_effects )
+			SpawnBlood( org, damage );
 	}
 	else
 	{
 		puff_count = puff_count + 1;
+		if( send_effects )
+		{
+			WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
+			WriteByte( MSG_MULTICAST, TE_GUNSHOT );
+			WriteByte( MSG_MULTICAST, 1 );
+			WriteCoord( MSG_MULTICAST, org[0] );
+			WriteCoord( MSG_MULTICAST, org[1] );
+			WriteCoord( MSG_MULTICAST, org[2] );
+			trap_multicast( PASSVEC3( puff_org ), MULTICAST_PVS );
+		}
 	}
 }
 
@@ -433,7 +445,7 @@ void FireInstaBullet( vec3_t dir, deathType_t deathtype )
 //		G_sprint( self, 2, "fraction %f\n", fraction); // DEBUG!!!!!
 //		G_sprint( self, 2, "solid %d, %s\n", solid, ignore->s.v.netname); // DEBUG!!!!!
 
-		TraceAttack( 4, dir );
+		TraceAttack( 4, dir, false );
 	    
 		// this is something like "fix" for one bullet hit more than one player?
 		if ( depth > 1 )
@@ -482,6 +494,7 @@ void FireBullets( float shotcount, vec3_t dir, float spread_x, float spread_y, f
 {
 	vec3_t          direction;
 	vec3_t          src, tmp, tmp2;
+	qboolean		classic_shotgun = cvar("k_classic_shotgun");
 
 	trap_makevectors( self->s.v.v_angle );
 	VectorScale( g_globalvars.v_forward, 10, tmp );
@@ -638,12 +651,13 @@ void FireBullets( float shotcount, vec3_t dir, float spread_x, float spread_y, f
 		VectorAdd( src, tmp, tmp );
 		traceline( PASSVEC3( src ), PASSVEC3( tmp ), false, self );
 		if ( g_globalvars.trace_fraction != 1.0 )
-			TraceAttack( 4, direction );
+			TraceAttack( 4, direction, classic_shotgun );
 
 		shotcount = shotcount - 1;
 	}
 	ApplyMultiDamage();
-	Multi_Finish();
+	if( !classic_shotgun )
+		Multi_Finish();
 }
 
 /*
