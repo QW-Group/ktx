@@ -1729,24 +1729,6 @@ gedict_t *get_ed_bestPow()
 
 // }
 
-void show_sv_version()
-{
-	char date[64];
-
-	if ( !strnull( ezinfokey( self, "*is" ) ) ) // show this only ones at connect time
-		return;
-
-	if ( QVMstrftime(date, sizeof(date), "%a %b %d, %H:%M:%S %Y", 0) )
-		G_sprint(self, 2, "Date: %s\n", date);
-
-	G_sprint(self, 2, "Mod: %s %s, build %d\n", MOD_NAME, MOD_VERSION, build_number());
-	G_sprint(self, 2, "Server: %s\n", cvar_string( "version" ));
-
-	if ( (int)cvar( "sv_specprint" ) & SPECPRINT_SPRINT )
-		G_sprint(self, PRINT_CHAT, "\x87\x87\x87WARNING: spectators may see team messages (mm2) on this server!\n");
-}
-
-
 char *str_noweapon(int k_disallow_weapons)
 {
 	static char	string[MAX_STRINGS][128];

@@ -38,6 +38,7 @@
 
 #define MOD_NAME			("KTX")
 #define MOD_VERSION			("1.36-Beta")
+#define MOD_BUILD_DATE		(__DATE__ ", " __TIME__)
 #define MOD_SERVERINFO_MOD_KEY		("ktxver")
 #define MOD_SERVERINFO_BUILD_KEY	("ktxbuild")
 #define MOD_URL    			("http://ktx.qw-dev.net")
@@ -304,7 +305,6 @@ gedict_t	*get_ed_best1();
 gedict_t	*get_ed_best2();
 gedict_t	*get_ed_bestPow();
 
-void		show_sv_version();
 char		*str_noweapon(int k_disallow_weapons);
 
 void		cvar_toggle_msg( gedict_t *p, char *cvarName, char *msg );

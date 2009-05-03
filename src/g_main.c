@@ -79,6 +79,7 @@ void			PausedTic( int duration );
 qboolean		ClientSay( qboolean isTeamSay );
 
 void			RemoveMOTD();
+void			ShowVersion();
 
 static			qboolean check_ezquake(gedict_t *p);
 
@@ -163,7 +164,8 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 
 		check_ezquake( self );
 
-		show_sv_version();
+		if ( strnull( ezinfokey( self, "*is" ) ) ) // show this only ones at connect time
+			ShowVersion();
 
 		if ( arg0 )
 			SpectatorConnect();
