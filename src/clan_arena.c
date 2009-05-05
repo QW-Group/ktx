@@ -32,8 +32,9 @@ qboolean isCA( )
 // hard coded default settings for CA
 static char ca_settings[] =
 	"k_clan_arena_rounds 9\n"
+	"dp 0\n"
 	"teamplay 4\n"
-	"deathmatch 4\n"
+	"deathmatch 5\n"
 	"k_overtime 0\n"
 	"k_spw 1\n"
 	"k_dmgfrags 1\n"
@@ -95,8 +96,45 @@ void CA_PutClientInServer(void)
 	if ( !isCA() )
 		return;
 
-	self->ca_alive = (ra_match_fight != 2);
+	// set CA self params
+	if ( match_in_progress == 2 )
+	{
+		int items;
 
+		self->s.v.ammo_nails   = 120;
+		self->s.v.ammo_shells  = 40;
+		self->s.v.ammo_rockets = 20;
+		self->s.v.ammo_cells   = 35;
+
+		self->s.v.armorvalue   = 200;
+		self->s.v.armortype    = 0.8;
+		self->s.v.health       = 100;
+
+		items = 0;
+		items |= IT_AXE;
+		items |= IT_SHOTGUN;
+		items |= IT_NAILGUN;
+		items |= IT_SUPER_NAILGUN;
+		items |= IT_SUPER_SHOTGUN;
+		items |= IT_ROCKET_LAUNCHER;
+		items |= IT_GRENADE_LAUNCHER;
+		items |= IT_LIGHTNING;
+		items |= IT_ARMOR3; // add red armor
+
+		self->s.v.items = items;
+
+		// { remove invincibility/quad if any
+		self->invincible_time = 0;
+		self->invincible_finished = 0;
+		self->super_time = 0;
+		self->super_damage_finished = 0;
+		// }
+
+		// default to spawning with rl
+		self->s.v.weapon = IT_ROCKET_LAUNCHER;
+	}
+
+	// set to ghost if dead
 	if ( ISDEAD( self ) )
 	{
 		self->s.v.solid		 = SOLID_NOT;

@@ -1280,7 +1280,7 @@ void PutClientInServer( void )
 	int             items;
 	int             tele_flags;
 
-	self->ca_alive = true; // CA_PutClientInServer() should change it properly
+	self->ca_alive = (isCA() ? (ra_match_fight != 2) : true);
 	self->deathtype = dtNONE;
 	self->s.v.classname = "player";
 	self->s.v.health = 100;
@@ -1391,6 +1391,13 @@ void PutClientInServer( void )
 	else if ( isRA() )
 	{
 		if ( isWinner( self ) || isLoser( self ) )
+		{
+			tele_flags |= TFLAGS_FOG_DST | TFLAGS_SND_DST;
+		}
+	}
+	else if ( isCA() )
+	{
+		if ( ISLIVE( self ) )
 		{
 			tele_flags |= TFLAGS_FOG_DST | TFLAGS_SND_DST;
 		}
