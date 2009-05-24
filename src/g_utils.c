@@ -2106,6 +2106,7 @@ char *respawn_model_name( int mdl_num )
 		case 1:  return "KT SpawnSafety";
 		case 2:  return "Kombat Teams respawns";
 		case 3:  return "KTX respawns";
+		case 4:  return "KTX2 respawns";
 		default: return "!Unknown!";
 	}
 }
@@ -2117,6 +2118,7 @@ char *respawn_model_name_short( int mdl_num )
 		case 1:  return "KTS";
 		case 2:  return "KT";
 		case 3:  return "KTX";
+		case 4:  return "KT2";
 		default: return "???";
 	}
 }

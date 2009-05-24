@@ -1922,7 +1922,7 @@ void ReportMe()
 
 void ToggleRespawns()
 {
-	int k_spw = bound(0, cvar( "k_spw" ), 3);
+	int k_spw = bound(0, cvar( "k_spw" ), 4);
 
 	if ( match_in_progress )
 		return;
@@ -1930,7 +1930,7 @@ void ToggleRespawns()
 	if( check_master() )
 		return;
 
-	if ( ++k_spw > 3 )
+	if ( ++k_spw > 4 )
 		k_spw = 0;
 
 	cvar_fset( "k_spw", k_spw );

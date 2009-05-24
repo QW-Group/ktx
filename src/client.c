@@ -845,7 +845,7 @@ SelectSpawnPoint
 Returns the entity to spawn at
 ============
 */
-gedict_t *SelectSpawnPoint( char *spawnname )
+gedict_t *Sub_SelectSpawnPoint( char *spawnname )
 {
 	gedict_t		*spot;
 	gedict_t		*spots;			// chain of "valid" spots
@@ -877,17 +877,18 @@ gedict_t *SelectSpawnPoint( char *spawnname )
 			if ( thing->ct != ctPlayer || ISDEAD( thing ) || thing == self )
 				continue; // ignore non player, or dead played, or self
 
-		   // k_spw 2 and 3 feature, if player is spawned not far away and run
+		   // k_spw 2 and 3 and 4 feature, if player is spawned not far away and run
 		   // around spot - treat this spot as not valid.
 		   // k_1spawn store this "not far away" time.
 		   // k_1spawn is _also_ set after player passed teleport
-            if( !( ( k_spw == 2 || k_spw == 3 ) && match_in_progress == 2 && thing->k_1spawn < g_globalvars.time ) )  {
+            if( !( ( k_spw == 2 || k_spw == 3 || k_spw == 4 ) && match_in_progress == 2 && thing->k_1spawn < g_globalvars.time ) )  {
 //				G_bprint(2, "ignore player: %s\n", thing->s.v.netname);
 				pcount++; // ignore spot
 			}
 		}
 
-		if( !k_yawnmode && k_spw && match_in_progress == 2 && self->k_lastspawn == spot ) {
+		// NOTE: k_spw != 4
+		if( !k_yawnmode && k_spw && k_spw != 4 && match_in_progress == 2 && self->k_lastspawn == spot ) {
 //			G_bprint(2, "ignore spot\n");
 			pcount++; // ignore this spot in this case, protection from spawn twice on the same spot
 		}
@@ -1016,6 +1017,21 @@ gedict_t *SelectSpawnPoint( char *spawnname )
 
 		return spot;
 	}
+}
+
+gedict_t *SelectSpawnPoint( char *spawnname )
+{
+	gedict_t	*k_lastspawn = self->k_lastspawn; // we need remember this before calling Sub_SelectSpawnPoint()
+	gedict_t	*spot = Sub_SelectSpawnPoint( spawnname );
+
+	// k_spw 4 feature, recheck spawn poit second time if we select same spawn point in row, so it low chance to get same spawn point
+	if ( match_in_progress == 2 && k_lastspawn == spot && cvar( "k_spw" ) == 4 )
+	{
+		self->k_lastspawn = k_lastspawn;
+		spot = Sub_SelectSpawnPoint( spawnname );
+	}
+
+	return spot;
 }
 
 qboolean CanConnect()
