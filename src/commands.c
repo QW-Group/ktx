@@ -2905,145 +2905,149 @@ ok:
 
 // common settings for all user modes
 const char common_um_init[] =
-	"set pm_airstep \"\"\n"
-	"samelevel 1\n"
-//	"set k_vwep 1\n"
-	"maxclients 8\n"
-	"k_yawnmode 0\n"
-	"k_instagib 0\n"					// instagib off
-	"k_cg_kb 1\n"						// coilgun kickback in instagib
-	"k_disallow_weapons 16\n"			// disallow gl in dmm4 by default
+	"pm_airstep \"\"\n"			// airstep off by default
+	"samelevel 1\n"				// change levels off
+	"k_vwep 0\n"				// disable VWEP by default
+	"maxclients 8\n"			// maxclients
+	"k_yawnmode 0\n"			// disable SHITMODE by default (c)Renzo
+	"k_instagib 0\n"			// instagib off
+	"k_cg_kb 1\n"				// coilgun kickback in instagib
+	"k_disallow_weapons 16\n"		// disallow gl in dmm4 by default
 
-	"floodprot 10 1 1\n"
-	"k_fp 1\n"
-	"k_fp_spec 3\n"
+	"floodprot 10 1 1\n"			// 10 messages in 1 seconds, 1 second silence
+	"k_fp 1\n"				// floodprot for players
+	"k_fp_spec 1\n"				// floodprot for specs
 
-	"dmm4_invinc_time \"\"\n"				// reset to default
+	"dmm4_invinc_time \"\"\n"		// reset to default
 
-	"k_noitems \"\"\n"					// reset to default
+	"k_noitems \"\"\n"			// reset to default
 
-//	"localinfo k_new_mode 0\n" 			// UNKNOWN ktpro
-//	"localinfo k_fast_mode 0\n"			// UNKNOWN ktpro
-//	"localinfo k_safe_rj 0\n"           // UNKNOWN ktpro
+//	"localinfo k_new_mode 0\n"		// UNKNOWN ktpro
+//	"localinfo k_fast_mode 0\n		// UNKNOWN ktpro
+//	"localinfo k_safe_rj 0\n"		// UNKNOWN ktpro
+//	"localinfo k_new_spw 0\n"		// ktpro feature
 
-	"k_clan_arena 0\n"					// disable Clan Arena by default
+	"k_clan_arena 0\n"			// disable Clan Arena by default
+	"k_rocketarena 0\n"			// disable Rocket Arena by default
 
-	"k_spec_info 1\n"					// allow spectators receive took info during game
-	"k_rocketarena 0\n"					// rocket arena
-	"k_midair 0\n"						// midair off
-//	"localinfo k_new_spw 0\n"			// ktpro feature
+	"k_spec_info 1\n"			// allow spectators receive took info during game
+	"k_midair 0\n"				// midair off
+	"k_noitems 0\n"				// noitems must be disabled
 
-	"fraglimit 0\n"						// fraglimit %)
-	"dp 1\n"							// drop pack
-	"dq 0\n"							// drop quad
-	"dr 0\n"							// drop ring
-	"k_frp 0\n"							// fairpacks
-	"k_spectalk 0\n"					// silence
-	"k_dis 1\n"							// discharge on
-	"k_spw 4\n"							// affect spawn type
-	"k_dmgfrags 0\n"					// damage frags off
-	"k_tp_tele_death 1\n"				// affect frags on team telefrags or not
-	"k_allowcountchange 1\n"			// permissions for upplayers, only real admins
-	"k_maxspectators 6\n"				// some default value
-	"k_ip_list 1\n"						// permissions for iplist, only real admins
-      
-	"k_membercount 0\n"					// some unlimited values
-	"k_lockmin 0\n"						// some unlimited values
-	"k_lockmax 64\n"         			// some unlimited values
-	"k_lockmode 1\n";         			// server lockmode
+	"fraglimit 0\n"				// fraglimit %)
+	"dp 1\n"				// drop pack
+	"dq 0\n"				// drop quad
+	"dr 0\n"				// drop ring
+	"k_frp 0\n"				// fairpacks
+	"k_spectalk 0\n"			// silence
+	"k_dis 1\n"				// discharge on
+	"k_spw 4\n"				// affect spawn type
+	"k_dmgfrags 0\n"			// damage frags off
+	"k_dmm4_gren_mode 0\n"			// dmm4 grenade mode off
+	"k_teamoverlay 1\n"			// teamoverlay on
+	"k_tp_tele_death 1\n"			// affect frags on team telefrags or not
+	"k_allowcountchange 1\n"		// permissions for upplayers, only real admins
+	"k_maxspectators 4\n"			// some default value
+	"k_ip_list 1\n"				// permissions for iplist, only real admins
+
+	"k_idletime 0\n"			// idlebot
+	"k_membercount 0\n"			// some unlimited values
+	"k_lockmin 0\n"				// some unlimited values
+	"k_lockmax 64\n"			// some unlimited values
+	"k_lockmode 1\n";			// server lockmode
 
 
 const char _1on1_um_init[] =
-	"coop 0\n"
-	"maxclients 2\n"
-	"k_maxclients 2\n"
-	"timelimit  10\n"					//
-	"teamplay   0\n"					//
-	"deathmatch 3\n"					//
-	"k_overtime 1\n"					// overtime type
-	"k_exttime 3\n"						// overtime 3mins
-	"k_pow 0\n"							// powerups
-	"k_membercount 0\n"					// no efect in duel
-	"k_lockmin 0\n"						// no efect in duel
-	"k_lockmax 0\n"           			// no efect in duel
-	"k_mode 1\n";
+	"coop 0\n"				// no coop
+	"maxclients 2\n"			// duel = two players
+	"k_maxclients 2\n"			// duel = two players
+	"timelimit  10\n"			// 10 minute rounds
+	"teamplay   0\n"			// hurt yourself, no teammates here
+	"deathmatch 3\n"			// weapons stay
+	"k_overtime 1\n"			// overtime type = time based
+	"k_exttime 3\n"				// overtime 3mins
+	"k_pow 0\n"				// powerups
+	"k_membercount 0\n"			// no efect in duel
+	"k_lockmin 0\n"				// no efect in duel
+	"k_lockmax 0\n"				// no efect in duel
+	"k_mode 1\n";				//
 
 const char _2on2_um_init[] =
-	"coop 0\n"
-	"maxclients 4\n"
-	"k_maxclients 4\n"
-	"timelimit  10\n"					//
-	"teamplay   2\n"					//
-	"deathmatch 3\n"					//
-	"k_overtime 1\n"					// overtime type
-	"k_exttime 3\n"						// extende time for overtime
-	"k_pow 1\n"							//
-	"k_membercount 1\n"					// minimum number of players in each team
-	"k_lockmin 1\n"						//
-	"k_lockmax 2\n"           			//
-	"k_mode 2\n";
+	"coop 0\n"				// no coop
+	"maxclients 4\n"			// 2on2 = 4 players
+	"k_maxclients 4\n"			// 2on2 = 4 players
+	"timelimit  10\n"			// 10 minute rounds
+	"teamplay   2\n"			// hurt teammates and yourself
+	"deathmatch 3\n"			// weapons stay
+	"k_overtime 1\n"			// time based
+	"k_exttime 3\n"				// overtime 3mins
+	"k_pow 1\n"				// use powerups
+	"k_membercount 1\n"			// minimum number of players in each team
+	"k_lockmin 1\n"				//
+	"k_lockmax 2\n"				//
+	"k_mode 2\n";				//
 
 const char _3on3_um_init[] =
-	"coop 0\n"
-	"maxclients 6\n"
-	"k_maxclients 6\n"
-	"timelimit  15\n"
-	"teamplay   2\n"
-	"deathmatch 1\n"
-	"k_pow 1\n"
-	"k_membercount 2\n"					// minimum number of players in each team
-	"k_lockmin 1\n"						//
-	"k_lockmax 2\n"           			//
-	"k_overtime 1\n"
-	"k_exttime 5\n"
-	"k_mode 2\n";
+	"coop 0\n"				// no coop
+	"maxclients 6\n"			// 3on3 = 6 players
+	"k_maxclients 6\n"			// 3on3 = 6 players
+	"timelimit  15\n"			// 15 minute rounds
+	"teamplay   2\n"			// hurt teammates and yourself
+	"deathmatch 1\n"			// weapons wont stay on pickup
+	"k_pow 1\n"				// use powerups
+	"k_membercount 2\n"			// minimum number of players in each team
+	"k_lockmin 1\n"				//
+	"k_lockmax 2\n"				//
+	"k_overtime 1\n"			// time based
+	"k_exttime 5\n"				// overtime 5mins
+	"k_mode 2\n";				//
 
 const char _4on4_um_init[] =
-	"coop 0\n"
-	"maxclients 8\n"
-	"k_maxclients 8\n"
-	"timelimit  20\n"
-	"teamplay   2\n"
-	"deathmatch 1\n"
-	"k_pow 1\n"
-	"k_membercount 3\n"					// minimum number of players in each team
-	"k_lockmin 1\n"						//
-	"k_lockmax 2\n"           			//
-	"k_overtime 1\n"
-	"k_exttime 5\n"
-	"k_mode 2\n";
+	"coop 0\n"				// no coop
+	"maxclients 8\n"			// 4on4 = 8 players
+	"k_maxclients 8\n"			// 4on4 = 8 players
+	"timelimit  20\n"			// 20 minute rounds
+	"teamplay   2\n"			// hurt teammates and yourself
+	"deathmatch 1\n"			// weapons wont stay on pickup
+	"k_pow 1\n"				// user powerups
+	"k_membercount 3\n"			// minimum number of players in each team
+	"k_lockmin 1\n"				//
+	"k_lockmax 2\n"				//
+	"k_overtime 1\n"			// time based
+	"k_exttime 5\n"				// overtime 5mins
+	"k_mode 2\n";				//
 
 const char _10on10_um_init[] =
-	"coop 0\n"
-	"maxclients 20\n"
-	"k_maxclients 20\n"
-	"timelimit  20\n"
-	"teamplay   2\n"
-	"deathmatch 1\n"
-	"k_pow 1\n"
-	"k_membercount 5\n"					// minimum number of players in each team
-	"k_lockmin 1\n"						//
-	"k_lockmax 2\n"           			//
-	"k_overtime 1\n"
-	"k_exttime 5\n"
-	"k_mode 2\n";
+	"coop 0\n"				// no coop
+	"maxclients 20\n"			// 10on10 = 20 players
+	"k_maxclients 20\n"			// 10on10 = 20 players
+	"timelimit  20\n"			// 20 minute rounds
+	"teamplay   2\n"			// hurt yourself and teammates
+	"deathmatch 1\n"			// wpons dowont stay on pickup
+	"k_pow 1\n"				// user powerups
+	"k_membercount 5\n"			// minimum number of players in each team
+	"k_lockmin 1\n"				//
+	"k_lockmax 2\n"				//
+	"k_overtime 1\n"			// time based
+	"k_exttime 5\n"				// overtime 5mins
+	"k_mode 2\n";				//
 
 const char ffa_um_init[] =
-//	"coop 0\n" NO WE CAN'T DO IT SO, FFA MATCHLESS USED IN COOP MODE
-	"maxclients 26\n"
-	"k_maxclients 26\n"
-	"timelimit  20\n"
-	"teamplay   0\n"
-	"deathmatch 3\n"
-	"dq 1\n"
-	"dr 1\n"
-	"k_pow 1\n"
-	"k_membercount 0\n"					// no effect in ffa
-	"k_lockmin 0\n"						// no effect in ffa
-	"k_lockmax 0\n"           			// no effect in ffa
-	"k_overtime 1\n"
-	"k_exttime 5\n"
-	"k_mode 3\n";
+//	"coop 0\n"				// NO WE CAN'T DO IT SO, FFA MATCHLESS USED IN COOP MODE
+	"maxclients 26\n"			// some limit
+	"k_maxclients 26\n"			// some limit
+	"timelimit  20\n"			// some limit
+	"teamplay   0\n"			// hurt yourself, no teammates
+	"deathmatch 3\n"			// weapons stay
+	"dq 1\n"				// drop quad
+	"dr 1\n"				// drop ring
+	"k_pow 1\n"				// use powerups
+	"k_membercount 0\n"			// no effect in ffa
+	"k_lockmin 0\n"				// no effect in ffa
+	"k_lockmax 0\n"				// no effect in ffa
+	"k_overtime 1\n"			// time based
+	"k_exttime 5\n"				// overtime 5mins
+	"k_mode 3\n";				//
 
 const char ctf_um_init[] =
 	"coop 0\n"
@@ -3052,7 +3056,7 @@ const char ctf_um_init[] =
 	"timelimit 20\n"
 	"teamplay 4\n"
 	"deathmatch 3\n"
-	"k_dis 2\n"						// no out of water discharges in ctf
+	"k_dis 2\n"				// no out of water discharges in ctf
 	"k_pow 1\n"
 	"k_spw 1\n"
 	"k_membercount 0\n"
@@ -3061,9 +3065,9 @@ const char ctf_um_init[] =
 	"k_overtime 1\n"
 	"k_exttime 5\n"
 	"k_mode 4\n"
-	"k_ctf_hook 1\n"				// hook on
-	"k_ctf_runes 1\n"				// runes on
-	"k_ctf_ga 1\n";					// green armor on
+	"k_ctf_hook 1\n"			// hook on
+	"k_ctf_runes 1\n"			// runes on
+	"k_ctf_ga 1\n";				// green armor on
 
 
 usermode um_list[] =
