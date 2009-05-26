@@ -2907,7 +2907,7 @@ ok:
 const char common_um_init[] =
 	"pm_airstep \"\"\n"			// airstep off by default
 	"samelevel 1\n"				// change levels off
-	"k_vwep 0\n"				// disable VWEP by default
+	"k_vwep 1\n"				// disable VWEP by default
 	"maxclients 8\n"			// maxclients
 	"k_yawnmode 0\n"			// disable SHITMODE by default (c)Renzo
 	"k_instagib 0\n"			// instagib off
@@ -2932,7 +2932,6 @@ const char common_um_init[] =
 
 	"k_spec_info 1\n"			// allow spectators receive took info during game
 	"k_midair 0\n"				// midair off
-	"k_noitems 0\n"				// noitems must be disabled
 
 	"fraglimit 0\n"				// fraglimit %)
 	"dp 1\n"				// drop pack
