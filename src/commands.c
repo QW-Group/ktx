@@ -2940,7 +2940,7 @@ const char common_um_init[] =
 	"k_frp 0\n"							// fairpacks
 	"k_spectalk 0\n"					// silence
 	"k_dis 1\n"							// discharge on
-	"k_spw 3\n"							// affect spawn type
+	"k_spw 4\n"							// affect spawn type
 	"k_dmgfrags 0\n"					// damage frags off
 	"k_tp_tele_death 1\n"				// affect frags on team telefrags or not
 	"k_allowcountchange 1\n"			// permissions for upplayers, only real admins
