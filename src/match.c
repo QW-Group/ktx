@@ -1640,7 +1640,7 @@ void StartMatch ()
 // spec silence
 	{ 
 		int fpd = iKey( world, "fpd" );
-		int k_spectalk = bound(0, cvar( "k_spectalk" ), 1);
+		int k_spectalk = ( coop ? 1 : bound(0, cvar( "k_spectalk" ), 1) );
 		cvar_fset( "sv_spectalk", k_spectalk );
 
 		fpd = ( k_spectalk ) ? (fpd & ~64) : (fpd | 64);
