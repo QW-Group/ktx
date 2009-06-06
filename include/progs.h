@@ -25,21 +25,8 @@
 
 #include "progdefs.h"
 
-#define	MAX_ENT_LEAFS	16
-
 typedef struct shared_edict_s {
-	qboolean        free;
-	link_t          area;	// linked to a division node or leaf
-
-	int             num_leafs;
-	short           leafnums[MAX_ENT_LEAFS];
-
-	entity_state_t  baseline;
-
-	float           freetime;	// sv.time when the object was freed
-	//double                lastruntime;            // sv.time when SV_RunEntity was last
-	float           lastruntime1, lastruntime2;	//VM not support double // called for this edict (Tonik)
-
+	void			*ptr; // this points to sv_edict_t but mod should NOT bother about that...
 	entvars_t       v;	// C exported fields from progs
 // other fields from progs come immediately after
 } edict_t;

@@ -108,17 +108,6 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 	case GAME_INIT:
         api_ver = trap_GetApiVersion();
 
-/* api 12 required at least
-		if ( api_ver == 9 && GAME_API_VERSION == 11 ) {
-			// ok, this allow start mod with API_V11 on server with API_V9
-			gamedata.APIversion = 9;
-		}
-		else if ( api_ver == 10 && GAME_API_VERSION == 11 ) {
-			// ok, this allow start mod with API_V11 on server with API_V10
-			gamedata.APIversion = 10;
-		}
-		else
-*/
 		if ( api_ver < GAME_API_VERSION )
 		{
 			G_cprint("Mod requried API_VERSION %d or higher, server have %d\n", GAME_API_VERSION, api_ver);
