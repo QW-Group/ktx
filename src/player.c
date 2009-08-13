@@ -387,7 +387,7 @@ void player_nail1()
 	self->s.v.think = ( func_t ) player_nail2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
-	if ( !self->s.v.button0 || intermission_running || ( self->s.v.impulse && self->weapon_switch_fix )	)
+	if ( !self->s.v.button0 || intermission_running || self->s.v.impulse )
 	{
 		self->walkframe = 0;
 		player_run();
@@ -412,7 +412,7 @@ void player_nail2()
 	self->s.v.think = ( func_t ) player_nail1;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
-	if ( !self->s.v.button0 || intermission_running || ( self->s.v.impulse && self->weapon_switch_fix )	)
+	if ( !self->s.v.button0 || intermission_running || self->s.v.impulse )
 	{
 		self->walkframe = 0;
 		player_run();
@@ -439,7 +439,7 @@ void player_light1()
 	self->s.v.think = ( func_t ) player_light2;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
-	if ( !self->s.v.button0 || intermission_running || ( self->s.v.impulse && self->weapon_switch_fix )	)
+	if ( !self->s.v.button0 || intermission_running || self->s.v.impulse )
 	{
 		self->walkframe = 0;
 		player_run();
@@ -464,7 +464,7 @@ void player_light2()
 	self->s.v.think = ( func_t ) player_light1;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 
-	if ( !self->s.v.button0 || intermission_running || ( self->s.v.impulse && self->weapon_switch_fix )	)
+	if ( !self->s.v.button0 || intermission_running || self->s.v.impulse )
 	{
 		self->walkframe = 0;
 		player_run();

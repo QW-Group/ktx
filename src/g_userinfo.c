@@ -23,7 +23,6 @@ extern void			trap_CmdArgv( int arg, char *valbuff, int sizebuff );
 extern qboolean		isSupport_Params(gedict_t *p);
 
 extern void			info_sys_mm_update( gedict_t *p, char *from, char *to );
-extern void			info_wswfix_update ( gedict_t *p, char *from, char *to );
 
 //========================================================
 //
@@ -71,8 +70,7 @@ cmdinfo_t cinfos[] = {
 //	{ "premsg", 0 },
 
 //	{ "ti", 0 },	// specifie use team info or not
-    { "wswfix", info_wswfix_update }, // weapon switch fix preference
-//    { "w_switch", 0 },
+//  { "w_switch", 0 },
 //	{ "k_sdir", 0 },
 //	{ "wps", 0 },
 //	{ "lra", 0 },		// ra status bar modificator
@@ -203,9 +201,6 @@ void cmdinfo_infoset ( gedict_t *p )
 	  	// so we can invoke on_enter
 		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "wait;wait;wait;cmd ack noinfoset\n");
 	}
-
-	// this need to be called each time client connects
-	info_wswfix_update( p, "", ezinfokey(p, "wswfix") );
 }
 
 //===================================================
@@ -260,13 +255,6 @@ qboolean 	ClientUserInfoChanged ()
 // different handlers
 //
 //===================================================
-
-void info_wswfix_update ( gedict_t *p, char *from, char *to )
-{
-	p->weapon_switch_fix = !!atoi( to );
-}
-
-//========================================================
 
 // in ctf we dont want red team players to be blue, etc
 qboolean FixPlayerColor ( char *newcolor )

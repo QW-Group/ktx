@@ -556,8 +556,6 @@ typedef struct gedict_s {
 	// yeah its lame, but better than checking setinfo each time.
 	int ezquake_version;
 
-	qboolean weapon_switch_fix;
-
 // { race
 	int 		race_id; 		// used by checkpoints, 
 				 				// start checkpoint have id = 0,
