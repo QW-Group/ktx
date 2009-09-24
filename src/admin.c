@@ -9,7 +9,6 @@
 void AdminMatchStart();
 void PlayerReady();
 void NextClient();
-
 qboolean DoKick(gedict_t *victim, gedict_t *kicker);
 
 // is real admin
