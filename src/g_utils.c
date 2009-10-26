@@ -40,8 +40,7 @@ int NUM_FOR_EDICT( gedict_t * e )
 {
 	int     b;
 
-	b = ( byte * ) e - ( byte * ) g_edicts;
-	b = b / sizeof( gedict_t );
+	b = e - g_edicts;
 
 	if ( b < 0 || b >= MAX_EDICTS )
 		DebugTrap( "NUM_FOR_EDICT: bad pointer" );

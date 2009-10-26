@@ -232,6 +232,8 @@ void giveme( );
 void ToggleCArena();
 // }
 
+void ToggleAntiLag();
+
 // CD - commands descriptions
 
 const char CD_NODESC[] = "no desc";
@@ -506,11 +508,12 @@ const char CD_NODESC[] = "no desc";
 #define CD_GIVEME       (CD_NODESC) // skip
 
 #define CD_VOTECOOP     "vote for coop on/off"
-#define CD_COOPNMPU	"new nightmare mode (pu drops) on/off"
+#define CD_COOPNMPU     "new nightmare mode (pu drops) on/off"
 
 #define CD_MAPSLIST_DL  (CD_NODESC) // skip
 #define CD_CMDSLIST_DL  (CD_NODESC) // skip
 
+#define CD_ANTILAG      "toggle anti lag"
 
 
 void dummy() {}
@@ -806,6 +809,7 @@ cmd_t cmds[] = {
 	{ "giveme",      giveme,                    0    , CF_PLAYER | CF_MATCHLESS | CF_PARAMS, CD_GIVEME },
 	{ "votecoop",    votecoop,                  0    , CF_PLAYER | CF_MATCHLESS, CD_VOTECOOP },
 	{ "coop_nm_pu",	 ToggleNewCoopNm,           0    , CF_PLAYER | CF_MATCHLESS, CD_COOPNMPU },
+	{ "antilag",	 ToggleAntiLag,             0    , CF_PLAYER | CF_SPC_ADMIN, CD_ANTILAG },
 };
 
 #undef DEF
@@ -6067,3 +6071,14 @@ void giveme()
 	G_sprint(self, 2, "You got %s for %.1fs\n", got, seconds );
 }
 
+void ToggleAntiLag()
+{
+	if ( match_in_progress )
+		return;
+
+	if ( check_master() )
+		return;
+
+	cvar_toggle_msg( self, "k_antilag", redtext("antilag") );
+	k_antilag = cvar( "k_antilag" );
+}

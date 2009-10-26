@@ -144,7 +144,15 @@ typedef union fi_s
 	int			_int;
 } fi_t;	
 
-//g_utils.c
+
+// g_cmd.c
+
+void			Antilag_Init(void);
+void			Antilag_Reset( gedict_t *s );
+void			Antilag_Apply( gedict_t *s );
+void			Antilag_Undo( gedict_t *s );
+
+// g_utils.c
 
 int				PASSFLOAT(float x);
 
@@ -859,6 +867,8 @@ extern	float lastTeamLocationTime; // next udate for CheckTeamStatus()
 extern	qboolean first_rl_taken; // true when some one alredy took rl
 
 extern	int sv_minping; // used to broadcast changes
+
+extern	qboolean	k_antilag;
 
 // heh, some hack for mvdsv for grabbing some data
 

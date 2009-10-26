@@ -98,3 +98,5 @@ float lastTeamLocationTime; // next udate for CheckTeamStatus()
 qboolean first_rl_taken; // true when some one alredy took rl
 
 int sv_minping; // used to broadcast changes
+
+qboolean	k_antilag;

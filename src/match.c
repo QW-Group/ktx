@@ -1681,6 +1681,7 @@ void PrintCountdown( int seconds )
 // Deathmatch  x
 // Mode		  D u e l | T e a m | F F A | C T F | RA | CA
 // Spawnmodel KTX | bla bla bla // optional
+// Antilag    On|Off
 // NoItems    On // optional
 // Midair     On // optional
 // Instagib   On // optional
@@ -1694,7 +1695,6 @@ void PrintCountdown( int seconds )
 // Powerups   On|Off|Jammed
 // Dmgfrags   On // optional
 // Noweapon
-
 
 	char text[1024] = {0};
 	char *mode = "";
@@ -1729,6 +1729,8 @@ void PrintCountdown( int seconds )
 
 //	if ( cvar( "k_spw" ) != 3 )
 		strlcat(text, va("%s %4s\n", "Respawns", respawn_model_name_short( cvar( "k_spw" ) )), sizeof(text));
+
+	strlcat(text, va("%s %5s\n", "Antilag", redtext(OnOff(cvar( "k_antilag" )))), sizeof(text));
 
 	if ( cvar("k_noitems") )
 		strlcat(text, va("%s %5s\n", "NoItems", redtext("On")), sizeof(text));

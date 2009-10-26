@@ -242,6 +242,11 @@ int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int a
 
 		BothPostThink ();
 
+		if ( !arg0 && k_antilag )
+		{
+			Antilag_Reset( self );
+		}
+
 		return 1;
 
 	case GAME_EDICT_TOUCH:
@@ -369,6 +374,7 @@ void G_InitGame( int levelTime, int randomSeed )
 	G_InitMemory();
 	memset( g_edicts, 0, sizeof( gedict_t ) * MAX_EDICTS );
 
+	Antilag_Init();
 
 	world->s.v.model = worldmodel;
 	g_globalvars.mapname = mapname;
