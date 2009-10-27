@@ -1064,6 +1064,8 @@ void FixRules ( )
 	int k_minr = bound(0, cvar( "k_minrate" ),  100000);
 	int k_maxr = bound(0, cvar( "sv_maxrate" ), 100000);
 
+	k_antilag = cvar( "k_antilag" );
+
 	skill = cvar( "skill" );
 
 	coop = cvar( "coop" );
