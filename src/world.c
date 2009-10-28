@@ -1254,6 +1254,11 @@ void StartFrame( int time )
 
 	current_maxfps = bound(50, current_maxfps, 1981);
 
+	if ( k_antilag != iKey( world, "al" ) )
+	{
+		localcmd("serverinfo al %s\n", k_antilag ? "1" : "\"\""); // add to serverinfo
+	}
+
 	CheckTiming(); // check if client lagged or returned from lag
 
 	if ( intermission_running && g_globalvars.time >= intermission_exittime - 1 
