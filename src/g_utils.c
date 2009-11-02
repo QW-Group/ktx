@@ -1349,30 +1349,30 @@ char *TrackWhom( gedict_t *p )
 
 int GetHandicap( gedict_t *p )
 {
-	int hdc = p->ps.handicap < 1 ? 100 : min( 100, p->ps.handicap );
+	int hdc = p->ps.handicap < 1 ? 100 : min( 150, p->ps.handicap );
 
-	if ( cvar( "k_lock_hdp" ) )
-		return 100;
-	else
-		return hdc;
+	return (cvar( "k_lock_hdp" ) ? 100 : hdc);
 }
 
 qboolean SetHandicap( gedict_t *p, int nhdc )
 {
-	int hdc = GetHandicap( p );
-
-	nhdc = nhdc < 1 ? 100 : min( 100, nhdc );	
+	int hdc = GetHandicap( p ); // remember before change
 
 	if ( match_in_progress )
 		return false;
 
-	if ( cvar( "k_lock_hdp" ) ){
+	if ( cvar( "k_lock_hdp" ) )
+	{
 		G_sprint(self, 2, "%s changes are not allowed\n", redtext("handicap"));
 		return false;	
 	}
 
-	if ( nhdc != hdc ){
-		p->ps.handicap = nhdc;
+	p->ps.handicap = nhdc; // set, unbound
+	p->ps.handicap = nhdc = GetHandicap( p ); // set, bounded
+
+	// anonce if changed
+	if ( nhdc != hdc )
+	{
 		if ( nhdc == 100 )
 			G_bprint(2, "%s turns %s off\n", p->s.v.netname, redtext("handicap"));
 		else

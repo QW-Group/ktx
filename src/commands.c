@@ -3426,7 +3426,7 @@ void klist ( )
 
 		G_sprint(self, 2, "%2d|%2s|%3d|%3s|%4.4s|%s\n", GetUserID( p ),
 						(is_real_adm( p ) ? redtext("A") : is_adm( p ) ? redtext("a") : ""), VIP( p ),
-						(hdc == 100 ? "off" : va("%d%%", hdc)), getteam( p ), getname( p ));
+						(hdc == 100 ? "off" : va("%d", hdc)), getteam( p ), getname( p ));
 	}
 
 	if (i)

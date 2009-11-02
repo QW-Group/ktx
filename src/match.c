@@ -1673,6 +1673,19 @@ void StartMatch ()
 		ent_remove( self ); // timelimit == 0, so match will end no due to timelimit but due to fraglimit or something
 }
 
+// just check if someone using handicap
+static qboolean handicap_in_use(void)
+{
+	gedict_t *p;
+	int from;
+
+	for ( from = 0, p = world; (p = find_plrghst ( p, &from )); )
+		if ( GetHandicap( p ) != 100 )
+			return true;
+
+	return false;
+}
+
 void PrintCountdown( int seconds )
 {
 // Countdown: seconds
@@ -1695,6 +1708,8 @@ void PrintCountdown( int seconds )
 // Powerups   On|Off|Jammed
 // Dmgfrags   On // optional
 // Noweapon
+
+// Handicap in use // optional
 
 	char text[1024] = {0};
 	char *mode = "";
@@ -1791,6 +1806,10 @@ void PrintCountdown( int seconds )
 	   )
 		strlcat(text, va("\n%s %4s\n", "Noweapon", 
 					redtext(nowp[0] == 32 ? (nowp+1) : nowp)), sizeof(text));
+
+	if ( handicap_in_use() )
+		strlcat(text, "\n"
+					  "Handicap in use\n", sizeof(text));
 
 	G_cp2all(text);
 }
