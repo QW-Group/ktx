@@ -1349,7 +1349,7 @@ char *TrackWhom( gedict_t *p )
 
 int GetHandicap( gedict_t *p )
 {
-	int hdc = p->ps.handicap < 1 ? 100 : min( 150, p->ps.handicap );
+	int hdc = p->ps.handicap < 1 ? 100 : bound( 50, p->ps.handicap, 150 );
 
 	return (cvar( "k_lock_hdp" ) ? 100 : hdc);
 }

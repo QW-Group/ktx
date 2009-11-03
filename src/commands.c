@@ -3503,24 +3503,16 @@ void hdptoggle ()
 void handicap ()
 {
 	char arg_2[1024];
-	int hdc = GetHandicap(self);
 
-	if ( trap_CmdArgc() == 2 ) {
-		trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
-		hdc = atoi(arg_2);
+	if ( trap_CmdArgc() != 2 )
+	{
+		G_sprint(self, 2, "use: /handicap value, value from 50 to 150\n");
+		return;
 	}
-	else if ( hdc > 85 )
-		hdc = 85;
-	else if ( hdc > 70 )
-		hdc = 70;
-	else if ( hdc > 55 )
-		hdc = 55;
-	else if ( hdc > 40 )
-		hdc = 40;
-	else
-		hdc = 100;
 
-	SetHandicap(self, hdc);
+	trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
+
+	SetHandicap( self, atoi( arg_2 ) );
 }
 
 void show_disallowed_weapons( int k_disallow_weapons )
