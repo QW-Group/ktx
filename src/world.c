@@ -597,6 +597,7 @@ void FirstFrame	( )
 	RegisterCvar("k_noitems");
 
 	RegisterCvarEx("k_antilag", "0");
+	RegisterCvarEx("k_antilag_lock", "1"); // do not allow antilag setting be changed via /antilag
 
 	RegisterCvar("k_mode");
 	RegisterCvar("k_defmode");

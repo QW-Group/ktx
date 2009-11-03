@@ -6079,6 +6079,12 @@ void ToggleAntiLag()
 	if ( check_master() )
 		return;
 
+	if ( cvar("k_antilag_lock") )
+	{
+		G_sprint(self, 2, "console: command is locked\n");
+		return;
+	}
+
 	cvar_toggle_msg( self, "k_antilag", redtext("antilag") );
 	k_antilag = cvar( "k_antilag" );
 }
