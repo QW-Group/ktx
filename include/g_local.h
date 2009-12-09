@@ -138,13 +138,6 @@ typedef enum
 } deathType_t;
 #undef DEATHTYPE
 
-typedef union fi_s
-{
-	float			_float;
-	int			_int;
-} fi_t;	
-
-
 // g_cmd.c
 
 void			Antilag_Init(void);
@@ -153,8 +146,6 @@ void			Antilag_Apply( gedict_t *s );
 void			Antilag_Undo( gedict_t *s );
 
 // g_utils.c
-
-int				PASSFLOAT(float x);
 
 float           g_random( void );
 float           crandom( void );

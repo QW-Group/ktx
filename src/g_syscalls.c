@@ -34,127 +34,140 @@
 
 #include "g_local.h"
 
-static int      ( QDECL * syscall ) ( int arg, ... ) =
-    ( int ( QDECL * ) ( int, ... ) ) -1;
+static intptr_t      ( QDECL * syscall ) ( intptr_t arg, ... ) =
+    ( intptr_t ( QDECL * ) ( intptr_t, ... ) ) -1;
 
 
 
-void dllEntry( int ( QDECL * syscallptr ) ( int arg, ... ) )
+void dllEntry( intptr_t ( QDECL * syscallptr ) ( intptr_t arg, ... ) )
 {
 	syscall = syscallptr;
 }
 
-int trap_GetApiVersion()
+typedef union fi_s
+{
+	float		_float;
+	intptr_t	_int;
+} fi_t;	
+
+static intptr_t PASSFLOAT(float x)
+{
+	fi_t rc;
+	rc._float = x;
+	return rc._int;
+}
+
+intptr_t trap_GetApiVersion()
 {
 	return syscall( G_GETAPIVERSION );
 }
 
-qboolean trap_GetEntityToken( char *token, int size )
+qboolean trap_GetEntityToken( char *token, intptr_t size )
 {
-	return ( qboolean ) syscall( G_GetEntityToken, (int)token, size );
+	return ( qboolean ) syscall( G_GetEntityToken, (intptr_t)token, size );
 }
 void trap_DPrintf( const char *fmt )
 {
-	syscall( G_DPRINT, (int)fmt );
+	syscall( G_DPRINT, (intptr_t)fmt );
 }
 
 void trap_conprint( const char *fmt )
 {
-	syscall( G_conprint, (int)fmt );
+	syscall( G_conprint, (intptr_t)fmt );
 }
 
-void trap_BPrint( int level, const char *fmt, int flags )
+void trap_BPrint( intptr_t level, const char *fmt, intptr_t flags )
 {
-	syscall( G_BPRINT, level, (int) fmt, flags );
+	syscall( G_BPRINT, level, (intptr_t) fmt, flags );
 }
 
-void trap_SPrint( int edn, int level, const char *fmt, int flags )
+void trap_SPrint( intptr_t edn, intptr_t level, const char *fmt, intptr_t flags )
 {
-	syscall( G_SPRINT, edn, level, (int)fmt, flags );
+	syscall( G_SPRINT, edn, level, (intptr_t)fmt, flags );
 }
-void trap_CenterPrint( int edn, const char *fmt )
+void trap_CenterPrint( intptr_t edn, const char *fmt )
 {
-	syscall( G_CENTERPRINT, edn , (int)fmt );
+	syscall( G_CENTERPRINT, edn , (intptr_t)fmt );
 }
 
 void trap_Error( const char *fmt )
 {
-	syscall( G_ERROR, (int) fmt );
+	syscall( G_ERROR, (intptr_t) fmt );
 }
 
-int	trap_spawn()
+intptr_t	trap_spawn()
 {
 	return syscall( G_SPAWN_ENT ) ;
 }
 
-void trap_remove( int edn )
+void trap_remove( intptr_t edn )
 {
 	syscall( G_REMOVE_ENT, edn  );
 }
 
 void trap_precache_sound( char *name )
 {
-	syscall( G_PRECACHE_SOUND, (int) name );
+	syscall( G_PRECACHE_SOUND, (intptr_t) name );
 }
 void trap_precache_model( char *name )
 {
-	syscall( G_PRECACHE_MODEL, (int) name );
+	syscall( G_PRECACHE_MODEL, (intptr_t) name );
 }
-int trap_precache_vwep_model( char *name )
+intptr_t trap_precache_vwep_model( char *name )
 {
-	return syscall( G_PRECACHE_VWEP_MODEL, (int) name );
+	return syscall( G_PRECACHE_VWEP_MODEL, (intptr_t) name );
 }
 
-void trap_setorigin( int edn, float origin_x, float origin_y, float origin_z )
+void trap_setorigin( intptr_t edn, float origin_x, float origin_y, float origin_z )
 {
 	syscall( G_SETORIGIN,  edn, PASSFLOAT(origin_x),
 		 PASSFLOAT(origin_y), PASSFLOAT(origin_z) );
 }
 
-void trap_setsize( int edn, float min_x, float min_y, float min_z, float max_x,
+void trap_setsize( intptr_t edn, float min_x, float min_y, float min_z, float max_x,
 		   float max_y, float max_z )
 {
 	syscall( G_SETSIZE, edn, PASSFLOAT( min_x), PASSFLOAT( min_y),
 		 PASSFLOAT( min_z), PASSFLOAT( max_x), PASSFLOAT( max_y), PASSFLOAT( max_z ));
 }
 
-void trap_setmodel( int edn, char *model )
+void trap_setmodel( intptr_t edn, char *model )
 {
-	syscall( G_SETMODEL, edn, (int)model );
+	syscall( G_SETMODEL, edn, (intptr_t)model );
 }
 
 void trap_ambientsound( float pos_x, float pos_y, float pos_z, char *samp, float vol,
 			float atten )
 {
 	syscall( G_AMBIENTSOUND, PASSFLOAT( pos_x), PASSFLOAT( pos_y), PASSFLOAT( pos_z),
-		 (int)samp, PASSFLOAT( vol), PASSFLOAT( atten ));
+		 (intptr_t)samp, PASSFLOAT( vol), PASSFLOAT( atten ));
 }
 
-void trap_sound( int edn, int channel, char *samp, float vol, float att )
+void trap_sound( intptr_t edn, intptr_t channel, char *samp, float vol, float att )
 {
-	syscall( G_SOUND, edn, channel, (int)samp, PASSFLOAT( vol ), PASSFLOAT( att ));
+	syscall( G_SOUND, edn, channel, (intptr_t)samp, PASSFLOAT( vol ), PASSFLOAT( att ));
 }
 
-int trap_checkclient()
+intptr_t trap_checkclient()
 {
 	return  syscall( G_CHECKCLIENT ) ;
 }
 void trap_traceline( float v1_x, float v1_y, float v1_z, float v2_x, float v2_y,
-		     float v2_z, int nomonst, int edn )
+		     float v2_z, intptr_t nomonst, intptr_t edn )
 {
 	syscall( G_TRACELINE, PASSFLOAT( v1_x), PASSFLOAT( v1_y), PASSFLOAT( v1_z),
 		 PASSFLOAT( v2_x), PASSFLOAT( v2_y), PASSFLOAT( v2_z), nomonst,
 		 edn );
 }
 
-void trap_stuffcmd( int edn, const char *fmt, int flags )
+void trap_stuffcmd( intptr_t edn, const char *fmt, intptr_t flags )
 {
-	syscall( G_STUFFCMD, edn, (int)fmt, flags );
+	syscall( G_STUFFCMD, edn, (intptr_t)fmt, flags );
 }
 
 void trap_localcmd( const char *fmt )
 {
-	syscall( G_LOCALCMD,(int) fmt );
+	syscall( G_LOCALCMD,(intptr_t) fmt );
 }
 
 void trap_executecmd()
@@ -162,14 +175,14 @@ void trap_executecmd()
 	syscall( G_executecmd );
 }
 
-void trap_readcmd( const char *str, char* buf, int size )
+void trap_readcmd( const char *str, char* buf, intptr_t size )
 {
-	syscall( G_readcmd,(int) str, (int)buf, size );
+	syscall( G_readcmd,(intptr_t) str, (intptr_t)buf, size );
 }
 
 void trap_redirectcmd( gedict_t* ent, char* str )
 {
-	syscall( G_redirectcmd,(int) ent, (int)str);
+	syscall( G_redirectcmd,(intptr_t) ent, (intptr_t)str);
 }
 
 
@@ -177,86 +190,86 @@ float trap_cvar( const char *var )
 {
 	fi_t tmp;
 	
-	tmp._int = syscall( G_CVAR, (int)var );
+	tmp._int = syscall( G_CVAR, (intptr_t)var );
 
 	return tmp._float;
 }
-void trap_cvar_string( const char *var, char *buffer, int buffsize )
+void trap_cvar_string( const char *var, char *buffer, intptr_t buffsize )
 {
-	syscall( G_CVAR_STRING, (int)var, (int)buffer, buffsize );
+	syscall( G_CVAR_STRING, (intptr_t)var, (intptr_t)buffer, buffsize );
 }
 
 void trap_cvar_set( const char *var, const char *val )
 {
-	syscall( G_CVAR_SET, (int)var, (int)val );
+	syscall( G_CVAR_SET, (intptr_t)var, (intptr_t)val );
 }
 
 void    trap_cvar_set_float( const char *var, float val )
 {
-	syscall( G_CVAR_SET_FLOAT, (int)var, PASSFLOAT(val) );
+	syscall( G_CVAR_SET_FLOAT, (intptr_t)var, PASSFLOAT(val) );
 }
 
-int trap_droptofloor( int edn )
+intptr_t trap_droptofloor( intptr_t edn )
 {
 	return syscall( G_DROPTOFLOOR, edn );
 }
 
-int trap_walkmove( int edn, float yaw, float dist )
+intptr_t trap_walkmove( intptr_t edn, float yaw, float dist )
 {
 	return syscall( G_WALKMOVE, edn, PASSFLOAT( yaw), PASSFLOAT( dist ) );
 }
 
-int trap_movetogoal( float dist )
+intptr_t trap_movetogoal( float dist )
 {
 	return syscall( G_MOVETOGOAL, PASSFLOAT( dist ) );
 }
 
-void trap_lightstyle( int style, char *val )
+void trap_lightstyle( intptr_t style, char *val )
 {
-	syscall( G_LIGHTSTYLE, style, (int)val );
+	syscall( G_LIGHTSTYLE, style, (intptr_t)val );
 }
 
-int trap_checkbottom( int edn )
+intptr_t trap_checkbottom( intptr_t edn )
 {
 	return syscall( G_CHECKBOTTOM, edn );
 }
 
-int trap_pointcontents( float origin_x, float origin_y, float origin_z )
+intptr_t trap_pointcontents( float origin_x, float origin_y, float origin_z )
 {
 	return syscall( G_POINTCONTENTS, PASSFLOAT( origin_x), PASSFLOAT( origin_y),
 			PASSFLOAT( origin_z ));
 }
 
-int trap_nextent( int n )
+intptr_t trap_nextent( intptr_t n )
 {
 	return syscall( G_NEXTENT, n );
 }
 
 gedict_t* trap_nextclient( gedict_t* ent )
 {
-	return (gedict_t*)syscall( G_NEXTCLIENT, (int)ent );
+	return (gedict_t*)syscall( G_NEXTCLIENT, (intptr_t)ent );
 }
 
-/*int trap_find( int n,int fofs, char*str )
+/*intptr_t trap_find( intptr_t n,intptr_t fofs, char*str )
 {
-	return syscall( G_Find, n, fofs, (int)str );
+	return syscall( G_Find, n, fofs, (intptr_t)str );
 }*/
-gedict_t* trap_find( gedict_t* ent,int fofs, char*str )
+gedict_t* trap_find( gedict_t* ent,intptr_t fofs, char*str )
 {
-	return (gedict_t*)syscall( G_Find, (int)ent, fofs, (int)str );
+	return (gedict_t*)syscall( G_Find, (intptr_t)ent, fofs, (intptr_t)str );
 }
 
 gedict_t* trap_findradius( gedict_t* ent, float *org, float rad )
 {
-	return (gedict_t*)syscall( G_FINDRADIUS, (int)ent, (int)org, PASSFLOAT(rad) );
+	return (gedict_t*)syscall( G_FINDRADIUS, (intptr_t)ent, (intptr_t)org, PASSFLOAT(rad) );
 }
 
-void trap_makestatic( int edn )
+void trap_makestatic( intptr_t edn )
 {
 	syscall( G_MAKESTATIC, edn );
 }
 
-void trap_setspawnparam( int edn )
+void trap_setspawnparam( intptr_t edn )
 {
 	syscall( G_SETSPAWNPARAMS, edn );
 }
@@ -266,59 +279,59 @@ void trap_changelevel( const char *name )
 	syscall( G_CHANGELEVEL, name );
 }
 
-int trap_multicast( float origin_x, float origin_y, float origin_z, int to )
+intptr_t trap_multicast( float origin_x, float origin_y, float origin_z, intptr_t to )
 {
 	return syscall( G_MULTICAST, PASSFLOAT( origin_x), PASSFLOAT( origin_y),
 			PASSFLOAT( origin_z), to );
 }
 
 
-void trap_logfrag( int killer, int killee )
+void trap_logfrag( intptr_t killer, intptr_t killee )
 {
 	syscall( G_LOGFRAG,  killer , killee  );
 }
 
-void trap_infokey( int edn, char *key, char *valbuff, int sizebuff )
+void trap_infokey( intptr_t edn, char *key, char *valbuff, intptr_t sizebuff )
 {
-	syscall( G_GETINFOKEY, edn, (int)key, (int)valbuff, sizebuff );
+	syscall( G_GETINFOKEY, edn, (intptr_t)key, (intptr_t)valbuff, sizebuff );
 }
 
-void trap_WriteByte( int to, int data )
+void trap_WriteByte( intptr_t to, intptr_t data )
 {
 	syscall( G_WRITEBYTE, to, data );
 }
 
-void trap_WriteChar( int to, int data )
+void trap_WriteChar( intptr_t to, intptr_t data )
 {
 	syscall( G_WRITECHAR, to, data );
 }
 
-void trap_WriteShort( int to, int data )
+void trap_WriteShort( intptr_t to, intptr_t data )
 {
 	syscall( G_WRITESHORT, to, data );
 }
 
-void trap_WriteLong( int to, int data )
+void trap_WriteLong( intptr_t to, intptr_t data )
 {
 	syscall( G_WRITELONG, to, data );
 }
 
-void trap_WriteAngle( int to, float data )
+void trap_WriteAngle( intptr_t to, float data )
 {
 	syscall( G_WRITEANGLE, to, PASSFLOAT( data ));
 }
 
-void trap_WriteCoord( int to, float data )
+void trap_WriteCoord( intptr_t to, float data )
 {
 	syscall( G_WRITECOORD, to, PASSFLOAT( data ));
 }
 
-void trap_WriteString( int to, char *data )
+void trap_WriteString( intptr_t to, char *data )
 {
-	syscall( G_WRITESTRING, to, (int)data );
+	syscall( G_WRITESTRING, to, (intptr_t)data );
 }
 
-void trap_WriteEntity( int to, int edn )
+void trap_WriteEntity( intptr_t to, intptr_t edn )
 {
 	syscall( G_WRITEENTITY, to, edn );
 }
@@ -329,33 +342,33 @@ void trap_FlushSignon()
 }
 
 
-void trap_disableupdates( int edn, float time )
+void trap_disableupdates( intptr_t edn, float time )
 {
 	syscall( G_DISABLEUPDATES, edn , PASSFLOAT( time ));
 }
 
-int trap_CmdArgc()
+intptr_t trap_CmdArgc()
 {
 	return syscall( G_CMD_ARGC );
 }
-void trap_CmdArgv( int arg, char *valbuff, int sizebuff )
+void trap_CmdArgv( intptr_t arg, char *valbuff, intptr_t sizebuff )
 {
-	syscall( G_CMD_ARGV, arg, (int)valbuff, sizebuff );
+	syscall( G_CMD_ARGV, arg, (intptr_t)valbuff, sizebuff );
 }
 
-void trap_CmdArgs( char *valbuff, int sizebuff )
+void trap_CmdArgs( char *valbuff, intptr_t sizebuff )
 {
-	syscall( G_CMD_ARGS, (int)valbuff, sizebuff );
+	syscall( G_CMD_ARGS, (intptr_t)valbuff, sizebuff );
 }
 
 void trap_CmdTokenize( char *str )
 {
-	syscall( G_CMD_TOKENIZE, (int)str );
+	syscall( G_CMD_TOKENIZE, (intptr_t)str );
 }
 
 void    trap_TraceCapsule( float v1_x, float v1_y, float v1_z, 
 			float v2_x, float v2_y, float v2_z, 
-			int nomonst, int edn ,
+			intptr_t nomonst, intptr_t edn ,
 			float min_x, float min_y, float min_z, 
 			float max_x, float max_y, float max_z)
 {
@@ -367,9 +380,9 @@ void    trap_TraceCapsule( float v1_x, float v1_y, float v1_z,
 		 PASSFLOAT( max_x), PASSFLOAT( max_y), PASSFLOAT( max_z));
 }
 
-int trap_FS_OpenFile(char*name, fileHandle_t* handle, fsMode_t fmode )
+intptr_t trap_FS_OpenFile(char*name, fileHandle_t* handle, fsMode_t fmode )
 {
-	return syscall( G_FSOpenFile, (int)name, (int)handle, fmode );
+	return syscall( G_FSOpenFile, (intptr_t)name, (intptr_t)handle, fmode );
 }
 
 void trap_FS_CloseFile( fileHandle_t handle )
@@ -377,83 +390,83 @@ void trap_FS_CloseFile( fileHandle_t handle )
 	syscall( G_FSCloseFile, handle );
 }
 
-int trap_FS_ReadFile( char*dest, int quantity, fileHandle_t handle )
+intptr_t trap_FS_ReadFile( char*dest, intptr_t quantity, fileHandle_t handle )
 {
-	return syscall( G_FSReadFile, (int)dest, quantity, handle );
+	return syscall( G_FSReadFile, (intptr_t)dest, quantity, handle );
 }
 
-int trap_FS_WriteFile( char*src, int quantity, fileHandle_t handle )
+intptr_t trap_FS_WriteFile( char*src, intptr_t quantity, fileHandle_t handle )
 {
-	return syscall( G_FSWriteFile, (int)src, quantity, handle );
+	return syscall( G_FSWriteFile, (intptr_t)src, quantity, handle );
 }
 
-int trap_FS_SeekFile( fileHandle_t handle, int offset, int type )
+intptr_t trap_FS_SeekFile( fileHandle_t handle, intptr_t offset, intptr_t type )
 {
 	return syscall( G_FSSeekFile, handle,offset,type );
 }
 
-int 	trap_FS_GetFileList(  const char *path, const char *extension, char *listbuf, int bufsize, int flags )
+intptr_t 	trap_FS_GetFileList(  const char *path, const char *extension, char *listbuf, intptr_t bufsize, intptr_t flags )
 {
-	return syscall( G_FSGetFileList, (int)path, (int)extension, (int)listbuf, bufsize, flags);
+	return syscall( G_FSGetFileList, (intptr_t)path, (intptr_t)extension, (intptr_t)listbuf, bufsize, flags);
 }
 
-int trap_Map_Extension( const char* ext_name, int mapto)
+intptr_t trap_Map_Extension( const char* ext_name, intptr_t mapto)
 {
-	return syscall( G_Map_Extension, (int)ext_name, mapto );
+	return syscall( G_Map_Extension, (intptr_t)ext_name, mapto );
 }
 
-int 	trap_AddBot( const char* name, int bottomcolor, int topcolor, const char* skin)
+intptr_t 	trap_AddBot( const char* name, intptr_t bottomcolor, intptr_t topcolor, const char* skin)
 {
-        return syscall( G_Add_Bot, (int)name, bottomcolor, topcolor, (int)skin );
+        return syscall( G_Add_Bot, (intptr_t)name, bottomcolor, topcolor, (intptr_t)skin );
 }
 
-int 	trap_RemoveBot( int edn )
+intptr_t 	trap_RemoveBot( intptr_t edn )
 {
         return syscall( G_Remove_Bot, edn );
 }
 
-int 	trap_SetBotUserInfo( int edn, const char* varname, const char* value )
+intptr_t 	trap_SetBotUserInfo( intptr_t edn, const char* varname, const char* value )
 {
-        return syscall( G_SetBotUserInfo, edn, (int)varname, (int)value );
+        return syscall( G_SetBotUserInfo, edn, (intptr_t)varname, (intptr_t)value );
 }
 
-int 	trap_SetBotCMD( int edn,int msec, float angles_x, float angles_y, float angles_z, 
-                                int forwardmove, int sidemove, int upmove, 
-                                int buttons, int impulse)
+intptr_t 	trap_SetBotCMD( intptr_t edn,intptr_t msec, float angles_x, float angles_y, float angles_z, 
+                                intptr_t forwardmove, intptr_t sidemove, intptr_t upmove, 
+                                intptr_t buttons, intptr_t impulse)
 {
         return syscall( G_SetBotCMD, edn, msec, PASSFLOAT( angles_x), PASSFLOAT( angles_y), PASSFLOAT( angles_z), 
                                 forwardmove, sidemove, upmove, buttons, impulse );
 }
 
-void 	trap_setpause( int pause )
+void 	trap_setpause( intptr_t pause )
 {
 	syscall( G_SETPAUSE, pause );
 }
 
 
-int QVMstrftime( char *valbuff, int sizebuff, const char *fmt, int offset )
+intptr_t QVMstrftime( char *valbuff, intptr_t sizebuff, const char *fmt, intptr_t offset )
 {
-	return syscall( G_QVMstrftime, (int)valbuff, sizebuff, (int)fmt, offset );
+	return syscall( G_QVMstrftime, (intptr_t)valbuff, sizebuff, (intptr_t)fmt, offset );
 }
 
 void trap_makevectors( float *v )
 {
-	syscall( G_MAKEVECTORS, (int)v );
+	syscall( G_MAKEVECTORS, (intptr_t)v );
 }
 
 #if defined( __linux__ ) || defined( _WIN32 ) /* || defined( __APPLE__ ) require?*/
 size_t strlcpy(char *dst, char *src, size_t siz)
 {
-	return syscall( g_strlcpy, (int)dst, (int)src, (int)siz );
+	return syscall( g_strlcpy, (intptr_t)dst, (intptr_t)src, (intptr_t)siz );
 }
 
 size_t strlcat(char *dst, char *src, size_t siz)
 {
-	return syscall( g_strlcat, (int)dst, (int)src, (int)siz );
+	return syscall( g_strlcat, (intptr_t)dst, (intptr_t)src, (intptr_t)siz );
 }
 #endif
 
-int 	trap_SetUserInfo( int edn, const char* varname, const char* value, int flags )
+intptr_t 	trap_SetUserInfo( intptr_t edn, const char* varname, const char* value, intptr_t flags )
 {
-        return syscall( G_SETUSERINFO, edn, (int)varname, (int)value, flags );
+        return syscall( G_SETUSERINFO, edn, (intptr_t)varname, (intptr_t)value, flags );
 }

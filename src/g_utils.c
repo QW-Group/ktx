@@ -27,15 +27,6 @@
 
 void Sc_Stats(float on);
 
-
-int PASSFLOAT(float x)
-{
-	fi_t rc;
-	rc._float = x;
-	return rc._int;
-}
-
-
 int NUM_FOR_EDICT( gedict_t * e )
 {
 	int     b;
@@ -1864,7 +1855,7 @@ void ghost2scores( gedict_t *g )
 	WriteByte(to, SVC_UPDATEENTERTIME);				// update time
 	WriteByte(to, cl_slot);  						// client number
 // FIXME: !!! qqshka: - must be WriteFloat but API have not it - so use WriteLong - dunno is this ok
-	WriteLong(to, PASSFLOAT(g_globalvars.time - g->ghost_dt)); // client enter time - here time since player was dropped
+	WriteLong(to, (int)(g_globalvars.time - g->ghost_dt)); // client enter time - here time since player was dropped
 
 	WriteByte(to, SVC_UPDATEPING);      // update ping
 	WriteByte(to, cl_slot);      		// client number
