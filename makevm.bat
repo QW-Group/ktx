@@ -23,6 +23,8 @@ cd VM
 @if errorlevel 1 goto quit
 %CC% %CFLAGS% %INCFLAGS% %SRC%\client.c
 @if errorlevel 1 goto quit
+%CC% %CFLAGS% %INCFLAGS% %SRC%\clan_arena.c
+@if errorlevel 1 goto quit
 %CC% %CFLAGS% %INCFLAGS% %SRC%\combat.c
 @if errorlevel 1 goto quit
 %CC% %CFLAGS% %INCFLAGS% %SRC%\doors.c
