@@ -68,6 +68,10 @@
 #include <ctype.h>
 #include <limits.h>
 
+	#if defined( __linux__ )
+	#include <stdint.h>
+	#endif
+
 	#if defined( __linux__ ) || defined( _WIN32 ) /* || defined( __APPLE__ ) require?*/
 
 	// this is trap/syscalls, for popular functions like cos/sin/tan prototypes
@@ -129,7 +133,7 @@ typedef enum {false, true}	qboolean;
 
 //typedef int	string_t;
 typedef char*	string_t;
-typedef int	func_t;
+typedef int func_t;
 
 
 typedef float vec_t;

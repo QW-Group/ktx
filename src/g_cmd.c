@@ -25,8 +25,6 @@
 
 #include "g_local.h"
 
-extern void     trap_CmdArgv( int arg, char *valbuff, int sizebuff );
-
 void			cmdinfo ();
 void			cmduinfo ();
 void			cmd_wreg_do( byte c );

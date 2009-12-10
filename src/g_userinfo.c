@@ -19,7 +19,6 @@
 
 #include "g_local.h"
 
-extern void			trap_CmdArgv( int arg, char *valbuff, int sizebuff );
 extern qboolean		isSupport_Params(gedict_t *p);
 
 extern void			info_sys_mm_update( gedict_t *p, char *from, char *to );

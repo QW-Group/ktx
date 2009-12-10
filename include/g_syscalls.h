@@ -23,10 +23,6 @@
  *  $Id$
  */
 
-#ifdef Q3_VM
-	#define intptr_t int
-#endif
-
 intptr_t     trap_GetApiVersion(  );
 qboolean trap_GetEntityToken( char *token, intptr_t size );
 void    trap_DPrintf( const char *fmt );
