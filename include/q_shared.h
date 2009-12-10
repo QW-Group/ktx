@@ -133,7 +133,7 @@ typedef enum {false, true}	qboolean;
 
 //typedef int	string_t;
 typedef char*	string_t;
-typedef int func_t;
+typedef intptr_t func_t;
 
 
 typedef float vec_t;
