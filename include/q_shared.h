@@ -68,7 +68,8 @@
 #include <ctype.h>
 #include <limits.h>
 
-	#if defined( __linux__ )
+	#if !defined( _WIN32 )
+	// so intptr_t is defined for all non MS compilers
 	#include <stdint.h>
 	#endif
 
