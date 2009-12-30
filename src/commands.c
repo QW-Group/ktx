@@ -234,6 +234,8 @@ void ToggleCArena();
 
 void ToggleAntiLag();
 
+void DemoMark() { stuffcmd( self, "//demomark\n" ); }
+
 // CD - commands descriptions
 
 const char CD_NODESC[] = "no desc";
@@ -514,6 +516,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_CMDSLIST_DL  (CD_NODESC) // skip
 
 #define CD_ANTILAG      "toggle anti lag"
+#define CD_DEMOMARK     "put mark in the demo"
 
 
 void dummy() {}
@@ -810,6 +813,7 @@ cmd_t cmds[] = {
 	{ "votecoop",    votecoop,                  0    , CF_PLAYER | CF_MATCHLESS, CD_VOTECOOP },
 	{ "coop_nm_pu",	 ToggleNewCoopNm,           0    , CF_PLAYER | CF_MATCHLESS, CD_COOPNMPU },
 	{ "antilag",	 ToggleAntiLag,             0    , CF_PLAYER | CF_SPC_ADMIN, CD_ANTILAG },
+	{ "demomark",	 DemoMark,                  0    , CF_PLAYER, CD_DEMOMARK },
 };
 
 #undef DEF
