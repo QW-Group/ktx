@@ -257,6 +257,8 @@ void CA_Frame(void)
 				G_bprint(2, "%s\n", redtext("draw"));
 				round_num++;
 				ra_match_fight = 0;
+
+				break;
 			}
 		case 1: // Only one team alive
 			{
@@ -271,6 +273,8 @@ void CA_Frame(void)
 				}
 				round_num++;
 				ra_match_fight = 0;
+
+				break;
 			}
 		default: break; // both teams alive
 		}
