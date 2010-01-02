@@ -2892,7 +2892,6 @@ void WS_OnSpecPovChange( gedict_t *s )
 void WS_CheckUpdate( gedict_t *p )
 {
 	int i, j, trackers_cnt;
-	qboolean wpsx;
 	gedict_t *trackers[MAX_CLIENTS], *s;
 
 	if ( !p->wpstats_mask )
@@ -2902,31 +2901,37 @@ void WS_CheckUpdate( gedict_t *p )
 	trackers_cnt = 0;
 	memset(trackers, 0, sizeof(trackers));
 
-	for ( s = world; (s = find_spc(s)); )
+	for ( s = world; (s = find_client(s)); )
 	{
 		if ( trackers_cnt >= MAX_CLIENTS ) // should not be the case
 			G_Error("WS_CheckUpdate: trackers_cnt >= MAX_CLIENTS");
 
-		if ( i != s->s.v.goalentity )
-			continue; // spec do not track this player
+		if ( s->ct == ctPlayer )
+		{
+			if ( s != p )
+				continue; // we search for self only in players
+		}
+		else
+		{
+			if ( i != s->s.v.goalentity )
+				continue; // spec do not track this player
+		}
 
 		if ( !iKey( s, "wpsx" ) )
-			continue; // spec not interesting in new weapon stats
+			continue; // client not interesting in new weapon stats
 
 		trackers[trackers_cnt++] = s; //  remember this spec
 	}
-
-	wpsx = iKey( p, "wpsx" );
 
 	for ( i = wpNONE + 1; i < wpMAX; i++ )
 	{
 		if ( !( p->wpstats_mask & ( 1 << i ) ) )
 			continue;
 
-		// if client not interesting in new weapon stats, then put it in demo only
-		stuffcmd_flags( p, wpsx ? 0 : STUFFCMD_DEMOONLY, "//wps %d %s %d %d\n", NUM_FOR_EDICT( p ) - 1, WpName( i ), p->ps.wpn[ i ].attacks, p->ps.wpn[ i ].hits );
+		// put it in demo only
+		stuffcmd_flags( p, STUFFCMD_DEMOONLY, "//wps %d %s %d %d\n", NUM_FOR_EDICT( p ) - 1, WpName( i ), p->ps.wpn[ i ].attacks, p->ps.wpn[ i ].hits );
 
-		// send it to specs, do not put it in demos
+		// send it to clients, do not put it in demos
 		for ( j = 0; j < trackers_cnt; j++ )
 			stuffcmd_flags( trackers[j], STUFFCMD_IGNOREINDEMO, "//wps %d %s %d %d\n", NUM_FOR_EDICT( p ) - 1, WpName( i ), p->ps.wpn[ i ].attacks, p->ps.wpn[ i ].hits );
 	}
