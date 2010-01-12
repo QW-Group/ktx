@@ -47,7 +47,7 @@ qboolean 	ClientCommand()
 	self = PROG_TO_EDICT( g_globalvars.self );
 
 	if ( !self->k_accepted )
-		return true; // cmon, u r zombie or etc...
+		return false; // cmon, u r zombie or etc...
 
 	trap_CmdArgv( 0, cmd_command, sizeof( cmd_command ) );
 
