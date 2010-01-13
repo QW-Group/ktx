@@ -9,16 +9,16 @@
 void AdminMatchStart();
 void PlayerReady();
 void NextClient();
-qboolean DoKick(gedict_t *victim, gedict_t *kicker);
+qbool DoKick(gedict_t *victim, gedict_t *kicker);
 
 // is real admin
-qboolean is_real_adm(gedict_t *p)
+qbool is_real_adm(gedict_t *p)
 {
 	return (p->k_admin & AF_REAL_ADMIN);
 }
 
 // is elected admin
-qboolean is_adm(gedict_t *p)
+qbool is_adm(gedict_t *p)
 {
 	return ( is_real_adm( p ) || (p->k_admin & AF_ADMIN) );
 }
@@ -53,7 +53,7 @@ void ExitKick (gedict_t *kicker)
 }
 
 // assuming kicker is admin
-qboolean is_can_kick(gedict_t *victim, gedict_t *kicker)
+qbool is_can_kick(gedict_t *victim, gedict_t *kicker)
 {
 	if ( VIP_IsFlags(victim, VIP_NOTKICKABLE) && !is_real_adm(kicker) ) {
 		G_sprint(kicker, 2, "You can't kick VIP \x8D %s as elected admin\n", 
@@ -69,7 +69,7 @@ qboolean is_can_kick(gedict_t *victim, gedict_t *kicker)
 	return true;
 }
 
-qboolean DoKick(gedict_t *victim, gedict_t *kicker)
+qbool DoKick(gedict_t *victim, gedict_t *kicker)
 {
 	if (!victim || !kicker)
 		return false;
@@ -775,7 +775,7 @@ void AdminSwapAll()
 }
 
 // assuming kicker is admin
-qboolean is_can_forcespec(gedict_t *victim, gedict_t *kicker)
+qbool is_can_forcespec(gedict_t *victim, gedict_t *kicker)
 {
 	if ( VIP_IsFlags(victim, VIP_NOTKICKABLE) && !is_real_adm(kicker) ) {
 		G_sprint(kicker, 2, "You can't force_spec VIP \x8D %s as elected admin\n", 
@@ -791,7 +791,7 @@ qboolean is_can_forcespec(gedict_t *victim, gedict_t *kicker)
 	return true;
 }
 
-void do_force_spec(gedict_t *p, gedict_t *admin, qboolean spec)
+void do_force_spec(gedict_t *p, gedict_t *admin, qbool spec)
 {
 	if (!is_can_forcespec(p, admin))
 		return;
@@ -808,7 +808,7 @@ void do_force_spec(gedict_t *p, gedict_t *admin, qboolean spec)
 // ktpro (c)
 void force_spec()
 {
-	qboolean found = false;
+	qbool found = false;
 	gedict_t *p = NULL;
 	char *c_fs, arg_2[1024];
 	int i_fs, argc = trap_CmdArgc();

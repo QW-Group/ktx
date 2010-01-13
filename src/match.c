@@ -933,7 +933,7 @@ char *ItName( itemName_t it )
 }            
              
              
-qboolean itPowerup( itemName_t it )
+qbool itPowerup( itemName_t it )
 {            
 	return (it == itQUAD || it == itPENT || it == itRING);
 }
@@ -1674,7 +1674,7 @@ void StartMatch ()
 }
 
 // just check if someone using handicap
-static qboolean handicap_in_use(void)
+static qbool handicap_in_use(void)
 {
 	gedict_t *p;
 	int from;
@@ -1814,7 +1814,7 @@ void PrintCountdown( int seconds )
 	G_cp2all(text);
 }
 
-qboolean isCanStart ( gedict_t *s, qboolean forceMembersWarn )
+qbool isCanStart ( gedict_t *s, qbool forceMembersWarn )
 {
 	int k_lockmin     = ( isCA() ) ? 2 : cvar( "k_lockmin" );
 	int k_lockmax     = ( isCA() ) ? 2 : cvar( "k_lockmax" );
@@ -2123,7 +2123,7 @@ char *CompilateDemoName ()
 void StartDemoRecord ()
 {
 	if ( cvar( "demo_tmp_record" ) ) { // FIXME: TODO: make this more like ktpro
-		qboolean record = false;
+		qbool record = false;
 
 		if ( !deathmatch )
 			record = false;
@@ -2386,7 +2386,7 @@ void IdlebotCheck ()
 				"server activates the %s\n", redtext("idle bot"));
 }
 
-void CheckAutoXonX(qboolean use_time);
+void CheckAutoXonX(qbool use_time);
 
 // Called by a player to inform that (s)he is ready for a match.
 void PlayerReady ()

@@ -324,7 +324,7 @@ BULLETS
 TraceAttack
 ================
 */
-void TraceAttack( float damage, vec3_t dir, qboolean send_effects )
+void TraceAttack( float damage, vec3_t dir, qbool send_effects )
 {
 	vec3_t          org, tmp;
 
@@ -494,7 +494,7 @@ void FireBullets( float shotcount, vec3_t dir, float spread_x, float spread_y, f
 {
 	vec3_t          direction;
 	vec3_t          src, tmp, tmp2;
-	qboolean		classic_shotgun = cvar("k_classic_shotgun");
+	qbool		classic_shotgun = cvar("k_classic_shotgun");
 
 	trap_makevectors( self->s.v.v_angle );
 	VectorScale( g_globalvars.v_forward, 10, tmp );
@@ -1439,7 +1439,7 @@ PLAYER WEAPON USE
 
 void W_SetCurrentAmmo()
 {
-	qboolean need_fix = false;
+	qbool need_fix = false;
 	int             items;
 	float old_currentammo = self->s.v.currentammo;
 
@@ -1788,7 +1788,7 @@ void W_Attack()
 	}
 }
 
-qboolean W_CanSwitch( int wp, qboolean warn )
+qbool W_CanSwitch( int wp, qbool warn )
 {
 	int             it, am, fl = 0;
 
@@ -1867,7 +1867,7 @@ W_ChangeWeapon
 
 ============
 */
-qboolean W_ChangeWeapon( int wp )
+qbool W_ChangeWeapon( int wp )
 {
 	int             it, am, fl = 0;
 
@@ -1959,7 +1959,7 @@ CycleWeaponCommand
 Go to the next weapon with ammo
 ============
 */
-qboolean CycleWeaponCommand()
+qbool CycleWeaponCommand()
 {
 	int             i, it, am;
 
@@ -2042,7 +2042,7 @@ CycleWeaponReverseCommand
 Go to the prev weapon with ammo
 ============
 */
-qboolean CycleWeaponReverseCommand()
+qbool CycleWeaponReverseCommand()
 {
 	int             i, it, am;
 
@@ -2141,7 +2141,7 @@ ImpulseCommands
 
 void ImpulseCommands()
 {
-	qboolean clear = true;
+	qbool clear = true;
     int capt, impulse = self->s.v.impulse;
 
 	if ( self->ct != ctPlayer )
@@ -2198,7 +2198,7 @@ void can_prewar_msg( char *msg )
 
 
 // if fire == false then can_prewar is called for jump
-qboolean can_prewar ( qboolean fire )
+qbool can_prewar ( qbool fire )
 {
 	int k_prewar;
 

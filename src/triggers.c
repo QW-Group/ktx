@@ -452,7 +452,7 @@ void spawn_tdeath( vec3_t org, gedict_t *death_owner )
 
 void teleport_player(gedict_t *player, vec3_t origin, vec3_t angles, int flags)
 {
-	qboolean		dm = deathmatch;
+	qbool		dm = deathmatch;
 	gedict_t		*p, *p2;
 	deathType_t		dt = dtNONE;
 

@@ -19,7 +19,7 @@
 
 #include "g_local.h"
 
-extern qboolean		isSupport_Params(gedict_t *p);
+extern qbool		isSupport_Params(gedict_t *p);
 
 extern void			info_sys_mm_update( gedict_t *p, char *from, char *to );
 
@@ -208,10 +208,10 @@ void cmdinfo_infoset ( gedict_t *p )
 //
 //===================================================
 
-qboolean FixPlayerTeam ( char *newteam );
-qboolean FixPlayerColor ( char *newcolor );
+qbool FixPlayerTeam ( char *newteam );
+qbool FixPlayerColor ( char *newcolor );
 
-qboolean 	ClientUserInfoChanged ()
+qbool 	ClientUserInfoChanged ()
 {
 	char	arg_0[1024], arg_1[1024], arg_2[1024], *old;
 	int		i;
@@ -256,7 +256,7 @@ qboolean 	ClientUserInfoChanged ()
 //===================================================
 
 // in ctf we dont want red team players to be blue, etc
-qboolean FixPlayerColor ( char *newcolor )
+qbool FixPlayerColor ( char *newcolor )
 {
 	if ( self->ct == ctSpec )
 		return false;
@@ -272,7 +272,7 @@ qboolean FixPlayerColor ( char *newcolor )
 }
 
 // check if player tried to change team and this is allowed
-qboolean FixPlayerTeam ( char *newteam )
+qbool FixPlayerTeam ( char *newteam )
 {
 	char *s1, *s2;
 

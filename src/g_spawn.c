@@ -33,7 +33,7 @@ char           *spawnVars[MAX_SPAWN_VARS][2];	// key / value pairs
 int             numSpawnVarChars;
 char            spawnVarChars[MAX_SPAWN_VARS_CHARS];
 
-qboolean G_SpawnString( const char *key, const char *defaultString, char **out )
+qbool G_SpawnString( const char *key, const char *defaultString, char **out )
 {
 	int             i;
 
@@ -55,30 +55,30 @@ qboolean G_SpawnString( const char *key, const char *defaultString, char **out )
 	return false;
 }
 
-qboolean G_SpawnFloat( const char *key, const char *defaultString, float *out )
+qbool G_SpawnFloat( const char *key, const char *defaultString, float *out )
 {
 	char           *s;
-	qboolean        present;
+	qbool        present;
 
 	present = G_SpawnString( key, defaultString, &s );
 	*out = atof( s );
 	return present;
 }
 
-qboolean G_SpawnInt( const char *key, const char *defaultString, int *out )
+qbool G_SpawnInt( const char *key, const char *defaultString, int *out )
 {
 	char           *s;
-	qboolean        present;
+	qbool        present;
 
 	present = G_SpawnString( key, defaultString, &s );
 	*out = atoi( s );
 	return present;
 }
 
-qboolean G_SpawnVector( const char *key, const char *defaultString, float *out )
+qbool G_SpawnVector( const char *key, const char *defaultString, float *out )
 {
 	char           *s;
-	qboolean        present;
+	qbool        present;
 
 	present = G_SpawnString( key, defaultString, &s );
 	sscanf( s, "%f %f %f", &out[0], &out[1], &out[2] );
@@ -375,10 +375,10 @@ Used as a positional target for spotlights, etc.
 G_CallSpawn
 
 Finds the spawn function for the entity and calls it,
-returning qfalse if not found
+returning false if not found
 ===============
 */
-qboolean G_CallSpawn( gedict_t * ent )
+qbool G_CallSpawn( gedict_t * ent )
 {
 	spawn_t        *s;
 
@@ -394,7 +394,7 @@ qboolean G_CallSpawn( gedict_t * ent )
 	for ( item=bg_itemlist+1 ; item->classname ; item++ ) {
 		if ( !strcmp(item->classname, ent->classname) ) {
 			G_SpawnItem( ent, item );
-			return qtrue;
+			return true;
 		}
 	}*/
 
@@ -593,7 +593,7 @@ level's entity strings into level.spawnVars[]
 This does not actually spawn an entity.
 ====================
 */
-qboolean G_ParseSpawnVars( void )
+qbool G_ParseSpawnVars( void )
 {
 	char            keyname[MAX_TOKEN_CHARS];
 	char            com_token[MAX_TOKEN_CHARS];

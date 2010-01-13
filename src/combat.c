@@ -45,7 +45,7 @@ char *death_type( deathType_t dt )
 
 //============================================================================
 
-qboolean ISLIVE( gedict_t *e )
+qbool ISLIVE( gedict_t *e )
 {
 	if ( !e )
 		return false;
@@ -56,7 +56,7 @@ qboolean ISLIVE( gedict_t *e )
 	return e->s.v.health > 0;
 }
 
-qboolean ISDEAD( gedict_t *e )
+qbool ISDEAD( gedict_t *e )
 {
 	return !ISLIVE( e );
 }
@@ -71,7 +71,7 @@ Returns true if the inflictor can directly damage the target.  Used for
 explosions and melee attacks.
 ============
 */
-qboolean CanDamage( gedict_t * targ, gedict_t * inflictor )
+qbool CanDamage( gedict_t * targ, gedict_t * inflictor )
 {
 	vec3_t	dif;
 
@@ -352,11 +352,11 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	float			non_hdp_damage; // save damage before handicap apply for kickback calculation
 	float			native_damage = damage; // save damage before apply any modificator
 	char            *attackerteam, *targteam, *attackername, *victimname;
-	qboolean		tp4teamdmg = false;
+	qbool		tp4teamdmg = false;
 
 	//midair and instagib
 	float playerheight = 0, midheight = 0;
-	qboolean lowheight = false, midair = false, inwater = false, do_dmg = false, rl_dmg = false;
+	qbool lowheight = false, midair = false, inwater = false, do_dmg = false, rl_dmg = false;
 
 	// can't apply damage to dead
 	if ( !targ->s.v.takedamage || ISDEAD( targ ) )

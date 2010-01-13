@@ -24,7 +24,7 @@ int CA_wins_required(void)
 	return (k_clan_arena_rounds + 1)/2;
 }
 
-qboolean isCA( )
+qbool isCA( )
 {
 	return ( isTeam() && cvar("k_clan_arena") );
 }
@@ -146,7 +146,7 @@ void CA_PutClientInServer(void)
 	}
 }
 
-qboolean CA_can_fire( gedict_t *p )
+qbool CA_can_fire( gedict_t *p )
 {
 	if ( !p )
 		return false;
@@ -163,7 +163,7 @@ qboolean CA_can_fire( gedict_t *p )
 static int CA_check_alive_teams( int *alive_team )
 {
 	gedict_t *p;
-	qboolean few_alive_teams = false;
+	qbool few_alive_teams = false;
 	char *first_team = NULL;
 
 	if ( alive_team )

@@ -68,24 +68,24 @@ float           starttime;
 void            G_InitGame( int levelTime, int randomSeed );
 void			G_ShutDown();
 void            StartFrame( int time );
-qboolean        ClientCommand();
-qboolean 		ClientUserInfoChanged();
+qbool        ClientCommand();
+qbool 		ClientUserInfoChanged();
 void            G_EdictTouch();
 void            G_EdictThink();
 void            G_EdictBlocked();
 void            ClearGlobals();
 void			PausedTic( int duration );
 
-qboolean		ClientSay( qboolean isTeamSay );
+qbool		ClientSay( qbool isTeamSay );
 
 void			RemoveMOTD();
 void			ShowVersion();
 
-static			qboolean check_ezquake(gedict_t *p);
+static			qbool check_ezquake(gedict_t *p);
 
 void			SaveLevelStartParams( gedict_t *e );
 
-qboolean		FTE_sv = false;
+qbool		FTE_sv = false;
 
 
 /*
@@ -502,7 +502,7 @@ void ClearGlobals()
 //===========================================================================
 
 // yeah its lame, but better than checking setinfo each time.
-static qboolean check_ezquake(gedict_t *p)
+static qbool check_ezquake(gedict_t *p)
 {
 	char *clinfo = ezinfokey( p, "*client" );
 

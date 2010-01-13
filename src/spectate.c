@@ -101,9 +101,9 @@ void SpecDecodeLevelParms()
 //    	self->ps.handicap = g_globalvars.parm14;
 }
 
-qboolean SpecCanConnect( gedict_t *spec )
+qbool SpecCanConnect( gedict_t *spec )
 {
-	extern qboolean nospecs_canconnect( gedict_t *spec );
+	extern qbool nospecs_canconnect( gedict_t *spec );
 
 	if ( !nospecs_canconnect( spec ) )
 	{
@@ -356,7 +356,7 @@ void FixSpecWizards ()
 {
 	static int k_asw = -1; // static
 
-	qboolean changed   = false;
+	qbool changed   = false;
 	int 	 k_asw_new = GetSpecWizard ();
 
 	if( k_asw != k_asw_new || framecount == 1 ) { // force on first frame

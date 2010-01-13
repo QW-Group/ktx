@@ -68,7 +68,7 @@ cruc_1, cruc_2, cruc_3, cruc_4, cruc_5, cruc_6,
 
 };
 
-qboolean frame_is_fast_zombie_pain( int frame )
+qbool frame_is_fast_zombie_pain( int frame )
 {
 	return (   ( frame >= paina1 && frame <= paina12 )
 			|| ( frame >= painb1 && frame <= painb28 )
@@ -77,7 +77,7 @@ qboolean frame_is_fast_zombie_pain( int frame )
 		   );
 }
 
-qboolean frame_is_long_zombie_pain( int frame )
+qbool frame_is_long_zombie_pain( int frame )
 {
 	return ( frame >= paine1 && frame <= paine30 );
 }

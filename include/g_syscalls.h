@@ -24,7 +24,7 @@
  */
 
 intptr_t     trap_GetApiVersion(  );
-qboolean trap_GetEntityToken( char *token, intptr_t size );
+qbool trap_GetEntityToken( char *token, intptr_t size );
 void    trap_DPrintf( const char *fmt );
 void 	trap_conprint( const char *fmt );
 

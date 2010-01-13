@@ -72,7 +72,7 @@ void ra_out_que( gedict_t *p )
 }
 
 // check if element is in ra queue
-qboolean ra_isin_que( gedict_t *p )
+qbool ra_isin_que( gedict_t *p )
 {
 	int i;
 
@@ -104,17 +104,17 @@ int ra_pos_que( gedict_t *p )
 // }
 
 // ra is just modificator of duel
-qboolean isRA( )
+qbool isRA( )
 {
 	return ( isDuel() && cvar("k_rocketarena") );
 }
 
-qboolean isWinner( gedict_t *p )
+qbool isWinner( gedict_t *p )
 {
 	return ( p->ra_pt == raWinner );
 }
 
-qboolean isLoser( gedict_t *p )
+qbool isLoser( gedict_t *p )
 {
 	return ( p->ra_pt == raLoser );
 }
@@ -355,7 +355,7 @@ void setnowep( gedict_t *anent )
 void setfullwep( gedict_t *anent )
 {
 	gedict_t *swap;
-	qboolean add = (match_start_time == g_globalvars.time ? false : true);
+	qbool add = (match_start_time == g_globalvars.time ? false : true);
 
 // ammo
 	anent->s.v.ammo_nails   = min(200, (add ? anent->s.v.ammo_nails : 0)   + 80);
@@ -398,7 +398,7 @@ void setfullwep( gedict_t *anent )
 	self = swap;
 }
 
-qboolean readytostart()
+qbool readytostart()
 {
 	if ( !isRA() )
 		return true;

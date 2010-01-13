@@ -60,7 +60,7 @@ int k_ctf_custom_models;// if server has flag/grapple models you can enable them
 						// http://www.quakeworld.us/ult/ctf/pak0.pak  (only 300kb)
 						// if not we use old style keys and ax/voreball for grapple
 #ifdef CTF_RELOADMAP
-qboolean k_ctf;			// is ctf was active at map load
+qbool k_ctf;			// is ctf was active at map load
 #endif
 // }
 
@@ -77,8 +77,8 @@ int   k_cmd_fp_disabled; // if 1 - don't use cmd floodprot
 
 // }
 
-qboolean	vw_available; // vwep extension available
-qboolean	vw_enabled; // vweps enabled
+qbool	vw_available; // vwep extension available
+qbool	vw_enabled; // vweps enabled
 
 float k_sv_locktime; // some time before non VIP players can't connect, spectators not affected
 
@@ -95,8 +95,8 @@ float	f_check; // is we in state of some f_xxx check
 
 float lastTeamLocationTime; // next udate for CheckTeamStatus()
 
-qboolean first_rl_taken; // true when some one alredy took rl
+qbool first_rl_taken; // true when some one alredy took rl
 
 int sv_minping; // used to broadcast changes
 
-qboolean	k_antilag;
+qbool	k_antilag;

@@ -1257,17 +1257,17 @@ char *armor_type( int items )
 	return string[index++];
 }
 
-qboolean isghost( gedict_t *ed )
+qbool isghost( gedict_t *ed )
 {
 	return (streq(ed->s.v.classname, "ghost") ? true : false);
 }
 // gametype >>>
-qboolean isDuel( )
+qbool isDuel( )
 {
 	return (k_mode == gtDuel ? true : false);
 }
 
-qboolean isTeam( )
+qbool isTeam( )
 {
 	return (k_mode == gtTeam ? true : false);
 }
@@ -1277,12 +1277,12 @@ int tp_num()
 	return ( (isTeam() || isCTF()) ? teamplay : 0);
 }
 
-qboolean isFFA( )
+qbool isFFA( )
 {
 	return (k_mode == gtFFA ? true : false);
 }
 
-qboolean isCTF( )
+qbool isCTF( )
 {
 #ifdef CTF_RELOADMAP
 	return k_ctf; // once setup at map load
@@ -1291,7 +1291,7 @@ qboolean isCTF( )
 #endif
 }
 
-qboolean isUnknown( )
+qbool isUnknown( )
 {
 #ifdef CTF_RELOADMAP
 	if ( cvar("k_mode") == gtCTF )
@@ -1345,7 +1345,7 @@ int GetHandicap( gedict_t *p )
 	return (cvar( "k_lock_hdp" ) ? 100 : hdc);
 }
 
-qboolean SetHandicap( gedict_t *p, int nhdc )
+qbool SetHandicap( gedict_t *p, int nhdc )
 {
 	int hdc = GetHandicap( p ); // remember before change
 
@@ -1764,7 +1764,7 @@ void cvar_toggle_msg( gedict_t *p, char *cvarName, char *msg )
 }
 
 // generally - this check if we can read file - but used for exec command
-qboolean can_exec( char *name )
+qbool can_exec( char *name )
 {
 	fileHandle_t handle;
 

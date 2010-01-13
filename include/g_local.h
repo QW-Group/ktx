@@ -87,7 +87,7 @@ int             NUM_FOR_EDICT( gedict_t * e );
 
 #define DA_WPNS (IT_AXE|IT_SHOTGUN|IT_SUPER_SHOTGUN|IT_NAILGUN|IT_SUPER_NAILGUN|IT_ROCKET_LAUNCHER|IT_GRENADE_LAUNCHER|IT_LIGHTNING)
 
-extern qboolean	FTE_sv; // is we run on FTE server
+extern qbool	FTE_sv; // is we run on FTE server
 
 
 extern gameData_t gamedata;
@@ -271,18 +271,18 @@ gedict_t	*not_connected_by_IDorName( const char *IDname );
 
 char		*armor_type( int items );
 
-qboolean	isghost( gedict_t *ed );
+qbool	isghost( gedict_t *ed );
 
-qboolean	isDuel( );
-qboolean	isTeam( );
-qboolean	isFFA( );
-qboolean	isCTF( );
-qboolean	isUnknown( );
+qbool	isDuel( );
+qbool	isTeam( );
+qbool	isFFA( );
+qbool	isCTF( );
+qbool	isUnknown( );
 int			tp_num();
 int			GetUserID(gedict_t *p);
 char		*TrackWhom(gedict_t *p);
 int			GetHandicap( gedict_t *p );
-qboolean	SetHandicap( gedict_t *p, int nhdc );
+qbool	SetHandicap( gedict_t *p, int nhdc );
 void		changelevel( const char *name );
 int			Get_Powerups ();
 
@@ -308,7 +308,7 @@ char		*str_noweapon(int k_disallow_weapons);
 
 void		cvar_toggle_msg( gedict_t *p, char *cvarName, char *msg );
 
-qboolean	can_exec( char *name );
+qbool	can_exec( char *name );
 
 void		ghostClearScores( gedict_t *g );
 void		update_ghosts ();
@@ -376,10 +376,10 @@ void            G_InitMemory( void );
 //
 
 void            G_SpawnEntitiesFromString( void );
-qboolean        G_SpawnString( const char *key, const char *defaultString, char **out );
-qboolean        G_SpawnFloat( const char *key, const char *defaultString, float *out );
-qboolean        G_SpawnInt( const char *key, const char *defaultString, int *out );
-qboolean        G_SpawnVector( const char *key, const char *defaultString, float *out );
+qbool        G_SpawnString( const char *key, const char *defaultString, char **out );
+qbool        G_SpawnFloat( const char *key, const char *defaultString, float *out );
+qbool        G_SpawnInt( const char *key, const char *defaultString, int *out );
+qbool        G_SpawnVector( const char *key, const char *defaultString, float *out );
 void            SUB_Remove();
 void			SUB_RM_01( gedict_t *ent );
 void            SUB_Null();
@@ -403,7 +403,7 @@ extern int      modelindex_eyes, modelindex_player;
 void			set_nextmap( char *map );
 void			GotoNextMap();
 
-qboolean		CheckRate (gedict_t *p, char *newrate);
+qbool		CheckRate (gedict_t *p, char *newrate);
 
 int				tiecount();
 void			Check_SD( gedict_t *p );
@@ -411,7 +411,7 @@ void			Check_SD( gedict_t *p );
 void            SetChangeParms();
 void            SetNewParms();
 void            ClientConnect();
-void			k_respawn( gedict_t *p, qboolean body );
+void			k_respawn( gedict_t *p, qbool body );
 void            PutClientInServer( void );
 void            ClientDisconnect();
 void            PlayerPreThink();
@@ -449,7 +449,7 @@ void            W_FireAxe();
 void            W_FireSpikes( float ox );
 void            W_FireLightning();
 void			LightningDamage( vec3_t p1, vec3_t p2, gedict_t * from, float damage );
-qboolean		W_CanSwitch( int wp, qboolean warn );
+qbool		W_CanSwitch( int wp, qbool warn );
 
 void			FireBullets( float shotcount, vec3_t dir, float spread_x, float spread_y, float spread_z, deathType_t deathtype );
 
@@ -459,7 +459,7 @@ void            launch_spike( vec3_t org, vec3_t dir );
 
 float			CountPlayers();
 float			CountRTeams();
-qboolean 		isCanStart ( gedict_t *s, qboolean forceMembersWarn );
+qbool 		isCanStart ( gedict_t *s, qbool forceMembersWarn );
 void			StartTimer ();
 void			StopTimer ( int removeDemo );
 
@@ -470,10 +470,10 @@ extern gedict_t *damage_attacker, *damage_inflictor;
 
 char			*death_type( deathType_t dt );
 
-qboolean		ISLIVE( gedict_t *e );
-qboolean		ISDEAD( gedict_t *e );
+qbool		ISLIVE( gedict_t *e );
+qbool		ISDEAD( gedict_t *e );
 
-qboolean		CanDamage( gedict_t *targ, gedict_t *inflictor );
+qbool		CanDamage( gedict_t *targ, gedict_t *inflictor );
 
 void            T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker,
 			  float damage );
@@ -508,7 +508,7 @@ void            teleport_player(gedict_t *player, vec3_t origin, vec3_t angles, 
 
 // runes.c
 void            DropRune();
-void            SpawnRunes( qboolean yes );
+void            SpawnRunes( qbool yes );
 void            TossRune();
 void            ResistanceSound( gedict_t *player );
 void            HasteSound( gedict_t *player );
@@ -516,8 +516,8 @@ void            RegenerationSound( gedict_t *player );
 
 // ctf.c
 void            PlayerDropFlag( gedict_t *player );
-void            RegenFlags( qboolean yes );
-void			AddHook( qboolean yes );
+void            RegenFlags( qbool yes );
+void			AddHook( qbool yes );
 void			CTF_Obituary( gedict_t *targ, gedict_t *attacker );
 
 // logs.c
@@ -569,7 +569,7 @@ extern int cmds_cnt; // count of commands in 'cmds'
 int DoCommand(int icmd);
 int DoCommand_Name(char *cmd_name);
 
-qboolean isCmdFlood(gedict_t *p);
+qbool isCmdFlood(gedict_t *p);
 
 void Init_cmds(void);
 
@@ -577,7 +577,7 @@ void StuffModCommands( gedict_t *p );
 
 void SetPractice(int srv_practice_mode, const char *mapname);
 
-qboolean check_master();
+qbool check_master();
 
 // { usermodes
 
@@ -611,8 +611,8 @@ int um_idx_byname(char *name); // return -1 if not found
 
 // { spec more info
 
-qboolean	mi_on();
-qboolean	mi_adm_only();
+qbool	mi_on();
+qbool	mi_adm_only();
 void		mi_print( gedict_t *tooker, int it, char *msg );
 void		info_mi_update( gedict_t *p, char *from, char *to );
 
@@ -655,13 +655,13 @@ typedef struct votemap_s {
 extern  votemap_t maps_voted[];
 int 	vote_get_maps ();
 
-qboolean is_elected(gedict_t *p, electType_t et);
+qbool is_elected(gedict_t *p, electType_t et);
 
 int  	get_elect_type ();
 char 	*get_elect_type_str ();
 
 void	vote_clear( int fofs );
-int		get_votes_req( int fofs, qboolean diff );
+int		get_votes_req( int fofs, qbool diff );
 int 	get_votes( int fofs );
 int		get_votes_by_value( int fofs, int value );
 int		is_admins_vote( int fofs );
@@ -692,8 +692,8 @@ void	AbortElect();
 #define AF_ADMIN       (1<<0) // elected admin
 #define AF_REAL_ADMIN  (1<<1) // pass/vip granted admin (real admin in terms of ktpro)
 
-qboolean is_real_adm(gedict_t *p); // is pass/vip granted admin (real admin in terms of ktpro)
-qboolean is_adm(gedict_t *p);      // is elected admin (admin rigths granted by /elect command)
+qbool is_real_adm(gedict_t *p); // is pass/vip granted admin (real admin in terms of ktpro)
+qbool is_adm(gedict_t *p);      // is elected admin (admin rigths granted by /elect command)
 
 void	KickThink ();
 void	ExitKick(gedict_t *kicker);
@@ -709,18 +709,18 @@ void		ra_init_que();
 gedict_t	*ra_que_first();
 void		ra_in_que( gedict_t *p );
 void		ra_out_que( gedict_t *p );
-qboolean	ra_isin_que( gedict_t *p );
+qbool	ra_isin_que( gedict_t *p );
 int			ra_pos_que( gedict_t *p );
-qboolean	isRA( ); // not game mode, but just modificator of duel
-qboolean	isWinner( gedict_t *p );
-qboolean	isLoser( gedict_t *p );
+qbool	isRA( ); // not game mode, but just modificator of duel
+qbool	isWinner( gedict_t *p );
+qbool	isLoser( gedict_t *p );
 gedict_t	*getWinner();
 gedict_t	*getLoser();
 void		ra_ClientDisconnect();
 void		ra_ClientObituary( gedict_t *targ, gedict_t *attacker );
 void		ra_PutClientInServer();
 void		RocketArenaPre();
-qboolean	readytostart();
+qbool	readytostart();
 void		ra_Frame();
 void		setfullwep( gedict_t *anent );
 
@@ -732,7 +732,7 @@ void		ra_break();
 
 // clan_arena.c
 
-qboolean	isCA();
+qbool	isCA();
 int			CA_wins_required(void);
 void		SM_PrepareCA(void);
 void		apply_CA_settings(void);
@@ -740,7 +740,7 @@ void		CA_PrintScores(void);
 void		CA_TeamsStats(void);
 void		CA_Frame(void);
 void		CA_PutClientInServer(void);
-qboolean	CA_can_fire( gedict_t *p );
+qbool	CA_can_fire( gedict_t *p );
 
 // captain.c
 
@@ -768,9 +768,9 @@ void    GrappleReset(gedict_t *rhook);
 
 // race.c
 
-qboolean 	isRACE( void );
+qbool 	isRACE( void );
 
-qboolean 	race_weapon_allowed( gedict_t *p );
+qbool 	race_weapon_allowed( gedict_t *p );
 
 void		race_init( void );
 void		race_shutdown( char *msg );
@@ -821,7 +821,7 @@ extern	int   k_lastvotedmap;	// last voted map, used for agree command?
 extern  int k_ctf_custom_models;// use or not custom models
 extern  int k_allowed_free_modes; // reflect appropriate cvar - but changed only at map load
 #ifdef CTF_RELOADMAP
-extern  qboolean k_ctf;			// is ctf was active at map load
+extern  qbool k_ctf;			// is ctf was active at map load
 #endif
 // }
 
@@ -839,8 +839,8 @@ extern  int   k_cmd_fp_disabled; // if 1 - don't use cmd floodprot
 
 extern  float k_sv_locktime; // some time before non VIP players can't connect, spectators not affected
 
-extern  qboolean	vw_available; // vwep extension available
-extern  qboolean	vw_enabled; // vweps enabled
+extern  qbool	vw_available; // vwep extension available
+extern  qbool	vw_enabled; // vweps enabled
 
 // { rocket arena
 
@@ -855,11 +855,11 @@ extern	float f_check; // is we in state of some f_xxx check
 
 extern	float lastTeamLocationTime; // next udate for CheckTeamStatus()
 
-extern	qboolean first_rl_taken; // true when some one alredy took rl
+extern	qbool first_rl_taken; // true when some one alredy took rl
 
 extern	int sv_minping; // used to broadcast changes
 
-extern	qboolean	k_antilag;
+extern	qbool	k_antilag;
 
 // heh, some hack for mvdsv for grabbing some data
 

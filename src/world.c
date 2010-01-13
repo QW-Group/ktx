@@ -537,7 +537,7 @@ void Customize_Maps()
 
 // create cvar via 'set' command
 // FIXME: unfortunately with current API I can't check if cvar already exist
-qboolean RegisterCvarEx ( const char *var, const char *defaultstr )
+qbool RegisterCvarEx ( const char *var, const char *defaultstr )
 {
 
 	if ( !strnull( cvar_string( var ) ) ) {
@@ -566,7 +566,7 @@ qboolean RegisterCvarEx ( const char *var, const char *defaultstr )
 }
 
 // like RegisterCvarEx, but uses "" for default value
-qboolean RegisterCvar ( const char *var )
+qbool RegisterCvar ( const char *var )
 {
 	return RegisterCvarEx(var, "");
 }
@@ -574,7 +574,7 @@ qboolean RegisterCvar ( const char *var )
 void FirstFrame	( )
 {
 	int 		i, um_idx;
-	qboolean	matchless_was_forced = false;
+	qbool	matchless_was_forced = false;
 
 	if ( framecount != 1 )
 		return;
@@ -883,7 +883,7 @@ void CheckSvUnlock ()
 }
 
 // switch XonX mode dependant on players + specs count
-void CheckAutoXonX(qboolean use_time)
+void CheckAutoXonX(qbool use_time)
 {
 	static int old_count = -666; // static
 	static float last_check_time = 0;
@@ -961,7 +961,7 @@ void FixCTFItems()
 
 void FixRA()
 {
-	static qboolean old_k_rocketarena = false;	// static
+	static qbool old_k_rocketarena = false;	// static
 
 	if ( framecount == 1 )
 		return; // can't guess here something yet
@@ -986,7 +986,7 @@ void FixPowerups ()
 {
 	static int k_pow = -1; // static
 
-	qboolean changed   = false;
+	qbool changed   = false;
 	int 	 k_pow_new = Get_Powerups();
 
 	if( k_pow != k_pow_new || framecount == 1 ) { // force on first frame

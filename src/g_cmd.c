@@ -38,9 +38,9 @@ void			s_t_do (char *str, char *tname);
 void			s_t();
 void			s_m_do (char *str, int m); // do multi print
 void			s_m();
-void			multi_do(int from_arg, qboolean from_mmode); // set up multi set
+void			multi_do(int from_arg, qbool from_mmode); // set up multi set
 
-qboolean 	ClientCommand()
+qbool 	ClientCommand()
 {
 	char	cmd_command[1024];
 
@@ -114,8 +114,8 @@ void cmd_ack()
 
 typedef struct
 {
-	qboolean	active;
-	qboolean	applied;
+	qbool	active;
+	qbool	applied;
 	
 	vec3_t		origin;
 	vec3_t		apply_origin;
@@ -368,7 +368,7 @@ void fp_toggle ( float type )
 					say_fp_levels[k_fp-1].name );
 }
 
-qboolean isSayFlood(gedict_t *p)
+qbool isSayFlood(gedict_t *p)
 {
 	int idx;
 
@@ -417,13 +417,13 @@ static int HexToInt(char c)
 		return -1;
 }
 
-static qboolean isSupport_ColoredText(gedict_t *p)
+static qbool isSupport_ColoredText(gedict_t *p)
 {
 	// seems only ezquake support it atm
 	return (p->ezquake_version < 1754 ? false : true);
 }
 
-qboolean ClientSay( qboolean isTeamSay )
+qbool ClientSay( qbool isTeamSay )
 {
 	int j, l, mmode, flags;
 	char text[1024] = {0}, textuncolored[1024] = {0}, text2[1024] = {0}, prefix[128] = {0};
@@ -431,7 +431,7 @@ qboolean ClientSay( qboolean isTeamSay )
 	int sv_spectalk = cvar("sv_spectalk");
 	int sv_sayteam_to_spec = cvar("sv_sayteam_to_spec");
 	gedict_t *client, *goal;
-	qboolean fake = false, ignore_in_demos, spec_talk = false;
+	qbool fake = false, ignore_in_demos, spec_talk = false;
 
 	self = PROG_TO_EDICT( g_globalvars.self );
 
@@ -892,7 +892,7 @@ void multi_usage()
 #define MMOP_QQ (5) // ??
 
 
-void multi_do(int from_arg, qboolean from_mmode)
+void multi_do(int from_arg, qbool from_mmode)
 {
 	gedict_t *p;
 	char arg_1[1024], arg_2[1024], arg_x[1024], multi[1024];
@@ -1074,7 +1074,7 @@ char *mmode_str(int mmode)
 
 void mmode ()
 {
-	qboolean set;
+	qbool set;
 	gedict_t *p = NULL;
 	int argc = trap_CmdArgc(), id, mmode, till;
 	char arg_2[1024], arg_3[1024], *tname, *rcpass;

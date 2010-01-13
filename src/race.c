@@ -80,7 +80,7 @@ typedef struct
 
 	int						next_race_time;		// used for centerprint, help us print it not each server frame but more rare, each 100ms or something
 
-	qboolean				warned;				// do we warned why we can't start race
+	qbool				warned;				// do we warned why we can't start race
 	int						next_racer;			// this is queue of racers
 
 	raceWeapoMode_t			weapon;				// weapon mode
@@ -100,7 +100,7 @@ race_t			race; // whole race struct
 //============================================
 
 void race_cancel( const char *fmt, ... );
-void race_start( qboolean restart, const char *fmt, ... );
+void race_start( qbool restart, const char *fmt, ... );
 void race_unready_all(void);
 
 void race_remove_ent( void );
@@ -114,7 +114,7 @@ char *classname_for_nodeType( raceRouteNodeType_t nodeType );
 // this is more like a HOOK, doesn't used internally in race.c but used outside,
 // outside of race.c file we does't need to know in which exact sate we are, but in some cases inside race.c we need to know 
 // is it contdown or active state and this function _doesn't_ help us in such cases. Argh, this comment supposed to make it more clean, but seems I failed.
-qboolean isRACE( void )
+qbool isRACE( void )
 {
 	if ( match_in_progress || match_over )
 		return false;
@@ -196,7 +196,7 @@ void race_unready_all(void)
 
 //============================================
 
-qboolean race_route_add_start( void )
+qbool race_route_add_start( void )
 {
 	if ( race.cnt < 0 || race.cnt >= MAX_ROUTES )
 		return false;
@@ -215,7 +215,7 @@ void race_route_add_end( void )
 	race.cnt++;
 }
 
-qboolean race_add_route_node(float x, float y, float z, float pitch, float yaw, raceRouteNodeType_t	type)
+qbool race_add_route_node(float x, float y, float z, float pitch, float yaw, raceRouteNodeType_t	type)
 {
 	int node_idx;
 
@@ -647,7 +647,7 @@ char *race_weapon_mode( void )
 	return ""; // keep compiler silent
 }
 
-qboolean race_weapon_allowed( gedict_t *p )
+qbool race_weapon_allowed( gedict_t *p )
 {
 	if ( !race.status )
 		return true; // not a race, so allowed
@@ -1187,7 +1187,7 @@ gedict_t *race_set_next_in_line( void )
 
 //============================================
 
-qboolean race_can_go( qboolean cancel )
+qbool race_can_go( qbool cancel )
 {
 	// can't go on, noone ready
 	if ( !race_count_ready_players() )
@@ -1247,10 +1247,10 @@ qboolean race_can_go( qboolean cancel )
 }
 
 //
-// qboolean restart:
+// qbool restart:
 // true  - means continue current competition, just select next racer in line, keep best results.
 // false - means start completely new race, reset best result and etc.
-void race_start( qboolean restart, const char *fmt, ... )
+void race_start( qbool restart, const char *fmt, ... )
 {
 	va_list argptr;
 	char    text[1024];
@@ -1709,7 +1709,7 @@ void r_mode( )
 	G_bprint(2, "%s set race weapon mode to %s\n", self->s.v.netname, redtext( race_weapon_mode() ) );
 }
 
-qboolean race_load_route( int route )
+qbool race_load_route( int route )
 {
 	int i;
 

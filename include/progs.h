@@ -206,7 +206,7 @@ typedef struct fp_cmd_s {
 #define MAX_WREG_IMP (9)
 
 typedef struct wreg_s {
-	qboolean init;
+	qbool init;
 
 	int attack;
 	int impulse[MAX_WREG_IMP];
@@ -469,7 +469,7 @@ typedef struct gedict_s {
 	int   favx[MAX_CLIENTS];    // here stored players number for appropriate favX_add/Xfav_go commands
 	int   fav[MAX_CLIENTS];     // here stored players number for fav_add/next_fav commands
 	autoTrackType_t autotrack;  // is autotrack or auto_pow or ktpro autorack
-	qboolean apply_ktpro_autotrack; // if we use ktpro's autotrack, that a hint to apply pov switch
+	qbool apply_ktpro_autotrack; // if we use ktpro's autotrack, that a hint to apply pov switch
 	struct gedict_s *autotrack_hint; // per spectator autotrack hint, this helps switch pov more precise
 	struct gedict_s *wizard;    // for specs, link to the entity which represent wizard
 	int   last_goal;            // just store here self->s.v.goal from last spec frame, so we can catch pov switch
@@ -481,9 +481,9 @@ typedef struct gedict_s {
 
 // { CTF
 	struct gedict_s *hook;         // grapple
-	qboolean ctf_sound;            // sound stuff
-	qboolean on_hook;              // are we on the grapple?
-	qboolean hook_out;             // is the grapple in flight?
+	qbool ctf_sound;            // sound stuff
+	qbool on_hook;              // are we on the grapple?
+	qbool hook_out;             // is the grapple in flight?
 	int ctf_flag;                  // do we have a rune or flag?
 	float ctf_freeze;              // removes jitterness from grapple 
 	float regen_time;              // time to update health if regen rune
@@ -499,10 +499,10 @@ typedef struct gedict_s {
 //
 	int i_agmr; 		// Instagib AirGib Master rune
 
-	qboolean was_jump;
+	qbool was_jump;
 
 // { wreg
-	qboolean wreg_attack;		   // client simulate +attack via "cmd wreg" feature
+	qbool wreg_attack;		   // client simulate +attack via "cmd wreg" feature
 	wreg_t *wreg; // [256]
 // }
 
@@ -524,18 +524,18 @@ typedef struct gedict_s {
 // }
 
 // { Clan Arena
-	qboolean ca_alive;
+	qbool ca_alive;
 // }
 
 // {
 	float pb_time;
 	float pb_old_time;
 	int pb_frame; // frame which currently must be or already played
-	qboolean is_playback;
+	qbool is_playback;
 
 	float rec_start_time; // time when record starts
 	int rec_count; // count of recorded frames
-	qboolean is_recording;
+	qbool is_recording;
 
 	struct gedict_s *pb_ent; // enitity which used to show our model during playback
 
@@ -567,7 +567,7 @@ typedef struct gedict_s {
 									// but unwilling to move type definition out of race.c so using int
 
 	int			race_ready; 	// is player ready for race
-	qboolean	racer;			// this player do race right now
+	qbool	racer;			// this player do race right now
 // }
 
 } gedict_t;

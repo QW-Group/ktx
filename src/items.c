@@ -656,7 +656,7 @@ void Deathmatch_Weapon( int new )
 		self->s.v.weapon = new;
 }
 
-void DoWeaponChange( int new, qboolean backpack )
+void DoWeaponChange( int new, qbool backpack )
 {
 	int w_switch = iKey( self, backpack ? "b_switch" : "w_switch" );
 
@@ -1130,7 +1130,7 @@ void SP_item_shells()
 
 void SP_item_spikes()
 {
-	qboolean old_style = streq(self->s.v.classname, "item_weapon");
+	qbool old_style = streq(self->s.v.classname, "item_weapon");
 
 	self->s.v.touch = ( func_t ) ammo_touch;
 
@@ -1674,7 +1674,7 @@ Player is invulnerable for 30 seconds
 */
 void SP_item_artifact_invulnerability()
 {
-	qboolean b_dp = self->cnt > g_globalvars.time; // dropped powerup by player, not normal spawn
+	qbool b_dp = self->cnt > g_globalvars.time; // dropped powerup by player, not normal spawn
 
 	self->s.v.touch = ( func_t ) powerup_touch;
 
@@ -1737,7 +1737,7 @@ Player is invisible for 30 seconds
 */
 void SP_item_artifact_invisibility()
 {
-	qboolean b_dp = self->cnt > g_globalvars.time; // dropped powerup by player, not normal spawn
+	qbool b_dp = self->cnt > g_globalvars.time; // dropped powerup by player, not normal spawn
 
 	self->s.v.touch = ( func_t ) powerup_touch;
 
@@ -1775,7 +1775,7 @@ The next attack from the player will do 4x damage
 */
 void SP_item_artifact_super_damage()
 {
-	qboolean b_dp = self->cnt > g_globalvars.time; // dropped powerup by player, not normal spawn
+	qbool b_dp = self->cnt > g_globalvars.time; // dropped powerup by player, not normal spawn
 
 	self->s.v.touch = ( func_t ) powerup_touch;
 

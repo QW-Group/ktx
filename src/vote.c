@@ -133,7 +133,7 @@ int get_votes_by_value( int fofs, int value )
 	return votes;
 }
 
-int get_votes_req( int fofs, qboolean diff )
+int get_votes_req( int fofs, qbool diff )
 {
 	float percent = 51;
 	int   votes, vt_req, idx, el_type;
@@ -216,7 +216,7 @@ void vote_clear( int fofs )
 }
 
 // return true if player invoke one of particular election
-qboolean is_elected(gedict_t *p, electType_t et)
+qbool is_elected(gedict_t *p, electType_t et)
 {
 	return (p->v.elect_type == et);
 }
@@ -478,7 +478,7 @@ void FixNoSpecs( void )
 
 #define ALLOWED_NOSPECS_VIPS ( VIP_NOTKICKABLE | VIP_ADMIN | VIP_RCON )
 
-qboolean nospecs_canconnect( gedict_t *spec )
+qbool nospecs_canconnect( gedict_t *spec )
 {
 	if ( cvar("_k_nospecs") )
 	{

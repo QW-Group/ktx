@@ -891,7 +891,7 @@ int DoCommand_Name(char *cmd_name)
 	return DO_OUT_OF_RANGE_CMDS;
 }
 
-qboolean isCmdFlood(gedict_t *p)
+qbool isCmdFlood(gedict_t *p)
 {
 	int idx;
 	float cmd_time;
@@ -964,7 +964,7 @@ void redirect()
 }
 
 // check if players client support params in aliases
-qboolean isSupport_Params(gedict_t *p)
+qbool isSupport_Params(gedict_t *p)
 {
 	// seems only ezQuake support 
 	return (p->ezquake_version > 0 ? true : false); // have no idea at which point ezquake start support it
@@ -991,7 +991,7 @@ void StuffAliases( gedict_t *p )
 
 // just check is this cmd valid for class of this player
 // admin rights skipped here
-qboolean isValidCmdForClass( int icmd, qboolean isSpec )
+qbool isValidCmdForClass( int icmd, qbool isSpec )
 {
 	if ( icmd < 0 || icmd >= cmds_cnt )
 		return false;
@@ -1016,7 +1016,7 @@ qboolean isValidCmdForClass( int icmd, qboolean isSpec )
 }
 
 // check if this cmd require admin rights
-qboolean isCmdRequireAdmin( int icmd, qboolean isSpec )
+qbool isCmdRequireAdmin( int icmd, qbool isSpec )
 {
 	if ( icmd < 0 || icmd >= cmds_cnt )
 		return false;
@@ -1038,8 +1038,8 @@ void cmdslist_dl()
 {
 	int i, from, to;
 	char *name, *params, arg_2[32];
-	qboolean spc = ( self->ct == ctSpec );
-	qboolean support_params = isSupport_Params( self );
+	qbool spc = ( self->ct == ctSpec );
+	qbool support_params = isSupport_Params( self );
 
 	// seems we alredy done that
 	if ( self->k_stuff & STUFF_COMMANDS )
@@ -1123,7 +1123,7 @@ void Init_cmds(void)
 	}
 }   
 
-qboolean check_master()
+qbool check_master()
 {
 	if( cvar( "k_master" ) && !is_adm(self) ) {
 		G_sprint(self, 2, "console: command is locked\n");
@@ -1133,9 +1133,9 @@ qboolean check_master()
 	return false;
 }
 
-void Do_ShowCmds( qboolean adm_req )
+void Do_ShowCmds( qbool adm_req )
 {
-	qboolean first = true;
+	qbool first = true;
 	int i, l;
 	char *name, dots[64];
 	char	arg_1[1024];
@@ -1182,7 +1182,7 @@ void ShowCmds()
 	Do_ShowCmds( true );  // show admin commands
 }
 
-qboolean check_perm(gedict_t *p, int perm)
+qbool check_perm(gedict_t *p, int perm)
 {
 	switch ( perm ) {
 		case 0:	G_sprint(p, 2, "%s can use this command\n", redtext("no one"));
@@ -1572,7 +1572,7 @@ void ModStatus2()
 
 void ModStatusVote()
 {
-	qboolean voted = false;
+	qbool voted = false;
 	int votes, i;
 	gedict_t *p;
 
@@ -1663,7 +1663,7 @@ char *OnePlayerStatus( gedict_t *p, gedict_t *e_self )
 
 void PlayerStatus()
 {
-	qboolean found = false;
+	qbool found = false;
 	gedict_t *p;
 
 	if( match_in_progress ) {
@@ -1684,7 +1684,7 @@ void PlayerStatus()
 
 void PlayerStatusS()
 {
-	qboolean found = false;
+	qbool found = false;
 	gedict_t *p;
 
 	for ( p = world; (p = find_plr( p )); ) {
@@ -1700,7 +1700,7 @@ void PlayerStatusS()
 
 void PlayerStatusN()
 {
-	qboolean found = false;
+	qbool found = false;
 	gedict_t *p;
 
 	if( match_in_progress ) {
@@ -1732,7 +1732,7 @@ void PlayerStatusN()
 
 void ListWhoNot()
 {
-	qboolean found = false;
+	qbool found = false;
 	gedict_t *p, *p2;
 
 	if( match_in_progress ) {
@@ -3114,7 +3114,7 @@ void UserMode(float umode)
 	const char *um;
 	char buf[1024*4];
 	char *cfg_name;
-	qboolean sv_invoked = false;
+	qbool sv_invoked = false;
 
 	int k_free_mode = ( k_matchLess ? 5 : cvar( "k_free_mode" ) );
 
@@ -3684,8 +3684,8 @@ void RandomPickup ()
 
 // { spec tracking stuff 
 
-qboolean fav_del_do(gedict_t *s, gedict_t *p, char *prefix);
-qboolean favx_del_do(gedict_t *s, gedict_t *p, char *prefix);
+qbool fav_del_do(gedict_t *s, gedict_t *p, char *prefix);
+qbool favx_del_do(gedict_t *s, gedict_t *p, char *prefix);
 
 // this is called from ClientDisconnect - so disconnected players
 // removed from spectators favourites
@@ -3735,9 +3735,9 @@ void fav_add( )
 
 // s - for whom remove
 // p - who removed
-qboolean fav_del_do(gedict_t *s, gedict_t *p, char *prefix)
+qbool fav_del_do(gedict_t *s, gedict_t *p, char *prefix)
 {
-	qboolean removed = false;
+	qbool removed = false;
 	int fav_num;
 
 	if ( !s || !p )
@@ -3759,9 +3759,9 @@ qboolean fav_del_do(gedict_t *s, gedict_t *p, char *prefix)
 
 // s - for whom remove
 // p - who removed
-qboolean favx_del_do(gedict_t *s, gedict_t *p, char *prefix)
+qbool favx_del_do(gedict_t *s, gedict_t *p, char *prefix)
 {
-	qboolean removed = false;
+	qbool removed = false;
 	int fav_num;
 
 	if ( !s || !p )
@@ -3798,7 +3798,7 @@ void fav_del( )
 
 void fav_all_del( )
 {
-	qboolean deleted = false;
+	qbool deleted = false;
 	int fav_num;
 
 	for ( fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
@@ -3924,7 +3924,7 @@ void xfav_go( float fav_num )
 void fav_show( )
 {
 	gedict_t *p;
-	qboolean first, showed = false;
+	qbool first, showed = false;
 	int fav_num, diff;
 
 	for ( first = true, fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
@@ -3968,7 +3968,7 @@ void fav_show( )
 // { // this is used for autotrack which saved in demo
 static gedict_t *autotrack_last = NULL;
 static gedict_t *autotrack_hint = NULL;
-static qboolean autotrack_update = false;
+static qbool autotrack_update = false;
 static char *autotrack_reason = "";
 // }
 
@@ -4274,7 +4274,7 @@ void next_best ()
 void next_pow ()
 {
 	gedict_t *goal = PROG_TO_EDICT( self->s.v.goalentity ), *to, *first, *p;
-	qboolean nextBreak = false;
+	qbool nextBreak = false;
 	int id;
 
 	to = first = NULL;
@@ -4382,7 +4382,7 @@ void Pos_Save ()
 }
 
 // Move & Set functions
-qboolean Pos_Set_origin (pos_t *pos)
+qbool Pos_Set_origin (pos_t *pos)
 {
 	gedict_t *p;
 
@@ -4688,7 +4688,7 @@ void lastscores ()
 	int i, j, cnt;
 	int k_ls = bound(0, cvar("__k_ls"), MAX_LASTSCORES-1);
 	char *e1, *e2, *le1, *le2, *t1, *t2, *lt1, *lt2, *sc;
-	qboolean extended = (trap_CmdArgc() > 1); // if they specified some params, then use extended version
+	qbool extended = (trap_CmdArgc() > 1); // if they specified some params, then use extended version
 	lsType_t last = lsUnknown;
 	lsType_t cur  = lsUnknown;
 
@@ -4746,12 +4746,12 @@ void lastscores ()
 
 // { spec moreinfo
 
-qboolean mi_on ()
+qbool mi_on ()
 {
 	return ( (int)cvar("k_spec_info") & MI_ON );
 }
 
-qboolean mi_adm_only ()
+qbool mi_adm_only ()
 {
 	return ( (int)cvar("k_spec_info") & MI_ADM_ONLY );
 }
@@ -4782,7 +4782,7 @@ void mi_print( gedict_t *tooker, int it, char *msg )
 	char *t_team;
 	gedict_t *p;
 	int level;
-	qboolean adm = mi_adm_only ();
+	qbool adm = mi_adm_only ();
 
 	if ( !mi_on() )
 		return; // spec info is turned off
@@ -4931,7 +4931,7 @@ void cmd_wreg()
 		return;
 
 	if ( argc == 1 ) {
-		qboolean found = false;
+		qbool found = false;
 
 		G_sprint(self, 2, "list of registered weapons:\n");
 
@@ -5052,7 +5052,7 @@ void cmd_wreg()
 
 void cmd_wreg_do( byte c )
 {
-	qboolean warn;
+	qbool warn;
 	int j;
 	wreg_t *w;
 
@@ -5361,9 +5361,9 @@ void dmgfrags ()
 // code is partially wroten by Tonik
 
 void mv_stop_record ();
-qboolean mv_is_recording ();
+qbool mv_is_recording ();
 
-qboolean mv_is_playback ()
+qbool mv_is_playback ()
 {
 	return self->is_playback;
 }
@@ -5383,7 +5383,7 @@ void mv_stop_playback ()
 	self->is_playback = false;
 }
 
-qboolean mv_can_playback ()
+qbool mv_can_playback ()
 {
 	if ( match_in_progress || intermission_running )
 		return false;
@@ -5463,7 +5463,7 @@ void mv_cmd_playback ()
 	self->is_playback = true;
 }
 
-qboolean mv_is_recording ()
+qbool mv_is_recording ()
 {
 	return self->is_recording;
 }
@@ -5478,7 +5478,7 @@ void mv_stop_record ()
 	self->is_recording = false;
 }
 
-qboolean mv_can_record ()
+qbool mv_can_record ()
 {
 	if ( match_in_progress || intermission_running )
 		return false;

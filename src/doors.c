@@ -354,7 +354,7 @@ gedict_t       *spawn_field( vec3_t fmins, vec3_t fmaxs )
 }
 
 
-qboolean EntitiesTouching( gedict_t * e1, gedict_t * e2 )
+qbool EntitiesTouching( gedict_t * e1, gedict_t * e2 )
 {
 	if ( e1->s.v.mins[0] > e2->s.v.maxs[0] )
 		return false;

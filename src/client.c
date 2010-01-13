@@ -36,7 +36,7 @@ vec3_t          VEC_HULL2_MIN = { -32, -32, -24 };
 vec3_t          VEC_HULL2_MAX = { 32, 32, 64 };
 int             modelindex_eyes, modelindex_player, vwep_index;
 
-qboolean can_prewar( qboolean fire );
+qbool can_prewar( qbool fire );
 void IdlebotCheck();
 void CheckAll();
 void PlayerStats();
@@ -63,9 +63,9 @@ void CheckAll ()
 		CheckRate( p, "" );
 }
 
-qboolean CheckRate (gedict_t *p, char *newrate)
+qbool CheckRate (gedict_t *p, char *newrate)
 {
-	qboolean ret = false;
+	qbool ret = false;
     float player_rate, maxrate=0, minrate=0;
 
 	// This is used to check a players rate.  If above allowed setting then it kicks em off.
@@ -760,7 +760,7 @@ void SP_info_player_deathmatch()
 }
 
 // I'v put next code in function, since it appear frequently
-void k_respawn( gedict_t *p, qboolean body )
+void k_respawn( gedict_t *p, qbool body )
 {
 	gedict_t *swap = self;
 
@@ -1034,7 +1034,7 @@ gedict_t *SelectSpawnPoint( char *spawnname )
 	return spot;
 }
 
-qboolean CanConnect()
+qbool CanConnect()
 {
 	gedict_t *p;
 	char *t;
@@ -2062,7 +2062,7 @@ void Print_Wp_Stats( )
 {
 	char buf[1024] = {0};
 
-	qboolean ktpl = (iKey( self, "ktpl" ) ? true : false);
+	qbool ktpl = (iKey( self, "ktpl" ) ? true : false);
 	int  i, lw = iKey( self, "lw" ) + (ktpl ? 12 : 0), lw_x = iKey ( self, "lw_x" );
 	int _wps = S_ALL & iKey ( self, "wps" );
 	int  wps = ( _wps ? _wps : S_DEF ); // if wps is not set - show S_DEF weapons
@@ -2179,7 +2179,7 @@ void Print_Scores( )
 
 	int  i, minutes = 0, seconds = 0, ts = 0, es = 0, ls = iKey( self, "ls" ) + (iKey( self, "ktpl" ) ? 12 : 0);
 
-	qboolean sc_ok = false;
+	qbool sc_ok = false;
 	gedict_t *p, *ed1, *ed2;
 	gedict_t *g = self->ct == ctSpec ? PROG_TO_EDICT( self->s.v.goalentity ) : NULL;
 	gedict_t *e = self->ct == ctPlayer ? self : ( g ? g : world ); // stats of whom we want to show
@@ -2388,7 +2388,7 @@ Called every frame before physics are run
 void PlayerPreThink()
 {
 	float   r;
-	qboolean zeroFps = false;
+	qbool zeroFps = false;
 
 	if ( self->k_timingWarnTime )
 		BackFromLag();
@@ -2761,11 +2761,11 @@ void CheckPowerups()
 
 void CheckLightEffects( void )
 {
-	qboolean dim = false;
-	qboolean brl = false;
-	qboolean r	 = false;
-	qboolean g   = false;
-	qboolean b   = false;
+	qbool dim = false;
+	qbool brl = false;
+	qbool r	 = false;
+	qbool g   = false;
+	qbool b   = false;
 
 	// remove particular EF_xxx
 

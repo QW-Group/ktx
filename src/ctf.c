@@ -122,7 +122,7 @@ void SP_func_ctf_wall()
 }
 
 // add/remove hook item to/from player
-void AddHook( qboolean yes )
+void AddHook( qbool yes )
 {
 	gedict_t *e, *oself;
 
@@ -164,7 +164,7 @@ void RegenFlag( gedict_t *flag )
 }
 
 // show/hide flag
-void RegenFlags( qboolean yes )
+void RegenFlags( qbool yes )
 {
 	gedict_t *flag;
 
@@ -567,8 +567,8 @@ void mctf()
 
 void CTF_Obituary( gedict_t *targ, gedict_t *attacker )
 {
-	qboolean carrier_bonus = false;
-	qboolean flagdefended = false;
+	qbool carrier_bonus = false;
+	qbool flagdefended = false;
 	gedict_t *head;
 	char *attackerteam;
 

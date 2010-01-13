@@ -253,7 +253,7 @@ void DoSelectMap(int iMap)
 	char     *m;
 	gedict_t *p;
 	int 	 till;
-	qboolean isVoted = false;
+	qbool isVoted = false;
 
 	if( (till = Q_rint( ( k_matchLess ? 15: 7 ) - g_globalvars.time)) > 0  ) {
 		G_sprint(self, 2, "Wait %d second%s!\n", till, count_s(till) );

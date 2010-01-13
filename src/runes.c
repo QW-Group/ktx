@@ -10,7 +10,7 @@ void RuneTouch();
 void RuneResetOwner();
 gedict_t* SelectRuneSpawnPoint();
 
-void DoDropRune(int rune, qboolean s)
+void DoDropRune(int rune, qbool s)
 {
 	gedict_t *item;
 
@@ -252,7 +252,7 @@ gedict_t* SelectRuneSpawnPoint()
 }
 
 // spawn/remove runes
-void SpawnRunes( qboolean yes )
+void SpawnRunes( qbool yes )
 {
 	gedict_t *oself, *e;
 

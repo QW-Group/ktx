@@ -62,9 +62,9 @@ intptr_t trap_GetApiVersion()
 	return syscall( G_GETAPIVERSION );
 }
 
-qboolean trap_GetEntityToken( char *token, intptr_t size )
+qbool trap_GetEntityToken( char *token, intptr_t size )
 {
-	return ( qboolean ) syscall( G_GetEntityToken, (intptr_t)token, size );
+	return ( qbool ) syscall( G_GetEntityToken, (intptr_t)token, size );
 }
 void trap_DPrintf( const char *fmt )
 {
