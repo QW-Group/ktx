@@ -287,15 +287,8 @@ void Multi_Finish()
 	SpawnBlood( puff_org, blood_count );
 }
 
-void CoilgunTrail( vec3_t endpos, int entnum )
+void CoilgunTrail( vec3_t org, vec3_t endpos, int entnum, int color )
 {
-	vec3_t 	org;
-	int 	color;
-	
-	VectorCopy( self->s.v.origin, org );	//org = self->s.v.origin + '0 0 16';
-	org[2] += 16;
-
-	color = iKey( self, "railcolor" );
 	if ( color < 1 || color > 7 )
 		color = 1;
 
@@ -477,10 +470,11 @@ void FireInstaBullet( vec3_t dir, deathType_t deathtype )
     
 	ApplyMultiDamage();
 	Multi_Finish();
-	CoilgunTrail(src, self - world);
+
+	VectorCopy( self->s.v.origin, tmp );	//tmp = self->s.v.origin + '0 0 16';
+	tmp[2] += 16;
+	CoilgunTrail(tmp, src, self - world, iKey( self, "railcolor" ));
 }
-
-
 
 /*
 ================
