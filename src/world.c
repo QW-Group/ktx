@@ -596,9 +596,6 @@ void FirstFrame	( )
 
 	RegisterCvar("k_noitems");
 
-	RegisterCvarEx("k_antilag", "0");
-	RegisterCvarEx("k_antilag_lock", "1"); // do not allow antilag setting be changed via /antilag
-
 	RegisterCvar("k_mode");
 	RegisterCvar("k_defmode");
 	RegisterCvar("k_auto_xonx"); // switch XonX mode dependant on players + specs count
@@ -1065,8 +1062,6 @@ void FixRules ( )
 	int k_minr = bound(0, cvar( "k_minrate" ),  100000);
 	int k_maxr = bound(0, cvar( "sv_maxrate" ), 100000);
 
-	k_antilag = cvar( "k_antilag" );
-
 	skill = cvar( "skill" );
 
 	coop = cvar( "coop" );
@@ -1254,11 +1249,6 @@ void StartFrame( int time )
 	}
 
 	current_maxfps = bound(50, current_maxfps, 1981);
-
-	if ( k_antilag != iKey( world, "al" ) )
-	{
-		localcmd("serverinfo al %s\n", k_antilag ? "1" : "\"\""); // add to serverinfo
-	}
 
 	CheckTiming(); // check if client lagged or returned from lag
 

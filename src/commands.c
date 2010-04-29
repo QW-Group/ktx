@@ -232,8 +232,6 @@ void giveme( );
 void ToggleCArena();
 // }
 
-void ToggleAntiLag();
-
 void DemoMark() { stuffcmd( self, "//demomark\n" ); }
 
 // CD - commands descriptions
@@ -515,7 +513,6 @@ const char CD_NODESC[] = "no desc";
 #define CD_MAPSLIST_DL  (CD_NODESC) // skip
 #define CD_CMDSLIST_DL  (CD_NODESC) // skip
 
-#define CD_ANTILAG      "toggle anti lag"
 #define CD_DEMOMARK     "put mark in the demo"
 
 
@@ -812,7 +809,6 @@ cmd_t cmds[] = {
 	{ "giveme",      giveme,                    0    , CF_PLAYER | CF_MATCHLESS | CF_PARAMS, CD_GIVEME },
 	{ "votecoop",    votecoop,                  0    , CF_PLAYER | CF_MATCHLESS, CD_VOTECOOP },
 	{ "coop_nm_pu",	 ToggleNewCoopNm,           0    , CF_PLAYER | CF_MATCHLESS, CD_COOPNMPU },
-	{ "antilag",	 ToggleAntiLag,             0    , CF_PLAYER | CF_SPC_ADMIN, CD_ANTILAG },
 	{ "demomark",	 DemoMark,                  0    , CF_PLAYER, CD_DEMOMARK },
 };
 
@@ -6065,22 +6061,4 @@ void giveme()
 	}
 
 	G_sprint(self, 2, "You got %s for %.1fs\n", got, seconds );
-}
-
-void ToggleAntiLag()
-{
-	if ( match_in_progress )
-		return;
-
-	if ( check_master() )
-		return;
-
-	if ( cvar("k_antilag_lock") )
-	{
-		G_sprint(self, 2, "console: command is locked\n");
-		return;
-	}
-
-	cvar_toggle_msg( self, "k_antilag", redtext("antilag") );
-	k_antilag = cvar( "k_antilag" );
 }

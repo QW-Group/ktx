@@ -670,8 +670,6 @@ void W_FireShotgun()
 	vec3_t          dir;
 	int				bullets = 6;
 
-	Antilag_Apply( self );
-
 	WS_Mark( self, wpSG );
 	
 	if ( cvar("k_instagib") )
@@ -698,8 +696,6 @@ void W_FireShotgun()
 		FireInstaBullet( dir, dtSG );
 	else
 		FireBullets( bullets, dir, 0.04, 0.04, 0, dtSG );
-
-	Antilag_Undo( self );
 }
 
 /*
@@ -717,8 +713,6 @@ void W_FireSuperShotgun()
 		W_FireShotgun();
 		return;
 	}
-
-	Antilag_Apply( self );
 
 	WS_Mark( self, wpSSG );
 
@@ -743,7 +737,9 @@ void W_FireSuperShotgun()
 	//dir = aim (self, 100000);
 	aim( dir );
 	if ( cvar("k_instagib") == 2 )
+	{
 		FireInstaBullet( dir, dtSSG );
+	}
 	else if ( k_yawnmode )
 	{
 	        // Yawnmode: larger SSG spread, higher reload time, more damage
@@ -751,9 +747,9 @@ void W_FireSuperShotgun()
 	        FireBullets( bullets, dir, 0.18, 0.12, 0, dtSSG );
 	}
 	else
+	{
 		FireBullets( bullets, dir, 0.14, 0.08, 0, dtSSG );
-
-	Antilag_Undo( self );
+	}
 }
 
 /*
@@ -984,8 +980,6 @@ void W_FireLightning()
 		return;
 	}
 
-	Antilag_Apply( self );
-
 	trap_makevectors( self->s.v.v_angle );
 
 // explode if under water
@@ -995,8 +989,6 @@ void W_FireLightning()
 		{
 			self->s.v.ammo_cells = 0;
 			W_SetCurrentAmmo();
-
-			Antilag_Undo( self );
 			return;
 		}
 
@@ -1008,8 +1000,6 @@ void W_FireLightning()
 			{
 				self->deathtype = dtLG_DIS_SELF;
 				T_Damage( self, self, self, 4000 );
-
-				Antilag_Undo( self );
 				return;
 			}
 			else
@@ -1019,14 +1009,9 @@ void W_FireLightning()
 				W_SetCurrentAmmo();
 
                 if ( !cvar( "k_dis" ) )
-				{
-					Antilag_Undo( self );
                     return;
-				}
 
 				T_RadiusDamage( self, self, 35 * cells, world, dtLG_DIS );
-
-				Antilag_Undo( self );
 				return;
 			}
 		} else
@@ -1036,14 +1021,9 @@ void W_FireLightning()
 			W_SetCurrentAmmo();
 
             if ( !cvar( "k_dis" ) )
-			{
-				Antilag_Undo( self );
                 return;
-			}
 
 			T_RadiusDamage( self, self, 35 * cells, world, dtLG_DIS );
-
-			Antilag_Undo( self );
 			return;
 		}
 	}
@@ -1088,8 +1068,6 @@ void W_FireLightning()
 // qqshka - not from 'self->s.v.origin' but from 'org'
 //	LightningDamage( self->s.v.origin, tmp, self, 30 );
 	LightningDamage( org, tmp, self, 30 );
-
-	Antilag_Undo( self );
 }
 
 //=============================================================================

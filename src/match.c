@@ -1745,7 +1745,8 @@ void PrintCountdown( int seconds )
 //	if ( cvar( "k_spw" ) != 3 )
 		strlcat(text, va("%s %4s\n", "Respawns", respawn_model_name_short( cvar( "k_spw" ) )), sizeof(text));
 
-	strlcat(text, va("%s %5s\n", "Antilag", redtext(OnOff( k_antilag ))), sizeof(text));
+	if (cvar("sv_antilag"))
+		strlcat(text, va("%s %5s\n", "Antilag", dig3((int)cvar("sv_antilag"))), sizeof(text));
 
 	if ( cvar("k_noitems") )
 		strlcat(text, va("%s %5s\n", "NoItems", redtext("On")), sizeof(text));

@@ -99,4 +99,3 @@ qbool first_rl_taken; // true when some one alredy took rl
 
 int sv_minping; // used to broadcast changes
 
-qbool	k_antilag;

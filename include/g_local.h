@@ -140,11 +140,6 @@ typedef enum
 
 // g_cmd.c
 
-void			Antilag_Init(void);
-void			Antilag_Reset( gedict_t *s );
-void			Antilag_Apply( gedict_t *s );
-void			Antilag_Undo( gedict_t *s );
-
 // g_utils.c
 
 float           g_random( void );
@@ -858,24 +853,6 @@ extern	float lastTeamLocationTime; // next udate for CheckTeamStatus()
 extern	qbool first_rl_taken; // true when some one alredy took rl
 
 extern	int sv_minping; // used to broadcast changes
-
-extern	qbool	k_antilag;
-
-// heh, some hack for mvdsv for grabbing some data
-
-#define	OFS_NULL		0
-#define	OFS_RETURN		1
-#define	OFS_PARM0		4		/* leave 3 ofs for each parm to hold vectors */
-#define	OFS_PARM1		7
-#define	OFS_PARM2		10
-#define	OFS_PARM3		13
-#define	OFS_PARM4		16
-#define	OFS_PARM5		19
-#define	OFS_PARM6		22
-#define	OFS_PARM7		25
-#define	RESERVED_OFS	28
-
-#define	G_FLOAT(o) ( ((float*)(&g_globalvars))[o])
 
 // { SP
 
