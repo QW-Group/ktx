@@ -659,6 +659,65 @@ void FireBullets( float shotcount, vec3_t dir, float spread_x, float spread_y, f
 W_FireShotgun
 ================
 */
+
+//#define HITBOXCHECK
+
+#ifdef HITBOXCHECK
+
+void W_FireShotgun()
+{
+	qbool			classic_shotgun = cvar("k_classic_shotgun");
+	vec3_t          dir, s_dir, src, o_src, eorg, tmp;
+	float			offset;
+	int				bullets = bound(1, cvar("k_hitboxcheck_bullets"), 64), color = iKey( self, "railcolor" );
+
+	WS_Mark( self, wpSG );
+	self->ps.wpn[wpSG].attacks += bullets;
+
+	sound( self, CHAN_WEAPON, "weapons/guncock.wav", 1, ATTN_NORM );
+
+	g_globalvars.msg_entity = EDICT_TO_PROG( self );
+	WriteByte( MSG_ONE, SVC_SMALLKICK );
+
+	trap_makevectors( self->s.v.v_angle );
+	// make dir
+	VectorCopy( g_globalvars.v_forward, dir );
+	// make scaled dir
+	VectorScale( dir, 8000, s_dir );
+	// make source
+	VectorScale( dir, 10, tmp );
+	VectorAdd( self->s.v.origin, tmp, src );
+	src[2] = self->s.v.absmin[2] + self->s.v.size[2] * 0.7;
+
+	// prepare multi damage
+	ClearMultiDamage();
+	multi_damage_type = dtSG;
+
+	// make puff
+	traceline( PASSVEC3( src ), src[0] + s_dir[0], src[1] + s_dir[1], src[2] + s_dir[2], false, self );
+	VectorScale( dir, 4, tmp );
+	VectorSubtract( g_globalvars.trace_endpos, tmp, puff_org );
+
+	// fire each bullet
+	for ( offset = -(float)(bullets - 1) / 2; bullets > 0; bullets--, offset++ )
+	{
+		// calculate where trace start
+		VectorMA( src, offset, g_globalvars.v_right, o_src );
+		// calculate where trace should end
+		VectorAdd( o_src, s_dir, eorg );
+		traceline( PASSVEC3( o_src ), PASSVEC3( eorg ), false, self );
+		if ( g_globalvars.trace_fraction != 1.0 )
+			TraceAttack( 4, dir, classic_shotgun );
+
+		CoilgunTrail(o_src, g_globalvars.trace_endpos, self - world, color);
+	}
+
+	// finish multi damage
+	ApplyMultiDamage();
+	if ( !classic_shotgun )
+		Multi_Finish();
+}
+#else
 void W_FireShotgun()
 {
 	vec3_t          dir;
@@ -691,7 +750,7 @@ void W_FireShotgun()
 	else
 		FireBullets( bullets, dir, 0.04, 0.04, 0, dtSG );
 }
-
+#endif
 /*
 ================
 W_FireSuperShotgun
