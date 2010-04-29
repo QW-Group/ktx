@@ -584,6 +584,8 @@ void FirstFrame	( )
 
 // register mod cvars
 
+	RegisterCvarEx("maxfps", "77"); // well, got tired from serverinfo, let it be cvar (mvdsv have it now too so it should just set it)
+
 	RegisterCvar("_k_last_xonx"); // internal usage, save last XonX command
 	RegisterCvar("_k_lastmap");	  // internal usage, name of last map
 	RegisterCvar("_k_last_cycle_map");  // internal usage, name of last map in map cycle,
@@ -1076,6 +1078,14 @@ void FixRules ( )
 
 	FixSayTeamToSpecs(); // k_sayteam_to_spec
 
+	current_maxfps = cvar( "maxfps" );
+	if ( current_maxfps != bound(50, current_maxfps, 1981) )
+	{
+//		current_maxfps = 72;	// 2.30 standard
+		current_maxfps = 77;	// year 2007 standard
+		cvar_fset( "maxfps", current_maxfps );
+	}
+
 	if ( skip_fixrules > 0 ) {
 		skip_fixrules--;
 		return;
@@ -1222,7 +1232,7 @@ void StartFrame( int time )
 		FixRules();
 	}
 
-	FixNoSpecs(); // of no players left turn off "no spectators" mode
+	FixNoSpecs(); // if no players left turn off "no spectators" mode
 
 	FixCTFItems(); // if modes have changed we may need to add/remove flags etc
 
@@ -1237,18 +1247,6 @@ void StartFrame( int time )
 	CheckSvUnlock();
 
 	DoMVDAutoTrack(); // mvd autotrack stuff
-
-// Tonik: note current "serverinfo maxfps" setting
-// (we don't want to do it in every player frame)
-	current_maxfps = iKey( world, "maxfps" );
-	if ( !current_maxfps )
-	{
-//		current_maxfps = 72;	// 2.30 standard
-		current_maxfps = 77;	// year 2007 standard
-		localcmd("serverinfo maxfps %d\n", (int)current_maxfps); // add to serverinfo
-	}
-
-	current_maxfps = bound(50, current_maxfps, 1981);
 
 	CheckTiming(); // check if client lagged or returned from lag
 

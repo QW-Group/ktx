@@ -800,7 +800,7 @@ extern	float match_over;       // boolean - whether or not the match stats have 
 extern	gedict_t *newcomer;     // stores last player who joined
 extern	int   k_overtime;		// is overtime is going on
 
-extern	float current_maxfps;	// current value of serverinfo maxfps
+extern	float current_maxfps;	// current value of maxfps
 
 // { yawn mode
 extern	int   k_yawnmode;		// is server in yawn mode

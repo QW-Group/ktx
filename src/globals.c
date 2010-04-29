@@ -44,7 +44,7 @@ gedict_t *newcomer = g_edicts;     // stores last player who joined
 
 int   k_overtime = 0;   // is overtime is going on
 
-float current_maxfps;	// current value of serverinfo maxfps
+float current_maxfps;	// current value of maxfps
 
 // { yawn mode
 int	k_yawnmode;			// is server in yawn mode
