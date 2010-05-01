@@ -1482,6 +1482,11 @@ void PutClientInServer( void )
 			self->s.v.armortype    = 0.8;
 			self->s.v.health       = 250;
 
+#ifdef HITBOXCHECK
+			self->s.v.armorvalue   = 30000;
+			self->s.v.health       = 30000;
+#endif
+
 			items = self->s.v.items;
 			items |= IT_NAILGUN;
 			items |= IT_SUPER_NAILGUN;

@@ -586,6 +586,10 @@ void FirstFrame	( )
 
 	RegisterCvarEx("maxfps", "77"); // well, got tired from serverinfo, let it be cvar (mvdsv have it now too so it should just set it)
 
+#ifdef HITBOXCHECK
+	RegisterCvarEx("k_hitboxcheck_bullets", "32"); // DEBUG: help me test hitbox of the player with modified shot gun
+#endif
+
 	RegisterCvar("_k_last_xonx"); // internal usage, save last XonX command
 	RegisterCvar("_k_lastmap");	  // internal usage, name of last map
 	RegisterCvar("_k_last_cycle_map");  // internal usage, name of last map in map cycle,

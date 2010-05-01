@@ -27,6 +27,7 @@
 
 //#define DEBUG
 #define CTF_RELOADMAP /* changing ctf status will force map reload */
+//#define HITBOXCHECK /* various changes which help test players hit box */
 
 #include "q_shared.h"
 #include "mathlib.h"

@@ -660,8 +660,6 @@ W_FireShotgun
 ================
 */
 
-//#define HITBOXCHECK
-
 #ifdef HITBOXCHECK
 
 void W_FireShotgun()
@@ -669,7 +667,7 @@ void W_FireShotgun()
 	qbool			classic_shotgun = cvar("k_classic_shotgun");
 	vec3_t          dir, s_dir, src, o_src, eorg, tmp;
 	float			offset;
-	int				bullets = bound(1, cvar("k_hitboxcheck_bullets"), 64), color = iKey( self, "railcolor" );
+	int				bullets = bound(1, cvar("k_hitboxcheck_bullets"), 64), color = iKey( self, "railcolor" ), b;
 
 	WS_Mark( self, wpSG );
 	self->ps.wpn[wpSG].attacks += bullets;
@@ -699,7 +697,7 @@ void W_FireShotgun()
 	VectorSubtract( g_globalvars.trace_endpos, tmp, puff_org );
 
 	// fire each bullet
-	for ( offset = -(float)(bullets - 1) / 2; bullets > 0; bullets--, offset++ )
+	for ( offset = -(float)(bullets - 1) / 2, b = bullets; b > 0; b--, offset++ )
 	{
 		// calculate where trace start
 		VectorMA( src, offset, g_globalvars.v_right, o_src );
@@ -707,9 +705,10 @@ void W_FireShotgun()
 		VectorAdd( o_src, s_dir, eorg );
 		traceline( PASSVEC3( o_src ), PASSVEC3( eorg ), false, self );
 		if ( g_globalvars.trace_fraction != 1.0 )
-			TraceAttack( 4, dir, classic_shotgun );
+			TraceAttack( 1, dir, classic_shotgun );
 
-		CoilgunTrail(o_src, g_globalvars.trace_endpos, self - world, color);
+		if (b == bullets || b == 1)
+			CoilgunTrail(o_src, g_globalvars.trace_endpos, self - world, color);
 	}
 
 	// finish multi damage
