@@ -258,7 +258,7 @@ float vectoyaw( vec3_t value1 )
 		yaw = 0;
 	else
 	{
-		yaw = ( int ) ( atan2( value1[1], value1[0] ) * 180 / M_PI );
+		yaw = /*( int )*/ ( atan2( value1[1], value1[0] ) * 180 / M_PI );
 		if ( yaw < 0 )
 			yaw += 360;
 	}
@@ -282,12 +282,12 @@ void vectoangles( vec3_t value1, vec3_t ret )
 			pitch = 270;
 	} else
 	{
-		yaw = ( int ) ( atan2( value1[1], value1[0] ) * 180 / M_PI );
+		yaw = /*( int )*/ ( atan2( value1[1], value1[0] ) * 180 / M_PI );
 		if ( yaw < 0 )
 			yaw += 360;
 
 		forward = sqrt( value1[0] * value1[0] + value1[1] * value1[1] );
-		pitch = ( int ) ( atan2( value1[2], forward ) * 180 / M_PI );
+		pitch = /*( int )*/ ( atan2( value1[2], forward ) * 180 / M_PI );
 		if ( pitch < 0 )
 			pitch += 360;
 	}
