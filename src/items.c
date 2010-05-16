@@ -44,129 +44,15 @@ void SUB_regen()
 	setorigin( self, PASSVEC3( self->s.v.origin ) );
 }
 
-static void ktpro_autotrack_predict_powerup( void )
-{
-	extern float visible( gedict_t *targ );
-	extern void ktpro_autotrack_on_powerup_predict (gedict_t *dude);
-
-	gedict_t *p, *best;
-	float len, best_len;
-	vec3_t org;
-
-	if ( self->s.v.items != IT_QUAD && self->s.v.items != IT_INVULNERABILITY )
-		return; // we use this function for quad and pent only, ring and suit is not interesting for us
-
-	best = NULL;
-	best_len = 99999999;
-
-    for( p = world; (p = find_plr( p )); )
-	{
-		if ( ISDEAD( p ) )
-			continue; // we are not interested in dead players
-
-		VectorSubtract( p->s.v.origin, self->s.v.origin, org );
-		len = vlen( org );
-
-		if ( len > 500 )
-		{
-//			G_bprint(2, "too far %f\n", len);
-			continue; // player too far from this powerup
-		}
-
-		if ( len >= best_len )
-			continue; // not interesting, we alredy have someone with similar closeness to powerup
-
-		if ( !visible( p ) )
-		{
-//			G_bprint(2, "not visible\n");
-			continue; // powerup not visible for this player
-		}
-
-		best = p;
-	}
-
-	if ( !best )
-		return; // noone was found
-
-	ktpro_autotrack_on_powerup_predict( best );
-}
-
 void SUB_regen_powerups()
 {
+	extern void ktpro_autotrack_predict_powerup( void );
+
+	// attempt to predict player which awating such powerup
 	ktpro_autotrack_predict_powerup( );
 
 	self->s.v.think = ( func_t ) SUB_regen;
 	self->s.v.nextthink = g_globalvars.time + AUTOTRACK_POWERUPS_PREDICT_TIME;
-}
-
-void DropPowerup( float timeleft, int powerup )
-{
-	gedict_t       *swp = self; // save self
-	char *playername;
-
-	if ( timeleft <= 0 || match_in_progress != 2 )
-		return;
-
-	if ( powerup != IT_QUAD && powerup != IT_INVISIBILITY && powerup != IT_INVULNERABILITY ) // only this supported
-		return;
-
-	self = spawn(); // WARNING!
-
-	setorigin (self, PASSVEC3( swp->s.v.origin ));
-	self->cnt = g_globalvars.time + timeleft;
-
-	if ( powerup == IT_QUAD )
-		SP_item_artifact_super_damage();
-	else if ( powerup == IT_INVISIBILITY )
-		SP_item_artifact_invisibility();
-	else if ( powerup == IT_INVULNERABILITY )
-		SP_item_artifact_invulnerability();
-	else
-		G_Error("DropPowerup");
-
-	playername = swp->s.v.netname;
-
-	/*
-	log_printf( "\t\t\t<droppu time=\"%f\" item=\"%s\" player=\"%s\" timeleft=\"%f\" />\n",
-				g_globalvars.time - match_start_time,
-				self->s.v.classname,
-				cleantext(playername),
-				timeleft );
-	*/
-	log_printf(
-		"\t\t<event>\n"
-		"\t\t\t<drop_powerup>\n"
-		"\t\t\t\t<time>%f</time>\n"
-		"\t\t\t\t<item>%s</item>\n"
-		"\t\t\t\t<player>%s</player>\n"
-		"\t\t\t\t<timeleft>%f</timeleft>\n"
-		"\t\t\t</drop_powerup>\n"
-		"\t\t</event>\n",
-		g_globalvars.time - match_start_time,
-		self->s.v.classname,
-		cleantext(playername),
-		timeleft
-	);
-
-	if ( swp->ct == ctPlayer )
-		mi_print( swp, powerup, va( "%s dropped a %s with %.0f seconds left", swp->s.v.netname, self->s.v.netname, timeleft ));
-
-	self = swp;// restore self
-}
-
-void DropPowerups()
-{
-	if ( cvar( "dq" ) && Get_Powerups() )
-	{
-		if ( self->super_damage_finished > 0 )
-			DropPowerup( self->super_damage_finished - g_globalvars.time, IT_QUAD );
-	}
-
-	if ( cvar( "dr" ) && Get_Powerups() )
-	{
-		if ( self->invisible_finished > 0 )
-			DropPowerup( self->invisible_finished - g_globalvars.time, IT_INVISIBILITY);
-	}
 }
 
 void PlaceItem()
@@ -188,22 +74,38 @@ void PlaceItem()
 	}
 
 	// if powerups disabled - hide
-	if ( (int)self->s.v.items & (IT_INVISIBILITY | IT_INVULNERABILITY | IT_SUIT | IT_QUAD) ) {
-		if ( !Get_Powerups() ) {
+	if ( (int)self->s.v.items & (IT_INVISIBILITY | IT_INVULNERABILITY | IT_SUIT | IT_QUAD) )
+	{
+		if ( !Get_Powerups() )
+		{
 			self->s.v.model = "";
 			self->s.v.solid = SOLID_NOT;
 		}
 	}
 }
 
+/*
+============
+PlaceItemIngame
+
+It is StartItem + PlaceItem, set some required fields for an item and drop it with random velocity,
+used for dropable powerups.
+============
+*/
 void PlaceItemIngame()
 {
 	self->s.v.solid = SOLID_TRIGGER;
 	self->s.v.movetype = MOVETYPE_TOSS;
 	self->s.v.flags = FL_ITEM;
-	self->mdl = self->s.v.model;
 
-	SetVector( self->s.v.velocity, 0, 0, 0 );
+	self->mdl = self->s.v.model; // qqshka - save model ASAP
+
+	self->s.v.velocity[2] = 300;
+	self->s.v.velocity[0] = -100 + ( g_random() * 200 );
+	self->s.v.velocity[1] = -100 + ( g_random() * 200 );
+
+	self->s.v.nextthink = self->cnt; // remove it with the time left on it
+	self->s.v.think = ( func_t ) SUB_Remove;
 }
 
 /*
@@ -332,7 +234,7 @@ void SP_item_health()
 	}
 
 	setsize( self, 0, 0, 0, 32, 32, 56 );
-	StartItem( self );
+	StartItem();
 }
 
 void health_touch()
@@ -547,7 +449,7 @@ void SP_item_armor1()
 	self->s.v.netname = "Green Armor";
 	self->s.v.skin = 0;
 	setsize( self, -16, -16, 0, 16, 16, 56 );
-	StartItem( self );
+	StartItem();
 }
 
 /*QUAKED item_armor2 (0 .5 .8) (-16 -16 0) (16 16 32)
@@ -561,7 +463,7 @@ void SP_item_armor2()
 	self->s.v.netname = "Yellow Armor";
 	self->s.v.skin = 1;
 	setsize( self, -16, -16, 0, 16, 16, 56 );
-	StartItem( self );
+	StartItem();
 }
 
 /*QUAKED item_armorInv (0 .5 .8) (-16 -16 0) (16 16 32)
@@ -575,7 +477,7 @@ void SP_item_armorInv()
 	self->s.v.netname = "Red Armor";
 	self->s.v.skin = 2;
 	setsize( self, -16, -16, 0, 16, 16, 56 );
-	StartItem( self );
+	StartItem();
 }
 
 /*
@@ -1510,7 +1412,7 @@ POWERUPS
 ===============================================================================
 */
 
-void            powerup_touch();
+void ktpro_autotrack_on_powerup_take (gedict_t *dude);
 
 void adjust_pickup_time( float *current, float *total )
 {
@@ -1521,7 +1423,109 @@ void adjust_pickup_time( float *current, float *total )
 	*current = 0;
 }
 
-extern void ktpro_autotrack_on_powerup_take (gedict_t *dude);
+void hide_powerups ( char *classname )
+{
+	gedict_t *p;
+
+	if ( strnull( classname ) )
+		G_Error("hide_items");
+
+	for( p = world; (p = find(p, FOFCLSN, classname)); )
+	{
+		// simply remove dropable powerups
+		if ( p->cnt )
+		{
+			ent_remove( p );
+			continue;
+		}
+
+		p->s.v.solid = SOLID_NOT;
+ 		p->s.v.model = "";
+		p->s.v.nextthink = 0;  // disable next think
+	}
+}
+
+void show_powerups ( char *classname )
+{
+	gedict_t *p;
+
+	if ( strnull( classname ) )
+		G_Error("show_items");
+
+	for( p = world; (p = find(p, FOFCLSN, classname)); )
+	{
+		// spawn item if needed
+		if ( strnull( p->s.v.model ) || p->s.v.solid != SOLID_TRIGGER )
+		{
+			p->s.v.nextthink = g_globalvars.time + 30;
+			p->s.v.nextthink -= AUTOTRACK_POWERUPS_PREDICT_TIME;
+			p->s.v.think = ( func_t ) SUB_regen_powerups;
+		}
+	}
+}
+
+void DropPowerup( float timeleft, int powerup )
+{
+	gedict_t		*swp = self; // save self
+	char			*playername;
+
+	if ( timeleft <= 0 || match_in_progress != 2 )
+		return;
+
+	if ( powerup != IT_QUAD && powerup != IT_INVISIBILITY && powerup != IT_INVULNERABILITY ) // only this supported
+		return;
+
+	self = spawn(); // WARNING!
+
+	setorigin (self, PASSVEC3( swp->s.v.origin ));
+	self->cnt = g_globalvars.time + timeleft;
+
+	if ( powerup == IT_QUAD )
+		SP_item_artifact_super_damage();
+	else if ( powerup == IT_INVISIBILITY )
+		SP_item_artifact_invisibility();
+	else if ( powerup == IT_INVULNERABILITY )
+		SP_item_artifact_invulnerability();
+	else
+		G_Error("DropPowerup");
+
+	playername = swp->s.v.netname;
+
+	log_printf(
+		"\t\t<event>\n"
+		"\t\t\t<drop_powerup>\n"
+		"\t\t\t\t<time>%f</time>\n"
+		"\t\t\t\t<item>%s</item>\n"
+		"\t\t\t\t<player>%s</player>\n"
+		"\t\t\t\t<timeleft>%f</timeleft>\n"
+		"\t\t\t</drop_powerup>\n"
+		"\t\t</event>\n",
+		g_globalvars.time - match_start_time,
+		self->s.v.classname,
+		cleantext(playername),
+		timeleft
+	);
+
+	if ( swp->ct == ctPlayer )
+		mi_print( swp, powerup, va( "%s dropped a %s with %.0f seconds left", swp->s.v.netname, self->s.v.netname, timeleft ));
+
+	self = swp;// restore self
+}
+
+void DropPowerups()
+{
+	if ( cvar( "dq" ) && Get_Powerups() )
+	{
+		if ( self->super_damage_finished > 0 )
+			DropPowerup( self->super_damage_finished - g_globalvars.time, IT_QUAD );
+	}
+
+	if ( cvar( "dr" ) && Get_Powerups() )
+	{
+		if ( self->invisible_finished > 0 )
+			DropPowerup( self->invisible_finished - g_globalvars.time, IT_INVISIBILITY);
+	}
+}
 
 void powerup_touch()
 {
@@ -1638,13 +1642,6 @@ void powerup_touch()
 
 	playername = other->s.v.netname;
 
-	/*
-	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%f\" />\n",
-				g_globalvars.time - match_start_time,
-				self->s.v.classname,
-				cleantext(playername),
-				real_time );
-	*/
 	log_printf(
 		"\t\t<event>\n"
 		"\t\t\t<pick_powerup>\n"
@@ -1660,14 +1657,11 @@ void powerup_touch()
 		real_time
 	);
 
-
 	ktpro_autotrack_on_powerup_take(other);
 
 	activator = other;
 	SUB_UseTargets();	// fire all targets / killtargets
 }
-
-
 
 /*QUAKED item_artifact_invulnerability (0 .5 .8) (-16 -16 -24) (16 16 32)
 Player is invulnerable for 30 seconds
@@ -1677,12 +1671,6 @@ void SP_item_artifact_invulnerability()
 	qbool b_dp = self->cnt > g_globalvars.time; // dropped powerup by player, not normal spawn
 
 	self->s.v.touch = ( func_t ) powerup_touch;
-
-// always precache it, need it for race and coop
-//	trap_precache_model( "progs/invulner.mdl" );
-//	trap_precache_sound( "items/protect.wav" );
-//	trap_precache_sound( "items/protect2.wav" );
-//	trap_precache_sound( "items/protect3.wav" );
 
 	self->s.v.noise = "items/protect.wav";
 	setmodel( self, "progs/invulner.mdl" );
@@ -1694,16 +1682,8 @@ void SP_item_artifact_invulnerability()
 	self->s.v.items = IT_INVULNERABILITY;
 	setsize( self, -16, -16, -24, 16, 16, 32 );
 
-	if ( b_dp ) {
+	if ( b_dp )
 		PlaceItemIngame();
-
-		self->s.v.velocity[2] = 300;
-		self->s.v.velocity[0] = -100 + ( g_random() * 200 );
-		self->s.v.velocity[1] = -100 + ( g_random() * 200 );
-
-		self->s.v.nextthink = self->cnt; // remove it with the time left on it
-		self->s.v.think = ( func_t ) SUB_Remove;
-	}
 	else
 		StartItem();
 }
@@ -1741,14 +1721,6 @@ void SP_item_artifact_invisibility()
 
 	self->s.v.touch = ( func_t ) powerup_touch;
 
-	if ( !b_dp ) {
-/*  already precached for instagib bonus and coop
-		trap_precache_model( "progs/invisibl.mdl" );
-		trap_precache_sound( "items/inv1.wav" );
-		trap_precache_sound( "items/inv2.wav" );
-		trap_precache_sound( "items/inv3.wav" );
-*/
-	}
 	self->s.v.noise = "items/inv1.wav";
 	setmodel( self, "progs/invisibl.mdl" );
 	self->s.v.netname = "Ring of Shadows";
@@ -1756,16 +1728,8 @@ void SP_item_artifact_invisibility()
 	self->s.v.items = IT_INVISIBILITY;
 	setsize( self, -16, -16, -24, 16, 16, 32 );
 
-	if ( b_dp ) {
+	if ( b_dp )
 		PlaceItemIngame();
-
-		self->s.v.velocity[2] = 300;
-		self->s.v.velocity[0] = -100 + ( g_random() * 200 );
-		self->s.v.velocity[1] = -100 + ( g_random() * 200 );
-
-		self->s.v.nextthink = self->cnt; // remove it with the time left on it
-		self->s.v.think = ( func_t ) SUB_Remove;
-	}
 	else
 		StartItem();
 }
@@ -1779,37 +1743,18 @@ void SP_item_artifact_super_damage()
 
 	self->s.v.touch = ( func_t ) powerup_touch;
 
-	if ( !b_dp ) {
-/* need this due to aerowalk customize and coop
-		trap_precache_model( "progs/quaddama.mdl" );
-		trap_precache_sound( "items/damage.wav" );
-		trap_precache_sound( "items/damage2.wav" );
-		trap_precache_sound( "items/damage3.wav" );
-*/
-	}
 	self->s.v.noise = "items/damage.wav";
 	setmodel( self, "progs/quaddama.mdl" );
 	self->s.v.classname = "item_artifact_super_damage";
-	if ( deathmatch == 4 )
-		self->s.v.netname = "OctaPower";
-	else
-		self->s.v.netname = "Quad Damage";
+	self->s.v.netname = deathmatch == 4 ? "OctaPower" : "Quad Damage";
 	self->s.v.items = IT_QUAD;
 
 	self->s.v.effects = ( int ) self->s.v.effects | EF_BLUE;
 
 	setsize( self, -16, -16, -24, 16, 16, 32 );
 
-	if ( b_dp ) { 	
+	if ( b_dp )
 		PlaceItemIngame();
-
-		self->s.v.velocity[2] = 300;
-		self->s.v.velocity[0] = -100 + ( g_random() * 200 );
-		self->s.v.velocity[1] = -100 + ( g_random() * 200 );
-
-		self->s.v.nextthink = self->cnt; // remove it with the time left on it
-		self->s.v.think = ( func_t ) SUB_Remove;
-	}
 	else
 		StartItem();
 }
@@ -2031,60 +1976,6 @@ void BackpackTouch()
 	self = stemp;
 }
 
-gedict_t *Spawn_OnePoint( vec3_t org, int effects )
-{
-	gedict_t	*p;
-
-	p = spawn();
-	p->s.v.flags = FL_ITEM;
-	p->s.v.solid = SOLID_NOT;
-	p->s.v.movetype = MOVETYPE_NONE;
-	setmodel( p, cvar("k_spm_custom_model") ? "progs/spawn.mdl" : "progs/w_g_key.mdl" );
-	p->s.v.netname = "Spawn Point";
-	p->s.v.classname = "spawnpoint";
-
-	p->s.v.effects = ( int ) p->s.v.effects | effects;
-
-	setorigin( p, PASSVEC3( org ) );
-
-	return p;
-}
-
-void Spawn_SpawnPoints( char *classname, int effects )
-{
-	gedict_t	*e;
-	vec3_t		org;
-
-	for ( e = world; ( e = ez_find( e, classname ) ); )
-	{
-		VectorCopy( e->s.v.origin, org );
-		org[2] += 0; // qqshka: it was 16, but I like more how it looks when it more close to ground
-
-		Spawn_OnePoint( org, effects );
-	}
-}
-
-void ShowSpawnPoints()
-{
-	Spawn_SpawnPoints( "info_player_deathmatch", cvar("k_spm_glow") ? ( EF_GREEN | EF_RED ) : 0 );
-
-	if ( isCTF() )
-	{
-		Spawn_SpawnPoints( "info_player_team1", cvar("k_spm_glow") ? EF_RED  : 0 );
-		Spawn_SpawnPoints( "info_player_team2", cvar("k_spm_glow") ? EF_BLUE : 0 );
-	}
-}
-
-void HideSpawnPoints()
-{
-	gedict_t	*e;
-
-	for ( e = world; ( e = ez_find( e, "spawnpoint" ) ); )
-	{
-		ent_remove( e );
-	}
-}
-
 /*
 ===============
 DropBackpack
@@ -2213,16 +2104,6 @@ void DropBackpack()
 
 	playername = self->s.v.netname;
 
-	/*
-	log_printf( "\t\t\t<dropbp time=\"%f\" weapon=\"%s\" shells=\"%d\" nails=\"%d\" rockets=\"%d\" cells=\"%d\" player=\"%s\" />\n",
-				g_globalvars.time - match_start_time,
-				item->s.v.netname,
-				(int)item->s.v.ammo_shells,
-				(int)item->s.v.ammo_nails,
-				(int)item->s.v.ammo_rockets,
-				(int)item->s.v.ammo_cells,
-				cleantext(playername) );
-	*/
 	log_printf(
 		"\t\t<event>\n"
 		"\t\t\t<drop_backpack>\n"
@@ -2259,3 +2140,66 @@ void DropBackpack()
 	item->s.v.nextthink = g_globalvars.time + ( self->ct == ctPlayer ? 120 : 30 );
 	item->s.v.think = ( func_t ) SUB_Remove;
 }
+
+/*
+===============================================================================
+
+SPAWN POINT MARKERS
+
+===============================================================================
+*/
+
+gedict_t *Spawn_OnePoint( vec3_t org, int effects )
+{
+	gedict_t	*p;
+
+	p = spawn();
+	p->s.v.flags = FL_ITEM;
+	p->s.v.solid = SOLID_NOT;
+	p->s.v.movetype = MOVETYPE_NONE;
+	setmodel( p, cvar("k_spm_custom_model") ? "progs/spawn.mdl" : "progs/w_g_key.mdl" );
+	p->s.v.netname = "Spawn Point";
+	p->s.v.classname = "spawnpoint";
+
+	p->s.v.effects = ( int ) p->s.v.effects | effects;
+
+	setorigin( p, PASSVEC3( org ) );
+
+	return p;
+}
+
+void Spawn_SpawnPoints( char *classname, int effects )
+{
+	gedict_t	*e;
+	vec3_t		org;
+
+	for ( e = world; ( e = ez_find( e, classname ) ); )
+	{
+		VectorCopy( e->s.v.origin, org );
+		org[2] += 0; // qqshka: it was 16, but I like more how it looks when it more close to ground
+
+		Spawn_OnePoint( org, effects );
+	}
+}
+
+void ShowSpawnPoints()
+{
+	Spawn_SpawnPoints( "info_player_deathmatch", cvar("k_spm_glow") ? ( EF_GREEN | EF_RED ) : 0 );
+
+	if ( isCTF() )
+	{
+		Spawn_SpawnPoints( "info_player_team1", cvar("k_spm_glow") ? EF_RED  : 0 );
+		Spawn_SpawnPoints( "info_player_team2", cvar("k_spm_glow") ? EF_BLUE : 0 );
+	}
+}
+
+void HideSpawnPoints()
+{
+	gedict_t	*e;
+
+	for ( e = world; ( e = ez_find( e, "spawnpoint" ) ); )
+	{
+		ent_remove( e );
+	}
+}
+

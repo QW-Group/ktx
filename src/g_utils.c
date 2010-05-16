@@ -1387,7 +1387,7 @@ int Get_Powerups ()
 	static float k_pow_check = 0;
 	static int   k_pow = 0;
 
-	int k_pow_new         = cvar( "k_pow" ); // sure - here we not using Get_Powerups %)
+	int k_pow_new         = cvar( "k_pow" ); // sure - here we not using Get_Powerups
 	int k_pow_min_players = bound(0, cvar( "k_pow_min_players"), 999);
 	int k_pow_check_time  = bound(0, cvar( "k_pow_check_time"), 999);
 
@@ -1403,17 +1403,21 @@ int Get_Powerups ()
 
 	// ok, time to re-check if powerups is still actual, or we have lack of players
 
-	// because not all players may connected yet, some work around :|
-	if ( framecount == 1 ) {
-		k_pow_check = g_globalvars.time + 3; // fast re-check. probably time when all players reconnect
-		k_pow_new = max(cvar("_k_players"), CountPlayers()) < k_pow_min_players ? 0 : k_pow_new;
+	// some work around because not all players may fully connected yet
+	if ( framecount == 1 )
+	{
 		k_pow = cvar( "_k_pow_last" ); // restore k_pow from last level
-	}else {
-		k_pow_check = g_globalvars.time + k_pow_check_time;
+		k_pow_new = WeirdCountPlayers() < k_pow_min_players ? 0 : k_pow_new;
+	}
+	else
+	{
 		k_pow_new = CountPlayers() < k_pow_min_players ? 0 : k_pow_new;
 	}
+	
+	k_pow_check = g_globalvars.time + k_pow_check_time;
 
-	if ( k_pow != k_pow_new ) {
+	if ( k_pow != k_pow_new )
+	{
 		char *pwr;
 
 		switch ( k_pow_new ) {

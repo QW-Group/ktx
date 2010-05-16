@@ -453,9 +453,10 @@ void            launch_spike( vec3_t org, vec3_t dir );
 
 // match.c
 
+int				WeirdCountPlayers(void);
 float			CountPlayers();
 float			CountRTeams();
-qbool 		isCanStart ( gedict_t *s, qbool forceMembersWarn );
+qbool 			isCanStart ( gedict_t *s, qbool forceMembersWarn );
 void			StartTimer ();
 void			StopTimer ( int removeDemo );
 

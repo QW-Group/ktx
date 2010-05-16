@@ -405,7 +405,6 @@ void G_ShutDown()
 		EndMatch( 1 ); // skip demo, make some other stuff
 
 	cvar_set( "_k_lastmap", ( strnull( map ) ? "" : map ) );
-	cvar_fset( "_k_players", CountPlayers());
 	cvar_fset( "_k_pow_last", Get_Powerups() );
 
 	if ( (i = IsMapInCycle( map )) )

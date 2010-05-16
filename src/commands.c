@@ -4242,6 +4242,52 @@ void ktpro_autotrack_on_race_status_changed (void)
 	ktpro_autotrack_mark_all( "race_status_changed", NULL );
 }
 
+void ktpro_autotrack_predict_powerup( void )
+{
+	extern float visible( gedict_t *targ );
+
+	gedict_t *p, *best;
+	float len, best_len;
+	vec3_t org;
+
+	if ( self->s.v.items != IT_QUAD && self->s.v.items != IT_INVULNERABILITY )
+		return; // we use this function for quad and pent only, ring and suit is not interesting for us
+
+	best = NULL;
+	best_len = 99999999;
+
+    for( p = world; (p = find_plr( p )); )
+	{
+		if ( ISDEAD( p ) )
+			continue; // we are not interested in dead players
+
+		VectorSubtract( p->s.v.origin, self->s.v.origin, org );
+		len = vlen( org );
+
+		if ( len > 500 )
+		{
+//			G_bprint(2, "too far %f\n", len);
+			continue; // player too far from this powerup
+		}
+
+		if ( len >= best_len )
+			continue; // not interesting, we alredy have someone with similar closeness to powerup
+
+		if ( !visible( p ) )
+		{
+//			G_bprint(2, "not visible\n");
+			continue; // powerup not visible for this player
+		}
+
+		best = p;
+	}
+
+	if ( !best )
+		return; // noone was found
+
+	ktpro_autotrack_on_powerup_predict( best );
+}
+
 // << end  ktpro compatible autotrack 
 
 void next_best ()

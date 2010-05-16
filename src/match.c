@@ -29,6 +29,25 @@ void OnePlayerInstagibStats();
 void StartLogs();
 void StopLogs();
 
+// Return count of players which have state cs_connected or cs_spawned.
+// It is weird because used string comparision so I treat it as slow and idiotic but it return more players than CountPlayers().
+int WeirdCountPlayers(void)
+{
+	gedict_t *p;
+	int num;
+	char state[16];
+
+	for( num = 0, p = world + 1; p <= world + MAX_CLIENTS; p++ )
+	{
+		infokey(p, "*state", state, sizeof(state));
+
+		if (streq(state, "connected") || streq(state, "spawned"))
+			num++;
+	}
+
+	return num;
+}
+
 float CountPlayers()
 {
 	gedict_t	*p;

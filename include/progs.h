@@ -461,8 +461,6 @@ typedef struct gedict_s {
 	int   ghost_clr;		// color of dropped player
 // }
 
-	float nthink;			// store here regeneration time of some items
-
 	vote_t v;				// player votes stored here
 
 // { spec stuff

@@ -595,7 +595,6 @@ void FirstFrame	( )
 	RegisterCvar("_k_last_cycle_map");  // internal usage, name of last map in map cycle,
 										// so we can back to map cycle if someone voted for map not in map cycle
 	RegisterCvar("_k_worldspawns"); // internal usage, count of maps server spawned
-	RegisterCvar("_k_players");   // internal usage, count of players on last map
 	RegisterCvar("_k_pow_last");  // internal usage, k_pow from last map
 
 	RegisterCvar("_k_nospecs");  // internal usage, will reject spectators connection
@@ -836,47 +835,6 @@ void SecondFrame ( )
 	Customize_Maps();
 }
 
-void hide_powerups ( char *classname )
-{
-	gedict_t *p;
-
-	if ( strnull( classname ) )
-		G_Error("hide_items");
-
-	for( p = world; (p = find(p, FOFCLSN, classname)); ) {
-		p->s.v.solid = SOLID_NOT;
- 		p->s.v.model = "";
-		if ( p->s.v.think == ( func_t ) SUB_regen ) {
-			p->nthink = p->s.v.nextthink > 0 ? p->s.v.nextthink : 0; // save respawn time
-			p->s.v.nextthink = 0;  // disable item auto respawn
-		}
-	}
-}
-
-void show_powerups ( char *classname )
-{
-	gedict_t *p, *swp;
-
-	if ( strnull( classname ) )
-		G_Error("show_items");
-
-	swp = self; 
-
-	for( p = world; (p = find(p, FOFCLSN, classname)); ) {
-		self = p; // WARNING
-
-		// spawn item if not yet so
-		if ( strnull( self->s.v.model ) || self->s.v.solid != SOLID_TRIGGER ) {
-			if ( self->s.v.think == ( func_t ) SUB_regen && self->nthink > 0 )
-				self->s.v.nextthink	= self->nthink; // spawn at this time
-			else
-				SUB_regen(); // spawn suddenly
-		}
-	}
-
-	self  = swp;
-}
-
 void CheckSvUnlock ()
 {
 	if ( k_sv_locktime && k_sv_locktime < g_globalvars.time ) {
@@ -992,19 +950,27 @@ void FixPowerups ()
 	qbool changed   = false;
 	int 	 k_pow_new = Get_Powerups();
 
-	if( k_pow != k_pow_new || framecount == 1 ) { // force on first frame
+	if( k_pow != k_pow_new || framecount == 1 )
+	{
+		// force on first frame
 		changed = true;
 		k_pow = k_pow_new;
 	}
 
-	if ( changed ) {
-		if ( k_pow ) { // show powerups for players
+	if ( changed )
+	{
+		extern void hide_powerups ( char *classname );
+		extern void show_powerups ( char *classname );
+
+		if ( k_pow )
+		{ // show powerups for players
 			show_powerups( "item_artifact_invulnerability" );
 			show_powerups( "item_artifact_super_damage" );
 			show_powerups( "item_artifact_envirosuit" );
 			show_powerups( "item_artifact_invisibility" );
 		}
-		else{ // hide powerups from players
+		else
+		{ // hide powerups from players
 			hide_powerups( "item_artifact_invulnerability" );
 			hide_powerups( "item_artifact_super_damage" );
 			hide_powerups( "item_artifact_envirosuit" );
