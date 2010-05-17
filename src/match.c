@@ -39,9 +39,14 @@ int WeirdCountPlayers(void)
 
 	for( num = 0, p = world + 1; p <= world + MAX_CLIENTS; p++ )
 	{
+		infokey(p, "*spectator", state, sizeof(state));
+
+		if ( state[0] )
+			continue; // ignore spectators
+
 		infokey(p, "*state", state, sizeof(state));
 
-		if (streq(state, "connected") || streq(state, "spawned"))
+		if ( streq(state, "connected") || streq(state, "spawned") )
 			num++;
 	}
 
