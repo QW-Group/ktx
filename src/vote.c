@@ -547,9 +547,6 @@ void nospecs( )
         return;
 	}
 
-	if ( check_master() )
-		return;
-
 	// admin may turn this status alone on server...
 	if ( !is_adm( self ) )
 	{
@@ -616,9 +613,6 @@ void votecoop( )
         G_sprint(self, 2, "Match in progress and deathmatch is non zero, you can't vote for coop\n");
         return;
 	}
-
-	if ( check_master() )
-		return;
 
 	self->v.coop = !self->v.coop;
 

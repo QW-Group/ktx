@@ -278,9 +278,8 @@ void DoSelectMap(int iMap)
 	if ( strnull( m = GetMapName( iMap ) ) )
 		return;
 
-	if( (    cvar( "k_lockmap" ) || cvar( "k_master" ) )
-		  && !is_adm( self )
-      ) {
+	if( cvar( "k_lockmap" ) && !is_adm( self ) )
+	{
 		G_sprint(self, 2, "MAP IS LOCKED!\n"
 						  "You are NOT allowed to change!\n");
 		return;

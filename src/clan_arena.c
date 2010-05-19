@@ -73,9 +73,6 @@ void ToggleCArena()
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
 	if ( !isCA() )
 	{
 		// seems we trying turn CA on.

@@ -1534,9 +1534,6 @@ void r_Xset( float t )
 	if ( match_in_progress || match_over || race.status )
 		return;
 
-	if ( check_master() )
-		return;
-
 	if ( checkpoints_count() >= MAX_ROUTE_NODES )
 	{
 		G_sprint( self, 2, "Can't add more checkpoints!\n" );
@@ -1567,9 +1564,6 @@ void r_cdel( )
 	char					*classname = classname_for_nodeType( nodeCheckPoint );
 
 	if ( match_in_progress || match_over || race.status )
-		return;
-
-	if ( check_master() )
 		return;
 
 	cnt = find_cnt( FOFCLSN, classname );
@@ -1631,9 +1625,6 @@ void r_changestatus( float t )
 	if ( match_in_progress || match_over )
 		return;
 
-	if ( check_master() )
-		return;
-
 	switch ( (int)t )
 	{
 		case 1: // rready
@@ -1678,9 +1669,6 @@ void r_timeout( )
 	if ( match_in_progress || match_over || race.status )
 		return;
 
-	if ( check_master() )
-		return;
-
 	trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
 
 	race.timeout_setting = atoi( arg_1 );
@@ -1696,9 +1684,6 @@ void r_timeout( )
 void r_mode( )
 {
 	if ( match_in_progress || match_over || race.status )
-		return;
-
-	if ( check_master() )
 		return;
 
 	race.weapon++;
@@ -1760,9 +1745,6 @@ void r_route( )
 	static int next_route = 0; // STATIC
 
 	if ( match_in_progress || match_over )
-		return;
-
-	if ( check_master() )
 		return;
 
 	if ( race.status )

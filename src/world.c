@@ -91,7 +91,7 @@ void ClearBodyQue()
 
 void CheckDefMap( )
 {
-	if( !CountPlayers() && !cvar( "k_master" ) && !cvar( "k_lockmap" ) )
+	if( !CountPlayers() && !cvar( "k_lockmap" ) )
 	{
 		char *s1 = cvar_string( "k_defmap" );
 
@@ -634,7 +634,6 @@ void FirstFrame	( )
 	RegisterCvar("k_admincode");
 	RegisterCvarEx("k_prewar", "1");
 	RegisterCvar("k_lockmap");
-	RegisterCvar("k_master");
 	RegisterCvar("k_fallbunny");
 	RegisterCvar("timing_players_time");
 	RegisterCvar("timing_players_action");

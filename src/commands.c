@@ -34,7 +34,6 @@ void AdminForceBreak ();
 void AdminSwapAll ();
 void TogglePreWar ();
 void ToggleMapLock ();
-void ToggleMaster ();
 void AdminKick ();
 void m_kick ();
 void YesKick ();
@@ -285,7 +284,6 @@ const char CD_NODESC[] = "no desc";
 #define CD_PICKUP     "vote for pickup game"
 #define CD_PREWAR     "playerfire before game"
 #define CD_LOCKMAP    "(un)lock current map"
-#define CD_MASTER     "toggle mastermode"
 #define CD_SPEED      "toggle sv_maxspeed"
 #define CD_FAIRPACKS  "best/last weapon dropped"
 #define CD_ABOUT      "mod's info"
@@ -573,7 +571,6 @@ cmd_t cmds[] = {
 	{ "pickup",      VotePickup,                0    , CF_PLAYER, CD_PICKUP }, 
 	{ "prewar",      TogglePreWar,              0    , CF_BOTH_ADMIN, CD_PREWAR },
 	{ "lockmap",     ToggleMapLock,             0    , CF_BOTH_ADMIN, CD_LOCKMAP },
-	{ "master",      ToggleMaster,              0    , CF_BOTH_ADMIN, CD_MASTER },
 	{ "speed",       ToggleSpeed,               0    , CF_PLAYER, CD_SPEED },
 	{ "fairpacks",   ToggleFairPacks,           0    , CF_PLAYER, CD_FAIRPACKS },
 	{ "about",       ShowVersion,               0    , CF_BOTH | CF_MATCHLESS, CD_ABOUT },
@@ -1119,16 +1116,6 @@ void Init_cmds(void)
 	}
 }   
 
-qbool check_master()
-{
-	if( cvar( "k_master" ) && !is_adm(self) ) {
-		G_sprint(self, 2, "console: command is locked\n");
-		return true;
-	}
-
-	return false;
-}
-
 void Do_ShowCmds( qbool adm_req )
 {
 	qbool first = true;
@@ -1286,9 +1273,6 @@ void ChangeOvertime()
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
     f1 = bound(0, cvar( "k_overtime" ), 3);
     f2 = bound(0, cvar( "k_exttime" ), 999);
 
@@ -1325,9 +1309,6 @@ void ChangeOvertimeUp ()
 	int k_exttime = cvar( "k_exttime" );
 
 	if( match_in_progress )
-		return;
-
-	if( check_master() )
 		return;
 
 	k_exttime++;
@@ -1782,9 +1763,6 @@ void ResetOptions()
 	if( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
 	if ( cvar("k_auto_xonx") ) {
 		G_sprint(self, 2, "Command blocked due to k_auto_xonx\n");
 		return;
@@ -1825,9 +1803,6 @@ void VotePickup()
 	int votes;
 
 	if( match_in_progress )
-		return;
-
-	if( check_master() )
 		return;
 
 	if( k_captains ) {
@@ -1931,9 +1906,6 @@ void ToggleRespawns()
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
 	if ( ++k_spw > 4 )
 		k_spw = 0;
 
@@ -1947,9 +1919,6 @@ void TogglePowerups()
 	int k_pow = bound(0, cvar( "k_pow" ), 2); // here we are not using Get_Powerups
 
 	if ( match_in_progress )
-		return;
-
-	if( check_master() )
 		return;
 
 	if ( ++k_pow > 2 )
@@ -1977,9 +1946,6 @@ void ToggleDischarge()
 	if( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
 	cvar_toggle_msg( self, "k_dis", redtext("discharges") );
 }
 
@@ -1991,9 +1957,6 @@ void ShowDMM()
 void ChangeDM(float dmm)
 {
 	if ( match_in_progress )
-		return;
-
-	if( check_master() )
 		return;
 
 	if ( deathmatch == (int)dmm ) {
@@ -2023,9 +1986,6 @@ void ChangeTP()
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
 	if( !isTeam() && !isCTF() ) {
 		G_sprint(self, 3, "console: non team mode disallows you to change teamplay setting\n");
 		return;
@@ -2048,9 +2008,6 @@ void TimeDown(float t)
 	int tl = timelimit;
 
 	if ( match_in_progress )
-		return;
-
-	if( check_master() )
 		return;
 
 	if (t == 5 && timelimit == 5)
@@ -2083,9 +2040,6 @@ void TimeUp(float t)
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
 	if (t == 5 && timelimit == 0)
 		timelimit = 1;
 	else if (t == 5 && timelimit == 1)
@@ -2113,12 +2067,7 @@ void TimeSet(float t)
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
-	timelimit = t;
-
-	timelimit = bound(0, timelimit, cvar( "k_timetop" ));
+	timelimit = bound(0, t, cvar( "k_timetop" ));
 
 	if ( tl == timelimit ) {
 		G_sprint(self, 2, "%s still %s\n", redtext("timelimit"), dig3(timelimit));
@@ -2134,9 +2083,6 @@ void FragsDown()
 	int fl = fraglimit;
 
 	if ( match_in_progress )
-		return;
-
-	if( check_master() )
 		return;
 
 	fraglimit -= 10;
@@ -2164,9 +2110,6 @@ void FragsUp()
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
 	fraglimit += 10;
 
 	fraglimit = bound(0, fraglimit, 100);
@@ -2185,18 +2128,12 @@ void ToggleDropQuad()
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
 	cvar_toggle_msg( self, "dq", redtext("DropQuad") );
 }
 
 void ToggleDropRing()
 {
 	if ( match_in_progress )
-		return;
-
-	if( check_master() )
 		return;
 
 	cvar_toggle_msg( self, "dr", redtext("DropRing") );
@@ -2207,9 +2144,6 @@ void ToggleDropPack()
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
 	cvar_toggle_msg( self, "dp", redtext("DropPacks") );
 }
 
@@ -2218,9 +2152,6 @@ void ToggleFairPacks()
 	int k_frp = bound(0, cvar("k_frp"), 2);
 
     if ( match_in_progress )
-		return;
-
-	if( check_master() )
 		return;
 
 	if( k_yawnmode ) {
@@ -2251,9 +2182,6 @@ void ToggleSpeed()
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
 	if( k_maxspeed != 320 )
 		k_maxspeed = 320;
 	else
@@ -2275,7 +2203,8 @@ void ToggleSpecTalk()
 
 	k_spectalk = bound(0, k_spectalk, 1);
 
-	if( match_in_progress == 2 ) {
+	if( match_in_progress == 2 )
+	{
 
 		fpd = ( k_spectalk ) ? (fpd & ~64) : (fpd | 64);
 
@@ -2290,10 +2219,9 @@ void ToggleSpecTalk()
 
 		return;
 
-	} else {
-		if( check_master() )
-			return;
-
+	}
+	else
+	{
 		cvar_fset( "k_spectalk", k_spectalk );
 
 		if( k_spectalk )
@@ -2333,9 +2261,6 @@ void ChangeLock()
 	int lock = bound(0, cvar("k_lockmode"), 2);
 
 	if ( match_in_progress )
-		return;
-
-	if( check_master() )
 		return;
 
 	lock++;
@@ -2535,9 +2460,6 @@ void ToggleQLag()
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
 	fpd ^= 8;
 
 	localcmd("serverinfo fpd %d\n", fpd);
@@ -2553,9 +2475,6 @@ void ToggleQEnemy()
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
 	fpd ^= 32;
 
 	localcmd("serverinfo fpd %d\n", fpd);
@@ -2569,9 +2488,6 @@ void ToggleQPoint()
 	int fpd = iKey( world, "fpd" );
 
 	if ( match_in_progress )
-		return;
-
-	if( check_master() )
 		return;
 
 	fpd ^= 128;
@@ -2590,9 +2506,6 @@ void ToggleSkinForcing()
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
 	fpd ^= 256;
 
 	localcmd("serverinfo fpd %d\n", fpd);
@@ -2606,9 +2519,6 @@ void ToggleColorForcing()
 	int fpd = iKey( world, "fpd" );
 
 	if ( match_in_progress )
-		return;
-
-	if( check_master() )
 		return;
 
 	fpd ^= 512;
@@ -2626,9 +2536,6 @@ void TogglePitchSpeedLimit()
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
 	fpd ^= 16384;
 
 	localcmd("serverinfo fpd %d\n", fpd);
@@ -2644,9 +2551,6 @@ void ToggleYawSpeedLimit()
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
 	fpd ^= 32768;
 
 	localcmd("serverinfo fpd %d\n", fpd);
@@ -2659,9 +2563,6 @@ void ToggleYawSpeedLimit()
 void ToggleFreeze()
 {
 	if ( match_in_progress )
-		return;
-
-	if( check_master() )
 		return;
 
 	cvar_toggle_msg( self, "k_freeze", redtext("map freeze"));
@@ -3141,16 +3042,6 @@ void UserMode(float umode)
 	if ( streq(um, "ffa") && k_matchLess && cvar("k_use_matchless_dir") )
 		um = "matchless"; // use configs/usermodes/matchless instead of configs/usermodes/ffa in matchless mode
 
-	if ( sv_invoked ) {
-		if ( !k_matchLess ) // allow for matchless mode
-		if ( cvar( "k_master" ) ) {
-			G_bprint(2, "UserMode: sv %s discarded due to k_master\n", um);
-			return;
-		}
-	}
-	else if( check_master() )
-		return;
-
 //for 1on1 / 2on2 / 4on4 and ffa commands manipulation
 //0 - no one, 1 - admins, 2 elected admins too
 //3 - only real real judges, 4 - elected judges too
@@ -3276,9 +3167,6 @@ void TogglePractice()
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
 	if(     lock_practice == 2 /* server locked in current practice mode */
 		|| (lock_practice != 0 && lock_practice != 1) /* unknown lock type, ignore command */
 	  ) {
@@ -3397,9 +3285,6 @@ void t_jump (float j_type)
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
 	jt    = va("k%cjump", cjt);
 	cv_jt = va("k_disallow_k%cjump", cjt);
 
@@ -3492,9 +3377,6 @@ void hdptoggle ()
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
 	trap_cvar_set_float( "k_lock_hdp", !cvar( "k_lock_hdp" ) );
 	G_bprint(2, "%s %s %s\n", self->s.v.netname,
 				redtext( Allows( !cvar( "k_lock_hdp" ) ) ), redtext( "handicap" ) );
@@ -3533,9 +3415,6 @@ void noweapon ()
 			show_disallowed_weapons( k_disallow_weapons );
 		return;
 	}
-
-	if( check_master() )
-		return;
 
 	if ( deathmatch != 4 ) {
 		G_sprint(self, 2, "command allowed in %s only\n", redtext("dmm4"));
@@ -3652,9 +3531,6 @@ void RandomPickup ()
 	
 	if( match_in_progress )
         return;
-
-	if( check_master() )
-		return;
 
 	if( k_captains ) {
 		G_sprint(self, 2, "No random pickup when captain stuffing\n");
@@ -4593,9 +4469,6 @@ void krnd ()
 	if ( match_in_progress ) 
 		return;
 
-	if( check_master() )
-		return;
-
 	if ( ( argc = trap_CmdArgc() ) < 2 ) {
 		G_sprint(self, 2, "usage: rnd <1st 2nd ...>\n");
 		return;
@@ -4897,9 +4770,6 @@ void infolock ( )
 	if ( match_in_progress ) 
 		return;
 
-	if( check_master() )
-		return;
-
 	if ( !is_adm( self ) ) {
 		G_sprint(self, 2, "You are not an admin\n");
 		return;
@@ -4919,9 +4789,6 @@ void infospec ( )
 	int k_spec_info = cvar("k_spec_info");
 
 	if ( match_in_progress )
-		return;
-
-	if( check_master() )
 		return;
 
 	k_spec_info ^= MI_ON;
@@ -5147,9 +5014,6 @@ void ToggleMidair()
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
 	// Can't enable midair unless dmm4 is set first
 	if ( !cvar("k_midair") && deathmatch != 4 ) {
 		G_sprint( self, 2, "Midair requires dmm4\n");
@@ -5172,9 +5036,6 @@ void ToggleInstagib()
 	int k_instagib = bound(0, cvar( "k_instagib" ), 2); 
 
 	if ( match_in_progress )
-		return;
-
-	if( check_master() )
 		return;
 
 	// Can't enable instagib unless dmm4 is set first
@@ -5232,13 +5093,10 @@ void ToggleCGKickback()
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
+	if ( !cvar("k_instagib") ) {
+		G_sprint( self, 2, "cg_kb requires Instagib\n");
 		return;
-
-        if ( !cvar("k_instagib") ) {
-                G_sprint( self, 2, "cg_kb requires Instagib\n");
-                return;
-        }
+	}
 
 	cvar_toggle_msg( self, "k_cg_kb", redtext("Coilgun kickback") );
 }
@@ -5254,9 +5112,6 @@ void sv_time()
 void GrenadeMode()
 {
 	if ( match_in_progress )
-		return;
-
-	if( check_master() )
 		return;
 
 	// Can't toggle unless dmm4 is set first
@@ -5301,9 +5156,6 @@ void teleteam ()
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
 	if ( ( k_tp_tele_death = (k_tp_tele_death ? 0 : 1) ) ) 
 		G_bprint(2, "%s turn teamtelefrag %s\n", self->s.v.netname, redtext("affects frags"));
 	else
@@ -5319,9 +5171,6 @@ void ChangeClientsCount( int type, int value )
 	int cl_count = 0;
 
 	if ( match_in_progress )
-		return;
-
-	if( check_master() )
 		return;
 
 	if ( !check_perm(self, cvar("k_allowcountchange")) )
@@ -5392,9 +5241,6 @@ void dmgfrags ()
 {
     if( match_in_progress )
         return;
-
-	if( check_master() )
-		return;
 
 	cvar_toggle_msg( self, "k_dmgfrags", redtext("damage frags") );
 }
@@ -5747,9 +5593,6 @@ void airstep()
 	if ( match_in_progress )
 		return;
 
-	if ( check_master() )
-		return;
-
 	cvar_toggle_msg( self, "pm_airstep", redtext("pm_airstep") );
 }
 
@@ -5758,9 +5601,6 @@ void ToggleVwep()
 	gedict_t *p, *oself;
 
 	if ( match_in_progress )
-		return;
-
-	if ( check_master() )
 		return;
 
 	if (!vw_available || !cvar("k_allow_vwep"))
@@ -5783,9 +5623,6 @@ void teamoverlay()
 	if ( match_in_progress )
 		return;
 
-	if ( check_master() )
-		return;
-
 	cvar_toggle_msg( self, "k_teamoverlay", redtext("teamoverlay") );
 }
 
@@ -5794,18 +5631,12 @@ void ToggleExclusive()
 	if ( match_in_progress )
 		return;
 
-	if ( check_master() )
-		return;
-
 	cvar_toggle_msg( self, "k_exclusive", redtext("exclusive mode") );
 }
 
 void ToggleNewCoopNm()
 {
 	if ( match_in_progress )
-		return;
-
-	if ( check_master() )
 		return;
 
 	cvar_toggle_msg( self, "k_nightmare_pu", redtext("New Nightmare mode (drops powerups)") );
@@ -5824,9 +5655,6 @@ void FixYawnMode()
 void ToggleYawnMode()
 {
 	if ( match_in_progress )
-		return;
-
-	if ( check_master() )
 		return;
 
 	cvar_toggle_msg( self, "k_yawnmode", redtext("yawnmode") );
@@ -5850,9 +5678,6 @@ void setTeleportCap()
 		return;
 	}
 
-	if ( check_master() )
-		return;
-	
 	trap_CmdArgv( 1, arg, sizeof( arg ) );
 	k_teleport_cap = atoi( arg ); // get user input
 	k_teleport_cap = bound( 0, k_teleport_cap, 100 ); // bound
@@ -5932,9 +5757,6 @@ void ToggleArena()
 	if ( match_in_progress )
 		return;
 
-	if( check_master() )
-		return;
-
 	if ( !isRA() )
 	{
 		// seems we trying turn RA on.
@@ -5977,9 +5799,6 @@ void Spawn666Time()
 	char arg_2[1024];
 	float dmm4_invinc_time;
 
-	if( check_master() )
-		return;
-
 	if ( deathmatch != 4 )
 	{
 		G_sprint(self, 2, "command allowed in %s only\n", redtext("dmm4"));
@@ -6009,9 +5828,6 @@ void Spawn666Time()
 void noitems()
 {
 	if ( match_in_progress )
-		return;
-
-	if ( check_master() )
 		return;
 
 	cvar_toggle_msg( self, "k_noitems", redtext("noitems mode") );

@@ -183,9 +183,6 @@ void fp_toggle ( float type )
 
 	int k_fp = bound(1, cvar(k_fp_name), say_fp_levels_cnt);
 
-	if( check_master() )
-		return;
-
 	if ( !is_adm( self ) ) {
 		G_sprint(self, 2, "You are not an admin\n");
 		return;

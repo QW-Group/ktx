@@ -699,32 +699,10 @@ void ToggleMapLock ()
         G_sprint(self, 2, "Map is locked\n");
 }
 
-void ToggleMaster ()
-{
-    float f1;
-
-    if( !is_adm( self ) )
-        return;
-
-    f1 = !cvar( "k_master" );
-
-    if( f1 )
-        G_bprint(2, "%s sets mastermode!\n"
-					"Players may %s alter settings\n", self->s.v.netname, redtext("not"));
-    else
-        G_bprint(2, "Mastermode disabled by %s\n"
-					"Players %s now alter settings\n", self->s.v.netname, redtext("can"));
-
-	cvar_fset( "k_master", f1 );
-}
-
 void ToggleFallBunny ()
 {
     if( match_in_progress )
         return;
-
-	if( check_master() )
-		return;
 
 	if ( k_yawnmode ) {
 		G_sprint(self, 2, "Command blocked because yawnmode is active\n");
