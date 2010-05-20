@@ -944,10 +944,10 @@ void FixRA()
 // serve k_pow and k_pow_min_players
 void FixPowerups ()
 {
-	static int k_pow = -1; // static
+	static int	k_pow = -1; // static
 
-	qbool changed   = false;
-	int 	 k_pow_new = Get_Powerups();
+	qbool		changed   = false;
+	int 		k_pow_new = Get_Powerups();
 
 	if( k_pow != k_pow_new || framecount == 1 )
 	{

@@ -1363,45 +1363,13 @@ void SendMessage(char *name)
 	G_sprint(self, 2, "No name to display\n");
 }
 
-void PrintToggle1( char *tog, char *key )
-{
-	int i;
-
-	if ( strnull(tog) || strnull(key) )
-		G_Error("PrintToggle1 null");
-
-	G_sprint(self, 2, "%s", tog);
-
-	i = streq(key, "k_pow") ? Get_Powerups() : bound(0, cvar( key ), 1);
-
-	if( !i )
-		G_sprint(self, 2, "Off ");
-	else if ( i == 1 )
-		G_sprint(self, 2, "On  ");
-	else
-		G_sprint(self, 2, "Jam ");
-}
-
-void PrintToggle2( char *tog, char *key )
-{
-	if ( strnull(tog) || strnull(key) )
-		G_Error("PrintToggle2 null");
-
-	G_sprint(self, 2, "%s", tog);
-
-	if( cvar( key ) )
-		G_sprint(self, 2, "On\n");
-	else
-		G_sprint(self, 2, "Off\n");
-}
-
-char *get_frp_str ()
+static char *get_frp_str ()
 {
 	switch( get_fair_pack() ) {
-		case  0: return "Off";
-		case  1: return "On";
-		case  2: return "Lst";
-		default: return "Unk";
+		case  0: return "off";
+		case  1: return "on";
+		case  2: return "lst";
+		default: return "unk";
 	}
 }
 
@@ -1410,23 +1378,23 @@ void ModStatus ()
 	int votes;
 	gedict_t *p;
 
-	G_sprint(self, 2, "%-14.14s %-3d\n", redtext("Maxspeed"), (int)k_maxspeed);
-	G_sprint(self, 2, "%-14.14s %-3d ",  redtext("Deathmatch"), (int)deathmatch);
-	G_sprint(self, 2, "%-14.14s %-3d\n", redtext("Teamplay"), (int)tp_num());
-	G_sprint(self, 2, "%-14.14s %-3d ",  redtext("Timelimit"), (int)timelimit);
-	G_sprint(self, 2, "%-14.14s %-3d\n", redtext("Fraglimit"), (int)fraglimit);
-	PrintToggle1(redtext("Powerups       "), "k_pow");
-	PrintToggle2(redtext("Discharge      "), "k_dis");
-	PrintToggle1(redtext("Drop Quad      "), "dq");
-	PrintToggle2(redtext("Drop Ring      "), "dr");
-	G_sprint(self, 2, "%-14.14s %-3.3s ", redtext("Fair Backpacks"), get_frp_str());
-	PrintToggle2(redtext("Drop Backpacks "), "dp");
+	G_sprint(self, 2, "%-14.14s %-4d\n",   redtext("Maxspeed"),			(int)k_maxspeed);
+	G_sprint(self, 2, "%-14.14s %-4d ",    redtext("Deathmatch"),		(int)deathmatch);
+	G_sprint(self, 2, "%-14.14s %-3d\n",   redtext("Teamplay"),			(int)tp_num());
+	G_sprint(self, 2, "%-14.14s %-4d ",    redtext("Timelimit"),		(int)timelimit);
+	G_sprint(self, 2, "%-14.14s %-3d\n",   redtext("Fraglimit"),		(int)fraglimit);
+	G_sprint(self, 2, "%-14.14s %-4.4s ",  redtext("Powerups"),			OnOff(Get_Powerups()));
+	G_sprint(self, 2, "%-14.14s %-3.3s\n", redtext("Discharge"),		OnOff(cvar("k_dis")));
+	G_sprint(self, 2, "%-14.14s %-4.4s ",  redtext("Drop Quad"),		OnOff(cvar("dq")));
+	G_sprint(self, 2, "%-14.14s %-3.3s\n", redtext("Drop Ring"),		OnOff(cvar("dr")));
+	G_sprint(self, 2, "%-14.14s %-4.4s ",  redtext("Fair Backpacks"),	get_frp_str());
+	G_sprint(self, 2, "%-14.14s %-3.3s\n", redtext("Drop Backpacks"),	OnOff(cvar("dp")));
+	G_sprint(self, 2, "%-14.14s %-4.4s ",  redtext("spec info perm"),	mi_adm_only() ? "adm" : "all");
+	G_sprint(self, 2, "%-14.14s %-3.3s\n", redtext("more spec info"),	OnOff(mi_on()));
+	G_sprint(self, 2, "%-14.14s %-4.4s\n", redtext("teleteam"),			OnOff(cvar("k_tp_tele_death")));
 
-	G_sprint(self, 2, "%-14.14s %-3.3s ",  redtext("spec info perm"), (mi_adm_only() ? "Adm" : "All"));
-	G_sprint(self, 2, "%-14.14s %-3.3s\n", redtext("more spec info"), (mi_on() ? "On" : "Off"));
-	G_sprint(self, 2, "%-14.14s %-3.3s\n", redtext("teleteam"), (cvar("k_tp_tele_death") ? "On" : "Off"));
-
-	if( match_in_progress == 1 ) {
+	if( match_in_progress == 1 )
+	{
 		p = find(world, FOFCLSN, "timer" );
 		if ( p )
 			G_sprint(self, 2, "The match will start in %d second%s\n", (int)p->cnt2, count_s(p->cnt2));
@@ -1444,15 +1412,20 @@ void ModStatus ()
 	if( floor( k_captains ) == 1 ) 
 		G_sprint(self, 2, "\x90\x31\x91 %s present\n", redtext("captain"));
 
-	if( match_in_progress == 2 ) {
-		if( k_sudden_death )                
+	if( match_in_progress == 2 )
+	{
+		if( k_sudden_death )
+		{
 			G_sprint(self, 2, "%s overtime in progress\n", redtext(SD_type_str()));
-		else {
+		}
+		else
+		{
 			p = find(world, FOFCLSN, "timer");
 			if ( p )
+			{
 				G_sprint(self, 2, "Match in progress\n"
-								  "\x90%s\x91 full minute%s left\n",
-									dig3(p->cnt - 1), count_s(p->cnt));
+								  "\x90%s\x91 full minute%s left\n", dig3(p->cnt - 1), count_s(p->cnt));
+			}
 		}
 	}
 }
@@ -1916,29 +1889,18 @@ void ToggleRespawns()
 
 void TogglePowerups()
 {
-	int k_pow = bound(0, cvar( "k_pow" ), 2); // here we are not using Get_Powerups
+//	int k_pow = cvar( "k_pow" ); // here we are not using Get_Powerups
 
 	if ( match_in_progress )
 		return;
 
-	if ( ++k_pow > 2 )
-		k_pow = 0;
-
-	if ( cvar("k_instagib") ) {
+	if ( cvar("k_instagib") )
+	{
 		G_bprint(2, "%s are disabled with Instagib\n", redtext("Powerups"));
 		return;
 	}
 
-	cvar_fset("k_pow", k_pow);
-
-	if ( !k_pow )
-		G_bprint(2, "%s disabled\n", redtext("Powerups"));
-	else if ( k_pow == 1 )
-		G_bprint(2, "%s enabled\n", redtext("Powerups"));
-	else if ( k_pow == 2 )
-		G_bprint(2, "%s enabled (timer jammer)\n", redtext("Powerups"));
-	else
-		G_bprint(2, "%s unknown\n", redtext("Powerups"));
+	cvar_toggle_msg( self, "k_pow", redtext("powerups") );
 }
 
 void ToggleDischarge()

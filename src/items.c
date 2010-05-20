@@ -1457,9 +1457,19 @@ void show_powerups ( char *classname )
 		// spawn item if needed
 		if ( strnull( p->s.v.model ) || p->s.v.solid != SOLID_TRIGGER )
 		{
-			p->s.v.nextthink = g_globalvars.time + 30;
-			p->s.v.nextthink -= AUTOTRACK_POWERUPS_PREDICT_TIME;
-			p->s.v.think = ( func_t ) SUB_regen_powerups;
+			if ( match_in_progress == 2 )
+			{
+				// spawn item in 30 seconds if game alredy running
+				p->s.v.nextthink = g_globalvars.time + 30;
+				p->s.v.nextthink -= AUTOTRACK_POWERUPS_PREDICT_TIME;
+				p->s.v.think = ( func_t ) SUB_regen_powerups;
+			}
+			else
+			{
+				// spawn item instantly if game is not running
+				p->s.v.nextthink = g_globalvars.time;
+				p->s.v.think = ( func_t ) SUB_regen;
+			}
 		}
 	}
 }

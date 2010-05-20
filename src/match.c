@@ -1729,7 +1729,7 @@ void PrintCountdown( int seconds )
 // Timelimit  xx
 // Fraglimit xxx
 // Overtime   xx		Overtime printout, supports sudden death display
-// Powerups   On|Off|Jammed
+// Powerups   On|Off
 // Dmgfrags   On // optional
 // Noweapon
 
@@ -1816,7 +1816,6 @@ void PrintCountdown( int seconds )
 	switch ( Get_Powerups() ) {
 		case 0:  pwr = redtext("Off"); break;
 		case 1:  pwr = redtext( "On"); break;
-		case 2:  pwr = redtext("Jam"); break;
 		default: pwr = redtext("Unkn"); break;
 	}
 

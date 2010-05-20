@@ -1418,16 +1418,7 @@ int Get_Powerups ()
 
 	if ( k_pow != k_pow_new )
 	{
-		char *pwr;
-
-		switch ( k_pow_new ) {
-			case 0:  pwr = redtext("Off"); break;
-			case 1:  pwr = redtext("On");  break;
-			case 2:  pwr = redtext("On (Jam)"); break;
-			default: pwr = redtext("Unkn"); break;
-		}
-		
-		G_bprint(2, "Server decides to turn %s %s\n", redtext("powerups"), pwr);
+		G_bprint( 2, "Server decides to turn %s %s\n", redtext("powerups"), redtext( OnOff( k_pow_new ) ) );
 	}
 
 	return (k_pow = k_pow_new);
