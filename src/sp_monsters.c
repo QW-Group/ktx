@@ -52,14 +52,14 @@ void MonsterDropPowerups()
 	{
 		case 0:
 
-		if ( /* cvar( "dp" ) && */ 1 )
+		if ( /* cvar( "dp" ) && */ cvar("k_pow_p") )
 			DropPowerup( 30, IT_INVULNERABILITY );
 
 		break;
 
 		case 1:
 
-		if ( /* cvar( "dr" ) && */ 1 )
+		if ( /* cvar( "dr" ) && */ cvar("k_pow_r") )
 			DropPowerup( 30, IT_INVISIBILITY );
 
 		break;
@@ -68,7 +68,7 @@ void MonsterDropPowerups()
 
 		default:
 
-		if ( /* cvar( "dq" ) && */ 1 )
+		if ( /* cvar( "dq" ) && */ cvar("k_pow_q") )
 			DropPowerup( 30, IT_QUAD );
 
 		break;

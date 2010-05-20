@@ -1382,6 +1382,40 @@ void changelevel( const char *name )
 	trap_changelevel(name);
 }
 
+char *Get_PowerupsStr(void)
+{
+	static char str[5];
+
+	str[0] = 0;
+
+	// global off or all off
+	if ( !cvar( "k_pow" )
+		|| (!cvar( "k_pow_q" ) && !cvar( "k_pow_p" ) && !cvar( "k_pow_r" ) && !cvar( "k_pow_s" ))
+	)
+	{
+		strlcpy(str, "off", sizeof(str));
+		return str;
+	}
+
+	// all on
+	if ( cvar( "k_pow_q" ) && cvar( "k_pow_p" ) && cvar( "k_pow_r" ) && cvar( "k_pow_s" ) )
+	{
+		strlcpy(str, "on", sizeof(str));
+		return str;
+	}
+
+	if ( cvar( "k_pow_q" ) )
+		strlcat(str, "q", sizeof(str));
+	if ( cvar( "k_pow_p" ) )
+		strlcat(str, "p", sizeof(str));
+	if ( cvar( "k_pow_r" ) )
+		strlcat(str, "r", sizeof(str));
+	if ( cvar( "k_pow_s" ) )
+		strlcat(str, "s", sizeof(str));
+
+	return str;
+}
+
 int Get_Powerups ()
 {
 	static float k_pow_check = 0;

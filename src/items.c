@@ -76,7 +76,12 @@ void PlaceItem()
 	// if powerups disabled - hide
 	if ( (int)self->s.v.items & (IT_INVISIBILITY | IT_INVULNERABILITY | IT_SUIT | IT_QUAD) )
 	{
-		if ( !Get_Powerups() )
+		if (	!Get_Powerups()
+			|| (((int)self->s.v.items & IT_INVISIBILITY) && !cvar("k_pow_r"))
+			|| (((int)self->s.v.items & IT_INVULNERABILITY) && !cvar("k_pow_p"))
+			|| (((int)self->s.v.items & IT_SUIT) && !cvar("k_pow_s"))
+			|| (((int)self->s.v.items & IT_QUAD) && !cvar("k_pow_q"))
+		)
 		{
 			self->s.v.model = "";
 			self->s.v.solid = SOLID_NOT;
@@ -1524,13 +1529,13 @@ void DropPowerup( float timeleft, int powerup )
 
 void DropPowerups()
 {
-	if ( cvar( "dq" ) && Get_Powerups() )
+	if ( cvar( "dq" ) && Get_Powerups() && cvar("k_pow_q") )
 	{
 		if ( self->super_damage_finished > 0 )
 			DropPowerup( self->super_damage_finished - g_globalvars.time, IT_QUAD );
 	}
 
-	if ( cvar( "dr" ) && Get_Powerups() )
+	if ( cvar( "dr" ) && Get_Powerups() && cvar("k_pow_r") )
 	{
 		if ( self->invisible_finished > 0 )
 			DropPowerup( self->invisible_finished - g_globalvars.time, IT_INVISIBILITY);
@@ -1556,8 +1561,15 @@ void powerup_touch()
 	if ( match_in_progress != 2 || !readytostart() )
 		return;
 
-    if ( !Get_Powerups() )
-        return;
+	if (	!Get_Powerups()
+		|| (((int)self->s.v.items & IT_INVISIBILITY) && !cvar("k_pow_r"))
+		|| (((int)self->s.v.items & IT_INVULNERABILITY) && !cvar("k_pow_p"))
+		|| (((int)self->s.v.items & IT_SUIT) && !cvar("k_pow_s"))
+		|| (((int)self->s.v.items & IT_QUAD) && !cvar("k_pow_q"))
+	)
+	{
+		return;
+	}
 
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
 

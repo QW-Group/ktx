@@ -539,7 +539,7 @@ cmd_t cmds[] = {
 	{ "list",        ListWhoNot,                0    , CF_PLAYER | CF_SPC_ADMIN, CD_LIST },
 	{ "whovote",     ModStatusVote,             0    , CF_BOTH | CF_MATCHLESS, CD_WHOVOTE },
 	{ "spawn",       ToggleRespawns,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_SPAWN },
-	{ "powerups",    TogglePowerups,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_POWERUPS },
+	{ "powerups",    TogglePowerups,            0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_POWERUPS },
 	{ "discharge",   ToggleDischarge,           0    , CF_PLAYER, CD_DISCHARGE },
 	{ "dm",          ShowDMM,                   0    , CF_PLAYER, CD_DM },
 	{ "dmm1",        DEF(ChangeDM),             1    , CF_PLAYER | CF_SPC_ADMIN, CD_DMM1 },
@@ -1383,7 +1383,7 @@ void ModStatus ()
 	G_sprint(self, 2, "%-14.14s %-3d\n",   redtext("Teamplay"),			(int)tp_num());
 	G_sprint(self, 2, "%-14.14s %-4d ",    redtext("Timelimit"),		(int)timelimit);
 	G_sprint(self, 2, "%-14.14s %-3d\n",   redtext("Fraglimit"),		(int)fraglimit);
-	G_sprint(self, 2, "%-14.14s %-4.4s ",  redtext("Powerups"),			OnOff(Get_Powerups()));
+	G_sprint(self, 2, "%-14.14s %-4.4s ",  redtext("Powerups"),			Get_PowerupsStr());
 	G_sprint(self, 2, "%-14.14s %-3.3s\n", redtext("Discharge"),		OnOff(cvar("k_dis")));
 	G_sprint(self, 2, "%-14.14s %-4.4s ",  redtext("Drop Quad"),		OnOff(cvar("dq")));
 	G_sprint(self, 2, "%-14.14s %-3.3s\n", redtext("Drop Ring"),		OnOff(cvar("dr")));
@@ -1889,7 +1889,9 @@ void ToggleRespawns()
 
 void TogglePowerups()
 {
-//	int k_pow = cvar( "k_pow" ); // here we are not using Get_Powerups
+	char arg[64];
+	int i;
+	qbool changed = false;
 
 	if ( match_in_progress )
 		return;
@@ -1900,7 +1902,45 @@ void TogglePowerups()
 		return;
 	}
 
-	cvar_toggle_msg( self, "k_pow", redtext("powerups") );
+	if ( trap_CmdArgc() <= 1 )
+	{	// no arguments, just toggle on/off powerups
+		cvar_toggle_msg( self, "k_pow", redtext("powerups") );
+		cvar_fset("k_pow_q", cvar("k_pow"));
+		cvar_fset("k_pow_p", cvar("k_pow"));
+		cvar_fset("k_pow_r", cvar("k_pow"));
+		cvar_fset("k_pow_s", cvar("k_pow"));
+		return;
+	}
+
+	// at least one argument
+	for ( i = 1; i < min(1 + 4, trap_CmdArgc()); i++ )
+	{
+		trap_CmdArgv( i, arg, sizeof( arg ) );
+		if ( streq("q", arg) )
+		{
+			cvar_toggle_msg( self, "k_pow_q", redtext("quad") );
+			changed = true;
+		}
+		else if ( streq("p", arg) )
+		{
+			cvar_toggle_msg( self, "k_pow_p", redtext("pent") );
+			changed = true;
+		}
+		else if ( streq("r", arg) )
+		{
+			cvar_toggle_msg( self, "k_pow_r", redtext("ring") );
+			changed = true;
+		}
+		else if ( streq("s", arg) )
+		{
+			cvar_toggle_msg( self, "k_pow_s", redtext("suit") );
+			changed = true;
+		}
+	}
+
+	// enable k_pow if at least one powerup was turned on and vice versa turn off k_pow if all powerups was turned off
+	if ( changed )
+		cvar_fset( "k_pow", ( cvar("k_pow_q") || cvar("k_pow_p") || cvar("k_pow_r") || cvar("k_pow_s") ) );
 }
 
 void ToggleDischarge()
@@ -2820,7 +2860,11 @@ const char common_um_init[] =
 	"k_membercount 0\n"			// some unlimited values
 	"k_lockmin 0\n"				// some unlimited values
 	"k_lockmax 64\n"			// some unlimited values
-	"k_lockmode 1\n";			// server lockmode
+	"k_lockmode 1\n"			// server lockmode
+	"k_pow_q 1\n"				// powerups - quad
+	"k_pow_p 1\n"				// powerups - pent
+	"k_pow_r 1\n"				// powerups - ring
+	"k_pow_s 1\n";				// powerups - suit
 
 
 const char _1on1_um_init[] =

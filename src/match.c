@@ -1729,7 +1729,7 @@ void PrintCountdown( int seconds )
 // Timelimit  xx
 // Fraglimit xxx
 // Overtime   xx		Overtime printout, supports sudden death display
-// Powerups   On|Off
+// Powerups   On|Off|QPRS
 // Dmgfrags   On // optional
 // Noweapon
 
@@ -1737,7 +1737,6 @@ void PrintCountdown( int seconds )
 
 	char text[1024] = {0};
 	char *mode = "";
-	char *pwr  = "";
 	char *ot   = "";
 	char *nowp = "";
 
@@ -1773,26 +1772,26 @@ void PrintCountdown( int seconds )
 		strlcat(text, va("%s %5s\n", "Antilag", dig3((int)cvar("sv_antilag"))), sizeof(text));
 
 	if ( cvar("k_noitems") )
-		strlcat(text, va("%s %5s\n", "NoItems", redtext("On")), sizeof(text));
+		strlcat(text, va("%s %5s\n", "NoItems", redtext("on")), sizeof(text));
 
 	if ( cvar("k_midair") )
-		strlcat(text, va("%s %6s\n", "Midair", redtext("On")), sizeof(text));
+		strlcat(text, va("%s %6s\n", "Midair", redtext("on")), sizeof(text));
 
 	if ( cvar("k_instagib") )
-		strlcat(text, va("%s %4s\n", "Instagib", redtext("On")), sizeof(text));
+		strlcat(text, va("%s %4s\n", "Instagib", redtext("on")), sizeof(text));
 	
 	if ( k_yawnmode )
-		strlcat(text, va("%s %4s\n", "Yawnmode", redtext("On")), sizeof(text));
+		strlcat(text, va("%s %4s\n", "Yawnmode", redtext("on")), sizeof(text));
 
 	if ( cvar("pm_airstep") )
-		strlcat(text, va("%s %5s\n", "Airstep", redtext("On")), sizeof(text));
+		strlcat(text, va("%s %5s\n", "Airstep", redtext("on")), sizeof(text));
 
 	vw_enabled = vw_available && cvar("k_allow_vwep") && cvar("k_vwep");
 	if ( vw_enabled )
-		strlcat(text, va("%s %8s\n", "VWep", redtext("On")), sizeof(text));
+		strlcat(text, va("%s %8s\n", "VWep", redtext("on")), sizeof(text));
 
 	if ( cvar("k_teamoverlay") && tp_num() && !isDuel() )
-		strlcat(text, va("%s %3s\n", "TmOverlay", redtext("On")), sizeof(text));
+		strlcat(text, va("%s %3s\n", "TmOverlay", redtext("on")), sizeof(text));
 
 	if ( !isRA() ) // useless in RA
 	if ( isTeam() || isCTF() )
@@ -1803,7 +1802,7 @@ void PrintCountdown( int seconds )
 		strlcat(text, va("%s %3s\n", "Fraglimit", dig3(fraglimit)), sizeof(text));
 
 	switch ( (int)cvar( "k_overtime" ) ) {
-		case 0:  ot = redtext("Off"); break;
+		case 0:  ot = redtext("off"); break;
 		case 1:  ot = dig3( cvar( "k_exttime" ) ); break;
 		case 2:  ot = redtext("sd"); break;
 		case 3:  ot = va("%s %s", dig3(tiecount()),redtext("tb")); break;
@@ -1813,17 +1812,11 @@ void PrintCountdown( int seconds )
 	if ( timelimit && cvar( "k_overtime" ) )
 		strlcat(text, va("%s %4s\n", "Overtime", ot), sizeof(text));
 
-	switch ( Get_Powerups() ) {
-		case 0:  pwr = redtext("Off"); break;
-		case 1:  pwr = redtext( "On"); break;
-		default: pwr = redtext("Unkn"); break;
-	}
-
-	if ( !isRA() && Get_Powerups() )
-		strlcat(text, va("%s %4s\n", "Powerups", pwr), sizeof(text));
+	if ( !isRA() && Get_Powerups() && strneq("off", Get_PowerupsStr()) )
+		strlcat(text, va("%s %4s\n", "Powerups", redtext(Get_PowerupsStr())), sizeof(text));
 
 	if ( cvar("k_dmgfrags") )
-		strlcat(text, va("%s %4s\n", "Dmgfrags", redtext("On")), sizeof(text));
+		strlcat(text, va("%s %4s\n", "Dmgfrags", redtext("on")), sizeof(text));
 
 	if ( deathmatch == 4 && !cvar("k_midair") && !cvar("k_instagib")
 		&& !strnull( nowp = str_noweapon((int)cvar("k_disallow_weapons") & DA_WPNS) )

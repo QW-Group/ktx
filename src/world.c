@@ -612,8 +612,14 @@ void FirstFrame	( )
 	RegisterCvar("k_lock_hdp");
 	RegisterCvar("k_disallow_weapons");
 
+	RegisterCvar("k_pow");
+	RegisterCvarEx("k_pow_q", "1"); // quad
+	RegisterCvarEx("k_pow_p", "1"); // pent
+	RegisterCvarEx("k_pow_r", "1"); // ring
+	RegisterCvarEx("k_pow_s", "1"); // suit
 	RegisterCvar("k_pow_min_players");
 	RegisterCvar("k_pow_check_time");
+
 	RegisterCvar("allow_spec_wizard");
 	RegisterCvar("k_no_wizard_animation"); // disallow wizard animation
 
@@ -663,7 +669,6 @@ void FirstFrame	( )
 	RegisterCvarEx("k_allow_vwep", "0");
 	RegisterCvarEx("k_vwep", "1");
 	RegisterCvar("allow_toggle_practice");
-	RegisterCvar("k_pow");
 	RegisterCvar("k_remove_end_hurt");
 	RegisterCvar("k_allowvoteadmin");
 //	RegisterCvar("k_maxrate"); -> now using sv_maxrate instead
@@ -945,15 +950,32 @@ void FixRA()
 void FixPowerups ()
 {
 	static int	k_pow = -1; // static
+	static int	k_pow_q = -1; // static
+	static int	k_pow_p = -1; // static
+	static int	k_pow_r = -1; // static
+	static int	k_pow_s = -1; // static
 
 	qbool		changed   = false;
 	int 		k_pow_new = Get_Powerups();
+	int			k_pow_q_new = cvar("k_pow_q");
+	int			k_pow_p_new = cvar("k_pow_p");
+	int			k_pow_r_new = cvar("k_pow_r");
+	int			k_pow_s_new = cvar("k_pow_s");
 
-	if( k_pow != k_pow_new || framecount == 1 )
+	if (   k_pow != k_pow_new
+		|| k_pow_q != k_pow_q_new
+		|| k_pow_r != k_pow_r_new
+		|| k_pow_p != k_pow_p_new
+		|| k_pow_s != k_pow_s_new
+		|| framecount == 1 // force on first frame
+	)
 	{
-		// force on first frame
 		changed = true;
 		k_pow = k_pow_new;
+		k_pow_q = k_pow_q_new;
+		k_pow_r = k_pow_r_new;
+		k_pow_p = k_pow_p_new;
+		k_pow_s = k_pow_s_new;
 	}
 
 	if ( changed )
@@ -961,20 +983,25 @@ void FixPowerups ()
 		extern void hide_powerups ( char *classname );
 		extern void show_powerups ( char *classname );
 
-		if ( k_pow )
-		{ // show powerups for players
+		if ( k_pow && k_pow_p )
 			show_powerups( "item_artifact_invulnerability" );
-			show_powerups( "item_artifact_super_damage" );
-			show_powerups( "item_artifact_envirosuit" );
-			show_powerups( "item_artifact_invisibility" );
-		}
 		else
-		{ // hide powerups from players
 			hide_powerups( "item_artifact_invulnerability" );
+
+		if ( k_pow && k_pow_q )
+			show_powerups( "item_artifact_super_damage" );
+		else
 			hide_powerups( "item_artifact_super_damage" );
+
+		if ( k_pow && k_pow_s )
+			show_powerups( "item_artifact_envirosuit" );
+		else
 			hide_powerups( "item_artifact_envirosuit" );
+
+		if ( k_pow && k_pow_r )
+			show_powerups( "item_artifact_invisibility" );
+		else
 			hide_powerups( "item_artifact_invisibility" );
-		}
 	}
 }
 

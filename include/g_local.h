@@ -267,19 +267,20 @@ gedict_t	*not_connected_by_IDorName( const char *IDname );
 
 char		*armor_type( int items );
 
-qbool	isghost( gedict_t *ed );
+qbool		isghost( gedict_t *ed );
 
-qbool	isDuel( );
-qbool	isTeam( );
-qbool	isFFA( );
-qbool	isCTF( );
-qbool	isUnknown( );
+qbool		isDuel( );
+qbool		isTeam( );
+qbool		isFFA( );
+qbool		isCTF( );
+qbool		isUnknown( );
 int			tp_num();
 int			GetUserID(gedict_t *p);
 char		*TrackWhom(gedict_t *p);
 int			GetHandicap( gedict_t *p );
-qbool	SetHandicap( gedict_t *p, int nhdc );
+qbool		SetHandicap( gedict_t *p, int nhdc );
 void		changelevel( const char *name );
+char		*Get_PowerupsStr(void);
 int			Get_Powerups ();
 
 char 		*count_s( int cnt );
