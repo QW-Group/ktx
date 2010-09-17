@@ -85,6 +85,7 @@ void ShowOpts();
 void ShowQizmo();
 void ShowRules();
 void ShowVersion();
+void killquad();
 void ToggleDischarge();
 void ToggleDropPack();
 void ToggleDropQuad();
@@ -269,6 +270,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_FALLBUNNY  "toggle fallbunny"
 #define CD_FRAGSDOWN  "-10 fraglimit"
 #define CD_FRAGSUP    "+10 fraglimit"
+#define CD_KILLQUAD   "kill the quad mode"
 #define CD_DROPQUAD   "drop quad when killed"
 #define CD_DROPRING   "drop ring when killed"
 #define CD_DROPPACK   "drop pack when killed"
@@ -555,6 +557,7 @@ cmd_t cmds[] = {
 	{ "fallbunny",   ToggleFallBunny,           0    , CF_PLAYER | CF_SPC_ADMIN, CD_FALLBUNNY },
 	{ "fragsdown",   FragsDown,                 0    , CF_PLAYER, CD_FRAGSDOWN },
 	{ "fragsup",     FragsUp,                   0    , CF_PLAYER, CD_FRAGSUP },
+	{ "killquad",    killquad,                  0    , CF_PLAYER, CD_KILLQUAD },
 	{ "dropquad",    ToggleDropQuad,            0    , CF_PLAYER, CD_DROPQUAD },
 	{ "dropring",    ToggleDropRing,            0    , CF_PLAYER, CD_DROPRING },
 	{ "droppack",    ToggleDropPack,            0    , CF_PLAYER, CD_DROPPACK },
@@ -2125,6 +2128,15 @@ void FragsUp()
 	G_bprint(2, "%s %s\n", redtext("Fraglimit set to"), dig3(fraglimit));
 }
 
+void killquad()
+{
+	if ( match_in_progress )
+		return;
+
+	cvar_toggle_msg( self, "k_killquad", redtext("KillQuad") );
+	k_killquad = cvar( "k_killquad" );
+}
+
 void ToggleDropQuad()
 {
 	if ( match_in_progress )
@@ -2812,6 +2824,7 @@ ok:
 
 // common settings for all user modes
 const char common_um_init[] =
+	"k_killquad 0\n"
 	"pm_airstep \"\"\n"			// airstep off by default
 	"samelevel 1\n"				// change levels off
 //	"k_vwep 1\n"				// disable VWEP by default

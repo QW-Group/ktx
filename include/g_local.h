@@ -780,6 +780,7 @@ gedict_t 	*race_get_racer( void );
 
 // globals.c
 
+extern	float k_killquad;	    // killquad mode
 extern	float framechecks;	    // if timedemo/uptime bugs are tolerated
 extern	float k_attendees;      // stores number of players on server - used in 'ready' checking
 extern	float k_captains;	    // number of captains

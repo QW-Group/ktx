@@ -21,6 +21,7 @@
 
 // WARNING: globals are cleared every map change
 
+float k_killquad;	    // killquad mode
 float framechecks;	    // if timedemo/uptime bugs are tolerated
 float k_attendees;      // stores number of players on server - used in 'ready' checking
 float k_captains;	    // number of captains

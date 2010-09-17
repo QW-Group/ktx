@@ -1421,7 +1421,7 @@ int Get_Powerups ()
 	static float k_pow_check = 0;
 	static int   k_pow = 0;
 
-	int k_pow_new         = cvar( "k_pow" ); // sure - here we not using Get_Powerups
+	int k_pow_new         = k_killquad ? 1 : cvar( "k_pow" ); // sure - here we not using Get_Powerups
 	int k_pow_min_players = bound(0, cvar( "k_pow_min_players"), 999);
 	int k_pow_check_time  = bound(0, cvar( "k_pow_check_time"), 999);
 

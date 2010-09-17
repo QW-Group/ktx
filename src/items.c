@@ -1479,6 +1479,11 @@ void show_powerups ( char *classname )
 	}
 }
 
+static void KillQuadThink()
+{
+	ent_remove( self );
+}
+
 void DropPowerup( float timeleft, int powerup )
 {
 	gedict_t		*swp = self; // save self
@@ -1496,7 +1501,14 @@ void DropPowerup( float timeleft, int powerup )
 	self->cnt = g_globalvars.time + timeleft;
 
 	if ( powerup == IT_QUAD )
+	{
 		SP_item_artifact_super_damage();
+		if ( k_killquad )
+		{
+			self->s.v.nextthink = g_globalvars.time + 10;		
+			self->s.v.think = ( func_t ) KillQuadThink; // ATM just remove self.
+		}
+	}
 	else if ( powerup == IT_INVISIBILITY )
 		SP_item_artifact_invisibility();
 	else if ( powerup == IT_INVULNERABILITY )
@@ -1527,12 +1539,37 @@ void DropPowerup( float timeleft, int powerup )
 	self = swp;// restore self
 }
 
+static qbool NeedDropQuad(void)
+{
+	gedict_t	*p;
+
+	for ( p = world; (p = find_plr( p )); )
+	{
+		if ( ISDEAD(p) )
+			continue; // ignore dead
+
+		if ( p->super_damage_finished > 0 )
+			return false; // one have quad, so we do not need drop new.
+	}
+
+	return !ez_find(world, "item_artifact_super_damage");
+}
+
 void DropPowerups()
 {
-	if ( cvar( "dq" ) && Get_Powerups() && cvar("k_pow_q") )
+	if ( k_killquad || ( cvar( "dq" ) && Get_Powerups() && cvar("k_pow_q") ) )
 	{
-		if ( self->super_damage_finished > 0 )
+		if ( k_killquad )
+		{
+			if ( NeedDropQuad() )
+			{
+				DropPowerup( 666, IT_QUAD );
+			}
+		}
+		else if ( self->super_damage_finished > 0 )
+		{
 			DropPowerup( self->super_damage_finished - g_globalvars.time, IT_QUAD );
+		}
 	}
 
 	if ( cvar( "dr" ) && Get_Powerups() && cvar("k_pow_r") )

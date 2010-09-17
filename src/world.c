@@ -704,6 +704,8 @@ void FirstFrame	( )
 	RegisterCvar("k_spec_info");
 	RegisterCvar("k_midair");
 	
+	RegisterCvarEx("k_killquad", "0");
+
 	RegisterCvarEx("k_nightmare_pu", "0");
 	RegisterCvarEx("k_nightmare_pu_droprate", "0.15");
 	RegisterCvarEx("k_instagib", "0");
@@ -1059,6 +1061,8 @@ void FixRules ( )
 	int dm   = deathmatch = cvar( "deathmatch" );
 	int k_minr = bound(0, cvar( "k_minrate" ),  100000);
 	int k_maxr = bound(0, cvar( "sv_maxrate" ), 100000);
+
+	k_killquad = cvar( "k_killquad" );
 
 	skill = cvar( "skill" );
 
