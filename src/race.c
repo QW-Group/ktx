@@ -18,7 +18,7 @@ typedef enum
 
 typedef enum
 {
-	nodeUnknown = 0,		// this node is fucked by lame coding, I mean this must never happens
+	nodeUnknown = 0,		// this node is runied by lame coding, I mean this must never happen
 	nodeStart,				// this node is start of race route
 	nodeCheckPoint,			// this node is intermediate
 	nodeEnd,				// this node is end of race route
@@ -38,8 +38,8 @@ typedef struct
 
 typedef struct
 {
-	char					name[128]; 				// NOTE: this will probably FUCK QVM!!!
-	char					desc[128]; 				// NOTE: this will probably FUCK QVM!!!
+	char					name[128]; 				// NOTE: this will probably break QVM!!!
+	char					desc[128]; 				// NOTE: this will probably break QVM!!!
 	int						cnt;				   	// how much nodes we actually have, no more than MAX_ROUTE_NODES
 	float					timeout;				// when timeout of race must occur
 	raceWeapoMode_t			weapon;					// weapon mode
@@ -74,7 +74,7 @@ typedef struct
 	float					start_time;			// when race was started
 
 // {
-	char					top_nick[64];		// NOTE: this will probably FUCK QVM!!!
+	char					top_nick[64];		// NOTE: this will probably break QVM!!!
 	int						top_time;
 // }
 
@@ -1645,7 +1645,7 @@ void r_changestatus( float t )
 		case 4: // rcancel
 
 		if ( !self->racer )
-			return; // FUCK U!
+			return; // get lost!
 
 		if ( !race.status )
 			return; // same
