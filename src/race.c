@@ -34,7 +34,7 @@ typedef struct
 
 } raceRouteNode_t;
 
-#define MAX_ROUTE_NODES		50 // why not
+#define MAX_ROUTE_NODES		48
 
 typedef struct
 {
@@ -56,7 +56,7 @@ typedef enum
 } raceStatus_t;
 
 
-#define MAX_ROUTES			10 // why not
+#define MAX_ROUTES			16
 
 typedef struct
 {
