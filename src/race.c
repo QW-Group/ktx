@@ -128,7 +128,7 @@ qbool isRACE( void )
 int race_time( void )
 {
 	if ( race.status != raceActive )
-		return 0; // count time only when race in state raceActive
+		return 0; // count time only when race is in raceActive state
 
 	return (g_globalvars.time - race.start_time) * 1000;
 }
