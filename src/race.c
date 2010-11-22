@@ -80,7 +80,7 @@ typedef struct
 
 	int						next_race_time;		// used for centerprint, help us print it not each server frame but more rare, each 100ms or something
 
-	qbool				warned;				// do we warned why we can't start race
+	qbool				warned;				// do we warn why we can't start race
 	int						next_racer;			// this is queue of racers
 
 	raceWeapoMode_t			weapon;				// weapon mode
@@ -114,6 +114,7 @@ char *classname_for_nodeType( raceRouteNodeType_t nodeType );
 // this is more like a HOOK, doesn't used internally in race.c but used outside,
 // outside of race.c file we does't need to know in which exact sate we are, but in some cases inside race.c we need to know 
 // is it contdown or active state and this function _doesn't_ help us in such cases. Argh, this comment supposed to make it more clean, but seems I failed.
+
 qbool isRACE( void )
 {
 	if ( match_in_progress || match_over )
