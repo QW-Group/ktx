@@ -1194,7 +1194,7 @@ qbool race_can_go( qbool cancel )
 	if ( !race_count_ready_players() )
 	{
 		if ( cancel )
-			race_cancel( "Race canceled, no ready players\n" );
+			race_cancel( "Race canceled, no players in line\n" );
 
 		return false;
 	}
