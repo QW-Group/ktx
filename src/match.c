@@ -1479,6 +1479,12 @@ void SM_PrepareMap()
 				}
 			}
 		}
+
+		if ( k_killquad && streq( p->s.v.classname, "item_artifact_super_damage") )
+		{	// no normal quad in killquad mode.
+			ent_remove( p );
+			continue;
+		}
 	}
 
 	ClearBodyQue(); // hide corpses
