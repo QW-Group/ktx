@@ -86,6 +86,7 @@ void ShowQizmo();
 void ShowRules();
 void ShowVersion();
 void killquad();
+void ToggleAntilag();
 void ToggleDischarge();
 void ToggleDropPack();
 void ToggleDropQuad();
@@ -255,6 +256,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_WHOVOTE    "info on received votes"
 #define CD_SPAWN      "toggle spawn modes"
 #define CD_POWERUPS   "quad, \x98\x98\x98, ring & suit"
+#define CD_ANTILAG    "toggle antilag"
 #define CD_DISCHARGE  "underwater discharges"
 #define CD_DM         "show deathmatch mode"
 #define CD_DMM1       "set deathmatch mode 1"
@@ -542,8 +544,9 @@ cmd_t cmds[] = {
 	{ "whovote",     ModStatusVote,             0    , CF_BOTH | CF_MATCHLESS, CD_WHOVOTE },
 	{ "spawn",       ToggleRespawns,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_SPAWN },
 	{ "powerups",    TogglePowerups,            0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_POWERUPS },
-	{ "discharge",   ToggleDischarge,           0    , CF_PLAYER, CD_DISCHARGE },
-	{ "dm",          ShowDMM,                   0    , CF_PLAYER, CD_DM },
+	{ "antilag",     ToggleAntilag,             0    , CF_PLAYER | CF_SPC_ADMIN , CD_ANTILAG },
+	{ "discharge",   ToggleDischarge,           0    , CF_PLAYER | CF_SPC_ADMIN , CD_DISCHARGE },
+	{ "dm",          ShowDMM,                   0    , CF_PLAYER | CF_SPC_ADMIN , CD_DM },
 	{ "dmm1",        DEF(ChangeDM),             1    , CF_PLAYER | CF_SPC_ADMIN, CD_DMM1 },
 	{ "dmm2",        DEF(ChangeDM),             2    , CF_PLAYER | CF_SPC_ADMIN, CD_DMM2 },
 	{ "dmm3",        DEF(ChangeDM),             3    , CF_PLAYER | CF_SPC_ADMIN, CD_DMM3 },
@@ -555,12 +558,12 @@ cmd_t cmds[] = {
 	{ "timedown",    DEF(TimeDown),           5.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIMEDOWN },
 	{ "timeup",      DEF(TimeUp),             5.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIMEUP },
 	{ "fallbunny",   ToggleFallBunny,           0    , CF_PLAYER | CF_SPC_ADMIN, CD_FALLBUNNY },
-	{ "fragsdown",   FragsDown,                 0    , CF_PLAYER, CD_FRAGSDOWN },
-	{ "fragsup",     FragsUp,                   0    , CF_PLAYER, CD_FRAGSUP },
-	{ "killquad",    killquad,                  0    , CF_PLAYER, CD_KILLQUAD },
-	{ "dropquad",    ToggleDropQuad,            0    , CF_PLAYER, CD_DROPQUAD },
-	{ "dropring",    ToggleDropRing,            0    , CF_PLAYER, CD_DROPRING },
-	{ "droppack",    ToggleDropPack,            0    , CF_PLAYER, CD_DROPPACK },
+	{ "fragsdown",   FragsDown,                 0    , CF_PLAYER | CF_SPC_ADMIN, CD_FRAGSDOWN },
+	{ "fragsup",     FragsUp,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_FRAGSUP },
+	{ "killquad",    killquad,                  0    , CF_PLAYER | CF_SPC_ADMIN, CD_KILLQUAD },
+	{ "dropquad",    ToggleDropQuad,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_DROPQUAD },
+	{ "dropring",    ToggleDropRing,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_DROPRING },
+	{ "droppack",    ToggleDropPack,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_DROPPACK },
 	                                             
 	{ "silence",     ToggleSpecTalk,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_SILENCE },
 	{ "reset",       ResetOptions,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_RESET },
@@ -578,12 +581,12 @@ cmd_t cmds[] = {
 	{ "fairpacks",   ToggleFairPacks,           0    , CF_PLAYER, CD_FAIRPACKS },
 	{ "about",       ShowVersion,               0    , CF_BOTH | CF_MATCHLESS, CD_ABOUT },
 	{ "shownick",    ShowNick,                  0    , CF_PLAYER | CF_PARAMS, CD_SHOWNICK },
-	{ "time5",       DEF(TimeSet),            5.0f   , CF_PLAYER, CD_TIME5 },
-	{ "time10",      DEF(TimeSet),           10.0f   , CF_PLAYER, CD_TIME10 },
-	{ "time15",      DEF(TimeSet),           15.0f   , CF_PLAYER, CD_TIME15 },
-	{ "time20",      DEF(TimeSet),           20.0f   , CF_PLAYER, CD_TIME20 },
-	{ "time25",      DEF(TimeSet),           25.0f   , CF_PLAYER, CD_TIME25 },
-	{ "time30",      DEF(TimeSet),           30.0f   , CF_PLAYER, CD_TIME30 },
+	{ "time5",       DEF(TimeSet),            5.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIME5 },
+	{ "time10",      DEF(TimeSet),           10.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIME10 },
+	{ "time15",      DEF(TimeSet),           15.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIME15 },
+	{ "time20",      DEF(TimeSet),           20.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIME20 },
+	{ "time25",      DEF(TimeSet),           25.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIME25 },
+	{ "time30",      DEF(TimeSet),           30.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIME30 },
 	                                             
 	{ "ksound1",     DEF(TeamSay),              1    , CF_PLAYER, CD_KSOUND1 },
 	{ "ksound2",     DEF(TeamSay),              2    , CF_PLAYER, CD_KSOUND2 },
@@ -619,7 +622,7 @@ cmd_t cmds[] = {
 	{ "yes",         VoteYes,                   0    , CF_PLAYER, CD_YES },
 	{ "no",          VoteNo,                    0    , CF_PLAYER, CD_NO },
 	{ "captain",     VoteCaptain,               0    , CF_PLAYER, CD_CAPTAIN },
-	{ "freeze",      ToggleFreeze,              0    , CF_PLAYER, CD_FREEZE },
+	{ "freeze",      ToggleFreeze,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_FREEZE },
 	{ "rpickup",     RandomPickup,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_RPICKUP },
 
 	{ "1on1",        DEF(UserMode),             1    , CF_PLAYER | CF_SPC_ADMIN, CD_1ON1 },
@@ -2824,6 +2827,7 @@ ok:
 
 // common settings for all user modes
 const char common_um_init[] =
+	"sv_antilag 2\n"			// antilag on
 	"k_killquad 0\n"
 	"pm_airstep \"\"\n"			// airstep off by default
 	"samelevel 1\n"				// change levels off
@@ -5942,4 +5946,16 @@ void giveme()
 	}
 
 	G_sprint(self, 2, "You got %s for %.1fs\n", got, seconds );
+}
+
+void ToggleAntilag()
+{
+    int i;
+
+	if ( match_in_progress )
+		return;
+
+	cvar_toggle_msg( self, "sv_antilag", redtext("antilag") );
+    i = cvar( "sv_antilag" );
+	trap_cvar_set_float( "sv_antilag", (float)(i ? 2 : 0));
 }
