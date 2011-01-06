@@ -86,7 +86,7 @@ void ShowQizmo();
 void ShowRules();
 void ShowVersion();
 void killquad();
-void ToggleAntilag();
+void antilag();
 void ToggleDischarge();
 void ToggleDropPack();
 void ToggleDropQuad();
@@ -544,7 +544,7 @@ cmd_t cmds[] = {
 	{ "whovote",     ModStatusVote,             0    , CF_BOTH | CF_MATCHLESS, CD_WHOVOTE },
 	{ "spawn",       ToggleRespawns,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_SPAWN },
 	{ "powerups",    TogglePowerups,            0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_POWERUPS },
-	{ "antilag",     ToggleAntilag,             0    , CF_PLAYER | CF_SPC_ADMIN , CD_ANTILAG },
+	{ "antilag",     antilag,                   0    , CF_PLAYER | CF_SPC_ADMIN , CD_ANTILAG },
 	{ "discharge",   ToggleDischarge,           0    , CF_PLAYER | CF_SPC_ADMIN , CD_DISCHARGE },
 	{ "dm",          ShowDMM,                   0    , CF_PLAYER | CF_SPC_ADMIN , CD_DM },
 	{ "dmm1",        DEF(ChangeDM),             1    , CF_PLAYER | CF_SPC_ADMIN, CD_DMM1 },
@@ -1597,6 +1597,30 @@ void ModStatusVote()
 
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.brk )
+				G_sprint(self, 2, " %s\n", p->s.v.netname);
+	}
+
+	if ( !match_in_progress )
+	if ( (votes = get_votes( OV_ANTILAG ))) {
+		voted = true;
+
+		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for a %s mode change:\n", votes,
+			 get_votes_req( OV_ANTILAG, false ), count_s(votes), redtext("antilag"));
+
+		for( p = world; (p = find_client( p )); )
+			if ( p->v.antilag )
+				G_sprint(self, 2, " %s\n", p->s.v.netname);
+	}
+
+	if ( !match_in_progress )
+	if ( (votes = get_votes( OV_NOSPECS ))) {
+		voted = true;
+
+		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for a %s mode change:\n", votes,
+			 get_votes_req( OV_NOSPECS, false ), count_s(votes), redtext("no spec"));
+
+		for( p = world; (p = find_client( p )); )
+			if ( p->v.nospecs )
 				G_sprint(self, 2, " %s\n", p->s.v.netname);
 	}
 
@@ -5948,14 +5972,3 @@ void giveme()
 	G_sprint(self, 2, "You got %s for %.1fs\n", got, seconds );
 }
 
-void ToggleAntilag()
-{
-    int i;
-
-	if ( match_in_progress )
-		return;
-
-	cvar_toggle_msg( self, "sv_antilag", redtext("antilag") );
-    i = cvar( "sv_antilag" );
-	trap_cvar_set_float( "sv_antilag", (float)(i ? 2 : 0));
-}

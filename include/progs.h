@@ -184,6 +184,7 @@ typedef struct vote_s {
 	int rpickup;
 	int nospecs;
 	int coop;
+	int antilag;
 
 	electType_t elect_type; // election type
 	float elect_block_till;	// block election for this time

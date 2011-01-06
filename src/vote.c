@@ -170,6 +170,7 @@ int get_votes_req( int fofs, qbool diff )
 
 		case OV_NOSPECS: percent = cvar("k_vp_nospecs"); break;
 		case OV_COOP:    percent = cvar("k_vp_coop"); break;
+		case OV_ANTILAG: percent = cvar("k_vp_antilag"); break;
 	}
 
 	percent = bound(0.51, bound(51, percent, 100)/100, 1); // calc and bound percentage between 50% to 100%
@@ -188,6 +189,8 @@ int get_votes_req( int fofs, qbool diff )
 		vt_req = max(2, vt_req); // at least 2 votes in this case
 	else if ( fofs == OV_COOP )
 		vt_req = max(1, vt_req); // at least 1 votes in this case
+	else if ( fofs == OV_ANTILAG )
+		vt_req = max(2, vt_req); // at least 2 votes in this case
 
 	if ( diff )
 		return max(0, vt_req - votes);
@@ -626,6 +629,69 @@ void votecoop( )
 
 // }
 
+// { antilag vote feature
+
+void vote_check_antilag ()
+{
+	int veto;
+
+	if ( match_in_progress || intermission_running || match_over )
+		return;
+
+	if ( !get_votes( OV_ANTILAG ) )
+		return;
+
+	veto = is_admins_vote( OV_ANTILAG );
+
+	if( veto || !get_votes_req( OV_ANTILAG, true ) )
+	{
+		vote_clear( OV_ANTILAG );
+
+		// toggle antilag mode.
+		trap_cvar_set_float( "sv_antilag", (float)(cvar( "sv_antilag" ) ? 0 : 2));
+
+		if ( veto )
+			G_bprint(2, "%s\n", redtext(va("Antilag mode %s by admin veto", OnOff(2 == cvar("sv_antilag")))));
+		else
+			G_bprint(2, "%s\n", redtext(va("Antilag mode %s by majority vote", OnOff(2 == cvar("sv_antilag")))));
+
+		return;
+	}
+}
+
+void antilag( )
+{
+    int votes;
+	
+	if ( match_in_progress )
+	{
+        G_sprint(self, 2, "%s mode %s\n", redtext("Antilag"), OnOff(2 == cvar("sv_antilag")));
+        return;
+	}
+
+	// admin may turn this status alone on server...
+	if ( !is_adm( self ) )
+	{
+		// Dont need to bother if less than 2 players
+		if ( CountPlayers() < 2 )
+		{
+			G_sprint(self, 2, "You need at least 2 players to do this.\n");
+			return;
+		}
+	}
+
+	self->v.antilag = !self->v.antilag;
+
+	G_bprint(2, "%s %s!%s\n", self->s.v.netname, 
+			(self->v.antilag ? redtext(va("votes for antilag %s", OnOff(!(2 == cvar("sv_antilag"))))) : 
+							   redtext(va("withdraws %s antilag vote", g_his(self)))),
+			((votes = get_votes_req( OV_ANTILAG, true )) ? va(" (%d)", votes) : ""));
+
+	vote_check_antilag ();
+}
+
+// }
+
 void vote_check_all ()
 {
 	vote_check_map ();
@@ -635,5 +701,6 @@ void vote_check_all ()
 	vote_check_rpickup ();
 	vote_check_nospecs ();
 	vote_check_coop ();
+	vote_check_antilag ();
 }
 

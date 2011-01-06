@@ -678,6 +678,7 @@ void 	vote_check_all ();
 #define OV_MAP ( VOTE_FOFS ( map ) )
 #define OV_NOSPECS ( VOTE_FOFS ( nospecs ) )
 #define OV_COOP ( VOTE_FOFS ( coop ) )
+#define OV_ANTILAG ( VOTE_FOFS ( antilag ) )
 
 void 	ElectThink();
 void	AbortElect();
