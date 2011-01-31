@@ -2851,6 +2851,7 @@ ok:
 
 // common settings for all user modes
 const char common_um_init[] =
+	"sv_loadentfiles_dir \"\"\n"
 	"sv_antilag 2\n"			// antilag on
 	"k_killquad 0\n"
 	"pm_airstep \"\"\n"			// airstep off by default
@@ -3001,6 +3002,7 @@ const char ffa_um_init[] =
 	"k_mode 3\n";				//
 
 const char ctf_um_init[] =
+	"sv_loadentfiles_dir ctf\n"
 	"coop 0\n"
 	"maxclients 16\n"
 	"k_maxclients 16\n"
