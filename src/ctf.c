@@ -121,6 +121,55 @@ void SP_func_ctf_wall()
 	setmodel( self, self->s.v.model ); 
 }
 
+#define TF_TEAM_BLUE 1
+#define TF_TEAM_RED 2
+
+void SP_item_tfgoal(  )
+{
+	// NOTE: team_no inverted for flags!!!
+
+	if (self->team_no == TF_TEAM_RED)
+	{
+		self->s.v.classname = "item_flag_team2";
+		SP_item_flag_team2();
+	}
+	else if (self->team_no == TF_TEAM_BLUE)
+	{
+		self->s.v.classname = "item_flag_team1";
+		SP_item_flag_team1();
+	}
+	else
+	{
+		G_Printf( "SP_item_tfgoal: team_no %d unsupported\n", self->team_no);
+		ent_remove( self );
+		return;
+	}
+}
+
+void SP_info_player_teamspawn(  )
+{
+	if (self->team_no == TF_TEAM_RED)
+	{
+		self->s.v.classname = "info_player_team1";
+	}
+	else if (self->team_no == TF_TEAM_BLUE)
+	{
+		self->s.v.classname = "info_player_team2";
+	}
+	else
+	{
+		G_Printf( "SP_info_player_teamspawn: team_no %d unsupported\n", self->team_no);
+		ent_remove( self );
+		return;
+	}
+}
+
+void SP_i_p_t(  )
+{
+	self->s.v.classname = "info_player_teamspawn";
+	SP_info_player_teamspawn(  );
+}
+
 // add/remove hook item to/from player
 void AddHook( qbool yes )
 {

@@ -118,6 +118,8 @@ field_t         fields[] = {
 	{"angle", 	FOFS( s.v.angles ),	F_ANGLEHACK},
 	{"light", 	0,			F_IGNORE},
 	{"wad", 	0, 			F_IGNORE},
+// TF
+	{"team_no",	FOFS( team_no ),		F_INT},
 	{NULL}
 };
 typedef struct {
@@ -246,6 +248,11 @@ void			SP_monster_boss();
 void			SP_monster_oldone();
 void			SP_event_lightning();
 
+// TF
+void			SP_item_tfgoal();
+void			SP_info_player_teamspawn();
+void			SP_i_p_t();
+
 spawn_t         spawns[] = {
 	// info entities don't do anything at all, but provide positional
 	// information for things controlled by other processes
@@ -344,7 +351,12 @@ Used as a positional target for lightning.
 	{"func_ctf_wall",		SP_func_ctf_wall},
 	{"info_player_team1",	SUB_Null},
 	{"info_player_team2",	SUB_Null},
-
+//
+// TF -- well, we does not support TF but require it for loading TF map as CTF map.
+//
+	{"item_tfgoal",         SP_item_tfgoal}, // FLAG
+	{"info_player_teamspawn", 	SP_info_player_teamspawn}, // red/blue team player spawns.
+	{"i_p_t",         	  	SP_i_p_t}, // same as "info_player_teamspawn".
 
 //not used ents
 /*QUAKED info_null (0 0.5 0) (-4 -4 -4) (4 4 4)

@@ -494,6 +494,11 @@ typedef struct gedict_s {
 	float rune_pickup_time;        // time we picked up current rune
 	char *last_rune;			   // name of last rune we send to client
 	float	items2;				   // using  ZQ_ITEMS2 extension in mvdsv we can use per client sigils for runes
+
+//
+// TF -- well, we does not support TF but require it for loading TF map as CTF map.
+//
+	int team_no; // team number, as I got TF support it from 1 to 4. (up to 4 teams).
 // }
 //
 	int i_agmr; 		// Instagib AirGib Master rune
