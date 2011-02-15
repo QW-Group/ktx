@@ -1609,7 +1609,7 @@ void powerup_touch()
 	}
 
 	if ( streq( self->s.v.classname, "item_artifact_envirosuit" ) 
-	&& other->rad_suit_finished > g_globalvars.time )
+	&& other->radsuit_finished > g_globalvars.time )
 		return;
 
 	if ( streq( self->s.v.classname, "item_artifact_invulnerability" ) 
