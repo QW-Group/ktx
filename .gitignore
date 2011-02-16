@@ -1,3 +1,7 @@
+*.o
+*.so
+*.dll
+*.qvm
 *.suo
 *.ncb
 VM/
