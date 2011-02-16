@@ -387,7 +387,7 @@ void armor_touch()
 	else
 		return;
 
-	if ( other->s.v.armortype * other->s.v.armorvalue >= type * value )
+	if ( other->s.v.armortype * ( other->s.v.armorvalue + 1 ) >= type * value )
 		return;
 
 	mi_print(other, bit, va("%s got %s", getname(other), self->s.v.netname));
