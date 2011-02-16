@@ -39,6 +39,7 @@
 #define FL_PARTIALGROUND 1024	// not all corners are valid
 #define FL_WATERJUMP 2048	// player jumping out of water
 #define FL_JUMPRELEASED 4096	// for jump debouncing
+#define FL_ATTACKRELEASED 8192	// for attack debouncing
 
 // edict.movetype values
 #define MOVETYPE_NONE   0	// never moves
@@ -53,6 +54,8 @@
 #define MOVETYPE_FLYMISSILE  9	// fly with extra size against monsters
 #define MOVETYPE_BOUNCE   10
 #define MOVETYPE_BOUNCEMISSILE 11	// bounce with extra size
+
+#define MOVETYPE_LOCK 15	// used for player spectating != spectator
 
 // edict.solid values
 #define SOLID_NOT  0		// no interaction with other objects

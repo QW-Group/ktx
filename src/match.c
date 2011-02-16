@@ -2083,10 +2083,16 @@ char *CompilateDemoName ()
 
 	demoname[0] = 0;
 
-	if ( isRA() ) {
+	if ( isRA() ) 
+	{
 		strlcat( demoname, va("ra_%d", (int)CountPlayers()), sizeof( demoname ) );
 	}
-	else if ( isDuel() ) {
+	else if ( isRACE() ) 
+	{
+		strlcat( demoname, va("race"), sizeof( demoname ) );
+	}
+	else if ( isDuel() ) 
+	{
 		strlcat( demoname, "duel", sizeof( demoname ) );
 		if ( cvar("k_midair") )
 			strlcat( demoname, "_midair", sizeof( demoname ) );
@@ -2103,7 +2109,8 @@ char *CompilateDemoName ()
 			vs = "_vs_";
 		}
 	}
-	else if ( isTeam() || isCTF() ) {
+	else if ( isTeam() || isCTF() ) 
+	{
 		char teams[MAX_CLIENTS][MAX_TEAM_NAME];
 		int cnt = getteams(teams);
 		int clt = cvar("maxclients"); //CountPlayers();
@@ -2133,7 +2140,10 @@ char *CompilateDemoName ()
 		strlcat( demoname, va("unknown_%d", (int)CountPlayers()), sizeof( demoname ) );
 	}
 
-	strlcat( demoname, va("[%s]", g_globalvars.mapname), sizeof( demoname ) );
+	if ( isRACE() )
+		strlcat( demoname, va("[%s_r%02d]", g_globalvars.mapname, race.active_route), sizeof( demoname ) );
+	else
+		strlcat( demoname, va("[%s]", g_globalvars.mapname), sizeof( demoname ) );
 
 	fmt = cvar_string( "k_demoname_date" );
 
@@ -2148,7 +2158,9 @@ void StartDemoRecord ()
 	if ( cvar( "demo_tmp_record" ) ) { // FIXME: TODO: make this more like ktpro
 		qbool record = false;
 
-		if ( !deathmatch )
+		if ( isRACE() )
+			record = true;
+		else if ( !deathmatch )
 			record = false;
 		else if ( isFFA() && cvar( "demo_skip_ktffa_record" ) )
 			record = false;
@@ -2160,6 +2172,7 @@ void StartDemoRecord ()
 				localcmd("cancel\n");  // demo is recording, cancel before new one
 
 			localcmd( "easyrecord \"%s\"\n", CompilateDemoName() );
+			cvar_set( "_k_recordeddemoname", CompilateDemoName() );
 		}
 	}
 }
@@ -2417,6 +2430,12 @@ void PlayerReady ()
 	gedict_t *p;
 	float nready;
 
+	if ( isRACE() )
+	{
+		r_changestatus( 1 ); // race_ready
+		return;
+	}
+
 	if ( self->ct == ctSpec ) {
 
 		if ( !cvar("k_auto_xonx") ) {
@@ -2538,6 +2557,12 @@ void PlayerBreak ()
 {
 	int votes;
 	gedict_t *p;
+
+	if ( isRACE() )
+	{
+		r_changestatus( 2 ); // race_break
+		return;
+	}
 
 	if ( self->ct == ctSpec ) {
 

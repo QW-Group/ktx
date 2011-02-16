@@ -362,6 +362,21 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	if ( !targ->s.v.takedamage || ISDEAD( targ ) )
 		return;
 
+	// can't touch/damage others in race
+	if ( isRACE() && ( attacker != targ ) )
+		if ( !( 	dtTELE1 == targ->deathtype		// always do tele damage
+				 || dtTELE2 == targ->deathtype		// always do tele damage
+				 || dtTELE3 == targ->deathtype		// always do tele damage
+				 || dtSUICIDE == targ->deathtype 	// do suicide damage anyway
+				 || dtWATER_DMG == targ->deathtype	// always do water damage
+				 || dtLAVA_DMG  == targ->deathtype	// always do lava damage
+				 || dtSLIME_DMG == targ->deathtype	// always do slime damage
+				 || targ->ct != ctPlayer			// always do damage to non player, secret doors etc...
+				 || attacker->ct != ctPlayer		// always take damage from non player
+			  )
+		)
+		return;
+
 	// ignore almost all damage in CA while coutdown
 	if ( isCA() && match_in_progress && ra_match_fight != 2 )
 	{
@@ -904,7 +919,7 @@ void T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage, ge
 
 						dmg_is_splash = 1; // mark damage as splash
 
-						if ( cvar("k_instagib") ) // in instagib splash applied to inflictor only, for coil jump
+						if ( cvar("k_instagib") || isRACE() ) // in instagib splash applied to inflictor only, for coil jump
 						{
 							if ( head == attacker )
 								T_Damage( head, inflictor, attacker, points );
