@@ -23,15 +23,13 @@ RM=@RM@
 
 INSTALLDIR=$(PREFIX)/sbin
 
-SVNREV = $(shell svnversion -n $(srcdir) 2>/dev/null | sed -e "s/M//")
-
 MODULE=../qwprogs.so
 
 # KTX does't work as 64bit binary, to compile KTX as 32bit on 64bit target platform use next:
 # for gcc its like: make dl FORCE32BITFLAGS=-m32
 FORCE32BITFLAGS=-m32
 
-CFLAGS=-g -Wall -O2 -fPIC -DSVNREV="$(SVNREV)" $(FORCE32BITFLAGS)
+CFLAGS=-g -Wall -O2 -fPIC $(FORCE32BITFLAGS)
 LDFLAGS=-shared -Wl,-soname,$(MODULE) $(FORCE32BITFLAGS)
 INCFLAGS=-I../include
 
