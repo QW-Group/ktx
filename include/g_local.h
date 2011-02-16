@@ -765,9 +765,14 @@ void    GrappleReset(gedict_t *rhook);
 
 // race.c
 
-qbool 	isRACE( void );
+qbool 		isRACE( void );
+void		apply_race_settings(void);
+void		ToggleRace( void );
+void 		StartDemoRecord();
 
-qbool 	race_weapon_allowed( gedict_t *p );
+qbool 		race_weapon_allowed( gedict_t *p );
+
+qbool		race_recording;
 
 void		race_init( void );
 void		race_shutdown( char *msg );
@@ -778,6 +783,10 @@ void		race_add_standart_routes( void );
 void		race_set_one_player_movetype_and_etc( gedict_t *p );
 
 gedict_t 	*race_get_racer( void );
+
+void		race_follow( void );
+void		setwepnone( gedict_t *p );
+void		setwepall ( gedict_t *p );
 
 // globals.c
 

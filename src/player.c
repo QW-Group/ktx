@@ -937,7 +937,10 @@ void GibPlayer()
 	gedict_t *p;
 
 	self->vw_index = 0;
-	ThrowHead( "progs/h_player.mdl", self->s.v.health );
+	if ( isRACE() )
+		ThrowHead( "", self->s.v.health );
+	else
+		ThrowHead( "progs/h_player.mdl", self->s.v.health );
 
     if( match_in_progress == 2 ) {
 		ThrowGib( "progs/gib1.mdl", self->s.v.health );
@@ -949,6 +952,9 @@ void GibPlayer()
 	setorigin( p, PASSVEC3( self->s.v.origin ) );
 	p->s.v.nextthink = g_globalvars.time + 0.1;
 	p->s.v.think = ( func_t ) SUB_Remove;
+
+	if ( isRACE() )
+		return;
 
 	if ( TELEDEATH( self )	)
 	{

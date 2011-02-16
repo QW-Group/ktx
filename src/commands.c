@@ -23,6 +23,7 @@
 
 int max_cmd_len = 0;
 
+qbool gametype_change_checks( void );
 void SendMessage(char *name);
 float CountRPlayers();
 float CountTeams();
@@ -215,15 +216,24 @@ void mapslist_dl();
 
 // { RACE
 void r_cdel( );
+void r_clear_route( void );
 void r_Xset( float t );
 void r_changestatus( float t );
+void r_changefollowstatus( float t );
 
 void r_timeout( );
+void r_falsestart( );
 void r_mode( );
+void r_all_break( );
 
 void r_route( );
 void r_print( );
 
+void race_display_line( );
+void display_scores( );
+void display_record_details( );
+void race_chasecam_change( );
+void race_chasecam_freelook_change( );
 // }
 
 // { CHEATS
@@ -489,18 +499,30 @@ const char CD_NODESC[] = "no desc";
 #define CD_VWEP         "toggle vweps"
 #define CD_PAUSE        "toggle pause"
 // { RACE
+#define CD_RACE       	"toggle race mode"
 #define CD_R_SSET       "set race start checkpoint"
 #define CD_R_CSET       "set race checkpoint"
 #define CD_R_ESET       "set race end checkpoint"
 #define CD_R_CDEL       "remove race current checkpoint"
 #define CD_R_ROUTE      "load predefined routes for map"
+#define CD_C_ROUTE      "clear current route completely"
 #define CD_R_PRINT      "show race route info"
 #define CD_RREADY       "ready for race"
 #define CD_RBREAK       "not ready for race"
+#define CD_RBREAKALL    "force all racers to break"
 #define CD_RTOGGLE      "toggle ready status for race"
 #define CD_RCANCEL      "cancel current race, for racer"
 #define CD_RTIMEOUT     "set race timeout"
+#define CD_RFALSESTART  "set race starting mode"
 #define CD_RMODE        "set race weapon mode"
+#define CD_RFOLLOW      "follow racers with chasecam while waiting in line"
+#define CD_RNOFOLLOW    "don't follow racers with chasecam while waiting in line"
+#define CD_RFTOGGLE	    "toggle chasecam status"
+#define CD_RCHASECAM	"cycle between chasecam views"
+#define CD_RCHASECAMFL	"toggle chasecam freelook"
+#define CD_RLINEUP		"show current race line-up"
+#define CD_RSCORES		"show top race times for current map"
+#define CD_RSCOREDETAIL "show details about a record"
 // }
 
 #define CD_NOSPECS      "allow/disallow spectators"
@@ -526,6 +548,7 @@ void redirect();
 #define DEF(ptr) ((void (*)())(ptr))
 
 cmd_t cmds[] = {
+	{ "race",		 ToggleRace,				0    , CF_PLAYER | CF_SPC_ADMIN, CD_RACE },
 	{ "cm",          SelectMap,                 0    , CF_BOTH | CF_MATCHLESS | CF_NOALIAS, CD_NODESC },
 	{ "mapslist_dl", mapslist_dl,               0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS | CF_NOALIAS | CF_CONNECTION_FLOOD, CD_MAPSLIST_DL },
 	{ "cmdslist_dl", cmdslist_dl,               0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS | CF_NOALIAS | CF_CONNECTION_FLOOD, CD_CMDSLIST_DL },
@@ -796,18 +819,27 @@ cmd_t cmds[] = {
 	{ "vwep",        ToggleVwep,                0    , CF_PLAYER | CF_SPC_ADMIN, CD_VWEP },
 	{ "pause",       TogglePause,               0    , CF_PLAYER | CF_MATCHLESS | CF_SPC_ADMIN, CD_PAUSE },
 // { RACE
-	{ "r_sset",      DEF(r_Xset),               1    , CF_PLAYER | CF_SPC_ADMIN, CD_R_SSET },
-	{ "r_cset",      DEF(r_Xset),               2    , CF_PLAYER | CF_SPC_ADMIN, CD_R_CSET },
-	{ "r_eset",      DEF(r_Xset),               3    , CF_PLAYER | CF_SPC_ADMIN, CD_R_ESET },
-	{ "r_cdel",      r_cdel,                    0    , CF_PLAYER | CF_SPC_ADMIN, CD_R_CDEL },
-	{ "r_route",     r_route,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_R_ROUTE },
-	{ "r_print",     r_print,                   0    , CF_BOTH, CD_R_PRINT },
-	{ "rready",      DEF(r_changestatus),       1    , CF_PLAYER, CD_RREADY },
-	{ "rbreak",      DEF(r_changestatus),       2    , CF_PLAYER, CD_RBREAK },
-	{ "rtoggle",     DEF(r_changestatus),       3    , CF_PLAYER, CD_RTOGGLE },
-	{ "rcancel",     DEF(r_changestatus),       4    , CF_PLAYER, CD_RCANCEL },
-	{ "rtimeout",    r_timeout,                 0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_RTIMEOUT },
-	{ "rmode",       r_mode,                    0    , CF_PLAYER | CF_SPC_ADMIN, CD_RMODE },
+	{ "race_ready",					DEF(r_changestatus),			1,	CF_PLAYER,								CD_RREADY },
+	{ "race_break",					DEF(r_changestatus),			2,	CF_PLAYER,								CD_RBREAK },
+	{ "race_break_all",				r_all_break,	  		  		0,	CF_BOTH_ADMIN,							CD_RBREAKALL },
+	{ "race_toggle",				DEF(r_changestatus),			3,	CF_PLAYER,								CD_RTOGGLE },
+	{ "race_cancel",				DEF(r_changestatus),			4,	CF_PLAYER,								CD_RCANCEL },
+	{ "race_show_lineup",			race_display_line,				0,	CF_BOTH,								CD_RLINEUP },
+	{ "race_show_toptimes",			display_scores,					0,	CF_BOTH,								CD_RSCORES },
+	{ "race_show_record_details",	display_record_details,			0,	CF_BOTH | CF_PARAMS,   	  				CD_RSCOREDETAIL },
+	{ "race_show_route",			r_print,						0,	CF_BOTH,								CD_R_PRINT },
+	{ "race_set_start",				DEF(r_Xset),					1,	CF_PLAYER | CF_SPC_ADMIN, 				CD_R_SSET },
+	{ "race_set_finish",			DEF(r_Xset),					3,	CF_PLAYER | CF_SPC_ADMIN, 				CD_R_ESET },
+	{ "race_set_checkpoint",		DEF(r_Xset),					2,	CF_PLAYER | CF_SPC_ADMIN, 				CD_R_CSET },
+	{ "race_del_checkpoint",		r_cdel,							0,	CF_PLAYER | CF_SPC_ADMIN, 				CD_R_CDEL },
+	{ "race_set_timeout",			r_timeout,						0,	CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS,	CD_RTIMEOUT },
+	{ "race_set_falsestart",		r_falsestart,					0,	CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS,	CD_RFALSESTART },
+	{ "race_set_weapon_mode",		r_mode,							0,	CF_PLAYER | CF_SPC_ADMIN,				CD_RMODE },
+	{ "race_route_switch",			r_route,						0,	CF_PLAYER | CF_SPC_ADMIN,				CD_R_ROUTE },
+	{ "race_route_clear",			r_clear_route,					0,	CF_PLAYER | CF_SPC_ADMIN,				CD_C_ROUTE },
+	{ "race_chasecam",				DEF(r_changefollowstatus),		3,	CF_PLAYER,								CD_RFTOGGLE },
+	{ "race_chasecam_view",			race_chasecam_change,			0,	CF_PLAYER,								CD_RCHASECAM },
+	{ "race_chasecam_freelook",		race_chasecam_freelook_change,  0,	CF_PLAYER,								CD_RCHASECAMFL },
 // }
 	{ "nospecs",     nospecs,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOSPECS },
 	{ "noitems",     noitems,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOITEMS },
@@ -1999,7 +2031,7 @@ void ShowDMM()
 
 void ChangeDM(float dmm)
 {
-	if ( match_in_progress )
+	if ( !gametype_change_checks() )
 		return;
 
 	if ( deathmatch == (int)dmm ) {
@@ -2873,41 +2905,42 @@ const char common_um_init[] =
 	"k_yawnmode 0\n"			// disable SHITMODE by default (c)Renzo
 	"k_instagib 0\n"			// instagib off
 	"k_cg_kb 1\n"				// coilgun kickback in instagib
-	"k_disallow_weapons 16\n"		// disallow gl in dmm4 by default
+	"k_disallow_weapons 16\n"	// disallow gl in dmm4 by default
 
-	"floodprot 10 1 1\n"			// 10 messages in 1 seconds, 1 second silence
-	"k_fp 1\n"				// floodprot for players
+	"floodprot 10 1 1\n"		// 10 messages in 1 seconds, 1 second silence
+	"k_fp 1\n"					// floodprot for players
 	"k_fp_spec 1\n"				// floodprot for specs
 
-	"dmm4_invinc_time \"\"\n"		// reset to default
+	"dmm4_invinc_time \"\"\n"	// reset to default
 
 	"k_noitems \"\"\n"			// reset to default
 
-//	"localinfo k_new_mode 0\n"		// UNKNOWN ktpro
-//	"localinfo k_fast_mode 0\n		// UNKNOWN ktpro
-//	"localinfo k_safe_rj 0\n"		// UNKNOWN ktpro
-//	"localinfo k_new_spw 0\n"		// ktpro feature
+//	"localinfo k_new_mode 0\n"	// UNKNOWN ktpro
+//	"localinfo k_fast_mode 0\n	// UNKNOWN ktpro
+//	"localinfo k_safe_rj 0\n"	// UNKNOWN ktpro
+//	"localinfo k_new_spw 0\n"	// ktpro feature
 
 	"k_clan_arena 0\n"			// disable Clan Arena by default
 	"k_rocketarena 0\n"			// disable Rocket Arena by default
+	"k_race 0\n"				// disable Race  by default
 
 	"k_spec_info 1\n"			// allow spectators receive took info during game
 	"k_midair 0\n"				// midair off
 
 	"fraglimit 0\n"				// fraglimit %)
-	"dp 1\n"				// drop pack
-	"dq 0\n"				// drop quad
-	"dr 0\n"				// drop ring
-	"k_frp 0\n"				// fairpacks
+	"dp 1\n"					// drop pack
+	"dq 0\n"					// drop quad
+	"dr 0\n"					// drop ring
+	"k_frp 0\n"					// fairpacks
 	"k_spectalk 0\n"			// silence
-	"k_dis 1\n"				// discharge on
-	"k_spw 4\n"				// affect spawn type
+	"k_dis 1\n"					// discharge on
+	"k_spw 4\n"					// affect spawn type
 	"k_dmgfrags 0\n"			// damage frags off
-	"k_dmm4_gren_mode 0\n"			// dmm4 grenade mode off
+	"k_dmm4_gren_mode 0\n"		// dmm4 grenade mode off
 	"k_teamoverlay 1\n"			// teamoverlay on
-	"k_tp_tele_death 1\n"			// affect frags on team telefrags or not
-	"k_allowcountchange 1\n"		// permissions for upplayers, only real admins
-	"k_maxspectators 4\n"			// some default value
+	"k_tp_tele_death 1\n"		// affect frags on team telefrags or not
+	"k_allowcountchange 1\n"	// permissions for upplayers, only real admins
+	"k_maxspectators 4\n"		// some default value
 	"k_ip_list 1\n"				// permissions for iplist, only real admins
 
 	"k_idletime 0\n"			// idlebot
@@ -2922,7 +2955,7 @@ const char common_um_init[] =
 
 
 const char _1on1_um_init[] =
-	"coop 0\n"				// no coop
+	"coop 0\n"					// no coop
 	"maxclients 2\n"			// duel = two players
 	"k_maxclients 2\n"			// duel = two players
 	"timelimit  10\n"			// 10 minute rounds
@@ -2930,14 +2963,14 @@ const char _1on1_um_init[] =
 	"deathmatch 3\n"			// weapons stay
 	"k_overtime 1\n"			// overtime type = time based
 	"k_exttime 3\n"				// overtime 3mins
-	"k_pow 0\n"				// powerups
+	"k_pow 0\n"					// powerups
 	"k_membercount 0\n"			// no efect in duel
 	"k_lockmin 0\n"				// no efect in duel
 	"k_lockmax 0\n"				// no efect in duel
 	"k_mode 1\n";				//
 
 const char _2on2_um_init[] =
-	"coop 0\n"				// no coop
+	"coop 0\n"					// no coop
 	"maxclients 4\n"			// 2on2 = 4 players
 	"k_maxclients 4\n"			// 2on2 = 4 players
 	"timelimit  10\n"			// 10 minute rounds
@@ -2945,20 +2978,20 @@ const char _2on2_um_init[] =
 	"deathmatch 3\n"			// weapons stay
 	"k_overtime 1\n"			// time based
 	"k_exttime 3\n"				// overtime 3mins
-	"k_pow 1\n"				// use powerups
+	"k_pow 1\n"					// use powerups
 	"k_membercount 1\n"			// minimum number of players in each team
 	"k_lockmin 1\n"				//
 	"k_lockmax 2\n"				//
 	"k_mode 2\n";				//
 
 const char _3on3_um_init[] =
-	"coop 0\n"				// no coop
+	"coop 0\n"					// no coop
 	"maxclients 6\n"			// 3on3 = 6 players
 	"k_maxclients 6\n"			// 3on3 = 6 players
 	"timelimit  15\n"			// 15 minute rounds
 	"teamplay   2\n"			// hurt teammates and yourself
 	"deathmatch 1\n"			// weapons wont stay on pickup
-	"k_pow 1\n"				// use powerups
+	"k_pow 1\n"					// use powerups
 	"k_membercount 2\n"			// minimum number of players in each team
 	"k_lockmin 1\n"				//
 	"k_lockmax 2\n"				//
@@ -2967,13 +3000,13 @@ const char _3on3_um_init[] =
 	"k_mode 2\n";				//
 
 const char _4on4_um_init[] =
-	"coop 0\n"				// no coop
+	"coop 0\n"					// no coop
 	"maxclients 8\n"			// 4on4 = 8 players
 	"k_maxclients 8\n"			// 4on4 = 8 players
 	"timelimit  20\n"			// 20 minute rounds
 	"teamplay   2\n"			// hurt teammates and yourself
 	"deathmatch 1\n"			// weapons wont stay on pickup
-	"k_pow 1\n"				// user powerups
+	"k_pow 1\n"					// use powerups
 	"k_membercount 3\n"			// minimum number of players in each team
 	"k_lockmin 1\n"				//
 	"k_lockmax 2\n"				//
@@ -2982,13 +3015,13 @@ const char _4on4_um_init[] =
 	"k_mode 2\n";				//
 
 const char _10on10_um_init[] =
-	"coop 0\n"				// no coop
+	"coop 0\n"					// no coop
 	"maxclients 20\n"			// 10on10 = 20 players
 	"k_maxclients 20\n"			// 10on10 = 20 players
 	"timelimit  20\n"			// 20 minute rounds
 	"teamplay   2\n"			// hurt yourself and teammates
 	"deathmatch 1\n"			// wpons dowont stay on pickup
-	"k_pow 1\n"				// user powerups
+	"k_pow 1\n"					// user powerups
 	"k_membercount 5\n"			// minimum number of players in each team
 	"k_lockmin 1\n"				//
 	"k_lockmax 2\n"				//
@@ -2997,15 +3030,15 @@ const char _10on10_um_init[] =
 	"k_mode 2\n";				//
 
 const char ffa_um_init[] =
-//	"coop 0\n"				// NO WE CAN'T DO IT SO, FFA MATCHLESS USED IN COOP MODE
+//	"coop 0\n"					// NO WE CAN'T DO IT SO, FFA MATCHLESS USED IN COOP MODE
 	"maxclients 26\n"			// some limit
 	"k_maxclients 26\n"			// some limit
 	"timelimit  20\n"			// some limit
 	"teamplay   0\n"			// hurt yourself, no teammates
 	"deathmatch 3\n"			// weapons stay
-	"dq 1\n"				// drop quad
-	"dr 1\n"				// drop ring
-	"k_pow 1\n"				// use powerups
+	"dq 1\n"					// drop quad
+	"dr 1\n"					// drop ring
+	"k_pow 1\n"					// use powerups
 	"k_membercount 0\n"			// no effect in ffa
 	"k_lockmin 0\n"				// no effect in ffa
 	"k_lockmax 0\n"				// no effect in ffa
@@ -3021,7 +3054,7 @@ const char ctf_um_init[] =
 	"timelimit 20\n"
 	"teamplay 4\n"
 	"deathmatch 3\n"
-	"k_dis 2\n"				// no out of water discharges in ctf
+	"k_dis 2\n"					// no out of water discharges in ctf
 	"k_pow 1\n"
 	"k_spw 1\n"
 	"k_membercount 0\n"
@@ -3077,7 +3110,7 @@ void UserMode(float umode)
 	int k_free_mode = ( k_matchLess ? 5 : cvar( "k_free_mode" ) );
 
 	if ( !k_matchLess ) // allow for matchless mode
-	if ( match_in_progress )
+	if ( !gametype_change_checks() )
 		return;
 
 	if ( umode < 0 ) {
@@ -5072,7 +5105,7 @@ void cmd_wreg_do( byte c )
 
 void ToggleMidair()
 {
-	if ( match_in_progress )
+	if ( !gametype_change_checks() )
 		return;
 
 	// Can't enable midair unless dmm4 is set first
@@ -5096,7 +5129,7 @@ void ToggleInstagib()
 {
 	int k_instagib = bound(0, cvar( "k_instagib" ), 2); 
 
-	if ( match_in_progress )
+	if ( !gametype_change_checks() )
 		return;
 
 	// Can't enable instagib unless dmm4 is set first
@@ -5172,7 +5205,7 @@ void sv_time()
 
 void GrenadeMode()
 {
-	if ( match_in_progress )
+	if ( !gametype_change_checks() )
 		return;
 
 	// Can't toggle unless dmm4 is set first
@@ -5193,6 +5226,12 @@ void GrenadeMode()
 
 void ToggleReady()
 {
+	if ( isRACE() )
+	{
+		r_changestatus( 3 ); // race_toggle
+		return;
+	}
+
 	if ( self->ready )
 		PlayerBreak();
 	else 
@@ -5300,8 +5339,8 @@ void iplist ()
 
 void dmgfrags ()
 {
-    if( match_in_progress )
-        return;
+	if ( !gametype_change_checks() )
+		return;
 
 	cvar_toggle_msg( self, "k_dmgfrags", redtext("damage frags") );
 }
@@ -5651,7 +5690,7 @@ void mapcycle ()
 
 void airstep()
 {
-	if ( match_in_progress )
+	if ( match_in_progress || isRACE() )
 		return;
 
 	cvar_toggle_msg( self, "pm_airstep", redtext("pm_airstep") );
@@ -5715,7 +5754,7 @@ void FixYawnMode()
 // Toggle yawnmode, implemented by Molgrum
 void ToggleYawnMode()
 {
-	if ( match_in_progress )
+	if ( !gametype_change_checks() )
 		return;
 
 	cvar_toggle_msg( self, "k_yawnmode", redtext("yawnmode") );
@@ -5815,7 +5854,7 @@ void TogglePause ()
 
 void ToggleArena()
 {
-	if ( match_in_progress )
+	if ( !gametype_change_checks() )
 		return;
 
 	if ( !isRA() )
@@ -5986,3 +6025,24 @@ void giveme()
 	G_sprint(self, 2, "You got %s for %.1fs\n", got, seconds );
 }
 
+qboolean gametype_change_checks( void )
+{
+	if ( match_in_progress )
+	{
+		G_sprint( self, 2, "Command is locked while %s is in progress\n", redtext( "match" ) );
+		return false;
+	}
+
+	if( check_master() )
+	{
+		return false;
+	}
+	
+	if ( isRACE() )
+	{
+		G_sprint( self, 2, "%s is on, please toggle it off by using %s command first\n", redtext( "race mode" ), redtext( "race" ) );
+		return false;
+	}
+
+	return true;
+}
