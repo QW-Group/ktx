@@ -8,7 +8,7 @@ static int round_num;
 static int team1_score;
 static int team2_score;
 
-qboolean gametype_change_checks( void );
+qbool gametype_change_checks( void );
 
 void SM_PrepareCA(void)
 {

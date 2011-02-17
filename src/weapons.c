@@ -89,7 +89,9 @@ void W_FireAxe()
 		int damage = 20; // default damage is 20
 
 		// can't touch/damage others in race
-		if ( isRACE() && ( PROG_TO_EDICT( g_globalvars.trace_ent )->ct == ctPlayer ) && ( self != PROG_TO_EDICT( g_globalvars.trace_ent ) ) )
+		if ( isRACE() 
+		&& ( PROG_TO_EDICT( g_globalvars.trace_ent )->ct == ctPlayer ) 
+		&& ( self != PROG_TO_EDICT( g_globalvars.trace_ent ) ) )
 			return;
 
 		if ( PROG_TO_EDICT( g_globalvars.trace_ent )->ct == ctPlayer )
@@ -331,7 +333,9 @@ void TraceAttack( float damage, vec3_t dir, qbool send_effects )
 // org = trace_endpos - dir*4;
 
 	// can't touch/damage others in race
-	if ( isRACE() && ( PROG_TO_EDICT( g_globalvars.trace_ent )->ct == ctPlayer ) && ( self != PROG_TO_EDICT( g_globalvars.trace_ent ) ) )
+	if ( isRACE() 
+	&& ( PROG_TO_EDICT( g_globalvars.trace_ent )->ct == ctPlayer ) 
+	&& ( self != PROG_TO_EDICT( g_globalvars.trace_ent ) ) )
 		return;
 
 	if ( PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.takedamage )
@@ -863,7 +867,9 @@ void T_MissileTouch()
 		return;		// don't explode on owner
 
 	// can't touch/damage others in race
-	if ( isRACE() && ( other->ct == ctPlayer ) && ( other != PROG_TO_EDICT( self->s.v.owner ) ) )
+	if ( isRACE() 
+	&& ( other->ct == ctPlayer ) 
+	&& ( other != PROG_TO_EDICT( self->s.v.owner ) ) )
 		return;
 
 	if ( self->voided )
@@ -1165,7 +1171,9 @@ void GrenadeTouch()
 		return;		// don't explode on owner
 	
 	// can't touch/damage others in race
-	if ( isRACE() && ( other->ct == ctPlayer ) && ( other != PROG_TO_EDICT( self->s.v.owner ) ) )
+	if ( isRACE()
+	&& ( other->ct == ctPlayer )
+	&& ( other != PROG_TO_EDICT( self->s.v.owner ) ) )
 		return;
 
 	if ( other->s.v.takedamage )
