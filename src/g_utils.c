@@ -26,7 +26,7 @@
 #include "g_local.h"
 
 void Sc_Stats(float on);
-void race_stoprecord( qboolean cancel );
+void race_stoprecord( qbool cancel );
 
 int NUM_FOR_EDICT( gedict_t * e )
 {

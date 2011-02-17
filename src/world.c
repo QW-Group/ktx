@@ -976,7 +976,7 @@ void FixRA()
 
 void FixRace()
 {
-	static qboolean old_k_race = false;	// static
+	static qbool old_k_race = false;	// static
 
 	if ( framecount == 1 )
 		return; // can't guess here something yet

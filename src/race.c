@@ -9,12 +9,12 @@
 #define MAX_TXTLEN	64
 
 void ktpro_autotrack_on_powerup_take (gedict_t *racer);
-void race_cancel( qboolean cancelrecord, const char *fmt, ... );
-void race_start( qboolean cancelrecord, const char *fmt, ... );
+void race_cancel( qbool cancelrecord, const char *fmt, ... );
+void race_start( qbool cancelrecord, const char *fmt, ... );
 void race_unready_all(void);
 void r_route( void );
 void race_record( void );
-void race_stoprecord( qboolean cancel );
+void race_stoprecord( qbool cancel );
 void race_remove_ent( void );
 void race_set_players_movetype_and_etc( void );
 void race_cleanmap( void );
@@ -26,9 +26,9 @@ void write_topscores( void );
 void read_topscores( void );
 void init_scores( void );
 
-qboolean gametype_change_checks( void );
-qboolean race_command_checks( void );
-qboolean race_is_started( void );
+qbool gametype_change_checks( void );
+qbool race_command_checks( void );
+qbool race_is_started( void );
 fileHandle_t race_fhandle = -1;
 raceRecord_t records[NUM_BESTSCORES];
 raceRecord_t currentrace;
@@ -39,7 +39,7 @@ char *classname_for_nodeType( raceRouteNodeType_t nodeType );
 // this is more like a HOOK, doesn't used internally in race.c but used outside,
 // outside of race.c file we does't need to know in which exact sate we are, but in some cases inside race.c we need to know 
 // is it contdown or active state and this function _doesn't_ help us in such cases. Argh, this comment supposed to make it more clean, but seems I failed.
-qboolean isRACE( void )
+qbool isRACE( void )
 {
 	return ( cvar("k_race") );
 }
@@ -2425,9 +2425,6 @@ qbool race_command_checks( void )
 		G_sprint( self, 2, "Command only available in %s mode (type %s to activate it)\n", redtext( "race" ), redtext( "race" ) );
 		return false;
 	}
-
-	if ( check_master() )
-		return false;
 
 	return true;
 }

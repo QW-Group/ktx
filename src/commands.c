@@ -6025,7 +6025,7 @@ void giveme()
 	G_sprint(self, 2, "You got %s for %.1fs\n", got, seconds );
 }
 
-qboolean gametype_change_checks( void )
+qbool gametype_change_checks( void )
 {
 	if ( match_in_progress )
 	{
@@ -6033,11 +6033,6 @@ qboolean gametype_change_checks( void )
 		return false;
 	}
 
-	if( check_master() )
-	{
-		return false;
-	}
-	
 	if ( isRACE() )
 	{
 		G_sprint( self, 2, "%s is on, please toggle it off by using %s command first\n", redtext( "race mode" ), redtext( "race" ) );

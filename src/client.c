@@ -48,8 +48,8 @@ void StartDie ();
 void ZeroFpsStats ();
 void ChasecamViewButton( void );
 
-void race_start( qboolean restart, const char *fmt, ... );
-void race_stoprecord( qboolean cancel );
+void race_start( qbool restart, const char *fmt, ... );
+void race_stoprecord( qbool cancel );
 
 void del_from_specs_favourites(gedict_t *rm);
 

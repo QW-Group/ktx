@@ -563,8 +563,6 @@ typedef struct gedict_s {
 	// yeah its lame, but better than checking setinfo each time.
 	int ezquake_version;
 
-	qboolean weapon_switch_fix;
-
 // { race
 	int 		race_id; 			// used by checkpoints, 
 				 					// start checkpoint have id = 0,
@@ -677,7 +675,7 @@ typedef struct
 
 	int						next_race_time;		// used for centerprint, help us print it not each server frame but more rare, each 100ms or something
 
-	qboolean				warned;				// do we warned why we can't start race
+	qbool				warned;				// do we warned why we can't start race
 	int						next_racer;			// this is queue of racers
 
 	raceWeapoMode_t			weapon;				// weapon mode
