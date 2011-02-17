@@ -3065,9 +3065,10 @@ void PlayerPostThink()
 
 	if ( isRACE() )
 	{
-		self->s.v.solid = SOLID_TRIGGER;
+		// test for multirace
+		//self->s.v.solid = SOLID_BBOX;
 		setorigin (self, PASSVEC3( self->s.v.origin ) );
-    }
+    	}
 
 	race_follow();
 
