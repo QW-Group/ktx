@@ -2718,13 +2718,13 @@ void r_route( void )
 		race_remove_ent();
 		race_route_now_custom();
 
-		if ( self->s.v.classname != "worldspawn" )
+		if (streq(self->s.v.classname, "worldspawn"))
 			G_bprint( 2, "Failed to load route %d by %s\n", next_route + 1, self->s.v.netname );
 
 		return;
 	}
 
-	if ( self->s.v.classname != "worldspawn" )
+	if (streq(self->s.v.classname, "worldspawn"))
 	{
 		race_print_route_info( NULL );
 		G_bprint( 2, "route loaded by %s\n", self->s.v.netname );
