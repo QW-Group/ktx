@@ -2423,6 +2423,7 @@ void IdlebotCheck ()
 }
 
 void CheckAutoXonX(qbool use_time);
+void r_changestatus( float t );
 
 // Called by a player to inform that (s)he is ready for a match.
 void PlayerReady ()
