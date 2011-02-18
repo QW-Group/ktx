@@ -1608,21 +1608,24 @@ void powerup_touch()
 		return;
 	}
 
-	if ( streq( self->s.v.classname, "item_artifact_envirosuit" ) 
-	&& other->radsuit_finished > g_globalvars.time )
-		return;
+	if ( isFFA() )
+	{
+		if ( streq( self->s.v.classname, "item_artifact_envirosuit" ) 
+		&& other->radsuit_finished > g_globalvars.time )
+			return;
 
-	if ( streq( self->s.v.classname, "item_artifact_invulnerability" ) 
-	&& other->invincible_finished > g_globalvars.time )
-		return;
+		if ( streq( self->s.v.classname, "item_artifact_invulnerability" ) 
+		&& other->invincible_finished > g_globalvars.time )
+			return;
 
-	if ( streq( self->s.v.classname, "item_artifact_invisibility" ) 
-	&& other->invisible_finished > g_globalvars.time )
-		return;
+		if ( streq( self->s.v.classname, "item_artifact_invisibility" ) 
+		&& other->invisible_finished > g_globalvars.time )
+			return;
 
-	if ( streq( self->s.v.classname, "item_artifact_super_damage" ) 
-	&& other->super_damage_finished > g_globalvars.time )
-		return;
+		if ( streq( self->s.v.classname, "item_artifact_super_damage" ) 
+		&& other->super_damage_finished > g_globalvars.time )
+			return;
+	}
 
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
 
