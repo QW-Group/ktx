@@ -1608,7 +1608,9 @@ void powerup_touch()
 		return;
 	}
 
-	if ( isFFA() )
+	// if "fair" powerups pickup is activated, don't allow one to pickup
+	// powerup if he already has one of the same kind (ie 2 quads)
+	if ( cvar( "k_pow_pickup" ) )
 	{
 		if ( streq( self->s.v.classname, "item_artifact_envirosuit" ) 
 		&& other->radsuit_finished > g_globalvars.time )

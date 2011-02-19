@@ -619,6 +619,7 @@ void FirstFrame	( )
 	RegisterCvarEx("k_pow_s", "1"); // suit
 	RegisterCvar("k_pow_min_players");
 	RegisterCvar("k_pow_check_time");
+	RegisterCvarEx("k_pow_pickup", "0");	// allow multiple pickup of same powerup - off by default
 
 	RegisterCvar("allow_spec_wizard");
 	RegisterCvar("k_no_wizard_animation"); // disallow wizard animation
