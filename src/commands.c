@@ -98,6 +98,7 @@ void ToggleMidair();
 void ToggleInstagib();
 void ToggleCGKickback();
 void TogglePowerups();
+void TogglePuPickup();
 void ToggleQEnemy();
 void ToggleQLag();
 void ToggleQPoint();
@@ -266,6 +267,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_WHOVOTE    "info on received votes"
 #define CD_SPAWN      "toggle spawn modes"
 #define CD_POWERUPS   "quad, \x98\x98\x98, ring & suit"
+#define CD_PUPICKUP   "change powerups pickup policy"
 #define CD_ANTILAG    "toggle antilag"
 #define CD_DISCHARGE  "underwater discharges"
 #define CD_DM         "show deathmatch mode"
@@ -567,6 +569,7 @@ cmd_t cmds[] = {
 	{ "whovote",     ModStatusVote,             0    , CF_BOTH | CF_MATCHLESS, CD_WHOVOTE },
 	{ "spawn",       ToggleRespawns,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_SPAWN },
 	{ "powerups",    TogglePowerups,            0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_POWERUPS },
+	{ "powerups_pickup", TogglePuPickup,  	    0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_PUPICKUP },
 	{ "antilag",     antilag,                   0    , CF_PLAYER | CF_SPC_ADMIN , CD_ANTILAG },
 	{ "discharge",   ToggleDischarge,           0    , CF_PLAYER | CF_SPC_ADMIN , CD_DISCHARGE },
 	{ "dm",          ShowDMM,                   0    , CF_PLAYER | CF_SPC_ADMIN , CD_DM },
@@ -2003,6 +2006,14 @@ void TogglePowerups()
 	// enable k_pow if at least one powerup was turned on and vice versa turn off k_pow if all powerups was turned off
 	if ( changed )
 		cvar_fset( "k_pow", ( cvar("k_pow_q") || cvar("k_pow_p") || cvar("k_pow_r") || cvar("k_pow_s") ) );
+}
+
+void TogglePuPickup()
+{
+	if( match_in_progress )
+		return;
+
+	cvar_toggle_msg( self, "k_pow_pickup", redtext("new powerups pickup (no multi pickup)") );
 }
 
 void ToggleDischarge()

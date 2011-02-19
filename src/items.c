@@ -387,7 +387,10 @@ void armor_touch()
 	else
 		return;
 
-	if ( other->s.v.armortype * ( other->s.v.armorvalue + 1 ) >= type * value )
+	// check if we have more armor than we trying to pick up.
+	// We add 1.0e-6 so floaing point comparision is happy,
+	// not all systems require it but on some this bugs in your face.
+	if ( other->s.v.armortype * other->s.v.armorvalue + 1.0e-6 >= type * value )
 		return;
 
 	mi_print(other, bit, va("%s got %s", getname(other), self->s.v.netname));
@@ -1608,21 +1611,26 @@ void powerup_touch()
 		return;
 	}
 
-	if ( streq( self->s.v.classname, "item_artifact_envirosuit" ) 
-	&& other->radsuit_finished > g_globalvars.time )
-		return;
+	// if "fair" powerups pickup is activated, don't allow one to pickup
+	// powerup if he already has one of the same kind (ie 2 quads)
+	if ( cvar( "k_pow_pickup" ) )
+	{
+		if ( streq( self->s.v.classname, "item_artifact_envirosuit" ) 
+		&& other->radsuit_finished > g_globalvars.time )
+			return;
 
-	if ( streq( self->s.v.classname, "item_artifact_invulnerability" ) 
-	&& other->invincible_finished > g_globalvars.time )
-		return;
+		if ( streq( self->s.v.classname, "item_artifact_invulnerability" ) 
+		&& other->invincible_finished > g_globalvars.time )
+			return;
 
-	if ( streq( self->s.v.classname, "item_artifact_invisibility" ) 
-	&& other->invisible_finished > g_globalvars.time )
-		return;
+		if ( streq( self->s.v.classname, "item_artifact_invisibility" ) 
+		&& other->invisible_finished > g_globalvars.time )
+			return;
 
-	if ( streq( self->s.v.classname, "item_artifact_super_damage" ) 
-	&& other->super_damage_finished > g_globalvars.time )
-		return;
+		if ( streq( self->s.v.classname, "item_artifact_super_damage" ) 
+		&& other->super_damage_finished > g_globalvars.time )
+			return;
+	}
 
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
 
