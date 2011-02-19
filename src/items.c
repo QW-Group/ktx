@@ -387,7 +387,10 @@ void armor_touch()
 	else
 		return;
 
-	if ( other->s.v.armortype * ( other->s.v.armorvalue + 0.00001 ) >= type * value )
+	// check if we have more armor than we trying to pick up.
+	// We add 1.0e-6 so floaing point comparision is happy,
+	// not all systems require it but on some this bugs in your face.
+	if ( other->s.v.armortype * other->s.v.armorvalue + 1.0e-6 >= type * value )
 		return;
 
 	mi_print(other, bit, va("%s got %s", getname(other), self->s.v.netname));
