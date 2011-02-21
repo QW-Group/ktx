@@ -2862,6 +2862,7 @@ ok:
 
 // common settings for all user modes
 const char common_um_init[] =
+	"k_pow_pickup 0\n"
 	"sv_loadentfiles_dir \"\"\n"
 	"sv_antilag 2\n"			// antilag on
 	"k_killquad 0\n"
