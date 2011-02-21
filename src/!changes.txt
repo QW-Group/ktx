@@ -1,3 +1,7 @@
+This file is outdated and should probably disappear.
+Please go to http://ktx.qw-dev.net for updated information.
+
+
 2008-07-06
 qq:
 292. COOP: Monsters now respawn on nightmare skill.
