@@ -8,8 +8,6 @@ static int round_num;
 static int team1_score;
 static int team2_score;
 
-qbool gametype_change_checks( void );
-
 void SM_PrepareCA(void)
 {
 	if( !isCA() )
@@ -72,7 +70,7 @@ void apply_CA_settings(void)
 
 void ToggleCArena()
 {
-	if ( !gametype_change_checks() )
+	if ( match_in_progress )
 		return;
 
 	if ( !isCA() )

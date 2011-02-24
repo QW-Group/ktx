@@ -26,7 +26,6 @@
 #include "g_local.h"
 
 void Sc_Stats(float on);
-void race_stoprecord( qbool cancel );
 
 int NUM_FOR_EDICT( gedict_t * e )
 {
@@ -711,9 +710,6 @@ void sound( gedict_t * ed, int channel, char *samp, float vol, float att )
 	if ( !samp || !*samp )
 		return; // ignore null sample
 
-	if ( isRACE() && ed->muted )
-		return;
-
 	trap_sound( NUM_FOR_EDICT( ed ), channel, samp, vol, att );
 }
 
@@ -1382,9 +1378,6 @@ void changelevel( const char *name )
 {
  	if ( strnull( name ) )
 		G_Error("changelevel: null");
-
-	if ( isRACE() && race_recording )
-		race_stoprecord( true );
 
 	trap_changelevel(name);
 }

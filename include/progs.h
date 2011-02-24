@@ -25,9 +25,6 @@
 
 #include "progdefs.h"
 
-#define MAX_ROUTE_NODES		50 // max race checkpoints per race (including start and finish checkpoints)
-#define MAX_ROUTES			10 // max race route per map
-
 typedef struct shared_edict_s {
 	void			*ptr; // this points to sv_edict_t but mod should NOT bother about that...
 	entvars_t       v;	// C exported fields from progs
@@ -564,126 +561,18 @@ typedef struct gedict_s {
 	int ezquake_version;
 
 // { race
-	int 		race_id; 			// used by checkpoints, 
-				 					// start checkpoint have id = 0,
-				 					// intermediate checkpoints have it from 1 to xxx,
-				 					// and end checkpoint have id xxx + 1
-	float		race_volume; 		// how loud to play sound() when you tocuh this checkpoint
-	int			race_effects; 		// apply this effects when checkpoint is touched
+	int 		race_id; 		// used by checkpoints, 
+				 				// start checkpoint have id = 0,
+				 				// intermediate checkpoints have it from 1 to xxx,
+				 				// and end checkpoint have id xxx + 1
+	float		race_volume; 	// how loud to play sound() when you tocuh this checkpoint
+	int			race_effects; 	// apply this effects when checkpoint is touched
 	int			race_RouteNodeType; // this is actually must be raceRouteNodeType_t 
 									// but unwilling to move type definition out of race.c so using int
 
-	int			race_ready; 		// is player ready for race
-	int			race_chasecam; 		// does player want to follow other racers in line
-	int			race_chasecam_freelook; // disable server forcing v_angle on client
-	int			race_chasecam_view;	// does follow uses the chasecam or 1st person view
-	int			race_afk;			// counter for afk starts
-	qbool		racer;				// this player do race right now
-	qbool		muted;				// this player produces no sound
-	int			hideentity;			// links to entity to hide in eye chasecam
+	int			race_ready; 	// is player ready for race
+	qbool	racer;			// this player do race right now
 // }
 
 } gedict_t;
 
-typedef enum
-{
-	raceWeaponUnknown = 0,	// this must never happens
-	raceWeaponNo,			// weapon not allowed. NOTE: must be second in this enum!!!
-	raceWeaponAllowed,		// weapon allowed
-	raceWeapon2s,			// weapon allowed after 2s
-	raceWeaponMAX
-
-} raceWeapoMode_t;
-
-typedef enum
-{
-	raceFalseStartUnknown = 0,	// this must never happens
-	raceFalseStartNo,			// no false start, player is stuck until 'go'
-	raceFalseStartYes,			// false start allowed, player can move anytime before 'go'
-	raceFalseStartMAX
-
-} raceFalseStartMode_t;
-
-typedef enum
-{
-	nodeUnknown = 0,		// this node is fucked by lame coding, I mean this must never happens
-	nodeStart,				// this node is start of race route
-	nodeCheckPoint,			// this node is intermediate
-	nodeEnd,				// this node is end of race route
-	nodeMAX
-
-} raceRouteNodeType_t;
-
-typedef struct
-{
-	raceRouteNodeType_t		type;			// race route node type
-	vec3_t					ang;			// this is only need for start node, so we can set player view angles
-	vec3_t					org;			// node origin in 3D space
-
-} raceRouteNode_t;
-
-typedef struct
-{
-	char					name[128]; 				// NOTE: this will probably FUCK QVM!!!
-	char					desc[128]; 				// NOTE: this will probably FUCK QVM!!!
-	int						cnt;				   	// how much nodes we actually have, no more than MAX_ROUTE_NODES
-	float					timeout;				// when timeout of race must occur
-	raceWeapoMode_t			weapon;					// weapon mode
-	raceFalseStartMode_t	falsestart;				// start mode
-	raceRouteNode_t			node[MAX_ROUTE_NODES];	// nodes of this route, fixed array, yeah I'm lazy
-} raceRoute_t;
- 
-typedef struct
-{
-	float					time;
-	char					racername[64];
-	char					demoname[64];
-	float					distance;
-	float					maxspeed;
-	float					avgspeed;
-	char					date[64];
-	raceWeapoMode_t			weaponmode;					// weapon mode
-	raceFalseStartMode_t	startmode;				// start mode
-} raceRecord_t;
- 
-typedef enum
-{
-       raceNone = 0,                // race is inactive
-       raceCD,                                // race in count down state
-       raceActive,                        // race is active
-} raceStatus_t;
- 
-typedef struct
-{
-	int						cnt;				// how much we actually have of routes, no more than MAX_ROUTES
-	int						active_route;		// which route active right now
-	raceRoute_t				route[MAX_ROUTES];	// fixed array of routes
-
-// { count down
-	int						cd_cnt;				// 4 3 2 1 GO!
-	float					cd_next_think;		//
-// }
-
-	int						timeout_setting;	// just how long timeout
-	float					timeout;			// when timeout of race must occur
-	float					start_time;			// when race was started
-
-// {
-	char					top_nick[64];		// NOTE: this will probably FUCK QVM!!!
-	int						top_time;
-// }
-
-	int						next_race_time;		// used for centerprint, help us print it not each server frame but more rare, each 100ms or something
-
-	qbool				warned;				// do we warned why we can't start race
-	int						next_racer;			// this is queue of racers
-
-	raceWeapoMode_t			weapon;				// weapon mode
-	
-	raceFalseStartMode_t	falsestart;			// start type
-
-	raceStatus_t			status;				// race status
-
-} race_t;
-
-race_t			race; // whole race struct

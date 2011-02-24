@@ -30,8 +30,6 @@ void  CheckAll();
 void  FixSpecWizards ();
 void  FixSayFloodProtect();
 void  FixRules ();
-void  ShowSpawnPoints();
-void  r_route();
 
 #define MAX_BODYQUE 4
 gedict_t       *bodyque[MAX_BODYQUE];
@@ -381,13 +379,6 @@ void SP_worldspawn()
 
 // pent mdl - need this for race and coop
 	trap_precache_model( "progs/invulner.mdl" );
-	if ( cvar("k_race_custom_models") ) 
-	{
-		// precache if custom models actived in config
-		trap_precache_model( "progs/start.mdl" );
-		trap_precache_model( "progs/check.mdl" );
-		trap_precache_model( "progs/finish.mdl" );
-	}
 
 // pent sounds - need for coop
 	trap_precache_sound( "items/protect.wav" );
@@ -542,11 +533,6 @@ void Customize_Maps()
 
 	if ( cvar( "k_spm_show" ) )
 		ShowSpawnPoints();
-
-	if ( isRACE() )
-	{
-		r_route();
-	}
 }
 
 // create cvar via 'set' command
@@ -612,10 +598,6 @@ void FirstFrame	( )
 	RegisterCvar("_k_pow_last");  // internal usage, k_pow from last map
 
 	RegisterCvar("_k_nospecs");  // internal usage, will reject spectators connection
-
-	RegisterCvar("_k_playmode");  // internal usage, active play mode
-	
-	RegisterCvar("_k_recordeddemoname");  // internal usage, name of last easyrecorded demo
 
 	RegisterCvar("k_noitems");
 
@@ -697,12 +679,6 @@ void FirstFrame	( )
 	RegisterCvarEx("k_spm_show", "1");
 	RegisterCvarEx("k_spm_glow", "0");
 	RegisterCvarEx("k_spm_custom_model", "0");
-// { race
-	RegisterCvarEx("k_race", "0");
-	RegisterCvarEx("k_race_custom_models", "0");
-	RegisterCvarEx("k_race_autorecord", "0");
-	//RegisterCvarEx("k_race_topscores", "10");
-// }
 	RegisterCvar("k_idletime");
 	RegisterCvar("k_timetop");
 	RegisterCvar("k_membercount");
@@ -970,28 +946,6 @@ void FixRA()
 	{
 		old_k_rocketarena = isRA();
 		G_bprint(2, "%s: RA settings changed, map will be reloaded\n", redtext("WARNING"));
-		changelevel( g_globalvars.mapname );
-	}
-}
-
-void FixRace()
-{
-	static qbool old_k_race = false;	// static
-
-	if ( framecount == 1 )
-		return; // can't guess here something yet
-
-	if ( framecount == 2 )
-	{
-		old_k_race = isRACE(); 
-		return;
-	}
-
-	// do that even match in progress...
-	if ( old_k_race != isRACE() )
-	{
-		old_k_race = isRACE();
-		G_bprint(2, "%s: Race settings changed, map will be reloaded\n", redtext("WARNING"));
 		changelevel( g_globalvars.mapname );
 	}
 }
@@ -1285,8 +1239,6 @@ void StartFrame( int time )
 	FixCTFItems(); // if modes have changed we may need to add/remove flags etc
 
 	FixRA(); // we may need reload map
-	
-	FixRace(); // we may need reload map
 
 	FixPowerups();
 
@@ -1318,8 +1270,7 @@ void StartFrame( int time )
 
 	CheckAll(); // just check some clients params
 
-	if ( isRACE() )
-		race_think();
+	race_think();
 
 	check_monsters_respawn();
 
