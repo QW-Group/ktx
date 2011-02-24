@@ -28,6 +28,7 @@
 void ReportMe();
 void AdminImpBot();
 void CaptainPickPlayer();
+void ChasecamToggleButton( void );
 
 // called by SP_worldspawn
 void W_Precache()
@@ -86,6 +87,12 @@ void W_FireAxe()
 	if ( PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.takedamage )
 	{
 		int damage = 20; // default damage is 20
+
+		// can't touch/damage others in race
+		if ( isRACE() 
+		&& ( PROG_TO_EDICT( g_globalvars.trace_ent )->ct == ctPlayer ) 
+		&& ( self != PROG_TO_EDICT( g_globalvars.trace_ent ) ) )
+			return;
 
 		if ( PROG_TO_EDICT( g_globalvars.trace_ent )->ct == ctPlayer )
 		{
@@ -324,6 +331,12 @@ void TraceAttack( float damage, vec3_t dir, qbool send_effects )
 	VectorScale( dir, 4, tmp );
 	VectorSubtract( g_globalvars.trace_endpos, tmp, org );
 // org = trace_endpos - dir*4;
+
+	// can't touch/damage others in race
+	if ( isRACE() 
+	&& ( PROG_TO_EDICT( g_globalvars.trace_ent )->ct == ctPlayer ) 
+	&& ( self != PROG_TO_EDICT( g_globalvars.trace_ent ) ) )
+		return;
 
 	if ( PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.takedamage )
 	{
@@ -853,6 +866,12 @@ void T_MissileTouch()
 	if ( other == PROG_TO_EDICT( self->s.v.owner ) )
 		return;		// don't explode on owner
 
+	// can't touch/damage others in race
+	if ( isRACE() 
+	&& ( other->ct == ctPlayer ) 
+	&& ( other != PROG_TO_EDICT( self->s.v.owner ) ) )
+		return;
+
 	if ( self->voided )
 	{
 		return;
@@ -1151,6 +1170,12 @@ void GrenadeTouch()
 	if ( other == PROG_TO_EDICT( self->s.v.owner ) )
 		return;		// don't explode on owner
 	
+	// can't touch/damage others in race
+	if ( isRACE()
+	&& ( other->ct == ctPlayer )
+	&& ( other != PROG_TO_EDICT( self->s.v.owner ) ) )
+		return;
+
 	if ( other->s.v.takedamage )
 	{
 		if ( other->ct == ctPlayer )
@@ -1874,14 +1899,14 @@ qbool W_CanSwitch( int wp, qbool warn )
 		break;
 	}
 
-	if ( !( it & fl ) )
+	if ( !( it & fl ) && !self->race_chasecam )
 	{			// don't have the weapon or the ammo
 		if ( warn )
 			G_sprint( self, PRINT_HIGH, "no weapon\n" );
 		return false;
 	}
 
-	if ( am )
+	if ( am && !self->race_chasecam )
 	{			// don't have the ammo
 		if ( warn )
 			G_sprint( self, PRINT_HIGH, "not enough ammo\n" );
@@ -1967,9 +1992,9 @@ qbool W_ChangeWeapon( int wp )
 		break;
 	}
 
-	if ( !( it & fl ) ) // don't have the weapon or the ammo
+	if ( !( it & fl ) && !self->race_chasecam ) // don't have the weapon
 		G_sprint( self, PRINT_HIGH, "no weapon\n" );
-	else if ( am ) // don't have the ammo
+	else if ( am && !self->race_chasecam ) // don't have the ammo
 		G_sprint( self, PRINT_HIGH, "not enough ammo\n" );
 	else {
 	//
@@ -2286,6 +2311,18 @@ void W_WeaponFrame()
 
 	if ( self->wreg_attack ) // client simulate +attack via "cmd wreg" feature
 		self->s.v.button0 = true;
+
+	if ( isRACE() )
+	{
+		if ( self->ct == ctPlayer && !self->racer && race.status )
+		{
+		   	if ( self->s.v.button0 )
+		   		ChasecamToggleButton();
+			else
+				self->s.v.flags = ( ( int ) ( self->s.v.flags ) ) | FL_ATTACKRELEASED;
+		   	return;
+		}
+    }
 
 	ImpulseCommands();
 

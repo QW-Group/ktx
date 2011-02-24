@@ -4,109 +4,34 @@
 
 #include "g_local.h"
 
-// ok, lets define some funny types for race
+#define NUM_CHASECAMS	3 // number of camera views defined
+#define NUM_BESTSCORES	10
+#define MAX_TXTLEN	64
 
-typedef enum
-{
-	raceWeaponUnknown = 0,	// this must never happens
-	raceWeaponNo,			// weapon not allowed. NOTE: must be second in this enum!!!
-	raceWeaponAllowed,		// weapon allowed
-	raceWeapon2s,			// weapon allowed after 2s
-	raceWeaponMAX
-
-} raceWeapoMode_t;
-
-typedef enum
-{
-	nodeUnknown = 0,		// this node is runied by lame coding, I mean this must never happen
-	nodeStart,				// this node is start of race route
-	nodeCheckPoint,			// this node is intermediate
-	nodeEnd,				// this node is end of race route
-	nodeMAX
-
-} raceRouteNodeType_t;
-
-typedef struct
-{
-	raceRouteNodeType_t		type;			// race route node type
-	vec3_t					ang;			// this is only need for start node, so we can set player view angles
-	vec3_t					org;			// node origin in 3D space
-
-} raceRouteNode_t;
-
-#define MAX_ROUTE_NODES		48
-
-typedef struct
-{
-	char					name[128]; 				// NOTE: this will probably break QVM!!!
-	char					desc[128]; 				// NOTE: this will probably break QVM!!!
-	int						cnt;				   	// how much nodes we actually have, no more than MAX_ROUTE_NODES
-	float					timeout;				// when timeout of race must occur
-	raceWeapoMode_t			weapon;					// weapon mode
-	raceRouteNode_t			node[MAX_ROUTE_NODES];	// nodes of this route, fixed array, yeah I'm lazy
-
-} raceRoute_t;
-
-typedef enum
-{
-	raceNone = 0,		// race is inactive
-	raceCD,				// race in count down state
-	raceActive,			// race is active
-
-} raceStatus_t;
-
-
-#define MAX_ROUTES			16
-
-typedef struct
-{
-	int						cnt;				// how much we actually have of routes, no more than MAX_ROUTES
-	int						active_route;		// which route active right now
-	raceRoute_t				route[MAX_ROUTES];	// fixed array of routes
-
-// { count down
-	int						cd_cnt;				// 4 3 2 1 GO!
-	float					cd_next_think;		//
-// }
-
-	int						timeout_setting;	// just how long timeout
-	float					timeout;			// when timeout of race must occur
-	float					start_time;			// when race was started
-
-// {
-	char					top_nick[64];		// NOTE: this will probably break QVM!!!
-	int						top_time;
-// }
-
-	int						next_race_time;		// used for centerprint, help us print it not each server frame but more rare, each 100ms or something
-
-	qbool				warned;				// do we warn why we can't start race
-	int						next_racer;			// this is queue of racers
-
-	raceWeapoMode_t			weapon;				// weapon mode
-
-	raceStatus_t			status;				// race status
-
-} race_t;
-
-
-race_t			race; // whole race struct
-
-
-//============================================
-//
-// Define some prototypes
-//
-//============================================
-
-void race_cancel( const char *fmt, ... );
-void race_start( qbool restart, const char *fmt, ... );
+void ktpro_autotrack_on_powerup_take (gedict_t *racer);
+void race_cancel( qbool cancelrecord, const char *fmt, ... );
+void race_start( qbool cancelrecord, const char *fmt, ... );
 void race_unready_all(void);
-
+void r_route( void );
+void race_record( void );
+void race_stoprecord( qbool cancel );
 void race_remove_ent( void );
-
 void race_set_players_movetype_and_etc( void );
+void race_cleanmap( void );
+void unmute_all_players( void );
+void HideSpawnPoints();
+void ShowSpawnPoints();
+void kill_race_idler( void );
+void write_topscores( void );
+void read_topscores( void );
+void init_scores( void );
 
+qbool gametype_change_checks( void );
+qbool race_command_checks( void );
+qbool race_is_started( void );
+fileHandle_t race_fhandle = -1;
+raceRecord_t records[NUM_BESTSCORES];
+raceRecord_t currentrace;
 char *classname_for_nodeType( raceRouteNodeType_t nodeType );
 
 //============================================
@@ -114,23 +39,190 @@ char *classname_for_nodeType( raceRouteNodeType_t nodeType );
 // this is more like a HOOK, doesn't used internally in race.c but used outside,
 // outside of race.c file we does't need to know in which exact sate we are, but in some cases inside race.c we need to know 
 // is it contdown or active state and this function _doesn't_ help us in such cases. Argh, this comment supposed to make it more clean, but seems I failed.
-
 qbool isRACE( void )
 {
-	if ( match_in_progress || match_over )
-		return false;
-
-	return !!race.status;
+	return ( cvar("k_race") );
 }
 
+void ToggleRace( void )
+{
+	if ( !streq ( cvar_string( "_k_playmode" ), "race" ) )
+		if ( !gametype_change_checks() )
+			return;
+
+	if ( !isRACE() )
+	{
+		if ( !isFFA() )
+		{
+			UserMode( 6 );
+		}
+	}
+	
+	if ( race_is_started() )
+		return;
+
+	cvar_toggle_msg( self, "k_race", redtext("Race") );
+
+	apply_race_settings();
+}
+
+// hard coded default settings for RACE
+static char race_settings[] =
+	"deathmatch 4\n"
+	"srv_practice_mode 1\n"
+    "lock_practice 1\n"
+	"allow_toggle_practice 0\n"
+	"sv_demotxt 0\n"
+	"pm_airstep 0\n"
+	"k_noitems 1\n";
+
+static char norace_settings[] =
+    "lock_practice 0\n"
+	"srv_practice_mode 0\n"
+	"allow_toggle_practice 5\n";
+
+void apply_race_settings( void )
+{
+    char buf[1024*4];
+	char *cfg_name;
+
+	if ( !isRACE() )
+	{
+		int um_idx;
+		int old_dm = deathmatch; // remember deathmatch before we start reseting.
+
+		cvar_set( "sv_silentrecord", "0" );
+		cvar_set( "_k_playmode", "default" );
+
+		race_stoprecord( true );
+
+		unmute_all_players();
+
+		trap_readcmd( norace_settings, buf, sizeof(buf) );
+		G_cprint("%s", buf);
+	
+   		cfg_name = va("configs/reset.cfg");
+		if ( can_exec( cfg_name ) )
+		{
+			trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
+			G_cprint("%s", buf);
+		}
+		
+		if ( ( um_idx = um_idx_byname( ( k_matchLess && old_dm ) ? "ffa" : cvar_string("k_defmode") ) ) >= 0 )
+			UserMode( -(um_idx + 1) ); // force exec configs for default user mode
+		
+		return;
+	}
+	
+	cvar_set( "sv_silentrecord", "1" ); // set recording message to none while in race mode
+	cvar_set( "_k_playmode", "race" ); // set playmode to race
+
+	trap_readcmd( race_settings, buf, sizeof(buf) );
+	G_cprint("%s", buf);
+
+	cfg_name = va("configs/usermodes/race/default.cfg");
+	if ( can_exec( cfg_name ) )
+	{
+		trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
+		G_cprint("%s", buf);
+	}
+
+	cfg_name = va("configs/usermodes/race/%s.cfg", g_globalvars.mapname);
+	if ( can_exec( cfg_name ) )
+	{
+		trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
+		G_cprint("%s", buf);
+	}
+
+	G_cprint("\n");
+}
+
+void race_cleanmap( void )
+{
+	gedict_t *p;
+
+	for( p = world; (p = nextent(p)); )
+	{
+		if ( cvar("k_noitems") )
+		{
+			if (   streq( p->s.v.classname, "weapon_nailgun" )
+				|| streq( p->s.v.classname, "weapon_supernailgun" )
+				|| streq( p->s.v.classname, "weapon_supershotgun" )
+				|| streq( p->s.v.classname, "weapon_rocketlauncher" )
+				|| streq( p->s.v.classname, "weapon_grenadelauncher" )
+				|| streq( p->s.v.classname, "weapon_lightning" )
+				|| streq( p->s.v.classname, "item_shells" )
+				|| streq( p->s.v.classname, "item_spikes" )
+				|| streq( p->s.v.classname, "item_rockets" )
+				|| streq( p->s.v.classname, "item_cells" )
+				|| streq( p->s.v.classname, "item_health" )
+				|| streq( p->s.v.classname, "item_armor1")
+				|| streq( p->s.v.classname, "item_armor2")
+				|| streq( p->s.v.classname, "item_armorInv")
+				|| streq( p->s.v.classname, "item_artifact_invulnerability")
+				|| streq( p->s.v.classname, "item_artifact_envirosuit")
+				|| streq( p->s.v.classname, "item_artifact_invisibility")
+				|| streq( p->s.v.classname, "item_artifact_super_damage")
+				|| streq( p->s.v.classname, "item_armor1" )
+			    || streq( p->s.v.classname, "item_armor2" )
+			    || streq( p->s.v.classname, "item_armorInv") )
+			{
+				ent_remove( p );
+				continue;
+			}
+		}
+ 	}
+}
 //===========================================
 
 int race_time( void )
 {
 	if ( race.status != raceActive )
-		return 0; // count time only when race is in raceActive state
+		return 0; // count time only when race in state raceActive
 
 	return (g_globalvars.time - race.start_time) * 1000;
+}
+
+void setwepall( gedict_t *p )
+{
+	gedict_t *swap;
+	
+	p->s.v.ammo_nails   = 255;
+	p->s.v.ammo_shells  = 255;
+	p->s.v.ammo_rockets = 255;
+	p->s.v.ammo_cells   = 255;
+	p->s.v.items = IT_AXE | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_NAILGUN | IT_SUPER_NAILGUN |
+					   IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER | IT_LIGHTNING;
+	p->lastwepfired = 0;
+	
+	swap = self;
+	self = p;
+
+	if ( !( (int)self->s.v.weapon & (int)self->s.v.items ) )
+		self->s.v.weapon = IT_ROCKET_LAUNCHER;
+
+	W_SetCurrentAmmo ();
+	self = swap;
+}
+
+void setwepnone( gedict_t *p )
+{
+	gedict_t *swap;
+
+	p->s.v.ammo_nails   = 0;
+	p->s.v.ammo_shells  = 0;
+	p->s.v.ammo_rockets = 0;
+	p->s.v.ammo_cells   = 0;
+	p->s.v.items = 0;
+	p->lastwepfired = 0;
+
+	swap = self;
+	self = p;
+	
+	self->s.v.weapon = W_BestWeapon();
+	W_SetCurrentAmmo();
+
+	self = swap;
 }
 
 char *race_route_name( void )
@@ -175,18 +267,21 @@ void race_init( void )
 	race.status = raceNone;
 
 	race.weapon = raceWeaponAllowed;
+	race.falsestart = raceFalseStartNo;
 }
 
 // clean up, so we can start actual match and there will be no some shit around
 void race_shutdown( char *msg )
 {
-	race_cancel( msg );
+	race_cancel( true, msg );
 	race_remove_ent();
 	race_unready_all();
+	if ( cvar( "k_spm_show" ) )
+		ShowSpawnPoints();
 }
 
 // make all players not ready for race, silently
-void race_unready_all(void)
+void race_unready_all( void )
 {
 	gedict_t *p;
 
@@ -204,6 +299,7 @@ qbool race_route_add_start( void )
 
 	race.route[race.cnt].weapon  = raceWeaponAllowed; // default allowed
 	race.route[race.cnt].timeout = 20; // default 20 sec
+	race.route[race.cnt].falsestart  = raceFalseStartNo; // default with falsestart
 
 	return true;
 }
@@ -255,7 +351,21 @@ void race_set_route_timeout( float timeout )
 	if ( race.cnt < 0 || race.cnt >= MAX_ROUTES )
 		G_Error( "race_set_route_timeout: race.cnt %d", race.cnt );
 
-	race.route[race.cnt].timeout = bound(1, timeout, 60 * 60);
+	race.route[race.cnt].timeout = bound(1, timeout, 999);
+}
+
+void race_set_route_falsestart_mode( raceFalseStartMode_t falsestart )
+{
+	switch ( falsestart )
+	{
+		case raceFalseStartNo:
+		case raceFalseStartYes:
+		break; // known
+
+		default: G_Error( "race_set_route_falsestart_mode: wrong type %d", falsestart );
+	}
+
+	race.route[race.cnt].falsestart = falsestart;
 }
 
 void race_set_route_weapon_mode( raceWeapoMode_t weapon )
@@ -278,7 +388,28 @@ void race_set_route_weapon_mode( raceWeapoMode_t weapon )
 
 void race_add_standart_routes( void )
 {
-	if ( streq( g_globalvars.mapname, "dm1" ) )
+	if ( streq( g_globalvars.mapname, "mvdsv-kg" ) )
+	{
+		if ( !race_route_add_start() )
+			return; // we are full
+
+		race_add_route_node(  118.5, -1345.5, 284.6, 5.2, 120.7, nodeStart );
+		race_add_route_node( -572.9,  -276.8, 330.9,   0,     0, nodeCheckPoint );
+		race_add_route_node( -111.9,   725.3, 466.0,   0,     0, nodeCheckPoint );
+		race_add_route_node(  546.5,  -134.5, 566.0,   0,     0, nodeCheckPoint );
+		race_add_route_node(  509.0, -1483.3, 706.6,   0,     0, nodeCheckPoint );
+		race_add_route_node( -515.8, -1152.6, 856.4,   0,     0, nodeCheckPoint );
+		race_add_route_node(  120.9,  -829.8, 889.4,   0,     0, nodeCheckPoint );
+		race_add_route_node(      0,   -74.1, 979.5,   0,     0, nodeEnd );
+
+		race_set_route_name( "Bunny to the top!", "castle\215pads\215platform" );
+		race_set_route_timeout( 30 );
+		race_set_route_weapon_mode( raceWeaponAllowed );
+		race_set_route_falsestart_mode( raceFalseStartNo );
+
+		race_route_add_end();
+	}
+	else if ( streq( g_globalvars.mapname, "dm1" ) )
 	{
 		if ( !race_route_add_start() )
 			return; // we are full
@@ -294,6 +425,7 @@ void race_add_standart_routes( void )
 		race_set_route_name( "áòïõîä äí±", "ya\215ng\215mh\215ssg\215ya" );
 		race_set_route_timeout( 30 );
 		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
 
 		race_route_add_end();
 	}
@@ -313,6 +445,7 @@ void race_add_standart_routes( void )
 		race_set_route_name( "Éèí§ó ñõáäòõî", "highrl\215quad\215water\215lower\215ramh" );
 		race_set_route_timeout( 35 );
 		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
 
 		race_route_add_end();
 
@@ -331,6 +464,7 @@ void race_add_standart_routes( void )
 		race_set_route_name( "áòïõîä äí²", "water\215quadlow\215rllow\215ng\215stairs" );
 		race_set_route_timeout( 35 );
 		race_set_route_weapon_mode( raceWeaponAllowed );
+		race_set_route_falsestart_mode( raceFalseStartNo );
 
 		race_route_add_end();
 	}
@@ -346,6 +480,7 @@ void race_add_standart_routes( void )
 		race_set_route_name( "òáæìù", "pentmh\215window\215ratop" );
 		race_set_route_timeout( 35 );
 		race_set_route_weapon_mode( raceWeaponAllowed );
+		race_set_route_falsestart_mode( raceFalseStartNo );
 
 		race_route_add_end();
 
@@ -361,6 +496,7 @@ void race_add_standart_routes( void )
 		race_set_route_name( "òáòõî", "rl\215center\215ratop" );
 		race_set_route_timeout( 30 );
 		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
 
 		race_route_add_end();
 
@@ -380,6 +516,7 @@ void race_add_standart_routes( void )
 		race_set_route_name( "áòïõîääí³", "rl\215hibridge\215quadya\215quadunderlifts\215sngmh\215ratop" );
 		race_set_route_timeout( 50 );
 		race_set_route_weapon_mode( raceWeaponAllowed );
+		race_set_route_falsestart_mode( raceFalseStartNo );
 
 		race_route_add_end();
 	}
@@ -394,6 +531,7 @@ void race_add_standart_routes( void )
 		race_set_route_name( "âáóå äí´", "ya\215quadtele" );
 		race_set_route_timeout( 15 );
 		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
 
 		race_route_add_end();
 
@@ -410,6 +548,7 @@ void race_add_standart_routes( void )
 		race_set_route_name( "íèòõî", "ya\215toptele\215gl\215mh" );
 		race_set_route_timeout( 20 );
 		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
 
 		race_route_add_end();
 
@@ -428,6 +567,7 @@ void race_add_standart_routes( void )
 		race_set_route_name( "ñõáäóôòáæå", "ya\215toptele\215gl\215lg\215quad\215quadtele" );
 		race_set_route_timeout( 20 );
 		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
 
 		race_route_add_end();
 	}
@@ -447,6 +587,7 @@ void race_add_standart_routes( void )
 		race_set_route_name( "áòïõîä äíµ", "ya\215gl\215rl\215telerl\215abovegl\215sng" );
 		race_set_route_timeout( 35 );
 		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
 
 		race_route_add_end();
 	}
@@ -462,6 +603,7 @@ void race_add_standart_routes( void )
 		race_set_route_name( "âáóå äí¶", "ga\215gl\215ra" );
 		race_set_route_timeout( 15 );
 		race_set_route_weapon_mode( raceWeaponAllowed );
+		race_set_route_falsestart_mode( raceFalseStartNo );
 
 		race_route_add_end();
 
@@ -479,6 +621,7 @@ void race_add_standart_routes( void )
 		race_set_route_name( "ð³§ó tuberun", "mh\215rlra\215glcircle\215ra" );
 		race_set_route_timeout( 25 );
 		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
 
 		race_route_add_end();
 	}
@@ -493,6 +636,7 @@ void race_add_standart_routes( void )
 		race_set_route_name( "Slide 1", "start\215end" );
 		race_set_route_timeout( 40 );
 		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
 
 		race_route_add_end();
 	}
@@ -507,6 +651,7 @@ void race_add_standart_routes( void )
 		race_set_route_name( "Slide 2", "start\215end" );
 		race_set_route_timeout( 40 );
 		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
 
 		race_route_add_end();
 	}
@@ -515,12 +660,15 @@ void race_add_standart_routes( void )
 		if ( !race_route_add_start() )
 			return; // we are full
 
-		race_add_route_node( -1920.0, 2208.0, -160.0, 0, 0, nodeStart );
-		race_add_route_node( -2336.9, 2203.4, -160.0, 0, 0, nodeEnd );
+		race_add_route_node( -1920.0,  2208.0, -160.0, 0, 0, nodeStart );
+		race_add_route_node(  2504.3,  2246.0, -168.0, 0, 0, nodeCheckPoint );
+		race_add_route_node( -1460.7, -1023.7, -168.0, 0, 0, nodeCheckPoint );
+		race_add_route_node( -2336.9,  2203.4, -160.0, 0, 0, nodeEnd );
 
 		race_set_route_name( "Slide 3", "start\215end" );
 		race_set_route_timeout( 40 );
-		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_weapon_mode( raceWeaponAllowed );
+		race_set_route_falsestart_mode( raceFalseStartNo );
 
 		race_route_add_end();
 	}
@@ -535,6 +683,7 @@ void race_add_standart_routes( void )
 		race_set_route_name( "Slide 4", "start\215end" );
 		race_set_route_timeout( 40 );
 		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
 
 		race_route_add_end();
 	}
@@ -549,6 +698,7 @@ void race_add_standart_routes( void )
 		race_set_route_name( "Slide 5", "start\215end" );
 		race_set_route_timeout( 40 );
 		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
 
 		race_route_add_end();
 	}
@@ -563,6 +713,7 @@ void race_add_standart_routes( void )
 		race_set_route_name( "Slide 6", "start\215end" );
 		race_set_route_timeout( 40 );
 		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
 
 		race_route_add_end();
 	}
@@ -577,6 +728,7 @@ void race_add_standart_routes( void )
 		race_set_route_name( "Slide 7", "start\215end" );
 		race_set_route_timeout( 40 );
 		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
 
 		race_route_add_end();
 	}
@@ -591,6 +743,110 @@ void race_add_standart_routes( void )
 		race_set_route_name( "Slide 8", "start\215end" );
 		race_set_route_timeout( 40 );
 		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
+
+		race_route_add_end();
+	}
+	else if ( streq( g_globalvars.mapname, "slide9" ) )
+	{
+		if ( !race_route_add_start() )
+			return; // we are full
+
+		race_add_route_node(   484.4,   -5.6,  3602.0, 2.0, 179.8, nodeStart );
+		race_add_route_node( -3809.2, 2450.9, -1109.3,   0,     0, nodeEnd );
+
+		race_set_route_name( "Slide 9", "start\215end" );
+		race_set_route_timeout( 60 );
+		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
+
+		race_route_add_end();
+	}
+	else if ( streq( g_globalvars.mapname, "subslide" ) )
+	{
+		if ( !race_route_add_start() )
+			return; // we are full
+
+		race_add_route_node( -1792.0, -320.0, 2264.0, 0, 0, nodeStart );
+		//race_add_route_node( -1234.8, 1726.2,  463.2, 0, 0, nodeEnd );
+		race_add_route_node( -1775.8,  545.6,  472.0, 0, 0, nodeEnd );
+
+		race_set_route_name( "Subslide", "start\215end" );
+		race_set_route_timeout( 25 );
+		//race_set_route_weapon_mode( raceWeaponAllowed );
+		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
+
+		race_route_add_end();
+	}
+	else if ( streq( g_globalvars.mapname, "slstart" ) )
+	{
+		if ( !race_route_add_start() )
+			return; // we are full
+
+		race_add_route_node(  -286.1, -504.5, 3544.0, 27.3, 92.6, nodeStart );
+		race_add_route_node( -3024.0, -223.8, 1432.0,    0,    0, nodeEnd );
+
+		race_set_route_name( "Slstart", "start\215end" );
+		race_set_route_timeout( 25 );
+		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
+
+		race_route_add_end();
+	}
+	else if ( streq( g_globalvars.mapname, "slidefox" ) )
+	{
+		if ( !race_route_add_start() )
+			return; // we are full
+
+		race_add_route_node(      0, -1201.8,  3736.0, -0.8, -179.4, nodeStart );
+		race_add_route_node( -271.9,   996.9, -1588.0,    0,      0, nodeEnd );
+
+		race_set_route_name( "Slidefox", "start\215end" );
+		race_set_route_timeout( 60 );
+		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
+
+		race_route_add_end();
+	}
+	else if ( streq( g_globalvars.mapname, "cmt3" ) )
+	{
+		if ( !race_route_add_start() )
+			return; // we are full
+
+		race_add_route_node(  518.0, 1192.0, -520.0, 0, 140.6, nodeStart );
+		race_add_route_node(  541.6, 1692.8, -528.0, 0,     0, nodeCheckPoint );
+		race_add_route_node( 1085.1, 1612.9, -688.0, 0,     0, nodeCheckPoint );
+		race_add_route_node(  839.2,  713.8, -896.0, 0,     0, nodeCheckPoint );
+		race_add_route_node(  442.9,  714.4, -592.0, 0,     0, nodeCheckPoint );
+		race_add_route_node( 1000.8,  839.3, -520.0, 0,     0, nodeCheckPoint );
+		race_add_route_node( 1300.0,  122.6, -528.0, 0,     0, nodeCheckPoint );
+		race_add_route_node(  988.2,  122.5, -816.0, 0,     0, nodeCheckPoint );
+		race_add_route_node(  565.5, -331.0, -816.0, 0,     0, nodeCheckPoint );
+		race_add_route_node( -438.2,   97.8, -344.0, 0,     0, nodeCheckPoint );
+		race_add_route_node( -994.2,    53.4, -471.8, 0,     0, nodeEnd );
+
+		race_set_route_name( "JohnNy_cz's Deutschmaschine race", "spawn\215pent\215lg\215quad\215ra\215rl" );
+		race_set_route_timeout( 40 );
+		race_set_route_weapon_mode( raceWeapon2s );
+		race_set_route_falsestart_mode( raceFalseStartNo );
+
+		race_route_add_end();
+	}
+	else if ( streq( g_globalvars.mapname, "rawspeed" ) )
+	{
+		if ( !race_route_add_start() )
+			return; // we are full
+
+		race_add_route_node(  -126.4,  -154.2, 312.0,  -1.3, 90.4, nodeStart );
+		race_add_route_node( -3195.8, -3422.9, -1432.0,   0,    0, nodeEnd );
+
+		race_set_route_name( "Raw Speed", "start\215end" );
+		race_set_route_timeout( 40 );
+		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
+
+		race_route_add_end();
 	}
 }
 
@@ -627,11 +883,49 @@ void race_remove_ent( void )
 		ent_remove_by_classname( classname_for_nodeType( i ) );
 }
 
+void race_record( void )
+{
+	if ( race.cd_cnt == 4 && cvar("k_race_autorecord") )
+	{
+		StartDemoRecord(); // start demo recording
+		race_recording = true;
+	}
+	
+}
+
+void race_stoprecord( qbool cancel )
+{
+	if ( cvar("k_race_autorecord") && race_recording )
+	{
+		if ( cancel )
+			localcmd("cancel\n");  // stop recording demo and discard it 
+		else
+			localcmd( "stop\n"); // stop recording demo and keep it
+
+		race_recording = false;
+	}
+}
 //============================================
 
-char *race_weapon_mode( void )
+char *race_falsestart_mode( int start )
 {
-	switch ( race.weapon )
+	switch ( start )
+	{
+		case raceFalseStartNo:
+		return "no falsestart";
+
+		case raceFalseStartYes:
+		return "falsestart enabled";
+
+		default: G_Error( "race_falsestart_mode: wrong race.falsestart %d", start );
+	}
+
+	return ""; // keep compiler silent
+}
+
+char *race_weapon_mode( int weapon )
+{
+	switch ( weapon )
 	{
 		case raceWeaponNo:
 		return "no";
@@ -642,7 +936,7 @@ char *race_weapon_mode( void )
 		case raceWeapon2s:
 		return "after 2s";
 
-		default: G_Error( "race_weapon_mode: wrong race.weapon %d", race.weapon );
+		default: G_Error( "race_weapon_mode: wrong race.weapon %d", weapon );
 	}
 
 	return ""; // keep compiler silent
@@ -685,8 +979,8 @@ char *name_for_nodeType( raceRouteNodeType_t nodeType )
 	switch ( nodeType )
 	{
 		case nodeStart:			return "start checkpoint";
-		case nodeCheckPoint:	return "checkpoint";
-		case nodeEnd:			return "end checkpoint";
+		case nodeCheckPoint:		return "checkpoint";
+		case nodeEnd:			return "finish checkpoint";
 
 		default:	G_Error( "name_for_nodeType: wrong nodeType %d", nodeType );
 	}
@@ -710,13 +1004,27 @@ char *classname_for_nodeType( raceRouteNodeType_t nodeType )
 
 char *model_for_nodeType( raceRouteNodeType_t nodeType )
 {
-	switch ( nodeType )
+	if ( cvar("k_race_custom_models") ) 
 	{
-		case nodeStart:			return "progs/invulner.mdl";
-		case nodeCheckPoint:	return "progs/w_s_key.mdl";
-		case nodeEnd:			return "progs/invulner.mdl";
-
-		default:	G_Error( "model_for_nodeType: wrong nodeType %d", nodeType );
+		switch ( nodeType )
+		{
+			case nodeStart:		return "progs/start.mdl";
+			case nodeCheckPoint:	return "progs/check.mdl";
+			case nodeEnd:		return "progs/finish.mdl";
+			
+			default:	G_Error( "model_for_nodeType: wrong nodeType %d", nodeType );
+		}
+	}
+	else
+	{
+		switch ( nodeType )
+		{
+			case nodeStart:			return "progs/invulner.mdl";
+			case nodeCheckPoint:	return "progs/w_s_key.mdl";
+			case nodeEnd:			return "progs/invulner.mdl";
+		
+			default:	G_Error( "model_for_nodeType: wrong nodeType %d", nodeType );
+		}
 	}
 
 	return ""; // keep compiler silent
@@ -727,7 +1035,7 @@ char *touch_sound_for_nodeType( raceRouteNodeType_t nodeType )
 	switch ( nodeType )
 	{
 		case nodeStart:			return "items/protect3.wav";
-		case nodeCheckPoint:	return "items/damage.wav";
+		case nodeCheckPoint:		return "items/damage.wav";
 		case nodeEnd:			return "items/suit.wav";
 
 		default:	G_Error( "touch_sound_for_nodeType: wrong nodeType %d", nodeType );
@@ -741,7 +1049,7 @@ char *spawn_sound_for_nodeType( raceRouteNodeType_t nodeType )
 	switch ( nodeType )
 	{
 		case nodeStart:			return "items/protect.wav";
-		case nodeCheckPoint:	return "items/itembk2.wav";
+		case nodeCheckPoint:		return "items/itembk2.wav";
 		case nodeEnd:			return "items/protect.wav";
 
 		default:	G_Error( "spawn_sound_for_nodeType: wrong nodeType %d", nodeType );
@@ -755,7 +1063,7 @@ float volume_for_touch_sound_for_nodeType( raceRouteNodeType_t nodeType )
 	switch ( nodeType )
 	{
 		case nodeStart:			return 0.5f;
-		case nodeCheckPoint:	return 0.3;
+		case nodeCheckPoint:		return 0.3;
 		case nodeEnd:			return 0.5f;
 
 		default:	G_Error( "volume_for_touch_sound_for_nodeType: wrong nodeType %d", nodeType );
@@ -769,9 +1077,9 @@ float blink_effects_for_nodeType( raceRouteNodeType_t nodeType )
 {
 	switch ( nodeType )
 	{
-		case nodeStart:			return ( EF_RED | EF_BLUE );
-		case nodeCheckPoint:	return EF_BLUE;
-		case nodeEnd:			return EF_RED;
+		case nodeStart:			return ( EF_BLUE | EF_GREEN );
+		case nodeCheckPoint:		return EF_BLUE;
+		case nodeEnd:			return ( EF_BLUE | EF_GREEN );
 
 		default:	G_Error( "volume_for_touch_sound_for_nodeType: wrong nodeType %d", nodeType );
 	}
@@ -809,6 +1117,57 @@ int race_count_ready_players( void )
 
 //===========================================
 
+void race_check_racer_falsestart( qbool nextracer )
+{
+	gedict_t *e;
+	gedict_t *racer = race_get_racer();
+	
+	for ( e = world; ( e = ez_find( e, "race_cp_start" ) ); )
+	{
+		if ( ( racer->s.v.origin[0] != e->s.v.origin[0] ) 
+			&&  ( racer->s.v.origin[1] != e->s.v.origin[1] ) )
+		{
+			if ( nextracer )
+			{
+				race_cancel( true, "Race aborted, %s did a %s\n", racer->s.v.netname, redtext( "falsestart" ) );
+			}
+			else
+			{
+				G_sprint( racer, 2, "Come here!\n" );
+				VectorCopy( e->s.v.origin, racer->s.v.origin );
+				VectorSet( racer->s.v.velocity, 0, 0, 0 );
+			}
+		}
+	}
+}
+
+void kill_race_idler( void )
+{
+	gedict_t *e;
+	gedict_t *racer = race_get_racer();
+	
+	for ( e = world; ( e = ez_find( e, "race_cp_start" ) ); )
+	{
+		if ( ( racer->s.v.origin[0] == e->s.v.origin[0] ) 
+			&&  ( racer->s.v.origin[1] == e->s.v.origin[1] ) )
+		{
+			racer->race_afk++;
+			
+			if ( racer->race_afk < 3 )
+				race_cancel( true, "Race aborted, %s was %s to start\n", racer->s.v.netname, redtext( "too slow" ) );
+			else
+			{
+				race_cancel( true, "%s was %s of race line: stop %s!\n", racer->s.v.netname, redtext( "kicked out" ), redtext( "idling" ) );
+				racer->race_ready = 0;
+			}
+		}
+		else
+		{
+			racer->race_afk = 0;
+		}
+	}
+}
+
 void race_brighten_checkpoints( void )
 {
 	int i;
@@ -826,9 +1185,29 @@ void race_brighten_checkpoints( void )
 		{
 			e->s.v.effects   = 0; // remove effects
 			e->s.v.nextthink = 0; // stop thinking
+			
+			//if ( racer->race_id && e->race_id == racer->race_id )
+			if ( e->race_id == racer->race_id )
+				e->s.v.effects = ( EF_GREEN ); // set some green light for next checkpoint
+			else
+				e->s.v.effects = ( EF_RED ); // turn all others red
+		}
+	}
+}
 
-			if ( racer->race_id && e->race_id == racer->race_id )
-				e->s.v.effects = EF_DIMLIGHT; // set some light for next checkpoint
+void race_dim_checkpoints( void )
+{
+	int i;
+	gedict_t *e;
+
+	for ( i = 1; i < nodeMAX; i++ )
+	{
+		char *classname = classname_for_nodeType( i );
+
+		for ( e = world; ( e = ez_find( e, classname ) ); )
+		{
+			e->s.v.effects   = 0; // remove effects
+			e->s.v.nextthink = 0; // stop thinking
 		}
 	}
 }
@@ -845,7 +1224,7 @@ void race_blink_node( gedict_t *e )
 	e->s.v.effects = e->race_effects;
 
 	// reset it to something normal late
-	e->s.v.nextthink = g_globalvars.time + 1.8;
+	e->s.v.nextthink = g_globalvars.time + 5;
 	e->s.v.think = ( func_t ) race_blink_think;
 }
 
@@ -904,7 +1283,7 @@ void race_spawn_meat( gedict_t *player, char *gibname, float vel )
 	setsize( newent, 0, 0, 0, 0, 0, 0 );
 	race_VelocityForDamage( vel, player->s.v.velocity, newent->s.v.velocity );
 	newent->s.v.movetype		= MOVETYPE_BOUNCE;
-	newent->s.v.solid			= SOLID_TRIGGER; // SOLID_NOT;
+	newent->s.v.solid			= SOLID_NOT;
 	newent->s.v.avelocity[0]	= g_random() * 600;
 	newent->s.v.avelocity[1]	= g_random() * 600;
 	newent->s.v.avelocity[2]	= g_random() * 600;
@@ -967,7 +1346,8 @@ void race_node_touch()
 
 		if ( self->race_RouteNodeType == nodeEnd )
 		{
-			// racer touch end node, FINISH!
+			int i, timeposition, nameposition;
+			qbool istopscore;
 
 			// spawn a bit of meat
 			{
@@ -980,35 +1360,111 @@ void race_node_touch()
 				race_spawn_meat( other, "progs/h_player.mdl", frac * speed + g_random() * (1.0 - frac) * speed );
 			}
 
-			if ( race_time() < race.top_time )
-			{
-				// do some sound
-				sound( other, CHAN_ITEM, "boss2/sight.wav", 1, ATTN_NONE );
+			currentrace.time = race_time();
 
-				// save nick
-				strlcpy(race.top_nick, other->s.v.netname, sizeof(race.top_nick));
-				// save best time
-				race.top_time = race_time();
-
-				race_start( true, "Race %s in %sms,\n"
-								  "new top time by %s\n", redtext( "finished" ), dig3( race_time() ), other->s.v.netname );
+			istopscore = false;
+			timeposition = nameposition = -1;
+    		
+			// first, let's see if racetime gets into top scores and if name already exists in there
+			for ( i = 0; i < NUM_BESTSCORES; i++ )
+		    {
+				if ( currentrace.time < records[i].time )
+					if ( timeposition == -1 )
+						timeposition = i;
+				
+				if ( streq( records[i].racername, other->s.v.netname ) )
+					nameposition = i;
 			}
-			else if ( race_time() == race.top_time )
+			
+			// racetime is within top scores range
+			if ( timeposition != -1 )
 			{
-				// do some sound
-				sound( other, CHAN_ITEM, "boss2/sight.wav", 1, ATTN_NONE );
+				// if player didn't beat his own score
+				if ( ( nameposition < timeposition ) && ( nameposition != -1 ) )
+				{
+					
+					sound( other, CHAN_ITEM, "ambience/thunder1.wav", 1, ATTN_NONE );
 
-				race_start( true, "Race %s in %sms, equal top time\n", redtext( "finished" ), dig3( race_time() ) );
+					race_start( true, "Race %s in %s%s\n%s didn't beat his own %s\n",
+							redtext( "finished" ),
+							dig3s( "%.3f", currentrace.time / 1000 ),
+							redtext( "s" ),
+							other->s.v.netname,
+							redtext( "record" )
+							);
+				}
+			
+				// if player beat his own record or player has no name in top scores yet
+				else
+				{
+
+                	if ( nameposition == -1 )
+						nameposition = ( NUM_BESTSCORES - 1 );
+
+					if ( records[nameposition].time < 999998 )
+					{
+						// let's remove the old demo
+						if ( !strnull( records[nameposition].demoname ) )
+						{
+							//G_bprint( 2, "Removing old demo: %s\n", records[nameposition].demoname );
+							localcmd( va( "rmdemo *%s\n", records[nameposition].demoname ) );
+						}
+					}
+					
+					for ( i = nameposition; i > timeposition; i-- )
+					{
+						// move old top scores down
+						records[i] = records[i - 1];
+					}
+
+					// add new top score
+					records[i].time = currentrace.time;
+					strlcpy( records[i].racername, other->s.v.netname, sizeof( records[i].racername ) );
+					strlcpy( records[i].demoname, cvar_string( "_k_recordeddemoname" ), sizeof( records[i].demoname ) );
+					records[i].distance = currentrace.distance;
+					records[i].maxspeed = currentrace.maxspeed;
+					records[i].avgspeed = currentrace.avgspeed;
+					if ( !QVMstrftime(records[i].date, sizeof(records[i].date), "%Y-%m-%d %H:%M:%S %Z", 0) )
+						records[i].date[0] = 0; // bad date
+
+					// save scores
+					write_topscores();
+
+					if ( !i ) // is it first place?
+					{
+						sound( other, CHAN_ITEM, "boss2/sight.wav", 1, ATTN_NONE );
+						strlcpy(race.top_nick, other->s.v.netname, sizeof(race.top_nick));
+						race.top_time = currentrace.time;
+					}
+					else
+					{
+						sound( other, CHAN_ITEM, "ambience/thunder1.wav", 1, ATTN_NONE );
+					}
+					
+					G_bprint( 2, "Race %s in %s%s\n%s took position %s %s!\n",
+							redtext( "finished" ),
+							dig3s( "%.3f", currentrace.time / 1000 ),
+							redtext( "s" ),
+							other->s.v.netname,
+							redtext( "number" ),
+							dig3( i + 1 )
+							);
+					
+					istopscore = true;
+					race_start( false, "" );
+				}
 			}
-			else
+
+			if ( !istopscore && ( nameposition == -1 ) )
 			{
-				// do some sound
-				sound( other, CHAN_ITEM, "ambience/thunder1.wav", 1, ATTN_NONE );
-
-				race_start( true, "Race %s in %sms\n", redtext( "finished" ), dig3( race_time() ) );
+				sound( other, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
+				
+				race_start( true, "Race %s in %s%s\n",
+   					redtext( "finished" ),
+   					dig3s( "%.3f", currentrace.time / 1000 ),
+					redtext( "s" )
+	   				);
 			}
-
-			return;
 		}
 
 		// if its not start checkpoint do something "cute"
@@ -1035,9 +1491,9 @@ void race_node_touch()
 		sound( other, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
 
 		if ( self->race_RouteNodeType == nodeCheckPoint )
-			race_start( true, "Race restarted, %s \220%d\221 in wrong order\n", redtext( name_for_nodeType( self->race_RouteNodeType ) ), self->race_id );
+			race_start( true, "Race aborted, %s \220%d\221 in wrong order\n", redtext( name_for_nodeType( self->race_RouteNodeType ) ), self->race_id );
 		else
-			race_start( true, "Race restarted, %s in wrong order\n", redtext( name_for_nodeType( self->race_RouteNodeType ) ) );
+			race_start( true, "Race aborted, %s in wrong order\n", redtext( name_for_nodeType( self->race_RouteNodeType ) ) );
 
 		return;
 	}
@@ -1087,7 +1543,7 @@ gedict_t *spawn_race_node( raceRouteNode_t *node )
 	setmodel( e, model_for_nodeType( node->type ) );
 	setsize( e, PASSVEC3( VEC_HULL_MIN ), PASSVEC3( VEC_HULL_MAX ) );
 	e->s.v.solid		= SOLID_TRIGGER;
-	e->s.v.movetype		= MOVETYPE_FLY;
+	e->s.v.movetype		= MOVETYPE_NONE;
 	e->s.v.flags		= FL_ITEM;
 	e->s.v.classname	= classname;
 	e->s.v.noise		= touch_sound_for_nodeType( node->type );
@@ -1124,7 +1580,7 @@ void race_clear_race_fields( void )
 	}
 }
 
-void race_cancel( const char *fmt, ... )
+void race_cancel( qbool cancelrecord, const char *fmt, ... )
 {
 	va_list argptr;
 	char    text[1024];
@@ -1132,6 +1588,8 @@ void race_cancel( const char *fmt, ... )
 	va_start( argptr, fmt );
 	Q_vsnprintf( text, sizeof( text ), fmt, argptr );
 	va_end( argptr );
+
+	race_stoprecord( cancelrecord );
 
 	G_cp2all( "" ); // clear centerprint
 
@@ -1186,15 +1644,91 @@ gedict_t *race_set_next_in_line( void )
 	return _race_line( 1 );
 }
 
+void init_scores( void )
+{
+    int i;
+
+    for ( i = 0; i < NUM_BESTSCORES; i++ )
+    {
+		records[i].time = 999999;
+		records[i].racername[0] = '\0';
+		records[i].demoname[0] = '\0';
+		records[i].distance = 0;
+		records[i].maxspeed = 0;
+		records[i].avgspeed = 0;
+		records[i].date[0] = '\0';
+		records[i].weaponmode = race.weapon;
+		records[i].startmode = race.falsestart;
+    }
+}
+
+void display_scores( void )
+{
+    int i;
+
+	if ( !race_command_checks() )
+		return;
+    
+	G_sprint(self, 2,  "\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\237%s %02d\237\236\236\236\236\236\236\236\236\236\236\236\236\236\235\n",
+			redtext( "top"), NUM_BESTSCORES );
+	G_sprint( self, 2, "pos.  racetime  nickname\n" );
+
+    for ( i = 0; i < NUM_BESTSCORES; i++ )
+    {
+		if ( records[i].time > 999998 )
+		{
+			G_sprint( self, 2, " %02d      -         -\n", i + 1 );
+		}
+        else
+        {
+			if ( streq( records[i].racername, self->s.v.netname ) )
+				G_sprint( self, 2, " %02d \215 %07.3f%s  %s\n", i + 1, records[i].time / 1000.0, redtext( "s" ), records[i].racername );
+			else
+				G_sprint( self, 2, " %02d   %07.3f%s  %s\n", i + 1, records[i].time / 1000.0, redtext( "s" ), records[i].racername );
+		}
+    }
+}
+
+void race_display_line( void )
+{
+    int i = 0;
+    gedict_t *p;
+
+	if ( !race_command_checks() )
+		return;
+
+    G_sprint( self, 2, "=== %s ===\n", redtext( "Line-Up") );
+
+    for ( p = world; ( p = find_plr( p ) ); )
+    {
+        if ( p->race_ready )
+        {
+            i++;
+            if ( p->racer )
+                G_sprint( self, 2, "%2d \215 %s\n", i, p->s.v.netname );
+            else
+                G_sprint( self, 2, "%2d   %s\n", i, p->s.v.netname );
+        }
+    }
+
+    if ( !i )
+        G_sprint( self, 2, "    (Empty)    \n" );
+}
+
 //============================================
 
 qbool race_can_go( qbool cancel )
 {
+	gedict_t *racer;
+
 	// can't go on, noone ready
 	if ( !race_count_ready_players() )
 	{
 		if ( cancel )
-			race_cancel( "Race canceled, no players in line\n" );
+		{
+			race_cancel( true, "Race in standby, no players in line\n" );
+			race_dim_checkpoints();
+		}
 
 		return false;
 	}
@@ -1203,7 +1737,9 @@ qbool race_can_go( qbool cancel )
 	if ( !ez_find( world, classname_for_nodeType( nodeStart ) ) )
 	{
 		if ( cancel )
-			race_cancel( "Race canceled, no %s\n", name_for_nodeType( nodeStart ) );
+		{
+			race_cancel( true, "Race in standby, no %s\n", name_for_nodeType( nodeStart ) );
+		}
 
 		return false;
 	}
@@ -1212,7 +1748,9 @@ qbool race_can_go( qbool cancel )
 	if ( !ez_find( world, classname_for_nodeType( nodeEnd ) ) )
 	{
 		if ( cancel )
-			race_cancel( "Race canceled, no %s\n", name_for_nodeType( nodeEnd ) );
+		{
+			race_cancel( true, "Race in standby, no %s\n", name_for_nodeType( nodeEnd ) );
+		}
 
 		return false;
 	}
@@ -1222,22 +1760,37 @@ qbool race_can_go( qbool cancel )
 		if ( !race_get_racer() )
 		{
 			if ( cancel )
-				race_start( true, "Race restarted, racer not found\n" );
-
+			{
+				race_start( true, "Race aborted, racer vanished\n" );
+			}
 			return false;
 		}
 	}
 
 	if ( race.status == raceActive )
 	{
+		racer = race_get_racer();
+		
+		if ( racer->s.v.health <= 0 )
+		{
+			if ( cancel )
+			{
+				// do some sound
+				sound( world, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
+				k_respawn( racer, false );
+				race_start( true, "Race aborted, %s died\n", racer->s.v.netname );
+			}
+
+			return false;
+		}
+		
 		if ( race.timeout < g_globalvars.time )
 		{
 			if ( cancel )
 			{
 				// do some sound
 				sound( world, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
-
-				race_start( true, "Race restarted, timeout\n" );
+				race_start( true, "Race aborted, %s couldn't finish in time\n", racer->s.v.netname );
 			}
 
 			return false;
@@ -1251,7 +1804,7 @@ qbool race_can_go( qbool cancel )
 // qbool restart:
 // true  - means continue current competition, just select next racer in line, keep best results.
 // false - means start completely new race, reset best result and etc.
-void race_start( qbool restart, const char *fmt, ... )
+void race_start( qbool cancelrecord, const char *fmt, ... )
 {
 	va_list argptr;
 	char    text[1024];
@@ -1264,24 +1817,21 @@ void race_start( qbool restart, const char *fmt, ... )
 	va_end( argptr );
 
 	// cancel it first, this will clear something what probably was't cleared before
-	race_cancel( text );
+	race_cancel( cancelrecord, text );
 
 	// switch status to coutdown
 	race.status = raceCD;
 
 	// set countdown timers
-	race.cd_cnt = 4;
+	if ( race_count_ready_players() == 1 )
+		race.cd_cnt = 2;
+	else
+		race.cd_cnt = 4;
+
 	race.cd_next_think = g_globalvars.time;
 
 	if ( !race.timeout_setting )
 		race.timeout_setting = 20; // default is 20 s
-
-	// if this is not restart, then reset best time
-	if ( !restart )
-	{
-		race.top_nick[0] = 0;
-		race.top_time = 999999999;
-	}
 
 	r = race_get_from_line();
 
@@ -1309,6 +1859,8 @@ void race_start( qbool restart, const char *fmt, ... )
 
 	// mark him as racer
 	r->racer = true;
+	ktpro_autotrack_on_powerup_take(r);
+	//G_bprint( 2, "%s is starting his race!\n", r->s.v.netname );
 
 	// make sure not hooked onto something at previous spot
 	if ( r->hook_out )
@@ -1332,7 +1884,7 @@ void race_start( qbool restart, const char *fmt, ... )
 
 	if ( n != r )
 	{
-		G_bprint( 2, "%s is next in line\n", n->s.v.netname );
+		G_sprint( n, 2, "Your are %s in line!\n", redtext( "next" ) );
 	}
 
 	// set light on next checkpoint
@@ -1361,33 +1913,46 @@ void race_set_one_player_movetype_and_etc( gedict_t *p )
 	if ( match_in_progress || match_over )
 		return;
 
+	if ( p->race_chasecam && !p->racer )
+		setwepnone( p );
+	else
+		setwepall( p );
+
 	switch ( race.status )
 	{
 		case raceNone:
 		p->s.v.movetype	= MOVETYPE_WALK;
-		p->s.v.solid 	= SOLID_SLIDEBOX;
+		p->muted = false;
 		setmodel( p, "progs/player.mdl" );
-
 		break;
 
 		case raceCD:
-		p->s.v.movetype	= ( p->racer ? MOVETYPE_NONE : MOVETYPE_FLY );
-		p->s.v.solid	= ( p->racer ? SOLID_SLIDEBOX : SOLID_NOT );
+		if ( race.falsestart == raceFalseStartNo )
+			p->s.v.movetype	= ( p->racer ? MOVETYPE_NONE : MOVETYPE_WALK );
+		else
+			p->s.v.movetype	= MOVETYPE_WALK;
+		p->muted = ( p->racer ? false : true );
 		setmodel( p, ( p->racer ? "progs/player.mdl" : "" ) );
-
 		break;
 
 		case raceActive:
-		p->s.v.movetype	= ( p->racer ? MOVETYPE_WALK : MOVETYPE_FLY );
-		p->s.v.solid	= ( p->racer ? SOLID_SLIDEBOX : SOLID_NOT );
+		p->s.v.movetype	=  MOVETYPE_WALK;
+		p->muted = ( p->racer ? false : true );
 		setmodel( p, ( p->racer ? "progs/player.mdl" : "" ) );
-
 		break;
 
 		default:
 
 		G_Error( "race_set_one_player_movetype_and_etc: unknown race.status %d", race.status );
 	}
+}
+
+void unmute_all_players( void )
+{
+ 	gedict_t *p;
+
+	for ( p = world; ( p = find_plr( p ) ); )
+		p->muted = false;
 }
 
 void race_set_players_movetype_and_etc( void )
@@ -1398,10 +1963,147 @@ void race_set_players_movetype_and_etc( void )
 		race_set_one_player_movetype_and_etc( p );
 }
 
+void race_chasecam_freelook_change ( void )
+{
+	if ( !race_command_checks() )
+		return;
+
+	self->race_chasecam_freelook = !self->race_chasecam_freelook;
+
+	switch ( self->race_chasecam_freelook )
+	{
+		case 0:
+			G_sprint( self, 2, "Chasecam freelook %s\n", redtext("disabled") );
+			return;
+		case 1:
+			G_sprint( self, 2, "Chasecam freelook %s\n", redtext("enabled") );
+			return;
+		default:
+			return;
+	}
+}
+
+void race_chasecam_change ( void )
+{
+	if ( !race_command_checks() )
+		return;
+
+	self->race_chasecam_view++;
+	if ( self->race_chasecam_view == NUM_CHASECAMS )
+		self->race_chasecam_view = 0;
+
+	if ( self->racer )
+		return;
+
+	switch (self->race_chasecam_view )
+	{
+		case 0:
+			G_sprint( self, 2, "Chasecam is in %s view mode\n", redtext("1st person") );
+			break;
+		case 1:
+			G_sprint( self, 2, "Chasecam is in %s view mode\n", redtext("3rd person") );
+			break;
+		case 2:
+			G_sprint( self, 2, "Chasecam is in %s view mode\n", redtext("hawk eye") );
+			break;
+		case 3:
+			G_sprint( self, 2, "Chasecam is in %s view mode\n", redtext("backpack ride") );
+			break;
+		default:
+			G_sprint( self, 2, "Chasecam position has not beem defined, keep cycling\n" );
+	}
+}
+
+void race_follow( void )
+{
+    gedict_t *racer = race_get_racer();
+	vec3_t delta;
+	float vlen;
+    int follow_distance;
+    int upward_distance;
+
+    if ( !racer )
+        return; // no racer found
+
+        if ( !self->racer && self->race_chasecam )
+        {
+            switch ( self->race_chasecam_view )
+            {
+                case 1: // 3rd person
+                    follow_distance = -120;
+                    upward_distance = 50;
+					self->hideentity = 0;
+            		VectorCopy( racer->s.v.v_angle, self->s.v.angles);
+                    break;
+                case 2: // hawk eye
+                    follow_distance = -50;
+                    upward_distance = 300;
+					self->hideentity = 0;
+					self->s.v.angles[0] = 90;
+					self->s.v.angles[1] = racer->s.v.angles[1];
+                    break;
+                case 3: // backpack ride
+                    follow_distance = -10;
+                    upward_distance = 0;
+					self->hideentity = EDICT_TO_PROG( racer ) ;
+					self->s.v.angles[0] = - racer->s.v.angles[0];
+					self->s.v.angles[1] = 180;
+                    break;
+                case 0: // 1st person - ok
+                    follow_distance = -10;
+                    upward_distance = 0;
+					self->hideentity = EDICT_TO_PROG( racer );  // in this mode we want to hide racer model for watcher's view
+            		VectorCopy( racer->s.v.v_angle, self->s.v.angles);
+					break;
+                default:
+					return;
+            }
+			
+			if ( !self->race_chasecam_freelook )
+				self->s.v.fixangle = true; // force client v_angle
+
+            trap_makevectors( racer->s.v.angles );
+            VectorMA (racer->s.v.origin, follow_distance, g_globalvars.v_forward, self->s.v.origin);
+            VectorMA (self->s.v.origin, upward_distance, g_globalvars.v_up, self->s.v.origin);
+
+            // avoid positionning in walls
+            traceline( PASSVEC3( racer->s.v.origin ), PASSVEC3( self->s.v.origin ), false, racer );
+			VectorCopy( g_globalvars.trace_endpos, self->s.v.origin );
+			
+			if ( g_globalvars.trace_fraction == 1 )
+           	{
+				VectorCopy(g_globalvars.trace_endpos, self->s.v.origin);
+            	VectorMA (self->s.v.origin, 10, g_globalvars.v_forward, self->s.v.origin);
+			}
+			else
+			{
+				VectorSubtract( g_globalvars.trace_endpos, racer->s.v.origin, delta );
+				vlen = VectorLength( delta );
+				vlen = vlen - 40;
+				VectorNormalize( delta );
+				VectorScale( delta, vlen, delta );
+				VectorAdd( racer->s.v.origin, delta, self->s.v.origin );
+			}
+
+			//if ( trap_pointcontents( PASSVEC3( self->s.v.origin ) ) == CONTENT_SKY )
+			//	G_bprint( 2, "SKY!\n" );
+			
+			// smooth playing for ezq / zq
+			self->s.v.movetype = MOVETYPE_LOCK;
+        }
+
+		if ( !self->racer && !self->race_chasecam )
+		{
+			// restore movement and show racer entity
+			self->s.v.movetype = MOVETYPE_WALK;
+			self->hideentity = 0;
+		}
+}
+
 void race_think( void )
 {
 	gedict_t *racer;
-	gedict_t *p;
+	gedict_t *p, *n;
 
 	if ( match_in_progress || match_over )
 	{
@@ -1418,8 +2120,8 @@ void race_think( void )
 			return;
 
 		// advance race status to countdown
-		race_start( false, "" );
-
+		race_start( true, "" );
+		
 		return;
 
 		case raceCD:
@@ -1436,36 +2138,36 @@ void race_think( void )
 		// must not never happens because we have race_can_go() above
 		if ( !racer )
 		{
-			race_start( true, "Race restarted, racer vanishes\n" );
+			race_start( true, "Race aborted, racer vanished\n" );
 			return;
 		}
 
 		// countdown still in progress
 		if ( race.cd_cnt > 0 )
 		{
+			race_record();
+
 			if ( race.cd_next_think < g_globalvars.time )
 			{
 				char cp_buf[1024] = { 0 }, tmp[512] = { 0 };
 
 				gedict_t *racer = race_get_racer();
-
-
+				
 				// ok, time for next "tick" in coutdown
-				snprintf( cp_buf, sizeof( cp_buf ),	"Race in: %s\n\n"
-						 							"Racer: %s\n\n", dig3( race.cd_cnt ), racer->s.v.netname );
-
-				snprintf ( tmp, sizeof( tmp ), "Weapon: %s\n", redtext( race_weapon_mode() ) );
+				snprintf( cp_buf, sizeof( cp_buf ),	"%s racing in: %s\n", racer->s.v.netname, dig3( race.cd_cnt ) );
+				snprintf ( tmp, sizeof( tmp ), "weapon: %s\n\n", redtext( race_weapon_mode( race.weapon ) ) );
 				strlcat( cp_buf, tmp, sizeof( cp_buf ) );
 
 				if ( !strnull( race.top_nick ) )
 				{
-					snprintf ( tmp, sizeof( tmp ),	"Top time: %sms\n"
-													"Top player: %s\n", dig3( race.top_time ), race.top_nick );
-
+					snprintf ( tmp, sizeof( tmp ),	"top time: %s%s (by %s)", dig3s( "%.3f", race.top_time / 1000.0 ), redtext( "s" ), race.top_nick );
 					strlcat( cp_buf, tmp, sizeof( cp_buf ) );
 				}
 
 				G_cp2all( cp_buf );
+
+				// check for falsestarts
+				race_check_racer_falsestart( false );
 
 				// FIXME: yeah, nice make some utility for that
 				for( p = world; (p = find_client( p )); )
@@ -1477,8 +2179,8 @@ void race_think( void )
 			
 			return;
 		}
-
-		G_cp2all("Go!");
+		
+		G_cp2all("GO!");
 
 		// FIXME: yeah, nice make some utility for that
 		for( p = world; (p = find_client( p )); )
@@ -1486,7 +2188,13 @@ void race_think( void )
 			stuffcmd (p, "play weapons/pkup.wav\n");  // I like this one better -- deurk.
 
 		race.status = raceActive; // countdown ends, now we ready for race
+		currentrace.distance = 0; // initiate distance
+		currentrace.maxspeed = 0;
+		currentrace.avgspeed = 0;
 
+		// check for falsestarts
+	   	race_check_racer_falsestart( true );
+		
 		race.start_time		= g_globalvars.time;
 		race.timeout		= g_globalvars.time + max( 1 , race.timeout_setting );
 		race.next_race_time = 500; // do not print race time for first 500 ms, so we can see "Go!"
@@ -1498,14 +2206,59 @@ void race_think( void )
 
 		case raceActive:
 
+		// anti-idling
+		if ( ( race_time() > race.start_time + 3000 ) && ( race_time() < race.start_time + 4000 ) )
+			kill_race_idler();
+		
 		// something wrong
 		if ( !race_can_go( true ) )
 			return;
-
+		
 		if ( race_time() >= race.next_race_time )
 		{
+			vec3_t tmp;
+
 			race.next_race_time = race_time() + 100; // update race time each 100 ms
-			G_cp2all( "%s", dig3( race_time() ) );
+
+			racer = race_get_racer();
+
+			VectorSubtract( racer->s.v.origin, racer->s.v.oldorigin, tmp );
+			currentrace.distance += vlen( tmp );
+
+			if ( vlen( racer->s.v.velocity ) > currentrace.maxspeed )
+				currentrace.maxspeed = vlen( racer->s.v.velocity );
+			
+			currentrace.avgspeed = ( currentrace.avgspeed + vlen( racer->s.v.velocity ) ) / 2;
+
+			for( p = world; (p = find_client( p )); )
+			{
+				n = race_get_from_line();
+
+				if ( p->racer )
+				{
+					G_centerprint( p, "%s", dig3s( "time: %.1f", race_time() / 1000.0 ) );
+				}
+				else
+				{
+			   		if ( p->race_chasecam )
+			   		{
+			   			G_centerprint( p, "following %s\n%s\nracer speed: %4.1f\ntime: %s",
+			   				racer->s.v.netname,
+			   				( n == p ) ? redtext( "== you are next in line ==" ) : "",
+			   				vlen( racer->s.v.velocity ),
+			   				dig3s( "%3.1f", race_time() / 1000.0 )
+			   				);
+			   		}
+			   		else
+			   		{
+			   			G_centerprint( p, "%s is racing\n%s\n\ntime: %s",
+			   				racer->s.v.netname,
+			   				( n == p ) ? redtext( "== you are next in line ==" ) : "",
+			   				dig3s( "%3.1f", race_time() / 1000.0 )
+			   				);
+			   		}
+				}
+			}
 		}
 
 		return;
@@ -1531,8 +2284,11 @@ void r_Xset( float t )
 {
 	gedict_t				*e;
 	raceRouteNode_t			node;
+	
+	if ( !race_command_checks() )
+		return;
 
-	if ( match_in_progress || match_over || race.status )
+	if ( race_is_started() )
 		return;
 
 	if ( checkpoints_count() >= MAX_ROUTE_NODES )
@@ -1551,9 +2307,21 @@ void r_Xset( float t )
 	e = spawn_race_node( &node );
 
 	if ( node.type == nodeCheckPoint )
+	{
 		G_bprint( 2, "%s \220%d\221 set\n", redtext( name_for_nodeType( node.type ) ), e->race_id );
-	else
+		G_bprint( 2, "Coordinates: %6.1f %6.1f %6.1f\n", e->s.v.origin[0], e->s.v.origin[1], e->s.v.origin[2] );
+	}
+	else if ( node.type == nodeStart )
+	{
 		G_bprint( 2, "%s set\n", redtext( name_for_nodeType( node.type ) ) );
+		G_bprint( 2, "Coordinates: %6.1f %6.1f %6.1f\n", e->s.v.origin[0], e->s.v.origin[1], e->s.v.origin[2] );
+		G_bprint( 2, "Direction: %6.1f %6.1f\n", e->s.v.v_angle[0], e->s.v.v_angle[1] );
+	}
+	else
+	{
+		G_bprint( 2, "%s set\n", redtext( name_for_nodeType( node.type ) ) );
+		G_bprint( 2, "Coordinates: %6.1f %6.1f %6.1f\n", e->s.v.origin[0], e->s.v.origin[1], e->s.v.origin[2] );
+	}
 
 	race_route_now_custom();  // mark this is a custom route now
 }
@@ -1564,7 +2332,10 @@ void r_cdel( )
 	int						cnt, id;
 	char					*classname = classname_for_nodeType( nodeCheckPoint );
 
-	if ( match_in_progress || match_over || race.status )
+	if ( !race_command_checks() )
+		return;
+
+	if ( race_is_started() )
 		return;
 
 	cnt = find_cnt( FOFCLSN, classname );
@@ -1598,6 +2369,32 @@ void r_cdel( )
 	race_route_now_custom();  // mark this is a custom route now
 }
 
+void set_player_race_follow( gedict_t *e, int follow )
+{
+	if ( follow )
+	{
+		if ( e->race_chasecam )
+			return;
+
+		G_sprint( self, 2, "Your %s is now %s\n", redtext( "chasecam"), redtext( "enabled" ) );
+
+		e->race_chasecam = 1;
+		if ( !e->racer )
+			setwepnone( e );
+	}
+	else
+	{
+		if ( !e->race_chasecam )
+			return;
+
+		G_sprint( self, 2, "Your %s is now %s\n", redtext( "chasecam"), redtext( "disabled" ) );
+		
+		e->race_chasecam = 0;
+		setwepall( e );
+		SetVector( e->s.v.velocity, 0, 0, 0 );
+	}
+}
+
 void set_player_race_ready(	gedict_t *e, int ready )
 {
 	if ( ready )
@@ -1605,9 +2402,9 @@ void set_player_race_ready(	gedict_t *e, int ready )
 		if ( e->race_ready )
 			return; // alredy ready
 
-		G_bprint( 2, "%s is %s for %s\n", e->s.v.netname, redtext("ready"), redtext("race"));
-
+		G_bprint( 2, "%s %s the %s line\n", e->s.v.netname, redtext("entered"), redtext("race"));
 		e->race_ready = 1;
+		e->race_afk = 0;
 
 		race.warned = false; // so we get warning why race can't be started
 	}
@@ -1616,50 +2413,107 @@ void set_player_race_ready(	gedict_t *e, int ready )
 		if ( !e->race_ready )
 			return; // alredy NOT ready
 
-		G_bprint( 2, "%s is %s for %s\n", e->s.v.netname, redtext("not ready"), redtext("race"));
+		G_bprint( 2, "%s %s the %s line\n", e->s.v.netname, redtext("left"), redtext("race"));
 		e->race_ready = 0;
+	}
+}
+
+qbool race_command_checks( void )
+{
+	if ( !isRACE() )
+	{
+		G_sprint( self, 2, "Command only available in %s mode (type %s to activate it)\n", redtext( "race" ), redtext( "race" ) );
+		return false;
+	}
+
+	return true;
+}
+
+qbool race_is_started( void )
+{
+	if ( race.status )
+	{
+		G_sprint( self, 2, "Can't use that command while %s is in progress, wait for all players to leave the line\n", redtext( "race" ) );
+		return true;
+	}
+
+	return false;
+}
+
+void r_changefollowstatus( float t )
+{
+	if ( !race_command_checks() )
+		return;
+
+	if ( self->racer )
+		return;
+
+	switch ( (int)t )
+	{
+		case 1: // rfollow
+			set_player_race_follow( self, 1 );
+			return;
+		case 2: // rnofollow
+			set_player_race_follow( self, 0 );
+			return;
+		case 3: // rftoggle
+			set_player_race_follow( self, !self->race_chasecam );
+			return;
+		default:
+			return;
 	}
 }
 
 void r_changestatus( float t )
 {
-	if ( match_in_progress || match_over )
+	if ( !race_command_checks() )
+		return;
+
+	if ( self->ct == ctSpec )
 		return;
 
 	switch ( (int)t )
 	{
 		case 1: // rready
-		set_player_race_ready( self, 1 );
+			set_player_race_ready( self, 1 );
 
-		return;
+			return;
 
 		case 2: // rbreak
-		set_player_race_ready( self, 0 );
+		
+			if ( self->racer && race.status )
+				race_start( true, "%s has quit the race\n", self->s.v.netname );
+			
+			set_player_race_ready( self, 0 );
 
-		return;
+			return;
 
 		case 3: // rtoggle
-		set_player_race_ready( self, !self->race_ready );
+			
+			if ( self->racer && race.status )
+				race_start( true, "%s has quit the race\n", self->s.v.netname );
+			
+			set_player_race_ready( self, !self->race_ready );
 
-		return;
+			return;
 
 		case 4: // rcancel
 
-		if ( !self->racer )
-			return; // get lost!
+  	  		if ( !self->racer )
+				return; // FUCK U!
 
-		if ( !race.status )
-			return; // same
+			if ( !race.status )
+				return; // same
 
-		// do some sound
-		sound( self, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
+			// do some sound
+			sound( self, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
 
-		race_start( true, "Race canceled by %s\n", self->s.v.netname );
+			race_start( true, "Race aborted by %s\n", self->s.v.netname );
 
-		return;
+			return;
 
 		default:
-		return;
+			return;
 	}
 }
 
@@ -1667,7 +2521,10 @@ void r_timeout( )
 {
 	char	arg_1[64];
 
-	if ( match_in_progress || match_over || race.status )
+	if ( !race_command_checks() )
+		return;
+
+	if ( race_is_started() )
 		return;
 
 	trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
@@ -1682,9 +2539,95 @@ void r_timeout( )
 	G_bprint(2, "%s set race timeout to %ss\n", self->s.v.netname, dig3( race.timeout_setting ) );
 }
 
+void display_record_details( )
+{
+	char	arg_1[64];
+	int		record;
+
+	if ( !race_command_checks() )
+		return;
+
+	trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
+
+	record = atoi( arg_1 );
+
+	if ( record )
+		record = 1;
+
+	record = bound(0, atoi( arg_1 ) - 1, NUM_BESTSCORES );
+
+	if ( records[record].time > 999998 )
+	{
+		G_sprint(self, 2, "record not found\n" );
+		return;
+    }
+
+	G_sprint(self, 2,  "\n\235\236\236\236\236\236\236\236\236\236\236\236\236\237%s %s\237\236\236\236\236\236\236\236\236\236\236\236\236\235\n",
+			redtext( "record") , dig3s( "%02d", record + 1 ) );
+	G_sprint(self, 2, "time: %s\n", dig3s( "%7.3f%s", records[record].time / 1000, redtext( "s" ) ) );
+	G_sprint(self, 2, "racer: %s\n", records[record].racername );
+	G_sprint(self, 2, "demo: %s\n", redtext( records[record].demoname ) );
+	G_sprint(self, 2, "distance: %s\n", dig3s( "%.1f", records[record].distance ) );
+	G_sprint(self, 2, "max speed: %s\n", dig3s( "%.0f", records[record].maxspeed ) );
+	G_sprint(self, 2, "avg speed: %s\n", dig3s( "%.0f", records[record].avgspeed ) );
+	G_sprint(self, 2, "date: %s\n", redtext( records[record].date ) );
+	G_sprint(self, 2, "weapon: %s\n", redtext( race_weapon_mode( records[record].weaponmode ) ) );
+	G_sprint(self, 2, "falsestart: %s\n", redtext( race_falsestart_mode( records[record].startmode ) ) );
+}
+
+void r_falsestart( )
+{
+	if ( !race_command_checks() )
+		return;
+
+	if ( race_is_started() )
+		return;
+
+	race.falsestart++;
+
+	if ( race.falsestart < raceFalseStartNo || race.falsestart >= raceFalseStartMAX )
+		race.falsestart = raceFalseStartNo;
+
+	G_bprint(2, "%s set race start mode to %s\n", self->s.v.netname, redtext( race_falsestart_mode( race.falsestart ) ) );
+
+	read_topscores();
+}
+
+void r_all_break ( void )
+{
+	if ( !race_command_checks() )
+		return;
+	
+	race_unready_all();
+	G_bprint(2, "%s has %s the race to stop\n", self->s.v.netname, redtext( "forced" ) );
+}
+
+void r_clear_route( void )
+{
+	gedict_t *p;
+
+	if ( !race_command_checks() )
+		return;
+	
+	if ( race_is_started() )
+		return;
+	
+	for ( p = world; ( p = find_plr( p ) ); )
+	{
+		setwepall( p );
+		p->muted = 0;
+	}
+	race_remove_ent();
+	
+	G_bprint(2, "%s cleared the current route\n", self->s.v.netname );
+}
+
 void r_mode( )
 {
-	if ( match_in_progress || match_over || race.status )
+	if ( !race_command_checks() )
+		return;
+
+	if ( race_is_started() )
 		return;
 
 	race.weapon++;
@@ -1692,7 +2635,9 @@ void r_mode( )
 	if ( race.weapon < raceWeaponNo || race.weapon >= raceWeaponMAX )
 		race.weapon = raceWeaponNo;
 
-	G_bprint(2, "%s set race weapon mode to %s\n", self->s.v.netname, redtext( race_weapon_mode() ) );
+	G_bprint(2, "%s set race weapon mode to %s\n", self->s.v.netname, redtext( race_weapon_mode( race.weapon ) ) );
+
+	read_topscores();
 }
 
 qbool race_load_route( int route )
@@ -1714,6 +2659,8 @@ qbool race_load_route( int route )
 	race.timeout_setting	= bound( 1, race.route[ route ].timeout, 60 * 60 );
 	race.active_route		= route + 1; // mark this is not custom route now
 
+	read_topscores();
+
 	return true;
 }
 
@@ -1727,7 +2674,7 @@ void race_print_route_info( gedict_t *p )
 		if ( race.active_route )
 			G_sprint( p, 2, "\220%s\221\n", race_route_desc() );
 
-		G_sprint( p, 2, "%s: %s\n", redtext( "weapon" ), race_weapon_mode() );
+		G_sprint( p, 2, "%s: %s\n", redtext( "weapon" ), race_weapon_mode( race.weapon ) );
 	}
 	else
 	{
@@ -1737,23 +2684,23 @@ void race_print_route_info( gedict_t *p )
 		if ( race.active_route )
 			G_bprint(    2, "\220%s\221\n", race_route_desc() );
 
-		G_bprint(    2, "%s: %s\n", redtext( "weapon" ), race_weapon_mode() );
+		G_bprint(    2, "%s: %s\n", redtext( "weapon" ), race_weapon_mode( race.weapon ) );
 	}		
 }
 
-void r_route( )
+void r_route( void )
 {
-	static int next_route = 0; // STATIC
+	static int next_route = -1; // STATIC
 
-	if ( match_in_progress || match_over )
+	if ( !race_command_checks() )
 		return;
 
-	if ( race.status )
-	{
-		G_sprint( self, 2, "Can't do that, race in progress\n");
+	if ( race_is_started() )
 		return;
-	}
-
+	
+	HideSpawnPoints();
+	race_cleanmap();
+	
 	if ( race.cnt < 1 )
 	{
 		G_sprint( self, 2, "No routes defined for this map\n");
@@ -1761,7 +2708,7 @@ void r_route( )
 	}
 
 	next_route++;
-
+    
 	if ( next_route < 0 || next_route >= race.cnt )
 		next_route = 0;
 
@@ -1771,20 +2718,221 @@ void r_route( )
 		race_remove_ent();
 		race_route_now_custom();
 
-		G_bprint( 2, "Failed to load route %d by %s\n", next_route + 1, self->s.v.netname );
+		if (streq(self->s.v.classname, "worldspawn"))
+			G_bprint( 2, "Failed to load route %d by %s\n", next_route + 1, self->s.v.netname );
 
 		return;
 	}
 
-	race_print_route_info( NULL );
-	G_bprint( 2, "route loaded by %s\n", self->s.v.netname );
+	if (streq(self->s.v.classname, "worldspawn"))
+	{
+		race_print_route_info( NULL );
+		G_bprint( 2, "route loaded by %s\n", self->s.v.netname );
+	}
 }
 
 void r_print( )
 {
-	if ( match_in_progress || match_over )
+	if ( !race_command_checks() )
 		return;
 
 	race_print_route_info( self );
 }
 
+void race_fclose(void)
+{
+	if ( race_fhandle < 0 )
+		return;
+
+	trap_FS_CloseFile( race_fhandle );
+	race_fhandle = -1;
+}
+
+void race_fwopen( const char *fmt, ... )
+{
+	va_list argptr;
+	char	text[MAX_TXTLEN] = {0};
+ 
+	va_start( argptr, fmt );
+	Q_vsnprintf( text, sizeof(text), fmt, argptr );
+	va_end( argptr );
+
+	text[sizeof(text)-1] = 0;
+ 
+	if ( trap_FS_OpenFile( text, &race_fhandle, FS_WRITE_TXT ) < 0 )
+	{
+		race_fhandle = -1;
+		//G_bprint( 2, "Failed to open file: %s\n", text );
+		return;
+	}
+	
+	//G_bprint( 2, "Succesfully opened file: %s\n", text );
+}
+ 
+void race_fropen( const char *fmt, ... )
+{
+	va_list argptr;
+	char	text[MAX_TXTLEN] = {0};
+ 
+	va_start( argptr, fmt );
+	Q_vsnprintf( text, sizeof(text), fmt, argptr );
+	va_end( argptr );
+
+	text[sizeof(text)-1] = 0;
+ 
+	if ( trap_FS_OpenFile( text, &race_fhandle, FS_READ_TXT ) < 0 )
+	{
+		race_fhandle = -1;
+		//G_bprint( 2, "Failed to open file: %s\n", text );
+		return;
+	}
+	
+	//G_bprint( 2, "Succesfully opened file: %s\n", text );
+}
+ 
+void race_fprintf( const char *fmt, ... )
+{
+	va_list argptr;
+	char	text[MAX_TXTLEN] = {0};
+
+	if ( race_fhandle < 0 )
+		return;
+        
+	va_start( argptr, fmt );
+	Q_vsnprintf( text, sizeof(text), fmt, argptr );
+	va_end( argptr );
+
+	text[sizeof(text)-1] = 0;
+	
+	trap_FS_WriteFile( text, strlen(text), race_fhandle );
+}
+
+void write_topscores( void )
+{
+	int i;
+
+	if ( !race.active_route )
+		return;
+
+	race_fwopen( "race[%s_r%02d]-w%1ds%1d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart );
+
+	if ( race_fhandle < 0 )
+		return;
+        
+	race_fprintf( "%d\n", NUM_BESTSCORES );
+
+    for ( i = 0; i < NUM_BESTSCORES; i++ )
+	{
+		race_fprintf( "%f\n", records[i].time );
+		race_fprintf( "%s\n", records[i].racername );
+		race_fprintf( "%s\n", records[i].demoname );
+		race_fprintf( "%f\n", records[i].distance );
+		race_fprintf( "%f\n", records[i].maxspeed );
+		race_fprintf( "%f\n", records[i].avgspeed );
+		race_fprintf( "%s\n", records[i].date );
+		race_fprintf( "%d\n", records[i].weaponmode );
+		race_fprintf( "%d\n", records[i].startmode );
+	}
+	race_fclose();
+}
+
+int race_fgetc( void )
+{
+   	char c;
+	int retval;
+
+	if ( race_fhandle < 0 )
+		return -2;
+
+	retval = trap_FS_ReadFile( &c, 1, race_fhandle );
+	//G_bprint( 2, "====> Read char: %d\n", c );
+	
+	return ( retval == 1 ? c : -1 );
+}
+
+char *race_fgets( char *buf, int limit )
+{
+	int c = '\0';
+	char *string;
+
+	if ( race_fhandle < 0 )
+		return NULL;
+
+	string = buf;
+	while ( --limit > 0 && ( ( c = race_fgetc() ) != -1 ) )
+		if ( ( *string++ = c ) == '\n' )
+			break;
+	*string = '\0';
+	//G_bprint( 2, "====> Read string: %s\n", buf );
+
+	return ( ( c == -1 ) && ( string = buf ) ) ? NULL : buf;
+}
+
+void read_topscores( void )
+{
+	char line[MAX_TXTLEN] = {0};
+	int cnt, max;
+	
+	if ( !race.active_route )
+		return;
+
+	race_fropen( "race[%s_r%02d]-w%1ds%1d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart );
+	
+	if ( race_fhandle >= 0 )
+	{
+		race_fgets( line, MAX_TXTLEN );
+		max = atoi( line ); 
+		for ( cnt = 0; cnt < max; cnt++ )
+		{                          
+			race_fgets( line, MAX_TXTLEN );
+			records[cnt].time = atof( line );
+			race_fgets( line, MAX_TXTLEN );
+			strlcpy( records[cnt].racername, line, strlen( line ) );
+			race_fgets( line, MAX_TXTLEN );
+			strlcpy( records[cnt].demoname, line, strlen( line ) );
+			race_fgets( line, MAX_TXTLEN );
+			records[cnt].distance = atof( line );
+			race_fgets( line, MAX_TXTLEN );
+			records[cnt].maxspeed = atof( line );
+			race_fgets( line, MAX_TXTLEN );
+			records[cnt].avgspeed = atof( line );
+			race_fgets( line, MAX_TXTLEN );
+			strlcpy( records[cnt].date, line, strlen( line ) );
+			race_fgets( line, MAX_TXTLEN );
+			records[cnt].weaponmode = atoi( line );
+			race_fgets( line, MAX_TXTLEN );
+			records[cnt].startmode = atoi( line );
+		}
+
+		race.top_time = records[0].time;
+		strlcpy(race.top_nick, records[0].racername, sizeof(race.top_nick));
+	}
+	else
+	{
+		init_scores();
+		race.top_nick[0] = 0;
+		race.top_time = 999999999;
+	}
+
+	race_fclose();
+}
+
+void ChasecamViewButton( void )
+{
+	if ( !( ( ( int ) ( self->s.v.flags ) ) & FL_JUMPRELEASED ) )
+		return;
+
+	self->s.v.flags = (int)self->s.v.flags & ~FL_JUMPRELEASED;
+	
+	race_chasecam_change();
+}
+
+void ChasecamToggleButton( void )
+{
+	if ( !( ( ( int ) ( self->s.v.flags ) ) & FL_ATTACKRELEASED ) )
+		return;
+
+	self->s.v.flags = (int)self->s.v.flags & ~FL_ATTACKRELEASED;
+	
+	r_changefollowstatus ( (float) 3 );
+}

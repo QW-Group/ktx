@@ -46,6 +46,10 @@ void MakeMOTD();
 void ImpulseCommands();
 void StartDie ();
 void ZeroFpsStats ();
+void ChasecamViewButton( void );
+
+void race_start( qbool restart, const char *fmt, ... );
+void race_stoprecord( qbool cancel );
 
 void del_from_specs_favourites(gedict_t *rm);
 
@@ -808,6 +812,20 @@ void ClientKill()
 	if ( isRA() ) {
 		G_sprint (self, PRINT_HIGH, "Can't suicide in RA mode\n");
 		return;
+	}
+
+	if ( isRACE() )
+	{
+		if ( self->racer && race.status )
+		{
+			race_stoprecord( true );
+			race_start( true, "Race restarted, %s suicided\n", self->s.v.netname );
+			return;
+		}
+		else if ( self->race_chasecam )
+		{
+			return;
+		}
 	}
 
 /*
@@ -2000,6 +2018,9 @@ void ClientDisconnect()
 
 		cvar_fset("_k_last_xonx", 0); // forget last XonX command
 
+		if ( isRACE() )
+			ToggleRace();
+
 		if( match_in_progress )
 			EndMatch( 1 ); // skip demo, make some other stuff
 
@@ -2532,6 +2553,23 @@ void PlayerPreThink()
 
 	}
 
+	if ( isRACE() )
+	{
+		self->s.v.solid = SOLID_SLIDEBOX;
+		setorigin (self, PASSVEC3( self->s.v.origin ) );
+
+		if ( self->ct == ctPlayer && !self->racer && race.status )
+		{
+			if ( self->race_chasecam )
+			{
+				if ( self->s.v.button2 )
+					ChasecamViewButton();
+		   		 else
+				 	self->s.v.flags = ( ( int ) ( self->s.v.flags ) ) | FL_JUMPRELEASED;
+			}
+		}
+	}
+	
 // brokenankle included here
 	if ( self->s.v.button2 || self->brokenankle )
 		PlayerJump();
@@ -3024,6 +3062,15 @@ void PlayerPostThink()
 	mv_record();
 
 	W_WeaponFrame();
+
+	if ( isRACE() )
+	{
+		// test for multirace
+		//self->s.v.solid = SOLID_BBOX;
+		setorigin (self, PASSVEC3( self->s.v.origin ) );
+    	}
+
+	race_follow();
 
 	{
 		float velocity = sqrt(self->s.v.velocity[0] * self->s.v.velocity[0] + 
