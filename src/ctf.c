@@ -497,6 +497,10 @@ void DropFlag( gedict_t *flag, qbool tossed )
 		flag->s.v.nextthink = g_globalvars.time + 0.75;
 		flag->s.v.think = (func_t) FlagResetOwner;
 	}
+	else
+	{
+		flag->s.v.owner = EDICT_TO_PROG( flag );
+	}
 
 	G_bprint( 2, "%s", p->s.v.netname );
 	if ( streq(getteam(p), "red") )
