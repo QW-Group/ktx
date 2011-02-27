@@ -1675,6 +1675,9 @@ void powerup_touch()
 	{
 		other->rad_time = 1;
 		other->radsuit_finished = g_globalvars.time + 30;
+
+		if ( self->cnt > g_globalvars.time ) // is this was a dropped powerup
+			p_cnt = &(other->radsuit_finished);
 	}
 	else if ( streq( self->s.v.classname, "item_artifact_invulnerability" ) )
 	{
@@ -1684,6 +1687,9 @@ void powerup_touch()
 		other->ps.itm[itPENT].tooks++;
 		other->invincible_time = 1;
 		other->invincible_finished = g_globalvars.time + 30;
+
+		if ( self->cnt > g_globalvars.time ) // is this was a dropped powerup
+			p_cnt = &(other->invincible_finished);
 	}
 	else if ( streq( self->s.v.classname, "item_artifact_invisibility" ) )
 	{
@@ -1696,7 +1702,6 @@ void powerup_touch()
 
 		if ( self->cnt > g_globalvars.time ) // is this was a dropped powerup
 			p_cnt = &(other->invisible_finished);
-
 	}
 	else if ( streq( self->s.v.classname, "item_artifact_super_damage" ) )
 	{
@@ -1710,7 +1715,7 @@ void powerup_touch()
 		if ( deathmatch == 4 )
 		{
 			other->s.v.armortype = 0;
-			other->s.v.armorvalue = 0 * 0.01;
+			other->s.v.armorvalue = 0;
 			other->s.v.ammo_cells = 0;
 		}
 		other->super_time = 1;
