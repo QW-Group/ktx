@@ -162,7 +162,7 @@ void ShalHome()
 	vec3_t	dir, vtemp;
 
 	if (   ISDEAD( PROG_TO_EDICT( self->s.v.enemy ) ) // enemy dead
-		|| self->spawn_time + 25 < g_globalvars.time  // flying for too long time
+		|| self->spawn_time + ( k_bloodfest ? 3 : 25 ) < g_globalvars.time  // flying for too long time
 	   )
 	{
 		other = world;

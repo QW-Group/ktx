@@ -33,8 +33,18 @@
 
 //============================================================================
 
-static const int k_bloodfest_monsters = 100; // maximum monsters allowed in bloodfest mode.
-static const int k_bloodfest_projectiles = 30; // maximum projectiles allowed in bloodfest mode.
+// LIMITS.
+static const int k_bloodfest_monsters = 100;	// maximum monsters allowed in bloodfest mode.
+static const int k_bloodfest_projectiles = 30;	// maximum projectiles allowed in bloodfest mode.
+static const float k_bloodfest_monsters_spawn_period = 20;	// with which perioud we should issue monsters wave.
+static const float k_bloodfest_monsters_spawn_factor = 0.2;	// monsters population is bigger by this each wave.
+static const int   k_bloodfest_monsters_spawn_initial = 10;	// monsters population in first wave.
+
+static const float k_bloodfest_monsters_damage_factor = 90;	// 
+
+// RUNTIME.
+float k_bloodfest_monsters_spawn_time;			// is it time to start monsters spawn wave.
+int	  k_bloodfest_monsters_to_spawn;			// amount of monsters we want to spawn in this wave.
 
 static char *monsters_names[] =
 {
@@ -57,6 +67,7 @@ static char *monsters_names[] =
 
 static const int monsters_names_count = sizeof(monsters_names) / sizeof(monsters_names[0]);
 
+// print bloodfest stats.
 void bloodfest_stats(void)
 {
 	float time = g_globalvars.time - match_start_time;
@@ -76,7 +87,7 @@ static void safe_ent_remove( gedict_t * t )
 // monsters do more damage with times, so its harder to survive.
 float bloodfest_monster_damage_factor(void)
 {
-	float factor = match_start_time ? (g_globalvars.time - match_start_time) / 30 : 1;
+	float factor = match_start_time ? 1 + (g_globalvars.time - match_start_time) / k_bloodfest_monsters_damage_factor : 1;
 	return bound(1, factor, 999999);
 }
 
@@ -90,7 +101,7 @@ void SP_info_monster_start()
 }
 
 // return monsters count, including corpses.
-int monsters_count(void)
+int monsters_count( qbool alive )
 {
 	int cnt = 0;
 	gedict_t *p;
@@ -99,6 +110,9 @@ int monsters_count(void)
     {
 		if ( !( (int)p->s.v.flags & FL_MONSTER ) )
 			continue; // not a monster
+
+		if ( alive && !ISLIVE(p) )
+			continue; // not alive.
 
 		cnt++;
     }
@@ -152,6 +166,32 @@ gedict_t * bloodfest_spawn_monster(gedict_t *spot, char * classname)
 	return p;
 }
 
+void bloodfest_wave_calculate(void)
+{
+	float factor;
+
+	if ( k_bloodfest_monsters_spawn_time > g_globalvars.time )
+		return; // not ready to calculate wave.
+
+	// OK. time for next wave!
+
+	// calculate next wave time.
+	k_bloodfest_monsters_spawn_time = g_globalvars.time + k_bloodfest_monsters_spawn_period;
+
+	// calculate how much monsters we should spawn in this wave.
+	factor = match_start_time ? 1 + k_bloodfest_monsters_spawn_factor * (g_globalvars.time - match_start_time) / k_bloodfest_monsters_spawn_period : 1;
+	factor = bound(1, factor, 999999);
+
+	k_bloodfest_monsters_to_spawn = (int)(factor * k_bloodfest_monsters_spawn_initial);
+	// if there is still alive monsters, reduce wave by that count.
+	k_bloodfest_monsters_to_spawn -= monsters_count( true );
+
+	// apply limits.
+	k_bloodfest_monsters_to_spawn = bound( 0, k_bloodfest_monsters_to_spawn, k_bloodfest_monsters );
+
+//	G_cprint("to spawn: %d\n", k_bloodfest_monsters_to_spawn);
+}
+
 // attempt to spawn more monsters.
 void bloodfest_spawn_monsters(void)
 {
@@ -171,8 +211,13 @@ void bloodfest_spawn_monsters(void)
 	if ( intermission_running || match_in_progress != 2 || match_over )
 			return;
 
+	bloodfest_wave_calculate();
+
+	if ( k_bloodfest_monsters_to_spawn < 1 )
+		return; // nothing to spawn.
+
 	// too much monsters, can't spawn more.
-	if (monsters_count() >= k_bloodfest_monsters)
+	if ( monsters_count( true ) >= k_bloodfest_monsters )
 		return;
 
 	// find some random spawn point.
@@ -184,6 +229,8 @@ void bloodfest_spawn_monsters(void)
 
 	// spawn monster.
 	bloodfest_spawn_monster( spot, monsters_names[i_rnd(0, monsters_names_count - 1)] );
+	// reduce amount to spawn next time.
+	k_bloodfest_monsters_to_spawn--;
 }
 
 // remove monsters corpses, so there free edicts.
