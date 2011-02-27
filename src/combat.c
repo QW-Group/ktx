@@ -27,7 +27,7 @@
 
 void	ClientObituary( gedict_t * e1, gedict_t * e2 );
 float	bloodfest_monster_damage_factor(void);
-void	bloodfest_killed_hook(gedict_t * killed);
+void	bloodfest_killed_hook( gedict_t * killed, gedict_t * attacker );
 
 #define DEATHTYPE( _dt_, _dt_str_ ) #_dt_str_,
 char *deathtype_strings[] =
@@ -279,7 +279,7 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 		EndMatch( 0 );
 
 	if ( k_bloodfest )
-		bloodfest_killed_hook( targ );
+		bloodfest_killed_hook( targ, attacker );
 }
 
 #ifndef Q3_VM
