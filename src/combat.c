@@ -676,7 +676,11 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	}
 
 	// figure momentum add
-	if ( inflictor != world && targ->s.v.movetype == MOVETYPE_WALK )
+	if ( inflictor != world
+		 && (	targ->s.v.movetype == MOVETYPE_WALK
+			  || ( k_bloodfest && ( (int)targ->s.v.flags & FL_MONSTER ) )
+			 )
+	)
 	{
 		float nailkick;
 
@@ -704,6 +708,11 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 		if ( midair && lowheight )
 			targ->s.v.velocity[2] += dir[2] * non_hdp_damage * c2 * nailkick; // only for z component
+
+		if ( k_bloodfest && ( (int)targ->s.v.flags & FL_MONSTER ) )
+		{
+			targ->s.v.flags = (int)targ->s.v.flags & ~FL_ONGROUND;		
+		}
 	}
 
 	if ( match_in_progress == 2 && (int)cvar("k_dmgfrags") )
