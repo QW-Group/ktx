@@ -54,6 +54,7 @@ void ChangeTP();
 void ToggleFallBunny ();
 // { CTF
 void FlagStatus();
+void TossFlag();
 void norunes();
 void nohook();
 void noga();
@@ -417,6 +418,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_POS_VELOCITY "set position velocity"
 #define CD_SH_SPEED     "toggle use show speed"
 #define CD_TOSSRUNE     "drop rune (CTF)"
+#define CD_TOSSFLAG     "drop flag (CTF)"
 #define CD_FLAGSTATUS   "show flags status (CTF)"
 #define CD_NOHOOK       "toggle hook (CTF)"
 #define CD_NORUNES      "toggle runes (CTF)"
@@ -723,6 +725,7 @@ cmd_t cmds[] = {
 	{ "sh_speed",    Sh_Speed,                  0    , CF_BOTH, CD_SH_SPEED },
 // { CTF commands
 	{ "tossrune",    TossRune,                  0    , CF_PLAYER, CD_TOSSRUNE },
+	{ "tossflag",    TossFlag,                  0    , CF_PLAYER, CD_TOSSFLAG },
 	{ "nohook",      nohook,                    0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOHOOK },
 	{ "norunes",     norunes,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NORUNES },
 	{ "noga",        noga,                      0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOGA },
@@ -2305,6 +2308,7 @@ void ShowRules()
 						  "Additional commands/impulses:\n"
 						  "impulse 22 : Grappling Hook\n"
 						  "tossrune   : Toss your current rune\n"
+						  "tossflag   : Toss carried flag\n"
 						  "flagstatus : Displays flag information\n");
 	else if ( isFFA() )
 		G_sprint(self, 2, "Server is in FFA mode.\n");

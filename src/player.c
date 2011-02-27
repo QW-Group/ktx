@@ -981,7 +981,7 @@ void PlayerDie()
 		}
 
 		DropRune();
-		PlayerDropFlag( self );
+		PlayerDropFlag( self, false );
 	} 
 
 	self->s.v.items -= ( int ) self->s.v.items & IT_INVISIBILITY;
