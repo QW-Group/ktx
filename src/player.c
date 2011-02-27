@@ -902,6 +902,7 @@ gedict_t *ThrowGib( char *gibname, float dm )
 	setsize( newent, 0, 0, 0, 0, 0, 0 );
 	VelocityForDamage( dm, newent->s.v.velocity );
 	newent->s.v.movetype = MOVETYPE_BOUNCE;
+	newent->isMissile = true;
 	newent->s.v.solid = SOLID_NOT;
 	newent->s.v.avelocity[0] = g_random() * 600;
 	newent->s.v.avelocity[1] = g_random() * 600;
@@ -920,6 +921,8 @@ void ThrowHead( char *gibname, float dm )
 	setmodel( self, gibname );
 	self->s.v.frame = 0;
 	self->s.v.movetype = MOVETYPE_BOUNCE;
+// qqshka: NO, you can't do that, that NOT projectile, its player entity!
+//	self->isMissile = true;
 	self->s.v.takedamage = DAMAGE_NO;
 	self->s.v.solid = SOLID_NOT;
 	SetVector( self->s.v.view_ofs, 0, 0, 8 );

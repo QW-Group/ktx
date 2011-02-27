@@ -209,6 +209,7 @@ void ShalMissile()
 	missile->s.v.owner = EDICT_TO_PROG( self );
 	missile->s.v.solid = SOLID_BBOX;
 	missile->s.v.movetype = MOVETYPE_FLYMISSILE;
+	missile->isMissile = true;
 	setmodel( missile, "progs/v_spike.mdl" );
 	setsize( missile, PASSVEC3( VEC_ORIGIN ), PASSVEC3( VEC_ORIGIN ) );
 

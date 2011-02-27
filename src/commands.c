@@ -86,6 +86,7 @@ void ShowQizmo();
 void ShowRules();
 void ShowVersion();
 void killquad();
+void bloodfest();
 void antilag();
 void ToggleDischarge();
 void ToggleDropPack();
@@ -275,6 +276,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_FRAGSDOWN  "-10 fraglimit"
 #define CD_FRAGSUP    "+10 fraglimit"
 #define CD_KILLQUAD   "kill the quad mode"
+#define CD_BLOODFEST  "blood fest mode (coop/single only)"
 #define CD_DROPQUAD   "drop quad when killed"
 #define CD_DROPRING   "drop ring when killed"
 #define CD_DROPPACK   "drop pack when killed"
@@ -564,6 +566,8 @@ cmd_t cmds[] = {
 	{ "fragsdown",   FragsDown,                 0    , CF_PLAYER | CF_SPC_ADMIN, CD_FRAGSDOWN },
 	{ "fragsup",     FragsUp,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_FRAGSUP },
 	{ "killquad",    killquad,                  0    , CF_PLAYER | CF_SPC_ADMIN, CD_KILLQUAD },
+// qqshka: Pointless to have it, XonX command will turn it off anyway.
+//	{ "bloodfest",   bloodfest,                 0    , CF_PLAYER | CF_SPC_ADMIN, CD_BLOODFEST },
 	{ "dropquad",    ToggleDropQuad,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_DROPQUAD },
 	{ "dropring",    ToggleDropRing,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_DROPRING },
 	{ "droppack",    ToggleDropPack,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_DROPPACK },
@@ -750,7 +754,7 @@ cmd_t cmds[] = {
 	{ "cg_kb",       ToggleCGKickback,          0    , CF_PLAYER | CF_SPC_ADMIN, CD_CG_KB },
 	{ "time",        sv_time,                   0    , CF_BOTH | CF_MATCHLESS, CD_TIME },
 	{ "gren_mode",   GrenadeMode,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_GREN_MODE },
-	{ "toggleready", ToggleReady,               0    , CF_BOTH, CD_TOGGLEREADY },
+	{ "toggleready", ToggleReady,               0    , CF_BOTH | CF_MATCHLESS, CD_TOGGLEREADY },
 	{ "fp",          DEF(fp_toggle),            1    , CF_BOTH_ADMIN, CD_FP },
 	{ "fp_spec",     DEF(fp_toggle),            2    , CF_BOTH_ADMIN, CD_FP_SPEC },
 	{ "dlist",       dlist,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_DLIST },
@@ -2175,6 +2179,15 @@ void killquad()
 	k_killquad = cvar( "k_killquad" );
 }
 
+void bloodfest()
+{
+	if ( match_in_progress )
+		return;
+
+	cvar_toggle_msg( self, "k_bloodfest", redtext("Blood Fest mode (for coop/single only)") );
+	k_bloodfest = cvar( "k_bloodfest" );
+}
+
 void ToggleDropQuad()
 {
 	if ( match_in_progress )
@@ -2865,6 +2878,7 @@ const char common_um_init[] =
 	"k_pow_pickup 0\n"
 	"sv_loadentfiles_dir \"\"\n"
 	"sv_antilag 2\n"			// antilag on
+	"k_bloodfest 0\n"
 	"k_killquad 0\n"
 	"pm_airstep \"\"\n"			// airstep off by default
 	"samelevel 1\n"				// change levels off

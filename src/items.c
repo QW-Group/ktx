@@ -1519,6 +1519,18 @@ void DropPowerup( float timeleft, int powerup )
 	else
 		G_Error("DropPowerup");
 
+	if ( k_bloodfest )
+	{
+		// limit amount of dropped powerups of particular class.
+		if ( find_cnt( FOFCLSN, self->s.v.classname ) > 3 )
+		{
+			ent_remove( self );
+	
+			self = swp;// restore self!!!
+			return;		
+		}
+	}
+
 	playername = swp->s.v.netname;
 
 	log_printf(
@@ -1539,7 +1551,7 @@ void DropPowerup( float timeleft, int powerup )
 	if ( swp->ct == ctPlayer )
 		mi_print( swp, powerup, va( "%s dropped a %s with %.0f seconds left", swp->s.v.netname, self->s.v.netname, timeleft ));
 
-	self = swp;// restore self
+	self = swp;// restore self!!!
 }
 
 static qbool NeedDropQuad(void)
@@ -2069,10 +2081,12 @@ DropBackpack
 
 void DropBackpack()
 {
-
     gedict_t	*item;
     float	f1;
     char	*playername;
+
+	if ( k_bloodfest )
+		return;
 
     f1 = get_fair_pack();
 

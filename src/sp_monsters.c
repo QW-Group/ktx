@@ -33,6 +33,238 @@
 
 //============================================================================
 
+static const int k_bloodfest_monsters = 100; // maximum monsters allowed in bloodfest mode.
+static const int k_bloodfest_projectiles = 30; // maximum projectiles allowed in bloodfest mode.
+
+static char *monsters_names[] =
+{
+	"monster_ogre",
+	"monster_demon1",
+	"monster_shambler",
+	"monster_knight",
+	"monster_army",
+	"monster_wizard",
+	"monster_dog",
+	"monster_zombie",
+//	"monster_boss",			// e1m7 boss, can't use it here.
+	"monster_tarbaby",
+	"monster_hell_knight",
+//	"monster_fish",			// you have to spawn it in water, can't use it here.
+	"monster_shalrath",
+	"monster_enforcer",
+//	"monster_oldone",		// end boss, can't use it here.
+};
+
+static const int monsters_names_count = sizeof(monsters_names) / sizeof(monsters_names[0]);
+
+void bloodfest_stats(void)
+{
+	float time = g_globalvars.time - match_start_time;
+
+	G_bprint( 2, "The surviving is over\n");
+	G_bprint( 2, "Surviving time is %.1f seconds\n", time);
+}
+
+static void safe_ent_remove( gedict_t * t )
+{
+	if ( !t || t == world /* || NUM_FOR_EDICT( t ) <= MAX_CLIENTS */ )
+		return;
+
+	ent_remove( t );
+}
+
+// monsters do more damage with times, so its harder to survive.
+float bloodfest_monster_damage_factor(void)
+{
+	float factor = match_start_time ? (g_globalvars.time - match_start_time) / 30 : 1;
+	return bound(1, factor, 999999);
+}
+
+void SP_info_monster_start()
+{
+	if ( deathmatch )
+	{
+		ent_remove( self );
+		return;
+	}
+}
+
+// return monsters count, including corpses.
+int monsters_count(void)
+{
+	int cnt = 0;
+	gedict_t *p;
+
+    for( p = world; ( p = nextent( p ) ); )
+    {
+		if ( !( (int)p->s.v.flags & FL_MONSTER ) )
+			continue; // not a monster
+
+		cnt++;
+    }
+
+	return cnt;
+}
+
+// return projectiles count.
+int projectiles_count(void)
+{
+	int cnt = 0;
+	gedict_t *p;
+
+    for( p = world; ( p = nextent( p ) ); )
+    {
+		if ( !p->isMissile )
+			continue; // not a projectile
+
+		cnt++;
+    }
+
+	return cnt;
+}
+
+
+// spawn one monster.
+gedict_t * bloodfest_spawn_monster(gedict_t *spot, char * classname)
+{
+	extern qbool G_CallSpawn( gedict_t * ent );
+
+	gedict_t *	oself;
+	gedict_t *	p = spawn();
+
+	p->s.v.classname = classname;
+	VectorCopy(spot->s.v.origin, p->s.v.origin);
+	VectorCopy(spot->s.v.angles, p->s.v.angles);
+	setorigin( p, PASSVEC3(p->s.v.origin) );
+
+	// G_CallSpawn will change 'self', so we have to do trick about it.
+	oself = self;	// save!!!
+
+	if (!G_CallSpawn( p ))
+	{
+		// failed to call spawn function, so remove it ASAP.
+		ent_remove( p );
+		p = NULL;
+	}
+
+	self = oself;	// restore!!!
+
+	return p;
+}
+
+// attempt to spawn more monsters.
+void bloodfest_spawn_monsters(void)
+{
+	gedict_t *		spot;
+	int				total_spawns;
+	int				i;
+
+	// precache: spawn all possible monsters and remove them so they precached.
+	if ( framecount == 1 )
+	{
+		for ( i = 0; i < monsters_names_count; i++ )
+			safe_ent_remove( bloodfest_spawn_monster( world, monsters_names[i] ) );
+
+		return;
+	}
+
+	if ( intermission_running || match_in_progress != 2 || match_over )
+			return;
+
+	// too much monsters, can't spawn more.
+	if (monsters_count() >= k_bloodfest_monsters)
+		return;
+
+	// find some random spawn point.
+	total_spawns = find_cnt( FOFCLSN, "info_monster_start" );
+
+	// can't find spawn point.
+	if ( !total_spawns || !(spot = find_idx( i_rnd(0, total_spawns - 1), FOFCLSN, "info_monster_start" )) )
+		return;
+
+	// spawn monster.
+	bloodfest_spawn_monster( spot, monsters_names[i_rnd(0, monsters_names_count - 1)] );
+}
+
+// remove monsters corpses, so there free edicts.
+void bloodfest_free_monsters(void)
+{
+	gedict_t *p;
+
+    for( p = world; ( p = nextent( p ) ); )
+    {
+		if ( !( (int)p->s.v.flags & FL_MONSTER ) )
+			continue; // not a monster
+
+		if (match_in_progress == 2)
+		{
+			if ( ISLIVE( p ) )
+				continue; // not dead
+
+			if ( p->dead_time && p->dead_time + 5 > g_globalvars.time )
+				continue; // time is not come yet
+		}
+
+		ent_remove( p );
+    }
+}
+
+// remove projectiles if there too much.
+void bloodfest_free_projectiles(void)
+{
+	int remove;
+	gedict_t *p;
+
+	remove = projectiles_count() - k_bloodfest_projectiles;
+
+    for( p = world; remove > 0 && ( p = nextent( p ) ); )
+    {
+		if ( !p->isMissile )
+			continue; // not a projectile
+
+		if ( PROG_TO_EDICT( p->s.v.owner )->ct == ctPlayer )
+			continue; // can't remove players projectiles.
+
+		ent_remove( p );
+		remove--;
+    }
+}
+
+// main clients bloodfest hook.
+void bloodfest_client_think(void)
+{
+	if ( self->ct != ctPlayer )
+		return;
+}
+
+// called each time something/someone is killed.
+void bloodfest_killed_hook( gedict_t * killed )
+{
+    gedict_t *p;
+
+	if ( killed->ct != ctPlayer )
+		return;
+
+    for( p = world; (p = find_plr( p )); )
+    {
+		if ( ISLIVE( p ) )
+			return; // we found at least one alive player!
+	}
+
+	// all players is dead, so issue end match now!
+	EndMatch( 0 );	
+}
+
+// main bloodfest hook.
+void bloodfest_think(void)
+{
+	bloodfest_spawn_monsters();
+	bloodfest_free_projectiles();
+	bloodfest_free_monsters();
+}
+
+//============================================================================
+
 void MonsterDropPowerups()
 {
 	int i;
@@ -59,7 +291,9 @@ void MonsterDropPowerups()
 
 		case 1:
 
-		if ( /* cvar( "dr" ) && */ cvar("k_pow_r") )
+		if ( k_bloodfest && cvar("k_pow_p") )
+			DropPowerup( 30, IT_INVULNERABILITY );
+		else if ( /* cvar( "dr" ) && */ cvar("k_pow_r") )
 			DropPowerup( 30, IT_INVISIBILITY );
 
 		break;
@@ -142,10 +376,16 @@ void check_monsters_respawn( void )
 	if ( deathmatch )
 		return; // no need in dm
 
+	if ( cvar( "k_bloodfest" ) )
+	{
+		bloodfest_think();
+		return;
+	}
+
 	if ( skill < 3 )
 		return; // skill 3 or more required
 
-	if ( cvar( "k_monster_spawn_time") <= 0 )
+	if ( cvar( "k_monster_spawn_time" ) <= 0 )
 		return;
 
     for( p = world; ( p = nextent( p ) ); )
@@ -170,6 +410,45 @@ void check_monsters_respawn( void )
 		self = oself;	// restore
     }
 }
+
+//============================================================================
+
+/*
+ * Checking is it possibile to put entity at position with such minx/maxs.
+ * !!! Pretty expensive for CPU. USE WITH CARE !!!
+*/
+static qbool is_location_occupied(gedict_t * e, vec3_t pos, vec3_t mins, vec3_t maxs)
+{
+	qbool occupied = false;
+	gedict_t * p;
+	vec3_t origin_copy, pos_copy;
+
+	// have to copy origin.
+	VectorCopy(self->s.v.origin, origin_copy);
+	// have to copy position since it most of the time
+	// is e->s.v.origin which is gonna be changed one line below.
+	VectorCopy(pos, pos_copy);
+
+	// have to change origin, so damned TraceCapsule() working as expected.
+	setorigin( self, 1.0e+5, 1.0e+5, 1.0e+5 );
+
+	TraceCapsule( PASSVEC3( pos_copy ), PASSVEC3( pos_copy ), false, e, PASSVEC3( mins ), PASSVEC3( maxs ) );
+
+	p = PROG_TO_EDICT( g_globalvars.trace_ent );
+
+	if (    g_globalvars.trace_startsolid
+		 ||	g_globalvars.trace_fraction != 1
+		 || ( p != e && p != world && (p->s.v.solid == SOLID_BSP || p->s.v.solid == SOLID_SLIDEBOX) )
+       ) {
+		occupied = true; // positon occupied.
+	}
+
+	// restore origin.
+	setorigin( self, PASSVEC3(origin_copy) );
+
+	return occupied;
+}
+
 
 //============================================================================
 
@@ -210,9 +489,19 @@ void monster_start_go( monsterType_t mt )
 	self->s.v.solid = SOLID_SLIDEBOX;
 	self->s.v.takedamage = DAMAGE_AIM;
 
-	if ( !walkmove( self, 0, 0 ) )
+	if ( /*!walkmove( self, 0, 0 )*/
+			is_location_occupied( self, self->s.v.origin, self->s.v.mins, self->s.v.maxs )
+	)
 	{
-//		G_bprint( 2, "monster in wall at: %.1f %.1f %.1f\n", self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] );
+		if ( k_bloodfest )
+		{
+//			G_cprint( "monster (%s) in wall at: %.1f %.1f %.1f, removed!\n",
+//				self->s.v.classname, self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] );
+
+			ent_remove( self ); // remove it ASAP.
+			return;
+		}
+
 		G_cprint( "monster in wall at: %.1f %.1f %.1f\n", self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] );
 
 		self->s.v.model = ""; // turn off model
@@ -303,7 +592,6 @@ static void common_monster_start( char *model, int flags )
 	{
 		// FL_MONSTER set, so we spawn monster non first time, it should be nightmare mode...
 
-		self->s.v.model = ""; // turn off model
 		self->s.v.solid = SOLID_NOT;
 		setorigin( self, PASSVEC3( self->s.v.oldorigin ) ); // move monster back to his first spawn origin
 		VectorCopy( self->oldangles, self->s.v.angles ); // restore angles
@@ -312,11 +600,14 @@ static void common_monster_start( char *model, int flags )
 	{
 		// FL_MONSTER not set, should be first monster spawn
 
-		setmodel( self, model ); // set model
+		setmodel( self, model ); // set model (so modelindex is initialized)
 		self->mdl = self->s.v.model; // save model
 		VectorCopy( self->s.v.origin, self->s.v.oldorigin ); // save first spawn origin
 		VectorCopy( self->s.v.angles, self->oldangles ); // save angles
 	}
+
+	// turn off model since monster spawn complete in monster_start_go().
+	self->s.v.model = "";
 
 	// always set FL_MONSTER and possibily add some additional flags
 	self->s.v.flags = (int)self->s.v.flags | FL_MONSTER | flags;

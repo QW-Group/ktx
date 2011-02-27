@@ -26,6 +26,8 @@
 #include "g_local.h"
 
 void	ClientObituary( gedict_t * e1, gedict_t * e2 );
+float	bloodfest_monster_damage_factor(void);
+void	bloodfest_killed_hook(gedict_t * killed);
 
 #define DEATHTYPE( _dt_, _dt_str_ ) #_dt_str_,
 char *deathtype_strings[] =
@@ -275,6 +277,9 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 		   )
 		)
 		EndMatch( 0 );
+
+	if ( k_bloodfest )
+		bloodfest_killed_hook( targ );
 }
 
 #ifndef Q3_VM
@@ -383,6 +388,13 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	if ( (int)cvar("k_midair") )
 		midair = true;
+
+	// in bloodfest mode monsters do more damage with times.
+	if ( k_bloodfest && ( (int)attacker->s.v.flags & FL_MONSTER ) )
+	{
+		damage *= bloodfest_monster_damage_factor();
+		damage = max(1, damage);
+	}
 
 	// check for quad damage powerup on the attacker
 	// midair quad makes rockets fast, but no change to damage

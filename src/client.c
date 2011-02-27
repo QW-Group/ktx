@@ -661,6 +661,9 @@ void NextLevel()
 {
 	gedict_t       *o;
 
+	if ( k_bloodfest )
+		return;
+
 	if ( nextmap[0] )
 		return;		// already done
 
@@ -1229,7 +1232,10 @@ void ClientConnect()
 	self->ct = ctPlayer;
 	self->s.v.classname = "player";
 	self->k_accepted = 1; // ok, we allowed to connect
-	self->ready = ((match_in_progress || k_matchLess) ? 1 : 0);
+
+	// if match in progress then set client read anyway.
+	// if there matchless mode and bloodfest is not active then set client ready too.
+	self->ready = ((match_in_progress || (k_matchLess && !k_bloodfest)) ? 1 : 0);
 
 	// if the guy started connecting during intermission and
 	// thus missed the svc_intermission, we'd better let him know
@@ -1438,7 +1444,7 @@ void PutClientInServer( void )
 		return;
 	}
 
-	if ( deathmatch == 4 && match_in_progress == 2 )
+	if ( ( deathmatch == 4 || k_bloodfest ) && match_in_progress == 2 )
 	{
 		float dmm4_invinc_time = cvar("dmm4_invinc_time");
 
@@ -1689,7 +1695,12 @@ void PlayerDeathThink()
 
 	if( (g_globalvars.time - self->dead_time) > respawn_time )
 	{
+		// do not allow respawn in bloodfest mode.
+		if ( k_bloodfest && match_in_progress )
+			return;
+
 		k_respawn( self, true );
+
 		return;
 	}
 // }
@@ -1705,6 +1716,10 @@ void PlayerDeathThink()
 
 // wait for any button down
 	if ( !self->s.v.button2 && !self->s.v.button1 && !self->s.v.button0 && !self->wreg_attack )
+		return;
+
+	// do not allow respawn in bloodfest mode.
+	if ( k_bloodfest && match_in_progress )
 		return;
 
 	k_respawn( self, true );

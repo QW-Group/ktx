@@ -167,6 +167,7 @@ void SpawnMeatSpray( vec3_t org, vec3_t vel )
 	missile = spawn();
 	missile->s.v.owner = EDICT_TO_PROG( self );
 	missile->s.v.movetype = MOVETYPE_BOUNCE;
+	missile->isMissile = true;
 	missile->s.v.solid = SOLID_NOT;
 
 	trap_makevectors( self->s.v.angles );
@@ -385,6 +386,7 @@ void FireInstaBullet( vec3_t dir, deathType_t deathtype )
         g_globalvars.newmis = EDICT_TO_PROG( newmis );
         newmis->s.v.owner = EDICT_TO_PROG( self );
         newmis->s.v.movetype = MOVETYPE_FLYMISSILE;
+		newmis->isMissile = true;
         newmis->s.v.solid = SOLID_BBOX;
 		
 		trap_makevectors( self->s.v.v_angle );
@@ -739,7 +741,7 @@ void W_FireShotgun()
 	WriteByte( MSG_ONE, SVC_SMALLKICK );
 
     if ( match_in_progress == 2 )
-		if ( deathmatch != 4 )
+		if ( deathmatch != 4 && !k_bloodfest )
 			self->s.v.currentammo = --( self->s.v.ammo_shells );
 
 	//dir = aim (self, 100000);
@@ -783,7 +785,7 @@ void W_FireSuperShotgun()
 	WriteByte( MSG_ONE, SVC_BIGKICK );
 
     if ( match_in_progress == 2 )
-		if ( deathmatch != 4 )
+		if ( deathmatch != 4 && !k_bloodfest )
 			self->s.v.currentammo = self->s.v.ammo_shells = self->s.v.ammo_shells - 2;
 
 	//dir = aim (self, 100000);
@@ -920,7 +922,7 @@ void W_FireRocket()
 	self->ps.wpn[wpRL].attacks++;
 
     if ( match_in_progress == 2 )
-		if ( deathmatch != 4 )
+		if ( deathmatch != 4 && !k_bloodfest )
 			self->s.v.currentammo = self->s.v.ammo_rockets = self->s.v.ammo_rockets - 1;
 
 	sound( self, CHAN_WEAPON, "weapons/sgun1.wav", 1, ATTN_NORM );
@@ -932,6 +934,7 @@ void W_FireRocket()
 	g_globalvars.newmis = EDICT_TO_PROG( newmis );
 	newmis->s.v.owner = EDICT_TO_PROG( self );
 	newmis->s.v.movetype = MOVETYPE_FLYMISSILE;
+	newmis->isMissile = true;
 	newmis->s.v.solid = SOLID_BBOX;
 
 // set newmis speed     
@@ -1093,7 +1096,7 @@ void W_FireLightning()
 	WriteByte( MSG_ONE, SVC_SMALLKICK );
 
     if ( match_in_progress == 2 )
-		if ( deathmatch != 4 )
+		if ( deathmatch != 4 && !k_bloodfest )
 			self->s.v.currentammo = self->s.v.ammo_cells = self->s.v.ammo_cells - 1;
 
 	VectorCopy( self->s.v.origin, org );	//org = self->s.v.origin + '0 0 16';
@@ -1182,7 +1185,7 @@ void W_FireGrenade()
 	self->ps.wpn[wpGL].attacks++;
 
     if ( match_in_progress == 2 )
-		if ( deathmatch != 4 )
+		if ( deathmatch != 4 && !k_bloodfest )
 			self->s.v.currentammo = self->s.v.ammo_rockets = self->s.v.ammo_rockets - 1;
 
 	sound( self, CHAN_WEAPON, "weapons/grenade.wav", 1, ATTN_NORM );
@@ -1196,6 +1199,7 @@ void W_FireGrenade()
 	newmis->voided = 0;
 	newmis->s.v.owner = EDICT_TO_PROG( self );
 	newmis->s.v.movetype = MOVETYPE_BOUNCE;
+	newmis->isMissile = true;
 	newmis->s.v.solid = SOLID_BBOX;
 	newmis->s.v.classname = "grenade";
 
@@ -1266,6 +1270,7 @@ void launch_spike( vec3_t org, vec3_t dir )
 	newmis->voided = 0;
 	newmis->s.v.owner = EDICT_TO_PROG( self );
 	newmis->s.v.movetype = MOVETYPE_FLYMISSILE;
+	newmis->isMissile = true;
 	newmis->s.v.solid = SOLID_BBOX;
 
 	newmis->s.v.touch = ( func_t ) spike_touch;
@@ -1397,7 +1402,7 @@ void W_FireSuperSpikes()
 	self->attack_finished = g_globalvars.time + 0.2;
 
     if ( match_in_progress == 2 )
-		if ( deathmatch != 4 )
+		if ( deathmatch != 4 && !k_bloodfest )
 			self->s.v.currentammo = self->s.v.ammo_nails = self->s.v.ammo_nails - 2;
 	aim( dir );		//dir = aim (self, 1000);
 
@@ -1446,7 +1451,7 @@ void W_FireSpikes( float ox )
 	self->attack_finished = g_globalvars.time + 0.2;
 
     if ( match_in_progress == 2 )
-		if ( deathmatch != 4 )
+		if ( deathmatch != 4 && !k_bloodfest )
 			self->s.v.currentammo = self->s.v.ammo_nails = self->s.v.ammo_nails - 1;
 
 	aim( dir );		// dir = aim (self, 1000);

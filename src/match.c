@@ -1193,6 +1193,12 @@ void EndMatch ( float skip_log )
 
 	EM_CorrectStats();
 
+	if ( k_bloodfest )
+	{
+		extern void bloodfest_stats(void);
+		bloodfest_stats();
+	}
+
 	if ( /* skip_log || */ !deathmatch )
 	{
 		;
@@ -1244,6 +1250,10 @@ void EndMatch ( float skip_log )
 	StopLogs();
 
 	NextLevel();
+
+	// allow ready/break in bloodfest without map reloading.
+	if ( k_bloodfest )
+		match_over = 0;
 }
 
 void SaveOvertimeStats ()
@@ -1411,6 +1421,7 @@ void SM_PrepareMap()
 		if (   isRA()
 			|| ( deathmatch == 4 && cvar("k_instagib") )
 			|| cvar("k_noitems")
+			|| k_bloodfest
 		   )
 		{
 			if (
@@ -1545,8 +1556,8 @@ void SM_PrepareClients()
 			continue;
 		}
 
-		// ignore k_respawn() in case of coop
-		if ( !deathmatch )
+		// ignore k_respawn() in case of coop unless bloodfest
+		if ( !deathmatch && !k_bloodfest )
 			continue;
 
 		// ignore  k_respawn() in case of CA
@@ -2419,7 +2430,7 @@ void PlayerReady ()
 
 	if ( self->ct == ctSpec ) {
 
-		if ( !cvar("k_auto_xonx") ) {
+		if ( !cvar("k_auto_xonx") || k_matchLess ) {
 			G_sprint(self, 2, "Command not allowed\n");
 			return;
 		}
@@ -2525,8 +2536,12 @@ void PlayerReady ()
 	
 	// ok all players ready
 
-	if ( nready < 2 ) // only one or less players ready, match is pointless
-		return;
+	// ignore 2 players requirement in bloodfest mode.
+	if ( !k_bloodfest )
+	{
+		if ( nready < 2 ) // only one or less players ready, match is pointless
+			return;
+	}
 
 	G_bprint(2, "All players ready\n"
 				"Timer started\n");

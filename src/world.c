@@ -708,6 +708,8 @@ void FirstFrame	( )
 	
 	RegisterCvarEx("k_killquad", "0");
 
+	RegisterCvarEx("k_bloodfest", "0");
+
 	RegisterCvarEx("k_nightmare_pu", "0");
 	RegisterCvarEx("k_nightmare_pu_droprate", "0.15");
 	RegisterCvarEx("k_instagib", "0");
@@ -1064,6 +1066,8 @@ void FixRules ( )
 	int k_minr = bound(0, cvar( "k_minrate" ),  100000);
 	int k_maxr = bound(0, cvar( "sv_maxrate" ), 100000);
 
+	k_bloodfest = cvar( "k_bloodfest" );
+
 	k_killquad = cvar( "k_killquad" );
 
 	skill = cvar( "skill" );
@@ -1256,7 +1260,7 @@ void StartFrame( int time )
 			&& !strnull( cvar_string( "serverdemo" ) ) )
 		localcmd("stop\n"); // demo is recording, stop it and save
 
-	if ( k_matchLess && !match_in_progress )
+	if ( k_matchLess && !match_in_progress && !k_bloodfest )
 		StartTimer(); // trying start countdown in matchless mode
 
 	if ( isRA() )

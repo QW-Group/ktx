@@ -904,6 +904,7 @@ void race_spawn_meat( gedict_t *player, char *gibname, float vel )
 	setsize( newent, 0, 0, 0, 0, 0, 0 );
 	race_VelocityForDamage( vel, player->s.v.velocity, newent->s.v.velocity );
 	newent->s.v.movetype		= MOVETYPE_BOUNCE;
+	newent->isMissile			= true;
 	newent->s.v.solid			= SOLID_TRIGGER; // SOLID_NOT;
 	newent->s.v.avelocity[0]	= g_random() * 600;
 	newent->s.v.avelocity[1]	= g_random() * 600;
@@ -1087,7 +1088,7 @@ gedict_t *spawn_race_node( raceRouteNode_t *node )
 	setmodel( e, model_for_nodeType( node->type ) );
 	setsize( e, PASSVEC3( VEC_HULL_MIN ), PASSVEC3( VEC_HULL_MAX ) );
 	e->s.v.solid		= SOLID_TRIGGER;
-	e->s.v.movetype		= MOVETYPE_FLY;
+	e->s.v.movetype		= MOVETYPE_FLY; // qqshka: hrm, why its fly?
 	e->s.v.flags		= FL_ITEM;
 	e->s.v.classname	= classname;
 	e->s.v.noise		= touch_sound_for_nodeType( node->type );

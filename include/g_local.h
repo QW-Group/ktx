@@ -781,6 +781,7 @@ gedict_t 	*race_get_racer( void );
 
 // globals.c
 
+extern  int   k_bloodfest;		// blood fest mode
 extern	float k_killquad;	    // killquad mode
 extern	float framechecks;	    // if timedemo/uptime bugs are tolerated
 extern	float k_attendees;      // stores number of players on server - used in 'ready' checking

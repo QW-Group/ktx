@@ -411,6 +411,7 @@ void ZombieFireGrenade( float st_x, float st_y, float st_z )
 	missile                = spawn ();
 	missile->s.v.owner     = EDICT_TO_PROG ( self );
 	missile->s.v.movetype  = MOVETYPE_BOUNCE;
+	missile->isMissile	   = true;
 	missile->s.v.solid     = SOLID_BBOX;
 
 	// calc org

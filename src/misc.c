@@ -202,6 +202,7 @@ void fire_fly()
 	fireball = spawn();
 	fireball->s.v.solid = SOLID_TRIGGER;
 	fireball->s.v.movetype = MOVETYPE_TOSS;
+	fireball->isMissile = true; // well, you can really treat fireball as missilie, nothing bad gonna heppen.
 	SetVector( fireball->s.v.velocity,
 		   ( g_random() * 100 ) - 50,
 		   ( g_random() * 100 ) - 50, self->speed + ( g_random() * 200 ) );
@@ -382,6 +383,7 @@ void LaunchLaser( vec3_t org, vec3_t vec )
 	g_globalvars.newmis = EDICT_TO_PROG( newmis );
 	newmis->s.v.owner = EDICT_TO_PROG( self );
 	newmis->s.v.movetype = MOVETYPE_FLY;
+	newmis->isMissile = true;
 	newmis->s.v.solid = SOLID_BBOX;
 	newmis->s.v.effects = EF_DIMLIGHT;
 

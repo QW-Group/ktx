@@ -92,6 +92,10 @@ float range( gedict_t *targ )
 	if ( r < 1000 )
 		return RANGE_MID;
 
+	// so monsters notice player father/faster in bloodfest mode.
+	if ( k_bloodfest )
+		return RANGE_MID;
+
 	return RANGE_FAR;
 }
 
@@ -355,21 +359,31 @@ void GetMadAtAttacker( gedict_t *attacker )
 	if ( !attacker || attacker == world )
 		return; // ignore world attacks
 
+	if ( k_bloodfest && attacker->ct != ctPlayer)
+		return; // in bloodfest mode get mad only on players.
+
+	if ( attacker == self )
+		return; // do not mad on self.
+	
+	if ( attacker == PROG_TO_EDICT( self->s.v.enemy ))
+		return; // alredy mad on this.
+
 	// get mad unless of the same class (except for soldiers)
-	if ( self != attacker && attacker != PROG_TO_EDICT( self->s.v.enemy ) )
-	{
-		if ( strneq( self->s.v.classname, attacker->s.v.classname ) || streq( self->s.v.classname, "monster_army" ) )
-		{
-			// remember current enemy if it was "player enemy", later we restore it
-			if ( PROG_TO_EDICT( self->s.v.enemy )->ct == ctPlayer )
-				self->oldenemy = PROG_TO_EDICT( self->s.v.enemy );
+	if (   streq( self->s.v.classname, attacker->s.v.classname )
+		&& strneq( self->s.v.classname, "monster_army" ) 
+	)
+		return; 
 
-			// set new enemy
-			self->s.v.enemy = EDICT_TO_PROG( attacker );
+	// OK, we are MAD!
 
-			FoundTarget ();
-		}
-	}
+	// remember current enemy if it was "player enemy", later we restore it
+	if ( PROG_TO_EDICT( self->s.v.enemy )->ct == ctPlayer )
+		self->oldenemy = PROG_TO_EDICT( self->s.v.enemy );
+
+	// set new enemy
+	self->s.v.enemy = EDICT_TO_PROG( attacker );
+
+	FoundTarget ();
 }
 
 //=============================================================================
