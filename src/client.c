@@ -1981,7 +1981,7 @@ void ClientDisconnect()
 	}
 
 	DropRune();
-	PlayerDropFlag( self );
+	PlayerDropFlag( self, false );
 
 // s: added conditional function call here
 	if( self->v.elect_type != etNone ) {
