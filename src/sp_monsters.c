@@ -309,33 +309,16 @@ void bloodfest_killed_hook( gedict_t * killed, gedict_t * attacker )
 		return;
 
 	// so regen.
-	// frist we try regen health to some point,
-	// then we regen armor to some point,
-	// and yet again we trying regen health to some higher point,
-	// and finally we regen armor to some higher point.
-	// this way you have somehow even armor and health.
 
-	if ( attacker->s.v.health < 150 )
-	{
-		attacker->s.v.health++;
-	}
-	else if ( attacker->s.v.armorvalue < 150 )
-	{
-		attacker->s.v.armorvalue++;	
-	}
-	else if ( attacker->s.v.health < 250 )
+	if ( attacker->s.v.health < 250 )
 	{
 		attacker->s.v.health++;	
 	}
-	else if ( attacker->s.v.armorvalue < 250 )
+	
+	if ( attacker->s.v.armorvalue < 200 )
 	{
 		attacker->s.v.armorvalue++;	
-	}
-
-	// reset armor.
-	if ( attacker->s.v.armorvalue > 0 )
-	{
-		// remove all armors plus add red armor.
+		// remove all armors add red armor.
 		attacker->s.v.items += IT_ARMOR3 - ( ( int ) attacker->s.v.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) );
 		attacker->s.v.armortype = 0.8;
 	}

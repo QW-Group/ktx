@@ -1598,6 +1598,7 @@ void powerup_touch()
 {
 	float	*p_cnt = NULL;
 	float	real_time = 30;
+	float	old_pu_time = 0;
 	char	*playername;
 
 	if ( strnull ( self->s.v.classname ) )
@@ -1673,6 +1674,7 @@ void powerup_touch()
 // do the apropriate action
 	if ( streq( self->s.v.classname, "item_artifact_envirosuit" ) )
 	{
+		old_pu_time = other->radsuit_finished;
 		other->rad_time = 1;
 		other->radsuit_finished = g_globalvars.time + 30;
 
@@ -1681,6 +1683,7 @@ void powerup_touch()
 	}
 	else if ( streq( self->s.v.classname, "item_artifact_invulnerability" ) )
 	{
+		old_pu_time = other->invincible_finished;
 		adjust_pickup_time( &other->p_pickup_time, &other->ps.itm[itPENT].time );
 		other->p_pickup_time = g_globalvars.time;
 
@@ -1693,6 +1696,7 @@ void powerup_touch()
 	}
 	else if ( streq( self->s.v.classname, "item_artifact_invisibility" ) )
 	{
+		old_pu_time = other->invisible_finished;
 		adjust_pickup_time( &other->r_pickup_time, &other->ps.itm[itRING].time );
 		other->r_pickup_time = g_globalvars.time;
 
@@ -1705,6 +1709,7 @@ void powerup_touch()
 	}
 	else if ( streq( self->s.v.classname, "item_artifact_super_damage" ) )
 	{
+		old_pu_time = other->super_damage_finished;
 		adjust_pickup_time( &other->q_pickup_time, &other->ps.itm[itQUAD].time );
 		other->q_pickup_time = g_globalvars.time;
 
@@ -1727,13 +1732,25 @@ void powerup_touch()
 	else
 		return;
 
-	if ( p_cnt ) {  // is this was a dropped powerup
-			p_cnt[0] = self->cnt;
-			mi_print( other, self->s.v.items, va( "%s got a %s with %d seconds left",
-			  					other->s.v.netname, self->s.v.netname,
-			  					( int ) ( p_cnt[0] - g_globalvars.time ) ));
-			real_time = p_cnt[0] - g_globalvars.time;
-			SUB_RM_01( self );// remove later
+	if ( p_cnt )  // is this was a dropped powerup
+	{
+		float seconds_left = self->cnt - g_globalvars.time; // seconds left on quad.
+
+		// sum up seconds player alredy have and seconds on quad left.
+		p_cnt[0] = max(g_globalvars.time, old_pu_time) + seconds_left;
+		// do not allow more than 30 seconds of quad anyway.
+		p_cnt[0] = min(g_globalvars.time + 30, p_cnt[0]);
+
+		seconds_left = p_cnt[0] - g_globalvars.time;
+		real_time = seconds_left;
+
+//		if ( k_bloodfest )
+//			G_sprint( other, 2, "Your %s have %d seconds left\n", self->s.v.netname, ( int )seconds_left );
+
+		mi_print( other, self->s.v.items, va( "%s got a %s with %d seconds left",
+		  					other->s.v.netname, self->s.v.netname, ( int )seconds_left ));
+
+		SUB_RM_01( self );// remove later
 	}
 	else
 	{
