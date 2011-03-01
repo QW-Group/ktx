@@ -50,6 +50,7 @@ int	  k_bloodfest_monsters_to_spawn;			// amount of monsters we want to spawn in
 
 static char *monsters_names[] =
 {
+	"monster_fish",	// WARNING: FISH MUST BE FIRST IN ARRAY, I HAVE HACK FOR IT IN bloodfest_spawn_monsters()!!!
 	"monster_ogre",
 	"monster_demon1",
 	"monster_shambler",
@@ -61,7 +62,6 @@ static char *monsters_names[] =
 //	"monster_boss",			// e1m7 boss, can't use it here.
 	"monster_tarbaby",
 	"monster_hell_knight",
-//	"monster_fish",			// you have to spawn it in water, can't use it here.
 	"monster_shalrath",
 	"monster_enforcer",
 //	"monster_oldone",		// end boss, can't use it here.
@@ -204,6 +204,7 @@ void bloodfest_spawn_monsters(void)
 	gedict_t *		spot;
 	int				total_spawns;
 	int				i;
+	intptr_t		content;
 
 	// precache: spawn all possible monsters and remove them so they precached.
 	if ( framecount == 1 )
@@ -233,8 +234,14 @@ void bloodfest_spawn_monsters(void)
 	if ( !total_spawns || !(spot = find_idx( i_rnd(0, total_spawns - 1), FOFCLSN, "info_monster_start" )) )
 		return;
 
+	// get spawn content.
+	content = trap_pointcontents( PASSVEC3( spot->s.v.origin ) );
 	// spawn monster.
-	bloodfest_spawn_monster( spot, monsters_names[i_rnd(0, monsters_names_count - 1)] );
+	if ( content == CONTENT_WATER )
+		bloodfest_spawn_monster( spot, monsters_names[0] ); // HACK: spawn fish.
+	else
+		bloodfest_spawn_monster( spot, monsters_names[i_rnd(1, monsters_names_count - 1)] );
+
 	// reduce amount to spawn next time.
 	k_bloodfest_monsters_to_spawn--;
 }
