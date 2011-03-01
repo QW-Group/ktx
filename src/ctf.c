@@ -372,7 +372,7 @@ void FlagTouch()
 			other->ps.ctf_points += RETURN_BONUS;
 			other->ps.returns++;
 			other->return_flag_time = g_globalvars.time;
-			sound (other, CHAN_ITEM, self->s.v.noise1, 1, ATTN_NORM);
+			sound (other, CHAN_ITEM, self->s.v.noise1, 1, ATTN_NONE);
 			RegenFlag( self );
 
 			G_bprint( 2, "%s", other->s.v.netname);
@@ -395,7 +395,7 @@ void FlagTouch()
 	refresh_plus_scores (); // update players status bar faster
 
 	// Pick up the flag
-	sound( other, CHAN_ITEM, self->s.v.noise, 1, ATTN_NORM );
+	sound( other, CHAN_ITEM, self->s.v.noise, 1, ATTN_NONE );
 	other->ctf_flag |= CTF_FLAG;
 
 	other->s.v.items = (int) other->s.v.items | (int) self->s.v.items;

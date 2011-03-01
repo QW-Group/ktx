@@ -3036,7 +3036,7 @@ const char ctf_um_init[] =
 	"coop 0\n"
 	"maxclients 16\n"
 	"k_maxclients 16\n"
-	"timelimit 20\n"
+	"timelimit 10\n"
 	"teamplay 4\n"
 	"deathmatch 3\n"
 	"k_dis 2\n"				// no out of water discharges in ctf
