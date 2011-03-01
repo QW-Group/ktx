@@ -39,6 +39,8 @@ static const int k_bloodfest_projectiles = 30;	// maximum projectiles allowed in
 static const float k_bloodfest_monsters_spawn_period = 20;	// with which perioud we should issue monsters wave.
 static const float k_bloodfest_monsters_spawn_factor = 0.2;	// monsters population is bigger by this each wave.
 static const int   k_bloodfest_monsters_spawn_initial = 10;	// monsters population in first wave.
+static const int   k_bloodfest_regen_hp = 3;
+static const int   k_bloodfest_regen_armor = 2;
 
 static const float k_bloodfest_monsters_damage_factor = 90;	// 
 
@@ -87,8 +89,12 @@ static void safe_ent_remove( gedict_t * t )
 // monsters do more damage with times, so its harder to survive.
 float bloodfest_monster_damage_factor(void)
 {
+#if 1
+	return 1;
+#else
 	float factor = match_start_time ? 1 + (g_globalvars.time - match_start_time) / k_bloodfest_monsters_damage_factor : 1;
 	return bound(1, factor, 999999);
+#endif
 }
 
 void SP_info_monster_start()
@@ -312,12 +318,12 @@ void bloodfest_killed_hook( gedict_t * killed, gedict_t * attacker )
 
 	if ( attacker->s.v.health < 250 )
 	{
-		attacker->s.v.health++;	
+		attacker->s.v.health += k_bloodfest_regen_hp;	
 	}
 	
 	if ( attacker->s.v.armorvalue < 200 )
 	{
-		attacker->s.v.armorvalue++;	
+		attacker->s.v.armorvalue += k_bloodfest_regen_armor;	
 		// remove all armors add red armor.
 		attacker->s.v.items += IT_ARMOR3 - ( ( int ) attacker->s.v.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) );
 		attacker->s.v.armortype = 0.8;

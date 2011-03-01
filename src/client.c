@@ -1052,7 +1052,8 @@ qbool CanConnect()
 		return false; // _can't_ connect
 	}
 
-	if( !match_in_progress || k_matchLess ) { // no ghost, team, etc... checks in matchLess mode
+	// no ghost, team, etc checks in matchLess mode.
+	if( !match_in_progress || ( k_matchLess && !k_bloodfest ) ) {
 		G_bprint(2, "%s entered the game\n", self->s.v.netname);
 		return true; // can connect
 	}
