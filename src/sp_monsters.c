@@ -373,9 +373,7 @@ void MonsterDropPowerups()
 
 		case 1:
 
-		if ( k_bloodfest && cvar("k_pow_p") )
-			DropPowerup( 30, IT_INVULNERABILITY );
-		else if ( /* cvar( "dr" ) && */ cvar("k_pow_r") )
+		if ( /* cvar( "dr" ) && */ cvar("k_pow_r") )
 			DropPowerup( 30, IT_INVISIBILITY );
 
 		break;
