@@ -260,14 +260,16 @@ void DoSelectMap(int iMap)
 		return;
 	}
 
-	if ( k_matchLess ) {
+	if ( k_matchLess && !k_bloodfest )
+	{
 		if ( cvar("k_no_vote_map") ) {
 			G_sprint(self, 2, "Voting map is %s allowed\n", redtext("not"));
 			return;
 		}
 
+		// you can select map in matchLess mode, but not in countdown.
 		if ( match_in_progress != 2 )
-			return; // u can select map in matchLess mode, but not in countdown
+			return;
 	}
 	else if ( match_in_progress )
 		return;
