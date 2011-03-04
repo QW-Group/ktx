@@ -38,7 +38,7 @@ static const int k_bloodfest_monsters = 100;	// maximum monsters allowed in bloo
 static const int k_bloodfest_projectiles = 30;	// maximum projectiles allowed in bloodfest mode.
 static const float k_bloodfest_monsters_spawn_period = 20;	// with which perioud we should issue monsters wave.
 static const float k_bloodfest_monsters_spawn_factor = 0.2;	// monsters population is bigger by this each wave.
-static const int   k_bloodfest_monsters_spawn_initial = 10;	// monsters population in first wave.
+static const int   k_bloodfest_monsters_spawn_initial = 20;	// monsters population in first wave.
 static const int   k_bloodfest_regen_hp = 3;
 static const int   k_bloodfest_regen_armor = 2;
 
