@@ -160,7 +160,7 @@ gedict_t * bloodfest_spawn_monster(gedict_t *spot, char * classname)
 	// G_CallSpawn will change 'self', so we have to do trick about it.
 	oself = self;	// save!!!
 
-	if (!G_CallSpawn( p ))
+	if (!G_CallSpawn( p ) || !p->s.v.solid)
 	{
 		// failed to call spawn function, so remove it ASAP.
 		ent_remove( p );
@@ -202,11 +202,13 @@ void bloodfest_wave_calculate(void)
 void bloodfest_spawn_monsters(void)
 {
 	gedict_t *		spot;
+	gedict_t *		p;
 	int				total_spawns;
 	int				i;
 	intptr_t		content;
 
 	// precache: spawn all possible monsters and remove them so they precached.
+	// we do it once at first frame of the map.
 	if ( framecount == 1 )
 	{
 		for ( i = 0; i < monsters_names_count; i++ )
@@ -227,20 +229,37 @@ void bloodfest_spawn_monsters(void)
 	if ( monsters_count( true ) >= k_bloodfest_monsters )
 		return;
 
-	// find some random spawn point.
+	// find total amount of spots.
 	total_spawns = find_cnt( FOFCLSN, "info_monster_start" );
 
 	// can't find spawn point.
-	if ( !total_spawns || !(spot = find_idx( i_rnd(0, total_spawns - 1), FOFCLSN, "info_monster_start" )) )
+	if ( !total_spawns )
 		return;
 
-	// get spawn content.
-	content = trap_pointcontents( PASSVEC3( spot->s.v.origin ) );
-	// spawn monster.
-	if ( content == CONTENT_WATER )
-		bloodfest_spawn_monster( spot, monsters_names[0] ); // HACK: spawn fish.
-	else
-		bloodfest_spawn_monster( spot, monsters_names[i_rnd(1, monsters_names_count - 1)] );
+	// attempt to spawn one monster,
+	// we trying to do it few times in row since we can fail because spawn point is busy or something.
+	for ( i = 0; i < 10; i++ )
+	{
+		// find some random spawn point.
+		spot = find_idx( i_rnd(0, total_spawns - 1), FOFCLSN, "info_monster_start" );
+
+		// can't find.
+		if ( !spot )
+			break;
+
+		// get spawn content.
+		content = trap_pointcontents( PASSVEC3( spot->s.v.origin ) );
+		// spawn monster.
+		if ( content == CONTENT_WATER )
+			p = bloodfest_spawn_monster( spot, monsters_names[0] ); // HACK: spawn fish.
+		else
+			p = bloodfest_spawn_monster( spot, monsters_names[i_rnd(1, monsters_names_count - 1)] );
+
+		if ( p )
+			break; // spawned something.
+
+//		G_cprint("respawn %d\n", i);
+	}
 
 	// reduce amount to spawn next time.
 	k_bloodfest_monsters_to_spawn--;
@@ -693,6 +712,15 @@ static void common_monster_start( char *model, int flags )
 	self->s.v.flags = (int)self->s.v.flags | FL_MONSTER | flags;
 }
 
+void bloodfest_speedup_monster_spawn(void)
+{
+	if ( !k_bloodfest || !self->s.v.think )
+		return;
+
+	self->s.v.nextthink = g_globalvars.time;
+	( ( void ( * )() ) ( self->s.v.think ) ) ();
+}
+
 void walkmonster_start( char *model )
 {
 	common_monster_start( model, 0 );
@@ -701,6 +729,8 @@ void walkmonster_start( char *model )
 	// spread think times so they don't all happen at same time
 	self->s.v.nextthink = g_globalvars.time + 0.1 + g_random() * 0.5;
 	self->s.v.think = ( func_t ) walkmonster_start_go;
+
+	bloodfest_speedup_monster_spawn();
 }
 
 void flymonster_start( char *model )
@@ -711,6 +741,8 @@ void flymonster_start( char *model )
 	// spread think times so they don't all happen at same time
 	self->s.v.nextthink = g_globalvars.time + 0.1 + g_random() * 0.5;
 	self->s.v.think = ( func_t ) flymonster_start_go;
+
+	bloodfest_speedup_monster_spawn();
 }
 
 void swimmonster_start( char *model )
@@ -721,4 +753,6 @@ void swimmonster_start( char *model )
 	// spread think times so they don't all happen at same time
 	self->s.v.nextthink = g_globalvars.time + 0.1 + g_random() * 0.5;
 	self->s.v.think = (func_t) swimmonster_start_go;
+
+	bloodfest_speedup_monster_spawn();
 }
