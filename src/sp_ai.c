@@ -270,7 +270,6 @@ slower noticing monsters.
 float FindTarget()
 {
 	gedict_t	*client = NULL;
-	float		r;
 
 // if the first spawnflag bit is set, the monster will only wake up on
 // really seeing the player, not another monster getting angry
@@ -305,22 +304,27 @@ float FindTarget()
 	if ( (int)client->s.v.items & IT_INVISIBILITY )
 		return false;
 
-	r = range ( client );
-	if ( r == RANGE_FAR )
-		return false;
-
-	if ( !visible( client ) )
-		return false;
-
-	if ( r == RANGE_NEAR )
+	// in bloodfest mode monsters spot players always.
+	if ( !k_bloodfest )
 	{
-		if ( client->show_hostile < g_globalvars.time && !infront( client ) )
+		float		r = range ( client );
+
+		if ( r == RANGE_FAR )
 			return false;
-	}
-	else if ( r == RANGE_MID )
-	{
-		if ( /* client->show_hostile < g_globalvars.time || */ !infront( client ) )
+
+		if ( !visible( client ) )
 			return false;
+
+		if ( r == RANGE_NEAR )
+		{
+			if ( client->show_hostile < g_globalvars.time && !infront( client ) )
+				return false;
+		}
+		else if ( r == RANGE_MID )
+		{
+			if ( /* client->show_hostile < g_globalvars.time || */ !infront( client ) )
+				return false;
+		}
 	}
 
 //
