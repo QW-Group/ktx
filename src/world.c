@@ -1101,14 +1101,19 @@ void FixRules ( )
 	if ( isCTF() && !( k_allowed_free_modes & UM_CTF ) )
 		cvar_fset("k_mode", (float)( k_mode = gtTeam ));
 
-	// if we are in coop, then deathmatch should be 0
-	if ( cvar( "coop" ) )
+	if ( coop )
 	{
+		// if we are in coop, then deathmatch should be 0
 		if ( deathmatch )
 			trap_cvar_set_float("deathmatch", (deathmatch = 0));
+		// set some teamplay in coop mode.
+		if ( !teamplay )
+			trap_cvar_set_float("teamplay", (teamplay = 2));
 	}
 	else
 	{
+// qqshka: interesting, why I commented it out, since I do not recall case then we can have zero deathmatch
+//		  in non coop game.
 //		if ( !deathmatch )
 //			trap_cvar_set_float("deathmatch", (deathmatch = 3));
 	}
@@ -1122,9 +1127,11 @@ void FixRules ( )
 		trap_cvar_set_float("deathmatch", (deathmatch = 3));
 
 	if ( k_matchLess ) {
+		// matchless mode MUST be FFA
 		if ( !isFFA() )
 			trap_cvar_set_float("k_mode", (float)( k_mode = gtFFA ));
-		if ( teamplay ) // sanity
+		// matchless mode should have teamplay set to 0 unless coop.
+		if ( teamplay && !coop )
 			trap_cvar_set_float("teamplay", (teamplay = 0));
 	}
 
@@ -1134,7 +1141,7 @@ void FixRules ( )
 
 	// teamplay set, but gametype is not team, disable teamplay in this case
 	if ( teamplay ) {
-		if ( !isTeam() && !isCTF())
+		if ( !isTeam() && !isCTF() && !coop )
 			trap_cvar_set_float("teamplay", (teamplay = 0));
 	}
 	

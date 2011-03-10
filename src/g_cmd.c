@@ -461,7 +461,9 @@ qbool ClientSay( qbool isTeamSay )
 			}
 			else
 			{
-				if ( client->ct == ctSpec )
+				if ( self == client )
+					; // send msg to self anyway
+				else if ( client->ct == ctSpec )
 				{
 					goal = PROG_TO_EDICT( client->s.v.goalentity );
 
@@ -476,10 +478,12 @@ qbool ClientSay( qbool isTeamSay )
 					  )
 					continue;	// on different teams
 				}
-				else if (   self != client // send msg to self anyway
-						 && ((!isTeam() && !isCTF()) || strneq(team, ezinfokey(client, "team")))
-						)
-					continue;	// on different teams
+				else if ( coop )
+					; // allow team messages to everyone in coop from players.
+				else if ( !isTeam() && !isCTF() )
+					continue; // non team game
+				else if ( strneq(team, ezinfokey(client, "team")) )
+					continue; // on different teams
 			}
 		}
 

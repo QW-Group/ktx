@@ -1223,6 +1223,14 @@ void ClientConnect()
 
 	k_nochange = 0;
 
+	if ( coop )
+	{
+		// set proper team.
+		SetUserInfo( self, "team", "coop", 0 );
+		// sends this to client - so he get right team too.
+		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "team " "coop" "\n");
+	}
+
 	if ( !CanConnect() ) {
 		stuffcmd(self, "disconnect\n"); // FIXME: stupid way
 		return;

@@ -281,7 +281,7 @@ qbool FixPlayerTeam ( char *newteam )
 		return false;
 
 	// do not allow change team in game / countdown
-	if( match_in_progress )
+	if( match_in_progress || coop )
 	{
 		s1 = newteam;
 		s2 = getteam(self);
