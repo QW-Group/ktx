@@ -843,13 +843,20 @@ void ai_run( float dist )
 // check knowledge of enemy
 	enemy_vis = visible( PROG_TO_EDICT( self->s.v.enemy ) );
 	if ( enemy_vis )
-		self->search_time = g_globalvars.time + 5;
+		self->search_time = g_globalvars.time + 5; // does not search for enemy next 5 seconds
 
 // look for other coop players
 	if ( coop && self->search_time < g_globalvars.time )
 	{
 		if ( FindTarget() )
+		{
+			// this is fix for too frequent enemy sighting, required for bloodfest mode.
+			if ( !visible( PROG_TO_EDICT( self->s.v.enemy ) ) )
+			{
+				self->search_time = g_globalvars.time + 5; // does not search for enemy next 5 seconds
+			}
 			return;
+		}
 	}
 
 	enemy_infront = infront( PROG_TO_EDICT( self->s.v.enemy ) );
