@@ -2806,6 +2806,9 @@ void CheckLightEffects( void )
 	if ( self->racer && !match_in_progress )
 		g = true; // RACE
 
+	if ( k_bloodfest && ISLIVE( self ) )
+		g = true;
+
 	if ( self->super_damage_finished > g_globalvars.time )
 		b = true;
 
