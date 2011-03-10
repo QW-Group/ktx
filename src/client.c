@@ -3108,6 +3108,9 @@ void SendTeamInfo(gedict_t *t)
 		if ( strneq(tm, getteam( p )) )
 			continue; // on different team
 
+		if ( k_bloodfest && !ISLIVE(p) )
+			continue; // do not send it if mate is dead in bloodfest mode.
+
 		if ( strnull( nick = ezinfokey(p, "k_nick") ) ) // get nick, if any, do not send name, client can guess it too
 			nick = ezinfokey(p, "k");
 
@@ -3130,7 +3133,7 @@ void CheckTeamStatus( )
 	gedict_t *p;
 	int k_teamoverlay;
 
-	if ( !isTeam() && !isCTF() )
+	if ( !isTeam() && !isCTF() && !coop )
 		return; // non team game
 
 	if ( g_globalvars.time - lastTeamLocationTime < TEAM_LOCATION_UPDATE_TIME )
