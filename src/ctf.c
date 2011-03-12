@@ -660,6 +660,19 @@ void mctf()
 	G_sprint ( self, 2, "%s turn off: %s\n", getname(self), redtext("hook & runes") );
 }
 
+void CTFBasedSpawn()
+{
+	if( match_in_progress )
+		return;
+
+	if ( !isCTF() ) {
+		G_sprint ( self, 2, "Can't do this in non CTF mode\n" );
+		return;
+	}
+
+	cvar_toggle_msg( self, "k_ctf_based_spawn", redtext("spawn on the base") );
+}
+
 void CTF_Obituary( gedict_t *targ, gedict_t *attacker )
 {
 	qbool carrier_bonus = false;

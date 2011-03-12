@@ -1367,7 +1367,11 @@ void PutClientInServer( void )
 
 	if ( deathmatch )
 	{
-		if ( isCTF() && match_start_time == g_globalvars.time ) // first spawn in CTF on corresponding base
+		// first spawn in CTF on corresponding base, later used info_player_deathmatch.
+		// qqshka: I found that it sux and added variable which force players spawn ONLY on the base,
+		// so maps like qwq3wcp9 works fine!
+
+		if ( isCTF() && (match_start_time == g_globalvars.time || cvar("k_ctf_based_spawn") ) )
 			spot = SelectSpawnPoint(streq(getteam(self), "red") ? "info_player_team1" : "info_player_team2" );
 		else if ( isRA() && ( isWinner( self ) || isLoser( self ) ) )
 			spot = SelectSpawnPoint("info_teleport_destination" );

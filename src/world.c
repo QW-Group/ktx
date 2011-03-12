@@ -702,6 +702,7 @@ void FirstFrame	( )
 	RegisterCvar("k_ctf_hook");
 	RegisterCvar("k_ctf_runes");
 	RegisterCvar("k_ctf_ga");
+	RegisterCvar("k_ctf_based_spawn"); // spawn players on the base (red/blue)
 //}
 	RegisterCvar("k_spec_info");
 	RegisterCvar("k_midair");
