@@ -59,6 +59,7 @@ void norunes();
 void nohook();
 void noga();
 void mctf();
+void CTFBasedSpawn();
 // also: TossRune()
 //       swapall()
 // } CTF
@@ -424,6 +425,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_NORUNES      "toggle runes (CTF)"
 #define CD_NOGA         "toggle green armor on spawn (CTF)"
 #define CD_MCTF         "disable hook+runes (CTF)"
+#define CD_CTFBASEDSPAWN "spawn players on the base (CTF)"
 #define CD_MOTD         "show motd"
 #define CD_INFOLOCK     "toggle specinfo perms"
 #define CD_INFOSPEC     "toggle spectator infos"
@@ -732,6 +734,8 @@ cmd_t cmds[] = {
 	{ "mctf",        mctf,                      0    , CF_PLAYER | CF_SPC_ADMIN, CD_MCTF },
 	{ "flagstatus",  FlagStatus,                0    , CF_BOTH, CD_FLAGSTATUS },
 	{ "swapall",     AdminSwapAll,              0    , CF_BOTH_ADMIN, CD_SWAPALL },
+
+	{ "ctfbasedspawn", CTFBasedSpawn,           0    , CF_PLAYER | CF_SPC_ADMIN, CD_CTFBASEDSPAWN },
 // }
 	{ "motd",        motd_show,                 0    , CF_BOTH | CF_MATCHLESS, CD_MOTD },
 	{ "infolock",    infolock,                  0    , CF_BOTH_ADMIN, CD_INFOLOCK },
@@ -3033,6 +3037,7 @@ const char ffa_um_init[] =
 
 const char ctf_um_init[] =
 	"sv_loadentfiles_dir ctf\n"
+	"pm_airstep 1\n"
 	"coop 0\n"
 	"maxclients 16\n"
 	"k_maxclients 16\n"
@@ -3048,6 +3053,7 @@ const char ctf_um_init[] =
 	"k_overtime 1\n"
 	"k_exttime 5\n"
 	"k_mode 4\n"
+	"k_ctf_based_spawn 0\n"		// non team based spawn
 	"k_ctf_hook 1\n"			// hook on
 	"k_ctf_runes 1\n"			// runes on
 	"k_ctf_ga 1\n";				// green armor on
