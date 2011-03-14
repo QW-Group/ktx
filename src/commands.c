@@ -5885,6 +5885,9 @@ void ToggleArena()
 		}
 
 		G_cprint("\n");
+
+		// avoid spawn bug with safe spawn mode
+		cvar_fset( "k_spw", 1);
 	}
 }
 
