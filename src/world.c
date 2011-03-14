@@ -387,6 +387,8 @@ void SP_worldspawn()
 
 // suit wav - need this for race
 	trap_precache_sound( "items/suit.wav" );
+	trap_precache_model( "progs/suit.mdl" );
+	trap_precache_sound( "items/suit2.wav" );
 
 // for race
 	trap_precache_sound( "knight/sword2.wav" );
@@ -406,6 +408,36 @@ void SP_worldspawn()
 
 // for instagib bonus
 	trap_precache_model( "progs/invisibl.mdl" );
+
+// various items.
+
+// health 15
+	trap_precache_model( "maps/b_bh10.bsp" );
+	trap_precache_sound( "items/r_item1.wav" );
+// health 25
+	trap_precache_model( "maps/b_bh25.bsp" );
+	trap_precache_sound( "items/health1.wav" );
+// megahealth
+	trap_precache_model( "maps/b_bh100.bsp" );
+	trap_precache_sound( "items/r_item2.wav" );
+// armor
+	trap_precache_model( "progs/armor.mdl" );
+// shells 20
+	trap_precache_model( "maps/b_shell0.bsp" );
+// shells 40
+	trap_precache_model( "maps/b_shell1.bsp" );
+// nails 20/25
+	trap_precache_model( "maps/b_nail0.bsp" );
+// nails 40/50
+	trap_precache_model( "maps/b_nail1.bsp" );
+// rockets 5
+	trap_precache_model( "maps/b_rock0.bsp" );
+// rockets 10
+	trap_precache_model( "maps/b_rock1.bsp" );
+// cells 6
+	trap_precache_model( "maps/b_batt0.bsp" );
+// cells 12
+	trap_precache_model( "maps/b_batt1.bsp" );
 
 //
 // Setup light animation tables. 'a' is total darkness, 'z' is maxbright.

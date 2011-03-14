@@ -231,6 +231,9 @@ void r_print( );
 
 // { CHEATS
 void giveme( );
+void dropitem( );
+void removeitem( );
+void dumpent( );
 // }
 
 // { Clan Arena
@@ -516,6 +519,9 @@ const char CD_NODESC[] = "no desc";
 #define CD_SPAWN666TIME "set spawn pent time (dmm4 atm)"
 
 #define CD_GIVEME       (CD_NODESC) // skip
+#define CD_DROPITEM     (CD_NODESC) // skip
+#define CD_REMOVEITEM   (CD_NODESC) // skip
+#define CD_DUMPENT      (CD_NODESC) // skip
 
 #define CD_VOTECOOP     "vote for coop on/off"
 #define CD_COOPNMPU     "new nightmare mode (pu drops) on/off"
@@ -824,6 +830,9 @@ cmd_t cmds[] = {
 	{ "noitems",     noitems,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOITEMS },
 	{ "spawn666time",Spawn666Time,              0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_SPAWN666TIME },
 	{ "giveme",      giveme,                    0    , CF_PLAYER | CF_MATCHLESS | CF_PARAMS, CD_GIVEME },
+	{ "dropitem",    dropitem,                  0    , CF_BOTH | CF_PARAMS, CD_DROPITEM },
+	{ "removeitem",  removeitem,                0    , CF_BOTH | CF_PARAMS, CD_REMOVEITEM },
+	{ "dumpent",     dumpent,                   0    , CF_BOTH | CF_PARAMS, CD_DUMPENT },
 	{ "votecoop",    votecoop,                  0    , CF_PLAYER | CF_MATCHLESS, CD_VOTECOOP },
 	{ "coop_nm_pu",	 ToggleNewCoopNm,           0    , CF_PLAYER | CF_MATCHLESS, CD_COOPNMPU },
 	{ "demomark",	 DemoMark,                  0    , CF_PLAYER, CD_DEMOMARK },
@@ -6010,3 +6019,236 @@ void giveme()
 	G_sprint(self, 2, "You got %s for %.1fs\n", got, seconds );
 }
 
+typedef struct
+{
+	char           *name;
+	char           *class_name;
+	int				spawnflags;
+} dropitem_spawn_t;
+
+#define  WEAPON_BIG2  1
+
+static dropitem_spawn_t dropitems[] = 
+{
+	{"h15",		"item_health",						H_ROTTEN},
+	{"h25",		"item_health",						0},
+	{"h100",	"item_health",						H_MEGA},
+	{"ga",		"item_armor1",						0},
+	{"ya",		"item_armor2",						0},
+	{"ra",		"item_armorInv",					0},
+	{"ssg",		"weapon_supershotgun",				0},
+	{"ng",		"weapon_nailgun",					0},
+	{"sng",		"weapon_supernailgun",				0},
+	{"gl",		"weapon_grenadelauncher",			0},
+	{"rl",		"weapon_rocketlauncher",			0},
+	{"lg",		"weapon_lightning",					0},
+	{"sh20",	"item_shells",						0},
+	{"sh40",	"item_shells",						WEAPON_BIG2},
+	{"sp25",	"item_spikes",						0},
+	{"sp50",	"item_spikes",						WEAPON_BIG2},
+	{"ro5",		"item_rockets",						0},
+	{"ro10",	"item_rockets",						WEAPON_BIG2},
+	{"ce6",		"item_cells",						0},
+	{"ce12",	"item_cells",						WEAPON_BIG2},
+	{"p",		"item_artifact_invulnerability",	0},
+	{"s",		"item_artifact_envirosuit",			0},
+	{"r",		"item_artifact_invisibility",		0},
+	{"q",		"item_artifact_super_damage",		0},
+};
+
+static const int dropitems_count = sizeof(dropitems) / sizeof(dropitems[0]);
+
+dropitem_spawn_t * dropitem_find_by_name(const char * name)
+{
+	int i;
+
+	for ( i = 0; i < dropitems_count; i++ )
+	{
+		if ( streq(dropitems[i].name, name) )
+			return &dropitems[i];
+	}
+
+	return NULL;
+}
+
+// spawn item.
+gedict_t * dropitem_spawn_item(gedict_t *spot, char * classname, int spawnflags)
+{
+	extern qbool G_CallSpawn( gedict_t * ent );
+
+	gedict_t *	oself;
+	gedict_t *	p = spawn();
+
+	p->s.v.classname = classname;
+	p->s.v.spawnflags = spawnflags;
+	VectorCopy(spot->s.v.origin, p->s.v.origin);
+//	VectorCopy(spot->s.v.angles, p->s.v.angles);
+	setorigin( p, PASSVEC3(p->s.v.origin) );
+
+	// G_CallSpawn will change 'self', so we have to do trick about it.
+	oself = self;	// save!!!
+
+	if ( !G_CallSpawn( p ) || strnull( p->s.v.classname ) )
+	{
+		// failed to call spawn function, so remove it ASAP.
+		ent_remove( p );
+		p = NULL;
+	}
+
+	self = oself;	// restore!!!
+
+	return p;
+}
+
+void dropitem_usage(void)
+{
+	int i;
+	char tmp[1024] = {0};
+
+// dropitems < x | y >
+
+	for ( i = 0; i < dropitems_count; i++ )
+	{
+		if ( !(i % 3) && *tmp )
+		{
+			G_sprint(self, 2, "dropitem < %s >\n", tmp);		
+			*tmp = 0;
+		}
+
+		if ( *tmp )
+			strlcat(tmp, " | ", sizeof(tmp));
+		strlcat(tmp, dropitems[i].name, sizeof(tmp));
+	}
+
+	if ( *tmp )
+		G_sprint(self, 2, "dropitem < %s >\n", tmp);
+}
+
+void dropitem()
+{
+	dropitem_spawn_t * di;
+	char arg_1[128];
+
+	if ( match_in_progress )
+		return;
+
+	if ( strnull( ezinfokey(world, "*cheats") ) )
+	{
+		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->s.v.netname);
+		return; // FU!
+	}
+
+	// no arguments, show info and return
+	if ( trap_CmdArgc() < 2 )
+	{
+		dropitem_usage();
+		return;
+	}
+
+	trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
+
+	if ( (di = dropitem_find_by_name( arg_1 )) )
+	{
+		if (dropitem_spawn_item( self, di->class_name, di->spawnflags ))
+		{
+			G_sprint(self, 2, "Spawned %s\n", di->class_name );
+		}
+		else
+		{
+			G_sprint(self, 2, "Can't spawn %s\n", di->class_name );
+		}
+	}
+	else
+	{
+		dropitem_usage();
+		return;
+	}
+}
+
+void removeitem()
+{
+	gedict_t *	p;
+
+	if ( match_in_progress )
+		return;
+
+	if ( strnull( ezinfokey(world, "*cheats") ) )
+	{
+		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->s.v.netname);
+		return; // FU!
+	}
+
+	for ( p = world; p = trap_findradius( p, self->s.v.origin, 64 ); )
+	{
+		if ( !((int)p->s.v.flags & FL_ITEM) )
+			continue; // not an item.
+
+		G_sprint(self, 2, "Removed %s\n", p->s.v.classname );
+		ent_remove( p );
+
+		return;
+	}
+
+	G_sprint(self, 2, "Nothing found around\n");
+}
+
+static void dump_print( fileHandle_t file_handle, const char *fmt, ... )
+{
+	va_list argptr;
+	char	text[1024] = {0};
+
+	if ( file_handle < 0 )
+		return;
+        
+	va_start( argptr, fmt );
+	Q_vsnprintf( text, sizeof(text), fmt, argptr );
+	va_end( argptr );
+
+	text[sizeof(text)-1] = 0;
+
+	trap_FS_WriteFile( text, strlen(text), file_handle );
+}
+
+static void dumpent()
+{
+	int cnt = 0;
+	gedict_t *p;
+	fileHandle_t file_handle = -1;
+
+	if ( match_in_progress )
+		return;
+
+	if ( strnull( ezinfokey(world, "*cheats") ) )
+	{
+		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->s.v.netname);
+		return; // FU!
+	}
+
+	if ( trap_FS_OpenFile( "dump.ent", &file_handle, FS_WRITE_BIN ) < 0 )
+	{
+		G_sprint(self, 2, "Can't open file for write\n");
+		return;
+	}
+
+    for( p = world; ( p = nextent( p ) ); )
+    {
+		if ( !((int)p->s.v.flags & FL_ITEM) )
+			continue; // not an item.
+
+		if ( strnull( p->s.v.classname ) )
+			continue; // null class name.
+
+		dump_print(file_handle, "{\n");
+		dump_print(file_handle, "\t" "\"classname\" \"%s\"" "\n", p->s.v.classname);
+		dump_print(file_handle, "\t" "\"origin\" \"%d %d %d\"" "\n", (int)p->s.v.origin[0], (int)p->s.v.origin[1], (int)p->s.v.origin[2]);
+		if ( p->s.v.spawnflags )
+			dump_print(file_handle, "\t" "\"spawnflags\" \"%d\"" "\n", (int)p->s.v.spawnflags);
+		dump_print(file_handle, "}\n");
+
+		cnt++;
+    }
+
+	trap_FS_CloseFile( file_handle );
+
+	G_sprint(self, 2, "Dumped %d entities\n", cnt);
+}
