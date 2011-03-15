@@ -2270,7 +2270,7 @@ captains:
 		return true; // u can fire/jump
 
 	if ( fire ) {  // u can't fire
-		can_prewar_msg(redtext("can't fire untill in captains mode"));
+		can_prewar_msg(redtext("can't fire until in captains mode"));
 		return false;
 	}
 

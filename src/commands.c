@@ -5865,7 +5865,7 @@ void ToggleArena()
 
 	if ( isRA() )
 	{
-	    char buf[1024*4];
+	  char buf[1024*4];
 		char *cfg_name;
 
 		char *um = "1on1";
