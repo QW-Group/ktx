@@ -633,6 +633,8 @@ void FirstFrame	( )
 
 	RegisterCvar("k_noitems");
 
+	RegisterCvar("k_random_maplist"); // select random map from k_ml_XXX variables.
+
 	RegisterCvar("k_mode");
 	RegisterCvar("k_defmode");
 	RegisterCvar("k_auto_xonx"); // switch XonX mode dependant on players + specs count

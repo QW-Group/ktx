@@ -381,6 +381,44 @@ int IsMapInCycle(char *map)
 	return 0;
 }
 
+char *SelectRandomMap(char *buf, int buf_size)
+{
+	char newmap[128] = {0}, mapid[128] = {0};
+	int cnt, c;
+
+	buf[0] = 0;
+
+	// find how much maps in pool.
+	for ( cnt = 0; cnt < 1000; cnt++ )
+	{
+		snprintf( mapid, sizeof(mapid), "k_ml_%d", cnt );
+		// huge for(), so using trap version instead of lazy but unsafe cvar_string()
+		trap_cvar_string( mapid, newmap, sizeof(newmap) );
+
+		if ( strnull( newmap ) ) // end of list
+			break;
+	}
+
+	// few attempts, to minimize selecting current map.
+	for ( c = 0; c < 5; c++ )
+	{
+		int id = i_rnd( 0, cnt - 1 ); // generate random id
+
+		// get map.
+		snprintf( mapid, sizeof(mapid), "k_ml_%d", id );
+		trap_cvar_string( mapid, newmap, sizeof(newmap) );
+
+		if ( streq( g_globalvars.mapname, newmap) )
+			continue; // same map, lets try again then.
+
+		// ok, we found it.
+		strlcpy(buf, newmap, buf_size);
+		break;
+	}
+
+	return buf;
+}
+
 // map list have now next syntax:
 // set k_ml_0 dm6
 // set k_ml_1 dm4
@@ -393,6 +431,12 @@ char *SelectMapInCycle(char *buf, int buf_size)
 	int i;
 
 	buf[0] = 0;
+
+	if ( cvar( "k_random_maplist" ) )
+	{
+		if ( *SelectRandomMap( buf, buf_size ) )
+			return buf;
+	}
 
 	if ( (i = IsMapInCycle( g_globalvars.mapname )) ) { // ok map found in map list, select next map
 
