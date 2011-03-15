@@ -445,16 +445,8 @@ void FireInstaBullet( vec3_t dir, deathType_t deathtype )
 		// this is something like "fix" for one bullet hit more than one player?
 		if ( depth > 1 )
 		{
-			if ( ( cvar("k_instagib") == 1 ) || ( cvar("k_instagib") == 3 ) )
-			{
 				WS_Mark( self, wpSG );
 				self->ps.wpn[wpSG].hits--;
-			}
-			else if ( ( cvar("k_instagib") == 2 ) || ( cvar("k_instagib") == 4 ) )
-			{
-				WS_Mark( self, wpSSG );
-				self->ps.wpn[wpSSG].hits--;
-			}
 
 			if ( depth > self->ps.i_maxmultigibs )
 				self->ps.i_maxmultigibs = depth;
@@ -731,7 +723,7 @@ void W_FireShotgun()
 	else
 		self->ps.wpn[wpSG].attacks += bullets;
 
-	if ( cvar("k_instagib_custom_models") && cvar("k_instagib") == 1 )
+	if ( cvar("k_instagib_custom_models") && cvar("k_instagib") )
 		sound( self, CHAN_WEAPON, "weapons/coilgun.wav", 1, ATTN_NORM );
 	else
 		sound( self, CHAN_WEAPON, "weapons/guncock.wav", 1, ATTN_NORM );
@@ -746,7 +738,7 @@ void W_FireShotgun()
 
 	//dir = aim (self, 100000);
 	aim( dir );
-	if ( cvar("k_instagib") == 1 )
+	if ( cvar("k_instagib") )
 		FireInstaBullet( dir, dtSG );
 	else
 		FireBullets( bullets, dir, 0.04, 0.04, 0, dtSG );
@@ -770,15 +762,9 @@ void W_FireSuperShotgun()
 
 	WS_Mark( self, wpSSG );
 
-	if ( cvar("k_instagib") )
-		self->ps.wpn[wpSSG].attacks ++;
-	else
-		self->ps.wpn[wpSSG].attacks += bullets;
+	self->ps.wpn[wpSSG].attacks += bullets;
 
-	if ( cvar("k_instagib_custom_models") && cvar("k_instagib") == 2 )
-		sound( self, CHAN_WEAPON, "weapons/coilgun.wav", 1, ATTN_NORM );
-	else
-		sound( self, CHAN_WEAPON, "weapons/shotgn2.wav", 1, ATTN_NORM );
+	sound( self, CHAN_WEAPON, "weapons/shotgn2.wav", 1, ATTN_NORM );
 
 	g_globalvars.msg_entity = EDICT_TO_PROG( self );
 
@@ -790,11 +776,7 @@ void W_FireSuperShotgun()
 
 	//dir = aim (self, 100000);
 	aim( dir );
-	if ( cvar("k_instagib") == 2 )
-	{
-		FireInstaBullet( dir, dtSSG );
-	}
-	else if ( k_yawnmode )
+	if ( k_yawnmode )
 	{
 	        // Yawnmode: larger SSG spread, higher reload time, more damage
 	        // - Molgrum
@@ -1533,7 +1515,7 @@ void W_SetCurrentAmmo()
 
 	case IT_SHOTGUN:
 		self->s.v.currentammo = self->s.v.ammo_shells;
-		if ( cvar("k_instagib_custom_models") && cvar("k_instagib") == 1 )
+		if ( cvar("k_instagib_custom_models") && cvar("k_instagib") )
 			self->s.v.weaponmodel = "progs/v_coil.mdl";
 		else
 			self->s.v.weaponmodel = "progs/v_shot.mdl";
@@ -1545,10 +1527,7 @@ void W_SetCurrentAmmo()
 
 	case IT_SUPER_SHOTGUN:
 		self->s.v.currentammo = self->s.v.ammo_shells;
-		if ( cvar("k_instagib_custom_models") && cvar("k_instagib") == 2 )
-			self->s.v.weaponmodel = "progs/v_coil.mdl";
-		else
-			self->s.v.weaponmodel = "progs/v_shot2.mdl";
+		self->s.v.weaponmodel = "progs/v_shot2.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_SHELLS;
 		if (vw_enabled)
@@ -1740,6 +1719,8 @@ void W_Attack()
 		else
 		{
 			if ( cvar("k_instagib") == 1 )
+				self->attack_finished = g_globalvars.time + 1.2;
+			else if ( cvar("k_instagib") == 2 )
 				self->attack_finished = g_globalvars.time + 0.7;
 			else
 				self->attack_finished = g_globalvars.time + 0.5;
@@ -1751,17 +1732,14 @@ void W_Attack()
 	case IT_SUPER_SHOTGUN:
 		player_shot1();
 
-        if ( self->ctf_flag & CTF_RUNE_HST )
+    if ( self->ctf_flag & CTF_RUNE_HST )
 		{
 			self->attack_finished = g_globalvars.time + 0.4;
 			HasteSound( self );
 		}
 		else
 		{
-			if ( cvar("k_instagib") == 2 )
-				self->attack_finished = g_globalvars.time + 1.2;
-			else
-				self->attack_finished = g_globalvars.time + ( k_yawnmode ? 0.8 : 0.7 );
+			self->attack_finished = g_globalvars.time + ( k_yawnmode ? 0.8 : 0.7 );
 		}
 
 		W_FireSuperShotgun();

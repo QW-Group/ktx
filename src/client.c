@@ -1488,7 +1488,7 @@ void PutClientInServer( void )
 			self->s.v.health       = 250;
 
 			items = IT_AXE;
-			items |= ( cvar("k_instagib") == 1 || cvar("k_instagib") == 3 ) ? IT_SHOTGUN : IT_SUPER_SHOTGUN;
+			items |= IT_SHOTGUN;
 		}
 		else
 		{
@@ -1533,7 +1533,7 @@ void PutClientInServer( void )
 
 		// default to spawning with rl, except if instagib or gren_mode is on
 		if ( cvar("k_instagib") )
-			self->s.v.weapon = cvar("k_instagib") == 1 ? IT_SHOTGUN : IT_SUPER_SHOTGUN;
+			self->s.v.weapon = IT_SHOTGUN;
 		else if ( cvar("k_dmm4_gren_mode") )
 			self->s.v.weapon = IT_GRENADE_LAUNCHER;
 		else

@@ -446,7 +446,6 @@ const char CD_NODESC[] = "no desc";
 #define CD_KILL         "invoke suicide"
 #define CD_MIDAIR       "midair settings"
 #define CD_INSTAGIB     "instagib settings"
-#define CD_INSTAGIB     "instagib settings"
 #define CD_CG_KB        "toggle coilgun kickback in instagib"
 #define CD_TIME         "show server time"
 #define CD_GREN_MODE    "grenades mode"
@@ -5127,7 +5126,7 @@ void ToggleMidair()
 void W_SetCurrentAmmo();
 void ToggleInstagib()
 {
-	int k_instagib = bound(0, cvar( "k_instagib" ), 2); 
+	int k_instagib = bound(0, cvar( "k_instagib" ), 3); 
 
 	if ( match_in_progress )
 		return;
@@ -5148,7 +5147,7 @@ void ToggleInstagib()
 	if ( k_instagib == 0 )
 		cvar_fset("dmm4_invinc_time", 1.0f); // default invic respawn time is 1s in instagib 
 
-	if ( ++k_instagib > 2 )
+	if ( ++k_instagib > 3 )
 		k_instagib = 0;
 
 	cvar_fset("k_instagib", k_instagib);
@@ -5160,16 +5159,23 @@ void ToggleInstagib()
 	else if ( k_instagib == 1 )
 	{
 		if ( cvar("k_instagib_custom_models") )
-			G_bprint(2, "%s enabled (Fast Coilgun mode)\n", redtext("Instagib"));
+			G_bprint(2, "%s enabled (slow coilgun mode)\n", redtext("Instagib"));
 		else
-			G_bprint(2, "%s enabled (SG mode)\n", redtext("Instagib"));
+			G_bprint(2, "%s enabled (slow mode)\n", redtext("Instagib"));
 	}
 	else if ( k_instagib == 2 )
 	{
 		if ( cvar("k_instagib_custom_models") )
-			G_bprint(2, "%s enabled (Slow Coilgun mode)\n", redtext("Instagib"));
+			G_bprint(2, "%s enabled (fast coilgun mode)\n", redtext("Instagib"));
 		else
-			G_bprint(2, "%s enabled (SSG mode)\n", redtext("Instagib"));
+			G_bprint(2, "%s enabled (fast mode)\n", redtext("Instagib"));
+	}
+	else if ( k_instagib == 3 )
+	{
+		if ( cvar("k_instagib_custom_models") )
+			G_bprint(2, "%s enabled (extreme coilgun mode)\n", redtext("Instagib"));
+		else
+			G_bprint(2, "%s enabled (extreme mode)\n", redtext("Instagib"));
 	}
 	else
 	{
