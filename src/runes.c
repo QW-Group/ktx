@@ -246,8 +246,16 @@ gedict_t* SelectRuneSpawnPoint()
 {
 	gedict_t *runespawn;
 
-	// we'll just use the player spawn point selector for runes as well
-	runespawn = SelectSpawnPoint( "info_player_deathmatch" );
+	if ( cvar("k_ctf_based_spawn") )
+	{
+		runespawn = SelectSpawnPoint( g_random() < 0.5 ? "info_player_team1" : "info_player_team2" );
+	}
+	else
+	{
+		// we'll just use the player spawn point selector for runes as well
+		runespawn = SelectSpawnPoint( "info_player_deathmatch" );
+	}
+
 	return runespawn;
 }
 

@@ -513,7 +513,7 @@ void            HasteSound( gedict_t *player );
 void            RegenerationSound( gedict_t *player );
 
 // ctf.c
-void            PlayerDropFlag( gedict_t *player );
+void            PlayerDropFlag( gedict_t *player, qbool tossed );
 void            RegenFlags( qbool yes );
 void			AddHook( qbool yes );
 void			CTF_Obituary( gedict_t *targ, gedict_t *attacker );
@@ -790,6 +790,7 @@ void		setwepall ( gedict_t *p );
 
 // globals.c
 
+extern  int   k_bloodfest;		// blood fest mode
 extern	float k_killquad;	    // killquad mode
 extern	float framechecks;	    // if timedemo/uptime bugs are tolerated
 extern	float k_attendees;      // stores number of players on server - used in 'ready' checking

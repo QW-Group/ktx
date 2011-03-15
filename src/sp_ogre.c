@@ -402,6 +402,7 @@ void OgreFireGrenade ()
 	missile = spawn ();
 	missile->s.v.owner = EDICT_TO_PROG( self );
 	missile->s.v.movetype = MOVETYPE_BOUNCE;
+	missile->isMissile = true;
 	missile->s.v.solid = SOLID_BBOX;
 
 	// set missile speed

@@ -199,7 +199,7 @@ void            item_megahealth_rot();
 
 /*QUAKED item_health (.3 .3 1) (0 0 0) (32 32 32) rotten megahealth
 Health box. Normally gives 25 points.
-Rotten box heals 5-10 points,
+Rotten box heals 15 points,
 megahealth will add 100 health, then 
 rot you down to your maximum health limit, 
 one point per second.
@@ -207,35 +207,28 @@ one point per second.
 
 void SP_item_health()
 {
-
 	self->s.v.touch = ( func_t ) health_touch;
+
 	if ( ( int ) self->s.v.spawnflags & H_ROTTEN )
 	{
-		trap_precache_model( "maps/b_bh10.bsp" );
-		trap_precache_sound( "items/r_item1.wav" );
 		setmodel( self, "maps/b_bh10.bsp" );
 		self->s.v.noise = "items/r_item1.wav";
 		self->healamount = 15;
 		self->healtype = 0;
-	} else
+	}
+	else if ( ( int ) self->s.v.spawnflags & H_MEGA )
 	{
-		if ( ( int ) self->s.v.spawnflags & H_MEGA )
-		{
-			trap_precache_model( "maps/b_bh100.bsp" );
-			trap_precache_sound( "items/r_item2.wav" );
-			setmodel( self, "maps/b_bh100.bsp" );
-			self->s.v.noise = "items/r_item2.wav";
-			self->healamount = 100;
-			self->healtype = 2;
-		} else
-		{
-			trap_precache_model( "maps/b_bh25.bsp" );
-			trap_precache_sound( "items/health1.wav" );
-			setmodel( self, "maps/b_bh25.bsp" );
-			self->s.v.noise = "items/health1.wav";
-			self->healamount = 25;
-			self->healtype = 1;
-		}
+		setmodel( self, "maps/b_bh100.bsp" );
+		self->s.v.noise = "items/r_item2.wav";
+		self->healamount = 100;
+		self->healtype = 2;
+	}
+	else
+	{
+		setmodel( self, "maps/b_bh25.bsp" );
+		self->s.v.noise = "items/health1.wav";
+		self->healamount = 25;
+		self->healtype = 1;
 	}
 
 	setsize( self, 0, 0, 0, 32, 32, 56 );
@@ -452,7 +445,6 @@ void armor_touch()
 void SP_item_armor1()
 {
 	self->s.v.touch = ( func_t ) armor_touch;
-	trap_precache_model( "progs/armor.mdl" );
 	setmodel( self, "progs/armor.mdl" );
 	self->s.v.netname = "Green Armor";
 	self->s.v.skin = 0;
@@ -466,7 +458,6 @@ void SP_item_armor1()
 void SP_item_armor2()
 {
 	self->s.v.touch = ( func_t ) armor_touch;
-	trap_precache_model( "progs/armor.mdl" );
 	setmodel( self, "progs/armor.mdl" );
 	self->s.v.netname = "Yellow Armor";
 	self->s.v.skin = 1;
@@ -480,7 +471,6 @@ void SP_item_armor2()
 void SP_item_armorInv()
 {
 	self->s.v.touch = ( func_t ) armor_touch;
-	trap_precache_model( "progs/armor.mdl" );
 	setmodel( self, "progs/armor.mdl" );
 	self->s.v.netname = "Red Armor";
 	self->s.v.skin = 2;
@@ -760,7 +750,6 @@ void weapon_touch()
 
 void SP_weapon_supershotgun()
 {
-	trap_precache_model( "progs/g_shot.mdl" );
 	setmodel( self, "progs/g_shot.mdl" );
 
 	self->s.v.weapon = IT_SUPER_SHOTGUN;
@@ -777,7 +766,6 @@ void SP_weapon_supershotgun()
 
 void SP_weapon_nailgun()
 {
-	trap_precache_model( "progs/g_nail.mdl" );
 	setmodel( self, "progs/g_nail.mdl" );
 
 	self->s.v.weapon = IT_NAILGUN;
@@ -794,7 +782,6 @@ void SP_weapon_nailgun()
 
 void SP_weapon_supernailgun()
 {
-	trap_precache_model( "progs/g_nail2.mdl" );
 	setmodel( self, "progs/g_nail2.mdl" );
 
 	self->s.v.weapon = IT_SUPER_NAILGUN;
@@ -812,7 +799,6 @@ void SP_weapon_supernailgun()
 
 void SP_weapon_grenadelauncher()
 {
-	trap_precache_model( "progs/g_rock.mdl" );
 	setmodel( self, "progs/g_rock.mdl" );
 
 	self->s.v.weapon = 3;
@@ -829,7 +815,6 @@ void SP_weapon_grenadelauncher()
 
 void SP_weapon_rocketlauncher()
 {
-	trap_precache_model( "progs/g_rock2.mdl" );
 	setmodel( self, "progs/g_rock2.mdl" );
 
 	self->s.v.weapon = 3;
@@ -847,7 +832,6 @@ void SP_weapon_rocketlauncher()
 
 void SP_weapon_lightning()
 {
-	trap_precache_model( "progs/g_light.mdl" );
 	setmodel( self, "progs/g_light.mdl" );
 
 	self->s.v.weapon = 3;
@@ -1017,12 +1001,11 @@ void SP_item_shells()
 
 	if ( ( int ) ( self->s.v.spawnflags ) & WEAPON_BIG2 )
 	{
-		trap_precache_model( "maps/b_shell1.bsp" );
 		setmodel( self, "maps/b_shell1.bsp" );
 		self->aflag = 40;
-	} else
+	}
+	else
 	{
-		trap_precache_model( "maps/b_shell0.bsp" );
 		setmodel( self, "maps/b_shell0.bsp" );
 		self->aflag = 20;
 	}
@@ -1046,12 +1029,11 @@ void SP_item_spikes()
 
 	if ( ( int ) ( self->s.v.spawnflags ) & WEAPON_BIG2 )
 	{
-		trap_precache_model( "maps/b_nail1.bsp" );
 		setmodel( self, "maps/b_nail1.bsp" );
 		self->aflag = (old_style ? 40 : 50);
-	} else
+	}
+	else
 	{
-		trap_precache_model( "maps/b_nail0.bsp" );
 		setmodel( self, "maps/b_nail0.bsp" );
 		self->aflag = (old_style ? 20 : 25);
 	}
@@ -1072,12 +1054,11 @@ void SP_item_rockets()
 
 	if ( ( int ) ( self->s.v.spawnflags ) & WEAPON_BIG2 )
 	{
-		trap_precache_model( "maps/b_rock1.bsp" );
 		setmodel( self, "maps/b_rock1.bsp" );
 		self->aflag = 10;
-	} else
+	}
+	else
 	{
-		trap_precache_model( "maps/b_rock0.bsp" );
 		setmodel( self, "maps/b_rock0.bsp" );
 		self->aflag = 5;
 	}
@@ -1099,12 +1080,11 @@ void SP_item_cells()
 
 	if ( ( int ) ( self->s.v.spawnflags ) & WEAPON_BIG2 )
 	{
-		trap_precache_model( "maps/b_batt1.bsp" );
 		setmodel( self, "maps/b_batt1.bsp" );
 		self->aflag = 12;
-	} else
+	}
+	else
 	{
-		trap_precache_model( "maps/b_batt0.bsp" );
 		setmodel( self, "maps/b_batt0.bsp" );
 		self->aflag = 6;
 	}
@@ -1519,6 +1499,18 @@ void DropPowerup( float timeleft, int powerup )
 	else
 		G_Error("DropPowerup");
 
+	if ( k_bloodfest )
+	{
+		// limit amount of dropped powerups of particular class.
+		if ( find_cnt( FOFCLSN, self->s.v.classname ) > 3 )
+		{
+			ent_remove( self );
+	
+			self = swp;// restore self!!!
+			return;		
+		}
+	}
+
 	playername = swp->s.v.netname;
 
 	log_printf(
@@ -1539,7 +1531,7 @@ void DropPowerup( float timeleft, int powerup )
 	if ( swp->ct == ctPlayer )
 		mi_print( swp, powerup, va( "%s dropped a %s with %.0f seconds left", swp->s.v.netname, self->s.v.netname, timeleft ));
 
-	self = swp;// restore self
+	self = swp;// restore self!!!
 }
 
 static qbool NeedDropQuad(void)
@@ -1586,6 +1578,7 @@ void powerup_touch()
 {
 	float	*p_cnt = NULL;
 	float	real_time = 30;
+	float	old_pu_time = 0;
 	char	*playername;
 
 	if ( strnull ( self->s.v.classname ) )
@@ -1661,20 +1654,29 @@ void powerup_touch()
 // do the apropriate action
 	if ( streq( self->s.v.classname, "item_artifact_envirosuit" ) )
 	{
+		old_pu_time = other->radsuit_finished;
 		other->rad_time = 1;
 		other->radsuit_finished = g_globalvars.time + 30;
+
+		if ( self->cnt > g_globalvars.time ) // is this was a dropped powerup
+			p_cnt = &(other->radsuit_finished);
 	}
 	else if ( streq( self->s.v.classname, "item_artifact_invulnerability" ) )
 	{
+		old_pu_time = other->invincible_finished;
 		adjust_pickup_time( &other->p_pickup_time, &other->ps.itm[itPENT].time );
 		other->p_pickup_time = g_globalvars.time;
 
 		other->ps.itm[itPENT].tooks++;
 		other->invincible_time = 1;
 		other->invincible_finished = g_globalvars.time + 30;
+
+		if ( self->cnt > g_globalvars.time ) // is this was a dropped powerup
+			p_cnt = &(other->invincible_finished);
 	}
 	else if ( streq( self->s.v.classname, "item_artifact_invisibility" ) )
 	{
+		old_pu_time = other->invisible_finished;
 		adjust_pickup_time( &other->r_pickup_time, &other->ps.itm[itRING].time );
 		other->r_pickup_time = g_globalvars.time;
 
@@ -1684,10 +1686,10 @@ void powerup_touch()
 
 		if ( self->cnt > g_globalvars.time ) // is this was a dropped powerup
 			p_cnt = &(other->invisible_finished);
-
 	}
 	else if ( streq( self->s.v.classname, "item_artifact_super_damage" ) )
 	{
+		old_pu_time = other->super_damage_finished;
 		adjust_pickup_time( &other->q_pickup_time, &other->ps.itm[itQUAD].time );
 		other->q_pickup_time = g_globalvars.time;
 
@@ -1698,7 +1700,7 @@ void powerup_touch()
 		if ( deathmatch == 4 )
 		{
 			other->s.v.armortype = 0;
-			other->s.v.armorvalue = 0 * 0.01;
+			other->s.v.armorvalue = 0;
 			other->s.v.ammo_cells = 0;
 		}
 		other->super_time = 1;
@@ -1710,13 +1712,25 @@ void powerup_touch()
 	else
 		return;
 
-	if ( p_cnt ) {  // is this was a dropped powerup
-			p_cnt[0] = self->cnt;
-			mi_print( other, self->s.v.items, va( "%s got a %s with %d seconds left",
-			  					other->s.v.netname, self->s.v.netname,
-			  					( int ) ( p_cnt[0] - g_globalvars.time ) ));
-			real_time = p_cnt[0] - g_globalvars.time;
-			SUB_RM_01( self );// remove later
+	if ( p_cnt )  // is this was a dropped powerup
+	{
+		float seconds_left = self->cnt - g_globalvars.time; // seconds left on quad.
+
+		// sum up seconds player alredy have and seconds on quad left.
+		p_cnt[0] = max(g_globalvars.time, old_pu_time) + seconds_left;
+		// do not allow more than 30 seconds of quad anyway.
+		p_cnt[0] = min(g_globalvars.time + 30, p_cnt[0]);
+
+		seconds_left = p_cnt[0] - g_globalvars.time;
+		real_time = seconds_left;
+
+//		if ( k_bloodfest )
+//			G_sprint( other, 2, "Your %s have %d seconds left\n", self->s.v.netname, ( int )seconds_left );
+
+		mi_print( other, self->s.v.items, va( "%s got a %s with %d seconds left",
+		  					other->s.v.netname, self->s.v.netname, ( int )seconds_left ));
+
+		SUB_RM_01( self );// remove later
 	}
 	else
 	{
@@ -1778,10 +1792,6 @@ void SP_item_artifact_envirosuit()
 {
 	self->s.v.touch = ( func_t ) powerup_touch;
 
-	trap_precache_model( "progs/suit.mdl" );
-// this is precahed always, because of RACE
-//	trap_precache_sound( "items/suit.wav" );
-	trap_precache_sound( "items/suit2.wav" );
 	self->s.v.noise = "items/suit.wav";
 	setmodel( self, "progs/suit.mdl" );
 	self->s.v.netname = "Biosuit";
@@ -2069,10 +2079,12 @@ DropBackpack
 
 void DropBackpack()
 {
-
     gedict_t	*item;
     float	f1;
     char	*playername;
+
+	if ( k_bloodfest )
+		return;
 
     f1 = get_fair_pack();
 

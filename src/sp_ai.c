@@ -92,6 +92,10 @@ float range( gedict_t *targ )
 	if ( r < 1000 )
 		return RANGE_MID;
 
+	// so monsters notice player father/faster in bloodfest mode.
+	if ( k_bloodfest )
+		return RANGE_MID;
+
 	return RANGE_FAR;
 }
 
@@ -266,7 +270,6 @@ slower noticing monsters.
 float FindTarget()
 {
 	gedict_t	*client = NULL;
-	float		r;
 
 // if the first spawnflag bit is set, the monster will only wake up on
 // really seeing the player, not another monster getting angry
@@ -301,22 +304,27 @@ float FindTarget()
 	if ( (int)client->s.v.items & IT_INVISIBILITY )
 		return false;
 
-	r = range ( client );
-	if ( r == RANGE_FAR )
-		return false;
-
-	if ( !visible( client ) )
-		return false;
-
-	if ( r == RANGE_NEAR )
+	// in bloodfest mode monsters spot players always.
+	if ( !k_bloodfest )
 	{
-		if ( client->show_hostile < g_globalvars.time && !infront( client ) )
+		float		r = range ( client );
+
+		if ( r == RANGE_FAR )
 			return false;
-	}
-	else if ( r == RANGE_MID )
-	{
-		if ( /* client->show_hostile < g_globalvars.time || */ !infront( client ) )
+
+		if ( !visible( client ) )
 			return false;
+
+		if ( r == RANGE_NEAR )
+		{
+			if ( client->show_hostile < g_globalvars.time && !infront( client ) )
+				return false;
+		}
+		else if ( r == RANGE_MID )
+		{
+			if ( /* client->show_hostile < g_globalvars.time || */ !infront( client ) )
+				return false;
+		}
 	}
 
 //
@@ -355,21 +363,31 @@ void GetMadAtAttacker( gedict_t *attacker )
 	if ( !attacker || attacker == world )
 		return; // ignore world attacks
 
+	if ( k_bloodfest && attacker->ct != ctPlayer)
+		return; // in bloodfest mode get mad only on players.
+
+	if ( attacker == self )
+		return; // do not mad on self.
+	
+	if ( attacker == PROG_TO_EDICT( self->s.v.enemy ))
+		return; // alredy mad on this.
+
 	// get mad unless of the same class (except for soldiers)
-	if ( self != attacker && attacker != PROG_TO_EDICT( self->s.v.enemy ) )
-	{
-		if ( strneq( self->s.v.classname, attacker->s.v.classname ) || streq( self->s.v.classname, "monster_army" ) )
-		{
-			// remember current enemy if it was "player enemy", later we restore it
-			if ( PROG_TO_EDICT( self->s.v.enemy )->ct == ctPlayer )
-				self->oldenemy = PROG_TO_EDICT( self->s.v.enemy );
+	if (   streq( self->s.v.classname, attacker->s.v.classname )
+		&& strneq( self->s.v.classname, "monster_army" ) 
+	)
+		return; 
 
-			// set new enemy
-			self->s.v.enemy = EDICT_TO_PROG( attacker );
+	// OK, we are MAD!
 
-			FoundTarget ();
-		}
-	}
+	// remember current enemy if it was "player enemy", later we restore it
+	if ( PROG_TO_EDICT( self->s.v.enemy )->ct == ctPlayer )
+		self->oldenemy = PROG_TO_EDICT( self->s.v.enemy );
+
+	// set new enemy
+	self->s.v.enemy = EDICT_TO_PROG( attacker );
+
+	FoundTarget ();
 }
 
 //=============================================================================
@@ -825,13 +843,20 @@ void ai_run( float dist )
 // check knowledge of enemy
 	enemy_vis = visible( PROG_TO_EDICT( self->s.v.enemy ) );
 	if ( enemy_vis )
-		self->search_time = g_globalvars.time + 5;
+		self->search_time = g_globalvars.time + 5; // does not search for enemy next 5 seconds
 
 // look for other coop players
 	if ( coop && self->search_time < g_globalvars.time )
 	{
 		if ( FindTarget() )
+		{
+			// this is fix for too frequent enemy sighting, required for bloodfest mode.
+			if ( !visible( PROG_TO_EDICT( self->s.v.enemy ) ) )
+			{
+				self->search_time = g_globalvars.time + 5; // does not search for enemy next 5 seconds
+			}
 			return;
+		}
 	}
 
 	enemy_infront = infront( PROG_TO_EDICT( self->s.v.enemy ) );

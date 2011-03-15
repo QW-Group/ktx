@@ -221,6 +221,12 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 		if ( self->wreg_attack ) // client simulate +attack via "cmd wreg" feature
 			self->s.v.button0 = true;
 
+		if ( k_bloodfest )
+		{
+			extern void bloodfest_client_think(void);
+			bloodfest_client_think();
+		}
+
 		if ( !arg0 )
 			PlayerPreThink();
 		return 1;

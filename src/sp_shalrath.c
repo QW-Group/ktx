@@ -162,7 +162,7 @@ void ShalHome()
 	vec3_t	dir, vtemp;
 
 	if (   ISDEAD( PROG_TO_EDICT( self->s.v.enemy ) ) // enemy dead
-		|| self->spawn_time + 25 < g_globalvars.time  // flying for too long time
+		|| self->spawn_time + ( k_bloodfest ? 3 : 25 ) < g_globalvars.time  // flying for too long time
 	   )
 	{
 		other = world;
@@ -209,6 +209,7 @@ void ShalMissile()
 	missile->s.v.owner = EDICT_TO_PROG( self );
 	missile->s.v.solid = SOLID_BBOX;
 	missile->s.v.movetype = MOVETYPE_FLYMISSILE;
+	missile->isMissile = true;
 	setmodel( missile, "progs/v_spike.mdl" );
 	setsize( missile, PASSVEC3( VEC_ORIGIN ), PASSVEC3( VEC_ORIGIN ) );
 

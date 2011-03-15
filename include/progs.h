@@ -272,6 +272,8 @@ typedef struct gedict_s {
 
 //custom fields
 
+	int				isMissile; //treat some objects as missiles.
+
 	float           vw_index;
 	float           maxspeed, gravity;
 	int             isBot;

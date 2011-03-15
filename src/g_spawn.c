@@ -248,6 +248,8 @@ void			SP_monster_boss();
 void			SP_monster_oldone();
 void			SP_event_lightning();
 
+void			SP_info_monster_start();
+
 // TF
 void			SP_item_tfgoal();
 void			SP_info_player_teamspawn();
@@ -379,6 +381,9 @@ Used as a positional target for spotlights, etc.
 	{"monster_enforcer",	SP_monster_enforcer},
 	{"monster_oldone",		SP_monster_oldone},
 	{"event_lightning",		SP_event_lightning},
+
+	{"info_monster_start",	SP_info_monster_start},
+
 	{0, 0}
 };
 

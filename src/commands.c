@@ -55,10 +55,12 @@ void ChangeTP();
 void ToggleFallBunny ();
 // { CTF
 void FlagStatus();
+void TossFlag();
 void norunes();
 void nohook();
 void noga();
 void mctf();
+void CTFBasedSpawn();
 // also: TossRune()
 //       swapall()
 // } CTF
@@ -87,6 +89,7 @@ void ShowQizmo();
 void ShowRules();
 void ShowVersion();
 void killquad();
+void bloodfest();
 void antilag();
 void ToggleDischarge();
 void ToggleDropPack();
@@ -238,6 +241,9 @@ void race_chasecam_freelook_change( );
 
 // { CHEATS
 void giveme( );
+void dropitem( );
+void removeitem( );
+static void dumpent( );
 // }
 
 // { Clan Arena
@@ -285,6 +291,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_FRAGSDOWN  "-10 fraglimit"
 #define CD_FRAGSUP    "+10 fraglimit"
 #define CD_KILLQUAD   "kill the quad mode"
+#define CD_BLOODFEST  "blood fest mode (coop/single only)"
 #define CD_DROPQUAD   "drop quad when killed"
 #define CD_DROPRING   "drop ring when killed"
 #define CD_DROPPACK   "drop pack when killed"
@@ -425,11 +432,13 @@ const char CD_NODESC[] = "no desc";
 #define CD_POS_VELOCITY "set position velocity"
 #define CD_SH_SPEED     "toggle use show speed"
 #define CD_TOSSRUNE     "drop rune (CTF)"
+#define CD_TOSSFLAG     "drop flag (CTF)"
 #define CD_FLAGSTATUS   "show flags status (CTF)"
 #define CD_NOHOOK       "toggle hook (CTF)"
 #define CD_NORUNES      "toggle runes (CTF)"
 #define CD_NOGA         "toggle green armor on spawn (CTF)"
 #define CD_MCTF         "disable hook+runes (CTF)"
+#define CD_CTFBASEDSPAWN "spawn players on the base (CTF)"
 #define CD_MOTD         "show motd"
 #define CD_INFOLOCK     "toggle specinfo perms"
 #define CD_INFOSPEC     "toggle spectator infos"
@@ -446,7 +455,6 @@ const char CD_NODESC[] = "no desc";
 #define CD_WREG         "register reliable wpns"
 #define CD_KILL         "invoke suicide"
 #define CD_MIDAIR       "midair settings"
-#define CD_INSTAGIB     "instagib settings"
 #define CD_INSTAGIB     "instagib settings"
 #define CD_CG_KB        "toggle coilgun kickback in instagib"
 #define CD_TIME         "show server time"
@@ -532,6 +540,9 @@ const char CD_NODESC[] = "no desc";
 #define CD_SPAWN666TIME "set spawn pent time (dmm4 atm)"
 
 #define CD_GIVEME       (CD_NODESC) // skip
+#define CD_DROPITEM     (CD_NODESC) // skip
+#define CD_REMOVEITEM   (CD_NODESC) // skip
+#define CD_DUMPENT      (CD_NODESC) // skip
 
 #define CD_VOTECOOP     "vote for coop on/off"
 #define CD_COOPNMPU     "new nightmare mode (pu drops) on/off"
@@ -587,6 +598,8 @@ cmd_t cmds[] = {
 	{ "fragsdown",   FragsDown,                 0    , CF_PLAYER | CF_SPC_ADMIN, CD_FRAGSDOWN },
 	{ "fragsup",     FragsUp,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_FRAGSUP },
 	{ "killquad",    killquad,                  0    , CF_PLAYER | CF_SPC_ADMIN, CD_KILLQUAD },
+// qqshka: Pointless to have it, XonX command will turn it off anyway.
+//	{ "bloodfest",   bloodfest,                 0    , CF_PLAYER | CF_SPC_ADMIN, CD_BLOODFEST },
 	{ "dropquad",    ToggleDropQuad,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_DROPQUAD },
 	{ "dropring",    ToggleDropRing,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_DROPRING },
 	{ "droppack",    ToggleDropPack,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_DROPPACK },
@@ -742,12 +755,15 @@ cmd_t cmds[] = {
 	{ "sh_speed",    Sh_Speed,                  0    , CF_BOTH, CD_SH_SPEED },
 // { CTF commands
 	{ "tossrune",    TossRune,                  0    , CF_PLAYER, CD_TOSSRUNE },
+	{ "tossflag",    TossFlag,                  0    , CF_PLAYER, CD_TOSSFLAG },
 	{ "nohook",      nohook,                    0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOHOOK },
 	{ "norunes",     norunes,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NORUNES },
 	{ "noga",        noga,                      0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOGA },
 	{ "mctf",        mctf,                      0    , CF_PLAYER | CF_SPC_ADMIN, CD_MCTF },
 	{ "flagstatus",  FlagStatus,                0    , CF_BOTH, CD_FLAGSTATUS },
 	{ "swapall",     AdminSwapAll,              0    , CF_BOTH_ADMIN, CD_SWAPALL },
+
+	{ "ctfbasedspawn", CTFBasedSpawn,           0    , CF_PLAYER | CF_SPC_ADMIN, CD_CTFBASEDSPAWN },
 // }
 	{ "motd",        motd_show,                 0    , CF_BOTH | CF_MATCHLESS, CD_MOTD },
 	{ "infolock",    infolock,                  0    , CF_BOTH_ADMIN, CD_INFOLOCK },
@@ -773,7 +789,7 @@ cmd_t cmds[] = {
 	{ "cg_kb",       ToggleCGKickback,          0    , CF_PLAYER | CF_SPC_ADMIN, CD_CG_KB },
 	{ "time",        sv_time,                   0    , CF_BOTH | CF_MATCHLESS, CD_TIME },
 	{ "gren_mode",   GrenadeMode,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_GREN_MODE },
-	{ "toggleready", ToggleReady,               0    , CF_BOTH, CD_TOGGLEREADY },
+	{ "toggleready", ToggleReady,               0    , CF_BOTH | CF_MATCHLESS, CD_TOGGLEREADY },
 	{ "fp",          DEF(fp_toggle),            1    , CF_BOTH_ADMIN, CD_FP },
 	{ "fp_spec",     DEF(fp_toggle),            2    , CF_BOTH_ADMIN, CD_FP_SPEC },
 	{ "dlist",       dlist,                     0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_DLIST },
@@ -845,6 +861,9 @@ cmd_t cmds[] = {
 	{ "noitems",     noitems,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOITEMS },
 	{ "spawn666time",Spawn666Time,              0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_SPAWN666TIME },
 	{ "giveme",      giveme,                    0    , CF_PLAYER | CF_MATCHLESS | CF_PARAMS, CD_GIVEME },
+	{ "dropitem",    dropitem,                  0    , CF_BOTH | CF_PARAMS, CD_DROPITEM },
+	{ "removeitem",  removeitem,                0    , CF_BOTH | CF_PARAMS, CD_REMOVEITEM },
+	{ "dumpent",     dumpent,                   0    , CF_BOTH | CF_PARAMS, CD_DUMPENT },
 	{ "votecoop",    votecoop,                  0    , CF_PLAYER | CF_MATCHLESS, CD_VOTECOOP },
 	{ "coop_nm_pu",	 ToggleNewCoopNm,           0    , CF_PLAYER | CF_MATCHLESS, CD_COOPNMPU },
 	{ "demomark",	 DemoMark,                  0    , CF_PLAYER, CD_DEMOMARK },
@@ -2207,6 +2226,15 @@ void killquad()
 	k_killquad = cvar( "k_killquad" );
 }
 
+void bloodfest()
+{
+	if ( match_in_progress )
+		return;
+
+	cvar_toggle_msg( self, "k_bloodfest", redtext("Blood Fest mode (for coop/single only)") );
+	k_bloodfest = cvar( "k_bloodfest" );
+}
+
 void ToggleDropQuad()
 {
 	if ( match_in_progress )
@@ -2324,6 +2352,7 @@ void ShowRules()
 						  "Additional commands/impulses:\n"
 						  "impulse 22 : Grappling Hook\n"
 						  "tossrune   : Toss your current rune\n"
+						  "tossflag   : Toss carried flag\n"
 						  "flagstatus : Displays flag information\n");
 	else if ( isFFA() )
 		G_sprint(self, 2, "Server is in FFA mode.\n");
@@ -2897,6 +2926,7 @@ const char common_um_init[] =
 	"k_pow_pickup 0\n"
 	"sv_loadentfiles_dir \"\"\n"
 	"sv_antilag 2\n"			// antilag on
+	"k_bloodfest 0\n"
 	"k_killquad 0\n"
 	"pm_airstep \"\"\n"			// airstep off by default
 	"samelevel 1\n"				// change levels off
@@ -3048,10 +3078,11 @@ const char ffa_um_init[] =
 
 const char ctf_um_init[] =
 	"sv_loadentfiles_dir ctf\n"
+	"pm_airstep 1\n"
 	"coop 0\n"
 	"maxclients 16\n"
 	"k_maxclients 16\n"
-	"timelimit 20\n"
+	"timelimit 10\n"
 	"teamplay 4\n"
 	"deathmatch 3\n"
 	"k_dis 2\n"					// no out of water discharges in ctf
@@ -3063,6 +3094,7 @@ const char ctf_um_init[] =
 	"k_overtime 1\n"
 	"k_exttime 5\n"
 	"k_mode 4\n"
+	"k_ctf_based_spawn 0\n"		// non team based spawn
 	"k_ctf_hook 1\n"			// hook on
 	"k_ctf_runes 1\n"			// runes on
 	"k_ctf_ga 1\n";				// green armor on
@@ -5127,7 +5159,7 @@ void ToggleMidair()
 void W_SetCurrentAmmo();
 void ToggleInstagib()
 {
-	int k_instagib = bound(0, cvar( "k_instagib" ), 2); 
+	int k_instagib = bound(0, cvar( "k_instagib" ), 3); 
 
 	if ( !gametype_change_checks() )
 		return;
@@ -5148,7 +5180,7 @@ void ToggleInstagib()
 	if ( k_instagib == 0 )
 		cvar_fset("dmm4_invinc_time", 1.0f); // default invic respawn time is 1s in instagib 
 
-	if ( ++k_instagib > 2 )
+	if ( ++k_instagib > 3 )
 		k_instagib = 0;
 
 	cvar_fset("k_instagib", k_instagib);
@@ -5160,16 +5192,23 @@ void ToggleInstagib()
 	else if ( k_instagib == 1 )
 	{
 		if ( cvar("k_instagib_custom_models") )
-			G_bprint(2, "%s enabled (Fast Coilgun mode)\n", redtext("Instagib"));
+			G_bprint(2, "%s enabled (slow coilgun mode)\n", redtext("Instagib"));
 		else
-			G_bprint(2, "%s enabled (SG mode)\n", redtext("Instagib"));
+			G_bprint(2, "%s enabled (slow mode)\n", redtext("Instagib"));
 	}
 	else if ( k_instagib == 2 )
 	{
 		if ( cvar("k_instagib_custom_models") )
-			G_bprint(2, "%s enabled (Slow Coilgun mode)\n", redtext("Instagib"));
+			G_bprint(2, "%s enabled (fast coilgun mode)\n", redtext("Instagib"));
 		else
-			G_bprint(2, "%s enabled (SSG mode)\n", redtext("Instagib"));
+			G_bprint(2, "%s enabled (fast mode)\n", redtext("Instagib"));
+	}
+	else if ( k_instagib == 3 )
+	{
+		if ( cvar("k_instagib_custom_models") )
+			G_bprint(2, "%s enabled (extreme coilgun mode)\n", redtext("Instagib"));
+		else
+			G_bprint(2, "%s enabled (extreme mode)\n", redtext("Instagib"));
 	}
 	else
 	{
@@ -5871,7 +5910,7 @@ void ToggleArena()
 
 	if ( isRA() )
 	{
-	    char buf[1024*4];
+	  char buf[1024*4];
 		char *cfg_name;
 
 		char *um = "1on1";
@@ -5891,6 +5930,9 @@ void ToggleArena()
 		}
 
 		G_cprint("\n");
+
+		// avoid spawn bug with safe spawn mode
+		cvar_fset( "k_spw", 1);
 	}
 }
 
@@ -6040,4 +6082,238 @@ qbool gametype_change_checks( void )
 	}
 
 	return true;
+}
+
+typedef struct
+{
+	char           *name;
+	char           *class_name;
+	int				spawnflags;
+} dropitem_spawn_t;
+
+#define  WEAPON_BIG2  1
+
+static dropitem_spawn_t dropitems[] = 
+{
+	{"h15",		"item_health",						H_ROTTEN},
+	{"h25",		"item_health",						0},
+	{"h100",	"item_health",						H_MEGA},
+	{"ga",		"item_armor1",						0},
+	{"ya",		"item_armor2",						0},
+	{"ra",		"item_armorInv",					0},
+	{"ssg",		"weapon_supershotgun",				0},
+	{"ng",		"weapon_nailgun",					0},
+	{"sng",		"weapon_supernailgun",				0},
+	{"gl",		"weapon_grenadelauncher",			0},
+	{"rl",		"weapon_rocketlauncher",			0},
+	{"lg",		"weapon_lightning",					0},
+	{"sh20",	"item_shells",						0},
+	{"sh40",	"item_shells",						WEAPON_BIG2},
+	{"sp25",	"item_spikes",						0},
+	{"sp50",	"item_spikes",						WEAPON_BIG2},
+	{"ro5",		"item_rockets",						0},
+	{"ro10",	"item_rockets",						WEAPON_BIG2},
+	{"ce6",		"item_cells",						0},
+	{"ce12",	"item_cells",						WEAPON_BIG2},
+	{"p",		"item_artifact_invulnerability",	0},
+	{"s",		"item_artifact_envirosuit",			0},
+	{"r",		"item_artifact_invisibility",		0},
+	{"q",		"item_artifact_super_damage",		0},
+};
+
+static const int dropitems_count = sizeof(dropitems) / sizeof(dropitems[0]);
+
+dropitem_spawn_t * dropitem_find_by_name(const char * name)
+{
+	int i;
+
+	for ( i = 0; i < dropitems_count; i++ )
+	{
+		if ( streq(dropitems[i].name, name) )
+			return &dropitems[i];
+	}
+
+	return NULL;
+}
+
+// spawn item.
+gedict_t * dropitem_spawn_item(gedict_t *spot, char * classname, int spawnflags)
+{
+	extern qbool G_CallSpawn( gedict_t * ent );
+
+	gedict_t *	oself;
+	gedict_t *	p = spawn();
+
+	p->s.v.classname = classname;
+	p->s.v.spawnflags = spawnflags;
+	VectorCopy(spot->s.v.origin, p->s.v.origin);
+//	VectorCopy(spot->s.v.angles, p->s.v.angles);
+	setorigin( p, PASSVEC3(p->s.v.origin) );
+
+	// G_CallSpawn will change 'self', so we have to do trick about it.
+	oself = self;	// save!!!
+
+	if ( !G_CallSpawn( p ) || strnull( p->s.v.classname ) )
+	{
+		// failed to call spawn function, so remove it ASAP.
+		ent_remove( p );
+		p = NULL;
+	}
+
+	self = oself;	// restore!!!
+
+	return p;
+}
+
+void dropitem_usage(void)
+{
+	int i;
+	char tmp[1024] = {0};
+
+// dropitems < x | y >
+
+	for ( i = 0; i < dropitems_count; i++ )
+	{
+		if ( !(i % 3) && *tmp )
+		{
+			G_sprint(self, 2, "dropitem < %s >\n", tmp);		
+			*tmp = 0;
+		}
+
+		if ( *tmp )
+			strlcat(tmp, " | ", sizeof(tmp));
+		strlcat(tmp, dropitems[i].name, sizeof(tmp));
+	}
+
+	if ( *tmp )
+		G_sprint(self, 2, "dropitem < %s >\n", tmp);
+}
+
+void dropitem()
+{
+	dropitem_spawn_t * di;
+	char arg_1[128];
+
+	if ( match_in_progress )
+		return;
+
+	if ( strnull( ezinfokey(world, "*cheats") ) )
+	{
+		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->s.v.netname);
+		return; // FU!
+	}
+
+	// no arguments, show info and return
+	if ( trap_CmdArgc() < 2 )
+	{
+		dropitem_usage();
+		return;
+	}
+
+	trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
+
+	if ( (di = dropitem_find_by_name( arg_1 )) )
+	{
+		if (dropitem_spawn_item( self, di->class_name, di->spawnflags ))
+		{
+			G_sprint(self, 2, "Spawned %s\n", di->class_name );
+		}
+		else
+		{
+			G_sprint(self, 2, "Can't spawn %s\n", di->class_name );
+		}
+	}
+	else
+	{
+		dropitem_usage();
+		return;
+	}
+}
+
+void removeitem()
+{
+	gedict_t *	p;
+
+	if ( match_in_progress )
+		return;
+
+	if ( strnull( ezinfokey(world, "*cheats") ) )
+	{
+		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->s.v.netname);
+		return; // FU!
+	}
+
+	for ( p = world; p = trap_findradius( p, self->s.v.origin, 64 ); )
+	{
+		if ( !((int)p->s.v.flags & FL_ITEM) )
+			continue; // not an item.
+
+		G_sprint(self, 2, "Removed %s\n", p->s.v.classname );
+		ent_remove( p );
+
+		return;
+	}
+
+	G_sprint(self, 2, "Nothing found around\n");
+}
+
+static void dump_print( fileHandle_t file_handle, const char *fmt, ... )
+{
+	va_list argptr;
+	char	text[1024] = {0};
+
+	if ( file_handle < 0 )
+		return;
+        
+	va_start( argptr, fmt );
+	Q_vsnprintf( text, sizeof(text), fmt, argptr );
+	va_end( argptr );
+
+	text[sizeof(text)-1] = 0;
+
+	trap_FS_WriteFile( text, strlen(text), file_handle );
+}
+
+static void dumpent()
+{
+	int cnt = 0;
+	gedict_t *p;
+	fileHandle_t file_handle = -1;
+
+	if ( match_in_progress )
+		return;
+
+	if ( strnull( ezinfokey(world, "*cheats") ) )
+	{
+		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->s.v.netname);
+		return; // FU!
+	}
+
+	if ( trap_FS_OpenFile( "dump.ent", &file_handle, FS_WRITE_BIN ) < 0 )
+	{
+		G_sprint(self, 2, "Can't open file for write\n");
+		return;
+	}
+
+    for( p = world; ( p = nextent( p ) ); )
+    {
+		if ( !((int)p->s.v.flags & FL_ITEM) )
+			continue; // not an item.
+
+		if ( strnull( p->s.v.classname ) )
+			continue; // null class name.
+
+		dump_print(file_handle, "{\n");
+		dump_print(file_handle, "\t" "\"classname\" \"%s\"" "\n", p->s.v.classname);
+		dump_print(file_handle, "\t" "\"origin\" \"%d %d %d\"" "\n", (int)p->s.v.origin[0], (int)p->s.v.origin[1], (int)p->s.v.origin[2]);
+		if ( p->s.v.spawnflags )
+			dump_print(file_handle, "\t" "\"spawnflags\" \"%d\"" "\n", (int)p->s.v.spawnflags);
+		dump_print(file_handle, "}\n");
+
+		cnt++;
+    }
+
+	trap_FS_CloseFile( file_handle );
+
+	G_sprint(self, 2, "Dumped %d entities\n", cnt);
 }

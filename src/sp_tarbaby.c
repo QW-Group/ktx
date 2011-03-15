@@ -45,6 +45,10 @@ exp1,
 };
 
 void tbaby_stand1();
+void tbaby_stand2();
+void tbaby_stand3();
+void tbaby_stand4();
+
 void tbaby_walk1();
 void tbaby_walk2();
 void tbaby_walk3();
@@ -110,7 +114,12 @@ void tbaby_die2();
 
 //============================================================================
 
-ANIM(tbaby_stand1, walk1, tbaby_stand1; ai_stand();)
+// qqshka: well, in original quake tarbaby have single stand frame = walk1,
+// that was boring so I replaced it with few frames of run sequence.
+ANIM(tbaby_stand1, run1, tbaby_stand2; ai_stand();)
+ANIM(tbaby_stand2, run2, tbaby_stand3; ai_stand();)
+ANIM(tbaby_stand3, run3, tbaby_stand4; ai_stand();)
+ANIM(tbaby_stand4, run2, tbaby_stand1; ai_stand();)
 
 ANIM(tbaby_walk1,  walk1,  tbaby_walk2;  ai_turn();)
 ANIM(tbaby_walk2,  walk2,  tbaby_walk3;  ai_turn();)
@@ -205,7 +214,7 @@ void Tar_JumpTouch ()
 	}
 
 	self->s.v.touch = ( func_t ) SUB_Null;
-	self->s.v.think = ( func_t ) tbaby_jump1;
+	self->s.v.think = ( func_t ) tbaby_run1;
 	self->s.v.nextthink = g_globalvars.time + FRAMETIME;
 }
 
@@ -213,11 +222,11 @@ void _tbaby_fly4( void )
 {
 	self->cnt = bound( 0, self->cnt + 1, 4 );
 
-
 	if ( self->cnt >= 4 )
 	{
 		//dprint ("spawn hop\n");
-		tbaby_jump5 ();
+//		tbaby_jump5 ();
+		tbaby_run1();
 	}
 }
 ANIM(tbaby_fly1, fly1, tbaby_fly2; )

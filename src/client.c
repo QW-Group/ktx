@@ -665,6 +665,9 @@ void NextLevel()
 {
 	gedict_t       *o;
 
+	if ( k_bloodfest )
+		return;
+
 	if ( nextmap[0] )
 		return;		// already done
 
@@ -1067,7 +1070,8 @@ qbool CanConnect()
 		return false; // _can't_ connect
 	}
 
-	if( !match_in_progress || k_matchLess ) { // no ghost, team, etc... checks in matchLess mode
+	// no ghost, team, etc checks in matchLess mode.
+	if( !match_in_progress || ( k_matchLess && !k_bloodfest ) ) {
 		G_bprint(2, "%s entered the game\n", self->s.v.netname);
 		return true; // can connect
 	}
@@ -1237,6 +1241,14 @@ void ClientConnect()
 
 	k_nochange = 0;
 
+	if ( coop )
+	{
+		// set proper team.
+		SetUserInfo( self, "team", "coop", 0 );
+		// sends this to client - so he get right team too.
+		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "team " "coop" "\n");
+	}
+
 	if ( !CanConnect() ) {
 		stuffcmd(self, "disconnect\n"); // FIXME: stupid way
 		return;
@@ -1247,7 +1259,10 @@ void ClientConnect()
 	self->ct = ctPlayer;
 	self->s.v.classname = "player";
 	self->k_accepted = 1; // ok, we allowed to connect
-	self->ready = ((match_in_progress || k_matchLess) ? 1 : 0);
+
+	// if match in progress then set client read anyway.
+	// if there matchless mode and bloodfest is not active then set client ready too.
+	self->ready = ((match_in_progress || (k_matchLess && !k_bloodfest)) ? 1 : 0);
 
 	// if the guy started connecting during intermission and
 	// thus missed the svc_intermission, we'd better let him know
@@ -1370,7 +1385,11 @@ void PutClientInServer( void )
 
 	if ( deathmatch )
 	{
-		if ( isCTF() && match_start_time == g_globalvars.time ) // first spawn in CTF on corresponding base
+		// first spawn in CTF on corresponding base, later used info_player_deathmatch.
+		// qqshka: I found that it sux and added variable which force players spawn ONLY on the base,
+		// so maps like qwq3wcp9 works fine!
+
+		if ( isCTF() && (match_start_time == g_globalvars.time || cvar("k_ctf_based_spawn") ) )
 			spot = SelectSpawnPoint(streq(getteam(self), "red") ? "info_player_team1" : "info_player_team2" );
 		else if ( isRA() && ( isWinner( self ) || isLoser( self ) ) )
 			spot = SelectSpawnPoint("info_teleport_destination" );
@@ -1456,7 +1475,7 @@ void PutClientInServer( void )
 		return;
 	}
 
-	if ( deathmatch == 4 && match_in_progress == 2 )
+	if ( ( deathmatch == 4 || k_bloodfest ) && match_in_progress == 2 )
 	{
 		float dmm4_invinc_time = cvar("dmm4_invinc_time");
 
@@ -1487,7 +1506,7 @@ void PutClientInServer( void )
 			self->s.v.health       = 250;
 
 			items = IT_AXE;
-			items |= ( cvar("k_instagib") == 1 || cvar("k_instagib") == 3 ) ? IT_SHOTGUN : IT_SUPER_SHOTGUN;
+			items |= IT_SHOTGUN;
 		}
 		else
 		{
@@ -1532,7 +1551,7 @@ void PutClientInServer( void )
 
 		// default to spawning with rl, except if instagib or gren_mode is on
 		if ( cvar("k_instagib") )
-			self->s.v.weapon = cvar("k_instagib") == 1 ? IT_SHOTGUN : IT_SUPER_SHOTGUN;
+			self->s.v.weapon = IT_SHOTGUN;
 		else if ( cvar("k_dmm4_gren_mode") )
 			self->s.v.weapon = IT_GRENADE_LAUNCHER;
 		else
@@ -1707,7 +1726,12 @@ void PlayerDeathThink()
 
 	if( (g_globalvars.time - self->dead_time) > respawn_time )
 	{
+		// do not allow respawn in bloodfest mode.
+		if ( k_bloodfest && match_in_progress )
+			return;
+
 		k_respawn( self, true );
+
 		return;
 	}
 // }
@@ -1723,6 +1747,10 @@ void PlayerDeathThink()
 
 // wait for any button down
 	if ( !self->s.v.button2 && !self->s.v.button1 && !self->s.v.button0 && !self->wreg_attack )
+		return;
+
+	// do not allow respawn in bloodfest mode.
+	if ( k_bloodfest && match_in_progress )
 		return;
 
 	k_respawn( self, true );
@@ -1984,7 +2012,7 @@ void ClientDisconnect()
 	}
 
 	DropRune();
-	PlayerDropFlag( self );
+	PlayerDropFlag( self, false );
 
 // s: added conditional function call here
 	if( self->v.elect_type != etNone ) {
@@ -2828,6 +2856,9 @@ void CheckLightEffects( void )
 	if ( self->racer && !match_in_progress )
 		g = true; // RACE
 
+	if ( k_bloodfest && ISLIVE( self ) )
+		g = true;
+
 	if ( self->super_damage_finished > g_globalvars.time )
 		b = true;
 
@@ -3128,6 +3159,9 @@ void SendTeamInfo(gedict_t *t)
 		if ( strneq(tm, getteam( p )) )
 			continue; // on different team
 
+		if ( k_bloodfest && !ISLIVE(p) )
+			continue; // do not send it if mate is dead in bloodfest mode.
+
 		if ( strnull( nick = ezinfokey(p, "k_nick") ) ) // get nick, if any, do not send name, client can guess it too
 			nick = ezinfokey(p, "k");
 
@@ -3150,7 +3184,7 @@ void CheckTeamStatus( )
 	gedict_t *p;
 	int k_teamoverlay;
 
-	if ( !isTeam() && !isCTF() )
+	if ( !isTeam() && !isCTF() && !coop )
 		return; // non team game
 
 	if ( g_globalvars.time - lastTeamLocationTime < TEAM_LOCATION_UPDATE_TIME )

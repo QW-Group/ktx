@@ -396,6 +396,8 @@ void SP_worldspawn()
 
 // suit wav - need this for race
 	trap_precache_sound( "items/suit.wav" );
+	trap_precache_model( "progs/suit.mdl" );
+	trap_precache_sound( "items/suit2.wav" );
 
 // for race
 	trap_precache_sound( "knight/sword2.wav" );
@@ -415,6 +417,36 @@ void SP_worldspawn()
 
 // for instagib bonus
 	trap_precache_model( "progs/invisibl.mdl" );
+
+// various items.
+
+// health 15
+	trap_precache_model( "maps/b_bh10.bsp" );
+	trap_precache_sound( "items/r_item1.wav" );
+// health 25
+	trap_precache_model( "maps/b_bh25.bsp" );
+	trap_precache_sound( "items/health1.wav" );
+// megahealth
+	trap_precache_model( "maps/b_bh100.bsp" );
+	trap_precache_sound( "items/r_item2.wav" );
+// armor
+	trap_precache_model( "progs/armor.mdl" );
+// shells 20
+	trap_precache_model( "maps/b_shell0.bsp" );
+// shells 40
+	trap_precache_model( "maps/b_shell1.bsp" );
+// nails 20/25
+	trap_precache_model( "maps/b_nail0.bsp" );
+// nails 40/50
+	trap_precache_model( "maps/b_nail1.bsp" );
+// rockets 5
+	trap_precache_model( "maps/b_rock0.bsp" );
+// rockets 10
+	trap_precache_model( "maps/b_rock1.bsp" );
+// cells 6
+	trap_precache_model( "maps/b_batt0.bsp" );
+// cells 12
+	trap_precache_model( "maps/b_batt1.bsp" );
 
 //
 // Setup light animation tables. 'a' is total darkness, 'z' is maxbright.
@@ -619,6 +651,8 @@ void FirstFrame	( )
 
 	RegisterCvar("k_noitems");
 
+	RegisterCvar("k_random_maplist"); // select random map from k_ml_XXX variables.
+
 	RegisterCvar("k_mode");
 	RegisterCvar("k_defmode");
 	RegisterCvar("k_auto_xonx"); // switch XonX mode dependant on players + specs count
@@ -726,11 +760,14 @@ void FirstFrame	( )
 	RegisterCvar("k_ctf_hook");
 	RegisterCvar("k_ctf_runes");
 	RegisterCvar("k_ctf_ga");
+	RegisterCvar("k_ctf_based_spawn"); // spawn players on the base (red/blue)
 //}
 	RegisterCvar("k_spec_info");
 	RegisterCvar("k_midair");
 	
 	RegisterCvarEx("k_killquad", "0");
+
+	RegisterCvarEx("k_bloodfest", "0");
 
 	RegisterCvarEx("k_nightmare_pu", "0");
 	RegisterCvarEx("k_nightmare_pu_droprate", "0.15");
@@ -1110,6 +1147,8 @@ void FixRules ( )
 	int k_minr = bound(0, cvar( "k_minrate" ),  100000);
 	int k_maxr = bound(0, cvar( "sv_maxrate" ), 100000);
 
+	k_bloodfest = cvar( "k_bloodfest" );
+
 	k_killquad = cvar( "k_killquad" );
 
 	skill = cvar( "skill" );
@@ -1143,14 +1182,19 @@ void FixRules ( )
 	if ( isCTF() && !( k_allowed_free_modes & UM_CTF ) )
 		cvar_fset("k_mode", (float)( k_mode = gtTeam ));
 
-	// if we are in coop, then deathmatch should be 0
-	if ( cvar( "coop" ) )
+	if ( coop )
 	{
+		// if we are in coop, then deathmatch should be 0
 		if ( deathmatch )
 			trap_cvar_set_float("deathmatch", (deathmatch = 0));
+		// set some teamplay in coop mode.
+		if ( !teamplay )
+			trap_cvar_set_float("teamplay", (teamplay = 2));
 	}
 	else
 	{
+// qqshka: interesting, why I commented it out, since I do not recall case then we can have zero deathmatch
+//		  in non coop game.
 //		if ( !deathmatch )
 //			trap_cvar_set_float("deathmatch", (deathmatch = 3));
 	}
@@ -1164,9 +1208,11 @@ void FixRules ( )
 		trap_cvar_set_float("deathmatch", (deathmatch = 3));
 
 	if ( k_matchLess ) {
+		// matchless mode MUST be FFA
 		if ( !isFFA() )
 			trap_cvar_set_float("k_mode", (float)( k_mode = gtFFA ));
-		if ( teamplay ) // sanity
+		// matchless mode should have teamplay set to 0 unless coop.
+		if ( teamplay && !coop )
 			trap_cvar_set_float("teamplay", (teamplay = 0));
 	}
 
@@ -1176,7 +1222,7 @@ void FixRules ( )
 
 	// teamplay set, but gametype is not team, disable teamplay in this case
 	if ( teamplay ) {
-		if ( !isTeam() && !isCTF())
+		if ( !isTeam() && !isCTF() && !coop )
 			trap_cvar_set_float("teamplay", (teamplay = 0));
 	}
 	
@@ -1304,7 +1350,7 @@ void StartFrame( int time )
 			&& !strnull( cvar_string( "serverdemo" ) ) )
 		localcmd("stop\n"); // demo is recording, stop it and save
 
-	if ( k_matchLess && !match_in_progress )
+	if ( k_matchLess && !match_in_progress && !k_bloodfest )
 		StartTimer(); // trying start countdown in matchless mode
 
 	if ( isRA() )

@@ -26,6 +26,8 @@
 #include "g_local.h"
 
 void	ClientObituary( gedict_t * e1, gedict_t * e2 );
+float	bloodfest_monster_damage_factor(void);
+void	bloodfest_killed_hook( gedict_t * killed, gedict_t * attacker );
 
 #define DEATHTYPE( _dt_, _dt_str_ ) #_dt_str_,
 char *deathtype_strings[] =
@@ -275,6 +277,9 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 		   )
 		)
 		EndMatch( 0 );
+
+	if ( k_bloodfest )
+		bloodfest_killed_hook( targ, attacker );
 }
 
 #ifndef Q3_VM
@@ -398,6 +403,13 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	if ( (int)cvar("k_midair") )
 		midair = true;
+
+	// in bloodfest mode monsters do more damage with times.
+	if ( k_bloodfest && ( (int)attacker->s.v.flags & FL_MONSTER ) )
+	{
+		damage *= bloodfest_monster_damage_factor();
+		damage = max(1, damage);
+	}
 
 	// check for quad damage powerup on the attacker
 	// midair quad makes rockets fast, but no change to damage
@@ -679,7 +691,11 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	}
 
 	// figure momentum add
-	if ( inflictor != world && targ->s.v.movetype == MOVETYPE_WALK )
+	if ( inflictor != world
+		 && (	targ->s.v.movetype == MOVETYPE_WALK
+			  || ( k_bloodfest && ( (int)targ->s.v.flags & FL_MONSTER ) )
+			 )
+	)
 	{
 		float nailkick;
 
@@ -707,6 +723,11 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 		if ( midair && lowheight )
 			targ->s.v.velocity[2] += dir[2] * non_hdp_damage * c2 * nailkick; // only for z component
+
+		if ( k_bloodfest && ( (int)targ->s.v.flags & FL_MONSTER ) )
+		{
+			targ->s.v.flags = (int)targ->s.v.flags & ~FL_ONGROUND;		
+		}
 	}
 
 	if ( match_in_progress == 2 && (int)cvar("k_dmgfrags") )

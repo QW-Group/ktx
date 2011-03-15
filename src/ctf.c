@@ -31,7 +31,7 @@
 #define RETURN_ASSIST_BONUS  1
 #define CARRIER_DEFEND_TIME  4
 
-void DropFlag( gedict_t *flag );
+void DropFlag( gedict_t *flag, qbool tossed );
 void PlaceFlag();
 void FlagThink();
 void FlagTouch();
@@ -288,6 +288,10 @@ void FlagTouch()
 	if ( self->cnt == FLAG_RETURNED )
 		return;
 
+	// if owner of the flag, do nothing (probably toss in progress)
+	if ( self->s.v.owner == EDICT_TO_PROG( other ) )
+		return;
+
 	// touching their own flag
 	if ((self->k_teamnumber == 1 && streq(getteam(other), "red")) ||
 		(self->k_teamnumber == 2 && streq(getteam(other), "blue")) )
@@ -368,7 +372,7 @@ void FlagTouch()
 			other->ps.ctf_points += RETURN_BONUS;
 			other->ps.returns++;
 			other->return_flag_time = g_globalvars.time;
-			sound (other, CHAN_ITEM, self->s.v.noise1, 1, ATTN_NORM);
+			sound (other, CHAN_ITEM, self->s.v.noise1, 1, ATTN_NONE);
 			RegenFlag( self );
 
 			G_bprint( 2, "%s", other->s.v.netname);
@@ -391,7 +395,7 @@ void FlagTouch()
 	refresh_plus_scores (); // update players status bar faster
 
 	// Pick up the flag
-	sound( other, CHAN_ITEM, self->s.v.noise, 1, ATTN_NORM );
+	sound( other, CHAN_ITEM, self->s.v.noise, 1, ATTN_NONE );
 	other->ctf_flag |= CTF_FLAG;
 
 	other->s.v.items = (int) other->s.v.items | (int) self->s.v.items;
@@ -417,7 +421,21 @@ void FlagTouch()
 	setmodel( self, "" );
 }
 
-void PlayerDropFlag( gedict_t *player )
+void FlagResetOwner( )
+{
+	gedict_t *p = PROG_TO_EDICT( self->s.v.owner );
+	self->s.v.think = (func_t) FlagThink;
+	self->s.v.touch = (func_t) FlagTouch;
+	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->s.v.owner = EDICT_TO_PROG( self );
+}
+
+void TossFlag()
+{
+	PlayerDropFlag ( self, true );
+}
+
+void PlayerDropFlag( gedict_t *player, qbool tossed )
 {
 	gedict_t *flag;
 	char *cn;
@@ -434,10 +452,10 @@ void PlayerDropFlag( gedict_t *player )
 
 	flag = find( world, FOFCLSN, cn );
 	if ( flag )
-		DropFlag( flag );
+		DropFlag( flag, tossed );
 }
 
-void DropFlag( gedict_t *flag)
+void DropFlag( gedict_t *flag, qbool tossed )
 {
 	gedict_t *p = PROG_TO_EDICT( flag->s.v.owner );
 	gedict_t *p1;
@@ -448,19 +466,47 @@ void DropFlag( gedict_t *flag)
 	setorigin( flag, PASSVEC3(p->s.v.origin) );
 	flag->s.v.origin[2] -= 24;
 	flag->cnt = FLAG_DROPPED;
-	SetVector( flag->s.v.velocity, 0, 0, 300 );
+	if ( tossed )
+	{
+		trap_makevectors( self->s.v.v_angle );
+		if ( p->s.v.v_angle[0] )
+		{
+			flag->s.v.velocity[0] = g_globalvars.v_forward[0] * 300 + g_globalvars.v_up[0] * 200;
+			flag->s.v.velocity[1] = g_globalvars.v_forward[1] * 300 + g_globalvars.v_up[1] * 200;
+			flag->s.v.velocity[2] = g_globalvars.v_forward[2] * 300 + g_globalvars.v_up[2] * 200;
+		}
+		else
+		{
+			aim( flag->s.v.velocity );
+			VectorScale( flag->s.v.velocity, 300, flag->s.v.velocity );
+			flag->s.v.velocity[2] = 200;
+		}
+	}
+	else
+	{
+		SetVector( flag->s.v.velocity, 0, 0, 300 );
+	}
 	flag->s.v.flags = FL_ITEM;
 	flag->s.v.solid = SOLID_TRIGGER;
 	flag->s.v.movetype = MOVETYPE_TOSS;
 	setmodel( flag, flag->mdl );
 	setsize ( flag, -16, -16, 0, 16, 16, 74 );
 	flag->super_time = g_globalvars.time + FLAG_RETURN_TIME;
+	if ( tossed )
+	{
+		flag->s.v.nextthink = g_globalvars.time + 0.75;
+		flag->s.v.think = (func_t) FlagResetOwner;
+	}
+	else
+	{
+		flag->s.v.owner = EDICT_TO_PROG( flag );
+	}
 
 	G_bprint( 2, "%s", p->s.v.netname );
 	if ( streq(getteam(p), "red") )
-		G_bprint( 2, " %s the %s flag!\n", redtext("lost"), redtext("BLUE") );
+		G_bprint( 2, " %s the %s flag!\n", tossed ? redtext("tossed") : redtext("lost"), redtext("BLUE") );
 	else
-		G_bprint( 2, " %s the %s flag!\n", redtext("lost"), redtext("RED") );
+		G_bprint( 2, " %s the %s flag!\n", tossed ? redtext("tossed") : redtext("lost"), redtext("RED") );
 
 	for ( p1 = world; (p1 = find_plr( p1 )); )
 	{
@@ -612,6 +658,19 @@ void mctf()
 	cvar_fset("k_ctf_runes", 0);
 
 	G_sprint ( self, 2, "%s turn off: %s\n", getname(self), redtext("hook & runes") );
+}
+
+void CTFBasedSpawn()
+{
+	if( match_in_progress )
+		return;
+
+	if ( !isCTF() ) {
+		G_sprint ( self, 2, "Can't do this in non CTF mode\n" );
+		return;
+	}
+
+	cvar_toggle_msg( self, "k_ctf_based_spawn", redtext("spawn on the base") );
 }
 
 void CTF_Obituary( gedict_t *targ, gedict_t *attacker )

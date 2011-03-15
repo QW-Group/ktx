@@ -317,13 +317,10 @@ void SummaryTPStats()
 				redtext("ga"), tmStats[i].itm[itGA].tooks, redtext("ya"), tmStats[i].itm[itYA].tooks, 
 				redtext("ra"), tmStats[i].itm[itRA].tooks, redtext("mh"), tmStats[i].itm[itHEALTH_100].tooks);
 
-		} else if (( cvar("k_instagib") == 1 ) || ( cvar("k_instagib") == 3 )) {
+		} else  {
 			G_bprint(2, "%s‘: %s:%s\n", tmStats[i].name, redtext("Wp"),
 					(h_sg  ? va(" %s%.0f%%", redtext("cg"),   h_sg) : ""));
-		} else {
-			G_bprint(2, "%s‘: %s:%s\n", tmStats[i].name, redtext("Wp"),
-					(h_ssg  ? va(" %s%.0f%%", redtext("cg"),   h_ssg) : ""));
-		}
+		} 
 
 		if ( isCTF() )
 		{
@@ -824,16 +821,11 @@ void OnePlayerInstagibStats( gedict_t *p, int tp )
 
 
 	stats_text = va("%s \220%s\221\n", stats_text, "WEAPONS");
-	if ( (cvar("k_instagib") == 1) )
+	if ( cvar("k_instagib") )
 	{
 		stats_text = va("%s  %s: %s", stats_text, redtext("Coilgun"), (a_sg ? va("%.1f%% (%d)", h_sg, p->ps.i_cggibs) : ""));
 		stats_text = va("%s%s", stats_text, (a_sg ? "" : "n/u"));
 	}
-	else
-	{
-		stats_text = va("%s  %s: %s", stats_text, redtext("Coilgun"), (a_ssg ? va("%.1f%% (%d)", h_ssg,  p->ps.i_cggibs) : ""));
-		stats_text = va("%s%s", stats_text, (a_ssg ? "" : "n/u"));
-	}	
 	stats_text = va("%s\n", stats_text);
 	stats_text = va("%s  %s: %s", stats_text, redtext("Axe"), (a_ax ? va("%.1f%% (%d)", h_ax, p->ps.i_axegibs) : ""));
 	stats_text = va("%s%s", stats_text, (a_ax ? "" : "n/u"));
@@ -1193,6 +1185,12 @@ void EndMatch ( float skip_log )
 
 	EM_CorrectStats();
 
+	if ( k_bloodfest )
+	{
+		extern void bloodfest_stats(void);
+		bloodfest_stats();
+	}
+
 	if ( /* skip_log || */ !deathmatch )
 	{
 		;
@@ -1244,6 +1242,10 @@ void EndMatch ( float skip_log )
 	StopLogs();
 
 	NextLevel();
+
+	// allow ready/break in bloodfest without map reloading.
+	if ( k_bloodfest )
+		match_over = 0;
 }
 
 void SaveOvertimeStats ()
@@ -1411,6 +1413,7 @@ void SM_PrepareMap()
 		if (   isRA()
 			|| ( deathmatch == 4 && cvar("k_instagib") )
 			|| cvar("k_noitems")
+			|| k_bloodfest
 		   )
 		{
 			if (
@@ -1545,8 +1548,8 @@ void SM_PrepareClients()
 			continue;
 		}
 
-		// ignore k_respawn() in case of coop
-		if ( !deathmatch )
+		// ignore k_respawn() in case of coop unless bloodfest
+		if ( !deathmatch && !k_bloodfest )
 			continue;
 
 		// ignore  k_respawn() in case of CA
@@ -1627,7 +1630,10 @@ void HideSpawnPoints();
 
 void StartMatch ()
 {
+	extern float k_bloodfest_monsters_spawn_time;
 	char date[64];
+
+	k_bloodfest_monsters_spawn_time = 0; // start next wave ASAP!
 
 	k_nochange   = 0;
 	k_showscores = 0;
@@ -2439,7 +2445,7 @@ void PlayerReady ()
 
 	if ( self->ct == ctSpec ) {
 
-		if ( !cvar("k_auto_xonx") ) {
+		if ( !cvar("k_auto_xonx") || k_matchLess ) {
 			G_sprint(self, 2, "Command not allowed\n");
 			return;
 		}
@@ -2545,8 +2551,12 @@ void PlayerReady ()
 	
 	// ok all players ready
 
-	if ( nready < 2 ) // only one or less players ready, match is pointless
-		return;
+	// ignore 2 players requirement in bloodfest mode.
+	if ( !k_bloodfest )
+	{
+		if ( nready < 2 ) // only one or less players ready, match is pointless
+			return;
+	}
 
 	G_bprint(2, "All players ready\n"
 				"Timer started\n");

@@ -85,8 +85,6 @@ void ent_remove( gedict_t * t )
 	trap_remove( NUM_FOR_EDICT( t ) );
 }
 
-
-
 gedict_t *nextent( gedict_t * ent )
 {
 	int     entn;
@@ -2168,11 +2166,10 @@ void remove_projectiles( void )
 
 	for( p = world; ( p = nextent( p ) ); )
 	{
-		if (    streq( p->s.v.classname, "rocket" )
-			 || streq( p->s.v.classname, "grenade" )
-			 || streq( p->s.v.classname, "spike" )
-		   )
+		if ( p->isMissile )
+		{
 			ent_remove( p );
+		}
 	}
 }
 
