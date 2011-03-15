@@ -233,7 +233,7 @@ void r_print( );
 void giveme( );
 void dropitem( );
 void removeitem( );
-void dumpent( );
+static void dumpent( );
 // }
 
 // { Clan Arena
