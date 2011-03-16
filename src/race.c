@@ -1186,7 +1186,6 @@ void race_brighten_checkpoints( void )
 			e->s.v.effects   = 0; // remove effects
 			e->s.v.nextthink = 0; // stop thinking
 			
-			//if ( racer->race_id && e->race_id == racer->race_id )
 			if ( e->race_id == racer->race_id )
 				e->s.v.effects = ( EF_GREEN ); // set some green light for next checkpoint
 			else
