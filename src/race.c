@@ -391,7 +391,7 @@ void race_add_standart_routes( void )
 	if ( streq( g_globalvars.mapname, "mvdsv-kg" ) )
 	{
 		if ( !race_route_add_start() )
-			return;
+			return; // can't add anymore route
 
 		race_add_route_node(  118.5, -1345.5, 284.6, 5.2, 120.7, nodeStart );
 		race_add_route_node( -572.9,  -276.8, 330.9,   0,     0, nodeCheckPoint );
