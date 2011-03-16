@@ -869,10 +869,7 @@ void T_MissileTouch()
 
 	FixQuad(PROG_TO_EDICT( self->s.v.owner ));
 
-	// Yawnmode: always 110 dmg on direct hits
-	// - Molgrum
-//	damg = 100 + (k_yawnmode ? 10 : g_random() * 20);
-// qqshka: this way it better
+	// always 110 dmg on direct hits
 	damg = 110;
 
 	if ( other->s.v.takedamage )
