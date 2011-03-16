@@ -2481,8 +2481,7 @@ void PlayerPreThink()
 
 		if( r > 103 && !match_in_progress ) {
 			G_sprint(self, PRINT_HIGH, 
-				"WARNING: QW clients up to 2.30 have a timer related bug which is caused by too"
-				" long uptime. Either reboot your machine or upgrade to QWCL 2.33.\n");
+				"Warning: It seems that your machine has a too long uptime causing a bug in your QW client. Please restart your machine and fix this message.\n");
 
 			if( r > 105 )
 				self->uptimebugpolicy += 1;
@@ -2490,8 +2489,7 @@ void PlayerPreThink()
 
 		if( self->uptimebugpolicy > 3 ) {
 			G_bprint(PRINT_HIGH, "\n%s gets kicked for too long uptime\n", self->s.v.netname);
-			G_sprint(self, PRINT_HIGH, "Reboot your machine to get rid of this bug\n");
-
+			G_sprint(self, PRINT_HIGH, "Please reboot your machine to get rid of the problem\n");
 			stuffcmd(self, "disconnect\n"); // FIXME: stupid way
 		}
 // ends here
@@ -2509,7 +2507,7 @@ void PlayerPreThink()
 
 			G_bprint( PRINT_HIGH,
 				"\n"
-				"WARNING: %s is using the timedemo bug and has abnormally high frame rates, "
+				"Warning: %s has abnormally high frame rates, "
 				"highest FPS = %3.1f, average FPS = %3.1f!\n",
 							self->s.v.netname, peak, fps);
 							
@@ -2519,9 +2517,10 @@ void PlayerPreThink()
 			{
 				// kick the player from server!
 				// s: changed the text a bit :)
-            	G_bprint(PRINT_HIGH, "%s gets kicked for timedemo cheating\n", self->s.v.netname );
+            	G_bprint(PRINT_HIGH, "%s gets kicked for potential cheat\n", self->s.v.netname );
+							G_sprint(self, PRINT_HIGH, "Please reboot your machine to try to get rid of the problem\n");
             	stuffcmd(self, "disconnect\n"); // FIXME: stupid way
-            }
+       }
 		}
 
 		zeroFps = true;
