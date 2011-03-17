@@ -4369,7 +4369,7 @@ void next_pow ()
 // pos_show/pos_save/pos_move/pos_set_* commands {
 //================================================
 // common functions
-#define Pos_Disallowed()	(match_in_progress || intermission_running || cvar( "sv_paused" ))
+#define Pos_Disallowed()	(match_in_progress || intermission_running || cvar( "sv_paused" ) || isRACE())
 // parse pos_show/pos_save/pos_move <number>
 int Pos_Get_idx()
 {
