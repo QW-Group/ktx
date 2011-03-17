@@ -1266,7 +1266,7 @@ void race_meat_touch()
 {
 	sound( self, CHAN_WEAPON, "zombie/z_miss.wav", 1, ATTN_NORM );	// bounce sound
 
-	f ( self->s.v.velocity[0] == 0 && self->s.v.velocity[1] == 0 && self->s.v.velocity[2] == 0 )
+	if ( self->s.v.velocity[0] == 0 && self->s.v.velocity[1] == 0 && self->s.v.velocity[2] == 0 )
 		VectorClear( self->s.v.avelocity );
 }
 
