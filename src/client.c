@@ -2582,7 +2582,10 @@ void PlayerPreThink()
 
 	if ( isRACE() )
 	{
-		self->s.v.solid = SOLID_SLIDEBOX;
+		if ( self->racer )
+			self->s.v.solid = SOLID_SLIDEBOX;
+		else
+			self->s.v.solid		= SOLID_NOT;
 		setorigin (self, PASSVEC3( self->s.v.origin ) );
 
 		if ( self->ct == ctPlayer && !self->racer && race.status )
