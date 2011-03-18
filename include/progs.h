@@ -688,4 +688,4 @@ typedef struct
 
 } race_t;
 
-race_t			race; // whole race struct
+extern race_t			race; // whole race struct

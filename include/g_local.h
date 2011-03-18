@@ -772,7 +772,7 @@ void 		StartDemoRecord();
 
 qbool 		race_weapon_allowed( gedict_t *p );
 
-qbool		race_recording;
+extern		qbool race_recording;
 
 void		race_init( void );
 void		race_shutdown( char *msg );

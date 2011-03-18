@@ -29,10 +29,19 @@ void init_scores( void );
 qbool gametype_change_checks( void );
 qbool race_command_checks( void );
 qbool race_is_started( void );
+
+
 fileHandle_t race_fhandle = -1;
 raceRecord_t records[NUM_BESTSCORES];
 raceRecord_t currentrace;
+// { FIXME: DEURK PUT IT IN race_t !!!!11111!!111 Probably some of above vars MUST BE IN race_t too !!!!111!!!111
+qbool		race_recording;
+// }
+
+race_t			race; // whole race struct
+
 char *classname_for_nodeType( raceRouteNodeType_t nodeType );
+
 
 //============================================
 
