@@ -2161,6 +2161,10 @@ char *CompilateDemoName ()
 
 void StartDemoRecord ()
 {
+	// extralog should be set by easyrecord and if we skip recording we will have it set to WRONG value.
+	// So this set it at least to something reasonable ffs.
+	cvar_set( "extralogname", "" );
+	
 	if ( cvar( "demo_tmp_record" ) ) { // FIXME: TODO: make this more like ktpro
 		qbool record = false;
 

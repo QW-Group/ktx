@@ -45,6 +45,9 @@ void log_open( const char *fmt, ... )
 	va_end( argptr );
 
 	text[sizeof(text)-1] = 0;
+
+	if ( !text[0] )
+		return; // name not specified
  
 	if ( trap_FS_OpenFile( text, &log_handle, FS_APPEND_BIN ) < 0 )
 	{

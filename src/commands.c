@@ -6243,7 +6243,7 @@ void removeitem()
 		return; // FU!
 	}
 
-	for ( p = world; p = trap_findradius( p, self->s.v.origin, 64 ); )
+	for ( p = world; (p = trap_findradius( p, self->s.v.origin, 64 )); )
 	{
 		if ( !((int)p->s.v.flags & FL_ITEM) )
 			continue; // not an item.
