@@ -423,7 +423,6 @@ void FlagTouch()
 
 void FlagResetOwner( )
 {
-	gedict_t *p = PROG_TO_EDICT( self->s.v.owner );
 	self->s.v.think = (func_t) FlagThink;
 	self->s.v.touch = (func_t) FlagTouch;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
