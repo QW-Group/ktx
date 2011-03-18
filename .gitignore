@@ -3,6 +3,7 @@
 *.so
 *.dll
 *.qvm
+*.map
 *.suo
 *.ncb
 VM/
