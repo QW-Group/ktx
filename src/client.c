@@ -822,7 +822,7 @@ void ClientKill()
 		if ( self->racer && race.status )
 		{
 			race_stoprecord( true );
-			race_start( true, "Race restarted, %s suicided\n", self->s.v.netname );
+			race_start( true, "%s cancelled his run\n", self->s.v.netname );
 			return;
 		}
 		else if ( self->race_chasecam )
@@ -2582,10 +2582,10 @@ void PlayerPreThink()
 
 	if ( isRACE() )
 	{
-		if ( self->racer )
-			self->s.v.solid = SOLID_SLIDEBOX;
+		if ( race.status && !self->racer )
+			self->s.v.solid = SOLID_NOT;
 		else
-			self->s.v.solid		= SOLID_NOT;
+			self->s.v.solid		= SOLID_SLIDEBOX;
 		setorigin (self, PASSVEC3( self->s.v.origin ) );
 
 		if ( self->ct == ctPlayer && !self->racer && race.status )
