@@ -45,7 +45,7 @@ install:	build
 			../install-sh -c -m 755 $(MODULE) $(INSTALLDIR)
 
 clean:
-			$(RM) -f $(OBJECTS) $(MODULE) *~ *.map ../*.map
+			$(RM) -f $(OBJECTS) $(MODULE) *~ *.map
 
 distclean:	clean
 			$(RM) -f *.orig *.rej *.tmp Makefile.vm
