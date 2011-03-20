@@ -3166,6 +3166,9 @@ void SendTeamInfo(gedict_t *t)
 		if ( k_bloodfest && !ISLIVE(p) )
 			continue; // do not send it if mate is dead in bloodfest mode.
 
+		if ( t->trackent && t->trackent == NUM_FOR_EDICT( p ) )
+			continue; // we pseudo speccing such player, no point to send info about him
+
 		if ( strnull( nick = ezinfokey(p, "k_nick") ) ) // get nick, if any, do not send name, client can guess it too
 			nick = ezinfokey(p, "k");
 
