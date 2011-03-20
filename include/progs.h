@@ -585,6 +585,8 @@ typedef struct gedict_s {
 	int			hideentity;			// links to entity to hide in eye chasecam
 // }
 
+	int			trackent;			// pseudo spectating for players.
+
 } gedict_t;
 
 typedef enum

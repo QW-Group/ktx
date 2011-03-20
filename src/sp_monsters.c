@@ -309,11 +309,52 @@ void bloodfest_free_projectiles(void)
     }
 }
 
+void bloodfest_change_pov(void)
+{
+    gedict_t *p;
+
+	if ( self->trackent > 0 && self->trackent <= MAX_CLIENTS )
+		p = &g_edicts[ self->trackent ];
+	else
+		p = world;
+
+	for( ; (p = find_plr( p )); )
+	{
+		if ( ISLIVE( p ) )
+			break; // we found alive player!
+	}
+
+	self->trackent = NUM_FOR_EDICT( p ? p : world );
+	if ( p )
+		G_sprint( self, 2, "tracking %s\n", getname( p )) ;
+}
+
+void bloodfest_dead_jump_button( void )
+{
+	if ( !self->s.v.button2 )
+	{
+ 		self->s.v.flags = ( ( int ) ( self->s.v.flags ) ) | FL_JUMPRELEASED;
+		return;
+	}
+
+	if ( !( ( ( int ) ( self->s.v.flags ) ) & FL_JUMPRELEASED ) )
+		return;
+
+	self->s.v.flags = (int)self->s.v.flags & ~FL_JUMPRELEASED;
+	
+	// switch pov.
+	bloodfest_change_pov();
+}
+
 // main clients bloodfest hook.
 void bloodfest_client_think(void)
 {
 	if ( self->ct != ctPlayer )
 		return;
+
+	// if player dead, then allow speccing alive players with jump button.
+	if ( !ISLIVE( self ) )
+		bloodfest_dead_jump_button();
 }
 
 // called each time something/someone is killed.

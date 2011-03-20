@@ -1329,6 +1329,8 @@ void PutClientInServer( void )
 	int             items;
 	int             tele_flags;
 
+	self->trackent = 0;
+
 	self->ca_alive = (isCA() ? (ra_match_fight != 2) : true);
 	self->deathtype = dtNONE;
 	self->s.v.classname = "player";
@@ -2585,7 +2587,7 @@ void PlayerPreThink()
 		if ( race.status && !self->racer )
 			self->s.v.solid = SOLID_NOT;
 		else
-			self->s.v.solid		= SOLID_SLIDEBOX;
+			self->s.v.solid	= SOLID_SLIDEBOX;
 		setorigin (self, PASSVEC3( self->s.v.origin ) );
 
 		if ( self->ct == ctPlayer && !self->racer && race.status )
@@ -3101,7 +3103,7 @@ void PlayerPostThink()
 		// test for multirace
 		//self->s.v.solid = SOLID_BBOX;
 		setorigin (self, PASSVEC3( self->s.v.origin ) );
-    	}
+	}
 
 	race_follow();
 
