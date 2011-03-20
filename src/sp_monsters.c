@@ -288,6 +288,43 @@ void bloodfest_free_monsters(void)
     }
 }
 
+// apply content damage for the monsters.
+void bloodfest_monsters_content_damage(void)
+{
+	gedict_t *p;
+
+	if ( match_in_progress != 2 )
+		return;
+
+    for( p = world; ( p = nextent( p ) ); )
+    {
+		if ( !( (int)p->s.v.flags & FL_MONSTER ) )
+			continue; // not a monster
+
+		if ( !ISLIVE( p ) )
+			continue; // dead
+
+		if ( p->s.v.watertype == CONTENT_LAVA )
+		{			// do damage
+			if ( p->dmgtime < g_globalvars.time )
+			{
+				p->dmgtime = g_globalvars.time + 0.2;
+				p->deathtype = dtLAVA_DMG;
+				T_Damage( p, world, world, 30 * p->s.v.waterlevel );
+			}
+		}
+		else if ( p->s.v.watertype == CONTENT_SLIME )
+		{			// do damage
+			if ( p->dmgtime < g_globalvars.time )
+			{
+				p->dmgtime = g_globalvars.time + 0.2;
+				p->deathtype = dtSLIME_DMG;
+				T_Damage( p, world, world, 20 * p->s.v.waterlevel );
+			}
+		}
+    }
+}
+
 // remove projectiles if there too much.
 void bloodfest_free_projectiles(void)
 {
@@ -403,6 +440,7 @@ void bloodfest_think(void)
 	bloodfest_spawn_monsters();
 	bloodfest_free_projectiles();
 	bloodfest_free_monsters();
+	bloodfest_monsters_content_damage();
 }
 
 //============================================================================
