@@ -1,7 +1,0 @@
-*.o
-*~
-q3lcc
-q3cpp
-q3rcc
-lburg/lburg
-rcc/dagcheck.c
