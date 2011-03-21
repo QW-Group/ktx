@@ -1411,6 +1411,7 @@ void SM_PrepareMap()
 	{
 		// going for the if content record..
 		if (   isRA()
+			|| isRACE()
 			|| ( deathmatch == 4 && cvar("k_instagib") )
 			|| cvar("k_noitems")
 			|| k_bloodfest
