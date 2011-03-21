@@ -5160,6 +5160,8 @@ void W_SetCurrentAmmo();
 void ToggleInstagib()
 {
 	int k_instagib = bound(0, cvar( "k_instagib" ), 3); 
+  char buf[1024*4];
+	char *cfg_name;
 
 	if ( !gametype_change_checks() )
 		return;
@@ -5170,6 +5172,22 @@ void ToggleInstagib()
 		G_sprint( self, 2, "Instagib requires dmm4\n");
 		return;
 	}
+
+	cfg_name = va("configs/usermodes/instagib/default.cfg");
+	if ( can_exec( cfg_name ) )
+	{
+		trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
+		G_cprint("%s", buf);
+	}
+
+	cfg_name = va("configs/usermodes/instagib/%s.cfg", g_globalvars.mapname);
+	if ( can_exec( cfg_name ) )
+	{
+		trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
+		G_cprint("%s", buf);
+	}
+
+	G_cprint("\n");
 
 	if ( cvar("k_midair") )
 		cvar_set("k_midair", "0"); // If instagib is enabled, disable midair
