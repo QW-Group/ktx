@@ -147,33 +147,30 @@ void race_cleanmap( void )
 
 	for( p = world; (p = nextent(p)); )
 	{
-		if ( cvar("k_noitems") )
+		if (   streq( p->s.v.classname, "weapon_nailgun" )
+			|| streq( p->s.v.classname, "weapon_supernailgun" )
+			|| streq( p->s.v.classname, "weapon_supershotgun" )
+			|| streq( p->s.v.classname, "weapon_rocketlauncher" )
+			|| streq( p->s.v.classname, "weapon_grenadelauncher" )
+			|| streq( p->s.v.classname, "weapon_lightning" )
+			|| streq( p->s.v.classname, "item_shells" )
+			|| streq( p->s.v.classname, "item_spikes" )
+			|| streq( p->s.v.classname, "item_rockets" )
+			|| streq( p->s.v.classname, "item_cells" )
+			|| streq( p->s.v.classname, "item_health" )
+			|| streq( p->s.v.classname, "item_armor1")
+			|| streq( p->s.v.classname, "item_armor2")
+			|| streq( p->s.v.classname, "item_armorInv")
+			|| streq( p->s.v.classname, "item_artifact_invulnerability")
+			|| streq( p->s.v.classname, "item_artifact_envirosuit")
+			|| streq( p->s.v.classname, "item_artifact_invisibility")
+			|| streq( p->s.v.classname, "item_artifact_super_damage")
+			|| streq( p->s.v.classname, "item_armor1" )
+	    || streq( p->s.v.classname, "item_armor2" )
+	    || streq( p->s.v.classname, "item_armorInv") )
 		{
-			if (   streq( p->s.v.classname, "weapon_nailgun" )
-				|| streq( p->s.v.classname, "weapon_supernailgun" )
-				|| streq( p->s.v.classname, "weapon_supershotgun" )
-				|| streq( p->s.v.classname, "weapon_rocketlauncher" )
-				|| streq( p->s.v.classname, "weapon_grenadelauncher" )
-				|| streq( p->s.v.classname, "weapon_lightning" )
-				|| streq( p->s.v.classname, "item_shells" )
-				|| streq( p->s.v.classname, "item_spikes" )
-				|| streq( p->s.v.classname, "item_rockets" )
-				|| streq( p->s.v.classname, "item_cells" )
-				|| streq( p->s.v.classname, "item_health" )
-				|| streq( p->s.v.classname, "item_armor1")
-				|| streq( p->s.v.classname, "item_armor2")
-				|| streq( p->s.v.classname, "item_armorInv")
-				|| streq( p->s.v.classname, "item_artifact_invulnerability")
-				|| streq( p->s.v.classname, "item_artifact_envirosuit")
-				|| streq( p->s.v.classname, "item_artifact_invisibility")
-				|| streq( p->s.v.classname, "item_artifact_super_damage")
-				|| streq( p->s.v.classname, "item_armor1" )
-			    || streq( p->s.v.classname, "item_armor2" )
-			    || streq( p->s.v.classname, "item_armorInv") )
-			{
-				ent_remove( p );
-				continue;
-			}
+			ent_remove( p );
+			continue;
 		}
  	}
 }
@@ -2390,7 +2387,7 @@ void set_player_race_ready(	gedict_t *e, int ready )
 	if ( ready )
 	{
 		if ( e->race_ready )
-			return; // alredy ready
+			return;
 
 		G_bprint( 2, "%s %s the %s line\n", e->s.v.netname, redtext("entered"), redtext("race"));
 		e->race_ready = 1;
@@ -2401,7 +2398,7 @@ void set_player_race_ready(	gedict_t *e, int ready )
 	else
 	{
 		if ( !e->race_ready )
-			return; // alredy NOT ready
+			return;
 
 		G_bprint( 2, "%s %s the %s line\n", e->s.v.netname, redtext("left"), redtext("race"));
 		e->race_ready = 0;
@@ -2464,12 +2461,12 @@ void r_changestatus( float t )
 
 	switch ( (int)t )
 	{
-		case 1: // rready
+		case 1: // race_ready
 			set_player_race_ready( self, 1 );
 
 			return;
 
-		case 2: // rbreak
+		case 2: // race_break
 
 			if ( self->racer && race.status )
 				race_start( true, "%s has quit the race\n", self->s.v.netname );
@@ -2478,7 +2475,7 @@ void r_changestatus( float t )
 
 			return;
 
-		case 3: // rtoggle
+		case 3: // race_toggle
 
 			if ( self->racer && race.status )
 				race_start( true, "%s has quit the race\n", self->s.v.netname );
@@ -2487,13 +2484,13 @@ void r_changestatus( float t )
 
 			return;
 
-		case 4: // rcancel
+		case 4: // race_cancel
 
   	  		if ( !self->racer )
-				return; // FUCK U!
+				return;
 
 			if ( !race.status )
-				return; // same
+				return;
 
 			// do some sound
 			sound( self, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
