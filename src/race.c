@@ -76,6 +76,7 @@ static char race_settings[] =
     "lock_practice 1\n"
 	"allow_toggle_practice 0\n"
 	"sv_demotxt 0\n"
+	"k_spw 1\n",
 	"pm_airstep 0\n";
 
 static char norace_settings[] =
