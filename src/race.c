@@ -740,8 +740,9 @@ void race_add_standart_routes( void )
 		if ( !race_route_add_start() )
 			return; // we are full
 
-		race_add_route_node(    0.0, -85.5,   20.9, 1.1, 90.4, nodeStart );
-		race_add_route_node( -456.6, -64.6, -876.0,   0,    0, nodeEnd );
+		race_add_route_node(    0.0,  -85.5,   20.9, 1.1, 90.4, nodeStart );
+		race_add_route_node( -777.4, 2527.1, -360.0,   0,    0, nodeCheckPoint );
+		race_add_route_node( -456.6,  -64.6, -876.0,   0,    0, nodeEnd );
 
 		race_set_route_name( "Slide 8", "start\215end" );
 		race_set_route_timeout( 40 );
