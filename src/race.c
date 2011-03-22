@@ -1378,12 +1378,11 @@ void race_node_touch()
 
 					sound( other, CHAN_ITEM, "ambience/thunder1.wav", 1, ATTN_NONE );
 
-					race_start( true, "Race %s in %s%s\n%s didn't beat his own %s\n",
+					race_start( true, "Race %s in %s%s\n%s didn't beat his own record\n",
 							redtext( "finished" ),
 							dig3s( "%.3f", currentrace.time / 1000 ),
 							redtext( "s" ),
-							other->s.v.netname,
-							redtext( "record" )
+							other->s.v.netname
 							);
 				}
 				else
@@ -1661,7 +1660,7 @@ void display_scores( void )
 
 	G_sprint(self, 2,  "\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\237%s %02d\237\236\236\236\236\236\236\236\236\236\236\236\236\236\235\n",
 			redtext( "top"), NUM_BESTSCORES );
-	G_sprint( self, 2, "pos.  racetime  nickname\n" );
+	G_sprint( self, 2, "pos.  time      name\n" );
 
     for ( i = 0; i < NUM_BESTSCORES; i++ )
     {
