@@ -932,13 +932,13 @@ char *race_weapon_mode( int weapon )
 	switch ( weapon )
 	{
 		case raceWeaponNo:
-		return "no";
+		return "disallowed";
 
 		case raceWeaponAllowed:
 		return "allowed";
 
 		case raceWeapon2s:
-		return "after 2s";
+		return "allowed after 2s";
 
 		default: G_Error( "race_weapon_mode: wrong race.weapon %d", weapon );
 	}
@@ -1133,11 +1133,11 @@ void race_check_racer_falsestart( qbool nextracer )
 		{
 			if ( nextracer )
 			{
-				race_cancel( true, "Race aborted, %s did a %s\n", racer->s.v.netname, redtext( "falsestart" ) );
+				race_cancel( true, "Run aborted, %s has %s\n", racer->s.v.netname, redtext( "false started" ) );
 			}
 			else
 			{
-				G_sprint( racer, 2, "Come here!\n" );
+				G_sprint( racer, 2, "Come back here!\n" );
 				VectorCopy( e->s.v.origin, racer->s.v.origin );
 				VectorSet( racer->s.v.velocity, 0, 0, 0 );
 			}
@@ -1158,10 +1158,10 @@ void kill_race_idler( void )
 			racer->race_afk++;
 
 			if ( racer->race_afk < 3 )
-				race_cancel( true, "Race aborted, %s was %s to start\n", racer->s.v.netname, redtext( "too slow" ) );
+				race_cancel( true, "Run aborted, %s was %s to start\n", racer->s.v.netname, redtext( "too slow" ) );
 			else
 			{
-				race_cancel( true, "%s was %s of race line: stop %s!\n", racer->s.v.netname, redtext( "kicked out" ), redtext( "idling" ) );
+				race_cancel( true, "%s was %s of line-up for %s\n", racer->s.v.netname, redtext( "kicked out" ), redtext( "idling" ) );
 				racer->race_ready = 0;
 			}
 		}
@@ -1378,8 +1378,8 @@ void race_node_touch()
 
 					sound( other, CHAN_ITEM, "ambience/thunder1.wav", 1, ATTN_NONE );
 
-					race_start( true, "Race %s in %s%s\n%s didn't beat his own record\n",
-							redtext( "finished" ),
+					race_start( true, "Run %s in %s%s\n%s couldn't beat his best time\n",
+							redtext( "done" ),
 							dig3s( "%.3f", currentrace.time / 1000 ),
 							redtext( "s" ),
 							other->s.v.netname
@@ -1430,14 +1430,29 @@ void race_node_touch()
 						sound( other, CHAN_ITEM, "ambience/thunder1.wav", 1, ATTN_NONE );
 					}
 
-					G_bprint( 2, "Race %s in %s%s\n%s took position %s %s!\n",
-							redtext( "finished" ),
+					G_bprint( 2, "Run %s in %s%s\n%s took the ",
+							redtext( "done" ),
 							dig3s( "%.3f", currentrace.time / 1000 ),
 							redtext( "s" ),
-							other->s.v.netname,
-							redtext( "number" ),
-							dig3( i + 1 )
+							other->s.v.netname
 							);
+
+					switch ( i + 1 )
+					{
+						case 1:
+							G_bprint( 2, "%s", redtext( "1st" ) );
+							break;
+						case 2:
+							G_bprint( 2, "%s", redtext( "2nd" ) );
+							break;
+						case 3:
+							G_bprint( 2, "%s", redtext( "3rd" ) );
+							break;
+						default:
+							G_bprint( 2, "%s%s", redtext( dig3( i + 1 ) ) , redtext( "th" ) );
+					}
+
+					G_bprint( 2, " %s\n", "place" );
 
 					istopscore = true;
 					race_start( false, "" );
@@ -1448,8 +1463,8 @@ void race_node_touch()
 				// run time did not make it to top scores
 				sound( other, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
 
-				race_start( true, "Race %s in %s%s\n",
-   					redtext( "finished" ),
+				race_start( true, "Run %s in %s%s\n",
+   					redtext( "done" ),
    					dig3s( "%.3f", currentrace.time / 1000 ),
 					redtext( "s" )
 	   				);
@@ -1480,9 +1495,9 @@ void race_node_touch()
 		sound( other, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
 
 		if ( self->race_RouteNodeType == nodeCheckPoint )
-			race_start( true, "Race aborted, %s \220%d\221 in wrong order\n", redtext( name_for_nodeType( self->race_RouteNodeType ) ), self->race_id );
+			race_start( true, "Run aborted, %s \220%d\221 touched in wrong order\n", redtext( name_for_nodeType( self->race_RouteNodeType ) ), self->race_id );
 		else
-			race_start( true, "Race aborted, %s in wrong order\n", redtext( name_for_nodeType( self->race_RouteNodeType ) ) );
+			race_start( true, "Run aborted, %s touched in wrong order\n", redtext( name_for_nodeType( self->race_RouteNodeType ) ) );
 
 		return;
 	}
@@ -1686,7 +1701,7 @@ void race_display_line( void )
 	if ( !race_command_checks() )
 		return;
 
-    G_sprint( self, 2, "=== %s ===\n", redtext( "Line-Up") );
+    G_sprint( self, 2, "=== %s ===\n", redtext( "Line-up") );
 
     for ( p = world; ( p = find_plr( p ) ); )
     {
@@ -2391,7 +2406,7 @@ void set_player_race_ready(	gedict_t *e, int ready )
 		if ( e->race_ready )
 			return;
 
-		G_bprint( 2, "%s %s the %s line\n", e->s.v.netname, redtext("entered"), redtext("race"));
+		G_bprint( 2, "%s %s the line-up\n", e->s.v.netname, redtext("joigned") );
 		e->race_ready = 1;
 		e->race_afk = 0;
 
@@ -2402,7 +2417,7 @@ void set_player_race_ready(	gedict_t *e, int ready )
 		if ( !e->race_ready )
 			return;
 
-		G_bprint( 2, "%s %s the %s line\n", e->s.v.netname, redtext("left"), redtext("race"));
+		G_bprint( 2, "%s %s the line-up\n", e->s.v.netname, redtext("left") );
 		e->race_ready = 0;
 	}
 }
@@ -2411,7 +2426,7 @@ qbool race_command_checks( void )
 {
 	if ( !isRACE() )
 	{
-		G_sprint( self, 2, "Command only available in %s mode (type %s to activate it)\n", redtext( "race" ), redtext( "race" ) );
+		G_sprint( self, 2, "Command only available in %s mode (type /%s to activate it)\n", redtext( "race" ), redtext( "race" ) );
 		return false;
 	}
 
@@ -2422,7 +2437,7 @@ qbool race_is_started( void )
 {
 	if ( race.status )
 	{
-		G_sprint( self, 2, "Can't use that command while %s is in progress, wait for all players to leave the line\n", redtext( "race" ) );
+		G_sprint( self, 2, "Can't use that command while %s is in progress, wait for all players to leave the line-up\n", redtext( "race" ) );
 		return true;
 	}
 
@@ -2497,7 +2512,7 @@ void r_changestatus( float t )
 			// do some sound
 			sound( self, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
 
-			race_start( true, "Race aborted by %s\n", self->s.v.netname );
+			race_start( true, "%s aborted his run\n", self->s.v.netname );
 
 			return;
 
@@ -2525,7 +2540,7 @@ void r_timeout( )
 
 	race.timeout_setting = bound(1, atoi( arg_1 ), 60 * 60 );
 
-	G_bprint(2, "%s set race timeout to %ss\n", self->s.v.netname, dig3( race.timeout_setting ) );
+	G_bprint(2, "%s set race time limit to %ss\n", self->s.v.netname, dig3( race.timeout_setting ) );
 }
 
 void display_record_details( )
