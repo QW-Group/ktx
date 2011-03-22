@@ -2515,7 +2515,7 @@ void display_record_details( )
 		return;
     }
 
-	G_sprint(self, 2,  "\n\235\236\236\236\236\236\236\236\236\236\236\236\236\237%s %s\237\236\236\236\236\236\236\236\236\236\236\236\236\235\n",
+	G_sprint(self, 2,  "\n\235\236\236\236\236\236\236\236\236\236\236\236\236\237%s %s\235\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
 			redtext( "record") , dig3s( "%02d", record + 1 ) );
 	G_sprint(self, 2, "time: %s\n", dig3s( "%7.3f%s", records[record].time / 1000, redtext( "s" ) ) );
 	G_sprint(self, 2, "racer: %s\n", records[record].racername );
