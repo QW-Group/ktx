@@ -17,6 +17,7 @@ void race_record( void );
 void race_stoprecord( qbool cancel );
 void race_remove_ent( void );
 void race_set_players_movetype_and_etc( void );
+void race_cleanmap( void );
 void unmute_all_players( void );
 void HideSpawnPoints();
 void ShowSpawnPoints();
@@ -73,14 +74,15 @@ void ToggleRace( void )
 static char race_settings[] =
 	"deathmatch 4\n"
 	"srv_practice_mode 1\n"
-    "lock_practice 1\n"
+	"lock_practice 1\n"
 	"allow_toggle_practice 0\n"
 	"sv_demotxt 0\n"
 	"k_spw 1\n"
+	"k_noitems 1\n";
 	"pm_airstep 0\n";
 
 static char norace_settings[] =
-    "lock_practice 0\n"
+	"lock_practice 0\n"
 	"srv_practice_mode 0\n"
 	"allow_toggle_practice 5\n";
 
@@ -138,6 +140,40 @@ void apply_race_settings( void )
 	}
 
 	G_cprint("\n");
+}
+
+	
+void race_cleanmap( void )
+{
+	gedict_t *p;
+	for( p = world; (p = nextent(p)); )
+	{
+		if (   streq( p->s.v.classname, "weapon_nailgun" )
+			|| streq( p->s.v.classname, "weapon_supernailgun" )
+			|| streq( p->s.v.classname, "weapon_supershotgun" )
+			|| streq( p->s.v.classname, "weapon_rocketlauncher" )
+			|| streq( p->s.v.classname, "weapon_grenadelauncher" )
+			|| streq( p->s.v.classname, "weapon_lightning" )
+			|| streq( p->s.v.classname, "item_shells" )
+			|| streq( p->s.v.classname, "item_spikes" )
+			|| streq( p->s.v.classname, "item_rockets" )
+			|| streq( p->s.v.classname, "item_cells" )
+			|| streq( p->s.v.classname, "item_health" )
+			|| streq( p->s.v.classname, "item_armor1")
+			|| streq( p->s.v.classname, "item_armor2")
+			|| streq( p->s.v.classname, "item_armorInv")
+			|| streq( p->s.v.classname, "item_artifact_invulnerability")
+			|| streq( p->s.v.classname, "item_artifact_envirosuit")
+			|| streq( p->s.v.classname, "item_artifact_invisibility")
+			|| streq( p->s.v.classname, "item_artifact_super_damage")
+			|| streq( p->s.v.classname, "item_armor1" )
+	    || streq( p->s.v.classname, "item_armor2" )
+	    || streq( p->s.v.classname, "item_armorInv") )
+		{
+			ent_remove( p );
+			continue;
+		}
+ 	}
 }
 
 //===========================================
