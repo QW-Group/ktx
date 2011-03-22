@@ -2688,6 +2688,7 @@ void r_route( void )
 		return;
 
 	HideSpawnPoints();
+	race_cleanmap();
 
 	if ( race.cnt < 1 )
 	{
