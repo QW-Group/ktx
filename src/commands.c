@@ -6304,7 +6304,7 @@ static void dumpent()
 	if ( strnull( ezinfokey(world, "*cheats") ) )
 	{
 		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->s.v.netname);
-		return; // FU!
+		return;
 	}
 
 	if ( trap_FS_OpenFile( "dump.ent", &file_handle, FS_WRITE_BIN ) < 0 )

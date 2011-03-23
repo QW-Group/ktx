@@ -45,7 +45,7 @@ char *classname_for_nodeType( raceRouteNodeType_t nodeType );
 
 int get_server_port ( void )
 {
-	char *ip = "", *port = "";
+	char *ip, *port;
 	int i = 0;
 
 	if ( strnull( ip = cvar_string( "sv_local_addr" ) ) || strnull( port = strchr(ip, ':') ) || !(i = atoi(port + 1)) )
@@ -1322,7 +1322,6 @@ void race_node_touch()
 {
 	if ( other->ct != ctPlayer )
 		return;
-
 
 	// no run in progress nor starting
 
@@ -2775,7 +2774,7 @@ void race_fwopen( const char *fmt, ... )
 
 	text[sizeof(text)-1] = 0;
 
-	if ( trap_FS_OpenFile( text, &race_fhandle, FS_WRITE_TXT ) < 0 )
+	if ( trap_FS_OpenFile( text, &race_fhandle, FS_WRITE_BIN ) < 0 )
 	{
 		race_fhandle = -1;
 		//G_bprint( 2, "Failed to open file: %s\n", text );
@@ -2796,7 +2795,7 @@ void race_fropen( const char *fmt, ... )
 
 	text[sizeof(text)-1] = 0;
 
-	if ( trap_FS_OpenFile( text, &race_fhandle, FS_READ_TXT ) < 0 )
+	if ( trap_FS_OpenFile( text, &race_fhandle, FS_READ_BIN ) < 0 )
 	{
 		race_fhandle = -1;
 		//G_bprint( 2, "Failed to open file: %s\n", text );
