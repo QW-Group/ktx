@@ -120,6 +120,8 @@ field_t         fields[] = {
 	{"wad", 	0, 			F_IGNORE},
 // TF
 	{"team_no",	FOFS( team_no ),		F_INT},
+// custom teleporters
+	{"size", 	FOFS( s.v.size ),	F_VECTOR},
 	{NULL}
 };
 typedef struct {
@@ -193,6 +195,7 @@ void            SP_trigger_secret();
 void            SP_trigger_counter();
 void            SP_info_teleport_destination();
 void            SP_trigger_teleport();
+void			SP_trigger_custom_teleport();
 void            SP_trigger_setskill();
 void            SP_trigger_onlyregistered();
 void            SP_trigger_hurt();
@@ -317,6 +320,7 @@ Used as a positional target for lightning.
 	{"trigger_counter",		SP_trigger_counter},
 	{"info_teleport_destination",	SP_info_teleport_destination},
 	{"trigger_teleport",		SP_trigger_teleport},
+	{"trigger_custom_teleport",		SP_trigger_custom_teleport},
 	{"trigger_setskill",		SP_trigger_setskill},
 	{"trigger_onlyregistered",	SP_trigger_onlyregistered},
 	{"trigger_hurt",		SP_trigger_hurt},

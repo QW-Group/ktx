@@ -719,6 +719,23 @@ void SP_trigger_teleport()
 	}
 }
 
+void SP_trigger_custom_teleport()
+{
+	// set real classname
+	self->s.v.classname = "trigger_teleport";
+	// some size hack.
+	setsize( self, -self->s.v.size[0], -self->s.v.size[1], -self->s.v.size[2],
+					self->s.v.size[0],  self->s.v.size[1],  self->s.v.size[2] );
+	// and call proper spawn function.
+	SP_trigger_teleport();
+
+	// reset origin, well, you have to set origin each time you change solid type...
+	setorigin( self, PASSVEC3( self->s.v.origin ) );
+	
+//	G_cprint("SP_trigger_custom_teleport: size %.1f %.1f %.1f\n", PASSVEC3(self->s.v.size));
+//	G_cprint("SP_trigger_custom_teleport: org %.1f %.1f %.1f\n", PASSVEC3(self->s.v.origin));
+}
+
 /*
 ==============================================================================
 
