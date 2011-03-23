@@ -79,7 +79,7 @@ void log_printf( const char *fmt, ... )
 char *GetMode();
 void StartLogs()
 {
-	char date[64] = {0}, date_c[64] = {0}, *ip = "", *port = "";
+	char date[64] = {0}, date_c[64] = {0}, *ip, *port;
 	int i = 0;
 
 	if ( strnull( ip = cvar_string( "sv_local_addr" ) ) || strnull( port = strchr(ip, ':') ) || !(i = atoi(port + 1)) )
