@@ -43,6 +43,17 @@ char *classname_for_nodeType( raceRouteNodeType_t nodeType );
 
 //============================================
 
+int get_server_port ( void )
+{
+	char *ip = "", *port = "";
+	int i = 0;
+
+	if ( strnull( ip = cvar_string( "sv_local_addr" ) ) || strnull( port = strchr(ip, ':') ) || !(i = atoi(port + 1)) )
+		return 27500;
+	else
+		return i;
+}
+	
 qbool isRACE( void )
 {
 	return ( cvar("k_race") );
@@ -291,7 +302,6 @@ void race_unready_all( void )
 	for ( p = world; ( p = find_plr( p ) ); )
 		p->race_ready = 0;
 }
-
 
 //============================================
 
@@ -909,6 +919,7 @@ void race_stoprecord( qbool cancel )
 		race_recording = false;
 	}
 }
+
 //============================================
 
 char *race_falsestart_mode( int start )
@@ -1311,6 +1322,7 @@ void race_node_touch()
 {
 	if ( other->ct != ctPlayer )
 		return;
+
 
 	// no run in progress nor starting
 
@@ -2818,7 +2830,7 @@ void write_topscores( void )
 	if ( !race.active_route )
 		return;
 
-	race_fwopen( "race[%s_r%02d]-w%1ds%1d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart );
+	race_fwopen( "race[%s_r%02d]-w%1ds%1d-%d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart, get_server_port() );
 
 	if ( race_fhandle < 0 )
 		return;
@@ -2880,7 +2892,7 @@ void read_topscores( void )
 	if ( !race.active_route )
 		return;
 
-	race_fropen( "race[%s_r%02d]-w%1ds%1d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart );
+	race_fropen( "race[%s_r%02d]-w%1ds%1d-%d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart, get_server_port() );
 
 	if ( race_fhandle >= 0 )
 	{
