@@ -2417,7 +2417,7 @@ void set_player_race_ready(	gedict_t *e, int ready )
 		if ( e->race_ready )
 			return;
 
-		G_bprint( 2, "%s %s the line-up\n", e->s.v.netname, redtext("joigned") );
+		G_bprint( 2, "%s %s the line-up\n", e->s.v.netname, redtext("joined") );
 		e->race_ready = 1;
 		e->race_afk = 0;
 
