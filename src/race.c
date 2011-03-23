@@ -4,7 +4,7 @@
 
 #include "g_local.h"
 
-#define NUM_CHASECAMS	3 // number of camera views defined
+#define NUM_CHASECAMS	4 // number of camera views defined
 #define NUM_BESTSCORES	10
 #define MAX_TXTLEN	64
 
@@ -2153,7 +2153,7 @@ void race_think( void )
 		// must not never happens because we have race_can_go() above
 		if ( !racer )
 		{
-			race_start( true, "Race aborted, racer vanished\n" );
+			race_start( true, "Run aborted, racer vanished\n" );
 			return;
 		}
 
@@ -2175,7 +2175,7 @@ void race_think( void )
 
 				if ( !strnull( race.top_nick ) )
 				{
-					snprintf ( tmp, sizeof( tmp ),	"top time: %s%s (by %s)", dig3s( "%.3f", race.top_time / 1000.0 ), redtext( "s" ), race.top_nick );
+					snprintf ( tmp, sizeof( tmp ),	"best run: %s%s (by %s)", dig3s( "%.3f", race.top_time / 1000.0 ), redtext( "s" ), race.top_nick );
 					strlcat( cp_buf, tmp, sizeof( cp_buf ) );
 				}
 
@@ -2255,23 +2255,12 @@ void race_think( void )
 				}
 				else
 				{
-			   		if ( p->race_chasecam )
-			   		{
-			   			G_centerprint( p, "following %s\n%s\nracer speed: %4.1f\ntime: %s",
-			   				racer->s.v.netname,
-			   				( n == p ) ? redtext( "== you are next in line ==" ) : "",
-			   				vlen( racer->s.v.velocity ),
-			   				dig3s( "%3.1f", race_time() / 1000.0 )
-			   				);
-			   		}
-			   		else
-			   		{
-			   			G_centerprint( p, "%s is racing\n%s\n\ntime: %s",
-			   				racer->s.v.netname,
-			   				( n == p ) ? redtext( "== you are next in line ==" ) : "",
-			   				dig3s( "%3.1f", race_time() / 1000.0 )
-			   				);
-			   		}
+					G_centerprint( p, "following %s\n%s\nspeed: %4.1f\ntime: %s",
+						racer->s.v.netname,
+						( n == p ) ? redtext( "== you're next in line-up ==" ) : "",
+						vlen( racer->s.v.velocity ),
+						dig3s( "%3.1f", race_time() / 1000.0 )
+						);
 				}
 			}
 		}
