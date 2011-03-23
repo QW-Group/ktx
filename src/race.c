@@ -2829,7 +2829,7 @@ void write_topscores( void )
 	if ( !race.active_route )
 		return;
 
-	race_fwopen( "race[%s_r%02d]-w%1ds%1d_%d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart, get_server_port() );
+	race_fwopen( "race/race[%s_r%02d]-w%1ds%1d_%d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart, get_server_port() );
 
 	if ( race_fhandle < 0 )
 		return;
@@ -2891,7 +2891,7 @@ void read_topscores( void )
 	if ( !race.active_route )
 		return;
 
-	race_fropen( "race[%s_r%02d]-w%1ds%1d_%d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart, get_server_port() );
+	race_fropen( "race/race[%s_r%02d]-w%1ds%1d_%d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart, get_server_port() );
 
 	if ( race_fhandle >= 0 )
 	{
