@@ -1038,7 +1038,7 @@ void W_FireLightning()
 // explode if under water
     if ( self->s.v.waterlevel > 1 && match_in_progress == 2 )
 	{
-		if ( isRA() || isCA() )
+		if ( isRA() || isCA() || k_bloodfest )
 		{
 			self->s.v.ammo_cells = 0;
 			W_SetCurrentAmmo();
