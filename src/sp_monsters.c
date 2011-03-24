@@ -322,6 +322,15 @@ void bloodfest_monsters_content_damage(void)
 				T_Damage( p, world, world, 20 * p->s.v.waterlevel );
 			}
 		}
+		else if ( p->s.v.watertype == CONTENT_WATER )
+		{			// do damage
+			if ( p->dmgtime < g_globalvars.time && strneq( "monster_fish", p->s.v.classname ) )
+			{
+				p->dmgtime = g_globalvars.time + 0.2;
+				p->deathtype = dtWATER_DMG;
+				T_Damage( p, world, world, 15 * p->s.v.waterlevel );
+			}
+		}
     }
 }
 
