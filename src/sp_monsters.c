@@ -394,28 +394,40 @@ void bloodfest_client_think(void)
 		bloodfest_dead_jump_button();
 }
 
-// called each time something/someone is killed.
-void bloodfest_killed_hook( gedict_t * killed, gedict_t * attacker )
+void bloodfest_check_end_match(void)
 {
     gedict_t *p;
 
-	// check for endmatch.
+	if ( match_in_progress != 2 )
+		return;
+
+	for( p = world; (p = find_plr( p )); )
+	{
+		if ( ISLIVE( p ) )
+			return; // we found at least one alive player!
+	}
+
+	// all players is dead, so issue end match now!
+	EndMatch( 0 );
+}
+
+// called each time something/someone is killed.
+void bloodfest_killed_hook( gedict_t * killed, gedict_t * attacker )
+{
+	if ( match_in_progress != 2 )
+		return;
+
+	// if killed was a player then check for endmatch.
 	if ( killed->ct == ctPlayer )
 	{
-		for( p = world; (p = find_plr( p )); )
-		{
-			if ( ISLIVE( p ) )
-				return; // we found at least one alive player!
-		}
-
-		// all players is dead, so issue end match now!
-		EndMatch( 0 );
-
+		bloodfest_check_end_match();
 		return;
 	}
 
+	// ok, bellow killed is a monsters or trigger.
+
 	// check for health regen, players regen health for killing monsters.
-	if ( attacker->ct != ctPlayer || !ISLIVE( attacker ) )
+	if ( !( (int)killed->s.v.flags & FL_MONSTER ) || attacker->ct != ctPlayer || !ISLIVE( attacker ) )
 		return;
 
 	// so regen.
@@ -437,6 +449,8 @@ void bloodfest_killed_hook( gedict_t * killed, gedict_t * attacker )
 // main bloodfest hook.
 void bloodfest_think(void)
 {
+	bloodfest_check_end_match();
+
 	bloodfest_spawn_monsters();
 	bloodfest_free_projectiles();
 	bloodfest_free_monsters();
