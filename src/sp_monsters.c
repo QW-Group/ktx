@@ -323,8 +323,8 @@ void bloodfest_monsters_content_damage(void)
 			}
 		}
 		else if ( p->s.v.watertype == CONTENT_WATER )
-		{			// do damage
-			if ( p->dmgtime < g_globalvars.time && strneq( "monster_fish", p->s.v.classname ) )
+		{			// do damage - if monster can't swim
+			if ( p->dmgtime < g_globalvars.time && !((int)p->s.v.flags & FL_SWIM) )
 			{
 				p->dmgtime = g_globalvars.time + 0.2;
 				p->deathtype = dtWATER_DMG;

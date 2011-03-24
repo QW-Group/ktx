@@ -594,6 +594,14 @@ The monster is in a melee attack, so get as close as possible to .enemy
 
 void ai_charge( float d )
 {
+	if ( k_bloodfest )
+	{
+		if ( (int)self->s.v.flags & FL_SWIM )
+		{
+			d *= 5; // let fish swim faster in bloodfest mode.
+		}
+	}
+
 	ai_face ();
 	movetogoal (d);		// done in C code...
 }
@@ -807,6 +815,14 @@ The monster has an enemy it is trying to kill
 void ai_run( float dist )
 {
 	vec3_t tmpv;
+
+	if ( k_bloodfest )
+	{
+		if ( (int)self->s.v.flags & FL_SWIM )
+		{
+			dist *= 5; // let fish swim faster in bloodfest mode.
+		}
+	}
 
 	movedist = dist;
 

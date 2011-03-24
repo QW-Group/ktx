@@ -181,6 +181,13 @@ void _f_run1(void)
 {
 	ai_run( 12 );
 
+	// force stupid fish attack faster.
+	if ( self->s.v.enemy && CanDamage( PROG_TO_EDICT( self->s.v.enemy ), self ) )
+	{
+		f_attack1();
+		return;
+	}
+
 	if ( g_random() < 0.5 )
 		sound( self, CHAN_VOICE, "fish/idle.wav", 1, ATTN_NORM );
 }
@@ -243,16 +250,20 @@ void fish_melee( void )
 
 	VectorSubtract( PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, self->s.v.origin, delta );
 
-	if ( vlen( delta ) > 60 )
+	if ( vlen( delta ) > 110 )
 		return;
 
 	sound( self, CHAN_VOICE, "fish/bite.wav", 1, ATTN_NORM );
 
-	ldmg = (g_random() + g_random()) * 3;
+	if ( k_bloodfest )
+		ldmg = (g_random() + g_random() + g_random() + g_random() + g_random()) * 3;
+	else
+		ldmg = (g_random() + g_random()) * 3;
+
 	PROG_TO_EDICT( self->s.v.enemy )->deathtype = dtSQUISH; // FIXME
 	T_Damage( PROG_TO_EDICT( self->s.v.enemy ), self, self, ldmg );
-
 }
+
 ANIM(f_attack1,  attack1,  f_attack2;  ai_charge(10);)
 ANIM(f_attack2,  attack2,  f_attack3;  ai_charge(10);)
 ANIM(f_attack3,  attack3,  f_attack4;  fish_melee();)
@@ -336,7 +347,10 @@ void SP_monster_fish()
 	safe_precache_sound( "fish/bite.wav" );
 	safe_precache_sound( "fish/idle.wav" );
 
-	setsize( self, -16, -16, -24, 16, 16, 24);
+	if ( k_bloodfest )
+		setsize( self, -10, -10, -5, 10, 10, 5);
+	else
+		setsize( self, -16, -16, -24, 16, 16, 24);
 	self->s.v.health = 25;
 
 	self->th_stand = f_stand1;
