@@ -822,7 +822,7 @@ void ClientKill()
 		if ( self->racer && race.status )
 		{
 			race_stoprecord( true );
-			race_start( true, "%s cancelled his run\n", self->s.v.netname );
+			race_start( true, "%s canceled his run\n", self->s.v.netname );
 			return;
 		}
 		else if ( self->race_chasecam )
@@ -1887,8 +1887,23 @@ void WaterMove()
 		return;
 	}
 
+	// in race, touching lava or slime cancels the run
+	if ( isRACE() )
+	{
+		if ( ( self->s.v.watertype == CONTENT_LAVA ) || ( self->s.v.watertype == CONTENT_SLIME ) )
+		{
+			if ( self->racer && race.status )
+			{
+				race_stoprecord( true );
+				race_start( true, "%s failed his run\n", self->s.v.netname );
+				return;
+			}
+		}
+	}
+
 	if ( self->s.v.watertype == CONTENT_LAVA )
-	{			// do damage
+	{
+		// do damage
 		if ( self->dmgtime < g_globalvars.time )
 		{
 			if ( self->radsuit_finished > g_globalvars.time )
@@ -1901,7 +1916,8 @@ void WaterMove()
 		}
 
 	} else if ( self->s.v.watertype == CONTENT_SLIME )
-	{			// do damage
+	{
+		// do damage
 		if ( self->dmgtime < g_globalvars.time && self->radsuit_finished < g_globalvars.time )
 		{
 			self->dmgtime = g_globalvars.time + 1;
