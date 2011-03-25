@@ -1078,26 +1078,6 @@ void StartDie ()
 	}
 }
 
-void set_suicide_frame()
-{
-// used by kill command
-
-    if( match_in_progress != 2 ) {  // qqshka: no corpse
-		self->s.v.model = "";
-		self->s.v.modelindex = 0;
-		self->s.v.frame = 0;
-	}
-	else {
-		setmodel( self, "progs/player.mdl" );
-		self->s.v.frame = 60;
-	}
-
-	self->s.v.solid = SOLID_NOT;
-	self->s.v.movetype = MOVETYPE_TOSS;
-	self->s.v.deadflag = DEAD_DEAD;
-	self->s.v.nextthink = -1;
-}
-
 void player_diea1()
 {
 	self->s.v.frame = 50;

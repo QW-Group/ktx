@@ -137,7 +137,6 @@ void            player_die_ax6();
 void            player_die_ax7();
 void            player_die_ax8();
 void            player_die_ax9();
-void            set_suicide_frame();
 void            PlayerDead();
 void            PlayerDie();
 

@@ -742,8 +742,6 @@ void NextLevel()
 =============================================================================
 */
 
-void            set_suicide_frame();
-
 void SP_info_player_deathmatch()
 {
 	gedict_t *spot;
