@@ -76,7 +76,7 @@ static int fixed_maps_cnt = sizeof ( fixed_maps_list ) / sizeof ( fixed_maps_lis
 
 //===============================================
 
-#define MAX_MAPS 8192
+#define MAX_MAPS 4096
 
 static char		*mapslist[MAX_MAPS] = {0};
 static int		maps_cnt = 0;
