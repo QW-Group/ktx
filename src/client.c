@@ -1069,8 +1069,11 @@ qbool CanConnect()
 	}
 
 	// no ghost, team, etc checks in matchLess mode.
-	if( !match_in_progress || ( k_matchLess && !k_bloodfest ) ) {
-		G_bprint(2, "%s entered the game\n", self->s.v.netname);
+	if( !match_in_progress || k_matchLess || k_bloodfest )
+	{
+		// in non bloodfest mode always anonce but do not anonce during bloodfest round.
+		if ( !k_bloodfest || !match_in_progress )
+			G_bprint( 2, "%s entered the game\n", self->s.v.netname );
 		return true; // can connect
 	}
 
@@ -1258,9 +1261,13 @@ void ClientConnect()
 	self->s.v.classname = "player";
 	self->k_accepted = 1; // ok, we allowed to connect
 
-	// if match in progress then set client read anyway.
-	// if there matchless mode and bloodfest is not active then set client ready too.
-	self->ready = ((match_in_progress || (k_matchLess && !k_bloodfest)) ? 1 : 0);
+	// if bloodfest is active then set player as unready and kill him later in PutClientInServer()
+	// if match in progress then set client ready anyway.
+	// if there matchless mode then set client ready too.
+	if (k_bloodfest)
+		self->ready = 0;
+	else
+		self->ready = ((match_in_progress || k_matchLess) ? 1 : 0);
 
 	// if the guy started connecting during intermission and
 	// thus missed the svc_intermission, we'd better let him know
@@ -1625,7 +1632,18 @@ void PutClientInServer( void )
 
 	W_SetCurrentAmmo();
 
-	teleport_player( self, self->s.v.origin, self->s.v.angles, tele_flags );
+	// Allow players connect during round in bloodfest, but make them dead.
+	if ( k_bloodfest && match_in_progress && !self->ready )
+	{
+		setorigin( self, PASSVEC3(self->s.v.origin) );
+		// kill him, so every damn entity field set properly.
+		self->deathtype = dtSUICIDE;
+		T_Damage( self, self, self, 999999 );
+	}
+	else
+	{
+		teleport_player( self, self->s.v.origin, self->s.v.angles, tele_flags );
+	}
 }
 
 /*
@@ -3504,6 +3522,11 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	if ( isRA() ) {
 		ra_ClientObituary (targ, attacker);
 		return;
+	}
+
+	if ( k_bloodfest && !targ->ready )
+	{
+		return; // someone connecting during round of bloodfest and got pseudo death.
 	}
 
 	targ->deaths += 1; // somehow dead, bump counter

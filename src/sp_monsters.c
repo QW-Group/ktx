@@ -577,7 +577,7 @@ void check_monsters_respawn( void )
 	if ( deathmatch )
 		return; // no need in dm
 
-	if ( cvar( "k_bloodfest" ) )
+	if ( k_bloodfest )
 	{
 		bloodfest_think();
 		return;

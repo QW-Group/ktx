@@ -934,38 +934,45 @@ void ThrowHead( char *gibname, float dm )
 	SetVector( self->s.v.avelocity, 0, crandom() * 600, 0 );
 }
 
-
 void GibPlayer()
 {
+	qbool bloodfest_round_connect = ( k_bloodfest && !self->ready ); // in case of bloodfest and connecion during round.
 	gedict_t *p;
 
 	self->vw_index = 0;
-	if ( isRACE() )
+
+	if ( isRACE() || bloodfest_round_connect )
 		ThrowHead( "", self->s.v.health );
 	else
 		ThrowHead( "progs/h_player.mdl", self->s.v.health );
 
-    if( match_in_progress == 2 ) {
+	if ( bloodfest_round_connect )
+		return; // do not spawn sounds and gibs, preventing abuse.
+
+    if( match_in_progress == 2 )
+	{
 		ThrowGib( "progs/gib1.mdl", self->s.v.health );
 		ThrowGib( "progs/gib2.mdl", self->s.v.health );
 		ThrowGib( "progs/gib3.mdl", self->s.v.health );
     }
 
+	if ( isRACE() )
+		return;
+
+	// spawn temporary entity.
 	p = spawn();
 	setorigin( p, PASSVEC3( self->s.v.origin ) );
 	p->s.v.nextthink = g_globalvars.time + 0.1;
 	p->s.v.think = ( func_t ) SUB_Remove;
 
-	if ( isRACE() )
-		return;
-
 	if ( TELEDEATH( self )	)
 	{
 		sound( p, CHAN_VOICE, "player/teledth1.wav", 1, ATTN_NONE );
-		return;
 	}
-
-	sound( p, CHAN_VOICE, (g_random() < 0.5 ? "player/gib.wav" : "player/udeath.wav"), 1, ATTN_NONE );
+	else
+	{
+		sound( p, CHAN_VOICE, (g_random() < 0.5 ? "player/gib.wav" : "player/udeath.wav"), 1, ATTN_NONE );
+	}
 }
 
 
