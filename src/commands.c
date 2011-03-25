@@ -1117,6 +1117,9 @@ void cmdslist_dl()
 	for ( i = from; i < to; i++ )
 	{
 		name = cmds[i].name;
+		
+		if ( i == 0 )
+			G_sprint( self, 2, "Loading commands list...\n" );
 
 		if (    !isValidCmdForClass( i, spc )   // cmd does't valid for this class of player or matchless mode does't have this command
 			 || cmds[i].f == dummy				// cmd have't function, ie u must not stuff alias for this cmd
@@ -1141,7 +1144,7 @@ void cmdslist_dl()
 
 	// we done
 	self->k_stuff = self->k_stuff | STUFF_COMMANDS; // add flag
-	G_sprint( self, 2, "Commands downloaded\n" );
+	G_sprint( self, 2, "Commands loaded\n" );
 }
 
 void StuffModCommands( gedict_t *p )

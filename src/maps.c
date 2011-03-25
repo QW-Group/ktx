@@ -76,7 +76,7 @@ static int fixed_maps_cnt = sizeof ( fixed_maps_list ) / sizeof ( fixed_maps_lis
 
 //===============================================
 
-#define MAX_MAPS 4096
+#define MAX_MAPS 8192
 
 static char		*mapslist[MAX_MAPS] = {0};
 static int		maps_cnt = 0;
@@ -190,7 +190,12 @@ void mapslist_dl()
 
 	// stuff portion of aliases
 	for ( i = from; i < to; i++ )
+	{
+		if ( i == 0 )
+		G_sprint( self, 2, "Loading maps list...\n" );
+
 		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "alias %s cmd cm %d\n", mapslist[i], i + 1);
+	}
 
 	if ( i < maps_cnt )
 	{
@@ -201,7 +206,7 @@ void mapslist_dl()
 
 	// we done
 	self->k_stuff = self->k_stuff | STUFF_MAPS; // add flag
-	G_sprint( self, 2, "Maps downloaded\n" );
+	G_sprint( self, 2, "Maps loaded\n" );
 
 	// request commands
 	if ( !( self->k_stuff & STUFF_COMMANDS ) )
