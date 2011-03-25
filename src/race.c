@@ -1383,6 +1383,8 @@ void race_node_touch()
 			istopscore = false;
 			timeposition = nameposition = -1;
 
+			read_topscores();
+
 			// first, let's see if run time gets into top scores and if name is already ranked
 			for ( i = 0; i < NUM_BESTSCORES; i++ )
 		    {
@@ -2832,7 +2834,10 @@ void write_topscores( void )
 	if ( !race.active_route )
 		return;
 
-	race_fwopen( "race/race[%s_r%02d]-w%1ds%1d_%d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart, get_server_port() );
+	if ( cvar("k_race_times_per_port") )
+		race_fwopen( "race/race[%s_r%02d]-w%1ds%1d_%d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart, get_server_port() );
+	else
+		race_fwopen( "race/race[%s_r%02d]-w%1ds%1d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart );
 
 	if ( race_fhandle < 0 )
 		return;
@@ -2894,7 +2899,10 @@ void read_topscores( void )
 	if ( !race.active_route )
 		return;
 
-	race_fropen( "race/race[%s_r%02d]-w%1ds%1d_%d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart, get_server_port() );
+	if ( cvar("k_race_times_per_port") )
+		race_fropen( "race/race[%s_r%02d]-w%1ds%1d_%d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart, get_server_port() );
+	else
+		race_fropen( "race/race[%s_r%02d]-w%1ds%1d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart );
 
 	if ( race_fhandle >= 0 )
 	{
