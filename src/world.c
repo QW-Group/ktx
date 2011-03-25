@@ -153,7 +153,7 @@ void SP_worldspawn()
 {
 	char		*s;
 
-	race_add_standart_routes();
+	race_add_standard_routes();
 
 	G_SpawnString( "classname", "", &s );
 	if ( Q_stricmp( s, "worldspawn" ) )

@@ -25,8 +25,8 @@
 
 #include "progdefs.h"
 
-#define MAX_ROUTE_NODES		50 // max race checkpoints per race (including start and finish checkpoints)
-#define MAX_ROUTES			10 // max race route per map
+#define MAX_ROUTE_NODES		20 // max race checkpoints per race (including start and finish checkpoints)
+#define MAX_ROUTES			20 // max race route per map
 
 typedef struct shared_edict_s {
 	void			*ptr; // this points to sv_edict_t but mod should NOT bother about that...
