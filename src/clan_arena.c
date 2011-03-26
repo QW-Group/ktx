@@ -311,11 +311,6 @@ void CA_Frame(void)
 		//sound (world, CHAN_AUTO + CHAN_NO_PHS_ADD, "ra/fight.wav", 1, ATTN_NONE);
 		G_cp2all("%s", fight);
 
-		for( p = world; (p = find_plr( p )); )
-		{
-			k_respawn( p, false );
-		}
-
 		ra_match_fight = 2;
 
 		// rounding suck, so this force readytostart() return true right after FIGHT! is printed
