@@ -4391,9 +4391,6 @@ void Pos_Show ()
 	int idx;
 	pos_t *pos;
 
-	if ( Pos_Disallowed() ) 
-		return;
-
 	pos = &(self->pos[idx = Pos_Get_idx()]);
 
 	G_sprint(self, 2, "Position: %d\n", idx + 1);
