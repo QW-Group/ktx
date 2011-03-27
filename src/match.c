@@ -2224,8 +2224,8 @@ void StartTimer ()
 
     timer->cnt2 = max(3, (int)cvar( "k_count" ));  // at the least we want a 3 second countdown
 
-	if ( k_matchLess ) // check if we need countdown in case of matchless or coop
-		if ( !cvar("k_matchless_countdown") || !deathmatch )
+	if ( k_matchLess ) // check if we need countdown in case of matchless or coop except bloodfest.
+		if ( !cvar("k_matchless_countdown") || ( !deathmatch && !k_bloodfest ) )
 			timer->cnt2 = 0; // ok - no countdown
 
 	( timer->cnt2 )++;
