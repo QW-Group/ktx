@@ -913,7 +913,7 @@ void race_remove_ent( void )
 
 void race_record( void )
 {
-	if ( race.cd_cnt == 4 && cvar("k_race_autorecord") )
+	if ( race.cd_cnt && cvar("k_race_autorecord") )
 	{
 		StartDemoRecord(); // start demo recording
 		race_recording = true;
@@ -1853,11 +1853,8 @@ void race_start( qbool cancelrecord, const char *fmt, ... )
 	// switch status to coutdown
 	race.status = raceCD;
 
-	// set countdown timers
-	if ( race_count_ready_players() == 1 )
-		race.cd_cnt = 2;
-	else
-		race.cd_cnt = 4;
+	// set countdown timer
+	race.cd_cnt = 3;
 
 	race.cd_next_think = g_globalvars.time;
 
@@ -2738,13 +2735,13 @@ void r_route( void )
 		race_remove_ent();
 		race_route_now_custom();
 
-		if (streq(self->s.v.classname, "worldspawn"))
+		if (!streq(self->s.v.classname, "worldspawn"))
 			G_bprint( 2, "Failed to load route %d by %s\n", next_route + 1, self->s.v.netname );
 
 		return;
 	}
 
-	if (streq(self->s.v.classname, "worldspawn"))
+	if (!streq(self->s.v.classname, "worldspawn"))
 	{
 		race_print_route_info( NULL );
 		G_bprint( 2, "route loaded by %s\n", self->s.v.netname );
