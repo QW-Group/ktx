@@ -2080,6 +2080,7 @@ void ClientDisconnect()
 
 		cvar_fset("_k_last_xonx", 0); // forget last XonX command
 
+		// if race is on, turn it off when all players are gone
 		if ( isRACE() )
 			ToggleRace();
 

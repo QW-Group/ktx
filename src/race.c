@@ -69,14 +69,14 @@ void ToggleRace( void )
 	{
 		if ( !isFFA() )
 		{
-			UserMode( 6 );
+			UserMode( -6 );
 		}
 	}
 
 	if ( race_is_started() )
 		return;
 
-	cvar_toggle_msg( self, "k_race", redtext("Race") );
+	cvar_toggle_msg( self, "k_race", redtext("race") );
 
 	apply_race_settings();
 }
@@ -2735,16 +2735,23 @@ void r_route( void )
 		race_remove_ent();
 		race_route_now_custom();
 
-		if (!streq(self->s.v.classname, "worldspawn"))
+		if (self->ct == ctPlayer)
 			G_bprint( 2, "Failed to load route %d by %s\n", next_route + 1, self->s.v.netname );
+		else
+			G_bprint( 2, "Server failed to load route %d\n", next_route + 1 );
 
 		return;
 	}
 
-	if (!streq(self->s.v.classname, "worldspawn"))
+	if (self->ct == ctPlayer)
 	{
 		race_print_route_info( NULL );
 		G_bprint( 2, "route loaded by %s\n", self->s.v.netname );
+	}
+	else
+	{
+		race_print_route_info( NULL );
+		G_bprint( 2, "Server loaded route %d\n", next_route );
 	}
 }
 
