@@ -2016,12 +2016,12 @@ void race_chasecam_change ( void )
 	if ( !race_command_checks() )
 		return;
 
+	if ( self->racer )
+		return;
+
 	self->race_chasecam_view++;
 	if ( self->race_chasecam_view == NUM_CHASECAMS )
 		self->race_chasecam_view = 0;
-
-	if ( self->racer )
-		return;
 
 	switch (self->race_chasecam_view )
 	{
