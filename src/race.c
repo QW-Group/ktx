@@ -2173,7 +2173,8 @@ void race_think( void )
 		// countdown still in progress
 		if ( race.cd_cnt > 0 )
 		{
-			race_record();
+			if (!race_recording)
+				race_record();
 
 			if ( race.cd_next_think < g_globalvars.time )
 			{

@@ -985,6 +985,9 @@ void StatsToFile()
 	port[0] = 0;
 	port++;
 
+	if ( isRACE() )
+		return; // doesn't save stats for race
+
 	if ( strnull( cvar_string( "serverdemo" ) ) || cvar("sv_demotxt") != 2 )
 		return; // does't record demo or does't want stats to be put in file
 
