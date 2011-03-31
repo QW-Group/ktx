@@ -876,6 +876,51 @@ void race_add_standard_routes( void )
 
 		race_route_add_end();
 	}
+	else if ( streq( g_globalvars.mapname, "race1-beta" ) )
+	{
+		if ( !race_route_add_start() )
+			return;
+
+		race_add_route_node(  -224,   0,   -40, 0, 0, nodeStart );
+		race_add_route_node( -1376, 423, -3752, 0, 0, nodeEnd );
+
+		race_set_route_name( "The infernal sewers", "start\215end" );
+		race_set_route_timeout( 40 );
+		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
+
+		race_route_add_end();
+	}
+	else if ( streq( g_globalvars.mapname, "race2-beta" ) )
+	{
+		if ( !race_route_add_start() )
+			return;
+
+		race_add_route_node(   0,    8,    88, 0, 0, nodeStart );
+		race_add_route_node( 771, 3472, -1240, 0, 0, nodeEnd );
+
+		race_set_route_name( "The infernal sewers", "start\215end" );
+		race_set_route_timeout( 40 );
+		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
+
+		race_route_add_end();
+	}
+	else if ( streq( g_globalvars.mapname, "race3-beta" ) )
+	{
+		if ( !race_route_add_start() )
+			return;
+
+		race_add_route_node( -352,  352, 2072, 0, 0, nodeStart );
+		race_add_route_node( -352, -110, -680, 0, 0, nodeEnd );
+
+		race_set_route_name( "A race for newbie", "start\215end" );
+		race_set_route_timeout( 30 );
+		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
+
+		race_route_add_end();
+	}
 }
 
 //============================================
@@ -1338,9 +1383,9 @@ void race_node_touch()
 		return;
 
 	// no run in progress nor starting
-
 	if ( !race.status )
 	{
+		
 		if ( self->attack_finished >= g_globalvars.time )
 			return; // still in node touch cooldown
 
@@ -1351,7 +1396,6 @@ void race_node_touch()
 	}
 
 	// run in progress or starting
-
 	if ( race.status != raceActive )
 		return; // starting run countdown
 
@@ -1406,7 +1450,7 @@ void race_node_touch()
 					sound( other, CHAN_ITEM, "ambience/thunder1.wav", 1, ATTN_NONE );
 
 					race_start( true, "Run %s in %s%s\n%s couldn't beat his best time\n",
-							redtext( "done" ),
+							redtext( "finished" ),
 							dig3s( "%.3f", currentrace.time / 1000 ),
 							redtext( "s" ),
 							other->s.v.netname
@@ -1458,7 +1502,7 @@ void race_node_touch()
 					}
 
 					G_bprint( 2, "Run %s in %s%s\n%s took the ",
-							redtext( "done" ),
+							redtext( "finished" ),
 							dig3s( "%.3f", currentrace.time / 1000 ),
 							redtext( "s" ),
 							other->s.v.netname
@@ -1491,7 +1535,7 @@ void race_node_touch()
 				sound( other, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
 
 				race_start( true, "Run %s in %s%s\n",
-   					redtext( "done" ),
+   					redtext( "finished" ),
    					dig3s( "%.3f", currentrace.time / 1000 ),
 					redtext( "s" )
 	   				);
@@ -1503,8 +1547,6 @@ void race_node_touch()
 		{
 			// do some sound
 			sound( other, CHAN_ITEM, "knight/sword2.wav", 1, ATTN_NONE );
-
-			race_sprint_checkpoint( other, self );
 		}
 
 		other->race_id++; // bump our id, so we can touch next checkpoint
