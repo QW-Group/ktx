@@ -601,7 +601,10 @@ void vote_check_coop ()
 			G_bprint( 2, "%s\n", redtext(va("Coop mode %s by majority vote", OnOff(cvar("coop")))) );
 
 		// and reload map
-		changelevel( coop ? "start" : g_globalvars.mapname );
+		if ( cvar("k_bloodfest") )
+			changelevel( coop ? g_globalvars.mapname : cvar_string( "k_defmap" ) );
+		else
+			changelevel( coop ? "start" : g_globalvars.mapname );
 			
 		return;
 	}
