@@ -40,8 +40,6 @@ static const float k_bloodfest_monsters_spawn_period = 20;	// with which perioud
 static const float k_bloodfest_monsters_spawn_factor = 0.2;	// monsters population is bigger by this each wave.
 static const int   k_bloodfest_monsters_spawn_initial = 20;	// monsters population in first wave.
 
-static const float k_bloodfest_monsters_damage_factor = 90;	// 
-
 // RUNTIME.
 float k_bloodfest_monsters_spawn_time;			// is it time to start monsters spawn wave.
 int	  k_bloodfest_monsters_to_spawn;			// amount of monsters we want to spawn in this wave.
@@ -140,17 +138,6 @@ static void safe_ent_remove( gedict_t * t )
 		return;
 
 	ent_remove( t );
-}
-
-// monsters do more damage with times, so its harder to survive.
-float bloodfest_monster_damage_factor(void)
-{
-#if 1
-	return 1;
-#else
-	float factor = match_start_time ? 1 + (g_globalvars.time - match_start_time) / k_bloodfest_monsters_damage_factor : 1;
-	return bound(1, factor, 999999);
-#endif
 }
 
 void SP_info_monster_start()
