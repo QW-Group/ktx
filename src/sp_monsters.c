@@ -39,8 +39,6 @@ static const int k_bloodfest_projectiles = 30;	// maximum projectiles allowed in
 static const float k_bloodfest_monsters_spawn_period = 20;	// with which perioud we should issue monsters wave.
 static const float k_bloodfest_monsters_spawn_factor = 0.2;	// monsters population is bigger by this each wave.
 static const int   k_bloodfest_monsters_spawn_initial = 20;	// monsters population in first wave.
-static const int   k_bloodfest_regen_hp = 3;
-static const int   k_bloodfest_regen_armor = 2;
 
 static const float k_bloodfest_monsters_damage_factor = 90;	// 
 
@@ -48,26 +46,84 @@ static const float k_bloodfest_monsters_damage_factor = 90;	//
 float k_bloodfest_monsters_spawn_time;			// is it time to start monsters spawn wave.
 int	  k_bloodfest_monsters_to_spawn;			// amount of monsters we want to spawn in this wave.
 
-static char *monsters_names[] =
+typedef struct bloodfest_monster_s
 {
-	"monster_fish",	// WARNING: FISH MUST BE FIRST IN ARRAY, I HAVE HACK FOR IT IN bloodfest_spawn_monsters()!!!
-	"monster_ogre",
-	"monster_demon1",
-	"monster_shambler",
-	"monster_knight",
-	"monster_army",
-	"monster_wizard",
-	"monster_dog",
-	"monster_zombie",
-//	"monster_boss",			// e1m7 boss, can't use it here.
-	"monster_tarbaby",
-	"monster_hell_knight",
-	"monster_shalrath",
-	"monster_enforcer",
-//	"monster_oldone",		// end boss, can't use it here.
+	char *			class_name;			// monsters class name, same that used in g_spawn.c
+	int				hp_for_kill;		// how much hp player gains for killing such monster.
+	int				armor_for_kill;		// how much armor player gains for killing such monster.
+} bloodfest_monster_t;
+
+static bloodfest_monster_t bloodfest_monster_array[] =
+{
+	{	// WARNING: FISH _MUST_ BE _FIRST_ IN ARRAY, I HAVE HACK FOR IT IN bloodfest_spawn_monsters()!!!
+		"monster_fish",
+		1, 1,
+	},
+	{
+		"monster_ogre",
+		3, 2,
+	},
+	{
+		"monster_demon1",
+		4, 4,
+	},
+	{
+		"monster_shambler",
+		10, 8,
+	},
+	{
+		"monster_knight",
+		1, 1,
+	},
+	{
+		"monster_army",
+		1, 1,
+	},
+	{
+		"monster_wizard",
+		2, 2,
+	},
+	{
+		"monster_dog",
+		1, 1,
+	},
+	{
+		"monster_zombie",
+		1, 1,
+	},
+	{
+		"monster_tarbaby",
+		4, 4,
+	},
+	{
+		"monster_hell_knight",
+		4, 3,
+	},
+	{
+		"monster_shalrath",
+		6, 6,
+	},
+	{
+		"monster_enforcer",
+		2, 1,
+	},
 };
 
-static const int monsters_names_count = sizeof(monsters_names) / sizeof(monsters_names[0]);
+static const int bloodfest_monster_array_size = sizeof(bloodfest_monster_array) / sizeof(bloodfest_monster_array[0]);
+
+// find bloodfest_monster_t in array by class_name.
+static bloodfest_monster_t * bloodfest_find_monster_by_classname(const char * class_name)
+{
+	int i;
+
+	for ( i = 0; i < bloodfest_monster_array_size; i++ )
+	{
+		if ( streq( bloodfest_monster_array[i].class_name, class_name ) )
+			return &bloodfest_monster_array[i];
+	}
+		
+	return NULL;
+}
 
 // print bloodfest stats.
 void bloodfest_stats(void)
@@ -80,7 +136,7 @@ void bloodfest_stats(void)
 
 static void safe_ent_remove( gedict_t * t )
 {
-	if ( !t || t == world /* || NUM_FOR_EDICT( t ) <= MAX_CLIENTS */ )
+	if ( !t || t == world )
 		return;
 
 	ent_remove( t );
@@ -142,7 +198,6 @@ int projectiles_count(void)
 
 	return cnt;
 }
-
 
 // spawn one monster.
 gedict_t * bloodfest_spawn_monster(gedict_t *spot, char * classname)
@@ -211,8 +266,8 @@ void bloodfest_spawn_monsters(void)
 	// we do it once at first frame of the map.
 	if ( framecount == 1 )
 	{
-		for ( i = 0; i < monsters_names_count; i++ )
-			safe_ent_remove( bloodfest_spawn_monster( world, monsters_names[i] ) );
+		for ( i = 0; i < bloodfest_monster_array_size; i++ )
+			safe_ent_remove( bloodfest_spawn_monster( world, bloodfest_monster_array[i].class_name ) );
 
 		return;
 	}
@@ -251,9 +306,9 @@ void bloodfest_spawn_monsters(void)
 		content = trap_pointcontents( PASSVEC3( spot->s.v.origin ) );
 		// spawn monster.
 		if ( content == CONTENT_WATER )
-			p = bloodfest_spawn_monster( spot, monsters_names[0] ); // HACK: spawn fish.
+			p = bloodfest_spawn_monster( spot, bloodfest_monster_array[0].class_name ); // HACK: spawn fish.
 		else
-			p = bloodfest_spawn_monster( spot, monsters_names[i_rnd(1, monsters_names_count - 1)] );
+			p = bloodfest_spawn_monster( spot, bloodfest_monster_array[i_rnd(1, bloodfest_monster_array_size - 1)].class_name );
 
 		if ( p )
 			break; // spawned something.
@@ -423,6 +478,8 @@ void bloodfest_check_end_match(void)
 // called each time something/someone is killed.
 void bloodfest_killed_hook( gedict_t * killed, gedict_t * attacker )
 {
+	bloodfest_monster_t * monster = NULL;
+
 	if ( match_in_progress != 2 )
 		return;
 
@@ -433,23 +490,28 @@ void bloodfest_killed_hook( gedict_t * killed, gedict_t * attacker )
 		return;
 	}
 
-	// ok, bellow killed is a monsters or trigger.
+	// alive players regen health for killing monsters.
+	if ( !ISLIVE( attacker ) || attacker->ct != ctPlayer )
+		return; // does not match our needs.
 
-	// check for health regen, players regen health for killing monsters.
-	if ( !( (int)killed->s.v.flags & FL_MONSTER ) || attacker->ct != ctPlayer || !ISLIVE( attacker ) )
+	// 'killed' should be a monstah or trigger, we need teh monstah.
+	if ( !( (int)killed->s.v.flags & FL_MONSTER )  )
 		return;
 
-	// so regen.
+	if ( !( monster = bloodfest_find_monster_by_classname( killed->s.v.classname ) ) )
+		return; // monster not found, should not be the case.
 
-	if ( attacker->s.v.health < 250 )
+	if ( attacker->s.v.health < 250 && monster->hp_for_kill > 0 )
 	{
-		attacker->s.v.health += k_bloodfest_regen_hp;	
+		attacker->s.v.health += monster->hp_for_kill;
+		attacker->s.v.health = min(attacker->s.v.health, 250); // cap it at 250
 	}
 	
-	if ( attacker->s.v.armorvalue < 200 )
+	if ( attacker->s.v.armorvalue < 200 && monster->armor_for_kill > 0 )
 	{
-		attacker->s.v.armorvalue += k_bloodfest_regen_armor;	
-		// remove all armors add red armor.
+		attacker->s.v.armorvalue += monster->armor_for_kill;
+		attacker->s.v.armorvalue = min(attacker->s.v.armorvalue, 200); // cap it at 200
+		// remove all armors and add red armor.
 		attacker->s.v.items += IT_ARMOR3 - ( ( int ) attacker->s.v.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) );
 		attacker->s.v.armortype = 0.8;
 	}
