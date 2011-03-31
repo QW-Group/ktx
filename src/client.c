@@ -2080,12 +2080,12 @@ void ClientDisconnect()
 
 		cvar_fset("_k_last_xonx", 0); // forget last XonX command
 
+		if( match_in_progress )
+			EndMatch( 1 ); // skip demo, make some other stuff
+
 		// if race is on, turn it off when all players are gone
 		if ( isRACE() )
 			ToggleRace();
-
-		if( match_in_progress )
-			EndMatch( 1 ); // skip demo, make some other stuff
 
 		// Check if issued to execute reset.cfg (sturm)
         if( cvar( "k_autoreset" ) ) {
