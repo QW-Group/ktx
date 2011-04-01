@@ -201,6 +201,7 @@ void            SP_trigger_onlyregistered();
 void            SP_trigger_hurt();
 void            SP_trigger_push();
 void            SP_trigger_monsterjump();
+void            SP_trigger_custom_monsterjump();
 void            SP_trigger_changelevel();
 void            SP_path_corner();
 
@@ -326,6 +327,7 @@ Used as a positional target for lightning.
 	{"trigger_hurt",		SP_trigger_hurt},
 	{"trigger_push",		SP_trigger_push},
 	{"trigger_monsterjump",		SP_trigger_monsterjump},
+	{"trigger_custom_monsterjump",		SP_trigger_custom_monsterjump},
 	{"path_corner",			SP_path_corner},
 
 	{"item_health",			SP_item_health},

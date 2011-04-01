@@ -938,3 +938,17 @@ void SP_trigger_monsterjump()
 	InitTrigger();
 	self->s.v.touch = ( func_t ) trigger_monsterjump_touch;
 }
+
+void SP_trigger_custom_monsterjump()
+{
+	// set real classname
+	self->s.v.classname = "trigger_monsterjump";
+	// some size hack.
+	setsize( self, -self->s.v.size[0], -self->s.v.size[1], -self->s.v.size[2],
+					self->s.v.size[0],  self->s.v.size[1],  self->s.v.size[2] );
+	// and call proper spawn function.
+	SP_trigger_monsterjump();
+
+	// reset origin, well, you have to set origin each time you change solid type...
+	setorigin( self, PASSVEC3( self->s.v.origin ) );
+}
