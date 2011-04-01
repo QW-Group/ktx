@@ -9,8 +9,8 @@
 VM/
 Debug_*/
 Release_*/
-*.vcproj.*.user
-*.vcproj.*.user
+*.sdf
+*.user
 ./Makefile
 config.log
 config.status
