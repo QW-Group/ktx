@@ -1467,7 +1467,10 @@ void race_node_touch()
 					{
 						// let's remove the old demo
 						if ( !strnull( records[nameposition].demoname ) )
-							localcmd( va( "rmdemo *%s\n", records[nameposition].demoname ) );
+						{
+							G_bprint( 2, "DELETING %s\n", striphigh( records[nameposition].demoname ) );
+							localcmd( va( "rmdemo %s\n", striphigh( records[nameposition].demoname ) ) );
+						}
 					}
 
 					// move old top scores down
@@ -2200,6 +2203,9 @@ void race_think( void )
 		if ( !race_can_go( true ) )
 			return;
 
+		if (!race_recording)
+			race_record();
+
 		// countdown in progress
 		if ( race.cd_next_think >= g_globalvars.time )
 			return;
@@ -2215,9 +2221,6 @@ void race_think( void )
 		// countdown still in progress
 		if ( race.cd_cnt > 0 )
 		{
-			if (!race_recording)
-				race_record();
-
 			if ( race.cd_next_think < g_globalvars.time )
 			{
 				char cp_buf[1024] = { 0 }, tmp[512] = { 0 };
