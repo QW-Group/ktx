@@ -2075,8 +2075,12 @@ void ClientDisconnect()
 	if ( !CountPlayers() ) {
 		void Spawn_DefMapChecker( float timeout );
 		int um_idx;
-		int old_dm = deathmatch; // remember deathmatch before we start reseting.
-								 // I need it to guess native/true matchless mode, not some coop hack
+		int old_matchless = k_matchLess;
+
+		// Well, not quite sure if it OK, k_matchLess C global variable really must be set ONCE per map.
+		// At the same time, k_matchless cvar should be set ONCE per whole server run, so it should be OK.
+		// So here we try to put server back to non matchless mode.
+		k_matchLess = cvar( "k_matchless" );
 
 		cvar_fset("_k_last_xonx", 0); // forget last XonX command
 
@@ -2098,10 +2102,12 @@ void ClientDisconnect()
 			}
 		}
 
-		if ( ( um_idx = um_idx_byname( ( k_matchLess && old_dm ) ? "ffa" : cvar_string("k_defmode") ) ) >= 0 )
+		if ( ( um_idx = um_idx_byname( k_matchLess ? "ffa" : cvar_string("k_defmode") ) ) >= 0 )
 			UserMode( -(um_idx + 1) ); // force exec configs for default user mode
-		
-		if ( !cvar( "lock_practice" ) && k_practice )
+
+		if ( old_matchless != k_matchLess )
+			changelevel( g_globalvars.mapname ); // force reload current map ASAP!
+		else if ( !cvar( "lock_practice" ) && k_practice )
 			changelevel( g_globalvars.mapname ); // force reload current map in practice mode anyway, ASAP
 		else
 			Spawn_DefMapChecker( 10 ); // delayed map reload, may be skipped due to different settings
