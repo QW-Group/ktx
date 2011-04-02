@@ -1732,7 +1732,7 @@ void PrintCountdown( int seconds )
 //
 //
 // Deathmatch  x
-// Mode		  D u e l | T e a m | F F A | C T F | RA | CA
+// Mode		  D u e l | T e a m | F F A | C O O P | BLOODFST | C T F | RA | CA
 // Spawnmodel KTX | bla bla bla // optional
 // Antilag    On|Off
 // NoItems    On // optional
@@ -1758,10 +1758,14 @@ void PrintCountdown( int seconds )
 
 
 	strlcat(text, va("%s: %2s\n\n\n", redtext("Countdown"), dig3(seconds)), sizeof(text));
-	if ( !isRA() ) // useless in RA
+	if ( !isRA() && !coop ) // useless in RA
 		strlcat(text, va("%s %2s\n", "Deathmatch", dig3(deathmatch)), sizeof(text));
 
-	if ( isRA() )
+	if ( k_bloodfest )
+		mode = redtext("BLOODFST");
+	else if ( coop )
+		mode = redtext("C O O P");
+	else if ( isRA() )
 		mode = redtext("RA");
 	else if ( isCA() )
 		mode = redtext("CA");
@@ -2029,8 +2033,19 @@ void TimerStartThink ()
 	PrintCountdown( self->cnt2 );
 
 	if( self->cnt2 < 6 )
+	{
+		char *gr = redtext("Get ready");
+
 		for( p = world; (p = find_client( p )); )
+		{
+			if ( p->ct == ctPlayer && !p->ready )
+			{
+				G_sprint(p, 2, "%s!\n", gr);
+			}
+
 			stuffcmd (p, "play buttons/switch04.wav\n");
+		}
+	}
 
 	self->s.v.nextthink = g_globalvars.time + 1;
 }
@@ -2221,9 +2236,13 @@ void StartTimer ()
 	for( timer = world; (timer = find(timer, FOFCLSN, "standby_th")); )
 		ent_remove( timer );
 
-	if ( !k_matchLess ) {
+	if ( !k_matchLess )
+	{
 		ShowMatchSettings ();
+	}
 
+	if ( !k_matchLess || k_bloodfest )
+	{
 		for( timer = world; (timer = find_client( timer )); )
 			stuffcmd(timer, "play items/protect2.wav\n");
 	}
@@ -2235,9 +2254,21 @@ void StartTimer ()
 
     timer->cnt2 = max(3, (int)cvar( "k_count" ));  // at the least we want a 3 second countdown
 
-	if ( k_matchLess ) // check if we need countdown in case of matchless or coop except bloodfest.
-		if ( !cvar("k_matchless_countdown") || ( !deathmatch && !k_bloodfest ) )
-			timer->cnt2 = 0; // ok - no countdown
+	if ( k_bloodfest )
+	{
+		// at the least 5 second countdown in bloodfest mode.
+		timer->cnt2 = max(5, (int)cvar( "k_count" ));
+	}
+	else if ( !deathmatch )
+	{
+		// no countdown in coop or similar modes.
+		timer->cnt2 = 0;
+	}
+	else if ( k_matchLess )
+	{
+		if ( !cvar("k_matchless_countdown") )
+			timer->cnt2 = 0; // no countdown if variable is not specified.
+	}
 
 	( timer->cnt2 )++;
 
@@ -2545,12 +2576,11 @@ void PlayerReady ()
 	G_bprint(2, "%s %s%s\n", self->s.v.netname, redtext("is ready"),
 						( ( isTeam() || isCTF() ) ? va(" \x90%s\x91", getteam( self ) ) : "" ) );
 
-	nready = 0;
-	for( p = world; (p = find_plr( p )); )
-		if( p->ready )
-			nready++;
-
+	nready = CountRPlayers();
 	k_attendees = CountPlayers();
+
+	if ( match_in_progress )
+		return; // possible in bloodfest.
 
 	if ( !isCanStart ( NULL, false ) )
 		return; // rules does't allow us to start match, idlebot ignored because of same reason
@@ -2558,24 +2588,25 @@ void PlayerReady ()
 	if ( k_force )
 		return; // admin forces match - timer will started somewhere else
 
-	if( nready != k_attendees ) { // not all players ready, check idlebot and return
-
-		IdlebotCheck();
-
-		return;
-	}
-	
-	// ok all players ready
-
-	// ignore 2 players requirement in bloodfest mode.
+	// we ignore "all players ready" and "at least two players ready" checks in bloodfest mode.
 	if ( !k_bloodfest )
 	{
-		if ( nready < 2 ) // only one or less players ready, match is pointless
+		if( nready != k_attendees )
+		{
+			// not all players ready, check idlebot and return
+			IdlebotCheck();
+			return;
+		}
+
+		// ok all players ready.
+		// only one or less players ready, match is pointless.
+		if ( nready < 2 )
 			return;
 	}
 
-	G_bprint(2, "All players ready\n"
-				"Timer started\n");
+	if ( k_attendees && nready == k_attendees )
+		G_bprint(2, "All players ready\n");
+	G_bprint(2,	"Timer started\n");
 
 	StartTimer();
 }
@@ -2591,9 +2622,10 @@ void PlayerBreak ()
 		return;
 	}
 
-	if ( self->ct == ctSpec ) {
-
-		if ( !cvar("k_auto_xonx") || k_matchLess ) {
+	if ( self->ct == ctSpec )
+	{
+		if ( !cvar("k_auto_xonx") || k_matchLess )
+		{
 			G_sprint(self, 2, "Command not allowed\n");
 			return;
 		}
@@ -2612,13 +2644,18 @@ void PlayerBreak ()
 	if( !self->ready || intermission_running || match_over )
 		return;
 
-	if ( k_matchLess )
-	if ( cvar("k_no_vote_map") ) {
-		G_sprint(self, 2, "Voting next map is %s allowed\n", redtext("not"));
-		return;
+	if ( k_matchLess && !k_bloodfest )
+	{
+		// do not allow break/next_map commands in some cases.
+		if ( cvar("k_no_vote_map") )
+		{
+			G_sprint(self, 2, "Voting next map is %s allowed\n", redtext("not"));
+			return;
+		}
 	}
 
-	if( !match_in_progress ) {
+	if( !match_in_progress )
+	{
 		self->ready = 0;
 
 		G_bprint(2, "%s %s\n", self->s.v.netname, redtext("is not ready"));
@@ -2626,20 +2663,34 @@ void PlayerBreak ()
 		return;
 	}
 
-	if( !k_matchLess ) // u can't stop countdown (but match u can) in matchless mode
-	if( match_in_progress == 1 ) {
-		p = find ( world, FOFCLSN, "timer");
-		if( p && p->cnt2 > 1 ) {
-			self->ready = 0;
+	if( !k_matchLess || k_bloodfest )
+	{
+		// try stop countdown.
+		if( match_in_progress == 1 )
+		{
+			p = find ( world, FOFCLSN, "timer");
 
-			G_bprint(2, "%s %s\n", self->s.v.netname, redtext("stops the countdown"));
+			if( p && p->cnt2 > 1 )
+			{
+				self->ready = 0;
 
-			StopTimer( 1 );
+				if ( !k_matchLess || ( k_bloodfest && CountRPlayers() < 1 ) )
+				{
+					G_bprint(2, "%s %s\n", self->s.v.netname, redtext("stops the countdown"));
+					StopTimer( 1 );
+				}
+				else
+				{
+					G_bprint(2, "%s %s\n", self->s.v.netname, redtext("is not ready"));
+				}
+			}
+
+			return;
 		}
-		return;
 	}
 
-	if( self->v.brk ) {
+	if( self->v.brk )
+	{
 		self->v.brk = 0;
 
 		G_bprint(2, "%s %s %s vote%s\n", self->s.v.netname,
@@ -2651,15 +2702,13 @@ void PlayerBreak ()
 
 	self->v.brk = 1;
 
-	
 	G_bprint(2, "%s %s%s\n", self->s.v.netname, redtext(k_matchLess ? "votes for next map" : "votes for stopping the match"),
 				((votes = get_votes_req( OV_BREAK, true )) ? va(" (%d)", votes) : ""));
 
-
-	// blocking stop countdown in matchless mode by one player
-	if ( CountPlayers() == 1 && k_matchLess && match_in_progress == 1 ) {
+	// show warning to player - that he can't stop countdown alone in matchless mode.
+	if ( k_matchLess && match_in_progress == 1 && CountPlayers() == 1 )
+	{
 		G_sprint(self, 2, "You can't stop countdown alone\n");
-		return;
 	}
 
 	vote_check_break ();
