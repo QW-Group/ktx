@@ -1390,7 +1390,7 @@ void PutClientInServer( void )
 // paustime is set by teleporters to keep the player from moving a while
 	self->pausetime = 0;
 
-	if ( deathmatch )
+	if ( deathmatch || k_bloodfest )
 	{
 		// first spawn in CTF on corresponding base, later used info_player_deathmatch.
 		// qqshka: I found that it sux and added variable which force players spawn ONLY on the base,
