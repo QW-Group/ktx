@@ -876,6 +876,7 @@ void race_add_standard_routes( void )
 
 		race_route_add_end();
 	}
+/*
 	else if ( streq( g_globalvars.mapname, "race1-beta" ) )
 	{
 		if ( !race_route_add_start() )
@@ -884,7 +885,7 @@ void race_add_standard_routes( void )
 		race_add_route_node(  -224,   0,   -40, 0, 0, nodeStart );
 		race_add_route_node( -1376, 423, -3752, 0, 0, nodeEnd );
 
-		race_set_route_name( "The infernal sewers", "start\215end" );
+		race_set_route_name( "The lava origin", "start\215end" );
 		race_set_route_timeout( 40 );
 		race_set_route_weapon_mode( raceWeaponNo );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -921,6 +922,22 @@ void race_add_standard_routes( void )
 
 		race_route_add_end();
 	}
+	else if ( streq( g_globalvars.mapname, "race4-beta" ) )
+	{
+		if ( !race_route_add_start() )
+			return;
+
+		race_add_route_node( -2816, 2816,  2712, 0, 0, nodeStart );
+		race_add_route_node( -2916, 1790, -1128, 0, 0, nodeEnd );
+
+		race_set_route_name( "Elite maker", "start\215end" );
+		race_set_route_timeout( 30 );
+		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
+
+		race_route_add_end();
+	}
+*/
 }
 
 //============================================
