@@ -1468,7 +1468,6 @@ void race_node_touch()
 						// let's remove the old demo
 						if ( !strnull( records[nameposition].demoname ) )
 						{
-							G_bprint( 2, "DELETING %s\n", striphigh( records[nameposition].demoname ) );
 							localcmd( va( "rmdemo %s\n", striphigh( records[nameposition].demoname ) ) );
 						}
 					}
