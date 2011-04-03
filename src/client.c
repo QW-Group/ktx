@@ -2024,12 +2024,16 @@ void set_important_fields(gedict_t *p)
 ///////////////
 void ClientDisconnect()
 {
+	extern void mv_stop_playback();
+
 	k_nochange = 0; // force recalculate frags scores
 
 	if ( !self->k_accepted ) {
 		set_important_fields( self ); // set classname == "" and etc
 		return;
 	}
+
+	mv_stop_playback();
 
 	del_from_specs_favourites( self );
 
