@@ -2188,11 +2188,15 @@ char *CompilateDemoName ()
 
 void StartDemoRecord ()
 {
+	char *demoname;
+	int i;
+
 	// extralog should be set by easyrecord and if we skip recording we will have it set to WRONG value.
 	// So this set it at least to something reasonable ffs.
 	cvar_set( "extralogname", "" );
 	
-	if ( cvar( "demo_tmp_record" ) ) { // FIXME: TODO: make this more like ktpro
+	if ( cvar( "demo_tmp_record" ) )
+	{ // FIXME: TODO: make this more like ktpro
 		qbool record = false;
 
 		if ( isRACE() )
@@ -2204,12 +2208,24 @@ void StartDemoRecord ()
 		else
 			record = true;
 
-		if ( record ) {
+		if ( record )
+		{
 			if( !strnull( cvar_string( "serverdemo" ) ) )
 				localcmd("cancel\n");  // demo is recording, cancel before new one
 
 			localcmd( "easyrecord \"%s\"\n", CompilateDemoName() );
-			cvar_set( "_k_recordeddemoname", CompilateDemoName() );
+			demoname = CompilateDemoName();
+
+			for (i = 0; demoname[i]; i++)
+			{
+				if ( demoname[i] >= 'A' && demoname[i] <= 'Z' )
+				{
+					demoname[i] += 'a' - 'A';
+				}
+			}
+
+			// used for race
+			cvar_set( "_k_recordeddemoname", striphigh( demoname ) );
 		}
 	}
 }
