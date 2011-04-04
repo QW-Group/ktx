@@ -2080,6 +2080,7 @@ void ClientDisconnect()
 		void Spawn_DefMapChecker( float timeout );
 		int um_idx;
 		int old_matchless = k_matchLess;
+		void race_stoprecord( qbool cancel );
 
 		// Well, not quite sure if it OK, k_matchLess C global variable really must be set ONCE per map.
 		// At the same time, k_matchless cvar should be set ONCE per whole server run, so it should be OK.
@@ -2093,7 +2094,10 @@ void ClientDisconnect()
 
 		// if race is on, turn it off when all players are gone
 		if ( isRACE() )
+		{
 			ToggleRace();
+			race_stoprecord( true );
+		}
 
 		// Check if issued to execute reset.cfg (sturm)
         if( cvar( "k_autoreset" ) ) {
