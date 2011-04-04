@@ -375,6 +375,16 @@
 "angle" "90"
 }
 {
+"origin" "2448 163 280"
+"angle" "180"
+"classname" "info_player_deathmatch"
+}
+{
+"origin" "2448 -64 280"
+"angle" "180"
+"classname" "info_player_deathmatch"
+}
+{
 "classname" "item_armorInv"
 "origin" "664 64 352"
 }
@@ -1344,4 +1354,58 @@
 {
 "classname" "info_monster_start"
 "origin" "565.75 199.625 24"
+}
+{
+// distant area right corner
+"classname" "trigger_custom_monsterjump"
+"origin" "2300 184 280"
+"size" "50 50 50"
+"angle" "166"
+"speed" "1111"
+"height" "1111"
+}
+{
+// distant area left corner
+"classname" "trigger_custom_monsterjump"
+"origin" "2278 -47 280"
+"size" "50 50 50"
+"angle" "-166"
+"speed" "1111"
+"height" "1111"
+}
+{
+// from up to right side
+"classname" "trigger_custom_monsterjump"
+"origin" "53 211 1304"
+"size" "50 50 50"
+"angle" "118"
+"speed" "555"
+"height" "300"
+}
+{
+// from up to left side
+"classname" "trigger_custom_monsterjump"
+"origin" "60 -82 1304"
+"size" "50 50 50"
+"angle" "-118"
+"speed" "555"
+"height" "300"
+}
+{
+// from down to left side
+"classname" "trigger_custom_monsterjump"
+"origin" "-134 -173 24"
+"size" "50 50 50"
+"angle" "-106"
+"speed" "222"
+"height" "1100"
+}
+{
+// from up to right side
+"classname" "trigger_custom_monsterjump"
+"origin" "-134 307 24"
+"size" "50 50 50"
+"angle" "106"
+"speed" "222"
+"height" "1100"
 }

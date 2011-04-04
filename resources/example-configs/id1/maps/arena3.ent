@@ -45,6 +45,26 @@
 // Entity 6
 // Entities:g[1] -> info_player_start:e[6]
 {
+"origin" "-31 403 -604"
+"angle" "-76"
+"classname" "info_player_deathmatch"
+}
+{
+"origin" "607 -637 -629"
+"angle" "114"
+"classname" "info_player_deathmatch"
+}
+{
+"origin" "775 -125 -629"
+"angle" "-176"
+"classname" "info_player_deathmatch"
+}
+{
+"origin" "574 266 -632"
+"angle" "-132"
+"classname" "info_player_deathmatch"
+}
+{
 "classname" "info_player_start"
 "origin" "189 -192 -512"
 }

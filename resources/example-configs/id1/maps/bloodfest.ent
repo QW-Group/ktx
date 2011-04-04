@@ -1,5 +1,6 @@
 {
 "classname" "worldspawn"
+"message" "Blood fest!"
 }
 {
 "origin" "0 64 1408"
@@ -23,6 +24,31 @@
 {
 "origin" "1463 -919 -1479"
 "angle" "140"
+"classname" "info_player_deathmatch"
+}
+{
+"origin" "1488 -1112 -1479"
+"angle" "180"
+"classname" "info_player_deathmatch"
+}
+{
+"origin" "1275 -1487 -1479"
+"angle" "100"
+"classname" "info_player_deathmatch"
+}
+{
+"origin" "1467 -1467 -1479"
+"angle" "135"
+"classname" "info_player_deathmatch"
+}
+{
+"origin" "964 -1487 -1479"
+"angle" "96"
+"classname" "info_player_deathmatch"
+}
+{
+"origin" "1459 -754 -1479"
+"angle" "180"
 "classname" "info_player_deathmatch"
 }
 {

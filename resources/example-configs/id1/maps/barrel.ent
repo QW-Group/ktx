@@ -1389,3 +1389,22 @@
 "classname" "info_monster_start"
 "origin" "-262.75 248.375 -95.875"
 }
+{
+        "classname" "info_teleport_destination"
+        "targetname" "lame_place"
+        "origin" "48 42 -104"
+        "angle" "0"
+}
+{
+        "classname" "trigger_custom_teleport"
+        "origin" "540 -2.5 280"
+        "size" "50 50 50"
+        "target" "lame_place"
+}
+{
+        "classname" "trigger_custom_teleport"
+        "origin" "391 -384 -232"
+        "size" "50 50 50"
+        "target" "lame_place"
+}
+

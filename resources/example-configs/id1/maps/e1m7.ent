@@ -428,6 +428,11 @@
 "angle" "0"
 }
 {
+"origin" "-275 -315 56"
+"angle" "0"
+"classname" "info_player_deathmatch"
+}
+{
 "spawnflags" "1792"
 "classname" "func_wall"
 "model" "*6"
@@ -1490,3 +1495,31 @@
 "classname" "info_monster_start"
 "origin" "-180 363.875 56"
 }
+{
+	"classname" "info_teleport_destination"
+	"targetname" "rune_spot"
+	"origin" "-10.75 62.5 8"
+}
+{
+	"classname" "trigger_custom_teleport"
+	"origin" "826 62 24"
+	"size" "32 32 32"
+	"target" "rune_spot"
+}
+{
+"classname" "trigger_custom_monsterjump"
+	"origin" "120 -205 33"
+	"size" "100 1 1"
+	"angle" "90"
+	"speed" "1400"
+	"height" "200"
+}
+{
+"classname" "trigger_custom_monsterjump"
+        "origin" "120 336 33"
+        "size" "100 1 1"
+        "angle" "-90"
+        "speed" "1400"
+        "height" "200"
+}
+

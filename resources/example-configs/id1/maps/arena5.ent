@@ -1068,7 +1068,7 @@
 }
 {
 	"classname" "trigger_custom_teleport"
-	"origin" "853 326 536"
+	"origin" "870 340 535"
 	"size" "50 50 50"
 	"target" "bottom_1"
 }
@@ -1080,7 +1080,7 @@
 }
 {
 	"classname" "trigger_custom_teleport"
-	"origin" "272 -878 536"
+	"origin" "295 -910 536"
 	"size" "50 50 50"
 	"target" "bottom_2"
 }
@@ -1092,7 +1092,7 @@
 }
 {
 	"classname" "trigger_custom_teleport"
-	"origin" "-1066 -326 536"
+	"origin" "-1100 -350 536"
 	"size" "50 50 50"
 	"target" "bottom_3"
 }
@@ -1104,7 +1104,7 @@
 }
 {
 	"classname" "trigger_custom_teleport"
-	"origin" "-560 938 536"
+	"origin" "-580 970 536"
 	"size" "50 50 50"
 	"target" "bottom_4"
 }
@@ -1158,4 +1158,37 @@
 	"classname" "info_player_deathmatch"
 	"angle" "-21"
 	"origin" "-893 383 535"
+}
+
+{
+"classname" "trigger_custom_monsterjump"
+"origin" "350 -154 253"
+"size" "100 100 64"
+"angle" "-23"
+"speed" "300"
+"height" "800"
+}
+{
+"classname" "trigger_custom_monsterjump"
+"origin" "-560 213 253"
+"size" "100 100 64"
+"angle" "154"
+"speed" "300"
+"height" "800"
+}
+{
+"classname" "trigger_custom_monsterjump"
+"origin" "-302 -641 535"
+"size" "75 75 75"
+"angle" "70"
+"speed" "200"
+"height" "200"
+}
+{
+"classname" "trigger_custom_monsterjump"
+"origin" "102 689 535"
+"size" "75 75 75"
+"angle" "-112"
+"speed" "200"
+"height" "200"
 }

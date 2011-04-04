@@ -103,6 +103,16 @@
 "angle" "0"
 }
 {
+"origin" "678 -360 -32"
+"angle" "145"
+"classname" "info_player_deathmatch"
+}
+{
+"origin" "952 270 -32"
+"angle" "180"
+"classname" "info_player_deathmatch"
+}
+{
 "classname" "trigger_multiple"
 "origin" "0 0 0"
 "angle" "360"
@@ -989,4 +999,22 @@
 {
 "classname" "info_monster_start"
 "origin" "1028.25 -503.375 -31.875"
+}
+{
+        "classname" "trigger_custom_teleport"
+        "origin" "172 1034 736"
+        "size" "50 50 50"
+        "target" "lame_place"
+}
+{
+        "classname" "trigger_custom_teleport"
+        "origin" "1200 736 -32"
+        "size" "100 100 100"
+        "target" "lame_place"
+}
+{
+        "classname" "info_teleport_destination"
+        "targetname" "lame_place"
+        "angle" "0"
+        "origin" "314 -166 656"
 }

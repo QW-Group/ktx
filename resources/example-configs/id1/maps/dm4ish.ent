@@ -247,6 +247,26 @@
 "angle" "90"
 }
 {
+"origin" "-14 257 184"
+"angle" "-90"
+"classname" "info_player_deathmatch"
+}
+{
+"origin" "59 -80 24"
+"angle" "180"
+"classname" "info_player_deathmatch"
+}
+{
+"origin" "-587 -670 24"
+"angle" "90"
+"classname" "info_player_deathmatch"
+}
+{
+"origin" "45 -683 184"
+"angle" "90"
+"classname" "info_player_deathmatch"
+}
+{
 "classname" "item_shells"
 "origin" "140 28 56"
 "angle" "90"
@@ -1010,4 +1030,28 @@
 {
 "classname" "info_monster_start"
 "origin" "207.875 -593.375 344"
+}
+{
+        "classname" "info_teleport_destination"
+        "targetname" "tunnel_exit1"
+        "origin" "726 5 344"
+        "angle" "-90"
+}
+{
+        "classname" "trigger_custom_teleport"
+        "origin" "728 102 344"
+        "size" "32 32 32"
+        "target" "tunnel_exit2"
+}
+{
+        "classname" "info_teleport_destination"
+        "targetname" "tunnel_exit2"
+        "origin" "-357 103 344"
+        "angle" "-90"
+}
+{
+        "classname" "trigger_custom_teleport"
+        "origin" "-336 188 344"
+        "size" "32 32 32"
+        "target" "tunnel_exit1"
 }
