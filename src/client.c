@@ -2086,6 +2086,8 @@ void ClientDisconnect()
 		// At the same time, k_matchless cvar should be set ONCE per whole server run, so it should be OK.
 		// So here we try to put server back to non matchless mode.
 		k_matchLess = cvar( "k_matchless" );
+		// turn off coop mode. FIXME: coop really should be real mode some day.
+		cvar_fset( "coop", 0 );
 
 		cvar_fset("_k_last_xonx", 0); // forget last XonX command
 
