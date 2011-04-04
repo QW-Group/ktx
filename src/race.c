@@ -882,8 +882,8 @@ void race_add_standard_routes( void )
 		if ( !race_route_add_start() )
 			return;
 
-		race_add_route_node(  -224,   0,   -40, 0, 0, nodeStart );
-		race_add_route_node( -1376, 423, -3752, 0, 0, nodeEnd );
+		race_add_route_node( -224,   0,   -40, 0, 0, nodeStart );
+		race_add_route_node( 1376, 423, -3752, 0, 0, nodeEnd );
 
 		race_set_route_name( "The lava origin", "start\215end" );
 		race_set_route_timeout( 40 );
