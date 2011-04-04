@@ -2133,7 +2133,7 @@ char *CompilateDemoName ()
 		strlcat( demoname, va("race"), sizeof( demoname ) );
 		for( vs = "_", p = world; (p = find_plr( p )); ) 
 		{
-			if ( strnull( name = getname( p ) ) && p->racer )
+			if ( strnull( name = getname( p ) ) || !( p->racer ) )
 				continue;
 
 			strlcat( demoname, vs, sizeof( demoname ) );
