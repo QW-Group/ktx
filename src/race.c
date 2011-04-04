@@ -985,7 +985,7 @@ void race_record( void )
 
 void race_stoprecord( qbool cancel )
 {
-	if ( cvar("k_race_autorecord") && race_recording )
+	if ( race_recording )
 	{
 		if ( cancel )
 			localcmd("cancel\n");  // stop recording demo and discard it

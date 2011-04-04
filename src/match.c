@@ -1165,6 +1165,8 @@ void EndMatch ( float skip_log )
 
 	match_over = 1;
 
+	remove_projectiles();
+
 // s: zero the flag
 	k_sudden_death = 0;
 
@@ -1191,6 +1193,20 @@ void EndMatch ( float skip_log )
 	if ( k_bloodfest )
 	{
 		extern void bloodfest_stats(void);
+
+		// remove any powerup left
+		for( p = world; (p = nextent(p)); )
+		{
+			if ( streq( p->s.v.classname, "item_artifact_invulnerability")
+					|| streq( p->s.v.classname, "item_artifact_invisibility")
+					|| streq( p->s.v.classname, "item_artifact_super_damage")
+			   )
+			{
+				ent_remove( p );
+				continue;
+			}
+		}
+		
 		bloodfest_stats();
 	}
 
@@ -2216,15 +2232,10 @@ void StartDemoRecord ()
 			localcmd( "easyrecord \"%s\"\n", CompilateDemoName() );
 			demoname = CompilateDemoName();
 
-			for (i = 0; demoname[i]; i++)
-			{
-				if ( demoname[i] >= 'A' && demoname[i] <= 'Z' )
-				{
-					demoname[i] += 'a' - 'A';
-				}
-			}
-
 			// used for race
+			for (i = 0; demoname[i]; i++)
+				if ( demoname[i] >= 'A' && demoname[i] <= 'Z' )
+					demoname[i] += 'a' - 'A';
 			cvar_set( "_k_recordeddemoname", striphigh( demoname ) );
 		}
 	}
