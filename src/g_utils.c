@@ -1,4 +1,4 @@
-e*
+/*
  *  QWProgs-DM
  *  Copyright (C) 2004  [sd] angel
  *
