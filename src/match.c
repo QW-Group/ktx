@@ -2233,10 +2233,7 @@ void StartDemoRecord ()
 			demoname = CompilateDemoName();
 
 			// used for race
-			for (i = 0; demoname[i]; i++)
-				if ( demoname[i] >= 'A' && demoname[i] <= 'Z' )
-					demoname[i] += 'a' - 'A';
-			cvar_set( "_k_recordeddemoname", striphigh( demoname ) );
+			cvar_set( "_k_recordeddemoname", stripcaps ( striphigh( demoname ) ) );
 		}
 	}
 }

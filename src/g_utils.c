@@ -544,6 +544,26 @@ char *striphigh(char *format)
 	}
 }
 
+char *stripcaps(char *format)
+{
+// >>>> like va(...)
+	static char	string[MAX_STRINGS][1024];
+	static int		index = 0;
+	
+	index %= MAX_STRINGS;
+	strlcpy(string[index], format ? format : "", sizeof(string[0]));
+// <<<<
+
+	{
+		unsigned char *i = (unsigned char *) string[index];
+
+		for ( ; *i; *i++ )
+			if ( *i >= 'A' && *i <= 'Z' )
+				*i += 'a' - 'A';
+	}
+
+	return string[index++];
+}
 
 /*
 ==============

@@ -1485,7 +1485,7 @@ void race_node_touch()
 						// let's remove the old demo
 						if ( !strnull( records[nameposition].demoname ) )
 						{
-							localcmd( va( "rmdemo %s\n", striphigh( records[nameposition].demoname ) ) );
+							localcmd( va( "rmdemo %s\n", records[nameposition].demoname ) );
 						}
 					}
 
