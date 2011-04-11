@@ -26,6 +26,7 @@ void write_topscores( void );
 void read_topscores( void );
 void init_scores( void );
 
+float avgcount;
 qbool gametype_change_checks( void );
 qbool race_command_checks( void );
 qbool race_is_started( void );
@@ -1375,7 +1376,7 @@ void race_spawn_meat( gedict_t *player, char *gibname, float vel )
 	race_VelocityForDamage( vel, player->s.v.velocity, newent->s.v.velocity );
 	newent->s.v.movetype		= MOVETYPE_BOUNCE;
 	newent->isMissile			= true;
-	newent->s.v.solid			= SOLID_TRIGGER; // SOLID_NOT;
+	newent->s.v.solid			= SOLID_TRIGGER;
 	newent->s.v.avelocity[0]	= g_random() * 600;
 	newent->s.v.avelocity[1]	= g_random() * 600;
 	newent->s.v.avelocity[2]	= g_random() * 600;
@@ -1502,7 +1503,7 @@ void race_node_touch()
 					strlcpy( records[i].demoname, cvar_string( "_k_recordeddemoname" ), sizeof( records[i].demoname ) );
 					records[i].distance = currentrace.distance;
 					records[i].maxspeed = currentrace.maxspeed;
-					records[i].avgspeed = currentrace.avgspeed;
+					records[i].avgspeed = currentrace.avgspeed / avgcount;
 					if ( !QVMstrftime(records[i].date, sizeof(records[i].date), "%Y-%m-%d %H:%M:%S %Z", 0) )
 						records[i].date[0] = 0; // bad date
 
@@ -2282,6 +2283,7 @@ void race_think( void )
 		currentrace.distance = 0; // initiate distance
 		currentrace.maxspeed = 0;
 		currentrace.avgspeed = 0;
+		avgcount = 0;
 
 		// check for falsestarts
 	   	race_check_racer_falsestart( true );
@@ -2319,7 +2321,8 @@ void race_think( void )
 			if ( vlen( racer->s.v.velocity ) > currentrace.maxspeed )
 				currentrace.maxspeed = vlen( racer->s.v.velocity );
 
-			currentrace.avgspeed = ( currentrace.avgspeed + vlen( racer->s.v.velocity ) ) / 2;
+			currentrace.avgspeed += vlen( racer->s.v.velocity );
+			avgcount++;
 
 			for( p = world; (p = find_client( p )); )
 			{
