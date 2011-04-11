@@ -178,8 +178,9 @@ void race_cleanmap( void )
 			|| streq( p->s.v.classname, "item_artifact_invisibility")
 			|| streq( p->s.v.classname, "item_artifact_super_damage")
 			|| streq( p->s.v.classname, "item_armor1" )
-	    || streq( p->s.v.classname, "item_armor2" )
-	    || streq( p->s.v.classname, "item_armorInv") )
+			|| streq( p->s.v.classname, "item_armor2" )
+			|| streq( p->s.v.classname, "item_armorInv")
+			|| streq( p->s.v.classname, "door") )
 		{
 			ent_remove( p );
 			continue;
