@@ -871,7 +871,7 @@ void T_MissileTouch()
 
 	// shamblers only take half damage from rockets
 	if ( streq(other->s.v.classname, "monster_shambler") && !cvar("k_bloodfest") )
-		damg /= 2;
+		damg = 55;
 	else // 110 dmg on direct hits for all other cases
 		damg = 110;
 
