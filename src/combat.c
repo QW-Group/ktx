@@ -356,7 +356,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	float			non_hdp_damage; // save damage before handicap apply for kickback calculation
 	float			native_damage = damage; // save damage before apply any modificator
 	char            *attackerteam, *targteam, *attackername, *victimname;
-	qbool		tp4teamdmg = false;
+	qbool			tp4teamdmg = false;
 
 	//midair and instagib
 	float playerheight = 0, midheight = 0;
@@ -640,17 +640,6 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			attackername = attacker->s.v.netname;
 			victimname = targ->s.v.netname;
 
-		/*
-		log_printf( "\t\t\t<damage time=\"%f\" attacker=\"%s\" "
-					"target=\"%s\" type=\"%s\" quad=\"%d\" splash=\"%d\" value=\"%d\" armor=\"1\"/>\n",
-					g_globalvars.time - match_start_time,
-					cleantext(attackername),
-					cleantext(victimname),
-					death_type( targ->deathtype ),
-					(int)(attacker->super_damage_finished > g_globalvars.time ? 1 : 0 ),
-					dmg_is_splash,
-					(int)save );
-		*/
 		log_printf(
 			"\t\t<event>\n"
 			"\t\t\t<damage>\n"
@@ -760,17 +749,6 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 				attackername = attacker->s.v.netname;
 				victimname = targ->s.v.netname;
 
-			/*
-			log_printf( "\t\t\t<damage time=\"%f\" attacker=\"%s\" target=\"%s\" type=\"%s\" "
-						"quad=\"%d\" splash=\"%d\" value=\"%d\" armor=\"0\"/>\n",
-						g_globalvars.time - match_start_time,
-						cleantext(attackername),
-						cleantext(victimname),
-						death_type( targ->deathtype ),
-						(int)(attacker->super_damage_finished > g_globalvars.time ? 1 : 0 ),
-						dmg_is_splash,
-						(int)take );
-			*/
 			log_printf(
 				"\t\t<event>\n"
 				"\t\t\t<damage>\n"
@@ -790,7 +768,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 				death_type( targ->deathtype ),
 				(int)(attacker->super_damage_finished > g_globalvars.time ? 1 : 0 ),
 				dmg_is_splash,
-				(int)save
+				(int)take
 			);
 		}
 
@@ -931,6 +909,9 @@ void T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage, ge
 						}
 						else
 						{
+							// shamblers only take half damage from rocket/grenade explosions
+							if ( streq(head->s.v.classname, "monster_shambler") && !cvar("k_bloodfest") )
+								points = points / 2;
 							T_Damage( head, inflictor, attacker, points );
 						}
 

@@ -869,8 +869,11 @@ void T_MissileTouch()
 
 	FixQuad(PROG_TO_EDICT( self->s.v.owner ));
 
-	// always 110 dmg on direct hits
-	damg = 110;
+	// shamblers only take half damage from rockets
+	if ( streq(other->s.v.classname, "monster_shambler") && !cvar("k_bloodfest") )
+		damg /= 2;
+	else // 110 dmg on direct hits for all other cases
+		damg = 110;
 
 	if ( other->s.v.takedamage )
 	{
@@ -888,7 +891,6 @@ void T_MissileTouch()
 	}
 	// don't do radius damage to the other, because all the damage
 	// was done in the impact
-
 
 	T_RadiusDamage( self, PROG_TO_EDICT( self->s.v.owner ), 120, other, dtRL );
 
@@ -1135,7 +1137,11 @@ void GrenadeExplode()
 
 	FixQuad(PROG_TO_EDICT( self->s.v.owner ));
 
-	T_RadiusDamage( self, PROG_TO_EDICT( self->s.v.owner ), 120, world, dtGL );
+	// shamblers only take half damage from grenades
+	if ( streq(self->s.v.classname, "monster_shambler") && !cvar("k_bloodfest") )
+		T_RadiusDamage( self, PROG_TO_EDICT( self->s.v.owner ), 60, world, dtGL );
+	else
+		T_RadiusDamage( self, PROG_TO_EDICT( self->s.v.owner ), 120, world, dtGL );
 
 	WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
 	WriteByte( MSG_MULTICAST, TE_EXPLOSION );

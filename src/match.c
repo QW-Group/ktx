@@ -2232,7 +2232,7 @@ void StartDemoRecord ()
 			demoname = CompilateDemoName();
 
 			// used for race
-			cvar_set( "_k_recordeddemoname", stripcaps ( striphigh( demoname ) ) );
+			cvar_set( "_k_recordeddemoname", stripcaps( striphigh( demoname ) ) );
 		}
 	}
 }
