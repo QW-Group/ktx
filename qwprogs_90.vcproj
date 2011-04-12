@@ -212,7 +212,7 @@
 				SubSystem="0"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				OptimizeForWindows98="1"
+				OptimizeForWindows98="0"
 				LinkTimeCodeGeneration="1"
 				SetChecksum="true"
 				RandomizedBaseAddress="1"

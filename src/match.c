@@ -2205,7 +2205,6 @@ char *CompilateDemoName ()
 void StartDemoRecord ()
 {
 	char *demoname;
-	int i;
 
 	// extralog should be set by easyrecord and if we skip recording we will have it set to WRONG value.
 	// So this set it at least to something reasonable ffs.
