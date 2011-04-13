@@ -557,7 +557,7 @@ char *stripcaps(char *format)
 	{
 		unsigned char *i = (unsigned char *) string[index];
 
-		for ( ; *i; *i++ )
+		for ( ; *i; i++ )
 			if ( *i >= 'A' && *i <= 'Z' )
 				*i += 'a' - 'A';
 	}
