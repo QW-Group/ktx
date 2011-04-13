@@ -645,6 +645,7 @@ typedef struct
 	float					distance;
 	float					maxspeed;
 	float					avgspeed;
+	float					avgcount;
 	char					date[64];
 	raceWeapoMode_t			weaponmode;					// weapon mode
 	raceFalseStartMode_t	startmode;				// start mode
@@ -657,8 +658,14 @@ typedef enum
        raceActive,                        // race is active
 } raceStatus_t;
  
+#define NUM_CHASECAMS	4 // number of camera views defined
+#define NUM_BESTSCORES	10
+
 typedef struct
 {
+	raceRecord_t records[NUM_BESTSCORES];	// array of best scores information
+	raceRecord_t currentrace;	// curent score information
+
 	int						cnt;				// how much we actually have of routes, no more than MAX_ROUTES
 	int						active_route;		// which route active right now
 	raceRoute_t				route[MAX_ROUTES];	// fixed array of routes
@@ -680,6 +687,7 @@ typedef struct
 	int						next_race_time;		// used for centerprint, help us print it not each server frame but more rare, each 100ms or something
 
 	qbool				warned;				// do we warned why we can't start race
+	qbool				race_recording;		// is race being recorded?
 	int						next_racer;			// this is queue of racers
 
 	raceWeapoMode_t			weapon;				// weapon mode

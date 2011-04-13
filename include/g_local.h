@@ -773,8 +773,6 @@ void 		StartDemoRecord();
 
 qbool 		race_weapon_allowed( gedict_t *p );
 
-extern		qbool race_recording;
-
 void		race_init( void );
 void		race_shutdown( char *msg );
 void		race_think( void );

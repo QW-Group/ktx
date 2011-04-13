@@ -1401,7 +1401,7 @@ void changelevel( const char *name )
  	if ( strnull( name ) )
 		G_Error("changelevel: null");
 
-	if ( isRACE() && race_recording )
+	if ( isRACE() && race.race_recording )
 		race_stoprecord( true );
 
 	trap_changelevel(name);
