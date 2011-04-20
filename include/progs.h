@@ -586,6 +586,9 @@ typedef struct gedict_s {
 // }
 
 	int			trackent;			// pseudo spectating for players.
+// { bloodfest
+	qbool		bloodfest_boss;		// is monsters is bloodfest boss?
+// }
 
 } gedict_t;
 

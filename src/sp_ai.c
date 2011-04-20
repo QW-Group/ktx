@@ -600,6 +600,10 @@ void ai_charge( float d )
 		{
 			d *= 5; // let fish swim faster in bloodfest mode.
 		}
+		else if ( self->bloodfest_boss )
+		{
+			d *= 2; // let boss move faster
+		}
 	}
 
 	ai_face ();
@@ -821,6 +825,10 @@ void ai_run( float dist )
 		if ( (int)self->s.v.flags & FL_SWIM )
 		{
 			dist *= 5; // let fish swim faster in bloodfest mode.
+		}
+		else if ( self->bloodfest_boss )
+		{
+			dist *= 2; // let boss move faster
 		}
 	}
 

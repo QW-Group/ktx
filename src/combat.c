@@ -395,6 +395,12 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	if ( (int)cvar("k_midair") )
 		midair = true;
 
+	// in bloodfest boss damage factor.
+	if ( k_bloodfest && attacker->bloodfest_boss )
+	{
+		damage *= 4;
+	}
+
 	// check for quad damage powerup on the attacker
 	// midair quad makes rockets fast, but no change to damage
 	if ( attacker->super_damage_finished > g_globalvars.time

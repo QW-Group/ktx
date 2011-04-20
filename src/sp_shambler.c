@@ -363,7 +363,7 @@ void CastLightning()
 	dir[2] += 16;
 	VectorSubtract( dir, org, dir );
 	normalize( dir, dir );
-	VectorMA( self->s.v.origin, 600, dir, dir );
+	VectorMA( self->s.v.origin, k_bloodfest && self->bloodfest_boss ? 900 : 600, dir, dir );
 
 	// trace from -> to
 	traceline( PASSVEC3( org ), PASSVEC3( dir ), true, self );
