@@ -40,7 +40,7 @@ static const float k_bloodfest_monsters_spawn_period = 20;	// with which perioud
 static const float k_bloodfest_monsters_spawn_factor = 0.2;	// monsters population is bigger by this each wave.
 static const int   k_bloodfest_monsters_spawn_initial = 20;	// monsters population in first wave.
 static const float k_bloodfest_boss_hp_factor = 13;			// hp factor if monster is boss.
-static const float k_bloodfest_boss_chance = 0.3;			// percentage chance of boss spawn in particular wave.
+static const float k_bloodfest_boss_chance = -1;			// percentage chance of boss spawn in particular wave.
 
 // RUNTIME.
 bloodfest_t g_bloodfest;
