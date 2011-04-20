@@ -927,6 +927,18 @@ void ai_melee_side();
 
 // sp_monsters.c
 
+typedef struct bloodfest_s
+{
+	float monsters_spawn_time;			// is it time to start monsters spawn wave.
+	int	  monsters_to_spawn;			// amount of monsters we want to spawn in this wave.
+	qbool spawn_boss;					// spawn boss in this wave.
+} bloodfest_t;
+
+extern bloodfest_t g_bloodfest;
+
+// reset bloodfest runtime variables to default values.
+void bloodfest_reset(void);
+
 void monster_death_use();
 
 void check_monsters_respawn( void );

@@ -1650,10 +1650,10 @@ void HideSpawnPoints();
 
 void StartMatch ()
 {
-	extern float k_bloodfest_monsters_spawn_time;
 	char date[64];
 
-	k_bloodfest_monsters_spawn_time = 0; // start next wave ASAP!
+	// reset bloodfest vars.
+	bloodfest_reset();
 
 	k_nochange   = 0;
 	k_showscores = 0;

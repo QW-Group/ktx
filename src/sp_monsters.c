@@ -34,76 +34,84 @@
 //============================================================================
 
 // LIMITS.
-static const int k_bloodfest_monsters = 100;	// maximum monsters allowed in bloodfest mode.
-static const int k_bloodfest_projectiles = 30;	// maximum projectiles allowed in bloodfest mode.
+static const int   k_bloodfest_monsters = 100;				// maximum monsters allowed in bloodfest mode.
+static const int   k_bloodfest_projectiles = 30;			// maximum projectiles allowed in bloodfest mode.
 static const float k_bloodfest_monsters_spawn_period = 20;	// with which perioud we should issue monsters wave.
 static const float k_bloodfest_monsters_spawn_factor = 0.2;	// monsters population is bigger by this each wave.
 static const int   k_bloodfest_monsters_spawn_initial = 20;	// monsters population in first wave.
+static const float k_bloodfest_boss_hp_factor = 5;			// hp factor if monster is boss.
+static const float k_bloodfest_boss_chance = 0.3;			// percentage chance of boss spawn in particular wave.
 
 // RUNTIME.
-float k_bloodfest_monsters_spawn_time;			// is it time to start monsters spawn wave.
-int	  k_bloodfest_monsters_to_spawn;			// amount of monsters we want to spawn in this wave.
+bloodfest_t g_bloodfest;
 
 typedef struct bloodfest_monster_s
 {
 	char *			class_name;			// monsters class name, same that used in g_spawn.c
 	int				hp_for_kill;		// how much hp player gains for killing such monster.
 	int				armor_for_kill;		// how much armor player gains for killing such monster.
+	qbool			boss_able;			// able to be boss.
 } bloodfest_monster_t;
+
+// reset bloodfest runtime variables to default values.
+void bloodfest_reset(void)
+{
+	memset(&g_bloodfest, 0, sizeof(g_bloodfest));
+}
 
 static bloodfest_monster_t bloodfest_monster_array[] =
 {
 	{	// WARNING: FISH _MUST_ BE _FIRST_ IN ARRAY, I HAVE HACK FOR IT IN bloodfest_spawn_monsters()!!!
 		"monster_fish",
-		1, 1,
+		1, 1, false,
 	},
 	{
 		"monster_ogre",
-		3, 2,
+		3, 2, false,
 	},
 	{
 		"monster_demon1",
-		4, 4,
+		4, 4, false,
 	},
 	{
 		"monster_shambler",
-		10, 8,
+		10, 8, true,
 	},
 	{
 		"monster_knight",
-		1, 1,
+		1, 1, false,
 	},
 	{
 		"monster_army",
-		1, 1,
+		1, 1, false,
 	},
 	{
 		"monster_wizard",
-		2, 2,
+		2, 2, false,
 	},
 	{
 		"monster_dog",
-		1, 1,
+		1, 1, false,
 	},
 	{
 		"monster_zombie",
-		1, 1,
+		1, 1, false,
 	},
 	{
 		"monster_tarbaby",
-		4, 4,
+		4, 4, false,
 	},
 	{
 		"monster_hell_knight",
-		4, 3,
+		4, 3, true,
 	},
 	{
 		"monster_shalrath",
-		6, 6,
+		6, 6, true,
 	},
 	{
 		"monster_enforcer",
-		2, 1,
+		2, 1, false,
 	},
 };
 
@@ -218,26 +226,28 @@ void bloodfest_wave_calculate(void)
 {
 	float factor;
 
-	if ( k_bloodfest_monsters_spawn_time > g_globalvars.time )
+	if ( g_bloodfest.monsters_spawn_time > g_globalvars.time )
 		return; // not ready to calculate wave.
 
 	// OK. time for next wave!
 
 	// calculate next wave time.
-	k_bloodfest_monsters_spawn_time = g_globalvars.time + k_bloodfest_monsters_spawn_period;
+	g_bloodfest.monsters_spawn_time = g_globalvars.time + k_bloodfest_monsters_spawn_period;
 
 	// calculate how much monsters we should spawn in this wave.
 	factor = match_start_time ? 1 + k_bloodfest_monsters_spawn_factor * (g_globalvars.time - match_start_time) / k_bloodfest_monsters_spawn_period : 1;
 	factor = bound(1, factor, 999999);
 
-	k_bloodfest_monsters_to_spawn = (int)(factor * k_bloodfest_monsters_spawn_initial);
+	g_bloodfest.monsters_to_spawn = (int)(factor * k_bloodfest_monsters_spawn_initial);
 	// if there is still alive monsters, reduce wave by that count.
-	k_bloodfest_monsters_to_spawn -= monsters_count( true );
+	g_bloodfest.monsters_to_spawn -= monsters_count( true );
 
 	// apply limits.
-	k_bloodfest_monsters_to_spawn = bound( 0, k_bloodfest_monsters_to_spawn, k_bloodfest_monsters );
+	g_bloodfest.monsters_to_spawn = bound( 0, g_bloodfest.monsters_to_spawn, k_bloodfest_monsters );
 
-//	G_cprint("to spawn: %d\n", k_bloodfest_monsters_to_spawn);
+	g_bloodfest.spawn_boss = (g_random() < k_bloodfest_boss_chance);
+
+//	G_cprint("to spawn: %d\n", monsters_to_spawn);
 }
 
 // attempt to spawn more monsters.
@@ -264,7 +274,7 @@ void bloodfest_spawn_monsters(void)
 
 	bloodfest_wave_calculate();
 
-	if ( k_bloodfest_monsters_to_spawn < 1 )
+	if ( g_bloodfest.monsters_to_spawn < 1 )
 		return; // nothing to spawn.
 
 	// too much monsters, can't spawn more.
@@ -282,6 +292,8 @@ void bloodfest_spawn_monsters(void)
 	// we trying to do it few times in row since we can fail because spawn point is busy or something.
 	for ( i = 0; i < 10; i++ )
 	{
+		int idx = 0;
+
 		// find some random spawn point.
 		spot = find_idx( i_rnd(0, total_spawns - 1), FOFCLSN, "info_monster_start" );
 
@@ -293,18 +305,31 @@ void bloodfest_spawn_monsters(void)
 		content = trap_pointcontents( PASSVEC3( spot->s.v.origin ) );
 		// spawn monster.
 		if ( content == CONTENT_WATER )
-			p = bloodfest_spawn_monster( spot, bloodfest_monster_array[0].class_name ); // HACK: spawn fish.
+			p = bloodfest_spawn_monster( spot, bloodfest_monster_array[idx = 0].class_name ); // HACK: spawn fish.
 		else
-			p = bloodfest_spawn_monster( spot, bloodfest_monster_array[i_rnd(1, bloodfest_monster_array_size - 1)].class_name );
+			p = bloodfest_spawn_monster( spot, bloodfest_monster_array[idx = i_rnd(1, bloodfest_monster_array_size - 1)].class_name );
 
 		if ( p )
+		{
+			// attempt to spawn boss.
+			if ( g_bloodfest.spawn_boss && bloodfest_monster_array[idx].boss_able )
+			{
+				p->s.v.health *= k_bloodfest_boss_hp_factor;
+				p->s.v.effects = (int)p->s.v.effects | EF_BLUE | EF_RED;
+
+				g_bloodfest.spawn_boss = false;
+
+//				G_bprint( 2, "BOSS %d\n", (int)p->s.v.health );
+			}
+
 			break; // spawned something.
+		}
 
 //		G_cprint("respawn %d\n", i);
 	}
 
 	// reduce amount to spawn next time.
-	k_bloodfest_monsters_to_spawn--;
+	g_bloodfest.monsters_to_spawn--;
 }
 
 // remove monsters corpses, so there free edicts.
