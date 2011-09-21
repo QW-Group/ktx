@@ -1124,7 +1124,7 @@ qbool CanConnect()
 	}
 
 	// don't allow empty team in any case
-	if ( isTeam() && strnull( getteam( self ) ) )
+	if ( tp_num() && strnull( getteam( self ) ) )
 	{
 		G_sprint(self, 2, "Match in progress,\n"
 						  "Set your team before connecting\n"
@@ -1248,6 +1248,17 @@ void ClientConnect()
 		SetUserInfo( self, "team", "coop", 0 );
 		// sends this to client - so he get right team too.
 		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "team " "coop" "\n");
+	}
+
+	// qqshka: force damn colors in CTF.
+	if ( isCTF() && match_in_progress )
+	{
+		qbool red = streq(getteam(self), "red");
+		// set proper colors.
+		SetUserInfo( self, "topcolor", red ? "4" : "13", 0 );
+		SetUserInfo( self, "bottomcolor", red ? "4" : "13", 0 );
+		// sends this to client - so he get right colors too.
+		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "color %s\n", red ? "4" : "13");
 	}
 
 	if ( !CanConnect() ) {
