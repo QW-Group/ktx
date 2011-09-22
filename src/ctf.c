@@ -447,8 +447,6 @@ void PlayerDropFlag( gedict_t *player, qbool tossed )
 	else
 		cn = "item_flag_team1";
 
-	player->ctf_flag -= ( player->ctf_flag & CTF_FLAG );
-
 	flag = find( world, FOFCLSN, cn );
 	if ( flag )
 		DropFlag( flag, tossed );
@@ -459,15 +457,16 @@ void DropFlag( gedict_t *flag, qbool tossed )
 	gedict_t *p = PROG_TO_EDICT( flag->s.v.owner );
 	gedict_t *p1;
 
+	p->ctf_flag -= ( p->ctf_flag & CTF_FLAG );
 	p->s.v.effects -= ( (int) p->s.v.effects & ( EF_FLAG1 | EF_FLAG2 ));
-	p->s.v.items -= ( (int) p->s.v.items & (int) self->s.v.items );
+	p->s.v.items -= ( (int) p->s.v.items & (int) flag->s.v.items );
 
 	setorigin( flag, PASSVEC3(p->s.v.origin) );
 	flag->s.v.origin[2] -= 24;
 	flag->cnt = FLAG_DROPPED;
 	if ( tossed )
 	{
-		trap_makevectors( self->s.v.v_angle );
+		trap_makevectors( p->s.v.v_angle );
 		if ( p->s.v.v_angle[0] )
 		{
 			flag->s.v.velocity[0] = g_globalvars.v_forward[0] * 300 + g_globalvars.v_up[0] * 200;
