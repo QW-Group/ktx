@@ -1132,6 +1132,15 @@ qbool CanConnect()
 		return false; // _can't_ connect
 	}
 
+	// you have to be on read or blue team in CTF mode
+	if ( isCTF() && ( strneq( getteam( self ), "red" ) && strneq( getteam( self ), "blue" ) ) )
+	{
+		G_sprint(self, 2, "Match in progress,\n"
+						  "Set your team (red or blue) before connecting\n"
+				  		  "or reconnect as spectator\n");
+		return false; // _can't_ connect
+	}
+
 	// kick if exclusive 
 	if( CountPlayers() >= k_attendees && cvar("k_exclusive") ) 
 	{
@@ -1977,6 +1986,12 @@ void MakeGhost ()
 	float f1 = 1;
 	float f2 = 0;
 
+	if ( k_matchLess ) // no ghost in matchless mode
+		return;
+
+	if ( !cvar("k_lockmode") )
+		return; // no ghost if lockmode is disabled
+
 	while( f1 < k_userid && !f2 ) {
 		if( strnull( ezinfokey(world, va("%d", (int)f1) ) ) )
 			f2 = 1;
@@ -2056,8 +2071,7 @@ void ClientDisconnect()
 
 		sound( self, CHAN_BODY, "player/tornoff2.wav", 1, ATTN_NONE );
 
-		if ( !k_matchLess ) // no ghost in matchless mode
-			MakeGhost ();
+		MakeGhost ();
 	}
 
 	DropRune();
