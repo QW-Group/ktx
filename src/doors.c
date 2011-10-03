@@ -656,7 +656,7 @@ void            fd_secret_done();
 #define SECRET_1ST_DOWN 4	// 1st move is down from arrow
 #define SECRET_NO_SHOOT 8	// only opened by trigger
 #define SECRET_YES_SHOOT 16	// shootable even if targeted
-
+#define SECRET_NEVER 32 // lock it shut, CTF ONLY.
 
 void fd_secret_use( gedict_t * attacker, float take )
 {
@@ -675,6 +675,9 @@ void fd_secret_use( gedict_t * attacker, float take )
 	self->s.v.message = 0;	// no more message
 	//activator=attacker;
 	SUB_UseTargets();	// fire all targets / killtargets
+
+	if ( isCTF() && ( ( int ) ( self->s.v.spawnflags ) & SECRET_NEVER ) )
+		return; // it never opens
 
 	if ( !( ( int ) ( self->s.v.spawnflags ) & SECRET_NO_SHOOT ) )
 	{
