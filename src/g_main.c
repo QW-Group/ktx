@@ -54,9 +54,9 @@ field_t         expfields[] = {
 	{"trackent",	FOFS( trackent ),	 F_INT},
 	{NULL}
 };
-static char     mapname[64];
-static char     worldmodel[64] = "worldmodel";
-static char     netnames[MAX_CLIENTS][32];
+//static char     mapname[64];
+//static char     worldmodel[64] = "worldmodel";
+//static char     netnames[MAX_CLIENTS][32];
 static char     callalias_buf[MAX_CLIENTS][CALLALIAS_SIZE];
 static char     f_checks[MAX_CLIENTS][F_CHECK_SIZE];
 
@@ -368,7 +368,7 @@ void Com_Printf( const char *msg, ... )
 
 void G_InitGame( int levelTime, int randomSeed )
 {
-	int 		i;
+//	int 		i;
 
 	srand( randomSeed );
 	framecount = 0;
@@ -377,12 +377,12 @@ void G_InitGame( int levelTime, int randomSeed )
 	G_InitMemory();
 	memset( g_edicts, 0, sizeof( gedict_t ) * MAX_EDICTS );
 
-	world->s.v.model = worldmodel;
-	g_globalvars.mapname = mapname;
-	for ( i = 0; i < MAX_CLIENTS; i++ )
-	{
-		g_edicts[i + 1].s.v.netname = netnames[i];
-	}
+//	world->s.v.model = worldmodel;
+//	g_globalvars.mapname = mapname;
+//	for ( i = 0; i < MAX_CLIENTS; i++ )
+//	{
+//		g_edicts[i + 1].s.v.netname = netnames[i];
+//	}
 
 	GetMapList();
 
