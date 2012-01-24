@@ -1100,7 +1100,7 @@ void StatsToFile()
 
 	trap_FS_CloseFile( di_handle );
 
-	localcmd("\ndemoinfoadd ** %s\n", name);
+	localcmd("\nsv_demoinfoadd ** %s\n", name);
 	trap_executecmd();
 }
 
