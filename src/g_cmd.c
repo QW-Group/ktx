@@ -255,8 +255,7 @@ static int HexToInt(char c)
 
 static qbool isSupport_ColoredText(gedict_t *p)
 {
-	// seems only ezquake support it atm
-	return (p->ezquake_version < 1754 ? false : true);
+	return !iKey(p, "nocolors");
 }
 
 qbool ClientSay( qbool isTeamSay )
