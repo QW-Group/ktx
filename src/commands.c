@@ -3097,9 +3097,9 @@ const char ctf_um_init[] =
 	"k_overtime 1\n"
 	"k_exttime 5\n"
 	"k_mode 4\n"
-	"k_ctf_based_spawn 0\n"		// non team based spawn
-	"k_ctf_hook 1\n"			// hook on
-	"k_ctf_runes 1\n"			// runes on
+	"k_ctf_based_spawn 1\n"		// team based spawn
+	"k_ctf_hook 0\n"			// hook off
+	"k_ctf_runes 0\n"			// runes off
 	"k_ctf_ga 1\n";				// green armor on
 
 
