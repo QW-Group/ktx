@@ -550,7 +550,7 @@ void bloodfest_killed_hook( gedict_t * killed, gedict_t * attacker )
 	if ( !ISLIVE( attacker ) || attacker->ct != ctPlayer )
 		return; // does not match our needs.
 
-	// 'killed' should be a monstah or trigger, we need teh monstah.
+	// 'killed' could be a monstah or trigger, we need teh monstah.
 	if ( !( (int)killed->s.v.flags & FL_MONSTER )  )
 		return;
 
@@ -571,6 +571,10 @@ void bloodfest_killed_hook( gedict_t * killed, gedict_t * attacker )
 		attacker->s.v.items += IT_ARMOR3 - ( ( int ) attacker->s.v.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) );
 		attacker->s.v.armortype = 0.8;
 	}
+	
+	// bump the score according to monster difficulty
+	if ( monster->hp_for_kill > 1 )
+		attacker->s.v.frags += monster->hp_for_kill - 1;
 }
 
 // main bloodfest hook.
