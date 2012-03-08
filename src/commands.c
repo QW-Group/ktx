@@ -757,9 +757,9 @@ cmd_t cmds[] = {
 	{ "tossrune",    TossRune,                  0    , CF_PLAYER, CD_TOSSRUNE },
 	{ "tossflag",    TossFlag,                  0    , CF_PLAYER, CD_TOSSFLAG },
 	{ "nohook",      nohook,                    0    , CF_BOTH_ADMIN, CD_NOHOOK },
-	{ "norunes",     norunes,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NORUNES },
+	{ "norunes",     norunes,                   0    , CF_BOTH_ADMIN, CD_NORUNES },
 	{ "noga",        noga,                      0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOGA },
-	{ "mctf",        mctf,                      0    , CF_PLAYER | CF_SPC_ADMIN, CD_MCTF },
+	{ "mctf",        mctf,                      0    , CF_BOTH_ADMIN, CD_MCTF },
 	{ "flagstatus",  FlagStatus,                0    , CF_BOTH, CD_FLAGSTATUS },
 	{ "swapall",     AdminSwapAll,              0    , CF_BOTH_ADMIN, CD_SWAPALL },
 
