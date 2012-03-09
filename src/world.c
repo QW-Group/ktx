@@ -545,6 +545,12 @@ void Customize_Maps()
 	// Modify some ctf maps
 	if ( k_allowed_free_modes & UM_CTF )
 	{
+
+		if ( !cvar("k_ctf_based_spawn") && ( find_cnt(FOFCLSN, "info_player_deathmatch") <= 1 ) ) {
+			G_sprint ( self, 2, "Spawn on base enforced due to map limitation\n" );
+			cvar_fset( "k_ctf_based_spawn", 1);
+		}
+
 		if ( streq( "ctf8", g_globalvars.mapname ) )
 		{
 			// fix/remove some bad spawns from ctf8

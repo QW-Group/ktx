@@ -668,7 +668,12 @@ void CTFBasedSpawn()
 		return;
 	}
 
-	cvar_toggle_msg( self, "k_ctf_based_spawn", redtext("spawn on the base") );
+	if ( cvar("k_ctf_based_spawn") && ( find_cnt(FOFCLSN, "info_player_deathmatch") <= 1 ) ) {
+		G_sprint ( self, 2, "Spawn on base enforced due to map limitation\n" );
+		return;
+	}
+		
+	cvar_toggle_msg( self, "k_ctf_based_spawn", redtext("spawn on base") );
 }
 
 void CTF_Obituary( gedict_t *targ, gedict_t *attacker )
