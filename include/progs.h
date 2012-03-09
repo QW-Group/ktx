@@ -590,6 +590,8 @@ typedef struct gedict_s {
 	qbool		bloodfest_boss;		// is monsters is bloodfest boss?
 // }
 
+	qbool		dropitem;			// true if placed with "dropitem" command.
+
 } gedict_t;
 
 typedef enum

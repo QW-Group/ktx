@@ -241,8 +241,8 @@ void race_chasecam_freelook_change( );
 
 // { CHEATS
 void giveme( );
-void dropitem( );
-void removeitem( );
+static void dropitem( );
+static void removeitem( );
 static void dumpent( );
 // }
 
@@ -6105,11 +6105,29 @@ qbool gametype_change_checks( void )
 typedef struct
 {
 	char           *name;
-	char           *class_name;
+	char           *classname;
 	int				spawnflags;
+	int				angle;			// should we set angles or not.
+	void            ( *spawn ) ();  // custom spawn function, called after actual spawn.
 } dropitem_spawn_t;
 
 #define  WEAPON_BIG2  1
+
+static dropitem_spawn_spawnpoint()
+{
+	int effects = EF_GREEN | EF_RED; // default effects.
+
+	self->s.v.flags = ( int )self->s.v.flags | FL_ITEM;
+	setmodel( self, "progs/w_g_key.mdl" );
+
+	if ( streq( self->s.v.classname, "info_player_team1" ) )
+		effects = EF_RED;
+	else if ( streq( self->s.v.classname, "info_player_team2" ) )
+		effects = EF_BLUE;
+
+	self->s.v.effects = ( int ) self->s.v.effects | effects;
+	setorigin( self, PASSVEC3( self->s.v.origin ) );
+}
 
 static dropitem_spawn_t dropitems[] = 
 {
@@ -6137,11 +6155,15 @@ static dropitem_spawn_t dropitems[] =
 	{"s",		"item_artifact_envirosuit",			0},
 	{"r",		"item_artifact_invisibility",		0},
 	{"q",		"item_artifact_super_damage",		0},
+	{"fl_r",	"item_flag_team1",					0,					1},
+	{"fl_b",	"item_flag_team2",					0,					1},
+	{"sp_r",	"info_player_team1",				0,					1, dropitem_spawn_spawnpoint},
+	{"sp_b",	"info_player_team2",				0,					1, dropitem_spawn_spawnpoint},
 };
 
 static const int dropitems_count = sizeof(dropitems) / sizeof(dropitems[0]);
 
-dropitem_spawn_t * dropitem_find_by_name(const char * name)
+static dropitem_spawn_t * dropitem_find_by_name(const char * name)
 {
 	int i;
 
@@ -6155,17 +6177,21 @@ dropitem_spawn_t * dropitem_find_by_name(const char * name)
 }
 
 // spawn item.
-gedict_t * dropitem_spawn_item(gedict_t *spot, char * classname, int spawnflags)
+static gedict_t * dropitem_spawn_item(gedict_t *spot, dropitem_spawn_t * di)
 {
 	extern qbool G_CallSpawn( gedict_t * ent );
 
 	gedict_t *	oself;
 	gedict_t *	p = spawn();
 
-	p->s.v.classname = classname;
-	p->s.v.spawnflags = spawnflags;
+	p->dropitem = true;
+	p->s.v.classname = di->classname;
+	p->s.v.spawnflags = di->spawnflags;
 	VectorCopy(spot->s.v.origin, p->s.v.origin);
 //	VectorCopy(spot->s.v.angles, p->s.v.angles);
+	if (di->angle)
+		p->s.v.angles[1] = spot->s.v.angles[1]; // seems we should set angles for this entity.
+
 	setorigin( p, PASSVEC3(p->s.v.origin) );
 
 	// G_CallSpawn will change 'self', so we have to do trick about it.
@@ -6177,13 +6203,17 @@ gedict_t * dropitem_spawn_item(gedict_t *spot, char * classname, int spawnflags)
 		ent_remove( p );
 		p = NULL;
 	}
+	else if ( di->spawn )
+	{
+		di->spawn(); // call custom spawn function if we succeed with main spawn function.
+	}
 
 	self = oself;	// restore!!!
 
 	return p;
 }
 
-void dropitem_usage(void)
+static void dropitem_usage(void)
 {
 	int i;
 	char tmp[1024] = {0};
@@ -6207,7 +6237,7 @@ void dropitem_usage(void)
 		G_sprint(self, 2, "dropitem < %s >\n", tmp);
 }
 
-void dropitem()
+static void dropitem()
 {
 	dropitem_spawn_t * di;
 	char arg_1[128];
@@ -6232,13 +6262,13 @@ void dropitem()
 
 	if ( (di = dropitem_find_by_name( arg_1 )) )
 	{
-		if (dropitem_spawn_item( self, di->class_name, di->spawnflags ))
+		if (dropitem_spawn_item( self, di ))
 		{
-			G_sprint(self, 2, "Spawned %s\n", di->class_name );
+			G_sprint(self, 2, "Spawned %s\n", di->classname );
 		}
 		else
 		{
-			G_sprint(self, 2, "Can't spawn %s\n", di->class_name );
+			G_sprint(self, 2, "Can't spawn %s\n", di->classname );
 		}
 	}
 	else
@@ -6248,7 +6278,7 @@ void dropitem()
 	}
 }
 
-void removeitem()
+static void removeitem()
 {
 	gedict_t *	p;
 
@@ -6263,8 +6293,8 @@ void removeitem()
 
 	for ( p = world; (p = trap_findradius( p, self->s.v.origin, 64 )); )
 	{
-		if ( !((int)p->s.v.flags & FL_ITEM) )
-			continue; // not an item.
+		if ( !p->dropitem )
+			continue; // not our item.
 
 		G_sprint(self, 2, "Removed %s\n", p->s.v.classname );
 		ent_remove( p );
@@ -6315,8 +6345,8 @@ static void dumpent()
 
     for( p = world; ( p = nextent( p ) ); )
     {
-		if ( !((int)p->s.v.flags & FL_ITEM) )
-			continue; // not an item.
+		if ( !p->dropitem )
+			continue; // not our item.
 
 		if ( strnull( p->s.v.classname ) )
 			continue; // null class name.
@@ -6324,6 +6354,12 @@ static void dumpent()
 		dump_print(file_handle, "{\n");
 		dump_print(file_handle, "\t" "\"classname\" \"%s\"" "\n", p->s.v.classname);
 		dump_print(file_handle, "\t" "\"origin\" \"%d %d %d\"" "\n", (int)p->s.v.origin[0], (int)p->s.v.origin[1], (int)p->s.v.origin[2]);
+
+		if ( p->s.v.angles[0] || p->s.v.angles[2] )
+			dump_print(file_handle, "\t" "\"angles\" \"%d %d %d\"" "\n", (int)p->s.v.angles[0], (int)p->s.v.angles[1], (int)p->s.v.angles[2]);
+		else if ( p->s.v.angles[1] )
+			dump_print(file_handle, "\t" "\"angle\" \"%d\"" "\n", (int)p->s.v.angles[1]);
+
 		if ( p->s.v.spawnflags )
 			dump_print(file_handle, "\t" "\"spawnflags\" \"%d\"" "\n", (int)p->s.v.spawnflags);
 		dump_print(file_handle, "}\n");
