@@ -6218,7 +6218,7 @@ static void dropitem_usage(void)
 	int i;
 	char tmp[1024] = {0};
 
-// dropitems < x | y >
+// dropitem < x | y >
 
 	for ( i = 0; i < dropitems_count; i++ )
 	{
@@ -6280,7 +6280,9 @@ static void dropitem()
 
 static void removeitem()
 {
-	gedict_t *	p;
+	gedict_t *	ent;
+	gedict_t *	p = NULL;
+	float		best_distance = 10e+32;//should be FLT_MAX but it is absent of some systems.
 
 	if ( match_in_progress )
 		return;
@@ -6291,18 +6293,37 @@ static void removeitem()
 		return; // FU!
 	}
 
-	for ( p = world; (p = trap_findradius( p, self->s.v.origin, 64 )); )
+    for( ent = world; ( ent = nextent( ent ) ); )
 	{
-		if ( !p->dropitem )
+		float	distance = 0;
+		int     j;
+
+		if ( !ent->dropitem )
 			continue; // not our item.
 
-		G_sprint(self, 2, "Removed %s\n", p->s.v.classname );
-		ent_remove( p );
+		for ( j = 0; j < 3; j++ )
+		{
+			float c = self->s.v.origin[j] - ( ent->s.v.origin[j] + ( ent->s.v.mins[j] + ent->s.v.maxs[j] ) * 0.5 );
+			distance += c * c;
+		}
 
-		return;
+		// check if that item closer to us.
+		if ( distance > best_distance )
+			continue;
+
+		p = ent;
+		best_distance = distance;
 	}
 
-	G_sprint(self, 2, "Nothing found around\n");
+	if ( p )
+	{
+		G_sprint(self, 2, "Removed %s\n", p->s.v.classname );
+		ent_remove( p );
+	}
+	else
+	{
+		G_sprint(self, 2, "Nothing found around\n");	
+	}
 }
 
 static void dump_print( fileHandle_t file_handle, const char *fmt, ... )
