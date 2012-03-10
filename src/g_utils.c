@@ -327,8 +327,10 @@ gedict_t *findradius( gedict_t * start, vec3_t org, float rad )
 
 }
 
-// just ignore solid field
-gedict_t *findradius2( gedict_t * start, vec3_t org, float rad )
+#endif
+
+// Same as findradius but ignore solid field.
+gedict_t *findradius_ignore_solid( gedict_t * start, vec3_t org, float rad )
 {
 	gedict_t *ent;
 	vec3_t  eorg;
@@ -345,10 +347,9 @@ gedict_t *findradius2( gedict_t * start, vec3_t org, float rad )
 		return ent;
 
 	}
-	return NULL;
 
+	return NULL;
 }
-#endif
 /*
 ==============
 changeyaw
