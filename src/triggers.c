@@ -899,6 +899,20 @@ void SP_trigger_push()
 		self->speed = 1000;
 }
 
+void SP_trigger_custom_push()
+{
+	// set real classname
+	self->s.v.classname = "trigger_push";
+	// some size hack.
+	setsize( self, -self->s.v.size[0], -self->s.v.size[1], -self->s.v.size[2],
+					self->s.v.size[0],  self->s.v.size[1],  self->s.v.size[2] );
+	// and call proper spawn function.
+	SP_trigger_push();
+
+	// reset origin, well, you have to set origin each time you change solid type...
+	setorigin( self, PASSVEC3( self->s.v.origin ) );
+}
+
 //============================================================================
 
 void trigger_monsterjump_touch()
