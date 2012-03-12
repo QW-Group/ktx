@@ -598,6 +598,31 @@ void FlagStatus()
 	}
 }
 
+void CTF_CheckFlagsAsKeys( void )
+{
+	gedict_t *flag1, *flag2;
+
+	if ( !isCTF() )
+		return;
+
+	flag1 = find( world, FOFCLSN, "item_flag_team1" ); // RED
+	flag2 = find( world, FOFCLSN, "item_flag_team2" ); // BLUE
+
+	if ( !flag1 || !flag2 )
+		return;
+
+	// remove keys/flags.
+	self->s.v.items = (int) self->s.v.items & ~(IT_KEY1 | IT_KEY2);
+
+	// add gold/RED.
+	if ( flag1->cnt != FLAG_AT_BASE )
+		self->s.v.items = (int) self->s.v.items | IT_KEY2;
+
+	// add silver/BLUE.
+	if ( flag2->cnt != FLAG_AT_BASE )
+		self->s.v.items = (int) self->s.v.items | IT_KEY1;
+}
+
 void norunes()
 {
 	if( match_in_progress )

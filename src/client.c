@@ -3168,6 +3168,7 @@ void PlayerPostThink()
 	CheckPowerups();
 	CheckLightEffects(); // NOTE: guess, this must be after CheckPowerups(), so u r warned.
 	CheckStuffRune();
+	CTF_CheckFlagsAsKeys();
 
 	mv_record();
 
