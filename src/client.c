@@ -2805,7 +2805,8 @@ void CheckPowerups()
 		{
 			if ( self->invincible_time == 1 )
 			{
-				G_sprint( self, PRINT_HIGH, "Protection is almost burned out\n" );
+				if ( !cvar("k_instagib") )
+					G_sprint( self, PRINT_HIGH, "Protection is almost burned out\n" );
 				stuffcmd( self, "bf\n" );
 				sound( self, CHAN_AUTO, "items/protect2.wav", 1, ATTN_NORM );
 				self->invincible_time = g_globalvars.time + 1;
