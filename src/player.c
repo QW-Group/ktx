@@ -956,7 +956,7 @@ void GibPlayer()
 		ThrowGib( "progs/gib3.mdl", self->s.v.health );
     }
 
-	if ( isRACE() )
+	if ( isRACE() && race.status )
 		return;
 
 	// spawn temporary entity.
