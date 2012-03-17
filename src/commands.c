@@ -1828,9 +1828,6 @@ void ResetOptions()
 		return;
 	}
 
-//	s1 = getteam( self );
-
-#if 1 // TODO: make commented code safe or remove it
 	{
 		char *cfg_name = "configs/reset.cfg";
 		char buf[1024*4];
@@ -1846,16 +1843,6 @@ void ResetOptions()
 		if ( ( um_idx = um_idx_byname( cvar_string("k_defmode") ) ) >= 0 )
 			UserMode( -(um_idx + 1) ); // force exec configs for default user mode
 	}
-#else
-/*
-	if( !is_adm(self) || strnull( s1 ) ) {
-		localcmd("exec configs/reset.cfg\n");
-	} else {
-		localcmd("exec configs/%s.cfg\n", s1); // FIXME: UNSAFE: player can set some dangerous team
-		G_bprint(2, "*** \"%s\" server setup by %s\n", s1, self->s.v.netname);
-	}
-*/
-#endif
 }
 
 void VotePickup()
