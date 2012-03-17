@@ -2126,8 +2126,7 @@ void ClientDisconnect()
 			race_stoprecord( true );
 		}
 
-		// Check if issued to execute reset.cfg (sturm)
-        if( cvar( "k_autoreset" ) ) {
+        {
 			char *cfg_name = "configs/reset.cfg";
 			char buf[1024*4];
 

@@ -704,7 +704,6 @@ void FirstFrame	( )
 	RegisterCvar("allow_timing");
 	RegisterCvarEx("demo_scoreslength", "10");
 	RegisterCvar("lock_practice");
-	RegisterCvar("k_autoreset");
 	RegisterCvar("k_defmap");
 	RegisterCvar("k_admins");
 	RegisterCvar("k_overtime");
