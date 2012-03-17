@@ -352,6 +352,8 @@ void		safe_precache_sound( char *name );
 
 char		*cl_ip( gedict_t *p );
 
+char		*clean_string(char *s);
+
 //
 //  subs.c
 //

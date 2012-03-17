@@ -348,9 +348,9 @@ const char CD_NODESC[] = "no desc";
 #define CD_FREEZE     "(un)freeze the map"
 #define CD_RPICKUP    "vote random team pickup"
 #define CD_1ON1       "duel settings"
-#define CD_2ON1       "2 on 2 settings"
-#define CD_3ON1       "3 on 3 settings"
-#define CD_4ON1       "4 on 4 settings"
+#define CD_2ON2       "2 on 2 settings"
+#define CD_3ON3       "3 on 3 settings"
+#define CD_4ON4       "4 on 4 settings"
 #define CD_10ON10     "10 on 10 settings"
 #define CD_FFA        "FFA settings"
 #define CD_CTF        "CTF settings"
@@ -661,13 +661,13 @@ cmd_t cmds[] = {
 	{ "freeze",      ToggleFreeze,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_FREEZE },
 	{ "rpickup",     RandomPickup,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_RPICKUP },
 
-	{ "1on1",        DEF(UserMode),             1    , CF_PLAYER | CF_SPC_ADMIN, CD_1ON1 },
-	{ "2on2",        DEF(UserMode),             2    , CF_PLAYER | CF_SPC_ADMIN, CD_2ON1 },
-	{ "3on3",        DEF(UserMode),             3    , CF_PLAYER | CF_SPC_ADMIN, CD_3ON1 },
-	{ "4on4",        DEF(UserMode),             4    , CF_PLAYER | CF_SPC_ADMIN, CD_4ON1 },
-	{ "10on10",      DEF(UserMode),             5    , CF_PLAYER | CF_SPC_ADMIN, CD_10ON10 },
-	{ "ffa",         DEF(UserMode),             6	 , CF_PLAYER | CF_SPC_ADMIN, CD_FFA },
-	{ "ctf",         DEF(UserMode),             7    , CF_PLAYER | CF_SPC_ADMIN, CD_CTF },
+	{ "1on1",        DEF(UserMode),             1    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_1ON1 },
+	{ "2on2",        DEF(UserMode),             2    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_2ON2 },
+	{ "3on3",        DEF(UserMode),             3    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_3ON3 },
+	{ "4on4",        DEF(UserMode),             4    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_4ON4 },
+	{ "10on10",      DEF(UserMode),             5    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_10ON10 },
+	{ "ffa",         DEF(UserMode),             6	 , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_FFA },
+	{ "ctf",         DEF(UserMode),             7    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_CTF },
 
 	{ "practice",    TogglePractice,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_PRACTICE },
 	{ "wp_reset",    Wp_Reset,                  0    , CF_PLAYER, CD_WP_RESET },
@@ -2877,7 +2877,10 @@ ok:
 // qqshka
 
 // below predefined settings for usermodes
-// I ripped this from ktpro
+
+// this settings used when server desire general rules reset: last player disconnects / race toggled / etc.
+const char _reset_settings[] =
+	"serverinfo matchtag \"\"\n";	// Hint for QTV what type of event it is. Like: "EQL semifinal" etc.
 
 // common settings for all user modes
 const char common_um_init[] =
@@ -3088,10 +3091,33 @@ int um_idx_byname(char *name)
 
 extern int skip_fixrules;
 
+static void UserMode_SetMatchTag(char * matchtag)
+{
+	char matchtag_old[20] = {0}, matchtag_new[20] = {0};
+	
+	// get current serverinfo matchtag.
+	infokey(world, "matchtag", matchtag_old, sizeof(matchtag_old));
+	// set new matchtag.
+	localcmd("serverinfo matchtag \"%s\"\n", clean_string(matchtag) );
+	trap_executecmd (); // <- this really needed
+	// check what we get in serverinfo after all.
+	infokey(world, "matchtag", matchtag_new, sizeof(matchtag_new));
+
+	if (matchtag_new[0])
+	{
+		G_bprint( 2, "\n" "%s is %s\n", redtext("matchtag"), matchtag_new );
+	}
+	else if (matchtag_old[0])
+	{
+		G_bprint( 2, "\n" "%s %s\n", redtext("matchtag"), redtext("disabled") );
+	}
+}
+
 // for user call this like UserMode( 1 )
 // for server call like UserMode( -1 )
 void UserMode(float umode)
 {
+	char matchtag[20] = {0};
 	const char *um;
 	char buf[1024*4];
 	char *cfg_name;
@@ -3120,6 +3146,9 @@ void UserMode(float umode)
 		G_bprint(2, "UserMode: unknown mode\n");
 		return;
 	}
+
+	// get user supplied matchtag if any.
+	trap_CmdArgs( matchtag, sizeof( matchtag ) );
 
 	um = um_list[(int)umode].name;
 
@@ -3221,6 +3250,10 @@ void UserMode(float umode)
 
 	G_cprint("\n");
 
+	// apply matchtag if not executed by server.
+	if (!sv_invoked)
+		UserMode_SetMatchTag( matchtag );
+
 	cvar_fset("_k_last_xonx", umode+1); // save last XonX command
 }
 
@@ -3232,12 +3265,20 @@ void execute_rules_reset(void)
 
 	cvar_fset("_k_last_xonx", 0); // forget last XonX command
 
+	// execute hardcoded reset settings.
+	trap_readcmd( _reset_settings, buf, sizeof(buf) );
+	G_cprint("%s", buf);
+
+	// execute configs/reset.cfg.
 	if ( can_exec( cfg_name ) )
 	{
 		trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
 		G_cprint("%s", buf);
 	}
 
+	G_cprint("\n");
+
+	// execute usermode.
 	if ( ( um_idx = um_idx_byname( k_matchLess ? "ffa" : cvar_string("k_defmode") ) ) >= 0 )
 		UserMode( -(um_idx + 1) ); // force exec configs for default user mode
 }

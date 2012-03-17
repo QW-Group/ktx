@@ -2226,3 +2226,29 @@ char *cl_ip(gedict_t *p)
 {
 	return ezinfokey(p, "ip");
 }
+
+//=======================================
+
+// Replace special characters with underscore.
+char *clean_string(char *string)
+{
+	char *s = string;
+
+	for( ; s && *s; s++)
+	{
+		int c = *s;
+
+		if ((c >= 'a' && c <= 'z')		// allow alpha
+			|| (c >= 'A' && c <= 'Z')	// allow alpha
+			|| (c >= '0' && c <= '9')	// allow numbers
+			|| c == ' '					// allow space
+			|| c == '-'					// allow minus
+			|| c == '+'					// allow plus
+		)
+			continue;
+
+		*s = '_';
+	}
+
+	return string;
+}

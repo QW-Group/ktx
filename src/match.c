@@ -1748,6 +1748,8 @@ void PrintCountdown( int seconds )
 // Countdown: seconds
 //
 //
+// EQL semifinal
+//
 // Deathmatch  x
 // Mode		  D u e l | T e a m | F F A | C O O P | BLOODFST | C T F | RA | CA
 // Spawnmodel KTX | bla bla bla // optional
@@ -1772,9 +1774,14 @@ void PrintCountdown( int seconds )
 	char *mode = "";
 	char *ot   = "";
 	char *nowp = "";
+	char *matchtag = ezinfokey(world, "matchtag");
 
 
 	strlcat(text, va("%s: %2s\n\n\n", redtext("Countdown"), dig3(seconds)), sizeof(text));
+
+	if (matchtag[0])
+		strlcat(text, va("%s\n\n\n", matchtag), sizeof(text));
+
 	if ( !isRA() && !coop ) // useless in RA
 		strlcat(text, va("%s %2s\n", "Deathmatch", dig3(deathmatch)), sizeof(text));
 
