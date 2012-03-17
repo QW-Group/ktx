@@ -23,7 +23,7 @@
 
 int max_cmd_len = 0;
 
-qbool gametype_change_checks( void );
+qbool is_rules_change_allowed( void );
 void SendMessage(char *name);
 float CountRPlayers();
 float CountTeams();
@@ -2053,7 +2053,7 @@ void ShowDMM()
 
 void ChangeDM(float dmm)
 {
-	if ( !gametype_change_checks() )
+	if ( !is_rules_change_allowed() )
 		return;
 
 	if ( deathmatch == (int)dmm ) {
@@ -3145,7 +3145,7 @@ void UserMode(float umode)
 	int k_free_mode = ( k_matchLess ? 5 : cvar( "k_free_mode" ) );
 
 	if ( !k_matchLess ) // allow for matchless mode
-	if ( !gametype_change_checks() )
+	if ( !is_rules_change_allowed() )
 		return;
 
 	if ( umode < 0 ) {
@@ -5137,7 +5137,7 @@ void cmd_wreg_do( byte c )
 
 void ToggleMidair()
 {
-	if ( !gametype_change_checks() )
+	if ( !is_rules_change_allowed() )
 		return;
 
 	// Can't enable midair unless dmm4 is set first
@@ -5163,7 +5163,7 @@ void ToggleInstagib()
   char buf[1024*4];
 	char *cfg_name;
 
-	if ( !gametype_change_checks() )
+	if ( !is_rules_change_allowed() )
 		return;
 
 	// Can't enable instagib unless dmm4 is set first
@@ -5262,7 +5262,7 @@ void sv_time()
 
 void GrenadeMode()
 {
-	if ( !gametype_change_checks() )
+	if ( !is_rules_change_allowed() )
 		return;
 
 	// Can't toggle unless dmm4 is set first
@@ -5396,7 +5396,7 @@ void iplist ()
 
 void dmgfrags ()
 {
-	if ( !gametype_change_checks() )
+	if ( !is_rules_change_allowed() )
 		return;
 
 	cvar_toggle_msg( self, "k_dmgfrags", redtext("damage frags") );
@@ -5811,7 +5811,7 @@ void FixYawnMode()
 // Toggle yawnmode, implemented by Molgrum
 void ToggleYawnMode()
 {
-	if ( !gametype_change_checks() )
+	if ( !is_rules_change_allowed() )
 		return;
 
 	cvar_toggle_msg( self, "k_yawnmode", redtext("yawnmode") );
@@ -5911,7 +5911,7 @@ void TogglePause ()
 
 void ToggleArena()
 {
-	if ( !gametype_change_checks() )
+	if ( !is_rules_change_allowed() )
 		return;
 
 	if ( !isRA() )
@@ -6085,7 +6085,7 @@ void giveme()
 	G_sprint(self, 2, "You got %s for %.1fs\n", got, seconds );
 }
 
-qbool gametype_change_checks( void )
+qbool is_rules_change_allowed( void )
 {
 	if ( match_in_progress )
 	{

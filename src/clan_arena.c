@@ -8,7 +8,7 @@ static int round_num;
 static int team1_score;
 static int team2_score;
 
-qbool gametype_change_checks( void );
+qbool is_rules_change_allowed( void );
 
 void SM_PrepareCA(void)
 {
@@ -72,7 +72,7 @@ void apply_CA_settings(void)
 
 void ToggleCArena()
 {
-	if ( !gametype_change_checks() )
+	if ( !is_rules_change_allowed() )
 		return;
 
 	if ( !isCA() )

@@ -24,7 +24,7 @@ void write_topscores( void );
 void read_topscores( void );
 void init_scores( void );
 
-qbool gametype_change_checks( void );
+qbool is_rules_change_allowed( void );
 qbool race_command_checks( void );
 qbool race_is_started( void );
 
@@ -54,7 +54,7 @@ qbool isRACE( void )
 void ToggleRace( void )
 {
 	if ( !isRACE() )
-		if ( !gametype_change_checks() )
+		if ( !is_rules_change_allowed() )
 			return;
 
 	if ( !isRACE() )
