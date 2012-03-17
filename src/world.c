@@ -650,8 +650,6 @@ void FirstFrame	( )
 	RegisterCvar("_k_pow_last");  // internal usage, k_pow from last map
 
 	RegisterCvar("_k_nospecs");  // internal usage, will reject spectators connection
-
-	RegisterCvar("_k_playmode");  // internal usage, active play mode
 	
 	RegisterCvar("_k_recordeddemoname");  // internal usage, name of last easyrecorded demo
 

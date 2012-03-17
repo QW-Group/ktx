@@ -53,7 +53,7 @@ qbool isRACE( void )
 
 void ToggleRace( void )
 {
-	if ( !streq ( cvar_string( "_k_playmode" ), "race" ) )
+	if ( !isRACE() )
 		if ( !gametype_change_checks() )
 			return;
 
@@ -100,7 +100,6 @@ void apply_race_settings( void )
 		int old_dm = deathmatch; // remember deathmatch before we start reseting.
 
 		cvar_set( "sv_silentrecord", "0" );
-		cvar_set( "_k_playmode", "default" );
 
 		race_stoprecord( true );
 
@@ -123,7 +122,6 @@ void apply_race_settings( void )
 	}
 
 	cvar_set( "sv_silentrecord", "1" ); // set recording message to none while in race mode
-	cvar_set( "_k_playmode", "race" ); // set playmode to race
 
 	trap_readcmd( race_settings, buf, sizeof(buf) );
 	G_cprint("%s", buf);
