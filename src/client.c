@@ -2103,7 +2103,6 @@ void ClientDisconnect()
 
 	if ( !CountPlayers() ) {
 		void Spawn_DefMapChecker( float timeout );
-		int um_idx;
 		int old_matchless = k_matchLess;
 		void race_stoprecord( qbool cancel );
 
@@ -2113,8 +2112,6 @@ void ClientDisconnect()
 		k_matchLess = cvar( "k_matchless" );
 		// turn off coop mode. FIXME: coop really should be real mode some day.
 		cvar_fset( "coop", 0 );
-
-		cvar_fset("_k_last_xonx", 0); // forget last XonX command
 
 		if( match_in_progress )
 			EndMatch( 1 ); // skip demo, make some other stuff
@@ -2126,19 +2123,10 @@ void ClientDisconnect()
 			race_stoprecord( true );
 		}
 
-        {
-			char *cfg_name = "configs/reset.cfg";
-			char buf[1024*4];
+		// Execute configs/reset.cfg and set k_defmode.
+		execute_rules_reset();
 
-			if ( can_exec( cfg_name ) ) {
-				trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
-				G_cprint("%s", buf);
-			}
-		}
-
-		if ( ( um_idx = um_idx_byname( k_matchLess ? "ffa" : cvar_string("k_defmode") ) ) >= 0 )
-			UserMode( -(um_idx + 1) ); // force exec configs for default user mode
-
+		// Change map.
 		if ( old_matchless != k_matchLess )
 			changelevel( g_globalvars.mapname ); // force reload current map ASAP!
 		else if ( !cvar( "lock_practice" ) && k_practice )

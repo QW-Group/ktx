@@ -577,6 +577,8 @@ void StuffModCommands( gedict_t *p );
 
 void SetPractice(int srv_practice_mode, const char *mapname);
 
+void execute_rules_reset(void);
+
 // { usermodes
 
 // um_flags

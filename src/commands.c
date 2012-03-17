@@ -75,7 +75,6 @@ void PlayerStatus();
 void PlayerStatusN();
 void PlayerStatusS();
 void PrintScores();
-void ResetOptions();
 void ReportMe();
 void SendKillerMsg();
 void SendNewcomerMsg();
@@ -296,7 +295,6 @@ const char CD_NODESC[] = "no desc";
 #define CD_DROPRING   "drop ring when killed"
 #define CD_DROPPACK   "drop pack when killed"
 #define CD_SILENCE    "toggle spectator talk"
-#define CD_RESET      "set defaults"
 #define CD_REPORT     "simple teamplay report"
 #define CD_RULES      "show game rules"
 #define CD_LOCKMODE   "change locking mode"
@@ -605,7 +603,6 @@ cmd_t cmds[] = {
 	{ "droppack",    ToggleDropPack,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_DROPPACK },
 	                                             
 	{ "silence",     ToggleSpecTalk,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_SILENCE },
-	{ "reset",       ResetOptions,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_RESET },
 	{ "report",      ReportMe,                  0    , CF_PLAYER, CD_REPORT },
 	{ "rules",       ShowRules,                 0    , CF_PLAYER | CF_MATCHLESS, CD_RULES },
 	{ "lockmode",    ChangeLock,                0    , CF_PLAYER | CF_SPC_ADMIN, CD_LOCKMODE },
@@ -1814,35 +1811,6 @@ void ListWhoNot()
 		G_bprint(2, "\n"); // broadcast
 	else
 		G_sprint(self, 2, "can't find not ready players\n"); // self
-}
-
-void ResetOptions()
-{
-//	char *s1;
-
-	if( match_in_progress )
-		return;
-
-	if ( cvar("k_auto_xonx") ) {
-		G_sprint(self, 2, "Command blocked due to k_auto_xonx\n");
-		return;
-	}
-
-	{
-		char *cfg_name = "configs/reset.cfg";
-		char buf[1024*4];
-		int um_idx;
-
-		cvar_fset("_k_last_xonx", 0); // forget last XonX command
-
-		if ( can_exec( cfg_name ) ) {
-			trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
-			G_cprint("%s", buf);
-		}
-
-		if ( ( um_idx = um_idx_byname( cvar_string("k_defmode") ) ) >= 0 )
-			UserMode( -(um_idx + 1) ); // force exec configs for default user mode
-	}
 }
 
 void VotePickup()
@@ -3254,6 +3222,24 @@ void UserMode(float umode)
 	G_cprint("\n");
 
 	cvar_fset("_k_last_xonx", umode+1); // save last XonX command
+}
+
+void execute_rules_reset(void)
+{
+	char *cfg_name = "configs/reset.cfg";
+	char buf[1024*4];
+	int um_idx;
+
+	cvar_fset("_k_last_xonx", 0); // forget last XonX command
+
+	if ( can_exec( cfg_name ) )
+	{
+		trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
+		G_cprint("%s", buf);
+	}
+
+	if ( ( um_idx = um_idx_byname( k_matchLess ? "ffa" : cvar_string("k_defmode") ) ) >= 0 )
+		UserMode( -(um_idx + 1) ); // force exec configs for default user mode
 }
 
 // ok, a bit complicated

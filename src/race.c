@@ -75,6 +75,7 @@ void ToggleRace( void )
 
 // hard coded default settings for RACE
 static char race_settings[] =
+	"sv_silentrecord 1\n"
 	"deathmatch 4\n"
 	"srv_practice_mode 1\n"
 	"lock_practice 1\n"
@@ -85,6 +86,7 @@ static char race_settings[] =
 	"pm_airstep 0\n";
 
 static char norace_settings[] =
+	"sv_silentrecord 0\n"
 	"lock_practice 0\n"
 	"srv_practice_mode 0\n"
 	"allow_toggle_practice 5\n";
@@ -96,33 +98,21 @@ void apply_race_settings( void )
 
 	if ( !isRACE() )
 	{
-		int um_idx;
-		int old_dm = deathmatch; // remember deathmatch before we start reseting.
-
-		cvar_set( "sv_silentrecord", "0" );
-
 		race_stoprecord( true );
 
 		unmute_all_players();
 
+		// turn off race settings.
 		trap_readcmd( norace_settings, buf, sizeof(buf) );
 		G_cprint("%s", buf);
 
-   		cfg_name = va("configs/reset.cfg");
-		if ( can_exec( cfg_name ) )
-		{
-			trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
-			G_cprint("%s", buf);
-		}
-
-		if ( ( um_idx = um_idx_byname( ( k_matchLess && old_dm ) ? "ffa" : cvar_string("k_defmode") ) ) >= 0 )
-			UserMode( -(um_idx + 1) ); // force exec configs for default user mode
+		// Execute configs/reset.cfg and set k_defmode.
+		execute_rules_reset();
 
 		return;
 	}
 
-	cvar_set( "sv_silentrecord", "1" ); // set recording message to none while in race mode
-
+	// turn on race settings.
 	trap_readcmd( race_settings, buf, sizeof(buf) );
 	G_cprint("%s", buf);
 
