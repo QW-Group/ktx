@@ -6127,7 +6127,7 @@ typedef struct
 
 #define  WEAPON_BIG2  1
 
-static dropitem_spawn_spawnpoint()
+static void dropitem_spawn_spawnpoint()
 {
 	int effects = EF_GREEN | EF_RED; // default effects.
 
