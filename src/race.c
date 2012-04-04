@@ -923,7 +923,7 @@ void race_node_touch()
 						// let's remove the old demo
 						if ( !strnull( race.records[nameposition].demoname ) )
 						{
-							localcmd( va( "rmdemo %s\n", race.records[nameposition].demoname ) );
+							localcmd( va( "sv_demoremove %s\n", race.records[nameposition].demoname ) );
 						}
 					}
 
