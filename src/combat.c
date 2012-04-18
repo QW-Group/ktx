@@ -448,6 +448,10 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	{
 		inwater = ( ((int)targ->s.v.flags & FL_INWATER) && targ->s.v.waterlevel > 1 );
 
+		if ( dtSTOMP == targ->deathtype ) {
+			damage = 9999;
+		}
+
 		if ( streq( inflictor->s.v.classname, "rocket" ))
 		{
 			midheight = targ->s.v.origin[2] - inflictor->s.v.oldorigin[2];
@@ -474,6 +478,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 				 	|| dtWATER_DMG == targ->deathtype	// always do water damage
 				 	|| dtLAVA_DMG  == targ->deathtype	// always do lava damage
 				 	|| dtSLIME_DMG == targ->deathtype	// always do slime damage
+				 	|| dtSTOMP == targ->deathtype	// always do stomp damage
 				 	|| dtTELE1 == targ->deathtype	// always do tele damage
 				 	|| dtTELE2 == targ->deathtype	// always do tele damage
 				 	|| dtTELE3 == targ->deathtype	// always do tele damage
@@ -840,6 +845,11 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	// mid air bonuses
 	if ( midair && match_in_progress == 2 && midheight > 190 && attacker != targ )
 		MidairDamageBonus(attacker, midheight);
+
+	if ( midair && match_in_progress == 2 && targ->deathtype == dtSTOMP ) {
+		targ->s.v.frags -= 3;
+		G_bprint( 2, "%s\n", redtext("defensive stomp") );
+	}
 
  	// if targed killed, do appropriate action and return
 	if ( ISDEAD( targ ) )
