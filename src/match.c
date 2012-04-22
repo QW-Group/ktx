@@ -794,7 +794,7 @@ void TopMidairStats ( )
 			maxspawnfrags = max(p->ps.spawn_frags, maxspawnfrags);
 			maxbonus = max(p->ps.mid_bonus, maxbonus);
 			maxtopheight = max(p->ps.mid_maxheight, maxtopheight);
-			maxtopavgheight = max(p->ps.mid_avgheight / p->ps.mid_total, maxtopavgheight);
+			maxtopavgheight = max(p->ps.mid_avgheight, maxtopavgheight);
 			h_rl  = p->ps.wpn[wpRL].hits;
 			vh_rl = p->ps.wpn[wpRL].vhits;
 			a_rl  = p->ps.wpn[wpRL].attacks;
@@ -904,7 +904,7 @@ void TopMidairStats ( )
 		from = f1 = 0;
 		p = find_plrghst ( world, &from );
 		while( p ) {
-			if( (p->ps.mid_avgheight / p->ps.mid_total) == maxtopavgheight ) {
+			if( (p->ps.mid_avgheight) == maxtopavgheight ) {
 				G_bprint(2, "   %-13s: %s%s (%.1f)\n", (f1 ? "" : redtext("avg height")), ( isghost( p ) ? "\x83" : "" ), getname( p ), maxtopavgheight);
 				f1 = 1;
 			}
@@ -1032,7 +1032,7 @@ void OnePlayerMidairStats( gedict_t *p, int tp )
 	G_bprint(2, "   %-13s: %d\n", redtext("spawnfrags"), p->ps.spawn_frags);
 	G_bprint(2, "   %-13s: %d\n", redtext("bonuses"), p->ps.mid_bonus);
 	G_bprint(2, "   %-13s: %.1f\n", redtext("max height"), p->ps.mid_maxheight);
-	G_bprint(2, "   %-13s: %.1f\n", redtext("avg height"), (p->ps.mid_maxheight ? p->ps.mid_avgheight / p->ps.mid_total : 0));
+	G_bprint(2, "   %-13s: %.1f\n", redtext("avg height"), (p->ps.mid_maxheight ? p->ps.mid_avgheight : 0));
 	G_bprint(2, "   %-13s: %s\n", redtext("rl efficiency"), (ph_rl ? va("%.1f%%", ph_rl) : "  0.0%"));
 
 	G_bprint(2,"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n" );

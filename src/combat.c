@@ -336,9 +336,14 @@ void MidairDamageBonus(gedict_t *attacker, float midheight)
 		G_bprint(2, "\n");
 
 	if (attacker->ps.mid_total > 1)
-		attacker->ps.mid_avgheight += midheight;
+	{
+		attacker->ps.mid_totalheight += midheight;
+		attacker->ps.mid_avgheight = attacker->ps.mid_totalheight / attacker->ps.mid_total;
+	}
 	else
-		attacker->ps.mid_avgheight = midheight;
+	{
+		attacker->ps.mid_totalheight = attacker->ps.mid_avgheight = midheight;
+	}
 
 	if (attacker->ps.mid_maxheight < midheight)
 		attacker->ps.mid_maxheight = midheight;

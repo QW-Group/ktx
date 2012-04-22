@@ -113,7 +113,7 @@ void HM_stats_show()
 	int i = 0;
 	while (previous_point >= 0)
 		{
-		G_sprint(self, 2,va("%s\n%s\n\%s\n"
+		G_sprint(self, 2,va("%s\n%s\n%s\n"
 			,hm_stat_lines[i]
 			,hm_stat_lines[i+1]
 			,hm_stat_lines[i+2]
@@ -268,5 +268,5 @@ char *HM_lastscores_extra ()
 	{
 	extra[0] = 0;
 	strlcat(extra, va("\n%s\n%s", extra1, extra2), sizeof(extra));
-	return &extra;
+	return extra;
 	}

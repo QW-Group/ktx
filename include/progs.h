@@ -143,6 +143,7 @@ typedef struct player_stats_s {
 	int mid_platinum;	// platinum midairs
 	int mid_total;	// total of midairs
 	int mid_bonus;	// total of bonuses
+	float mid_totalheight; // maximum height of midairs
 	float mid_maxheight; // maximum height of midairs
 	float mid_avgheight;	// average height of midairs
 
