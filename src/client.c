@@ -882,28 +882,29 @@ gedict_t *Sub_SelectSpawnPoint( char *spawnname )
 
 // K_SPW_0_NONRANDOM changes "Normal QW respawns" to "pre-qtest nonrandom respawns"
 #ifdef K_SPW_0_NONRANDOM
-	static gedict_t *last_spot = NULL;
 	if (k_spw == 0)
-		{
+	{
+		static gedict_t *last_spot = NULL;
+
 		spot = world;
-//G_bprint(2, "(%d,%s) last_spot = %d, spot = %d\n", FOFS(s.v.classname), spawnname, last_spot, spot);
+		//G_bprint(2, "(%d,%s) last_spot = %d, spot = %d\n", FOFS(s.v.classname), spawnname, last_spot, spot);
 		if (last_spot != NULL)
+		{
+			for ( ; (spot = find( spot, FOFS( s.v.classname ), spawnname )); )
 			{
-			for (; (spot = find( spot, FOFS( s.v.classname ), spawnname )); )
-				{
 				if (spot == last_spot)
-					{
-//G_bprint(2, "found spot==last_spot==%d\n", last_spot);
+				{
+					//G_bprint(2, "found spot==last_spot==%d\n", last_spot);
 					break;
-					}
 				}
 			}
+		}
 		last_spot = find(spot, FOFS(s.v.classname),spawnname);
-//G_bprint(2, "returning %d\n", last_spot);
+		//G_bprint(2, "returning %d\n", last_spot);
 		if (last_spot == NULL) // wrap around
 			last_spot = find(world, FOFS(s.v.classname),spawnname);
 		return last_spot;
-		}
+	}
 #endif
 
 // ok, find all spots that don't have players nearby

@@ -104,13 +104,14 @@ static char hm_stat_lines[30][80];
 void HM_stats_show()
 	{
 	int previous_point = HM_current_point() - 1;
+	int i = 0;
+
 	if (previous_point == -1)
 		{
 		G_sprint(self, 2, "no statistics until end of first point\n");
 		return;
 		}
 
-	int i = 0;
 	while (previous_point >= 0)
 		{
 		G_sprint(self, 2,va("%s\n%s\n%s\n"
