@@ -651,8 +651,6 @@ void FirstFrame	( )
 
 	RegisterCvar("_k_nospecs");  // internal usage, will reject spectators connection
 
-	RegisterCvar("_k_playmode");  // internal usage, active play mode
-	
 	RegisterCvar("_k_recordeddemoname");  // internal usage, name of last easyrecorded demo
 
 	RegisterCvar("k_noitems");
@@ -706,7 +704,6 @@ void FirstFrame	( )
 	RegisterCvar("allow_timing");
 	RegisterCvarEx("demo_scoreslength", "10");
 	RegisterCvar("lock_practice");
-	RegisterCvar("k_autoreset");
 	RegisterCvar("k_defmap");
 	RegisterCvar("k_admins");
 	RegisterCvar("k_overtime");
