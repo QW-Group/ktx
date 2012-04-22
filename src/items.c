@@ -2229,8 +2229,7 @@ void DropBackpack()
 	item->s.v.nextthink = g_globalvars.time + ( self->ct == ctPlayer ? 120 : 30 );
 	item->s.v.think = ( func_t ) SUB_Remove;
 
-	if (isHoonyMode()) // ideally, backpacks should always have a classname, but I don't want to break anything :)
-		item->s.v.classname = "backpack"; // and we do need to be able to get rid of these things between points
+	item->s.v.classname = "backpack"; // we do need to be able to get rid of these things between points (hoony mode)
 }
 
 /*
