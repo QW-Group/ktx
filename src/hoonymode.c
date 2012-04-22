@@ -61,9 +61,7 @@ void HM_next_point(gedict_t *won, gedict_t *lost) // won is optional, lost is no
 			max_len = max(strlen(won->s.v.netname), strlen(lost->s.v.netname));
 			for (i = 0; i < max_len + 2; ++i) // I forgot how to do this using std functions lol --phil
 				{
-				p_extra[i] = (i < strlen(p->s.v.netname)
-					? p->s.v.netname[i]
-					: (i == strlen(p->s.v.netname) ? ':' : ' '));
+				p_extra[i] = (i < strlen(p->s.v.netname) ? p->s.v.netname[i] : (i == strlen(p->s.v.netname) ? ':' : ' '));
 				}
 			p_extra[i] = 0;
 			}
