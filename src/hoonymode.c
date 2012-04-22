@@ -52,6 +52,7 @@ void HM_next_point(gedict_t *won, gedict_t *lost) // won is optional, lost is no
 	else if (id2 == -99)
 		id2 = GetUserID(lost);
 
+	// And what are you doing here? --qqshka.
 	for (p = world; (p = find_plr(p));)
 	{
 		if (id1 == GetUserID(p))
