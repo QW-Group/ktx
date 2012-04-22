@@ -75,7 +75,6 @@ void PlayerStatus();
 void PlayerStatusN();
 void PlayerStatusS();
 void PrintScores();
-void ResetOptions();
 void ReportMe();
 void SendKillerMsg();
 void SendNewcomerMsg();
@@ -297,7 +296,6 @@ const char CD_NODESC[] = "no desc";
 #define CD_DROPRING   "drop ring when killed"
 #define CD_DROPPACK   "drop pack when killed"
 #define CD_SILENCE    "toggle spectator talk"
-#define CD_RESET      "set defaults"
 #define CD_REPORT     "simple teamplay report"
 #define CD_RULES      "show game rules"
 #define CD_LOCKMODE   "change locking mode"
@@ -609,7 +607,6 @@ cmd_t cmds[] = {
 	{ "droppack",    ToggleDropPack,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_DROPPACK },
 	                                             
 	{ "silence",     ToggleSpecTalk,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_SILENCE },
-	{ "reset",       ResetOptions,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_RESET },
 	{ "report",      ReportMe,                  0    , CF_PLAYER, CD_REPORT },
 	{ "rules",       ShowRules,                 0    , CF_PLAYER | CF_MATCHLESS, CD_RULES },
 	{ "lockmode",    ChangeLock,                0    , CF_PLAYER | CF_SPC_ADMIN, CD_LOCKMODE },
@@ -1823,48 +1820,6 @@ void ListWhoNot()
 		G_sprint(self, 2, "can't find not ready players\n"); // self
 }
 
-void ResetOptions()
-{
-//	char *s1;
-
-	if( match_in_progress )
-		return;
-
-	if ( cvar("k_auto_xonx") ) {
-		G_sprint(self, 2, "Command blocked due to k_auto_xonx\n");
-		return;
-	}
-
-//	s1 = getteam( self );
-
-#if 1 // TODO: make commented code safe or remove it
-	{
-		char *cfg_name = "configs/reset.cfg";
-		char buf[1024*4];
-		int um_idx;
-
-		cvar_fset("_k_last_xonx", 0); // forget last XonX command
-
-		if ( can_exec( cfg_name ) ) {
-			trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
-			G_cprint("%s", buf);
-		}
-
-		if ( ( um_idx = um_idx_byname( cvar_string("k_defmode") ) ) >= 0 )
-			UserMode( -(um_idx + 1) ); // force exec configs for default user mode
-	}
-#else
-/*
-	if( !is_adm(self) || strnull( s1 ) ) {
-		localcmd("exec configs/reset.cfg\n");
-	} else {
-		localcmd("exec configs/%s.cfg\n", s1); // FIXME: UNSAFE: player can set some dangerous team
-		G_bprint(2, "*** \"%s\" server setup by %s\n", s1, self->s.v.netname);
-	}
-*/
-#endif
-}
-
 void VotePickup()
 {
 	int votes;
@@ -2934,7 +2889,6 @@ ok:
 // qqshka
 
 // below predefined settings for usermodes
-// I ripped this from ktpro
 
 // this settings used when server desire general rules reset: last player disconnects / race toggled / etc.
 const char _reset_settings[] =
@@ -4744,46 +4698,55 @@ void lastscore_add ()
 
 	e1 = e2 = extra = "";
 	
-	if ( ( isRA() || isFFA() ) && ed1 && ed2 ) { // not the best way since get_ed_scores do not serve ghosts, so...
+	if ( ( isRA() || isFFA() ) && ed1 && ed2 )
+	{ // not the best way since get_ed_scores do not serve ghosts, so...
 		lst = (isRA() ? lsRA : lsFFA);
 		e1 = getname( ed1 );
 		s1 = ed1->s.v.frags;
 		e2 = getname( ed2 );
 		s2 = ed2->s.v.frags;
 	}
-	else if   ( isHoonyMode() )
-		{
+	else if ( isHoonyMode() )
+	{
 		if ( HM_current_point_type() != HM_PT_FINAL )
 			return;
 
 		lst = lsHM;
-		for( i = from = 0, p = world; (p = find_plrghst( p, &from )) && i < 2; i++ ) {
-			if ( !i ) { // info about first dueler
+		for( i = from = 0, p = world; (p = find_plrghst( p, &from )) && i < 2; i++ )
+		{
+			if ( !i )
+			{ // info about first dueler
 				e1 = getname( p );
 				s1 = p->s.v.frags;
 			}
-			else {	   // about second
+			else
+			{	   // about second
 				e2 = getname( p );
 				s2 = p->s.v.frags;
 			}
-		extra = HM_lastscores_extra();
+			extra = HM_lastscores_extra();
 		}
 	}
-	else if   ( isDuel() ) {
+	else if ( isDuel() )
+	{
 		lst = lsDuel;
 
-		for( i = from = 0, p = world; (p = find_plrghst( p, &from )) && i < 2; i++ ) {
-			if ( !i ) { // info about first dueler
+		for( i = from = 0, p = world; (p = find_plrghst( p, &from )) && i < 2; i++ )
+		{
+			if ( !i )
+			{ // info about first dueler
 				e1 = getname( p );
 				s1 = p->s.v.frags;
 			}
-			else {	   // about second
+			else
+			{	   // about second
 				e2 = getname( p );
 				s2 = p->s.v.frags;
 			}
 		}
 	}
-	else if ( ( isTeam() || isCTF() ) && k_showscores ) {
+	else if ( ( isTeam() || isCTF() ) && k_showscores )
+	{
 		lst = isTeam() ? lsTeam : lsCTF;
 
 		e1 = cvar_string( "_k_team1" );
