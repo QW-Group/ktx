@@ -884,25 +884,12 @@ gedict_t *Sub_SelectSpawnPoint( char *spawnname )
 #ifdef K_SPW_0_NONRANDOM
 	if (k_spw == 0)
 	{
-		static gedict_t *last_spot = NULL;
+		static gedict_t *last_spot = g_edicts; // basically, g_edicts is same as world, but we can't initialize static variable with world.
 
-		spot = world;
-		//G_bprint(2, "(%d,%s) last_spot = %d, spot = %d\n", FOFS(s.v.classname), spawnname, last_spot, spot);
-		if (last_spot != NULL)
-		{
-			for ( ; (spot = find( spot, FOFS( s.v.classname ), spawnname )); )
-			{
-				if (spot == last_spot)
-				{
-					//G_bprint(2, "found spot==last_spot==%d\n", last_spot);
-					break;
-				}
-			}
-		}
-		last_spot = find(spot, FOFS(s.v.classname),spawnname);
-		//G_bprint(2, "returning %d\n", last_spot);
-		if (last_spot == NULL) // wrap around
-			last_spot = find(world, FOFS(s.v.classname),spawnname);
+		last_spot = ez_find(last_spot, spawnname);
+		if (!last_spot) // wrap around
+			last_spot = ez_find(world, spawnname);
+
 		return last_spot;
 	}
 #endif
