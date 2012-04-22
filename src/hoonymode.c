@@ -25,16 +25,16 @@
 #include "g_local.h"
 
 qbool isHoonyMode()
-	{
+{
 	return (isDuel() && cvar("k_hoonymode"));
-	}
+}
 
 char extra1[99] = {0};
 char extra2[99] = {0};
 char extra[199] = {0};
 
 void HM_next_point(gedict_t *won, gedict_t *lost) // won is optional, lost is not
-	{
+{
 	// note: i need won/lost because depending on s.v.frags is unreliable here...
 	gedict_t *p;
 	char *p_extra;
@@ -42,7 +42,10 @@ void HM_next_point(gedict_t *won, gedict_t *lost) // won is optional, lost is no
 	static int id1 = -99, id2 = -99, max_len = 0;
 	int f = 0;
 
-	if (won == 0) for (p = world; (p = find_plr(p));) if (p != lost) won = p;
+	if (won == 0)
+		for (p = world; (p = find_plr(p));)
+			if (p != lost)
+				won = p;
 
 	if (id1 == -99)
 		id1 = GetUserID(won);
@@ -50,21 +53,21 @@ void HM_next_point(gedict_t *won, gedict_t *lost) // won is optional, lost is no
 		id2 = GetUserID(lost);
 
 	for (p = world; (p = find_plr(p));)
-		{
+	{
 		if (id1 == GetUserID(p))
 			p_extra = extra1;
 		else
 			p_extra = extra2;
 
 		if (HM_current_point() == 1)
-			{
+		{
 			max_len = max(strlen(won->s.v.netname), strlen(lost->s.v.netname));
 			for (i = 0; i < max_len + 2; ++i) // I forgot how to do this using std functions lol --phil
-				{
+			{
 				p_extra[i] = (i < strlen(p->s.v.netname) ? p->s.v.netname[i] : (i == strlen(p->s.v.netname) ? ':' : ' '));
-				}
-			p_extra[i] = 0;
 			}
+			p_extra[i] = 0;
+		}
 
 		for (i = max_len + 2; i < strlen(p_extra); i += 2)
 			f += (p_extra[i] == '0' ? 0 : 1);
@@ -72,28 +75,28 @@ void HM_next_point(gedict_t *won, gedict_t *lost) // won is optional, lost is no
 		p_extra[i] = (p == won ? '1' : '0');
 		p_extra[i+1] = ' ';
 		p_extra[i+2] = 0;
-		}
-	EndMatch(0);
 	}
+	EndMatch(0);
+}
 
 #define HM_MIN_POINTS 6
 #define HM_WINNING_DIFF 2
 
 int HM_current_point()
-	{
+{
 	gedict_t *p;
 	int i = 0;
 	for (p = world; (p = find_plr(p));) i += p->s.v.frags;
 	return i;
-	}
+}
 
 /*
 static struct
-	{
-	float lg;
-	int dh;
-	int hp;
-	}
+{
+float lg;
+int dh;
+int hp;
+}
 hm_stat[2][99]; */ // save myself some code
 
 // [80] = 5 points per line (plus maybe a vs_blurb), times 30/3 = 50 points max
@@ -102,31 +105,31 @@ static char hm_stat_lines[30][80];
 #define HM_PTS_PER_STAT_LINE 5
 
 void HM_stats_show()
-	{
+{
 	int previous_point = HM_current_point() - 1;
 	int i = 0;
 
 	if (previous_point == -1)
-		{
+	{
 		G_sprint(self, 2, "no statistics until end of first point\n");
 		return;
-		}
+	}
 
 	while (previous_point >= 0)
-		{
+	{
 		G_sprint(self, 2,va("%s\n%s\n%s\n"
 			,hm_stat_lines[i]
 			,hm_stat_lines[i+1]
 			,hm_stat_lines[i+2]
-			) );
+		) );
 		previous_point -= HM_PTS_PER_STAT_LINE;
 		i += 3;
-		}
-	G_sprint(self,2,"\235\236\236\236\236\236\236\236\236\237\n");
 	}
+	G_sprint(self,2,"\235\236\236\236\236\236\236\236\236\237\n");
+}
 
 void HM_stats()
-	{
+{
 	gedict_t *p;
 	int previous_point = HM_current_point() - 1;
 
@@ -138,7 +141,7 @@ void HM_stats()
 	char vs_blurb[40] = {0};
 
 	for (p = world; (p = find_plr(p));)
-		{
+	{
 		if (previous_point % HM_PTS_PER_STAT_LINE == 0) strlcat(vs_blurb, va("%s%s", p->s.v.netname, i == 0 ? " - " : "\n"), sizeof(vs_blurb));
 		hm_stat[i].lg = bound(0.0, 100.0 * p->ps.wpn[wpLG].hits / max(1, p->ps.wpn[wpLG].attacks), 99.0);
 		hm_stat[i].dh = p->ps.wpn[wpRL].hits + p->ps.wpn[wpGL].hits;
@@ -147,23 +150,23 @@ void HM_stats()
 		else // is armor ever negative? who knows...
 			hm_stat[i].hp = bound(0, bound(0,p->s.v.armorvalue,99) + p->s.v.health,99);
 		++i;
-		}
+	}
 
 	if (previous_point % HM_PTS_PER_STAT_LINE == 0)
-		{
+	{
 		if (previous_point == 0) hm_stat_lines[0][0] = hm_stat_lines[1][0] = hm_stat_lines[2][0] = 0;
 		strlcat(hm_stat_lines[0+line_set], va("%sLG: ", vs_blurb), sizeof(hm_stat_lines[0])); // don't need to add to sizeof()s since its static array
 		strlcat(hm_stat_lines[1+line_set], "DH: ", sizeof(hm_stat_lines[1]));
 		strlcat(hm_stat_lines[2+line_set], "HP: ", sizeof(hm_stat_lines[2]));
-		}
+	}
 
 	strlcat(hm_stat_lines[0+line_set], va("%02.0f-%02.0f ", hm_stat[0].lg, hm_stat[1].lg), sizeof(hm_stat_lines[0]));
 	strlcat(hm_stat_lines[1+line_set], va("%02d-%02d ", hm_stat[0].dh, hm_stat[1].dh), sizeof(hm_stat_lines[1]));
 	strlcat(hm_stat_lines[2+line_set], va("%02d-%02d ", hm_stat[0].hp, hm_stat[1].hp), sizeof(hm_stat_lines[2]));
-	}
+}
 
 int HM_current_point_type()
-	{
+{
 	gedict_t *p;
 	int s1 = -999, s2 = -999;
 
@@ -177,13 +180,13 @@ int HM_current_point_type()
 		return HM_PT_SET; // as used in the code, HM_PT_SET == "this point is set point"
 
 	return 0;
-	}
+}
 
 void show_powerups(char *);
 void hide_powerups(char *);
 
 void HM_all_ready()
-	{
+{
 	gedict_t *p;
 
 	// make sure stuff is spawned for every point
@@ -206,11 +209,11 @@ void HM_all_ready()
 
 	if (HM_current_point_type() == HM_PT_SET)
 		G_bprint(2, "Set point!\n");
-	}
+}
 
 // note: this will probably break if a player drops and rejoins..
 void HM_rig_the_spawns(int mode, gedict_t *spot)
-	{
+{
 	static int enabled = 0;
 	static gedict_t *p;
 
@@ -218,36 +221,36 @@ void HM_rig_the_spawns(int mode, gedict_t *spot)
 	static int id1 = -99, id2 = -99;
 
 	if (mode < 2) // we don't want to rig every spawn, so first call it with (1, null) to turn on spawn rigging (don't forget (0, null) to turn off)
-		{
+	{
 		enabled = mode;
 		return;
-		}
+	}
 
 	// then we call it with (2, spot) to spawn on the other guy's last spawn (only if it is enabled, of course)
 	if (enabled)
-		{
+	{
 		if (HM_current_point() % 2 == 1)
-			{
+		{
 			for (p = world; (p = find_plr(p));) if (p == self)
-				{
+			{
 				if (id1 == GetUserID(p))
 					*spot = spot2;
 				else
 					*spot = spot1;
-				}
+			}
 			// this should be all you need
 			/*for (p = world; (p = find_plr(p));)
-				{
-				if (GetUserID(p) != GetUserID(self))
-					{
-					spot = p->wizard;
-					}
-				}*/
-			}
-		else
 			{
+			if (GetUserID(p) != GetUserID(self))
+			{
+			spot = p->wizard;
+			}
+			}*/
+		}
+		else
+		{
 			for (p = world; (p = find_plr(p));) if (p == self)
-				{
+			{
 				if (id1 == -99)
 					id1 = GetUserID(p);
 				else if (id2 == -99)
@@ -257,17 +260,16 @@ void HM_rig_the_spawns(int mode, gedict_t *spot)
 					spot1 = *spot;
 				else
 					spot2 = *spot;
-				}
+			}
 			// this should be all you need
 			//self->wizard = spot; // ->wizard should really be ->k_hoonyspawn, but when I add it in progs.h, stuff breaks randomly? :X
-			}
 		}
 	}
-
+}
 
 char *HM_lastscores_extra ()
-	{
+{
 	extra[0] = 0;
 	strlcat(extra, va("\n%s\n%s", extra1, extra2), sizeof(extra));
 	return extra;
-	}
+}
