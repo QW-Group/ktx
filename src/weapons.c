@@ -1190,6 +1190,8 @@ W_FireGrenade
 */
 void W_FireGrenade()
 {
+	float r1 = crandom(), r2 = crandom();
+	vec3_t ang;
 	WS_Mark( self, wpGL );
 
 	self->ps.wpn[wpGL].attacks++;
@@ -1215,35 +1217,33 @@ void W_FireGrenade()
 
 // set newmis speed     
 
-	trap_makevectors( self->s.v.v_angle );
+	VectorCopy(self->s.v.v_angle, ang);
 
-	if ( self->s.v.v_angle[0] )
-	{
-		float r1 = crandom(), r2 = crandom();
+	// limit pitch in case the server allows pitch angles < -70,
+	// so that grenades still go straight up and not behind
+	if (ang[PITCH] < -70)
+		ang[PITCH] = -70;
 
-		// Yawnmode: disable randomness in grenade aim
-		// - Molgrum
-		if ( k_yawnmode )
-			r1 = r2 = 0;
+	trap_makevectors( ang );
 
-		newmis->s.v.velocity[0] =
-		    g_globalvars.v_forward[0] * 600 + g_globalvars.v_up[0] * 200 +
-		    r1 * g_globalvars.v_right[0] * 10 +
-		    r2 * g_globalvars.v_up[0]    * 10;
-		newmis->s.v.velocity[1] =
-		    g_globalvars.v_forward[1] * 600 + g_globalvars.v_up[1] * 200 +
-		    r1 * g_globalvars.v_right[1] * 10 +
-		    r2 * g_globalvars.v_up[1]    * 10;
-		newmis->s.v.velocity[2] =
-		    g_globalvars.v_forward[2] * 600 + g_globalvars.v_up[2] * 200 +
-		    r1 * g_globalvars.v_right[2] * 10 +
-		    r2 * g_globalvars.v_up[0]    * 10;
-	} else
-	{
-		aim( newmis->s.v.velocity );	// = aim(self, 10000);
-		VectorScale( newmis->s.v.velocity, 600, newmis->s.v.velocity );	// * 600;
-		newmis->s.v.velocity[2] = 200;
-	}
+	// Yawnmode: disable randomness in grenade aim
+	// - Molgrum
+	if ( k_yawnmode )
+		r1 = r2 = 0;
+
+	newmis->s.v.velocity[0] =
+	    g_globalvars.v_forward[0] * 600 + g_globalvars.v_up[0] * 200 +
+	    r1 * g_globalvars.v_right[0] * 10 +
+	    r2 * g_globalvars.v_up[0]    * 10;
+	newmis->s.v.velocity[1] =
+	    g_globalvars.v_forward[1] * 600 + g_globalvars.v_up[1] * 200 +
+	    r1 * g_globalvars.v_right[1] * 10 +
+	    r2 * g_globalvars.v_up[1]    * 10;
+	newmis->s.v.velocity[2] =
+	    g_globalvars.v_forward[2] * 600 + g_globalvars.v_up[2] * 200 +
+	    r1 * g_globalvars.v_right[2] * 10 +
+	    r2 * g_globalvars.v_up[0]    * 10;
+
 	SetVector( newmis->s.v.avelocity, 300, 300, 300 );
 // newmis.avelocity = '300 300 300';
 
