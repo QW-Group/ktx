@@ -1254,8 +1254,10 @@ void FixRules ( )
 	{
     	if( (timelimit == 0 && fraglimit == 0) || timelimit > k_tt || timelimit < 0 )
     	{
-        	if (!isHoonyMode()) cvar_fset( "timelimit", timelimit = k_tt ); // sensible default if no max set
-// note: hoonymode works with fraglimit = 0, and timelimit = 0, and manages the game by frags directly
+        	if ( !isHoonyMode() )
+				cvar_fset( "timelimit", timelimit = k_tt ); // sensible default if no max set
+
+			// NOTE: hoonymode works with fraglimit = 0, and timelimit = 0, and manages the game by frags directly
     	}
 	}
 	else

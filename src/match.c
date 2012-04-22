@@ -640,7 +640,9 @@ void PlayersStats ()
 
 		p = find_plrghst ( p, &from1 );
 	}
-	if (isHoonyMode()) HM_stats();
+
+	if (isHoonyMode())
+		HM_stats();
 }
 
 // Print the high score table
@@ -1415,10 +1417,12 @@ void EndMatch ( float skip_log )
 	if (isHoonyMode()) {
 		if ( HM_current_point_type() != HM_PT_FINAL ) {
 			match_over = 0;
-			for ( p = world; (p = find_plr( p )); ) stuffcmd(p, "ready\n");
+			for ( p = world; (p = find_plr( p )); )
+				stuffcmd(p, "ready\n");
 		}
 		else {
-			for ( p = world; (p = find_plr( p )); ) stuffcmd(p, "hmstats\n");
+			for ( p = world; (p = find_plr( p )); )
+				stuffcmd(p, "hmstats\n");
 			StopLogs();
 			NextLevel();
 		}
@@ -1846,9 +1850,11 @@ void StartMatch ()
 
 	remove_specs_wizards (); // remove wizards
 
-	if (isHoonyMode()) HM_rig_the_spawns(1, 0);
+	if (isHoonyMode())
+		HM_rig_the_spawns(1, 0);
 	SM_PrepareClients(); // put clients in server and reset some params
-	if (isHoonyMode()) HM_rig_the_spawns(0, 0);
+	if (isHoonyMode())
+		HM_rig_the_spawns(0, 0);
 
 	if ( !QVMstrftime(date, sizeof(date), "%Y-%m-%d %H:%M:%S %Z", 0) )
 		date[0] = 0;
@@ -2043,12 +2049,12 @@ void PrintCountdown( int seconds )
 					  "Handicap in use\n", sizeof(text));
 
 	if (isHoonyMode())
-		{
+	{
 		if ((HM_current_point() % 2 == 0))
 			strlcat(text, va("\n%-13s\n", redtext("New spawns")), sizeof(text));
 		else
 			strlcat(text, va("\n%-13s\n", redtext("Switch spawns")), sizeof(text));
-		}
+	}
 
 	G_cp2all(text);
 }
@@ -2407,7 +2413,7 @@ void StartDemoRecord ()
 		else if ( isFFA() && cvar( "demo_skip_ktffa_record" ) )
 			record = false;
 		else if ( isHoonyMode() && HM_current_point() > 0 )
-			record = false; // don't tryu to record (segfault) when already recording
+			record = false; // don't try to record (segfault) when already recording
 		else
 			record = true;
 
@@ -2465,8 +2471,8 @@ void StartTimer ()
 
     timer->cnt2 = max(3, (int)cvar( "k_count" ));  // at the least we want a 3 second countdown
 
-        if ( isHoonyMode() && HM_current_point() > 0)
-                timer->cnt2 = 3; // first point gets usual 10 seconds, next points gets less
+	if ( isHoonyMode() && HM_current_point() > 0)
+		timer->cnt2 = 3; // first point gets usual 10 seconds, next points gets less
 
 	if ( k_bloodfest )
 	{
@@ -2542,11 +2548,13 @@ void StopTimer ( int removeDemo )
 	match_start_time = 0;
 
 	if (isHoonyMode() && HM_current_point_type() != HM_PT_FINAL )
-		{
+	{
 		; // do not set to Standby during points, (unless its the final point of course)
-		}
+	}
 	else
+	{
 		localcmd("serverinfo status Standby\n");
+	}
 }
 
 void IdlebotForceStart ()
@@ -2824,9 +2832,12 @@ void PlayerReady ()
 			return;
 	}
 
-	if ( k_attendees && nready == k_attendees && isHoonyMode())
+	if ( isHoonyMode() && k_attendees && nready == k_attendees )
+	{
 		HM_all_ready();
-	else {
+	}
+	else
+	{
 		if ( k_attendees && nready == k_attendees )
 			G_bprint(2, "All players ready\n");
 		G_bprint(2,	"Timer started\n");
