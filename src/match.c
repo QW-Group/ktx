@@ -640,6 +640,7 @@ void PlayersStats ()
 
 		p = find_plrghst ( p, &from1 );
 	}
+	if (isHoonyMode()) HM_stats();
 }
 
 // Print the high score table
@@ -1332,7 +1333,9 @@ void EndMatch ( float skip_log )
 		cvar_fset("sv_spectalk", 1);
 	}
 
-	if ( deathmatch )
+	if ( isHoonyMode() )
+		G_bprint( 2, "The point is over\n");
+	else if ( deathmatch )
 		G_bprint( 2, "The match is over\n");
 
 	EM_CorrectStats();
@@ -1409,9 +1412,21 @@ void EndMatch ( float skip_log )
 
 	EM_on_MatchEndBreak( skip_log );
 
-	StopLogs();
-
-	NextLevel();
+	if (isHoonyMode()) {
+		if ( HM_current_point_type() != HM_PT_FINAL ) {
+			match_over = 0;
+			for ( p = world; (p = find_plr( p )); ) stuffcmd(p, "ready\n");
+		}
+		else {
+			for ( p = world; (p = find_plr( p )); ) stuffcmd(p, "hmstats\n");
+			StopLogs();
+			NextLevel();
+		}
+	}
+	else {
+		StopLogs();
+		NextLevel();
+	}
 
 	// allow ready/break in bloodfest without map reloading.
 	if ( k_bloodfest )
@@ -1701,7 +1716,8 @@ void SM_PrepareClients()
 				p->k_teamnum = 666;
 		}
 
-		p->friendly = p->deaths = p->s.v.frags = 0;
+		if (!isHoonyMode())
+			p->friendly = p->deaths = p->s.v.frags = 0;
 
 		hdc = p->ps.handicap; // save player handicap
 
@@ -1830,12 +1846,14 @@ void StartMatch ()
 
 	remove_specs_wizards (); // remove wizards
 
+	if (isHoonyMode()) HM_rig_the_spawns(1, 0);
 	SM_PrepareClients(); // put clients in server and reset some params
+	if (isHoonyMode()) HM_rig_the_spawns(0, 0);
 
 	if ( !QVMstrftime(date, sizeof(date), "%Y-%m-%d %H:%M:%S %Z", 0) )
 		date[0] = 0;
 
-	if ( deathmatch )
+	if ( deathmatch && (!isHoonyMode() || HM_current_point() == 0))
 	{
 		if ( date[0] )
 			G_bprint(2, "matchdate: %s\n", date);
@@ -1943,6 +1961,8 @@ void PrintCountdown( int seconds )
 		mode = redtext("RA");
 	else if ( isCA() )
 		mode = redtext("CA");
+	else if( isHoonyMode() )
+		mode = redtext("Hoony");
 	else if( isDuel() )
 		mode = redtext("D u e l");
 	else if ( isTeam() )
@@ -2021,6 +2041,14 @@ void PrintCountdown( int seconds )
 	if ( handicap_in_use() )
 		strlcat(text, "\n"
 					  "Handicap in use\n", sizeof(text));
+
+	if (isHoonyMode())
+		{
+		if ((HM_current_point() % 2 == 0))
+			strlcat(text, va("\n%-13s\n", redtext("New spawns")), sizeof(text));
+		else
+			strlcat(text, va("\n%-13s\n", redtext("Switch spawns")), sizeof(text));
+		}
 
 	G_cp2all(text);
 }
@@ -2378,6 +2406,8 @@ void StartDemoRecord ()
 			record = false;
 		else if ( isFFA() && cvar( "demo_skip_ktffa_record" ) )
 			record = false;
+		else if ( isHoonyMode() && HM_current_point() > 0 )
+			record = false; // don't tryu to record (segfault) when already recording
 		else
 			record = true;
 
@@ -2434,6 +2464,9 @@ void StartTimer ()
 	timer->cnt = 0;
 
     timer->cnt2 = max(3, (int)cvar( "k_count" ));  // at the least we want a 3 second countdown
+
+        if ( isHoonyMode() && HM_current_point() > 0)
+                timer->cnt2 = 3; // first point gets usual 10 seconds, next points gets less
 
 	if ( k_bloodfest )
 	{
@@ -2508,7 +2541,12 @@ void StopTimer ( int removeDemo )
 
 	match_start_time = 0;
 
-	localcmd("serverinfo status Standby\n");
+	if (isHoonyMode() && HM_current_point_type() != HM_PT_FINAL )
+		{
+		; // do not set to Standby during points, (unless its the final point of course)
+		}
+	else
+		localcmd("serverinfo status Standby\n");
 }
 
 void IdlebotForceStart ()
@@ -2754,7 +2792,8 @@ void PlayerReady ()
 			stuffcmd_flags( self, STUFFCMD_IGNOREINDEMO, "color 4\n" );
 	}
 
-	G_bprint(2, "%s %s%s\n", self->s.v.netname, redtext("is ready"),
+	if (!isHoonyMode() || HM_current_point() == 0)
+		G_bprint(2, "%s %s%s\n", self->s.v.netname, redtext("is ready"),
 						( ( isTeam() || isCTF() ) ? va(" \x90%s\x91", getteam( self ) ) : "" ) );
 
 	nready = CountRPlayers();
@@ -2785,9 +2824,13 @@ void PlayerReady ()
 			return;
 	}
 
-	if ( k_attendees && nready == k_attendees )
-		G_bprint(2, "All players ready\n");
-	G_bprint(2,	"Timer started\n");
+	if ( k_attendees && nready == k_attendees && isHoonyMode())
+		HM_all_ready();
+	else {
+		if ( k_attendees && nready == k_attendees )
+			G_bprint(2, "All players ready\n");
+		G_bprint(2,	"Timer started\n");
+	}
 
 	StartTimer();
 }

@@ -32,7 +32,7 @@ SOURCES=g_main.c bg_lib.c buttons.c client.c combat.c doors.c g_cmd.c \
 	g_mem.c g_spawn.c g_utils.c items.c mathlib.c misc.c plats.c player.c \
 	q_shared.c server.c spectate.c subs.c triggers.c weapons.c world.c clan_arena.c \
 	admin.c captain.c commands.c globals.c logs.c maps.c match.c motd.c vip.c vote.c \
-	g_userinfo.c grapple.c runes.c ctf.c arena.c race.c \
+	g_userinfo.c grapple.c runes.c ctf.c arena.c hoonymode.c race.c \
 	sp_ai.c sp_boss.c sp_client.c sp_demon.c sp_dog.c sp_enforcer.c sp_fish.c sp_hknight.c sp_knight.c \
 	sp_monsters.c sp_ogre.c sp_oldone.c sp_shalrath.c sp_shambler.c sp_soldier.c sp_tarbaby.c sp_wizard.c sp_zombie.c
 OBJECTS=$(SOURCES:.c=.s)

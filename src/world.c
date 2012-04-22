@@ -650,6 +650,8 @@ void FirstFrame	( )
 	RegisterCvar("_k_pow_last");  // internal usage, k_pow from last map
 
 	RegisterCvar("_k_nospecs");  // internal usage, will reject spectators connection
+
+	RegisterCvar("_k_playmode");  // internal usage, active play mode
 	
 	RegisterCvar("_k_recordeddemoname");  // internal usage, name of last easyrecorded demo
 
@@ -704,6 +706,7 @@ void FirstFrame	( )
 	RegisterCvar("allow_timing");
 	RegisterCvarEx("demo_scoreslength", "10");
 	RegisterCvar("lock_practice");
+	RegisterCvar("k_autoreset");
 	RegisterCvar("k_defmap");
 	RegisterCvar("k_admins");
 	RegisterCvar("k_overtime");
@@ -734,6 +737,9 @@ void FirstFrame	( )
 	RegisterCvarEx("k_spm_show", "1");
 	RegisterCvarEx("k_spm_glow", "0");
 	RegisterCvarEx("k_spm_custom_model", "0");
+// { hoonymode
+	RegisterCvarEx("k_hoonymode", "0");
+// }
 // { race
 	RegisterCvarEx("k_race", "0");
 	RegisterCvarEx("k_race_custom_models", "0");
@@ -1248,7 +1254,8 @@ void FixRules ( )
 	{
     	if( (timelimit == 0 && fraglimit == 0) || timelimit > k_tt || timelimit < 0 )
     	{
-        	cvar_fset( "timelimit", timelimit = k_tt ); // sensible default if no max set
+        	if (!isHoonyMode()) cvar_fset( "timelimit", timelimit = k_tt ); // sensible default if no max set
+// note: hoonymode works with fraglimit = 0, and timelimit = 0, and manages the game by frags directly
     	}
 	}
 	else

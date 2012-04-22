@@ -2145,7 +2145,12 @@ char *SD_type_str()
 char *respawn_model_name( int mdl_num )
 {
 	switch ( mdl_num ) {
+// K_SPW_0_NONRANDOM changes "Normal QW respawns" to "pre-qtest nonrandom respawns"
+#ifdef K_SPW_0_NONRANDOM
+		case 0:  return "pre-qtest nonrandom respawns";
+#else
 		case 0:  return "Normal QW respawns";
+#endif
 		case 1:  return "KT SpawnSafety";
 		case 2:  return "Kombat Teams respawns";
 		case 3:  return "KTX respawns";

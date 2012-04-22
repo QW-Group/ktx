@@ -127,7 +127,8 @@ typedef enum
 	lsTeam,
 	lsFFA,
 	lsCTF,
-	lsRA 	// note no correspoding gameType_t for lsType
+	lsRA, 	// note no correspoding gameType_t for lsType
+	lsHM
 } lsType_t; // lastscores type
 
 #define DEATHTYPE( _dt_, _dt_str_ ) _dt_,
@@ -142,6 +143,9 @@ typedef enum
 // g_cmd.c
 
 // g_utils.c
+
+// K_SPW_0_NONRANDOM changes "Normal QW respawns" to "pre-qtest nonrandom respawns"
+#define K_SPW_0_NONRANDOM
 
 float           g_random( void );
 float           crandom( void );
@@ -592,6 +596,7 @@ void execute_rules_reset(void);
 #define UM_10ON10	( 1<<4  )
 #define UM_FFA		( 1<<5  )
 #define UM_CTF		( 1<<6  )
+#define UM_1ON1HM	( 1<<7  )
 
 typedef struct usermode_s {
 	const char 	  *name;
@@ -768,6 +773,20 @@ void	EndMatch ( float skip_log );
 void    GrappleThrow();
 void    GrappleService();
 void    GrappleReset(gedict_t *rhook);
+
+// hoonymode.c
+
+#define HM_PT_FINAL 1
+#define HM_PT_SET 2
+qbool	isHoonyMode();
+void	HM_next_point(gedict_t *won, gedict_t *lost);
+void	HM_all_ready();
+int	HM_current_point_type();
+int	HM_current_point();
+void	HM_rig_the_spawns(int mode, gedict_t *spot);
+char	*HM_lastscores_extra();
+void	HM_stats();
+void	HM_stats_show();
 
 // race.c
 

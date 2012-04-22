@@ -606,6 +606,9 @@ typedef struct gedict_s {
 // }
 
 	qbool		dropitem;			// true if placed with "dropitem" command.
+// { hoonymode
+//	struct gedict_s *k_hoonyspawn; // hoonymode: on odd-number points, we switch the spawns
+// }
 
 } gedict_t;
 
