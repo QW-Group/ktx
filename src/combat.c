@@ -301,34 +301,47 @@ float newceil( float f )
 // this was part of T_Damage(), but I split it, so less mess
 void MidairDamageBonus(gedict_t *attacker, float midheight)
 {
-	attacker->ps.midairs++;
+	attacker->ps.mid_total++;
 	G_bprint( 2, "%s got ", attacker->s.v.netname );
 
-	if ( midheight > 900 )
+	if ( midheight > 1024 )
 	{
-		attacker->ps.midairs_d++;
+		attacker->ps.mid_platinum++;
 		attacker->s.v.frags += 8;
-		G_bprint( 2, "%s\n", redtext("diam0nd midair") );
+		G_bprint( 2, "%s", redtext("platinum") );
 	}
-	else if ( midheight > 500 )
+	else if ( midheight > 512 )
 	{
-		G_bprint( 2, "%s\n", redtext("g0ld midair") );
+		attacker->ps.mid_gold++;
 		attacker->s.v.frags += 4;
-		attacker->ps.midairs_g++;
+		G_bprint( 2, "%s", redtext("gold") );
 	}
-	else if ( midheight > 380 )
+	else if ( midheight > 256 )
 	{
-		G_bprint( 2, "%s\n", redtext("silver midair") );
+		attacker->ps.mid_silver++;
 		attacker->s.v.frags += 2;
-		attacker->ps.midairs_s++;
+		G_bprint( 2, "%s", redtext("silver") );
 	}
 	else
 	{
-		G_bprint( 2, "%s\n", redtext("midair") );
-		attacker->s.v.frags++;
+		attacker->ps.mid_bronze++;
+		attacker->s.v.frags += 1;
+		G_bprint( 2, "%s", redtext("bronze") );
 	}
 
-	G_bprint(2, "%.1f (midheight)\n", midheight);
+	G_bprint(2, " midair");
+	if (midheight > 128)
+		G_bprint(2, " (height: %s)\n", dig3s( "%.1f", midheight));
+	else
+		G_bprint(2, "\n");
+
+	if (attacker->ps.mid_total > 1)
+		attacker->ps.mid_avgheight += midheight;
+	else
+		attacker->ps.mid_avgheight = midheight;
+
+	if (attacker->ps.mid_maxheight < midheight)
+		attacker->ps.mid_maxheight = midheight;
 }
 
 
@@ -360,7 +373,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	//midair and instagib
 	float playerheight = 0, midheight = 0;
-	qbool lowheight = false, midair = false, inwater = false, do_dmg = false, rl_dmg = false;
+	qbool midair = false, inwater = false, do_dmg = false, rl_dmg = false, stomp_dmg = false;
 
 	// can't apply damage to dead
 	if ( !targ->s.v.takedamage || ISDEAD( targ ) )
@@ -448,33 +461,15 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	{
 		inwater = ( ((int)targ->s.v.flags & FL_INWATER) && targ->s.v.waterlevel > 1 );
 
-		if ( dtSTOMP == targ->deathtype ) {
-			damage = 9999;
-		}
-
 		if ( streq( inflictor->s.v.classname, "rocket" ))
-		{
 			midheight = targ->s.v.origin[2] - inflictor->s.v.oldorigin[2];
-			if ( midheight <= 190 )
-				midheight = 0;
-		}
-
-		if ( playerheight < 45 )
-		{
-			lowheight = true;
-		}
-		else
-		{
-			damage *= ( 1 + ( playerheight - 45 ) / 64 );
-			lowheight = false;
-		}
 
 		rl_dmg = ( targ->ct == ctPlayer && dtRL == targ->deathtype );
+		stomp_dmg = ( targ->ct == ctPlayer && dtSTOMP == targ->deathtype );
 
 		if ( !rl_dmg ) {
 			// damage types which ignore "lowheight"
 			do_dmg =   targ->ct != ctPlayer				// always do damage to non player, secret doors etc...
-				 	|| dtAXE == targ->deathtype			// always do axe damage
 				 	|| dtWATER_DMG == targ->deathtype	// always do water damage
 				 	|| dtLAVA_DMG  == targ->deathtype	// always do lava damage
 				 	|| dtSLIME_DMG == targ->deathtype	// always do slime damage
@@ -510,9 +505,6 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	save = newceil( targ->s.v.armortype * damage );
 
-	if ( midair && lowheight && !inwater && rl_dmg )
-		save *= 0.5; // take half of armor in such case
-
 	if ( tp4teamdmg )
 		save = 0; // we do not touch armor
 
@@ -533,7 +525,28 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	// mid air damage modificators
 	if ( midair )
 	{
-		if ( lowheight && !inwater && rl_dmg )
+		int k_midair_minheight, midair_minheight;
+
+		k_midair_minheight = (int)cvar("k_midair_minheight");	
+
+		if ( k_midair_minheight == 1 )
+			midair_minheight = 128;
+		else if ( k_midair_minheight == 2 )
+			midair_minheight = 256;
+		else if ( k_midair_minheight == 3 )
+			midair_minheight = 512;
+		else if ( k_midair_minheight == 4 )
+			midair_minheight = 1024;
+		else
+			midair_minheight = 64;
+
+		if ( rl_dmg || stomp_dmg )
+			take = 9999;
+
+		if ( playerheight < midair_minheight && rl_dmg )
+			take = 0; // no dmg done if target is not high enough
+
+		if ( playerheight < 45 && !inwater && rl_dmg )
 			take = 0; // no rl dmg in such case
 
 		if ( !rl_dmg && !do_dmg )
@@ -705,7 +718,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		for ( i = 0; i < 3; i++ ) 
 			targ->s.v.velocity[i] += dir[i] * non_hdp_damage * c1 * nailkick;
 
-		if ( midair && lowheight )
+		if ( midair && playerheight < 45 )
 			targ->s.v.velocity[2] += dir[2] * non_hdp_damage * c2 * nailkick; // only for z component
 
 		if ( k_bloodfest && ( (int)targ->s.v.flags & FL_MONSTER ) )
@@ -843,12 +856,12 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	}
 
 	// mid air bonuses
-	if ( midair && match_in_progress == 2 && midheight > 190 && attacker != targ )
-		MidairDamageBonus(attacker, midheight);
+	if ( midair && match_in_progress == 2 && attacker != targ && take && rl_dmg)
+			MidairDamageBonus(attacker, midheight);
 
-	if ( midair && match_in_progress == 2 && targ->deathtype == dtSTOMP ) {
+	if ( midair && match_in_progress == 2 && stomp_dmg ) {
+		attacker->ps.mid_stomps++;
 		targ->s.v.frags -= 3;
-		G_bprint( 2, "%s\n", redtext("defensive stomp") );
 	}
 
  	// if targed killed, do appropriate action and return

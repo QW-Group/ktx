@@ -136,10 +136,15 @@ typedef struct player_stats_s {
 	float rgn_time;	// time with regen rune
 
 	// midair stats
-	int midairs;	// total number of midairs
-	int midairs_s;	// silver midairs
-	int midairs_g;	// gold midairs
-	int midairs_d;	// diamond midairs
+	int mid_stomps;	// stomps done on other players
+	int mid_bronze;	// bronze midairs
+	int mid_silver;	// silver midairs
+	int mid_gold;	// gold midairs
+	int mid_platinum;	// platinum midairs
+	int mid_total;	// total of midairs
+	int mid_bonus;	// total of bonuses
+	float mid_maxheight; // maximum height of midairs
+	float mid_avgheight;	// average height of midairs
 
 	// spree stats
 	int spree_current;		// number of frags since our last death
@@ -564,6 +569,16 @@ typedef struct gedict_s {
 
 	// yeah its lame, but better than checking setinfo each time.
 	int ezquake_version;
+
+// midair
+	float		mid_top_height;
+	float		mid_top_avgheight;
+	float		mid_top_score;
+	float		mid_top_kills;
+	float		mid_top_stomps;
+	float		mid_top_streak;
+	float		mid_top_spawnfrag;
+	float		mid_top_rl_efficiency;
 
 // { race
 	int 		race_id; 			// used by checkpoints, 

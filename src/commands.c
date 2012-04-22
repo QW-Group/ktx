@@ -97,6 +97,7 @@ void ToggleDropRing();
 void ToggleFairPacks();
 void ToggleFreeze();
 void ToggleMidair();
+void SetMidairMinHeight();
 void ToggleInstagib();
 void ToggleCGKickback();
 void TogglePowerups();
@@ -452,7 +453,8 @@ const char CD_NODESC[] = "no desc";
 #define CD_KUINFO       "examine someone params"
 #define CD_WREG         "register reliable wpns"
 #define CD_KILL         "invoke suicide"
-#define CD_MIDAIR       "midair settings"
+#define CD_MIDAIR       "turn midair mode on/off"
+#define CD_MIDAIR_MINHEIGHT "midair minimum frag height"
 #define CD_INSTAGIB     "instagib settings"
 #define CD_CG_KB        "toggle coilgun kickback in instagib"
 #define CD_TIME         "show server time"
@@ -781,9 +783,10 @@ cmd_t cmds[] = {
 // }
 	{ "wreg",        cmd_wreg,                  0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_WREG },
 	{ "kill",        ClientKill,                0    , CF_PLAYER | CF_MATCHLESS, CD_KILL },
-	{ "mid_air",     ToggleMidair,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_MIDAIR },
+	{ "midair",      ToggleMidair,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_MIDAIR },
+	{ "midair_minheight", SetMidairMinHeight,   0    , CF_PLAYER | CF_SPC_ADMIN, CD_MIDAIR_MINHEIGHT },
 	{ "instagib",    ToggleInstagib,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
-	{ "cg_kb",       ToggleCGKickback,          0    , CF_PLAYER | CF_SPC_ADMIN, CD_CG_KB },
+	{ "instagib_coilgun_kickback", ToggleCGKickback, 0, CF_PLAYER | CF_SPC_ADMIN, CD_CG_KB },
 	{ "time",        sv_time,                   0    , CF_BOTH | CF_MATCHLESS, CD_TIME },
 	{ "gren_mode",   GrenadeMode,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_GREN_MODE },
 	{ "toggleready", ToggleReady,               0    , CF_BOTH | CF_MATCHLESS, CD_TOGGLEREADY },
@@ -1276,7 +1279,7 @@ void ShowOpts()
 			"ףילומדו.... toggle spectator talk\n"
 			"%s..... toggle midair mode\n" 
 			"%s..... toggle grenade mode\n" 
-			"%s..... toggle instagib mode\n", redtext("mid_air"), redtext("gren_mode"), redtext("instagib"));
+			"%s..... toggle instagib mode\n", redtext("midair"), redtext("gren_mode"), redtext("instagib"));
 }
 
 void ShowQizmo()
@@ -5169,6 +5172,37 @@ void ToggleMidair()
 
 	cvar_toggle_msg( self, "k_midair", redtext("Midair") );
 }
+
+void SetMidairMinHeight()
+{
+	int k_midair_minheight = bound(0, cvar( "k_midair_minheight" ), 4); 
+
+	if ( !is_rules_change_allowed() )
+		return;
+
+	// Can't set minheight if midair is not turned on 
+	if ( !cvar("k_midair") ) {
+		G_sprint( self, 2, "Midair must be turned on to set minimal frag height\n");
+		return;
+	}
+
+	if ( ++k_midair_minheight > 4 )
+		k_midair_minheight = 0;
+
+  cvar_fset("k_midair_minheight", k_midair_minheight);
+
+	if ( k_midair_minheight == 1 )
+		G_bprint(2, "Midair minimum height set to %s enabled level\n", redtext("bronze"));
+	else if ( k_midair_minheight == 2 )
+		G_bprint(2, "Midair minimum height set to %s enabled level\n", redtext("silver"));
+	else if ( k_midair_minheight == 3 )
+		G_bprint(2, "Midair minimum height set to %s enabled level\n", redtext("gold"));
+	else if ( k_midair_minheight == 4 )
+		G_bprint(2, "Midair minimum height set to %s enabled level\n", redtext("platinum"));
+	else
+		G_bprint(2, "Midair minimum height set to %s enabled level\n", redtext("ground"));
+}
+
 
 void W_SetCurrentAmmo();
 void ToggleInstagib()

@@ -3684,7 +3684,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		else
 		{	// normal kill, Kteams version
 
-			if ( !cvar("k_dmgfrags") ) // add frag only if not a case of k_dmgfrags
+			if ( !cvar("k_dmgfrags") && !cvar("k_midair") ) // add frag only if not a case of k_dmgfrags
 				attacker->s.v.frags += 1;
 			logfrag (attacker, targ);
 

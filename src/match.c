@@ -575,10 +575,9 @@ void PlayersStats ()
 
 	tp = isTeam() || isCTF();
 
-	G_bprint(2, "\n%s:\n"
-				"%s (%s) %s %s\n"
-				"žžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n", redtext("Player statistics"),
-				redtext( "Frags"), redtext( "rank"), ( tp ? redtext("friendkills "): "" ), redtext( "efficiency" ));
+	G_bprint(2, "\n%s:\nžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n", redtext("Player statistics"));
+	if (!cvar("k_midair"))
+		G_bprint(2, "%s (%s) %s %s\n", redtext( "Frags"), redtext( "rank"), ( tp ? redtext("friendkills "): "" ), redtext( "efficiency" ));
 
 	from1 = 0;
 	p = find_plrghst ( world, &from1 );
@@ -777,6 +776,157 @@ void TopStats ( )
 	G_bprint(2, "\nžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n");
 }
 
+void TopMidairStats ( )
+{
+  gedict_t  *p;
+  float f1, h_rl, vh_rl, a_rl, ph_rl, maxtopheight = 0, maxtopavgheight = 0, maxrlefficiency = 0;
+  int  from, maxscore = -99999, maxkills = 0, maxmidairs = 0, maxstomps = 0, maxstreak = 0, maxspawnfrags = 0, maxbonus = 0;
+
+	from = f1 = 0;
+	p = find_plrghst ( world, &from );
+	while( p ) {
+			maxscore = max(p->s.v.frags, maxscore);
+			maxkills = max(p->ps.mid_total + p->ps.mid_stomps, maxkills);
+			maxmidairs = max(p->ps.mid_total, maxmidairs);
+			maxstomps = max(p->ps.mid_stomps, maxstomps);
+			maxstreak = max(p->ps.spree_max, maxstreak);
+			maxspawnfrags = max(p->ps.spawn_frags, maxspawnfrags);
+			maxbonus = max(p->ps.mid_bonus, maxbonus);
+			maxtopheight = max(p->ps.mid_maxheight, maxtopheight);
+			maxtopavgheight = max(p->ps.mid_avgheight / p->ps.mid_total, maxtopavgheight);
+			h_rl  = p->ps.wpn[wpRL].hits;
+			vh_rl = p->ps.wpn[wpRL].vhits;
+			a_rl  = p->ps.wpn[wpRL].attacks;
+			ph_rl = 100.0 * vh_rl / max(1, a_rl);
+			maxrlefficiency = max(ph_rl, maxrlefficiency);
+		
+		p = find_plrghst ( p, &from );
+	}
+  
+  G_bprint(2, "%s:\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n", redtext("Top performers"));
+
+  from = f1 = 0;
+  p = find_plrghst ( world, &from );
+  while( p ) {
+    if( p->s.v.frags == maxscore ) {
+			G_bprint(2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("score")), ( isghost( p ) ? "\x83" : "" ), getname( p ), maxscore);
+      f1 = 1;
+    }
+    p = find_plrghst ( p, &from );
+  }
+
+	if (maxkills) {
+		from = f1 = 0;
+		p = find_plrghst ( world, &from );
+		while( p ) {
+			if( (p->ps.mid_total + p->ps.mid_stomps) == maxkills ) {
+				G_bprint(2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("kills")), ( isghost( p ) ? "\x83" : "" ), getname( p ), maxkills);
+				f1 = 1;
+			}
+			p = find_plrghst ( p, &from );
+		}
+	}
+
+	if (maxmidairs) {
+		from = f1 = 0;
+		p = find_plrghst ( world, &from );
+		while( p ) {
+			if( (p->ps.mid_total) == maxmidairs ) {
+				G_bprint(2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("midairs")), ( isghost( p ) ? "\x83" : "" ), getname( p ), maxmidairs);
+				f1 = 1;
+			}
+			p = find_plrghst ( p, &from );
+		}
+	}
+
+	if (maxstomps) {
+		from = f1 = 0;
+		p = find_plrghst ( world, &from );
+		while( p ) {
+			if( (p->ps.mid_stomps) == maxstomps ) {
+				G_bprint(2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("head stomps")), ( isghost( p ) ? "\x83" : "" ), getname( p ), maxstomps);
+				f1 = 1;
+			}
+			p = find_plrghst ( p, &from );
+		}
+	}
+
+	if (maxstreak) {
+		from = f1 = 0;
+		p = find_plrghst ( world, &from );
+		while( p ) {
+			if( (p->ps.spree_max) == maxstreak ) {
+				G_bprint(2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("streak")), ( isghost( p ) ? "\x83" : "" ), getname( p ), maxmidairs);
+				f1 = 1;
+			}
+			p = find_plrghst ( p, &from );
+		}
+	}
+
+	if (maxspawnfrags) {
+		from = f1 = 0;
+		p = find_plrghst ( world, &from );
+		while( p ) {
+			if( (p->ps.spawn_frags) == maxspawnfrags ) {
+				G_bprint(2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("spawn frags")), ( isghost( p ) ? "\x83" : "" ), getname( p ), maxspawnfrags);
+				f1 = 1;
+			}
+			p = find_plrghst ( p, &from );
+		}
+	}
+
+	if (maxbonus) {
+		from = f1 = 0;
+		p = find_plrghst ( world, &from );
+		while( p ) {
+			if( (p->ps.mid_bonus) == maxbonus ) {
+				G_bprint(2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("bonus fiend")), ( isghost( p ) ? "\x83" : "" ), getname( p ), maxbonus);
+				f1 = 1;
+			}
+			p = find_plrghst ( p, &from );
+		}
+	}
+
+	if (maxtopheight) {
+		from = f1 = 0;
+		p = find_plrghst ( world, &from );
+		while( p ) {
+			if( (p->ps.mid_maxheight) == maxtopheight ) {
+				G_bprint(2, "   %-13s: %s%s (%.1f)\n", (f1 ? "" : redtext("highest kill")), ( isghost( p ) ? "\x83" : "" ), getname( p ), maxtopheight);
+				f1 = 1;
+			}
+			p = find_plrghst ( p, &from );
+		}
+	}
+
+	if (maxtopavgheight) {
+		from = f1 = 0;
+		p = find_plrghst ( world, &from );
+		while( p ) {
+			if( (p->ps.mid_avgheight / p->ps.mid_total) == maxtopavgheight ) {
+				G_bprint(2, "   %-13s: %s%s (%.1f)\n", (f1 ? "" : redtext("avg height")), ( isghost( p ) ? "\x83" : "" ), getname( p ), maxtopavgheight);
+				f1 = 1;
+			}
+			p = find_plrghst ( p, &from );
+		}
+	}
+
+	from = f1 = 0;
+	p = find_plrghst ( world, &from );
+	while( p ) {
+		h_rl  = p->ps.wpn[wpRL].hits;
+		vh_rl = p->ps.wpn[wpRL].vhits;
+		a_rl  = p->ps.wpn[wpRL].attacks;
+		ph_rl = 100.0 * vh_rl / max(1, a_rl);
+		if( (ph_rl) == maxrlefficiency ) {
+			G_bprint(2, "   %-13s: %s%s (%.1f%%)\n", (f1 ? "" : redtext("rl efficiency")), ( isghost( p ) ? "\x83" : "" ), getname( p ), maxrlefficiency);
+			f1 = 1;
+		}
+		p = find_plrghst ( p, &from );
+	}
+
+  G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
+}
 
 void OnePlayerInstagibStats( gedict_t *p, int tp )
 {
@@ -863,32 +1013,28 @@ void OnePlayerInstagibStats( gedict_t *p, int tp )
 
 void OnePlayerMidairStats( gedict_t *p, int tp )
 {
-	int midairs, silver, gold, diamond;
+	float h_rl, vh_rl, a_rl, ph_rl;
 
-	midairs = p->ps.midairs;
-	silver  = p->ps.midairs_s;
-	gold    = p->ps.midairs_g;
-	diamond = p->ps.midairs_d;
+  h_rl  = p->ps.wpn[wpRL].hits;
+  vh_rl = p->ps.wpn[wpRL].vhits;
+  a_rl  = p->ps.wpn[wpRL].attacks;
+  ph_rl = 100.0 * vh_rl / max(1, a_rl);
 
-	if ( tp )
-		G_bprint(2,"\235\236\236\236\236\236\236\236\236\237\n" );
+	G_bprint(2, "\x87 %s%s: %d\n", ( isghost( p ) ? "\x83" : "" ), getname(p), (int)p->s.v.frags);
+	G_bprint(2, "   %-13s: %d\n", redtext("total midairs"), p->ps.mid_total);
+	G_bprint(2, "    %12s: %d\n", "bronze", p->ps.mid_bronze);
+	G_bprint(2, "    %12s: %d\n", "silver", p->ps.mid_silver);
+	G_bprint(2, "    %12s: %d\n", "gold", p->ps.mid_gold);
+	G_bprint(2, "    %12s: %d\n", "platinum", p->ps.mid_platinum);
+	G_bprint(2, "   %-13s: %d\n", redtext("stomps"), p->ps.mid_stomps);
+	G_bprint(2, "   %-13s: %d\n", redtext("streak"), p->ps.spree_max);
+	G_bprint(2, "   %-13s: %d\n", redtext("spawnfrags"), p->ps.spawn_frags);
+	G_bprint(2, "   %-13s: %d\n", redtext("bonuses"), p->ps.mid_bonus);
+	G_bprint(2, "   %-13s: %.1f\n", redtext("max height"), p->ps.mid_maxheight);
+	G_bprint(2, "   %-13s: %.1f\n", redtext("avg height"), (p->ps.mid_maxheight ? p->ps.mid_avgheight / p->ps.mid_total : 0));
+	G_bprint(2, "   %-13s: %s\n", redtext("rl efficiency"), (ph_rl ? va("%.1f%%", ph_rl) : "  0.0%"));
 
-	// need to fix stats in midair similar to ctf
-
-	G_bprint(2, "\x87 %s%s:\n"
-		 "  %d (%d) %s%.1f%%\n", ( isghost( p ) ? "\x83" : "" ), getname(p),
-		 ( isCTF() ? (int)(p->s.v.frags - p->ps.ctf_points) : (int)p->s.v.frags),
-		 ( isCTF() ? (int)(p->s.v.frags - p->ps.ctf_points - p->deaths) : (int)(p->s.v.frags - p->deaths)),
-		 ( tp ? va("%d ", (int)p->friendly ) : "" ),
-		 p->efficiency);
-
-	G_bprint(2, "%s: %d\n", redtext("Midairs"), midairs);
-	G_bprint(2, "%s: %d\n", redtext(" Silver"), silver);
-	G_bprint(2, "%s: %d\n", redtext("   G0ld"), gold);
-	G_bprint(2, "%s: %d\n", redtext("Diam0nd"), diamond);
-
-	if ( !tp )
-		G_bprint(2,"\235\236\236\236\236\236\236\236\236\237\n" );
+	G_bprint(2,"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n" );
 }
 
 char *GetMode() {
@@ -1228,6 +1374,10 @@ void EndMatch ( float skip_log )
 
         	if( !isDuel() ) // top stats only in non duel modes
 				TopStats (); // print top frags tkills deaths...
+		}
+		else
+		{
+			TopMidairStats();
 		}
 
 		if( isTeam() || isCTF() )

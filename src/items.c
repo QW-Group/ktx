@@ -1896,16 +1896,9 @@ void BackpackTouch()
 
 	if ( deathmatch == 4 )
 	{
-		if ( cvar("k_midair") )
-		{
-			other->s.v.health += 15;
-			G_sprint(other, PRINT_LOW, "15 additional health\n" );
-		}
-		else
-		{
-			other->s.v.health += 10;
-			G_sprint( other, PRINT_LOW, "10 additional health\n" );
-		}
+		other->s.v.health += 10;
+		G_sprint( other, PRINT_LOW, "10 additional health\n" );
+
 		if ( ( other->s.v.health > 250 ) && ( other->s.v.health < 300 ) )
 			sound( other, CHAN_ITEM, "items/protect3.wav", 1, ATTN_NORM );
 		else
@@ -1932,6 +1925,7 @@ void BackpackTouch()
 				other->super_time = 1;
 				other->super_damage_finished = g_globalvars.time + 30;
 				other->s.v.items = ( int ) other->s.v.items | IT_QUAD;
+				other->ps.mid_bonus++;
 			}
 
 			other->s.v.ammo_cells = 0;

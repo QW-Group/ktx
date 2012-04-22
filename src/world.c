@@ -768,6 +768,7 @@ void FirstFrame	( )
 //}
 	RegisterCvar("k_spec_info");
 	RegisterCvar("k_midair");
+	RegisterCvarEx("k_midair_minheight", "1");
 	
 	RegisterCvarEx("k_killquad", "0");
 
