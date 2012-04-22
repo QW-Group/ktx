@@ -1442,7 +1442,8 @@ void PutClientInServer( void )
 		spot = SelectSpawnPoint( coop ? "info_player_coop" : "info_player_start" );
 	}
 
-	if (isHoonyMode()) HM_rig_the_spawns(2, spot);
+	if (isHoonyMode())
+		HM_rig_the_spawns(2, spot);
 
 	VectorCopy( spot->s.v.origin, self->s.v.origin );
 	self->s.v.origin[2] += 1;
@@ -3621,13 +3622,17 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		{
 			// killed self
 			if (isHoonyMode())
-				{
+			{
 				gedict_t *other_dude;
-				for (other_dude = world; (other_dude = find_plr(other_dude));) if (other_dude != targ)
-					other_dude->s.v.frags += 1; // hoonymode: suicide, etc, count as a point for the other player
-				}
+				for (other_dude = world; (other_dude = find_plr(other_dude));)
+					if (other_dude != targ)
+						other_dude->s.v.frags += 1; // hoonymode: suicide, etc, count as a point for the other player
+			}
 			else
+			{
 				targ->s.v.frags -= (dtSUICIDE == targ->deathtype ? 2 : 1);
+			}
+
 			logfrag (targ, targ);
 
 			if ( dtGL == targ->deathtype ) {
@@ -3668,8 +3673,11 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
                 deathstring = " somehow becomes bored with life\n"; // hm, and how it is possible?
 
 			G_bprint (PRINT_MEDIUM, "%s%s", targ->s.v.netname, deathstring);
-		if (isHoonyMode()) HM_next_point(0, targ);
-            return;
+
+			if (isHoonyMode())
+				HM_next_point(0, targ); // probably better to use world instead of the 0 here and change hooney code accordingly.
+
+			return;
 		}
         else if ( ( (isTeam() || isCTF()) && streq( targteam, attackerteam ) && !strnull( attackerteam ) ) || coop )
 		{
@@ -3739,7 +3747,10 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			}
 			else if ( dtSQUISH == targ->deathtype )	{
 				G_bprint (PRINT_MEDIUM, "%s squishes %s\n", attacker->s.v.netname, targ->s.v.netname);
-				if (isHoonyMode()) HM_next_point(attacker, targ);
+
+				if (isHoonyMode())
+					HM_next_point(attacker, targ);
+
 				return;	// !!! return !!!
 			}
 			else if ( dtSTOMP == targ->deathtype )	{
@@ -3754,8 +3765,11 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 						case 3:  deathstring = " was crushed by "; break;
 						default:
 							 	G_bprint (PRINT_MEDIUM, "%s stomps %s\n", attacker->s.v.netname, targ->s.v.netname);
-								if (isHoonyMode()) HM_next_point(attacker, targ);
-							 	return; // !!! return !!!
+
+								if (isHoonyMode())
+									HM_next_point(attacker, targ);
+
+								return; // !!! return !!!
 					}
 				}
 			}
@@ -3800,8 +3814,11 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 						case 1:	deathstring = " was smeared by "; break;
 						default:
 								G_bprint (PRINT_MEDIUM, "%s rips %s a new one\n", attacker->s.v.netname, targ->s.v.netname);
+
 								// hoonymode shouldn't have quad but just in case...
-								if (isHoonyMode()) HM_next_point(attacker, targ);
+								if (isHoonyMode())
+									HM_next_point(attacker, targ);
+
 								return; // !!! return !!!
 					}
 
@@ -3882,19 +3899,26 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 			G_bprint (PRINT_MEDIUM,"%s%s%s%s", targ->s.v.netname, deathstring, attacker->s.v.netname, deathstring2);
 		}
-		if (isHoonyMode()) HM_next_point(attacker, targ);
+
+		if (isHoonyMode())
+			HM_next_point(attacker, targ);
+
 		return;
 	}
 	else // attacker->ct != ctPlayer
 	{
 		if (isHoonyMode())
-			{
+		{
 			gedict_t *other_dude;
-			for (other_dude = world; (other_dude = find_plr(other_dude));) if (other_dude != targ)
-				other_dude->s.v.frags += 1; // hoonymode: suicide, etc, count as a point for the other player
-			}
+			for (other_dude = world; (other_dude = find_plr(other_dude));)
+				if (other_dude != targ)
+					other_dude->s.v.frags += 1; // hoonymode: suicide, etc, count as a point for the other player
+		}
 		else
-	        	targ->s.v.frags -= 1;            // killed self
+		{
+			targ->s.v.frags -= 1;            // killed self
+		}
+
 		logfrag (targ, targ);
 
 		if ( (int)attacker->s.v.flags & FL_MONSTER )
@@ -3967,7 +3991,9 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		}
 
 		G_bprint (PRINT_MEDIUM, "%s%s", targ->s.v.netname, deathstring );
-		if (isHoonyMode()) HM_next_point(0, targ);
+
+		if (isHoonyMode())
+			HM_next_point(0, targ);
 	}
 }
 
