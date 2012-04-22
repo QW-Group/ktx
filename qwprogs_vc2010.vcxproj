@@ -289,6 +289,7 @@
     </ClCompile>
     <ClCompile Include="src\globals.c" />
     <ClCompile Include="src\grapple.c" />
+    <ClCompile Include="src\hoonymode.c" />
     <ClCompile Include="src\items.c">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>

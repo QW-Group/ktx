@@ -386,6 +386,9 @@
 				RelativePath="src\grapple.c">
 			</File>
 			<File
+				RelativePath="src\hoonymode.c">
+			</File>
+			<File
 				RelativePath="src\items.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -516,6 +519,9 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;QWPROGS_EXPORTS;$(NoInherit)"/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\race.c">
 			</File>
 			<File
 				RelativePath="src\runes.c">
