@@ -169,7 +169,7 @@ void FixSayFloodProtect()
 		//         redirect say/say_team to mod, then try use server floodprot, so
 		//		   in most cases this code useless.
 
-		trap_readcmd( va("floodprot %d %d %d\n", 
+		trap_readcmd( va("floodprot %d %d %d\n",
 						k_say_fp_count, k_say_fp_per, k_say_fp_for), buf, sizeof(buf) );
 		G_cprint("%s", buf);
 	}
@@ -197,7 +197,7 @@ void fp_toggle ( float type )
 
 	G_bprint( 2, "%s level %s \x90%s %s %s\x91 %6s\n",
 					type == 1 ? "floodprot" : "spec floodprot",
-					dig3(k_fp), 
+					dig3(k_fp),
 					dig3(say_fp_levels[k_fp-1].fp_count),
 					dig3(say_fp_levels[k_fp-1].fp_per),
 					dig3(say_fp_levels[k_fp-1].fp_for),
@@ -354,8 +354,8 @@ qbool ClientSay( qbool isTeamSay )
 			else
 */
 			{
-				G_cprint("RCON from: %s: %s: %s\n", getname(self), ezinfokey(self, "ip"), str);
-				trap_redirectcmd(self, va("%s\n", str)); // !!! WARNING: FULL ACCESS TO SERVER CONSOLE !!!
+        G_cprint("MM RCON from: %s: %s: %s\n", getname(self), ezinfokey(self, "ip"), str);
+        //trap_redirectcmd(self, va("%s\n", str)); // !!! WARNING: FULL ACCESS TO SERVER CONSOLE !!!
 			}
 
 			return true;
@@ -486,7 +486,7 @@ qbool ClientSay( qbool isTeamSay )
 			}
 		}
 
-		// do not put private info in demos: private is team say from player without $\ symbol 
+		// do not put private info in demos: private is team say from player without $\ symbol
 		ignore_in_demos = ( ( self->ct == ctPlayer && isTeamSay && !fake ) || spec_talk );
 
 		flags			= ( ignore_in_demos ? SPRINT_IGNOREINDEMO : 0 );
@@ -749,7 +749,7 @@ void multi_do(int from_arg, qbool from_mmode)
 
 			p = &(g_edicts[i+1]);
 
-			if ( !(p->ct == ctPlayer || p->ct == ctSpec) ) 
+			if ( !(p->ct == ctPlayer || p->ct == ctSpec) )
 				continue; // not valid
 
 			bit = 1 << i;
@@ -763,7 +763,7 @@ void multi_do(int from_arg, qbool from_mmode)
 
 			k++;
 		}
-		
+
 		if ( k ) {
 			SetUserInfo(self, "*mm", va("%d", MMODE_MULTI), SETUSERINFO_STAR);
 			SetUserInfo(self, "*mu", va("%d", m), SETUSERINFO_STAR);
@@ -776,7 +776,7 @@ void multi_do(int from_arg, qbool from_mmode)
 	}
 
 	if ( strneq(arg_1, "?") && strnull(arg_2) ) { // something like: "/mmode multi =" or /multi =" - too few params
-		multi_usage(); 
+		multi_usage();
 		return;
 	}
 
@@ -801,7 +801,7 @@ void multi_do(int from_arg, qbool from_mmode)
 		for ( multi[0] = 0, k = 0, i = from_arg + 1; i < argc; i++ ) {
 			trap_CmdArgv( i, arg_x, sizeof( arg_x ) );
 
-			if ( !(p = SpecPlayer_by_IDorName( arg_x )) || p == self ) 
+			if ( !(p = SpecPlayer_by_IDorName( arg_x )) || p == self )
 				continue;
 
 			bit = 1 << (int)(p - g_edicts - 1);
@@ -825,7 +825,7 @@ void multi_do(int from_arg, qbool from_mmode)
 
 			k++;
 		}
-		
+
 		if ( k ) {
 			if ( from_mmode ) // allow set up mmode only from /mmode cmd, not from /multi cmd
 				SetUserInfo(self, "*mm", va("%d", MMODE_MULTI), SETUSERINFO_STAR);
@@ -848,7 +848,7 @@ void multi_do(int from_arg, qbool from_mmode)
 
 			p = &(g_edicts[i+1]);
 
-			if ( !(p->ct == ctPlayer || p->ct == ctSpec) ) 
+			if ( !(p->ct == ctPlayer || p->ct == ctSpec) )
 				continue; // not valid
 
 			bit = 1 << i;
@@ -862,7 +862,7 @@ void multi_do(int from_arg, qbool from_mmode)
 
 			k++;
 		}
-		
+
 		if ( k )
 			G_sprint(self, 2, "multi %s: %s\n", arg_1, multi);
 		else
@@ -872,7 +872,7 @@ void multi_do(int from_arg, qbool from_mmode)
 
 		default:
 
-		multi_usage(); 
+		multi_usage();
 
 		return;
 	}
