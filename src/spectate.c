@@ -93,7 +93,7 @@ void SpecDecodeLevelParms()
 
 //    if( g_globalvars.parm12 )
 //        self->k_accepted = g_globalvars.parm12;
-	
+
 	if ( g_globalvars.parm13 )
     	self->k_stuff = g_globalvars.parm13;
 
@@ -163,9 +163,15 @@ void SpectatorConnect()
 // time
 // self
 ///////////////
+extern int g_matchstarttime;
 void PutSpectatorInServer()
 {
 //	G_sprint(self, 2, "Hellow %s\n", getname(self));
+
+  g_globalvars.msg_entity = EDICT_TO_PROG(self);
+  WriteByte(MSG_ONE, 38 /*svc_updatestatlong*/);
+  WriteByte(MSG_ONE, 18 /*STAT_MATCHSTARTTIME*/);
+  WriteLong(MSG_ONE, g_matchstarttime);
 
 	AutoTrackRestore();
 }
@@ -180,7 +186,7 @@ void SpectatorDisconnect()
 
 	if ( self->k_accepted )
 	{
-		for ( p = world; (p = ( match_in_progress == 2 && !cvar("k_ann") ) ? find_spc( p ) : find_client( p )); )	
+		for ( p = world; (p = ( match_in_progress == 2 && !cvar("k_ann") ) ? find_spc( p ) : find_client( p )); )
 			G_sprint( p, PRINT_HIGH, "Spectator %s left the game\n", self->s.v.netname );
 	}
 
@@ -304,7 +310,7 @@ void SpectatorThink()
 		// set model angles
 		wizard->s.v.angles[0] = -self->s.v.v_angle[0] / 2;
 		wizard->s.v.angles[1] = self->s.v.v_angle[1];
-        // wizard model blinking at spectator screen - so move model behind spec camera a bit		
+        // wizard model blinking at spectator screen - so move model behind spec camera a bit
 		trap_makevectors( self->s.v.v_angle );
 		VectorMA (self->s.v.origin, -32, g_globalvars.v_forward, wizard->s.v.origin);
 		// model bobbing

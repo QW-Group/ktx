@@ -29,6 +29,8 @@ void OnePlayerInstagibStats();
 void StartLogs();
 void StopLogs();
 
+extern int g_matchstarttime;
+
 // Return count of players which have state cs_connected or cs_spawned.
 // It is weird because used string comparision so I treat it as slow and idiotic but it return more players than CountPlayers().
 int WeirdCountPlayers(void)
@@ -187,7 +189,7 @@ void CollectTpStats()
 	for( from1 = 0, p = world; (p = find_plrghst ( p, &from1 )); )
 		p->ready = 0; // clear mark
 
-//	get one player and search all his mates, mark served players via ->ready field 
+//	get one player and search all his mates, mark served players via ->ready field
 //  ghosts is served too
 
 	for( from1 = 0, p = world; (p = find_plrghst ( p, &from1 )); ) {
@@ -283,9 +285,9 @@ void SummaryTPStats()
 {
 	int i;
 	float h_sg, h_ssg, h_gl, h_rl, h_lg;
-	
+
 	ShowTeamsBanner ();
-	
+
 	G_bprint(2, "\n%s, %s, %s, %s\n", redtext("weapons"), redtext("powerups"),
 									  redtext("armors&mhs"), redtext("damage"));
 	G_bprint(2, "Ÿ\n");
@@ -302,25 +304,25 @@ void SummaryTPStats()
 		if ( !cvar("k_instagib") ) {
 		G_bprint(2, "%s‘: %s:%s%s%s%s%s\n", tmStats[i].name, redtext("Wp"),
 					(h_lg  ? va(" %s%.0f%%", redtext("lg"),   h_lg) : ""),
-					(h_rl  ? va(" %s%.0f",   redtext("rl"),   h_rl) : ""), 
-					(h_gl  ? va(" %s%.0f",   redtext("gl"),   h_gl) : ""), 
+					(h_rl  ? va(" %s%.0f",   redtext("rl"),   h_rl) : ""),
+					(h_gl  ? va(" %s%.0f",   redtext("gl"),   h_gl) : ""),
 					(h_sg  ? va(" %s%.0f%%", redtext("sg"),   h_sg) : ""),
 					(h_ssg ? va(" %s%.0f%%", redtext("ssg"), h_ssg) : ""));
 
 		// powerups
 		G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("Powerups"),
-				redtext("Q"), tmStats[i].itm[itQUAD].tooks, redtext("P"), tmStats[i].itm[itPENT].tooks, 
+				redtext("Q"), tmStats[i].itm[itQUAD].tooks, redtext("P"), tmStats[i].itm[itPENT].tooks,
 				redtext("R"), tmStats[i].itm[itRING].tooks);
 
 		// armors + megahealths
 		G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("Armr&mhs"),
-				redtext("ga"), tmStats[i].itm[itGA].tooks, redtext("ya"), tmStats[i].itm[itYA].tooks, 
+				redtext("ga"), tmStats[i].itm[itGA].tooks, redtext("ya"), tmStats[i].itm[itYA].tooks,
 				redtext("ra"), tmStats[i].itm[itRA].tooks, redtext("mh"), tmStats[i].itm[itHEALTH_100].tooks);
 
 		} else  {
 			G_bprint(2, "%s‘: %s:%s\n", tmStats[i].name, redtext("Wp"),
 					(h_sg  ? va(" %s%.0f%%", redtext("cg"),   h_sg) : ""));
-		} 
+		}
 
 		if ( isCTF() )
 		{
@@ -453,7 +455,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 
 	G_bprint(2, "\x87 %s%s:\n"
 		"  %d (%d) %s%.1f%%\n", ( isghost( p ) ? "\x83" : "" ), getname(p),
-		( isCTF() ? (int)(p->s.v.frags - p->ps.ctf_points) : (int)p->s.v.frags), 
+		( isCTF() ? (int)(p->s.v.frags - p->ps.ctf_points) : (int)p->s.v.frags),
 		( isCTF() ? (int)(p->s.v.frags - p->ps.ctf_points - p->deaths) : (int)(p->s.v.frags - p->deaths)),
 		( tp ? va("%d ", (int)p->friendly ) : "" ),
 		p->efficiency);
@@ -467,7 +469,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 		(ph_gl ? va(" %s%.1f%%", redtext("gl"), ph_gl) : ""),
 		(h_sg  ? va(" %s%.1f%%", redtext("sg"), h_sg) : ""),
 		(h_ssg ? va(" %s%.1f%%", redtext("ssg"), h_ssg) : ""));
-		
+
 		// rockets detail
 		G_bprint(2, "%s: %s:%.1f %s:%.0f\n", redtext("RL skill"),
 			redtext("ad"), vh_rl ? ( dmg_g_rl / vh_rl ) : 0. , redtext("dh"), h_rl);
@@ -802,10 +804,10 @@ void TopMidairStats ( )
 			a_rl  = p->ps.wpn[wpRL].attacks;
 			ph_rl = 100.0 * vh_rl / max(1, a_rl);
 			maxrlefficiency = max(ph_rl, maxrlefficiency);
-		
+
 		p = find_plrghst ( p, &from );
 	}
-  
+
   G_bprint(2, "%s:\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n", redtext("Top performers"));
 
   from = f1 = 0;
@@ -953,7 +955,7 @@ void OnePlayerInstagibStats( gedict_t *p, int tp )
 	h_ax  = 100.0 * h_ax  / max(1, a_ax);
 	h_sg  = 100.0 * h_sg  / max(1, a_sg);
 	h_ssg = 100.0 * h_ssg / max(1, a_ssg);
-	
+
 	stats_text = va("\n\x87 %s: %s%s \x87\n", "PLAYER", ( isghost( p ) ? "\x83" : "" ), getname(p));
 
 	stats_text = va("%s \220%s\221\n", stats_text, "SCORES");
@@ -969,7 +971,7 @@ void OnePlayerInstagibStats( gedict_t *p, int tp )
 
 	stats_text = va("%s \220%s\221\n", stats_text, "SPEED");
 	stats_text = va("%s  %s: %.1f\n", stats_text, redtext("Maximum"), p->ps.velocity_max);
-	stats_text = va("%s  %s: %.1f\n", stats_text, redtext("Average"), 
+	stats_text = va("%s  %s: %.1f\n", stats_text, redtext("Average"),
 		p->ps.vel_frames > 0 ? p->ps.velocity_sum / p->ps.vel_frames : 0.);
 
 
@@ -999,7 +1001,7 @@ void OnePlayerInstagibStats( gedict_t *p, int tp )
 	stats_text = va("%s  %s: %d\n", stats_text, redtext("Maximum Height"), p->ps.i_maxheight);
 	stats_text = va("%s  %s: %.1f\n", stats_text, redtext("Average Height"), p->ps.i_airgibs ? p->ps.i_height / p->ps.i_airgibs : 0.);
 	G_bprint(2, "%s", stats_text);
-	
+
 	if ( !tp )
 		G_bprint(2,"Ÿ\n");
 
@@ -1092,14 +1094,14 @@ char *ItName( itemName_t it )
 		// shut up gcc
 		case itNONE:
 		case itMAX: return "unknown";
-	}        
-	         
+	}
+
 	return "unknown";
-}            
-             
-             
+}
+
+
 qbool itPowerup( itemName_t it )
-{            
+{
 	return (it == itQUAD || it == itPENT || it == itRING);
 }
 
@@ -1148,7 +1150,7 @@ void StatsToFile()
 		date[0] = 0; // bad date
 
 	s2di("%s", "<?xml version=\"1.0\"?>\n");
-	s2di("<match version=\"2\" date=\"%s\" map=\"%s\" hostname=\"%s\" ip=\"%s\" port=\"%d\" mode=\"%s\">\n", 
+	s2di("<match version=\"2\" date=\"%s\" map=\"%s\" hostname=\"%s\" ip=\"%s\" port=\"%d\" mode=\"%s\">\n",
 		date, g_globalvars.mapname, striphigh(cvar_string("hostname")), ip, i, GetMode());
 
 // { TEAMS
@@ -1162,7 +1164,7 @@ void StatsToFile()
 		s2di("\t<teams%s>\n", striphigh(tmp));
 
 	for ( i = 0; i < min(tmStats_cnt, MAX_TM_STATS); i++ ) {
-		s2di("\t\t<team name=\"%s\" frags=\"%d\" deaths=\"%d\" tkills=\"%d\" dmg_tkn=\"%d\" dmg_gvn=\"%d\" dmg_tm=\"%d\">\n", 
+		s2di("\t\t<team name=\"%s\" frags=\"%d\" deaths=\"%d\" tkills=\"%d\" dmg_tkn=\"%d\" dmg_gvn=\"%d\" dmg_tm=\"%d\">\n",
 			striphigh(tmStats[i].name), tmStats[i].frags + tmStats[i].gfrags, tmStats[i].deaths, tmStats[i].tkills,
 			(int)tmStats[i].dmg_t, (int)tmStats[i].dmg_g, (int)tmStats[i].dmg_team);
 
@@ -1200,7 +1202,7 @@ void StatsToFile()
 
 	s2di("\t<players>\n");
 
-//	get one player and search all his mates, mark served players via ->ready field 
+//	get one player and search all his mates, mark served players via ->ready field
 //  ghosts is served too
 
 	for ( from1 = 0, p = world; (p = find_plrghst ( p, &from1 )); ) {
@@ -1269,7 +1271,7 @@ void EM_CorrectStats()
 {
 	gedict_t	*p;
 
-	for( p = world; (p = find_plr( p )); ) 
+	for( p = world; (p = find_plr( p )); )
 	{
 		// take away powerups so scoreboard looks normal
 		p->s.v.items = (int)p->s.v.items & ~(IT_INVISIBILITY | IT_INVULNERABILITY | IT_SUIT | IT_QUAD);
@@ -1358,7 +1360,7 @@ void EndMatch ( float skip_log )
 				continue;
 			}
 		}
-		
+
 		bloodfest_stats();
 	}
 
@@ -1371,7 +1373,7 @@ void EndMatch ( float skip_log )
 			CollectTpStats();
 
 		PlayersStats (); // all info about any player
-	
+
 		if ( !cvar("k_midair") )
 		{
         	if( isTeam() || isCTF() )
@@ -1387,7 +1389,7 @@ void EndMatch ( float skip_log )
 
 		if( isTeam() || isCTF() )
 				TeamsStats (); // print basic info like frags for each team
-		
+
 		if ( (p = find( world, FOFCLSN, "ghost" )) ) // show legend :)
 			G_bprint(2, "\n\x83 - %s player\n\n", redtext("disconnected"));
 
@@ -1396,7 +1398,7 @@ void EndMatch ( float skip_log )
 		StatsToFile();
 	}
 
-	for( p = world; (p = find ( p, FOFCLSN, "ghost" )); ) 
+	for( p = world; (p = find ( p, FOFCLSN, "ghost" )); )
 		ent_remove( p );
 
 	StopTimer( skip_log ); // WARNING: if we are skip log, we are also delete demo
@@ -1435,6 +1437,8 @@ void EndMatch ( float skip_log )
 	// allow ready/break in bloodfest without map reloading.
 	if ( k_bloodfest )
 		match_over = 0;
+
+  g_matchstarttime = 0;
 }
 
 void SaveOvertimeStats ()
@@ -1467,7 +1471,7 @@ void CheckOvertime()
 		EndMatch( 0 );
 		return;
 	}
-	
+
     // Overtime.
 	// Ok we have now decided that the game is ending, so decide overtime wise here what to do.
 
@@ -1481,7 +1485,7 @@ void CheckOvertime()
 
 	if( (isTeam() || isCTF()) && teams != 2 ) {
 		k_mb_overtime = 0; // no overtime in case of less then 2 or more then 2 teams
-	}			
+	}
 	else if(    ( (isDuel() || isFFA()) && ed1 && ed2 ) // duel or ffa
 			 || ( (isTeam() || isCTF()) && teams == 2 && players > 2 ) // Handle a 2v2 or above team game
 	)
@@ -1543,7 +1547,7 @@ void TimerThink ()
 	}
 
 	if( k_sudden_death )
-		return;      
+		return;
 
 	if( self->k_teamnum < g_globalvars.time && !k_checkx )
 		k_checkx = 1; // global which set to true when some time spend after match start
@@ -1657,7 +1661,7 @@ void SM_PrepareMap()
 				ent_remove( p );
 				continue;
 			}
-			
+
 			if ( deathmatch == 4 )
 			{
 				if (   streq( p->s.v.classname, "item_shells" )
@@ -1715,7 +1719,7 @@ void SM_PrepareClients()
 					localcmd( "localinfo %d \"%s\"\n", i, pl_team );
 					trap_executecmd (); // <- this really needed
 				}
-			} 
+			}
 			else
 				p->k_teamnum = 666;
 		}
@@ -1762,7 +1766,7 @@ void SM_PrepareShowscores()
 	if ( (!isTeam() && !isCTF()) || CountRTeams() != 2 ) // we need 2 teams
 		return;
 
-	if ( (p = find_plr( world )) ) 
+	if ( (p = find_plr( world )) )
 		team1 = getteam( p );
 
 	if ( strnull( team1 ) )
@@ -1844,8 +1848,9 @@ void StartMatch ()
 	HideSpawnPoints();
 
 	match_start_time  = g_globalvars.time;
+  g_matchstarttime = (int) (g_globalvars.time*1000);
 	match_in_progress = 2;
-	
+
 	lastTeamLocationTime = -TEAM_LOCATION_UPDATE_TIME; // update on next frame
 
 	remove_specs_wizards (); // remove wizards
@@ -1863,13 +1868,13 @@ void StartMatch ()
 	{
 		if ( date[0] )
 			G_bprint(2, "matchdate: %s\n", date);
-    
+
 		if ( !k_matchLess || cvar( "k_matchless_countdown" ) )
 			G_bprint(2, "%s\n", redtext("The match has begun!"));
 	}
 
 // spec silence
-	{ 
+	{
 		int fpd = iKey( world, "fpd" );
 		int k_spectalk = ( coop ? 1 : bound(0, cvar( "k_spectalk" ), 1) );
 		cvar_fset( "sv_spectalk", k_spectalk );
@@ -1999,7 +2004,7 @@ void PrintCountdown( int seconds )
 
 	if ( cvar("k_instagib") )
 		strlcat(text, va("%s %4s\n", "Instagib", redtext("on")), sizeof(text));
-	
+
 	if ( k_yawnmode )
 		strlcat(text, va("%s %4s\n", "Yawnmode", redtext("on")), sizeof(text));
 
@@ -2041,7 +2046,7 @@ void PrintCountdown( int seconds )
 	if ( deathmatch == 4 && !cvar("k_midair") && !cvar("k_instagib")
 		&& !strnull( nowp = str_noweapon((int)cvar("k_disallow_weapons") & DA_WPNS) )
 	   )
-		strlcat(text, va("\n%s %4s\n", "Noweapon", 
+		strlcat(text, va("\n%s %4s\n", "Noweapon",
 					redtext(nowp[0] == 32 ? (nowp+1) : nowp)), sizeof(text));
 
 	if ( handicap_in_use() )
@@ -2081,7 +2086,7 @@ qbool isCanStart ( gedict_t *s, qbool forceMembersWarn )
 		if ( sub > 0 ) // we need two players in duel...
 		{
 			txt = va("Get rid of %d player%s!\n", sub, count_s( sub ));
-    
+
 			if ( s )
             	G_sprint(s, 2, "%s", txt);
 			else
@@ -2124,7 +2129,7 @@ qbool isCanStart ( gedict_t *s, qbool forceMembersWarn )
 
 		return false;
 	}
-	
+
 	if( i > k_lockmax )
 	{
 		sub = i - k_lockmax;
@@ -2152,7 +2157,7 @@ qbool isCanStart ( gedict_t *s, qbool forceMembersWarn )
 				 "%s\n",
 			 redtext("Server wants at least"), k_membercount, redtext("players in each team"),
 			 redtext("Waiting..."));
-					
+
 		if ( s )
         	G_sprint(s, 2, "%s", txt);
 		else
@@ -2166,7 +2171,7 @@ qbool isCanStart ( gedict_t *s, qbool forceMembersWarn )
 		// can't really play ctf if map doesn't have flags
 		gedict_t *rflag = find( world, FOFCLSN, "item_flag_team1" );
 		gedict_t *bflag = find( world, FOFCLSN, "item_flag_team2" );
-       
+
 		if ( !rflag || !bflag )
 		{
 			txt = "This map does not support CTF mode\n";
@@ -2177,7 +2182,7 @@ qbool isCanStart ( gedict_t *s, qbool forceMembersWarn )
         		G_bprint(2, "%s", txt);
 
 			return false;
-		}  
+		}
 	}
 
 	return true;
@@ -2316,14 +2321,14 @@ char *CompilateDemoName ()
 
 	demoname[0] = 0;
 
-	if ( isRA() ) 
+	if ( isRA() )
 	{
 		strlcat( demoname, va("ra_%d", (int)CountPlayers()), sizeof( demoname ) );
 	}
-	else if ( isRACE() ) 
+	else if ( isRACE() )
 	{
 		strlcat( demoname, va("race"), sizeof( demoname ) );
-		for( vs = "_", p = world; (p = find_plr( p )); ) 
+		for( vs = "_", p = world; (p = find_plr( p )); )
 		{
 			if ( strnull( name = getname( p ) ) || !( p->racer ) )
 				continue;
@@ -2332,7 +2337,7 @@ char *CompilateDemoName ()
 			strlcat( demoname, name, sizeof( demoname ) );
 		}
 	}
-	else if ( isDuel() ) 
+	else if ( isDuel() )
 	{
 		strlcat( demoname, "duel", sizeof( demoname ) );
 		if ( cvar("k_midair") )
@@ -2340,7 +2345,7 @@ char *CompilateDemoName ()
 		if ( cvar("k_instagib") )
 			strlcat( demoname, "_instagib", sizeof( demoname ) );
 
-		for( vs = "_", p = world; (p = find_plr( p )); ) 
+		for( vs = "_", p = world; (p = find_plr( p )); )
 		{
 			if ( strnull( name = getname( p ) ) )
 				continue;
@@ -2350,7 +2355,7 @@ char *CompilateDemoName ()
 			vs = "_vs_";
 		}
 	}
-	else if ( isTeam() || isCTF() ) 
+	else if ( isTeam() || isCTF() )
 	{
 		char teams[MAX_CLIENTS][MAX_TEAM_NAME];
 		int cnt = getteams(teams);
@@ -2364,7 +2369,7 @@ char *CompilateDemoName ()
 
 		strlcat( demoname, (isTeam() ? (clt ? va("%don%d", clt, clt) : "team"): "ctf"), sizeof( demoname ) );
 
-		for( vs = "_", i = 0; i < MAX_CLIENTS; i++ ) 
+		for( vs = "_", i = 0; i < MAX_CLIENTS; i++ )
 		{
 			if ( strnull( teams[i] ) )
 				break;
@@ -2401,7 +2406,7 @@ void StartDemoRecord ()
 	// extralog should be set by easyrecord and if we skip recording we will have it set to WRONG value.
 	// So this set it at least to something reasonable ffs.
 	cvar_set( "extralogname", "" );
-	
+
 	if ( cvar( "demo_tmp_record" ) )
 	{ // FIXME: TODO: make this more like ktpro
 		qbool record = false;
@@ -2524,7 +2529,7 @@ void StopTimer ( int removeDemo )
 		// standby flag needs clearing (sturm)
 		k_standby = 0;
 
-		for( p = world; (p = find_plr( p )); ) 
+		for( p = world; (p = find_plr( p )); )
 		{
 			p->s.v.takedamage = 2;
 			p->s.v.solid      = 3;
@@ -2539,7 +2544,7 @@ void StopTimer ( int removeDemo )
 	for( timer = world; (timer = find(timer, FOFCLSN, "standby_th")); )
 		ent_remove( timer );
 
-	if (   removeDemo 
+	if (   removeDemo
 		&& ( !match_start_time || (g_globalvars.time - match_start_time ) < k_demo_mintime )
 		&& !strnull( cvar_string( "serverdemo" ) )
 	   )
@@ -2670,7 +2675,7 @@ void IdlebotCheck ()
 		}
 
 		return;
-	} 
+	}
 
 	if( match_in_progress || intermission_running || k_force )
 		return;
@@ -2735,7 +2740,7 @@ void PlayerReady ()
 			G_sprint(p, 2, "%s %s to play\n", self->s.v.netname, redtext("desire"));
 
 		CheckAutoXonX(g_globalvars.time < 10 ? true : false); // forse switch mode asap if possible after some time spend
-		
+
 		return;
 	}
 
@@ -2751,7 +2756,7 @@ void PlayerReady ()
 		G_sprint(self, 2, "Type break to unready yourself\n");
 		return;
 	}
-        
+
     if ( isCTF() )
 	{
 		if ( !streq(getteam(self), "red") && !streq(getteam(self), "blue") )
@@ -2872,7 +2877,7 @@ void PlayerBreak ()
 
 		for( p = world; (p = (match_in_progress ? find_spc( p ) : find_client( p ))); )
 			G_sprint(p, 2, "%s %s to play\n", self->s.v.netname, redtext("lost desire"));
-		
+
 		return;
 	}
 

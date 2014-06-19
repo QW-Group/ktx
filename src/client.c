@@ -25,7 +25,7 @@
 
 //===========================================================================
 // Client
-// 
+//
 //===========================================================================
 #include "g_local.h"
 vec3_t          VEC_ORIGIN = { 0, 0, 0 };
@@ -52,6 +52,8 @@ void race_start( qbool restart, const char *fmt, ... );
 void race_stoprecord( qbool cancel );
 
 void del_from_specs_favourites(gedict_t *rm);
+
+extern int g_matchstarttime;
 
 void CheckAll ()
 {
@@ -194,7 +196,7 @@ Use mangle instead of angle, so you can set pitch or roll as well as yaw.  'pitc
 void SP_info_intermission()
 {
 	// so C can get at it
-	VectorCopy( self->mangle, self->s.v.angles );	//self.angles = self.mangle;      
+	VectorCopy( self->mangle, self->s.v.angles );	//self.angles = self.mangle;
 }
 
 typedef struct playerparams_s
@@ -352,7 +354,7 @@ void SetChangeParms()
 		NonDMParams();
 	else if ( /* match_in_progress == 2 ||*/ cvar( "k_matchless" ) )
 		InGameParams();
-    else 
+    else
 		PrewarParams();
 
 	g_globalvars.parm11 = self->k_admin;
@@ -365,9 +367,9 @@ void SetChangeParms()
 //
 void SetNewParms()
 {
-	if ( match_in_progress == 2 || k_matchLess ) 
+	if ( match_in_progress == 2 || k_matchLess )
 		InGameParams();
-    else 
+    else
 		PrewarParams();
 
 	g_globalvars.parm11 = 0;
@@ -381,7 +383,7 @@ void SetNewParms()
 void SetRespawnParms()
 {
 	if ( !deathmatch )
-	{	
+	{
 		if ( streq( g_globalvars.mapname, "start" ) )
 			InGameParams(); // take away all stuff on starting new episode
 		else
@@ -389,7 +391,7 @@ void SetRespawnParms()
 	}
 	else if ( match_in_progress == 2 || k_matchLess )
 		InGameParams();
-    else 
+    else
 		PrewarParams();
 
 	if ( self->connect_time == g_globalvars.time )
@@ -419,7 +421,7 @@ void DecodeLevelParms()
 	self->s.v.ammo_cells 	= g_globalvars.parm7;
 	self->s.v.weapon 		= g_globalvars.parm8;
 	self->s.v.armortype 	= g_globalvars.parm9 * 0.01;
-       
+
 	if ( g_globalvars.parm11 )
 		self->k_admin = g_globalvars.parm11;
 
@@ -606,10 +608,10 @@ void changelevel_touch()
 		return;
 
 	if ( deathmatch )
-	{ 
+	{
 		if ( isCTF() )
 		{
-			// ctf has always allowed players to hide in exits, etc 		
+			// ctf has always allowed players to hide in exits, etc
 		}
 		else
 		{
@@ -624,7 +626,7 @@ void changelevel_touch()
 	G_bprint( PRINT_HIGH, "%s exited the level\n", other->s.v.netname );
 
 	set_nextmap( self->map );
-	
+
 	activator = other;
 	SUB_UseTargets();
 
@@ -648,7 +650,7 @@ void SP_trigger_changelevel()
 	//         not only hurt trigger
 	if (    streq( "end", g_globalvars.mapname )
 		 && cvar( "k_remove_end_hurt" )
-		 && cvar( "k_remove_end_hurt" ) != 2 
+		 && cvar( "k_remove_end_hurt" ) != 2
 	   ) {
 		ent_remove ( self );
 		return;
@@ -783,7 +785,7 @@ void k_respawn( gedict_t *p, qbool body )
 
 	// set default spawn parms
 	SetRespawnParms();
-	// respawn              
+	// respawn
 	PutClientInServer();
 
 	self = swap;
@@ -874,7 +876,7 @@ gedict_t *Sub_SelectSpawnPoint( char *spawnname )
 	int				pcount;
 	int				k_spw = cvar( "k_spw" );
 	int				weight_sum = 0;	// used by "fair spawns"
-    
+
 // testinfo_player_start is only found in regioned levels
 	spot = find( world, FOFS( s.v.classname ), "testplayerstart" );
 	if ( spot )
@@ -1045,7 +1047,7 @@ gedict_t *Sub_SelectSpawnPoint( char *spawnname )
 		for ( spot = spots; numspots > 0; numspots-- )
 			spot = PROG_TO_EDICT( spot->s.v.goalentity );
 
-		if( totalspots > 2 && match_in_progress == 2 ) 
+		if( totalspots > 2 && match_in_progress == 2 )
 			self->k_lastspawn = spot;
 
 		return spot;
@@ -1076,7 +1078,7 @@ qbool CanConnect()
 	if ( k_sv_locktime && !VIP( self ) ) { // kick non vip in this case
 		int seconds = k_sv_locktime - g_globalvars.time;
 
-		G_sprint(self, 2, "%s: %d second%s\n", 
+		G_sprint(self, 2, "%s: %d second%s\n",
 					redtext("server is temporary locked"), seconds, count_s(seconds));
 
 		return false; // _can't_ connect
@@ -1107,7 +1109,7 @@ qbool CanConnect()
 			for( from = 1, p = world; (p = find_plrghst( p, &from )); )
 				if ( streq( getname( p ), self->s.v.netname ) )
 					break;  // don't kick, find "ghost" with equal name
-		
+
 			if ( !p ) {
 				G_sprint(self, 2, "%s in progress, server locked\n"
 								  "Please reconnect as spectator\n", isDuel() ? "Duel" : "Match");
@@ -1121,7 +1123,7 @@ qbool CanConnect()
 			for( from = 0, p = world; (p = find_plrghst( p, &from )); )
 				if ( p != self && streq( getteam( p ), t ) )
 					break;  // don't kick, find "player" or "ghost" with equal team
-		
+
 			if ( !p ) {
 				G_sprint(self, 2, "Match in progress, server locked\n"
 								  "Set your team before connecting\n"
@@ -1155,8 +1157,8 @@ qbool CanConnect()
 		return false; // _can't_ connect
 	}
 
-	// kick if exclusive 
-	if( CountPlayers() >= k_attendees && cvar("k_exclusive") ) 
+	// kick if exclusive
+	if( CountPlayers() >= k_attendees && cvar("k_exclusive") )
 	{
 		G_sprint(self, 2, "Sorry, server is full\n"
 						  "Please reconnect as spectator\n");
@@ -1167,7 +1169,7 @@ qbool CanConnect()
 	{
 		G_bprint(2, "%s entered the game\n", self->s.v.netname);
 		return true; // can connect
-	} 
+	}
 
 	for( usrid = 1; usrid < k_userid; usrid++ ) // search for ghost for this player (localinfo)
 		if( streq( ezinfokey(world, va("%d", (int) usrid)), self->s.v.netname ))
@@ -1182,7 +1184,7 @@ qbool CanConnect()
 		if( p ) // found ghost entity
 		{
 			// check teams only for team mode
-			if( ( isTeam() || isCTF() ) && strneq( getteam( self ), getteam( p ) ) ) 
+			if( ( isTeam() || isCTF() ) && strneq( getteam( self ), getteam( p ) ) )
 			{
 				G_sprint(self, 2, "Please join your old team and reconnect\n");
 				return false; // _can't_ connect
@@ -1202,7 +1204,7 @@ qbool CanConnect()
 			}
 			else {
 				self->k_teamnum = 0; // force check is we have team in localinfo or not below
-				G_bprint(2, "%s %s %d %s%s\n", self->s.v.netname, 
+				G_bprint(2, "%s %s %d %s%s\n", self->s.v.netname,
 					redtext("rejoins the game with"), (int)self->s.v.frags, redtext("frag"), redtext(count_s(self->s.v.frags)));
 			}
 
@@ -1225,10 +1227,10 @@ qbool CanConnect()
 			G_bprint(2, "%s %s\n", self->s.v.netname, redtext("arrives late"));
 	}
 
-	// check is we have team in localinfo or not	
-	if( !strnull ( t = getteam( self ) ) ) 
+	// check is we have team in localinfo or not
+	if( !strnull ( t = getteam( self ) ) )
 	{
-		for( tmid = 665; tmid < k_teamid && !self->k_teamnum; ) 
+		for( tmid = 665; tmid < k_teamid && !self->k_teamnum; )
 		{
 			tmid++;
 			if( streq( t, ezinfokey(world, va("%d", tmid)) ) )
@@ -1392,7 +1394,7 @@ void PutClientInServer( void )
 	self->lastwepfired = 0;
 
 	self->q_pickup_time = self->p_pickup_time = self->r_pickup_time = 0;
-        
+
 // the spawn falling damage bug workaround
 	self->jump_flag = 0;
 	self->swim_flag = 0;
@@ -1470,7 +1472,7 @@ void PutClientInServer( void )
 	SetVector( self->s.v.view_ofs, 0, 0, 22 );
 	SetVector( self->s.v.velocity, 0, 0, 0 );
 
-	self->walkframe = 0;	
+	self->walkframe = 0;
 	player_stand1();
 
 	trap_makevectors( self->s.v.angles );
@@ -1625,7 +1627,7 @@ void PutClientInServer( void )
 		items |= IT_ARMOR3; // add red armor
 
 		items |= IT_INVULNERABILITY;
-		
+
 		self->s.v.items = items;
 
 		self->invincible_time = 1;
@@ -1681,6 +1683,10 @@ void PutClientInServer( void )
 	{
 		teleport_player( self, self->s.v.origin, self->s.v.angles, tele_flags );
 	}
+  g_globalvars.msg_entity = EDICT_TO_PROG(self);
+  WriteByte(MSG_ONE, 38 /*svc_updatestatlong*/);
+  WriteByte(MSG_ONE, 18 /*STAT_MATCHSTARTTIME*/);
+  WriteLong(MSG_ONE, g_matchstarttime);
 }
 
 /*
@@ -1817,7 +1823,7 @@ void PlayerJump()
 	//vec3_t start, end;
 
 	if ( self->spawn_time + 0.05 > g_globalvars.time ) {
-		self->s.v.velocity[2] = -270;  // discard +jump till 50 ms after respawn, like ktpro 
+		self->s.v.velocity[2] = -270;  // discard +jump till 50 ms after respawn, like ktpro
 		self->s.v.flags = (int)self->s.v.flags & ~FL_JUMPRELEASED;
 		return;
 	}
@@ -2039,7 +2045,7 @@ void MakeGhost ()
 	ghost->ghost_clr |= (int)bound(0, iKey(self, "bottomcolor" ), 13) ; // save colors
 
 //	G_bprint( PRINT_HIGH, "name num: %d team num %d\n", (int)ghost->cnt2, (int)ghost->k_teamnum);
-  
+
 	localcmd("localinfo %d \"%s\"\n", (int)f1, self->s.v.netname);
 	trap_executecmd();
 }
@@ -2444,53 +2450,53 @@ float v_for_jump (int frametime_ms)
 
 //	G_bprint(2, "MS: %d\n", frametime_ms);
 
-	if (frametime_ms > 44) 
+	if (frametime_ms > 44)
 		return  1.05;
-	else if (frametime_ms > 38) 
+	else if (frametime_ms > 38)
 		return  1.041;
-	else if (frametime_ms > 33) 
+	else if (frametime_ms > 33)
 		return  1.035;
-	else if (frametime_ms > 28) 
+	else if (frametime_ms > 28)
 		return  1.032;
-	else if (frametime_ms > 24) 
+	else if (frametime_ms > 24)
 		return  1.029;
-	else if (frametime_ms > 22) 
+	else if (frametime_ms > 22)
 		return  1.025;
-	else if (frametime_ms > 19) 
+	else if (frametime_ms > 19)
 		return  1.02;
-	else if (frametime_ms > 18) 
+	else if (frametime_ms > 18)
 		return  1.015;
-	else if (frametime_ms > 16) 
+	else if (frametime_ms > 16)
 		return  1.01;
-	else if (frametime_ms > 15) 
+	else if (frametime_ms > 15)
 		return  1.005;
-	else if (frametime_ms > 14) 
+	else if (frametime_ms > 14)
 		return  1;
-	else if (frametime_ms > 13) 
+	else if (frametime_ms > 13)
 		return  1;
-	else if (frametime_ms > 12) 
+	else if (frametime_ms > 12)
 		return  1;
-	else if (frametime_ms > 11) 
+	else if (frametime_ms > 11)
 		return  0.9991;
-	else if (frametime_ms > 10) 
+	else if (frametime_ms > 10)
 		return  0.9982;
-	else if (frametime_ms > 9) 
+	else if (frametime_ms > 9)
 		return  0.9961;
-	else if (frametime_ms > 8) 
+	else if (frametime_ms > 8)
 		return  0.9941;
-	else if (frametime_ms > 7) 
+	else if (frametime_ms > 7)
 		return  0.9886;
-	else if (frametime_ms > 6) 
+	else if (frametime_ms > 6)
 		return  0.9882;
-	else if (frametime_ms > 5) 
+	else if (frametime_ms > 5)
 		return  0.9865;
-	else if (frametime_ms > 4) 
+	else if (frametime_ms > 4)
 		return  0.9855;
-	else if (frametime_ms > 3) 
+	else if (frametime_ms > 3)
 		return  0.9801;
-	else if (frametime_ms > 2) 
+	else if (frametime_ms > 2)
 		return  0.9783;
-	else 
+	else
 		return  0.9652;
 }
 
@@ -2550,7 +2556,7 @@ void PlayerPreThink()
 
 	if( g_globalvars.frametime > self->fHighestFrameTime )
 		self->fHighestFrameTime = g_globalvars.frametime;
-	
+
 	if( self->fDisplayIllegalFPS < g_globalvars.time && framechecks )
 	{
 		float fps;
@@ -2560,7 +2566,7 @@ void PlayerPreThink()
 		r = self->fAverageFrameTime * 100 / (g_globalvars.time - self->real_time);
 
 		if( r > 103 && !match_in_progress ) {
-			G_sprint(self, PRINT_HIGH, 
+			G_sprint(self, PRINT_HIGH,
 				"Warning: It seems that your machine has a too long uptime causing a bug in your QW client. Please restart your machine and fix this message.\n");
 
 			if( r > 105 )
@@ -2580,7 +2586,7 @@ void PlayerPreThink()
 		fps = fps ? (1.0f / fps) : 1;
 
 //		G_bprint(2, "%s FPS: %3.1f\n", self->s.v.netname, fps);
-		
+
 		if( fps > current_maxfps + 2 ) // 2 fps fluctuation is allowed :(
 		{
 			float peak = self->fLowestFrameTime ? (1.0f / self->fLowestFrameTime) : 1;
@@ -2590,9 +2596,9 @@ void PlayerPreThink()
 				"Warning: %s has abnormally high frame rates, "
 				"highest FPS = %3.1f, average FPS = %3.1f!\n",
 							self->s.v.netname, peak, fps);
-							
+
 			self->fIllegalFPSWarnings += 1;
-			
+
             if( self->fIllegalFPSWarnings > 3 )
 			{
 				// kick the player from server!
@@ -2655,7 +2661,7 @@ void PlayerPreThink()
 		) {
 			StartDie();
 		}
-		
+
 		return;		// dying, so do nothing
 
 	}
@@ -2679,7 +2685,7 @@ void PlayerPreThink()
 			}
 		}
 	}
-	
+
 // brokenankle included here
 	if ( self->s.v.button2 || self->brokenankle )
 		PlayerJump();
@@ -2879,7 +2885,7 @@ void CheckPowerups()
 		}
 	}
 
-// suit 
+// suit
 	if ( self->radsuit_finished )
 	{
 		self->air_finished = g_globalvars.time + 12;	// don't drown
@@ -2984,7 +2990,7 @@ void BothPostThink ()
 	if ( !self->sc_stats && self->sc_stats_time && self->sc_stats_time <= g_globalvars.time )
 		self->sc_stats_time = 0;
 
-	if (     self->need_clearCP 
+	if (     self->need_clearCP
 		 && !self->shownick_time
          && !self->wp_stats_time
          && !self->sc_stats_time
@@ -3133,7 +3139,7 @@ void PlayerPostThink()
     if( (int)self->s.v.flags & FL_ONGROUND )
 		self->brokenankle = 0;
 
-// check to see if player landed and play landing sound 
+// check to see if player landed and play landing sound
 	if ( ( self->jump_flag < -300 ) && ( ( ( int ) ( self->s.v.flags ) ) & FL_ONGROUND ) )
 	{
 // Falling often results in 5-5 points of damage through 2 frames.
@@ -3188,7 +3194,7 @@ void PlayerPostThink()
 	race_follow();
 
 	{
-		float velocity = sqrt(self->s.v.velocity[0] * self->s.v.velocity[0] + 
+		float velocity = sqrt(self->s.v.velocity[0] * self->s.v.velocity[0] +
 							  self->s.v.velocity[1] * self->s.v.velocity[1]);
 
 		if ( !match_in_progress && !match_over && !k_captains && !k_matchLess && !isHoonyMode() )
@@ -3232,7 +3238,7 @@ void SendTeamInfo(gedict_t *t)
 		return;
 
 	tm = getteam( s );
-	
+
 	for ( cnt = 0, p = world; (p = find_plr( p )); ) {
 		if (cnt >= MAX_MEMBERS)
 			break;
@@ -3276,7 +3282,7 @@ void CheckTeamStatus( )
 
 	if ( g_globalvars.time - lastTeamLocationTime < TEAM_LOCATION_UPDATE_TIME )
 		return;
-	
+
 	lastTeamLocationTime = g_globalvars.time;
 
 	k_teamoverlay = cvar("k_teamoverlay");
@@ -3358,7 +3364,7 @@ void StatsHandler(gedict_t *targ, gedict_t *attacker)
   						wp = wpLG;  break;
 			default:	wp = wpNONE;
 		}
-		
+
 		if ( targ == attacker ) {
 			; // killed self, nothing interest
 		}
@@ -3392,7 +3398,7 @@ void StatsHandler(gedict_t *targ, gedict_t *attacker)
 	}
 }
 
-// Instagib rewards are suspended till I figure out if that would be useful or not -- deurk 
+// Instagib rewards are suspended till I figure out if that would be useful or not -- deurk
 // static int	i_agmr_height = 0; // used for instagib, reset to 0 on each map reload...
 
 float Instagib_Obituary( gedict_t *targ, gedict_t *attacker )
@@ -3403,8 +3409,8 @@ float Instagib_Obituary( gedict_t *targ, gedict_t *attacker )
 		return playerheight;
 
 	traceline( PASSVEC3(targ->s.v.origin),
-			targ->s.v.origin[0], 
-			targ->s.v.origin[1], 
+			targ->s.v.origin[0],
+			targ->s.v.origin[1],
 			targ->s.v.origin[2] - 2048,
 			true, targ );
 
@@ -3424,7 +3430,7 @@ float Instagib_Obituary( gedict_t *targ, gedict_t *attacker )
 		{
  			G_bprint( 2, "%s from %s: height %d\n", redtext("Amazing AirGib"), attacker->s.v.netname, (int)playerheight );
 		}
-				
+
 		if ( playerheight > 45 )
 		{
 			attacker->ps.i_height += playerheight;
@@ -3451,7 +3457,7 @@ float Instagib_Obituary( gedict_t *targ, gedict_t *attacker )
 		}
 	}
 
-	/* Instagib rewards are suspended till I figure out if that would be useful or not -- deurk 
+	/* Instagib rewards are suspended till I figure out if that would be useful or not -- deurk
 	if ( attacker->ps.i_height > 2000 )
 	{
 		if ( !i_agmr_height )
@@ -3475,14 +3481,14 @@ float Instagib_Obituary( gedict_t *targ, gedict_t *attacker )
 					continue;
 
 				i_agmr_height = attacker->ps.i_height;
-				    
+
 				p->i_agmr = 0;
 				p->s.v.frags -= 5;
 				attacker->i_agmr = 1;
 				attacker->s.v.frags += 5;
-				G_bprint( 2, "%s took the %s rune from %s!\n", attacker->s.v.netname, 
+				G_bprint( 2, "%s took the %s rune from %s!\n", attacker->s.v.netname,
 												redtext("AirGib Master"), p->s.v.netname);
-			}				
+			}
 		}
 	}
 	*/
@@ -3520,7 +3526,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		return;
 
 	refresh_plus_scores ();
-    
+
 	//ZOID 12-13-96: self.team doesn't work in QW.  Use keys
 	attackerteam = getteam(attacker);
 	targteam     = getteam(targ);
@@ -3870,7 +3876,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			else if ( dtLG_DIS == targ->deathtype )
 			{
 				switch( (int)(g_random() * 2) ) {
-					case 0: 
+					case 0:
 							 deathstring = " drains ";
 							 deathstring2 = "'s batteries\n"; break;
 					default:

@@ -67,6 +67,7 @@ gameData_t      gamedata =
     { ( edict_t * ) g_edicts, sizeof( gedict_t ), &g_globalvars, expfields , GAME_API_VERSION};
 
 float           starttime;
+int   g_matchstarttime;
 void            G_InitGame( int levelTime, int randomSeed );
 void			G_ShutDown();
 void            StartFrame( int time );
@@ -104,7 +105,7 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
     int api_ver;
 
 	ClearGlobals();
-	
+
 	switch ( command )
 	{
 	case GAME_INIT:
@@ -167,7 +168,7 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 			cmdinfo_infoset ( self );
 
 		update_ghosts();
-		
+
 		return 1;
 
 	case GAME_PUT_CLIENT_IN_SERVER:
@@ -422,7 +423,7 @@ void G_ShutDown()
 
 //===========================================================================
 // Physics
-// 
+//
 //===========================================================================
 ////////////////
 // GlobalParams:
