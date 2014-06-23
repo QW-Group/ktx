@@ -806,7 +806,7 @@ void FirstFrame	( )
 	RegisterCvar("k_cmd_fp_disabled");
 // }
 
-	RegisterCvarEx("k_extralog_xsd_uri", "http://qw-dev.net/attachments/download/177/ktxlog_0.1.xsd");
+	RegisterCvarEx("k_extralog_xsd_uri", "http://mirror.quakeworld.eu/ktx/ktxlog_0.1.xsd");
 	RegisterCvar("k_extralog");
 	RegisterCvar("k_demo_mintime");
 	RegisterCvar("k_dmm4_gren_mode");

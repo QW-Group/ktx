@@ -38,11 +38,11 @@
 #include "player.h"
 
 #define MOD_NAME			("KTX")
-#define MOD_VERSION			("1.37-beta.1")
+#define MOD_VERSION			("1.37-beta")
 #define MOD_BUILD_DATE		(__DATE__ ", " __TIME__)
 #define MOD_SERVERINFO_MOD_KEY		("ktxver")
 #define MOD_SERVERINFO_BUILD_KEY	("ktxbuild")
-#define MOD_URL    			("http://ktx.qw-dev.net")
+#define MOD_URL    			("https://github.com/deurk/ktx")
 
 // qqshka - hmm, seems in C this is macros
 #undef max
