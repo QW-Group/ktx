@@ -3,7 +3,7 @@ KTX: a Quakeworld&trade; server mod
 
 [KTX] is a popular **Quakeworld&trade;** server modification, adding numerous features to the core features of the server.
 
-Although it had been developed to be **QuakeworldQuakeworld&trade;** server agnostic, it has over the years been developed very close to [MVDSV] to which it has become an extent, thus compatibility with other **Quakeworld™** servers might not have been maintained.
+Although it had been developed to be **Quakeworld&trade;** server agnostic, it has over the years been developed very close to [MVDSV] to which it has become an extent, thus compatibility with other **Quakeworld™** servers might not have been maintained.
 
 Current code status: [![Build Status](https://drone.io/github.com/qwassoc/ktx/status.png)](https://drone.io/github.com/qwassoc/ktx/latest)
 
