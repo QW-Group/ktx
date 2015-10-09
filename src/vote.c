@@ -169,6 +169,7 @@ int get_votes_req( int fofs, qbool diff )
 						break;
 
 		case OV_NOSPECS: percent = cvar("k_vp_nospecs"); break;
+		case OV_TEAMOVERLAY: percent = cvar("k_vp_teamoverlay"); break;
 		case OV_COOP:    percent = cvar("k_vp_coop"); break;
 		case OV_ANTILAG: percent = cvar("k_vp_antilag"); break;
 	}
@@ -186,6 +187,8 @@ int get_votes_req( int fofs, qbool diff )
 	else if ( fofs == OV_RPICKUP )
 		vt_req = max(3, vt_req); // at least 3 votes in this case
 	else if ( fofs == OV_NOSPECS )
+		vt_req = max(2, vt_req); // at least 2 votes in this case
+	else if ( fofs == OV_TEAMOVERLAY )
 		vt_req = max(2, vt_req); // at least 2 votes in this case
 	else if ( fofs == OV_COOP )
 		vt_req = max(1, vt_req); // at least 1 votes in this case
@@ -571,6 +574,65 @@ void nospecs( )
 	vote_check_nospecs ();
 }
 
+void vote_check_teamoverlay ()
+{
+	int veto;
+
+	if ( match_in_progress || intermission_running || match_over )
+		return;
+
+	if ( !get_votes( OV_TEAMOVERLAY ) )
+		return;
+
+	veto = is_admins_vote( OV_TEAMOVERLAY );
+
+	if( veto || !get_votes_req( OV_TEAMOVERLAY, true ) )
+	{
+		vote_clear( OV_TEAMOVERLAY );
+
+		// Toggle teamoverlay.
+		cvar_fset("k_teamoverlay", !cvar("k_teamoverlay"));
+
+		if ( veto )
+			G_bprint(2, "%s\n", redtext(va("Teamoverlay %s by admin veto", OnOff(cvar("k_teamoverlay")))));
+		else
+			G_bprint(2, "%s\n", redtext(va("Teamoverlay %s by majority vote", OnOff(cvar("k_teamoverlay")))));
+
+		return;
+	}
+}
+
+void teamoverlay( )
+{
+    int votes;
+
+    if ( match_in_progress )
+    {
+        G_sprint(self, 2, "%s %s\n", redtext("Teamoverlay"), OnOff(cvar("k_teamoverlay")));
+        return;
+    }
+
+	// admin may turn this status alone on server...
+	if ( !is_adm( self ) )
+	{
+		// Dont need to bother if less than 2 players
+		if ( CountPlayers() < 2 )
+		{
+			G_sprint(self, 2, "You need at least 2 players to do this.\n");
+			return;
+		}
+	}
+
+	self->v.teamoverlay = !self->v.teamoverlay;
+
+	G_bprint(2, "%s %s!%s\n", self->s.v.netname, 
+			(self->v.teamoverlay ? redtext(va("votes for teamoverlay %s", OnOff(!cvar("k_teamoverlay")))) : 
+							       redtext(va("withdraws %s teamoverlay vote", g_his(self)))),
+			((votes = get_votes_req( OV_TEAMOVERLAY, true )) ? va(" (%d)", votes) : ""));
+
+    vote_check_teamoverlay ();
+}
+
 // }
 
 // { votecoop
@@ -703,6 +765,7 @@ void vote_check_all ()
 	vote_check_pickup ();
 	vote_check_rpickup ();
 	vote_check_nospecs ();
+	vote_check_teamoverlay ();
 	vote_check_coop ();
 	vote_check_antilag ();
 }

@@ -191,6 +191,7 @@ typedef struct vote_s {
 	int map;
 	int pickup;
 	int rpickup;
+	int teamoverlay;
 	int nospecs;
 	int coop;
 	int antilag;
