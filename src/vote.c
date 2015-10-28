@@ -340,7 +340,7 @@ void vote_check_break ()
 
 		G_bprint(2, "%s\n", redtext("Match stopped by majority vote"));
 
-		EndMatch( 1 );
+		EndMatch( 0 );
 
 		return;
 	}
