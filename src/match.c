@@ -388,8 +388,8 @@ void TeamsStats ( )
 		G_bprint(2, "žžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n");
 }
 
-float maxfrags, maxdeaths, maxfriend, maxeffi, maxcaps, maxdefends;
-int maxspree, maxspree_q;
+float maxfrags, maxdeaths, maxfriend, maxeffi, maxcaps, maxdefends, maxsgeffi;
+int maxspree, maxspree_q, maxdmgg, maxrlkills;
 
 void OnePlayerStats(gedict_t *p, int tp)
 {
@@ -553,6 +553,9 @@ void OnePlayerStats(gedict_t *p, int tp)
 	maxdefends = max(p->ps.f_defends, maxdefends);
 	maxspree   = max(p->ps.spree_max, maxspree);
 	maxspree_q = max(p->ps.spree_max_q, maxspree_q);
+	maxdmgg    = max(p->ps.dmg_g, maxdmgg);
+	maxrlkills = max(p->ps.wpn[wpRL].ekills, maxrlkills);
+	maxsgeffi  = max(h_sg, maxsgeffi);
 }
 
 // Players statistics printout here
@@ -572,8 +575,8 @@ void PlayersStats ()
 	// Probably low enough for a start value :)
 	maxfrags = -999999;
 
-	maxeffi = maxfriend = maxdeaths = maxcaps = maxdefends = 0;
-	maxspree = maxspree_q = 0;
+	maxeffi = maxfriend = maxdeaths = maxcaps = maxdefends = maxsgeffi = 0;
+	maxspree = maxspree_q = maxdmgg = maxrlkills = 0;
 
 	tp = isTeam() || isCTF();
 
@@ -651,7 +654,7 @@ void PlayersStats ()
 void TopStats ( )
 {
 	gedict_t	*p;
-	float		f1;
+	float		f1, h_sg, a_sg;
 	int			from;
 
 	G_bprint(2, "%s‘ %s:\n"
@@ -745,6 +748,54 @@ void TopStats ( )
 		}
 	}
 
+    if ( maxrlkills && deathmatch == 1 )
+    {
+		G_bprint( 2, "  RL Killer: ");
+		from = f1 = 0;
+		p = find_plrghst( world, &from );
+		while( p ) {
+			if ( p->ps.wpn[wpRL].ekills == maxrlkills ) {
+					G_bprint(2, "%s%s%s \220%d\221\n", (f1 ? "             " : ""),
+						( isghost( p ) ? "\x83" : "" ), getname( p ), maxrlkills );
+					f1 = 1;
+			}
+			p = find_plrghst( p, &from );
+		}
+    }
+
+    if ( maxsgeffi && deathmatch == 1 )
+    {
+		G_bprint( 2, "Boomsticker: ");
+		from = f1 = 0;
+		p = find_plrghst( world, &from );
+		while( p ) {
+        	h_sg  = p->ps.wpn[wpSG].hits;
+        	a_sg  = p->ps.wpn[wpSG].attacks;
+        	h_sg  = 100.0 * h_sg  / max(1, a_sg);
+			if ( h_sg == maxsgeffi ) {
+					G_bprint(2, "%s%s%s \220%.1f%%\221\n", (f1 ? "             " : ""),
+						( isghost( p ) ? "\x83" : "" ), getname( p ), maxsgeffi );
+					f1 = 1;
+			}
+			p = find_plrghst( p, &from );
+		}
+    }
+ 
+	if ( maxdmgg )
+	{
+		G_bprint( 2, "Annihilator: ");
+		from = f1 = 0;
+		p = find_plrghst( world, &from );
+		while( p ) {
+			if ( p->ps.dmg_g == maxdmgg ) {
+					G_bprint(2, "%s%s%s \220%d\221\n", (f1 ? "             " : ""),
+						( isghost( p ) ? "\x83" : "" ), getname( p ), maxdmgg );
+					f1 = 1;
+			}
+			p = find_plrghst( p, &from );
+		}
+	}
+ 
 	if ( isCTF() )
 	{
 		if ( maxcaps > 0 )
@@ -1013,6 +1064,9 @@ void OnePlayerInstagibStats( gedict_t *p, int tp )
 	maxdefends = max(p->ps.f_defends, maxdefends);
 	maxspree   = max(p->ps.spree_max, maxspree);
 	maxspree_q = max(p->ps.spree_max_q, maxspree_q);
+	maxdmgg    = max(p->ps.dmg_g, maxdmgg);
+	maxrlkills = max(p->ps.wpn[wpRL].ekills, maxrlkills);
+	maxsgeffi  = max(h_sg, maxsgeffi);
 
 }
 
