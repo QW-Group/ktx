@@ -44,6 +44,7 @@ void VoteYes();
 void VoteNo();
 void VoteCaptain ();
 void nospecs();
+void teamoverlay();
 void votecoop();
 void RandomPickup();
 void ShowDMM();
@@ -195,7 +196,6 @@ void callalias ();
 void fcheck ();
 void mapcycle ();
 void airstep();
-void teamoverlay();
 void ToggleExclusive();
 void ToggleNewCoopNm();
 void ToggleVwep();
@@ -504,7 +504,6 @@ const char CD_NODESC[] = "no desc";
 #define CD_FALLBUNNYCAP "set fallbunny cap (yawn)"
 #define CD_TELEPORTCAP  "set teleport cap (yawn)"
 #define CD_AIRSTEP      "toggle airstep"
-#define CD_TEAMOVERLAY  "toggle teamoverlay"
 #define CD_EXCLUSIVE    "toggle exclusive mode"
 #define CD_VWEP         "toggle vweps"
 #define CD_PAUSE        "toggle pause"
@@ -536,8 +535,8 @@ const char CD_NODESC[] = "no desc";
 // }
 
 #define CD_NOSPECS      "allow/disallow spectators"
-
 #define CD_NOITEMS      "allow/disallow items in game"
+#define CD_TEAMOVERLAY  "allow/disallow teamoverlay"
 
 #define CD_SPAWN666TIME "set spawn pent time (dmm4 atm)"
 
@@ -834,7 +833,6 @@ cmd_t cmds[] = {
 	{ "yawnmode",    ToggleYawnMode,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_YAWNMODE },
 	{ "teleportcap", setTeleportCap,            0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_TELEPORTCAP },
 	{ "airstep",     airstep,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_AIRSTEP },
-	{ "teamoverlay", teamoverlay,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_TEAMOVERLAY },
 	{ "exclusive",   ToggleExclusive,           0    , CF_BOTH_ADMIN, CD_EXCLUSIVE },
 	{ "vwep",        ToggleVwep,                0    , CF_PLAYER | CF_SPC_ADMIN, CD_VWEP },
 	{ "pause",       TogglePause,               0    , CF_PLAYER | CF_MATCHLESS | CF_SPC_ADMIN, CD_PAUSE },
@@ -863,6 +861,7 @@ cmd_t cmds[] = {
 // }
 	{ "nospecs",     nospecs,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOSPECS },
 	{ "noitems",     noitems,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOITEMS },
+	{ "teamoverlay", teamoverlay,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_TEAMOVERLAY },
 	{ "spawn666time",Spawn666Time,              0    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_SPAWN666TIME },
 	{ "giveme",      giveme,                    0    , CF_PLAYER | CF_MATCHLESS | CF_PARAMS, CD_GIVEME },
 	{ "dropitem",    dropitem,                  0    , CF_BOTH | CF_PARAMS, CD_DROPITEM },
@@ -1612,7 +1611,7 @@ void ModStatusVote()
 		}
 	}
 
-	if( !(get_elect_type() == etCaptain && match_in_progress) ) // does't show captain ellection in game
+	if( !(get_elect_type() == etCaptain && match_in_progress) ) // doesn't show captain election in game
 	if( (votes = get_votes( OV_ELECT )) ) {
 		voted = true;
 
@@ -1682,6 +1681,18 @@ void ModStatusVote()
 
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.nospecs )
+				G_sprint(self, 2, " %s\n", p->s.v.netname);
+	}
+
+	if ( !match_in_progress )
+	if ( (votes = get_votes( OV_TEAMOVERLAY ))) {
+		voted = true;
+
+		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for a %s change:\n", votes,
+			 get_votes_req( OV_TEAMOVERLAY, false ), count_s(votes), redtext("teamoverlay"));
+
+		for( p = world; (p = find_client( p )); )
+			if ( p->v.teamoverlay )
 				G_sprint(self, 2, " %s\n", p->s.v.netname);
 	}
 
@@ -5878,14 +5889,6 @@ void ToggleVwep()
 			W_SetCurrentAmmo();
 		}
 	self = oself;
-}
-
-void teamoverlay()
-{
-	if ( match_in_progress )
-		return;
-
-	cvar_toggle_msg( self, "k_teamoverlay", redtext("teamoverlay") );
 }
 
 void ToggleExclusive()

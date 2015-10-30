@@ -687,6 +687,7 @@ void FirstFrame	( )
 	RegisterCvar("k_vp_pickup");  // votes percentage for pickup voting
 	RegisterCvar("k_vp_rpickup"); // votes percentage for rpickup voting
 	RegisterCvar("k_vp_nospecs"); // votes percentage for nospecs voting
+	RegisterCvar("k_vp_teamoverlay"); // votes percentage for teamoverlay voting
 	RegisterCvar("k_vp_coop");    // votes percentage for coop voting
 	RegisterCvar("k_vp_antilag"); // votes percentage for antilag voting
 	RegisterCvar("k_no_vote_map"); // dis allow map voting in matcless mode, also disallow /next_map
