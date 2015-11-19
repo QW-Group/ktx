@@ -109,6 +109,7 @@ typedef struct player_stats_s {
 	float    dmg_g; // damage given
 	float    dmg_g_rl; // virtual given rl damage
 	float    dmg_team;  // damage to team
+	float    dmg_self;  // damage to team
 // { k_dmgfrags
 	float    dmg_frags; // frags awarded from damage (CA)
 // }

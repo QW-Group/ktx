@@ -393,7 +393,7 @@ int maxspree, maxspree_q;
 
 void OnePlayerStats(gedict_t *p, int tp)
 {
-	float	dmg_g, dmg_t, dmg_team, dmg_g_rl;
+	float	dmg_g, dmg_t, dmg_team, dmg_self, dmg_g_rl;
 	int   ra, ya, ga;
 	int   mh, d_rl, k_rl, t_rl;
 	int   quad, pent, ring;
@@ -404,6 +404,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 	dmg_g_rl = p->ps.dmg_g_rl;
 	dmg_t = p->ps.dmg_t;
 	dmg_team = p->ps.dmg_team;
+	dmg_self = p->ps.dmg_self;
 	ra    = p->ps.itm[itRA].tooks;
 	ya    = p->ps.itm[itYA].tooks;
 	ga    = p->ps.itm[itGA].tooks;
@@ -510,8 +511,8 @@ void OnePlayerStats(gedict_t *p, int tp)
 				redtext("Took"), t_rl, redtext("Killed"), k_rl, redtext("Dropped"), d_rl);
 
 		// damage
-		G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f\n", redtext("  Damage"),
-			redtext("Tkn"), dmg_t, redtext("Gvn"), dmg_g, redtext("Tm"), dmg_team);
+		G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f %s:%.0f\n", redtext("  Damage"),
+			redtext("Tkn"), dmg_t, redtext("Gvn"), dmg_g, redtext("Tm"), dmg_team, redtext("Self"), dmg_self);
 
 		if ( isDuel() )
 		{
