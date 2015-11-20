@@ -1393,6 +1393,7 @@ void PutClientInServer( void )
 	self->axhitme = 0;
 	self->lastwepfired = 0;
 
+	self->control_start_time = 0;
 	self->q_pickup_time = self->p_pickup_time = self->r_pickup_time = 0;
 
 // the spawn falling damage bug workaround
@@ -2028,6 +2029,12 @@ void MakeGhost ()
 	adjust_pickup_time( &self->q_pickup_time, &self->ps.itm[itQUAD].time );
 	adjust_pickup_time( &self->p_pickup_time, &self->ps.itm[itPENT].time );
 	adjust_pickup_time( &self->r_pickup_time, &self->ps.itm[itRING].time );
+
+	if ( self->control_start_time )
+	{
+		self->ps.control_time += g_globalvars.time - self->control_start_time;
+		self->control_start_time = 0;
+	}
 
 	ghost = spawn();
 	ghost->s.v.owner  = EDICT_TO_PROG( world );
@@ -3348,6 +3355,30 @@ void StatsHandler(gedict_t *targ, gedict_t *attacker)
 	targ->ps.spree_max = max(targ->ps.spree_current, targ->ps.spree_max);
 	targ->ps.spree_max_q = max(targ->ps.spree_current_q, targ->ps.spree_max_q);
 	targ->ps.spree_current = targ->ps.spree_current_q = 0;
+
+	if ( isDuel() )
+	{
+		// player dieing loses control
+		if ( targ->control_start_time )
+		{
+			targ->ps.control_time += g_globalvars.time - targ->control_start_time;
+			targ->control_start_time = 0;
+		}
+
+		// player killing with spree of 2 gains control
+		if ( attacker->ps.spree_current >= 2 && !attacker->control_start_time )
+		{
+			attacker->control_start_time = g_globalvars.time;
+		}
+
+		// FIXME: We should want to consider other times when control switches.
+		// Some ideas:
+		//   - if one player gets a much larger stack (Mega + RA) we can probably assume
+		//     they have taken control. This could be detected on Mega / RA pickup.
+		//   - if one player takes RA multiple times in a row, they may indicate they
+		//     have won control but not yet killed the opponent, or opponent is hiding.
+		//     This could be detected on RA pickup.
+	}
 
 	if ( attacker->ct == ctPlayer ) {
 		switch ( targ->deathtype ) {

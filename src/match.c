@@ -347,6 +347,10 @@ void SummaryTPStats()
 		// damage
 		G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f\n", redtext("  Damage"),
 					redtext("Tkn"), tmStats[i].dmg_t, redtext("Gvn"), tmStats[i].dmg_g, redtext("Tm"), tmStats[i].dmg_team);
+
+		// times
+		G_bprint(2, "%s: %s:%d\n", redtext("    Time"),
+					redtext("Quad"), (int)tmStats[i].itm[itQUAD].time);
 	}
 
 	G_bprint(2, "žžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n");
@@ -512,6 +516,21 @@ void OnePlayerStats(gedict_t *p, int tp)
 		// damage
 		G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f\n", redtext("  Damage"),
 			redtext("Tkn"), dmg_t, redtext("Gvn"), dmg_g, redtext("Tm"), dmg_team);
+
+		// times
+		if ( g_globalvars.time - match_start_time > 0 )
+		{
+			if ( isDuel() )
+			{
+				G_bprint(2, "%s: %s:%d (%d%%)\n", redtext("    Time"),
+					redtext("Control"), (int)p->ps.control_time, (int)((p->ps.control_time / ( g_globalvars.time - match_start_time )) * 100));
+			}
+			else
+			{
+				G_bprint(2, "%s: %s:%d\n", redtext("    Time"),
+					redtext("Quad"), (int)p->ps.itm[itQUAD].time);
+			}
+		}
 
 		if ( isDuel() )
 		{
@@ -1287,6 +1306,12 @@ void EM_CorrectStats()
 		adjust_pickup_time( &p->q_pickup_time, &p->ps.itm[itQUAD].time );
 		adjust_pickup_time( &p->p_pickup_time, &p->ps.itm[itPENT].time );
 		adjust_pickup_time( &p->r_pickup_time, &p->ps.itm[itRING].time );
+
+		if ( p->control_start_time )
+		{
+			p->ps.control_time += g_globalvars.time - p->control_start_time;
+			p->control_start_time = 0;
+		}
 
 		if ( isCTF() ) { // if a player ends the game with a rune adjust their rune time
 

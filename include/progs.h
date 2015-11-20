@@ -153,6 +153,9 @@ typedef struct player_stats_s {
 	int spree_max;			// largest spree throughout game
 	int spree_max_q;		// largest quad spree throughout game
 
+	// time stats
+	float control_time; // time spent in control
+
 	// rocket arena
 	int wins;	//number of wins they have
 	int loses;	//number of loses they have
@@ -457,6 +460,7 @@ typedef struct gedict_s {
 
 	player_stats_t ps;		// store player statistic here, like taken armors etc...
 
+	float control_start_time; // time when player gained control
 	float q_pickup_time;	// time then u took quad
 	float p_pickup_time;	// time then u took pent
 	float r_pickup_time;	// time then u took ring
