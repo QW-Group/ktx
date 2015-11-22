@@ -1863,7 +1863,7 @@ PLAYER BACKPACKS
 void BackpackTouch()
 {
 	int		new;
-	gedict_t	*stemp;
+	gedict_t	*stemp, *p;
 	float           acount, new_shells, new_nails, new_rockets, new_cells;
 	char            *new_wp = "";
 	char		*playername;
@@ -2048,6 +2048,20 @@ void BackpackTouch()
 	   )
 		other->s.v.ammo_rockets = 5;
 
+	// detect transferred packs, credit the player who dropped the pack with the transfer
+	if ( isTeam() && self->s.v.items == IT_ROCKET_LAUNCHER )
+	{
+		if ( streq(self->backpack_team_name, getteam(other)) )
+		{
+			for( p = world; (p = find_plr( p )); ) {
+				if ( streq(getname(p), self->backpack_player_name) ) {
+					p->ps.transferred_packs++;
+					break;
+				}
+			}
+		}
+	}
+
 	G_sprint( other, PRINT_LOW, "\n" );
 // backpack touch sound
 	sound( other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM );
@@ -2230,6 +2244,12 @@ void DropBackpack()
 	item->s.v.think = ( func_t ) SUB_Remove;
 
 	item->s.v.classname = "backpack"; // we do need to be able to get rid of these things between points (hoony mode)
+
+	if (isTeam())
+	{
+		item->backpack_player_name = playername;
+		strlcpy(item->backpack_team_name, getteam(self), MAX_TEAM_NAME);
+	}
 }
 
 /*

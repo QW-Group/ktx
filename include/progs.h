@@ -119,8 +119,8 @@ typedef struct player_stats_s {
 	int		ot_h;	 // overtime health
 
 	int		spawn_frags;
-
 	int		handicap;
+	int		transferred_packs;
 
 	// ctf stats
 	int ctf_points; // use frags - this to calculate efficiency for ctf
@@ -395,6 +395,9 @@ typedef struct gedict_s {
 	float	ready;           // if a player is ready or not
 	char	*killer;         // name of player who last killed player
 	char	*victim;         // name of player last killed
+
+	char    *backpack_player_name; // player who dropped the backpack
+	char    backpack_team_name[32 /*MAX_TEAM_NAME*/]; // team associated with the backpack
 
 	struct gedict_s *k_lastspawn;    // NOT_SURE: spot at which player last spawned?
 // { kick mode
