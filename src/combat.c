@@ -831,6 +831,13 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		{
 			attacker->ps.dmg_g += dmg_dealt;
 			targ->ps.dmg_t     += dmg_dealt;
+
+			// damage to enemy weapon
+			int items = targ->s.v.items;
+			if ( items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING) )
+			{
+				attacker->ps.dmg_eweapon += dmg_dealt;
+			}
 		}
 
 		// real hits
