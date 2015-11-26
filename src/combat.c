@@ -819,44 +819,53 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	}
 
 	// update damage stats like: give/taked/team damage
-	if ( attacker->ct == ctPlayer && targ->ct == ctPlayer && attacker != targ )
+	if ( attacker->ct == ctPlayer && targ->ct == ctPlayer )
 	{
-		// damage
-
-		if ( tp_num() && streq(attackerteam, targteam) )
+		if ( attacker == targ )
 		{
-			attacker->ps.dmg_team += dmg_dealt;
+			// self damage
+
+			attacker->ps.dmg_self += dmg_dealt;
 		}
-		else 
+		else
 		{
-			attacker->ps.dmg_g += dmg_dealt;
-			targ->ps.dmg_t     += dmg_dealt;
-		}
+			// damage
 
-		// real hits
-
-		if ( take || save )
-		{
-			if ( dtRL == targ->deathtype )
-				attacker->ps.wpn[wpRL].rhits++;
-
-			if ( dtGL == targ->deathtype )
-				attacker->ps.wpn[wpGL].rhits++;
-		}
-
-		// virtual hits
-
-		if ( virtual_take || save )
-		{
-			if ( dtRL == targ->deathtype )
+			if ( tp_num() && streq(attackerteam, targteam) )
 			{
-				attacker->ps.wpn[wpRL].vhits++;
-				// virtual given rl damage
-				attacker->ps.dmg_g_rl += ( virtual_take + save );
+				attacker->ps.dmg_team += dmg_dealt;
+			}
+			else 
+			{
+				attacker->ps.dmg_g += dmg_dealt;
+				targ->ps.dmg_t     += dmg_dealt;
 			}
 
-			if ( dtGL == targ->deathtype )
-				attacker->ps.wpn[wpGL].vhits++;
+			// real hits
+
+			if ( take || save )
+			{
+				if ( dtRL == targ->deathtype )
+					attacker->ps.wpn[wpRL].rhits++;
+
+				if ( dtGL == targ->deathtype )
+					attacker->ps.wpn[wpGL].rhits++;
+			}
+
+			// virtual hits
+
+			if ( virtual_take || save )
+			{
+				if ( dtRL == targ->deathtype )
+				{
+					attacker->ps.wpn[wpRL].vhits++;
+					// virtual given rl damage
+					attacker->ps.dmg_g_rl += ( virtual_take + save );
+				}
+
+				if ( dtGL == targ->deathtype )
+					attacker->ps.wpn[wpGL].vhits++;
+			}
 		}
 	}
 
