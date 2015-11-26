@@ -200,6 +200,12 @@ typedef struct vote_s {
 	float elect_block_till;	// block election for this time
 } vote_t;
 
+// demo marker
+typedef struct demo_marker_s {
+	float time;
+	char markername[64];
+} demo_marker_t;
+
 // cmd flood protection
 
 #define MAX_FP_CMDS (10)

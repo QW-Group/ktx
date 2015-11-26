@@ -250,7 +250,41 @@ static void dumpent( );
 void ToggleCArena();
 // }
 
-void DemoMark() { stuffcmd( self, "//demomark\n" ); }
+// Save the first 5 demo markers to print at the end.
+demo_marker_t demo_markers[10];
+int demo_markers_count = 10;
+int demo_marker_index = 0;
+
+void ClearDemoMarkers()
+{
+	demo_marker_index = 0;
+}
+
+void DemoMark()
+{
+	stuffcmd( self, "//demomark\n" );
+
+	if ( match_in_progress <= 1 )
+		return;
+
+	// Do not add marker if there was already a marker just a few seconds ago.
+	if ( demo_marker_index > 0 && (g_globalvars.time - demo_markers[demo_marker_index - 1].time) < 5 )
+		return;
+
+	if ( demo_marker_index < demo_markers_count )
+	{
+		demo_markers[demo_marker_index].time = g_globalvars.time;
+		strlcpy(demo_markers[demo_marker_index].markername, getname(self), sizeof(demo_markers[demo_marker_index].markername));
+		demo_marker_index++;
+
+		int total = (int)(g_globalvars.time - match_start_time);
+		G_sprint(self, 2, "Added demo marker: \220%d:%02d\221\n", (total / 60), (total % 60));
+	}
+	else
+	{
+		G_sprint(self, 2, "Demo markers full!\n");
+	}
+}
 
 // CD - commands descriptions
 
@@ -869,7 +903,7 @@ cmd_t cmds[] = {
 	{ "dumpent",     dumpent,                   0    , CF_BOTH | CF_PARAMS, CD_DUMPENT },
 	{ "votecoop",    votecoop,                  0    , CF_PLAYER | CF_MATCHLESS, CD_VOTECOOP },
 	{ "coop_nm_pu",	 ToggleNewCoopNm,           0    , CF_PLAYER | CF_MATCHLESS, CD_COOPNMPU },
-	{ "demomark",	 DemoMark,                  0    , CF_PLAYER, CD_DEMOMARK },
+	{ "demomark",	 DemoMark,                  0    , CF_BOTH, CD_DEMOMARK },
 };
 
 #undef DEF
