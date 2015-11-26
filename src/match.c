@@ -173,6 +173,7 @@ typedef struct teamStats_s {
 // }
 	wpType_t wpn[wpMAX];
 	itType_t itm[itMAX];
+	int transferred_packs;
 } teamStats_t;
 
 teamStats_t tmStats[MAX_TM_STATS];
@@ -232,6 +233,8 @@ void CollectTpStats()
 				tmStats[tmStats_cnt].wpn[i].tooks   += p2->ps.wpn[i].tooks;
 				tmStats[tmStats_cnt].wpn[i].ttooks  += p2->ps.wpn[i].ttooks;
 			}
+
+			tmStats[tmStats_cnt].transferred_packs += p2->ps.transferred_packs;
 
 // { ctf related
 			tmStats[tmStats_cnt].res += p2->ps.res_time;
@@ -339,10 +342,9 @@ void SummaryTPStats()
 		}
 
 		// rl
-		if ( isTeam() ) // rl stats pointless in other modes?
-			G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("      RL"),
-					redtext("Took"), tmStats[i].wpn[wpRL].tooks, redtext("Killed"), tmStats[i].wpn[wpRL].ekills,
-					redtext("Dropped"), tmStats[i].wpn[wpRL].drops);
+		G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("      RL"),
+				redtext("Took"), tmStats[i].wpn[wpRL].tooks, redtext("Killed"), tmStats[i].wpn[wpRL].ekills,
+				redtext("Dropped"), tmStats[i].wpn[wpRL].drops, redtext("Xfer"), tmStats[i].transferred_packs);
 
 		// damage
 		G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f\n", redtext("  Damage"),
@@ -506,8 +508,9 @@ void OnePlayerStats(gedict_t *p, int tp)
 
 		// rl
 		if ( isTeam() )
-			G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("      RL"),
-				redtext("Took"), t_rl, redtext("Killed"), k_rl, redtext("Dropped"), d_rl);
+			G_bprint(2, "%s: %s:%d %s:%d %s:%d%s\n", redtext("      RL"),
+				redtext("Took"), t_rl, redtext("Killed"), k_rl, redtext("Dropped"), d_rl,
+				(p->ps.transferred_packs ? va(" %s:%d", redtext("Xfer"), p->ps.transferred_packs) : ""));
 
 		// damage
 		G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f\n", redtext("  Damage"),
