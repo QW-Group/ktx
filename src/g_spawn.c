@@ -122,6 +122,7 @@ field_t         fields[] = {
 	{"team_no",	FOFS( team_no ),		F_INT},
 // custom teleporters
 	{"size", 	FOFS( s.v.size ),	F_VECTOR},
+// race routes
 	{"race_route_name", FOFS( race_route_name ), F_LSTRING},
 	{"race_route_description", FOFS( race_route_description ), F_LSTRING},
 	{"race_route_timeout", FOFS( race_route_timeout ), F_INT},
@@ -129,6 +130,16 @@ field_t         fields[] = {
 	{"race_route_falsestart_mode", FOFS( race_route_falsestart_mode ), F_INT},
 	{"race_route_start_yaw", FOFS( race_route_start_yaw ), F_FLOAT},
 	{"race_route_start_pitch", FOFS( race_route_start_yaw ), F_FLOAT},
+// advanced hoonymode (spawn points determine how the player spawns)
+	{"spawn_items",   FOFS( s.v.items ),  F_FLOAT},
+	{"spawn_armorvalue", FOFS( s.v.armorvalue ), F_FLOAT},
+	{"spawn_ammo_shells", FOFS( s.v.ammo_shells ), F_FLOAT},
+	{"spawn_ammo_nails", FOFS( s.v.ammo_nails ), F_FLOAT},
+	{"spawn_ammo_rockets", FOFS( s.v.ammo_rockets ), F_FLOAT},
+	{"spawn_ammo_cells", FOFS( s.v.ammo_cells ), F_FLOAT},
+	{"spawn_initial_delay", FOFS( initial_spawn_delay ), F_FLOAT},
+	{"hoony_timelimit", FOFS( hoony_timelimit ), F_INT},
+	{"hoony_defaultwinner", FOFS( hoony_defaultwinner ), F_LSTRING},
 	{NULL}
 };
 typedef struct {

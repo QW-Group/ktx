@@ -3215,6 +3215,11 @@ void UserMode(float umode)
 		umode *= -1;
 	}
 	else {
+		if ( world->hoony_timelimit || ! strnull(world->hoony_defaultwinner) ) {
+			G_sprint( self, 2, "This map is designed for hoonymode only\n" );
+			return;
+		}
+
 		if ( cvar("k_auto_xonx") ) {
 			G_sprint(self, 2, "Command blocked due to k_auto_xonx\n");
 			return;
@@ -4773,7 +4778,6 @@ void lastscore_add ()
 				e2 = getname( p );
 				s2 = p->s.v.frags;
 			}
-			extra = HM_lastscores_extra();
 		}
 	}
 	else if ( isDuel() )

@@ -24,85 +24,99 @@
 
 #include "g_local.h"
 
+#define HM_RESULT_NOTPLAYED    0
+#define HM_RESULT_WONROUND     1
+#define HM_RESULT_LOSTROUND    2
+#define HM_RESULT_SUICIDELOSS  3
+#define HM_RESULT_SUICIDEWIN   4
+#define HM_RESULT_DRAWWIN      5
+
+#define HM_MIN_POINTS 6
+#define HM_WINNING_DIFF 2
+
 qbool isHoonyMode()
 {
 	return (isDuel() && cvar("k_hoonymode"));
 }
 
-char extra1[99] = {0};
-char extra2[99] = {0};
-char extra[199] = {0};
+static int round_number = 0;
 
-void HM_next_point(gedict_t *won, gedict_t *lost) // won is optional, lost is not
+void HM_initialise_rounds()
 {
-	// note: i need won/lost because depending on s.v.frags is unreliable here...
+	round_number = 0;
+}
+
+// hoonymode: suicide, etc, count as a point for other players
+void HM_suicide(gedict_t* player)
+{
 	gedict_t *p;
-	char *p_extra;
-	int i = 0;
-	static int id1 = -99, id2 = -99, max_len = 0;
-	int f = 0;
 
-	if (won == 0)
-		for (p = world; (p = find_plr(p));)
-			if (p != lost)
-				won = p;
+	player->hoony_results[round_number] = HM_RESULT_SUICIDELOSS;
 
-	if (id1 == -99)
-		id1 = GetUserID(won);
-	else if (id2 == -99)
-		id2 = GetUserID(lost);
+	for (p = world; (p = find_plr(p));) {
+		if (p != player) {
+			p->s.v.frags += 1; 
+			p->hoony_results[round_number] = HM_RESULT_SUICIDEWIN;
+		}
+	}
 
-	// And what are you doing here? --qqshka.
-	for (p = world; (p = find_plr(p));)
-	{
-		if (id1 == GetUserID(p))
-			p_extra = extra1;
-		else
-			p_extra = extra2;
+	EndMatch( 0 );
+}
 
-		if (HM_current_point() == 1)
-		{
-			max_len = max(strlen(won->s.v.netname), strlen(lost->s.v.netname));
-			for (i = 0; i < max_len + 2; ++i) // I forgot how to do this using std functions lol --phil
-			{
-				p_extra[i] = (i < strlen(p->s.v.netname) ? p->s.v.netname[i] : (i == strlen(p->s.v.netname) ? ':' : ' '));
+// Timelimit hit
+void HM_draw()
+{
+	gedict_t* p;
+
+	// .ent file can dictate that one player wins by default
+	if (! strnull(world->hoony_defaultwinner)) {
+		for (p = world; p = find_plr(p);) {
+			if (p->k_hoony_new_spawn && streq(p->k_hoony_new_spawn->s.v.targetname, world->hoony_defaultwinner)) {
+				p->s.v.frags++;
+				G_bprint(2, "%s wins the round on time.\n", p->s.v.netname);
+				EndMatch( 0 );
+				return;
 			}
-			p_extra[i] = 0;
+		}
+	}
+
+	// If in normal rounds, everyone gets a point, so we get closer to finishing.  
+	//   Otherwise ignore round and go on to next one
+	if (round_number < HM_MIN_POINTS)
+	{
+		gedict_t* p;
+
+		for (p = world; p = find_plr(p); )
+		{
+			p->hoony_results[round_number] = HM_RESULT_DRAWWIN;
+			p->s.v.frags++;
 		}
 
-		for (i = max_len + 2; i < strlen(p_extra); i += 2)
-			f += (p_extra[i] == '0' ? 0 : 1);
-
-		p_extra[i] = (p == won ? '1' : '0');
-		p_extra[i+1] = ' ';
-		p_extra[i+2] = 0;
+		++round_number;
 	}
+	G_bprint(2, "This round ends in a draw\n");
+
 	EndMatch(0);
 }
 
-#define HM_MIN_POINTS 6
-#define HM_WINNING_DIFF 2
+void HM_next_point(gedict_t *winner, gedict_t *loser)
+{
+	winner->hoony_results[round_number] = HM_RESULT_WONROUND;
+	loser->hoony_results[round_number]  = HM_RESULT_LOSTROUND;
+	
+	if (round_number < HM_MAX_ROUNDS - 1)
+		++round_number;
+
+	EndMatch(0);
+}
 
 int HM_current_point()
 {
-	gedict_t *p;
-	int i = 0;
-	for (p = world; (p = find_plr(p));) i += p->s.v.frags;
-	return i;
+	return round_number;
 }
-
-/*
-static struct
-{
-float lg;
-int dh;
-int hp;
-}
-hm_stat[2][99]; */ // save myself some code
 
 // [80] = 5 points per line (plus maybe a vs_blurb), times 30/3 = 50 points max
 static char hm_stat_lines[30][80];
-
 #define HM_PTS_PER_STAT_LINE 5
 
 void HM_stats_show()
@@ -143,7 +157,8 @@ void HM_stats()
 
 	for (p = world; (p = find_plr(p));)
 	{
-		if (previous_point % HM_PTS_PER_STAT_LINE == 0) strlcat(vs_blurb, va("%s%s", p->s.v.netname, i == 0 ? " - " : "\n"), sizeof(vs_blurb));
+		if (previous_point % HM_PTS_PER_STAT_LINE == 0) 
+			strlcat(vs_blurb, va("%s%s", p->s.v.netname, i == 0 ? " - " : "\n"), sizeof(vs_blurb));
 		hm_stat[i].lg = bound(0.0, 100.0 * p->ps.wpn[wpLG].hits / max(1, p->ps.wpn[wpLG].attacks), 99.0);
 		hm_stat[i].dh = p->ps.wpn[wpRL].hits + p->ps.wpn[wpGL].hits;
 		if (p->s.v.health <= 0) // avoid calculating something like (hp = -10) + (armor = 100) ...
@@ -155,7 +170,8 @@ void HM_stats()
 
 	if (previous_point % HM_PTS_PER_STAT_LINE == 0)
 	{
-		if (previous_point == 0) hm_stat_lines[0][0] = hm_stat_lines[1][0] = hm_stat_lines[2][0] = 0;
+		if (previous_point == 0) 
+			hm_stat_lines[0][0] = hm_stat_lines[1][0] = hm_stat_lines[2][0] = 0;
 		strlcat(hm_stat_lines[0+line_set], va("%sLG: ", vs_blurb), sizeof(hm_stat_lines[0])); // don't need to add to sizeof()s since its static array
 		strlcat(hm_stat_lines[1+line_set], "DH: ", sizeof(hm_stat_lines[1]));
 		strlcat(hm_stat_lines[2+line_set], "HP: ", sizeof(hm_stat_lines[2]));
@@ -169,108 +185,185 @@ void HM_stats()
 int HM_current_point_type()
 {
 	gedict_t *p;
-	int s1 = -999, s2 = -999;
+	int maxfrags = -999, minfrags = 999;
+	int fragdiff = 0;
 
-	for (p = world; (p = find_plr(p));)
-		if (s1 == -999) s1 = p->s.v.frags; else s2 = p->s.v.frags;
+	for (p = world; (p = find_plr(p));) {
+		maxfrags = max(maxfrags, p->s.v.frags);
+		minfrags = min(minfrags, p->s.v.frags);
+	}
+	fragdiff = maxfrags - minfrags;
 
-	if ((s1 >= HM_MIN_POINTS || s2 >= HM_MIN_POINTS) && abs(s1-s2) >= HM_WINNING_DIFF)
+	if (maxfrags >= HM_MIN_POINTS && fragdiff >= HM_WINNING_DIFF)
 		return HM_PT_FINAL; // as used in the code (match.c) HM_PT_FINAL == "last point was final"
 
-	if ((s1 >= HM_MIN_POINTS - 1 || s2 >= HM_MIN_POINTS - 1) && abs(s1-s2) >= HM_WINNING_DIFF - 1)
+	if (maxfrags >= HM_MIN_POINTS - 1 && fragdiff >= HM_WINNING_DIFF - 1)
 		return HM_PT_SET; // as used in the code, HM_PT_SET == "this point is set point"
 
 	return 0;
 }
 
-void show_powerups(char *);
-void hide_powerups(char *);
+void SUB_regen();
 
-void HM_all_ready()
+void remove_items(char* classname)
 {
 	gedict_t *p;
 
-	// make sure stuff is spawned for every point
-	show_powerups("item_shells");
-	show_powerups("item_spikes");
-	show_powerups("item_rockets");
-	show_powerups("item_cells");
-	show_powerups("item_health");
-	show_powerups("item_armor1");
-	show_powerups("item_armor2");
-	show_powerups("item_armorInv");
-	hide_powerups("item_artifact_invulnerability");
-	hide_powerups("item_artifact_super_damage");
-	hide_powerups("item_artifact_envirosuit");
-	hide_powerups("item_artifact_invisibility");
-
-	// get rid of any backpacks too ... is there a better find than nextent() here?
-	for (p = world; (p = nextent(p));) if (streq(p->s.v.classname, "backpack"))
+	for (p = world; (p = find(p, FOFCLSN, classname)); /**/) 
 		ent_remove(p);
-
-	if (HM_current_point_type() == HM_PT_SET)
-		G_bprint(2, "Set point!\n");
 }
 
-// note: this will probably break if a player drops and rejoins..
-void HM_rig_the_spawns(int mode, gedict_t *spot)
+void respawn_items(char* classname, qbool enabled)
 {
-	static int enabled = 0;
-	static gedict_t *p;
+	gedict_t *p;
 
-	static gedict_t spot1, spot2;
-	static int id1 = -99, id2 = -99;
+	if ( strnull( classname ) )
+		G_Error("respawn_items");
 
-	if (mode < 2) // we don't want to rig every spawn, so first call it with (1, null) to turn on spawn rigging (don't forget (0, null) to turn off)
+	for( p = world; (p = find(p, FOFCLSN, classname)); /**/ )
 	{
-		enabled = mode;
-		return;
+		if (enabled)
+		{
+			if (p->initial_spawn_delay > 0)
+			{
+				// hide, but respawn at future point
+				p->s.v.model = NULL;
+				p->s.v.solid = SOLID_NOT;
+				p->s.v.nextthink = g_globalvars.time + p->initial_spawn_delay;
+				p->s.v.think = ( func_t ) SUB_regen;
+			}
+			else if (strnull( p->s.v.model ) || p->s.v.solid != SOLID_TRIGGER)
+			{
+				// respawn now
+				p->s.v.nextthink = g_globalvars.time;
+				p->s.v.think = ( func_t ) SUB_regen;
+			}
+		}
+		else 
+		{
+			// hide item
+			p->s.v.model = NULL;
+			p->s.v.solid = SOLID_NOT;
+			p->s.v.nextthink = 0; 
+		}
+	}
+}
+
+void HM_reset_map()
+{
+	// re-initialise items for every point
+	respawn_items("item_shells", true);
+	respawn_items("item_spikes", true);
+	respawn_items("item_rockets", true);
+	respawn_items("item_cells", true);
+
+	respawn_items("item_health", true);
+	respawn_items("item_armor1", true);
+	respawn_items("item_armor2", true);
+	respawn_items("item_armorInv", true);
+	
+	respawn_items("weapon_supershotgun", true);
+	respawn_items("weapon_nailgun", true);
+	respawn_items("weapon_supernailgun", true);
+	respawn_items("weapon_grenadelauncher", true);
+	respawn_items("weapon_rocketlauncher", true);
+	respawn_items("weapon_lightning", true);
+
+	respawn_items("item_artifact_invulnerability", false);
+	respawn_items("item_artifact_super_damage", false);
+	respawn_items("item_artifact_envirosuit", false);
+	respawn_items("item_artifact_invisibility", false);
+
+	// remove temporary objects
+	remove_projectiles();
+	remove_items("backpack");
+}
+
+static qbool SpawnAlreadyAllocated(gedict_t* spawn)
+{
+	gedict_t* p;
+
+	for (p = world; p = find_plr(p); /**/) {
+		if (p->k_hoony_new_spawn == spawn)
+			return true;
 	}
 
-	// then we call it with (2, spot) to spawn on the other guy's last spawn (only if it is enabled, of course)
-	if (enabled)
-	{
-		if (HM_current_point() % 2 == 1)
-		{
-			for (p = world; (p = find_plr(p));) if (p == self)
-			{
-				if (id1 == GetUserID(p))
-					*spot = spot2;
-				else
-					*spot = spot1;
-			}
-			// this should be all you need
-			/*for (p = world; (p = find_plr(p));)
-			{
-			if (GetUserID(p) != GetUserID(self))
-			{
-			spot = p->wizard;
-			}
-			}*/
-		}
-		else
-		{
-			for (p = world; (p = find_plr(p));) if (p == self)
-			{
-				if (id1 == -99)
-					id1 = GetUserID(p);
-				else if (id2 == -99)
-					id2 = GetUserID(p);
+	return false;
+}
 
-				if (id1 == GetUserID(p))
-					spot1 = *spot;
-				else
-					spot2 = *spot;
+static void HM_rig_spawn(gedict_t* player)
+{
+	if (HM_current_point() % 2 == 1)
+	{
+		// Swap spawn points with next player
+		gedict_t* p = find_plr(player);
+
+		if (p == NULL)
+			p = find_plr(world);
+		
+		player->k_hoony_new_spawn = p->k_hoonyspawn;
+	}
+	else 
+	{
+		// SelectSpawnPoint() is used to us placing the player there immediately, which we are not doing,
+		//   so try and avoid picking the same point for two people manually.
+		int i;
+
+		for (i = 0; i < 10; ++i)
+		{
+			gedict_t* attempt = SelectSpawnPoint("info_player_deathmatch");
+
+			if (! SpawnAlreadyAllocated(attempt)) {
+				player->k_hoony_new_spawn = player->k_hoonyspawn = attempt;
+				break;
 			}
-			// this should be all you need
-			//self->wizard = spot; // ->wizard should really be ->k_hoonyspawn, but when I add it in progs.h, stuff breaks randomly? :X
 		}
+
+		if (! player->k_hoony_new_spawn)
+		{
+			// oh dear - go sequential...
+			gedict_t* attempt = SelectSpawnPoint("info_player_deathmatch");
+
+			if (SpawnAlreadyAllocated(attempt))
+			{
+				attempt = find(attempt, FOFCLSN, "info_player_deathmatch");
+
+				// go back to the start
+				if (attempt == NULL)
+					attempt = find(world, FOFCLSN, "info_player_deathmatch");
+
+				// should never happen...
+				if (attempt == NULL)
+					attempt = SelectSpawnPoint("info_player_deathmatch");	
+			}
+			player->k_hoony_new_spawn = player->k_hoonyspawn = attempt;	
+		}
+	}
+}
+
+void HM_all_ready()
+{
+	gedict_t* p;
+
+	// Clear all spawns for the current round
+	for (p = world; p = find_plr(p); /**/) {
+		p->k_hoony_new_spawn = NULL;
+	}
+
+	// TODO: at start of match: 
+	// - put all spawns in array, shuffle order
+	// - shuffle order and then assign to players/teams?
+
+	// Assign players to spawns
+	for (p = world; p = find_plr(p); /**/) {
+		HM_rig_spawn(p);
 	}
 }
 
 char *HM_lastscores_extra ()
 {
-	extra[0] = 0;
-	strlcat(extra, va("\n%s\n%s", extra1, extra2), sizeof(extra));
-	return extra;
+	//extra[0] = 0;
+	//strlcat(extra, va("\n%s\n%s", extra1, extra2), sizeof(extra));
+	//return extra;
+	return "";
 }

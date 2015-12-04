@@ -1589,6 +1589,12 @@ void CheckOvertime()
 	int sc = get_scores1() - get_scores2();
 	int k_mb_overtime = cvar( "k_overtime" );
 	int k_exttime = bound(1, cvar( "k_exttime" ), 999); // at least some reasonable values
+	
+	// In hoonymode the round is timing out, not the match - we're effectively always in suddendeath mode
+	if (isHoonyMode()) {
+		HM_draw();
+		return;
+	}
 
 	// If 0 no overtime, 1 overtime, 2 sudden death
 	// And if its neither then well we exit
@@ -1810,6 +1816,7 @@ void SM_PrepareMap()
 		}
 	}
 
+	HM_reset_map();
 	ClearBodyQue(); // hide corpses
 }
 
@@ -1974,18 +1981,14 @@ void StartMatch ()
 	HideSpawnPoints();
 
 	match_start_time  = g_globalvars.time;
-  g_matchstarttime = (int) (g_globalvars.time*1000);
+	g_matchstarttime = (int) (g_globalvars.time*1000);
 	match_in_progress = 2;
 
 	lastTeamLocationTime = -TEAM_LOCATION_UPDATE_TIME; // update on next frame
 
 	remove_specs_wizards (); // remove wizards
 
-	if (isHoonyMode())
-		HM_rig_the_spawns(1, 0);
 	SM_PrepareClients(); // put clients in server and reset some params
-	if (isHoonyMode())
-		HM_rig_the_spawns(0, 0);
 
 	if ( !QVMstrftime(date, sizeof(date), "%Y-%m-%d %H:%M:%S %Z", 0) )
 		date[0] = 0;
@@ -2012,9 +2015,29 @@ void StartMatch ()
 
 	self->k_teamnum = g_globalvars.time + 3;  //dirty i know, but why waste space?
 											  // FIXME: waste space, but be clean
-	self->cnt = bound(0, timelimit, 9999);
-	self->cnt2 = 60;
-	localcmd("serverinfo status \"%d min left\"\n", (int)timelimit);
+
+	// If the players haven't specified their own time limit then use the one from the .ent file
+	//   (otherwise it's just sudden-death)
+	if (isHoonyMode() && timelimit == 0 && world->hoony_timelimit > 0) 
+	{
+		int minutes = bound(0, world->hoony_timelimit / 60, 9999);
+		int seconds = world->hoony_timelimit % 60;
+
+		if (seconds)
+			++minutes;
+		else
+			seconds = 60;
+
+		self->cnt = minutes;
+		self->cnt2 = seconds;
+		localcmd("serverinfo status \"%d min left\"\n", minutes);
+	}
+	else 
+	{
+		self->cnt = bound(0, timelimit, 9999);
+		self->cnt2 = 60;
+		localcmd("serverinfo status \"%d min left\"\n", (int)timelimit);
+	}
 
 	self->s.v.think = ( func_t ) TimerThink;
 	self->s.v.nextthink = g_globalvars.time + 1;
@@ -2048,6 +2071,50 @@ static qbool handicap_in_use(void)
 			return true;
 
 	return false;
+}
+
+void PersonalisedCountdown(char* baseText)
+{
+	char text[1024];
+	gedict_t* p;
+
+	for (p = world; p = find_plr(p); /**/) {
+		strlcpy(text, baseText, sizeof(text));
+
+		if (HM_current_point_type() == HM_PT_SET)
+			strlcat(text, va("%s\n\n", redtext("* Set Point *")), sizeof(text));
+
+		if (p->k_hoony_new_spawn && ! strnull(p->k_hoony_new_spawn->s.v.targetname))
+		{
+			strlcat(text, va("Next %8.8s\n", redtext(p->k_hoony_new_spawn->s.v.targetname)), sizeof(text));
+
+			if ( timelimit )
+				strlcat(text, va("%s %3s\n", "Timelimit", dig3(timelimit)), sizeof(text));
+			else if ( isHoonyMode() && world->hoony_timelimit ) 
+			{
+				int minutes = world->hoony_timelimit / 60;
+				int seconds = world->hoony_timelimit % 60;
+
+				if (minutes == 0)
+					strlcat(text, va("%s %3ss\n", "Duration", dig3(seconds)), sizeof(text));
+				else if (seconds == 0)
+					strlcat(text, va("%s %3sm\n", "Duration", dig3(minutes)), sizeof(text));
+				else 
+					strlcat(text, va("%s %1s:%2s\n", "Duration", dig3(minutes), dig3(seconds)), sizeof(text));
+			}
+
+			if (! strnull(world->hoony_defaultwinner)) {
+				if (streq(p->k_hoony_new_spawn->s.v.targetname, world->hoony_defaultwinner)) {
+					strlcat(text, va("Draw %s\n", redtext(" you win")), sizeof(text));
+				}
+				else {
+					strlcat(text, va("Draw %s\n", redtext("you lose")), sizeof(text));
+				}
+			}
+		}
+
+		G_centerprint(p, "%s", text);
+	}
 }
 
 void PrintCountdown( int seconds )
@@ -2088,6 +2155,13 @@ void PrintCountdown( int seconds )
 
 	if (matchtag[0])
 		strlcat(text, va("%s\n\n\n", matchtag), sizeof(text));
+
+
+	if (isHoonyMode() && seconds <= 3)
+	{
+		PersonalisedCountdown(text);
+		return;
+	}
 
 	if ( !isRA() && !coop ) // useless in RA
 		strlcat(text, va("%s %2s\n", "Deathmatch", dig3(deathmatch)), sizeof(text));
@@ -2151,6 +2225,18 @@ void PrintCountdown( int seconds )
 		strlcat(text, va("%s %4s\n", "Teamplay", dig3(teamplay)), sizeof(text));
 	if ( timelimit )
 		strlcat(text, va("%s %3s\n", "Timelimit", dig3(timelimit)), sizeof(text));
+	else if ( isHoonyMode() && world->hoony_timelimit ) 
+	{
+		int minutes = world->hoony_timelimit / 60;
+		int seconds = world->hoony_timelimit % 60;
+
+		if (minutes == 0)
+			strlcat(text, va("%s %3ss\n", "Duration", dig3(seconds)), sizeof(text));
+		else if (seconds == 0)
+			strlcat(text, va("%s %3sm\n", "Duration", dig3(minutes)), sizeof(text));
+		else 
+			strlcat(text, va("%s %1s:%2s\n", "Duration", dig3(minutes), dig3(seconds)), sizeof(text));
+	}
 	if ( fraglimit )
 		strlcat(text, va("%s %3s\n", "Fraglimit", dig3(fraglimit)), sizeof(text));
 
