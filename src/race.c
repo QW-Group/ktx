@@ -2505,7 +2505,7 @@ void race_add_standard_routes( void )
 		race_add_route_node(  405.6, 1565.6, 62.2,   0,   0, nodeCheckPoint );
 		race_add_route_node(    4.1, 1437.4, 24.0,   0,   0, nodeEnd );
 
-		race_set_route_name( "·ÚÔıÓ‰ ‰Ì±", "ya\215ng\215mh\215ssg\215ya" );
+		race_set_route_name( "√°√≤√Ø√µ√Æ√§ √§√≠¬±", "ya\215ng\215mh\215ssg\215ya" );
 		race_set_route_timeout( 30 );
 		race_set_route_weapon_mode( raceWeaponNo );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2525,7 +2525,7 @@ void race_add_standard_routes( void )
 		race_add_route_node( 2445.9, -1979.4, 120.0,   0,    0, nodeCheckPoint );
 		race_add_route_node( 2246.4, -2473.3, 200.0,   0,    0, nodeEnd );
 
-		race_set_route_name( "…ËÌßÛ Òı·‰èÚıÓ", "highèrl\215quad\215water\215lower\215raèmh" );
+		race_set_route_name( "√â√®√≠¬ß√≥ √±√µ√°√§¬è√≤√µ√Æ", "high¬èrl\215quad\215water\215lower\215ra¬èmh" );
 		race_set_route_timeout( 35 );
 		race_set_route_weapon_mode( raceWeaponNo );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2544,7 +2544,7 @@ void race_add_standard_routes( void )
 		race_add_route_node( 2397.6,    86.0,   41.2,     0,      0, nodeCheckPoint );
 		race_add_route_node( 2246.2,  -194.7, -136.0,     0,      0, nodeEnd );
 
-		race_set_route_name( "·ÚÔıÓ‰ ‰Ì≤", "water\215quadèlow\215rlèlow\215ng\215stairs" );
+		race_set_route_name( "√°√≤√Ø√µ√Æ√§ √§√≠¬≤", "water\215quad¬èlow\215rl¬èlow\215ng\215stairs" );
 		race_set_route_timeout( 35 );
 		race_set_route_weapon_mode( raceWeaponAllowed );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2560,7 +2560,7 @@ void race_add_standard_routes( void )
 		race_add_route_node(  701.0,  237.5,   89.2,   0,     0, nodeCheckPoint );
 		race_add_route_node(  261.0, -709.0,  328.0,   0,     0, nodeEnd );
 
-		race_set_route_name( "Ú·èÊÏ˘", "pentèmh\215window\215raètop" );
+		race_set_route_name( "√≤√°¬è√¶√¨√π", "pent¬èmh\215window\215ra¬ètop" );
 		race_set_route_timeout( 35 );
 		race_set_route_weapon_mode( raceWeaponAllowed );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2576,7 +2576,7 @@ void race_add_standard_routes( void )
 		race_add_route_node(  581.8,    0.2, -168.0,    0,    0, nodeCheckPoint );
 		race_add_route_node(  261.0, -709.0,  328.0,    0,    0, nodeEnd );
 
-		race_set_route_name( "Ú·èÚıÓ", "rl\215center\215raètop" );
+		race_set_route_name( "√≤√°¬è√≤√µ√Æ", "rl\215center\215ra¬ètop" );
 		race_set_route_timeout( 30 );
 		race_set_route_weapon_mode( raceWeaponNo );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2596,7 +2596,7 @@ void race_add_standard_routes( void )
 		race_add_route_node( -221.7, -561.6,  20.6, 0, 0, nodeCheckPoint );
 		race_add_route_node(  261.0, -709.0, 328.0, 0, 0, nodeEnd );
 
-		race_set_route_name( "·ÚÔıÓ‰è‰Ì≥", "rl\215hièbridge\215quadèya\215quadèunderèlifts\215sngèmh\215raètop" );
+		race_set_route_name( "√°√≤√Ø√µ√Æ√§¬è√§√≠¬≥", "rl\215hi¬èbridge\215quad¬èya\215quad¬èunder¬èlifts\215sng¬èmh\215ra¬ètop" );
 		race_set_route_timeout( 50 );
 		race_set_route_weapon_mode( raceWeaponAllowed );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2611,7 +2611,7 @@ void race_add_standard_routes( void )
 		race_add_route_node( 1199.9, -603.0,  24.0, 1.8, 178.4, nodeStart );
 		race_add_route_node( -144.0, -227.0, -72.0,   0,     0, nodeEnd );
 
-		race_set_route_name( "‚·ÛÂ ‰Ì¥", "ya\215quadètele" );
+		race_set_route_name( "√¢√°√≥√• √§√≠¬¥", "ya\215quad¬ètele" );
 		race_set_route_timeout( 15 );
 		race_set_route_weapon_mode( raceWeaponNo );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2628,7 +2628,7 @@ void race_add_standard_routes( void )
 		race_add_route_node(  336.2,  -664.8, -104.0,   0,     0, nodeCheckPoint );
 		race_add_route_node(  -68.6,   611.1, -296.0,   0,     0, nodeEnd );
 
-		race_set_route_name( "ÌËèÚıÓ", "ya\215topètele\215gl\215mh" );
+		race_set_route_name( "√≠√®¬è√≤√µ√Æ", "ya\215top¬ètele\215gl\215mh" );
 		race_set_route_timeout( 20 );
 		race_set_route_weapon_mode( raceWeaponNo );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2647,7 +2647,7 @@ void race_add_standard_routes( void )
 		race_add_route_node(  200.5,   -41.5, -104.0,   0,     0, nodeCheckPoint );
 		race_add_route_node( -129.3,  -580.4,  -72.0,   0,     0, nodeEnd );
 
-		race_set_route_name( "Òı·‰èÛÙÚ·ÊÂ", "ya\215topètele\215gl\215lg\215quad\215quadètele" );
+		race_set_route_name( "√±√µ√°√§¬è√≥√¥√≤√°√¶√•", "ya\215top¬ètele\215gl\215lg\215quad\215quad¬ètele" );
 		race_set_route_timeout( 20 );
 		race_set_route_weapon_mode( raceWeaponNo );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2667,7 +2667,7 @@ void race_add_standard_routes( void )
 		race_add_route_node( 874.3, -210.2, 232.6,    0,     0, nodeCheckPoint );
 		race_add_route_node( 141.1, -223.6, 216.0,    0,     0, nodeEnd );
 
-		race_set_route_name( "·ÚÔıÓ‰ ‰Ìµ", "ya\215gl\215rl\215teleèrl\215aboveègl\215sng" );
+		race_set_route_name( "√°√≤√Ø√µ√Æ√§ √§√≠¬µ", "ya\215gl\215rl\215tele¬èrl\215above¬ègl\215sng" );
 		race_set_route_timeout( 35 );
 		race_set_route_weapon_mode( raceWeaponNo );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2683,7 +2683,7 @@ void race_add_standard_routes( void )
 		race_add_route_node(  450.2, -1484.5, 256.0,     0,    0, nodeCheckPoint );
 		race_add_route_node( 1735.0,  -345.0, 168.0,     0,    0, nodeEnd );
 
-		race_set_route_name( "‚·ÛÂ ‰Ì∂", "ga\215gl\215ra" );
+		race_set_route_name( "√¢√°√≥√• √§√≠¬∂", "ga\215gl\215ra" );
 		race_set_route_timeout( 15 );
 		race_set_route_weapon_mode( raceWeaponAllowed );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2701,7 +2701,7 @@ void race_add_standard_routes( void )
 		race_add_route_node( 1015.9,  -867.3, 256.0,   0,    0, nodeCheckPoint );
 		race_add_route_node( 1632.2,  -160.4, 168.0,   0,    0, nodeEnd );
 
-		race_set_route_name( "≥ßÛ tubeèrun", "mh\215rlèra\215glècircle\215ra" );
+		race_set_route_name( "√∞¬≥¬ß√≥ tube¬èrun", "mh\215rl¬èra\215gl¬ècircle\215ra" );
 		race_set_route_timeout( 25 );
 		race_set_route_weapon_mode( raceWeaponNo );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2946,66 +2946,169 @@ void race_add_standard_routes( void )
 
 		race_route_add_end();
 	}
-/*
-	else if ( streq( g_globalvars.mapname, "race1-beta" ) )
-	{
-		if ( !race_route_add_start() )
-			return;
+        else if ( streq( g_globalvars.mapname, "race1" ) )                                                                                                                                                                                                                    [92/5431]
+        {
+                if ( !race_route_add_start() )
+                        return;
 
-		race_add_route_node( -224,   0,   -40, 0, 0, nodeStart );
-		race_add_route_node( 1376, 423, -3752, 0, 0, nodeEnd );
+                race_add_route_node(    0,   0,   -40, 0, 0, nodeStart );
+                race_add_route_node( 1376, 382, -3700, 0, 0, nodeEnd );
 
-		race_set_route_name( "The lava origin", "start\215end" );
-		race_set_route_timeout( 40 );
-		race_set_route_weapon_mode( raceWeaponNo );
-		race_set_route_falsestart_mode( raceFalseStartNo );
+                race_set_route_name( "Pillars", "start\215finish" );
+                race_set_route_timeout( 40 );
+                race_set_route_weapon_mode( raceWeaponNo );
+                race_set_route_falsestart_mode( raceFalseStartNo );
 
-		race_route_add_end();
-	}
-	else if ( streq( g_globalvars.mapname, "race2-beta" ) )
-	{
-		if ( !race_route_add_start() )
-			return;
+                race_route_add_end();
+        }
+        else if ( streq( g_globalvars.mapname, "race2" ) )
+        {
+                if ( !race_route_add_start() )
+                        return;
 
-		race_add_route_node(   0,    8,    88, 0, 0, nodeStart );
-		race_add_route_node( 771, 3472, -1240, 0, 0, nodeEnd );
+                race_add_route_node(   0,    8,    88, 0, 0, nodeStart );
+                race_add_route_node( 1013, 3486, -1240, 0, 0, nodeEnd );
 
-		race_set_route_name( "The infernal sewers", "start\215end" );
-		race_set_route_timeout( 40 );
-		race_set_route_weapon_mode( raceWeaponNo );
-		race_set_route_falsestart_mode( raceFalseStartNo );
+                race_set_route_name( "Waste Warehouse", "start\215finish" );
+                race_set_route_timeout( 40 );
+                race_set_route_weapon_mode( raceWeaponNo );
+                race_set_route_falsestart_mode( raceFalseStartNo );
 
-		race_route_add_end();
-	}
-	else if ( streq( g_globalvars.mapname, "race3-beta" ) )
-	{
-		if ( !race_route_add_start() )
-			return;
+                race_route_add_end();
+        }
+        else if ( streq( g_globalvars.mapname, "race3" ) )
+        {
+                if ( !race_route_add_start() )
+                        return;
 
-		race_add_route_node( -352,  352, 2072, 0, 0, nodeStart );
-		race_add_route_node( -352, -110, -680, 0, 0, nodeEnd );
+                race_add_route_node( -352, 352, 2072, 0, 0, nodeStart );
+                race_add_route_node( -353, -92, -680, 0, 0, nodeEnd );
 
-		race_set_route_name( "A race for newbie", "start\215end" );
-		race_set_route_timeout( 30 );
-		race_set_route_weapon_mode( raceWeaponNo );
-		race_set_route_falsestart_mode( raceFalseStartNo );
+                race_set_route_name( "The Cube", "start\215finish" );
+                race_set_route_timeout( 30 );
+                race_set_route_weapon_mode( raceWeaponNo );
+                race_set_route_falsestart_mode( raceFalseStartNo );
 
-		race_route_add_end();
-	}
-	else if ( streq( g_globalvars.mapname, "race4-beta" ) )
-	{
-		if ( !race_route_add_start() )
-			return;
+                race_route_add_end();
+        }
+        else if ( streq( g_globalvars.mapname, "race4" ) )
+        {
+                if ( !race_route_add_start() )
+                        return;
 
-		race_add_route_node( -2816, 2816,  2712, 0, 0, nodeStart );
-		race_add_route_node( -2916, 1790, -1128, 0, 0, nodeEnd );
+                race_add_route_node( -2816, 2816,  2712, 0, 0, nodeStart );
+                race_add_route_node( -2918, 1790, -1115, 0, 0, nodeEnd );
 
-		race_set_route_name( "Elite maker", "start\215end" );
-		race_set_route_timeout( 30 );
-		race_set_route_weapon_mode( raceWeaponNo );
-		race_set_route_falsestart_mode( raceFalseStartNo );
+                race_set_route_name( "Curve Control", "start\215finish" );
+                race_set_route_timeout( 40 );
+                race_set_route_weapon_mode( raceWeaponNo );
+                race_set_route_falsestart_mode( raceFalseStartNo );
 
-		race_route_add_end();
-	}
-*/
+                race_route_add_end();
+        }
+        else if ( streq( g_globalvars.mapname, "race5" ) )
+        {
+                if ( !race_route_add_start() )
+                        return;
+
+                race_add_route_node( -1882, 2400, 2840, 0, -180, nodeStart );
+                race_add_route_node(  2463, -1793,  98, 0,    0, nodeEnd );
+
+                race_set_route_name( "Spin Cycle", "start\215finish" );
+                race_set_route_timeout( 40 );
+                race_set_route_weapon_mode( raceWeaponNo );
+                race_set_route_falsestart_mode( raceFalseStartNo );
+
+                race_route_add_end();
+        }
+        else if ( streq( g_globalvars.mapname, "race6" ) )
+        {
+                if ( !race_route_add_start() )
+                        return;
+
+                race_add_route_node( -2848,   0, 2872, 0, 0, nodeStart );
+                race_add_route_node(     0, 965, -985, 0, 0, nodeEnd );
+
+                race_set_route_name( "The Tube", "start\215finish" );
+                race_set_route_timeout( 40 );
+                race_set_route_weapon_mode( raceWeaponNo );
+                race_set_route_falsestart_mode( raceFalseStartNo );
+
+                race_route_add_end();
+        }
+        else if ( streq( g_globalvars.mapname, "race7" ) )
+        {
+                if ( !race_route_add_start() )
+                        return;
+
+                race_add_route_node( -2880, -768, 2520, 0, 0, nodeStart );
+                race_add_route_node( -1378,  794,  344, 0, 0, nodeEnd );
+
+                race_set_route_name( "Upslider", "start\215finish" );
+                race_set_route_timeout( 40 );
+                race_set_route_weapon_mode( raceWeaponNo );
+                race_set_route_falsestart_mode( raceFalseStartNo );
+
+                race_route_add_end();
+        }
+        else if ( streq( g_globalvars.mapname, "race8" ) )
+        {
+                if ( !race_route_add_start() )
+                        return;
+
+                race_add_route_node( -1440,  2304, 1496, 0, 0, nodeStart );
+                race_add_route_node( -1479, -1788, -1000, 0, 0, nodeEnd );
+
+                race_set_route_name( "Canyon Run", "start\215finish" );
+                race_set_route_timeout( 60 );
+                race_set_route_weapon_mode( raceWeaponAllowed );
+                race_set_route_falsestart_mode( raceFalseStartNo );
+
+                race_route_add_end();
+        }
+        else if ( streq( g_globalvars.mapname, "race9" ) )
+        {
+                if ( !race_route_add_start() )
+                        return;
+
+                race_add_route_node( -2736, 2568, 2776, 0, 0, nodeStart );
+                race_add_route_node( -2981, 688,  -296, 0, 0, nodeEnd );
+
+                race_set_route_name( "Forgotten Path", "start\215finish" );
+                race_set_route_timeout( 90 );
+                race_set_route_weapon_mode( raceWeaponNo );
+                race_set_route_falsestart_mode( raceFalseStartNo );
+
+                race_route_add_end();
+        }
+        else if ( streq( g_globalvars.mapname, "race10" ) )
+        {
+                if ( !race_route_add_start() )
+                        return;
+
+                race_add_route_node( -2988,    0,    88, 0, 0, nodeStart );
+                race_add_route_node(  1146, 2300, -2448, 0, 0, nodeEnd );
+
+                race_set_route_name( "Place of Death", "start\215finish" );
+                race_set_route_timeout( 40 );
+                race_set_route_weapon_mode( raceWeaponNo );
+                race_set_route_falsestart_mode( raceFalseStartNo );
+
+                race_route_add_end();
+        }
+        else if ( streq( g_globalvars.mapname, "escape2a" ) )
+        {
+                if ( !race_route_add_start() )
+                        return;
+
+                race_add_route_node( -3633, -1819,  3748, 0, 0, nodeStart );
+                race_add_route_node(  1847, -2046, -3613, 0, 0, nodeEnd );
+
+                race_set_route_name( "Space Odyssey", "start\215finish" );
+                race_set_route_timeout( 90 );
+                race_set_route_weapon_mode( raceWeaponNo );
+                race_set_route_falsestart_mode( raceFalseStartNo );
+
+                race_route_add_end();
+        }
 }
