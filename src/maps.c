@@ -101,6 +101,80 @@ static void Map_AddMapToList( char *name )
 	maps_cnt++;
 }
 
+// Extension to allow multiple .ent files for individual maps.
+// We check all *.ent files we can find, and look for format mapName#description.ent, where mapName is a 
+//    standard map we already have in list.
+void GetCustomEntityMapsForDirectory(char* directory)
+{
+	char *s, name[32], *sep;
+	int i, cnt, l, m;
+
+	ml_buf[0] = 0;
+
+	// Find all entity files in the maps directory
+	cnt = trap_FS_GetFileList( directory, ( FTE_sv ? ".ent" : "\\.ent$" ), ml_buf, sizeof(ml_buf), 0 );
+	ml_buf[sizeof(ml_buf)-1] = 0;
+
+	for ( i = 0, s = ml_buf; i < cnt && s < ml_buf + sizeof(ml_buf); ++i )
+	{
+		l = strlen( s );
+
+		if ( FTE_sv )
+			l -= 4; // skip extension
+
+		if ( l <= 0 )
+			break;
+
+		l++; // + nul
+
+		sep = strchr(s, SV_ENTITYFILE_SEPARATOR);
+		if (sep)
+		{
+			int baseMapFound = 0, duplicateFound = 0;
+			int mapNameLength;
+
+			// copy
+			strlcpy( name, s, min( sizeof(name), l ) );
+
+			// The server could have mapName#entName.ent in more than one directory, so check here for duplicates
+			mapNameLength = sep - s;
+			if (mapNameLength > 0)
+			{
+				for (m = 0; m < maps_cnt; ++m)
+				{
+					baseMapFound |= (strlen(mapslist[m]) == mapNameLength && !strncmp(mapslist[m], s, mapNameLength));
+					duplicateFound |= !strcmp(mapslist[m], s);
+				}
+
+				if (baseMapFound && ! duplicateFound)
+					Map_AddMapToList( name );
+			}
+		}
+
+		// find next map name
+		s = strchr(s, 0);
+		if ( !s )
+			G_Error( "GetMapList: strchr returns NULL" );
+		s++;
+	}
+
+	return;
+}
+
+void GetCustomEntityMaps(void)
+{
+	char path[1024] = { 0 };
+
+	char* entityDir = cvar_string("sv_loadentfiles_dir");
+	if (entityDir && *entityDir)
+	{
+		snprintf(path, sizeof(path) - 1, "maps/%s", entityDir);
+		GetCustomEntityMapsForDirectory(path);
+	}
+
+	GetCustomEntityMapsForDirectory("maps");
+}
+
 void AddFixedMaps(void)
 {
 	int i;
@@ -155,6 +229,8 @@ void GetMapList(void)
 
 		s++;
 	}
+
+	GetCustomEntityMaps();
 
 #if 0 // debug
 	G_cprint( "Maps list\n" );

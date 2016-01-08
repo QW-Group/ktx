@@ -978,3 +978,5 @@ void swimmonster_start( char *model );
 
 void LaunchLaser( vec3_t org, vec3_t vec );
 
+// identify alternative .ent files by format <map>#<name>.ent
+#define SV_ENTITYFILE_SEPARATOR '#'
