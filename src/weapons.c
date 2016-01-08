@@ -1644,10 +1644,42 @@ void W_SetCurrentAmmo()
 
 float W_BestWeapon()
 {
-	int             it;
+	int   it = self->s.v.items;
+	char* w_rank = ezinfokey( self, "w_rank" );
 
-	it = self->s.v.items;
+	if ( ! strnull(w_rank) )
+	{
+		while (*w_rank)
+		{
+			int weapon = (*w_rank - '0');
 
+			if (weapon == 8 && (it & IT_LIGHTNING) && self->s.v.ammo_cells >= 1)
+				return IT_LIGHTNING;
+			if (weapon == 7 && (it & IT_ROCKET_LAUNCHER) && self->s.v.ammo_rockets >= 1)
+				return IT_ROCKET_LAUNCHER;
+			if (weapon == 6 && (it & IT_GRENADE_LAUNCHER) && self->s.v.ammo_rockets >= 1)
+				return IT_GRENADE_LAUNCHER;
+			if (weapon == 5 && (it & IT_SUPER_NAILGUN) && self->s.v.ammo_nails >= 2)
+				return IT_SUPER_NAILGUN;
+			if (weapon == 4 && (it & IT_NAILGUN) && self->s.v.ammo_nails >= 1)
+				return IT_NAILGUN;
+			if (weapon == 3 && (it & IT_SUPER_SHOTGUN) && self->s.v.ammo_shells >= 2)
+				return IT_SUPER_SHOTGUN;
+			if (weapon == 2 && (it & IT_SHOTGUN) && self->s.v.ammo_shells >= 1)
+				return IT_SHOTGUN;
+			if (weapon == 1 && (it & IT_AXE))
+				return IT_AXE;
+
+			++w_rank;
+		}
+
+		if (it & IT_AXE)
+			return IT_AXE;
+
+		return 0;
+	}
+
+	// Standard behaviour
 	if ( self->s.v.waterlevel <= 1 && self->s.v.ammo_cells >= 1
 	     && ( it & IT_LIGHTNING ) )
 		return IT_LIGHTNING;
