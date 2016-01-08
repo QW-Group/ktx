@@ -862,12 +862,14 @@ extern int demo_marker_index;
 
 void ListDemoMarkers()
 {
+	int i = 0;
+
 	if ( !demo_marker_index )
 		return;
 
     G_bprint(2, "%s:\nŸ\n", redtext("Demo markers"));
 
-	for (int i = 0; i < demo_marker_index; ++i)
+	for (i = 0; i < demo_marker_index; ++i)
 	{
 		int total = (int)(demo_markers[i].time - match_start_time);
 		G_bprint( 2, "%s: %d:%02d \220%s\221\n", redtext("Time"), (total / 60), (total % 60), demo_markers[i].markername);
