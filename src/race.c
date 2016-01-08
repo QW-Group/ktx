@@ -33,6 +33,8 @@ race_t			race; // whole race struct
 
 char *classname_for_nodeType( raceRouteNodeType_t nodeType );
 
+static int next_route = -1; // STATIC
+
 //============================================
 
 int get_server_port ( void )
@@ -2209,8 +2211,6 @@ void race_print_route_info( gedict_t *p )
 
 void r_route( void )
 {
-	static int next_route = -1; // STATIC
-
 	if ( !race_command_checks() )
 		return;
 
@@ -2467,6 +2467,120 @@ void ChasecamToggleButton( void )
 	self->s.v.flags = (int)self->s.v.flags & ~FL_ATTACKRELEASED;
 
 	r_changefollowstatus ( (float) 3 );
+}
+
+void race_route_create( void )
+{
+	gedict_t* route[MAX_ROUTE_NODES] = { 0 };
+	gedict_t* current = self, *next = NULL;
+	int route_nodes = 0;
+	int i = 0;
+
+	// If race mode not enabled, just ignore quietly
+	if ( !isRACE() ) {
+		return;
+	}
+
+	// Name & description are mandatory, ignore route if not specified
+	if (strnull(self->race_route_name) || strnull(self->race_route_description)) {
+		G_bprint(2, "Route name/description not specified\n");
+		return;
+	}
+
+	// weapon-mode must be valid
+	if (self->race_route_weapon_mode <= raceWeaponUnknown || self->race_route_weapon_mode >= raceWeaponMAX) {
+		G_bprint(2, "Route weapon mode not valid\n");
+		return;
+	}
+
+	// false-start-mode must be valid
+	if (self->race_route_falsestart_mode <= raceFalseStartUnknown || self->race_route_falsestart_mode >= raceFalseStartMAX) {
+		G_bprint(2, "Route falsestart mode not valid\n");
+		return;
+	}
+
+	while (current && current != world)
+	{
+		// flag current entity to be removed next frame
+		SUB_RM_01(current);
+
+		// route is too long, ignore
+		if (route_nodes >= sizeof(route) / sizeof(route[0])) {
+			G_bprint(2, "Route too long\n");
+			return;
+		}
+
+		// route is circular?  ignore
+		for (i = 0; i < route_nodes; ++i)
+		{
+			if (route[i] == current) {
+				G_bprint(2, "Circular route detected\n");
+				return;
+			}
+		}
+
+		// add to route
+		route[route_nodes++] = current;
+
+		// no targetname => end
+		if (strnull(current->s.v.target))
+			break;
+
+		// move to next target
+		current = find(world, FOFS(s.v.targetname), current->s.v.target);
+
+		// next target must be route marker
+		if (current && strneq(current->s.v.classname, "race_route_marker")) {
+			G_bprint(2, "Expected route marker, found %s instead\n", current->s.v.classname);
+			return;
+		}
+	}
+
+	// must have at least start and end
+	if (route_nodes < 2) {
+		G_bprint(2, "Route too short (%d nodes)\n", route_nodes);
+		return;
+	}
+
+	// Create route
+	if ( !race_route_add_start() ) {
+		G_bprint(2, "Couldn't create new route\n");
+		return;
+	}
+
+	// Add path
+	for (i = 0; i < route_nodes; ++i)
+	{
+		raceRouteNodeType_t nodeType = nodeCheckPoint;
+		if (i == 0)
+			nodeType = nodeStart;
+		else if (i == route_nodes - 1)
+			nodeType = nodeEnd;
+
+		race_add_route_node(
+			route[i]->s.v.origin[0],
+			route[i]->s.v.origin[1],
+			route[i]->s.v.origin[2],
+			route[i]->race_route_start_pitch,
+			route[i]->race_route_start_yaw,
+			nodeType
+		);
+	}
+
+	race_set_route_name( self->race_route_name, self->race_route_description );
+	race_set_route_timeout( self->race_route_timeout );
+	race_set_route_weapon_mode( (raceWeapoMode_t)self->race_route_weapon_mode );
+	race_set_route_falsestart_mode( (raceFalseStartMode_t)self->race_route_falsestart_mode );
+	race_route_add_end();
+
+	if (next_route < 0)
+		r_route();
+}
+
+void SP_race_route_start( void )
+{
+	self->s.v.nextthink = g_globalvars.time + 0.001f;	// create route once all markers have spawned
+	self->s.v.think = ( func_t ) race_route_create;
 }
 
 void race_add_standard_routes( void )

@@ -122,6 +122,13 @@ field_t         fields[] = {
 	{"team_no",	FOFS( team_no ),		F_INT},
 // custom teleporters
 	{"size", 	FOFS( s.v.size ),	F_VECTOR},
+	{"race_route_name", FOFS( race_route_name ), F_LSTRING},
+	{"race_route_description", FOFS( race_route_description ), F_LSTRING},
+	{"race_route_timeout", FOFS( race_route_timeout ), F_INT},
+	{"race_route_weapon_mode", FOFS( race_route_weapon_mode ), F_INT},
+	{"race_route_falsestart_mode", FOFS( race_route_falsestart_mode ), F_INT},
+	{"race_route_start_yaw", FOFS( race_route_start_yaw ), F_FLOAT},
+	{"race_route_start_pitch", FOFS( race_route_start_yaw ), F_FLOAT},
 	{NULL}
 };
 typedef struct {
@@ -260,6 +267,9 @@ void			SP_item_tfgoal();
 void			SP_info_player_teamspawn();
 void			SP_i_p_t();
 
+// Races
+void            SP_race_route_start();
+
 spawn_t         spawns[] = {
 	// info entities don't do anything at all, but provide positional
 	// information for things controlled by other processes
@@ -391,6 +401,10 @@ Used as a positional target for spotlights, etc.
 	{"event_lightning",		SP_event_lightning},
 
 	{"info_monster_start",	SP_info_monster_start},
+
+	// race routes
+	{"race_route_start",    SP_race_route_start},
+	{"race_route_marker",   SUB_Null},
 
 	{0, 0}
 };
