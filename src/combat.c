@@ -829,7 +829,13 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		}
 		else
 		{
-			// damage
+			int items = targ->s.v.items;
+
+			// damage to enemy weapon
+			if ( items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING) )
+			{
+				attacker->ps.dmg_eweapon += dmg_dealt;
+			}
 
 			if ( tp_num() && streq(attackerteam, targteam) )
 			{
