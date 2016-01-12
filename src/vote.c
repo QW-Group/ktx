@@ -186,6 +186,8 @@ int get_votes_req( int fofs, qbool diff )
 		vt_req = max(1, vt_req); // at least 1 vote in any case
 	else if ( fofs == OV_RPICKUP )
 		vt_req = max(3, vt_req); // at least 3 votes in this case
+	else if ( fofs == OV_NOSPECS && cvar("_k_nospecs") )
+		vt_req = max(1, vt_req); // at least 1 vote in this case
 	else if ( fofs == OV_NOSPECS )
 		vt_req = max(2, vt_req); // at least 2 votes in this case
 	else if ( fofs == OV_TEAMOVERLAY )
@@ -557,7 +559,7 @@ void nospecs( )
 	if ( !is_adm( self ) )
 	{
 		// Dont need to bother if less than 2 players
-		if ( CountPlayers() < 2 )
+		if ( CountPlayers() < 2 && !cvar("_k_nospecs") )
 		{
 			G_sprint(self, 2, "You need at least 2 players to do this.\n");
 			return;
