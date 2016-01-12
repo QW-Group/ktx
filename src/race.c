@@ -2073,7 +2073,7 @@ void display_record_details( )
 	if ( record )
 		record = 1;
 
-	record = bound(0, atoi( arg_1 ) - 1, NUM_BESTSCORES );
+	record = bound(0, atoi( arg_1 ) - 1, NUM_BESTSCORES - 1 );
 
 	if ( race.records[record].time > 999998 )
 	{
