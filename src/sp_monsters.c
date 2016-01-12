@@ -812,20 +812,18 @@ void monster_start_go( monsterType_t mt )
 	self->s.v.solid = SOLID_SLIDEBOX;
 	self->s.v.takedamage = DAMAGE_AIM;
 
-	if ( /*!walkmove( self, 0, 0 )*/
-			is_location_occupied( self, self->s.v.origin, self->s.v.mins, self->s.v.maxs )
-	)
+	if (k_bloodfest && is_location_occupied( self, self->s.v.origin, self->s.v.mins, self->s.v.maxs ))
 	{
-		if ( k_bloodfest )
-		{
-//			G_cprint( "monster (%s) in wall at: %.1f %.1f %.1f, removed!\n",
-//				self->s.v.classname, self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] );
+//		G_cprint( "monster (%s) in wall at: %.1f %.1f %.1f, removed!\n",
+//			self->s.v.classname, self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] );
 
-			ent_remove( self ); // remove it ASAP.
-			return;
-		}
+		ent_remove( self ); // remove it ASAP.
+		return;
+	}
 
-		G_cprint( "monster in wall at: %.1f %.1f %.1f\n", self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] );
+	if (!k_bloodfest && !walkmove(self, 0, 0))
+	{
+		G_cprint( "monster %d in wall at: %.1f %.1f %.1f\n", NUM_FOR_EDICT(self), self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] );
 
 		self->s.v.model = ""; // turn off model
 		self->s.v.solid = SOLID_NOT;
