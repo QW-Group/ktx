@@ -1882,7 +1882,7 @@ void CheckRules()
 	if ( !match_in_progress )
 		return;
 
-    if ( fraglimit && self->s.v.frags >= fraglimit )
+    if ( !isHoonyMode() && fraglimit && self->s.v.frags >= fraglimit )
         EndMatch( 0 );
 }
 

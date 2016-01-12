@@ -31,19 +31,36 @@
 #define HM_RESULT_SUICIDEWIN   4
 #define HM_RESULT_DRAWWIN      5
 
-#define HM_MIN_POINTS 6
 #define HM_WINNING_DIFF 2
+
+static int round_number = 0;
+
+static void EndRound()
+{
+	if (round_number < HM_MAX_ROUNDS - 1)
+		++round_number;
+	else
+		--round_number;	// Start over-writing to stop buffer over-run
+
+	EndMatch(0);
+}
 
 qbool isHoonyMode()
 {
 	return (isDuel() && cvar("k_hoonymode"));
 }
 
-static int round_number = 0;
-
 void HM_initialise_rounds()
 {
 	round_number = 0;
+}
+
+int HM_timelimit()
+{
+	if (timelimit)
+		return timelimit * 60;
+
+	return world->hoony_timelimit;
 }
 
 // hoonymode: suicide, etc, count as a point for other players
@@ -60,30 +77,31 @@ void HM_suicide(gedict_t* player)
 		}
 	}
 
-	EndMatch( 0 );
+	EndRound();
 }
 
 // Timelimit hit
 void HM_draw()
 {
 	gedict_t* p;
+	int maxfrags = -9999, minfrags = 9999;
 
-	// .ent file can dictate that one player wins by default
-	if (! strnull(world->hoony_defaultwinner)) {
-		for (p = world; p = find_plr(p);) {
-			if (p->k_hoony_new_spawn && streq(p->k_hoony_new_spawn->s.v.targetname, world->hoony_defaultwinner)) {
-				p->s.v.frags++;
-				G_bprint(2, "%s wins the round on time.\n", p->s.v.netname);
-				EndMatch( 0 );
-				return;
-			}
+	for (p = world; p = find_plr(p);) {
+		// .ent file can dictate that one player wins by default
+		if (! strnull(world->hoony_defaultwinner) && p->k_hoony_new_spawn && streq(p->k_hoony_new_spawn->s.v.targetname, world->hoony_defaultwinner)) {
+			p->s.v.frags++;
+			G_bprint(2, "%s wins the round on time.\n", p->s.v.netname);
+			EndRound();
+			return;
 		}
+
+		maxfrags = max(p->s.v.frags, maxfrags);
+		minfrags = min(p->s.v.frags, minfrags);
 	}
 
-	// If in normal rounds, everyone gets a point, so we get closer to finishing.  
-	//   Otherwise ignore round and go on to next one
-	if (round_number < HM_MIN_POINTS)
+	if (maxfrags < fraglimit)
 	{
+		// If in normal rounds, everyone gets a point, so we get closer to finishing.  
 		gedict_t* p;
 
 		for (p = world; p = find_plr(p); )
@@ -91,12 +109,36 @@ void HM_draw()
 			p->hoony_results[round_number] = HM_RESULT_DRAWWIN;
 			p->s.v.frags++;
 		}
-
-		++round_number;
 	}
-	G_bprint(2, "This round ends in a draw\n");
 
-	EndMatch(0);
+	// We go again...
+	G_bprint(2, "This round ends in a draw\n");
+	EndRound();
+}
+
+qbool HM_is_game_over()
+{
+	// Game is over if we've hit frag limit and one player is in lead (HM_PT_FINAL), or
+	//                 one player is one frag ahead at the start of a round of spawns and we're past the fraglimit
+	if (HM_current_point_type() == HM_PT_FINAL)
+		return true;
+
+	if (HM_current_point_type() == HM_PT_SET && HM_current_point() % 2 == 0)
+	{
+		gedict_t* p;
+		int maxfrags = -999;
+		int minfrags = 999;
+
+		for (p = world; (p = find_plr(p));)
+		{
+			maxfrags = max(p->s.v.frags, maxfrags);
+			minfrags = min(p->s.v.frags, minfrags);
+		}
+
+		return maxfrags != minfrags && maxfrags >= fraglimit;
+	}
+
+	return false;
 }
 
 void HM_next_point(gedict_t *winner, gedict_t *loser)
@@ -104,10 +146,7 @@ void HM_next_point(gedict_t *winner, gedict_t *loser)
 	winner->hoony_results[round_number] = HM_RESULT_WONROUND;
 	loser->hoony_results[round_number]  = HM_RESULT_LOSTROUND;
 	
-	if (round_number < HM_MAX_ROUNDS - 1)
-		++round_number;
-
-	EndMatch(0);
+	EndRound();
 }
 
 int HM_current_point()
@@ -194,10 +233,10 @@ int HM_current_point_type()
 	}
 	fragdiff = maxfrags - minfrags;
 
-	if (maxfrags >= HM_MIN_POINTS && fragdiff >= HM_WINNING_DIFF)
+	if (maxfrags >= fraglimit && fragdiff >= HM_WINNING_DIFF)
 		return HM_PT_FINAL; // as used in the code (match.c) HM_PT_FINAL == "last point was final"
 
-	if (maxfrags >= HM_MIN_POINTS - 1 && fragdiff >= HM_WINNING_DIFF - 1)
+	if (maxfrags >= fraglimit - 1 && fragdiff >= HM_WINNING_DIFF - 1)
 		return HM_PT_SET; // as used in the code, HM_PT_SET == "this point is set point"
 
 	return 0;

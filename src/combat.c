@@ -267,15 +267,18 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 	self = oself;
 
 	// KTEAMS: check if sudden death is the case
-	Check_SD( targ );
+	if (!isHoonyMode())
+	{
+		Check_SD( targ );
 
-	// check fraglimit
-	if (	fraglimit
-		&& (   ( targ->s.v.frags >= fraglimit && targ->ct == ctPlayer )
-			|| ( attacker->s.v.frags >= fraglimit && attacker->ct == ctPlayer )
-		   )
-		)
-		EndMatch( 0 );
+		// check fraglimit
+		if ( fraglimit
+			&& (   ( targ->s.v.frags >= fraglimit && targ->ct == ctPlayer )
+				|| ( attacker->s.v.frags >= fraglimit && attacker->ct == ctPlayer )
+			   )
+			)
+			EndMatch( 0 );
+	}
 
 	if ( k_bloodfest )
 		bloodfest_killed_hook( targ, attacker );

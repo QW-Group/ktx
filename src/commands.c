@@ -2186,6 +2186,13 @@ void TimeSet(float t)
 	G_bprint(2, "%s %s %s%s\n", redtext("Match length set to"), dig3(timelimit), redtext("minute"), redtext(count_s(timelimit)));
 }
 
+void AdjustFragLimit(int delta)
+{
+	fraglimit += delta * (isHoonyMode() ? 2 : 10);
+
+	fraglimit = bound(isHoonyMode() ? 6 : 1, fraglimit, isHoonyMode() ? 20 : 100);
+}
+
 void FragsDown()
 {
 	int fl = fraglimit;
@@ -2198,8 +2205,7 @@ void FragsDown()
 	else if ( fraglimit == 0)
 		fraglimit = 0; // avoid cycling between 0 and 1 (this happens due to below shortcut using bound())
 	else {
-		fraglimit -= 10;
-		fraglimit = bound(1, fraglimit, 100);
+		AdjustFragLimit(-1);
 	}
 
 	if ( timelimit <= 0 && fraglimit <= 0 ) {
@@ -2223,9 +2229,7 @@ void FragsUp()
 	if ( match_in_progress )
 		return;
 
-	fraglimit += 10;
-
-	fraglimit = bound(0, fraglimit, 100);
+	AdjustFragLimit(1);
 
 	if ( fl == fraglimit ) {
 		G_sprint(self, 2, "%s still %s\n", redtext("fraglimit"), dig3(fraglimit));
@@ -3023,22 +3027,22 @@ const char _1on1_um_init[] =
 	"k_mode 1\n";				//
 
 const char _1on1hm_um_init[] =
-	"coop 0\n"					// no coop
-	"maxclients 2\n"			// duel = two players
-	"k_maxclients 2\n"			// duel = two players
-	"timelimit  10\n"			// 10 minute rounds
-	"fraglimit  0\n"                        // hoonymode - fraglimit 0 (but every 1 frag we respawn)
-	"timelimit  0\n"                        // hoonymode - timelimit 10
+	"coop 0\n"                  // no coop
+	"maxclients 2\n"            // duel = two players
+	"k_maxclients 2\n"          // duel = two players
+	"timelimit  10\n"           // 10 minute rounds
+	"fraglimit  6\n"            // hoonymode - fraglimit 6 (but every 1 frag we respawn)
+	"timelimit  0\n"            // hoonymode - timelimit 0
 	"k_hoonymode 1\n"
-	"teamplay   0\n"			// hurt yourself, no teammates here
-	"deathmatch 3\n"			// weapons stay
-	"k_overtime 1\n"			// overtime type = time based
-	"k_exttime 3\n"				// overtime 3mins
-	"k_pow 0\n"					// powerups
-	"k_membercount 0\n"			// no efect in duel
-	"k_lockmin 0\n"				// no efect in duel
-	"k_lockmax 0\n"				// no efect in duel
-	"k_mode 1\n";				//
+	"teamplay   0\n"            // hurt yourself, no teammates here
+	"deathmatch 3\n"            // weapons stay
+	"k_overtime 1\n"            // overtime type = time based
+	"k_exttime 3\n"             // overtime 3mins
+	"k_pow 0\n"                 // powerups
+	"k_membercount 0\n"         // no efect in duel
+	"k_lockmin 0\n"             // no efect in duel
+	"k_lockmax 0\n"             // no efect in duel
+	"k_mode 1\n";               //
 
 const char _2on2_um_init[] =
 	"coop 0\n"					// no coop

@@ -1543,7 +1543,7 @@ void EndMatch ( float skip_log )
 	EM_on_MatchEndBreak( skip_log );
 
 	if (isHoonyMode()) {
-		if ( HM_current_point_type() != HM_PT_FINAL ) {
+		if ( ! HM_is_game_over()  ) {
 			match_over = 0;
 			for ( p = world; (p = find_plr( p )); )
 				stuffcmd(p, "ready\n");
@@ -2016,12 +2016,10 @@ void StartMatch ()
 	self->k_teamnum = g_globalvars.time + 3;  //dirty i know, but why waste space?
 											  // FIXME: waste space, but be clean
 
-	// If the players haven't specified their own time limit then use the one from the .ent file
-	//   (otherwise it's just sudden-death)
-	if (isHoonyMode() && timelimit == 0 && world->hoony_timelimit > 0) 
+	if (isHoonyMode() && HM_timelimit() > 0)
 	{
-		int minutes = bound(0, world->hoony_timelimit / 60, 9999);
-		int seconds = world->hoony_timelimit % 60;
+		int minutes = bound(0, HM_timelimit() / 60, 9999);
+		int seconds = HM_timelimit() % 60;
 
 		if (seconds)
 			++minutes;
@@ -2099,7 +2097,7 @@ void PersonalisedCountdown(char* baseText)
 					strlcat(text, va("%s %3ss\n", "Duration", dig3(seconds)), sizeof(text));
 				else if (seconds == 0)
 					strlcat(text, va("%s %3sm\n", "Duration", dig3(minutes)), sizeof(text));
-				else 
+				else
 					strlcat(text, va("%s %1s:%2s\n", "Duration", dig3(minutes), dig3(seconds)), sizeof(text));
 			}
 
@@ -2223,20 +2221,23 @@ void PrintCountdown( int seconds )
 	if ( !isRA() ) // useless in RA
 	if ( isTeam() || isCTF() )
 		strlcat(text, va("%s %4s\n", "Teamplay", dig3(teamplay)), sizeof(text));
-	if ( timelimit )
-		strlcat(text, va("%s %3s\n", "Timelimit", dig3(timelimit)), sizeof(text));
-	else if ( isHoonyMode() && world->hoony_timelimit ) 
-	{
-		int minutes = world->hoony_timelimit / 60;
-		int seconds = world->hoony_timelimit % 60;
 
-		if (minutes == 0)
-			strlcat(text, va("%s %3ss\n", "Duration", dig3(seconds)), sizeof(text));
-		else if (seconds == 0)
-			strlcat(text, va("%s %3sm\n", "Duration", dig3(minutes)), sizeof(text));
-		else 
-			strlcat(text, va("%s %1s:%2s\n", "Duration", dig3(minutes), dig3(seconds)), sizeof(text));
+	if (isHoonyMode()) {
+		int hm_timelimit = HM_timelimit();
+		if (hm_timelimit) {
+			int minutes = hm_timelimit / 60;
+			int seconds = hm_timelimit % 60;
+
+			if (minutes == 0)
+				strlcat(text, va("%s %3ss\n", "Duration", dig3(seconds)), sizeof(text));
+			else if (seconds == 0)
+				strlcat(text, va("%s %3sm\n", "Duration", dig3(minutes)), sizeof(text));
+			else
+				strlcat(text, va("%s %1s:%2s\n", "Duration", dig3(minutes), dig3(seconds)), sizeof(text));
+		}
 	}
+	else if ( timelimit )
+		strlcat(text, va("%s %3s\n", "Timelimit", dig3(timelimit)), sizeof(text));
 	if ( fraglimit )
 		strlcat(text, va("%s %3s\n", "Fraglimit", dig3(fraglimit)), sizeof(text));
 
