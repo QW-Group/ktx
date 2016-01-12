@@ -273,11 +273,12 @@ void DemoMark()
 
 	if ( demo_marker_index < demo_markers_count )
 	{
+		int total = (int)(g_globalvars.time - match_start_time);
+
 		demo_markers[demo_marker_index].time = g_globalvars.time;
 		strlcpy(demo_markers[demo_marker_index].markername, getname(self), sizeof(demo_markers[demo_marker_index].markername));
 		demo_marker_index++;
 
-		int total = (int)(g_globalvars.time - match_start_time);
 		G_sprint(self, 2, "Added demo marker: \220%d:%02d\221\n", (total / 60), (total % 60));
 	}
 	else
