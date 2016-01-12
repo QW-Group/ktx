@@ -2414,6 +2414,16 @@ void standby_think()
 		for( p = world;	(p = find_plr( p )); ) {
 			if( !strnull ( p->s.v.netname ) ) {
 				//set to ghost, 0.2 second before matchstart
+				if (isHoonyMode() && p->k_hoony_new_spawn) {
+					// move viewpoint to selected spawn
+					VectorCopy( p->k_hoony_new_spawn->s.v.origin, p->s.v.origin );
+					p->s.v.origin[2] += 1;
+					VectorCopy( p->k_hoony_new_spawn->s.v.angles, p->s.v.angles );
+					p->s.v.fixangle = true;
+
+					setnowep(p);
+				}
+
 				p->s.v.takedamage = 0;
 				p->s.v.solid      = 0;
 				p->s.v.movetype   = 0;
@@ -2746,9 +2756,11 @@ void StopTimer ( int removeDemo )
 
 		for( p = world; (p = find_plr( p )); )
 		{
-			p->s.v.takedamage = 2;
-			p->s.v.solid      = 3;
-			p->s.v.movetype   = 3;
+			setfullwep(p);
+
+			p->s.v.takedamage = DAMAGE_AIM;
+			p->s.v.solid      = SOLID_SLIDEBOX;
+			p->s.v.movetype   = MOVETYPE_WALK;
 			setmodel (p, "progs/player.mdl");
 		}
 	}
@@ -3120,8 +3132,8 @@ void PlayerBreak ()
 
 	if( !k_matchLess || k_bloodfest )
 	{
-		// try stop countdown.
-		if( match_in_progress == 1 )
+		// try stop countdown.  (countdown between hoony-mode points can't be stopped, treat as standard break request).
+		if( match_in_progress == 1 && (! isHoonyMode() || HM_current_point() == 0) )
 		{
 			p = find ( world, FOFCLSN, "timer");
 

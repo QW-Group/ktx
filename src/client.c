@@ -1523,7 +1523,7 @@ void PutClientInServer( void )
 			tele_flags |= TFLAGS_FOG_DST | TFLAGS_SND_DST;
 		}
 	}
-	else
+	else if ( ! isHoonyMode() )
 	{
 		tele_flags |= TFLAGS_FOG_DST | TFLAGS_SND_DST;
 	}

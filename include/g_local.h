@@ -732,6 +732,7 @@ void		RocketArenaPre();
 qbool	readytostart();
 void		ra_Frame();
 void		setfullwep( gedict_t *anent );
+void		setnowep( gedict_t *anent );
 
 // { ra commands
 void		ra_PlayerStats();
