@@ -742,7 +742,7 @@ void FirstFrame	( )
 // { race
 	RegisterCvarEx("k_race", "0");
 	RegisterCvarEx("k_race_custom_models", "0");
-	RegisterCvarEx("k_race_autorecord", "0");
+	RegisterCvarEx("k_race_autorecord", "1");
 	RegisterCvarEx("k_race_times_per_port", "0");
 	//RegisterCvarEx("k_race_topscores", "10");
 // }

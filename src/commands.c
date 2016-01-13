@@ -237,6 +237,7 @@ void display_scores( );
 void display_record_details( );
 void race_chasecam_change( );
 void race_chasecam_freelook_change( );
+void race_download_record_demo( );
 // }
 
 // { CHEATS
@@ -567,6 +568,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_RLINEUP		"show current race line-up"
 #define CD_RSCORES		"show top race times for current map"
 #define CD_RSCOREDETAIL "show details about a record"
+#define CD_RDLDEMO      "download demo for a record"
 // }
 
 #define CD_NOSPECS      "allow/disallow spectators"
@@ -872,27 +874,28 @@ cmd_t cmds[] = {
 	{ "vwep",        ToggleVwep,                0    , CF_PLAYER | CF_SPC_ADMIN, CD_VWEP },
 	{ "pause",       TogglePause,               0    , CF_PLAYER | CF_MATCHLESS | CF_SPC_ADMIN, CD_PAUSE },
 // { RACE
-	{ "race_ready",					DEF(r_changestatus),			1,	CF_PLAYER,								CD_RREADY },
-	{ "race_break",					DEF(r_changestatus),			2,	CF_PLAYER,								CD_RBREAK },
-	{ "race_break_all",				r_all_break,	  		  		0,	CF_BOTH_ADMIN,							CD_RBREAKALL },
-	{ "race_toggle",				DEF(r_changestatus),			3,	CF_PLAYER,								CD_RTOGGLE },
-	{ "race_cancel",				DEF(r_changestatus),			4,	CF_PLAYER,								CD_RCANCEL },
-	{ "race_show_lineup",			race_display_line,				0,	CF_BOTH,								CD_RLINEUP },
-	{ "race_show_toptimes",			display_scores,					0,	CF_BOTH,								CD_RSCORES },
-	{ "race_show_record_details",	display_record_details,			0,	CF_BOTH | CF_PARAMS,   	  				CD_RSCOREDETAIL },
-	{ "race_show_route",			r_print,						0,	CF_BOTH,								CD_R_PRINT },
-	{ "race_set_start",				DEF(r_Xset),					1,	CF_PLAYER | CF_SPC_ADMIN, 				CD_R_SSET },
-	{ "race_set_finish",			DEF(r_Xset),					3,	CF_PLAYER | CF_SPC_ADMIN, 				CD_R_ESET },
-	{ "race_set_checkpoint",		DEF(r_Xset),					2,	CF_PLAYER | CF_SPC_ADMIN, 				CD_R_CSET },
-	{ "race_del_checkpoint",		r_cdel,							0,	CF_PLAYER | CF_SPC_ADMIN, 				CD_R_CDEL },
-	{ "race_set_timeout",			r_timeout,						0,	CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS,	CD_RTIMEOUT },
-	{ "race_set_falsestart",		r_falsestart,					0,	CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS,	CD_RFALSESTART },
-	{ "race_set_weapon_mode",		r_mode,							0,	CF_PLAYER | CF_SPC_ADMIN,				CD_RMODE },
-	{ "race_route_switch",			r_route,						0,	CF_PLAYER | CF_SPC_ADMIN,				CD_R_ROUTE },
-	{ "race_route_clear",			r_clear_route,					0,	CF_PLAYER | CF_SPC_ADMIN,				CD_C_ROUTE },
-	{ "race_chasecam",				DEF(r_changefollowstatus),		3,	CF_PLAYER,								CD_RFTOGGLE },
-	{ "race_chasecam_view",			race_chasecam_change,			0,	CF_PLAYER,								CD_RCHASECAM },
-	{ "race_chasecam_freelook",		race_chasecam_freelook_change,  0,	CF_PLAYER,								CD_RCHASECAMFL },
+	{ "race_ready",                 DEF(r_changestatus),            1,  CF_PLAYER,                              CD_RREADY },
+	{ "race_break",                 DEF(r_changestatus),            2,  CF_PLAYER,                              CD_RBREAK },
+	{ "race_break_all",             r_all_break,                    0,  CF_BOTH_ADMIN,                          CD_RBREAKALL },
+	{ "race_toggle",                DEF(r_changestatus),            3,  CF_PLAYER,                              CD_RTOGGLE },
+	{ "race_cancel",                DEF(r_changestatus),            4,  CF_PLAYER,                              CD_RCANCEL },
+	{ "race_show_lineup",           race_display_line,              0,  CF_BOTH,                                CD_RLINEUP },
+	{ "race_show_toptimes",         display_scores,                 0,  CF_BOTH,                                CD_RSCORES },
+	{ "race_show_record_details",   display_record_details,         0,  CF_BOTH | CF_PARAMS,                    CD_RSCOREDETAIL },
+	{ "race_show_route",            r_print,                        0,  CF_BOTH,                                CD_R_PRINT },
+	{ "race_set_start",             DEF(r_Xset),                    1,  CF_PLAYER | CF_SPC_ADMIN,               CD_R_SSET },
+	{ "race_set_finish",            DEF(r_Xset),                    3,  CF_PLAYER | CF_SPC_ADMIN,               CD_R_ESET },
+	{ "race_set_checkpoint",        DEF(r_Xset),                    2,  CF_PLAYER | CF_SPC_ADMIN,               CD_R_CSET },
+	{ "race_del_checkpoint",        r_cdel,                         0,  CF_PLAYER | CF_SPC_ADMIN,               CD_R_CDEL },
+	{ "race_set_timeout",           r_timeout,                      0,  CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS,   CD_RTIMEOUT },
+	{ "race_set_falsestart",        r_falsestart,                   0,  CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS,   CD_RFALSESTART },
+	{ "race_set_weapon_mode",       r_mode,                         0,  CF_PLAYER | CF_SPC_ADMIN,               CD_RMODE },
+	{ "race_route_switch",          r_route,                        0,  CF_PLAYER | CF_SPC_ADMIN,               CD_R_ROUTE },
+	{ "race_route_clear",           r_clear_route,                  0,  CF_PLAYER | CF_SPC_ADMIN,               CD_C_ROUTE },
+	{ "race_chasecam",              DEF(r_changefollowstatus),      3,  CF_PLAYER,                              CD_RFTOGGLE },
+	{ "race_chasecam_view",         race_chasecam_change,           0,  CF_PLAYER,                              CD_RCHASECAM },
+	{ "race_chasecam_freelook",     race_chasecam_freelook_change,  0,  CF_PLAYER,                              CD_RCHASECAMFL },
+	{ "race_dl_record_demo",        race_download_record_demo,      0,  CF_BOTH | CF_PARAMS,                    CD_RDLDEMO },
 // }
 	{ "nospecs",     nospecs,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOSPECS },
 	{ "noitems",     noitems,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOITEMS },

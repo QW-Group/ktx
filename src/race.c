@@ -938,7 +938,10 @@ void race_node_touch()
 					// add new top score
 					race.records[i].time = race.currentrace.time;
 					strlcpy( race.records[i].racername, other->s.v.netname, sizeof( race.records[i].racername ) );
-					strlcpy( race.records[i].demoname, cvar_string( "_k_recordeddemoname" ), sizeof( race.records[i].demoname ) );
+					if (race.race_recording)
+						strlcpy( race.records[i].demoname, cvar_string( "_k_recordeddemoname" ), sizeof( race.records[i].demoname ) );
+					else
+						memset( race.records[i].demoname, 0, sizeof( race.records[i].demoname ) );
 					race.records[i].distance = race.currentrace.distance;
 					race.records[i].maxspeed = race.currentrace.maxspeed;
 					race.records[i].avgspeed = race.currentrace.avgspeed / race.currentrace.avgcount;
@@ -1201,7 +1204,7 @@ void display_scores( void )
 	if ( !race_command_checks() )
 		return;
 
-	G_sprint(self, 2,  "\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\237%s %02d\237\236\236\236\236\236\236\236\236\236\236\236\236\236\235\n",
+	G_sprint(self, 2,  "\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\237%s %02d\235\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
 			redtext( "top"), NUM_BESTSCORES );
 	G_sprint( self, 2, "pos.  time      name\n" );
 
@@ -2060,6 +2063,38 @@ void r_timeout( )
 	G_bprint(2, "%s set race time limit to %ss\n", self->s.v.netname, dig3( race.timeout_setting ) );
 }
 
+void race_download_record_demo( void )
+{
+	char	arg_1[64];
+	int		record;
+
+	if ( !race_command_checks() )
+		return;
+
+	trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
+
+	record = atoi( arg_1 );
+
+	if ( record )
+		record = 1;
+
+	record = bound(0, atoi( arg_1 ) - 1, NUM_BESTSCORES - 1 );
+
+	if ( race.records[record].time > 999998 )
+	{
+		G_sprint(self, 2, "record not found\n" );
+		return;
+	}
+
+	if ( strnull(race.records[record].demoname) )
+	{
+		G_sprint(self, 2, "demo for record #%d is not available\n", record + 1 );
+		return;
+	}
+
+	stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "download \"demos/%s.mvd\"\n", race.records[record].demoname);
+}
+
 void display_record_details( )
 {
 	char	arg_1[64];
@@ -2619,7 +2654,7 @@ void race_add_standard_routes( void )
 		race_add_route_node(  405.6, 1565.6, 62.2,   0,   0, nodeCheckPoint );
 		race_add_route_node(    4.1, 1437.4, 24.0,   0,   0, nodeEnd );
 
-		race_set_route_name( "áòïõîä äí±", "ya\215ng\215mh\215ssg\215ya" );
+		race_set_route_name( redtext("around dm1"), "ya\215ng\215mh\215ssg\215ya" );
 		race_set_route_timeout( 30 );
 		race_set_route_weapon_mode( raceWeaponNo );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2639,7 +2674,7 @@ void race_add_standard_routes( void )
 		race_add_route_node( 2445.9, -1979.4, 120.0,   0,    0, nodeCheckPoint );
 		race_add_route_node( 2246.4, -2473.3, 200.0,   0,    0, nodeEnd );
 
-		race_set_route_name( "Éèí§ó ñõáäòõî", "highrl\215quad\215water\215lower\215ramh" );
+		race_set_route_name( redtext("ihm's quad run"), "high rl\215quad\215water\215lower\215ra mh" );
 		race_set_route_timeout( 35 );
 		race_set_route_weapon_mode( raceWeaponNo );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2658,7 +2693,7 @@ void race_add_standard_routes( void )
 		race_add_route_node( 2397.6,    86.0,   41.2,     0,      0, nodeCheckPoint );
 		race_add_route_node( 2246.2,  -194.7, -136.0,     0,      0, nodeEnd );
 
-		race_set_route_name( "áòïõîä äí²", "water\215quadlow\215rllow\215ng\215stairs" );
+		race_set_route_name( redtext("around dm2"), "water\215quad low\215rl low\215ng\215stairs" );
 		race_set_route_timeout( 35 );
 		race_set_route_weapon_mode( raceWeaponAllowed );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2674,7 +2709,7 @@ void race_add_standard_routes( void )
 		race_add_route_node(  701.0,  237.5,   89.2,   0,     0, nodeCheckPoint );
 		race_add_route_node(  261.0, -709.0,  328.0,   0,     0, nodeEnd );
 
-		race_set_route_name( "òáæìù", "pentmh\215window\215ratop" );
+		race_set_route_name( redtext("ra fly"), "pent mh\215window\215ra top" );
 		race_set_route_timeout( 35 );
 		race_set_route_weapon_mode( raceWeaponAllowed );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2690,7 +2725,7 @@ void race_add_standard_routes( void )
 		race_add_route_node(  581.8,    0.2, -168.0,    0,    0, nodeCheckPoint );
 		race_add_route_node(  261.0, -709.0,  328.0,    0,    0, nodeEnd );
 
-		race_set_route_name( "òáòõî", "rl\215center\215ratop" );
+		race_set_route_name( redtext("ra run"), "rl\215center\215ra top" );
 		race_set_route_timeout( 30 );
 		race_set_route_weapon_mode( raceWeaponNo );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2710,7 +2745,7 @@ void race_add_standard_routes( void )
 		race_add_route_node( -221.7, -561.6,  20.6, 0, 0, nodeCheckPoint );
 		race_add_route_node(  261.0, -709.0, 328.0, 0, 0, nodeEnd );
 
-		race_set_route_name( "áòïõîääí³", "rl\215hibridge\215quadya\215quadunderlifts\215sngmh\215ratop" );
+		race_set_route_name( redtext("around dm3"), "rl\215hi bridge\215quad\215ya\215quad\215under lifts\215sng mh\215ra top" );
 		race_set_route_timeout( 50 );
 		race_set_route_weapon_mode( raceWeaponAllowed );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2725,7 +2760,7 @@ void race_add_standard_routes( void )
 		race_add_route_node( 1199.9, -603.0,  24.0, 1.8, 178.4, nodeStart );
 		race_add_route_node( -144.0, -227.0, -72.0,   0,     0, nodeEnd );
 
-		race_set_route_name( "âáóå äí´", "ya\215quadtele" );
+		race_set_route_name( redtext("base dm4"), "ya\215quad tele" );
 		race_set_route_timeout( 15 );
 		race_set_route_weapon_mode( raceWeaponNo );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2742,7 +2777,7 @@ void race_add_standard_routes( void )
 		race_add_route_node(  336.2,  -664.8, -104.0,   0,     0, nodeCheckPoint );
 		race_add_route_node(  -68.6,   611.1, -296.0,   0,     0, nodeEnd );
 
-		race_set_route_name( "íèòõî", "ya\215toptele\215gl\215mh" );
+		race_set_route_name( redtext("mh run"), "ya\215top tele\215gl\215mh" );
 		race_set_route_timeout( 20 );
 		race_set_route_weapon_mode( raceWeaponNo );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2761,7 +2796,7 @@ void race_add_standard_routes( void )
 		race_add_route_node(  200.5,   -41.5, -104.0,   0,     0, nodeCheckPoint );
 		race_add_route_node( -129.3,  -580.4,  -72.0,   0,     0, nodeEnd );
 
-		race_set_route_name( "ñõáäóôòáæå", "ya\215toptele\215gl\215lg\215quad\215quadtele" );
+		race_set_route_name( redtext("quad strafe"), "ya\215top tele\215gl\215lg\215quad\215quad tele" );
 		race_set_route_timeout( 20 );
 		race_set_route_weapon_mode( raceWeaponNo );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2781,7 +2816,7 @@ void race_add_standard_routes( void )
 		race_add_route_node( 874.3, -210.2, 232.6,    0,     0, nodeCheckPoint );
 		race_add_route_node( 141.1, -223.6, 216.0,    0,     0, nodeEnd );
 
-		race_set_route_name( "áòïõîä äíµ", "ya\215gl\215rl\215telerl\215abovegl\215sng" );
+		race_set_route_name( redtext("around dm5"), "ya\215gl\215rl\215tele rl\215above gl\215sng" );
 		race_set_route_timeout( 35 );
 		race_set_route_weapon_mode( raceWeaponNo );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2797,7 +2832,7 @@ void race_add_standard_routes( void )
 		race_add_route_node(  450.2, -1484.5, 256.0,     0,    0, nodeCheckPoint );
 		race_add_route_node( 1735.0,  -345.0, 168.0,     0,    0, nodeEnd );
 
-		race_set_route_name( "âáóå äí¶", "ga\215gl\215ra" );
+		race_set_route_name( redtext("base dm6"), "ga\215gl\215ra" );
 		race_set_route_timeout( 15 );
 		race_set_route_weapon_mode( raceWeaponAllowed );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -2815,7 +2850,8 @@ void race_add_standard_routes( void )
 		race_add_route_node( 1015.9,  -867.3, 256.0,   0,    0, nodeCheckPoint );
 		race_add_route_node( 1632.2,  -160.4, 168.0,   0,    0, nodeEnd );
 
-		race_set_route_name( "ð³§ó tuberun", "mh\215rlra\215glcircle\215ra" );
+		// p3's tube run
+		race_set_route_name( "\360\263\247\363 tube run", "mh\215rl ra\215gl circle\215ra" );
 		race_set_route_timeout( 25 );
 		race_set_route_weapon_mode( raceWeaponNo );
 		race_set_route_falsestart_mode( raceFalseStartNo );
