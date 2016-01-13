@@ -482,7 +482,12 @@ void GotoNextMap()
 	if ( trap_cvar( "samelevel" ) )
 	{
 		// if samelevel is set, stay on same level
-		strlcpy( newmap, g_globalvars.mapname, sizeof(newmap) );
+		char *entityfile = cvar_string("k_entityfile");
+
+		if (! strnull(entityfile))
+			strlcpy( newmap, entityfile, sizeof(newmap) );
+		else
+			strlcpy( newmap, g_globalvars.mapname, sizeof(newmap) );
 	}
 	else
 	{
@@ -666,6 +671,7 @@ go to the next level for deathmatch
 void NextLevel()
 {
 	gedict_t       *o;
+	char           *entityfile;
 
 	if ( k_bloodfest )
 		return;
@@ -673,7 +679,11 @@ void NextLevel()
 	if ( nextmap[0] )
 		return;		// already done
 
-	set_nextmap( g_globalvars.mapname );
+	entityfile = cvar_string("k_entityfile");
+	if (! strnull(entityfile))
+		set_nextmap( entityfile );
+	else
+		set_nextmap( g_globalvars.mapname );
 
 	o = spawn();
 	o->map = g_globalvars.mapname;

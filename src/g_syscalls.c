@@ -274,9 +274,9 @@ void trap_setspawnparam( intptr_t edn )
 	syscall( G_SETSPAWNPARAMS, edn );
 }
 
-void trap_changelevel( const char *name )
+void trap_changelevel( const char *name, const char* entityname )
 {
-	syscall( G_CHANGELEVEL, name );
+	syscall( G_CHANGELEVEL, name, entityname );
 }
 
 intptr_t trap_multicast( float origin_x, float origin_y, float origin_z, intptr_t to )

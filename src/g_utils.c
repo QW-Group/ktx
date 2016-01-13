@@ -1399,13 +1399,28 @@ qbool SetHandicap( gedict_t *p, int nhdc )
 
 void changelevel( const char *name )
 {
+	const char* entityFileSep = NULL;
+
  	if ( strnull( name ) )
 		G_Error("changelevel: null");
 
 	if ( isRACE() && race.race_recording )
 		race_stoprecord( true );
 
-	trap_changelevel(name);
+	entityFileSep = strchr(name, K_ENTITYFILE_SEPARATOR);
+	if (entityFileSep)
+	{
+		char mapName[128] = { 0 };
+
+		cvar_set("k_entityfile", name);
+		strlcpy(mapName, (char*)name, min(entityFileSep - name + 1, sizeof(mapName) / sizeof(mapName[0])));
+		trap_changelevel(mapName, name);
+	}
+	else
+	{
+		cvar_set("k_entityfile", "");
+		trap_changelevel(name, "");
+	}
 }
 
 char *Get_PowerupsStr(void)

@@ -80,7 +80,7 @@ gedict_t*	trap_findradius( gedict_t* ent, float *org, float rad );
 
 void    trap_makestatic( intptr_t edn );
 void    trap_setspawnparam( intptr_t edn );
-void    trap_changelevel( const char *name );
+void    trap_changelevel( const char *name, const char* entityname );
 intptr_t     trap_multicast( float origin_x, float origin_y, float origin_z, intptr_t to );
 void    trap_logfrag( intptr_t killer, intptr_t killee );
 void    trap_infokey( intptr_t edn, char *key, char *valbuff, intptr_t sizebuff );

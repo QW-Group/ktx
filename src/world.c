@@ -735,6 +735,7 @@ void FirstFrame	( )
 	RegisterCvarEx("k_spm_show", "1");
 	RegisterCvarEx("k_spm_glow", "0");
 	RegisterCvarEx("k_spm_custom_model", "0");
+	RegisterCvar("k_entityfile");
 // { hoonymode
 	RegisterCvarEx("k_hoonymode", "0");
 // }
