@@ -33,6 +33,10 @@ race_t			race; // whole race struct
 
 char *classname_for_nodeType( raceRouteNodeType_t nodeType );
 
+#define RACE_INVALID_RECORD_TIME 999999
+#define RACE_DEFAULT_TIMEOUT 60
+#define RACE_MAX_TIMEOUT 3600
+
 static int next_route = -1; // STATIC
 
 //============================================
@@ -51,6 +55,23 @@ int get_server_port ( void )
 qbool isRACE( void )
 {
 	return ( cvar("k_race") );
+}
+
+static qbool is_valid_record ( raceRecord_t* record )
+{
+	return record->time < RACE_INVALID_RECORD_TIME;
+}
+
+static int read_record_param( int param )
+{
+	char arg_1[64] = { 0 };
+
+	if ( trap_CmdArgc() <= param )
+		return 0;
+
+	trap_CmdArgv( param, arg_1, sizeof( arg_1 ) );
+
+	return bound(0, atoi( arg_1 ) - 1, NUM_BESTSCORES - 1 );
 }
 
 void ToggleRace( void )
@@ -258,7 +279,7 @@ void race_init( void )
 {
 	memset( &race, 0, sizeof( race ) );
 
-	race.timeout_setting = 60; // default is 60 sec
+	race.timeout_setting = RACE_DEFAULT_TIMEOUT;
 
 	race.warned = true;
 	race.status = raceNone;
@@ -920,7 +941,7 @@ void race_node_touch()
 					if ( nameposition == -1 )
 						nameposition = ( NUM_BESTSCORES - 1 );
 
-					if ( race.records[nameposition].time < 999998 )
+					if ( is_valid_record( &race.records[nameposition] ) )
 					{
 						// let's remove the old demo
 						if ( !strnull( race.records[nameposition].demoname ) )
@@ -1185,7 +1206,7 @@ void init_scores( void )
 
     for ( i = 0; i < NUM_BESTSCORES; i++ )
     {
-		race.records[i].time = 999999;
+		race.records[i].time = RACE_INVALID_RECORD_TIME;
 		race.records[i].racername[0] = '\0';
 		race.records[i].demoname[0] = '\0';
 		race.records[i].distance = 0;
@@ -1210,12 +1231,12 @@ void display_scores( void )
 
     for ( i = 0; i < NUM_BESTSCORES; i++ )
     {
-		if ( race.records[i].time > 999998 )
+		if ( ! is_valid_record( &race.records[i] ) )
 		{
 			G_sprint( self, 2, " %02d      -         -\n", i + 1 );
 		}
-        else
-        {
+		else
+		{
 			if ( streq( race.records[i].racername, self->s.v.netname ) )
 				G_sprint( self, 2, " %02d \215 %07.3f%s  %s\n", i + 1, race.records[i].time / 1000.0, redtext( "s" ), race.records[i].racername );
 			else
@@ -1363,7 +1384,7 @@ void race_start( qbool cancelrecord, const char *fmt, ... )
 	race.cd_next_think = g_globalvars.time;
 
 	if ( !race.timeout_setting )
-		race.timeout_setting = 20; // default is 20 s
+		race.timeout_setting = RACE_DEFAULT_TIMEOUT;
 
 	r = race_get_from_line();
 
@@ -2055,38 +2076,28 @@ void r_timeout( )
 
 	race.timeout_setting = atoi( arg_1 );
 
-	if ( race.timeout_setting )
-		race.timeout_setting = 20; // default is 20 sec
+	if ( ! race.timeout_setting )
+		race.timeout_setting = RACE_DEFAULT_TIMEOUT;
 
-	race.timeout_setting = bound(1, atoi( arg_1 ), 60 * 60 );
+	race.timeout_setting = bound(1, race.timeout_setting, RACE_MAX_TIMEOUT );
 
 	G_bprint(2, "%s set race time limit to %ss\n", self->s.v.netname, dig3( race.timeout_setting ) );
 }
 
 void race_download_record_demo( void )
 {
-	char	arg_1[64];
-	int		record;
+	int record = read_record_param( 1 );
 
 	if ( !race_command_checks() )
 		return;
 
-	trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
-
-	record = atoi( arg_1 );
-
-	if ( record )
-		record = 1;
-
-	record = bound(0, atoi( arg_1 ) - 1, NUM_BESTSCORES - 1 );
-
-	if ( race.records[record].time > 999998 )
+	if ( ! is_valid_record( &race.records[record] ) )
 	{
 		G_sprint(self, 2, "record not found\n" );
 		return;
 	}
 
-	if ( strnull(race.records[record].demoname) )
+	if ( strnull( race.records[record].demoname ) )
 	{
 		G_sprint(self, 2, "demo for record #%d is not available\n", record + 1 );
 		return;
@@ -2097,22 +2108,12 @@ void race_download_record_demo( void )
 
 void display_record_details( )
 {
-	char	arg_1[64];
-	int		record;
+	int record = read_record_param( 1 );
 
 	if ( !race_command_checks() )
 		return;
 
-	trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
-
-	record = atoi( arg_1 );
-
-	if ( record )
-		record = 1;
-
-	record = bound(0, atoi( arg_1 ) - 1, NUM_BESTSCORES - 1 );
-
-	if ( race.records[record].time > 999998 )
+	if ( ! is_valid_record( &race.records[record] ) )
 	{
 		G_sprint(self, 2, "record not found\n" );
 		return;
@@ -2212,7 +2213,7 @@ qbool race_load_route( int route )
 	}
 
 	race.weapon 			= race.route[ route ].weapon;
-	race.timeout_setting	= bound( 1, race.route[ route ].timeout, 60 * 60 );
+	race.timeout_setting	= bound( 1, race.route[ route ].timeout, RACE_MAX_TIMEOUT );
 	race.active_route		= route + 1; // mark this is not custom route now
 
 	read_topscores();
@@ -2478,7 +2479,7 @@ void read_topscores( void )
 	{
 		init_scores();
 		race.top_nick[0] = 0;
-		race.top_time = 999999999;
+		race.top_time = RACE_INVALID_RECORD_TIME;
 	}
 
 	race_fclose();
