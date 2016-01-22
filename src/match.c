@@ -598,7 +598,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 	maxspree_q = max(p->ps.spree_max_q, maxspree_q);
 	maxdmgg    = max(p->ps.dmg_g, maxdmgg);
 	maxrlkills = max(p->ps.wpn[wpRL].ekills, maxrlkills);
-	maxsgeffi  = max(h_sg, maxsgeffi);
+	maxsgeffi  = max(e_sg, maxsgeffi);
 }
 
 // Players statistics printout here
