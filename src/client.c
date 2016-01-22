@@ -771,6 +771,7 @@ void SP_info_player_deathmatch()
 // above the ground, fix them
 	setsize( self, PASSVEC3( VEC_HULL_MIN ), PASSVEC3( VEC_HULL_MAX ) );
 	VectorCopy (self->s.v.origin, saved_org);
+	HM_name_map_spawn( self );
 	droptofloor (self);
 	if (self->s.v.origin[2] < saved_org[2] - 64)
 		setorigin (self, PASSVEC3(saved_org));

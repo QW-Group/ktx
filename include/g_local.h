@@ -796,6 +796,8 @@ char*   HM_lastscores_extra();
 void    HM_stats();
 void    HM_stats_show();
 qbool   HM_is_game_over();
+void    HM_name_map_spawn(gedict_t* spawn);
+void    HM_pick_spawn();
 
 // race.c
 

@@ -251,6 +251,8 @@ static void dumpent( );
 void ToggleCArena();
 // }
 
+void HM_spawn_test();
+
 // Save the first 5 demo markers to print at the end.
 demo_marker_t demo_markers[10];
 int demo_markers_count = 10;
@@ -590,11 +592,14 @@ const char CD_NODESC[] = "no desc";
 
 #define CD_DEMOMARK     "put mark in the demo"
 
+#define CD_PICKSPAWN    "nominate hoonymode spawn"
 
 void dummy() {}
 void redirect();
 
 #define DEF(ptr) ((void (*)())(ptr))
+
+void HM_(void);
 
 cmd_t cmds[] = {
 	{ "race",		 ToggleRace,				0    , CF_PLAYER | CF_SPC_ADMIN, CD_RACE },
@@ -908,6 +913,10 @@ cmd_t cmds[] = {
 	{ "votecoop",    votecoop,                  0    , CF_PLAYER | CF_MATCHLESS, CD_VOTECOOP },
 	{ "coop_nm_pu",	 ToggleNewCoopNm,           0    , CF_PLAYER | CF_MATCHLESS, CD_COOPNMPU },
 	{ "demomark",	 DemoMark,                  0    , CF_BOTH, CD_DEMOMARK },
+// { HOONYMODE
+	{ "pickspawn",   HM_pick_spawn,             0    , CF_PLAYER, CD_PICKSPAWN },
+	{ "spawntest",   HM_spawn_test,             0    , CF_PLAYER, CD_PICKSPAWN }
+// }
 };
 
 #undef DEF

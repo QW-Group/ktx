@@ -31,7 +31,7 @@
 #define HM_RESULT_SUICIDEWIN   4
 #define HM_RESULT_DRAWWIN      5
 
-#define HM_WINNING_DIFF 2
+#define HM_WINNING_DIFF        2
 
 static int round_number = 0;
 
@@ -318,91 +318,355 @@ void HM_reset_map()
 	remove_items("backpack");
 }
 
-static qbool SpawnAlreadyAllocated(gedict_t* spawn)
+static int HM_spawn_comparison(const void* lhs_, const void* rhs_)
 {
+	const gedict_t* lhs = *(gedict_t**) lhs_;
+	const gedict_t* rhs = *(gedict_t**) rhs_;
+
+	if (lhs->hoony_spawn_order < rhs->hoony_spawn_order)
+		return -1;
+	else if (lhs->hoony_spawn_order > rhs->hoony_spawn_order)
+		return 1;
+
+	return 0;
+}
+
+static void HM_shuffle_spawns(gedict_t** spawns, int count)
+{
+	int i = 0;
+	int j = 0;
+
+	for (i = 0; i < 6; ++i)
+	{
+		for (j = 0; j < count; ++j)
+			spawns[j]->hoony_spawn_order = (spawns[j]->hoony_nomination ? -1 : 1) * i_rnd(1, 100);
+
+		qsort(spawns, count, sizeof(gedict_t*), HM_spawn_comparison);
+	}
+}
+
+void HM_spawn_test(void)
+{
+	gedict_t* spawns[MAX_CLIENTS] = { 0 };
+	int spawncount = 0;
+	int i = 0;
 	gedict_t* p;
 
-	for (p = world; p = find_plr(p); /**/) {
-		if (p->k_hoony_new_spawn == spawn)
-			return true;
-	}
+	for (p = world; (p = ez_find(p, "info_player_deathmatch")) && spawncount < MAX_CLIENTS; )
+		spawns[spawncount++] = p;
 
-	return false;
+	G_sprint(self, 2, "%d spawns found\n", spawncount);
+	for (i = 0; i < spawncount; ++i)
+		G_sprint(self, 2, "> %d: %s\n", i, spawns[i]->s.v.targetname);
+	HM_shuffle_spawns(spawns, spawncount);
+	G_sprint(self, 2, "---\n");
+	for (i = 0; i < spawncount; ++i)
+		G_sprint(self, 2, "> %d: %s (%d)\n", i, spawns[i]->s.v.targetname, spawns[i]->hoony_spawn_order);
+	G_sprint(self, 2, "---\n");
 }
 
-static void HM_rig_spawn(gedict_t* player)
-{
-	if (HM_current_point() % 2 == 1)
-	{
-		// Swap spawn points with next player
-		gedict_t* p = find_plr(player);
-
-		if (p == NULL)
-			p = find_plr(world);
-		
-		player->k_hoony_new_spawn = p->k_hoonyspawn;
-	}
-	else 
-	{
-		// SelectSpawnPoint() is used to us placing the player there immediately, which we are not doing,
-		//   so try and avoid picking the same point for two people manually.
-		int i;
-
-		for (i = 0; i < 10; ++i)
-		{
-			gedict_t* attempt = SelectSpawnPoint("info_player_deathmatch");
-
-			if (! SpawnAlreadyAllocated(attempt)) {
-				player->k_hoony_new_spawn = player->k_hoonyspawn = attempt;
-				break;
-			}
-		}
-
-		if (! player->k_hoony_new_spawn)
-		{
-			// oh dear - go sequential...
-			gedict_t* attempt = SelectSpawnPoint("info_player_deathmatch");
-
-			if (SpawnAlreadyAllocated(attempt))
-			{
-				attempt = find(attempt, FOFCLSN, "info_player_deathmatch");
-
-				// go back to the start
-				if (attempt == NULL)
-					attempt = find(world, FOFCLSN, "info_player_deathmatch");
-
-				// should never happen...
-				if (attempt == NULL)
-					attempt = SelectSpawnPoint("info_player_deathmatch");	
-			}
-			player->k_hoony_new_spawn = player->k_hoonyspawn = attempt;	
-		}
-	}
-}
-
+// This is called at the start of each round
 void HM_all_ready()
 {
+	gedict_t* spawns[MAX_CLIENTS] = { 0 };
+	int spawncount = 0;
 	gedict_t* p;
 
-	// Clear all spawns for the current round
-	for (p = world; p = find_plr(p); /**/) {
+	for (p = world; p = find_plr(p); /**/)
+	{
+		// Clear allocated spawns for the current round
 		p->k_hoony_new_spawn = NULL;
 	}
 
-	// TODO: at start of match: 
-	// - put all spawns in array, shuffle order
-	// - shuffle order and then assign to players/teams?
+	// Shuffle spawn order, then assign to players
+	if (HM_current_point() % 2 == 0)
+	{
+		int assigned_spawn = 0;
 
-	// Assign players to spawns
-	for (p = world; p = find_plr(p); /**/) {
-		HM_rig_spawn(p);
+		// randomise order
+		for (p = world; (p = ez_find(p, "info_player_deathmatch")) && spawncount < MAX_CLIENTS; )
+			spawns[spawncount++] = p;
+		HM_shuffle_spawns(spawns, spawncount);
+
+		// assign as standard
+		for (p = world; p = find_plr(p); /**/) 
+		{
+			if (assigned_spawn == (int) min(spawncount, MAX_CLIENTS))
+				assigned_spawn = 0;
+
+			p->k_hoony_new_spawn = p->k_hoonyspawn = spawns[assigned_spawn++];
+		}
+	}
+	else 
+	{
+		// On odd-numbered rounds, just swap spawn points with next player
+		for (p = world; p = find_plr(p); /**/)
+		{
+			gedict_t* next = find_plr(p);
+
+			if (next == NULL)
+				next = find_plr(world);
+
+			p->k_hoony_new_spawn = next->k_hoonyspawn;
+		}
 	}
 }
 
-char *HM_lastscores_extra ()
+char *HM_lastscores_extra (void)
 {
 	//extra[0] = 0;
 	//strlcat(extra, va("\n%s\n%s", extra1, extra2), sizeof(extra));
 	//return extra;
 	return "";
+}
+
+// Naming spawns
+// - Spawns can have name set in map or .ent file
+//   Hardcoded names for TB3/TB5 - could go away in future
+
+typedef struct hm_spawn_name_t {
+	vec3_t origin;
+	char* name;
+} hm_spawn_name;
+
+static void HM_name_spawn(gedict_t* spawn, hm_spawn_name* spawns, int spawncount)
+{
+	if (strnull(spawn->s.v.targetname))
+	{
+		int i = 0;
+		for (i = 0; i < spawncount; ++i)
+		{
+			if (VectorCompare(spawn->s.v.origin, spawns[i].origin))
+			{
+				spawn->s.v.targetname = spawns[i].name;
+				break;
+			}
+		}
+	}
+}
+
+void HM_name_map_spawn(gedict_t* spawn)
+{
+	char* mapname = g_globalvars.mapname;
+
+	if (streq(mapname, "dm2"))
+	{
+		hm_spawn_name spawns[] = {
+			{ { 2560,  -192,   32 }, "nailgun" },
+			{ { 2544,   -32,  -64 }, "low-tele" },
+			{ { 2624,  -488,   32 }, "water" },
+			{ { 2176, -2176,   88 }, "ra-mega btn" },
+			{ { 2576, -1328,   24 }, "low-rl" },
+			{ { 2704, -2048,  128 }, "ra-mega" },
+			{ { 1712,  -504,   24 }, "under quad" },
+			{ { 2048, -1352,  136 }, "big (stairs)" },
+			{ { 2248,   -16, -136 }, "low-tele (btn)" }
+		};
+
+		HM_name_spawn(spawn, spawns, sizeof(spawns) / sizeof(spawns[0]));
+	}
+	else if (streq(mapname, "dm3"))
+	{
+		hm_spawn_name spawns[] = {
+			{ { -880, -232,  -16 }, "tele (sng)" },
+			{ {  192, -208, -176 }, "ra tunnel" },
+			{ { 1472, -928,  -24 }, "ya box" },
+			{ { 1520,  432,  -88 }, "rl room" },
+			{ { -632, -680,  -16 }, "tele (ra)" },
+			{ {  512,  768,  216 }, "lifts" }
+		};
+
+		HM_name_spawn(spawn, spawns, sizeof(spawns) / sizeof(spawns[0]));
+	}
+	else if (streq(mapname, "dm4"))
+	{
+		hm_spawn_name spawns[] = {
+			{ { -64,   512, -296 }, "mega-room" },
+			{ { -64,  -232,  -72 }, "quad-tele" },
+			{ { 272,  -952,   24 }, "high-tele" },
+			{ { 112, -1136, -104 }, "ammo-room" },
+			{ { 776,  -808, -232 }, "ra / rl" },
+			{ { 784,  -176,   24 }, "ya-entry" }
+		};
+
+		HM_name_spawn(spawn, spawns, sizeof(spawns) / sizeof(spawns[0]));
+	}
+	else if (streq(mapname, "dm6"))
+	{
+		hm_spawn_name spawns[] = {
+			{ {  232, -1512,  40 }, "ga tele" },
+			{ { 1016,  -416,  40 }, "low rl" },
+			{ {    0, -1088, 264 }, "high rl" },
+			{ {  456, -1504, 256 }, "above sng" },
+			{ {  408, -1088, 256 }, "gl > sng" },
+			{ {  896, -1464, 256 }, "gl room" },
+			{ { 1892,  -160, 168 }, "behind ra" }
+		};
+
+		HM_name_spawn(spawn, spawns, sizeof(spawns) / sizeof(spawns[0]));
+	}
+	else if (streq(mapname, "e1m2"))
+	{
+		hm_spawn_name spawns[] = {
+			{ { -416,  -144, 320 }, "mega room" },
+			{ {  168,  -480, 320 }, "mega entrance" },
+			{ { 1496,  1328, 200 }, "start" },
+			{ { 1936,  -136, 312 }, "nail traps" },
+			{ {  936, -1216, 432 }, "quad -> gl" },
+			{ {  792,  -992, 440 }, "gl -> quad" },
+			{ { 1080,  -720, 312 }, "ya area" },
+			{ {  408,  -752, 432 }, "quad room" },
+			{ {  792,  -208, 320 }, "doors" },
+			{ {  784,   808, 206 }, "rl room" }
+		};
+
+		HM_name_spawn(spawn, spawns, sizeof(spawns) / sizeof(spawns[0]));
+	}
+	else if (streq(mapname, "ztndm3"))
+	{
+		hm_spawn_name spawns[] = {
+			{ {  -432,  128,  32 }, "ra (nailgun)" },
+			{ { -1056, -544, 224 }, "gl/corner" },
+			{ {  -208, -400, 224 }, "ya room" },
+			{ {  -320,  576, 224 }, "quad room" },
+			{ {  -176, -112, 288 }, "ra (ssg)" },
+			{ {   -96,  224,  32 }, "lg tunnel" },
+			{ {  -800,    0, -32 }, "ra (rl/mega)" }
+		};
+
+		HM_name_spawn(spawn, spawns, sizeof(spawns) / sizeof(spawns[0]));
+	}
+	else if (streq(mapname, "aerowalk"))
+	{
+		hm_spawn_name spawns[] = {
+			{ { -224, -720, 256 }, "ga (gl/quad)" },
+			{ { -488,  624, 264 }, "ga (low rl)" },
+			{ { -224, -704, 456 }, "high rl" },
+			{ { -272,   24,  40 }, "big (ssg)" },
+			{ { -320,  480, 456 }, "ra platform" },
+			{ {  160,  128, 256 }, "air tunnel" }
+		};
+
+		HM_name_spawn(spawn, spawns, sizeof(spawns) / sizeof(spawns[0]));
+	}
+}
+
+// Picking spawns
+// - In pregame, allow players to pick spawn points to use during the game
+//   If player doesn't nominate a spawn point, 'their' spawn will be randomly chosen each round
+gedict_t *Spawn_OnePoint( gedict_t* spawn_point, vec3_t org, int effects );
+
+static void HM_deselect_spawn(gedict_t* spawn)
+{
+	int effects = (EF_GREEN | EF_RED);
+
+	if (! spawn->wizard)
+		return;
+
+	// If showing all spawns, just remove the glow.  otherwise remove the marker.
+	if (cvar( "k_spm_show" ))
+	{
+		spawn->wizard->s.v.effects = (int) spawn->wizard->s.v.effects & ~effects;
+	}
+	else 
+	{
+		ent_remove(spawn->wizard);
+		spawn->wizard = 0;
+	}
+
+	if (spawn->hoony_nomination)
+		g_edicts[spawn->hoony_nomination].hoony_nomination = 0;
+	spawn->hoony_nomination = 0;
+}
+
+static void HM_select_spawn(gedict_t* spawn, gedict_t* player)
+{
+	int effects = (EF_GREEN | EF_RED);
+
+	if (spawn->wizard)
+	{
+		spawn->wizard->s.v.effects = (int) spawn->wizard->s.v.effects | effects;
+	}
+	else 
+	{
+		Spawn_OnePoint(spawn, spawn->s.v.origin, effects);
+	}
+
+	spawn->hoony_nomination = NUM_FOR_EDICT(player);
+	player->hoony_nomination = NUM_FOR_EDICT(spawn);
+}
+
+void HM_pick_spawn(void)
+{
+	gedict_t* spawn = world;
+	gedict_t* closest = world;
+	gedict_t* old_nomination = world;
+	int spawn_count = 0;
+	int closest_spawn_num = 0;                  // count spawns and use when spawns are unnamed
+	int self_num = NUM_FOR_EDICT(self);
+	float closest_distance = 9999999.9f;
+
+	if (! isHoonyMode())
+	{
+		G_sprint(self, 2, "Command only available in %s.\n", redtext("hoonymode"));
+		return;
+	}
+
+	if (match_in_progress || intermission_running) 
+	{
+		G_sprint(self, 2, "Command not available during game.\n");
+		return;
+	}
+
+	for (spawn = world; (spawn = ez_find(spawn, "info_player_deathmatch")); )
+	{
+		vec3_t difference;
+		float distance = 0.0f;
+		
+		++spawn_count;
+		if (spawn->hoony_nomination == self_num)
+			old_nomination = spawn;
+
+		VectorSubtract(spawn->s.v.origin, self->s.v.origin, difference);
+		distance = VectorLength(difference);
+
+		if (closest == world || distance < closest_distance)
+		{
+			closest = spawn;
+			closest_distance = distance;
+			closest_spawn_num = spawn_count;
+		}
+	}
+
+	if (closest == world)
+	{
+		G_sprint(self, 2, "No closest spawn found\n");
+		return;
+	}
+
+	if (closest == old_nomination) 
+	{
+		G_bprint(2, "%s opts for %s spawns\n", self->s.v.netname, redtext("random"));
+		
+		HM_deselect_spawn(closest);
+	}
+	else if (closest->hoony_nomination)
+	{
+		if (! strnull(closest->s.v.targetname))
+			G_sprint(self, 2, "%s has already nominated %s\n", g_edicts[closest->hoony_nomination].s.v.netname, closest->s.v.targetname);
+		else
+			G_sprint(self, 2, "%s has already nominated spawn #%d\n", g_edicts[closest->hoony_nomination].s.v.netname, closest_spawn_num);
+	}
+	else
+	{
+		if (old_nomination != 0)
+			HM_deselect_spawn(old_nomination);
+
+		if (! strnull(closest->s.v.targetname))
+			G_bprint(2, "%s picks spawn %s\n", self->s.v.netname, redtext(closest->s.v.targetname));
+		else
+			G_bprint(2, "%s picks spawn #%d\n", self->s.v.netname, closest_spawn_num);
+
+		HM_select_spawn(closest, self);
+	}
 }
