@@ -1581,31 +1581,29 @@ void PutClientInServer( void )
 
 		if (! match_in_progress)
 		{
+			int itemvalues[] = { IT_SUPER_SHOTGUN, IT_NAILGUN, IT_SUPER_NAILGUN, IT_GRENADE_LAUNCHER, IT_ROCKET_LAUNCHER, IT_LIGHTNING };
+			char* itemnames[] = { "ssg", "ng", "sng", "gl", "rl", "lg" };
+			int i;
+			qbool first = true;
+
 			// Tell the player what they would have received here
 			if (! strnull(spot->s.v.targetname))
 				G_sprint(self, 2, "This spawn is: %s\n", redtext(spot->s.v.targetname));
 			G_sprint(self, 2, "Spawning here gives you:\n");
 			G_sprint(self, 2, "  %d%s, %dh\n", (int)armorvalue, armorExplanation, (int)spot->s.v.health);
-			if (true)
-			{
-				int itemvalues[] = { IT_SUPER_SHOTGUN, IT_NAILGUN, IT_SUPER_NAILGUN, IT_GRENADE_LAUNCHER, IT_ROCKET_LAUNCHER, IT_LIGHTNING };
-				char* itemnames[] = { "ssg", "ng", "sng", "gl", "rl", "lg" };
-				int i;
-				qbool first = true;
 
-				for (i = 0; i < sizeof(itemvalues) / sizeof(itemvalues[0]); ++i)
+			for (i = 0; i < sizeof(itemvalues) / sizeof(itemvalues[0]); ++i)
+			{
+				if (items & itemvalues[i])
 				{
-					if (items & itemvalues[i])
-					{
-						G_sprint(self, 2, "%s%s", first ? "  " : ",", itemnames[i]);
-						first = false;
-					}
+					G_sprint(self, 2, "%s%s", first ? "  " : ",", itemnames[i]);
+					first = false;
 				}
-				if (! first)
-					G_sprint(self, 2, "\n");
-				else
-					G_sprint(self, 2, "  (no extra weapons)\n");
 			}
+			if (! first)
+				G_sprint(self, 2, "\n");
+			else
+				G_sprint(self, 2, "  (no extra weapons)\n");
 		}
 
 		if (match_in_progress == 2)

@@ -345,31 +345,9 @@ static void HM_shuffle_spawns(gedict_t** spawns, int count)
 	}
 }
 
-void HM_spawn_test(void)
-{
-	gedict_t* spawns[MAX_CLIENTS] = { 0 };
-	int spawncount = 0;
-	int i = 0;
-	gedict_t* p;
-
-	for (p = world; (p = ez_find(p, "info_player_deathmatch")) && spawncount < MAX_CLIENTS; )
-		spawns[spawncount++] = p;
-
-	G_sprint(self, 2, "%d spawns found\n", spawncount);
-	for (i = 0; i < spawncount; ++i)
-		G_sprint(self, 2, "> %d: %s\n", i, spawns[i]->s.v.targetname);
-	HM_shuffle_spawns(spawns, spawncount);
-	G_sprint(self, 2, "---\n");
-	for (i = 0; i < spawncount; ++i)
-		G_sprint(self, 2, "> %d: %s (%d)\n", i, spawns[i]->s.v.targetname, spawns[i]->hoony_spawn_order);
-	G_sprint(self, 2, "---\n");
-}
-
 // This is called at the start of each round
 void HM_all_ready()
 {
-	gedict_t* spawns[MAX_CLIENTS] = { 0 };
-	int spawncount = 0;
 	gedict_t* p;
 
 	for (p = world; p = find_plr(p); /**/)
@@ -381,33 +359,89 @@ void HM_all_ready()
 	// Shuffle spawn order, then assign to players
 	if (HM_current_point() % 2 == 0)
 	{
-		int assigned_spawn = 0;
-
 		// randomise order
-		for (p = world; (p = ez_find(p, "info_player_deathmatch")) && spawncount < MAX_CLIENTS; )
-			spawns[spawncount++] = p;
-		HM_shuffle_spawns(spawns, spawncount);
-
-		// assign as standard
-		for (p = world; p = find_plr(p); /**/) 
+		if (isTeam())
 		{
-			if (assigned_spawn == (int) min(spawncount, MAX_CLIENTS))
-				assigned_spawn = 0;
+			gedict_t* red_spawns[MAX_CLIENTS] = { 0 };
+			gedict_t* blue_spawns[MAX_CLIENTS] = { 0 };
 
-			p->k_hoony_new_spawn = p->k_hoonyspawn = spawns[assigned_spawn++];
+			int red_spawncount = 0;
+			int blue_spawncount = 0;
+			int red_assigned_spawn = 0;
+			int blue_assigned_spawn = 0;
+
+			// Allocate specific red/blue spawns accordingly
+			for (p = world; (p = ez_find(p, "info_player_team1")) && red_spawncount < MAX_CLIENTS; )
+				red_spawns[red_spawncount++] = p;
+			for (p = world; (p = ez_find(p, "info_player_team2")) && blue_spawncount < MAX_CLIENTS; )
+				blue_spawns[blue_spawncount++] = p;
+
+			// Allocate standard deathmatch spawns
+			for (p = world; (p = ez_find(p, "info_player_deathmatch")) && (red_spawncount < MAX_CLIENTS || blue_spawncount < MAX_CLIENTS); )
+			{
+				if (red_spawncount < MAX_CLIENTS && red_spawncount < blue_spawncount)
+					red_spawns[red_spawncount++] = p;
+				else if (blue_spawncount < MAX_CLIENTS)
+					blue_spawns[blue_spawncount++] = p;
+			}
+
+			// Shuffle
+			HM_shuffle_spawns(red_spawns, red_spawncount);
+			HM_shuffle_spawns(blue_spawns, blue_spawncount);
+
+			// Assign based on team
+			for (p = world; p = find_plr(p); /**/) 
+			{
+				if (red_assigned_spawn == (int) min(red_spawncount, MAX_CLIENTS))
+					red_assigned_spawn = 0;
+				if (blue_assigned_spawn == (int) min(blue_spawncount, MAX_CLIENTS))
+					blue_assigned_spawn = 0;
+
+				if (streq(getteam(self), "red"))
+					p->k_hoony_new_spawn = p->k_hoonyspawn = red_spawns[red_assigned_spawn++];
+				else
+					p->k_hoony_new_spawn = p->k_hoonyspawn = blue_spawns[blue_assigned_spawn++];
+			}
+		}
+		else 
+		{
+			gedict_t* spawns[MAX_CLIENTS] = { 0 };
+			int spawncount = 0;
+			int assigned_spawn = 0;
+
+			for (p = world; (p = ez_find(p, "info_player_deathmatch")) && spawncount < MAX_CLIENTS; )
+				spawns[spawncount++] = p;
+			HM_shuffle_spawns(spawns, spawncount);
+
+			// assign as standard
+			for (p = world; p = find_plr(p); /**/) 
+			{
+				if (assigned_spawn == (int) min(spawncount, MAX_CLIENTS))
+					assigned_spawn = 0;
+
+				p->k_hoony_new_spawn = p->k_hoonyspawn = spawns[assigned_spawn++];
+			}
 		}
 	}
 	else 
 	{
-		// On odd-numbered rounds, just swap spawn points with next player
-		for (p = world; p = find_plr(p); /**/)
+		// on odd-numbered rounds, spawn spawn points
+		if (isTeam())
 		{
-			gedict_t* next = find_plr(p);
+			gedict_t* red_players[MAX_CLIENTS] = { 0 };
+			gedict_t* blue_players[MAX_CLIENTS] = { 0 };
+		}
+		else 
+		{
+			for (p = world; p = find_plr(p); /**/)
+			{
+				gedict_t* next = find_plr(p);
 
-			if (next == NULL)
-				next = find_plr(world);
+				if (next == NULL)
+					next = find_plr(world);
 
-			p->k_hoony_new_spawn = next->k_hoonyspawn;
+				p->k_hoony_new_spawn = next->k_hoonyspawn;
+			}
 		}
 	}
 }
