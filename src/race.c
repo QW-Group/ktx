@@ -28,6 +28,8 @@ qbool is_rules_change_allowed( void );
 qbool race_command_checks( void );
 qbool race_is_started( void );
 
+void StatsToFile ();
+
 fileHandle_t race_fhandle = -1;
 race_t			race; // whole race struct
 
@@ -455,10 +457,15 @@ void race_stoprecord( qbool cancel )
 {
 	if ( race.race_recording )
 	{
-		if ( cancel )
-			localcmd("cancel\n");  // stop recording demo and discard it
+		if (cancel)
+		{
+			localcmd ("cancel\n");  // stop recording demo and discard it
+		}
 		else
-			localcmd( "stop\n"); // stop recording demo and keep it
+		{
+			StatsToFile ();
+			localcmd ("stop\n"); // stop recording demo and keep it
+		}
 
 		race.race_recording = false;
 	}
