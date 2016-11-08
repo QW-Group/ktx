@@ -24,6 +24,7 @@
  */
 
 #include "g_local.h"
+#include "fb_globals.h"
 
 void            plat_center_touch();
 void            plat_outside_touch();
@@ -83,12 +84,18 @@ void plat_hit_top()
 	self->state = STATE_TOP;
 	self->s.v.think = ( func_t ) plat_go_down;
 	self->s.v.nextthink = self->s.v.ltime + 3;
+
+	if (bots_enabled ())
+		BotEventPlatformHitTop (self);
 }
 
 void plat_hit_bottom()
 {
 	sound( self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->s.v.noise1, 1, ATTN_NORM );
 	self->state = STATE_BOTTOM;
+
+	if (bots_enabled ())
+		BotEventPlatformHitBottom (self);
 }
 
 void plat_go_down()

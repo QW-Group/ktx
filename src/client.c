@@ -28,6 +28,8 @@
 //
 //===========================================================================
 #include "g_local.h"
+#include "fb_globals.h"
+
 vec3_t          VEC_ORIGIN = { 0, 0, 0 };
 vec3_t          VEC_HULL_MIN = { -16, -16, -24 };
 vec3_t          VEC_HULL_MAX = { 16, 16, 32 };
@@ -48,6 +50,9 @@ void StartDie ();
 void ZeroFpsStats ();
 
 void del_from_specs_favourites(gedict_t *rm);
+
+// bot functions
+void BotWaterJumpFix(void);
 
 extern int g_matchstarttime;
 
@@ -653,12 +658,14 @@ void SP_trigger_changelevel()
 		 && cvar( "k_remove_end_hurt" )
 		 && cvar( "k_remove_end_hurt" ) != 2
 	   ) {
-		ent_remove ( self );
-		return;
+		if (!bots_enabled ()) {
+			ent_remove ( self );
+		}
 	}
-
-	InitTrigger();
-	self->s.v.touch = ( func_t ) changelevel_touch;
+	else {
+		InitTrigger ();
+		self->s.v.touch = (func_t)changelevel_touch;
+	}
 }
 
 /*
@@ -1351,6 +1358,10 @@ void ClientConnect()
 	}
 
 	MakeMOTD();
+
+	if (bots_enabled()) {
+		BotClientConnectedEvent (self);
+	}
 }
 
 ////////////////
@@ -1680,10 +1691,15 @@ void PutClientInServer( void )
 	{
 		teleport_player( self, self->s.v.origin, self->s.v.angles, tele_flags );
 	}
-  g_globalvars.msg_entity = EDICT_TO_PROG(self);
-  WriteByte(MSG_ONE, 38 /*svc_updatestatlong*/);
-  WriteByte(MSG_ONE, 18 /*STAT_MATCHSTARTTIME*/);
-  WriteLong(MSG_ONE, g_matchstarttime);
+	g_globalvars.msg_entity = EDICT_TO_PROG(self);
+	WriteByte(MSG_ONE, 38 /*svc_updatestatlong*/);
+	WriteByte(MSG_ONE, 18 /*STAT_MATCHSTARTTIME*/);
+	WriteLong(MSG_ONE, g_matchstarttime);
+
+	if (bots_enabled())
+	{
+		BotClientEntersEvent (self, spot);
+	}
 }
 
 /*
@@ -1762,6 +1778,10 @@ void PlayerDeathThink()
 
     if( k_standby )
         return;
+
+	if (self->isBot) {
+		BotDeathThink();
+	}
 
 	if ( ( ( int ) ( self->s.v.flags ) ) & FL_ONGROUND )
 	{
@@ -1907,6 +1927,9 @@ void WaterMove()
 
 	if ( self->s.v.waterlevel != 3 )
 	{
+		if (self->isBot && self->s.v.waterlevel)
+			BotWaterJumpFix();
+
 		if ( self->air_finished < g_globalvars.time )
 			sound( self, CHAN_VOICE, "player/gasp2.wav", 1, ATTN_NORM );
 		else if ( self->air_finished < g_globalvars.time + 9 )
@@ -1915,8 +1938,13 @@ void WaterMove()
 		self->air_finished = g_globalvars.time + 12;
 		self->dmg = 2;
 
-	} else if ( self->air_finished < g_globalvars.time )
-	{			// drown!
+		if (self->isBot) {
+			BotOutOfWater (self);
+		}
+	} 
+	else if ( self->air_finished < g_globalvars.time )
+	{
+		// drown!
 		if ( self->pain_finished < g_globalvars.time )
 		{
 			self->dmg = self->dmg + 2;
@@ -1931,6 +1959,11 @@ void WaterMove()
 			T_Damage( self, world, world, self->dmg );
 			self->pain_finished = g_globalvars.time + 1;
 		}
+	}
+
+	if ( self->isBot )
+	{
+		BotWaterMove (self);
 	}
 
 	if ( !self->s.v.waterlevel )
@@ -2537,6 +2570,10 @@ void PlayerPreThink()
 		self->was_jump = false;
 	}
 
+	if ( bots_enabled() ) {
+		BotPreThink (self);
+	}
+
 // ILLEGALFPS[
 
 	self->fAverageFrameTime += g_globalvars.frametime;
@@ -2550,7 +2587,7 @@ void PlayerPreThink()
 	if( g_globalvars.frametime > self->fHighestFrameTime )
 		self->fHighestFrameTime = g_globalvars.frametime;
 
-	if( self->fDisplayIllegalFPS < g_globalvars.time && framechecks )
+	if( self->fDisplayIllegalFPS < g_globalvars.time && framechecks && ! self->isBot )
 	{
 		float fps;
 
@@ -2599,7 +2636,7 @@ void PlayerPreThink()
             	G_bprint(PRINT_HIGH, "%s gets kicked for potential cheat\n", self->s.v.netname );
 							G_sprint(self, PRINT_HIGH, "Please reboot your machine to try to get rid of the problem\n");
             	stuffcmd(self, "disconnect\n"); // FIXME: stupid way
-       }
+			}
 		}
 
 		zeroFps = true;
@@ -2649,7 +2686,7 @@ void PlayerPreThink()
         // invoked on death for some reason (couldn't figure out why). This leads to a
         // state when the player stands still after dying and can't respawn or even
         // suicide and has to reconnect. This is checked and fixed here
-	        if( g_globalvars.time > (self->dead_time + 0.1)
+		if ( g_globalvars.time > (self->dead_time + 0.1)
 			&& ( self->s.v.frame < 41 || self->s.v.frame > 102 ) // FIXME: hardcoded range of dead frames
 		) {
 			StartDie();
@@ -2694,6 +2731,9 @@ void PlayerPreThink()
 				if ( self->s.v.health > 150 )
 					self->s.v.health = 150;
 				self->regen_time += 0.5;
+				if (bots_enabled ()) {
+					FrogbotSetHealthArmour (self);
+				}
 				RegenerationSound( self );
 	    	}
 
@@ -2703,6 +2743,9 @@ void PlayerPreThink()
 				if ( self->s.v.armorvalue > 150 )
 					self->s.v.armorvalue = 150;
 				self->regen_time += 0.5;
+				if (bots_enabled ()) {
+					FrogbotSetHealthArmour (self);
+				}
 				RegenerationSound( self );
 	    	}
 		}
@@ -2965,7 +3008,7 @@ void BothPostThink ()
 	if ( !self->sc_stats && self->sc_stats_time && self->sc_stats_time <= g_globalvars.time )
 		self->sc_stats_time = 0;
 
-	if (     self->need_clearCP
+	if (  self->need_clearCP
 		 && !self->shownick_time
          && !self->wp_stats_time
          && !self->sc_stats_time
@@ -3079,37 +3122,9 @@ void WS_CheckUpdate( gedict_t *p )
 // } end of new weapon stats
 // ====================================
 
-////////////////
-// GlobalParams:
-// time
-// self
-///////////////
-void PlayerPostThink()
+
+void CheckLand()
 {
-//dprint ("post think\n");
-
-	WS_CheckUpdate( self );
-
-	if ( intermission_running )
-    {
-		setorigin( self, PASSVEC3( intermission_spot->s.v.origin ) );
-        SetVector( self->s.v.velocity, 0, 0, 0 ); 	// don't stray off the intermission spot too far
-
-        return;
-    }
-
-	if ( self->s.v.deadflag )
-		return;
-
-//team
-
-// WaterMove function call moved here from PlayerPreThink to avoid
-// occurrence of the spawn lavaburn bug and to fix the problem on spawning
-// and playing the leave water sound if the player died underwater.
-
-    WaterMove ();
-
-
 // clear the flag if we landed
     if( (int)self->s.v.flags & FL_ONGROUND )
 		self->brokenankle = 0;
@@ -3149,6 +3164,39 @@ void PlayerPostThink()
 	}
 
 	self->jump_flag = self->s.v.velocity[2];
+}
+
+////////////////
+// GlobalParams:
+// time
+// self
+///////////////
+void PlayerPostThink()
+{
+//dprint ("post think\n");
+
+	WS_CheckUpdate( self );
+
+	if ( intermission_running )
+    {
+		setorigin( self, PASSVEC3( intermission_spot->s.v.origin ) );
+        SetVector( self->s.v.velocity, 0, 0, 0 ); 	// don't stray off the intermission spot too far
+
+        return;
+    }
+
+	if ( self->s.v.deadflag )
+		return;
+
+//team
+
+// WaterMove function call moved here from PlayerPreThink to avoid
+// occurrence of the spawn lavaburn bug and to fix the problem on spawning
+// and playing the leave water sound if the player died underwater.
+
+    WaterMove ();
+
+	CheckLand();
 
 	CheckPowerups();
 	CheckLightEffects(); // NOTE: guess, this must be after CheckPowerups(), so u r warned.
@@ -3156,6 +3204,9 @@ void PlayerPostThink()
 	CTF_CheckFlagsAsKeys();
 
 	mv_record();
+
+	if ( bots_enabled() )
+		BotsThinkTime (self);
 
 	W_WeaponFrame();
 

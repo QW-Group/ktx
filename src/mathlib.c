@@ -391,6 +391,15 @@ vec_t VectorLength (vec3_t v)
 	return length;
 }
 
+float VectorDistance (vec3_t v1, vec3_t v2)
+{
+	vec3_t diff;
+
+	VectorSubtract(v1, v2, diff);
+
+	return vlen(diff);
+}
+
 float VectorNormalize (vec3_t v)
 {
 	float	length, ilength;

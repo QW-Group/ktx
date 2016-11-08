@@ -24,6 +24,7 @@
  */
 
 #include "g_local.h"
+#include "fb_globals.h"
 
 #define DOOR_START_OPEN   1
 #define DOOR_DONT_LINK    4
@@ -85,6 +86,9 @@ void door_hit_top()
 	sound( self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->s.v.noise1, 1, ATTN_NORM );
 	self->state = STATE_TOP;
 
+	if (bots_enabled ())
+		BotEventDoorHitTop (self);
+
 	if ( ( int ) ( self->s.v.spawnflags ) & DOOR_TOGGLE )
 		return;		// don't come down automatically
 
@@ -96,6 +100,9 @@ void door_hit_bottom()
 {
 	sound( self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->s.v.noise1, 1, ATTN_NORM );
 	self->state = STATE_BOTTOM;
+
+	if (bots_enabled ())
+		BotEventDoorHitBottom (self);
 }
 
 void door_go_down()

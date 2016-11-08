@@ -32,6 +32,7 @@ void  FixSayFloodProtect();
 void  FixRules ();
 void  ShowSpawnPoints();
 void  r_route();
+void  LoadMap (void);
 
 #define MAX_BODYQUE 4
 gedict_t       *bodyque[MAX_BODYQUE];
@@ -524,7 +525,7 @@ void Customize_Maps()
 		self = swp; // restore self
 	}
 
-	if ( !cvar("k_end_tele_spawn") && streq( "end", g_globalvars.mapname) ) {
+	if ( !cvar("k_end_tele_spawn") && streq( "end", g_globalvars.mapname) && !bots_enabled() ) {
 		vec3_t      TS_ORIGIN = { -392, 608, 40 }; // tele spawn
 
 		for( p = world; (p = find( p, FOFCLSN, "info_player_deathmatch" )); )
@@ -856,6 +857,17 @@ void FirstFrame	( )
 
 // }
 
+// { frogbots support
+	RegisterCvarEx ("k_fb_skill", "10");
+	RegisterCvarEx ("k_fb_options", "0");
+
+	for (i = 0; i < MAX_LASTSCORES; i++) {
+		RegisterCvarEx (va ("k_fb_name_%d", i), "");
+		RegisterCvarEx (va ("k_fb_name_enemy_%d", i), "");
+		RegisterCvarEx (va ("k_fb_name_team_%d", i), "");
+	}
+// }
+
 // below globals changed only here
 
 	k_matchLess = cvar( "k_matchless" );
@@ -919,6 +931,8 @@ void SecondFrame ( )
 		return;
 
 	Customize_Maps();
+
+	LocationInitialise ();
 }
 
 void CheckSvUnlock ()
@@ -1331,6 +1345,7 @@ void CheckTeamStatus();
 void DoMVDAutoTrack( void );
 
 void FixNoSpecs( void );
+void BotStartFrame( int );
 
 void StartFrame( int time )
 {
@@ -1344,6 +1359,10 @@ void StartFrame( int time )
 	if ( framecount == 2 ) {
 		SecondFrame();
 		FixRules();
+	}
+
+	if ( bots_enabled() ) {
+		BotStartFrame (framecount);
 	}
 
 	FixNoSpecs(); // if no players left turn off "no spectators" mode
@@ -1396,5 +1415,7 @@ void StartFrame( int time )
 	Check_LongMapUptime(); // reload map after some long up time, so our float time variables are happy
 
 	check_fcheck();
+
+	TeamplayGameTick ();
 }
 

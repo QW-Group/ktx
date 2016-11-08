@@ -30,8 +30,24 @@ void            SP_item_artifact_super_damage();
 void			SP_item_artifact_invulnerability();
 
 void TookWeaponHandler( gedict_t *p, int new_wp );
+void BecomeMarker(gedict_t* self);
+void BotsBackpackTouchedNonPlayer (gedict_t* backpack, gedict_t* entity);
+void BotsBackpackDropped (gedict_t* self, gedict_t* pack);
 
 #define AUTOTRACK_POWERUPS_PREDICT_TIME 2
+
+static qbool ItemTouched (gedict_t* item, gedict_t* player)
+{
+	return (self->fb.item_touch && self->fb.item_touch (item, player));
+}
+
+static void ItemTaken (gedict_t* item, gedict_t* player)
+{
+	TeamplayEventItemTaken (player, item);
+
+	if (self->fb.item_taken)
+		self->fb.item_taken (item, player);
+}
 
 void SUB_regen()
 {
@@ -42,6 +58,9 @@ void SUB_regen()
 	self->s.v.solid = SOLID_TRIGGER;	// allow it to be touched again
 	sound( self, CHAN_VOICE, "items/itembk2.wav", 1, ATTN_NORM );	// play respawn sound
 	setorigin( self, PASSVEC3( self->s.v.origin ) );
+
+	if (self->fb.item_respawned)
+		self->fb.item_respawned (self);
 }
 
 void SUB_regen_powerups()
@@ -128,6 +147,9 @@ void StartItem()
 
 	self->s.v.nextthink = g_globalvars.time + 0.2;	// items start after other solids
 	self->s.v.think = ( func_t ) PlaceItem;
+
+	if (bots_enabled())
+		BecomeMarker(self);
 }
 
 /*
@@ -208,6 +230,7 @@ one point per second.
 void SP_item_health()
 {
 	self->s.v.touch = ( func_t ) health_touch;
+	self->tp_flags = it_health;
 
 	if ( ( int ) self->s.v.spawnflags & H_ROTTEN )
 	{
@@ -222,6 +245,7 @@ void SP_item_health()
 		self->s.v.noise = "items/r_item2.wav";
 		self->healamount = 100;
 		self->healtype = 2;
+		self->tp_flags = it_mh;
 	}
 	else
 	{
@@ -241,6 +265,9 @@ void health_touch()
 		return;
 
 	if ( ISDEAD( other ) )
+		return;
+
+	if (ItemTouched (self, other))
 		return;
 
 	if ( deathmatch == 4 )
@@ -300,6 +327,8 @@ void health_touch()
 		}
 	}
 
+	ItemTaken (self, other);
+
 	activator = other;
 	SUB_UseTargets();	// fire all targets / killtargets
 }
@@ -314,6 +343,9 @@ void item_megahealth_rot()
 			other->s.v.health -= 1;
 
 		self->s.v.nextthink = g_globalvars.time + 1;
+		if (self->fb.item_affect) {
+			self->fb.item_affect (other, self);
+		}
 		return;
 	}
 
@@ -325,6 +357,10 @@ void item_megahealth_rot()
 	{
 		self->s.v.nextthink = g_globalvars.time + 20;
 		self->s.v.think = ( func_t ) SUB_regen;
+	}
+
+	if (self->fb.item_affect) {
+		self->fb.item_affect (other, self);
 	}
 }
 
@@ -348,6 +384,10 @@ void armor_touch()
 
 	if ( other->ct != ctPlayer )
 		return;
+
+	if (ItemTouched (self, other)) {
+		return;
+	}
 
 	if ( match_in_progress != 2 || !readytostart() )
         return;
@@ -437,6 +477,8 @@ void armor_touch()
 
 	activator = other;
 	SUB_UseTargets();	// fire all targets / killtargets
+
+	ItemTaken (self, other);
 }
 
 /*QUAKED item_armor1 (0 .5 .8) (-16 -16 0) (16 16 32)
@@ -448,6 +490,7 @@ void SP_item_armor1()
 	setmodel( self, "progs/armor.mdl" );
 	self->s.v.netname = "Green Armor";
 	self->s.v.skin = 0;
+	self->tp_flags = it_ga;
 	setsize( self, -16, -16, 0, 16, 16, 56 );
 	StartItem();
 }
@@ -461,6 +504,7 @@ void SP_item_armor2()
 	setmodel( self, "progs/armor.mdl" );
 	self->s.v.netname = "Yellow Armor";
 	self->s.v.skin = 1;
+	self->tp_flags = it_ya;
 	setsize( self, -16, -16, 0, 16, 16, 56 );
 	StartItem();
 }
@@ -474,6 +518,7 @@ void SP_item_armorInv()
 	setmodel( self, "progs/armor.mdl" );
 	self->s.v.netname = "Red Armor";
 	self->s.v.skin = 2;
+	self->tp_flags = it_ra;
 	setsize( self, -16, -16, 0, 16, 16, 56 );
 	StartItem();
 }
@@ -597,6 +642,9 @@ void weapon_touch()
 		return;
 
 	if ( other->ct != ctPlayer )
+		return;
+
+	if (ItemTouched (self, other))
 		return;
 
 	if ( match_in_progress != 2 || !readytostart() )
@@ -729,8 +777,10 @@ void weapon_touch()
 
 	self = stemp;
 
-	if ( leave )
+	if (leave) {
+		ItemTaken (self, other);
 		return;
+	}
 
 	if ( deathmatch != 3 || deathmatch != 5 )
 	{
@@ -743,6 +793,8 @@ void weapon_touch()
 	}
 	activator = other;
 	SUB_UseTargets();	// fire all targets / killtargets
+
+	ItemTaken (self, other);
 }
 
 /*QUAKED weapon_supershotgun (0 .5 .8) (-16 -16 0) (16 16 32)
@@ -755,6 +807,7 @@ void SP_weapon_supershotgun()
 	self->s.v.weapon = IT_SUPER_SHOTGUN;
 	self->s.v.netname = "Double-barrelled Shotgun";
 	self->s.v.touch = ( func_t ) weapon_touch;
+	self->tp_flags = it_ssg;
 
 	setsize( self, -16, -16, 0, 16, 16, 56 );
 
@@ -771,9 +824,10 @@ void SP_weapon_nailgun()
 	self->s.v.weapon = IT_NAILGUN;
 	self->s.v.netname = "nailgun";
 	self->s.v.touch = ( func_t ) weapon_touch;
+	self->tp_flags = it_ng;
 
 	setsize( self, -16, -16, 0, 16, 16, 56 );
-	
+
 	StartItem();
 }
 
@@ -787,6 +841,7 @@ void SP_weapon_supernailgun()
 	self->s.v.weapon = IT_SUPER_NAILGUN;
 	self->s.v.netname = "Super Nailgun";
 	self->s.v.touch = ( func_t ) weapon_touch;
+	self->tp_flags = it_sng;
 
 	setsize( self, -16, -16, 0, 16, 16, 56 );
 
@@ -804,6 +859,7 @@ void SP_weapon_grenadelauncher()
 	self->s.v.weapon = 3;
 	self->s.v.netname = "Grenade Launcher";
 	self->s.v.touch = ( func_t ) weapon_touch;
+	self->tp_flags = it_gl;
 
 	setsize( self, -16, -16, 0, 16, 16, 56 );
 
@@ -820,6 +876,7 @@ void SP_weapon_rocketlauncher()
 	self->s.v.weapon = 3;
 	self->s.v.netname = "Rocket Launcher";
 	self->s.v.touch = ( func_t ) weapon_touch;
+	self->tp_flags = it_rl;
 
 	setsize( self, -16, -16, 0, 16, 16, 56 );
 
@@ -837,6 +894,7 @@ void SP_weapon_lightning()
 	self->s.v.weapon = 3;
 	self->s.v.netname = "Thunderbolt";
 	self->s.v.touch = ( func_t ) weapon_touch;
+	self->tp_flags = it_lg;
 
 	setsize( self, -16, -16, 0, 16, 16, 56 );
 
@@ -865,7 +923,10 @@ void ammo_touch()
 	if ( other->ct != ctPlayer )
 		return;
 
-    if ( match_in_progress != 2 || !readytostart() )
+	if (ItemTouched (self, other))
+		return;
+
+	if ( match_in_progress != 2 || !readytostart() )
         return;
 
 // if the player was using his best weapon, change up to the new one if better          
@@ -982,6 +1043,7 @@ void ammo_touch()
 		self->s.v.nextthink = g_globalvars.time + 15;
 
 	self->s.v.think = ( func_t ) SUB_regen;
+	ItemTaken (self, other);
 
 	activator = other;
 	SUB_UseTargets();	// fire all targets / killtargets
@@ -1013,6 +1075,7 @@ void SP_item_shells()
 	self->s.v.weapon = 1;
 	self->s.v.netname = "shells";
 	self->s.v.classname = "item_shells";
+	self->tp_flags = it_shells;
 
 	setsize( self, 0, 0, 0, 32, 32, 56 );
 	StartItem();
@@ -1040,6 +1103,7 @@ void SP_item_spikes()
 	self->s.v.weapon = 2;
 	self->s.v.netname = (old_style ? "spikes" : "nails"); // hehe, different message when u pick different nails ammo
 	self->s.v.classname = "item_spikes";
+	self->tp_flags = it_nails;
 
 	setsize( self, 0, 0, 0, 32, 32, 56 );
 	StartItem();
@@ -1065,6 +1129,7 @@ void SP_item_rockets()
 	self->s.v.weapon = 3;
 	self->s.v.netname = "rockets";
 	self->s.v.classname = "item_rockets";
+	self->tp_flags = it_rockets;
 
 	setsize( self, 0, 0, 0, 32, 32, 56 );
 	StartItem();
@@ -1092,6 +1157,7 @@ void SP_item_cells()
 	self->s.v.weapon = 4;
 	self->s.v.netname = "cells";
 	self->s.v.classname = "item_cells";
+	self->tp_flags = it_cells;
 
 	setsize( self, 0, 0, 0, 32, 32, 56 );
 	StartItem();
@@ -1390,6 +1456,7 @@ void SP_item_sigil()
 	self->s.v.touch = ( func_t ) sigil_touch;
 	setsize( self, -16, -16, -24, 16, 16, 32 );
 	StartItem();
+	self->tp_flags = it_rune1;
 }
 
 /*
@@ -1590,6 +1657,9 @@ void powerup_touch()
 	if ( ISDEAD( other ) )
 		return;
 
+	if ( ItemTouched (self, other) )
+		return;
+
 	if ( !k_practice ) // #practice mode#
 	if ( match_in_progress != 2 || !readytostart() )
 		return;
@@ -1756,6 +1826,8 @@ void powerup_touch()
 
 	ktpro_autotrack_on_powerup_take(other);
 
+	ItemTaken (self, other);
+
 	activator = other;
 	SUB_UseTargets();	// fire all targets / killtargets
 }
@@ -1777,6 +1849,7 @@ void SP_item_artifact_invulnerability()
 	self->s.v.effects = ( int ) self->s.v.effects | EF_RED;
 
 	self->s.v.items = IT_INVULNERABILITY;
+	self->tp_flags = it_pent;
 	setsize( self, -16, -16, -24, 16, 16, 32 );
 
 	if ( b_dp )
@@ -1800,6 +1873,7 @@ void SP_item_artifact_envirosuit()
 	self->s.v.effects = ( int ) self->s.v.effects | EF_GREEN;
 
 	self->s.v.items = IT_SUIT;
+	self->tp_flags = it_suit;
 	setsize( self, -16, -16, -24, 16, 16, 32 );
 	StartItem();
 }
@@ -1819,6 +1893,7 @@ void SP_item_artifact_invisibility()
 	self->s.v.netname = "Ring of Shadows";
 	self->s.v.classname = "item_artifact_invisibility";
 	self->s.v.items = IT_INVISIBILITY;
+	self->tp_flags = it_ring;
 	setsize( self, -16, -16, -24, 16, 16, 32 );
 
 	if ( b_dp )
@@ -1841,6 +1916,7 @@ void SP_item_artifact_super_damage()
 	self->s.v.classname = "item_artifact_super_damage";
 	self->s.v.netname = deathmatch == 4 ? "OctaPower" : "Quad Damage";
 	self->s.v.items = IT_QUAD;
+	self->tp_flags = it_quad;
 
 	self->s.v.effects = ( int ) self->s.v.effects | EF_BLUE;
 
@@ -1868,18 +1944,23 @@ void BackpackTouch()
 	char            *new_wp = "";
 	char		*playername;
 
-    if ( match_in_progress != 2 )
-        return;
+	if ( other->ct != ctPlayer ) {
+		BotsBackpackTouchedNonPlayer (self, other);
+		return;
+	}
+
+	if ( ISDEAD( other ) )
+		return;
+
+	if ( ItemTouched(self, other) )
+		return;
+
+	if ( match_in_progress != 2 )
+		return;
 
 	if ( deathmatch == 4 )
 		if ( other->invincible_finished )
 			return; // we have pent, ignore pack
-
-	if ( other->ct != ctPlayer )
-		return;
-
-	if ( ISDEAD( other ) )
-		return;
 
 	//crt -- no backpacks in waiting area
 	if ( isRA() && !isWinner( other ) && !isLoser( other ) ) 
@@ -2067,6 +2148,8 @@ void BackpackTouch()
 	sound( other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM );
 	stuffcmd( other, "bf\n" );
 
+	ItemTaken (self, other);
+
 	ent_remove( self );
 
 	stemp = self;
@@ -2118,6 +2201,7 @@ void DropBackpack()
 	item->s.v.origin[2] -= 24;
 
 	item->s.v.items = self->s.v.weapon;
+	item->tp_flags = it_pack;
 
 // drop best weapon in case of fairpacks 1 (KTEAMS)
 	if( f1 == 1 )
@@ -2250,6 +2334,10 @@ void DropBackpack()
 		item->backpack_player_name = playername;
 		strlcpy(item->backpack_team_name, getteam(self), MAX_TEAM_NAME);
 	}
+
+	if (bots_enabled ()) {
+		BotsBackpackDropped (self, item);
+	}
 }
 
 /*
@@ -2260,7 +2348,7 @@ SPAWN POINT MARKERS
 ===============================================================================
 */
 
-gedict_t *Spawn_OnePoint( vec3_t org, int effects )
+gedict_t *Spawn_OnePoint( gedict_t* e, vec3_t org, int effects )
 {
 	gedict_t	*p;
 
@@ -2271,6 +2359,7 @@ gedict_t *Spawn_OnePoint( vec3_t org, int effects )
 	setmodel( p, cvar("k_spm_custom_model") ? "progs/spawn.mdl" : "progs/w_g_key.mdl" );
 	p->s.v.netname = "Spawn Point";
 	p->s.v.classname = "spawnpoint";
+	p->k_lastspawn = e;
 
 	p->s.v.effects = ( int ) p->s.v.effects | effects;
 
@@ -2289,7 +2378,7 @@ void Spawn_SpawnPoints( char *classname, int effects )
 		VectorCopy( e->s.v.origin, org );
 		org[2] += 0; // qqshka: it was 16, but I like more how it looks when it more close to ground
 
-		Spawn_OnePoint( org, effects );
+		Spawn_OnePoint( e, org, effects );
 	}
 }
 

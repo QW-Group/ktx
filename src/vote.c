@@ -180,7 +180,7 @@ int get_votes_req( int fofs, qbool diff )
 		vt_req = race_count_votes_req(percent);
 	}
 	else {
-		vt_req = ceil(percent * CountPlayers());
+		vt_req = ceil(percent * (CountPlayers() - CountBots()));
 	}
 
 	if ( fofs == OV_ELECT )
@@ -202,10 +202,13 @@ int get_votes_req( int fofs, qbool diff )
 	else if ( fofs == OV_ANTILAG )
 		vt_req = max(2, vt_req); // at least 2 votes in this case
 
-	if ( diff )
-		return max(0, vt_req - votes);
+	if (CountBots () > 0 && CountPlayers () - CountBots () == 1)
+		vt_req = 1;
 
-	return max(0, vt_req);
+	if ( diff )
+		return max(0, vt_req - votes );
+
+	return max(0, vt_req - CountBots());
 }
 
 int is_admins_vote( int fofs )

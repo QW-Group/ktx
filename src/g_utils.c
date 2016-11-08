@@ -28,6 +28,8 @@
 void Sc_Stats(float on);
 void race_stoprecord( qbool cancel );
 
+void BotsSoundMadeEvent (gedict_t* entity);
+
 int NUM_FOR_EDICT( gedict_t * e )
 {
 	int     b;
@@ -60,6 +62,29 @@ int i_rnd( int from, int to )
 	r = (int)(from + (1.0 + to - from) * g_random());
 
 	return bound(from, r, to);
+}
+
+// Returns random value based on (approx) normal distribution
+float dist_random (float minValue, float maxValue, float spreadFactor)
+{
+	float sum = 0.0f;
+
+	// sum follows normal distribution from 0->6
+	sum += g_random ();
+	sum += g_random ();
+	sum += g_random ();
+	sum += g_random ();
+	sum += g_random ();
+	sum += g_random ();
+
+	// normal distribution will produce very low % of tail probabilities, so alter std deviation
+	if (spreadFactor != 1)
+		sum = bound (0.0f, 3 + (sum - 3) * spreadFactor, 6.0f);
+
+	sum /= 6.0f;
+
+	// Move to be around the average
+	return minValue + (maxValue - minValue) * sum;
 }
 
 gedict_t *spawn(  )
@@ -732,6 +757,10 @@ void sound( gedict_t * ed, int channel, char *samp, float vol, float att )
 
 	if ( isRACE() && ed->muted )
 		return;
+
+	if (bots_enabled ()) {
+		BotsSoundMadeEvent (ed);
+	}
 
 	trap_sound( NUM_FOR_EDICT( ed ), channel, samp, vol, att );
 }

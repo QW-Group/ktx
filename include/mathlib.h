@@ -70,6 +70,7 @@ void _VectorCopy (vec3_t in, vec3_t out);
 int VectorCompare (vec3_t v1, vec3_t v2);
 int VectorCompareF (vec3_t v1, float x,float y,float z);
 vec_t VectorLength (vec3_t v);
+float VectorDistance (vec3_t v1, vec3_t v2);
 void CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross);
 float VectorNormalize (vec3_t v);		// returns vector length
 void VectorInverse (vec3_t v);

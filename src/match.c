@@ -18,6 +18,7 @@
  */
 
 #include "g_local.h"
+#include "fb_globals.h"
 
 void NextLevel ();
 void IdlebotForceStart ();
@@ -68,6 +69,18 @@ float CountPlayers()
 
 	for ( p = world; (p = find_plr( p )); )
 		num++;
+
+	return num;
+}
+
+float CountBots (void)
+{
+	gedict_t	*p;
+	float		num = 0;
+
+	for (p = world; (p = find_plr (p)); )
+		if (p->isBot)
+			num++;
 
 	return num;
 }
@@ -1494,6 +1507,8 @@ qbool CreateStatsFile(char* filename, char* ip, int port, qbool xml)
 	char *team = "";
 	int format = STATSFORMAT_XML;
 
+	char date[64] = {0};
+	char tmp[1024] = {0}, buf[1024] = {0};
 	int i = 0, j = 0;
 
 	if ( trap_FS_OpenFile( filename, &di_handle, FS_WRITE_BIN ) < 0 )
@@ -1570,6 +1585,8 @@ qbool CreateStatsFile(char* filename, char* ip, int port, qbool xml)
 				s2di_player_ctf_stats(di_handle, format, &p2->ps);
 			if ( isRA() )
 				s2di_player_ra_stats(di_handle, format, &p2->ps);
+			if ( p2->isBot )
+				s2di_player_bot_info (di_handle, format, &p2->fb);
 
 			s2di_player_footer(di_handle, format);
 			p2->ready = 1; // set mark
@@ -1789,8 +1806,17 @@ void EndMatch ( float skip_log )
 	if (isHoonyMode()) {
 		if ( HM_current_point_type() != HM_PT_FINAL ) {
 			match_over = 0;
-			for ( p = world; (p = find_plr( p )); )
-				stuffcmd(p, "ready\n");
+
+			// All bots ready first
+			for (p = world; (p = find_plr (p)); ) {
+				if (p->isBot) {
+					p->ready = true;
+				}
+			}
+
+			for (p = world; (p = find_plr (p)); ) {
+				stuffcmd (p, "ready\n");
+			}
 		}
 		else {
 			for ( p = world; (p = find_plr( p )); )
@@ -1958,6 +1984,22 @@ void TimerThink ()
 	self->s.v.nextthink = g_globalvars.time + 1;
 }
 
+void soft_ent_remove (gedict_t* ent)
+{
+	if (bots_enabled ()) {
+		ent->s.v.model = "";
+		ent->s.v.solid = SOLID_TRIGGER;
+		ent->s.v.nextthink = 0;
+		ent->s.v.think = (func_t) SUB_Null;
+		ent->s.v.touch = (func_t) marker_touch;
+		ent->fb.desire = goal_NULL;
+		ent->fb.goal_respawn_time = 0;
+	}
+	else {
+		ent_remove (ent);
+	}
+}
+
 // remove/add some items from map regardind with dmm and game mode
 void SM_PrepareMap()
 {
@@ -2000,7 +2042,7 @@ void SM_PrepareMap()
 				|| streq( p->s.v.classname, "item_artifact_super_damage")
 			   )
 			{
-				ent_remove( p );
+				soft_ent_remove( p );
 				continue;
 			}
 		}
@@ -2012,7 +2054,7 @@ void SM_PrepareMap()
 			    || streq( p->s.v.classname, "item_armorInv")
 			   )
 			{
-				ent_remove( p );
+				soft_ent_remove( p );
 				continue;
 			}
 		}
@@ -2027,7 +2069,7 @@ void SM_PrepareMap()
 				|| streq( p->s.v.classname, "weapon_lightning" )
 			   )
 			{ // no weapons for any of this deathmatches (4 or 5)
-				ent_remove( p );
+				soft_ent_remove( p );
 				continue;
 			}
 
@@ -2040,7 +2082,7 @@ void SM_PrepareMap()
 					|| (streq( p->s.v.classname, "item_health" ) && (( int ) p->s.v.spawnflags & H_MEGA))
 			       )
 				{ // no weapon ammo and megahealth for dmm4
-					ent_remove( p );
+					soft_ent_remove( p );
 					continue;
 				}
 			}
@@ -2048,7 +2090,7 @@ void SM_PrepareMap()
 
 		if ( k_killquad && streq( p->s.v.classname, "item_artifact_super_damage") )
 		{	// no normal quad in killquad mode.
-			ent_remove( p );
+			soft_ent_remove( p );
 			continue;
 		}
 	}
@@ -2277,6 +2319,8 @@ void StartMatch ()
 	ClearDemoMarkers();
 
 	StartLogs();
+
+	BotsMatchStart ();
 
 	if ( !self->cnt )
 		ent_remove( self ); // timelimit == 0, so match will end no due to timelimit but due to fraglimit or something

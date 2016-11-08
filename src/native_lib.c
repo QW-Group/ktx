@@ -44,7 +44,7 @@ int snprintf(char *buffer, size_t count, char const *format, ...)
 
 	return ret;
 }
-#endif
+#endif // !(Visual Studio 2015+)
 
 #endif // _WIN32
 

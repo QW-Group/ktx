@@ -26,6 +26,7 @@
 #include "g_local.h"
 
 void            bubble_bob();
+void            BotPlayerDeathEvent (gedict_t* player);
 
 /*
 ==============================================================================
@@ -404,6 +405,8 @@ void player_nail1()
 	SuperDamageSound();
 	W_FireSpikes( 4 );
 	self->attack_finished = g_globalvars.time + 0.2;
+	if (self->fb.ammo_used)
+		self->fb.ammo_used (self);
 }
 
 void player_nail2()
@@ -429,6 +432,8 @@ void player_nail2()
 	SuperDamageSound();
 	W_FireSpikes( -4 );
 	self->attack_finished = g_globalvars.time + 0.2;
+	if (self->fb.ammo_used)
+		self->fb.ammo_used (self);
 }
 
 //============================================================================
@@ -995,7 +1000,10 @@ void PlayerDie()
 
 		DropRune();
 		PlayerDropFlag( self, false );
-	} 
+	}
+
+	TeamplayDeathEvent (self);
+	BotPlayerDeathEvent (self);
 
 	self->s.v.items -= ( int ) self->s.v.items & IT_INVISIBILITY;
 	self->invisible_finished = 0;	// don't die as eyes

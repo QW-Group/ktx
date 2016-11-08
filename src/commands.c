@@ -258,6 +258,10 @@ static void dumpent( );
 void ToggleCArena();
 // }
 
+// { Frogbots
+void FrogbotsCommand(void);
+// }
+
 // Save the first 5 demo markers to print at the end.
 demo_marker_t demo_markers[10];
 int demo_markers_count = 10;
@@ -602,6 +606,9 @@ const char CD_NODESC[] = "no desc";
 
 #define CD_DEMOMARK     "put mark in the demo"
 
+#define CD_BOTCOMMAND   "bot configuration"
+
+#define CD_TEAMPLAYMESSAGE "teamplay messages"
 
 void dummy() {}
 void redirect();
@@ -925,6 +932,13 @@ cmd_t cmds[] = {
 	{ "votecoop",    votecoop,                  0    , CF_PLAYER | CF_MATCHLESS, CD_VOTECOOP },
 	{ "coop_nm_pu",	 ToggleNewCoopNm,           0    , CF_PLAYER | CF_MATCHLESS, CD_COOPNMPU },
 	{ "demomark",	 DemoMark,                  0    , CF_BOTH, CD_DEMOMARK },
+
+// { FROGBOTS
+	{ "botcmd",      FrogbotsCommand,           0    , CF_BOTH | CF_PARAMS, CD_BOTCOMMAND },
+// }
+
+// { TEAMPLAY
+	{ "tpmsg",       TeamplayMessage,           0    , CF_PLAYER | CF_PARAMS | CF_MATCHLESS, CD_TEAMPLAYMESSAGE }
 };
 
 #undef DEF

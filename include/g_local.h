@@ -62,7 +62,7 @@ float max( float a, float b );
 float bound( float a, float b, float c );
 //#define bound(a,b,c) ((a) >= (c) ? (a) : (b) < (a) ? (a) : (b) > (c) ? (c) : (b))
 
-#ifdef DEBUG
+#if defined(DEBUG) || defined(_DEBUG)
 #define DebugTrap(x) *(char*)0=x
 #else
 #define DebugTrap(x) G_Error(x)
@@ -151,6 +151,7 @@ typedef enum
 float           g_random( void );
 float           crandom( void );
 int				i_rnd( int from, int to );
+float           dist_random (float minValue, float maxValue, float spreadFactor);
 gedict_t       *spawn( void );
 void            ent_remove( gedict_t * t );
 
@@ -464,6 +465,7 @@ void            launch_spike( vec3_t org, vec3_t dir );
 
 int				WeirdCountPlayers(void);
 float			CountPlayers();
+float			CountBots(void);
 float			CountRTeams();
 qbool 			isCanStart ( gedict_t *s, qbool forceMembersWarn );
 void			StartTimer ();
@@ -771,7 +773,8 @@ void	VoteMap();
 
 // match.c
 
-void	EndMatch ( float skip_log );
+void    EndMatch ( float skip_log );
+void    StatsToFile (void);
 
 // grapple.c
 void    GrappleThrow();
@@ -987,3 +990,22 @@ void LaunchLaser( vec3_t org, vec3_t vec );
 
 // identify alternative .ent files by format <map>#<name>.ent
 #define K_ENTITYFILE_SEPARATOR '#'
+
+// bots
+qbool bots_enabled();
+void InitParameters();
+
+// files
+fileHandle_t std_fropen (const char *fmt, ...);
+int std_fgetc (fileHandle_t handle);
+char *std_fgets (fileHandle_t handle, char *buf, int limit);
+void std_fclose (fileHandle_t handle);
+
+// teamplay
+void TeamplayEventItemTaken (gedict_t* client, gedict_t* item);
+void TeamplayDeathEvent (gedict_t* client);
+void TeamplayMessage (void);
+qbool TeamplayMessageByName (gedict_t* client, const char* message);
+void TeamplayGameTick (void);
+
+void LocationInitialise (void);

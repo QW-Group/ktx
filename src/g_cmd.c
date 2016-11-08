@@ -258,45 +258,45 @@ static qbool isSupport_ColoredText(gedict_t *p)
 	return !iKey(p, "nocolors");
 }
 
-qbool ClientSay( qbool isTeamSay )
+qbool ClientSay (qbool isTeamSay)
 {
 	int j, l, mmode, flags;
-	char text[1024] = {0}, textuncolored[1024] = {0}, text2[1024] = {0}, prefix[128] = {0};
+	char text[1024] = { 0 }, textuncolored[1024] = { 0 }, text2[1024] = { 0 }, prefix[128] = { 0 };
 	char arg_2[64], *str, *clr, *name, *team, *result_msg;
-	int sv_spectalk = cvar("sv_spectalk");
-	int sv_sayteam_to_spec = cvar("sv_sayteam_to_spec");
+	int sv_spectalk = cvar ("sv_spectalk");
+	int sv_sayteam_to_spec = cvar ("sv_sayteam_to_spec");
 	gedict_t *client, *goal;
 	qbool fake = false, ignore_in_demos, spec_talk = false;
 
-	self = PROG_TO_EDICT( g_globalvars.self );
+	self = PROG_TO_EDICT (g_globalvars.self);
 
-	if ( !self->k_accepted )
+	if (!self->k_accepted)
 		return true; // cmon, u r zombie or etc...
 
-	trap_CmdArgs( str = text, sizeof( text ) );
-	if ( str[0] == '"' && (j = strlen(str)) > 2 ) {
-		str[j-1] = 0;
+	trap_CmdArgs (str = text, sizeof (text));
+	if (str[0] == '"' && (j = strlen (str)) > 2) {
+		str[j - 1] = 0;
 		str++;
-		trap_CmdArgv( 0, arg_2, sizeof( arg_2 ) );
-		strlcat(text2, arg_2, sizeof(text2));
-		strlcat(text2,   " ", sizeof(text2));
-		strlcat(text2,   str, sizeof(text2));
-		trap_CmdTokenize(text2);
+		trap_CmdArgv (0, arg_2, sizeof (arg_2));
+		strlcat (text2, arg_2, sizeof (text2));
+		strlcat (text2, " ", sizeof (text2));
+		strlcat (text2, str, sizeof (text2));
+		trap_CmdTokenize (text2);
 	}
 
-	if ( f_check && self->ct == ctPlayer ) {
-		if ( !self->f_checkbuf )
+	if (f_check && self->ct == ctPlayer) {
+		if (!self->f_checkbuf)
 			return true; // just in case
 
-		strlcat(self->f_checkbuf,  str, F_CHECK_SIZE);
-		strlcat(self->f_checkbuf, "\n", F_CHECK_SIZE);
+		strlcat (self->f_checkbuf, str, F_CHECK_SIZE);
+		strlcat (self->f_checkbuf, "\n", F_CHECK_SIZE);
 		return true;
 	}
 
-	if ( isSayFlood( self ) )
+	if (isSayFlood (self))
 		return true; // flooder
 
-	trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
+	trap_CmdArgv (1, arg_2, sizeof (arg_2));
 
 	if ( streq(arg_2, "s-p") ) {
 		s_p();

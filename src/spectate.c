@@ -37,6 +37,8 @@ void AdminImpBot();
 void MakeMOTD();
 void AutoTrackRestore();
 
+void Bot_Print_Thinking (void);
+
 int GetSpecWizard ()
 {
 	int k_asw = bound(0, cvar("allow_spec_wizard"), 2);
@@ -305,6 +307,13 @@ void SpectatorThink()
 
 	if ( self->wp_stats && self->wp_stats_time && self->wp_stats_time <= g_globalvars.time && match_in_progress != 1 )
 		Print_Wp_Stats ();
+
+	if ( self->s.v.goalentity ) {
+		gedict_t *goal = PROG_TO_EDICT( self->s.v.goalentity );
+
+		if (goal->isBot)
+			Bot_Print_Thinking ();
+	}
 
 	if ( wizard ) {
 		// set model angles
