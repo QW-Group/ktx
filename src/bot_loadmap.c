@@ -144,7 +144,7 @@ static void fb_spawn_teleport_destination (gedict_t* ent)
 	ent->s.v.touch = (func_t) fb_spawn_teleport_destination_touch;
 	ent->s.v.flags = FL_ITEM;
 	BecomeMarker (ent);
-	setsize (ent, -65, -65, -24, 65, 65, 32);
+	setsize (ent, -65, -65, -24 - 27, 65, 65, 32);  // -27 extra to get back to floor
 	VectorSet(ent->s.v.view_ofs, 80, 80, 24);
 	ent->fb.pickup = pickup_true;
 	adjust_view_ofs_z (ent);
