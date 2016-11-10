@@ -6,18 +6,6 @@
 // Globals
 void SUB_regen (void);
 
-// FIXME: Never called (should be though... some markers are created then removed)
-// FIXME: Needs fixed, dropper->fb.marker_link never set (see above)
-void RemoveMarker(gedict_t* marker) {
-	gedict_t* e;
-	marker->fb.fl_marker = false;
-	e = dropper;
-	while (e->fb.marker_link != marker) {
-		e = e->fb.marker_link;
-	}
-	e->fb.marker_link = marker->fb.marker_link;
-}
-
 // self = item, other = player that just touched the marker
 // called even if the item is waiting to respawn
 void check_marker(gedict_t* self, gedict_t* other) {

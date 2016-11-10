@@ -112,6 +112,13 @@ void BotDeathThink(void) {
 	self->fb.jumping = (qbool) (g_random() >= 0.5); // FIXME: 50% chance of respawning every frame
 }
 
+qbool BotUsingCorrectWeapon (gedict_t* self)
+{
+	return self->fb.desired_weapon_impulse >= 1 &&
+	       self->fb.desired_weapon_impulse <= 8 &&
+	       self->s.v.weapon == weapon_impulse_codes[self->fb.desired_weapon_impulse];
+}
+
 void BotSetCommand(gedict_t* self) {
 	float msec = g_globalvars.frametime * 1000; //min ((g_globalvars.time - self->fb.last_cmd_sent) * 1000, 255);
 	int weapon_script_impulse = 0;
@@ -146,10 +153,8 @@ void BotSetCommand(gedict_t* self) {
 		self->fb.firing ? self->fb.desired_weapon_impulse :
 		weapon_script_impulse;
 
-	if (self->fb.firing && self->fb.desired_weapon_impulse >= 1 && self->fb.desired_weapon_impulse <= 8) {
-		if (self->s.v.weapon == weapon_impulse_codes[self->fb.desired_weapon_impulse]) {
-			impulse = 0; // we already have the requested weapon
-		}
+	if (self->fb.firing && BotUsingCorrectWeapon(self)) {
+		impulse = 0; // we already have the requested weapon
 	}
 
 	jumping |= self->fb.waterjumping;

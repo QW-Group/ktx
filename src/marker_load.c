@@ -231,11 +231,17 @@ qbool LoadBotRoutingFromFile (void)
 			for (i = 0; i < strlen (argument); ++i) {
 				switch (argument[i]) {
 				case 'u':
-					marker_flags |= UNREACHABLE; break;
+					marker_flags |= UNREACHABLE;
+					break;
 				case '6':
-					marker_flags |= MARKER_IS_DM6_DOOR; break;
+					marker_flags |= MARKER_IS_DM6_DOOR;
+					break;
 				case 't':
-					marker_flags |= MARKER_DOOR_TOUCHABLE; break;
+					marker_flags |= MARKER_DOOR_TOUCHABLE;
+					break;
+				case 'e':
+					marker_flags |= MARKER_ESCAPE_ROUTE;
+					break;
 				}
 			}
 

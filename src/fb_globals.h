@@ -1,5 +1,8 @@
 // Converted from .qc on 05/02/2016
 
+#ifndef FB_GLOBALS_H
+#define FB_GLOBALS_H
+
 #define PATH_SCORE_NULL -1000000
 
 #define FB_OPTION_SHOW_MARKERS 1
@@ -48,258 +51,101 @@ extern float sv_accelerate;
 
 extern gedict_t* dropper;
 
-#ifndef FL_ONGROUND_PARTIALGROUND
 #define FL_ONGROUND_PARTIALGROUND (FL_ONGROUND | FL_PARTIALGROUND)
-#endif
-#ifndef IT_EITHER_NAILGUN
 #define IT_EITHER_NAILGUN (IT_NAILGUN | IT_SUPER_NAILGUN)
-#endif
-#ifndef IT_NAILGUN_ROCKET
 #define IT_NAILGUN_ROCKET (IT_ROCKET_LAUNCHER | IT_SUPER_NAILGUN | IT_NAILGUN)
-#endif
-#ifndef IT_CONTINUOUS
 #define IT_CONTINUOUS (IT_LIGHTNING | IT_SUPER_NAILGUN | IT_NAILGUN)
-#endif
-#ifndef IT_AXE_SHOTGUN
 #define IT_AXE_SHOTGUN (IT_AXE | IT_SHOTGUN)
-#endif
-#ifndef IT_ALL_BUT_GRENADE
 #define IT_ALL_BUT_GRENADE (IT_AXE | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_NAILGUN | IT_SUPER_NAILGUN | IT_ROCKET_LAUNCHER | IT_LIGHTNING)
-#endif
-#ifndef IT_ALL
 #define IT_ALL (IT_AXE | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_NAILGUN | IT_SUPER_NAILGUN | IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER | IT_LIGHTNING)
-#endif
-#ifndef IT_NOT_AMMO
 #define IT_NOT_AMMO 16773375
-#endif
-#ifndef IT_ARMOR
 #define IT_ARMOR (IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3)
-#endif
-#ifndef IT_NOT_ARMOR
 #define IT_NOT_ARMOR (~IT_ARMOR)
-#endif
-#ifndef IT_INVULNERABILITY_QUAD
 #define IT_INVULNERABILITY_QUAD (IT_INVULNERABILITY | IT_QUAD)
-#endif
-#ifndef IT_NOT_INVISIBILITY
 #define IT_NOT_INVISIBILITY (~IT_INVISIBILITY)
-#endif
-#ifndef IT_NOT_INVULNERABILITY
 #define IT_NOT_INVULNERABILITY (~IT_INVULNERABILITY)
-#endif
-#ifndef IT_NOT_SUIT
 #define IT_NOT_SUIT (~IT_SUIT)
-#endif
-#ifndef IT_NOT_QUAD
 #define IT_NOT_QUAD (~IT_QUAD)
-#endif
-#ifndef ITEM_RUNE_MASK
 #define ITEM_RUNE_MASK (CTF_RUNE_RES | CTF_RUNE_STR | CTF_RUNE_HST | CTF_RUNE_RGN)
-#endif
-#ifndef NOT_EF_DIMLIGHT
 #define NOT_EF_DIMLIGHT 16777207
-#endif
-#ifndef EF_DIMLIGHT_BLUE
 #define EF_DIMLIGHT_BLUE (EF_DIMLIGHT | EF_BLUE)
-#endif
-#ifndef EF_DIMLIGHT_RED
 #define EF_DIMLIGHT_RED (EF_DIMLIGHT | EF_RED)
-#endif
-#ifndef CLIENTKILL
 #define CLIENTKILL 11
-#endif
 
 #define FB_PREFER_ROCKET_LAUNCHER 1
 #define FB_PREFER_LIGHTNING_GUN   2
 
-#ifndef GAME_ENABLE_POWERUPS
 #define GAME_ENABLE_POWERUPS 1
-#endif
-#ifndef GAME_ENABLE_RUNES
 #define GAME_ENABLE_RUNES 2
-#endif
-#ifndef GAME_RUNE_RJ
 #define GAME_RUNE_RJ 4
-#endif
-#ifndef GAME_MATCH
 #define GAME_MATCH 64
-#endif
-#ifndef GAME_ENABLE_DROPWEAP
 #define GAME_ENABLE_DROPWEAP 512
-#endif
-#ifndef GAME_ENABLE_AUTOREPORT
 #define GAME_ENABLE_AUTOREPORT 1024
-#endif
-#ifndef GAME_ENABLE_AUTOSTEAMS
 #define GAME_ENABLE_AUTOSTEAMS 2048
-#endif
-#ifndef FORWARD
 #define FORWARD 1
-#endif
-#ifndef BACK
 #define BACK 2
-#endif
-#ifndef LEFT
 #define LEFT 4
-#endif
-#ifndef RIGHT
 #define RIGHT 8
-#endif
-#ifndef FORWARD_LEFT
 #define FORWARD_LEFT 5
-#endif
-#ifndef FORWARD_RIGHT
 #define FORWARD_RIGHT 9
-#endif
-#ifndef BACK_LEFT
 #define BACK_LEFT 6
-#endif
-#ifndef BACK_RIGHT
 #define BACK_RIGHT 10
-#endif
-#ifndef UP
 #define UP 16
-#endif
-#ifndef DOWN
 #define DOWN 32
-#endif
-#ifndef JUMPSPEED
 #define JUMPSPEED 270
-#endif
 
 // Fall results
-#ifndef FALL_FALSE
 #define FALL_FALSE 0
-#endif
-#ifndef FALL_BLOCKED
 #define FALL_BLOCKED 1
-#endif
-#ifndef FALL_LAND
 #define FALL_LAND 2
-#endif
-#ifndef FALL_DEATH
 #define FALL_DEATH 3
-#endif
 
 // Path flags
-#ifndef WATERJUMP_
 #define WATERJUMP_ (1 << 1)
-#endif
-#ifndef DM6_DOOR
 #define DM6_DOOR (1 << 8)
-#endif
-#ifndef ROCKET_JUMP
 #define ROCKET_JUMP (1 << 9)
-#endif
-#ifndef JUMP_LEDGE
 #define JUMP_LEDGE (1 << 10)
-#endif
-#ifndef VERTICAL_PLATFORM
 #define VERTICAL_PLATFORM (1 << 11)
-#endif
-#ifndef BOTPATH_DOOR
 #define BOTPATH_DOOR (1 << 12)
-#endif
-#ifndef BOTPATH_DOOR_CLOSED
 #define BOTPATH_DOOR_CLOSED (1 << 13)
-#endif
-#ifndef SAVED_DESCRIPTION
 #define SAVED_DESCRIPTION (DM6_DOOR | ROCKET_JUMP | JUMP_LEDGE | VERTICAL_PLATFORM | BOTPATH_DOOR | BOTPATH_DOOR_CLOSED)
-#endif
-#ifndef NOT_ROCKET_JUMP
 #define NOT_ROCKET_JUMP (~ROCKET_JUMP)
-#endif
-#ifndef REVERSIBLE
 #define REVERSIBLE (1 << 14)
-#endif
-#ifndef WATER_PATH
 #define WATER_PATH (1 << 15)
-#endif
-#ifndef DELIBERATE_AIR
 #define DELIBERATE_AIR (1 << 17)
-#endif
-#ifndef WAIT_GROUND
 #define WAIT_GROUND (1 << 18)
-#endif
-#ifndef STUCK_PATH
 #define STUCK_PATH (1 << 19)
-#endif
-#ifndef AIR_ACCELERATION
 #define AIR_ACCELERATION (1 << 20)
-#endif
-#ifndef NO_DODGE
 #define NO_DODGE (1 << 21)
-#endif
-#ifndef DELIBERATE_AIR_WAIT_GROUND
 #define DELIBERATE_AIR_WAIT_GROUND (DELIBERATE_AIR | WAIT_GROUND)
-#endif
 
 // Bot flags
-#ifndef BOTFLAG_UNREACHABLE
 #define BOTFLAG_UNREACHABLE 1
-#endif
 
 // Marker flags
-#ifndef UNREACHABLE
 #define UNREACHABLE 1
-#endif
-#ifndef T_WATER
 #define T_WATER 2
-#endif
-#ifndef T_NO_AIR
 #define T_NO_AIR 4
-#endif
-#ifndef MARKER_IS_DM6_DOOR
 #define MARKER_IS_DM6_DOOR 8
-#endif
-#ifndef MARKER_BLOCKED_ON_STATE_TOP
 #define MARKER_BLOCKED_ON_STATE_TOP 16
-#endif
-#ifndef MARKER_FIRE_ON_MATCH_START
 #define MARKER_FIRE_ON_MATCH_START 32
-#endif
-#ifndef MARKER_DOOR_TOUCHABLE
 #define MARKER_DOOR_TOUCHABLE 64
-#endif
+#define MARKER_ESCAPE_ROUTE 128
 
 // Bot flags
-#ifndef NOTARGET_ENEMY
 #define NOTARGET_ENEMY 32
-#endif
-#ifndef AWARE_SURROUNDINGS
 #define AWARE_SURROUNDINGS 128
-#endif
-#ifndef HURT_SELF
 #define HURT_SELF 1024
-#endif
-#ifndef CHASE_ENEMY
 #define CHASE_ENEMY 2048
-#endif
-#ifndef RUNAWAY
 #define RUNAWAY 4096
-#endif
-#ifndef WAIT
 #define WAIT 8192
-#endif
-#ifndef NOT_HURT_SELF
 #define NOT_HURT_SELF (~HURT_SELF)
-#endif
-#ifndef NOT_NOTARGET_ENEMY
 #define NOT_NOTARGET_ENEMY ~(NOTARGET_ENEMY)
-#endif
-#ifndef NOT_AWARE_SURROUNDINGS
 #define NOT_AWARE_SURROUNDINGS ~(AWARE_SURROUNDINGS)
-#endif
 
-#ifndef CAMPBOT
 #define CAMPBOT 1
-#endif
-#ifndef SHOT_FOR_LUCK
 #define SHOT_FOR_LUCK 2
-#endif
-#ifndef HELP_TEAMMATE
 #define HELP_TEAMMATE 128
-#endif
 
 qbool ExistsPath (gedict_t* from_marker, gedict_t* to_marker, int* new_path_state);
 float boomstick_only (void);
@@ -451,15 +297,13 @@ void UpdateGoalEntity (gedict_t* item);
 
 // bot_client.qc
 void BotPlayerDeathEvent (gedict_t* self);
+qbool BotUsingCorrectWeapon (gedict_t* self);
 
 // bot_items.qc
 int ItemSpawnFunctionCount (void);
 void StartItemFB (gedict_t* ent);
 qbool NoItemTouch (gedict_t* self, gedict_t* other);
 qbool BotsPreTeleport (gedict_t* self, gedict_t* other);
-
-#define FB_CVAR_GAMEMODE "k_fb_gamemode"
-#define FB_CVAR_SKILL "k_fb_skill"
 
 // FBCA code just set nextthink to 0 when item respawned...
 qbool WaitingToRespawn (gedict_t* ent);
@@ -510,3 +354,6 @@ void SetMarker (gedict_t* client, gedict_t* marker);
 
 // debugging
 void RunRandomTrials (float min, float max, float mult);
+
+
+#endif // ifdef(FB_GLOBALS_H)
