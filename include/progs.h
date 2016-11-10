@@ -513,11 +513,8 @@ typedef struct fb_entvars_s {
 	qbool  avoiding;                        // Avoiding next path marker, due to incoming rocket or arrow_time in future
 	float  turning_speed;
 
-	struct gedict_s* marker_link;           // linked list, this points to next marker
 	qbool fl_marker;                        // true if the current item is considered a marker (used when finding all objects in given radius)
-	struct gedict_s* previous;
-	struct gedict_s* next;
-	struct gedict_s* next_load;
+	//struct gedict_s* next;
 	
 	// Goal evaluation
 	struct gedict_s* best_goal;

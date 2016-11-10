@@ -11,6 +11,7 @@
 
 typedef qbool (*fb_path_calc_func_t)(gedict_t* m, gedict_t* m_P, float P_time, int m_D);
 #define PASSINTVEC3(x) ((int)x[0]),((int)x[1]),((int)x[2])
+extern gedict_t* markers[];
 
 static void Calc_G_time_12 (void);
 
@@ -23,9 +24,7 @@ static gedict_t* first_marker = NULL;
 
 void BecomeMarker(gedict_t* marker) {
 	marker->fb.fl_marker = true;
-	marker->fb.marker_link = first_marker;
 	first_marker = marker;
-	//dropper->fb.marker_link = first_marker;
 }
 
 static void TravelTimeForPath (gedict_t* m, int i)
@@ -180,15 +179,20 @@ static int CheckReversible(gedict_t* m, gedict_t* from_marker) {
 
 // if path from m1->m2 and m2->m1, set the reversible flag
 static void Calc_G_time_7(void) {
-	gedict_t* m, *from_marker;
+	int i;
 
-	for (m = first_marker; m; m = m->fb.marker_link) {
-		int i = 0;
+	for (i = 0; i < NUMBER_MARKERS; ++i) {
+		gedict_t* m = markers[i];
+		int j;
 
-		for (i = 0; i < NUMBER_PATHS; ++i) {
-			from_marker = m->fb.paths[i].next_marker;
+		if (!m)
+			continue;
+
+		for (j = 0; j < NUMBER_PATHS; ++j) {
+			gedict_t* from_marker = m->fb.paths[j].next_marker;
+
 			if (from_marker && from_marker != world) {
-				m->fb.paths[i].flags |= CheckReversible(m, from_marker);
+				m->fb.paths[j].flags |= CheckReversible(m, from_marker);
 			}
 		}
 	}
@@ -260,12 +264,24 @@ static void Calc_G_time_9_apply(gedict_t* m, gedict_t* m_2, vec3_t m_pos, vec3_t
 }
 
 static void Calc_G_time_9(void) {
-	gedict_t* m;
-	gedict_t* m2;
-	vec3_t m_pos, m2_pos;
+	int i;
 
-	for (m = first_marker; m && m != world; m = m->fb.marker_link) {
-		for (m2 = first_marker; m2 && m2 != world; m2 = m2->fb.marker_link) {
+	for (i = 0; i < NUMBER_MARKERS; ++i) {
+		gedict_t* m = markers[i];
+		int j;
+
+		if (!m) {
+			continue;
+		}
+
+		for (j = 0; j < NUMBER_MARKERS; ++j) {
+			gedict_t* m2 = markers[j];
+			vec3_t m_pos, m2_pos;
+
+			if (!m2) {
+				continue;
+			}
+
 			VectorAdd(m->s.v.absmin, m->s.v.view_ofs, m_pos);
 			m_pos[2] += 32;
 		
@@ -343,13 +359,17 @@ static void Calc_G_time_11_apply(gedict_t* m, gedict_t* next_marker) {
 
 static void Calc_G_time_11(void) {
 	gedict_t* m_zone;
-	gedict_t* m;
+	int i;
 
-	for (m = first_marker; m && m != world; m = m->fb.marker_link) {
+	for (i = 0; i < NUMBER_MARKERS; ++i) {
+		gedict_t* m = markers[i];
 		int zone;
 
+		if (!m) {
+			continue;
+		}
+
 		for (zone = 0; zone < NUMBER_ZONES; ++zone) {
-		//for (m_zone = zone_stack_head; m_zone && m_zone != world; m_zone = m_zone->fb.zone_stack_next) {
 			m_zone = FirstZoneMarker (zone);
 			if (m_zone == NULL)
 				continue;
@@ -390,11 +410,16 @@ static void Calc_G_time_11(void) {
 }
 
 static void Calc_G_time_12(void) {
-	gedict_t* m;
 	gedict_t* runaway_dest;
+	int i;
 
-	for (m = first_marker; m && m != world; m = m->fb.marker_link) {
+	for (i = 0; i < NUMBER_MARKERS; ++i) {
+		gedict_t* m = markers[i];
 		vec3_t m_pos;
+
+		if (!m) {
+			continue;
+		}
 
 		middle_marker = m;
 		zone_time = 0;
@@ -432,29 +457,39 @@ static void Calc_G_time_12(void) {
 
 // Repeatedly calls func(x, y) until func returns true for every path in the system
 static void PathCalculation(fb_path_calc_func_t func) {
-	int i = 0, j = 0;
 	qbool no_change = false;
 
 	while (!no_change) {
-		gedict_t* m;
+		int i, j;
 
 		no_change = true;
-		for (m = first_marker; m && m != world; m = m->fb.marker_link) {
-			for (i = 0; i < NUMBER_PATHS; ++i) {
-				no_change &= func(m, m->fb.paths[i].next_marker, m->fb.paths[i].time, m->fb.paths[i].flags);
+		for (i = 0; i < NUMBER_MARKERS; ++i) {
+			gedict_t* m = markers[i];
+
+			if (!m) {
+				continue;
+			}
+
+			for (j = 0; j < NUMBER_PATHS; ++j) {
+				no_change &= func(m, m->fb.paths[j].next_marker, m->fb.paths[j].time, m->fb.paths[j].flags);
 			}
 		}
 	}
 }
 
 void InitialiseMarkerRoutes(void) {
-	gedict_t* m;
+	int i;
 
 	// This calculates water columns (if marker is in water, can the player go straight up to get air?)
 	self = dropper;
-	for (m = first_marker; m && m != world; m = m->fb.marker_link) {
+	for (i = 0; i < NUMBER_MARKERS; ++i) {
+		gedict_t* m = markers[i];
 		vec3_t point, m_pos;
 		int content;
+
+		if (!m) {
+			continue;
+		}
 
 		VectorAdd(m->s.v.absmin, m->s.v.view_ofs, m_pos);
 		m->fb.touch_marker = m;
@@ -473,38 +508,43 @@ void InitialiseMarkerRoutes(void) {
 	}
 
 	// Calc_G_time_2();
-	for (m = first_marker; m && m != world; m = m->fb.marker_link) {
-		int i = 0;
+	for (i = 0; i < NUMBER_MARKERS; ++i) {
+		gedict_t* m = markers[i];
+		int j = 0;
 
-		for (i = 0; i < NUMBER_PATHS; ++i) {
-			gedict_t* m_P = m->fb.paths[i].next_marker;
+		if (!m) {
+			continue;
+		}
+
+		for (j = 0; j < NUMBER_PATHS; ++j) {
+			gedict_t* m_P = m->fb.paths[j].next_marker;
 			if (m_P && m_P->fb.fl_marker) {
-				TravelTimeForPath(m, i);
+				TravelTimeForPath(m, j);
 			}
 			else {
-				m->fb.paths[i].next_marker = 0;
+				m->fb.paths[j].next_marker = 0;
 			}
 		}
 
-		for (i = 0; i < NUMBER_GOALS; ++i) {
-			if (! m->fb.goals[i].next_marker) {
-				m->fb.goals[i].time = 1000000;
-				m->fb.goals[i].next_marker = dropper;
+		for (j = 0; j < NUMBER_GOALS; ++j) {
+			if (! m->fb.goals[j].next_marker) {
+				m->fb.goals[j].time = 1000000;
+				m->fb.goals[j].next_marker = dropper;
 			}
 		}
 
-		for (i = 0; i < NUMBER_ZONES; ++i) {
-			if (! m->fb.zones[i].marker) {
-				m->fb.zones[i].time = m->fb.zones[i].reverse_time = m->fb.zones[i].from_time = 1000000;
-				m->fb.zones[i].marker = m->fb.zones[i].reverse_marker = dropper;
+		for (j = 0; j < NUMBER_ZONES; ++j) {
+			if (! m->fb.zones[j].marker) {
+				m->fb.zones[j].time = m->fb.zones[j].reverse_time = m->fb.zones[j].from_time = 1000000;
+				m->fb.zones[j].marker = m->fb.zones[j].reverse_marker = dropper;
 			}
 
-			m->fb.zones[i].sight_from_time = 1000000;
+			m->fb.zones[j].sight_from_time = 1000000;
 		}
 
-		for (i = 0; i < NUMBER_SUBZONES; ++i) {
-			if (m->fb.S_ != i) {
-				m->fb.subzones[i].time = 1000000;
+		for (j = 0; j < NUMBER_SUBZONES; ++j) {
+			if (m->fb.S_ != j) {
+				m->fb.subzones[j].time = 1000000;
 			}
 		}
 	}

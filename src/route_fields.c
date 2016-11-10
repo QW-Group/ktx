@@ -8,6 +8,7 @@ static gedict_t* zone_tail[NUMBER_ZONES] = { 0 };
 
 // FIXME: Map-specific hack for existing map-specific logic...
 extern gedict_t* dm6_door;
+gedict_t* spawn_marker (float x, float y, float z);
 
 // FIXME: globals
 extern gedict_t* markers[];
@@ -79,5 +80,63 @@ void SetMarkerFixedSize (int marker_number, int size_x, int size_y, int size_z)
 		return;
 
 	VectorSet (markers[marker_number]->fb.fixed_size, size_x, size_y, size_z);
+}
+
+void RemoveMarker (gedict_t* marker)
+{
+	int i, j;
+
+	if (!streq (marker->s.v.classname, "marker")) {
+		G_sprint (self, 2, "Cannot remove non-marker\n");
+		return;
+	}
+
+	for (i = 0; i < NUMBER_MARKERS; ++i) {
+		// Remove from linked paths
+		for (j = 0; j < NUMBER_PATHS; ++j) {
+			if (markers[i]->fb.paths[j].next_marker == marker) {
+				markers[i]->fb.paths[j].next_marker = NULL;
+			}
+		}
+
+		// Remove marker
+		if (markers[i] == marker) {
+			markers[i] = NULL;
+			ent_remove (markers[i]);
+		}
+	}
+}
+
+void CreateNewMarker (void)
+{
+	gedict_t* new_marker = spawn_marker (PASSVEC3 (self->s.v.origin));
+	int i;
+
+	for (i = 0; i < NUMBER_MARKERS; ++i) {
+		if (markers[i] == NULL) {
+			markers[i] = new_marker;
+			new_marker->fb.index = i;
+			return;
+		}
+	}
+
+	AddToQue (new_marker);
+}
+
+qbool CreateNewPath (gedict_t* current, gedict_t* next)
+{
+	int i;
+
+	for (i = 0; i < NUMBER_PATHS; ++i) {
+		if (current->fb.paths[i].next_marker == NULL) {
+			current->fb.paths[i].next_marker = next;
+			current->fb.paths[i].flags = 0;
+			current->fb.paths[i].time = 0;
+			return true;
+		}
+	}
+
+	G_sprint (self, 2, "Source marker already has %d paths, cannot add any more.", NUMBER_PATHS);
+	return false;
 }
 

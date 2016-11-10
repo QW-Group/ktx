@@ -15,7 +15,7 @@ void AddToQue(gedict_t* ent) {
 	ent->fb.index = marker_index++;
 }
 
-static gedict_t* spawn_marker(float x, float y, float z) {
+gedict_t* spawn_marker(float x, float y, float z) {
 	gedict_t* marker_ = spawn();
 	marker_->s.v.classname = "marker";
 	marker_->s.v.flags = FL_ITEM;
