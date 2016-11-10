@@ -1910,7 +1910,7 @@ void DM3CampLogic() {
 											SetLinkedMarker(self, self->fb.touch_marker, "dm3-camp");
 										}
 									}
-									else  {
+									else {
 										self->fb.camp_state &= ~CAMPBOT;
 									}
 								}

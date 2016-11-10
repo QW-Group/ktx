@@ -714,25 +714,25 @@ static void fb_spawn_quad (gedict_t* ent)
 }
 
 fb_spawn_t itemSpawnFunctions[] = {
-	{ "item_health", fb_spawn_health },
 	{ "item_armor1", fb_spawn_armor },
 	{ "item_armor2", fb_spawn_armor },
 	{ "item_armorInv", fb_spawn_armor },
+	{ "item_artifact_invulnerability", fb_spawn_pent },
+	{ "item_artifact_envirosuit", fb_spawn_biosuit },
+	{ "item_artifact_invisibility", fb_spawn_ring },
+	{ "item_artifact_super_damage", fb_spawn_quad },
+	{ "item_cells", fb_spawn_cells },
+	{ "item_health", fb_spawn_health },
+	{ "item_rockets", fb_spawn_rockets },
+	{ "item_shells", fb_spawn_shells },
+	{ "item_spikes", fb_spawn_spikes },
+	{ "item_weapon", fb_spawn_weapon },
 	{ "weapon_supershotgun", fb_spawn_ssg },
 	{ "weapon_nailgun", fb_spawn_ng },
 	{ "weapon_supernailgun", fb_spawn_sng },
 	{ "weapon_grenadelauncher", fb_spawn_gl },
 	{ "weapon_rocketlauncher", fb_spawn_rl },
 	{ "weapon_lightning", fb_spawn_lg },
-	{ "item_shells", fb_spawn_shells },
-	{ "item_spikes", fb_spawn_spikes },
-	{ "item_rockets", fb_spawn_rockets },
-	{ "item_cells", fb_spawn_cells },
-	{ "item_weapon", fb_spawn_weapon },
-	{ "item_artifact_invulnerability", fb_spawn_pent },
-	{ "item_artifact_envirosuit", fb_spawn_biosuit },
-	{ "item_artifact_invisibility", fb_spawn_ring },
-	{ "item_artifact_super_damage", fb_spawn_quad }
 };
 
 fb_spawn_t* ItemSpawnFunction (int i)

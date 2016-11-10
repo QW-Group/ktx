@@ -151,22 +151,22 @@ static void fb_spawn_teleport_destination (gedict_t* ent)
 }
 
 static fb_spawn_t stdSpawnFunctions[] = {
+	{ "door", fb_spawn_door },  // covers func_door and func_door_secret
 	{ "func_button", fb_spawn_button },
-	{ "trigger_changelevel", fb_spawn_simple },
 	{ "info_player_deathmatch", fb_spawn_spawnpoint },
-	{ "door", fb_spawn_door },
+	{ "info_teleport_destination", fb_spawn_teleport_destination },
+	{ "plat", fb_spawn_simple },
+	{ "train", fb_spawn_simple },
+	{ "trigger_changelevel", fb_spawn_simple },
+	{ "trigger_counter", fb_spawn_simple },
+	{ "trigger_hurt", fb_spawn_simple },
 	{ "trigger_multiple", fb_spawn_simple },
 	{ "trigger_once", fb_spawn_simple },
-	{ "trigger_secret", fb_spawn_simple },
-	{ "trigger_counter", fb_spawn_simple },
-	{ "info_teleport_destination", fb_spawn_teleport_destination },
-	{ "trigger_teleport", fb_spawn_trigger_teleport },
-	{ "trigger_setskill", fb_spawn_simple },
 	{ "trigger_onlyregistered", fb_spawn_simple },
-	{ "trigger_hurt", fb_spawn_simple },
 	{ "trigger_push", fb_spawn_simple },
-	{ "train", fb_spawn_simple },
-	{ "plat", fb_spawn_simple }
+	{ "trigger_secret", fb_spawn_simple },
+	{ "trigger_setskill", fb_spawn_simple },
+	{ "trigger_teleport", fb_spawn_trigger_teleport }
 };
 
 static void CreateItemMarkers() {

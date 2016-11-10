@@ -209,6 +209,8 @@ qbool LoadBotRoutingFromFile (void)
 					path_flags |= ROCKET_JUMP; break;
 				case 'j':
 					path_flags |= JUMP_LEDGE; break;
+				case 'v':
+					path_flags |= VERTICAL_PLATFORM; break;
 				}
 			}
 
