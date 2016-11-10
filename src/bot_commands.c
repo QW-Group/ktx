@@ -168,6 +168,38 @@ static void FrogbotsSetSkill (void)
 	}
 }
 
+static void FrogbotsPathInfo (void)
+{
+	extern void CoilgunTrail (vec3_t org, vec3_t endpos, int entnum, int color);
+	int i = 0, j = 0;
+
+	if (!(FrogbotOptionEnabled (FB_OPTION_SHOW_MARKERS) && !match_in_progress))
+		return;
+
+	if (!self->fb.touch_marker)
+		return;
+
+	for (i = 0; i < NUMBER_MARKERS; ++i) {
+		qbool found = false;
+
+		if (!markers[i])
+			continue;
+
+		for (j = 0; j < NUMBER_PATHS; ++j) {
+			gedict_t* next = self->fb.touch_marker->fb.paths[j].next_marker;
+			if (next && next == markers[i]) {
+				setmodel( next, "progs/w_g_key.mdl" );
+				found = true;
+				break;
+			}
+		}
+
+		if (!found) {
+			setmodel (markers[i], "progs/w_s_key.mdl");
+		}
+	}
+}
+
 static void FrogbotsDebug (void)
 {
 	if (trap_CmdArgc () == 2) {
@@ -375,6 +407,9 @@ void FrogbotsCommand (void)
 	}
 	else if (streq (command, "remove")) {
 		FrogbotsRemovebot ();
+	}
+	else if (streq (command, "pathinfo")) {
+		FrogbotsPathInfo ();
 	}
 	else if (streq (command, "debug")) {
 		FrogbotsDebug ();

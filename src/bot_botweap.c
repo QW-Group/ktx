@@ -616,7 +616,7 @@ void SelectWeapon(void) {
 				}
 			}
 		}
-		self->fb.state = self->fb.state & NOT_HURT_SELF;
+		self->fb.state &= NOT_HURT_SELF;
 	}
 
 	CheckNewWeapon( DesiredWeapon() );

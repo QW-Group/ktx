@@ -102,6 +102,14 @@ gedict_t* BotsFirstBot (void)
 void BotsMatchStart (void)
 {
 	gedict_t* first_bot = BotsFirstBot();
+	gedict_t* ent;
+
+	for (ent = world; ent = find (ent, FOFCLSN, "marker_indicator"); ) {
+		ent_remove (ent);
+	}
+	for (ent = world; ent = find (ent, FOFCLSN, "marker"); ) {
+		setmodel (ent, "");
+	}
 
 	// No bots => perform no action, standard human match
 	if (first_bot == NULL)

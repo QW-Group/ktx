@@ -169,6 +169,19 @@ static fb_spawn_t stdSpawnFunctions[] = {
 	{ "trigger_teleport", fb_spawn_trigger_teleport }
 };
 
+static void SpawnMarkerIndicator (gedict_t* item)
+{
+	gedict_t* p = spawn();
+	p->s.v.flags = FL_ITEM;
+	p->s.v.solid = SOLID_NOT;
+	p->s.v.movetype = MOVETYPE_NONE;
+	setmodel( p, "progs/w_g_key.mdl" );
+	p->s.v.netname = "Marker";
+	p->s.v.classname = "marker_indicator";
+
+	setorigin( p, PASSVEC3( item->s.v.origin ) );
+}
+
 static void CreateItemMarkers() {
 	// Old frogbot method was to call during item spawns, we just 
 	//    catch up afterwards once we know the map is valid
@@ -196,9 +209,14 @@ static void CreateItemMarkers() {
 			for (i = 0; i < sizeof(stdSpawnFunctions) / sizeof(stdSpawnFunctions[0]); ++i) {
 				if (streq(stdSpawnFunctions[i].name, item->s.v.classname)) {
 					stdSpawnFunctions[i].func(item);
+					found = true;
 					break;
 				}
 			}
+		}
+
+		if (found && FrogbotOptionEnabled (FB_OPTION_SHOW_MARKERS)) {
+			SpawnMarkerIndicator (item);
 		}
 	}
 }
