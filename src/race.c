@@ -277,6 +277,8 @@ char *race_route_desc( void )
 
 void race_init( void )
 {
+	int i;
+
 	memset( &race, 0, sizeof( race ) );
 
 	race.timeout_setting = RACE_DEFAULT_TIMEOUT;
@@ -286,6 +288,11 @@ void race_init( void )
 
 	race.weapon = raceWeaponAllowed;
 	race.falsestart = raceFalseStartNo;
+
+	for ( i = 0; i < NUM_BESTSCORES; i++ )
+	{
+		race.records[i].time = RACE_INVALID_RECORD_TIME;
+	}
 }
 
 // clean up, so we can start actual match and there will be no some shit around
@@ -966,6 +973,8 @@ void race_node_touch()
 					race.records[i].distance = race.currentrace.distance;
 					race.records[i].maxspeed = race.currentrace.maxspeed;
 					race.records[i].avgspeed = race.currentrace.avgspeed / race.currentrace.avgcount;
+					race.records[i].weaponmode = race.weapon;
+					race.records[i].startmode = race.falsestart;
 					if ( !QVMstrftime(race.records[i].date, sizeof(race.records[i].date), "%Y-%m-%d %H:%M:%S", 0) )
 						race.records[i].date[0] = 0; // bad date
 
