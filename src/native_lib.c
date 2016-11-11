@@ -28,6 +28,7 @@ int Q_vsnprintf(char *buffer, size_t count, const char *format, va_list argptr)
 	return ret;
 }
 
+#if !defined(_MSC_VER) || (_MSC_VER < 1900)
 int snprintf(char *buffer, size_t count, char const *format, ...)
 {
 	int ret;
@@ -43,6 +44,7 @@ int snprintf(char *buffer, size_t count, char const *format, ...)
 
 	return ret;
 }
+#endif
 
 #endif // _WIN32
 
