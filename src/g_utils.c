@@ -162,7 +162,7 @@ void normalize( vec3_t value, vec3_t newvalue )
 	new = sqrt( new );
 
 	if ( new == 0 )
-		value[0] = value[1] = value[2] = 0;
+		newvalue[0] = newvalue[1] = newvalue[2] = 0;
 	else
 	{
 		new = 1 / new;
