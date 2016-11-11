@@ -79,14 +79,17 @@ static void SwimAwayFromWall(gedict_t* self, vec3_t dir_move) {
 
 void BotWaterMove(gedict_t* self) {
 	vec3_t dir_move;
-	VectorCopy (self->fb.dir_move_, dir_move);
-	
-	self->fb.swim_arrow = 0;
 
-	if (self->s.v.waterlevel <= 2 || g_globalvars.time < self->fb.frogwatermove_time) {
+	//if ((self->s.v.watertype == CONTENT_LAVA || self->s.v.watertype == CONTENT_SLIME) && escape_marker_count > 0) {
+
+	//}
+
+	self->fb.swim_arrow = 0;
+	if (self->s.v.waterlevel <= 2 || FUTURE(frogwatermove_time)) {
 		return;
 	}
 
+	VectorCopy (self->fb.dir_move_, dir_move);
 	self->fb.frogwatermove_time = self->fb.frogbot_nextthink + 0.1;
 	if (self->fb.obstruction_normal[0] || self->fb.obstruction_normal[1] || self->fb.obstruction_normal[2]) {
 		SwimAwayFromWall(self, dir_move);

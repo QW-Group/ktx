@@ -86,24 +86,25 @@ static void SetFireButtonBasedOnAngles (gedict_t* self, float rel_dist)
 	float risk_factor = 0.5;
 	float risk = g_random();
 	float min_angle_error;
+	vec3_t angle_error;
 	int i;
 
 	risk *= risk;
-	VectorSubtract(self->fb.desired_angle, self->s.v.v_angle, self->fb.angle_error);
+	VectorSubtract(self->fb.desired_angle, self->s.v.v_angle, angle_error);
 
 	for (i = 0; i < 2; ++i) {
-		if (self->fb.angle_error[i] >= 180)
-			self->fb.angle_error[i] -= 360;
-		else if (self->fb.angle_error[i] < -180)
-			self->fb.angle_error[i] += 360;
+		if (angle_error[i] >= 180)
+			angle_error[i] -= 360;
+		else if (angle_error[i] < -180)
+			angle_error[i] += 360;
 
-		self->fb.angle_error[i] = fabs (self->fb.angle_error[i]);
+		angle_error[i] = fabs (angle_error[i]);
 	}
 
 	min_angle_error = (1 + risk) * risk_factor * (self->fb.skill.accuracy + (1440 / rel_dist));
 
 	// Frogbots take into account the distance they've had to snap to look at the player, and won't fire if distance is too high, compared to skill.accuracy
-	self->fb.firing |= (self->fb.angle_error[0] <= min_angle_error && self->fb.angle_error[1] <= min_angle_error);
+	self->fb.firing |= (angle_error[0] <= min_angle_error && angle_error[1] <= min_angle_error);
 }
 
 // FIXME: should just be avoiding bore anyway?

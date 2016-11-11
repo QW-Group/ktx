@@ -30,13 +30,6 @@ static void BotSetDesiredAngles (gedict_t* self, vec3_t rel_pos)
 	}
 }
 
-// Input: self->fb.desired_angle
-// Output: self->fb.desired_angle
-static void BotSetMouseParameters (gedict_t* self)
-{
-	VectorSubtract(self->fb.desired_angle, self->s.v.v_angle, self->fb.angle_error);
-}
-
 static void BotStopFiring(gedict_t* bot) {
 	qbool continuous =
 		bot->fb.desired_weapon_impulse == 4 ||
@@ -237,19 +230,10 @@ static void AttackRespawns(gedict_t* self) {
 
 void BotsFireLogic(void) {
 	vec3_t rel_pos;
-	float time_increment = self->fb.skill.firing_reflex * (0.95 + (0.1 * g_random ()));
 
 	BotStopFiring(self);
 
 	AttackRespawns(self);
-
-	if (FUTURE(fire_nextthink))
-		return;
-
-	self->fb.fire_nextthink += time_increment;
-	if (PAST(fire_nextthink)) {
-		self->fb.fire_nextthink = g_globalvars.time + time_increment;
-	}
 
 	// a_attackfix()
 	if (!self->fb.rocketjumping && self->s.v.enemy == 0 && !(self->fb.state & SHOT_FOR_LUCK)) {
@@ -268,7 +252,6 @@ void BotsFireLogic(void) {
 		BotSetDesiredAngles (self, rel_pos);
 		if (self->fb.look_object->ct == ctPlayer)
 			BotsAimAtPlayerLogic (self, rel_pos, rel_dist);
-		BotSetMouseParameters (self);
 
 		if (!self->fb.rocketjumping) {
 			SetFireButton(self, rel_pos, rel_dist);

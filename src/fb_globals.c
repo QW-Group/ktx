@@ -78,7 +78,6 @@ float rel_dist = 0;
 float rel_time = 0;
 vec3_t rel_hor_dir = { 0 };
 float hor_component = 0;
-float min_angle_error = 0;
 gedict_t* enemy_touch_marker = 0;
 vec3_t src = { 0 };
 vec3_t direction = { 0 };

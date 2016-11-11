@@ -537,7 +537,6 @@ typedef struct fb_entvars_s {
 	struct gedict_s* old_linked_marker;       // the previous linked marker
 	struct gedict_s* look_object;             // the player/marker/entity that the bot is locked onto
 	float frogbot_nextthink;                  // when to next run periodic movement logic for this player
-	float fire_nextthink;                     // when to next run periodic firing logic for this bot
 
 	int T;                                    // flags for this individual marker
 	int G_;                                   // assigned goal number for this marker [1-based...]
@@ -569,7 +568,6 @@ typedef struct fb_entvars_s {
 	qbool jumping;                    // does the bot want to jump this frame?
 	int desired_weapon_impulse;       // impulse to send the next time the player
 	vec3_t desired_angle;             // for 'perfect' aim, this is where the bot wants to be aiming
-	vec3_t angle_error;               // this is the difference between current viewangle and desired_angle
 	qbool botchose;                   // next_impulse is valid
 	int next_impulse;                 // the impulse to send in next command
 
