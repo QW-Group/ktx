@@ -55,6 +55,28 @@ void del_from_specs_favourites(gedict_t *rm);
 
 extern int g_matchstarttime;
 
+static int EncodeUserCommand (gedict_t* player)
+{
+	int result = (player->s.v.button0 ? 1 : 0) + (player->s.v.button2 ? 2 : 0);
+
+	if (player->movement[0] > 0)
+		result += 4;
+	else if (player->movement[0] < 0)
+		result += 8;
+
+	if (player->movement[1] > 0)
+		result += 16;
+	else if (player->movement[1] < 0)
+		result += 32;
+
+	if (player->movement[2] > 0)
+		result += 64;
+	else if (player->movement[2] < 0)
+		result += 128;
+
+	return result;
+}
+
 void CheckAll ()
 {
 	static float next_check = -1;
@@ -2700,6 +2722,10 @@ void PlayerPreThink()
 		   		 else
 				 	self->s.v.flags = ( ( int ) ( self->s.v.flags ) ) | FL_JUMPRELEASED;
 			}
+		}
+		else if ( self->ct == ctPlayer && self->racer && race.status )
+		{
+			stuffcmd_flags (self, STUFFCMD_DEMOONLY, "//ucmd %f %d\n", g_globalvars.time, EncodeUserCommand(self));
 		}
 	}
 
