@@ -88,7 +88,7 @@ void ToggleRace( void )
 		}
 	}
 
-	if ( race_is_started() )
+	if ( CountPlayers() && race_is_started() )
 		return;
 
 	cvar_toggle_msg( self, "k_race", redtext("race") );
