@@ -705,6 +705,9 @@ void kill_race_idler( void )
 	gedict_t *e;
 	gedict_t *racer = race_get_racer();
 
+	if (!racer)
+		return;
+
 	for ( e = world; ( e = ez_find( e, "race_cp_start" ) ); )
 	{
 		if ( ( racer->s.v.origin[0] == e->s.v.origin[0] )
@@ -1784,8 +1787,7 @@ void race_think( void )
 
 			race.next_race_time = race_time() + 100; // update race time each 100 ms
 
-			racer = race_get_racer();
-
+			racer = race_get_racer ();
 			VectorSubtract( racer->s.v.origin, racer->s.v.oldorigin, tmp );
 			race.currentrace.distance += vlen( tmp );
 
