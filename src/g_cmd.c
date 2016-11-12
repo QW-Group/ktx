@@ -487,7 +487,7 @@ qbool ClientSay( qbool isTeamSay )
 		}
 
 		// do not put private info in demos: private is team say from player without $\ symbol
-		ignore_in_demos = ( ( self->ct == ctPlayer && isTeamSay && !fake ) || spec_talk );
+		ignore_in_demos = ( ( self->ct == ctPlayer && isTeamSay && (!fake || match_in_progress != 2) ) || spec_talk );
 
 		flags			= ( ignore_in_demos ? SPRINT_IGNOREINDEMO : 0 );
 		result_msg		= ( isSupport_ColoredText(client) ? str : textuncolored );
