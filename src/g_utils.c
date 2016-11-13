@@ -1912,9 +1912,9 @@ void ghost2scores( gedict_t *g )
 	WriteByte(to, cl_slot);            // client number
 	WriteLong(to, 0);                  // client userid
 	WriteString(to, va("\\name\\\x83 %s\\team\\%s\\topcolor\\%d\\bottomcolor\\%d",
-			 		getname( g ), getteam( g ),
-			 		bound(0, ((g->ghost_clr >> 8) & 0xF), 13),
-			 		bound(0, (g->ghost_clr & 0xF), 13)));
+	                getname( g ), getteam( g ),
+	                (int)bound(0, ((g->ghost_clr >> 8) & 0xF), 13),
+	                (int)bound(0, (g->ghost_clr & 0xF), 13)));
 
 	WriteByte(to, SVC_UPDATEFRAGS); // update frags
 	WriteByte(to, cl_slot);
