@@ -721,7 +721,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			nailkick = 1.0;
 
 		for ( i = 0; i < 3; i++ ) 
-			targ->s.v.velocity[i] += dir[i] * non_hdp_damage * c1 * nailkick;
+			targ->s.v.velocity[i] += dir[i] * non_hdp_damage * c1 * nailkick * ( midair && playerheight >= 45 ? ( 1 + ( playerheight - 45 ) / 64 ) : 1 );
 
 		if ( midair && playerheight < 45 )
 			targ->s.v.velocity[2] += dir[2] * non_hdp_damage * c2 * nailkick; // only for z component
