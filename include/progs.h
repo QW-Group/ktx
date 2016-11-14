@@ -624,6 +624,7 @@ typedef struct gedict_s {
 	int         race_route_falsestart_mode; // the falsestart mode - see raceFalseStartMode_t
 	float       race_route_start_yaw;       // the player's initial yaw angle
 	float       race_route_start_pitch;     // the player's initial pitch angle
+	int         race_flags;                 // flags affecting this particular object (teleports only atm)
 // }
 
 	int			trackent;			// pseudo spectating for players.
@@ -672,7 +673,7 @@ typedef struct
 	raceRouteNodeType_t		type;			// race route node type
 	vec3_t					ang;			// this is only need for start node, so we can set player view angles
 	vec3_t					org;			// node origin in 3D space
-
+	vec3_t                  sizes;          // dimensions (if 0, default)
 } raceRouteNode_t;
 
 typedef struct

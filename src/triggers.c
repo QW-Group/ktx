@@ -657,6 +657,9 @@ void teleport_touch()
 	if ( isRA() && !isWinner( other ) && !isLoser( other ) )
 		return;
 
+	if ( isRACE() && race_handle_event (other, self, "touch") )
+		return;
+
 // activator = other;
 	SUB_UseTargets();
 

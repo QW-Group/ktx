@@ -129,6 +129,7 @@ field_t         fields[] = {
 	{"race_route_falsestart_mode", FOFS( race_route_falsestart_mode ), F_INT},
 	{"race_route_start_yaw", FOFS( race_route_start_yaw ), F_FLOAT},
 	{"race_route_start_pitch", FOFS( race_route_start_yaw ), F_FLOAT},
+	{"race_flags", FOFS(race_flags), F_INT},
 	{NULL}
 };
 typedef struct {
@@ -721,5 +722,7 @@ void G_SpawnEntitiesFromString( void )
 		G_SpawnGEntityFromSpawnVars();
 		trap_FlushSignon();
 	}
+
+	race_add_standard_routes ();
 }
 

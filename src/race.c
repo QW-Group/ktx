@@ -6,6 +6,9 @@
 
 #define MAX_TXTLEN	64
 
+#define RACEFLAG_TOUCH_RACEFAIL 1
+#define RACEFLAG_TOUCH_RACEEND  2
+
 void ktpro_autotrack_on_powerup_take (gedict_t *racer);
 void race_cancel( qbool cancelrecord, const char *fmt, ... );
 void race_start( qbool cancelrecord, const char *fmt, ... );
@@ -338,7 +341,7 @@ void race_route_add_end( void )
 	race.cnt++;
 }
 
-qbool race_add_route_node(float x, float y, float z, float pitch, float yaw, raceRouteNodeType_t	type)
+raceRouteNode_t* race_add_route_node(float x, float y, float z, float pitch, float yaw, raceRouteNodeType_t	type)
 {
 	int node_idx;
 
@@ -348,7 +351,7 @@ qbool race_add_route_node(float x, float y, float z, float pitch, float yaw, rac
 	node_idx = race.route[race.cnt].cnt;
 
 	if ( node_idx < 0 || node_idx >= MAX_ROUTE_NODES )
-		return false; // we are full
+		return NULL; // we are full
 
 	race.route[race.cnt].node[node_idx].type = type;
 	race.route[race.cnt].node[node_idx].org[0] = x;
@@ -357,10 +360,11 @@ qbool race_add_route_node(float x, float y, float z, float pitch, float yaw, rac
 	race.route[race.cnt].node[node_idx].ang[0] = pitch;
 	race.route[race.cnt].node[node_idx].ang[1] = yaw;
 	race.route[race.cnt].node[node_idx].ang[2] = 0;
+	VectorClear (race.route[race.cnt].node[node_idx].sizes);
 
 	race.route[race.cnt].cnt++; // one more node
 
-	return true;
+	return &race.route[race.cnt].node[node_idx];
 }
 
 void race_set_route_name( char *name, char *desc )
@@ -872,6 +876,145 @@ void race_sprint_checkpoint( gedict_t *player, gedict_t *cp )
 		G_sprint( player, 2, "%s\n", redtext( name_for_nodeType( cp->race_RouteNodeType ) ) );
 }
 
+static void race_end_point_touched (gedict_t* self, gedict_t* other)
+{
+	int i, timeposition, nameposition;
+	qbool istopscore;
+
+	// spawn a bit of meat
+	float speed = max( 600, vlen( other->s.v.velocity ) );
+	float frac  = bound( 0, 0.8, 1 ); // non random fraction of the speed
+	race_spawn_meat( other, "progs/gib1.mdl",     frac * speed + g_random() * (1.0 - frac) * speed );
+	race_spawn_meat( other, "progs/gib2.mdl",     frac * speed + g_random() * (1.0 - frac) * speed );
+	race_spawn_meat( other, "progs/gib3.mdl",     frac * speed + g_random() * (1.0 - frac) * speed );
+	race_spawn_meat( other, "progs/h_player.mdl", frac * speed + g_random() * (1.0 - frac) * speed );
+
+	race.currentrace.time = race_time(); // stop run timer
+
+	istopscore = false;
+	timeposition = nameposition = -1;
+
+	read_topscores();
+
+	// first, let's see if run time gets into top scores and if name is already ranked
+	for ( i = 0; i < NUM_BESTSCORES; i++ )
+	{
+		if ( race.currentrace.time < race.records[i].time )
+			if ( timeposition == -1 )
+				timeposition = i;
+
+		if ( streq( race.records[i].racername, other->s.v.netname ) )
+			nameposition = i;
+	}
+
+	// run time is within top scores range
+	if ( timeposition != -1 )
+	{
+		// if player didn't beat his own record
+		if ( ( nameposition < timeposition ) && ( nameposition != -1 ) )
+		{
+			sound( other, CHAN_ITEM, "ambience/thunder1.wav", 1, ATTN_NONE );
+
+			race_start( true, "Run %s in %s%s\n%s couldn't beat his best time\n",
+				redtext( "finished" ),
+				dig3s( "%.3f", race.currentrace.time / 1000 ),
+				redtext( "s" ),
+				other->s.v.netname
+			);
+		}
+		else
+		{
+
+			// if player beat his own record or is not yet ranked
+			if ( nameposition == -1 )
+				nameposition = ( NUM_BESTSCORES - 1 );
+
+			if ( is_valid_record( &race.records[nameposition] ) )
+			{
+				// let's remove the old demo
+				if ( !strnull( race.records[nameposition].demoname ) )
+				{
+					localcmd( va( "sv_demoremove %s\n", race.records[nameposition].demoname ) );
+				}
+			}
+
+			// move old top scores down
+			for ( i = nameposition; i > timeposition; i-- )
+			{
+				race.records[i] = race.records[i - 1];
+			}
+
+			// add new top score
+			race.records[i].time = race.currentrace.time;
+			strlcpy( race.records[i].racername, other->s.v.netname, sizeof( race.records[i].racername ) );
+			if (race.race_recording)
+				strlcpy( race.records[i].demoname, cvar_string( "_k_recordeddemoname" ), sizeof( race.records[i].demoname ) );
+			else
+				memset( race.records[i].demoname, 0, sizeof( race.records[i].demoname ) );
+			race.records[i].distance = race.currentrace.distance;
+			race.records[i].maxspeed = race.currentrace.maxspeed;
+			race.records[i].avgspeed = race.currentrace.avgspeed / race.currentrace.avgcount;
+			race.records[i].weaponmode = race.weapon;
+			race.records[i].startmode = race.falsestart;
+			if ( !QVMstrftime(race.records[i].date, sizeof(race.records[i].date), "%Y-%m-%d %H:%M:%S", 0) )
+				race.records[i].date[0] = 0; // bad date
+
+												// save scores in file
+			write_topscores();
+
+			if ( !i )
+			{
+				// first place! we go the extra mile
+				sound( other, CHAN_ITEM, "boss2/sight.wav", 1, ATTN_NONE );
+				strlcpy(race.top_nick, other->s.v.netname, sizeof(race.top_nick));
+				race.top_time = race.currentrace.time;
+			}
+			else
+			{
+				sound( other, CHAN_ITEM, "ambience/thunder1.wav", 1, ATTN_NONE );
+			}
+
+			G_bprint( 2, "Run %s in %s%s\n%s took the ",
+				redtext( "finished" ),
+				dig3s( "%.3f", race.currentrace.time / 1000 ),
+				redtext( "s" ),
+				other->s.v.netname
+			);
+
+			switch ( i + 1 )
+			{
+			case 1:
+				G_bprint( 2, "%s", redtext( "1st" ) );
+				break;
+			case 2:
+				G_bprint( 2, "%s", redtext( "2nd" ) );
+				break;
+			case 3:
+				G_bprint( 2, "%s", redtext( "3rd" ) );
+				break;
+			default:
+				G_bprint( 2, "%s%s", redtext( dig3( i + 1 ) ) , redtext( "th" ) );
+			}
+
+			G_bprint( 2, " %s\n", "place" );
+
+			istopscore = true;
+			race_start( false, "" );
+		}
+	}
+	else
+	{
+		// run time did not make it to top scores
+		sound( other, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
+
+		race_start( true, "Run %s in %s%s\n",
+			redtext( "finished" ),
+			dig3s( "%.3f", race.currentrace.time / 1000 ),
+			redtext( "s" )
+		);
+	}
+}
+
 void race_node_touch()
 {
 	if ( other->ct != ctPlayer )
@@ -905,144 +1048,7 @@ void race_node_touch()
 		// racer touched checkpoint in right order
 
 		if ( self->race_RouteNodeType == nodeEnd )
-		{
-			int i, timeposition, nameposition;
-			qbool istopscore;
-
-			// spawn a bit of meat
-				float speed = max( 600, vlen( other->s.v.velocity ) );
-				float frac  = bound( 0, 0.8, 1 ); // non random fraction of the speed
-				race_spawn_meat( other, "progs/gib1.mdl",     frac * speed + g_random() * (1.0 - frac) * speed );
-				race_spawn_meat( other, "progs/gib2.mdl",     frac * speed + g_random() * (1.0 - frac) * speed );
-				race_spawn_meat( other, "progs/gib3.mdl",     frac * speed + g_random() * (1.0 - frac) * speed );
-				race_spawn_meat( other, "progs/h_player.mdl", frac * speed + g_random() * (1.0 - frac) * speed );
-
-			race.currentrace.time = race_time(); // stop run timer
-
-			istopscore = false;
-			timeposition = nameposition = -1;
-
-			read_topscores();
-
-			// first, let's see if run time gets into top scores and if name is already ranked
-			for ( i = 0; i < NUM_BESTSCORES; i++ )
-		    {
-				if ( race.currentrace.time < race.records[i].time )
-					if ( timeposition == -1 )
-						timeposition = i;
-
-				if ( streq( race.records[i].racername, other->s.v.netname ) )
-					nameposition = i;
-			}
-
-			// run time is within top scores range
-			if ( timeposition != -1 )
-			{
-				// if player didn't beat his own record
-				if ( ( nameposition < timeposition ) && ( nameposition != -1 ) )
-				{
-
-					sound( other, CHAN_ITEM, "ambience/thunder1.wav", 1, ATTN_NONE );
-
-					race_start( true, "Run %s in %s%s\n%s couldn't beat his best time\n",
-							redtext( "finished" ),
-							dig3s( "%.3f", race.currentrace.time / 1000 ),
-							redtext( "s" ),
-							other->s.v.netname
-							);
-				}
-				else
-				{
-
-					// if player beat his own record or is not yet ranked
-					if ( nameposition == -1 )
-						nameposition = ( NUM_BESTSCORES - 1 );
-
-					if ( is_valid_record( &race.records[nameposition] ) )
-					{
-						// let's remove the old demo
-						if ( !strnull( race.records[nameposition].demoname ) )
-						{
-							localcmd( va( "sv_demoremove %s\n", race.records[nameposition].demoname ) );
-						}
-					}
-
-					// move old top scores down
-					for ( i = nameposition; i > timeposition; i-- )
-					{
-						race.records[i] = race.records[i - 1];
-					}
-
-					// add new top score
-					race.records[i].time = race.currentrace.time;
-					strlcpy( race.records[i].racername, other->s.v.netname, sizeof( race.records[i].racername ) );
-					if (race.race_recording)
-						strlcpy( race.records[i].demoname, cvar_string( "_k_recordeddemoname" ), sizeof( race.records[i].demoname ) );
-					else
-						memset( race.records[i].demoname, 0, sizeof( race.records[i].demoname ) );
-					race.records[i].distance = race.currentrace.distance;
-					race.records[i].maxspeed = race.currentrace.maxspeed;
-					race.records[i].avgspeed = race.currentrace.avgspeed / race.currentrace.avgcount;
-					race.records[i].weaponmode = race.weapon;
-					race.records[i].startmode = race.falsestart;
-					if ( !QVMstrftime(race.records[i].date, sizeof(race.records[i].date), "%Y-%m-%d %H:%M:%S", 0) )
-						race.records[i].date[0] = 0; // bad date
-
-					// save scores in file
-					write_topscores();
-
-					if ( !i )
-					{
-						// first place! we go the extra mile
-						sound( other, CHAN_ITEM, "boss2/sight.wav", 1, ATTN_NONE );
-						strlcpy(race.top_nick, other->s.v.netname, sizeof(race.top_nick));
-						race.top_time = race.currentrace.time;
-					}
-					else
-					{
-						sound( other, CHAN_ITEM, "ambience/thunder1.wav", 1, ATTN_NONE );
-					}
-
-					G_bprint( 2, "Run %s in %s%s\n%s took the ",
-							redtext( "finished" ),
-							dig3s( "%.3f", race.currentrace.time / 1000 ),
-							redtext( "s" ),
-							other->s.v.netname
-							);
-
-					switch ( i + 1 )
-					{
-						case 1:
-							G_bprint( 2, "%s", redtext( "1st" ) );
-							break;
-						case 2:
-							G_bprint( 2, "%s", redtext( "2nd" ) );
-							break;
-						case 3:
-							G_bprint( 2, "%s", redtext( "3rd" ) );
-							break;
-						default:
-							G_bprint( 2, "%s%s", redtext( dig3( i + 1 ) ) , redtext( "th" ) );
-					}
-
-					G_bprint( 2, " %s\n", "place" );
-
-					istopscore = true;
-					race_start( false, "" );
-				}
-			}
-			else
-			{
-				// run time did not make it to top scores
-				sound( other, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
-
-				race_start( true, "Run %s in %s%s\n",
-   					redtext( "finished" ),
-   					dig3s( "%.3f", race.currentrace.time / 1000 ),
-					redtext( "s" )
-	   				);
-			}
-		}
+			race_end_point_touched (self, other);
 
 		// if its not start checkpoint do something "cute"
 		if ( self->race_id )
@@ -1116,7 +1122,10 @@ gedict_t *spawn_race_node( raceRouteNode_t *node )
 	}
 
 	setmodel( e, model_for_nodeType( node->type ) );
-	setsize( e, PASSVEC3( VEC_HULL_MIN ), PASSVEC3( VEC_HULL_MAX ) );
+	if (VectorCompareF (node->sizes, 0, 0, 0))
+		setsize (e, PASSVEC3 (VEC_HULL_MIN), PASSVEC3 (VEC_HULL_MAX));
+	else
+		setsize (e, -node->sizes[0] / 2, -node->sizes[1] / 2, -node->sizes[2] / 2, node->sizes[0] / 2, node->sizes[1] / 2, node->sizes[2] / 2);
 	e->s.v.solid		= SOLID_TRIGGER;
 	e->s.v.movetype		= MOVETYPE_NONE;
 	e->s.v.flags		= FL_ITEM;
@@ -1838,8 +1847,9 @@ void race_think( void )
 //
 //============================================
 
-void race_route_now_custom( void )
+static void race_route_now_custom( void )
 {
+	init_scores ();
 	race.active_route = 0; // mark this is a custom route now
 }
 
@@ -2513,6 +2523,19 @@ void ChasecamToggleButton( void )
 	r_changefollowstatus ( (float) 3 );
 }
 
+void race_set_teleport_flags_by_name ( const char* name, int flags )
+{
+	gedict_t* ent;
+
+	for (ent = world; ent = ez_find (ent, "trigger_teleport"); )
+	{
+		if (streq (ent->s.v.target, name ))
+		{
+			ent->race_flags = flags;
+		}
+	}
+}
+
 void race_route_create( void )
 {
 	gedict_t* route[MAX_ROUTE_NODES] = { 0 };
@@ -2596,12 +2619,13 @@ void race_route_create( void )
 	for (i = 0; i < route_nodes; ++i)
 	{
 		raceRouteNodeType_t nodeType = nodeCheckPoint;
+		raceRouteNode_t* node = NULL;
 		if (i == 0)
 			nodeType = nodeStart;
 		else if (i == route_nodes - 1)
 			nodeType = nodeEnd;
 
-		race_add_route_node(
+		node = race_add_route_node(
 			route[i]->s.v.origin[0],
 			route[i]->s.v.origin[1],
 			route[i]->s.v.origin[2],
@@ -2609,6 +2633,8 @@ void race_route_create( void )
 			route[i]->race_route_start_yaw,
 			nodeType
 		);
+		if (node)
+			VectorCopy (route[i]->s.v.size, node->sizes);
 	}
 
 	race_set_route_name( self->race_route_name, self->race_route_description );
@@ -2947,6 +2973,8 @@ void race_add_standard_routes( void )
 	}
 	else if ( streq( g_globalvars.mapname, "slide6" ) )
 	{
+		raceRouteNode_t* checkpoint;
+
 		if ( !race_route_add_start() )
 			return; // we are full
 
@@ -2954,6 +2982,25 @@ void race_add_standard_routes( void )
 		race_add_route_node( -1084, 1958,   18, 0, 0, nodeEnd );
 
 		race_set_route_name( "Slide 6", "top \215 bottom" );
+		race_set_route_timeout( 40 );
+		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
+
+		race_route_add_end();
+
+		if ( !race_route_add_start() )
+			return; // we are full
+
+		race_add_route_node(     0,    0, 3534, 0, 0, nodeStart );
+		checkpoint = race_add_route_node(  2605,  800, 3485, 0, 0, nodeCheckPoint );
+		if (checkpoint)
+			VectorSet (checkpoint->sizes, 430, 400, 1030);
+		checkpoint = race_add_route_node(  1025,  -2275, 2200, 0, 0, nodeCheckPoint );
+		if (checkpoint)
+			VectorSet (checkpoint->sizes, 500, 400, 400);
+		race_add_route_node( -1084, 1958,   18, 0, 0, nodeEnd );
+
+		race_set_route_name( "Slide6: NO SHORTCUTS", "top \215 bottom" );
 		race_set_route_timeout( 40 );
 		race_set_route_weapon_mode( raceWeaponNo );
 		race_set_route_falsestart_mode( raceFalseStartNo );
@@ -3270,4 +3317,94 @@ void race_add_standard_routes( void )
 
         race_route_add_end();
     }
+	else if (streq (g_globalvars.mapname, "hoppa2"))
+	{
+		if ( !race_route_add_start() )
+			return;
+
+		race_add_route_node(  1200, -3075,  -24, 0, 0, nodeStart );
+		race_add_route_node(  1168, -1375,  130, 0, 0, nodeEnd );
+
+		race_set_route_name( "One way", "start\215finish" );
+		race_set_route_timeout( 60 );
+		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
+
+		race_route_add_end();
+
+		race_set_teleport_flags_by_name ("tele_1", RACEFLAG_TOUCH_RACEFAIL);
+	}
+	else if (streq (g_globalvars.mapname, "speedrush"))
+	{
+		if ( !race_route_add_start() )
+			return;
+
+		race_add_route_node(  -955, -1140,  2010, 0, 90, nodeStart );
+		race_add_route_node( -2675, -1155, -2984, 0, 0, nodeEnd );
+
+		race_set_route_name( "Rush", "start\215finish" );
+		race_set_route_timeout( 60 );
+		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
+
+		race_route_add_end();
+
+		if ( !race_route_add_start() )
+			return;
+
+		race_add_route_node(  -955, -1140,  2010, 0, 90, nodeStart );
+		race_add_route_node( -2675, -1155, -2984, 0, 0, nodeEnd );
+
+		race_set_route_name( "Rush (+weapons)", "start\215finish" );
+		race_set_route_timeout( 60 );
+		race_set_route_weapon_mode( raceWeaponAllowed );
+		race_set_route_falsestart_mode( raceFalseStartNo );
+
+		race_route_add_end();
+
+		race_set_teleport_flags_by_name ( "killer", RACEFLAG_TOUCH_RACEFAIL );
+		race_set_teleport_flags_by_name ( "start", RACEFLAG_TOUCH_RACEEND );
+	}
+	else if (streq (g_globalvars.mapname, "zjumps")) {
+		if ( !race_route_add_start() )
+			return;
+
+		race_add_route_node( -3740,  3950,  3865, 0, -90, nodeStart );
+		race_add_route_node( -3880,  2720,  3830, 0, 0, nodeEnd );
+
+		race_set_route_name( "Zzzzzzz", "start\215finish" );
+		race_set_route_timeout( 60 );
+		race_set_route_weapon_mode( raceWeaponNo );
+		race_set_route_falsestart_mode( raceFalseStartNo );
+
+		race_route_add_end();
+
+		race_set_teleport_flags_by_name ( "start", RACEFLAG_TOUCH_RACEFAIL );
+	}
+}
+
+qbool race_handle_event (gedict_t* player, gedict_t* entity, const char* eventName)
+{
+	if ( !other->racer )
+		return false; // can't touch if not the racer
+
+	if (streq (eventName, "touch")) {
+		if (entity->race_flags & RACEFLAG_TOUCH_RACEFAIL)
+		{
+			// do some sound
+			sound( player, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
+
+			race_start( true, "Run aborted\n" );
+
+			return true;
+		}
+		else if (entity->race_flags & RACEFLAG_TOUCH_RACEEND)
+		{
+			race_end_point_touched (entity, player);
+
+			return true;
+		}
+	}
+
+	return false;
 }
