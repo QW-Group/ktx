@@ -2503,16 +2503,6 @@ void read_topscores( void )
 	race_fclose();
 }
 
-void ChasecamViewButton( void )
-{
-	if ( !( ( ( int ) ( self->s.v.flags ) ) & FL_JUMPRELEASED ) )
-		return;
-
-	self->s.v.flags = (int)self->s.v.flags & ~FL_JUMPRELEASED;
-
-	race_chasecam_change();
-}
-
 void ChasecamToggleButton( void )
 {
 	if ( !( ( ( int ) ( self->s.v.flags ) ) & FL_ATTACKRELEASED ) )

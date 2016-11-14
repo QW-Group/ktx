@@ -46,7 +46,6 @@ void MakeMOTD();
 void ImpulseCommands();
 void StartDie ();
 void ZeroFpsStats ();
-void ChasecamViewButton( void );
 
 void race_start( qbool restart, const char *fmt, ... );
 void race_stoprecord( qbool cancel );
@@ -2717,10 +2716,7 @@ void PlayerPreThink()
 		{
 			if ( self->race_chasecam )
 			{
-				if ( self->s.v.button2 )
-					ChasecamViewButton();
-		   		 else
-				 	self->s.v.flags = ( ( int ) ( self->s.v.flags ) ) | FL_JUMPRELEASED;
+				self->s.v.flags = ( ( int ) ( self->s.v.flags ) ) | FL_JUMPRELEASED;
 			}
 		}
 		else if ( self->ct == ctPlayer && self->racer && race.status )
