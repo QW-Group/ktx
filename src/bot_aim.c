@@ -18,13 +18,6 @@ static void BotSetDesiredAngles (gedict_t* self, vec3_t rel_pos)
 		self->fb.desired_angle[0] = 0 - self->fb.desired_angle[0];
 	}
 
-	// FIXME: why? :(
-	/*
-	self->fb.desired_angle[0] = (pr1_rint(self->fb.desired_angle[0] / 1.40625));
-	self->fb.desired_angle[1] = (pr1_rint(self->fb.desired_angle[1] / 1.40625));
-	VectorScale(self->fb.desired_angle, 1.40625, self->fb.desired_angle);
-	*/
-
 	if (self->fb.state & HURT_SELF) {
 		self->fb.desired_angle[0] = 180;
 	}

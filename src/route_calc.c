@@ -480,17 +480,18 @@ static void PathCalculation(fb_path_calc_func_t func) {
 void InitialiseMarkerRoutes(void) {
 	int i;
 
-	// This calculates water columns (if marker is in water, can the player go straight up to get air?)
 	self = dropper;
 	for (i = 0; i < NUMBER_MARKERS; ++i) {
 		gedict_t* m = markers[i];
 		vec3_t point, m_pos;
 		int content;
+		int j = 0;
 
 		if (!m) {
 			continue;
 		}
 
+		// Calc_G_time_1: This calculates water columns (if marker is in water, can the player go straight up to get air?)
 		VectorAdd(m->s.v.absmin, m->s.v.view_ofs, m_pos);
 		m->fb.touch_marker = m;
 
@@ -505,17 +506,8 @@ void InitialiseMarkerRoutes(void) {
 				setsize(m, m->s.v.mins[0], m->s.v.mins[1], m->s.v.mins[2], m->s.v.maxs[0] + testplace[0] - m_pos[0], m->s.v.maxs[1] + testplace[1] - m_pos[1], m->s.v.maxs[2] + testplace[2] - m_pos[2]);
 			}
 		}
-	}
 
-	// Calc_G_time_2();
-	for (i = 0; i < NUMBER_MARKERS; ++i) {
-		gedict_t* m = markers[i];
-		int j = 0;
-
-		if (!m) {
-			continue;
-		}
-
+		// Calc_G_time_2
 		for (j = 0; j < NUMBER_PATHS; ++j) {
 			gedict_t* m_P = m->fb.paths[j].next_marker;
 			if (m_P && m_P->fb.fl_marker) {
