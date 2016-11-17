@@ -8,6 +8,7 @@ static qbool map_supported = false;
 void check_marker (gedict_t* self, gedict_t* other);
 qbool LoadBotRoutingFromFile (void);
 qbool pickup_true(void);
+int AddPath (gedict_t* marker, gedict_t* next_marker);
 
 // fixme: also in doors.c
 #define SECRET_OPEN_ONCE 1	// stays open
@@ -102,6 +103,17 @@ static void fb_spawn_door(gedict_t* ent) {
 	}
 }
 
+static void fb_spawn_plat (gedict_t* ent)
+{
+	AddToQue (ent);
+
+	VectorSubtract (ent->s.v.absmax, ent->s.v.absmin, ent->s.v.view_ofs);
+	VectorScale (ent->s.v.view_ofs, 0.5f, ent->s.v.view_ofs);
+	ent->s.v.view_ofs[2] = ent->s.v.absmax[2] - ent->s.v.absmin[2] + 23;
+	adjust_view_ofs_z (ent);
+	BecomeMarker(ent);
+}
+
 static void fb_spawn_simple(gedict_t* ent) {
 	AddToQue(ent);
 
@@ -155,7 +167,7 @@ static fb_spawn_t stdSpawnFunctions[] = {
 	{ "func_button", fb_spawn_button },
 	{ "info_player_deathmatch", fb_spawn_spawnpoint },
 	{ "info_teleport_destination", fb_spawn_teleport_destination },
-	{ "plat", fb_spawn_simple },
+	{ "plat", fb_spawn_plat },
 	{ "train", fb_spawn_simple },
 	{ "trigger_changelevel", fb_spawn_simple },
 	{ "trigger_counter", fb_spawn_simple },
@@ -171,6 +183,8 @@ static fb_spawn_t stdSpawnFunctions[] = {
 
 static void SpawnMarkerIndicator (gedict_t* item)
 {
+	vec3_t pos;
+
 	gedict_t* p = spawn();
 	p->s.v.flags = FL_ITEM;
 	p->s.v.solid = SOLID_NOT;
@@ -178,8 +192,21 @@ static void SpawnMarkerIndicator (gedict_t* item)
 	setmodel( p, "progs/w_g_key.mdl" );
 	p->s.v.netname = "Marker";
 	p->s.v.classname = "marker_indicator";
+	p->fb.index = item->fb.index;
 
-	setorigin( p, PASSVEC3( item->s.v.origin ) );
+	//VectorCopy (item->s.v.origin, pos);
+	VectorAdd (item->s.v.absmin, item->s.v.absmax, pos);
+	VectorScale (pos, 0.5f, pos);
+	if (streq (item->s.v.classname, "plat")) {
+		//Com_Printf ("> Pos1 %f %f %f, Pos2 %f %f %f\n", PASSVEC3 (item->pos1), PASSVEC3 (item->pos2));
+		//Com_Printf ("> Mins %f %f %f, Maxs %f %f %f\n", PASSVEC3 (item->s.v.mins), PASSVEC3 (item->s.v.maxs));
+		//Com_Printf ("> AbsMins %f %f %f, AbsMaxs %f %f %f\n", PASSVEC3 (item->s.v.absmin), PASSVEC3 (item->s.v.absmax));
+		VectorAdd (item->s.v.mins, item->s.v.maxs, pos);
+		VectorScale (pos, 0.5f, pos);
+		//Com_Printf ("Marker #%d [%s] @ %f %f %f\n", item->fb.index, item->s.v.classname, PASSVEC3 (pos));
+	}
+
+	setorigin( p, PASSVEC3( pos ) );
 }
 
 static void CreateItemMarkers() {
@@ -215,7 +242,7 @@ static void CreateItemMarkers() {
 			}
 		}
 
-		if (found && FrogbotOptionEnabled (FB_OPTION_SHOW_MARKERS)) {
+		if (found && FrogbotShowMarkerIndicators()) {
 			SpawnMarkerIndicator (item);
 		}
 	}
@@ -267,7 +294,6 @@ static void CustomiseFrogbotMap (void)
 	// KTX may have added a quad, so to keep routes compatible with PR1-version, we add it as a marker after others
 	if (streq(g_globalvars.mapname, "aerowalk"))
 	{
-		Com_Printf ("---\n");
 		gedict_t* quad = find (world, FOFCLSN, "item_artifact_super_damage");
 		if (quad) {
 			gedict_t* nearest_marker = LocateMarker (quad->s.v.origin);
@@ -286,7 +312,6 @@ static void CustomiseFrogbotMap (void)
 				}
 			}
 		}
-		Com_Printf ("---\n");
 	}
 
 	// We stopped it from removing the telespawn earlier on...
@@ -316,18 +341,33 @@ static void CustomiseFrogbotMap (void)
 		if (streq (ent->s.v.classname, "marker")) {
 			vec3_t mins = { -65, -65, -24 };
 			vec3_t maxs = {  65,  65,  32 };
+			vec3_t viewoffset = { 80, 80, 24 };
 			int i;
 
 			for (i = 0; i < 3; ++i) {
 				if (ent->fb.fixed_size[i]) {
 					mins[i] = -ent->fb.fixed_size[i] / 2 - (i < 2 ? 15 : 0);
 					maxs[i] = ent->fb.fixed_size[i] / 2 - (i < 2 ? 15 : 0);
+					viewoffset[i] = (maxs[i] - mins[i]) / 2;
 				}
 			}
+			VectorCopy(viewoffset, ent->s.v.view_ofs);
 			setsize(ent, PASSVEC3(mins), PASSVEC3(maxs));
 		}
 		else if ((int)ent->s.v.flags & FL_ITEM) {
 			PlaceItemFB (ent);
+		}
+	}
+
+	// Link all teleporters
+	for (ent = world; ent = ez_find (ent, "trigger_teleport"); ) {
+		// If this teleport takes us to the marker close to the grenade, set arrow_time
+		if (!strnull (ent->s.v.target)) {
+			gedict_t* target = find (world, FOFS (s.v.targetname), ent->s.v.target);
+
+			G_bprint (PRINT_HIGH, "Linking teleport to %s\n", ent->s.v.target);
+
+			AddPath (ent, target);
 		}
 	}
 }
@@ -336,31 +376,41 @@ void LoadMap(void) {
 	// Need to do this anyway, otherwise teleporters will be broken
 	CreateItemMarkers();
 
-	// If we have a .bot file, use that
-	if (LoadBotRoutingFromFile ()) {
-		map_supported = true;
-		CustomiseFrogbotMap ();
-		AssignVirtualGoals ();
-		AllMarkersLoaded();
-		return;
-	}
-	else {
-		// Fall-back to built-in support
-		int i = 0;
-		for (i = 0; i < sizeof(maps) / sizeof(maps[0]); ++i) {
-			if (streq(g_globalvars.mapname, maps[i].name)) {
-				maps[i].func();
-				map_supported = true;
-				CustomiseFrogbotMap ();
-				AssignVirtualGoals ();
-				AllMarkersLoaded();
-				return;
+	if (!(isRACE () || isCTF ())) {
+		// If we have a .bot file, use that
+		if (LoadBotRoutingFromFile ()) {
+			map_supported = true;
+			CustomiseFrogbotMap ();
+			AssignVirtualGoals ();
+			AllMarkersLoaded ();
+			return;
+		}
+		else {
+			// Fall-back to built-in support
+			int i = 0;
+			for (i = 0; i < sizeof (maps) / sizeof (maps[0]); ++i) {
+				if (streq (g_globalvars.mapname, maps[i].name)) {
+					maps[i].func ();
+					map_supported = true;
+					CustomiseFrogbotMap ();
+					AssignVirtualGoals ();
+					AllMarkersLoaded ();
+					return;
+				}
 			}
 		}
 	}
 
-	// Need this in order to change bounding boxes
+	// At this point it's an unsupported map
 	CustomiseFrogbotMap ();
+	if (FrogbotOptionEnabled (FB_OPTION_EDITOR_MODE)) {
+		gedict_t* e;
+
+		// We don't want spawnpoint markers or powerups to mess with colours
+		for (e = world; e = nextent (e); ) {
+			e->s.v.effects = (int)e->s.v.effects & ~(EF_BLUE | EF_GREEN | EF_RED);
+		}
+	}
 }
 
 qbool FrogbotsCheckMapSupport (void)

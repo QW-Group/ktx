@@ -128,6 +128,8 @@ void plat_center_touch()
 		return;
 
 	self = PROG_TO_EDICT( self->s.v.enemy );
+	BotPlatformTouched (self, other);
+
 	if ( self->state == STATE_BOTTOM )
 		plat_go_up();
 

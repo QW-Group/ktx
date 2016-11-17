@@ -225,7 +225,7 @@ void ProcessNewLinkedMarker(gedict_t* self) {
 				return;
 			}
 		}
-		self->fb.state &= NOT_HURT_SELF;
+		self->fb.state &= ~HURT_SELF;
 	}
 
 	self->fb.path_normal_ = true;

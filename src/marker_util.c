@@ -71,28 +71,38 @@ gedict_t* LocateMarker(vec3_t org) {
 	float shortest_distance = 1000000;
 	gedict_t* closest_marker = NULL;
 	float distance = 0;
+	float max_distance = FrogbotOptionEnabled (FB_OPTION_EDITOR_MODE) ? 100 : 1000;
 
-	for (marker_ = world; marker_ = trap_findradius(marker_, org, 1000); ) {
+	for (marker_ = world; marker_ = trap_findradius(marker_, org, max_distance); ) {
+		vec3_t marker_center;
+
+		if (streq (marker_->s.v.classname, "door") && !(marker_->fb.T & MARKER_DOOR_TOUCHABLE))
+			continue;
+
 		if (marker_->fb.fl_marker) {
-			vec3_t marker_pos;
+			VectorAdd (marker_->s.v.absmin, marker_->s.v.absmax, marker_center);
+			VectorScale (marker_center, 0.5f, marker_center);
+		}
+		/*else if (streq (marker_->s.v.classname, "plat")) {
+			VectorAdd (marker_->s.v.mins, marker_->s.v.maxs, marker_center);
+			VectorScale (marker_center, 0.5f, marker_center);
+		}*/
+		else {
+			continue;
+		}
 
-			if (streq (marker_->s.v.classname, "door") && !(marker_->fb.T & MARKER_DOOR_TOUCHABLE))
-				continue;
-
-			VectorAdd(marker_->s.v.absmin, marker_->s.v.view_ofs, marker_pos);
-			distance = VectorDistance(marker_pos, org);
-			traceline(PASSVEC3(org), PASSVEC3(marker_pos), true, dropper);
-			if (g_globalvars.trace_fraction != 1) {
-				distance = distance + 1000;
-			}
-			if (distance < shortest_distance) {
-				self->fb.near_teleport = NULL;
-				shortest_distance = distance;
-				closest_marker = marker_;
-			}
-			else if (streq(marker_->s.v.classname, "trigger_teleport")) {
-				self->fb.near_teleport = marker_;
-			}
+		distance = VectorDistance(marker_center, org);
+		traceline(PASSVEC3(org), PASSVEC3(marker_center), true, dropper);
+		if (g_globalvars.trace_fraction != 1) {
+			distance = distance + 1000;
+		}
+		if (distance < shortest_distance) {
+			self->fb.near_teleport = NULL;
+			shortest_distance = distance;
+			closest_marker = marker_;
+		}
+		else if (streq(marker_->s.v.classname, "trigger_teleport")) {
+			self->fb.near_teleport = marker_;
 		}
 	}
 

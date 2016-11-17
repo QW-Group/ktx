@@ -46,7 +46,12 @@ void BotEventDoorHitBottom (gedict_t* self)
 	//G_bprint (2, "DoorHitBottom... %s\n", (self->state & STATE_BOTTOM ? "bottom" : "non-bottom"));
 }
 
-
+void BotPlatformTouched (gedict_t* platform, gedict_t* player)
+{
+	if (IsMarkerFrame() && platform->fb.fl_marker) {
+		check_marker (platform, player);
+	}
+}
 
 
 
@@ -112,5 +117,4 @@ qbool BotDoorIsClosed (gedict_t* door)
 
 	return false;
 }
-
 

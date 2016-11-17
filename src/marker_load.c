@@ -15,6 +15,101 @@ void AddToQue(gedict_t* ent) {
 	ent->fb.index = marker_index++;
 }
 
+const char* EncodeMarkerFlags (int marker_flags)
+{
+	static char buffer[10];
+	char* s = buffer;
+
+	if (marker_flags & UNREACHABLE)
+		*s++ = 'u';
+	if (marker_flags & MARKER_IS_DM6_DOOR)
+		*s++ = '6';
+	if (marker_flags & MARKER_DOOR_TOUCHABLE)
+		*s++ = 't';
+	if (marker_flags & MARKER_ESCAPE_ROUTE)
+		*s++ = 'e';
+	if (marker_flags & MARKER_FIRE_ON_MATCH_START)
+		*s++ = 'f';
+
+	*s = 0;
+	return buffer;
+}
+
+int DecodeMarkerFlagString (const char* s)
+{
+	size_t i;
+	int marker_flags = 0;
+
+	for (i = 0; i < strlen (s); ++i) {
+		switch (s[i]) {
+		case 'u':
+			marker_flags |= UNREACHABLE;
+			break;
+		case '6':
+			marker_flags |= MARKER_IS_DM6_DOOR;
+			break;
+		case 'f':
+			marker_flags |= MARKER_FIRE_ON_MATCH_START;
+			break;
+		case 't':
+			marker_flags |= MARKER_DOOR_TOUCHABLE;
+			break;
+		case 'e':
+			marker_flags |= MARKER_ESCAPE_ROUTE;
+			break;
+		}
+	}
+	return marker_flags;
+}
+
+const char* EncodeMarkerPathFlags (int path_flags)
+{
+	static char buffer[10];
+	char* s = buffer;
+
+	if (path_flags & WATERJUMP_)
+		*s++ = 'w';
+	if (path_flags & DM6_DOOR)
+		*s++ = '6';
+	if (path_flags & ROCKET_JUMP)
+		*s++ = 'r';
+	if (path_flags & JUMP_LEDGE)
+		*s++ = 'j';
+	if (path_flags & VERTICAL_PLATFORM)
+		*s++ = 'v';
+
+	*s = 0;
+	return buffer;
+}
+
+int DecodeMarkerPathFlagString (const char* s)
+{
+	size_t i = 0;
+	int path_flags = 0;
+
+	for (i = 0; i < strlen (s); ++i) {
+		switch (s[i]) {
+		case 'w':
+			path_flags |= WATERJUMP_; break;
+		case '6':
+			path_flags |= DM6_DOOR; break;
+		case 'r':
+			path_flags |= ROCKET_JUMP; break;
+		case 'j':
+			path_flags |= JUMP_LEDGE; break;
+		case 'v':
+			path_flags |= VERTICAL_PLATFORM; break;
+		}
+	}
+
+	return path_flags;
+}
+
+qbool FrogbotShowMarkerIndicators (void)
+{
+	return FrogbotOptionEnabled (FB_OPTION_SHOW_MARKERS | FB_OPTION_EDITOR_MODE);
+}
+
 gedict_t* spawn_marker(float x, float y, float z) {
 	gedict_t* marker_ = spawn();
 	marker_->s.v.classname = "marker";
@@ -25,7 +120,7 @@ gedict_t* spawn_marker(float x, float y, float z) {
 	marker_->s.v.origin[2] = pr1_rint(z);
 	marker_->s.v.solid = SOLID_TRIGGER;
 	marker_->s.v.touch = (func_t) marker_touch;
-	if ( FrogbotOptionEnabled(FB_OPTION_SHOW_MARKERS) )
+	if ( FrogbotShowMarkerIndicators() )
 		setmodel( marker_, "progs/w_g_key.mdl" );
 	VectorSet(marker_->s.v.view_ofs, 80, 80, 24);
 	setsize (marker_, -65, -65, -24, 65, 65, 32);
@@ -111,7 +206,7 @@ qbool LoadBotRoutingFromFile (void)
 			file = std_fropen ("bots/maps/%s.bot", g_globalvars.mapname);
 		}
 	}
-	
+
 	if (file == -1) {
 		return false;
 	}
@@ -149,9 +244,9 @@ qbool LoadBotRoutingFromFile (void)
 				continue;
 
 			trap_CmdArgv (1, argument, sizeof (argument));
-			goal = atoi (argument);
-			trap_CmdArgv (2, argument, sizeof (argument));
 			marker = atoi (argument);
+			trap_CmdArgv (2, argument, sizeof (argument));
+			goal = atoi (argument);
 
 			SetGoal (goal, marker);
 		}
@@ -188,7 +283,6 @@ qbool LoadBotRoutingFromFile (void)
 		else if (streq (argument, "SetMarkerPathFlags")) {
 			// SetMarkerPathFlags %d %d %s
 			int source_marker, path_number, path_flags;
-			size_t i;
 
 			if (trap_CmdArgc () != 4)
 				continue;
@@ -198,28 +292,13 @@ qbool LoadBotRoutingFromFile (void)
 			trap_CmdArgv (2, argument, sizeof (argument));
 			path_number = atoi (argument);
 			trap_CmdArgv (3, argument, sizeof (argument));
-			path_flags = 0;
-			for (i = 0; i < strlen (argument); ++i) {
-				switch (argument[i]) {
-				case 'w':
-					path_flags |= WATERJUMP_; break;
-				case '6':
-					path_flags |= DM6_DOOR; break;
-				case 'r':
-					path_flags |= ROCKET_JUMP; break;
-				case 'j':
-					path_flags |= JUMP_LEDGE; break;
-				case 'v':
-					path_flags |= VERTICAL_PLATFORM; break;
-				}
-			}
+			path_flags = DecodeMarkerPathFlagString(argument);
 
 			SetMarkerPathFlags (source_marker, path_number, path_flags);
 		}
 		else if (streq (argument, "SetMarkerFlag")) {
 			// SetMarkerFlag %d %s
 			int source_marker, marker_flags;
-			size_t i;
 
 			if (trap_CmdArgc () != 3)
 				continue;
@@ -227,23 +306,7 @@ qbool LoadBotRoutingFromFile (void)
 			trap_CmdArgv (1, argument, sizeof (argument));
 			source_marker = atoi (argument);
 			trap_CmdArgv (2, argument, sizeof (argument));
-			marker_flags = 0;
-			for (i = 0; i < strlen (argument); ++i) {
-				switch (argument[i]) {
-				case 'u':
-					marker_flags |= UNREACHABLE;
-					break;
-				case '6':
-					marker_flags |= MARKER_IS_DM6_DOOR;
-					break;
-				case 't':
-					marker_flags |= MARKER_DOOR_TOUCHABLE;
-					break;
-				case 'e':
-					marker_flags |= MARKER_ESCAPE_ROUTE;
-					break;
-				}
-			}
+			marker_flags = DecodeMarkerFlagString(argument);
 
 			SetMarkerFlag (source_marker, marker_flags);
 		}

@@ -6,6 +6,8 @@
 // FIXME: globals, this is just setting
 void DM6SelectWeaponToOpenDoor (gedict_t* self);
 
+// FIXME: This is just stopping quad damage rocket shot, always replacing with shotgun
+// Can do far better than this
 static qbool TP_CouldDamageTeammate (gedict_t* self)
 {
 	if ((int)self->s.v.items & IT_QUAD) {
@@ -473,6 +475,8 @@ static qbool BotShouldDischarge (void)
 
 static int DesiredWeapon(void) {
 	int items_ = self->s.v.items;
+	qbool has_rl = self->s.v.ammo_rockets && (items_ & IT_ROCKET_LAUNCHER);
+	qbool has_lg = self->s.v.ammo_cells && (items_ & IT_LIGHTNING);
 	qbool shaft_available = false;
 	qbool avoid_rockets = false;
 
@@ -481,19 +485,17 @@ static int DesiredWeapon(void) {
 
 	// When to always use RL
 	if (self->fb.skill.rl_preference >= g_random() || fb_lg_disabled()) {
-		if (items_ & IT_ROCKET_LAUNCHER) {
-			if (self->s.v.ammo_rockets) {
-				if (RocketSafe()) {
-					return IT_ROCKET_LAUNCHER;
-				}
-				avoid_rockets = true;
+		if (has_rl) {
+			if (RocketSafe()) {
+				return IT_ROCKET_LAUNCHER;
 			}
+			avoid_rockets = true;
 		}
 	}
 
 	if (self->fb.skill.lg_preference >= g_random() && !fb_lg_disabled()) {
 		if ((self->s.v.waterlevel <= 1) || ((int)self->s.v.items & IT_INVULNERABILITY)) {
-			if ((items_ & IT_LIGHTNING) && self->s.v.ammo_cells) {
+			if (has_lg) {
 				if (self->fb.enemy_dist <= 600) {
 					return IT_LIGHTNING;
 				}
@@ -605,19 +607,18 @@ void SelectWeapon(void) {
 	}
 
 	if (self->fb.state & HURT_SELF) {
-		if ((int)self->s.v.items & IT_ROCKET_LAUNCHER) {
-			if (self->s.v.ammo_rockets) {
-				if (self->s.v.health >= 50) {
-					if (self->super_damage_finished <= g_globalvars.time) {
-						if (self->s.v.weapon != IT_ROCKET_LAUNCHER) {
-							self->fb.desired_weapon_impulse = 7;
-						}
-						return;
-					}
+		qbool has_rl = self->s.v.ammo_rockets && ((int)self->s.v.items & IT_ROCKET_LAUNCHER);
+
+		if (has_rl) {
+			if (self->s.v.health >= 50) {
+				if (self->super_damage_finished <= g_globalvars.time) {
+					self->fb.desired_weapon_impulse = 7;
+					return;
 				}
 			}
 		}
-		self->fb.state &= NOT_HURT_SELF;
+
+		self->fb.state &= ~HURT_SELF;
 	}
 
 	CheckNewWeapon( DesiredWeapon() );

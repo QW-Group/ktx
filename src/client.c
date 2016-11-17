@@ -2945,6 +2945,9 @@ void CheckLightEffects( void )
 	qbool g   = false;
 	qbool b   = false;
 
+	if (FrogbotOptionEnabled (FB_OPTION_EDITOR_MODE))
+		return;
+
 	// remove particular EF_xxx
 
 	self->s.v.effects = (int)self->s.v.effects & ~(EF_DIMLIGHT | EF_BRIGHTLIGHT | EF_BLUE | EF_RED | EF_GREEN);

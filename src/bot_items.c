@@ -12,7 +12,6 @@
 
 // Goal functions
 void item_megahealth_rot ();
-void check_marker (gedict_t* self, gedict_t* other);
 
 static void LocateDynamicItem (gedict_t* item)
 {

@@ -63,3 +63,43 @@ void std_fclose( fileHandle_t handle )
 
 	trap_FS_CloseFile( handle );
 }
+
+// Writing
+fileHandle_t std_fwopen (const char *fmt, ...)
+{
+	va_list      argptr;
+	fileHandle_t handle;
+	char         text[MAX_TXTLEN] = {0};
+
+	va_start( argptr, fmt );
+	Q_vsnprintf( text, sizeof(text), fmt, argptr );
+	va_end( argptr );
+
+	text[sizeof(text)-1] = 0;
+
+	if ( trap_FS_OpenFile( text, &handle, FS_WRITE_BIN ) < 0 )
+	{
+		//G_bprint( 2, "Failed to open file: %s\n", text );
+		return -1;
+	}
+
+	//G_bprint( 2, "Succesfully opened file: %s\n", text );
+	return handle;
+}
+
+void std_fprintf( fileHandle_t handle, const char *fmt, ... )
+{
+	va_list argptr;
+	char	text[MAX_TXTLEN] = {0};
+
+	if ( handle < 0 )
+		return;
+
+	va_start( argptr, fmt );
+	Q_vsnprintf( text, sizeof(text), fmt, argptr );
+	va_end( argptr );
+
+	text[sizeof(text)-1] = 0;
+
+	trap_FS_WriteFile( text, strlen(text), handle );
+}

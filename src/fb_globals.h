@@ -6,6 +6,7 @@
 #define PATH_SCORE_NULL -1000000
 
 #define FB_OPTION_SHOW_MARKERS 1
+#define FB_OPTION_EDITOR_MODE  2
 
 typedef void (*fb_spawn_func_t)(gedict_t* ent);
 
@@ -139,7 +140,6 @@ extern gedict_t* dropper;
 #define CHASE_ENEMY 2048
 #define RUNAWAY 4096
 #define WAIT 8192
-#define NOT_HURT_SELF (~HURT_SELF)
 #define NOT_NOTARGET_ENEMY ~(NOTARGET_ENEMY)
 #define NOT_AWARE_SURROUNDINGS ~(AWARE_SURROUNDINGS)
 
@@ -180,6 +180,7 @@ unsigned long ClientFlag (gedict_t* client);
 
 // marker_util.qc
 void marker_touch (void);
+void check_marker (gedict_t* self, gedict_t* other);
 void BecomeMarker (gedict_t* marker);
 
 // route_calc.qc
@@ -260,6 +261,9 @@ void SetMarkerPathFlags (int marker_number, int path_index, int flags);
 void SetMarkerPath (int source_marker, int path_index, int next_marker);
 void SetMarkerViewOffset (int marker, float zOffset);
 
+#define FROGBOT_PATH_FLAG_OPTIONS "w6rjv"
+#define FROGBOT_MARKER_FLAG_OPTIONS "u6te"
+
 // added for ktx
 qbool fb_lg_disabled (void);
 //void StartItems(void);
@@ -330,6 +334,7 @@ void PathScoringLogic (
 
 int BotVersionNumber (void);
 qbool FrogbotOptionEnabled (int option);
+qbool FrogbotShowMarkerIndicators (void);
 
 void SetDirectionMove (gedict_t* self, vec3_t dir_move, const char* explanation);
 
@@ -337,6 +342,7 @@ void BotEventPlatformHitTop (gedict_t* self);
 void BotEventPlatformHitBottom (gedict_t* self);
 void BotEventDoorHitTop (gedict_t* self);
 void BotEventDoorHitBottom (gedict_t* self);
+void BotPlatformTouched (gedict_t* platform, gedict_t* player);
 
 void BotsBackpackTouchedNonPlayer (gedict_t* backpack, gedict_t* entity);
 void BotsMatchStart (void);

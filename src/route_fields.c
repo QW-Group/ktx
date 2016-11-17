@@ -92,6 +92,9 @@ void RemoveMarker (gedict_t* marker)
 	}
 
 	for (i = 0; i < NUMBER_MARKERS; ++i) {
+		if (!markers[i])
+			continue;
+
 		// Remove from linked paths
 		for (j = 0; j < NUMBER_PATHS; ++j) {
 			if (markers[i]->fb.paths[j].next_marker == marker) {
@@ -101,8 +104,8 @@ void RemoveMarker (gedict_t* marker)
 
 		// Remove marker
 		if (markers[i] == marker) {
-			markers[i] = NULL;
 			ent_remove (markers[i]);
+			markers[i] = NULL;
 		}
 	}
 }
@@ -123,6 +126,11 @@ void CreateNewMarker (void)
 	AddToQue (new_marker);
 }
 
+void MoveMarker (gedict_t* selected, vec3_t move_to)
+{
+	//selected->
+}
+
 qbool CreateNewPath (gedict_t* current, gedict_t* next)
 {
 	int i;
@@ -140,3 +148,39 @@ qbool CreateNewPath (gedict_t* current, gedict_t* next)
 	return false;
 }
 
+void RemovePath (gedict_t* source, int path_number)
+{
+	if (path_number < 0 || path_number >= NUMBER_PATHS)
+		return;
+
+	source->fb.paths[path_number].flags = 0;
+	source->fb.paths[path_number].next_marker = NULL;
+	source->fb.paths[path_number].time = 0;
+}
+
+int AddPath (gedict_t* source, gedict_t* next)
+{
+	int i = 0;
+	int place = -1;
+	qbool found = false;
+
+	if (source == NULL || next == NULL || source == next) {
+		return -1;
+	}
+
+	for (i = 0; i < NUMBER_PATHS; ++i) {
+		if (source->fb.paths[i].next_marker == next) {
+			return i;
+		}
+		if (place < 0 && source->fb.paths[i].next_marker == NULL) {
+			place = i;
+		}
+	}
+
+	if (place >= 0) {
+		source->fb.paths[place].next_marker = next;
+		source->fb.paths[place].flags = 0;
+		source->fb.paths[place].time = 0;
+	}
+	return place;
+}

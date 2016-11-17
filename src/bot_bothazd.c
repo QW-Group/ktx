@@ -98,8 +98,11 @@ static void ExplodeAlert(vec3_t org, float next_time) {
 
 				for (tele = world; tele = ez_find (tele, "trigger_teleport"); ) {
 					// If this teleport takes us to the marker close to the grenade, set arrow_time
-					if (tele->s.v.enemy == NUM_FOR_EDICT(marker)) {
-						tele->fb.arrow_time = max (tele->fb.arrow_time, next_time);
+					if (!strnull (tele->s.v.target)) {
+						gedict_t* target = find (world, FOFS (s.v.targetname), tele->s.v.target);
+						if (target == marker) {
+							tele->fb.arrow_time = max (tele->fb.arrow_time, next_time);
+						}
 					}
 				}
 			}

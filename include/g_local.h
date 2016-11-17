@@ -997,9 +997,11 @@ void InitParameters();
 
 // files
 fileHandle_t std_fropen (const char *fmt, ...);
+fileHandle_t std_fwopen (const char *fmt, ...);
 int std_fgetc (fileHandle_t handle);
 char *std_fgets (fileHandle_t handle, char *buf, int limit);
 void std_fclose (fileHandle_t handle);
+void std_fprintf (fileHandle_t handle, const char *fmt, ...);
 
 // teamplay
 void TeamplayEventItemTaken (gedict_t* client, gedict_t* item);

@@ -14,6 +14,7 @@ void Bot_Print_Thinking (void);
 static void PeriodicAllClientLogic (void);
 static void BotStopFiring (gedict_t* bot);
 void BotsFireLogic (void);
+void FrogbotEditorMarkerTouched (gedict_t* marker);
 
 static void SetNextThinkTime(gedict_t* ent) {
 	ent->fb.frogbot_nextthink += 0.15 + (0.015 * g_random());
@@ -214,6 +215,10 @@ static void BotTouchMarkerLogic() {
 static void HumanTouchMarkerLogic(void) {
 	if (PAST(enemy_time)) {
 		BotsPickBestEnemy(self);
+	}
+
+	if (FrogbotOptionEnabled (FB_OPTION_EDITOR_MODE)) {
+		FrogbotEditorMarkerTouched (self->fb.touch_marker);
 	}
 }
 
