@@ -15,17 +15,17 @@ gedict_t* SubZoneNextPathMarker (gedict_t* from_marker, gedict_t* to_marker)
 
 gedict_t* SightFromMarkerFunction (gedict_t* from_marker, gedict_t* to_marker)
 {
-	return (to_marker && from_marker ? to_marker->fb.zones[from_marker->fb.Z_].sight_from : NULL);
+	return (to_marker && from_marker && from_marker->fb.Z_ ? to_marker->fb.zones[from_marker->fb.Z_ - 1].sight_from : NULL);
 }
 
 gedict_t* HigherSightFromFunction (gedict_t* from_marker, gedict_t* to_marker)
 {
-	return (to_marker && from_marker ? to_marker->fb.zones[from_marker->fb.Z_].higher_sight_from : NULL);
+	return (to_marker && from_marker && from_marker->fb.Z_ ? to_marker->fb.zones[from_marker->fb.Z_ - 1].higher_sight_from : NULL);
 }
 
 float SightFromTime (gedict_t* from_marker, gedict_t* to_marker)
 {
-	return to_marker && from_marker ? to_marker->fb.zones[from_marker->fb.Z_].sight_from_time : 0.0f;
+	return to_marker && from_marker && from_marker->fb.Z_ ? to_marker->fb.zones[from_marker->fb.Z_ - 1].sight_from_time : 0.0f;
 }
 
 void ZoneMarker (gedict_t* from_marker, gedict_t* to_marker, qbool path_normal)
@@ -35,22 +35,25 @@ void ZoneMarker (gedict_t* from_marker, gedict_t* to_marker, qbool path_normal)
 		zone_time = 1000000;
 	}
 
+	if (!to_marker->fb.Z_)
+		return;
+
 	if (path_normal) {
-		middle_marker = from_marker->fb.zones[to_marker->fb.Z_].marker;
-		zone_time = from_marker->fb.zones[to_marker->fb.Z_].time;
+		middle_marker = from_marker->fb.zones[to_marker->fb.Z_ - 1].marker;
+		zone_time = from_marker->fb.zones[to_marker->fb.Z_ - 1].time;
 	}
 	else {
-		middle_marker = from_marker->fb.zones[to_marker->fb.Z_].reverse_marker;
-		zone_time = from_marker->fb.zones[to_marker->fb.Z_].reverse_time;
+		middle_marker = from_marker->fb.zones[to_marker->fb.Z_ - 1].reverse_marker;
+		zone_time = from_marker->fb.zones[to_marker->fb.Z_ - 1].reverse_time;
 	}
 }
 
 gedict_t* ZonePathMarker (gedict_t* from_marker, gedict_t* to_marker, qbool path_normal)
 {
-	if (from_marker == NULL || to_marker == NULL)
+	if (from_marker == NULL || to_marker == NULL || to_marker->fb.Z_ == 0)
 		return NULL;
 
-	return path_normal ? from_marker->fb.zones[to_marker->fb.Z_].next : from_marker->fb.zones[to_marker->fb.Z_].reverse_next;
+	return path_normal ? from_marker->fb.zones[to_marker->fb.Z_ - 1].next : from_marker->fb.zones[to_marker->fb.Z_ - 1].reverse_next;
 }
 
 // This is called when the standard highersight calculation has failed

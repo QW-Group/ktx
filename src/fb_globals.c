@@ -233,12 +233,15 @@ qbool EnemyDefenceless(gedict_t* self)
 
 gedict_t* FirstZoneMarker (int zone)
 {
-	return zone_head[zone];
+	return zone_head[zone - 1];
 }
 
 void AddZoneMarker (gedict_t* marker)
 {
-	int zone = marker->fb.Z_;
+	int zone = marker->fb.Z_ - 1;
+	if (zone < 0 || zone >= NUMBER_ZONES) {
+		return;
+	}
 
 	if (zone_tail[zone]) {
 		zone_tail[zone]->fb.Z_next = marker;

@@ -302,7 +302,7 @@ static void CustomiseFrogbotMap (void)
 			StartItemFB (quad);
 
 			// Quad is in same zone as nearest marker, and linked by the first path that's valid
-			SetZone (nearest_marker->fb.Z_ + 1, quad->fb.index + 1);
+			SetZone (nearest_marker->fb.Z_, quad->fb.index + 1);
 			SetGoalForMarker (20, quad);
 			for (i = 0; i < NUMBER_PATHS; ++i) {
 				if (nearest_marker->fb.paths[i].next_marker == 0) {

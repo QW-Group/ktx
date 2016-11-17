@@ -168,7 +168,7 @@ static qbool Calc_G_time_6_path_apply(gedict_t* m, gedict_t* m_P, float P_time, 
 }
 
 static int CheckReversible(gedict_t* m, gedict_t* from_marker) {
-	gedict_t* next_marker = from_marker->fb.zones[m->fb.Z_].next_zone;
+	gedict_t* next_marker = from_marker->fb.zones[m->fb.Z_ - 1].next_zone;
 	if (next_marker != NULL && next_marker->fb.Z_ == m->fb.Z_) {
 		return REVERSIBLE;
 	}

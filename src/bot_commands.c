@@ -439,7 +439,7 @@ static void BotFileGenerate (void)
 			if (markers[i]->fb.G_) {
 				std_fprintf (file, "SetGoal %d %d\n", markers[i]->fb.index + 1, markers[i]->fb.G_ + 1);
 			}
-			std_fprintf (file, "SetZone %d %d\n", markers[i]->fb.index + 1, markers[i]->fb.Z_ + 1);
+			std_fprintf (file, "SetZone %d %d\n", markers[i]->fb.index + 1, markers[i]->fb.Z_);
 			if (markers[i]->fb.T) {
 				std_fprintf (file, "SetMarkerFlag %d %d\n", markers[i]->fb.index + 1, EncodeMarkerFlags (markers[i]->fb.T));
 			}
@@ -711,17 +711,17 @@ static void FrogbotEditorCommand (void)
 			return;
 		}
 
-		zone = (nearest->fb.Z_ + 1) % NUMBER_ZONES;
+		zone = bound (1, nearest->fb.Z_, NUMBER_ZONES);
 		if (trap_CmdArgc () >= 3) {
 			trap_CmdArgv (2, sub_command, sizeof (sub_command));
 
 			if (atoi (sub_command) != 0) {
-				zone = (atoi (sub_command) - 1) % NUMBER_ZONES;
+				zone = bound (1, atoi (sub_command), NUMBER_ZONES);
 			}
 		}
 
-		nearest->fb.Z_ = bound(0, zone, NUMBER_ZONES - 1);
-		G_sprint (self, PRINT_HIGH, "Marker #%d now has zone %d\n", nearest->fb.index + 1, nearest->fb.Z_ + 1);
+		nearest->fb.Z_ = zone;
+		G_sprint (self, PRINT_HIGH, "Marker #%d now has zone %d\n", nearest->fb.index + 1, nearest->fb.Z_);
 	}
 	else if (streq (sub_command, "togglepathflag")) {
 		gedict_t* nearest = LocateMarker (self->s.v.origin);

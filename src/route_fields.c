@@ -51,7 +51,7 @@ void SetZone(int zone, int marker_number) {
 
 	marker->fb.S_ = subzone_indexes[zone]++;
 	z->marker = z->reverse_marker = z->next_zone = z->next = z->reverse_next = marker;
-	marker->fb.Z_ = zone;
+	marker->fb.Z_ = zone + 1;
 
 	AddZoneMarker (marker);
 }
