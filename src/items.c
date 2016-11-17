@@ -605,6 +605,9 @@ void DoWeaponChange( int new, qbool backpack )
 {
 	int w_switch = iKey( self, backpack ? "b_switch" : "w_switch" );
 
+	if (self->isBot)
+		return;
+
 	if ( !w_switch )
 		w_switch = 8;
 

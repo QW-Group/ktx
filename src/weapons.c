@@ -1686,6 +1686,9 @@ float W_BestWeapon()
 	int   it = self->s.v.items;
 	char* w_rank = ezinfokey( self, "w_rank" );
 
+	if (self->isBot)
+		return;
+
 	if ( ! strnull(w_rank) )
 	{
 		while (*w_rank)
