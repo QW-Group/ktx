@@ -21,21 +21,27 @@ typedef struct fb_mapping_s {
 fb_spawn_t* ItemSpawnFunction (int i);
 
 static fb_mapping_t maps[] = {
-	{ "dm6", map_dm6 },
-	{ "dm4", map_dm4 },
-	{ "e1m2", map_e1m2 },
 	{ "aerowalk", map_aerowalk },
-	{ "ztndm3", map_ztndm3 },
-	{ "dm3", map_dm3 },
-	{ "spinev2", map_spinev2 },
-	{ "pkeg1", map_pkeg1 },
-	{ "ultrav", map_ultrav },
-	{ "frobodm2", map_frobodm2 },
 	{ "amphi2", map_amphi2 },
+	{ "dm3", map_dm3 },
+	{ "dm4", map_dm4 },
+	{ "dm6", map_dm6 },
+	{ "e1m2", map_e1m2 },
+	{ "frobodm2", map_frobodm2 },
+	{ "pkeg1", map_pkeg1 },
 	{ "povdmm4", map_povdmm4 },
+	{ "spinev2", map_spinev2 },
 	{ "ukooldm2", map_ukooldm2 },
+	{ "ukooldm3", map_ukooldm3 },
+	{ "ukooldm6", map_ukooldm6 },
+	{ "ukooldm8", map_ukooldm8 },
+	{ "ultrav", map_ultrav },
+	{ "ztndm1", map_ztndm1 },
+	{ "ztndm2", map_ztndm2 },
+	{ "ztndm3", map_ztndm3 },
 	{ "ztndm4", map_ztndm4 },
 	{ "ztndm5", map_ztndm5 },
+	{ "ztndm6", map_ztndm6 },
 };
 
 void InvalidMap() {

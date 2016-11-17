@@ -283,10 +283,16 @@ void map_pkeg1 (void);
 void map_povdmm4 (void);
 void map_spinev2 (void);
 void map_ukooldm2 (void);
+void map_ukooldm3 (void);
+void map_ukooldm6 (void);
+void map_ukooldm8 (void);
 void map_ultrav (void);
+void map_ztndm1 (void);
+void map_ztndm2 (void);
 void map_ztndm3 (void);
 void map_ztndm4 (void);
 void map_ztndm5 (void);
+void map_ztndm6 (void);
 
 // 
 float pr1_rint (float f);
