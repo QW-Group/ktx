@@ -24,6 +24,8 @@ const char* EncodeMarkerFlags (int marker_flags)
 		*s++ = 'u';
 	if (marker_flags & MARKER_IS_DM6_DOOR)
 		*s++ = '6';
+	if (marker_flags & MARKER_BLOCKED_ON_STATE_TOP)
+		*s++ = 'b';
 	if (marker_flags & MARKER_DOOR_TOUCHABLE)
 		*s++ = 't';
 	if (marker_flags & MARKER_ESCAPE_ROUTE)
@@ -50,6 +52,9 @@ int DecodeMarkerFlagString (const char* s)
 			break;
 		case 'f':
 			marker_flags |= MARKER_FIRE_ON_MATCH_START;
+			break;
+		case 'b':
+			marker_flags |= MARKER_BLOCKED_ON_STATE_TOP;
 			break;
 		case 't':
 			marker_flags |= MARKER_DOOR_TOUCHABLE;

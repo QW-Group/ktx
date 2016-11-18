@@ -20,6 +20,8 @@ gedict_t* BotsFirstBot (void);
 #define EDITOR_UNIDIRECTIONAL_COLOUR EF_RED
 #define EDITOR_SELECTED_NODE         EF_GREEN
 
+#define PASSINTVEC3(x) ((int)x[0]),((int)x[1]),((int)x[2])
+
 static qbool marker_time;
 static float next_marker_time;
 static qbool hazard_time;
@@ -425,29 +427,31 @@ static void BotFileGenerate (void)
 
 	for (i = 0; i < NUMBER_MARKERS; ++i) {
 		if (markers[i] && streq (markers[i]->s.v.classname, "marker")) {
-			std_fprintf (file, "CreateMarker %.3f %.3f %.3f\n", PASSVEC3(markers[i]->s.v.origin));
-			if (markers[i]->s.v.view_ofs[2]) {
-				std_fprintf (file, "SetMarkerViewOffset %d %f\n", markers[i]->fb.index + 1, markers[i]->s.v.view_ofs[2]);
+			std_fprintf (file, "CreateMarker %d %d %d\n", PASSINTVEC3(markers[i]->s.v.origin));
+			if (markers[i]->s.v.view_ofs[2] && markers[i]->s.v.view_ofs[2] != 24) {
+				std_fprintf (file, "SetMarkerViewOffset %d %d\n", markers[i]->fb.index + 1, (int)markers[i]->s.v.view_ofs[2]);
 			}
 		}
 	}
 
 	for (i = 0; i < NUMBER_MARKERS; ++i) {
-		if (markers[i]) {
+		if (markers[i] && ! (markers[i]->fb.T & MARKER_DYNAMICALLY_ADDED)) {
 			int p;
 
 			if (markers[i]->fb.G_) {
-				std_fprintf (file, "SetGoal %d %d\n", markers[i]->fb.index + 1, markers[i]->fb.G_ + 1);
+				std_fprintf (file, "SetGoal %d %d\n", markers[i]->fb.index + 1, markers[i]->fb.G_);
 			}
-			std_fprintf (file, "SetZone %d %d\n", markers[i]->fb.index + 1, markers[i]->fb.Z_);
-			if (markers[i]->fb.T) {
-				std_fprintf (file, "SetMarkerFlag %d %d\n", markers[i]->fb.index + 1, EncodeMarkerFlags (markers[i]->fb.T));
+			if (markers[i]->fb.Z_) {
+				std_fprintf (file, "SetZone %d %d\n", markers[i]->fb.index + 1, markers[i]->fb.Z_);
+			}
+			if (markers[i]->fb.T & EXTERNAL_MARKER_FLAGS) {
+				std_fprintf (file, "SetMarkerFlag %d %s\n", markers[i]->fb.index + 1, EncodeMarkerFlags (markers[i]->fb.T & EXTERNAL_MARKER_FLAGS));
 			}
 			for (p = 0; p < NUMBER_PATHS; ++p) {
-				if (markers[i]->fb.paths[p].next_marker) {
-					std_fprintf (file, "SetMarkerPath %d %d %d\n", markers[i]->fb.index + 1, p + 1, markers[i]->fb.paths[p].next_marker->fb.index);
-					if (markers[i]->fb.paths[p].flags) {
-						std_fprintf (file, "SetMarkerPathFlags %d %d %s\n", markers[i]->fb.index + 1, p + 1, EncodeMarkerPathFlags (markers[i]->fb.paths[p].flags));
+				if (markers[i]->fb.paths[p].next_marker && ! (markers[i]->fb.paths[p].next_marker->fb.T & MARKER_DYNAMICALLY_ADDED)) {
+					std_fprintf (file, "SetMarkerPath %d %d %d\n", markers[i]->fb.index + 1, p, markers[i]->fb.paths[p].next_marker->fb.index + 1);
+					if (markers[i]->fb.paths[p].flags & EXTERNAL_MARKER_PATH_FLAGS) {
+						std_fprintf (file, "SetMarkerPathFlags %d %d %s\n", markers[i]->fb.index + 1, p, EncodeMarkerPathFlags (markers[i]->fb.paths[p].flags & EXTERNAL_MARKER_PATH_FLAGS));
 					}
 				}
 			}

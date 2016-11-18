@@ -124,14 +124,15 @@ extern gedict_t* dropper;
 #define BOTFLAG_UNREACHABLE 1
 
 // Marker flags
-#define UNREACHABLE 1
-#define T_WATER 2
-#define T_NO_AIR 4
-#define MARKER_IS_DM6_DOOR 8
-#define MARKER_BLOCKED_ON_STATE_TOP 16
-#define MARKER_FIRE_ON_MATCH_START 32
-#define MARKER_DOOR_TOUCHABLE 64
-#define MARKER_ESCAPE_ROUTE 128
+#define UNREACHABLE 1                         // Typically set for markers that are lava, waterlevel 3?  (automate?)
+#define T_WATER 2                             // Set by server if the marker is in liquid
+#define T_NO_AIR 4                            // Set by server (means the bot would be trapped underwater - dm3 tunnel for instance)
+#define MARKER_IS_DM6_DOOR 8                  // Should only be set for DM6 door to LG at the moment (logic needs generalised to all shootable doors)
+#define MARKER_BLOCKED_ON_STATE_TOP 16        // If set, door is considered 'closed' when STATE_TOP.
+#define MARKER_FIRE_ON_MATCH_START 32         // Used to automatically fire triggers (open secret doors etc).  Ignored if no bots spawned.
+#define MARKER_DOOR_TOUCHABLE 64              // If set, door will spawn a touchable marker.  If not set, door shouldn't be in bot path definitions
+#define MARKER_ESCAPE_ROUTE 128               // (not currently implemented) bot should head towards marker when in lava or slime (think amphi2/end)
+#define MARKER_DYNAMICALLY_ADDED 256          // Added dynamically by server.  Do not include in .bot file generation
 
 // Bot flags
 #define NOTARGET_ENEMY 32
@@ -367,5 +368,7 @@ void SetMarker (gedict_t* client, gedict_t* marker);
 // debugging
 void RunRandomTrials (float min, float max, float mult);
 
+#define EXTERNAL_MARKER_PATH_FLAGS (WATERJUMP_ | DM6_DOOR | ROCKET_JUMP | JUMP_LEDGE | VERTICAL_PLATFORM)
+#define EXTERNAL_MARKER_FLAGS (UNREACHABLE | MARKER_IS_DM6_DOOR | MARKER_FIRE_ON_MATCH_START | MARKER_DOOR_TOUCHABLE | MARKER_ESCAPE_ROUTE)
 
 #endif // ifdef(FB_GLOBALS_H)

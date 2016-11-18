@@ -297,14 +297,17 @@ void UpdateGoal(gedict_t* self) {
 		G_bprint_debug (2, "After enemy-logic:  best_goal %s, best_score %f\n", self->fb.best_goal2 ? self->fb.best_goal2->s.v.classname : "(none)", self->fb.best_score2);
 
 		for (i = 0; i < NUMBER_GOALS; ++i) {
-			if (self->fb.touch_marker->fb.goals[i].next_marker)
+			gedict_t* next = self->fb.touch_marker->fb.goals[i].next_marker;
+			if (next && next != world && next != dropper) {
 				EvalGoal2 (self->fb.touch_marker->fb.goals[i].next_marker->fb.virtual_goal, self->fb.best_goal->fb.touch_marker);
+			}
 		}
 		G_bprint_debug (2, "After EvalGoal2:  best_goal %s, best_score %f\n", self->fb.best_goal2 ? self->fb.best_goal2->s.v.classname : "(none)", self->fb.best_score2);
 
 		for (goal_entity = world; goal_entity = ez_find(goal_entity, BACKPACK_CLASSNAME); ) {
-			if (goal_entity->fb.touch_marker)
+			if (goal_entity->fb.touch_marker) {
 				EvalGoal2 (goal_entity, self->fb.best_goal->fb.touch_marker);
+			}
 		}
 		G_bprint_debug (2, "After EvalGoal2-BP:  best_goal %s, best_score %f\n", self->fb.best_goal2 ? self->fb.best_goal2->s.v.classname : "(none)", self->fb.best_score2);
 

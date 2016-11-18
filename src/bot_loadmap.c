@@ -306,6 +306,7 @@ static void CustomiseFrogbotMap (void)
 			int i = 0;
 
 			StartItemFB (quad);
+			quad->fb.T |= MARKER_DYNAMICALLY_ADDED;
 
 			// Quad is in same zone as nearest marker, and linked by the first path that's valid
 			SetZone (nearest_marker->fb.Z_, quad->fb.index + 1);
@@ -366,14 +367,14 @@ static void CustomiseFrogbotMap (void)
 	}
 
 	// Link all teleporters
-	for (ent = world; ent = ez_find (ent, "trigger_teleport"); ) {
-		// If this teleport takes us to the marker close to the grenade, set arrow_time
-		if (!strnull (ent->s.v.target)) {
-			gedict_t* target = find (world, FOFS (s.v.targetname), ent->s.v.target);
+	if (FrogbotOptionEnabled (FB_OPTION_EDITOR_MODE)) {
+		for (ent = world; ent = ez_find (ent, "trigger_teleport"); ) {
+			// If this teleport takes us to the marker close to the grenade, set arrow_time
+			if (!strnull (ent->s.v.target)) {
+				gedict_t* target = find (world, FOFS (s.v.targetname), ent->s.v.target);
 
-			G_bprint (PRINT_HIGH, "Linking teleport to %s\n", ent->s.v.target);
-
-			AddPath (ent, target);
+				AddPath (ent, target);
+			}
 		}
 	}
 }
