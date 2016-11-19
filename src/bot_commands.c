@@ -2,6 +2,8 @@
 #include "g_local.h"
 #include "fb_globals.h"
 
+// Handles all "botcmd x" commands from the user
+
 void SetAttribs (gedict_t* self);
 void Bot_Print_Thinking (void);
 void BotsFireInitialTriggers (gedict_t* client);
@@ -21,6 +23,10 @@ gedict_t* BotsFirstBot (void);
 #define EDITOR_SELECTED_NODE         EF_GREEN
 
 #define PASSINTVEC3(x) ((int)x[0]),((int)x[1]),((int)x[2])
+
+// If the marker/path flag isn't set here, won't be included in .bot file
+#define EXTERNAL_MARKER_PATH_FLAGS (WATERJUMP_ | DM6_DOOR | ROCKET_JUMP | JUMP_LEDGE | VERTICAL_PLATFORM)
+#define EXTERNAL_MARKER_FLAGS (UNREACHABLE | MARKER_IS_DM6_DOOR | MARKER_FIRE_ON_MATCH_START | MARKER_DOOR_TOUCHABLE | MARKER_ESCAPE_ROUTE)
 
 static qbool marker_time;
 static float next_marker_time;
@@ -84,6 +90,7 @@ static int CountTeamMembers (const char* teamName)
 	return count;
 }
 
+// FIXME: Autoteams vs manual...
 static void FrogbotsAddbot(void) {
 	int i = 0;
 
@@ -97,7 +104,6 @@ static void FrogbotsAddbot(void) {
 			int entity = 0;
 			int topColor = 0;
 			int bottomColor = 0;
-			// FIXME: Autoteams vs manual...
 			int red = CountTeamMembers ("red");
 			int blue = CountTeamMembers ("blue");
 			qbool red_team = red < blue || (red == blue && g_random () < 0.5);
@@ -105,14 +111,18 @@ static void FrogbotsAddbot(void) {
 
 			if (teamplay) {
 				int teamCount = (int)CountTeams ();
+				char* botName = SetTeamNetName (i, teamName);
 
-				strlcpy (bots[i].name, SetTeamNetName (i, teamName), sizeof(bots[i].name));
+				strlcpy (bots[i].name, botName, sizeof(bots[i].name));
 
 				// Pick team
-				topColor = bottomColor = 4;
+				topColor = bottomColor = (red_team ? 4 : 13);
 			}
 			else {
 				strlcpy (bots[i].name, SetNetName(i), sizeof(bots[i].name));
+
+				topColor = i_rnd (0, 13);
+				bottomColor = i_rnd (0, 13);
 			}
 			entity = trap_AddBot(bots[i].name, topColor, bottomColor, "base");
 
@@ -127,9 +137,9 @@ static void FrogbotsAddbot(void) {
 			g_edicts[entity].fb.last_cmd_sent = g_globalvars.time;
 			g_edicts[entity].fb.skill.skill_level = FrogbotSkillLevel();
 			g_edicts[entity].fb.botnumber = i;
-			trap_SetBotUserInfo (entity, "team", teamName);
+			trap_SetBotUserInfo (entity, "team", teamName, 0);
 			SetAttribs (&g_edicts[entity]);
-			trap_SetBotUserInfo (entity, "k_nick", bots[i].name);
+			trap_SetBotUserInfo (entity, "k_nick", bots[i].name, 0);
 			return;
 		}
 	}
@@ -551,290 +561,378 @@ void FrogbotEditorMarkerTouched (gedict_t* marker)
 	last_touched_marker = marker;
 }
 
-static void FrogbotEditorCommand (void)
+static void FrogbotAddMarker (void)
 {
-	char sub_command[64];
+	vec3_t pos, nearest_pos;
+	gedict_t* nearest = LocateMarker (self->s.v.origin);
+	gedict_t* spawn = NULL;
 
-	if (! FrogbotOptionEnabled(FB_OPTION_EDITOR_MODE)) {
-		G_sprint (self, PRINT_HIGH, "Route editing disabled by server\n");
-		return;
-	}
-
-	if (match_in_progress) {
-		G_sprint (self, PRINT_HIGH, "Routing editing not available while match in progress");
-		return;
-	}
-	if (CountBots ()) {
-		G_sprint (self, PRINT_HIGH, "Remove all bots before entering route editing mode");
-		return;
-	}
-
-	trap_CmdArgv (1, sub_command, sizeof (sub_command));
-
-	if (streq (sub_command, "addmarker")) {
-		vec3_t pos, nearest_pos;
-		gedict_t* nearest = LocateMarker (self->s.v.origin);
-		gedict_t* spawn = NULL;
-
-		if (nearest) {
-			VectorAdd (self->s.v.origin, self->s.v.view_ofs, pos);
-			VectorAdd (nearest->s.v.origin, nearest->s.v.view_ofs, nearest_pos);
-			if (VectorDistance (nearest_pos, pos) < 30) {
-				G_sprint (self, PRINT_HIGH, "Too close to marker #%d [%s]\n", nearest->fb.index + 1, nearest->s.v.classname);
-				return;
-			}
-		}
-
-		spawn = CreateMarker (PASSVEC3 (self->s.v.origin));
-		G_sprint (self, PRINT_HIGH, "Created marker #%d\n", spawn->fb.index + 1);
-	}
-	else if (streq (sub_command, "removemarker")) {
-		gedict_t* nearest = LocateMarker (self->s.v.origin);
-
-		if (!streq (nearest->s.v.classname, "marker")) {
-			G_sprint (self, PRINT_HIGH, "Cannot remove non-manual markers\n");
+	if (nearest) {
+		VectorAdd (self->s.v.origin, self->s.v.view_ofs, pos);
+		VectorAdd (nearest->s.v.origin, nearest->s.v.view_ofs, nearest_pos);
+		if (VectorDistance (nearest_pos, pos) < 30) {
+			G_sprint (self, PRINT_HIGH, "Too close to marker #%d [%s]\n", nearest->fb.index + 1, nearest->s.v.classname);
 			return;
 		}
-
-		if (saved_marker == nearest) {
-			DeselectMarker (nearest);
-			saved_marker = NULL;
-		}
-		RemoveMarker (nearest);
 	}
-	else if (streq (sub_command, "savemarker")) {
-		if (saved_marker == NULL) {
-			gedict_t* nearest = LocateMarker (self->s.v.origin);
 
-			if (nearest != NULL) {
-				if (last_touched_marker) {
-					DeselectMarker (last_touched_marker);
-				}
-				SelectMarker (saved_marker = nearest);
+	spawn = CreateMarker (PASSVEC3 (self->s.v.origin));
+	G_sprint (self, PRINT_HIGH, "Created marker #%d\n", spawn->fb.index + 1);
+}
 
-				G_sprint (self, PRINT_HIGH, "Marker #%d [%s] is saved\n", nearest->fb.index + 1, nearest->s.v.classname);
-			}
-		}
-		else {
-			DeselectMarker (saved_marker);
-			saved_marker = NULL;
+static void FrogbotRemoveMarker (void) {
+	gedict_t* nearest = LocateMarker (self->s.v.origin);
 
+	if (!streq (nearest->s.v.classname, "marker")) {
+		G_sprint (self, PRINT_HIGH, "Cannot remove non-manual markers\n");
+		return;
+	}
+
+	if (saved_marker == nearest) {
+		DeselectMarker (nearest);
+		saved_marker = NULL;
+	}
+	RemoveMarker (nearest);
+}
+
+static void FrogbotSaveMarker (void)
+{
+	if (saved_marker == NULL) {
+		gedict_t* nearest = LocateMarker (self->s.v.origin);
+
+		if (nearest != NULL) {
 			if (last_touched_marker) {
-				SelectMarker (last_touched_marker);
+				DeselectMarker (last_touched_marker);
 			}
+			SelectMarker (saved_marker = nearest);
 
-			G_sprint (self, PRINT_HIGH, "Cleared saved marker\n");
+			G_sprint (self, PRINT_HIGH, "Marker #%d [%s] is saved\n", nearest->fb.index + 1, nearest->s.v.classname);
 		}
 	}
-	else if (streq (sub_command, "addpath")) {
-		gedict_t* nearest = LocateMarker (self->s.v.origin);
-		gedict_t* nearest_indicator;
-		int source_to_target_path = FindPathIndex (saved_marker, nearest);
-		int target_to_source_path = FindPathIndex (nearest, saved_marker);
+	else {
+		DeselectMarker (saved_marker);
+		saved_marker = NULL;
 
-		if (nearest == NULL) {
-			G_sprint (self, PRINT_HIGH, "Could not locate marker nearby\n");
-			return;
+		if (last_touched_marker) {
+			SelectMarker (last_touched_marker);
 		}
 
-		if (saved_marker == NULL) {
-			G_sprint (self, PRINT_HIGH, "Save a marker before creating path\n");
-			return;
-		}
+		G_sprint (self, PRINT_HIGH, "Cleared saved marker\n");
+	}
+}
 
-		if (nearest == saved_marker) {
-			G_sprint (self, PRINT_HIGH, "Cannot link a marker to itself\n");
-			return;
-		}
+static void FrogbotAddPath (void)
+{
+	gedict_t* nearest = LocateMarker (self->s.v.origin);
+	gedict_t* nearest_indicator;
+	int source_to_target_path = FindPathIndex (saved_marker, nearest);
+	int target_to_source_path = FindPathIndex (nearest, saved_marker);
 
-		if (source_to_target_path >= 0 && target_to_source_path >= 0) {
-			RemovePath (saved_marker, source_to_target_path);
-			RemovePath (nearest, target_to_source_path);
+	if (nearest == NULL) {
+		G_sprint (self, PRINT_HIGH, "Could not locate marker nearby\n");
+		return;
+	}
 
+	if (saved_marker == NULL) {
+		G_sprint (self, PRINT_HIGH, "Save a marker before creating path\n");
+		return;
+	}
+
+	if (nearest == saved_marker) {
+		G_sprint (self, PRINT_HIGH, "Cannot link a marker to itself\n");
+		return;
+	}
+
+	if (source_to_target_path >= 0 && target_to_source_path >= 0) {
+		RemovePath (saved_marker, source_to_target_path);
+		RemovePath (nearest, target_to_source_path);
+
+		nearest_indicator = MarkerIndicator (nearest);
+		if (nearest_indicator)
+			nearest_indicator->s.v.effects = (int)nearest_indicator->s.v.effects & ~(EDITOR_BIDIRECTIONAL_COLOUR | EDITOR_UNIDIRECTIONAL_COLOUR);
+
+		G_sprint (self, PRINT_HIGH, "Both paths cleared - no link\n");
+		return;
+	}
+
+	if (source_to_target_path >= 0) {
+		if (AddPath (nearest, saved_marker) >= 0) {
+			G_sprint (self, PRINT_HIGH, "Marker %d > %d linked (bi-directional)\n", nearest->fb.index, saved_marker->fb.index);
 			nearest_indicator = MarkerIndicator (nearest);
 			if (nearest_indicator)
-				nearest_indicator->s.v.effects = (int)nearest_indicator->s.v.effects & ~(EDITOR_BIDIRECTIONAL_COLOUR | EDITOR_UNIDIRECTIONAL_COLOUR);
-
-			G_sprint (self, PRINT_HIGH, "Both paths cleared - no link\n");
-			return;
-		}
-
-		if (source_to_target_path >= 0) {
-			if (AddPath (nearest, saved_marker) >= 0) {
-				G_sprint (self, PRINT_HIGH, "Marker %d > %d linked (bi-directional)\n", nearest->fb.index, saved_marker->fb.index);
-				nearest_indicator = MarkerIndicator (nearest);
-				if (nearest_indicator)
-					nearest_indicator->s.v.effects = ((int)nearest_indicator->s.v.effects & ~EDITOR_UNIDIRECTIONAL_COLOUR) | EDITOR_BIDIRECTIONAL_COLOUR;
-			}
-			else {
-				G_sprint (self, PRINT_HIGH, "{&cf00ERROR&cfff}: Unable to link (maximum paths hit?)");
-			}
-
-			return;
-		}
-
-		if (AddPath (saved_marker, nearest) >= 0) {
-			G_sprint (self, PRINT_HIGH, "Marker %d > %d linked (uni-directional)\n", saved_marker->fb.index, nearest->fb.index);
-			nearest_indicator = MarkerIndicator (nearest);
-			if (nearest_indicator)
-				nearest_indicator->s.v.effects = ((int)nearest_indicator->s.v.effects & ~EDITOR_BIDIRECTIONAL_COLOUR) | EDITOR_UNIDIRECTIONAL_COLOUR;
+				nearest_indicator->s.v.effects = ((int)nearest_indicator->s.v.effects & ~EDITOR_UNIDIRECTIONAL_COLOUR) | EDITOR_BIDIRECTIONAL_COLOUR;
 		}
 		else {
 			G_sprint (self, PRINT_HIGH, "{&cf00ERROR&cfff}: Unable to link (maximum paths hit?)");
 		}
+
 		return;
 	}
-	else if (streq (sub_command, "removepath")) {
-		gedict_t* nearest = LocateMarker (self->s.v.origin);
-		gedict_t* nearest_indicator;
-		int source_to_target_path = FindPathIndex (saved_marker, nearest);
-		int target_to_source_path = FindPathIndex (nearest, saved_marker);
 
-		if (nearest == NULL) {
-			G_sprint (self, PRINT_HIGH, "Could not locate marker nearby\n");
-			return;
-		}
-
-		if (saved_marker == NULL) {
-			G_sprint (self, PRINT_HIGH, "Save a marker before creating path\n");
-			return;
-		}
-
-		if (source_to_target_path >= 0) {
-			RemovePath (saved_marker, source_to_target_path);
-		}
-		if (target_to_source_path >= 0) {
-			RemovePath (nearest, target_to_source_path);
-		}
-
+	if (AddPath (saved_marker, nearest) >= 0) {
+		G_sprint (self, PRINT_HIGH, "Marker %d > %d linked (uni-directional)\n", saved_marker->fb.index, nearest->fb.index);
 		nearest_indicator = MarkerIndicator (nearest);
 		if (nearest_indicator)
-			nearest_indicator->s.v.effects = (int)nearest_indicator->s.v.effects & ~(EDITOR_UNIDIRECTIONAL_COLOUR | EDITOR_BIDIRECTIONAL_COLOUR);
-		return;
-	}
-	else if (streq (sub_command, "setzone")) {
-		gedict_t* nearest = LocateMarker (self->s.v.origin);
-		int zone = 0;
-
-		if (!nearest) {
-			return;
-		}
-
-		zone = bound (1, nearest->fb.Z_, NUMBER_ZONES);
-		if (trap_CmdArgc () >= 3) {
-			trap_CmdArgv (2, sub_command, sizeof (sub_command));
-
-			if (atoi (sub_command) != 0) {
-				zone = bound (1, atoi (sub_command), NUMBER_ZONES);
-			}
-		}
-
-		nearest->fb.Z_ = zone;
-		G_sprint (self, PRINT_HIGH, "Marker #%d now has zone %d\n", nearest->fb.index + 1, nearest->fb.Z_);
-	}
-	else if (streq (sub_command, "togglepathflag")) {
-		gedict_t* nearest = LocateMarker (self->s.v.origin);
-		int source_to_target_path = FindPathIndex (saved_marker, nearest);
-
-		if (trap_CmdArgc () < 3) {
-			G_sprint (self, PRINT_HIGH, "Provide path flags: " FROGBOT_PATH_FLAG_OPTIONS "\n");
-			return;
-		}
-		
-		trap_CmdArgv (2, sub_command, sizeof (sub_command));
-		if (source_to_target_path >= 0) {
-			int flags = DecodeMarkerFlagString (sub_command);
-			if (!(saved_marker->fb.paths[source_to_target_path].flags & flags)) {
-				saved_marker->fb.paths[source_to_target_path].flags |= flags;
-				G_sprint (self, PRINT_HIGH, "Path flags set: %s\n", EncodeMarkerPathFlags(saved_marker->fb.paths[source_to_target_path].flags));
-			}
-			else {
-				saved_marker->fb.paths[source_to_target_path].flags &= ~flags;
-				G_sprint (self, PRINT_HIGH, "Path flags cleared, now: %s\n", EncodeMarkerPathFlags(saved_marker->fb.paths[source_to_target_path].flags));
-			}
-		}
-		else {
-			G_sprint (self, PRINT_HIGH, "No path linked to add flag\n");
-		}
-	}
-	else if (streq (sub_command, "mode")) {
-		
-	}
-	else if (streq (sub_command, "save")) {
-		BotFileGenerate ();
-	}
-	else if (streq (sub_command, "debug")) {
-		FrogbotsDebug ();
+			nearest_indicator->s.v.effects = ((int)nearest_indicator->s.v.effects & ~EDITOR_BIDIRECTIONAL_COLOUR) | EDITOR_UNIDIRECTIONAL_COLOUR;
 	}
 	else {
-		G_sprint (self, PRINT_HIGH, "Unknown editor command\n");
+		G_sprint (self, PRINT_HIGH, "{&cf00ERROR&cfff}: Unable to link (maximum paths hit?)");
+	}
+}
+
+static void FrogbotRemovePath (void)
+{
+	gedict_t* nearest = LocateMarker (self->s.v.origin);
+	gedict_t* nearest_indicator;
+	int source_to_target_path = FindPathIndex (saved_marker, nearest);
+	int target_to_source_path = FindPathIndex (nearest, saved_marker);
+
+	if (nearest == NULL) {
+		G_sprint (self, PRINT_HIGH, "Could not locate marker nearby\n");
+		return;
+	}
+
+	if (saved_marker == NULL) {
+		G_sprint (self, PRINT_HIGH, "Save a marker before creating path\n");
+		return;
+	}
+
+	if (source_to_target_path >= 0) {
+		RemovePath (saved_marker, source_to_target_path);
+	}
+	if (target_to_source_path >= 0) {
+		RemovePath (nearest, target_to_source_path);
+	}
+
+	nearest_indicator = MarkerIndicator (nearest);
+	if (nearest_indicator)
+		nearest_indicator->s.v.effects = (int)nearest_indicator->s.v.effects & ~(EDITOR_UNIDIRECTIONAL_COLOUR | EDITOR_BIDIRECTIONAL_COLOUR);
+}
+
+static void FrogbotSetZone(void)
+{
+	gedict_t* nearest = LocateMarker (self->s.v.origin);
+	int zone = 0;
+
+	if (!nearest) {
+		return;
+	}
+
+	zone = ((int)bound (1, nearest->fb.Z_, NUMBER_ZONES) + 1) % NUMBER_ZONES;
+	if (trap_CmdArgc () >= 3) {
+		char param[64];
+
+		trap_CmdArgv (2, param, sizeof (param));
+
+		if (atoi (param) != 0) {
+			zone = bound (1, atoi (param), NUMBER_ZONES);
+		}
+	}
+
+	nearest->fb.Z_ = zone;
+	G_sprint (self, PRINT_HIGH, "Marker #%d now has zone %d\n", nearest->fb.index + 1, nearest->fb.Z_);
+}
+
+static void FrogbotSetPathFlag (void)
+{
+	gedict_t* nearest = LocateMarker (self->s.v.origin);
+	int source_to_target_path = FindPathIndex (saved_marker, nearest);
+	char param[64];
+
+	if (trap_CmdArgc () < 3) {
+		G_sprint (self, PRINT_HIGH, "Provide path flags: " FROGBOT_PATH_FLAG_OPTIONS "\n");
+		return;
+	}
+
+	trap_CmdArgv (2, param, sizeof (param));
+	if (source_to_target_path >= 0) {
+		int flags = DecodeMarkerFlagString (param);
+
+		saved_marker->fb.paths[source_to_target_path].flags |= flags;
+		G_sprint (self, PRINT_HIGH, "Path flags set, now: %s\n", EncodeMarkerPathFlags (saved_marker->fb.paths[source_to_target_path].flags));
+	}
+	else {
+		G_sprint (self, PRINT_HIGH, "No path linked to add flag\n");
+	}
+}
+
+static void FrogbotClearPathFlag (void)
+{
+	gedict_t* nearest = LocateMarker (self->s.v.origin);
+	int source_to_target_path = FindPathIndex (saved_marker, nearest);
+	char param[64];
+
+	if (trap_CmdArgc () < 3) {
+		G_sprint (self, PRINT_HIGH, "Provide path flags: " FROGBOT_PATH_FLAG_OPTIONS "\n");
+		return;
+	}
+
+	trap_CmdArgv (2, param, sizeof (param));
+	if (source_to_target_path >= 0) {
+		int flags = DecodeMarkerFlagString (param);
+
+		saved_marker->fb.paths[source_to_target_path].flags &= ~flags;
+		G_sprint (self, PRINT_HIGH, "Path flags cleared, now: %s\n", EncodeMarkerPathFlags (saved_marker->fb.paths[source_to_target_path].flags));
+	}
+	else {
+		G_sprint (self, PRINT_HIGH, "No path linked to add flag\n");
+	}
+}
+
+static void FrogbotSaveBotFile (void)
+{
+	BotFileGenerate ();
+}
+
+static void FrogbotShowInfo (void)
+{
+	FrogbotsDebug ();
+}
+
+static void FrogbotsFillServer (void)
+{
+	int max_clients = cvar ("maxclients");
+	int plr_count = CountPlayers ();
+	int i;
+
+	for (i = 0; i < max_clients - plr_count; ++i) {
+		FrogbotsAddbot ();
+	}
+}
+
+static void FrogbotsRemoveAll (void)
+{
+	int bot_count = CountBots ();
+
+	while (bot_count-- > 0) {
+		FrogbotsRemovebot ();
+	}
+}
+
+typedef struct frogbot_cmd_s {
+	char* name;
+	void (*func) (void);
+	char* description;
+} frogbot_cmd_t;
+
+static frogbot_cmd_t std_commands[] = {
+	{ "skill", FrogbotsSetSkill, "Set skill level for next bot added" },
+	{ "addbot", FrogbotsAddbot, "Adds a bot to the server" },
+	{ "fill", FrogbotsFillServer, "Fills the server with bots" },
+	{ "removebot", FrogbotsRemovebot, "Removes a single bot" },
+	{ "removeall", FrogbotsRemoveAll, "Removes all bots from server" },
+	{ "debug", FrogbotsDebug, "Debugging commands" }
+};
+
+static frogbot_cmd_t editor_commands[] = {
+	{ "addmarker", FrogbotAddMarker, "Adds a routing marker to the map" },
+	{ "removemarker", FrogbotRemoveMarker, "Removes a routing marker from the map" },
+	{ "savemarker", FrogbotSaveMarker, "Saves current marker" },
+	{ "addpath", FrogbotAddPath, "Adds a path between markers" },
+	{ "removepath", FrogbotRemovePath, "Removes a path between markers" },
+	{ "setzone", FrogbotSetZone, "Sets a marker's zone #" },
+	{ "setpathflag", FrogbotSetPathFlag, "Flags a path between two markers" },
+	{ "clearpathflag", FrogbotClearPathFlag, "Clears flag on a parth between two markers" },
+	{ "save", FrogbotSaveBotFile, "Saves current routing as a .bot file" },
+	{ "info", FrogbotShowInfo, "Shows information about the current marker" }
+};
+
+#define NUM_EDITOR_COMMANDS (sizeof (editor_commands) / sizeof (editor_commands[0]))
+#define NUM_STANDARD_COMMANDS (sizeof (std_commands) / sizeof (std_commands[0]))
+
+static void PrintAvailableCommands (frogbot_cmd_t* commands, int num_commands)
+{
+	int i;
+	int max_length = 0;
+
+	G_sprint (self, PRINT_HIGH, "Available commands:\n");
+	for (i = 0; i < num_commands; ++i) {
+		max_length = max (max_length, strlen (commands[i].name));
+	}
+
+	for (i = 0; i < num_commands; ++i) {
+		G_sprint (self, PRINT_HIGH, "  &cff0%s&cfff %*s%s\n", commands[i].name, max_length - strlen(commands[i].name), "", commands[i].description);
 	}
 }
 
 void FrogbotsCommand (void)
 {
+	frogbot_cmd_t* commands = FrogbotOptionEnabled (FB_OPTION_EDITOR_MODE) ? editor_commands : std_commands;
+	int num_commands = FrogbotOptionEnabled (FB_OPTION_EDITOR_MODE) ? NUM_EDITOR_COMMANDS : NUM_STANDARD_COMMANDS;
 	char command[64];
+	int i;
 
 	if (trap_CmdArgc () <= 1) {
-		G_sprint (self, PRINT_HIGH, "Available commands:\n");
-		G_sprint (self, PRINT_HIGH, "  &cff0skill&r <skill> .... set bot skill\n");
-		G_sprint (self, PRINT_HIGH, "  &cff0add&r .............. add bot\n");
-		G_sprint (self, PRINT_HIGH, "  &cff0remove&r ........... remove bot\n");
-		G_sprint (self, PRINT_HIGH, "  &cff0debug&r ............ debug bots\n");
-		G_sprint (self, PRINT_HIGH, "  &cff0edit&r ............. editing commands\n");
+		PrintAvailableCommands (commands, num_commands);
+		return;
+	}
+
+	if (!FrogbotOptionEnabled (FB_OPTION_EDITOR_MODE) && !FrogbotsCheckMapSupport ()) {
+		G_sprint (self, PRINT_HIGH, "Bots not supported on this map.\n");
 		return;
 	}
 
 	trap_CmdArgv (1, command, sizeof (command));
 
-	if (FrogbotOptionEnabled (FB_OPTION_EDITOR_MODE)) {
-		FrogbotEditorCommand ();
-		return;
-	}
-
-	if (!FrogbotsCheckMapSupport ()) {
-		G_sprint (self, PRINT_HIGH, "Bots not supported on this map.\n");
-		return;
-	}
-
-	if (streq (command, "skill")) {
-		FrogbotsSetSkill ();
-	}
-	else if (streq (command, "add")) {
-		FrogbotsAddbot ();
-	}
-	else if (streq (command, "fill")) {
-		int max_clients = cvar ("maxclients");
-		int plr_count = CountPlayers ();
-		int i;
-
-		for (i = 0; i < max_clients - plr_count; ++i) {
-			FrogbotsAddbot ();
+	for (i = 0; i < num_commands; ++i) {
+		if (streq (commands[i].name, command)) {
+			commands[i].func ();
+			return;
 		}
 	}
-	else if (streq (command, "removeall")) {
-		int bot_count = CountBots ();
 
-		while (bot_count-- > 0) {
-			FrogbotsRemovebot ();
-		}
-	}
-	else if (streq (command, "remove")) {
-		FrogbotsRemovebot ();
-	}
-	else if (streq (command, "pathinfo")) {
-		FrogbotsPathInfo ();
-	}
-	else if (streq (command, "debug")) {
-		FrogbotsDebug ();
-	}
-	else if (streq (command, "edit")) {
-		FrogbotEditorCommand ();
-	}
-	else {
-		G_sprint (self, 2, "Command not known.\n");
-	}
+	G_sprint (self, 2, "Command not known.\n");
+	PrintAvailableCommands (commands, num_commands);
 }
+
+
+
+void Bot_Print_Thinking (void)
+{
+	// Spectator is watching a bot - display bot's thinking
+	qbool isSpectator = self->ct == ctSpec && self->s.v.goalentity;
+	gedict_t* bot = self->isBot ? self :
+		isSpectator ? PROG_TO_EDICT( self->s.v.goalentity ) :
+		bots[0].entity ? &g_edicts[bots[0].entity] :
+		self;
+	gedict_t* linked = bot->fb.linked_marker;
+	gedict_t* oldlink = bot->fb.old_linked_marker;
+	char data[1024] = { 0 };
+
+	if (g_globalvars.time < self->fb.last_spec_cp)
+		return;
+
+	strlcat(data, va("Bot: %s\n", bot->s.v.netname), sizeof(data));
+	strlcat(data, va("  %s: %s (%d)\n", redtext ("Touch"), bot->fb.touch_marker ? bot->fb.touch_marker->s.v.classname : "(none)", bot->fb.touch_marker ? bot->fb.touch_marker->fb.index : -1), sizeof(data));
+	strlcat(data, va("  %s: %s\n", redtext ("Looking"), bot->fb.look_object ? bot->fb.look_object->s.v.classname : "(nothing)"), sizeof(data));
+	strlcat(data, va("  %s: %s (%d)\n", redtext ("Linked"), linked ? linked->s.v.classname : "?", linked ? linked->fb.index : -1), sizeof (data));
+	strlcat(data, va("  %s: %s (%d)\n", redtext ("OldLinked"), oldlink ? oldlink->s.v.classname : "?", oldlink ? oldlink->fb.index : -1), sizeof (data));
+	strlcat(data, va("  %s: %s\n", redtext ("GoalEnt"), bot->s.v.goalentity ? va("%s (%d) (%f)", g_edicts[bot->s.v.goalentity].s.v.classname, g_edicts[bot->s.v.goalentity].fb.index, g_edicts[bot->s.v.goalentity].fb.saved_goal_desire) : "(none)"), sizeof(data));
+	//strlcat(data, va("  %s: armor %d, damage %d\n", redtext ("Strength"), (int)bot->fb.total_armor, (int)bot->fb.total_damage), sizeof(data));
+	//strlcat(data, va("  %s: RA %d YA %d GA %d\n", redtext ("Desire"), (int)bot->fb.desire_armorInv, (int)bot->fb.desire_armor2, (int)bot->fb.desire_armor1), sizeof(data));
+	//strlcat(data, va("  %s: LG %d RL %d\n", redtext ("Desire"), (int)bot->fb.desire_lightning, (int)bot->fb.desire_rocketlauncher), sizeof(data));
+	strlcat(data, "\n", sizeof(data));
+	strlcat (data, va ("  %s: %f %f %f\n", redtext ("Velocity"), PASSVEC3 (bot->s.v.velocity)), sizeof(data));
+	strlcat (data, va ("  %s: %f %f %f\n", redtext ("Obstruction"), PASSVEC3 (bot->fb.obstruction_normal)), sizeof (data));
+	strlcat (data, va ("  %s: %f %f %f\n", redtext ("LastDirection"), PASSVEC3 (bot->fb.last_cmd_direction)), sizeof (data));
+
+	if (bot->s.v.enemy) {
+		gedict_t* enemy = &g_edicts[bot->s.v.enemy];
+
+		strlcat(data, va("\n%s: %s\n", redtext ("Enemy"), enemy->s.v.netname), sizeof(data));
+		strlcat(data, va("  %s: armor %d, damage %d\n", redtext ("Strength"), (int)enemy->fb.total_armor, (int)enemy->fb.total_damage), sizeof(data));
+		strlcat(data, va("  %s: RA %d YA %d GA %d\n", redtext ("Desire"), (int)enemy->fb.desire_armorInv, (int)enemy->fb.desire_armor2, (int)bot->fb.desire_armor1), sizeof(data));
+		strlcat(data, va("  %s: LG %d RL %d\n", redtext ("Desire"), (int)enemy->fb.desire_lightning, (int)enemy->fb.desire_rocketlauncher), sizeof(data));
+	}
+
+	G_centerprint (self, data);
+	self->fb.last_spec_cp = g_globalvars.time + 0.2;
+}
+
+
+
+
+
 
 qbool TimeTrigger (float *next_time, float time_increment)
 {
@@ -888,7 +986,9 @@ void BotStartFrame(int framecount) {
 
 				BotsFireLogic ();
 
-				Bot_Print_Thinking ();
+				if (FrogbotOptionEnabled (FB_OPTION_SHOW_THINKING)) {
+					Bot_Print_Thinking ();
+				}
 
 				BotSetCommand (self);
 			}
@@ -896,45 +996,13 @@ void BotStartFrame(int framecount) {
 	}
 }
 
-void Bot_Print_Thinking (void)
+// This is stored in statistics files
+int BotVersionNumber (void)
 {
-	// Spectator is watching a bot - display bot's thinking
-	qbool isSpectator = self->ct == ctSpec && self->s.v.goalentity;
-	gedict_t* bot = self->isBot ? self :
-	                isSpectator ? PROG_TO_EDICT( self->s.v.goalentity ) :
-	                bots[0].entity ? &g_edicts[bots[0].entity] :
-	                self;
-	gedict_t* linked = bot->fb.linked_marker;
-	gedict_t* oldlink = bot->fb.old_linked_marker;
-	char data[1024] = { 0 };
-
-	if (g_globalvars.time < self->fb.last_spec_cp)
-		return;
-
-	strlcat(data, va("Bot: %s\n", bot->s.v.netname), sizeof(data));
-	strlcat(data, va("  %s: %s (%d)\n", redtext ("Touch"), bot->fb.touch_marker ? bot->fb.touch_marker->s.v.classname : "(none)", bot->fb.touch_marker ? bot->fb.touch_marker->fb.index : -1), sizeof(data));
-	strlcat(data, va("  %s: %s\n", redtext ("Looking"), bot->fb.look_object ? bot->fb.look_object->s.v.classname : "(nothing)"), sizeof(data));
-	strlcat(data, va("  %s: %s (%d)\n", redtext ("Linked"), linked ? linked->s.v.classname : "?", linked ? linked->fb.index : -1), sizeof (data));
-	strlcat(data, va("  %s: %s (%d)\n", redtext ("OldLinked"), oldlink ? oldlink->s.v.classname : "?", oldlink ? oldlink->fb.index : -1), sizeof (data));
-	strlcat(data, va("  %s: %s\n", redtext ("GoalEnt"), bot->s.v.goalentity ? va("%s (%d) (%f)", g_edicts[bot->s.v.goalentity].s.v.classname, g_edicts[bot->s.v.goalentity].fb.index, g_edicts[bot->s.v.goalentity].fb.saved_goal_desire) : "(none)"), sizeof(data));
-	//strlcat(data, va("  %s: armor %d, damage %d\n", redtext ("Strength"), (int)bot->fb.total_armor, (int)bot->fb.total_damage), sizeof(data));
-	//strlcat(data, va("  %s: RA %d YA %d GA %d\n", redtext ("Desire"), (int)bot->fb.desire_armorInv, (int)bot->fb.desire_armor2, (int)bot->fb.desire_armor1), sizeof(data));
-	//strlcat(data, va("  %s: LG %d RL %d\n", redtext ("Desire"), (int)bot->fb.desire_lightning, (int)bot->fb.desire_rocketlauncher), sizeof(data));
-	strlcat(data, "\n", sizeof(data));
-	strlcat (data, va ("  %s: %f %f %f\n", redtext ("Velocity"), PASSVEC3 (bot->s.v.velocity)), sizeof(data));
-	strlcat (data, va ("  %s: %f %f %f\n", redtext ("Obstruction"), PASSVEC3 (bot->fb.obstruction_normal)), sizeof (data));
-	strlcat (data, va ("  %s: %f %f %f\n", redtext ("LastDirection"), PASSVEC3 (bot->fb.last_cmd_direction)), sizeof (data));
-
-	if (bot->s.v.enemy) {
-		gedict_t* enemy = &g_edicts[bot->s.v.enemy];
-
-		strlcat(data, va("\n%s: %s\n", redtext ("Enemy"), enemy->s.v.netname), sizeof(data));
-		strlcat(data, va("  %s: armor %d, damage %d\n", redtext ("Strength"), (int)enemy->fb.total_armor, (int)enemy->fb.total_damage), sizeof(data));
-		strlcat(data, va("  %s: RA %d YA %d GA %d\n", redtext ("Desire"), (int)enemy->fb.desire_armorInv, (int)enemy->fb.desire_armor2, (int)bot->fb.desire_armor1), sizeof(data));
-		strlcat(data, va("  %s: LG %d RL %d\n", redtext ("Desire"), (int)enemy->fb.desire_lightning, (int)enemy->fb.desire_rocketlauncher), sizeof(data));
-	}
-
-	G_centerprint (self, data);
-	self->fb.last_spec_cp = g_globalvars.time + 0.2;
+	return 1;
 }
 
+qbool FrogbotOptionEnabled (int option)
+{
+	return ((int)cvar ("k_fb_options")) & option;
+}

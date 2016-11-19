@@ -330,14 +330,4 @@ void BotPreThink(gedict_t* self) {
 	self->fb.touch_distance = 1000000;
 }
 
-// This is stored in statistics files
-int BotVersionNumber (void)
-{
-	return 1;
-}
-
-qbool FrogbotOptionEnabled (int option)
-{
-	return ((int)cvar ("k_fb_options")) & option;
-}
 

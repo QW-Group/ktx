@@ -5,8 +5,9 @@
 
 #define PATH_SCORE_NULL -1000000
 
-#define FB_OPTION_SHOW_MARKERS 1
-#define FB_OPTION_EDITOR_MODE  2
+#define FB_OPTION_SHOW_MARKERS      1
+#define FB_OPTION_EDITOR_MODE       2
+#define FB_OPTION_SHOW_THINKING     4
 
 typedef void (*fb_spawn_func_t)(gedict_t* ent);
 
@@ -52,6 +53,7 @@ extern float sv_accelerate;
 
 extern gedict_t* dropper;
 
+// FIXME: A lot of these not used anymore
 #define FL_ONGROUND_PARTIALGROUND (FL_ONGROUND | FL_PARTIALGROUND)
 #define IT_EITHER_NAILGUN (IT_NAILGUN | IT_SUPER_NAILGUN)
 #define IT_NAILGUN_ROCKET (IT_ROCKET_LAUNCHER | IT_SUPER_NAILGUN | IT_NAILGUN)
@@ -370,7 +372,5 @@ void RunRandomTrials (float min, float max, float mult);
 
 // editor
 qbool HasSavedMarker (void);
-#define EXTERNAL_MARKER_PATH_FLAGS (WATERJUMP_ | DM6_DOOR | ROCKET_JUMP | JUMP_LEDGE | VERTICAL_PLATFORM)
-#define EXTERNAL_MARKER_FLAGS (UNREACHABLE | MARKER_IS_DM6_DOOR | MARKER_FIRE_ON_MATCH_START | MARKER_DOOR_TOUCHABLE | MARKER_ESCAPE_ROUTE)
 
 #endif // ifdef(FB_GLOBALS_H)
