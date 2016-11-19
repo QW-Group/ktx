@@ -340,9 +340,9 @@ static qbool TP_IsItemVisible(item_vis_t *visitem)
 	return false;
 }
 
-unsigned long ClientFlag (gedict_t* client)
+unsigned int ClientFlag (gedict_t* client)
 {
-	return (unsigned long)1 << (NUM_FOR_EDICT (client) - 1);
+	return (unsigned int)1 << (NUM_FOR_EDICT (client) - 1);
 }
 
 static gedict_t* TeamplayFindPoint (gedict_t* client)
@@ -1008,7 +1008,7 @@ static void TeamplayEnemyPowerup (gedict_t* client)
 static void TeamplaySetEnemyFlags (gedict_t* client)
 {
 	gedict_t* plr = world;
-	unsigned long clientFlag = ClientFlag (client);
+	unsigned int clientFlag = ClientFlag (client);
 	int enemy_items = 0;
 	int enemy_count = 0;
 	int friend_count = 0;

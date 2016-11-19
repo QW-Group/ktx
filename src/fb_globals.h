@@ -177,7 +177,7 @@ char* SetTeamNetName (int botNumber, const char* teamName);
 
 qbool Visible_360 (gedict_t* self, gedict_t* visible_object);
 qbool Visible_infront (gedict_t* self, gedict_t* visible_object);
-unsigned long ClientFlag (gedict_t* client);
+unsigned int ClientFlag (gedict_t* client);
 
 // marker_util.qc
 void marker_touch (void);
