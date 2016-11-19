@@ -187,6 +187,9 @@ void BecomeMarker (gedict_t* marker);
 // route_calc.qc
 void CheckWaterColumn (gedict_t* m, vec3_t m_pos, vec3_t testplace);
 
+// route_fields.qc
+gedict_t* CreateNewMarker (vec3_t origin);
+
 // botwater.qc
 void BotWaterMove (gedict_t* self);
 
@@ -263,7 +266,7 @@ void SetMarkerPath (int source_marker, int path_index, int next_marker);
 void SetMarkerViewOffset (int marker, float zOffset);
 
 #define FROGBOT_PATH_FLAG_OPTIONS "w6rjv"
-#define FROGBOT_MARKER_FLAG_OPTIONS "u6te"
+#define FROGBOT_MARKER_FLAG_OPTIONS "u6fbte"
 
 // added for ktx
 qbool fb_lg_disabled (void);
@@ -364,6 +367,8 @@ void SetMarker (gedict_t* client, gedict_t* marker);
 
 #define MIN_FROGBOT_SKILL  0
 #define MAX_FROGBOT_SKILL 20
+
+#define PASSINTVEC3(x) ((int)x[0]),((int)x[1]),((int)x[2])
 
 // debugging
 void RunRandomTrials (float min, float max, float mult);

@@ -33,6 +33,7 @@ void ZoneMarker (gedict_t* from_marker, gedict_t* to_marker, qbool path_normal)
 	if (from_marker == NULL || to_marker == NULL) {
 		middle_marker = dropper;
 		zone_time = 1000000;
+		return;
 	}
 
 	if (!to_marker->fb.Z_)

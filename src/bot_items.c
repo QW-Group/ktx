@@ -2,13 +2,79 @@
 #include "g_local.h"
 #include "fb_globals.h"
 
-#define FB_GOAL_SHELLS 24
-#define FB_GOAL_SPIKES 23
-#define FB_GOAL_CELLS  19
+// If multiple items have the same goal, markers on the map will point to the closest
+//   So (my logic) if you only care about the closest item rather than timing all items, assign same goal to all objects
+//   Statically assign goals for minor items and leave other goal numbers free for items to be tracked across the whole map
+#define FB_FIRST_AUTOGOAL  15
+#define FB_GOAL_GA         15
+#define FB_GOAL_HEALTH     16
+#define FB_GOAL_GL         17
+#define FB_GOAL_ROCKETS    18
 
-#define FB_GOAL_SNG    20
-#define FB_GOAL_SSG    21
-#define FB_GOAL_NG     22
+// These were set in the original FBCA
+#define FB_GOAL_CELLS      19
+#define FB_GOAL_SNG        20
+#define FB_GOAL_SSG        21
+#define FB_GOAL_NG         22
+#define FB_GOAL_SPIKES     23
+#define FB_GOAL_SHELLS     24
+
+// This automatically assigns default goal numbers
+void AssignGoalNumbers (void)
+{
+	gedict_t* ent;
+	int unassigned_goal = 1;
+
+	for (ent = world; ent = nextent (ent); ) {
+		switch (ent->tp_flags) {
+		case it_ra:
+		case it_ya:
+		case it_rl:
+		case it_lg:
+		case it_mh:
+		case it_quad:
+		case it_pent:
+		case it_suit:
+		case it_ring:
+			if (unassigned_goal < FB_FIRST_AUTOGOAL) {
+				SetGoalForMarker (unassigned_goal, ent);
+
+				++unassigned_goal;
+			}
+			else {
+				G_bprint (PRINT_HIGH, "Unable to assign goal to %s @ [%d %d %d]\n", ent->s.v.classname, PASSINTVEC3 (ent->s.v.origin));
+			}
+			break;
+		case it_ga:
+			SetGoalForMarker (FB_GOAL_GA, ent);
+			break;
+		case it_health:
+			SetGoalForMarker (FB_GOAL_HEALTH, ent);
+			break;
+		case it_ng:
+			SetGoalForMarker (FB_GOAL_NG, ent);
+			break;
+		case it_sng:
+			SetGoalForMarker (FB_GOAL_SNG, ent);
+			break;
+		case it_gl:
+			SetGoalForMarker (FB_GOAL_GL, ent);
+			break;
+		case it_shells:
+			SetGoalForMarker (FB_GOAL_SHELLS, ent);
+			break;
+		case it_nails:
+			SetGoalForMarker (FB_GOAL_SPIKES, ent);
+			break;
+		case it_rockets:
+			SetGoalForMarker (FB_GOAL_ROCKETS, ent);
+			break;
+		case it_cells:
+			SetGoalForMarker (FB_GOAL_CELLS, ent);
+			break;
+		}
+	}
+}
 
 // Goal functions
 void item_megahealth_rot ();

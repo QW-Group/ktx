@@ -418,7 +418,7 @@ typedef struct fb_zone_s {
 	struct gedict_s* sight_from;
 	float sight_from_time;
 	struct gedict_s* higher_sight_from;
-	float higher_sight_from_time;
+	float higher_sight_from_time;            // FIXME: Never used?  Was used in runaway code, but in peculiar fashion...
 	int task;
 } fb_zone_t;
 

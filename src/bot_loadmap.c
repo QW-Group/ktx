@@ -9,6 +9,7 @@ void check_marker (gedict_t* self, gedict_t* other);
 qbool LoadBotRoutingFromFile (void);
 qbool pickup_true(void);
 int AddPath (gedict_t* marker, gedict_t* next_marker);
+void AssignGoalNumbers (void);
 
 // fixme: also in doors.c
 #define SECRET_OPEN_ONCE 1	// stays open
@@ -417,6 +418,8 @@ void LoadMap(void) {
 		for (e = world; e = nextent (e); ) {
 			e->s.v.effects = (int)e->s.v.effects & ~(EF_BLUE | EF_GREEN | EF_RED);
 		}
+
+		AssignGoalNumbers ();
 	}
 }
 

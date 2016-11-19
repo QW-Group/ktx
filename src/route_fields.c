@@ -110,20 +110,22 @@ void RemoveMarker (gedict_t* marker)
 	}
 }
 
-void CreateNewMarker (void)
+gedict_t* CreateNewMarker (vec3_t origin)
 {
-	gedict_t* new_marker = spawn_marker (PASSVEC3 (self->s.v.origin));
+	gedict_t* new_marker = spawn_marker (PASSVEC3 (origin));
 	int i;
 
 	for (i = 0; i < NUMBER_MARKERS; ++i) {
 		if (markers[i] == NULL) {
 			markers[i] = new_marker;
 			new_marker->fb.index = i;
-			return;
+			return new_marker;
 		}
 	}
 
 	AddToQue (new_marker);
+
+	return new_marker;
 }
 
 void MoveMarker (gedict_t* selected, vec3_t move_to)

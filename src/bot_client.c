@@ -123,8 +123,8 @@ void BotSetCommand(gedict_t* self) {
 	float msec = g_globalvars.frametime * 1000; //min ((g_globalvars.time - self->fb.last_cmd_sent) * 1000, 255);
 	int weapon_script_impulse = 0;
 	int impulse = 0;
-	qbool jumping = self->fb.jumping;
-	qbool firing = self->fb.firing;
+	qbool jumping;
+	qbool firing;
 
 	BotPerformRocketJump(self);
 
@@ -156,6 +156,9 @@ void BotSetCommand(gedict_t* self) {
 	if (self->fb.firing && BotUsingCorrectWeapon(self)) {
 		impulse = 0; // we already have the requested weapon
 	}
+
+	jumping = self->fb.jumping;
+	firing = self->fb.firing;
 
 	jumping |= self->fb.waterjumping;
 	self->fb.waterjumping = false;
