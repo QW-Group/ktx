@@ -636,6 +636,10 @@ typedef struct fb_entvars_s {
 
 	qbool               waterjumping;    // true if the bot should waterjump
 	int                 dbg_countdown;   // bot will be stationary for x frames
+
+	// Aiming
+	int                 last_yaw_sign;
+	int                 last_pitch_sign;
 } fb_entvars_t;
 
 //typedef (void(*)(gedict_t *)) one_edict_func;

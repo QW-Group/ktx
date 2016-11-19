@@ -185,6 +185,9 @@ void BotSetCommand(gedict_t* self) {
 //		G_bprint (2, ":: state %d [%3.0f %3.0f %3.0f]\n", self->fb.path_state, PASSVEC3(self->fb.last_cmd_direction));
 
 	VectorClear (self->fb.obstruction_normal);
+	if (!firing) {
+		self->fb.last_pitch_sign = self->fb.last_yaw_sign = 0;
+	}
 }
 
 static float goal_client(gedict_t* self) {

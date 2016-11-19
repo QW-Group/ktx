@@ -141,6 +141,9 @@ static void BotsFireAtPlayerLogic(gedict_t* self, vec3_t rel_pos, float* rel_dis
 
 typedef void (*bot_aim_model_t)(gedict_t* self, vec3_t rel_pos, float rel_distance);
 
+#define YAW_SNAP_THRESHOLD     8
+#define PITCH_SNAP_THRESHOLD  10
+
 // Called after desired angles have been set to aim at the player
 static void BotsAimAtPlayerLogic (gedict_t* self, vec3_t rel_pos, float rel_dist)
 {
@@ -150,9 +153,23 @@ static void BotsAimAtPlayerLogic (gedict_t* self, vec3_t rel_pos, float rel_dist
 	float pitch_diff = bound(pitch->minimum, fabs(self->fb.desired_angle[PITCH] - self->s.v.angles[PITCH]) * pitch->scale, pitch->maximum);
 	float yaw_diff = bound(yaw->minimum, fabs(self->fb.desired_angle[YAW] - self->s.v.angles[YAW]) * yaw->scale, yaw->maximum);
 
+	float pitch_rnd = dist_random (-pitch_diff, pitch_diff, pitch->multiplier);
+	float yaw_rnd = dist_random (-yaw_diff, yaw_diff, yaw->multiplier);
+
+	// If making a small adjustment when tracking, keep the aim to the same side
+	if (self->fb.last_yaw_sign && yaw_diff < YAW_SNAP_THRESHOLD && g_random () < 0.8) {
+		yaw_rnd = self->fb.last_yaw_sign * abs (yaw_rnd);
+	}
+	if (self->fb.last_pitch_sign && pitch_diff < PITCH_SNAP_THRESHOLD && g_random () < 0.8) {
+		pitch_rnd = self->fb.last_pitch_sign * abs (pitch_rnd);
+	}
+
+	self->fb.last_yaw_sign = yaw_rnd < 0 ? -1 : 1;
+	self->fb.last_pitch_sign = pitch_rnd < 0 ? -1 : 1;
+
 	// Based on skill level, randomise the aim a bit
-	self->fb.desired_angle[PITCH] = bound (-89.9, self->fb.desired_angle[PITCH] + dist_random (-pitch_diff, pitch_diff, pitch->multiplier), 89.9);
-	self->fb.desired_angle[YAW] += dist_random (-yaw_diff, yaw_diff, yaw->multiplier);
+	self->fb.desired_angle[PITCH] = bound (-89.9, self->fb.desired_angle[PITCH] + pitch_rnd, 89.9);
+	self->fb.desired_angle[YAW] += yaw_rnd;
 }
 
 // Aim lower over longer distances?  (FIXME: we already allow for gravity in predicting where to fire - should this test for the enemy being on the ground?)
