@@ -155,7 +155,6 @@ float count_ = 0;
 gedict_t* array_sub_object_ = 0;
 float bind_char = 0;
 float dodge_factor = 0;
-gedict_t* bodyque_head = 0;
 vec3_t hor_normal_vec = { 0 };
 vec3_t last_clear_angle = { 0 };
 vec3_t velocity_hor_angle = { 0 };

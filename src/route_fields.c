@@ -162,7 +162,6 @@ int AddPath (gedict_t* source, gedict_t* next)
 {
 	int i = 0;
 	int place = -1;
-	qbool found = false;
 
 	if (source == NULL || next == NULL || source == next) {
 		return -1;

@@ -3,8 +3,6 @@
 #include "g_local.h"
 #include "fb_globals.h"
 
-static qbool door_open = false;
-
 void map_povdmm4() {
 	CreateMarker(557, -345, 88);
 	CreateMarker(580, -172, 88);

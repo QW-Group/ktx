@@ -166,9 +166,7 @@ float WeaponCode (float w);
 float crandom (void);
 
 qbool able_rj (gedict_t* self);
-qbool PointVisible (vec3_t vec);
 qbool VisibleEntity (gedict_t* ent);
-qbool TP_CouldDamageTeammate (gedict_t* self);
 gedict_t* IdentifyMostVisibleTeammate (gedict_t* self);
 float anglemod (float v);
 gedict_t* HelpTeammate (void);
