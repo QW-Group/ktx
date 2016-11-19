@@ -368,6 +368,8 @@ void SetMarker (gedict_t* client, gedict_t* marker);
 // debugging
 void RunRandomTrials (float min, float max, float mult);
 
+// editor
+qbool HasSavedMarker (void);
 #define EXTERNAL_MARKER_PATH_FLAGS (WATERJUMP_ | DM6_DOOR | ROCKET_JUMP | JUMP_LEDGE | VERTICAL_PLATFORM)
 #define EXTERNAL_MARKER_FLAGS (UNREACHABLE | MARKER_IS_DM6_DOOR | MARKER_FIRE_ON_MATCH_START | MARKER_DOOR_TOUCHABLE | MARKER_ESCAPE_ROUTE)
 

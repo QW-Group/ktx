@@ -743,6 +743,10 @@ qbool BotsPreTeleport (gedict_t* self, gedict_t* other)
 		return true;
 	}
 
+	if (HasSavedMarker()) {
+		return true;
+	}
+
 	return false;
 }
 

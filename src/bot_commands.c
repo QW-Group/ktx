@@ -33,6 +33,11 @@ static gedict_t* last_touched_marker = NULL;
 // FIXME: Globals
 extern gedict_t* markers[];
 
+qbool HasSavedMarker (void)
+{
+	return saved_marker != NULL;
+}
+
 qbool IsMarkerFrame (void)
 {
 	return marker_time;
