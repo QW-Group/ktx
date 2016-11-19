@@ -29,7 +29,7 @@ static void BotStopFiring(gedict_t* bot) {
 		bot->fb.desired_weapon_impulse == 5 ||
 		bot->fb.desired_weapon_impulse == 8;
 
-	bot->fb.firing &= (continuous && BotUsingCorrectWeapon(bot)) || bot->fb.rocketjumping;
+	bot->fb.firing &= (continuous && BotUsingCorrectWeapon(bot) && bot->s.v.enemy && !ISDEAD(&g_edicts[bot->s.v.enemy])) || bot->fb.rocketjumping;
 }
 
 // FIXME: Magic numbers (400 = 0.5 * sv_gravity)
