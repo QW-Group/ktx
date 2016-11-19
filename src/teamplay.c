@@ -870,7 +870,7 @@ static void TeamplayReportNeeds (gedict_t* client)
 	}
 }
 
-static char* TeamplayLastEnemyPowerupText (gedict_t* client)
+static char* TeamplayLastEnemyPowerupText (gedict_t* client, qbool* location_included)
 {
 	static char buffer[128];
 
@@ -879,6 +879,7 @@ static char* TeamplayLastEnemyPowerupText (gedict_t* client)
 	if (client->tp.enemy_items == 0 || g_globalvars.time - client->tp.enemy_itemtime > 5) {
 		// too long ago, assume quad
 		strlcat (buffer, TP_NAME_QUAD, sizeof (buffer));
+		*location_included = false;
 	}
 	else {
 		qbool eyes = client->tp.enemy_items & IT_INVISIBILITY;
@@ -897,8 +898,10 @@ static char* TeamplayLastEnemyPowerupText (gedict_t* client)
 		else if (eyes)
 			strlcat (buffer, TP_NAME_RING, sizeof (buffer));
 
-		strlcat (buffer, " ", sizeof (buffer));
+		strlcat (buffer, " \20{", sizeof (buffer));
 		strlcat (buffer, LocationName (PASSVEC3(client->tp.enemy_location)), sizeof (buffer));
+		strlcat (buffer, "}\21", sizeof (buffer));
+		*location_included = true;
 	}
 
 	return buffer;
@@ -942,8 +945,7 @@ static void TeamplayEnemyPowerup (gedict_t* client)
 			strlcat (buffer, TP_NAME_PENT " ", sizeof (buffer));
 		}
 		else {
-			strlcat (buffer, TeamplayLastEnemyPowerupText (client), sizeof (buffer));
-
+			strlcat (buffer, TeamplayLastEnemyPowerupText (client, &suppressLocation), sizeof (buffer));
 		}
 	}
 	else if (HAVE_POWERUP (client)) {
@@ -957,7 +959,7 @@ static void TeamplayEnemyPowerup (gedict_t* client)
 		needFlags = TeamplayNeedFlags (client);
 		if (NEED (needFlags, it_health) || NEED (needFlags, it_armor) ||
 			NEED (needFlags, it_rockets) || NEED (needFlags, it_cells) ||
-			NEED (needFlags, it_rl) || NEED (needFlags, it_cells)) {
+			NEED (needFlags, it_rl) || NEED (needFlags, it_lg)) {
 			TeamplayReportNeeds (client);
 			return;
 		}
@@ -981,14 +983,12 @@ static void TeamplayEnemyPowerup (gedict_t* client)
 		}
 		else {
 			strlcpy (buffer, TP_NAME_ENEMY " ", sizeof (buffer));
-			strlcat (buffer, TeamplayLastEnemyPowerupText (client), sizeof (buffer));
-			suppressLocation = true;
+			strlcat (buffer, TeamplayLastEnemyPowerupText (client, &suppressLocation), sizeof (buffer));
 		}
 	}
 	else {
 		strlcpy (buffer, TP_NAME_ENEMY " ", sizeof (buffer));
-		strlcat (buffer, TeamplayLastEnemyPowerupText (client), sizeof (buffer));
-		suppressLocation = true;
+		strlcat (buffer, TeamplayLastEnemyPowerupText (client, &suppressLocation), sizeof (buffer));
 	}
 
 	if (!suppressLocation) {
