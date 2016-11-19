@@ -94,7 +94,10 @@ void ClearBodyQue()
 
 void CheckDefMap( )
 {
-	if( !CountPlayers() && !cvar( "k_lockmap" ) )
+	int player_count = CountPlayers ();
+	int bot_count = CountBots ();
+
+	if( (player_count == 0 || player_count == bot_count) && !cvar( "k_lockmap" ) )
 	{
 		char *s1 = cvar_string( "k_defmap" );
 
@@ -139,7 +142,7 @@ void Check_LongMapUptime()
 
 	max_map_uptime += (60 * 5); // so if map reloading fail, we repeat it after some time
 
-	if ( CountPlayers() ) { // oh, here players, warn but not reload
+	if ( CountPlayers() || CountPlayers() == CountBots() ) { // oh, here players, warn but not reload
 		G_bprint(2, "\x87%s Long map uptime detected, reload map please!\n", redtext( "WARNING:" ));
 		return;
 	}
