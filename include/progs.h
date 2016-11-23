@@ -431,7 +431,6 @@ typedef struct fb_botaim_s {
 
 typedef struct fb_botskill_s {
 	int   skill_level;            // 0-20 as standard
-	float fast_aim;               //
 	float dodge_amount;           // left/right strafing 
 	float lookahead_time;         // how far ahead the bot can think (regarding items respawning etc) 5-30s in original
 	float prediction_error;       // affects goal travellling error (lower values => turn up earlier) 1-0 in original.  randomised.
@@ -444,6 +443,18 @@ typedef struct fb_botskill_s {
 	float visibility;             // cos(fov / 2) ... fov 90 = cos(45) = 0.7071067, fov 120 = cos(60) = 0.5
 
 	qbool attack_respawns;        // fire at respawns if enemy just died
+
+	float min_volatility;
+	float max_volatility;
+	float reduce_volatility;
+	float ownspeed_volatility_threshold;
+	float ownspeed_volatility;
+	float enemyspeed_volatility_threshold;
+	float enemyspeed_volatility;
+	float enemydirection_volatility;
+	float initial_volatility;
+
+	float current_volatility;
 
 	fb_botaim_t aim_params[2];
 } fb_botskill_t;
@@ -600,6 +611,7 @@ typedef struct fb_entvars_s {
 	float real_pitch;
 	float real_yaw;
 	float last_cmd_sent;
+	struct gedict_s* prev_look_object;          // stores whatever the bot was looking at last frame
 
 	// Item event functions
 	fb_touch_func_t     item_touch;      // called whenever an item is touched

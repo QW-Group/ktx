@@ -195,6 +195,7 @@ void BotSetCommand(gedict_t* self) {
 	if (!firing) {
 		self->fb.last_pitch_sign = self->fb.last_yaw_sign = 0;
 	}
+	self->fb.prev_look_object = self->fb.look_object;
 }
 
 static float goal_client(gedict_t* self) {

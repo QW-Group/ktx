@@ -46,13 +46,7 @@ void SetAttribs(gedict_t* self) {
 	int skill_ = self->fb.skill.skill_level;
 
 	G_bprint (2, "skill &cf00%d&r\n", self->fb.skill.skill_level);
-	if (skill_ > 10) {
-		self->fb.skill.fast_aim = (skill_ - 10) * 0.1;
-		skill_ = 10;
-	}
-	else  {
-		self->fb.skill.fast_aim = 0;
-	}
+	skill_ = min (skill_, 10);
 	self->fb.skill.accuracy = 45 - (skill_ * 2.25);
 
 	self->fb.skill.dodge_amount = 1;
@@ -60,8 +54,7 @@ void SetAttribs(gedict_t* self) {
 	self->fb.skill.lookahead_time = 30;
 	self->fb.skill.prediction_error = 0;
 
-	self->fb.skill.lg_preference = self->fb.skill.fast_aim;
-
+	self->fb.skill.lg_preference = RangeOverSkill (self, 0.0f, 1.0f);
 	self->fb.skill.visibility = 0.7071067f - (0.02f * skill_);   // fov 90 (0.707) => fov 120 (0.5)
 
 	self->fb.skill.aim_params[YAW].minimum = RangeOverSkill(self, 2, 1);
@@ -75,6 +68,17 @@ void SetAttribs(gedict_t* self) {
 	self->fb.skill.aim_params[PITCH].scale = RangeOverSkill (self, 5, 1);
 
 	self->fb.skill.attack_respawns = self->fb.skill.skill_level >= 15;
+
+	// Volatility
+	self->fb.skill.min_volatility = 1.0f;
+	self->fb.skill.max_volatility = RangeOverSkill (self, 2.0f, 1.5f);
+	self->fb.skill.initial_volatility = RangeOverSkill (self, 1.8f, 1.4f);
+	self->fb.skill.reduce_volatility = RangeOverSkill (self, 0.99f, 0.95f);
+	self->fb.skill.ownspeed_volatility_threshold = RangeOverSkill (self, 320, 400);
+	self->fb.skill.ownspeed_volatility = RangeOverSkill (self, 0.3f, 0.1f);
+	self->fb.skill.enemyspeed_volatility_threshold = RangeOverSkill (self, 280, 350);
+	self->fb.skill.enemyspeed_volatility = RangeOverSkill (self, 0.4f, 0.2f);
+	self->fb.skill.enemydirection_volatility = RangeOverSkill (self, 0.8f, 0.4f);
 }
 
 char* SetTeamNetName(int botNumber, const char* teamName) {
