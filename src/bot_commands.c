@@ -696,6 +696,28 @@ static void FrogbotRemovePath (void)
 		nearest_indicator->s.v.effects = (int)nearest_indicator->s.v.effects & ~(EDITOR_UNIDIRECTIONAL_COLOUR | EDITOR_BIDIRECTIONAL_COLOUR);
 }
 
+static void FrogbotRemoveAllPaths (void)
+{
+	gedict_t* nearest = LocateMarker (self->s.v.origin);
+	int i;
+
+	if (nearest == NULL) {
+		G_sprint (self, PRINT_HIGH, "Could not locate marker nearby\n");
+		return;
+	}
+
+	for (i = 0; i < NUMBER_PATHS; ++i) {
+		gedict_t* next = nearest->fb.paths[i].next_marker;
+		if (next) {
+			gedict_t* indicator = MarkerIndicator (next);
+			if (indicator) {
+				indicator->s.v.effects = (int)indicator->s.v.effects & ~(EDITOR_UNIDIRECTIONAL_COLOUR | EDITOR_BIDIRECTIONAL_COLOUR);
+			}
+		}
+		RemovePath (nearest, i);
+	}
+}
+
 static void FrogbotSetZone(void)
 {
 	gedict_t* nearest = LocateMarker (self->s.v.origin);
@@ -866,7 +888,32 @@ static void FrogbotShowInfo (void)
 	char message[1024] = { 0 };
 	int i = 0;
 	gedict_t* marker = self->fb.touch_marker;
-	const char* marker_flags = EncodeMarkerFlags (marker->fb.T);
+	const char* marker_flags = 0;
+
+	if (trap_CmdArgc () >= 3) {
+		char temp[10];
+
+		trap_CmdArgv (2, temp, sizeof (temp));
+
+		if (atoi (temp) >= 1 && atoi (temp) <= NUMBER_MARKERS) {
+			marker = markers[atoi (temp) - 1];
+
+			if (marker == NULL) {
+				G_sprint (self, PRINT_HIGH, "No such marker #%d found\n", atoi (temp));
+				return;
+			}
+		}
+	}
+
+	if (marker == NULL)
+		marker = LocateMarker (self->s.v.origin);
+
+	if (marker == NULL) {
+		G_sprint (self, PRINT_HIGH, "Unable to find nearby marker\n");
+		return;
+	}
+
+	marker_flags = EncodeMarkerFlags (marker->fb.T);
 
 	if (g_globalvars.time < self->fb.last_spec_cp)
 		return;
@@ -875,6 +922,7 @@ static void FrogbotShowInfo (void)
 		return;
 
 	strlcpy (message, va ("Marker #%3d [%s]\n", marker->fb.index + 1, marker->s.v.classname), sizeof (message));
+	strlcat (message, va ("Origin #%3d %3d %3d\n", PASSINTVEC3(marker->s.v.origin)), sizeof (message));
 	strlcat (message, va ("Zone #%2d, Goal #%2d\n", marker->fb.Z_, marker->fb.G_), sizeof (message));
 	strlcat (message, va ("Flags: %s\n", strnull (marker_flags) ? "(none)" : marker_flags), sizeof (message));
 	strlcat (message, "Paths:\n", sizeof (message));
@@ -984,6 +1032,7 @@ static frogbot_cmd_t editor_commands[] = {
 	{ "savemarker", FrogbotSaveMarker, "Saves current marker" },
 	{ "addpath", FrogbotAddPath, "Adds a path between markers" },
 	{ "removepath", FrogbotRemovePath, "Removes a path between markers" },
+	{ "removeallpaths", FrogbotRemoveAllPaths, "Removes all paths from this marker" },
 	{ "setzone", FrogbotSetZone, "Sets a marker's zone #" },
 	{ "setmarkerflag", FrogbotSetMarkerFlag, "Flags a path between two markers" },
 	{ "clearmarkerflag", FrogbotClearMarkerFlag, "Clears flag on a parth between two markers" },
