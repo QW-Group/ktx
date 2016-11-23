@@ -40,7 +40,7 @@ static qbool WaterCombat(gedict_t* self) {
 
 static qbool RocketSafe(void) {
 	float splash_damage = 80 - (0.25 * self->fb.enemy_dist);
-	if (splash_damage <= 0 || (teamplay != 1 && teamplay != 5)) {
+	if (teamplay == 1 || teamplay == 5 || cvar("k_midair") || splash_damage <= 0) {
 		return true;
 	}
 
@@ -118,7 +118,7 @@ static void AvoidQuadBore (gedict_t* self)
 	qbool could_explode = self->fb.desired_weapon_impulse == 7 || self->fb.desired_weapon_impulse == 6;
 	qbool could_hurt_self = could_explode && !has_pent && teamplay != 1 && teamplay != 5;
 
-	if (!has_quad || !could_hurt_self)
+	if ( cvar("k_midair") || !has_quad || !could_hurt_self)
 		return;
 
 	if (self->fb.look_object == &g_edicts[self->s.v.enemy] && self->fb.enemy_dist <= 250) {
@@ -180,7 +180,7 @@ static void SpamRocketShot (gedict_t* self)
 {
 	qbool has_rl = ((int)self->s.v.items & IT_ROCKET_LAUNCHER) && self->s.v.ammo_rockets > 3;
 	qbool safe_to_fire = self->fb.allowedMakeNoise && !CouldHurtTeammate (self);
-    
+
 	if (self->fb.rocketjumping)
 		return;
 
@@ -189,7 +189,7 @@ static void SpamRocketShot (gedict_t* self)
 
 	if (self->fb.look_object) {
 		// dist_sfl = threshold distance before attempting shot for luck
-		float dist_sfl = ((int)self->s.v.items & IT_QUAD) ? 300.0f : 250.0f;
+		float dist_sfl = cvar("k_midair") ? 0 : ((int)self->s.v.items & IT_QUAD) ? 300.0f : 250.0f;
 		vec3_t testplace;
 		vec3_t rel_pos;
 		float rel_dist;

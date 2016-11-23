@@ -372,6 +372,7 @@ void ProcessNewLinkedMarker(gedict_t* self) {
 	}
 
 	// Either look at the next marker or the marker after that...
+	if (self->fb.linked_marker)
 	{
 		vec3_t dir_look = { 0 };
 
