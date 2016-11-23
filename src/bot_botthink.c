@@ -4,7 +4,6 @@
 #include "fb_globals.h"
 
 void AMPHI2BotInLava(void);
-qbool DM6FireAtDoor (gedict_t* self);
 
 // FIXME: Move to bot.skill
 #define CHANCE_EVADE_DUEL 0.08

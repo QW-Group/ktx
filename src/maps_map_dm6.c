@@ -8,8 +8,6 @@ gedict_t* dm6_door = 0;
 qbool CheckNewWeapon (int weapon);
 
 // FIXME: Globals
-extern gedict_t* look_object_;
-extern vec3_t rel_pos;
 extern gedict_t* markers[];
 
 void map_dm6() {
@@ -772,6 +770,9 @@ void map_dm6() {
 
 	// special case...
 	dm6_door = markers[41 - 1];
+	if (!dm6_door->fb.door_entity) {
+		G_Error ("Expected marker 41 to be door...\n");
+	}
 }
 
 void DM6CampLogic() {
@@ -828,10 +829,11 @@ qbool DM6DoorLogic (gedict_t* self, gedict_t* goal_entity)
 {
 	if (goal_entity->fb.Z_ == 1) {
 		if (self->fb.touch_marker->fb.zones[0].task & DM6_DOOR) {
-			if (dm6_door->s.v.takedamage) {
-				if (self->s.v.enemy == NUM_FOR_EDICT(self->fb.look_object)) {
-					if (!self->invincible_time) {
-						if (self->fb.look_object->fb.firepower >= 50) {
+			if (dm6_door->fb.door_entity && dm6_door->fb.door_entity->s.v.takedamage) {
+				gedict_t* enemy = &g_edicts[self->s.v.enemy];
+				if (enemy == self->fb.look_object) {
+					if (!self->invincible_time) {  // on dm6?...
+						if (enemy->fb.firepower >= 50) {
 							goal_entity->fb.saved_goal_desire = 0;
 							return true;
 						}
@@ -846,25 +848,27 @@ qbool DM6DoorLogic (gedict_t* self, gedict_t* goal_entity)
 
 qbool DM6DoorClosed (fb_path_eval_t* eval)
 {
-	return (eval->test_marker == dm6_door && !dm6_door->s.v.takedamage) ||
-		   ((eval->description & DM6_DOOR) && dm6_door->s.v.origin[0] > -64);
+	return (eval->test_marker == dm6_door && !dm6_door->fb.door_entity->s.v.takedamage) ||
+		   ((eval->description & DM6_DOOR) && dm6_door->fb.door_entity->s.v.origin[0] > -64);
 }
 
 void DM6MarkerTouchLogic (gedict_t* self, gedict_t* goalentity_marker)
 {
 	if (goalentity_marker && goalentity_marker->fb.Z_ == 1) {
 		if (self->fb.touch_marker->fb.zones[0].task & DM6_DOOR) {
-			if (dm6_door->s.v.takedamage) {
+			if (dm6_door->fb.door_entity->s.v.takedamage) {
 				vec3_t temp, src, direction;
 
-				VectorAdd(dm6_door->s.v.absmin, dm6_door->s.v.view_ofs, temp);
+				VectorAdd(dm6_door->fb.door_entity->s.v.absmin, dm6_door->fb.door_entity->s.v.view_ofs, temp);
 				VectorSubtract(temp, self->s.v.origin, temp);
 				temp[2] -= 40;
 				normalize(temp, direction);
 				VectorCopy(self->s.v.origin, src);
 				src[2] += 16;
 				traceline(src[0], src[1], src[2], src[0] + direction[0] * 2048, src[1] + direction[1] * 2048, src[2] + direction[2] * 2048, false, self);
-				if (PROG_TO_EDICT(g_globalvars.trace_ent) == dm6_door) {
+				if (PROG_TO_EDICT(g_globalvars.trace_ent) == dm6_door->fb.door_entity) {
+					if (self->fb.debug_path)
+						G_bprint (PRINT_HIGH, "**** TRACED TO DOOR ****\n");
 					self->fb.path_state |= DM6_DOOR;
 				}
 			}
@@ -879,26 +883,69 @@ qbool DM6LookAtDoor (gedict_t* self)
 {
 	if (self->fb.path_state & DM6_DOOR) {
 		self->fb.state |= NOTARGET_ENEMY;
-		self->fb.look_object = look_object_ = dm6_door;
+		self->fb.look_object = dm6_door->fb.door_entity;
+
+		if (self->fb.debug_path)
+			G_bprint (PRINT_HIGH, "looking at door\n");
 		return true;
 	}
 
 	return false;
 }
 
-qbool DM6FireAtDoor (gedict_t* self)
+qbool DM6FireAtDoor (gedict_t* self, vec3_t rel_pos)
 {
 	if (self->fb.path_state & DM6_DOOR) {
-		if (dm6_door->s.v.takedamage) {
+		if (dm6_door->fb.door_entity->s.v.takedamage) {
 			rel_pos[2] -= 38;
 		}
 		else {
-			self->fb.path_state -= DM6_DOOR;
-			self->fb.state &= NOT_NOTARGET_ENEMY;
+			self->fb.path_state &= ~DM6_DOOR;
+			self->fb.state &= ~NOTARGET_ENEMY;
 		}
 
+		if (self->fb.debug_path)
+			G_bprint (PRINT_HIGH, "Shooting at door\n");
 		return true;
 	}
 
 	return false;
+}
+
+void DM6Debug (gedict_t* self)
+{
+	int i, j;
+
+	if (dm6_door) {
+		G_sprint (self, PRINT_HIGH, "DM6 Door is marker #%3d\n", dm6_door->fb.index + 1);
+	}
+	else {
+		G_sprint (self, PRINT_HIGH, "DM6 Door not set...\n");
+	}
+
+	G_sprint (self, PRINT_HIGH, "Paths with DM6_DOOR set:\n");
+	for (i = 0; i < NUMBER_MARKERS; ++i) {
+		gedict_t* s = markers[i];
+		if (s) {
+			for (j = 0; j < NUMBER_PATHS; ++j) {
+				gedict_t* t = markers[i]->fb.paths[j].next_marker;
+				if (t && (s->fb.paths[j].flags & DM6_DOOR)) {
+					G_sprint (self, PRINT_HIGH, "  > %3d (%s) to %3d (%s)\n", s->fb.index + 1, s->s.v.classname, t->fb.index + 1, t->s.v.classname);
+				}
+			}
+		}
+	}
+
+	G_sprint (self, PRINT_HIGH, "Markers with DM6_DOOR task set:\n");
+	for (i = 0; i < NUMBER_MARKERS; ++i) {
+		gedict_t* s = markers[i];
+		if (s && (s->fb.zones[0].task & DM6_DOOR)) {
+			G_sprint (self, PRINT_HIGH, "  > %3d (%s)\n", s->fb.index + 1, s->s.v.classname);
+		}
+	}
+
+	G_sprint (self, PRINT_HIGH, "dm6_door->takedamage = %s\n", dm6_door->s.v.takedamage ? "true" : "false");
+	if (dm6_door->fb.door_entity) {
+		G_sprint (self, PRINT_HIGH, "dm6_door->door->takedamage = %s\n", dm6_door->fb.door_entity->s.v.takedamage ? "true" : "false");
+	}
 }

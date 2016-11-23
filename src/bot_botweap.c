@@ -333,12 +333,14 @@ static qbool PreWarBlockFiring (gedict_t* self)
 {
 	// Only fire in pre-war if enemy attacked us
 	if (match_in_progress == 0) {
+		// Don't fire at other bots
 		if (self->s.v.enemy == 0 || g_edicts[self->s.v.enemy].isBot) {
 			self->fb.firing = false;
 			return true;
 		}
 
-		if (g_globalvars.time > g_edicts[self->s.v.enemy].attack_finished + 0.5) {
+		// If looking at enemy and they haven't attacked us recently, don't fire
+		if (&g_edicts[self->s.v.enemy] == self->fb.look_object && g_globalvars.time > g_edicts[self->s.v.enemy].attack_finished + 0.5) {
 			self->fb.firing = false;
 			return true;
 		}

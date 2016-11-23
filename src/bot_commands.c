@@ -23,6 +23,7 @@ int DecodeMarkerFlagString (const char* string);
 int DecodeMarkerPathFlagString (const char* string);
 const char* EncodeMarkerPathFlags (int path_flags);
 const char* EncodeMarkerFlags (int marker_flags);
+void DM6Debug (gedict_t* self);
 
 #define MAX_BOTS          32
 
@@ -373,6 +374,9 @@ static void FrogbotsDebug (void)
 			}
 			first_bot->fb.dbg_countdown = 33;
 			teleport_player (first_bot, teleport_location, teleport_angles, TFLAGS_SND_DST | TFLAGS_FOG_DST);
+		}
+		else if (streq (sub_command, "dm6")) {
+			DM6Debug (self);
 		}
 	}
 }

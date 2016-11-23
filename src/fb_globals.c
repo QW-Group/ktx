@@ -4,7 +4,6 @@
 
 float predict_dist = 0;
 gedict_t* enemy_ = 0;
-gedict_t* look_object_ = 0;
 gedict_t* test_enemy = 0;
 
 gedict_t* current_waiting_bot = 0;

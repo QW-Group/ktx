@@ -6,7 +6,7 @@
 // FIXME: fb.skill
 #define ATTACK_RESPAWN_TIME 3
 
-qbool DM6FireAtDoor (gedict_t* self);
+qbool DM6FireAtDoor (gedict_t* self, vec3_t rel_pos);
 
 static void BotSetDesiredAngles (gedict_t* self, vec3_t rel_pos)
 {
@@ -84,7 +84,7 @@ static void BotsFireAtWorldLogic(gedict_t* self, vec3_t rel_pos, float* rel_dist
 	VectorSubtract(rel_pos, self->s.v.origin, rel_pos);
 	*rel_dist = vlen(rel_pos);
 
-	if (DM6FireAtDoor (self))
+	if (DM6FireAtDoor (self, rel_pos))
 		return;
 
 	if (*rel_dist < 160) {
