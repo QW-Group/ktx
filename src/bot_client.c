@@ -8,6 +8,11 @@
 void PlayerReady ();
 void BotBlocked (void);
 
+int weapon_impulse_codes[] = {
+	0, IT_AXE, IT_SHOTGUN, IT_SUPER_SHOTGUN, IT_NAILGUN, IT_SUPER_NAILGUN, IT_GRENADE_LAUNCHER, IT_ROCKET_LAUNCHER, IT_LIGHTNING
+};
+
+
 void TeamplayReportVisiblePowerups (gedict_t* player)
 {
 	unsigned int clientFlag = ClientFlag (player);
@@ -28,10 +33,6 @@ void TeamplayReportVisiblePowerups (gedict_t* player)
 		}
 	}
 }
-
-int weapon_impulse_codes[] = {
-	0, IT_AXE, IT_SHOTGUN, IT_SUPER_SHOTGUN, IT_NAILGUN, IT_SUPER_NAILGUN, IT_GRENADE_LAUNCHER, IT_ROCKET_LAUNCHER, IT_LIGHTNING
-};
 
 static void ResetEnemy(gedict_t* self) {
 	gedict_t* test_enemy = NULL;
@@ -125,6 +126,7 @@ void BotSetCommand(gedict_t* self) {
 	int impulse = 0;
 	qbool jumping;
 	qbool firing;
+	vec3_t direction;
 
 	BotPerformRocketJump(self);
 
@@ -166,18 +168,20 @@ void BotSetCommand(gedict_t* self) {
 	jumping &= !self->fb.dbg_countdown;
 	firing &= !self->fb.dbg_countdown;
 
+	direction[0] = DotProduct (g_globalvars.v_forward, self->fb.dir_move_) * (self->fb.dbg_countdown ? 0 : 800);
+	direction[1] = DotProduct (g_globalvars.v_right, self->fb.dir_move_) * (self->fb.dbg_countdown ? 0 : 800);
+	direction[2] = DotProduct (g_globalvars.v_up, self->fb.dir_move_) * (self->fb.dbg_countdown ? 0 : 800);
+	self->fb.desired_angle[2] = 0;
+
 	trap_SetBotCMD (
 		NUM_FOR_EDICT (self),
 		msec,
-		self->fb.desired_angle[0],
-		self->fb.desired_angle[1],
-		0,
-		DotProduct (g_globalvars.v_forward, self->fb.dir_move_) * (self->fb.dbg_countdown ? 0 : 800),
-		DotProduct (g_globalvars.v_right, self->fb.dir_move_) * (self->fb.dbg_countdown ? 0 : 800),
-		DotProduct (g_globalvars.v_up, self->fb.dir_move_) * (self->fb.dbg_countdown ? 0 : 800),
+		PASSVEC3(self->fb.desired_angle),
+		PASSVEC3(direction),
 		(firing ? 1 : 0) | (jumping ? 2 : 0),
 		impulse
 	);
+
 	self->fb.next_impulse = 0;
 	self->fb.botchose = false;
 	self->fb.last_cmd_sent = g_globalvars.time;

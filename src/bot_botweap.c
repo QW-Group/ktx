@@ -64,7 +64,7 @@ qbool CheckNewWeapon(int desired_weapon) {
 		IT_AXE, IT_SHOTGUN, IT_SUPER_SHOTGUN, IT_NAILGUN, IT_SUPER_NAILGUN, IT_GRENADE_LAUNCHER, IT_ROCKET_LAUNCHER, IT_LIGHTNING
 	};
 
-	if (self->s.v.weapon != desired_weapon) {
+	if (self->s.v.weapon != desired_weapon || !BotUsingCorrectWeapon (self)) {
 		int i = 0;
 		for (i = 0; i < sizeof(weapons) / sizeof(weapons[0]); ++i) {
 			if (weapons[i] == desired_weapon) {
@@ -72,9 +72,9 @@ qbool CheckNewWeapon(int desired_weapon) {
 				return true;
 			}
 		}
+		return false;
 	}
-
-	return false;
+	return true;
 }
 
 static qbool ShotForLuck(vec3_t object) {
@@ -334,13 +334,13 @@ static qbool PreWarBlockFiring (gedict_t* self)
 	// Only fire in pre-war if enemy attacked us
 	if (match_in_progress == 0) {
 		// Don't fire at other bots
-		if (self->s.v.enemy == 0 || g_edicts[self->s.v.enemy].isBot) {
+		if (self->s.v.enemy == 0 || g_edicts[self->s.v.enemy].isBot || !self->fb.look_object) {
 			self->fb.firing = false;
 			return true;
 		}
 
 		// If looking at enemy and they haven't attacked us recently, don't fire
-		if (&g_edicts[self->s.v.enemy] == self->fb.look_object && g_globalvars.time > g_edicts[self->s.v.enemy].attack_finished + 0.5) {
+		if ((&g_edicts[self->s.v.enemy] == self->fb.look_object || ! self->fb.debug_path) && g_globalvars.time > g_edicts[self->s.v.enemy].attack_finished + 0.5) {
 			self->fb.firing = false;
 			return true;
 		}
@@ -358,15 +358,18 @@ static qbool PreWarBlockFiring (gedict_t* self)
 static qbool KeepFiringAtEnemy (gedict_t* self)
 {
 	// Keep fire button down if tracking enemy
-	return self->fb.firing && self->fb.look_object == &g_edicts[self->s.v.enemy] && g_random() < 0.666667 && !self->fb.next_impulse;
+	return self->fb.look_object == &g_edicts[self->s.v.enemy] && g_random() < 0.666667 && BotUsingCorrectWeapon(self);
 }
 
 void SetFireButton(gedict_t* self, vec3_t rel_pos, float rel_dist) {
 	if (PreWarBlockFiring (self))
 		return;
 
-	if (KeepFiringAtEnemy(self)) {
-		return;
+	if (self->fb.firing) {
+		if (KeepFiringAtEnemy(self))
+			return;
+		if (!self->fb.willRocketJumpThisTic)
+			self->fb.firing = false;
 	}
 	else if ((!self->fb.firing && g_globalvars.time < self->attack_finished) || self->fb.next_impulse) {
 		return;
@@ -623,6 +626,6 @@ void SelectWeapon(void) {
 		self->fb.state &= ~HURT_SELF;
 	}
 
-	CheckNewWeapon( DesiredWeapon() );
+	CheckNewWeapon( DesiredWeapon () );
 }
 
