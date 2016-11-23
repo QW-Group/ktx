@@ -43,7 +43,6 @@ void RunRandomTrials (float min, float max, float mult)
 
 // TODO: Exchange standard attributes for different bot characters/profiles
 void SetAttribs(gedict_t* self) {
-	float smartness = 10;
 	int skill_ = self->fb.skill.skill_level;
 
 	G_bprint (2, "skill &cf00%d&r\n", self->fb.skill.skill_level);
@@ -54,15 +53,14 @@ void SetAttribs(gedict_t* self) {
 	else  {
 		self->fb.skill.fast_aim = 0;
 	}
-	self->fb.skill.firing_reflex = 0; // RangeOverSkill (self, 0.5, 0.011);
+	self->fb.skill.firing_reflex = 0;
 	self->fb.skill.accuracy = 45 - (skill_ * 2.25);
 
-	// FIXME: Smartness is always 10, so these will always be the same...
-	self->fb.skill.stop_turn_speed = 135 + (smartness * 40.5);
-	self->fb.skill.dodge_amount = smartness * 0.1;
-	self->fb.skill.look_anywhere = smartness * 0.1;
-	self->fb.skill.lookahead_time = 5 + (smartness * 2.5);
-	self->fb.skill.prediction_error = 1 - (smartness * 0.1);
+	self->fb.skill.stop_turn_speed = 135 + 405;
+	self->fb.skill.dodge_amount = 1;
+	self->fb.skill.look_anywhere = 1;
+	self->fb.skill.lookahead_time = 30;
+	self->fb.skill.prediction_error = 0;
 
 	self->fb.skill.lg_preference = self->fb.skill.fast_aim;
 
@@ -78,10 +76,6 @@ void SetAttribs(gedict_t* self) {
 	self->fb.skill.aim_params[PITCH].multiplier = RangeOverSkill(self, 3, 2);
 	self->fb.skill.aim_params[PITCH].scale = RangeOverSkill (self, 5, 1);
 
-	G_bprint (2, "yaw: %f %f %f\n", self->fb.skill.aim_params[YAW].minimum, self->fb.skill.aim_params[YAW].maximum, self->fb.skill.aim_params[YAW].multiplier);
-	RunRandomTrials (self->fb.skill.aim_params[YAW].minimum, self->fb.skill.aim_params[YAW].maximum, self->fb.skill.aim_params[YAW].multiplier);
-	G_bprint (2, "pitch: %f %f %f\n", self->fb.skill.aim_params[PITCH].minimum, self->fb.skill.aim_params[PITCH].maximum, self->fb.skill.aim_params[PITCH].multiplier);
-	RunRandomTrials (self->fb.skill.aim_params[PITCH].minimum, self->fb.skill.aim_params[PITCH].maximum, self->fb.skill.aim_params[PITCH].multiplier);
 	self->fb.skill.attack_respawns = self->fb.skill.skill_level >= 15;
 }
 
