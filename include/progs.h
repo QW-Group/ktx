@@ -436,9 +436,7 @@ typedef struct fb_botskill_s {
 	float lookahead_time;         // how far ahead the bot can think (regarding items respawning etc) 5-30s in original
 	float prediction_error;       // affects goal travellling error (lower values => turn up earlier) 1-0 in original.  randomised.
 	float look_anywhere;          // 0...1  determines when the bot will look at the enemy's location
-	float stop_turn_speed;        // not used
 	float accuracy;
-	float firing_reflex;          // this affects aim as well
 
 	float lg_preference;          // 0...1  previously game-wide, look to use LG when possible
 	float rl_preference;          // 0...1  previously game-wide, look to use RL when possible

@@ -53,10 +53,8 @@ void SetAttribs(gedict_t* self) {
 	else  {
 		self->fb.skill.fast_aim = 0;
 	}
-	self->fb.skill.firing_reflex = 0;
 	self->fb.skill.accuracy = 45 - (skill_ * 2.25);
 
-	self->fb.skill.stop_turn_speed = 135 + 405;
 	self->fb.skill.dodge_amount = 1;
 	self->fb.skill.look_anywhere = 1;
 	self->fb.skill.lookahead_time = 30;
