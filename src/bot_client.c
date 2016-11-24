@@ -149,7 +149,7 @@ void BotSetCommand(gedict_t* self) {
 	if (intermission_running) {
 		self->fb.firing = self->fb.jumping = false;
 	}
-	else if (teamplay && !self->fb.firing) {
+	else if (teamplay && deathmatch == 1 && !self->fb.firing) {
 		// Weaponscripts
 		if (self->s.v.weapon != IT_SHOTGUN && self->s.v.weapon != IT_AXE) {
 			weapon_script_impulse = (self->s.v.ammo_shells ? 2 : 1);
