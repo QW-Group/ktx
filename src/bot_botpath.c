@@ -210,6 +210,7 @@ void ProcessNewLinkedMarker(gedict_t* self) {
 	if (self->fb.linked_marker == self->fb.touch_marker) {
 		if (goalentity_ == self->fb.touch_marker) {
 			if (! WaitingToRespawn(self->fb.touch_marker)) {
+				// Have arrived at goal entity but not quite touched it yet
 				return;
 			}
 		}

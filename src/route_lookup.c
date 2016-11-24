@@ -89,13 +89,10 @@ gedict_t* SightMarker(gedict_t* from_marker, gedict_t* to_marker, float max_dist
 					// 
 					traveltime = SubZoneArrivalTime (zone_time, middle_marker, marker_);
 					if (look_traveltime > traveltime) {
+						// Teleports don't count
 						if (strneq(marker_->s.v.classname, "trigger_teleport")) {
 							look_traveltime = traveltime;
 							look_marker = marker_;
-							marker_->fb.near_teleport = NULL;
-						}
-						else if (streq(marker_->s.v.classname, "trigger_teleport")) {
-							marker_->fb.near_teleport = marker_;
 						}
 					}
 				}

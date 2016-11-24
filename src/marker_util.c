@@ -97,12 +97,8 @@ gedict_t* LocateMarker(vec3_t org) {
 			distance = distance + 1000;
 		}
 		if (distance < shortest_distance) {
-			self->fb.near_teleport = NULL;
 			shortest_distance = distance;
 			closest_marker = marker_;
-		}
-		else if (streq(marker_->s.v.classname, "trigger_teleport")) {
-			self->fb.near_teleport = marker_;
 		}
 	}
 

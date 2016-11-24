@@ -541,8 +541,6 @@ typedef struct fb_entvars_s {
 	float best_score2;
 	float best_goal_time;
 
-	struct gedict_s* near_teleport;           // FIXME: not currently used.  Code was commented out, used to stop bot from accidentally going into teleport
-
 	struct gedict_s* linked_marker;           // the next path in the route to goalentity
 	struct gedict_s* old_linked_marker;       // the previous linked marker
 	struct gedict_s* look_object;             // the player/marker/entity that the bot is locked onto

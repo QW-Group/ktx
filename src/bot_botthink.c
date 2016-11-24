@@ -156,11 +156,21 @@ static void BotOnGroundMovement(gedict_t* self, vec3_t dir_move) {
 static void BotMoveTowardsLinkedMarker(gedict_t* self, vec3_t dir_move) {
 	vec3_t temp;
 	gedict_t* goalentity_ = &g_edicts[self->s.v.goalentity];
+	gedict_t* linked = self->fb.linked_marker;
 
-	VectorAdd(self->fb.linked_marker->s.v.absmin, self->fb.linked_marker->s.v.view_ofs, temp);
+	VectorAdd(linked->s.v.absmin, linked->s.v.view_ofs, temp);
 	VectorSubtract(temp, self->s.v.origin, temp);
 	normalize(temp, dir_move);
-	if (self->fb.linked_marker == self->fb.touch_marker) {
+
+	if (self->fb.path_state & DELIBERATE_BACKUP) {
+		if (linked->fb.arrow_time > g_globalvars.time) {
+			VectorInverse (dir_move);
+		}
+		else {
+			self->fb.path_state &= ~DELIBERATE_BACKUP;
+		}
+	}
+	else if (linked == self->fb.touch_marker) {
 		if (goalentity_ == self->fb.touch_marker) {
 			if (WaitingToRespawn(self->fb.touch_marker)) {
 				VectorClear(dir_move);

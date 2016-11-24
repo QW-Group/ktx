@@ -67,17 +67,23 @@ static void AvoidEdge(gedict_t* self) {
 	}
 }
 
-static void HazardTeleport(gedict_t* self, gedict_t* other) {
+static void HazardTeleport(gedict_t* teleport, gedict_t* teleported_player) {
 	gedict_t* plr;
 
-	self->fb.arrow_time = max (self->fb.arrow_time, g_globalvars.time + ARROW_TIME_AFTER_TELEPORT);
+	teleport->fb.arrow_time = max (teleport->fb.arrow_time, g_globalvars.time + ARROW_TIME_AFTER_TELEPORT);
 
-	for (plr = world; plr = find_plr(plr); ) {
-		if (plr != other && plr->fb.linked_marker == self) {
-			plr->fb.old_linked_marker = NULL;
-			SetLinkedMarker(plr, LocateMarker(plr->s.v.origin), "HazardTeleport");
-			plr->fb.path_state = 0;
-			plr->fb.linked_marker_time = g_globalvars.time + 5;
+	// If teleported bot already has flag set, don't set for others
+	//   (otherwise two bots can keep triggering the same logic and blocking each other)
+	if (teleported_player->fb.path_state & DELIBERATE_BACKUP) {
+		return;
+	}
+
+	// Make all other bots wait a brief period before going through tele
+	for (plr = world; plr = find_plr (plr); ) {
+		// Tell other bots directly next to the teleport to back up a while
+		if (plr->isBot && plr != teleported_player && plr->fb.linked_marker == teleport) {
+			plr->fb.path_state |= DELIBERATE_BACKUP;
+			plr->fb.linked_marker_time = g_globalvars.time + 0.1;
 		}
 	}
 }
@@ -736,7 +742,6 @@ void BotsRocketSpawned (gedict_t* newmis)
 qbool BotsPreTeleport (gedict_t* self, gedict_t* other)
 {
 	if (NoItemTouch (self, other)) {
-		other->fb.near_teleport = self;
 		if (IsMarkerFrame ()) {
 			HazardTeleport (self, other);
 		}

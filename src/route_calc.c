@@ -39,7 +39,6 @@ static void TravelTimeForPath (gedict_t* m, int i)
 
 	// Distance irrelevant if teleporting
 	if (streq(m->s.v.classname, "trigger_teleport")) {
-		m_P->fb.near_teleport = m;
 		m->fb.paths[i].time = 0;
 	}
 	else {
