@@ -111,7 +111,7 @@ void SetAttributesBasedOnSkill (int skill)
 
 	cvar_fset (FB_CVAR_DODGEFACTOR, 1);
 	cvar_fset (FB_CVAR_LOOKANYWHERE, 1);
-	cvar_fset (FB_CVAR_LOOKAHEADTIME, 1);
+	cvar_fset (FB_CVAR_LOOKAHEADTIME, 30);
 	cvar_fset (FB_CVAR_PREDICTIONERROR, 0);
 
 	cvar_fset (FB_CVAR_LGPREF, RangeOverSkill (skill, 0.0f, 1.0f));
