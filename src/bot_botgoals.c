@@ -56,7 +56,7 @@ static qbool GoalLeaveForTeammate (gedict_t* self, gedict_t* goal_entity) {
 }
 
 // Evaluates a goal 
-static void EvalGoal(gedict_t* self, gedict_t* goal_entity) {
+void EvalGoal(gedict_t* self, gedict_t* goal_entity) {
 	float goal_desire = goal_entity && goal_entity->fb.desire ? goal_entity->fb.desire (self) : 0;
 	float goal_time = 0.0f;
 

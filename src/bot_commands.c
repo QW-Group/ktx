@@ -183,6 +183,34 @@ static void FrogbotsRemovebot(void) {
 	memset(lastbot, 0, sizeof(bot_t));
 }
 
+static void PrintCurrentGoals (void)
+{
+	int i;
+	gedict_t* touch = self->fb.touch_marker;
+	extern void EvalGoal (gedict_t* self, gedict_t* goal_entity);
+	gedict_t* first_bot = BotsFirstBot ();
+	gedict_t* temp_self = self;
+
+	if (!touch) {
+		return;
+	}
+
+	self->fb.best_goal_score = 0;
+	self->fb.best_goal = NULL;
+	self->fb.goal_enemy_repel = self->fb.goal_enemy_desire = 0;
+	G_sprint (self, PRINT_HIGH, "Goals from marker #%3d (%s)\n", touch->fb.index + 1, touch->s.v.classname);
+	for (i = 0; i < NUMBER_GOALS; ++i) {
+		gedict_t* next = touch->fb.goals[i].next_marker;
+
+		if (next == NULL || next == world || next == dropper) {
+			continue;
+		}
+
+		EvalGoal (self, next);
+		G_sprint (self, PRINT_HIGH, "  #%2d: %25s = %3.1f\n", i + 1, next->s.v.classname, next->fb.saved_goal_desire);
+	}
+}
+
 static void FrogbotsSetSkill (void)
 {
 	if (!bots_enabled ()) {
@@ -222,7 +250,13 @@ static void FrogbotsDebug (void)
 
 		trap_CmdArgv (2, sub_command, sizeof (sub_command));
 
-		if (streq (sub_command, "door")) {
+		if (match_in_progress)
+			return;
+
+		if (streq (sub_command, "goals")) {
+			PrintCurrentGoals ();
+		} 
+		else if (streq (sub_command, "door")) {
 			if (streq (g_globalvars.mapname, "povdmm4")) {
 				if (markers[0]->fb.door_entity && markers[4]->fb.door_entity) {
 					G_sprint (self, 2, "Low-spawn door is %s @ %f %f %f\n", BotDoorIsClosed (markers[0]) ? "closed" : "open", PASSVEC3(markers[0]->s.v.origin));
@@ -235,11 +269,7 @@ static void FrogbotsDebug (void)
 				G_sprint (self, 2, "Only available on povdmm4.\n");
 			}
 		}
-
-		if (match_in_progress)
-			return;
-
-		if (streq (sub_command, "markers")) {
+		else if (streq (sub_command, "markers")) {
 			int i = 0;
 			
 			for (i = 0; i < NUMBER_MARKERS; ++i) {
