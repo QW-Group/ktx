@@ -120,7 +120,7 @@ static float goal_armor1 (gedict_t* self)
 static float goal_armor2 (gedict_t* self)
 {
 	if (self->fb.desire_armor2) {
-		return (self->fb.desire_armor2 + self->fb.virtual_enemy->fb.desire_armor2);
+		return (self->fb.desire_armor2 + (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_armor2 : 0));
 	}
 	else {
 		qbool low_armor = (qbool)(self->fb.total_armor <= 100 && self->s.v.health >= 50);
@@ -128,7 +128,7 @@ static float goal_armor2 (gedict_t* self)
 		qbool has_quad = (qbool)(self->super_damage_finished <= g_globalvars.time);
 
 		if (low_armor && has_rl && has_quad) {
-			return self->fb.virtual_enemy->fb.desire_armor2;
+			return self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_armor2 : 0;
 		}
 		return 0;
 	}
@@ -137,7 +137,7 @@ static float goal_armor2 (gedict_t* self)
 static float goal_armorInv (gedict_t* self)
 {
 	if (self->fb.desire_armorInv) {
-		return (self->fb.desire_armorInv + self->fb.virtual_enemy->fb.desire_armorInv);
+		return (self->fb.desire_armorInv + (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_armorInv : 0));
 	}
 	else {
 		qbool has_rl = (qbool)(((int)self->s.v.items & IT_ROCKET_LAUNCHER) && (self->s.v.ammo_rockets));
@@ -145,7 +145,7 @@ static float goal_armorInv (gedict_t* self)
 		qbool ok_health = (qbool)(self->s.v.health >= 50);
 
 		if (has_rl && has_quad && ok_health) {
-			return self->fb.virtual_enemy->fb.desire_armorInv;
+			return self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_armorInv : 0;
 		}
 		return 0;
 	}
@@ -153,7 +153,7 @@ static float goal_armorInv (gedict_t* self)
 
 static float goal_supershotgun1 (gedict_t* self)
 {
-	return (self->fb.desire_supershotgun + (self->fb.virtual_enemy->fb.desire_supershotgun * 0.5));
+	return self->fb.desire_supershotgun + (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_supershotgun * 0.5 : 0);
 }
 
 static float goal_supershotgun2 (gedict_t* self)
@@ -166,7 +166,7 @@ static float goal_supershotgun2 (gedict_t* self)
 
 static float goal_nailgun1 (gedict_t* self)
 {
-	return (self->fb.desire_nailgun + (self->fb.virtual_enemy->fb.desire_nailgun * 0.5));
+	return self->fb.desire_nailgun + (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_nailgun * 0.5 : 0);
 }
 
 static float goal_nailgun2 (gedict_t* self)
@@ -179,7 +179,7 @@ static float goal_nailgun2 (gedict_t* self)
 
 static float goal_supernailgun1 (gedict_t* self)
 {
-	return (self->fb.desire_supernailgun + (self->fb.virtual_enemy->fb.desire_supernailgun * 0.5));
+	return self->fb.desire_supernailgun + (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_supernailgun * 0.5 : 0);
 }
 
 static float goal_supernailgun2 (gedict_t* self)
@@ -192,7 +192,7 @@ static float goal_supernailgun2 (gedict_t* self)
 
 static float goal_grenadelauncher1 (gedict_t* self)
 {
-	return (self->fb.desire_grenadelauncher + self->fb.virtual_enemy->fb.desire_grenadelauncher * 0.5);
+	return self->fb.desire_grenadelauncher + (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_grenadelauncher * 0.5 : 0);
 }
 
 static float goal_grenadelauncher2 (gedict_t* self)
@@ -205,7 +205,7 @@ static float goal_grenadelauncher2 (gedict_t* self)
 
 static float goal_rocketlauncher1 (gedict_t* self)
 {
-	return (self->fb.desire_rocketlauncher + self->fb.virtual_enemy->fb.desire_rocketlauncher);
+	return self->fb.desire_rocketlauncher + (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_rocketlauncher : 0);
 }
 
 static float goal_rocketlauncher2 (gedict_t* self)
@@ -218,7 +218,7 @@ static float goal_rocketlauncher2 (gedict_t* self)
 
 static float goal_lightning1 (gedict_t* self)
 {
-	return (self->fb.desire_lightning + (self->fb.virtual_enemy->fb.desire_lightning * 0.5));
+	return self->fb.desire_lightning + (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_lightning * 0.5 : 0);
 }
 
 static float goal_lightning2 (gedict_t* self)
@@ -248,7 +248,7 @@ static float goal_spikes (gedict_t* self)
 static float goal_rockets (gedict_t* self)
 {
 	if (self->s.v.ammo_rockets < 100) {
-		return (self->fb.desire_rockets + self->fb.virtual_enemy->fb.desire_rockets);
+		return self->fb.desire_rockets + (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_rockets : 0);
 	}
 	return 0;
 }
@@ -256,7 +256,7 @@ static float goal_rockets (gedict_t* self)
 static float goal_cells (gedict_t* self)
 {
 	if (self->s.v.ammo_cells < 100) {
-		return (self->fb.desire_cells + (self->fb.virtual_enemy->fb.desire_cells * 0.5));
+		return self->fb.desire_cells + (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_cells * 0.5 : 0);
 	}
 	return 0;
 }
