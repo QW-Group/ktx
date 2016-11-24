@@ -132,9 +132,7 @@ void BotSetCommand(gedict_t* self) {
 
 	// dir_move_ is the direction we want to move in, but need to take inertia into effect
 	// ... as rough guide (and save doubling physics calculations), scale command > 
-	//normalize (self->s.v.velocity, current_direction);
 	VectorNormalize (self->fb.dir_move_);
-	//VectorSubtract (self->fb.dir_move_, current_direction, self->fb.dir_move_);
 	VectorScale (self->fb.dir_move_, sv_maxspeed, self->fb.last_cmd_direction);
 
 	trap_makevectors (self->fb.desired_angle);
@@ -165,12 +163,16 @@ void BotSetCommand(gedict_t* self) {
 	jumping |= self->fb.waterjumping;
 	self->fb.waterjumping = false;
 
-	jumping &= !self->fb.dbg_countdown;
-	firing &= !self->fb.dbg_countdown;
-
-	direction[0] = DotProduct (g_globalvars.v_forward, self->fb.dir_move_) * (self->fb.dbg_countdown ? 0 : 800);
-	direction[1] = DotProduct (g_globalvars.v_right, self->fb.dir_move_) * (self->fb.dbg_countdown ? 0 : 800);
-	direction[2] = DotProduct (g_globalvars.v_up, self->fb.dir_move_) * (self->fb.dbg_countdown ? 0 : 800);
+	if (self->fb.dbg_countdown > 0) {
+		jumping = firing = false;
+		VectorClear (direction);
+		--self->fb.dbg_countdown;
+	}
+	else {
+		direction[0] = DotProduct (g_globalvars.v_forward, self->fb.dir_move_) * 800;
+		direction[1] = DotProduct (g_globalvars.v_right, self->fb.dir_move_) * 800;
+		direction[2] = DotProduct (g_globalvars.v_up, self->fb.dir_move_) * 800;
+	}
 	self->fb.desired_angle[2] = 0;
 
 	trap_SetBotCMD (
@@ -185,11 +187,6 @@ void BotSetCommand(gedict_t* self) {
 	self->fb.next_impulse = 0;
 	self->fb.botchose = false;
 	self->fb.last_cmd_sent = g_globalvars.time;
-	if (self->fb.dbg_countdown)
-		--self->fb.dbg_countdown;
-
-//	if (self->fb.debug_path)
-//		G_bprint (2, ":: state %d [%3.0f %3.0f %3.0f]\n", self->fb.path_state, PASSVEC3(self->fb.last_cmd_direction));
 
 	VectorClear (self->fb.obstruction_normal);
 	if (!firing) {

@@ -484,6 +484,7 @@ static int DesiredWeapon(void) {
 	qbool has_lg = self->s.v.ammo_cells && (items_ & IT_LIGHTNING);
 	qbool shaft_available = false;
 	qbool avoid_rockets = false;
+	qbool firing_lg = self->fb.firing && self->s.v.weapon == IT_LIGHTNING && self->s.v.ammo_cells && g_globalvars.time < self->attack_finished;
 
 	if (TP_CouldDamageTeammate (self))
 		return IT_SHOTGUN;
@@ -498,7 +499,8 @@ static int DesiredWeapon(void) {
 		}
 	}
 
-	if (self->fb.skill.lg_preference >= g_random() && !fb_lg_disabled()) {
+	// If firing LG then keep going, else look at LG_pref to switch to it
+	if ((firing_lg || self->fb.skill.lg_preference >= g_random()) && !fb_lg_disabled()) {
 		if ((self->s.v.waterlevel <= 1) || ((int)self->s.v.items & IT_INVULNERABILITY)) {
 			if (has_lg) {
 				if (self->fb.enemy_dist <= 600) {

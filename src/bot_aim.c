@@ -31,8 +31,10 @@ static void BotStopFiring(gedict_t* bot) {
 		bot->fb.desired_weapon_impulse == 4 ||
 		bot->fb.desired_weapon_impulse == 5 ||
 		bot->fb.desired_weapon_impulse == 8;
+	qbool correct_weapon = BotUsingCorrectWeapon (bot);
+	qbool enemy_alive = bot->s.v.enemy && ISLIVE (&g_edicts[bot->s.v.enemy]);
 
-	bot->fb.firing &= (continuous && BotUsingCorrectWeapon(bot) && bot->s.v.enemy && !ISDEAD(&g_edicts[bot->s.v.enemy])) || bot->fb.rocketjumping;
+	bot->fb.firing &= (continuous && correct_weapon && enemy_alive) || bot->fb.rocketjumping;
 }
 
 // FIXME: Magic numbers (400 = 0.5 * sv_gravity)
@@ -308,15 +310,18 @@ void BotsFireLogic(void) {
 	if (self->fb.look_object) {
 		float rel_dist = 0;
 
-		if (self->fb.look_object->ct == ctPlayer)
-			BotsFireAtPlayerLogic(self, rel_pos, &rel_dist);
-		else
-			BotsFireAtWorldLogic(self, rel_pos, &rel_dist);
+		if (self->fb.look_object->ct == ctPlayer) {
+			BotsFireAtPlayerLogic (self, rel_pos, &rel_dist);
+		}
+		else {
+			BotsFireAtWorldLogic (self, rel_pos, &rel_dist);
+		}
 
 		BotsAimAtFloor (self, rel_pos, rel_dist);
 		BotSetDesiredAngles (self, rel_pos);
-		if (self->fb.look_object->ct == ctPlayer)
+		if (self->fb.look_object->ct == ctPlayer) {
 			BotsAimAtPlayerLogic (self, rel_pos, rel_dist);
+		}
 
 		if (!self->fb.rocketjumping) {
 			SetFireButton(self, rel_pos, rel_dist);
