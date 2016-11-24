@@ -14,7 +14,7 @@ gedict_t* spawn_marker (float x, float y, float z);
 extern gedict_t* markers[];
 
 void SetGoalForMarker(int goal, gedict_t* marker) {
-	if (goal <= 0 || goal > NUMBER_GOALS)
+	if (goal <= 0 || goal > NUMBER_GOALS || marker == NULL)
 		return;
 
 	marker->fb.goals[goal - 1].next_marker = marker;
@@ -47,6 +47,10 @@ void SetZone(int zone, int marker_number) {
 		return;
 
 	marker = markers[marker_number];
+	if (marker == NULL) {
+		return;
+	}
+
 	z = &marker->fb.zones[zone];
 
 	marker->fb.S_ = subzone_indexes[zone]++;

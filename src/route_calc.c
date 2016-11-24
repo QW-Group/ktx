@@ -20,12 +20,6 @@ static float runaway_score = 0;
 static float min_traveltime = 0;
 static float runaway_time = 0;
 static float P_time = 0;
-static gedict_t* first_marker = NULL;
-
-void BecomeMarker(gedict_t* marker) {
-	marker->fb.fl_marker = true;
-	first_marker = marker;
-}
 
 static void TravelTimeForPath (gedict_t* m, int i)
 {

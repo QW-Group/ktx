@@ -88,7 +88,7 @@ static void fb_spawn_door(gedict_t* ent) {
 	VectorMA (position, 0.5, original->s.v.maxs, position);
 	position[2] = min (original->s.v.mins[2], original->s.v.maxs[2]) + 24;
 	ent = CreateMarker(PASSVEC3(position));
-	ent->s.v.classname = "door";
+	ent->s.v.classname = "door_marker";
 	ent->fb.door_entity = original;
 	ent->s.v.solid = SOLID_NOT;     // this will be set to SOLID_TRIGGER if MARKER_DOOR_TOUCHABLE flag set
 
@@ -225,13 +225,16 @@ static void CreateItemMarkers() {
 		int i = 0;
 		qbool found = false;
 
-		if (item->fb.index)
+		// Don't bother with search if it's already processed
+		if (item->fb.fl_marker || item->fb.index) {
 			continue;
+		}
 
 		// check for item spawn
 		for (i = 0; i < ItemSpawnFunctionCount(); ++i) {
 			fb_spawn_t* spawn = ItemSpawnFunction (i);
 			if (streq(spawn->name, item->s.v.classname)) {
+				BecomeMarker (item);
 				spawn->func(item);
 				found = true;
 				break;
@@ -432,3 +435,6 @@ qbool FrogbotsCheckMapSupport (void)
 	return false;
 }
 
+void BecomeMarker(gedict_t* marker) {
+	marker->fb.fl_marker = true;
+}

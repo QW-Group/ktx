@@ -30,7 +30,6 @@ void            SP_item_artifact_super_damage();
 void			SP_item_artifact_invulnerability();
 
 void TookWeaponHandler( gedict_t *p, int new_wp );
-void BecomeMarker(gedict_t* self);
 void BotsBackpackTouchedNonPlayer (gedict_t* backpack, gedict_t* entity);
 void BotsBackpackDropped (gedict_t* self, gedict_t* pack);
 
@@ -147,9 +146,6 @@ void StartItem()
 
 	self->s.v.nextthink = g_globalvars.time + 0.2;	// items start after other solids
 	self->s.v.think = ( func_t ) PlaceItem;
-
-	if (bots_enabled())
-		BecomeMarker(self);
 }
 
 /*
