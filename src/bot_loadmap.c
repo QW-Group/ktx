@@ -201,19 +201,19 @@ static void SpawnMarkerIndicator (gedict_t* item)
 	p->s.v.classname = "marker_indicator";
 	p->fb.index = item->fb.index;
 
-	//VectorCopy (item->s.v.origin, pos);
 	VectorAdd (item->s.v.absmin, item->s.v.absmax, pos);
 	VectorScale (pos, 0.5f, pos);
 	if (streq (item->s.v.classname, "plat")) {
-		//Com_Printf ("> Pos1 %f %f %f, Pos2 %f %f %f\n", PASSVEC3 (item->pos1), PASSVEC3 (item->pos2));
-		//Com_Printf ("> Mins %f %f %f, Maxs %f %f %f\n", PASSVEC3 (item->s.v.mins), PASSVEC3 (item->s.v.maxs));
-		//Com_Printf ("> AbsMins %f %f %f, AbsMaxs %f %f %f\n", PASSVEC3 (item->s.v.absmin), PASSVEC3 (item->s.v.absmax));
 		VectorAdd (item->s.v.mins, item->s.v.maxs, pos);
 		VectorScale (pos, 0.5f, pos);
-		//Com_Printf ("Marker #%d [%s] @ %f %f %f\n", item->fb.index, item->s.v.classname, PASSVEC3 (pos));
 	}
 
 	setorigin( p, PASSVEC3( pos ) );
+}
+
+static qbool ProcessedItem (gedict_t* item)
+{
+	return item->fb.fl_marker || item->fb.index;
 }
 
 static void CreateItemMarkers() {
@@ -226,7 +226,7 @@ static void CreateItemMarkers() {
 		qbool found = false;
 
 		// Don't bother with search if it's already processed
-		if (item->fb.fl_marker || item->fb.index) {
+		if (ProcessedItem(item)) {
 			continue;
 		}
 
@@ -252,7 +252,7 @@ static void CreateItemMarkers() {
 			}
 		}
 
-		if (found && FrogbotShowMarkerIndicators()) {
+		if (found && FrogbotShowMarkerIndicators() && ProcessedItem(item)) {
 			SpawnMarkerIndicator (item);
 		}
 	}
@@ -304,7 +304,7 @@ static void CustomiseFrogbotMap (void)
 	// KTX may have added a quad, so to keep routes compatible with PR1-version, we add it as a marker after others
 	if (streq(g_globalvars.mapname, "aerowalk"))
 	{
-		gedict_t* quad = find (world, FOFCLSN, "item_artifact_super_damage");
+		gedict_t* quad = ez_find (world, "item_artifact_super_damage");
 		if (quad) {
 			gedict_t* nearest_marker = LocateMarker (quad->s.v.origin);
 			int i = 0;
@@ -314,14 +314,11 @@ static void CustomiseFrogbotMap (void)
 
 			// Quad is in same zone as nearest marker, and linked by the first path that's valid
 			SetZone (nearest_marker->fb.Z_, quad->fb.index + 1);
-			SetGoalForMarker (20, quad);
-			for (i = 0; i < NUMBER_PATHS; ++i) {
-				if (nearest_marker->fb.paths[i].next_marker == 0) {
-					SetMarkerPath (nearest_marker->fb.index + 1, i, quad->fb.index + 1);
-					SetMarkerPath (quad->fb.index + 1, 0, nearest_marker->fb.index + 1);
-					break;
-				}
-			}
+			SetGoalForMarker (18, quad);
+			AddPath (nearest_marker, quad);
+			AddPath (quad, nearest_marker);
+
+			SpawnMarkerIndicator (quad);
 		}
 	}
 

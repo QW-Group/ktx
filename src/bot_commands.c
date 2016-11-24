@@ -244,7 +244,7 @@ static void FrogbotsDebug (void)
 			
 			for (i = 0; i < NUMBER_MARKERS; ++i) {
 				if (markers[i]) {
-					G_sprint (self, 2, "%d / %d: %s\n", i, markers[i]->fb.index, markers[i]->s.v.classname);
+					G_sprint (self, 2, "%d / %d: %s\n", i, markers[i]->fb.index + 1, markers[i]->s.v.classname);
 				}
 			}
 		}
@@ -271,7 +271,7 @@ static void FrogbotsDebug (void)
 				G_sprint (self, 2, "(marker #%d not present)\n", atoi(sub_command));
 			}
 			else {
-				G_sprint (self, 2, "Marker %d, %s, position %f %f %f\n", marker->fb.index, marker->s.v.classname, PASSVEC3 (marker->s.v.origin));
+				G_sprint (self, 2, "Marker %d, %s, position %f %f %f\n", marker->fb.index + 1, marker->s.v.classname, PASSVEC3 (marker->s.v.origin));
 				G_sprint (self, 2, "> mins [%f %f %f] maxs [%f %f %f]\n", PASSVEC3 (marker->s.v.mins), PASSVEC3 (marker->s.v.maxs));
 				G_sprint (self, 2, "> absmin [%f %f %f] absmax [%f %f %f]\n", PASSVEC3 (marker->s.v.absmin), PASSVEC3 (marker->s.v.absmax));
 				G_sprint (self, 2, "Zone %d, Subzone %d\n", marker->fb.Z_, marker->fb.S_);
@@ -280,7 +280,7 @@ static void FrogbotsDebug (void)
 					gedict_t* next = marker->fb.paths[i].next_marker;
 
 					if (next != NULL) {
-						G_sprint (self, 2, "  %d: %d (%s), time %f\n", i, next->fb.index, next->s.v.classname, marker->fb.paths[i].time);
+						G_sprint (self, 2, "  %d: %d (%s), time %f\n", i, next->fb.index + 1, next->s.v.classname, marker->fb.paths[i].time);
 					}
 				}
 			}
@@ -304,7 +304,7 @@ static void FrogbotsDebug (void)
 					ZoneMarker (from_marker, to, path_normal);
 					traveltime = SubZoneArrivalTime (zone_time, middle_marker, to);
 					G_sprint (self, 2, "Travel time %f, zone_time %f\n", traveltime, zone_time);
-					G_sprint (self, 2, "Middle marker %d (zone %d subzone %d), time %f\n", middle_marker->fb.index, middle_marker->fb.Z_, middle_marker->fb.S_, middle_marker->fb.subzones[to->fb.S_].time);
+					G_sprint (self, 2, "Middle marker %d (zone %d subzone %d), time %f\n", middle_marker->fb.index + 1, middle_marker->fb.Z_, middle_marker->fb.S_, middle_marker->fb.subzones[to->fb.S_].time);
 
 					{
 						float best_score = -1000000;
@@ -352,17 +352,17 @@ static void FrogbotsDebug (void)
 			}
 
 			trap_CmdArgv (3, sub_command, sizeof (sub_command));
-			marker = markers[(int)bound (0, atoi (sub_command), NUMBER_MARKERS - 1)];
+			marker = markers[(int)bound (0, atoi (sub_command) - 1, NUMBER_MARKERS - 1)];
 
-			if (marker == NULL || marker->fb.index != atoi(sub_command)) {
+			if (marker == NULL || marker->fb.index + 1 != atoi(sub_command)) {
 				G_sprint (self, 2, "(marker #%d not present)\n", atoi(sub_command));
 				return;
 			}
 
 			trap_CmdArgv (4, sub_command, sizeof (sub_command));
-			target = markers[(int)bound (0, atoi (sub_command), NUMBER_MARKERS - 1)];
+			target = markers[(int)bound (0, atoi (sub_command) - 1, NUMBER_MARKERS - 1)];
 
-			if (target == NULL || target->fb.index != atoi(sub_command)) {
+			if (target == NULL || target->fb.index + 1 != atoi(sub_command)) {
 				G_sprint (self, 2, "(marker #%d not present)\n", atoi(sub_command));
 				return;
 			}
@@ -542,6 +542,32 @@ void FrogbotEditorMarkerTouched (gedict_t* marker)
 	last_touched_marker = marker;
 }
 
+static void FrogbotMapInfo (void)
+{
+	if (streq (g_globalvars.mapname, "aerowalk")) {
+		gedict_t* quad = ez_find (world, "item_artifact_super_damage");
+		if (quad) {
+			gedict_t* indicator = MarkerIndicator (quad);
+
+			G_sprint (self, PRINT_HIGH, "Found quad damage, marker #%3d, goal %d, zone %d\n", quad->fb.index + 1, quad->fb.G_, quad->fb.Z_);
+			G_sprint (self, PRINT_HIGH, " solid = %d, fl_marker = %s\n", (int)quad->s.v.solid, quad->fb.fl_marker);
+
+			if (indicator) {
+				G_sprint (self, PRINT_HIGH, "Indicator found @ %d %d %d\n", PASSINTVEC3 (indicator->s.v.origin));
+			}
+			else {
+				G_sprint (self, PRINT_HIGH, "Indicator for quad not found...\n");
+			}
+		}
+		else {
+			G_sprint (self, PRINT_HIGH, "Quad damage not found\n");
+		}
+	}
+	else {
+		G_sprint (self, PRINT_HIGH, "No map-specific info available\n");
+	}
+}
+
 static void FrogbotAddMarker (void)
 {
 	vec3_t pos, nearest_pos;
@@ -645,7 +671,7 @@ static void FrogbotAddPath (void)
 
 	if (source_to_target_path >= 0) {
 		if (AddPath (nearest, saved_marker) >= 0) {
-			G_sprint (self, PRINT_HIGH, "Marker %d > %d linked (bi-directional)\n", nearest->fb.index, saved_marker->fb.index);
+			G_sprint (self, PRINT_HIGH, "Marker %d > %d linked (bi-directional)\n", nearest->fb.index + 1, saved_marker->fb.index + 1);
 			nearest_indicator = MarkerIndicator (nearest);
 			if (nearest_indicator) {
 				nearest_indicator->s.v.effects = ((int)nearest_indicator->s.v.effects & ~EDITOR_UNIDIRECTIONAL_COLOUR) | EDITOR_BIDIRECTIONAL_COLOUR;
@@ -660,7 +686,7 @@ static void FrogbotAddPath (void)
 	}
 
 	if (AddPath (saved_marker, nearest) >= 0) {
-		G_sprint (self, PRINT_HIGH, "Marker %d > %d linked (uni-directional)\n", saved_marker->fb.index, nearest->fb.index);
+		G_sprint (self, PRINT_HIGH, "Marker %d > %d linked (uni-directional)\n", saved_marker->fb.index + 1, nearest->fb.index + 1);
 		nearest_indicator = MarkerIndicator (nearest);
 		if (nearest_indicator) {
 			nearest_indicator->s.v.effects = ((int)nearest_indicator->s.v.effects & ~EDITOR_BIDIRECTIONAL_COLOUR) | EDITOR_UNIDIRECTIONAL_COLOUR;
@@ -965,6 +991,44 @@ static void FrogbotsRemoveAll (void)
 	}
 }
 
+static void FrogbotGoalSummary (void)
+{
+	int i, j;
+
+	G_sprint (self, PRINT_HIGH, "Goal summary:\n");
+	for (i = 1; i <= NUMBER_GOALS; ++i) {
+		qbool first = true;
+		for (j = 0; j < NUMBER_MARKERS; ++j) {
+			if (markers[j] && markers[j]->fb.G_ == i) {
+				if (first) {
+					G_sprint (self, PRINT_HIGH, "  Goal #%2d:\n", i);
+					first = false;
+				}
+				G_sprint (self, PRINT_HIGH, "    %3d: %s\n", markers[j]->fb.index + 1, markers[j]->s.v.classname);
+			}
+		}
+	}
+}
+
+static void FrogbotGoalInfo (void)
+{
+	gedict_t* marker = self->fb.touch_marker;
+	int g;
+
+	if (marker == NULL) {
+		return;
+	}
+
+	G_sprint (self, PRINT_HIGH, "Goals for marker #%d (%s)\n", marker->fb.index + 1, marker->s.v.classname);
+	for (g = 0; g < NUMBER_GOALS; ++g) {
+		gedict_t* next = marker->fb.goals[g].next_marker;
+
+		if (next && next != world && next != dropper) {
+			G_sprint (self, PRINT_HIGH, "%2d: time %3.1f: marker %3d: %s\n", g + 1, marker->fb.goals[g].time, next->fb.index + 1, next->s.v.classname);
+		}
+	}
+}
+
 static void FrogbotSummary (void)
 {
 	int marker_count = 0;
@@ -1045,7 +1109,10 @@ static frogbot_cmd_t editor_commands[] = {
 	{ "clearpathflag", FrogbotClearPathFlag, "Clears flag on a parth between two markers" },
 	{ "save", FrogbotSaveBotFile, "Saves current routing as a .bot file" },
 	{ "info", FrogbotShowInfo, "Shows information about the current marker" },
-	{ "summary", FrogbotSummary, "Shows summary of current map" }
+	{ "summary", FrogbotSummary, "Shows summary of current map" },
+	{ "goalsummary", FrogbotGoalSummary, "Show summary of goals" },
+	{ "mapinfo", FrogbotMapInfo, "Shows information about current map" },
+	{ "goalinfo", FrogbotGoalInfo, "Shows goal information for current marker" }
 };
 
 #define NUM_EDITOR_COMMANDS (sizeof (editor_commands) / sizeof (editor_commands[0]))
@@ -1113,30 +1180,41 @@ void Bot_Print_Thinking (void)
 	if (g_globalvars.time < self->fb.last_spec_cp)
 		return;
 
-	strlcat(data, va("Bot: %s\n", bot->s.v.netname), sizeof(data));
-	strlcat(data, va("  %s: %s (%d)\n", redtext ("Touch"), bot->fb.touch_marker ? bot->fb.touch_marker->s.v.classname : "(none)", bot->fb.touch_marker ? bot->fb.touch_marker->fb.index : -1), sizeof(data));
-	strlcat(data, va("  %s: %s\n", redtext ("Looking"), bot->fb.look_object ? bot->fb.look_object->s.v.classname : "(nothing)"), sizeof(data));
-	strlcat(data, va("  %s: %s (%d)\n", redtext ("Linked"), linked ? linked->s.v.classname : "?", linked ? linked->fb.index : -1), sizeof (data));
-	strlcat(data, va("  %s: %s (%d)\n", redtext ("OldLinked"), oldlink ? oldlink->s.v.classname : "?", oldlink ? oldlink->fb.index : -1), sizeof (data));
-	strlcat(data, va("  %s: %s\n", redtext ("GoalEnt"), bot->s.v.goalentity ? va("%s (%d) (%f)", g_edicts[bot->s.v.goalentity].s.v.classname, g_edicts[bot->s.v.goalentity].fb.index, g_edicts[bot->s.v.goalentity].fb.saved_goal_desire) : "(none)"), sizeof(data));
-	//strlcat(data, va("  %s: armor %d, damage %d\n", redtext ("Strength"), (int)bot->fb.total_armor, (int)bot->fb.total_damage), sizeof(data));
-	//strlcat(data, va("  %s: RA %d YA %d GA %d\n", redtext ("Desire"), (int)bot->fb.desire_armorInv, (int)bot->fb.desire_armor2, (int)bot->fb.desire_armor1), sizeof(data));
-	//strlcat(data, va("  %s: LG %d RL %d\n", redtext ("Desire"), (int)bot->fb.desire_lightning, (int)bot->fb.desire_rocketlauncher), sizeof(data));
-	strlcat(data, "\n", sizeof(data));
-	strlcat (data, va ("  %s: %f %f %f\n", redtext ("Velocity"), PASSVEC3 (bot->s.v.velocity)), sizeof(data));
-	strlcat (data, va ("  %s: %f %f %f\n", redtext ("Obstruction"), PASSVEC3 (bot->fb.obstruction_normal)), sizeof (data));
-	strlcat (data, va ("  %s: %f %f %f\n", redtext ("LastDirection"), PASSVEC3 (bot->fb.last_cmd_direction)), sizeof (data));
-
-	if (bot->s.v.enemy) {
-		gedict_t* enemy = &g_edicts[bot->s.v.enemy];
-
-		strlcat(data, va("\n%s: %s\n", redtext ("Enemy"), enemy->s.v.netname), sizeof(data));
-		strlcat(data, va("  %s: armor %d, damage %d\n", redtext ("Strength"), (int)enemy->fb.total_armor, (int)enemy->fb.total_damage), sizeof(data));
-		strlcat(data, va("  %s: RA %d YA %d GA %d\n", redtext ("Desire"), (int)enemy->fb.desire_armorInv, (int)enemy->fb.desire_armor2, (int)bot->fb.desire_armor1), sizeof(data));
-		strlcat(data, va("  %s: LG %d RL %d\n", redtext ("Desire"), (int)enemy->fb.desire_lightning, (int)enemy->fb.desire_rocketlauncher), sizeof(data));
+	if (FrogbotOptionEnabled (FB_OPTION_SHOW_ROUTING_LOGIC)) {
+		strlcat(data, "\n", sizeof(data));
+		strlcat (data, va ("  %s: %s (%d)\n", redtext ("Touch"), bot->fb.touch_marker ? bot->fb.touch_marker->s.v.classname : "(none)", bot->fb.touch_marker ? bot->fb.touch_marker->fb.index : -1), sizeof (data));
+		strlcat (data, va ("  %s: %s\n", redtext ("Looking"), bot->fb.look_object ? bot->fb.look_object->s.v.classname : "(nothing)"), sizeof (data));
+		strlcat (data, va ("  %s: %s (%d)\n", redtext ("Linked"), linked ? linked->s.v.classname : "?", linked ? linked->fb.index : -1), sizeof (data));
+		strlcat (data, va ("  %s: %s (%d)\n", redtext ("OldLinked"), oldlink ? oldlink->s.v.classname : "?", oldlink ? oldlink->fb.index : -1), sizeof (data));
+		strlcat (data, va ("  %s: %s\n", redtext ("GoalEnt"), bot->s.v.goalentity ? va ("%s (%d) (%f)", g_edicts[bot->s.v.goalentity].s.v.classname, g_edicts[bot->s.v.goalentity].fb.index, g_edicts[bot->s.v.goalentity].fb.saved_goal_desire) : "(none)"), sizeof (data));
 	}
 
-	G_centerprint (self, data);
+	if (FrogbotOptionEnabled (FB_OPTION_SHOW_DUEL_LOGIC)) {
+		strlcat(data, "\n", sizeof(data));
+		strlcat(data, va("  %s: armor %d, damage %d\n", redtext ("Strength"), (int)bot->fb.total_armor, (int)bot->fb.total_damage), sizeof(data));
+		strlcat(data, va("  %s: RA %d YA %d GA %d\n", redtext ("Desire"), (int)bot->fb.desire_armorInv, (int)bot->fb.desire_armor2, (int)bot->fb.desire_armor1), sizeof(data));
+		strlcat(data, va("  %s: LG %d RL %d\n", redtext ("Desire"), (int)bot->fb.desire_lightning, (int)bot->fb.desire_rocketlauncher), sizeof(data));
+
+		if (bot->s.v.enemy) {
+			gedict_t* enemy = &g_edicts[bot->s.v.enemy];
+
+			strlcat(data, va("\n%s: %s\n", redtext ("Enemy"), enemy->s.v.netname), sizeof(data));
+			strlcat(data, va("  %s: armor %d, damage %d\n", redtext ("Strength"), (int)enemy->fb.total_armor, (int)enemy->fb.total_damage), sizeof(data));
+			strlcat(data, va("  %s: RA %d YA %d GA %d\n", redtext ("Desire"), (int)enemy->fb.desire_armorInv, (int)enemy->fb.desire_armor2, (int)bot->fb.desire_armor1), sizeof(data));
+			strlcat(data, va("  %s: LG %d RL %d\n", redtext ("Desire"), (int)enemy->fb.desire_lightning, (int)enemy->fb.desire_rocketlauncher), sizeof(data));
+		}
+	}
+
+	if (FrogbotOptionEnabled (FB_OPTION_SHOW_MOVEMENT_LOGIC)) {
+		strlcat (data, "\n", sizeof (data));
+		strlcat (data, va ("  %s: %f %f %f\n", redtext ("Velocity"), PASSVEC3 (bot->s.v.velocity)), sizeof (data));
+		strlcat (data, va ("  %s: %f %f %f\n", redtext ("Obstruction"), PASSVEC3 (bot->fb.obstruction_normal)), sizeof (data));
+		strlcat (data, va ("  %s: %f %f %f\n", redtext ("LastDirection"), PASSVEC3 (bot->fb.last_cmd_direction)), sizeof (data));
+	}
+
+	if (data[0]) {
+		G_centerprint (self, data);
+	}
 	self->fb.last_spec_cp = g_globalvars.time + 0.2;
 }
 
