@@ -1779,10 +1779,6 @@ void PlayerDeathThink()
     if( k_standby )
         return;
 
-	if (self->isBot) {
-		BotDeathThink();
-	}
-
 	if ( ( ( int ) ( self->s.v.flags ) ) & FL_ONGROUND )
 	{
 		forward = vlen( self->s.v.velocity );

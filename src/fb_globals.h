@@ -197,7 +197,6 @@ void BotWaterMove (gedict_t* self);
 float goal_NULL (gedict_t* self);
 
 // client.qc
-void BotDeathThink (void);
 void BotClientEntersEvent (gedict_t* self, gedict_t* spawn_pos);
 void BotPreThink (gedict_t* self);
 void BotClientConnectedEvent (gedict_t* self);

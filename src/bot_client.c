@@ -4,6 +4,8 @@
 #include "fb_globals.h"
 
 #define PERIODIC_MM2_STATUS 8
+#define MIN_DEAD_TIME 0.2f
+#define MAX_DEAD_TIME 1.0f
 
 void PlayerReady ();
 void BotBlocked (void);
@@ -11,7 +13,6 @@ void BotBlocked (void);
 int weapon_impulse_codes[] = {
 	0, IT_AXE, IT_SHOTGUN, IT_SUPER_SHOTGUN, IT_NAILGUN, IT_SUPER_NAILGUN, IT_GRENADE_LAUNCHER, IT_ROCKET_LAUNCHER, IT_LIGHTNING
 };
-
 
 void TeamplayReportVisiblePowerups (gedict_t* player)
 {
@@ -114,10 +115,10 @@ void BotClientEntersEvent(gedict_t* self, gedict_t* spawn_pos)
 	self->s.v.blocked = (func_t) BotBlocked;
 }
 
-// Called by client/PlayerDeathThink
-void BotDeathThink(void) {
-	self->fb.firing = false;
-	self->fb.jumping = (qbool) (g_random() >= 0.5); // FIXME: 50% chance of respawning every frame
+static qbool BotRequestRespawn(gedict_t* self) {
+	float time_dead = min (g_globalvars.time - self->fb.last_death, MAX_DEAD_TIME);
+
+	return self->s.v.deadflag == DEAD_RESPAWNABLE && time_dead > MIN_DEAD_TIME && (g_random () < (time_dead / MAX_DEAD_TIME));
 }
 
 qbool BotUsingCorrectWeapon (gedict_t* self)
@@ -181,6 +182,13 @@ void BotSetCommand(gedict_t* self) {
 		direction[2] = DotProduct (g_globalvars.v_up, self->fb.dir_move_) * 800;
 	}
 	self->fb.desired_angle[2] = 0;
+
+	if (ISDEAD (self)) {
+		firing = false;
+		jumping = BotRequestRespawn (self);
+		VectorClear (direction);
+		impulse = 0;
+	}
 
 	trap_SetBotCMD (
 		NUM_FOR_EDICT (self),
