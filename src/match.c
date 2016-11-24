@@ -3110,7 +3110,7 @@ void IdlebotCheck ()
 		return;
 	}
 
-	i = CountPlayers();
+	i = CountPlayers() - CountBots();
 
 	if( 0.5f * i > CountRPlayers() || i < 2 ) {
 		p = find ( world, FOFCLSN, "idlebot" );
