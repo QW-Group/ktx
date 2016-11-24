@@ -104,6 +104,9 @@ void RegisterSkillVariables (void)
 
 void SetAttributesBasedOnSkill (int skill)
 {
+	char* cfg_name;
+
+	skill = bound (MIN_FROGBOT_SKILL, skill, MAX_FROGBOT_SKILL);
 	cvar_fset (FB_CVAR_ACCURACY, 45 - min (skill, 10) * 2.25);
 
 	cvar_fset (FB_CVAR_DODGEFACTOR, 1);
@@ -137,6 +140,18 @@ void SetAttributesBasedOnSkill (int skill)
 	cvar_fset (FB_CVAR_ENEMYSPEED_VOLATILITY_THRESHOLD, RangeOverSkill (skill, 280, 400));
 	cvar_fset (FB_CVAR_OWNSPEED_VOLATILITY_INCREASE, RangeOverSkill (skill, 0.6f, 0.2f));
 	cvar_fset (FB_CVAR_ENEMYDIRECTION_VOLATILITY_INCREASE, RangeOverSkill (skill, 0.8f, 0.4f));
+
+	{
+		char buf[1024 * 4];
+
+		cfg_name = va ("bots/configs/skill_all.cfg", skill);
+		if ( can_exec( cfg_name ) )
+			trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
+
+		cfg_name = va ("bots/configs/skill_%02d.cfg", skill);
+		if ( can_exec( cfg_name ) )
+			trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
+	}
 }
 
 // TODO: Exchange standard attributes for different bot characters/profiles
