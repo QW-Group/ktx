@@ -3,7 +3,7 @@
 #include "g_local.h"
 #include "fb_globals.h"
 
-#define PERIODIC_MM2_STATUS 8
+#define PERIODIC_MM2_STATUS 4
 #define MIN_DEAD_TIME 0.2f
 #define MAX_DEAD_TIME 1.0f
 
@@ -307,7 +307,7 @@ static void BotPeriodicMessages (gedict_t* self)
 {
 	gedict_t* opponent = NULL;
 
-	if (g_globalvars.time - self->fb.last_mm2_status > PERIODIC_MM2_STATUS) {
+	if (PAST(last_mm2_status)) {
 		qbool has_rl = ((int)self->s.v.items & IT_ROCKET_LAUNCHER) && self->s.v.ammo_rockets >= 3;
 		qbool has_lg = ((int)self->s.v.items & IT_LIGHTNING) && self->s.v.ammo_cells >= 6;
 		qbool is_strong = (has_rl || has_lg) && self->fb.total_damage >= 120;
@@ -321,11 +321,11 @@ static void BotPeriodicMessages (gedict_t* self)
 		else if (self->tp.enemy_count == 0) {
 			TeamplayMessageByName (self, "status");
 		}
-		else if (self->fb.look_object && NUM_FOR_EDICT(self->fb.look_object) == self->s.v.enemy) {
+		else if (self->fb.look_object && NUM_FOR_EDICT (self->fb.look_object) == self->s.v.enemy) {
 			TeamplayMessageByName (self, "point");
 		}
 
-		self->fb.last_mm2_status = g_globalvars.time + PERIODIC_MM2_STATUS * crandom();
+		self->fb.last_mm2_status = g_globalvars.time + PERIODIC_MM2_STATUS * (g_random() + 0.5);
 	}
 
 	// Check for opponents with powerups

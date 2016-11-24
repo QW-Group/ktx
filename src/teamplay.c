@@ -56,6 +56,7 @@
 #define TP_SEPARATOR       "/"
 #define TP_NAME_HEALTH     "health"
 #define TP_NAME_AMMO       "ammo"
+#define TP_NAME_WEAPON     "weapon"
 
 #define TP_NAME_QUADDED    "{&c05fquaded&cfff}"
 #define TP_NAME_PENTED     "{&cf00pented&cfff}"
@@ -457,8 +458,9 @@ static char* TeamplayNeedText (unsigned long needFlags)
 
 	buffer[0] = '\0';
 
-	if (needFlags & it_armor)
+	if (needFlags & it_armor) {
 		strlcat (buffer, TP_NAME_ARMOR, sizeof (buffer));
+	}
 	if (needFlags & it_health) {
 		if (buffer[0])
 			strlcat (buffer, TP_SEPARATOR, sizeof (buffer));
@@ -469,7 +471,12 @@ static char* TeamplayNeedText (unsigned long needFlags)
 			strlcat (buffer, TP_SEPARATOR, sizeof (buffer));
 		strlcat (buffer, TP_NAME_AMMO, sizeof (buffer));
 	}
-	
+	if (needFlags & (it_rl | it_lg)) {
+		if (buffer[0])
+			strlcat (buffer, TP_SEPARATOR, sizeof (buffer));
+		strlcat (buffer, TP_NAME_WEAPON, sizeof (buffer));
+	}
+
 	return buffer;
 }
 

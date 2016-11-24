@@ -379,7 +379,7 @@ void StartItemFB (gedict_t* ent)
 
 static void BotTookMessage (gedict_t* item, gedict_t* player)
 {
-	if (player->isBot) {
+	if (player->isBot && teamplay) {
 		TeamplayMessageByName (player, "took");
 	}
 }
