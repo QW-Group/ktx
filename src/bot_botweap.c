@@ -374,6 +374,9 @@ void SetFireButton(gedict_t* self, vec3_t rel_pos, float rel_dist) {
 	else if ((!self->fb.firing && g_globalvars.time < self->attack_finished) || self->fb.next_impulse) {
 		return;
 	}
+	else if ((!self->fb.firing && g_globalvars.time < self->fb.min_fire_time)) {
+		return;
+	}
 
 	if (SameTeam (self->fb.look_object, self)) {
 		return;

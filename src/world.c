@@ -25,6 +25,7 @@
 
 #include "g_local.h"
 
+void RegisterSkillVariables (void);
 void  SUB_regen();
 void  CheckAll();
 void  FixSpecWizards ();
@@ -869,6 +870,8 @@ void FirstFrame	( )
 		RegisterCvarEx (va ("k_fb_name_enemy_%d", i), "");
 		RegisterCvarEx (va ("k_fb_name_team_%d", i), "");
 	}
+
+	RegisterSkillVariables ();
 // }
 
 // below globals changed only here

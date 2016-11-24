@@ -53,6 +53,10 @@ static void ResetEnemy(gedict_t* self) {
 				test_enemy->fb.goal_refresh_time = 0;
 			}
 		}
+
+		if (test_enemy->fb.prev_look_object == self) {
+			test_enemy->fb.prev_look_object = NULL;
+		}
 	}
 
 	self->s.v.enemy = NUM_FOR_EDICT(world);
@@ -81,6 +85,7 @@ void BotPlayerDeathEvent(gedict_t* self) {
 	}
 
 	self->fb.last_death = g_globalvars.time;
+	self->fb.prev_look_object = NULL;
 }
 
 // Was: PutClientInServer_apply()
@@ -90,6 +95,8 @@ void BotClientEntersEvent(gedict_t* self, gedict_t* spawn_pos)
 	self->fb.desired_angle[0] = self->fb.real_pitch = self->s.v.angles[0];
 	self->fb.desired_angle[1] = self->fb.real_yaw = self->s.v.angles[1];
 	self->fb.state = 0;
+	self->fb.min_fire_time = g_globalvars.time + self->fb.skill.awareness_delay;
+	self->fb.last_pitch_sign = self->fb.last_yaw_sign = 0;
 
 	SetMarker(self, spawn_pos);
 

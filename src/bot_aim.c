@@ -118,7 +118,7 @@ static qbool IsNailgun (int impulse)
 }
 
 // When firing at another player
-static void BotsFireAtPlayerLogic(gedict_t* self, vec3_t rel_pos, float* rel_dist) {
+static void BotsAimAtPlayerLogic(gedict_t* self, vec3_t rel_pos, float* rel_dist) {
 	float rel_time = 0;
 
 	VectorSubtract(self->fb.look_object->s.v.origin, self->s.v.origin, rel_pos);
@@ -149,39 +149,24 @@ typedef void (*bot_aim_model_t)(gedict_t* self, vec3_t rel_pos, float rel_distan
 #define YAW_SNAP_THRESHOLD     4
 #define PITCH_SNAP_THRESHOLD   6
 
-// Called after desired angles have been set to aim at the player
-static void BotsAimAtPlayerLogic (gedict_t* self, vec3_t rel_pos, float rel_dist)
+static qbool HorizontalVelocityCheck (vec3_t velocity, float threshold)
 {
-	fb_botaim_t* pitch = &self->fb.skill.aim_params[PITCH];
-	fb_botaim_t* yaw   = &self->fb.skill.aim_params[YAW];
+	float value = velocity[0] * velocity[0] + velocity[1] * velocity[1];
+
+	return value > threshold * threshold;
+}
+
+static void CalculateVolatility (gedict_t* self)
+{
 	float volatility   = self->fb.skill.current_volatility;
 	gedict_t* opponent = self->fb.look_object;
-
-	float raw_yaw_diff = self->fb.desired_angle[PITCH] - self->s.v.angles[PITCH];
-	float raw_pitch_diff = self->fb.desired_angle[YAW] - self->s.v.angles[YAW];
-
-	float pitch_diff = bound(pitch->minimum, fabs(raw_pitch_diff) * pitch->scale, pitch->maximum);
-	float yaw_diff = bound(yaw->minimum, fabs(raw_yaw_diff) * yaw->scale, yaw->maximum);
-
-	float pitch_rnd = dist_random (-pitch_diff, pitch_diff, pitch->multiplier);
-	float yaw_rnd = dist_random (-yaw_diff, yaw_diff, yaw->multiplier);
-
-	int new_yaw_sign = yaw_rnd < 0 ? -1 : 1;
-	int new_pitch_sign = pitch_rnd < 0 ? -1 : 1;
-
 	int vol_flags = 0;
-
-	// If making a small adjustment when tracking, keep the aim to the same side
-	if (self->fb.last_yaw_sign && g_random () < 0.9) {
-		yaw_rnd = self->fb.last_yaw_sign * abs (yaw_rnd);
-	}
-	if (self->fb.last_pitch_sign && g_random () < 0.9) {
-		pitch_rnd = self->fb.last_pitch_sign * abs (pitch_rnd);
-	}
 
 	if (opponent != self->fb.prev_look_object) {
 		// Treat as if they hadn't seen player before
 		volatility = self->fb.skill.initial_volatility;
+		self->fb.min_fire_time = g_globalvars.time + self->fb.skill.awareness_delay;
+		self->fb.last_pitch_sign = self->fb.last_yaw_sign = 0;
 
 		vol_flags = 1;
 	}
@@ -190,43 +175,73 @@ static void BotsAimAtPlayerLogic (gedict_t* self, vec3_t rel_pos, float rel_dist
 		vec3_t enemy_direction = { PASSVEC3 (opponent->s.v.velocity) };
 		float same_direction = 0.0f;
 
-		VectorNormalize (bot_direction);
-		VectorNormalize (enemy_direction);
-		same_direction = DotProduct (bot_direction, enemy_direction);
-
-		volatility = volatility * self->fb.skill.reduce_volatility;
+		volatility *= self->fb.skill.reduce_volatility;
 
 		// Ownspeed penalty
-		if (VectorLength (self->s.v.velocity) >= self->fb.skill.ownspeed_volatility_threshold) {
+		if (HorizontalVelocityCheck(self->s.v.velocity, self->fb.skill.ownspeed_volatility_threshold)) {
 			volatility += self->fb.skill.ownspeed_volatility;
 			vol_flags = 2;
 		}
 
 		// Speed penalty
-		if (VectorLength (opponent->s.v.velocity) >= self->fb.skill.enemyspeed_volatility_threshold) {
+		if (HorizontalVelocityCheck(opponent->s.v.velocity, self->fb.skill.enemyspeed_volatility_threshold)) {
 			volatility += self->fb.skill.enemyspeed_volatility;
 			vol_flags |= 4;
 		}
 
+		VectorNormalize (bot_direction);
+		VectorNormalize (enemy_direction);
+		same_direction = DotProduct (bot_direction, enemy_direction);
+
 		// Direction penalty ... if we're going in same direction, no penalty
-		if (same_direction) {
-			volatility += (1 - same_direction) * (self->fb.skill.enemydirection_volatility / 2);
-			vol_flags |= 8;
-		}
+		volatility += (1 - same_direction) * (self->fb.skill.enemydirection_volatility / 2);
+		vol_flags |= 8;
 
 		volatility = bound(self->fb.skill.min_volatility, volatility * self->fb.skill.reduce_volatility, self->fb.skill.max_volatility);
 	}
 
+	self->fb.skill.current_volatility = volatility;
+}
+
+// Called after desired angles have been set to aim at the player
+static void BotsModifyAimAtPlayerLogic (gedict_t* self, vec3_t rel_pos, float rel_dist)
+{
+	fb_botaim_t* pitch = &self->fb.skill.aim_params[PITCH];
+	fb_botaim_t* yaw   = &self->fb.skill.aim_params[YAW];
+
+	float raw_yaw_diff = self->fb.desired_angle[PITCH] - self->s.v.angles[PITCH];
+	float raw_pitch_diff = self->fb.desired_angle[YAW] - self->s.v.angles[YAW];
+
+	float pitch_diff, yaw_diff;
+	float pitch_rnd, yaw_rnd;
+
+	CalculateVolatility (self);
+
+	pitch_diff = bound (pitch->minimum, fabs (raw_pitch_diff) * pitch->scale, pitch->maximum);
+	yaw_diff = bound(yaw->minimum, fabs(raw_yaw_diff) * yaw->scale, yaw->maximum);
+
+	pitch_rnd = dist_random (-pitch_diff, pitch_diff, pitch->multiplier * self->fb.skill.current_volatility);
+	yaw_rnd = dist_random (-yaw_diff, yaw_diff, yaw->multiplier * self->fb.skill.current_volatility);
+
+	// If making a small adjustment when tracking, keep the aim to the same side
+	if (self->fb.last_yaw_sign && g_random() < 0.9) {
+		yaw_rnd = self->fb.last_yaw_sign * abs (yaw_rnd);
+	}
+	else {
+		self->fb.last_yaw_sign = yaw_rnd < 0 ? -1 : 1;
+	}
+	if (self->fb.last_pitch_sign && g_random() < 0.9) {
+		pitch_rnd = self->fb.last_pitch_sign * abs (pitch_rnd);
+	}
+	else {
+		self->fb.last_pitch_sign = pitch_rnd < 0 ? -1 : 1;
+	}
+
 	//G_bprint (PRINT_HIGH, "Volatility %3.1f, %s%s%s%s yaw_diff %f\n", volatility, vol_flags & 1 ? "max" : "", vol_flags & 2 ? "o" : "", vol_flags & 4 ? "s" : "", vol_flags & 8 ? "d" : "", yaw_diff);
 
-	self->fb.last_yaw_sign = new_yaw_sign;
-	self->fb.last_pitch_sign = new_pitch_sign;
-
 	// Randomise the aim a bit based on raw skill level
-	self->fb.desired_angle[PITCH] = bound (-89.9, self->fb.desired_angle[PITCH] + min(pitch_rnd * volatility, MAX_PITCH_ERROR), 89.9);
-	self->fb.desired_angle[YAW] += min(yaw_rnd * volatility, MAX_YAW_ERROR);
-
-	self->fb.skill.current_volatility = volatility;
+	self->fb.desired_angle[PITCH] = bound (-89.9, self->fb.desired_angle[PITCH] + pitch_rnd, 89.9);
+	self->fb.desired_angle[YAW] += yaw_rnd;
 }
 
 // Aim lower over longer distances?  (FIXME: we already allow for gravity in predicting where to fire - should this test for the enemy being on the ground?)
@@ -311,7 +326,7 @@ void BotsFireLogic(void) {
 		float rel_dist = 0;
 
 		if (self->fb.look_object->ct == ctPlayer) {
-			BotsFireAtPlayerLogic (self, rel_pos, &rel_dist);
+			BotsAimAtPlayerLogic (self, rel_pos, &rel_dist);
 		}
 		else {
 			BotsFireAtWorldLogic (self, rel_pos, &rel_dist);
@@ -320,7 +335,7 @@ void BotsFireLogic(void) {
 		BotsAimAtFloor (self, rel_pos, rel_dist);
 		BotSetDesiredAngles (self, rel_pos);
 		if (self->fb.look_object->ct == ctPlayer) {
-			BotsAimAtPlayerLogic (self, rel_pos, rel_dist);
+			BotsModifyAimAtPlayerLogic (self, rel_pos, rel_dist);
 		}
 
 		if (!self->fb.rocketjumping) {

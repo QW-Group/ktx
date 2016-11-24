@@ -6,6 +6,7 @@
 
 // Cripes.  Fix all these declarations
 void SetAttribs (gedict_t* self);
+void SetAttributesBasedOnSkill (int skill_level);
 void Bot_Print_Thinking (void);
 void BotsFireInitialTriggers (gedict_t* client);
 void PathScoringLogic (
@@ -149,6 +150,8 @@ static void FrogbotsAddbot(void) {
 			g_edicts[entity].fb.skill.skill_level = FrogbotSkillLevel();
 			g_edicts[entity].fb.botnumber = i;
 			trap_SetBotUserInfo (entity, "team", teamName, 0);
+			G_bprint (2, "skill &cf00%d&r\n", self->fb.skill.skill_level);
+			SetAttributesBasedOnSkill (self->fb.skill.skill_level);
 			SetAttribs (&g_edicts[entity]);
 			trap_SetBotUserInfo (entity, "k_nick", bots[i].name, 0);
 			return;
@@ -203,6 +206,8 @@ static void FrogbotsSetSkill (void)
 		if (new_skill != old_skill) {
 			cvar_fset ("k_fb_skill", new_skill);
 			G_sprint (self, 2, "bot skill changed to \"%d\"\n", FrogbotSkillLevel());
+
+			SetAttributesBasedOnSkill (FrogbotSkillLevel());
 		}
 	}
 }

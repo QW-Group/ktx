@@ -455,6 +455,7 @@ typedef struct fb_botskill_s {
 	float initial_volatility;
 
 	float current_volatility;
+	float awareness_delay;
 
 	fb_botaim_t aim_params[2];
 } fb_botskill_t;
@@ -478,7 +479,7 @@ typedef struct fb_entvars_s {
 	int   teamflag;                      // This is used to add a teamflag to a goal entity, so it bots on same team ignore item
 
 	float oldwaterlevel;                 // used to detect FL_WATERJUMP waterjump...  may not be required?  server will set...
-	float oldwatertype;                  // FIXME: may no longer be required?  server will set, this is in MOVETYPE_STEP code...
+	float oldwatertype;                  // FIXME: never read.  server will set, this is in MOVETYPE_STEP code...
 
 	// these determine the strength of each player
 	float total_armor;
@@ -650,6 +651,7 @@ typedef struct fb_entvars_s {
 	// Aiming
 	int                 last_yaw_sign;
 	int                 last_pitch_sign;
+	float               min_fire_time;   // time before bot will fire
 } fb_entvars_t;
 
 //typedef (void(*)(gedict_t *)) one_edict_func;
