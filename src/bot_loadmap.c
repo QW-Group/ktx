@@ -191,24 +191,27 @@ static fb_spawn_t stdSpawnFunctions[] = {
 static void SpawnMarkerIndicator (gedict_t* item)
 {
 	vec3_t pos;
+	gedict_t* p;
 
-	gedict_t* p = spawn();
-	p->s.v.flags = FL_ITEM;
-	p->s.v.solid = SOLID_NOT;
-	p->s.v.movetype = MOVETYPE_NONE;
-	setmodel( p, "progs/w_g_key.mdl" );
-	p->s.v.netname = "Marker";
-	p->s.v.classname = "marker_indicator";
-	p->fb.index = item->fb.index;
+	if (FrogbotShowMarkerIndicators ()) {
+		p = spawn ();
+		p->s.v.flags = FL_ITEM;
+		p->s.v.solid = SOLID_NOT;
+		p->s.v.movetype = MOVETYPE_NONE;
+		setmodel (p, "progs/w_g_key.mdl");
+		p->s.v.netname = "Marker";
+		p->s.v.classname = "marker_indicator";
+		p->fb.index = item->fb.index;
 
-	VectorAdd (item->s.v.absmin, item->s.v.absmax, pos);
-	VectorScale (pos, 0.5f, pos);
-	if (streq (item->s.v.classname, "plat")) {
-		VectorAdd (item->s.v.mins, item->s.v.maxs, pos);
+		VectorAdd (item->s.v.absmin, item->s.v.absmax, pos);
 		VectorScale (pos, 0.5f, pos);
-	}
+		if (streq (item->s.v.classname, "plat")) {
+			VectorAdd (item->s.v.mins, item->s.v.maxs, pos);
+			VectorScale (pos, 0.5f, pos);
+		}
 
-	setorigin( p, PASSVEC3( pos ) );
+		setorigin (p, PASSVEC3 (pos));
+	}
 }
 
 static qbool ProcessedItem (gedict_t* item)
@@ -252,7 +255,7 @@ static void CreateItemMarkers() {
 			}
 		}
 
-		if (found && FrogbotShowMarkerIndicators() && ProcessedItem(item)) {
+		if (found && ProcessedItem(item)) {
 			SpawnMarkerIndicator (item);
 		}
 	}
@@ -306,9 +309,12 @@ static void CustomiseFrogbotMap (void)
 	{
 		gedict_t* quad = ez_find (world, "item_artifact_super_damage");
 		if (quad) {
-			gedict_t* nearest_marker = LocateMarker (quad->s.v.origin);
+			gedict_t* nearest_marker;;
 			int i = 0;
 
+			quad->fb.fl_marker = false;
+			nearest_marker = LocateMarker (quad->s.v.origin);
+			quad->fb.fl_marker = true;
 			StartItemFB (quad);
 			quad->fb.T |= MARKER_DYNAMICALLY_ADDED;
 
