@@ -1526,6 +1526,9 @@ void PutClientInServer( void )
 
 		teleport_player( self, self->s.v.origin, self->s.v.angles, tele_flags );
 
+		if (bots_enabled())
+			BotClientEntersEvent (self, spot);
+
 		return;
 	}
 
@@ -1697,9 +1700,7 @@ void PutClientInServer( void )
 	WriteLong(MSG_ONE, g_matchstarttime);
 
 	if (bots_enabled())
-	{
 		BotClientEntersEvent (self, spot);
-	}
 }
 
 /*
