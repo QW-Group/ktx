@@ -946,7 +946,7 @@ static void FrogbotsFillServer (void)
 	int plr_count = CountPlayers ();
 	int i;
 
-	for (i = 0; i < max_clients - plr_count; ++i) {
+	for (i = 0; i < min(max_clients - plr_count, 8); ++i) {
 		FrogbotsAddbot ();
 	}
 }
@@ -1020,7 +1020,7 @@ typedef struct frogbot_cmd_s {
 static frogbot_cmd_t std_commands[] = {
 	{ "skill", FrogbotsSetSkill, "Set skill level for next bot added" },
 	{ "addbot", FrogbotsAddbot, "Adds a bot to the server" },
-	{ "fill", FrogbotsFillServer, "Fills the server with bots" },
+	{ "fill", FrogbotsFillServer, "Fills the server (max 8 bots at a time)" },
 	{ "removebot", FrogbotsRemovebot, "Removes a single bot" },
 	{ "removeall", FrogbotsRemoveAll, "Removes all bots from server" },
 	{ "debug", FrogbotsDebug, "Debugging commands" }
