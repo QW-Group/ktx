@@ -70,7 +70,7 @@ void SetMarkerFlag(int marker_number, int flags) {
 
 	if (flags & MARKER_IS_DM6_DOOR)
 		dm6_door = markers[marker_number];
-	if (flags & MARKER_DOOR_TOUCHABLE)
+	if (flags & (MARKER_IS_DM6_DOOR | MARKER_DOOR_TOUCHABLE))
 		markers[marker_number]->s.v.solid = SOLID_TRIGGER;
 }
 
