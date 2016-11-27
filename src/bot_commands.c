@@ -403,6 +403,8 @@ static void FrogbotsDebug (void)
 			first_bot->fb.touch_marker_time = first_bot->fb.linked_marker_time = first_bot->fb.goal_refresh_time = 0;
 			first_bot->fb.old_linked_marker = NULL;
 
+			G_sprint (self, 2, "Marker #%d (%s) set as goalent\n", target->fb.index + 1, target->s.v.classname);
+
 			VectorCopy (marker->s.v.origin, teleport_location);
 			if (!streq (marker->s.v.classname, "marker")) {
 				teleport_location[2] += 32;

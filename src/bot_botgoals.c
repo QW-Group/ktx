@@ -231,6 +231,13 @@ void UpdateGoal(gedict_t* self) {
 	gedict_t* goal_entity = 0;
 
 	self->fb.goal_refresh_time = g_globalvars.time + 2 + g_random();
+
+	if (self->fb.fixed_goal) {
+		self->s.v.goalentity = NUM_FOR_EDICT (self->fb.fixed_goal);
+		self->fb.goal_refresh_time = g_globalvars.time + 2 + g_random();
+		return;
+	}
+
 	self->fb.best_goal_score = 0;
 	self->fb.best_goal = NULL;
 	self->fb.goal_enemy_repel = self->fb.goal_enemy_desire = 0;
