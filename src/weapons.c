@@ -34,6 +34,12 @@ void ChasecamToggleButton( void );
 void BotsRocketSpawned (gedict_t* newmis);
 void BotsGrenadeSpawned (gedict_t* newmis);
 
+void AmmoUsed (gedict_t* player)
+{
+	if (player->fb.ammo_used)
+		player->fb.ammo_used (player);
+}
+
 // called by SP_worldspawn
 void W_Precache()
 {
@@ -752,8 +758,7 @@ void W_FireShotgun()
     if ( match_in_progress == 2 )
 		if (deathmatch != 4 && !k_bloodfest) {
 			self->s.v.currentammo = --(self->s.v.ammo_shells);
-			if (self->fb.ammo_used)
-				self->fb.ammo_used (self);
+			AmmoUsed (self);
 		}
 
 	//dir = aim (self, 100000);
@@ -794,8 +799,7 @@ void W_FireSuperShotgun()
 		if (deathmatch != 4 && !k_bloodfest)
 		{
 			self->s.v.currentammo = self->s.v.ammo_shells = self->s.v.ammo_shells - 2;
-			if (self->fb.ammo_used)
-				self->fb.ammo_used (self);
+			AmmoUsed (self);
 		}
 
 	//dir = aim (self, 100000);
@@ -934,8 +938,7 @@ void W_FireRocket()
 		if (deathmatch != 4 && !k_bloodfest)
 		{
 			self->s.v.currentammo = self->s.v.ammo_rockets = self->s.v.ammo_rockets - 1;
-			if (self->fb.ammo_used)
-				self->fb.ammo_used (self);
+			AmmoUsed (self);
 		}
 
 	sound( self, CHAN_WEAPON, "weapons/sgun1.wav", 1, ATTN_NORM );
@@ -1059,8 +1062,7 @@ void W_FireLightning()
 		{
 			self->s.v.ammo_cells = 0;
 			W_SetCurrentAmmo();
-			if (self->fb.ammo_used)
-				self->fb.ammo_used (self);
+			AmmoUsed (self);
 			return;
 		}
 
@@ -1079,8 +1081,7 @@ void W_FireLightning()
 				cells = self->s.v.ammo_cells;
 				self->s.v.ammo_cells = 0;
 				W_SetCurrentAmmo();
-				if (self->fb.ammo_used)
-					self->fb.ammo_used (self);
+				AmmoUsed (self);
 
                 if ( !cvar( "k_dis" ) )
                     return;
@@ -1093,8 +1094,7 @@ void W_FireLightning()
 			cells = self->s.v.ammo_cells;
 			self->s.v.ammo_cells = 0;
 			W_SetCurrentAmmo();
-			if (self->fb.ammo_used)
-				self->fb.ammo_used (self);
+			AmmoUsed (self);
 
             if ( !cvar( "k_dis" ) )
                 return;
@@ -1120,8 +1120,7 @@ void W_FireLightning()
 		if (deathmatch != 4 && !k_bloodfest)
 		{
 			self->s.v.currentammo = self->s.v.ammo_cells = self->s.v.ammo_cells - 1;
-			if (self->fb.ammo_used)
-				self->fb.ammo_used (self);
+			AmmoUsed (self);
 		}
 
 	VectorCopy( self->s.v.origin, org );	//org = self->s.v.origin + '0 0 16';
@@ -1225,8 +1224,7 @@ void W_FireGrenade()
 		if (deathmatch != 4 && !k_bloodfest)
 		{
 			self->s.v.currentammo = self->s.v.ammo_rockets = self->s.v.ammo_rockets - 1;
-			if (self->fb.ammo_used)
-				self->fb.ammo_used (self);
+			AmmoUsed (self);
 		}
 
 	sound( self, CHAN_WEAPON, "weapons/grenade.wav", 1, ATTN_NORM );
@@ -1446,8 +1444,7 @@ void W_FireSuperSpikes()
 		if (deathmatch != 4 && !k_bloodfest)
 		{
 			self->s.v.currentammo = self->s.v.ammo_nails = self->s.v.ammo_nails - 2;
-			if (self->fb.ammo_used)
-				self->fb.ammo_used (self);
+			AmmoUsed (self);
 		}
 	aim( dir );		//dir = aim (self, 1000);
 
@@ -1499,8 +1496,7 @@ void W_FireSpikes( float ox )
 		if (deathmatch != 4 && !k_bloodfest)
 		{
 			self->s.v.currentammo = self->s.v.ammo_nails = self->s.v.ammo_nails - 1;
-			if (self->fb.ammo_used)
-				self->fb.ammo_used (self);
+			AmmoUsed (self);
 		}
 
 	aim( dir );		// dir = aim (self, 1000);

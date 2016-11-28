@@ -24,6 +24,7 @@
  */
 
 #include "g_local.h"
+#include "fb_globals.h"
 
 void Sc_Stats(float on);
 void race_stoprecord( qbool cancel );
@@ -108,6 +109,23 @@ void ent_remove( gedict_t * t )
 		G_Error ("remove client");
 
 	trap_remove( NUM_FOR_EDICT( t ) );
+}
+
+// The bots need map entities for route-finding, so don't remove
+void soft_ent_remove (gedict_t* ent)
+{
+	if (bots_enabled ()) {
+		ent->s.v.model = "";
+		ent->s.v.solid = SOLID_TRIGGER;
+		ent->s.v.nextthink = 0;
+		ent->s.v.think = (func_t) SUB_Null;
+		ent->s.v.touch = (func_t) marker_touch;
+		ent->fb.desire = goal_NULL;
+		ent->fb.goal_respawn_time = 0;
+	}
+	else {
+		ent_remove (ent);
+	}
 }
 
 gedict_t *nextent( gedict_t * ent )

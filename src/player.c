@@ -27,6 +27,7 @@
 
 void            bubble_bob();
 void            BotPlayerDeathEvent (gedict_t* player);
+void            AmmoUsed (gedict_t* player);
 
 /*
 ==============================================================================
@@ -405,8 +406,7 @@ void player_nail1()
 	SuperDamageSound();
 	W_FireSpikes( 4 );
 	self->attack_finished = g_globalvars.time + 0.2;
-	if (self->fb.ammo_used)
-		self->fb.ammo_used (self);
+	AmmoUsed (self);
 }
 
 void player_nail2()
@@ -432,8 +432,7 @@ void player_nail2()
 	SuperDamageSound();
 	W_FireSpikes( -4 );
 	self->attack_finished = g_globalvars.time + 0.2;
-	if (self->fb.ammo_used)
-		self->fb.ammo_used (self);
+	AmmoUsed (self);
 }
 
 //============================================================================

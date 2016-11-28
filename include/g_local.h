@@ -154,6 +154,7 @@ int				i_rnd( int from, int to );
 float           dist_random (float minValue, float maxValue, float spreadFactor);
 gedict_t       *spawn( void );
 void            ent_remove( gedict_t * t );
+void            soft_ent_remove (gedict_t* ent);
 
 gedict_t       *nextent( gedict_t * ent );
 gedict_t       *find( gedict_t * start, int fieldoff, char *str );

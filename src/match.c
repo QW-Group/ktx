@@ -1984,22 +1984,6 @@ void TimerThink ()
 	self->s.v.nextthink = g_globalvars.time + 1;
 }
 
-void soft_ent_remove (gedict_t* ent)
-{
-	if (bots_enabled ()) {
-		ent->s.v.model = "";
-		ent->s.v.solid = SOLID_TRIGGER;
-		ent->s.v.nextthink = 0;
-		ent->s.v.think = (func_t) SUB_Null;
-		ent->s.v.touch = (func_t) marker_touch;
-		ent->fb.desire = goal_NULL;
-		ent->fb.goal_respawn_time = 0;
-	}
-	else {
-		ent_remove (ent);
-	}
-}
-
 // remove/add some items from map regardind with dmm and game mode
 void SM_PrepareMap()
 {
