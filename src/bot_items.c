@@ -737,45 +737,51 @@ static void fb_spawn_pent (gedict_t* ent)
 {
 	ent->fb.desire = goal_artifact_invulnerability;
 	ent->fb.pickup = pickup_true;
-	ent->fb.item_touch = fb_powerup_touch;
 	ent->fb.item_taken = fb_powerup_taken;
 	ent->fb.item_respawned = AssignVirtualGoal;
-
-	StartItemFB (ent);
+	if (ent->fb.fl_marker) {
+		ent->fb.item_touch = fb_powerup_touch;
+		StartItemFB (ent);
+	}
 }
 
 static void fb_spawn_biosuit (gedict_t* ent)
 {
 	ent->fb.desire = goal_NULL; // FIXME
 	ent->fb.pickup = pickup_true;
-	ent->fb.item_touch = fb_powerup_touch;
 	ent->fb.item_taken = fb_powerup_taken;
 	ent->fb.item_respawned = AssignVirtualGoal;
-
-	StartItemFB (ent);
+	if (ent->fb.fl_marker) {
+		ent->fb.item_touch = fb_powerup_touch;
+		StartItemFB (ent);
+	}
 }
 
 static void fb_spawn_ring (gedict_t* ent)
 {
 	ent->fb.desire = goal_artifact_invisibility;
 	ent->fb.pickup = pickup_true;
-	ent->fb.item_touch = fb_powerup_touch;
 	ent->fb.item_taken = fb_powerup_taken;
 	ent->fb.item_respawned = AssignVirtualGoal;
-
-	StartItemFB (ent);
+	if (ent->fb.fl_marker) {
+		ent->fb.item_touch = fb_powerup_touch;
+		StartItemFB (ent);
+	}
 }
 
 static void fb_spawn_quad (gedict_t* ent)
 {
 	ent->fb.desire = goal_artifact_super_damage;
 	ent->fb.pickup = pickup_true;
-	ent->fb.item_touch = fb_powerup_touch;
 	ent->fb.item_taken = fb_powerup_taken;
 	ent->fb.item_respawned = AssignVirtualGoal;
-
-	if (!streq ("aerowalk", g_globalvars.mapname))
-		StartItemFB (ent);
+	if (ent->fb.fl_marker) {
+		ent->fb.item_touch = fb_powerup_touch;
+		if (!streq ("aerowalk", g_globalvars.mapname)) {
+			G_bprint (PRINT_HIGH, "Starting item %s...\n", ent->s.v.classname);
+			StartItemFB (ent);
+		}
+	}
 }
 
 fb_spawn_t itemSpawnFunctions[] = {
@@ -904,4 +910,35 @@ void BotsBackpackDropped (gedict_t* self, gedict_t* pack)
 	LocateDynamicItem (pack);
 
 	BotDroppedMessage (self, pack);
+}
+
+static void fb_dropped_powerup_touch (gedict_t* item, gedict_t* player)
+{
+	if (player->s.v.goalentity == NUM_FOR_EDICT (item)) {
+		player->fb.goal_refresh_time = 0;
+	}
+}
+
+void BotsPowerupDropped (gedict_t* player, gedict_t* powerup)
+{
+	if (powerup->tp_flags & it_quad) {
+		fb_spawn_quad (powerup);
+	}
+	else if (powerup->tp_flags & it_pent) {
+		fb_spawn_pent (powerup);
+	}
+	else if (powerup->tp_flags & it_ring) {
+		fb_spawn_ring (powerup);
+	}
+	else {
+		return;
+	}
+
+	LocateDynamicItem (powerup);
+	AssignVirtualGoal (powerup);
+}
+
+void BotsPowerupTouchedNonPlayer (gedict_t* powerup, gedict_t* touch_ent)
+{
+	LocateDynamicItem (powerup);
 }

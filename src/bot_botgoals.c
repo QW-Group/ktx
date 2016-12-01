@@ -229,6 +229,11 @@ void UpdateGoal(gedict_t* self) {
 	int items_ = self->s.v.items;
 	gedict_t* enemy_ = &g_edicts[self->s.v.enemy];
 	gedict_t* goal_entity = 0;
+	char* dropped_powerup_names[] = {
+		"item_artifact_invulnerability",
+		"item_artifact_invisibility",
+		"item_artifact_super_damage"
+	};
 
 	self->fb.goal_refresh_time = g_globalvars.time + 2 + g_random();
 
@@ -280,12 +285,23 @@ void UpdateGoal(gedict_t* self) {
 	}
 	G_bprint_debug (2, "After goal-eval1: best_goal %s, best_score %f\n", self->fb.best_goal ? self->fb.best_goal->s.v.classname : "(none)", self->fb.best_goal_score);
 
-	for (goal_entity = world; goal_entity = ez_find(goal_entity, BACKPACK_CLASSNAME); ) {
+	// Dropped backpacks
+	for (goal_entity = world; goal_entity = ez_find (goal_entity, BACKPACK_CLASSNAME); ) {
 		if (goal_entity->fb.touch_marker) {
-			EvalGoal(self, goal_entity);
+			EvalGoal (self, goal_entity);
 		}
 	}
 	G_bprint_debug (2, "After backpacks:  best_goal %s, best_score %f\n", self->fb.best_goal ? self->fb.best_goal->s.v.classname : "(none)", self->fb.best_goal_score);
+
+	// Dropped powerups
+	for (i = 0; i < sizeof (dropped_powerup_names) / sizeof (dropped_powerup_names[0]); ++i) {
+		for (goal_entity = world; goal_entity = ez_find (goal_entity, dropped_powerup_names[i]); ) {
+			if (goal_entity->cnt > g_globalvars.time && goal_entity->fb.touch_marker) {
+				EvalGoal (self, goal_entity);
+			}
+		}
+	}
+	G_bprint_debug (2, "After powerups:  best_goal %s, best_score %f\n", self->fb.best_goal ? self->fb.best_goal->s.v.classname : "(none)", self->fb.best_goal_score);
 
 	if (teamplay && !isRA()) {
 		gedict_t* search_entity = HelpTeammate();

@@ -32,6 +32,8 @@ void			SP_item_artifact_invulnerability();
 void TookWeaponHandler( gedict_t *p, int new_wp );
 void BotsBackpackTouchedNonPlayer (gedict_t* backpack, gedict_t* entity);
 void BotsBackpackDropped (gedict_t* self, gedict_t* pack);
+void BotsPowerupTouchedNonPlayer (gedict_t* powerup, gedict_t* touch_ent);
+void BotsPowerupDropped (gedict_t* player, gedict_t* powerup);
 
 #define AUTOTRACK_POWERUPS_PREDICT_TIME 2
 
@@ -1597,6 +1599,7 @@ void DropPowerup( float timeleft, int powerup )
 	if ( swp->ct == ctPlayer )
 		mi_print( swp, powerup, va( "%s dropped a %s with %.0f seconds left", swp->s.v.netname, self->s.v.netname, timeleft ));
 
+	BotsPowerupDropped (swp, self);
 	self = swp;// restore self!!!
 }
 
@@ -1651,7 +1654,10 @@ void powerup_touch()
 		G_Error("powerup_touch: null classname");
 
 	if ( other->ct != ctPlayer )
+	{
+		BotsPowerupTouchedNonPlayer (self, other);
 		return;
+	}
 
 	if ( ISDEAD( other ) )
 		return;

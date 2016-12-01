@@ -143,11 +143,17 @@ static qbool WaitingToHitGround (gedict_t* self)
 	return (self->fb.path_state & WAIT_GROUND) && !((int)self->s.v.flags & FL_ONGROUND);
 }
 
-static qbool WalkTowardsBackpack (gedict_t* self)
+static qbool WalkTowardsDroppedItem (gedict_t* self)
 {
 	gedict_t* goalentity_ = &g_edicts[self->s.v.goalentity];
 	if (streq(goalentity_->s.v.classname, "backpack") && VisibleEntity(goalentity_)) {
 		SetLinkedMarker(self, goalentity_, "ProcNewLinked(backpack)");
+		self->fb.linked_marker_time = g_globalvars.time + 5;
+		self->fb.old_linked_marker = self->fb.touch_marker;
+		return true;
+	}
+	else if (goalentity_->cnt) {
+		SetLinkedMarker(self, goalentity_, "ProcNewLinked(dropped-powerup)");
 		self->fb.linked_marker_time = g_globalvars.time + 5;
 		self->fb.old_linked_marker = self->fb.touch_marker;
 		return true;
@@ -214,7 +220,7 @@ void ProcessNewLinkedMarker(gedict_t* self) {
 				return;
 			}
 		}
-		else if (goalentity_marker == self->fb.touch_marker && WalkTowardsBackpack (self)) {
+		else if (goalentity_marker == self->fb.touch_marker && WalkTowardsDroppedItem (self)) {
 			return;
 		}
 	}
