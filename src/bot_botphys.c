@@ -19,34 +19,6 @@ int NumberOfClients (void)
 	return count;
 }
 
-static void AirControl (gedict_t* self, vec3_t hor_velocity, float hor_speed)
-{
-	vec3_t temp;
-	float max_accel_forward = sv_accelerate * g_globalvars.frametime * sv_maxspeed;
-	vec3_t velocity_hor_angle = { 0, vectoyaw(hor_velocity) + (self->fb.turning_speed * g_globalvars.frametime), 0 };
-	vec3_t desired_accel;
-	vec3_t dir_forward;
-	float accel_forward = 0;
-	float velocity_forward = 0;
-	vec3_t new_velocity;
-
-	trap_makevectors(velocity_hor_angle);
-	VectorScale(g_globalvars.v_forward, hor_speed, temp);
-	VectorSubtract(temp, hor_velocity, desired_accel);
-	normalize(desired_accel, dir_forward);
-	accel_forward = min(vlen(desired_accel), max_accel_forward);
-	velocity_forward = DotProduct(self->s.v.velocity, dir_forward);
-	if ((velocity_forward + accel_forward) > 30) {
-		accel_forward = 30 - velocity_forward;
-		if (accel_forward < 0) {
-			accel_forward = 0;
-		}
-	}
-
-	VectorMA (self->fb.dir_move_, accel_forward, dir_forward, new_velocity);
-	SetDirectionMove (self, new_velocity, "AirControl");
-}
-
 void FrogbotPrePhysics1(void) {
 	// Set all players to non-solid so we can avoid hazards
 	if (IsHazardFrame()) {

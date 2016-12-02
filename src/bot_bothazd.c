@@ -755,23 +755,23 @@ qbool BotsPreTeleport (gedict_t* self, gedict_t* other)
 	return false;
 }
 
-void BotsPostTeleport (gedict_t* self, gedict_t* other, gedict_t* teleport_destination)
+void BotsPostTeleport (gedict_t* teleport_trigger, gedict_t* player, gedict_t* teleport_destination)
 {
-	if (other->isBot) {
+	if (player->isBot) {
 		//if (teamplay != 0)
 		//	say_team_report_teleport(other, t);
 
 		// other.angles holds crosshair position
-		other->fb.real_pitch = other->s.v.angles[0];
-		other->fb.real_yaw = other->s.v.angles[1];
+		player->fb.real_pitch = player->s.v.angles[0];
+		player->fb.real_yaw = player->s.v.angles[1];
 	}
 
-	other->fb.frogbot_nextthink = g_globalvars.time;
+	player->fb.frogbot_nextthink = g_globalvars.time;
 
-	if (other->fb.linked_marker == self) {
-		SetLinkedMarker (other, teleport_destination, "BotsPostTeleport");
+	if (player->fb.linked_marker == teleport_trigger) {
+		SetLinkedMarker (player, teleport_destination, "BotsPostTeleport");
 	}
 
-	HazardTeleport (self, other);
-	SetMarker (other, teleport_destination);
+	HazardTeleport (teleport_trigger, player);
+	SetMarker (player, teleport_destination);
 }

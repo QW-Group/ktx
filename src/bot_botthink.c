@@ -16,9 +16,11 @@ void BotsFireLogic (void);
 void FrogbotEditorMarkerTouched (gedict_t* marker);
 
 static void SetNextThinkTime(gedict_t* ent) {
-	ent->fb.frogbot_nextthink += 0.15 + (0.015 * g_random());
-	if (PAST(frogbot_nextthink)) {
-		ent->fb.frogbot_nextthink = g_globalvars.time + 0.16;
+	if (!((int)ent->s.v.flags & FL_ONGROUND)) {
+		ent->fb.frogbot_nextthink += 0.15 + (0.015 * g_random ());
+		if (PAST (frogbot_nextthink)) {
+			ent->fb.frogbot_nextthink = g_globalvars.time + 0.16;
+		}
 	}
 }
 
@@ -161,6 +163,8 @@ static void BotMoveTowardsLinkedMarker(gedict_t* self, vec3_t dir_move) {
 	VectorAdd(linked->s.v.absmin, linked->s.v.view_ofs, temp);
 	VectorSubtract(temp, self->s.v.origin, temp);
 	normalize(temp, dir_move);
+	if (self->isBot && self->fb.debug_path)
+		G_bprint (PRINT_HIGH, "%3.2f: Moving %3d > %3d, dir %3.1f %3.1f %3.1f\n", g_globalvars.time, self->fb.touch_marker->fb.index + 1, self->fb.linked_marker->fb.index + 1, PASSVEC3 (dir_move));
 
 	if (self->fb.path_state & DELIBERATE_BACKUP) {
 		if (linked->fb.arrow_time > g_globalvars.time) {
@@ -199,6 +203,8 @@ static void BotTouchMarkerLogic() {
 	}
 
 	if (FUTURE(arrow_time)) {
+		if (self->isBot && self->fb.debug_path)
+			G_bprint (PRINT_HIGH, "%3.2f: arrow_time is %3.2f\n", g_globalvars.time, self->fb.arrow_time);
 		if (FUTURE(arrow_time2)) {
 			if (g_random() < 0.5) {
 				SetLinkedMarker (self, self->fb.touch_marker, "BotTouchMarkerLogic");

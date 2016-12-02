@@ -578,11 +578,14 @@ static void FrogbotMapInfo (void)
 {
 	if (streq (g_globalvars.mapname, "aerowalk")) {
 		gedict_t* quad = ez_find (world, "item_artifact_super_damage");
+		gedict_t* tele_exit = markers[10];
+		gedict_t* high_landing = markers[70];
+
 		if (quad) {
 			gedict_t* indicator = MarkerIndicator (quad);
 
 			G_sprint (self, PRINT_HIGH, "Found quad damage, marker #%3d, goal %d, zone %d\n", quad->fb.index + 1, quad->fb.G_, quad->fb.Z_);
-			G_sprint (self, PRINT_HIGH, " solid = %d, fl_marker = %s\n", (int)quad->s.v.solid, quad->fb.fl_marker);
+			G_sprint (self, PRINT_HIGH, " solid = %d, fl_marker = %s\n", (int)quad->s.v.solid, quad->fb.fl_marker ? "true" : "false");
 
 			if (indicator) {
 				G_sprint (self, PRINT_HIGH, "Indicator found @ %d %d %d\n", PASSINTVEC3 (indicator->s.v.origin));
@@ -593,6 +596,16 @@ static void FrogbotMapInfo (void)
 		}
 		else {
 			G_sprint (self, PRINT_HIGH, "Quad damage not found\n");
+		}
+
+		if (tele_exit && high_landing) {
+			vec3_t high_pos;
+			VectorAdd(high_landing->s.v.absmin, high_landing->s.v.view_ofs, high_pos);
+
+			G_sprint (self, PRINT_HIGH, "Tele-exit:    %3d %3d %3d\n", PASSINTVEC3 (tele_exit->s.v.origin));
+			G_sprint (self, PRINT_HIGH, "High-landing: %3d %3d %3d\n", PASSINTVEC3 (high_pos));
+			VectorSubtract(high_pos, tele_exit->s.v.origin, high_pos);
+			G_sprint (self, PRINT_HIGH, "Difference:   %3d %3d %3d\n", PASSINTVEC3 (high_pos));
 		}
 	}
 	else {

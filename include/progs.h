@@ -634,6 +634,7 @@ typedef struct fb_entvars_s {
 	qbool               debug;           // If set, trace logic
 	qbool               debug_path;      // Set by "debug botpath" command
 	struct gedict_s*    fixed_goal;      // Set by "debug botpath" command
+	vec3_t              prev_velocity;   // used by "debug bothpath" command
 	float               last_spec_cp;    // last spectator centerprint
 
 	// Navigation
