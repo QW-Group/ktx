@@ -912,13 +912,6 @@ void BotsBackpackDropped (gedict_t* self, gedict_t* pack)
 	BotDroppedMessage (self, pack);
 }
 
-static void fb_dropped_powerup_touch (gedict_t* item, gedict_t* player)
-{
-	if (player->s.v.goalentity == NUM_FOR_EDICT (item)) {
-		player->fb.goal_refresh_time = 0;
-	}
-}
-
 void BotsPowerupDropped (gedict_t* player, gedict_t* powerup)
 {
 	if (powerup->tp_flags & it_quad) {
