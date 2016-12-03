@@ -355,10 +355,21 @@ static qbool PreWarBlockFiring (gedict_t* self)
 	return false;
 }
 
+static qbool AttackFinished (gedict_t* self)
+{
+	if (g_globalvars.time < self->attack_finished) {
+		if ((int)self->s.v.weapon & (IT_LIGHTNING | IT_EITHER_NAILGUN)) {
+			return g_globalvars.time < self->s.v.nextthink;
+		}
+		return true;
+	}
+	return false;
+}
+
 static qbool KeepFiringAtEnemy (gedict_t* self)
 {
 	// Keep fire button down if tracking enemy
-	return self->fb.look_object == &g_edicts[self->s.v.enemy] && g_random() < 0.666667 && BotUsingCorrectWeapon(self);
+	return self->fb.look_object == &g_edicts[self->s.v.enemy] && g_random() < 0.666667f && BotUsingCorrectWeapon(self);
 }
 
 void SetFireButton(gedict_t* self, vec3_t rel_pos, float rel_dist) {
@@ -366,15 +377,18 @@ void SetFireButton(gedict_t* self, vec3_t rel_pos, float rel_dist) {
 		return;
 
 	if (self->fb.firing) {
-		if (KeepFiringAtEnemy(self))
+		if (KeepFiringAtEnemy (self))
 			return;
-		if (!self->fb.willRocketJumpThisTic)
-			self->fb.firing = false;
+		if (!AttackFinished (self))
+			return;
+		self->fb.firing &= self->fb.willRocketJumpThisTic;
 	}
-	else if ((!self->fb.firing && g_globalvars.time < self->attack_finished) || self->fb.next_impulse) {
+	else if (self->fb.next_impulse) {
 		return;
 	}
-	else if ((!self->fb.firing && g_globalvars.time < self->fb.min_fire_time)) {
+		
+	if (g_globalvars.time < self->fb.min_fire_time) {
+		self->fb.firing = false;
 		return;
 	}
 

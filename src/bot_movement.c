@@ -3,6 +3,8 @@
 #include "fb_globals.h"
 
 #define ARROW_TIME_INCREASE       0.15  // Seconds to advance after NewVelocityForArrow
+#define MIN_DEAD_TIME 0.2f
+#define MAX_DEAD_TIME 1.0f
 
 void SetLinkedMarker (gedict_t* player, gedict_t* marker, char* explanation)
 {
@@ -34,6 +36,12 @@ void SetDirectionMove (gedict_t* self, vec3_t dir_move, const char* explanation)
 void NewVelocityForArrow(gedict_t* self, vec3_t dir_move, const char* explanation) {
 	SetDirectionMove (self, dir_move, explanation);
 	self->fb.arrow_time = g_globalvars.time + ARROW_TIME_INCREASE;
+}
+
+static qbool BotRequestRespawn(gedict_t* self) {
+	float time_dead = min (g_globalvars.time - self->fb.last_death, MAX_DEAD_TIME);
+
+	return self->s.v.deadflag == DEAD_RESPAWNABLE && time_dead > MIN_DEAD_TIME && (g_random () < (time_dead / MAX_DEAD_TIME));
 }
 
 void BotSetCommand(gedict_t* self) {

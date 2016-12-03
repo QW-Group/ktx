@@ -4,8 +4,6 @@
 #include "fb_globals.h"
 
 #define PERIODIC_MM2_STATUS 4
-#define MIN_DEAD_TIME 0.2f
-#define MAX_DEAD_TIME 1.0f
 
 void PlayerReady ();
 void BotBlocked (void);
@@ -113,12 +111,6 @@ void BotClientEntersEvent(gedict_t* self, gedict_t* spawn_pos)
 	FrogbotSetHealthArmour (self);
 	self->fb.weapon_refresh_time = 0;
 	self->s.v.blocked = (func_t) BotBlocked;
-}
-
-static qbool BotRequestRespawn(gedict_t* self) {
-	float time_dead = min (g_globalvars.time - self->fb.last_death, MAX_DEAD_TIME);
-
-	return self->s.v.deadflag == DEAD_RESPAWNABLE && time_dead > MIN_DEAD_TIME && (g_random () < (time_dead / MAX_DEAD_TIME));
 }
 
 qbool BotUsingCorrectWeapon (gedict_t* self)
