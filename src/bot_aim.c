@@ -209,8 +209,8 @@ static void BotsModifyAimAtPlayerLogic (gedict_t* self, vec3_t rel_pos, float re
 	fb_botaim_t* pitch = &self->fb.skill.aim_params[PITCH];
 	fb_botaim_t* yaw   = &self->fb.skill.aim_params[YAW];
 
-	float raw_yaw_diff = self->fb.desired_angle[PITCH] - self->s.v.angles[PITCH];
-	float raw_pitch_diff = self->fb.desired_angle[YAW] - self->s.v.angles[YAW];
+	float raw_pitch_diff = self->fb.desired_angle[PITCH] - self->s.v.angles[PITCH];
+	float raw_yaw_diff = self->fb.desired_angle[YAW] - self->s.v.angles[YAW];
 
 	float pitch_diff, yaw_diff;
 	float pitch_rnd, yaw_rnd;
