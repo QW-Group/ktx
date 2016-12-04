@@ -20,28 +20,12 @@ int NumberOfClients (void)
 }
 
 void FrogbotPrePhysics1(void) {
-	// Set all players to non-solid so we can avoid hazards
-	if (IsHazardFrame()) {
-		for (self = world; self = find_plr(self); ) {
-			self->fb.oldsolid = self->s.v.solid;
-			self->s.v.solid = SOLID_NOT;
-		}
-	}
-
 	// 
-	for (self = world; self = find_plr (self); ) {
-		if (self->isBot && self->s.v.takedamage) {
-			VectorCopy(self->s.v.velocity, self->fb.oldvelocity);
-			if (IsHazardFrame()) {
-				AvoidHazards(self);
-			}
-		}
-	}
+	gedict_t* p;
 
-	// Re-instate client entity types
-	if (IsHazardFrame()) {
-		for (self = world; self = find_plr(self); ) {
-			self->s.v.solid = self->fb.oldsolid;
+	for (p = world; p = find_plr (p); ) {
+		if (p->isBot && p->s.v.takedamage) {
+			VectorCopy(p->s.v.velocity, p->fb.oldvelocity);
 		}
 	}
 }

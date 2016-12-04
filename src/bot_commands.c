@@ -1328,6 +1328,27 @@ void BotStartFrame(int framecount) {
 					Bot_Print_Thinking ();
 				}
 
+				if (IsHazardFrame ()) {
+					gedict_t* p;
+
+					// Set all players to non-solid so we can avoid hazards
+					if (IsHazardFrame()) {
+						for (p = world; p = find_plr(p); ) {
+							p->fb.oldsolid = p->s.v.solid;
+							p->s.v.solid = SOLID_NOT;
+						}
+					}
+
+					AvoidHazards (self);
+
+					// Re-instate client entity types
+					if (IsHazardFrame()) {
+						for (p = world; p = find_plr(p); ) {
+							p->s.v.solid = p->fb.oldsolid;
+						}
+					}
+				}
+
 				BotSetCommand (self);
 			}
 		}
