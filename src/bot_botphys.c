@@ -93,22 +93,6 @@ void FrogbotPrePhysics2() {
 			BotDetectTrapped(self);
 
 			if (self->s.v.takedamage) {
-				/*if ((int)self->s.v.flags & FL_ONGROUND) {
-					if (self->s.v.velocity[2] < 0) {
-						self->fb.oldvelocity[2] = self->s.v.velocity[2] = 0;
-					}
-					if (self->fb.fl_ontrain) {
-						self->fb.fl_ontrain = false;
-					}
-					else {
-						self->s.v.flags = self->s.v.flags - FL_ONGROUND;
-					}
-				}
-				else  {
-					self->jump_flag = self->s.v.velocity[2];
-					self->fb.fl_ontrain = false;
-				}*/
-
 				VectorCopy(self->s.v.origin, self->s.v.oldorigin);
 			}
 		}

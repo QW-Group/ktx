@@ -333,14 +333,20 @@ static qbool PreWarBlockFiring (gedict_t* self)
 {
 	// Only fire in pre-war if enemy attacked us
 	if (match_in_progress == 0) {
+		gedict_t* enemy = &g_edicts[self->s.v.enemy];
+		qbool enemy_is_world = self->s.v.enemy && enemy->ct == ctNone;
+		qbool looking_at_enemy = enemy == self->fb.look_object;
+		qbool enemy_attacked = self->s.v.enemy && g_globalvars.time > enemy->attack_finished + 0.5;
+
 		// Don't fire at other bots
-		if (self->s.v.enemy == 0 || g_edicts[self->s.v.enemy].isBot || !self->fb.look_object) {
+		if (self->s.v.enemy == 0 || enemy->isBot || !self->fb.look_object) {
 			self->fb.firing = false;
 			return true;
 		}
 
 		// If looking at enemy and they haven't attacked us recently, don't fire
-		if ((&g_edicts[self->s.v.enemy] == self->fb.look_object || ! self->fb.debug_path) && g_globalvars.time > g_edicts[self->s.v.enemy].attack_finished + 0.5) {
+		// Exception for debug_path, when it can fire at doors (but not players)
+		if (looking_at_enemy && (enemy_attacked || (self->fb.debug_path && enemy_is_world))) {
 			self->fb.firing = false;
 			return true;
 		}

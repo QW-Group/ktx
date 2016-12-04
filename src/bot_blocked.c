@@ -49,8 +49,6 @@ void BotBlocked (void)
 		{
 			VectorClear (self->fb.obstruction_normal);
 			self->fb.jumping = true;
-			if (self->fb.debug_path)
-				G_bprint (2, "blocked() => jumping over?\n");
 			BotSetCommand (self);
 			return;
 		}

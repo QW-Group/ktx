@@ -7,6 +7,7 @@
 #define ARROW_TIME_AFTER_TELEPORT 0.20  // was 0.5
 
 void GrenadeExplode (void);
+void BotPathCheck (gedict_t* self, gedict_t* touch_marker);
 
 // FIXME: Local globals
 static float first_trace_fraction = 0;
@@ -764,6 +765,8 @@ void BotsPostTeleport (gedict_t* teleport_trigger, gedict_t* player, gedict_t* t
 		// other.angles holds crosshair position
 		player->fb.real_pitch = player->s.v.angles[0];
 		player->fb.real_yaw = player->s.v.angles[1];
+
+		BotPathCheck (player, teleport_trigger);
 	}
 
 	player->fb.frogbot_nextthink = g_globalvars.time;

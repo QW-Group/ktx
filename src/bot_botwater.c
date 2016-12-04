@@ -5,7 +5,8 @@
 
 #define BOT_DROWN_SAFETY_TIME           2  // Time before air running out that the bot starts searching for air
 
-static qbool BotCanReachMarker(gedict_t* self) {
+static qbool BotCanReachMarker(gedict_t* self)
+{
 	vec3_t spot1,
 	       spot2;
 	VectorCopy(self->fb.linked_marker->s.v.origin, spot2);
@@ -14,15 +15,18 @@ static qbool BotCanReachMarker(gedict_t* self) {
 	return (g_globalvars.trace_fraction == 1);
 }
 
-static qbool BotSwimDown(gedict_t* self) {
+static qbool BotSwimDown(gedict_t* self)
+{
 	return (self->fb.linked_marker->s.v.origin[2] < self->s.v.origin[2]);
 }
 
-static qbool BotSwimUp(gedict_t* self) {
+static qbool BotSwimUp(gedict_t* self)
+{
 	return (self->fb.linked_marker->s.v.origin[2] >= self->s.v.origin[2]);
 }
 
-static qbool BotGoUpForAir(gedict_t* self, vec3_t dir_move) {
+static qbool BotGoUpForAir(gedict_t* self, vec3_t dir_move)
+{
 	vec3_t temp;
 
 	if (g_globalvars.time > (self->air_finished - BOT_DROWN_SAFETY_TIME)) {
@@ -52,7 +56,8 @@ static qbool BotGoUpForAir(gedict_t* self, vec3_t dir_move) {
 	return false;
 }
 
-static void SwimAwayFromWall(gedict_t* self, vec3_t dir_move) {
+static void SwimAwayFromWall(gedict_t* self, vec3_t dir_move)
+{
 	if (DotProduct(self->fb.obstruction_normal, self->fb.obstruction_direction) > 0.5) {
 		VectorScale(dir_move, -1, dir_move);
 	}

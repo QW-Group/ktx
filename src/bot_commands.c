@@ -400,6 +400,10 @@ static void FrogbotsDebug (void)
 			first_bot->fb.fixed_goal = target;
 			first_bot->fb.debug = true;
 			first_bot->fb.debug_path = true;
+			cvar_fset ("k_fb_debug", 1);
+			VectorClear (first_bot->s.v.velocity);
+			trap_SetBotCMD (NUM_FOR_EDICT (first_bot), g_globalvars.frametime, 0, 0, 0, 0, 0, 0, 0, 0);
+			first_bot->fb.debug_path_start = g_globalvars.time;
 			first_bot->fb.touch_marker_time = first_bot->fb.linked_marker_time = first_bot->fb.goal_refresh_time = 0;
 			first_bot->fb.old_linked_marker = NULL;
 
@@ -1304,8 +1308,8 @@ void BotStartFrame(int framecount) {
 	else if ( framecount == 20 ) {
 		LoadMap();
 	}
-	else if (framecount > 20) {
-		marker_time = TimeTrigger (&next_marker_time, 0.1);
+	else if ( framecount > 20 ) {
+		marker_time = TimeTrigger (&next_marker_time, 0.03);
 		hazard_time = TimeTrigger (&next_hazard_time, 0.025);
 
 		FrogbotPrePhysics1 ();

@@ -458,6 +458,8 @@ typedef struct fb_botskill_s {
 	float awareness_delay;
 
 	fb_botaim_t aim_params[2];
+
+	float movement;
 } fb_botskill_t;
 
 typedef struct fb_entvars_s {
@@ -633,6 +635,7 @@ typedef struct fb_entvars_s {
 	// Debugging
 	qbool               debug;           // If set, trace logic
 	qbool               debug_path;      // Set by "debug botpath" command
+	float               debug_path_start;// Set by "debug botpath" command
 	struct gedict_s*    fixed_goal;      // Set by "debug botpath" command
 	vec3_t              prev_velocity;   // used by "debug bothpath" command
 	float               last_spec_cp;    // last spectator centerprint

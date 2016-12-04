@@ -864,6 +864,7 @@ void FirstFrame	( )
 // { frogbots support
 	RegisterCvarEx ("k_fb_skill", "10");
 	RegisterCvarEx ("k_fb_options", "0");
+	RegisterCvarEx ("k_fb_debug", "0");
 
 	for (i = 0; i < MAX_LASTSCORES; i++) {
 		RegisterCvarEx (va ("k_fb_name_%d", i), "");

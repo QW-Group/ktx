@@ -34,6 +34,8 @@ static char* FriendTeamName (int botNumber);
 #define FB_CVAR_ENEMYSPEED_VOLATILITY_INCREASE "k_fbskill_vol_oppvel_incr"
 #define FB_CVAR_ENEMYDIRECTION_VOLATILITY_INCREASE "k_fbskill_vol_oppdir_incr"
 
+#define FB_CVAR_MOVEMENT_SKILL "k_fbskill_movement"
+
 static float RangeOverSkill (int skill_level, float minimum, float maximum)
 {
 	float skill = skill_level * 1.0f / (MAX_FROGBOT_SKILL - MIN_FROGBOT_SKILL);
@@ -100,6 +102,8 @@ void RegisterSkillVariables (void)
 	RegisterCvar (FB_CVAR_ENEMYSPEED_VOLATILITY_THRESHOLD);
 	RegisterCvar (FB_CVAR_ENEMYSPEED_VOLATILITY_INCREASE);
 	RegisterCvar (FB_CVAR_ENEMYDIRECTION_VOLATILITY_INCREASE);
+
+	RegisterCvar (FB_CVAR_MOVEMENT_SKILL);
 }
 
 void SetAttributesBasedOnSkill (int skill)
@@ -141,6 +145,9 @@ void SetAttributesBasedOnSkill (int skill)
 	cvar_fset (FB_CVAR_OWNSPEED_VOLATILITY_INCREASE, RangeOverSkill (skill, 0.4f, 0.2f));
 	cvar_fset (FB_CVAR_ENEMYDIRECTION_VOLATILITY_INCREASE, RangeOverSkill (skill, 0.6f, 0.4f));
 
+	cvar_fset (FB_CVAR_MOVEMENT_SKILL, RangeOverSkill (skill, 0.3f, 1.0f));
+
+	// Customise
 	{
 		char buf[1024 * 4];
 
@@ -190,6 +197,9 @@ void SetAttribs(gedict_t* self)
 	self->fb.skill.enemyspeed_volatility = bound (0, cvar (FB_CVAR_ENEMYSPEED_VOLATILITY_INCREASE), 5.0f);
 	self->fb.skill.enemydirection_volatility = bound (0, cvar (FB_CVAR_ENEMYDIRECTION_VOLATILITY_INCREASE), 5.0f);
 	self->fb.skill.awareness_delay = bound (0, cvar (FB_CVAR_REACTION_TIME), 1.0f);
+
+	// Movement
+	self->fb.skill.movement = bound (0, cvar (FB_CVAR_MOVEMENT_SKILL), 1.0f);
 }
 
 char* SetTeamNetName(int botNumber, const char* teamName) {

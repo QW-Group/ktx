@@ -164,7 +164,7 @@ static void BotMoveTowardsLinkedMarker(gedict_t* self, vec3_t dir_move) {
 	VectorSubtract(temp, self->s.v.origin, temp);
 	normalize(temp, dir_move);
 	if (self->isBot && self->fb.debug_path)
-		G_bprint (PRINT_HIGH, "%3.2f: Moving %3d > %3d, dir %3.1f %3.1f %3.1f\n", g_globalvars.time, self->fb.touch_marker->fb.index + 1, self->fb.linked_marker->fb.index + 1, PASSVEC3 (dir_move));
+		//G_bprint (PRINT_HIGH, "%3.2f: Moving %3d > %3d, dir %3.1f %3.1f %3.1f\n", g_globalvars.time, self->fb.touch_marker->fb.index + 1, self->fb.linked_marker->fb.index + 1, PASSVEC3 (dir_move));
 
 	if (self->fb.path_state & DELIBERATE_BACKUP) {
 		if (linked->fb.arrow_time > g_globalvars.time) {
@@ -237,7 +237,20 @@ static void HumanTouchMarkerLogic(void) {
 	}
 }
 
-static void PeriodicAllClientLogic(void) {
+void BotPathCheck (gedict_t* self, gedict_t* touch_marker)
+{
+	// FIXME: This should be when they touch the marker, not when linking to it
+	if (self->fb.debug_path && self->fb.fixed_goal == touch_marker) {
+		G_bprint (2, "at goal, path complete.  %4.3f seconds\n", g_globalvars.time - self->fb.debug_path_start);
+		self->fb.fixed_goal = NULL;
+		self->fb.debug_path = false;
+		self->fb.debug_path_start = 0;
+		cvar_fset ("k_fb_debug", 0);
+	}
+}
+
+static void PeriodicAllClientLogic(void)
+{
 	SetNextThinkTime(self);
 
 	if (PAST(weapon_refresh_time)) {
@@ -250,6 +263,8 @@ static void PeriodicAllClientLogic(void) {
 	}
 
 	if (self->fb.touch_marker) {
+		BotPathCheck (self, self->fb.touch_marker);
+
 		if (self->fb.state & AWARE_SURROUNDINGS) {
 			if (self->isBot) {
 				BotTouchMarkerLogic();
