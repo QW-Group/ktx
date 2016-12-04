@@ -1350,8 +1350,6 @@ void FrogbotsCommand (void)
 	PrintAvailableCommands (commands, num_commands);
 }
 
-
-
 void Bot_Print_Thinking (void)
 {
 	// Spectator is watching a bot - display bot's thinking
@@ -1394,9 +1392,9 @@ void Bot_Print_Thinking (void)
 
 	if (FrogbotOptionEnabled (FB_OPTION_SHOW_MOVEMENT_LOGIC)) {
 		strlcat (data, "\n", sizeof (data));
-		strlcat (data, va ("  %s: %f %f %f\n", redtext ("Velocity"), PASSVEC3 (bot->s.v.velocity)), sizeof (data));
-		strlcat (data, va ("  %s: %f %f %f\n", redtext ("Obstruction"), PASSVEC3 (bot->fb.obstruction_normal)), sizeof (data));
-		strlcat (data, va ("  %s: %f %f %f\n", redtext ("LastDirection"), PASSVEC3 (bot->fb.last_cmd_direction)), sizeof (data));
+		strlcat (data, va ("  %s: %4d %4d %4d\n", redtext ("Velocity"), PASSINTVEC3 (bot->s.v.velocity)), sizeof (data));
+		strlcat (data, va ("  %s: %4d %4d %4d\n", redtext ("Obstruction"), PASSSCALEDINTVEC3 (bot->fb.obstruction_normal, 320)), sizeof (data));
+		strlcat (data, va ("  %s: %4d %4d %4d\n", redtext ("LastDirection"), PASSINTVEC3 (bot->fb.last_cmd_direction)), sizeof (data));
 	}
 
 	if (data[0]) {

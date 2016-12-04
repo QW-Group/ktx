@@ -111,7 +111,7 @@ extern gedict_t* dropper;
 #define WATERJUMP_              (1 <<  1)
 #define DM6_DOOR                (1 <<  8)
 #define ROCKET_JUMP             (1 <<  9)
-#define JUMP_LEDGE              (1 << 10)
+#define JUMP_LEDGE              (1 << 10)             // Implies NO_DODGE
 #define VERTICAL_PLATFORM       (1 << 11)
 #define BOTPATH_DOOR            (1 << 12)
 #define BOTPATH_DOOR_CLOSED     (1 << 13)
@@ -125,7 +125,7 @@ extern gedict_t* dropper;
 #define DELIBERATE_BACKUP       (1 << 22)
 #define BOTPATH_CURLJUMP_HINT   (1 << 23)
 #define DELIBERATE_AIR_WAIT_GROUND (DELIBERATE_AIR | WAIT_GROUND)
-#define SAVED_DESCRIPTION (DM6_DOOR | ROCKET_JUMP | JUMP_LEDGE | VERTICAL_PLATFORM | BOTPATH_DOOR | BOTPATH_DOOR_CLOSED)
+#define SAVED_DESCRIPTION (DM6_DOOR | ROCKET_JUMP | JUMP_LEDGE | VERTICAL_PLATFORM | BOTPATH_DOOR | BOTPATH_DOOR_CLOSED | NO_DODGE)
 #define NOT_ROCKET_JUMP (~ROCKET_JUMP)
 
 // Marker flags (FIXME: fb.T?  check.  consistent naming)
@@ -337,6 +337,7 @@ void AddZoneMarker (gedict_t* marker);
 
 // bot_commands.qc
 void SetLinkedMarker (gedict_t* player, gedict_t* marker, char* explanation);
+void SetJumpFlag (gedict_t* player, qbool jumping, char* explanation);
 
 // bot_routing.qc
 void PathScoringLogic (
