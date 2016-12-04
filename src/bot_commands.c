@@ -1137,7 +1137,8 @@ static void FrogbotShowInfo (void)
 	}
 
 	strlcpy (message, va ("Marker #%3d [%s]\n", marker->fb.index + 1, marker->s.v.classname), sizeof (message));
-	strlcat (message, va ("Origin #%3d %3d %3d\n", PASSINTVEC3(marker->s.v.origin)), sizeof (message));
+	strlcat (message, va ("Origin %3d %3d %3d\n", PASSINTVEC3(marker->s.v.origin)), sizeof (message));
+	strlcat (message, va ("Dim [%3d %3d %3d] > [%3d %3d %3d]\n\n", PASSINTVEC3(marker->s.v.absmin), PASSINTVEC3(marker->s.v.absmax)), sizeof (message));
 	strlcat (message, va ("Zone #%2d, Goal #%2d\n", marker->fb.Z_, marker->fb.G_), sizeof (message));
 	strlcat (message, va ("Flags: %s\n", strnull (marker_flags) ? "(none)" : marker_flags), sizeof (message));
 	strlcat (message, "Paths:\n", sizeof (message));

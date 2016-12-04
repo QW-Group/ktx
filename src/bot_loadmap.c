@@ -358,6 +358,11 @@ static void CustomiseFrogbotMap (void)
 
 	// Expand bounding box of all items
 	for (ent = world; ent = nextent (ent); ) {
+		if (streq (ent->s.v.classname, "info_teleport_destination") ||
+			streq (ent->s.v.classname, "info_player_deathmatch")) {
+			continue;
+		}
+
 		if (streq (ent->s.v.classname, "marker")) {
 			vec3_t mins = { -65, -65, -24 };
 			vec3_t maxs = {  65,  65,  32 };
