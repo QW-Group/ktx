@@ -8,7 +8,6 @@
 
 void GrenadeExplode (void);
 void BotPathCheck (gedict_t* self, gedict_t* touch_marker);
-int MapDeathHeight (void);
 
 // FIXME: Local globals
 static float first_trace_fraction = 0;
@@ -324,7 +323,7 @@ static qbool CanJumpOver(gedict_t* self, vec3_t jump_origin, vec3_t jump_velocit
 				gedict_t* test_enemy;
 
 				for (test_enemy = world; test_enemy = find_plr (test_enemy); ) {
-					test_enemy->s.v.solid = test_enemy->fb.oldsolid;
+					test_enemy->s.v.solid = SOLID_SLIDEBOX;
 				}
 
 				// Generally this flag is set for when marker is lava

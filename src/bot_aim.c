@@ -62,7 +62,6 @@ static void PredictEnemyLocationInFuture(gedict_t* enemy, float rel_time) {
 	vec3_t testplace;
 	float fallheight = enemy->s.v.origin[2] - 56 + enemy->s.v.velocity[2] * rel_time;
 
-	enemy->fb.oldsolid = enemy->s.v.solid;
 	enemy->s.v.solid = SOLID_NOT;
 	VectorMA(enemy->s.v.origin, rel_time, enemy->s.v.velocity, testplace);
 	testplace[2] += 36;
@@ -79,7 +78,7 @@ static void PredictEnemyLocationInFuture(gedict_t* enemy, float rel_time) {
 			VectorCopy(testplace, self->fb.predict_origin);
 		}
 	}
-	enemy->s.v.solid = enemy->fb.oldsolid;
+	enemy->s.v.solid = SOLID_SLIDEBOX;
 }
 
 // This is when firing at buttons/doors etc

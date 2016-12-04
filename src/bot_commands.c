@@ -1220,9 +1220,6 @@ static void FrogbotGoalInfo (void)
 
 static void FrogbotSetDeathHeight (void)
 {
-	extern int MapDeathHeight (void);
-	extern void SetMapDeathHeight (int height);
-
 	if (trap_CmdArgc () == 2) {
 		if (MapDeathHeight () <= FB_MAPDEATHHEIGHT_DEFAULT) {
 			G_sprint (self, PRINT_HIGH, "Death height: not set\n");
@@ -1504,7 +1501,6 @@ void BotStartFrame(int framecount) {
 					// Set all players to non-solid so we can avoid hazards
 					if (IsHazardFrame()) {
 						for (p = world; p = find_plr(p); ) {
-							p->fb.oldsolid = p->s.v.solid;
 							p->s.v.solid = SOLID_NOT;
 						}
 					}
@@ -1514,7 +1510,7 @@ void BotStartFrame(int framecount) {
 					// Re-instate client entity types
 					if (IsHazardFrame()) {
 						for (p = world; p = find_plr(p); ) {
-							p->s.v.solid = p->fb.oldsolid;
+							p->s.v.solid = SOLID_SLIDEBOX;
 						}
 					}
 				}

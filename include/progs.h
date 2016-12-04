@@ -475,7 +475,6 @@ typedef struct fb_entvars_s {
 	int angle_hint;                      // for curl-jumping, angle offset (right-handed, +ve = to left, -ve = to right)
 
 	int index;                           // marker number
-	float oldsolid;                      // temp storage of ->s.v.solid, all clients are set to not solid when detecting hazards
 
 	float wait;
 	float fl_ontrain;                    // FIXME: never set (used for frogbot train movement)

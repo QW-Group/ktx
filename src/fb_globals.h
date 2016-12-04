@@ -377,6 +377,9 @@ void SetMarker (gedict_t* client, gedict_t* marker);
 
 #define FB_MAPDEATHHEIGHT_DEFAULT -9999999
 
+int MapDeathHeight (void);
+void SetMapDeathHeight (int height);
+
 // debugging
 void RunRandomTrials (float min, float max, float mult);
 
