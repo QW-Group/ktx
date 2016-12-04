@@ -176,8 +176,9 @@ float anglemod (float v);
 gedict_t* HelpTeammate (void);
 
 // 
-char* SetNetName (int botNumber);
-char* SetTeamNetName (int botNumber, const char* teamName);
+char* BotNameGeneric (int botNumber);
+char* BotNameFriendly (int botNumber);
+char* BotNameEnemy (int botNumber);
 
 qbool Visible_360 (gedict_t* self, gedict_t* visible_object);
 qbool Visible_infront (gedict_t* self, gedict_t* visible_object);

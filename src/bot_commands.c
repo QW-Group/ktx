@@ -102,6 +102,80 @@ static int CountTeamMembers (const char* teamName)
 	return count;
 }
 
+typedef struct team_s {
+	char name[16];
+	int humans;
+	int bots;
+	int topColor;
+	int bottomColor;
+} team_t;
+
+team_t teams[4];
+
+static team_t* AddTeamToList (int* teamsFound, char* team, int topColor, int bottomColor)
+{
+	int i;
+	qbool found = false;
+
+	for (i = 0; !found && i < *teamsFound; ++i) {
+		if (found = streq (team, teams[i].name)) {
+			return &teams[i];
+		}
+	}
+
+	if (!found && *teamsFound < sizeof (teams) / sizeof(teams[0])) {
+		i = *teamsFound;
+		strlcpy (teams[i].name, team, sizeof (teams[i].name));
+		teams[i].topColor = topColor;
+		teams[i].bottomColor = bottomColor;
+		teams[i].humans = teams[i].bots = 0;
+		*teamsFound = *teamsFound + 1;
+		return &teams[i];
+	}
+
+	return NULL;
+}
+
+const char* defaultTeamNames[] = { "red", "blue", "yellow", "green" };
+
+static void BuildTeamList ()
+{
+	const char* teamNames[4] = { 0 };
+	int teamColors[4] = { -1 };
+	int foundTeams = 0;
+
+	gedict_t* ed;
+
+	for (ed = world; ed = find_plr (ed); ) {
+		char* t = getteam (ed);
+		int topColor, bottomColor;
+		team_t* team = NULL;
+
+		if (strnull (t)) {
+			continue;
+		}
+
+		topColor = atoi (ezinfokey (ed, "topcolor"));
+		bottomColor = atoi (ezinfokey (ed, "bottomcolor"));
+
+		team = AddTeamToList (&foundTeams, t, topColor, bottomColor);
+		if (team) {
+			if (ed->isBot) {
+				++team->bots;
+			}
+			else {
+				++team->humans;
+			}
+		}
+	}
+
+	// Add defaults
+	AddTeamToList (&foundTeams, "red", 4, 4);
+	AddTeamToList (&foundTeams, "blue", 13, 13);
+	AddTeamToList (&foundTeams, "yellow", 12, 12);
+	AddTeamToList (&foundTeams, "green", 3, 3);
+}
+
 // FIXME: Autoteams vs manual...
 static void FrogbotsAddbot(void) {
 	int i = 0;
@@ -116,27 +190,42 @@ static void FrogbotsAddbot(void) {
 			int entity = 0;
 			int topColor = 0;
 			int bottomColor = 0;
-			int red = CountTeamMembers ("red");
-			int blue = CountTeamMembers ("blue");
-			qbool red_team = red < blue || (red == blue && g_random () < 0.5);
-			const char* teamName = red_team ? "red" : "blue";
+			char* teamName = "";
 
 			if (teamplay) {
-				int teamCount = (int)CountTeams ();
-				char* botName = SetTeamNetName (i, teamName);
+				int team1Count, team2Count;
+				team_t* team;
+				team_t* otherTeam;
 
-				strlcpy (bots[i].name, botName, sizeof(bots[i].name));
+				BuildTeamList ();
 
-				// Pick team
-				topColor = bottomColor = (red_team ? 4 : 13);
+				team1Count = teams[0].humans + teams[0].bots;
+				team2Count = teams[1].humans + teams[1].bots;
+
+				team = team1Count < team2Count || (team1Count == team2Count && g_random () < 0.5) ? &teams[0] : &teams[1];
+				otherTeam = team == &teams[0] ? &teams[1] : &teams[0];
+
+				if (team->humans && !otherTeam->humans) {
+					strlcpy (bots[i].name, BotNameFriendly (team->bots), sizeof (bots[i].name));
+				}
+				else if (otherTeam->humans && !team->humans) {
+					strlcpy (bots[i].name, BotNameEnemy (team->bots), sizeof (bots[i].name));
+				}
+				else {
+					strlcpy (bots[i].name, BotNameGeneric (i), sizeof (bots[i].name));
+				}
+
+				topColor = team->topColor;
+				bottomColor = team->bottomColor;
+				teamName = team->name;
 			}
 			else {
-				strlcpy (bots[i].name, SetNetName(i), sizeof(bots[i].name));
+				strlcpy (bots[i].name, BotNameGeneric (i), sizeof(bots[i].name));
 
 				topColor = i_rnd (0, 13);
 				bottomColor = i_rnd (0, 13);
 			}
-			entity = trap_AddBot(bots[i].name, topColor, bottomColor, "base");
+			entity = trap_AddBot(bots[i].name, bottomColor, topColor, "base");
 
 			if (entity == 0) {
 				G_sprint(self, 2, "Error adding bot\n");

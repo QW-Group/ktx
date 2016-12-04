@@ -206,68 +206,12 @@ void SetAttribs(gedict_t* self)
 	self->fb.skill.combat_jump_chance = bound (0, cvar (FB_CVAR_COMBATJUMP_CHANCE), 1.0f);
 }
 
-char* SetTeamNetName(int botNumber, const char* teamName) {
-	float playersOnThisTeam = 0,
-	      playersOnOtherTeams = 0,
-	      frogbotsOnThisTeam = 0;
-	char* attemptedName = NULL;
-	gedict_t* search_entity = NULL;
-
-	playersOnThisTeam = 0;
-	frogbotsOnThisTeam = 0;
-	playersOnOtherTeams = 0;
-
-	for (search_entity = world; search_entity = find_plr (search_entity); ) {
-		if (!search_entity->isBot) {
-			if ( streq( getteam(search_entity), teamName)) {
-				playersOnThisTeam = playersOnThisTeam + 1;
-			}
-			else {
-				playersOnOtherTeams = playersOnOtherTeams + 1;
-			}
-		}
-		else if ( streq( getteam(search_entity), teamName ) ) {
-			frogbotsOnThisTeam = frogbotsOnThisTeam + 1;
-		}
-	}
-
-	if (playersOnOtherTeams > 0 && playersOnThisTeam == 0) {
-		attemptedName = EnemyTeamName(botNumber);
-	}
-	else if (playersOnThisTeam > 0 && playersOnOtherTeams == 0) {
-		attemptedName = FriendTeamName(botNumber);
-	}
-	else {
-		attemptedName = SetNetName(botNumber);
-	}
-
-	if (attemptedName) {
-		return attemptedName;
-	}
-	return SetNetName(botNumber);
-}
-
-static char* EnemyTeamName(int botNumber) {
+char* BotNameEnemy(int botNumber) {
 	char* names[] = {
-		": Timber",
-		": Sujoy",
-		": Rix",
-		": Batch",
-
-		": Nikodemus",
-		": Paralyzer",
-		": Kane",
-		": Gollum",
-
-		": sCary",
-		": Xenon",
-		": Thresh",
-		": Frick",
-
-		": B2",
-		": Reptile",
-		": Unholy",
-		": Spice"
+		": Timber", ": Sujoy", ": Nightwing", ": Cenobite",
+		": Thresh", ": Frick", ": Unholy", ": Reptile",
+		": Nikodemus", ": Paralyzer", ": Xenon", ": Spice"
+		": Kornelia", ": Rix", ": Batch", ": Gollum"
 	};
 	char* custom_name = cvar_string (va ("k_fb_name_enemy_%d", botNumber));
 
@@ -278,27 +222,12 @@ static char* EnemyTeamName(int botNumber) {
 	return custom_name;
 }
 
-static char* FriendTeamName(int botNumber) {
+char* BotNameFriendly(int botNumber) {
 	char* names[] = {
-		"> MrJustice",
-		"> Parrais",
-		"> Jon",
-		"> Gaz",
-
-		"> Jakey",
-		"> Tele",
-		"> Thurg",
-		"> Kool",
-
-		"> Zaphod",
-		"> Dreamer",
-		"> Mandrixx",
-		"> Skill5",
-
-		"> Gunner",
-		"> DanJ",
-		"> Vid",
-		"> Soul99"
+		"> MrJustice", "> DanJ", "> Gunner", "> Tele",
+		"> Jakey", "> Parrais", "> Thurg", "> Kool",
+		"> Zaphod", "> Dreamer", "> Mandrixx", "> Skill5",
+		"> Vid", "> Soul99", "> Jon", "> Gaz"
 	};
 	char* custom_name = cvar_string (va ("k_fb_name_team_%d", botNumber));
 
@@ -309,28 +238,12 @@ static char* FriendTeamName(int botNumber) {
 	return custom_name;
 }
 
-// FIXME
-char* SetNetName(int botNumber) {
+char* BotNameGeneric(int botNumber) {
 	char* names[] = {
-		"/ bro",
-		"/ goldenboy",
-		"/ tincan",
-		"/ grue",
-
-		"/ dizzy",
-		"/ daisy",
-		"/ denzil",
-		"/ dora",
-
-		"/ shortie",
-		"/ machina",
-		"/ gudgie",
-		"/ scoosh",
-
-		"/ frazzle",
-		"/ pop",
-		"/ junk",
-		"/ overflow"
+		"/ bro", "/ goldenboy", "/ tincan", "/ grue",
+		"/ dizzy", "/ daisy", "/ denzil", "/ dora",
+		"/ shortie", "/ machina", "/ gudgie", "/ scoosh",
+		"/ frazzle", "/ pop", "/ junk", "/ overflow"
 	};
 	char* custom_name = cvar_string (va ("k_fb_name_%d", botNumber));
 
