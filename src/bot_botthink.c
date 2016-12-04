@@ -159,12 +159,30 @@ static void BotMoveTowardsLinkedMarker(gedict_t* self, vec3_t dir_move) {
 	vec3_t temp;
 	gedict_t* goalentity_ = &g_edicts[self->s.v.goalentity];
 	gedict_t* linked = self->fb.linked_marker;
+	qbool onGround = ((int)self->s.v.flags & FL_ONGROUND);
+	qbool curlJump = ((int)self->fb.path_state & BOTPATH_CURLJUMP_HINT);
 
 	VectorAdd(linked->s.v.absmin, linked->s.v.view_ofs, temp);
 	VectorSubtract(temp, self->s.v.origin, temp);
 	normalize(temp, dir_move);
-	if (self->isBot && self->fb.debug_path)
+
+	if (curlJump && (onGround || self->s.v.velocity[2] > 0)) {
+		vec3_t up = { 0, 0, 1 };
+
+		if (self->isBot && self->fb.debug_path) {
+			G_bprint (PRINT_HIGH, "%3.2f: Moving %3d > %3d, dir %3.1f %3.1f %3.1f\n", g_globalvars.time, self->fb.touch_marker->fb.index + 1, self->fb.linked_marker->fb.index + 1, PASSVEC3 (dir_move));
+		}
+
+		RotatePointAroundVector (dir_move, up, dir_move, self->fb.angle_hint);
+
+		if (self->isBot && self->fb.debug_path) {
+			G_bprint (PRINT_HIGH, "%3.2f: Rotating %d, %3.1f %3.1f %3.1f\n", g_globalvars.time, self->fb.angle_hint, PASSVEC3 (dir_move));
+		}
+	}
+
+	if (self->isBot && self->fb.debug_path) {
 		//G_bprint (PRINT_HIGH, "%3.2f: Moving %3d > %3d, dir %3.1f %3.1f %3.1f\n", g_globalvars.time, self->fb.touch_marker->fb.index + 1, self->fb.linked_marker->fb.index + 1, PASSVEC3 (dir_move));
+	}
 
 	if (self->fb.path_state & DELIBERATE_BACKUP) {
 		if (linked->fb.arrow_time > g_globalvars.time) {

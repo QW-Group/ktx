@@ -9,11 +9,6 @@ void SetAttribs (gedict_t* self);
 void SetAttributesBasedOnSkill (int skill_level);
 void Bot_Print_Thinking (void);
 void BotsFireInitialTriggers (gedict_t* client);
-void PathScoringLogic (
-	float respawn_time, qbool be_quiet, float lookahead_time, qbool path_normal, vec3_t player_origin, vec3_t player_direction, 
-	gedict_t* touch_marker_, gedict_t* goalentity_marker, qbool rocket_alert, qbool rocket_jump_routes_allowed,
-	qbool trace_bprint, float *best_score, gedict_t** linked_marker_, int* new_path_state
-);
 qbool BotDoorIsClosed (gedict_t* door);
 qbool POVDMM4DontWalkThroughDoor (gedict_t* entity);
 gedict_t* BotsFirstBot (void);
@@ -25,7 +20,8 @@ int DecodeMarkerPathFlagString (const char* string);
 const char* EncodeMarkerPathFlags (int path_flags);
 const char* EncodeMarkerFlags (int marker_flags);
 void DM6Debug (gedict_t* self);
-float AverageTraceAngle (gedict_t* self, qbool debug);
+float AverageTraceAngle (gedict_t* self, qbool debug, qbool report);
+static gedict_t* MarkerIndicator (gedict_t* marker);
 
 #define MAX_BOTS          32
 
@@ -40,6 +36,8 @@ float AverageTraceAngle (gedict_t* self, qbool debug);
 // If the marker/path flag isn't set here, won't be included in .bot file
 #define EXTERNAL_MARKER_PATH_FLAGS (WATERJUMP_ | DM6_DOOR | ROCKET_JUMP | JUMP_LEDGE | VERTICAL_PLATFORM)
 #define EXTERNAL_MARKER_FLAGS (UNREACHABLE | MARKER_IS_DM6_DOOR | MARKER_FIRE_ON_MATCH_START | MARKER_DOOR_TOUCHABLE | MARKER_ESCAPE_ROUTE)
+
+#define MIN_DISTANCE_BETWEEN_MARKERS 30
 
 static qbool marker_time;
 static float next_marker_time;
@@ -342,9 +340,10 @@ static void FrogbotsDebug (void)
 						float best_score = -1000000;
 						gedict_t* linked_marker_ = NULL;
 						int new_path_state = 0;
+						int new_angle_hint = 0;
 						vec3_t player_direction = { 0, 0, 0 }; // Standing still, for sake of argument
 
-						PathScoringLogic (to->fb.goal_respawn_time, false, 30, true, from->s.v.origin, player_direction, from, to, false, true, true, &best_score, &linked_marker_, &new_path_state);
+						PathScoringLogic (to->fb.goal_respawn_time, false, 30, true, from->s.v.origin, player_direction, from, to, false, true, true, &best_score, &linked_marker_, &new_path_state, &new_angle_hint);
 
 						G_sprint (self, 2, "Finished: next marker %d (%s), best_score %f\n", (linked_marker_ ? linked_marker_->fb.index : -1), (linked_marker_ ? linked_marker_->s.v.classname : "null"), best_score);
 					}
@@ -422,7 +421,7 @@ static void FrogbotsDebug (void)
 			DM6Debug (self);
 		}
 		else if (streq (sub_command, "trace")) {
-			AverageTraceAngle (self, true);
+			AverageTraceAngle (self, true, true);
 		}
 	}
 }
@@ -432,6 +431,7 @@ static void FrogbotGoto (void)
 	gedict_t* marker = NULL;
 	char buffer[64];
 	vec3_t teleport_location;
+	vec3_t teleport_angles = { 0, 0, 0 };
 
 	if (trap_CmdArgc () != 3) {
 		G_sprint (self, PRINT_HIGH, "Usage: /botcmd goto <marker#>\n");
@@ -447,9 +447,30 @@ static void FrogbotGoto (void)
 
 	VectorCopy (marker->s.v.origin, teleport_location);
 	if (!streq (marker->s.v.classname, "marker")) {
-		vec3_t teleport_angles = { 0, 0, 0 };
+		teleport_location[2] += 32;
+	}
+	teleport_player (self, teleport_location, teleport_angles, TFLAGS_SND_DST | TFLAGS_FOG_DST);
+}
 
-		teleport_player (self, teleport_location, teleport_angles, TFLAGS_SND_DST | TFLAGS_FOG_DST);
+static void FrogbotMoveMarker (void)
+{
+	gedict_t* marker = LocateMarker (self->s.v.origin);
+	gedict_t* indicator;
+	while (marker != NULL && !streq (marker->s.v.classname, "marker")) {
+		marker = LocateNextMarker (self->s.v.origin, marker);
+	}
+
+	if (marker == NULL) {
+		G_sprint (self, PRINT_HIGH, "No marker nearby\n");
+		return;
+	}
+
+	setorigin (marker, PASSVEC3 (self->s.v.origin));
+	indicator = MarkerIndicator (marker);
+	if (indicator) {
+		extern void SetMarkerIndicatorPosition (gedict_t* item, gedict_t* indicator);
+
+		SetMarkerIndicatorPosition (marker, indicator);
 	}
 }
 
@@ -514,6 +535,9 @@ static void BotFileGenerate (void)
 					std_fprintf (file, "SetMarkerPath %d %d %d\n", markers[i]->fb.index + 1, p, markers[i]->fb.paths[p].next_marker->fb.index + 1);
 					if (markers[i]->fb.paths[p].flags & EXTERNAL_MARKER_PATH_FLAGS) {
 						std_fprintf (file, "SetMarkerPathFlags %d %d %s\n", markers[i]->fb.index + 1, p, EncodeMarkerPathFlags (markers[i]->fb.paths[p].flags & EXTERNAL_MARKER_PATH_FLAGS));
+					}
+					if (markers[i]->fb.paths[p].angle_hint) {
+						std_fprintf (file, "SetMarkerPathAngleHint %d %d %d\n", markers[i]->fb.index + 1, p, markers[i]->fb.paths[p].angle_hint);
 					}
 				}
 			}
@@ -657,7 +681,7 @@ static void FrogbotAddMarker (void)
 	if (nearest) {
 		VectorAdd (self->s.v.origin, self->s.v.view_ofs, pos);
 		VectorAdd (nearest->s.v.origin, nearest->s.v.view_ofs, nearest_pos);
-		if (VectorDistance (nearest_pos, pos) < 30) {
+		if (VectorDistance (nearest_pos, pos) < MIN_DISTANCE_BETWEEN_MARKERS) {
 			G_sprint (self, PRINT_HIGH, "Too close to marker #%d [%s]\n", nearest->fb.index + 1, nearest->s.v.classname);
 			return;
 		}
@@ -956,6 +980,37 @@ static void FrogbotClearMarkerFlag (void)
 	}
 }
 
+static void FrogbotSetAngleHint (void)
+{
+	gedict_t* nearest = LocateMarker (self->s.v.origin);
+	int source_to_target_path = FindPathIndex (saved_marker, nearest);
+	char param[64];
+
+	if (nearest == NULL) {
+		G_sprint (self, PRINT_HIGH, "No marker nearby\n");
+		return;
+	}
+
+	if (source_to_target_path >= 0) {
+		short offset = saved_marker->fb.paths[source_to_target_path].angle_hint;
+
+		if (trap_CmdArgc () < 3) {
+			G_sprint (self, PRINT_HIGH, "Current angle hint: %d\n", offset);
+			return;
+		}
+
+		trap_CmdArgv (2, param, sizeof (param));
+		offset = atoi (param);
+
+		saved_marker->fb.paths[source_to_target_path].angle_hint = offset;
+
+		G_sprint (self, PRINT_HIGH, "Angle hint set to %d\n", offset);
+	}
+	else {
+		G_sprint (self, PRINT_HIGH, "No path linked to add angle hint\n");
+	}
+}
+
 static void FrogbotSetPathFlag (void)
 {
 	gedict_t* nearest = LocateMarker (self->s.v.origin);
@@ -1062,8 +1117,9 @@ static void FrogbotShowInfo (void)
 		}
 	}
 
-	if (marker == NULL)
+	if (marker == NULL) {
 		marker = LocateMarker (self->s.v.origin);
+	}
 
 	if (marker == NULL) {
 		G_sprint (self, PRINT_HIGH, "Unable to find nearby marker\n");
@@ -1072,11 +1128,13 @@ static void FrogbotShowInfo (void)
 
 	marker_flags = EncodeMarkerFlags (marker->fb.T);
 
-	if (g_globalvars.time < self->fb.last_spec_cp)
+	if (g_globalvars.time < self->fb.last_spec_cp) {
 		return;
+	}
 
-	if (!marker)
+	if (!marker) {
 		return;
+	}
 
 	strlcpy (message, va ("Marker #%3d [%s]\n", marker->fb.index + 1, marker->s.v.classname), sizeof (message));
 	strlcat (message, va ("Origin #%3d %3d %3d\n", PASSINTVEC3(marker->s.v.origin)), sizeof (message));
@@ -1089,7 +1147,7 @@ static void FrogbotShowInfo (void)
 		if (next) {
 			const char* path_flags = EncodeMarkerPathFlags (marker->fb.paths[i].flags);
 
-			strlcat (message, va ("  %3d: %s [%s]\n", next->fb.index + 1, next->s.v.classname, strnull (path_flags) ? "(none)" : path_flags), sizeof (message));
+			strlcat (message, va ("  %3d: %s [%s] ang %d\n", next->fb.index + 1, next->s.v.classname, strnull (path_flags) ? "(none)" : path_flags, marker->fb.paths[i].angle_hint), sizeof (message));
 		}
 	}
 
@@ -1239,7 +1297,9 @@ static frogbot_cmd_t editor_commands[] = {
 	{ "goalsummary", FrogbotGoalSummary, "Show summary of goals" },
 	{ "mapinfo", FrogbotMapInfo, "Shows information about current map" },
 	{ "goalinfo", FrogbotGoalInfo, "Shows goal information for current marker" },
-	{ "goto", FrogbotGoto, "Teleport to a marker #" }
+	{ "goto", FrogbotGoto, "Teleport to a marker #" },
+	{ "move", FrogbotMoveMarker, "Moves marker to current position" },
+	{ "anglehint", FrogbotSetAngleHint, "Sets angle hint for bot path" }
 };
 
 #define NUM_EDITOR_COMMANDS (sizeof (editor_commands) / sizeof (editor_commands[0]))

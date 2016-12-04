@@ -33,6 +33,9 @@ const char* EncodeMarkerFlags (int marker_flags)
 	if (marker_flags & MARKER_FIRE_ON_MATCH_START)
 		*s++ = 'f';
 
+	if (s == buffer)
+		return "(none)";
+
 	*s = 0;
 	return buffer;
 }
@@ -82,6 +85,9 @@ const char* EncodeMarkerPathFlags (int path_flags)
 		*s++ = 'j';
 	if (path_flags & VERTICAL_PLATFORM)
 		*s++ = 'v';
+
+	if (s == buffer)
+		return "(none)";
 
 	*s = 0;
 	return buffer;
@@ -147,10 +153,32 @@ void AllMarkersLoaded() {
 	InitialiseMarkerRoutes();
 }
 
+void SetMarkerAngleHint(int marker_number, int path_index, int hint) {
+	--marker_number;
+
+	if (marker_number < 0 || marker_number >= NUMBER_MARKERS) {
+		return;
+	}
+	if (path_index < 0 || path_index >= NUMBER_PATHS) {
+		return;
+	}
+
+	markers[marker_number]->fb.paths[path_index].angle_hint = hint;
+	if (hint) {
+		markers[marker_number]->fb.paths[path_index].flags |= BOTPATH_CURLJUMP_HINT;
+	}
+	else {
+		markers[marker_number]->fb.paths[path_index].flags &= ~BOTPATH_CURLJUMP_HINT;
+	}
+} 
+
 void SetMarkerPathFlags(int marker_number, int path_index, int flags) {
 	--marker_number;
 
 	if (marker_number < 0 || marker_number >= NUMBER_MARKERS) {
+		return;
+	}
+	if (path_index < 0 || path_index >= NUMBER_PATHS) {
 		return;
 	}
 
@@ -329,6 +357,23 @@ qbool LoadBotRoutingFromFile (void)
 			offset = atof (argument);
 
 			SetMarkerViewOffset (source_marker, offset);
+		}
+		else if (streq (argument, "SetMarkerPathAngleHint")) {
+			int source_marker;
+			int path_number;
+			int hint;
+
+			if (trap_CmdArgc () != 4)
+				continue;
+
+			trap_CmdArgv (1, argument, sizeof (argument));
+			source_marker = atoi (argument);
+			trap_CmdArgv (2, argument, sizeof (argument));
+			path_number = atoi (argument);
+			trap_CmdArgv (3, argument, sizeof (argument));
+			hint = atoi(argument);
+
+			SetMarkerAngleHint (source_marker, path_number, hint);
 		}
 	}
 

@@ -209,6 +209,7 @@ void ProcessNewLinkedMarker(gedict_t* self) {
 	vec3_t player_direction;
 	gedict_t* new_linked_marker;
 	int new_path_state = 0;
+	int new_angle_hint = 0;
 
 	if (WaitingToHitGround(self))
 		return;
@@ -314,7 +315,7 @@ void ProcessNewLinkedMarker(gedict_t* self) {
 	self->fb.be_quiet = (self->s.v.enemy && &g_edicts[self->s.v.enemy] != self->fb.look_object && !self->fb.allowedMakeNoise);
 	
 	new_linked_marker = self->fb.linked_marker;
-	PathScoringLogic (self->fb.goal_respawn_time, self->fb.be_quiet, self->fb.skill.lookahead_time, self->fb.path_normal_, self->s.v.origin, player_direction, self->fb.touch_marker, goalentity_marker, rocket_alert, rocket_jump_routes_allowed, trace_bprint, &best_score, &new_linked_marker, &new_path_state);
+	PathScoringLogic (self->fb.goal_respawn_time, self->fb.be_quiet, self->fb.skill.lookahead_time, self->fb.path_normal_, self->s.v.origin, player_direction, self->fb.touch_marker, goalentity_marker, rocket_alert, rocket_jump_routes_allowed, trace_bprint, &best_score, &new_linked_marker, &new_path_state, &new_angle_hint);
 	SetLinkedMarker (self, new_linked_marker, "ProcNewLinked(std)");
 
 	STOP_DEBUGGING
@@ -341,6 +342,7 @@ void ProcessNewLinkedMarker(gedict_t* self) {
 
 	G_bprint_debug (2, "New linked marker: %d\n", self->fb.linked_marker->fb.index);
 	self->fb.path_state = new_path_state;
+	self->fb.angle_hint = new_angle_hint;
 	self->fb.linked_marker_time = g_globalvars.time + (self->fb.touch_marker == self->fb.linked_marker ? 0.3 : 5);
 	self->fb.old_linked_marker = self->fb.touch_marker;
 

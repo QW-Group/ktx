@@ -394,6 +394,7 @@ typedef struct fb_path_s {
 	struct gedict_s* next_marker;
 	float time;
 	int flags;
+	short angle_hint;
 } fb_path_t;
 
 typedef struct fb_goal_s {
@@ -468,7 +469,9 @@ typedef struct fb_entvars_s {
 	fb_goal_t          goals[NUMBER_GOALS];         // links to goals
 	fb_runaway_route_t runaway[NUMBER_PATHS];       // routes when running away
 	fb_path_t          paths[NUMBER_PATHS];         // direct links from this marker to next
-	int path_state;
+
+	int path_state;                      // flags for next path, copied from routing definition
+	int angle_hint;                      // for curl-jumping, angle offset (right-handed, +ve = to left, -ve = to right)
 
 	int index;                           // marker number
 	float oldsolid;                      // temp storage of ->s.v.solid, all clients are set to not solid when detecting hazards

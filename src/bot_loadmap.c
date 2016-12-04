@@ -188,9 +188,22 @@ static fb_spawn_t stdSpawnFunctions[] = {
 	{ "trigger_teleport", fb_spawn_trigger_teleport }
 };
 
-static void SpawnMarkerIndicator (gedict_t* item)
+void SetMarkerIndicatorPosition (gedict_t* item, gedict_t* indicator)
 {
 	vec3_t pos;
+
+	VectorAdd (item->s.v.absmin, item->s.v.absmax, pos);
+	VectorScale (pos, 0.5f, pos);
+	if (streq (item->s.v.classname, "plat")) {
+		VectorAdd (item->s.v.mins, item->s.v.maxs, pos);
+		VectorScale (pos, 0.5f, pos);
+	}
+
+	setorigin (indicator, PASSVEC3 (pos));
+}
+
+static void SpawnMarkerIndicator (gedict_t* item)
+{
 	gedict_t* p;
 
 	if (FrogbotShowMarkerIndicators ()) {
@@ -203,14 +216,7 @@ static void SpawnMarkerIndicator (gedict_t* item)
 		p->s.v.classname = "marker_indicator";
 		p->fb.index = item->fb.index;
 
-		VectorAdd (item->s.v.absmin, item->s.v.absmax, pos);
-		VectorScale (pos, 0.5f, pos);
-		if (streq (item->s.v.classname, "plat")) {
-			VectorAdd (item->s.v.mins, item->s.v.maxs, pos);
-			VectorScale (pos, 0.5f, pos);
-		}
-
-		setorigin (p, PASSVEC3 (pos));
+		SetMarkerIndicatorPosition (item, p);
 	}
 }
 

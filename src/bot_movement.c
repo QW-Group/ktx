@@ -22,8 +22,8 @@ void SetDirectionMove (gedict_t* self, vec3_t dir_move, const char* explanation)
 {
 	normalize (dir_move, self->fb.dir_move_);
 
-	//if (self->isBot)
-	//	G_bprint (2, "%3.2f: SetDirection(%2.2f %2.2f %2.2f): %s\n", g_globalvars.time, PASSVEC3(self->fb.dir_move_), explanation);
+	if (self->isBot && self->fb.debug_path)
+		G_bprint (2, "%3.2f: SetDirection(%2.2f %2.2f %2.2f): %s\n", g_globalvars.time, PASSVEC3(self->fb.dir_move_), explanation);
 }
 
 void NewVelocityForArrow(gedict_t* self, vec3_t dir_move, const char* explanation)
@@ -81,21 +81,24 @@ static void ApplyPhysics (gedict_t* self)
 	}
 
 	// Step 2: change direction to maximise acceleration in desired direction
-
 	if (self->s.v.waterlevel >= 2) {
 		// Water movement
 	}
 	else {
 		float min_numerator = onGround ? 319 : 29;
 		float max_numerator = onGround ? 281.6 : -8.4;
-		float used_numerator = min_numerator + movement_skill * (max_numerator - min_numerator);
-		float max_incr = used_numerator * used_numerator;
+		float used_numerator;
+		float max_incr;
+		vec3_t current_direction;
+		vec3_t original_direction;
 
 		// Gravity kicks in
+		/*
 		if (!onGround)
 			expected_velocity[2] -= self->gravity * cvar ("sv_gravity") * g_globalvars.frametime;
 		else
 			expected_velocity[2] = 0;
+		*/
 
 		// Ground & air acceleration is the same
 		hor_speed_squared = (expected_velocity[0] * expected_velocity[0] + expected_velocity[1] * expected_velocity[1]);
@@ -104,28 +107,50 @@ static void ApplyPhysics (gedict_t* self)
 			return;
 		}
 
+		normalize (self->fb.dir_move_, original_direction);
+		normalize (expected_velocity, current_direction);
+		used_numerator = min_numerator + movement_skill * (max_numerator - min_numerator);
+		max_incr = used_numerator * used_numerator;
 		if (hor_speed_squared >= max_incr) {
-			vec3_t current_direction;
-			vec3_t original_direction;
 			vec3_t perpendicular;
 
 			vec3_t up_vector = { 0, 0, 1 };
 			float rotation   = acos (max_incr / hor_speed_squared) * 180 / M_PI;
 
 			// Find out if rotation should be positive or negative
-			normalize (self->fb.dir_move_, original_direction);
-			normalize (expected_velocity, current_direction);
 			CrossProduct (current_direction, original_direction, perpendicular);
 
 			// Negative rotation => rotate 'right'
-			if (perpendicular[2] < 0)
+			if ((self->fb.path_state & BOTPATH_CURLJUMP_HINT) && !onGround) {
+				// Once in the air, we rotate in opposite direction
+				if (framecount % 3) {
+					rotation = 0;
+				}
+				else if (self->fb.angle_hint > 0) {
+					rotation = -rotation;
+				}
+			}
+			else if (perpendicular[2] < 0) {
 				rotation = -rotation;
-			RotatePointAroundVector (self->fb.dir_move_, up_vector, current_direction, rotation);
+			}
+
+			if (rotation) {
+				RotatePointAroundVector (self->fb.dir_move_, up_vector, current_direction, rotation);
+				if (self->fb.debug_path && ! onGround) {
+					G_bprint (PRINT_HIGH, "AirControl rotation: %3.2f, [%3d %3d %3d]x[%3d %3d %3d] => [%1.3f]/[%3d %3d %3d]\n", rotation, PASSSCALEDINTVEC3(original_direction, 320), PASSSCALEDINTVEC3(current_direction, 320), perpendicular[2], PASSSCALEDINTVEC3(self->fb.dir_move_, 320));
+				}
+			}
+			else {
+				VectorCopy (expected_velocity, self->fb.dir_move_);
+				if (self->fb.debug_path && ! onGround) {
+					G_bprint (PRINT_HIGH, "AirControl rotation: <ignoring>\n");
+				}
+			}
 		}
 	}
 }
 
-float AverageTraceAngle (gedict_t* self, qbool debug)
+float AverageTraceAngle (gedict_t* self, qbool debug, qbool report)
 {
 	vec3_t back_left, projection, incr;
 	int angles[] = { 45, 30, 15, 0, -15, -30, -45 };
@@ -135,28 +160,43 @@ float AverageTraceAngle (gedict_t* self, qbool debug)
 	float total_angle = 0;
 	float avg_angle;
 
-	trap_makevectors (self->s.v.angles);
+	float distance = 320;
+
+	if (self->fb.path_state & JUMP_LEDGE)
+		return 0;
+
+	if (debug) {
+		trap_makevectors (self->s.v.angles);
+	}
+	else {
+		trap_makevectors (self->fb.dir_move_);
+	}
 	VectorMA (self->s.v.origin, -VEC_HULL_MIN[0], g_globalvars.v_forward, back_left);
 	VectorMA (back_left, VEC_HULL_MIN[1], g_globalvars.v_right, back_left);
 
 	VectorScale (g_globalvars.v_right, (VEC_HULL_MAX[0] - VEC_HULL_MIN[0]) / (sizeof(angles) / sizeof(angles[0]) - 1), incr);
 
 	if (debug) {
-		G_sprint (self, 2, "Current origin: %d %d %d\n", PASSINTVEC3 (self->s.v.origin));
-		G_sprint (self, 2, "Current angles: %d %d\n", PASSINTVEC3 (self->s.v.angles));
+		G_bprint (2, "Current origin: %d %d %d\n", PASSINTVEC3 (self->s.v.origin));
+		G_bprint (2, "Current angles: %d %d\n", PASSINTVEC3 (self->s.v.angles));
 	}
 
 	for (i = 0; i < sizeof (angles) / sizeof (angles[0]); ++i) {
 		int angle = angles[i];
 
 		RotatePointAroundVector (projection, g_globalvars.v_up, g_globalvars.v_forward, angle);
-		VectorMA (back_left, 320, projection, projection);
+		VectorMA (back_left, distance, projection, projection);
 		traceline (PASSVEC3 (back_left), PASSVEC3 (projection), false, self);
 
-		total_angle += angle * g_globalvars.trace_fraction;
+		if (g_globalvars.trace_fraction == 1) {
+			total_angle += angle * 1.5; // bonus for success
+		}
+		else if (g_globalvars.trace_fraction > 0.4) {
+			total_angle += angle * g_globalvars.trace_fraction;
+		}
 
 		if (debug) {
-			G_sprint (self, 2, "Angle: %d => [%d %d %d] [%d %d %d] = %f\n", angle, PASSINTVEC3 (back_left), PASSINTVEC3 (projection), g_globalvars.trace_fraction);
+			G_bprint (2, "Angle: %d => [%d %d %d] [%d %d %d] = %f\n", angle, PASSINTVEC3 (back_left), PASSINTVEC3 (projection), g_globalvars.trace_fraction);
 		}
 
 		if (i == 0 || g_globalvars.trace_fraction > best_angle_frac) {
@@ -170,37 +210,23 @@ float AverageTraceAngle (gedict_t* self, qbool debug)
 	avg_angle = total_angle / (sizeof (angles) / sizeof (angles[0]));
 
 	if (debug) {
-		G_sprint (self, 2, "Best angle: %d\n", best_angle);
-		G_sprint (self, 2, "Total angle: %f\n", avg_angle);
+		G_bprint (2, "Best angle: %d\n", best_angle);
+		G_bprint (2, "Total angle: %f\n", avg_angle);
 	}
 	return avg_angle;
 }
 
 static void BestJumpingDirection (gedict_t* self)
 {
-	float avg_angle = AverageTraceAngle (self, false);
+	float raw_avg_angle = AverageTraceAngle (self, false, self->fb.debug_path);
+	float avg_angle;
 
-	if (avg_angle < 0)
-		avg_angle = min (avg_angle, -15);
+	if (raw_avg_angle < 0)
+		avg_angle = min (raw_avg_angle, -15);
 	else
-		avg_angle = max (avg_angle, 15);
+		avg_angle = max (raw_avg_angle, 15);
 
 	RotatePointAroundVector (self->fb.dir_move_, g_globalvars.v_up, g_globalvars.v_forward, avg_angle);
-
-	/*
-	vec3_t forward_left, forward_right;
-	vec3_t back_left = 
-	int angle;
-
-	for (angle = 45; angle >= -45; angle -= 15) {
-	}
-	RotatePointAroundVector (forward_left, g_globalvars.v_up, g_globalvars.v_forward, 45);
-	RotatePointAroundVector (forward_right, g_globalvars.v_up, g_globalvars.v_forward, -45);
-	VectorMA (self->s.v.origin, 320, forward_left, forward_left);
-	VectorMA (self->s.v.origin, 320, forward_right, forward_right);
-	traceline (PASSVEC3 (self->s.v.origin), PASSVEC3 (forward_left), false, self);
-	traceline (PASSVEC3 (self->s.v.origin), PASSVEC3 (forward_right), false, self);
-	*/
 }
 
 void BotSetCommand (gedict_t* self)

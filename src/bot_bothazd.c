@@ -522,7 +522,6 @@ static void AvoidHazardsOnGround (gedict_t* self, float hor_speed, vec3_t new_or
 	char debug[10][128] = { 0 };
 	int line = 0;
 
-	// FIXME: Is this for NQ?  
 	if (new_velocity[2] < 0) {
 		new_velocity[2] = 0;
 	}
@@ -547,6 +546,14 @@ static void AvoidHazardsOnGround (gedict_t* self, float hor_speed, vec3_t new_or
 		}
 		fall = FallSpotGround(testplace, fallheight);
 		sprintf (debug[line++], "> FallSpotGround([%d %d %d], %f) = %s\n", PASSINTVEC3 (testplace), fallheight, FallType (fall));
+	}
+
+	if (fall >= FALL_LAND && (self->fb.path_state & BOTPATH_CURLJUMP_HINT)) {
+		sprintf (debug[line++], "> CurlJumpHint(%d)... jumping\n", self->fb.angle_hint);
+		DumpDebugLines (debug, line, "CurlJumpHint\n");
+		self->fb.jumping = true;
+		self->fb.path_state |= DELIBERATE_AIR_WAIT_GROUND;
+		return;
 	}
 
 	if (fall >= FALL_LAND) {
@@ -604,6 +611,15 @@ static void AvoidHazardsOnGround (gedict_t* self, float hor_speed, vec3_t new_or
 	VectorMA(testplace, 16 / hor_speed, new_velocity, testplace);
 	fall = FallSpotGround (testplace, fallheight);
 	sprintf (debug[line++], "> 3: FallSpotGround([%d %d %d], %f) = %s\n", PASSINTVEC3 (testplace), fallheight, FallType (fall));
+
+	if (fall >= FALL_LAND && (self->fb.path_state & BOTPATH_CURLJUMP_HINT)) {
+		sprintf (debug[line++], "> CurlJumpHint(%d)... jumping\n", self->fb.angle_hint);
+		DumpDebugLines (debug, line, "CurlJumpHint\n");
+		self->fb.jumping = true;
+		self->fb.path_state |= DELIBERATE_AIR_WAIT_GROUND;
+		return;
+	}
+
 	if (fall >= FALL_LAND) {
 		new_fall = fall;
 		VectorCopy(testplace, jump_origin);

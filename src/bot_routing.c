@@ -117,7 +117,7 @@ static float EvalPath(fb_path_eval_t* eval, qbool allowRocketJumps, qbool trace_
 	return path_score;
 }
 
-static void BotRouteEvaluation (qbool be_quiet, float lookahead_time, gedict_t* from_marker, gedict_t* to_marker, qbool rocket_alert, qbool rocket_jump_routes_allowed, vec3_t player_origin, vec3_t player_direction, qbool path_normal, qbool trace_bprint, float current_goal_time, float current_goal_time_125, float goal_late_time, float* best_score, gedict_t** next_marker, int* next_description)
+static void BotRouteEvaluation (qbool be_quiet, float lookahead_time, gedict_t* from_marker, gedict_t* to_marker, qbool rocket_alert, qbool rocket_jump_routes_allowed, vec3_t player_origin, vec3_t player_direction, qbool path_normal, qbool trace_bprint, float current_goal_time, float current_goal_time_125, float goal_late_time, float* best_score, gedict_t** next_marker, int* next_description, int* new_angle_hint)
 { 
 	fb_path_eval_t eval = { 0 };
 	int i = 0;
@@ -147,6 +147,7 @@ static void BotRouteEvaluation (qbool be_quiet, float lookahead_time, gedict_t* 
 				*best_score = path_score;
 				*next_marker = eval.test_marker;
 				*next_description = eval.description;
+				*new_angle_hint = from_marker->fb.paths[i].angle_hint;
 			}
 		}
 	}
@@ -155,7 +156,7 @@ static void BotRouteEvaluation (qbool be_quiet, float lookahead_time, gedict_t* 
 void PathScoringLogic(
 	float goal_respawn_time, qbool be_quiet, float lookahead_time, qbool path_normal, vec3_t player_origin, vec3_t player_direction, gedict_t* touch_marker_,
 	gedict_t* goalentity_marker, qbool rocket_alert, qbool rocket_jump_routes_allowed,
-	qbool trace_bprint, float *best_score, gedict_t** linked_marker_, int* new_path_state
+	qbool trace_bprint, float *best_score, gedict_t** linked_marker_, int* new_path_state, int* new_angle_hint
 )
 {
 	float current_goal_time = 0;
@@ -192,6 +193,7 @@ void PathScoringLogic(
 		}
 	}
 
+	// Direct from touch marker to goal entity
 	if (goalentity_marker && touch_marker_) {
 		float path_score = 0;
 		fb_path_eval_t eval = { 0 };
@@ -217,9 +219,10 @@ void PathScoringLogic(
 			*best_score = path_score;
 			*linked_marker_ = eval.test_marker;
 			*new_path_state = eval.description;
+			*new_angle_hint = 0;
 		}
 	}
 
 	// Evaluate all paths from touched marker to the goal entity
-	BotRouteEvaluation (be_quiet, lookahead_time, touch_marker_, goalentity_marker, rocket_alert, rocket_jump_routes_allowed, player_origin, player_direction, path_normal, trace_bprint, current_goal_time, current_goal_time_125, goal_late_time, best_score, linked_marker_, new_path_state);
+	BotRouteEvaluation (be_quiet, lookahead_time, touch_marker_, goalentity_marker, rocket_alert, rocket_jump_routes_allowed, player_origin, player_direction, path_normal, trace_bprint, current_goal_time, current_goal_time_125, goal_late_time, best_score, linked_marker_, new_path_state, new_angle_hint);
 }

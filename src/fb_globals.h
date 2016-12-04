@@ -123,6 +123,7 @@ extern gedict_t* dropper;
 #define AIR_ACCELERATION        (1 << 20)
 #define NO_DODGE                (1 << 21)
 #define DELIBERATE_BACKUP       (1 << 22)
+#define BOTPATH_CURLJUMP_HINT   (1 << 23)
 #define DELIBERATE_AIR_WAIT_GROUND (DELIBERATE_AIR | WAIT_GROUND)
 #define SAVED_DESCRIPTION (DM6_DOOR | ROCKET_JUMP | JUMP_LEDGE | VERTICAL_PLATFORM | BOTPATH_DOOR | BOTPATH_DOOR_CLOSED)
 #define NOT_ROCKET_JUMP (~ROCKET_JUMP)
@@ -342,9 +343,9 @@ void SetLinkedMarker (gedict_t* player, gedict_t* marker, char* explanation);
 
 // bot_routing.qc
 void PathScoringLogic (
-	float goal_respawn_time, qbool be_quiet, float lookahead_time, qbool path_normal, vec3_t player_origin, vec3_t player_velocity, gedict_t* touch_marker_,
+	float goal_respawn_time, qbool be_quiet, float lookahead_time, qbool path_normal, vec3_t player_origin, vec3_t player_direction, gedict_t* touch_marker_,
 	gedict_t* goalentity_marker, qbool rocket_alert, qbool rocket_jump_routes_allowed,
-	qbool trace_bprint, float *best_score, gedict_t** linked_marker_, int* new_path_state
+	qbool trace_bprint, float *best_score, gedict_t** linked_marker_, int* new_path_state, int* new_angle_hint
 );
 
 int BotVersionNumber (void);
