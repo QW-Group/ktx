@@ -22,16 +22,18 @@ void SetDirectionMove (gedict_t* self, vec3_t dir_move, const char* explanation)
 {
 	normalize (dir_move, self->fb.dir_move_);
 
-	//if (self->isBot && self->fb.debug_path)
-//		G_bprint (2, "%3.2f: SetDirection(%2.2f %2.2f %2.2f): %s\n", g_globalvars.time, PASSVEC3(self->fb.dir_move_), explanation);
+	//if (self->isBot)
+	//	G_bprint (2, "%3.2f: SetDirection(%2.2f %2.2f %2.2f): %s\n", g_globalvars.time, PASSVEC3(self->fb.dir_move_), explanation);
 }
 
-void NewVelocityForArrow(gedict_t* self, vec3_t dir_move, const char* explanation) {
+void NewVelocityForArrow(gedict_t* self, vec3_t dir_move, const char* explanation)
+{
 	SetDirectionMove (self, dir_move, explanation);
 	self->fb.arrow_time = g_globalvars.time + ARROW_TIME_INCREASE;
 }
 
-static qbool BotRequestRespawn(gedict_t* self) {
+static qbool BotRequestRespawn(gedict_t* self)
+{
 	float time_dead = min (g_globalvars.time - self->fb.last_death, MAX_DEAD_TIME);
 
 	return self->s.v.deadflag == DEAD_RESPAWNABLE && time_dead > MIN_DEAD_TIME && (g_random () < (time_dead / MAX_DEAD_TIME));
@@ -45,9 +47,6 @@ static void ApplyPhysics (gedict_t* self)
 	float hor_speed_squared;
 	float movement_skill = bound (0, self->fb.skill.movement, 1.0);
 	qbool onGround = (int)self->s.v.flags & FL_ONGROUND;
-
-	if (onGround && movement_skill < 0.6)
-		return;
 
 	// Step 1: Apply friction
 	VectorCopy (self->s.v.velocity, expected_velocity);
@@ -87,8 +86,10 @@ static void ApplyPhysics (gedict_t* self)
 		// Water movement
 	}
 	else {
-		float max_vel = onGround ? 281.6 : 30; // FIXME: should be min(x, requested_speed)
-		float max_incr = movement_skill * max_vel * max_vel;
+		float min_numerator = onGround ? 319 : 29;
+		float max_numerator = onGround ? 281.6 : -8.4;
+		float used_numerator = min_numerator + movement_skill * (max_numerator - min_numerator);
+		float max_incr = used_numerator * used_numerator;
 
 		// Gravity kicks in
 		if (!onGround)
@@ -104,30 +105,105 @@ static void ApplyPhysics (gedict_t* self)
 		}
 
 		if (hor_speed_squared >= max_incr) {
-			vec3_t cross_product = { 0, 0, -1 };
-			float rotation = acos (max_incr / hor_speed_squared) * 180 / M_PI;
 			vec3_t current_direction;
 			vec3_t original_direction;
 			vec3_t perpendicular;
 
+			vec3_t up_vector = { 0, 0, 1 };
+			float rotation   = acos (max_incr / hor_speed_squared) * 180 / M_PI;
+
 			// Find out if rotation should be positive or negative
 			normalize (self->fb.dir_move_, original_direction);
 			normalize (expected_velocity, current_direction);
-			CrossProduct (original_direction, current_direction, perpendicular);
+			CrossProduct (current_direction, original_direction, perpendicular);
 
+			// Negative rotation => rotate 'right'
 			if (perpendicular[2] < 0)
 				rotation = -rotation;
-
-			RotatePointAroundVector (self->fb.dir_move_, cross_product, current_direction, rotation);
-
-			if (self->isBot && self->fb.debug_path) {
-				//G_bprint (PRINT_HIGH, "%3.2f,KTX,%4.1f,%4.1f,%4.1f,%4.1f,%4.1f,%4.1f,%4.1f,%4.1f,%4.1f,%4.1f,%4.1f,%4.1f,%3.2f,%3.2f,%3.2f,%3.2f\n", g_globalvars.time, PASSVEC3 (expected_velocity), PASSVEC3(original_direction), PASSVEC3 (current_direction), PASSVEC3(self->fb.dir_move_), max_incr, hor_speed_squared, max_incr / hor_speed_squared, rotation);
-			}
+			RotatePointAroundVector (self->fb.dir_move_, up_vector, current_direction, rotation);
 		}
 	}
 }
 
-void BotSetCommand(gedict_t* self)
+float AverageTraceAngle (gedict_t* self, qbool debug)
+{
+	vec3_t back_left, projection, incr;
+	int angles[] = { 45, 30, 15, 0, -15, -30, -45 };
+	int i;
+	float best_angle = 0;
+	float best_angle_frac = 0;
+	float total_angle = 0;
+	float avg_angle;
+
+	trap_makevectors (self->s.v.angles);
+	VectorMA (self->s.v.origin, -VEC_HULL_MIN[0], g_globalvars.v_forward, back_left);
+	VectorMA (back_left, VEC_HULL_MIN[1], g_globalvars.v_right, back_left);
+
+	VectorScale (g_globalvars.v_right, (VEC_HULL_MAX[0] - VEC_HULL_MIN[0]) / (sizeof(angles) / sizeof(angles[0]) - 1), incr);
+
+	if (debug) {
+		G_sprint (self, 2, "Current origin: %d %d %d\n", PASSINTVEC3 (self->s.v.origin));
+		G_sprint (self, 2, "Current angles: %d %d\n", PASSINTVEC3 (self->s.v.angles));
+	}
+
+	for (i = 0; i < sizeof (angles) / sizeof (angles[0]); ++i) {
+		int angle = angles[i];
+
+		RotatePointAroundVector (projection, g_globalvars.v_up, g_globalvars.v_forward, angle);
+		VectorMA (back_left, 320, projection, projection);
+		traceline (PASSVEC3 (back_left), PASSVEC3 (projection), false, self);
+
+		total_angle += angle * g_globalvars.trace_fraction;
+
+		if (debug) {
+			G_sprint (self, 2, "Angle: %d => [%d %d %d] [%d %d %d] = %f\n", angle, PASSINTVEC3 (back_left), PASSINTVEC3 (projection), g_globalvars.trace_fraction);
+		}
+
+		if (i == 0 || g_globalvars.trace_fraction > best_angle_frac) {
+			best_angle = angle;
+			best_angle_frac = g_globalvars.trace_fraction;
+		}
+
+		VectorAdd (back_left, incr, back_left);
+	}
+
+	avg_angle = total_angle / (sizeof (angles) / sizeof (angles[0]));
+
+	if (debug) {
+		G_sprint (self, 2, "Best angle: %d\n", best_angle);
+		G_sprint (self, 2, "Total angle: %f\n", avg_angle);
+	}
+	return avg_angle;
+}
+
+static void BestJumpingDirection (gedict_t* self)
+{
+	float avg_angle = AverageTraceAngle (self, false);
+
+	if (avg_angle < 0)
+		avg_angle = min (avg_angle, -15);
+	else
+		avg_angle = max (avg_angle, 15);
+
+	RotatePointAroundVector (self->fb.dir_move_, g_globalvars.v_up, g_globalvars.v_forward, avg_angle);
+
+	/*
+	vec3_t forward_left, forward_right;
+	vec3_t back_left = 
+	int angle;
+
+	for (angle = 45; angle >= -45; angle -= 15) {
+	}
+	RotatePointAroundVector (forward_left, g_globalvars.v_up, g_globalvars.v_forward, 45);
+	RotatePointAroundVector (forward_right, g_globalvars.v_up, g_globalvars.v_forward, -45);
+	VectorMA (self->s.v.origin, 320, forward_left, forward_left);
+	VectorMA (self->s.v.origin, 320, forward_right, forward_right);
+	traceline (PASSVEC3 (self->s.v.origin), PASSVEC3 (forward_left), false, self);
+	traceline (PASSVEC3 (self->s.v.origin), PASSVEC3 (forward_right), false, self);
+	*/
+}
+
+void BotSetCommand (gedict_t* self)
 {
 	float msec = g_globalvars.frametime * 1000; //min ((g_globalvars.time - self->fb.last_cmd_sent) * 1000, 255);
 	int weapon_script_impulse = 0;
@@ -136,7 +212,7 @@ void BotSetCommand(gedict_t* self)
 	qbool firing;
 	vec3_t direction;
 
-	BotPerformRocketJump(self);
+	BotPerformRocketJump (self);
 
 	// dir_move_ is the direction we want to move in, but need to take inertia into effect
 	// ... as rough guide (and save doubling physics calculations), scale command > 
@@ -161,7 +237,7 @@ void BotSetCommand(gedict_t* self)
 		self->fb.firing ? self->fb.desired_weapon_impulse :
 		weapon_script_impulse;
 
-	if (self->fb.firing && BotUsingCorrectWeapon(self)) {
+	if (self->fb.firing && BotUsingCorrectWeapon (self)) {
 		impulse = 0; // we already have the requested weapon
 	}
 
@@ -170,14 +246,19 @@ void BotSetCommand(gedict_t* self)
 
 	self->fb.waterjumping = false;
 
-	ApplyPhysics (self);
-
 	if (self->fb.dbg_countdown > 0) {
 		jumping = firing = false;
 		VectorClear (direction);
 		--self->fb.dbg_countdown;
 	}
 	else {
+		if (jumping && ((int)self->s.v.flags & FL_ONGROUND)) {
+			BestJumpingDirection (self);
+		}
+		else {
+			ApplyPhysics (self);
+		}
+
 		direction[0] = DotProduct (g_globalvars.v_forward, self->fb.dir_move_) * 800;
 		direction[1] = DotProduct (g_globalvars.v_right, self->fb.dir_move_) * 800;
 		direction[2] = DotProduct (g_globalvars.v_up, self->fb.dir_move_) * 800;

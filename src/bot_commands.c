@@ -25,6 +25,7 @@ int DecodeMarkerPathFlagString (const char* string);
 const char* EncodeMarkerPathFlags (int path_flags);
 const char* EncodeMarkerFlags (int marker_flags);
 void DM6Debug (gedict_t* self);
+float AverageTraceAngle (gedict_t* self, qbool debug);
 
 #define MAX_BOTS          32
 
@@ -418,6 +419,9 @@ static void FrogbotsDebug (void)
 		}
 		else if (streq (sub_command, "dm6")) {
 			DM6Debug (self);
+		}
+		else if (streq (sub_command, "trace")) {
+			AverageTraceAngle (self, true);
 		}
 	}
 }

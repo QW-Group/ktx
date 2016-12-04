@@ -42,20 +42,8 @@ void BotBlocked (void)
 		float yaw = vectoyaw (self->fb.obstruction_normal);
 		float dist = 0;
 
-		// meag: attempt to make the bot jump more often when going up steps to YA on e1m2
-		//       walkmove() would fail as step was too large.  maybe make JUMP_STEPS flag and
-		//       use that in future instead?
-		if ((self->fb.path_state & JUMP_LEDGE) && ((int)self->s.v.flags & FL_ONGROUND) && !self->fb.jumping)
-		{
-			VectorClear (self->fb.obstruction_normal);
-			self->fb.jumping = true;
-			BotSetCommand (self);
-			return;
-		}
-
 		//removed: seems to be just scaling velocity to see if we can find new spot...
 		// old code set velocity specifically which we don't need to do (?)
-		/*
 		VectorAdd(blocked_velocity, velocity_normal, new_velocity);
 
 		//dist = ((new_velocity * frametime) - (self.origin - self.oldorigin)) * self.obstruction_normal;
@@ -67,9 +55,6 @@ void BotBlocked (void)
 			VectorSubtract (temp, originDiff, temp);
 			dist = DotProduct (temp, self->fb.obstruction_normal);
 		}
-		*/
-		// meag: remove this if switching back
-		VectorCopy (self->fb.obstruction_normal, new_velocity);
 
 		VectorCopy(self->s.v.origin, dropper->s.v.origin);
 		dropper->s.v.flags = FL_ONGROUND_PARTIALGROUND;
@@ -81,9 +66,12 @@ void BotBlocked (void)
 			SetDirectionMove (self, self->fb.obstruction_normal, "Obstruction");
 			//G_bprint (2, "> [%f %f %f]\n", PASSVEC3(self->fb.dir_move_));
 			VectorClear (self->fb.obstruction_normal);
-			BotSetCommand (self);
-			return;
 		}
+		else {
+			AvoidHazards (self);
+		}
+		BotSetCommand (self);
+		return;
 	}
 }
 
