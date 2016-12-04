@@ -20,6 +20,7 @@ static void BotSetDesiredAngles (gedict_t* self, vec3_t rel_pos)
 		self->fb.desired_angle[0] = 0 - self->fb.desired_angle[0];
 	}
 
+	// FIXME
 	if (self->fb.state & HURT_SELF) {
 		self->fb.desired_angle[0] = 180;
 	}
@@ -33,7 +34,7 @@ static void BotStopFiring(gedict_t* bot) {
 	qbool correct_weapon = BotUsingCorrectWeapon (bot);
 	qbool enemy_alive = bot->s.v.enemy && ISLIVE (&g_edicts[bot->s.v.enemy]);
 
-	bot->fb.firing &= (continuous && correct_weapon && enemy_alive) || bot->fb.rocketjumping;
+	bot->fb.firing &= (continuous && correct_weapon && enemy_alive) || bot->fb.rocketJumping;
 }
 
 // FIXME: Magic numbers (400 = 0.5 * sv_gravity)
@@ -320,7 +321,7 @@ static void AttackRespawns(gedict_t* self) {
 	if (ISDEAD(enemy_)) {
 		if (enemy_->fb.last_death + ATTACK_RESPAWN_TIME >= g_globalvars.time) {
 			if (self->fb.skill.attack_respawns) {
-				if (has_rl && !self->fb.rocketjumping) {
+				if (has_rl && !self->fb.rocketJumping) {
 					if (g_random() > 0.15) {
 						FireAtSpawnPoint (self);
 					}
@@ -338,7 +339,7 @@ void BotsFireLogic(void) {
 	AttackRespawns(self);
 
 	// a_attackfix()
-	if (!self->fb.rocketjumping && self->s.v.enemy == 0 && !(self->fb.state & SHOT_FOR_LUCK)) {
+	if (!self->fb.rocketJumping && self->s.v.enemy == 0 && !(self->fb.state & SHOT_FOR_LUCK)) {
 		self->fb.firing = false;
 	}
 
@@ -358,7 +359,7 @@ void BotsFireLogic(void) {
 			BotsModifyAimAtPlayerLogic (self, rel_pos, rel_dist);
 		}
 
-		if (!self->fb.rocketjumping) {
+		if (!self->fb.rocketJumping) {
 			SetFireButton(self, rel_pos, rel_dist);
 		}
 	}

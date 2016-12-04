@@ -124,6 +124,7 @@ extern gedict_t* dropper;
 #define NO_DODGE                (1 << 21)
 #define DELIBERATE_BACKUP       (1 << 22)
 #define BOTPATH_CURLJUMP_HINT   (1 << 23)
+#define BOTPATH_FULL_AIRCONTROL (1 << 24)
 #define DELIBERATE_AIR_WAIT_GROUND (DELIBERATE_AIR | WAIT_GROUND)
 #define SAVED_DESCRIPTION (DM6_DOOR | ROCKET_JUMP | JUMP_LEDGE | VERTICAL_PLATFORM | BOTPATH_DOOR | BOTPATH_DOOR_CLOSED | NO_DODGE)
 #define NOT_ROCKET_JUMP (~ROCKET_JUMP)
@@ -169,11 +170,13 @@ float WeaponCode (float w);
 
 float crandom (void);
 
-qbool able_rj (gedict_t* self);
+void BotCanRocketJump (gedict_t* self);
 qbool VisibleEntity (gedict_t* ent);
 gedict_t* IdentifyMostVisibleTeammate (gedict_t* self);
 float anglemod (float v);
 gedict_t* HelpTeammate (void);
+float TotalStrengthAfterDamage (float health, float armorValue, float armorType, float damage);
+float TotalStrength (float health, float armorValue, float armorType);
 
 // 
 char* BotNameGeneric (int botNumber);
@@ -224,8 +227,8 @@ gedict_t* SightFromMarkerFunction (gedict_t* from_marker, gedict_t* to_marker);
 gedict_t* SubZoneNextPathMarker (gedict_t* from_marker, gedict_t* to_marker);
 float SubZoneArrivalTime (float zone_time, gedict_t* middle_marker, gedict_t* to_marker);
 float SightFromTime (gedict_t* from_marker, gedict_t* to_marker);
-void ZoneMarker (gedict_t* from_marker, gedict_t* to_marker, qbool path_normal);
-gedict_t* ZonePathMarker (gedict_t* from_marker, gedict_t* to_marker, qbool path_normal);
+void ZoneMarker (gedict_t* from_marker, gedict_t* to_marker, qbool path_normal, qbool rj_routes);
+gedict_t* ZonePathMarker (gedict_t* from_marker, gedict_t* to_marker, qbool path_normal, qbool rl_jump_routes);
 
 // botweap.qc
 void FrogbotSetFirepower (gedict_t* self);
@@ -344,7 +347,7 @@ void SetJumpFlag (gedict_t* player, qbool jumping, const char* explanation);
 void PathScoringLogic (
 	float goal_respawn_time, qbool be_quiet, float lookahead_time, qbool path_normal, vec3_t player_origin, vec3_t player_direction, gedict_t* touch_marker_,
 	gedict_t* goalentity_marker, qbool rocket_alert, qbool rocket_jump_routes_allowed,
-	qbool trace_bprint, float *best_score, gedict_t** linked_marker_, int* new_path_state, int* new_angle_hint
+	qbool trace_bprint, float *best_score, gedict_t** linked_marker_, int* new_path_state, int* new_angle_hint, int* new_rj_frame_delay, float new_rj_angles[2]
 );
 
 int BotVersionNumber (void);

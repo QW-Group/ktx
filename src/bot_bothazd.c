@@ -584,7 +584,7 @@ static void AvoidHazardsOnGround (gedict_t* self, float hor_speed, vec3_t new_or
 			self->fb.path_state &= ~DELIBERATE_AIR;
 		}
 		if (new_fall > fall) {
-			//G_bprint (2, "%s: %d (%s) -> %d (%s)\n", self->s.v.netname, self->fb.touch_marker->fb.index, self->fb.touch_marker->s.v.classname, self->fb.linked_marker->fb.index, self->fb.linked_marker->s.v.classname);
+			//G_bprint (2, "%s: %d (%s) -> %d (%s)\n", self->s.v.netname, self->fb.touch_marker->fb.index + 1, self->fb.touch_marker->s.v.classname, self->fb.linked_marker->fb.index, self->fb.linked_marker->s.v.classname);
 			if (g_globalvars.time > self->fb.arrow_time2) {
 				// if (CanFallAndGetAcrossHazard(self, new_velocity))
 				VectorCopy(new_velocity, jump_velocity);
@@ -766,10 +766,6 @@ void AvoidHazards(gedict_t* self)
 	vec3_t dir_forward;
 	vec3_t testplace;
 
-	//if (self->fb.touch_marker && (self->fb.touch_marker->fb.index == 89 || self->fb.touch_marker->fb.index == 51)) {
-		//G_bprint (2, "touching #%d: goal entity %s, linked %d\n", self->fb.touch_marker->fb.index, g_edicts[self->s.v.goalentity].s.v.classname, (self->fb.linked_marker ? self->fb.linked_marker->fb.index : -1));
-	//}
-
 	// FIXME: should this be current velocity or proposed velocity (self->fb.dir_move_, scaled by speed?)
 	VectorCopy(self->s.v.velocity, new_velocity);
 	//VectorScale (self->fb.dir_move_, , new_velocity);
@@ -831,6 +827,8 @@ void BotsRocketSpawned (gedict_t* newmis)
 	newmis->fb.frogbot_nextthink = newmis->s.v.nextthink;
 	newmis->s.v.think = (func_t) RocketAlert;
 	newmis->s.v.nextthink = 0.001;
+
+	// 
 
 	// Store rocket direction
 	VectorCopy(g_globalvars.v_forward, newmis->fb.missile_forward);

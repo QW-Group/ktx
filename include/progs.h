@@ -391,29 +391,45 @@ typedef struct fb_runaway_route_s {
 } fb_runaway_route_t;
 
 typedef struct fb_path_s {
-	struct gedict_s* next_marker;
-	float time;
-	int flags;
-	short angle_hint;
+	struct gedict_s* next_marker;    // next marker in the graph
+	float time;                      // time to travel if walking (0 if teleporting)
+	float rj_time;                   // time to travel if using rocket jump
+	int flags;                       // hints on how to travel to next marker
+
+	short angle_hint;                // When travelling to marker, offset to standard angle (+ = anti-clockwise)
+	float rj_pitch;                  // ideal pitch angle when rocket jumping
+	float rj_yaw;                    // ideal yaw angle when rocket jumping (0 for no change)
+	int rj_delay;                    // number of frames to delay between jumping and firing rocket
 } fb_path_t;
 
 typedef struct fb_goal_s {
 	struct gedict_s* next_marker;
 	float time;
+	struct gedict_s* next_marker_rj;
+	float rj_time;
 } fb_goal_t;
 
 typedef struct fb_subzone_s {
 	struct gedict_s* next_marker;
 	float time;
+	struct gedict_s* next_marker_rj;
+	float rj_time;
 } fb_subzone_t;
 
 typedef struct fb_zone_s {
+	// Standard routing
 	struct gedict_s* marker;
-	struct gedict_s* reverse_marker;
 	float time;
-	float reverse_time;
-	struct gedict_s* next_zone;
 	struct gedict_s* next;
+	struct gedict_s* next_zone;
+
+	// Rocket jumping
+	struct gedict_s* marker_rj;
+	float rj_time;
+	struct gedict_s* next_rj;
+
+	float reverse_time;
+	struct gedict_s* reverse_marker;
 	struct gedict_s* reverse_next;
 	float from_time;
 	struct gedict_s* sight_from;
@@ -601,7 +617,16 @@ typedef struct fb_entvars_s {
 
 	// frogbot logic (move out of entity)
 	qbool allowedMakeNoise;                     // if false, paths involving picking up an item are penalised
-	qbool willRocketJumpThisTic;                // will consider rocket jumping this frame?
+
+	// Rocket jumping logic
+	qbool canRocketJump;                        // will consider rocket jump routes
+	qbool rocketJumping;                        // in middle of rocket jumping
+	int   rocketJumpPathFrameDelay;             // value rocketJumpPathFrameDelay
+	int   rocketJumpFrameDelay;                 // active delay between jumping and firing
+	int   rocketJumpAngles[2];                  // pitch/yaw for rocket jump angle
+
+	// Editor
+	int   last_jump_frame;                      // framecount when player last jumped.  used to help setting rj fields
 
 	qbool bot_evade;                            // 
 	
@@ -609,7 +634,6 @@ typedef struct fb_entvars_s {
 	float frogwatermove_time;
 	float up_finished;                          // Swimming
 	int botnumber;                              // bots[botnumber]
-	qbool rocketjumping;
 
 	float last_cmd_sent;
 	struct gedict_s* prev_look_object;          // stores whatever the bot was looking at last frame
@@ -635,9 +659,10 @@ typedef struct fb_entvars_s {
 	// Debugging
 	qbool               debug;           // If set, trace logic
 	qbool               debug_path;      // Set by "debug botpath" command
-	float               debug_path_start;// Set by "debug botpath" command
-	struct gedict_s*    fixed_goal;      // Set by "debug botpath" command
-	vec3_t              prev_velocity;   // used by "debug bothpath" command
+	qbool               debug_path_rj;   // Set by "debug botpath" command: can rocket jump
+	float               debug_path_start;// Set by "debug botpath" command: time debug started
+	struct gedict_s*    fixed_goal;      // Set by "debug botpath" command: target goal entity to move to
+	vec3_t              prev_velocity;   // used by "debug botpath" command: keep track of acceleration
 	float               last_spec_cp;    // last spectator centerprint
 
 	// Navigation

@@ -329,7 +329,7 @@ void AMPHI2BotInLava(void) {
 				if (trap_pointcontents(point[0], point[1], point[2]) == CONTENT_LAVA) {
 					if ((int)self->s.v.flags & FL_ONGROUND) {
 						if (!enemy_shaft_attack()) {
-							if (!self->fb.rocketjumping) {
+							if (!self->fb.rocketJumping) {
 								vec3_t dir_move;
 								// FIXME: The combination of these two... means nothing?
 								VectorCopy (self->fb.dir_move_, dir_move);

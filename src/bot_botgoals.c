@@ -80,14 +80,14 @@ void EvalGoal(gedict_t* self, gedict_t* goal_entity) {
 		// Calculate travel time to the goal
 		from_marker = self->fb.touch_marker;
 		to_marker = goal_entity->fb.touch_marker;
-		ZoneMarker (from_marker, to_marker, path_normal);
+		ZoneMarker (from_marker, to_marker, path_normal, self->fb.canRocketJump);
 		traveltime = SubZoneArrivalTime(zone_time, middle_marker, to_marker);
 		goal_time = traveltime;
 
 		if (self->fb.goal_enemy_repel) {
 			// Time for our enemy to get there
 			from_marker = g_edicts[self->s.v.enemy].fb.touch_marker;
-			ZoneMarker (from_marker, to_marker, path_normal);
+			ZoneMarker (from_marker, to_marker, path_normal, g_edicts[self->s.v.enemy].fb.canRocketJump);
 			traveltime = SubZoneArrivalTime(zone_time, middle_marker, to_marker);
 			// If enemy will get there much faster than we will...
 			if (traveltime <= (goal_time - 1.25)) {
@@ -109,7 +109,7 @@ void EvalGoal(gedict_t* self, gedict_t* goal_entity) {
 		if (self->fb.bot_evade) {
 			if (self->fb.goal_enemy_repel) {
 				from_marker = g_edicts[self->s.v.enemy].fb.touch_marker;
-				ZoneMarker (from_marker, to_marker, path_normal);
+				ZoneMarker (from_marker, to_marker, path_normal, g_edicts[self->s.v.enemy].fb.canRocketJump);
 				traveltime = SubZoneArrivalTime(zone_time, middle_marker, to_marker);
 				goal_entity->fb.saved_enemy_time_squared = traveltime * traveltime;
 			}
@@ -131,7 +131,7 @@ void EvalGoal(gedict_t* self, gedict_t* goal_entity) {
 }
 
 // FIXME: parameters
-static void EvalGoal2(gedict_t* goal_entity, gedict_t* best_goal_marker) {
+static void EvalGoal2(gedict_t* goal_entity, gedict_t* best_goal_marker, qbool canRocketJump) {
 	float goal_desire = 0.0f;
 	float traveltime2 = 0.0f;
 
@@ -144,7 +144,7 @@ static void EvalGoal2(gedict_t* goal_entity, gedict_t* best_goal_marker) {
 		if (goal_time2 <= 5) {
 			gedict_t* goal_marker2 = goal_entity->fb.touch_marker;
 			from_marker = goal_marker2;
-			ZoneMarker (from_marker, best_goal_marker, path_normal);
+			ZoneMarker (from_marker, best_goal_marker, path_normal, canRocketJump);
 			traveltime = SubZoneArrivalTime (zone_time, middle_marker, best_goal_marker);
 			traveltime2 = max(best_respawn_time, goal_time2 + traveltime);
 
@@ -162,7 +162,7 @@ static void EvalGoal2(gedict_t* goal_entity, gedict_t* best_goal_marker) {
 				}
 			}
 			from_marker = best_goal_marker;
-			ZoneMarker (from_marker, goal_marker2, path_normal);
+			ZoneMarker (from_marker, goal_marker2, path_normal, canRocketJump);
 			traveltime = SubZoneArrivalTime (zone_time, middle_marker, goal_marker2);
 			traveltime2 = max(self->fb.best_goal_time + traveltime, goal_entity->fb.saved_respawn_time);
 			if (self->fb.bot_evade && self->fb.goal_enemy_repel) {
@@ -196,7 +196,7 @@ static void EnemyGoalLogic (gedict_t* self)
 			gedict_t* goal_marker2 = g_edicts[self->s.v.enemy].fb.touch_marker;
 			float traveltime2 = 0.0f;
 			from_marker = goal_marker2;
-			ZoneMarker (from_marker, best_goal_marker, path_normal);
+			ZoneMarker (from_marker, best_goal_marker, path_normal, self->fb.canRocketJump);
 			traveltime = SubZoneArrivalTime (zone_time, middle_marker, best_goal_marker);
 			traveltime2 = max(goal_time2 + traveltime, best_respawn_time);
 
@@ -210,7 +210,7 @@ static void EnemyGoalLogic (gedict_t* self)
 
 			// Work out time to best goal marker
 			from_marker = best_goal_marker;
-			ZoneMarker (from_marker, goal_marker2, path_normal);
+			ZoneMarker (from_marker, goal_marker2, path_normal, self->fb.canRocketJump);
 			traveltime = SubZoneArrivalTime (zone_time, middle_marker, goal_marker2);
 			traveltime2 = max(best_goal_time + traveltime, g_edicts[self->s.v.enemy].fb.saved_respawn_time);
 
@@ -257,7 +257,7 @@ void UpdateGoal(gedict_t* self) {
 			gedict_t* enemy = &g_edicts[self->s.v.enemy];
 			// Time from here to the enemy's last marker
 			from_marker = self->fb.touch_marker;
-			ZoneMarker (from_marker, enemy->fb.touch_marker, path_normal);
+			ZoneMarker (from_marker, enemy->fb.touch_marker, path_normal, self->fb.canRocketJump);
 			traveltime = SubZoneArrivalTime(zone_time, middle_marker, enemy->fb.touch_marker);
 			enemy_->fb.saved_respawn_time = 0;
 			enemy_->fb.saved_goal_time = traveltime;
@@ -323,14 +323,14 @@ void UpdateGoal(gedict_t* self) {
 		for (i = 0; i < NUMBER_GOALS; ++i) {
 			gedict_t* next = self->fb.touch_marker->fb.goals[i].next_marker;
 			if (next && next != world && next != dropper) {
-				EvalGoal2 (self->fb.touch_marker->fb.goals[i].next_marker->fb.virtual_goal, self->fb.best_goal->fb.touch_marker);
+				EvalGoal2 (self->fb.touch_marker->fb.goals[i].next_marker->fb.virtual_goal, self->fb.best_goal->fb.touch_marker, self->fb.canRocketJump);
 			}
 		}
 		G_bprint_debug (2, "After EvalGoal2:  best_goal %s, best_score %f\n", self->fb.best_goal2 ? self->fb.best_goal2->s.v.classname : "(none)", self->fb.best_score2);
 
 		for (goal_entity = world; goal_entity = ez_find(goal_entity, BACKPACK_CLASSNAME); ) {
 			if (goal_entity->fb.touch_marker) {
-				EvalGoal2 (goal_entity, self->fb.best_goal->fb.touch_marker);
+				EvalGoal2 (goal_entity, self->fb.best_goal->fb.touch_marker, self->fb.canRocketJump);
 			}
 		}
 		G_bprint_debug (2, "After EvalGoal2-BP:  best_goal %s, best_score %f\n", self->fb.best_goal2 ? self->fb.best_goal2->s.v.classname : "(none)", self->fb.best_score2);

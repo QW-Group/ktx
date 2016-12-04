@@ -28,8 +28,10 @@ float SightFromTime (gedict_t* from_marker, gedict_t* to_marker)
 	return to_marker && from_marker && from_marker->fb.Z_ ? to_marker->fb.zones[from_marker->fb.Z_ - 1].sight_from_time : 0.0f;
 }
 
-void ZoneMarker (gedict_t* from_marker, gedict_t* to_marker, qbool path_normal)
+void ZoneMarker (gedict_t* from_marker, gedict_t* to_marker, qbool path_normal, qbool rl_jump_routes)
 {
+	fb_zone_t* zone;
+
 	if (from_marker == NULL || to_marker == NULL) {
 		middle_marker = dropper;
 		zone_time = 1000000;
@@ -39,9 +41,10 @@ void ZoneMarker (gedict_t* from_marker, gedict_t* to_marker, qbool path_normal)
 	if (!to_marker->fb.Z_)
 		return;
 
+	zone = &from_marker->fb.zones[to_marker->fb.Z_ - 1];
 	if (path_normal) {
-		middle_marker = from_marker->fb.zones[to_marker->fb.Z_ - 1].marker;
-		zone_time = from_marker->fb.zones[to_marker->fb.Z_ - 1].time;
+		middle_marker = rl_jump_routes ? zone->marker_rj : zone->marker;
+		zone_time = rl_jump_routes ? zone->rj_time : zone->time;
 	}
 	else {
 		middle_marker = from_marker->fb.zones[to_marker->fb.Z_ - 1].reverse_marker;
@@ -49,12 +52,18 @@ void ZoneMarker (gedict_t* from_marker, gedict_t* to_marker, qbool path_normal)
 	}
 }
 
-gedict_t* ZonePathMarker (gedict_t* from_marker, gedict_t* to_marker, qbool path_normal)
+gedict_t* ZonePathMarker (gedict_t* from_marker, gedict_t* to_marker, qbool path_normal, qbool rl_jump_routes)
 {
 	if (from_marker == NULL || to_marker == NULL || to_marker->fb.Z_ == 0)
 		return NULL;
 
-	return path_normal ? from_marker->fb.zones[to_marker->fb.Z_ - 1].next : from_marker->fb.zones[to_marker->fb.Z_ - 1].reverse_next;
+	if (path_normal) {
+		if (rl_jump_routes) {
+			return from_marker->fb.zones[to_marker->fb.Z_ - 1].next_rj;
+		}
+		return from_marker->fb.zones[to_marker->fb.Z_ - 1].next;
+	}
+	return from_marker->fb.zones[to_marker->fb.Z_ - 1].reverse_next;
 }
 
 // This is called when the standard highersight calculation has failed

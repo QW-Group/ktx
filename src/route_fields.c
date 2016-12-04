@@ -17,7 +17,7 @@ void SetGoalForMarker(int goal, gedict_t* marker) {
 	if (goal <= 0 || goal > NUMBER_GOALS || marker == NULL)
 		return;
 
-	marker->fb.goals[goal - 1].next_marker = marker;
+	marker->fb.goals[goal - 1].next_marker_rj = marker->fb.goals[goal - 1].next_marker = marker;
 	marker->fb.G_ = goal;
 }
 
@@ -54,7 +54,7 @@ void SetZone(int zone, int marker_number) {
 	z = &marker->fb.zones[zone];
 
 	marker->fb.S_ = subzone_indexes[zone]++;
-	z->marker = z->reverse_marker = z->next_zone = z->next = z->reverse_next = marker;
+	z->marker_rj = z->next_rj = z->marker = z->reverse_marker = z->next = z->reverse_next = marker;
 	marker->fb.Z_ = zone + 1;
 
 	AddZoneMarker (marker);
@@ -162,6 +162,7 @@ void RemovePath (gedict_t* source, int path_number)
 	source->fb.paths[path_number].flags = 0;
 	source->fb.paths[path_number].next_marker = NULL;
 	source->fb.paths[path_number].time = 0;
+	source->fb.paths[path_number].rj_time = 0;
 }
 
 int AddPath (gedict_t* source, gedict_t* next)
@@ -186,6 +187,7 @@ int AddPath (gedict_t* source, gedict_t* next)
 		source->fb.paths[place].next_marker = next;
 		source->fb.paths[place].flags = 0;
 		source->fb.paths[place].time = 0;
+		source->fb.paths[place].rj_time = 0;
 	}
 	return place;
 }

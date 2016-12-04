@@ -67,7 +67,7 @@
 #define TP_NAME_HASQUAD    "{&c05fquaded&cfff}"
 #define TP_NAME_HADPENT    "{&cf00pented&cfff}"
 
-static char* LocationName (float x, float y, float z);
+char* LocationName (float x, float y, float z);
 static void TeamplayQuadDead (gedict_t* client);
 static void TeamplayAreaLost (gedict_t* client);
 static void TeamplayAreaSecure (gedict_t* client);
@@ -1226,7 +1226,7 @@ static locmacro_t locmacros[] = {
 static int node_count = 0;
 static location_node_t nodes[256];
 
-static char* LocationName (float x, float y, float z)
+char* LocationName (float x, float y, float z)
 {
 	int i = 0;
 	int best = -1;

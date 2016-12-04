@@ -181,7 +181,7 @@ static void SpamRocketShot (gedict_t* self)
 	qbool has_rl = ((int)self->s.v.items & IT_ROCKET_LAUNCHER) && self->s.v.ammo_rockets > 3;
 	qbool safe_to_fire = self->fb.allowedMakeNoise && !CouldHurtTeammate (self);
 
-	if (self->fb.rocketjumping)
+	if (self->fb.rocketJumping)
 		return;
 
 	if (!has_rl || !safe_to_fire)
@@ -265,7 +265,7 @@ static void RocketLauncherShot (gedict_t* self)
 					VectorAdd(self->fb.look_object->s.v.absmin, self->fb.look_object->s.v.view_ofs, testplace);
 					from_marker = g_edicts[self->s.v.enemy].fb.touch_marker;
 					path_normal = true;
-					ZoneMarker (from_marker, self->fb.look_object, path_normal);
+					ZoneMarker (from_marker, self->fb.look_object, path_normal, g_edicts[self->s.v.enemy].fb.canRocketJump);
 					traveltime = SubZoneArrivalTime (zone_time, middle_marker, self->fb.look_object);
 					predict_dist = (traveltime * sv_maxspeed) + VectorDistance(testplace, self->fb.rocket_endpos);
 				}
@@ -295,7 +295,7 @@ static void RocketLauncherShot (gedict_t* self)
 
 						if ((int)self->s.v.items & IT_GRENADE_LAUNCHER) {
 							if (self->fb.arrow == BACK) {
-								if (self->s.v.enemy && !self->fb.rocketjumping) {
+								if (self->s.v.enemy && !self->fb.rocketJumping) {
 									if (self->fb.allowedMakeNoise && self->s.v.ammo_rockets > 3 && !CouldHurtTeammate(self)) {
 										self->fb.desired_weapon_impulse = 6;
 										self->fb.firing = true;
@@ -388,7 +388,7 @@ void SetFireButton(gedict_t* self, vec3_t rel_pos, float rel_dist) {
 			return;
 		if (!AttackFinished (self))
 			return;
-		self->fb.firing &= self->fb.willRocketJumpThisTic;
+		self->fb.firing &= self->fb.rocketJumping && self->fb.rocketJumpFrameDelay == 0;
 	}
 	else if (self->fb.next_impulse) {
 		return;

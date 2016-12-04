@@ -3,13 +3,46 @@
 #include "g_local.h"
 #include "fb_globals.h"
 
+// FIXME: Copy/paste from combat.c
+#ifndef Q3_VM
+// qvm have some bugs/round problem as i get from SD-Angel, so this trick
+float newceil( float f )
+{
+	return ceil(((int)(f*1000.0))/1000.0);
+}
+#else
+// native use lib ceil function
+#define newceil ceil
+#endif
+
+float TotalStrength (float health, float armorValue, float armorType)
+{
+	return max (0, min (
+		health / (1 - armorType),
+		health + armorValue
+	) );
+}
+
+float TotalStrengthAfterDamage (float health, float armorValue, float armorType, float damage)
+{
+	float damage_saved = newceil (damage * armorType);
+	if (damage_saved > armorValue) {
+		// lost all armor
+		damage_saved = armorValue;
+		armorType = 0;
+	}
+	damage = newceil (damage - damage_saved);
+	health -= damage;
+
+	return health <= 0 ? 0 : TotalStrength (health, armorValue, armorType);
+}
+
 // Called every time the player's statistics change (item pickups etc)
 void FrogbotSetHealthArmour(gedict_t* client)
 {
-	float min_first = client->s.v.health / (1 - client->s.v.armortype);
-	float min_second = client->s.v.health + client->s.v.armorvalue;
+	float min_first = 0, min_second = 0;
 	client->fb.total_armor = client->s.v.armortype * client->s.v.armorvalue;
-	client->fb.total_damage = min (min_first, min_second);
+	client->fb.total_damage = TotalStrength (client->s.v.health, client->s.v.armorvalue, client->s.v.armortype);
 
 	// 160 = 200RA
 	if (client->fb.total_armor == 160) {

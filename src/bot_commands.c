@@ -17,10 +17,12 @@ int AddPath (gedict_t* marker, gedict_t* next_marker);
 void RemoveMarker (gedict_t* marker);
 int DecodeMarkerFlagString (const char* string);
 int DecodeMarkerPathFlagString (const char* string);
+void BotSetRocketJumpFields (int marker_number, int path_index, float pitch, float yaw, int delay);
 const char* EncodeMarkerPathFlags (int path_flags);
 const char* EncodeMarkerFlags (int marker_flags);
 void DM6Debug (gedict_t* self);
 float AverageTraceAngle (gedict_t* self, qbool debug, qbool report);
+char* LocationName (float x, float y, float z);
 static gedict_t* MarkerIndicator (gedict_t* marker);
 
 #define MAX_BOTS          32
@@ -384,28 +386,51 @@ static void FrogbotsDebug (void)
 			int i = 0;
 
 			trap_CmdArgv (3, sub_command, sizeof (sub_command));
-			marker = markers[(int)bound (0, atoi (sub_command), NUMBER_MARKERS - 1)];
+			marker = markers[(int)bound (0, atoi (sub_command) - 1, NUMBER_MARKERS - 1)];
 
 			if (marker == NULL) {
 				G_sprint (self, 2, "(marker #%d not present)\n", atoi(sub_command));
 			}
 			else {
-				G_sprint (self, 2, "Marker %d, %s, position %f %f %f\n", marker->fb.index + 1, marker->s.v.classname, PASSVEC3 (marker->s.v.origin));
-				G_sprint (self, 2, "> mins [%f %f %f] maxs [%f %f %f]\n", PASSVEC3 (marker->s.v.mins), PASSVEC3 (marker->s.v.maxs));
-				G_sprint (self, 2, "> absmin [%f %f %f] absmax [%f %f %f]\n", PASSVEC3 (marker->s.v.absmin), PASSVEC3 (marker->s.v.absmax));
+				G_sprint (self, 2, "Marker %d, %s, position %d %d %d\n", marker->fb.index + 1, marker->s.v.classname, PASSINTVEC3 (marker->s.v.origin));
+				G_sprint (self, 2, "> mins [%d %d %d] maxs [%d %d %d]\n", PASSINTVEC3 (marker->s.v.mins), PASSINTVEC3 (marker->s.v.maxs));
+				G_sprint (self, 2, "> absmin [%d %d %d] absmax [%d %d %d]\n", PASSINTVEC3 (marker->s.v.absmin), PASSINTVEC3 (marker->s.v.absmax));
 				G_sprint (self, 2, "Zone %d, Subzone %d\n", marker->fb.Z_, marker->fb.S_);
 				G_sprint (self, 2, "Paths:\n");
 				for (i = 0; i < NUMBER_PATHS; ++i) {
 					gedict_t* next = marker->fb.paths[i].next_marker;
 
 					if (next != NULL) {
-						G_sprint (self, 2, "  %d: %d (%s), time %f\n", i, next->fb.index + 1, next->s.v.classname, marker->fb.paths[i].time);
+						G_sprint (self, 2, "  %d: %d (%s), time %3.1f, rj time %3.1f\n", i + 1, next->fb.index + 1, next->s.v.classname, marker->fb.paths[i].time, marker->fb.paths[i].rj_time);
+					}
+				}
+				G_sprint (self, 2, "Zones:\n");
+				for (i = 0; i < NUMBER_ZONES; ++i) {
+					fb_zone_t* zone = &marker->fb.zones[i];
+
+					if (zone->next) {
+						G_sprint (self, 2, "    %2d: %d (%s), time %3.1f\n", i + 1, zone->next->fb.index + 1, zone->next->s.v.classname, zone->time);
+					}
+					if (zone->next_rj) {
+						G_sprint (self, 2, "  RJ%2d: %d (%s), time %3.1f\n", i + 1, zone->next_rj->fb.index + 1, zone->next_rj->s.v.classname, zone->rj_time);
+					}
+				}
+				G_sprint (self, 2, "Goals:\n");
+				for (i = 0; i < NUMBER_GOALS; ++i) {
+					fb_goal_t* goal = &marker->fb.goals[i];
+
+					if (goal->next_marker) {
+						G_sprint (self, 2, "    %2d: %d (%s), time %3.1f\n", i + 1, goal->next_marker->fb.index + 1, goal->next_marker->s.v.classname, goal->time);
+					}
+					if (goal->next_marker_rj) {
+						G_sprint (self, 2, "  RJ%2d: %d (%s), time %3.1f\n", i + 1, goal->next_marker_rj->fb.index + 1, goal->next_marker_rj->s.v.classname, goal->rj_time);
 					}
 				}
 			}
 		}
-		else if (streq (sub_command, "path") && trap_CmdArgc() == 5) {
+		else if ((streq (sub_command, "path") || streq (sub_command, "path/rj")) && trap_CmdArgc() == 5) {
 			int start, end;
+			qbool allow_rj = streq (sub_command, "path/rj");
 
 			trap_CmdArgv (3, sub_command, sizeof (sub_command));
 			start = atoi (sub_command);
@@ -413,17 +438,17 @@ static void FrogbotsDebug (void)
 			end = atoi (sub_command);
 
 			if (start >= 0 && start < NUMBER_MARKERS && end >= 0 && end < NUMBER_MARKERS) {
-				gedict_t *from = markers[start];
-				gedict_t *to = markers[end];
+				gedict_t *from = markers[start - 1];
+				gedict_t *to = markers[end - 1];
 
 				if (from && to) {
-					G_sprint (self, 2, "%s -> %s\n", from->s.v.classname, to->s.v.classname);
+					G_sprint (self, 2, "%s \20%s\21 -> %s \20%s\21\n", from->s.v.classname, LocationName (PASSVEC3(from->s.v.origin)), to->s.v.classname, LocationName (PASSVEC3(to->s.v.origin)));
 					G_sprint (self, 2, "From zone %d, subzone %d to zone %d subzone %d\n", from->fb.Z_, from->fb.S_, to->fb.Z_, to->fb.S_);
 					from_marker = from;
-					ZoneMarker (from_marker, to, path_normal);
+					ZoneMarker (from_marker, to, path_normal, allow_rj);
 					traveltime = SubZoneArrivalTime (zone_time, middle_marker, to);
 					G_sprint (self, 2, "Travel time %f, zone_time %f\n", traveltime, zone_time);
-					G_sprint (self, 2, "Middle marker %d (zone %d subzone %d), time %f\n", middle_marker->fb.index + 1, middle_marker->fb.Z_, middle_marker->fb.S_, middle_marker->fb.subzones[to->fb.S_].time);
+					G_sprint (self, 2, "Middle marker %d \20%s\21 (zone %d subzone %d), time %f\n", middle_marker->fb.index + 1, LocationName (PASSVEC3(middle_marker->s.v.origin)), middle_marker->fb.Z_, middle_marker->fb.S_, middle_marker->fb.subzones[to->fb.S_].time);
 
 					{
 						float best_score = -1000000;
@@ -431,10 +456,20 @@ static void FrogbotsDebug (void)
 						int new_path_state = 0;
 						int new_angle_hint = 0;
 						vec3_t player_direction = { 0, 0, 0 }; // Standing still, for sake of argument
+						int new_rj_frame_delay = 0;
+						float new_rj_angles[2] = { 0, 0 };
 
-						PathScoringLogic (to->fb.goal_respawn_time, false, 30, true, from->s.v.origin, player_direction, from, to, false, true, true, &best_score, &linked_marker_, &new_path_state, &new_angle_hint);
+						PathScoringLogic (to->fb.goal_respawn_time, false, 30, true, from->s.v.origin, player_direction, from, to, false, allow_rj, true, &best_score, &linked_marker_, &new_path_state, &new_angle_hint, &new_rj_frame_delay, new_rj_angles);
 
-						G_sprint (self, 2, "Finished: next marker %d (%s), best_score %f\n", (linked_marker_ ? linked_marker_->fb.index : -1), (linked_marker_ ? linked_marker_->s.v.classname : "null"), best_score);
+						if (linked_marker_) {
+							G_sprint (self, PRINT_HIGH, "Finished: next marker %d (%s) \20%s\21, best_score %5.2f\n", linked_marker_->fb.index + 1, linked_marker_->s.v.classname, LocationName (PASSVEC3(linked_marker_->s.v.origin)), best_score);
+						}
+						else {
+							G_sprint (self, PRINT_HIGH, "Finished: next marker \20UNKNOWN\21\n");
+						}
+						if (new_path_state & ROCKET_JUMP) {
+							G_sprint (self, PRINT_HIGH, "> RJ Delay: %d frames, [%3.1f %3.1f]\n", new_rj_frame_delay, new_rj_angles[PITCH], new_rj_angles[YAW]);
+						}
 					}
 				}
 			}
@@ -454,13 +489,14 @@ static void FrogbotsDebug (void)
 
 			BotsFireInitialTriggers (self);
 		}
-		else if (streq (sub_command, "botpath")) {
+		else if (streq (sub_command, "botpath") || streq (sub_command, "botpath/rj")) {
 			gedict_t* first_bot = BotsFirstBot ();
 			gedict_t* marker = NULL;
 			gedict_t* target = NULL;
 			vec3_t teleport_angles = { 0, 0, 0 };
 			vec3_t teleport_location = { 0, 0, 0 };
 			int i = 0;
+			qbool allow_rj = streq (sub_command, "botpath/rj");
 
 			if (!k_practice) {
 				SetPractice (1, NULL);
@@ -490,6 +526,7 @@ static void FrogbotsDebug (void)
 			first_bot->fb.fixed_goal = target;
 			first_bot->fb.debug = true;
 			first_bot->fb.debug_path = true;
+			first_bot->fb.debug_path_rj = allow_rj;
 			cvar_fset ("k_fb_debug", 1);
 			VectorClear (first_bot->s.v.velocity);
 			trap_SetBotCMD (NUM_FOR_EDICT (first_bot), g_globalvars.frametime, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -511,6 +548,9 @@ static void FrogbotsDebug (void)
 		}
 		else if (streq (sub_command, "trace")) {
 			AverageTraceAngle (self, true, true);
+		}
+		else if (streq (sub_command, "info")) {
+
 		}
 	}
 }
@@ -624,6 +664,12 @@ static void BotFileGenerate (void)
 					std_fprintf (file, "SetMarkerPath %d %d %d\n", markers[i]->fb.index + 1, p, markers[i]->fb.paths[p].next_marker->fb.index + 1);
 					if (markers[i]->fb.paths[p].flags & EXTERNAL_MARKER_PATH_FLAGS) {
 						std_fprintf (file, "SetMarkerPathFlags %d %d %s\n", markers[i]->fb.index + 1, p, EncodeMarkerPathFlags (markers[i]->fb.paths[p].flags & EXTERNAL_MARKER_PATH_FLAGS));
+						if (markers[i]->fb.paths[p].flags & ROCKET_JUMP) {
+							gedict_t* m = markers[i];
+							fb_path_t* path = &markers[i]->fb.paths[p];
+
+							std_fprintf (file, "SetRocketJumpPathFields %d %d %3.1f %3.1f %d\n", m->fb.index + 1, p, path->rj_pitch, path->rj_yaw, path->rj_delay);
+						}
 					}
 					if (markers[i]->fb.paths[p].angle_hint) {
 						std_fprintf (file, "SetMarkerPathAngleHint %d %d %d\n", markers[i]->fb.index + 1, p, markers[i]->fb.paths[p].angle_hint);
@@ -1307,6 +1353,53 @@ static void FrogbotGoalInfo (void)
 	}
 }
 
+// Format: botcmd rjfields <pitch> <yaw> <delay>
+static void FrogbotSetRocketJumpFields (void)
+{
+	gedict_t* nearest = LocateMarker (self->s.v.origin);
+	int source_to_target_path = FindPathIndex (saved_marker, nearest);
+	char param[64];
+	float pitch = 0.0f, yaw = 0.0f;
+	int delay = 0;
+
+	if (nearest == NULL) {
+		G_sprint (self, PRINT_HIGH, "No marker nearby\n");
+		return;
+	}
+
+	if (source_to_target_path < 0) {
+		G_sprint (self, PRINT_HIGH, "No linked path found\n");
+		return;
+	}
+
+	if (! (saved_marker->fb.paths[source_to_target_path].flags & ROCKET_JUMP)) {
+		G_sprint (self, PRINT_HIGH, "Path is not flagged as a RJ\n");
+		return;
+	}
+
+	if (trap_CmdArgc () == 2) {
+		fb_path_t* path = &saved_marker->fb.paths[source_to_target_path];
+
+		G_sprint (self, PRINT_HIGH, "Current fields: pitch %3.1f, yaw %3.1f, delay %d\n", path->rj_pitch, path->rj_yaw, path->rj_delay);
+		return;
+	}
+
+	if (trap_CmdArgc () < 5) {
+		G_sprint (self, PRINT_HIGH, "Parameters: <pitch> <yaw> <delay>\n");
+		return;
+	}
+
+	trap_CmdArgv (2, param, sizeof (param));
+	saved_marker->fb.paths[source_to_target_path].rj_pitch = atof (param);
+	trap_CmdArgv (3, param, sizeof (param));
+	saved_marker->fb.paths[source_to_target_path].rj_yaw = atof (param);
+	trap_CmdArgv (4, param, sizeof (param));
+	saved_marker->fb.paths[source_to_target_path].rj_delay = atoi (param);
+
+	G_sprint (self, PRINT_HIGH, "RJ parameters updated\n");
+	return;
+}
+
 static void FrogbotSetDeathHeight (void)
 {
 	if (trap_CmdArgc () == 2) {
@@ -1419,7 +1512,8 @@ static frogbot_cmd_t editor_commands[] = {
 	{ "goto", FrogbotGoto, "Teleport to a marker #" },
 	{ "move", FrogbotMoveMarker, "Moves marker to current position" },
 	{ "anglehint", FrogbotSetAngleHint, "Sets angle hint for bot path" },
-	{ "deathheight", FrogbotSetDeathHeight, "Sets the auto-death level for this map." }
+	{ "deathheight", FrogbotSetDeathHeight, "Sets the auto-death level for this map" },
+	{ "rjfields", FrogbotSetRocketJumpFields, "Sets rocket jump fields" },
 };
 
 #define NUM_EDITOR_COMMANDS (sizeof (editor_commands) / sizeof (editor_commands[0]))
@@ -1574,7 +1668,7 @@ void BotStartFrame(int framecount) {
 		for (self = world; self = find_plr (self); ) {
 			// Logic that gets called every frame for every frogbot
 			if (self->isBot) {
-				self->fb.willRocketJumpThisTic = able_rj(self);
+				BotCanRocketJump (self);
 
 				SelectWeapon ();
 
@@ -1605,6 +1699,25 @@ void BotStartFrame(int framecount) {
 				}
 
 				BotSetCommand (self);
+			}
+			else if (FrogbotOptionEnabled (FB_OPTION_EDITOR_MODE)) {
+				if (self->s.v.button2 && self->fb.last_jump_frame == 0) {
+					self->fb.last_jump_frame = framecount;
+				}
+				else if (! self->s.v.button2 && ((int)self->s.v.flags & FL_ONGROUND)) {
+					self->fb.last_jump_frame = 0;
+				}
+
+				if (self->fb.last_jump_frame > 1 && self->s.v.button0) {
+					float yaw = self->s.v.v_angle[YAW];
+					float pitch = self->s.v.v_angle[PITCH];
+
+					if (yaw < 1) {
+						yaw += 360;
+					}
+					G_sprint (self, PRINT_HIGH, "Jumpflags: %d %d %d\n", (int)pitch, (int)yaw, framecount - self->fb.last_jump_frame);
+					self->fb.last_jump_frame = 1;
+				}
 			}
 		}
 	}

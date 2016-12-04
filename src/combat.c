@@ -289,7 +289,7 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 
 // qvm have some bugs/round problem as i get from SD-Angel, so this trick
 
-float newceil( float f )
+static float newceil( float f )
 {
 	return ceil(((int)(f*1000.0))/1000.0);
 }

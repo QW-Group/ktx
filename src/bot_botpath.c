@@ -63,11 +63,11 @@ static void EvalCloseRunAway(float runaway_time, gedict_t* enemy_touch_marker, f
 	float traveltime2;
 
 	from_marker = enemy_touch_marker;
-	ZoneMarker (from_marker, to_marker, path_normal);
+	ZoneMarker (from_marker, to_marker, path_normal, false);
 	traveltime = SubZoneArrivalTime (zone_time, middle_marker, to_marker);
 	traveltime2 = traveltime;
 	from_marker = touch_marker;
-	ZoneMarker (from_marker, to_marker, path_normal);
+	ZoneMarker (from_marker, to_marker, path_normal, false);
 	traveltime = SubZoneArrivalTime (zone_time, middle_marker, to_marker);
 	if (look_traveltime) {
 		test_away_score = g_random() * runaway_time * ((traveltime2 * traveltime2) - (look_traveltime_squared + (traveltime * traveltime))) / (look_traveltime * traveltime);
@@ -173,7 +173,7 @@ static qbool PredictionShotLogic (gedict_t* self, gedict_t* goalentity_marker)
 			look_marker = SightFromMarkerFunction(from_marker, to_marker);
 			if (look_marker) {
 				path_normal = true;
-				ZoneMarker (from_marker, look_marker, path_normal);
+				ZoneMarker (from_marker, look_marker, path_normal, self->fb.canRocketJump);
 				traveltime = SubZoneArrivalTime (zone_time, middle_marker, look_marker);
 				look_traveltime = traveltime;
 			}
@@ -185,7 +185,7 @@ static qbool PredictionShotLogic (gedict_t* self, gedict_t* goalentity_marker)
 				to_marker = from_marker;
 				from_marker = self->fb.linked_marker;
 				path_normal = true;
-				ZoneMarker (from_marker, to_marker, path_normal);
+				ZoneMarker (from_marker, to_marker, path_normal, self->fb.canRocketJump);
 				traveltime = SubZoneArrivalTime (zone_time, middle_marker, to_marker);
 				if (look_traveltime < traveltime) {
 					self->fb.look_object = look_marker;
@@ -203,13 +203,15 @@ void ProcessNewLinkedMarker(gedict_t* self) {
 	gedict_t* goalentity_ = &g_edicts[self->s.v.goalentity];
 	gedict_t* goalentity_marker = (goalentity_ == world || (self->fb.state & RUNAWAY) ? NULL : goalentity_->fb.touch_marker);
 	qbool trace_bprint = self->fb.debug;
-	qbool rocket_jump_routes_allowed = self->fb.willRocketJumpThisTic;
+	qbool rocket_jump_routes_allowed = self->fb.canRocketJump;
 	qbool rocket_alert = false;
 	float best_score = PATH_SCORE_NULL;
 	vec3_t player_direction;
 	gedict_t* new_linked_marker;
 	int new_path_state = 0;
 	int new_angle_hint = 0;
+	int new_rj_delay = 0;
+	float new_rj_angles[2] = { 0, 0 };
 
 	if (WaitingToHitGround(self))
 		return;
@@ -315,7 +317,7 @@ void ProcessNewLinkedMarker(gedict_t* self) {
 	self->fb.be_quiet = (self->s.v.enemy && &g_edicts[self->s.v.enemy] != self->fb.look_object && !self->fb.allowedMakeNoise);
 	
 	new_linked_marker = self->fb.linked_marker;
-	PathScoringLogic (self->fb.goal_respawn_time, self->fb.be_quiet, self->fb.skill.lookahead_time, self->fb.path_normal_, self->s.v.origin, player_direction, self->fb.touch_marker, goalentity_marker, rocket_alert, rocket_jump_routes_allowed, trace_bprint, &best_score, &new_linked_marker, &new_path_state, &new_angle_hint);
+	PathScoringLogic (self->fb.goal_respawn_time, self->fb.be_quiet, self->fb.skill.lookahead_time, self->fb.path_normal_, self->s.v.origin, player_direction, self->fb.touch_marker, goalentity_marker, rocket_alert, rocket_jump_routes_allowed, trace_bprint, &best_score, &new_linked_marker, &new_path_state, &new_angle_hint, &new_rj_delay, new_rj_angles);
 	SetLinkedMarker (self, new_linked_marker, "ProcNewLinked(std)");
 
 	STOP_DEBUGGING
@@ -340,9 +342,12 @@ void ProcessNewLinkedMarker(gedict_t* self) {
 		DM6CampLogic();
 	}
 
-	G_bprint_debug (2, "New linked marker: %d\n", self->fb.linked_marker->fb.index);
+	G_bprint_debug (2, "New linked marker: %d\n", self->fb.linked_marker->fb.index + 1);
 	self->fb.path_state = new_path_state;
 	self->fb.angle_hint = new_angle_hint;
+	self->fb.rocketJumpFrameDelay = new_rj_delay;
+	self->fb.rocketJumpAngles[PITCH] = new_rj_angles[PITCH];
+	self->fb.rocketJumpAngles[YAW] = new_rj_angles[YAW];
 	self->fb.linked_marker_time = g_globalvars.time + (self->fb.touch_marker == self->fb.linked_marker ? 0.3 : 5);
 	self->fb.old_linked_marker = self->fb.touch_marker;
 

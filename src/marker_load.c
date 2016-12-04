@@ -127,6 +127,22 @@ int DecodeMarkerPathFlagString (const char* s)
 	return path_flags;
 }
 
+void BotSetRocketJumpFields (int marker_number, int path_index, float pitch, float yaw, int delay)
+{
+	--marker_number;
+
+	if (marker_number < 0 || marker_number >= NUMBER_MARKERS) {
+		return;
+	}
+	if (path_index < 0 || path_index >= NUMBER_PATHS) {
+		return;
+	}
+
+	markers[marker_number]->fb.paths[path_index].rj_pitch = pitch;
+	markers[marker_number]->fb.paths[path_index].rj_yaw = yaw;
+	markers[marker_number]->fb.paths[path_index].rj_delay = delay;
+}
+
 qbool FrogbotShowMarkerIndicators (void)
 {
 	return FrogbotOptionEnabled (FB_OPTION_SHOW_MARKERS | FB_OPTION_EDITOR_MODE);
@@ -194,6 +210,10 @@ void SetMarkerPathFlags(int marker_number, int path_index, int flags) {
 	}
 
 	markers[marker_number]->fb.paths[path_index].flags = flags;
+	if (flags & ROCKET_JUMP) {
+		markers[marker_number]->fb.paths[path_index].rj_pitch = 78.25;
+		markers[marker_number]->fb.paths[path_index].rj_yaw = -1;
+	}
 }
 
 void SetMarkerPath(int source_marker, int path_index, int next_marker) {
@@ -393,6 +413,28 @@ qbool LoadBotRoutingFromFile (void)
 			trap_CmdArgv (1, argument, sizeof (argument));
 			mapDeathHeight = atoi (argument);
 			Com_Printf ("Set death height to %d\n", mapDeathHeight);
+		}
+		else if (streq (argument, "SetRocketJumpPathFields")) {
+			int marker_number;
+			int path_number;
+			float pitch, yaw;
+			int delay;
+
+			if (trap_CmdArgc () != 6)
+				continue;
+
+			trap_CmdArgv (1, argument, sizeof (argument));
+			marker_number = atoi (argument);
+			trap_CmdArgv (2, argument, sizeof (argument));
+			path_number = atoi (argument);
+			trap_CmdArgv (3, argument, sizeof (argument));
+			pitch = atof (argument);
+			trap_CmdArgv (4, argument, sizeof (argument));
+			yaw = atof (argument);
+			trap_CmdArgv (5, argument, sizeof (argument));
+			delay = atoi (argument);
+
+			BotSetRocketJumpFields (marker_number, path_number, pitch, yaw, delay);
 		}
 	}
 
