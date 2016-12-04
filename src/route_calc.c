@@ -9,8 +9,8 @@
 #include "g_local.h"
 #include "fb_globals.h"
 
-typedef qbool (*fb_path_calc_func_t)(gedict_t* m, gedict_t* m_P, float P_time, int m_D);
-#define PASSINTVEC3(x) ((int)x[0]),((int)x[1]),((int)x[2])
+//typedef qbool (*fb_path_calc_func_t)(gedict_t* m, gedict_t* m_P, float P_time, int m_D);
+typedef qbool (*fb_path_calc_func_t)(gedict_t* m, fb_path_t* path);
 extern gedict_t* markers[];
 
 static void Calc_G_time_12 (void);
@@ -464,7 +464,8 @@ static void PathCalculation(fb_path_calc_func_t func) {
 			}
 
 			for (j = 0; j < NUMBER_PATHS; ++j) {
-				no_change &= func(m, m->fb.paths[j].next_marker, m->fb.paths[j].time, m->fb.paths[j].flags);
+				//no_change &= func(m, m->fb.paths[j].next_marker, m->fb.paths[j].time, m->fb.paths[j].flags);
+				no_change &= func(m, &m->fb.paths[j]);
 			}
 		}
 	}
