@@ -27,6 +27,7 @@
 #include "fb_globals.h"
 
 void	ClientObituary( gedict_t * e1, gedict_t * e2 );
+void    BotPlayerKilledEvent (gedict_t* targ, gedict_t* attacker, gedict_t* inflictor);
 void	bloodfest_killed_hook( gedict_t * killed, gedict_t * attacker );
 
 #define DEATHTYPE( _dt_, _dt_str_ ) #_dt_str_,
@@ -211,6 +212,8 @@ Killed
 void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 {
 	gedict_t       *oself;
+
+	BotPlayerKilledEvent (targ, attacker, inflictor);
 
 	oself = self;
 	self = targ;
@@ -889,8 +892,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		targ->s.v.frags -= 3;
 	}
 
-	if (bots_enabled())
-		FrogbotSetHealthArmour(targ);
+	FrogbotSetHealthArmour(targ);
 
  	// if targed killed, do appropriate action and return
 	if ( ISDEAD( targ ) )

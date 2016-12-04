@@ -128,10 +128,7 @@ extern gedict_t* dropper;
 #define SAVED_DESCRIPTION (DM6_DOOR | ROCKET_JUMP | JUMP_LEDGE | VERTICAL_PLATFORM | BOTPATH_DOOR | BOTPATH_DOOR_CLOSED)
 #define NOT_ROCKET_JUMP (~ROCKET_JUMP)
 
-// Bot flags
-#define BOTFLAG_UNREACHABLE 1
-
-// Marker flags
+// Marker flags (FIXME: fb.T?  check.  consistent naming)
 #define UNREACHABLE 1                         // Typically set for markers that are lava, waterlevel 3?  (automate?)
 #define T_WATER 2                             // Set by server if the marker is in liquid
 #define T_NO_AIR 4                            // Set by server (means the bot would be trapped underwater - dm3 tunnel for instance)
@@ -142,19 +139,19 @@ extern gedict_t* dropper;
 #define MARKER_ESCAPE_ROUTE 128               // (not currently implemented) bot should head towards marker when in lava or slime (think amphi2/end)
 #define MARKER_DYNAMICALLY_ADDED 256          // Added dynamically by server.  Do not include in .bot file generation
 
-// Bot flags
+// Bot flags (FIXME: fb.state?  check.  consistent naming, comment with descriptions)
+#define CAMPBOT 1
+#define SHOT_FOR_LUCK 2
+#define BACKPACK_IS_UNREACHABLE 4
 #define NOTARGET_ENEMY 32
 #define AWARE_SURROUNDINGS 128
 #define HURT_SELF 1024
-#define CHASE_ENEMY 2048
 #define RUNAWAY 4096
 #define WAIT 8192
 #define NOT_NOTARGET_ENEMY ~(NOTARGET_ENEMY)
 #define NOT_AWARE_SURROUNDINGS ~(AWARE_SURROUNDINGS)
 
-#define CAMPBOT 1
-#define SHOT_FOR_LUCK 2
-#define HELP_TEAMMATE 128
+#define HELP_TEAMMATE 128   // FIXME: same as AWARE_SURROUNDINGS... deliberate?
 
 qbool ExistsPath (gedict_t* from_marker, gedict_t* to_marker, int* new_path_state);
 float boomstick_only (void);

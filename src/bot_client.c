@@ -61,7 +61,8 @@ static void ResetEnemy(gedict_t* self) {
 	self->s.v.enemy = NUM_FOR_EDICT(world);
 }
 
-static void ResetGoalEntity(gedict_t* self) {
+static void ResetGoalEntity(gedict_t* self)
+{
 	if (self->s.v.goalentity) {
 		gedict_t* ent = &g_edicts[self->s.v.goalentity];
 		ent->fb.teamflag &= ~self->fb.teamflag;
@@ -69,8 +70,16 @@ static void ResetGoalEntity(gedict_t* self) {
 	}
 }
 
+void BotPlayerKilledEvent (gedict_t* targ, gedict_t* attacker, gedict_t* inflictor)
+{
+	if (inflictor && inflictor->ct != ctPlayer && (inflictor->fb.T & UNREACHABLE)) {
+		targ->fb.state |= BACKPACK_IS_UNREACHABLE;
+	}
+}
+
 // Called whenever a player dies
-void BotPlayerDeathEvent(gedict_t* self) {
+void BotPlayerDeathEvent(gedict_t* self)
+{
 	ResetGoalEntity(self);
 	ResetEnemy(self);
 
@@ -155,7 +164,7 @@ static float goal_client6(gedict_t* self) {
 // TODO: any preferences stored against the specific bot to be restored here?
 void BotClientConnectedEvent(gedict_t* self) {
 	self->fb.desire = (deathmatch <= 3 ? goal_client : goal_client6);
-	self->fb.T = BOTFLAG_UNREACHABLE;
+	self->fb.T = UNREACHABLE;
 	self->fb.skill.skill_level = g_globalvars.parm3;
 	self->fb.skill.lookahead_time = 30;
 	self->fb.skill.prediction_error = 0;

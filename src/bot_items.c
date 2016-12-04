@@ -906,9 +906,10 @@ void BotsBackpackDropped (gedict_t* self, gedict_t* pack)
 	pack->fb.item_touch = fb_backpack_touch;
 	pack->fb.item_taken = fb_backpack_taken;
 
-	LocateDynamicItem (pack);
-
-	BotDroppedMessage (self, pack);
+	if (! (self->fb.state & BACKPACK_IS_UNREACHABLE)) {
+		LocateDynamicItem (pack);
+		BotDroppedMessage (self, pack);
+	}
 }
 
 void BotsPowerupDropped (gedict_t* player, gedict_t* powerup)

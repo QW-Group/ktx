@@ -2340,9 +2340,7 @@ void DropBackpack()
 		strlcpy(item->backpack_team_name, getteam(self), MAX_TEAM_NAME);
 	}
 
-	if (bots_enabled ()) {
-		BotsBackpackDropped (self, item);
-	}
+	BotsBackpackDropped (self, item);
 }
 
 /*
