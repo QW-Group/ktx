@@ -73,6 +73,7 @@ SetMarkerPath 6 6 88
 SetGoal 7 5
 SetZone 7 10
 SetMarkerPath 7 0 67
+SetMarkerPathAngleHint 7 0 20
 SetMarkerPath 7 1 81
 SetMarkerPath 7 2 82
 SetMarkerPath 7 3 76
@@ -357,6 +358,7 @@ SetMarkerPath 66 4 1
 SetZone 67 8
 SetMarkerPath 67 0 85
 SetMarkerPath 67 1 7
+SetMarkerPathAngleHint 67 1 -20
 SetMarkerPath 67 2 44
 SetMarkerPath 67 3 60
 SetZone 68 8
@@ -427,7 +429,9 @@ SetMarkerPath 81 0 7
 SetMarkerPath 81 1 35
 SetMarkerPath 81 2 6
 SetMarkerPath 81 3 66
+SetMarkerPathAngleHint 81 3 -30
 SetMarkerPath 81 4 14
+SetMarkerPathAngleHint 81 4 30
 SetZone 82 2
 SetMarkerPath 82 0 32
 SetMarkerPath 82 1 29
