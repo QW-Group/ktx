@@ -402,7 +402,7 @@ static void fb_health_taken (gedict_t* item, gedict_t* player)
 
 	AssignVirtualGoal (item);
 	FrogbotSetHealthArmour (player);
-	UpdateGoalEntity (item);
+	UpdateGoalEntity (item, player);
 	item->s.v.solid = SOLID_TRIGGER;
 }
 
@@ -456,7 +456,7 @@ static void fb_armor_taken (gedict_t* item, gedict_t* player)
 	item->fb.goal_respawn_time = item->s.v.nextthink;
 	AssignVirtualGoal (item);
 	FrogbotSetHealthArmour (player);
-	UpdateGoalEntity (item);
+	UpdateGoalEntity (item, player);
 	BotTookMessage (item, player);
 
 	item->s.v.solid = SOLID_TRIGGER;
@@ -548,7 +548,7 @@ static void fb_weapon_taken (gedict_t* item, gedict_t* player)
 		// Weapon left
 	}
 	else {
-		UpdateGoalEntity (item);
+		UpdateGoalEntity (item, player);
 		item->fb.goal_respawn_time = item->s.v.nextthink;
 		AssignVirtualGoal (item);
 		item->s.v.solid = SOLID_TRIGGER;
@@ -637,7 +637,7 @@ static qbool fb_ammo_touch (gedict_t* item, gedict_t* player)
 static void fb_ammo_taken (gedict_t* item, gedict_t* player)
 {
 	item->fb.goal_respawn_time = item->s.v.nextthink;
-	UpdateGoalEntity (item);
+	UpdateGoalEntity (item, player);
 	AssignVirtualGoal (item);
 
 	item->s.v.solid = SOLID_TRIGGER;
@@ -725,7 +725,7 @@ static qbool fb_powerup_touch (gedict_t* item, gedict_t* player)
 
 static void fb_powerup_taken (gedict_t* item, gedict_t* player)
 {
-	UpdateGoalEntity (item);
+	UpdateGoalEntity (item, player);
 	item->fb.goal_respawn_time = item->s.v.nextthink;
 	AssignVirtualGoal (item);
 	item->s.v.solid = SOLID_TRIGGER;
@@ -860,7 +860,7 @@ static void fb_backpack_taken (gedict_t* item, gedict_t* player)
 {
 	player->fb.weapon_refresh_time = 0;
 
-	UpdateGoalEntity (item);
+	UpdateGoalEntity (item, player);
 	player->fb.old_linked_marker = NULL;
 	SetLinkedMarker (player, LocateMarker (player->s.v.origin), "bp taken");
 	player->fb.linked_marker_time = g_globalvars.time + 5;

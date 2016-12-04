@@ -27,17 +27,18 @@ qbool WaitingToRespawn (gedict_t* ent)
 }
 
 // If an item is picked up, all bots heading for that item should re-evaluate their goals
-// FIXME: Unless they heard it get picked up or a teammate took it?
-void UpdateGoalEntity(gedict_t* item) {
+void UpdateGoalEntity(gedict_t* item, gedict_t* taker) {
 	gedict_t* plr;
 	int item_entity = NUM_FOR_EDICT(item);
 
 	for (plr = world; plr = find_plr(plr); ) {
+		qbool same_team = SameTeam (plr, taker);
+		qbool heard_it = VectorDistance (plr->s.v.origin, item->s.v.origin) < 1000;
+
 		if (plr->s.v.goalentity == item_entity) {
-			float goal_refresh_time_ = g_globalvars.time + g_random();
-			if (plr->fb.goal_refresh_time > goal_refresh_time_) {
-				plr->fb.goal_refresh_time = goal_refresh_time_;
-			}
+			float goal_refresh_time_ = g_globalvars.time + (same_team || heard_it ? 0 : g_random());
+
+			plr->fb.goal_refresh_time = min (plr->fb.goal_refresh_time, goal_refresh_time_);
 		}
 	}
 }

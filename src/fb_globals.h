@@ -311,7 +311,7 @@ qbool SameTeam (gedict_t* p1, gedict_t* p2);
 
 // botstat.qc
 void FrogbotSetHealthArmour (gedict_t* client);
-void UpdateGoalEntity (gedict_t* item);
+void UpdateGoalEntity (gedict_t* item, gedict_t* taker);
 
 // bot_client.qc
 void BotPlayerDeathEvent (gedict_t* self);
