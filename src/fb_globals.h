@@ -165,6 +165,7 @@ float enemy_shaft_attack (void);
 float W_BestWeapon (void);
 
 gedict_t* LocateMarker (vec3_t org);
+gedict_t* LocateNextMarker (vec3_t org, gedict_t* ignore_ent);
 float RankForWeapon (float w);
 float WeaponCode (float w);
 

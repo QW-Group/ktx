@@ -66,32 +66,47 @@ void adjust_view_ofs_z(gedict_t* ent) {
 	}
 }
 
-gedict_t* LocateMarker(vec3_t org) {
+gedict_t* LocateNextMarker (vec3_t org, gedict_t* ignore_ent)
+{
 	gedict_t* marker_ = NULL;
-	float shortest_distance = 1000000;
 	gedict_t* closest_marker = NULL;
+	float shortest_distance = 1000000;
+	vec3_t marker_center;
+	qbool editor_mode = FrogbotOptionEnabled (FB_OPTION_EDITOR_MODE);
 	float distance = 0;
-	float max_distance = FrogbotOptionEnabled (FB_OPTION_EDITOR_MODE) ? 100 : 1000;
+	float min_distance = 0;
+	float max_distance = editor_mode ? 100 : 1000;
+
+	if (ignore_ent) {
+		VectorAdd (ignore_ent->s.v.absmin, ignore_ent->s.v.absmax, marker_center);
+		VectorScale (marker_center, 0.5f, marker_center);
+		min_distance = VectorDistance(marker_center, org);
+	}
 
 	for (marker_ = world; marker_ = trap_findradius(marker_, org, max_distance); ) {
-		vec3_t marker_center;
+		if (marker_ == ignore_ent) {
+			ignore_ent = NULL;
+			continue;
+		}
 
-		if (streq (marker_->s.v.classname, "door") && !(marker_->fb.T & MARKER_DOOR_TOUCHABLE))
+		if (!editor_mode && streq (marker_->s.v.classname, "door") && !(marker_->fb.T & MARKER_DOOR_TOUCHABLE))
 			continue;
 
-		if (marker_->fb.fl_marker) {
+		if (marker_->fb.fl_marker || (editor_mode && marker_->fb.index)) {
 			VectorAdd (marker_->s.v.absmin, marker_->s.v.absmax, marker_center);
 			VectorScale (marker_center, 0.5f, marker_center);
 		}
-		/*else if (streq (marker_->s.v.classname, "plat")) {
-			VectorAdd (marker_->s.v.mins, marker_->s.v.maxs, marker_center);
-			VectorScale (marker_center, 0.5f, marker_center);
-		}*/
 		else {
 			continue;
 		}
 
 		distance = VectorDistance(marker_center, org);
+
+		if (distance < min_distance)
+			continue;
+		if (distance == min_distance && ignore_ent)
+			continue;
+
 		traceline(PASSVEC3(org), PASSVEC3(marker_center), true, dropper);
 		if (g_globalvars.trace_fraction != 1) {
 			distance = distance + 1000;
@@ -103,6 +118,10 @@ gedict_t* LocateMarker(vec3_t org) {
 	}
 
 	return closest_marker;
+}
+
+gedict_t* LocateMarker(vec3_t org) {
+	return LocateNextMarker (org, NULL);
 }
 
 // If the current item is a goal but has been taken and waiting to respawn, set a virtual goal

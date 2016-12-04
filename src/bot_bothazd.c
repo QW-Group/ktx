@@ -325,7 +325,7 @@ static qbool CanJumpOver(gedict_t* self, vec3_t jump_origin, vec3_t jump_velocit
 			return do_jump;
 		}
 
-		// Air-control
+		// Air-control (FIXME: looks like this function runs simulation at 10fps
 		VectorMA (last_clear_velocity, 7 * 5.0f, accel_direction, last_clear_velocity);
 		VectorMA (last_clear_hor_velocity, 7 * 5.0f, accel_direction, last_clear_hor_velocity);
 		last_clear_hor_speed = vlen (last_clear_hor_velocity);

@@ -46,6 +46,7 @@ static float next_marker_time;
 static qbool hazard_time;
 static float next_hazard_time;
 
+static vec3_t saved_marker_pos = { -INFINITY, -INFINITY, -INFINITY };
 static gedict_t* saved_marker = NULL;
 static gedict_t* last_touched_marker = NULL;
 
@@ -426,6 +427,32 @@ static void FrogbotsDebug (void)
 	}
 }
 
+static void FrogbotGoto (void)
+{
+	gedict_t* marker = NULL;
+	char buffer[64];
+	vec3_t teleport_location;
+
+	if (trap_CmdArgc () != 3) {
+		G_sprint (self, PRINT_HIGH, "Usage: /botcmd goto <marker#>\n");
+		return;
+	}
+
+	trap_CmdArgv (2, buffer, sizeof (buffer));
+	marker = markers[(int)bound (0, atoi (buffer) - 1, NUMBER_MARKERS - 1)];
+	if (!marker) {
+		G_sprint (self, PRINT_HIGH, "Marker #%3d not found\n", atoi(buffer));
+		return;
+	}
+
+	VectorCopy (marker->s.v.origin, teleport_location);
+	if (!streq (marker->s.v.classname, "marker")) {
+		vec3_t teleport_angles = { 0, 0, 0 };
+
+		teleport_player (self, teleport_location, teleport_angles, TFLAGS_SND_DST | TFLAGS_FOG_DST);
+	}
+}
+
 static int FindPathIndex (gedict_t* saved_marker, gedict_t* nearest)
 {
 	int i = 0;
@@ -670,8 +697,29 @@ static void FrogbotSaveMarker (void)
 				DeselectMarker (last_touched_marker);
 			}
 			SelectMarker (saved_marker = nearest);
+			VectorCopy (self->s.v.origin, saved_marker_pos);
 
 			G_sprint (self, PRINT_HIGH, "Marker #%d [%s] is saved\n", nearest->fb.index + 1, nearest->s.v.classname);
+		}
+	}
+	else if (saved_marker && VectorCompare (self->s.v.origin, saved_marker_pos)) {
+		gedict_t* nearest = LocateNextMarker (self->s.v.origin, saved_marker);
+
+		if (nearest) {
+			DeselectMarker (saved_marker);
+			SelectMarker (saved_marker = nearest);
+
+			G_sprint (self, PRINT_HIGH, "Marker #%d [%s] is saved\n", nearest->fb.index + 1, nearest->s.v.classname);
+		}
+		else {
+			DeselectMarker (saved_marker);
+			saved_marker = NULL;
+
+			if (last_touched_marker) {
+				SelectMarker (last_touched_marker);
+			}
+
+			G_sprint (self, PRINT_HIGH, "Cleared saved marker\n");
 		}
 	}
 	else {
@@ -807,21 +855,46 @@ static void FrogbotSetZone(void)
 	gedict_t* nearest = LocateMarker (self->s.v.origin);
 	int zone = 0;
 
-	if (!nearest) {
-		G_sprint (self, PRINT_HIGH, "No marker found nearby\n");
-		return;
-	}
-
-	zone = nearest->fb.Z_ + 1;
-	if (zone > NUMBER_ZONES)
-		zone = 1;
-	if (trap_CmdArgc () >= 3) {
+	if (trap_CmdArgc () >= 4) {
 		char param[64];
+		int marker_number = 0;
+		int i;
 
 		trap_CmdArgv (2, param, sizeof (param));
+		marker_number = bound (1, atoi (param), NUMBER_MARKERS);
+		trap_CmdArgv (3, param, sizeof (param));
+		zone = bound (1, atoi (param), NUMBER_ZONES);
 
-		if (atoi (param) != 0) {
-			zone = bound (1, atoi (param), NUMBER_ZONES);
+		for (i = 0; i < NUMBER_MARKERS; ++i) {
+			if (markers[i] && markers[i]->fb.index == marker_number - 1) {
+				nearest = markers[i];
+				break;
+			}
+		}
+
+		if (!nearest) {
+			G_sprint (self, PRINT_HIGH, "No marker #%3d found\n", marker_number);
+			return;
+		}
+	}
+	else {
+		if (!nearest) {
+			G_sprint (self, PRINT_HIGH, "No marker found nearby\n");
+			return;
+		}
+
+		zone = nearest->fb.Z_ + 1;
+		if (zone > NUMBER_ZONES)
+			zone = 1;
+
+		if (trap_CmdArgc () == 3) {
+			char param[64];
+
+			trap_CmdArgv (2, param, sizeof (param));
+
+			if (atoi (param) != 0) {
+				zone = bound (1, atoi (param), NUMBER_ZONES);
+			}
 		}
 	}
 
@@ -1165,7 +1238,8 @@ static frogbot_cmd_t editor_commands[] = {
 	{ "summary", FrogbotSummary, "Shows summary of current map" },
 	{ "goalsummary", FrogbotGoalSummary, "Show summary of goals" },
 	{ "mapinfo", FrogbotMapInfo, "Shows information about current map" },
-	{ "goalinfo", FrogbotGoalInfo, "Shows goal information for current marker" }
+	{ "goalinfo", FrogbotGoalInfo, "Shows goal information for current marker" },
+	{ "goto", FrogbotGoto, "Teleport to a marker #" }
 };
 
 #define NUM_EDITOR_COMMANDS (sizeof (editor_commands) / sizeof (editor_commands[0]))
