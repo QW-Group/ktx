@@ -114,32 +114,32 @@ void SetAttributesBasedOnSkill (int skill)
 	cvar_fset (FB_CVAR_LOOKAHEADTIME, 30);
 	cvar_fset (FB_CVAR_PREDICTIONERROR, 0);
 
-	cvar_fset (FB_CVAR_LGPREF, RangeOverSkill (skill, 0.0f, 1.0f));
+	cvar_fset (FB_CVAR_LGPREF, RangeOverSkill (skill, 0.2f, 1.0f));
 	cvar_fset (FB_CVAR_VISIBILITY, 0.7071067f - (0.02f * min (skill, 10)));   // equivalent of 90 => 120
 
-	cvar_fset (FB_CVAR_YAW_MIN_ERROR, RangeOverSkill(skill, 1, 1));
-	cvar_fset (FB_CVAR_YAW_MAX_ERROR, RangeOverSkill (skill, 5, 4));
-	cvar_fset (FB_CVAR_YAW_MULTIPLIER, RangeOverSkill(skill, 3, 2));
-	cvar_fset (FB_CVAR_YAW_SCALE, RangeOverSkill (skill, 5, 1));
+	cvar_fset (FB_CVAR_YAW_MIN_ERROR, RangeOverSkill(skill, 1.5, 1));
+	cvar_fset (FB_CVAR_YAW_MAX_ERROR, RangeOverSkill (skill, 5.5, 3));
+	cvar_fset (FB_CVAR_YAW_MULTIPLIER, RangeOverSkill(skill, 4, 2));
+	cvar_fset (FB_CVAR_YAW_SCALE, RangeOverSkill (skill, 5, 1.5));
 
-	cvar_fset (FB_CVAR_PITCH_MIN_ERROR, RangeOverSkill(skill, 2, 1));
-	cvar_fset (FB_CVAR_PITCH_MAX_ERROR, RangeOverSkill(skill, 5, 2));
-	cvar_fset (FB_CVAR_PITCH_MULTIPLIER, RangeOverSkill(skill, 3, 2));
-	cvar_fset (FB_CVAR_PITCH_SCALE, RangeOverSkill (skill, 5, 1));
+	cvar_fset (FB_CVAR_PITCH_MIN_ERROR, RangeOverSkill(skill, 1.5, 1));
+	cvar_fset (FB_CVAR_PITCH_MAX_ERROR, RangeOverSkill(skill, 4.5, 2));
+	cvar_fset (FB_CVAR_PITCH_MULTIPLIER, RangeOverSkill(skill, 4, 2));
+	cvar_fset (FB_CVAR_PITCH_SCALE, RangeOverSkill (skill, 5, 1.5));
 
 	cvar_fset (FB_CVAR_ATTACK_RESPAWNS, skill >= 15 ? 1 : 0);
 	cvar_fset (FB_CVAR_REACTION_TIME, RangeOverSkill (skill, 0.4f, 0.2f));
 
 	// Volatility
 	cvar_fset (FB_CVAR_MIN_VOLATILITY, 1.0f);
-	cvar_fset (FB_CVAR_MAX_VOLATILITY, RangeOverSkill (skill, 3.0f, 1.5f));
-	cvar_fset (FB_CVAR_INITIAL_VOLATILITY, RangeOverSkill (skill, 2.0f, 1.4f));
+	cvar_fset (FB_CVAR_MAX_VOLATILITY, RangeOverSkill (skill, 3.5f, 2.0f));
+	cvar_fset (FB_CVAR_INITIAL_VOLATILITY, RangeOverSkill (skill, 3.0f, 1.4f));
 	cvar_fset (FB_CVAR_REDUCE_VOLATILITY, RangeOverSkill (skill, 0.99f, 0.95f));
-	cvar_fset (FB_CVAR_OWNSPEED_VOLATILITY_THRESHOLD, RangeOverSkill (skill, 320, 400));
-	cvar_fset (FB_CVAR_OWNSPEED_VOLATILITY_INCREASE, RangeOverSkill (skill, 0.3f, 0.1f));
-	cvar_fset (FB_CVAR_ENEMYSPEED_VOLATILITY_THRESHOLD, RangeOverSkill (skill, 280, 400));
-	cvar_fset (FB_CVAR_OWNSPEED_VOLATILITY_INCREASE, RangeOverSkill (skill, 0.6f, 0.2f));
-	cvar_fset (FB_CVAR_ENEMYDIRECTION_VOLATILITY_INCREASE, RangeOverSkill (skill, 0.8f, 0.4f));
+	cvar_fset (FB_CVAR_OWNSPEED_VOLATILITY_THRESHOLD, RangeOverSkill (skill, 360, 450));
+	cvar_fset (FB_CVAR_OWNSPEED_VOLATILITY_INCREASE, RangeOverSkill (skill, 0.2f, 0.1f));
+	cvar_fset (FB_CVAR_ENEMYSPEED_VOLATILITY_THRESHOLD, RangeOverSkill (skill, 360, 450));
+	cvar_fset (FB_CVAR_OWNSPEED_VOLATILITY_INCREASE, RangeOverSkill (skill, 0.4f, 0.2f));
+	cvar_fset (FB_CVAR_ENEMYDIRECTION_VOLATILITY_INCREASE, RangeOverSkill (skill, 0.6f, 0.4f));
 
 	{
 		char buf[1024 * 4];

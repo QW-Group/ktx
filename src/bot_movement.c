@@ -146,8 +146,9 @@ void BotSetCommand(gedict_t* self) {
 	self->fb.last_cmd_sent = g_globalvars.time;
 
 	VectorClear (self->fb.obstruction_normal);
-	if (!firing) {
-		self->fb.last_pitch_sign = self->fb.last_yaw_sign = 0;
+	if (self->s.v.button0 && !firing) {
+		// Stopped firing, randomise next time
+		self->fb.last_rndaim_time = 0;
 	}
 	self->fb.prev_look_object = self->fb.look_object;
 	if (self->isBot && self->fb.debug_path) {

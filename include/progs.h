@@ -648,8 +648,8 @@ typedef struct fb_entvars_s {
 	int                 dbg_countdown;   // bot will be stationary for x frames
 
 	// Aiming
-	int                 last_yaw_sign;
-	int                 last_pitch_sign;
+	float               last_rndaim[2];
+	float               last_rndaim_time;
 	float               min_fire_time;   // time before bot will fire
 } fb_entvars_t;
 

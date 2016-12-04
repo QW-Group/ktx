@@ -3,11 +3,10 @@
 #include "g_local.h"
 #include "fb_globals.h"
 
-// FIXME: fb.skill
-#define ATTACK_RESPAWN_TIME 3
+#define YAW_SNAP_THRESHOLD     4
+#define PITCH_SNAP_THRESHOLD   6
 
-#define MAX_YAW_ERROR 8
-#define MAX_PITCH_ERROR 5
+#define ATTACK_RESPAWN_TIME 3
 
 qbool DM6FireAtDoor (gedict_t* self, vec3_t rel_pos);
 
@@ -144,11 +143,6 @@ static void BotsAimAtPlayerLogic(gedict_t* self, vec3_t rel_pos, float* rel_dist
 	}
 }
 
-typedef void (*bot_aim_model_t)(gedict_t* self, vec3_t rel_pos, float rel_distance);
-
-#define YAW_SNAP_THRESHOLD     4
-#define PITCH_SNAP_THRESHOLD   6
-
 static qbool HorizontalVelocityCheck (vec3_t velocity, float threshold)
 {
 	float value = velocity[0] * velocity[0] + velocity[1] * velocity[1];
@@ -166,7 +160,7 @@ static void CalculateVolatility (gedict_t* self)
 		// Treat as if they hadn't seen player before
 		volatility = self->fb.skill.initial_volatility;
 		self->fb.min_fire_time = g_globalvars.time + self->fb.skill.awareness_delay;
-		self->fb.last_pitch_sign = self->fb.last_yaw_sign = 0;
+		self->fb.last_rndaim_time = 0;
 
 		vol_flags = 1;
 	}
@@ -203,43 +197,60 @@ static void CalculateVolatility (gedict_t* self)
 	self->fb.skill.current_volatility = volatility;
 }
 
+static float anglefix (float angle)
+{
+	if (angle >= 180)
+		angle -= 360;
+	else if (angle <= -180)
+		angle += 360;
+	return angle;
+}
+
 // Called after desired angles have been set to aim at the player
 static void BotsModifyAimAtPlayerLogic (gedict_t* self, vec3_t rel_pos, float rel_dist)
 {
 	fb_botaim_t* pitch = &self->fb.skill.aim_params[PITCH];
 	fb_botaim_t* yaw   = &self->fb.skill.aim_params[YAW];
 
-	float raw_pitch_diff = self->fb.desired_angle[PITCH] - self->s.v.angles[PITCH];
-	float raw_yaw_diff = self->fb.desired_angle[YAW] - self->s.v.angles[YAW];
+	float raw_pitch_diff = anglefix( anglemod(self->fb.desired_angle[PITCH]) - anglemod(self->s.v.angles[PITCH]) );
+	float raw_yaw_diff = anglefix( anglemod(self->fb.desired_angle[YAW]) - anglemod(self->s.v.angles[YAW]) );
 
-	float pitch_diff, yaw_diff;
 	float pitch_rnd, yaw_rnd;
 
+	float threshold_time;
+
+	// Run every frame so it decreases correctly (also resets last_rndaim_time)
 	CalculateVolatility (self);
 
-	pitch_diff = bound (pitch->minimum, fabs (raw_pitch_diff) * pitch->scale, pitch->maximum);
-	yaw_diff = bound(yaw->minimum, fabs(raw_yaw_diff) * yaw->scale, yaw->maximum);
+	threshold_time = self->fb.firing ? ((int)self->s.v.weapon & (IT_LIGHTNING | IT_EITHER_NAILGUN) ? self->s.v.nextthink : self->attack_finished) - g_globalvars.frametime : self->fb.last_rndaim_time + 0.3;
 
-	pitch_rnd = dist_random (-pitch_diff, pitch_diff, pitch->multiplier * self->fb.skill.current_volatility);
-	yaw_rnd = dist_random (-yaw_diff, yaw_diff, yaw->multiplier * self->fb.skill.current_volatility);
+	if (g_globalvars.time > threshold_time) {
+		float pitch_diff, yaw_diff;
+		qbool reverse = false;
 
-	// If making a small adjustment when tracking, keep the aim to the same side
-	if (self->fb.last_yaw_sign && g_random() < 0.9) {
-		yaw_rnd = self->fb.last_yaw_sign * abs (yaw_rnd);
+		float lg_percent = (float)self->ps.wpn[wpLG].hits / max(1, self->ps.wpn[wpLG].attacks);
+
+		pitch_diff = bound (pitch->minimum, fabs (raw_pitch_diff) * pitch->scale, pitch->maximum);
+		yaw_diff = bound (yaw->minimum, fabs (raw_yaw_diff) * yaw->scale, yaw->maximum);
+
+		pitch_rnd = dist_random (-pitch_diff, pitch_diff, pitch->multiplier * self->fb.skill.current_volatility);
+		yaw_rnd = dist_random (-yaw_diff, yaw_diff, yaw->multiplier * self->fb.skill.current_volatility);
+
+		if (g_random () < 0.8) {
+			// Randomise the amount but not the side that we're aiming on
+			yaw_rnd = (self->fb.last_rndaim[YAW] > 0 ? 1 : -1) * abs (yaw_rnd);
+			pitch_rnd = (self->fb.last_rndaim[PITCH] > 0 ? 1 : -1) * abs (pitch_rnd);
+		}
+
+		self->fb.last_rndaim_time = g_globalvars.time;
+		self->fb.last_rndaim[YAW] = yaw_rnd;
+		self->fb.last_rndaim[PITCH] = pitch_rnd;
 	}
 	else {
-		self->fb.last_yaw_sign = yaw_rnd < 0 ? -1 : 1;
-	}
-	if (self->fb.last_pitch_sign && g_random() < 0.9) {
-		pitch_rnd = self->fb.last_pitch_sign * abs (pitch_rnd);
-	}
-	else {
-		self->fb.last_pitch_sign = pitch_rnd < 0 ? -1 : 1;
+		yaw_rnd = self->fb.last_rndaim[YAW];
+		pitch_rnd = self->fb.last_rndaim[PITCH];
 	}
 
-	//G_bprint (PRINT_HIGH, "Volatility %3.1f, %s%s%s%s yaw_diff %f\n", volatility, vol_flags & 1 ? "max" : "", vol_flags & 2 ? "o" : "", vol_flags & 4 ? "s" : "", vol_flags & 8 ? "d" : "", yaw_diff);
-
-	// Randomise the aim a bit based on raw skill level
 	self->fb.desired_angle[PITCH] = bound (-89.9, self->fb.desired_angle[PITCH] + pitch_rnd, 89.9);
 	self->fb.desired_angle[YAW] += yaw_rnd;
 }
@@ -288,21 +299,18 @@ static void FireAtSpawnPoint (gedict_t* self)
 // When duelling, try and spawn frag.
 static void AttackRespawns(gedict_t* self) {
 	gedict_t* enemy_ = &g_edicts[self->s.v.enemy];
+	qbool has_rl = ((int)self->s.v.items & IT_ROCKET_LAUNCHER) && self->s.v.ammo_rockets > 3;
 
 	if (isRA() || isHoonyMode() || !isDuel()) {
 		return;
 	}
 
-	if (enemy_ != world && enemy_->s.v.health < 1) {
+	if (ISDEAD(enemy_)) {
 		if (enemy_->fb.last_death + ATTACK_RESPAWN_TIME >= g_globalvars.time) {
 			if (self->fb.skill.attack_respawns) {
-				if ((int)self->s.v.items & IT_ROCKET_LAUNCHER) {
-					if (self->s.v.ammo_rockets > 3) {
-						if (!self->fb.rocketjumping) {
-							if (g_random() > 0.15) {
-								FireAtSpawnPoint (self);
-							}
-						}
+				if (has_rl && !self->fb.rocketjumping) {
+					if (g_random() > 0.15) {
+						FireAtSpawnPoint (self);
 					}
 				}
 			}
