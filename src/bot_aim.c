@@ -131,7 +131,9 @@ static void BotsAimAtPlayerLogic(gedict_t* self, vec3_t rel_pos, float* rel_dist
 		else if (self->fb.desired_weapon_impulse == 6) {
 			rel_time = *rel_dist / 600;
 		}
-		rel_time = min(rel_time, 0.5);
+		else if (cvar ("k_midair") && self->super_damage_finished > g_globalvars.time) {
+			rel_time *= 0.5;
+		}
 
 		if (self->s.v.enemy) {
 			PredictEnemyLocationInFuture(&g_edicts[self->s.v.enemy], rel_time);
@@ -255,13 +257,24 @@ static void BotsModifyAimAtPlayerLogic (gedict_t* self, vec3_t rel_pos, float re
 	self->fb.desired_angle[YAW] += yaw_rnd;
 }
 
-// Aim lower over longer distances?  (FIXME: we already allow for gravity in predicting where to fire - should this test for the enemy being on the ground?)
+// Aim lower over longer distances?
+// FIXME: we already allow for gravity in predicting where to fire - should this test for the enemy being on the ground?
 static void BotsAimAtFloor (gedict_t* self, vec3_t rel_pos, float rel_dist)
 {
-	if (self->fb.desired_weapon_impulse == 7 && rel_dist > 96) {
-		traceline(self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] + 16, self->s.v.origin[0] + rel_pos[0], self->s.v.origin[1] + rel_pos[1], self->s.v.origin[2] + rel_pos[2] - 22, true, self);
+	qbool is_midair = cvar ("k_midair");
+
+	if (self->fb.desired_weapon_impulse == 7 && rel_dist > 96 && ! is_midair) {
+		// If clear space below player...
+		traceline (self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] + 16, self->s.v.origin[0] + rel_pos[0], self->s.v.origin[1] + rel_pos[1], self->s.v.origin[2] + rel_pos[2] - 22, true, self);
 		if (g_globalvars.trace_fraction == 1) {
-			rel_pos[2] = rel_pos[2] - 38;
+			rel_pos[2] -= 38;
+		}
+	}
+	else if (is_midair) {
+		// Always aim for the feet when player is on ground
+		// FIXME: BotsAimAtPlayerLogic already sets rel_pos to origin, then SetFireButton raises it again, but we artificially lower it here... argh!
+		if ((int)self->fb.look_object->s.v.flags & FL_ONGROUND) {
+			rel_pos[2] -= 20;
 		}
 	}
 }

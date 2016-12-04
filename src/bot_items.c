@@ -840,7 +840,9 @@ static void BackpackTimedOut (void)
 
 static float goal_health_backpack (gedict_t* self)
 {
-	if (self->invincible_time)
+	if (self->invincible_time > g_globalvars.time)
+		return 0;
+	if (self->super_damage_finished > g_globalvars.time)
 		return 0;
 
 	return 20;

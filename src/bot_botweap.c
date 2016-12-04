@@ -394,12 +394,24 @@ void SetFireButton(gedict_t* self, vec3_t rel_pos, float rel_dist) {
 		return;
 	}
 		
-	if (g_globalvars.time < self->fb.min_fire_time) {
+	if (FUTURE(min_fire_time)) {
 		self->fb.firing = false;
 		return;
 	}
 
+	// In midair mode, delay firing until the rocket will hit opponent near peak of their jump
+	if (cvar("k_midair") && self->fb.look_object && self->fb.look_object->s.v.velocity[2] > JUMPSPEED) {
+		float time_to_hit = rel_dist / (self->super_damage_finished > g_globalvars.time ? 2000 : 1000);
+		float time_to_stationary = self->fb.look_object->s.v.velocity[2] / 800;
+		
+		if (time_to_stationary - time_to_hit > 0.15f) {
+			self->fb.firing = false;
+			return;
+		}
+	}
+
 	if (SameTeam (self->fb.look_object, self)) {
+		self->fb.firing = false;
 		return;
 	}
 
@@ -416,23 +428,27 @@ void SetFireButton(gedict_t* self, vec3_t rel_pos, float rel_dist) {
 	}
 
 	if (self->s.v.enemy && g_edicts[self->s.v.enemy].fb.touch_marker) {
-		// FIXME: If they can't see the centre of the hitbox, aim high/low
-		traceline(self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] + 16,
-				  self->s.v.origin[0] + rel_pos[0], self->s.v.origin[1] + rel_pos[1], self->s.v.origin[2] + rel_pos[2] + 16,
-				  false, self);
+		traceline (
+			self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] + 16,
+			self->s.v.origin[0] + rel_pos[0], self->s.v.origin[1] + rel_pos[1], self->s.v.origin[2] + rel_pos[2] + 16,
+			false, self
+		);
 
 		if (g_globalvars.trace_fraction == 1) {
-			if (self->fb.desired_weapon_impulse != 7 && self->fb.look_object != &g_edicts[self->s.v.enemy]) {
+			// FIXME: This keeps accuracy too high, stops the first shot from missing? !!!! FIXME FIXME FIXME
+			// i.e. could be using rocket launcher for 'shot-for-luck', or using other weapon to hit world
+			if (!(self->fb.desired_weapon_impulse == 7 || NUM_FOR_EDICT (self->fb.look_object) == self->s.v.enemy)) {
+				// don't needlessly fire into space
 				return;
 			}
 		}
-		else if (PROG_TO_EDICT(g_globalvars.trace_ent) != self->fb.look_object) {
-			gedict_t* traced = PROG_TO_EDICT(g_globalvars.trace_ent);
+		else if (PROG_TO_EDICT (g_globalvars.trace_ent) != self->fb.look_object) {
+			gedict_t* traced = PROG_TO_EDICT (g_globalvars.trace_ent);
 			if (traced->ct == ctPlayer) {
-				if (!SameTeam(traced, self)) {
+				if (!SameTeam (traced, self)) {
 					if (!((int)self->s.v.flags & FL_WATERJUMP)) {
-						self->s.v.enemy = NUM_FOR_EDICT( traced );
-						LookEnemy(self, traced);
+						self->s.v.enemy = NUM_FOR_EDICT (traced);
+						LookEnemy (self, traced);
 					}
 				}
 				return;
