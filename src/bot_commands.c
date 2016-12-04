@@ -544,6 +544,10 @@ static void BotFileGenerate (void)
 		}
 	}
 
+	if (MapDeathHeight () > FB_MAPDEATHHEIGHT_DEFAULT) {
+		std_fprintf (file, "SetMapDeathHeight %d\n", MapDeathHeight ());
+	}
+
 	std_fclose (file);
 	G_sprint (self, PRINT_HIGH, "Created file %s\n", fileName);
 }
@@ -1214,6 +1218,34 @@ static void FrogbotGoalInfo (void)
 	}
 }
 
+static void FrogbotSetDeathHeight (void)
+{
+	extern int MapDeathHeight (void);
+	extern void SetMapDeathHeight (int height);
+
+	if (trap_CmdArgc () == 2) {
+		if (MapDeathHeight () <= FB_MAPDEATHHEIGHT_DEFAULT) {
+			G_sprint (self, PRINT_HIGH, "Death height: not set\n");
+		}
+		else {
+			G_sprint (self, PRINT_HIGH, "Death height: %d\n", MapDeathHeight ());
+			G_sprint (self, PRINT_HIGH, "  Specify 'deathheight clear' to clear\n");
+		}
+	}
+	else {
+		char buffer[64];
+
+		trap_CmdArgv (2, buffer, sizeof (buffer));
+
+		if (streq (buffer, "clear")) {
+			SetMapDeathHeight (FB_MAPDEATHHEIGHT_DEFAULT);
+		}
+		else if (atoi (buffer)) {
+			SetMapDeathHeight (atoi (buffer));
+		}
+	}
+}
+
 static void FrogbotSummary (void)
 {
 	int marker_count = 0;
@@ -1300,7 +1332,8 @@ static frogbot_cmd_t editor_commands[] = {
 	{ "goalinfo", FrogbotGoalInfo, "Shows goal information for current marker" },
 	{ "goto", FrogbotGoto, "Teleport to a marker #" },
 	{ "move", FrogbotMoveMarker, "Moves marker to current position" },
-	{ "anglehint", FrogbotSetAngleHint, "Sets angle hint for bot path" }
+	{ "anglehint", FrogbotSetAngleHint, "Sets angle hint for bot path" },
+	{ "deathheight", FrogbotSetDeathHeight, "Sets the auto-death level for this map." }
 };
 
 #define NUM_EDITOR_COMMANDS (sizeof (editor_commands) / sizeof (editor_commands[0]))

@@ -4,6 +4,7 @@
 #include "fb_globals.h"
 
 static int marker_index = 0;
+static int mapDeathHeight = FB_MAPDEATHHEIGHT_DEFAULT;
 
 void InitialiseMarkerRoutes(void);
 
@@ -13,6 +14,16 @@ extern gedict_t* markers[];
 void AddToQue(gedict_t* ent) {
 	markers[marker_index] = ent;
 	ent->fb.index = marker_index++;
+}
+
+int MapDeathHeight (void)
+{
+	return mapDeathHeight;
+}
+
+void SetMapDeathHeight (int height)
+{
+	mapDeathHeight = max(height, FB_MAPDEATHHEIGHT_DEFAULT);
 }
 
 const char* EncodeMarkerFlags (int marker_flags)
@@ -374,6 +385,14 @@ qbool LoadBotRoutingFromFile (void)
 			hint = atoi(argument);
 
 			SetMarkerAngleHint (source_marker, path_number, hint);
+		}
+		else if (streq (argument, "SetMapDeathHeight")) {
+			if (trap_CmdArgc () != 2)
+				continue;
+
+			trap_CmdArgv (1, argument, sizeof (argument));
+			mapDeathHeight = atoi (argument);
+			Com_Printf ("Set death height to %d\n", mapDeathHeight);
 		}
 	}
 

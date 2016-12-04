@@ -8,6 +8,7 @@
 
 void GrenadeExplode (void);
 void BotPathCheck (gedict_t* self, gedict_t* touch_marker);
+int MapDeathHeight (void);
 
 // FIXME: Local globals
 static float first_trace_fraction = 0;
@@ -176,6 +177,9 @@ static int FallSpotGround(vec3_t testplace, float fallheight) {
 	if (walkmove(dropper, 0, 0)) {
 		int content;
 
+		if (dropper->s.v.origin[2] <= MapDeathHeight ())
+			return FALL_DEATH;
+
 		// If we didn't fall into water...
 		if (!JumpInWater(dropper->s.v.origin) && !droptofloor(dropper)) {
 			VectorCopy(testplace, dropper->s.v.origin);
@@ -196,10 +200,14 @@ static int FallSpotGround(vec3_t testplace, float fallheight) {
 		return FALL_FALSE;
 	}
 
+	if (dropper->s.v.origin[2] <= MapDeathHeight ())
+		return FALL_DEATH;
+
 	return FALL_BLOCKED;
 }
 
-static int FallSpotAir(vec3_t testplace, float fallheight) {
+static int FallSpotAir (gedict_t* self, vec3_t testplace, float fallheight) {
+	vec3_t final_origin;
 	int fall = 0;
 	int content;
 
@@ -207,6 +215,9 @@ static int FallSpotAir(vec3_t testplace, float fallheight) {
 	dropper->s.v.flags = FL_ONGROUND_PARTIALGROUND;
 
 	if (walkmove(dropper, 0, 0)) {
+		if (dropper->s.v.origin[2] <= MapDeathHeight ())
+			return FALL_DEATH;
+
 		if (!JumpInWater (dropper->s.v.origin) && dropper->s.v.origin[2] > testplace[2]) {
 			return FALL_BLOCKED;
 		}
@@ -219,14 +230,20 @@ static int FallSpotAir(vec3_t testplace, float fallheight) {
 		VectorCopy(testplace, dropper->s.v.origin);
 		dropper->s.v.origin[2] -= 256;
 
-		if (!(droptofloor(dropper)))
+		if (! droptofloor(dropper))
 			return FALL_DEATH;
 	}
 
-	content = trap_pointcontents(dropper->s.v.origin[0], dropper->s.v.origin[1], dropper->s.v.origin[2] - 24);
-	if (content == CONTENT_LAVA)
+	VectorCopy (dropper->s.v.origin, final_origin);
+	content = trap_pointcontents(final_origin[0], final_origin[1], final_origin[2] - 24);
+	if (content == CONTENT_LAVA) {
 		return FALL_DEATH;
-	
+	}
+
+	if (final_origin[2] <= MapDeathHeight ()) {
+		return FALL_DEATH;
+	}
+
 	if (dropper->s.v.origin[2] < fallheight) {
 		return FALL_LAND;
 	}
@@ -266,7 +283,7 @@ static qbool CanJumpOver(gedict_t* self, vec3_t jump_origin, vec3_t jump_velocit
 
 		VectorMA (last_clear_point, (32 / last_clear_hor_speed), last_clear_velocity, testplace);
 
-		fall = FallSpotAir(testplace, fallheight);
+		fall = FallSpotAir(self, testplace, fallheight);
 		//G_bprint (2, "    Testplace: %d %d %d = %s\n", PASSINTVEC3 (testplace), FallType(fall));
 		if (fall == FALL_BLOCKED) {
 			first_trace_fraction = 1;
@@ -289,7 +306,7 @@ static qbool CanJumpOver(gedict_t* self, vec3_t jump_origin, vec3_t jump_velocit
 
 				VectorMA (testplace, (32 / last_clear_hor_speed) * (1 - first_trace_fraction), last_clear_velocity, testplace);
 			}
-			fall = FallSpotAir (testplace, fallheight);
+			fall = FallSpotAir (self, testplace, fallheight);
 			//G_bprint (2, "    Blocked testplace: %f %f %f = %d\n", PASSVEC3 (testplace), fall);
 		}
 
@@ -696,13 +713,17 @@ static void AvoidHazardsOnGround (gedict_t* self, float hor_speed, vec3_t new_or
 static void AvoidHazardsInAir (gedict_t* self, float hor_speed, vec3_t new_origin, vec3_t new_velocity, vec3_t last_clear_point, vec3_t testplace)
 {
 	float fallheight = StandardFallHeight (self);
-	int fall = FallSpotAir(testplace, fallheight);
+	int fall = FallSpotAir (self, testplace, fallheight);
+	if (testplace[2] )
 	if (fall >= FALL_LAND) {
 		int new_fall = fall;
 		VectorCopy(new_origin, testplace);
-		fall = FallSpotAir(testplace, fallheight);
+		fall = FallSpotAir (self, testplace, fallheight);
 		if (self->fb.path_state & DELIBERATE_AIR) {
 			if (fall < FALL_LAND) {
+				if (FrogbotOptionEnabled (FB_OPTION_SHOW_MOVEMENT_LOGIC)) {
+					G_sprint (self, PRINT_HIGH, "AvoidHazardsInAir: DELIBERATE_AIR [%s/%s]\n", FallType(new_fall), FallType(fall));
+				}
 				return;
 			}
 			self->fb.path_state &= ~DELIBERATE_AIR;
@@ -710,19 +731,28 @@ static void AvoidHazardsInAir (gedict_t* self, float hor_speed, vec3_t new_origi
 
 		if (new_fall > fall) {
 			VectorMA(new_origin, (16 / hor_speed), new_velocity, testplace);
-			fall = FallSpotAir(testplace, fallheight);
+			fall = FallSpotAir (self, testplace, fallheight);
 			if (new_fall > fall) {
 				vec3_t jump_origin, jump_velocity;
 
 				VectorCopy(new_origin, jump_origin);
 				VectorCopy(new_velocity, jump_velocity);
 				if (CanJumpOver(self, jump_origin, jump_velocity, fallheight, fall)) {
+					if (FrogbotOptionEnabled (FB_OPTION_SHOW_MOVEMENT_LOGIC)) {
+						G_sprint (self, PRINT_HIGH, "AvoidHazardsInAir: CanJumpOver [%s/%s]\n", FallType(new_fall), FallType(fall));
+					}
 					return;
 				}
 
 				AvoidEdge(self);
 			}
 		}
+		else if (FrogbotOptionEnabled (FB_OPTION_SHOW_MOVEMENT_LOGIC)) {
+			G_sprint (self, PRINT_HIGH, "AvoidHazardsInAir: Ignored [%s/%s]\n", FallType(new_fall), FallType(fall));
+		}
+	}
+	else if (FrogbotOptionEnabled (FB_OPTION_SHOW_MOVEMENT_LOGIC)) {
+		G_sprint (self, PRINT_HIGH, "AvoidHazardsInAir: Ignored [%s]\n", FallType(fall));
 	}
 }
 
