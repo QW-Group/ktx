@@ -778,7 +778,6 @@ static void fb_spawn_quad (gedict_t* ent)
 	if (ent->fb.fl_marker) {
 		ent->fb.item_touch = fb_powerup_touch;
 		if (!streq ("aerowalk", g_globalvars.mapname)) {
-			G_bprint (PRINT_HIGH, "Starting item %s...\n", ent->s.v.classname);
 			StartItemFB (ent);
 		}
 	}
