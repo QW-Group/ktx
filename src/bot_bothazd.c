@@ -859,10 +859,6 @@ void BotsPostTeleport (gedict_t* teleport_trigger, gedict_t* player, gedict_t* t
 		//if (teamplay != 0)
 		//	say_team_report_teleport(other, t);
 
-		// other.angles holds crosshair position
-		player->fb.real_pitch = player->s.v.angles[0];
-		player->fb.real_yaw = player->s.v.angles[1];
-
 		BotPathCheck (player, teleport_trigger);
 	}
 

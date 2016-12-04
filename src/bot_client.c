@@ -100,8 +100,8 @@ void BotPlayerDeathEvent(gedict_t* self)
 void BotClientEntersEvent(gedict_t* self, gedict_t* spawn_pos)
 {
 	self->fb.oldwaterlevel = self->fb.oldwatertype = 0;
-	self->fb.desired_angle[0] = self->fb.real_pitch = self->s.v.angles[0];
-	self->fb.desired_angle[1] = self->fb.real_yaw = self->s.v.angles[1];
+	self->fb.desired_angle[0] = self->s.v.angles[0];
+	self->fb.desired_angle[1] = self->s.v.angles[1];
 	self->fb.state = 0;
 	self->fb.min_fire_time = g_globalvars.time + self->fb.skill.awareness_delay;
 	self->fb.last_rndaim_time = 0;

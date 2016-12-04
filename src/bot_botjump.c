@@ -77,16 +77,13 @@ static void lava_jump(gedict_t* self) {
 	}
 
 	best_yaw = vectoyaw(pt->s.v.origin);
-	self->fb.real_yaw = (360 - best_yaw);
 	if (self->s.v.waterlevel == 3) {
-		self->fb.real_pitch = 78.75;
 		self->fb.arrow = BACK;
 		//VelocityForArrow(self);
 		NewVelocityForArrow (self, straight_up, "LavaJump1");
 	}
 	if (self->s.v.waterlevel == 2) {
 		if (self->fb.arrow == BACK) {
-			self->fb.real_pitch = 78.75;
 			self->fb.arrow = BACK;
 			//VelocityForArrow(self);
 			NewVelocityForArrow (self, straight_up, "LavaJump2");
@@ -177,7 +174,6 @@ void BotPerformRocketJump(gedict_t* self) {
 			return;
 		}
 
-		self->fb.real_pitch = 78.75;
 		self->fb.desired_angle[0] = 78.75;
 		self->fb.rocketjumping = true;
 		self->fb.desired_weapon_impulse = 7;

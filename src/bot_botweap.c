@@ -419,7 +419,7 @@ void SetFireButton(gedict_t* self, vec3_t rel_pos, float rel_dist) {
 
 	// If we want to grab an armour to stop player getting it...
 	if (self->fb.state & HURT_SELF) {
-		if (HasWeapon(self, IT_ROCKET_LAUNCHER) && self->fb.real_pitch == 78.75) {
+		if (HasWeapon(self, IT_ROCKET_LAUNCHER) && self->fb.desired_angle[PITCH] > 75) {
 			self->fb.desired_weapon_impulse = 7;
 			self->fb.firing = true;
 			self->fb.state &= ~HURT_SELF;
@@ -656,13 +656,9 @@ void SelectWeapon(void) {
 	if (self->fb.state & HURT_SELF) {
 		qbool has_rl = self->s.v.ammo_rockets && ((int)self->s.v.items & IT_ROCKET_LAUNCHER);
 
-		if (has_rl) {
-			if (self->s.v.health >= 50) {
-				if (self->super_damage_finished <= g_globalvars.time) {
-					self->fb.desired_weapon_impulse = 7;
-					return;
-				}
-			}
+		if (has_rl && self->s.v.health >= 60 && self->super_damage_finished <= g_globalvars.time) {
+			self->fb.desired_weapon_impulse = 7;
+			return;
 		}
 
 		self->fb.state &= ~HURT_SELF;

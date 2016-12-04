@@ -611,8 +611,6 @@ typedef struct fb_entvars_s {
 	int botnumber;                              // bots[botnumber]
 	qbool rocketjumping;
 
-	float real_pitch;
-	float real_yaw;
 	float last_cmd_sent;
 	struct gedict_s* prev_look_object;          // stores whatever the bot was looking at last frame
 
