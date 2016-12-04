@@ -6,7 +6,8 @@
 #define CHANCE_ROCKET_JUMP 0.2       // FIXME: personalise in fb.skill
 
 // Returns true if the bot is travelling in the 'right' direction (with 90 degrees of target)
-static qbool right_direction(gedict_t* self) {
+static qbool right_direction(gedict_t* self)
+{
 	vec3_t test_direction,
 	       direction_to_test_marker;
 	float current_direction,
@@ -38,13 +39,15 @@ static qbool right_direction(gedict_t* self) {
 }
 
 // Returns true if space above bot
-static float BotCheckSpaceAbove(gedict_t* self) {
+static float BotCheckSpaceAbove(gedict_t* self)
+{
 	traceline(self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2], self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] + 140, true, self);
 	return (g_globalvars.trace_fraction == 1);
 }
 
 // Returns true if ground directly in front of bot
-static float checkground(gedict_t* self) {
+static float checkground(gedict_t* self)
+{
 	trap_makevectors(self->s.v.v_angle);
 	g_globalvars.v_forward[2] = 0;
 	VectorNormalize(g_globalvars.v_forward);
@@ -182,16 +185,50 @@ void BotPerformRocketJump(gedict_t* self) {
 	}
 }
 
-// TODO: FIX THIS
-void CheckCombatJump() {
-	if (self->isBot && !self->s.v.waterlevel && self->fb.allowedMakeNoise && !self->fb.debug_path) {
-		if (((int)self->s.v.flags & FL_ONGROUND) && self->s.v.weapon != IT_LIGHTNING) {
-			if (self->fb.look_object == &g_edicts[self->s.v.enemy] && g_random() < 0.2 && !self->fb.rocketjumping) {
-				if (self->fb.debug_path)
-					G_bprint (2, "CheckCombatJump() => jumping\n");
-				self->fb.jumping = true;
-			}
-		}
+static qbool PlayerFiringLG (gedict_t* player)
+{
+	return player && player->s.v.button0 && ((int)player->s.v.weapon & IT_LIGHTNING) && player->s.v.ammo_cells > 0;
+}
+
+void CheckCombatJump(gedict_t* self)
+{
+	qbool inWater = self->s.v.waterlevel && self->fb.allowedMakeNoise;
+	qbool onGround = ((int)self->s.v.flags & FL_ONGROUND);
+	qbool lgSelected = self->fb.desired_weapon_impulse == 8 && self->fb.firing;
+	qbool lookingAtEnemy = self->fb.look_object && NUM_FOR_EDICT(self->fb.look_object) == self->s.v.enemy;
+	qbool lookObjectFiringLG = PlayerFiringLG (self->fb.look_object);
+
+	// Never combat jump when debugging route execution
+	if (self->fb.debug_path) {
+		return;
 	}
+
+	// If jumping makes sense...
+	if (!onGround || inWater) {
+		return;
+	}
+
+	// Never jump in midair
+	if (cvar ("k_midair")) {
+		return;
+	}
+
+	// Rocket jumping decisions made elsewhere
+	if (self->fb.rocketjumping) {
+		return;
+	}
+
+	// If path is expecting an edge then no combat jump...
+	if (self->fb.path_state & (JUMP_LEDGE | BOTPATH_CURLJUMP_HINT)) {
+		return;
+	}
+
+	// If surprised or player firing LG, don't jump
+	if (!lookingAtEnemy || lookObjectFiringLG) {
+		return;
+	}
+
+	// Now just down to bot characteristics
+	self->fb.jumping |= (g_random () < self->fb.skill.combat_jump_chance);
 }
 

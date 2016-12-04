@@ -244,7 +244,7 @@ qbool BotsPickBestEnemy (gedict_t* self);
 void BotDamageInflictedEvent (gedict_t* attacker, gedict_t* targ);
 
 // botjump.qc
-void CheckCombatJump (void);
+void CheckCombatJump (gedict_t* self);
 //void BotInLava(void);
 void BotPerformRocketJump (gedict_t* self);
 

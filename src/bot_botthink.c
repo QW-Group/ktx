@@ -337,7 +337,7 @@ void BotsThinkTime(gedict_t* self) {
 		PeriodicAllClientLogic();
 
 		if (self->isBot) {
-			CheckCombatJump();
+			CheckCombatJump(self);
 			AMPHI2BotInLava();
 		}
 	}

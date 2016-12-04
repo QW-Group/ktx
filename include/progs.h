@@ -461,6 +461,7 @@ typedef struct fb_botskill_s {
 	fb_botaim_t aim_params[2];
 
 	float movement;
+	float combat_jump_chance;
 } fb_botskill_t;
 
 typedef struct fb_entvars_s {
