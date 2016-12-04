@@ -337,7 +337,7 @@ void AddZoneMarker (gedict_t* marker);
 
 // bot_commands.qc
 void SetLinkedMarker (gedict_t* player, gedict_t* marker, char* explanation);
-void SetJumpFlag (gedict_t* player, qbool jumping, char* explanation);
+void SetJumpFlag (gedict_t* player, qbool jumping, const char* explanation);
 
 // bot_routing.qc
 void PathScoringLogic (

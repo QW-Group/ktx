@@ -181,7 +181,8 @@ void BotPerformRocketJump(gedict_t* self) {
 		self->fb.desired_angle[0] = 78.75;
 		self->fb.rocketjumping = true;
 		self->fb.desired_weapon_impulse = 7;
-		self->fb.firing = self->fb.jumping = true;
+		self->fb.firing = true;
+		SetJumpFlag (self, true, "RocketJump");
 	}
 }
 
@@ -229,6 +230,6 @@ void CheckCombatJump(gedict_t* self)
 	}
 
 	// Now just down to bot characteristics
-	self->fb.jumping |= (g_random () < self->fb.skill.combat_jump_chance);
+	SetJumpFlag (self, (g_random () < self->fb.skill.combat_jump_chance), "CombatJump");
 }
 

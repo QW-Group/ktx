@@ -520,7 +520,7 @@ typedef struct fb_entvars_s {
 	qbool wasinwater;
 	float swim_arrow;
 	float arrow_time;                       // If set in future, bots will avoid this path.  Used to detect grenade/rocket at teleport exit.
-	float arrow_time2;
+	float arrow_time2;                      // If set in future, sustain current direction (used to avoid edges or back away from objects)
 	float linked_marker_time;
 
 	vec3_t oldvelocity;

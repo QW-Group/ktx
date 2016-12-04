@@ -360,7 +360,7 @@ void ProcessNewLinkedMarker(gedict_t* self) {
 		self->fb.wasinwater = true;
 		self->fb.state |= NOTARGET_ENEMY;
 		self->fb.look_object = self->fb.linked_marker;
-		self->fb.jumping = true;
+		SetJumpFlag (self, true, "WaterJump");
 		self->fb.waterjumping = true;
 		self->fb.arrow_time = g_globalvars.time + 0.02;
 		return;

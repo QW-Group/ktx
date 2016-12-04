@@ -331,7 +331,7 @@ void BotEvadeLogic(gedict_t* self) {
 
 // Logic that gets called for every player
 void BotsThinkTime(gedict_t* self) {
-	self->fb.jumping = false;
+	self->fb.jumping = false; // Don't call SetJumpFlag here
 
 	if (PAST(frogbot_nextthink)) {
 		PeriodicAllClientLogic();

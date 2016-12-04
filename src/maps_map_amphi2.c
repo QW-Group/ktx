@@ -334,8 +334,7 @@ void AMPHI2BotInLava(void) {
 								// FIXME: The combination of these two... means nothing?
 								VectorCopy (self->fb.dir_move_, dir_move);
 								NewVelocityForArrow (self, dir_move, "amphi2");
-								//VelocityForArrow(self);
-								self->fb.jumping = true;
+								SetJumpFlag (self, true, "Amphi2 logic");
 							}
 						}
 					}

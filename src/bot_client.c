@@ -209,13 +209,13 @@ void BotOutOfWater(gedict_t* self) {
 			VectorScale (g_globalvars.trace_plane_normal, -50, self->s.v.movedir);
 			traceline(start[0], start[1], start[2], end[0], end[1], end[2], true, self);
 			if (g_globalvars.trace_fraction == 1) {
+				// FIXME: Setting vector here has no effect, hangover from PR1
 				vec3_t temp_vector;
-
-				//self->s.v.flags = ((int)self->s.v.flags | FL_WATERJUMP) & ~FL_JUMPRELEASED;
-				self->fb.jumping = true;
 				VectorCopy (self->fb.dir_move_, temp_vector);
 				temp_vector[2] = 225;
 				SetDirectionMove (self, temp_vector, "BotOutOfWater");
+				SetJumpFlag (self, true, "BotOutOfWater");
+				//self->s.v.flags = ((int)self->s.v.flags | FL_WATERJUMP) & ~FL_JUMPRELEASED;
 				//self->s.v.teleport_time = g_globalvars.time + 2;
 			}
 		}

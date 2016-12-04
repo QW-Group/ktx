@@ -324,7 +324,7 @@ static void JumpToAttack (vec3_t rel_pos)
 	if (self->fb.look_object == &g_edicts[self->s.v.enemy]) {
 		if (self->s.v.waterlevel == 0 && self->fb.allowedMakeNoise && ((int)self->s.v.flags & FL_ONGROUND)) {
 			traceline(self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] + 32, self->s.v.origin[0] + rel_pos[0], self->s.v.origin[1] + rel_pos[1], self->s.v.origin[2] + rel_pos[2] + 32, false, self);
-			self->fb.jumping |= (g_globalvars.trace_fraction == 1);
+			SetJumpFlag (self, (g_globalvars.trace_fraction == 1), "JumpToAttack");
 		}
 	}
 }
@@ -336,7 +336,7 @@ static qbool PreWarBlockFiring (gedict_t* self)
 		gedict_t* enemy = &g_edicts[self->s.v.enemy];
 		qbool enemy_is_world = self->s.v.enemy && enemy->ct == ctNone;
 		qbool looking_at_enemy = enemy == self->fb.look_object;
-		qbool enemy_attacked = self->s.v.enemy && g_globalvars.time > enemy->attack_finished + 0.5;
+		qbool enemy_attacked = self->s.v.enemy && g_globalvars.time < enemy->attack_finished + 0.5;
 
 		// Don't fire at other bots
 		if (self->s.v.enemy == 0 || enemy->isBot || !self->fb.look_object) {

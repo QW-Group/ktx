@@ -42,7 +42,7 @@ void BotDetectTrapped(gedict_t* self) {
 		unstick_time = unstick_time + g_globalvars.frametime;
 		if (unstick_time <= NumberOfClients()) {
 			no_bots_stuck = false;
-			self->fb.jumping = true;
+			SetJumpFlag (self, true, "Trapped1");
 		}
 		else  {
 			self->fb.botchose = true;

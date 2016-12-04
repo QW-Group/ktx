@@ -395,9 +395,7 @@ static qbool LedgeJumpLogic (gedict_t* self, vec3_t rel_pos, vec3_t new_velocity
 	if (try_jump_ledge && rel_pos[2] > 18) {
 		float jumpspeed  = new_velocity[2] + JUMPSPEED;
 		if ((jumpspeed * jumpspeed * 0.000625) >= rel_pos[2]) {  // 0.000625 = 0.5 / sv_gravity
-			if (self->fb.debug_path)
-				G_bprint (2, "JumpLedgeLogic() => jumping\n");
-			self->fb.jumping = true;
+			SetJumpFlag (self, true, "LedgeJumpLogic");
 			self->fb.path_state |= WAIT_GROUND;
 			self->fb.ledge_backup_time = 0;
 			return true;
@@ -551,7 +549,7 @@ static void AvoidHazardsOnGround (gedict_t* self, float hor_speed, vec3_t new_or
 	if (fall >= FALL_LAND && (self->fb.path_state & BOTPATH_CURLJUMP_HINT)) {
 		sprintf (debug[line++], "> CurlJumpHint(%d)... jumping\n", self->fb.angle_hint);
 		DumpDebugLines (debug, line, "CurlJumpHint\n");
-		self->fb.jumping = true;
+		SetJumpFlag (self, true, "AvoidHazards(CurlJump)");
 		self->fb.path_state |= DELIBERATE_AIR_WAIT_GROUND;
 		return;
 	}
@@ -592,7 +590,7 @@ static void AvoidHazardsOnGround (gedict_t* self, float hor_speed, vec3_t new_or
 				if (CanJumpOver(self, jump_origin, jump_velocity, fallheight, fall)) {
 					//G_bprint (2, "    CanJumpOver(jumpo[%f %f %f] v[%f %f %f] %f %d %f)\n", PASSVEC3 (new_origin), PASSVEC3(jump_velocity), fallheight, fall, hor_speed);
 					DumpDebugLines (debug, line, "CanJumpOver() => Jumping\n");
-					self->fb.jumping = true;
+					SetJumpFlag (self, true, "AvoidHazards(CanJumpAcrossHzd)");
 					self->fb.path_state |= DELIBERATE_AIR_WAIT_GROUND;
 					return;
 				}
@@ -615,7 +613,7 @@ static void AvoidHazardsOnGround (gedict_t* self, float hor_speed, vec3_t new_or
 	if (fall >= FALL_LAND && (self->fb.path_state & BOTPATH_CURLJUMP_HINT)) {
 		sprintf (debug[line++], "> CurlJumpHint(%d)... jumping\n", self->fb.angle_hint);
 		DumpDebugLines (debug, line, "CurlJumpHint\n");
-		self->fb.jumping = true;
+		SetJumpFlag (self, true, "AvoidHazards(CurlJumpHint2)");
 		self->fb.path_state |= DELIBERATE_AIR_WAIT_GROUND;
 		return;
 	}
@@ -655,7 +653,7 @@ static void AvoidHazardsOnGround (gedict_t* self, float hor_speed, vec3_t new_or
 				if (CanJumpOver(self, jump_origin, jump_velocity, fallheight, fall)) {
 					DumpDebugLines (debug, line, "CanJumpOver2\n");
 					self->fb.path_state |= NO_DODGE;
-					self->fb.jumping = true;
+					SetJumpFlag (self, true, "AvoidHazards(CanJumpOver2)");
 					return;
 				}
 			}
