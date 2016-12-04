@@ -212,12 +212,20 @@ static void BotTouchMarkerLogic() {
 		UpdateGoal(self);
 	}
 
-	if (PAST(linked_marker_time)) {
-		self->fb.old_linked_marker = NULL;
+	if (self->fb.path_state & BOTPATH_RJ_IN_PROGRESS) {
+		if (self->s.v.velocity[2] <= 0) {
+			self->fb.path_state &= ~BOTPATH_RJ_IN_PROGRESS;
+		}
 	}
 
-	if (self->fb.old_linked_marker != self->fb.touch_marker) {
-		ProcessNewLinkedMarker(self);
+	if (! (self->fb.path_state & BOTPATH_RJ_IN_PROGRESS)) {
+		if (PAST (linked_marker_time)) {
+			self->fb.old_linked_marker = NULL;
+		}
+
+		if (self->fb.old_linked_marker != self->fb.touch_marker) {
+			ProcessNewLinkedMarker (self);
+		}
 	}
 
 	if (FUTURE(arrow_time)) {
@@ -238,7 +246,7 @@ static void BotTouchMarkerLogic() {
 		BotMoveTowardsLinkedMarker(self, dir_move);
 		BotOnGroundMovement(self, dir_move);
 
-		SetDirectionMove (self, dir_move, "OnGround");
+		SetDirectionMove (self, dir_move, ((int)self->s.v.flags & FL_ONGROUND) ? "OnGround" : "InAir");
 	}
 
 	SelectWeapon();
@@ -257,7 +265,6 @@ static void HumanTouchMarkerLogic(void) {
 
 void BotPathCheck (gedict_t* self, gedict_t* touch_marker)
 {
-	// FIXME: This should be when they touch the marker, not when linking to it
 	if (self->fb.debug_path && self->fb.fixed_goal == touch_marker) {
 		G_bprint (2, "at goal, path complete.  %4.3f seconds\n", g_globalvars.time - self->fb.debug_path_start);
 		self->fb.fixed_goal = NULL;

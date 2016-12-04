@@ -138,7 +138,7 @@ static qbool LookingAtPlayer (gedict_t* self)
 	return self->fb.look_object && self->fb.look_object->ct == ctPlayer;
 }
 
-static qbool WaitingToHitGround (gedict_t* self)
+qbool WaitingToHitGround (gedict_t* self)
 {
 	return (self->fb.path_state & WAIT_GROUND) && !((int)self->s.v.flags & FL_ONGROUND);
 }

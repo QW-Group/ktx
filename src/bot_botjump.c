@@ -3,6 +3,7 @@
 #include "g_local.h"
 #include "fb_globals.h"
 
+void DemoMark ();
 #define CHANCE_ROCKET_JUMP 0.2       // FIXME: personalise in fb.skill
 
 // Returns true if the bot is travelling in the 'right' direction (with 90 degrees of target)
@@ -194,6 +195,9 @@ void BotPerformRocketJump(gedict_t* self) {
 			self->fb.rocketJumping = true;
 			self->fb.rocketJumpFrameDelay = self->fb.rocketJumpPathFrameDelay;
 			self->fb.path_state |= DELIBERATE_AIR_WAIT_GROUND;
+			if (FrogbotOptionEnabled (FB_OPTION_DEMOMARK_ROCKETJUMPS)) {
+				DemoMark ();
+			}
 		}
 		else if (self->fb.debug_path && ok_to_rj) {
 			G_bprint (PRINT_HIGH, "path_is_rj: %s, distance %s, dir %s, fire %s\n", path_is_rj ? "yes" : "no", ok_distance ? "yes" : "no", ok_direction ? "yes" : "no", ok_to_fire ? "yes" : "no");
@@ -220,6 +224,7 @@ void BotPerformRocketJump(gedict_t* self) {
 			// Finish rocket jumping
 			self->fb.rocketJumping = false;
 			self->fb.path_state &= ROCKET_JUMP;
+			self->fb.path_state |= BOTPATH_RJ_IN_PROGRESS;
 		}
 		else {
 			// Make sure we don't start firing
