@@ -204,6 +204,11 @@ void CheckCombatJump(gedict_t* self)
 		return;
 	}
 
+	// Or during prewar (noisy)
+	if (match_in_progress < 2) {
+		return;
+	}
+
 	// If jumping makes sense...
 	if (!onGround || inWater) {
 		return;
