@@ -3,9 +3,14 @@
 #include "g_local.h"
 #include "fb_globals.h"
 
-float SubZoneArrivalTime (float zone_time, gedict_t* middle_marker, gedict_t* from_marker)
+float SubZoneArrivalTime (float zone_time, gedict_t* middle_marker, gedict_t* from_marker, qbool rl_routes)
 {
-	return zone_time + middle_marker->fb.subzones[from_marker->fb.S_].time;
+	if (rl_routes) {
+		return zone_time + middle_marker->fb.subzones[from_marker->fb.S_].rj_time;
+	}
+	else {
+		return zone_time + middle_marker->fb.subzones[from_marker->fb.S_].time;
+	}
 }
 
 gedict_t* SubZoneNextPathMarker (gedict_t* from_marker, gedict_t* to_marker)
@@ -96,7 +101,7 @@ gedict_t* SightMarker(gedict_t* from_marker, gedict_t* to_marker, float max_dist
 				traceline(PASSVEC3(to_marker_pos), PASSVEC3(marker_pos), true, world);
 				if (g_globalvars.trace_fraction == 1) {
 					// 
-					traveltime = SubZoneArrivalTime (zone_time, middle_marker, marker_);
+					traveltime = SubZoneArrivalTime (zone_time, middle_marker, marker_, false);
 					if (look_traveltime > traveltime) {
 						// Teleports don't count
 						if (strneq(marker_->s.v.classname, "trigger_teleport")) {

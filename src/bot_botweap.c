@@ -266,7 +266,7 @@ static void RocketLauncherShot (gedict_t* self)
 					from_marker = g_edicts[self->s.v.enemy].fb.touch_marker;
 					path_normal = true;
 					ZoneMarker (from_marker, self->fb.look_object, path_normal, g_edicts[self->s.v.enemy].fb.canRocketJump);
-					traveltime = SubZoneArrivalTime (zone_time, middle_marker, self->fb.look_object);
+					traveltime = SubZoneArrivalTime (zone_time, middle_marker, self->fb.look_object, g_edicts[self->s.v.enemy].fb.canRocketJump);
 					predict_dist = (traveltime * sv_maxspeed) + VectorDistance(testplace, self->fb.rocket_endpos);
 				}
 			}

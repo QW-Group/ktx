@@ -438,7 +438,7 @@ static void Calc_G_time_11(void) {
 					next_marker = ZonePathMarker(from_marker, runaway_dest, path_normal, false);
 					from_marker = m;
 					ZoneMarker (m, next_marker, path_normal, false);
-					traveltime = SubZoneArrivalTime (zone_time, middle_marker, next_marker);
+					traveltime = SubZoneArrivalTime (zone_time, middle_marker, next_marker, false);
 					if (traveltime >= min_traveltime) {
 						if (strneq(next_marker->s.v.classname, "trigger_teleport")) {
 							Calc_G_time_11_apply(m, next_marker);
@@ -479,7 +479,7 @@ static void Calc_G_time_12(void) {
 		for (runaway_dest = m->fb.Z_head; runaway_dest && runaway_dest != world; runaway_dest = runaway_dest->fb.Z_next) {
 			if (runaway_dest != m) {
 				from_marker = m;
-				traveltime = SubZoneArrivalTime (zone_time, middle_marker, runaway_dest);
+				traveltime = SubZoneArrivalTime (zone_time, middle_marker, runaway_dest, false);
 				if (traveltime < 1000000) {
 					runaway_score = runaway_time = traveltime;
 					next_marker = m;
@@ -491,7 +491,7 @@ static void Calc_G_time_12(void) {
 						traceline(m_pos[0], m_pos[1], m_pos[2], next_marker->s.v.absmin[0] + next_marker->s.v.view_ofs[0], next_marker->s.v.absmin[1] + next_marker->s.v.view_ofs[1], next_marker->s.v.absmin[2] + next_marker->s.v.view_ofs[2] + 32, true, world);
 						if (g_globalvars.trace_fraction != 1) {
 							from_marker = m;
-							traveltime = SubZoneArrivalTime (zone_time, middle_marker, next_marker);
+							traveltime = SubZoneArrivalTime (zone_time, middle_marker, next_marker, false);
 							if (traveltime >= min_traveltime) {
 								if (strneq(next_marker->s.v.classname, "trigger_teleport")) {
 									Calc_G_time_11_apply(m, next_marker);

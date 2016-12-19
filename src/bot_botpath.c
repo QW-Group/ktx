@@ -64,11 +64,11 @@ static void EvalCloseRunAway(float runaway_time, gedict_t* enemy_touch_marker, f
 
 	from_marker = enemy_touch_marker;
 	ZoneMarker (from_marker, to_marker, path_normal, false);
-	traveltime = SubZoneArrivalTime (zone_time, middle_marker, to_marker);
+	traveltime = SubZoneArrivalTime (zone_time, middle_marker, to_marker, false);
 	traveltime2 = traveltime;
 	from_marker = touch_marker;
 	ZoneMarker (from_marker, to_marker, path_normal, false);
-	traveltime = SubZoneArrivalTime (zone_time, middle_marker, to_marker);
+	traveltime = SubZoneArrivalTime (zone_time, middle_marker, to_marker, false);
 	if (look_traveltime) {
 		test_away_score = g_random() * runaway_time * ((traveltime2 * traveltime2) - (look_traveltime_squared + (traveltime * traveltime))) / (look_traveltime * traveltime);
 	}
@@ -174,7 +174,7 @@ static qbool PredictionShotLogic (gedict_t* self, gedict_t* goalentity_marker)
 			if (look_marker) {
 				path_normal = true;
 				ZoneMarker (from_marker, look_marker, path_normal, self->fb.canRocketJump);
-				traveltime = SubZoneArrivalTime (zone_time, middle_marker, look_marker);
+				traveltime = SubZoneArrivalTime (zone_time, middle_marker, look_marker, self->fb.canRocketJump);
 				look_traveltime = traveltime;
 			}
 			else {
@@ -186,7 +186,7 @@ static qbool PredictionShotLogic (gedict_t* self, gedict_t* goalentity_marker)
 				from_marker = self->fb.linked_marker;
 				path_normal = true;
 				ZoneMarker (from_marker, to_marker, path_normal, self->fb.canRocketJump);
-				traveltime = SubZoneArrivalTime (zone_time, middle_marker, to_marker);
+				traveltime = SubZoneArrivalTime (zone_time, middle_marker, to_marker, self->fb.canRocketJump);
 				if (look_traveltime < traveltime) {
 					self->fb.look_object = look_marker;
 					self->fb.predict_shoot = true;

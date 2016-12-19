@@ -446,7 +446,7 @@ static void FrogbotsDebug (void)
 					G_sprint (self, 2, "From zone %d, subzone %d to zone %d subzone %d\n", from->fb.Z_, from->fb.S_, to->fb.Z_, to->fb.S_);
 					from_marker = from;
 					ZoneMarker (from_marker, to, path_normal, allow_rj);
-					traveltime = SubZoneArrivalTime (zone_time, middle_marker, to);
+					traveltime = SubZoneArrivalTime (zone_time, middle_marker, to, allow_rj);
 					G_sprint (self, 2, "Travel time %f, zone_time %f\n", traveltime, zone_time);
 					G_sprint (self, 2, "Middle marker %d \20%s\21 (zone %d subzone %d), time %f\n", middle_marker->fb.index + 1, LocationName (PASSVEC3(middle_marker->s.v.origin)), middle_marker->fb.Z_, middle_marker->fb.S_, middle_marker->fb.subzones[to->fb.S_].time);
 

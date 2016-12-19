@@ -97,7 +97,7 @@ static float EvalPath(fb_path_eval_t* eval, qbool allowRocketJumps, qbool trace_
 		from_marker = eval->test_marker;
 		path_normal = eval->path_normal;
 		ZoneMarker (from_marker, eval->goalentity_marker, path_normal, allowRocketJumps);
-		traveltime = SubZoneArrivalTime (zone_time, middle_marker, eval->goalentity_marker);
+		traveltime = SubZoneArrivalTime (zone_time, middle_marker, eval->goalentity_marker, allowRocketJumps);
 		total_goal_time = eval->path_time + traveltime;
 		G_bprint_debug (2, "> total_goal_time = %f + %f = %f\n", eval->path_time, traveltime, total_goal_time);
 
@@ -185,7 +185,7 @@ void PathScoringLogic(
 	if (goalentity_marker) {
 		from_marker = touch_marker_;
 		ZoneMarker (from_marker, goalentity_marker, path_normal, rocket_jump_routes_allowed);
-		traveltime = SubZoneArrivalTime (zone_time, middle_marker, goalentity_marker);
+		traveltime = SubZoneArrivalTime (zone_time, middle_marker, goalentity_marker, rocket_jump_routes_allowed);
 		current_goal_time = traveltime;
 		current_goal_time_125 = traveltime + 1.25;
 

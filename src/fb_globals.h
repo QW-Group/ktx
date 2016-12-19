@@ -227,7 +227,7 @@ gedict_t* SightMarker (gedict_t* from_marker, gedict_t* to_marker, float max_dis
 gedict_t* HigherSightFromFunction (gedict_t* from_marker, gedict_t* to_marker);
 gedict_t* SightFromMarkerFunction (gedict_t* from_marker, gedict_t* to_marker);
 gedict_t* SubZoneNextPathMarker (gedict_t* from_marker, gedict_t* to_marker);
-float SubZoneArrivalTime (float zone_time, gedict_t* middle_marker, gedict_t* to_marker);
+float SubZoneArrivalTime (float zone_time, gedict_t* middle_marker, gedict_t* to_marker, qbool rl_routes);
 float SightFromTime (gedict_t* from_marker, gedict_t* to_marker);
 void ZoneMarker (gedict_t* from_marker, gedict_t* to_marker, qbool path_normal, qbool rj_routes);
 gedict_t* ZonePathMarker (gedict_t* from_marker, gedict_t* to_marker, qbool path_normal, qbool rl_jump_routes);

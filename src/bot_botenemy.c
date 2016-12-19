@@ -83,7 +83,7 @@ static void BestEnemy_apply(gedict_t* test_enemy, float* best_score, gedict_t** 
 	look_marker = SightFromMarkerFunction(from_marker, to_marker);
 	if (look_marker != NULL) {
 		ZoneMarker (from_marker, look_marker, path_normal, test_enemy->fb.canRocketJump);
-		traveltime = SubZoneArrivalTime(zone_time, middle_marker, look_marker);
+		traveltime = SubZoneArrivalTime(zone_time, middle_marker, look_marker, test_enemy->fb.canRocketJump);
 		enemy_score = traveltime + g_random();
 	}
 	else {
