@@ -138,6 +138,34 @@ static team_t* AddTeamToList (int* teamsFound, char* team, int topColor, int bot
 	return NULL;
 }
 
+void FrogbotListRocketJumpPaths (void)
+{
+	int path_count = 0;
+	int i, j;
+
+	for (i = 0; i < NUMBER_MARKERS; ++i) {
+		gedict_t* m = markers[i];
+		if (!m || m == world || m == dropper)
+			continue;
+
+		for (j = 0; j < NUMBER_PATHS; ++j) {
+			fb_path_t* p = &m->fb.paths[j];
+			gedict_t* next = p->next_marker;
+
+			if (!next || !(p->flags & ROCKET_JUMP))
+				continue;
+
+			if (path_count == 0) {
+				G_sprint (self, PRINT_HIGH, "Rocket jump paths:\n");
+			}
+			G_sprint (self, PRINT_HIGH, "  %3d > %3d \20%s\21 > \20%s\21\n", m->fb.index + 1, next->fb.index + 1, LocationName (PASSVEC3 (m->s.v.origin)), LocationName (PASSVEC3 (next->s.v.origin)));
+			++path_count;
+		}
+	}
+
+	G_sprint (self, PRINT_HIGH, "%3d rocket jump paths found\n", path_count);
+}
+
 const char* defaultTeamNames[] = { "red", "blue", "yellow", "green" };
 
 static void BuildTeamList ()
@@ -551,6 +579,9 @@ static void FrogbotsDebug (void)
 		}
 		else if (streq (sub_command, "info")) {
 
+		}
+		else if (streq (sub_command, "rjlist")) {
+			FrogbotListRocketJumpPaths ();
 		}
 	}
 }
@@ -1514,6 +1545,7 @@ static frogbot_cmd_t editor_commands[] = {
 	{ "anglehint", FrogbotSetAngleHint, "Sets angle hint for bot path" },
 	{ "deathheight", FrogbotSetDeathHeight, "Sets the auto-death level for this map" },
 	{ "rjfields", FrogbotSetRocketJumpFields, "Sets rocket jump fields" },
+	{ "rjlist", FrogbotListRocketJumpPaths, "Lists rocket jump paths"}
 };
 
 #define NUM_EDITOR_COMMANDS (sizeof (editor_commands) / sizeof (editor_commands[0]))
