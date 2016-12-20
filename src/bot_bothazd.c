@@ -709,11 +709,19 @@ static void AvoidHazardsOnGround (gedict_t* self, float hor_speed, vec3_t new_or
 	}
 }
 
-static void AvoidHazardsInAir (gedict_t* self, float hor_speed, vec3_t new_origin, vec3_t new_velocity, vec3_t last_clear_point, vec3_t testplace)
+static void AvoidHazardsInAir (gedict_t* self, float hor_speed, vec3_t new_origin, vec3_t new_velocity, vec3_t last_clear_point)
 {
 	float fallheight = StandardFallHeight (self);
-	int fall = FallSpotAir (self, testplace, fallheight);
-	if (testplace[2] )
+	vec3_t testplace;
+	int fall;
+
+	// Don't change trajectory on rocket jump while ascending
+	if (self->fb.path_state & BOTPATH_RJ_IN_PROGRESS) {
+		return;
+	}
+
+	VectorMA(new_origin, 32 / hor_speed, new_velocity, testplace);  // FIXME: Why 32?  (10 fps?)
+	fall = FallSpotAir (self, testplace, fallheight);
 	if (fall >= FALL_LAND) {
 		int new_fall = fall;
 		VectorCopy(new_origin, testplace);
@@ -743,6 +751,9 @@ static void AvoidHazardsInAir (gedict_t* self, float hor_speed, vec3_t new_origi
 					return;
 				}
 
+				if (FrogbotOptionEnabled (FB_OPTION_SHOW_MOVEMENT_LOGIC)) {
+					G_sprint (self, PRINT_HIGH, "AvoidHazardsInAir: AvoidingEdge [%s/%s]\n", FallType(new_fall), FallType(fall));
+				}
 				AvoidEdge(self);
 			}
 		}
@@ -798,10 +809,7 @@ void AvoidHazards(gedict_t* self)
 		AvoidHazardsOnGround (self, hor_speed, new_origin, new_velocity, dir_forward);
 	}
 	else {
-		vec3_t last_clear_point = { 0 };
-
-		VectorMA(new_origin, 32 / hor_speed, new_velocity, testplace);  // FIXME: Why 32?
-		AvoidHazardsInAir (self, hor_speed, new_origin, new_velocity, last_clear_point, testplace);
+		AvoidHazardsInAir (self, hor_speed, new_origin, new_velocity, testplace);
 	}
 }
 
