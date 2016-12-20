@@ -274,7 +274,7 @@ void SetMarkerPathFlags (int marker_number, int path_index, int flags);
 void SetMarkerPath (int source_marker, int path_index, int next_marker);
 void SetMarkerViewOffset (int marker, float zOffset);
 
-#define FROGBOT_PATH_FLAG_OPTIONS "w6rjv"
+#define FROGBOT_PATH_FLAG_OPTIONS "w6rjva"
 #define FROGBOT_MARKER_FLAG_OPTIONS "u6fbte"
 
 // added for ktx

@@ -96,6 +96,8 @@ const char* EncodeMarkerPathFlags (int path_flags)
 		*s++ = 'j';
 	if (path_flags & VERTICAL_PLATFORM)
 		*s++ = 'v';
+	if (path_flags & BOTPATH_CURLJUMP_HINT)
+		*s++ = 'a';
 
 	if (s == buffer)
 		return "(none)";
@@ -121,6 +123,8 @@ int DecodeMarkerPathFlagString (const char* s)
 			path_flags |= JUMP_LEDGE; break;
 		case 'v':
 			path_flags |= VERTICAL_PLATFORM; break;
+		case 'a':
+			path_flags |= BOTPATH_CURLJUMP_HINT; break;
 		}
 	}
 

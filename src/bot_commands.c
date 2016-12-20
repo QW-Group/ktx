@@ -138,10 +138,26 @@ static team_t* AddTeamToList (int* teamsFound, char* team, int topColor, int bot
 	return NULL;
 }
 
-void FrogbotListRocketJumpPaths (void)
+void FrogbotListPaths (void)
 {
 	int path_count = 0;
+	int path_filter;
+	int arg_number = FrogbotOptionEnabled (FB_OPTION_EDITOR_MODE) ? 2 : 3;
+	char argument[64];
 	int i, j;
+
+	if (trap_CmdArgc () <= arg_number) {
+		G_sprint (self, PRINT_HIGH, "Provide path flags: " FROGBOT_PATH_FLAG_OPTIONS "\n");
+		return;
+	}
+
+	trap_CmdArgv (arg_number, argument, sizeof (argument));
+	path_filter = DecodeMarkerPathFlagString (argument);
+
+	if (!path_filter) {
+		G_sprint (self, PRINT_HIGH, "Path flags invalid, options are %s\n", FROGBOT_PATH_FLAG_OPTIONS);
+		return;
+	}
 
 	for (i = 0; i < NUMBER_MARKERS; ++i) {
 		gedict_t* m = markers[i];
@@ -152,18 +168,18 @@ void FrogbotListRocketJumpPaths (void)
 			fb_path_t* p = &m->fb.paths[j];
 			gedict_t* next = p->next_marker;
 
-			if (!next || !(p->flags & ROCKET_JUMP))
+			if (!next || !(p->flags & path_filter))
 				continue;
 
 			if (path_count == 0) {
-				G_sprint (self, PRINT_HIGH, "Rocket jump paths:\n");
+				G_sprint (self, PRINT_HIGH, "Paths found:\n");
 			}
 			G_sprint (self, PRINT_HIGH, "  %3d > %3d \20%s\21 > \20%s\21\n", m->fb.index + 1, next->fb.index + 1, LocationName (PASSVEC3 (m->s.v.origin)), LocationName (PASSVEC3 (next->s.v.origin)));
 			++path_count;
 		}
 	}
 
-	G_sprint (self, PRINT_HIGH, "%3d rocket jump paths found\n", path_count);
+	G_sprint (self, PRINT_HIGH, "%3d paths found matching %s\n", path_count, argument);
 }
 
 const char* defaultTeamNames[] = { "red", "blue", "yellow", "green" };
@@ -580,8 +596,8 @@ static void FrogbotsDebug (void)
 		else if (streq (sub_command, "info")) {
 
 		}
-		else if (streq (sub_command, "rjlist")) {
-			FrogbotListRocketJumpPaths ();
+		else if (streq (sub_command, "pathlist")) {
+			FrogbotListPaths ();
 		}
 	}
 }
@@ -1556,7 +1572,7 @@ static frogbot_cmd_t editor_commands[] = {
 	{ "anglehint", FrogbotSetAngleHint, "Sets angle hint for bot path" },
 	{ "deathheight", FrogbotSetDeathHeight, "Sets the auto-death level for this map" },
 	{ "rjfields", FrogbotSetRocketJumpFields, "Sets rocket jump fields" },
-	{ "rjlist", FrogbotListRocketJumpPaths, "Lists rocket jump paths" }
+	{ "pathlist", FrogbotListPaths, "Lists paths with flags set" }
 };
 
 #define NUM_EDITOR_COMMANDS (sizeof (editor_commands) / sizeof (editor_commands[0]))
