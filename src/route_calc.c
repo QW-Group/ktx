@@ -29,11 +29,21 @@ static void TravelTimeForPath (gedict_t* m, int i)
 
 	if (m->fb.paths[i].flags & ROCKET_JUMP) {
 		vec3_t m_P_pos;
+		vec3_t distance;
+		vec3_t hor_distance;
+		float player_speed;
+		float total_distance;
+
 		VectorAdd (m_P->s.v.absmin, m_P->s.v.view_ofs, m_P_pos);
+		VectorSubtract (m_P_pos, m_pos, distance);
+		VectorCopy (distance, hor_distance);
+		total_distance = VectorNormalize (distance);
+		VectorNormalize (hor_distance);
+		player_speed = sv_maxspeed * (1 + max(0, DotProduct (distance, hor_distance)));
 
 		// FIXME: RJ time is guideline, but we can do better than this?
 		m->fb.paths[i].time = 100000;
-		m->fb.paths[i].rj_time = (VectorDistance (m_P_pos, m_pos) / sv_maxspeed);
+		m->fb.paths[i].rj_time = (total_distance / player_speed);
 		return;
 	}
 

@@ -6,14 +6,16 @@
 #define MIN_DEAD_TIME 0.2f
 #define MAX_DEAD_TIME 1.0f
 
+//#define DEBUG_MOVEMENT
+
 void SetLinkedMarker (gedict_t* player, gedict_t* marker, char* explanation)
 {
 	gedict_t* touch = player->fb.touch_marker;
 
 	if (marker != player->fb.linked_marker && FrogbotOptionEnabled (FB_OPTION_SHOW_MOVEMENT_LOGIC))
-		G_sprint (player, 2, "linked to %3d/%s, touching %3d/%s g %s (%s)\n", marker ? marker->fb.index + 1 : -1, marker ? marker->s.v.classname : "(null)", touch ? touch->fb.index : -1, touch ? touch->s.v.classname : "(null)", g_edicts[player->s.v.goalentity].s.v.classname, explanation ? explanation : "");
+		G_sprint (player, 2, "linked to %3d/%s, touching %3d/%s g %s (%s)\n", marker ? marker->fb.index + 1 : -1, marker ? marker->s.v.classname : "(null)", touch ? touch->fb.index + 1 : -1, touch ? touch->s.v.classname : "(null)", g_edicts[player->s.v.goalentity].s.v.classname, explanation ? explanation : "");
 	if (player->fb.debug_path)
-		G_bprint (2, "%3.2f: linked to %3d/%s, touching %3d/%s g %s (%s)\n", g_globalvars.time, marker ? marker->fb.index + 1 : -1, marker ? marker->s.v.classname : "(null)", touch ? touch->fb.index : -1, touch ? touch->s.v.classname : "(null)", g_edicts[player->s.v.goalentity].s.v.classname, explanation ? explanation : "");
+		G_bprint (2, "%3.2f: linked to %3d/%s, touching %3d/%s g %s (%s)\n", g_globalvars.time, marker ? marker->fb.index + 1 : -1, marker ? marker->s.v.classname : "(null)", touch ? touch->fb.index + 1 : -1, touch ? touch->s.v.classname : "(null)", g_edicts[player->s.v.goalentity].s.v.classname, explanation ? explanation : "");
 
 	player->fb.linked_marker = marker;
 }
@@ -35,12 +37,12 @@ void SetDirectionMove (gedict_t* self, vec3_t dir_move, const char* explanation)
 {
 	normalize (dir_move, self->fb.dir_move_);
 
-	if (self->fb.debug_path) {
+/*	if (self->fb.debug_path) {
 		G_bprint (PRINT_HIGH, "%3.2f: SetDirection(%4d %4d %4d): %s\n", g_globalvars.time, PASSSCALEDINTVEC3 (self->fb.dir_move_, 320), explanation);
 	}
 	if (FrogbotOptionEnabled (FB_OPTION_SHOW_MOVEMENT_LOGIC)) {
 		G_sprint (self, PRINT_HIGH, "%3.2f: SetDirection(%4d %4d %4d): %s\n", g_globalvars.time, PASSSCALEDINTVEC3 (self->fb.dir_move_, 320), explanation);
-	}
+	}*/
 }
 
 void NewVelocityForArrow(gedict_t* self, vec3_t dir_move, const char* explanation)
@@ -56,23 +58,47 @@ static qbool BotRequestRespawn(gedict_t* self)
 	return self->s.v.deadflag == DEAD_RESPAWNABLE && time_dead > MIN_DEAD_TIME && (g_random () < (time_dead / MAX_DEAD_TIME));
 }
 
-static void PM_Accelerate (vec3_t vel_after_friction, qbool onGround, vec3_t wishdir, vec3_t vel_result)
+static void PM_Accelerate (vec3_t vel_after_friction, qbool onGround, vec3_t orig_wishdir, vec3_t vel_result, qbool trace)
 {
 	float addspeed, accelspeed, currentspeed;
 	float wishspeed = 320; // FIXME: assuming attemping sv_maxspeed
 	float accel = 10; // FIXME: assumption
+	vec3_t velocity;
+	vec3_t wishdir;
 
-	VectorCopy (vel_after_friction, vel_result);
+	VectorCopy (vel_after_friction, velocity);
+	if (onGround) {
+		velocity[2] = 0;
+	}
 
-	currentspeed = DotProduct (vel_after_friction, wishdir);
+	wishdir[0] = orig_wishdir[0];
+	wishdir[1] = orig_wishdir[1];
+	wishdir[2] = 0;
+	wishspeed = VectorNormalize (wishdir);
+	wishspeed = sv_maxspeed; // fixme: we scale back up to maximum just as passing command
+
+	currentspeed = DotProduct (velocity, wishdir);
 	addspeed = wishspeed - currentspeed;
-	if (addspeed <= 0)
+	if (addspeed <= 0) {
+		VectorCopy (vel_after_friction, vel_result);
+#ifdef DEBUG_MOVEMENT
+		if (trace) {
+			G_bprint (PRINT_HIGH, "%3.2f,KTX,%4.1f,%4.1f,%4.1f,%4.1f,%4.1f,%4.1f,%3.2f,%3.2f,%3.2f,0,%4.1f,%4.1f,%4.1f\n",
+				g_globalvars.time, PASSVEC3 (vel_after_friction), PASSVEC3 (wishdir), wishspeed, currentspeed, addspeed, PASSVEC3 (vel_result)
+			);
+		}
+#endif
 		return;
+	}
 	accelspeed = accel * g_globalvars.frametime * wishspeed;
-	if (accelspeed > addspeed)
-		accelspeed = addspeed;
-
-	VectorMA(vel_after_friction, accelspeed, wishdir, vel_result);
+	VectorMA(vel_after_friction, min(accelspeed, addspeed), wishdir, vel_result);
+#ifdef DEBUG_MOVEMENT
+	if (trace) {
+		G_bprint (PRINT_HIGH, "%3.2f,KTX,%4.1f,%4.1f,%4.1f,%4.1f,%4.1f,%4.1f,%3.2f,%3.2f,%3.2f,%3.2f,%4.1f,%4.1f,%4.1f\n",
+			g_globalvars.time, PASSVEC3 (vel_after_friction), PASSVEC3 (wishdir), wishspeed, currentspeed, addspeed, accelspeed, PASSVEC3 (vel_result)
+		);
+	}
+#endif
 }
 
 static void ApplyPhysics (gedict_t* self)
@@ -144,10 +170,11 @@ static void ApplyPhysics (gedict_t* self)
 		// Ground & air acceleration is the same
 		hor_speed_squared = (expected_velocity[0] * expected_velocity[0] + expected_velocity[1] * expected_velocity[1]);
 
-		if (onGround && hor_speed_squared < 300) {
+		if (onGround && hor_speed_squared < sv_maxspeed * sv_maxspeed * 0.8 * 0.8) {
 			return;
 		}
 
+		self->fb.dir_move_[2] = 0;
 		normalize (self->fb.dir_move_, original_direction);
 		normalize (expected_velocity, current_direction);
 		used_numerator = min_numerator + movement_skill * (max_numerator - min_numerator);
@@ -164,6 +191,7 @@ static void ApplyPhysics (gedict_t* self)
 			// Negative rotation => rotate 'right'
 			if ((self->fb.path_state & BOTPATH_CURLJUMP_HINT) && !onGround) {
 				// Once in the air, we rotate in opposite direction
+				// FIXME: THIS IS UGLY HACK
 				if (framecount % 3) {
 					rotation = 0;
 				}
@@ -182,29 +210,29 @@ static void ApplyPhysics (gedict_t* self)
 				float dp_std, dp_rot;
 
 				RotatePointAroundVector (proposed_dir, up_vector, current_direction, rotation);
-				/*if (self->fb.debug_path && ! onGround) {
-					G_bprint (PRINT_HIGH, "AirControl rotation: %3.2f, [%3d %3d %3d]x[%3d %3d %3d] => [%1.3f]/[%3d %3d %3d]\n", rotation, PASSSCALEDINTVEC3(original_direction, 320), PASSSCALEDINTVEC3(current_direction, 320), perpendicular[2], PASSSCALEDINTVEC3(self->fb.dir_move_, 320));
-				}
-				else if (FrogbotOptionEnabled (FB_OPTION_SHOW_MOVEMENT_LOGIC)) {
-					G_sprint (self, PRINT_HIGH, "AirControl rotation: %3.2f, [%3d %3d %3d]x[%3d %3d %3d] => [%1.3f]/[%3d %3d %3d]\n", rotation, PASSSCALEDINTVEC3(original_direction, 320), PASSSCALEDINTVEC3(current_direction, 320), perpendicular[2], PASSSCALEDINTVEC3(self->fb.dir_move_, 320));
-				}*/
 
 				// Calculate what mvdsv will do (roughly)
-				PM_Accelerate (expected_velocity, (int)self->s.v.flags & FL_ONGROUND, proposed_dir, vel_after_rot);
-				PM_Accelerate (expected_velocity, (int)self->s.v.flags & FL_ONGROUND, current_direction, vel_std);
+				PM_Accelerate (expected_velocity, (int)self->s.v.flags & FL_ONGROUND, proposed_dir, vel_after_rot, false);
+				PM_Accelerate (expected_velocity, (int)self->s.v.flags & FL_ONGROUND, current_direction, vel_std, false);
 
 				// Only rotate if 'better' than moving normally
 				dp_rot = DotProduct (vel_after_rot, original_direction);
 				dp_std = DotProduct (vel_std, original_direction);
+
 				if (dp_rot > dp_std || dp_rot >= 0.9) {
 					VectorCopy (proposed_dir, self->fb.dir_move_);
+					PM_Accelerate (expected_velocity, (int)self->s.v.flags & FL_ONGROUND, proposed_dir, vel_after_rot, self->fb.debug_path);
+				}
+				else {
+					PM_Accelerate (expected_velocity, (int)self->s.v.flags & FL_ONGROUND, current_direction, vel_std, self->fb.debug_path);
 				}
 			}
 			else {
-				//VectorCopy (expected_velocity, self->fb.dir_move_);
+#ifdef DEBUG_MOVEMENT
 				if (self->fb.debug_path && ! onGround) {
-					G_bprint (PRINT_HIGH, "AirControl rotation: <ignoring>\n");
+					G_bprint (PRINT_HIGH, "> AirControl rotation: <ignoring>\n");
 				}
+#endif
 			}
 		}
 	}
@@ -345,9 +373,28 @@ void BotSetCommand (gedict_t* self)
 			ApplyPhysics (self);
 		}
 
-		direction[0] = DotProduct (g_globalvars.v_forward, self->fb.dir_move_) * 800;
-		direction[1] = DotProduct (g_globalvars.v_right, self->fb.dir_move_) * 800;
-		direction[2] = DotProduct (g_globalvars.v_up, self->fb.dir_move_) * 800;
+		if (self->s.v.waterlevel <= 1) {
+			vec3_t hor;
+
+			VectorCopy (self->fb.dir_move_, hor);
+			hor[2] = 0;
+			VectorNormalize (hor);
+			VectorScale (hor, 800, hor);
+
+			direction[0] = DotProduct (g_globalvars.v_forward, hor);
+			direction[1] = DotProduct (g_globalvars.v_right, hor);
+			direction[2] = 0;
+		}
+		else {
+			direction[0] = DotProduct (g_globalvars.v_forward, self->fb.dir_move_) * 800;
+			direction[1] = DotProduct (g_globalvars.v_right, self->fb.dir_move_) * 800;
+			direction[2] = DotProduct (g_globalvars.v_up, self->fb.dir_move_) * 800;
+		}
+#ifdef DEBUG_MOVEMENT
+		if (self->fb.debug_path) {
+			G_bprint (PRINT_HIGH, "     : final direction sent [%4.1f %4.1f %4.1f]\n", PASSVEC3 (self->fb.dir_move_));
+		}
+#endif
 	}
 	self->fb.desired_angle[2] = 0;
 

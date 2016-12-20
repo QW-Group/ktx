@@ -151,17 +151,19 @@ static qbool CouldHurtNearbyTeammate(gedict_t* me) {
 }
 
 // Checks that (x=>z, y=>z) direction is sufficiently similar
-static qbool DirectionCheck (vec3_t x, vec3_t y, vec3_t z, float threshold)
+static qbool DirectionCheck (vec3_t start, vec3_t end, vec3_t vel, float threshold)
 {
-	vec3_t xz, yz;
+	vec3_t path, hor_vel;
 
-	VectorSubtract (z, x, xz);
-	VectorSubtract (z, y, yz);
+	VectorSubtract (end, start, path);
+	path[2] = 0;
+	VectorCopy (vel, hor_vel);
+	hor_vel[2] = 0;
 
-	VectorNormalize (xz);
-	VectorNormalize (yz);
+	VectorNormalize (path);
+	VectorNormalize (hor_vel);
 
-	return DotProduct (xz, yz) >= threshold;
+	return DotProduct (path, hor_vel) >= threshold;
 }
 
 // Performs rocket jump
@@ -179,18 +181,23 @@ void BotPerformRocketJump(gedict_t* self) {
 	}
 	else if (self->fb.canRocketJump && ((int)self->s.v.flags & FL_ONGROUND)) {
 		qbool path_is_rj   = self->fb.path_state & ROCKET_JUMP;
-		qbool ok_vel       = VectorLength (self->s.v.velocity) > sv_maxspeed * 0.9;
 		qbool ok_to_rj     = match_in_progress == 2 || (self->fb.debug_path && self->fb.debug_path_rj);
 		float touch_dist   = VectorDistance (self->s.v.origin, self->fb.touch_marker->s.v.origin);
-		qbool ok_distance  = touch_dist >= 10 && touch_dist <= 100; // FIXME: TODO
-		qbool ok_direction = DirectionCheck (self->fb.touch_marker->s.v.origin, self->s.v.origin, self->fb.linked_marker->s.v.origin, 0.8f); // FIXME: TODO
-		qbool ok_to_fire   = !self->s.v.button0;
-		// FIXME: TODO: Also used to check they wouldn't kill teammate, but think that should be
-		//        fuzzy logic
+		// Close enough to marker
+		qbool ok_distance  = touch_dist >= 10 && touch_dist <= 100;
+		// Travelling towards target
+		qbool ok_direction = DirectionCheck (self->fb.touch_marker->s.v.origin, self->fb.linked_marker->s.v.origin, self->s.v.velocity, 0.8f); // FIXME: TODO
+		// Going at reasonable pace
+		qbool ok_vel       = VectorLength (self->s.v.velocity) > sv_maxspeed * 0.9;
+		// Fire will trigger (technically we could jump anyway if framedelay enabled, but leave for now)
+		qbool ok_to_fire   = !self->s.v.button0 && self->attack_finished < g_globalvars.time;
+
+		// FIXME: TODO: Also used to check they wouldn't kill teammate, but think that should be fuzzy logic
 		qbool can_start_rj = ok_to_rj && path_is_rj && ok_distance && ok_direction && ok_to_fire && ok_vel;
 
 		if (can_start_rj) {
 			// Perform the jump
+			//G_bprint (PRINT_HIGH, "rocket-jumping: %s, distance %s, dir %s, fire %s\n", path_is_rj ? "yes" : "no", ok_distance ? "yes" : "no", ok_direction ? "yes" : "no", ok_to_fire ? "yes" : "no");
 			SetJumpFlag (self, true, "RocketJump");
 			self->fb.rocketJumping = true;
 			self->fb.rocketJumpFrameDelay = self->fb.rocketJumpPathFrameDelay;
@@ -200,7 +207,7 @@ void BotPerformRocketJump(gedict_t* self) {
 			}
 		}
 		else if (self->fb.debug_path && ok_to_rj) {
-			G_bprint (PRINT_HIGH, "path_is_rj: %s, distance %s, dir %s, fire %s\n", path_is_rj ? "yes" : "no", ok_distance ? "yes" : "no", ok_direction ? "yes" : "no", ok_to_fire ? "yes" : "no");
+			//G_bprint (PRINT_HIGH, "path_is_rj: %s, distance %s, dir %s, fire %s\n", path_is_rj ? "yes" : "no", ok_distance ? "yes" : "no", ok_direction ? "yes" : "no", ok_to_fire ? "yes" : "no");
 		}
 	}
 

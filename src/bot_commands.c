@@ -555,7 +555,7 @@ static void FrogbotsDebug (void)
 			first_bot->fb.debug = true;
 			first_bot->fb.debug_path = true;
 			first_bot->fb.debug_path_rj = allow_rj;
-			cvar_fset ("k_fb_debug", 1);
+			//cvar_fset ("k_fb_debug", 1);
 			VectorClear (first_bot->s.v.velocity);
 			trap_SetBotCMD (NUM_FOR_EDICT (first_bot), g_globalvars.frametime, 0, 0, 0, 0, 0, 0, 0, 0);
 			first_bot->fb.debug_path_start = g_globalvars.time;
@@ -1365,6 +1365,30 @@ static void FrogbotGoalSummary (void)
 	}
 }
 
+static void FrogbotZoneSummary (void)
+{
+	int i, j;
+
+	G_sprint (self, PRINT_HIGH, "Zone summary:\n");
+	for (i = 0; i <= NUMBER_ZONES; ++i) {
+		qbool first = true;
+		for (j = 0; j < NUMBER_MARKERS; ++j) {
+			if (markers[j] && markers[j]->fb.Z_ == i) {
+				if (first) {
+					if (i) {
+						G_sprint (self, PRINT_HIGH, "  Zone #%2d:\n", i);
+					}
+					else {
+						G_sprint (self, PRINT_HIGH, "  &cf00Zone #%2d&cfff:\n", i);
+					}
+					first = false;
+				}
+				G_sprint (self, PRINT_HIGH, "    %3d: %s\n", markers[j]->fb.index + 1, markers[j]->s.v.classname);
+			}
+		}
+	}
+}
+
 static void FrogbotGoalInfo (void)
 {
 	gedict_t* marker = self->fb.touch_marker;
@@ -1491,20 +1515,6 @@ static void FrogbotSummary (void)
 		}
 	}
 	G_sprint (self, PRINT_HIGH, "  %d markers in total\n", marker_count);
-
-	G_sprint (self, PRINT_HIGH, "Goal summary:\n");
-	for (i = 0; i < NUMBER_GOALS; ++i) {
-		if (goal_count[i]) {
-			G_sprint (self, PRINT_HIGH, "  %2d: %d markers\n", i + 1, goal_count[i]);
-		}
-	}
-
-	G_sprint (self, PRINT_HIGH, "Zone summary:\n");
-	for (i = 0; i < NUMBER_ZONES; ++i) {
-		if (zone_count[i]) {
-			G_sprint (self, PRINT_HIGH, "  %2d: %d markers\n", i + 1, zone_count[i]);
-		}
-	}
 }
 
 typedef struct frogbot_cmd_s {
@@ -1538,6 +1548,7 @@ static frogbot_cmd_t editor_commands[] = {
 	{ "info", FrogbotShowInfo, "Shows information about the current marker" },
 	{ "summary", FrogbotSummary, "Shows summary of current map" },
 	{ "goalsummary", FrogbotGoalSummary, "Show summary of goals" },
+	{ "zonesummary", FrogbotZoneSummary, "Show summary of zones" },
 	{ "mapinfo", FrogbotMapInfo, "Shows information about current map" },
 	{ "goalinfo", FrogbotGoalInfo, "Shows goal information for current marker" },
 	{ "goto", FrogbotGoto, "Teleport to a marker #" },
@@ -1545,7 +1556,7 @@ static frogbot_cmd_t editor_commands[] = {
 	{ "anglehint", FrogbotSetAngleHint, "Sets angle hint for bot path" },
 	{ "deathheight", FrogbotSetDeathHeight, "Sets the auto-death level for this map" },
 	{ "rjfields", FrogbotSetRocketJumpFields, "Sets rocket jump fields" },
-	{ "rjlist", FrogbotListRocketJumpPaths, "Lists rocket jump paths"}
+	{ "rjlist", FrogbotListRocketJumpPaths, "Lists rocket jump paths" }
 };
 
 #define NUM_EDITOR_COMMANDS (sizeof (editor_commands) / sizeof (editor_commands[0]))
