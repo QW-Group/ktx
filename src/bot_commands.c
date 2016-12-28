@@ -1670,6 +1670,29 @@ void Bot_Print_Thinking (void)
 		strlcat (data, va ("  %s: %4d %4d %4d\n", redtext ("LastDirection"), PASSINTVEC3 (bot->fb.last_cmd_direction)), sizeof (data));
 	}
 
+	if (FrogbotOptionEnabled(FB_OPTION_SHOW_GOAL_LOGIC)) {
+		int i;
+		gedict_t* touch = bot->fb.touch_marker;
+
+		if (touch && touch != world && touch != dropper) {
+			strlcat(data, "\nGoals:\n", sizeof(data));
+			for (i = 0; i < NUMBER_GOALS; ++i) {
+				gedict_t* goal = touch->fb.goals[i].next_marker;
+				if (goal && goal != world && goal != dropper) {
+					char* name = goal->s.v.classname;
+					if (streq(name, "item_artifact_super_damage"))
+						name = "quad";
+					else if (streq(name, "item_health") && ((int)goal->s.v.spawnflags & H_MEGA))
+						name = "mega";
+					strlcat(data, va("Goal %2d: %s (%3.1f) %d\n", i + 1, name, goal->fb.desire(bot), (int) max(0, goal->fb.goal_respawn_time - g_globalvars.time)), sizeof (data));
+				}
+			}
+		}
+		else {
+			strlcat(data, "\nGoals: (no touch marker)\n", sizeof(data));
+		}
+	}
+
 	if (data[0]) {
 		G_centerprint (self, data);
 	}

@@ -342,7 +342,7 @@ void item_megahealth_rot()
 
 		self->s.v.nextthink = g_globalvars.time + 1;
 		if (self->fb.item_affect) {
-			self->fb.item_affect (other, self);
+			self->fb.item_affect (self, other);
 		}
 		return;
 	}
@@ -358,7 +358,7 @@ void item_megahealth_rot()
 	}
 
 	if (self->fb.item_affect) {
-		self->fb.item_affect (other, self);
+		self->fb.item_affect (self, other);
 	}
 }
 

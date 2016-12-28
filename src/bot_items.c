@@ -104,7 +104,7 @@ static float goal_health0 (gedict_t* self)
 
 static float goal_health2 (gedict_t* self)
 {
-	return self->fb.desire_health2;
+	return self->fb.desire_mega_health;
 }
 
 float goal_NULL (gedict_t* self)
@@ -424,7 +424,7 @@ static void fb_health_rot (gedict_t* item, gedict_t* player)
 {
 	FrogbotSetHealthArmour (player);
 
-	if (player->s.v.health <= 100) {
+	if (player->s.v.health <= player->s.v.max_health) {
 		item->fb.goal_respawn_time = item->s.v.nextthink;
 		AssignVirtualGoal (item);
 	}
@@ -435,6 +435,7 @@ static void fb_spawn_health (gedict_t* ent)
 	if ((int)ent->s.v.spawnflags & H_MEGA) {
 		ent->fb.desire = goal_health2;
 		ent->fb.pickup = pickup_health2;
+		ent->fb.item_affect = fb_health_rot;
 	}
 	else {
 		ent->fb.desire = goal_health0;
@@ -443,7 +444,6 @@ static void fb_spawn_health (gedict_t* ent)
 
 	ent->fb.item_taken = fb_health_taken;
 	ent->fb.item_touch = fb_health_touch;
-	ent->fb.item_affect = fb_health_rot;
 	ent->fb.item_respawned = AssignVirtualGoal;
 	StartItemFB (ent);
 }

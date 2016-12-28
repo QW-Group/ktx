@@ -517,7 +517,7 @@ typedef struct fb_entvars_s {
 	float desire_armor2;
 	float desire_armorInv;
 	float desire_health0;
-	float desire_health2;
+	float desire_mega_health;
 	float desire_supershotgun;
 	float desire_nailgun;
 	float desire_supernailgun;
