@@ -238,6 +238,7 @@ void display_record_details( );
 void race_chasecam_change( );
 void race_chasecam_freelook_change( );
 void race_download_record_demo( );
+void race_pacemaker(void);
 // }
 
 // { CHEATS
@@ -569,6 +570,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_RSCORES		"show top race times for current map"
 #define CD_RSCOREDETAIL "show details about a record"
 #define CD_RDLDEMO      "download demo for a record"
+#define CD_RPACEMAKER   "set pacemaker"
 // }
 
 #define CD_NOSPECS      "allow/disallow spectators"
@@ -896,6 +898,7 @@ cmd_t cmds[] = {
 	{ "race_chasecam_view",         race_chasecam_change,           0,  CF_PLAYER,                              CD_RCHASECAM },
 	{ "race_chasecam_freelook",     race_chasecam_freelook_change,  0,  CF_PLAYER,                              CD_RCHASECAMFL },
 	{ "race_dl_record_demo",        race_download_record_demo,      0,  CF_BOTH | CF_PARAMS,                    CD_RDLDEMO },
+	{ "race_pacemaker",             race_pacemaker,                 0,  CF_PLAYER | CF_PARAMS,                  CD_RPACEMAKER },
 // }
 	{ "nospecs",     nospecs,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOSPECS },
 	{ "noitems",     noitems,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOITEMS },

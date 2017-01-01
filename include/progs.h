@@ -746,6 +746,8 @@ typedef struct
 
 	raceStatus_t			status;				// race status
 
+	int                 pacemaker_time;      // time of the current pacemaker route
+	char                pacemaker_nick[64];  // name of the current pacemaker
 } race_t;
 
 extern race_t			race; // whole race struct

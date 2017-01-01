@@ -1469,16 +1469,20 @@ void s2di_player_ra_stats(fileHandle_t handle, int format, player_stats_t* stats
 	s2di(handle, "\t\t\t<rocket-arena wins=\"%d\" losses=\"%d\" />\n", stats->wins, stats->loses);
 }
 
-void s2di_race_stats (fileHandle_t handle, int format)
+void s2di_race_stats(fileHandle_t handle, int format)
 {
 	if (race.currentrace.avgcount <= 0.0f)
 		return;
 
 	s2di(handle, "\t<race route=\"%d\" avgspeed=\"%f\" distance=\"%f\" time=\"%f\" "
-	                     "racer=\"%s\" weaponmode=\"%d\" startmode=\"%d\" maxspeed=\"%f\" />\n", 
+	                     "racer=\"%s\" weaponmode=\"%d\" startmode=\"%d\" maxspeed=\"%f\">\n", 
 		race.active_route, race.currentrace.avgspeed / race.currentrace.avgcount, race.currentrace.distance, race.currentrace.time, 
 		striphigh(race_get_racer()->s.v.netname), race.weapon, race.falsestart, race.currentrace.maxspeed
 	);
+	if (! strnull(race.pacemaker_nick)) {
+		s2di(handle, "\t\t<pacemaker time=\"%f\">%s</pacemaker>\n", race.pacemaker_time * 1.0f, race.pacemaker_nick);
+	}
+	s2di(handle, "\t</race>\n");
 }
 
 // Only format supported at present
