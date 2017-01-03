@@ -8,6 +8,7 @@
 
 #define RACEFLAG_TOUCH_RACEFAIL 1
 #define RACEFLAG_TOUCH_RACEEND  2
+#define RACEFLAG_ENTITY_KEEP    4
 
 void ktpro_autotrack_on_powerup_take (gedict_t *racer);
 void race_cancel( qbool cancelrecord, const char *fmt, ... );
@@ -187,8 +188,16 @@ void race_cleanmap( void )
 			|| streq( p->s.v.classname, "item_artifact_super_damage")
 			|| streq( p->s.v.classname, "item_armor1" )
 			|| streq( p->s.v.classname, "item_armor2" )
-			|| streq( p->s.v.classname, "item_armorInv")
-			|| streq( p->s.v.classname, "door") )
+			|| streq( p->s.v.classname, "item_armorInv") )
+		{
+			ent_remove ( p );
+			continue;
+		}
+
+		if ( p->race_flags & RACEFLAG_ENTITY_KEEP )
+			continue;
+
+		if ( streq( p->s.v.classname, "door") )
 		{
 			ent_remove( p );
 			continue;
