@@ -335,7 +335,7 @@ void SP_worldspawn()
 	trap_precache_model( "progs/bolt.mdl" );	// for lightning gun
 	trap_precache_model( "progs/bolt2.mdl" );	// for lightning gun
 	trap_precache_model( "progs/bolt3.mdl" );	// for boss shock
-	trap_precache_model( "progs/lavaball.mdl" );	// for testing
+	trap_precache_model( "progs/lavaball.mdl" );	// for testing (also for race, if ctf models disabled)
 
 	trap_precache_model( "progs/missile.mdl" );
 	trap_precache_model( "progs/grenade.mdl" );
@@ -899,7 +899,7 @@ void FirstFrame	( )
 
 #ifdef CTF_RELOADMAP
 	k_ctf = (k_mode == gtCTF); // finaly decide is ctf active or not
-	k_ctf_custom_models = k_ctf_custom_models && isCTF(); // precache only if CTF is really on
+	k_ctf_custom_models = k_ctf_custom_models && (isCTF() || isRACE()); // precache only if CTF is really on
 #endif
 }
 
