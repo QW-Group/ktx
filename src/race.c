@@ -3090,6 +3090,8 @@ void race_add_standard_routes( void )
 		race_set_route_weapon_mode( raceWeaponNo );
 		race_set_route_falsestart_mode( raceFalseStartNo );
 
+		race_set_teleport_flags_by_name( "teleskill", RACEFLAG_TOUCH_RACEFAIL );
+
 		race_route_add_end();
 	}
 	else if ( streq( g_globalvars.mapname, "slidefox" ) )
