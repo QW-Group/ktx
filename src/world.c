@@ -742,6 +742,10 @@ void FirstFrame	( )
 	RegisterCvarEx("k_race_custom_models", "0");
 	RegisterCvarEx("k_race_autorecord", "1");
 	RegisterCvarEx("k_race_times_per_port", "0");
+	RegisterCvarEx("k_race_pace_headstart", "0.5");
+	RegisterCvarEx("k_race_pace_jumps", "0");
+	RegisterCvarEx("k_race_pace_resolution", "2");
+	RegisterCvarEx("k_race_pace_legal", "0");
 	//RegisterCvarEx("k_race_topscores", "10");
 // }
 	RegisterCvar("k_idletime");

@@ -2944,7 +2944,8 @@ ok:
 
 // this settings used when server desire general rules reset: last player disconnects / race toggled / etc.
 const char _reset_settings[] =
-	"serverinfo matchtag \"\"\n";	// Hint for QTV what type of event it is. Like: "EQL semifinal" etc.
+	"serverinfo matchtag \"\"\n" // Hint for QTV what type of event it is. Like: "EQL semifinal" etc.
+	"serverinfo ktxmode \"\"\n"; // No special mode
 
 // common settings for all user modes
 const char common_um_init[] =

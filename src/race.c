@@ -15,6 +15,21 @@
 #define RACE_GUIDE_BASE_ENT    32
 #define RACE_JUMP_INDICATORS    4
 
+#define RACE_PACEMAKER_JUMPS_CVAR      "k_race_pace_jumps"
+#define RACE_PACEMAKER_LEGAL_RECORD    "k_race_pace_legal"
+#define RACE_PACEMAKER_HEADSTART_CVAR  "k_race_pace_headstart"
+#define RACE_PACEMAKER_RESOLUTION_CVAR "k_race_pace_resolution"
+#define RACE_PACEMAKER_HEADSTART_MIN  0.00f
+#define RACE_PACEMAKER_HEADSTART_MAX  1.00f
+#define RACE_PACEMAKER_HEADSTART_INCR 0.25f
+#define RACE_PACEMAKER_RESOLUTION_MIN  0
+#define RACE_PACEMAKER_RESOLUTION_MAX  3
+#define RACE_PACEMAKER_RESOLUTION_INCR 1
+
+#define RACE_PACEMAKER_TRAIL_COUNT     12
+
+#define RACE_INCR_PARAMS(name) (RACE_PACEMAKER_##name##_CVAR),(RACE_PACEMAKER_##name##_INCR),(RACE_PACEMAKER_##name##_MIN),(RACE_PACEMAKER_##name##_MAX)
+
 typedef struct race_capture_pos_s {
 	float race_time;
 	vec3_t origin;
@@ -69,6 +84,7 @@ static void race_init_capture(void);
 static void race_save_position(void);
 static void race_finish_capture(qbool store);
 static qbool race_pacemaker_enabled(void);
+static void race_pacemaker_race_start(void);
 
 void StatsToFile ();
 
@@ -150,13 +166,15 @@ static char race_settings[] =
 	"sv_demotxt 0\n"
 	"k_spw 1\n"
 	"k_noitems 1\n"
-	"pm_airstep 0\n";
+	"pm_airstep 0\n"
+	"serverinfo ktxmode race\n";
 
 static char norace_settings[] =
 	"sv_silentrecord 0\n"
 	"lock_practice 0\n"
 	"srv_practice_mode 0\n"
-	"allow_toggle_practice 5\n";
+	"allow_toggle_practice 5\n"
+	"serverinfo ktxmode \"\"\n";
 
 void apply_race_settings( void )
 {
@@ -981,7 +999,9 @@ static void race_end_point_touched (gedict_t* self, gedict_t* other)
 		}
 		else
 		{
-			if (!race_pacemaker_enabled()) {
+			qbool blocked_record = race_pacemaker_enabled() && !cvar(RACE_PACEMAKER_LEGAL_RECORD);
+
+			if (!blocked_record) {
 				// if player beat his own record or is not yet ranked
 				if (nameposition == -1)
 					nameposition = (NUM_BESTSCORES - 1);
@@ -1032,7 +1052,7 @@ static void race_end_point_touched (gedict_t* self, gedict_t* other)
 				dig3s( "%.3f", race.currentrace.time / 1000 ),
 				redtext( "s" ),
 				other->s.v.netname,
-				race_pacemaker_enabled() ? "would have taken" : "took the"
+				blocked_record ? "would have taken" : "took the"
 			);
 
 			switch ( timeposition + 1 )
@@ -1053,7 +1073,7 @@ static void race_end_point_touched (gedict_t* self, gedict_t* other)
 			G_bprint( 2, " %s\n", "place" );
 
 			istopscore = true;
-			race_finish_capture(timeposition == 0 || !race_pacemaker_enabled());
+			race_finish_capture(timeposition == 0 || !blocked_record);
 			race_start(false, "");
 		}
 	}
@@ -1105,13 +1125,13 @@ void race_node_touch()
 		if (self->race_RouteNodeType == nodeEnd) {
 			race_end_point_touched(self, other);
 		}
-		else {
+		else if (self->race_RouteNodeType == nodeCheckPoint) {
 			stuffcmd(other, "//ktx race cp %d %f %f %f %f\n",
 				other->race_id,
 				race.currentrace.time,
 				race.currentrace.distance,
 				race.currentrace.maxspeed,
-				race.currentrace.avgspeed / race.currentrace.avgcount
+				race.currentrace.avgcount ? race.currentrace.avgspeed / race.currentrace.avgcount : 0
 			);
 		}
 
@@ -1544,6 +1564,9 @@ void race_start( qbool cancelrecord, const char *fmt, ... )
 
 	// autotrack - force switch pov to racer
 	ktpro_autotrack_on_race_status_changed();
+
+	// create pacemaker entity and announce to players
+	race_pacemaker_race_start();
 }
 
 
@@ -3504,42 +3527,78 @@ qbool race_handle_event (gedict_t* player, gedict_t* entity, const char* eventNa
 	return false;
 }
 
+static float race_toggle_incr_cvar(char* cvar_name, float incr, float min, float max)
+{
+	float current = cvar(cvar_name);
+	current += incr;
+	if (current < min || current > max)
+		current = min;
+	cvar_fset(cvar_name, current);
+	return current;
+}
+
 void race_pacemaker(void)
 {
 	int position = 0;
 	char buffer[128];
 	race_capture_pos_t* capture;
 
+	if (!race_command_checks())
+		return;
+
 	if (race.status)
 	{
+		G_sprint(self, PRINT_HIGH, "Cannot change pacemaker settings while race is active.\n");
 		return;
 	}
 
-	if (trap_CmdArgc() == 2)
-	{
-		trap_CmdArgv(1, buffer, sizeof(buffer));
-
-		position = atoi(buffer) - 1;
-		if (streq(buffer, "off"))
-		{
-			position = -1;
+	trap_CmdArgv(1, buffer, sizeof(buffer));
+	if (streq(buffer, "headstart")) {
+		float new_headstart = race_toggle_incr_cvar(RACE_INCR_PARAMS(HEADSTART));
+		G_bprint(PRINT_HIGH, "%s changes pacemaker headstart to \20%.2fs\21\n", self->s.v.netname, new_headstart);
+		return;
+	}
+	else if (streq(buffer, "trail")) {
+		float new_resolution = race_toggle_incr_cvar(RACE_INCR_PARAMS(RESOLUTION));
+		if (new_resolution) {
+			G_bprint(PRINT_HIGH, "%s changes pacemaker trail to \20%.2fs\21\n", self->s.v.netname, new_resolution / 10.0);
 		}
+		else {
+			G_bprint(PRINT_HIGH, "%s changes pacemaker trail \20off\21\n", self->s.v.netname);
+		}
+		return;
 	}
-	else if (guide_capture_count != 0)
-	{
-		position = -1;
-	}
+	else if (streq(buffer, "jumps")) {
+		qbool enabled = !cvar(RACE_PACEMAKER_JUMPS_CVAR);
 
-	if (position == -1)
-	{
+		G_bprint(PRINT_HIGH, "%s changes pacemaker jump indicators \20%s\21\n", self->s.v.netname, enabled ? "on" : "off");
+
+		cvar_fset(RACE_PACEMAKER_JUMPS_CVAR, enabled ? 1 : 0);
+		return;
+	}
+	else if (streq(buffer, "off") || (guide_capture_count != 0 && trap_CmdArgc() == 1)) {
 		G_bprint(PRINT_HIGH, "%s disables the pacemaker\n", self->s.v.netname);
 		guide_capture_count = 0;
 		return;
 	}
-	else if (position < 0 || position >= sizeof(race.records) / sizeof(race.records[0]) || race.records[position].time >= RACE_INVALID_RECORD_TIME)
-	{
-		G_sprint(self, PRINT_HIGH, "No race record #%2d.\n", position + 1);
-		return;
+	else {
+		position = 0;
+		if (trap_CmdArgc() == 2) {
+			position = atoi(buffer);
+
+			if (position == 0 && buffer[0] != '0') {
+				G_sprint(self, PRINT_HIGH, "Unknown pacemaker command '%s'.\n", buffer);
+				return;
+			}
+
+			--position;
+		}
+
+		if (position < 0 || position >= sizeof(race.records) / sizeof(race.records[0]) || race.records[position].time >= RACE_INVALID_RECORD_TIME)
+		{
+			G_sprint(self, PRINT_HIGH, "No race record #%2d.\n", position + 1);
+			return;
+		}
 	}
 
 	// Try and load
@@ -3621,21 +3680,24 @@ qbool race_pacemaker_enabled(void)
 	return guide_capture_count;
 }
 
-static float race_pacemaker_advantage(void)
+static void race_pacemaker_announce(gedict_t* pacemaker)
 {
-	// FIXME: make cvar
-	return 0.5f;
-}
+	gedict_t* p;
 
-static float race_pacemaker_traceline(void)
-{
-	// FIXME: make cvar
-	return 0.5f;
+	for (p = world; p = find_plr(p); /**/) {
+		if (pacemaker) {
+			stuffcmd(p, "//ktx race pm %d\n", NUM_FOR_EDICT(pacemaker));
+		}
+		else {
+			stuffcmd(p, "//ktx race pm 0\n");
+		}
+	}
 }
 
 static gedict_t* race_pacemaker_entity(qbool create_if_needed)
 {
 	gedict_t* ent = ez_find(world, "race_pacemaker");
+
 	if (ent == NULL && create_if_needed) {
 		ent = spawn();
 		ent->s.v.classname = "race_pacemaker";
@@ -3734,6 +3796,41 @@ static void race_finish_capture(qbool store)
 	race_capture_jump_pos = race_capture_pos = 0;
 }
 
+static void race_remove_jump_markers(void)
+{
+	int i;
+	for (i = 0; i < RACE_JUMP_INDICATORS; ++i) {
+		if (race_jump_indicators[i]) {
+			ent_remove(race_jump_indicators[i]);
+			race_jump_indicators[i] = NULL;
+		}
+	}
+	guide_jump_pos = 0;
+}
+
+static void race_remove_pacemaker(void)
+{
+	gedict_t* ent = race_pacemaker_entity(false);
+
+	if (ent) {
+		race_pacemaker_announce(NULL);
+		ent_remove(ent);
+	}
+	guide_closest_pos = 0;
+	race_remove_jump_markers();
+}
+
+static void race_pacemaker_race_start(void)
+{
+	if (race_pacemaker_enabled()) {
+		gedict_t* ent = race_pacemaker_entity(true);
+		if (ent) {
+			race_pacemaker_announce(ent);
+		}
+	}
+	race_remove_jump_markers();
+}
+
 static void race_update_pacemaker(void)
 {
 	float race_time;
@@ -3741,6 +3838,7 @@ static void race_update_pacemaker(void)
 	qbool advanced = false;
 	int i;
 	qbool removal_required = (guide_capture_count == 0);
+	qbool jumps_enabled = cvar(RACE_PACEMAKER_JUMPS_CVAR);
 
 	if (framecount < 5) {
 		return;
@@ -3756,28 +3854,17 @@ static void race_update_pacemaker(void)
 		break;
 	case raceCD:
 		if (race.cd_cnt) {
-			guide_capture_pos = 0;
-			removal_required = true;
+			guide_jump_pos = guide_capture_pos = 0;
 		}
 		race_time = -(race.cd_cnt + (race.cd_next_think - g_globalvars.time));
 		break;
 	}
 
-	race_time += race_pacemaker_advantage();
+	race_time += bound(RACE_PACEMAKER_HEADSTART_MIN, cvar(RACE_PACEMAKER_HEADSTART_CVAR), RACE_PACEMAKER_HEADSTART_MAX);
 
 	// If we're finished or player disabled feature, remove the guide
 	if (removal_required) {
-		gedict_t* ent = race_pacemaker_entity(false);
-		if (ent) {
-			ent_remove(ent);
-		}
-		guide_jump_pos = guide_closest_pos = 0;
-		for (i = 0; i < RACE_JUMP_INDICATORS; ++i) {
-			if (race_jump_indicators[i]) {
-				ent_remove(race_jump_indicators[i]);
-			}
-			race_jump_indicators[i] = NULL;
-		}
+		race_remove_pacemaker();
 		return;
 	}
 
@@ -3792,7 +3879,7 @@ static void race_update_pacemaker(void)
 		advanced = true;
 	}
 
-	// If the guide ends the map, return
+	// If the guide ends the map, remove pacemaker, leave the guides
 	if (guide_capture_pos >= guide_capture_count - 1) {
 		gedict_t* ent = race_pacemaker_entity(false);
 		if (ent) {
@@ -3862,24 +3949,28 @@ static void race_update_pacemaker(void)
 		// Create lightning trail for next part of route
 		if (racer && guide_closest_pos) {
 			int num = 0;
-			int start = (guide_closest_pos / 2) * 2;
-			for (i = start; i < min(guide_capture_count, guide_capture_pos) - 2 && num < 8; i += 2, ++num) {
-				WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
-				WriteByte(MSG_MULTICAST, TE_LIGHTNING2);
-				WriteShort(MSG_MULTICAST, RACE_GUIDE_BASE_ENT + num);
-				WriteCoord(MSG_MULTICAST, guide_captures[i].origin[0]);
-				WriteCoord(MSG_MULTICAST, guide_captures[i].origin[1]);
-				WriteCoord(MSG_MULTICAST, guide_captures[i].origin[2]);
-				WriteCoord(MSG_MULTICAST, guide_captures[i + 2].origin[0]);
-				WriteCoord(MSG_MULTICAST, guide_captures[i + 2].origin[1]);
-				WriteCoord(MSG_MULTICAST, guide_captures[i + 2].origin[2]);
+			int resolution = (int)bound(RACE_PACEMAKER_RESOLUTION_MIN, cvar(RACE_PACEMAKER_RESOLUTION_CVAR), RACE_PACEMAKER_RESOLUTION_MAX);
+			if (resolution) {
+				int start = (guide_closest_pos / resolution) * resolution;
+				for (i = start; i < min(guide_capture_count, guide_capture_pos) - resolution && num < RACE_PACEMAKER_TRAIL_COUNT; i += resolution, ++num) {
+					WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
+					WriteByte(MSG_MULTICAST, TE_LIGHTNING2);
+					WriteShort(MSG_MULTICAST, RACE_GUIDE_BASE_ENT + num);
+					WriteCoord(MSG_MULTICAST, guide_captures[i].origin[0]);
+					WriteCoord(MSG_MULTICAST, guide_captures[i].origin[1]);
+					WriteCoord(MSG_MULTICAST, guide_captures[i].origin[2]);
+					WriteCoord(MSG_MULTICAST, guide_captures[i + resolution].origin[0]);
+					WriteCoord(MSG_MULTICAST, guide_captures[i + resolution].origin[1]);
+					WriteCoord(MSG_MULTICAST, guide_captures[i + resolution].origin[2]);
 
-				trap_multicast(PASSVEC3(racer->s.v.origin), MULTICAST_PHS);
+					trap_multicast(PASSVEC3(racer->s.v.origin), MULTICAST_PHS);
+				}
 			}
 		}
 	}
 
 	{
+		int resolution = (int)cvar(RACE_PACEMAKER_RESOLUTION_CVAR); // just need to know off or on
 		float guide_race_time = guide_closest_pos >= guide_capture_count ? 99999.9f : guide_captures[guide_closest_pos].race_time;
 
 		// Remove old indicators
@@ -3895,7 +3986,7 @@ static void race_update_pacemaker(void)
 		}
 
 		// Create new indicators
-		if (guide_jump_pos < guide_jump_count && guide_jumps[guide_jump_pos].race_time <= race_time) {
+		if (jumps_enabled && resolution && guide_jump_pos < guide_jump_count && guide_jumps[guide_jump_pos].race_time <= race_time) {
 			for (i = 0; i < RACE_JUMP_INDICATORS; ++i) {
 				if (! race_jump_indicators[i]) {
 					gedict_t* ent = spawn();
@@ -3909,7 +4000,9 @@ static void race_update_pacemaker(void)
 						setmodel(ent, "progs/lavaball.mdl");
 					}
 					setorigin(ent, PASSVEC3(guide_jumps[guide_jump_pos].origin));
-					setsize(ent, PASSVEC3( VEC_HULL_MIN ), PASSVEC3( VEC_HULL_MAX ));
+					setsize(ent, PASSVEC3(VEC_HULL_MIN), PASSVEC3(VEC_HULL_MAX));
+					droptofloor(ent);
+					setorigin(ent, ent->s.v.origin[0], ent->s.v.origin[1], ent->s.v.origin[2] - 12);
 
 					race_jump_indicators[i] = ent;
 					race_jump_indicator_times[i] = guide_jumps[guide_jump_pos].race_time;
