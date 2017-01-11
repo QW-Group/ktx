@@ -249,6 +249,7 @@ void SetMarkerViewOffset (int marker, float zOffset)
 		return;
 	}
 
+	markers[marker]->fb.T |= MARKER_EXPLICIT_VIEWOFFSET;
 	markers[marker]->s.v.view_ofs[2] = zOffset;
 }
 

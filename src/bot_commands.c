@@ -696,33 +696,41 @@ static void BotFileGenerate (void)
 	}
 
 	for (i = 0; i < NUMBER_MARKERS; ++i) {
-		if (markers[i] && ! (markers[i]->fb.T & MARKER_DYNAMICALLY_ADDED)) {
-			int p;
+		int p;
 
-			if (markers[i]->fb.G_) {
-				std_fprintf (file, "SetGoal %d %d\n", markers[i]->fb.index + 1, markers[i]->fb.G_);
-			}
-			if (markers[i]->fb.Z_) {
-				std_fprintf (file, "SetZone %d %d\n", markers[i]->fb.index + 1, markers[i]->fb.Z_);
-			}
-			if (markers[i]->fb.T & EXTERNAL_MARKER_FLAGS) {
-				std_fprintf (file, "SetMarkerFlag %d %s\n", markers[i]->fb.index + 1, EncodeMarkerFlags (markers[i]->fb.T & EXTERNAL_MARKER_FLAGS));
-			}
-			for (p = 0; p < NUMBER_PATHS; ++p) {
-				if (markers[i]->fb.paths[p].next_marker && ! (markers[i]->fb.paths[p].next_marker->fb.T & MARKER_DYNAMICALLY_ADDED)) {
-					std_fprintf (file, "SetMarkerPath %d %d %d\n", markers[i]->fb.index + 1, p, markers[i]->fb.paths[p].next_marker->fb.index + 1);
-					if (markers[i]->fb.paths[p].flags & EXTERNAL_MARKER_PATH_FLAGS) {
-						std_fprintf (file, "SetMarkerPathFlags %d %d %s\n", markers[i]->fb.index + 1, p, EncodeMarkerPathFlags (markers[i]->fb.paths[p].flags & EXTERNAL_MARKER_PATH_FLAGS));
-						if (markers[i]->fb.paths[p].flags & ROCKET_JUMP) {
-							gedict_t* m = markers[i];
-							fb_path_t* path = &markers[i]->fb.paths[p];
+		if (markers[i] == NULL || markers[i] == world) {
+			continue;
+		}
+		if (markers[i]->fb.T & MARKER_DYNAMICALLY_ADDED) {
+			continue;
+		}
 
-							std_fprintf (file, "SetRocketJumpPathFields %d %d %3.1f %3.1f %d\n", m->fb.index + 1, p, path->rj_pitch, path->rj_yaw, path->rj_delay);
-						}
+		if (markers[i]->fb.G_) {
+			std_fprintf (file, "SetGoal %d %d\n", markers[i]->fb.index + 1, markers[i]->fb.G_);
+		}
+		if (markers[i]->fb.Z_) {
+			std_fprintf (file, "SetZone %d %d\n", markers[i]->fb.index + 1, markers[i]->fb.Z_);
+		}
+		if (markers[i]->fb.T & EXTERNAL_MARKER_FLAGS) {
+			std_fprintf (file, "SetMarkerFlag %d %s\n", markers[i]->fb.index + 1, EncodeMarkerFlags (markers[i]->fb.T & EXTERNAL_MARKER_FLAGS));
+		}
+		if (markers[i]->fb.T & MARKER_EXPLICIT_VIEWOFFSET) {
+			std_fprintf (file, "SetMarkerViewOfs %d %d\n", markers[i]->fb.index + 1, (int)markers[i]->s.v.view_ofs[2]);
+		}
+		for (p = 0; p < NUMBER_PATHS; ++p) {
+			if (markers[i]->fb.paths[p].next_marker && ! (markers[i]->fb.paths[p].next_marker->fb.T & MARKER_DYNAMICALLY_ADDED)) {
+				std_fprintf (file, "SetMarkerPath %d %d %d\n", markers[i]->fb.index + 1, p, markers[i]->fb.paths[p].next_marker->fb.index + 1);
+				if (markers[i]->fb.paths[p].flags & EXTERNAL_MARKER_PATH_FLAGS) {
+					std_fprintf (file, "SetMarkerPathFlags %d %d %s\n", markers[i]->fb.index + 1, p, EncodeMarkerPathFlags (markers[i]->fb.paths[p].flags & EXTERNAL_MARKER_PATH_FLAGS));
+					if (markers[i]->fb.paths[p].flags & ROCKET_JUMP) {
+						gedict_t* m = markers[i];
+						fb_path_t* path = &markers[i]->fb.paths[p];
+
+						std_fprintf (file, "SetRocketJumpPathFields %d %d %3.1f %3.1f %d\n", m->fb.index + 1, p, path->rj_pitch, path->rj_yaw, path->rj_delay);
 					}
-					if (markers[i]->fb.paths[p].angle_hint) {
-						std_fprintf (file, "SetMarkerPathAngleHint %d %d %d\n", markers[i]->fb.index + 1, p, markers[i]->fb.paths[p].angle_hint);
-					}
+				}
+				if (markers[i]->fb.paths[p].angle_hint) {
+					std_fprintf (file, "SetMarkerPathAngleHint %d %d %d\n", markers[i]->fb.index + 1, p, markers[i]->fb.paths[p].angle_hint);
 				}
 			}
 		}

@@ -132,15 +132,16 @@ extern gedict_t* dropper;
 #define NOT_ROCKET_JUMP (~ROCKET_JUMP)
 
 // Marker flags (FIXME: fb.T?  check.  consistent naming)
-#define UNREACHABLE 1                         // Typically set for markers that are lava, waterlevel 3?  (automate?)
-#define T_WATER 2                             // Set by server if the marker is in liquid
-#define T_NO_AIR 4                            // Set by server (means the bot would be trapped underwater - dm3 tunnel for instance)
-#define MARKER_IS_DM6_DOOR 8                  // Should only be set for DM6 door to LG at the moment (logic needs generalised to all shootable doors)
-#define MARKER_BLOCKED_ON_STATE_TOP 16        // If set, door is considered 'closed' when STATE_TOP.
-#define MARKER_FIRE_ON_MATCH_START 32         // Used to automatically fire triggers (open secret doors etc).  Ignored if no bots spawned.
-#define MARKER_DOOR_TOUCHABLE 64              // If set, door will spawn a touchable marker.  If not set, door shouldn't be in bot path definitions
-#define MARKER_ESCAPE_ROUTE 128               // (not currently implemented) bot should head towards marker when in lava or slime (think amphi2/end)
-#define MARKER_DYNAMICALLY_ADDED 256          // Added dynamically by server.  Do not include in .bot file generation
+#define UNREACHABLE                       1   // Typically set for markers that are lava, waterlevel 3?  (automate?)
+#define T_WATER                           2   // Set by server if the marker is in liquid
+#define T_NO_AIR                          4   // Set by server (means the bot would be trapped underwater - dm3 tunnel for instance)
+#define MARKER_IS_DM6_DOOR                8   // Should only be set for DM6 door to LG at the moment (logic needs generalised to all shootable doors)
+#define MARKER_BLOCKED_ON_STATE_TOP      16   // If set, door is considered 'closed' when STATE_TOP.
+#define MARKER_FIRE_ON_MATCH_START       32   // Used to automatically fire triggers (open secret doors etc).  Ignored if no bots spawned.
+#define MARKER_DOOR_TOUCHABLE            64   // If set, door will spawn a touchable marker.  If not set, door shouldn't be in bot path definitions
+#define MARKER_ESCAPE_ROUTE             128   // (not currently implemented) bot should head towards marker when in lava or slime (think amphi2/end)
+#define MARKER_DYNAMICALLY_ADDED        256   // Added dynamically by server.  Do not include in .bot file generation
+#define MARKER_EXPLICIT_VIEWOFFSET      512   // Viewoffset has been set by map defintion and should be included in .bot file generation
 
 // Bot flags (FIXME: fb.state?  check.  consistent naming, comment with descriptions)
 #define CAMPBOT 1

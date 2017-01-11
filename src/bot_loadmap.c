@@ -311,7 +311,7 @@ static void CustomiseFrogbotMap (void)
 	gedict_t* ent = NULL;
 
 	// KTX may have added a quad, so to keep routes compatible with PR1-version, we add it as a marker after others
-	if (streq(g_globalvars.mapname, "aerowalk"))
+	if (streq(g_globalvars.mapname, "aerowalk") && !FrogbotOptionEnabled(FB_OPTION_EDITOR_MODE))
 	{
 		gedict_t* quad = ez_find (world, "item_artifact_super_damage");
 		if (quad) {
