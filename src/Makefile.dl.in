@@ -49,7 +49,7 @@ SOURCES=native_lib.c buttons.c client.c combat.c doors.c g_cmd.c g_main.c \
 	maps_map_ztndm4.c maps_map_ztndm5.c maps_map_ztndm6.c \
 	bot_aim.c bot_blocked.c bot_botenemy.c bot_botgoals.c bot_bothazd.c bot_bothelp.c bot_botimp.c bot_botjump.c \
 	bot_botpath.c bot_botphys.c bot_botstat.c bot_botthink.c bot_botwater.c bot_botweap.c bot_client.c \
-	bot_commands.c bot_items.c bot_loadmap.c bot_match.c bot_movement.c bot_routing.c bot_world.c \
+	bot_commands.c bot_items.c bot_loadmap.c bot_match.c bot_movement.c bot_routing.c bot_world.c bot_navmesh.c \
 	fb_globals.c marker_load.c marker_util.c route_calc.c route_fields.c route_lookup.c teamplay.c files.c
 
 OBJECTS=$(SOURCES:.c=.o)
