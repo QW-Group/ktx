@@ -584,6 +584,7 @@ typedef struct fb_entvars_s {
 	fb_bool_func_t pickup;                      // return true if a player would pickup an item as they touch it
 	float weapon_refresh_time;
 
+	struct gedict_s* prev_touch_marker;         // the last touch marker processed
 	struct gedict_s* touch_marker;              // the last marker touched, while we were expecting to touch something (ignored during rocket jumps)
 	float touch_distance;                       // distance from player to touch marker.  used when multiple touch events fired in same frame
 	float touch_marker_time;                    // if < time, run a brute force closest-marker search for marker the player is closest to

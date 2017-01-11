@@ -240,13 +240,21 @@ static void BotTouchMarkerLogic() {
 			}
 		}
 	}
-	else {
+	else if (self->fb.linked_marker) {
 		vec3_t dir_move;
 
 		BotMoveTowardsLinkedMarker(self, dir_move);
 		BotOnGroundMovement(self, dir_move);
 
 		SetDirectionMove (self, dir_move, ((int)self->s.v.flags & FL_ONGROUND) ? "OnGround" : "InAir");
+	}
+	else {
+		// The map is, imo, broken at this point, but some old fbca maps are missing links
+		//   and at this point would use 'world'
+		// Deliberately don't move and hope that the fall gets us somewhere
+		vec3_t dir_move = { 0, 0, 0 };
+
+		SetDirectionMove(self, dir_move, "NoLinkedMarker!");
 	}
 
 	SelectWeapon();
@@ -277,6 +285,7 @@ void BotPathCheck (gedict_t* self, gedict_t* touch_marker)
 static void PeriodicAllClientLogic(void)
 {
 	SetNextThinkTime(self);
+	self->fb.prev_touch_marker = self->fb.touch_marker;
 
 	if (PAST(weapon_refresh_time)) {
 		FrogbotSetFirepower(self);
@@ -340,7 +349,7 @@ void BotEvadeLogic(gedict_t* self) {
 void BotsThinkTime(gedict_t* self) {
 	self->fb.jumping = false; // Don't call SetJumpFlag here
 
-	if (PAST(frogbot_nextthink)) {
+	if (self->fb.prev_touch_marker != self->fb.touch_marker || PAST(frogbot_nextthink)) {
 		PeriodicAllClientLogic();
 
 		if (self->isBot) {
