@@ -238,6 +238,7 @@ void FrogbotSetFirepower (gedict_t* self);
 void SelectWeapon (void);
 void SetFireButton (gedict_t* self, vec3_t rel_pos, float rel_dist);
 void FrogbotWeaponFiredEvent (gedict_t* self);
+void FindRocketExplosionPoint(vec3_t player_origin, vec3_t player_angles, vec3_t output, float* distance_frac);
 
 // marker_util.qc
 void AssignVirtualGoal (gedict_t* item);

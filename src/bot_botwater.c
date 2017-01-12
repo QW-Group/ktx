@@ -130,7 +130,7 @@ void BotWaterMove(gedict_t* self) {
 }
 
 // client.qc
-void BotWaterJumpFix() {
+void BotWaterJumpFix(void) {
 	if (self->isBot) {
 		++self->fb.tread_water_count;
 		if (self->fb.tread_water_count > 60) {

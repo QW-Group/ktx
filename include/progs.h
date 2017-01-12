@@ -625,6 +625,7 @@ typedef struct fb_entvars_s {
 	int   rocketJumpPathFrameDelay;             // value rocketJumpPathFrameDelay
 	int   rocketJumpFrameDelay;                 // active delay between jumping and firing
 	int   rocketJumpAngles[2];                  // pitch/yaw for rocket jump angle
+	int   lavaJumpState;                        // keep track of submerge/rise/fire sequence
 
 	// Editor
 	int   last_jump_frame;                      // framecount when player last jumped.  used to help setting rj fields
@@ -633,7 +634,7 @@ typedef struct fb_entvars_s {
 	
 	float help_teammate_time;
 	float frogwatermove_time;
-	float up_finished;                          // Swimming
+	float up_finished;                          // Swimming, used to keep pushing up for a period during lavajump
 	int botnumber;                              // bots[botnumber]
 
 	float last_cmd_sent;
@@ -654,7 +655,7 @@ typedef struct fb_entvars_s {
 	float               last_death;      // Last time this player died
 
 	struct gedict_s*    virtual_enemy;   //
-	vec3_t              rocket_endpos;   // where an incoming rocket will explode
+	vec3_t              rocket_endpos;   // where an incoming rocket will explode.  
 	struct gedict_s*    dodge_missile;   // rocket belonging to look_object
 
 	// Debugging

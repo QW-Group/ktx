@@ -4,7 +4,13 @@
 #include "fb_globals.h"
 
 void DemoMark ();
-#define CHANCE_ROCKET_JUMP 0.2       // FIXME: personalise in fb.skill
+
+#define FB_LAVAJUMP_NOT    0      // not lava-jumping
+#define FB_LAVAJUMP_SINK   1      // deliberately sinking, waiting for waterlevel == 3
+#define FB_LAVAJUMP_RISE   2      // ready to fire on first sign of waterlevel == 2
+
+static vec3_t straight_up = { 0, 0, 1 };
+static vec3_t straight_down = { 0, 0, -1 };
 
 // Returns true if the bot is travelling in the 'right' direction (with 90 degrees of target)
 static qbool right_direction(gedict_t* self)
@@ -36,7 +42,7 @@ static qbool right_direction(gedict_t* self)
 	}
 	min_two = fabs(desired_direction - current_direction);
 
-	return (qbool) (min(min_one, min_two) <= 90);
+	return (qbool)(min(min_one, min_two) <= 90);
 }
 
 // Returns true if space above bot
@@ -53,68 +59,26 @@ static float checkground(gedict_t* self)
 	g_globalvars.v_forward[2] = 0;
 	VectorNormalize(g_globalvars.v_forward);
 	VectorScale(g_globalvars.v_forward, 10, g_globalvars.v_forward);
-	traceline(self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2], self->s.v.origin[0] + g_globalvars.v_forward[0], self->s.v.origin[1] + g_globalvars.v_forward[1], self->s.v.origin[2] + g_globalvars.v_forward[2] -40, true, self);
+	traceline(self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2], self->s.v.origin[0] + g_globalvars.v_forward[0], self->s.v.origin[1] + g_globalvars.v_forward[1], self->s.v.origin[2] + g_globalvars.v_forward[2] - 40, true, self);
 	return (g_globalvars.trace_fraction != 1);
 }
 
-// Performs lava jump (RJ when in lava)
-static void lava_jump(gedict_t* self) {
-
-	return;
-	/*
-	gedict_t *e = NULL,
-	         *pt = self;
-	vec3_t straight_up = { 0, 0, 1 };
-	vec3_t straight_down = { 0, 0, -1 };
-	float best_distance = 1001,
-	      best_yaw = 0;
-
-	// Find closest marker... don't we have a function for this already?
-	// Note: this was bugged in .qc code, referencing entity 't'
-	for (e = world; e = trap_findradius(e, self->s.v.origin, 1000); ) {
-		if (streq(e->s.v.classname, "marker")) {
-			if (VectorDistance(self->s.v.origin, e->s.v.origin) < best_distance) {
-				best_distance = VectorDistance(self->s.v.origin, e->s.v.origin);
-				pt = e;
-			}
-		}
-	}
-
-	best_yaw = vectoyaw(pt->s.v.origin);
-	if (self->s.v.waterlevel == 3) {
-		self->fb.arrow = BACK;
-		//VelocityForArrow(self);
-		NewVelocityForArrow (self, straight_up, "LavaJump1");
-	}
-	if (self->s.v.waterlevel == 2) {
-		if (self->fb.arrow == BACK) {
-			self->fb.arrow = BACK;
-			//VelocityForArrow(self);
-			NewVelocityForArrow (self, straight_up, "LavaJump2");
-			self->fb.rocketjumping = true;
-			self->fb.desired_weapon_impulse = 7;
-			self->fb.firing = true;
-			self->fb.up_finished = g_globalvars.time + 0.1;
-		}
-		else if (g_globalvars.time > self->fb.up_finished) {
-			self->fb.swim_arrow = DOWN;
-			//VelocityForArrow(self);
-			NewVelocityForArrow (self, straight_down, "LavaJump3");
-		}
-	}*/
-}
-
-void BotCanRocketJump (gedict_t* self) {
-	qbool has_quad     = self->super_damage_finished > g_globalvars.time;
-	qbool tp_damage    = teamplay != 1 && teamplay != 5;
-	float health_after = TotalStrengthAfterDamage (self->s.v.health, self->s.v.armorvalue, self->s.v.armortype, tp_damage ? 55 * (has_quad ? 4 : 1) : 0);
-	qbool has_rl       = (qbool) (((int)self->s.v.items & IT_ROCKET_LAUNCHER) && (self->s.v.ammo_rockets >= 1));
-	qbool has_pent     = (qbool) ((int)self->s.v.items & IT_INVULNERABILITY);
-	qbool will_pickup  = self->fb.linked_marker && !WaitingToRespawn (self->fb.linked_marker);
-	qbool onground     = (int)self->s.v.flags & FL_ONGROUND;
+void BotCanRocketJump(gedict_t* self)
+{
+	qbool has_quad = self->super_damage_finished > g_globalvars.time;
+	qbool tp_damage = teamplay != 1 && teamplay != 5;
+	float health_after = TotalStrengthAfterDamage(self->s.v.health, self->s.v.armorvalue, self->s.v.armortype, tp_damage ? 55 * (has_quad ? 4 : 1) : 0);
+	qbool has_rl = (qbool)(((int)self->s.v.items & IT_ROCKET_LAUNCHER) && (self->s.v.ammo_rockets >= 1));
+	qbool has_pent = (qbool)((int)self->s.v.items & IT_INVULNERABILITY);
+	qbool will_pickup = self->fb.linked_marker && !WaitingToRespawn(self->fb.linked_marker);
+	qbool onground = (int)self->s.v.flags & FL_ONGROUND;
 
 	if (self->fb.debug_path) {
 		self->fb.canRocketJump = self->fb.debug_path_rj;
+	}
+	else if (has_rl && self->s.v.waterlevel > 1 && trap_pointcontents(self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2]) == CONTENT_LAVA) {
+		// In lava, is our main priority...
+		self->fb.canRocketJump = true;
 	}
 	else if (!has_rl || self->fb.be_quiet || !onground) {
 		self->fb.canRocketJump = false;
@@ -131,7 +95,7 @@ void BotCanRocketJump (gedict_t* self) {
 		// FIXME: this threshold should be flexible depending on fuzzy logic
 		// - depending on enemy status (maybe higher or lower depending on strength of enemy)
 		// - might be higher or lower depending on running away from enemy
-		// - might be lower if we need to be enemy to item (quad for instance)
+		// - might be lower if we need to beat enemy to item (quad for instance)
 		self->fb.canRocketJump = health_after > 110;
 	}
 }
@@ -166,14 +130,135 @@ static qbool DirectionCheck (vec3_t start, vec3_t end, vec3_t vel, float thresho
 	return DotProduct (path, hor_vel) >= threshold;
 }
 
+static void BotLavaJumpRise(gedict_t* self)
+{
+	self->fb.arrow = BACK;
+	NewVelocityForArrow (self, straight_up, "LavaJump1");
+	self->fb.path_state |= ROCKET_JUMP;
+	self->fb.lavaJumpState = FB_LAVAJUMP_RISE;
+	self->fb.desired_angle[PITCH] = 78.25;
+}
+
+static void BotLavaJumpSink(gedict_t* self)
+{
+	self->fb.swim_arrow = DOWN;
+	self->fb.rocketJumping = false;
+	NewVelocityForArrow (self, straight_down, "LavaJump3");
+	// Moving backwards... 
+	self->fb.lavaJumpState = FB_LAVAJUMP_SINK;
+	self->fb.desired_angle[PITCH] = 78.25;
+	self->fb.up_finished = 0;
+}
+
+static void SetRocketJumpAngles(gedict_t* self)
+{
+	if (self->fb.path_state & ROCKET_JUMP) {
+		if (self->fb.rocketJumpAngles[PITCH] > 0) {
+			self->fb.desired_angle[PITCH] = self->fb.rocketJumpAngles[PITCH];
+		}
+		else {
+			self->fb.desired_angle[PITCH] = 78.25;
+		}
+		if (self->fb.rocketJumpAngles[YAW] > 0) {
+			self->fb.desired_angle[YAW] = self->fb.rocketJumpAngles[YAW];
+		}
+	}
+}
+
+static void BotPerformLavaJump(gedict_t* self)
+{
+	vec3_t point = { self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] - 24 };
+	int content = self->s.v.waterlevel > 1 ? trap_pointcontents(PASSVEC3(point)) : CONTENT_EMPTY;
+
+	// Have fired but still in lava
+	if ((self->fb.path_state & BOTPATH_RJ_IN_PROGRESS) && content == CONTENT_LAVA) {
+		BotLavaJumpRise(self);
+		self->fb.desired_angle[PITCH] = 78.25;
+		return;
+	}
+
+	// Waiting to fire, still in lava
+	if (content == CONTENT_LAVA && self->fb.rocketJumpFrameDelay) {
+		BotLavaJumpRise(self);
+		self->fb.desired_angle[PITCH] = 78.25;
+		return;
+	}
+
+	if (self->fb.canRocketJump && content == CONTENT_LAVA) {
+		switch (self->fb.lavaJumpState) {
+		case FB_LAVAJUMP_NOT:
+			if (self->s.v.waterlevel >= 2 && BotCheckSpaceAbove(self)) {
+				vec3_t linked_direction;
+				float best_yaw = 0;
+
+				// Face away from target
+				VectorSubtract(self->s.v.origin, self->fb.linked_marker->s.v.origin, linked_direction);
+				best_yaw = vectoyaw(linked_direction);
+
+				if (self->s.v.waterlevel == 3) {
+					BotLavaJumpRise(self);
+
+					self->fb.desired_angle[YAW] = best_yaw;
+				}
+				else {
+					BotLavaJumpSink(self);
+					self->fb.desired_angle[YAW] = best_yaw;
+				}
+			}
+			else {
+				// Move as standard, hopefully to somewhere with space
+				return;
+			}
+			break;
+		case FB_LAVAJUMP_SINK:
+			if (self->s.v.waterlevel == 3 || self->s.v.velocity[2] == 0) {
+				// That's far enough, start rising again
+				BotLavaJumpRise(self);
+			}
+			else {
+				// Keep going
+				BotLavaJumpSink(self);
+			}
+			break;
+		case FB_LAVAJUMP_RISE:
+			if (self->fb.up_finished && g_globalvars.time > self->fb.up_finished) {
+				// Lava jump failed, back to sinking...
+				BotLavaJumpSink(self);
+			}
+			else if (self->s.v.waterlevel == 3) {
+				BotLavaJumpRise(self);
+			}
+			else {
+				// Broken surface, time to fire... queue up a delay...
+				vec3_t explosion_point;
+				float distance_frac;
+				float frames_to_explosion;
+
+				SetRocketJumpAngles(self);
+				FindRocketExplosionPoint(self->s.v.origin, self->fb.desired_angle, explosion_point, &distance_frac);
+				BotLavaJumpRise(self);
+
+				frames_to_explosion = (VectorDistance(self->s.v.origin, explosion_point) / 1000) / g_globalvars.frametime;
+
+				self->fb.rocketJumping = true;
+				self->fb.rocketJumpFrameDelay = 12 - (int)frames_to_explosion;
+				self->fb.lavaJumpState = FB_LAVAJUMP_NOT;
+				self->fb.up_finished = g_globalvars.time + 0.1;
+			}
+			break;
+		}
+	}
+}
+
 // Performs rocket jump
 // FIXME: Very basic rocket jumps, needs a lot more work
 // Direction of rocket jump (currently just straight up) - set pitch, checkground() looks directly ahead
-// 
 void BotPerformRocketJump(gedict_t* self) {
 	if (!(self->fb.touch_marker && self->fb.linked_marker)) {
 		return;
 	}
+
+	BotPerformLavaJump(self);
 
 	if (self->fb.rocketJumping) {
 		// In middle of rocket jumping
@@ -214,17 +299,7 @@ void BotPerformRocketJump(gedict_t* self) {
 	// Is it time to fire
 	if (self->fb.rocketJumping) {
 		if (self->fb.rocketJumpFrameDelay <= 0) {
-			if (self->fb.path_state & ROCKET_JUMP) {
-				if (self->fb.rocketJumpAngles[PITCH] > 0) {
-					self->fb.desired_angle[PITCH] = self->fb.rocketJumpAngles[PITCH];
-				}
-				else {
-					self->fb.desired_angle[PITCH] = 78.25;
-				}
-				if (self->fb.rocketJumpAngles[YAW] > 0) {
-					self->fb.desired_angle[YAW] = self->fb.rocketJumpAngles[YAW];
-				}
-			}
+			SetRocketJumpAngles(self);
 			self->fb.desired_weapon_impulse = 7;
 			self->fb.firing = true;
 

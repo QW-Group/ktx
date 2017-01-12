@@ -229,8 +229,9 @@ static void BotTouchMarkerLogic() {
 	}
 
 	if (FUTURE(arrow_time)) {
-		if (self->isBot && self->fb.debug_path)
-			G_bprint (PRINT_HIGH, "%3.2f: arrow_time is %3.2f\n", g_globalvars.time, self->fb.arrow_time);
+		if (self->isBot && self->fb.debug_path) {
+			G_bprint(PRINT_HIGH, "%3.2f: arrow_time is %3.2f\n", g_globalvars.time, self->fb.arrow_time);
+		}
 		if (FUTURE(arrow_time2)) {
 			if (g_random() < 0.5) {
 				SetLinkedMarker (self, self->fb.touch_marker, "BotTouchMarkerLogic");

@@ -226,11 +226,24 @@ static void SpamRocketShot (gedict_t* self)
 	}
 }
 
+void FindRocketExplosionPoint(vec3_t player_origin, vec3_t player_angles, vec3_t output, float* distance_frac)
+{
+	vec3_t rocket_origin;
+	vec3_t final_point;
+
+	VectorCopy(player_origin, rocket_origin);
+	rocket_origin[2] += 16;
+	trap_makevectors(player_angles);
+	VectorMA(rocket_origin, 600, g_globalvars.v_forward, final_point);
+	traceline(PASSVEC3(rocket_origin), PASSVEC3(final_point), false, self);
+	VectorCopy(g_globalvars.trace_endpos, output);
+	*distance_frac = g_globalvars.trace_fraction;
+}
+
 // FIXME: Predicts aim*600, then predicts if the enemy's predicted position will be close to the explosion point...
 static void RocketLauncherShot (gedict_t* self)
 {
 	float hit_radius = 160;
-	vec3_t rocket_origin;     // where the rocket will be spawned from
 	float risk_strength;
 	gedict_t* test_enemy;
 	float risk_factor = 0.5;
@@ -238,12 +251,7 @@ static void RocketLauncherShot (gedict_t* self)
 	risk *= risk;
 
 	// 
-	VectorCopy(self->s.v.origin, rocket_origin);
-	rocket_origin[2] += 16;
-	trap_makevectors(self->fb.desired_angle);
-	traceline(rocket_origin[0], rocket_origin[1], rocket_origin[2], rocket_origin[0] + (g_globalvars.v_forward[0] * 600), rocket_origin[1] + (g_globalvars.v_forward[1] * 600), rocket_origin[2] + (g_globalvars.v_forward[2] * 600), false, self);
-	VectorCopy(g_globalvars.trace_endpos, self->fb.rocket_endpos);
-	risk_strength = g_globalvars.trace_fraction;
+	FindRocketExplosionPoint(self->s.v.origin, self->fb.desired_angle, self->fb.rocket_endpos, &risk_strength);
 
 	for (test_enemy = world; test_enemy = find_plr (test_enemy); ) {
 		float predict_dist = 1000000;

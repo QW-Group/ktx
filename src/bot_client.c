@@ -182,6 +182,8 @@ void BotClientConnectedEvent(gedict_t* self) {
 
 // client.qc
 void BotOutOfWater(gedict_t* self) {
+	return;
+
 	if (self->s.v.waterlevel == 2) {
 		vec3_t start;
 		vec3_t end;
