@@ -689,9 +689,6 @@ static void BotFileGenerate (void)
 	for (i = 0; i < NUMBER_MARKERS; ++i) {
 		if (markers[i] && streq (markers[i]->s.v.classname, "marker")) {
 			std_fprintf (file, "CreateMarker %d %d %d\n", PASSINTVEC3(markers[i]->s.v.origin));
-			if (markers[i]->s.v.view_ofs[2] && markers[i]->s.v.view_ofs[2] != 24) {
-				std_fprintf (file, "SetMarkerViewOffset %d %d\n", markers[i]->fb.index + 1, (int)markers[i]->s.v.view_ofs[2]);
-			}
 		}
 	}
 
@@ -1651,11 +1648,11 @@ void Bot_Print_Thinking (void)
 
 	if (FrogbotOptionEnabled (FB_OPTION_SHOW_ROUTING_LOGIC)) {
 		strlcat(data, "\n", sizeof(data));
-		strlcat (data, va ("  %s: %s (%d)\n", redtext ("Touch"), bot->fb.touch_marker ? bot->fb.touch_marker->s.v.classname : "(none)", bot->fb.touch_marker ? bot->fb.touch_marker->fb.index : -1), sizeof (data));
+		strlcat (data, va ("  %s: %s (%d)\n", redtext ("Touch"), bot->fb.touch_marker ? bot->fb.touch_marker->s.v.classname : "(none)", bot->fb.touch_marker ? bot->fb.touch_marker->fb.index + 1 : -1), sizeof (data));
 		strlcat (data, va ("  %s: %s\n", redtext ("Looking"), bot->fb.look_object ? bot->fb.look_object->s.v.classname : "(nothing)"), sizeof (data));
-		strlcat (data, va ("  %s: %s (%d)\n", redtext ("Linked"), linked ? linked->s.v.classname : "?", linked ? linked->fb.index : -1), sizeof (data));
-		strlcat (data, va ("  %s: %s (%d)\n", redtext ("OldLinked"), oldlink ? oldlink->s.v.classname : "?", oldlink ? oldlink->fb.index : -1), sizeof (data));
-		strlcat (data, va ("  %s: %s\n", redtext ("GoalEnt"), bot->s.v.goalentity ? va ("%s (%d) (%f)", g_edicts[bot->s.v.goalentity].s.v.classname, g_edicts[bot->s.v.goalentity].fb.index, g_edicts[bot->s.v.goalentity].fb.saved_goal_desire) : "(none)"), sizeof (data));
+		strlcat (data, va ("  %s: %s (%d)\n", redtext ("Linked"), linked ? linked->s.v.classname : "?", linked ? linked->fb.index + 1 : -1), sizeof (data));
+		strlcat (data, va ("  %s: %s (%d)\n", redtext ("OldLinked"), oldlink ? oldlink->s.v.classname : "?", oldlink ? oldlink->fb.index + 1 : -1), sizeof (data));
+		strlcat (data, va ("  %s: %s\n", redtext ("GoalEnt"), bot->s.v.goalentity ? va ("%s (%d) (%f)", g_edicts[bot->s.v.goalentity].s.v.classname, g_edicts[bot->s.v.goalentity].fb.index + 1, g_edicts[bot->s.v.goalentity].fb.saved_goal_desire) : "(none)"), sizeof (data));
 	}
 
 	if (FrogbotOptionEnabled (FB_OPTION_SHOW_DUEL_LOGIC)) {
