@@ -338,14 +338,16 @@ void ProcessNewLinkedMarker(gedict_t* self) {
 	}
 
 	// FIXME: Map specific waiting points
-	if (streq(g_globalvars.mapname, "dm3")) {
-		DM3CampLogic();
-	}
-	else if (streq(g_globalvars.mapname, "dm4")) {
-		DM4CampLogic();
-	}
-	else if (streq(g_globalvars.mapname, "dm6")) {
-		DM6CampLogic();
+	if (!self->fb.debug_path) {
+		if (streq(g_globalvars.mapname, "dm3")) {
+			DM3CampLogic();
+		}
+		else if (streq(g_globalvars.mapname, "dm4")) {
+			DM4CampLogic();
+		}
+		else if (streq(g_globalvars.mapname, "dm6")) {
+			DM6CampLogic();
+		}
 	}
 
 	G_bprint_debug (2, "New linked marker: %d\n", self->fb.linked_marker->fb.index + 1);
