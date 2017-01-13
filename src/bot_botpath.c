@@ -315,9 +315,15 @@ void ProcessNewLinkedMarker(gedict_t* self) {
 	rocket_alert = CheckForRocketEnemyAim (self);
 	normalize (self->s.v.velocity, player_direction);
 	self->fb.be_quiet = (self->s.v.enemy && &g_edicts[self->s.v.enemy] != self->fb.look_object && !self->fb.allowedMakeNoise);
-	
+
 	new_linked_marker = self->fb.linked_marker;
-	PathScoringLogic (self->fb.goal_respawn_time, self->fb.be_quiet, self->fb.skill.lookahead_time, self->fb.path_normal_, self->s.v.origin, player_direction, self->fb.touch_marker, goalentity_marker, rocket_alert, rocket_jump_routes_allowed, trace_bprint, &best_score, &new_linked_marker, &new_path_state, &new_angle_hint, &new_rj_delay, new_rj_angles);
+
+	PathScoringLogic (
+		self->fb.goal_respawn_time, self->fb.be_quiet, self->fb.skill.lookahead_time, self->fb.path_normal_, 
+		self->s.v.origin, player_direction, self->fb.touch_marker, goalentity_marker, rocket_alert, rocket_jump_routes_allowed, trace_bprint, 
+		self,
+		&best_score, &new_linked_marker, &new_path_state, &new_angle_hint, &new_rj_delay, new_rj_angles
+	);
 	SetLinkedMarker (self, new_linked_marker, "ProcNewLinked(std)");
 
 	STOP_DEBUGGING

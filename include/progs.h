@@ -535,6 +535,7 @@ typedef struct fb_entvars_s {
 	qbool wasinwater;
 	float swim_arrow;
 	float arrow_time;                       // If set in future, bots will avoid this path.  Used to detect grenade/rocket at teleport exit.
+	struct gedict_s* arrow_time_setby;      // Which player set the most recent arrow time?
 	float arrow_time2;                      // If set in future, sustain current direction (used to avoid edges or back away from objects)
 	float linked_marker_time;
 

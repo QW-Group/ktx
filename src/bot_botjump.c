@@ -144,7 +144,7 @@ static void BotLavaJumpSink(gedict_t* self)
 	self->fb.swim_arrow = DOWN;
 	self->fb.rocketJumping = false;
 	NewVelocityForArrow (self, straight_down, "LavaJump3");
-	// Moving backwards... 
+	// Moving backwards...
 	self->fb.lavaJumpState = FB_LAVAJUMP_SINK;
 	self->fb.desired_angle[PITCH] = 78.25;
 	self->fb.up_finished = 0;

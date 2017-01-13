@@ -22,6 +22,24 @@ static qbool DetectIncomingRocket(gedict_t* self, qbool rocket_alert, vec3_t mar
 	return false;
 }
 
+static qbool AvoidTeleport(fb_path_eval_t* eval)
+{
+	if (g_globalvars.time >= eval->test_marker->fb.arrow_time) {
+		return false;
+	}
+
+	if (!eval->test_marker->fb.arrow_time_setby || !eval->player) {
+		return true; // old behaviour
+	}
+
+	if (eval->test_marker->fb.arrow_time_setby == eval->player || eval->test_marker->fb.arrow_time_setby->ct != ctPlayer) {
+		return false; // we can't telefrag ourselves
+	}
+
+	// don't telefrag our own teammates
+	return SameTeam(eval->test_marker->fb.arrow_time_setby, eval->player);
+}
+
 static float EvalPath(fb_path_eval_t* eval, qbool allowRocketJumps, qbool trace_bprint, float current_goal_time, float current_goal_time_125) {
 	float path_score;
 	float same_dir;
@@ -73,7 +91,7 @@ static float EvalPath(fb_path_eval_t* eval, qbool allowRocketJumps, qbool trace_
 	}
 
 	path_score = same_dir + g_random();
-	self->fb.avoiding = (g_globalvars.time < eval->test_marker->fb.arrow_time) || DetectIncomingRocket(self, eval->rocket_alert, marker_position);
+	self->fb.avoiding = AvoidTeleport(eval) || DetectIncomingRocket(self, eval->rocket_alert, marker_position);
 	G_bprint_debug (2, "> Temp path_score = %f\n", path_score);
 
 	// If we'd pickup an item as we travel, negatively impact score
@@ -88,7 +106,7 @@ static float EvalPath(fb_path_eval_t* eval, qbool allowRocketJumps, qbool trace_
 
 	if (self->fb.avoiding) {
 		path_score -= PATH_AVOID_PENALTY;
-		G_bprint_debug (2, "> avoid penalty, final path_score %f\n", path_score);
+		G_bprint_debug (2, "> avoid penalty (%.3f vs %.3f, final path_score %f)\n", g_globalvars.time, eval->test_marker->fb.arrow_time, path_score);
 	}
 	else if (eval->goalentity_marker) {
 		float total_goal_time;
@@ -117,7 +135,8 @@ static float EvalPath(fb_path_eval_t* eval, qbool allowRocketJumps, qbool trace_
 	return path_score;
 }
 
-static void BotRouteEvaluation (qbool be_quiet, float lookahead_time, gedict_t* from_marker, gedict_t* to_marker, qbool rocket_alert, qbool rocket_jump_routes_allowed, vec3_t player_origin, vec3_t player_direction, qbool path_normal, qbool trace_bprint, float current_goal_time, float current_goal_time_125, float goal_late_time, float* best_score, gedict_t** next_marker, int* next_description, int* new_angle_hint, int* new_rj_frame_delay, float new_rj_angles[2])
+// FIXME: Breaking it up like this was useful for initial testing
+static void BotRouteEvaluation (qbool be_quiet, float lookahead_time, gedict_t* from_marker, gedict_t* to_marker, qbool rocket_alert, qbool rocket_jump_routes_allowed, vec3_t player_origin, vec3_t player_direction, qbool path_normal, qbool trace_bprint, float current_goal_time, float current_goal_time_125, float goal_late_time, gedict_t* player, float* best_score, gedict_t** next_marker, int* next_description, int* new_angle_hint, int* new_rj_frame_delay, float new_rj_angles[2])
 { 
 	fb_path_eval_t eval = { 0 };
 	int i = 0;
@@ -131,6 +150,7 @@ static void BotRouteEvaluation (qbool be_quiet, float lookahead_time, gedict_t* 
 	eval.goal_late_time = goal_late_time;
 	eval.lookahead_time_ = lookahead_time;
 	eval.be_quiet = be_quiet;
+	eval.player = player;
 
 	for (i = 0; i < NUMBER_PATHS; ++i) {
 		eval.description = from_marker->fb.paths[i].flags;
@@ -159,7 +179,8 @@ static void BotRouteEvaluation (qbool be_quiet, float lookahead_time, gedict_t* 
 void PathScoringLogic(
 	float goal_respawn_time, qbool be_quiet, float lookahead_time, qbool path_normal, vec3_t player_origin, vec3_t player_direction, gedict_t* touch_marker_,
 	gedict_t* goalentity_marker, qbool rocket_alert, qbool rocket_jump_routes_allowed,
-	qbool trace_bprint, float *best_score, gedict_t** linked_marker_, int* new_path_state, int* new_angle_hint, int* new_rj_frame_delay, float new_rj_angles[2]
+	qbool trace_bprint, gedict_t* player,
+	float *best_score, gedict_t** linked_marker_, int* new_path_state, int* new_angle_hint, int* new_rj_frame_delay, float new_rj_angles[2]
 )
 {
 	float current_goal_time = 0;
@@ -174,12 +195,13 @@ void PathScoringLogic(
 	G_bprint_debug (2, "  goal_respawn_time = %f\n", goal_respawn_time);
 	G_bprint_debug (2, "  path_normal = %s\n", path_normal ? "true" : "false");
 	G_bprint_debug (2, "  player_origin = [%f %f %f]\n", PASSVEC3(player_origin));
-	G_bprint_debug (2, "  touch_marker_ = %d (%s)\n", touch_marker_->fb.index, touch_marker_->s.v.classname);
-	G_bprint_debug (2, "  goalentity_marker  = %d (%s)\n", (goalentity_marker ? goalentity_marker->fb.index : -1), goalentity_marker ? goalentity_marker->s.v.classname : "(null)");
+	G_bprint_debug (2, "  touch_marker_ = %d (%s)\n", touch_marker_->fb.index + 1, touch_marker_->s.v.classname);
+	G_bprint_debug (2, "  goalentity_marker  = %d (%s)\n", (goalentity_marker ? goalentity_marker->fb.index + 1 : -1), goalentity_marker ? goalentity_marker->s.v.classname : "(null)");
 	G_bprint_debug (2, "  rocket_alert = %s\n", rocket_alert ? "true" : "false");
 	G_bprint_debug (2, "  rj_allowed = %s\n", rocket_jump_routes_allowed ? "true" : "false");
+	G_bprint_debug (2, "  player = %s\n", player && player->ct == ctPlayer ? player->s.v.netname : "(none)");
 	G_bprint_debug (2, "  *best_score = %f\n", *best_score);
-	G_bprint_debug (2, "  *linked_marker = %d (%s)\n", (*linked_marker_) ? (*linked_marker_)->fb.index : -1, (*linked_marker_) ? (*linked_marker_)->s.v.classname : "(null)");
+	G_bprint_debug (2, "  *linked_marker = %d (%s)\n", (*linked_marker_) ? (*linked_marker_)->fb.index + 1 : -1, (*linked_marker_) ? (*linked_marker_)->s.v.classname : "(null)");
 	G_bprint_debug (2, ") = \n");
 
 	if (goalentity_marker) {
@@ -214,6 +236,7 @@ void PathScoringLogic(
 		eval.be_quiet = be_quiet;
 		VectorCopy (player_origin, eval.player_origin);
 		VectorCopy (player_direction, eval.player_direction);
+		eval.player = player;
 
 		eval.test_marker = touch_marker_;
 
@@ -232,7 +255,7 @@ void PathScoringLogic(
 	// Evaluate all paths from touched marker to the goal entity
 	BotRouteEvaluation (
 		be_quiet, lookahead_time, touch_marker_, goalentity_marker, rocket_alert, rocket_jump_routes_allowed, player_origin, 
-		player_direction, path_normal, trace_bprint, current_goal_time, current_goal_time_125, goal_late_time, best_score, linked_marker_, 
+		player_direction, path_normal, trace_bprint, current_goal_time, current_goal_time_125, goal_late_time, player, best_score, linked_marker_, 
 		new_path_state, new_angle_hint, new_rj_frame_delay, new_rj_angles
 	);
 }

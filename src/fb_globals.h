@@ -34,6 +34,7 @@ typedef struct fb_path_eval_s {
 	float lookahead_time_;
 	vec3_t player_direction;
 	qbool be_quiet;
+	gedict_t* player;
 } fb_path_eval_t;
 
 // Globals used for general path-finding
@@ -351,7 +352,8 @@ void SetJumpFlag (gedict_t* player, qbool jumping, const char* explanation);
 void PathScoringLogic (
 	float goal_respawn_time, qbool be_quiet, float lookahead_time, qbool path_normal, vec3_t player_origin, vec3_t player_direction, gedict_t* touch_marker_,
 	gedict_t* goalentity_marker, qbool rocket_alert, qbool rocket_jump_routes_allowed,
-	qbool trace_bprint, float *best_score, gedict_t** linked_marker_, int* new_path_state, int* new_angle_hint, int* new_rj_frame_delay, float new_rj_angles[2]
+	qbool trace_bprint, gedict_t* player,
+	float *best_score, gedict_t** linked_marker_, int* new_path_state, int* new_angle_hint, int* new_rj_frame_delay, float new_rj_angles[2]
 );
 
 int BotVersionNumber (void);

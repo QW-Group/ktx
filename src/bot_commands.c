@@ -505,7 +505,10 @@ static void FrogbotsDebug (void)
 						int new_rj_frame_delay = 0;
 						float new_rj_angles[2] = { 0, 0 };
 
-						PathScoringLogic (to->fb.goal_respawn_time, false, 30, true, from->s.v.origin, player_direction, from, to, false, allow_rj, true, &best_score, &linked_marker_, &new_path_state, &new_angle_hint, &new_rj_frame_delay, new_rj_angles);
+						PathScoringLogic (
+							to->fb.goal_respawn_time, false, 30, true, from->s.v.origin, player_direction, from, to, false, allow_rj, true, NULL, 
+							&best_score, &linked_marker_, &new_path_state, &new_angle_hint, &new_rj_frame_delay, new_rj_angles
+						);
 
 						if (linked_marker_) {
 							G_sprint (self, PRINT_HIGH, "Finished: next marker %d (%s) \20%s\21, best_score %5.2f\n", linked_marker_->fb.index + 1, linked_marker_->s.v.classname, LocationName (PASSVEC3(linked_marker_->s.v.origin)), best_score);
@@ -1647,12 +1650,17 @@ void Bot_Print_Thinking (void)
 		return;
 
 	if (FrogbotOptionEnabled (FB_OPTION_SHOW_ROUTING_LOGIC)) {
+		gedict_t* goal = bot->s.v.goalentity ? &g_edicts[bot->s.v.goalentity] : NULL;
+
 		strlcat(data, "\n", sizeof(data));
 		strlcat (data, va ("  %s: %s (%d)\n", redtext ("Touch"), bot->fb.touch_marker ? bot->fb.touch_marker->s.v.classname : "(none)", bot->fb.touch_marker ? bot->fb.touch_marker->fb.index + 1 : -1), sizeof (data));
 		strlcat (data, va ("  %s: %s\n", redtext ("Looking"), bot->fb.look_object ? bot->fb.look_object->s.v.classname : "(nothing)"), sizeof (data));
 		strlcat (data, va ("  %s: %s (%d)\n", redtext ("Linked"), linked ? linked->s.v.classname : "?", linked ? linked->fb.index + 1 : -1), sizeof (data));
 		strlcat (data, va ("  %s: %s (%d)\n", redtext ("OldLinked"), oldlink ? oldlink->s.v.classname : "?", oldlink ? oldlink->fb.index + 1 : -1), sizeof (data));
-		strlcat (data, va ("  %s: %s\n", redtext ("GoalEnt"), bot->s.v.goalentity ? va ("%s (%d) (%f)", g_edicts[bot->s.v.goalentity].s.v.classname, g_edicts[bot->s.v.goalentity].fb.index + 1, g_edicts[bot->s.v.goalentity].fb.saved_goal_desire) : "(none)"), sizeof (data));
+		strlcat (data, va ("  %s: %s\n", redtext ("GoalEnt"), goal ? va ("%s (%d) (%f)", goal->s.v.classname, goal->fb.index + 1, goal->fb.saved_goal_desire) : "(none)"), sizeof (data));
+		if (goal && !strcmp(goal->s.v.classname, "player")) {
+			strlcat(data, va("   %s (touch %d)", goal->s.v.netname, goal->fb.touch_marker ? goal->fb.touch_marker->fb.index + 1 : -1), sizeof(data));
+		}
 	}
 
 	if (FrogbotOptionEnabled (FB_OPTION_SHOW_DUEL_LOGIC)) {

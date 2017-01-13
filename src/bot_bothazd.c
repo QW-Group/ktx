@@ -91,6 +91,7 @@ static void HazardTeleport(gedict_t* teleport, gedict_t* teleported_player) {
 	gedict_t* plr;
 
 	teleport->fb.arrow_time = max (teleport->fb.arrow_time, g_globalvars.time + ARROW_TIME_AFTER_TELEPORT);
+	teleport->fb.arrow_time_setby = teleported_player;
 
 	// If teleported bot already has flag set, don't set for others
 	//   (otherwise two bots can keep triggering the same logic and blocking each other)
