@@ -80,6 +80,7 @@ qbool race_command_checks( void );
 qbool race_is_started( void );
 
 static void race_update_pacemaker(void);
+static void race_clear_pacemaker(void);
 static void race_init_capture(void);
 static void race_save_position(void);
 static void race_finish_capture(qbool store);
@@ -1960,6 +1961,7 @@ static void race_route_now_custom( void )
 {
 	init_scores ();
 	race.active_route = 0; // mark this is a custom route now
+	race_clear_pacemaker();
 }
 
 void r_Xset( float t )
@@ -2285,6 +2287,7 @@ void r_falsestart( )
 	G_bprint(2, "%s set race start mode to %s\n", self->s.v.netname, redtext( race_falsestart_mode( race.falsestart ) ) );
 
 	read_topscores();
+	race_clear_pacemaker();
 }
 
 void r_all_break ( void )
@@ -2314,6 +2317,7 @@ void r_clear_route( void )
 	race_remove_ent();
 
 	G_bprint(2, "%s cleared the current route\n", self->s.v.netname );
+	race_clear_pacemaker();
 }
 
 void r_mode( )
@@ -2332,6 +2336,7 @@ void r_mode( )
 	G_bprint(2, "%s set race weapon mode to %s\n", self->s.v.netname, redtext( race_weapon_mode( race.weapon ) ) );
 
 	read_topscores();
+	race_clear_pacemaker();
 }
 
 qbool race_load_route( int route )
@@ -2428,6 +2433,8 @@ void r_route( void )
 		race_print_route_info( NULL );
 		G_bprint( 2, "Server loaded route %d\n", next_route );
 	}
+
+	race_clear_pacemaker();
 }
 
 void r_print( )
@@ -2678,7 +2685,9 @@ void race_route_create( void )
 	while (current && current != world)
 	{
 		// flag current entity to be removed next frame
-		SUB_RM_01(current);
+		if (streq(current->s.v.classname, "race_route_marker") || streq(current->s.v.classname, "race_route_start")) {
+			SUB_RM_01(current);
+		}
 
 		// route is too long, ignore
 		if (route_nodes >= sizeof(route) / sizeof(route[0])) {
@@ -2699,14 +2708,14 @@ void race_route_create( void )
 		route[route_nodes++] = current;
 
 		// no targetname => end
-		if (strnull(current->s.v.target))
+		if ((current->race_flags & RACEFLAG_TOUCH_RACEEND) || strnull(current->s.v.target))
 			break;
 
 		// move to next target
 		current = find(world, FOFS(s.v.targetname), current->s.v.target);
 
-		// next target must be route marker
-		if (current && strneq(current->s.v.classname, "race_route_marker")) {
+		// next target must be route marker, or end the race
+		if (current && !((current->race_flags & RACEFLAG_TOUCH_RACEEND) || streq(current->s.v.classname, "race_route_marker"))) {
 			G_bprint(2, "Expected route marker, found %s instead\n", current->s.v.classname);
 			return;
 		}
@@ -3609,8 +3618,7 @@ void race_pacemaker(void)
 		return;
 	}
 
-	guide_capture_count = 0;
-	guide_jump_count = 0;
+	race_clear_pacemaker();
 	capture = guide_captures;
 	while (race_fgets(buffer, sizeof(buffer)))
 	{
@@ -4013,4 +4021,9 @@ static void race_update_pacemaker(void)
 			}
 		}
 	}
+}
+
+static void race_clear_pacemaker(void)
+{
+	guide_jump_count = guide_capture_count = 0;
 }
