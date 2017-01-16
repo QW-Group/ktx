@@ -649,8 +649,6 @@ void FirstFrame	( )
 
 	RegisterCvar("_k_nospecs");  // internal usage, will reject spectators connection
 
-	RegisterCvar("_k_recordeddemoname");  // internal usage, name of last easyrecorded demo
-
 	RegisterCvar("k_noitems");
 
 	RegisterCvar("k_random_maplist"); // select random map from k_ml_XXX variables.

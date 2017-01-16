@@ -83,7 +83,7 @@ static void race_update_pacemaker(void);
 static void race_clear_pacemaker(void);
 static void race_init_capture(void);
 static void race_save_position(void);
-static void race_finish_capture(qbool store);
+static void race_finish_capture(qbool store, char* filename);
 static qbool race_pacemaker_enabled(void);
 static void race_pacemaker_race_start(void);
 static void race_pacemaker_remove(void);
@@ -947,6 +947,8 @@ static void race_end_point_touched (gedict_t* self, gedict_t* other)
 {
 	int i, timeposition, nameposition;
 	qbool istopscore;
+	char demoFileName[MAX_OSPATH];
+	char* pos;
 
 	// spawn a bit of meat
 	float speed = max( 600, vlen( other->s.v.velocity ) );
@@ -955,6 +957,12 @@ static void race_end_point_touched (gedict_t* self, gedict_t* other)
 	race_spawn_meat( other, "progs/gib2.mdl",     frac * speed + g_random() * (1.0 - frac) * speed );
 	race_spawn_meat( other, "progs/gib3.mdl",     frac * speed + g_random() * (1.0 - frac) * speed );
 	race_spawn_meat( other, "progs/h_player.mdl", frac * speed + g_random() * (1.0 - frac) * speed );
+
+	strlcpy(demoFileName, cvar_string("serverdemo"), sizeof(demoFileName));
+	pos = strchr(demoFileName, '.');
+	if (pos) {
+		*pos = '\0';
+	}
 
 	// Add marker for demos/clients
 	stuffcmd(other, "//ktx race end %f %f %f %f\n",
@@ -997,7 +1005,7 @@ static void race_end_point_touched (gedict_t* self, gedict_t* other)
 				other->s.v.netname
 			);
 
-			race_finish_capture(false);
+			race_finish_capture(false, "");
 		}
 		else
 		{
@@ -1023,10 +1031,12 @@ static void race_end_point_touched (gedict_t* self, gedict_t* other)
 				// add new top score
 				race.records[i].time = race.currentrace.time;
 				strlcpy(race.records[i].racername, other->s.v.netname, sizeof(race.records[i].racername));
-				if (race.race_recording)
-					strlcpy(race.records[i].demoname, cvar_string("_k_recordeddemoname"), sizeof(race.records[i].demoname));
-				else
+				if (race.race_recording) {
+					strlcpy(race.records[i].demoname, demoFileName, sizeof(race.records[i].demoname));
+				}
+				else {
 					memset(race.records[i].demoname, 0, sizeof(race.records[i].demoname));
+				}
 				race.records[i].distance = race.currentrace.distance;
 				race.records[i].maxspeed = race.currentrace.maxspeed;
 				race.records[i].avgspeed = race.currentrace.avgspeed / race.currentrace.avgcount;
@@ -1075,7 +1085,7 @@ static void race_end_point_touched (gedict_t* self, gedict_t* other)
 			G_bprint( 2, " %s\n", "place" );
 
 			istopscore = true;
-			race_finish_capture(timeposition == 0 || !blocked_record);
+			race_finish_capture(timeposition == 0 || !blocked_record, demoFileName);
 			race_start(false, "");
 		}
 	}
@@ -1089,7 +1099,7 @@ static void race_end_point_touched (gedict_t* self, gedict_t* other)
 			dig3s( "%.3f", race.currentrace.time / 1000 ),
 			redtext( "s" )
 		);
-		race_finish_capture(false);
+		race_finish_capture(false, demoFileName);
 	}
 }
 
@@ -3776,13 +3786,13 @@ static void race_init_capture(void)
 	race_store_position(0, PASSVEC3(racer->s.v.origin), racer->s.v.angles[0], racer->s.v.angles[1]);
 }
 
-static void race_finish_capture(qbool store)
+static void race_finish_capture(qbool store, char* filename)
 {
 	gedict_t* racer = race_get_racer();
 	if (racer) {
 		race_store_position(g_globalvars.time - race.start_time, PASSVEC3(racer->s.v.origin), racer->s.v.angles[0], racer->s.v.angles[1]);
 		if (store && race.race_recording) {
-			race_fwopen("race/%s.pos", cvar_string("_k_recordeddemoname"));
+			race_fwopen("race/%s.pos", filename);
 
 			if (race_fhandle >= 0) {
 				int i = 0;

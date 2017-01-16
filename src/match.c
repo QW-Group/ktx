@@ -2797,22 +2797,11 @@ void StartDemoRecord ()
 
 		if ( record )
 		{
-			char* easyrecord_name;
-
 			if( !strnull( cvar_string( "serverdemo" ) ) )
 				localcmd("cancel\n");  // demo is recording, cancel before new one
 
 			demoname = CompilateDemoName();
 			localcmd( "easyrecord \"%s\"\n", demoname );
-
-			// used for race
-			easyrecord_name = cvar_string("serverdemo");
-			if ( strnull(easyrecord_name) ) {
-				cvar_set( "_k_recordeddemoname", stripcaps( striphigh( demoname ) ) );
-			}
-			else {
-				cvar_set( "_k_recordeddemoname", easyrecord_name );
-			}
 		}
 	}
 }
