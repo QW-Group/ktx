@@ -3692,7 +3692,7 @@ static void race_pacemaker_announce(gedict_t* pacemaker)
 {
 	gedict_t* p;
 
-	for (p = world; p = find_plr(p); /**/) {
+	for (p = world; p = find_client(p); /**/) {
 		if (pacemaker) {
 			stuffcmd(p, "//ktx race pm %d\n", NUM_FOR_EDICT(pacemaker));
 		}
