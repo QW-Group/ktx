@@ -86,6 +86,7 @@ static void race_save_position(void);
 static void race_finish_capture(qbool store);
 static qbool race_pacemaker_enabled(void);
 static void race_pacemaker_race_start(void);
+static void race_pacemaker_remove(void);
 
 void StatsToFile ();
 
@@ -3837,6 +3838,7 @@ static void race_pacemaker_race_start(void)
 		}
 	}
 	race_remove_jump_markers();
+	race_pacemaker_remove();
 }
 
 static void race_update_pacemaker(void)
@@ -3889,10 +3891,7 @@ static void race_update_pacemaker(void)
 
 	// If the guide ends the map, remove pacemaker, leave the guides
 	if (guide_capture_pos >= guide_capture_count - 1) {
-		gedict_t* ent = race_pacemaker_entity(false);
-		if (ent) {
-			ent_remove(ent);
-		}
+		race_pacemaker_remove();
 	}
 
 	// Guide capture position
@@ -4026,4 +4025,13 @@ static void race_update_pacemaker(void)
 static void race_clear_pacemaker(void)
 {
 	guide_jump_count = guide_capture_count = 0;
+	race_pacemaker_remove();
+}
+
+static void race_pacemaker_remove(void)
+{
+	gedict_t* ent = race_pacemaker_entity(false);
+	if (ent) {
+		ent_remove(ent);
+	}
 }
