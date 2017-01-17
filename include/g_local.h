@@ -813,7 +813,6 @@ void		setwepall ( gedict_t *p );
 qbool       race_handle_event (gedict_t* player, gedict_t* object, const char* eventName);
 void        race_player_pre_think(void);
 void        race_player_post_think(void);
-qbool       race_end(gedict_t* racer);
 
 // globals.c
 
