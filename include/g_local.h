@@ -808,10 +808,12 @@ void		race_set_one_player_movetype_and_etc( gedict_t *p );
 
 gedict_t 	*race_get_racer( void );
 
-void		race_follow( void );
 void		setwepnone( gedict_t *p );
 void		setwepall ( gedict_t *p );
 qbool       race_handle_event (gedict_t* player, gedict_t* object, const char* eventName);
+void        race_player_pre_think(void);
+void        race_player_post_think(void);
+qbool       race_end(gedict_t* racer);
 
 // globals.c
 

@@ -240,8 +240,9 @@ void barrel_explode()
 {
 	self->s.v.takedamage = DAMAGE_NO;
 	self->s.v.classname = "explo_box";
+
 	// did say self.owner
-	T_RadiusDamage( self, self, 160, world, dtEXPLO_BOX );
+	T_RadiusDamage(self, self, 160, world, dtEXPLO_BOX);
 
 	WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
 	WriteByte( MSG_MULTICAST, TE_EXPLOSION );

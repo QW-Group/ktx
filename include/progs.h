@@ -612,7 +612,8 @@ typedef struct gedict_s {
 	int			race_chasecam_freelook; // disable server forcing v_angle on client
 	int			race_chasecam_view;	// does follow uses the chasecam or 1st person view
 	int			race_afk;			// counter for afk starts
-	qbool		racer;				// this player do race right now
+	qbool		racer;				// this player is actively racing right now
+	qbool       race_participant;   // this player participated in the current race
 	qbool		muted;				// this player produces no sound
 	int			hideentity;			// links to entity to hide in eye chasecam
 
@@ -714,7 +715,7 @@ typedef enum
 typedef struct
 {
 	raceRecord_t records[NUM_BESTSCORES];	// array of best scores information
-	raceRecord_t currentrace;	// curent score information
+	raceRecord_t currentrace[MAX_CLIENTS];	// curent score information
 
 	int						cnt;				// how much we actually have of routes, no more than MAX_ROUTES
 	int						active_route;		// which route active right now
@@ -748,6 +749,11 @@ typedef struct
 
 	int                 pacemaker_time;      // time of the current pacemaker route
 	char                pacemaker_nick[64];  // name of the current pacemaker
+
+	int                 racers_complete;     // number of players finished current race
+	int                 last_completion_time;// time of last player to complete the race
+	int                 last_completion_eq;  // number of players equalling the last completion time
+	int                 racers_competing;    // number of players starting current race
 } race_t;
 
 extern race_t			race; // whole race struct

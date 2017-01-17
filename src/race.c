@@ -87,6 +87,11 @@ static void race_finish_capture(qbool store, char* filename);
 static qbool race_pacemaker_enabled(void);
 static void race_pacemaker_race_start(void);
 static void race_pacemaker_remove(void);
+static void race_make_active_racer(gedict_t* r, gedict_t* s);
+static qbool race_end(gedict_t* racer);
+static char* race_position_string(int position);
+static gedict_t* race_find_race_participants(gedict_t* p);
+static qbool race_simultaneous(void);
 
 void StatsToFile ();
 
@@ -483,15 +488,27 @@ void race_set_route_weapon_mode( raceWeapoMode_t weapon )
 	race.route[race.cnt].weapon = weapon;
 }
 
+gedict_t* race_find_race_participants(gedict_t* p)
+{
+	p = find_plr(p);
+	while (p && !p->race_participant) {
+		p = find_plr(p);
+	}
+	return p;
+}
+
+gedict_t* race_find_racer(gedict_t* p)
+{
+	p = find_plr(p);
+	while (p && !p->racer) {
+		p = find_plr(p);
+	}
+	return p;
+}
+
 gedict_t *race_get_racer( void )
 {
-	gedict_t *p;
-
-	for ( p = world; ( p = find_plr( p ) ); )
-		if ( p->racer )
-			return p;
-
-	return NULL;
+	return race_find_racer(world);
 }
 
 //===========================================
@@ -757,22 +774,21 @@ int race_count_ready_players( void )
 void race_check_racer_falsestart( qbool nextracer )
 {
 	gedict_t *e;
-	gedict_t *racer = race_get_racer();
+	gedict_t *racer;
 
-	for ( e = world; ( e = ez_find( e, "race_cp_start" ) ); )
-	{
-		if ( ( racer->s.v.origin[0] != e->s.v.origin[0] )
-			&&  ( racer->s.v.origin[1] != e->s.v.origin[1] ) )
-		{
-			if ( nextracer )
-			{
-				race_cancel( true, "Run aborted, %s has %s\n", racer->s.v.netname, redtext( "false started" ) );
-			}
-			else
-			{
-				G_sprint( racer, 2, "Come back here!\n" );
-				VectorCopy( e->s.v.origin, racer->s.v.origin );
-				VectorSet( racer->s.v.velocity, 0, 0, 0 );
+	for (racer = world; racer = race_find_racer(racer); /**/) {
+		for (e = world; (e = ez_find(e, "race_cp_start")); ) {
+			if ((racer->s.v.origin[0] != e->s.v.origin[0])
+				&& (racer->s.v.origin[1] != e->s.v.origin[1])) {
+				if (nextracer) {
+					G_bprint(PRINT_HIGH, "\20%s\21 false-started\n", racer->s.v.netname);
+					race_end(racer);
+				}
+				else {
+					G_sprint(racer, 2, "Come back here!\n");
+					VectorCopy(e->s.v.origin, racer->s.v.origin);
+					VectorSet(racer->s.v.velocity, 0, 0, 0);
+				}
 			}
 		}
 	}
@@ -781,29 +797,28 @@ void race_check_racer_falsestart( qbool nextracer )
 void kill_race_idler( void )
 {
 	gedict_t *e;
-	gedict_t *racer = race_get_racer();
+	gedict_t *racer;
+	
+	for (racer = world; racer = race_find_racer(racer); /**/) {
+		// FIXME: Keep track of which start, any map with multiple starts would break
+		for (e = world; (e = ez_find(e, "race_cp_start")); ) {
+			if (racer->s.v.origin[0] >= e->s.v.absmin[0] && racer->s.v.origin[0] <= e->s.v.absmax[0] &&
+				racer->s.v.origin[1] >= e->s.v.absmin[1] && racer->s.v.origin[1] <= e->s.v.absmax[1]) {
+				racer->race_afk++;
 
-	if (!racer)
-		return;
-
-	for ( e = world; ( e = ez_find( e, "race_cp_start" ) ); )
-	{
-		if ( ( racer->s.v.origin[0] == e->s.v.origin[0] )
-			&&  ( racer->s.v.origin[1] == e->s.v.origin[1] ) )
-		{
-			racer->race_afk++;
-
-			if ( racer->race_afk < 3 )
-				race_cancel( true, "Run aborted, %s was %s to start\n", racer->s.v.netname, redtext( "too slow" ) );
-			else
-			{
-				race_cancel( true, "%s was %s of line-up for %s\n", racer->s.v.netname, redtext( "kicked out" ), redtext( "idling" ) );
-				racer->race_ready = 0;
+				if (racer->race_afk < 3) {
+					G_bprint(PRINT_HIGH, "Run aborted, %s was %s to start\n", racer->s.v.netname, redtext("too slow"));
+					race_end(racer);
+				}
+				else {
+					G_bprint(PRINT_HIGH, "%s was %s of line-up for %s\n", racer->s.v.netname, redtext("kicked out"), redtext("idling"));
+					race_end(racer);
+					racer->race_ready = 0;
+				}
 			}
-		}
-		else
-		{
-			racer->race_afk = 0;
+			else {
+				racer->race_afk = 0;
+			}
 		}
 	}
 }
@@ -812,10 +827,12 @@ void race_brighten_checkpoints( void )
 {
 	int i;
 	gedict_t *e;
-	gedict_t *racer = race_get_racer();
-
-	if ( !racer )
-		return;
+	gedict_t *racer;
+	int furthest_checkpoint = 0;
+	
+	for (racer = world; racer = race_find_race_participants(racer); /**/) {
+		furthest_checkpoint = max(furthest_checkpoint, racer->race_id);
+	}
 
 	for ( i = 1; i < nodeMAX; i++ )
 	{
@@ -826,7 +843,7 @@ void race_brighten_checkpoints( void )
 			e->s.v.effects   = 0; // remove effects
 			e->s.v.nextthink = 0; // stop thinking
 
-			if ( e->race_id == racer->race_id )
+			if ( e->race_id == furthest_checkpoint )
 				e->s.v.effects = ( EF_GREEN ); // set some green light for next checkpoint
 			else
 				e->s.v.effects = ( EF_RED ); // turn all others red
@@ -943,20 +960,72 @@ void race_sprint_checkpoint( gedict_t *player, gedict_t *cp )
 		G_sprint( player, 2, "%s\n", redtext( name_for_nodeType( cp->race_RouteNodeType ) ) );
 }
 
-static void race_end_point_touched (gedict_t* self, gedict_t* other)
+static void race_end_point_touched(gedict_t* self, gedict_t* other)
 {
-	int i, timeposition, nameposition;
-	qbool istopscore;
-	char demoFileName[MAX_OSPATH];
-	char* pos;
+	int player_num = NUM_FOR_EDICT(other) - 1;
+	float speed, frac;
+
+	// 
+	if (race.currentrace[player_num].time) {
+		return;
+	}
 
 	// spawn a bit of meat
-	float speed = max( 600, vlen( other->s.v.velocity ) );
-	float frac  = bound( 0, 0.8, 1 ); // non random fraction of the speed
-	race_spawn_meat( other, "progs/gib1.mdl",     frac * speed + g_random() * (1.0 - frac) * speed );
-	race_spawn_meat( other, "progs/gib2.mdl",     frac * speed + g_random() * (1.0 - frac) * speed );
-	race_spawn_meat( other, "progs/gib3.mdl",     frac * speed + g_random() * (1.0 - frac) * speed );
-	race_spawn_meat( other, "progs/h_player.mdl", frac * speed + g_random() * (1.0 - frac) * speed );
+	speed = max(600, vlen(other->s.v.velocity));
+	frac = bound(0, 0.8, 1); // non random fraction of the speed
+	race_spawn_meat(other, "progs/gib1.mdl", frac * speed + g_random() * (1.0 - frac) * speed);
+	race_spawn_meat(other, "progs/gib2.mdl", frac * speed + g_random() * (1.0 - frac) * speed);
+	race_spawn_meat(other, "progs/gib3.mdl", frac * speed + g_random() * (1.0 - frac) * speed);
+	race_spawn_meat(other, "progs/h_player.mdl", frac * speed + g_random() * (1.0 - frac) * speed);
+
+	// If multi-racing, report on position for this race
+	if (race.racers_competing > 1) {
+		char* position;
+		if (race.last_completion_time < race_time()) {
+			race.racers_complete += race.last_completion_eq + 1;
+			position = race_position_string(race.racers_complete);
+			G_bprint(PRINT_HIGH, "\20%s\21 finished%s%s \20%.3fs\21\n", other->s.v.netname, strnull(position) ? "" : " in ", position, race_time() / 1000.0f);
+			race.last_completion_eq = 0;
+		}
+		else {
+			position = race_position_string(race.racers_complete);
+			G_bprint(PRINT_HIGH, "\20%s\21 also finished%s \20%.3f\21\n", other->s.v.netname, strnull(position) ? "" : " in ", position, race_time() / 1000.0f);
+			++race.last_completion_eq;
+		}
+
+		if (race.racers_complete == 1) {
+			sound(other, CHAN_ITEM, "boss2/sight.wav", 1, ATTN_NONE);
+		}
+		else {
+			sound(other, CHAN_ITEM, "ambience/thunder1.wav", 1, ATTN_NONE);
+		}
+	}
+
+	// Add marker for demos/clients
+	{
+		stuffcmd(other, "//ktx race end %f %f %f %f\n",
+			race.currentrace[player_num].time,
+			race.currentrace[player_num].distance,
+			race.currentrace[player_num].maxspeed,
+			race.currentrace[player_num].avgcount ? race.currentrace[player_num].avgspeed / race.currentrace[player_num].avgcount : 0
+		);
+
+		race.currentrace[player_num].time = race_time(); // stop run timer
+	}
+
+	race_end(other);
+}
+
+static void race_over(void)
+{
+	char demoFileName[MAX_OSPATH];
+	int i, timeposition, nameposition;
+	qbool istopscore;
+	char* pos;
+	gedict_t* racer = NULL;
+	qbool keep_demo = false;
+	qbool blocked_record = race_pacemaker_enabled() && !cvar(RACE_PACEMAKER_LEGAL_RECORD);
+	qbool debug = cvar("developer");
 
 	strlcpy(demoFileName, cvar_string("serverdemo"), sizeof(demoFileName));
 	pos = strchr(demoFileName, '.');
@@ -964,143 +1033,159 @@ static void race_end_point_touched (gedict_t* self, gedict_t* other)
 		*pos = '\0';
 	}
 
-	// Add marker for demos/clients
-	stuffcmd(other, "//ktx race end %f %f %f %f\n",
-		race.currentrace.time,
-		race.currentrace.distance,
-		race.currentrace.maxspeed,
-		race.currentrace.avgspeed / race.currentrace.avgcount
-	);
-
-	race.currentrace.time = race_time(); // stop run timer
-
 	istopscore = false;
-	timeposition = nameposition = -1;
-
 	read_topscores();
 
-	// first, let's see if run time gets into top scores and if name is already ranked
-	for ( i = 0; i < NUM_BESTSCORES; i++ )
-	{
-		if ( race.currentrace.time < race.records[i].time )
-			if ( timeposition == -1 )
-				timeposition = i;
-
-		if ( streq( race.records[i].racername, other->s.v.netname ) )
-			nameposition = i;
+	if (debug) {
+		G_bprint(PRINT_HIGH, "Race over: %d participants\n", race.racers_competing);
 	}
-
-	// run time is within top scores range
-	if ( timeposition != -1 )
-	{
-		// if player didn't beat his own record
-		if ( ( nameposition < timeposition ) && ( nameposition != -1 ) )
-		{
-			sound( other, CHAN_ITEM, "ambience/thunder1.wav", 1, ATTN_NONE );
-
-			race_start( true, "Run %s in %s%s\n%s couldn't beat his best time\n",
-				redtext( "finished" ),
-				dig3s( "%.3f", race.currentrace.time / 1000 ),
-				redtext( "s" ),
-				other->s.v.netname
-			);
-
-			race_finish_capture(false, "");
+	for (racer = world; racer = race_find_race_participants(racer); /**/) {
+		int player_num = NUM_FOR_EDICT(racer) - 1;
+		if (debug) {
+			G_bprint(PRINT_HIGH, "Player: %d, %s\n", player_num, racer->s.v.netname);
 		}
-		else
-		{
-			qbool blocked_record = race_pacemaker_enabled() && !cvar(RACE_PACEMAKER_LEGAL_RECORD);
 
-			if (!blocked_record) {
-				// if player beat his own record or is not yet ranked
-				if (nameposition == -1)
-					nameposition = (NUM_BESTSCORES - 1);
+		if (!race.currentrace[player_num].time) {
+			// They didn't set a time
+			if (debug) {
+				G_bprint(PRINT_HIGH, "- didn't set a time\n");
+			}
+			continue;
+		}
 
-				if (is_valid_record(&race.records[nameposition])) {
-					// let's remove the old demo
-					if (!strnull(race.records[nameposition].demoname)) {
-						localcmd(va("sv_demoremove %s\n", race.records[nameposition].demoname));
+		// first, let's see if run time gets into top scores and if name is already ranked
+		timeposition = nameposition = -1;
+		for (i = 0; i < NUM_BESTSCORES; i++) {
+			if (race.currentrace[player_num].time < race.records[i].time) {
+				if (timeposition == -1) {
+					timeposition = i;
+				}
+			}
+
+			if (streq(race.records[i].racername, racer->s.v.netname)) {
+				nameposition = i;
+			}
+		}
+		if (debug) {
+			G_bprint(PRINT_HIGH, "- time %.3f, position %d, nameposition %d\n", race.currentrace[player_num].time, timeposition, nameposition);
+		}
+
+		// run time is within top scores range
+		if (timeposition != -1) {
+			// if player didn't beat his own record
+			if ((nameposition < timeposition) && (nameposition != -1)) {
+				if (race.racers_competing == 1) {
+					sound(racer, CHAN_ITEM, "ambience/thunder1.wav", 1, ATTN_NONE);
+					G_bprint(PRINT_HIGH, "Run %s in %s%s\n%s couldn't beat %s best time\n",
+						redtext("finished"),
+						dig3s("%.3f", race.currentrace[player_num].time / 1000),
+						redtext("s"),
+						racer->s.v.netname,
+						g_his(racer)
+					);
+				}
+			}
+			else {
+				if (!blocked_record) {
+					// if player beat his own record or is not yet ranked
+					if (nameposition == -1) {
+						nameposition = (NUM_BESTSCORES - 1);
+					}
+
+					if (is_valid_record(&race.records[nameposition])) {
+						// let's remove the old demo
+						if (!strnull(race.records[nameposition].demoname)) {
+							int demo_references = 0;
+
+							// one demo might now contain records for more than one player, so
+							//   only remove if this record is the last reference
+							for (i = 0; i < sizeof(race.records) / sizeof(race.records[0]); ++i) {
+								if (streq(race.records[nameposition].demoname, race.records[i].demoname)) {
+									++demo_references;
+								}
+							}
+
+							if (debug) {
+								G_bprint(PRINT_HIGH, "%s has %d references\n", race.records[nameposition].demoname, demo_references);
+							}
+							if (demo_references == 1) {
+								localcmd(va("sv_demoremove %s\n", race.records[nameposition].demoname));
+							}
+						}
+					}
+
+					// move old top scores down
+					for (i = nameposition; i > timeposition; i--) {
+						race.records[i] = race.records[i - 1];
+					}
+
+					// add new top score
+					race.records[i].time = race.currentrace[player_num].time;
+					strlcpy(race.records[i].racername, racer->s.v.netname, sizeof(race.records[i].racername));
+					if (race.race_recording) {
+						strlcpy(race.records[i].demoname, demoFileName, sizeof(race.records[i].demoname));
+					}
+					else {
+						memset(race.records[i].demoname, 0, sizeof(race.records[i].demoname));
+					}
+					race.records[i].distance = race.currentrace[player_num].distance;
+					race.records[i].maxspeed = race.currentrace[player_num].maxspeed;
+					race.records[i].avgspeed = race.currentrace[player_num].avgspeed / race.currentrace[player_num].avgcount;
+					race.records[i].weaponmode = race.weapon;
+					race.records[i].startmode = race.falsestart;
+					if (!QVMstrftime(race.records[i].date, sizeof(race.records[i].date), "%Y-%m-%d %H:%M:%S", 0))
+						race.records[i].date[0] = 0; // bad date
+
+					// save scores in file
+					write_topscores();
+
+					if (race.racers_competing == 1) {
+						if (!i) {
+							// first place! we go the extra mile
+							sound(racer, CHAN_ITEM, "boss2/sight.wav", 1, ATTN_NONE);
+							strlcpy(race.top_nick, racer->s.v.netname, sizeof(race.top_nick));
+						}
+						else {
+							sound(racer, CHAN_ITEM, "ambience/thunder1.wav", 1, ATTN_NONE);
+						}
+					}
+
+					if (!i) {
+						race.top_time = race.currentrace[player_num].time;
 					}
 				}
 
-				// move old top scores down
-				for (i = nameposition; i > timeposition; i--) {
-					race.records[i] = race.records[i - 1];
+				if (race.racers_competing == 1) {
+					G_bprint(2, "Run %s in %s%s\n",
+						redtext("finished"),
+						dig3s("%.3f", race.currentrace[player_num].time / 1000),
+						redtext("s")
+					);
 				}
 
-				// add new top score
-				race.records[i].time = race.currentrace.time;
-				strlcpy(race.records[i].racername, other->s.v.netname, sizeof(race.records[i].racername));
-				if (race.race_recording) {
-					strlcpy(race.records[i].demoname, demoFileName, sizeof(race.records[i].demoname));
-				}
-				else {
-					memset(race.records[i].demoname, 0, sizeof(race.records[i].demoname));
-				}
-				race.records[i].distance = race.currentrace.distance;
-				race.records[i].maxspeed = race.currentrace.maxspeed;
-				race.records[i].avgspeed = race.currentrace.avgspeed / race.currentrace.avgcount;
-				race.records[i].weaponmode = race.weapon;
-				race.records[i].startmode = race.falsestart;
-				if (!QVMstrftime(race.records[i].date, sizeof(race.records[i].date), "%Y-%m-%d %H:%M:%S", 0))
-					race.records[i].date[0] = 0; // bad date
+				G_bprint(PRINT_HIGH, "%s %s %s record\n",
+					racer->s.v.netname,
+					blocked_record ? "would have taken" : "took the",
+					race_position_string(timeposition + 1)
+				);
 
-				// save scores in file
-				write_topscores();
-
-				if (!i) {
-					// first place! we go the extra mile
-					sound(other, CHAN_ITEM, "boss2/sight.wav", 1, ATTN_NONE);
-					strlcpy(race.top_nick, other->s.v.netname, sizeof(race.top_nick));
-					race.top_time = race.currentrace.time;
-				}
-				else {
-					sound(other, CHAN_ITEM, "ambience/thunder1.wav", 1, ATTN_NONE);
-				}
+				keep_demo = timeposition == 0 || !blocked_record;
 			}
-
-			G_bprint( 2, "Run %s in %s%s\n%s %s ",
-				redtext( "finished" ),
-				dig3s( "%.3f", race.currentrace.time / 1000 ),
-				redtext( "s" ),
-				other->s.v.netname,
-				blocked_record ? "would have taken" : "took the"
-			);
-
-			switch ( timeposition + 1 )
-			{
-			case 1:
-				G_bprint( 2, "%s", redtext( "1st" ) );
-				break;
-			case 2:
-				G_bprint( 2, "%s", redtext( "2nd" ) );
-				break;
-			case 3:
-				G_bprint( 2, "%s", redtext( "3rd" ) );
-				break;
-			default:
-				G_bprint( 2, "%s%s", redtext( dig3( timeposition + 1 ) ) , redtext( "th" ) );
+		}
+		else {
+			// run time did not make it to top scores
+			if (race.racers_competing == 1) {
+				sound(racer, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE);
+				G_bprint(PRINT_HIGH, "Run %s in %s%s\n",
+					redtext("finished"),
+					dig3s("%.3f", race.currentrace[player_num].time / 1000),
+					redtext("s")
+				);
 			}
-
-			G_bprint( 2, " %s\n", "place" );
-
-			istopscore = true;
-			race_finish_capture(timeposition == 0 || !blocked_record, demoFileName);
-			race_start(false, "");
 		}
 	}
-	else
-	{
-		// run time did not make it to top scores
-		sound( other, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
-
-		race_start( true, "Run %s in %s%s\n",
-			redtext( "finished" ),
-			dig3s( "%.3f", race.currentrace.time / 1000 ),
-			redtext( "s" )
-		);
-		race_finish_capture(false, demoFileName);
-	}
+	race_start(!keep_demo, "");
+	race_finish_capture(keep_demo, demoFileName);
 }
 
 void race_node_touch()
@@ -1111,7 +1196,6 @@ void race_node_touch()
 	// no run in progress nor starting
 	if ( !race.status )
 	{
-		
 		if ( self->attack_finished >= g_globalvars.time )
 			return; // still in node touch cooldown
 
@@ -1138,12 +1222,14 @@ void race_node_touch()
 			race_end_point_touched(self, other);
 		}
 		else if (self->race_RouteNodeType == nodeCheckPoint) {
+			int player_num = NUM_FOR_EDICT(other) - 1;
+
 			stuffcmd(other, "//ktx race cp %d %f %f %f %f\n",
 				other->race_id,
-				race.currentrace.time,
-				race.currentrace.distance,
-				race.currentrace.maxspeed,
-				race.currentrace.avgcount ? race.currentrace.avgspeed / race.currentrace.avgcount : 0
+				race.currentrace[player_num].time,
+				race.currentrace[player_num].distance,
+				race.currentrace[player_num].maxspeed,
+				race.currentrace[player_num].avgcount ? race.currentrace[player_num].avgspeed / race.currentrace[player_num].avgcount : 0
 			);
 		}
 
@@ -1168,10 +1254,14 @@ void race_node_touch()
 		// do some sound
 		sound( other, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
 
-		if ( self->race_RouteNodeType == nodeCheckPoint )
-			race_start( true, "Run aborted, %s \220%d\221 touched in wrong order\n", redtext( name_for_nodeType( self->race_RouteNodeType ) ), self->race_id );
-		else
-			race_start( true, "Run aborted, %s touched in wrong order\n", redtext( name_for_nodeType( self->race_RouteNodeType ) ) );
+		if (self->race_RouteNodeType == nodeCheckPoint) {
+			G_bprint(PRINT_HIGH, "\20%s\21: %s \220%d\221 touched in wrong order\n", other->s.v.netname, redtext(name_for_nodeType(self->race_RouteNodeType)), self->race_id);
+			race_end(other);
+		}
+		else {
+			G_bprint(PRINT_HIGH, "\20%s\21: \220%s\221 touched in wrong order\n", other->s.v.netname, redtext(name_for_nodeType(self->race_RouteNodeType)));
+			race_end(other);
+		}
 
 		return;
 	}
@@ -1256,7 +1346,7 @@ void race_clear_race_fields( void )
 
 	for ( p = world; ( p = find_plr( p ) ); )
 	{
-		p->racer = false;
+		p->race_participant = p->racer = false;
 		p->race_id = 0;
 	}
 }
@@ -1438,6 +1528,7 @@ qbool race_can_go( qbool cancel )
 
 	if ( race.status )
 	{
+		// Multi-person racing: this is fine, means we can't find even one racer
 		if ( !race_get_racer() )
 		{
 			if ( cancel )
@@ -1450,32 +1541,44 @@ qbool race_can_go( qbool cancel )
 
 	if ( race.status == raceActive )
 	{
-		racer = race_get_racer();
+		int timeouts = 0;
+		int deaths = 0;
+		gedict_t* timeout_plr = NULL;
+		qbool race_ended = false;
 
-		if ( racer->s.v.health <= 0 )
-		{
-			if ( cancel )
-			{
+		// Multi-person racing: end individual racer's races if they die
+		for (racer = world; racer = race_find_racer(racer); /**/) {
+			if (racer->s.v.health <= 0 && cancel) {
 				// do some sound
-				sound( world, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
-				k_respawn( racer, false );
-				race_start( true, "Race aborted, %s died\n", racer->s.v.netname );
+				k_respawn(racer, false);
+				G_bprint(PRINT_HIGH, "\20%s\21 died\n", racer->s.v.netname);
+				race_ended |= race_end(racer);
 			}
 
-			return false;
-		}
-
-		if ( race.timeout < g_globalvars.time )
-		{
-			if ( cancel )
-			{
-				// do some sound
-				sound( world, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
-				race_start( true, "Race aborted, %s couldn't finish in time\n", racer->s.v.netname );
+			// Timeout everyone still racing
+			if (race.timeout < g_globalvars.time) {
+				if (cancel) {
+					race_ended |= race_end(racer);
+					timeout_plr = racer;
+					++timeouts;
+				}
 			}
-
-			return false;
 		}
+
+		// Reduce number of announcements
+		if (timeouts || deaths) {
+			// do some sound
+			sound(world, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE);
+			if (timeouts == 1 && timeout_plr) {
+				G_bprint(PRINT_HIGH, "\20%s\21 couldn't finish in time\n", timeout_plr->s.v.netname);
+			}
+			else if (timeouts > 1) {
+				G_bprint(PRINT_HIGH, "\20%d\21 players couldn't finish in time\n", timeouts);
+			}
+		}
+
+		// Race officially ends once everyone has stopped
+		return !race_ended;
 	}
 
 	return true;
@@ -1511,32 +1614,67 @@ void race_start( qbool cancelrecord, const char *fmt, ... )
 	if ( !race.timeout_setting )
 		race.timeout_setting = RACE_DEFAULT_TIMEOUT;
 
-	r = race_get_from_line();
-
-	if ( !r )
-	{
-		race_shutdown( "race_start: race_get_from_line() == NULL, shutdown race\n" );
-		return;
-	}
-
-	n = race_set_next_in_line();
-
-	if ( !n )
-	{
-		race_shutdown( "race_start: race_set_next_in_line() == NULL, shutdown race\n" );
-		return;
-	}
-
 	s = ez_find( world, classname_for_nodeType( nodeStart ) );
-
 	if ( !s )
 	{
 		race_shutdown( "race_start: can't find start checkpoint, shutdown race\n" );
 		return;
 	}
 
+	if (race_simultaneous()) {
+		// Everyone in queue gets to race
+		race.racers_competing = 0;
+		for (r = world; r = find_plr(r); /**/) {
+			if (r->ct == ctPlayer && r->race_ready) {
+				race_make_active_racer(r, s);
+				++race.racers_competing;
+			}
+		}
+	}
+	else {
+		r = race_get_from_line();
+		if ( !r ) {
+			race_shutdown( "race_start: race_get_from_line() == NULL, shutdown race\n" );
+			return;
+		}
+
+		n = race_set_next_in_line();
+		if ( !n ) {
+			race_shutdown( "race_start: race_set_next_in_line() == NULL, shutdown race\n" );
+			return;
+		}
+
+		race_make_active_racer(r, s);
+
+		if ( n != r ) {
+			G_sprint( n, 2, "Your are %s in line!\n", redtext( "next" ) );
+		}
+
+		race.racers_competing = 1;
+	}
+
+	// set light on next checkpoint
+	race_brighten_checkpoints();
+
+	// set proper move type for players
+	race_set_players_movetype_and_etc();
+
+	// remove some projectiles
+	remove_projectiles();
+
+	// autotrack - force switch pov to racer
+	ktpro_autotrack_on_race_status_changed();
+
+	// create pacemaker entity and announce to players
+	race_pacemaker_race_start();
+
+	race.last_completion_eq = race.racers_complete = 0;
+}
+
+static void race_make_active_racer(gedict_t* r, gedict_t* s)
+{
 	// mark him as racer
-	r->racer = true;
+	r->racer = r->race_participant = true;
 	ktpro_autotrack_on_powerup_take(r);
 	//G_bprint( 2, "%s is starting his race!\n", r->s.v.netname );
 
@@ -1559,28 +1697,7 @@ void race_start( qbool cancelrecord, const char *fmt, ... )
 
 	// telefrag anyone at this origin
 	teleport_player( r, r->s.v.origin, r->s.v.angles, TFLAGS_SND_DST );
-
-	if ( n != r )
-	{
-		G_sprint( n, 2, "Your are %s in line!\n", redtext( "next" ) );
-	}
-
-	// set light on next checkpoint
-	race_brighten_checkpoints();
-
-	// set proper move type for players
-	race_set_players_movetype_and_etc();
-
-	// remove some projectiles
-	remove_projectiles();
-
-	// autotrack - force switch pov to racer
-	ktpro_autotrack_on_race_status_changed();
-
-	// create pacemaker entity and announce to players
-	race_pacemaker_race_start();
 }
-
 
 //============================================
 //
@@ -1594,7 +1711,7 @@ void race_set_one_player_movetype_and_etc( gedict_t *p )
 	if ( match_in_progress || match_over )
 		return;
 
-	if ( p->race_chasecam && !p->racer )
+	if ( race.status && p->race_chasecam && !p->racer )
 		setwepnone( p );
 	else
 		setwepall( p );
@@ -1602,29 +1719,33 @@ void race_set_one_player_movetype_and_etc( gedict_t *p )
 	switch ( race.status )
 	{
 		case raceNone:
-		p->s.v.movetype	= MOVETYPE_WALK;
-		p->muted = false;
-		setmodel( p, "progs/player.mdl" );
-		break;
+			p->s.v.movetype	= MOVETYPE_WALK;
+			p->s.v.solid = SOLID_BBOX;
+			p->muted = false;
+			setmodel( p, "progs/player.mdl" );
+			break;
 
 		case raceCD:
-		if ( race.falsestart == raceFalseStartNo )
-			p->s.v.movetype	= ( p->racer ? MOVETYPE_NONE : MOVETYPE_WALK );
-		else
-			p->s.v.movetype	= MOVETYPE_WALK;
-		p->muted = ( p->racer ? false : true );
-		setmodel( p, ( p->racer ? "progs/player.mdl" : "" ) );
-		break;
+			if (race.falsestart == raceFalseStartNo) {
+				p->s.v.movetype = (p->racer ? MOVETYPE_NONE : MOVETYPE_WALK);
+			}
+			else {
+				p->s.v.movetype = MOVETYPE_WALK;
+			}
+			p->s.v.solid = SOLID_NOT;
+			p->muted = ( p->racer ? false : true );
+			setmodel( p, ( p->racer ? "progs/player.mdl" : "" ) );
+			break;
 
 		case raceActive:
-		p->s.v.movetype	=  MOVETYPE_WALK;
-		p->muted = ( p->racer ? false : true );
-		setmodel( p, ( p->racer ? "progs/player.mdl" : "" ) );
-		break;
+			p->s.v.movetype	=  MOVETYPE_WALK;
+			p->s.v.solid = SOLID_NOT;
+			p->muted = ( p->racer ? false : true );
+			setmodel( p, ( p->racer ? "progs/player.mdl" : "" ) );
+			break;
 
 		default:
-
-		G_Error( "race_set_one_player_movetype_and_etc: unknown race.status %d", race.status );
+			G_Error( "race_set_one_player_movetype_and_etc: unknown race.status %d", race.status );
 	}
 }
 
@@ -1695,6 +1816,7 @@ void race_chasecam_change ( void )
 	}
 }
 
+// FIXME: Allow player to toggle which racer they follow
 void race_follow( void )
 {
     gedict_t *racer = race_get_racer();
@@ -1706,85 +1828,85 @@ void race_follow( void )
     if ( !racer )
         return; // no racer found
 
-        if ( !self->racer && self->race_chasecam )
+    if ( !self->racer && self->race_chasecam )
+    {
+        switch ( self->race_chasecam_view )
         {
-            switch ( self->race_chasecam_view )
-            {
-                case 1: // 3rd person
-                    follow_distance = -120;
-                    upward_distance = 50;
-					self->hideentity = 0;
-            		VectorCopy( racer->s.v.v_angle, self->s.v.angles);
-                    break;
-                case 2: // hawk eye
-                    follow_distance = -50;
-                    upward_distance = 300;
-					self->hideentity = 0;
-					self->s.v.angles[0] = 90;
-					self->s.v.angles[1] = racer->s.v.angles[1];
-                    break;
-                case 3: // backpack ride
-                    follow_distance = -10;
-                    upward_distance = 0;
-					self->hideentity = EDICT_TO_PROG( racer ) ;
-					self->s.v.angles[0] = - racer->s.v.angles[0];
-					self->s.v.angles[1] = 180;
-                    break;
-                case 0: // 1st person - ok
-                    follow_distance = -10;
-                    upward_distance = 0;
-					self->hideentity = EDICT_TO_PROG( racer );  // in this mode we want to hide racer model for watcher's view
-            		VectorCopy( racer->s.v.v_angle, self->s.v.angles);
-					break;
-                default:
-					return;
-            }
-
-			if ( !self->race_chasecam_freelook )
-				self->s.v.fixangle = true; // force client v_angle
-
-            trap_makevectors( racer->s.v.angles );
-            VectorMA (racer->s.v.origin, follow_distance, g_globalvars.v_forward, self->s.v.origin);
-            VectorMA (self->s.v.origin, upward_distance, g_globalvars.v_up, self->s.v.origin);
-
-            // avoid positionning in walls
-            traceline( PASSVEC3( racer->s.v.origin ), PASSVEC3( self->s.v.origin ), false, racer );
-			VectorCopy( g_globalvars.trace_endpos, self->s.v.origin );
-
-			if ( g_globalvars.trace_fraction == 1 )
-           	{
-				VectorCopy(g_globalvars.trace_endpos, self->s.v.origin);
-            	VectorMA (self->s.v.origin, 10, g_globalvars.v_forward, self->s.v.origin);
-			}
-			else
-			{
-				VectorSubtract( g_globalvars.trace_endpos, racer->s.v.origin, delta );
-				vlen = VectorLength( delta );
-				vlen = vlen - 40;
-				VectorNormalize( delta );
-				VectorScale( delta, vlen, delta );
-				VectorAdd( racer->s.v.origin, delta, self->s.v.origin );
-			}
-
-			//if ( trap_pointcontents( PASSVEC3( self->s.v.origin ) ) == CONTENT_SKY )
-			//	G_bprint( 2, "SKY!\n" );
-
-			// smooth playing for ezq / zq
-			self->s.v.movetype = MOVETYPE_LOCK;
+            case 1: // 3rd person
+                follow_distance = -120;
+                upward_distance = 50;
+				self->hideentity = 0;
+            	VectorCopy( racer->s.v.v_angle, self->s.v.angles);
+                break;
+            case 2: // hawk eye
+                follow_distance = -50;
+                upward_distance = 300;
+				self->hideentity = 0;
+				self->s.v.angles[0] = 90;
+				self->s.v.angles[1] = racer->s.v.angles[1];
+                break;
+            case 3: // backpack ride
+                follow_distance = -10;
+                upward_distance = 0;
+				self->hideentity = EDICT_TO_PROG( racer ) ;
+				self->s.v.angles[0] = - racer->s.v.angles[0];
+				self->s.v.angles[1] = 180;
+                break;
+            case 0: // 1st person - ok
+                follow_distance = -10;
+                upward_distance = 0;
+				self->hideentity = EDICT_TO_PROG( racer );  // in this mode we want to hide racer model for watcher's view
+            	VectorCopy( racer->s.v.v_angle, self->s.v.angles);
+				break;
+            default:
+				return;
         }
 
-		if ( !self->racer && !self->race_chasecam )
-		{
-			// restore movement and show racer entity
-			self->s.v.movetype = MOVETYPE_WALK;
-			self->hideentity = 0;
+		if ( !self->race_chasecam_freelook )
+			self->s.v.fixangle = true; // force client v_angle
+
+        trap_makevectors( racer->s.v.angles );
+        VectorMA (racer->s.v.origin, follow_distance, g_globalvars.v_forward, self->s.v.origin);
+        VectorMA (self->s.v.origin, upward_distance, g_globalvars.v_up, self->s.v.origin);
+
+        // avoid positionning in walls
+        traceline( PASSVEC3( racer->s.v.origin ), PASSVEC3( self->s.v.origin ), false, racer );
+		VectorCopy( g_globalvars.trace_endpos, self->s.v.origin );
+
+		if ( g_globalvars.trace_fraction == 1 )
+        {
+			VectorCopy(g_globalvars.trace_endpos, self->s.v.origin);
+            VectorMA (self->s.v.origin, 10, g_globalvars.v_forward, self->s.v.origin);
 		}
+		else
+		{
+			VectorSubtract( g_globalvars.trace_endpos, racer->s.v.origin, delta );
+			vlen = VectorLength( delta );
+			vlen = vlen - 40;
+			VectorNormalize( delta );
+			VectorScale( delta, vlen, delta );
+			VectorAdd( racer->s.v.origin, delta, self->s.v.origin );
+		}
+
+		//if ( trap_pointcontents( PASSVEC3( self->s.v.origin ) ) == CONTENT_SKY )
+		//	G_bprint( 2, "SKY!\n" );
+
+		// smooth playing for ezq / zq
+		self->s.v.movetype = MOVETYPE_LOCK;
+    }
+
+	if ( !self->racer && !self->race_chasecam )
+	{
+		// restore movement and show racer entity
+		self->s.v.movetype = MOVETYPE_WALK;
+		self->hideentity = 0;
+	}
 }
 
 void race_think( void )
 {
 	gedict_t *racer;
-	gedict_t *p, *n;
+	gedict_t *p, *n = NULL;
 
 	race_update_pacemaker();
 
@@ -1838,7 +1960,12 @@ void race_think( void )
 					gedict_t *racer = race_get_racer();
 
 					// ok, time for next "tick" in coutdown
-					snprintf( cp_buf, sizeof( cp_buf ),	"%s racing in: %s\n", racer->s.v.netname, dig3( race.cd_cnt ) );
+					if (race_find_racer(racer)) {
+						snprintf(cp_buf, sizeof(cp_buf), "Racing in: %s\n", dig3(race.cd_cnt));
+					}
+					else {
+						snprintf(cp_buf, sizeof(cp_buf), "%s racing in: %s\n", racer->s.v.netname, dig3(race.cd_cnt));
+					}
 					snprintf ( tmp, sizeof( tmp ), "weapon: %s\n\n", redtext( race_weapon_mode( race.weapon ) ) );
 					strlcat( cp_buf, tmp, sizeof( cp_buf ) );
 
@@ -1860,8 +1987,9 @@ void race_think( void )
 					race_check_racer_falsestart( false );
 
 					// FIXME: yeah, nice make some utility for that
-					for( p = world; (p = find_client( p )); )
-						stuffcmd (p, "play buttons/switch04.wav\n");
+					for (p = world; (p = find_client(p)); ) {
+						stuffcmd(p, "play buttons/switch04.wav\n");
+					}
 
 					race.cd_next_think = g_globalvars.time + 1; // set next think one second later
 					race.cd_cnt--;
@@ -1873,15 +2001,13 @@ void race_think( void )
 			G_cp2all("GO!");
 
 			// FIXME: yeah, nice make some utility for that
-			for( p = world; (p = find_client( p )); )
+			for (p = world; (p = find_client(p)); ) {
 				//stuffcmd (p, "play enforcer/enfire.wav\n");
-				stuffcmd (p, "play weapons/pkup.wav\n");  // I like this one better -- deurk.
+				stuffcmd(p, "play weapons/pkup.wav\n");  // I like this one better -- deurk.
+			}
 
 			race.status = raceActive; // countdown ends, now we ready for race
-			race.currentrace.distance = 0; // initiate distance
-			race.currentrace.maxspeed = 0;
-			race.currentrace.avgspeed = 0;
-			race.currentrace.avgcount = 0;
+			memset(race.currentrace, 0, sizeof(race.currentrace)); // initiate distance
 			race_init_capture();
 
 			// check for falsestarts
@@ -1898,11 +2024,14 @@ void race_think( void )
 				char date[64];
 				if (!QVMstrftime(date, sizeof(date), "%Y%m%d%H%M%S", 0))
 					date[0] = '\0';
-				stuffcmd(racer, "//ktx race start %d %d %s\n",
-					race.weapon,
-					race.falsestart,
-					date
-				);
+
+				for (racer = world; racer = race_find_racer(racer); /**/) {
+					stuffcmd(racer, "//ktx race start %d %d %s\n",
+						race.weapon,
+						race.falsestart,
+						date
+					);
+				}
 			}
 
 			return;
@@ -1918,38 +2047,43 @@ void race_think( void )
 				return;
 
 			race_save_position();
+
 			if ( race_time() >= race.next_race_time )
 			{
 				vec3_t tmp;
 
 				race.next_race_time = race_time() + 100; // update race time each 100 ms
 
-				racer = race_get_racer ();
-				VectorSubtract( racer->s.v.origin, racer->s.v.oldorigin, tmp );
-				race.currentrace.distance += vlen( tmp );
+				for (racer = world; racer = race_find_racer(racer); /**/) {
+					int player_num = NUM_FOR_EDICT(racer) - 1;
+					raceRecord_t* raceStats = &race.currentrace[player_num];
+					float current_velocity = vlen(racer->s.v.velocity);
 
-				if ( vlen( racer->s.v.velocity ) > race.currentrace.maxspeed )
-					race.currentrace.maxspeed = vlen( racer->s.v.velocity );
+					VectorSubtract(racer->s.v.origin, racer->s.v.oldorigin, tmp);
+					raceStats->distance += vlen(tmp);
 
-				race.currentrace.avgspeed += vlen( racer->s.v.velocity );
-				race.currentrace.avgcount++;
+					raceStats->maxspeed = max(raceStats->maxspeed, current_velocity);
+					raceStats->avgspeed += current_velocity;
+					raceStats->avgcount++;
+				}
 
+				// FIXME: Multi-racing, multi-tracking
+				racer = race_get_racer();
+				if (!race_simultaneous()) {
+					n = race_get_from_line();
+				}
 				for( p = world; (p = find_client( p )); )
 				{
-					n = race_get_from_line();
-
-					if ( p->racer )
-					{
+					if ( p->racer ) {
 						G_centerprint( p, "%s", dig3s( "time: %.1f", race_time() / 1000.0 ) );
 					}
-					else
-					{
+					else {
 						G_centerprint( p, "following %s\n%s\nspeed: %4.1f\ntime: %s",
 							racer->s.v.netname,
 							( n == p ) ? redtext( "== you're next in line-up ==" ) : "",
 							vlen( racer->s.v.velocity ),
 							dig3s( "%3.1f", race_time() / 1000.0 )
-							);
+						);
 					}
 				}
 			}
@@ -2176,8 +2310,10 @@ void r_changestatus( float t )
 
 		case 2: // race_break
 
-			if ( self->racer && race.status )
-				race_start( true, "%s has quit the race\n", self->s.v.netname );
+			if (self->racer && race.status) {
+				G_bprint(PRINT_HIGH, "%s has quit the race\n", self->s.v.netname);
+				race_end(self);
+			}
 
 			set_player_race_ready( self, 0 );
 
@@ -2185,8 +2321,10 @@ void r_changestatus( float t )
 
 		case 3: // race_toggle
 
-			if ( self->racer && race.status )
-				race_start( true, "%s has quit the race\n", self->s.v.netname );
+			if (self->racer && race.status) {
+				G_bprint(PRINT_HIGH, "%s has quit the race\n", self->s.v.netname);
+				race_end(self);
+			}
 
 			set_player_race_ready( self, !self->race_ready );
 
@@ -2202,8 +2340,8 @@ void r_changestatus( float t )
 
 			// do some sound
 			sound( self, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
-
-			race_start( true, "%s aborted his run\n", self->s.v.netname );
+			G_bprint(PRINT_HIGH, "%s aborted %s run\n", self->s.v.netname, g_his(self));
+			race_end(self);
 
 			return;
 
@@ -3543,6 +3681,25 @@ qbool race_handle_event (gedict_t* player, gedict_t* entity, const char* eventNa
 			++race_capture_jump_pos;
 		}
 	}
+	else if (streq(eventName, "watermove")) {
+		if ( ( player->s.v.watertype == CONTENT_LAVA ) || ( player->s.v.watertype == CONTENT_SLIME ) ) {
+			if ( player->racer && race.status ) {
+				G_bprint(PRINT_HIGH, "%s failed %s run\n", player->s.v.netname, g_his(player));
+				race_end(player);
+				return true;
+			}
+		}
+	}
+	else if (streq(eventName, "kill")) {
+		if ( player->racer && race.status ) {
+			G_bprint(PRINT_HIGH, "%s canceled %s run\n", player->s.v.netname, g_his(player));
+			race_end(player);
+			return true;
+		}
+		else if ( player->race_chasecam ) {
+			return true;
+		}
+	}
 
 	return false;
 }
@@ -3759,6 +3916,10 @@ static void race_save_position(void)
 	if (!racer)
 		return;
 
+	// FIXME: Multiracing
+	if (race_find_racer(racer))
+		return;
+
 	if (race_capture_pos == 0 || race_capture_pos >= RACE_MAX_CAPTURES - 1)
 		return;
 
@@ -3783,6 +3944,10 @@ static void race_init_capture(void)
 	if (!racer)
 		return;
 
+	// FIXME: Multiracing
+	if (race_find_racer(racer))
+		return;
+
 	race_store_position(0, PASSVEC3(racer->s.v.origin), racer->s.v.angles[0], racer->s.v.angles[1]);
 }
 
@@ -3790,6 +3955,10 @@ static void race_finish_capture(qbool store, char* filename)
 {
 	gedict_t* racer = race_get_racer();
 	if (racer) {
+		// FIXME: Multiracing
+		if (race_find_racer(racer))
+			return;
+
 		race_store_position(g_globalvars.time - race.start_time, PASSVEC3(racer->s.v.origin), racer->s.v.angles[0], racer->s.v.angles[1]);
 		if (store && race.race_recording) {
 			race_fwopen("race/%s.pos", filename);
@@ -3938,7 +4107,8 @@ static void race_update_pacemaker(void)
 	{
 		// Advance closest marker until at the right position
 		gedict_t* racer = race_get_racer();
-		if (!racer) {
+		// FIXME: Multiracing
+		if (!racer || race_find_racer(racer)) {
 			guide_closest_pos = 0;
 		}
 		else if (guide_closest_pos < guide_capture_count) {
@@ -4043,5 +4213,102 @@ static void race_pacemaker_remove(void)
 	gedict_t* ent = race_pacemaker_entity(false);
 	if (ent) {
 		ent_remove(ent);
+	}
+}
+
+qbool race_end(gedict_t* racer)
+{
+	racer->racer = false;
+	racer->muted = true;
+	race_set_one_player_movetype_and_etc(racer);
+
+	if (race_get_racer() == NULL) {
+		race_over();
+		return true;
+	}
+
+	return false;
+}
+
+static char* race_position_string(int position)
+{
+	static char buffer[64];
+	char* positions[] = {
+		"1st place",
+		"2nd place",
+		"3rd place",
+		"4th place",
+		"5th place",
+		"6th place",
+		"7th place",
+		"8th place",
+		"9th place",
+		"10th place"
+	};
+
+	if (position >= 1 && position <= sizeof(positions) / sizeof(positions[0])) {
+		return positions[position - 1];
+	}
+	return "";
+}
+
+static qbool race_simultaneous(void)
+{
+	return true;
+}
+
+void race_player_post_think(void)
+{
+	if ( isRACE() )
+	{
+		// test for multirace
+		self->s.v.solid = SOLID_NOT;
+		setorigin (self, PASSVEC3( self->s.v.origin ) );
+	}
+
+	race_follow();
+}
+
+static int race_encode_user_command(gedict_t* player)
+{
+	int result = (player->s.v.button0 ? 1 : 0) + (player->s.v.button2 ? 2 : 0);
+
+	if (player->movement[0] > 0)
+		result += 4;
+	else if (player->movement[0] < 0)
+		result += 8;
+
+	if (player->movement[1] > 0)
+		result += 16;
+	else if (player->movement[1] < 0)
+		result += 32;
+
+	if (player->movement[2] > 0)
+		result += 64;
+	else if (player->movement[2] < 0)
+		result += 128;
+
+	return result;
+}
+
+void race_player_pre_think(void)
+{
+	if ( isRACE() )
+	{
+		// Set this player to solid so we trigger checkpoints & teleports during move
+		self->s.v.solid = (race.status == raceNone || self->racer ? SOLID_SLIDEBOX : SOLID_NOT);
+		setorigin (self, PASSVEC3( self->s.v.origin ) );
+
+		if ( self->ct == ctPlayer && !self->racer && race.status )
+		{
+			if ( self->race_chasecam )
+			{
+				self->s.v.flags = ( ( int ) ( self->s.v.flags ) ) | FL_JUMPRELEASED;
+			}
+		}
+		else if ( self->ct == ctPlayer && self->racer && race.status )
+		{
+			stuffcmd_flags (self, STUFFCMD_DEMOONLY, "//ucmd %f %d\n", g_globalvars.time, race_encode_user_command(self));
+		}
 	}
 }

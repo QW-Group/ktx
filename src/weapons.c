@@ -889,10 +889,10 @@ void T_MissileTouch()
 		other->deathtype = dtRL;
 		T_Damage( other, self, PROG_TO_EDICT( self->s.v.owner ), damg );
 	}
+
 	// don't do radius damage to the other, because all the damage
 	// was done in the impact
-
-	T_RadiusDamage( self, PROG_TO_EDICT( self->s.v.owner ), 120, other, dtRL );
+	T_RadiusDamage(self, PROG_TO_EDICT(self->s.v.owner), 120, other, dtRL);
 
 //  sound (self, CHAN_WEAPON, "weapons/r_exp3.wav", 1, ATTN_NORM);
 	normalize( self->s.v.velocity, tmp );
@@ -935,7 +935,7 @@ void W_FireRocket()
 	newmis->s.v.owner = EDICT_TO_PROG( self );
 	newmis->s.v.movetype = MOVETYPE_FLYMISSILE;
 	newmis->isMissile = true;
-	newmis->s.v.solid = SOLID_BBOX;
+	newmis->s.v.solid = SOLID_TRIGGER;
 
 // set newmis speed     
 	trap_makevectors( self->s.v.v_angle );
@@ -2332,7 +2332,7 @@ void W_WeaponFrame()
 
 	if ( isRACE() )
 	{
-		if ( self->ct == ctPlayer && !self->racer && race.status )
+		if ( self->ct == ctPlayer && !self->race_participant && race.status )
 		{
 		   	if ( self->s.v.button0 )
 		   		ChasecamToggleButton();

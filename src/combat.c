@@ -387,8 +387,8 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	// can't damage other players in race
 	if ( isRACE() && ( attacker != targ ) )
 	{
-			if ( targ->ct == ctPlayer || attacker->ct == ctPlayer )
-				return;
+		if ( targ->ct == ctPlayer || attacker->ct == ctPlayer )
+			return;
 	}
 
 	// ignore almost all damage in CA while coutdown
@@ -908,6 +908,56 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	self = oldself;
 }
 
+void T_RadiusDamageApply(gedict_t * inflictor, gedict_t * attacker, gedict_t* head, float damage, deathType_t dtype)
+{
+	float           points;
+	vec3_t          org;
+
+	if ( head->s.v.takedamage )
+	{
+		org[0] = inflictor->s.v.origin[0] - ( head->s.v.origin[0] + ( head->s.v.mins[0] + head->s.v.maxs[0] ) * 0.5 );
+		org[1] = inflictor->s.v.origin[1] - ( head->s.v.origin[1] + ( head->s.v.mins[1] + head->s.v.maxs[1] ) * 0.5 );
+		org[2] = inflictor->s.v.origin[2] - ( head->s.v.origin[2] + ( head->s.v.mins[2] + head->s.v.maxs[2] ) * 0.5 );
+		points = 0.5 * vlen( org );
+
+		if ( points < 0 )
+			points = 0;
+
+		points = damage - points;
+
+		if ( head == attacker )
+			points = points * 0.5;
+		// no out of water discharge damage if k_dis 2
+		else if ( cvar("k_dis") == 2 && dtLG_DIS == dtype && !head->s.v.waterlevel )
+			points = 0;
+
+		if ( points > 0 )
+		{
+			if ( CanDamage( head, inflictor ) )
+			{
+				head->deathtype = dtype;
+
+				dmg_is_splash = 1; // mark damage as splash
+
+				if ( cvar("k_instagib") || isRACE() ) // in instagib splash applied to inflictor only, for coil jump
+				{
+					if ( head == attacker )
+						T_Damage( head, inflictor, attacker, points );
+				}
+				else
+				{
+					// shamblers only take half damage from rocket/grenade explosions
+					if ( streq(head->s.v.classname, "monster_shambler") && !cvar("k_bloodfest") )
+						points = points / 2;
+					T_Damage( head, inflictor, attacker, points );
+				}
+
+				dmg_is_splash = 0; // unmark splash
+			}
+		}
+	}
+}
+
 /*
 ============
 T_RadiusDamage
@@ -915,9 +965,14 @@ T_RadiusDamage
 */
 void T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage, gedict_t * ignore, deathType_t dtype )
 {
-	float           points;
 	gedict_t       *head;
-	vec3_t          org;
+
+	if (isRACE()) {
+		attacker->s.v.solid = SOLID_BBOX;
+		T_RadiusDamageApply(inflictor, attacker, attacker, damage, dtype);
+		attacker->s.v.solid = SOLID_NOT;
+		return;
+	}
 
 	head = trap_findradius( world, inflictor->s.v.origin, damage + 40 );
 
@@ -925,49 +980,7 @@ void T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage, ge
 	{
 		if ( head != ignore )
 		{
-			if ( head->s.v.takedamage )
-			{
-				org[0] = inflictor->s.v.origin[0] - ( head->s.v.origin[0] + ( head->s.v.mins[0] + head->s.v.maxs[0] ) * 0.5 );
-				org[1] = inflictor->s.v.origin[1] - ( head->s.v.origin[1] + ( head->s.v.mins[1] + head->s.v.maxs[1] ) * 0.5 );
-				org[2] = inflictor->s.v.origin[2] - ( head->s.v.origin[2] + ( head->s.v.mins[2] + head->s.v.maxs[2] ) * 0.5 );
-				points = 0.5 * vlen( org );
-
-				if ( points < 0 )
-					points = 0;
-
-				points = damage - points;
-
-				if ( head == attacker )
-					points = points * 0.5;
-				// no out of water discharge damage if k_dis 2
-				else if ( cvar("k_dis") == 2 && dtLG_DIS == dtype && !head->s.v.waterlevel )
-					points = 0;
-
-				if ( points > 0 )
-				{
-					if ( CanDamage( head, inflictor ) )
-					{
-						head->deathtype = dtype;
-
-						dmg_is_splash = 1; // mark damage as splash
-
-						if ( cvar("k_instagib") || isRACE() ) // in instagib splash applied to inflictor only, for coil jump
-						{
-							if ( head == attacker )
-								T_Damage( head, inflictor, attacker, points );
-						}
-						else
-						{
-							// shamblers only take half damage from rocket/grenade explosions
-							if ( streq(head->s.v.classname, "monster_shambler") && !cvar("k_bloodfest") )
-								points = points / 2;
-							T_Damage( head, inflictor, attacker, points );
-						}
-
-						dmg_is_splash = 0; // unmark splash
-					}
-				}
-			}
+			T_RadiusDamageApply( inflictor, attacker, head, damage, dtype );
 		}
 		head = trap_findradius( head, inflictor->s.v.origin, damage + 40 );
 	}

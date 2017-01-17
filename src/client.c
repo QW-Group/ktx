@@ -47,34 +47,9 @@ void ImpulseCommands();
 void StartDie ();
 void ZeroFpsStats ();
 
-void race_start( qbool restart, const char *fmt, ... );
-void race_stoprecord( qbool cancel );
-
 void del_from_specs_favourites(gedict_t *rm);
 
 extern int g_matchstarttime;
-
-static int EncodeUserCommand (gedict_t* player)
-{
-	int result = (player->s.v.button0 ? 1 : 0) + (player->s.v.button2 ? 2 : 0);
-
-	if (player->movement[0] > 0)
-		result += 4;
-	else if (player->movement[0] < 0)
-		result += 8;
-
-	if (player->movement[1] > 0)
-		result += 16;
-	else if (player->movement[1] < 0)
-		result += 32;
-
-	if (player->movement[2] > 0)
-		result += 64;
-	else if (player->movement[2] < 0)
-		result += 128;
-
-	return result;
-}
 
 void CheckAll ()
 {
@@ -848,18 +823,8 @@ void ClientKill()
 		return;
 	}
 
-	if ( isRACE() )
-	{
-		if ( self->racer && race.status )
-		{
-			race_stoprecord( true );
-			race_start( true, "%s canceled his run\n", self->s.v.netname );
-			return;
-		}
-		else if ( self->race_chasecam )
-		{
-			return;
-		}
+	if ( isRACE() && race_handle_event(self, NULL, "kill") ) {
+		return;
 	}
 
 /*
@@ -1982,17 +1947,8 @@ void WaterMove()
 	}
 
 	// in race, touching lava or slime cancels the run
-	if ( isRACE() )
-	{
-		if ( ( self->s.v.watertype == CONTENT_LAVA ) || ( self->s.v.watertype == CONTENT_SLIME ) )
-		{
-			if ( self->racer && race.status )
-			{
-				race_stoprecord( true );
-				race_start( true, "%s failed his run\n", self->s.v.netname );
-				return;
-			}
-		}
+	if ( isRACE() && race_handle_event(self, NULL, "watermove") ) {
+		return;
 	}
 
 	if ( self->s.v.watertype == CONTENT_LAVA )
@@ -2168,7 +2124,6 @@ void ClientDisconnect()
 	if ( !CountPlayers() ) {
 		void Spawn_DefMapChecker( float timeout );
 		int old_matchless = k_matchLess;
-		void race_stoprecord( qbool cancel );
 
 		// Well, not quite sure if it OK, k_matchLess C global variable really must be set ONCE per map.
 		// At the same time, k_matchless cvar should be set ONCE per whole server run, so it should be OK.
@@ -2184,7 +2139,6 @@ void ClientDisconnect()
 		if ( isRACE() )
 		{
 			ToggleRace();
-			race_stoprecord( true );
 		}
 
 		// Execute configs/reset.cfg and set k_defmode.
@@ -2707,26 +2661,7 @@ void PlayerPreThink()
 
 	}
 
-	if ( isRACE() )
-	{
-		if ( race.status && !self->racer )
-			self->s.v.solid = SOLID_NOT;
-		else
-			self->s.v.solid	= SOLID_SLIDEBOX;
-		setorigin (self, PASSVEC3( self->s.v.origin ) );
-
-		if ( self->ct == ctPlayer && !self->racer && race.status )
-		{
-			if ( self->race_chasecam )
-			{
-				self->s.v.flags = ( ( int ) ( self->s.v.flags ) ) | FL_JUMPRELEASED;
-			}
-		}
-		else if ( self->ct == ctPlayer && self->racer && race.status )
-		{
-			stuffcmd_flags (self, STUFFCMD_DEMOONLY, "//ucmd %f %d\n", g_globalvars.time, EncodeUserCommand(self));
-		}
-	}
+	race_player_pre_think();
 
 // brokenankle included here
 	if ( self->s.v.button2 || self->brokenankle )
@@ -2984,8 +2919,8 @@ void CheckLightEffects( void )
 	if ( self->radsuit_finished > g_globalvars.time )
 		g = true;
 
-	if ( self->racer && !match_in_progress )
-		g = true; // RACE
+	//if ( self->racer && race.status && !match_in_progress )
+	//	g = true; // RACE (disabled with multi-racing)
 
 	if ( k_bloodfest && ISLIVE( self ) )
 		g = true;
@@ -2993,7 +2928,7 @@ void CheckLightEffects( void )
 	if ( self->super_damage_finished > g_globalvars.time )
 		b = true;
 
-	if ( !match_in_progress && !match_over && !k_matchLess && !self->ready && cvar( "k_sready" ) )
+	if ( !match_in_progress && !match_over && !k_matchLess && !self->ready && cvar( "k_sready" ) && !isRACE() )
 		b = true;
 
 	// apply all EF_xxx
@@ -3226,14 +3161,7 @@ void PlayerPostThink()
 
 	W_WeaponFrame();
 
-	if ( isRACE() )
-	{
-		// test for multirace
-		//self->s.v.solid = SOLID_BBOX;
-		setorigin (self, PASSVEC3( self->s.v.origin ) );
-	}
-
-	race_follow();
+	race_player_post_think();
 
 	{
 		float velocity = sqrt(self->s.v.velocity[0] * self->s.v.velocity[0] +
