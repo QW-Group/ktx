@@ -744,6 +744,8 @@ void FirstFrame	( )
 	RegisterCvarEx("k_race_pace_jumps", "0");
 	RegisterCvarEx("k_race_pace_resolution", "2");
 	RegisterCvarEx("k_race_pace_legal", "0");
+	RegisterCvarEx("k_race_pace_enabled", "0");
+	RegisterCvarEx("k_race_simultaneous", "0");
 	//RegisterCvarEx("k_race_topscores", "10");
 // }
 	RegisterCvar("k_idletime");

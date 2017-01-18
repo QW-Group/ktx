@@ -616,6 +616,7 @@ typedef struct gedict_s {
 	qbool       race_participant;   // this player participated in the current race
 	qbool		muted;				// this player produces no sound
 	int			hideentity;			// links to entity to hide in eye chasecam
+	int         race_closest_guide_pos; // when guide route loaded, this is closest position
 
 	// race_route_start entity fields
 	char*       race_route_name;            // the name of the route
@@ -700,6 +701,7 @@ typedef struct
 	char					date[64];
 	raceWeapoMode_t			weaponmode;					// weapon mode
 	raceFalseStartMode_t	startmode;				// start mode
+	int                     playernumber;
 } raceRecord_t;
  
 typedef enum

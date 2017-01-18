@@ -239,6 +239,7 @@ void race_chasecam_change( );
 void race_chasecam_freelook_change( );
 void race_download_record_demo( );
 void race_pacemaker(void);
+void race_simultaneous_toggle(void);
 // }
 
 // { CHEATS
@@ -571,6 +572,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_RSCOREDETAIL "show details about a record"
 #define CD_RDLDEMO      "download demo for a record"
 #define CD_RPACEMAKER   "set pacemaker"
+#define CD_RSIMULMODE   "toggle simultaneous racing"
 // }
 
 #define CD_NOSPECS      "allow/disallow spectators"
@@ -899,6 +901,7 @@ cmd_t cmds[] = {
 	{ "race_chasecam_freelook",     race_chasecam_freelook_change,  0,  CF_PLAYER,                              CD_RCHASECAMFL },
 	{ "race_dl_record_demo",        race_download_record_demo,      0,  CF_BOTH | CF_PARAMS,                    CD_RDLDEMO },
 	{ "race_pacemaker",             race_pacemaker,                 0,  CF_PLAYER | CF_PARAMS,                  CD_RPACEMAKER },
+	{ "race_simultaneous",          race_simultaneous_toggle,       0,  CF_PLAYER,                              CD_RSIMULMODE },
 // }
 	{ "nospecs",     nospecs,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOSPECS },
 	{ "noitems",     noitems,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOITEMS },
@@ -1321,9 +1324,9 @@ void ShowOpts()
 			"זביענבדכף.. best/last weapon dropped\n"
 			"היףדטבעחו.. underwater discharges\n"
 			"ףילומדו.... toggle spectator talk\n"
-			"%s..... toggle midair mode\n" 
-			"%s..... toggle grenade mode\n" 
-			"%s..... toggle instagib mode\n", redtext("midair"), redtext("gren_mode"), redtext("instagib"));
+			"%s..... toggle midair mode\n"
+			"%s.. toggle grenade mode\n"
+			"%s... toggle instagib mode\n", redtext("midair"), redtext("gren_mode"), redtext("instagib"));
 }
 
 void ShowQizmo()
