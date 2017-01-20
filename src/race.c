@@ -3359,12 +3359,39 @@ void race_add_standard_routes( void )
 	}
 	else if ( streq( g_globalvars.mapname, "slide8" ) )
 	{
+		extern int SP_trigger_custom_push();
+		gedict_t* push;
+		gedict_t* ent;
+		gedict_t* oldself;
+
 		if ( !race_route_add_start() )
 			return; // we are full
 
 		race_add_route_node(    0,  -85,   20, 0, 90, nodeStart );
 		race_add_route_node( -777, 2527, -360, 0,  0, nodeCheckPoint );
 		race_add_route_node( -456,  -64, -876, 0,  0, nodeEnd );
+
+		// create extra push before lava pit
+		push = spawn();
+		if (!push) {
+			return;
+		}
+
+		// Create push over the lava pit
+		VectorSet(push->s.v.origin, -2110, 2550, -850);
+		VectorSet(push->s.v.size, 250, 250, 50);
+		VectorSet(push->s.v.movedir, -0.5, 0, 0.5);
+		push->speed = 120;
+		self = push;
+		SP_trigger_custom_push();
+		oldself = self;
+
+		// Remove hurt indicators around lava pit
+		for (ent = world; ent = findradius_ignore_solid(ent, push->s.v.origin, 300); /**/) {
+			if (streq(ent->s.v.classname, "trigger_hurt")) {
+				ent_remove(ent);
+			}
+		}
 
 		race_set_route_name( "Slide 8", "top \215 bottom" );
 		race_set_route_timeout( 40 );
