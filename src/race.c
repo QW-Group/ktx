@@ -1732,7 +1732,10 @@ void race_set_one_player_movetype_and_etc( gedict_t *p )
 	{
 		case raceNone:
 			p->s.v.movetype	= MOVETYPE_WALK;
-			p->s.v.solid = SOLID_BBOX;
+			if (p->s.v.solid != SOLID_BBOX) {
+				p->s.v.solid = SOLID_BBOX;
+				setorigin( p, PASSVEC3( p->s.v.origin ) );
+			}
 			p->muted = false;
 			setmodel( p, "progs/player.mdl" );
 			break;
@@ -1744,14 +1747,20 @@ void race_set_one_player_movetype_and_etc( gedict_t *p )
 			else {
 				p->s.v.movetype = MOVETYPE_WALK;
 			}
-			p->s.v.solid = SOLID_NOT;
+			if (p->s.v.solid != SOLID_NOT) {
+				p->s.v.solid = SOLID_NOT;
+				setorigin( p, PASSVEC3( p->s.v.origin ) );
+			}
 			p->muted = ( p->racer ? false : true );
 			setmodel( p, ( p->racer ? "progs/player.mdl" : "" ) );
 			break;
 
 		case raceActive:
 			p->s.v.movetype	=  MOVETYPE_WALK;
-			p->s.v.solid = SOLID_NOT;
+			if (p->s.v.solid != SOLID_NOT) {
+				p->s.v.solid = SOLID_NOT;
+				setorigin( p, PASSVEC3( p->s.v.origin ) );
+			}
 			p->muted = ( p->racer ? false : true );
 			setmodel( p, ( p->racer ? "progs/player.mdl" : "" ) );
 			break;
