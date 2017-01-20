@@ -3732,7 +3732,7 @@ qbool race_handle_event (gedict_t* player, gedict_t* entity, const char* eventNa
 			// do some sound
 			sound( player, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
 
-			race_start( true, "Run aborted\n" );
+			race_end(player);
 
 			return true;
 		}
