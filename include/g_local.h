@@ -128,7 +128,8 @@ typedef enum
 	lsFFA,
 	lsCTF,
 	lsRA, 	// note no correspoding gameType_t for lsType
-	lsHM
+	lsHM,
+	lsRACE
 } lsType_t; // lastscores type
 
 #define DEATHTYPE( _dt_, _dt_str_ ) _dt_,
@@ -597,12 +598,14 @@ void execute_rules_reset(void);
 #define UM_FFA		( 1<<5  )
 #define UM_CTF		( 1<<6  )
 #define UM_1ON1HM	( 1<<7  )
+#define UM_RACEMODE ( 1<<31 )
 
 typedef struct usermode_s {
 	const char 	  *name;
 	const char 	  *displayname;
 	const char    *initstring;
 	int		um_flags;
+	int     race_plrs_per_team;
 } usermode;
 
 extern usermode um_list[];

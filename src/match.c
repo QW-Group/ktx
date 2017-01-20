@@ -30,6 +30,11 @@ void StartLogs();
 void StopLogs();
 void ClearDemoMarkers();
 
+void race_match_start(void);
+qbool race_match_mode(void);
+char* race_scoring_system_name(void);
+qbool race_can_cancel_demo(void);
+
 extern int g_matchstarttime;
 
 // Return count of players which have state cs_connected or cs_spawned.
@@ -1698,7 +1703,7 @@ void EndMatch ( float skip_log )
 
 	remove_projectiles();
 
-// s: zero the flag
+	// s: zero the flag
 	k_sudden_death = 0;
 
 	if( !strnull( tmp = cvar_string( "_k_host" ) ) )
@@ -1706,7 +1711,7 @@ void EndMatch ( float skip_log )
 
 	trap_lightstyle(0, "m");
 
-// spec silence
+	// spec silence
 	{
 		int fpd = iKey ( world, "fpd" );
 
@@ -1751,28 +1756,33 @@ void EndMatch ( float skip_log )
 		if( isTeam() || isCTF() )
 			CollectTpStats();
 
-		PlayersStats (); // all info about any player
+		if (isRACE()) {
+			extern void race_match_stats(void);
 
-		if ( !cvar("k_midair") )
-		{
-        	if( isTeam() || isCTF() )
-				SummaryTPStats (); // print summary stats like armos powerups weapons etc..
-
-        	if( !isDuel() ) // top stats only in non duel modes
-				TopStats (); // print top frags tkills deaths...
+			race_match_stats();
 		}
-		else
-		{
-			TopMidairStats();
+		else {
+			PlayersStats(); // all info about any player
+
+			if (!cvar("k_midair")) {
+				if (isTeam() || isCTF())
+					SummaryTPStats(); // print summary stats like armos powerups weapons etc..
+
+				if (!isDuel()) // top stats only in non duel modes
+					TopStats(); // print top frags tkills deaths...
+			}
+			else {
+				TopMidairStats();
+			}
+
+			if (isTeam() || isCTF())
+				TeamsStats(); // print basic info like frags for each team
+
+			if ((p = find(world, FOFCLSN, "ghost"))) // show legend :)
+				G_bprint(2, "\n\x83 - %s player\n\n", redtext("disconnected"));
+
+			ListDemoMarkers();
 		}
-
-		if( isTeam() || isCTF() )
-			TeamsStats (); // print basic info like frags for each team
-
-		if ( (p = find( world, FOFCLSN, "ghost" )) ) // show legend :)
-			G_bprint(2, "\n\x83 - %s player\n\n", redtext("disconnected"));
-
-		ListDemoMarkers();
 
 		lastscore_add(); // save game result somewhere, so we can show it later
 
@@ -1907,7 +1917,6 @@ void CheckOvertime()
 	}
 
 	if ( k_sudden_death ) {
-
 		G_bprint(2, "%s %s\n", SD_type_str(), redtext("overtime begins"));
 
 		// added timer removal at sudden death beginning
@@ -2132,6 +2141,10 @@ void SM_PrepareClients()
 		if ( isCA() )
 			continue;
 
+		// ignore  k_respawn() in case of race mode
+		if ( isRACE() )
+			continue;
+
 		k_respawn( p, false );
 	}
 }
@@ -2222,8 +2235,6 @@ void StartMatch ()
 
 	first_rl_taken = false; // no one took rl yet
 
-	race_shutdown( "" ); // remove all about race
-
 	SM_PrepareMap(); // remove/add some items from map regardind with dmm and game mode
 
 	HideSpawnPoints();
@@ -2290,6 +2301,9 @@ void StartMatch ()
 
 	if ( !self->cnt )
 		ent_remove( self ); // timelimit == 0, so match will end no due to timelimit but due to fraglimit or something
+
+	if ( isRACE() )
+		race_match_start();
 }
 
 // just check if someone using handicap
@@ -2344,7 +2358,7 @@ void PrintCountdown( int seconds )
 	if (matchtag[0])
 		strlcat(text, va("%s\n\n\n", matchtag), sizeof(text));
 
-	if ( !isRA() && !coop ) // useless in RA
+	if ( !isRA() && !coop && !isRACE() ) // useless in RA
 		strlcat(text, va("%s %2s\n", "Deathmatch", dig3(deathmatch)), sizeof(text));
 
 	if ( k_bloodfest )
@@ -2357,6 +2371,8 @@ void PrintCountdown( int seconds )
 		mode = redtext("CA");
 	else if( isHoonyMode() )
 		mode = redtext("Hoony");
+	else if( isRACE() )
+		mode = redtext("R A C E");
 	else if( isDuel() )
 		mode = redtext("D u e l");
 	else if ( isTeam() )
@@ -2372,14 +2388,22 @@ void PrintCountdown( int seconds )
 
 	if ( isCA() )
 		strlcat(text, va("%s %8s\n", "Wins", dig3(CA_wins_required())), sizeof(text));
+	if (isRACE())
+	{
+		if (race.round_number >= race.rounds) {
+			strlcat(text, va("Round %7s\n", redtext("final")), sizeof(text));
+		}
+		strlcat(text, va("%s %9s\n", "Pts", race_scoring_system_name()), sizeof(text));
+	}
 
 //	if ( cvar( "k_spw" ) != 3 )
+	if ( ! isRACE() )
 		strlcat(text, va("%s %4s\n", "Respawns", respawn_model_name_short( cvar( "k_spw" ) )), sizeof(text));
 
 	if (cvar("sv_antilag"))
 		strlcat(text, va("%s %5s\n", "Antilag", dig3((int)cvar("sv_antilag"))), sizeof(text));
 
-	if ( cvar("k_noitems") )
+	if ( cvar("k_noitems") && !isRACE() )
 		strlcat(text, va("%s %5s\n", "NoItems", redtext("on")), sizeof(text));
 
 	if ( cvar("k_midair") )
@@ -2395,10 +2419,10 @@ void PrintCountdown( int seconds )
 		strlcat(text, va("%s %5s\n", "Airstep", redtext("on")), sizeof(text));
 
 	vw_enabled = vw_available && cvar("k_allow_vwep") && cvar("k_vwep");
-	if ( vw_enabled )
+	if ( vw_enabled && ! isRACE() )
 		strlcat(text, va("%s %8s\n", "VWep", redtext("on")), sizeof(text));
 
-	if ( cvar("k_teamoverlay") && tp_num() && !isDuel() )
+	if ( cvar("k_teamoverlay") && tp_num() && !isDuel() && ! isRACE() )
 		strlcat(text, va("%s %3s\n", "TmOverlay", redtext("on")), sizeof(text));
 
 	if ( !isRA() ) // useless in RA
@@ -2449,8 +2473,8 @@ void PrintCountdown( int seconds )
 
 qbool isCanStart ( gedict_t *s, qbool forceMembersWarn )
 {
-	int k_lockmin     = ( isCA() ) ? 2 : cvar( "k_lockmin" );
-	int k_lockmax     = ( isCA() ) ? 2 : cvar( "k_lockmax" );
+	int k_lockmin     = ( isCA() || isRACE() ) ? 2 : cvar( "k_lockmin" );
+	int k_lockmax     = ( isCA() || isRACE() ) ? 2 : cvar( "k_lockmax" );
 	int k_membercount = cvar( "k_membercount" );
 	int i = CountRTeams();
 	int sub, nready;
@@ -2703,14 +2727,13 @@ char *CompilateDemoName ()
 	char *name, *vs;
 
 	demoname[0] = 0;
-
 	if ( isRA() )
 	{
 		strlcat( demoname, va("ra_%d", (int)CountPlayers()), sizeof( demoname ) );
 	}
-	else if ( isRACE() )
+	else if ( isRACE() && ! race_match_mode() )
 	{
-		strlcat( demoname, va("race"), sizeof( demoname ) );
+		strlcat( demoname, "race", sizeof( demoname ) );
 		for( vs = "_", p = world; (p = find_plr( p )); )
 		{
 			if ( strnull( name = getname( p ) ) || !( p->racer ) )
@@ -2723,6 +2746,8 @@ char *CompilateDemoName ()
 	else if ( isDuel() )
 	{
 		strlcat( demoname, "duel", sizeof( demoname ) );
+		if ( isRACE() )
+			strlcat( demoname, "_race", sizeof( demoname ) );
 		if ( cvar("k_midair") )
 			strlcat( demoname, "_midair", sizeof( demoname ) );
 		if ( cvar("k_instagib") )
@@ -2731,6 +2756,8 @@ char *CompilateDemoName ()
 		for( vs = "_", p = world; (p = find_plr( p )); )
 		{
 			if ( strnull( name = getname( p ) ) )
+				continue;
+			if ( isRACE() && !( p->race_participant ) )
 				continue;
 
 			strlcat( demoname, vs, sizeof( demoname ) );
@@ -2751,6 +2778,8 @@ char *CompilateDemoName ()
 			clt = 0; // no
 
 		strlcat( demoname, (isTeam() ? (clt ? va("%don%d", clt, clt) : "team"): "ctf"), sizeof( demoname ) );
+		if ( isRACE() )
+			strlcat( demoname, "_race", sizeof( demoname ) );
 
 		for( vs = "_", i = 0; i < MAX_CLIENTS; i++ )
 		{
@@ -2763,9 +2792,13 @@ char *CompilateDemoName ()
 		}
 	}
 	else if ( isFFA() ) {
+		if ( isRACE() )
+			strlcat( demoname, "race_", sizeof( demoname ) );
 		strlcat( demoname, va("ffa_%d", (int)CountPlayers()), sizeof( demoname ) );
 	}
 	else {
+		if ( isRACE() )
+			strlcat( demoname, "race_", sizeof( demoname ) );
 		strlcat( demoname, va("unknown_%d", (int)CountPlayers()), sizeof( demoname ) );
 	}
 
@@ -2926,6 +2959,7 @@ void StopTimer ( int removeDemo )
 
 	if (   removeDemo
 		&& ( !match_start_time || (g_globalvars.time - match_start_time ) < k_demo_mintime )
+		&& ( !isRACE() || race_can_cancel_demo() )
 		&& !strnull( cvar_string( "serverdemo" ) )
 	   )
 		localcmd("cancel\n");  // demo is recording and must be removed, do it
@@ -3096,13 +3130,13 @@ void PlayerReady ()
 	gedict_t *p;
 	float nready;
 
-	if ( isRACE() )
+	if ( isRACE() && ! race_match_mode() )
 	{
 		r_changestatus( 1 ); // race_ready
 		return;
 	}
 
-	if ( self->ct == ctSpec ) {
+	if ( self->ct == ctSpec && ! isRACE() ) {
 
 		if ( !cvar("k_auto_xonx") || k_matchLess ) {
 			G_sprint(self, 2, "Command not allowed\n");
@@ -3119,15 +3153,15 @@ void PlayerReady ()
 		for( p = world; (p = (match_in_progress ? find_spc( p ) : find_client( p ))); )
 			G_sprint(p, 2, "%s %s to play\n", self->s.v.netname, redtext("desire"));
 
-		CheckAutoXonX(g_globalvars.time < 10 ? true : false); // forse switch mode asap if possible after some time spend
+		CheckAutoXonX(g_globalvars.time < 10 ? true : false); // force switch mode asap if possible after some time spent
 
 		return;
 	}
 
 	if ( intermission_running || match_in_progress == 2 || match_over )
-			return;
+		return;
 
-	if ( k_practice ) { // #practice mode#
+	if ( k_practice && !isRACE() ) { // #practice mode#
 		G_sprint(self, 2, "%s\n", redtext("Server in practice mode"));
 		return;
 	}
@@ -3236,13 +3270,13 @@ void PlayerBreak ()
 	int votes;
 	gedict_t *p;
 
-	if ( isRACE() )
+	if ( isRACE() && ! race_match_mode() )
 	{
 		r_changestatus( 2 ); // race_break
 		return;
 	}
 
-	if ( self->ct == ctSpec )
+	if ( self->ct == ctSpec && ! isRACE() )
 	{
 		if ( !cvar("k_auto_xonx") || k_matchLess )
 		{

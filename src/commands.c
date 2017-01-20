@@ -240,6 +240,10 @@ void race_chasecam_freelook_change( );
 void race_download_record_demo( );
 void race_pacemaker(void);
 void race_simultaneous_toggle(void);
+void race_match_toggle(void);
+qbool race_match_mode(void);
+void race_switch_usermode(const char* displayName, int players_per_team);
+void race_scoring_system_toggle(void);
 // }
 
 // { CHEATS
@@ -573,6 +577,8 @@ const char CD_NODESC[] = "no desc";
 #define CD_RDLDEMO      "download demo for a record"
 #define CD_RPACEMAKER   "set pacemaker"
 #define CD_RSIMULMODE   "toggle simultaneous racing"
+#define CD_RMATCHMODE   "toggle race match mode"
+#define CD_RSCORINGMODE "toggle between scoring systems"
 // }
 
 #define CD_NOSPECS      "allow/disallow spectators"
@@ -902,6 +908,8 @@ cmd_t cmds[] = {
 	{ "race_dl_record_demo",        race_download_record_demo,      0,  CF_BOTH | CF_PARAMS,                    CD_RDLDEMO },
 	{ "race_pacemaker",             race_pacemaker,                 0,  CF_PLAYER | CF_PARAMS,                  CD_RPACEMAKER },
 	{ "race_simultaneous",          race_simultaneous_toggle,       0,  CF_PLAYER,                              CD_RSIMULMODE },
+	{ "race_match",                 race_match_toggle,              0,  CF_PLAYER,                              CD_RMATCHMODE },
+	{ "race_scoring",               race_scoring_system_toggle,     0,  CF_PLAYER,                              CD_RSCORINGMODE },
 // }
 	{ "nospecs",     nospecs,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOSPECS },
 	{ "noitems",     noitems,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOITEMS },
@@ -3150,14 +3158,14 @@ const char ctf_um_init[] =
 
 usermode um_list[] =
 {
-	{ "1on1", 	"\x93 on \x93",			_1on1_um_init,		UM_1ON1},
-	{ "2on2",	"\x94 on \x94",			_2on2_um_init,		UM_2ON2},
-	{ "3on3",	"\x95 on \x95",			_3on3_um_init,		UM_3ON3},
-	{ "4on4",	"\x96 on \x96",			_4on4_um_init,		UM_4ON4},
-	{ "10on10",	"\x93\x92 on \x93\x92",	_10on10_um_init,	UM_10ON10},
-	{ "ffa",	"ffa",					ffa_um_init,		UM_FFA},
-	{ "ctf",	"ctf",					ctf_um_init,		UM_CTF},
-	{ "hoonymode",	"HoonyMode",				_1on1hm_um_init,	UM_1ON1HM}
+	{ "1on1", 	"\x93 on \x93",			_1on1_um_init,		UM_1ON1, 1},
+	{ "2on2",	"\x94 on \x94",			_2on2_um_init,		UM_2ON2, 2},
+	{ "3on3",	"\x95 on \x95",			_3on3_um_init,		UM_3ON3, 3},
+	{ "4on4",	"\x96 on \x96",			_4on4_um_init,		UM_4ON4, 4},
+	{ "10on10",	"\x93\x92 on \x93\x92",	_10on10_um_init,	UM_10ON10, 10},
+	{ "ffa",	"ffa",					ffa_um_init,		UM_FFA, -1},
+	{ "ctf",	"ctf",					ctf_um_init,		UM_CTF, 0},
+	{ "hoonymode",	"HoonyMode",		_1on1hm_um_init,	UM_1ON1HM, 0}
 };
 
 int um_cnt = sizeof (um_list) / sizeof (um_list[0]);
@@ -3213,10 +3221,6 @@ void UserMode(float umode)
 
 	int k_free_mode = ( k_matchLess ? 5 : cvar( "k_free_mode" ) );
 
-	if ( !k_matchLess ) // allow for matchless mode
-	if ( !is_rules_change_allowed() )
-		return;
-
 	if ( umode < 0 ) {
 		sv_invoked = true;
 		umode *= -1;
@@ -3239,6 +3243,15 @@ void UserMode(float umode)
 	trap_CmdArgs( matchtag, sizeof( matchtag ) );
 
 	um = um_list[(int)umode].name;
+
+	if (isRACE()) {
+		race_switch_usermode(um, um_list[(int)umode].race_plrs_per_team);
+		return;
+	}
+
+	if ( !k_matchLess ) // allow for matchless mode
+		if ( !is_rules_change_allowed() )
+			return;
 
 	if ( streq(um, "ffa") && k_matchLess && cvar("k_use_matchless_dir") )
 		um = "matchless"; // use configs/usermodes/matchless instead of configs/usermodes/ffa in matchless mode
@@ -4738,6 +4751,7 @@ char *lastscores2str( lsType_t lst )
 		case lsCTF:  return "CTF";
 		case lsRA:   return "RA";
 		case lsHM:   return "HoonyMode";
+		case lsRACE: return "race";
 
 		default:	 return "unknown";
 	}
@@ -4826,6 +4840,10 @@ void lastscore_add ()
 
 	if ( lst == lsUnknown ) // sorry but something wrong
 		return;
+
+	if ( isRACE() ) {
+		lst = lsRACE;
+	}
 
 	if ( !QVMstrftime(date, sizeof(date), "%b %d, %H:%M:%S %Y", 0) )
 		date[0] = 0;

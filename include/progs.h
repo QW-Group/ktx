@@ -627,6 +627,7 @@ typedef struct gedict_s {
 	float       race_route_start_yaw;       // the player's initial yaw angle
 	float       race_route_start_pitch;     // the player's initial pitch angle
 	int         race_flags;                 // flags affecting this particular object (teleports only atm)
+	int         race_track;                 // ent# of person this player is tracking (0 for default)
 // }
 
 	int			trackent;			// pseudo spectating for players.
@@ -702,6 +703,7 @@ typedef struct
 	raceWeapoMode_t			weaponmode;					// weapon mode
 	raceFalseStartMode_t	startmode;				// start mode
 	int                     playernumber;
+	int                     position;
 } raceRecord_t;
  
 typedef enum
@@ -756,6 +758,9 @@ typedef struct
 	int                 last_completion_time;// time of last player to complete the race
 	int                 last_completion_eq;  // number of players equalling the last completion time
 	int                 racers_competing;    // number of players starting current race
+
+	int                 rounds;              // number of rounds in this match
+	int                 round_number;        // current round number
 } race_t;
 
 extern race_t			race; // whole race struct

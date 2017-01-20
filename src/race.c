@@ -4,6 +4,8 @@
 
 #include "g_local.h"
 
+void SP_info_intermission();
+
 #define MAX_TXTLEN	64
 #define TOP_FILE_VERSION 2
 #define POS_FILE_VERSION 2
@@ -23,6 +25,9 @@
 #define RACE_PACEMAKER_RESOLUTION_CVAR "k_race_pace_resolution"
 #define RACE_PACEMAKER_ENABLED_CVAR    "k_race_pace_enabled"
 #define RACE_SIMULTANEOUS_CVAR         "k_race_simultaneous"
+#define RACE_SCORINGSYSTEM_CVAR        "k_race_scoring_system"
+#define RACE_MATCH_CVAR                "k_race_match"
+#define RACE_MATCH_ROUNDS_CVAR         "k_race_match_rounds"
 #define RACE_PACEMAKER_HEADSTART_MIN  0.00f
 #define RACE_PACEMAKER_HEADSTART_MAX  1.00f
 #define RACE_PACEMAKER_HEADSTART_INCR 0.25f
@@ -31,6 +36,8 @@
 #define RACE_PACEMAKER_RESOLUTION_INCR 1
 
 #define RACE_PACEMAKER_TRAIL_COUNT     12
+#define RACE_MIN_MATCH_ROUNDS           3
+#define RACE_MAX_MATCH_ROUNDS          21
 
 #define RACE_INCR_PARAMS(name) (RACE_PACEMAKER_##name##_CVAR),(RACE_PACEMAKER_##name##_INCR),(RACE_PACEMAKER_##name##_MIN),(RACE_PACEMAKER_##name##_MAX)
 
@@ -61,6 +68,17 @@ typedef struct race_capture_playback_s {
 race_capture_t player_captures[MAX_CLIENTS];
 race_capture_playback_t guide;
 
+typedef struct race_player_match_info_s {
+	race_capture_t best_run_capture;
+	int wins;
+	int completions;
+	float times[RACE_MAX_MATCH_ROUNDS + 1];
+	float best_time;
+	float total_time;
+} race_player_match_info_t;
+
+static race_player_match_info_t player_match_info[MAX_CLIENTS];
+
 static void update_jump_markers(float race_time, int guide_start, int resolution);
 static gedict_t* race_jump_indicators[RACE_JUMP_INDICATORS];
 static float race_jump_indicator_times[RACE_JUMP_INDICATORS];
@@ -82,6 +100,9 @@ void kill_race_idler( void );
 void write_topscores( void );
 void read_topscores( void );
 void init_scores( void );
+qbool race_match_mode(void);
+qbool race_match_started(void);
+int race_award_points(int position, int participants);
 
 qbool is_rules_change_allowed( void );
 qbool race_command_checks( void );
@@ -101,6 +122,7 @@ static char* race_position_string(int position);
 static gedict_t* race_find_race_participants(gedict_t* p);
 static qbool race_simultaneous(void);
 static void race_update_closest_positions(void);
+static void race_match_round_end(char* demoFileName);
 
 void StatsToFile ();
 
@@ -183,7 +205,18 @@ static char race_settings[] =
 	"k_spw 1\n"
 	"k_noitems 1\n"
 	"pm_airstep 0\n"
-	"serverinfo ktxmode race\n";
+	"serverinfo ktxmode race\n"
+	"k_race_pace_jumps 0\n"
+	"k_race_pace_legal 0\n"
+	"k_race_pace_headstart 0.5\n"
+	"k_race_pace_resolution 2\n"
+	"k_race_pace_enabled 0\n"
+	"k_race_simultaneous 0\n"
+	"k_race_scoring_system 0\n"
+	"k_race_match 0\n" 
+	"k_race_match_rounds 9\n"
+	"timelimit 0\n"
+	"fraglimit 0\n";
 
 static char norace_settings[] =
 	"sv_silentrecord 0\n"
@@ -379,6 +412,8 @@ void race_init( void )
 	{
 		race.records[i].time = RACE_INVALID_RECORD_TIME;
 	}
+
+	race.rounds = bound(RACE_MIN_MATCH_ROUNDS, cvar(RACE_MATCH_ROUNDS_CVAR), RACE_MAX_MATCH_ROUNDS);
 }
 
 // clean up, so we can start actual match and there will be no some shit around
@@ -389,6 +424,7 @@ void race_shutdown( char *msg )
 	race_unready_all();
 	if ( cvar( "k_spm_show" ) )
 		ShowSpawnPoints();
+	race_set_players_movetype_and_etc();
 }
 
 // make all players not ready for race, silently
@@ -544,7 +580,9 @@ void race_record( void )
 {
 	if ( race.cd_cnt && cvar("k_race_autorecord") )
 	{
-		StartDemoRecord(); // start demo recording
+		if (strnull(cvar_string("serverdemo"))) {
+			StartDemoRecord(); // start demo recording
+		}
 		race.race_recording = true;
 	}
 
@@ -815,7 +853,11 @@ void kill_race_idler( void )
 				racer->s.v.origin[1] >= e->s.v.absmin[1] && racer->s.v.origin[1] <= e->s.v.absmax[1]) {
 				racer->race_afk++;
 
-				if (racer->race_afk < 3) {
+				if (race_match_mode()) {
+					G_bprint(PRINT_HIGH, "\20%s\21 was %s to start\n", racer->s.v.netname, redtext("too slow"));
+					race_end(racer);
+				}
+				else if (racer->race_afk < 3) {
 					G_bprint(PRINT_HIGH, "Run aborted, %s was %s to start\n", racer->s.v.netname, redtext("too slow"));
 					race_end(racer);
 				}
@@ -992,16 +1034,16 @@ static void race_end_point_touched(gedict_t* self, gedict_t* other)
 
 	// If multi-racing, report on position for this race
 	if (race.racers_competing > 1) {
-		char* position;
+		char* positionString;
 		if (race.last_completion_time < race_time()) {
 			race.racers_complete += race.last_completion_eq + 1;
-			position = race_position_string(race.racers_complete);
-			G_bprint(PRINT_HIGH, "\20%s\21 finished%s%s \20%.3fs\21\n", other->s.v.netname, strnull(position) ? "" : " in ", position, race_time() / 1000.0f);
+			positionString = race_position_string(race.racers_complete);
+			G_bprint(PRINT_HIGH, "\20%s\21 finished%s%s \20%.3fs\21\n", other->s.v.netname, strnull(positionString) ? "" : " in ", positionString, race_time() / 1000.0f);
 			race.last_completion_eq = 0;
 		}
 		else {
-			position = race_position_string(race.racers_complete);
-			G_bprint(PRINT_HIGH, "\20%s\21 also finished%s \20%.3f\21\n", other->s.v.netname, strnull(position) ? "" : " in ", position, race_time() / 1000.0f);
+			positionString = race_position_string(race.racers_complete);
+			G_bprint(PRINT_HIGH, "\20%s\21 also finished%s \20%.3f\21\n", other->s.v.netname, strnull(positionString) ? "" : " in ", positionString, race_time() / 1000.0f);
 			++race.last_completion_eq;
 		}
 
@@ -1015,14 +1057,16 @@ static void race_end_point_touched(gedict_t* self, gedict_t* other)
 
 	// Add marker for demos/clients
 	{
-		stuffcmd(other, "//ktx race end %f %f %f %f\n",
+		stuffcmd(other, "//ktx race end %f %f %f %f %d\n",
 			race.currentrace[player_num].time,
 			race.currentrace[player_num].distance,
 			race.currentrace[player_num].maxspeed,
-			race.currentrace[player_num].avgcount ? race.currentrace[player_num].avgspeed / race.currentrace[player_num].avgcount : 0
+			race.currentrace[player_num].avgcount ? race.currentrace[player_num].avgspeed / race.currentrace[player_num].avgcount : 0,
+			race.racers_complete
 		);
 
 		race.currentrace[player_num].time = race_time(); // stop run timer
+		race.currentrace[player_num].position = race.racers_complete;
 	}
 
 	race_end(other);
@@ -1196,8 +1240,16 @@ static void race_over(void)
 			}
 		}
 	}
-	race_finish_capture(keep_demo, demoFileName);
-	race_start(!keep_demo, "");
+
+
+	if (race_match_started()) {
+		race_match_round_end(demoFileName);
+	}
+	else {
+		// Continue match with next run
+		race_finish_capture(!keep_demo, demoFileName);
+		race_start(!keep_demo, "");
+	}
 }
 
 void race_node_touch()
@@ -1368,16 +1420,18 @@ void race_cancel( qbool cancelrecord, const char *fmt, ... )
 	va_list argptr;
 	char    text[1024];
 
-	va_start( argptr, fmt );
-	Q_vsnprintf( text, sizeof( text ), fmt, argptr );
-	va_end( argptr );
+	if (!race_match_started()) {
+		va_start( argptr, fmt );
+		Q_vsnprintf( text, sizeof( text ), fmt, argptr );
+		va_end( argptr );
 
-	race_stoprecord( cancelrecord );
+		race_stoprecord( cancelrecord );
 
-	G_cp2all( "" ); // clear centerprint
+		G_cp2all( "" ); // clear centerprint
 
-	if ( !strnull( text ) )
-		G_bprint( 2, "%s", text );
+		if ( !strnull( text ) )
+			G_bprint( 2, "%s", text );
+	}
 
 	race_clear_race_fields();
 
@@ -1538,13 +1592,10 @@ qbool race_can_go( qbool cancel )
 		return false;
 	}
 
-	if ( race.status )
-	{
+	if ( race.status ) {
 		// Multi-person racing: this is fine, means we can't find even one racer
-		if ( !race_get_racer() )
-		{
-			if ( cancel )
-			{
+		if ( !race_get_racer() ) {
+			if ( cancel ) {
 				race_start( true, "Race aborted, racer vanished\n" );
 			}
 			return false;
@@ -1562,17 +1613,26 @@ qbool race_can_go( qbool cancel )
 		for (racer = world; racer = race_find_racer(racer); /**/) {
 			if (racer->s.v.health <= 0 && cancel) {
 				// do some sound
-				k_respawn(racer, false);
-				G_bprint(PRINT_HIGH, "\20%s\21 died\n", racer->s.v.netname);
 				race_ended |= race_end(racer);
+				G_bprint(PRINT_HIGH, "\20%s\21 died\n", racer->s.v.netname);
+				k_respawn(racer, false);
+
+				if (race_ended) {
+					break;
+				}
 			}
 
 			// Timeout everyone still racing
 			if (race.timeout < g_globalvars.time) {
 				if (cancel) {
+					G_bprint(PRINT_HIGH, "Timing out: %s\n", racer->s.v.netname);
 					race_ended |= race_end(racer);
 					timeout_plr = racer;
 					++timeouts;
+
+					if (race_ended) {
+						break;
+					}
 				}
 			}
 		}
@@ -1613,7 +1673,7 @@ void race_start( qbool cancelrecord, const char *fmt, ... )
 	va_end( argptr );
 
 	// cancel it first, this will clear something what probably was't cleared before
-	race_cancel( cancelrecord, text );
+	race_cancel(cancelrecord, text);
 
 	// switch status to coutdown
 	race.status = raceCD;
@@ -1720,7 +1780,7 @@ static void race_make_active_racer(gedict_t* r, gedict_t* s)
 // well, this set some fields on players which help to not block racer
 void race_set_one_player_movetype_and_etc( gedict_t *p )
 {
-	if ( match_in_progress || match_over )
+	if ( match_over )
 		return;
 
 	if ( race.status && p->race_chasecam && !p->racer )
@@ -1837,6 +1897,43 @@ void race_chasecam_change ( void )
 	}
 }
 
+static void race_advance_chasecam_for_plr(gedict_t* plr)
+{
+	gedict_t* first_racer = race_get_racer();
+	gedict_t* racer = first_racer;
+	if (!first_racer) {
+		return;
+	}
+
+	if (!plr->race_track) {
+		plr->race_track = NUM_FOR_EDICT(racer);
+	}
+
+	racer = race_find_racer(&g_edicts[plr->race_track - 1]);
+	if (!racer) {
+		racer = first_racer;
+	}
+
+	plr->race_track = NUM_FOR_EDICT(racer);
+}
+
+static gedict_t* race_find_chasecam_for_plr(gedict_t* plr, gedict_t* racer)
+{
+	if (plr->race_track) {
+		int player_num = plr->race_track - 1;
+		if (player_num >= 0 && player_num < MAX_CLIENTS) {
+			gedict_t* tracked = &g_edicts[player_num];
+			while (tracked && tracked->ct == ctPlayer && !tracked->racer) {
+				tracked = race_find_racer(tracked);
+			}
+			if (tracked) {
+				racer = tracked;
+			}
+		}
+	}
+	return racer;
+}
+
 // FIXME: Allow player to toggle which racer they follow
 void race_follow( void )
 {
@@ -1851,6 +1948,8 @@ void race_follow( void )
 
     if ( !self->racer && self->race_chasecam )
     {
+		racer = race_find_chasecam_for_plr(self, racer);
+
         switch ( self->race_chasecam_view )
         {
             case 1: // 3rd person
@@ -1931,7 +2030,7 @@ void race_think( void )
 
 	race_update_pacemaker();
 
-	if ( match_in_progress || match_over )
+	if ( match_over )
 	{
 		race.status = raceNone;
 		return;
@@ -1990,16 +2089,26 @@ void race_think( void )
 					snprintf ( tmp, sizeof( tmp ), "weapon: %s\n\n", redtext( race_weapon_mode( race.weapon ) ) );
 					strlcat( cp_buf, tmp, sizeof( cp_buf ) );
 
-					if ( !strnull( race.top_nick ) )
-					{
-						snprintf ( tmp, sizeof( tmp ),	"best run: %s%s (by %s)", dig3s( "%.3f", race.top_time / 1000.0 ), redtext( "s" ), race.top_nick );
-						strlcat( cp_buf, tmp, sizeof( cp_buf ) );
-					}
+					if (race_match_mode()) {
+						strlcat(cp_buf, "round: ", sizeof(cp_buf));
 
-					if ( !strnull( race.pacemaker_nick ))
-					{
-						snprintf ( tmp, sizeof( tmp ),	"\npacemaker: %s%s (by %s)", dig3s( "%.3f", race.pacemaker_time / 1000.0 ), redtext( "s" ), race.pacemaker_nick );
-						strlcat( cp_buf, tmp, sizeof( cp_buf ) );
+						if (race.round_number >= race.rounds) {
+							strlcat(cp_buf, redtext("final\n"), sizeof(cp_buf));
+						}
+						else {
+							snprintf(tmp, sizeof(tmp), "%d/%d\n", race.round_number + 1, race.rounds);
+							strlcat(cp_buf, tmp, sizeof(cp_buf));
+						}
+					}
+					else {
+						if (!strnull(race.top_nick)) {
+							snprintf(tmp, sizeof(tmp), "best run: %s%s (by %s)", dig3s("%.3f", race.top_time / 1000.0), redtext("s"), race.top_nick);
+							strlcat(cp_buf, tmp, sizeof(cp_buf));
+						}
+						if (!strnull(race.pacemaker_nick)) {
+							snprintf(tmp, sizeof(tmp), "\npacemaker: %s%s (by %s)", dig3s("%.3f", race.pacemaker_time / 1000.0), redtext("s"), race.pacemaker_nick);
+							strlcat(cp_buf, tmp, sizeof(cp_buf));
+						}
 					}
 
 					G_cp2all( cp_buf );
@@ -2349,6 +2458,8 @@ void r_changefollowstatus( float t )
 
 void r_changestatus( float t )
 {
+	qbool match_enabled = race_match_mode();
+
 	if ( !race_command_checks() )
 		return;
 
@@ -2358,12 +2469,15 @@ void r_changestatus( float t )
 	switch ( (int)t )
 	{
 		case 1: // race_ready
+			if (match_enabled && race.status) {
+				G_sprint(self, PRINT_HIGH, "Cannot join match in progress\n");
+				return;
+			}
 			set_player_race_ready( self, 1 );
 
 			return;
 
 		case 2: // race_break
-
 			if (self->racer && race.status) {
 				G_bprint(PRINT_HIGH, "%s has quit the race\n", self->s.v.netname);
 				race_end(self);
@@ -2374,7 +2488,6 @@ void r_changestatus( float t )
 			return;
 
 		case 3: // race_toggle
-
 			if (self->racer && race.status) {
 				G_bprint(PRINT_HIGH, "%s has quit the race\n", self->s.v.netname);
 				race_end(self);
@@ -2988,6 +3101,22 @@ void SP_race_route_start( void )
 	self->s.v.think = ( func_t ) race_route_create;
 }
 
+void race_spawn_intermission(float x, float y, float z, float ang_x, float ang_y, float ang_z)
+{
+	gedict_t* intermission = spawn();
+	gedict_t* oldself = self;
+	if (!intermission) {
+		return;
+	}
+
+	intermission->s.v.classname = "info_intermission";
+	VectorSet(intermission->s.v.origin, x, y, z);
+	VectorSet(intermission->mangle, ang_x, ang_y, ang_z);
+	self = intermission;
+	SP_info_intermission();
+	oldself = self;
+}
+
 void race_add_standard_routes( void )
 {
 	if ( streq( g_globalvars.mapname, "mvdsv-kg" ) )
@@ -3341,6 +3470,8 @@ void race_add_standard_routes( void )
 		race_set_route_falsestart_mode( raceFalseStartNo );
 
 		race_route_add_end();
+
+		race_spawn_intermission(-1990, -615, 985, 25, 215, 0);
 	}
 	else if ( streq( g_globalvars.mapname, "slide7" ) )
 	{
@@ -3530,6 +3661,7 @@ void race_add_standard_routes( void )
         race_set_route_falsestart_mode( raceFalseStartNo );
 
         race_route_add_end();
+		race_spawn_intermission(2550, 2200, -745, 25, 235, 0);
     }
     else if ( streq( g_globalvars.mapname, "race2" ) )
     {
@@ -3545,6 +3677,7 @@ void race_add_standard_routes( void )
         race_set_route_falsestart_mode( raceFalseStartNo );
 
         race_route_add_end();
+		race_spawn_intermission(780, 3525, -1200, 15, 315, 0);
     }
     else if ( streq( g_globalvars.mapname, "race3" ) )
     {
@@ -3560,6 +3693,7 @@ void race_add_standard_routes( void )
         race_set_route_falsestart_mode( raceFalseStartNo );
 
         race_route_add_end();
+		race_spawn_intermission(-415, 1180, -200, 45, 45, 0);
     }
     else if ( streq( g_globalvars.mapname, "race4" ) )
     {
@@ -3575,7 +3709,9 @@ void race_add_standard_routes( void )
         race_set_route_falsestart_mode( raceFalseStartNo );
 
         race_route_add_end();
-    }
+
+		race_spawn_intermission(-1825, 1570, -845, 25, 145, 0);
+	}
     else if ( streq( g_globalvars.mapname, "race5" ) )
     {
 	    if ( !race_route_add_start() )
@@ -3590,6 +3726,7 @@ void race_add_standard_routes( void )
         race_set_route_falsestart_mode( raceFalseStartNo );
 
         race_route_add_end();
+		race_spawn_intermission(-2280, -1660, 735, 40, 40, 0);
     }
     else if ( streq( g_globalvars.mapname, "race6" ) )
     {
@@ -3605,6 +3742,7 @@ void race_add_standard_routes( void )
         race_set_route_falsestart_mode( raceFalseStartNo );
 
         race_route_add_end();
+		race_spawn_intermission(0, -575, -350, 55, 90, 0);
     }
     else if ( streq( g_globalvars.mapname, "race7" ) )
     {
@@ -3620,6 +3758,7 @@ void race_add_standard_routes( void )
         race_set_route_falsestart_mode( raceFalseStartNo );
 
         race_route_add_end();
+		race_spawn_intermission(1850, -2225, 1620, 20, 155, 0);
     }
     else if ( streq( g_globalvars.mapname, "race8" ) )
     {
@@ -3635,6 +3774,7 @@ void race_add_standard_routes( void )
         race_set_route_falsestart_mode( raceFalseStartNo );
 
         race_route_add_end();
+		race_spawn_intermission(-630, -1400, 900, 35, 225, 0);
     }
     else if ( streq( g_globalvars.mapname, "race9" ) )
     {
@@ -3650,7 +3790,8 @@ void race_add_standard_routes( void )
         race_set_route_falsestart_mode( raceFalseStartNo );
 
         race_route_add_end();
-    }
+		race_spawn_intermission(-2900, 1050, -260, 10, 315, 0);
+	}
     else if ( streq( g_globalvars.mapname, "race10" ) )
     {
         if ( !race_route_add_start() )
@@ -3665,7 +3806,8 @@ void race_add_standard_routes( void )
         race_set_route_falsestart_mode( raceFalseStartNo );
 
         race_route_add_end();
-    }
+		race_spawn_intermission(850, 2400, -2150, 45, 315, 0);
+	}
     else if ( streq( g_globalvars.mapname, "escape2a" ) )
     {
         if ( !race_route_add_start() )
@@ -3750,8 +3892,13 @@ void race_add_standard_routes( void )
 qbool race_handle_event (gedict_t* player, gedict_t* entity, const char* eventName)
 {
 	int player_num = NUM_FOR_EDICT(player) - 1;
-	if ( !player->racer )
+	if (!player->racer) {
+		if (streq(eventName, "jump") && player->race_chasecam) {
+			race_advance_chasecam_for_plr(player);
+		}
+
 		return false; // can't touch if not the racer
+	}
 
 	if (streq (eventName, "touch")) {
 		if (entity->race_flags & RACEFLAG_TOUCH_RACEFAIL)
@@ -4078,7 +4225,8 @@ static void race_finish_capture(qbool store, char* filename)
 
 		for (racer = world; racer = race_find_race_participants(racer); /**/) {
 			int player_num = NUM_FOR_EDICT(racer) - 1;
-			race_capture_t* capture = &player_captures[player_num];
+			race_capture_t* capture = race_match_mode() ? &player_match_info[player_num].best_run_capture : &player_captures[player_num];
+			float race_time = race_match_mode() ? player_match_info[player_num].best_time : race.currentrace[player_num].time;
 
 			// Didn't set a time?  Skip.
 			if (!race.currentrace[player_num].time)
@@ -4419,7 +4567,8 @@ static char* race_position_string(int position)
 
 static qbool race_simultaneous(void)
 {
-	return cvar(RACE_SIMULTANEOUS_CVAR);
+	// We don't support matches where the players go turn about
+	return race_match_mode() || cvar(RACE_SIMULTANEOUS_CVAR);
 }
 
 void race_player_post_think(void)
@@ -4487,4 +4636,382 @@ void race_simultaneous_toggle(void)
 		return;
 
 	cvar_toggle_msg(self, RACE_SIMULTANEOUS_CVAR, redtext("simultaneous racing"));
+}
+
+
+// match rules
+
+// ... scoring systems
+
+typedef struct race_score_system_s {
+	char* name;                 // friendly name, appears in countdown (keep <= 9 characters)
+	int positions[10];          // points allocated for being 1st, 2nd, 3rd etc
+	int complete;               // points allocated for completing the course
+	int beating;                // points allocated for each opponent beaten
+	int dnf_penalty;            // penalise anyone failing to finish (-1? - not use atm)
+	int round_max_diff;         // in duels, end early if frag_diff > round_max_diff * rounds_remaining 
+} race_score_system_t;
+
+// These are very basic, no competitions to base systems on
+static race_score_system_t scoring_systems[] = {
+	// Winner only: 1 frag for winning, for winner after x rounds (hoony-mode stylee)
+	{ "Win Only", { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, 0, 0, 1 },
+	// Scaled system: 1 frag for completing run, 1 frag for each opponent beaten, 1 bonus frag for winner
+	//   (better for more players... also gives penalty in duels to risky play, 3-0 instead of 3-1)
+	{ "Scaled", { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 1, 1, 0, 3 },
+	// Formula1: points allocated by position (winning-bonus/losing-penalty increases - for 4+ players really)
+	{ "Formula1", { 25, 18, 15, 12, 10, 8, 6, 4, 2, 1 }, 0, 0, 0, 25 }
+};
+
+#define NUM_SCORING_SYSTEMS (sizeof(scoring_systems) / sizeof(scoring_systems[0]))
+
+void race_scoring_system_toggle(void)
+{
+	int current = bound(0, (int)cvar(RACE_SCORINGSYSTEM_CVAR), NUM_SCORING_SYSTEMS - 1);
+
+	if (!race_command_checks()) {
+		return;
+	}
+
+	if (race_is_started() || match_in_progress) {
+		return;
+	}
+
+	current = (current + 1) % NUM_SCORING_SYSTEMS;
+	cvar_fset(RACE_SCORINGSYSTEM_CVAR, current);
+	G_bprint(PRINT_HIGH, "%s enabled the \20%s\21 scoring system\n", self->s.v.netname, scoring_systems[current].name);
+}
+
+int race_award_points(int position, int participants)
+{
+	int current = bound(0, (int)cvar(RACE_SCORINGSYSTEM_CVAR), NUM_SCORING_SYSTEMS - 1);
+	race_score_system_t* system = &scoring_systems[current];
+	int points = 0;
+
+	if (!race_match_mode()) {
+		return 0;
+	}
+
+	if (position <= 0) {
+		points += system->dnf_penalty;
+	}
+	else if (position >= 1 && position <= sizeof(system->positions) / sizeof(system->positions[0])) {
+		points = system->complete;
+
+		points += system->positions[position - 1];
+
+		// This also gives points for coming joint = with another player... change?
+		points += (participants - position) * system->beating;
+	}
+	return points;
+}
+
+char* race_scoring_system_name(void)
+{
+	int current = bound(0, (int)cvar(RACE_SCORINGSYSTEM_CVAR), NUM_SCORING_SYSTEMS - 1);
+
+	if (!race_match_mode()) {
+		return "???";
+	}
+
+	return scoring_systems[current].name;
+}
+
+// ... configuration
+
+qbool race_match_mode(void)
+{
+	return cvar(RACE_MATCH_CVAR);
+}
+
+void race_match_toggle(void)
+{
+	if ( !race_command_checks() )
+		return;
+
+	if ( race_is_started() )
+		return;
+
+	cvar_toggle_msg(self, RACE_MATCH_CVAR, redtext("match mode"));
+	cvar_fset("sv_silentrecord", cvar(RACE_MATCH_CVAR) ? 0 : 1);
+}
+
+typedef struct race_team_score_s {
+	char* name;
+	int wins;
+	int score;
+	int completions;
+	float best_time;
+	float total_time;
+} race_team_score_t;
+
+static int TeamSorter(const void* lhs_, const void* rhs_)
+{
+	const race_team_score_t* lhs = (const race_team_score_t*)lhs_;
+	const race_team_score_t* rhs = (const race_team_score_t*)rhs_;
+
+	if (lhs->score > rhs->score)
+		return -1;
+	if (rhs->score > lhs->score)
+		return 1;
+	return strcmp(lhs->name, rhs->name);
+}
+
+static void race_match_stats_print(char* title, race_team_score_t* scores, int team_count)
+{
+	int i;
+
+	G_bprint(2, "\n%s\n%s\n"
+		"Ÿ\n", redtext(title),
+		redtext("score  wins  avg-time  best-time  name"));
+	for (i = 0; i < team_count; ++i) {
+		char avg_time[20];
+		if (scores[i].completions) {
+			snprintf(avg_time, sizeof(avg_time), "%8.3f", (scores[i].total_time / 1000.0f) / scores[i].completions);
+		}
+		else {
+			strlcpy(avg_time, "   n/a  ", sizeof(avg_time));
+		}
+
+		G_bprint(PRINT_HIGH, "%5d  %4d  %s   %8.3f  %s\n", scores[i].score, scores[i].wins, avg_time, scores[i].best_time / 1000.0f, scores[i].name);
+	}
+}
+
+static void race_match_stats_apply(race_team_score_t* stats, gedict_t* player)
+{
+	int p_num = NUM_FOR_EDICT(player) - 1;
+
+	stats->score += player->s.v.frags;
+	stats->wins += player_match_info[p_num].wins;
+	stats->completions += player_match_info[p_num].completions;
+	if (player_match_info[p_num].best_time) {
+		if (stats->best_time == 0) {
+			stats->best_time = player_match_info[p_num].best_time;
+		}
+		else {
+			stats->best_time = min(stats->best_time, player_match_info[p_num].best_time);
+		}
+	}
+	if (player_match_info[p_num].completions) {
+		stats->total_time += player_match_info[p_num].total_time;
+	}
+}
+
+static void race_match_team_stats(void)
+{
+	gedict_t* p, *p2;
+	int teams_found = 0;
+	race_team_score_t teams[MAX_CLIENTS] = { 0 };
+
+	// keep track of players we've processed
+	for (p = world; p = race_find_race_participants(p); /**/) {
+		p->cnt = 0;
+	}
+
+	for (p = world; p = race_find_race_participants(p); /**/) {
+
+		if (!p->cnt) {
+			char* team = getteam(p);
+
+			teams[teams_found].name = team;
+			race_match_stats_apply(&teams[teams_found], p);
+
+			for (p2 = p; p2 = race_find_race_participants(p2); /**/) {
+				if (!p2->cnt) {
+					char* team2 = getteam(p2);
+
+					if (streq(team, team2)) {
+						race_match_stats_apply(&teams[teams_found], p2);
+						p2->cnt = 1;
+					}
+				}
+			}
+			++teams_found;
+		}
+	}
+
+	qsort(teams, teams_found, sizeof(teams[0]), TeamSorter);
+
+	race_match_stats_print("Team scores", teams, teams_found);
+}
+
+static void race_match_player_stats(void)
+{
+	gedict_t* p;
+	int teams_found = 0;
+	race_team_score_t teams[MAX_CLIENTS] = { 0 };
+
+	for (p = world; p = race_find_race_participants(p); /**/) {
+		int p_num = NUM_FOR_EDICT(p);
+
+		teams[teams_found].name = p->s.v.netname;
+		race_match_stats_apply(&teams[teams_found], p);
+		++teams_found;
+	}
+
+	race_match_stats_print("Player scores", teams, teams_found);
+}
+
+void race_match_stats(void)
+{
+	float best_time = RACE_INVALID_RECORD_TIME;
+	float best_avg_time = RACE_INVALID_RECORD_TIME;
+
+	// TODO: Think up and keep track of stats we want summarised/match
+	if (teamplay) {
+		race_match_team_stats();
+	}
+
+	race_match_player_stats();
+}
+
+void race_match_start(void)
+{
+	gedict_t* p;
+
+	// convert all match-ready players to race-ready
+	for (p = world; p = find_plr(p); /**/) {
+		p->race_ready = p->ready;
+	}
+
+	race.round_number = 0;
+	memset(player_match_info, 0, sizeof(player_match_info));
+	race_start(false, "");
+}
+
+qbool race_match_started(void)
+{
+	return race_match_mode() && (race.status || match_in_progress);
+}
+
+void race_switch_usermode(const char* displayName, int players_per_team)
+{
+	int maxClients = (players_per_team < 0 ? 26 : players_per_team * 2);
+
+	if ( !race_command_checks() )
+		return;
+
+	if ( race_is_started() )
+		return;
+
+	if (players_per_team == 0) {
+		G_sprint( self, 2, "%s is not a supported race mode\n", displayName );
+		return;
+	}
+
+	if (match_in_progress) {
+		G_sprint( self, 2, "Command is locked while %s is in progress\n", redtext( "match" ) );
+		return;
+	}
+
+	if (!race_match_mode()) {
+		race_match_toggle();
+	}
+
+	cvar_fset("maxclients", maxClients);
+	cvar_fset("k_maxclients", maxClients);
+	cvar_fset("teamplay", players_per_team > 0 ? 3 : 0);
+	if (players_per_team < 0) {
+		cvar_fset("k_mode", gtFFA);
+	}
+	else if (players_per_team == 1) {
+		cvar_fset("k_mode", gtDuel);
+	}
+	else {
+		cvar_fset("k_mode", gtTeam);
+	}
+
+	G_bprint(PRINT_HIGH, "%s %s %s\n", displayName, redtext("settings enabled by"), self->s.v.netname);
+}
+
+// Return true if new countdown should be started
+static void race_match_round_end(char* demoFileName)
+{
+	gedict_t* racer;
+
+	gedict_t *ed1, *ed2;
+	int score1, score2;
+	int sc;
+
+	// Award points for this round
+	for (racer = world; racer = race_find_race_participants(racer); /**/) {
+		int player_num = NUM_FOR_EDICT(racer) - 1;
+
+		racer->s.v.frags += race_award_points(race.currentrace[player_num].position, race.racers_competing);
+		if (race.currentrace[player_num].time) {
+			++player_match_info[player_num].completions;
+
+			if (player_match_info[player_num].best_time == 0 || player_match_info[player_num].best_time > race.currentrace[player_num].time) {
+				memcpy(&player_match_info[player_num].best_run_capture, &player_captures[player_num], sizeof(race_capture_t));
+				player_match_info[player_num].best_time = race.currentrace[player_num].time;
+			}
+
+			player_match_info[player_num].total_time += race.currentrace[player_num].time;
+			if (race.currentrace[player_num].position == 1) {
+				++player_match_info[player_num].wins;
+			}
+		}
+	}
+
+	ed1 = get_ed_scores1();
+	ed2 = get_ed_scores2();
+	score1 = get_scores1();
+	score2 = get_scores2();
+	if ((isDuel() || isFFA()) && ed1 && ed2) {
+		score1 = ed1->s.v.frags;
+		score2 = ed2->s.v.frags;
+	}
+	sc = score1 - score2;
+
+	// Advance round pointer
+	race.round_number = min(race.round_number + 1, race.rounds);
+	k_nochange = false;
+
+	if (race.round_number >= race.rounds) {
+		if (sc == 0) {
+			if (!teamplay) {
+				// Remove anyone apart from the top-scorers for deciding round
+				for (racer = world; racer = race_find_race_participants(racer); /**/) {
+					racer->race_ready = (racer->s.v.frags == score1);
+				}
+			}
+			else {
+				// Remove members of all teams not currently on top score...
+
+				// TODO: Support more than 2 teams, consistently with match mode in KTX
+				//    Can't see anything to remove losing teams on sudden death mode in
+				//    standard teamplay, so leaving them here too...  Does mean that a
+				//    third place team could win the match in final round
+			}
+		}
+		else {
+			// We have a winner, end the race
+			race_finish_capture(true, demoFileName);
+			EndMatch(false);
+			return;
+		}
+	}
+	else {
+		// Standard round... in duels and ffa, can finish as soon as leading player has unassailable lead
+		int rounds_remaining = (race.rounds - race.round_number);
+		int system_no = bound(0, (int)cvar(RACE_SCORINGSYSTEM_CVAR), NUM_SCORING_SYSTEMS - 1);
+
+		race_score_system_t* system = &scoring_systems[system_no];
+		if (system->round_max_diff && rounds_remaining * system->round_max_diff < sc) {
+			// We have winner, end the race
+			G_bprint(PRINT_HIGH, "%d points (%d rounds) available... ending match\n", rounds_remaining * system->round_max_diff, rounds_remaining);
+			race_finish_capture(true, demoFileName);
+			EndMatch(false);
+			return;
+		}
+	}
+
+	// Start next run
+	race_start(false, "");
+}
+
+qbool race_can_cancel_demo(void)
+{
+	// Always save demos as soon as a run is completed
+	return race.round_number == 0 && race.racers_complete == 0;
 }

@@ -1748,8 +1748,9 @@ void CheckRules()
 	if ( !match_in_progress )
 		return;
 
-    if ( fraglimit && self->s.v.frags >= fraglimit )
-        EndMatch( 0 );
+	if (fraglimit && self->s.v.frags >= fraglimit) {
+		EndMatch(0);
+	}
 }
 
 //============================================================================
@@ -3249,6 +3250,9 @@ void CheckTeamStatus( )
 
 	if ( !isTeam() && !isCTF() && !coop )
 		return; // non team game
+
+	if (isRACE())
+		return; // could advance in the future by working out ongoing positions and sending those?
 
 	if ( g_globalvars.time - lastTeamLocationTime < TEAM_LOCATION_UPDATE_TIME )
 		return;

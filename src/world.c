@@ -746,6 +746,9 @@ void FirstFrame	( )
 	RegisterCvarEx("k_race_pace_legal", "0");
 	RegisterCvarEx("k_race_pace_enabled", "0");
 	RegisterCvarEx("k_race_simultaneous", "0");
+	RegisterCvarEx("k_race_match", "0");
+	RegisterCvarEx("k_race_match_rounds", "9");
+	RegisterCvarEx("k_race_scoring_system", "0");
 	//RegisterCvarEx("k_race_topscores", "10");
 // }
 	RegisterCvar("k_idletime");
@@ -1255,7 +1258,7 @@ void FixRules ( )
 	{
     	if( (timelimit == 0 && fraglimit == 0) || timelimit > k_tt || timelimit < 0 )
     	{
-        	if ( !isHoonyMode() )
+        	if ( !isHoonyMode() && !isRACE() )
 				cvar_fset( "timelimit", timelimit = k_tt ); // sensible default if no max set
 
 			// NOTE: hoonymode works with fraglimit = 0, and timelimit = 0, and manages the game by frags directly
