@@ -816,6 +816,8 @@ void		setwepall ( gedict_t *p );
 qbool       race_handle_event (gedict_t* player, gedict_t* object, const char* eventName);
 void        race_player_pre_think(void);
 void        race_player_post_think(void);
+int         race_count_votes_req(float percentage);
+qbool       race_allow_map_vote(gedict_t* player);
 
 // globals.c
 

@@ -176,7 +176,12 @@ int get_votes_req( int fofs, qbool diff )
 
 	percent = bound(0.51, bound(51, percent, 100)/100, 1); // calc and bound percentage between 50% to 100%
 
-	vt_req  = ceil( percent * CountPlayers() );
+	if (isRACE() && fofs == OV_MAP) {
+		vt_req = race_count_votes_req(percent);
+	}
+	else {
+		vt_req = ceil(percent * CountPlayers());
+	}
 
 	if ( fofs == OV_ELECT )
 		vt_req = max(2, vt_req); // if election, at least 2 votes needed
@@ -280,6 +285,9 @@ int vote_get_maps ()
 
 		if ( !p->v.map )
 			continue; // player is not voted
+
+		if (!race_allow_map_vote(p))
+			continue;
 
 		for ( i = 0; i < MAX_CLIENTS; i++ ) {
 			if ( !maps_voted[i].map_id )

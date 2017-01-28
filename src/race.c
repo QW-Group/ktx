@@ -5015,3 +5015,28 @@ qbool race_can_cancel_demo(void)
 	// Always save demos as soon as a run is completed
 	return race.round_number == 0 && race.racers_complete == 0;
 }
+
+int race_count_votes_req(float percentage)
+{
+	int racers_ready;
+
+	// No-one ready or map recently started, so behave as normal
+	if (g_globalvars.time < 10 || !(racers_ready = race_count_ready_players())) {
+		return ceil(percentage * CountPlayers());
+	}
+
+	return racers_ready;
+}
+
+qbool race_allow_map_vote(gedict_t* player)
+{
+	int racers_ready;
+
+	// No-one ready or map recently started, so behave as normal
+	if (g_globalvars.time < 10 || !(racers_ready = race_count_ready_players())) {
+		return true;
+	}
+
+	return (racers_ready == 0 || player->race_ready);
+}
+
