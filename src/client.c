@@ -1874,9 +1874,6 @@ void PlayerJump()
 		if ( !isRA() || ( isWinner( self ) || isLoser( self ) ) )
 			sound( self, CHAN_BODY, "player/plyrjmp8.wav", 1, ATTN_NORM );
 
-		if ( isRACE() ) {
-			race_handle_event(self, NULL, "jump");
-		}
        	// JUMPBUG[
         // the engine checks velocity_z and won't perform the jump if it's < zero!
 

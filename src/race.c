@@ -1769,9 +1769,6 @@ static void race_make_active_racer(gedict_t* r, gedict_t* s)
 	// set proper origin
 	setorigin( r, PASSVEC3( s->s.v.origin ) );
 
-	// not tracking anyone
-	r->hideentity = 0;
-
 	// telefrag anyone at this origin
 	teleport_player( r, r->s.v.origin, r->s.v.angles, TFLAGS_SND_DST );
 }
@@ -1906,27 +1903,33 @@ static void race_advance_chasecam_for_plr(gedict_t* plr)
 {
 	gedict_t* first_racer = race_get_racer();
 	gedict_t* racer = first_racer;
+
 	if (!first_racer) {
 		return;
+	}
+
+	if (plr->race_track && g_edicts[plr->race_track].ct != ctPlayer) {
+		plr->race_track = NUM_FOR_EDICT(racer);
 	}
 
 	if (!plr->race_track) {
 		plr->race_track = NUM_FOR_EDICT(racer);
 	}
+	else {
+		racer = race_find_racer(&g_edicts[plr->race_track]);
+		if (!racer) {
+			racer = first_racer;
+		}
 
-	racer = race_find_racer(&g_edicts[plr->race_track - 1]);
-	if (!racer) {
-		racer = first_racer;
+		plr->race_track = NUM_FOR_EDICT(racer);
 	}
-
-	plr->race_track = NUM_FOR_EDICT(racer);
 }
 
 static gedict_t* race_find_chasecam_for_plr(gedict_t* plr, gedict_t* racer)
 {
 	if (plr->race_track) {
-		int player_num = plr->race_track - 1;
-		if (player_num >= 0 && player_num < MAX_CLIENTS) {
+		int player_num = plr->race_track;
+		if (player_num >= 1 && player_num <= MAX_CLIENTS) {
 			gedict_t* tracked = &g_edicts[player_num];
 			while (tracked && tracked->ct == ctPlayer && !tracked->racer) {
 				tracked = race_find_racer(tracked);
@@ -1936,6 +1939,7 @@ static gedict_t* race_find_chasecam_for_plr(gedict_t* plr, gedict_t* racer)
 			}
 		}
 	}
+	plr->race_track = NUM_FOR_EDICT(racer);
 	return racer;
 }
 
@@ -1952,6 +1956,8 @@ void race_follow( void )
 
     if ( !self->racer && self->race_chasecam )
     {
+		int orig = self->race_track;
+
 		racer = race_find_chasecam_for_plr(self, racer);
 
         switch ( self->race_chasecam_view )
@@ -2019,10 +2025,12 @@ void race_follow( void )
 		self->s.v.movetype = MOVETYPE_LOCK;
     }
 
-	if ( !self->racer && !self->race_chasecam )
-	{
+	if ( !self->racer && !self->race_chasecam ) {
 		// restore movement and show racer entity
 		self->s.v.movetype = MOVETYPE_WALK;
+		self->hideentity = 0;
+	}
+	else if (self->racer) {
 		self->hideentity = 0;
 	}
 }
@@ -3907,11 +3915,8 @@ void race_add_standard_routes( void )
 qbool race_handle_event (gedict_t* player, gedict_t* entity, const char* eventName)
 {
 	int player_num = NUM_FOR_EDICT(player) - 1;
-	if (!player->racer) {
-		if (streq(eventName, "jump") && player->race_chasecam) {
-			race_advance_chasecam_for_plr(player);
-		}
 
+	if (!player->racer) {
 		return false; // can't touch if not the racer
 	}
 
@@ -4632,7 +4637,16 @@ void race_player_pre_think(void)
 		{
 			if ( self->race_chasecam )
 			{
-				self->s.v.flags = ( ( int ) ( self->s.v.flags ) ) | FL_JUMPRELEASED;
+				if (self->s.v.button2) {
+					if (((int)(self->s.v.flags)) & FL_JUMPRELEASED) {
+						self->s.v.flags = (int)self->s.v.flags & ~FL_JUMPRELEASED;
+
+						race_advance_chasecam_for_plr(self);
+					}
+				}
+				else {
+					self->s.v.flags = ((int)(self->s.v.flags)) | FL_JUMPRELEASED;
+				}
 			}
 		}
 		else if ( self->ct == ctPlayer && self->racer && race.status )
