@@ -1769,6 +1769,9 @@ static void race_make_active_racer(gedict_t* r, gedict_t* s)
 	// set proper origin
 	setorigin( r, PASSVEC3( s->s.v.origin ) );
 
+	// not tracking anyone
+	r->hideentity = 0;
+
 	// telefrag anyone at this origin
 	teleport_player( r, r->s.v.origin, r->s.v.angles, TFLAGS_SND_DST );
 }
@@ -1936,7 +1939,6 @@ static gedict_t* race_find_chasecam_for_plr(gedict_t* plr, gedict_t* racer)
 	return racer;
 }
 
-// FIXME: Allow player to toggle which racer they follow
 void race_follow( void )
 {
     gedict_t *racer = race_get_racer();
