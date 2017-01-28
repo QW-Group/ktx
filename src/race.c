@@ -5020,7 +5020,7 @@ static void race_match_round_end(char* demoFileName)
 			return;
 		}
 	}
-	else {
+	else if (! teamplay) {
 		// Standard round... in duels and ffa, can finish as soon as leading player has unassailable lead
 		int rounds_remaining = (race.rounds - race.round_number);
 		int system_no = bound(0, (int)cvar(RACE_SCORINGSYSTEM_CVAR), NUM_SCORING_SYSTEMS - 1);
