@@ -749,6 +749,8 @@ void FirstFrame	( )
 	RegisterCvarEx("k_race_match", "0");
 	RegisterCvarEx("k_race_match_rounds", "9");
 	RegisterCvarEx("k_race_scoring_system", "0");
+	RegisterCvarEx("k_race_route_number", "0");
+	RegisterCvarEx("k_race_route_mapname", "");
 	//RegisterCvarEx("k_race_topscores", "10");
 // }
 	RegisterCvar("k_idletime");

@@ -28,9 +28,11 @@ void SP_info_intermission();
 #define RACE_SCORINGSYSTEM_CVAR        "k_race_scoring_system"
 #define RACE_MATCH_CVAR                "k_race_match"
 #define RACE_MATCH_ROUNDS_CVAR         "k_race_match_rounds"
-#define RACE_PACEMAKER_HEADSTART_MIN  0.00f
-#define RACE_PACEMAKER_HEADSTART_MAX  1.00f
-#define RACE_PACEMAKER_HEADSTART_INCR 0.25f
+#define RACE_ROUTE_NUMBER_CVAR         "k_race_route_number"
+#define RACE_ROUTE_MAPNAME_CVAR        "k_race_route_mapname"
+#define RACE_PACEMAKER_HEADSTART_MIN   0.00f
+#define RACE_PACEMAKER_HEADSTART_MAX   1.00f
+#define RACE_PACEMAKER_HEADSTART_INCR  0.25f
 #define RACE_PACEMAKER_RESOLUTION_MIN  0
 #define RACE_PACEMAKER_RESOLUTION_MAX  3
 #define RACE_PACEMAKER_RESOLUTION_INCR 1
@@ -2270,6 +2272,9 @@ static void race_route_now_custom( void )
 	init_scores ();
 	race.active_route = 0; // mark this is a custom route now
 	race_clear_pacemaker();
+
+	cvar_fset(RACE_ROUTE_NUMBER_CVAR, -1);
+	cvar_set(RACE_ROUTE_MAPNAME_CVAR, "");
 }
 
 void r_Xset( float t )
@@ -2720,7 +2725,13 @@ void r_route( void )
 		return;
 	}
 
-	next_route++;
+	// If server-side toggle and map matches, load correct route
+	if (self->ct != ctPlayer && streq(cvar_string(RACE_ROUTE_MAPNAME_CVAR), g_globalvars.mapname)) {
+		next_route = cvar(RACE_ROUTE_NUMBER_CVAR);
+	}
+	else {
+		next_route++;
+	}
 
 	if ( next_route < 0 || next_route >= race.cnt )
 		next_route = 0;
@@ -2750,6 +2761,8 @@ void r_route( void )
 		G_bprint( 2, "Server loaded route %d\n", next_route );
 	}
 
+	cvar_fset(RACE_ROUTE_NUMBER_CVAR, next_route);
+	cvar_set(RACE_ROUTE_MAPNAME_CVAR, g_globalvars.mapname);
 	race_clear_pacemaker();
 }
 
