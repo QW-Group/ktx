@@ -2975,7 +2975,7 @@ const char common_um_init[] =
 	"k_clan_arena 0\n"			// disable Clan Arena by default
 	"k_rocketarena 0\n"			// disable Rocket Arena by default
 	"k_race 0\n"				// disable Race  by default
-	"k_hoonymode 0\n"			// disable HoonyMode by default
+	"k_hoonymode 1\n"			// enable HoonyMode by default
 
 	"k_spec_info 1\n"			// allow spectators receive took info during game
 	"k_midair 0\n"				// midair off
