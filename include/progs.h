@@ -607,15 +607,17 @@ typedef struct gedict_s {
 	int			race_RouteNodeType; // this is actually must be raceRouteNodeType_t 
 									// but unwilling to move type definition out of race.c so using int
 
-	int			race_ready; 		// is player ready for race
-	int			race_chasecam; 		// does player want to follow other racers in line
-	int			race_chasecam_freelook; // disable server forcing v_angle on client
-	int			race_chasecam_view;	// does follow uses the chasecam or 1st person view
-	int			race_afk;			// counter for afk starts
-	qbool		racer;				// this player is actively racing right now
-	qbool       race_participant;   // this player participated in the current race
-	qbool		muted;				// this player produces no sound
-	int			hideentity;			// links to entity to hide in eye chasecam
+	int         race_ready;             // is player ready for race
+	int         race_chasecam;          // does player want to follow other racers in line
+	int         race_chasecam_freelook; // disable server forcing v_angle on client
+	int         race_chasecam_view;     // does follow uses the chasecam or 1st person view
+	int         race_afk;               // counter for afk starts
+	qbool       racer;                  // this player is actively racing right now
+	qbool       race_participant;       // this player participated in the current race
+	qbool       muted;                  // this player produces no sound
+	int         hideentity;             // links to entity to hide in eye chasecam
+	qbool       hideplayers;            // if set, all players hidden (read by mvdsv)
+	qbool       hideplayers_default;    // racer can choose to have this on or off
 	int         race_closest_guide_pos; // when guide route loaded, this is closest position
 
 	// race_route_start entity fields

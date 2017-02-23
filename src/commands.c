@@ -244,6 +244,7 @@ void race_match_toggle(void);
 qbool race_match_mode(void);
 void race_switch_usermode(const char* displayName, int players_per_team);
 void race_scoring_system_toggle(void);
+void race_hide_players_toggle(void);
 // }
 
 // { CHEATS
@@ -579,6 +580,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_RSIMULMODE   "toggle simultaneous racing"
 #define CD_RMATCHMODE   "toggle race match mode"
 #define CD_RSCORINGMODE "toggle between scoring systems"
+#define CD_RHIDEPLAYERS "toggle visible players during race"
 // }
 
 #define CD_NOSPECS      "allow/disallow spectators"
@@ -910,6 +912,7 @@ cmd_t cmds[] = {
 	{ "race_simultaneous",          race_simultaneous_toggle,       0,  CF_PLAYER,                              CD_RSIMULMODE },
 	{ "race_match",                 race_match_toggle,              0,  CF_PLAYER,                              CD_RMATCHMODE },
 	{ "race_scoring",               race_scoring_system_toggle,     0,  CF_PLAYER,                              CD_RSCORINGMODE },
+	{ "race_hide_players",          race_hide_players_toggle,       0,  CF_PLAYER,                              CD_RHIDEPLAYERS },
 // }
 	{ "nospecs",     nospecs,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOSPECS },
 	{ "noitems",     noitems,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOITEMS },

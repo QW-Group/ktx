@@ -1413,6 +1413,7 @@ void race_clear_race_fields( void )
 	for ( p = world; ( p = find_plr( p ) ); )
 	{
 		p->race_participant = p->racer = false;
+		p->hideplayers = false;
 		p->race_id = 0;
 	}
 }
@@ -1749,6 +1750,7 @@ static void race_make_active_racer(gedict_t* r, gedict_t* s)
 {
 	// mark him as racer
 	r->racer = r->race_participant = true;
+	r->hideplayers = r->hideplayers_default;
 	ktpro_autotrack_on_powerup_take(r);
 	//G_bprint( 2, "%s is starting his race!\n", r->s.v.netname );
 
@@ -5069,3 +5071,9 @@ qbool race_allow_map_vote(gedict_t* player)
 	return (racers_ready == 0 || player->race_ready);
 }
 
+void race_hide_players_toggle(void)
+{
+	self->hideplayers_default = !self->hideplayers_default;
+
+	G_sprint(self, PRINT_HIGH, "Racers %s during race\n", self->hideplayers_default ? redtext("hidden") : redtext("shown"));
+}

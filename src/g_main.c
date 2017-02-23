@@ -52,6 +52,7 @@ field_t         expfields[] = {
 	{"items2",      FOFS( items2 ),      F_FLOAT},
 	{"hideentity",  FOFS( hideentity ),  F_INT},
 	{"trackent",	FOFS( trackent ),	 F_INT},
+	{"hideplayers", FOFS( hideplayers ), F_INT},
 	{NULL}
 };
 //static char     mapname[64];
@@ -168,6 +169,7 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 			cmdinfo_infoset ( self );
 
 		update_ghosts();
+		self->hideplayers_default = (self->ezquake_version < 4957);
 
 		return 1;
 
