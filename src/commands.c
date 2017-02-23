@@ -3022,8 +3022,9 @@ const char common_um_init[] =
 	"k_pow_q 1\n"				// powerups - quad
 	"k_pow_p 1\n"				// powerups - pent
 	"k_pow_r 1\n"				// powerups - ring
-	"k_pow_s 1\n";				// powerups - suit
-
+	"k_pow_s 1\n"				// powerups - suit
+	"qtv_sayenabled 0\n"       // default blocking of qtv chat
+;
 
 const char _1on1_um_init[] =
 	"coop 0\n"					// no coop

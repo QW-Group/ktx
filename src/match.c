@@ -2304,6 +2304,8 @@ void StartMatch ()
 
 	if ( isRACE() )
 		race_match_start();
+
+	cvar_fset("qtv_sayenabled", 0);
 }
 
 // just check if someone using handicap

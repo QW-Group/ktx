@@ -218,14 +218,16 @@ static char race_settings[] =
 	"k_race_match 0\n" 
 	"k_race_match_rounds 9\n"
 	"timelimit 0\n"
-	"fraglimit 0\n";
+	"fraglimit 0\n"
+	"qtv_sayenabled 1\n";
 
 static char norace_settings[] =
 	"sv_silentrecord 0\n"
 	"lock_practice 0\n"
 	"srv_practice_mode 0\n"
 	"allow_toggle_practice 5\n"
-	"serverinfo ktxmode \"\"\n";
+	"serverinfo ktxmode \"\"\n"
+	"qtv_sayenabled 0\n";
 
 void apply_race_settings( void )
 {
