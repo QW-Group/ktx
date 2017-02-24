@@ -5075,6 +5075,9 @@ qbool race_allow_map_vote(gedict_t* player)
 
 void race_hide_players_toggle(void)
 {
+	if ( !race_command_checks() )
+		return;
+
 	self->hideplayers_default = !self->hideplayers_default;
 
 	G_sprint(self, PRINT_HIGH, "Racers %s during race\n", self->hideplayers_default ? redtext("hidden") : redtext("shown"));
