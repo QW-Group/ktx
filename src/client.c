@@ -812,6 +812,10 @@ void ClientKill()
 	if( k_standby )
 		return;
 
+	if ( isRACE() && race_handle_event(self, NULL, "kill") ) {
+		return;
+	}
+
 	if ( ISDEAD( self ) || !self->s.v.takedamage )
 		return; // already dead
 
@@ -820,10 +824,6 @@ void ClientKill()
 
 	if ( isRA() ) {
 		G_sprint (self, PRINT_HIGH, "Can't suicide in RA mode\n");
-		return;
-	}
-
-	if ( isRACE() && race_handle_event(self, NULL, "kill") ) {
 		return;
 	}
 
