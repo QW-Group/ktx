@@ -10,6 +10,7 @@ static char* FriendTeamName (int botNumber);
 #define FB_CVAR_LOOKANYWHERE "k_fbskill_aim_lookanywhere"
 #define FB_CVAR_LOOKAHEADTIME "k_fbskill_goallookaheadtime"
 #define FB_CVAR_PREDICTIONERROR "k_fbskill_goalpredictionerror"
+#define FB_CVAR_DISTANCEERROR "k_fbskill_distanceerror"
 #define FB_CVAR_VISIBILITY "k_fbskill_visibility"
 #define FB_CVAR_LGPREF "k_fbskill_aim_lgpref"
 #define FB_CVAR_ACCURACY "k_fbskill_aim_accuracy"
@@ -33,6 +34,9 @@ static char* FriendTeamName (int botNumber);
 #define FB_CVAR_ENEMYSPEED_VOLATILITY_THRESHOLD "k_fbskill_vol_oppvel"
 #define FB_CVAR_ENEMYSPEED_VOLATILITY_INCREASE "k_fbskill_vol_oppvel_incr"
 #define FB_CVAR_ENEMYDIRECTION_VOLATILITY_INCREASE "k_fbskill_vol_oppdir_incr"
+#define FB_CVAR_PAIN_VOLATILITY_INCREASE "k_fbskill_vol_pain_incr"
+#define FB_CVAR_SELF_MIDAIR_VOLATILITY_INCREASE "k_fbskill_vol_bot_midair_incr"
+#define FB_CVAR_OPPONENT_MIDAIR_VOLATILITY_INCREASE "k_fbskill_vol_opp_midair_incr"
 
 #define FB_CVAR_MOVEMENT_SKILL "k_fbskill_movement"
 #define FB_CVAR_COMBATJUMP_CHANCE "k_fbskill_combatjump"
@@ -115,15 +119,18 @@ void SetAttributesBasedOnSkill (int skill)
 	char* cfg_name;
 
 	skill = bound (MIN_FROGBOT_SKILL, skill, MAX_FROGBOT_SKILL);
+
+	// Old frogbot settings (items generally)
 	cvar_fset (FB_CVAR_ACCURACY, 45 - min (skill, 10) * 2.25);
+	cvar_fset (FB_CVAR_DODGEFACTOR, RangeOverSkill(skill, 0.0f, 1.0f));
+	cvar_fset (FB_CVAR_LOOKANYWHERE, RangeOverSkill(skill, 0.0f, 1.0f));
+	cvar_fset (FB_CVAR_LOOKAHEADTIME, RangeOverSkill(skill, 5.0f, 30.0f));
+	cvar_fset (FB_CVAR_PREDICTIONERROR, RangeOverSkill(skill, 1.0f, 0.0f));
+	cvar_fset (FB_CVAR_DISTANCEERROR, RangeOverSkill(skill, 0.15f, 0.0f));
 
-	cvar_fset (FB_CVAR_DODGEFACTOR, 1);
-	cvar_fset (FB_CVAR_LOOKANYWHERE, 1);
-	cvar_fset (FB_CVAR_LOOKAHEADTIME, 30);
-	cvar_fset (FB_CVAR_PREDICTIONERROR, 0);
-
+	// Old, but used to be global
 	cvar_fset (FB_CVAR_LGPREF, RangeOverSkill (skill, 0.2f, 1.0f));
-	cvar_fset (FB_CVAR_VISIBILITY, 0.7071067f - (0.02f * min (skill, 10)));   // equivalent of 90 => 120
+	cvar_fset (FB_CVAR_VISIBILITY, 0.7071067f - (0.02f * min (skill, 10)));   // equivalent of 90 => 120 fov
 
 	cvar_fset (FB_CVAR_YAW_MIN_ERROR, RangeOverSkill(skill, 1.5, 1));
 	cvar_fset (FB_CVAR_YAW_MAX_ERROR, RangeOverSkill (skill, 5.5, 3));
@@ -140,7 +147,7 @@ void SetAttributesBasedOnSkill (int skill)
 
 	// Volatility
 	cvar_fset (FB_CVAR_MIN_VOLATILITY, 1.0f);
-	cvar_fset (FB_CVAR_MAX_VOLATILITY, RangeOverSkill (skill, 3.5f, 2.0f));
+	cvar_fset (FB_CVAR_MAX_VOLATILITY, RangeOverSkill (skill, 4.0f, 2.0f));
 	cvar_fset (FB_CVAR_INITIAL_VOLATILITY, RangeOverSkill (skill, 3.0f, 1.4f));
 	cvar_fset (FB_CVAR_REDUCE_VOLATILITY, RangeOverSkill (skill, 0.99f, 0.95f));
 	cvar_fset (FB_CVAR_OWNSPEED_VOLATILITY_THRESHOLD, RangeOverSkill (skill, 360, 450));
@@ -148,10 +155,14 @@ void SetAttributesBasedOnSkill (int skill)
 	cvar_fset (FB_CVAR_ENEMYSPEED_VOLATILITY_THRESHOLD, RangeOverSkill (skill, 360, 450));
 	cvar_fset (FB_CVAR_OWNSPEED_VOLATILITY_INCREASE, RangeOverSkill (skill, 0.4f, 0.2f));
 	cvar_fset (FB_CVAR_ENEMYDIRECTION_VOLATILITY_INCREASE, RangeOverSkill (skill, 0.6f, 0.4f));
+	cvar_fset (FB_CVAR_PAIN_VOLATILITY_INCREASE, RangeOverSkill(skill, 1.0f, 0.1f));
+	cvar_fset (FB_CVAR_SELF_MIDAIR_VOLATILITY_INCREASE, RangeOverSkill(skill, 1.5f, 0.0f));
+	cvar_fset (FB_CVAR_OPPONENT_MIDAIR_VOLATILITY_INCREASE, RangeOverSkill(skill, 1.0f, 0.0f));
 
+	// Movement
 	cvar_fset (FB_CVAR_MOVEMENT_SKILL, RangeOverSkill (skill, 0.3f, 1.0f));
 	cvar_fset (FB_CVAR_COMBATJUMP_CHANCE, RangeOverSkill (skill, 0.03f, 0.1f));
-	cvar_fset (FB_CVAR_MISSILEDODGE_TIME, RangeOverSkill (skill, 0.5f, 0.25f));
+	cvar_fset (FB_CVAR_MISSILEDODGE_TIME, RangeOverSkill (skill, 1.0f, 0.5f));
 
 	// Customise
 	{
@@ -175,7 +186,8 @@ void SetAttribs(gedict_t* self)
 	self->fb.skill.dodge_amount = bound (0, cvar ( FB_CVAR_DODGEFACTOR ), 1);
 	self->fb.skill.look_anywhere = bound (0, cvar ( FB_CVAR_LOOKANYWHERE ), 1);
 	self->fb.skill.lookahead_time = bound (0, cvar ( FB_CVAR_LOOKAHEADTIME ), 45);
-	self->fb.skill.prediction_error = bound (0, cvar ( FB_CVAR_PREDICTIONERROR ), 1);
+	self->fb.skill.prediction_error = bound(0, cvar(FB_CVAR_PREDICTIONERROR), 1);
+	self->fb.skill.movement_estimate_error = bound(0, cvar(FB_CVAR_DISTANCEERROR), 0.25);
 
 	self->fb.skill.lg_preference = bound (0, cvar ( FB_CVAR_LGPREF ), 1);
 	self->fb.skill.visibility = bound (0.5, cvar ( FB_CVAR_VISIBILITY ), 0.7071067f);   // fov 90 (0.707) => fov 120 (0.5)
@@ -203,6 +215,9 @@ void SetAttribs(gedict_t* self)
 	self->fb.skill.enemyspeed_volatility = bound (0, cvar (FB_CVAR_ENEMYSPEED_VOLATILITY_INCREASE), 5.0f);
 	self->fb.skill.enemydirection_volatility = bound (0, cvar (FB_CVAR_ENEMYDIRECTION_VOLATILITY_INCREASE), 5.0f);
 	self->fb.skill.awareness_delay = bound (0, cvar (FB_CVAR_REACTION_TIME), 1.0f);
+	self->fb.skill.pain_volatility = bound (0, cvar(FB_CVAR_PAIN_VOLATILITY_INCREASE), 2.0f);
+	self->fb.skill.self_midair_volatility = bound (0, cvar(FB_CVAR_SELF_MIDAIR_VOLATILITY_INCREASE), 2.0f);
+	self->fb.skill.opponent_midair_volatility = bound(0, cvar(FB_CVAR_OPPONENT_MIDAIR_VOLATILITY_INCREASE), 2.0f);
 
 	// Movement
 	self->fb.skill.movement = bound (0, cvar (FB_CVAR_MOVEMENT_SKILL), 1.0f);

@@ -469,16 +469,22 @@ typedef struct fb_botskill_s {
 	float enemyspeed_volatility_threshold;
 	float enemyspeed_volatility;
 	float enemydirection_volatility;
-	float initial_volatility;
+	float pain_volatility;                   // when bot has taken damage in last second
+	float opponent_midair_volatility;        // when opponent is in midair
+	float self_midair_volatility;            // when bot is in midair
+
+	float initial_volatility;                // when bot sees player for first time
 
 	float current_volatility;
 	float awareness_delay;
+	float movement_estimate_error;           // % of time the bot gets wrong when predicting player location
 
 	fb_botaim_t aim_params[2];
 
 	float movement;
 	float combat_jump_chance;
 	float missile_dodge_time;                       // minimum time in seconds before bot dodges missile
+
 } fb_botskill_t;
 
 typedef struct fb_entvars_s {
@@ -684,9 +690,12 @@ typedef struct fb_entvars_s {
 	float               min_fire_time;   // time before bot will fire
 
 	// Stored on missile to detect where item will explode
-	vec3_t missile_forward;           
-	vec3_t missile_right;
-	float missile_spawntime;
+	vec3_t              missile_forward;
+	vec3_t              missile_right;
+	float               missile_spawntime;
+
+	// last time this player was hurt
+	float               last_hurt;
 } fb_entvars_t;
 
 //typedef (void(*)(gedict_t *)) one_edict_func;

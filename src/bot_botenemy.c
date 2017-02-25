@@ -17,6 +17,8 @@ void LookEnemy(gedict_t* player, gedict_t* enemy) {
 
 // Called when a player inflicts damage on another
 void BotDamageInflictedEvent(gedict_t* attacker, gedict_t* targ) {
+	targ->fb.last_hurt = g_globalvars.time;
+
 	// if object we're looking at has less firepower than us...
 	if (targ->fb.look_object && targ->fb.look_object->fb.firepower < attacker->fb.firepower) {
 		if (attacker != targ) {

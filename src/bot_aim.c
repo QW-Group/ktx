@@ -59,9 +59,17 @@ static qbool PredictSpot(gedict_t* self, gedict_t* enemy_, vec3_t testplace, flo
 	return false;
 }
 
-static void PredictEnemyLocationInFuture(gedict_t* enemy, float rel_time) {
+static float EstimateTimeBasedOnSkill(gedict_t* self, float original_time)
+{
+	float dist = self->fb.skill.movement_estimate_error;
+
+	return dist_random(original_time * (1 - dist), original_time * (1 + dist), 2);
+}
+
+static void PredictEnemyLocationInFuture(gedict_t* enemy, float rel_time)
+{
 	vec3_t testplace;
-	float fallheight = enemy->s.v.origin[2] - 56 + enemy->s.v.velocity[2] * rel_time;
+	float fallheight = enemy->s.v.origin[2] - 56 + enemy->s.v.velocity[2] * EstimateTimeBasedOnSkill(self, rel_time);
 
 	enemy->s.v.solid = SOLID_NOT;
 	VectorMA(enemy->s.v.origin, rel_time, enemy->s.v.velocity, testplace);
@@ -192,6 +200,19 @@ static void CalculateVolatility (gedict_t* self)
 		// Direction penalty ... if we're going in same direction, no penalty
 		volatility += (1 - same_direction) * (self->fb.skill.enemydirection_volatility / 2);
 		vol_flags |= 8;
+
+		// Pain penalty - if they are being attacked, not as accurate
+		if (self->fb.last_hurt && g_globalvars.time - self->fb.last_hurt < 1.0f) {
+			volatility += self->fb.skill.pain_volatility;
+		}
+
+		// Midair penalty - if we're in midair, not as accurate
+		if (!(int)self->s.v.flags & FL_ONGROUND_PARTIALGROUND) {
+			volatility += self->fb.skill.self_midair_volatility;
+		}
+		if (!(int)opponent->s.v.flags & FL_ONGROUND_PARTIALGROUND) {
+			volatility += self->fb.skill.opponent_midair_volatility;
+		}
 
 		volatility = bound(self->fb.skill.min_volatility, volatility * self->fb.skill.reduce_volatility, self->fb.skill.max_volatility);
 	}

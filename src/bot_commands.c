@@ -228,12 +228,16 @@ void FrogbotsAddbot(int skill_level, const char* specificteam, qbool error_messa
 {
 	int i;
 
+	skill_level = bound(MIN_FROGBOT_SKILL, skill_level, MAX_FROGBOT_SKILL);
+
 	for (i = 0; i < sizeof(bots) / sizeof(bots[0]); ++i) {
 		if (bots[i].entity == 0) {
 			int entity = 0;
 			int topColor = 0;
 			int bottomColor = 0;
 			const char* teamName = specificteam;
+
+			SetAttributesBasedOnSkill (skill_level);
 
 			if (teamplay && !specificteam[0]) {
 				int team1Count, team2Count;
@@ -285,7 +289,6 @@ void FrogbotsAddbot(int skill_level, const char* specificteam, qbool error_messa
 			g_edicts[entity].fb.botnumber = i;
 			trap_SetBotUserInfo (entity, "team", teamName, 0);
 			G_bprint (2, "skill &cf00%d&r\n", self->fb.skill.skill_level);
-			SetAttributesBasedOnSkill (self->fb.skill.skill_level);
 			SetAttribs (&g_edicts[entity]);
 			trap_SetBotUserInfo (entity, "k_nick", bots[i].name, 0);
 			return;
@@ -402,10 +405,10 @@ static void FrogbotsSetSkill (void)
 		new_skill = bound(MIN_FROGBOT_SKILL, atoi (argument), MAX_FROGBOT_SKILL);
 
 		if (new_skill != old_skill) {
-			cvar_fset ("k_fb_skill", new_skill);
-			G_sprint (self, 2, "bot skill changed to \"%d\"\n", FrogbotSkillLevel());
+			cvar_fset("k_fb_skill", new_skill);
+			G_sprint(self, 2, "bot skill changed to \"%d\"\n", new_skill);
 
-			SetAttributesBasedOnSkill (FrogbotSkillLevel());
+			SetAttributesBasedOnSkill (new_skill);
 		}
 	}
 }
