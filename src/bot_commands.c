@@ -1945,7 +1945,7 @@ void BotStartFrame(int framecount) {
 			}
 		}
 
-		if (human_count && g_globalvars.time - last_auto_client >= max(auto_delay, 1)) {
+		if (FrogbotsCheckMapSupport() && human_count && g_globalvars.time - last_auto_client >= max(auto_delay, 1)) {
 			if (min_required_clients && client_count < min(min_required_clients, max_clients)) {
 				FrogbotsAddbot(FrogbotSkillLevel(), "", false);
 

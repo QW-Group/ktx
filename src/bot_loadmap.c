@@ -442,11 +442,10 @@ void LoadMap(void) {
 
 qbool FrogbotsCheckMapSupport (void)
 {
-	if (map_supported)
-		return true;
-
-	G_sprint (self, 2, "Map %s not supported for bots\n", g_globalvars.mapname);
-	return false;
+	if (!map_supported && self) {
+		G_sprint(self, 2, "Map %s not supported for bots\n", g_globalvars.mapname);
+	}
+	return map_supported;
 }
 
 void BecomeMarker(gedict_t* marker) {
