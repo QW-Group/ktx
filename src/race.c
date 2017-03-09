@@ -3914,6 +3914,82 @@ void race_add_standard_routes( void )
 
 		race_set_teleport_flags_by_name ( "start", RACEFLAG_TOUCH_RACEFAIL );
 	}
+	else if (streq(g_globalvars.mapname, "dungeonsurf")) {
+		if (!race_route_add_start()) {
+			return;
+		}
+
+		race_add_route_node(-128, 0, -8, 0, 0, nodeStart);
+		race_add_route_node(-496, -2430, -3208, 0, 0, nodeEnd);
+
+		race_set_route_name("Time to surf", "start\215finish");
+		race_set_route_timeout(30);
+		race_set_route_weapon_mode(raceWeaponNo);
+		race_set_route_falsestart_mode(raceFalseStartNo);
+
+		race_route_add_end();
+	}
+	else if (streq(g_globalvars.mapname, "jqdf1")) {
+		if (!race_route_add_start()) {
+			return;
+		}
+
+		race_add_route_node(8, 0, 24, 0, 0, nodeStart);
+		race_add_route_node(62.5, 0, 424, 0, 0, nodeEnd);
+
+		race_set_route_name("You are not a Jedi yet", "start\215finish");
+		race_set_route_timeout(60);
+		race_set_route_weapon_mode(raceWeaponNo);
+		race_set_route_falsestart_mode(raceFalseStartNo);
+
+		race_route_add_end();
+
+		race_set_teleport_flags_by_name ( "tele", RACEFLAG_TOUCH_RACEFAIL );
+	}
+	else if (streq(g_globalvars.mapname, "rampcity")) {
+		if (!race_route_add_start()) {
+			return;
+		}
+
+		race_add_route_node(-255, 250, 88, 0, -180, nodeStart);
+		race_add_route_node(-255, 250, 856, 0, 0, nodeEnd);
+
+		race_set_route_name("Up you go...", "start\215finish");
+		race_set_route_timeout(60);
+		race_set_route_weapon_mode(raceWeaponNo);
+		race_set_route_falsestart_mode(raceFalseStartNo);
+
+		race_route_add_end();
+
+		if (!race_route_add_start()) {
+			return;
+		}
+
+		race_add_route_node(-255, 250, 856, 0, 0, nodeStart);
+		race_add_route_node(-255, 250, 88, 0, -180, nodeEnd);
+
+		race_set_route_name("... and down you fall", "start\215finish");
+		race_set_route_timeout(10);
+		race_set_route_weapon_mode(raceWeaponNo);
+		race_set_route_falsestart_mode(raceFalseStartNo);
+
+		race_route_add_end();
+	}
+	else if (streq(g_globalvars.mapname, "rj3")) {
+		if (!race_route_add_start()) {
+			return;
+		}
+
+		race_add_route_node(784, -112, 48, 0, 0, nodeStart);
+		race_add_route_node(-1410, -1135, -196, 0, 0, nodeEnd);
+
+		race_set_route_name("So you want to rj?", "start\215finish");
+		race_set_route_timeout(300);
+		race_set_route_weapon_mode(raceWeaponAllowed);
+		race_set_route_falsestart_mode(raceFalseStartNo);
+
+		race_route_add_end();
+	}
 }
 
 qbool race_handle_event (gedict_t* player, gedict_t* entity, const char* eventName)

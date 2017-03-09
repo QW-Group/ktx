@@ -4666,7 +4666,7 @@ void Pos_Set (float set_type)
 			return;
 	}
 
-	G_sprint(self, 2, "Position was seted\n");
+	G_sprint(self, 2, "Position set\n");
 }
 //================================================
 // pos_show/pos_save/pos_move/pos_set_* commands }
