@@ -3249,7 +3249,9 @@ void UserMode(float umode)
 	um = um_list[(int)umode].name;
 
 	if (isRACE()) {
-		race_switch_usermode(um, um_list[(int)umode].race_plrs_per_team);
+		if (!sv_invoked) {
+			race_switch_usermode(um, um_list[(int)umode].race_plrs_per_team);
+		}
 		return;
 	}
 
