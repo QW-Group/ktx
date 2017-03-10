@@ -3973,7 +3973,7 @@ void race_add_standard_routes( void )
 
 		race_set_route_name("Up you go...", "start\215finish");
 		race_set_route_timeout(60);
-		race_set_route_weapon_mode(raceWeaponNo);
+		race_set_route_weapon_mode(raceWeaponAllowed);
 		race_set_route_falsestart_mode(raceFalseStartNo);
 
 		race_route_add_end();
@@ -4457,7 +4457,7 @@ static void race_update_closest_positions(void)
 
 static void race_update_pacemaker(void)
 {
-	float race_time;
+	float race_time = 0;
 	float frac;
 	qbool advanced = false;
 	int i;
