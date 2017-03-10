@@ -3920,14 +3920,31 @@ void race_add_standard_routes( void )
 		}
 
 		race_add_route_node(-128, 0, -8, 0, 0, nodeStart);
-		race_add_route_node(-496, -2430, -3208, 0, 0, nodeEnd);
+		race_add_route_node(-3340, 1790, 3320, 0, 0, nodeCheckPoint);
+		race_add_route_node(3400, 1800, 1700, 0, 0, nodeEnd);
 
-		race_set_route_name("Time to surf", "start\215finish");
+		race_set_route_name("Lava surfing", "start\215finish");
 		race_set_route_timeout(30);
 		race_set_route_weapon_mode(raceWeaponNo);
 		race_set_route_falsestart_mode(raceFalseStartNo);
 
 		race_route_add_end();
+
+		if (!race_route_add_start()) {
+			return;
+		}
+
+		race_add_route_node(-3340, 1790, 3320, 0, 0, nodeStart);
+		race_add_route_node(3400, 1800, 1700, 0, 0, nodeEnd);
+
+		race_set_route_name("Room2", "start\215finish");
+		race_set_route_timeout(15);
+		race_set_route_weapon_mode(raceWeaponNo);
+		race_set_route_falsestart_mode(raceFalseStartNo);
+
+		race_route_add_end();
+
+		race_set_teleport_flags_by_name ( "tele2", RACEFLAG_TOUCH_RACEEND );
 	}
 	else if (streq(g_globalvars.mapname, "jqdf1")) {
 		if (!race_route_add_start()) {
