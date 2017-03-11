@@ -77,6 +77,7 @@ typedef struct race_player_match_info_s {
 	float times[RACE_MAX_MATCH_ROUNDS + 1];
 	float best_time;
 	float total_time;
+	float total_distance;
 } race_player_match_info_t;
 
 static race_player_match_info_t player_match_info[MAX_CLIENTS];
@@ -4908,6 +4909,7 @@ typedef struct race_team_score_s {
 	int completions;
 	float best_time;
 	float total_time;
+	float total_distance;
 } race_team_score_t;
 
 static int TeamSorter(const void* lhs_, const void* rhs_)
@@ -4926,19 +4928,16 @@ static void race_match_stats_print(char* title, race_team_score_t* scores, int t
 {
 	int i;
 
-	G_bprint(2, "\n%s\n%s\n"
-		"Ÿ\n", redtext(title),
-		redtext("score  wins  avg-time  best-time  name"));
-	for (i = 0; i < team_count; ++i) {
-		char avg_time[20];
-		if (scores[i].completions) {
-			snprintf(avg_time, sizeof(avg_time), "%8.3f", (scores[i].total_time / 1000.0f) / scores[i].completions);
-		}
-		else {
-			strlcpy(avg_time, "   n/a  ", sizeof(avg_time));
-		}
+	G_bprint(2, "\n%s\n%s\nŸ\n", redtext(title));
 
-		G_bprint(PRINT_HIGH, "%5d  %4d  %s   %8.3f  %s\n", scores[i].score, scores[i].wins, avg_time, scores[i].best_time / 1000.0f, scores[i].name);
+	for (i = 0; i < team_count; ++i) {
+		G_bprint(PRINT_HIGH, "\20%s\21: %d points\n", scores[i].name, scores[i].score);
+		G_bprint(PRINT_HIGH, "  Completed %d rounds, won %d\n", scores[i].completions, scores[i].wins);
+		if (scores[i].completions) {
+			G_bprint(PRINT_HIGH, "  Average time:  %8.3f\n", (scores[i].total_time / 1000.0f) / scores[i].completions);
+			G_bprint(PRINT_HIGH, "  Average speed: %8.3f\n", (scores[i].total_distance / 1000.0f) / scores[i].completions);
+			G_bprint(PRINT_HIGH, "  Best time:     %8.3f\n", scores[i].best_time / 1000.0f);
+		}
 	}
 }
 
@@ -4959,6 +4958,7 @@ static void race_match_stats_apply(race_team_score_t* stats, gedict_t* player)
 	}
 	if (player_match_info[p_num].completions) {
 		stats->total_time += player_match_info[p_num].total_time;
+		stats->total_distance += player_match_info[p_num].total_distance;
 	}
 }
 
@@ -5112,6 +5112,7 @@ static void race_match_round_end(char* demoFileName)
 			}
 
 			player_match_info[player_num].total_time += race.currentrace[player_num].time;
+			player_match_info[player_num].total_distance += race.currentrace[player_num].distance;
 			if (race.currentrace[player_num].position == 1) {
 				++player_match_info[player_num].wins;
 			}
