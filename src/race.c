@@ -1638,7 +1638,6 @@ qbool race_can_go( qbool cancel )
 			// Timeout everyone still racing
 			if (race.timeout < g_globalvars.time) {
 				if (cancel) {
-					G_bprint(PRINT_HIGH, "Timing out: %s\n", racer->s.v.netname);
 					race_ended |= race_end(racer);
 					timeout_plr = racer;
 					++timeouts;
@@ -3976,7 +3975,7 @@ void race_add_standard_routes( void )
 			return;
 		}
 
-		race_add_route_node(8, 0, 24, 0, 0, nodeStart);
+		race_add_route_node(-45, -1.6, 34, 0, 0, nodeStart);
 		race_add_route_node(62.5, 0, 424, 0, 0, nodeEnd);
 
 		race_set_route_name("You are not a Jedi yet", "start\215finish");
