@@ -2721,7 +2721,7 @@ void ShowMatchSettings()
 
 char *CompilateDemoName ()
 {
-	static char demoname[512];
+	static char demoname[60];
 	char date[128], *fmt;
 
 	int i;
@@ -2735,14 +2735,23 @@ char *CompilateDemoName ()
 	}
 	else if ( isRACE() && ! race_match_mode() )
 	{
+		int players = 0;
+
 		strlcat( demoname, "race", sizeof( demoname ) );
 		for( vs = "_", p = world; (p = find_plr( p )); )
 		{
 			if ( strnull( name = getname( p ) ) || !( p->racer ) )
 				continue;
 
-			strlcat( demoname, vs, sizeof( demoname ) );
-			strlcat( demoname, name, sizeof( demoname ) );
+			if (players < 2) {
+				strlcat(demoname, vs, sizeof(demoname));
+				strlcat(demoname, name, sizeof(demoname));
+			}
+			else if (players == 2) {
+				strlcat(demoname, vs, sizeof(demoname));
+				strlcat(demoname, "others", sizeof(demoname));
+			}
+			++players;
 		}
 	}
 	else if ( isDuel() )
