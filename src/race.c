@@ -1948,68 +1948,68 @@ static gedict_t* race_find_chasecam_for_plr(gedict_t* plr, gedict_t* racer)
 
 void race_follow( void )
 {
-    gedict_t *racer = race_get_racer();
+	gedict_t *racer = race_get_racer();
 	vec3_t delta;
 	float vlen;
-    int follow_distance;
-    int upward_distance;
+	int follow_distance;
+	int upward_distance;
 
-    if ( !racer )
-        return; // no racer found
+	if ( !racer )
+		return; // no racer found
 
-    if ( !self->racer && self->race_chasecam )
-    {
+	if ( !self->racer && self->race_chasecam )
+	{
 		int orig = self->race_track;
 
 		racer = race_find_chasecam_for_plr(self, racer);
 
-        switch ( self->race_chasecam_view )
-        {
-            case 1: // 3rd person
-                follow_distance = -120;
-                upward_distance = 50;
+		switch ( self->race_chasecam_view )
+		{
+			case 1: // 3rd person
+				follow_distance = -120;
+				upward_distance = 50;
 				self->hideentity = 0;
-            	VectorCopy( racer->s.v.v_angle, self->s.v.angles);
-                break;
-            case 2: // hawk eye
-                follow_distance = -50;
-                upward_distance = 300;
+				VectorCopy(racer->s.v.v_angle, self->s.v.angles);
+				break;
+			case 2: // hawk eye
+				follow_distance = -50;
+				upward_distance = 300;
 				self->hideentity = 0;
 				self->s.v.angles[0] = 90;
 				self->s.v.angles[1] = racer->s.v.angles[1];
-                break;
-            case 3: // backpack ride
-                follow_distance = -10;
-                upward_distance = 0;
+				break;
+			case 3: // backpack ride
+				follow_distance = -10;
+				upward_distance = 0;
 				self->hideentity = EDICT_TO_PROG( racer ) ;
 				self->s.v.angles[0] = - racer->s.v.angles[0];
 				self->s.v.angles[1] = 180;
-                break;
-            case 0: // 1st person - ok
-                follow_distance = -10;
-                upward_distance = 0;
-				self->hideentity = EDICT_TO_PROG( racer );  // in this mode we want to hide racer model for watcher's view
-            	VectorCopy( racer->s.v.v_angle, self->s.v.angles);
 				break;
-            default:
+			case 0: // 1st person - ok
+				follow_distance = -10;
+				upward_distance = 0;
+				self->hideentity = EDICT_TO_PROG( racer );  // in this mode we want to hide racer model for watcher's view
+				VectorCopy( racer->s.v.v_angle, self->s.v.angles);
+				break;
+			default:
 				return;
-        }
+		}
 
 		if ( !self->race_chasecam_freelook )
 			self->s.v.fixangle = true; // force client v_angle
 
-        trap_makevectors( racer->s.v.angles );
-        VectorMA (racer->s.v.origin, follow_distance, g_globalvars.v_forward, self->s.v.origin);
-        VectorMA (self->s.v.origin, upward_distance, g_globalvars.v_up, self->s.v.origin);
+		trap_makevectors( racer->s.v.angles );
+		VectorMA (racer->s.v.origin, follow_distance, g_globalvars.v_forward, self->s.v.origin);
+		VectorMA (self->s.v.origin, upward_distance, g_globalvars.v_up, self->s.v.origin);
 
-        // avoid positionning in walls
-        traceline( PASSVEC3( racer->s.v.origin ), PASSVEC3( self->s.v.origin ), false, racer );
+		// avoid positionning in walls
+		traceline( PASSVEC3( racer->s.v.origin ), PASSVEC3( self->s.v.origin ), false, racer );
 		VectorCopy( g_globalvars.trace_endpos, self->s.v.origin );
 
 		if ( g_globalvars.trace_fraction == 1 )
-        {
+		{
 			VectorCopy(g_globalvars.trace_endpos, self->s.v.origin);
-            VectorMA (self->s.v.origin, 10, g_globalvars.v_forward, self->s.v.origin);
+			VectorMA (self->s.v.origin, 10, g_globalvars.v_forward, self->s.v.origin);
 		}
 		else
 		{
@@ -2240,24 +2240,41 @@ void race_think( void )
 						else {
 							int player_num = NUM_FOR_EDICT(p) - 1;
 							qbool time_set = p->ct == ctPlayer && p->race_participant && race.currentrace[player_num].time;
+							char* tracking_text = "";
+							char* tracking_speed = "";
+
+							if (p->race_chasecam && p->race_track >= 1 && p->race_track <= MAX_CLIENTS) {
+								gedict_t* chasing = &g_edicts[p->race_track];
+
+								if (chasing->ct == ctPlayer && chasing->racer) {
+									tracking_text = va("following %s\n", chasing->s.v.netname);
+									tracking_speed = va("speed: %4.1f\n", vlen(chasing->s.v.velocity));
+								}
+							}
 
 							if (time_set) {
-								G_centerprint(p, "%s %.3f %s\ntime: %s",
+								G_centerprint(p, "%s%s %.3f %s\n%stime: %s",
+									tracking_text,
 									redtext("== Race over: "),
 									race.currentrace[player_num].time / 1000.0,
 									redtext("=="),
+									tracking_speed,
 									dig3s("%3.1f", race_time() / 1000.0)
 								);
 							}
 							else if (p->ct == ctPlayer && p->race_participant) {
-								G_centerprint(p, "%s\ntime: %s",
-									redtext("== Race ended - please wait =="),
+								G_centerprint(p, "%s%s\n%stime: %s",
+									tracking_text,
+									redtext("== Race over: please wait =="),
+									tracking_speed,
 									dig3s("%3.1f", race_time() / 1000.0)
 								);
 							}
 							else {
-								G_centerprint(p, "%s\ntime: %s",
+								G_centerprint(p, "%s%s\n%stime: %s",
+									tracking_text,
 									redtext("== Race in progress =="),
+									tracking_speed,
 									dig3s("%3.1f", race_time() / 1000.0)
 								);
 							}
