@@ -3975,7 +3975,7 @@ void race_add_standard_routes( void )
 			return;
 		}
 
-		race_add_route_node(-45, -1.6, 34, 0, 0, nodeStart);
+		race_add_route_node(-45, -1.6, 24, 0, 0, nodeStart);
 		race_add_route_node(62.5, 0, 424, 0, 0, nodeEnd);
 
 		race_set_route_name("You are not a Jedi yet", "start\215finish");
