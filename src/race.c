@@ -833,7 +833,9 @@ void race_check_racer_falsestart( qbool nextracer )
 				&& (racer->s.v.origin[1] != e->s.v.origin[1])) {
 				if (nextracer) {
 					G_bprint(PRINT_HIGH, "\20%s\21 false-started\n", racer->s.v.netname);
-					race_end(racer);
+					if (race_end(racer)) {
+						return;
+					}
 				}
 				else {
 					G_sprint(racer, 2, "Come back here!\n");
@@ -859,16 +861,22 @@ void kill_race_idler( void )
 
 				if (race_match_mode()) {
 					G_bprint(PRINT_HIGH, "\20%s\21 was %s to start\n", racer->s.v.netname, redtext("too slow"));
-					race_end(racer);
+					if (race_end(racer)) {
+						return;
+					}
 				}
 				else if (racer->race_afk < 3) {
-					G_bprint(PRINT_HIGH, "Run aborted, %s was %s to start\n", racer->s.v.netname, redtext("too slow"));
-					race_end(racer);
+					G_bprint(PRINT_HIGH, "\20%s\21 was %s to start\n", racer->s.v.netname, redtext("too slow"));
+					if (race_end(racer)) {
+						return;
+					}
 				}
 				else {
 					G_bprint(PRINT_HIGH, "%s was %s of line-up for %s\n", racer->s.v.netname, redtext("kicked out"), redtext("idling"));
-					race_end(racer);
 					racer->race_ready = 0;
+					if (race_end(racer)) {
+						return;
+					}
 				}
 			}
 			else {
