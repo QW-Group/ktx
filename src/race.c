@@ -4006,6 +4006,21 @@ void race_add_standard_routes( void )
 
 		race_route_add_end();
 	}
+	else if (streq(g_globalvars.mapname, "jqdf3")) {
+		if (!race_route_add_start()) {
+			return;
+		}
+
+		race_add_route_node(540, 0, 88, 0, 180, nodeStart);
+		race_add_route_node(-2880, 585, 460, 0, 0, nodeEnd);
+
+		race_set_route_name("Think hard", "start\215finish");
+		race_set_route_timeout(60);
+		race_set_route_weapon_mode(raceWeaponNo);
+		race_set_route_falsestart_mode(raceFalseStartNo);
+
+		race_route_add_end();
+	}
 }
 
 qbool race_handle_event (gedict_t* player, gedict_t* entity, const char* eventName)
