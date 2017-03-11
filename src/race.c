@@ -1229,7 +1229,7 @@ static void race_over(void)
 					race_position_string(timeposition + 1)
 				);
 
-				keep_demo = timeposition == 0 || !blocked_record;
+				keep_demo |= timeposition == 0 || !blocked_record;
 			}
 		}
 		else {
@@ -1245,13 +1245,12 @@ static void race_over(void)
 		}
 	}
 
-
 	if (race_match_started()) {
 		race_match_round_end(demoFileName);
 	}
 	else {
 		// Continue match with next run
-		race_finish_capture(!keep_demo, demoFileName);
+		race_finish_capture(keep_demo, demoFileName);
 		race_start(!keep_demo, "");
 	}
 }
@@ -1677,7 +1676,7 @@ void race_start( qbool cancelrecord, const char *fmt, ... )
 	Q_vsnprintf( text, sizeof( text ), fmt, argptr );
 	va_end( argptr );
 
-	// cancel it first, this will clear something what probably was't cleared before
+	// cancel it first, this will clear something what probably wasn't cleared before
 	race_cancel(cancelrecord, text);
 
 	// switch status to coutdown
