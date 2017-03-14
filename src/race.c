@@ -4207,7 +4207,7 @@ void race_pacemaker(void)
 		if (!strncmp(buffer, "player ", sizeof("player ") - 1)) {
 			int this_player = atoi(buffer + sizeof("player ") - 1);
 
-			ignoring_lines = (this_player == race.records[position].playernumber);
+			ignoring_lines = (this_player != race.records[position].playernumber);
 		}
 
 		if (ignoring_lines) {
