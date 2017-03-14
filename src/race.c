@@ -4092,8 +4092,10 @@ qbool race_handle_event (gedict_t* player, gedict_t* entity, const char* eventNa
 	}
 	else if (streq(eventName, "kill")) {
 		if ( player->racer && race.status ) {
-			G_bprint(PRINT_HIGH, "%s canceled %s run\n", player->s.v.netname, g_his(player));
-			race_end(player);
+			if (!race_simultaneous() || race.status >= raceActive) {
+				G_bprint(PRINT_HIGH, "%s canceled %s run\n", player->s.v.netname, g_his(player));
+				race_end(player);
+			}
 			return true;
 		}
 		else if ( player->race_chasecam ) {
