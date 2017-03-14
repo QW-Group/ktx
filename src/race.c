@@ -4387,7 +4387,7 @@ static void race_finish_capture(qbool store, char* filename)
 			float race_time = race_match_mode() ? player_match_info[player_num].best_time : race.currentrace[player_num].time;
 
 			// Didn't set a time?  Skip.
-			if (!race.currentrace[player_num].time)
+			if (!race_time)
 				continue;
 
 			race_fprintf("player %d\n", player_num);
@@ -4981,7 +4981,7 @@ static void race_match_team_stats(void)
 			teams[teams_found].name = team;
 			race_match_stats_apply(&teams[teams_found], p);
 
-			for (p2 = p; p2 = race_find_race_participants(p2); /**/) {
+			for (p2 = p; (p2 = race_find_race_participants(p2)); /**/) {
 				if (!p2->cnt) {
 					char* team2 = getteam(p2);
 
