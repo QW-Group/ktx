@@ -4160,6 +4160,7 @@ void race_pacemaker(void)
 		G_bprint(PRINT_HIGH, "%s disables the pacemaker\n", self->s.v.netname);
 		cvar_fset(RACE_PACEMAKER_ENABLED_CVAR, 0);
 		memset(&guide, 0, sizeof(guide));
+		memset(&race.pacemaker_nick, 0, sizeof(race.pacemaker_nick));
 		return;
 	}
 	else {
