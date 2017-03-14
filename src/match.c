@@ -418,8 +418,8 @@ void OnePlayerStats(gedict_t *p, int tp)
 	int   ra, ya, ga;
 	int   mh, d_rl, k_rl, t_rl;
 	int   quad, pent, ring;
-	float h_ax, a_ax, ph_rl, rh_rl, vh_rl, h_rl, a_rl, ph_gl, rh_gl, vh_gl, h_gl, a_gl, h_lg, a_lg, h_sg, a_sg, h_ssg, a_ssg;
-	float e_ax, e_sg, e_ssg, e_lg;
+	float ph_rl, vh_rl, h_rl, a_rl, ph_gl, vh_gl, a_gl, h_lg, a_lg, h_sg, a_sg, h_ssg, a_ssg;
+	float e_sg, e_ssg, e_lg;
 	int res, str, hst, rgn;
 
 	dmg_g = p->ps.dmg_g;
@@ -437,11 +437,8 @@ void OnePlayerStats(gedict_t *p, int tp)
 	ring  = p->ps.itm[itRING].tooks;
 
 	h_rl  = p->ps.wpn[wpRL].hits;
-	rh_rl = p->ps.wpn[wpRL].rhits;
 	vh_rl = p->ps.wpn[wpRL].vhits;
 	a_rl  = p->ps.wpn[wpRL].attacks;
-	h_gl  = p->ps.wpn[wpGL].hits;
-	rh_gl = p->ps.wpn[wpGL].rhits;
 	vh_gl = p->ps.wpn[wpGL].vhits;
 	a_gl  = p->ps.wpn[wpGL].attacks;
 	h_lg  = p->ps.wpn[wpLG].hits;
@@ -450,10 +447,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 	a_sg  = p->ps.wpn[wpSG].attacks;
 	h_ssg = p->ps.wpn[wpSSG].hits;
 	a_ssg = p->ps.wpn[wpSSG].attacks;
-	h_ax  = p->ps.wpn[wpAXE].hits;
-	a_ax  = p->ps.wpn[wpAXE].attacks;
 
-	e_ax  = 100.0 * h_ax  / max(1, a_ax);
 	e_sg  = 100.0 * h_sg  / max(1, a_sg);
 	e_ssg = 100.0 * h_ssg / max(1, a_ssg);
 	ph_gl = 100.0 * vh_gl / max(1, a_gl);
@@ -903,27 +897,26 @@ void ListDemoMarkers()
 
 void TopMidairStats ( )
 {
-  gedict_t  *p;
-  float f1, h_rl, vh_rl, a_rl, ph_rl, maxtopheight = 0, maxtopavgheight = 0, maxrlefficiency = 0;
-  int  from, maxscore = -99999, maxkills = 0, maxmidairs = 0, maxstomps = 0, maxstreak = 0, maxspawnfrags = 0, maxbonus = 0;
+	gedict_t  *p;
+	float f1, vh_rl, a_rl, ph_rl, maxtopheight = 0, maxtopavgheight = 0, maxrlefficiency = 0;
+	int  from, maxscore = -99999, maxkills = 0, maxmidairs = 0, maxstomps = 0, maxstreak = 0, maxspawnfrags = 0, maxbonus = 0;
 
 	from = f1 = 0;
 	p = find_plrghst ( world, &from );
 	while( p ) {
-			maxscore = max(p->s.v.frags, maxscore);
-			maxkills = max(p->ps.mid_total + p->ps.mid_stomps, maxkills);
-			maxmidairs = max(p->ps.mid_total, maxmidairs);
-			maxstomps = max(p->ps.mid_stomps, maxstomps);
-			maxstreak = max(p->ps.spree_max, maxstreak);
-			maxspawnfrags = max(p->ps.spawn_frags, maxspawnfrags);
-			maxbonus = max(p->ps.mid_bonus, maxbonus);
-			maxtopheight = max(p->ps.mid_maxheight, maxtopheight);
-			maxtopavgheight = max(p->ps.mid_avgheight, maxtopavgheight);
-			h_rl  = p->ps.wpn[wpRL].hits;
-			vh_rl = p->ps.wpn[wpRL].vhits;
-			a_rl  = p->ps.wpn[wpRL].attacks;
-			ph_rl = 100.0 * vh_rl / max(1, a_rl);
-			maxrlefficiency = max(ph_rl, maxrlefficiency);
+		maxscore = max(p->s.v.frags, maxscore);
+		maxkills = max(p->ps.mid_total + p->ps.mid_stomps, maxkills);
+		maxmidairs = max(p->ps.mid_total, maxmidairs);
+		maxstomps = max(p->ps.mid_stomps, maxstomps);
+		maxstreak = max(p->ps.spree_max, maxstreak);
+		maxspawnfrags = max(p->ps.spawn_frags, maxspawnfrags);
+		maxbonus = max(p->ps.mid_bonus, maxbonus);
+		maxtopheight = max(p->ps.mid_maxheight, maxtopheight);
+		maxtopavgheight = max(p->ps.mid_avgheight, maxtopavgheight);
+		vh_rl = p->ps.wpn[wpRL].vhits;
+		a_rl  = p->ps.wpn[wpRL].attacks;
+		ph_rl = 100.0 * vh_rl / max(1, a_rl);
+		maxrlefficiency = max(ph_rl, maxrlefficiency);
 
 		p = find_plrghst ( p, &from );
 	}
@@ -1039,7 +1032,6 @@ void TopMidairStats ( )
 	from = f1 = 0;
 	p = find_plrghst ( world, &from );
 	while( p ) {
-		h_rl  = p->ps.wpn[wpRL].hits;
 		vh_rl = p->ps.wpn[wpRL].vhits;
 		a_rl  = p->ps.wpn[wpRL].attacks;
 		ph_rl = 100.0 * vh_rl / max(1, a_rl);
@@ -1055,15 +1047,8 @@ void TopMidairStats ( )
 
 void OnePlayerInstagibStats( gedict_t *p, int tp )
 {
-	float	dmg_g, dmg_t, dmg_team;
-	int   ring;
 	float h_ax, a_ax, h_sg, a_sg, h_ssg, a_ssg;
 	char *stats_text;
-
-	dmg_g = p->ps.dmg_g;
-	dmg_t = p->ps.dmg_t;
-	dmg_team = p->ps.dmg_team;
-	ring  = p->ps.i_rings;
 
 	h_sg  = p->ps.wpn[wpSG].hits;
 	a_sg  = p->ps.wpn[wpSG].attacks;
@@ -1093,7 +1078,6 @@ void OnePlayerInstagibStats( gedict_t *p, int tp )
 	stats_text = va("%s  %s: %.1f\n", stats_text, redtext("Maximum"), p->ps.velocity_max);
 	stats_text = va("%s  %s: %.1f\n", stats_text, redtext("Average"),
 		p->ps.vel_frames > 0 ? p->ps.velocity_sum / p->ps.vel_frames : 0.);
-
 
 	stats_text = va("%s \220%s\221\n", stats_text, "WEAPONS");
 	if ( cvar("k_instagib") )
@@ -1141,12 +1125,11 @@ void OnePlayerInstagibStats( gedict_t *p, int tp )
 
 void OnePlayerMidairStats( gedict_t *p, int tp )
 {
-	float h_rl, vh_rl, a_rl, ph_rl;
+	float vh_rl, a_rl, ph_rl;
 
-  h_rl  = p->ps.wpn[wpRL].hits;
-  vh_rl = p->ps.wpn[wpRL].vhits;
-  a_rl  = p->ps.wpn[wpRL].attacks;
-  ph_rl = 100.0 * vh_rl / max(1, a_rl);
+	vh_rl = p->ps.wpn[wpRL].vhits;
+	a_rl  = p->ps.wpn[wpRL].attacks;
+	ph_rl = 100.0 * vh_rl / max(1, a_rl);
 
 	G_bprint(2, "\x87 %s%s: %d\n", ( isghost( p ) ? "\x83" : "" ), getname(p), (int)p->s.v.frags);
 	G_bprint(2, "   %-13s: %d\n", redtext("total midairs"), p->ps.mid_total);
@@ -1483,7 +1466,7 @@ void s2di_race_stats(fileHandle_t handle, int format)
 	if (! strnull(race.pacemaker_nick)) {
 		s2di(handle, "\t\t<pacemaker time=\"%f\">%s</pacemaker>\n", race.pacemaker_time * 1.0f, race.pacemaker_nick);
 	}
-	for (p = world; p = race_find_racer(p); /**/) {
+	for (p = world; (p = race_find_racer(p)); /**/) {
 		int player_number = NUM_FOR_EDICT(p) - 1;
 		raceRecord_t* record = NULL;
 		if (player_number < 0 || player_number >= sizeof(race.currentrace) / sizeof(race.currentrace[0])) {
@@ -1511,8 +1494,6 @@ qbool CreateStatsFile(char* filename, char* ip, int port, qbool xml)
 	char *team = "";
 	int format = STATSFORMAT_XML;
 
-	char date[64] = {0};
-	char tmp[1024] = {0}, buf[1024] = {0};
 	int i = 0, j = 0;
 
 	if ( trap_FS_OpenFile( filename, &di_handle, FS_WRITE_BIN ) < 0 )
@@ -1609,9 +1590,7 @@ qbool CreateStatsFile(char* filename, char* ip, int port, qbool xml)
 
 void StatsToFile()
 {
-	qbool done = false;
-
-	char date[64] = {0}, name[256] = {0}, *ip = "", *port = "";
+	char name[256] = {0}, *ip = "", *port = "";
 	int i = 0;
 
 	if ( strnull( ip = cvar_string( "sv_local_addr" ) ) || strnull( port = strchr(ip, ':') ) || !(i = atoi(port + 1)) )

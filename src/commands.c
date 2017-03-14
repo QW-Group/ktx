@@ -5632,7 +5632,7 @@ void mv_playback ()
 	gedict_t *pb_ent = self->pb_ent;
 	float scale;
 	int s, i;
-	plrfrm_t *fc, *ftmp, *fp;
+	plrfrm_t *ftmp, *fp;
 
 	if ( !mv_is_playback() )
 		return;
@@ -5647,7 +5647,7 @@ void mv_playback ()
 	self->pb_time += (g_globalvars.time - self->pb_old_time) * scale;
 	self->pb_old_time = g_globalvars.time;
 
-	fc = fp = ftmp = &(self->plrfrms[self->pb_frame]);
+	fp = ftmp = &(self->plrfrms[self->pb_frame]);
 
 	for( i = self->pb_frame + 1; i < self->rec_count; i++ ) {
 		ftmp = &(self->plrfrms[i]);

@@ -28,9 +28,7 @@
 
 int VIP(gedict_t* cl)
 {
-	char vip[10];
-
-  return 0; //atoi(infokey(cl, "*VIP", vip, sizeof(vip)));
+	return 0; //atoi(infokey(cl, "*VIP", vip, sizeof(vip)));
 }
 
 // check if client have ALL bit 'flags'

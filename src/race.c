@@ -828,7 +828,7 @@ void race_check_racer_falsestart( qbool nextracer )
 	gedict_t *e;
 	gedict_t *racer;
 
-	for (racer = world; racer = race_find_racer(racer); /**/) {
+	for (racer = world; (racer = race_find_racer(racer)); /**/) {
 		for (e = world; (e = ez_find(e, "race_cp_start")); ) {
 			if ((racer->s.v.origin[0] != e->s.v.origin[0])
 				&& (racer->s.v.origin[1] != e->s.v.origin[1])) {
@@ -853,7 +853,7 @@ void kill_race_idler( void )
 	gedict_t *e;
 	gedict_t *racer;
 	
-	for (racer = world; racer = race_find_racer(racer); /**/) {
+	for (racer = world; (racer = race_find_racer(racer)); /**/) {
 		// FIXME: Keep track of which start, any map with multiple starts would break
 		for (e = world; (e = ez_find(e, "race_cp_start")); ) {
 			if (racer->s.v.origin[0] >= e->s.v.absmin[0] && racer->s.v.origin[0] <= e->s.v.absmax[0] &&
@@ -894,7 +894,7 @@ void race_brighten_checkpoints( void )
 	gedict_t *racer;
 	int furthest_checkpoint = 0;
 	
-	for (racer = world; racer = race_find_race_participants(racer); /**/) {
+	for (racer = world; (racer = race_find_race_participants(racer)); /**/) {
 		furthest_checkpoint = max(furthest_checkpoint, racer->race_id);
 	}
 
@@ -1089,7 +1089,6 @@ static void race_over(void)
 {
 	char demoFileName[MAX_OSPATH];
 	int i, timeposition, nameposition;
-	qbool istopscore;
 	char* pos;
 	gedict_t* racer = NULL;
 	qbool keep_demo = false;
@@ -1102,13 +1101,12 @@ static void race_over(void)
 		*pos = '\0';
 	}
 
-	istopscore = false;
 	read_topscores();
 
 	if (debug) {
 		G_bprint(PRINT_HIGH, "Race over: %d participants\n", race.racers_competing);
 	}
-	for (racer = world; racer = race_find_race_participants(racer); /**/) {
+	for (racer = world; (racer = race_find_race_participants(racer)); /**/) {
 		int player_num = NUM_FOR_EDICT(racer) - 1;
 		if (debug) {
 			G_bprint(PRINT_HIGH, "Player: %d, %s\n", player_num, racer->s.v.netname);
@@ -1623,7 +1621,7 @@ qbool race_can_go( qbool cancel )
 		qbool race_ended = false;
 
 		// Multi-person racing: end individual racer's races if they die
-		for (racer = world; racer = race_find_racer(racer); /**/) {
+		for (racer = world; (racer = race_find_racer(racer)); /**/) {
 			if (racer->s.v.health <= 0 && cancel) {
 				// do some sound
 				race_ended |= race_end(racer);
@@ -1708,7 +1706,7 @@ void race_start( qbool cancelrecord, const char *fmt, ... )
 	if (race_simultaneous()) {
 		// Everyone in queue gets to race
 		race.racers_competing = 0;
-		for (r = world; r = find_plr(r); /**/) {
+		for (r = world; (r = find_plr(r)); /**/) {
 			if (r->ct == ctPlayer && r->race_ready) {
 				race_make_active_racer(r, s);
 				++race.racers_competing;
@@ -1967,8 +1965,6 @@ void race_follow( void )
 
 	if ( !self->racer && self->race_chasecam )
 	{
-		int orig = self->race_track;
-
 		racer = race_find_chasecam_for_plr(self, racer);
 
 		switch ( self->race_chasecam_view )
@@ -2178,7 +2174,7 @@ void race_think( void )
 				if (!QVMstrftime(date, sizeof(date), "%Y%m%d%H%M%S", 0))
 					date[0] = '\0';
 
-				for (racer = world; racer = race_find_racer(racer); /**/) {
+				for (racer = world; (racer = race_find_racer(racer)); /**/) {
 					stuffcmd(racer, "//ktx race start %d %d %s\n",
 						race.weapon,
 						race.falsestart,
@@ -2207,7 +2203,7 @@ void race_think( void )
 
 				race.next_race_time = race_time() + 100; // update race time each 100 ms
 
-				for (racer = world; racer = race_find_racer(racer); /**/) {
+				for (racer = world; (racer = race_find_racer(racer)); /**/) {
 					int player_num = NUM_FOR_EDICT(racer) - 1;
 					raceRecord_t* raceStats = &race.currentrace[player_num];
 					float current_velocity = vlen(racer->s.v.velocity);
@@ -2241,7 +2237,7 @@ void race_think( void )
 					}
 				}
 				else {
-					for (p = world; p = find_client(p); /**/) {
+					for (p = world; (p = find_client(p)); /**/) {
 						if (p->racer) {
 							G_centerprint(p, "%s", dig3s("time: %.1f", race_time() / 1000.0));
 						}
@@ -3024,7 +3020,7 @@ void race_set_teleport_flags_by_name ( const char* name, int flags )
 {
 	gedict_t* ent;
 
-	for (ent = world; ent = ez_find (ent, "trigger_teleport"); )
+	for (ent = world; (ent = ez_find (ent, "trigger_teleport")); )
 	{
 		if (streq (ent->s.v.target, name ))
 		{
@@ -3036,7 +3032,7 @@ void race_set_teleport_flags_by_name ( const char* name, int flags )
 void race_route_create( void )
 {
 	gedict_t* route[MAX_ROUTE_NODES] = { 0 };
-	gedict_t* current = self, *next = NULL;
+	gedict_t* current = self;
 	int route_nodes = 0;
 	int i = 0;
 
@@ -3165,7 +3161,7 @@ void race_spawn_intermission(float x, float y, float z, float ang_x, float ang_y
 	VectorSet(intermission->mangle, ang_x, ang_y, ang_z);
 	self = intermission;
 	SP_info_intermission();
-	oldself = self;
+	self = oldself;
 }
 
 void race_add_standard_routes( void )
@@ -3544,7 +3540,6 @@ void race_add_standard_routes( void )
 		extern int SP_trigger_custom_push();
 		gedict_t* push;
 		gedict_t* ent;
-		gedict_t* oldself;
 
 		if ( !race_route_add_start() )
 			return; // we are full
@@ -3566,10 +3561,9 @@ void race_add_standard_routes( void )
 		push->speed = 120;
 		self = push;
 		SP_trigger_custom_push();
-		oldself = self;
 
 		// Remove hurt indicators around lava pit
-		for (ent = world; ent = findradius_ignore_solid(ent, push->s.v.origin, 300); /**/) {
+		for (ent = world; (ent = findradius_ignore_solid(ent, push->s.v.origin, 300)); /**/) {
 			if (streq(ent->s.v.classname, "trigger_hurt")) {
 				ent_remove(ent);
 			}
@@ -4201,6 +4195,11 @@ void race_pacemaker(void)
 
 		if (!strncmp(buffer, "version ", sizeof("version ") - 1)) {
 			file_version = atoi(buffer + sizeof("version ") - 1);
+			if (file_version > POS_FILE_VERSION) {
+				G_sprint(self, PRINT_HIGH, "Position file is later version (expected %d, found %d)\n", POS_FILE_VERSION, file_version);
+				guide.capture.position_count = 0;
+				return;
+			}
 			ignoring_lines = true;
 		}
 
@@ -4228,7 +4227,7 @@ void race_pacemaker(void)
 			ch = strchr(ch, ',');
 
 			for (i = 0; i < 3; ++i) {
-				if (error = !ch)
+				if ((error = !ch))
 					break;
 				jump->origin[i] = atof(ch + 1);
 				ch = strchr(ch + 1, ',');
@@ -4249,13 +4248,13 @@ void race_pacemaker(void)
 			ch = strchr(ch, ',');
 
 			for (i = 0; i < 3; ++i) {
-				if (error = !ch)
+				if ((error = !ch))
 					break;
 				capture->origin[i] = atof(ch + 1);
 				ch = strchr(ch + 1, ',');
 			}
 			for (i = 0; i < 2; ++i) {
-				if (error = !ch)
+				if ((error = !ch))
 					break;
 				capture->angles[i] = atof(ch + 1);
 				ch = strchr(ch + 1, ',');
@@ -4286,7 +4285,7 @@ static void race_pacemaker_announce(gedict_t* pacemaker)
 {
 	gedict_t* p;
 
-	for (p = world; p = find_client(p); /**/) {
+	for (p = world; (p = find_client(p)); /**/) {
 		if (pacemaker) {
 			stuffcmd(p, "//ktx race pm %d\n", NUM_FOR_EDICT(pacemaker));
 		}
@@ -4340,7 +4339,7 @@ static void race_save_position(void)
 	gedict_t* racer;
 	float race_time = g_globalvars.time - race.start_time;
 
-	for (racer = world; racer = race_find_racer(racer); /**/) {
+	for (racer = world; (racer = race_find_racer(racer)); /**/) {
 		int player_num = NUM_FOR_EDICT(racer) - 1;
 		race_capture_t* capture = &player_captures[player_num];
 
@@ -4366,7 +4365,7 @@ static void race_init_capture(void)
 	gedict_t* racer;
 
 	memset(&player_captures, 0, sizeof(player_captures));
-	for (racer = world; racer = race_find_racer(racer); /**/) {
+	for (racer = world; (racer = race_find_racer(racer)); /**/) {
 		int player_num = NUM_FOR_EDICT(racer) - 1;
 
 		race_store_position(&player_captures[player_num], 0, PASSVEC3(racer->s.v.origin), racer->s.v.angles[0], racer->s.v.angles[1]);	
@@ -4382,7 +4381,7 @@ static void race_finish_capture(qbool store, char* filename)
 		race_fwopen("race/%s.pos", filename);
 		race_fprintf("version %d\n", POS_FILE_VERSION);
 
-		for (racer = world; racer = race_find_race_participants(racer); /**/) {
+		for (racer = world; (racer = race_find_race_participants(racer)); /**/) {
 			int player_num = NUM_FOR_EDICT(racer) - 1;
 			race_capture_t* capture = race_match_mode() ? &player_match_info[player_num].best_run_capture : &player_captures[player_num];
 			float race_time = race_match_mode() ? player_match_info[player_num].best_time : race.currentrace[player_num].time;
@@ -4431,7 +4430,7 @@ static void race_reset_pacemaker_route(void)
 	gedict_t* plr;
 
 	race_remove_pacemaker_indicator();
-	for (plr = world; plr = find_plr(plr); /**/) {
+	for (plr = world; (plr = find_plr(plr)); /**/) {
 		plr->race_closest_guide_pos = 0;
 	}
 	race_remove_jump_markers();
@@ -4441,7 +4440,7 @@ static void race_pacemaker_race_start(void)
 {
 	gedict_t* racer;
 
-	for (racer = world; racer = race_find_racer(racer); /**/) {
+	for (racer = world; (racer = race_find_racer(racer)); /**/) {
 		racer->race_closest_guide_pos = 0;
 	}
 
@@ -4469,7 +4468,7 @@ static void race_update_closest_positions(void)
 		return;
 	}
 
-	for (racer = world; racer = race_find_racer(racer); /**/) {
+	for (racer = world; (racer = race_find_racer(racer)); /**/) {
 		if (racer->race_closest_guide_pos < guide.capture.position_count) {
 			float closest_distance = 0.0f;
 			vec3_t diff;
@@ -4682,7 +4681,7 @@ static void race_clear_pacemaker(void)
 static void race_remove_pacemaker_indicator(void)
 {
 	gedict_t* ent;
-	while (ent = race_pacemaker_entity(false)) {
+	while ((ent = race_pacemaker_entity(false))) {
 		ent_remove(ent);
 		race_pacemaker_announce(NULL);
 	}
@@ -4704,7 +4703,6 @@ qbool race_end(gedict_t* racer)
 
 static char* race_position_string(int position)
 {
-	static char buffer[64];
 	char* positions[] = {
 		"1st place",
 		"2nd place",
@@ -4971,11 +4969,11 @@ static void race_match_team_stats(void)
 	race_team_score_t teams[MAX_CLIENTS] = { 0 };
 
 	// keep track of players we've processed
-	for (p = world; p = race_find_race_participants(p); /**/) {
+	for (p = world; (p = race_find_race_participants(p)); /**/) {
 		p->cnt = 0;
 	}
 
-	for (p = world; p = race_find_race_participants(p); /**/) {
+	for (p = world; (p = race_find_race_participants(p)); /**/) {
 
 		if (!p->cnt) {
 			char* team = getteam(p);
@@ -5008,9 +5006,7 @@ static void race_match_player_stats(void)
 	int teams_found = 0;
 	race_team_score_t teams[MAX_CLIENTS] = { 0 };
 
-	for (p = world; p = race_find_race_participants(p); /**/) {
-		int p_num = NUM_FOR_EDICT(p);
-
+	for (p = world; (p = race_find_race_participants(p)); /**/) {
 		teams[teams_found].name = p->s.v.netname;
 		race_match_stats_apply(&teams[teams_found], p);
 		++teams_found;
@@ -5021,9 +5017,6 @@ static void race_match_player_stats(void)
 
 void race_match_stats(void)
 {
-	float best_time = RACE_INVALID_RECORD_TIME;
-	float best_avg_time = RACE_INVALID_RECORD_TIME;
-
 	// TODO: Think up and keep track of stats we want summarised/match
 	if (teamplay) {
 		race_match_team_stats();
@@ -5037,7 +5030,7 @@ void race_match_start(void)
 	gedict_t* p;
 
 	// convert all match-ready players to race-ready
-	for (p = world; p = find_plr(p); /**/) {
+	for (p = world; (p = find_plr(p)); /**/) {
 		p->race_ready = p->ready;
 	}
 
@@ -5101,7 +5094,7 @@ static void race_match_round_end(char* demoFileName)
 	int sc;
 
 	// Award points for this round
-	for (racer = world; racer = race_find_race_participants(racer); /**/) {
+	for (racer = world; (racer = race_find_race_participants(racer)); /**/) {
 		int player_num = NUM_FOR_EDICT(racer) - 1;
 
 		racer->s.v.frags += race_award_points(race.currentrace[player_num].position, race.racers_competing);
@@ -5139,7 +5132,7 @@ static void race_match_round_end(char* demoFileName)
 		if (sc == 0) {
 			if (!teamplay) {
 				// Remove anyone apart from the top-scorers for deciding round
-				for (racer = world; racer = race_find_race_participants(racer); /**/) {
+				for (racer = world; (racer = race_find_race_participants(racer)); /**/) {
 					racer->race_ready = (racer->s.v.frags == score1);
 				}
 			}

@@ -78,7 +78,7 @@ float bound( float a, float b, float c );
 #define	MAX_STRING_TOKENS	1024	// max tokens resulting from Cmd_TokenizeString
 #define	MAX_TOKEN_CHARS		1024	// max length of an individual token
 
-#define	FOFS(x) ((int)&(((gedict_t *)0)->x))
+#define	FOFS(x) ((intptr_t)&(((gedict_t *)0)->x))
 
 #define FOFCLSN ( FOFS ( s.v.classname ) )
 
@@ -683,7 +683,7 @@ void	vote_check_pickup ();
 void	vote_check_rpickup ();
 void 	vote_check_all ();
 
-#define	VOTE_FOFS(x) ((int)&(((vote_t *)0)->x))
+#define	VOTE_FOFS(x) ((intptr_t)&(((vote_t *)0)->x))
 
 #define OV_BREAK ( VOTE_FOFS ( brk ) )
 #define OV_ELECT ( VOTE_FOFS ( elect ) )

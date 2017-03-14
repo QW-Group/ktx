@@ -38,8 +38,8 @@ void HM_next_point(gedict_t *won, gedict_t *lost) // won is optional, lost is no
 	// note: i need won/lost because depending on s.v.frags is unreliable here...
 	gedict_t *p;
 	char *p_extra;
-	int i = 0;
-	static int id1 = -99, id2 = -99, max_len = 0;
+	size_t i = 0, max_len = 0;
+	static int id1 = -99, id2 = -99;
 	int f = 0;
 
 	if (won == 0)
