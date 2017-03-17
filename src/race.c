@@ -1071,7 +1071,7 @@ static void race_end_point_touched(gedict_t* self, gedict_t* other)
 	// Add marker for demos/clients
 	{
 		stuffcmd(other, "//ktx race end %f %f %f %f %d\n",
-			race.currentrace[player_num].time,
+			race_time() / 1000.0f,
 			race.currentrace[player_num].distance,
 			race.currentrace[player_num].maxspeed,
 			race.currentrace[player_num].avgcount ? race.currentrace[player_num].avgspeed / race.currentrace[player_num].avgcount : 0,
@@ -1300,7 +1300,7 @@ void race_node_touch()
 
 			stuffcmd(other, "//ktx race cp %d %f %f %f %f\n",
 				other->race_id,
-				race.currentrace[player_num].time,
+				race_time() / 1000.0f,
 				race.currentrace[player_num].distance,
 				race.currentrace[player_num].maxspeed,
 				race.currentrace[player_num].avgcount ? race.currentrace[player_num].avgspeed / race.currentrace[player_num].avgcount : 0
@@ -4788,7 +4788,7 @@ void race_player_pre_think(void)
 		}
 		else if ( self->ct == ctPlayer && self->racer && race.status )
 		{
-			stuffcmd_flags (self, STUFFCMD_DEMOONLY, "//ucmd %f %d\n", g_globalvars.time, race_encode_user_command(self));
+			stuffcmd_flags (self, STUFFCMD_DEMOONLY, "//ucmd %f %d %d\n", g_globalvars.time, race_encode_user_command(self), NUM_FOR_EDICT(self));
 		}
 	}
 }
