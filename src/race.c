@@ -585,12 +585,11 @@ void race_record( void )
 {
 	if ( race.cd_cnt && cvar("k_race_autorecord") )
 	{
-		if (strnull(cvar_string("serverdemo"))) {
+		if (!race_match_mode()) {
 			StartDemoRecord(); // start demo recording
 		}
 		race.race_recording = true;
 	}
-
 }
 
 void race_stoprecord( qbool cancel )
@@ -1096,7 +1095,7 @@ static void race_over(void)
 	qbool debug = cvar("developer");
 
 	strlcpy(demoFileName, cvar_string("serverdemo"), sizeof(demoFileName));
-	pos = strchr(demoFileName, '.');
+	pos = strstr(demoFileName, ".mvd");
 	if (pos) {
 		*pos = '\0';
 	}
