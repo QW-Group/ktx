@@ -1,0 +1,22 @@
+race_route_add_start
+	race_add_route_node  -955 -1140  2010 0 90 
+	race_add_route_node -2675 -1155 -2984 0 0  
+
+	race_set_route_name "Rush" "start\215finish" 
+	race_set_route_timeout 60 
+	race_set_route_weapon_mode raceWeaponNo 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node  -955 -1140  2010 0 90 
+	race_add_route_node -2675 -1155 -2984 0 0  
+
+	race_set_route_name "Rush +weapons)" "start\215finish" 
+	race_set_route_timeout 60 
+	race_set_route_weapon_mode raceWeaponAllowed 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
+
+race_set_teleport_flags_by_name  "killer" RACEFLAG_TOUCH_RACEFAIL 
+race_set_teleport_flags_by_name  "start" RACEFLAG_TOUCH_RACEEND 

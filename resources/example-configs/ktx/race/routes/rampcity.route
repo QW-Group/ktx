@@ -1,0 +1,19 @@
+race_route_add_start
+	race_add_route_node -255 250 88 0 -180
+	race_add_route_node -255 250 856 0 0 
+
+	race_set_route_name "Up you go..." "start\215finish"
+	race_set_route_timeout 60
+	race_set_route_weapon_mode raceWeaponAllowed
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node -255 250 856 0 0 
+	race_add_route_node -255 250 88 0 -180 
+
+	race_set_route_name "... and down you fall" "start\215finish"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end

@@ -1,0 +1,9 @@
+race_route_add_start
+	race_add_route_node 784 -112 48 0 0 
+	race_add_route_node -1410 -1135 -196 0 0 
+
+	race_set_route_name "So you want to rj?" "start\215finish"
+	race_set_route_timeout 300
+	race_set_route_weapon_mode raceWeaponAllowed
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end

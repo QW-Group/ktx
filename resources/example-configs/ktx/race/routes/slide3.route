@@ -1,0 +1,11 @@
+race_route_add_start
+	race_add_route_node -1920  2208 -160 0 0 
+	race_add_route_node  2504  2246 -160 0 0  
+	race_add_route_node -1460 -1023 -160 0 0  
+	race_add_route_node -2336  2203 -160 0 0  
+
+	race_set_route_name "Slide 3" "start \215 end" 
+	race_set_route_timeout 40 
+	race_set_route_weapon_mode raceWeaponAllowed 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end

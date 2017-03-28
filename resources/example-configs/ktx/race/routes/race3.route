@@ -1,0 +1,9 @@
+race_route_add_start
+    race_add_route_node -352 352 2072 0 0 
+    race_add_route_node -353 -92 -680 0 0  
+
+    race_set_route_name "The Cube" "start\215finish" 
+    race_set_route_timeout 30 
+    race_set_route_weapon_mode raceWeaponNo 
+    race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end

@@ -1,0 +1,11 @@
+race_route_add_start
+
+    race_add_route_node    0   0   -40 0 0 
+    race_add_route_node 1376 382 -3700 0 0  
+
+    race_set_route_name "Pillars" "start\215finish" 
+    race_set_route_timeout 40 
+    race_set_route_weapon_mode raceWeaponNo 
+    race_set_route_falsestart_mode raceFalseStartNo 
+
+race_route_add_end

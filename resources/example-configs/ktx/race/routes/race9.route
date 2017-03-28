@@ -1,0 +1,9 @@
+race_route_add_start
+	race_add_route_node -2736 2568 2776 0 0 
+	race_add_route_node -2981 688  -296 0 0  
+
+	race_set_route_name "Forgotten Path" "start\215finish" 
+	race_set_route_timeout 90 
+	race_set_route_weapon_mode raceWeaponNo 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end

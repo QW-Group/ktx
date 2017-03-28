@@ -1,0 +1,29 @@
+race_route_add_start
+	race_add_route_node 1309.7  -903.8 344.0 5.2 87.8
+	race_add_route_node 1498.8  -713.5 184.0   0    0  
+	race_add_route_node 1896.2  -634.4 184.0   0    0  
+	race_add_route_node 2613.7  -218.5 120.0   0    0  
+	race_add_route_node 2714.6 -1735.3 120.0   0    0  
+	race_add_route_node 2445.9 -1979.4 120.0   0    0  
+	race_add_route_node 2246.4 -2473.3 200.0   0    0  
+
+	race_set_route_name "ihm's quad run" "high rl\215quad\215water\215lower\215ra mh" 
+	race_set_route_timeout 35 
+	race_set_route_weapon_mode raceWeaponNo 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node 2114.0  -100.9   24.0 -10.4 -109.4 
+	race_add_route_node 2014.6  -469.5  140.7     0      0  
+	race_add_route_node 1696.7 -1463.7   28.7     0      0  
+	race_add_route_node 2612.7  -677.0  144.0     0      0  
+	race_add_route_node 2304.8  -152.6   67.6     0      0  
+	race_add_route_node 2397.6    86.0   41.2     0      0  
+	race_add_route_node 2246.2  -194.7 -136.0     0      0  
+
+	race_set_route_name "around dm2" "water\215quad low\215rl low\215ng\215stairs" 
+	race_set_route_timeout 35 
+	race_set_route_weapon_mode raceWeaponAllowed 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end

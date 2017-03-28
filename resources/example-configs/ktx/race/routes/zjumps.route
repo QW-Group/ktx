@@ -1,0 +1,11 @@
+race_route_add_start
+	race_add_route_node -3740  3950  3865 0 -90 
+	race_add_route_node -3880  2720  3830 0 0  
+
+	race_set_route_name "Zzzzzzz" "start\215finish" 
+	race_set_route_timeout 60 
+	race_set_route_weapon_mode raceWeaponNo 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
+
+race_set_teleport_flags_by_name  "start" RACEFLAG_TOUCH_RACEFAIL 

@@ -1,0 +1,9 @@
+race_route_add_start
+	race_add_route_node -1440  2304 1496 0 0 
+	race_add_route_node -1479 -1788 -1000 0 0  
+
+	race_set_route_name "Canyon Run" "start\215finish" 
+	race_set_route_timeout 60 
+	race_set_route_weapon_mode raceWeaponAllowed 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
