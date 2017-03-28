@@ -64,8 +64,14 @@ static char     f_checks[MAX_CLIENTS][F_CHECK_SIZE];
 static wreg_t   wregs[MAX_CLIENTS][MAX_WREGS];
 static plrfrm_t plrfrms[MAX_CLIENTS][MAX_PLRFRMS];
 
-gameData_t      gamedata =
-    { ( edict_t * ) g_edicts, sizeof( gedict_t ), &g_globalvars, expfields , GAME_API_VERSION};
+gameData_t gamedata = {
+	( edict_t * ) g_edicts,
+	sizeof( gedict_t ),
+	&g_globalvars,
+	expfields,
+	GAME_API_VERSION,
+	MAX_EDICTS
+};
 
 float           starttime;
 int   g_matchstarttime;
