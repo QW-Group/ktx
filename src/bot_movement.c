@@ -35,7 +35,8 @@ void SetJumpFlag (gedict_t* player, qbool jumping, const char* explanation)
 
 void SetDirectionMove (gedict_t* self, vec3_t dir_move, const char* explanation)
 {
-	normalize (dir_move, self->fb.dir_move_);
+	VectorCopy(dir_move, self->fb.dir_move_);
+	self->fb.dir_speed = VectorNormalize(self->fb.dir_move_);
 
 /*	if (self->fb.debug_path) {
 		G_bprint (PRINT_HIGH, "%3.2f: SetDirection(%4d %4d %4d): %s\n", g_globalvars.time, PASSSCALEDINTVEC3 (self->fb.dir_move_, 320), explanation);

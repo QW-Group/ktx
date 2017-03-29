@@ -61,7 +61,7 @@ static void ResetEnemy(gedict_t* self) {
 	self->s.v.enemy = NUM_FOR_EDICT(world);
 }
 
-static void ResetGoalEntity(gedict_t* self)
+void ResetGoalEntity(gedict_t* self)
 {
 	if (self->s.v.goalentity) {
 		gedict_t* ent = &g_edicts[self->s.v.goalentity];

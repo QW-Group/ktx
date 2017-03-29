@@ -39,6 +39,7 @@ void UpdateGoalEntity(gedict_t* item, gedict_t* taker) {
 			float goal_refresh_time_ = g_globalvars.time + (same_team || heard_it ? 0 : g_random());
 
 			plr->fb.goal_refresh_time = min (plr->fb.goal_refresh_time, goal_refresh_time_);
+			ResetGoalEntity(plr);
 		}
 	}
 }

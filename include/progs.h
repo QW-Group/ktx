@@ -605,6 +605,7 @@ typedef struct fb_entvars_s {
 	vec3_t virtual_maxs;                        // true bounds of the object
 
 	vec3_t dir_move_;                           // the direction the bot wants to move in
+	float dir_speed;                            // the magnitude of vector the bot wants to move in
 	vec3_t last_cmd_direction;                  // the direction the bot did move in (scaled for speed)
 	float ledge_backup_time;
 

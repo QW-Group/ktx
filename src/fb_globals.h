@@ -344,6 +344,8 @@ qbool IsHazardFrame (void);
 gedict_t* FirstZoneMarker (int zone);
 void AddZoneMarker (gedict_t* marker);
 
+void ResetGoalEntity(gedict_t* self);
+
 // bot_commands.qc
 void SetLinkedMarker (gedict_t* player, gedict_t* marker, char* explanation);
 void SetJumpFlag (gedict_t* player, qbool jumping, const char* explanation);

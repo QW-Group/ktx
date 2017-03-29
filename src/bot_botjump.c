@@ -88,9 +88,14 @@ void BotCanRocketJump(gedict_t* self)
 		self->fb.canRocketJump = true;
 	}
 	else {
-		// work out how much health we'll have after
-		if (health_after >= 0 && will_pickup && self->fb.linked_marker->tp_flags & (it_mh | it_health)) {
-			health_after += self->fb.linked_marker->healamount;
+		// work out how much health we'll have in next marker
+		float health_after = TotalStrengthAfterDamage(self->s.v.health, self->s.v.armorvalue, self->s.v.armortype, tp_damage ? 55 * (has_quad ? 4 : 1) : 0);
+		if (health_after >= 0 && will_pickup) {
+			// FIXME: This is broken, need to know how much health/armor they'd have left after initial impact
+			//    Also take into account the goal entity, not just next link in path
+			if (self->fb.linked_marker->tp_flags & (it_mh | it_health)) {
+				health_after += 50;
+			}
 		}
 		// FIXME: this threshold should be flexible depending on fuzzy logic
 		// - depending on enemy status (maybe higher or lower depending on strength of enemy)

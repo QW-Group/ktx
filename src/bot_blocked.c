@@ -20,7 +20,8 @@ When blocked() function is called, velocity/position/flags of where the bot woul
 This is temporary kludge until I work out better solution.  Really the bot should do this calculation first, or
   perhaps extend API to have G_SIMULATE_COMMAND?  This is very basic attempt to not break API, while effectively
   (under the covers) changing the API.  Ho hum.
-
+Long term goal is to replace this kind of "try...fail...try-something-else" logic with a navigation mesh, there would
+  still need to be some collision detection for colliding with other players tho.
 */
 
 static qbool obstruction (gedict_t* self, vec3_t new_velocity, vec3_t new_origin, int newFlags, vec3_t velocity_normal);
