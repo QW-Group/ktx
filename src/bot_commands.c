@@ -1700,7 +1700,7 @@ void Bot_Print_Thinking (void)
 						name = "quad";
 					else if (streq(name, "item_health") && ((int)goal->s.v.spawnflags & H_MEGA))
 						name = "mega";
-					strlcat(data, va("Goal %2d: %s (%3.1f) %d\n", i + 1, name, goal->fb.desire(bot), (int) max(0, goal->fb.goal_respawn_time - g_globalvars.time)), sizeof (data));
+					strlcat(data, va("Goal %2d: %s (%3.1f) %d\n", i + 1, name, goal->fb.desire(bot, goal), (int) max(0, goal->fb.goal_respawn_time - g_globalvars.time)), sizeof (data));
 				}
 			}
 		}

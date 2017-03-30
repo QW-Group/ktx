@@ -129,14 +129,42 @@ qbool BotUsingCorrectWeapon (gedict_t* self)
 	       self->s.v.weapon == weapon_impulse_codes[self->fb.desired_weapon_impulse];
 }
 
-static float goal_client(gedict_t* self) {
-	if (g_globalvars.time < self->fb.virtual_enemy->invisible_finished) {
+static float goal_client(gedict_t* self, gedict_t* other) {
+	gedict_t* p;
+	int seconds = 0;
+
+	if (g_globalvars.time < other->invisible_finished) {
 		return 0;     // don't chase enemies with eyes
 	}
-	else if (g_globalvars.time < self->fb.virtual_enemy->invincible_finished) {
+	else if (g_globalvars.time < other->invincible_finished) {
 		return 0;     // or with pent
 	}
-	else if (self->fb.look_object && self->s.v.enemy == NUM_FOR_EDICT(self->fb.look_object)) {
+
+	if( (p = find(world, FOFCLSN, "timer")) ) {
+		seconds = p->cnt2 + (p->cnt - 1) * 60;
+	}
+
+	if (isDuel() && seconds && timelimit) {
+		// More human logic... if winning, value control, if losing, frag-hunt
+		int frag_difference = self->s.v.frags - other->s.v.frags;
+
+		if (frag_difference > 10) {
+			// don't chase once comfortably in lead
+			return 0;
+		}
+		else if (frag_difference > 4 && seconds < 60) {
+			// don't chase unless no chance
+			if (!EnemyDefenceless(self)) {
+				return 0;
+			}
+		}
+		else if (frag_difference > 0 && seconds < 20) {
+			// 
+			return 0;
+		}
+	}
+
+	if (self->fb.look_object && self->s.v.enemy == NUM_FOR_EDICT(self->fb.look_object)) {
 		return ((self->fb.total_damage + 100) * self->fb.firepower - self->fb.virtual_enemy->fb.total_damage * self->fb.virtual_enemy->fb.firepower) * 0.01;
 	}
 	else if (EnemyDefenceless(self)) {
@@ -147,7 +175,7 @@ static float goal_client(gedict_t* self) {
 	}
 }
 
-static float goal_client6(gedict_t* self) {
+static float goal_client6(gedict_t* self, gedict_t* other) {
 	if (! k_matchLess && match_in_progress != 2) {
 		return 100;
 	}

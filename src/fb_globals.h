@@ -206,7 +206,7 @@ gedict_t* CreateNewMarker (vec3_t origin);
 void BotWaterMove (gedict_t* self);
 
 // items.qc
-float goal_NULL (gedict_t* self);
+float goal_NULL (gedict_t* self, gedict_t* other);
 
 // client.qc
 void BotClientEntersEvent (gedict_t* self, gedict_t* spawn_pos);

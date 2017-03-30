@@ -97,27 +97,27 @@ static void LocateDynamicItem (gedict_t* item)
 	}
 }
 
-static float goal_health0 (gedict_t* self)
+static float goal_health0 (gedict_t* self, gedict_t* other)
 {
 	return self->fb.desire_health0;
 }
 
-static float goal_health2 (gedict_t* self)
+static float goal_health2 (gedict_t* self, gedict_t* other)
 {
 	return self->fb.desire_mega_health;
 }
 
-float goal_NULL (gedict_t* self)
+float goal_NULL (gedict_t* self, gedict_t* other)
 {
 	return 0;
 }
 
-static float goal_armor1 (gedict_t* self)
+static float goal_armor1 (gedict_t* self, gedict_t* other)
 {
 	return self->fb.desire_armor1;
 }
 
-static float goal_armor2 (gedict_t* self)
+static float goal_armor2 (gedict_t* self, gedict_t* other)
 {
 	if (self->fb.desire_armor2) {
 		return (self->fb.desire_armor2 + (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_armor2 : 0));
@@ -134,7 +134,7 @@ static float goal_armor2 (gedict_t* self)
 	}
 }
 
-static float goal_armorInv (gedict_t* self)
+static float goal_armorInv (gedict_t* self, gedict_t* other)
 {
 	if (self->fb.desire_armorInv) {
 		return (self->fb.desire_armorInv + (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_armorInv : 0));
@@ -151,85 +151,85 @@ static float goal_armorInv (gedict_t* self)
 	}
 }
 
-static float goal_supershotgun1 (gedict_t* self)
+static float goal_supershotgun1 (gedict_t* self, gedict_t* other)
 {
 	return self->fb.desire_supershotgun + (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_supershotgun * 0.5 : 0);
 }
 
-static float goal_supershotgun2 (gedict_t* self)
+static float goal_supershotgun2 (gedict_t* self, gedict_t* other)
 {
 	if (deathmatch != 1 && ((int)self->s.v.items & IT_SUPER_SHOTGUN))
 		return 0;
 
-	return goal_supershotgun1 (self);
+	return goal_supershotgun1 (self, other);
 }
 
-static float goal_nailgun1 (gedict_t* self)
+static float goal_nailgun1 (gedict_t* self, gedict_t* other)
 {
 	return self->fb.desire_nailgun + (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_nailgun * 0.5 : 0);
 }
 
-static float goal_nailgun2 (gedict_t* self)
+static float goal_nailgun2 (gedict_t* self, gedict_t* other)
 {
 	if (deathmatch != 1 && ((int)self->s.v.items & IT_NAILGUN))
 		return 0;
 
-	return goal_nailgun1 (self);
+	return goal_nailgun1 (self, other);
 }
 
-static float goal_supernailgun1 (gedict_t* self)
+static float goal_supernailgun1 (gedict_t* self, gedict_t* other)
 {
 	return self->fb.desire_supernailgun + (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_supernailgun * 0.5 : 0);
 }
 
-static float goal_supernailgun2 (gedict_t* self)
+static float goal_supernailgun2 (gedict_t* self, gedict_t* other)
 {
 	if (deathmatch != 1 && ((int)self->s.v.items & IT_SUPER_NAILGUN))
 		return 0;
 
-	return goal_supernailgun1 (self);
+	return goal_supernailgun1 (self, other);
 }
 
-static float goal_grenadelauncher1 (gedict_t* self)
+static float goal_grenadelauncher1 (gedict_t* self, gedict_t* other)
 {
 	return self->fb.desire_grenadelauncher + (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_grenadelauncher * 0.5 : 0);
 }
 
-static float goal_grenadelauncher2 (gedict_t* self)
+static float goal_grenadelauncher2 (gedict_t* self, gedict_t* other)
 {
 	if (deathmatch != 1 && ((int)self->s.v.items & IT_GRENADE_LAUNCHER))
 		return 0;
 
-	return goal_grenadelauncher1 (self);
+	return goal_grenadelauncher1 (self, other);
 }
 
-static float goal_rocketlauncher1 (gedict_t* self)
+static float goal_rocketlauncher1 (gedict_t* self, gedict_t* other)
 {
 	return self->fb.desire_rocketlauncher + (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_rocketlauncher : 0);
 }
 
-static float goal_rocketlauncher2 (gedict_t* self)
+static float goal_rocketlauncher2 (gedict_t* self, gedict_t* other)
 {
 	if (deathmatch != 1 && ((int)self->s.v.items & IT_ROCKET_LAUNCHER))
 		return 0;
 
-	return goal_rocketlauncher1 (self);
+	return goal_rocketlauncher1 (self, other);
 }
 
-static float goal_lightning1 (gedict_t* self)
+static float goal_lightning1 (gedict_t* self, gedict_t* other)
 {
 	return self->fb.desire_lightning + (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_lightning * 0.5 : 0);
 }
 
-static float goal_lightning2 (gedict_t* self)
+static float goal_lightning2 (gedict_t* self, gedict_t* other)
 {
 	if (deathmatch != 1 && ((int)self->s.v.items & IT_LIGHTNING))
 		return 0;
 
-	return goal_lightning1 (self);
+	return goal_lightning1 (self, other);
 }
 
-static float goal_shells (gedict_t* self)
+static float goal_shells (gedict_t* self, gedict_t* other)
 {
 	if (self->s.v.ammo_shells < 100) {
 		return self->fb.desire_shells;
@@ -237,7 +237,7 @@ static float goal_shells (gedict_t* self)
 	return 0;
 }
 
-static float goal_spikes (gedict_t* self)
+static float goal_spikes (gedict_t* self, gedict_t* other)
 {
 	if (self->s.v.ammo_nails < 200) {
 		return self->fb.desire_nails;
@@ -245,7 +245,7 @@ static float goal_spikes (gedict_t* self)
 	return 0;
 }
 
-static float goal_rockets (gedict_t* self)
+static float goal_rockets (gedict_t* self, gedict_t* other)
 {
 	if (self->s.v.ammo_rockets < 100) {
 		return self->fb.desire_rockets + (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_rockets : 0);
@@ -253,7 +253,7 @@ static float goal_rockets (gedict_t* self)
 	return 0;
 }
 
-static float goal_cells (gedict_t* self)
+static float goal_cells (gedict_t* self, gedict_t* other)
 {
 	if (self->s.v.ammo_cells < 100) {
 		return self->fb.desire_cells + (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_cells * 0.5 : 0);
@@ -261,21 +261,21 @@ static float goal_cells (gedict_t* self)
 	return 0;
 }
 
-static float goal_artifact_invulnerability (gedict_t* self)
+static float goal_artifact_invulnerability (gedict_t* self, gedict_t* other)
 {
 	if (Get_Powerups ())
 		return 200 + self->fb.total_damage;
 	return 0;
 }
 
-static float goal_artifact_invisibility (gedict_t* self)
+static float goal_artifact_invisibility (gedict_t* self, gedict_t* other)
 {
 	if (Get_Powerups ())
 		return 200 + self->fb.total_damage;
 	return 0;
 }
 
-static float goal_artifact_super_damage (gedict_t* self)
+static float goal_artifact_super_damage (gedict_t* self, gedict_t* other)
 {
 	if (Get_Powerups ())
 		return 200 + self->fb.total_damage;
@@ -838,7 +838,7 @@ static void BackpackTimedOut (void)
 	SUB_Remove ();
 }
 
-static float goal_health_backpack (gedict_t* self)
+static float goal_health_backpack (gedict_t* self, gedict_t* pack)
 {
 	if (self->invincible_time > g_globalvars.time)
 		return 0;

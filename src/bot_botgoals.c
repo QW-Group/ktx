@@ -59,7 +59,7 @@ static qbool GoalLeaveForTeammate (gedict_t* self, gedict_t* goal_entity) {
 
 // Evaluates a goal 
 void EvalGoal(gedict_t* self, gedict_t* goal_entity) {
-	float goal_desire = goal_entity && goal_entity->fb.desire ? goal_entity->fb.desire (self) : 0;
+	float goal_desire = goal_entity && goal_entity->fb.desire ? goal_entity->fb.desire (self, goal_entity) : 0;
 	float goal_time = 0.0f;
 
 	if (!goal_entity)
@@ -255,7 +255,7 @@ void UpdateGoal(gedict_t* self) {
 
 	if (enemy_->fb.touch_marker) {
 		self->fb.virtual_enemy = enemy_;
-		self->fb.goal_enemy_desire = enemy_ && enemy_->fb.desire ? enemy_->fb.desire(self) : 0;
+		self->fb.goal_enemy_desire = enemy_ && enemy_->fb.desire ? enemy_->fb.desire(self, enemy_) : 0;
 		if (self->fb.goal_enemy_desire > 0) {
 			gedict_t* enemy = &g_edicts[self->s.v.enemy];
 			// Time from here to the enemy's last marker

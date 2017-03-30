@@ -362,7 +362,7 @@ typedef struct teamplay_s {
 // frogbots
 typedef void (*fb_void_func_t)(void);
 typedef qbool (*fb_bool_func_t)(void);
-typedef float (*fb_desire_func_t)(struct gedict_s* self);
+typedef float (*fb_desire_func_t)(struct gedict_s* self, struct gedict_s* other);
 typedef qbool (*fb_touch_func_t)(struct gedict_s* item, struct gedict_s* player);
 typedef void (*fb_taken_func_t)(struct gedict_s* item, struct gedict_s* player);
 typedef void (*fb_entity_func_t)(struct gedict_s* item);
