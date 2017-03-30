@@ -224,13 +224,28 @@ static void BuildTeamList ()
 	AddTeamToList (&foundTeams, "green", 3, 3);
 }
 
-// FIXME: Autoteams vs manual...
 static void FrogbotsAddbot(void) {
 	int i = 0;
+	int skill_level = FrogbotSkillLevel();
+	char specificteam[10] = { 0 };
 
 	if (!bots_enabled ()) {
 		G_sprint (self, 2, "Bots are disabled by the server.\n");
 		return;
+	}
+
+	if (trap_CmdArgc() >= 3) {
+		char temp[10];
+
+		trap_CmdArgv(2, temp, sizeof(temp));
+
+		if (isdigit(temp[0])) {
+			skill_level = atoi(temp);
+		}
+	}
+
+	if (trap_CmdArgc() >= 4) {
+		trap_CmdArgv(3, specificteam, sizeof(specificteam));
 	}
 
 	for (i = 0; i < sizeof(bots) / sizeof(bots[0]); ++i) {
@@ -238,9 +253,9 @@ static void FrogbotsAddbot(void) {
 			int entity = 0;
 			int topColor = 0;
 			int bottomColor = 0;
-			char* teamName = "";
+			char* teamName = specificteam;
 
-			if (teamplay) {
+			if (teamplay && !specificteam[0]) {
 				int team1Count, team2Count;
 				team_t* team;
 				team_t* otherTeam;
@@ -284,7 +299,7 @@ static void FrogbotsAddbot(void) {
 			bots[i].entity = entity;
 			memset(&bots[i].command, 0, sizeof(bots[i].command));
 			g_edicts[entity].fb.last_cmd_sent = g_globalvars.time;
-			g_edicts[entity].fb.skill.skill_level = FrogbotSkillLevel();
+			g_edicts[entity].fb.skill.skill_level = skill_level;
 			g_edicts[entity].fb.botnumber = i;
 			trap_SetBotUserInfo (entity, "team", teamName, 0);
 			G_bprint (2, "skill &cf00%d&r\n", self->fb.skill.skill_level);
@@ -1551,7 +1566,7 @@ typedef struct frogbot_cmd_s {
 
 static frogbot_cmd_t std_commands[] = {
 	{ "skill", FrogbotsSetSkill, "Set skill level for next bot added" },
-	{ "addbot", FrogbotsAddbot, "Adds a bot to the server" },
+	{ "addbot", FrogbotsAddbot, "Adds a bot. Skill & team optional" },
 	{ "fill", FrogbotsFillServer, "Fills the server (max 8 bots at a time)" },
 	{ "removebot", FrogbotsRemovebot, "Removes a single bot" },
 	{ "removeall", FrogbotsRemoveAll, "Removes all bots from server" },
