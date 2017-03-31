@@ -478,6 +478,7 @@ typedef struct fb_botskill_s {
 
 	float movement;
 	float combat_jump_chance;
+	float missile_dodge_time;                       // minimum time in seconds before bot dodges missile
 } fb_botskill_t;
 
 typedef struct fb_entvars_s {
@@ -594,12 +595,12 @@ typedef struct fb_entvars_s {
 	fb_botskill_t skill;
 
 	// These control the bot's next command
-	qbool firing;                     // does the bot want to attack this frame?
-	qbool jumping;                    // does the bot want to jump this frame?
-	int desired_weapon_impulse;       // impulse to send the next time the player
-	vec3_t desired_angle;             // for 'perfect' aim, this is where the bot wants to be aiming
-	qbool botchose;                   // next_impulse is valid
-	int next_impulse;                 // the impulse to send in next command
+	qbool firing;                               // does the bot want to attack this frame?
+	qbool jumping;                              // does the bot want to jump this frame?
+	int desired_weapon_impulse;                 // impulse to send the next time the player
+	vec3_t desired_angle;                       // for 'perfect' aim, this is where the bot wants to be aiming
+	qbool botchose;                             // next_impulse is valid
+	int next_impulse;                           // the impulse to send in next command
 
 	vec3_t virtual_mins;                        // true bounds of the object (items are markers, so size is boosted)
 	vec3_t virtual_maxs;                        // true bounds of the object
@@ -609,9 +610,8 @@ typedef struct fb_entvars_s {
 	vec3_t last_cmd_direction;                  // the direction the bot did move in (scaled for speed)
 	float ledge_backup_time;
 
-	// TODO: stored directions for missile
-	vec3_t missile_forward;
-	vec3_t missile_right;
+	// Bot's missile parameters
+	struct gedict_s* missile_dodge;             // rocket belonging to look_object
 
 	int tread_water_count;                      // number of frames spent treading water 
 
@@ -633,7 +633,7 @@ typedef struct fb_entvars_s {
 	int   last_jump_frame;                      // framecount when player last jumped.  used to help setting rj fields
 
 	qbool bot_evade;                            // 
-	
+
 	float help_teammate_time;
 	float frogwatermove_time;
 	float up_finished;                          // Swimming, used to keep pushing up for a period during lavajump
@@ -643,22 +643,21 @@ typedef struct fb_entvars_s {
 	struct gedict_s* prev_look_object;          // stores whatever the bot was looking at last frame
 
 	// Item event functions
-	fb_touch_func_t     item_touch;      // called whenever an item is touched
-	fb_taken_func_t     item_taken;      // called whenever an item is taken
-	fb_taken_func_t     item_affect;     // called whenever an item affects a player (mega-health)
-	fb_entity_func_t    item_respawned;  // called whenever an item respawns
-	fb_entity_func_t    item_placed;     // called when item has been placed in the map
+	fb_touch_func_t     item_touch;             // called whenever an item is touched
+	fb_taken_func_t     item_taken;             // called whenever an item is taken
+	fb_taken_func_t     item_affect;            // called whenever an item affects a player (mega-health)
+	fb_entity_func_t    item_respawned;         // called whenever an item respawns
+	fb_entity_func_t    item_placed;            // called when item has been placed in the map
 
 	// Player event functions
-	fb_entity_func_t    ammo_used;      // Whenever ammo is updated
+	fb_entity_func_t    ammo_used;             // Whenever ammo is updated
 
 	qbool               be_quiet;
 	qbool               enemy_visible;
-	float               last_death;      // Last time this player died
+	float               last_death;             // Last time this player died
 
-	struct gedict_s*    virtual_enemy;   //
-	vec3_t              rocket_endpos;   // where an incoming rocket will explode.  
-	struct gedict_s*    dodge_missile;   // rocket belonging to look_object
+	struct gedict_s*    virtual_enemy;          //
+	vec3_t              rocket_endpos;          // where an incoming rocket will explode.  
 
 	// Debugging
 	qbool               debug;           // If set, trace logic
@@ -683,6 +682,11 @@ typedef struct fb_entvars_s {
 	float               last_rndaim[2];
 	float               last_rndaim_time;
 	float               min_fire_time;   // time before bot will fire
+
+	// Stored on missile to detect where item will explode
+	vec3_t missile_forward;           
+	vec3_t missile_right;
+	float missile_spawntime;
 } fb_entvars_t;
 
 //typedef (void(*)(gedict_t *)) one_edict_func;

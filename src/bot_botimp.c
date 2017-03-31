@@ -36,6 +36,7 @@ static char* FriendTeamName (int botNumber);
 
 #define FB_CVAR_MOVEMENT_SKILL "k_fbskill_movement"
 #define FB_CVAR_COMBATJUMP_CHANCE "k_fbskill_combatjump"
+#define FB_CVAR_MISSILEDODGE_TIME "k_fbskill_missiledodge"
 
 static float RangeOverSkill (int skill_level, float minimum, float maximum)
 {
@@ -106,6 +107,7 @@ void RegisterSkillVariables (void)
 
 	RegisterCvar (FB_CVAR_MOVEMENT_SKILL);
 	RegisterCvar (FB_CVAR_COMBATJUMP_CHANCE);
+	RegisterCvar (FB_CVAR_MISSILEDODGE_TIME);
 }
 
 void SetAttributesBasedOnSkill (int skill)
@@ -149,6 +151,7 @@ void SetAttributesBasedOnSkill (int skill)
 
 	cvar_fset (FB_CVAR_MOVEMENT_SKILL, RangeOverSkill (skill, 0.3f, 1.0f));
 	cvar_fset (FB_CVAR_COMBATJUMP_CHANCE, RangeOverSkill (skill, 0.03f, 0.1f));
+	cvar_fset (FB_CVAR_MISSILEDODGE_TIME, RangeOverSkill (skill, 0.5f, 0.25f));
 
 	// Customise
 	{
@@ -204,6 +207,7 @@ void SetAttribs(gedict_t* self)
 	// Movement
 	self->fb.skill.movement = bound (0, cvar (FB_CVAR_MOVEMENT_SKILL), 1.0f);
 	self->fb.skill.combat_jump_chance = bound (0, cvar (FB_CVAR_COMBATJUMP_CHANCE), 1.0f);
+	self->fb.skill.missile_dodge_time = bound (0, cvar (FB_CVAR_MISSILEDODGE_TIME), 0.5f);
 }
 
 char* BotNameEnemy(int botNumber) {

@@ -953,7 +953,7 @@ void W_FireRocket()
 	newmis->isMissile = true;
 	newmis->s.v.solid = (isRACE() ? SOLID_TRIGGER : SOLID_BBOX);
 
-// set newmis speed     
+	// set newmis speed
 	trap_makevectors( self->s.v.v_angle );
 	aim( newmis->s.v.velocity );	// = aim(self, 1000);
 	if ( cvar("k_midair") && self->super_damage_finished > g_globalvars.time ) {
@@ -961,7 +961,7 @@ void W_FireRocket()
 		newmis->s.v.effects = EF_BLUE;
 	}
 	else {
-		VectorScale( newmis->s.v.velocity, 1000, newmis->s.v.velocity );
+		VectorScale(newmis->s.v.velocity, 1000, newmis->s.v.velocity);
 	}
 
 	vectoangles( newmis->s.v.velocity, newmis->s.v.angles );

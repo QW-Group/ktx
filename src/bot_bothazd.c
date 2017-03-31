@@ -837,7 +837,8 @@ void BotsRocketSpawned (gedict_t* newmis)
 	newmis->s.v.think = (func_t) RocketAlert;
 	newmis->s.v.nextthink = 0.001;
 
-	// 
+	// Store spawn time so we don't avoid too early
+	newmis->fb.missile_spawntime = g_globalvars.time;
 
 	// Store rocket direction
 	VectorCopy(g_globalvars.v_forward, newmis->fb.missile_forward);

@@ -27,11 +27,11 @@ static void SetNextThinkTime(gedict_t* ent) {
 static void AvoidLookObjectsMissile(gedict_t* self) {
 	gedict_t* rocket;
 
-	self->fb.dodge_missile = NULL;
+	self->fb.missile_dodge = NULL;
 	if (self->fb.look_object && self->fb.look_object->ct == ctPlayer) {
 		for (rocket = world; rocket = ez_find (rocket, "rocket"); ) {
 			if (rocket->s.v.owner == EDICT_TO_PROG(self->fb.look_object)) {
-				self->fb.dodge_missile = rocket;
+				self->fb.missile_dodge = rocket;
 				break;
 			}
 		}
@@ -77,7 +77,7 @@ static void NewlyPickedEnemyLogic() {
 }
 
 static void TargetEnemyLogic(gedict_t* self) {
-	self->fb.dodge_missile = NULL;
+	self->fb.missile_dodge = NULL;
 
 	if (!(self->fb.state & NOTARGET_ENEMY)) {
 		if (self->fb.look_object && self->fb.look_object->ct == ctPlayer) {
@@ -114,19 +114,19 @@ static void BotOnGroundMovement(gedict_t* self, vec3_t dir_move) {
 	if ((int)self->s.v.flags & FL_ONGROUND) {
 		if (!(self->fb.path_state & NO_DODGE)) {
 			// Dodge a rocket our enemy is firing at us
-			if (self->fb.dodge_missile) {
-				if (PROG_TO_EDICT(self->fb.dodge_missile->s.v.owner)->ct == ctPlayer) {
+			if (self->fb.missile_dodge && g_globalvars.time - self->fb.missile_dodge->fb.missile_spawntime >= self->fb.skill.missile_dodge_time) {
+				if (PROG_TO_EDICT(self->fb.missile_dodge->s.v.owner)->ct == ctPlayer) {
 					vec3_t rel_pos;
 
-					VectorSubtract(self->s.v.origin, self->fb.dodge_missile->s.v.origin, rel_pos);
-					if (DotProduct(rel_pos, self->fb.dodge_missile->fb.missile_forward) > 0.7071067) {
+					VectorSubtract(self->s.v.origin, self->fb.missile_dodge->s.v.origin, rel_pos);
+					if (DotProduct(rel_pos, self->fb.missile_dodge->fb.missile_forward) > 0.7071067) {
 						vec3_t temp;
 						normalize(rel_pos, temp);
-						dodge_factor = DotProduct(temp, self->fb.dodge_missile->fb.missile_right);
+						dodge_factor = DotProduct(temp, self->fb.missile_dodge->fb.missile_right);
 					}
 				}
 				else {
-					self->fb.dodge_missile = NULL;
+					self->fb.missile_dodge = NULL;
 				}
 			}
 
