@@ -194,6 +194,29 @@
   <ItemGroup>
     <ClCompile Include="src\admin.c" />
     <ClCompile Include="src\arena.c" />
+    <ClCompile Include="src\bot_aim.c" />
+    <ClCompile Include="src\bot_blocked.c" />
+    <ClCompile Include="src\bot_botenemy.c" />
+    <ClCompile Include="src\bot_botgoals.c" />
+    <ClCompile Include="src\bot_bothazd.c" />
+    <ClCompile Include="src\bot_bothelp.c" />
+    <ClCompile Include="src\bot_botimp.c" />
+    <ClCompile Include="src\bot_botjump.c" />
+    <ClCompile Include="src\bot_botpath.c" />
+    <ClCompile Include="src\bot_botphys.c" />
+    <ClCompile Include="src\bot_botstat.c" />
+    <ClCompile Include="src\bot_botthink.c" />
+    <ClCompile Include="src\bot_botwater.c" />
+    <ClCompile Include="src\bot_botweap.c" />
+    <ClCompile Include="src\bot_client.c" />
+    <ClCompile Include="src\bot_commands.c" />
+    <ClCompile Include="src\bot_items.c" />
+    <ClCompile Include="src\bot_loadmap.c" />
+    <ClCompile Include="src\bot_match.c" />
+    <ClCompile Include="src\bot_movement.c" />
+    <ClCompile Include="src\bot_navmesh.c" />
+    <ClCompile Include="src\bot_routing.c" />
+    <ClCompile Include="src\bot_world.c" />
     <ClCompile Include="src\buttons.c">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -234,6 +257,8 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;QWPROGS_EXPORTS</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="src\fb_globals.c" />
+    <ClCompile Include="src\files.c" />
     <ClCompile Include="src\g_cmd.c">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -303,6 +328,29 @@
     </ClCompile>
     <ClCompile Include="src\logs.c" />
     <ClCompile Include="src\maps.c" />
+    <ClCompile Include="src\maps_map_aerowalk.c" />
+    <ClCompile Include="src\maps_map_amphi2.c" />
+    <ClCompile Include="src\maps_map_dm3.c" />
+    <ClCompile Include="src\maps_map_dm4.c" />
+    <ClCompile Include="src\maps_map_dm6.c" />
+    <ClCompile Include="src\maps_map_e1m2.c" />
+    <ClCompile Include="src\maps_map_frobodm2.c" />
+    <ClCompile Include="src\maps_map_pkeg1.c" />
+    <ClCompile Include="src\maps_map_povdmm4.c" />
+    <ClCompile Include="src\maps_map_spinev2.c" />
+    <ClCompile Include="src\maps_map_ukooldm2.c" />
+    <ClCompile Include="src\maps_map_ukooldm3.c" />
+    <ClCompile Include="src\maps_map_ukooldm6.c" />
+    <ClCompile Include="src\maps_map_ukooldm8.c" />
+    <ClCompile Include="src\maps_map_ultrav.c" />
+    <ClCompile Include="src\maps_map_ztndm1.c" />
+    <ClCompile Include="src\maps_map_ztndm2.c" />
+    <ClCompile Include="src\maps_map_ztndm3.c" />
+    <ClCompile Include="src\maps_map_ztndm4.c" />
+    <ClCompile Include="src\maps_map_ztndm5.c" />
+    <ClCompile Include="src\maps_map_ztndm6.c" />
+    <ClCompile Include="src\marker_load.c" />
+    <ClCompile Include="src\marker_util.c" />
     <ClCompile Include="src\match.c" />
     <ClCompile Include="src\mathlib.c">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
@@ -352,6 +400,9 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;QWPROGS_EXPORTS</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="src\race.c" />
+    <ClCompile Include="src\route_calc.c" />
+    <ClCompile Include="src\route_fields.c" />
+    <ClCompile Include="src\route_lookup.c" />
     <ClCompile Include="src\runes.c" />
     <ClCompile Include="src\server.c">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
@@ -398,6 +449,7 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;QWPROGS_EXPORTS</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="src\teamplay.c" />
     <ClCompile Include="src\triggers.c">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -442,6 +494,7 @@
     <ClInclude Include="include\progdefs.h" />
     <ClInclude Include="include\progs.h" />
     <ClInclude Include="include\q_shared.h" />
+    <ClInclude Include="src\fb_globals.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
