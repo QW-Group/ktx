@@ -45,6 +45,8 @@ CreateMarker -18 1117 24
 CreateMarker -208 792 24
 CreateMarker -240 1098 156
 CreateMarker 636 257 168
+CreateMarker -384 136 296
+CreateMarker 464 124 168
 SetZone 1 11
 SetMarkerPath 1 0 2
 SetZone 2 1
@@ -560,3 +562,9 @@ SetRocketJumpPathFields 91 5 55.0 27.0 0
 SetMarkerPath 91 6 3
 SetMarkerPathFlags 91 6 r
 SetRocketJumpPathFields 91 6 64.0 141.0 4
+SetZone 92 6
+SetMarkerPath 92 0 52
+SetMarkerPath 92 1 40
+SetZone 93 7
+SetMarkerPath 93 0 22
+SetMarkerPath 93 1 5
