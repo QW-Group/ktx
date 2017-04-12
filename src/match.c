@@ -2245,7 +2245,7 @@ void StartMatch ()
 	HideSpawnPoints();
 
 	match_start_time  = g_globalvars.time;
-  g_matchstarttime = (int) (g_globalvars.time*1000);
+	g_matchstarttime = (int) (g_globalvars.time*1000);
 	match_in_progress = 2;
 
 	lastTeamLocationTime = -TEAM_LOCATION_UPDATE_TIME; // update on next frame

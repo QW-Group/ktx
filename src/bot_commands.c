@@ -498,7 +498,7 @@ static void FrogbotsDebug (void)
 			trap_CmdArgv (4, sub_command, sizeof (sub_command));
 			end = atoi (sub_command);
 
-			if (start >= 0 && start < NUMBER_MARKERS && end >= 0 && end < NUMBER_MARKERS) {
+			if (start > 0 && start <= NUMBER_MARKERS && end > 0 && end <= NUMBER_MARKERS) {
 				gedict_t *from = markers[start - 1];
 				gedict_t *to = markers[end - 1];
 
@@ -1367,6 +1367,73 @@ static void FrogbotShowInfo (void)
 	self->fb.last_spec_cp = g_globalvars.time + 0.2;
 }
 
+static void FrogbotPathList (void)
+{
+	char message[1024] = { 0 };
+	int i = 0;
+	gedict_t* marker = self->fb.touch_marker;
+	const char* marker_flags = 0;
+
+	if (trap_CmdArgc () >= 3) {
+		char temp[10];
+
+		trap_CmdArgv (2, temp, sizeof (temp));
+
+		if (atoi (temp) >= 1 && atoi (temp) <= NUMBER_MARKERS) {
+			marker = markers[atoi (temp) - 1];
+
+			if (marker == NULL) {
+				G_sprint (self, PRINT_HIGH, "No such marker #%d found\n", atoi (temp));
+				return;
+			}
+		}
+	}
+
+	if (marker == NULL) {
+		marker = LocateMarker (self->s.v.origin);
+	}
+
+	if (marker == NULL) {
+		G_sprint (self, PRINT_HIGH, "Unable to find nearby marker\n");
+		return;
+	}
+
+	if (g_globalvars.time < self->fb.last_spec_cp) {
+		return;
+	}
+
+	if (!marker) {
+		return;
+	}
+
+	strlcpy(message, "Paths away:\n", sizeof(message));
+	for (i = 0; i < NUMBER_PATHS; ++i) {
+		gedict_t* next = marker->fb.paths[i].next_marker;
+
+		if (next) {
+			const char* path_flags = EncodeMarkerPathFlags (marker->fb.paths[i].flags);
+
+			strlcat (message, va ("  %3d: %s [%s] ang %d\n", next->fb.index + 1, next->s.v.classname, strnull (path_flags) ? "(none)" : path_flags, marker->fb.paths[i].angle_hint), sizeof (message));
+		}
+	}
+	strlcat(message, "Path to:\n", sizeof(message));
+	for (i = 0; i < NUMBER_MARKERS; ++i) {
+		int j;
+
+		if (!markers[i]) {
+			continue;
+		}
+
+		for (j = 0; j < NUMBER_PATHS; ++j) {
+			if (markers[i]->fb.paths[j].next_marker == marker) {
+				strlcat (message, va ("  %3d: %s\n", markers[i]->fb.index + 1, markers[i]->s.v.classname), sizeof (message));
+			}
+		}
+	}
+
+	G_sprint (self, PRINT_HIGH, message);
+}
+
 static void FrogbotsFillServer (void)
 {
 	int max_clients = cvar ("maxclients");
@@ -1587,6 +1654,7 @@ static frogbot_cmd_t editor_commands[] = {
 	{ "clearpathflag", FrogbotClearPathFlag, "Clears flag on a path between two markers" },
 	{ "save", FrogbotSaveBotFile, "Saves current routing as a .bot file" },
 	{ "info", FrogbotShowInfo, "Shows information about the current marker" },
+	{ "pathinfo", FrogbotPathList, "Shows information abouts paths to/from current marker" },
 	{ "summary", FrogbotSummary, "Shows summary of current map" },
 	{ "goalsummary", FrogbotGoalSummary, "Show summary of goals" },
 	{ "zonesummary", FrogbotZoneSummary, "Show summary of zones" },
