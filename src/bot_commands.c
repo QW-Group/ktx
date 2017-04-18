@@ -224,36 +224,16 @@ static void BuildTeamList ()
 	AddTeamToList (&foundTeams, "green", 3, 3);
 }
 
-static void FrogbotsAddbot(void) {
-	int i = 0;
-	int skill_level = FrogbotSkillLevel();
-	char specificteam[10] = { 0 };
-
-	if (!bots_enabled ()) {
-		G_sprint (self, 2, "Bots are disabled by the server.\n");
-		return;
-	}
-
-	if (trap_CmdArgc() >= 3) {
-		char temp[10];
-
-		trap_CmdArgv(2, temp, sizeof(temp));
-
-		if (isdigit(temp[0])) {
-			skill_level = atoi(temp);
-		}
-	}
-
-	if (trap_CmdArgc() >= 4) {
-		trap_CmdArgv(3, specificteam, sizeof(specificteam));
-	}
+void FrogbotsAddbot(int skill_level, const char* specificteam, qbool error_messages)
+{
+	int i;
 
 	for (i = 0; i < sizeof(bots) / sizeof(bots[0]); ++i) {
 		if (bots[i].entity == 0) {
 			int entity = 0;
 			int topColor = 0;
 			int bottomColor = 0;
-			char* teamName = specificteam;
+			const char* teamName = specificteam;
 
 			if (teamplay && !specificteam[0]) {
 				int team1Count, team2Count;
@@ -291,7 +271,9 @@ static void FrogbotsAddbot(void) {
 			entity = trap_AddBot(bots[i].name, bottomColor, topColor, "base");
 
 			if (entity == 0) {
-				G_sprint(self, 2, "Error adding bot\n");
+				if (error_messages) {
+					G_sprint(self, 2, "Error adding bot\n");
+				}
 				return;
 			}
 
@@ -310,18 +292,57 @@ static void FrogbotsAddbot(void) {
 		}
 	}
 
-	G_sprint(self, 2, "Bot limit reached\n");
+	if (error_messages) {
+		G_sprint(self, 2, "Bot limit reached\n");
+	}
 }
 
-static void FrogbotsRemovebot(void) {
+static void FrogbotsAddbot_f(void)
+{
+	int skill_level = FrogbotSkillLevel();
+	char specificteam[10] = { 0 };
+
+	if (!bots_enabled()) {
+		G_sprint(self, 2, "Bots are disabled by the server.\n");
+		return;
+	}
+
+	if (trap_CmdArgc() >= 3) {
+		char temp[10];
+
+		trap_CmdArgv(2, temp, sizeof(temp));
+
+		if (isdigit(temp[0])) {
+			skill_level = atoi(temp);
+		}
+	}
+
+	if (trap_CmdArgc() >= 4) {
+		trap_CmdArgv(3, specificteam, sizeof(specificteam));
+	}
+
+	FrogbotsAddbot(skill_level, specificteam, true);
+}
+
+static void FrogbotsRemoveBot(bot_t* lastbot)
+{
+	gedict_t* e = NULL;
+	e = &g_edicts[lastbot->entity];
+
+	G_bprint(PRINT_HIGH, "%s left the game with %.0f frags\n", e->s.v.netname, e->s.v.frags);
+	sound(e, CHAN_BODY, "player/tornoff2.wav", 1, ATTN_NONE);
+	trap_RemoveBot(lastbot->entity);
+	memset(lastbot, 0, sizeof(bot_t));
+}
+
+static void FrogbotsRemovebot_f(void)
+{
 	int i = 0;
 	bot_t* lastbot = NULL;
-	gedict_t* e = NULL;
 
 	for (i = 0; i < sizeof(bots) / sizeof(bots[0]); ++i) {
 		if (bots[i].entity) {
 			lastbot = &bots[i];
-			e = &g_edicts[bots[i].entity];
 		}
 	}
 
@@ -329,10 +350,7 @@ static void FrogbotsRemovebot(void) {
 		return;
 	}
 
-	G_bprint( PRINT_HIGH, "%s left the game with %.0f frags\n", e->s.v.netname, e->s.v.frags );
-	sound( self, CHAN_BODY, "player/tornoff2.wav", 1, ATTN_NONE );
-	trap_RemoveBot(lastbot->entity);
-	memset(lastbot, 0, sizeof(bot_t));
+	FrogbotsRemoveBot(lastbot);
 }
 
 static void PrintCurrentGoals (void)
@@ -1441,16 +1459,16 @@ static void FrogbotsFillServer (void)
 	int i;
 
 	for (i = 0; i < min(max_clients - plr_count, 8); ++i) {
-		FrogbotsAddbot ();
+		FrogbotsAddbot (FrogbotSkillLevel(), "", true);
 	}
 }
 
 static void FrogbotsRemoveAll (void)
 {
-	int bot_count = CountBots ();
+	int bot_count = CountBots();
 
 	while (bot_count-- > 0) {
-		FrogbotsRemovebot ();
+		FrogbotsRemovebot_f();
 	}
 }
 
@@ -1633,9 +1651,9 @@ typedef struct frogbot_cmd_s {
 
 static frogbot_cmd_t std_commands[] = {
 	{ "skill", FrogbotsSetSkill, "Set skill level for next bot added" },
-	{ "addbot", FrogbotsAddbot, "Adds a bot. Skill & team optional" },
+	{ "addbot", FrogbotsAddbot_f, "Adds a bot. Skill & team optional" },
 	{ "fill", FrogbotsFillServer, "Fills the server (max 8 bots at a time)" },
-	{ "removebot", FrogbotsRemovebot, "Removes a single bot" },
+	{ "removebot", FrogbotsRemovebot_f, "Removes a single bot" },
 	{ "removeall", FrogbotsRemoveAll, "Removes all bots from server" },
 	{ "debug", FrogbotsDebug, "Debugging commands" }
 };
@@ -1830,8 +1848,18 @@ static void BotInitialiseServer (void)
 	inv_sv_maxspeed = 1 / sv_maxspeed;
 }
 
+static float last_auto_client = 0;
+
 void BotStartFrame(int framecount) {
 	extern void BotsFireLogic (void);
+	int min_required_clients = cvar("k_fb_autoadd_limit");
+	int max_required_clients = cvar("k_fb_autoremove_at");
+	int auto_delay = cvar("k_fb_auto_delay");
+
+	// disable feature if it has been mis-configured
+	if (min_required_clients && max_required_clients && min_required_clients > max_required_clients) {
+		min_required_clients = max_required_clients = 0;
+	}
 
 	if ( framecount == 3 ) {
 		BotInitialiseServer();
@@ -1840,6 +1868,11 @@ void BotStartFrame(int framecount) {
 		LoadMap();
 	}
 	else if ( framecount > 20 ) {
+		int client_count = 0;
+		int human_count = 0;
+		int max_clients = cvar("maxclients");
+		gedict_t* lowest_scoring_bot = NULL;
+
 		marker_time = TimeTrigger (&next_marker_time, 0.03);
 		hazard_time = TimeTrigger (&next_hazard_time, 0.025);
 
@@ -1847,6 +1880,8 @@ void BotStartFrame(int framecount) {
 		FrogbotPrePhysics2 ();
 
 		for (self = world; self = find_plr (self); ) {
+			++client_count;
+
 			// Logic that gets called every frame for every frogbot
 			if (self->isBot) {
 				BotCanRocketJump (self);
@@ -1880,25 +1915,46 @@ void BotStartFrame(int framecount) {
 				}
 
 				BotSetCommand (self);
+
+				if (lowest_scoring_bot == NULL || self->s.v.frags < lowest_scoring_bot->s.v.frags) {
+					lowest_scoring_bot = self;
+				}
 			}
-			else if (FrogbotOptionEnabled (FB_OPTION_EDITOR_MODE)) {
-				if (self->s.v.button2 && self->fb.last_jump_frame == 0) {
-					self->fb.last_jump_frame = framecount;
-				}
-				else if (! self->s.v.button2 && ((int)self->s.v.flags & FL_ONGROUND)) {
-					self->fb.last_jump_frame = 0;
-				}
+			else {
+				++human_count;
 
-				if (self->fb.last_jump_frame > 1 && self->s.v.button0) {
-					float yaw = self->s.v.v_angle[YAW];
-					float pitch = self->s.v.v_angle[PITCH];
-
-					if (yaw < 1) {
-						yaw += 360;
+				if (FrogbotOptionEnabled(FB_OPTION_EDITOR_MODE)) {
+					if (self->s.v.button2 && self->fb.last_jump_frame == 0) {
+						self->fb.last_jump_frame = framecount;
 					}
-					G_sprint (self, PRINT_HIGH, "Jumpflags: %d %d %d\n", (int)pitch, (int)yaw, framecount - self->fb.last_jump_frame);
-					self->fb.last_jump_frame = 1;
+					else if (!self->s.v.button2 && ((int)self->s.v.flags & FL_ONGROUND)) {
+						self->fb.last_jump_frame = 0;
+					}
+
+					if (self->fb.last_jump_frame > 1 && self->s.v.button0) {
+						float yaw = self->s.v.v_angle[YAW];
+						float pitch = self->s.v.v_angle[PITCH];
+
+						if (yaw < 1) {
+							yaw += 360;
+						}
+						G_sprint(self, PRINT_HIGH, "Jumpflags: %d %d %d\n", (int)pitch, (int)yaw, framecount - self->fb.last_jump_frame);
+						self->fb.last_jump_frame = 1;
+					}
 				}
+			}
+		}
+
+		if (human_count && g_globalvars.time - last_auto_client >= max(auto_delay, 1)) {
+			if (min_required_clients && client_count < min(min_required_clients, max_clients)) {
+				FrogbotsAddbot(FrogbotSkillLevel(), "", false);
+
+				last_auto_client = g_globalvars.time;
+			}
+			else if (max_required_clients && client_count > max_required_clients && lowest_scoring_bot) {
+				FrogbotsRemoveBot(&bots[lowest_scoring_bot->fb.botnumber]);
+
+				last_auto_client = g_globalvars.time;
 			}
 		}
 

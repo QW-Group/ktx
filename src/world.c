@@ -865,8 +865,11 @@ void FirstFrame	( )
 	RegisterCvarEx ("k_fb_skill", "10");
 	RegisterCvarEx ("k_fb_options", "0");
 	RegisterCvarEx ("k_fb_debug", "0");
+	RegisterCvarEx ("k_fb_autoadd_limit", "0");
+	RegisterCvarEx ("k_fb_autoremove_at", "0");
+	RegisterCvarEx ("k_fb_auto_delay", "1");
 
-	for (i = 0; i < MAX_LASTSCORES; i++) {
+	for (i = 0; i < MAX_CLIENTS; i++) {
 		RegisterCvarEx (va ("k_fb_name_%d", i), "");
 		RegisterCvarEx (va ("k_fb_name_enemy_%d", i), "");
 		RegisterCvarEx (va ("k_fb_name_team_%d", i), "");
