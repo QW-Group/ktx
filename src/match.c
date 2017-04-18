@@ -3087,14 +3087,15 @@ void IdlebotCheck ()
 {
 	gedict_t *p;
 	int i;
+	int bots = CountBots();
 
-	if ( cvar( "k_idletime" ) <= 0 ) {
+	if ( cvar( "k_idletime" ) <= 0 || bots ) {
 		if ( (p = find ( world, FOFCLSN, "idlebot" )) )
 			ent_remove( p );
 		return;
 	}
 
-	i = CountPlayers() - CountBots();
+	i = CountPlayers();
 
 	if( 0.5f * i > CountRPlayers() || i < 2 ) {
 		p = find ( world, FOFCLSN, "idlebot" );
