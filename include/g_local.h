@@ -63,7 +63,7 @@ float bound( float a, float b, float c );
 //#define bound(a,b,c) ((a) >= (c) ? (a) : (b) < (a) ? (a) : (b) > (c) ? (c) : (b))
 
 #if defined(DEBUG) || defined(_DEBUG)
-#define DebugTrap(x) *(char*)0=x
+#define DebugTrap(x) *(char**)0=x
 #else
 #define DebugTrap(x) G_Error(x)
 #endif
