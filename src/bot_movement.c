@@ -1,4 +1,6 @@
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -320,7 +322,7 @@ static void BestJumpingDirection (gedict_t* self)
 
 void BotSetCommand (gedict_t* self)
 {
-	float msec = g_globalvars.frametime * 1000; //min ((g_globalvars.time - self->fb.last_cmd_sent) * 1000, 255);
+	float msec = g_globalvars.frametime * 1000;
 	int weapon_script_impulse = 0;
 	int impulse = 0;
 	qbool jumping;
@@ -427,3 +429,5 @@ void BotSetCommand (gedict_t* self)
 	self->fb.prev_look_object = self->fb.look_object;
 	VectorCopy (self->s.v.velocity, self->fb.prev_velocity);
 }
+
+#endif

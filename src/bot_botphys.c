@@ -1,5 +1,7 @@
 // Converted from .qc on 05/02/2016
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -11,9 +13,10 @@ int NumberOfClients (void)
 	int count = 0;
 	gedict_t* plr = NULL;
 
-	for (plr = world; plr = find_plr (plr); ) {
-		if (plr->ct == ctPlayer)
+	for (plr = world; (plr = find_plr (plr)); ) {
+		if (plr->ct == ctPlayer) {
 			++count;
+		}
 	}
 
 	return count;
@@ -23,7 +26,7 @@ void FrogbotPrePhysics1(void) {
 	// 
 	gedict_t* p;
 
-	for (p = world; p = find_plr (p); ) {
+	for (p = world; (p = find_plr (p)); ) {
 		if (p->isBot && p->s.v.takedamage) {
 			VectorCopy(p->s.v.velocity, p->fb.oldvelocity);
 		}
@@ -72,7 +75,7 @@ void BotDetectTrapped(gedict_t* self) {
 void FrogbotPrePhysics2() {
 	no_bots_stuck = true;
 
-	for (self = world; self = find_plr (self); ) {
+	for (self = world; (self = find_plr (self)); ) {
 		if (self->isBot) {
 			BotDetectTrapped(self);
 
@@ -85,3 +88,5 @@ void FrogbotPrePhysics2() {
 		unstick_time = 0;
 	}
 }
+
+#endif // BOT_SUPPORT

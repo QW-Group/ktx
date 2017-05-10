@@ -90,7 +90,7 @@ void TeamplayEventItemTaken (gedict_t* client, gedict_t* item)
 {
 	char* took_flags_s = ezinfokey(client, "tptook");
 	unsigned long took_flags = ~0;
-	unsigned long items = (unsigned long)client->s.v.items;
+
 	if (!strnull (took_flags_s))
 		took_flags = strtoul (took_flags_s, NULL, 10);
 	if (took_flags == 0)
@@ -210,7 +210,7 @@ static qbool HAVE_GA (gedict_t* client)
 {
 	return client && (int)client->s.v.items & IT_ARMOR1;
 }
-
+/*
 static qbool HAVE_YA (gedict_t* client)
 {
 	return (int)client->s.v.items & IT_ARMOR2;
@@ -220,7 +220,7 @@ static qbool HAVE_RA (gedict_t* client)
 {
 	return (int)client->s.v.items & IT_ARMOR3;
 }
-
+*/
 static qbool HAVE_RL (gedict_t* client)
 {
 	return (int)client->s.v.items & IT_ROCKET_LAUNCHER;
@@ -235,12 +235,12 @@ static qbool HAVE_SNG (gedict_t* client)
 {
 	return (int)client->s.v.items & IT_SUPER_NAILGUN;
 }
-
+/*
 static qbool HAVE_NG (gedict_t* client)
 {
 	return (int)client->s.v.items & IT_NAILGUN;
 }
-
+*/
 static qbool HAVE_GL (gedict_t* client)
 {
 	return (int)client->s.v.items & IT_GRENADE_LAUNCHER;
@@ -370,7 +370,7 @@ static gedict_t* TeamplayFindPoint (gedict_t* client)
 	visitem.viewent = client;
 	VectorAdd (visitem.vieworg, client->s.v.view_ofs, visitem.vieworg);   // FIXME: v_viewheight not taken into account
 
-	for (e = world; e = nextent (e); ) {
+	for (e = world; (e = nextent(e)); ) {
 		vec3_t size;
 		float rank;
 
@@ -485,7 +485,6 @@ static unsigned long TeamplayNeedFlags (gedict_t* client)
 	unsigned long needflags = 0;
 	int items = (int)client->s.v.items;
 	const char* need_weapons = ezinfokey(self, "tp_need_weapon");
-	int i = 0;
 
 	if (strnull(need_weapons))
 		need_weapons = NEED_WEAPONS_DEFAULT;
@@ -641,12 +640,7 @@ static char* ColoredArmor (gedict_t* client)
 // Cmd_AddCommand ("tp_msgreport", TP_Msg_Report_f);
 static void TeamplayReportPersonalStatus (gedict_t* client)
 {
-	const char* powerup = "";
-	const char* rl = "";
-	const char* lg = "";
-	const char* weapon = "";
 	char buffer[128];
-	int ammo = -1;
 
 	buffer[0] = '\0';
 
@@ -734,8 +728,6 @@ static void TeamplayAreaSecure (gedict_t* client)
 // Cmd_AddCommand ("tp_msghelp", TP_Msg_Help_f);
 static void TeamplayAreaHelp (gedict_t* client)
 {
-	qbool have_armor = (int)client->s.v.items & IT_ARMOR;
-	qbool have_weapon = (int)client->s.v.items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING);
 	char buffer[128];
 
 	buffer[0] = '\0';
@@ -1019,7 +1011,7 @@ static void TeamplaySetEnemyFlags (gedict_t* client)
 	int enemy_items = 0;
 	int enemy_count = 0;
 	int friend_count = 0;
-	for (plr = world; plr = find_plr (plr); ) {
+	for (plr = world; (plr = find_plr (plr)); ) {
 		if (plr == client)
 			continue;
 		if (!(plr->visclients & clientFlag))
@@ -1046,7 +1038,7 @@ void TeamplayGameTick (void)
 {
 	// Set all enemy powerup flags
 	gedict_t* plr = NULL;
-	for (plr = world; plr = find_plr (plr); ) {
+	for (plr = world; (plr = find_plr (plr)); ) {
 		TeamplaySetEnemyFlags (plr);
 	}
 }
@@ -1393,3 +1385,7 @@ void TeamplayMessage (void)
 	}
 }
 
+qbool SameTeam(gedict_t* p1, gedict_t* p2)
+{
+	return p1 == p2 || (teamplay && streq( ezinfokey(p1, "team"), ezinfokey(p2, "team") ));
+}

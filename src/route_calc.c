@@ -1,5 +1,7 @@
 // Converted from .qc on 05/02/2016
 
+#ifdef BOT_SUPPORT
+
 // After markers have been created and zone/subzone set, this calculates travel time
 //   between different markers & goals etc.
 // Single entry point InitialiseMarkerRoutes()
@@ -74,7 +76,6 @@ static qbool IdentifyFastestSubzoneRoute (gedict_t* m, fb_path_t* path)
 {
 	qbool no_change = true;
 	gedict_t* m_P = path->next_marker;
-	float P_time = path->time;
 	int m_D = path->flags;
 
 	if (!m || m == world || !m_P || m_P == world) {
@@ -196,9 +197,6 @@ static qbool IdentifyFastestZoneRoute(gedict_t* m, fb_path_t* path) {
 	return no_change;
 }
 
-static qbool ZoneFromTimeAdjust(gedict_t* m, gedict_t* m_P, int x, float P_time, int m_D) {
-}
-
 // was: Calc_G_time_6_path_apply
 static qbool Calc_G_time_6_path_apply(gedict_t* m, fb_path_t* path) {
 	qbool no_change = true;
@@ -267,7 +265,6 @@ static qbool ZoneReverseTimeAdjust(gedict_t* m, gedict_t* m_P, int x, int m_D) {
 static qbool Calc_G_time_8_path_apply(gedict_t* m, fb_path_t* path) {
 	qbool no_change = true;
 	gedict_t* m_P = path->next_marker;
-	float P_time = path->time;
 	int m_D = path->flags;
 	int i = 0;
 
@@ -367,7 +364,6 @@ static qbool ZoneMinSightFromTimeCalc(gedict_t* m, gedict_t* m_P, int x, int m_D
 static qbool Calc_G_time_10_path_apply(gedict_t* m, fb_path_t* path) {
 	qbool no_change = true;
 	gedict_t* m_P = path->next_marker;
-	float P_time = path->time;
 	int m_D = path->flags;
 	int i = 0;
 
@@ -639,3 +635,5 @@ void InitialiseMarkerRoutes(void) {
 
 	return;
 }
+
+#endif

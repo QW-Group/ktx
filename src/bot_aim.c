@@ -1,5 +1,7 @@
 
 // bot_aim.c
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -108,12 +110,12 @@ static void BotsFireAtWorldLogic(gedict_t* self, vec3_t rel_pos, float* rel_dist
 		*rel_dist = 160;
 	}
 }
-
+/*
 static qbool IsHitscanWeapon (int impulse)
 {
 	return impulse == 1 || impulse == 2 || impulse == 3 || impulse == 8;
 }
-
+*/
 static qbool IsVelocityWeapon (int impulse)
 {
 	return impulse == 4 || impulse == 5 || impulse == 6 || impulse == 7;
@@ -207,10 +209,10 @@ static void CalculateVolatility (gedict_t* self)
 		}
 
 		// Midair penalty - if we're in midair, not as accurate
-		if (!(int)self->s.v.flags & FL_ONGROUND_PARTIALGROUND) {
+		if (!((int)self->s.v.flags & FL_ONGROUND_PARTIALGROUND)) {
 			volatility += self->fb.skill.self_midair_volatility;
 		}
-		if (!(int)opponent->s.v.flags & FL_ONGROUND_PARTIALGROUND) {
+		if (!((int)opponent->s.v.flags & FL_ONGROUND_PARTIALGROUND)) {
 			volatility += self->fb.skill.opponent_midair_volatility;
 		}
 
@@ -249,8 +251,6 @@ static void BotsModifyAimAtPlayerLogic (gedict_t* self, vec3_t rel_pos, float re
 
 	if (g_globalvars.time > threshold_time) {
 		float pitch_diff, yaw_diff;
-		qbool reverse = false;
-
 		float lg_percent = (float)self->ps.wpn[wpLG].hits / max(1, self->ps.wpn[wpLG].attacks);
 
 		pitch_diff = bound (pitch->minimum, fabs (raw_pitch_diff) * pitch->scale, pitch->maximum);
@@ -303,7 +303,7 @@ static void BotsAimAtFloor (gedict_t* self, vec3_t rel_pos, float rel_dist)
 static void FireAtSpawnPoint (gedict_t* self)
 {
 	gedict_t* resp;
-	for (resp = world; resp = trap_findradius(resp, self->s.v.origin, 1000); ) {
+	for (resp = world; (resp = trap_findradius(resp, self->s.v.origin, 1000)); ) {
 		if (streq(resp->s.v.classname, "info_player_deathmatch")) {
 			vec3_t test;
 			VectorCopy(self->s.v.origin, test);
@@ -385,3 +385,5 @@ void BotsFireLogic(void) {
 		}
 	}
 }
+
+#endif // BOT_SUPPORT

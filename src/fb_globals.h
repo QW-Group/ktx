@@ -183,38 +183,39 @@ float TotalStrengthAfterDamage (float health, float armorValue, float armorType,
 float TotalStrength (float health, float armorValue, float armorType);
 
 // 
-char* BotNameGeneric (int botNumber);
-char* BotNameFriendly (int botNumber);
-char* BotNameEnemy (int botNumber);
+char* BotNameGeneric(int botNumber);
+char* BotNameFriendly(int botNumber);
+char* BotNameEnemy(int botNumber);
 
-qbool Visible_360 (gedict_t* self, gedict_t* visible_object);
-qbool Visible_infront (gedict_t* self, gedict_t* visible_object);
-unsigned int ClientFlag (gedict_t* client);
+qbool Visible_360(gedict_t* self, gedict_t* visible_object);
+qbool Visible_infront(gedict_t* self, gedict_t* visible_object);
+unsigned int ClientFlag(gedict_t* client);
 
 // marker_util.qc
-void marker_touch (void);
-void check_marker (gedict_t* self, gedict_t* other);
-void BecomeMarker (gedict_t* marker);
+void marker_touch(void);
+void check_marker(gedict_t* self, gedict_t* other);
+void BecomeMarker(gedict_t* marker);
 
 // route_calc.qc
-void CheckWaterColumn (gedict_t* m, vec3_t m_pos, vec3_t testplace);
+void CheckWaterColumn(gedict_t* m, vec3_t m_pos, vec3_t testplace);
 
 // route_fields.qc
-gedict_t* CreateNewMarker (vec3_t origin);
+gedict_t* CreateNewMarker(vec3_t origin);
 
 // botwater.qc
-void BotWaterMove (gedict_t* self);
+void BotWaterMove(gedict_t* self);
+void BotWaterJumpFix(void);
 
 // items.qc
-float goal_NULL (gedict_t* self, gedict_t* other);
+float goal_NULL(gedict_t* self, gedict_t* other);
 
 // client.qc
-void BotClientEntersEvent (gedict_t* self, gedict_t* spawn_pos);
-void BotPreThink (gedict_t* self);
-void BotClientConnectedEvent (gedict_t* self);
-void BotOutOfWater (gedict_t* self);
-void BotSetCommand (gedict_t* self);
-void BotsThinkTime (gedict_t* self);
+void BotClientEntersEvent(gedict_t* self, gedict_t* spawn_pos);
+void BotPreThink(gedict_t* self);
+void BotClientConnectedEvent(gedict_t* self);
+void BotOutOfWater(gedict_t* self);
+void BotSetCommand(gedict_t* self);
+void BotsThinkTime(gedict_t* self);
 
 // botphys.qc
 void FrogbotPrePhysics1 (void);

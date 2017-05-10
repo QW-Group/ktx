@@ -1,5 +1,7 @@
 // Converted from .qc on 05/02/2016
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -8,7 +10,6 @@ void DM4CampLogic();
 void DM6CampLogic();
 void DM6MarkerTouchLogic (gedict_t* self, gedict_t* goalentity_marker);
 qbool DM6LookAtDoor (gedict_t* self);
-static float EvalPath (fb_path_eval_t* eval, qbool allowRocketJumps, qbool trace_bprint, float current_goal_time, float current_goal_time_125);
 
 #define G_bprint_debug(...) if (self->fb.debug) { G_bprint(__VA_ARGS__); }
 #define STOP_DEBUGGING { self->fb.debug = false; }
@@ -433,3 +434,5 @@ void ProcessNewLinkedMarker(gedict_t* self) {
 	}
 	self->fb.predict_shoot = false;
 }
+
+#endif

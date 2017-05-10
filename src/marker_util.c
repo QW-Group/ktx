@@ -1,5 +1,7 @@
 // Converted from .qc on 05/02/2016
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -83,7 +85,7 @@ gedict_t* LocateNextMarker (vec3_t org, gedict_t* ignore_ent)
 		min_distance = VectorDistance(marker_center, org);
 	}
 
-	for (marker_ = world; marker_ = trap_findradius(marker_, org, max_distance); ) {
+	for (marker_ = world; (marker_ = trap_findradius(marker_, org, max_distance)); ) {
 		if (marker_ == ignore_ent) {
 			ignore_ent = NULL;
 			continue;
@@ -201,3 +203,4 @@ void CheckWaterColumn(gedict_t* m, vec3_t m_pos, vec3_t testplace) {
 	}
 }
 
+#endif

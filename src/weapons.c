@@ -36,8 +36,11 @@ void BotsGrenadeSpawned (gedict_t* newmis);
 
 void AmmoUsed (gedict_t* player)
 {
-	if (player->fb.ammo_used)
-		player->fb.ammo_used (player);
+#ifdef BOT_SUPPORT
+	if (player->fb.ammo_used) {
+		player->fb.ammo_used(player);
+	}
+#endif
 }
 
 // called by SP_worldspawn
@@ -120,8 +123,10 @@ void W_FireAxe()
 		PROG_TO_EDICT( g_globalvars.trace_ent )->deathtype = dtAXE;
 
 		T_Damage( PROG_TO_EDICT( g_globalvars.trace_ent ), self, self, damage );
-	} else
-	{	// hit wall
+	}
+	else
+	{
+		// hit wall
 
 		//crt - get rid of axe sound for spec
 		if ( !isRA() || ( isWinner( self ) || isLoser( self ) ) )
@@ -985,7 +990,9 @@ void W_FireRocket()
 	// midair 
 	VectorCopy( self->s.v.origin, newmis->s.v.oldorigin );
 
+#ifdef BOT_SUPPORT
 	BotsRocketSpawned (newmis);
+#endif
 }
 
 /*
@@ -1287,7 +1294,9 @@ void W_FireGrenade()
 	setsize( newmis, 0, 0, 0, 0, 0, 0 );
 	setorigin( newmis, PASSVEC3( self->s.v.origin ) );
 
+#ifdef BOT_SUPPORT
 	BotsGrenadeSpawned (newmis);
+#endif
 }
 
 //=============================================================================

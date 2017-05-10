@@ -1,3 +1,6 @@
+
+#ifdef BOT_SUPPORT
+
 // Converted from .qc on 05/02/2016
 #include "g_local.h"
 #include "fb_globals.h"
@@ -187,10 +190,6 @@ qbool bots_enabled() {
 	return true;	// FIXME: make a variable
 }
 
-qbool SameTeam(gedict_t* p1, gedict_t* p2) {
-	return p1 == p2 || (teamplay && streq( ezinfokey(p1, "team"), ezinfokey(p2, "team") ));
-}
-
 static qbool HasRLOrLG (gedict_t* self)
 {
 	return ((((int)self->s.v.items & IT_ROCKET_LAUNCHER) && (self->s.v.ammo_rockets > 1)) || (((int)self->s.v.items & IT_LIGHTNING) && (self->s.v.ammo_cells > 5)));
@@ -250,3 +249,5 @@ void AddZoneMarker (gedict_t* marker)
 	}
 	marker->fb.Z_head = zone_head[zone]; // FIXME: this can't be trustworthy in future?
 }
+
+#endif

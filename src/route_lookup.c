@@ -1,5 +1,7 @@
 // Converted from .qc on 05/02/2016
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -118,3 +120,4 @@ gedict_t* SightMarker(gedict_t* from_marker, gedict_t* to_marker, float max_dist
 	return look_marker;
 }
 
+#endif

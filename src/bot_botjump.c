@@ -1,5 +1,7 @@
 // Converted from .qc on 05/02/2016
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -12,6 +14,7 @@ void DemoMark ();
 static vec3_t straight_up = { 0, 0, 1 };
 static vec3_t straight_down = { 0, 0, -1 };
 
+/*
 // Returns true if the bot is travelling in the 'right' direction (with 90 degrees of target)
 static qbool right_direction(gedict_t* self)
 {
@@ -43,7 +46,7 @@ static qbool right_direction(gedict_t* self)
 	min_two = fabs(desired_direction - current_direction);
 
 	return (qbool)(min(min_one, min_two) <= 90);
-}
+}*/
 
 // Returns true if space above bot
 static float BotCheckSpaceAbove(gedict_t* self)
@@ -52,6 +55,7 @@ static float BotCheckSpaceAbove(gedict_t* self)
 	return (g_globalvars.trace_fraction == 1);
 }
 
+/*
 // Returns true if ground directly in front of bot
 static float checkground(gedict_t* self)
 {
@@ -62,12 +66,13 @@ static float checkground(gedict_t* self)
 	traceline(self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2], self->s.v.origin[0] + g_globalvars.v_forward[0], self->s.v.origin[1] + g_globalvars.v_forward[1], self->s.v.origin[2] + g_globalvars.v_forward[2] - 40, true, self);
 	return (g_globalvars.trace_fraction != 1);
 }
+*/
 
 void BotCanRocketJump(gedict_t* self)
 {
 	qbool has_quad = self->super_damage_finished > g_globalvars.time;
 	qbool tp_damage = teamplay != 1 && teamplay != 5;
-	float health_after = TotalStrengthAfterDamage(self->s.v.health, self->s.v.armorvalue, self->s.v.armortype, tp_damage ? 55 * (has_quad ? 4 : 1) : 0);
+	//float health_after = TotalStrengthAfterDamage(self->s.v.health, self->s.v.armorvalue, self->s.v.armortype, tp_damage ? 55 * (has_quad ? 4 : 1) : 0);
 	qbool has_rl = (qbool)(((int)self->s.v.items & IT_ROCKET_LAUNCHER) && (self->s.v.ammo_rockets >= 1));
 	qbool has_pent = (qbool)((int)self->s.v.items & IT_INVULNERABILITY);
 	qbool will_pickup = self->fb.linked_marker && !WaitingToRespawn(self->fb.linked_marker);
@@ -105,6 +110,7 @@ void BotCanRocketJump(gedict_t* self)
 	}
 }
 
+/*
 // FIXME: If teammate is strong (RA etc), fire anyway?  Also if boomsticker and we are strong
 // FIXME: Use find_radius?  Currently ignores teammates behind them.
 static qbool CouldHurtNearbyTeammate(gedict_t* me) {
@@ -118,6 +124,7 @@ static qbool CouldHurtNearbyTeammate(gedict_t* me) {
 	p = IdentifyMostVisibleTeammate(me);
 	return VectorDistance(p->s.v.origin, me->s.v.origin) < 140;
 }
+*/
 
 // Checks that (x=>z, y=>z) direction is sufficiently similar
 static qbool DirectionCheck (vec3_t start, vec3_t end, vec3_t vel, float threshold)
@@ -367,7 +374,6 @@ void CheckCombatJump(gedict_t* self)
 {
 	qbool inWater = self->s.v.waterlevel && self->fb.allowedMakeNoise;
 	qbool onGround = ((int)self->s.v.flags & FL_ONGROUND);
-	qbool lgSelected = self->fb.desired_weapon_impulse == 8 && self->fb.firing;
 	qbool lookingAtEnemy = self->fb.look_object && NUM_FOR_EDICT(self->fb.look_object) == self->s.v.enemy;
 	qbool lookObjectFiringLG = PlayerFiringLG (self->fb.look_object);
 
@@ -410,3 +416,4 @@ void CheckCombatJump(gedict_t* self)
 	SetJumpFlag (self, (g_random () < self->fb.skill.combat_jump_chance), "CombatJump");
 }
 
+#endif

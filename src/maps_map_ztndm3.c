@@ -1,5 +1,7 @@
 // Converted from .qc on 05/02/2016
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -751,3 +753,5 @@ void map_ztndm3() {
 	SetMarkerPathFlags(9, 2, ROCKET_JUMP);
 	//SetMarkerPathFlags(90, 3, JUMP_LEDGE);
 }
+
+#endif

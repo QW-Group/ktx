@@ -1002,7 +1002,9 @@ void PlayerDie()
 	}
 
 	TeamplayDeathEvent (self);
+#ifdef BOT_SUPPORT
 	BotPlayerDeathEvent (self);
+#endif
 
 	self->s.v.items -= ( int ) self->s.v.items & IT_INVISIBILITY;
 	self->invisible_finished = 0;	// don't die as eyes

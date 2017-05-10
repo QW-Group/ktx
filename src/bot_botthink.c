@@ -1,5 +1,7 @@
 // Converted from .qc on 05/02/2016
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -11,7 +13,6 @@ void AMPHI2BotInLava(void);
 
 void Bot_Print_Thinking (void);
 static void PeriodicAllClientLogic (void);
-static void BotStopFiring (gedict_t* bot);
 void BotsFireLogic (void);
 void FrogbotEditorMarkerTouched (gedict_t* marker);
 
@@ -29,7 +30,7 @@ static void AvoidLookObjectsMissile(gedict_t* self) {
 
 	self->fb.missile_dodge = NULL;
 	if (self->fb.look_object && self->fb.look_object->ct == ctPlayer) {
-		for (rocket = world; rocket = ez_find (rocket, "rocket"); ) {
+		for (rocket = world; (rocket = ez_find (rocket, "rocket")); ) {
 			if (rocket->s.v.owner == EDICT_TO_PROG(self->fb.look_object)) {
 				self->fb.missile_dodge = rocket;
 				break;
@@ -368,3 +369,4 @@ void SetMarker(gedict_t* client, gedict_t* marker) {
 	client->fb.touch_marker_time = g_globalvars.time + 5;
 }
 
+#endif // BOT_SUPPORT

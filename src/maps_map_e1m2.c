@@ -1,5 +1,7 @@
 // Converted from .qc on 05/02/2016
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -903,3 +905,6 @@ void map_e1m2() {
 	SetMarkerFixedSize (186, 40, 40, 0);
 	SetMarkerFixedSize (180, 40, 40, 0);
 }
+
+#endif
+

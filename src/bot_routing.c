@@ -1,4 +1,6 @@
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -259,3 +261,5 @@ void PathScoringLogic(
 		new_path_state, new_angle_hint, new_rj_frame_delay, new_rj_angles
 	);
 }
+
+#endif // BOT_SUPPORT

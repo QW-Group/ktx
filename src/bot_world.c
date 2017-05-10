@@ -1,4 +1,6 @@
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -118,3 +120,4 @@ qbool BotDoorIsClosed (gedict_t* door)
 	return false;
 }
 
+#endif

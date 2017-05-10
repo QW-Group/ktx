@@ -1,5 +1,7 @@
 // Converted from .qc on 05/02/2016
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -46,7 +48,7 @@ void BotsSoundMadeEvent(gedict_t* entity) {
 		gedict_t* plr;
 
 		// Find all bots which has this entity as enemy
-		for (plr = world; plr = find_plr (plr); ) {
+		for (plr = world; (plr = find_plr (plr)); ) {
 			if (plr->isBot && !(plr->fb.state & NOTARGET_ENEMY)) {
 				if (NUM_FOR_EDICT(entity) == plr->s.v.enemy && entity != plr->fb.look_object) {
 					vec3_t temp;
@@ -116,7 +118,7 @@ qbool BotsPickBestEnemy(gedict_t* self) {
 	gedict_t* test_enemy;
 	int old_enemy = self->s.v.enemy;
 
-	for (test_enemy = world; test_enemy = find_plr(test_enemy); ) {
+	for (test_enemy = world; (test_enemy = find_plr(test_enemy)); ) {
 		if ( ! SameTeam(self, test_enemy) ) {
 			from_marker = test_enemy->fb.touch_marker;
 			if (from_marker) {
@@ -135,3 +137,5 @@ qbool BotsPickBestEnemy(gedict_t* self) {
 
 	return self->s.v.enemy != old_enemy;
 }
+
+#endif

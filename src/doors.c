@@ -86,8 +86,11 @@ void door_hit_top()
 	sound( self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->s.v.noise1, 1, ATTN_NORM );
 	self->state = STATE_TOP;
 
-	if (bots_enabled ())
-		BotEventDoorHitTop (self);
+#ifdef BOT_SUPPORT
+	if (bots_enabled()) {
+		BotEventDoorHitTop(self);
+	}
+#endif
 
 	if ( ( int ) ( self->s.v.spawnflags ) & DOOR_TOGGLE )
 		return;		// don't come down automatically
@@ -101,8 +104,11 @@ void door_hit_bottom()
 	sound( self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->s.v.noise1, 1, ATTN_NORM );
 	self->state = STATE_BOTTOM;
 
-	if (bots_enabled ())
-		BotEventDoorHitBottom (self);
+#ifdef BOT_SUPPORT
+	if (bots_enabled()) {
+		BotEventDoorHitBottom(self);
+	}
+#endif
 }
 
 void door_go_down()

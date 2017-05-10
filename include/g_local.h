@@ -484,8 +484,7 @@ qbool		ISDEAD( gedict_t *e );
 
 qbool		CanDamage( gedict_t *targ, gedict_t *inflictor );
 
-void            T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker,
-			  float damage );
+void            T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float damage );
 void            T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage,
 				gedict_t * ignore, deathType_t dtype );
 void            T_BeamDamage( gedict_t * attacker, float damage );
@@ -996,7 +995,6 @@ void LaunchLaser( vec3_t org, vec3_t vec );
 
 // bots
 qbool bots_enabled();
-void InitParameters();
 
 // files
 fileHandle_t std_fropen (const char *fmt, ...);
@@ -1007,10 +1005,10 @@ void std_fclose (fileHandle_t handle);
 void std_fprintf (fileHandle_t handle, const char *fmt, ...);
 
 // teamplay
-void TeamplayEventItemTaken (gedict_t* client, gedict_t* item);
-void TeamplayDeathEvent (gedict_t* client);
-void TeamplayMessage (void);
-qbool TeamplayMessageByName (gedict_t* client, const char* message);
-void TeamplayGameTick (void);
-
-void LocationInitialise (void);
+void TeamplayEventItemTaken(gedict_t* client, gedict_t* item);
+void TeamplayDeathEvent(gedict_t* client);
+void TeamplayMessage(void);
+qbool TeamplayMessageByName(gedict_t* client, const char* message);
+void TeamplayGameTick(void);
+void LocationInitialise(void);
+qbool SameTeam(gedict_t* p1, gedict_t* p2);

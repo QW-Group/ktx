@@ -85,8 +85,11 @@ void plat_hit_top()
 	self->s.v.think = ( func_t ) plat_go_down;
 	self->s.v.nextthink = self->s.v.ltime + 3;
 
-	if (bots_enabled ())
-		BotEventPlatformHitTop (self);
+#ifdef BOT_SUPPORT
+	if (bots_enabled()) {
+		BotEventPlatformHitTop(self);
+	}
+#endif
 }
 
 void plat_hit_bottom()
@@ -94,8 +97,11 @@ void plat_hit_bottom()
 	sound( self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->s.v.noise1, 1, ATTN_NORM );
 	self->state = STATE_BOTTOM;
 
-	if (bots_enabled ())
-		BotEventPlatformHitBottom (self);
+#ifdef BOT_SUPPORT
+	if (bots_enabled()) {
+		BotEventPlatformHitBottom(self);
+	}
+#endif
 }
 
 void plat_go_down()
@@ -128,7 +134,9 @@ void plat_center_touch()
 		return;
 
 	self = PROG_TO_EDICT( self->s.v.enemy );
+#ifdef BOT_SUPPORT
 	BotPlatformTouched (self, other);
+#endif
 
 	if ( self->state == STATE_BOTTOM )
 		plat_go_up();
@@ -154,14 +162,16 @@ void plat_outside_touch()
 
 //dprint ("plat_outside_touch\n");
 	self = PROG_TO_EDICT( self->s.v.enemy );
-	if ( self->state == STATE_TOP )
+	if (self->state == STATE_TOP) {
 		plat_go_down();
+	}
 }
 
 void plat_trigger_use()
 {
-	if ( self->s.v.think )
-		return;		// allready activated
+	if (self->s.v.think) {
+		return;		// already activated
+	}
 	plat_go_down();
 }
 

@@ -1,10 +1,13 @@
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
 // If multiple items have the same goal, markers on the map will point to the closest
-//   So (my logic) if you only care about the closest item rather than timing all items, assign same goal to all objects
-//   Statically assign goals for minor items and leave other goal numbers free for items to be tracked across the whole map
+//   So (my logic) if you only care about the closest item rather than timing all items,
+//     assign same goal to all objects. Statically assign goals for minor items and leave
+//     other goal numbers free for items to be tracked across the whole map
 #define FB_FIRST_AUTOGOAL  15
 #define FB_GOAL_GA         15
 #define FB_GOAL_HEALTH     16
@@ -25,7 +28,7 @@ void AssignGoalNumbers (void)
 	gedict_t* ent;
 	int unassigned_goal = 1;
 
-	for (ent = world; ent = nextent (ent); ) {
+	for (ent = world; (ent = nextent (ent)); ) {
 		switch (ent->tp_flags) {
 		case it_ra:
 		case it_ya:
@@ -937,3 +940,5 @@ void BotsPowerupTouchedNonPlayer (gedict_t* powerup, gedict_t* touch_ent)
 {
 	LocateDynamicItem (powerup);
 }
+
+#endif // BOT_SUPPORT

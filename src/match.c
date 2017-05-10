@@ -795,13 +795,17 @@ void StartMatch ()
 
 	StartLogs();
 
-	BotsMatchStart ();
+#ifdef BOT_SUPPORT
+	BotsMatchStart();
+#endif
 
-	if ( !self->cnt )
-		ent_remove( self ); // timelimit == 0, so match will end no due to timelimit but due to fraglimit or something
+	if (!self->cnt) {
+		ent_remove(self); // timelimit == 0, so match will end no due to timelimit but due to fraglimit or something
+	}
 
-	if ( isRACE() )
+	if (isRACE()) {
 		race_match_start();
+	}
 
 	cvar_fset("qtv_sayenabled", 0);
 }

@@ -1,5 +1,7 @@
 // Converted from .qc on 05/02/2016
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -641,3 +643,5 @@ void DM4CampLogic() {
 		}
 	}
 }
+
+#endif

@@ -1,10 +1,11 @@
 // Converted from .qc on 05/02/2016
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
 static int subzone_indexes[NUMBER_ZONES] = { 0 };
-static gedict_t* zone_tail[NUMBER_ZONES] = { 0 };
 
 // FIXME: Map-specific hack for existing map-specific logic...
 extern gedict_t* dm6_door;
@@ -191,3 +192,5 @@ int AddPath (gedict_t* source, gedict_t* next)
 	}
 	return place;
 }
+
+#endif

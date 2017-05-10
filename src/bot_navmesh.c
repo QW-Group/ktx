@@ -1,6 +1,8 @@
 
 // Navigation mesh
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -348,3 +350,5 @@ void BotNavMeshFrameThink(void)
 		}
 	}
 }
+
+#endif 

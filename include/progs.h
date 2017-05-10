@@ -364,6 +364,7 @@ typedef struct teamplay_s {
 
 #define MAX_SPAWN_WEIGHTS (64)
 
+#ifdef BOT_SUPPORT
 // frogbots
 typedef void (*fb_void_func_t)(void);
 typedef qbool (*fb_bool_func_t)(void);
@@ -492,6 +493,8 @@ typedef struct fb_botskill_s {
 
 } fb_botskill_t;
 
+// FIXME: Need to break this up into marker fields, client fields and entity fields
+//        Currently using way too much memory as a lot of these are invalid for particular entity types
 typedef struct fb_entvars_s {
 	fb_zone_t          zones[NUMBER_ZONES];         // directions to zones
 	fb_subzone_t       subzones[NUMBER_SUBZONES];   // links to subzones (subzone is unique marker inside a zone)
@@ -702,6 +705,7 @@ typedef struct fb_entvars_s {
 	// last time this player was hurt
 	float               last_hurt;
 } fb_entvars_t;
+#endif
 
 //typedef (void(*)(gedict_t *)) one_edict_func;
 typedef struct gedict_s {
@@ -1061,9 +1065,11 @@ typedef struct gedict_s {
 //	struct gedict_s *k_hoonyspawn; // hoonymode: on odd-number points, we switch the spawns
 // }
 
+#ifdef BOT_SUPPORT
 // { frogbots
 	fb_entvars_t fb;
 // }
+#endif
 
 // { highlights which clients this entity was visible to
 	unsigned int visclients;

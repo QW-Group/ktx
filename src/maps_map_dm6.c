@@ -1,5 +1,7 @@
 // Converted from .qc on 05/02/2016
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -949,3 +951,5 @@ void DM6Debug (gedict_t* self)
 		G_sprint (self, PRINT_HIGH, "dm6_door->door->takedamage = %s\n", dm6_door->fb.door_entity->s.v.takedamage ? "true" : "false");
 	}
 }
+
+#endif

@@ -1,5 +1,7 @@
 // Converted from .qc on 05/02/2016
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -148,15 +150,14 @@ static void AvoidQuadBore (gedict_t* self)
 
 // FIXME: This doesn't do what it says, as it has teamplay-value checks
 static qbool CouldHurtTeammate(gedict_t* me) {
-	float ang,
-		curang;
+	float ang, curang;
 	gedict_t* p;
 
 	if (teamplay == 0 || teamplay == 1 || teamplay == 5) {
 		return false;
 	}
 
-	for (p = world; p = find_plr (p); ) {
+	for (p = world; (p = find_plr (p)); ) {
 		if (p != me) {
 			if (SameTeam(me, p)) {
 				if (VisibleEntity(p)) {
@@ -253,7 +254,7 @@ static void RocketLauncherShot (gedict_t* self)
 	// 
 	FindRocketExplosionPoint(self->s.v.origin, self->fb.desired_angle, self->fb.rocket_endpos, &risk_strength);
 
-	for (test_enemy = world; test_enemy = find_plr (test_enemy); ) {
+	for (test_enemy = world; (test_enemy = find_plr (test_enemy)); ) {
 		float predict_dist = 1000000;
 		vec3_t testplace;
 
@@ -490,7 +491,6 @@ void SetFireButton(gedict_t* self, vec3_t rel_pos, float rel_dist) {
 // FIXME: should still discharge if < 25 cells and would kill enemy...
 static qbool BotShouldDischarge (void)
 {
-	gedict_t* p = NULL;
 	gedict_t* enemy = &g_edicts[self->s.v.enemy];
 
 	if (self->s.v.waterlevel != 3) {
@@ -675,3 +675,4 @@ void SelectWeapon(void) {
 	CheckNewWeapon( DesiredWeapon () );
 }
 
+#endif // BOT_SUPPORT

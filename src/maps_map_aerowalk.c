@@ -1,5 +1,7 @@
 // Converted from .qc on 05/02/2016
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -530,3 +532,4 @@ void map_aerowalk() {
 	SetMarkerPathFlags(14, 6, JUMP_LEDGE);
 }
 
+#endif

@@ -3168,8 +3168,6 @@ void race_add_standard_routes( void )
 	char   line[MAX_TXTLEN];
 	char   token[MAX_TXTLEN];
 	qbool  in_route_def = false;
-	int    marker_number = 0;
-	qbool  prev_marker_set = false;
 	int    lineNumber = 0;
 	size_t i = 0;
 	char   *entityfile;
@@ -4341,7 +4339,7 @@ static void race_match_team_stats(void)
 {
 	gedict_t* p, *p2;
 	int teams_found = 0;
-	race_team_score_t teams[MAX_CLIENTS] = { 0 };
+	race_team_score_t teams[MAX_CLIENTS] = { { 0 } };
 
 	// keep track of players we've processed
 	for (p = world; (p = race_find_race_participants(p)); /**/) {
@@ -4379,7 +4377,7 @@ static void race_match_player_stats(void)
 {
 	gedict_t* p;
 	int teams_found = 0;
-	race_team_score_t teams[MAX_CLIENTS] = { 0 };
+	race_team_score_t teams[MAX_CLIENTS] = { { 0 } };
 
 	for (p = world; (p = race_find_race_participants(p)); /**/) {
 		teams[teams_found].name = p->s.v.netname;

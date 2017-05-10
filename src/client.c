@@ -51,9 +51,6 @@ void ZeroFpsStats ();
 
 void del_from_specs_favourites(gedict_t *rm);
 
-// bot functions
-void BotWaterJumpFix(void);
-
 extern int g_matchstarttime;
 
 void CheckAll ()
@@ -658,9 +655,7 @@ void SP_trigger_changelevel()
 		 && cvar( "k_remove_end_hurt" )
 		 && cvar( "k_remove_end_hurt" ) != 2
 	   ) {
-		if (!bots_enabled ()) {
-			ent_remove ( self );
-		}
+		soft_ent_remove ( self );
 	}
 	else {
 		InitTrigger ();
@@ -1359,7 +1354,9 @@ void ClientConnect()
 
 	MakeMOTD();
 
+#ifdef BOT_SUPPORT
 	BotClientConnectedEvent (self);
+#endif
 }
 
 ////////////////
@@ -1524,7 +1521,9 @@ void PutClientInServer( void )
 
 		teleport_player( self, self->s.v.origin, self->s.v.angles, tele_flags );
 
+#ifdef BOT_SUPPORT
 		BotClientEntersEvent (self, spot);
+#endif
 
 		return;
 	}
@@ -1696,7 +1695,9 @@ void PutClientInServer( void )
 	WriteByte(MSG_ONE, 18 /*STAT_MATCHSTARTTIME*/);
 	WriteLong(MSG_ONE, g_matchstarttime);
 
+#ifdef BOT_SUPPORT
 	BotClientEntersEvent (self, spot);
+#endif
 }
 
 /*
@@ -1920,8 +1921,11 @@ void WaterMove()
 
 	if ( self->s.v.waterlevel != 3 )
 	{
-		if (self->isBot && self->s.v.waterlevel)
+#ifdef BOT_SUPPORT
+		if (self->isBot && self->s.v.waterlevel) {
 			BotWaterJumpFix();
+		}
+#endif
 
 		if ( self->air_finished < g_globalvars.time )
 			sound( self, CHAN_VOICE, "player/gasp2.wav", 1, ATTN_NORM );
@@ -1931,9 +1935,11 @@ void WaterMove()
 		self->air_finished = g_globalvars.time + 12;
 		self->dmg = 2;
 
+#ifdef BOT_SUPPORT
 		if (self->isBot) {
 			BotOutOfWater (self);
 		}
+#endif
 	} 
 	else if ( self->air_finished < g_globalvars.time )
 	{
@@ -1954,10 +1960,11 @@ void WaterMove()
 		}
 	}
 
-	if ( self->isBot )
-	{
-		BotWaterMove (self);
+#ifdef BOT_SUPPORT
+	if (self->isBot) {
+		BotWaterMove(self);
 	}
+#endif
 
 	if ( !self->s.v.waterlevel )
 	{
@@ -2563,9 +2570,11 @@ void PlayerPreThink()
 		self->was_jump = false;
 	}
 
+#ifdef BOT_SUPPORT
 	if ( bots_enabled() ) {
-		BotPreThink (self);
+		BotPreThink(self);
 	}
+#endif
 
 // ILLEGALFPS[
 
@@ -2724,7 +2733,9 @@ void PlayerPreThink()
 				if ( self->s.v.health > 150 )
 					self->s.v.health = 150;
 				self->regen_time += 0.5;
+#ifdef BOT_SUPPORT
 				FrogbotSetHealthArmour (self);
+#endif
 				RegenerationSound( self );
 	    	}
 
@@ -2734,7 +2745,9 @@ void PlayerPreThink()
 				if ( self->s.v.armorvalue > 150 )
 					self->s.v.armorvalue = 150;
 				self->regen_time += 0.5;
+#ifdef BOT_SUPPORT
 				FrogbotSetHealthArmour (self);
+#endif
 				RegenerationSound( self );
 	    	}
 		}
@@ -2926,23 +2939,25 @@ void CheckPowerups()
 	}
 }
 
-void CheckLightEffects( void )
+void CheckLightEffects(void)
 {
 	qbool dim = false;
 	qbool brl = false;
-	qbool r	 = false;
-	qbool g   = false;
-	qbool b   = false;
+	qbool r = false;
+	qbool g = false;
+	qbool b = false;
 
-	if (FrogbotOptionEnabled (FB_OPTION_EDITOR_MODE))
+#ifdef BOT_SUPPORT
+	// Keep colours for markers when in editing mode
+	if (FrogbotOptionEnabled(FB_OPTION_EDITOR_MODE)) {
 		return;
+	}
+#endif
 
 	// remove particular EF_xxx
-
 	self->s.v.effects = (int)self->s.v.effects & ~(EF_DIMLIGHT | EF_BRIGHTLIGHT | EF_BLUE | EF_RED | EF_GREEN);
 
 	// well, EF_xxx may originate from different sources, check it all
-
 	if ( self->ctf_flag & CTF_FLAG )
 		dim = true;
 
@@ -3197,8 +3212,11 @@ void PlayerPostThink()
 
 	mv_record();
 
-	if ( bots_enabled() )
-		BotsThinkTime (self);
+#ifdef BOT_SUPPORT
+	if (bots_enabled()) {
+		BotsThinkTime(self);
+	}
+#endif
 
 	W_WeaponFrame();
 
@@ -3404,7 +3422,7 @@ void StatsHandler(gedict_t *targ, gedict_t *attacker)
 		}
 
 		if ( targ == attacker ) {
-			; // killed self, nothing interest
+			targ->ps.wpn[wp].suicides++;
 		}
         else if ( (isTeam() || isCTF()) && streq( targteam, attackerteam ) && !strnull( attackerteam ) ) {
 			// team kill

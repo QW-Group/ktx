@@ -933,9 +933,11 @@ cmd_t cmds[] = {
 	{ "coop_nm_pu",	 ToggleNewCoopNm,           0    , CF_PLAYER | CF_MATCHLESS, CD_COOPNMPU },
 	{ "demomark",	 DemoMark,                  0    , CF_BOTH, CD_DEMOMARK },
 
+#ifdef BOT_SUPPORT
 // { FROGBOTS
 	{ "botcmd",      FrogbotsCommand,           0    , CF_BOTH | CF_PARAMS, CD_BOTCOMMAND },
 // }
+#endif
 
 // { TEAMPLAY
 	{ "tpmsg",       TeamplayMessage,           0    , CF_PLAYER | CF_PARAMS | CF_MATCHLESS, CD_TEAMPLAYMESSAGE }

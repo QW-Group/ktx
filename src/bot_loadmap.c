@@ -1,5 +1,7 @@
 // Converted from .qc on 05/02/2016
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -62,10 +64,6 @@ static void fb_spawn_button(gedict_t* ent) {
 		BecomeMarker(ent);
 		adjust_view_ofs_z(ent);
 	}
-}
-
-static void fb_spawn_changelevel(gedict_t* ent) {
-	AddToQue(ent);
 }
 
 static void fb_spawn_spawnpoint(gedict_t* ent) {
@@ -230,7 +228,7 @@ static void CreateItemMarkers() {
 	//    catch up afterwards once we know the map is valid
 	gedict_t* item;
 
-	for (item = world; item = nextent(item); ) {
+	for (item = world; (item = nextent(item)); ) {
 		int i = 0;
 		qbool found = false;
 
@@ -272,7 +270,7 @@ static void AssignVirtualGoals (void)
 {
 	gedict_t* item;
 
-	for (item = world; item = nextent(item); ) {
+	for (item = world; (item = nextent(item)); ) {
 		int i = 0;
 
 		for (i = 0; i < ItemSpawnFunctionCount(); ++i) {
@@ -316,7 +314,6 @@ static void CustomiseFrogbotMap (void)
 		gedict_t* quad = ez_find (world, "item_artifact_super_damage");
 		if (quad) {
 			gedict_t* nearest_marker;;
-			int i = 0;
 
 			quad->fb.fl_marker = false;
 			nearest_marker = LocateMarker (quad->s.v.origin);
@@ -345,7 +342,7 @@ static void CustomiseFrogbotMap (void)
 				p->s.v.classname = "info_player_deathmatch_removed";
 
 				// Remove any spawn marker
-				for (m = world; m = find (m, FOFCLSN, "spawnpoint"); ) {
+				for (m = world; (m = find (m, FOFCLSN, "spawnpoint")); ) {
 					if (m->k_lastspawn == p) {
 						ent_remove (m);
 						break;
@@ -357,7 +354,7 @@ static void CustomiseFrogbotMap (void)
 	}
 
 	// Expand bounding box of all items
-	for (ent = world; ent = nextent (ent); ) {
+	for (ent = world; (ent = nextent (ent)); ) {
 		if (streq (ent->s.v.classname, "info_teleport_destination") ||
 			streq (ent->s.v.classname, "info_player_deathmatch")) {
 			continue;
@@ -386,7 +383,7 @@ static void CustomiseFrogbotMap (void)
 
 	// Link all teleporters
 	if (FrogbotOptionEnabled (FB_OPTION_EDITOR_MODE)) {
-		for (ent = world; ent = ez_find (ent, "trigger_teleport"); ) {
+		for (ent = world; (ent = ez_find (ent, "trigger_teleport")); ) {
 			// If this teleport takes us to the marker close to the grenade, set arrow_time
 			if (!strnull (ent->s.v.target)) {
 				gedict_t* target = find (world, FOFS (s.v.targetname), ent->s.v.target);
@@ -432,7 +429,7 @@ void LoadMap(void) {
 		gedict_t* e;
 
 		// We don't want spawnpoint markers or powerups to mess with colours
-		for (e = world; e = nextent (e); ) {
+		for (e = world; (e = nextent (e)); ) {
 			e->s.v.effects = (int)e->s.v.effects & ~(EF_BLUE | EF_GREEN | EF_RED);
 		}
 
@@ -451,3 +448,5 @@ qbool FrogbotsCheckMapSupport (void)
 void BecomeMarker(gedict_t* marker) {
 	marker->fb.fl_marker = true;
 }
+
+#endif // BOT_SUPPORT

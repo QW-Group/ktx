@@ -1,10 +1,9 @@
 // Converted from .qc on 05/02/2016
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
-
-static char* EnemyTeamName (int botNumber);
-static char* FriendTeamName (int botNumber);
 
 #define FB_CVAR_DODGEFACTOR "k_fbskill_movement_dodgefactor"
 #define FB_CVAR_LOOKANYWHERE "k_fbskill_aim_lookanywhere"
@@ -272,3 +271,5 @@ char* BotNameGeneric(int botNumber) {
 
 	return custom_name;
 }
+
+#endif

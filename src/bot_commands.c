@@ -1,4 +1,6 @@
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -55,6 +57,16 @@ static gedict_t* last_touched_marker = NULL;
 // FIXME: Globals
 extern gedict_t* markers[];
 
+typedef struct team_s {
+	char name[16];
+	int humans;
+	int bots;
+	int topColor;
+	int bottomColor;
+} team_t;
+
+static team_t teams[4];
+
 qbool HasSavedMarker (void)
 {
 	return saved_marker != NULL;
@@ -85,49 +97,24 @@ typedef struct bot_s {
 	botcmd_t         command;
 } bot_t;
 
-bot_t            bots[MAX_BOTS] = { 0 };
+bot_t            bots[MAX_BOTS] = { { 0 } };
 
 static int FrogbotSkillLevel (void)
 {
 	return (int)cvar ("k_fb_skill");
 }
 
-static int CountTeamMembers (const char* teamName)
-{
-	int count = 0;
-	gedict_t* ed;
-
-	for (ed = world; ed = find_plr (ed); ) {
-		if (streq (getteam (ed), teamName)) {
-			++count;
-		}
-	}
-
-	return count;
-}
-
-typedef struct team_s {
-	char name[16];
-	int humans;
-	int bots;
-	int topColor;
-	int bottomColor;
-} team_t;
-
-team_t teams[4];
-
 static team_t* AddTeamToList (int* teamsFound, char* team, int topColor, int bottomColor)
 {
 	int i;
-	qbool found = false;
 
-	for (i = 0; !found && i < *teamsFound; ++i) {
-		if (found = streq (team, teams[i].name)) {
+	for (i = 0; i < *teamsFound; ++i) {
+		if (streq (team, teams[i].name)) {
 			return &teams[i];
 		}
 	}
 
-	if (!found && *teamsFound < sizeof (teams) / sizeof(teams[0])) {
+	if (*teamsFound < sizeof (teams) / sizeof(teams[0])) {
 		i = *teamsFound;
 		strlcpy (teams[i].name, team, sizeof (teams[i].name));
 		teams[i].topColor = topColor;
@@ -184,17 +171,13 @@ void FrogbotListPaths (void)
 	G_sprint (self, PRINT_HIGH, "%3d paths found matching %s\n", path_count, argument);
 }
 
-const char* defaultTeamNames[] = { "red", "blue", "yellow", "green" };
-
 static void BuildTeamList ()
 {
-	const char* teamNames[4] = { 0 };
-	int teamColors[4] = { -1 };
 	int foundTeams = 0;
 
 	gedict_t* ed;
 
-	for (ed = world; ed = find_plr (ed); ) {
+	for (ed = world; (ed = find_plr (ed)); ) {
 		char* t = getteam (ed);
 		int topColor, bottomColor;
 		team_t* team = NULL;
@@ -361,8 +344,6 @@ static void PrintCurrentGoals (void)
 	int i;
 	gedict_t* touch = self->fb.touch_marker;
 	extern void EvalGoal (gedict_t* self, gedict_t* goal_entity);
-	gedict_t* first_bot = BotsFirstBot ();
-	gedict_t* temp_self = self;
 
 	if (!touch) {
 		return;
@@ -452,7 +433,6 @@ static void FrogbotsDebug (void)
 			}
 		}
 		else if (streq (sub_command, "entity")) {
-			gedict_t* e = NULL;
 			int ent = 0;
 
 			trap_CmdArgv (3, sub_command, sizeof (sub_command));
@@ -580,7 +560,6 @@ static void FrogbotsDebug (void)
 			gedict_t* target = NULL;
 			vec3_t teleport_angles = { 0, 0, 0 };
 			vec3_t teleport_location = { 0, 0, 0 };
-			int i = 0;
 			qbool allow_rj = streq (sub_command, "botpath/rj");
 
 			if (!k_practice) {
@@ -788,7 +767,7 @@ static gedict_t* MarkerIndicator (gedict_t* marker)
 		return marker;
 	}
 
-	for (indicator = world; indicator = ez_find (indicator, "marker_indicator"); ) {
+	for (indicator = world; (indicator = ez_find (indicator, "marker_indicator")); ) {
 		if (indicator->fb.index == marker->fb.index) {
 			return indicator;
 		}
@@ -1393,7 +1372,6 @@ static void FrogbotPathList (void)
 	char message[1024] = { 0 };
 	int i = 0;
 	gedict_t* marker = self->fb.touch_marker;
-	const char* marker_flags = 0;
 
 	if (trap_CmdArgc () >= 3) {
 		char temp[10];
@@ -1543,8 +1521,6 @@ static void FrogbotSetRocketJumpFields (void)
 	gedict_t* nearest = LocateMarker (self->s.v.origin);
 	int source_to_target_path = FindPathIndex (saved_marker, nearest);
 	char param[64];
-	float pitch = 0.0f, yaw = 0.0f;
-	int delay = 0;
 
 	if (nearest == NULL) {
 		G_sprint (self, PRINT_HIGH, "No marker nearby\n");
@@ -1882,7 +1858,7 @@ void BotStartFrame(int framecount) {
 		FrogbotPrePhysics1 ();
 		FrogbotPrePhysics2 ();
 
-		for (self = world; self = find_plr (self); ) {
+		for (self = world; (self = find_plr (self)); ) {
 			++client_count;
 
 			// Logic that gets called every frame for every frogbot
@@ -1902,7 +1878,7 @@ void BotStartFrame(int framecount) {
 
 					// Set all players to non-solid so we can avoid hazards
 					if (IsHazardFrame()) {
-						for (p = world; p = find_plr(p); ) {
+						for (p = world; (p = find_plr(p)); ) {
 							p->s.v.solid = SOLID_NOT;
 						}
 					}
@@ -1911,7 +1887,7 @@ void BotStartFrame(int framecount) {
 
 					// Re-instate client entity types
 					if (IsHazardFrame()) {
-						for (p = world; p = find_plr(p); ) {
+						for (p = world; (p = find_plr(p)); ) {
 							p->s.v.solid = SOLID_SLIDEBOX;
 						}
 					}
@@ -1975,3 +1951,5 @@ qbool FrogbotOptionEnabled (int option)
 {
 	return ((int)cvar ("k_fb_options")) & option;
 }
+
+#endif // BOT_SUPPORT

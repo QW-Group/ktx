@@ -1,5 +1,7 @@
 // Converted from .qc on 05/02/2016
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -21,7 +23,7 @@ gedict_t* IdentifyMostVisibleTeammate(gedict_t* me) {
 	vec3_t diff, point;
 	float currclose;
 
-	for (p = world; p = find_plr (p); ) {
+	for (p = world; (p = find_plr (p)); ) {
 		if (me != p && (p->visclients & clientFlag) && SameTeam(me, p)) {
 			// Find difference in angles between aim & aiming at teammate
 			VectorSubtract(p->s.v.origin, me->s.v.origin, diff);
@@ -110,7 +112,7 @@ gedict_t* HelpTeammate() {
 	selected2 = NULL;
 	best_dist1 = 99999999;
 	best_dist2 = 99999999;
-	for (head = world; head = trap_findradius(head, self->s.v.origin, bdist); ) {
+	for (head = world; (head = trap_findradius(head, self->s.v.origin, bdist)); ) {
 		if (head->ct == ctPlayer) {
 			if (SameTeam(head, self)) {
 				if (head != self) {
@@ -121,7 +123,7 @@ gedict_t* HelpTeammate() {
 								if ((int)self->s.v.items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING)) {
 									if ((self->s.v.ammo_cells > 10) || (self->s.v.ammo_rockets > 2)) {
 										selected1 = head;
-										self->fb.state = self->fb.state | HELP_TEAMMATE;
+										self->fb.state |= HELP_TEAMMATE;
 										best_dist1 = d;
 									}
 								}
@@ -135,7 +137,7 @@ gedict_t* HelpTeammate() {
 									if ((int)self->s.v.items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING)) {
 										if ((self->s.v.ammo_cells > 10) || (self->s.v.ammo_rockets > 2)) {
 											selected2 = head;
-											self->fb.state = self->fb.state | HELP_TEAMMATE;
+											self->fb.state |= HELP_TEAMMATE;
 											best_dist2 = d;
 										}
 									}
@@ -156,3 +158,4 @@ gedict_t* HelpTeammate() {
 	return NULL;
 }
 
+#endif

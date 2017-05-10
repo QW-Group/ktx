@@ -1,4 +1,6 @@
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -85,10 +87,10 @@ static qbool obstruction(gedict_t* self, vec3_t new_velocity, vec3_t new_origin,
 	qbool onGround = (newFlags & FL_ONGROUND);
 	qbool waterJump = (newFlags & FL_WATERJUMP);
 	vec3_t delta_velocity = { 0 };
-	vec3_t proposed = { 0 };
+	/*vec3_t proposed = { 0 };
 	vec3_t direction = { 0 };
 	float scale = 0.0f;
-	float heading = 0.0f;
+	float heading = 0.0f;*/
 
 	VectorClear (velocity_normal);
 	VectorSubtract (old_velocity, new_velocity, delta_velocity);
@@ -138,3 +140,4 @@ static qbool obstruction(gedict_t* self, vec3_t new_velocity, vec3_t new_origin,
 	return false;
 }
 
+#endif

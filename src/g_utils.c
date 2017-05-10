@@ -114,6 +114,7 @@ void ent_remove( gedict_t * t )
 // The bots need map entities for route-finding, so don't remove
 void soft_ent_remove (gedict_t* ent)
 {
+#ifdef BOT_SUPPORT
 	if (bots_enabled ()) {
 		ent->s.v.model = "";
 		ent->s.v.solid = SOLID_TRIGGER;
@@ -126,6 +127,9 @@ void soft_ent_remove (gedict_t* ent)
 	else {
 		ent_remove (ent);
 	}
+#else
+	ent_remove (ent);
+#endif
 }
 
 gedict_t *nextent( gedict_t * ent )
@@ -776,9 +780,11 @@ void sound( gedict_t * ed, int channel, char *samp, float vol, float att )
 	if ( isRACE() && ed->muted )
 		return;
 
+#ifdef BOT_SUPPORT
 	if (bots_enabled ()) {
 		BotsSoundMadeEvent (ed);
 	}
+#endif
 
 	trap_sound( NUM_FOR_EDICT( ed ), channel, samp, vol, att );
 }

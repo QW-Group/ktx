@@ -1,5 +1,7 @@
 // Converted from .qc on 05/02/2016
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -31,7 +33,7 @@ void UpdateGoalEntity(gedict_t* item, gedict_t* taker) {
 	gedict_t* plr;
 	int item_entity = NUM_FOR_EDICT(item);
 
-	for (plr = world; plr = find_plr(plr); ) {
+	for (plr = world; (plr = find_plr(plr)); ) {
 		qbool same_team = SameTeam (plr, taker);
 		qbool heard_it = VectorDistance (plr->s.v.origin, item->s.v.origin) < 1000;
 
@@ -230,7 +232,6 @@ static void EnemyGoalLogic (gedict_t* self)
 
 void UpdateGoal(gedict_t* self) {
 	int i = 0;
-	int items_ = self->s.v.items;
 	gedict_t* enemy_ = &g_edicts[self->s.v.enemy];
 	gedict_t* goal_entity = 0;
 	char* dropped_powerup_names[] = {
@@ -290,7 +291,7 @@ void UpdateGoal(gedict_t* self) {
 	G_bprint_debug (2, "After goal-eval1: best_goal %s, best_score %f\n", self->fb.best_goal ? self->fb.best_goal->s.v.classname : "(none)", self->fb.best_goal_score);
 
 	// Dropped backpacks
-	for (goal_entity = world; goal_entity = ez_find (goal_entity, BACKPACK_CLASSNAME); ) {
+	for (goal_entity = world; (goal_entity = ez_find (goal_entity, BACKPACK_CLASSNAME)); ) {
 		if (goal_entity->fb.touch_marker) {
 			EvalGoal (self, goal_entity);
 		}
@@ -299,7 +300,7 @@ void UpdateGoal(gedict_t* self) {
 
 	// Dropped powerups
 	for (i = 0; i < sizeof (dropped_powerup_names) / sizeof (dropped_powerup_names[0]); ++i) {
-		for (goal_entity = world; goal_entity = ez_find (goal_entity, dropped_powerup_names[i]); ) {
+		for (goal_entity = world; (goal_entity = ez_find (goal_entity, dropped_powerup_names[i])); ) {
 			if (goal_entity->cnt > g_globalvars.time && goal_entity->fb.touch_marker) {
 				EvalGoal (self, goal_entity);
 			}
@@ -331,7 +332,7 @@ void UpdateGoal(gedict_t* self) {
 		}
 		G_bprint_debug (2, "After EvalGoal2:  best_goal %s, best_score %f\n", self->fb.best_goal2 ? self->fb.best_goal2->s.v.classname : "(none)", self->fb.best_score2);
 
-		for (goal_entity = world; goal_entity = ez_find(goal_entity, BACKPACK_CLASSNAME); ) {
+		for (goal_entity = world; (goal_entity = ez_find(goal_entity, BACKPACK_CLASSNAME)); ) {
 			if (goal_entity->fb.touch_marker) {
 				EvalGoal2 (goal_entity, self->fb.best_goal->fb.touch_marker, self->fb.canRocketJump);
 			}
@@ -349,3 +350,4 @@ void UpdateGoal(gedict_t* self) {
 	STOP_DEBUGGING
 }
 
+#endif // BOT_SUPPORT

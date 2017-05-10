@@ -672,16 +672,20 @@ void teleport_touch()
 		return;
 	}
 
-	if (bots_enabled () && BotsPreTeleport (self, other)) {
+#ifdef BOT_SUPPORT
+	if (bots_enabled() && BotsPreTeleport(self, other)) {
 		return;
 	}
+#endif
 
 	teleport_player( other, t->s.v.origin, t->mangle,
 			 TFLAGS_FOG_SRC | TFLAGS_FOG_DST | TFLAGS_SND_SRC | TFLAGS_SND_DST | TFLAGS_VELOCITY_ADJUST );
 
-	if (bots_enabled ()) {
-		BotsPostTeleport (self, other, t);
+#ifdef BOT_SUPPORT
+	if (bots_enabled()) {
+		BotsPostTeleport(self, other, t);
 	}
+#endif
 }
 
 /*QUAKED info_teleport_destination (.5 .5 .5) (-8 -8 -8) (8 8 32)
@@ -858,16 +862,16 @@ defalt dmg = 5
 */
 void SP_trigger_hurt()
 {
-	if ( streq( "end", g_globalvars.mapname ) && cvar( "k_remove_end_hurt" ) ) {
-		if (!bots_enabled ()) {
-			ent_remove (self);
-		}
+	if (streq("end", g_globalvars.mapname) && cvar("k_remove_end_hurt")) {
+		soft_ent_remove (self);
 		return;
 	}
+
 	InitTrigger();
 	self->s.v.touch = ( func_t ) hurt_touch;
-	if ( !self->dmg )
+	if (!self->dmg) {
 		self->dmg = 5;
+	}
 }
 
 //============================================================================

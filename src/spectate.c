@@ -308,12 +308,15 @@ void SpectatorThink()
 	if ( self->wp_stats && self->wp_stats_time && self->wp_stats_time <= g_globalvars.time && match_in_progress != 1 )
 		Print_Wp_Stats ();
 
-	if ( self->s.v.goalentity ) {
-		gedict_t *goal = PROG_TO_EDICT( self->s.v.goalentity );
+#ifdef BOT_SUPPORT
+	if (self->s.v.goalentity) {
+		gedict_t *goal = PROG_TO_EDICT(self->s.v.goalentity);
 
-		if (goal->isBot)
-			Bot_Print_Thinking ();
+		if (goal->isBot) {
+			Bot_Print_Thinking();
+		}
 	}
+#endif
 
 	if ( wizard ) {
 		// set model angles

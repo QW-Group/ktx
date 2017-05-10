@@ -1,5 +1,7 @@
 // Converted from .qc on 07/02/2016
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -18,7 +20,7 @@ void TeamplayReportVisiblePowerups (gedict_t* player)
 	gedict_t* opponent;
 
 	// Assumes that visclients match
-	for (opponent = world; opponent = find_plr (opponent); ) {
+	for (opponent = world; (opponent = find_plr (opponent)); ) {
 		qbool diff_team = opponent->k_teamnum != player->k_teamnum;
 		qbool powerups = (int)opponent->s.v.items & (IT_QUAD | IT_INVULNERABILITY);
 		qbool visible = (opponent->visclients & clientFlag);
@@ -37,7 +39,7 @@ static void ResetEnemy(gedict_t* self) {
 	gedict_t* test_enemy = NULL;
 
 	// Find all players who consider the current player their enemy, and clear it
-	for (test_enemy = world; test_enemy = find_plr(test_enemy); ) {
+	for (test_enemy = world; (test_enemy = find_plr(test_enemy)); ) {
 		if (test_enemy->s.v.enemy == NUM_FOR_EDICT(self)) {
 			test_enemy->s.v.enemy = NUM_FOR_EDICT(world);
 
@@ -190,7 +192,8 @@ static float goal_client6(gedict_t* self, gedict_t* other) {
 // client.qc
 // This is called whenever a client connects (not just bots)
 // TODO: any preferences stored against the specific bot to be restored here?
-void BotClientConnectedEvent(gedict_t* self) {
+void BotClientConnectedEvent(gedict_t* self)
+{
 	self->fb.desire = (deathmatch <= 3 ? goal_client : goal_client6);
 	self->fb.T = UNREACHABLE;
 	self->fb.skill.skill_level = g_globalvars.parm3;
@@ -254,8 +257,6 @@ void BotOutOfWater(gedict_t* self) {
 
 static void BotPeriodicMessages (gedict_t* self)
 {
-	gedict_t* opponent = NULL;
-
 	if (PAST(last_mm2_status)) {
 		qbool has_rl = ((int)self->s.v.items & IT_ROCKET_LAUNCHER) && self->s.v.ammo_rockets >= 3;
 		qbool has_lg = ((int)self->s.v.items & IT_LIGHTNING) && self->s.v.ammo_cells >= 6;
@@ -282,7 +283,8 @@ static void BotPeriodicMessages (gedict_t* self)
 }
 
 // Called for every player, if bots are enabled
-void BotPreThink(gedict_t* self) {
+void BotPreThink(gedict_t* self)
+{
 	if (self->isBot) {
 		self->fb.firing = self->s.v.button0;
 		self->fb.jumping = self->s.v.button2;
@@ -299,4 +301,4 @@ void BotPreThink(gedict_t* self) {
 	self->fb.touch_distance = 1000000;
 }
 
-
+#endif // BOT_SUPPORT

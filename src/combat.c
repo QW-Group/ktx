@@ -24,7 +24,9 @@
  */
 
 #include "g_local.h"
+#ifdef BOT_SUPPORT
 #include "fb_globals.h"
+#endif
 
 void	ClientObituary( gedict_t * e1, gedict_t * e2 );
 void    BotPlayerKilledEvent (gedict_t* targ, gedict_t* attacker, gedict_t* inflictor);
@@ -213,7 +215,9 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 {
 	gedict_t       *oself;
 
+#ifdef BOT_SUPPORT
 	BotPlayerKilledEvent (targ, attacker, inflictor);
+#endif
 
 	oself = self;
 	self = targ;
@@ -389,10 +393,10 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		return;
 
 	// can't damage other players in race
-	if ( isRACE() && ( attacker != targ ) )
-	{
-		if ( targ->ct == ctPlayer || attacker->ct == ctPlayer )
+	if (isRACE() && (attacker != targ)) {
+		if (targ->ct == ctPlayer || attacker->ct == ctPlayer) {
 			return;
+		}
 	}
 
 	// ignore almost all damage in CA while coutdown
@@ -735,10 +739,14 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			targ->s.v.flags = (int)targ->s.v.flags & ~FL_ONGROUND;		
 		}
 
+#ifdef BOT_SUPPORT
 		targ->fb.path_state |= AIR_ACCELERATION;
+#endif
 	}
 
-	BotDamageInflictedEvent (attacker, targ);
+#ifdef BOT_SUPPORT
+	BotDamageInflictedEvent(attacker, targ);
+#endif
 
 	if ( match_in_progress == 2 && (int)cvar("k_dmgfrags") )
 	{
@@ -829,30 +837,65 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	// update damage stats like: give/taked/team damage
 	if ( attacker->ct == ctPlayer && targ->ct == ctPlayer )
 	{
+		int weapon = wpNONE;
+		switch (targ->deathtype)
+		{
+		case dtAXE:
+			weapon = wpAXE;
+			break;
+		case dtSG:
+			weapon = wpSG;
+			break;
+		case dtSSG:
+			weapon = wpSSG;
+			break;
+		case dtNG:
+			weapon = wpNG;
+			break;
+		case dtSNG:
+			weapon = wpSNG;
+			break;
+		case dtGL:
+			weapon = wpGL;
+			break;
+		case dtRL:
+			weapon = wpRL;
+			break;
+		case dtLG_BEAM:
+		case dtLG_DIS:
+			weapon = wpLG;
+			break;
+		}
+
 		if ( attacker == targ )
 		{
 			// self damage
-
 			attacker->ps.dmg_self += dmg_dealt;
 		}
 		else
 		{
 			int items = targ->s.v.items;
 
-			// damage to enemy weapon
-			if ( items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING) )
-			{
-				attacker->ps.dmg_eweapon += dmg_dealt;
-			}
-
 			if ( tp_num() && streq(attackerteam, targteam) )
 			{
 				attacker->ps.dmg_team += dmg_dealt;
+				attacker->ps.wpn[weapon].tdamage += dmg_dealt;
+
+				// damage to enemy weapon
+				if (items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING)) {
+					attacker->ps.dmg_tweapon += dmg_dealt;
+				}
 			}
 			else 
 			{
 				attacker->ps.dmg_g += dmg_dealt;
 				targ->ps.dmg_t     += dmg_dealt;
+				attacker->ps.wpn[weapon].edamage += dmg_dealt;
+
+				// damage to enemy weapon
+				if (items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING)) {
+					attacker->ps.dmg_eweapon += dmg_dealt;
+				}
 			}
 
 			// real hits
@@ -892,7 +935,9 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		targ->s.v.frags -= 3;
 	}
 
+#ifdef BOT_SUPPORT
 	FrogbotSetHealthArmour(targ);
+#endif
 
  	// if targed killed, do appropriate action and return
 	if ( ISDEAD( targ ) )

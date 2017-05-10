@@ -1,5 +1,7 @@
 // Converted from .qc on 05/02/2016
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -100,7 +102,7 @@ static void HazardTeleport(gedict_t* teleport, gedict_t* teleported_player) {
 	}
 
 	// Make all other bots wait a brief period before going through tele
-	for (plr = world; plr = find_plr (plr); ) {
+	for (plr = world; (plr = find_plr (plr)); ) {
 		// Tell other bots directly next to the teleport to back up a while
 		if (plr->isBot && plr != teleported_player && plr->fb.linked_marker == teleport) {
 			plr->fb.path_state |= DELIBERATE_BACKUP;
@@ -115,7 +117,7 @@ static void ExplodeAlert(vec3_t org, float next_time) {
 	gedict_t* tele;
 
 	// Find all map markers close to this point
-	for (marker = world; marker = trap_findradius(marker, org, 256); ) {
+	for (marker = world; (marker = trap_findradius(marker, org, 256)); ) {
 		if (marker->fb.fl_marker) {
 			// Would the grenade hurt the marker?
 			traceline(org[0], org[1], org[2], marker->s.v.absmin[0] + marker->s.v.view_ofs[0], marker->s.v.absmin[1] + marker->s.v.view_ofs[1], marker->s.v.absmin[2] + marker->s.v.view_ofs[2], true, marker);
@@ -123,7 +125,7 @@ static void ExplodeAlert(vec3_t org, float next_time) {
 				// Mark the current time
 				marker->fb.arrow_time = next_time;
 
-				for (tele = world; tele = ez_find (tele, "trigger_teleport"); ) {
+				for (tele = world; (tele = ez_find (tele, "trigger_teleport")); ) {
 					// If this teleport takes us to the marker close to the grenade, set arrow_time
 					if (!strnull (tele->s.v.target)) {
 						gedict_t* target = find (world, FOFS (s.v.targetname), tele->s.v.target);
@@ -208,7 +210,6 @@ static int FallSpotGround(vec3_t testplace, float fallheight) {
 
 static int FallSpotAir (gedict_t* self, vec3_t testplace, float fallheight) {
 	vec3_t final_origin;
-	int fall = 0;
 	int content;
 
 	VectorCopy(testplace, dropper->s.v.origin);
@@ -253,7 +254,6 @@ static int FallSpotAir (gedict_t* self, vec3_t testplace, float fallheight) {
 
 // last_clear_point is output variable
 static qbool CanJumpOver(gedict_t* self, vec3_t jump_origin, vec3_t jump_velocity, float fallheight, int current_fallspot) {
-	int i = 0;
 	int tries = 0;
 	float last_clear_hor_speed = 0;
 	vec3_t last_clear_hor_velocity;
@@ -323,19 +323,19 @@ static qbool CanJumpOver(gedict_t* self, vec3_t jump_origin, vec3_t jump_velocit
 			if ((int)self->s.v.flags & FL_ONGROUND) {
 				gedict_t* test_enemy;
 
-				for (test_enemy = world; test_enemy = find_plr (test_enemy); ) {
+				for (test_enemy = world; (test_enemy = find_plr (test_enemy)); ) {
 					test_enemy->s.v.solid = SOLID_SLIDEBOX;
 				}
 
 				// Generally this flag is set for when marker is lava
-				for (test_enemy = world; test_enemy = trap_findradius(test_enemy, testplace, 84); ) {
+				for (test_enemy = world; (test_enemy = trap_findradius(test_enemy, testplace, 84)); ) {
 					if (test_enemy->fb.T & UNREACHABLE) {
 						do_jump = false;
 						break;
 					}
 				}
 
-				for (test_enemy = world; test_enemy = find_plr (test_enemy); ) {
+				for (test_enemy = world; (test_enemy = find_plr (test_enemy)); ) {
 					test_enemy->s.v.solid = SOLID_NOT;
 				}
 			}
@@ -351,10 +351,10 @@ static qbool CanJumpOver(gedict_t* self, vec3_t jump_origin, vec3_t jump_velocit
 	return false;
 }
 
+/*
 // This code removed - was called at end of main loop of CanJumpOver
 static void ApplyTurningAccel (void)
 {
-	/*
 	if (self->fb.turning_speed) {
 		vec3_t last_clear_angle;
 		vectoangles(last_clear_velocity, last_clear_angle);
@@ -362,8 +362,8 @@ static void ApplyTurningAccel (void)
 		last_clear_angle[1] = last_clear_angle[1] + (self->fb.turning_speed * 32 / last_clear_hor_speed);
 		trap_makevectors(last_clear_angle);
 		VectorScale(g_globalvars.v_forward, vlen(last_clear_velocity), last_clear_velocity);
-	}*/
-}
+	}
+}*/
 
 // This code removed.... because ledge_backup fires based on velocity, this fires too often when bot is in midair,
 //   reversing the direction and causing the bot to go back to platform.
@@ -534,7 +534,7 @@ static void AvoidHazardsOnGround (gedict_t* self, float hor_speed, vec3_t new_or
 	vec3_t jump_velocity;
 	vec3_t testplace;
 	float fallheight = StandardFallHeight (self);
-	char debug[10][128] = { 0 };
+	char debug[10][128] = { { 0 } };
 	int line = 0;
 
 	if (new_velocity[2] < 0) {
@@ -879,3 +879,5 @@ void BotsPostTeleport (gedict_t* teleport_trigger, gedict_t* player, gedict_t* t
 	HazardTeleport (teleport_trigger, player);
 	SetMarker (player, teleport_destination);
 }
+
+#endif // BOT_SUPPORT

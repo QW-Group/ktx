@@ -1,6 +1,8 @@
 
 // bot_match.c
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -61,7 +63,7 @@ void BotsAssignTeamFlags (void)
 		return;
 
 	// Clear teamflag from all items
-	for (p = world; p = nextent (p); )
+	for (p = world; (p = nextent (p)); )
 		p->fb.teamflag = 0;
 
 	for ( p = world; (p = find_plr( p )); )
@@ -88,7 +90,7 @@ gedict_t* BotsFirstBot (void)
 	gedict_t* first_bot = NULL;
 	gedict_t* ent;
 
-	for (ent = world; ent = find_plr (ent); ) {
+	for (ent = world; (ent = find_plr (ent)); ) {
 		if (ent->isBot) {
 			first_bot = ent;
 			break;
@@ -104,10 +106,10 @@ void BotsMatchStart (void)
 	gedict_t* first_bot = BotsFirstBot();
 	gedict_t* ent;
 
-	for (ent = world; ent = find (ent, FOFCLSN, "marker_indicator"); ) {
+	for (ent = world; (ent = find (ent, FOFCLSN, "marker_indicator")); ) {
 		ent_remove (ent);
 	}
-	for (ent = world; ent = find (ent, FOFCLSN, "marker"); ) {
+	for (ent = world; (ent = find (ent, FOFCLSN, "marker")); ) {
 		setmodel (ent, "");
 	}
 
@@ -118,3 +120,5 @@ void BotsMatchStart (void)
 	BotsAssignTeamFlags ();
 	BotsFireInitialTriggers (first_bot);
 }
+
+#endif

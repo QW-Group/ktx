@@ -37,17 +37,24 @@ void BotsPowerupDropped (gedict_t* player, gedict_t* powerup);
 
 #define AUTOTRACK_POWERUPS_PREDICT_TIME 2
 
-static qbool ItemTouched (gedict_t* item, gedict_t* player)
+static qbool ItemTouched(gedict_t* item, gedict_t* player)
 {
-	return (self->fb.item_touch && self->fb.item_touch (item, player));
+#ifdef BOT_SUPPORT
+	return (self->fb.item_touch && self->fb.item_touch(item, player));
+#else
+	return false;
+#endif
 }
 
-static void ItemTaken (gedict_t* item, gedict_t* player)
+static void ItemTaken(gedict_t* item, gedict_t* player)
 {
-	TeamplayEventItemTaken (player, item);
+	TeamplayEventItemTaken(player, item);
 
-	if (self->fb.item_taken)
-		self->fb.item_taken (item, player);
+#ifdef BOT_SUPPORT
+	if (self->fb.item_taken) {
+		self->fb.item_taken(item, player);
+	}
+#endif
 }
 
 void SUB_regen()
@@ -60,8 +67,11 @@ void SUB_regen()
 	sound( self, CHAN_VOICE, "items/itembk2.wav", 1, ATTN_NORM );	// play respawn sound
 	setorigin( self, PASSVEC3( self->s.v.origin ) );
 
-	if (self->fb.item_respawned)
-		self->fb.item_respawned (self);
+#ifdef BOT_SUPPORT
+	if (self->fb.item_respawned) {
+		self->fb.item_respawned(self);
+	}
+#endif
 }
 
 void SUB_regen_powerups()
@@ -341,9 +351,11 @@ void item_megahealth_rot()
 			other->s.v.health -= 1;
 
 		self->s.v.nextthink = g_globalvars.time + 1;
+#ifdef BOT_SUPPORT
 		if (self->fb.item_affect) {
 			self->fb.item_affect (self, other);
 		}
+#endif
 		return;
 	}
 
@@ -357,9 +369,11 @@ void item_megahealth_rot()
 		self->s.v.think = ( func_t ) SUB_regen;
 	}
 
+#ifdef BOT_SUPPORT
 	if (self->fb.item_affect) {
 		self->fb.item_affect (self, other);
 	}
+#endif
 }
 
 /*
@@ -1599,7 +1613,9 @@ void DropPowerup( float timeleft, int powerup )
 	if ( swp->ct == ctPlayer )
 		mi_print( swp, powerup, va( "%s dropped a %s with %.0f seconds left", swp->s.v.netname, self->s.v.netname, timeleft ));
 
-	BotsPowerupDropped (swp, self);
+#ifdef BOT_SUPPORT
+	BotsPowerupDropped(swp, self);
+#endif
 	self = swp;// restore self!!!
 }
 
@@ -1653,9 +1669,10 @@ void powerup_touch()
 	if ( strnull ( self->s.v.classname ) )
 		G_Error("powerup_touch: null classname");
 
-	if ( other->ct != ctPlayer )
-	{
-		BotsPowerupTouchedNonPlayer (self, other);
+	if (other->ct != ctPlayer) {
+#ifdef BOT_SUPPORT
+		BotsPowerupTouchedNonPlayer(self, other);
+#endif
 		return;
 	}
 
@@ -1949,8 +1966,10 @@ void BackpackTouch()
 	char            *new_wp = "";
 	char		*playername;
 
-	if ( other->ct != ctPlayer ) {
-		BotsBackpackTouchedNonPlayer (self, other);
+	if (other->ct != ctPlayer) {
+#ifdef BOT_SUPPORT
+		BotsBackpackTouchedNonPlayer(self, other);
+#endif
 		return;
 	}
 
@@ -2340,7 +2359,9 @@ void DropBackpack()
 		strlcpy(item->backpack_team_name, getteam(self), MAX_TEAM_NAME);
 	}
 
-	BotsBackpackDropped (self, item);
+#ifdef BOT_SUPPORT
+	BotsBackpackDropped(self, item);
+#endif
 }
 
 /*

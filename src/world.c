@@ -529,7 +529,11 @@ void Customize_Maps()
 		self = swp; // restore self
 	}
 
-	if ( !cvar("k_end_tele_spawn") && streq( "end", g_globalvars.mapname) && !bots_enabled() ) {
+	if ( !cvar("k_end_tele_spawn") && streq( "end", g_globalvars.mapname) 
+#ifdef BOT_SUPPORT
+		&& !bots_enabled() 
+#endif
+		) {
 		vec3_t      TS_ORIGIN = { -392, 608, 40 }; // tele spawn
 
 		for( p = world; (p = find( p, FOFCLSN, "info_player_deathmatch" )); )
@@ -861,6 +865,9 @@ void FirstFrame	( )
 
 // }
 
+	RegisterCvarEx("k_demotxt_format", "xml"); // what format for .txt files
+
+#ifdef BOT_SUPPORT
 // { frogbots support
 	RegisterCvarEx ("k_fb_skill", "10");
 	RegisterCvarEx ("k_fb_options", "0");
@@ -877,6 +884,7 @@ void FirstFrame	( )
 
 	RegisterSkillVariables ();
 // }
+#endif
 
 // below globals changed only here
 
@@ -1371,9 +1379,11 @@ void StartFrame( int time )
 		FixRules();
 	}
 
-	if ( bots_enabled() ) {
+#ifdef BOT_SUPPORT
+	if (bots_enabled()) {
 		BotStartFrame (framecount);
 	}
+#endif
 
 	FixNoSpecs(); // if no players left turn off "no spectators" mode
 

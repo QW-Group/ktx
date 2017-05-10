@@ -1,5 +1,7 @@
 // Converted from .qc on 05/02/2016
 
+#ifdef BOT_SUPPORT
+
 #include "g_local.h"
 #include "fb_globals.h"
 
@@ -41,7 +43,6 @@ float TotalStrengthAfterDamage (float health, float armorValue, float armorType,
 // Evaluate desire for armor, health etc based on the improvement it would cause
 void FrogbotSetHealthArmour(gedict_t* client)
 {
-	float min_first = 0, min_second = 0;
 	client->fb.total_armor = client->s.v.armortype * client->s.v.armorvalue;
 	client->fb.total_damage = TotalStrength (client->s.v.health, client->s.v.armorvalue, client->s.v.armortype);
 
@@ -185,3 +186,5 @@ void FrogbotSetFirepower(gedict_t* self)
 void FrogbotWeaponFiredEvent(gedict_t* self) {
 	self->fb.weapon_refresh_time = min (g_globalvars.time + 1, self->fb.weapon_refresh_time);
 }
+
+#endif
