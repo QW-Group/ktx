@@ -324,19 +324,12 @@ static qbool CanJumpOver(gedict_t* self, vec3_t jump_origin, vec3_t jump_velocit
 				gedict_t* test_enemy;
 
 				for (test_enemy = world; (test_enemy = find_plr (test_enemy)); ) {
-					test_enemy->s.v.solid = SOLID_SLIDEBOX;
-				}
-
-				// Generally this flag is set for when marker is lava
-				for (test_enemy = world; (test_enemy = trap_findradius(test_enemy, testplace, 84)); ) {
 					if (test_enemy->fb.T & UNREACHABLE) {
-						do_jump = false;
-						break;
+						if (VectorDistance(test_enemy->s.v.origin, testplace) <= 84) {
+							do_jump = false;
+							break;
+						}
 					}
-				}
-
-				for (test_enemy = world; (test_enemy = find_plr (test_enemy)); ) {
-					test_enemy->s.v.solid = SOLID_NOT;
 				}
 			}
 			return do_jump;

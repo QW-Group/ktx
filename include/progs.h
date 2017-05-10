@@ -525,6 +525,8 @@ typedef struct fb_entvars_s {
 	float enemy_time;                       // Time before bot re-evaluates who is its primary enemy
 	float enemy_dist;                       // Distance to primary enemy
 
+	int oldsolid;                           // need to keep track of this for hazard calculations
+
 	// these determine the desire for items for each player 
 	//   (not just for bots ... bot's desire can take enemy's desire into consideration)
 	fb_desire_func_t desire;

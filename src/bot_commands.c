@@ -1879,6 +1879,7 @@ void BotStartFrame(int framecount) {
 					// Set all players to non-solid so we can avoid hazards
 					if (IsHazardFrame()) {
 						for (p = world; (p = find_plr(p)); ) {
+							p->fb.oldsolid = p->s.v.solid;
 							p->s.v.solid = SOLID_NOT;
 						}
 					}
@@ -1888,7 +1889,7 @@ void BotStartFrame(int framecount) {
 					// Re-instate client entity types
 					if (IsHazardFrame()) {
 						for (p = world; (p = find_plr(p)); ) {
-							p->s.v.solid = SOLID_SLIDEBOX;
+							p->s.v.solid = p->fb.oldsolid;
 						}
 					}
 				}
