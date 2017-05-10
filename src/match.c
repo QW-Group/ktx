@@ -1470,6 +1470,11 @@ void s2di_player_ra_stats(fileHandle_t handle, int format, player_stats_t* stats
 	s2di(handle, "\t\t\t<rocket-arena wins=\"%d\" losses=\"%d\" />\n", stats->wins, stats->loses);
 }
 
+void s2di_player_bot_info(fileHandle_t handle, int format, fb_entvars_t* bot)
+{
+	s2di(handle, "\t\t\t<bot skill=\"%d\" logic=\"%s\" logic-version=\"%d\" />\n", bot->skill.skill_level, "frogbot", BotVersionNumber());
+}
+
 void s2di_race_stats(fileHandle_t handle, int format)
 {
 	extern gedict_t* race_find_racer(gedict_t* p);
