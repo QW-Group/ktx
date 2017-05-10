@@ -72,11 +72,15 @@ typedef struct wpType_s {
 	int kills;			// kills with this weapon
 	int deaths;			// deaths from this weapon
 	int tkills;			// team kills with this weapon
+	int suicides;       // suicides with this weapon
+
 	int ekills;			// killed enemys which contain this weapon in inventory
 	int drops;			// number of packs dropped which contain this weapon
 	int tooks;			// took this weapon and does't have this weapon before took (weapon from packs counted too)
 	int ttooks;			// total tooked, even u alredy have this weapon
 
+	int edamage;        // damage to enemies
+	int tdamage;        // damage to team-mates
 } wpType_t;
 
 typedef enum
@@ -111,6 +115,7 @@ typedef struct player_stats_s {
 	float    dmg_team;  // damage to team
 	float    dmg_self;  // damage to own player
 	float    dmg_eweapon;  // damage to enemy weapons
+	float    dmg_tweapon;  // damage to team weapons
 // { k_dmgfrags
 	float    dmg_frags; // frags awarded from damage (CA)
 // }

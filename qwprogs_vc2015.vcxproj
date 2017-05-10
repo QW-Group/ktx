@@ -440,6 +440,9 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;QWPROGS_EXPORTS</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="src\stats.c" />
+    <ClCompile Include="src\stats_json.c" />
+    <ClCompile Include="src\stats_xml.c" />
     <ClCompile Include="src\subs.c">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -495,6 +498,7 @@
     <ClInclude Include="include\progs.h" />
     <ClInclude Include="include\q_shared.h" />
     <ClInclude Include="src\fb_globals.h" />
+    <ClInclude Include="include\stats.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

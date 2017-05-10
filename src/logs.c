@@ -76,7 +76,7 @@ void log_printf( const char *fmt, ... )
 	trap_FS_WriteFile( text, strlen(text), log_handle );
 }
 
-char *GetMode();
+char *GetMode(void);
 void StartLogs()
 {
 	char date[64] = {0}, date_c[64] = {0}, *ip, *port;

@@ -122,7 +122,7 @@ static void race_remove_pacemaker_indicator(void);
 static void race_make_active_racer(gedict_t* r, gedict_t* s);
 static qbool race_end(gedict_t* racer);
 static char* race_position_string(int position);
-static gedict_t* race_find_race_participants(gedict_t* p);
+gedict_t* race_find_race_participants(gedict_t* p);
 static qbool race_simultaneous(void);
 static void race_update_closest_positions(void);
 static void race_match_round_end(char* demoFileName);

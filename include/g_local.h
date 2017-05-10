@@ -823,6 +823,8 @@ void        race_player_post_think(void);
 int         race_count_votes_req(float percentage);
 qbool       race_allow_map_vote(gedict_t* player);
 
+gedict_t*   race_find_race_participants(gedict_t* p);
+
 // globals.c
 
 extern  int   k_bloodfest;		// blood fest mode
