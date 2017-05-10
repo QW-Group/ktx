@@ -69,7 +69,7 @@
 #include <ctype.h>
 #include <limits.h>
 
-	#if !defined( _WIN32 )
+	#if !defined( _WIN32 ) || !defined(_MSC_VER)
 	// so intptr_t is defined for all non MS compilers
 	#include <stdint.h>
 	#endif
