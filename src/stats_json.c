@@ -208,7 +208,11 @@ void json_player_detail(fileHandle_t handle, int player_num, gedict_t* player, c
 	s2di(handle, "      \"name\": \"%s\",\n", json_string(getname(player)));
 	s2di(handle, "      \"team\": \"%s\",\n", json_string(team));
 	s2di(handle, "      \"stats\": [%d, %d, %d, %d],\n", (int)player->s.v.frags, (int)player->deaths, (int)player->friendly, player->ps.spawn_frags);
-	s2di(handle, "      \"dmg\": [%d, %d, %d],\n", (int)player->ps.dmg_t, (int)player->ps.dmg_g, (int)player->ps.dmg_team);
+	s2di(handle, "      \"dmg\": [%d, %d, %d, %d, %d, %d],\n",
+		(int)player->ps.dmg_t, (int)player->ps.dmg_g,
+		(int)player->ps.dmg_team, (int)player->ps.dmg_self,
+		(int)player->ps.dmg_tweapon, (int)player->ps.dmg_eweapon
+	);
 	s2di(handle, "      \"xfer\": %d,\n", player->ps.transferred_packs);
 	s2di(handle, "      \"spree\": [%d %d],\n", player->ps.spree_max, player->ps.spree_max_q);
 	s2di(handle, "      \"control\": %f,\n", player->ps.control_time);
