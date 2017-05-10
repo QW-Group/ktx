@@ -189,8 +189,14 @@ qbool BotDoorIsClosed (gedict_t* door);
 //        should know that the path is blocked, rather than thinking "bot doesn't want yellow armour"
 qbool POVDMM4DontWalkThroughDoor (gedict_t* goal_entity)
 {
-	if (!streq (g_globalvars.mapname, "povdmm4"))
+	if (!streq(g_globalvars.mapname, "povdmm4")) {
 		return false;
+	}
+
+	if (cvar("k_midair") || cvar("k_instagib")) {
+		goal_entity->fb.saved_goal_desire = 0;
+		return true;
+	}
 
 	if (streq(goal_entity->s.v.classname, "item_armor2")) {
 		// Find linked door entity - if closed, set desire to 0

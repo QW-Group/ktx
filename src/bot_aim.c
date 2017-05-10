@@ -39,7 +39,7 @@ static void BotStopFiring(gedict_t* bot) {
 	bot->fb.firing &= (continuous && correct_weapon && enemy_alive) || bot->fb.rocketJumping;
 }
 
-// FIXME: Magic numbers (400 = 0.5 * sv_gravity)
+// Magic numbers here: 400 = 0.5 * sv_gravity
 static qbool PredictSpot(gedict_t* self, gedict_t* enemy_, vec3_t testplace, float rel_time, float fallheight) {
 	VectorCopy(testplace, dropper->s.v.origin);
 	dropper->s.v.flags = FL_ONGROUND_PARTIALGROUND;
