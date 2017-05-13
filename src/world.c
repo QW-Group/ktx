@@ -505,6 +505,13 @@ void SP_worldspawn()
 	if ( !k_matchLess ) // skip practice in matchLess mode
 	if ( cvar( "srv_practice_mode" ) ) // #practice mode#
 		SetPractice( cvar( "srv_practice_mode" ), NULL ); // may not reload map
+
+	// Set hoonymode by default if flags set
+	if ( world->hoony_timelimit || ! strnull(world->hoony_defaultwinner) )
+	{
+		UserMode(-8);
+		HM_initialise_rounds();
+	}
 }
 
 void ShowSpawnPoints();

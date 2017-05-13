@@ -307,7 +307,7 @@ void EndMatch ( float skip_log )
 	EM_on_MatchEndBreak( skip_log );
 
 	if (isHoonyMode()) {
-		if ( HM_current_point_type() != HM_PT_FINAL ) {
+		if ( ! HM_is_game_over()  ) {
 			match_over = 0;
 
 			// All bots ready first
@@ -362,6 +362,12 @@ void CheckOvertime()
 	int sc = get_scores1() - get_scores2();
 	int k_mb_overtime = cvar( "k_overtime" );
 	int k_exttime = bound(1, cvar( "k_exttime" ), 999); // at least some reasonable values
+
+	// In hoonymode the round is timing out, not the match - we're effectively always in suddendeath mode
+	if (isHoonyMode()) {
+		HM_draw();
+		return;
+	}
 
 	// If 0 no overtime, 1 overtime, 2 sudden death
 	// And if its neither then well we exit
@@ -582,6 +588,7 @@ void SM_PrepareMap()
 		}
 	}
 
+	HM_reset_map();
 	ClearBodyQue(); // hide corpses
 }
 
@@ -743,11 +750,7 @@ void StartMatch ()
 
 	remove_specs_wizards (); // remove wizards
 
-	if (isHoonyMode())
-		HM_rig_the_spawns(1, 0);
 	SM_PrepareClients(); // put clients in server and reset some params
-	if (isHoonyMode())
-		HM_rig_the_spawns(0, 0);
 
 	if ( !QVMstrftime(date, sizeof(date), "%Y-%m-%d %H:%M:%S %Z", 0) )
 		date[0] = 0;
@@ -774,9 +777,25 @@ void StartMatch ()
 
 	self->k_teamnum = g_globalvars.time + 3;  //dirty i know, but why waste space?
 											  // FIXME: waste space, but be clean
-	self->cnt = bound(0, timelimit, 9999);
-	self->cnt2 = 60;
-	localcmd("serverinfo status \"%d min left\"\n", (int)timelimit);
+
+	if (isHoonyMode() && HM_timelimit() > 0) {
+		int minutes = bound(0, HM_timelimit() / 60, 9999);
+		int seconds = HM_timelimit() % 60;
+
+		if (seconds)
+			++minutes;
+		else
+			seconds = 60;
+
+		self->cnt = minutes;
+		self->cnt2 = seconds;
+		localcmd("serverinfo status \"%d min left\"\n", minutes);
+	}
+	else {
+		self->cnt = bound(0, timelimit, 9999);
+		self->cnt2 = 60;
+		localcmd("serverinfo status \"%d min left\"\n", (int)timelimit);
+	}
 
 	self->s.v.think = ( func_t ) TimerThink;
 	self->s.v.nextthink = g_globalvars.time + 1;
@@ -823,6 +842,50 @@ static qbool handicap_in_use(void)
 	return false;
 }
 
+void PersonalisedCountdown(char* baseText)
+{
+	char text[1024];
+	gedict_t* p;
+
+	for (p = world; p = find_plr(p); /**/) {
+		strlcpy(text, baseText, sizeof(text));
+
+		if (HM_current_point_type() == HM_PT_SET)
+			strlcat(text, va("%s\n\n", redtext("* Set Point *")), sizeof(text));
+
+		if (p->k_hoony_new_spawn && ! strnull(p->k_hoony_new_spawn->s.v.targetname))
+		{
+			strlcat(text, va("Next %8.8s\n", redtext(p->k_hoony_new_spawn->s.v.targetname)), sizeof(text));
+
+			if ( timelimit )
+				strlcat(text, va("%s %3s\n", "Timelimit", dig3(timelimit)), sizeof(text));
+			else if ( isHoonyMode() && world->hoony_timelimit ) 
+			{
+				int minutes = world->hoony_timelimit / 60;
+				int seconds = world->hoony_timelimit % 60;
+
+				if (minutes == 0)
+					strlcat(text, va("%s %3ss\n", "Duration", dig3(seconds)), sizeof(text));
+				else if (seconds == 0)
+					strlcat(text, va("%s %3sm\n", "Duration", dig3(minutes)), sizeof(text));
+				else
+					strlcat(text, va("%s %1s:%2s\n", "Duration", dig3(minutes), dig3(seconds)), sizeof(text));
+			}
+
+			if (! strnull(world->hoony_defaultwinner)) {
+				if (streq(p->k_hoony_new_spawn->s.v.targetname, world->hoony_defaultwinner)) {
+					strlcat(text, va("Draw %s\n", redtext(" you win")), sizeof(text));
+				}
+				else {
+					strlcat(text, va("Draw %s\n", redtext("you lose")), sizeof(text));
+				}
+			}
+		}
+
+		G_centerprint(p, "%s", text);
+	}
+}
+
 void PrintCountdown( int seconds )
 {
 // Countdown: seconds
@@ -862,8 +925,15 @@ void PrintCountdown( int seconds )
 	if (matchtag[0])
 		strlcat(text, va("%s\n\n\n", matchtag), sizeof(text));
 
-	if ( !isRA() && !coop && !isRACE() ) // useless in RA
+	if (isHoonyMode() && seconds <= 3) {
+		PersonalisedCountdown(text);
+		return;
+	}
+
+	// useless in RA
+	if (!isRA() && !coop && !isRACE()) {
 		strlcat(text, va("%s %2s\n", "Deathmatch", dig3(deathmatch)), sizeof(text));
+	}
 
 	if ( k_bloodfest )
 		mode = redtext("BLOODFST");
@@ -932,7 +1002,22 @@ void PrintCountdown( int seconds )
 	if ( !isRA() ) // useless in RA
 	if ( isTeam() || isCTF() )
 		strlcat(text, va("%s %4s\n", "Teamplay", dig3(teamplay)), sizeof(text));
-	if ( timelimit )
+
+	if (isHoonyMode()) {
+		int hm_timelimit = HM_timelimit();
+		if (hm_timelimit) {
+			int minutes = hm_timelimit / 60;
+			int seconds = hm_timelimit % 60;
+
+			if (minutes == 0)
+				strlcat(text, va("%s %3ss\n", "Duration", dig3(seconds)), sizeof(text));
+			else if (seconds == 0)
+				strlcat(text, va("%s %3sm\n", "Duration", dig3(minutes)), sizeof(text));
+			else
+				strlcat(text, va("%s %1s:%2s\n", "Duration", dig3(minutes), dig3(seconds)), sizeof(text));
+		}
+	}
+	else if ( timelimit )
 		strlcat(text, va("%s %3s\n", "Timelimit", dig3(timelimit)), sizeof(text));
 	if ( fraglimit )
 		strlcat(text, va("%s %3s\n", "Fraglimit", dig3(fraglimit)), sizeof(text));
@@ -1110,6 +1195,16 @@ void standby_think()
 		for( p = world;	(p = find_plr( p )); ) {
 			if( !strnull ( p->s.v.netname ) ) {
 				//set to ghost, 0.2 second before matchstart
+				if (isHoonyMode() && p->k_hoony_new_spawn) {
+					// move viewpoint to selected spawn
+					VectorCopy( p->k_hoony_new_spawn->s.v.origin, p->s.v.origin );
+					p->s.v.origin[2] += 1;
+					VectorCopy( p->k_hoony_new_spawn->s.v.angles, p->s.v.angles );
+					p->s.v.fixangle = true;
+
+					setnowep(p);
+				}
+
 				p->s.v.takedamage = 0;
 				p->s.v.solid      = 0;
 				p->s.v.movetype   = 0;
@@ -1457,9 +1552,11 @@ void StopTimer ( int removeDemo )
 
 		for( p = world; (p = find_plr( p )); )
 		{
-			p->s.v.takedamage = 2;
-			p->s.v.solid      = 3;
-			p->s.v.movetype   = 3;
+			setfullwep(p);
+
+			p->s.v.takedamage = DAMAGE_AIM;
+			p->s.v.solid      = SOLID_SLIDEBOX;
+			p->s.v.movetype   = MOVETYPE_WALK;
 			setmodel (p, "progs/player.mdl");
 		}
 	}
@@ -1833,8 +1930,8 @@ void PlayerBreak ()
 
 	if( !k_matchLess || k_bloodfest )
 	{
-		// try stop countdown.
-		if( match_in_progress == 1 )
+		// try stop countdown.  (countdown between hoony-mode points can't be stopped, treat as standard break request).
+		if( match_in_progress == 1 && (! isHoonyMode() || HM_current_point() == 0) )
 		{
 			p = find ( world, FOFCLSN, "timer");
 

@@ -737,6 +737,7 @@ void		RocketArenaPre();
 qbool	readytostart();
 void		ra_Frame();
 void		setfullwep( gedict_t *anent );
+void		setnowep( gedict_t *anent );
 
 // { ra commands
 void		ra_PlayerStats();
@@ -785,15 +786,24 @@ void    GrappleReset(gedict_t *rhook);
 
 #define HM_PT_FINAL 1
 #define HM_PT_SET 2
-qbool	isHoonyMode();
-void	HM_next_point(gedict_t *won, gedict_t *lost);
-void	HM_all_ready();
-int	HM_current_point_type();
-int	HM_current_point();
-void	HM_rig_the_spawns(int mode, gedict_t *spot);
-char	*HM_lastscores_extra();
-void	HM_stats();
-void	HM_stats_show();
+
+qbool   isHoonyMode();
+void    HM_draw();
+void    HM_suicide(gedict_t* player);
+void    HM_next_point(gedict_t *won, gedict_t *lost);
+void    HM_all_ready();
+void    HM_reset_map();
+void    HM_initialise_rounds();
+
+int     HM_current_point_type();
+int     HM_current_point();
+int     HM_timelimit();
+char*   HM_lastscores_extra();
+void    HM_stats();
+void    HM_stats_show();
+qbool   HM_is_game_over();
+void    HM_name_map_spawn(gedict_t* spawn);
+void    HM_pick_spawn();
 
 // race.c
 

@@ -2372,7 +2372,7 @@ SPAWN POINT MARKERS
 ===============================================================================
 */
 
-gedict_t *Spawn_OnePoint( gedict_t* e, vec3_t org, int effects )
+static gedict_t* Spawn_OnePoint( gedict_t* spawn_point, vec3_t org, int effects )
 {
 	gedict_t	*p;
 
@@ -2383,9 +2383,13 @@ gedict_t *Spawn_OnePoint( gedict_t* e, vec3_t org, int effects )
 	setmodel( p, cvar("k_spm_custom_model") ? "progs/spawn.mdl" : "progs/w_g_key.mdl" );
 	p->s.v.netname = "Spawn Point";
 	p->s.v.classname = "spawnpoint";
-	p->k_lastspawn = e;
+	p->k_lastspawn = spawn_point;
 
 	p->s.v.effects = ( int ) p->s.v.effects | effects;
+
+	// store references for changing selections in hoonymode
+	spawn_point->wizard = p;
+	p->wizard = spawn_point;
 
 	setorigin( p, PASSVEC3( org ) );
 
@@ -2401,6 +2405,10 @@ void Spawn_SpawnPoints( char *classname, int effects )
 	{
 		VectorCopy( e->s.v.origin, org );
 		org[2] += 0; // qqshka: it was 16, but I like more how it looks when it more close to ground
+
+		if (isHoonyMode()) {
+			effects = (e->hoony_nomination ? (EF_GREEN | EF_RED) : 0);
+		}
 
 		Spawn_OnePoint( e, org, effects );
 	}
@@ -2423,6 +2431,9 @@ void HideSpawnPoints()
 
 	for ( e = world; ( e = ez_find( e, "spawnpoint" ) ); )
 	{
+		if (e->wizard)
+			e->wizard->wizard = 0;
+
 		ent_remove( e );
 	}
 }

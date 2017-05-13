@@ -768,6 +768,7 @@ void SP_info_player_deathmatch()
 // above the ground, fix them
 	setsize( self, PASSVEC3( VEC_HULL_MIN ), PASSVEC3( VEC_HULL_MAX ) );
 	VectorCopy (self->s.v.origin, saved_org);
+	HM_name_map_spawn( self );
 	droptofloor (self);
 	if (self->s.v.origin[2] < saved_org[2] - 64)
 		setorigin (self, PASSVEC3(saved_org));
@@ -1429,7 +1430,18 @@ void PutClientInServer( void )
 // paustime is set by teleporters to keep the player from moving a while
 	self->pausetime = 0;
 
-	if ( deathmatch || k_bloodfest )
+	if (isHoonyMode() && self->k_hoony_new_spawn) {
+		if (match_in_progress) {
+			spot = self->k_hoony_new_spawn;
+		}
+		else {
+			// Go through spawns sequentially when pre-game
+			spot = find(self->k_hoony_new_spawn, FOFCLSN, "info_player_deathmatch");
+			if (spot == NULL)
+				spot = find(world, FOFCLSN, "info_player_deathmatch");
+		}
+	}
+	else if ( deathmatch || k_bloodfest )
 	{
 		// first spawn in CTF on corresponding base, later used info_player_deathmatch.
 		// qqshka: I found that it sux and added variable which force players spawn ONLY on the base,
@@ -1447,8 +1459,7 @@ void PutClientInServer( void )
 		spot = SelectSpawnPoint( coop ? "info_player_coop" : "info_player_start" );
 	}
 
-	if (isHoonyMode())
-		HM_rig_the_spawns(2, spot);
+	self->k_hoony_new_spawn = spot;
 
 	VectorCopy( spot->s.v.origin, self->s.v.origin );
 	self->s.v.origin[2] += 1;
@@ -1504,7 +1515,7 @@ void PutClientInServer( void )
 			tele_flags |= TFLAGS_FOG_DST | TFLAGS_SND_DST;
 		}
 	}
-	else
+	else if ( ! isHoonyMode() )
 	{
 		tele_flags |= TFLAGS_FOG_DST | TFLAGS_SND_DST;
 	}
@@ -1526,6 +1537,113 @@ void PutClientInServer( void )
 #endif
 
 		return;
+	}
+	
+	if ( spot->s.v.items && isHoonyMode() )
+	{
+		char* armorExplanation = "a";
+		float armortype = 0.0f;
+		float armorvalue = 0.0f;
+
+		items = spot->s.v.items;
+		if (items & IT_ARMOR3) 
+		{
+			armortype        = (k_yawnmode ? 0.8 : 0.8); // Yawnmode: changed armor protection
+			armorvalue       = max(0, min(spot->s.v.armorvalue, 200));
+			armorExplanation = "&cf00ra&cfff";
+		}
+		else if (items & IT_ARMOR2)
+		{
+			armortype        = (k_yawnmode ? 0.6 : 0.6); // Yawnmode: changed armor protection
+			armorvalue       = max(0, min(spot->s.v.armorvalue, 150));
+			armorExplanation = "&cff0ya&cfff";
+		}
+		else if (items & IT_ARMOR1)
+		{
+			armortype        = (k_yawnmode ? 0.4 : 0.3); // Yawnmode: changed armor protection
+			armorvalue       = max(0, min(spot->s.v.armorvalue, 100));
+			armorExplanation = "&c0b0ga&cfff";
+		}
+
+		// Fix flags on ammo
+		items |= (spot->s.v.ammo_shells ? IT_SHELLS : 0);
+		items |= (spot->s.v.ammo_nails ? IT_NAILS : 0);
+		items |= (spot->s.v.ammo_rockets ? IT_ROCKETS : 0);
+		items |= (spot->s.v.ammo_cells ? IT_CELLS : 0);
+
+		// They always get axe & shotgun.  
+		items |= (IT_SHOTGUN | IT_AXE);
+
+		if (! match_in_progress)
+		{
+			int itemvalues[] = { IT_SUPER_SHOTGUN, IT_NAILGUN, IT_SUPER_NAILGUN, IT_GRENADE_LAUNCHER, IT_ROCKET_LAUNCHER, IT_LIGHTNING };
+			char* itemnames[] = { "ssg", "ng", "sng", "gl", "rl", "lg" };
+			int i;
+			qbool first = true;
+
+			// Tell the player what they would have received here
+			if (! strnull(spot->s.v.targetname))
+				G_sprint(self, 2, "This spawn is: %s\n", redtext(spot->s.v.targetname));
+			G_sprint(self, 2, "Spawning here gives you:\n");
+			G_sprint(self, 2, "  %d%s, %dh\n", (int)armorvalue, armorExplanation, (int)spot->s.v.health);
+
+			for (i = 0; i < sizeof(itemvalues) / sizeof(itemvalues[0]); ++i)
+			{
+				if (items & itemvalues[i])
+				{
+					G_sprint(self, 2, "%s%s", first ? "  " : ",", itemnames[i]);
+					first = false;
+				}
+			}
+			if (! first)
+				G_sprint(self, 2, "\n");
+			else
+				G_sprint(self, 2, "  (no extra weapons)\n");
+		}
+
+		if (match_in_progress == 2)
+		{
+			self->s.v.items = items;
+
+			// Copy ammo - if none specified, spawn with default
+			self->s.v.ammo_shells  = spot->s.v.ammo_shells;
+			self->s.v.ammo_nails   = spot->s.v.ammo_nails;
+			self->s.v.ammo_rockets = spot->s.v.ammo_rockets;
+			self->s.v.ammo_cells   = spot->s.v.ammo_cells;
+			if (self->s.v.ammo_shells == 0 && self->s.v.ammo_nails == 0 && self->s.v.ammo_rockets == 0 && self->s.v.ammo_cells == 0)
+				self->s.v.ammo_shells = 25;
+
+			// Set armor
+			self->s.v.armortype    = armortype;
+			self->s.v.armorvalue   = armorvalue;
+
+			// Set health - if none specified, spawn with default
+			self->s.v.health       = max(0, min(spot->s.v.health, 250));
+			if (self->s.v.health == 0)
+				self->s.v.health = 100;
+
+			// If any megahealth items are set to this spawn, set to track this player
+			if (! strnull(spot->s.v.targetname))
+			{
+				gedict_t *p;
+
+				for( p = world; (p = find(p, FOFCLSN, "item_health")); )
+				{
+					if (p->s.v.spawnflags == 2 && streq(spot->s.v.targetname, p->s.v.target))
+					{
+						// Pretend item was taken by this player
+						p->s.v.model = "";
+						p->s.v.solid = SOLID_NOT;
+						p->s.v.nextthink = g_globalvars.time + max(0, min(p->initial_spawn_delay, 5)) + 0.2; // bit extra otherwise 1 frame after the other
+						p->s.v.think = ( func_t ) item_megahealth_rot;
+						p->s.v.owner = EDICT_TO_PROG( self );
+
+						// Set flag on player
+						items |= IT_SUPERHEALTH;
+					}
+				}
+			}
+		}
 	}
 
 	if ( ( deathmatch == 4 || k_bloodfest ) && match_in_progress == 2 )
@@ -1759,10 +1877,11 @@ Exit deathmatch games upon conditions
 */
 void CheckRules()
 {
-	if ( !match_in_progress )
+	if (!match_in_progress) {
 		return;
+	}
 
-	if (fraglimit && self->s.v.frags >= fraglimit) {
+	if (!isHoonyMode() && fraglimit && self->s.v.frags >= fraglimit) {
 		EndMatch(0);
 	}
 }
@@ -3670,17 +3789,8 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		if ( targ == attacker )
 		{
 			// killed self
-			if (isHoonyMode())
-			{
-				gedict_t *other_dude;
-				for (other_dude = world; (other_dude = find_plr(other_dude));)
-					if (other_dude != targ)
-						other_dude->s.v.frags += 1; // hoonymode: suicide, etc, count as a point for the other player
-			}
-			else
-			{
+			if (!isHoonyMode())
 				targ->s.v.frags -= (dtSUICIDE == targ->deathtype ? 2 : 1);
-			}
 
 			logfrag (targ, targ);
 
@@ -3724,7 +3834,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			G_bprint (PRINT_MEDIUM, "%s%s", targ->s.v.netname, deathstring);
 
 			if (isHoonyMode())
-				HM_next_point(0, targ); // probably better to use world instead of the 0 here and change hooney code accordingly.
+				HM_suicide(targ); // probably better to use world instead of the 0 here and change hooney code accordingly.
 
 			return;
 		}
@@ -3956,17 +4066,8 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	}
 	else // attacker->ct != ctPlayer
 	{
-		if (isHoonyMode())
-		{
-			gedict_t *other_dude;
-			for (other_dude = world; (other_dude = find_plr(other_dude));)
-				if (other_dude != targ)
-					other_dude->s.v.frags += 1; // hoonymode: suicide, etc, count as a point for the other player
-		}
-		else
-		{
+		if (!isHoonyMode())
 			targ->s.v.frags -= 1;            // killed self
-		}
 
 		logfrag (targ, targ);
 
@@ -4042,7 +4143,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		G_bprint (PRINT_MEDIUM, "%s%s", targ->s.v.netname, deathstring );
 
 		if (isHoonyMode())
-			HM_next_point(0, targ);
+			HM_suicide(targ);
 	}
 }
 
