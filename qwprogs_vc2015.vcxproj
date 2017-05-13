@@ -321,7 +321,6 @@
     <ClCompile Include="src\maps_map_dm3.c" />
     <ClCompile Include="src\maps_map_dm4.c" />
     <ClCompile Include="src\maps_map_dm6.c" />
-    <ClCompile Include="src\maps_map_e1m2.c" />
     <ClCompile Include="src\maps_map_povdmm4.c" />
     <ClCompile Include="src\marker_load.c" />
     <ClCompile Include="src\marker_util.c" />

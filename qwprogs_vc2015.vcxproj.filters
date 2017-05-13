@@ -112,9 +112,6 @@
     <ClCompile Include="src\maps_map_dm6.c">
       <Filter>Bots\Maps</Filter>
     </ClCompile>
-    <ClCompile Include="src\maps_map_e1m2.c">
-      <Filter>Bots\Maps</Filter>
-    </ClCompile>
     <ClCompile Include="src\maps_map_povdmm4.c">
       <Filter>Bots\Maps</Filter>
     </ClCompile>
