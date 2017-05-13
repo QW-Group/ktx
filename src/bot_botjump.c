@@ -263,8 +263,6 @@ static void BotPerformLavaJump(gedict_t* self)
 }
 
 // Performs rocket jump
-// FIXME: Very basic rocket jumps, needs a lot more work
-// Direction of rocket jump (currently just straight up) - set pitch, checkground() looks directly ahead
 void BotPerformRocketJump(gedict_t* self) {
 	if (!(self->fb.touch_marker && self->fb.linked_marker)) {
 		return;
@@ -325,44 +323,6 @@ void BotPerformRocketJump(gedict_t* self) {
 			self->fb.firing = false;
 		}
 	}
-
-	/*
-	// FIXME: completely wrong now
-	if (match_in_progress == 2 && self->fb.rocketJumping) {
-
-		if (self->s.v.waterlevel > 1) {
-			vec3_t point = { self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] - 24 };
-			if (trap_pointcontents (point[0], point[1], point[2]) == CONTENT_LAVA) {
-				if (BotCheckSpaceAbove (self)) {
-					lava_jump (self);
-					return;
-				}
-			}
-		}
-		if (has_quad && !has_pent) {
-			return;
-		}
-		if (!path_is_rj || self->fb.firing || self->fb.jumping || CouldHurtNearbyTeammate (self)) {
-			return;
-		}
-		if (!onground || self->attack_finished > g_globalvars.time) {
-			return;
-		}
-
-		// If too far away from the marker, ignore
-		if (VectorDistance (self->s.v.origin, self->fb.touch_marker->s.v.origin) > 100) {
-			return;
-		}
-		if (!BotCheckSpaceAbove (self) || !checkground (self) || !right_direction (self)) {
-			return;
-		}
-
-		self->fb.desired_angle[0] = 78.75;
-		self->fb.rocketjumping = true;
-		self->fb.desired_weapon_impulse = 7;
-		self->fb.firing = true;
-		SetJumpFlag (self, true, "RocketJump");
-	}*/
 }
 
 static qbool PlayerFiringLG (gedict_t* player)

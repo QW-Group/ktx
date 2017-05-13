@@ -251,7 +251,7 @@ static void BotsModifyAimAtPlayerLogic (gedict_t* self, vec3_t rel_pos, float re
 
 	if (g_globalvars.time > threshold_time) {
 		float pitch_diff, yaw_diff;
-		float lg_percent = (float)self->ps.wpn[wpLG].hits / max(1, self->ps.wpn[wpLG].attacks);
+		//float lg_percent = (float)self->ps.wpn[wpLG].hits / max(1, self->ps.wpn[wpLG].attacks);
 
 		pitch_diff = bound (pitch->minimum, fabs (raw_pitch_diff) * pitch->scale, pitch->maximum);
 		yaw_diff = bound (yaw->minimum, fabs (raw_yaw_diff) * yaw->scale, yaw->maximum);

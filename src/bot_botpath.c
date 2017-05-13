@@ -166,7 +166,7 @@ static qbool WalkTowardsDroppedItem (gedict_t* self)
 // FIXME: Move to bot_aim
 static qbool PredictionShotLogic (gedict_t* self, gedict_t* goalentity_marker)
 {
-	if (g_random() < self->fb.skill.look_anywhere) {
+	if (match_in_progress == 2 && g_random() < self->fb.skill.look_anywhere) {
 		gedict_t* from_marker = g_edicts[self->s.v.enemy].fb.touch_marker;
 		from_marker = (from_marker ? from_marker : goalentity_marker);
 		if (from_marker) {
