@@ -1059,8 +1059,10 @@ static void FrogbotRemovePath (void)
 	}
 
 	nearest_indicator = MarkerIndicator (nearest);
-	if (nearest_indicator)
+	if (nearest_indicator) {
 		nearest_indicator->s.v.effects = (int)nearest_indicator->s.v.effects & ~(EDITOR_UNIDIRECTIONAL_COLOUR | EDITOR_BIDIRECTIONAL_COLOUR);
+		setmodel(nearest_indicator, UNLINKED_MARKER_MODEL);
+	}
 }
 
 static void FrogbotRemoveAllPaths (void)
@@ -1079,6 +1081,7 @@ static void FrogbotRemoveAllPaths (void)
 			gedict_t* indicator = MarkerIndicator (next);
 			if (indicator) {
 				indicator->s.v.effects = (int)indicator->s.v.effects & ~(EDITOR_UNIDIRECTIONAL_COLOUR | EDITOR_BIDIRECTIONAL_COLOUR);
+				setmodel(indicator, UNLINKED_MARKER_MODEL);
 			}
 		}
 		RemovePath (nearest, i);
