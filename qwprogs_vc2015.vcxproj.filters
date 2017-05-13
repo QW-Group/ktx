@@ -100,9 +100,6 @@
     <ClCompile Include="src\route_lookup.c">
       <Filter>Bots</Filter>
     </ClCompile>
-    <ClCompile Include="src\maps_map_aerowalk.c">
-      <Filter>Bots\Maps</Filter>
-    </ClCompile>
     <ClCompile Include="src\maps_map_amphi2.c">
       <Filter>Bots\Maps</Filter>
     </ClCompile>
@@ -118,49 +115,7 @@
     <ClCompile Include="src\maps_map_e1m2.c">
       <Filter>Bots\Maps</Filter>
     </ClCompile>
-    <ClCompile Include="src\maps_map_frobodm2.c">
-      <Filter>Bots\Maps</Filter>
-    </ClCompile>
-    <ClCompile Include="src\maps_map_pkeg1.c">
-      <Filter>Bots\Maps</Filter>
-    </ClCompile>
     <ClCompile Include="src\maps_map_povdmm4.c">
-      <Filter>Bots\Maps</Filter>
-    </ClCompile>
-    <ClCompile Include="src\maps_map_spinev2.c">
-      <Filter>Bots\Maps</Filter>
-    </ClCompile>
-    <ClCompile Include="src\maps_map_ukooldm2.c">
-      <Filter>Bots\Maps</Filter>
-    </ClCompile>
-    <ClCompile Include="src\maps_map_ukooldm3.c">
-      <Filter>Bots\Maps</Filter>
-    </ClCompile>
-    <ClCompile Include="src\maps_map_ukooldm6.c">
-      <Filter>Bots\Maps</Filter>
-    </ClCompile>
-    <ClCompile Include="src\maps_map_ukooldm8.c">
-      <Filter>Bots\Maps</Filter>
-    </ClCompile>
-    <ClCompile Include="src\maps_map_ultrav.c">
-      <Filter>Bots\Maps</Filter>
-    </ClCompile>
-    <ClCompile Include="src\maps_map_ztndm1.c">
-      <Filter>Bots\Maps</Filter>
-    </ClCompile>
-    <ClCompile Include="src\maps_map_ztndm2.c">
-      <Filter>Bots\Maps</Filter>
-    </ClCompile>
-    <ClCompile Include="src\maps_map_ztndm3.c">
-      <Filter>Bots\Maps</Filter>
-    </ClCompile>
-    <ClCompile Include="src\maps_map_ztndm4.c">
-      <Filter>Bots\Maps</Filter>
-    </ClCompile>
-    <ClCompile Include="src\maps_map_ztndm5.c">
-      <Filter>Bots\Maps</Filter>
-    </ClCompile>
-    <ClCompile Include="src\maps_map_ztndm6.c">
       <Filter>Bots\Maps</Filter>
     </ClCompile>
     <ClCompile Include="src\route_fields.c">

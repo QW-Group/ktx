@@ -194,8 +194,6 @@ SetZone 29 3
 SetMarkerPath 29 0 84
 SetMarkerPath 29 1 30
 SetMarkerPath 29 2 73
-SetMarkerPath 29 3 93
-SetMarkerPathFlags 29 3 j
 SetMarkerPath 29 4 51
 SetMarkerPathFlags 29 4 j
 SetGoal 30 23
@@ -248,6 +246,9 @@ SetZone 38 5
 SetMarkerPath 38 0 95
 SetMarkerPath 38 1 50
 SetMarkerPath 38 2 42
+SetMarkerPath 38 3 77
+SetMarkerPathFlags 38 3 r
+SetRocketJumpPathFields 38 3 75.0 181.0 0
 SetGoal 39 13
 SetZone 39 2
 SetMarkerPath 39 0 61
@@ -313,7 +314,7 @@ SetZone 49 4
 SetMarkerPath 49 0 48
 SetMarkerPath 49 1 77
 SetZone 50 5
-SetMarkerPath 50 0 3
+SetMarkerPath 50 0 74
 SetMarkerPath 50 1 38
 SetMarkerPath 50 2 37
 SetMarkerPath 50 3 42
@@ -461,7 +462,6 @@ SetZone 77 4
 SetMarkerPath 77 0 49
 SetMarkerPath 77 1 22
 SetMarkerPath 77 2 83
-SetMarkerPath 77 3 38
 SetZone 78 5
 SetMarkerPath 78 0 43
 SetMarkerPath 78 1 96
@@ -536,9 +536,6 @@ SetMarkerPath 93 2 1
 SetMarkerPath 93 3 53
 SetMarkerPath 93 4 25
 SetMarkerPath 93 5 9
-SetMarkerPath 93 6 29
-SetMarkerPathFlags 93 6 r
-SetRocketJumpPathFields 93 6 78.3 -1.0 0
 SetMarkerPath 93 7 99
 SetZone 94 2
 SetMarkerPath 94 0 93

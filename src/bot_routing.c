@@ -63,7 +63,7 @@ static float EvalPath(fb_path_eval_t* eval, qbool allowRocketJumps, qbool trace_
 
 		VectorAdd(eval->touch_marker->s.v.absmin, eval->touch_marker->s.v.view_ofs, m_pos);
 
-		eval->path_time = (VectorDistance(marker_position, m_pos) / sv_maxspeed);
+		eval->path_time = (VectorDistance(marker_position, m_pos) / (sv_maxspeed * 1.5));
 	}
 
 	//

@@ -317,27 +317,12 @@
     </ClCompile>
     <ClCompile Include="src\logs.c" />
     <ClCompile Include="src\maps.c" />
-    <ClCompile Include="src\maps_map_aerowalk.c" />
     <ClCompile Include="src\maps_map_amphi2.c" />
     <ClCompile Include="src\maps_map_dm3.c" />
     <ClCompile Include="src\maps_map_dm4.c" />
     <ClCompile Include="src\maps_map_dm6.c" />
     <ClCompile Include="src\maps_map_e1m2.c" />
-    <ClCompile Include="src\maps_map_frobodm2.c" />
-    <ClCompile Include="src\maps_map_pkeg1.c" />
     <ClCompile Include="src\maps_map_povdmm4.c" />
-    <ClCompile Include="src\maps_map_spinev2.c" />
-    <ClCompile Include="src\maps_map_ukooldm2.c" />
-    <ClCompile Include="src\maps_map_ukooldm3.c" />
-    <ClCompile Include="src\maps_map_ukooldm6.c" />
-    <ClCompile Include="src\maps_map_ukooldm8.c" />
-    <ClCompile Include="src\maps_map_ultrav.c" />
-    <ClCompile Include="src\maps_map_ztndm1.c" />
-    <ClCompile Include="src\maps_map_ztndm2.c" />
-    <ClCompile Include="src\maps_map_ztndm3.c" />
-    <ClCompile Include="src\maps_map_ztndm4.c" />
-    <ClCompile Include="src\maps_map_ztndm5.c" />
-    <ClCompile Include="src\maps_map_ztndm6.c" />
     <ClCompile Include="src\marker_load.c" />
     <ClCompile Include="src\marker_util.c" />
     <ClCompile Include="src\match.c" />
