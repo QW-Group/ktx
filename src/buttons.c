@@ -81,9 +81,10 @@ void button_fire()
 
 void button_use()
 {
-	if( !k_practice ) // #practice mode#
-    if( match_in_progress != 2 )
-        return;
+	// #practice mode#
+	if (!k_practice && match_in_progress != 2) {
+		return;
+	}
 
 	self->s.v.enemy = EDICT_TO_PROG( activator );
 	button_fire();
@@ -91,9 +92,10 @@ void button_use()
 
 void button_touch()
 {
-	if( !k_practice ) // #practice mode#
-    if( match_in_progress != 2 )
-        return;
+	// #practice mode#
+	if (!k_practice && match_in_progress != 2) {
+		return;
+	}
 
 	if ( other->ct != ctPlayer )
 		return;
@@ -105,9 +107,9 @@ void button_touch()
 
 void button_killed()
 {
-	if( !k_practice ) // #practice mode#
-    if( match_in_progress != 2 )
-        return;
+	if (!k_practice && match_in_progress != 2) {
+		return;
+	}
 
 	self->s.v.enemy = EDICT_TO_PROG( damage_attacker );
 	self->s.v.health = self->s.v.max_health;

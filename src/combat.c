@@ -664,21 +664,23 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	if ( save )
 	{
-		if (( streq( inflictor->s.v.classname, "worldspawn" ) || strnull( attacker->s.v.classname ))
-	        	|| ( targ->deathtype == dtWATER_DMG )
-	                || ( targ->deathtype == dtEXPLO_BOX )
-	                || ( targ->deathtype == dtFALL )
-	                || ( targ->deathtype == dtSQUISH )
-	                || ( targ->deathtype == dtCHANGELEVEL )
-	                || ( targ->deathtype == dtFIREBALL )
-	                || ( targ->deathtype == dtSLIME_DMG )
-	                || ( targ->deathtype == dtLAVA_DMG )
-	                || ( targ->deathtype == dtTRIGGER_HURT )
-		)
-				attackername = "world";
-		else
+		if ((streq(inflictor->s.v.classname, "worldspawn") || strnull(attacker->s.v.classname))
+			|| (targ->deathtype == dtWATER_DMG)
+			|| (targ->deathtype == dtEXPLO_BOX)
+			|| (targ->deathtype == dtFALL)
+			|| (targ->deathtype == dtSQUISH)
+			|| (targ->deathtype == dtCHANGELEVEL)
+			|| (targ->deathtype == dtFIREBALL)
+			|| (targ->deathtype == dtSLIME_DMG)
+			|| (targ->deathtype == dtLAVA_DMG)
+			|| (targ->deathtype == dtTRIGGER_HURT)
+			) {
+			attackername = "world";
+		}
+		else {
 			attackername = attacker->s.v.netname;
-			victimname = targ->s.v.netname;
+		}
+		victimname = targ->s.v.netname;
 
 		log_printf(
 			"\t\t<event>\n"
@@ -781,21 +783,23 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 		if ( take )
 		{
-			if (( streq( inflictor->s.v.classname, "worldspawn" ) || strnull( attacker->s.v.classname ))
-		        	|| ( targ->deathtype == dtWATER_DMG )
-		                || ( targ->deathtype == dtEXPLO_BOX )
-		                || ( targ->deathtype == dtFALL )
-		                || ( targ->deathtype == dtSQUISH )
-		                || ( targ->deathtype == dtCHANGELEVEL )
-		                || ( targ->deathtype == dtFIREBALL )
-		                || ( targ->deathtype == dtSLIME_DMG )
-		                || ( targ->deathtype == dtLAVA_DMG )
-		                || ( targ->deathtype == dtTRIGGER_HURT )
-			)
+			if ((streq(inflictor->s.v.classname, "worldspawn") || strnull(attacker->s.v.classname))
+				|| (targ->deathtype == dtWATER_DMG)
+				|| (targ->deathtype == dtEXPLO_BOX)
+				|| (targ->deathtype == dtFALL)
+				|| (targ->deathtype == dtSQUISH)
+				|| (targ->deathtype == dtCHANGELEVEL)
+				|| (targ->deathtype == dtFIREBALL)
+				|| (targ->deathtype == dtSLIME_DMG)
+				|| (targ->deathtype == dtLAVA_DMG)
+				|| (targ->deathtype == dtTRIGGER_HURT)
+				) {
 				attackername = "world";
-			else
+			}
+			else {
 				attackername = attacker->s.v.netname;
-				victimname = targ->s.v.netname;
+			}
+			victimname = targ->s.v.netname;
 
 			log_printf(
 				"\t\t<event>\n"

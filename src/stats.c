@@ -422,7 +422,7 @@ void StatsToFile(void)
 	// This file over-written every time
 	snprintf(name, sizeof(name), "demoinfo_%s_%d.txt", ip, i);
 
-	if (CreateStatsFile(name, ip, i));
+	if (CreateStatsFile(name, ip, i))
 	{
 		localcmd("\n" // why new line?
 			"sv_demoinfoadd ** %s\n", name);

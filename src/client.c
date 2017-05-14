@@ -1894,8 +1894,9 @@ void PlayerDeathThink()
 	float           forward;
 	float			respawn_time;
 
-    if( k_standby )
-        return;
+	if (k_standby) {
+		return;
+	}
 
 	if ( ( ( int ) ( self->s.v.flags ) ) & FL_ONGROUND )
 	{
@@ -3712,19 +3713,21 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	ktpro_autotrack_on_death(targ);
 
 	playerheight = Instagib_Obituary( targ, attacker );
-	if (( targ->deathtype == dtWATER_DMG )
-		|| ( targ->deathtype == dtEXPLO_BOX )
-		|| ( targ->deathtype == dtFALL )
-		|| ( targ->deathtype == dtSQUISH )
-		|| ( targ->deathtype == dtCHANGELEVEL )
-		|| ( targ->deathtype == dtFIREBALL )
-		|| ( targ->deathtype == dtSLIME_DMG )
-		|| ( targ->deathtype == dtLAVA_DMG )
-		|| ( targ->deathtype == dtTRIGGER_HURT ) )
+	if ((targ->deathtype == dtWATER_DMG)
+		|| (targ->deathtype == dtEXPLO_BOX)
+		|| (targ->deathtype == dtFALL)
+		|| (targ->deathtype == dtSQUISH)
+		|| (targ->deathtype == dtCHANGELEVEL)
+		|| (targ->deathtype == dtFIREBALL)
+		|| (targ->deathtype == dtSLIME_DMG)
+		|| (targ->deathtype == dtLAVA_DMG)
+		|| (targ->deathtype == dtTRIGGER_HURT)) {
 		attackername = "world";
-	else
+	}
+	else {
 		attackername = attacker->s.v.netname;
-		victimname = targ->s.v.netname;
+	}
+	victimname = targ->s.v.netname;
 
 	log_printf(
 		"\t\t<event>\n"

@@ -540,8 +540,9 @@ void AdminForceStart ()
 {
     gedict_t *mess;
 
-    if( match_in_progress || match_over || !is_adm( self ) )
-        return;
+	if (match_in_progress || match_over || !is_adm(self)) {
+		return;
+	}
 
 	// no forcestart in practice mode
 	if ( k_practice ) {
@@ -634,11 +635,13 @@ void TogglePreWar ()
 {
     int k_prewar = bound(0, cvar( "k_prewar" ), 2);
 
-    if( !is_adm( self ) )
-        return;
+	if (!is_adm(self)) {
+		return;
+	}
 
-	if ( ++k_prewar > 2 )
+	if (++k_prewar > 2) {
 		k_prewar = 0;
+	}
 
 	switch ( k_prewar ) {
 		case  1: if( !match_in_progress )
@@ -701,8 +704,9 @@ void ToggleMapLock ()
 
 void ToggleFallBunny ()
 {
-    if( match_in_progress )
-        return;
+	if (match_in_progress) {
+		return;
+	}
 
 	if ( k_yawnmode ) {
 		G_sprint(self, 2, "Command blocked because yawnmode is active\n");
