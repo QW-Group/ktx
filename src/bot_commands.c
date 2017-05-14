@@ -7,8 +7,6 @@
 // Handles all "botcmd x" commands from the user
 
 // Cripes.  Fix all these declarations
-void BotNavMeshBuild (void);
-void BotNavMeshFrameThink (void);
 void SetAttribs (gedict_t* self);
 void SetAttributesBasedOnSkill (int skill_level);
 void Bot_Print_Thinking (void);
@@ -1665,8 +1663,7 @@ static frogbot_cmd_t editor_commands[] = {
 	{ "anglehint", FrogbotSetAngleHint, "Sets angle hint for bot path" },
 	{ "deathheight", FrogbotSetDeathHeight, "Sets the auto-death level for this map" },
 	{ "rjfields", FrogbotSetRocketJumpFields, "Sets rocket jump fields" },
-	{ "pathlist", FrogbotListPaths, "Lists paths with flags set" },
-	{ "navmeshgen", BotNavMeshBuild, "Generate navigation mesh" }
+	{ "pathlist", FrogbotListPaths, "Lists paths with flags set" }
 };
 
 #define NUM_EDITOR_COMMANDS (sizeof (editor_commands) / sizeof (editor_commands[0]))
@@ -1940,8 +1937,6 @@ void BotStartFrame(int framecount) {
 				last_auto_client = g_globalvars.time;
 			}
 		}
-
-		BotNavMeshFrameThink ();
 	}
 }
 

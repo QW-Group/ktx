@@ -138,9 +138,6 @@
     <ClCompile Include="src\bot_aim.c">
       <Filter>Bots</Filter>
     </ClCompile>
-    <ClCompile Include="src\bot_navmesh.c">
-      <Filter>Bots</Filter>
-    </ClCompile>
     <ClCompile Include="src\arena.c">
       <Filter>Modes</Filter>
     </ClCompile>

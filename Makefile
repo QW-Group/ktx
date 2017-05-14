@@ -44,11 +44,18 @@ build:		build-dl build-dl32 build-vm
 build-dl:
 			cd $(SRCDIR); $(MAKEDL) build
 
+build-dlbots:
+			cd $(SRCDIR); $(MAKEDL) build BOT_SUPPORT=1
+
 build-dl32:
 			cd $(SRCDIR); $(MAKEDL32) build
 
+build-dl32bots:
+			cd $(SRCDIR); $(MAKEDL32) build BOT_SUPPORT=1
+
 build-vm:
 			cd $(SRCDIR); $(MAKEQVM) build
+
 
 
 install:	install-dl install-dl32 install-vm

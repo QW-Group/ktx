@@ -214,7 +214,6 @@
     <ClCompile Include="src\bot_loadmap.c" />
     <ClCompile Include="src\bot_match.c" />
     <ClCompile Include="src\bot_movement.c" />
-    <ClCompile Include="src\bot_navmesh.c" />
     <ClCompile Include="src\bot_routing.c" />
     <ClCompile Include="src\bot_world.c" />
     <ClCompile Include="src\buttons.c">
