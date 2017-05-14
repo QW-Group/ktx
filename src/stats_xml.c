@@ -4,25 +4,46 @@
 #include "g_local.h"
 #include "stats.h"
 
+#ifdef USER_FRIENDLY_XML
+#define INDENT2  "  "
+#define INDENT4  "    "
+#define INDENT6  "      "
+#define INDENT8  "        "
+#define INDENT10 "          "
+#define INDENT12 "            "
+#define JSON_CR  "\n"
+#else
+#define INDENT2
+#define INDENT4
+#define INDENT6
+#define INDENT8
+#define INDENT10
+#define INDENT12
+#define JSON_CR  ""
+#endif
+
 char* xml_string(const char* original);
 
 static void xml_weap_header(fileHandle_t handle)
 {
-	s2di(handle, "\t\t\t<weapons>\n");
+	s2di(handle, INDENT6 "<weapons>\n");
 }
 
 static void xml_weap_footer(fileHandle_t handle)
 {
-	s2di(handle, "\t\t\t</weapons>\n");
+	s2di(handle, INDENT6 "</weapons>\n");
 }
 
 static void xml_weap_stats(fileHandle_t handle, int weapon, wpType_t* stats)
 {
-	s2di(handle, "\t\t\t\t<weapon name=\"%s\" hits=\"%d\" attacks=\"%d\""
-		" kills=\"%d\" deaths=\"%d\" tkills=\"%d\" ekills=\"%d\""
-		" drops=\"%d\" tooks=\"%d\" ttooks=\"%d\"/>\n",
-		WpName(weapon), stats->hits, stats->attacks, stats->kills, stats->deaths, stats->tkills, stats->ekills,
-		stats->drops, stats->tooks, stats->ttooks);
+	s2di(handle, INDENT8 "<weapon name=\"%s\" hits=\"%d\" attacks=\"%d\" rhits=\"%d\" vhits=\"%d\" "
+		" kills=\"%d\" tkills=\"%d\" ekills=\"%d\" suicides=\"%d\" "
+		" deaths=\"%d\" "
+		" drops=\"%d\" tooks=\"%d\" ttooks=\"%d\" staken=\"%d\" sttaken=\"%d\" />\n",
+		xml_string(WpName(weapon)), stats->hits, stats->attacks, stats->rhits, stats->vhits,
+		stats->kills, stats->tkills, stats->ekills, stats->suicides, 
+		stats->deaths,
+		stats->drops, stats->tooks, stats->ttooks, stats->stooks, stats->sttooks);
 }
 
 void xml_teams_header(fileHandle_t handle)
@@ -36,20 +57,20 @@ void xml_teams_header(fileHandle_t handle)
 	}
 
 	if (i) {
-		s2di(handle, "\t<teams%s>\n", tmp);
+		s2di(handle, INDENT2 "<teams%s>\n", tmp);
 	}
 }
 
 void xml_teams_footer(fileHandle_t handle, int num)
 {
 	if (num) {
-		s2di(handle, "\t</teams>\n");
+		s2di(handle, INDENT2 "</teams>\n");
 	}
 }
 
 static void xml_team_header(fileHandle_t handle, int num, teamStats_t* stats)
 {
-	s2di(handle, "\t\t<team name=\"%s\" frags=\"%d\" deaths=\"%d\" tkills=\"%d\" dmg_tkn=\"%d\" dmg_gvn=\"%d\" dmg_tm=\"%d\">\n",
+	s2di(handle, INDENT4 "<team name=\"%s\" frags=\"%d\" deaths=\"%d\" tkills=\"%d\" dmg_tkn=\"%d\" dmg_gvn=\"%d\" dmg_tm=\"%d\">\n",
 		xml_string(stats->name), stats->frags + stats->gfrags, stats->deaths, stats->tkills,
 		(int)stats->dmg_t, (int)stats->dmg_g, (int)stats->dmg_team);
 }
@@ -61,7 +82,7 @@ static void xml_team_footer(fileHandle_t handle)
 
 static void xml_items_header(fileHandle_t handle)
 {
-	s2di(handle, "\t\t\t<items>\n");
+	s2di(handle, INDENT6 "<items>\n");
 }
 
 static void xml_item_stats(fileHandle_t handle, int j, itType_t* stats)
@@ -74,27 +95,27 @@ static void xml_item_stats(fileHandle_t handle, int j, itType_t* stats)
 	else {
 		buf[0] = 0;
 	}
-	s2di(handle, "\t\t\t\t<item name=\"%s\" tooks=\"%d\"%s/>\n", ItName(j), stats->tooks, buf);
+	s2di(handle, INDENT8 "<item name=\"%s\" tooks=\"%d\"%s/>\n", ItName(j), stats->tooks, buf);
 }
 
 static void xml_items_footer(fileHandle_t handle)
 {
-	s2di(handle, "\t\t\t</items>\n");
+	s2di(handle, INDENT6 "</items>\n");
 }
 
 void xml_players_header(fileHandle_t handle)
 {
-	s2di(handle, "\t<players>\n");
+	s2di(handle, INDENT2 "<players>\n");
 }
 
 void xml_players_footer(fileHandle_t handle)
 {
-	s2di(handle, "\t</players>\n");
+	s2di(handle, INDENT2 "</players>\n");
 }
 
 static void xml_player_header(fileHandle_t handle, gedict_t* player, const char* team)
 {
-	s2di(handle, "\t\t<player name=\"%s\" team=\"%s\" frags=\"%d\" deaths=\"%d\" tkills=\"%d\""
+	s2di(handle, INDENT4 "<player name=\"%s\" team=\"%s\" frags=\"%d\" deaths=\"%d\" tkills=\"%d\""
 		" dmg_tkn=\"%d\" dmg_gvn=\"%d\" dmg_tm=\"%d\" spawnfrags=\"%d\" xfer_packs=\"%d\""
 		" spree=\"%d\" qspree=\"%d\" control_time=\"%f\">\n",
 		xml_string(getname(player)), xml_string(team), (int)player->s.v.frags, (int)player->deaths, (int)player->friendly,
@@ -104,7 +125,7 @@ static void xml_player_header(fileHandle_t handle, gedict_t* player, const char*
 
 static void xml_player_footer(fileHandle_t handle)
 {
-	s2di(handle, "\t\t</player>\n");
+	s2di(handle, INDENT4 "</player>\n");
 }
 
 char* xml_string(const char* original)
@@ -188,7 +209,7 @@ void xml_match_header(fileHandle_t handle, char* ip, int port)
 	s2di(handle, "<match version=\"3\" date=\"%s\" map=\"%s\" hostname=\"%s\" ip=\"%s\" port=\"%d\" mode=\"%s\" tl=\"%d\" fl=\"%d\" dmm=\"%d\" tp=\"%d\">\n",
 		date, g_globalvars.mapname, xml_string(cvar_string("hostname")), ip, port, mode, timelimit, fraglimit, deathmatch, teamplay);
 	if (!strnull(cvar_string("serverdemo"))) {
-		s2di(handle, "\t<demo>%s</demo>\n", xml_string(cvar_string("serverdemo")));
+		s2di(handle, INDENT2 "<demo>%s</demo>\n", xml_string(cvar_string("serverdemo")));
 	}
 }
 
@@ -199,7 +220,7 @@ void xml_match_footer(fileHandle_t handle)
 
 static void xml_player_ctf_stats(fileHandle_t handle, player_stats_t* stats)
 {
-	s2di(handle, "\t\t\t<ctf points=\"%d\" caps=\"%d\" flag-defends=\"%d\" cap-defends=\"%d\" "
+	s2di(handle, INDENT6 "<ctf points=\"%d\" caps=\"%d\" flag-defends=\"%d\" cap-defends=\"%d\" "
 		"cap-frags=\"%d\" pickups=\"%d\" returns=\"%d\" "
 		"rune-res-time=\"%f\" rune-str-time=\"%f\" rune-hst-time=\"%f\" rune-rgn-time=\"%f\" />\n",
 		stats->ctf_points, stats->caps, stats->f_defends, stats->c_defends,
@@ -209,7 +230,7 @@ static void xml_player_ctf_stats(fileHandle_t handle, player_stats_t* stats)
 
 static void xml_player_instagib_stats(fileHandle_t handle, player_stats_t* stats)
 {
-	s2di(handle, "\t\t\t<instagib height=\"%d\" maxheight=\"%d\" cggibs=\"%d\""
+	s2di(handle, INDENT6 "<instagib height=\"%d\" maxheight=\"%d\" cggibs=\"%d\""
 		" axegibs=\"%d\" stompgibs=\"%d\" multigibs=\"%d\" airgibs=\"%d\" "
 		" maxmultigibs=\"%d\" rings=\"%d\" />\n",
 		stats->i_height, stats->i_maxheight, stats->i_cggibs,
@@ -219,7 +240,7 @@ static void xml_player_instagib_stats(fileHandle_t handle, player_stats_t* stats
 
 static void xml_player_midair_stats(fileHandle_t handle, player_stats_t* stats)
 {
-	s2di(handle, "\t\t\t<midair stomps=\"%d\" bronze=\"%d\" silver=\"%d\" gold=\"%d\" platinum=\"%d\" "
+	s2di(handle, INDENT6 "<midair stomps=\"%d\" bronze=\"%d\" silver=\"%d\" gold=\"%d\" platinum=\"%d\" "
 		" total=\"%d\" bonus=\"%d\" totalheight=\"%f\" maxheight=\"%f\" avgheight=\"%f\" />\n",
 		stats->mid_stomps, stats->mid_bronze, stats->mid_silver, stats->mid_gold, stats->mid_platinum,
 		stats->mid_total, stats->mid_bonus, stats->mid_totalheight, stats->mid_maxheight, stats->mid_avgheight);
@@ -227,7 +248,7 @@ static void xml_player_midair_stats(fileHandle_t handle, player_stats_t* stats)
 
 static void xml_player_ra_stats(fileHandle_t handle, player_stats_t* stats)
 {
-	s2di(handle, "\t\t\t<rocket-arena wins=\"%d\" losses=\"%d\" />\n", stats->wins, stats->loses);
+	s2di(handle, INDENT6 "<rocket-arena wins=\"%d\" losses=\"%d\" />\n", stats->wins, stats->loses);
 }
 
 void xml_race_detail(fileHandle_t handle)
@@ -235,9 +256,9 @@ void xml_race_detail(fileHandle_t handle)
 	extern gedict_t* race_find_racer(gedict_t* p);
 	gedict_t* p;
 
-	s2di(handle, "\t<race route=\"%d\" weaponmode=\"%d\" startmode=\"%d\">", race.active_route - 1, race.weapon, race.falsestart);
+	s2di(handle, INDENT2 "<race route=\"%d\" weaponmode=\"%d\" startmode=\"%d\">", race.active_route - 1, race.weapon, race.falsestart);
 	if (!strnull(race.pacemaker_nick)) {
-		s2di(handle, "\t\t<pacemaker time=\"%f\">%s</pacemaker>\n", race.pacemaker_time * 1.0f, xml_string(race.pacemaker_nick));
+		s2di(handle, INDENT4 "<pacemaker time=\"%f\">%s</pacemaker>\n", race.pacemaker_time * 1.0f, xml_string(race.pacemaker_nick));
 	}
 	for (p = world; (p = race_find_racer(p)); /**/) {
 		int player_number = NUM_FOR_EDICT(p) - 1;
@@ -247,12 +268,12 @@ void xml_race_detail(fileHandle_t handle)
 		}
 		record = &race.currentrace[player_number];
 
-		s2di(handle, "\t<racer avgspeed=\"%f\" distance=\"%f\" time=\"%f\" "
+		s2di(handle, INDENT4 "<racer avgspeed=\"%f\" distance=\"%f\" time=\"%f\" "
 			"racer=\"%s\" weaponmode=\"%d\" startmode=\"%d\" maxspeed=\"%f\">\n",
 			record->avgspeed / record->avgcount, record->distance, record->time,
 			xml_string(p->netname), record->maxspeed
 		);
-		s2di(handle, "\t</race>\n");
+		s2di(handle, INDENT2 "</race>\n");
 	}
 }
 
@@ -312,6 +333,17 @@ void xml_player_detail(fileHandle_t handle, int num, gedict_t* player, const cha
 	}
 	if (isRA()) {
 		xml_player_ra_stats(handle, &player->ps);
+	}
+	if (isHoonyModeDuel()) {
+		s2di(handle, INDENT4 "<hm-rounds>%s</hm-rounds>\n", xml_string(HM_round_results(player)));
+	}
+	else {
+		int i;
+		s2di(handle, INDENT4 "<hm-frags>");
+		for (i = 0; i < HM_current_point(); ++i) {
+			s2di(handle,  "%s%d", i ? "," : "", player->hoony_results[i]);
+		}
+		s2di(handle, "</hm-frags>\n");
 	}
 #ifdef BOT_SUPPORT
 	if (player->isBot) {

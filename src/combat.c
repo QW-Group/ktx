@@ -275,7 +275,7 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 	self = oself;
 
 	// KTEAMS: check if sudden death is the case
-	if (!isHoonyMode())
+	if (!isHoonyModeAny())
 	{
 		Check_SD( targ );
 

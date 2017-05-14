@@ -225,7 +225,7 @@ float T_Heal( gedict_t * e, float healamount, float ignore )
 }
 
 void            health_touch();
-void            item_megahealth_rot();
+void            item_megahealth_rot(void);
 
 /*QUAKED item_health (.3 .3 1) (0 0 0) (32 32 32) rotten megahealth
 Health box. Normally gives 25 points.
@@ -341,7 +341,7 @@ void health_touch()
 	SUB_UseTargets();	// fire all targets / killtargets
 }
 
-void item_megahealth_rot()
+void item_megahealth_rot(void)
 {
 	other = PROG_TO_EDICT( self->s.v.owner );
 
@@ -2407,7 +2407,7 @@ void Spawn_SpawnPoints( char *classname, int effects )
 		VectorCopy( e->s.v.origin, org );
 		org[2] += 0; // qqshka: it was 16, but I like more how it looks when it more close to ground
 
-		if (isHoonyMode()) {
+		if (isHoonyModeDuel()) {
 			effects = (e->hoony_nomination ? (EF_GREEN | EF_RED) : 0);
 		}
 

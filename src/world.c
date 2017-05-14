@@ -785,6 +785,9 @@ void FirstFrame	( )
 	RegisterCvar("k_entityfile");
 // { hoonymode
 	RegisterCvarEx("k_hoonymode", "0");
+	RegisterCvarEx("k_hoonyrounds", "6");
+	RegisterCvarEx("k_hoonymode_prevmap", "");
+	RegisterCvarEx("k_hoonymode_prevspawns", "");
 // }
 // { race
 	RegisterCvarEx("k_race", "0");
@@ -994,6 +997,8 @@ void SecondFrame ( )
 	Customize_Maps();
 
 	LocationInitialise ();
+
+	HM_restore_spawns();
 }
 
 void CheckSvUnlock ()
@@ -1335,8 +1340,9 @@ void FixRules ( )
 	{
     	if( (timelimit == 0 && fraglimit == 0) || timelimit > k_tt || timelimit < 0 )
     	{
-        	if ( !isHoonyMode() && !isRACE() )
-				cvar_fset( "timelimit", timelimit = k_tt ); // sensible default if no max set
+			if (!isHoonyModeDuel() && !isRACE()) {
+				cvar_fset("timelimit", timelimit = k_tt); // sensible default if no max set
+			}
 
 			// NOTE: hoonymode works with fraglimit = 0, and timelimit = 0, and manages the game by frags directly
     	}

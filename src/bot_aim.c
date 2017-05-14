@@ -372,7 +372,7 @@ static void AttackRespawns(gedict_t* self)
 	gedict_t* enemy_ = &g_edicts[self->s.v.enemy];
 	qbool has_rl = ((int)self->s.v.items & IT_ROCKET_LAUNCHER) && self->s.v.ammo_rockets > 3;
 
-	if (isRA() || isHoonyMode() || !isDuel()) {
+	if (isRA() || isHoonyModeDuel() || !isDuel()) {
 		return;
 	}
 

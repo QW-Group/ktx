@@ -257,7 +257,7 @@ const char *GetMode(void)
 	else if (cvar("k_midair")) {
 		return "midair";
 	}
-	else if (isHoonyMode()) {
+	else if (isHoonyModeAny()) {
 		return "hoonymode";
 	}
 	else if (isRACE()) {
@@ -673,68 +673,70 @@ void PlayersStats(void)
 
 	from1 = 0;
 	p = find_plrghst ( world, &from1 );
-	while( p ) {
-		if( !p->ready ) {
+	while (p) {
+		if (!p->ready) {
 
 			first = 1;
 
 			from2 = 0;
-			p2 = find_plrghst ( world, &from2 );
-			while ( p2 ) {
-				if( !p2->ready ) {
+			p2 = find_plrghst(world, &from2);
+			while (p2) {
+				if (!p2->ready) {
 					// sort by team
 					tmp = getteam(p);
 					tmp2 = getteam(p2);
 
-					if( streq ( tmp, tmp2 ) ) {
+					if (streq(tmp, tmp2)) {
 						p2->ready = 1; // set mark
 
-						if ( first ) {
+						if (first) {
 							first = 0;
-							if ( tp )
-								G_bprint(2, "Team %s‘:\n", tmp );
+							if (tp) {
+								G_bprint(2, "Team %s‘:\n", tmp);
+							}
 						}
 
-						if ( isCTF() )
-						{
-							if ( p2->s.v.frags - p2->ps.ctf_points < 1 )
+						if (isCTF()) {
+							if (p2->s.v.frags - p2->ps.ctf_points < 1) {
 								p2->efficiency = 0;
-							else
+							}
+							else {
 								p2->efficiency = (p2->s.v.frags - p2->ps.ctf_points) / (p2->s.v.frags - p2->ps.ctf_points + p2->deaths) * 100;
+							}
 						}
-						else if ( isRA() )
-						{
-							p2->efficiency = ( ( p2->ps.loses + p2->ps.wins ) ? ( p2->ps.wins * 100.0f ) / ( p2->ps.loses + p2->ps.wins ) : 0 );
+						else if (isRA()) {
+							p2->efficiency = ((p2->ps.loses + p2->ps.wins) ? (p2->ps.wins * 100.0f) / (p2->ps.loses + p2->ps.wins) : 0);
 						}
-						else
-						{
-							if( p2->s.v.frags < 1 )
+						else {
+							if (p2->s.v.frags < 1) {
 								p2->efficiency = 0;
-							else
+							}
+							else {
 								p2->efficiency = p2->s.v.frags / (p2->s.v.frags + p2->deaths) * 100;
+							}
 						}
 
-						if ( cvar("k_midair") )
+						if (cvar("k_midair")) {
 							OnePlayerMidairStats(p2, tp);
-						else if ( cvar("k_instagib") )
+						}
+						else if (cvar("k_instagib")) {
 							OnePlayerInstagibStats(p2, tp);
-						else
+						}
+						else {
 							OnePlayerStats(p2, tp);
+						}
 					}
 				}
 
-				p2 = find_plrghst ( p2, &from2 );
+				p2 = find_plrghst(p2, &from2);
 
-				if ( !p2 )
+				if (!p2) {
 					G_bprint(2, "\n"); // split players from different teams via \n
+				}
 			}
 		}
 
-		p = find_plrghst ( p, &from1 );
-	}
-
-	if (isHoonyMode()) {
-		HM_stats();
+		p = find_plrghst(p, &from1);
 	}
 }
 
@@ -1219,8 +1221,7 @@ void MatchEndStats(void)
 {
 	gedict_t* p;
 
-	if (isHoonyMode() && !HM_is_game_over()) {
-		HM_stats();
+	if (isHoonyModeAny() && !HM_is_game_over()) {
 		return;
 	}
 

@@ -788,24 +788,36 @@ void    GrappleReset(gedict_t *rhook);
 #define HM_PT_FINAL 1
 #define HM_PT_SET 2
 
-qbool isHoonyMode();
-void HM_draw();
-void HM_suicide(gedict_t* player);
-void HM_next_point(gedict_t *won, gedict_t *lost);
-void HM_all_ready();
-void HM_reset_map();
-void HM_initialise_rounds();
-const char* HM_round_results(gedict_t* player);
+qbool isHoonyModeDuel(void);
+qbool isHoonyModeAny(void);
+qbool isHoonyModeTDM(void);
 
-int     HM_current_point_type();
-int     HM_current_point();
-int     HM_timelimit();
-char*   HM_lastscores_extra();
-void    HM_stats();
-void    HM_stats_show();
-qbool   HM_is_game_over();
+gedict_t* HM_choose_spawn_point(gedict_t* player);
+void HM_log_spawn_point(gedict_t* player, gedict_t* spawn);
+
+void    HM_draw(void);
+void    HM_suicide(gedict_t* player);
+void    HM_next_point(gedict_t *won, gedict_t *lost);
+void    HM_all_ready(void);
+void    HM_reset_map(void);
+void    HM_initialise_rounds(void);
+void    HM_rounds_adjust(int change);
+
+int     HM_current_point_type(void);
+int     HM_current_point(void);
+int     HM_rounds(void);
+int     HM_timelimit(void);
+char*   HM_lastscores_extra(void);
+qbool   HM_is_game_over(void);
 void    HM_name_map_spawn(gedict_t* spawn);
-void    HM_pick_spawn();
+void    HM_pick_spawn(void);
+void    HM_unpick_all_spawns(void);
+void    HM_roundsup(void);
+void    HM_roundsdown(void);
+void    HM_point_stats(void);
+void    HM_restore_spawns(void);
+
+const char* HM_round_results(gedict_t* player);
 
 // race.c
 

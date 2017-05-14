@@ -51,6 +51,7 @@ void ZeroFpsStats ();
 void item_megahealth_rot();
 
 void del_from_specs_favourites(gedict_t *rm);
+void item_megahealth_rot(void);
 
 extern int g_matchstarttime;
 
@@ -1431,16 +1432,8 @@ void PutClientInServer( void )
 // paustime is set by teleporters to keep the player from moving a while
 	self->pausetime = 0;
 
-	if (isHoonyMode() && self->k_hoony_new_spawn) {
-		if (match_in_progress) {
-			spot = self->k_hoony_new_spawn;
-		}
-		else {
-			// Go through spawns sequentially when pre-game
-			spot = find(self->k_hoony_new_spawn, FOFCLSN, "info_player_deathmatch");
-			if (spot == NULL)
-				spot = find(world, FOFCLSN, "info_player_deathmatch");
-		}
+	if (isHoonyModeAny() && (spot = HM_choose_spawn_point(self))) {
+		// Nothing more to do
 	}
 #ifdef BOT_SUPPORT
 	else if (FrogbotOptionEnabled(FB_OPTION_DEBUG_MOVEMENT) && self->isBot && match_in_progress && streq(g_globalvars.mapname, "povdmm4")) {
@@ -1471,7 +1464,7 @@ void PutClientInServer( void )
 		spot = SelectSpawnPoint( coop ? "info_player_coop" : "info_player_start" );
 	}
 
-	self->k_hoony_new_spawn = spot;
+	HM_log_spawn_point(self, spot);
 
 	VectorCopy( spot->s.v.origin, self->s.v.origin );
 	self->s.v.origin[2] += 1;
@@ -1527,7 +1520,7 @@ void PutClientInServer( void )
 			tele_flags |= TFLAGS_FOG_DST | TFLAGS_SND_DST;
 		}
 	}
-	else if ( ! isHoonyMode() )
+	else if ( ! isHoonyModeAny() )
 	{
 		tele_flags |= TFLAGS_FOG_DST | TFLAGS_SND_DST;
 	}
@@ -1551,7 +1544,7 @@ void PutClientInServer( void )
 		return;
 	}
 	
-	if ( spot->s.v.items && isHoonyMode() )
+	if ( spot->s.v.items && isHoonyModeAny() )
 	{
 		char* armorExplanation = "a";
 		float armortype = 0.0f;
@@ -1893,7 +1886,7 @@ void CheckRules()
 		return;
 	}
 
-	if (!isHoonyMode() && fraglimit && self->s.v.frags >= fraglimit) {
+	if (!isHoonyModeAny() && fraglimit && self->s.v.frags >= fraglimit) {
 		EndMatch(0);
 	}
 }
@@ -3360,7 +3353,7 @@ void PlayerPostThink()
 		float velocity = sqrt(self->s.v.velocity[0] * self->s.v.velocity[0] +
 							  self->s.v.velocity[1] * self->s.v.velocity[1]);
 
-		if ( !match_in_progress && !match_over && !k_captains && !k_matchLess && !isHoonyMode() )
+		if ( !match_in_progress && !match_over && !k_captains && !k_matchLess && !isHoonyModeAny() )
 		{
 			if ( iKey( self, "kf" ) & KF_SPEED ) {
 				float velocity_vert_abs	= fabs(self->s.v.velocity[2]);
@@ -3822,7 +3815,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		if ( targ == attacker )
 		{
 			// killed self
-			if (!isHoonyMode())
+			if (!isHoonyModeDuel())
 				targ->s.v.frags -= (dtSUICIDE == targ->deathtype ? 2 : 1);
 
 			logfrag (targ, targ);
@@ -3866,8 +3859,8 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 			G_bprint (PRINT_MEDIUM, "%s%s", targ->netname, deathstring);
 
-			if (isHoonyMode())
-				HM_suicide(targ); // probably better to use world instead of the 0 here and change hooney code accordingly.
+			if (isHoonyModeDuel())
+				HM_suicide(targ);
 
 			return;
 		}
@@ -3940,8 +3933,9 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			else if ( dtSQUISH == targ->deathtype )	{
 				G_bprint (PRINT_MEDIUM, "%s squishes %s\n", attacker->netname, targ->netname);
 
-				if (isHoonyMode())
+				if (isHoonyModeDuel()) {
 					HM_next_point(attacker, targ);
+				}
 
 				return;	// !!! return !!!
 			}
@@ -3958,8 +3952,9 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 						default:
 							 	G_bprint (PRINT_MEDIUM, "%s stomps %s\n", attacker->netname, targ->netname);
 
-								if (isHoonyMode())
+								if (isHoonyModeDuel()) {
 									HM_next_point(attacker, targ);
+								}
 
 								return; // !!! return !!!
 					}
@@ -4008,8 +4003,9 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 								G_bprint (PRINT_MEDIUM, "%s rips %s a new one\n", attacker->netname, targ->netname);
 
 								// hoonymode shouldn't have quad but just in case...
-								if (isHoonyMode())
+								if (isHoonyModeDuel()) {
 									HM_next_point(attacker, targ);
+								}
 
 								return; // !!! return !!!
 					}
@@ -4092,15 +4088,17 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			G_bprint (PRINT_MEDIUM,"%s%s%s%s", targ->netname, deathstring, attacker->netname, deathstring2);
 		}
 
-		if (isHoonyMode())
+		if (isHoonyModeDuel()) {
 			HM_next_point(attacker, targ);
+		}
 
 		return;
 	}
 	else // attacker->ct != ctPlayer
 	{
-		if (!isHoonyMode())
+		if (!isHoonyModeDuel()) {
 			targ->s.v.frags -= 1;            // killed self
+		}
 
 		logfrag (targ, targ);
 
@@ -4175,7 +4173,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 		G_bprint (PRINT_MEDIUM, "%s%s", targ->netname, deathstring );
 
-		if (isHoonyMode())
+		if (isHoonyModeDuel())
 			HM_suicide(targ);
 	}
 }

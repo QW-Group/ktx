@@ -1103,6 +1103,7 @@ typedef struct gedict_s {
 	int              hoony_timelimit;	           // maximum time for each round
 	char*            hoony_defaultwinner;          // if round time expires, who wins the round?  if null then both players score point
 	byte             hoony_results[HM_MAX_ROUNDS]; // store results of each round
+	int              hoony_prevfrags;              // frags at end of previous round
 	int              hoony_nomination;             // links player -> nominated spawn and vice versa
 	int              hoony_spawn_order;            // spawn order when shuffling
 // }

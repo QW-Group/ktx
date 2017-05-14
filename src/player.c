@@ -1039,7 +1039,7 @@ void PlayerDie()
 		// Hoonymode: Also force some time, e.g. to prevent instant respawn after /kill which
 		// can cause bug if kill telefrags an idle player (counts as two points...)
 		// only ever happens in testing, but oh well --phil
-		if ( k_yawnmode || isHoonyMode() )
+		if ( k_yawnmode || isHoonyModeDuel() )
 		{
 			self->s.v.nextthink = g_globalvars.time + 0.9;
 			self->think = ( func_t ) PlayerDead;

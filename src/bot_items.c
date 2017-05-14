@@ -4,6 +4,9 @@
 #include "g_local.h"
 #include "fb_globals.h"
 
+// Goal functions
+void item_megahealth_rot(void);
+
 // If multiple items have the same goal, markers on the map will point to the closest
 //   So (my logic) if you only care about the closest item rather than timing all items,
 //     assign same goal to all objects. Statically assign goals for minor items and leave
@@ -78,9 +81,6 @@ void AssignGoalNumbers (void)
 		}
 	}
 }
-
-// Goal functions
-void item_megahealth_rot ();
 
 static void LocateDynamicItem (gedict_t* item)
 {

@@ -340,7 +340,7 @@ void json_player_detail(fileHandle_t handle, int player_num, gedict_t* player, c
 	if (isRA()) {
 		json_player_ra_stats(handle, stats);
 	}
-	if (isHoonyMode()) {
+	if (isHoonyModeAny()) {
 		json_player_hoonymode_stats(handle, player);
 	}
 #ifdef BOT_SUPPORT
@@ -501,7 +501,18 @@ static void json_player_ra_stats(fileHandle_t handle, player_stats_t* stats)
 static void json_player_hoonymode_stats(fileHandle_t handle, gedict_t* player)
 {
 	s2di(handle, "," JSON_CR);
-	s2di(handle, INDENT6 "\"hm-rounds\": \"%s\"" JSON_CR, HM_round_results(player));
+	if (isHoonyModeDuel()) {
+		s2di(handle, INDENT6 "\"hm-rounds\": \"%s\"" JSON_CR, json_string(HM_round_results(player)));
+	}
+	else {
+		int i;
+
+		s2di(handle, INDENT6 "\"hm-frags\": [");
+		for (i = 0; i < HM_current_point(); ++i) {
+			s2di(handle, "%s%d", i ? ", " : "", player->hoony_results[i]);
+		}
+		s2di(handle, "]" JSON_CR);
+	}
 }
 
 void json_race_detail(fileHandle_t handle)
