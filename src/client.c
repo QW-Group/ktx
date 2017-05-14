@@ -48,6 +48,7 @@ void MakeMOTD();
 void ImpulseCommands();
 void StartDie ();
 void ZeroFpsStats ();
+void item_megahealth_rot();
 
 void del_from_specs_favourites(gedict_t *rm);
 

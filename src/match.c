@@ -847,7 +847,7 @@ void PersonalisedCountdown(char* baseText)
 	char text[1024];
 	gedict_t* p;
 
-	for (p = world; p = find_plr(p); /**/) {
+	for (p = world; (p = find_plr(p)); /**/) {
 		strlcpy(text, baseText, sizeof(text));
 
 		if (HM_current_point_type() == HM_PT_SET)

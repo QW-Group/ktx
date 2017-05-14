@@ -86,7 +86,7 @@ void HM_draw()
 	gedict_t* p;
 	int maxfrags = -9999, minfrags = 9999;
 
-	for (p = world; p = find_plr(p);) {
+	for (p = world; (p = find_plr(p));) {
 		// .ent file can dictate that one player wins by default
 		if (! strnull(world->hoony_defaultwinner) && p->k_hoony_new_spawn && streq(p->k_hoony_new_spawn->s.v.targetname, world->hoony_defaultwinner)) {
 			p->s.v.frags++;
@@ -104,7 +104,7 @@ void HM_draw()
 		// If in normal rounds, everyone gets a point, so we get closer to finishing.  
 		gedict_t* p;
 
-		for (p = world; p = find_plr(p); )
+		for (p = world; (p = find_plr(p)); )
 		{
 			p->hoony_results[round_number] = HM_RESULT_DRAWWIN;
 			p->s.v.frags++;
@@ -350,7 +350,7 @@ void HM_all_ready()
 {
 	gedict_t* p;
 
-	for (p = world; p = find_plr(p); /**/)
+	for (p = world; (p = find_plr(p)); /**/)
 	{
 		// Clear allocated spawns for the current round
 		p->k_hoony_new_spawn = NULL;
@@ -390,7 +390,7 @@ void HM_all_ready()
 			HM_shuffle_spawns(blue_spawns, blue_spawncount);
 
 			// Assign based on team
-			for (p = world; p = find_plr(p); /**/) 
+			for (p = world; (p = find_plr(p)); /**/) 
 			{
 				if (red_assigned_spawn == (int) min(red_spawncount, MAX_CLIENTS))
 					red_assigned_spawn = 0;
@@ -414,7 +414,7 @@ void HM_all_ready()
 			HM_shuffle_spawns(spawns, spawncount);
 
 			// assign as standard
-			for (p = world; p = find_plr(p); /**/) 
+			for (p = world; (p = find_plr(p)); /**/) 
 			{
 				if (assigned_spawn == (int) min(spawncount, MAX_CLIENTS))
 					assigned_spawn = 0;
@@ -428,12 +428,12 @@ void HM_all_ready()
 		// on odd-numbered rounds, spawn spawn points
 		if (isTeam())
 		{
-			gedict_t* red_players[MAX_CLIENTS] = { 0 };
-			gedict_t* blue_players[MAX_CLIENTS] = { 0 };
+			//gedict_t* red_players[MAX_CLIENTS] = { 0 };
+			//gedict_t* blue_players[MAX_CLIENTS] = { 0 };
 		}
 		else 
 		{
-			for (p = world; p = find_plr(p); /**/)
+			for (p = world; (p = find_plr(p)); /**/)
 			{
 				gedict_t* next = find_plr(p);
 

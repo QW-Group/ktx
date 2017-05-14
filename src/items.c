@@ -2372,7 +2372,7 @@ SPAWN POINT MARKERS
 ===============================================================================
 */
 
-static gedict_t* Spawn_OnePoint( gedict_t* spawn_point, vec3_t org, int effects )
+gedict_t* Spawn_OnePoint( gedict_t* spawn_point, vec3_t org, int effects )
 {
 	gedict_t	*p;
 
