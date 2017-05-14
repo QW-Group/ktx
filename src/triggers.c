@@ -106,9 +106,10 @@ void multi_use()
 
 void multi_touch()
 {
-	if( !k_practice ) // #practice mode#
-    if( match_in_progress != 2 )
-        return;
+	// #practice mode#
+	if (!k_practice && match_in_progress != 2) {
+		return;
+	}
 
 	if ( !other->s.v.classname )
 		return;
