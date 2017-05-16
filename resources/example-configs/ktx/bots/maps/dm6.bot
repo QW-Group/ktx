@@ -310,6 +310,7 @@ SetMarkerPath 41 4 109
 SetMarkerPathFlags 41 4 j
 SetMarkerPath 41 5 112
 SetMarkerPathFlags 41 5 6
+SetMarkerFlag 41 6
 SetZone 42 9
 SetMarkerPath 42 0 43
 SetZone 43 9
