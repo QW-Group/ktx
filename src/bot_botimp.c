@@ -113,9 +113,10 @@ void RegisterSkillVariables (void)
 	RegisterCvar (FB_CVAR_MISSILEDODGE_TIME);
 }
 
-void SetAttributesBasedOnSkill (int skill)
+qbool SetAttributesBasedOnSkill (int skill)
 {
 	char* cfg_name;
+	qbool customised = false;
 
 	skill = bound (MIN_FROGBOT_SKILL, skill, MAX_FROGBOT_SKILL);
 
@@ -168,17 +169,22 @@ void SetAttributesBasedOnSkill (int skill)
 		char buf[1024 * 4];
 
 		cfg_name = va ("bots/configs/skill_all.cfg", skill);
-		if ( can_exec( cfg_name ) )
-			trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
+		if (can_exec(cfg_name)) {
+			trap_readcmd(va("exec %s\n", cfg_name), buf, sizeof(buf));
+			customised = true;
+		}
 
 		cfg_name = va ("bots/configs/skill_%02d.cfg", skill);
-		if ( can_exec( cfg_name ) )
-			trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
+		if (can_exec(cfg_name)) {
+			trap_readcmd(va("exec %s\n", cfg_name), buf, sizeof(buf));
+			customised = true;
+		}
 	}
+	return customised;
 }
 
 // TODO: Exchange standard attributes for different bot characters/profiles
-void SetAttribs(gedict_t* self)
+void SetAttribs(gedict_t* self, qbool customised)
 {
 	self->fb.skill.accuracy = bound (0, cvar( FB_CVAR_ACCURACY ), 45);
 
@@ -222,6 +228,8 @@ void SetAttribs(gedict_t* self)
 	self->fb.skill.movement = bound (0, cvar (FB_CVAR_MOVEMENT_SKILL), 1.0f);
 	self->fb.skill.combat_jump_chance = bound (0, cvar (FB_CVAR_COMBATJUMP_CHANCE), 1.0f);
 	self->fb.skill.missile_dodge_time = bound (0, cvar (FB_CVAR_MISSILEDODGE_TIME), 0.5f);
+
+	self->fb.skill.customised = customised;
 }
 
 char* BotNameEnemy(int botNumber) {

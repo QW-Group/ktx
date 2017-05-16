@@ -7,8 +7,8 @@
 // Handles all "botcmd x" commands from the user
 
 // Cripes.  Fix all these declarations
-void SetAttribs (gedict_t* self);
-void SetAttributesBasedOnSkill (int skill_level);
+void SetAttribs (gedict_t* self, qbool customised);
+qbool SetAttributesBasedOnSkill (int skill_level);
 void Bot_Print_Thinking (void);
 void BotsFireInitialTriggers (gedict_t* client);
 qbool BotDoorIsClosed (gedict_t* door);
@@ -26,6 +26,8 @@ void DM6Debug (gedict_t* self);
 float AverageTraceAngle (gedict_t* self, qbool debug, qbool report);
 char* LocationName (float x, float y, float z);
 static gedict_t* MarkerIndicator (gedict_t* marker);
+
+static qbool customised_skill = false;
 
 #define MAX_BOTS          32
 
@@ -218,8 +220,7 @@ void FrogbotsAddbot(int skill_level, const char* specificteam, qbool error_messa
 			int bottomColor = 0;
 			const char* teamName = specificteam;
 
-			SetAttributesBasedOnSkill (skill_level);
-
+			customised_skill = SetAttributesBasedOnSkill (skill_level);
 			if (teamplay && !specificteam[0]) {
 				int team1Count, team2Count;
 				team_t* team;
@@ -270,7 +271,7 @@ void FrogbotsAddbot(int skill_level, const char* specificteam, qbool error_messa
 			g_edicts[entity].fb.botnumber = i;
 			trap_SetBotUserInfo (entity, "team", teamName, 0);
 			G_bprint (2, "skill &cf00%d&r\n", self->fb.skill.skill_level);
-			SetAttribs (&g_edicts[entity]);
+			SetAttribs (&g_edicts[entity], customised_skill);
 			trap_SetBotUserInfo (entity, "k_nick", bots[i].name, 0);
 			return;
 		}
@@ -387,7 +388,7 @@ static void FrogbotsSetSkill (void)
 			cvar_fset("k_fb_skill", new_skill);
 			G_sprint(self, 2, "bot skill changed to \"%d\"\n", new_skill);
 
-			SetAttributesBasedOnSkill (new_skill);
+			customised_skill = SetAttributesBasedOnSkill(new_skill);
 		}
 	}
 }

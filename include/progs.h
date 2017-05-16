@@ -491,8 +491,9 @@ typedef struct fb_botskill_s {
 
 	float movement;
 	float combat_jump_chance;
-	float missile_dodge_time;                       // minimum time in seconds before bot dodges missile
+	float missile_dodge_time;                // minimum time in seconds before bot dodges missile
 
+	qbool customised;                        // if set, customised file
 } fb_botskill_t;
 
 // FIXME: Need to break this up into marker fields, client fields and entity fields
