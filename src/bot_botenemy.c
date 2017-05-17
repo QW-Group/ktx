@@ -117,9 +117,10 @@ qbool BotsPickBestEnemy(gedict_t* self) {
 	float predict_dist = 600;
 	gedict_t* test_enemy;
 	int old_enemy = self->s.v.enemy;
+	qbool team_game = isTeam();
 
 	for (test_enemy = world; (test_enemy = find_plr(test_enemy)); ) {
-		if ( ! SameTeam(self, test_enemy) ) {
+		if ((!team_game || ISLIVE(test_enemy)) && !SameTeam(self, test_enemy)) {
 			from_marker = test_enemy->fb.touch_marker;
 			if (from_marker) {
 				to_marker = self->fb.touch_marker;
