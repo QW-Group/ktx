@@ -588,7 +588,9 @@ void SM_PrepareMap()
 		}
 	}
 
-	HM_reset_map();
+	if (isHoonyMode()) {
+		HM_reset_map();
+	}
 	ClearBodyQue(); // hide corpses
 }
 
