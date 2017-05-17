@@ -2,10 +2,15 @@
 #include "g_local.h"
 #include "stats.h"
 
+// TODO
+// - Hoonymode stats: would be interesting to see spawn A vs B result... could always get from demo tho
+// - 
+
 static void json_player_ctf_stats(fileHandle_t handle, player_stats_t* stats);
 static void json_player_instagib_stats(fileHandle_t handle, player_stats_t* stats);
 static void json_player_midair_stats(fileHandle_t handle, player_stats_t* stats);
 static void json_player_ra_stats(fileHandle_t handle, player_stats_t* stats);
+static void json_player_hoonymode_stats(fileHandle_t handle, gedict_t* player);
 
 #define STATS_VERSION_NUMBER 3
 
@@ -31,50 +36,52 @@ static char* json_string(const char* input)
 
 	start = ch = string[index++];
 	while (*input) {
+		unsigned char current = *input;
+
 		if (ch - start >= 1000) {
 			break;
 		}
 
-		if (*input == '\\' || *input == '"') {
+		if (current == '\\' || current == '"') {
 			*ch++ = '\\';
-			*ch++ = *input;
+			*ch++ = current;
 		}
-		else if (*input == '\n') {
+		else if (current == '\n') {
 			*ch++ = '\\';
 			*ch++ = 'n';
 		}
-		else if (*input == '\r') {
+		else if (current == '\r') {
 			*ch++ = '\\';
 			*ch++ = 'r';
 		}
-		else if (*input == '\b') {
+		else if (current == '\b') {
 			*ch++ = '\\';
 			*ch++ = 'b';
 		}
-		else if (*input == '\t') {
+		else if (current == '\t') {
 			*ch++ = '\\';
 			*ch++ = 't';
 		}
-		else if (*input == '\f') {
+		else if (current == '\f') {
 			*ch++ = '\\';
 			*ch++ = 'f';
 		}
-		else if (*input < ' ') {
+		else if (current < ' ') {
 			*ch++ = '\\';
 			*ch++ = 'u';
 			*ch++ = '0';
 			*ch++ = '0';
-			if (*input < 16) {
+			if (current < 16) {
 				*ch++ = '0';
-				*ch++ = "0123456789ABCDEF"[(int)*input];
+				*ch++ = "0123456789ABCDEF"[(int)current];
 			}
 			else {
-				*ch++ = "0123456789ABCDEF"[((int)(*input)) >> 4];
-				*ch++ = "0123456789ABCDEF"[((int)(*input)) & 15];
+				*ch++ = "0123456789ABCDEF"[((int)(current)) >> 4];
+				*ch++ = "0123456789ABCDEF"[((int)(current)) & 15];
 			}
 		}
 		else {
-			*ch++ = *input;
+			*ch++ = current;
 		}
 		++input;
 	}
@@ -223,7 +230,7 @@ void json_player_detail(fileHandle_t handle, int player_num, gedict_t* player, c
 		(int)player->ps.dmg_tweapon, (int)player->ps.dmg_eweapon
 	);
 	s2di(handle, "      \"xfer\": %d,\n", player->ps.transferred_packs);
-	s2di(handle, "      \"spree\": [%d %d],\n", player->ps.spree_max, player->ps.spree_max_q);
+	s2di(handle, "      \"spree\": [%d, %d],\n", player->ps.spree_max, player->ps.spree_max_q);
 	s2di(handle, "      \"control\": %f,\n", player->ps.control_time);
 
 	json_weap_header(handle);
@@ -268,6 +275,9 @@ void json_player_detail(fileHandle_t handle, int player_num, gedict_t* player, c
 	if (isRA()) {
 		json_player_ra_stats(handle, stats);
 	}
+	if (isHoonyMode()) {
+		json_player_hoonymode_stats(handle, player);
+	}
 #ifdef BOT_SUPPORT
 	if (player->isBot) {
 		json_player_bot_info(handle, &player->fb.skill);
@@ -282,7 +292,7 @@ void json_match_header(fileHandle_t handle, char* ip, int port)
 {
 	char date[64] = { 0 };
 	char matchtag[64] = { 0 };
-	const char* mode = cvar("k_instagib") ? "instagib" : (isRACE() ? "race" : GetMode());
+	const char* mode = cvar("k_instagib") ? "instagib" : isHoonyMode() ? "hoonymode" : isRACE() ? "race" : GetMode();
 
 	infokey(world, "matchtag", matchtag, sizeof(matchtag));
 
@@ -290,7 +300,7 @@ void json_match_header(fileHandle_t handle, char* ip, int port)
 		date[0] = 0; // bad date
 
 	s2di(handle, "{\n");
-	s2di(handle, "  \"version\": %d\n", STATS_VERSION_NUMBER);
+	s2di(handle, "  \"version\": %d,\n", STATS_VERSION_NUMBER);
 	s2di(handle, "  \"date\": \"%s\",\n", date);
 	s2di(handle, "  \"map\": \"%s\",\n", json_string(g_globalvars.mapname));
 	s2di(handle, "  \"hostname\": \"%s\",\n", json_string(striphigh(cvar_string("hostname"))));
@@ -420,6 +430,12 @@ static void json_player_ra_stats(fileHandle_t handle, player_stats_t* stats)
 {
 	s2di(handle, ",\n");
 	s2di(handle, "      \"ra\": [%d, %d]", stats->wins, stats->loses);
+}
+
+static void json_player_hoonymode_stats(fileHandle_t handle, gedict_t* player)
+{
+	s2di(handle, ",\n");
+	s2di(handle, "      \"hm-rounds\": \"%s\"\n", HM_round_results(player));
 }
 
 void json_race_detail(fileHandle_t handle)
