@@ -13,6 +13,7 @@
 // 2012-03-20 - Per-point player stats (was thinking about how to do this and had a sudden idea)
 // 2012-03-26 - Bugs fixed - hmstats health incorrectly computed as health+armor,
 //              lava deaths (and others) not scored properly, and also ring/quad... (thx dr4k0 for testing)
+// 2017-05-17 - Added fraglimits, timelimits on rounds, spawn nominations
 
 // todo: fix lg door/dm2 floating/etc
 // todo: test drop/rejoin, and how it affects spawn memory
@@ -31,18 +32,36 @@
 #define HM_RESULT_SUICIDEWIN   4
 #define HM_RESULT_DRAWWIN      5
 
+const char hm_result_indicator[] = "\0WLswD";
+
 #define HM_WINNING_DIFF        2
 
 static int round_number = 0;
 
 static void EndRound()
 {
-	if (round_number < HM_MAX_ROUNDS - 1)
+	if (round_number < HM_MAX_ROUNDS - 1) {
 		++round_number;
-	else
-		--round_number;	// Start over-writing to stop buffer over-run
+	}
+	else {
+		// Start over-writing last round to stop buffer over-run
+	}
 
 	EndMatch(0);
+}
+
+const char* HM_round_results(gedict_t* player)
+{
+	static char buffer[HM_MAX_ROUNDS + 1];
+	int i;
+
+	for (i = 0; i < round_number; ++i) {
+		if (player->hoony_results[i] >= 0 && player->hoony_results[i] < sizeof(hm_result_indicator)) {
+			buffer[i] = hm_result_indicator[player->hoony_results[i]];
+		}
+	}
+	buffer[i] = '\0';
+	return buffer;
 }
 
 qbool isHoonyMode()
@@ -487,14 +506,14 @@ void HM_name_map_spawn(gedict_t* spawn)
 	{
 		hm_spawn_name spawns[] = {
 			{ { 2560,  -192,   32 }, "nailgun" },
-			{ { 2544,   -32,  -64 }, "low-tele" },
+			{ { 2544,   -32,  -64 }, "low tele" },
 			{ { 2624,  -488,   32 }, "water" },
-			{ { 2176, -2176,   88 }, "ra-mega btn" },
+			{ { 2176, -2176,   88 }, "low-btn" },
 			{ { 2576, -1328,   24 }, "low-rl" },
 			{ { 2704, -2048,  128 }, "ra-mega" },
-			{ { 1712,  -504,   24 }, "under quad" },
-			{ { 2048, -1352,  136 }, "big (stairs)" },
-			{ { 2248,   -16, -136 }, "low-tele (btn)" }
+			{ { 1712,  -504,   24 }, "quad" },
+			{ { 2048, -1352,  136 }, "big" },
+			{ { 2248,   -16, -136 }, "tele-btn" }
 		};
 
 		HM_name_spawn(spawn, spawns, sizeof(spawns) / sizeof(spawns[0]));
@@ -502,11 +521,11 @@ void HM_name_map_spawn(gedict_t* spawn)
 	else if (streq(mapname, "dm3"))
 	{
 		hm_spawn_name spawns[] = {
-			{ { -880, -232,  -16 }, "tele (sng)" },
-			{ {  192, -208, -176 }, "ra tunnel" },
+			{ { -880, -232,  -16 }, "tele/sng" },
+			{ {  192, -208, -176 }, "big>ra" },
 			{ { 1472, -928,  -24 }, "ya box" },
-			{ { 1520,  432,  -88 }, "rl room" },
-			{ { -632, -680,  -16 }, "tele (ra)" },
+			{ { 1520,  432,  -88 }, "rl" },
+			{ { -632, -680,  -16 }, "tele/ra" },
 			{ {  512,  768,  216 }, "lifts" }
 		};
 
@@ -515,11 +534,11 @@ void HM_name_map_spawn(gedict_t* spawn)
 	else if (streq(mapname, "dm4"))
 	{
 		hm_spawn_name spawns[] = {
-			{ { -64,   512, -296 }, "mega-room" },
-			{ { -64,  -232,  -72 }, "quad-tele" },
-			{ { 272,  -952,   24 }, "high-tele" },
-			{ { 112, -1136, -104 }, "ammo-room" },
-			{ { 776,  -808, -232 }, "ra / rl" },
+			{ { -64,   512, -296 }, "mh room" },
+			{ { -64,  -232,  -72 }, "quad" },
+			{ { 272,  -952,   24 }, "high" },
+			{ { 112, -1136, -104 }, "ssg" },
+			{ { 776,  -808, -232 }, "ra" },
 			{ { 784,  -176,   24 }, "ya-entry" }
 		};
 
@@ -531,10 +550,10 @@ void HM_name_map_spawn(gedict_t* spawn)
 			{ {  232, -1512,  40 }, "ga tele" },
 			{ { 1016,  -416,  40 }, "low rl" },
 			{ {    0, -1088, 264 }, "high rl" },
-			{ {  456, -1504, 256 }, "above sng" },
-			{ {  408, -1088, 256 }, "gl > sng" },
+			{ {  456, -1504, 256 }, "sng" },
+			{ {  408, -1088, 256 }, "gl>sng" },
 			{ {  896, -1464, 256 }, "gl room" },
-			{ { 1892,  -160, 168 }, "behind ra" }
+			{ { 1892,  -160, 168 }, "ra" }
 		};
 
 		HM_name_spawn(spawn, spawns, sizeof(spawns) / sizeof(spawns[0]));
@@ -542,16 +561,16 @@ void HM_name_map_spawn(gedict_t* spawn)
 	else if (streq(mapname, "e1m2"))
 	{
 		hm_spawn_name spawns[] = {
-			{ { -416,  -144, 320 }, "mega room" },
-			{ {  168,  -480, 320 }, "mega entrance" },
+			{ { -416,  -144, 320 }, "mh room" },
+			{ {  168,  -480, 320 }, "mh door" },
 			{ { 1496,  1328, 200 }, "start" },
-			{ { 1936,  -136, 312 }, "nail traps" },
-			{ {  936, -1216, 432 }, "quad -> gl" },
-			{ {  792,  -992, 440 }, "gl -> quad" },
-			{ { 1080,  -720, 312 }, "ya area" },
-			{ {  408,  -752, 432 }, "quad room" },
+			{ { 1936,  -136, 312 }, "traps>ya" },
+			{ {  936, -1216, 432 }, "quad>gl" },
+			{ {  792,  -992, 440 }, "gl>quad" },
+			{ { 1080,  -720, 312 }, "ya" },
+			{ {  408,  -752, 432 }, "quad" },
 			{ {  792,  -208, 320 }, "doors" },
-			{ {  784,   808, 206 }, "rl room" }
+			{ {  784,   808, 206 }, "rl" }
 		};
 
 		HM_name_spawn(spawn, spawns, sizeof(spawns) / sizeof(spawns[0]));
@@ -559,13 +578,13 @@ void HM_name_map_spawn(gedict_t* spawn)
 	else if (streq(mapname, "ztndm3"))
 	{
 		hm_spawn_name spawns[] = {
-			{ {  -432,  128,  32 }, "ra (nailgun)" },
-			{ { -1056, -544, 224 }, "gl/corner" },
+			{ {  -432,  128,  32 }, "ra/nails" },
+			{ { -1056, -544, 224 }, "grenade" },
 			{ {  -208, -400, 224 }, "ya room" },
-			{ {  -320,  576, 224 }, "quad room" },
-			{ {  -176, -112, 288 }, "ra (ssg)" },
-			{ {   -96,  224,  32 }, "lg tunnel" },
-			{ {  -800,    0, -32 }, "ra (rl/mega)" }
+			{ {  -320,  576, 224 }, "quad" },
+			{ {  -176, -112, 288 }, "ra/ssg" },
+			{ {   -96,  224,  32 }, "lg" },
+			{ {  -800,    0, -32 }, "ra/mega" }
 		};
 
 		HM_name_spawn(spawn, spawns, sizeof(spawns) / sizeof(spawns[0]));
@@ -573,12 +592,12 @@ void HM_name_map_spawn(gedict_t* spawn)
 	else if (streq(mapname, "aerowalk"))
 	{
 		hm_spawn_name spawns[] = {
-			{ { -224, -720, 256 }, "ga (gl/quad)" },
-			{ { -488,  624, 264 }, "ga (low rl)" },
+			{ { -224, -720, 256 }, "grenade" },
+			{ { -488,  624, 264 }, "low rl" },
 			{ { -224, -704, 456 }, "high rl" },
-			{ { -272,   24,  40 }, "big (ssg)" },
-			{ { -320,  480, 456 }, "ra platform" },
-			{ {  160,  128, 256 }, "air tunnel" }
+			{ { -272,   24,  40 }, "floor" },
+			{ { -320,  480, 456 }, "ra" },
+			{ {  160,  128, 256 }, "under lg" }
 		};
 
 		HM_name_spawn(spawn, spawns, sizeof(spawns) / sizeof(spawns[0]));

@@ -332,7 +332,7 @@ void s2di(fileHandle_t file_handle, const char *fmt, ...)
 	trap_FS_WriteFile(text, strlen(text), file_handle);
 }
 
-qbool CreateStatsFile(char* filename, char* ip, int port)
+static qbool CreateStatsFile(char* filename, char* ip, int port)
 {
 	gedict_t	*p, *p2;
 	fileHandle_t di_handle;
@@ -710,8 +710,9 @@ void PlayersStats(void)
 		p = find_plrghst ( p, &from1 );
 	}
 
-	if (isHoonyMode())
+	if (isHoonyMode()) {
 		HM_stats();
+	}
 }
 
 // Print the high score table
@@ -1194,6 +1195,11 @@ void EM_CorrectStats(void)
 void MatchEndStats(void)
 {
 	gedict_t* p;
+
+	if (isHoonyMode() && !HM_is_game_over()) {
+		HM_stats();
+		return;
+	}
 
 	if( isTeam() || isCTF() )
 		CollectTpStats();

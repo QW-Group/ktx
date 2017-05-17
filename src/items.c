@@ -1529,7 +1529,7 @@ void show_powerups ( char *classname )
 		{
 			if ( match_in_progress == 2 )
 			{
-				// spawn item in 30 seconds if game alredy running
+				// spawn item in 30 seconds if game already running
 				p->s.v.nextthink = g_globalvars.time + 30;
 				p->s.v.nextthink -= AUTOTRACK_POWERUPS_PREDICT_TIME;
 				p->s.v.think = ( func_t ) SUB_regen_powerups;

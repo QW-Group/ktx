@@ -787,13 +787,14 @@ void    GrappleReset(gedict_t *rhook);
 #define HM_PT_FINAL 1
 #define HM_PT_SET 2
 
-qbool   isHoonyMode();
-void    HM_draw();
-void    HM_suicide(gedict_t* player);
-void    HM_next_point(gedict_t *won, gedict_t *lost);
-void    HM_all_ready();
-void    HM_reset_map();
-void    HM_initialise_rounds();
+qbool isHoonyMode();
+void HM_draw();
+void HM_suicide(gedict_t* player);
+void HM_next_point(gedict_t *won, gedict_t *lost);
+void HM_all_ready();
+void HM_reset_map();
+void HM_initialise_rounds();
+const char* HM_round_results(gedict_t* player);
 
 int     HM_current_point_type();
 int     HM_current_point();
