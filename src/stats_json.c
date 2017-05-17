@@ -292,7 +292,7 @@ void json_match_header(fileHandle_t handle, char* ip, int port)
 {
 	char date[64] = { 0 };
 	char matchtag[64] = { 0 };
-	const char* mode = cvar("k_instagib") ? "instagib" : isHoonyMode() ? "hoonymode" : isRACE() ? "race" : GetMode();
+	const char* mode = cvar("k_instagib") ? "instagib" : isHoonyMode() ? "hoonymode" : isRACE() ? "race" : isCA() ? "clan-arena" : isRA() ? "rocket-arena" : GetMode();
 
 	infokey(world, "matchtag", matchtag, sizeof(matchtag));
 
