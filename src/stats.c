@@ -435,11 +435,18 @@ void StatsToFile(void)
 	// This file over-written every time
 	snprintf(name, sizeof(name), "demoinfo_%s_%d.txt", ip, i);
 
-	if (CreateStatsFile(name, ip, i))
-	{
-		localcmd("\n" // why new line?
-			"sv_demoinfoadd ** %s\n", name);
-		trap_executecmd();
+	if (CreateStatsFile(name, ip, i)) {
+		if (!strnull(cvar_string("cs_address"))) {
+			localcmd("\n" // why new line?
+				"sv_demoinfoadd ** %s\n"
+				"sv_web_postfile Game/Submit \"\" *\n", name);
+			trap_executecmd();
+		}
+		else {
+			localcmd("\n" // why new line?
+				"sv_demoinfoadd ** %s\n", name);
+			trap_executecmd();
+		}
 	}
 }
 
@@ -1218,8 +1225,6 @@ void MatchEndStats(void)
 		CollectTpStats();
 
 	if (isRACE()) {
-		extern void race_match_stats(void);
-
 		race_match_stats();
 	}
 	else {
