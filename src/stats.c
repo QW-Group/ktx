@@ -249,10 +249,22 @@ static void TeamsStats (void)
 
 
 // Statistic file generation
-char *GetMode(void)
+const char *GetMode(void)
 {
+	if (cvar("k_instagib")) {
+		return "instagib";
+	}
+	if (isHoonyMode()) {
+		return "hoonymode";
+	}
+	if (isRACE()) {
+		return "race";
+	}
+	if (isCA()) {
+		return "clan-arena";
+	}
 	if (isRA()) {
-		return "RA";
+		return "rocket-arena";
 	}
 	else if (isDuel()) {
 		return "duel";
@@ -261,10 +273,10 @@ char *GetMode(void)
 		return "team";
 	}
 	else if (isCTF()) {
-		return "CTF";
+		return "ctf";
 	}
 	else if (isFFA()) {
-		return "FFA";
+		return "ffa";
 	}
 	else {
 		return "unknown";
@@ -362,41 +374,42 @@ static qbool CreateStatsFile(char* filename, char* ip, int port)
 	if (isRACE()) {
 		format->race_detail(di_handle);
 	}
-
-	format->teams_header(di_handle);
-	for (i = 0; i < min(tmStats_cnt, MAX_TM_STATS); i++) {
-		format->team_detail(di_handle, i, &tmStats[i]);
-	}
-	format->teams_footer(di_handle, i);
-
-	// } TEAMS
-
-	// { PLAYERS
-
-	for (from1 = 0, p = world; (p = find_plrghst(p, &from1)); ) {
-		p->ready = 0; // clear mark
-	}
-
-	//	get one player and search all his mates, mark served players via ->ready field
-	//  ghosts is served too
-
-	format->players_header(di_handle);
-	for (from1 = 0, p = world; (p = find_plrghst(p, &from1)); ) {
-		team = getteam(p);
-		if (p->ready /* || strnull( team ) */)
-			continue; // served or wrong team
-
-		for (from2 = 0, p2 = world; (p2 = find_plrghst(p2, &from2)); ) {
-			if (p2->ready || strneq(team, getteam(p2)))
-				continue; // served or on different team
-
-			format->player_detail(di_handle, player_num++, p2, team);
-
-			p2->ready = 1; // set mark
+	else {
+		format->teams_header(di_handle);
+		for (i = 0; i < min(tmStats_cnt, MAX_TM_STATS); i++) {
+			format->team_detail(di_handle, i, &tmStats[i]);
 		}
+		format->teams_footer(di_handle, i);
+
+		// } TEAMS
+
+		// { PLAYERS
+
+		for (from1 = 0, p = world; (p = find_plrghst(p, &from1)); ) {
+			p->ready = 0; // clear mark
+		}
+
+		//	get one player and search all his mates, mark served players via ->ready field
+		//  ghosts is served too
+
+		format->players_header(di_handle);
+		for (from1 = 0, p = world; (p = find_plrghst(p, &from1)); ) {
+			team = getteam(p);
+			if (p->ready /* || strnull( team ) */)
+				continue; // served or wrong team
+
+			for (from2 = 0, p2 = world; (p2 = find_plrghst(p2, &from2)); ) {
+				if (p2->ready || strneq(team, getteam(p2)))
+					continue; // served or on different team
+
+				format->player_detail(di_handle, player_num++, p2, team);
+
+				p2->ready = 1; // set mark
+			}
+		}
+		format->players_footer(di_handle, player_num);
+		// } PLAYERS
 	}
-	format->players_footer(di_handle, player_num);
-	// } PLAYERS
 
 	format->match_footer(di_handle);
 

@@ -18,6 +18,7 @@
  */
 
 #include "g_local.h"
+#include "stats.h"
 
 fileHandle_t log_handle = -1;
 
@@ -76,7 +77,6 @@ void log_printf( const char *fmt, ... )
 	trap_FS_WriteFile( text, strlen(text), log_handle );
 }
 
-char *GetMode(void);
 void StartLogs()
 {
 	char date[64] = {0}, date_c[64] = {0}, *ip, *port;

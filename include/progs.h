@@ -831,6 +831,8 @@ typedef struct gedict_s {
 	float	deaths;          // number of times player died
 	float	efficiency;      // stores player efficiency rating
 	float	friendly;        // number of times player killed teammates
+	float   kills;           // number of times player killed enemy
+	float   suicides;        // number of times player killed themselves
 	float	ready;           // if a player is ready or not
 	char	*killer;         // name of player who last killed player
 	char	*victim;         // name of player last killed

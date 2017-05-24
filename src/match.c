@@ -34,8 +34,6 @@ void MatchEndStats(void);
 void SM_PrepareTeamsStats(void);
 
 void race_match_start(void);
-qbool race_match_mode(void);
-char* race_scoring_system_name(void);
 qbool race_can_cancel_demo(void);
 
 extern int g_matchstarttime;
@@ -631,8 +629,9 @@ void SM_PrepareClients()
 				p->k_teamnum = 666;
 		}
 
-		if (!isHoonyMode())
-			p->friendly = p->deaths = p->s.v.frags = 0;
+		if (!isHoonyMode()) {
+			p->kills = p->suicides = p->friendly = p->deaths = p->s.v.frags = 0;
+		}
 
 		hdc = p->ps.handicap; // save player handicap
 

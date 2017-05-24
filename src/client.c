@@ -2187,6 +2187,8 @@ void MakeGhost ()
 	ghost->deaths     = self->deaths;
 	ghost->friendly   = self->friendly;
 	ghost->ready      = 0;
+	ghost->suicides   = self->suicides;
+	ghost->kills      = self->kills;
 
 	ghost->ps         = self->ps; // save player stats
 	ghost->ghost_dt   = g_globalvars.time; // save drop time
@@ -3763,8 +3765,15 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	}
 
 	targ->deaths += 1; // somehow dead, bump counter
-	if ( (isTeam() || isCTF()) && streq( targteam, attackerteam ) && !strnull( attackerteam ) && targ != attacker )
+	if ((isTeam() || isCTF()) && streq(targteam, attackerteam) && !strnull(attackerteam) && targ != attacker) {
 		attacker->friendly += 1; // bump teamkills counter
+	}
+	else if (targ == attacker || attacker->ct != ctPlayer) {
+		attacker->suicides += 1;
+	}
+	else if (attacker->ct == ctPlayer) {
+		attacker->kills += 1;
+	}
 
 // { !!! THIS TELEFRAGS TYPES DOES'T HANDLE TEAM KILLS I DUNNO WHY !!!
 	// mortal trying telefrag someone who has 666

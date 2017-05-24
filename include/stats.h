@@ -64,6 +64,6 @@ void x##_race_detail(fileHandle_t handle);
 void s2di(fileHandle_t file_handle, const char *fmt, ...);
 qbool itPowerup(itemName_t it);
 char *ItName(itemName_t it);
-char *GetMode(void);
+const char *GetMode(void);
 
 #endif // STATS_H

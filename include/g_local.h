@@ -808,6 +808,16 @@ void    HM_pick_spawn();
 
 // race.c
 
+typedef struct race_stats_score_s {
+	char* name;
+	int wins;
+	int score;
+	int completions;
+	float best_time;
+	float total_time;
+	float total_distance;
+} race_stats_score_t;
+
 qbool 		isRACE( void );
 void		apply_race_settings(void);
 void		ToggleRace( void );
@@ -834,6 +844,11 @@ int         race_count_votes_req(float percentage);
 qbool       race_allow_map_vote(gedict_t* player);
 
 gedict_t*   race_find_race_participants(gedict_t* p);
+
+qbool race_match_mode(void);
+char* race_scoring_system_name(void);
+void race_match_stats(void);
+race_stats_score_t* race_get_player_stats(int* players);
 
 // globals.c
 
