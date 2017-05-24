@@ -120,7 +120,7 @@ static qbool race_pacemaker_enabled(void);
 static void race_pacemaker_race_start(void);
 static void race_remove_pacemaker_indicator(void);
 static void race_make_active_racer(gedict_t* r, gedict_t* s);
-static qbool race_end(gedict_t* racer);
+static qbool race_end(gedict_t* racer, qbool valid, qbool complete);
 static char* race_position_string(int position);
 gedict_t* race_find_race_participants(gedict_t* p);
 static qbool race_simultaneous(void);
@@ -833,7 +833,7 @@ void race_check_racer_falsestart( qbool nextracer )
 				&& (racer->s.v.origin[1] != e->s.v.origin[1])) {
 				if (nextracer) {
 					G_bprint(PRINT_HIGH, "\20%s\21 false-started\n", racer->s.v.netname);
-					if (race_end(racer)) {
+					if (race_end(racer, false, false)) {
 						return;
 					}
 				}
@@ -861,20 +861,20 @@ void kill_race_idler( void )
 
 				if (race_match_mode()) {
 					G_bprint(PRINT_HIGH, "\20%s\21 was %s to start\n", racer->s.v.netname, redtext("too slow"));
-					if (race_end(racer)) {
+					if (race_end(racer, false, false)) {
 						return;
 					}
 				}
 				else if (racer->race_afk < 3) {
 					G_bprint(PRINT_HIGH, "\20%s\21 was %s to start\n", racer->s.v.netname, redtext("too slow"));
-					if (race_end(racer)) {
+					if (race_end(racer, false, false)) {
 						return;
 					}
 				}
 				else {
 					G_bprint(PRINT_HIGH, "%s was %s of line-up for %s\n", racer->s.v.netname, redtext("kicked out"), redtext("idling"));
 					racer->race_ready = 0;
-					if (race_end(racer)) {
+					if (race_end(racer, false, false)) {
 						return;
 					}
 				}
@@ -1081,7 +1081,7 @@ static void race_end_point_touched(gedict_t* self, gedict_t* other)
 		race.currentrace[player_num].position = race.racers_complete;
 	}
 
-	race_end(other);
+	race_end(other, true, true);
 }
 
 static void race_over(void)
@@ -1329,12 +1329,11 @@ void race_node_touch()
 
 		if (self->race_RouteNodeType == nodeCheckPoint) {
 			G_bprint(PRINT_HIGH, "\20%s\21: %s \220%d\221 touched in wrong order\n", other->s.v.netname, redtext(name_for_nodeType(self->race_RouteNodeType)), self->race_id);
-			race_end(other);
 		}
 		else {
 			G_bprint(PRINT_HIGH, "\20%s\21: \220%s\221 touched in wrong order\n", other->s.v.netname, redtext(name_for_nodeType(self->race_RouteNodeType)));
-			race_end(other);
 		}
+		race_end(other, true, false);
 
 		return;
 	}
@@ -1623,7 +1622,7 @@ qbool race_can_go( qbool cancel )
 		for (racer = world; (racer = race_find_racer(racer)); /**/) {
 			if (racer->s.v.health <= 0 && cancel) {
 				// do some sound
-				race_ended |= race_end(racer);
+				race_ended |= race_end(racer, true, false);
 				G_bprint(PRINT_HIGH, "\20%s\21 died\n", racer->s.v.netname);
 				k_respawn(racer, false);
 
@@ -1635,7 +1634,7 @@ qbool race_can_go( qbool cancel )
 			// Timeout everyone still racing
 			if (race.timeout < g_globalvars.time) {
 				if (cancel) {
-					race_ended |= race_end(racer);
+					race_ended |= race_end(racer, true, false);
 					timeout_plr = racer;
 					++timeouts;
 
@@ -2518,7 +2517,7 @@ void r_changestatus( float t )
 		case 2: // race_break
 			if (self->racer && race.status) {
 				G_bprint(PRINT_HIGH, "%s has quit the race\n", self->s.v.netname);
-				race_end(self);
+				race_end(self, true, false);
 			}
 
 			set_player_race_ready( self, 0 );
@@ -2528,7 +2527,7 @@ void r_changestatus( float t )
 		case 3: // race_toggle
 			if (self->racer && race.status) {
 				G_bprint(PRINT_HIGH, "%s has quit the race\n", self->s.v.netname);
-				race_end(self);
+				race_end(self, true, false);
 			}
 
 			set_player_race_ready( self, !self->race_ready );
@@ -2546,7 +2545,7 @@ void r_changestatus( float t )
 			// do some sound
 			sound( self, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
 			G_bprint(PRINT_HIGH, "%s aborted %s run\n", self->s.v.netname, g_his(self));
-			race_end(self);
+			race_end(self, true, false);
 
 			return;
 
@@ -2691,6 +2690,7 @@ void r_mode( )
 
 	read_topscores();
 	race_clear_pacemaker();
+	race_route_now_custom();
 }
 
 qbool race_load_route( int route )
@@ -3429,7 +3429,7 @@ qbool race_handle_event (gedict_t* player, gedict_t* entity, const char* eventNa
 			// do some sound
 			sound( player, CHAN_ITEM, "boss2/idle.wav", 1, ATTN_NONE );
 
-			race_end(player);
+			race_end(player, true, false);
 
 			return true;
 		}
@@ -3452,7 +3452,7 @@ qbool race_handle_event (gedict_t* player, gedict_t* entity, const char* eventNa
 		if ( ( player->s.v.watertype == CONTENT_LAVA ) || ( player->s.v.watertype == CONTENT_SLIME ) ) {
 			if ( player->racer && race.status ) {
 				G_bprint(PRINT_HIGH, "%s failed %s run\n", player->s.v.netname, g_his(player));
-				race_end(player);
+				race_end(player, true, false);
 				return true;
 			}
 		}
@@ -3461,7 +3461,7 @@ qbool race_handle_event (gedict_t* player, gedict_t* entity, const char* eventNa
 		if ( player->racer && race.status ) {
 			if (!race_simultaneous() || race.status >= raceActive) {
 				G_bprint(PRINT_HIGH, "%s canceled %s run\n", player->s.v.netname, g_his(player));
-				race_end(player);
+				race_end(player, true, false);
 			}
 			return true;
 		}
@@ -3763,8 +3763,9 @@ static void race_finish_capture(qbool store, char* filename)
 			if (!race_time)
 				continue;
 
-			race_fprintf("player %d\n", player_num);
 			race_store_position(capture, g_globalvars.time - race.start_time, PASSVEC3(racer->s.v.origin), racer->s.v.angles[0], racer->s.v.angles[1]);
+
+			race_fprintf("player %d\n", player_num);
 			if (race_fhandle >= 0) {
 				int i = 0;
 				for (i = 0; i < capture->position_count; ++i) {
@@ -4060,11 +4061,25 @@ static void race_remove_pacemaker_indicator(void)
 	}
 }
 
-qbool race_end(gedict_t* racer)
+static qbool race_end(gedict_t* racer, qbool valid, qbool complete)
 {
+	int player_num = NUM_FOR_EDICT(other) - 1;
+
 	racer->racer = false;
 	racer->muted = true;
 	race_set_one_player_movetype_and_etc(racer);
+
+	if (valid && !strnull(cvar_string("cs_address")) && !strnull(racer->s.v.netname)) {
+		const char* map = cvar_string(RACE_ROUTE_MAPNAME_CVAR);
+		int route_number = cvar(RACE_ROUTE_NUMBER_CVAR);
+
+		if (!strnull(map) && route_number >= 0) {
+			localcmd("\n" // why new line?
+				"sv_web_post Race/LogAttempt \"\" map %s routeNumber %d racer %s time %.3f complete %s\n",
+				map, route_number, racer->s.v.netname, race_time() / 1000.0f, complete ? "true" : "false");
+			trap_executecmd();
+		}
+	}
 
 	if (race_get_racer() == NULL) {
 		race_over();
@@ -4275,20 +4290,10 @@ void race_match_toggle(void)
 	cvar_fset("sv_silentrecord", cvar(RACE_MATCH_CVAR) ? 0 : 1);
 }
 
-typedef struct race_team_score_s {
-	char* name;
-	int wins;
-	int score;
-	int completions;
-	float best_time;
-	float total_time;
-	float total_distance;
-} race_team_score_t;
-
 static int TeamSorter(const void* lhs_, const void* rhs_)
 {
-	const race_team_score_t* lhs = (const race_team_score_t*)lhs_;
-	const race_team_score_t* rhs = (const race_team_score_t*)rhs_;
+	const race_stats_score_t* lhs = (const race_stats_score_t*)lhs_;
+	const race_stats_score_t* rhs = (const race_stats_score_t*)rhs_;
 
 	if (lhs->score > rhs->score)
 		return -1;
@@ -4297,7 +4302,7 @@ static int TeamSorter(const void* lhs_, const void* rhs_)
 	return strcmp(lhs->name, rhs->name);
 }
 
-static void race_match_stats_print(char* title, race_team_score_t* scores, int team_count)
+static void race_match_stats_print(char* title, race_stats_score_t* scores, int team_count)
 {
 	int i;
 
@@ -4314,7 +4319,7 @@ static void race_match_stats_print(char* title, race_team_score_t* scores, int t
 	}
 }
 
-static void race_match_stats_apply(race_team_score_t* stats, gedict_t* player)
+static void race_match_stats_apply(race_stats_score_t* stats, gedict_t* player)
 {
 	int p_num = NUM_FOR_EDICT(player) - 1;
 
@@ -4339,7 +4344,7 @@ static void race_match_team_stats(void)
 {
 	gedict_t* p, *p2;
 	int teams_found = 0;
-	race_team_score_t teams[MAX_CLIENTS] = { { 0 } };
+	race_stats_score_t teams[MAX_CLIENTS] = { { 0 } };
 
 	// keep track of players we've processed
 	for (p = world; (p = race_find_race_participants(p)); /**/) {
@@ -4373,19 +4378,30 @@ static void race_match_team_stats(void)
 	race_match_stats_print("Team scores", teams, teams_found);
 }
 
+static race_stats_score_t player_stats[MAX_CLIENTS] = { { 0 } };
+static int players_found = 0;
+
 static void race_match_player_stats(void)
 {
 	gedict_t* p;
-	int teams_found = 0;
-	race_team_score_t teams[MAX_CLIENTS] = { { 0 } };
+
+	memset(player_stats, 0, sizeof(player_stats));
+	players_found = 0;
 
 	for (p = world; (p = race_find_race_participants(p)); /**/) {
-		teams[teams_found].name = p->s.v.netname;
-		race_match_stats_apply(&teams[teams_found], p);
-		++teams_found;
+		player_stats[players_found].name = p->s.v.netname;
+		race_match_stats_apply(&player_stats[players_found], p);
+		++players_found;
 	}
 
-	race_match_stats_print("Player scores", teams, teams_found);
+	race_match_stats_print("Player scores", player_stats, players_found);
+}
+
+race_stats_score_t* race_get_player_stats(int* players)
+{
+	*players = players_found;
+
+	return player_stats;
 }
 
 void race_match_stats(void)
