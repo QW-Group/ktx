@@ -76,41 +76,46 @@ void RunRandomTrials (float min, float max, float mult)
 		G_bprint (2, " < %2.3f: %4d %3.2f%%\n", min + frac * (i+1), hits[i], hits[i] * 100.0f / trials);
 }
 
-void RegisterSkillVariables (void)
+void RegisterSkillVariables(void)
 {
-	extern qbool RegisterCvar (const char* var);
+	extern qbool RegisterCvar(const char* var);
 
-	RegisterCvar (FB_CVAR_DODGEFACTOR);
-	RegisterCvar (FB_CVAR_LOOKANYWHERE);
-	RegisterCvar (FB_CVAR_LOOKAHEADTIME);
-	RegisterCvar (FB_CVAR_PREDICTIONERROR);
-	RegisterCvar (FB_CVAR_VISIBILITY);
-	RegisterCvar (FB_CVAR_LGPREF);
-	RegisterCvar (FB_CVAR_ACCURACY);
-	RegisterCvar (FB_CVAR_YAW_MIN_ERROR);
-	RegisterCvar (FB_CVAR_YAW_MAX_ERROR);
-	RegisterCvar (FB_CVAR_YAW_MULTIPLIER);
-	RegisterCvar (FB_CVAR_YAW_SCALE);
-	RegisterCvar (FB_CVAR_PITCH_MIN_ERROR);
-	RegisterCvar (FB_CVAR_PITCH_MAX_ERROR);
-	RegisterCvar (FB_CVAR_PITCH_MULTIPLIER);
-	RegisterCvar (FB_CVAR_PITCH_SCALE);
-	RegisterCvar (FB_CVAR_ATTACK_RESPAWNS);
-	RegisterCvar (FB_CVAR_REACTION_TIME);
+	RegisterCvar(FB_CVAR_DODGEFACTOR);
+	RegisterCvar(FB_CVAR_LOOKANYWHERE);
+	RegisterCvar(FB_CVAR_LOOKAHEADTIME);
+	RegisterCvar(FB_CVAR_PREDICTIONERROR);
+	RegisterCvar(FB_CVAR_VISIBILITY);
+	RegisterCvar(FB_CVAR_LGPREF);
+	RegisterCvar(FB_CVAR_ACCURACY);
+	RegisterCvar(FB_CVAR_YAW_MIN_ERROR);
+	RegisterCvar(FB_CVAR_YAW_MAX_ERROR);
+	RegisterCvar(FB_CVAR_YAW_MULTIPLIER);
+	RegisterCvar(FB_CVAR_YAW_SCALE);
+	RegisterCvar(FB_CVAR_PITCH_MIN_ERROR);
+	RegisterCvar(FB_CVAR_PITCH_MAX_ERROR);
+	RegisterCvar(FB_CVAR_PITCH_MULTIPLIER);
+	RegisterCvar(FB_CVAR_PITCH_SCALE);
+	RegisterCvar(FB_CVAR_ATTACK_RESPAWNS);
+	RegisterCvar(FB_CVAR_REACTION_TIME);
 
-	RegisterCvar (FB_CVAR_MIN_VOLATILITY);
-	RegisterCvar (FB_CVAR_MAX_VOLATILITY);
-	RegisterCvar (FB_CVAR_INITIAL_VOLATILITY);
-	RegisterCvar (FB_CVAR_REDUCE_VOLATILITY);
-	RegisterCvar (FB_CVAR_OWNSPEED_VOLATILITY_THRESHOLD);
-	RegisterCvar (FB_CVAR_OWNSPEED_VOLATILITY_INCREASE);
-	RegisterCvar (FB_CVAR_ENEMYSPEED_VOLATILITY_THRESHOLD);
-	RegisterCvar (FB_CVAR_ENEMYSPEED_VOLATILITY_INCREASE);
-	RegisterCvar (FB_CVAR_ENEMYDIRECTION_VOLATILITY_INCREASE);
+	RegisterCvar(FB_CVAR_MIN_VOLATILITY);
+	RegisterCvar(FB_CVAR_MAX_VOLATILITY);
+	RegisterCvar(FB_CVAR_INITIAL_VOLATILITY);
+	RegisterCvar(FB_CVAR_REDUCE_VOLATILITY);
+	RegisterCvar(FB_CVAR_OWNSPEED_VOLATILITY_THRESHOLD);
+	RegisterCvar(FB_CVAR_OWNSPEED_VOLATILITY_INCREASE);
+	RegisterCvar(FB_CVAR_ENEMYSPEED_VOLATILITY_THRESHOLD);
+	RegisterCvar(FB_CVAR_ENEMYSPEED_VOLATILITY_INCREASE);
+	RegisterCvar(FB_CVAR_ENEMYDIRECTION_VOLATILITY_INCREASE);
 
-	RegisterCvar (FB_CVAR_MOVEMENT_SKILL);
-	RegisterCvar (FB_CVAR_COMBATJUMP_CHANCE);
-	RegisterCvar (FB_CVAR_MISSILEDODGE_TIME);
+	RegisterCvar(FB_CVAR_MOVEMENT_SKILL);
+	RegisterCvar(FB_CVAR_COMBATJUMP_CHANCE);
+	RegisterCvar(FB_CVAR_MISSILEDODGE_TIME);
+
+	RegisterCvar(FB_CVAR_DISTANCEERROR);
+	RegisterCvar(FB_CVAR_PAIN_VOLATILITY_INCREASE);
+	RegisterCvar(FB_CVAR_SELF_MIDAIR_VOLATILITY_INCREASE);
+	RegisterCvar(FB_CVAR_OPPONENT_MIDAIR_VOLATILITY_INCREASE);
 }
 
 qbool SetAttributesBasedOnSkill (int skill)
@@ -155,8 +160,8 @@ qbool SetAttributesBasedOnSkill (int skill)
 	cvar_fset (FB_CVAR_ENEMYSPEED_VOLATILITY_THRESHOLD, RangeOverSkill (skill, 360, 450));
 	cvar_fset (FB_CVAR_OWNSPEED_VOLATILITY_INCREASE, RangeOverSkill (skill, 0.4f, 0.2f));
 	cvar_fset (FB_CVAR_ENEMYDIRECTION_VOLATILITY_INCREASE, RangeOverSkill (skill, 0.6f, 0.4f));
-	cvar_fset (FB_CVAR_PAIN_VOLATILITY_INCREASE, RangeOverSkill(skill, 1.0f, 0.1f));
-	cvar_fset (FB_CVAR_SELF_MIDAIR_VOLATILITY_INCREASE, RangeOverSkill(skill, 1.5f, 0.0f));
+	cvar_fset (FB_CVAR_PAIN_VOLATILITY_INCREASE, RangeOverSkill(skill, 0.5f, 0.1f));
+	cvar_fset (FB_CVAR_SELF_MIDAIR_VOLATILITY_INCREASE, RangeOverSkill(skill, 1.0f, 0.0f));
 	cvar_fset (FB_CVAR_OPPONENT_MIDAIR_VOLATILITY_INCREASE, RangeOverSkill(skill, 1.0f, 0.0f));
 
 	// Movement
