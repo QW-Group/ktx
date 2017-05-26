@@ -469,7 +469,7 @@ void json_race_detail(fileHandle_t handle)
 
 	s2di(handle, "  \"race\": {\n");
 	s2di(handle, "    \"route\": %d,\n", race.active_route);
-	s2di(handle, "    \"weapon-mode\": \"%s\"\n", race.weapon == raceWeaponAllowed ? "allowed" : race.weapon == raceWeapon2s ? "delayed" : "none");
+	s2di(handle, "    \"weapon-mode\": \"%s\",\n", race.weapon == raceWeaponAllowed ? "allowed" : race.weapon == raceWeapon2s ? "delayed" : "none");
 	s2di(handle, "    \"can-false-start\": %s,\n", race.falsestart == raceFalseStartYes ? "true" : "false");
 	s2di(handle, "    \"match\": %s,\n", race_match_mode() ? "true" : "false");
 	if (!strnull(race.pacemaker_nick)) {
