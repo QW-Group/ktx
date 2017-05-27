@@ -4074,7 +4074,7 @@ static qbool race_end(gedict_t* racer, qbool valid, qbool complete)
 		if (!strnull(map) && route_number >= 0) {
 			localcmd("\n" // why new line?
 				"sv_web_post Race/LogAttempt \"\" map %s routeNumber %d racer %s time %.3f complete %s\n",
-				map, route_number, racer->s.v.netname, race_time() / 1000.0f, complete ? "true" : "false");
+				map, route_number, racer->s.v.netname, race_time() / 1000.0f, complete && !race_pacemaker_enabled() ? "true" : "false");
 			trap_executecmd();
 		}
 	}
