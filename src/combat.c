@@ -397,7 +397,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	// can't damage other players in race
 	if (isRACE() && (attacker != targ)) {
-		if (targ->ct == ctPlayer || attacker->ct == ctPlayer) {
+		if (targ->ct == ctPlayer && attacker->ct == ctPlayer) {
 			return;
 		}
 	}

@@ -1319,7 +1319,7 @@ void launch_spike( vec3_t org, vec3_t dir )
 	newmis->s.v.owner = EDICT_TO_PROG( self );
 	newmis->s.v.movetype = MOVETYPE_FLYMISSILE;
 	newmis->isMissile = true;
-	newmis->s.v.solid = SOLID_BBOX;
+	newmis->s.v.solid = (isRACE() ? SOLID_TRIGGER : SOLID_BBOX);
 
 	newmis->s.v.touch = ( func_t ) spike_touch;
 	newmis->s.v.classname = "spike";
@@ -1336,10 +1336,35 @@ void launch_spike( vec3_t org, vec3_t dir )
 	vectoangles( newmis->s.v.velocity, newmis->s.v.angles );
 }
 
+static qbool race_ignore_spike(gedict_t* self, gedict_t* other)
+{
+	// we're not racing, treat as normal
+	if (!isRACE()) {
+		return false;
+	}
+
+	// everything collides with walls
+	if (other == world) {
+		return false;
+	}
+
+	// they only collide with players
+	if (other->ct != ctPlayer) {
+		return true;
+	}
+
+	// player fired it?  ignore
+	return PROG_TO_EDICT(self->s.v.owner)->ct == ctPlayer;
+}
+
 void spike_touch()
 {
 	if ( other == PROG_TO_EDICT( self->s.v.owner ) )
 		return;
+
+	if (race_ignore_spike(self, other)) {
+		return;
+	}
 
 	if ( self->voided )
 	{
@@ -1347,8 +1372,10 @@ void spike_touch()
 	}
 	self->voided = 1;
 
-	if ( other->s.v.solid == SOLID_TRIGGER )
+	if (other->s.v.solid == SOLID_TRIGGER) {
+		G_bprint(2, "Trigger field, do nothing (%s)\n", other->s.v.netname);
 		return;		// trigger field, do nothing
+	}
 
 	if ( trap_pointcontents( PASSVEC3( self->s.v.origin ) ) == CONTENT_SKY )
 	{
@@ -1393,6 +1420,10 @@ void superspike_touch()
 {
 	if ( other == PROG_TO_EDICT( self->s.v.owner ) )
 		return;
+
+	if (race_ignore_spike(self, other)) {
+		return;
+	}
 
 	if ( self->voided )
 	{
