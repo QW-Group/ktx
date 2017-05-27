@@ -4063,8 +4063,6 @@ static void race_remove_pacemaker_indicator(void)
 
 static qbool race_end(gedict_t* racer, qbool valid, qbool complete)
 {
-	int player_num = NUM_FOR_EDICT(other) - 1;
-
 	racer->racer = false;
 	racer->muted = true;
 	race_set_one_player_movetype_and_etc(racer);
