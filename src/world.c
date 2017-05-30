@@ -106,7 +106,7 @@ void CheckDefMap( )
 
 		if( !strnull( s1 ) && strneq( s1, g_globalvars.mapname ) )
 			changelevel( s1 );
-		else if ( intermission_running || player_count == bot_count )
+		else if ( intermission_running || (player_count == bot_count && bot_count) )
 			changelevel( g_globalvars.mapname );
 	}
 
