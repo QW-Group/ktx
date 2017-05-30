@@ -235,7 +235,7 @@ void xml_race_detail(fileHandle_t handle)
 	extern gedict_t* race_find_racer(gedict_t* p);
 	gedict_t* p;
 
-	s2di(handle, "\t<race route=\"%d\" weaponmode=\"%d\" startmode=\"%d\">", race.active_route, race.weapon, race.falsestart);
+	s2di(handle, "\t<race route=\"%d\" weaponmode=\"%d\" startmode=\"%d\">", race.active_route - 1, race.weapon, race.falsestart);
 	if (!strnull(race.pacemaker_nick)) {
 		s2di(handle, "\t\t<pacemaker time=\"%f\">%s</pacemaker>\n", race.pacemaker_time * 1.0f, xml_string(race.pacemaker_nick));
 	}

@@ -6,6 +6,26 @@
 // - Hoonymode stats: would be interesting to see spawn A vs B result... could always get from demo tho
 // - 
 
+//#define USER_FRIENDLY_JSON
+
+#ifdef USER_FRIENDLY_JSON
+#define INDENT2  "  "
+#define INDENT4  "    "
+#define INDENT6  "      "
+#define INDENT8  "        "
+#define INDENT10 "          "
+#define INDENT12 "            "
+#define JSON_CR  "\n"
+#else
+#define INDENT2
+#define INDENT4
+#define INDENT6
+#define INDENT8
+#define INDENT10
+#define INDENT12
+#define JSON_CR  ""
+#endif
+
 static void json_player_ctf_stats(fileHandle_t handle, player_stats_t* stats);
 static void json_player_instagib_stats(fileHandle_t handle, player_stats_t* stats);
 static void json_player_midair_stats(fileHandle_t handle, player_stats_t* stats);
@@ -21,8 +41,8 @@ static void json_player_hoonymode_stats(fileHandle_t handle, gedict_t* player);
 	any = true; \
 }
 
-#define NEWLINE_CHECK(handle, any) SIMPLE_CHECK(handle, any, "\n")
-#define COMMA_CHECK(handle, any) SIMPLE_CHECK(handle, any, ",\n")
+#define NEWLINE_CHECK(handle, any) SIMPLE_CHECK(handle, any, JSON_CR)
+#define COMMA_CHECK(handle, any) SIMPLE_CHECK(handle, any, "," JSON_CR)
 
 static char* json_string(const char* input)
 {
@@ -91,7 +111,7 @@ static char* json_string(const char* input)
 
 static void json_weap_header(fileHandle_t handle)
 {
-	s2di(handle, "      \"weapons\": {\n");
+	s2di(handle, INDENT6 "\"weapons\": {" JSON_CR);
 }
 
 static void json_weap_detail(fileHandle_t handle, const char* name, int weapon_num, wpType_t* stats)
@@ -99,11 +119,11 @@ static void json_weap_detail(fileHandle_t handle, const char* name, int weapon_n
 	qbool any = false;
 
 	if (weapon_num) {
-		s2di(handle, ",\n");
+		s2di(handle, "," JSON_CR);
 	}
-	s2di(handle, "        \"%s\": {\n", json_string(name));
+	s2di(handle, INDENT8 "\"%s\": {" JSON_CR, json_string(name));
 	if (stats->attacks || stats->hits || stats->rhits || stats->vhits) {
-		s2di(handle, "          \"acc\": { \"attacks\": %d, \"hits\": %d", stats->attacks, stats->hits);
+		s2di(handle, INDENT10 "\"acc\": { \"attacks\": %d, \"hits\": %d", stats->attacks, stats->hits);
 		if (stats->rhits || stats->vhits) {
 			s2di(handle, ", \"real\": %d, \"virtual\": %d", stats->rhits, stats->vhits);
 		}
@@ -112,30 +132,53 @@ static void json_weap_detail(fileHandle_t handle, const char* name, int weapon_n
 	}
 	if (stats->kills || stats->tkills || stats->ekills || stats->suicides) {
 		COMMA_CHECK(handle, any);
-		s2di(handle, "          \"kills\": { \"total\": %d, \"team\": %d, \"enemy\": %d, \"self\": %d }", stats->kills, stats->tkills, stats->ekills, stats->suicides);
+		s2di(handle, INDENT10 "\"kills\": { \"total\": %d, \"team\": %d, \"enemy\": %d, \"self\": %d }", stats->kills, stats->tkills, stats->ekills, stats->suicides);
 	}
 	if (deathmatch < 4) {
 		COMMA_CHECK(handle, any);
-		s2di(handle, "          \"deaths\": %d", stats->deaths);
+		s2di(handle, INDENT10 "\"deaths\": %d", stats->deaths);
 	}
-	if (deathmatch < 4 && (stats->drops || stats->tooks || stats->ttooks)) {
+	if (deathmatch < 4 && (stats->drops || stats->tooks || stats->ttooks || stats->stooks || stats->sttooks)) {
+		qbool inner_any = false;
 		COMMA_CHECK(handle, any);
-		s2di(handle, "          \"pickups\": { \"dropped\": %d, \"took\": %d, \"total-took\": %d }", stats->drops, stats->tooks, stats->ttooks);
+		s2di(handle, INDENT10 "\"pickups\": {" JSON_CR);
+		if (stats->drops) {
+			COMMA_CHECK(handle, inner_any);
+			s2di(handle, INDENT12 "\"dropped\": %d", stats->drops);
+		}
+		if (stats->tooks) {
+			COMMA_CHECK(handle, inner_any);
+			s2di(handle, INDENT12 "\"taken\": %d", stats->tooks);
+		}
+		if (stats->ttooks) {
+			COMMA_CHECK(handle, inner_any);
+			s2di(handle, INDENT12 "\"total-taken\": %d", stats->ttooks);
+		}
+		if (stats->stooks) {
+			COMMA_CHECK(handle, inner_any);
+			s2di(handle, INDENT12 "\"spawn-taken\": %d", stats->stooks);
+		}
+		if (stats->sttooks) {
+			COMMA_CHECK(handle, inner_any);
+			s2di(handle, INDENT12 "\"spawn-total-taken\": %d", stats->sttooks);
+		}
+		NEWLINE_CHECK(handle, inner_any);
+		s2di(handle, INDENT10 "}");
 	}
 	if (stats->edamage || stats->tdamage) {
 		COMMA_CHECK(handle, any);
-		s2di(handle, "          \"damage\": { \"enemy\": %d, \"team\": %d }", stats->edamage, stats->tdamage);
+		s2di(handle, INDENT10 "\"damage\": { \"enemy\": %d, \"team\": %d }", stats->edamage, stats->tdamage);
 	}
 	NEWLINE_CHECK(handle, any);
-	s2di(handle, "        }");
+	s2di(handle, INDENT8 "}");
 }
 
 static void json_weap_footer(fileHandle_t handle, int num)
 {
 	if (num) {
-		s2di(handle, "\n");
+		s2di(handle, JSON_CR);
 	}
-	s2di(handle, "      },\n");
+	s2di(handle, INDENT6 "}," JSON_CR);
 }
 
 void json_teams_header(fileHandle_t handle)
@@ -153,7 +196,7 @@ void json_teams_header(fileHandle_t handle)
 	}
 
 	if (i) {
-		s2di(handle, "  \"teams\": [%s],\n", tmp);
+		s2di(handle, INDENT2 "\"teams\": [%s]," JSON_CR, tmp);
 	}
 }
 
@@ -163,7 +206,6 @@ void json_teams_footer(fileHandle_t handle, int teams)
 
 void json_team_detail(fileHandle_t handle, int num, teamStats_t* stats)
 {
-
 }
 
 void json_team_footer(fileHandle_t handle)
@@ -172,7 +214,7 @@ void json_team_footer(fileHandle_t handle)
 
 static void json_items_header(fileHandle_t handle)
 {
-	s2di(handle, "      \"items\": {\n");
+	s2di(handle, INDENT6 "\"items\": {" JSON_CR);
 }
 
 static void json_item_detail(fileHandle_t handle, const char* name, int item_num, itType_t* stats)
@@ -180,9 +222,9 @@ static void json_item_detail(fileHandle_t handle, const char* name, int item_num
 	qbool any = false;
 
 	if (item_num) {
-		s2di(handle, ",\n");
+		s2di(handle, "," JSON_CR);
 	}
-	s2di(handle, "        \"%s\": { ", json_string(name));
+	s2di(handle, INDENT8 "\"%s\": { ", json_string(name));
 	if (stats->tooks) {
 		COMMA_CHECK(handle, any);
 		s2di(handle, "\"took\": %d", stats->tooks);
@@ -197,31 +239,31 @@ static void json_item_detail(fileHandle_t handle, const char* name, int item_num
 static void json_items_footer(fileHandle_t handle, int item_num)
 {
 	if (item_num) {
-		s2di(handle, "\n");
+		s2di(handle, "" JSON_CR);
 	}
-	s2di(handle, "      }");
+	s2di(handle, INDENT6 "}");
 }
 
 void json_players_header(fileHandle_t handle)
 {
-	s2di(handle, "  \"players\": [\n");
+	s2di(handle, INDENT2 "\"players\": [" JSON_CR);
 }
 
 void json_players_footer(fileHandle_t handle, int player_count)
 {
 	if (player_count) {
-		s2di(handle, "\n");
+		s2di(handle, JSON_CR);
 	}
-	s2di(handle, "  ]\n");
+	s2di(handle, INDENT2 "]" JSON_CR);
 }
 
 void json_player_bot_info(fileHandle_t handle, fb_botskill_t* skill)
 {
-	s2di(handle, ",\n");
-	s2di(handle, "      \"bot\": {\n");
-	s2di(handle, "        \"skill\": %d,\n", skill->skill_level);
-	s2di(handle, "        \"customised\": %s\n", skill->customised ? "true" : "false");
-	s2di(handle, "      }");
+	s2di(handle, "," JSON_CR);
+	s2di(handle, INDENT6 "\"bot\": {" JSON_CR);
+	s2di(handle, INDENT8 "\"skill\": %d," JSON_CR, skill->skill_level);
+	s2di(handle, INDENT8 "\"customised\": %s" JSON_CR, skill->customised ? "true" : "false");
+	s2di(handle, INDENT6 "}");
 }
 
 void json_player_detail(fileHandle_t handle, int player_num, gedict_t* player, const char* team)
@@ -232,27 +274,27 @@ void json_player_detail(fileHandle_t handle, int player_num, gedict_t* player, c
 	int count = 0;
 
 	if (player_num) {
-		s2di(handle, ",\n");
+		s2di(handle, "," JSON_CR);
 	}
 
-	s2di(handle, "    {\n");
-	s2di(handle, "      \"top-color\": %d,\n", iKey(player, "topcolor"));
-	s2di(handle, "      \"bottom-color\": %d,\n", iKey(player, "bottomcolor"));
-	s2di(handle, "      \"ping\": %d,\n", iKey(player, "ping"));
-	s2di(handle, "      \"name\": \"%s\",\n", json_string(getname(player)));
-	s2di(handle, "      \"team\": \"%s\",\n", json_string(team));
-	s2di(handle, "      \"stats\": { \"frags\": %d, \"deaths\": %d, \"tk\": %d, \"spawn-frags\": %d, \"kills\": %d, \"suicides\": %d },\n", (int)player->s.v.frags, (int)player->deaths, (int)player->friendly, player->ps.spawn_frags, (int)player->kills, (int)player->suicides);
-	s2di(handle, "      \"dmg\": { \"taken\": %d, \"given\": %d, \"team\": %d, \"self\": %d, \"team-weapons\": %d, \"enemy-weapons\": %d },\n",
+	s2di(handle, INDENT4 "{" JSON_CR);
+	s2di(handle, INDENT6 "\"top-color\": %d," JSON_CR, iKey(player, "topcolor"));
+	s2di(handle, INDENT6 "\"bottom-color\": %d," JSON_CR, iKey(player, "bottomcolor"));
+	s2di(handle, INDENT6 "\"ping\": %d," JSON_CR, iKey(player, "ping"));
+	s2di(handle, INDENT6 "\"name\": \"%s\"," JSON_CR, json_string(getname(player)));
+	s2di(handle, INDENT6 "\"team\": \"%s\"," JSON_CR, json_string(team));
+	s2di(handle, INDENT6 "\"stats\": { \"frags\": %d, \"deaths\": %d, \"tk\": %d, \"spawn-frags\": %d, \"kills\": %d, \"suicides\": %d }," JSON_CR, (int)player->s.v.frags, (int)player->deaths, (int)player->friendly, player->ps.spawn_frags, (int)player->kills, (int)player->suicides);
+	s2di(handle, INDENT6 "\"dmg\": { \"taken\": %d, \"given\": %d, \"team\": %d, \"self\": %d, \"team-weapons\": %d, \"enemy-weapons\": %d }," JSON_CR,
 		(int)player->ps.dmg_t, (int)player->ps.dmg_g,
 		(int)player->ps.dmg_team, (int)player->ps.dmg_self,
 		(int)player->ps.dmg_tweapon, (int)player->ps.dmg_eweapon
 	);
-	s2di(handle, "      \"xfer\": %d,\n", player->ps.transferred_packs);
-	s2di(handle, "      \"spree\": { \"max\": %d, \"quad\": %d },\n", player->ps.spree_max, player->ps.spree_max_q);
-	s2di(handle, "      \"control\": %f,\n", player->ps.control_time);
-	s2di(handle, "      \"speed\": { \"max\": %f, \"avg\": %f },\n", player->ps.velocity_max, player->ps.vel_frames > 0 ? player->ps.velocity_sum / player->ps.vel_frames : 0.);
+	s2di(handle, INDENT6 "\"xfer\": %d," JSON_CR, player->ps.transferred_packs);
+	s2di(handle, INDENT6 "\"spree\": { \"max\": %d, \"quad\": %d }," JSON_CR, player->ps.spree_max, player->ps.spree_max_q);
+	s2di(handle, INDENT6 "\"control\": %f," JSON_CR, player->ps.control_time);
+	s2di(handle, INDENT6 "\"speed\": { \"max\": %f, \"avg\": %f }," JSON_CR, player->ps.velocity_max, player->ps.vel_frames > 0 ? player->ps.velocity_sum / player->ps.vel_frames : 0.);
 	if (GetHandicap(player) != 100) {
-		s2di(handle, "      \"handicap\": %d,\n", GetHandicap(player));
+		s2di(handle, INDENT6 "\"handicap\": %d," JSON_CR, GetHandicap(player));
 	}
 
 	json_weap_header(handle);
@@ -306,8 +348,8 @@ void json_player_detail(fileHandle_t handle, int player_num, gedict_t* player, c
 	}
 #endif
 
-	s2di(handle, "\n");
-	s2di(handle, "    }");
+	s2di(handle, JSON_CR);
+	s2di(handle, INDENT4 "}");
 }
 
 void json_match_header(fileHandle_t handle, char* ip, int port)
@@ -321,144 +363,138 @@ void json_match_header(fileHandle_t handle, char* ip, int port)
 	if (!QVMstrftime(date, sizeof(date), "%Y-%m-%d %H:%M:%S %z", 0))
 		date[0] = 0; // bad date
 
-	s2di(handle, "{\n");
-	s2di(handle, "  \"version\": %d,\n", STATS_VERSION_NUMBER);
-	s2di(handle, "  \"date\": \"%s\",\n", date);
-	s2di(handle, "  \"map\": \"%s\",\n", json_string(g_globalvars.mapname));
-	s2di(handle, "  \"hostname\": \"%s\",\n", json_string(striphigh(cvar_string("hostname"))));
-	s2di(handle, "  \"ip\": \"%s\",\n", json_string(ip));
-	s2di(handle, "  \"port\": %d,\n", port);
+	s2di(handle, "{" JSON_CR);
+	s2di(handle, INDENT2 "\"version\": %d," JSON_CR, STATS_VERSION_NUMBER);
+	s2di(handle, INDENT2 "\"date\": \"%s\"," JSON_CR, date);
+	s2di(handle, INDENT2 "\"map\": \"%s\"," JSON_CR, json_string(g_globalvars.mapname));
+	s2di(handle, INDENT2 "\"hostname\": \"%s\"," JSON_CR, json_string(striphigh(cvar_string("hostname"))));
+	s2di(handle, INDENT2 "\"ip\": \"%s\"," JSON_CR, json_string(ip));
+	s2di(handle, INDENT2 "\"port\": %d," JSON_CR, port);
 	if (!strnull(matchtag)) {
-		s2di(handle, "  \"matchtag\": \"%s\",\n", json_string(matchtag));
+		s2di(handle, INDENT2 "\"matchtag\": \"%s\"," JSON_CR, json_string(matchtag));
 	}
 	if (!strnull(mode)) {
-		s2di(handle, "  \"mode\": \"%s\",\n", json_string(mode));
+		s2di(handle, INDENT2 "\"mode\": \"%s\"," JSON_CR, json_string(mode));
 	}
 	if (timelimit) {
-		s2di(handle, "  \"tl\": %d,\n", timelimit);
+		s2di(handle, INDENT2 "\"tl\": %d," JSON_CR, timelimit);
 	}
 	if (fraglimit) {
-		s2di(handle, "  \"fl\": %d,\n", timelimit);
+		s2di(handle, INDENT2 "\"fl\": %d," JSON_CR, timelimit);
 	}
 	if (deathmatch) {
-		s2di(handle, "  \"dm\": %d,\n", deathmatch);
+		s2di(handle, INDENT2 "\"dm\": %d," JSON_CR, deathmatch);
 	}
 	if (teamplay) {
-		s2di(handle, "  \"tp\": %d,\n", teamplay);
+		s2di(handle, INDENT2 "\"tp\": %d," JSON_CR, teamplay);
 	}
 
 	if (!strnull(cvar_string("serverdemo"))) {
-		const char* demo_dir = cvar_string("sv_demodir");
 		const char* server_demo = cvar_string("serverdemo");
 
-		if (!strnull(demo_dir)) {
-			s2di(handle, "  \"demo\": \"%s/%s\",\n", json_string(demo_dir), json_string(server_demo));
-		}
-		else {
-			s2di(handle, "  \"demo\": \"%s\",\n", json_string(cvar_string("serverdemo")));
-		}
+		s2di(handle, INDENT2 "\"demo\": \"%s\"," JSON_CR, json_string(server_demo));
 	}
 }
 
 void json_match_footer(fileHandle_t handle)
 {
-	s2di(handle, "}\n");
+	s2di(handle, "}" JSON_CR);
 }
 
 static void json_player_ctf_stats(fileHandle_t handle, player_stats_t* stats)
 {
 	qbool any = false;
 
-	s2di(handle, ",\n");
-	s2di(handle, "      \"ctf\": {\n");
+	s2di(handle, "," JSON_CR);
+	s2di(handle, INDENT6 "\"ctf\": {" JSON_CR);
 	if (stats->ctf_points) {
-		s2di(handle, "        \"points\": %d", stats->ctf_points);
+		s2di(handle, INDENT8 "\"points\": %d", stats->ctf_points);
 		any = true;
 	}
 	if (stats->caps) {
 		COMMA_CHECK(handle, any);
-		s2di(handle, "        \"caps\": %d", stats->caps);
+		s2di(handle, INDENT8 "\"caps\": %d", stats->caps);
 	}
 	if (stats->f_defends || stats->c_defends) {
 		COMMA_CHECK(handle, any);
-		s2di(handle, "        \"defends\": [%d, %d]", stats->f_defends, stats->c_defends);
+		s2di(handle, INDENT8 "\"defends\": [%d, %d]", stats->f_defends, stats->c_defends);
 	}
 	if (stats->c_frags) {
 		COMMA_CHECK(handle, any);
-		s2di(handle, "        \"frags\": %d", stats->c_frags);
+		s2di(handle, INDENT8 "\"frags\": %d", stats->c_frags);
 	}
 	if (stats->pickups) {
 		COMMA_CHECK(handle, any);
-		s2di(handle, "        \"pickups\": %d", stats->pickups);
+		s2di(handle, INDENT8 "\"pickups\": %d", stats->pickups);
 	}
 	if (stats->returns) {
 		COMMA_CHECK(handle, any);
-		s2di(handle, "        \"returns\": %d", stats->returns);
+		s2di(handle, INDENT8 "\"returns\": %d", stats->returns);
 	}
 	COMMA_CHECK(handle, any);
-	s2di(handle, "        \"runes\": [%d %d %d %d]\n", (int)(stats->res_time + 0.5f), (int)(stats->str_time + 0.5f), (int)(stats->hst_time + 0.5f), (int)(stats->rgn_time + 0.5f));
-	s2di(handle, "      }");
+	s2di(handle, INDENT8 "\"runes\": [%d %d %d %d]" JSON_CR, (int)(stats->res_time + 0.5f), (int)(stats->str_time + 0.5f), (int)(stats->hst_time + 0.5f), (int)(stats->rgn_time + 0.5f));
+	s2di(handle, INDENT6 "}");
 }
 
 static void json_player_instagib_stats(fileHandle_t handle, player_stats_t* stats)
 {
 	qbool any = false;
 
-	s2di(handle, ",\n");
-	s2di(handle, "      \"instagib\": {\n");
+	s2di(handle, "," JSON_CR);
+	s2di(handle, INDENT6 "\"instagib\": {" JSON_CR);
 	if (stats->i_height || stats->i_maxheight) {
-		s2di(handle, "        \"height\": [%d, %d]", stats->i_height, stats->i_maxheight);
+		s2di(handle, INDENT8 "\"height\": [%d, %d]", stats->i_height, stats->i_maxheight);
 		COMMA_CHECK(handle, any);
 	}
 	if (stats->i_rings) {
 		COMMA_CHECK(handle, any);
-		s2di(handle, "        \"rings\": %d", stats->i_rings);
+		s2di(handle, INDENT8 "\"rings\": %d", stats->i_rings);
 	}
 	COMMA_CHECK(handle, any);
-	s2di(handle, "        \"gibs\": { \"coil\": %d, \"axe\": %d, \"stomp\": %d, \"multi\": %d, \"air\": %d, \"best-multi\": %d }\n", stats->i_cggibs, stats->i_axegibs, stats->i_stompgibs, stats->i_multigibs, stats->i_airgibs, stats->i_maxmultigibs);
-	s2di(handle, "      }");
+	s2di(handle, INDENT8 "\"gibs\": { \"coil\": %d, \"axe\": %d, \"stomp\": %d, \"multi\": %d, \"air\": %d, \"best-multi\": %d }" JSON_CR, stats->i_cggibs, stats->i_axegibs, stats->i_stompgibs, stats->i_multigibs, stats->i_airgibs, stats->i_maxmultigibs);
+	s2di(handle, INDENT6 "}");
 }
 
 static void json_player_midair_stats(fileHandle_t handle, player_stats_t* stats)
 {
 	qbool any = false;
 
-	s2di(handle, ",\n");
-	s2di(handle, "      \"midair\": {\n");
+	s2di(handle, "," JSON_CR);
+	s2di(handle, INDENT6 "\"midair\": {" JSON_CR);
 	if (stats->mid_stomps) {
-		s2di(handle, "        \"stomps\": %d", stats->mid_stomps);
+		s2di(handle, INDENT8 "\"stomps\": %d", stats->mid_stomps);
 		any = true;
 	}
 	if (stats->mid_bronze || stats->mid_silver || stats->mid_gold || stats->mid_platinum) {
 		COMMA_CHECK(handle, any);
-		s2di(handle, "        \"midairs\": { \"bronze\": %d, \"silver\": %d, \"gold\": %d, \"platinum\": %d }", stats->mid_bronze, stats->mid_silver, stats->mid_gold, stats->mid_platinum);
+		s2di(handle, INDENT8 "\"midairs\": { \"bronze\": %d, \"silver\": %d, \"gold\": %d, \"platinum\": %d }", stats->mid_bronze, stats->mid_silver, stats->mid_gold, stats->mid_platinum);
 	}
 	if (stats->mid_total) {
 		COMMA_CHECK(handle, any);
-		s2di(handle, "        \"total\": %d", stats->mid_total);
+		s2di(handle, INDENT8 "\"total\": %d", stats->mid_total);
 	}
 	if (stats->mid_bonus) {
 		COMMA_CHECK(handle, any);
-		s2di(handle, "        \"bonus\": %d", stats->mid_bonus);
+		s2di(handle, INDENT8 "\"bonus\": %d", stats->mid_bonus);
 	}
 	if (stats->mid_totalheight || stats->mid_maxheight || stats->mid_avgheight) {
 		COMMA_CHECK(handle, any);
-		s2di(handle, "        \"heights\": { \"total\": %f, \"max\": %f, \"avg\": %f }", stats->mid_totalheight, stats->mid_maxheight, stats->mid_avgheight);
+		s2di(handle, INDENT8 "\"heights\": { \"total\": %f, \"max\": %f, \"avg\": %f }", stats->mid_totalheight, stats->mid_maxheight, stats->mid_avgheight);
 	}
 	NEWLINE_CHECK(handle, any);
-	s2di(handle, "      }");
+	s2di(handle, INDENT6 "}");
 }
 
 static void json_player_ra_stats(fileHandle_t handle, player_stats_t* stats)
 {
-	s2di(handle, ",\n");
-	s2di(handle, "      \"ra\": { \"wins\": %d, \"losses\": %d }", stats->wins, stats->loses);
+	s2di(handle, "," JSON_CR);
+	s2di(handle, INDENT6 "\"ra\": { \"wins\": %d, \"losses\": %d }", stats->wins, stats->loses);
 }
 
 static void json_player_hoonymode_stats(fileHandle_t handle, gedict_t* player)
 {
-	s2di(handle, ",\n");
-	s2di(handle, "      \"hm-rounds\": \"%s\"\n", HM_round_results(player));
+	s2di(handle, "," JSON_CR);
+	s2di(handle, INDENT6 "\"hm-rounds\": \"%s\"" JSON_CR, HM_round_results(player));
 }
 
 void json_race_detail(fileHandle_t handle)
@@ -467,35 +503,35 @@ void json_race_detail(fileHandle_t handle)
 	qbool any = false;
 	race_stats_score_t* stats;
 
-	s2di(handle, "  \"race\": {\n");
-	s2di(handle, "    \"route\": %d,\n", race.active_route);
-	s2di(handle, "    \"weapon-mode\": \"%s\",\n", race.weapon == raceWeaponAllowed ? "allowed" : race.weapon == raceWeapon2s ? "delayed" : "none");
-	s2di(handle, "    \"can-false-start\": %s,\n", race.falsestart == raceFalseStartYes ? "true" : "false");
-	s2di(handle, "    \"match\": %s,\n", race_match_mode() ? "true" : "false");
+	s2di(handle, INDENT2 "\"race\": {" JSON_CR);
+	s2di(handle, INDENT4 "\"route\": %d," JSON_CR, race.active_route - 1);
+	s2di(handle, INDENT4 "\"weapon-mode\": \"%s\"," JSON_CR, race.weapon == raceWeaponAllowed ? "allowed" : race.weapon == raceWeapon2s ? "delayed" : "none");
+	s2di(handle, INDENT4 "\"can-false-start\": %s," JSON_CR, race.falsestart == raceFalseStartYes ? "true" : "false");
+	s2di(handle, INDENT4 "\"match\": %s," JSON_CR, race_match_mode() ? "true" : "false");
 	if (!strnull(race.pacemaker_nick)) {
-		s2di(handle, "    \"pacemaker\": { \"time\": %f, \"name\": \"%s\" },\n", race.pacemaker_time * 0.001f, json_string(race.pacemaker_nick));
+		s2di(handle, INDENT4 "\"pacemaker\": { \"time\": %.3f, \"name\": \"%s\" }," JSON_CR, race.pacemaker_time * 0.001f, json_string(race.pacemaker_nick));
 	}
 	if (race_match_mode()) {
 		int player_count;
 		int i;
 
-		s2di(handle, "    \"scoring\": \"%s\", \n", race_scoring_system_name());
+		s2di(handle, INDENT4 "\"scoring\": \"%s\"," JSON_CR, race_scoring_system_name());
 		stats = race_get_player_stats(&player_count);
-		s2di(handle, "    \"racers\": [\n");
+		s2di(handle, INDENT4 "\"racers\": [" JSON_CR);
 		for (i = 0; i < player_count; ++i) {
 			COMMA_CHECK(handle, any);
-			s2di(handle, "      { \"bestTime\": %f, \"completions\": %f, \"score\": %f, "
-				"\"racer\": \"%s\", \"distance\": %f, \"time\": %f, \"wins\": %d }",
-				stats[i].best_time, stats[i].completions, stats[i].score,
-				json_string(stats[i].name), stats[i].total_distance, stats[i].total_time, stats[i].wins
+			s2di(handle, INDENT6 "{ \"bestTime\": %.3f, \"completions\": %d, \"score\": %d, "
+				"\"racer\": \"%s\", \"distance\": %f, \"time\": %.3f, \"wins\": %d }",
+				stats[i].best_time / 1000.0f, stats[i].completions, stats[i].score,
+				json_string(stats[i].name), stats[i].total_distance, stats[i].total_time / 1000.0f, stats[i].wins
 			);
 		}
 		NEWLINE_CHECK(handle, any);
-		s2di(handle, "    ]\n");
+		s2di(handle, INDENT4 "]" JSON_CR);
 	}
 	else {
 		gedict_t* p;
-		s2di(handle, "    \"racers\": [\n");
+		s2di(handle, INDENT4 "\"racers\": [" JSON_CR);
 		for (p = world; (p = race_find_race_participants(p)); /**/) {
 			int player_number = NUM_FOR_EDICT(p) - 1;
 			raceRecord_t* record = NULL;
@@ -509,14 +545,14 @@ void json_race_detail(fileHandle_t handle)
 			}
 
 			COMMA_CHECK(handle, any);
-			s2di(handle, "      { \"avgspeed\": %f, \"distance\": %f, \"time\": %f, "
+			s2di(handle, INDENT6 "{ \"avgspeed\": %f, \"distance\": %f, \"time\": %f, "
 				"\"racer\": \"%s\", \"maxspeed\": %f }",
-				record->avgspeed / record->avgcount, record->distance, record->time,
+				record->avgspeed / record->avgcount, record->distance, record->time / 1000.0f,
 				json_string(p->s.v.netname), record->maxspeed
 			);
 		}
 		NEWLINE_CHECK(handle, any);
-		s2di(handle, "    ]\n");
+		s2di(handle, INDENT4 "]" JSON_CR);
 	}
-	s2di(handle, "  }\n");
+	s2di(handle, INDENT2 "}" JSON_CR);
 }
