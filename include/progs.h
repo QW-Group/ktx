@@ -64,20 +64,22 @@ typedef enum
 } weaponName_t;
 
 typedef struct wpType_s {
-	int hits;			// hits with this weapon, for SG and SSG this is count of bullets
-	int rhits;			// real hits for this weapon (direct + splash), used for RL and GL only
-	int vhits;			// virtual hits for this weapon (direct + splash, do not care about pent and such), used for RL and GL only
-	int attacks;		// all attacks with this weapon, for SG and SSG this is count of bullets
+	int hits;           // hits with this weapon, for SG and SSG this is count of bullets
+	int rhits;          // real hits for this weapon (direct + splash), used for RL and GL only
+	int vhits;          // virtual hits for this weapon (direct + splash, do not care about pent and such), used for RL and GL only
+	int attacks;        // all attacks with this weapon, for SG and SSG this is count of bullets
 
-	int kills;			// kills with this weapon
-	int deaths;			// deaths from this weapon
-	int tkills;			// team kills with this weapon
+	int kills;          // kills with this weapon
+	int deaths;         // deaths from this weapon
+	int tkills;         // team kills with this weapon
 	int suicides;       // suicides with this weapon
 
-	int ekills;			// killed enemys which contain this weapon in inventory
-	int drops;			// number of packs dropped which contain this weapon
-	int tooks;			// took this weapon and does't have this weapon before took (weapon from packs counted too)
-	int ttooks;			// total tooked, even u alredy have this weapon
+	int ekills;         // killed enemys which contain this weapon in inventory
+	int drops;          // number of packs dropped which contain this weapon
+	int tooks;          // took this weapon and does't have this weapon before took (weapon from packs counted too)
+	int stooks;         // spawned items taken (backpacks not included), and didn't have weapon beforehand
+	int ttooks;         // total taken, even if you already had this weapon
+	int sttooks;        // spawned items taken (backpacks not included), even if you already had this weapon
 
 	int edamage;        // damage to enemies
 	int tdamage;        // damage to team-mates

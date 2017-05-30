@@ -29,7 +29,7 @@ void            SP_item_artifact_invisibility();
 void            SP_item_artifact_super_damage();
 void			SP_item_artifact_invulnerability();
 
-void TookWeaponHandler( gedict_t *p, int new_wp );
+void TookWeaponHandler( gedict_t *p, int new_wp, qbool from_backpack );
 void BotsBackpackTouchedNonPlayer (gedict_t* backpack, gedict_t* entity);
 void BotsBackpackDropped (gedict_t* self, gedict_t* pack);
 void BotsPowerupTouchedNonPlayer (gedict_t* powerup, gedict_t* touch_ent);
@@ -735,7 +735,7 @@ void weapon_touch()
 	else
 		G_Error( "weapon_touch: unknown classname" );
 
-	TookWeaponHandler( other, new );
+	TookWeaponHandler( other, new, false );
 	mi_print(other, new, va("%s got %s", getname(other), self->s.v.netname));
 
 	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
@@ -2051,7 +2051,7 @@ void BackpackTouch()
 	new = self->s.v.items;
 
 	if ( new ) {
-		TookWeaponHandler( other, new );
+		TookWeaponHandler( other, new, true );
 
 		if ( !( ( int ) other->s.v.items & new ) )
 		{ // new weapon - so print u got it

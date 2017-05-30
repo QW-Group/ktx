@@ -3458,7 +3458,7 @@ void CheckTeamStatus( )
 	}
 }
 
-void TookWeaponHandler( gedict_t *p, int new_wp )
+void TookWeaponHandler( gedict_t *p, int new_wp, qbool from_backpack )
 {
 	weaponName_t wp;
 
@@ -3475,8 +3475,17 @@ void TookWeaponHandler( gedict_t *p, int new_wp )
 	}
 
 	p->ps.wpn[wp].ttooks++; // total weapon tooks
-	if ( !((int)p->s.v.items & new_wp) ) // player does't have this weapon before took
+	if (!from_backpack) {
+		p->ps.wpn[wp].sttooks++; // spawned item tooks
+	}
+
+	// player does't have this weapon before took
+	if (!((int)p->s.v.items & new_wp)) {
+		if (!from_backpack) {
+			p->ps.wpn[wp].stooks++; // spawned item tooks
+		}
 		p->ps.wpn[wp].tooks++;
+	}
 }
 
 void StatsHandler(gedict_t *targ, gedict_t *attacker)
