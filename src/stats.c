@@ -439,7 +439,7 @@ void StatsToFile(void)
 		if (!strnull(cvar_string("cs_address"))) {
 			localcmd("\n" // why new line?
 				"sv_demoinfoadd ** %s\n"
-				"sv_web_postfile Game/Submit \"\" *\n", name);
+				"sv_web_postfile ServerApi/UploadGameStats \"\" *\n", name);
 			trap_executecmd();
 		}
 		else {

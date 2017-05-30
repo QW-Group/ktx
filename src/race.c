@@ -142,7 +142,7 @@ static int next_route = -1; // STATIC
 
 //============================================
 
-int get_server_port ( void )
+static int get_server_port ( void )
 {
 	char *ip, *port;
 	int i = 0;
@@ -152,7 +152,21 @@ int get_server_port ( void )
 	else
 		return i;
 }
-	
+
+static const char* race_top_filename(void)
+{
+	static char filename[128];
+
+	if (cvar("k_race_times_per_port")) {
+		snprintf(filename, sizeof(filename), "race/race[%s_r%02d]-w%1ds%1d_%d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart, get_server_port());
+	}
+	else {
+		snprintf(filename, sizeof(filename), "race/race[%s_r%02d]-w%1ds%1d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart);
+	}
+
+	return filename;
+}
+
 qbool isRACE( void )
 {
 	return ( cvar("k_race") );
@@ -2714,6 +2728,11 @@ qbool race_load_route( int route )
 
 	read_topscores();
 
+	if (!strnull(cvar_string("cs_address"))) {
+		localcmd("\nsv_web_postfile ServerApi/UploadTopFile \"\" %s\n", race_top_filename());
+		trap_executecmd();
+	}
+
 	return true;
 }
 
@@ -2882,11 +2901,7 @@ void write_topscores( void )
 	if ( !race.active_route )
 		return;
 
-	if ( cvar("k_race_times_per_port") )
-		race_fwopen( "race/race[%s_r%02d]-w%1ds%1d_%d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart, get_server_port() );
-	else
-		race_fwopen( "race/race[%s_r%02d]-w%1ds%1d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart );
-
+	race_fwopen("%s", race_top_filename());
 	if ( race_fhandle < 0 )
 		return;
 
@@ -2950,11 +2965,7 @@ void read_topscores( void )
 	if ( !race.active_route )
 		return;
 
-	if ( cvar("k_race_times_per_port") )
-		race_fropen( "race/race[%s_r%02d]-w%1ds%1d_%d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart, get_server_port() );
-	else
-		race_fropen( "race/race[%s_r%02d]-w%1ds%1d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart );
-
+	race_fropen("%s", race_top_filename());
 	if ( race_fhandle >= 0 )
 	{
 		race_fgets( line, MAX_TXTLEN );
@@ -4073,8 +4084,8 @@ static qbool race_end(gedict_t* racer, qbool valid, qbool complete)
 
 		if (!strnull(map) && route_number >= 0) {
 			localcmd("\n" // why new line?
-				"sv_web_post Race/LogAttempt \"\" map %s routeNumber %d racer %s time %.3f complete %s\n",
-				map, route_number, racer->s.v.netname, race_time() / 1000.0f, complete && !race_pacemaker_enabled() ? "true" : "false");
+				"sv_web_post ServerApi/LogRaceAttempt \"\" map %s routeNumber %d weap %d fs %d racer %s time %.3f complete %s\n",
+				map, route_number, race.weapon, race.falsestart, racer->s.v.netname, race_time() / 1000.0f, complete && !race_pacemaker_enabled() ? "true" : "false");
 			trap_executecmd();
 		}
 	}
