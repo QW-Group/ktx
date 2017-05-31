@@ -257,6 +257,7 @@ void json_players_footer(fileHandle_t handle, int player_count)
 	s2di(handle, INDENT2 "]" JSON_CR);
 }
 
+#ifdef BOT_SUPPORT
 void json_player_bot_info(fileHandle_t handle, fb_botskill_t* skill)
 {
 	s2di(handle, "," JSON_CR);
@@ -265,6 +266,7 @@ void json_player_bot_info(fileHandle_t handle, fb_botskill_t* skill)
 	s2di(handle, INDENT8 "\"customised\": %s" JSON_CR, skill->customised ? "true" : "false");
 	s2di(handle, INDENT6 "}");
 }
+#endif
 
 void json_player_detail(fileHandle_t handle, int player_num, gedict_t* player, const char* team)
 {
