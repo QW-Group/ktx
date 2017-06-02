@@ -86,7 +86,7 @@ static char* json_string(const char* input)
 			*ch++ = '\\';
 			*ch++ = 'f';
 		}
-		else if (current < ' ') {
+		else if (current < ' ' || current >= 128) {
 			*ch++ = '\\';
 			*ch++ = 'u';
 			*ch++ = '0';
