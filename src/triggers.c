@@ -913,7 +913,6 @@ Pushes the player
 void SP_trigger_push()
 {
 	InitTrigger();
-	trap_precache_sound( "ambience/windfly.wav" );
 	self->s.v.touch = ( func_t ) trigger_push_touch;
 	if ( !self->speed )
 		self->speed = 1000;

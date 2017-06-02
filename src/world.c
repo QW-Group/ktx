@@ -34,6 +34,7 @@ void  FixRules ();
 void  ShowSpawnPoints();
 void  r_route();
 void  LoadMap (void);
+void SP_trigger_custom_push();
 
 #define MAX_BODYQUE 4
 gedict_t       *bodyque[MAX_BODYQUE];
@@ -292,6 +293,8 @@ void SP_worldspawn()
 		trap_precache_model( "progs/v_coil.mdl" );	
 		trap_precache_sound( "weapons/coilgun.wav" );
 	}
+
+	trap_precache_sound( "ambience/windfly.wav" );
 	
 	if ( cvar("k_spm_custom_model") )
 		trap_precache_model( "progs/spawn.mdl" );
@@ -589,6 +592,34 @@ void Customize_Maps()
 					ent_remove( p );
 					break;
 				}
+		}
+	}
+
+	// modify slide8 to make it possible to complete in race mode
+	if (streq(g_globalvars.mapname, "slide8")) {
+		gedict_t *push, *oldself, *ent;
+
+		// create extra push before lava pit
+		push = spawn();
+		if (!push) {
+			return;
+		}
+
+		// Create push over the lava pit
+		VectorSet(push->s.v.origin, -2110, 2550, -850);
+		VectorSet(push->s.v.size, 250, 250, 50);
+		VectorSet(push->s.v.movedir, -0.5, 0, 0.5);
+		push->speed = 120;
+		oldself = self;
+		self = push;
+		SP_trigger_custom_push();
+		self = oldself;
+
+		// Remove hurt indicators around lava pit
+		for (ent = world; ent = findradius_ignore_solid(ent, push->s.v.origin, 300); /**/) {
+			if (streq(ent->s.v.classname, "trigger_hurt")) {
+				ent_remove(ent);
+			}
 		}
 	}
 
