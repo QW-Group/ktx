@@ -4165,6 +4165,10 @@ void race_player_pre_think(void)
 	{
 		// Set this player to solid so we trigger checkpoints & teleports during move
 		self->s.v.solid = (race.status == raceNone || self->racer ? SOLID_SLIDEBOX : SOLID_NOT);
+		if (self->s.v.mins[0] == 0 || self->s.v.mins[1] == 0) {
+			// This can happen if the world 'squashes' a SOLID_NOT entity, mvdsv will turn into corpse
+			setsize( self, PASSVEC3( VEC_HULL_MIN ), PASSVEC3( VEC_HULL_MAX ) );
+		}
 		setorigin (self, PASSVEC3( self->s.v.origin ) );
 
 		if ( self->ct == ctPlayer && !self->racer && race.status )
