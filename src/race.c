@@ -869,8 +869,13 @@ void kill_race_idler( void )
 	for (racer = world; (racer = race_find_racer(racer)); /**/) {
 		// FIXME: Keep track of which start, any map with multiple starts would break
 		for (e = world; (e = ez_find(e, "race_cp_start")); ) {
-			if (racer->s.v.origin[0] >= e->s.v.absmin[0] && racer->s.v.origin[0] <= e->s.v.absmax[0] &&
-				racer->s.v.origin[1] >= e->s.v.absmin[1] && racer->s.v.origin[1] <= e->s.v.absmax[1]) {
+			vec3_t test_point;
+			VectorAdd(racer->s.v.origin, racer->s.v.view_ofs, test_point);
+
+			if (test_point[0] >= e->s.v.absmin[0] && test_point[0] <= e->s.v.absmax[0] &&
+			    test_point[1] >= e->s.v.absmin[1] && test_point[1] <= e->s.v.absmax[1] &&
+			    test_point[2] >= e->s.v.absmin[2] && test_point[2] <= e->s.v.absmax[2])
+			{
 				racer->race_afk++;
 
 				if (race_match_mode()) {

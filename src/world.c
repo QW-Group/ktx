@@ -616,7 +616,7 @@ void Customize_Maps()
 		self = oldself;
 
 		// Remove hurt indicators around lava pit
-		for (ent = world; ent = findradius_ignore_solid(ent, push->s.v.origin, 300); /**/) {
+		for (ent = world; (ent = findradius_ignore_solid(ent, push->s.v.origin, 300)); /**/) {
 			if (streq(ent->s.v.classname, "trigger_hurt")) {
 				ent_remove(ent);
 			}
