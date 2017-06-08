@@ -1529,15 +1529,41 @@ void StartTimer ()
 	StartDemoRecord (); // if allowed
 }
 
+static qbool match_can_cancel_demo(void)
+{
+	char matchtag[64] = { 0 };
+	int k_demo_mintime = bound(0, cvar("k_demo_mintime"), 3600);
+
+	if (!match_start_time) {
+		return true; // match not started
+	}
+
+#ifdef BOT_SUPPORT
+	// if any bots involved, /break is a standard cancel, regardless of matchtag
+	if (CountBots() == 0)
+	{
+#endif
+		// don't cancel demo for match with matchtag
+		infokey(world, "matchtag", matchtag, sizeof(matchtag));
+		if (!strnull(matchtag)) {
+			return false;
+		}
+#ifdef BOT_SUPPORT
+	}
+#endif
+
+	// only cancel if /break before set time elapsed
+	if (k_demo_mintime <= 0) {
+		k_demo_mintime = 120; // 120 seconds is default
+	}
+	return (g_globalvars.time - match_start_time) < k_demo_mintime;
+}
+
 // Whenever a countdown or match stops, remove the timer and reset everything.
 // also stop/cancel demo recording
 void StopTimer ( int removeDemo )
 {
 	gedict_t *timer, *p;
-	int k_demo_mintime = bound(0, cvar("k_demo_mintime"), 3600);
-
-	if ( k_demo_mintime <= 0 )
-		k_demo_mintime = 120; // 120 seconds is default
 
 	if ( match_in_progress == 1 )
 		G_cp2all(""); // clear center print
@@ -1569,8 +1595,8 @@ void StopTimer ( int removeDemo )
 		ent_remove( timer );
 
 	if (   removeDemo
-		&& ( !match_start_time || (g_globalvars.time - match_start_time ) < k_demo_mintime )
-		&& ( !isRACE() || race_can_cancel_demo() )
+		&& ( match_can_cancel_demo() )
+		&& ( race_can_cancel_demo() )
 		&& !strnull( cvar_string( "serverdemo" ) )
 	   )
 		localcmd("cancel\n");  // demo is recording and must be removed, do it

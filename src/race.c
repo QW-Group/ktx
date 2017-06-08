@@ -4580,6 +4580,10 @@ static void race_match_round_end(char* demoFileName)
 
 qbool race_can_cancel_demo(void)
 {
+	if (!isRACE()) {
+		return true;
+	}
+
 	// Always save demos as soon as a run is completed
 	return race.round_number == 0 && race.racers_complete == 0;
 }

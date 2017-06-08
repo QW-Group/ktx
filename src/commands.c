@@ -3219,23 +3219,24 @@ extern int skip_fixrules;
 
 static void UserMode_SetMatchTag(char * matchtag)
 {
-	char matchtag_old[20] = {0}, matchtag_new[20] = {0};
-	
+	char matchtag_old[20] = { 0 }, matchtag_new[20] = { 0 };
+
 	// get current serverinfo matchtag.
 	infokey(world, "matchtag", matchtag_old, sizeof(matchtag_old));
 	// set new matchtag.
-	localcmd("serverinfo matchtag \"%s\"\n", clean_string(matchtag) );
-	trap_executecmd (); // <- this really needed
+	localcmd("serverinfo matchtag \"%s\"\n", clean_string(matchtag));
+	trap_executecmd(); // <- this really needed
 	// check what we get in serverinfo after all.
 	infokey(world, "matchtag", matchtag_new, sizeof(matchtag_new));
 
-	if (matchtag_new[0])
-	{
-		G_bprint( 2, "\n" "%s is %s\n", redtext("matchtag"), matchtag_new );
+	if (matchtag_new[0]) {
+		G_bprint(2, "\n" "%s is %s\n", redtext("matchtag"), matchtag_new);
 	}
-	else if (matchtag_old[0])
-	{
-		G_bprint( 2, "\n" "%s %s\n", redtext("matchtag"), redtext("disabled") );
+	else if (matchtag_old[0]) {
+		G_bprint(2, "\n" "%s %s\n", redtext("matchtag"), redtext("disabled"));
+	}
+	else {
+		G_bprint(2, "\n" "%s not set\n", redtext("matchtag"));
 	}
 }
 
