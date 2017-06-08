@@ -254,16 +254,19 @@ const char *GetMode(void)
 	if (cvar("k_instagib")) {
 		return "instagib";
 	}
-	if (isHoonyMode()) {
+	else if (cvar("k_midair")) {
+		return "midair";
+	}
+	else if (isHoonyMode()) {
 		return "hoonymode";
 	}
-	if (isRACE()) {
+	else if (isRACE()) {
 		return "race";
 	}
-	if (isCA()) {
+	else if (isCA()) {
 		return "clan-arena";
 	}
-	if (isRA()) {
+	else if (isRA()) {
 		return "rocket-arena";
 	}
 	else if (isDuel()) {

@@ -359,6 +359,7 @@ void json_match_header(fileHandle_t handle, char* ip, int port)
 	char date[64] = { 0 };
 	char matchtag[64] = { 0 };
 	const char* mode = GetMode();
+	int duration = (g_globalvars.time - match_start_time);
 
 	infokey(world, "matchtag", matchtag, sizeof(matchtag));
 
@@ -390,6 +391,7 @@ void json_match_header(fileHandle_t handle, char* ip, int port)
 	if (teamplay) {
 		s2di(handle, INDENT2 "\"tp\": %d," JSON_CR, teamplay);
 	}
+	s2di(handle, INDENT2 "\"duration\": %d," JSON_CR, duration);
 
 	if (!strnull(cvar_string("serverdemo"))) {
 		const char* server_demo = cvar_string("serverdemo");
@@ -417,13 +419,17 @@ static void json_player_ctf_stats(fileHandle_t handle, player_stats_t* stats)
 		COMMA_CHECK(handle, any);
 		s2di(handle, INDENT8 "\"caps\": %d", stats->caps);
 	}
-	if (stats->f_defends || stats->c_defends) {
+	if (stats->f_defends) {
 		COMMA_CHECK(handle, any);
-		s2di(handle, INDENT8 "\"defends\": [%d, %d]", stats->f_defends, stats->c_defends);
+		s2di(handle, INDENT8 "\"defends\": %d", stats->f_defends);
+	}
+	if (stats->c_defends) {
+		COMMA_CHECK(handle, any);
+		s2di(handle, INDENT8 "\"carrier-defends\": %d", stats->c_defends);
 	}
 	if (stats->c_frags) {
 		COMMA_CHECK(handle, any);
-		s2di(handle, INDENT8 "\"frags\": %d", stats->c_frags);
+		s2di(handle, INDENT8 "\"carrier-frags\": %d", stats->c_frags);
 	}
 	if (stats->pickups) {
 		COMMA_CHECK(handle, any);
@@ -434,7 +440,7 @@ static void json_player_ctf_stats(fileHandle_t handle, player_stats_t* stats)
 		s2di(handle, INDENT8 "\"returns\": %d", stats->returns);
 	}
 	COMMA_CHECK(handle, any);
-	s2di(handle, INDENT8 "\"runes\": [%d %d %d %d]" JSON_CR, (int)(stats->res_time + 0.5f), (int)(stats->str_time + 0.5f), (int)(stats->hst_time + 0.5f), (int)(stats->rgn_time + 0.5f));
+	s2di(handle, INDENT8 "\"runes\": [%d, %d, %d, %d]" JSON_CR, (int)(stats->res_time + 0.5f), (int)(stats->str_time + 0.5f), (int)(stats->hst_time + 0.5f), (int)(stats->rgn_time + 0.5f));
 	s2di(handle, INDENT6 "}");
 }
 
