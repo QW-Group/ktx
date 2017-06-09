@@ -7,3 +7,6 @@ race_route_add_start
 	race_set_route_weapon_mode raceWeaponNo 
 	race_set_route_falsestart_mode raceFalseStartNo 
 race_route_add_end
+
+race_set_teleport_flags_by_name "t1" RACEFLAG_TOUCH_RACEFAIL
+race_set_teleport_flags_by_name "t2" RACEFLAG_TOUCH_RACEFAIL
