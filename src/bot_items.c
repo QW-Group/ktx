@@ -786,7 +786,7 @@ static void fb_spawn_quad (gedict_t* ent)
 	}
 }
 
-fb_spawn_t itemSpawnFunctions[] = {
+static fb_spawn_t itemSpawnFunctions[] = {
 	{ "item_armor1", fb_spawn_armor },
 	{ "item_armor2", fb_spawn_armor },
 	{ "item_armorInv", fb_spawn_armor },

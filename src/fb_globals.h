@@ -399,4 +399,12 @@ void RunRandomTrials (float min, float max, float mult);
 // editor
 qbool HasSavedMarker (void);
 
+#define FB_CVAR_ENABLED       "k_fb_enabled"
+#define FB_CVAR_OPTIONS       "k_fb_options"
+#define FB_CVAR_AUTOADD_LIMIT "k_fb_autoadd_limit"
+#define FB_CVAR_AUTOREMOVE_AT "k_fb_autoremove_at"
+#define FB_CVAR_AUTO_DELAY    "k_fb_auto_delay"
+#define FB_CVAR_SKILL         "k_fb_skill"
+#define FB_CVAR_DEBUG         "k_fb_debug"
+
 #endif // ifdef(FB_GLOBALS_H)

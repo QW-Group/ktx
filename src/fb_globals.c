@@ -163,13 +163,14 @@ vec3_t velocity_hor_angle = { 0 };
 gedict_t* to_zone = 0;
 gedict_t* search_entity = 0;
 
-
-qbool fb_lg_disabled() {
+qbool fb_lg_disabled(void)
+{
 	return (qbool) ((int)cvar("k_disallow_weapons") & IT_LIGHTNING) != 0;
 }
 
 // taken from pr1 implementation
-float pr1_rint(float f) {
+float pr1_rint(float f)
+{
 	if (f > 0)
 		return (int)(f + 0.5);
 	else
@@ -177,20 +178,22 @@ float pr1_rint(float f) {
 }
 
 // match.qc
-qbool HasWeapon (gedict_t* player, int weapon)
+qbool HasWeapon(gedict_t* player, int weapon)
 {
 	return ((int)player->s.v.items & weapon);
 }
 
-float enemy_shaft_attack() {
+float enemy_shaft_attack(void)
+{
 	return (HasWeapon(enemy_, IT_LIGHTNING) && enemy_->s.v.ammo_cells && (self->fb.enemy_dist < 630) && (g_globalvars.time < enemy_->attack_finished));
 }
 
-qbool bots_enabled() {
-	return true;	// FIXME: make a variable
+qbool bots_enabled(void)
+{
+	return cvar(FB_CVAR_ENABLED) == 1;
 }
 
-static qbool HasRLOrLG (gedict_t* self)
+static qbool HasRLOrLG(gedict_t* self)
 {
 	return ((((int)self->s.v.items & IT_ROCKET_LAUNCHER) && (self->s.v.ammo_rockets > 1)) || (((int)self->s.v.items & IT_LIGHTNING) && (self->s.v.ammo_cells > 5)));
 }

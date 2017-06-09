@@ -239,7 +239,7 @@ static void CreateItemMarkers() {
 }
 
 // After all markers have been created, re-process items
-static void AssignVirtualGoals (void)
+static void AssignVirtualGoals(void)
 {
 	gedict_t* item;
 
@@ -247,9 +247,9 @@ static void AssignVirtualGoals (void)
 		int i = 0;
 
 		for (i = 0; i < ItemSpawnFunctionCount(); ++i) {
-			fb_spawn_t* spawn = ItemSpawnFunction (i);
+			fb_spawn_t* spawn = ItemSpawnFunction(i);
 			if (streq(spawn->name, item->s.v.classname)) {
-				AssignVirtualGoal_apply (item);
+				AssignVirtualGoal_apply(item);
 				break;
 			}
 		}

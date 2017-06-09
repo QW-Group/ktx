@@ -280,7 +280,7 @@ void BotPathCheck (gedict_t* self, gedict_t* touch_marker)
 		self->fb.fixed_goal = NULL;
 		self->fb.debug_path = false;
 		self->fb.debug_path_start = 0;
-		cvar_fset ("k_fb_debug", 0);
+		cvar_fset (FB_CVAR_DEBUG, 0);
 	}
 }
 

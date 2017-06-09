@@ -101,7 +101,7 @@ bot_t            bots[MAX_BOTS] = { { 0 } };
 
 static int FrogbotSkillLevel (void)
 {
-	return (int)cvar ("k_fb_skill");
+	return (int)cvar (FB_CVAR_SKILL);
 }
 
 static team_t* AddTeamToList (int* teamsFound, char* team, int topColor, int bottomColor)
@@ -385,7 +385,7 @@ static void FrogbotsSetSkill (void)
 		new_skill = bound(MIN_FROGBOT_SKILL, atoi (argument), MAX_FROGBOT_SKILL);
 
 		if (new_skill != old_skill) {
-			cvar_fset("k_fb_skill", new_skill);
+			cvar_fset(FB_CVAR_SKILL, new_skill);
 			G_sprint(self, 2, "bot skill changed to \"%d\"\n", new_skill);
 
 			customised_skill = SetAttributesBasedOnSkill(new_skill);
@@ -590,7 +590,7 @@ static void FrogbotsDebug (void)
 			first_bot->fb.debug = true;
 			first_bot->fb.debug_path = true;
 			first_bot->fb.debug_path_rj = allow_rj;
-			//cvar_fset ("k_fb_debug", 1);
+			//cvar_fset (FB_CVAR_DEBUG, 1);
 			VectorClear (first_bot->s.v.velocity);
 			trap_SetBotCMD (NUM_FOR_EDICT (first_bot), g_globalvars.frametime, 0, 0, 0, 0, 0, 0, 0, 0);
 			first_bot->fb.debug_path_start = g_globalvars.time;
@@ -1624,6 +1624,14 @@ static void FrogbotSummary (void)
 	G_sprint (self, PRINT_HIGH, "  %d markers in total\n", marker_count);
 }
 
+static void FrogbotsDisable(void)
+{
+	if (! match_in_progress) {
+		cvar_fset(FB_CVAR_ENABLED, 0);
+		GotoNextMap();
+	}
+}
+
 typedef struct frogbot_cmd_s {
 	char* name;
 	void (*func) (void);
@@ -1636,7 +1644,8 @@ static frogbot_cmd_t std_commands[] = {
 	{ "fill", FrogbotsFillServer, "Fills the server (max 8 bots at a time)" },
 	{ "removebot", FrogbotsRemovebot_f, "Removes a single bot" },
 	{ "removeall", FrogbotsRemoveAll, "Removes all bots from server" },
-	{ "debug", FrogbotsDebug, "Debugging commands" }
+	{ "debug", FrogbotsDebug, "Debugging commands" },
+	{ "disable", FrogbotsDisable, "Disable frogbots" }
 };
 
 static frogbot_cmd_t editor_commands[] = {
@@ -1691,6 +1700,28 @@ void FrogbotsCommand (void)
 	int num_commands = FrogbotOptionEnabled (FB_OPTION_EDITOR_MODE) ? NUM_EDITOR_COMMANDS : NUM_STANDARD_COMMANDS;
 	char command[64];
 	int i;
+
+	if (!bots_enabled()) {
+		trap_CmdArgv (1, command, sizeof (command));
+
+		if (trap_CmdArgc () > 1 && streq(command, "enable")) {
+			if (match_in_progress) {
+				G_sprint(self, PRINT_HIGH, "Cannot enable bots while match in progress\n");
+				return;
+			}
+			if (isRACE()) {
+				G_sprint(self, PRINT_HIGH, "Cannot enable bots while in race mode\n");
+				return;
+			}
+
+			cvar_fset(FB_CVAR_ENABLED, 1);
+			GotoNextMap();
+			return;
+		}
+
+		G_sprint(self, PRINT_HIGH, "Bots not enabled: to turn on, %s\n", redtext("/botcmd enable"));
+		return;
+	}
 
 	if (trap_CmdArgc () <= 1) {
 		PrintAvailableCommands (commands, num_commands);
@@ -1832,9 +1863,9 @@ static float last_auto_client = 0;
 
 void BotStartFrame(int framecount) {
 	extern void BotsFireLogic (void);
-	int min_required_clients = cvar("k_fb_autoadd_limit");
-	int max_required_clients = cvar("k_fb_autoremove_at");
-	int auto_delay = cvar("k_fb_auto_delay");
+	int min_required_clients = cvar(FB_CVAR_AUTOADD_LIMIT);
+	int max_required_clients = cvar(FB_CVAR_AUTOREMOVE_AT);
+	int auto_delay = cvar(FB_CVAR_AUTO_DELAY);
 
 	// disable feature if it has been mis-configured
 	if (min_required_clients && max_required_clients && min_required_clients > max_required_clients) {
@@ -1949,7 +1980,7 @@ int BotVersionNumber (void)
 
 qbool FrogbotOptionEnabled (int option)
 {
-	return ((int)cvar ("k_fb_options")) & option;
+	return ((int)cvar (FB_CVAR_OPTIONS)) & option;
 }
 
 #endif // BOT_SUPPORT

@@ -25,6 +25,10 @@
 
 #include "g_local.h"
 
+#ifdef BOT_SUPPORT
+#include "fb_globals.h"
+#endif
+
 void RegisterSkillVariables (void);
 void  SUB_regen();
 void  CheckAll();
@@ -907,20 +911,21 @@ void FirstFrame	( )
 
 #ifdef BOT_SUPPORT
 // { frogbots support
-	RegisterCvarEx ("k_fb_skill", "10");
-	RegisterCvarEx ("k_fb_options", "0");
-	RegisterCvarEx ("k_fb_debug", "0");
-	RegisterCvarEx ("k_fb_autoadd_limit", "0");
-	RegisterCvarEx ("k_fb_autoremove_at", "0");
-	RegisterCvarEx ("k_fb_auto_delay", "1");
+	RegisterCvarEx(FB_CVAR_ENABLED, "0");
+	RegisterCvarEx(FB_CVAR_OPTIONS, "0");
+	RegisterCvarEx(FB_CVAR_AUTOADD_LIMIT, "0");
+	RegisterCvarEx(FB_CVAR_AUTOREMOVE_AT, "0");
+	RegisterCvarEx(FB_CVAR_AUTO_DELAY, "1");
+	RegisterCvarEx(FB_CVAR_SKILL, "10");
+	RegisterCvarEx(FB_CVAR_DEBUG, "0");
 
 	for (i = 0; i < MAX_CLIENTS; i++) {
-		RegisterCvarEx (va ("k_fb_name_%d", i), "");
-		RegisterCvarEx (va ("k_fb_name_enemy_%d", i), "");
-		RegisterCvarEx (va ("k_fb_name_team_%d", i), "");
+		RegisterCvarEx(va("k_fb_name_%d", i), "");
+		RegisterCvarEx(va("k_fb_name_enemy_%d", i), "");
+		RegisterCvarEx(va("k_fb_name_team_%d", i), "");
 	}
 
-	RegisterSkillVariables ();
+	RegisterSkillVariables();
 // }
 #endif
 
