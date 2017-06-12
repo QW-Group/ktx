@@ -34,13 +34,13 @@ void UpdateGoalEntity(gedict_t* item, gedict_t* taker) {
 	int item_entity = NUM_FOR_EDICT(item);
 
 	for (plr = world; (plr = find_plr(plr)); ) {
+		// if the same team, pretend bot read a 'took' notification
 		qbool same_team = SameTeam (plr, taker);
 		qbool heard_it = VectorDistance (plr->s.v.origin, item->s.v.origin) < 1000;
+		float delay = (same_team || heard_it ? 0 : g_random());
 
 		if (plr->s.v.goalentity == item_entity) {
-			float goal_refresh_time_ = g_globalvars.time + (same_team || heard_it ? 0 : g_random());
-
-			plr->fb.goal_refresh_time = min (plr->fb.goal_refresh_time, goal_refresh_time_);
+			plr->fb.goal_refresh_time = min (plr->fb.goal_refresh_time, g_globalvars.time + delay);
 			ResetGoalEntity(plr);
 		}
 	}

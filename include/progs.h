@@ -572,11 +572,11 @@ typedef struct fb_entvars_s {
 	// Goal evaluation
 	struct gedict_s* best_goal;
 	float best_goal_score;
-	float saved_goal_desire;                         // the desire for the current goal entity
-	float saved_respawn_time;                        // seconds until this item respawns (includes current bot's error)
+	float saved_goal_desire;                  // the desire for the current goal entity
+	float saved_respawn_time;                 // seconds until this item respawns (includes current bot's error)
 	float saved_goal_time;
 	float saved_enemy_time_squared;
-	float goal_respawn_time;                         // the time when this->best_goal2 will respawn (can be in past)
+	float goal_respawn_time;                  // the time when this->best_goal2 will respawn (can be in past)
 	float goal_refresh_time;
 	float goal_enemy_repel;
 	float goal_enemy_desire;
