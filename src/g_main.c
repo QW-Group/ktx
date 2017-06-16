@@ -139,7 +139,18 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 		return 1;
 
 	case GAME_START_FRAME:
-		StartFrame( arg0 );
+		if (arg1) {
+#ifdef BOT_SUPPORT
+			extern void BotStartFrame(void);
+
+			if (bots_enabled()) {
+				BotStartFrame();
+			}
+#endif
+		}
+		else {
+			StartFrame(arg0);
+		}
 		return 1;
 
 	case GAME_CLIENT_CONNECT:

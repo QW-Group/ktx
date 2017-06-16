@@ -1861,7 +1861,9 @@ static void BotInitialiseServer (void)
 
 static float last_auto_client = 0;
 
-void BotStartFrame(int framecount) {
+void BotStartFrame(void)
+{
+	static int bot_framecount = 0;
 	extern void BotsFireLogic (void);
 	int min_required_clients = cvar(FB_CVAR_AUTOADD_LIMIT);
 	int max_required_clients = cvar(FB_CVAR_AUTOREMOVE_AT);
@@ -1872,13 +1874,15 @@ void BotStartFrame(int framecount) {
 		min_required_clients = max_required_clients = 0;
 	}
 
-	if ( framecount == 3 ) {
+	++bot_framecount;
+
+	if ( bot_framecount == 3 ) {
 		BotInitialiseServer();
 	}
-	else if ( framecount == 20 ) {
+	else if ( bot_framecount == 20 ) {
 		LoadMap();
 	}
-	else if ( framecount > 20 ) {
+	else if ( bot_framecount > 20 ) {
 		int client_count = 0;
 		int human_count = 0;
 		int max_clients = cvar("maxclients");
