@@ -342,6 +342,11 @@ void CheckCombatJump(gedict_t* self)
 		return;
 	}
 
+	// Or immediately after spawning...
+	if (FUTURE(min_fire_time)) {
+		return;
+	}
+
 	// Or during prewar (noisy)
 	if (match_in_progress < 2) {
 		return;

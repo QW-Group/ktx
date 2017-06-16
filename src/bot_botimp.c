@@ -148,7 +148,7 @@ qbool SetAttributesBasedOnSkill (int skill)
 	cvar_fset (FB_CVAR_PITCH_SCALE, RangeOverSkill (skill, 5, 1.5));
 
 	cvar_fset (FB_CVAR_ATTACK_RESPAWNS, skill >= 15 ? 1 : 0);
-	cvar_fset (FB_CVAR_REACTION_TIME, RangeOverSkill (skill, 0.4f, 0.2f));
+	cvar_fset (FB_CVAR_REACTION_TIME, RangeOverSkill (skill, 0.75f, 0.3f));
 
 	// Volatility
 	cvar_fset (FB_CVAR_MIN_VOLATILITY, 1.0f);

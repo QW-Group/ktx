@@ -359,6 +359,10 @@ void BotsThinkTime(gedict_t* self) {
 			AMPHI2BotInLava();
 		}
 	}
+
+	if (self->isBot && FrogbotOptionEnabled(FB_OPTION_DEBUG_MOVEMENT)) {
+		stuffcmd_flags(self, STUFFCMD_DEMOONLY, "//botcmd %f %d %d %d | %d %d %d\n", g_globalvars.time, PASSINTVEC3(self->s.v.v_angle), PASSINTVEC3(self->fb.predict_origin));
+	}
 }
 
 // Sets a client's last marker

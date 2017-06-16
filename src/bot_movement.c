@@ -118,6 +118,10 @@ static void ApplyPhysics (gedict_t* self)
 		return;
 	}
 
+	if (deathmatch >= 4) {
+		return;
+	}
+
 	// Step 1: Apply friction
 	VectorCopy (self->s.v.velocity, expected_velocity);
 	vel_length = VectorLength (expected_velocity);

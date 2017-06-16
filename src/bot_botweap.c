@@ -389,8 +389,9 @@ static qbool KeepFiringAtEnemy (gedict_t* self)
 }
 
 void SetFireButton(gedict_t* self, vec3_t rel_pos, float rel_dist) {
-	if (PreWarBlockFiring (self))
+	if (PreWarBlockFiring(self)) {
 		return;
+	}
 
 	if (self->fb.firing) {
 		if (KeepFiringAtEnemy (self))
@@ -402,7 +403,7 @@ void SetFireButton(gedict_t* self, vec3_t rel_pos, float rel_dist) {
 	else if (self->fb.next_impulse) {
 		return;
 	}
-		
+
 	if (FUTURE(min_fire_time)) {
 		self->fb.firing = false;
 		return;
