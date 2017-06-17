@@ -11,7 +11,7 @@
 #include "g_local.h"
 #include "fb_globals.h"
 
-typedef qbool (*fb_path_calc_func_t)(gedict_t* m, fb_path_t* path);
+typedef qbool (*fb_path_calc_funcref_t)(gedict_t* m, fb_path_t* path);
 extern gedict_t* markers[];
 
 static void Calc_G_time_12 (void);
@@ -54,7 +54,7 @@ static void TravelTimeForPath (gedict_t* m, int i)
 	}
 
 	// Distance irrelevant if teleporting
-	if (streq (m->s.v.classname, "trigger_teleport")) {
+	if (streq (m->classname, "trigger_teleport")) {
 		m->fb.paths[i].time = 0;
 	}
 	else {
@@ -344,7 +344,7 @@ static void Calc_G_time_9(void) {
 
 			traceline(m_pos[0], m_pos[1], m_pos[2], m2_pos[0], m2_pos[1], m2_pos[2], true, world);
 			if (g_globalvars.trace_fraction == 1) {
-				if (strneq(m2->s.v.classname, "trigger_teleport")) {
+				if (strneq(m2->classname, "trigger_teleport")) {
 					Calc_G_time_9_apply(m, m2, m_pos, m2_pos);
 				}
 			}
@@ -446,7 +446,7 @@ static void Calc_G_time_11(void) {
 					ZoneMarker (m, next_marker, path_normal, false);
 					traveltime = SubZoneArrivalTime (zone_time, middle_marker, next_marker, false);
 					if (traveltime >= min_traveltime) {
-						if (strneq(next_marker->s.v.classname, "trigger_teleport")) {
+						if (strneq(next_marker->classname, "trigger_teleport")) {
 							Calc_G_time_11_apply(m, next_marker);
 						}
 					}
@@ -499,7 +499,7 @@ static void Calc_G_time_12(void) {
 							from_marker = m;
 							traveltime = SubZoneArrivalTime (zone_time, middle_marker, next_marker, false);
 							if (traveltime >= min_traveltime) {
-								if (strneq(next_marker->s.v.classname, "trigger_teleport")) {
+								if (strneq(next_marker->classname, "trigger_teleport")) {
 									Calc_G_time_11_apply(m, next_marker);
 								}
 							}
@@ -512,7 +512,7 @@ static void Calc_G_time_12(void) {
 }
 
 // Repeatedly calls func(x, y) until func returns true for every path in the system
-static void PathCalculation(fb_path_calc_func_t func) {
+static void PathCalculation(fb_path_calc_funcref_t func) {
 	qbool no_change = false;
 
 	while (!no_change) {
@@ -619,7 +619,7 @@ void InitialiseMarkerRoutes(void) {
 					m->fb.index,
 					m->fb.Z_,
 					m->fb.G_,
-					m->s.v.classname,
+					m->classname,
 					PASSINTVEC3 (m->s.v.absmin),
 					PASSINTVEC3 (m->s.v.absmax)
 				);

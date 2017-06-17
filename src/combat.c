@@ -264,7 +264,7 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 	ClientObituary( self, attacker );
 
 	self->s.v.takedamage = DAMAGE_NO;
-	self->s.v.touch = ( func_t ) SUB_Null;
+	self->touch = ( func_t ) SUB_Null;
 	self->s.v.effects = 0;
 
 	monster_death_use();
@@ -313,7 +313,7 @@ static float newceil( float f )
 void MidairDamageBonus(gedict_t *attacker, float midheight)
 {
 	attacker->ps.mid_total++;
-	G_bprint( 2, "%s got ", attacker->s.v.netname );
+	G_bprint( 2, "%s got ", attacker->netname );
 
 	if ( midheight > 1024 )
 	{
@@ -433,7 +433,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	// check for quad damage powerup on the attacker
 	// midair quad makes rockets fast, but no change to damage
 	if ( attacker->super_damage_finished > g_globalvars.time
-	     && strneq( inflictor->s.v.classname, "door" ) && dtSTOMP != targ->deathtype
+	     && strneq( inflictor->classname, "door" ) && dtSTOMP != targ->deathtype
 		 && !midair 
 	   )
 		damage *= ( deathmatch == 4 ? 8 : 4 ); // in dmm4 quad is octa actually
@@ -477,7 +477,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	{
 		inwater = ( ((int)targ->s.v.flags & FL_INWATER) && targ->s.v.waterlevel > 1 );
 
-		if ( streq( inflictor->s.v.classname, "rocket" ))
+		if ( streq( inflictor->classname, "rocket" ))
 			midheight = targ->s.v.origin[2] - inflictor->s.v.oldorigin[2];
 
 		rl_dmg = ( targ->ct == ctPlayer && dtRL == targ->deathtype );
@@ -611,7 +611,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		 	&& !strnull( attackerteam )
 		 	&& streq( targteam, attackerteam )
 		 	&& attacker->ct == ctPlayer
-		 	&& strneq( inflictor->s.v.classname, "door" )
+		 	&& strneq( inflictor->classname, "door" )
 		 	&& !TELEDEATH( targ ) // do telefrag damage in tp
 	   	)
 	   	{
@@ -664,7 +664,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	if ( save )
 	{
-		if ((streq(inflictor->s.v.classname, "worldspawn") || strnull(attacker->s.v.classname))
+		if ((streq(inflictor->classname, "worldspawn") || strnull(attacker->classname))
 			|| (targ->deathtype == dtWATER_DMG)
 			|| (targ->deathtype == dtEXPLO_BOX)
 			|| (targ->deathtype == dtFALL)
@@ -678,9 +678,9 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 			attackername = "world";
 		}
 		else {
-			attackername = attacker->s.v.netname;
+			attackername = attacker->netname;
 		}
-		victimname = targ->s.v.netname;
+		victimname = targ->netname;
 
 		log_printf(
 			"\t\t<event>\n"
@@ -728,7 +728,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 		// Yawnmode: nails increases kickback
 		// - Molgrum
-		if ( k_yawnmode && streq( inflictor->s.v.classname, "spike" ) )
+		if ( k_yawnmode && streq( inflictor->classname, "spike" ) )
 			nailkick = 1.2;
 		else
 			nailkick = 1.0;
@@ -779,11 +779,11 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	{
 		targ->s.v.health -= take;
 
-//		G_bprint( 2, "%s %f\n", targ->s.v.classname, targ->s.v.health );
+//		G_bprint( 2, "%s %f\n", targ->classname, targ->s.v.health );
 
 		if ( take )
 		{
-			if ((streq(inflictor->s.v.classname, "worldspawn") || strnull(attacker->s.v.classname))
+			if ((streq(inflictor->classname, "worldspawn") || strnull(attacker->classname))
 				|| (targ->deathtype == dtWATER_DMG)
 				|| (targ->deathtype == dtEXPLO_BOX)
 				|| (targ->deathtype == dtFALL)
@@ -797,9 +797,9 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 				attackername = "world";
 			}
 			else {
-				attackername = attacker->s.v.netname;
+				attackername = attacker->netname;
 			}
-			victimname = targ->s.v.netname;
+			victimname = targ->netname;
 
 			log_printf(
 				"\t\t<event>\n"
@@ -1009,7 +1009,7 @@ void T_RadiusDamageApply(gedict_t * inflictor, gedict_t * attacker, gedict_t* he
 				else
 				{
 					// shamblers only take half damage from rocket/grenade explosions
-					if ( streq(head->s.v.classname, "monster_shambler") && !cvar("k_bloodfest") )
+					if ( streq(head->classname, "monster_shambler") && !cvar("k_bloodfest") )
 						points = points / 2;
 					T_Damage( head, inflictor, attacker, points );
 				}

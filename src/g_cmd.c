@@ -398,7 +398,7 @@ qbool ClientSay (qbool isTeamSay)
 
 	textuncolored[(int)bound(0, j, sizeof(textuncolored)-1)] = 0;
 
-	name = (strnull( self->s.v.netname ) ? "!noname!" : self->s.v.netname);
+	name = (strnull( self->netname ) ? "!noname!" : self->netname);
 
 	if ( self->ct == ctSpec )
 	{

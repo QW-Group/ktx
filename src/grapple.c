@@ -33,7 +33,7 @@ void GrappleReset( gedict_t *rhook )
 	// Original 3wave code added 0.25 to time, but instant-switch is the qw way.
 	owner->attack_finished = g_globalvars.time;
 
-	rhook->s.v.think       = (func_t) SUB_Remove;
+	rhook->think       = (func_t) SUB_Remove;
 	rhook->s.v.nextthink   = g_globalvars.time;
 }
 
@@ -120,19 +120,19 @@ gedict_t* MakeLink()
 //
 void RemoveChain()
 {
-	self->s.v.think = ( func_t ) SUB_Remove;
+	self->think = ( func_t ) SUB_Remove;
 	self->s.v.nextthink = g_globalvars.time;
 
 	if ( self->s.v.goalentity )
 	{
 		gedict_t *goal = PROG_TO_EDICT( self->s.v.goalentity );
-		goal->s.v.think = (func_t) SUB_Remove;
+		goal->think = (func_t) SUB_Remove;
 		goal->s.v.nextthink = g_globalvars.time;
 
  		if ( goal->s.v.goalentity )
 		{
 			gedict_t *goal2 = PROG_TO_EDICT( goal->s.v.goalentity );
-			goal2->s.v.think = (func_t) SUB_Remove;
+			goal2->think = (func_t) SUB_Remove;
 			goal2->s.v.nextthink = g_globalvars.time;
 		}
 	}                
@@ -151,7 +151,7 @@ void UpdateChain()
 
 	if (!owner->hook_out)
 	{
-		self->s.v.think     = (func_t) RemoveChain;
+		self->think     = (func_t) RemoveChain;
 		self->s.v.nextthink = g_globalvars.time;
 		return;
 	}
@@ -181,7 +181,7 @@ void UpdateChain()
 void BuildChain()
 {
 	self->s.v.goalentity = EDICT_TO_PROG( MakeLink() );
-	PROG_TO_EDICT( self->s.v.goalentity )->s.v.think = (func_t) UpdateChain;
+	PROG_TO_EDICT( self->s.v.goalentity )->think = (func_t) UpdateChain;
 	PROG_TO_EDICT( self->s.v.goalentity )->s.v.nextthink = g_globalvars.time + 0.1;
 	PROG_TO_EDICT( self->s.v.goalentity )->s.v.owner = self->s.v.owner;
 	PROG_TO_EDICT( self->s.v.goalentity )->s.v.goalentity = EDICT_TO_PROG( MakeLink() );
@@ -200,10 +200,10 @@ void GrappleAnchor()
 	// classnames below or write code to exclude your new classname so
 	// grapples will not stick to them.
 
-	if ( streq(other->s.v.classname, "rocket")  ||
-		 streq(other->s.v.classname, "grenade") ||
-		 streq(other->s.v.classname, "spike"  ) ||
-		 streq(other->s.v.classname, "hook"   )) 
+	if ( streq(other->classname, "rocket")  ||
+		 streq(other->classname, "grenade") ||
+		 streq(other->classname, "spike"  ) ||
+		 streq(other->classname, "hook"   )) 
 			return;
 
 	if ( other->ct == ctPlayer )
@@ -263,10 +263,10 @@ void GrappleAnchor()
 	owner->ctf_sound = true;
 
 	self->s.v.enemy     = EDICT_TO_PROG( other );
-	self->s.v.think     = (func_t) GrappleTrack;
+	self->think     = (func_t) GrappleTrack;
 	self->s.v.nextthink = g_globalvars.time;
 	self->s.v.solid     = SOLID_NOT;
-	self->s.v.touch     = (func_t) SUB_Null;
+	self->touch     = (func_t) SUB_Null;
 }
 
 // Called from client.c
@@ -317,7 +317,7 @@ void GrappleService()
 			// is never a good idea.
 			if ( self->hook->s.v.goalentity )
 			{
-				PROG_TO_EDICT(self->hook->s.v.goalentity)->s.v.think     = (func_t) RemoveChain;
+				PROG_TO_EDICT(self->hook->s.v.goalentity)->think     = (func_t) RemoveChain;
 				PROG_TO_EDICT(self->hook->s.v.goalentity)->s.v.nextthink = g_globalvars.time;
 			}
 
@@ -345,7 +345,7 @@ void GrappleThrow()
 	newmis->s.v.solid     = SOLID_BBOX;
 	newmis->s.v.owner     = EDICT_TO_PROG( self );
 	self->hook            = newmis;
-	newmis->s.v.classname = "hook";
+	newmis->classname = "hook";
 
 	trap_makevectors ( self->s.v.v_angle );
 
@@ -358,8 +358,8 @@ void GrappleThrow()
 		VectorScale( g_globalvars.v_forward, 800, newmis->s.v.velocity );
 	SetVector( newmis->s.v.avelocity, 0, 0, -500 );
 
-	newmis->s.v.touch     = (func_t) GrappleAnchor;
-	newmis->s.v.think     = (func_t) BuildChain;
+	newmis->touch     = (func_t) GrappleAnchor;
+	newmis->think     = (func_t) BuildChain;
 	newmis->s.v.nextthink = g_globalvars.time + 0.1;
 
 	if ( k_ctf_custom_models )

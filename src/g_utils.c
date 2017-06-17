@@ -88,6 +88,27 @@ float dist_random (float minValue, float maxValue, float spreadFactor)
 	return minValue + (maxValue - minValue) * sum;
 }
 
+#define PR2SetFieldOffset(ent, field) (ent->s.v.field ## _ = NUM_FOR_EDICT(ent) * sizeof(gedict_t) + FOFS(field))
+
+void initialise_spawned_ent(gedict_t* ent)
+{
+	PR2SetFieldOffset(ent, classname);
+	PR2SetFieldOffset(ent, model);
+	PR2SetFieldOffset(ent, touch);
+	PR2SetFieldOffset(ent, use);
+	PR2SetFieldOffset(ent, think);
+	PR2SetFieldOffset(ent, blocked);
+	PR2SetFieldOffset(ent, weaponmodel);
+	PR2SetFieldOffset(ent, netname);
+	PR2SetFieldOffset(ent, target);
+	PR2SetFieldOffset(ent, targetname);
+	PR2SetFieldOffset(ent, message);
+	PR2SetFieldOffset(ent, noise);
+	PR2SetFieldOffset(ent, noise1);
+	PR2SetFieldOffset(ent, noise2);
+	PR2SetFieldOffset(ent, noise3);
+}
+
 gedict_t *spawn(  )
 {
 	gedict_t *t = &g_edicts[trap_spawn(  )];
@@ -96,6 +117,7 @@ gedict_t *spawn(  )
 		DebugTrap( "spawn return world\n" );
 
 	t->spawn_time = g_globalvars.time;
+	initialise_spawned_ent(t);
 
 	return t;
 }
@@ -116,11 +138,11 @@ void soft_ent_remove (gedict_t* ent)
 {
 #ifdef BOT_SUPPORT
 	if (bots_enabled ()) {
-		ent->s.v.model = "";
+		ent->model = "";
 		ent->s.v.solid = SOLID_TRIGGER;
 		ent->s.v.nextthink = 0;
-		ent->s.v.think = (func_t) SUB_Null;
-		ent->s.v.touch = (func_t) marker_touch;
+		ent->think = (func_t) SUB_Null;
+		ent->touch = (func_t) marker_touch;
 		ent->fb.desire = goal_NULL;
 		ent->fb.goal_respawn_time = 0;
 	}
@@ -1027,10 +1049,10 @@ char *getteam( gedict_t * ed )
 
 	if ( num >= 1 && num <= MAX_CLIENTS )
 		team = ezinfokey(ed, "team");
-	else if ( streq(ed->s.v.classname, "ghost") )
+	else if ( streq(ed->classname, "ghost") )
 		team = ezinfokey(world, va("%d", (int)ed->k_teamnum));
 	else {
-//		G_Error("getteam: wrong classname %s", ed->s.v.classname);
+//		G_Error("getteam: wrong classname %s", ed->classname);
 		team = "";
 	}
 
@@ -1050,12 +1072,12 @@ char *getname( gedict_t * ed )
 	index %= MAX_STRINGS;
 
 	if ( num >= 1 && num <= MAX_CLIENTS )
-		name = ed->s.v.netname;
-	else if ( streq(ed->s.v.classname, "ghost") )
+		name = ed->netname;
+	else if ( streq(ed->classname, "ghost") )
 		name = ezinfokey(world, va("%d", (int)ed->cnt2));
 	else {
 		name = "";
-//		G_Error("getname: wrong classname %s", ed->s.v.classname);
+//		G_Error("getname: wrong classname %s", ed->classname);
 	}
 
 	string[index][0] = 0;
@@ -1074,7 +1096,7 @@ char *g_his( gedict_t * ed )
 	index %= MAX_STRINGS;
 
 //	if ( ed->ct != ctPlayer && ed->ct != ctSpec )
-//		G_Error("g_his: not client, classname %s", ed->s.v.classname);
+//		G_Error("g_his: not client, classname %s", ed->classname);
 	if( streq( ezinfokey( ed, "gender" ), "f" ) )
 		sex = "her";
 
@@ -1094,7 +1116,7 @@ char *g_he( gedict_t * ed )
 	index %= MAX_STRINGS;
 
 //	if ( ed->ct != ctPlayer && ed->ct != ctSpec )
-//		G_Error("g_his: not client, classname %s", ed->s.v.classname);
+//		G_Error("g_his: not client, classname %s", ed->classname);
 	if( streq( ezinfokey( ed, "gender" ), "f" ) )
 		sex = "she";
 
@@ -1114,7 +1136,7 @@ char *g_himself( gedict_t * ed )
 	index %= MAX_STRINGS;
 
 //	if ( ed->ct != ctPlayer && ed->ct != ctSpec )
-//		G_Error("g_himself: not client, classname %s", ed->s.v.classname);
+//		G_Error("g_himself: not client, classname %s", ed->classname);
 	if( streq( ezinfokey( ed, "gender" ), "f" ) )
 		sex = "herself";
 
@@ -1208,7 +1230,7 @@ gedict_t *player_by_name( const char *name )
 		return NULL;
 
 	for ( p = world; (p = find_plr( p )); ) {
-		if ( streq(p->s.v.netname, name) )
+		if ( streq(p->netname, name) )
 			return p;
 	}
 
@@ -1245,7 +1267,7 @@ gedict_t *spec_by_name( const char *name )
 		return NULL;
 
 	for ( p = world; (p = find_spc( p )); ) {
-		if ( streq(p->s.v.netname, name) )
+		if ( streq(p->netname, name) )
 			return p;
 	}
 
@@ -1296,7 +1318,7 @@ gedict_t *not_connected_by_name( const char *name )
 	for( p = g_edicts + 1; p <= g_edicts + MAX_CLIENTS; p++ )
 		if ( (   streq(statk = ezinfokey(p, "*state"), "preconnected")
 			  || streq(statk, "connected")
-			 ) && streq(p->s.v.netname, name)
+			 ) && streq(p->netname, name)
 		   )
 			return p;
 
@@ -1335,7 +1357,7 @@ char *armor_type( int items )
 
 qbool isghost( gedict_t *ed )
 {
-	return (streq(ed->s.v.classname, "ghost") ? true : false);
+	return (streq(ed->classname, "ghost") ? true : false);
 }
 // gametype >>>
 qbool isDuel( )
@@ -1441,9 +1463,9 @@ qbool SetHandicap( gedict_t *p, int nhdc )
 	if ( nhdc != hdc )
 	{
 		if ( nhdc == 100 )
-			G_bprint(2, "%s turns %s off\n", p->s.v.netname, redtext("handicap"));
+			G_bprint(2, "%s turns %s off\n", p->netname, redtext("handicap"));
 		else
-			G_bprint(2, "%s uses %s %d%%\n", p->s.v.netname, redtext("handicap"), nhdc);
+			G_bprint(2, "%s uses %s %d%%\n", p->netname, redtext("handicap"), nhdc);
 		return true;
 	}
 
@@ -1879,7 +1901,7 @@ void cvar_toggle_msg( gedict_t *p, char *cvarName, char *msg )
     i = !cvar( cvarName );
 
 	if ( !strnull( msg ) )
-    	G_bprint(2, "%s %s %s\n", p->s.v.netname, Enables( i ), msg);
+    	G_bprint(2, "%s %s %s\n", p->netname, Enables( i ), msg);
 
 	trap_cvar_set_float( cvarName, (float)i );
 }
@@ -1904,13 +1926,13 @@ void ghostClearScores( gedict_t *g )
 	int to = MSG_ALL;
 	int cl_slot = g->ghost_slot;
 
-	if ( strneq( g->s.v.classname, "ghost" ) )
+	if ( strneq( g->classname, "ghost" ) )
 		return;
 
 	if ( cl_slot < 1 || cl_slot > MAX_CLIENTS )
 		return;
 
-    if ( !strnull( g_edicts[ cl_slot ].s.v.netname ) )
+    if ( !strnull( g_edicts[ cl_slot ].netname ) )
 			return; // slot is busy - does't clear
 
 	g_edicts[ cl_slot ].ghost_slot = 0; // mark it as free
@@ -1934,12 +1956,12 @@ void ghost2scores( gedict_t *g )
 		return;
 	}
 
-	if ( strneq( g->s.v.classname, "ghost" ) )
+	if ( strneq( g->classname, "ghost" ) )
 		return;
 
  	cl_slot = g->ghost_slot; // try restore
 
-	if ( cl_slot < 1 || cl_slot > MAX_CLIENTS || !strnull( g_edicts[ cl_slot ].s.v.netname ) )
+	if ( cl_slot < 1 || cl_slot > MAX_CLIENTS || !strnull( g_edicts[ cl_slot ].netname ) )
 		cl_slot	= 0; // slot was occupied or wrong
 
  	// check is restore possible
@@ -1948,7 +1970,7 @@ void ghost2scores( gedict_t *g )
 			if ( g_edicts[ cl_slot ].ghost_slot )
 				continue; // some ghost is already uses this slot
 
-        	if ( strnull( g_edicts[ cl_slot ].s.v.netname ) )
+        	if ( strnull( g_edicts[ cl_slot ].netname ) )
 				break;
 		}
 	}

@@ -259,9 +259,9 @@ void EndMatch ( float skip_log )
 		// remove any powerup left
 		for( p = world; (p = nextent(p)); )
 		{
-			if ( streq( p->s.v.classname, "item_artifact_invulnerability")
-					|| streq( p->s.v.classname, "item_artifact_invisibility")
-					|| streq( p->s.v.classname, "item_artifact_super_damage")
+			if ( streq( p->classname, "item_artifact_invulnerability")
+					|| streq( p->classname, "item_artifact_invisibility")
+					|| streq( p->classname, "item_artifact_super_damage")
 			   )
 			{
 				ent_remove( p );
@@ -513,24 +513,24 @@ void SM_PrepareMap()
 		   )
 		{
 			if (
-				   streq( p->s.v.classname, "weapon_nailgun" )
-				|| streq( p->s.v.classname, "weapon_supernailgun" )
-				|| streq( p->s.v.classname, "weapon_supershotgun" )
-				|| streq( p->s.v.classname, "weapon_rocketlauncher" )
-				|| streq( p->s.v.classname, "weapon_grenadelauncher" )
-				|| streq( p->s.v.classname, "weapon_lightning" )
-				|| streq( p->s.v.classname, "item_shells" )
-				|| streq( p->s.v.classname, "item_spikes" )
-				|| streq( p->s.v.classname, "item_rockets" )
-				|| streq( p->s.v.classname, "item_cells" )
-				|| streq( p->s.v.classname, "item_health" )
-				|| streq( p->s.v.classname, "item_armor1")
-				|| streq( p->s.v.classname, "item_armor2")
-				|| streq( p->s.v.classname, "item_armorInv")
-				|| streq( p->s.v.classname, "item_artifact_invulnerability")
-				|| streq( p->s.v.classname, "item_artifact_envirosuit")
-				|| streq( p->s.v.classname, "item_artifact_invisibility")
-				|| streq( p->s.v.classname, "item_artifact_super_damage")
+				   streq( p->classname, "weapon_nailgun" )
+				|| streq( p->classname, "weapon_supernailgun" )
+				|| streq( p->classname, "weapon_supershotgun" )
+				|| streq( p->classname, "weapon_rocketlauncher" )
+				|| streq( p->classname, "weapon_grenadelauncher" )
+				|| streq( p->classname, "weapon_lightning" )
+				|| streq( p->classname, "item_shells" )
+				|| streq( p->classname, "item_spikes" )
+				|| streq( p->classname, "item_rockets" )
+				|| streq( p->classname, "item_cells" )
+				|| streq( p->classname, "item_health" )
+				|| streq( p->classname, "item_armor1")
+				|| streq( p->classname, "item_armor2")
+				|| streq( p->classname, "item_armorInv")
+				|| streq( p->classname, "item_artifact_invulnerability")
+				|| streq( p->classname, "item_artifact_envirosuit")
+				|| streq( p->classname, "item_artifact_invisibility")
+				|| streq( p->classname, "item_artifact_super_damage")
 			   )
 			{
 				soft_ent_remove( p );
@@ -540,9 +540,9 @@ void SM_PrepareMap()
 
 		if ( deathmatch == 2 )
 		{
-			if (   streq( p->s.v.classname, "item_armor1" )
-			    || streq( p->s.v.classname, "item_armor2" )
-			    || streq( p->s.v.classname, "item_armorInv")
+			if (   streq( p->classname, "item_armor1" )
+			    || streq( p->classname, "item_armor2" )
+			    || streq( p->classname, "item_armorInv")
 			   )
 			{
 				soft_ent_remove( p );
@@ -552,12 +552,12 @@ void SM_PrepareMap()
 
 		if ( deathmatch >= 4 )
 		{
-			if (   streq( p->s.v.classname, "weapon_nailgun" )
-				|| streq( p->s.v.classname, "weapon_supernailgun" )
-				|| streq( p->s.v.classname, "weapon_supershotgun" )
-				|| streq( p->s.v.classname, "weapon_rocketlauncher" )
-				|| streq( p->s.v.classname, "weapon_grenadelauncher" )
-				|| streq( p->s.v.classname, "weapon_lightning" )
+			if (   streq( p->classname, "weapon_nailgun" )
+				|| streq( p->classname, "weapon_supernailgun" )
+				|| streq( p->classname, "weapon_supershotgun" )
+				|| streq( p->classname, "weapon_rocketlauncher" )
+				|| streq( p->classname, "weapon_grenadelauncher" )
+				|| streq( p->classname, "weapon_lightning" )
 			   )
 			{ // no weapons for any of this deathmatches (4 or 5)
 				soft_ent_remove( p );
@@ -566,11 +566,11 @@ void SM_PrepareMap()
 
 			if ( deathmatch == 4 )
 			{
-				if (   streq( p->s.v.classname, "item_shells" )
-					|| streq( p->s.v.classname, "item_spikes" )
-					|| streq( p->s.v.classname, "item_rockets" )
-					|| streq( p->s.v.classname, "item_cells" )
-					|| (streq( p->s.v.classname, "item_health" ) && (( int ) p->s.v.spawnflags & H_MEGA))
+				if (   streq( p->classname, "item_shells" )
+					|| streq( p->classname, "item_spikes" )
+					|| streq( p->classname, "item_rockets" )
+					|| streq( p->classname, "item_cells" )
+					|| (streq( p->classname, "item_health" ) && (( int ) p->s.v.spawnflags & H_MEGA))
 			       )
 				{ // no weapon ammo and megahealth for dmm4
 					soft_ent_remove( p );
@@ -579,7 +579,7 @@ void SM_PrepareMap()
 			}
 		}
 
-		if ( k_killquad && streq( p->s.v.classname, "item_artifact_super_damage") )
+		if ( k_killquad && streq( p->classname, "item_artifact_super_damage") )
 		{	// no normal quad in killquad mode.
 			soft_ent_remove( p );
 			continue;
@@ -798,7 +798,7 @@ void StartMatch ()
 		localcmd("serverinfo status \"%d min left\"\n", (int)timelimit);
 	}
 
-	self->s.v.think = ( func_t ) TimerThink;
+	self->think = ( func_t ) TimerThink;
 	self->s.v.nextthink = g_globalvars.time + 1;
 
 	SM_PrepareShowscores();
@@ -854,9 +854,9 @@ void PersonalisedCountdown(char* baseText)
 		if (HM_current_point_type() == HM_PT_SET)
 			strlcat(text, va("%s\n\n", redtext("* Set Point *")), sizeof(text));
 
-		if (p->k_hoony_new_spawn && ! strnull(p->k_hoony_new_spawn->s.v.targetname))
+		if (p->k_hoony_new_spawn && ! strnull(p->k_hoony_new_spawn->targetname))
 		{
-			strlcat(text, va("Next %8.8s\n", redtext(p->k_hoony_new_spawn->s.v.targetname)), sizeof(text));
+			strlcat(text, va("Next %8.8s\n", redtext(p->k_hoony_new_spawn->targetname)), sizeof(text));
 
 			if ( timelimit )
 				strlcat(text, va("%s %3s\n", "Timelimit", dig3(timelimit)), sizeof(text));
@@ -874,7 +874,7 @@ void PersonalisedCountdown(char* baseText)
 			}
 
 			if (! strnull(world->hoony_defaultwinner)) {
-				if (streq(p->k_hoony_new_spawn->s.v.targetname, world->hoony_defaultwinner)) {
+				if (streq(p->k_hoony_new_spawn->targetname, world->hoony_defaultwinner)) {
 					strlcat(text, va("Draw %s\n", redtext(" you win")), sizeof(text));
 				}
 				else {
@@ -1194,7 +1194,7 @@ void standby_think()
 		k_standby = 1;
 
 		for( p = world;	(p = find_plr( p )); ) {
-			if( !strnull ( p->s.v.netname ) ) {
+			if( !strnull ( p->netname ) ) {
 				//set to ghost, 0.2 second before matchstart
 				if (isHoonyMode() && p->k_hoony_new_spawn) {
 					// move viewpoint to selected spawn
@@ -1210,7 +1210,7 @@ void standby_think()
 				p->s.v.solid      = 0;
 				p->s.v.movetype   = 0;
 				p->s.v.modelindex = 0;
-				p->s.v.model      = "";
+				p->model      = "";
 			}
 		}
 	}
@@ -1238,9 +1238,9 @@ void TimerStartThink ()
 	if( self->cnt2 == 1 ) {
 		p = spawn();
 		p->s.v.owner = EDICT_TO_PROG( world );
-		p->s.v.classname = "standby_th";
+		p->classname = "standby_th";
 		p->s.v.nextthink = g_globalvars.time + 0.8;
-		p->s.v.think = ( func_t ) standby_think;
+		p->think = ( func_t ) standby_think;
 	}
     else if( self->cnt2 <= 0 ) {
 		G_cp2all("");
@@ -1493,7 +1493,7 @@ void StartTimer ()
 
 	timer = spawn();
 	timer->s.v.owner = EDICT_TO_PROG( world );
-	timer->s.v.classname = "timer";
+	timer->classname = "timer";
 	timer->cnt = 0;
 
     timer->cnt2 = max(3, (int)cvar( "k_count" ));  // at the least we want a 3 second countdown
@@ -1520,7 +1520,7 @@ void StartTimer ()
 	( timer->cnt2 )++;
 
     timer->s.v.nextthink = g_globalvars.time + 0.001;
-	timer->s.v.think = ( func_t ) TimerStartThink;
+	timer->think = ( func_t ) TimerStartThink;
 
 	match_in_progress = 1;
 
@@ -1629,7 +1629,7 @@ void IdlebotForceStart ()
 		}
 		else
 		{
-    		G_bprint(2, "%s was kicked by IDLE BOT\n", p->s.v.netname);
+    		G_bprint(2, "%s was kicked by IDLE BOT\n", p->netname);
     		G_sprint(p, 2, "Bye bye! Pay attention next time.\n");
 
     		stuffcmd(p, "disconnect\n"); // FIXME: stupid way
@@ -1749,8 +1749,8 @@ void IdlebotCheck ()
 	}
 
 	p = spawn();
-	p->s.v.classname = "idlebot";
-	p->s.v.think = (func_t) IdlebotThink;
+	p->classname = "idlebot";
+	p->think = (func_t) IdlebotThink;
 	p->s.v.nextthink = g_globalvars.time + 0.001;
 
 	p->attack_finished = max( 3, cvar( "k_idletime" ) );
@@ -1789,7 +1789,7 @@ void PlayerReady ()
 		self->ready = 1;
 
 		for( p = world; (p = (match_in_progress ? find_spc( p ) : find_client( p ))); )
-			G_sprint(p, 2, "%s %s to play\n", self->s.v.netname, redtext("desire"));
+			G_sprint(p, 2, "%s %s to play\n", self->netname, redtext("desire"));
 
 		CheckAutoXonX(g_globalvars.time < 10 ? true : false); // force switch mode asap if possible after some time spent
 
@@ -1858,7 +1858,7 @@ void PlayerReady ()
 	}
 
 	if (!isHoonyMode() || HM_current_point() == 0)
-		G_bprint(2, "%s %s%s\n", self->s.v.netname, redtext("is ready"),
+		G_bprint(2, "%s %s%s\n", self->netname, redtext("is ready"),
 						( ( isTeam() || isCTF() ) ? va(" \x90%s\x91", getteam( self ) ) : "" ) );
 
 	nready = CountRPlayers();
@@ -1928,7 +1928,7 @@ void PlayerBreak ()
 		self->ready = 0;
 
 		for( p = world; (p = (match_in_progress ? find_spc( p ) : find_client( p ))); )
-			G_sprint(p, 2, "%s %s to play\n", self->s.v.netname, redtext("lost desire"));
+			G_sprint(p, 2, "%s %s to play\n", self->netname, redtext("lost desire"));
 
 		return;
 	}
@@ -1950,7 +1950,7 @@ void PlayerBreak ()
 	{
 		self->ready = 0;
 
-		G_bprint(2, "%s %s\n", self->s.v.netname, redtext("is not ready"));
+		G_bprint(2, "%s %s\n", self->netname, redtext("is not ready"));
 
 		return;
 	}
@@ -1968,12 +1968,12 @@ void PlayerBreak ()
 
 				if ( !k_matchLess || ( k_bloodfest && CountRPlayers() < 1 ) )
 				{
-					G_bprint(2, "%s %s\n", self->s.v.netname, redtext("stops the countdown"));
+					G_bprint(2, "%s %s\n", self->netname, redtext("stops the countdown"));
 					StopTimer( 1 );
 				}
 				else
 				{
-					G_bprint(2, "%s %s\n", self->s.v.netname, redtext("is not ready"));
+					G_bprint(2, "%s %s\n", self->netname, redtext("is not ready"));
 				}
 			}
 
@@ -1985,7 +1985,7 @@ void PlayerBreak ()
 	{
 		self->v.brk = 0;
 
-		G_bprint(2, "%s %s %s vote%s\n", self->s.v.netname,
+		G_bprint(2, "%s %s %s vote%s\n", self->netname,
 				redtext("withdraws"), redtext(g_his(self)),
 				((votes = get_votes_req( OV_BREAK, true )) ? va(" (%d)", votes) : ""));
 
@@ -1994,7 +1994,7 @@ void PlayerBreak ()
 
 	self->v.brk = 1;
 
-	G_bprint(2, "%s %s%s\n", self->s.v.netname, redtext(k_matchLess ? "votes for next map" : "votes for stopping the match"),
+	G_bprint(2, "%s %s%s\n", self->netname, redtext(k_matchLess ? "votes for next map" : "votes for stopping the match"),
 				((votes = get_votes_req( OV_BREAK, true )) ? va(" (%d)", votes) : ""));
 
 	// show warning to player - that he can't stop countdown alone in matchless mode.

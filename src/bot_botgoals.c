@@ -25,7 +25,7 @@ void SUB_regen_powerups ();
 
 qbool WaitingToRespawn (gedict_t* ent)
 {
-	return ent->s.v.nextthink > g_globalvars.time && (ent->s.v.think == (func_t)SUB_regen || ent->s.v.think == (func_t)SUB_regen_powerups);
+	return ent->s.v.nextthink > g_globalvars.time && (ent->think == (func_t)SUB_regen || ent->think == (func_t)SUB_regen_powerups);
 }
 
 // If an item is picked up, all bots heading for that item should re-evaluate their goals
@@ -284,11 +284,11 @@ void UpdateGoal(gedict_t* self) {
 		self->fb.virtual_enemy = dropper;
 	}
 
-	G_bprint_debug (2, "After enemy-eval: best_goal %s, best_score %f\n", self->fb.best_goal ? self->fb.best_goal->s.v.classname : "(none)", self->fb.best_goal_score);
+	G_bprint_debug (2, "After enemy-eval: best_goal %s, best_score %f\n", self->fb.best_goal ? self->fb.best_goal->classname : "(none)", self->fb.best_goal_score);
 	for (i = 0; i < NUMBER_GOALS; ++i) {
 		EvalGoal(self, self->fb.touch_marker->fb.goals[i].next_marker->fb.virtual_goal);
 	}
-	G_bprint_debug (2, "After goal-eval1: best_goal %s, best_score %f\n", self->fb.best_goal ? self->fb.best_goal->s.v.classname : "(none)", self->fb.best_goal_score);
+	G_bprint_debug (2, "After goal-eval1: best_goal %s, best_score %f\n", self->fb.best_goal ? self->fb.best_goal->classname : "(none)", self->fb.best_goal_score);
 
 	// Dropped backpacks
 	for (goal_entity = world; (goal_entity = ez_find (goal_entity, BACKPACK_CLASSNAME)); ) {
@@ -296,7 +296,7 @@ void UpdateGoal(gedict_t* self) {
 			EvalGoal (self, goal_entity);
 		}
 	}
-	G_bprint_debug (2, "After backpacks:  best_goal %s, best_score %f\n", self->fb.best_goal ? self->fb.best_goal->s.v.classname : "(none)", self->fb.best_goal_score);
+	G_bprint_debug (2, "After backpacks:  best_goal %s, best_score %f\n", self->fb.best_goal ? self->fb.best_goal->classname : "(none)", self->fb.best_goal_score);
 
 	// Dropped powerups
 	for (i = 0; i < sizeof (dropped_powerup_names) / sizeof (dropped_powerup_names[0]); ++i) {
@@ -306,7 +306,7 @@ void UpdateGoal(gedict_t* self) {
 			}
 		}
 	}
-	G_bprint_debug (2, "After powerups:  best_goal %s, best_score %f\n", self->fb.best_goal ? self->fb.best_goal->s.v.classname : "(none)", self->fb.best_goal_score);
+	G_bprint_debug (2, "After powerups:  best_goal %s, best_score %f\n", self->fb.best_goal ? self->fb.best_goal->classname : "(none)", self->fb.best_goal_score);
 
 	if (teamplay && !isRA()) {
 		gedict_t* search_entity = HelpTeammate();
@@ -322,7 +322,7 @@ void UpdateGoal(gedict_t* self) {
 		self->fb.best_score2 = self->fb.best_goal_score;
 
 		EnemyGoalLogic (self);
-		G_bprint_debug (2, "After enemy-logic:  best_goal %s, best_score %f\n", self->fb.best_goal2 ? self->fb.best_goal2->s.v.classname : "(none)", self->fb.best_score2);
+		G_bprint_debug (2, "After enemy-logic:  best_goal %s, best_score %f\n", self->fb.best_goal2 ? self->fb.best_goal2->classname : "(none)", self->fb.best_score2);
 
 		for (i = 0; i < NUMBER_GOALS; ++i) {
 			gedict_t* next = self->fb.touch_marker->fb.goals[i].next_marker;
@@ -330,14 +330,14 @@ void UpdateGoal(gedict_t* self) {
 				EvalGoal2 (self->fb.touch_marker->fb.goals[i].next_marker->fb.virtual_goal, self->fb.best_goal->fb.touch_marker, self->fb.canRocketJump);
 			}
 		}
-		G_bprint_debug (2, "After EvalGoal2:  best_goal %s, best_score %f\n", self->fb.best_goal2 ? self->fb.best_goal2->s.v.classname : "(none)", self->fb.best_score2);
+		G_bprint_debug (2, "After EvalGoal2:  best_goal %s, best_score %f\n", self->fb.best_goal2 ? self->fb.best_goal2->classname : "(none)", self->fb.best_score2);
 
 		for (goal_entity = world; (goal_entity = ez_find(goal_entity, BACKPACK_CLASSNAME)); ) {
 			if (goal_entity->fb.touch_marker) {
 				EvalGoal2 (goal_entity, self->fb.best_goal->fb.touch_marker, self->fb.canRocketJump);
 			}
 		}
-		G_bprint_debug (2, "After EvalGoal2-BP:  best_goal %s, best_score %f\n", self->fb.best_goal2 ? self->fb.best_goal2->s.v.classname : "(none)", self->fb.best_score2);
+		G_bprint_debug (2, "After EvalGoal2-BP:  best_goal %s, best_score %f\n", self->fb.best_goal2 ? self->fb.best_goal2->classname : "(none)", self->fb.best_score2);
 
 		self->s.v.goalentity = NUM_FOR_EDICT(self->fb.best_goal2);
 		self->fb.goal_respawn_time = g_globalvars.time + self->fb.best_goal2->fb.saved_respawn_time;
@@ -346,7 +346,7 @@ void UpdateGoal(gedict_t* self) {
 		self->s.v.goalentity = NUM_FOR_EDICT(world);
 	}
 
-	G_bprint_debug (2, "UpdateGoal() => %s\n", g_edicts[self->s.v.goalentity].s.v.classname);
+	G_bprint_debug (2, "UpdateGoal() => %s\n", g_edicts[self->s.v.goalentity].classname);
 	STOP_DEBUGGING
 }
 

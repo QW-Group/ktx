@@ -20,7 +20,7 @@ qbool POVDMM4DontWalkThroughDoor (gedict_t* goal_entity)
 		return true;
 	}
 
-	if (streq(goal_entity->s.v.classname, "item_armor2")) {
+	if (streq(goal_entity->classname, "item_armor2")) {
 		// Find linked door entity - if closed, set desire to 0
 		int i = 0;
 		for (i = 0; i < sizeof (goal_entity->fb.paths) / sizeof (goal_entity->fb.paths[0]); ++i) {

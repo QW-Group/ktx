@@ -30,7 +30,7 @@ void check_marker(gedict_t* self, gedict_t* other) {
 		other->fb.touch_distance = distance;
 
 		//if (other->isBot && other->fb.touch_marker != self)
-			//G_sprint (other, 2, "touched %3d/%s, g %d\n", self->fb.index, self->s.v.classname, g_edicts[other->s.v.goalentity].fb.index);
+			//G_sprint (other, 2, "touched %3d/%s, g %d\n", self->fb.index, self->classname, g_edicts[other->s.v.goalentity].fb.index);
 		other->fb.touch_marker = self;
 		other->fb.Z_ = self->fb.Z_;
 
@@ -91,7 +91,7 @@ gedict_t* LocateNextMarker (vec3_t org, gedict_t* ignore_ent)
 			continue;
 		}
 
-		if (!editor_mode && streq (marker_->s.v.classname, "door") && !(marker_->fb.T & MARKER_DOOR_TOUCHABLE))
+		if (!editor_mode && streq (marker_->classname, "door") && !(marker_->fb.T & MARKER_DOOR_TOUCHABLE))
 			continue;
 
 		if (marker_->fb.fl_marker || (editor_mode && marker_->fb.index)) {

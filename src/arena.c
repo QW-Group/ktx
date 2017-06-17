@@ -607,7 +607,7 @@ void ra_PlayerStats()
 	}
 
 	for ( p = world; (p = find_plr( p )); )
-		pL = max(pL, strlen(p->s.v.netname));
+		pL = max(pL, strlen(p->netname));
 
 	pL = bound( strlen("Name"), pL, 10 );
 
@@ -624,8 +624,8 @@ void ra_PlayerStats()
 	G_sprint(self, 2, "\237\n");
 
 	for ( p = world; (p = find_plr( p )); ) {
-		G_sprint(self, 2, "%.10s", p->s.v.netname); // player name
-		for ( i = strlen(p->s.v.netname); i < pL; i++ )
+		G_sprint(self, 2, "%.10s", p->netname); // player name
+		for ( i = strlen(p->netname); i < pL; i++ )
 			G_sprint(self, 2, " "); // dynamically pad name
 
 		G_sprint(self, 2, " %5d", (int)p->s.v.frags); // Frags

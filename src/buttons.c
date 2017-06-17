@@ -31,7 +31,7 @@ void button_wait()
 {
 	self->state = STATE_TOP;
 	self->s.v.nextthink = self->s.v.ltime + self->wait;
-	self->s.v.think = ( func_t ) button_return;
+	self->think = ( func_t ) button_return;
 	activator = PROG_TO_EDICT( self->s.v.enemy );
 
 	SUB_UseTargets();
@@ -71,7 +71,7 @@ void button_fire()
 	if ( self->state == STATE_UP || self->state == STATE_TOP )
 		return;
 
-	sound( self, CHAN_VOICE, self->s.v.noise, 1, ATTN_NORM );
+	sound( self, CHAN_VOICE, self->noise, 1, ATTN_NORM );
 
 	self->state = STATE_UP;
 
@@ -141,22 +141,22 @@ void SP_func_button()
 	if ( self->s.v.sounds == 0 )
 	{
 		trap_precache_sound( "buttons/airbut1.wav" );
-		self->s.v.noise = "buttons/airbut1.wav";
+		self->noise = "buttons/airbut1.wav";
 	}
 	if ( self->s.v.sounds == 1 )
 	{
 		trap_precache_sound( "buttons/switch21.wav" );
-		self->s.v.noise = "buttons/switch21.wav";
+		self->noise = "buttons/switch21.wav";
 	}
 	if ( self->s.v.sounds == 2 )
 	{
 		trap_precache_sound( "buttons/switch02.wav" );
-		self->s.v.noise = "buttons/switch02.wav";
+		self->noise = "buttons/switch02.wav";
 	}
 	if ( self->s.v.sounds == 3 )
 	{
 		trap_precache_sound( "buttons/switch04.wav" );
-		self->s.v.noise = "buttons/switch04.wav";
+		self->noise = "buttons/switch04.wav";
 	}
 
 	SetMovedir();
@@ -164,11 +164,11 @@ void SP_func_button()
 	self->s.v.movetype = MOVETYPE_PUSH;
 	// if button does't have model ( mapper fault? ),
 	// we must set it to something safe, because with SOLID_BSP and null model server crashed
-	self->s.v.solid = (strnull(self->s.v.model) ? SOLID_NOT : SOLID_BSP);
-	setmodel( self, self->s.v.model );
+	self->s.v.solid = (strnull(self->model) ? SOLID_NOT : SOLID_BSP);
+	setmodel( self, self->model );
 
-	self->s.v.blocked = ( func_t ) button_blocked;
-	self->s.v.use = ( func_t ) button_use;
+	self->blocked = ( func_t ) button_blocked;
+	self->use = ( func_t ) button_use;
 
 	if ( ISLIVE(self) )
 	{
@@ -176,7 +176,7 @@ void SP_func_button()
 		self->th_die = button_killed;
 		self->s.v.takedamage = DAMAGE_YES;
 	} else
-		self->s.v.touch = ( func_t ) button_touch;
+		self->touch = ( func_t ) button_touch;
 
 	if ( !self->speed )
 		self->speed = 40;

@@ -179,7 +179,7 @@ static void BotsAimAtPlayerLogic(gedict_t* self, vec3_t rel_pos, float* rel_dist
 			}
 		}
 		else if (FrogbotOptionEnabled(FB_OPTION_DEBUG_MOVEMENT)) {
-			stuffcmd(self, "//bot-nonpredict-2 (%s)\n", self->fb.look_object ? self->fb.look_object->s.v.classname : "//");
+			stuffcmd(self, "//bot-nonpredict-2 (%s)\n", self->fb.look_object ? self->fb.look_object->classname : "//");
 		}
 	}
 	else if (FrogbotOptionEnabled(FB_OPTION_DEBUG_MOVEMENT)) {
@@ -336,7 +336,7 @@ static void FireAtSpawnPoint(gedict_t* self)
 {
 	gedict_t* resp;
 	for (resp = world; (resp = trap_findradius(resp, self->s.v.origin, 1000)); ) {
-		if (streq(resp->s.v.classname, "info_player_deathmatch")) {
+		if (streq(resp->classname, "info_player_deathmatch")) {
 			vec3_t test;
 			VectorCopy(self->s.v.origin, test);
 			test[2] += 16;

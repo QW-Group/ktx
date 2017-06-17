@@ -250,7 +250,7 @@ void xml_race_detail(fileHandle_t handle)
 		s2di(handle, "\t<racer avgspeed=\"%f\" distance=\"%f\" time=\"%f\" "
 			"racer=\"%s\" weaponmode=\"%d\" startmode=\"%d\" maxspeed=\"%f\">\n",
 			record->avgspeed / record->avgcount, record->distance, record->time,
-			xml_string(p->s.v.netname), record->maxspeed
+			xml_string(p->netname), record->maxspeed
 		);
 		s2di(handle, "\t</race>\n");
 	}

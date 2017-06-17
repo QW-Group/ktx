@@ -226,8 +226,8 @@ void Dog_JumpTouch ()
 		if ( (int)self->s.v.flags & FL_ONGROUND )
 		{	// jump randomly to not get hung up
 //			dprint ("popjump\n");
-			self->s.v.touch = ( func_t ) SUB_Null;
-			self->s.v.think = ( func_t ) dog_leap1;
+			self->touch = ( func_t ) SUB_Null;
+			self->think = ( func_t ) dog_leap1;
 			self->s.v.nextthink = g_globalvars.time + FRAMETIME;
 
 //			self.velocity_x = (g_random() - 0.5) * 600;
@@ -239,8 +239,8 @@ void Dog_JumpTouch ()
 		return;	// not on ground yet
 	}
 
-	self->s.v.touch = ( func_t ) SUB_Null;
-	self->s.v.think = ( func_t ) dog_run1;
+	self->touch = ( func_t ) SUB_Null;
+	self->think = ( func_t ) dog_run1;
 	self->s.v.nextthink = g_globalvars.time + FRAMETIME;
 }
 
@@ -248,7 +248,7 @@ void _dog_leap2()
 {
 	ai_face();
 
-	self->s.v.touch = ( func_t ) Dog_JumpTouch;
+	self->touch = ( func_t ) Dog_JumpTouch;
 	trap_makevectors( self->s.v.angles );
 	self->s.v.origin[2] += 1; // FIXME: possibile stuck in walls, right?
 	VectorScale( g_globalvars.v_forward, 300, self->s.v.velocity );

@@ -29,21 +29,21 @@ void BotsFireInitialTriggers (gedict_t* player)
 		if (ent && ent->fb.door_entity)
 			ent = ent->fb.door_entity;
 
-		if (streq (ent->s.v.classname, "func_button")) {
+		if (streq (ent->classname, "func_button")) {
 			self = ent;
 			button_use ();
 		}
-		else if (streq (ent->s.v.classname, "trigger_once")) {
+		else if (streq (ent->classname, "trigger_once")) {
 			self = ent;
 			multi_use ();
 		}
-		else if (streq (ent->s.v.classname, "door")) {
+		else if (streq (ent->classname, "door")) {
 			self = ent;
 			if (ent->s.v.takedamage) {
 				((void (*)()) (ent->th_pain)) ();
 			}
-			else if (ent->s.v.use) {
-				((void (*)()) (ent->s.v.use)) ();
+			else if (ent->use) {
+				((void (*)()) (ent->use)) ();
 			}
 		}
 	}

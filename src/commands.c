@@ -1478,7 +1478,7 @@ void SendVictimMsg()
 
 void SendNewcomerMsg()
 {
-	SendMessage(newcomer->s.v.netname);
+	SendMessage(newcomer->netname);
 }
 
 void SendMessage(char *name)
@@ -1490,7 +1490,7 @@ void SendMessage(char *name)
 		if ( p == self )
 			continue;
 
-		if ( !strnull( name ) && streq( p->s.v.netname, name ) ) {
+		if ( !strnull( name ) && streq( p->netname, name ) ) {
 			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "say ");
 			if ((s = ezinfokey(self, "premsg")))
 				stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, " %s ", s);
@@ -1684,7 +1684,7 @@ void ModStatusVote()
 
 			for( p = world; (p = find_client( p )); )
 				if ( p->v.map == maps_voted[i].map_id )
-					G_sprint(self, 2, " %s\n", p->s.v.netname);
+					G_sprint(self, 2, " %s\n", p->netname);
 		}
 	}
 
@@ -1698,7 +1698,7 @@ void ModStatusVote()
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.elect )
 				G_sprint(self, 2, "%s%s\n", 
-				(p->v.elect_type != etNone) ? "\x87" : " ", p->s.v.netname);
+				(p->v.elect_type != etNone) ? "\x87" : " ", p->netname);
 	}
 
 	if ( !match_in_progress )
@@ -1710,7 +1710,7 @@ void ModStatusVote()
 
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.pickup )
-				G_sprint(self, 2, " %s\n", p->s.v.netname);
+				G_sprint(self, 2, " %s\n", p->netname);
 	}
 
 	if ( !match_in_progress )
@@ -1722,7 +1722,7 @@ void ModStatusVote()
 
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.rpickup )
-				G_sprint(self, 2, " %s\n", p->s.v.netname);
+				G_sprint(self, 2, " %s\n", p->netname);
 	}
 
 	if( k_matchLess || match_in_progress == 2 )
@@ -1734,7 +1734,7 @@ void ModStatusVote()
 
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.brk )
-				G_sprint(self, 2, " %s\n", p->s.v.netname);
+				G_sprint(self, 2, " %s\n", p->netname);
 	}
 
 	if ( !match_in_progress )
@@ -1746,7 +1746,7 @@ void ModStatusVote()
 
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.antilag )
-				G_sprint(self, 2, " %s\n", p->s.v.netname);
+				G_sprint(self, 2, " %s\n", p->netname);
 	}
 
 	if ( !match_in_progress )
@@ -1758,7 +1758,7 @@ void ModStatusVote()
 
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.nospecs )
-				G_sprint(self, 2, " %s\n", p->s.v.netname);
+				G_sprint(self, 2, " %s\n", p->netname);
 	}
 
 	if ( !match_in_progress )
@@ -1770,7 +1770,7 @@ void ModStatusVote()
 
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.teamoverlay )
-				G_sprint(self, 2, " %s\n", p->s.v.netname);
+				G_sprint(self, 2, " %s\n", p->netname);
 	}
 
 	if ( voted )
@@ -1820,7 +1820,7 @@ void PlayerStatusS()
 		if ( !found )
 			G_sprint(self, 2, "Players skins list:\n"
 							  "žžžžžžžžžžžžžžžžžžžžžŸ\n");
-		G_sprint(self, 2, "\x90%10s\x91 %s\n", ezinfokey(p, "skin"), p->s.v.netname);
+		G_sprint(self, 2, "\x90%10s\x91 %s\n", ezinfokey(p, "skin"), p->netname);
 		found = true;
 	}
 			
@@ -1922,7 +1922,7 @@ void VotePickup()
 
 	self->v.pickup = !self->v.pickup;
 
-	G_bprint(2, "%s %s %s%s\n", self->s.v.netname, 
+	G_bprint(2, "%s %s %s%s\n", self->netname, 
 					redtext("says"), (self->v.pickup ? "pickup!" : "no pickup"),
 					((votes = get_votes_req( OV_PICKUP, true )) ? va(" (%d)", votes) : ""));
 
@@ -1988,7 +1988,7 @@ void ReportMe()
 			G_sprint(p, 3, "%s: ", t1);
 		}
 		else
-			G_sprint(p, 3, "%s%s%s", pa1, self->s.v.netname, pa2);
+			G_sprint(p, 3, "%s%s%s", pa1, self->netname, pa2);
 
 		if( self->s.v.armorvalue )
 			G_sprint(p, 3, "%s:%d", armor_type((int)self->s.v.items),
@@ -2458,7 +2458,7 @@ void TeamSay(float fsndname)
 	char *sndname = va("ktsound%d.wav", (int)fsndname);
 
 	for( p = world; (p = find_plr(p)); ) {
-		if( p != self && (isTeam() || isCTF()) && !strnull( p->s.v.netname )
+		if( p != self && (isTeam() || isCTF()) && !strnull( p->netname )
 			&& ( iKey( p, "kf" ) & KF_KTSOUNDS ) 
 		   ) {
 			if( streq( getteam( self ), getteam( p ) ) ) {
@@ -2555,7 +2555,7 @@ void PlayerStats()
 		p->k_flag = 0;
 
 	for ( p = world; (p = find_plr( p )); ) {
-		pL = max(pL, strlen(p->s.v.netname));
+		pL = max(pL, strlen(p->netname));
 		tL = max(tL, strlen(getteam(p)));
 	}
 	pL = bound( 0, pL, 10 );
@@ -2587,8 +2587,8 @@ void PlayerStats()
 					G_sprint(self, 2, " ");
  			}
 
-			G_sprint(self, 2, "%.10s ", p2->s.v.netname); // player name
-			for ( i = strlen(p2->s.v.netname); i < pL; i++ )
+			G_sprint(self, 2, "%.10s ", p2->netname); // player name
+			for ( i = strlen(p2->netname); i < pL; i++ )
 				G_sprint(self, 2, " ");
 
 			stats = va("%d", ( !isCTF() ? (int)p2->s.v.frags : (int)(p2->s.v.frags - p2->ps.ctf_points)));
@@ -2786,7 +2786,7 @@ void ShowNick()
 		if ( p == self )
 			continue; // ignore self
 
-		if ( strnull( p->s.v.netname ) )
+		if ( strnull( p->netname ) )
 			continue; // ignore not really players
 
 		if ( p->s.v.modelindex != modelindex_player )
@@ -2945,7 +2945,7 @@ ok:
 	if ( strnull( kn ) )
 		kn = ezinfokey( bp, "k" );
 	if ( strnull( kn ) )
-		kn = bp->s.v.netname;
+		kn = bp->netname;
 
 	ln = iKey( self, "ln" );
 	ln = (iKey( self, "ktpl" ) ? abs(ln + 2) : ln); // NOTE: ktpro does't allow negative "ln", muhaha
@@ -3355,7 +3355,7 @@ void UserMode(float umode)
 		if ( sv_invoked )
 			G_bprint(2, "%s %s\n", redtext(va("%s", um_list[(int)umode].displayname)), redtext("settings enabled") );
 		else
-			G_bprint(2, "%s %s %s\n", redtext(va("%s", um_list[(int)umode].displayname)), redtext("settings enabled by"), self->s.v.netname );
+			G_bprint(2, "%s %s %s\n", redtext(va("%s", um_list[(int)umode].displayname)), redtext("settings enabled by"), self->netname );
 	}
 
 	trap_readcmd( common_um_init, buf, sizeof(buf) );
@@ -3571,7 +3571,7 @@ void t_jump (float j_type)
 	cv_jt = va("k_disallow_k%cjump", cjt);
 
 	trap_cvar_set_float( cv_jt, !cvar( cv_jt ) );
-	G_bprint(2, "%s %s %s\n", self->s.v.netname, redtext( Enables( !cvar( cv_jt ) ) ),
+	G_bprint(2, "%s %s %s\n", self->netname, redtext( Enables( !cvar( cv_jt ) ) ),
 							  redtext( jt ) );
 }
 
@@ -3645,7 +3645,7 @@ void klist ( )
 
 		G_sprint(self, 2, "%2d|%3d|%-10.10s|%s\n", 
 					iKey(p, "*userid"), // can't use GetUserID here
-					VIP( p ), track, (strnull( p->s.v.netname ) ? "!noname!" : p->s.v.netname));
+					VIP( p ), track, (strnull( p->netname ) ? "!noname!" : p->netname));
 
 		i++;
 	}
@@ -3660,7 +3660,7 @@ void hdptoggle ()
 		return;
 
 	trap_cvar_set_float( "k_lock_hdp", !cvar( "k_lock_hdp" ) );
-	G_bprint(2, "%s %s %s\n", self->s.v.netname,
+	G_bprint(2, "%s %s %s\n", self->netname,
 				redtext( Allows( !cvar( "k_lock_hdp" ) ) ), redtext( "handicap" ) );
 }
 
@@ -3733,7 +3733,7 @@ void noweapon ()
 			k_disallow_weapons ^= bit = IT_LIGHTNING;
 
 		if ( bit ) {
-			G_bprint(2, "%s %s %s\n", self->s.v.netname,
+			G_bprint(2, "%s %s %s\n", self->netname,
 				redtext( Allows( !(k_disallow_weapons & bit) ) ), redtext( nwp ) );
 			trap_cvar_set_float( "k_disallow_weapons", k_disallow_weapons );
 		}
@@ -3828,7 +3828,7 @@ void RandomPickup ()
 
 	self->v.rpickup = !self->v.rpickup;
 
-	G_bprint(2, "%s %s!%s\n", self->s.v.netname, 
+	G_bprint(2, "%s %s!%s\n", self->netname, 
 			(self->v.rpickup ? redtext("votes for rpickup") :
 							   redtext(va("withdraws %s rpickup vote", g_his(self)))),
 			((votes = get_votes_req( OV_RPICKUP, true )) ? va(" (%d)", votes) : ""));
@@ -3866,7 +3866,7 @@ void fav_add( )
 
 	for ( free_num = -1, fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
 		if ( self->fav[fav_num] == diff ) {
-			G_sprint(self, 2, "fav_add: %s %s added to favourites\n", goal->s.v.netname,
+			G_sprint(self, 2, "fav_add: %s %s added to favourites\n", goal->netname,
 																	redtext("already"));
 			return;
 		}
@@ -3881,7 +3881,7 @@ void fav_add( )
 		return;
 	}
 	
-	G_sprint(self, 2, "fav_add: %s added to favourites\n", goal->s.v.netname);
+	G_sprint(self, 2, "fav_add: %s added to favourites\n", goal->netname);
 
 	self->fav[(int)fav_num - 1] = diff;
 }
@@ -3901,7 +3901,7 @@ qbool fav_del_do(gedict_t *s, gedict_t *p, char *prefix)
 		if ( s->fav[fav_num] && (world + s->fav[fav_num]) == p ) {
 			if ( removed == false ) // show info one time
 				G_sprint(s, 2, "%s%s removed from favourites\n", 
-							prefix, (strnull(p->s.v.netname) ? "-someone-" : p->s.v.netname));
+							prefix, (strnull(p->netname) ? "-someone-" : p->netname));
 
 			s->fav[fav_num] = 0;
 			removed = true; // does't break, so if this player multiple times in favourites
@@ -3924,7 +3924,7 @@ qbool favx_del_do(gedict_t *s, gedict_t *p, char *prefix)
 	for ( fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
 		if ( s->favx[fav_num] && (world + s->favx[fav_num]) == p ) {
 			G_sprint(s, 2, "%s%s removed from \x90slot %2d\x91\n", 
-				prefix, (strnull(p->s.v.netname) ? "-someone-" : p->s.v.netname), fav_num + 1);
+				prefix, (strnull(p->netname) ? "-someone-" : p->netname), fav_num + 1);
 
 			s->favx[fav_num] = 0;
 			removed = true; // does't break, so if this player multiple times in favourites
@@ -3947,7 +3947,7 @@ void fav_del( )
 	if ( fav_del_do(self, goal, "fav_del: ") )
 		return;
 
-	G_sprint(self, 2, "fav_del: %s is %s favourites\n", goal->s.v.netname, redtext("not in"));
+	G_sprint(self, 2, "fav_del: %s is %s favourites\n", goal->netname, redtext("not in"));
 }
 
 void fav_all_del( )
@@ -3977,7 +3977,7 @@ void favx_add( float fav_num )
 		return;
 	}
 	
-	G_sprint(self, 2, "fav add: %s added to \x90slot %d\x91\n", goal->s.v.netname, (int)fav_num);
+	G_sprint(self, 2, "fav add: %s added to \x90slot %d\x91\n", goal->netname, (int)fav_num);
 
 	self->favx[(int)fav_num - 1] = diff;
 }
@@ -4084,7 +4084,7 @@ void fav_show( )
 	for ( first = true, fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
 		if ( (diff = self->favx[fav_num]) ) {
 		    p = world + diff;
-			if ( p->ct != ctPlayer || strnull( p->s.v.netname ) )
+			if ( p->ct != ctPlayer || strnull( p->netname ) )
 				continue;
 
 			if ( first ) {
@@ -4093,7 +4093,7 @@ void fav_show( )
 				first = false;
 			}
 
-			G_sprint(self, 2, " \x90slot %2d\x91 \x8D %s\n", fav_num + 1, p->s.v.netname);
+			G_sprint(self, 2, " \x90slot %2d\x91 \x8D %s\n", fav_num + 1, p->netname);
 			showed = true;
 		}
 
@@ -4103,7 +4103,7 @@ void fav_show( )
 	for ( first = true, fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
 		if ( (diff = self->fav[fav_num]) ) {
 		    p = world + diff;
-			if ( p->ct != ctPlayer || strnull( p->s.v.netname ) )
+			if ( p->ct != ctPlayer || strnull( p->netname ) )
 				continue;
 
 			if ( first ) {
@@ -4111,7 +4111,7 @@ void fav_show( )
 				first = false;
 			}
 
-			G_sprint(self, 2, " %s\n", p->s.v.netname);
+			G_sprint(self, 2, " %s\n", p->netname);
 			showed = true;
 		}
 
@@ -4732,10 +4732,10 @@ void motd_show ()
 		}
 
 	motd = spawn();
-	motd->s.v.classname = "motd";
+	motd->classname = "motd";
 	motd->s.v.owner = EDICT_TO_PROG( self );
 	// select MOTD for spectator or player
-	motd->s.v.think = ( func_t ) ( self->ct == ctSpec ? SMOTDThink : PMOTDThink );
+	motd->think = ( func_t ) ( self->ct == ctSpec ? SMOTDThink : PMOTDThink );
 	motd->s.v.nextthink = g_globalvars.time + 0.1;
 	motd->attack_finished = g_globalvars.time + 10;
 }
@@ -5530,9 +5530,9 @@ void teleteam ()
 		return;
 
 	if ( ( k_tp_tele_death = (k_tp_tele_death ? 0 : 1) ) ) 
-		G_bprint(2, "%s turn teamtelefrag %s\n", self->s.v.netname, redtext("affects frags"));
+		G_bprint(2, "%s turn teamtelefrag %s\n", self->netname, redtext("affects frags"));
 	else
-		G_bprint(2, "%s turn teamtelefrag does %s\n", self->s.v.netname, redtext("not affect frags"));
+		G_bprint(2, "%s turn teamtelefrag does %s\n", self->netname, redtext("not affect frags"));
 
 	cvar_fset("k_tp_tele_death", k_tp_tele_death);
 }
@@ -5566,7 +5566,7 @@ void ChangeClientsCount( int type, int value )
 		return;
 
 	cvar_fset(sv_max, cl_count);
-	G_bprint(2, "%s set %s to %d\n", self->s.v.netname, redtext(sv_max), cl_count);
+	G_bprint(2, "%s set %s to %d\n", self->netname, redtext(sv_max), cl_count);
 }
 
 void upplayers ( float type )
@@ -5581,7 +5581,7 @@ void downplayers ( float type )
 
 void iplist_one(gedict_t *s, gedict_t *p)
 {
-	G_sprint(s, 2, "%15.15s %s %-18.18s\n", cl_ip( p ), is_adm( p ) ? "A" : " ", p->s.v.netname);
+	G_sprint(s, 2, "%15.15s %s %-18.18s\n", cl_ip( p ), is_adm( p ) ? "A" : " ", p->netname);
 }
 
 // ktpro (c)
@@ -5716,7 +5716,7 @@ void mv_cmd_playback ()
 	G_sprint(self, 2, "playback\n");
 
 	self->pb_ent = spawn ();
-	self->pb_ent->s.v.classname = "pb_ent";
+	self->pb_ent->classname = "pb_ent";
 	setmodel (self->pb_ent, "progs/player.mdl");
 
 	self->pb_time = 0;
@@ -5774,7 +5774,7 @@ void mv_record ()
 	f->frame    = self->s.v.frame;
 	f->effects  = self->s.v.effects;
 	f->colormap = self->s.v.colormap;
-//	f->modelindex = self.modelindex;
+//	f->s.v.modelindex = self.modelindex;
 
 	self->rec_count++;
 }
@@ -5898,11 +5898,11 @@ void fcheck ()
 	f_check = g_globalvars.time + 3;
 	strlcpy(fcheck_name, arg_x, sizeof(fcheck_name)); // remember check name
 
-	G_bprint(2, "%s is checking \20%s\21\n", self->s.v.netname, arg_x);
+	G_bprint(2, "%s is checking \20%s\21\n", self->netname, arg_x);
 	if ( streq(arg_x, "f_version") || streq(arg_x, "f_modified") )
-		G_bprint(3, "%s: %s %d%d\n", self->s.v.netname, arg_x, i_rnd(1, 9999), i_rnd(0, 9999));
+		G_bprint(3, "%s: %s %d%d\n", self->netname, arg_x, i_rnd(1, 9999), i_rnd(0, 9999));
 	else
-		G_bprint(3, "%s: %s\n", self->s.v.netname, arg_x);
+		G_bprint(3, "%s: %s\n", self->netname, arg_x);
 }
 
 void check_fcheck ()
@@ -5917,14 +5917,14 @@ void check_fcheck ()
 
 	for( p = world; (p = find_plr( p )); ) {
 		if ( strnull( tmp = p->f_checkbuf ) ) {
-			G_bprint(3, "%s did not reply!\n", p->s.v.netname);
+			G_bprint(3, "%s did not reply!\n", p->netname);
 			continue;
 		}
 
 		while ( !strnull( tmp ) ) {
 			if ( ( nl = strchr(tmp, '\n') ) )
 				nl[0] = 0;
-			G_bprint(3, "%s: %s\n", p->s.v.netname, tmp);
+			G_bprint(3, "%s: %s\n", p->netname, tmp);
 
 			tmp = (nl ? nl+1: NULL);
 		}
@@ -6050,7 +6050,7 @@ void setTeleportCap()
 
 	FixYawnMode(); // apply changes ASAP
 
-	G_bprint( 2, "%s set %s to %d%%\n", self->s.v.netname, redtext("Teleport cap"), k_teleport_cap ); // and print
+	G_bprint( 2, "%s set %s to %d%%\n", self->netname, redtext("Teleport cap"), k_teleport_cap ); // and print
 }
 
 // }
@@ -6104,7 +6104,7 @@ void TogglePause ()
 
 		when_to_unpause = pauseduration + 2000; // shedule unpause in 2000 ms
 
-		G_bprint(2, "%s unpaused the game (will resume in 2 seconds)\n", self->s.v.netname);
+		G_bprint(2, "%s unpaused the game (will resume in 2 seconds)\n", self->netname);
 	}
 	else
 	{
@@ -6112,7 +6112,7 @@ void TogglePause ()
 
 		pauseduration = when_to_unpause = 0; // reset our globals
 
-		G_bprint(2, "%s paused the game\n", self->s.v.netname);
+		G_bprint(2, "%s paused the game\n", self->netname);
 		trap_setpause (1);
 	}
 }
@@ -6187,7 +6187,7 @@ void Spawn666Time()
 
 	dmm4_invinc_time = bound(0, atof( arg_2 ), DMM4_INVINCIBLE_DEFAULT);
 
-	G_bprint(2, "%s set %s to %.1fs\n", self->s.v.netname, redtext("spawn invincibility time"), dmm4_invinc_time);
+	G_bprint(2, "%s set %s to %.1fs\n", self->netname, redtext("spawn invincibility time"), dmm4_invinc_time);
 
 	// to actualy disable dmm4_invinc_time we need set it to negative value
 	trap_cvar_set_float( "dmm4_invinc_time", dmm4_invinc_time ? dmm4_invinc_time : -1 );
@@ -6218,7 +6218,7 @@ void giveme()
 
 	if ( strnull( ezinfokey(world, "*cheats") ) )
 	{
-		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->s.v.netname);
+		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->netname);
 		return; // FU!
 	}
 
@@ -6328,9 +6328,9 @@ static void dropitem_spawn_spawnpoint()
 	self->s.v.flags = ( int )self->s.v.flags | FL_ITEM;
 	setmodel( self, "progs/w_g_key.mdl" );
 
-	if ( streq( self->s.v.classname, "info_player_team1" ) )
+	if ( streq( self->classname, "info_player_team1" ) )
 		effects = EF_RED;
-	else if ( streq( self->s.v.classname, "info_player_team2" ) )
+	else if ( streq( self->classname, "info_player_team2" ) )
 		effects = EF_BLUE;
 
 	self->s.v.effects = ( int ) self->s.v.effects | effects;
@@ -6393,7 +6393,7 @@ static gedict_t * dropitem_spawn_item(gedict_t *spot, dropitem_spawn_t * di)
 	gedict_t *	p = spawn();
 
 	p->dropitem = true;
-	p->s.v.classname = di->classname;
+	p->classname = di->classname;
 	p->s.v.spawnflags = di->spawnflags;
 	VectorCopy(spot->s.v.origin, p->s.v.origin);
 //	VectorCopy(spot->s.v.angles, p->s.v.angles);
@@ -6405,7 +6405,7 @@ static gedict_t * dropitem_spawn_item(gedict_t *spot, dropitem_spawn_t * di)
 	// G_CallSpawn will change 'self', so we have to do trick about it.
 	oself = self;	// save!!!
 
-	if ( !G_CallSpawn( p ) || strnull( p->s.v.classname ) )
+	if ( !G_CallSpawn( p ) || strnull( p->classname ) )
 	{
 		// failed to call spawn function, so remove it ASAP.
 		ent_remove( p );
@@ -6455,7 +6455,7 @@ static void dropitem()
 
 	if ( strnull( ezinfokey(world, "*cheats") ) )
 	{
-		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->s.v.netname);
+		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->netname);
 		return; // FU!
 	}
 
@@ -6497,7 +6497,7 @@ static void removeitem()
 
 	if ( strnull( ezinfokey(world, "*cheats") ) )
 	{
-		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->s.v.netname);
+		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->netname);
 		return; // FU!
 	}
 
@@ -6525,7 +6525,7 @@ static void removeitem()
 
 	if ( p )
 	{
-		G_sprint(self, 2, "Removed %s\n", p->s.v.classname );
+		G_sprint(self, 2, "Removed %s\n", p->classname );
 		ent_remove( p );
 	}
 	else
@@ -6562,7 +6562,7 @@ static void dumpent()
 
 	if ( strnull( ezinfokey(world, "*cheats") ) )
 	{
-		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->s.v.netname);
+		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->netname);
 		return;
 	}
 
@@ -6577,11 +6577,11 @@ static void dumpent()
 		if ( !p->dropitem )
 			continue; // not our item.
 
-		if ( strnull( p->s.v.classname ) )
+		if ( strnull( p->classname ) )
 			continue; // null class name.
 
 		dump_print(file_handle, "{\n");
-		dump_print(file_handle, "\t" "\"classname\" \"%s\"" "\n", p->s.v.classname);
+		dump_print(file_handle, "\t" "\"classname\" \"%s\"" "\n", p->classname);
 		dump_print(file_handle, "\t" "\"origin\" \"%d %d %d\"" "\n", (int)p->s.v.origin[0], (int)p->s.v.origin[1], (int)p->s.v.origin[2]);
 
 		if ( p->s.v.angles[0] || p->s.v.angles[2] )

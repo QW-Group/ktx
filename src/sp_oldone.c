@@ -166,7 +166,7 @@ void _old_thrash15( void )
 	self->cnt++;
 
 	if ( self->cnt < 3 )
-		self->s.v.think = ( func_t ) old_thrash1;
+		self->think = ( func_t ) old_thrash1;
 }
 ANIM(old_thrash1,  shake1,  old_thrash2;  trap_lightstyle(0, "m");)
 ANIM(old_thrash2,  shake2,  old_thrash3;  trap_lightstyle(0, "k");)
@@ -253,7 +253,7 @@ void finale_1()
 	// wait for 1 second
 	timer = spawn();
 	timer->s.v.nextthink = g_globalvars.time + 1;
-	timer->s.v.think = ( func_t ) finale_2;
+	timer->think = ( func_t ) finale_2;
 }
 
 gedict_t *shub_find( char *msg )
@@ -286,7 +286,7 @@ void finale_2()
 	sound( shub, CHAN_VOICE, "misc/r_tele1.wav", 1, ATTN_NORM );
 
 	self->s.v.nextthink = g_globalvars.time + 2;
-	self->s.v.think = ( func_t ) finale_3;
+	self->think = ( func_t ) finale_3;
 }
 
 void finale_3()
@@ -294,7 +294,7 @@ void finale_3()
 	gedict_t *shub = shub_find( "finale_3" );
 
 	// start shub thrashing wildly
-	shub->s.v.think = ( func_t ) old_thrash1;
+	shub->think = ( func_t ) old_thrash1;
 	shub->s.v.nextthink = g_globalvars.time + 0.01;
 	sound( shub, CHAN_VOICE, "boss2/death.wav", 1, ATTN_NORM );
 	trap_lightstyle( 0, "abcdefghijklmlkjihgfedcb" );
@@ -319,7 +319,7 @@ void kill_all_monsters()
 		T_Damage( monster, world, world, 50000 );
 	}
 
-	self->s.v.think = ( func_t ) kill_all_monsters;
+	self->think = ( func_t ) kill_all_monsters;
 	self->s.v.nextthink = g_globalvars.time + 0.2;
 }
 
@@ -376,7 +376,7 @@ void finale_4()
 
 	// prepare timer commit genocide in monsters formation
 	n = spawn();
-	n->s.v.think = ( func_t ) kill_all_monsters;
+	n->think = ( func_t ) kill_all_monsters;
 	n->s.v.nextthink = g_globalvars.time + 0.01;
 
 	// put a player model down
@@ -385,7 +385,7 @@ void finale_4()
 	setorigin( n, oldo[0] - 32, oldo[1] - 264, oldo[2] );
 	SetVector( n->s.v.angles, 0, 290, 0 );
 	n->s.v.frame = 17;
-	n->s.v.think = ( func_t ) player_stand1;
+	n->think = ( func_t ) player_stand1;
 	n->s.v.nextthink = g_globalvars.time;
 	n->s.v.weapon = IT_AXE;
 	n->s.v.effects = (int)n->s.v.effects | EF_BLUE;
@@ -432,7 +432,7 @@ void SP_monster_oldone()
 	setsize( self, -160, -128, -24 ,160, 128, 256 );
 
 	self->s.v.health = 40000;		// kill by telefrag
-	self->s.v.think = ( func_t ) old_idle1;
+	self->think = ( func_t ) old_idle1;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 	self->s.v.takedamage = DAMAGE_YES;
 	self->th_pain = nopain;

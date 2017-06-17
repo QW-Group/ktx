@@ -79,8 +79,9 @@ float bound( float a, float b, float c );
 #define	MAX_TOKEN_CHARS		1024	// max length of an individual token
 
 #define	FOFS(x) ((intptr_t)&(((gedict_t *)0)->x))
+#define	GOFS(x) ((intptr_t)&(((globalvars_t *)0)->x))
 
-#define FOFCLSN ( FOFS ( s.v.classname ) )
+#define FOFCLSN ( FOFS ( classname ) )
 
 int             NUM_FOR_EDICT( gedict_t * e );
 
@@ -539,7 +540,7 @@ extern fileHandle_t log_handle;
 // commands.c
 typedef struct cmd_s {
 	char    *name;
-//	func_t	f;
+//	funcref_t	f;
 	void ( *f )();
 	float	arg;
 	int		cf_flags;
@@ -938,7 +939,7 @@ extern	int sv_minping; // used to broadcast changes
 void name () {				\
 	self->s.v.frame = _frame;				\
 	self->s.v.nextthink = g_globalvars.time + FRAMETIME;	\
-	self->s.v.think = ( func_t ) _next; }
+	self->think = ( func_t ) _next; }
 
 // sp_client.c
 void ExitIntermission();

@@ -156,14 +156,14 @@ qbool FrogbotShowMarkerIndicators (void)
 
 gedict_t* spawn_marker(float x, float y, float z) {
 	gedict_t* marker_ = spawn();
-	marker_->s.v.classname = "marker";
+	marker_->classname = "marker";
 	marker_->s.v.flags = FL_ITEM;
 	BecomeMarker(marker_);
 	marker_->s.v.origin[0] = pr1_rint(x);
 	marker_->s.v.origin[1] = pr1_rint(y);
 	marker_->s.v.origin[2] = pr1_rint(z);
 	marker_->s.v.solid = SOLID_TRIGGER;
-	marker_->s.v.touch = (func_t) marker_touch;
+	marker_->touch = (func_t) marker_touch;
 	if ( FrogbotShowMarkerIndicators() )
 		setmodel( marker_, "progs/w_g_key.mdl" );
 	VectorSet(marker_->s.v.view_ofs, 80, 80, 24);

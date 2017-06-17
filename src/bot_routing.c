@@ -197,13 +197,13 @@ void PathScoringLogic(
 	G_bprint_debug (2, "  goal_respawn_time = %f\n", goal_respawn_time);
 	G_bprint_debug (2, "  path_normal = %s\n", path_normal ? "true" : "false");
 	G_bprint_debug (2, "  player_origin = [%f %f %f]\n", PASSVEC3(player_origin));
-	G_bprint_debug (2, "  touch_marker_ = %d (%s)\n", touch_marker_->fb.index + 1, touch_marker_->s.v.classname);
-	G_bprint_debug (2, "  goalentity_marker  = %d (%s)\n", (goalentity_marker ? goalentity_marker->fb.index + 1 : -1), goalentity_marker ? goalentity_marker->s.v.classname : "(null)");
+	G_bprint_debug (2, "  touch_marker_ = %d (%s)\n", touch_marker_->fb.index + 1, touch_marker_->classname);
+	G_bprint_debug (2, "  goalentity_marker  = %d (%s)\n", (goalentity_marker ? goalentity_marker->fb.index + 1 : -1), goalentity_marker ? goalentity_marker->classname : "(null)");
 	G_bprint_debug (2, "  rocket_alert = %s\n", rocket_alert ? "true" : "false");
 	G_bprint_debug (2, "  rj_allowed = %s\n", rocket_jump_routes_allowed ? "true" : "false");
-	G_bprint_debug (2, "  player = %s\n", player && player->ct == ctPlayer ? player->s.v.netname : "(none)");
+	G_bprint_debug (2, "  player = %s\n", player && player->ct == ctPlayer ? player->netname : "(none)");
 	G_bprint_debug (2, "  *best_score = %f\n", *best_score);
-	G_bprint_debug (2, "  *linked_marker = %d (%s)\n", (*linked_marker_) ? (*linked_marker_)->fb.index + 1 : -1, (*linked_marker_) ? (*linked_marker_)->s.v.classname : "(null)");
+	G_bprint_debug (2, "  *linked_marker = %d (%s)\n", (*linked_marker_) ? (*linked_marker_)->fb.index + 1 : -1, (*linked_marker_) ? (*linked_marker_)->classname : "(null)");
 	G_bprint_debug (2, ") = \n");
 
 	if (goalentity_marker) {
@@ -242,7 +242,7 @@ void PathScoringLogic(
 
 		eval.test_marker = touch_marker_;
 
-		G_bprint_debug (2, "Marker > GoalEntity (%s) %d\n", goalentity_marker->s.v.classname, goalentity_marker->fb.index);
+		G_bprint_debug (2, "Marker > GoalEntity (%s) %d\n", goalentity_marker->classname, goalentity_marker->fb.index);
 		path_score = EvalPath(&eval, rocket_jump_routes_allowed, trace_bprint, current_goal_time, current_goal_time_125);
 		G_bprint_debug (2, ">> path score %f vs %f\n", path_score, *best_score);
 		if (path_score > *best_score) {

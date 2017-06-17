@@ -34,7 +34,7 @@ typedef struct
 	float	frametime;
 	int	newmis;
 	float	force_retouch;
-	string_t	mapname;
+	stringref_t	mapname_;
 	float	serverflags;
 	float	total_secrets;
 	float	total_monsters;
@@ -69,16 +69,18 @@ typedef struct
 	float	trace_inopen;
 	float	trace_inwater;
 	int	msg_entity;
-	func_t	main;
-	func_t	StartFrame;
-	func_t	PlayerPreThink;
-	func_t	PlayerPostThink;
-	func_t	ClientKill;
-	func_t	ClientConnect;
-	func_t	PutClientInServer;
-	func_t	ClientDisconnect;
-	func_t	SetNewParms;
-	func_t	SetChangeParms;
+	funcref_t	main_;
+	funcref_t	StartFrame_;
+	funcref_t	PlayerPreThink_;
+	funcref_t	PlayerPostThink_;
+	funcref_t	ClientKill_;
+	funcref_t	ClientConnect_;
+	funcref_t	PutClientInServer_;
+	funcref_t	ClientDisconnect_;
+	funcref_t	SetNewParms_;
+	funcref_t	SetChangeParms_;
+
+	string_t mapname;
 } globalvars_t;
 
 typedef struct
@@ -95,24 +97,24 @@ typedef struct
 	vec3_t	velocity;
 	vec3_t	angles;
 	vec3_t	avelocity;
-	string_t	classname;
-	string_t	model;
+	stringref_t	classname_;
+	stringref_t	model_;
 	float	frame;
 	float	skin;
 	float	effects;
 	vec3_t	mins;
 	vec3_t	maxs;
 	vec3_t	size;
-	func_t	touch;
-	func_t	use;
-	func_t	think;
-	func_t	blocked;
+	funcref_t	touch_;
+	funcref_t	use_;
+	funcref_t	think_;
+	funcref_t	blocked_;
 	float	nextthink;
 	int	groundentity;
 	float	health;
 	float	frags;
 	float	weapon;
-	string_t	weaponmodel;
+	stringref_t	weaponmodel_;
 	float	weaponframe;
 	float	currentammo;
 	float	ammo_shells;
@@ -132,7 +134,7 @@ typedef struct
 	float	impulse;
 	float	fixangle;
 	vec3_t	v_angle;
-	string_t	netname;
+	stringref_t	netname_;
 	int	enemy;
 	float	flags;
 	float	colormap;
@@ -148,19 +150,19 @@ typedef struct
 	int	aiment;
 	int	goalentity;
 	float	spawnflags;
-	string_t	target;
-	string_t	targetname;
+	stringref_t	target_;
+	stringref_t	targetname_;
 	float	dmg_take;
 	float	dmg_save;
 	int	dmg_inflictor;
 	int	owner;
 	vec3_t	movedir;
-	string_t	message;
+	stringref_t	message_;
 	float	sounds;
-	string_t	noise;
-	string_t	noise1;
-	string_t	noise2;
-	string_t	noise3;
+	stringref_t	noise_;
+	stringref_t	noise1_;
+	stringref_t	noise2_;
+	stringref_t	noise3_;
 } entvars_t;
 
 #define PROGHEADER_CRC 54730

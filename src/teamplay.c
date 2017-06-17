@@ -100,62 +100,62 @@ void TeamplayEventItemTaken (gedict_t* client, gedict_t* item)
 		return;
 
 	client->tp.took.flags = 0;
-	if (streq (item->s.v.classname, "weapon_lightning")) {
+	if (streq (item->classname, "weapon_lightning")) {
 		client->tp.took.item = it_lg;
 	}
-	else if (streq (item->s.v.classname, "weapon_rocketlauncher")) {
+	else if (streq (item->classname, "weapon_rocketlauncher")) {
 		client->tp.took.item = it_rl;
 	}
-	else if (streq (item->s.v.classname, "weapon_grenadelauncher")) {
+	else if (streq (item->classname, "weapon_grenadelauncher")) {
 		client->tp.took.item = it_gl;
 	}
-	else if (streq (item->s.v.classname, "weapon_supernailgun")) {
+	else if (streq (item->classname, "weapon_supernailgun")) {
 		client->tp.took.item = it_sng;
 	}
-	else if (streq (item->s.v.classname, "weapon_nailgun")) {
+	else if (streq (item->classname, "weapon_nailgun")) {
 		client->tp.took.item = it_ng;
 	}
-	else if (streq (item->s.v.classname, "weapon_supershotgun")) {
+	else if (streq (item->classname, "weapon_supershotgun")) {
 		client->tp.took.item = it_ssg;
 	}
-	else if (streq (item->s.v.classname, "item_armorInv")) {
+	else if (streq (item->classname, "item_armorInv")) {
 		client->tp.took.item = it_ra;
 	}
-	else if (streq (item->s.v.classname, "item_armor2")) {
+	else if (streq (item->classname, "item_armor2")) {
 		client->tp.took.item = it_ya;
 	}
-	else if (streq (item->s.v.classname, "item_armor1")) {
+	else if (streq (item->classname, "item_armor1")) {
 		client->tp.took.item = it_ga;
 	}
-	else if (streq (item->s.v.classname, "item_artifact_envirosuit")) {
+	else if (streq (item->classname, "item_artifact_envirosuit")) {
 		client->tp.took.item = it_suit;
 	}
-	else if (streq (item->s.v.classname, "item_artifact_invulnerability")) {
+	else if (streq (item->classname, "item_artifact_invulnerability")) {
 		client->tp.took.item = it_pent;
 	}
-	else if (streq (item->s.v.classname, "item_artifact_invisibility")) {
+	else if (streq (item->classname, "item_artifact_invisibility")) {
 		client->tp.took.item = it_ring;
 	}
-	else if (streq (item->s.v.classname, "item_artifact_super_damage")) {
+	else if (streq (item->classname, "item_artifact_super_damage")) {
 		client->tp.took.item = it_quad;
 	}
-	else if (streq (item->s.v.classname, "backpack")) {
+	else if (streq (item->classname, "backpack")) {
 		client->tp.took.item = it_pack;
 		client->tp.took.flags = item->s.v.items;
 	}
-	else if (streq (item->s.v.classname, "item_shells")) {
+	else if (streq (item->classname, "item_shells")) {
 		client->tp.took.item = it_shells;
 	}
-	else if (streq (item->s.v.classname, "item_spikes")) {
+	else if (streq (item->classname, "item_spikes")) {
 		client->tp.took.item = it_nails;
 	}
-	else if (streq (item->s.v.classname, "item_rockets")) {
+	else if (streq (item->classname, "item_rockets")) {
 		client->tp.took.item = it_rockets;
 	}
-	else if (streq (item->s.v.classname, "item_cells")) {
+	else if (streq (item->classname, "item_cells")) {
 		client->tp.took.item = it_cells;
 	}
-	else if (streq (item->s.v.classname, "item_health")) {
+	else if (streq (item->classname, "item_health")) {
 		client->tp.took.item = (item->healamount >= 100 ? it_mh : it_health);
 	}
 	else {
@@ -376,7 +376,7 @@ static gedict_t* TeamplayFindPoint (gedict_t* client)
 
 		if (e->ct == ctPlayer && !ISLIVE (e))
 			continue;
-		if (strnull (e->s.v.model))
+		if (strnull (e->model))
 			continue;
 		if (!(e->visclients & clientflag))
 			continue;
@@ -438,7 +438,7 @@ static void TeamplayMM2 (gedict_t* client, char* text)
 	if ( strnull( name ) )
 		name = ezinfokey(client, "k");
 	if ( strnull( name ) && client->isBot )
-		name = client->s.v.netname;
+		name = client->netname;
 	if (!strnull (name)) {
 		strlcat (buffer, "\r", sizeof (buffer));
 		strlcat (buffer, name, sizeof (buffer));
@@ -789,7 +789,7 @@ static void TeamplayKillMe (gedict_t* client)
 	point = TeamplayFindPoint (client);
 	if (point && point->ct == ctPlayer && SameTeam(client, point)) {
 		strlcpy (buffer, "{&c0b0", sizeof (buffer));
-		strlcat (buffer, point->s.v.netname, sizeof (buffer));
+		strlcat (buffer, point->netname, sizeof (buffer));
 		strlcat (buffer, "&cfff} ", sizeof (buffer));
 	}
 	strlcat (buffer, "{&cb1akill me [&cfff}{", sizeof (buffer));
@@ -825,7 +825,7 @@ static void TeamplayYouTake (gedict_t* client)
 	point = TeamplayFindPoint (client);
 	if (point && point->ct == ctPlayer && SameTeam(client, point)) {
 		strlcpy (buffer, "{&c0b0", sizeof (buffer));
-		strlcpy (buffer, point->s.v.netname, sizeof (buffer));
+		strlcpy (buffer, point->netname, sizeof (buffer));
 		strlcpy (buffer, "&cfff} take \20{", sizeof (buffer));
 	}
 	else {
@@ -1122,7 +1122,7 @@ static void TeamplayPoint (gedict_t* client)
 		}
 		else {
 			strlcat (buffer, "{&c0b0", sizeof (buffer));
-			strlcat (buffer, point->s.v.netname, sizeof (buffer));
+			strlcat (buffer, point->netname, sizeof (buffer));
 			strlcat (buffer, "&cfff}", sizeof (buffer));
 		}
 	}

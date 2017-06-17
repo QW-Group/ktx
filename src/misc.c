@@ -51,7 +51,7 @@ If targeted, it will toggle between on or off.
 void SP_light()
 {
 
-	if ( !self->s.v.targetname )
+	if ( !self->targetname )
 	{			// inert light
 		ent_remove( self );
 		return;
@@ -59,7 +59,7 @@ void SP_light()
 
 	if ( self->style >= 32 )
 	{
-		self->s.v.use = ( func_t ) light_use;
+		self->use = ( func_t ) light_use;
 		if ( ( int ) self->s.v.spawnflags & START_OFF )
 			trap_lightstyle( self->style, "a" );
 		else
@@ -78,7 +78,7 @@ void SP_light_fluoro()
 {
 	if ( self->style >= 32 )
 	{
-		self->s.v.use = ( func_t ) light_use;
+		self->use = ( func_t ) light_use;
 		if ( ( int ) self->s.v.spawnflags & START_OFF )
 			trap_lightstyle( self->style, "a" );
 		else
@@ -187,9 +187,9 @@ void            fire_touch();
 void SP_misc_fireball()
 {
 	trap_precache_model( "progs/lavaball.mdl" );
-	self->s.v.classname = "fireball";
+	self->classname = "fireball";
 	self->s.v.nextthink = g_globalvars.time + ( g_random() * 5 );
-	self->s.v.think = ( func_t ) fire_fly;
+	self->think = ( func_t ) fire_fly;
 
 	if ( !self->speed )
 		self->speed = 1000;
@@ -207,18 +207,18 @@ void fire_fly()
 		   ( g_random() * 100 ) - 50,
 		   ( g_random() * 100 ) - 50, self->speed + ( g_random() * 200 ) );
 
-	fireball->s.v.classname = "fireball";
+	fireball->classname = "fireball";
 
 	setmodel( fireball, "progs/lavaball.mdl" );
 	setsize( fireball, 0, 0, 0, 0, 0, 0 );
 	setorigin( fireball, PASSVEC3( self->s.v.origin ) );
 
 	fireball->s.v.nextthink = g_globalvars.time + 5;
-	fireball->s.v.think = ( func_t ) SUB_Remove;
-	fireball->s.v.touch = ( func_t ) fire_touch;
+	fireball->think = ( func_t ) SUB_Remove;
+	fireball->touch = ( func_t ) fire_touch;
 
 	self->s.v.nextthink = g_globalvars.time + ( g_random() * 5 ) + 3;
-	self->s.v.think = ( func_t ) fire_fly;
+	self->think = ( func_t ) fire_fly;
 }
 
 
@@ -239,7 +239,7 @@ void fire_touch()
 void barrel_explode()
 {
 	self->s.v.takedamage = DAMAGE_NO;
-	self->s.v.classname = "explo_box";
+	self->classname = "explo_box";
 
 	// did say self.owner
 	T_RadiusDamage(self, self, 160, world, dtEXPLO_BOX);
@@ -375,7 +375,7 @@ void LaunchLaser( vec3_t org, vec3_t vec )
 {
 	//vec3_t  vec;
 
-	if ( streq( self->s.v.classname, "monster_enforcer" ) )
+	if ( streq( self->classname, "monster_enforcer" ) )
 		sound( self, CHAN_WEAPON, "enforcer/enfire.wav", 1, ATTN_NORM );
 
 	normalize( vec, vec );
@@ -399,8 +399,8 @@ void LaunchLaser( vec3_t org, vec3_t vec )
 	vectoangles( newmis->s.v.velocity, newmis->s.v.angles );
 
 	newmis->s.v.nextthink = g_globalvars.time + 5;
-	newmis->s.v.think = ( func_t ) SUB_Remove;
-	newmis->s.v.touch = ( func_t ) Laser_Touch;
+	newmis->think = ( func_t ) SUB_Remove;
+	newmis->touch = ( func_t ) Laser_Touch;
 }
 
 void            spike_touch();
@@ -420,7 +420,7 @@ void spikeshooter_use()
 			     PROG_TO_EDICT( g_globalvars.newmis )->s.v.velocity );
 //  newmis->s.v.velocity = self->s.v.movedir * 500;
 		if ( ( int ) ( self->s.v.spawnflags ) & SPAWNFLAG_SUPERSPIKE )
-			PROG_TO_EDICT( g_globalvars.newmis )->s.v.touch =
+			PROG_TO_EDICT( g_globalvars.newmis )->touch =
 			    ( func_t ) superspike_touch;
 	}
 }
@@ -443,7 +443,7 @@ Laser is only for REGISTERED.
 void SP_trap_spikeshooter()
 {
 	SetMovedir();
-	self->s.v.use = ( func_t ) spikeshooter_use;
+	self->use = ( func_t ) spikeshooter_use;
 	if ( ( int ) ( self->s.v.spawnflags ) & SPAWNFLAG_LASER )
 	{
 		trap_precache_model( "progs/laser.mdl" );
@@ -467,7 +467,7 @@ void SP_trap_shooter()
 	if ( self->wait == 0 )
 		self->wait = 1;
 	self->s.v.nextthink = self->s.v.nextthink + self->wait + self->s.v.ltime;
-	self->s.v.think = ( func_t ) shooter_think;
+	self->think = ( func_t ) shooter_think;
 }
 
 /*
@@ -504,16 +504,16 @@ void make_bubbles()
 
 	SetVector( bubble->s.v.velocity, 0, 0, 15 );
 	bubble->s.v.nextthink = g_globalvars.time + 0.5;
-	bubble->s.v.think = ( func_t ) bubble_bob;
-	bubble->s.v.touch = ( func_t ) bubble_remove;
-	bubble->s.v.classname = "bubble";
+	bubble->think = ( func_t ) bubble_bob;
+	bubble->touch = ( func_t ) bubble_remove;
+	bubble->classname = "bubble";
 	bubble->s.v.frame = 0;
 	bubble->cnt = 0;
 
 	setsize( bubble, -8, -8, -8, 8, 8, 8 );
 
 	self->s.v.nextthink = g_globalvars.time + g_random() + 0.5;
-	self->s.v.think = ( func_t ) make_bubbles;
+	self->think = ( func_t ) make_bubbles;
 }
 
 void bubble_split()
@@ -530,9 +530,9 @@ void bubble_split()
 	VectorCopy( self->s.v.velocity, bubble->s.v.velocity );
 
 	bubble->s.v.nextthink = g_globalvars.time + 0.5;
-	bubble->s.v.think = ( func_t ) bubble_bob;
-	bubble->s.v.touch = ( func_t ) bubble_remove;
-	bubble->s.v.classname = "bubble";
+	bubble->think = ( func_t ) bubble_bob;
+	bubble->touch = ( func_t ) bubble_remove;
+	bubble->classname = "bubble";
 	bubble->s.v.frame = 1;
 	bubble->cnt = 10;
 
@@ -547,7 +547,7 @@ void bubble_split()
 
 void bubble_remove()
 {
-	if ( streq( other->s.v.classname, self->s.v.classname ) )
+	if ( streq( other->classname, self->classname ) )
 	{
 //              dprint ("bump");
 		return;
@@ -591,7 +591,7 @@ void bubble_bob()
 	self->s.v.velocity[2] = rnd3;
 
 	self->s.v.nextthink = g_globalvars.time + 0.5;
-	self->s.v.think = ( func_t ) bubble_bob;
+	self->think = ( func_t ) bubble_bob;
 }
 
 /*~>~<~>~<~>~<~>~<~>~<~>~<~>~<~>~<~>~<~>~<~>~<~>~<~>~<~>~<~>~<~>~<~>~<~>
@@ -633,8 +633,8 @@ void SP_func_wall()
 	SetVector( self->s.v.angles, 0, 0, 0 );
 	self->s.v.movetype = MOVETYPE_PUSH;	// so it doesn't get pushed by anything
 	self->s.v.solid = SOLID_BSP;
-	self->s.v.use = ( func_t ) func_wall_use;
-	setmodel( self, self->s.v.model );
+	self->use = ( func_t ) func_wall_use;
+	setmodel( self, self->model );
 }
 
 
@@ -646,7 +646,7 @@ void SP_func_illusionary()
 	SetVector( self->s.v.angles, 0, 0, 0 );
 	self->s.v.movetype = MOVETYPE_NONE;
 	self->s.v.solid = SOLID_NOT;
-	setmodel( self, self->s.v.model );
+	setmodel( self, self->model );
 	makestatic( self );
 }
 
@@ -661,8 +661,8 @@ void SP_func_episodegate()
 	SetVector( self->s.v.angles, 0, 0, 0 );
 	self->s.v.movetype = MOVETYPE_PUSH;	// so it doesn't get pushed by anything
 	self->s.v.solid = SOLID_BSP;
-	self->s.v.use = ( func_t ) func_wall_use;
-	setmodel( self, self->s.v.model );
+	self->use = ( func_t ) func_wall_use;
+	setmodel( self, self->model );
 }
 
 /*QUAKED func_bossgate (0 .5 .8) ?
@@ -675,8 +675,8 @@ void SP_func_bossgate()
 	SetVector( self->s.v.angles, 0, 0, 0 );
 	self->s.v.movetype = MOVETYPE_PUSH;	// so it doesn't get pushed by anything
 	self->s.v.solid = SOLID_BSP;
-	self->s.v.use = ( func_t ) func_wall_use;
-	setmodel( self, self->s.v.model );
+	self->use = ( func_t ) func_wall_use;
+	setmodel( self, self->model );
 }
 
 //============================================================================
@@ -794,5 +794,5 @@ void SP_misc_noisemaker()
 	trap_precache_sound( "enforcer/idle1.wav" );
 
 	self->s.v.nextthink = g_globalvars.time + 0.1 + g_random();
-	self->s.v.think = ( func_t ) noise_think;
+	self->think = ( func_t ) noise_think;
 }

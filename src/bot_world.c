@@ -108,7 +108,7 @@ qbool BotDoorIsClosed (gedict_t* door)
 		return false;
 
 	door = door->fb.door_entity;
-	if (streq(door->s.v.classname, "door")) {
+	if (streq(door->classname, "door")) {
 		if (door->fb.T & MARKER_BLOCKED_ON_STATE_TOP) {
 			return (door->state & STATE_TOP);
 		}

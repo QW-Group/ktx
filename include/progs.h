@@ -35,11 +35,11 @@ typedef struct shared_edict_s {
 } edict_t;
 
 struct gedict_s;
-typedef void (*th_die_func_t)();
-typedef void (*th_pain_func_t)(struct gedict_s *, float);
+typedef void (*th_die_funcref_t)();
+typedef void (*th_pain_funcref_t)(struct gedict_s *, float);
 
 // { SP
-typedef void (*th_sp_func_t)();
+typedef void (*th_sp_funcref_t)();
 // }
 
 typedef enum
@@ -370,12 +370,12 @@ typedef struct teamplay_s {
 
 #ifdef BOT_SUPPORT
 // frogbots
-typedef void (*fb_void_func_t)(void);
-typedef qbool (*fb_bool_func_t)(void);
-typedef float (*fb_desire_func_t)(struct gedict_s* self, struct gedict_s* other);
-typedef qbool (*fb_touch_func_t)(struct gedict_s* item, struct gedict_s* player);
-typedef void (*fb_taken_func_t)(struct gedict_s* item, struct gedict_s* player);
-typedef void (*fb_entity_func_t)(struct gedict_s* item);
+typedef void (*fb_void_funcref_t)(void);
+typedef qbool (*fb_bool_funcref_t)(void);
+typedef float (*fb_desire_funcref_t)(struct gedict_s* self, struct gedict_s* other);
+typedef qbool (*fb_touch_funcref_t)(struct gedict_s* item, struct gedict_s* player);
+typedef void (*fb_taken_funcref_t)(struct gedict_s* item, struct gedict_s* player);
+typedef void (*fb_entity_funcref_t)(struct gedict_s* item);
 
 #ifndef NUMBER_MARKERS
 #define NUMBER_MARKERS 300
@@ -534,7 +534,7 @@ typedef struct fb_entvars_s {
 
 	// these determine the desire for items for each player 
 	//   (not just for bots ... bot's desire can take enemy's desire into consideration)
-	fb_desire_func_t desire;
+	fb_desire_funcref_t desire;
 	float desire_armor1;
 	float desire_armor2;
 	float desire_armorInv;
@@ -604,7 +604,7 @@ typedef struct fb_entvars_s {
 
 	float path_normal_;
 
-	fb_bool_func_t pickup;                      // return true if a player would pickup an item as they touch it
+	fb_bool_funcref_t pickup;                      // return true if a player would pickup an item as they touch it
 	float weapon_refresh_time;
 
 	struct gedict_s* prev_touch_marker;         // the last touch marker processed
@@ -664,14 +664,14 @@ typedef struct fb_entvars_s {
 	struct gedict_s* prev_look_object;          // stores whatever the bot was looking at last frame
 
 	// Item event functions
-	fb_touch_func_t     item_touch;             // called whenever an item is touched
-	fb_taken_func_t     item_taken;             // called whenever an item is taken
-	fb_taken_func_t     item_affect;            // called whenever an item affects a player (mega-health)
-	fb_entity_func_t    item_respawned;         // called whenever an item respawns
-	fb_entity_func_t    item_placed;            // called when item has been placed in the map
+	fb_touch_funcref_t     item_touch;             // called whenever an item is touched
+	fb_taken_funcref_t     item_taken;             // called whenever an item is taken
+	fb_taken_funcref_t     item_affect;            // called whenever an item affects a player (mega-health)
+	fb_entity_funcref_t    item_respawned;         // called whenever an item respawns
+	fb_entity_funcref_t    item_placed;            // called when item has been placed in the map
 
 	// Player event functions
-	fb_entity_func_t    ammo_used;             // Whenever ammo is updated
+	fb_entity_funcref_t    ammo_used;             // Whenever ammo is updated
 
 	qbool               be_quiet;
 	qbool               enemy_visible;
@@ -717,6 +717,23 @@ typedef struct fb_entvars_s {
 //typedef (void(*)(gedict_t *)) one_edict_func;
 typedef struct gedict_s {
 	edict_t         s;
+
+//fields that used to be pointers are now byte offsets to these pointers...
+	string_t    classname;
+	string_t    model;
+	func_t      touch;
+	func_t      use;
+	func_t      think;
+	func_t      blocked;
+	string_t    weaponmodel;
+	string_t    netname;
+	string_t    target;
+	string_t    targetname;
+	string_t    message;
+	string_t    noise;
+	string_t    noise1;
+	string_t    noise2;
+	string_t    noise3;
 
 //custom fields
 
@@ -795,8 +812,8 @@ typedef struct gedict_s {
 	int				deathtype;	// keeps track of how the player died
 	float           dmgtime;
 
-	th_die_func_t   th_die;
-	th_pain_func_t  th_pain;
+	th_die_funcref_t   th_die;
+	th_pain_funcref_t  th_pain;
 
 // below is KTX fields
 
@@ -805,13 +822,13 @@ typedef struct gedict_s {
 	//
 	// monster ai
 	//
-	th_sp_func_t	th_stand;
-	th_sp_func_t	th_walk;
-	th_sp_func_t	th_run;
-	th_sp_func_t	th_missile;
-	th_sp_func_t	th_melee;
+	th_sp_funcref_t	th_stand;
+	th_sp_funcref_t	th_walk;
+	th_sp_funcref_t	th_run;
+	th_sp_funcref_t	th_missile;
+	th_sp_funcref_t	th_melee;
 
-	th_sp_func_t	th_respawn; // for nightmare mode
+	th_sp_funcref_t	th_respawn; // for nightmare mode
 
 	struct gedict_s *oldenemy;	// mad at this player before taking damage
 

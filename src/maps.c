@@ -380,14 +380,14 @@ void DoSelectMap(int iMap)
 		}
 
 	if( !get_votes( OV_MAP ) ) {
-		G_bprint(2, "%s %s %s\n", self->s.v.netname, redtext("suggests map"),m);
+		G_bprint(2, "%s %s %s\n", self->netname, redtext("suggests map"),m);
 	}
 	else if ( isVoted ) {
-		G_bprint(2, "%s %s %s %s %s\n", self->s.v.netname, redtext("agrees"),
+		G_bprint(2, "%s %s %s %s %s\n", self->netname, redtext("agrees"),
 			(CountPlayers() < 3 ? redtext("to") : redtext("on") ), redtext("map"), m);
 	}
 	else
-		G_bprint(2, "%s %s %s\n", self->s.v.netname, redtext("would rather play on"), m);
+		G_bprint(2, "%s %s %s\n", self->netname, redtext("would rather play on"), m);
 
 	self->v.map = k_lastvotedmap = iMap;
 

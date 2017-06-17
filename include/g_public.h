@@ -189,7 +189,7 @@ typedef enum
 	// and parameters.  Return false if the game doesn't recognize it as a command.
 	GAME_CLIENT_SAY,			// ( int isTeamSay );
 	GAME_PAUSED_TIC,			// ( int duration_msec );	// duration is in msecs
-
+	GAME_CLEAR_EDICT,           // (self)
 } gameExport_t;
 
 
@@ -209,10 +209,10 @@ typedef enum
 
 typedef struct
 {
-	string_t	name;
-	int			ofs;
-	fieldtype_t	type;
-//	int			flags;
+	string_t     name;
+	int          ofs;
+	fieldtype_t  type;
+//	int          flags;
 } field_t;
 
 typedef struct

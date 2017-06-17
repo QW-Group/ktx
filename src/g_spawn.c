@@ -90,15 +90,15 @@ qbool G_SpawnVector( const char *key, const char *defaultString, float *out )
 //
 
 field_t         fields[] = {
-	{"classname",	FOFS( s.v.classname ),	F_LSTRING},
+	{"classname",	FOFCLSN,	F_LSTRING},
 	{"origin", 	FOFS( s.v.origin ),	F_VECTOR},
-	{"model", 	FOFS( s.v.model ),	F_LSTRING},
-	{"message", 	FOFS( s.v.message ),	F_LSTRING},
-	{"target", 	FOFS( s.v.target ),	F_LSTRING},
+	{"model", 	FOFS( model ),	F_LSTRING},
+	{"message", 	FOFS( message ),	F_LSTRING},
+	{"target", 	FOFS( target ),	F_LSTRING},
 	{"map", 	FOFS( map ),	 	F_LSTRING},
 	{"killtarget", 	FOFS( killtarget ),	F_LSTRING},
 	{"count", 	FOFS( count ),	 	F_FLOAT},
-	{"targetname", 	FOFS( s.v.targetname ),	F_LSTRING},
+	{"targetname", 	FOFS( targetname ),	F_LSTRING},
 	{"wait", 	FOFS( wait ),	 	F_FLOAT},
 	{"skin", 	FOFS( s.v.skin ),	F_FLOAT},
 	{"effects", 	FOFS( s.v.effects ),	F_FLOAT},
@@ -151,8 +151,8 @@ typedef struct {
 
 void SUB_Remove()
 {
-//	if (self && self->s.v.classname )
-//		G_bprint(2, "rm: %s\n", self->s.v.classname);
+//	if (self && self->classname )
+//		G_bprint(2, "rm: %s\n", self->classname);
 
 	ent_remove( self );
 }
@@ -161,7 +161,7 @@ void SUB_RM_01( gedict_t *ent )
 {
 	if ( ent ) {
 		ent->s.v.nextthink = g_globalvars.time + 0.001f;	// remove later
-		ent->s.v.think = ( func_t ) SUB_Remove;
+		ent->think = ( func_t ) SUB_Remove;
 	}
 }
 
@@ -204,7 +204,7 @@ void            SP_func_bossgate();
 void            SP_func_door();
 void            SP_func_door_secret();
 void            SP_func_plat();
-void            SP_func_train();
+void            SP_funcref_train();
 void            SP_misc_teleporttrain();
 void            SP_func_button();
 
@@ -334,7 +334,7 @@ Used as a positional target for lightning.
 	{"func_door",			SP_func_door},
 	{"func_door_secret",		SP_func_door_secret},
 	{"func_plat",			SP_func_plat},
-	{"func_train",			SP_func_train},
+	{"funcref_train",			SP_funcref_train},
 	{"misc_teleporttrain",		SP_misc_teleporttrain},
 	{"func_button",			SP_func_button},
 
@@ -436,7 +436,7 @@ qbool G_CallSpawn( gedict_t * ent )
 
 //      gitem_t *item;
 
-	if ( !ent->s.v.classname )
+	if ( !ent->classname )
 	{
 		G_Printf( "G_CallSpawn: NULL classname\n" );
 		return false;
@@ -453,16 +453,16 @@ qbool G_CallSpawn( gedict_t * ent )
 	// check normal spawn functions
 	for ( s = spawns; s->name; s++ )
 	{
-		if ( !strcmp( s->name, ent->s.v.classname ) )
+		if ( !strcmp( s->name, ent->classname ) )
 		{
 			// found it
 			self = ent;
-			//G_Printf("%8i %s\n",ent->s.v.classname,ent->s.v.classname);
+			//G_Printf("%8i %s\n",ent->classname,ent->classname);
 			s->spawn();
 			return true;
 		}
 	}
-	G_Printf( "%s doesn't have a spawn function\n", ent->s.v.classname );
+	G_Printf( "%s doesn't have a spawn function\n", ent->classname );
 	return false;
 }
 
@@ -515,7 +515,7 @@ Takes a key/value pair and sets the binary values
 in a gentity
 ===============
 */
-void G_ParseField( const char *key, const char *value, gedict_t * ent )
+static void G_ParseField( const char *key, const char *value, gedict_t * ent )
 {
 	field_t        *f;
 	byte           *b;
@@ -587,7 +587,7 @@ void G_SpawnGEntityFromSpawnVars( void )
 	{
 		if ( ( ( int ) ent->s.v.spawnflags & SPAWNFLAG_NOT_DEATHMATCH ) )
 		{
-//			G_cprint( "%s removed because of SPAWNFLAG_NOT_DEATHMATCH\n", ent->s.v.classname );
+//			G_cprint( "%s removed because of SPAWNFLAG_NOT_DEATHMATCH\n", ent->classname );
 			ent_remove( ent );
 			return;
 		}
@@ -597,7 +597,7 @@ void G_SpawnGEntityFromSpawnVars( void )
 			 || ( skill >= 2 && ((int)ent->s.v.spawnflags & SPAWNFLAG_NOT_HARD) ) 
 	   )
 	{
-//		G_cprint( "%s removed because of SPAWNFLAG_NOT_XXX\n", ent->s.v.classname );
+//		G_cprint( "%s removed because of SPAWNFLAG_NOT_XXX\n", ent->classname );
 		ent_remove( ent );
 		return;
 	}

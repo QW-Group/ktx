@@ -44,7 +44,7 @@ void plat_spawn_inside_trigger()
 // middle trigger
 // 
 	trigger = spawn();
-	trigger->s.v.touch = ( func_t ) plat_center_touch;
+	trigger->touch = ( func_t ) plat_center_touch;
 	trigger->s.v.movetype = MOVETYPE_NONE;
 	trigger->s.v.solid = SOLID_TRIGGER;
 	trigger->s.v.enemy = EDICT_TO_PROG( self );
@@ -80,9 +80,9 @@ void plat_spawn_inside_trigger()
 
 void plat_hit_top()
 {
-	sound( self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->s.v.noise1, 1, ATTN_NORM );
+	sound( self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->noise1, 1, ATTN_NORM );
 	self->state = STATE_TOP;
-	self->s.v.think = ( func_t ) plat_go_down;
+	self->think = ( func_t ) plat_go_down;
 	self->s.v.nextthink = self->s.v.ltime + 3;
 
 #ifdef BOT_SUPPORT
@@ -94,7 +94,7 @@ void plat_hit_top()
 
 void plat_hit_bottom()
 {
-	sound( self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->s.v.noise1, 1, ATTN_NORM );
+	sound( self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->noise1, 1, ATTN_NORM );
 	self->state = STATE_BOTTOM;
 
 #ifdef BOT_SUPPORT
@@ -106,14 +106,14 @@ void plat_hit_bottom()
 
 void plat_go_down()
 {
-	sound( self, CHAN_VOICE, self->s.v.noise, 1, ATTN_NORM );
+	sound( self, CHAN_VOICE, self->noise, 1, ATTN_NORM );
 	self->state = STATE_DOWN;
 	SUB_CalcMove( self->pos2, self->speed, plat_hit_bottom );
 }
 
 void plat_go_up()
 {
-	sound( self, CHAN_VOICE, self->s.v.noise, 1, ATTN_NORM );
+	sound( self, CHAN_VOICE, self->noise, 1, ATTN_NORM );
 	self->state = STATE_UP;
 	SUB_CalcMove( self->pos1, self->speed, plat_hit_top );
 }
@@ -169,7 +169,7 @@ void plat_outside_touch()
 
 void plat_trigger_use()
 {
-	if (self->s.v.think) {
+	if (self->think) {
 		return;		// already activated
 	}
 	plat_go_down();
@@ -193,7 +193,7 @@ void plat_crush()
 
 void plat_use()
 {
-	self->s.v.use = ( func_t ) SUB_Null;
+	self->use = ( func_t ) SUB_Null;
 	if ( self->state != STATE_UP )
 		G_Error( "plat_use: not in up state" );
 
@@ -233,30 +233,30 @@ void SP_func_plat()
 	{
 		trap_precache_sound( "plats/plat1.wav" );
 		trap_precache_sound( "plats/plat2.wav" );
-		self->s.v.noise = "plats/plat1.wav";
-		self->s.v.noise1 = "plats/plat2.wav";
+		self->noise = "plats/plat1.wav";
+		self->noise1 = "plats/plat2.wav";
 	}
 
 	if ( self->s.v.sounds == 2 )
 	{
 		trap_precache_sound( "plats/medplat1.wav" );
 		trap_precache_sound( "plats/medplat2.wav" );
-		self->s.v.noise = "plats/medplat1.wav";
-		self->s.v.noise1 = "plats/medplat2.wav";
+		self->noise = "plats/medplat1.wav";
+		self->noise1 = "plats/medplat2.wav";
 	}
 
 	VectorCopy( self->s.v.angles, self->mangle );
 	//self->mangle = self->s.v.angles;
 	SetVector( self->s.v.angles, 0, 0, 0 );
 
-	self->s.v.classname = "plat";
+	self->classname = "plat";
 	self->s.v.solid = SOLID_BSP;
 	self->s.v.movetype = MOVETYPE_PUSH;
 	setorigin( self, PASSVEC3( self->s.v.origin ) );
-	setmodel( self, self->s.v.model );
+	setmodel( self, self->model );
 	setsize( self, PASSVEC3( self->s.v.mins ), PASSVEC3( self->s.v.maxs ) );
 
-	self->s.v.blocked = ( func_t ) plat_crush;
+	self->blocked = ( func_t ) plat_crush;
 	if ( !self->speed )
 		self->speed = 150;
 
@@ -270,14 +270,14 @@ void SP_func_plat()
 	else
 		self->pos2[2] = self->s.v.origin[2] - self->s.v.size[2] + 8;
 
-	self->s.v.use = ( func_t ) plat_trigger_use;
+	self->use = ( func_t ) plat_trigger_use;
 
 	plat_spawn_inside_trigger();	// the "start moving" trigger 
 
-	if ( self->s.v.targetname )
+	if ( self->targetname )
 	{
 		self->state = STATE_UP;
-		self->s.v.use = ( func_t ) plat_use;
+		self->use = ( func_t ) plat_use;
 	} else
 	{
 		setorigin( self, PASSVEC3( self->pos2 ) );
@@ -288,7 +288,7 @@ void SP_func_plat()
 //============================================================================
 
 void            train_next();
-void            func_train_find();
+void            funcref_train_find();
 
 void train_blocked()
 {
@@ -302,7 +302,7 @@ void train_blocked()
 
 void train_use()
 {
-	if ( self->s.v.think != ( func_t ) func_train_find )
+	if ( self->think != ( func_t ) funcref_train_find )
 		return;		// already activated
 
 	train_next();
@@ -313,7 +313,7 @@ void train_wait()
 	if ( self->wait )
 	{
 		self->s.v.nextthink = self->s.v.ltime + self->wait;
-		sound( self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->s.v.noise, 1,
+		sound( self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->noise, 1,
 			    ATTN_NORM );
 	} else
 		self->s.v.nextthink = self->s.v.ltime + 0.1;
@@ -323,7 +323,7 @@ void train_wait()
 		|| ( !cvar( "k_freeze" ) && !match_in_progress )
 		|| k_practice  // #practice mode#
 	  )
-		self->s.v.think = ( func_t ) train_next;
+		self->think = ( func_t ) train_next;
 }
 
 void train_next()
@@ -331,12 +331,12 @@ void train_next()
 	gedict_t       *targ;
 	vec3_t          tmpv;
 
-	targ = find( world, FOFS( s.v.targetname ), self->s.v.target );
+	targ = find( world, FOFS( targetname ), self->target );
 	if ( !targ )
 		G_Error( "train_next: no next target" );
 
-	self->s.v.target = targ->s.v.target;
-	if ( !self->s.v.target )
+	self->target = targ->target;
+	if ( !self->target )
 		G_Error( "train_next: no next target" );
 
 	if ( targ->wait )
@@ -344,35 +344,35 @@ void train_next()
 	else
 		self->wait = 0;
 
-	sound( self, CHAN_VOICE, self->s.v.noise1, 1, ATTN_NORM );
+	sound( self, CHAN_VOICE, self->noise1, 1, ATTN_NORM );
 	VectorSubtract( targ->s.v.origin, self->s.v.mins, tmpv );
 	SUB_CalcMove( tmpv, self->speed, train_wait );
 }
 
-void func_train_find()
+void funcref_train_find()
 {
 	gedict_t       *targ;
 
-	targ = find( world, FOFS( s.v.targetname ), self->s.v.target );
+	targ = find( world, FOFS( targetname ), self->target );
 	if ( !targ )
-		G_Error( "func_train_find: no next target" );
+		G_Error( "funcref_train_find: no next target" );
 
 // qqshka: i comment below line, this let us freeze level _right_ after spawn,
 // 			of course if k_freeze is set, if u uncomment this, train will move one time,
 //			even k_freeze is set
-//	self->s.v.target = targ->s.v.target;
+//	self->target = targ->target;
 
 	setorigin( self, targ->s.v.origin[0] - self->s.v.mins[0],
 			targ->s.v.origin[1] - self->s.v.mins[1],
 			targ->s.v.origin[2] - self->s.v.mins[2] );
-	if ( !self->s.v.targetname )
+	if ( !self->targetname )
 	{			// not triggered, so start immediately
 		self->s.v.nextthink = self->s.v.ltime + 0.1;
-		self->s.v.think = ( func_t ) train_next;
+		self->think = ( func_t ) train_next;
 	}
 }
 
-/*QUAKED func_train (0 .5 .8) ?
+/*QUAKED funcref_train (0 .5 .8) ?
 Trains are moving platforms that players can ride.
 The targets origin specifies the min point of the train at each corner.
 The train spawns at the first target it is pointing at.
@@ -383,49 +383,49 @@ sounds
 1) ratchet metal
 
 */
-void SP_func_train()
+void SP_funcref_train()
 {
 	if ( !self->speed )
 		self->speed = 100;
-	if ( !self->s.v.target )
-		G_Error( "func_train without a target" );
+	if ( !self->target )
+		G_Error( "funcref_train without a target" );
 	if ( !self->dmg )
 		self->dmg = 2;
 
 	if ( self->s.v.sounds == 0 )
 	{
-//		self->s.v.noise = ( "misc/null.wav" );
+//		self->noise = ( "misc/null.wav" );
 ///		trap_precache_sound( "misc/null.wav" );
-//		self->s.v.noise1 = ( "misc/null.wav" );
+//		self->noise1 = ( "misc/null.wav" );
 //		trap_precache_sound( "misc/null.wav" );
 // qqshka: shut up null.wav, have some artefact, we can hear
-		self->s.v.noise  = "";
-		self->s.v.noise1 = "";
+		self->noise  = "";
+		self->noise1 = "";
 	}
 
 	if ( self->s.v.sounds == 1 )
 	{
-		self->s.v.noise = ( "plats/train2.wav" );
+		self->noise = ( "plats/train2.wav" );
 		trap_precache_sound( "plats/train2.wav" );
-		self->s.v.noise1 = ( "plats/train1.wav" );
+		self->noise1 = ( "plats/train1.wav" );
 		trap_precache_sound( "plats/train1.wav" );
 	}
 
 	self->cnt = 1;
 	self->s.v.solid = SOLID_BSP;
 	self->s.v.movetype = MOVETYPE_PUSH;
-	self->s.v.blocked = ( func_t ) train_blocked;
-	self->s.v.use = ( func_t ) train_use;
-	self->s.v.classname = "train";
+	self->blocked = ( func_t ) train_blocked;
+	self->use = ( func_t ) train_use;
+	self->classname = "train";
 
-	setmodel( self, self->s.v.model );
+	setmodel( self, self->model );
 	setsize( self, PASSVEC3( self->s.v.mins ), PASSVEC3( self->s.v.maxs ) );
 	setorigin( self, PASSVEC3( self->s.v.origin ) );
 
 // start trains on the second frame, to make sure their targets have had
 // a chance to spawn
 	self->s.v.nextthink = self->s.v.ltime + 0.1;
-	self->s.v.think = ( func_t ) func_train_find;
+	self->think = ( func_t ) funcref_train_find;
 }
 
 /*QUAKED misc_teleporttrain (0 .5 .8) (-8 -8 -8) (8 8 8)
@@ -435,24 +435,24 @@ void SP_misc_teleporttrain()
 {
 	if ( !self->speed )
 		self->speed = 100;
-	if ( !self->s.v.target )
-		G_Error( "func_train without a target" );
+	if ( !self->target )
+		G_Error( "funcref_train without a target" );
 
 	self->cnt = 1;
 	self->s.v.solid = SOLID_NOT;
 	self->s.v.movetype = MOVETYPE_PUSH;
-	self->s.v.blocked = ( func_t ) train_blocked;
-	self->s.v.use = ( func_t ) train_use;
+	self->blocked = ( func_t ) train_blocked;
+	self->use = ( func_t ) train_use;
 	SetVector( self->s.v.avelocity, 100, 200, 300 );
 	//self->s.v.avelocity = '100 200 300';
 
-//	self->s.v.noise = ( "misc/null.wav" );
+//	self->noise = ( "misc/null.wav" );
 //	trap_precache_sound( "misc/null.wav" );
-//	self->s.v.noise1 = ( "misc/null.wav" );
+//	self->noise1 = ( "misc/null.wav" );
 //	trap_precache_sound( "misc/null.wav" );
 // qqshka: shut up null.wav, have some artefact, we can hear
-	self->s.v.noise  = "";
-	self->s.v.noise1 = "";
+	self->noise  = "";
+	self->noise1 = "";
 
 
 	trap_precache_model( "progs/teleport.mdl" );
@@ -463,5 +463,5 @@ void SP_misc_teleporttrain()
 // start trains on the second frame, to make sure their targets have had
 // a chance to spawn
 	self->s.v.nextthink = self->s.v.ltime + 0.1;
-	self->s.v.think = ( func_t ) func_train_find;
+	self->think = ( func_t ) funcref_train_find;
 }

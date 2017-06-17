@@ -48,11 +48,11 @@ void InitBodyQue()
 	int             i;
 
 	bodyque[0] = spawn();
-	bodyque[0]->s.v.classname = "bodyque";
+	bodyque[0]->classname = "bodyque";
 	for ( i = 1; i < MAX_BODYQUE; i++ )
 	{
 		bodyque[i] = spawn();
-		bodyque[i]->s.v.classname = "bodyque";
+		bodyque[i]->classname = "bodyque";
 		bodyque[i - 1]->s.v.owner = EDICT_TO_PROG( bodyque[i] );
 	}
 	bodyque[MAX_BODYQUE - 1]->s.v.owner = EDICT_TO_PROG( bodyque[0] );
@@ -69,7 +69,7 @@ void CopyToBodyQue( gedict_t * ent )
 	VectorCopy( ent->s.v.angles, bodyque[bodyque_head]->s.v.angles );
 	VectorCopy( ent->s.v.velocity, bodyque[bodyque_head]->s.v.velocity );
 
-	bodyque[bodyque_head]->s.v.model = ent->s.v.model;
+	bodyque[bodyque_head]->model = ent->model;
 	bodyque[bodyque_head]->s.v.modelindex = ent->s.v.modelindex;
 	bodyque[bodyque_head]->s.v.frame = ent->s.v.frame;
 	bodyque[bodyque_head]->s.v.colormap = ent->s.v.colormap;
@@ -90,7 +90,7 @@ void ClearBodyQue()
 
 	for ( i = 0; i < MAX_BODYQUE; i++ )
 	{
-		bodyque[i]->s.v.model = "";
+		bodyque[i]->model = "";
 		bodyque[i]->s.v.modelindex = 0;
 		bodyque[i]->s.v.frame = 0;
 		bodyque[i]->s.v.movetype = MOVETYPE_NONE;
@@ -130,9 +130,9 @@ void Spawn_DefMapChecker( float timeout )
 
 	e = spawn();
 
-	e->s.v.classname = "mapguard";
+	e->classname = "mapguard";
 	e->s.v.owner = EDICT_TO_PROG( world );
-	e->s.v.think = ( func_t ) CheckDefMap;
+	e->think = ( func_t ) CheckDefMap;
 	e->s.v.nextthink = g_globalvars.time + max(0.0001, timeout);
 }
 
@@ -168,14 +168,14 @@ void SP_worldspawn()
 	{
 		G_Error( "SP_worldspawn: The first entity isn't 'worldspawn'" );
 	}
-	world->s.v.classname = "worldspawn";
+	world->classname = "worldspawn";
 	InitBodyQue();
 
-	if ( !Q_stricmp( self->s.v.model, "maps/e1m8.bsp" ) )
+	if ( !Q_stricmp( self->model, "maps/e1m8.bsp" ) )
 		trap_cvar_set( "sv_gravity", "100" );
-	else if ( !Q_stricmp( self->s.v.model, "maps/bunmoo3.bsp" ) )
+	else if ( !Q_stricmp( self->model, "maps/bunmoo3.bsp" ) )
 		trap_cvar_set( "sv_gravity", "150" );
-	else if ( !Q_stricmp( self->s.v.model, "maps/lowgrav.bsp" ) )
+	else if ( !Q_stricmp( self->model, "maps/lowgrav.bsp" ) )
 		trap_cvar_set( "sv_gravity", "150" );
 	else
 		trap_cvar_set( "sv_gravity", "800" );
@@ -560,8 +560,8 @@ void Customize_Maps()
 	// correcting some teleport destintions on death32c (c) ktpro
 	if ( streq( "death32c", g_globalvars.mapname ) )
 		for( p = world; (p = find( p, FOFCLSN, "trigger_teleport" )); )
-			if ( streq( "dm220", p->s.v.target ) )
-				p->s.v.target = "dm6t1";
+			if ( streq( "dm220", p->target ) )
+				p->target = "dm6t1";
 
 	// Modify some ctf maps
 	if ( k_allowed_free_modes & UM_CTF )
@@ -581,13 +581,13 @@ void Customize_Maps()
 			
 			for( p = world; (p = find( p, FOFCLSN, "info_player_team2" )); )
 				if ( VectorCompare( p->s.v.origin, spawn1 ) ) {
-					p->s.v.classname = "info_player_team1";
+					p->classname = "info_player_team1";
 					break;
 				}
 
 			for( p = world; (p = find( p, FOFCLSN, "info_player_team1" )); )
 				if ( VectorCompare( p->s.v.origin, spawn2 ) ) { 
-					p->s.v.classname = "info_player_team2";
+					p->classname = "info_player_team2";
 					break;
 				}
 
@@ -621,7 +621,7 @@ void Customize_Maps()
 
 		// Remove hurt indicators around lava pit
 		for (ent = world; (ent = findradius_ignore_solid(ent, push->s.v.origin, 300)); /**/) {
-			if (streq(ent->s.v.classname, "trigger_hurt")) {
+			if (streq(ent->classname, "trigger_hurt")) {
 				ent_remove(ent);
 			}
 		}

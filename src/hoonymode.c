@@ -107,9 +107,9 @@ void HM_draw()
 
 	for (p = world; (p = find_plr(p));) {
 		// .ent file can dictate that one player wins by default
-		if (! strnull(world->hoony_defaultwinner) && p->k_hoony_new_spawn && streq(p->k_hoony_new_spawn->s.v.targetname, world->hoony_defaultwinner)) {
+		if (! strnull(world->hoony_defaultwinner) && p->k_hoony_new_spawn && streq(p->k_hoony_new_spawn->targetname, world->hoony_defaultwinner)) {
 			p->s.v.frags++;
-			G_bprint(2, "%s wins the round on time.\n", p->s.v.netname);
+			G_bprint(2, "%s wins the round on time.\n", p->netname);
 			EndRound();
 			return;
 		}
@@ -216,7 +216,7 @@ void HM_stats()
 	for (p = world; (p = find_plr(p));)
 	{
 		if (previous_point % HM_PTS_PER_STAT_LINE == 0) 
-			strlcat(vs_blurb, va("%s%s", p->s.v.netname, i == 0 ? " - " : "\n"), sizeof(vs_blurb));
+			strlcat(vs_blurb, va("%s%s", p->netname, i == 0 ? " - " : "\n"), sizeof(vs_blurb));
 		hm_stat[i].lg = bound(0.0, 100.0 * p->ps.wpn[wpLG].hits / max(1, p->ps.wpn[wpLG].attacks), 99.0);
 		hm_stat[i].dh = p->ps.wpn[wpRL].hits + p->ps.wpn[wpGL].hits;
 		if (p->s.v.health <= 0) // avoid calculating something like (hp = -10) + (armor = 100) ...
@@ -285,22 +285,22 @@ void respawn_items(char* classname, qbool enabled)
 			if (p->initial_spawn_delay > 0)
 			{
 				// hide, but respawn at future point
-				p->s.v.model = NULL;
+				p->model = NULL;
 				p->s.v.solid = SOLID_NOT;
 				p->s.v.nextthink = g_globalvars.time + p->initial_spawn_delay;
-				p->s.v.think = ( func_t ) SUB_regen;
+				p->think = ( func_t ) SUB_regen;
 			}
-			else if (strnull( p->s.v.model ) || p->s.v.solid != SOLID_TRIGGER)
+			else if (strnull( p->model ) || p->s.v.solid != SOLID_TRIGGER)
 			{
 				// respawn now
 				p->s.v.nextthink = g_globalvars.time;
-				p->s.v.think = ( func_t ) SUB_regen;
+				p->think = ( func_t ) SUB_regen;
 			}
 		}
 		else 
 		{
 			// hide item
-			p->s.v.model = NULL;
+			p->model = NULL;
 			p->s.v.solid = SOLID_NOT;
 			p->s.v.nextthink = 0; 
 		}
@@ -484,14 +484,14 @@ typedef struct hm_spawn_name_t {
 
 static void HM_name_spawn(gedict_t* spawn, hm_spawn_name* spawns, int spawncount)
 {
-	if (strnull(spawn->s.v.targetname))
+	if (strnull(spawn->targetname))
 	{
 		int i = 0;
 		for (i = 0; i < spawncount; ++i)
 		{
 			if (VectorCompare(spawn->s.v.origin, spawns[i].origin))
 			{
-				spawn->s.v.targetname = spawns[i].name;
+				spawn->targetname = spawns[i].name;
 				break;
 			}
 		}
@@ -699,26 +699,26 @@ void HM_pick_spawn(void)
 
 	if (closest == old_nomination) 
 	{
-		G_bprint(2, "%s opts for %s spawns\n", self->s.v.netname, redtext("random"));
+		G_bprint(2, "%s opts for %s spawns\n", self->netname, redtext("random"));
 		
 		HM_deselect_spawn(closest);
 	}
 	else if (closest->hoony_nomination)
 	{
-		if (! strnull(closest->s.v.targetname))
-			G_sprint(self, 2, "%s has already nominated %s\n", g_edicts[closest->hoony_nomination].s.v.netname, closest->s.v.targetname);
+		if (! strnull(closest->targetname))
+			G_sprint(self, 2, "%s has already nominated %s\n", g_edicts[closest->hoony_nomination].netname, closest->targetname);
 		else
-			G_sprint(self, 2, "%s has already nominated spawn #%d\n", g_edicts[closest->hoony_nomination].s.v.netname, closest_spawn_num);
+			G_sprint(self, 2, "%s has already nominated spawn #%d\n", g_edicts[closest->hoony_nomination].netname, closest_spawn_num);
 	}
 	else
 	{
 		if (old_nomination != 0)
 			HM_deselect_spawn(old_nomination);
 
-		if (! strnull(closest->s.v.targetname))
-			G_bprint(2, "%s picks spawn %s\n", self->s.v.netname, redtext(closest->s.v.targetname));
+		if (! strnull(closest->targetname))
+			G_bprint(2, "%s picks spawn %s\n", self->netname, redtext(closest->targetname));
 		else
-			G_bprint(2, "%s picks spawn #%d\n", self->s.v.netname, closest_spawn_num);
+			G_bprint(2, "%s picks spawn #%d\n", self->netname, closest_spawn_num);
 
 		HM_select_spawn(closest, self);
 	}

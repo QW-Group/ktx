@@ -109,7 +109,7 @@ static qbool CheckForRocketEnemyAim (gedict_t* self)
 
 static qbool OnLift (gedict_t* self)
 {
-	if (streq(self->fb.touch_marker->s.v.classname, "door") && self->deathtype == dtSQUISH) {
+	if (streq(self->fb.touch_marker->classname, "door") && self->deathtype == dtSQUISH) {
 		if (self->fb.linked_marker->s.v.absmin[2] + self->fb.linked_marker->s.v.view_ofs[2] > self->s.v.origin[2] + 18) {
 			if (teamplay) {
 				self->fb.state &= ~HELP_TEAMMATE;
@@ -147,7 +147,7 @@ qbool WaitingToHitGround (gedict_t* self)
 static qbool WalkTowardsDroppedItem (gedict_t* self)
 {
 	gedict_t* goalentity_ = &g_edicts[self->s.v.goalentity];
-	if (streq(goalentity_->s.v.classname, "backpack") && VisibleEntity(goalentity_)) {
+	if (streq(goalentity_->classname, "backpack") && VisibleEntity(goalentity_)) {
 		SetLinkedMarker(self, goalentity_, "ProcNewLinked(backpack)");
 		self->fb.linked_marker_time = g_globalvars.time + 5;
 		self->fb.old_linked_marker = self->fb.touch_marker;

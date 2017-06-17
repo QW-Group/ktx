@@ -279,7 +279,7 @@ void boss_missile( float p_x, float p_y, float p_z )
 	SetVector( newmis->s.v.avelocity, 200, 100, 300 );
 	setsize( newmis, PASSVEC3( VEC_ORIGIN ), PASSVEC3( VEC_ORIGIN ) );
 	VectorScale( vec, 300, newmis->s.v.velocity );
-	newmis->s.v.touch = ( func_t ) T_MissileTouch; // rocket explosion
+	newmis->touch = ( func_t ) T_MissileTouch; // rocket explosion
 	sound( self, CHAN_WEAPON, "boss1/throw.wav", 1, ATTN_NORM );
 
 	// check for dead enemy
@@ -418,7 +418,7 @@ void SP_monster_boss()
 
 	g_globalvars.total_monsters++;
 
-	self->s.v.use = ( func_t ) boss_awake;
+	self->use = ( func_t ) boss_awake;
 }
 
 //===========================================================================
@@ -432,10 +432,10 @@ void lightning_fire()
 	vec3_t		p1, p2, tmpv;
 
 	le1 = le2 = NULL;
-	le1 = find( world, FOFS( s.v.target ), "lightning");
+	le1 = find( world, FOFS( target ), "lightning");
 
 	if ( le1 )
-		le2 = find( le1, FOFS( s.v.target ), "lightning");
+		le2 = find( le1, FOFS( target ), "lightning");
 
 	if ( !le1 || !le2 )
 	{
@@ -476,7 +476,7 @@ void lightning_fire()
 	VectorMA( p2, -100, tmpv, p2 );
 
 	self->s.v.nextthink = g_globalvars.time + 0.1;
-	self->s.v.think = ( func_t ) lightning_fire;
+	self->think = ( func_t ) lightning_fire;
 
 	WriteByte( MSG_ALL, SVC_TEMPENTITY );
 	WriteByte( MSG_ALL, TE_LIGHTNING3 );
@@ -497,10 +497,10 @@ void lightning_use()
 		return;
 
 	le1 = le2 = NULL;
-	le1 = find( world, FOFS( s.v.target ), "lightning");
+	le1 = find( world, FOFS( target ), "lightning");
 
 	if ( le1 )
-		le2 = find( le1, FOFS( s.v.target ), "lightning");
+		le2 = find( le1, FOFS( target ), "lightning");
 
 	if ( !le1 || !le2 )
 	{
@@ -557,6 +557,6 @@ Just for boss level.
 */
 void SP_event_lightning()
 {
-	self->s.v.use = ( func_t ) lightning_use;
+	self->use = ( func_t ) lightning_use;
 }
 

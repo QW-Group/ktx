@@ -127,8 +127,8 @@ static void ExplodeAlert(vec3_t org, float next_time) {
 
 				for (tele = world; (tele = ez_find (tele, "trigger_teleport")); ) {
 					// If this teleport takes us to the marker close to the grenade, set arrow_time
-					if (!strnull (tele->s.v.target)) {
-						gedict_t* target = find (world, FOFS (s.v.targetname), tele->s.v.target);
+					if (!strnull (tele->target)) {
+						gedict_t* target = find (world, FOFS (targetname), tele->target);
 						if (target == marker) {
 							tele->fb.arrow_time = max (tele->fb.arrow_time, next_time);
 						}
@@ -142,9 +142,9 @@ static void ExplodeAlert(vec3_t org, float next_time) {
 // This is essentially just to call ExplodeAlert(origin) every 0.05s, until the grenade explodes
 static void GrenadeAlert(void) {
 	self->s.v.nextthink = g_globalvars.time + 0.05;
-	self->s.v.think = (func_t) GrenadeAlert;
+	self->think = (func_t) GrenadeAlert;
 	if (self->fb.frogbot_nextthink <= g_globalvars.time) {
-		self->s.v.think = (func_t) GrenadeExplode;
+		self->think = (func_t) GrenadeExplode;
 		self->s.v.nextthink = g_globalvars.time;
 	}
 	ExplodeAlert(self->s.v.origin, self->s.v.nextthink);
@@ -160,7 +160,7 @@ static void RocketAlert(void) {
 
 	self->s.v.nextthink = g_globalvars.time + 0.5;
 	if (self->fb.frogbot_nextthink <= g_globalvars.time) {
-		self->s.v.think = (func_t) Missile_Remove;
+		self->think = (func_t) Missile_Remove;
 	}
 	VectorMA (self->s.v.origin, 600, self->s.v.velocity, end_point);
 	traceline(PASSVEC3(self->s.v.origin), PASSVEC3(end_point), true, PROG_TO_EDICT(self->s.v.owner));
@@ -578,7 +578,7 @@ static void AvoidHazardsOnGround (gedict_t* self, float hor_speed, vec3_t new_or
 			self->fb.path_state &= ~DELIBERATE_AIR;
 		}
 		if (new_fall > fall) {
-			//G_bprint (2, "%s: %d (%s) -> %d (%s)\n", self->s.v.netname, self->fb.touch_marker->fb.index + 1, self->fb.touch_marker->s.v.classname, self->fb.linked_marker->fb.index, self->fb.linked_marker->s.v.classname);
+			//G_bprint (2, "%s: %d (%s) -> %d (%s)\n", self->netname, self->fb.touch_marker->fb.index + 1, self->fb.touch_marker->classname, self->fb.linked_marker->fb.index, self->fb.linked_marker->classname);
 			if (g_globalvars.time > self->fb.arrow_time2) {
 				// if (CanFallAndGetAcrossHazard(self, new_velocity))
 				VectorCopy(new_velocity, jump_velocity);
@@ -816,7 +816,7 @@ void BotsGrenadeSpawned (gedict_t* newmis)
 	// Call GrenadeAlert() repeatedly so we can avoid the grenade
 	newmis->fb.frogbot_nextthink = newmis->s.v.nextthink;
 	newmis->s.v.nextthink = g_globalvars.time + 0.05; // New
-	newmis->s.v.think = (func_t) GrenadeAlert;
+	newmis->think = (func_t) GrenadeAlert;
 }
 
 // Called after a rocket has been spawned
@@ -827,7 +827,7 @@ void BotsRocketSpawned (gedict_t* newmis)
 
 	// Call RocketAlert() repeatedly so we can avoid the rocket
 	newmis->fb.frogbot_nextthink = newmis->s.v.nextthink;
-	newmis->s.v.think = (func_t) RocketAlert;
+	newmis->think = (func_t) RocketAlert;
 	newmis->s.v.nextthink = 0.001;
 
 	// Store spawn time so we don't avoid too early

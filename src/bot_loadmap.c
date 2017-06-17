@@ -18,7 +18,7 @@ void AssignGoalNumbers (void);
 
 typedef struct fb_mapping_s {
 	char* name;
-	fb_void_func_t func;
+	fb_void_funcref_t func;
 } fb_mapping_t;
 
 fb_spawn_t* ItemSpawnFunction (int i);
@@ -42,7 +42,7 @@ static void fb_spawn_button(gedict_t* ent) {
 static void fb_spawn_spawnpoint(gedict_t* ent) {
 	AddToQue(ent);
 	ent->s.v.solid = SOLID_TRIGGER;
-	ent->s.v.touch = (func_t) marker_touch;
+	ent->touch = (func_t) marker_touch;
 	ent->s.v.flags = FL_ITEM;
 	BecomeMarker(ent);
 	setsize(ent, -65, -65, -24, 65, 65, 32);
@@ -59,7 +59,7 @@ static void fb_spawn_door(gedict_t* ent) {
 	VectorMA (position, 0.5, original->s.v.maxs, position);
 	position[2] = min (original->s.v.mins[2], original->s.v.maxs[2]) + 24;
 	ent = CreateMarker(PASSVEC3(position));
-	ent->s.v.classname = "door_marker";
+	ent->classname = "door_marker";
 	ent->fb.door_entity = original;
 	ent->s.v.solid = SOLID_NOT;     // this will be set to SOLID_TRIGGER if MARKER_DOOR_TOUCHABLE flag set
 
@@ -131,7 +131,7 @@ static void fb_spawn_teleport_destination (gedict_t* ent)
 	AddToQue (ent);
 
 	ent->s.v.solid = SOLID_TRIGGER;
-	ent->s.v.touch = (func_t) fb_spawn_teleport_destination_touch;
+	ent->touch = (func_t) fb_spawn_teleport_destination_touch;
 	ent->s.v.flags = FL_ITEM;
 	BecomeMarker (ent);
 	setsize (ent, -65, -65, -24 - 27, 65, 65, 32);  // -27 extra to get back to floor
@@ -165,7 +165,7 @@ void SetMarkerIndicatorPosition (gedict_t* item, gedict_t* indicator)
 
 	VectorAdd (item->s.v.absmin, item->s.v.absmax, pos);
 	VectorScale (pos, 0.5f, pos);
-	if (streq (item->s.v.classname, "plat")) {
+	if (streq (item->classname, "plat")) {
 		VectorAdd (item->s.v.mins, item->s.v.maxs, pos);
 		VectorScale (pos, 0.5f, pos);
 	}
@@ -183,8 +183,8 @@ static void SpawnMarkerIndicator (gedict_t* item)
 		p->s.v.solid = SOLID_NOT;
 		p->s.v.movetype = MOVETYPE_NONE;
 		setmodel (p, "progs/w_g_key.mdl");
-		p->s.v.netname = "Marker";
-		p->s.v.classname = "marker_indicator";
+		p->netname = "Marker";
+		p->classname = "marker_indicator";
 		p->fb.index = item->fb.index;
 
 		SetMarkerIndicatorPosition (item, p);
@@ -213,7 +213,7 @@ static void CreateItemMarkers() {
 		// check for item spawn
 		for (i = 0; i < ItemSpawnFunctionCount(); ++i) {
 			fb_spawn_t* spawn = ItemSpawnFunction (i);
-			if (streq(spawn->name, item->s.v.classname)) {
+			if (streq(spawn->name, item->classname)) {
 				BecomeMarker (item);
 				spawn->func(item);
 				found = true;
@@ -224,7 +224,7 @@ static void CreateItemMarkers() {
 		// check for std spawn (world items like buttons etc)
 		if (! found) {
 			for (i = 0; i < sizeof(stdSpawnFunctions) / sizeof(stdSpawnFunctions[0]); ++i) {
-				if (streq(stdSpawnFunctions[i].name, item->s.v.classname)) {
+				if (streq(stdSpawnFunctions[i].name, item->classname)) {
 					stdSpawnFunctions[i].func(item);
 					found = true;
 					break;
@@ -248,7 +248,7 @@ static void AssignVirtualGoals(void)
 
 		for (i = 0; i < ItemSpawnFunctionCount(); ++i) {
 			fb_spawn_t* spawn = ItemSpawnFunction(i);
-			if (streq(spawn->name, item->s.v.classname)) {
+			if (streq(spawn->name, item->classname)) {
 				AssignVirtualGoal_apply(item);
 				break;
 			}
@@ -312,7 +312,7 @@ static void CustomiseFrogbotMap (void)
 
 		for (p = world; (p = find (p, FOFCLSN, "info_player_deathmatch")); ) {
 			if (VectorCompare (p->s.v.origin, TS_ORIGIN)) {
-				p->s.v.classname = "info_player_deathmatch_removed";
+				p->classname = "info_player_deathmatch_removed";
 
 				// Remove any spawn marker
 				for (m = world; (m = find (m, FOFCLSN, "spawnpoint")); ) {
@@ -328,12 +328,12 @@ static void CustomiseFrogbotMap (void)
 
 	// Expand bounding box of all items
 	for (ent = world; (ent = nextent (ent)); ) {
-		if (streq (ent->s.v.classname, "info_teleport_destination") ||
-			streq (ent->s.v.classname, "info_player_deathmatch")) {
+		if (streq (ent->classname, "info_teleport_destination") ||
+			streq (ent->classname, "info_player_deathmatch")) {
 			continue;
 		}
 
-		if (streq (ent->s.v.classname, "marker")) {
+		if (streq (ent->classname, "marker")) {
 			vec3_t mins = { -65, -65, -24 };
 			vec3_t maxs = {  65,  65,  32 };
 			vec3_t viewoffset = { 80, 80, 24 };
@@ -358,8 +358,8 @@ static void CustomiseFrogbotMap (void)
 	if (FrogbotOptionEnabled (FB_OPTION_EDITOR_MODE)) {
 		for (ent = world; (ent = ez_find (ent, "trigger_teleport")); ) {
 			// If this teleport takes us to the marker close to the grenade, set arrow_time
-			if (!strnull (ent->s.v.target)) {
-				gedict_t* target = find (world, FOFS (s.v.targetname), ent->s.v.target);
+			if (!strnull (ent->target)) {
+				gedict_t* target = find (world, FOFS (targetname), ent->target);
 
 				AddPath (ent, target);
 			}

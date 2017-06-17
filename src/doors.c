@@ -83,7 +83,7 @@ void door_blocked()
 
 void door_hit_top()
 {
-	sound( self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->s.v.noise1, 1, ATTN_NORM );
+	sound( self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->noise1, 1, ATTN_NORM );
 	self->state = STATE_TOP;
 
 #ifdef BOT_SUPPORT
@@ -95,13 +95,13 @@ void door_hit_top()
 	if ( ( int ) ( self->s.v.spawnflags ) & DOOR_TOGGLE )
 		return;		// don't come down automatically
 
-	self->s.v.think = ( func_t ) door_go_down;
+	self->think = ( func_t ) door_go_down;
 	self->s.v.nextthink = self->s.v.ltime + self->wait;
 }
 
 void door_hit_bottom()
 {
-	sound( self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->s.v.noise1, 1, ATTN_NORM );
+	sound( self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->noise1, 1, ATTN_NORM );
 	self->state = STATE_BOTTOM;
 
 #ifdef BOT_SUPPORT
@@ -113,7 +113,7 @@ void door_hit_bottom()
 
 void door_go_down()
 {
-	sound( self, CHAN_VOICE, self->s.v.noise2, 1, ATTN_NORM );
+	sound( self, CHAN_VOICE, self->noise2, 1, ATTN_NORM );
 	if ( self->s.v.max_health )
 	{
 		self->s.v.takedamage = DAMAGE_YES;
@@ -137,7 +137,7 @@ void door_go_up()
 		return;
 	}
 
-	sound( self, CHAN_VOICE, self->s.v.noise2, 1, ATTN_NORM );
+	sound( self, CHAN_VOICE, self->noise2, 1, ATTN_NORM );
 	self->state = STATE_UP;
 
 	SUB_CalcMove( self->pos2, self->speed, door_hit_top );
@@ -165,7 +165,7 @@ void door_fire()
 	if ( self->s.v.items )
 		sound( self, CHAN_VOICE, self->noise4, 1, ATTN_NORM );
 
-	self->s.v.message = 0;	// no more message
+	self->message = 0;	// no more message
 	oself = self;
 
 	if ( ( int ) ( self->s.v.spawnflags ) & DOOR_TOGGLE )
@@ -202,9 +202,9 @@ void door_use()
 {
 	gedict_t       *oself;
 
-	self->s.v.message = "";	// door message are for touch only
-	PROG_TO_EDICT( self->s.v.owner )->s.v.message = "";
-	PROG_TO_EDICT( self->s.v.enemy )->s.v.message = "";
+	self->message = "";	// door message are for touch only
+	PROG_TO_EDICT( self->s.v.owner )->message = "";
+	PROG_TO_EDICT( self->s.v.enemy )->message = "";
 
 	oself = self;
 	self = PROG_TO_EDICT( self->s.v.owner );
@@ -279,11 +279,11 @@ void door_touch()
 		return;
 
 	PROG_TO_EDICT( self->s.v.owner )->attack_finished = g_globalvars.time + 2;
-	msg = PROG_TO_EDICT( self->s.v.owner )->s.v.message;
+	msg = PROG_TO_EDICT( self->s.v.owner )->message;
 
 	if ( msg && msg[0] )
 	{
-		G_centerprint( other, "%s", PROG_TO_EDICT( self->s.v.owner )->s.v.message );
+		G_centerprint( other, "%s", PROG_TO_EDICT( self->s.v.owner )->message );
 		sound( other, CHAN_VOICE, "misc/talk.wav", 1, ATTN_NORM );
 	}
 // key door stuff
@@ -298,17 +298,17 @@ void door_touch()
 			if ( world->worldtype == 2 )
 			{
 				G_centerprint( other, "You need the silver keycard" );
-				sound( self, CHAN_VOICE, self->s.v.noise3, 1,
+				sound( self, CHAN_VOICE, self->noise3, 1,
 					    ATTN_NORM );
 			} else if ( world->worldtype == 1 )
 			{
 				G_centerprint( other, "You need the silver runekey" );
-				sound( self, CHAN_VOICE, self->s.v.noise3, 1,
+				sound( self, CHAN_VOICE, self->noise3, 1,
 					    ATTN_NORM );
 			} else if ( world->worldtype == 0 )
 			{
 				G_centerprint( other, "You need the silver key" );
-				sound( self, CHAN_VOICE, self->s.v.noise3, 1,
+				sound( self, CHAN_VOICE, self->noise3, 1,
 					    ATTN_NORM );
 			}
 		} else
@@ -316,17 +316,17 @@ void door_touch()
 			if ( world->worldtype == 2 )
 			{
 				G_centerprint( other, "You need the gold keycard" );
-				sound( self, CHAN_VOICE, self->s.v.noise3, 1,
+				sound( self, CHAN_VOICE, self->noise3, 1,
 					    ATTN_NORM );
 			} else if ( world->worldtype == 1 )
 			{
 				G_centerprint( other, "You need the gold runekey" );
-				sound( self, CHAN_VOICE, self->s.v.noise3, 1,
+				sound( self, CHAN_VOICE, self->noise3, 1,
 					    ATTN_NORM );
 			} else if ( world->worldtype == 0 )
 			{
 				G_centerprint( other, "You need the gold key" );
-				sound( self, CHAN_VOICE, self->s.v.noise3, 1,
+				sound( self, CHAN_VOICE, self->noise3, 1,
 					    ATTN_NORM );
 			}
 		}
@@ -334,10 +334,10 @@ void door_touch()
 	}
 
 	other->s.v.items -= self->s.v.items;
-	self->s.v.touch = ( func_t ) SUB_Null;
+	self->touch = ( func_t ) SUB_Null;
 
 	if ( self->s.v.enemy )
-		PROG_TO_EDICT( self->s.v.enemy )->s.v.touch = ( func_t ) SUB_Null;	// get paired door
+		PROG_TO_EDICT( self->s.v.enemy )->touch = ( func_t ) SUB_Null;	// get paired door
 
 	door_use();
 }
@@ -359,7 +359,7 @@ gedict_t       *spawn_field( vec3_t fmins, vec3_t fmaxs )
 	trigger->s.v.movetype = MOVETYPE_NONE;
 	trigger->s.v.solid = SOLID_TRIGGER;
 	trigger->s.v.owner = EDICT_TO_PROG( self );
-	trigger->s.v.touch = ( func_t ) door_trigger_touch;
+	trigger->touch = ( func_t ) door_trigger_touch;
 
 	setsize( trigger, fmins[0] - 60, fmins[1] - 60, fmins[2] - 8, fmaxs[0] + 60,
 		      fmaxs[1] + 60, fmaxs[2] + 8 );
@@ -427,13 +427,13 @@ void LinkDoors()
 		if ( ISLIVE( self ) )
 			starte->s.v.health = self->s.v.health;
 
-		if ( self->s.v.targetname )
-			starte->s.v.targetname = self->s.v.targetname;
+		if ( self->targetname )
+			starte->targetname = self->targetname;
 
-		if ( strneq( self->s.v.message, "" ) )
-			starte->s.v.message = self->s.v.message;
+		if ( strneq( self->message, "" ) )
+			starte->message = self->message;
 
-		t = find( t, FOFS( s.v.classname ), self->s.v.classname );
+		t = find( t, FOFCLSN, self->classname );
 
 		if ( !t )
 		{
@@ -446,7 +446,7 @@ void LinkDoors()
 
 			if ( ISLIVE( self ) )
 				return;
-			if ( self->s.v.targetname )
+			if ( self->targetname )
 				return;
 			if ( self->s.v.items )
 				return;
@@ -521,19 +521,19 @@ void SP_func_door()
 	{
 		trap_precache_sound( "doors/medtry.wav" );
 		trap_precache_sound( "doors/meduse.wav" );
-		self->s.v.noise3 = "doors/medtry.wav";
+		self->noise3 = "doors/medtry.wav";
 		self->noise4 = "doors/meduse.wav";
 	} else if ( world->worldtype == 1 )
 	{
 		trap_precache_sound( "doors/runetry.wav" );
 		trap_precache_sound( "doors/runeuse.wav" );
-		self->s.v.noise3 = "doors/runetry.wav";
+		self->noise3 = "doors/runetry.wav";
 		self->noise4 = "doors/runeuse.wav";
 	} else if ( world->worldtype == 2 )
 	{
 		trap_precache_sound( "doors/basetry.wav" );
 		trap_precache_sound( "doors/baseuse.wav" );
-		self->s.v.noise3 = "doors/basetry.wav";
+		self->noise3 = "doors/basetry.wav";
 		self->noise4 = "doors/baseuse.wav";
 	} else
 	{
@@ -543,39 +543,39 @@ void SP_func_door()
 	{
 //		trap_precache_sound( "misc/null.wav" );
 //		trap_precache_sound( "misc/null.wav" );
-//		self->s.v.noise1 = "misc/null.wav";
-//		self->s.v.noise2 = "misc/null.wav";
+//		self->noise1 = "misc/null.wav";
+//		self->noise2 = "misc/null.wav";
 // qqshka: shut up null.wav, have some artefact, we can hear
-		self->s.v.noise1 = "";
-		self->s.v.noise2 = "";
+		self->noise1 = "";
+		self->noise2 = "";
 	}
 	if ( self->s.v.sounds == 1 )
 	{
 		trap_precache_sound( "doors/drclos4.wav" );
 		trap_precache_sound( "doors/doormv1.wav" );
-		self->s.v.noise1 = "doors/drclos4.wav";
-		self->s.v.noise2 = "doors/doormv1.wav";
+		self->noise1 = "doors/drclos4.wav";
+		self->noise2 = "doors/doormv1.wav";
 	}
 	if ( self->s.v.sounds == 2 )
 	{
 		trap_precache_sound( "doors/hydro1.wav" );
 		trap_precache_sound( "doors/hydro2.wav" );
-		self->s.v.noise2 = "doors/hydro1.wav";
-		self->s.v.noise1 = "doors/hydro2.wav";
+		self->noise2 = "doors/hydro1.wav";
+		self->noise1 = "doors/hydro2.wav";
 	}
 	if ( self->s.v.sounds == 3 )
 	{
 		trap_precache_sound( "doors/stndr1.wav" );
 		trap_precache_sound( "doors/stndr2.wav" );
-		self->s.v.noise2 = "doors/stndr1.wav";
-		self->s.v.noise1 = "doors/stndr2.wav";
+		self->noise2 = "doors/stndr1.wav";
+		self->noise1 = "doors/stndr2.wav";
 	}
 	if ( self->s.v.sounds == 4 )
 	{
 		trap_precache_sound( "doors/ddoor1.wav" );
 		trap_precache_sound( "doors/ddoor2.wav" );
-		self->s.v.noise1 = "doors/ddoor2.wav";
-		self->s.v.noise2 = "doors/ddoor1.wav";
+		self->noise1 = "doors/ddoor2.wav";
+		self->noise2 = "doors/ddoor1.wav";
 	}
 
 
@@ -586,12 +586,12 @@ void SP_func_door()
 	self->s.v.movetype = MOVETYPE_PUSH;
 
 	setorigin( self, PASSVEC3( self->s.v.origin ) );
-	setmodel( self, self->s.v.model );
+	setmodel( self, self->model );
 
-	self->s.v.classname = "door";
+	self->classname = "door";
 
-	self->s.v.blocked = ( func_t ) door_blocked;
-	self->s.v.use = ( func_t ) door_use;
+	self->blocked = ( func_t ) door_blocked;
+	self->use = ( func_t ) door_use;
 
 	if ( ( int ) ( self->s.v.spawnflags ) & DOOR_SILVER_KEY )
 		self->s.v.items = IT_KEY1;
@@ -640,11 +640,11 @@ void SP_func_door()
 	if ( self->s.v.items )
 		self->wait = -1;
 
-	self->s.v.touch = ( func_t ) door_touch;
+	self->touch = ( func_t ) door_touch;
 
 // LinkDoors can't be done until all of the doors have been spawned, so
 // the sizes can be detected properly.
-	self->s.v.think = ( func_t ) LinkDoors;
+	self->think = ( func_t ) LinkDoors;
 	self->s.v.nextthink = self->s.v.ltime + 0.1;
 }
 
@@ -685,7 +685,7 @@ void fd_secret_use( gedict_t * attacker, float take )
 	if ( !VectorCompare( self->s.v.origin, self->s.v.oldorigin ) )
 		return;
 
-	self->s.v.message = 0;	// no more message
+	self->message = 0;	// no more message
 	//activator=attacker;
 	SUB_UseTargets();	// fire all targets / killtargets
 
@@ -694,7 +694,7 @@ void fd_secret_use( gedict_t * attacker, float take )
 
 	if ( !( ( int ) ( self->s.v.spawnflags ) & SECRET_NO_SHOOT ) )
 	{
-		self->th_pain = (th_pain_func_t) (0);	//SUB_Null;
+		self->th_pain = (th_pain_funcref_t) (0);	//SUB_Null;
 		self->s.v.takedamage = DAMAGE_NO;
 	}
 
@@ -702,7 +702,7 @@ void fd_secret_use( gedict_t * attacker, float take )
 
 	// Make a sound, wait a little...
 
-	sound( self, CHAN_VOICE, self->s.v.noise1, 1, ATTN_NORM );
+	sound( self, CHAN_VOICE, self->noise1, 1, ATTN_NORM );
 	self->s.v.nextthink = self->s.v.ltime + 0.1;
 
 	temp = 1 - ( ( int ) ( self->s.v.spawnflags ) & SECRET_1ST_LEFT );	// 1 or -1
@@ -746,39 +746,39 @@ void fd_secret_use( gedict_t * attacker, float take )
 	self->dest2[2] = self->dest1[2] + g_globalvars.v_forward[2] * self->t_length;
 
 	SUB_CalcMove( self->dest1, self->speed, fd_secret_move1 );
-	sound( self, CHAN_VOICE, self->s.v.noise2, 1, ATTN_NORM );
+	sound( self, CHAN_VOICE, self->noise2, 1, ATTN_NORM );
 }
 
 // Wait after first movement...
 void fd_secret_move1()
 {
 	self->s.v.nextthink = self->s.v.ltime + 1.0;
-	self->s.v.think = ( func_t ) fd_secret_move2;
-	sound( self, CHAN_VOICE, self->s.v.noise3, 1, ATTN_NORM );
+	self->think = ( func_t ) fd_secret_move2;
+	sound( self, CHAN_VOICE, self->noise3, 1, ATTN_NORM );
 }
 
 // Start moving sideways w/sound...
 void fd_secret_move2()
 {
-	sound( self, CHAN_VOICE, self->s.v.noise2, 1, ATTN_NORM );
+	sound( self, CHAN_VOICE, self->noise2, 1, ATTN_NORM );
 	SUB_CalcMove( self->dest2, self->speed, fd_secret_move3 );
 }
 
 // Wait here until time to go back...
 void fd_secret_move3()
 {
-	sound( self, CHAN_VOICE, self->s.v.noise3, 1, ATTN_NORM );
+	sound( self, CHAN_VOICE, self->noise3, 1, ATTN_NORM );
 	if ( !( ( int ) ( self->s.v.spawnflags ) & SECRET_OPEN_ONCE ) )
 	{
 		self->s.v.nextthink = self->s.v.ltime + self->wait;
-		self->s.v.think = ( func_t ) fd_secret_move4;
+		self->think = ( func_t ) fd_secret_move4;
 	}
 }
 
 // Move backward...
 void fd_secret_move4()
 {
-	sound( self, CHAN_VOICE, self->s.v.noise2, 1, ATTN_NORM );
+	sound( self, CHAN_VOICE, self->noise2, 1, ATTN_NORM );
 	SUB_CalcMove( self->dest1, self->speed, fd_secret_move5 );
 }
 
@@ -786,19 +786,19 @@ void fd_secret_move4()
 void fd_secret_move5()
 {
 	self->s.v.nextthink = self->s.v.ltime + 1.0;
-	self->s.v.think = ( func_t ) fd_secret_move6;
-	sound( self, CHAN_VOICE, self->s.v.noise3, 1, ATTN_NORM );
+	self->think = ( func_t ) fd_secret_move6;
+	sound( self, CHAN_VOICE, self->noise3, 1, ATTN_NORM );
 }
 
 void fd_secret_move6()
 {
-	sound( self, CHAN_VOICE, self->s.v.noise2, 1, ATTN_NORM );
+	sound( self, CHAN_VOICE, self->noise2, 1, ATTN_NORM );
 	SUB_CalcMove( self->s.v.oldorigin, self->speed, fd_secret_done );
 }
 
 void fd_secret_done()
 {
-	if ( !self->s.v.targetname
+	if ( !self->targetname
 	     || ( int ) ( self->s.v.spawnflags ) & SECRET_YES_SHOOT )
 	{
 		self->s.v.health = 10000;
@@ -806,7 +806,7 @@ void fd_secret_done()
 		self->th_pain = fd_secret_use;
 		self->th_die = ( void ( * )() ) fd_secret_use;
 	}
-	sound( self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->s.v.noise3, 1, ATTN_NORM );
+	sound( self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->noise3, 1, ATTN_NORM );
 }
 
 void secret_blocked()
@@ -842,9 +842,9 @@ void secret_touch()
 
 	self->attack_finished = g_globalvars.time + 2;
 
-	if ( self->s.v.message )
+	if ( self->message )
 	{
-		G_centerprint( other, "%s", self->s.v.message );
+		G_centerprint( other, "%s", self->message );
 		sound( other, CHAN_BODY, "misc/talk.wav", 1, ATTN_NORM );
 	}
 }
@@ -876,25 +876,25 @@ void SP_func_door_secret()
 		trap_precache_sound( "doors/latch2.wav" );
 		trap_precache_sound( "doors/winch2.wav" );
 		trap_precache_sound( "doors/drclos4.wav" );
-		self->s.v.noise1 = "doors/latch2.wav";
-		self->s.v.noise2 = "doors/winch2.wav";
-		self->s.v.noise3 = "doors/drclos4.wav";
+		self->noise1 = "doors/latch2.wav";
+		self->noise2 = "doors/winch2.wav";
+		self->noise3 = "doors/drclos4.wav";
 	}
 	if ( self->s.v.sounds == 2 )
 	{
 		trap_precache_sound( "doors/airdoor1.wav" );
 		trap_precache_sound( "doors/airdoor2.wav" );
-		self->s.v.noise2 = "doors/airdoor1.wav";
-		self->s.v.noise1 = "doors/airdoor2.wav";
-		self->s.v.noise3 = "doors/airdoor2.wav";
+		self->noise2 = "doors/airdoor1.wav";
+		self->noise1 = "doors/airdoor2.wav";
+		self->noise3 = "doors/airdoor2.wav";
 	}
 	if ( self->s.v.sounds == 3 )
 	{
 		trap_precache_sound( "doors/basesec1.wav" );
 		trap_precache_sound( "doors/basesec2.wav" );
-		self->s.v.noise2 = "doors/basesec1.wav";
-		self->s.v.noise1 = "doors/basesec2.wav";
-		self->s.v.noise3 = "doors/basesec2.wav";
+		self->noise2 = "doors/basesec1.wav";
+		self->noise1 = "doors/basesec2.wav";
+		self->noise3 = "doors/basesec2.wav";
 	}
 
 	if ( self->dmg == 0 )
@@ -905,15 +905,15 @@ void SP_func_door_secret()
 	SetVector( self->s.v.angles, 0, 0, 0 );
 	self->s.v.solid = SOLID_BSP;
 	self->s.v.movetype = MOVETYPE_PUSH;
-	self->s.v.classname = "door";
-	setmodel( self, self->s.v.model );
+	self->classname = "door";
+	setmodel( self, self->model );
 	setorigin( self, PASSVEC3( self->s.v.origin ) );
 
-	self->s.v.touch   = ( func_t ) secret_touch;
-	self->s.v.blocked = ( func_t ) secret_blocked;
+	self->touch   = ( func_t ) secret_touch;
+	self->blocked = ( func_t ) secret_blocked;
 	self->speed = 50;
-	self->s.v.use     = ( func_t ) fd_secret_use;
-	if ( !self->s.v.targetname
+	self->use     = ( func_t ) fd_secret_use;
+	if ( !self->targetname
 	     || ( int ) ( self->s.v.spawnflags ) & SECRET_YES_SHOOT )
 	{
 		self->s.v.health = 10000;

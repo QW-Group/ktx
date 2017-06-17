@@ -15,11 +15,11 @@
 #define FB_OPTION_DEBUG_MOVEMENT       128
 #define FB_OPTION_SHOW_THINKING     (FB_OPTION_SHOW_DUEL_LOGIC | FB_OPTION_SHOW_GOAL_LOGIC | FB_OPTION_SHOW_ROUTING_LOGIC | FB_OPTION_SHOW_MOVEMENT_LOGIC)
 
-typedef void (*fb_spawn_func_t)(gedict_t* ent);
+typedef void (*fb_spawn_funcref_t)(gedict_t* ent);
 
 typedef struct fb_spawn_s {
 	char* name;                 // classname
-	fb_spawn_func_t func;       // initialisation function
+	fb_spawn_funcref_t func;       // initialisation function
 } fb_spawn_t;
 
 typedef struct fb_path_eval_s {

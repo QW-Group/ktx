@@ -167,7 +167,7 @@ void DM6Debug (gedict_t* self)
 			for (j = 0; j < NUMBER_PATHS; ++j) {
 				gedict_t* t = markers[i]->fb.paths[j].next_marker;
 				if (t && (s->fb.paths[j].flags & DM6_DOOR)) {
-					G_sprint (self, PRINT_HIGH, "  > %3d (%s) to %3d (%s)\n", s->fb.index + 1, s->s.v.classname, t->fb.index + 1, t->s.v.classname);
+					G_sprint (self, PRINT_HIGH, "  > %3d (%s) to %3d (%s)\n", s->fb.index + 1, s->classname, t->fb.index + 1, t->classname);
 				}
 			}
 		}
@@ -177,7 +177,7 @@ void DM6Debug (gedict_t* self)
 	for (i = 0; i < NUMBER_MARKERS; ++i) {
 		gedict_t* s = markers[i];
 		if (s && (s->fb.zones[0].task & DM6_DOOR)) {
-			G_sprint (self, PRINT_HIGH, "  > %3d (%s)\n", s->fb.index + 1, s->s.v.classname);
+			G_sprint (self, PRINT_HIGH, "  > %3d (%s)\n", s->fb.index + 1, s->classname);
 		}
 	}
 

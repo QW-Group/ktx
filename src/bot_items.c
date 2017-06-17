@@ -45,7 +45,7 @@ void AssignGoalNumbers (void)
 				++unassigned_goal;
 			}
 			else {
-				G_bprint (PRINT_HIGH, "Unable to assign goal to %s @ [%d %d %d]\n", ent->s.v.classname, PASSINTVEC3 (ent->s.v.origin));
+				G_bprint (PRINT_HIGH, "Unable to assign goal to %s @ [%d %d %d]\n", ent->classname, PASSINTVEC3 (ent->s.v.origin));
 			}
 			break;
 		case it_ga:
@@ -371,8 +371,8 @@ void StartItemFB (gedict_t* ent)
 {
 	AddToQue (ent);
 	VectorSet (ent->s.v.view_ofs, 80, 80, 24);
-	if (!ent->s.v.touch) {
-		ent->s.v.touch = (func_t)marker_touch;
+	if (!ent->touch) {
+		ent->touch = (func_t)marker_touch;
 		ent->s.v.nextthink = -1;
 	}
 
@@ -415,7 +415,7 @@ static qbool fb_health_touch (gedict_t* item, gedict_t* player)
 		return true;
 	if (IsMarkerFrame ())
 		check_marker (item, player);
-	if (WaitingToRespawn (item) || self->s.v.think == (func_t)item_megahealth_rot)
+	if (WaitingToRespawn (item) || self->think == (func_t)item_megahealth_rot)
 		return true;
 	if (NoItemTouch (item, player))
 		return true;
@@ -496,17 +496,17 @@ static qbool fb_armor_touch (gedict_t* item, gedict_t* player)
 
 static void fb_spawn_armor (gedict_t* ent)
 {
-	if (streq (ent->s.v.classname, "item_armor1")) {
+	if (streq (ent->classname, "item_armor1")) {
 		ent->fb.desire = goal_armor1;
 		ent->fb.pickup = pickup_armor1;
 		ent->fb.total_armor = (k_yawnmode ? 0.4 : 0.3) * 100.0f;
 	}
-	else if (streq (ent->s.v.classname, "item_armor2")) {
+	else if (streq (ent->classname, "item_armor2")) {
 		ent->fb.desire = goal_armor2;
 		ent->fb.pickup = pickup_armor2;
 		ent->fb.total_armor = (k_yawnmode ? 0.6 : 0.6) * 150.0f;
 	}
-	else if (streq (ent->s.v.classname, "item_armorInv")) {
+	else if (streq (ent->classname, "item_armorInv")) {
 		ent->fb.desire = goal_armorInv;
 		ent->fb.pickup = pickup_armorInv;
 		ent->fb.total_armor = (k_yawnmode ? 0.8 : 0.8) * 200.0f;
@@ -880,7 +880,7 @@ void BotsBackpackTouchedNonPlayer (gedict_t* pack, gedict_t* touch_ent)
 
 void BotsBackpackDropped (gedict_t* self, gedict_t* pack)
 {
-	pack->s.v.think = (func_t)BackpackTimedOut;
+	pack->think = (func_t)BackpackTimedOut;
 	pack->fb.goal_respawn_time = g_globalvars.time;
 
 	if ((int)pack->s.v.items & IT_SUPER_SHOTGUN)

@@ -67,12 +67,12 @@ void t_movetarget()
 	self = other;
 	other = temp;
 
-	if ( streq( self->s.v.classname, "monster_ogre" ) )
+	if ( streq( self->classname, "monster_ogre" ) )
 		sound( self, CHAN_VOICE, "ogre/ogdrag.wav", 1, ATTN_IDLE );	// play chainsaw drag sound
 
 //dprint ("t_movetarget\n");
-	if ( other->s.v.target )
-		self->movetarget = find( world, FOFS( s.v.targetname ), other->s.v.target );
+	if ( other->target )
+		self->movetarget = find( world, FOFS( targetname ), other->target );
 	else
 		self->movetarget = NULL;
 
@@ -94,11 +94,11 @@ void t_movetarget()
 
 void movetarget_f()
 {
-	if ( !self->s.v.targetname )
+	if ( !self->targetname )
 		G_Error( "monster_movetarget: no targetname" );
 
 	self->s.v.solid = SOLID_TRIGGER;
-	self->s.v.touch = ( func_t ) t_movetarget;
+	self->touch = ( func_t ) t_movetarget;
 	setsize( self, -8, -8, -8, 8, 8, 8 );
 
 }

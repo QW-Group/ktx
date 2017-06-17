@@ -417,11 +417,11 @@ void OgreFireGrenade ()
 
 	vectoangles( missile->s.v.velocity, missile->s.v.angles );
 
-	missile->s.v.touch = ( func_t ) OgreGrenadeTouch;
+	missile->touch = ( func_t ) OgreGrenadeTouch;
 
 	// set missile duration
 	missile->s.v.nextthink = g_globalvars.time + 2.5;
-	missile->s.v.think = ( func_t ) OgreGrenadeExplode;
+	missile->think = ( func_t ) OgreGrenadeExplode;
 
 	setmodel( missile, "progs/grenade.mdl" );
 	setsize( missile, PASSVEC3( VEC_ORIGIN ), PASSVEC3( VEC_ORIGIN ) );

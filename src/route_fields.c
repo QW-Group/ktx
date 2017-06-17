@@ -91,7 +91,7 @@ void RemoveMarker (gedict_t* marker)
 {
 	int i, j;
 
-	if (!streq (marker->s.v.classname, "marker")) {
+	if (!streq (marker->classname, "marker")) {
 		G_sprint (self, 2, "Cannot remove non-marker\n");
 		return;
 	}

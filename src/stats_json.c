@@ -556,7 +556,7 @@ void json_race_detail(fileHandle_t handle)
 			s2di(handle, INDENT6 "{ \"avgspeed\": %f, \"distance\": %f, \"time\": %f, "
 				"\"racer\": \"%s\", \"maxspeed\": %f }",
 				record->avgspeed / record->avgcount, record->distance, record->time / 1000.0f,
-				json_string(p->s.v.netname), record->maxspeed
+				json_string(p->netname), record->maxspeed
 			);
 		}
 		NEWLINE_CHECK(handle, any);

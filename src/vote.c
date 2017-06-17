@@ -76,7 +76,7 @@ void VoteYes()
 // register the vote
 	self->v.elect = 1;
 
-	G_bprint(2, "%s gives %s vote\n", self->s.v.netname, g_his( self ));
+	G_bprint(2, "%s gives %s vote\n", self->netname, g_his( self ));
 
 // calculate how many more votes are needed
 	if ( (votes = get_votes_req( OV_ELECT, true )) )
@@ -96,7 +96,7 @@ void VoteNo()
 // unregister the vote
 	self->v.elect = 0;
 
-	G_bprint(2, "%s withdraws %s vote\n", self->s.v.netname, g_his( self ));
+	G_bprint(2, "%s withdraws %s vote\n", self->netname, g_his( self ));
 
 // calculate how many more votes are needed
 	if ( (votes = get_votes_req( OV_ELECT, true )) )
@@ -579,7 +579,7 @@ void nospecs( )
 
 	self->v.nospecs = !self->v.nospecs;
 
-	G_bprint(2, "%s %s!%s\n", self->s.v.netname, 
+	G_bprint(2, "%s %s!%s\n", self->netname, 
 			(self->v.nospecs ? redtext(va("votes for nospecs %s", OnOff(!cvar("_k_nospecs")))) : 
 							   redtext(va("withdraws %s nospecs vote", g_his(self)))),
 			((votes = get_votes_req( OV_NOSPECS, true )) ? va(" (%d)", votes) : ""));
@@ -638,7 +638,7 @@ void teamoverlay( )
 
 	self->v.teamoverlay = !self->v.teamoverlay;
 
-	G_bprint(2, "%s %s!%s\n", self->s.v.netname, 
+	G_bprint(2, "%s %s!%s\n", self->netname, 
 			(self->v.teamoverlay ? redtext(va("votes for teamoverlay %s", OnOff(!cvar("k_teamoverlay")))) : 
 							       redtext(va("withdraws %s teamoverlay vote", g_his(self)))),
 			((votes = get_votes_req( OV_TEAMOVERLAY, true )) ? va(" (%d)", votes) : ""));
@@ -697,7 +697,7 @@ void votecoop( )
 
 	self->v.coop = !self->v.coop;
 
-	G_bprint(2, "%s %s!%s\n", self->s.v.netname, 
+	G_bprint(2, "%s %s!%s\n", self->netname, 
 			(self->v.coop ? redtext(va("votes for coop %s", OnOff(!cvar("coop")))) : 
 							redtext(va("withdraws %s coop vote", g_his(self)))),
 			((votes = get_votes_req( OV_COOP, true )) ? va(" (%d)", votes) : ""));
@@ -760,7 +760,7 @@ void antilag( )
 
 	self->v.antilag = !self->v.antilag;
 
-	G_bprint(2, "%s %s!%s\n", self->s.v.netname, 
+	G_bprint(2, "%s %s!%s\n", self->netname, 
 			(self->v.antilag ? redtext(va("votes for antilag %s", OnOff(!(2 == cvar("sv_antilag"))))) : 
 							   redtext(va("withdraws %s antilag vote", g_his(self)))),
 			((votes = get_votes_req( OV_ANTILAG, true )) ? va(" (%d)", votes) : ""));

@@ -44,7 +44,7 @@ void SpawnCTFItem( char* classname, float x, float y, float z, float angle )
 {
 	gedict_t *item = spawn();
 
-	item->s.v.classname = classname;
+	item->classname = classname;
 	setorigin( item, x, y, z );
 	item->s.v.angles[0] = 0;
 	item->s.v.angles[1] = angle;
@@ -57,17 +57,17 @@ void spawn_item_flag()
 	if ( k_ctf_custom_models )
 		setmodel( self, "progs/flag.mdl" );
 
-	self->s.v.noise = "misc/flagtk.wav";
-	self->s.v.noise1 = "doors/runetry.wav";
+	self->noise = "misc/flagtk.wav";
+	self->noise1 = "doors/runetry.wav";
 	setsize( self, -16, -16, 0, 16, 16, 74);
-	self->mdl = self->s.v.model;
+	self->mdl = self->model;
 	self->s.v.flags = FL_ITEM;
 	self->s.v.solid = SOLID_TRIGGER;
 	self->s.v.movetype = MOVETYPE_TOSS;
 	SetVector( self->s.v.velocity, 0, 0, 0 );
 	self->s.v.origin[2] += 6;
-	self->s.v.think = (func_t) FlagThink;
-	self->s.v.touch = (func_t) FlagTouch;
+	self->think = (func_t) FlagThink;
+	self->touch = (func_t) FlagTouch;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 	self->cnt = FLAG_AT_BASE;
 	self->cnt2 = 0.0;
@@ -82,7 +82,7 @@ void spawn_item_flag()
 	if ( !isCTF() )
 	{
 		setmodel( self, "" );
-		self->s.v.touch = (func_t) SUB_Null;
+		self->touch = (func_t) SUB_Null;
 	}
 }
 
@@ -118,7 +118,7 @@ void SP_func_ctf_wall()
 	SetVector( self->s.v.angles, 0, 0, 0 );
 	self->s.v.movetype = MOVETYPE_PUSH;
 	self->s.v.solid = SOLID_BSP;
-	setmodel( self, self->s.v.model ); 
+	setmodel( self, self->model ); 
 }
 
 #define TF_TEAM_BLUE 1
@@ -130,12 +130,12 @@ void SP_item_tfgoal(  )
 
 	if (self->team_no == TF_TEAM_RED)
 	{
-		self->s.v.classname = "item_flag_team2";
+		self->classname = "item_flag_team2";
 		SP_item_flag_team2();
 	}
 	else if (self->team_no == TF_TEAM_BLUE)
 	{
-		self->s.v.classname = "item_flag_team1";
+		self->classname = "item_flag_team1";
 		SP_item_flag_team1();
 	}
 	else
@@ -150,11 +150,11 @@ void SP_info_player_teamspawn(  )
 {
 	if (self->team_no == TF_TEAM_RED)
 	{
-		self->s.v.classname = "info_player_team1";
+		self->classname = "info_player_team1";
 	}
 	else if (self->team_no == TF_TEAM_BLUE)
 	{
-		self->s.v.classname = "info_player_team2";
+		self->classname = "info_player_team2";
 	}
 	else
 	{
@@ -166,7 +166,7 @@ void SP_info_player_teamspawn(  )
 
 void SP_i_p_t(  )
 {
-	self->s.v.classname = "info_player_teamspawn";
+	self->classname = "info_player_teamspawn";
 	SP_info_player_teamspawn(  );
 }
 
@@ -209,7 +209,7 @@ void RegenFlag( gedict_t *flag )
 	sound( flag, CHAN_VOICE, "items/itembk2.wav", 1, ATTN_NORM);
 	flag->s.v.nextthink = g_globalvars.time + 0.2;
 	flag->s.v.groundentity = EDICT_TO_PROG( world );
-	flag->s.v.touch = (func_t) FlagTouch;
+	flag->touch = (func_t) FlagTouch;
 }
 
 // show/hide flag
@@ -221,7 +221,7 @@ void RegenFlags( qbool yes )
 
 	if ( flag ) {
 		if ( !yes ) {
-			flag->s.v.touch = (func_t) SUB_Null;
+			flag->touch = (func_t) SUB_Null;
 			setmodel( flag, "" );
 		}
 		else
@@ -232,7 +232,7 @@ void RegenFlags( qbool yes )
 
 	if ( flag ) {
 		if ( !yes ) {
-			flag->s.v.touch = (func_t) SUB_Null;
+			flag->touch = (func_t) SUB_Null;
 			setmodel( flag, "" );
 		}
 		else
@@ -308,7 +308,7 @@ void FlagTouch()
 
 				sound( other, CHAN_VOICE, "misc/flagcap.wav", 1, ATTN_NONE);
 
-				G_bprint( 2, "%s", other->s.v.netname );
+				G_bprint( 2, "%s", other->netname );
 				if ( self->k_teamnumber == 1 )
 				{
 					cflag = find( world, FOFCLSN, "item_flag_team2" );
@@ -338,14 +338,14 @@ void FlagTouch()
 							p->return_flag_time = -1;
 							p->s.v.frags += RETURN_ASSIST_BONUS;
 							p->ps.ctf_points += RETURN_ASSIST_BONUS;
-							G_bprint( 2, "%s gets an assist for returning his flag!\n", p->s.v.netname );
+							G_bprint( 2, "%s gets an assist for returning his flag!\n", p->netname );
 						}
 						if ( p->carrier_frag_time + CARRIER_ASSIST_TIME > g_globalvars.time )
 						{
 							p->carrier_frag_time = -1;
 							p->s.v.frags += CARRIER_ASSIST_BONUS;
 							p->ps.ctf_points += CARRIER_ASSIST_BONUS;
-							G_bprint( 2, "%s gets an assist for fragging the flag carrier!\n", p->s.v.netname );
+							G_bprint( 2, "%s gets an assist for fragging the flag carrier!\n", p->netname );
 						}
 
 						if ( p != other ) 
@@ -372,10 +372,10 @@ void FlagTouch()
 			other->ps.ctf_points += RETURN_BONUS;
 			other->ps.returns++;
 			other->return_flag_time = g_globalvars.time;
-			sound (other, CHAN_ITEM, self->s.v.noise1, 1, ATTN_NONE);
+			sound (other, CHAN_ITEM, self->noise1, 1, ATTN_NONE);
 			RegenFlag( self );
 
-			G_bprint( 2, "%s", other->s.v.netname);
+			G_bprint( 2, "%s", other->netname);
 
 			if ( self->k_teamnumber == 1)
 				G_bprint( 2, " %s the %s flag!\n", redtext("returned"), redtext("RED") );
@@ -395,7 +395,7 @@ void FlagTouch()
 	refresh_plus_scores (); // update players status bar faster
 
 	// Pick up the flag
-	sound( other, CHAN_ITEM, self->s.v.noise, 1, ATTN_NONE );
+	sound( other, CHAN_ITEM, self->noise, 1, ATTN_NONE );
 	other->ctf_flag |= CTF_FLAG;
 
 	other->s.v.items = (int) other->s.v.items | (int) self->s.v.items;
@@ -407,7 +407,7 @@ void FlagTouch()
 	owner = PROG_TO_EDICT( self->s.v.owner );
 	owner->ps.pickups++;
 
-	G_bprint( 2, "%s", other->s.v.netname );
+	G_bprint( 2, "%s", other->netname );
 	if ( streq(getteam(other), "red") )
 	{
 		G_bprint( 2, " %s the %s flag!\n", redtext("got"), redtext("BLUE") );
@@ -423,8 +423,8 @@ void FlagTouch()
 
 void FlagResetOwner( )
 {
-	self->s.v.think = (func_t) FlagThink;
-	self->s.v.touch = (func_t) FlagTouch;
+	self->think = (func_t) FlagThink;
+	self->touch = (func_t) FlagTouch;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 	self->s.v.owner = EDICT_TO_PROG( self );
 }
@@ -493,14 +493,14 @@ void DropFlag( gedict_t *flag, qbool tossed )
 	if ( tossed )
 	{
 		flag->s.v.nextthink = g_globalvars.time + 0.75;
-		flag->s.v.think = (func_t) FlagResetOwner;
+		flag->think = (func_t) FlagResetOwner;
 	}
 	else
 	{
 		flag->s.v.owner = EDICT_TO_PROG( flag );
 	}
 
-	G_bprint( 2, "%s", p->s.v.netname );
+	G_bprint( 2, "%s", p->netname );
 	if ( streq(getteam(p), "red") )
 		G_bprint( 2, " %s the %s flag!\n", tossed ? redtext("tossed") : redtext("lost"), redtext("BLUE") );
 	else
@@ -536,7 +536,7 @@ void FlagStatus()
 				G_sprint( self, 2, "The %s flag is in base.\n", redtext("RED") );
 				break;
  			case FLAG_CARRIED:
-				G_sprint( self, 2, "%s has the %s flag.\n", PROG_TO_EDICT( flag1->s.v.owner )->s.v.netname, redtext("RED") );
+				G_sprint( self, 2, "%s has the %s flag.\n", PROG_TO_EDICT( flag1->s.v.owner )->netname, redtext("RED") );
 				break;
 			case FLAG_DROPPED:
 				G_sprint( self, 2, "The %s flag is lying about.\n", redtext("RED") );
@@ -549,7 +549,7 @@ void FlagStatus()
 				G_sprint( self, 2, "The %s flag is in base. ", redtext("BLUE") );
 				break;
 			case FLAG_CARRIED:
-				G_sprint( self, 2, "%s has the %s flag. ", PROG_TO_EDICT( flag1->s.v.owner )->s.v.netname, redtext("BLUE") );
+				G_sprint( self, 2, "%s has the %s flag. ", PROG_TO_EDICT( flag1->s.v.owner )->netname, redtext("BLUE") );
 				break;
 			case FLAG_DROPPED:
 				G_sprint( self, 2, "The %s flag is lying about. ", redtext("BLUE") );
@@ -572,7 +572,7 @@ void FlagStatus()
 			G_sprint( self, 2, "Your flag is in base. " );
 			break;
 		case FLAG_CARRIED:
-			G_sprint( self, 2, "%s has your flag. ", PROG_TO_EDICT( flag1->s.v.owner )->s.v.netname );
+			G_sprint( self, 2, "%s has your flag. ", PROG_TO_EDICT( flag1->s.v.owner )->netname );
 			break;
 		case FLAG_DROPPED:
 			G_sprint( self, 2, "Your flag is lying about. " );
@@ -588,7 +588,7 @@ void FlagStatus()
 			if ( self == PROG_TO_EDICT( flag2->s.v.owner ))
 				G_sprint ( self, 2, "You have the enemy flag.\n" );
 			else
-				G_sprint ( self, 2, "%s has the enemy flag.\n", PROG_TO_EDICT( flag2->s.v.owner)->s.v.netname );
+				G_sprint ( self, 2, "%s has the enemy flag.\n", PROG_TO_EDICT( flag2->s.v.owner)->netname );
 			break;
 		case FLAG_DROPPED:
 			G_sprint ( self, 2, "The enemy flag is lying about.\n" );
@@ -733,7 +733,7 @@ void CTF_Obituary( gedict_t *targ, gedict_t *attacker )
 		attacker->ps.ctf_points += 2;
 		// Yes, aggressive is spelled wrong.. but dont want to fix now and break stat parsers
 		G_bprint( 2, "%s defends %s's flag carrier against an agressive enemy\n",
-			attacker->s.v.netname,
+			attacker->netname,
 			streq( getteam(attacker), "red" ) ? redtext("RED") : redtext("BLUE") );
 	}
 
@@ -749,15 +749,15 @@ void CTF_Obituary( gedict_t *targ, gedict_t *attacker )
 				attacker->ps.c_defends++;
 				attacker->s.v.frags++;
 				attacker->ps.ctf_points++;
-				G_bprint( 2, "%s defends %s's flag carrier\n", attacker->s.v.netname,
+				G_bprint( 2, "%s defends %s's flag carrier\n", attacker->netname,
 					streq(getteam(attacker), "red") ? redtext("RED") : redtext("BLUE"));
 			}
 		}
 
 		if ( (streq(getteam(attacker), "red") &&
-			  streq(head->s.v.classname, "item_flag_team1")) ||
+			  streq(head->classname, "item_flag_team1")) ||
 			 (streq(getteam(attacker), "blue") &&
-			  streq(head->s.v.classname, "item_flag_team2")) 
+			  streq(head->classname, "item_flag_team2")) 
 		   )
 		{
 			flagdefended = true;
@@ -765,7 +765,7 @@ void CTF_Obituary( gedict_t *targ, gedict_t *attacker )
 			attacker->s.v.frags += 2;
 			attacker->ps.ctf_points += 2;
 			G_bprint( 2, "%s defends the %s flag\n", 
-				attacker->s.v.netname, 
+				attacker->netname, 
 				streq(getteam(attacker), "red") ? redtext("RED") : redtext("BLUE"));
 		}
 
@@ -776,8 +776,8 @@ void CTF_Obituary( gedict_t *targ, gedict_t *attacker )
 	head = trap_findradius( world, attacker->s.v.origin, 400 );
 	while ( head )
 	{
-		if ( ( streq(head->s.v.classname, "item_flag_team1") && streq(attackerteam, "red" ) ) ||
-			 ( streq(head->s.v.classname, "item_flag_team2") && streq(attackerteam, "blue") ) )
+		if ( ( streq(head->classname, "item_flag_team1") && streq(attackerteam, "red" ) ) ||
+			 ( streq(head->classname, "item_flag_team2") && streq(attackerteam, "blue") ) )
 		{
 			if (!flagdefended)
 			{
@@ -785,7 +785,7 @@ void CTF_Obituary( gedict_t *targ, gedict_t *attacker )
 				attacker->s.v.frags += 2;
 				attacker->ps.ctf_points += 2;
 				G_bprint( 2, "%s defends the %s flag\n",
-					attacker->s.v.netname,
+					attacker->netname,
 					streq(attackerteam, "red") ? redtext("RED") : redtext("BLUE"));
 			}
 		}

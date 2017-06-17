@@ -35,6 +35,8 @@ entity          trace_ent;
 entity          msg_entity;                             // destination of single entity writes
 
 */
+void initialise_spawned_ent(gedict_t* ent);
+
 gedict_t        g_edicts[MAX_EDICTS];	//768
 gedict_t       *world = g_edicts;
 gedict_t       *self, *other;
@@ -112,12 +114,11 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 {
     int api_ver;
 
-	ClearGlobals();
-
 	switch ( command )
 	{
 	case GAME_INIT:
-        api_ver = trap_GetApiVersion();
+		ClearGlobals();
+		api_ver = trap_GetApiVersion();
 
 		if ( api_ver < GAME_API_VERSION )
 		{
@@ -135,10 +136,12 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 		return ( intptr_t ) ( &gamedata );
 
 	case GAME_LOADENTS:
+		ClearGlobals();
 		G_SpawnEntitiesFromString();
 		return 1;
 
 	case GAME_START_FRAME:
+		ClearGlobals();
 		if (arg1) {
 #ifdef BOT_SUPPORT
 			extern void BotStartFrame(void);
@@ -154,10 +157,11 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 		return 1;
 
 	case GAME_CLIENT_CONNECT:
+		ClearGlobals();
 		self = PROG_TO_EDICT( g_globalvars.self );
 
 		self->last_rune = "setme";
-		self->s.v.classname = ""; // at least empty classname
+		self->classname = ""; // at least empty classname
 		self->connect_time = g_globalvars.time;
 		self->k_lastspawn = world; // set safe value
 		self->k_msgcount = g_globalvars.time;
@@ -192,6 +196,7 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 		return 1;
 
 	case GAME_PUT_CLIENT_IN_SERVER:
+		ClearGlobals();
 		self = PROG_TO_EDICT( g_globalvars.self );
 
 		if( !self->k_accepted )
@@ -209,6 +214,7 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 		return 1;
 
 	case GAME_CLIENT_DISCONNECT:
+		ClearGlobals();
 		self = PROG_TO_EDICT( g_globalvars.self );
 
 		RemoveMOTD(); // remove MOTD entitys
@@ -221,7 +227,7 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 			ClientDisconnect();
 
 // { guarantee this set to some safe values after client disconnect
-		self->s.v.classname = "";
+		self->classname = "";
 		self->ct = ctNone;
 		self->k_accepted = 0;
 // }
@@ -231,10 +237,12 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 		return 1;
 
 	case GAME_SETNEWPARMS:
+		ClearGlobals();
 		SetNewParms();
 		return 1;
 
 	case GAME_CLIENT_PRETHINK:
+		ClearGlobals();
 		self = PROG_TO_EDICT( g_globalvars.self );
 
 		if( !self->k_accepted )
@@ -254,6 +262,7 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 		return 1;
 
 	case GAME_CLIENT_POSTTHINK:
+		ClearGlobals();
 		self = PROG_TO_EDICT( g_globalvars.self );
 
 		if( !self->k_accepted )
@@ -274,24 +283,28 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 		return 1;
 
 	case GAME_EDICT_TOUCH:
+		ClearGlobals();
 		G_EdictTouch();
 		return 1;
 
 	case GAME_EDICT_THINK:
+		ClearGlobals();
 		G_EdictThink();
 		return 1;
 
 	case GAME_EDICT_BLOCKED:
+		ClearGlobals();
 		G_EdictBlocked();
 		return 1;
 
 	case GAME_SETCHANGEPARMS:
+		ClearGlobals();
 		self = PROG_TO_EDICT( g_globalvars.self );
 		SetChangeParms();
 		return 1;
 
 	case GAME_CLIENT_COMMAND:
-
+		ClearGlobals();
 		return ClientCommand();
 
 	case GAME_CLIENT_USERINFO_CHANGED:
@@ -299,6 +312,7 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 		// return not zero dont allow change
 		// params like GAME_CLIENT_COMMAND, but argv(0) always "setinfo" and argc always 3
 
+		ClearGlobals();
 		self = PROG_TO_EDICT( g_globalvars.self );
 
 		if ( !self->k_accepted )
@@ -311,12 +325,14 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 		// called before level change/spawn
 		// qqshka: YES, REALLY COOL QVM FEATURE COMPARING TO QC, U CAN CATCH LEVEL CHANGE
 		//         INVOKED FROM SERVER CONSOLE !!!
+		ClearGlobals();
 		G_ShutDown();
 		return 0;
 
 	case GAME_CONSOLE_COMMAND:
 		// called on server console command "mod"
 		// params like GAME_CLIENT_COMMAND, but argv(0) always "mod"
+		ClearGlobals();
 		return 0;//ConsoleCommand();
 
 	case GAME_CLIENT_SAY:
@@ -325,11 +341,18 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 		// return non zero if say/say_team handled by mod
 		// params like GAME_CLIENT_COMMAND
 
+		ClearGlobals();
 		return ClientSay( arg0 );
 
 	case GAME_PAUSED_TIC:
 		// called every frame when the game is paused
+		ClearGlobals();
 		PausedTic( arg0 );
+		return 0;
+
+	case GAME_CLEAR_EDICT:
+		// Don't ClearGlobals() as this will be called during spawn()
+		initialise_spawned_ent(PROG_TO_EDICT( g_globalvars.self ));
 		return 0;
 	}
 
@@ -394,11 +417,12 @@ void G_InitGame( int levelTime, int randomSeed )
 	srand( randomSeed );
 	framecount = 0;
 	starttime = levelTime * 0.001;
+	g_globalvars.mapname_ = GOFS(mapname);
 	G_Printf( "Init Game\n" );
 	G_InitMemory();
 	memset( g_edicts, 0, sizeof( gedict_t ) * MAX_EDICTS );
 
-//	world->s.v.model = worldmodel;
+//	world->model = worldmodel;
 //	g_globalvars.mapname = mapname;
 //	for ( i = 0; i < MAX_CLIENTS; i++ )
 //	{
@@ -455,16 +479,16 @@ void G_EdictTouch()
 {
 	self = PROG_TO_EDICT( g_globalvars.self );
 	other = PROG_TO_EDICT( g_globalvars.other );
-	if ( self->s.v.touch )
+	if ( self->touch )
 	{
 /*
 #ifdef DEBUG
-	        if(self->s.v.classname && other->s.v.classname)
-	        	if(!strcmp(self->s.v.classname,"player")||!strcmp(other->s.v.classname,"player"))
-	         G_bprint(2, "touch %s <-> %s\n", self->s.v.classname,other->s.v.classname);
+	        if(self->classname && other->classname)
+	        	if(!strcmp(self->classname,"player")||!strcmp(other->classname,"player"))
+	         G_bprint(2, "touch %s <-> %s\n", self->classname,other->classname);
 #endif
 */
-		( ( void ( * )() ) ( self->s.v.touch ) ) ();
+		( ( void ( * )() ) ( self->touch ) ) ();
 	} else
 	{
 		G_Printf( "Null touch func" );
@@ -481,9 +505,9 @@ void G_EdictThink()
 {
 	self = PROG_TO_EDICT( g_globalvars.self );
 	other = PROG_TO_EDICT( g_globalvars.other );
-	if ( self->s.v.think )
+	if ( self->think )
 	{
-		( ( void ( * )() ) ( self->s.v.think ) ) ();
+		( ( void ( * )() ) ( self->think ) ) ();
 	} else
 	{
 		G_Printf( "Null think func" );
@@ -504,9 +528,9 @@ void G_EdictBlocked()
 	self = PROG_TO_EDICT( g_globalvars.self );
 	other = PROG_TO_EDICT( g_globalvars.other );
 
-	if ( self->s.v.blocked )
+	if ( self->blocked )
 	{
-		( ( void ( * )() ) ( self->s.v.blocked ) ) ();
+		( ( void ( * )() ) ( self->blocked ) ) ();
 	} else
 	{
 		//G_Printf("Null blocked func");

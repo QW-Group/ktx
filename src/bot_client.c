@@ -121,7 +121,7 @@ void BotClientEntersEvent(gedict_t* self, gedict_t* spawn_pos)
 
 	FrogbotSetHealthArmour (self);
 	self->fb.weapon_refresh_time = 0;
-	self->s.v.blocked = (func_t) BotBlocked;
+	self->blocked = (func_t) BotBlocked;
 }
 
 qbool BotUsingCorrectWeapon (gedict_t* self)

@@ -132,10 +132,11 @@ typedef enum {false, true}	qbool;
 #define NULL ((void *)0)
 #endif
 
-//typedef int	string_t;
 typedef char*	string_t;
 typedef intptr_t func_t;
 
+typedef int      stringref_t;
+typedef int      funcref_t;
 
 typedef float vec_t;
 typedef vec_t vec3_t[3];

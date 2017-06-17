@@ -91,7 +91,7 @@ void MOTDThinkX()
 	}
 
 	// select MOTD for spectator or player
-	self->s.v.think = ( func_t ) ( owner->ct == ctSpec ? SMOTDThink : PMOTDThink );
+	self->think = ( func_t ) ( owner->ct == ctSpec ? SMOTDThink : PMOTDThink );
 	self->s.v.nextthink = g_globalvars.time + 0.3;
 
 	if( owner->k_stuff )
@@ -115,9 +115,9 @@ void MakeMOTD()
 	int i = bound(0, cvar("k_motd_time"), 30);
 
 	motd = spawn();
-	motd->s.v.classname = "motd";
+	motd->classname = "motd";
 	motd->s.v.owner = EDICT_TO_PROG( self );
-	motd->s.v.think = ( func_t ) MOTDThinkX;
+	motd->think = ( func_t ) MOTDThinkX;
 	motd->s.v.nextthink = g_globalvars.time + 0.1;
 	motd->attack_finished = g_globalvars.time + (i ? i : ( k_matchLess ? 3 : 7 ));
 }

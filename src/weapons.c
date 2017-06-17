@@ -203,7 +203,7 @@ void SpawnMeatSpray( vec3_t org, vec3_t vel )
 
 // set missile duration
 	missile->s.v.nextthink = g_globalvars.time + 1;
-	missile->s.v.think = ( func_t ) SUB_Remove;
+	missile->think = ( func_t ) SUB_Remove;
 
 	setmodel( missile, "progs/zom_gib.mdl" );
 	setsize( missile, 0, 0, 0, 0, 0, 0 );
@@ -421,12 +421,12 @@ void FireInstaBullet( vec3_t dir, deathType_t deathtype )
 		aim( newmis->s.v.velocity );	// = aim(self, 1000);
 		VectorScale( newmis->s.v.velocity, 1000, newmis->s.v.velocity );
 		vectoangles( newmis->s.v.velocity, newmis->s.v.angles );
-		newmis->s.v.touch = ( func_t ) T_InstaKickback;
+		newmis->touch = ( func_t ) T_InstaKickback;
 		newmis->voided = 0;
 
 		newmis->s.v.nextthink = g_globalvars.time + 1;
-		newmis->s.v.think = ( func_t ) SUB_Remove;
-		newmis->s.v.classname = "kickback";
+		newmis->think = ( func_t ) SUB_Remove;
+		newmis->classname = "kickback";
 		setmodel( newmis, "" );
 		setsize( newmis, 0, 0, 0, 0, 0, 0 );
 
@@ -466,7 +466,7 @@ void FireInstaBullet( vec3_t dir, deathType_t deathtype )
 		VectorCopy( g_globalvars.trace_endpos, src );
 
 //		G_sprint( self, 2, "fraction %f\n", fraction); // DEBUG!!!!!
-//		G_sprint( self, 2, "solid %d, %s\n", solid, ignore->s.v.netname); // DEBUG!!!!!
+//		G_sprint( self, 2, "solid %d, %s\n", solid, ignore->netname); // DEBUG!!!!!
 
 		TraceAttack( 4, dir, false );
 	    
@@ -888,7 +888,7 @@ void T_MissileTouch()
 	FixQuad(PROG_TO_EDICT( self->s.v.owner ));
 
 	// shamblers only take half damage from rockets
-	if ( streq(other->s.v.classname, "monster_shambler") && !cvar("k_bloodfest") )
+	if ( streq(other->classname, "monster_shambler") && !cvar("k_bloodfest") )
 		damg = 55;
 	else // 110 dmg on direct hits for all other cases
 		damg = 110;
@@ -971,13 +971,13 @@ void W_FireRocket()
 
 	vectoangles( newmis->s.v.velocity, newmis->s.v.angles );
 
-	newmis->s.v.touch = ( func_t ) T_MissileTouch;
+	newmis->touch = ( func_t ) T_MissileTouch;
 	newmis->voided = 0;
 
 	// set newmis duration
 	newmis->s.v.nextthink = g_globalvars.time + 10;
-	newmis->s.v.think = ( func_t ) SUB_Remove;
-	newmis->s.v.classname = "rocket";
+	newmis->think = ( func_t ) SUB_Remove;
+	newmis->classname = "rocket";
 
 	setmodel( newmis, "progs/missile.mdl" );
 	setsize( newmis, 0, 0, 0, 0, 0, 0 );
@@ -1040,7 +1040,7 @@ void LightningDamage( vec3_t p1, vec3_t p2, gedict_t *from, float damage )
 
 			if (    gre 
 				 && gre == PROG_TO_EDICT( g_globalvars.trace_ent )
-				 && streq( gre->s.v.classname, "door" ) 
+				 && streq( gre->classname, "door" ) 
 			   )
 				PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.velocity[2] += 400;
 		}
@@ -1169,7 +1169,7 @@ void GrenadeExplode()
 	FixQuad(PROG_TO_EDICT( self->s.v.owner ));
 
 	// shamblers only take half damage from grenades
-	if ( streq(self->s.v.classname, "monster_shambler") && !cvar("k_bloodfest") )
+	if ( streq(self->classname, "monster_shambler") && !cvar("k_bloodfest") )
 		T_RadiusDamage( self, PROG_TO_EDICT( self->s.v.owner ), 60, world, dtGL );
 	else
 		T_RadiusDamage( self, PROG_TO_EDICT( self->s.v.owner ), 120, world, dtGL );
@@ -1247,7 +1247,7 @@ void W_FireGrenade()
 	newmis->s.v.movetype = MOVETYPE_BOUNCE;
 	newmis->isMissile = true;
 	newmis->s.v.solid = SOLID_BBOX;
-	newmis->s.v.classname = "grenade";
+	newmis->classname = "grenade";
 
 // set newmis speed     
 
@@ -1283,12 +1283,12 @@ void W_FireGrenade()
 
 	vectoangles( newmis->s.v.velocity, newmis->s.v.angles );
 
-	newmis->s.v.touch = ( func_t ) GrenadeTouch;
+	newmis->touch = ( func_t ) GrenadeTouch;
 	newmis->s.v.nextthink = g_globalvars.time + 2.5;
-	newmis->s.v.think = ( func_t ) GrenadeExplode;
+	newmis->think = ( func_t ) GrenadeExplode;
 
 	if ( deathmatch == 4 && cvar("k_dmm4_gren_mode") )
-		newmis->s.v.think = ( func_t ) SUB_Remove;
+		newmis->think = ( func_t ) SUB_Remove;
 
 	setmodel( newmis, "progs/grenade.mdl" );
 	setsize( newmis, 0, 0, 0, 0, 0, 0 );
@@ -1321,9 +1321,9 @@ void launch_spike( vec3_t org, vec3_t dir )
 	newmis->isMissile = true;
 	newmis->s.v.solid = (isRACE() ? SOLID_TRIGGER : SOLID_BBOX);
 
-	newmis->s.v.touch = ( func_t ) spike_touch;
-	newmis->s.v.classname = "spike";
-	newmis->s.v.think = ( func_t ) SUB_Remove;
+	newmis->touch = ( func_t ) spike_touch;
+	newmis->classname = "spike";
+	newmis->think = ( func_t ) SUB_Remove;
 	newmis->s.v.nextthink = g_globalvars.time + 6;
 	setmodel( newmis, "progs/spike.mdl" );
 	setsize( newmis, 0, 0, 0, 0, 0, 0 );
@@ -1373,7 +1373,7 @@ void spike_touch()
 	self->voided = 1;
 
 	if (other->s.v.solid == SOLID_TRIGGER) {
-		G_bprint(2, "Trigger field, do nothing (%s)\n", other->s.v.netname);
+		G_bprint(2, "Trigger field, do nothing (%s)\n", other->netname);
 		return;		// trigger field, do nothing
 	}
 
@@ -1401,9 +1401,9 @@ void spike_touch()
 	else
 	{
 		WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
-		if ( !strcmp( self->s.v.classname, "wizspike" ) )
+		if ( !strcmp( self->classname, "wizspike" ) )
 			WriteByte( MSG_MULTICAST, TE_WIZSPIKE );
-		else if ( !strcmp( self->s.v.classname, "knightspike" ) )
+		else if ( !strcmp( self->classname, "knightspike" ) )
 			WriteByte( MSG_MULTICAST, TE_KNIGHTSPIKE );
 		else
 			WriteByte( MSG_MULTICAST, TE_SPIKE );
@@ -1491,7 +1491,7 @@ void W_FireSuperSpikes()
 	VectorCopy( self->s.v.origin, tmp );
 	tmp[2] += 16;
 	launch_spike( tmp, dir );
-	newmis->s.v.touch = ( func_t ) superspike_touch;
+	newmis->touch = ( func_t ) superspike_touch;
 	setmodel( newmis, "progs/s_spike.mdl" );
 	setsize( newmis, 0, 0, 0, 0, 0, 0 );
 	g_globalvars.msg_entity = EDICT_TO_PROG( self );
@@ -1565,7 +1565,7 @@ void W_SetCurrentAmmo()
 
 // { get out of any weapon firing states
 
-	if ( self->s.v.think == ( func_t )player_stand1 || self->s.v.think == ( func_t )player_run ) {
+	if ( self->think == ( func_t )player_stand1 || self->think == ( func_t )player_run ) {
 		if ( self->s.v.weapon == IT_AXE || self->s.v.weapon == IT_HOOK ) {
 			if ( self->s.v.velocity[0] || self->s.v.velocity[1] ) { // run
 				if ( self->s.v.frame < 0 || self->s.v.frame > 5 )
@@ -1588,7 +1588,7 @@ void W_SetCurrentAmmo()
 		}
 	}
 	else {
-		need_fix = true; // hm, set proper ->s.v.think
+		need_fix = true; // hm, set proper ->think
 	}
 
 	if ( need_fix ) {
@@ -1610,7 +1610,7 @@ void W_SetCurrentAmmo()
 	{
 	case IT_AXE:
 		self->s.v.currentammo = 0;
-		self->s.v.weaponmodel = "progs/v_axe.mdl";
+		self->weaponmodel = "progs/v_axe.mdl";
 		self->s.v.weaponframe = 0;
 		if (vw_enabled)
             		self->vw_index = 1;
@@ -1619,9 +1619,9 @@ void W_SetCurrentAmmo()
 	case IT_SHOTGUN:
 		self->s.v.currentammo = self->s.v.ammo_shells;
 		if ( cvar("k_instagib_custom_models") && cvar("k_instagib") )
-			self->s.v.weaponmodel = "progs/v_coil.mdl";
+			self->weaponmodel = "progs/v_coil.mdl";
 		else
-			self->s.v.weaponmodel = "progs/v_shot.mdl";
+			self->weaponmodel = "progs/v_shot.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_SHELLS;
 		if (vw_enabled)
@@ -1630,7 +1630,7 @@ void W_SetCurrentAmmo()
 
 	case IT_SUPER_SHOTGUN:
 		self->s.v.currentammo = self->s.v.ammo_shells;
-		self->s.v.weaponmodel = "progs/v_shot2.mdl";
+		self->weaponmodel = "progs/v_shot2.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_SHELLS;
 		if (vw_enabled)
@@ -1639,7 +1639,7 @@ void W_SetCurrentAmmo()
 
 	case IT_NAILGUN:
 		self->s.v.currentammo = self->s.v.ammo_nails;
-		self->s.v.weaponmodel = "progs/v_nail.mdl";
+		self->weaponmodel = "progs/v_nail.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_NAILS;
 		if (vw_enabled)
@@ -1648,7 +1648,7 @@ void W_SetCurrentAmmo()
 
 	case IT_SUPER_NAILGUN:
 		self->s.v.currentammo = self->s.v.ammo_nails;
-		self->s.v.weaponmodel = "progs/v_nail2.mdl";
+		self->weaponmodel = "progs/v_nail2.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_NAILS;
 		if (vw_enabled)
@@ -1657,7 +1657,7 @@ void W_SetCurrentAmmo()
 
 	case IT_GRENADE_LAUNCHER:
 		self->s.v.currentammo = self->s.v.ammo_rockets;
-		self->s.v.weaponmodel = "progs/v_rock.mdl";
+		self->weaponmodel = "progs/v_rock.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_ROCKETS;
 		if (vw_enabled)
@@ -1666,7 +1666,7 @@ void W_SetCurrentAmmo()
 
 	case IT_ROCKET_LAUNCHER:
 		self->s.v.currentammo = self->s.v.ammo_rockets;
-		self->s.v.weaponmodel = "progs/v_rock2.mdl";
+		self->weaponmodel = "progs/v_rock2.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_ROCKETS;
 		if (vw_enabled)
@@ -1675,7 +1675,7 @@ void W_SetCurrentAmmo()
 
 	case IT_LIGHTNING:
 		self->s.v.currentammo = self->s.v.ammo_cells;
-		self->s.v.weaponmodel = "progs/v_light.mdl";
+		self->weaponmodel = "progs/v_light.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_CELLS;
 		if (vw_enabled)
@@ -1686,9 +1686,9 @@ void W_SetCurrentAmmo()
 		self->s.v.currentammo = 0;
 
 		if ( k_ctf_custom_models )
-			self->s.v.weaponmodel = "progs/v_star.mdl";
+			self->weaponmodel = "progs/v_star.mdl";
 		else
-			self->s.v.weaponmodel = "progs/v_axe.mdl";
+			self->weaponmodel = "progs/v_axe.mdl";
 
 		self->s.v.weaponframe = 0;
 		if (vw_enabled)
@@ -1697,7 +1697,7 @@ void W_SetCurrentAmmo()
 
 	default:
 		self->s.v.currentammo = 0;
-		self->s.v.weaponmodel = "";
+		self->weaponmodel = "";
 		self->s.v.weaponframe = 0;
         	self->vw_index = 0;
 		break;

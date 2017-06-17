@@ -48,7 +48,7 @@ void ExitKick (gedict_t *kicker)
 	kicker->k_playertokick = world;
 	kicker->k_kicking = 0;
 
-	if( !strnull( kicker->s.v.classname ) )
+	if( !strnull( kicker->classname ) )
 		G_sprint(kicker, 2, "Kicking process terminated\n");
 }
 
@@ -57,12 +57,12 @@ qbool is_can_kick(gedict_t *victim, gedict_t *kicker)
 {
 	if ( VIP_IsFlags(victim, VIP_NOTKICKABLE) && !is_real_adm(kicker) ) {
 		G_sprint(kicker, 2, "You can't kick VIP \x8D %s as elected admin\n", 
-					(strnull( victim->s.v.netname ) ? "!noname!" : victim->s.v.netname));
+					(strnull( victim->netname ) ? "!noname!" : victim->netname));
 		return false;
 	}
 	if ( is_real_adm(victim) && !is_real_adm(kicker) ) {
 		G_sprint(kicker, 2, "You can't kick real admin \x8D %s as elected admin\n", 
-					(strnull( victim->s.v.netname ) ? "!noname!" : victim->s.v.netname));
+					(strnull( victim->netname ) ? "!noname!" : victim->netname));
 		return false;
 	}
 
@@ -222,7 +222,7 @@ void YesKick ()
 	if( !self->k_kicking )
 		return;
 
-	if ( !self->k_playertokick || strnull(self->k_playertokick->s.v.classname) ) {
+	if ( !self->k_playertokick || strnull(self->k_playertokick->classname) ) {
         NextClient();
 		return;
 	}
@@ -243,7 +243,7 @@ void DontKick ()
 
 void BecomeAdmin(gedict_t *p, int adm_flags)
 {
-	G_bprint(2, "%s %s!\n", p->s.v.netname, redtext("gains admins status"));
+	G_bprint(2, "%s %s!\n", p->netname, redtext("gains admins status"));
 	G_sprint(p, 2, "Please give up admin rights when you're done\n"
 				   "Type %s for info\n", redtext("commands"));
 
@@ -265,7 +265,7 @@ void ReqAdmin ()
 
     if( is_adm( self ) )
     {
-        G_bprint(2, "%s is no longer an %s\n", self->s.v.netname, redtext("admin"));
+        G_bprint(2, "%s is no longer an %s\n", self->netname, redtext("admin"));
 
         if( self->k_kicking )
             ExitKick( self );
@@ -394,7 +394,7 @@ void VoteAdmin()
 	}
 
 	if( is_elected( self, etAdmin ) ) {
-		G_bprint(2, "%s %s!\n", self->s.v.netname, redtext("aborts election"));
+		G_bprint(2, "%s %s!\n", self->netname, redtext("aborts election"));
 		AbortElect();
 		return;
 	}
@@ -425,7 +425,7 @@ void VoteAdmin()
 	if( self->ct == ctSpec && match_in_progress )
 		return;
 
-	G_bprint(2, "%s has %s rights!\n", self->s.v.netname, redtext("requested admin"));
+	G_bprint(2, "%s has %s rights!\n", self->netname, redtext("requested admin"));
 
 	for( p = world; (p = find_client( p )); )
 		if ( p != self && p->ct == ctPlayer )
@@ -439,8 +439,8 @@ void VoteAdmin()
 
 	electguard = spawn(); // Check the 1 minute timeout for election
 	electguard->s.v.owner = EDICT_TO_PROG( world );
-	electguard->s.v.classname = "electguard";
-	electguard->s.v.think = ( func_t ) ElectThink;
+	electguard->classname = "electguard";
+	electguard->think = ( func_t ) ElectThink;
 	electguard->s.v.nextthink = g_globalvars.time + 60;
 }
 
@@ -456,7 +456,7 @@ void AdminMatchStart ()
 		}
 		else
 		{
-			G_bprint(2, "%s was kicked by admin forcestart\n", p->s.v.netname);
+			G_bprint(2, "%s was kicked by admin forcestart\n", p->netname);
 			G_sprint(p, 2, "Bye bye! Pay attention next time.\n");
 
 			stuffcmd(p, "disconnect\n"); // FIXME: stupid way
@@ -489,7 +489,7 @@ void ReadyThink ()
     {
         k_force = 0;
 
-        G_bprint(2, "%s interrupts countdown\n", p2->s.v.netname );
+        G_bprint(2, "%s interrupts countdown\n", p2->netname );
 
         ent_remove ( self );
 
@@ -574,14 +574,14 @@ void AdminForceStart ()
 
     if( k_attendees )
     {
-        G_bprint(2, "%s forces matchstart!\n", self->s.v.netname);
+        G_bprint(2, "%s forces matchstart!\n", self->netname);
 
         k_force = 1;
 
         mess = spawn();
-        mess->s.v.classname = "mess";
+        mess->classname = "mess";
         mess->s.v.owner = EDICT_TO_PROG( self );
-        mess->s.v.think = ( func_t ) ReadyThink;
+        mess->think = ( func_t ) ReadyThink;
         mess->s.v.nextthink = g_globalvars.time + 0.1;
         mess->attack_finished = 10 + 1;
     }
@@ -612,7 +612,7 @@ void AdminForceBreak ()
     if( k_oldmaxspeed ) // huh???
         cvar_fset( "sv_maxspeed", k_oldmaxspeed );
 
-    G_bprint(2, "%s forces a break!\n", self->s.v.netname);
+    G_bprint(2, "%s forces a break!\n", self->netname);
 
     EndMatch( 0 );
 }
@@ -687,7 +687,7 @@ void ToggleMapLock ()
 		cvar_fset( "k_lockmap", 0 );
 
         if( !match_in_progress )
-            G_bprint(2, "%s unlocks map\n", self->s.v.netname);
+            G_bprint(2, "%s unlocks map\n", self->netname);
         else
             G_sprint(self, 2, "Map unlocked\n");
 
@@ -697,7 +697,7 @@ void ToggleMapLock ()
 	cvar_fset( "k_lockmap", 1 );
 
     if( !match_in_progress )
-        G_bprint(2, "%s locks map\n", self->s.v.netname);
+        G_bprint(2, "%s locks map\n", self->netname);
     else
         G_sprint(self, 2, "Map is locked\n");
 }
@@ -761,12 +761,12 @@ qbool is_can_forcespec(gedict_t *victim, gedict_t *kicker)
 {
 	if ( VIP_IsFlags(victim, VIP_NOTKICKABLE) && !is_real_adm(kicker) ) {
 		G_sprint(kicker, 2, "You can't force_spec VIP \x8D %s as elected admin\n", 
-					(strnull( victim->s.v.netname ) ? "!noname!" : victim->s.v.netname));
+					(strnull( victim->netname ) ? "!noname!" : victim->netname));
 		return false;
 	}
 	if ( is_real_adm(victim) && !is_real_adm(kicker) ) {
 		G_sprint(kicker, 2, "You can't force_spec real admin \x8D %s as elected admin\n", 
-					(strnull( victim->s.v.netname ) ? "!noname!" : victim->s.v.netname));
+					(strnull( victim->netname ) ? "!noname!" : victim->netname));
 		return false;
 	}
 
