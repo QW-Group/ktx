@@ -536,8 +536,8 @@ static void AvoidHazardsOnGround (gedict_t* self, float hor_speed, vec3_t new_or
 	VectorCopy(self->s.v.origin, last_clear_point);
 	VectorMA(last_clear_point, (16 / hor_speed), new_velocity, testplace);
 	fall = FallSpotGround(testplace, fallheight);
-	sprintf (debug[line++], "AvoidHazardsOnGround(origin [%d %d %d], vel [%d %d %d])\n", PASSINTVEC3 (new_origin), PASSINTVEC3 (new_velocity));
-	sprintf (debug[line++], "> FallSpotGround([%d %d %d], %f) = %s\n", PASSINTVEC3 (testplace), fallheight, FallType (fall));
+	snprintf (debug[line++], sizeof(debug[0]), "AvoidHazardsOnGround(origin [%d %d %d], vel [%d %d %d])\n", PASSINTVEC3 (new_origin), PASSINTVEC3 (new_velocity));
+	snprintf (debug[line++], sizeof(debug[0]), "> FallSpotGround([%d %d %d], %f) = %s\n", PASSINTVEC3 (testplace), fallheight, FallType (fall));
 
 	if (fall == FALL_BLOCKED) {
 		first_trace_fraction = 1;
@@ -553,11 +553,11 @@ static void AvoidHazardsOnGround (gedict_t* self, float hor_speed, vec3_t new_or
 			VectorMA(testplace, (16 / hor_speed) * (1 - first_trace_fraction), new_velocity, testplace);
 		}
 		fall = FallSpotGround(testplace, fallheight);
-		sprintf (debug[line++], "> FallSpotGround([%d %d %d], %f) = %s\n", PASSINTVEC3 (testplace), fallheight, FallType (fall));
+		snprintf (debug[line++], sizeof(debug[0]), "> FallSpotGround([%d %d %d], %f) = %s\n", PASSINTVEC3 (testplace), fallheight, FallType (fall));
 	}
 
 	if (fall >= FALL_LAND && (self->fb.path_state & BOTPATH_CURLJUMP_HINT)) {
-		sprintf (debug[line++], "> CurlJumpHint(%d)... jumping\n", self->fb.angle_hint);
+		snprintf (debug[line++], sizeof(debug[0]), "> CurlJumpHint(%d)... jumping\n", self->fb.angle_hint);
 		DumpDebugLines (debug, line, "CurlJumpHint\n");
 		SetJumpFlag (self, true, "AvoidHazards(CurlJump)");
 		self->fb.path_state |= DELIBERATE_AIR_WAIT_GROUND;
@@ -569,7 +569,7 @@ static void AvoidHazardsOnGround (gedict_t* self, float hor_speed, vec3_t new_or
 		new_fall = fall;
 		VectorCopy(new_origin, testplace);
 		fall = FallSpotGround(testplace, fallheight);
-		sprintf (debug[line++], "> 2: FallSpotGround([%d %d %d], %f) = %s\n", PASSINTVEC3 (testplace), fallheight, FallType (fall));
+		snprintf (debug[line++], sizeof(debug[0]), "> 2: FallSpotGround([%d %d %d], %f) = %s\n", PASSINTVEC3 (testplace), fallheight, FallType (fall));
 		if ((int)self->fb.path_state & DELIBERATE_AIR) {
 			if (fall < FALL_LAND) {
 				DumpDebugLines (debug, line, "Deliberate_Air detected\n");
@@ -596,7 +596,7 @@ static void AvoidHazardsOnGround (gedict_t* self, float hor_speed, vec3_t new_or
 				VectorCopy(new_origin, jump_origin);
 				VectorCopy(new_velocity, jump_velocity);
 				jump_velocity[2] += JUMPSPEED;
-				sprintf (debug[line++], "> CanJumpOver([%d %d %d], [%d %d %d], %f, %s)\n", PASSINTVEC3 (jump_origin), PASSINTVEC3 (jump_velocity), fallheight, FallType (fall));
+				snprintf (debug[line++], sizeof(debug[0]), "> CanJumpOver([%d %d %d], [%d %d %d], %f, %s)\n", PASSINTVEC3 (jump_origin), PASSINTVEC3 (jump_velocity), fallheight, FallType (fall));
 				if (CanJumpOver(self, jump_origin, jump_velocity, fallheight, fall)) {
 					//G_bprint (2, "    CanJumpOver(jumpo[%f %f %f] v[%f %f %f] %f %d %f)\n", PASSVEC3 (new_origin), PASSVEC3(jump_velocity), fallheight, fall, hor_speed);
 					DumpDebugLines (debug, line, "CanJumpOver() => Jumping\n");
@@ -618,10 +618,10 @@ static void AvoidHazardsOnGround (gedict_t* self, float hor_speed, vec3_t new_or
 	VectorMA(testplace, 8 / hor_speed, new_velocity, new_origin);
 	VectorMA(testplace, 16 / hor_speed, new_velocity, testplace);
 	fall = FallSpotGround (testplace, fallheight);
-	sprintf (debug[line++], "> 3: FallSpotGround([%d %d %d], %f) = %s\n", PASSINTVEC3 (testplace), fallheight, FallType (fall));
+	snprintf (debug[line++], sizeof(debug[0]), "> 3: FallSpotGround([%d %d %d], %f) = %s\n", PASSINTVEC3 (testplace), fallheight, FallType (fall));
 
 	if (fall >= FALL_LAND && (self->fb.path_state & BOTPATH_CURLJUMP_HINT)) {
-		sprintf (debug[line++], "> CurlJumpHint(%d)... jumping\n", self->fb.angle_hint);
+		snprintf (debug[line++], sizeof(debug[0]), "> CurlJumpHint(%d)... jumping\n", self->fb.angle_hint);
 		DumpDebugLines (debug, line, "CurlJumpHint\n");
 		SetJumpFlag (self, true, "AvoidHazards(CurlJumpHint2)");
 		self->fb.path_state |= DELIBERATE_AIR_WAIT_GROUND;
@@ -633,7 +633,7 @@ static void AvoidHazardsOnGround (gedict_t* self, float hor_speed, vec3_t new_or
 		VectorCopy(testplace, jump_origin);
 		VectorCopy(self->s.v.origin, testplace);
 		fall = FallSpotGround (testplace, fallheight);
-		sprintf (debug[line++], "> 4: FallSpotGround([%d %d %d], %f) = %s\n", PASSINTVEC3 (testplace), fallheight, FallType (fall));
+		snprintf (debug[line++], sizeof(debug[0]), "> 4: FallSpotGround([%d %d %d], %f) = %s\n", PASSINTVEC3 (testplace), fallheight, FallType (fall));
 		if ((int)self->fb.path_state & DELIBERATE_AIR) {
 			if (fall < FALL_LAND) {
 				DumpDebugLines (debug, line, "Deliberate_Air detected\n");
@@ -650,7 +650,7 @@ static void AvoidHazardsOnGround (gedict_t* self, float hor_speed, vec3_t new_or
 				jump_velocity[2] = jump_velocity[2] - (6400 / hor_speed);
 				jump_origin[2] = jump_origin[2] + (jump_velocity[2] * (16 / hor_speed));
 				jump_velocity[2] = jump_velocity[2] - (6400 / hor_speed);
-				sprintf (debug[line++], "> CanJumpOver([%d %d %d], [%d %d %d], %f, %s)\n", PASSINTVEC3 (jump_origin), PASSINTVEC3 (jump_velocity), fallheight, FallType (fall));
+				snprintf (debug[line++], sizeof(debug[0]), "> CanJumpOver([%d %d %d], [%d %d %d], %f, %s)\n", PASSINTVEC3 (jump_origin), PASSINTVEC3 (jump_velocity), fallheight, FallType (fall));
 				if (CanJumpOver(self, jump_origin, jump_velocity, fallheight, fall)) {
 					DumpDebugLines (debug, line, "CanFallOver2\n");
 					self->fb.path_state |= NO_DODGE;
@@ -659,7 +659,7 @@ static void AvoidHazardsOnGround (gedict_t* self, float hor_speed, vec3_t new_or
 				VectorCopy(new_origin, jump_origin);
 				VectorCopy(new_velocity, jump_velocity);
 				jump_velocity[2] += JUMPSPEED;
-				sprintf (debug[line++], "> CanJumpOver([%d %d %d], [%d %d %d], %f, %s)\n", PASSINTVEC3 (jump_origin), PASSINTVEC3 (jump_velocity), fallheight, FallType (fall));
+				snprintf (debug[line++], sizeof(debug[0]), "> CanJumpOver([%d %d %d], [%d %d %d], %f, %s)\n", PASSINTVEC3 (jump_origin), PASSINTVEC3 (jump_velocity), fallheight, FallType (fall));
 				if (CanJumpOver(self, jump_origin, jump_velocity, fallheight, fall)) {
 					DumpDebugLines (debug, line, "CanJumpOver2\n");
 					self->fb.path_state |= NO_DODGE;

@@ -1442,6 +1442,7 @@ void PutClientInServer( void )
 				spot = find(world, FOFCLSN, "info_player_deathmatch");
 		}
 	}
+#ifdef BOT_SUPPORT
 	else if (FrogbotOptionEnabled(FB_OPTION_DEBUG_MOVEMENT) && self->isBot && match_in_progress && streq(g_globalvars.mapname, "povdmm4")) {
 		gedict_t* highest = NULL;
 		for (spot = world; (spot = ez_find(spot, "info_player_deathmatch")); ) {
@@ -1451,6 +1452,7 @@ void PutClientInServer( void )
 		}
 		spot = highest;
 	}
+#endif
 	else if ( deathmatch || k_bloodfest )
 	{
 		// first spawn in CTF on corresponding base, later used info_player_deathmatch.

@@ -339,8 +339,8 @@ void HM_reset_map()
 
 static int HM_spawn_comparison(const void* lhs_, const void* rhs_)
 {
-	const gedict_t* lhs = *(gedict_t**) lhs_;
-	const gedict_t* rhs = *(gedict_t**) rhs_;
+	const gedict_t* lhs = (const gedict_t*)lhs_;
+	const gedict_t* rhs = (const gedict_t*)rhs_;
 
 	if (lhs->hoony_spawn_order < rhs->hoony_spawn_order)
 		return -1;
@@ -348,6 +348,31 @@ static int HM_spawn_comparison(const void* lhs_, const void* rhs_)
 		return 1;
 
 	return 0;
+}
+
+static void HM_sort_spawns(gedict_t** spawns, int count)
+{
+#ifdef Q3_VM
+	qbool any_changes = true;
+
+	// bubble-sort, lovely
+	while (any_changes) {
+		int i;
+
+		any_changes = false;
+		for (i = 0; i < count - 1; ++i) {
+			int comp = HM_spawn_comparison(&spawns[i], &spawns[i + 1]);
+			if (comp > 0) {
+				gedict_t* temp = spawns[i];
+				spawns[i] = spawns[i + 1];
+				spawns[i + 1] = temp;
+				any_changes = true;
+			}
+		}
+	}
+#else
+	qsort(spawns, count, sizeof(spawns[0]), HM_spawn_comparison);
+#endif
 }
 
 static void HM_shuffle_spawns(gedict_t** spawns, int count)
@@ -360,7 +385,7 @@ static void HM_shuffle_spawns(gedict_t** spawns, int count)
 		for (j = 0; j < count; ++j)
 			spawns[j]->hoony_spawn_order = (spawns[j]->hoony_nomination ? -1 : 1) * i_rnd(1, 100);
 
-		qsort(spawns, count, sizeof(gedict_t*), HM_spawn_comparison);
+		HM_sort_spawns(spawns, count);
 	}
 }
 

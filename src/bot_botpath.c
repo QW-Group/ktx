@@ -11,11 +11,6 @@ void DM6CampLogic();
 void DM6MarkerTouchLogic (gedict_t* self, gedict_t* goalentity_marker);
 qbool DM6LookAtDoor (gedict_t* self);
 
-#define G_bprint_debug(...) if (self->fb.debug) { G_bprint(__VA_ARGS__); }
-#define STOP_DEBUGGING { self->fb.debug = false; }
-//#define G_bprint_debug(...)
-//#define STOP_DEBUGGING 
-
 static qbool HasItem (gedict_t* player, int mask)
 {
 	return ((int)player->s.v.items & mask);
@@ -327,8 +322,6 @@ void ProcessNewLinkedMarker(gedict_t* self) {
 	);
 	SetLinkedMarker (self, new_linked_marker, "ProcNewLinked(std)");
 
-	STOP_DEBUGGING
-
 	// "check if fully on lift - if not then continue moving to linked_marker_"
 	if (OnLift (self)) {
 		return;
@@ -351,7 +344,6 @@ void ProcessNewLinkedMarker(gedict_t* self) {
 		}
 	}
 
-	G_bprint_debug (2, "New linked marker: %d\n", self->fb.linked_marker->fb.index + 1);
 	self->fb.path_state = new_path_state;
 	self->fb.angle_hint = new_angle_hint;
 	self->fb.rocketJumpFrameDelay = new_rj_delay;

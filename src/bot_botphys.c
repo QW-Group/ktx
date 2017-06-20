@@ -35,8 +35,12 @@ void FrogbotPrePhysics1(void) {
 
 void BotDetectTrapped(gedict_t* self) {
 	// This tries to detect stuck bots, and fixes the situation by either jumping or committing suicide
-	vec3_t point = { self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] - 24 };
-	int content1 = trap_pointcontents(point[0], point[1], point[2]);
+	vec3_t point;
+	int content1;
+
+	VectorSet(point, self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] - 24);
+	content1 = trap_pointcontents(PASSVEC3(point));
+
 	if (content1 == CONTENT_EMPTY) {
 		self->fb.oldwaterlevel = 0;
 		self->fb.oldwatertype = CONTENT_EMPTY;

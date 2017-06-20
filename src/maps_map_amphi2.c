@@ -11,8 +11,11 @@ void AMPHI2BotInLava(void) {
 	if ( self->isBot && streq(g_globalvars.mapname, "amphi2") ) {
 		if (g_globalvars.time > self->fb.arrow_time) {
 			if (self->s.v.waterlevel == 1) {
-				vec3_t point = { self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] - 24 };
-				if (trap_pointcontents(point[0], point[1], point[2]) == CONTENT_LAVA) {
+				vec3_t point;
+
+				VectorSet(point, self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] - 24);
+
+				if (trap_pointcontents(PASSVEC3(point)) == CONTENT_LAVA) {
 					if ((int)self->s.v.flags & FL_ONGROUND) {
 						if (!enemy_shaft_attack()) {
 							if (!self->fb.rocketJumping) {

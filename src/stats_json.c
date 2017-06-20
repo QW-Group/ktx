@@ -272,7 +272,6 @@ void json_player_detail(fileHandle_t handle, int player_num, gedict_t* player, c
 {
 	int j;
 	player_stats_t* stats = &player->ps;
-	wpType_t blankWeapon = { 0 };
 	int count = 0;
 
 	if (player_num) {
@@ -308,7 +307,7 @@ void json_player_detail(fileHandle_t handle, int player_num, gedict_t* player, c
 			weap->ekills = 0;
 		}
 
-		if (memcmp(weap, &blankWeapon, sizeof(wpType_t))) {
+		if (weap->attacks == 0 && weap->deaths == 0 && weap->drops == 0 && weap->sttooks == 0 && weap->ttooks == 0) {
 			json_weap_detail(handle, WpName(j), count, weap);
 			++count;
 		}

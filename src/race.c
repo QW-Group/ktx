@@ -107,6 +107,8 @@ qbool race_match_mode(void);
 qbool race_match_started(void);
 int race_award_points(int position, int participants);
 
+gedict_t* race_find_race_participants(gedict_t* p);
+qbool race_pacemaker_enabled(void);
 qbool is_rules_change_allowed( void );
 qbool race_command_checks( void );
 qbool race_is_started( void );
@@ -116,13 +118,11 @@ static void race_clear_pacemaker(void);
 static void race_init_capture(void);
 static void race_save_position(void);
 static void race_finish_capture(qbool store, char* filename);
-static qbool race_pacemaker_enabled(void);
 static void race_pacemaker_race_start(void);
 static void race_remove_pacemaker_indicator(void);
 static void race_make_active_racer(gedict_t* r, gedict_t* s);
 static qbool race_end(gedict_t* racer, qbool valid, qbool complete);
 static char* race_position_string(int position);
-gedict_t* race_find_race_participants(gedict_t* p);
 static qbool race_simultaneous(void);
 static void race_update_closest_positions(void);
 static void race_match_round_end(char* demoFileName);
@@ -4358,6 +4358,31 @@ static void race_match_stats_apply(race_stats_score_t* stats, gedict_t* player)
 	}
 }
 
+static void race_sort_teams(race_stats_score_t* teams, int count)
+{
+#ifdef Q3_VM
+	qbool any_changes = true;
+
+	// bubble-sort, lovely
+	while (any_changes) {
+		int i;
+
+		any_changes = false;
+		for (i = 0; i < count - 1; ++i) {
+			int comp = TeamSorter(&teams[i], &teams[i + 1]);
+			if (comp > 0) {
+				race_stats_score_t temp = teams[i];
+				teams[i] = teams[i + 1];
+				teams[i + 1] = temp;
+				any_changes = true;
+			}
+		}
+	}
+#else
+	qsort(teams, count, sizeof(teams[0]), TeamSorter);
+#endif
+}
+
 static void race_match_team_stats(void)
 {
 	gedict_t* p, *p2;
@@ -4391,7 +4416,7 @@ static void race_match_team_stats(void)
 		}
 	}
 
-	qsort(teams, teams_found, sizeof(teams[0]), TeamSorter);
+	race_sort_teams(teams, teams_found);
 
 	race_match_stats_print("Team scores", teams, teams_found);
 }

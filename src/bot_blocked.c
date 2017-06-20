@@ -83,14 +83,12 @@ void BotBlocked (void)
 //
 static qbool obstruction(gedict_t* self, vec3_t new_velocity, vec3_t new_origin, int newFlags, vec3_t velocity_normal)
 {
-	vec3_t old_velocity = { PASSVEC3 (self->fb.last_cmd_direction) };
+	vec3_t old_velocity;
 	qbool onGround = (newFlags & FL_ONGROUND);
 	qbool waterJump = (newFlags & FL_WATERJUMP);
 	vec3_t delta_velocity = { 0 };
-	/*vec3_t proposed = { 0 };
-	vec3_t direction = { 0 };
-	float scale = 0.0f;
-	float heading = 0.0f;*/
+
+	VectorCopy(self->fb.last_cmd_direction, old_velocity);
 
 	VectorClear (velocity_normal);
 	VectorSubtract (old_velocity, new_velocity, delta_velocity);

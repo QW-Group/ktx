@@ -123,7 +123,9 @@ static void BotsFireAtWorldLogic(gedict_t* self, vec3_t rel_pos, float* rel_dist
 		return;
 
 	if (*rel_dist < 160) {
-		vec3_t rel_pos2 = { rel_pos[0], rel_pos[1], 0 };
+		vec3_t rel_pos2;
+
+		VectorSet(rel_pos2, rel_pos[0], rel_pos[1], 0);
 		VectorNormalize(rel_pos2);
 		VectorScale(rel_pos2, 160, rel_pos2);
 		rel_pos[0] = rel_pos2[0];
@@ -209,10 +211,12 @@ static void CalculateVolatility(gedict_t* self)
 		vol_flags = 1;
 	}
 	else {
-		vec3_t bot_direction = { PASSVEC3(self->s.v.velocity) };
-		vec3_t enemy_direction = { PASSVEC3(opponent->s.v.velocity) };
+		vec3_t bot_direction;
+		vec3_t enemy_direction;
 		float same_direction = 0.0f;
 
+		VectorCopy(self->s.v.velocity, bot_direction);
+		VectorCopy(opponent->s.v.velocity, enemy_direction);
 		volatility *= self->fb.skill.reduce_volatility;
 
 		// Ownspeed penalty

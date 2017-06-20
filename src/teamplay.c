@@ -86,15 +86,27 @@ char* item_names[] = {
 	TP_NAME_RUNE4, TP_NAME_QUAD, TP_NAME_PENT, TP_NAME_RING
 };
 
+#ifdef Q3_VM
+unsigned long strtoul(const char* str, char** endptr, int base)
+{
+	unsigned long value = 0;
+	while (*str >= '0' && *str <= '9') {
+		value *= 10 + (*str - '0');
+		++str;
+	}
+	return value;
+}
+#endif
+
 void TeamplayEventItemTaken (gedict_t* client, gedict_t* item)
 {
 	char* took_flags_s = ezinfokey(client, "tptook");
-	unsigned long took_flags = ~0;
+	unsigned long took_flags = ~0U;
 
 	if (!strnull (took_flags_s))
 		took_flags = strtoul (took_flags_s, NULL, 10);
 	if (took_flags == 0)
-		took_flags = ~0;
+		took_flags = ~0U;
 
 	if (!(took_flags & item->tp_flags))
 		return;
@@ -349,7 +361,7 @@ unsigned int ClientFlag (gedict_t* client)
 static gedict_t* TeamplayFindPoint (gedict_t* client)
 {
 	gedict_t* e = world;
-	unsigned long pointflags = ~0;
+	unsigned long pointflags = ~0U;
 	vec3_t ang;
 	item_vis_t visitem;
 	unsigned int clientflag = ClientFlag (client);
@@ -358,9 +370,9 @@ static gedict_t* TeamplayFindPoint (gedict_t* client)
 
 	if (deathmatch >= 1 && deathmatch <= 4) {
 		if (deathmatch == 4)
-			pointflags &= ~it_ammo;
+			pointflags &= ~(unsigned long)it_ammo;
 		if (deathmatch != 1)
-			pointflags &= ~it_weapons;
+			pointflags &= ~(unsigned long)it_weapons;
 	}
 
 	VectorCopy (client->s.v.v_angle, ang);
@@ -1223,8 +1235,9 @@ char* LocationName (float x, float y, float z)
 	int i = 0;
 	int best = -1;
 	float best_distance = 0.0f;
-	vec3_t point = { x, y, z };
-
+	vec3_t point;
+	
+	VectorSet(point, x, y, z);
 	for (i = 0; i < node_count; ++i) {
 		float distance = VectorDistance (point, nodes[i].point);
 
@@ -1260,9 +1273,10 @@ void LocationInitialise (void)
 
 	while (std_fgets (file, lineData, sizeof (lineData))) {
 		char x[16], y[16], z[16];
-		char* name = nodes[node_count].name;
+		char* name;
 		int i = 0;
 
+		name = nodes[node_count].name;
 		trap_CmdTokenize (lineData);
 		trap_CmdArgv (0, x, sizeof (x));
 		trap_CmdArgv (1, y, sizeof (y));
@@ -1359,7 +1373,7 @@ qbool TeamplayMessageByName (gedict_t* client, const char* message)
 
 void TeamplayMessage (void)
 {
-	int i;
+	int i, max_len = 0;
 
 	if (trap_CmdArgc () == 2) {
 		char argument[32];
@@ -1372,7 +1386,6 @@ void TeamplayMessage (void)
 	}
 
 	// Print usage
-	int max_len = 0;
 	for (i = 0; i < sizeof (messages) / sizeof (messages[0]); ++i) {
 		max_len = max (max_len, strlen(messages[i].cmdname));
 	}

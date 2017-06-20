@@ -97,11 +97,7 @@ qbool Visible_infront(gedict_t* self, gedict_t* visible_object) {
 	return (self->fb.enemy_visible = VisibilityTest (self, visible_object, self->fb.skill.visibility));
 }
 
-
-
-// FIXME: not technically true, really this should return true whenever there is not enough space
-//        might even be better as a short-term fix to consider the door blocked if it starts to close
-qbool BotDoorIsClosed (gedict_t* door)
+qbool BotDoorIsClosed(gedict_t* door)
 {
 	// Not a door
 	if (!door->fb.door_entity)

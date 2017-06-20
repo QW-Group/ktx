@@ -55,6 +55,8 @@ build-dl32bots:
 
 build-vm:
 			cd $(SRCDIR); $(MAKEQVM) build
+build-vmbots:
+			cd $(SRCDIR); $(MAKEQVM) build BOT_SUPPORT=1
 
 
 install:	install-dl install-dl32 install-vm

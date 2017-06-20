@@ -50,7 +50,7 @@ static float next_marker_time;
 static qbool hazard_time;
 static float next_hazard_time;
 
-static vec3_t saved_marker_pos = { -INFINITY, -INFINITY, -INFINITY };
+static vec3_t saved_marker_pos = { -999999, -999999, -999999 };
 static gedict_t* saved_marker = NULL;
 static gedict_t* last_touched_marker = NULL;
 

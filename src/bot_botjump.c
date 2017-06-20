@@ -179,8 +179,11 @@ static void SetRocketJumpAngles(gedict_t* self)
 
 static void BotPerformLavaJump(gedict_t* self)
 {
-	vec3_t point = { self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] - 24 };
-	int content = self->s.v.waterlevel > 1 ? trap_pointcontents(PASSVEC3(point)) : CONTENT_EMPTY;
+	vec3_t point;
+	int content;
+
+	VectorSet(point, self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] - 24);
+	content = self->s.v.waterlevel > 1 ? trap_pointcontents(PASSVEC3(point)) : CONTENT_EMPTY;
 
 	// Have fired but still in lava
 	if ((self->fb.path_state & BOTPATH_RJ_IN_PROGRESS) && content == CONTENT_LAVA) {

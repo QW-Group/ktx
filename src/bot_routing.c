@@ -10,9 +10,6 @@ qbool BotDoorIsClosed (gedict_t* door);
 #define PATH_NOISE_PENALTY 2.5
 #define PATH_AVOID_PENALTY 2.5
 
-#define G_bprint_debug(...) if (self->fb.debug) { G_bprint(__VA_ARGS__); }
-#define STOP_DEBUGGING { self->fb.debug = false; }
-
 static qbool DetectIncomingRocket(gedict_t* self, qbool rocket_alert, vec3_t marker_pos) {
 	// if the path location is too close to an incoming rocket, 
 	if (rocket_alert && VectorDistance(marker_pos, self->fb.rocket_endpos) < 200) {
@@ -49,7 +46,6 @@ static float EvalPath(fb_path_eval_t* eval, qbool allowRocketJumps, qbool trace_
 
 	// don't try and pass through closed doors
 	if (BotDoorIsClosed(eval->test_marker)) {
-		G_bprint_debug (2, "> Door closed, ignoring...\n");
 		return PATH_SCORE_NULL;
 	}
 
@@ -68,18 +64,15 @@ static float EvalPath(fb_path_eval_t* eval, qbool allowRocketJumps, qbool trace_
 
 	//
 	if (!eval->path_normal && !(eval->description & REVERSIBLE)) {
-		G_bprint_debug (2, "> path not normal and not reversible, stopping\n");
 		return PATH_SCORE_NULL;
 	}
 
 	// FIXME: Map specific logic
 	if (DM6DoorClosed(eval)) {
-		G_bprint_debug (2, "> DM6 Door Closed, stopping\n");
 		return PATH_SCORE_NULL;
 	}
 
 	if ((eval->description & ROCKET_JUMP) && !allowRocketJumps) {
-		G_bprint_debug (2, "> RJ required, stopping\n");
 		return PATH_SCORE_NULL;
 	}
 
@@ -94,21 +87,18 @@ static float EvalPath(fb_path_eval_t* eval, qbool allowRocketJumps, qbool trace_
 
 	path_score = same_dir + g_random();
 	self->fb.avoiding = AvoidTeleport(eval) || DetectIncomingRocket(self, eval->rocket_alert, marker_position);
-	G_bprint_debug (2, "> Temp path_score = %f\n", path_score);
 
 	// If we'd pickup an item as we travel, negatively impact score
 	if (eval->be_quiet && eval->test_marker->fb.pickup && ! WaitingToRespawn(eval->test_marker)) {
 		if (eval->test_marker != eval->goalentity_marker) {
 			if (eval->test_marker->fb.pickup()) {
 				path_score -= PATH_NOISE_PENALTY;
-				G_bprint_debug (2, "> be_quiet penalty, new path_score %f\n", path_score);
 			}
 		}
 	}
 
 	if (self->fb.avoiding) {
 		path_score -= PATH_AVOID_PENALTY;
-		G_bprint_debug (2, "> avoid penalty (%.3f vs %.3f, final path_score %f)\n", g_globalvars.time, eval->test_marker->fb.arrow_time, path_score);
 	}
 	else if (eval->goalentity_marker) {
 		float total_goal_time;
@@ -119,17 +109,13 @@ static float EvalPath(fb_path_eval_t* eval, qbool allowRocketJumps, qbool trace_
 		ZoneMarker (from_marker, eval->goalentity_marker, path_normal, allowRocketJumps);
 		traveltime = SubZoneArrivalTime (zone_time, middle_marker, eval->goalentity_marker, allowRocketJumps);
 		total_goal_time = eval->path_time + traveltime;
-		G_bprint_debug (2, "> total_goal_time = %f + %f = %f\n", eval->path_time, traveltime, total_goal_time);
 
 		if (total_goal_time > eval->goal_late_time) {
-			G_bprint_debug (2, "> total_goal time > goal_late_time (%f)\n", eval->goal_late_time);
 			if (traveltime < current_goal_time) {
 				path_score += eval->lookahead_time_ - total_goal_time;
-				G_bprint_debug (2, "> += %f - %f\n", eval->lookahead_time_, total_goal_time);
 			}
 			else if (total_goal_time > current_goal_time_125) {
 				path_score -= total_goal_time;
-				G_bprint_debug (2, "> -= %f\n", total_goal_time);
 			}
 		}
 	}
@@ -162,9 +148,7 @@ static void BotRouteEvaluation (qbool be_quiet, float lookahead_time, gedict_t* 
 		if (eval.test_marker) {
 			float path_score = 0;
 
-			G_bprint_debug (2, "Path from %d > %d\n", eval.touch_marker->fb.index + 1, eval.test_marker->fb.index + 1);
 			path_score = EvalPath(&eval, rocket_jump_routes_allowed, trace_bprint, current_goal_time, current_goal_time_125);
-			G_bprint_debug (2, ">> path score %f vs %f\n", path_score, *best_score);
 			if (path_score > *best_score) {
 				*best_score = path_score;
 				*next_marker = eval.test_marker;
@@ -193,27 +177,12 @@ void PathScoringLogic(
 	new_rj_angles[PITCH] = 78.25;
 	new_rj_angles[YAW] = 0;
 
-	G_bprint_debug (2, "PathScoringLogic(\n");
-	G_bprint_debug (2, "  goal_respawn_time = %f\n", goal_respawn_time);
-	G_bprint_debug (2, "  path_normal = %s\n", path_normal ? "true" : "false");
-	G_bprint_debug (2, "  player_origin = [%f %f %f]\n", PASSVEC3(player_origin));
-	G_bprint_debug (2, "  touch_marker_ = %d (%s)\n", touch_marker_->fb.index + 1, touch_marker_->classname);
-	G_bprint_debug (2, "  goalentity_marker  = %d (%s)\n", (goalentity_marker ? goalentity_marker->fb.index + 1 : -1), goalentity_marker ? goalentity_marker->classname : "(null)");
-	G_bprint_debug (2, "  rocket_alert = %s\n", rocket_alert ? "true" : "false");
-	G_bprint_debug (2, "  rj_allowed = %s\n", rocket_jump_routes_allowed ? "true" : "false");
-	G_bprint_debug (2, "  player = %s\n", player && player->ct == ctPlayer ? player->netname : "(none)");
-	G_bprint_debug (2, "  *best_score = %f\n", *best_score);
-	G_bprint_debug (2, "  *linked_marker = %d (%s)\n", (*linked_marker_) ? (*linked_marker_)->fb.index + 1 : -1, (*linked_marker_) ? (*linked_marker_)->classname : "(null)");
-	G_bprint_debug (2, ") = \n");
-
 	if (goalentity_marker) {
 		from_marker = touch_marker_;
 		ZoneMarker (from_marker, goalentity_marker, path_normal, rocket_jump_routes_allowed);
 		traveltime = SubZoneArrivalTime (zone_time, middle_marker, goalentity_marker, rocket_jump_routes_allowed);
 		current_goal_time = traveltime;
 		current_goal_time_125 = traveltime + 1.25;
-
-		G_bprint_debug (2, "Init: goal_time %f, \n", current_goal_time);
 
 		// FIXME: Estimating respawn times should be skill-based
 		if (current_goal_time < 2.5) {
@@ -242,9 +211,7 @@ void PathScoringLogic(
 
 		eval.test_marker = touch_marker_;
 
-		G_bprint_debug (2, "Marker > GoalEntity (%s) %d\n", goalentity_marker->classname, goalentity_marker->fb.index);
 		path_score = EvalPath(&eval, rocket_jump_routes_allowed, trace_bprint, current_goal_time, current_goal_time_125);
-		G_bprint_debug (2, ">> path score %f vs %f\n", path_score, *best_score);
 		if (path_score > *best_score) {
 			*best_score = path_score;
 			*linked_marker_ = eval.test_marker;
