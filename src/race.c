@@ -43,6 +43,8 @@ void SP_info_intermission();
 
 #define RACE_INCR_PARAMS(name) (RACE_PACEMAKER_##name##_CVAR),(RACE_PACEMAKER_##name##_INCR),(RACE_PACEMAKER_##name##_MIN),(RACE_PACEMAKER_##name##_MAX)
 
+void UserMode_SetMatchTag(char * matchtag);
+
 typedef struct race_capture_pos_s {
 	float race_time;
 	vec3_t origin;
@@ -191,20 +193,19 @@ static int read_record_param( int param )
 
 void ToggleRace( void )
 {
-	if ( !isRACE() )
-		if ( !is_rules_change_allowed() )
-			return;
+	if (!isRACE() && !is_rules_change_allowed()) {
+		return;
+	}
 
-	if ( !isRACE() )
-	{
-		if ( !isFFA() )
-		{
-			UserMode( -6 );
+	if (!isRACE()) {
+		if (!isFFA()) {
+			UserMode(-6);
 		}
 	}
 
-	if ( CountPlayers() && race_is_started() )
+	if (CountPlayers() && race_is_started()) {
 		return;
+	}
 
 	cvar_toggle_msg( self, "k_race", redtext("race") );
 
@@ -266,6 +267,8 @@ void apply_race_settings( void )
 	}
 
 	// turn on race settings.
+	UserMode_SetMatchTag("");
+
 	trap_readcmd( race_settings, buf, sizeof(buf) );
 	G_cprint("%s", buf);
 

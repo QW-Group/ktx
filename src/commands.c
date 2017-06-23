@@ -3217,7 +3217,7 @@ int um_idx_byname(char *name)
 
 extern int skip_fixrules;
 
-static void UserMode_SetMatchTag(char * matchtag)
+void UserMode_SetMatchTag(char * matchtag)
 {
 	char matchtag_old[20] = { 0 }, matchtag_new[20] = { 0 };
 
