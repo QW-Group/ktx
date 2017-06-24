@@ -204,7 +204,7 @@ static void ApplyPhysics (gedict_t* self)
 					rotation = -rotation;
 				}
 			}
-			else {
+			else if (deathmatch == 4) {
 				if (self->fb.wiggle_run_dir == 0) {
 					self->fb.wiggle_increasing = perpendicular[2] > 0;
 					self->fb.wiggle_run_dir = self->fb.wiggle_increasing ? 1 : -1;
@@ -225,6 +225,9 @@ static void ApplyPhysics (gedict_t* self)
 				if (self->fb.wiggle_increasing) {
 					rotation = -rotation;
 				}
+			}
+			else if (perpendicular[2] < 0) {
+				rotation = -rotation;
 			}
 
 			if (rotation) {
@@ -345,7 +348,7 @@ static void BestJumpingDirection (gedict_t* self)
 
 void BotSetCommand (gedict_t* self)
 {
-	float msec = g_globalvars.frametime * 1000;
+	float msec = (g_globalvars.time - self->fb.last_cmd_sent) * 1000;
 	int weapon_script_impulse = 0;
 	int impulse = 0;
 	qbool jumping;
@@ -353,6 +356,9 @@ void BotSetCommand (gedict_t* self)
 	vec3_t direction;
 
 	BotPerformRocketJump (self);
+	if (msec < 1) {
+		msec = g_globalvars.frametime * 1000;
+	}
 
 	// dir_move_ is the direction we want to move in, but need to take inertia into effect
 	// ... as rough guide (and save doubling physics calculations), scale command > 

@@ -157,7 +157,7 @@ static void BotsAimAtPlayerLogic(gedict_t* self, vec3_t rel_pos, float* rel_dist
 	VectorSubtract(self->fb.look_object->s.v.origin, self->s.v.origin, rel_pos);
 	*rel_dist = vlen(rel_pos);
 
-	if (IsVelocityWeapon(self->fb.desired_weapon_impulse) && AttackFinished(self)) {
+	if (IsVelocityWeapon(self->fb.desired_weapon_impulse) && !AttackFinished(self)) {
 		rel_time = *rel_dist / 1000;
 		if (IsNailgun(self->fb.desired_weapon_impulse) && (self->ctf_flag & CTF_RUNE_HST)) {
 			rel_time *= 0.5;
