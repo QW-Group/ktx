@@ -371,7 +371,7 @@ static qbool PreWarBlockFiring (gedict_t* self)
 	return false;
 }
 
-static qbool AttackFinished (gedict_t* self)
+qbool AttackFinished (gedict_t* self)
 {
 	if (g_globalvars.time < self->attack_finished) {
 		if ((int)self->s.v.weapon & (IT_LIGHTNING | IT_EITHER_NAILGUN)) {
@@ -388,16 +388,48 @@ static qbool KeepFiringAtEnemy (gedict_t* self)
 	return self->fb.look_object == &g_edicts[self->s.v.enemy] && g_random() < 0.666667f && BotUsingCorrectWeapon(self);
 }
 
+static qbool MidairAimLogic(gedict_t* self, float rel_dist)
+{
+	// In midair mode, delay firing until the rocket will hit opponent near peak of their jump
+	if (cvar("k_midair") && self->fb.look_object && self->fb.look_object->s.v.velocity[2] > JUMPSPEED) {
+		float time_to_hit = rel_dist / (self->super_damage_finished > g_globalvars.time ? 2000 : 1000);
+		float time_to_stationary = self->fb.look_object->s.v.velocity[2] / 800;
+
+		if (time_to_stationary - time_to_hit > 0.15f) {
+			self->fb.firing = false;
+			return true;
+		}
+	}
+	return false;
+}
+
+static qbool HurtSelfLogic(gedict_t* self)
+{
+	// If we want to grab an armour to stop player getting it...
+	if (self->fb.state & HURT_SELF) {
+		if (HasWeapon(self, IT_ROCKET_LAUNCHER) && self->fb.desired_angle[PITCH] > 75) {
+			self->fb.desired_weapon_impulse = 7;
+			self->fb.firing = true;
+			self->fb.state &= ~HURT_SELF;
+		}
+		return true;
+	}
+	return false;
+}
+
 void SetFireButton(gedict_t* self, vec3_t rel_pos, float rel_dist) {
 	if (PreWarBlockFiring(self)) {
 		return;
 	}
 
 	if (self->fb.firing) {
-		if (KeepFiringAtEnemy (self))
+		if (KeepFiringAtEnemy(self)) {
 			return;
-		if (!AttackFinished (self))
+		}
+		if (!AttackFinished(self)) {
 			return;
+		}
+
 		self->fb.firing &= self->fb.rocketJumping && self->fb.rocketJumpFrameDelay == 0;
 	}
 	else if (self->fb.next_impulse) {
@@ -409,15 +441,8 @@ void SetFireButton(gedict_t* self, vec3_t rel_pos, float rel_dist) {
 		return;
 	}
 
-	// In midair mode, delay firing until the rocket will hit opponent near peak of their jump
-	if (cvar("k_midair") && self->fb.look_object && self->fb.look_object->s.v.velocity[2] > JUMPSPEED) {
-		float time_to_hit = rel_dist / (self->super_damage_finished > g_globalvars.time ? 2000 : 1000);
-		float time_to_stationary = self->fb.look_object->s.v.velocity[2] / 800;
-		
-		if (time_to_stationary - time_to_hit > 0.15f) {
-			self->fb.firing = false;
-			return;
-		}
+	if (MidairAimLogic(self, rel_dist)) {
+		return;
 	}
 
 	if (SameTeam (self->fb.look_object, self)) {
@@ -427,13 +452,7 @@ void SetFireButton(gedict_t* self, vec3_t rel_pos, float rel_dist) {
 
 	DM6SelectWeaponToOpenDoor (self);
 
-	// If we want to grab an armour to stop player getting it...
-	if (self->fb.state & HURT_SELF) {
-		if (HasWeapon(self, IT_ROCKET_LAUNCHER) && self->fb.desired_angle[PITCH] > 75) {
-			self->fb.desired_weapon_impulse = 7;
-			self->fb.firing = true;
-			self->fb.state &= ~HURT_SELF;
-		}
+	if (HurtSelfLogic(self)) {
 		return;
 	}
 
