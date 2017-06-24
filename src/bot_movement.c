@@ -118,7 +118,7 @@ static void ApplyPhysics (gedict_t* self)
 		return;
 	}
 
-	if (deathmatch >= 4) {
+	if (deathmatch >= 4 && isDuel() && !self->fb.skill.wiggle_run_dmm4) {
 		return;
 	}
 
@@ -176,26 +176,24 @@ static void ApplyPhysics (gedict_t* self)
 
 		// Ground & air acceleration is the same
 		hor_speed_squared = (expected_velocity[0] * expected_velocity[0] + expected_velocity[1] * expected_velocity[1]);
-
 		if (onGround && hor_speed_squared < sv_maxspeed * sv_maxspeed * 0.8 * 0.8) {
 			return;
 		}
 
 		self->fb.dir_move_[2] = 0;
-		normalize (self->fb.dir_move_, original_direction);
-		normalize (expected_velocity, current_direction);
+		normalize(self->fb.dir_move_, original_direction);
+		normalize(expected_velocity, current_direction);
 		used_numerator = min_numerator + movement_skill * (max_numerator - min_numerator);
 		max_incr = used_numerator * used_numerator;
 		if (hor_speed_squared >= max_incr) {
 			vec3_t perpendicular;
-
 			vec3_t up_vector = { 0, 0, 1 };
-			float rotation   = acos (max_incr / hor_speed_squared) * 180 / M_PI;
+			float dot_prod = 0.0f;
+			float rotation = acos(max_incr / hor_speed_squared) * 180 / M_PI;
 
 			// Find out if rotation should be positive or negative
 			CrossProduct (current_direction, original_direction, perpendicular);
 
-			// Negative rotation => rotate 'right'
 			if ((self->fb.path_state & BOTPATH_CURLJUMP_HINT) && !onGround) {
 				// Once in the air, we rotate in opposite direction
 				// FIXME: THIS IS UGLY HACK
@@ -206,8 +204,27 @@ static void ApplyPhysics (gedict_t* self)
 					rotation = -rotation;
 				}
 			}
-			else if (perpendicular[2] < 0) {
-				rotation = -rotation;
+			else {
+				if (self->fb.wiggle_run_dir == 0) {
+					self->fb.wiggle_increasing = perpendicular[2] > 0;
+					self->fb.wiggle_run_dir = self->fb.wiggle_increasing ? 1 : -1;
+				}
+				else if (self->fb.wiggle_run_dir > self->fb.skill.wiggle_run_limit && perpendicular[2] < 0) {
+					self->fb.wiggle_increasing = false;
+				}
+				else if (self->fb.wiggle_run_dir < -self->fb.skill.wiggle_run_limit && perpendicular[2] > 0) {
+					self->fb.wiggle_increasing = 1;
+				}
+				else if (self->fb.wiggle_increasing) {
+					++self->fb.wiggle_run_dir;
+				}
+				else {
+					--self->fb.wiggle_run_dir;
+				}
+
+				if (self->fb.wiggle_increasing) {
+					rotation = -rotation;
+				}
 			}
 
 			if (rotation) {

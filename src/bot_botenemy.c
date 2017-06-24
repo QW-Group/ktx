@@ -21,22 +21,29 @@ void LookEnemy(gedict_t* player, gedict_t* enemy) {
 void BotDamageInflictedEvent(gedict_t* attacker, gedict_t* targ) {
 	targ->fb.last_hurt = g_globalvars.time;
 
-	// if object we're looking at has less firepower than us...
-	if (targ->fb.look_object && targ->fb.look_object->fb.firepower < attacker->fb.firepower) {
-		if (attacker != targ) {
-			// look at the attacker
-			targ->fb.look_object = attacker;
-			VectorCopy(attacker->s.v.origin, targ->fb.predict_origin);
+	if (targ->isBot) {
+		// in dmm4, there's a chance taking damage will reset move direction
+		if (deathmatch >= 4 && g_random() < targ->fb.skill.wiggle_toggle && abs(targ->fb.wiggle_run_dir) > self->fb.skill.wiggle_run_limit / 2) {
+			targ->fb.wiggle_run_dir = targ->fb.wiggle_run_dir < 0 ? 1 : -1;
+		}
 
-			if (! SameTeam(attacker, targ)) {
-				if (targ->s.v.goalentity == targ->s.v.enemy) {
-					targ->fb.goal_refresh_time = 0;
+		// if object we're looking at has less firepower than us...
+		if (targ->fb.look_object && targ->fb.look_object->fb.firepower < attacker->fb.firepower) {
+			if (attacker != targ) {
+				// look at the attacker
+				targ->fb.look_object = attacker;
+				VectorCopy(attacker->s.v.origin, targ->fb.predict_origin);
+
+				if (! SameTeam(attacker, targ)) {
+					if (targ->s.v.goalentity == targ->s.v.enemy) {
+						targ->fb.goal_refresh_time = 0;
+					}
+					targ->fb.enemy_time = g_globalvars.time + 1;
+					targ->s.v.enemy = NUM_FOR_EDICT(attacker);
 				}
-				targ->fb.enemy_time = g_globalvars.time + 1;
-				targ->s.v.enemy = NUM_FOR_EDICT(attacker);
-			}
-			else {
-				targ->fb.enemy_time = g_globalvars.time + 2.5;
+				else {
+					targ->fb.enemy_time = g_globalvars.time + 2.5;
+				}
 			}
 		}
 	}

@@ -859,7 +859,7 @@ void BotsPostTeleport (gedict_t* teleport_trigger, gedict_t* player, gedict_t* t
 	if (player->isBot) {
 		//if (teamplay != 0)
 		//	say_team_report_teleport(other, t);
-
+		player->fb.wiggle_run_dir = 0;
 		BotPathCheck (player, teleport_trigger);
 	}
 

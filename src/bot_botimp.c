@@ -38,6 +38,9 @@
 #define FB_CVAR_OPPONENT_MIDAIR_VOLATILITY_INCREASE "k_fbskill_vol_opp_midair_incr"
 
 #define FB_CVAR_MOVEMENT_SKILL "k_fbskill_movement"
+#define FB_CVAR_MOVEMENT_DMM4WIGGLE "k_fbskill_dmm4wiggle"
+#define FB_CVAR_MOVEMENT_DMM4WIGGLETOGGLE "k_fbskill_dmm4wiggletoggle"
+#define FB_CVAR_MOVEMENT_WIGGLEFRAMES "k_fbskill_wiggleframes"
 #define FB_CVAR_COMBATJUMP_CHANCE "k_fbskill_combatjump"
 #define FB_CVAR_MISSILEDODGE_TIME "k_fbskill_missiledodge"
 
@@ -109,6 +112,9 @@ void RegisterSkillVariables(void)
 	RegisterCvar(FB_CVAR_ENEMYDIRECTION_VOLATILITY_INCREASE);
 
 	RegisterCvar(FB_CVAR_MOVEMENT_SKILL);
+	RegisterCvar(FB_CVAR_MOVEMENT_DMM4WIGGLE);
+	RegisterCvar(FB_CVAR_MOVEMENT_WIGGLEFRAMES);
+	RegisterCvar(FB_CVAR_MOVEMENT_DMM4WIGGLETOGGLE);
 	RegisterCvar(FB_CVAR_COMBATJUMP_CHANCE);
 	RegisterCvar(FB_CVAR_MISSILEDODGE_TIME);
 
@@ -122,8 +128,10 @@ qbool SetAttributesBasedOnSkill (int skill)
 {
 	char* cfg_name;
 	qbool customised = false;
+	int aimskill;
 
-	skill = bound (MIN_FROGBOT_SKILL, skill, MAX_FROGBOT_SKILL);
+	skill = bound(MIN_FROGBOT_SKILL, skill, MAX_FROGBOT_SKILL);
+	aimskill = bound(MIN_FROGBOT_SKILL, skill, MAX_FROGBOT_AIM_SKILL);
 
 	// Old frogbot settings (items generally)
 	cvar_fset (FB_CVAR_ACCURACY, 45 - min (skill, 10) * 2.25);
@@ -137,24 +145,24 @@ qbool SetAttributesBasedOnSkill (int skill)
 	cvar_fset (FB_CVAR_LGPREF, RangeOverSkill (skill, 0.2f, 1.0f));
 	cvar_fset (FB_CVAR_VISIBILITY, 0.7071067f - (0.02f * min (skill, 10)));   // equivalent of 90 => 120 fov
 
-	cvar_fset (FB_CVAR_YAW_MIN_ERROR, RangeOverSkill(skill, 1.5, 1));
-	cvar_fset (FB_CVAR_YAW_MAX_ERROR, RangeOverSkill (skill, 5.5, 3));
-	cvar_fset (FB_CVAR_YAW_MULTIPLIER, RangeOverSkill(skill, 4, 2));
-	cvar_fset (FB_CVAR_YAW_SCALE, RangeOverSkill (skill, 5, 1.5));
+	cvar_fset (FB_CVAR_YAW_MIN_ERROR, RangeOverSkill(aimskill, 1.5, 1));
+	cvar_fset (FB_CVAR_YAW_MAX_ERROR, RangeOverSkill(aimskill, 4.5, 3));
+	cvar_fset (FB_CVAR_YAW_MULTIPLIER, RangeOverSkill(aimskill, 4, 2));
+	cvar_fset (FB_CVAR_YAW_SCALE, RangeOverSkill(aimskill, 5, 1.75));
 
-	cvar_fset (FB_CVAR_PITCH_MIN_ERROR, RangeOverSkill(skill, 1.5, 1));
-	cvar_fset (FB_CVAR_PITCH_MAX_ERROR, RangeOverSkill(skill, 4.5, 2));
-	cvar_fset (FB_CVAR_PITCH_MULTIPLIER, RangeOverSkill(skill, 4, 2));
-	cvar_fset (FB_CVAR_PITCH_SCALE, RangeOverSkill (skill, 5, 1.5));
+	cvar_fset (FB_CVAR_PITCH_MIN_ERROR, RangeOverSkill(aimskill, 1.5, 1));
+	cvar_fset (FB_CVAR_PITCH_MAX_ERROR, RangeOverSkill(aimskill, 4.5, 3));
+	cvar_fset (FB_CVAR_PITCH_MULTIPLIER, RangeOverSkill(aimskill, 4, 2));
+	cvar_fset (FB_CVAR_PITCH_SCALE, RangeOverSkill (aimskill, 5, 1.75));
 
 	cvar_fset (FB_CVAR_ATTACK_RESPAWNS, skill >= 15 ? 1 : 0);
 	cvar_fset (FB_CVAR_REACTION_TIME, RangeOverSkill (skill, 0.75f, 0.3f));
 
 	// Volatility
 	cvar_fset (FB_CVAR_MIN_VOLATILITY, 1.0f);
-	cvar_fset (FB_CVAR_MAX_VOLATILITY, RangeOverSkill (skill, 4.0f, 2.0f));
+	cvar_fset (FB_CVAR_MAX_VOLATILITY, RangeOverSkill (skill, 4.0f, 2.5f));
 	cvar_fset (FB_CVAR_INITIAL_VOLATILITY, RangeOverSkill (skill, 3.0f, 1.4f));
-	cvar_fset (FB_CVAR_REDUCE_VOLATILITY, RangeOverSkill (skill, 0.99f, 0.95f));
+	cvar_fset (FB_CVAR_REDUCE_VOLATILITY, RangeOverSkill (skill, 0.98f, 0.96f));
 	cvar_fset (FB_CVAR_OWNSPEED_VOLATILITY_THRESHOLD, RangeOverSkill (skill, 360, 450));
 	cvar_fset (FB_CVAR_OWNSPEED_VOLATILITY_INCREASE, RangeOverSkill (skill, 0.2f, 0.1f));
 	cvar_fset (FB_CVAR_ENEMYSPEED_VOLATILITY_THRESHOLD, RangeOverSkill (skill, 360, 450));
@@ -166,6 +174,9 @@ qbool SetAttributesBasedOnSkill (int skill)
 
 	// Movement
 	cvar_fset (FB_CVAR_MOVEMENT_SKILL, RangeOverSkill (skill, 0.3f, 1.0f));
+	cvar_fset (FB_CVAR_MOVEMENT_DMM4WIGGLE, skill > 10 ? 1 : 0);
+	cvar_fset (FB_CVAR_MOVEMENT_DMM4WIGGLETOGGLE, skill > 10 ? RangeOverSkill((skill - 10) * 2, 0.0f, 0.25f) : 0);
+	cvar_fset (FB_CVAR_MOVEMENT_WIGGLEFRAMES, RangeOverSkill(skill, 30, 20));
 	cvar_fset (FB_CVAR_COMBATJUMP_CHANCE, RangeOverSkill (skill, 0.03f, 0.1f));
 	cvar_fset (FB_CVAR_MISSILEDODGE_TIME, RangeOverSkill (skill, 1.0f, 0.5f));
 
@@ -231,6 +242,9 @@ void SetAttribs(gedict_t* self, qbool customised)
 
 	// Movement
 	self->fb.skill.movement = bound (0, cvar (FB_CVAR_MOVEMENT_SKILL), 1.0f);
+	self->fb.skill.wiggle_run_dmm4 = bound(0, (int)cvar(FB_CVAR_MOVEMENT_DMM4WIGGLE), 1.0f);
+	self->fb.skill.wiggle_run_limit = bound(0, (int)cvar(FB_CVAR_MOVEMENT_WIGGLEFRAMES), 45.0f);
+	self->fb.skill.wiggle_toggle = bound(0, cvar(FB_CVAR_MOVEMENT_DMM4WIGGLETOGGLE), 1.0f);
 	self->fb.skill.combat_jump_chance = bound (0, cvar (FB_CVAR_COMBATJUMP_CHANCE), 1.0f);
 	self->fb.skill.missile_dodge_time = bound (0, cvar (FB_CVAR_MISSILEDODGE_TIME), 0.5f);
 

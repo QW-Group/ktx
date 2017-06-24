@@ -496,6 +496,10 @@ typedef struct fb_botskill_s {
 	float missile_dodge_time;                // minimum time in seconds before bot dodges missile
 
 	qbool customised;                        // if set, customised file
+
+	qbool wiggle_run_dmm4;                   // if set, wiggle run on dmm4 (and up)
+	int wiggle_run_limit;                    // number of frames until bot will switch strafe direction
+	float wiggle_toggle;                     // % chance of switching direction when being hit
 } fb_botskill_t;
 
 // FIXME: Need to break this up into marker fields, client fields and entity fields
@@ -628,6 +632,8 @@ typedef struct fb_entvars_s {
 
 	vec3_t dir_move_;                           // the direction the bot wants to move in
 	float dir_speed;                            // the magnitude of vector the bot wants to move in
+	int wiggle_run_dir;                         // when wiggle-running, going left or right
+	qbool wiggle_increasing;                 // dictates direction, positive or negative
 	vec3_t last_cmd_direction;                  // the direction the bot did move in (scaled for speed)
 	float ledge_backup_time;
 

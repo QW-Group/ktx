@@ -107,6 +107,7 @@ void BotClientEntersEvent(gedict_t* self, gedict_t* spawn_pos)
 	self->fb.state = 0;
 	self->fb.min_fire_time = g_globalvars.time + self->fb.skill.awareness_delay;
 	self->fb.last_rndaim_time = 0;
+	self->fb.wiggle_run_dir = 0;
 
 	SetMarker(self, spawn_pos);
 
