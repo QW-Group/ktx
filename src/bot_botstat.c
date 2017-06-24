@@ -19,6 +19,10 @@ float newceil( float f )
 
 float TotalStrength (float health, float armorValue, float armorType)
 {
+	if (match_in_progress < 2) {
+		return 1000.0f;
+	}
+
 	return max (0, min (
 		health / (1 - armorType),
 		health + armorValue
