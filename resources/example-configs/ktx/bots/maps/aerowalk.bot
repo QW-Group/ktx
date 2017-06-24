@@ -138,9 +138,9 @@ SetMarkerPath 18 2 87
 SetGoal 19 10
 SetZone 19 5
 SetMarkerPath 19 0 43
-SetMarkerPath 19 1 20
 SetZone 20 5
 SetMarkerViewOfs 20 30
+SetMarkerFlag 20 n
 SetMarkerPath 20 0 19
 SetMarkerPath 20 1 43
 SetGoal 21 19
@@ -276,10 +276,9 @@ SetGoal 43 15
 SetZone 43 5
 SetMarkerPath 43 0 92
 SetMarkerPath 43 1 19
-SetMarkerPath 43 2 20
-SetMarkerPath 43 3 7
-SetMarkerPath 43 4 8
-SetMarkerPath 43 5 78
+SetMarkerPath 43 2 7
+SetMarkerPath 43 3 8
+SetMarkerPath 43 4 78
 SetGoal 44 1
 SetZone 44 1
 SetMarkerPath 44 0 25

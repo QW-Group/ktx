@@ -45,6 +45,8 @@ const char* EncodeMarkerFlags (int marker_flags)
 		*s++ = 'e';
 	if (marker_flags & MARKER_FIRE_ON_MATCH_START)
 		*s++ = 'f';
+	if (marker_flags & MARKER_NOTOUCH)
+		*s++ = 'n';
 
 	if (s == buffer)
 		return "(none)";
@@ -77,6 +79,9 @@ int DecodeMarkerFlagString (const char* s)
 			break;
 		case 'e':
 			marker_flags |= MARKER_ESCAPE_ROUTE;
+			break;
+		case 'n':
+			marker_flags |= MARKER_NOTOUCH;
 			break;
 		}
 	}

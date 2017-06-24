@@ -14,6 +14,10 @@ void check_marker(gedict_t* self, gedict_t* other) {
 	vec3_t temp;
 	float distance;
 
+	if (self->fb.T & MARKER_NOTOUCH) {
+		return;
+	}
+
 	if (g_random() < 0.25) {
 		self->fb.touchPlayer = other;
 		self->fb.touchPlayerTime = g_globalvars.time + 2.5;

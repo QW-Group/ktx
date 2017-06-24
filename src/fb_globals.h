@@ -111,6 +111,7 @@ extern gedict_t* dropper;
 #define FALL_DEATH 3
 
 // Path flags
+// NOTE: Editor won't save newly-added flags unless added to EXTERNAL_MARKER_PATH_FLAGS
 #define WATERJUMP_              (1 <<  1)
 #define DM6_DOOR                (1 <<  8)
 #define ROCKET_JUMP             (1 <<  9)
@@ -134,6 +135,7 @@ extern gedict_t* dropper;
 #define NOT_ROCKET_JUMP (~ROCKET_JUMP)
 
 // Marker flags (FIXME: fb.T?  check.  consistent naming)
+// NOTE: Editor won't save newly-added flags unless added to EXTERNAL_MARKER_FLAGS
 #define UNREACHABLE                       1   // Typically set for markers that are lava, waterlevel 3?  (automate?)
 #define T_WATER                           2   // Set by server if the marker is in liquid
 #define T_NO_AIR                          4   // Set by server (means the bot would be trapped underwater - dm3 tunnel for instance)
@@ -144,6 +146,7 @@ extern gedict_t* dropper;
 #define MARKER_ESCAPE_ROUTE             128   // (not currently implemented) bot should head towards marker when in lava or slime (think amphi2/end)
 #define MARKER_DYNAMICALLY_ADDED        256   // Added dynamically by server.  Do not include in .bot file generation
 #define MARKER_EXPLICIT_VIEWOFFSET      512   // Viewoffset has been set by map defintion and should be included in .bot file generation
+#define MARKER_NOTOUCH                 1024   // Not touchable - used when two markers on top of each other
 
 // Bot flags (FIXME: fb.state?  check.  consistent naming, comment with descriptions)
 #define CAMPBOT 1
@@ -242,6 +245,7 @@ void SelectWeapon (void);
 void SetFireButton (gedict_t* self, vec3_t rel_pos, float rel_dist);
 void FrogbotWeaponFiredEvent (gedict_t* self);
 void FindRocketExplosionPoint(vec3_t player_origin, vec3_t player_angles, vec3_t output, float* distance_frac);
+qbool AttackFinished(gedict_t* self);
 
 // marker_util.qc
 void AssignVirtualGoal (gedict_t* item);
@@ -383,8 +387,9 @@ void SetMarker (gedict_t* client, gedict_t* marker);
 #define PAST(x) (g_globalvars.time >= self->fb.x)
 #define FUTURE(x) (g_globalvars.time < self->fb.x)
 
-#define MIN_FROGBOT_SKILL  0
-#define MAX_FROGBOT_SKILL 20
+#define MIN_FROGBOT_SKILL      0
+#define MAX_FROGBOT_SKILL     20
+#define MAX_FROGBOT_AIM_SKILL 20
 
 #define PASSINTVEC3(x) ((int)x[0]),((int)x[1]),((int)x[2])
 #define PASSSCALEDINTVEC3(x,y) ((int)(x[0]*y)),((int)(x[1]*y)),((int)(x[2]*y))
