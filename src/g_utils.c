@@ -88,25 +88,32 @@ float dist_random (float minValue, float maxValue, float spreadFactor)
 	return minValue + (maxValue - minValue) * sum;
 }
 
-#define PR2SetFieldOffset(ent, field) (ent->s.v.field ## _ = NUM_FOR_EDICT(ent) * sizeof(gedict_t) + FOFS(field))
+// Should be "" but too many references in code simply checking for 0 to mean null string...
+#define PR2SetStringFieldOffset(ent, field) \
+	ent->s.v.field ## _ = NUM_FOR_EDICT(ent) * sizeof(gedict_t) + FOFS(field); \
+	ent->field = 0;
+
+#define PR2SetFuncFieldOffset(ent, field) \
+	ent->s.v.field ## _ = NUM_FOR_EDICT(ent) * sizeof(gedict_t) + FOFS(field); \
+	ent->field = (func_t) SUB_Null;
 
 void initialise_spawned_ent(gedict_t* ent)
 {
-	PR2SetFieldOffset(ent, classname);
-	PR2SetFieldOffset(ent, model);
-	PR2SetFieldOffset(ent, touch);
-	PR2SetFieldOffset(ent, use);
-	PR2SetFieldOffset(ent, think);
-	PR2SetFieldOffset(ent, blocked);
-	PR2SetFieldOffset(ent, weaponmodel);
-	PR2SetFieldOffset(ent, netname);
-	PR2SetFieldOffset(ent, target);
-	PR2SetFieldOffset(ent, targetname);
-	PR2SetFieldOffset(ent, message);
-	PR2SetFieldOffset(ent, noise);
-	PR2SetFieldOffset(ent, noise1);
-	PR2SetFieldOffset(ent, noise2);
-	PR2SetFieldOffset(ent, noise3);
+	PR2SetStringFieldOffset(ent, classname);
+	PR2SetStringFieldOffset(ent, model);
+	PR2SetFuncFieldOffset(ent, touch);
+	PR2SetFuncFieldOffset(ent, use);
+	PR2SetFuncFieldOffset(ent, think);
+	PR2SetFuncFieldOffset(ent, blocked);
+	PR2SetStringFieldOffset(ent, weaponmodel);
+	PR2SetStringFieldOffset(ent, netname);
+	PR2SetStringFieldOffset(ent, target);
+	PR2SetStringFieldOffset(ent, targetname);
+	PR2SetStringFieldOffset(ent, message);
+	PR2SetStringFieldOffset(ent, noise);
+	PR2SetStringFieldOffset(ent, noise1);
+	PR2SetStringFieldOffset(ent, noise2);
+	PR2SetStringFieldOffset(ent, noise3);
 }
 
 gedict_t *spawn(  )

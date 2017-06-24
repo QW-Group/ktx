@@ -125,7 +125,7 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 
 		if ( api_ver < GAME_API_VERSION )
 		{
-			G_cprint("Mod requried API_VERSION %d or higher, server have %d\n", GAME_API_VERSION, api_ver);
+			G_cprint("Mod requires API_VERSION %d or higher, server have %d\n", GAME_API_VERSION, api_ver);
 			return 0;
 		}
 
