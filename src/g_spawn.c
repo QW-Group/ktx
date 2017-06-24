@@ -204,7 +204,7 @@ void            SP_func_bossgate();
 void            SP_func_door();
 void            SP_func_door_secret();
 void            SP_func_plat();
-void            SP_funcref_train();
+void            SP_func_train();
 void            SP_misc_teleporttrain();
 void            SP_func_button();
 
@@ -334,7 +334,7 @@ Used as a positional target for lightning.
 	{"func_door",			SP_func_door},
 	{"func_door_secret",		SP_func_door_secret},
 	{"func_plat",			SP_func_plat},
-	{"funcref_train",			SP_funcref_train},
+	{"func_train",			SP_func_train},
 	{"misc_teleporttrain",		SP_misc_teleporttrain},
 	{"func_button",			SP_func_button},
 

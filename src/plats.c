@@ -274,12 +274,11 @@ void SP_func_plat()
 
 	plat_spawn_inside_trigger();	// the "start moving" trigger 
 
-	if ( self->targetname )
-	{
+	if (self->targetname) {
 		self->state = STATE_UP;
-		self->use = ( func_t ) plat_use;
-	} else
-	{
+		self->use = (func_t)plat_use;
+	}
+	else {
 		setorigin( self, PASSVEC3( self->pos2 ) );
 		self->state = STATE_BOTTOM;
 	}
@@ -310,20 +309,21 @@ void train_use()
 
 void train_wait()
 {
-	if ( self->wait )
-	{
+	if (self->wait) {
 		self->s.v.nextthink = self->s.v.ltime + self->wait;
-		sound( self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->noise, 1,
-			    ATTN_NORM );
-	} else
+		sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->noise, 1, ATTN_NORM);
+	}
+	else {
 		self->s.v.nextthink = self->s.v.ltime + 0.1;
+	}
 
     // make trains stop if frozen
-	if( match_in_progress == 2
-		|| ( !cvar( "k_freeze" ) && !match_in_progress )
+	if (match_in_progress == 2
+		|| (!cvar("k_freeze") && !match_in_progress)
 		|| k_practice  // #practice mode#
-	  )
-		self->think = ( func_t ) train_next;
+		) {
+		self->think = (func_t)train_next;
+	}
 }
 
 void train_next()
@@ -383,7 +383,7 @@ sounds
 1) ratchet metal
 
 */
-void SP_funcref_train()
+void SP_func_train()
 {
 	if ( !self->speed )
 		self->speed = 100;
