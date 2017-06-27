@@ -147,13 +147,13 @@ qbool SetAttributesBasedOnSkill (int skill)
 
 	cvar_fset (FB_CVAR_YAW_MIN_ERROR, RangeOverSkill(aimskill, 1.5, 1));
 	cvar_fset (FB_CVAR_YAW_MAX_ERROR, RangeOverSkill(aimskill, 4.5, 3));
-	cvar_fset (FB_CVAR_YAW_MULTIPLIER, RangeOverSkill(aimskill, 4, 2));
-	cvar_fset (FB_CVAR_YAW_SCALE, RangeOverSkill(aimskill, 5, 1.5));
+	cvar_fset (FB_CVAR_YAW_MULTIPLIER, RangeOverSkill(aimskill, 4, 2.5));
+	cvar_fset (FB_CVAR_YAW_SCALE, RangeOverSkill(aimskill, 5, 2));
 
 	cvar_fset (FB_CVAR_PITCH_MIN_ERROR, RangeOverSkill(aimskill, 1.5, 1));
 	cvar_fset (FB_CVAR_PITCH_MAX_ERROR, RangeOverSkill(aimskill, 4.5, 3));
 	cvar_fset (FB_CVAR_PITCH_MULTIPLIER, RangeOverSkill(aimskill, 4, 2));
-	cvar_fset (FB_CVAR_PITCH_SCALE, RangeOverSkill (aimskill, 5, 1.5));
+	cvar_fset (FB_CVAR_PITCH_SCALE, RangeOverSkill (aimskill, 5, 2));
 
 	cvar_fset (FB_CVAR_ATTACK_RESPAWNS, skill >= 15 ? 1 : 0);
 	cvar_fset (FB_CVAR_REACTION_TIME, RangeOverSkill (skill, 0.75f, 0.3f));
