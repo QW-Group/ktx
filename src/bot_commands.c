@@ -1860,6 +1860,7 @@ static void BotInitialiseServer (void)
 }
 
 static float last_auto_client = 0;
+float last_frame_time = 0;
 
 void BotStartFrame(void)
 {
@@ -1868,6 +1869,8 @@ void BotStartFrame(void)
 	int min_required_clients = cvar(FB_CVAR_AUTOADD_LIMIT);
 	int max_required_clients = cvar(FB_CVAR_AUTOREMOVE_AT);
 	int auto_delay = cvar(FB_CVAR_AUTO_DELAY);
+
+	last_frame_time = g_globalvars.time;
 
 	// disable feature if it has been mis-configured
 	if (min_required_clients && max_required_clients && min_required_clients > max_required_clients) {

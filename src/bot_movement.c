@@ -348,7 +348,9 @@ static void BestJumpingDirection (gedict_t* self)
 
 void BotSetCommand (gedict_t* self)
 {
-	float msec = (g_globalvars.time - self->fb.last_cmd_sent) * 1000;
+	extern float last_frame_time;
+	float msec_since_last = (last_frame_time - self->fb.last_cmd_sent) * 1000;
+	int cmd_msec = (int)msec_since_last;
 	int weapon_script_impulse = 0;
 	int impulse = 0;
 	qbool jumping;
@@ -356,9 +358,23 @@ void BotSetCommand (gedict_t* self)
 	vec3_t direction;
 
 	BotPerformRocketJump (self);
-	if (msec < 1) {
-		msec = g_globalvars.frametime * 1000;
+
+	if (cmd_msec) {
+		self->fb.cmd_msec_lost += (msec_since_last - cmd_msec);
+		if (self->fb.cmd_msec_lost >= 1) {
+			self->fb.cmd_msec_lost -= 1;
+			cmd_msec += 1;
+		}
 	}
+	else if (self->fb.cmd_msec_last) {
+		// Probably re-sending after blocked(), re-use old number
+		cmd_msec = self->fb.cmd_msec_last;
+	}
+	else {
+		cmd_msec = 12;
+	}
+
+	G_sprint(self, PRINT_HIGH, "Movement length @ %f: %d\n", last_frame_time, cmd_msec);
 
 	// dir_move_ is the direction we want to move in, but need to take inertia into effect
 	// ... as rough guide (and save doubling physics calculations), scale command > 
@@ -439,7 +455,7 @@ void BotSetCommand (gedict_t* self)
 
 	trap_SetBotCMD (
 		NUM_FOR_EDICT (self),
-		msec,
+		cmd_msec,
 		PASSVEC3(self->fb.desired_angle),
 		PASSVEC3(direction),
 		(firing ? 1 : 0) | (jumping ? 2 : 0),
@@ -448,7 +464,8 @@ void BotSetCommand (gedict_t* self)
 
 	self->fb.next_impulse = 0;
 	self->fb.botchose = false;
-	self->fb.last_cmd_sent = g_globalvars.time;
+	self->fb.last_cmd_sent = last_frame_time;
+	self->fb.cmd_msec_last = cmd_msec;
 
 	VectorClear (self->fb.obstruction_normal);
 	if (self->s.v.button0 && !firing) {

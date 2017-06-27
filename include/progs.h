@@ -717,6 +717,9 @@ typedef struct fb_entvars_s {
 
 	// last time this player was hurt
 	float               last_hurt;
+
+	float               cmd_msec_lost;
+	int                 cmd_msec_last;
 } fb_entvars_t;
 #endif
 
