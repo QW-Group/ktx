@@ -2277,8 +2277,8 @@ int get_fair_pack()
 
 int get_fallbunny()
 {
-	// Yawnmode: no broken ankle
-	return k_yawnmode ? 1 : cvar( "k_fallbunny" );
+	// Yawnmode/race: no broken ankle
+	return k_yawnmode || isRACE() ? 1 : cvar( "k_fallbunny" );
 }
 
 //======================================

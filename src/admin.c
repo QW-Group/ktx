@@ -708,6 +708,11 @@ void ToggleFallBunny ()
 		return;
 	}
 
+	if (isRACE()) {
+		G_sprint(self, 2, "Command blocked because race mode is active\n");
+		return;
+	}
+
 	if ( k_yawnmode ) {
 		G_sprint(self, 2, "Command blocked because yawnmode is active\n");
 		return;
