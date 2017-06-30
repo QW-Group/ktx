@@ -131,6 +131,11 @@ static void race_match_round_end(char* demoFileName);
 
 void StatsToFile ();
 
+static float race_vlen(vec3_t velocity)
+{
+	return sqrt(velocity[0] * velocity[0] + velocity[1] * velocity[1]);
+}
+
 fileHandle_t race_fhandle = -1;
 race_t			race; // whole race struct
 
@@ -2250,7 +2255,7 @@ void race_think( void )
 							G_centerprint( p, "following %s\n%s\nspeed: %4.1f\ntime: %s",
 								racer->netname,
 								( n == p ) ? redtext( "== you're next in line-up ==" ) : "",
-								vlen( racer->s.v.velocity ),
+								race_vlen(racer->s.v.velocity),
 								dig3s( "%3.1f", race_time() / 1000.0 )
 							);
 						}
@@ -2272,7 +2277,7 @@ void race_think( void )
 
 								if (chasing->ct == ctPlayer && chasing->racer) {
 									tracking_text = va("following %s\n", chasing->netname);
-									tracking_speed = va("speed: %4.1f\n", vlen(chasing->s.v.velocity));
+									tracking_speed = va("speed: %4.1f\n", race_vlen(chasing->s.v.velocity));
 								}
 							}
 
