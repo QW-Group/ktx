@@ -1739,25 +1739,19 @@ void race_start( qbool cancelrecord, const char *fmt, ... )
 		}
 	}
 	else {
+		race.racers_competing = 0;
+
 		r = race_get_from_line();
-		if ( !r ) {
-			race_shutdown( "race_start: race_get_from_line() == NULL, shutdown race\n" );
-			return;
+		if (r) {
+			race_make_active_racer(r, s);
+
+			n = race_set_next_in_line();
+			if (n && n != r) {
+				G_sprint(n, 2, "You are %s in line!\n", redtext("next"));
+			}
+
+			race.racers_competing = 1;
 		}
-
-		n = race_set_next_in_line();
-		if ( !n ) {
-			race_shutdown( "race_start: race_set_next_in_line() == NULL, shutdown race\n" );
-			return;
-		}
-
-		race_make_active_racer(r, s);
-
-		if ( n != r ) {
-			G_sprint( n, 2, "Your are %s in line!\n", redtext( "next" ) );
-		}
-
-		race.racers_competing = 1;
 	}
 
 	// set light on next checkpoint
