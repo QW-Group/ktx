@@ -119,7 +119,7 @@ static void race_update_pacemaker(void);
 static void race_clear_pacemaker(void);
 static void race_init_capture(void);
 static void race_save_position(void);
-static void race_finish_capture(qbool store, char* filename);
+static void race_finish_capture(qbool store);
 static void race_pacemaker_race_start(void);
 static void race_remove_pacemaker_indicator(void);
 static void race_make_active_racer(gedict_t* r, gedict_t* s);
@@ -127,7 +127,7 @@ static qbool race_end(gedict_t* racer, qbool valid, qbool complete);
 static char* race_position_string(int position);
 static qbool race_simultaneous(void);
 static void race_update_closest_positions(void);
-static void race_match_round_end(char* demoFileName);
+static void race_match_round_end(void);
 
 void StatsToFile ();
 
@@ -160,15 +160,15 @@ static int get_server_port ( void )
 		return i;
 }
 
-static const char* race_top_filename(void)
+static const char* race_filename(const char* extension)
 {
 	static char filename[128];
 
 	if (cvar("k_race_times_per_port")) {
-		snprintf(filename, sizeof(filename), "race/race[%s_r%02d]-w%1ds%1d_%d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart, get_server_port());
+		snprintf(filename, sizeof(filename), "race/race[%s_r%02d]-w%1ds%1d_%d.%s", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart, get_server_port(), extension);
 	}
 	else {
-		snprintf(filename, sizeof(filename), "race/race[%s_r%02d]-w%1ds%1d.top", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart);
+		snprintf(filename, sizeof(filename), "race/race[%s_r%02d]-w%1ds%1d.%s", g_globalvars.mapname, race.active_route, race.weapon, race.falsestart, extension);
 	}
 
 	return filename;
@@ -1115,6 +1115,7 @@ static void race_over(void)
 {
 	char demoFileName[MAX_OSPATH];
 	int i, timeposition, nameposition;
+	int best_time_position = 1000;
 	char* pos;
 	gedict_t* racer = NULL;
 	qbool keep_demo = false;
@@ -1262,7 +1263,8 @@ static void race_over(void)
 					race_position_string(timeposition + 1)
 				);
 
-				keep_demo |= timeposition == 0 || !blocked_record;
+				best_time_position = min(timeposition, best_time_position);
+				keep_demo |= !blocked_record;
 			}
 		}
 		else {
@@ -1279,11 +1281,11 @@ static void race_over(void)
 	}
 
 	if (race_match_started()) {
-		race_match_round_end(demoFileName);
+		race_match_round_end();
 	}
 	else {
 		// Continue match with next run
-		race_finish_capture(keep_demo, demoFileName);
+		race_finish_capture(best_time_position == 0 && !blocked_record);
 		race_start(!keep_demo, "");
 	}
 }
@@ -2736,7 +2738,7 @@ qbool race_load_route( int route )
 	read_topscores();
 
 	if (!strnull(cvar_string("cs_address"))) {
-		localcmd("\nsv_web_postfile ServerApi/UploadTopFile \"\" %s\n", race_top_filename());
+		localcmd("\nsv_web_postfile ServerApi/UploadTopFile \"\" %s\n", race_filename("top"));
 		trap_executecmd();
 	}
 
@@ -2908,7 +2910,7 @@ void write_topscores( void )
 	if ( !race.active_route )
 		return;
 
-	race_fwopen("%s", race_top_filename());
+	race_fwopen("%s", race_filename("top"));
 	if ( race_fhandle < 0 )
 		return;
 
@@ -2972,7 +2974,7 @@ void read_topscores( void )
 	if ( !race.active_route )
 		return;
 
-	race_fropen("%s", race_top_filename());
+	race_fropen("%s", race_filename("top"));
 	if ( race_fhandle >= 0 )
 	{
 		race_fgets( line, MAX_TXTLEN );
@@ -3550,29 +3552,13 @@ void race_pacemaker(void)
 	}
 	else {
 		position = 0;
-		if (trap_CmdArgc() == 2) {
-			position = atoi(buffer);
-
-			if (position == 0 && buffer[0] != '0') {
-				G_sprint(self, PRINT_HIGH, "Unknown pacemaker command '%s'.\n", buffer);
-				return;
-			}
-
-			--position;
-		}
-
-		if (position < 0 || position >= sizeof(race.records) / sizeof(race.records[0]) || race.records[position].time >= RACE_INVALID_RECORD_TIME)
-		{
-			G_sprint(self, PRINT_HIGH, "No race record #%2d.\n", position + 1);
-			return;
-		}
 	}
 
 	// Try and load
-	race_fropen("race/%s.pos", race.records[position].demoname);
+	race_fropen("%s", race_filename("pos"));
 	if (race_fhandle < 0)
 	{
-		G_sprint(self, PRINT_HIGH, "Unable to load positions for record #%2d.\n", position + 1);
+		G_sprint(self, PRINT_HIGH, "Unable to load pacemaker record.\n", position + 1);
 		return;
 	}
 
@@ -3763,13 +3749,13 @@ static void race_init_capture(void)
 	}
 }
 
-static void race_finish_capture(qbool store, char* filename)
+static void race_finish_capture(qbool store)
 {
 	// Multi-racing: only store positions for those setting a record?
 	gedict_t* racer;
 
 	if (store && race.race_recording) {
-		race_fwopen("race/%s.pos", filename);
+		race_fwopen("%s", race_filename("pos"));
 		race_fprintf("version %d\n", POS_FILE_VERSION);
 
 		for (racer = world; (racer = race_find_race_participants(racer)); /**/) {
@@ -4519,7 +4505,7 @@ void race_switch_usermode(const char* displayName, int players_per_team)
 }
 
 // Return true if new countdown should be started
-static void race_match_round_end(char* demoFileName)
+static void race_match_round_end(void)
 {
 	gedict_t* racer;
 
@@ -4581,7 +4567,7 @@ static void race_match_round_end(char* demoFileName)
 		}
 		else {
 			// We have a winner, end the race
-			race_finish_capture(true, demoFileName);
+			race_finish_capture(false);
 			EndMatch(false);
 			return;
 		}
@@ -4595,7 +4581,7 @@ static void race_match_round_end(char* demoFileName)
 		if (system->round_max_diff && rounds_remaining * system->round_max_diff < sc) {
 			// We have winner, end the race
 			G_bprint(PRINT_HIGH, "%d points (%d rounds) available... ending match\n", rounds_remaining * system->round_max_diff, rounds_remaining);
-			race_finish_capture(true, demoFileName);
+			race_finish_capture(false);
 			EndMatch(false);
 			return;
 		}
