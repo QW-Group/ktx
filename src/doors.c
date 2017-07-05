@@ -811,11 +811,19 @@ void fd_secret_done()
 
 void secret_blocked()
 {
-	if ( g_globalvars.time < self->attack_finished )
+	if (g_globalvars.time < self->attack_finished) {
 		return;
+	}
+
 	self->attack_finished = g_globalvars.time + 0.5;
 	other->deathtype = dtSQUISH;
-	T_Damage( other, self, self, self->dmg );
+
+	if (self->think1 == fd_secret_move1) {
+		T_Damage(other, self, self, self->dmg * 100);
+	}
+	else {
+		T_Damage(other, self, self, self->dmg);
+	}
 }
 
 /*
