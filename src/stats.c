@@ -463,7 +463,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 	int   ra, ya, ga;
 	int   mh, d_rl, k_rl, t_rl;
 	int   quad, pent, ring;
-	float ph_rl, vh_rl, h_rl, a_rl, ph_gl, vh_gl, a_gl, h_lg, a_lg, h_sg, a_sg, h_ssg, a_ssg;
+	float ph_rl, vh_rl, h_rl, a_rl, ph_gl, vh_gl, a_gl, h_lg, a_lg, h_sg, a_sg, h_ssg, a_ssg, h_axe, h_ng, h_sng;
 	float e_sg, e_ssg, e_lg;
 	int res, str, hst, rgn;
 
@@ -492,6 +492,9 @@ void OnePlayerStats(gedict_t *p, int tp)
 	a_sg  = p->ps.wpn[wpSG].attacks;
 	h_ssg = p->ps.wpn[wpSSG].hits;
 	a_ssg = p->ps.wpn[wpSSG].attacks;
+	h_ng = p->ps.wpn[wpNG].attacks;
+	h_sng = p->ps.wpn[wpSNG].attacks;
+	h_axe = p->ps.wpn[wpAXE].hits;
 
 	e_sg  = 100.0 * h_sg  / max(1, a_sg);
 	e_ssg = 100.0 * h_ssg / max(1, a_ssg);
@@ -627,6 +630,12 @@ void OnePlayerStats(gedict_t *p, int tp)
 	// spawnfrags
 	if ( !isCTF() )
 		G_bprint(2, "  %s: %d\n", redtext("SpawnFrags"), p->ps.spawn_frags);
+
+	if (isDuel() && deathmatch == 4 && ((int)cvar("k_disallow_weapons") & IT_LIGHTNING) == 0) {
+		qbool illegal = ra || ya || ga || a_rl || a_gl || h_sg || h_ssg || h_axe || h_sng || h_ng;
+
+		G_bprint(PRINT_HIGH, "  %s: %d \20%s\21\n", redtext("LGC Score"), (int)(e_lg * (p->ps.wpn[wpLG].edamage / 100)), illegal ? redtext("not legal") : "legal");
+	}
 
 	//	}
 	if ( !tp )
