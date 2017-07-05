@@ -1812,7 +1812,13 @@ void Bot_Print_Thinking (void)
 						name = "quad";
 					else if (streq(name, "item_health") && ((int)goal->s.v.spawnflags & H_MEGA))
 						name = "mega";
-					strlcat(data, va("Goal %2d: %s (%3.1f) %d\n", i + 1, name, goal->fb.desire(bot, goal), (int) max(0, goal->fb.goal_respawn_time - g_globalvars.time)), sizeof (data));
+					if (!strncmp(name, "weapon_", sizeof("weapon_") - 1)) {
+						name += sizeof("weapon_") - 1;
+					}
+					else if (!strncmp(name, "item_", sizeof("item_") - 1)) {
+						name += sizeof("item_") - 1;
+					}
+					strlcat(data, va("%2d: %s (%3.1f) %d\n", i + 1, name, goal->fb.desire(bot, goal), (int) max(0, goal->fb.goal_respawn_time - g_globalvars.time)), sizeof (data));
 				}
 			}
 		}

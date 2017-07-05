@@ -440,12 +440,15 @@ void CheckOvertime()
 
 		G_bprint(2, "\x90%s\x91 minute%s overtime follows\n", dig3(k_exttime), count_s(k_exttime));
 		self->s.v.nextthink = g_globalvars.time + 1;
+		match_end_time = match_start_time + self->cnt * 60;
 	}
 	else if ( k_overtime == 2 ) {
 		k_sudden_death = SD_NORMAL;
+		match_end_time = 0;
 	}
 	else {
 		k_sudden_death = SD_TIEBREAK;
+		match_end_time = 0;
 	}
 
 	if ( k_sudden_death ) {
@@ -766,7 +769,7 @@ void StartMatch ()
 
 	HideSpawnPoints();
 
-	match_start_time  = g_globalvars.time;
+	match_start_time = g_globalvars.time;
 	g_matchstarttime = (int) (g_globalvars.time*1000);
 	match_in_progress = 2;
 
@@ -806,19 +809,23 @@ void StartMatch ()
 		int minutes = bound(0, HM_timelimit() / 60, 9999);
 		int seconds = HM_timelimit() % 60;
 
-		if (seconds)
+		if (seconds) {
 			++minutes;
-		else
+		}
+		else {
 			seconds = 60;
+		}
 
 		self->cnt = minutes;
 		self->cnt2 = seconds;
 		localcmd("serverinfo status \"%d min left\"\n", minutes);
+		match_end_time = match_start_time + (minutes - 1) * 60 + seconds;
 	}
 	else {
 		self->cnt = bound(0, timelimit, 9999);
 		self->cnt2 = 60;
 		localcmd("serverinfo status \"%d min left\"\n", (int)timelimit);
+		match_end_time = match_start_time + self->cnt * 60;
 	}
 
 	self->think = ( func_t ) TimerThink;

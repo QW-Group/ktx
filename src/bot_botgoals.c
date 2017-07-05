@@ -75,6 +75,12 @@ void EvalGoal(gedict_t* self, gedict_t* goal_entity) {
 			return;
 		}
 
+		// If item isn't going to respawn before match end
+		if (match_end_time && goal_entity->fb.goal_respawn_time > match_end_time) {
+			goal_entity->fb.saved_goal_desire = 0;
+			return;
+		}
+
 		// Calculate travel time to the goal
 		from_marker = self->fb.touch_marker;
 		to_marker = goal_entity->fb.touch_marker;

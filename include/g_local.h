@@ -884,6 +884,7 @@ extern	float k_userid;
 extern	float k_whonottime;     // NOT_SURE: 
 extern	float match_in_progress;// if a match has begun
 extern  float match_start_time;	// time when match has been started
+extern  float match_end_time;   // time when match is expected to end
 extern	float match_over;       // boolean - whether or not the match stats have been printed at end of game
 extern	gedict_t *newcomer;     // stores last player who joined
 extern	int   k_overtime;		// is overtime is going on

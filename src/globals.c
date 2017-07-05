@@ -41,6 +41,7 @@ float k_userid = 0;		// somethink like numbers of ghosts + 1
 float k_whonottime;     // NOT_SURE: 
 float match_in_progress = 0;    // if a match has begun
 float match_start_time; // time when match has been started
+float match_end_time;   // time when match is expected to end
 float match_over;       // boolean - whether or not the match stats have been printed at end of game
 gedict_t *newcomer = g_edicts;     // stores last player who joined
 
