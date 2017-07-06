@@ -726,14 +726,14 @@ static qbool fb_powerup_touch (gedict_t* item, gedict_t* player)
 	return false;
 }
 
-static void fb_powerup_taken (gedict_t* item, gedict_t* player)
+static void fb_powerup_taken(gedict_t* item, gedict_t* player)
 {
-	UpdateGoalEntity (item, player);
-	item->fb.goal_respawn_time = item->s.v.nextthink;
-	AssignVirtualGoal (item);
+	UpdateGoalEntity(item, player);
+	item->fb.goal_respawn_time = item->s.v.nextthink + AUTOTRACK_POWERUPS_PREDICT_TIME;
+	AssignVirtualGoal(item);
 	item->s.v.solid = SOLID_TRIGGER;
 	player->fb.last_mm2_spot = 0;
-	BotTookMessage (item, player);
+	BotTookMessage(item, player);
 }
 
 static void fb_spawn_pent (gedict_t* ent)

@@ -440,7 +440,7 @@ void CheckOvertime()
 
 		G_bprint(2, "\x90%s\x91 minute%s overtime follows\n", dig3(k_exttime), count_s(k_exttime));
 		self->s.v.nextthink = g_globalvars.time + 1;
-		match_end_time = match_start_time + self->cnt * 60;
+		match_end_time += self->cnt * 60;
 	}
 	else if ( k_overtime == 2 ) {
 		k_sudden_death = SD_NORMAL;

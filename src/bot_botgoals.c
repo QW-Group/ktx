@@ -20,7 +20,8 @@ void SUB_regen_powerups ();
 
 qbool WaitingToRespawn (gedict_t* ent)
 {
-	return ent->s.v.nextthink > g_globalvars.time && (ent->think == (func_t)SUB_regen || ent->think == (func_t)SUB_regen_powerups);
+	return (ent->s.v.nextthink >= g_globalvars.time && ent->think == (func_t)SUB_regen_powerups) ||
+	       (ent->s.v.nextthink > g_globalvars.time && ent->think == (func_t)SUB_regen);
 }
 
 // If an item is picked up, all bots heading for that item should re-evaluate their goals
@@ -59,16 +60,19 @@ void EvalGoal(gedict_t* self, gedict_t* goal_entity) {
 	float goal_desire = goal_entity && goal_entity->fb.desire ? goal_entity->fb.desire (self, goal_entity) : 0;
 	float goal_time = 0.0f;
 
-	if (!goal_entity)
+	if (!goal_entity) {
 		return;
+	}
 
-	if (self->fb.fixed_goal != NULL)
+	if (self->fb.fixed_goal != NULL) {
 		goal_desire = (self->fb.fixed_goal == goal_entity ? 1000 : 0);
+	}
 
 	goal_entity->fb.saved_goal_desire = goal_desire;
 	if (goal_desire > 0) {
-		if (POVDMM4DontWalkThroughDoor (goal_entity))
+		if (POVDMM4DontWalkThroughDoor(goal_entity)) {
 			return;
+		}
 
 		// If one person on a team is sitting waiting for an item to respawn
 		if (GoalLeaveForTeammate (self, goal_entity)) {
@@ -91,8 +95,9 @@ void EvalGoal(gedict_t* self, gedict_t* goal_entity) {
 		if (self->fb.goal_enemy_repel) {
 			// Time for our enemy to get there
 			from_marker = g_edicts[self->s.v.enemy].fb.touch_marker;
-			ZoneMarker (from_marker, to_marker, path_normal, g_edicts[self->s.v.enemy].fb.canRocketJump);
+			ZoneMarker(from_marker, to_marker, path_normal, g_edicts[self->s.v.enemy].fb.canRocketJump);
 			traveltime = SubZoneArrivalTime(zone_time, middle_marker, to_marker, g_edicts[self->s.v.enemy].fb.canRocketJump);
+
 			// If enemy will get there much faster than we will...
 			if (traveltime <= (goal_time - 1.25)) {
 				goal_desire += self->fb.goal_enemy_repel;
@@ -103,11 +108,14 @@ void EvalGoal(gedict_t* self, gedict_t* goal_entity) {
 			}
 		}
 
-		if (DM6DoorLogic (self, goal_entity)) {
+		if (DM6DoorLogic(self, goal_entity)) {
 			return;
 		}
 
-		goal_entity->fb.saved_respawn_time = goal_entity->fb.goal_respawn_time - g_globalvars.time + (goal_time * self->fb.skill.prediction_error * g_random());
+		goal_entity->fb.saved_respawn_time = (goal_entity->fb.goal_respawn_time - g_globalvars.time) + (goal_time * self->fb.skill.prediction_error * g_random());
+		if (goal_entity->fb.G_ == 18) {
+			G_sprint(self, PRINT_HIGH, "Goal18: [%3.1f vs %3.1f] Eval(%s) = max(gt=%3.1f, respawn=%3.1f, srespawn=%3.1f)\n", g_globalvars.time, match_end_time, goal_entity->classname, goal_time, goal_entity->fb.goal_respawn_time, goal_entity->fb.saved_respawn_time);
+		}
 		goal_time = max (goal_time, goal_entity->fb.saved_respawn_time);
 		goal_entity->fb.saved_goal_time = goal_time;
 		if (self->fb.bot_evade) {

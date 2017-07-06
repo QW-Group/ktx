@@ -286,7 +286,7 @@ static void CustomiseFrogbotMap (void)
 	{
 		gedict_t* quad = ez_find (world, "item_artifact_super_damage");
 		if (quad) {
-			gedict_t* nearest_marker;;
+			gedict_t* nearest_marker;
 
 			quad->fb.fl_marker = false;
 			nearest_marker = LocateMarker (quad->s.v.origin);

@@ -35,8 +35,6 @@ void BotsBackpackDropped (gedict_t* self, gedict_t* pack);
 void BotsPowerupTouchedNonPlayer (gedict_t* powerup, gedict_t* touch_ent);
 void BotsPowerupDropped (gedict_t* player, gedict_t* powerup);
 
-#define AUTOTRACK_POWERUPS_PREDICT_TIME 2
-
 static qbool ItemTouched(gedict_t* item, gedict_t* player)
 {
 #ifdef BOT_SUPPORT

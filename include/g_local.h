@@ -1052,3 +1052,5 @@ qbool TeamplayMessageByName(gedict_t* client, const char* message);
 void TeamplayGameTick(void);
 void LocationInitialise(void);
 qbool SameTeam(gedict_t* p1, gedict_t* p2);
+
+#define AUTOTRACK_POWERUPS_PREDICT_TIME 2

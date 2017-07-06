@@ -374,7 +374,7 @@ void BotSetCommand (gedict_t* self)
 		cmd_msec = 12;
 	}
 
-	G_sprint(self, PRINT_HIGH, "Movement length @ %f: %d\n", last_frame_time, cmd_msec);
+	//G_sprint(self, PRINT_HIGH, "Movement length @ %f: %d\n", last_frame_time, cmd_msec);
 
 	// dir_move_ is the direction we want to move in, but need to take inertia into effect
 	// ... as rough guide (and save doubling physics calculations), scale command > 
