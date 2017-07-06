@@ -1441,14 +1441,19 @@ gedict_t *spawn_race_node( raceRouteNode_t *node )
 //============================================
 
 // set some race related fields for all players
-void race_clear_race_fields( void )
+void race_clear_race_fields(void)
 {
 	gedict_t *p;
 
-	for ( p = world; ( p = find_plr( p ) ); )
-	{
+	for (p = world; (p = find_plr(p)); ) {
 		p->race_participant = p->racer = false;
-		p->hideplayers = false;
+		p->hideplayers = p->hideplayers_default;
+		p->race_id = 0;
+	}
+
+	for (p = world; (p = find_spc(p)); ) {
+		p->race_participant = p->racer = false;
+		p->hideplayers = p->hideplayers_default;
 		p->race_id = 0;
 	}
 }
@@ -4627,10 +4632,15 @@ qbool race_allow_map_vote(gedict_t* player)
 
 void race_hide_players_toggle(void)
 {
-	if ( !race_command_checks() )
+	if (!race_command_checks()) {
 		return;
+	}
 
 	self->hideplayers_default = !self->hideplayers_default;
 
 	G_sprint(self, PRINT_HIGH, "Racers %s during race\n", self->hideplayers_default ? redtext("hidden") : redtext("shown"));
+
+	if (race.status) {
+		self->hideplayers = self->hideplayers_default;
+	}
 }

@@ -151,7 +151,7 @@ void HM_draw(void)
 			for (p = world; (p = find_plr(p)); ) {
 				p->hoony_results[round_number] = HM_RESULT_DRAWWIN;
 				p->s.v.frags++;
-				for (p = world; p = find_plr(p); ) {
+				for (p = world; (p = find_plr(p)); ) {
 					p->hoony_results[round_number] = HM_RESULT_DRAWWIN;
 					p->s.v.frags++;
 				}
@@ -487,7 +487,7 @@ void HM_all_ready(void)
 			HM_shuffle_spawns(blue_spawns, blue_spawncount);
 
 			// Assign based on team
-			for (p = world; p = find_plr(p); /**/) {
+			for (p = world; (p = find_plr(p)); /**/) {
 				if (red_assigned_spawn == (int)min(red_spawncount, MAX_CLIENTS)) {
 					red_assigned_spawn = 0;
 				}
