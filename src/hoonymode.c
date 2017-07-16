@@ -257,8 +257,9 @@ void respawn_items(char* classname, qbool enabled)
 {
 	gedict_t *p;
 
-	if (strnull(classname))
+	if (strnull(classname)) {
 		G_Error("respawn_items");
+	}
 
 	for (p = world; (p = find(p, FOFCLSN, classname)); /**/) {
 		if (enabled) {
@@ -275,12 +276,18 @@ void respawn_items(char* classname, qbool enabled)
 				p->s.v.nextthink = g_globalvars.time;
 				p->think = ( func_t ) SUB_regen;
 			}
+#ifdef BOT_SUPPORT
+			p->fb.goal_respawn_time = p->s.v.nextthink;
+#endif
 		}
 		else {
 			// hide item
 			p->model = NULL;
 			p->s.v.solid = SOLID_NOT;
 			p->s.v.nextthink = 0;
+#ifdef BOT_SUPPORT
+			p->fb.goal_respawn_time = 0;
+#endif
 		}
 	}
 }
@@ -391,6 +398,10 @@ void HM_all_ready(void)
 		if (isTeam()) {
 			int red_assigned_spawn = 0;
 			int blue_assigned_spawn = 0;
+			int red_players = 0;
+			int blue_players = 0;
+			qbool red_wrapped = false;
+			qbool blue_wrapped = false;
 
 			// Allocate specific red/blue spawns accordingly
 			red_spawncount = blue_spawncount = 0;
@@ -433,20 +444,31 @@ void HM_all_ready(void)
 			for (p = world; (p = find_plr(p)); /**/) {
 				if (red_assigned_spawn == (int)min(red_spawncount, MAX_CLIENTS)) {
 					red_assigned_spawn = 0;
+					red_wrapped = true;
 				}
 				if (blue_assigned_spawn == (int)min(blue_spawncount, MAX_CLIENTS)) {
 					blue_assigned_spawn = 0;
+					blue_wrapped = true;
 				}
 
 				if (streq(getteam(p), "red")) {
 					p->k_hoony_new_spawn = p->k_hoonyspawn = red_spawns[red_assigned_spawn++];
+					++red_players;
 				}
 				else {
 					p->k_hoony_new_spawn = p->k_hoonyspawn = blue_spawns[blue_assigned_spawn++];
+					++blue_players;
 				}
 				if (debug) {
 					G_bprint(PRINT_HIGH, "Assigned '%s' to %s (%s)\n", p->k_hoony_new_spawn->targetname, p->netname, getteam(p));
 				}
+			}
+
+			if (!red_wrapped) {
+				red_spawncount = min(red_spawncount, max(red_assigned_spawn, blue_players));
+			}
+			if (!blue_wrapped) {
+				blue_spawncount = min(blue_spawncount, max(blue_assigned_spawn, red_players));
 			}
 		}
 		else {
