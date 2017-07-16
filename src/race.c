@@ -119,7 +119,7 @@ static void race_update_pacemaker(void);
 static void race_clear_pacemaker(void);
 static void race_init_capture(void);
 static void race_save_position(void);
-static void race_finish_capture(qbool store);
+static void race_finish_capture(qbool store, int player_num);
 static void race_pacemaker_race_start(void);
 static void race_remove_pacemaker_indicator(void);
 static void race_make_active_racer(gedict_t* r, gedict_t* s);
@@ -1116,6 +1116,7 @@ static void race_over(void)
 	char demoFileName[MAX_OSPATH];
 	int i, timeposition, nameposition;
 	int best_time_position = 1000;
+	int best_player_num = -1;
 	char* pos;
 	gedict_t* racer = NULL;
 	qbool keep_demo = false;
@@ -1263,7 +1264,10 @@ static void race_over(void)
 					race_position_string(timeposition + 1)
 				);
 
-				best_time_position = min(timeposition, best_time_position);
+				if (timeposition <= best_time_position) {
+					best_player_num = player_num;
+					best_time_position = timeposition;
+				}
 				keep_demo |= !blocked_record;
 			}
 		}
@@ -1285,7 +1289,7 @@ static void race_over(void)
 	}
 	else {
 		// Continue match with next run
-		race_finish_capture(best_time_position == 0 && !blocked_record);
+		race_finish_capture(best_time_position == 0 && !blocked_record, best_player_num);
 		race_start(!keep_demo, "");
 	}
 }
@@ -3515,11 +3519,11 @@ void race_pacemaker(void)
 	qbool ignoring_lines = false;
 	int file_version = 1;
 
-	if (!race_command_checks())
+	if (!race_command_checks()) {
 		return;
+	}
 
-	if (race.status)
-	{
+	if (race.status) {
 		G_sprint(self, PRINT_HIGH, "Cannot change pacemaker settings while race is active.\n");
 		return;
 	}
@@ -3754,39 +3758,30 @@ static void race_init_capture(void)
 	}
 }
 
-static void race_finish_capture(qbool store)
+static void race_finish_capture(qbool store, int player_num)
 {
-	// Multi-racing: only store positions for those setting a record?
-	gedict_t* racer;
+	if (store && player_num >= 0 && player_num < MAX_CLIENTS) {
+		gedict_t* racer = &g_edicts[player_num + 1];
+		race_capture_t* capture = race_match_mode() ? &player_match_info[player_num].best_run_capture : &player_captures[player_num];
+		float race_time = race_match_mode() ? player_match_info[player_num].best_time : race.currentrace[player_num].time;
 
-	if (store && race.race_recording) {
 		race_fwopen("%s", race_filename("pos"));
 		race_fprintf("version %d\n", POS_FILE_VERSION);
 
-		for (racer = world; (racer = race_find_race_participants(racer)); /**/) {
-			int player_num = NUM_FOR_EDICT(racer) - 1;
-			race_capture_t* capture = race_match_mode() ? &player_match_info[player_num].best_run_capture : &player_captures[player_num];
-			float race_time = race_match_mode() ? player_match_info[player_num].best_time : race.currentrace[player_num].time;
+		race_store_position(capture, g_globalvars.time - race.start_time, PASSVEC3(racer->s.v.origin), racer->s.v.angles[0], racer->s.v.angles[1]);
 
-			// Didn't set a time?  Skip.
-			if (!race_time)
-				continue;
+		race_fprintf("player %d\n", player_num);
+		if (race_fhandle >= 0) {
+			int i = 0;
+			for (i = 0; i < capture->position_count; ++i) {
+				race_capture_pos_t* pos = &capture->positions[i];
 
-			race_store_position(capture, g_globalvars.time - race.start_time, PASSVEC3(racer->s.v.origin), racer->s.v.angles[0], racer->s.v.angles[1]);
+				race_fprintf("%.3f,%.1f,%.1f,%.1f,%.1f,%.1f\n", pos->race_time, PASSVEC3(pos->origin), pos->angles[0], pos->angles[1]);
+			}
+			for (i = 0; i < capture->jump_count; ++i) {
+				race_capture_jump_t* jump = &capture->jumps[i];
 
-			race_fprintf("player %d\n", player_num);
-			if (race_fhandle >= 0) {
-				int i = 0;
-				for (i = 0; i < capture->position_count; ++i) {
-					race_capture_pos_t* pos = &capture->positions[i];
-
-					race_fprintf("%.3f,%.1f,%.1f,%.1f,%.1f,%.1f\n", pos->race_time, PASSVEC3(pos->origin), pos->angles[0], pos->angles[1]);
-				}
-				for (i = 0; i < capture->jump_count; ++i) {
-					race_capture_jump_t* jump = &capture->jumps[i];
-
-					race_fprintf("jump,%.3f,%.1f,%.1f,%.1f\n", jump->race_time, PASSVEC3(jump->origin));
-				}
+				race_fprintf("jump,%.3f,%.1f,%.1f,%.1f\n", jump->race_time, PASSVEC3(jump->origin));
 			}
 		}
 
@@ -4572,7 +4567,7 @@ static void race_match_round_end(void)
 		}
 		else {
 			// We have a winner, end the race
-			race_finish_capture(false);
+			race_finish_capture(false, -1);
 			EndMatch(false);
 			return;
 		}
@@ -4586,7 +4581,7 @@ static void race_match_round_end(void)
 		if (system->round_max_diff && rounds_remaining * system->round_max_diff < sc) {
 			// We have winner, end the race
 			G_bprint(PRINT_HIGH, "%d points (%d rounds) available... ending match\n", rounds_remaining * system->round_max_diff, rounds_remaining);
-			race_finish_capture(false);
+			race_finish_capture(false, -1);
 			EndMatch(false);
 			return;
 		}
