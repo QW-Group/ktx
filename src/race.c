@@ -1238,7 +1238,6 @@ static void race_over(void)
 						if (!i) {
 							// first place! we go the extra mile
 							sound(racer, CHAN_ITEM, "boss2/sight.wav", 1, ATTN_NONE);
-							strlcpy(race.top_nick, racer->netname, sizeof(race.top_nick));
 						}
 						else {
 							sound(racer, CHAN_ITEM, "ambience/thunder1.wav", 1, ATTN_NONE);
@@ -1247,6 +1246,7 @@ static void race_over(void)
 
 					if (!i) {
 						race.top_time = race.currentrace[player_num].time;
+						strlcpy(race.top_nick, racer->netname, sizeof(race.top_nick));
 					}
 				}
 
