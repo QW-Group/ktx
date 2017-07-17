@@ -37,6 +37,8 @@ const char hm_result_indicator[] = "\0WLswD";
 #define HM_WINNING_DIFF        2
 
 static int round_number = 0;
+static char round_explanation[128] = { 0 };
+static char series_explanation[128] = { 0 };
 
 static void EndRound(void)
 {
@@ -402,22 +404,17 @@ void HM_all_ready(void)
 			int blue_players = 0;
 			qbool red_wrapped = false;
 			qbool blue_wrapped = false;
+			qbool alternate = i_rnd(1, 10) <= 5;
 
 			// Allocate specific red/blue spawns accordingly
 			red_spawncount = blue_spawncount = 0;
-			/*
-			for (p = world; (p = ez_find(p, "info_player_team1")) && red_spawncount < MAX_CLIENTS; )
-				red_spawns[red_spawncount++] = p;
-			for (p = world; (p = ez_find(p, "info_player_team2")) && blue_spawncount < MAX_CLIENTS; )
-				blue_spawns[blue_spawncount++] = p;
-			*/
 
 			// Allocate assigned deathmatch spawns
 			for (p = world; (p = ez_find(p, "info_player_deathmatch")); ) {
-				if (red_spawncount < MAX_CLIENTS && p->hoony_nomination == 1) {
+				if (red_spawncount < MAX_CLIENTS && p->hoony_nomination == (alternate ? 2 : 1)) {
 					red_spawns[red_spawncount++] = p;
 				}
-				else if (blue_spawncount < MAX_CLIENTS && p->hoony_nomination == 2) {
+				else if (blue_spawncount < MAX_CLIENTS && p->hoony_nomination == (alternate ? 1 : 2)) {
 					blue_spawns[blue_spawncount++] = p;
 				}
 			}
@@ -906,9 +903,6 @@ void HM_rounds_adjust(int change)
 	}
 }
 
-#define BLUE_TEAM_TEXT "&c59Fblue&r"
-#define RED_TEAM_TEXT "&cf00red&r"
-
 void HM_point_stats(void)
 {
 	gedict_t* p;
@@ -944,24 +938,37 @@ void HM_point_stats(void)
 	blue_last_round = blue_frags - prev_blue_frags;
 
 	if (red_last_round == blue_last_round) {
-		G_bprint(PRINT_HIGH, "The round was a draw!\n");
+		strlcpy(round_explanation, "Round was a draw!\n", sizeof(round_explanation));
 	}
 	else if (red_last_round > blue_last_round) {
-		G_bprint(PRINT_HIGH, "Team " RED_TEAM_TEXT " won the round by %d frag%s\n", red_last_round - blue_last_round, red_last_round - blue_last_round > 1 ? "s" : "");
+		snprintf(round_explanation, sizeof(round_explanation), "\20%s\21 won round by %d frag%s\n", redtext("red"), red_last_round - blue_last_round, red_last_round - blue_last_round > 1 ? "s" : "");
 	}
 	else {
-		G_bprint(PRINT_HIGH, "Team " BLUE_TEAM_TEXT " won the round by %d frag%s\n", blue_last_round - red_last_round, blue_last_round - red_last_round > 1 ? "s" : "");
+		snprintf(round_explanation, sizeof(round_explanation), "\20%s\21 won round by %d frag%s\n", redtext("blue"), blue_last_round - red_last_round, blue_last_round - red_last_round > 1 ? "s" : "");
 	}
 
 	if (red_frags == blue_frags) {
-		G_bprint(PRINT_HIGH, "The series is currently tied\n");
+		strlcpy(series_explanation, "Series is currently tied.\n", sizeof(series_explanation));
 	}
 	else if (red_frags > blue_frags) {
-		G_bprint(PRINT_HIGH, "Team " RED_TEAM_TEXT " is ahead in the series by %d frag%s\n", red_frags - blue_frags, red_frags - blue_frags > 1 ? "s" : "");
+		snprintf(series_explanation, sizeof(series_explanation), "\20%s\21 leads series by %d frag%s\n", redtext("red"), red_frags - blue_frags, red_frags - blue_frags > 1 ? "s" : "");
 	}
 	else {
-		G_bprint(PRINT_HIGH, "Team " BLUE_TEAM_TEXT " is ahead in the series by %d frag%s\n", blue_frags - red_frags, blue_frags - red_frags > 1 ? "s" : "");
+		snprintf(series_explanation, sizeof(series_explanation), "\20%s\21 leads series by %d frag%s\n", redtext("blue"), blue_frags - red_frags, blue_frags - red_frags > 1 ? "s" : "");
 	}
+
+	G_bprint(PRINT_HIGH, round_explanation);
+	G_bprint(PRINT_HIGH, series_explanation);
+}
+
+const char* HM_round_explanation(void)
+{
+	return round_explanation;
+}
+
+const char* HM_series_explanation(void)
+{
+	return series_explanation;
 }
 
 void HM_roundsup(void)

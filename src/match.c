@@ -1009,48 +1009,65 @@ void PrintCountdown( int seconds )
 
 	strlcat(text, va("%s %8s\n", "Mode", mode), sizeof(text));
 
-	if ( isCA() )
+	if (isCA()) {
 		strlcat(text, va("%s %8s\n", "Wins", dig3(CA_wins_required())), sizeof(text));
-	if (isRACE())
-	{
+	}
+	else if (isHoonyModeTDM() && HM_current_point()) {
+		strlcat(text, "\n", sizeof(text));
+		strlcat(text, (char*)HM_round_explanation(), sizeof(text));
+		strlcat(text, (char*)HM_series_explanation(), sizeof(text));
+		strlcat(text, "\n", sizeof(text));
+	}
+	else if (isRACE()) {
 		if (race.round_number >= race.rounds) {
 			strlcat(text, va("Round %7s\n", redtext("final")), sizeof(text));
 		}
 		strlcat(text, va("%s %9s\n", "Pts", race_scoring_system_name()), sizeof(text));
 	}
 
-//	if ( cvar( "k_spw" ) != 3 )
-	if ( ! isRACE() )
-		strlcat(text, va("%s %4s\n", "Respawns", respawn_model_name_short( cvar( "k_spw" ) )), sizeof(text));
+	if (!(isHoonyModeTDM() && HM_current_point())) {
+		//	if ( cvar( "k_spw" ) != 3 )
+		if (!isRACE()) {
+			strlcat(text, va("%s %4s\n", "Respawns", respawn_model_name_short(cvar("k_spw"))), sizeof(text));
+		}
 
-	if (cvar("sv_antilag"))
-		strlcat(text, va("%s %5s\n", "Antilag", dig3((int)cvar("sv_antilag"))), sizeof(text));
+		if (cvar("sv_antilag")) {
+			strlcat(text, va("%s %5s\n", "Antilag", dig3((int)cvar("sv_antilag"))), sizeof(text));
+		}
 
-	if ( cvar("k_noitems") && !isRACE() )
-		strlcat(text, va("%s %5s\n", "NoItems", redtext("on")), sizeof(text));
+		if (cvar("k_noitems") && !isRACE()) {
+			strlcat(text, va("%s %5s\n", "NoItems", redtext("on")), sizeof(text));
+		}
 
-	if ( cvar("k_midair") )
-		strlcat(text, va("%s %6s\n", "Midair", redtext("on")), sizeof(text));
+		if (cvar("k_midair")) {
+			strlcat(text, va("%s %6s\n", "Midair", redtext("on")), sizeof(text));
+		}
 
-	if ( cvar("k_instagib") )
-		strlcat(text, va("%s %4s\n", "Instagib", redtext("on")), sizeof(text));
+		if (cvar("k_instagib")) {
+			strlcat(text, va("%s %4s\n", "Instagib", redtext("on")), sizeof(text));
+		}
 
-	if ( k_yawnmode )
-		strlcat(text, va("%s %4s\n", "Yawnmode", redtext("on")), sizeof(text));
+		if (k_yawnmode) {
+			strlcat(text, va("%s %4s\n", "Yawnmode", redtext("on")), sizeof(text));
+		}
 
-	if ( cvar("pm_airstep") )
-		strlcat(text, va("%s %5s\n", "Airstep", redtext("on")), sizeof(text));
+		if (cvar("pm_airstep")) {
+			strlcat(text, va("%s %5s\n", "Airstep", redtext("on")), sizeof(text));
+		}
 
-	vw_enabled = vw_available && cvar("k_allow_vwep") && cvar("k_vwep");
-	if ( vw_enabled && ! isRACE() )
-		strlcat(text, va("%s %8s\n", "VWep", redtext("on")), sizeof(text));
+		vw_enabled = vw_available && cvar("k_allow_vwep") && cvar("k_vwep");
+		if (vw_enabled && !isRACE()) {
+			strlcat(text, va("%s %8s\n", "VWep", redtext("on")), sizeof(text));
+		}
 
-	if ( cvar("k_teamoverlay") && tp_num() && !isDuel() && ! isRACE() )
-		strlcat(text, va("%s %3s\n", "TmOverlay", redtext("on")), sizeof(text));
+		if (cvar("k_teamoverlay") && tp_num() && !isDuel() && !isRACE()) {
+			strlcat(text, va("%s %3s\n", "TmOverlay", redtext("on")), sizeof(text));
+		}
 
-	if ( !isRA() ) // useless in RA
-	if ( isTeam() || isCTF() )
-		strlcat(text, va("%s %4s\n", "Teamplay", dig3(teamplay)), sizeof(text));
+		if (!isRA() && (isTeam() || isCTF())) {
+			strlcat(text, va("%s %4s\n", "Teamplay", dig3(teamplay)), sizeof(text));
+		}
+	}
 
 	if (isHoonyModeAny()) {
 		int hm_timelimit = HM_timelimit();
@@ -1058,12 +1075,15 @@ void PrintCountdown( int seconds )
 			int minutes = hm_timelimit / 60;
 			int seconds = hm_timelimit % 60;
 
-			if (minutes == 0)
+			if (minutes == 0) {
 				strlcat(text, va("%s %3ss\n", "Duration", dig3(seconds)), sizeof(text));
-			else if (seconds == 0)
+			}
+			else if (seconds == 0) {
 				strlcat(text, va("%s %3sm\n", "Duration", dig3(minutes)), sizeof(text));
-			else
+			}
+			else {
 				strlcat(text, va("%s %1s:%2s\n", "Duration", dig3(minutes), dig3(seconds)), sizeof(text));
+			}
 		}
 		if (HM_rounds()) {
 			strlcat(text, va(" %s     %2s/%2s\n", "Round", dig3(HM_current_point() + 1), dig3(HM_rounds())), sizeof(text));
@@ -1086,8 +1106,10 @@ void PrintCountdown( int seconds )
 		default: ot	= redtext("Unkn"); break;
 	}
 
-	if ( timelimit && cvar( "k_overtime" ) )
-		strlcat(text, va("%s %4s\n", "Overtime", ot), sizeof(text));
+	if (!isHoonyModeAny()) {
+		if (timelimit && cvar("k_overtime"))
+			strlcat(text, va("%s %4s\n", "Overtime", ot), sizeof(text));
+	}
 
 	if ( !isRA() && Get_Powerups() && strneq("off", Get_PowerupsStr()) )
 		strlcat(text, va("%s %4s\n", "Powerups", redtext(Get_PowerupsStr())), sizeof(text));
