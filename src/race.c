@@ -234,7 +234,7 @@ static char race_settings[] =
 	"k_race_pace_headstart 0.5\n"
 	"k_race_pace_resolution 2\n"
 	"k_race_pace_enabled 0\n"
-	"k_race_simultaneous 0\n"
+	"k_race_simultaneous 1\n"
 	"k_race_scoring_system 0\n"
 	"k_race_match 0\n" 
 	"k_race_match_rounds 9\n"
