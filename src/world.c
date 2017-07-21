@@ -714,6 +714,7 @@ void FirstFrame	( )
 	RegisterCvar("k_disallow_krjump");
 	RegisterCvar("k_lock_hdp");
 	RegisterCvar("k_disallow_weapons");
+	RegisterCvar("k_force_mapcycle"); // will use mapcycle even when /deathmatch 0
 
 	RegisterCvar("k_pow");
 	RegisterCvarEx("k_pow_q", "1"); // quad

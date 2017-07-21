@@ -493,7 +493,7 @@ void GotoNextMap()
 	{
 		extern  char *SelectMapInCycle(char *buf, int buf_size);
 
-		if ( deathmatch )
+		if ( deathmatch || cvar("k_force_mapcycle") )
 			SelectMapInCycle( newmap, sizeof(newmap) );
 	}
 
