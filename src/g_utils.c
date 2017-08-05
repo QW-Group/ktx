@@ -1379,7 +1379,7 @@ qbool isTeam( )
 
 int tp_num()
 {
-	return ( (isTeam() || isCTF()) ? teamplay : 0);
+	return ( (isTeam() || isCTF() || coop) ? teamplay : 0);
 }
 
 qbool isFFA( )
