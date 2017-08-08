@@ -1,3 +1,10 @@
+/*
+bot/bothelp.qc
+
+Copyright (C) 1999-2000 Numb
+Copyright (C) 2000-2007 ParboiL
+*/
+
 // Converted from .qc on 05/02/2016
 
 #ifdef BOT_SUPPORT

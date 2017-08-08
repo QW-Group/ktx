@@ -1,3 +1,9 @@
+/*
+bot/botwater.qc
+
+Copyright (C) 1999-2000 Numb
+*/
+
 // Converted from .qc on 05/02/2016
 
 #ifdef BOT_SUPPORT

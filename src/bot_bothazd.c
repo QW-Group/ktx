@@ -1,3 +1,11 @@
+/*
+bot/bothazd.qc
+
+Copyright (C) 1997-1999 Robert 'Frog' Field
+Copyright (C) 2003 3d[Power]
+Copyright (C) 2000-2007 ParboiL
+*/
+
 // Converted from .qc on 05/02/2016
 
 #ifdef BOT_SUPPORT

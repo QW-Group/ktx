@@ -1,3 +1,13 @@
+/*
+bot/botweap.qc
+
+Copyright (C) 1997-1999 Robert 'Frog' Field
+Copyright (C) 1998-2000 Matt 'asdf' McChesney
+Copyright (C) 2000-2001 DMSouL
+Copyright (C) 2003 3d[Power]
+Copyright (C) 2000-2007 ParboiL
+*/
+
 // Converted from .qc on 05/02/2016
 
 #ifdef BOT_SUPPORT

@@ -1,3 +1,9 @@
+/*
+commands.qc
+
+Copyright (C) 2000-2003 rxr
+Copyright (C) 2000-2007 ParboiL
+*/
 
 #ifdef BOT_SUPPORT
 

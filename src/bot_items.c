@@ -1,3 +1,13 @@
+/*
+items.qc
+
+item functions
+
+Copyright (C) 1996-1997 Id Software, Inc.
+Copyright (C) 1997-1999 Robert 'Frog' Field
+Copyright (C) 1998-2000 Matt 'asdf' McChesney
+Copyright (C) 2000-2007 ParboiL
+*/
 
 #ifdef BOT_SUPPORT
 
