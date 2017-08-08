@@ -1,0 +1,12 @@
+race_route_add_start
+    race_add_route_node -3633 -1819  3748 0 0 
+    race_add_route_node  1847 -2046 -3613 0 0  
+
+    race_set_route_name "Space Odyssey" "start\215finish" 
+    race_set_route_timeout 90 
+    race_set_route_weapon_mode raceWeaponNo 
+    race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
+
+race_set_teleport_flags_by_name "t1" RACEFLAG_TOUCH_RACEFAIL
+race_set_teleport_flags_by_name "t2" RACEFLAG_TOUCH_RACEFAIL

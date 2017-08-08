@@ -1,0 +1,22 @@
+race_route_add_start
+	race_add_route_node -128 0 -8 0 0
+	race_add_route_node -3340 1790 3320 0 0 
+	race_add_route_node 3400 1800 1700 0 0 
+
+	race_set_route_name "Lava surfing" "start\215finish"
+	race_set_route_timeout 30
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node -3340 1790 3320 0 0
+	race_add_route_node 3400 1800 1700 0 0 
+
+	race_set_route_name "Room2" "start\215finish"
+	race_set_route_timeout 15
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_set_teleport_flags_by_name  "tele2" RACEFLAG_TOUCH_RACEEND 

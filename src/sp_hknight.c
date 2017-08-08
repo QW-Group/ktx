@@ -431,7 +431,7 @@ void hknight_shot( float offset )
 	vec[2] = -vec[2] + ( g_random() - 0.5 ) * 0.1;
 
 	launch_spike( org, vec );
-	newmis->s.v.classname = "knightspike";
+	newmis->classname = "knightspike";
 	setmodel( newmis, "progs/k_spike.mdl" );
 	setsize( newmis, PASSVEC3( VEC_ORIGIN ), PASSVEC3( VEC_ORIGIN ) );
 	VectorScale( vec, 300, newmis->s.v.velocity );

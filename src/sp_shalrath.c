@@ -138,7 +138,7 @@ void ShalMissileTouch ()
 	if ( other == PROG_TO_EDICT( self->s.v.owner ) )
 		return;		// don't explode on owner
 
-	if ( streq( other->s.v.classname, "monster_zombie" ) )
+	if ( streq( other->classname, "monster_zombie" ) )
 	{
 		other->deathtype = dtSQUISH; // FIXME
 		T_Damage( other, self, self, 110 );
@@ -179,7 +179,7 @@ void ShalHome()
 	normalize( dir, dir );
 	VectorScale( dir, skill == 3 ? 350 : 250, self->s.v.velocity);
 	self->s.v.nextthink = g_globalvars.time + 0.2;
-	self->s.v.think = ( func_t ) ShalHome;
+	self->think = ( func_t ) ShalHome;
 }
 
 /*
@@ -205,7 +205,7 @@ void ShalMissile()
 	sound( self, CHAN_WEAPON, "shalrath/attack2.wav", 1, ATTN_NORM );
 
 	missile = spawn ();
-	missile->s.v.classname = "shalrath_missile";
+	missile->classname = "shalrath_missile";
 	missile->s.v.owner = EDICT_TO_PROG( self );
 	missile->s.v.solid = SOLID_BBOX;
 	missile->s.v.movetype = MOVETYPE_FLYMISSILE;
@@ -217,9 +217,9 @@ void ShalMissile()
 	VectorScale( dir, 400, missile->s.v.velocity );
 	SetVector( missile->s.v.avelocity, 300, 300, 300 );
 	missile->s.v.nextthink = g_globalvars.time + flytime;
-	missile->s.v.think = ( func_t ) ShalHome;
+	missile->think = ( func_t ) ShalHome;
 	missile->s.v.enemy = self->s.v.enemy;
-	missile->s.v.touch = ( func_t) ShalMissileTouch;
+	missile->touch = ( func_t) ShalMissileTouch;
 }
 
 void _shal_attack1( void )

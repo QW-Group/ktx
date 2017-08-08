@@ -1,0 +1,258 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="src\admin.c" />
+    <ClCompile Include="src\buttons.c" />
+    <ClCompile Include="src\captain.c" />
+    <ClCompile Include="src\client.c" />
+    <ClCompile Include="src\combat.c" />
+    <ClCompile Include="src\commands.c" />
+    <ClCompile Include="src\doors.c" />
+    <ClCompile Include="src\g_cmd.c" />
+    <ClCompile Include="src\g_main.c" />
+    <ClCompile Include="src\g_mem.c" />
+    <ClCompile Include="src\g_spawn.c" />
+    <ClCompile Include="src\g_syscalls.c" />
+    <ClCompile Include="src\g_userinfo.c" />
+    <ClCompile Include="src\g_utils.c" />
+    <ClCompile Include="src\globals.c" />
+    <ClCompile Include="src\grapple.c" />
+    <ClCompile Include="src\items.c" />
+    <ClCompile Include="src\logs.c" />
+    <ClCompile Include="src\maps.c" />
+    <ClCompile Include="src\match.c" />
+    <ClCompile Include="src\mathlib.c" />
+    <ClCompile Include="src\misc.c" />
+    <ClCompile Include="src\motd.c" />
+    <ClCompile Include="src\native_lib.c" />
+    <ClCompile Include="src\plats.c" />
+    <ClCompile Include="src\player.c" />
+    <ClCompile Include="src\q_shared.c" />
+    <ClCompile Include="src\runes.c" />
+    <ClCompile Include="src\server.c" />
+    <ClCompile Include="src\spectate.c" />
+    <ClCompile Include="src\subs.c" />
+    <ClCompile Include="src\triggers.c" />
+    <ClCompile Include="src\vip.c" />
+    <ClCompile Include="src\vote.c" />
+    <ClCompile Include="src\weapons.c" />
+    <ClCompile Include="src\world.c" />
+    <ClCompile Include="src\bot_botenemy.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot_botgoals.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot_bothazd.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot_bothelp.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot_botimp.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot_botjump.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot_botpath.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot_botphys.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot_botstat.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot_botthink.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot_botwater.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot_botweap.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot_client.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot_commands.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot_items.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot_loadmap.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fb_globals.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\marker_load.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\marker_util.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\route_calc.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\route_lookup.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\maps_map_amphi2.c">
+      <Filter>Bots\Maps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\maps_map_dm3.c">
+      <Filter>Bots\Maps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\maps_map_dm4.c">
+      <Filter>Bots\Maps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\maps_map_dm6.c">
+      <Filter>Bots\Maps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\maps_map_povdmm4.c">
+      <Filter>Bots\Maps</Filter>
+    </ClCompile>
+    <ClCompile Include="src\route_fields.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot_routing.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot_blocked.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot_world.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\teamplay.c" />
+    <ClCompile Include="src\bot_match.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\files.c" />
+    <ClCompile Include="src\bot_movement.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bot_aim.c">
+      <Filter>Bots</Filter>
+    </ClCompile>
+    <ClCompile Include="src\arena.c">
+      <Filter>Modes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\clan_arena.c">
+      <Filter>Modes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ctf.c">
+      <Filter>Modes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hoonymode.c">
+      <Filter>Modes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\race.c">
+      <Filter>Modes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sp_ai.c">
+      <Filter>Modes\SinglePlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sp_boss.c">
+      <Filter>Modes\SinglePlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sp_client.c">
+      <Filter>Modes\SinglePlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sp_demon.c">
+      <Filter>Modes\SinglePlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sp_dog.c">
+      <Filter>Modes\SinglePlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sp_enforcer.c">
+      <Filter>Modes\SinglePlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sp_fish.c">
+      <Filter>Modes\SinglePlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sp_hknight.c">
+      <Filter>Modes\SinglePlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sp_knight.c">
+      <Filter>Modes\SinglePlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sp_monsters.c">
+      <Filter>Modes\SinglePlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sp_ogre.c">
+      <Filter>Modes\SinglePlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sp_oldone.c">
+      <Filter>Modes\SinglePlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sp_shalrath.c">
+      <Filter>Modes\SinglePlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sp_shambler.c">
+      <Filter>Modes\SinglePlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sp_soldier.c">
+      <Filter>Modes\SinglePlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sp_tarbaby.c">
+      <Filter>Modes\SinglePlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sp_wizard.c">
+      <Filter>Modes\SinglePlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sp_zombie.c">
+      <Filter>Modes\SinglePlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stats.c">
+      <Filter>Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stats_json.c">
+      <Filter>Stats</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stats_xml.c">
+      <Filter>Stats</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\bg_lib.h" />
+    <ClInclude Include="include\g_consts.h" />
+    <ClInclude Include="include\g_local.h" />
+    <ClInclude Include="include\g_public.h" />
+    <ClInclude Include="include\g_syscalls.h" />
+    <ClInclude Include="include\mathlib.h" />
+    <ClInclude Include="include\player.h" />
+    <ClInclude Include="include\progdefs.h" />
+    <ClInclude Include="include\progs.h" />
+    <ClInclude Include="include\q_shared.h" />
+    <ClInclude Include="src\fb_globals.h">
+      <Filter>Bots</Filter>
+    </ClInclude>
+    <ClInclude Include="include\stats.h">
+      <Filter>Stats</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\game.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Bots">
+      <UniqueIdentifier>{b887a586-0b54-4d9b-bd8c-3155138e3bcb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Bots\Maps">
+      <UniqueIdentifier>{9376c879-e150-4e19-ab63-4a5dcfaf0267}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modes">
+      <UniqueIdentifier>{9473438b-2455-40f2-a1ae-a9d161cb9e43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modes\SinglePlayer">
+      <UniqueIdentifier>{6a902278-4425-421f-98d2-9d8f2c0a3a61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Stats">
+      <UniqueIdentifier>{ffd977d6-a4a0-4e43-b85e-a94dff6a7568}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

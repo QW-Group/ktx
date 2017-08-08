@@ -90,15 +90,15 @@ qbool G_SpawnVector( const char *key, const char *defaultString, float *out )
 //
 
 field_t         fields[] = {
-	{"classname",	FOFS( s.v.classname ),	F_LSTRING},
+	{"classname",	FOFCLSN,	F_LSTRING},
 	{"origin", 	FOFS( s.v.origin ),	F_VECTOR},
-	{"model", 	FOFS( s.v.model ),	F_LSTRING},
-	{"message", 	FOFS( s.v.message ),	F_LSTRING},
-	{"target", 	FOFS( s.v.target ),	F_LSTRING},
+	{"model", 	FOFS( model ),	F_LSTRING},
+	{"message", 	FOFS( message ),	F_LSTRING},
+	{"target", 	FOFS( target ),	F_LSTRING},
 	{"map", 	FOFS( map ),	 	F_LSTRING},
 	{"killtarget", 	FOFS( killtarget ),	F_LSTRING},
 	{"count", 	FOFS( count ),	 	F_FLOAT},
-	{"targetname", 	FOFS( s.v.targetname ),	F_LSTRING},
+	{"targetname", 	FOFS( targetname ),	F_LSTRING},
 	{"wait", 	FOFS( wait ),	 	F_FLOAT},
 	{"skin", 	FOFS( s.v.skin ),	F_FLOAT},
 	{"effects", 	FOFS( s.v.effects ),	F_FLOAT},
@@ -122,6 +122,7 @@ field_t         fields[] = {
 	{"team_no",	FOFS( team_no ),		F_INT},
 // custom teleporters
 	{"size", 	FOFS( s.v.size ),	F_VECTOR},
+// race routes
 	{"race_route_name", FOFS( race_route_name ), F_LSTRING},
 	{"race_route_description", FOFS( race_route_description ), F_LSTRING},
 	{"race_route_timeout", FOFS( race_route_timeout ), F_INT},
@@ -129,6 +130,18 @@ field_t         fields[] = {
 	{"race_route_falsestart_mode", FOFS( race_route_falsestart_mode ), F_INT},
 	{"race_route_start_yaw", FOFS( race_route_start_yaw ), F_FLOAT},
 	{"race_route_start_pitch", FOFS( race_route_start_yaw ), F_FLOAT},
+	{"race_flags", FOFS(race_flags), F_INT},
+
+// advanced hoonymode (spawn points determine how the player spawns)
+	{"spawn_items",   FOFS( s.v.items ),  F_FLOAT},
+	{"spawn_armorvalue", FOFS( s.v.armorvalue ), F_FLOAT},
+	{"spawn_ammo_shells", FOFS( s.v.ammo_shells ), F_FLOAT},
+	{"spawn_ammo_nails", FOFS( s.v.ammo_nails ), F_FLOAT},
+	{"spawn_ammo_rockets", FOFS( s.v.ammo_rockets ), F_FLOAT},
+	{"spawn_ammo_cells", FOFS( s.v.ammo_cells ), F_FLOAT},
+	{"spawn_initial_delay", FOFS( initial_spawn_delay ), F_FLOAT},
+	{"hoony_timelimit", FOFS( hoony_timelimit ), F_INT},
+	{"hoony_defaultwinner", FOFS( hoony_defaultwinner ), F_LSTRING},
 	{NULL}
 };
 typedef struct {
@@ -138,8 +151,8 @@ typedef struct {
 
 void SUB_Remove()
 {
-//	if (self && self->s.v.classname )
-//		G_bprint(2, "rm: %s\n", self->s.v.classname);
+//	if (self && self->classname )
+//		G_bprint(2, "rm: %s\n", self->classname);
 
 	ent_remove( self );
 }
@@ -148,7 +161,7 @@ void SUB_RM_01( gedict_t *ent )
 {
 	if ( ent ) {
 		ent->s.v.nextthink = g_globalvars.time + 0.001f;	// remove later
-		ent->s.v.think = ( func_t ) SUB_Remove;
+		ent->think = ( func_t ) SUB_Remove;
 	}
 }
 
@@ -423,7 +436,7 @@ qbool G_CallSpawn( gedict_t * ent )
 
 //      gitem_t *item;
 
-	if ( !ent->s.v.classname )
+	if ( !ent->classname )
 	{
 		G_Printf( "G_CallSpawn: NULL classname\n" );
 		return false;
@@ -440,16 +453,16 @@ qbool G_CallSpawn( gedict_t * ent )
 	// check normal spawn functions
 	for ( s = spawns; s->name; s++ )
 	{
-		if ( !strcmp( s->name, ent->s.v.classname ) )
+		if ( !strcmp( s->name, ent->classname ) )
 		{
 			// found it
 			self = ent;
-			//G_Printf("%8i %s\n",ent->s.v.classname,ent->s.v.classname);
+			//G_Printf("%8i %s\n",ent->classname,ent->classname);
 			s->spawn();
 			return true;
 		}
 	}
-	G_Printf( "%s doesn't have a spawn function\n", ent->s.v.classname );
+	G_Printf( "%s doesn't have a spawn function\n", ent->classname );
 	return false;
 }
 
@@ -502,7 +515,7 @@ Takes a key/value pair and sets the binary values
 in a gentity
 ===============
 */
-void G_ParseField( const char *key, const char *value, gedict_t * ent )
+static void G_ParseField( const char *key, const char *value, gedict_t * ent )
 {
 	field_t        *f;
 	byte           *b;
@@ -574,7 +587,7 @@ void G_SpawnGEntityFromSpawnVars( void )
 	{
 		if ( ( ( int ) ent->s.v.spawnflags & SPAWNFLAG_NOT_DEATHMATCH ) )
 		{
-//			G_cprint( "%s removed because of SPAWNFLAG_NOT_DEATHMATCH\n", ent->s.v.classname );
+//			G_cprint( "%s removed because of SPAWNFLAG_NOT_DEATHMATCH\n", ent->classname );
 			ent_remove( ent );
 			return;
 		}
@@ -584,7 +597,7 @@ void G_SpawnGEntityFromSpawnVars( void )
 			 || ( skill >= 2 && ((int)ent->s.v.spawnflags & SPAWNFLAG_NOT_HARD) ) 
 	   )
 	{
-//		G_cprint( "%s removed because of SPAWNFLAG_NOT_XXX\n", ent->s.v.classname );
+//		G_cprint( "%s removed because of SPAWNFLAG_NOT_XXX\n", ent->classname );
 		ent_remove( ent );
 		return;
 	}
@@ -721,5 +734,7 @@ void G_SpawnEntitiesFromString( void )
 		G_SpawnGEntityFromSpawnVars();
 		trap_FlushSignon();
 	}
+
+	race_add_standard_routes ();
 }
 

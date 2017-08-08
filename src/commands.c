@@ -238,6 +238,13 @@ void display_record_details( );
 void race_chasecam_change( );
 void race_chasecam_freelook_change( );
 void race_download_record_demo( );
+void race_pacemaker(void);
+void race_simultaneous_toggle(void);
+void race_match_toggle(void);
+qbool race_match_mode(void);
+void race_switch_usermode(const char* displayName, int players_per_team);
+void race_scoring_system_toggle(void);
+void race_hide_players_toggle(void);
 // }
 
 // { CHEATS
@@ -249,6 +256,10 @@ static void dumpent( );
 
 // { Clan Arena
 void ToggleCArena();
+// }
+
+// { Frogbots
+void FrogbotsCommand(void);
 // }
 
 // Save the first 5 demo markers to print at the end.
@@ -386,6 +397,8 @@ const char CD_NODESC[] = "no desc";
 #define CD_RPICKUP    "vote random team pickup"
 #define CD_1ON1       "duel settings"
 #define CD_1ON1HM     "HoonyMode settings"
+#define CD_2ON2HM     "HoonyMode 2v2"
+#define CD_4ON4HM     "HoonyMode 4v4"
 #define CD_HMSTATS    "show stats per hoonymode point"
 #define CD_2ON2       "2 on 2 settings"
 #define CD_3ON3       "3 on 3 settings"
@@ -569,6 +582,11 @@ const char CD_NODESC[] = "no desc";
 #define CD_RSCORES		"show top race times for current map"
 #define CD_RSCOREDETAIL "show details about a record"
 #define CD_RDLDEMO      "download demo for a record"
+#define CD_RPACEMAKER   "set pacemaker"
+#define CD_RSIMULMODE   "toggle simultaneous racing"
+#define CD_RMATCHMODE   "toggle race match mode"
+#define CD_RSCORINGMODE "toggle between scoring systems"
+#define CD_RHIDEPLAYERS "toggle visible players during race"
 // }
 
 #define CD_NOSPECS      "allow/disallow spectators"
@@ -590,6 +608,13 @@ const char CD_NODESC[] = "no desc";
 
 #define CD_DEMOMARK     "put mark in the demo"
 
+#define CD_BOTCOMMAND   "bot configuration"
+
+#define CD_TEAMPLAYMESSAGE "teamplay messages"
+
+#define CD_PICKSPAWN    "nominate hoonymode spawn"
+#define CD_ROUNDSUP     "increase rounds in match"
+#define CD_ROUNDSDOWN   "decrease rounds in match"
 
 void dummy() {}
 void redirect();
@@ -700,16 +725,17 @@ cmd_t cmds[] = {
 	{ "captain",     VoteCaptain,               0    , CF_PLAYER, CD_CAPTAIN },
 	{ "freeze",      ToggleFreeze,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_FREEZE },
 	{ "rpickup",     RandomPickup,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_RPICKUP },
-	{ "hmstats",     HM_stats_show,             0    , CF_BOTH | CF_MATCHLESS, CD_HMSTATS },
 
-	{ "1on1",        DEF(UserMode),             1    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_1ON1 },
-	{ "2on2",        DEF(UserMode),             2    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_2ON2 },
-	{ "3on3",        DEF(UserMode),             3    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_3ON3 },
-	{ "4on4",        DEF(UserMode),             4    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_4ON4 },
-	{ "10on10",      DEF(UserMode),             5    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_10ON10 },
-	{ "ffa",         DEF(UserMode),             6	 , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_FFA },
-	{ "ctf",         DEF(UserMode),             7    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_CTF },
-	{ "hoonymode",   DEF(UserMode),             8    , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_1ON1HM },
+	{ "1on1",         DEF(UserMode),             1   , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_1ON1 },
+	{ "2on2",         DEF(UserMode),             2   , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_2ON2 },
+	{ "3on3",         DEF(UserMode),             3   , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_3ON3 },
+	{ "4on4",         DEF(UserMode),             4   , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_4ON4 },
+	{ "10on10",       DEF(UserMode),             5   , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_10ON10 },
+	{ "ffa",          DEF(UserMode),             6	 , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_FFA },
+	{ "ctf",          DEF(UserMode),             7   , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_CTF },
+	{ "hoonymode",    DEF(UserMode),             8   , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_1ON1HM },
+	{ "hoonymode2v2", DEF(UserMode),             9   , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_2ON2HM },
+	{ "hoonymode4v4", DEF(UserMode),             10  , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_4ON4HM },
 
 	{ "practice",    TogglePractice,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_PRACTICE },
 	{ "wp_reset",    Wp_Reset,                  0    , CF_PLAYER, CD_WP_RESET },
@@ -896,6 +922,11 @@ cmd_t cmds[] = {
 	{ "race_chasecam_view",         race_chasecam_change,           0,  CF_PLAYER,                              CD_RCHASECAM },
 	{ "race_chasecam_freelook",     race_chasecam_freelook_change,  0,  CF_PLAYER,                              CD_RCHASECAMFL },
 	{ "race_dl_record_demo",        race_download_record_demo,      0,  CF_BOTH | CF_PARAMS,                    CD_RDLDEMO },
+	{ "race_pacemaker",             race_pacemaker,                 0,  CF_PLAYER | CF_PARAMS,                  CD_RPACEMAKER },
+	{ "race_simultaneous",          race_simultaneous_toggle,       0,  CF_PLAYER,                              CD_RSIMULMODE },
+	{ "race_match",                 race_match_toggle,              0,  CF_PLAYER,                              CD_RMATCHMODE },
+	{ "race_scoring",               race_scoring_system_toggle,     0,  CF_PLAYER,                              CD_RSCORINGMODE },
+	{ "race_hide_players",          race_hide_players_toggle,       0,  CF_PLAYER,                              CD_RHIDEPLAYERS },
 // }
 	{ "nospecs",     nospecs,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOSPECS },
 	{ "noitems",     noitems,                   0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOITEMS },
@@ -908,6 +939,21 @@ cmd_t cmds[] = {
 	{ "votecoop",    votecoop,                  0    , CF_PLAYER | CF_MATCHLESS, CD_VOTECOOP },
 	{ "coop_nm_pu",	 ToggleNewCoopNm,           0    , CF_PLAYER | CF_MATCHLESS, CD_COOPNMPU },
 	{ "demomark",	 DemoMark,                  0    , CF_BOTH, CD_DEMOMARK },
+
+#ifdef BOT_SUPPORT
+// { FROGBOTS
+	{ "botcmd",      FrogbotsCommand,           0    , CF_BOTH | CF_PARAMS, CD_BOTCOMMAND },
+// }
+#endif
+
+// { TEAMPLAY
+	{ "tpmsg",       TeamplayMessage,           0    , CF_PLAYER | CF_PARAMS | CF_MATCHLESS, CD_TEAMPLAYMESSAGE },
+
+// { HOONYMODE
+	{ "pickspawn",   HM_pick_spawn,             0    , CF_PLAYER, CD_PICKSPAWN },
+	{ "roundsup",    HM_roundsup,               0    , CF_PLAYER, CD_ROUNDSUP },
+	{ "roundsdown",  HM_roundsdown,             0    , CF_PLAYER, CD_ROUNDSDOWN }
+// }
 };
 
 #undef DEF
@@ -1318,9 +1364,9 @@ void ShowOpts()
 			"æáéòðáãëó.. best/last weapon dropped\n"
 			"äéóãèáòçå.. underwater discharges\n"
 			"óéìåîãå.... toggle spectator talk\n"
-			"%s..... toggle midair mode\n" 
-			"%s..... toggle grenade mode\n" 
-			"%s..... toggle instagib mode\n", redtext("midair"), redtext("gren_mode"), redtext("instagib"));
+			"%s..... toggle midair mode\n"
+			"%s.. toggle grenade mode\n"
+			"%s... toggle instagib mode\n", redtext("midair"), redtext("gren_mode"), redtext("instagib"));
 }
 
 void ShowQizmo()
@@ -1439,7 +1485,7 @@ void SendVictimMsg()
 
 void SendNewcomerMsg()
 {
-	SendMessage(newcomer->s.v.netname);
+	SendMessage(newcomer->netname);
 }
 
 void SendMessage(char *name)
@@ -1451,7 +1497,7 @@ void SendMessage(char *name)
 		if ( p == self )
 			continue;
 
-		if ( !strnull( name ) && streq( p->s.v.netname, name ) ) {
+		if ( !strnull( name ) && streq( p->netname, name ) ) {
 			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "say ");
 			if ((s = ezinfokey(self, "premsg")))
 				stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, " %s ", s);
@@ -1580,10 +1626,10 @@ void ModStatus2()
 
 	i = iKey( world, "fpd" );
 
-	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo lag"),             OnOff( i &   8 ));
-	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo timers"),          OnOff( i &   2 ));
-	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo enemy reporting"), OnOff( i &  32 ));
-	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo pointing"),        OnOff( i & 128 ));
+	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo lag"), OnOff(i & 8));
+	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo timers"), OnOff(i & 2));
+	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo enemy reporting"), OnOff(i & 32));
+	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo pointing"), OnOff(i & 128));
 /* new FDP bits http://wiki.qwdrama.com/FPD
 	G_sprint(self, 2, "%s: %s\n", redtext("Skin forcing"),          OnOff(! (i & 256) ));
 	G_sprint(self, 2, "%s: %s\n", redtext("Color forcing"),         OnOff(! (i & 512) ));
@@ -1645,7 +1691,7 @@ void ModStatusVote()
 
 			for( p = world; (p = find_client( p )); )
 				if ( p->v.map == maps_voted[i].map_id )
-					G_sprint(self, 2, " %s\n", p->s.v.netname);
+					G_sprint(self, 2, " %s\n", p->netname);
 		}
 	}
 
@@ -1659,7 +1705,7 @@ void ModStatusVote()
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.elect )
 				G_sprint(self, 2, "%s%s\n", 
-				(p->v.elect_type != etNone) ? "\x87" : " ", p->s.v.netname);
+				(p->v.elect_type != etNone) ? "\x87" : " ", p->netname);
 	}
 
 	if ( !match_in_progress )
@@ -1671,7 +1717,7 @@ void ModStatusVote()
 
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.pickup )
-				G_sprint(self, 2, " %s\n", p->s.v.netname);
+				G_sprint(self, 2, " %s\n", p->netname);
 	}
 
 	if ( !match_in_progress )
@@ -1683,7 +1729,7 @@ void ModStatusVote()
 
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.rpickup )
-				G_sprint(self, 2, " %s\n", p->s.v.netname);
+				G_sprint(self, 2, " %s\n", p->netname);
 	}
 
 	if( k_matchLess || match_in_progress == 2 )
@@ -1695,7 +1741,7 @@ void ModStatusVote()
 
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.brk )
-				G_sprint(self, 2, " %s\n", p->s.v.netname);
+				G_sprint(self, 2, " %s\n", p->netname);
 	}
 
 	if ( !match_in_progress )
@@ -1707,7 +1753,7 @@ void ModStatusVote()
 
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.antilag )
-				G_sprint(self, 2, " %s\n", p->s.v.netname);
+				G_sprint(self, 2, " %s\n", p->netname);
 	}
 
 	if ( !match_in_progress )
@@ -1719,7 +1765,7 @@ void ModStatusVote()
 
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.nospecs )
-				G_sprint(self, 2, " %s\n", p->s.v.netname);
+				G_sprint(self, 2, " %s\n", p->netname);
 	}
 
 	if ( !match_in_progress )
@@ -1731,7 +1777,7 @@ void ModStatusVote()
 
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.teamoverlay )
-				G_sprint(self, 2, " %s\n", p->s.v.netname);
+				G_sprint(self, 2, " %s\n", p->netname);
 	}
 
 	if ( voted )
@@ -1781,7 +1827,7 @@ void PlayerStatusS()
 		if ( !found )
 			G_sprint(self, 2, "Players skins list:\n"
 							  "žžžžžžžžžžžžžžžžžžžžžŸ\n");
-		G_sprint(self, 2, "\x90%10s\x91 %s\n", ezinfokey(p, "skin"), p->s.v.netname);
+		G_sprint(self, 2, "\x90%10s\x91 %s\n", ezinfokey(p, "skin"), p->netname);
 		found = true;
 	}
 			
@@ -1883,7 +1929,7 @@ void VotePickup()
 
 	self->v.pickup = !self->v.pickup;
 
-	G_bprint(2, "%s %s %s%s\n", self->s.v.netname, 
+	G_bprint(2, "%s %s %s%s\n", self->netname, 
 					redtext("says"), (self->v.pickup ? "pickup!" : "no pickup"),
 					((votes = get_votes_req( OV_PICKUP, true )) ? va(" (%d)", votes) : ""));
 
@@ -1949,7 +1995,7 @@ void ReportMe()
 			G_sprint(p, 3, "%s: ", t1);
 		}
 		else
-			G_sprint(p, 3, "%s%s%s", pa1, self->s.v.netname, pa2);
+			G_sprint(p, 3, "%s%s%s", pa1, self->netname, pa2);
 
 		if( self->s.v.armorvalue )
 			G_sprint(p, 3, "%s:%d", armor_type((int)self->s.v.items),
@@ -2115,15 +2161,23 @@ void TimeDown(float t)
 {
 	int tl = timelimit;
 
-	if ( match_in_progress )
+	if (match_in_progress) {
 		return;
+	}
 
-	if (t == 5 && timelimit == 5)
+	if (t == 5 && isHoonyModeAny()) {
+		t = 2;
+	}
+
+	if (t == 5 && timelimit == 5) {
 		timelimit = 3;
-	else if (t == 5 && timelimit == 3)
+	}
+	else if (t == 5 && timelimit == 3) {
 		timelimit = 1;
-	else
+	}
+	else {
 		timelimit -= t;
+	}
 
 	timelimit = bound(0, timelimit, cvar( "k_timetop" ));
 
@@ -2186,54 +2240,73 @@ void TimeSet(float t)
 	G_bprint(2, "%s %s %s%s\n", redtext("Match length set to"), dig3(timelimit), redtext("minute"), redtext(count_s(timelimit)));
 }
 
+void AdjustFragLimit(int delta)
+{
+	fraglimit += delta * (isHoonyModeAny() ? 2 : 10);
+
+	fraglimit = bound(isHoonyModeAny() ? 0 : 1, fraglimit, isHoonyModeDuel() ? 20 : 100);
+}
+
 void FragsDown()
 {
-	int fl = fraglimit;
-
-	if ( match_in_progress )
+	if (match_in_progress) {
 		return;
-
-	if ( fraglimit == 1 ) // allow fraglimit "1" (instead of going from 10 directly to 0) as a type of minimal hoonymode
-		fraglimit = 0;
-	else if ( fraglimit == 0)
-		fraglimit = 0; // avoid cycling between 0 and 1 (this happens due to below shortcut using bound())
+	}
+	else if (isHoonyModeAny()) {
+		G_sprint(self, PRINT_HIGH, "No fraglimit in hoonymode\n");
+		return;
+	}
 	else {
-		fraglimit -= 10;
-		fraglimit = bound(1, fraglimit, 100);
-	}
+		int fl = fraglimit;
 
-	if ( timelimit <= 0 && fraglimit <= 0 ) {
-		G_sprint(self, 2, "You need some timelimit or fraglimit at least\n");
-		fraglimit = fl;
-	}
+		if (fraglimit == 1) {
+			// allow fraglimit "1" (instead of going from 10 directly to 0) as a type of minimal hoonymode
+			fraglimit = 0;
+		}
+		else if (fraglimit == 0) {
+			// avoid cycling between 0 and 1 (this happens due to below shortcut using bound())
+			fraglimit = 0;
+		}
+		else {
+			AdjustFragLimit(-1);
+		}
 
-	if ( fl == fraglimit ) {
-		G_sprint(self, 2, "%s still %s\n", redtext("fraglimit"), dig3(fraglimit));
-		return;
-	}
+		if (timelimit <= 0 && fraglimit <= 0) {
+			G_sprint(self, 2, "You need some timelimit or fraglimit at least\n");
+			fraglimit = fl;
+		}
 
-	cvar_set("fraglimit", va("%d", (int)(fraglimit)));
-	G_bprint(2, "%s %s\n", redtext("Fraglimit set to"), dig3(fraglimit));
+		if (fl == fraglimit) {
+			G_sprint(self, 2, "%s still %s\n", redtext("fraglimit"), dig3(fraglimit));
+			return;
+		}
+
+		cvar_set("fraglimit", va("%d", (int)(fraglimit)));
+		G_bprint(2, "%s %s\n", redtext("Fraglimit set to"), dig3(fraglimit));
+	}
 }
 
 void FragsUp()
 {
-	int fl = fraglimit;
-
-	if ( match_in_progress )
-		return;
-
-	fraglimit += 10;
-
-	fraglimit = bound(0, fraglimit, 100);
-
-	if ( fl == fraglimit ) {
-		G_sprint(self, 2, "%s still %s\n", redtext("fraglimit"), dig3(fraglimit));
+	if (match_in_progress) {
 		return;
 	}
+	else if (isHoonyModeAny()) {
+		G_sprint(self, PRINT_HIGH, "No fraglimit in hoonymode\n");
+	}
+	else {
+		int fl = fraglimit;
 
-	cvar_set("fraglimit", va("%d", (int)(fraglimit)));
-	G_bprint(2, "%s %s\n", redtext("Fraglimit set to"), dig3(fraglimit));
+		AdjustFragLimit(1);
+
+		if (fl == fraglimit) {
+			G_sprint(self, 2, "%s still %s\n", redtext("fraglimit"), dig3(fraglimit));
+			return;
+		}
+
+		cvar_set("fraglimit", va("%d", (int)(fraglimit)));
+		G_bprint(2, "%s %s\n", redtext("Fraglimit set to"), dig3(fraglimit));
+	}
 }
 
 void killquad()
@@ -2415,7 +2488,7 @@ void TeamSay(float fsndname)
 	char *sndname = va("ktsound%d.wav", (int)fsndname);
 
 	for( p = world; (p = find_plr(p)); ) {
-		if( p != self && (isTeam() || isCTF()) && !strnull( p->s.v.netname )
+		if( p != self && (isTeam() || isCTF()) && !strnull( p->netname )
 			&& ( iKey( p, "kf" ) & KF_KTSOUNDS ) 
 		   ) {
 			if( streq( getteam( self ), getteam( p ) ) ) {
@@ -2512,7 +2585,7 @@ void PlayerStats()
 		p->k_flag = 0;
 
 	for ( p = world; (p = find_plr( p )); ) {
-		pL = max(pL, strlen(p->s.v.netname));
+		pL = max(pL, strlen(p->netname));
 		tL = max(tL, strlen(getteam(p)));
 	}
 	pL = bound( 0, pL, 10 );
@@ -2544,8 +2617,8 @@ void PlayerStats()
 					G_sprint(self, 2, " ");
  			}
 
-			G_sprint(self, 2, "%.10s ", p2->s.v.netname); // player name
-			for ( i = strlen(p2->s.v.netname); i < pL; i++ )
+			G_sprint(self, 2, "%.10s ", p2->netname); // player name
+			for ( i = strlen(p2->netname); i < pL; i++ )
 				G_sprint(self, 2, " ");
 
 			stats = va("%d", ( !isCTF() ? (int)p2->s.v.frags : (int)(p2->s.v.frags - p2->ps.ctf_points)));
@@ -2743,7 +2816,7 @@ void ShowNick()
 		if ( p == self )
 			continue; // ignore self
 
-		if ( strnull( p->s.v.netname ) )
+		if ( strnull( p->netname ) )
 			continue; // ignore not really players
 
 		if ( p->s.v.modelindex != modelindex_player )
@@ -2902,7 +2975,7 @@ ok:
 	if ( strnull( kn ) )
 		kn = ezinfokey( bp, "k" );
 	if ( strnull( kn ) )
-		kn = bp->s.v.netname;
+		kn = bp->netname;
 
 	ln = iKey( self, "ln" );
 	ln = (iKey( self, "ktpl" ) ? abs(ln + 2) : ln); // NOTE: ktpro does't allow negative "ln", muhaha
@@ -2941,7 +3014,8 @@ ok:
 
 // this settings used when server desire general rules reset: last player disconnects / race toggled / etc.
 const char _reset_settings[] =
-	"serverinfo matchtag \"\"\n";	// Hint for QTV what type of event it is. Like: "EQL semifinal" etc.
+	"serverinfo matchtag \"\"\n" // Hint for QTV what type of event it is. Like: "EQL semifinal" etc.
+	"serverinfo ktxmode \"\"\n"; // No special mode
 
 // common settings for all user modes
 const char common_um_init[] =
@@ -3004,8 +3078,9 @@ const char common_um_init[] =
 	"k_pow_q 1\n"				// powerups - quad
 	"k_pow_p 1\n"				// powerups - pent
 	"k_pow_r 1\n"				// powerups - ring
-	"k_pow_s 1\n";				// powerups - suit
-
+	"k_pow_s 1\n"				// powerups - suit
+	"qtv_sayenabled 0\n"       // default blocking of qtv chat
+;
 
 const char _1on1_um_init[] =
 	"coop 0\n"					// no coop
@@ -3023,22 +3098,40 @@ const char _1on1_um_init[] =
 	"k_mode 1\n";				//
 
 const char _1on1hm_um_init[] =
-	"coop 0\n"					// no coop
-	"maxclients 2\n"			// duel = two players
-	"k_maxclients 2\n"			// duel = two players
-	"timelimit  10\n"			// 10 minute rounds
-	"fraglimit  0\n"                        // hoonymode - fraglimit 0 (but every 1 frag we respawn)
-	"timelimit  0\n"                        // hoonymode - timelimit 10
+	"coop 0\n"                  // no coop
+	"maxclients 2\n"            // duel = two players
+	"k_maxclients 2\n"          // duel = two players
+	"fraglimit 1\n"             // hoonymode - every 1 frag we toggle spawns
+	"timelimit 0\n"             // hoonymode - timelimit 0
 	"k_hoonymode 1\n"
-	"teamplay   0\n"			// hurt yourself, no teammates here
+	"k_hoonyrounds 12\n"        // first to seven
+	"teamplay 0\n"              // hurt yourself, no teammates here
+	"deathmatch 3\n"            // weapons stay
+	"k_overtime 1\n"            // overtime type = time based
+	"k_exttime 3\n"             // overtime 3mins
+	"k_pow 0\n"                 // powerups
+	"k_membercount 0\n"         // no efect in duel
+	"k_lockmin 0\n"             // no efect in duel
+	"k_lockmax 0\n"             // no efect in duel
+	"k_mode 1\n";               //
+
+const char _2on2hm_um_init[] =
+	"coop 0\n"					// no coop
+	"maxclients 4\n"			// 2on2 = 4 players
+	"k_maxclients 4\n"			// 2on2 = 4 players
+	"timelimit  3\n"			// 3 minute rounds
+	"k_hoonyrounds 4\n"         // 4 rounds (2 rotations)
+	"fraglimit  0\n"            // hoonymode - no fraglimit, time-based
+	"k_hoonymode 1\n"
+	"teamplay   2\n"			// hurt teammates and yourself
 	"deathmatch 3\n"			// weapons stay
-	"k_overtime 1\n"			// overtime type = time based
+	"k_overtime 0\n"			// time based
 	"k_exttime 3\n"				// overtime 3mins
-	"k_pow 0\n"					// powerups
-	"k_membercount 0\n"			// no efect in duel
-	"k_lockmin 0\n"				// no efect in duel
-	"k_lockmax 0\n"				// no efect in duel
-	"k_mode 1\n";				//
+	"k_pow 1\n"					// use powerups
+	"k_membercount 1\n"			// minimum number of players in each team
+	"k_lockmin 1\n"				//
+	"k_lockmax 2\n"				//
+	"k_mode 2\n";				//
 
 const char _2on2_um_init[] =
 	"coop 0\n"					// no coop
@@ -3064,6 +3157,24 @@ const char _3on3_um_init[] =
 	"deathmatch 1\n"			// weapons wont stay on pickup
 	"k_pow 1\n"					// use powerups
 	"k_membercount 2\n"			// minimum number of players in each team
+	"k_lockmin 1\n"				//
+	"k_lockmax 2\n"				//
+	"k_overtime 1\n"			// time based
+	"k_exttime 5\n"				// overtime 5mins
+	"k_mode 2\n";				//
+
+const char _4on4hm_um_init[] =
+	"coop 0\n"					// no coop
+	"maxclients 8\n"			// 4on4 = 8 players
+	"k_maxclients 8\n"			// 4on4 = 8 players
+	"timelimit  3\n"			// 3 minute rounds
+	"k_hoonyrounds 6\n"         // 6 rounds (3 rotations)
+	"fraglimit  0\n"            // no fraglimit, time-based
+	"teamplay   2\n"			// hurt teammates and yourself
+	"deathmatch 1\n"			// weapons wont stay on pickup
+	"k_hoonymode 1\n"
+	"k_pow 1\n"					// use powerups
+	"k_membercount 3\n"			// minimum number of players in each team
 	"k_lockmin 1\n"				//
 	"k_lockmax 2\n"				//
 	"k_overtime 1\n"			// time based
@@ -3143,14 +3254,16 @@ const char ctf_um_init[] =
 
 usermode um_list[] =
 {
-	{ "1on1", 	"\x93 on \x93",			_1on1_um_init,		UM_1ON1},
-	{ "2on2",	"\x94 on \x94",			_2on2_um_init,		UM_2ON2},
-	{ "3on3",	"\x95 on \x95",			_3on3_um_init,		UM_3ON3},
-	{ "4on4",	"\x96 on \x96",			_4on4_um_init,		UM_4ON4},
-	{ "10on10",	"\x93\x92 on \x93\x92",	_10on10_um_init,	UM_10ON10},
-	{ "ffa",	"ffa",					ffa_um_init,		UM_FFA},
-	{ "ctf",	"ctf",					ctf_um_init,		UM_CTF},
-	{ "hoonymode",	"HoonyMode",				_1on1hm_um_init,	UM_1ON1HM}
+	{ "1on1",          "\x93 on \x93",          _1on1_um_init,      UM_1ON1,    1 },
+	{ "2on2",          "\x94 on \x94",          _2on2_um_init,      UM_2ON2,    2 },
+	{ "3on3",          "\x95 on \x95",          _3on3_um_init,      UM_3ON3,    3 },
+	{ "4on4",          "\x96 on \x96",          _4on4_um_init,      UM_4ON4,    4 },
+	{ "10on10",        "\x93\x92 on \x93\x92",  _10on10_um_init,    UM_10ON10, 10 },
+	{ "ffa",           "ffa",                   ffa_um_init,        UM_FFA,    -1 },
+	{ "ctf",           "ctf",                   ctf_um_init,        UM_CTF,     0 },
+	{ "hoonymode",     "HoonyMode",		        _1on1hm_um_init,    UM_1ON1HM,  0 },
+	{ "hoonymode-2v2", "HoonyMode (2v2)",       _2on2hm_um_init,    UM_1ON1HM,  0 },
+	{ "hoonymode-4v4", "HoonyMode (4v4)",       _4on4hm_um_init,    UM_1ON1HM,  0 }
 };
 
 int um_cnt = sizeof (um_list) / sizeof (um_list[0]);
@@ -3172,25 +3285,26 @@ int um_idx_byname(char *name)
 
 extern int skip_fixrules;
 
-static void UserMode_SetMatchTag(char * matchtag)
+void UserMode_SetMatchTag(char * matchtag)
 {
-	char matchtag_old[20] = {0}, matchtag_new[20] = {0};
-	
+	char matchtag_old[20] = { 0 }, matchtag_new[20] = { 0 };
+
 	// get current serverinfo matchtag.
 	infokey(world, "matchtag", matchtag_old, sizeof(matchtag_old));
 	// set new matchtag.
-	localcmd("serverinfo matchtag \"%s\"\n", clean_string(matchtag) );
-	trap_executecmd (); // <- this really needed
+	localcmd("serverinfo matchtag \"%s\"\n", clean_string(matchtag));
+	trap_executecmd(); // <- this really needed
 	// check what we get in serverinfo after all.
 	infokey(world, "matchtag", matchtag_new, sizeof(matchtag_new));
 
-	if (matchtag_new[0])
-	{
-		G_bprint( 2, "\n" "%s is %s\n", redtext("matchtag"), matchtag_new );
+	if (matchtag_new[0]) {
+		G_bprint(2, "\n" "%s is %s\n", redtext("matchtag"), matchtag_new);
 	}
-	else if (matchtag_old[0])
-	{
-		G_bprint( 2, "\n" "%s %s\n", redtext("matchtag"), redtext("disabled") );
+	else if (matchtag_old[0]) {
+		G_bprint(2, "\n" "%s %s\n", redtext("matchtag"), redtext("disabled"));
+	}
+	else {
+		G_bprint(2, "\n" "%s not set\n", redtext("matchtag"));
 	}
 }
 
@@ -3206,15 +3320,16 @@ void UserMode(float umode)
 
 	int k_free_mode = ( k_matchLess ? 5 : cvar( "k_free_mode" ) );
 
-	if ( !k_matchLess ) // allow for matchless mode
-	if ( !is_rules_change_allowed() )
-		return;
-
 	if ( umode < 0 ) {
 		sv_invoked = true;
 		umode *= -1;
 	}
 	else {
+		if ( world->hoony_timelimit || ! strnull(world->hoony_defaultwinner) ) {
+			G_sprint( self, 2, "This map is designed for hoonymode only\n" );
+			return;
+		}
+
 		if ( cvar("k_auto_xonx") ) {
 			G_sprint(self, 2, "Command blocked due to k_auto_xonx\n");
 			return;
@@ -3233,16 +3348,27 @@ void UserMode(float umode)
 
 	um = um_list[(int)umode].name;
 
+	if (isRACE()) {
+		if (!sv_invoked) {
+			race_switch_usermode(um, um_list[(int)umode].race_plrs_per_team);
+		}
+		return;
+	}
+
+	if ( !k_matchLess ) // allow for matchless mode
+		if ( !is_rules_change_allowed() )
+			return;
+
 	if ( streq(um, "ffa") && k_matchLess && cvar("k_use_matchless_dir") )
 		um = "matchless"; // use configs/usermodes/matchless instead of configs/usermodes/ffa in matchless mode
 
-//for 1on1 / 2on2 / 4on4 and ffa commands manipulation
-//0 - no one, 1 - admins, 2 elected admins too
-//3 - only real real judges, 4 - elected judges too
-//5 - all players
+	//for 1on1 / 2on2 / 4on4 and ffa commands manipulation
+	//0 - no one, 1 - admins, 2 elected admins too
+	//3 - only real real judges, 4 - elected judges too
+	//5 - all players
 
-// hmm, I didn't understand how k_free_mode affect this command,
-// so implement how i think this must be, it is like some sort of access control
+	// hmm, I didn't understand how k_free_mode affect this command,
+	// so implement how i think this must be, it is like some sort of access control
 	if ( sv_invoked ) {
 		if ( k_free_mode != 5 ) {
 			G_bprint(2, "UserMode: sv %s discarded due to k_free_mode\n", um);
@@ -3297,7 +3423,7 @@ void UserMode(float umode)
 		if ( sv_invoked )
 			G_bprint(2, "%s %s\n", redtext(va("%s", um_list[(int)umode].displayname)), redtext("settings enabled") );
 		else
-			G_bprint(2, "%s %s %s\n", redtext(va("%s", um_list[(int)umode].displayname)), redtext("settings enabled by"), self->s.v.netname );
+			G_bprint(2, "%s %s %s\n", redtext(va("%s", um_list[(int)umode].displayname)), redtext("settings enabled by"), self->netname );
 	}
 
 	trap_readcmd( common_um_init, buf, sizeof(buf) );
@@ -3327,6 +3453,7 @@ void UserMode(float umode)
 		G_cprint("%s", buf);
 	}
 
+	HM_unpick_all_spawns();
 	apply_CA_settings();
 
 	G_cprint("\n");
@@ -3513,7 +3640,7 @@ void t_jump (float j_type)
 	cv_jt = va("k_disallow_k%cjump", cjt);
 
 	trap_cvar_set_float( cv_jt, !cvar( cv_jt ) );
-	G_bprint(2, "%s %s %s\n", self->s.v.netname, redtext( Enables( !cvar( cv_jt ) ) ),
+	G_bprint(2, "%s %s %s\n", self->netname, redtext( Enables( !cvar( cv_jt ) ) ),
 							  redtext( jt ) );
 }
 
@@ -3587,7 +3714,7 @@ void klist ( )
 
 		G_sprint(self, 2, "%2d|%3d|%-10.10s|%s\n", 
 					iKey(p, "*userid"), // can't use GetUserID here
-					VIP( p ), track, (strnull( p->s.v.netname ) ? "!noname!" : p->s.v.netname));
+					VIP( p ), track, (strnull( p->netname ) ? "!noname!" : p->netname));
 
 		i++;
 	}
@@ -3602,7 +3729,7 @@ void hdptoggle ()
 		return;
 
 	trap_cvar_set_float( "k_lock_hdp", !cvar( "k_lock_hdp" ) );
-	G_bprint(2, "%s %s %s\n", self->s.v.netname,
+	G_bprint(2, "%s %s %s\n", self->netname,
 				redtext( Allows( !cvar( "k_lock_hdp" ) ) ), redtext( "handicap" ) );
 }
 
@@ -3675,7 +3802,7 @@ void noweapon ()
 			k_disallow_weapons ^= bit = IT_LIGHTNING;
 
 		if ( bit ) {
-			G_bprint(2, "%s %s %s\n", self->s.v.netname,
+			G_bprint(2, "%s %s %s\n", self->netname,
 				redtext( Allows( !(k_disallow_weapons & bit) ) ), redtext( nwp ) );
 			trap_cvar_set_float( "k_disallow_weapons", k_disallow_weapons );
 		}
@@ -3770,7 +3897,7 @@ void RandomPickup ()
 
 	self->v.rpickup = !self->v.rpickup;
 
-	G_bprint(2, "%s %s!%s\n", self->s.v.netname, 
+	G_bprint(2, "%s %s!%s\n", self->netname, 
 			(self->v.rpickup ? redtext("votes for rpickup") :
 							   redtext(va("withdraws %s rpickup vote", g_his(self)))),
 			((votes = get_votes_req( OV_RPICKUP, true )) ? va(" (%d)", votes) : ""));
@@ -3808,7 +3935,7 @@ void fav_add( )
 
 	for ( free_num = -1, fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
 		if ( self->fav[fav_num] == diff ) {
-			G_sprint(self, 2, "fav_add: %s %s added to favourites\n", goal->s.v.netname,
+			G_sprint(self, 2, "fav_add: %s %s added to favourites\n", goal->netname,
 																	redtext("already"));
 			return;
 		}
@@ -3823,7 +3950,7 @@ void fav_add( )
 		return;
 	}
 	
-	G_sprint(self, 2, "fav_add: %s added to favourites\n", goal->s.v.netname);
+	G_sprint(self, 2, "fav_add: %s added to favourites\n", goal->netname);
 
 	self->fav[(int)fav_num - 1] = diff;
 }
@@ -3843,7 +3970,7 @@ qbool fav_del_do(gedict_t *s, gedict_t *p, char *prefix)
 		if ( s->fav[fav_num] && (world + s->fav[fav_num]) == p ) {
 			if ( removed == false ) // show info one time
 				G_sprint(s, 2, "%s%s removed from favourites\n", 
-							prefix, (strnull(p->s.v.netname) ? "-someone-" : p->s.v.netname));
+							prefix, (strnull(p->netname) ? "-someone-" : p->netname));
 
 			s->fav[fav_num] = 0;
 			removed = true; // does't break, so if this player multiple times in favourites
@@ -3866,7 +3993,7 @@ qbool favx_del_do(gedict_t *s, gedict_t *p, char *prefix)
 	for ( fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
 		if ( s->favx[fav_num] && (world + s->favx[fav_num]) == p ) {
 			G_sprint(s, 2, "%s%s removed from \x90slot %2d\x91\n", 
-				prefix, (strnull(p->s.v.netname) ? "-someone-" : p->s.v.netname), fav_num + 1);
+				prefix, (strnull(p->netname) ? "-someone-" : p->netname), fav_num + 1);
 
 			s->favx[fav_num] = 0;
 			removed = true; // does't break, so if this player multiple times in favourites
@@ -3889,7 +4016,7 @@ void fav_del( )
 	if ( fav_del_do(self, goal, "fav_del: ") )
 		return;
 
-	G_sprint(self, 2, "fav_del: %s is %s favourites\n", goal->s.v.netname, redtext("not in"));
+	G_sprint(self, 2, "fav_del: %s is %s favourites\n", goal->netname, redtext("not in"));
 }
 
 void fav_all_del( )
@@ -3919,7 +4046,7 @@ void favx_add( float fav_num )
 		return;
 	}
 	
-	G_sprint(self, 2, "fav add: %s added to \x90slot %d\x91\n", goal->s.v.netname, (int)fav_num);
+	G_sprint(self, 2, "fav add: %s added to \x90slot %d\x91\n", goal->netname, (int)fav_num);
 
 	self->favx[(int)fav_num - 1] = diff;
 }
@@ -4026,7 +4153,7 @@ void fav_show( )
 	for ( first = true, fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
 		if ( (diff = self->favx[fav_num]) ) {
 		    p = world + diff;
-			if ( p->ct != ctPlayer || strnull( p->s.v.netname ) )
+			if ( p->ct != ctPlayer || strnull( p->netname ) )
 				continue;
 
 			if ( first ) {
@@ -4035,7 +4162,7 @@ void fav_show( )
 				first = false;
 			}
 
-			G_sprint(self, 2, " \x90slot %2d\x91 \x8D %s\n", fav_num + 1, p->s.v.netname);
+			G_sprint(self, 2, " \x90slot %2d\x91 \x8D %s\n", fav_num + 1, p->netname);
 			showed = true;
 		}
 
@@ -4045,7 +4172,7 @@ void fav_show( )
 	for ( first = true, fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
 		if ( (diff = self->fav[fav_num]) ) {
 		    p = world + diff;
-			if ( p->ct != ctPlayer || strnull( p->s.v.netname ) )
+			if ( p->ct != ctPlayer || strnull( p->netname ) )
 				continue;
 
 			if ( first ) {
@@ -4053,7 +4180,7 @@ void fav_show( )
 				first = false;
 			}
 
-			G_sprint(self, 2, " %s\n", p->s.v.netname);
+			G_sprint(self, 2, " %s\n", p->netname);
 			showed = true;
 		}
 
@@ -4642,7 +4769,7 @@ void Pos_Set (float set_type)
 			return;
 	}
 
-	G_sprint(self, 2, "Position was seted\n");
+	G_sprint(self, 2, "Position set\n");
 }
 //================================================
 // pos_show/pos_save/pos_move/pos_set_* commands }
@@ -4674,10 +4801,10 @@ void motd_show ()
 		}
 
 	motd = spawn();
-	motd->s.v.classname = "motd";
+	motd->classname = "motd";
 	motd->s.v.owner = EDICT_TO_PROG( self );
 	// select MOTD for spectator or player
-	motd->s.v.think = ( func_t ) ( self->ct == ctSpec ? SMOTDThink : PMOTDThink );
+	motd->think = ( func_t ) ( self->ct == ctSpec ? SMOTDThink : PMOTDThink );
 	motd->s.v.nextthink = g_globalvars.time + 0.1;
 	motd->attack_finished = g_globalvars.time + 10;
 }
@@ -4731,6 +4858,7 @@ char *lastscores2str( lsType_t lst )
 		case lsCTF:  return "CTF";
 		case lsRA:   return "RA";
 		case lsHM:   return "HoonyMode";
+		case lsRACE: return "race";
 
 		default:	 return "unknown";
 	}
@@ -4755,25 +4883,23 @@ void lastscore_add ()
 		e2 = getname( ed2 );
 		s2 = ed2->s.v.frags;
 	}
-	else if ( isHoonyMode() )
-	{
-		if ( HM_current_point_type() != HM_PT_FINAL )
+	else if (isHoonyModeAny()) {
+		if (HM_current_point_type() != HM_PT_FINAL) {
 			return;
+		}
 
 		lst = lsHM;
-		for( i = from = 0, p = world; (p = find_plrghst( p, &from )) && i < 2; i++ )
-		{
-			if ( !i )
-			{ // info about first dueler
-				e1 = getname( p );
+		for (i = from = 0, p = world; (p = find_plrghst(p, &from)) && i < 2; i++) {
+			if (!i) {
+				// info about first dueler
+				e1 = getname(p);
 				s1 = p->s.v.frags;
 			}
-			else
-			{	   // about second
-				e2 = getname( p );
+			else {
+				// about second
+				e2 = getname(p);
 				s2 = p->s.v.frags;
 			}
-			extra = HM_lastscores_extra();
 		}
 	}
 	else if ( isDuel() )
@@ -4819,6 +4945,10 @@ void lastscore_add ()
 
 	if ( lst == lsUnknown ) // sorry but something wrong
 		return;
+
+	if ( isRACE() ) {
+		lst = lsRACE;
+	}
 
 	if ( !QVMstrftime(date, sizeof(date), "%b %d, %H:%M:%S %Y", 0) )
 		date[0] = 0;
@@ -5468,9 +5598,9 @@ void teleteam ()
 		return;
 
 	if ( ( k_tp_tele_death = (k_tp_tele_death ? 0 : 1) ) ) 
-		G_bprint(2, "%s turn teamtelefrag %s\n", self->s.v.netname, redtext("affects frags"));
+		G_bprint(2, "%s turn teamtelefrag %s\n", self->netname, redtext("affects frags"));
 	else
-		G_bprint(2, "%s turn teamtelefrag does %s\n", self->s.v.netname, redtext("not affect frags"));
+		G_bprint(2, "%s turn teamtelefrag does %s\n", self->netname, redtext("not affect frags"));
 
 	cvar_fset("k_tp_tele_death", k_tp_tele_death);
 }
@@ -5504,7 +5634,7 @@ void ChangeClientsCount( int type, int value )
 		return;
 
 	cvar_fset(sv_max, cl_count);
-	G_bprint(2, "%s set %s to %d\n", self->s.v.netname, redtext(sv_max), cl_count);
+	G_bprint(2, "%s set %s to %d\n", self->netname, redtext(sv_max), cl_count);
 }
 
 void upplayers ( float type )
@@ -5519,7 +5649,7 @@ void downplayers ( float type )
 
 void iplist_one(gedict_t *s, gedict_t *p)
 {
-	G_sprint(s, 2, "%15.15s %s %-18.18s\n", cl_ip( p ), is_adm( p ) ? "A" : " ", p->s.v.netname);
+	G_sprint(s, 2, "%15.15s %s %-18.18s\n", cl_ip( p ), is_adm( p ) ? "A" : " ", p->netname);
 }
 
 // ktpro (c)
@@ -5601,7 +5731,7 @@ void mv_playback ()
 	gedict_t *pb_ent = self->pb_ent;
 	float scale;
 	int s, i;
-	plrfrm_t *fc, *ftmp, *fp;
+	plrfrm_t *ftmp, *fp;
 
 	if ( !mv_is_playback() )
 		return;
@@ -5616,7 +5746,7 @@ void mv_playback ()
 	self->pb_time += (g_globalvars.time - self->pb_old_time) * scale;
 	self->pb_old_time = g_globalvars.time;
 
-	fc = fp = ftmp = &(self->plrfrms[self->pb_frame]);
+	fp = ftmp = &(self->plrfrms[self->pb_frame]);
 
 	for( i = self->pb_frame + 1; i < self->rec_count; i++ ) {
 		ftmp = &(self->plrfrms[i]);
@@ -5654,7 +5784,7 @@ void mv_cmd_playback ()
 	G_sprint(self, 2, "playback\n");
 
 	self->pb_ent = spawn ();
-	self->pb_ent->s.v.classname = "pb_ent";
+	self->pb_ent->classname = "pb_ent";
 	setmodel (self->pb_ent, "progs/player.mdl");
 
 	self->pb_time = 0;
@@ -5712,7 +5842,7 @@ void mv_record ()
 	f->frame    = self->s.v.frame;
 	f->effects  = self->s.v.effects;
 	f->colormap = self->s.v.colormap;
-//	f->modelindex = self.modelindex;
+//	f->s.v.modelindex = self.modelindex;
 
 	self->rec_count++;
 }
@@ -5836,11 +5966,11 @@ void fcheck ()
 	f_check = g_globalvars.time + 3;
 	strlcpy(fcheck_name, arg_x, sizeof(fcheck_name)); // remember check name
 
-	G_bprint(2, "%s is checking \20%s\21\n", self->s.v.netname, arg_x);
+	G_bprint(2, "%s is checking \20%s\21\n", self->netname, arg_x);
 	if ( streq(arg_x, "f_version") || streq(arg_x, "f_modified") )
-		G_bprint(3, "%s: %s %d%d\n", self->s.v.netname, arg_x, i_rnd(1, 9999), i_rnd(0, 9999));
+		G_bprint(3, "%s: %s %d%d\n", self->netname, arg_x, i_rnd(1, 9999), i_rnd(0, 9999));
 	else
-		G_bprint(3, "%s: %s\n", self->s.v.netname, arg_x);
+		G_bprint(3, "%s: %s\n", self->netname, arg_x);
 }
 
 void check_fcheck ()
@@ -5855,14 +5985,14 @@ void check_fcheck ()
 
 	for( p = world; (p = find_plr( p )); ) {
 		if ( strnull( tmp = p->f_checkbuf ) ) {
-			G_bprint(3, "%s did not reply!\n", p->s.v.netname);
+			G_bprint(3, "%s did not reply!\n", p->netname);
 			continue;
 		}
 
 		while ( !strnull( tmp ) ) {
 			if ( ( nl = strchr(tmp, '\n') ) )
 				nl[0] = 0;
-			G_bprint(3, "%s: %s\n", p->s.v.netname, tmp);
+			G_bprint(3, "%s: %s\n", p->netname, tmp);
 
 			tmp = (nl ? nl+1: NULL);
 		}
@@ -5988,7 +6118,7 @@ void setTeleportCap()
 
 	FixYawnMode(); // apply changes ASAP
 
-	G_bprint( 2, "%s set %s to %d%%\n", self->s.v.netname, redtext("Teleport cap"), k_teleport_cap ); // and print
+	G_bprint( 2, "%s set %s to %d%%\n", self->netname, redtext("Teleport cap"), k_teleport_cap ); // and print
 }
 
 // }
@@ -6042,7 +6172,7 @@ void TogglePause ()
 
 		when_to_unpause = pauseduration + 2000; // shedule unpause in 2000 ms
 
-		G_bprint(2, "%s unpaused the game (will resume in 2 seconds)\n", self->s.v.netname);
+		G_bprint(2, "%s unpaused the game (will resume in 2 seconds)\n", self->netname);
 	}
 	else
 	{
@@ -6050,7 +6180,7 @@ void TogglePause ()
 
 		pauseduration = when_to_unpause = 0; // reset our globals
 
-		G_bprint(2, "%s paused the game\n", self->s.v.netname);
+		G_bprint(2, "%s paused the game\n", self->netname);
 		trap_setpause (1);
 	}
 }
@@ -6125,7 +6255,7 @@ void Spawn666Time()
 
 	dmm4_invinc_time = bound(0, atof( arg_2 ), DMM4_INVINCIBLE_DEFAULT);
 
-	G_bprint(2, "%s set %s to %.1fs\n", self->s.v.netname, redtext("spawn invincibility time"), dmm4_invinc_time);
+	G_bprint(2, "%s set %s to %.1fs\n", self->netname, redtext("spawn invincibility time"), dmm4_invinc_time);
 
 	// to actualy disable dmm4_invinc_time we need set it to negative value
 	trap_cvar_set_float( "dmm4_invinc_time", dmm4_invinc_time ? dmm4_invinc_time : -1 );
@@ -6156,7 +6286,7 @@ void giveme()
 
 	if ( strnull( ezinfokey(world, "*cheats") ) )
 	{
-		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->s.v.netname);
+		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->netname);
 		return; // FU!
 	}
 
@@ -6266,9 +6396,9 @@ static void dropitem_spawn_spawnpoint()
 	self->s.v.flags = ( int )self->s.v.flags | FL_ITEM;
 	setmodel( self, "progs/w_g_key.mdl" );
 
-	if ( streq( self->s.v.classname, "info_player_team1" ) )
+	if ( streq( self->classname, "info_player_team1" ) )
 		effects = EF_RED;
-	else if ( streq( self->s.v.classname, "info_player_team2" ) )
+	else if ( streq( self->classname, "info_player_team2" ) )
 		effects = EF_BLUE;
 
 	self->s.v.effects = ( int ) self->s.v.effects | effects;
@@ -6331,7 +6461,7 @@ static gedict_t * dropitem_spawn_item(gedict_t *spot, dropitem_spawn_t * di)
 	gedict_t *	p = spawn();
 
 	p->dropitem = true;
-	p->s.v.classname = di->classname;
+	p->classname = di->classname;
 	p->s.v.spawnflags = di->spawnflags;
 	VectorCopy(spot->s.v.origin, p->s.v.origin);
 //	VectorCopy(spot->s.v.angles, p->s.v.angles);
@@ -6343,7 +6473,7 @@ static gedict_t * dropitem_spawn_item(gedict_t *spot, dropitem_spawn_t * di)
 	// G_CallSpawn will change 'self', so we have to do trick about it.
 	oself = self;	// save!!!
 
-	if ( !G_CallSpawn( p ) || strnull( p->s.v.classname ) )
+	if ( !G_CallSpawn( p ) || strnull( p->classname ) )
 	{
 		// failed to call spawn function, so remove it ASAP.
 		ent_remove( p );
@@ -6393,7 +6523,7 @@ static void dropitem()
 
 	if ( strnull( ezinfokey(world, "*cheats") ) )
 	{
-		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->s.v.netname);
+		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->netname);
 		return; // FU!
 	}
 
@@ -6435,7 +6565,7 @@ static void removeitem()
 
 	if ( strnull( ezinfokey(world, "*cheats") ) )
 	{
-		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->s.v.netname);
+		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->netname);
 		return; // FU!
 	}
 
@@ -6463,7 +6593,7 @@ static void removeitem()
 
 	if ( p )
 	{
-		G_sprint(self, 2, "Removed %s\n", p->s.v.classname );
+		G_sprint(self, 2, "Removed %s\n", p->classname );
 		ent_remove( p );
 	}
 	else
@@ -6500,7 +6630,7 @@ static void dumpent()
 
 	if ( strnull( ezinfokey(world, "*cheats") ) )
 	{
-		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->s.v.netname);
+		G_sprint(self, 2, "Cheats are disabled on this server, so use the force, Luke... err %s\n", self->netname);
 		return;
 	}
 
@@ -6515,11 +6645,11 @@ static void dumpent()
 		if ( !p->dropitem )
 			continue; // not our item.
 
-		if ( strnull( p->s.v.classname ) )
+		if ( strnull( p->classname ) )
 			continue; // null class name.
 
 		dump_print(file_handle, "{\n");
-		dump_print(file_handle, "\t" "\"classname\" \"%s\"" "\n", p->s.v.classname);
+		dump_print(file_handle, "\t" "\"classname\" \"%s\"" "\n", p->classname);
 		dump_print(file_handle, "\t" "\"origin\" \"%d %d %d\"" "\n", (int)p->s.v.origin[0], (int)p->s.v.origin[1], (int)p->s.v.origin[2]);
 
 		if ( p->s.v.angles[0] || p->s.v.angles[2] )

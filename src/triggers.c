@@ -26,6 +26,8 @@
 #include "g_local.h"
 gedict_t       *stemp, *otemp, *old;
 
+qbool BotsPreTeleport (gedict_t* self, gedict_t* other);
+void BotsPostTeleport (gedict_t* self, gedict_t* other, gedict_t* teleport_destination);
 
 void trigger_reactivate()
 {
@@ -59,7 +61,7 @@ void multi_trigger()
 		return;		// allready been triggered
 	}
 
-	if ( streq( self->s.v.classname, "trigger_secret" ) )
+	if ( streq( self->classname, "trigger_secret" ) )
 	{
 		if ( PROG_TO_EDICT( self->s.v.enemy )->ct != ctPlayer )
 			return;
@@ -67,8 +69,8 @@ void multi_trigger()
 		WriteByte( MSG_ALL, SVC_FOUNDSECRET );
 	}
 
-	if ( self->s.v.noise )
-		sound( self, CHAN_VOICE, self->s.v.noise, 1, ATTN_NORM );
+	if ( self->noise )
+		sound( self, CHAN_VOICE, self->noise, 1, ATTN_NORM );
 
 // don't trigger again until reset
 	self->s.v.takedamage = DAMAGE_NO;
@@ -79,14 +81,14 @@ void multi_trigger()
 
 	if ( self->wait > 0 )
 	{
-		self->s.v.think = ( func_t ) multi_wait;
+		self->think = ( func_t ) multi_wait;
 		self->s.v.nextthink = g_globalvars.time + self->wait;
 	} else
 	{			// we can't just ent_remove(self) here, because this is a touch function
 		// called wheil C code is looping through area links...
-		self->s.v.touch = ( func_t ) SUB_Null;
+		self->touch = ( func_t ) SUB_Null;
 		self->s.v.nextthink = g_globalvars.time + 0.1;
-		self->s.v.think = ( func_t ) SUB_Remove;
+		self->think = ( func_t ) SUB_Remove;
 	}
 }
 
@@ -104,11 +106,12 @@ void multi_use()
 
 void multi_touch()
 {
-	if( !k_practice ) // #practice mode#
-    if( match_in_progress != 2 )
-        return;
+	// #practice mode#
+	if (!k_practice && match_in_progress != 2) {
+		return;
+	}
 
-	if ( !other->s.v.classname )
+	if ( !other->classname )
 		return;
 	if ( other->ct != ctPlayer )
 		return;
@@ -144,20 +147,20 @@ void SP_trigger_multiple()
 	if ( self->s.v.sounds == 1 )
 	{
 		trap_precache_sound( "misc/secret.wav" );
-		self->s.v.noise = "misc/secret.wav";
+		self->noise = "misc/secret.wav";
 	} else if ( self->s.v.sounds == 2 )
 	{
 		trap_precache_sound( "misc/talk.wav" );
-		self->s.v.noise = "misc/talk.wav";
+		self->noise = "misc/talk.wav";
 	} else if ( self->s.v.sounds == 3 )
 	{
 		trap_precache_sound( "misc/trigger1.wav" );
-		self->s.v.noise = "misc/trigger1.wav";
+		self->noise = "misc/trigger1.wav";
 	}
 
 	if ( !self->wait )
 		self->wait = 0.2;
-	self->s.v.use = ( func_t ) multi_use;
+	self->use = ( func_t ) multi_use;
 
 	InitTrigger();
 
@@ -174,7 +177,7 @@ void SP_trigger_multiple()
 	{
 		if ( !( ( int ) ( self->s.v.spawnflags ) & SPAWNFLAG_NOTOUCH ) )
 		{
-			self->s.v.touch = ( func_t ) multi_touch;
+			self->touch = ( func_t ) multi_touch;
 		}
 	}
 }
@@ -206,7 +209,7 @@ This fixed size trigger cannot be touched, it can only be fired by other events.
 */
 void SP_trigger_relay()
 {
-	self->s.v.use = ( func_t ) SUB_UseTargets;
+	self->use = ( func_t ) SUB_UseTargets;
 }
 
 
@@ -232,11 +235,11 @@ void SP_trigger_secret()
 	if ( self->s.v.sounds == 1 )
 	{
 		trap_precache_sound( "misc/secret.wav" );
-		self->s.v.noise = "misc/secret.wav";
+		self->noise = "misc/secret.wav";
 	} else if ( self->s.v.sounds == 2 )
 	{
 		trap_precache_sound( "misc/talk.wav" );
-		self->s.v.noise = "misc/talk.wav";
+		self->noise = "misc/talk.wav";
 	}
 
 	SP_trigger_multiple();
@@ -288,7 +291,7 @@ void SP_trigger_counter()
 	if ( !self->count )
 		self->count = 2;
 
-	self->s.v.use = ( func_t ) counter_use;
+	self->use = ( func_t ) counter_use;
 }
 
 
@@ -331,7 +334,7 @@ void spawn_tfog( vec3_t org )
 //	gedict_t *s = spawn();
 //	VectorCopy( org, s->s.v.origin );// s->s.v.origin = org;
 //	s->s.v.nextthink = g_globalvars.time + 0.2;
-//	s->s.v.think = ( func_t ) SUB_Remove;
+//	s->think = ( func_t ) SUB_Remove;
 // }
 
 	WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
@@ -426,7 +429,7 @@ void spawn_tdeath( vec3_t org, gedict_t *death_owner )
 	gedict_t       *death;
 
 	death = spawn();
-	death->s.v.classname = "teledeath";
+	death->classname = "teledeath";
 	death->s.v.movetype = MOVETYPE_NONE;
 	death->s.v.solid = SOLID_TRIGGER;
 	SetVector( death->s.v.angles, 0, 0, 0 );
@@ -436,10 +439,10 @@ void spawn_tdeath( vec3_t org, gedict_t *death_owner )
 		      death_owner->s.v.maxs[1] + 1, death_owner->s.v.maxs[2] + 1 );
 	setorigin( death, PASSVEC3( org ) );
 
-	death->s.v.touch = ( func_t ) tdeath_touch;
+	death->touch = ( func_t ) tdeath_touch;
     // fixes the telefrag bug from previous kteams
 	death->s.v.nextthink = g_globalvars.time + 0.1;
-	death->s.v.think = ( func_t ) SUB_Remove;
+	death->think = ( func_t ) SUB_Remove;
 	death->s.v.owner = EDICT_TO_PROG( death_owner );
 
 // { ktpro way to reduce double telefrags
@@ -474,7 +477,7 @@ void teleport_player(gedict_t *player, vec3_t origin, vec3_t angles, int flags)
 
 		setorigin( othercopy, PASSVEC3( player->s.v.origin ) );
 		othercopy->s.v.nextthink  = g_globalvars.time + 0.1;
-		othercopy->s.v.think = ( func_t ) SUB_Remove;
+		othercopy->think = ( func_t ) SUB_Remove;
 		play_teleport( othercopy );
 	}
 
@@ -575,7 +578,7 @@ void teleport_player(gedict_t *player, vec3_t origin, vec3_t angles, int flags)
 		)
 		{
 /*
-			G_bprint(2, "%s do not intersects\n", p->s.v.netname);
+			G_bprint(2, "%s do not intersects\n", p->netname);
 			G_bprint(2, "%.1f %.1f\n", player->s.v.absmin[0] , p->s.v.absmax[0]);
 			G_bprint(2, "%.1f %.1f\n", player->s.v.absmin[1] , p->s.v.absmax[1]);
 			G_bprint(2, "%.1f %.1f\n", player->s.v.absmin[2] , p->s.v.absmax[2]);
@@ -586,7 +589,7 @@ void teleport_player(gedict_t *player, vec3_t origin, vec3_t angles, int flags)
 			continue; // bboxes not intersects
 		}
 
-//		G_bprint(2, "%s intersects\n", p->s.v.netname);
+//		G_bprint(2, "%s intersects\n", p->netname);
 
 		// frag anyone who teleports in on top of an invincible player
 		if ( p->ct == ctPlayer )
@@ -636,7 +639,7 @@ void teleport_touch()
 {
 	gedict_t       *t;
 
-	if ( self->s.v.targetname )
+	if ( self->targetname )
 	{
 		if ( self->s.v.nextthink < g_globalvars.time )
 		{
@@ -651,24 +654,39 @@ void teleport_touch()
 	}
 
 // only teleport living creatures
-	if ( ISDEAD( other ) || other->s.v.solid != SOLID_SLIDEBOX )
+	if ( ISDEAD( other ) || (! isRACE() && other->s.v.solid != SOLID_SLIDEBOX) )
 		return;
 
 	if ( isRA() && !isWinner( other ) && !isLoser( other ) )
 		return;
 
+	if ( isRACE() && race_handle_event (other, self, "touch") )
+		return;
+
 // activator = other;
 	SUB_UseTargets();
 
-	t = find( world, FOFS( s.v.targetname ), self->s.v.target );
+	t = find( world, FOFS( targetname ), self->target );
 	if ( !t )
 	{
 		// G_Error( "couldn't find target" );
 		return;
 	}
 
+#ifdef BOT_SUPPORT
+	if (bots_enabled() && BotsPreTeleport(self, other)) {
+		return;
+	}
+#endif
+
 	teleport_player( other, t->s.v.origin, t->mangle,
 			 TFLAGS_FOG_SRC | TFLAGS_FOG_DST | TFLAGS_SND_SRC | TFLAGS_SND_DST | TFLAGS_VELOCITY_ADJUST );
+
+#ifdef BOT_SUPPORT
+	if (bots_enabled()) {
+		BotsPostTeleport(self, other, t);
+	}
+#endif
 }
 
 /*QUAKED info_teleport_destination (.5 .5 .5) (-8 -8 -8) (8 8 32)
@@ -680,9 +698,9 @@ void SP_info_teleport_destination()
 	VectorCopy( self->s.v.angles, self->mangle );
 // self.mangle = self.angles;
 	SetVector( self->s.v.angles, 0, 0, 0 );
-	self->s.v.model = "";
+	self->model = "";
 	self->s.v.origin[2] += 27;
-	if ( !self->s.v.targetname )
+	if ( !self->targetname )
 		G_Error( "no targetname" );
 }
 
@@ -690,7 +708,7 @@ void teleport_use()
 {
 	self->s.v.nextthink = g_globalvars.time + 0.2;
 	g_globalvars.force_retouch = 2;	// make sure even still objects get hit
-	self->s.v.think = ( func_t ) SUB_Null;
+	self->think = ( func_t ) SUB_Null;
 }
 
 /*QUAKED trigger_teleport (.5 .5 .5) ? PLAYER_ONLY SILENT
@@ -703,11 +721,11 @@ void SP_trigger_teleport()
 	vec3_t          o;
 
 	InitTrigger();
-	self->s.v.touch = ( func_t ) teleport_touch;
+	self->touch = ( func_t ) teleport_touch;
 	// find the destination 
-	if ( !self->s.v.target )
+	if ( !self->target )
 		G_Error( "no target" );
-	self->s.v.use = ( func_t ) teleport_use;
+	self->use = ( func_t ) teleport_use;
 
 	if ( !( ( int ) ( self->s.v.spawnflags ) & SILENT ) )
 	{
@@ -722,7 +740,7 @@ void SP_trigger_teleport()
 void SP_trigger_custom_teleport()
 {
 	// set real classname
-	self->s.v.classname = "trigger_teleport";
+	self->classname = "trigger_teleport";
 	// some size hack.
 	setsize( self, -self->s.v.size[0], -self->s.v.size[1], -self->s.v.size[2],
 					self->s.v.size[0],  self->s.v.size[1],  self->s.v.size[2] );
@@ -749,7 +767,7 @@ void trigger_skill_touch ()
 	if ( other->ct != ctPlayer )
 		return;
 
-	cvar_set( "skill", self->s.v.message );
+	cvar_set( "skill", self->message );
 }
 
 /*QUAKED trigger_setskill (.5 .5 .5) ?
@@ -764,11 +782,11 @@ void SP_trigger_setskill ()
 		return;
 	}
 
-	if ( !self->s.v.message )
-		self->s.v.message = "";
+	if ( !self->message )
+		self->message = "";
 
 	InitTrigger ();
-	self->s.v.touch = ( func_t ) trigger_skill_touch;
+	self->touch = ( func_t ) trigger_skill_touch;
 }
 
 
@@ -791,15 +809,15 @@ void trigger_onlyregistered_touch()
 	self->attack_finished = g_globalvars.time + 2;
 	if ( /*trap_cvar( "registered" )*/ true )
 	{
-		self->s.v.message = "";
+		self->message = "";
 		activator = other;
 		SUB_UseTargets();
 		ent_remove( self );
 	} else
 	{
-		if ( self->s.v.message && strneq( self->s.v.message, "" ) )
+		if ( self->message && strneq( self->message, "" ) )
 		{
-			G_centerprint( other, "%s", self->s.v.message );
+			G_centerprint( other, "%s", self->message );
 			sound( other, CHAN_BODY, "misc/talk.wav", 1, ATTN_NORM );
 		}
 	}
@@ -812,7 +830,7 @@ void SP_trigger_onlyregistered()
 {
 	trap_precache_sound( "misc/talk.wav" );
 	InitTrigger();
-	self->s.v.touch = ( func_t ) trigger_onlyregistered_touch;
+	self->touch = ( func_t ) trigger_onlyregistered_touch;
 }
 
 //============================================================================
@@ -834,7 +852,7 @@ void hurt_touch()
 	self->s.v.solid = SOLID_NOT;
 	other->deathtype = dtTRIGGER_HURT;
 	T_Damage( other, self, self, self->dmg );
-	self->s.v.think = ( func_t ) hurt_on;
+	self->think = ( func_t ) hurt_on;
 	self->s.v.nextthink = g_globalvars.time + 1;
 }
 
@@ -845,14 +863,16 @@ defalt dmg = 5
 */
 void SP_trigger_hurt()
 {
-	if ( streq( "end", g_globalvars.mapname ) && cvar( "k_remove_end_hurt" ) ) {
-		ent_remove ( self );
+	if (streq("end", g_globalvars.mapname) && cvar("k_remove_end_hurt")) {
+		soft_ent_remove (self);
 		return;
 	}
+
 	InitTrigger();
-	self->s.v.touch = ( func_t ) hurt_touch;
-	if ( !self->dmg )
+	self->touch = ( func_t ) hurt_touch;
+	if (!self->dmg) {
 		self->dmg = 5;
+	}
 }
 
 //============================================================================
@@ -861,7 +881,7 @@ void SP_trigger_hurt()
 
 void trigger_push_touch()
 {
-	if ( streq( other->s.v.classname, "grenade" ) )
+	if ( streq( other->classname, "grenade" ) )
 	{
 		other->s.v.velocity[0] = self->speed * self->s.v.movedir[0] * 10;
 		other->s.v.velocity[1] = self->speed * self->s.v.movedir[1] * 10;
@@ -893,8 +913,7 @@ Pushes the player
 void SP_trigger_push()
 {
 	InitTrigger();
-	trap_precache_sound( "ambience/windfly.wav" );
-	self->s.v.touch = ( func_t ) trigger_push_touch;
+	self->touch = ( func_t ) trigger_push_touch;
 	if ( !self->speed )
 		self->speed = 1000;
 }
@@ -902,7 +921,7 @@ void SP_trigger_push()
 void SP_trigger_custom_push()
 {
 	// set real classname
-	self->s.v.classname = "trigger_push";
+	self->classname = "trigger_push";
 	// some size hack.
 	setsize( self, -self->s.v.size[0], -self->s.v.size[1], -self->s.v.size[2],
 					self->s.v.size[0],  self->s.v.size[1],  self->s.v.size[2] );
@@ -950,13 +969,13 @@ void SP_trigger_monsterjump()
 		SetVector( self->s.v.angles, 0, 360, 0 );
 
 	InitTrigger();
-	self->s.v.touch = ( func_t ) trigger_monsterjump_touch;
+	self->touch = ( func_t ) trigger_monsterjump_touch;
 }
 
 void SP_trigger_custom_monsterjump()
 {
 	// set real classname
-	self->s.v.classname = "trigger_monsterjump";
+	self->classname = "trigger_monsterjump";
 	// some size hack.
 	setsize( self, -self->s.v.size[0], -self->s.v.size[1], -self->s.v.size[2],
 					self->s.v.size[0],  self->s.v.size[1],  self->s.v.size[2] );

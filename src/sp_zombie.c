@@ -393,7 +393,7 @@ void ZombieGrenadeTouch()
 	sound( self, CHAN_WEAPON, "zombie/z_miss.wav", 1, ATTN_NORM );	// bounce sound
 	VectorCopy( VEC_ORIGIN, self->s.v.velocity );
 	VectorCopy( VEC_ORIGIN, self->s.v.avelocity );
-	self->s.v.touch = ( func_t) SUB_Remove;
+	self->touch = ( func_t) SUB_Remove;
 }
 
 /*
@@ -430,11 +430,11 @@ void ZombieFireGrenade( float st_x, float st_y, float st_z )
 
 	SetVector( missile->s.v.avelocity, 3000, 1000, 2000 );
 
-	missile->s.v.touch = ( func_t ) ZombieGrenadeTouch;
+	missile->touch = ( func_t ) ZombieGrenadeTouch;
 
 	// set missile duration
 	missile->s.v.nextthink = g_globalvars.time + 2.5 + g_random();
-	missile->s.v.think = ( func_t ) SUB_Remove;
+	missile->think = ( func_t ) SUB_Remove;
 
 	setmodel( missile, "progs/zom_gib.mdl" );
 	setsize( missile, PASSVEC3( VEC_ORIGIN ), PASSVEC3( VEC_ORIGIN ) );
@@ -606,7 +606,7 @@ void _zombie_paine12( void )
 	{
 		// not ok, delay wake up in zombie_paine11
 		self->s.v.solid = SOLID_NOT; // return back non solid state
-		self->s.v.think = ( func_t ) zombie_paine11;
+		self->think = ( func_t ) zombie_paine11;
 		return;
 	}
 }

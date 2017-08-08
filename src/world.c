@@ -25,6 +25,11 @@
 
 #include "g_local.h"
 
+#ifdef BOT_SUPPORT
+#include "fb_globals.h"
+#endif
+
+void RegisterSkillVariables (void);
 void  SUB_regen();
 void  CheckAll();
 void  FixSpecWizards ();
@@ -32,6 +37,8 @@ void  FixSayFloodProtect();
 void  FixRules ();
 void  ShowSpawnPoints();
 void  r_route();
+void  LoadMap (void);
+void SP_trigger_custom_push();
 
 #define MAX_BODYQUE 4
 gedict_t       *bodyque[MAX_BODYQUE];
@@ -41,11 +48,11 @@ void InitBodyQue()
 	int             i;
 
 	bodyque[0] = spawn();
-	bodyque[0]->s.v.classname = "bodyque";
+	bodyque[0]->classname = "bodyque";
 	for ( i = 1; i < MAX_BODYQUE; i++ )
 	{
 		bodyque[i] = spawn();
-		bodyque[i]->s.v.classname = "bodyque";
+		bodyque[i]->classname = "bodyque";
 		bodyque[i - 1]->s.v.owner = EDICT_TO_PROG( bodyque[i] );
 	}
 	bodyque[MAX_BODYQUE - 1]->s.v.owner = EDICT_TO_PROG( bodyque[0] );
@@ -62,7 +69,7 @@ void CopyToBodyQue( gedict_t * ent )
 	VectorCopy( ent->s.v.angles, bodyque[bodyque_head]->s.v.angles );
 	VectorCopy( ent->s.v.velocity, bodyque[bodyque_head]->s.v.velocity );
 
-	bodyque[bodyque_head]->s.v.model = ent->s.v.model;
+	bodyque[bodyque_head]->model = ent->model;
 	bodyque[bodyque_head]->s.v.modelindex = ent->s.v.modelindex;
 	bodyque[bodyque_head]->s.v.frame = ent->s.v.frame;
 	bodyque[bodyque_head]->s.v.colormap = ent->s.v.colormap;
@@ -83,7 +90,7 @@ void ClearBodyQue()
 
 	for ( i = 0; i < MAX_BODYQUE; i++ )
 	{
-		bodyque[i]->s.v.model = "";
+		bodyque[i]->model = "";
 		bodyque[i]->s.v.modelindex = 0;
 		bodyque[i]->s.v.frame = 0;
 		bodyque[i]->s.v.movetype = MOVETYPE_NONE;
@@ -93,7 +100,10 @@ void ClearBodyQue()
 
 void CheckDefMap( )
 {
-	if( !CountPlayers() && !cvar( "k_lockmap" ) )
+	int player_count = CountPlayers ();
+	int bot_count = CountBots ();
+
+	if( (player_count == 0 || player_count == bot_count) && !cvar( "k_lockmap" ) )
 	{
 		char *s1 = cvar_string( "k_defmap" );
 
@@ -101,7 +111,7 @@ void CheckDefMap( )
 
 		if( !strnull( s1 ) && strneq( s1, g_globalvars.mapname ) )
 			changelevel( s1 );
-		else if ( intermission_running )
+		else if ( intermission_running || (player_count == bot_count && bot_count) )
 			changelevel( g_globalvars.mapname );
 	}
 
@@ -120,9 +130,9 @@ void Spawn_DefMapChecker( float timeout )
 
 	e = spawn();
 
-	e->s.v.classname = "mapguard";
+	e->classname = "mapguard";
 	e->s.v.owner = EDICT_TO_PROG( world );
-	e->s.v.think = ( func_t ) CheckDefMap;
+	e->think = ( func_t ) CheckDefMap;
 	e->s.v.nextthink = g_globalvars.time + max(0.0001, timeout);
 }
 
@@ -138,7 +148,7 @@ void Check_LongMapUptime()
 
 	max_map_uptime += (60 * 5); // so if map reloading fail, we repeat it after some time
 
-	if ( CountPlayers() ) { // oh, here players, warn but not reload
+	if ( CountPlayers() || CountPlayers() == CountBots() ) { // oh, here players, warn but not reload
 		G_bprint(2, "\x87%s Long map uptime detected, reload map please!\n", redtext( "WARNING:" ));
 		return;
 	}
@@ -153,21 +163,19 @@ void SP_worldspawn()
 {
 	char		*s;
 
-	race_add_standard_routes();
-
 	G_SpawnString( "classname", "", &s );
 	if ( Q_stricmp( s, "worldspawn" ) )
 	{
 		G_Error( "SP_worldspawn: The first entity isn't 'worldspawn'" );
 	}
-	world->s.v.classname = "worldspawn";
+	world->classname = "worldspawn";
 	InitBodyQue();
 
-	if ( !Q_stricmp( self->s.v.model, "maps/e1m8.bsp" ) )
+	if ( !Q_stricmp( self->model, "maps/e1m8.bsp" ) )
 		trap_cvar_set( "sv_gravity", "100" );
-	else if ( !Q_stricmp( self->s.v.model, "maps/bunmoo3.bsp" ) )
+	else if ( !Q_stricmp( self->model, "maps/bunmoo3.bsp" ) )
 		trap_cvar_set( "sv_gravity", "150" );
-	else if ( !Q_stricmp( self->s.v.model, "maps/lowgrav.bsp" ) )
+	else if ( !Q_stricmp( self->model, "maps/lowgrav.bsp" ) )
 		trap_cvar_set( "sv_gravity", "150" );
 	else
 		trap_cvar_set( "sv_gravity", "800" );
@@ -289,6 +297,8 @@ void SP_worldspawn()
 		trap_precache_model( "progs/v_coil.mdl" );	
 		trap_precache_sound( "weapons/coilgun.wav" );
 	}
+
+	trap_precache_sound( "ambience/windfly.wav" );
 	
 	if ( cvar("k_spm_custom_model") )
 		trap_precache_model( "progs/spawn.mdl" );
@@ -337,7 +347,7 @@ void SP_worldspawn()
 	trap_precache_model( "progs/bolt.mdl" );	// for lightning gun
 	trap_precache_model( "progs/bolt2.mdl" );	// for lightning gun
 	trap_precache_model( "progs/bolt3.mdl" );	// for boss shock
-	trap_precache_model( "progs/lavaball.mdl" );	// for testing
+	trap_precache_model( "progs/lavaball.mdl" );	// for testing (also for race, if ctf models disabled)
 
 	trap_precache_model( "progs/missile.mdl" );
 	trap_precache_model( "progs/grenade.mdl" );
@@ -502,6 +512,13 @@ void SP_worldspawn()
 	if ( !k_matchLess ) // skip practice in matchLess mode
 	if ( cvar( "srv_practice_mode" ) ) // #practice mode#
 		SetPractice( cvar( "srv_practice_mode" ), NULL ); // may not reload map
+
+	// Set hoonymode by default if flags set
+	if ( world->hoony_timelimit || ! strnull(world->hoony_defaultwinner) )
+	{
+		UserMode(-8);
+		HM_initialise_rounds();
+	}
 }
 
 void ShowSpawnPoints();
@@ -526,7 +543,11 @@ void Customize_Maps()
 		self = swp; // restore self
 	}
 
-	if ( !cvar("k_end_tele_spawn") && streq( "end", g_globalvars.mapname) ) {
+	if ( !cvar("k_end_tele_spawn") && streq( "end", g_globalvars.mapname) 
+#ifdef BOT_SUPPORT
+		&& !bots_enabled() 
+#endif
+		) {
 		vec3_t      TS_ORIGIN = { -392, 608, 40 }; // tele spawn
 
 		for( p = world; (p = find( p, FOFCLSN, "info_player_deathmatch" )); )
@@ -539,8 +560,8 @@ void Customize_Maps()
 	// correcting some teleport destintions on death32c (c) ktpro
 	if ( streq( "death32c", g_globalvars.mapname ) )
 		for( p = world; (p = find( p, FOFCLSN, "trigger_teleport" )); )
-			if ( streq( "dm220", p->s.v.target ) )
-				p->s.v.target = "dm6t1";
+			if ( streq( "dm220", p->target ) )
+				p->target = "dm6t1";
 
 	// Modify some ctf maps
 	if ( k_allowed_free_modes & UM_CTF )
@@ -560,13 +581,13 @@ void Customize_Maps()
 			
 			for( p = world; (p = find( p, FOFCLSN, "info_player_team2" )); )
 				if ( VectorCompare( p->s.v.origin, spawn1 ) ) {
-					p->s.v.classname = "info_player_team1";
+					p->classname = "info_player_team1";
 					break;
 				}
 
 			for( p = world; (p = find( p, FOFCLSN, "info_player_team1" )); )
 				if ( VectorCompare( p->s.v.origin, spawn2 ) ) { 
-					p->s.v.classname = "info_player_team2";
+					p->classname = "info_player_team2";
 					break;
 				}
 
@@ -575,6 +596,34 @@ void Customize_Maps()
 					ent_remove( p );
 					break;
 				}
+		}
+	}
+
+	// modify slide8 to make it possible to complete in race mode
+	if (streq(g_globalvars.mapname, "slide8")) {
+		gedict_t *push, *oldself, *ent;
+
+		// create extra push before lava pit
+		push = spawn();
+		if (!push) {
+			return;
+		}
+
+		// Create push over the lava pit
+		VectorSet(push->s.v.origin, -2110, 2550, -850);
+		VectorSet(push->s.v.size, 250, 250, 50);
+		VectorSet(push->s.v.movedir, -0.5, 0, 0.5);
+		push->speed = 120;
+		oldself = self;
+		self = push;
+		SP_trigger_custom_push();
+		self = oldself;
+
+		// Remove hurt indicators around lava pit
+		for (ent = world; (ent = findradius_ignore_solid(ent, push->s.v.origin, 300)); /**/) {
+			if (streq(ent->classname, "trigger_hurt")) {
+				ent_remove(ent);
+			}
 		}
 	}
 
@@ -651,8 +700,6 @@ void FirstFrame	( )
 
 	RegisterCvar("_k_nospecs");  // internal usage, will reject spectators connection
 
-	RegisterCvar("_k_recordeddemoname");  // internal usage, name of last easyrecorded demo
-
 	RegisterCvar("k_noitems");
 
 	RegisterCvar("k_random_maplist"); // select random map from k_ml_XXX variables.
@@ -667,6 +714,7 @@ void FirstFrame	( )
 	RegisterCvar("k_disallow_krjump");
 	RegisterCvar("k_lock_hdp");
 	RegisterCvar("k_disallow_weapons");
+	RegisterCvar("k_force_mapcycle"); // will use mapcycle even when /deathmatch 0
 
 	RegisterCvar("k_pow");
 	RegisterCvarEx("k_pow_q", "1"); // quad
@@ -738,12 +786,26 @@ void FirstFrame	( )
 	RegisterCvar("k_entityfile");
 // { hoonymode
 	RegisterCvarEx("k_hoonymode", "0");
+	RegisterCvarEx("k_hoonyrounds", "6");
+	RegisterCvarEx("k_hoonymode_prevmap", "");
+	RegisterCvarEx("k_hoonymode_prevspawns", "");
 // }
 // { race
 	RegisterCvarEx("k_race", "0");
 	RegisterCvarEx("k_race_custom_models", "0");
 	RegisterCvarEx("k_race_autorecord", "1");
 	RegisterCvarEx("k_race_times_per_port", "0");
+	RegisterCvarEx("k_race_pace_headstart", "0.5");
+	RegisterCvarEx("k_race_pace_jumps", "0");
+	RegisterCvarEx("k_race_pace_resolution", "2");
+	RegisterCvarEx("k_race_pace_legal", "0");
+	RegisterCvarEx("k_race_pace_enabled", "0");
+	RegisterCvarEx("k_race_simultaneous", "0");
+	RegisterCvarEx("k_race_match", "0");
+	RegisterCvarEx("k_race_match_rounds", "9");
+	RegisterCvarEx("k_race_scoring_system", "0");
+	RegisterCvarEx("k_race_route_number", "0");
+	RegisterCvarEx("k_race_route_mapname", "");
 	//RegisterCvarEx("k_race_topscores", "10");
 // }
 	RegisterCvar("k_idletime");
@@ -849,6 +911,28 @@ void FirstFrame	( )
 
 // }
 
+	RegisterCvarEx("k_demotxt_format", "xml"); // what format for .txt files
+
+#ifdef BOT_SUPPORT
+// { frogbots support
+	RegisterCvarEx(FB_CVAR_ENABLED, "0");
+	RegisterCvarEx(FB_CVAR_OPTIONS, "0");
+	RegisterCvarEx(FB_CVAR_AUTOADD_LIMIT, "0");
+	RegisterCvarEx(FB_CVAR_AUTOREMOVE_AT, "0");
+	RegisterCvarEx(FB_CVAR_AUTO_DELAY, "1");
+	RegisterCvarEx(FB_CVAR_SKILL, "10");
+	RegisterCvarEx(FB_CVAR_DEBUG, "0");
+
+	for (i = 0; i < MAX_CLIENTS; i++) {
+		RegisterCvarEx(va("k_fb_name_%d", i), "");
+		RegisterCvarEx(va("k_fb_name_enemy_%d", i), "");
+		RegisterCvarEx(va("k_fb_name_team_%d", i), "");
+	}
+
+	RegisterSkillVariables();
+// }
+#endif
+
 // below globals changed only here
 
 	k_matchLess = cvar( "k_matchless" );
@@ -901,7 +985,7 @@ void FirstFrame	( )
 
 #ifdef CTF_RELOADMAP
 	k_ctf = (k_mode == gtCTF); // finaly decide is ctf active or not
-	k_ctf_custom_models = k_ctf_custom_models && isCTF(); // precache only if CTF is really on
+	k_ctf_custom_models = k_ctf_custom_models && (isCTF() || isRACE()); // precache only if CTF is really on
 #endif
 }
 
@@ -912,6 +996,10 @@ void SecondFrame ( )
 		return;
 
 	Customize_Maps();
+
+	LocationInitialise ();
+
+	HM_restore_spawns();
 }
 
 void CheckSvUnlock ()
@@ -1253,8 +1341,9 @@ void FixRules ( )
 	{
     	if( (timelimit == 0 && fraglimit == 0) || timelimit > k_tt || timelimit < 0 )
     	{
-        	if ( !isHoonyMode() )
-				cvar_fset( "timelimit", timelimit = k_tt ); // sensible default if no max set
+			if (!isHoonyModeDuel() && !isRACE()) {
+				cvar_fset("timelimit", timelimit = k_tt); // sensible default if no max set
+			}
 
 			// NOTE: hoonymode works with fraglimit = 0, and timelimit = 0, and manages the game by frags directly
     	}
@@ -1389,5 +1478,7 @@ void StartFrame( int time )
 	Check_LongMapUptime(); // reload map after some long up time, so our float time variables are happy
 
 	check_fcheck();
+
+	TeamplayGameTick ();
 }
 

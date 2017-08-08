@@ -35,11 +35,11 @@ typedef struct shared_edict_s {
 } edict_t;
 
 struct gedict_s;
-typedef void (*th_die_func_t)();
-typedef void (*th_pain_func_t)(struct gedict_s *, float);
+typedef void (*th_die_funcref_t)();
+typedef void (*th_pain_funcref_t)(struct gedict_s *, float);
 
 // { SP
-typedef void (*th_sp_func_t)();
+typedef void (*th_sp_funcref_t)();
 // }
 
 typedef enum
@@ -64,19 +64,25 @@ typedef enum
 } weaponName_t;
 
 typedef struct wpType_s {
-	int hits;			// hits with this weapon, for SG and SSG this is count of bullets
-	int rhits;			// real hits for this weapon (direct + splash), used for RL and GL only
-	int vhits;			// virtual hits for this weapon (direct + splash, do not care about pent and such), used for RL and GL only
-	int attacks;		// all attacks with this weapon, for SG and SSG this is count of bullets
+	int hits;           // hits with this weapon, for SG and SSG this is count of bullets
+	int rhits;          // real hits for this weapon (direct + splash), used for RL and GL only
+	int vhits;          // virtual hits for this weapon (direct + splash, do not care about pent and such), used for RL and GL only
+	int attacks;        // all attacks with this weapon, for SG and SSG this is count of bullets
 
-	int kills;			// kills with this weapon
-	int deaths;			// deaths from this weapon
-	int tkills;			// team kills with this weapon
-	int ekills;			// killed enemys which contain this weapon in inventory
-	int drops;			// number of packs dropped which contain this weapon
-	int tooks;			// took this weapon and does't have this weapon before took (weapon from packs counted too)
-	int ttooks;			// total tooked, even u alredy have this weapon
+	int kills;          // kills with this weapon
+	int deaths;         // deaths from this weapon
+	int tkills;         // team kills with this weapon
+	int suicides;       // suicides with this weapon
 
+	int ekills;         // killed enemys which contain this weapon in inventory
+	int drops;          // number of packs dropped which contain this weapon
+	int tooks;          // took this weapon and does't have this weapon before took (weapon from packs counted too)
+	int stooks;         // spawned items taken (backpacks not included), and didn't have weapon beforehand
+	int ttooks;         // total taken, even if you already had this weapon
+	int sttooks;        // spawned items taken (backpacks not included), even if you already had this weapon
+
+	int edamage;        // damage to enemies
+	int tdamage;        // damage to team-mates
 } wpType_t;
 
 typedef enum
@@ -111,6 +117,7 @@ typedef struct player_stats_s {
 	float    dmg_team;  // damage to team
 	float    dmg_self;  // damage to own player
 	float    dmg_eweapon;  // damage to enemy weapons
+	float    dmg_tweapon;  // damage to team weapons
 // { k_dmgfrags
 	float    dmg_frags; // frags awarded from damage (CA)
 // }
@@ -282,11 +289,460 @@ typedef enum
 } raPlayerType_t;
 // }
 
+typedef struct teamplay_memory_s {
+	unsigned long item;          // classname of saved item
+	vec3_t location;             // location of item
+	float time;                  // time details were saved
+	int flags;                   // flags about the particular item
+} teamplay_memory_t;
+
+typedef struct teamplay_preferences_s {
+	char      need_weapons[10];  // weapons (ezQuake: <var>)
+	int       need_health;       // threshold for announcing player needs health
+} teamplay_preferences_t;
+
+typedef struct teamplay_s {
+	teamplay_memory_t    took;
+	teamplay_memory_t    point;
+
+	unsigned long        enemy_items;                  // powerup flags, updated when enemy powerup (or eyes) visible
+	float                enemy_itemtime;               // time when enemy_items was last set
+	vec3_t               enemy_location;               // location of player when enemy_items was last set
+	int                  enemy_count;                  // number of enemies in pvs (also eyes)
+	int                  teammate_count;               // number of teammates in pvs
+
+	// Last location (FIXME: last_death_location)
+	float                death_time;
+	vec3_t               death_location;
+	int                  death_items;
+	int                  death_weapon;
+
+	// Client's preferences
+	teamplay_preferences_t preferences;
+} teamplay_t;
+
+#define NEED_WEAPONS_DEFAULT "87"
+
+#define it_quad		(1 << 0)
+#define it_pent		(1 << 1)
+#define it_ring		(1 << 2)
+#define it_suit		(1 << 3)
+#define it_ra		(1 << 4)
+#define it_ya		(1 << 5)
+#define it_ga		(1 << 6)
+#define it_mh		(1 << 7)
+#define it_health	(1 << 8)
+#define it_lg		(1 << 9)
+#define it_rl		(1 << 10)
+#define it_gl		(1 << 11)
+#define it_sng		(1 << 12)
+#define it_ng		(1 << 13)
+#define it_ssg		(1 << 14)
+#define it_pack		(1 << 15)
+#define it_cells	(1 << 16)
+#define it_rockets	(1 << 17)
+#define it_nails	(1 << 18)
+#define it_shells	(1 << 19)
+#define it_flag		(1 << 20)
+#define it_teammate	(1 << 21)
+#define it_enemy	(1 << 22)
+#define it_eyes		(1 << 23)
+#define it_sentry   (1 << 24)
+#define it_disp		(1 << 25)
+#define it_quaded   (1 << 26)
+#define it_pented   (1 << 27)
+#define it_rune1	(1 << 28)
+#define it_rune2	(1 << 29)
+#define it_rune3	(1 << 30)
+#define it_rune4	((unsigned int) (1 << 31))
+#define NUM_ITEMFLAGS 32
+
+#define it_runes	(it_rune1|it_rune2|it_rune3|it_rune4)
+#define it_powerups	(it_quad|it_pent|it_ring|it_suit)
+#define it_weapons	(it_lg|it_rl|it_gl|it_sng|it_ssg)
+#define it_armor	(it_ra|it_ya|it_ga)
+#define it_ammo		(it_cells|it_rockets|it_nails|it_shells)
+#define it_players	(it_teammate|it_enemy|it_eyes)
+
 #define MAX_SPAWN_WEIGHTS (64)
+#define HM_MAX_ROUNDS 64
+
+
+#ifdef BOT_SUPPORT
+// frogbots
+typedef void (*fb_void_funcref_t)(void);
+typedef qbool (*fb_bool_funcref_t)(void);
+typedef float (*fb_desire_funcref_t)(struct gedict_s* self, struct gedict_s* other);
+typedef qbool (*fb_touch_funcref_t)(struct gedict_s* item, struct gedict_s* player);
+typedef void (*fb_taken_funcref_t)(struct gedict_s* item, struct gedict_s* player);
+typedef void (*fb_entity_funcref_t)(struct gedict_s* item);
+
+#ifndef NUMBER_MARKERS
+#define NUMBER_MARKERS 300
+#endif
+#ifndef NUMBER_GOALS
+#define NUMBER_GOALS 24
+#endif
+#ifndef NUMBER_ZONES
+#define NUMBER_ZONES 24
+#endif
+#ifndef NUMBER_PATHS
+#define NUMBER_PATHS 8
+#endif
+#ifndef NUMBER_SUBZONES
+#define NUMBER_SUBZONES 32
+#endif
+
+typedef struct fb_runaway_route_s {
+	struct gedict_s* next_marker;
+	struct gedict_s* prev_marker;
+	float time;
+	float score;
+} fb_runaway_route_t;
+
+typedef struct fb_path_s {
+	struct gedict_s* next_marker;    // next marker in the graph
+	float time;                      // time to travel if walking (0 if teleporting)
+	float rj_time;                   // time to travel if using rocket jump
+	int flags;                       // hints on how to travel to next marker
+
+	short angle_hint;                // When travelling to marker, offset to standard angle (+ = anti-clockwise)
+	float rj_pitch;                  // ideal pitch angle when rocket jumping
+	float rj_yaw;                    // ideal yaw angle when rocket jumping (0 for no change)
+	int rj_delay;                    // number of frames to delay between jumping and firing rocket
+} fb_path_t;
+
+typedef struct fb_goal_s {
+	struct gedict_s* next_marker;
+	float time;
+	struct gedict_s* next_marker_rj;
+	float rj_time;
+} fb_goal_t;
+
+typedef struct fb_subzone_s {
+	struct gedict_s* next_marker;
+	float time;
+	struct gedict_s* next_marker_rj;
+	float rj_time;
+} fb_subzone_t;
+
+typedef struct fb_zone_s {
+	// Standard routing
+	struct gedict_s* marker;
+	float time;
+	struct gedict_s* next;
+	struct gedict_s* next_zone;
+
+	// Rocket jumping
+	struct gedict_s* marker_rj;
+	float rj_time;
+	struct gedict_s* next_rj;
+
+	float reverse_time;
+	struct gedict_s* reverse_marker;
+	struct gedict_s* reverse_next;
+	float from_time;
+	struct gedict_s* sight_from;
+	float sight_from_time;
+	struct gedict_s* higher_sight_from;
+	float higher_sight_from_time;            // FIXME: Never used?  Was used in runaway code, but in peculiar fashion...
+	int task;
+} fb_zone_t;
+
+typedef struct fb_botaim_s {
+	float scale;            // difference between current viewangle and desired is scaled by this
+	float minimum;          // minimum & maximum final variation
+	float maximum;
+	float multiplier;       // alter 
+} fb_botaim_t;
+
+typedef struct fb_botskill_s {
+	int   skill_level;            // 0-20 as standard
+	float dodge_amount;           // left/right strafing 
+	float lookahead_time;         // how far ahead the bot can think (regarding items respawning etc) 5-30s in original
+	float prediction_error;       // affects goal travellling error (lower values => turn up earlier) 1-0 in original.  randomised.
+	float look_anywhere;          // 0...1  determines when the bot will look at the enemy's location
+	float accuracy;
+
+	float lg_preference;          // 0...1  previously game-wide, look to use LG when possible
+	float rl_preference;          // 0...1  previously game-wide, look to use RL when possible
+
+	float visibility;             // cos(fov / 2) ... fov 90 = cos(45) = 0.7071067, fov 120 = cos(60) = 0.5
+
+	qbool attack_respawns;        // fire at respawns if enemy just died
+
+	float min_volatility;
+	float max_volatility;
+	float reduce_volatility;
+	float ownspeed_volatility_threshold;
+	float ownspeed_volatility;
+	float enemyspeed_volatility_threshold;
+	float enemyspeed_volatility;
+	float enemydirection_volatility;
+	float pain_volatility;                   // when bot has taken damage in last second
+	float opponent_midair_volatility;        // when opponent is in midair
+	float self_midair_volatility;            // when bot is in midair
+
+	float initial_volatility;                // when bot sees player for first time
+
+	float current_volatility;
+	float awareness_delay;
+	float movement_estimate_error;           // % of time the bot gets wrong when predicting player location
+
+	fb_botaim_t aim_params[2];
+
+	float movement;
+	float combat_jump_chance;
+	float missile_dodge_time;                // minimum time in seconds before bot dodges missile
+
+	qbool customised;                        // if set, customised file
+
+	qbool wiggle_run_dmm4;                   // if set, wiggle run on dmm4 (and up)
+	int wiggle_run_limit;                    // number of frames until bot will switch strafe direction
+	float wiggle_toggle;                     // % chance of switching direction when being hit
+} fb_botskill_t;
+
+// FIXME: Need to break this up into marker fields, client fields and entity fields
+//        Currently using way too much memory as a lot of these are invalid for particular entity types
+typedef struct fb_entvars_s {
+	fb_zone_t          zones[NUMBER_ZONES];         // directions to zones
+	fb_subzone_t       subzones[NUMBER_SUBZONES];   // links to subzones (subzone is unique marker inside a zone)
+	fb_goal_t          goals[NUMBER_GOALS];         // links to goals
+	fb_runaway_route_t runaway[NUMBER_PATHS];       // routes when running away
+	fb_path_t          paths[NUMBER_PATHS];         // direct links from this marker to next
+
+	int path_state;                      // flags for next path, copied from routing definition
+	int angle_hint;                      // for curl-jumping, angle offset (right-handed, +ve = to left, -ve = to right)
+
+	int index;                           // marker number
+
+	float wait;
+	float fl_ontrain;                    // FIXME: never set (used for frogbot train movement)
+
+	struct gedict_s* touchPlayer;        // last player to touch this object (see below)
+	float touchPlayerTime;               // how long the current item will be considered touched by touchPlayer
+	int   teamflag;                      // This is used to add a teamflag to a goal entity, so it bots on same team ignore item
+
+	float oldwaterlevel;                 // used to detect FL_WATERJUMP waterjump...  may not be required?  server will set...
+	float oldwatertype;                  // FIXME: never read.  server will set, this is in MOVETYPE_STEP code...
+
+	// these determine the strength of each player
+	float total_armor;
+	float total_damage;
+	float firepower;
+
+	float enemy_time;                       // Time before bot re-evaluates who is its primary enemy
+	float enemy_dist;                       // Distance to primary enemy
+
+	int oldsolid;                           // need to keep track of this for hazard calculations
+
+	// these determine the desire for items for each player 
+	//   (not just for bots ... bot's desire can take enemy's desire into consideration)
+	fb_desire_funcref_t desire;
+	float desire_armor1;
+	float desire_armor2;
+	float desire_armorInv;
+	float desire_health0;
+	float desire_mega_health;
+	float desire_supershotgun;
+	float desire_nailgun;
+	float desire_supernailgun;
+	float desire_grenadelauncher;
+	float desire_rocketlauncher;
+	float desire_lightning;
+	float desire_rockets;
+	float desire_cells;
+	float desire_nails;
+	float desire_shells;
+
+	int state;                              // WAIT | RUNAWAY | NOTARGET_ENEMY | HELP_TEAMMATE | STATE_BOTTOM (doors) | SHOT_FOR_LUCK
+	int camp_state;                         // CAMPBOT (FIXME: values set, but read value never acted on)
+	float arrow;
+	qbool wasinwater;
+	float swim_arrow;
+	float arrow_time;                       // If set in future, bots will avoid this path.  Used to detect grenade/rocket at teleport exit.
+	struct gedict_s* arrow_time_setby;      // Which player set the most recent arrow time?
+	float arrow_time2;                      // If set in future, sustain current direction (used to avoid edges or back away from objects)
+	float linked_marker_time;
+
+	vec3_t oldvelocity;
+	vec3_t obstruction_normal;
+	vec3_t obstruction_direction;           // Instead of storing in rel_pos, store direction to obstruction here (for BotWaterMove)
+	qbool  avoiding;                        // Avoiding next path marker, due to incoming rocket or arrow_time in future
+
+	qbool fl_marker;                        // true if the current item is considered a marker (used when finding all objects in given radius)
+	//struct gedict_s* next;
+	
+	// Goal evaluation
+	struct gedict_s* best_goal;
+	float best_goal_score;
+	float saved_goal_desire;                  // the desire for the current goal entity
+	float saved_respawn_time;                 // seconds until this item respawns (includes current bot's error)
+	float saved_goal_time;
+	float saved_enemy_time_squared;
+	float goal_respawn_time;                  // the time when this->best_goal2 will respawn (can be in past)
+	float goal_refresh_time;
+	float goal_enemy_repel;
+	float goal_enemy_desire;
+	struct gedict_s* best_goal2;
+	float best_score2;
+	float best_goal_time;
+
+	struct gedict_s* linked_marker;           // the next path in the route to goalentity
+	struct gedict_s* old_linked_marker;       // the previous linked marker
+	struct gedict_s* look_object;             // the player/marker/entity that the bot is locked onto
+	float frogbot_nextthink;                  // when to next run periodic movement logic for this player
+
+	int T;                                    // flags for this individual marker
+	int G_;                                   // assigned goal number for this marker [1-based...]
+	int Z_;                                   // assigned zone for this marker
+	int S_;                                   // subzone for this marker
+
+	vec3_t fixed_size;                        // fixed dimensions for this marker.  if dimension is 0, default marker size used
+
+	struct gedict_s* virtual_goal;
+
+	struct gedict_s* zone_stack_next;
+	struct gedict_s* Z_head;
+	struct gedict_s* Z_next;
+
+	float path_normal_;
+
+	fb_bool_funcref_t pickup;                      // return true if a player would pickup an item as they touch it
+	float weapon_refresh_time;
+
+	struct gedict_s* prev_touch_marker;         // the last touch marker processed
+	struct gedict_s* touch_marker;              // the last marker touched, while we were expecting to touch something (ignored during rocket jumps)
+	float touch_distance;                       // distance from player to touch marker.  used when multiple touch events fired in same frame
+	float touch_marker_time;                    // if < time, run a brute force closest-marker search for marker the player is closest to
+
+	// These settings dictate the 'skill' of the bot
+	fb_botskill_t skill;
+
+	// These control the bot's next command
+	qbool firing;                               // does the bot want to attack this frame?
+	qbool jumping;                              // does the bot want to jump this frame?
+	int desired_weapon_impulse;                 // impulse to send the next time the player
+	vec3_t desired_angle;                       // for 'perfect' aim, this is where the bot wants to be aiming
+	qbool botchose;                             // next_impulse is valid
+	int next_impulse;                           // the impulse to send in next command
+
+	vec3_t virtual_mins;                        // true bounds of the object (items are markers, so size is boosted)
+	vec3_t virtual_maxs;                        // true bounds of the object
+
+	vec3_t dir_move_;                           // the direction the bot wants to move in
+	float dir_speed;                            // the magnitude of vector the bot wants to move in
+	int wiggle_run_dir;                         // when wiggle-running, going left or right
+	qbool wiggle_increasing;                 // dictates direction, positive or negative
+	vec3_t last_cmd_direction;                  // the direction the bot did move in (scaled for speed)
+	float ledge_backup_time;
+
+	// Bot's missile parameters
+	struct gedict_s* missile_dodge;             // rocket belonging to look_object
+
+	int tread_water_count;                      // number of frames spent treading water 
+
+	vec3_t predict_origin;                      // origin of enemy, or where the bot thinks they will land
+	qbool predict_shoot;                        // make a prediction shot this frame?
+
+	// frogbot logic (move out of entity)
+	qbool allowedMakeNoise;                     // if false, paths involving picking up an item are penalised
+
+	// Rocket jumping logic
+	qbool canRocketJump;                        // will consider rocket jump routes
+	qbool rocketJumping;                        // in middle of rocket jumping
+	int   rocketJumpPathFrameDelay;             // value rocketJumpPathFrameDelay
+	int   rocketJumpFrameDelay;                 // active delay between jumping and firing
+	int   rocketJumpAngles[2];                  // pitch/yaw for rocket jump angle
+	int   lavaJumpState;                        // keep track of submerge/rise/fire sequence
+
+	// Editor
+	int   last_jump_frame;                      // framecount when player last jumped.  used to help setting rj fields
+
+	qbool bot_evade;                            // 
+
+	float help_teammate_time;
+	float frogwatermove_time;
+	float up_finished;                          // Swimming, used to keep pushing up for a period during lavajump
+	int botnumber;                              // bots[botnumber]
+
+	float last_cmd_sent;
+	struct gedict_s* prev_look_object;          // stores whatever the bot was looking at last frame
+
+	// Item event functions
+	fb_touch_funcref_t     item_touch;             // called whenever an item is touched
+	fb_taken_funcref_t     item_taken;             // called whenever an item is taken
+	fb_taken_funcref_t     item_affect;            // called whenever an item affects a player (mega-health)
+	fb_entity_funcref_t    item_respawned;         // called whenever an item respawns
+	fb_entity_funcref_t    item_placed;            // called when item has been placed in the map
+
+	// Player event functions
+	fb_entity_funcref_t    ammo_used;             // Whenever ammo is updated
+
+	qbool               be_quiet;
+	qbool               enemy_visible;
+	float               last_death;             // Last time this player died
+
+	struct gedict_s*    virtual_enemy;          //
+	vec3_t              rocket_endpos;          // where an incoming rocket will explode.  
+
+	// Debugging
+	qbool               debug;           // If set, trace logic
+	qbool               debug_path;      // Set by "debug botpath" command
+	qbool               debug_path_rj;   // Set by "debug botpath" command: can rocket jump
+	float               debug_path_start;// Set by "debug botpath" command: time debug started
+	struct gedict_s*    fixed_goal;      // Set by "debug botpath" command: target goal entity to move to
+	vec3_t              prev_velocity;   // used by "debug botpath" command: keep track of acceleration
+	float               last_spec_cp;    // last spectator centerprint
+
+	// Navigation
+	struct gedict_s*    door_entity;     // actual door entity (we spawn markers in doorway for navigation)
+
+	// Teamplay
+	float               last_mm2_status; // last time this bot reported
+	float               last_mm2_spot;   // last time this player had powerup reported by enemy
+
+	qbool               waterjumping;    // true if the bot should waterjump
+	int                 dbg_countdown;   // bot will be stationary for x frames
+
+	// Aiming
+	float               last_rndaim[2];
+	float               last_rndaim_time;
+	float               min_fire_time;   // time before bot will fire
+
+	// Stored on missile to detect where item will explode
+	vec3_t              missile_forward;
+	vec3_t              missile_right;
+	float               missile_spawntime;
+
+	// last time this player was hurt
+	float               last_hurt;
+
+	float               cmd_msec_lost;
+	int                 cmd_msec_last;
+} fb_entvars_t;
+#endif
 
 //typedef (void(*)(gedict_t *)) one_edict_func;
 typedef struct gedict_s {
 	edict_t         s;
+
+//fields that used to be pointers are now byte offsets to these pointers...
+	string_t    classname;
+	string_t    model;
+	func_t      touch;
+	func_t      use;
+	func_t      think;
+	func_t      blocked;
+	string_t    weaponmodel;
+	string_t    netname;
+	string_t    target;
+	string_t    targetname;
+	string_t    message;
+	string_t    noise;
+	string_t    noise1;
+	string_t    noise2;
+	string_t    noise3;
 
 //custom fields
 
@@ -365,8 +821,8 @@ typedef struct gedict_s {
 	int				deathtype;	// keeps track of how the player died
 	float           dmgtime;
 
-	th_die_func_t   th_die;
-	th_pain_func_t  th_pain;
+	th_die_funcref_t   th_die;
+	th_pain_funcref_t  th_pain;
 
 // below is KTX fields
 
@@ -375,13 +831,13 @@ typedef struct gedict_s {
 	//
 	// monster ai
 	//
-	th_sp_func_t	th_stand;
-	th_sp_func_t	th_walk;
-	th_sp_func_t	th_run;
-	th_sp_func_t	th_missile;
-	th_sp_func_t	th_melee;
+	th_sp_funcref_t	th_stand;
+	th_sp_funcref_t	th_walk;
+	th_sp_funcref_t	th_run;
+	th_sp_funcref_t	th_missile;
+	th_sp_funcref_t	th_melee;
 
-	th_sp_func_t	th_respawn; // for nightmare mode
+	th_sp_funcref_t	th_respawn; // for nightmare mode
 
 	struct gedict_s *oldenemy;	// mad at this player before taking damage
 
@@ -403,6 +859,8 @@ typedef struct gedict_s {
 	float	deaths;          // number of times player died
 	float	efficiency;      // stores player efficiency rating
 	float	friendly;        // number of times player killed teammates
+	float   kills;           // number of times player killed enemy
+	float   suicides;        // number of times player killed themselves
 	float	ready;           // if a player is ready or not
 	char	*killer;         // name of player who last killed player
 	char	*victim;         // name of player last killed
@@ -607,14 +1065,18 @@ typedef struct gedict_s {
 	int			race_RouteNodeType; // this is actually must be raceRouteNodeType_t 
 									// but unwilling to move type definition out of race.c so using int
 
-	int			race_ready; 		// is player ready for race
-	int			race_chasecam; 		// does player want to follow other racers in line
-	int			race_chasecam_freelook; // disable server forcing v_angle on client
-	int			race_chasecam_view;	// does follow uses the chasecam or 1st person view
-	int			race_afk;			// counter for afk starts
-	qbool		racer;				// this player do race right now
-	qbool		muted;				// this player produces no sound
-	int			hideentity;			// links to entity to hide in eye chasecam
+	int         race_ready;             // is player ready for race
+	int         race_chasecam;          // does player want to follow other racers in line
+	int         race_chasecam_freelook; // disable server forcing v_angle on client
+	int         race_chasecam_view;     // does follow uses the chasecam or 1st person view
+	int         race_afk;               // counter for afk starts
+	qbool       racer;                  // this player is actively racing right now
+	qbool       race_participant;       // this player participated in the current race
+	qbool       muted;                  // this player produces no sound
+	int         hideentity;             // links to entity to hide in eye chasecam
+	qbool       hideplayers;            // if set, all players hidden (read by mvdsv)
+	qbool       hideplayers_default;    // racer can choose to have this on or off
+	int         race_closest_guide_pos; // when guide route loaded, this is closest position
 
 	// race_route_start entity fields
 	char*       race_route_name;            // the name of the route
@@ -624,6 +1086,8 @@ typedef struct gedict_s {
 	int         race_route_falsestart_mode; // the falsestart mode - see raceFalseStartMode_t
 	float       race_route_start_yaw;       // the player's initial yaw angle
 	float       race_route_start_pitch;     // the player's initial pitch angle
+	int         race_flags;                 // flags affecting this particular object (teleports only atm)
+	int         race_track;                 // ent# of person this player is tracking (0 for default)
 // }
 
 	int			trackent;			// pseudo spectating for players.
@@ -633,9 +1097,31 @@ typedef struct gedict_s {
 
 	qbool		dropitem;			// true if placed with "dropitem" command.
 // { hoonymode
-//	struct gedict_s *k_hoonyspawn; // hoonymode: on odd-number points, we switch the spawns
+	struct gedict_s* k_hoonyspawn;                 // hoonymode: the player's spawn on even-numbered round
+	struct gedict_s* k_hoony_new_spawn;            // hoonymode: the player's spawn for the current round
+	float            initial_spawn_delay;          // should be 'taken' at game start and spawn after delay
+	int              hoony_timelimit;	           // maximum time for each round
+	char*            hoony_defaultwinner;          // if round time expires, who wins the round?  if null then both players score point
+	byte             hoony_results[HM_MAX_ROUNDS]; // store results of each round
+	int              hoony_prevfrags;              // frags at end of previous round
+	int              hoony_nomination;             // links player -> nominated spawn and vice versa
+	int              hoony_spawn_order;            // spawn order when shuffling
 // }
 
+#ifdef BOT_SUPPORT
+// { frogbots
+	fb_entvars_t fb;
+// }
+#endif
+
+// { highlights which clients this entity was visible to
+	unsigned int visclients;
+// }
+
+// { teamplay extensions, for server-side mm2
+	teamplay_t   tp;
+	unsigned int tp_flags;
+// }
 } gedict_t;
 
 typedef enum
@@ -672,7 +1158,7 @@ typedef struct
 	raceRouteNodeType_t		type;			// race route node type
 	vec3_t					ang;			// this is only need for start node, so we can set player view angles
 	vec3_t					org;			// node origin in 3D space
-
+	vec3_t                  sizes;          // dimensions (if 0, default)
 } raceRouteNode_t;
 
 typedef struct
@@ -698,6 +1184,8 @@ typedef struct
 	char					date[64];
 	raceWeapoMode_t			weaponmode;					// weapon mode
 	raceFalseStartMode_t	startmode;				// start mode
+	int                     playernumber;
+	int                     position;
 } raceRecord_t;
  
 typedef enum
@@ -713,7 +1201,7 @@ typedef enum
 typedef struct
 {
 	raceRecord_t records[NUM_BESTSCORES];	// array of best scores information
-	raceRecord_t currentrace;	// curent score information
+	raceRecord_t currentrace[MAX_CLIENTS];	// curent score information
 
 	int						cnt;				// how much we actually have of routes, no more than MAX_ROUTES
 	int						active_route;		// which route active right now
@@ -745,6 +1233,16 @@ typedef struct
 
 	raceStatus_t			status;				// race status
 
+	int                 pacemaker_time;      // time of the current pacemaker route
+	char                pacemaker_nick[64];  // name of the current pacemaker
+
+	int                 racers_complete;     // number of players finished current race
+	int                 last_completion_time;// time of last player to complete the race
+	int                 last_completion_eq;  // number of players equalling the last completion time
+	int                 racers_competing;    // number of players starting current race
+
+	int                 rounds;              // number of rounds in this match
+	int                 round_number;        // current round number
 } race_t;
 
 extern race_t			race; // whole race struct

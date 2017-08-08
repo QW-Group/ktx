@@ -37,6 +37,8 @@ void AdminImpBot();
 void MakeMOTD();
 void AutoTrackRestore();
 
+void Bot_Print_Thinking (void);
+
 int GetSpecWizard ()
 {
 	int k_asw = bound(0, cvar("allow_spec_wizard"), 2);
@@ -134,12 +136,12 @@ void SpectatorConnect()
 	SpecDecodeLevelParms();
 
 	self->ct = ctSpec;
-	self->s.v.classname = "spectator"; // Added this in for kick code
+	self->classname = "spectator"; // Added this in for kick code
 	self->k_accepted = 1; // spectator has no restriction to connect
 
 	for ( p = world; (p = ( match_in_progress == 2 && !cvar("k_ann") ) ? find_spc( p ) : find_client( p )); )
 		if ( p != self )  // does't show msg for self
-			G_sprint( p, PRINT_HIGH, "Spectator %s entered the game\n", self->s.v.netname  );
+			G_sprint( p, PRINT_HIGH, "Spectator %s entered the game\n", self->netname  );
 
 	if ( diff < 0 || diff >= MAX_EDICTS ) // something wrong happen - fixing
 		self->s.v.goalentity = EDICT_TO_PROG( world );
@@ -149,8 +151,8 @@ void SpectatorConnect()
 
 	if ( match_in_progress != 2 ) {
 		self->wizard = spawn();
-		self->wizard->s.v.classname = "spectator_wizard";
-		self->wizard->s.v.think = ( func_t ) wizard_think;
+		self->wizard->classname = "spectator_wizard";
+		self->wizard->think = ( func_t ) wizard_think;
 		self->wizard->s.v.nextthink = g_globalvars.time + 0.1;
 	}
 
@@ -187,7 +189,7 @@ void SpectatorDisconnect()
 	if ( self->k_accepted )
 	{
 		for ( p = world; (p = ( match_in_progress == 2 && !cvar("k_ann") ) ? find_spc( p ) : find_client( p )); )
-			G_sprint( p, PRINT_HIGH, "Spectator %s left the game\n", self->s.v.netname );
+			G_sprint( p, PRINT_HIGH, "Spectator %s left the game\n", self->netname );
 	}
 
 // s: added conditional function call here
@@ -207,7 +209,7 @@ void SpectatorDisconnect()
 	if( self->k_kicking )
 		ExitKick( self );
 
-	self->s.v.classname = ""; // Cenobite, so we clear out any specs as they leave
+	self->classname = ""; // Cenobite, so we clear out any specs as they leave
 	self->k_accepted  = 0;
 	self->ct = ctNone;
 }
@@ -248,10 +250,10 @@ void SpectatorImpulseCommand()
 			return;
 		}
 
-		goal = find( goal, FOFS( s.v.classname ), "info_player_deathmatch" );
+		goal = find( goal, FOFCLSN, "info_player_deathmatch" );
 
 		if ( !goal )
-			goal = find( world, FOFS( s.v.classname ), "info_player_deathmatch" );
+			goal = find( world, FOFCLSN, "info_player_deathmatch" );
 
 		if ( goal )
 		{
@@ -306,6 +308,16 @@ void SpectatorThink()
 	if ( self->wp_stats && self->wp_stats_time && self->wp_stats_time <= g_globalvars.time && match_in_progress != 1 )
 		Print_Wp_Stats ();
 
+#ifdef BOT_SUPPORT
+	if (self->s.v.goalentity) {
+		gedict_t *goal = PROG_TO_EDICT(self->s.v.goalentity);
+
+		if (goal->isBot) {
+			Bot_Print_Thinking();
+		}
+	}
+#endif
+
 	if ( wizard ) {
 		// set model angles
 		wizard->s.v.angles[0] = -self->s.v.v_angle[0] / 2;
@@ -321,12 +333,12 @@ void SpectatorThink()
 			gedict_t *goal = PROG_TO_EDICT( self->s.v.goalentity );
 
 			if ( goal && goal->ct == ctPlayer ) // tracking player, so turn model off
-				wizard->s.v.model = "";
+				wizard->model = "";
 			else // turn model on
 				setmodel( wizard, "progs/wizard.mdl" );
 		}
 		else {
-			wizard->s.v.model = ""; // turn model off
+			wizard->model = ""; // turn model off
 		}
 	}
 }
@@ -347,7 +359,7 @@ void hide_specs_wizards ()
 	gedict_t *p;
 
 	for( p = world; (p = find( p, FOFCLSN, "spectator_wizard" )); )
-		p->s.v.model = "";
+		p->model = "";
 }
 
 void show_specs_wizards ()

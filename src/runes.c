@@ -18,7 +18,7 @@ void DoDropRune(int rune, qbool s)
 
 	item = spawn();
 	setorigin( item, self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] - 24);
-	item->s.v.classname = "rune";
+	item->classname = "rune";
 	item->ctf_flag = rune;
 	item->s.v.velocity[0] = i_rnd( -100, 100 );
 	item->s.v.velocity[1] = i_rnd( -100, 100 );
@@ -37,9 +37,9 @@ void DoDropRune(int rune, qbool s)
 		setmodel( item, "progs/end4.mdl" );
 
 	setsize( item, -16, -16, 0, 16, 16, 56 );
-	item->s.v.touch = (func_t) RuneTouch;
+	item->touch = (func_t) RuneTouch;
 	item->s.v.nextthink = g_globalvars.time + 90;
-	item->s.v.think = (func_t) RuneRespawn;
+	item->think = (func_t) RuneRespawn;
 
 	// qqshka, add spawn sound to rune if rune respawned, not for player dropped from corpse rune
 	if ( s )
@@ -54,7 +54,7 @@ void DoTossRune( int rune )
 
 	item = spawn();
 	item->ctf_flag = rune;
-	item->s.v.classname = "rune";
+	item->classname = "rune";
 	item->s.v.flags = FL_ITEM;
 	item->s.v.solid = SOLID_TRIGGER;
 	item->s.v.movetype = MOVETYPE_TOSS;
@@ -88,9 +88,9 @@ void DoTossRune( int rune )
 	setorigin( item, self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] - 24);
 	setsize( item, -16, -16, 0, 16, 16, 56 );
 	item->s.v.owner = EDICT_TO_PROG( self );
-	item->s.v.touch = (func_t) RuneTouch;
+	item->touch = (func_t) RuneTouch;
 	item->s.v.nextthink = g_globalvars.time + 0.75;
-	item->s.v.think = (func_t) RuneResetOwner;
+	item->think = (func_t) RuneResetOwner;
 }
 
 void DropRune()
@@ -141,7 +141,7 @@ void TossRune()
 		DoTossRune( CTF_RUNE_RGN );
 		self->ps.rgn_time += g_globalvars.time - self->rune_pickup_time;
 		regenrot->s.v.nextthink = g_globalvars.time + 5;
-		regenrot->s.v.think = (func_t) RegenLostRot;
+		regenrot->think = (func_t) RegenLostRot;
 		regenrot->s.v.owner = EDICT_TO_PROG( self );
 	}
 
@@ -166,7 +166,7 @@ void RegenLostRot()
 void RuneResetOwner()
 {
 	self->s.v.owner     = EDICT_TO_PROG( self );
-	self->s.v.think     = (func_t) RuneRespawn;
+	self->think     = (func_t) RuneRespawn;
 	self->s.v.nextthink = g_globalvars.time + 90;
 }
 
@@ -193,7 +193,7 @@ void RuneTouch()
 	if ( other == PROG_TO_EDICT ( self->s.v.owner ) )
 		return;
 
-	if ( self->s.v.think == (func_t) RuneRespawn )
+	if ( self->think == (func_t) RuneRespawn )
 		self->s.v.nextthink = g_globalvars.time + 90;
 
 	if ( other->ctf_flag & CTF_RUNE_MASK )

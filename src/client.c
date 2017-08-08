@@ -28,6 +28,8 @@
 //
 //===========================================================================
 #include "g_local.h"
+#include "fb_globals.h"
+
 vec3_t          VEC_ORIGIN = { 0, 0, 0 };
 vec3_t          VEC_HULL_MIN = { -16, -16, -24 };
 vec3_t          VEC_HULL_MAX = { 16, 16, 32 };
@@ -46,12 +48,10 @@ void MakeMOTD();
 void ImpulseCommands();
 void StartDie ();
 void ZeroFpsStats ();
-void ChasecamViewButton( void );
-
-void race_start( qbool restart, const char *fmt, ... );
-void race_stoprecord( qbool cancel );
+void item_megahealth_rot();
 
 void del_from_specs_favourites(gedict_t *rm);
+void item_megahealth_rot(void);
 
 extern int g_matchstarttime;
 
@@ -132,7 +132,7 @@ void CheckTiming()
 			// warn and repeat warn after some time
 			if ( firstTime || p->k_timingWarnTime + 20 < g_globalvars.time ){
 			    if ( timing_players_action & TA_INFO )
-					G_bprint(2, "\x87%s %s is timing out!\n", redtext( "WARNING:" ), p->s.v.netname);
+					G_bprint(2, "\x87%s %s is timing out!\n", redtext( "WARNING:" ), p->netname);
 
 				p->k_timingWarnTime = g_globalvars.time;
 			}
@@ -437,10 +437,10 @@ gedict_t *Do_FindIntermission( char *info_name )
 	gedict_t       *spot;
 	int             i;
 
-	i = find_cnt( FOFS( s.v.classname ), info_name );
+	i = find_cnt( FOFCLSN, info_name );
 	i = ( i ? g_random() * i : -1); // pick a random one
 
-	return (spot = find_idx( i, FOFS( s.v.classname ), info_name ));
+	return (spot = find_idx( i, FOFCLSN, info_name ));
 }
 
 
@@ -493,7 +493,7 @@ void GotoNextMap()
 	{
 		extern  char *SelectMapInCycle(char *buf, int buf_size);
 
-		if ( deathmatch )
+		if ( deathmatch || cvar("k_force_mapcycle") )
 			SelectMapInCycle( newmap, sizeof(newmap) );
 	}
 
@@ -597,7 +597,7 @@ void execute_changelevel()
 
 
 // KTEAMS: make players invisible
-        other->s.v.model = "";
+        other->model = "";
 		// take screenshot if requested
         if( iKey( other, "kf" ) & KF_SCREEN )
 			stuffcmd_flags(other, STUFFCMD_IGNOREINDEMO, "wait; wait; wait; wait; wait; wait; screenshot\n");
@@ -628,18 +628,18 @@ void changelevel_touch()
 		return;
 	}
 
-	G_bprint( PRINT_HIGH, "%s exited the level\n", other->s.v.netname );
+	G_bprint( PRINT_HIGH, "%s exited the level\n", other->netname );
 
 	set_nextmap( self->map );
 
 	activator = other;
 	SUB_UseTargets();
 
-	self->s.v.touch = ( func_t ) SUB_Null;
+	self->touch = ( func_t ) SUB_Null;
 
 	// we can't move people right now, because touch functions are called
 	// in the middle of C movement code, so set a think time to do it
-	self->s.v.think = ( func_t ) execute_changelevel;
+	self->think = ( func_t ) execute_changelevel;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 }
 
@@ -657,12 +657,12 @@ void SP_trigger_changelevel()
 		 && cvar( "k_remove_end_hurt" )
 		 && cvar( "k_remove_end_hurt" ) != 2
 	   ) {
-		ent_remove ( self );
-		return;
+		soft_ent_remove ( self );
 	}
-
-	InitTrigger();
-	self->s.v.touch = ( func_t ) changelevel_touch;
+	else {
+		InitTrigger ();
+		self->touch = (func_t)changelevel_touch;
+	}
 }
 
 /*
@@ -687,8 +687,8 @@ void NextLevel()
 
 	o = spawn();
 	o->map = g_globalvars.mapname;
-	o->s.v.classname = "trigger_changelevel";
-	o->s.v.think = ( func_t ) execute_changelevel;
+	o->classname = "trigger_changelevel";
+	o->think = ( func_t ) execute_changelevel;
 	o->s.v.nextthink = g_globalvars.time + 0.1;
 
 /*
@@ -740,7 +740,7 @@ void NextLevel()
 
 	if ( o->s.v.nextthink < g_globalvars.time )
 	{
-		o->s.v.think = ( func_t ) execute_changelevel;
+		o->think = ( func_t ) execute_changelevel;
 		o->s.v.nextthink = g_globalvars.time + 0.1;
 	}
 */
@@ -760,7 +760,7 @@ void SP_info_player_deathmatch()
 	vec3_t saved_org;
 	int i = 0;
 
-	for ( spot = world; (spot = find( spot, FOFS( s.v.classname ), self->s.v.classname )); i++ )
+	for ( spot = world; (spot = find( spot, FOFCLSN, self->classname )); i++ )
 	{
 		if ( spot == self )
 			self->cnt = i;
@@ -770,6 +770,7 @@ void SP_info_player_deathmatch()
 // above the ground, fix them
 	setsize( self, PASSVEC3( VEC_HULL_MIN ), PASSVEC3( VEC_HULL_MAX ) );
 	VectorCopy (self->s.v.origin, saved_org);
+	HM_name_map_spawn( self );
 	droptofloor (self);
 	if (self->s.v.origin[2] < saved_org[2] - 64)
 		setorigin (self, PASSVEC3(saved_org));
@@ -816,6 +817,10 @@ void ClientKill()
 	if( k_standby )
 		return;
 
+	if ( isRACE() && race_handle_event(self, NULL, "kill") ) {
+		return;
+	}
+
 	if ( ISDEAD( self ) || !self->s.v.takedamage )
 		return; // already dead
 
@@ -825,20 +830,6 @@ void ClientKill()
 	if ( isRA() ) {
 		G_sprint (self, PRINT_HIGH, "Can't suicide in RA mode\n");
 		return;
-	}
-
-	if ( isRACE() )
-	{
-		if ( self->racer && race.status )
-		{
-			race_stoprecord( true );
-			race_start( true, "%s canceled his run\n", self->s.v.netname );
-			return;
-		}
-		else if ( self->race_chasecam )
-		{
-			return;
-		}
 	}
 
 /*
@@ -888,7 +879,7 @@ gedict_t *Sub_SelectSpawnPoint( char *spawnname )
 	int				weight_sum = 0;	// used by "fair spawns"
 
 // testinfo_player_start is only found in regioned levels
-	spot = find( world, FOFS( s.v.classname ), "testplayerstart" );
+	spot = find( world, FOFCLSN, "testplayerstart" );
 	if ( spot )
 		return spot;
 
@@ -911,7 +902,7 @@ gedict_t *Sub_SelectSpawnPoint( char *spawnname )
 	spots = world;
 	totalspots = numspots = 0;
 
-	for ( spot = world; (spot = find( spot, FOFS( s.v.classname ), spawnname )); )
+	for ( spot = world; (spot = find( spot, FOFCLSN, spawnname )); )
 	{
 		totalspots++;
 		pcount = 0;
@@ -927,7 +918,7 @@ gedict_t *Sub_SelectSpawnPoint( char *spawnname )
 		   // k_1spawn store this "not far away" time.
 		   // k_1spawn is _also_ set after player passed teleport
             if( !( ( k_spw == 2 || k_spw == 3 || k_spw == 4 ) && match_in_progress == 2 && thing->k_1spawn < g_globalvars.time ) )  {
-//				G_bprint(2, "ignore player: %s\n", thing->s.v.netname);
+//				G_bprint(2, "ignore player: %s\n", thing->netname);
 				pcount++; // ignore spot
 			}
 		}
@@ -959,7 +950,7 @@ gedict_t *Sub_SelectSpawnPoint( char *spawnname )
 
 //		G_bprint (PRINT_HIGH, "%s\n", "Ackk! All spots are full. Selecting random spawn spot");
 
-		if ( !(spot = find_idx( i_rnd(0, totalspots - 1), FOFS( s.v.classname ), spawnname )) ) {
+		if ( !(spot = find_idx( i_rnd(0, totalspots - 1), FOFCLSN, spawnname )) ) {
 			totalspots = 1; // proper count is not so important, something going wrong anyway...
 
 			if ( !(spot = Do_FindIntermission( "info_player_deathmatch" )) )
@@ -1099,7 +1090,7 @@ qbool CanConnect()
 	{
 		// in non bloodfest mode always anonce but do not anonce during bloodfest round.
 		if ( !k_bloodfest || !match_in_progress )
-			G_bprint( 2, "%s entered the game\n", self->s.v.netname );
+			G_bprint( 2, "%s entered the game\n", self->netname );
 		return true; // can connect
 	}
 
@@ -1117,7 +1108,7 @@ qbool CanConnect()
 		if ( isDuel() || isFFA() ) {
 			 // kick if no ghost with same name as for self
 			for( from = 1, p = world; (p = find_plrghst( p, &from )); )
-				if ( streq( getname( p ), self->s.v.netname ) )
+				if ( streq( getname( p ), self->netname ) )
 					break;  // don't kick, find "ghost" with equal name
 
 			if ( !p ) {
@@ -1177,12 +1168,12 @@ qbool CanConnect()
 
 	if( match_in_progress != 2 ) // actually that match_in_progress == 1
 	{
-		G_bprint(2, "%s entered the game\n", self->s.v.netname);
+		G_bprint(2, "%s entered the game\n", self->netname);
 		return true; // can connect
 	}
 
 	for( usrid = 1; usrid < k_userid; usrid++ ) // search for ghost for this player (localinfo)
-		if( streq( ezinfokey(world, va("%d", (int) usrid)), self->s.v.netname ))
+		if( streq( ezinfokey(world, va("%d", (int) usrid)), self->netname ))
 			break;
 
 	if( usrid < k_userid ) // ghost probably found (localinfo)
@@ -1209,12 +1200,12 @@ qbool CanConnect()
 
 			if ( isTeam() || isCTF() ) {
 				self->k_teamnum = p->k_teamnum; // we alredy have team in localinfo
-				G_bprint(2, "%s \220%s\221 %s %d %s%s\n", self->s.v.netname, getteam( self ),
+				G_bprint(2, "%s \220%s\221 %s %d %s%s\n", self->netname, getteam( self ),
 					redtext("rejoins the game with"), (int)self->s.v.frags, redtext("frag"), redtext(count_s(self->s.v.frags)));
 			}
 			else {
 				self->k_teamnum = 0; // force check is we have team in localinfo or not below
-				G_bprint(2, "%s %s %d %s%s\n", self->s.v.netname,
+				G_bprint(2, "%s %s %d %s%s\n", self->netname,
 					redtext("rejoins the game with"), (int)self->s.v.frags, redtext("frag"), redtext(count_s(self->s.v.frags)));
 			}
 
@@ -1225,16 +1216,16 @@ qbool CanConnect()
 		{
 			localcmd("localinfo %d \"\"\n", usrid); // remove ghost in localinfo
 			if ( isTeam() || isCTF() )
-				G_bprint(2, "%s \220%s\221 %s\n", self->s.v.netname, getteam( self ), redtext("reenters the game without stats"));
+				G_bprint(2, "%s \220%s\221 %s\n", self->netname, getteam( self ), redtext("reenters the game without stats"));
 			else
-				G_bprint(2, "%s %s\n", self->s.v.netname, redtext("reenters the game without stats"));
+				G_bprint(2, "%s %s\n", self->netname, redtext("reenters the game without stats"));
 		}
 	}
 	else { // ghost not found (localinfo)
 		if ( isTeam() || isCTF() )
-			G_bprint(2, "%s \220%s\221 %s\n", self->s.v.netname, getteam( self ), redtext("arrives late"));
+			G_bprint(2, "%s \220%s\221 %s\n", self->netname, getteam( self ), redtext("arrives late"));
 		else
-			G_bprint(2, "%s %s\n", self->s.v.netname, redtext("arrives late"));
+			G_bprint(2, "%s %s\n", self->netname, redtext("arrives late"));
 	}
 
 	// check is we have team in localinfo or not
@@ -1304,7 +1295,7 @@ void ClientConnect()
 	newcomer = self;
 
 	self->ct = ctPlayer;
-	self->s.v.classname = "player";
+	self->classname = "player";
 	self->k_accepted = 1; // ok, we allowed to connect
 
 	// if bloodfest is active then set player as unready and kill him later in PutClientInServer()
@@ -1354,7 +1345,7 @@ void ClientConnect()
 
 	// Yawnmode: reset spawn weights at server join (can handle max MAX_SPAWN_WEIGHTS spawn points atm)
 	// Just count the spots
-	totalspots = find_cnt(FOFS( s.v.classname ), "info_player_deathmatch" );
+	totalspots = find_cnt(FOFCLSN, "info_player_deathmatch" );
 
 	// Don't use this spawn model for maps with more than MAX_SPAWN_WEIGHTS spawns (shouldn't even happen)
 	if ( totalspots <= MAX_SPAWN_WEIGHTS )
@@ -1365,6 +1356,10 @@ void ClientConnect()
 	}
 
 	MakeMOTD();
+
+#ifdef BOT_SUPPORT
+	BotClientConnectedEvent (self);
+#endif
 }
 
 ////////////////
@@ -1384,7 +1379,7 @@ void PutClientInServer( void )
 
 	self->ca_alive = (isCA() ? (ra_match_fight != 2) : true);
 	self->deathtype = dtNONE;
-	self->s.v.classname = "player";
+	self->classname = "player";
 	self->s.v.health = 100;
 	self->s.v.takedamage = DAMAGE_AIM;
 	self->s.v.solid = SOLID_SLIDEBOX;
@@ -1437,7 +1432,21 @@ void PutClientInServer( void )
 // paustime is set by teleporters to keep the player from moving a while
 	self->pausetime = 0;
 
-	if ( deathmatch || k_bloodfest )
+	if (isHoonyModeAny() && (spot = HM_choose_spawn_point(self))) {
+		// Nothing more to do
+	}
+#ifdef BOT_SUPPORT
+	else if (FrogbotOptionEnabled(FB_OPTION_DEBUG_MOVEMENT) && self->isBot && match_in_progress && streq(g_globalvars.mapname, "povdmm4")) {
+		gedict_t* highest = NULL;
+		for (spot = world; (spot = ez_find(spot, "info_player_deathmatch")); ) {
+			if (highest == NULL || spot->s.v.origin[2] > highest->s.v.origin[2]) {
+				highest = spot;
+			}
+		}
+		spot = highest;
+	}
+#endif
+	else if ( deathmatch || k_bloodfest )
 	{
 		// first spawn in CTF on corresponding base, later used info_player_deathmatch.
 		// qqshka: I found that it sux and added variable which force players spawn ONLY on the base,
@@ -1455,8 +1464,7 @@ void PutClientInServer( void )
 		spot = SelectSpawnPoint( coop ? "info_player_coop" : "info_player_start" );
 	}
 
-	if (isHoonyMode())
-		HM_rig_the_spawns(2, spot);
+	HM_log_spawn_point(self, spot);
 
 	VectorCopy( spot->s.v.origin, self->s.v.origin );
 	self->s.v.origin[2] += 1;
@@ -1512,7 +1520,7 @@ void PutClientInServer( void )
 			tele_flags |= TFLAGS_FOG_DST | TFLAGS_SND_DST;
 		}
 	}
-	else
+	else if ( ! isHoonyModeAny() )
 	{
 		tele_flags |= TFLAGS_FOG_DST | TFLAGS_SND_DST;
 	}
@@ -1529,7 +1537,118 @@ void PutClientInServer( void )
 
 		teleport_player( self, self->s.v.origin, self->s.v.angles, tele_flags );
 
+#ifdef BOT_SUPPORT
+		BotClientEntersEvent (self, spot);
+#endif
+
 		return;
+	}
+	
+	if ( spot->s.v.items && isHoonyModeAny() )
+	{
+		char* armorExplanation = "a";
+		float armortype = 0.0f;
+		float armorvalue = 0.0f;
+
+		items = spot->s.v.items;
+		if (items & IT_ARMOR3) 
+		{
+			armortype        = (k_yawnmode ? 0.8 : 0.8); // Yawnmode: changed armor protection
+			armorvalue       = max(0, min(spot->s.v.armorvalue, 200));
+			armorExplanation = "&cf00ra&cfff";
+		}
+		else if (items & IT_ARMOR2)
+		{
+			armortype        = (k_yawnmode ? 0.6 : 0.6); // Yawnmode: changed armor protection
+			armorvalue       = max(0, min(spot->s.v.armorvalue, 150));
+			armorExplanation = "&cff0ya&cfff";
+		}
+		else if (items & IT_ARMOR1)
+		{
+			armortype        = (k_yawnmode ? 0.4 : 0.3); // Yawnmode: changed armor protection
+			armorvalue       = max(0, min(spot->s.v.armorvalue, 100));
+			armorExplanation = "&c0b0ga&cfff";
+		}
+
+		// Fix flags on ammo
+		items |= (spot->s.v.ammo_shells ? IT_SHELLS : 0);
+		items |= (spot->s.v.ammo_nails ? IT_NAILS : 0);
+		items |= (spot->s.v.ammo_rockets ? IT_ROCKETS : 0);
+		items |= (spot->s.v.ammo_cells ? IT_CELLS : 0);
+
+		// They always get axe & shotgun.  
+		items |= (IT_SHOTGUN | IT_AXE);
+
+		if (! match_in_progress)
+		{
+			int itemvalues[] = { IT_SUPER_SHOTGUN, IT_NAILGUN, IT_SUPER_NAILGUN, IT_GRENADE_LAUNCHER, IT_ROCKET_LAUNCHER, IT_LIGHTNING };
+			char* itemnames[] = { "ssg", "ng", "sng", "gl", "rl", "lg" };
+			int i;
+			qbool first = true;
+
+			// Tell the player what they would have received here
+			if (! strnull(spot->targetname))
+				G_sprint(self, 2, "This spawn is: %s\n", redtext(spot->targetname));
+			G_sprint(self, 2, "Spawning here gives you:\n");
+			G_sprint(self, 2, "  %d%s, %dh\n", (int)armorvalue, armorExplanation, (int)spot->s.v.health);
+
+			for (i = 0; i < sizeof(itemvalues) / sizeof(itemvalues[0]); ++i)
+			{
+				if (items & itemvalues[i])
+				{
+					G_sprint(self, 2, "%s%s", first ? "  " : ",", itemnames[i]);
+					first = false;
+				}
+			}
+			if (! first)
+				G_sprint(self, 2, "\n");
+			else
+				G_sprint(self, 2, "  (no extra weapons)\n");
+		}
+
+		if (match_in_progress == 2)
+		{
+			self->s.v.items = items;
+
+			// Copy ammo - if none specified, spawn with default
+			self->s.v.ammo_shells  = spot->s.v.ammo_shells;
+			self->s.v.ammo_nails   = spot->s.v.ammo_nails;
+			self->s.v.ammo_rockets = spot->s.v.ammo_rockets;
+			self->s.v.ammo_cells   = spot->s.v.ammo_cells;
+			if (self->s.v.ammo_shells == 0 && self->s.v.ammo_nails == 0 && self->s.v.ammo_rockets == 0 && self->s.v.ammo_cells == 0)
+				self->s.v.ammo_shells = 25;
+
+			// Set armor
+			self->s.v.armortype    = armortype;
+			self->s.v.armorvalue   = armorvalue;
+
+			// Set health - if none specified, spawn with default
+			self->s.v.health       = max(0, min(spot->s.v.health, 250));
+			if (self->s.v.health == 0)
+				self->s.v.health = 100;
+
+			// If any megahealth items are set to this spawn, set to track this player
+			if (! strnull(spot->targetname))
+			{
+				gedict_t *p;
+
+				for( p = world; (p = find(p, FOFCLSN, "item_health")); )
+				{
+					if (p->s.v.spawnflags == 2 && streq(spot->targetname, p->target))
+					{
+						// Pretend item was taken by this player
+						p->model = "";
+						p->s.v.solid = SOLID_NOT;
+						p->s.v.nextthink = g_globalvars.time + max(0, min(p->initial_spawn_delay, 5)) + 0.2; // bit extra otherwise 1 frame after the other
+						p->think = ( func_t ) item_megahealth_rot;
+						p->s.v.owner = EDICT_TO_PROG( self );
+
+						// Set flag on player
+						items |= IT_SUPERHEALTH;
+					}
+				}
+			}
+		}
 	}
 
 	if ( ( deathmatch == 4 || k_bloodfest ) && match_in_progress == 2 )
@@ -1694,10 +1813,14 @@ void PutClientInServer( void )
 	{
 		teleport_player( self, self->s.v.origin, self->s.v.angles, tele_flags );
 	}
-  g_globalvars.msg_entity = EDICT_TO_PROG(self);
-  WriteByte(MSG_ONE, 38 /*svc_updatestatlong*/);
-  WriteByte(MSG_ONE, 18 /*STAT_MATCHSTARTTIME*/);
-  WriteLong(MSG_ONE, g_matchstarttime);
+	g_globalvars.msg_entity = EDICT_TO_PROG(self);
+	WriteByte(MSG_ONE, 38 /*svc_updatestatlong*/);
+	WriteByte(MSG_ONE, 18 /*STAT_MATCHSTARTTIME*/);
+	WriteLong(MSG_ONE, g_matchstarttime);
+
+#ifdef BOT_SUPPORT
+	BotClientEntersEvent (self, spot);
+#endif
 }
 
 /*
@@ -1759,11 +1882,13 @@ Exit deathmatch games upon conditions
 */
 void CheckRules()
 {
-	if ( !match_in_progress )
+	if (!match_in_progress) {
 		return;
+	}
 
-    if ( fraglimit && self->s.v.frags >= fraglimit )
-        EndMatch( 0 );
+	if (!isHoonyModeAny() && fraglimit && self->s.v.frags >= fraglimit) {
+		EndMatch(0);
+	}
 }
 
 //============================================================================
@@ -1773,8 +1898,9 @@ void PlayerDeathThink()
 	float           forward;
 	float			respawn_time;
 
-    if( k_standby )
-        return;
+	if (k_standby) {
+		return;
+	}
 
 	if ( ( ( int ) ( self->s.v.flags ) ) & FL_ONGROUND )
 	{
@@ -1920,6 +2046,12 @@ void WaterMove()
 
 	if ( self->s.v.waterlevel != 3 )
 	{
+#ifdef BOT_SUPPORT
+		if (self->isBot && self->s.v.waterlevel) {
+			BotWaterJumpFix();
+		}
+#endif
+
 		if ( self->air_finished < g_globalvars.time )
 			sound( self, CHAN_VOICE, "player/gasp2.wav", 1, ATTN_NORM );
 		else if ( self->air_finished < g_globalvars.time + 9 )
@@ -1928,8 +2060,15 @@ void WaterMove()
 		self->air_finished = g_globalvars.time + 12;
 		self->dmg = 2;
 
-	} else if ( self->air_finished < g_globalvars.time )
-	{			// drown!
+#ifdef BOT_SUPPORT
+		if (self->isBot) {
+			BotOutOfWater (self);
+		}
+#endif
+	} 
+	else if ( self->air_finished < g_globalvars.time )
+	{
+		// drown!
 		if ( self->pain_finished < g_globalvars.time )
 		{
 			self->dmg = self->dmg + 2;
@@ -1946,6 +2085,12 @@ void WaterMove()
 		}
 	}
 
+#ifdef BOT_SUPPORT
+	if (self->isBot) {
+		BotWaterMove(self);
+	}
+#endif
+
 	if ( !self->s.v.waterlevel )
 	{
 		if ( ( ( int ) ( self->s.v.flags ) ) & FL_INWATER )
@@ -1958,17 +2103,8 @@ void WaterMove()
 	}
 
 	// in race, touching lava or slime cancels the run
-	if ( isRACE() )
-	{
-		if ( ( self->s.v.watertype == CONTENT_LAVA ) || ( self->s.v.watertype == CONTENT_SLIME ) )
-		{
-			if ( self->racer && race.status )
-			{
-				race_stoprecord( true );
-				race_start( true, "%s failed his run\n", self->s.v.netname );
-				return;
-			}
-		}
+	if ( isRACE() && race_handle_event(self, NULL, "watermove") ) {
+		return;
 	}
 
 	if ( self->s.v.watertype == CONTENT_LAVA )
@@ -2048,13 +2184,15 @@ void MakeGhost ()
 
 	ghost = spawn();
 	ghost->s.v.owner  = EDICT_TO_PROG( world );
-	ghost->s.v.classname = "ghost";
+	ghost->classname = "ghost";
 	ghost->cnt2       = f1;
 	ghost->k_teamnum  = self->k_teamnum;
 	ghost->s.v.frags  = self->s.v.frags;
 	ghost->deaths     = self->deaths;
 	ghost->friendly   = self->friendly;
 	ghost->ready      = 0;
+	ghost->suicides   = self->suicides;
+	ghost->kills      = self->kills;
 
 	ghost->ps         = self->ps; // save player stats
 	ghost->ghost_dt   = g_globalvars.time; // save drop time
@@ -2063,7 +2201,7 @@ void MakeGhost ()
 
 //	G_bprint( PRINT_HIGH, "name num: %d team num %d\n", (int)ghost->cnt2, (int)ghost->k_teamnum);
 
-	localcmd("localinfo %d \"%s\"\n", (int)f1, self->s.v.netname);
+	localcmd("localinfo %d \"%s\"\n", (int)f1, self->netname);
 	trap_executecmd();
 }
 
@@ -2076,12 +2214,12 @@ void set_important_fields(gedict_t *p)
 	p->s.v.health		= 0;
 	p->s.v.frame		= 0;
 	p->s.v.modelindex	= 0;
-	p->s.v.model		= "";
+	p->model		= "";
 	p->s.v.nextthink	= -1;
 
 	p->ct				= ctNone;
 	p->k_accepted		= 0;
-	p->s.v.classname	= ""; // clear client classname on disconnect
+	p->classname	= ""; // clear client classname on disconnect
 }
 
 ////////////////
@@ -2107,7 +2245,7 @@ void ClientDisconnect()
 
 	if( match_in_progress == 2 && self->ct == ctPlayer )
 	{
-		G_bprint( PRINT_HIGH, "%s left the game with %.0f frags\n", self->s.v.netname, self->s.v.frags );
+		G_bprint( PRINT_HIGH, "%s left the game with %.0f frags\n", self->netname, self->s.v.frags );
 
 		sound( self, CHAN_BODY, "player/tornoff2.wav", 1, ATTN_NONE );
 
@@ -2141,10 +2279,9 @@ void ClientDisconnect()
 	if( cvar( "k_idletime" ) > 0 )
 		IdlebotCheck();
 
-	if ( !CountPlayers() ) {
+	if ( ! (CountPlayers() - CountBots()) ) {
 		void Spawn_DefMapChecker( float timeout );
 		int old_matchless = k_matchLess;
-		void race_stoprecord( qbool cancel );
 
 		// Well, not quite sure if it OK, k_matchLess C global variable really must be set ONCE per map.
 		// At the same time, k_matchless cvar should be set ONCE per whole server run, so it should be OK.
@@ -2160,7 +2297,6 @@ void ClientDisconnect()
 		if ( isRACE() )
 		{
 			ToggleRace();
-			race_stoprecord( true );
 		}
 
 		// Execute configs/reset.cfg and set k_defmode.
@@ -2183,7 +2319,7 @@ void BackFromLag()
 	self->k_timingWarnTime = 0;
 
 	if ( timing_players_action & TA_INFO )
-		G_bprint(2, "%s %s\n", self->s.v.netname, redtext( "is back from lag") );
+		G_bprint(2, "%s %s\n", self->netname, redtext( "is back from lag") );
 
 	if ( timing_players_action & TA_INVINCIBLE ) {
 		self->s.v.takedamage = self->k_timingTakedmg;
@@ -2561,6 +2697,12 @@ void PlayerPreThink()
 		self->was_jump = false;
 	}
 
+#ifdef BOT_SUPPORT
+	if ( bots_enabled() ) {
+		BotPreThink(self);
+	}
+#endif
+
 // ILLEGALFPS[
 
 	self->fAverageFrameTime += g_globalvars.frametime;
@@ -2574,7 +2716,7 @@ void PlayerPreThink()
 	if( g_globalvars.frametime > self->fHighestFrameTime )
 		self->fHighestFrameTime = g_globalvars.frametime;
 
-	if( self->fDisplayIllegalFPS < g_globalvars.time && framechecks )
+	if( self->fDisplayIllegalFPS < g_globalvars.time && framechecks && ! self->isBot )
 	{
 		float fps;
 
@@ -2591,7 +2733,7 @@ void PlayerPreThink()
 		}
 
 		if( self->uptimebugpolicy > 3 ) {
-			G_bprint(PRINT_HIGH, "\n%s gets kicked for too long uptime\n", self->s.v.netname);
+			G_bprint(PRINT_HIGH, "\n%s gets kicked for too long uptime\n", self->netname);
 			G_sprint(self, PRINT_HIGH, "Please reboot your machine to get rid of the problem\n");
 			stuffcmd(self, "disconnect\n"); // FIXME: stupid way
 		}
@@ -2602,7 +2744,7 @@ void PlayerPreThink()
 
 		fps = fps ? (1.0f / fps) : 1;
 
-//		G_bprint(2, "%s FPS: %3.1f\n", self->s.v.netname, fps);
+//		G_bprint(2, "%s FPS: %3.1f\n", self->netname, fps);
 
 		if( fps > current_maxfps + 2 ) // 2 fps fluctuation is allowed :(
 		{
@@ -2612,7 +2754,7 @@ void PlayerPreThink()
 				"\n"
 				"Warning: %s has abnormally high frame rates, "
 				"highest FPS = %3.1f, average FPS = %3.1f!\n",
-							self->s.v.netname, peak, fps);
+							self->netname, peak, fps);
 
 			self->fIllegalFPSWarnings += 1;
 
@@ -2620,10 +2762,10 @@ void PlayerPreThink()
 			{
 				// kick the player from server!
 				// s: changed the text a bit :)
-            	G_bprint(PRINT_HIGH, "%s gets kicked for potential cheat\n", self->s.v.netname );
+            	G_bprint(PRINT_HIGH, "%s gets kicked for potential cheat\n", self->netname );
 							G_sprint(self, PRINT_HIGH, "Please reboot your machine to try to get rid of the problem\n");
             	stuffcmd(self, "disconnect\n"); // FIXME: stupid way
-       }
+			}
 		}
 
 		zeroFps = true;
@@ -2673,7 +2815,7 @@ void PlayerPreThink()
         // invoked on death for some reason (couldn't figure out why). This leads to a
         // state when the player stands still after dying and can't respawn or even
         // suicide and has to reconnect. This is checked and fixed here
-	        if( g_globalvars.time > (self->dead_time + 0.1)
+		if ( g_globalvars.time > (self->dead_time + 0.1)
 			&& ( self->s.v.frame < 41 || self->s.v.frame > 102 ) // FIXME: hardcoded range of dead frames
 		) {
 			StartDie();
@@ -2683,25 +2825,7 @@ void PlayerPreThink()
 
 	}
 
-	if ( isRACE() )
-	{
-		if ( race.status && !self->racer )
-			self->s.v.solid = SOLID_NOT;
-		else
-			self->s.v.solid	= SOLID_SLIDEBOX;
-		setorigin (self, PASSVEC3( self->s.v.origin ) );
-
-		if ( self->ct == ctPlayer && !self->racer && race.status )
-		{
-			if ( self->race_chasecam )
-			{
-				if ( self->s.v.button2 )
-					ChasecamViewButton();
-		   		 else
-				 	self->s.v.flags = ( ( int ) ( self->s.v.flags ) ) | FL_JUMPRELEASED;
-			}
-		}
-	}
+	race_player_pre_think();
 
 // brokenankle included here
 	if ( self->s.v.button2 || self->brokenankle )
@@ -2736,6 +2860,9 @@ void PlayerPreThink()
 				if ( self->s.v.health > 150 )
 					self->s.v.health = 150;
 				self->regen_time += 0.5;
+#ifdef BOT_SUPPORT
+				FrogbotSetHealthArmour (self);
+#endif
 				RegenerationSound( self );
 	    	}
 
@@ -2745,6 +2872,9 @@ void PlayerPreThink()
 				if ( self->s.v.armorvalue > 150 )
 					self->s.v.armorvalue = 150;
 				self->regen_time += 0.5;
+#ifdef BOT_SUPPORT
+				FrogbotSetHealthArmour (self);
+#endif
 				RegenerationSound( self );
 	    	}
 		}
@@ -2801,7 +2931,7 @@ void CheckPowerups()
 			self->s.v.items = (int)self->s.v.items & ~IT_INVISIBILITY;
 			if ( cvar("k_instagib") )
 			{
-				G_bprint( PRINT_HIGH, "%s lost his powers\n", self->s.v.netname );
+				G_bprint( PRINT_HIGH, "%s lost his powers\n", self->netname );
 				self->s.v.health = min(200, self->s.v.health);
 			}
 			self->invisible_finished = 0;
@@ -2936,20 +3066,25 @@ void CheckPowerups()
 	}
 }
 
-void CheckLightEffects( void )
+void CheckLightEffects(void)
 {
 	qbool dim = false;
 	qbool brl = false;
-	qbool r	 = false;
-	qbool g   = false;
-	qbool b   = false;
+	qbool r = false;
+	qbool g = false;
+	qbool b = false;
+
+#ifdef BOT_SUPPORT
+	// Keep colours for markers when in editing mode
+	if (FrogbotOptionEnabled(FB_OPTION_EDITOR_MODE)) {
+		return;
+	}
+#endif
 
 	// remove particular EF_xxx
-
 	self->s.v.effects = (int)self->s.v.effects & ~(EF_DIMLIGHT | EF_BRIGHTLIGHT | EF_BLUE | EF_RED | EF_GREEN);
 
 	// well, EF_xxx may originate from different sources, check it all
-
 	if ( self->ctf_flag & CTF_FLAG )
 		dim = true;
 
@@ -2959,8 +3094,8 @@ void CheckLightEffects( void )
 	if ( self->radsuit_finished > g_globalvars.time )
 		g = true;
 
-	if ( self->racer && !match_in_progress )
-		g = true; // RACE
+	//if ( self->racer && race.status && !match_in_progress )
+	//	g = true; // RACE (disabled with multi-racing)
 
 	if ( k_bloodfest && ISLIVE( self ) )
 		g = true;
@@ -2968,7 +3103,7 @@ void CheckLightEffects( void )
 	if ( self->super_damage_finished > g_globalvars.time )
 		b = true;
 
-	if ( !match_in_progress && !match_over && !k_matchLess && !self->ready && cvar( "k_sready" ) )
+	if ( !match_in_progress && !match_over && !k_matchLess && !self->ready && cvar( "k_sready" ) && !isRACE() )
 		b = true;
 
 	// apply all EF_xxx
@@ -3007,7 +3142,7 @@ void BothPostThink ()
 	if ( !self->sc_stats && self->sc_stats_time && self->sc_stats_time <= g_globalvars.time )
 		self->sc_stats_time = 0;
 
-	if (     self->need_clearCP
+	if (  self->need_clearCP
 		 && !self->shownick_time
          && !self->wp_stats_time
          && !self->sc_stats_time
@@ -3121,37 +3256,9 @@ void WS_CheckUpdate( gedict_t *p )
 // } end of new weapon stats
 // ====================================
 
-////////////////
-// GlobalParams:
-// time
-// self
-///////////////
-void PlayerPostThink()
+
+void CheckLand()
 {
-//dprint ("post think\n");
-
-	WS_CheckUpdate( self );
-
-	if ( intermission_running )
-    {
-		setorigin( self, PASSVEC3( intermission_spot->s.v.origin ) );
-        SetVector( self->s.v.velocity, 0, 0, 0 ); 	// don't stray off the intermission spot too far
-
-        return;
-    }
-
-	if ( self->s.v.deadflag )
-		return;
-
-//team
-
-// WaterMove function call moved here from PlayerPreThink to avoid
-// occurrence of the spawn lavaburn bug and to fix the problem on spawning
-// and playing the leave water sound if the player died underwater.
-
-    WaterMove ();
-
-
 // clear the flag if we landed
     if( (int)self->s.v.flags & FL_ONGROUND )
 		self->brokenankle = 0;
@@ -3191,6 +3298,39 @@ void PlayerPostThink()
 	}
 
 	self->jump_flag = self->s.v.velocity[2];
+}
+
+////////////////
+// GlobalParams:
+// time
+// self
+///////////////
+void PlayerPostThink()
+{
+//dprint ("post think\n");
+
+	WS_CheckUpdate( self );
+
+	if ( intermission_running )
+    {
+		setorigin( self, PASSVEC3( intermission_spot->s.v.origin ) );
+        SetVector( self->s.v.velocity, 0, 0, 0 ); 	// don't stray off the intermission spot too far
+
+        return;
+    }
+
+	if ( self->s.v.deadflag )
+		return;
+
+//team
+
+// WaterMove function call moved here from PlayerPreThink to avoid
+// occurrence of the spawn lavaburn bug and to fix the problem on spawning
+// and playing the leave water sound if the player died underwater.
+
+    WaterMove ();
+
+	CheckLand();
 
 	CheckPowerups();
 	CheckLightEffects(); // NOTE: guess, this must be after CheckPowerups(), so u r warned.
@@ -3199,22 +3339,21 @@ void PlayerPostThink()
 
 	mv_record();
 
+#ifdef BOT_SUPPORT
+	if (bots_enabled()) {
+		BotsThinkTime(self);
+	}
+#endif
+
 	W_WeaponFrame();
 
-	if ( isRACE() )
-	{
-		// test for multirace
-		//self->s.v.solid = SOLID_BBOX;
-		setorigin (self, PASSVEC3( self->s.v.origin ) );
-	}
-
-	race_follow();
+	race_player_post_think();
 
 	{
 		float velocity = sqrt(self->s.v.velocity[0] * self->s.v.velocity[0] +
 							  self->s.v.velocity[1] * self->s.v.velocity[1]);
 
-		if ( !match_in_progress && !match_over && !k_captains && !k_matchLess && !isHoonyMode() )
+		if ( !match_in_progress && !match_over && !k_captains && !k_matchLess && !isHoonyModeAny() )
 		{
 			if ( iKey( self, "kf" ) & KF_SPEED ) {
 				float velocity_vert_abs	= fabs(self->s.v.velocity[2]);
@@ -3297,6 +3436,9 @@ void CheckTeamStatus( )
 	if ( !isTeam() && !isCTF() && !coop )
 		return; // non team game
 
+	if (isRACE())
+		return; // could advance in the future by working out ongoing positions and sending those?
+
 	if ( g_globalvars.time - lastTeamLocationTime < TEAM_LOCATION_UPDATE_TIME )
 		return;
 
@@ -3320,7 +3462,7 @@ void CheckTeamStatus( )
 	}
 }
 
-void TookWeaponHandler( gedict_t *p, int new_wp )
+void TookWeaponHandler( gedict_t *p, int new_wp, qbool from_backpack )
 {
 	weaponName_t wp;
 
@@ -3337,8 +3479,17 @@ void TookWeaponHandler( gedict_t *p, int new_wp )
 	}
 
 	p->ps.wpn[wp].ttooks++; // total weapon tooks
-	if ( !((int)p->s.v.items & new_wp) ) // player does't have this weapon before took
+	if (!from_backpack) {
+		p->ps.wpn[wp].sttooks++; // spawned item tooks
+	}
+
+	// player does't have this weapon before took
+	if (!((int)p->s.v.items & new_wp)) {
+		if (!from_backpack) {
+			p->ps.wpn[wp].stooks++; // spawned item tooks
+		}
 		p->ps.wpn[wp].tooks++;
+	}
 }
 
 void StatsHandler(gedict_t *targ, gedict_t *attacker)
@@ -3407,7 +3558,7 @@ void StatsHandler(gedict_t *targ, gedict_t *attacker)
 		}
 
 		if ( targ == attacker ) {
-			; // killed self, nothing interest
+			targ->ps.wpn[wp].suicides++;
 		}
         else if ( (isTeam() || isCTF()) && streq( targteam, attackerteam ) && !strnull( attackerteam ) ) {
 			// team kill
@@ -3461,15 +3612,15 @@ float Instagib_Obituary( gedict_t *targ, gedict_t *attacker )
 	{
 		if ( playerheight >= 250 && playerheight < 400 )
 		{
- 			G_bprint( 2, "%s from %s: height %d\n", redtext("AirGib"), attacker->s.v.netname, (int)playerheight );
+ 			G_bprint( 2, "%s from %s: height %d\n", redtext("AirGib"), attacker->netname, (int)playerheight );
 		}
 		else if ( playerheight >= 400 && playerheight < 1000 )
 		{
- 			G_bprint( 2, "%s from %s: height %d\n", redtext("Great AirGib"), attacker->s.v.netname,	(int)playerheight );
+ 			G_bprint( 2, "%s from %s: height %d\n", redtext("Great AirGib"), attacker->netname,	(int)playerheight );
 		}
 		else if ( playerheight >= 1000 )
 		{
- 			G_bprint( 2, "%s from %s: height %d\n", redtext("Amazing AirGib"), attacker->s.v.netname, (int)playerheight );
+ 			G_bprint( 2, "%s from %s: height %d\n", redtext("Amazing AirGib"), attacker->netname, (int)playerheight );
 		}
 
 		if ( playerheight > 45 )
@@ -3509,7 +3660,7 @@ float Instagib_Obituary( gedict_t *targ, gedict_t *attacker )
 
 				attacker->i_agmr = 1;
 				attacker->s.v.frags += 5;
-				G_bprint( 2, "%s acquired the %s rune!\n", attacker->s.v.netname, redtext("AirGib Master"));
+				G_bprint( 2, "%s acquired the %s rune!\n", attacker->netname, redtext("AirGib Master"));
 			}
 		}
 		else if ( attacker->ps.i_height > i_agmr_height )
@@ -3527,8 +3678,8 @@ float Instagib_Obituary( gedict_t *targ, gedict_t *attacker )
 				p->s.v.frags -= 5;
 				attacker->i_agmr = 1;
 				attacker->s.v.frags += 5;
-				G_bprint( 2, "%s took the %s rune from %s!\n", attacker->s.v.netname,
-												redtext("AirGib Master"), p->s.v.netname);
+				G_bprint( 2, "%s took the %s rune from %s!\n", attacker->netname,
+												redtext("AirGib Master"), p->netname);
 			}
 		}
 	}
@@ -3577,19 +3728,21 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	ktpro_autotrack_on_death(targ);
 
 	playerheight = Instagib_Obituary( targ, attacker );
-	if (( targ->deathtype == dtWATER_DMG )
-		|| ( targ->deathtype == dtEXPLO_BOX )
-		|| ( targ->deathtype == dtFALL )
-		|| ( targ->deathtype == dtSQUISH )
-		|| ( targ->deathtype == dtCHANGELEVEL )
-		|| ( targ->deathtype == dtFIREBALL )
-		|| ( targ->deathtype == dtSLIME_DMG )
-		|| ( targ->deathtype == dtLAVA_DMG )
-		|| ( targ->deathtype == dtTRIGGER_HURT ) )
+	if ((targ->deathtype == dtWATER_DMG)
+		|| (targ->deathtype == dtEXPLO_BOX)
+		|| (targ->deathtype == dtFALL)
+		|| (targ->deathtype == dtSQUISH)
+		|| (targ->deathtype == dtCHANGELEVEL)
+		|| (targ->deathtype == dtFIREBALL)
+		|| (targ->deathtype == dtSLIME_DMG)
+		|| (targ->deathtype == dtLAVA_DMG)
+		|| (targ->deathtype == dtTRIGGER_HURT)) {
 		attackername = "world";
-	else
-		attackername = attacker->s.v.netname;
-		victimname = targ->s.v.netname;
+	}
+	else {
+		attackername = attacker->netname;
+	}
+	victimname = targ->netname;
 
 	log_printf(
 		"\t\t<event>\n"
@@ -3625,14 +3778,21 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	}
 
 	targ->deaths += 1; // somehow dead, bump counter
-	if ( (isTeam() || isCTF()) && streq( targteam, attackerteam ) && !strnull( attackerteam ) && targ != attacker )
+	if ((isTeam() || isCTF()) && streq(targteam, attackerteam) && !strnull(attackerteam) && targ != attacker) {
 		attacker->friendly += 1; // bump teamkills counter
+	}
+	else if (targ == attacker || attacker->ct != ctPlayer) {
+		attacker->suicides += 1;
+	}
+	else if (attacker->ct == ctPlayer) {
+		attacker->kills += 1;
+	}
 
 // { !!! THIS TELEFRAGS TYPES DOES'T HANDLE TEAM KILLS I DUNNO WHY !!!
 	// mortal trying telefrag someone who has 666
 	if ( dtTELE2 == targ->deathtype )
 	{
-		G_bprint (PRINT_MEDIUM, "Satan's power deflects %s's telefrag\n", targ->s.v.netname);
+		G_bprint (PRINT_MEDIUM, "Satan's power deflects %s's telefrag\n", targ->netname);
 
         targ->s.v.frags -= 1;
 		logfrag (targ, targ);
@@ -3642,7 +3802,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	// double 666 telefrag (can happen often in deathmatch 4)
 	if ( dtTELE3 == targ->deathtype )
 	{
-		G_bprint (PRINT_MEDIUM, "%s was telefragged by %s's Satan's power\n", targ->s.v.netname, attacker->s.v.netname);
+		G_bprint (PRINT_MEDIUM, "%s was telefragged by %s's Satan's power\n", targ->netname, attacker->netname);
 
 		targ->s.v.frags -= 1;
 		logfrag (targ, targ);
@@ -3655,17 +3815,8 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		if ( targ == attacker )
 		{
 			// killed self
-			if (isHoonyMode())
-			{
-				gedict_t *other_dude;
-				for (other_dude = world; (other_dude = find_plr(other_dude));)
-					if (other_dude != targ)
-						other_dude->s.v.frags += 1; // hoonymode: suicide, etc, count as a point for the other player
-			}
-			else
-			{
+			if (!isHoonyModeDuel())
 				targ->s.v.frags -= (dtSUICIDE == targ->deathtype ? 2 : 1);
-			}
 
 			logfrag (targ, targ);
 
@@ -3706,10 +3857,10 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			else
                 deathstring = " somehow becomes bored with life\n"; // hm, and how it is possible?
 
-			G_bprint (PRINT_MEDIUM, "%s%s", targ->s.v.netname, deathstring);
+			G_bprint (PRINT_MEDIUM, "%s%s", targ->netname, deathstring);
 
-			if (isHoonyMode())
-				HM_next_point(0, targ); // probably better to use world instead of the 0 here and change hooney code accordingly.
+			if (isHoonyModeDuel())
+				HM_suicide(targ);
 
 			return;
 		}
@@ -3729,11 +3880,11 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			// some deathtypes have specific death messages
 
 			if ( dtTELE1 == targ->deathtype ) {
-				G_bprint (PRINT_MEDIUM, "%s was telefragged by %s teammate\n", targ->s.v.netname, g_his(targ));
+				G_bprint (PRINT_MEDIUM, "%s was telefragged by %s teammate\n", targ->netname, g_his(targ));
 				return;
 			}
 			else if ( dtSQUISH == targ->deathtype ) {
-				G_bprint (PRINT_MEDIUM, "%s squished a teammate\n", attacker->s.v.netname);
+				G_bprint (PRINT_MEDIUM, "%s squished a teammate\n", attacker->netname);
 				return;
 			}
 			else if ( dtSTOMP == targ->deathtype ) {
@@ -3742,7 +3893,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 					default: deathstring = " was crushed by "; break;
 				}
 
-				G_bprint (PRINT_MEDIUM,"%s%s%s teammate\n",	targ->s.v.netname, deathstring, g_his( targ ));
+				G_bprint (PRINT_MEDIUM,"%s%s%s teammate\n",	targ->netname, deathstring, g_his( targ ));
 				return;
 			}
 
@@ -3755,7 +3906,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				default: deathstring = " mows down a teammate\n"; break;
 			}
 
-			G_bprint (PRINT_MEDIUM, "%s%s", attacker->s.v.netname, deathstring);
+			G_bprint (PRINT_MEDIUM, "%s%s", attacker->netname, deathstring);
 			return;
 		}
 		else
@@ -3765,8 +3916,8 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				attacker->s.v.frags += 1;
 			logfrag (attacker, targ);
 
-			attacker->victim = targ->s.v.netname;
-			targ->killer = attacker->s.v.netname;
+			attacker->victim = targ->netname;
+			targ->killer = attacker->netname;
 
 			if ( targ->spawn_time + 2 > g_globalvars.time )
 				attacker->ps.spawn_frags++;
@@ -3780,10 +3931,11 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				deathstring = " was telefragged by ";
 			}
 			else if ( dtSQUISH == targ->deathtype )	{
-				G_bprint (PRINT_MEDIUM, "%s squishes %s\n", attacker->s.v.netname, targ->s.v.netname);
+				G_bprint (PRINT_MEDIUM, "%s squishes %s\n", attacker->netname, targ->netname);
 
-				if (isHoonyMode())
+				if (isHoonyModeDuel()) {
 					HM_next_point(attacker, targ);
+				}
 
 				return;	// !!! return !!!
 			}
@@ -3798,10 +3950,11 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 						case 2:  deathstring = " was jumped by "; break;
 						case 3:  deathstring = " was crushed by "; break;
 						default:
-							 	G_bprint (PRINT_MEDIUM, "%s stomps %s\n", attacker->s.v.netname, targ->s.v.netname);
+							 	G_bprint (PRINT_MEDIUM, "%s stomps %s\n", attacker->netname, targ->netname);
 
-								if (isHoonyMode())
+								if (isHoonyModeDuel()) {
 									HM_next_point(attacker, targ);
+								}
 
 								return; // !!! return !!!
 					}
@@ -3847,11 +4000,12 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 						case 0: deathstring = " was brutalized by "; break;
 						case 1:	deathstring = " was smeared by "; break;
 						default:
-								G_bprint (PRINT_MEDIUM, "%s rips %s a new one\n", attacker->s.v.netname, targ->s.v.netname);
+								G_bprint (PRINT_MEDIUM, "%s rips %s a new one\n", attacker->netname, targ->netname);
 
 								// hoonymode shouldn't have quad but just in case...
-								if (isHoonyMode())
+								if (isHoonyModeDuel()) {
 									HM_next_point(attacker, targ);
+								}
 
 								return; // !!! return !!!
 					}
@@ -3931,25 +4085,18 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				deathstring2 = " ?\n";
 			}
 
-			G_bprint (PRINT_MEDIUM,"%s%s%s%s", targ->s.v.netname, deathstring, attacker->s.v.netname, deathstring2);
+			G_bprint (PRINT_MEDIUM,"%s%s%s%s", targ->netname, deathstring, attacker->netname, deathstring2);
 		}
 
-		if (isHoonyMode())
+		if (isHoonyModeDuel()) {
 			HM_next_point(attacker, targ);
+		}
 
 		return;
 	}
 	else // attacker->ct != ctPlayer
 	{
-		if (isHoonyMode())
-		{
-			gedict_t *other_dude;
-			for (other_dude = world; (other_dude = find_plr(other_dude));)
-				if (other_dude != targ)
-					other_dude->s.v.frags += 1; // hoonymode: suicide, etc, count as a point for the other player
-		}
-		else
-		{
+		if (!isHoonyModeDuel()) {
 			targ->s.v.frags -= 1;            // killed self
 		}
 
@@ -3957,7 +4104,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 
 		if ( (int)attacker->s.v.flags & FL_MONSTER )
 		{
-			deathstring = ObituaryForMonster( attacker->s.v.classname );
+			deathstring = ObituaryForMonster( attacker->classname );
 //			deathstring = " killed by monster? :)\n";
 		}
 		else if ( dtEXPLO_BOX == targ->deathtype )
@@ -4024,10 +4171,10 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			deathstring = " died\n";
 		}
 
-		G_bprint (PRINT_MEDIUM, "%s%s", targ->s.v.netname, deathstring );
+		G_bprint (PRINT_MEDIUM, "%s%s", targ->netname, deathstring );
 
-		if (isHoonyMode())
-			HM_next_point(0, targ);
+		if (isHoonyModeDuel())
+			HM_suicide(targ);
 	}
 }
 

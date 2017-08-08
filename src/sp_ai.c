@@ -178,7 +178,7 @@ void SUB_CheckRefire( func_t thinkst )
 		return;
 
 	self->cnt = 1;
-	self->s.v.think = thinkst;
+	self->think = thinkst;
 }
 
 //============================================================================
@@ -188,7 +188,7 @@ void HuntTarget()
 	vec3_t tmpv;
 
 	self->s.v.goalentity = self->s.v.enemy;
-	self->s.v.think = ( func_t ) self->th_run;
+	self->think = ( func_t ) self->th_run;
 	VectorSubtract( PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, self->s.v.origin, tmpv );
 	self->s.v.ideal_yaw = vectoyaw( tmpv );
 	self->s.v.nextthink = g_globalvars.time + 0.1;
@@ -197,27 +197,27 @@ void HuntTarget()
 
 void SightSound()
 {
-	if ( streq( self->s.v.classname, "monster_ogre" ) )
+	if ( streq( self->classname, "monster_ogre" ) )
 		sound (self, CHAN_VOICE, "ogre/ogwake.wav", 1, ATTN_NORM);
-	else if ( streq( self->s.v.classname, "monster_knight" ) )
+	else if ( streq( self->classname, "monster_knight" ) )
 		sound (self, CHAN_VOICE, "knight/ksight.wav", 1, ATTN_NORM);
-	else if ( streq( self->s.v.classname, "monster_shambler" ) )
+	else if ( streq( self->classname, "monster_shambler" ) )
 		sound (self, CHAN_VOICE, "shambler/ssight.wav", 1, ATTN_NORM);
-	else if ( streq( self->s.v.classname, "monster_demon1" ) )
+	else if ( streq( self->classname, "monster_demon1" ) )
 		sound (self, CHAN_VOICE, "demon/sight2.wav", 1, ATTN_NORM);
-	else if ( streq( self->s.v.classname, "monster_wizard" ) )
+	else if ( streq( self->classname, "monster_wizard" ) )
 		sound (self, CHAN_VOICE, "wizard/wsight.wav", 1, ATTN_NORM);
-	else if ( streq( self->s.v.classname, "monster_zombie" ) )
+	else if ( streq( self->classname, "monster_zombie" ) )
 		sound (self, CHAN_VOICE, "zombie/z_idle.wav", 1, ATTN_NORM);
-	else if ( streq( self->s.v.classname, "monster_dog" ) )
+	else if ( streq( self->classname, "monster_dog" ) )
 		sound (self, CHAN_VOICE, "dog/dsight.wav", 1, ATTN_NORM);
-	else if ( streq( self->s.v.classname, "monster_hell_knight" ) )
+	else if ( streq( self->classname, "monster_hell_knight" ) )
 		sound (self, CHAN_VOICE, "hknight/sight1.wav", 1, ATTN_NORM);
-	else if ( streq( self->s.v.classname, "monster_tarbaby" ) )
+	else if ( streq( self->classname, "monster_tarbaby" ) )
 		sound (self, CHAN_VOICE, "blob/sight1.wav", 1, ATTN_NORM);
-	else if ( streq( self->s.v.classname, "monster_vomit" ) )
+	else if ( streq( self->classname, "monster_vomit" ) )
 		sound (self, CHAN_VOICE, "vomitus/v_sight1.wav", 1, ATTN_NORM);
-	else if ( streq( self->s.v.classname, "monster_enforcer" ) )
+	else if ( streq( self->classname, "monster_enforcer" ) )
 	{
 		float	rsnd = Q_rint(g_random() * 3);
 
@@ -230,9 +230,9 @@ void SightSound()
 		else
 			sound (self, CHAN_VOICE, "enforcer/sight4.wav", 1, ATTN_NORM);
 	}
-	else if ( streq( self->s.v.classname, "monster_army" ) )
+	else if ( streq( self->classname, "monster_army" ) )
 		sound (self, CHAN_VOICE, "soldier/sight1.wav", 1, ATTN_NORM);
-	else if ( streq( self->s.v.classname, "monster_shalrath" ) )
+	else if ( streq( self->classname, "monster_shalrath" ) )
 		sound (self, CHAN_VOICE, "shalrath/sight.wav", 1, ATTN_NORM);
 }
 
@@ -373,8 +373,8 @@ void GetMadAtAttacker( gedict_t *attacker )
 		return; // alredy mad on this.
 
 	// get mad unless of the same class (except for soldiers)
-	if (   streq( self->s.v.classname, attacker->s.v.classname )
-		&& strneq( self->s.v.classname, "monster_army" ) 
+	if (   streq( self->classname, attacker->classname )
+		&& strneq( self->classname, "monster_army" ) 
 	)
 		return; 
 
@@ -494,7 +494,7 @@ void ai_walk( float dist )
 {
 	movedist = dist;
 
-	if ( streq( self->s.v.classname, "monster_dragon" ) )
+	if ( streq( self->classname, "monster_dragon" ) )
 	{
 		movetogoal( dist );
 		return;
@@ -720,17 +720,17 @@ float CheckAnyAttack()
 	if ( !enemy_vis )
 		return false;
 
-	if ( streq( self->s.v.classname, "monster_dog" ) )
+	if ( streq( self->classname, "monster_dog" ) )
 		return DogCheckAttack ();
-	if ( streq( self->s.v.classname, "monster_army" ) )
+	if ( streq( self->classname, "monster_army" ) )
 		return SoldierCheckAttack ();
-	if ( streq( self->s.v.classname, "monster_ogre" ) )
+	if ( streq( self->classname, "monster_ogre" ) )
 		return OgreCheckAttack ();
-	if ( streq( self->s.v.classname, "monster_shambler" ) )
+	if ( streq( self->classname, "monster_shambler" ) )
 		return ShamCheckAttack ();
-	if ( streq( self->s.v.classname, "monster_demon1" ) )
+	if ( streq( self->classname, "monster_demon1" ) )
 		return DemonCheckAttack ();
-	if ( streq( self->s.v.classname, "monster_wizard" ) )
+	if ( streq( self->classname, "monster_wizard" ) )
 		return WizardCheckAttack ();
 
 	return CheckAttack ();

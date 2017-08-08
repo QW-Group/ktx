@@ -1,0 +1,24 @@
+race_route_add_start
+	race_add_route_node   55.2 -2005.1  88.0 -15.2 49.0 
+	race_add_route_node  450.2 -1484.5 256.0     0    0  
+	race_add_route_node 1735.0  -345.0 168.0     0    0  
+
+	race_set_route_name "base dm6" "ga\215gl\215ra" 
+	race_set_route_timeout 15 
+	race_set_route_weapon_mode raceWeaponAllowed 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node  209.8 -1247.9 112.3 3.4 43.0 
+	race_add_route_node 1359.7  -427.7  40.0   0    0  
+	race_add_route_node 1108.6 -1316.2 256.0   0    0  
+	race_add_route_node  813.4 -1081.0 256.0   0    0  
+	race_add_route_node 1015.9  -867.3 256.0   0    0  
+	race_add_route_node 1632.2  -160.4 168.0   0    0  
+
+	race_set_route_name "\360\263\247\363 tube run" "mh\215rl ra\215gl circle\215ra" 
+	race_set_route_timeout 25 
+	race_set_route_weapon_mode raceWeaponNo 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end

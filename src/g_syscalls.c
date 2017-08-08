@@ -425,9 +425,9 @@ intptr_t 	trap_RemoveBot( intptr_t edn )
         return syscall( G_Remove_Bot, edn );
 }
 
-intptr_t 	trap_SetBotUserInfo( intptr_t edn, const char* varname, const char* value )
+intptr_t 	trap_SetBotUserInfo( intptr_t edn, const char* varname, const char* value, intptr_t flags )
 {
-        return syscall( G_SetBotUserInfo, edn, (intptr_t)varname, (intptr_t)value );
+	return syscall( G_SetBotUserInfo, edn, (intptr_t)varname, (intptr_t)value, flags );
 }
 
 intptr_t 	trap_SetBotCMD( intptr_t edn,intptr_t msec, float angles_x, float angles_y, float angles_z, 

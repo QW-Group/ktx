@@ -38,7 +38,7 @@
 #include "player.h"
 
 #define MOD_NAME			("KTX")
-#define MOD_VERSION			("1.37")
+#define MOD_VERSION			("1.38-dev")
 #define MOD_BUILD_DATE		(__DATE__ ", " __TIME__)
 #define MOD_SERVERINFO_MOD_KEY		("ktxver")
 #define MOD_SERVERINFO_BUILD_KEY	("ktxbuild")
@@ -62,8 +62,8 @@ float max( float a, float b );
 float bound( float a, float b, float c );
 //#define bound(a,b,c) ((a) >= (c) ? (a) : (b) < (a) ? (a) : (b) > (c) ? (c) : (b))
 
-#ifdef DEBUG
-#define DebugTrap(x) *(char*)0=x
+#if defined(DEBUG) || defined(_DEBUG)
+#define DebugTrap(x) *(char**)0=x
 #else
 #define DebugTrap(x) G_Error(x)
 #endif
@@ -78,9 +78,10 @@ float bound( float a, float b, float c );
 #define	MAX_STRING_TOKENS	1024	// max tokens resulting from Cmd_TokenizeString
 #define	MAX_TOKEN_CHARS		1024	// max length of an individual token
 
-#define	FOFS(x) ((int)&(((gedict_t *)0)->x))
+#define	FOFS(x) ((intptr_t)&(((gedict_t *)0)->x))
+#define	GOFS(x) ((intptr_t)&(((globalvars_t *)0)->x))
 
-#define FOFCLSN ( FOFS ( s.v.classname ) )
+#define FOFCLSN ( FOFS ( classname ) )
 
 int             NUM_FOR_EDICT( gedict_t * e );
 
@@ -128,7 +129,8 @@ typedef enum
 	lsFFA,
 	lsCTF,
 	lsRA, 	// note no correspoding gameType_t for lsType
-	lsHM
+	lsHM,
+	lsRACE
 } lsType_t; // lastscores type
 
 #define DEATHTYPE( _dt_, _dt_str_ ) _dt_,
@@ -150,8 +152,10 @@ typedef enum
 float           g_random( void );
 float           crandom( void );
 int				i_rnd( int from, int to );
+float           dist_random (float minValue, float maxValue, float spreadFactor);
 gedict_t       *spawn( void );
 void            ent_remove( gedict_t * t );
+void            soft_ent_remove (gedict_t* ent);
 
 gedict_t       *nextent( gedict_t * ent );
 gedict_t       *find( gedict_t * start, int fieldoff, char *str );
@@ -463,6 +467,7 @@ void            launch_spike( vec3_t org, vec3_t dir );
 
 int				WeirdCountPlayers(void);
 float			CountPlayers();
+float			CountBots(void);
 float			CountRTeams();
 qbool 			isCanStart ( gedict_t *s, qbool forceMembersWarn );
 void			StartTimer ();
@@ -480,8 +485,7 @@ qbool		ISDEAD( gedict_t *e );
 
 qbool		CanDamage( gedict_t *targ, gedict_t *inflictor );
 
-void            T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker,
-			  float damage );
+void            T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float damage );
 void            T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage,
 				gedict_t * ignore, deathType_t dtype );
 void            T_BeamDamage( gedict_t * attacker, float damage );
@@ -536,7 +540,7 @@ extern fileHandle_t log_handle;
 // commands.c
 typedef struct cmd_s {
 	char    *name;
-//	func_t	f;
+//	funcref_t	f;
 	void ( *f )();
 	float	arg;
 	int		cf_flags;
@@ -597,12 +601,14 @@ void execute_rules_reset(void);
 #define UM_FFA		( 1<<5  )
 #define UM_CTF		( 1<<6  )
 #define UM_1ON1HM	( 1<<7  )
+#define UM_RACEMODE ( 1<<31 )
 
 typedef struct usermode_s {
 	const char 	  *name;
 	const char 	  *displayname;
 	const char    *initstring;
 	int		um_flags;
+	int     race_plrs_per_team;
 } usermode;
 
 extern usermode um_list[];
@@ -680,7 +686,7 @@ void	vote_check_pickup ();
 void	vote_check_rpickup ();
 void 	vote_check_all ();
 
-#define	VOTE_FOFS(x) ((int)&(((vote_t *)0)->x))
+#define	VOTE_FOFS(x) ((intptr_t)&(((vote_t *)0)->x))
 
 #define OV_BREAK ( VOTE_FOFS ( brk ) )
 #define OV_ELECT ( VOTE_FOFS ( elect ) )
@@ -732,6 +738,7 @@ void		RocketArenaPre();
 qbool	readytostart();
 void		ra_Frame();
 void		setfullwep( gedict_t *anent );
+void		setnowep( gedict_t *anent );
 
 // { ra commands
 void		ra_PlayerStats();
@@ -768,7 +775,8 @@ void	VoteMap();
 
 // match.c
 
-void	EndMatch ( float skip_log );
+void    EndMatch ( float skip_log );
+void    StatsToFile (void);
 
 // grapple.c
 void    GrappleThrow();
@@ -779,17 +787,52 @@ void    GrappleReset(gedict_t *rhook);
 
 #define HM_PT_FINAL 1
 #define HM_PT_SET 2
-qbool	isHoonyMode();
-void	HM_next_point(gedict_t *won, gedict_t *lost);
-void	HM_all_ready();
-int	HM_current_point_type();
-int	HM_current_point();
-void	HM_rig_the_spawns(int mode, gedict_t *spot);
-char	*HM_lastscores_extra();
-void	HM_stats();
-void	HM_stats_show();
+
+qbool isHoonyModeDuel(void);
+qbool isHoonyModeAny(void);
+qbool isHoonyModeTDM(void);
+
+gedict_t* HM_choose_spawn_point(gedict_t* player);
+void HM_log_spawn_point(gedict_t* player, gedict_t* spawn);
+
+void    HM_draw(void);
+void    HM_suicide(gedict_t* player);
+void    HM_next_point(gedict_t *won, gedict_t *lost);
+void    HM_all_ready(void);
+void    HM_reset_map(void);
+void    HM_initialise_rounds(void);
+void    HM_rounds_adjust(int change);
+
+int     HM_current_point_type(void);
+int     HM_current_point(void);
+int     HM_rounds(void);
+int     HM_timelimit(void);
+char*   HM_lastscores_extra(void);
+qbool   HM_is_game_over(void);
+void    HM_name_map_spawn(gedict_t* spawn);
+void    HM_pick_spawn(void);
+void    HM_unpick_all_spawns(void);
+void    HM_roundsup(void);
+void    HM_roundsdown(void);
+void    HM_point_stats(void);
+void    HM_restore_spawns(void);
+const char* HM_round_explanation(void);
+const char* HM_series_explanation(void);
+
+
+const char* HM_round_results(gedict_t* player);
 
 // race.c
+
+typedef struct race_stats_score_s {
+	char* name;
+	int wins;
+	int score;
+	int completions;
+	float best_time;
+	float total_time;
+	float total_distance;
+} race_stats_score_t;
 
 qbool 		isRACE( void );
 void		apply_race_settings(void);
@@ -808,9 +851,20 @@ void		race_set_one_player_movetype_and_etc( gedict_t *p );
 
 gedict_t 	*race_get_racer( void );
 
-void		race_follow( void );
 void		setwepnone( gedict_t *p );
 void		setwepall ( gedict_t *p );
+qbool       race_handle_event (gedict_t* player, gedict_t* object, const char* eventName);
+void        race_player_pre_think(void);
+void        race_player_post_think(void);
+int         race_count_votes_req(float percentage);
+qbool       race_allow_map_vote(gedict_t* player);
+
+gedict_t*   race_find_race_participants(gedict_t* p);
+
+qbool race_match_mode(void);
+char* race_scoring_system_name(void);
+void race_match_stats(void);
+race_stats_score_t* race_get_player_stats(int* players);
 
 // globals.c
 
@@ -833,6 +887,7 @@ extern	float k_userid;
 extern	float k_whonottime;     // NOT_SURE: 
 extern	float match_in_progress;// if a match has begun
 extern  float match_start_time;	// time when match has been started
+extern  float match_end_time;   // time when match is expected to end
 extern	float match_over;       // boolean - whether or not the match stats have been printed at end of game
 extern	gedict_t *newcomer;     // stores last player who joined
 extern	int   k_overtime;		// is overtime is going on
@@ -900,7 +955,7 @@ extern	int sv_minping; // used to broadcast changes
 void name () {				\
 	self->s.v.frame = _frame;				\
 	self->s.v.nextthink = g_globalvars.time + FRAMETIME;	\
-	self->s.v.think = ( func_t ) _next; }
+	self->think = ( func_t ) _next; }
 
 // sp_client.c
 void ExitIntermission();
@@ -980,3 +1035,25 @@ void LaunchLaser( vec3_t org, vec3_t vec );
 
 // identify alternative .ent files by format <map>#<name>.ent
 #define K_ENTITYFILE_SEPARATOR '#'
+
+// bots
+qbool bots_enabled();
+
+// files
+fileHandle_t std_fropen (const char *fmt, ...);
+fileHandle_t std_fwopen (const char *fmt, ...);
+int std_fgetc (fileHandle_t handle);
+char *std_fgets (fileHandle_t handle, char *buf, int limit);
+void std_fclose (fileHandle_t handle);
+void std_fprintf (fileHandle_t handle, const char *fmt, ...);
+
+// teamplay
+void TeamplayEventItemTaken(gedict_t* client, gedict_t* item);
+void TeamplayDeathEvent(gedict_t* client);
+void TeamplayMessage(void);
+qbool TeamplayMessageByName(gedict_t* client, const char* message);
+void TeamplayGameTick(void);
+void LocationInitialise(void);
+qbool SameTeam(gedict_t* p1, gedict_t* p2);
+
+#define AUTOTRACK_POWERUPS_PREDICT_TIME 2

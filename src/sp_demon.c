@@ -183,8 +183,8 @@ void Demon_JumpTouch ()
 		if ( (int)self->s.v.flags & FL_ONGROUND )
 		{	// jump randomly to not get hung up
 			//dprint ("popjump\n");
-			self->s.v.touch = ( func_t ) SUB_Null;
-			self->s.v.think = ( func_t ) demon1_jump1;
+			self->touch = ( func_t ) SUB_Null;
+			self->think = ( func_t ) demon1_jump1;
 			self->s.v.nextthink = g_globalvars.time + FRAMETIME;
 
 //			self.velocity_x = (g_random() - 0.5) * 600;
@@ -196,8 +196,8 @@ void Demon_JumpTouch ()
 		return;	// not on ground yet
 	}
 
-	self->s.v.touch = ( func_t) SUB_Null;
-	self->s.v.think = ( func_t) demon1_jump11;
+	self->touch = ( func_t) SUB_Null;
+	self->think = ( func_t) demon1_jump11;
 	self->s.v.nextthink = g_globalvars.time + FRAMETIME;
 }
 
@@ -205,7 +205,7 @@ void _demon1_jump4(void)
 {
 	ai_face();
 
-	self->s.v.touch = ( func_t ) Demon_JumpTouch;
+	self->touch = ( func_t ) Demon_JumpTouch;
 	trap_makevectors( self->s.v.angles );
 	self->s.v.origin[2] += 1; // FIXME: possibile stuck in walls, right?
 	VectorScale (g_globalvars.v_forward, 600, self->s.v.velocity);
@@ -283,7 +283,7 @@ ANIM(demon1_pain6, pain6, demon1_run1)
 
 void demon1_pain( struct gedict_s *attacker, float damage )
 {
-	if ( self->s.v.touch == ( func_t ) Demon_JumpTouch )
+	if ( self->touch == ( func_t ) Demon_JumpTouch )
 		return;
 
 	if ( self->pain_finished > g_globalvars.time )

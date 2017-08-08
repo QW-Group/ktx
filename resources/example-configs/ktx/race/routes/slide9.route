@@ -1,0 +1,9 @@
+race_route_add_start
+	race_add_route_node   484   -5  3602 0 180 
+	race_add_route_node -3809 2450 -1109 0   0  
+
+	race_set_route_name "Slide 9" "top \215 bottom" 
+	race_set_route_timeout 60 
+	race_set_route_weapon_mode raceWeaponNo 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end

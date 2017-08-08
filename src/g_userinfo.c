@@ -142,7 +142,7 @@ void cmduinfo ()
 			return;
 		}
 
-		G_sprint(self, 2, "%s's personal keys:\n", p->s.v.netname);
+		G_sprint(self, 2, "%s's personal keys:\n", p->netname);
 
 		for ( i = 0; i < cinfos_cnt; i++ ) {
 			
@@ -175,7 +175,7 @@ void cmduinfo ()
 		if ( !v )
 			G_sprint(self, 2, "key \"%s\" is hidden\n", arg_2);
 		else
-			G_sprint(self, 2, "%s's %s = \"%s\"\n", p->s.v.netname, arg_2, v);
+			G_sprint(self, 2, "%s's %s = \"%s\"\n", p->netname, arg_2, v);
 
 		return;
 	}

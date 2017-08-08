@@ -1,0 +1,9 @@
+race_route_add_start
+	race_add_route_node -1792 -320 2264 0 0 
+	race_add_route_node -1775  545  472 0 0  
+
+	race_set_route_name "Subslide" "top \215 bottom" 
+	race_set_route_timeout 25 
+	race_set_route_weapon_mode raceWeaponNo 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end

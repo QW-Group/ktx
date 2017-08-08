@@ -205,7 +205,7 @@ gedict_t * bloodfest_spawn_monster(gedict_t *spot, char * classname)
 	gedict_t *	oself;
 	gedict_t *	p = spawn();
 
-	p->s.v.classname = classname;
+	p->classname = classname;
 	VectorCopy(spot->s.v.origin, p->s.v.origin);
 	VectorCopy(spot->s.v.angles, p->s.v.angles);
 	setorigin( p, PASSVEC3(p->s.v.origin) );
@@ -554,7 +554,7 @@ void bloodfest_killed_hook( gedict_t * killed, gedict_t * attacker )
 	if ( !( (int)killed->s.v.flags & FL_MONSTER )  )
 		return;
 
-	if ( !( monster = bloodfest_find_monster_by_classname( killed->s.v.classname ) ) )
+	if ( !( monster = bloodfest_find_monster_by_classname( killed->classname ) ) )
 		return; // monster not found, should not be the case.
 
 	if ( attacker->s.v.health < 250 && monster->hp_for_kill > 0 )
@@ -661,7 +661,7 @@ void monster_use ()
 	// delay reaction so if the monster is teleported, its sound is still heard
 	self->s.v.enemy = EDICT_TO_PROG( activator );
 	self->s.v.nextthink = g_globalvars.time + 0.1;
-	self->s.v.think = ( func_t ) FoundTarget;
+	self->think = ( func_t ) FoundTarget;
 }
 
 /*
@@ -683,7 +683,7 @@ void monster_death_use ()
 	// fall to ground
 	self->s.v.flags = (int)self->s.v.flags & ~( FL_FLY | FL_SWIM);
 
-	if ( !self->s.v.target )
+	if ( !self->target )
 		return;
 
 	activator = PROG_TO_EDICT( self->s.v.enemy );
@@ -807,7 +807,7 @@ void monster_start_go( monsterType_t mt )
 	}
 
 	VectorSet( self->s.v.view_ofs, 0, 0, mt == mtSwim ? 10 : 25 );
-	self->s.v.use = ( func_t ) monster_use;
+	self->use = ( func_t ) monster_use;
 
 	self->s.v.solid = SOLID_SLIDEBOX;
 	self->s.v.takedamage = DAMAGE_AIM;
@@ -815,7 +815,7 @@ void monster_start_go( monsterType_t mt )
 	if (k_bloodfest && is_location_occupied( self, self->s.v.origin, self->s.v.mins, self->s.v.maxs ))
 	{
 //		G_cprint( "monster (%s) in wall at: %.1f %.1f %.1f, removed!\n",
-//			self->s.v.classname, self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] );
+//			self->classname, self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] );
 
 		ent_remove( self ); // remove it ASAP.
 		return;
@@ -825,7 +825,7 @@ void monster_start_go( monsterType_t mt )
 	{
 		G_cprint( "monster %d in wall at: %.1f %.1f %.1f\n", NUM_FOR_EDICT(self), self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] );
 
-		self->s.v.model = ""; // turn off model
+		self->model = ""; // turn off model
 		self->s.v.solid = SOLID_NOT;
 		self->s.v.takedamage = DAMAGE_NO;
 
@@ -846,9 +846,9 @@ void monster_start_go( monsterType_t mt )
 		spawn_tfog( self->s.v.origin );
 	}
 
-	if ( self->s.v.target )
+	if ( self->target )
 	{
-		self->movetarget = find( world, FOFS( s.v.targetname ), self->s.v.target );
+		self->movetarget = find( world, FOFS( targetname ), self->target );
 		if ( !self->movetarget ) // NOTE: this is a damn difference with qc
 			self->movetarget = world;
 		self->s.v.goalentity = EDICT_TO_PROG( self->movetarget );
@@ -863,7 +863,7 @@ void monster_start_go( monsterType_t mt )
 		}
 		// this used to be an objerror
 
-		if ( self->movetarget && streq( self->movetarget->s.v.classname, "path_corner" ) )
+		if ( self->movetarget && streq( self->movetarget->classname, "path_corner" ) )
 		{
 			if ( self->th_walk )
 				self->th_walk();
@@ -922,13 +922,13 @@ static void common_monster_start( char *model, int flags )
 		// FL_MONSTER not set, should be first monster spawn
 
 		setmodel( self, model ); // set model (so modelindex is initialized)
-		self->mdl = self->s.v.model; // save model
+		self->mdl = self->model; // save model
 		VectorCopy( self->s.v.origin, self->s.v.oldorigin ); // save first spawn origin
 		VectorCopy( self->s.v.angles, self->oldangles ); // save angles
 	}
 
 	// turn off model since monster spawn complete in monster_start_go().
-	self->s.v.model = "";
+	self->model = "";
 
 	// always set FL_MONSTER and possibily add some additional flags
 	self->s.v.flags = (int)self->s.v.flags | FL_MONSTER | flags;
@@ -936,11 +936,11 @@ static void common_monster_start( char *model, int flags )
 
 void bloodfest_speedup_monster_spawn(void)
 {
-	if ( !k_bloodfest || !self->s.v.think )
+	if ( !k_bloodfest || !self->think )
 		return;
 
 	self->s.v.nextthink = g_globalvars.time;
-	( ( void ( * )() ) ( self->s.v.think ) ) ();
+	( ( void ( * )() ) ( self->think ) ) ();
 }
 
 void walkmonster_start( char *model )
@@ -950,7 +950,7 @@ void walkmonster_start( char *model )
 	// delay drop to floor to make sure all doors have been spawned
 	// spread think times so they don't all happen at same time
 	self->s.v.nextthink = g_globalvars.time + 0.1 + g_random() * 0.5;
-	self->s.v.think = ( func_t ) walkmonster_start_go;
+	self->think = ( func_t ) walkmonster_start_go;
 
 	bloodfest_speedup_monster_spawn();
 }
@@ -962,7 +962,7 @@ void flymonster_start( char *model )
 
 	// spread think times so they don't all happen at same time
 	self->s.v.nextthink = g_globalvars.time + 0.1 + g_random() * 0.5;
-	self->s.v.think = ( func_t ) flymonster_start_go;
+	self->think = ( func_t ) flymonster_start_go;
 
 	bloodfest_speedup_monster_spawn();
 }
@@ -974,7 +974,7 @@ void swimmonster_start( char *model )
 
 	// spread think times so they don't all happen at same time
 	self->s.v.nextthink = g_globalvars.time + 0.1 + g_random() * 0.5;
-	self->s.v.think = (func_t) swimmonster_start_go;
+	self->think = (func_t) swimmonster_start_go;
 
 	bloodfest_speedup_monster_spawn();
 }

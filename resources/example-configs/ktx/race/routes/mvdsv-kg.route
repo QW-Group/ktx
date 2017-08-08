@@ -1,0 +1,15 @@
+race_route_add_start
+	race_add_route_node 118.5 -1345.5 284.6 5.2 120.7
+	race_add_route_node -572.9 -276.8 330.9 0 0
+	race_add_route_node -111.9   725.3 466.0   0     0  
+	race_add_route_node  546.5  -134.5 566.0   0     0  
+	race_add_route_node  509.0 -1483.3 706.6   0     0  
+	race_add_route_node -515.8 -1152.6 856.4   0     0  
+	race_add_route_node  120.9  -829.8 889.4   0     0  
+	race_add_route_node      0   -74.1 979.5   0     0  
+
+	race_set_route_name "Bunny to the top!" "castle\215pads\215platform" 
+	race_set_route_timeout 30 
+	race_set_route_weapon_mode raceWeaponAllowed 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end

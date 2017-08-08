@@ -51,10 +51,10 @@ void SetPlayerParams (gedict_t *p, gedict_t *cap)
 		k_captainturn = (k_captainturn == 1 ? 2 : 1);
 	turn_number++;
 
-    G_bprint(2, "%s set to team \x90%s\x91\n", p->s.v.netname, infoteam);
+    G_bprint(2, "%s set to team \x90%s\x91\n", p->netname, infoteam);
 
     G_sprint(p, 2, "You were picked by %s\n"
-				   "Time to go ready\n", cap->s.v.netname );
+				   "Time to go ready\n", cap->netname );
 
     stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "break\n"
 									   		 "team \"%s\"\n"
@@ -72,7 +72,7 @@ void PrintCaptainInTurn ()
         ; // empty
 
 	if ( p )
-		G_bprint(2, "%s is picking\n", p->s.v.netname);
+		G_bprint(2, "%s is picking\n", p->netname);
 	else {
 		G_bprint(2, "PrintCaptainInTurn: captain not found\n");
 		CancelCaptains ();
@@ -190,7 +190,7 @@ void VoteCaptain ()
     // s: check if we are being elected or we are a captain already
 	if( is_elected(self, etCaptain) )
 	{
-    	G_bprint(2,  "%s %s!\n", self->s.v.netname, redtext("aborts election"));
+    	G_bprint(2,  "%s %s!\n", self->netname, redtext("aborts election"));
 
     	AbortElect();
 		return;
@@ -198,7 +198,7 @@ void VoteCaptain ()
 
 	if ( capt_num( self ) )
 	{
-    	G_bprint(2, "%s is no longer a %s\n", self->s.v.netname, redtext("captain"));
+    	G_bprint(2, "%s is no longer a %s\n", self->netname, redtext("captain"));
 
 	    ExitCaptain();
 		return;
@@ -285,7 +285,7 @@ void VoteCaptain ()
 
     k_captains += 0.5;
 
-	G_bprint(2, "%s has %s status!\n", self->s.v.netname, redtext("requested captain"));
+	G_bprint(2, "%s has %s status!\n", self->netname, redtext("requested captain"));
 
 	for( p = world; (p = find_client( p )); )
 		if ( p != self && p->ct == ctPlayer )
@@ -296,8 +296,8 @@ void VoteCaptain ()
     // s: spawn the cool dude
     electguard = spawn(); // Check the 1 minute timeout for election
     electguard->s.v.owner = EDICT_TO_PROG( world );
-    electguard->s.v.classname = "electguard";
-    electguard->s.v.think = ( func_t) ElectThink;
+    electguard->classname = "electguard";
+    electguard->think = ( func_t) ElectThink;
     electguard->s.v.nextthink = g_globalvars.time + 60;
 }
 
@@ -362,7 +362,7 @@ void BecomeCaptain(gedict_t *p)
 
 	k_captains = floor( k_captains ) + 1;
 
-	G_bprint(2, "%s becomes a %s\n", cap->s.v.netname, redtext("captain"));
+	G_bprint(2, "%s becomes a %s\n", cap->netname, redtext("captain"));
 
 	// s: if both captains are already elected, start choosing players
 	if( k_captains == 2 )

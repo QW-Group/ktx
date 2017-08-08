@@ -199,7 +199,7 @@ void Wiz_FastFire ()
 
 		VectorScale( vec, 600, newmis->s.v.velocity );
 		newmis->s.v.owner = self->s.v.owner;
-		newmis->s.v.classname = "wizspike";
+		newmis->classname = "wizspike";
 		setmodel( newmis, "progs/w_spike.mdl" );
 		setsize( newmis, PASSVEC3( VEC_ORIGIN ), PASSVEC3( VEC_ORIGIN ) );
 	}
@@ -227,7 +227,7 @@ void Wiz_StartFast()
 	setorigin( missile, PASSVEC3( missile->s.v.origin ) );
 	missile->s.v.enemy = self->s.v.enemy;
 	missile->s.v.nextthink = g_globalvars.time + 0.8;
-	missile->s.v.think = ( func_t ) Wiz_FastFire;
+	missile->think = ( func_t ) Wiz_FastFire;
 	VectorCopy( g_globalvars.v_right, missile->s.v.movedir );
 
 	missile = spawn ();
@@ -241,7 +241,7 @@ void Wiz_StartFast()
 	setorigin( missile, PASSVEC3( missile->s.v.origin ) );
 	missile->s.v.enemy = self->s.v.enemy;
 	missile->s.v.nextthink = g_globalvars.time + 0.3;
-	missile->s.v.think = ( func_t ) Wiz_FastFire;
+	missile->think = ( func_t ) Wiz_FastFire;
 	VectorScale( g_globalvars.v_right, -1, missile->s.v.movedir );
 }
 
@@ -250,12 +250,12 @@ void WizardAttackFinished ()
 	if ( enemy_range >= RANGE_MID || !enemy_vis )
 	{
 		self->attack_state = AS_STRAIGHT;
-		self->s.v.think = ( func_t ) wiz_run1;
+		self->think = ( func_t ) wiz_run1;
 	}
 	else
 	{
 		self->attack_state = AS_SLIDING;
-		self->s.v.think = ( func_t ) wiz_side1;
+		self->think = ( func_t ) wiz_side1;
 	}
 }
 

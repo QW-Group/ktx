@@ -1,0 +1,14 @@
+race_route_add_start
+	race_add_route_node -385.2 1417.6 24.0 4.1 2.7
+	race_add_route_node -398.8 1595.6 28.0   0   0  
+	race_add_route_node -664.7 1104.4 67.0   0   0  
+	race_add_route_node   83.6  630.0 51.0   0   0  
+	race_add_route_node  939.3 1311.8 95.6   0   0  
+	race_add_route_node  405.6 1565.6 62.2   0   0  
+	race_add_route_node    4.1 1437.4 24.0   0   0  
+
+	race_set_route_name "around dm1" "ya\215ng\215mh\215ssg\215ya" 
+	race_set_route_timeout 30 
+	race_set_route_weapon_mode raceWeaponNo 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end

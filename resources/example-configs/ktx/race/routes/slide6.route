@@ -1,0 +1,29 @@
+race_route_add_start
+	race_add_route_node     0    0 3534 0 0 
+	race_add_route_node -1084 1958   18 0 0  
+
+	race_set_route_name "Slide 6" "top \215 bottom" 
+	race_set_route_timeout 40 
+	race_set_route_weapon_mode raceWeaponNo 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node     0    0 3534 0 0 
+	race_add_route_node  2605  800 3485 0 0  
+	race_set_node_size 430 400 1030
+	race_add_route_node  1025  -2275 2200 0 0  
+	race_set_node_size  500 400 400
+	race_add_route_node -1084 1958   18 0 0  
+
+	race_set_route_name "Slide6: NO SHORTCUTS" "top \215 bottom" 
+	race_set_route_timeout 40 
+	race_set_route_weapon_mode raceWeaponNo 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
+
+race_set_teleport_flags_by_name "tnw" RACEFLAG_TOUCH_RACEFAIL
+race_set_teleport_flags_by_name "tne" RACEFLAG_TOUCH_RACEFAIL
+race_set_teleport_flags_by_name "tsw" RACEFLAG_TOUCH_RACEFAIL
+race_set_teleport_flags_by_name "tse" RACEFLAG_TOUCH_RACEFAIL
+race_set_teleport_flags_by_name "tc" RACEFLAG_TOUCH_RACEFAIL

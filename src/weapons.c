@@ -30,6 +30,19 @@ void AdminImpBot();
 void CaptainPickPlayer();
 void ChasecamToggleButton( void );
 
+// Bots support
+void BotsRocketSpawned (gedict_t* newmis);
+void BotsGrenadeSpawned (gedict_t* newmis);
+
+void AmmoUsed (gedict_t* player)
+{
+#ifdef BOT_SUPPORT
+	if (player->fb.ammo_used) {
+		player->fb.ammo_used(player);
+	}
+#endif
+}
+
 // called by SP_worldspawn
 void W_Precache()
 {
@@ -110,8 +123,10 @@ void W_FireAxe()
 		PROG_TO_EDICT( g_globalvars.trace_ent )->deathtype = dtAXE;
 
 		T_Damage( PROG_TO_EDICT( g_globalvars.trace_ent ), self, self, damage );
-	} else
-	{	// hit wall
+	}
+	else
+	{
+		// hit wall
 
 		//crt - get rid of axe sound for spec
 		if ( !isRA() || ( isWinner( self ) || isLoser( self ) ) )
@@ -188,7 +203,7 @@ void SpawnMeatSpray( vec3_t org, vec3_t vel )
 
 // set missile duration
 	missile->s.v.nextthink = g_globalvars.time + 1;
-	missile->s.v.think = ( func_t ) SUB_Remove;
+	missile->think = ( func_t ) SUB_Remove;
 
 	setmodel( missile, "progs/zom_gib.mdl" );
 	setsize( missile, 0, 0, 0, 0, 0, 0 );
@@ -406,12 +421,12 @@ void FireInstaBullet( vec3_t dir, deathType_t deathtype )
 		aim( newmis->s.v.velocity );	// = aim(self, 1000);
 		VectorScale( newmis->s.v.velocity, 1000, newmis->s.v.velocity );
 		vectoangles( newmis->s.v.velocity, newmis->s.v.angles );
-		newmis->s.v.touch = ( func_t ) T_InstaKickback;
+		newmis->touch = ( func_t ) T_InstaKickback;
 		newmis->voided = 0;
 
 		newmis->s.v.nextthink = g_globalvars.time + 1;
-		newmis->s.v.think = ( func_t ) SUB_Remove;
-		newmis->s.v.classname = "kickback";
+		newmis->think = ( func_t ) SUB_Remove;
+		newmis->classname = "kickback";
 		setmodel( newmis, "" );
 		setsize( newmis, 0, 0, 0, 0, 0, 0 );
 
@@ -451,7 +466,7 @@ void FireInstaBullet( vec3_t dir, deathType_t deathtype )
 		VectorCopy( g_globalvars.trace_endpos, src );
 
 //		G_sprint( self, 2, "fraction %f\n", fraction); // DEBUG!!!!!
-//		G_sprint( self, 2, "solid %d, %s\n", solid, ignore->s.v.netname); // DEBUG!!!!!
+//		G_sprint( self, 2, "solid %d, %s\n", solid, ignore->netname); // DEBUG!!!!!
 
 		TraceAttack( 4, dir, false );
 	    
@@ -746,8 +761,10 @@ void W_FireShotgun()
 	WriteByte( MSG_ONE, SVC_SMALLKICK );
 
     if ( match_in_progress == 2 )
-		if ( deathmatch != 4 && !k_bloodfest )
-			self->s.v.currentammo = --( self->s.v.ammo_shells );
+		if (deathmatch != 4 && !k_bloodfest) {
+			self->s.v.currentammo = --(self->s.v.ammo_shells);
+			AmmoUsed (self);
+		}
 
 	//dir = aim (self, 100000);
 	aim( dir );
@@ -784,8 +801,11 @@ void W_FireSuperShotgun()
 	WriteByte( MSG_ONE, SVC_BIGKICK );
 
     if ( match_in_progress == 2 )
-		if ( deathmatch != 4 && !k_bloodfest )
+		if (deathmatch != 4 && !k_bloodfest)
+		{
 			self->s.v.currentammo = self->s.v.ammo_shells = self->s.v.ammo_shells - 2;
+			AmmoUsed (self);
+		}
 
 	//dir = aim (self, 100000);
 	aim( dir );
@@ -850,10 +870,8 @@ void T_MissileTouch()
 	if ( other == PROG_TO_EDICT( self->s.v.owner ) )
 		return;		// don't explode on owner
 
-	// can't touch/damage others in race
-	if ( isRACE() 
-	&& ( other->ct == ctPlayer ) 
-	&& ( other != PROG_TO_EDICT( self->s.v.owner ) ) )
+	// race rockets can only hit the world
+	if ( isRACE() && other->s.v.solid != SOLID_BSP)
 		return;
 
 	if ( self->voided )
@@ -870,7 +888,7 @@ void T_MissileTouch()
 	FixQuad(PROG_TO_EDICT( self->s.v.owner ));
 
 	// shamblers only take half damage from rockets
-	if ( streq(other->s.v.classname, "monster_shambler") && !cvar("k_bloodfest") )
+	if ( streq(other->classname, "monster_shambler") && !cvar("k_bloodfest") )
 		damg = 55;
 	else // 110 dmg on direct hits for all other cases
 		damg = 110;
@@ -889,10 +907,10 @@ void T_MissileTouch()
 		other->deathtype = dtRL;
 		T_Damage( other, self, PROG_TO_EDICT( self->s.v.owner ), damg );
 	}
+
 	// don't do radius damage to the other, because all the damage
 	// was done in the impact
-
-	T_RadiusDamage( self, PROG_TO_EDICT( self->s.v.owner ), 120, other, dtRL );
+	T_RadiusDamage(self, PROG_TO_EDICT(self->s.v.owner), 120, other, dtRL);
 
 //  sound (self, CHAN_WEAPON, "weapons/r_exp3.wav", 1, ATTN_NORM);
 	normalize( self->s.v.velocity, tmp );
@@ -922,8 +940,11 @@ void W_FireRocket()
 	self->ps.wpn[wpRL].attacks++;
 
     if ( match_in_progress == 2 )
-		if ( deathmatch != 4 && !k_bloodfest )
+		if (deathmatch != 4 && !k_bloodfest)
+		{
 			self->s.v.currentammo = self->s.v.ammo_rockets = self->s.v.ammo_rockets - 1;
+			AmmoUsed (self);
+		}
 
 	sound( self, CHAN_WEAPON, "weapons/sgun1.wav", 1, ATTN_NORM );
 
@@ -935,39 +956,43 @@ void W_FireRocket()
 	newmis->s.v.owner = EDICT_TO_PROG( self );
 	newmis->s.v.movetype = MOVETYPE_FLYMISSILE;
 	newmis->isMissile = true;
-	newmis->s.v.solid = SOLID_BBOX;
+	newmis->s.v.solid = (isRACE() ? SOLID_TRIGGER : SOLID_BBOX);
 
-// set newmis speed     
+	// set newmis speed
 	trap_makevectors( self->s.v.v_angle );
 	aim( newmis->s.v.velocity );	// = aim(self, 1000);
-	if ( cvar("k_midair") && self->super_damage_finished > g_globalvars.time ) 
-	{
+	if ( cvar("k_midair") && self->super_damage_finished > g_globalvars.time ) {
 		VectorScale ( newmis->s.v.velocity, 2000, newmis->s.v.velocity );
 		newmis->s.v.effects = EF_BLUE;
 	}
-	else
-		VectorScale( newmis->s.v.velocity, 1000, newmis->s.v.velocity );
+	else {
+		VectorScale(newmis->s.v.velocity, 1000, newmis->s.v.velocity);
+	}
 
 	vectoangles( newmis->s.v.velocity, newmis->s.v.angles );
-	
-	newmis->s.v.touch = ( func_t ) T_MissileTouch;
+
+	newmis->touch = ( func_t ) T_MissileTouch;
 	newmis->voided = 0;
 
-// set newmis duration
+	// set newmis duration
 	newmis->s.v.nextthink = g_globalvars.time + 10;
-	newmis->s.v.think = ( func_t ) SUB_Remove;
-	newmis->s.v.classname = "rocket";
+	newmis->think = ( func_t ) SUB_Remove;
+	newmis->classname = "rocket";
 
 	setmodel( newmis, "progs/missile.mdl" );
 	setsize( newmis, 0, 0, 0, 0, 0, 0 );
 
-// setorigin (newmis, self->s.v.origin + v_forward*8 + '0 0 16');
+	// setorigin (newmis, self->s.v.origin + v_forward*8 + '0 0 16');
 	setorigin( newmis, self->s.v.origin[0] + g_globalvars.v_forward[0] * 8,
 			self->s.v.origin[1] + g_globalvars.v_forward[1] * 8,
 			self->s.v.origin[2] + g_globalvars.v_forward[2] * 8 + 16 );
 
 	// midair 
 	VectorCopy( self->s.v.origin, newmis->s.v.oldorigin );
+
+#ifdef BOT_SUPPORT
+	BotsRocketSpawned (newmis);
+#endif
 }
 
 /*
@@ -1015,7 +1040,7 @@ void LightningDamage( vec3_t p1, vec3_t p2, gedict_t *from, float damage )
 
 			if (    gre 
 				 && gre == PROG_TO_EDICT( g_globalvars.trace_ent )
-				 && streq( gre->s.v.classname, "door" ) 
+				 && streq( gre->classname, "door" ) 
 			   )
 				PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.velocity[2] += 400;
 		}
@@ -1044,6 +1069,7 @@ void W_FireLightning()
 		{
 			self->s.v.ammo_cells = 0;
 			W_SetCurrentAmmo();
+			AmmoUsed (self);
 			return;
 		}
 
@@ -1062,6 +1088,7 @@ void W_FireLightning()
 				cells = self->s.v.ammo_cells;
 				self->s.v.ammo_cells = 0;
 				W_SetCurrentAmmo();
+				AmmoUsed (self);
 
                 if ( !cvar( "k_dis" ) )
                     return;
@@ -1074,6 +1101,7 @@ void W_FireLightning()
 			cells = self->s.v.ammo_cells;
 			self->s.v.ammo_cells = 0;
 			W_SetCurrentAmmo();
+			AmmoUsed (self);
 
             if ( !cvar( "k_dis" ) )
                 return;
@@ -1096,8 +1124,11 @@ void W_FireLightning()
 	WriteByte( MSG_ONE, SVC_SMALLKICK );
 
     if ( match_in_progress == 2 )
-		if ( deathmatch != 4 && !k_bloodfest )
+		if (deathmatch != 4 && !k_bloodfest)
+		{
 			self->s.v.currentammo = self->s.v.ammo_cells = self->s.v.ammo_cells - 1;
+			AmmoUsed (self);
+		}
 
 	VectorCopy( self->s.v.origin, org );	//org = self->s.v.origin + '0 0 16';
 	org[2] += 16;
@@ -1138,7 +1169,7 @@ void GrenadeExplode()
 	FixQuad(PROG_TO_EDICT( self->s.v.owner ));
 
 	// shamblers only take half damage from grenades
-	if ( streq(self->s.v.classname, "monster_shambler") && !cvar("k_bloodfest") )
+	if ( streq(self->classname, "monster_shambler") && !cvar("k_bloodfest") )
 		T_RadiusDamage( self, PROG_TO_EDICT( self->s.v.owner ), 60, world, dtGL );
 	else
 		T_RadiusDamage( self, PROG_TO_EDICT( self->s.v.owner ), 120, world, dtGL );
@@ -1197,8 +1228,11 @@ void W_FireGrenade()
 	self->ps.wpn[wpGL].attacks++;
 
     if ( match_in_progress == 2 )
-		if ( deathmatch != 4 && !k_bloodfest )
+		if (deathmatch != 4 && !k_bloodfest)
+		{
 			self->s.v.currentammo = self->s.v.ammo_rockets = self->s.v.ammo_rockets - 1;
+			AmmoUsed (self);
+		}
 
 	sound( self, CHAN_WEAPON, "weapons/grenade.wav", 1, ATTN_NORM );
 
@@ -1213,7 +1247,7 @@ void W_FireGrenade()
 	newmis->s.v.movetype = MOVETYPE_BOUNCE;
 	newmis->isMissile = true;
 	newmis->s.v.solid = SOLID_BBOX;
-	newmis->s.v.classname = "grenade";
+	newmis->classname = "grenade";
 
 // set newmis speed     
 
@@ -1249,16 +1283,20 @@ void W_FireGrenade()
 
 	vectoangles( newmis->s.v.velocity, newmis->s.v.angles );
 
-	newmis->s.v.touch = ( func_t ) GrenadeTouch;
+	newmis->touch = ( func_t ) GrenadeTouch;
 	newmis->s.v.nextthink = g_globalvars.time + 2.5;
-	newmis->s.v.think = ( func_t ) GrenadeExplode;
+	newmis->think = ( func_t ) GrenadeExplode;
 
 	if ( deathmatch == 4 && cvar("k_dmm4_gren_mode") )
-		newmis->s.v.think = ( func_t ) SUB_Remove;
+		newmis->think = ( func_t ) SUB_Remove;
 
 	setmodel( newmis, "progs/grenade.mdl" );
 	setsize( newmis, 0, 0, 0, 0, 0, 0 );
 	setorigin( newmis, PASSVEC3( self->s.v.origin ) );
+
+#ifdef BOT_SUPPORT
+	BotsGrenadeSpawned (newmis);
+#endif
 }
 
 //=============================================================================
@@ -1281,11 +1319,11 @@ void launch_spike( vec3_t org, vec3_t dir )
 	newmis->s.v.owner = EDICT_TO_PROG( self );
 	newmis->s.v.movetype = MOVETYPE_FLYMISSILE;
 	newmis->isMissile = true;
-	newmis->s.v.solid = SOLID_BBOX;
+	newmis->s.v.solid = (isRACE() ? SOLID_TRIGGER : SOLID_BBOX);
 
-	newmis->s.v.touch = ( func_t ) spike_touch;
-	newmis->s.v.classname = "spike";
-	newmis->s.v.think = ( func_t ) SUB_Remove;
+	newmis->touch = ( func_t ) spike_touch;
+	newmis->classname = "spike";
+	newmis->think = ( func_t ) SUB_Remove;
 	newmis->s.v.nextthink = g_globalvars.time + 6;
 	setmodel( newmis, "progs/spike.mdl" );
 	setsize( newmis, 0, 0, 0, 0, 0, 0 );
@@ -1298,10 +1336,35 @@ void launch_spike( vec3_t org, vec3_t dir )
 	vectoangles( newmis->s.v.velocity, newmis->s.v.angles );
 }
 
+static qbool race_ignore_spike(gedict_t* self, gedict_t* other)
+{
+	// we're not racing, treat as normal
+	if (!isRACE()) {
+		return false;
+	}
+
+	// everything collides with walls
+	if (other == world) {
+		return false;
+	}
+
+	// they only collide with players
+	if (other->ct != ctPlayer) {
+		return true;
+	}
+
+	// player fired it?  ignore
+	return PROG_TO_EDICT(self->s.v.owner)->ct == ctPlayer;
+}
+
 void spike_touch()
 {
 	if ( other == PROG_TO_EDICT( self->s.v.owner ) )
 		return;
+
+	if (race_ignore_spike(self, other)) {
+		return;
+	}
 
 	if ( self->voided )
 	{
@@ -1309,8 +1372,10 @@ void spike_touch()
 	}
 	self->voided = 1;
 
-	if ( other->s.v.solid == SOLID_TRIGGER )
+	if (other->s.v.solid == SOLID_TRIGGER) {
+		G_bprint(2, "Trigger field, do nothing (%s)\n", other->netname);
 		return;		// trigger field, do nothing
+	}
 
 	if ( trap_pointcontents( PASSVEC3( self->s.v.origin ) ) == CONTENT_SKY )
 	{
@@ -1336,9 +1401,9 @@ void spike_touch()
 	else
 	{
 		WriteByte( MSG_MULTICAST, SVC_TEMPENTITY );
-		if ( !strcmp( self->s.v.classname, "wizspike" ) )
+		if ( !strcmp( self->classname, "wizspike" ) )
 			WriteByte( MSG_MULTICAST, TE_WIZSPIKE );
-		else if ( !strcmp( self->s.v.classname, "knightspike" ) )
+		else if ( !strcmp( self->classname, "knightspike" ) )
 			WriteByte( MSG_MULTICAST, TE_KNIGHTSPIKE );
 		else
 			WriteByte( MSG_MULTICAST, TE_SPIKE );
@@ -1355,6 +1420,10 @@ void superspike_touch()
 {
 	if ( other == PROG_TO_EDICT( self->s.v.owner ) )
 		return;
+
+	if (race_ignore_spike(self, other)) {
+		return;
+	}
 
 	if ( self->voided )
 	{
@@ -1412,14 +1481,17 @@ void W_FireSuperSpikes()
 	self->attack_finished = g_globalvars.time + 0.2;
 
     if ( match_in_progress == 2 )
-		if ( deathmatch != 4 && !k_bloodfest )
+		if (deathmatch != 4 && !k_bloodfest)
+		{
 			self->s.v.currentammo = self->s.v.ammo_nails = self->s.v.ammo_nails - 2;
+			AmmoUsed (self);
+		}
 	aim( dir );		//dir = aim (self, 1000);
 
 	VectorCopy( self->s.v.origin, tmp );
 	tmp[2] += 16;
 	launch_spike( tmp, dir );
-	newmis->s.v.touch = ( func_t ) superspike_touch;
+	newmis->touch = ( func_t ) superspike_touch;
 	setmodel( newmis, "progs/s_spike.mdl" );
 	setsize( newmis, 0, 0, 0, 0, 0, 0 );
 	g_globalvars.msg_entity = EDICT_TO_PROG( self );
@@ -1461,8 +1533,11 @@ void W_FireSpikes( float ox )
 	self->attack_finished = g_globalvars.time + 0.2;
 
     if ( match_in_progress == 2 )
-		if ( deathmatch != 4 && !k_bloodfest )
+		if (deathmatch != 4 && !k_bloodfest)
+		{
 			self->s.v.currentammo = self->s.v.ammo_nails = self->s.v.ammo_nails - 1;
+			AmmoUsed (self);
+		}
 
 	aim( dir );		// dir = aim (self, 1000);
 	VectorScale( g_globalvars.v_right, ox, tmp );
@@ -1490,7 +1565,7 @@ void W_SetCurrentAmmo()
 
 // { get out of any weapon firing states
 
-	if ( self->s.v.think == ( func_t )player_stand1 || self->s.v.think == ( func_t )player_run ) {
+	if ( self->think == ( func_t )player_stand1 || self->think == ( func_t )player_run ) {
 		if ( self->s.v.weapon == IT_AXE || self->s.v.weapon == IT_HOOK ) {
 			if ( self->s.v.velocity[0] || self->s.v.velocity[1] ) { // run
 				if ( self->s.v.frame < 0 || self->s.v.frame > 5 )
@@ -1513,7 +1588,7 @@ void W_SetCurrentAmmo()
 		}
 	}
 	else {
-		need_fix = true; // hm, set proper ->s.v.think
+		need_fix = true; // hm, set proper ->think
 	}
 
 	if ( need_fix ) {
@@ -1535,7 +1610,7 @@ void W_SetCurrentAmmo()
 	{
 	case IT_AXE:
 		self->s.v.currentammo = 0;
-		self->s.v.weaponmodel = "progs/v_axe.mdl";
+		self->weaponmodel = "progs/v_axe.mdl";
 		self->s.v.weaponframe = 0;
 		if (vw_enabled)
             		self->vw_index = 1;
@@ -1544,9 +1619,9 @@ void W_SetCurrentAmmo()
 	case IT_SHOTGUN:
 		self->s.v.currentammo = self->s.v.ammo_shells;
 		if ( cvar("k_instagib_custom_models") && cvar("k_instagib") )
-			self->s.v.weaponmodel = "progs/v_coil.mdl";
+			self->weaponmodel = "progs/v_coil.mdl";
 		else
-			self->s.v.weaponmodel = "progs/v_shot.mdl";
+			self->weaponmodel = "progs/v_shot.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_SHELLS;
 		if (vw_enabled)
@@ -1555,7 +1630,7 @@ void W_SetCurrentAmmo()
 
 	case IT_SUPER_SHOTGUN:
 		self->s.v.currentammo = self->s.v.ammo_shells;
-		self->s.v.weaponmodel = "progs/v_shot2.mdl";
+		self->weaponmodel = "progs/v_shot2.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_SHELLS;
 		if (vw_enabled)
@@ -1564,7 +1639,7 @@ void W_SetCurrentAmmo()
 
 	case IT_NAILGUN:
 		self->s.v.currentammo = self->s.v.ammo_nails;
-		self->s.v.weaponmodel = "progs/v_nail.mdl";
+		self->weaponmodel = "progs/v_nail.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_NAILS;
 		if (vw_enabled)
@@ -1573,7 +1648,7 @@ void W_SetCurrentAmmo()
 
 	case IT_SUPER_NAILGUN:
 		self->s.v.currentammo = self->s.v.ammo_nails;
-		self->s.v.weaponmodel = "progs/v_nail2.mdl";
+		self->weaponmodel = "progs/v_nail2.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_NAILS;
 		if (vw_enabled)
@@ -1582,7 +1657,7 @@ void W_SetCurrentAmmo()
 
 	case IT_GRENADE_LAUNCHER:
 		self->s.v.currentammo = self->s.v.ammo_rockets;
-		self->s.v.weaponmodel = "progs/v_rock.mdl";
+		self->weaponmodel = "progs/v_rock.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_ROCKETS;
 		if (vw_enabled)
@@ -1591,7 +1666,7 @@ void W_SetCurrentAmmo()
 
 	case IT_ROCKET_LAUNCHER:
 		self->s.v.currentammo = self->s.v.ammo_rockets;
-		self->s.v.weaponmodel = "progs/v_rock2.mdl";
+		self->weaponmodel = "progs/v_rock2.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_ROCKETS;
 		if (vw_enabled)
@@ -1600,7 +1675,7 @@ void W_SetCurrentAmmo()
 
 	case IT_LIGHTNING:
 		self->s.v.currentammo = self->s.v.ammo_cells;
-		self->s.v.weaponmodel = "progs/v_light.mdl";
+		self->weaponmodel = "progs/v_light.mdl";
 		self->s.v.weaponframe = 0;
 		items |= IT_CELLS;
 		if (vw_enabled)
@@ -1611,9 +1686,9 @@ void W_SetCurrentAmmo()
 		self->s.v.currentammo = 0;
 
 		if ( k_ctf_custom_models )
-			self->s.v.weaponmodel = "progs/v_star.mdl";
+			self->weaponmodel = "progs/v_star.mdl";
 		else
-			self->s.v.weaponmodel = "progs/v_axe.mdl";
+			self->weaponmodel = "progs/v_axe.mdl";
 
 		self->s.v.weaponframe = 0;
 		if (vw_enabled)
@@ -1622,7 +1697,7 @@ void W_SetCurrentAmmo()
 
 	default:
 		self->s.v.currentammo = 0;
-		self->s.v.weaponmodel = "";
+		self->weaponmodel = "";
 		self->s.v.weaponframe = 0;
         	self->vw_index = 0;
 		break;
@@ -2332,7 +2407,7 @@ void W_WeaponFrame()
 
 	if ( isRACE() )
 	{
-		if ( self->ct == ctPlayer && !self->racer && race.status )
+		if ( self->ct == ctPlayer && !self->race_participant && race.status )
 		{
 		   	if ( self->s.v.button0 )
 		   		ChasecamToggleButton();

@@ -24,8 +24,12 @@
  */
 
 #include "g_local.h"
+#ifdef BOT_SUPPORT
+#include "fb_globals.h"
+#endif
 
 void	ClientObituary( gedict_t * e1, gedict_t * e2 );
+void    BotPlayerKilledEvent (gedict_t* targ, gedict_t* attacker, gedict_t* inflictor);
 void	bloodfest_killed_hook( gedict_t * killed, gedict_t * attacker );
 
 #define DEATHTYPE( _dt_, _dt_str_ ) #_dt_str_,
@@ -211,6 +215,10 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 {
 	gedict_t       *oself;
 
+#ifdef BOT_SUPPORT
+	BotPlayerKilledEvent (targ, attacker, inflictor);
+#endif
+
 	oself = self;
 	self = targ;
 
@@ -256,7 +264,7 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 	ClientObituary( self, attacker );
 
 	self->s.v.takedamage = DAMAGE_NO;
-	self->s.v.touch = ( func_t ) SUB_Null;
+	self->touch = ( func_t ) SUB_Null;
 	self->s.v.effects = 0;
 
 	monster_death_use();
@@ -267,15 +275,18 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 	self = oself;
 
 	// KTEAMS: check if sudden death is the case
-	Check_SD( targ );
+	if (!isHoonyModeAny())
+	{
+		Check_SD( targ );
 
-	// check fraglimit
-	if (	fraglimit
-		&& (   ( targ->s.v.frags >= fraglimit && targ->ct == ctPlayer )
-			|| ( attacker->s.v.frags >= fraglimit && attacker->ct == ctPlayer )
-		   )
-		)
-		EndMatch( 0 );
+		// check fraglimit
+		if ( fraglimit
+			&& (   ( targ->s.v.frags >= fraglimit && targ->ct == ctPlayer )
+				|| ( attacker->s.v.frags >= fraglimit && attacker->ct == ctPlayer )
+			   )
+			)
+			EndMatch( 0 );
+	}
 
 	if ( k_bloodfest )
 		bloodfest_killed_hook( targ, attacker );
@@ -285,7 +296,7 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 
 // qvm have some bugs/round problem as i get from SD-Angel, so this trick
 
-float newceil( float f )
+static float newceil( float f )
 {
 	return ceil(((int)(f*1000.0))/1000.0);
 }
@@ -302,7 +313,7 @@ float newceil( float f )
 void MidairDamageBonus(gedict_t *attacker, float midheight)
 {
 	attacker->ps.mid_total++;
-	G_bprint( 2, "%s got ", attacker->s.v.netname );
+	G_bprint( 2, "%s got ", attacker->netname );
 
 	if ( midheight > 1024 )
 	{
@@ -385,10 +396,10 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		return;
 
 	// can't damage other players in race
-	if ( isRACE() && ( attacker != targ ) )
-	{
-			if ( targ->ct == ctPlayer || attacker->ct == ctPlayer )
-				return;
+	if (isRACE() && (attacker != targ)) {
+		if (targ->ct == ctPlayer && attacker->ct == ctPlayer) {
+			return;
+		}
 	}
 
 	// ignore almost all damage in CA while coutdown
@@ -422,7 +433,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	// check for quad damage powerup on the attacker
 	// midair quad makes rockets fast, but no change to damage
 	if ( attacker->super_damage_finished > g_globalvars.time
-	     && strneq( inflictor->s.v.classname, "door" ) && dtSTOMP != targ->deathtype
+	     && strneq( inflictor->classname, "door" ) && dtSTOMP != targ->deathtype
 		 && !midair 
 	   )
 		damage *= ( deathmatch == 4 ? 8 : 4 ); // in dmm4 quad is octa actually
@@ -466,7 +477,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	{
 		inwater = ( ((int)targ->s.v.flags & FL_INWATER) && targ->s.v.waterlevel > 1 );
 
-		if ( streq( inflictor->s.v.classname, "rocket" ))
+		if ( streq( inflictor->classname, "rocket" ))
 			midheight = targ->s.v.origin[2] - inflictor->s.v.oldorigin[2];
 
 		rl_dmg = ( targ->ct == ctPlayer && dtRL == targ->deathtype );
@@ -600,7 +611,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		 	&& !strnull( attackerteam )
 		 	&& streq( targteam, attackerteam )
 		 	&& attacker->ct == ctPlayer
-		 	&& strneq( inflictor->s.v.classname, "door" )
+		 	&& strneq( inflictor->classname, "door" )
 		 	&& !TELEDEATH( targ ) // do telefrag damage in tp
 	   	)
 	   	{
@@ -653,21 +664,23 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	if ( save )
 	{
-		if (( streq( inflictor->s.v.classname, "worldspawn" ) || strnull( attacker->s.v.classname ))
-	        	|| ( targ->deathtype == dtWATER_DMG )
-	                || ( targ->deathtype == dtEXPLO_BOX )
-	                || ( targ->deathtype == dtFALL )
-	                || ( targ->deathtype == dtSQUISH )
-	                || ( targ->deathtype == dtCHANGELEVEL )
-	                || ( targ->deathtype == dtFIREBALL )
-	                || ( targ->deathtype == dtSLIME_DMG )
-	                || ( targ->deathtype == dtLAVA_DMG )
-	                || ( targ->deathtype == dtTRIGGER_HURT )
-		)
-				attackername = "world";
-		else
-			attackername = attacker->s.v.netname;
-			victimname = targ->s.v.netname;
+		if ((streq(inflictor->classname, "worldspawn") || strnull(attacker->classname))
+			|| (targ->deathtype == dtWATER_DMG)
+			|| (targ->deathtype == dtEXPLO_BOX)
+			|| (targ->deathtype == dtFALL)
+			|| (targ->deathtype == dtSQUISH)
+			|| (targ->deathtype == dtCHANGELEVEL)
+			|| (targ->deathtype == dtFIREBALL)
+			|| (targ->deathtype == dtSLIME_DMG)
+			|| (targ->deathtype == dtLAVA_DMG)
+			|| (targ->deathtype == dtTRIGGER_HURT)
+			) {
+			attackername = "world";
+		}
+		else {
+			attackername = attacker->netname;
+		}
+		victimname = targ->netname;
 
 		log_printf(
 			"\t\t<event>\n"
@@ -715,13 +728,13 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 		// Yawnmode: nails increases kickback
 		// - Molgrum
-		if ( k_yawnmode && streq( inflictor->s.v.classname, "spike" ) )
+		if ( k_yawnmode && streq( inflictor->classname, "spike" ) )
 			nailkick = 1.2;
 		else
 			nailkick = 1.0;
 
 		for ( i = 0; i < 3; i++ ) 
-			targ->s.v.velocity[i] += dir[i] * non_hdp_damage * c1 * nailkick;
+			targ->s.v.velocity[i] += dir[i] * non_hdp_damage * c1 * nailkick * ( midair && playerheight >= 45 ? ( 1 + ( playerheight - 45 ) / 64 ) : 1 );
 
 		if ( midair && playerheight < 45 )
 			targ->s.v.velocity[2] += dir[2] * non_hdp_damage * c2 * nailkick; // only for z component
@@ -730,7 +743,15 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		{
 			targ->s.v.flags = (int)targ->s.v.flags & ~FL_ONGROUND;		
 		}
+
+#ifdef BOT_SUPPORT
+		targ->fb.path_state |= AIR_ACCELERATION;
+#endif
 	}
+
+#ifdef BOT_SUPPORT
+	BotDamageInflictedEvent(attacker, targ);
+#endif
 
 	if ( match_in_progress == 2 && (int)cvar("k_dmgfrags") )
 	{
@@ -758,25 +779,27 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	{
 		targ->s.v.health -= take;
 
-//		G_bprint( 2, "%s %f\n", targ->s.v.classname, targ->s.v.health );
+//		G_bprint( 2, "%s %f\n", targ->classname, targ->s.v.health );
 
 		if ( take )
 		{
-			if (( streq( inflictor->s.v.classname, "worldspawn" ) || strnull( attacker->s.v.classname ))
-		        	|| ( targ->deathtype == dtWATER_DMG )
-		                || ( targ->deathtype == dtEXPLO_BOX )
-		                || ( targ->deathtype == dtFALL )
-		                || ( targ->deathtype == dtSQUISH )
-		                || ( targ->deathtype == dtCHANGELEVEL )
-		                || ( targ->deathtype == dtFIREBALL )
-		                || ( targ->deathtype == dtSLIME_DMG )
-		                || ( targ->deathtype == dtLAVA_DMG )
-		                || ( targ->deathtype == dtTRIGGER_HURT )
-			)
+			if ((streq(inflictor->classname, "worldspawn") || strnull(attacker->classname))
+				|| (targ->deathtype == dtWATER_DMG)
+				|| (targ->deathtype == dtEXPLO_BOX)
+				|| (targ->deathtype == dtFALL)
+				|| (targ->deathtype == dtSQUISH)
+				|| (targ->deathtype == dtCHANGELEVEL)
+				|| (targ->deathtype == dtFIREBALL)
+				|| (targ->deathtype == dtSLIME_DMG)
+				|| (targ->deathtype == dtLAVA_DMG)
+				|| (targ->deathtype == dtTRIGGER_HURT)
+				) {
 				attackername = "world";
-			else
-				attackername = attacker->s.v.netname;
-				victimname = targ->s.v.netname;
+			}
+			else {
+				attackername = attacker->netname;
+			}
+			victimname = targ->netname;
 
 			log_printf(
 				"\t\t<event>\n"
@@ -821,30 +844,65 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	// update damage stats like: give/taked/team damage
 	if ( attacker->ct == ctPlayer && targ->ct == ctPlayer )
 	{
+		int weapon = wpNONE;
+		switch (targ->deathtype)
+		{
+		case dtAXE:
+			weapon = wpAXE;
+			break;
+		case dtSG:
+			weapon = wpSG;
+			break;
+		case dtSSG:
+			weapon = wpSSG;
+			break;
+		case dtNG:
+			weapon = wpNG;
+			break;
+		case dtSNG:
+			weapon = wpSNG;
+			break;
+		case dtGL:
+			weapon = wpGL;
+			break;
+		case dtRL:
+			weapon = wpRL;
+			break;
+		case dtLG_BEAM:
+		case dtLG_DIS:
+			weapon = wpLG;
+			break;
+		}
+
 		if ( attacker == targ )
 		{
 			// self damage
-
 			attacker->ps.dmg_self += dmg_dealt;
 		}
 		else
 		{
 			int items = targ->s.v.items;
 
-			// damage to enemy weapon
-			if ( items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING) )
-			{
-				attacker->ps.dmg_eweapon += dmg_dealt;
-			}
-
 			if ( tp_num() && streq(attackerteam, targteam) )
 			{
 				attacker->ps.dmg_team += dmg_dealt;
+				attacker->ps.wpn[weapon].tdamage += dmg_dealt;
+
+				// damage to enemy weapon
+				if (items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING)) {
+					attacker->ps.dmg_tweapon += dmg_dealt;
+				}
 			}
 			else 
 			{
 				attacker->ps.dmg_g += dmg_dealt;
 				targ->ps.dmg_t     += dmg_dealt;
+				attacker->ps.wpn[weapon].edamage += dmg_dealt;
+
+				// damage to enemy weapon
+				if (items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING)) {
+					attacker->ps.dmg_eweapon += dmg_dealt;
+				}
 			}
 
 			// real hits
@@ -884,6 +942,10 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 		targ->s.v.frags -= 3;
 	}
 
+#ifdef BOT_SUPPORT
+	FrogbotSetHealthArmour(targ);
+#endif
+
  	// if targed killed, do appropriate action and return
 	if ( ISDEAD( targ ) )
 	{
@@ -908,6 +970,56 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	self = oldself;
 }
 
+void T_RadiusDamageApply(gedict_t * inflictor, gedict_t * attacker, gedict_t* head, float damage, deathType_t dtype)
+{
+	float           points;
+	vec3_t          org;
+
+	if ( head->s.v.takedamage )
+	{
+		org[0] = inflictor->s.v.origin[0] - ( head->s.v.origin[0] + ( head->s.v.mins[0] + head->s.v.maxs[0] ) * 0.5 );
+		org[1] = inflictor->s.v.origin[1] - ( head->s.v.origin[1] + ( head->s.v.mins[1] + head->s.v.maxs[1] ) * 0.5 );
+		org[2] = inflictor->s.v.origin[2] - ( head->s.v.origin[2] + ( head->s.v.mins[2] + head->s.v.maxs[2] ) * 0.5 );
+		points = 0.5 * vlen( org );
+
+		if ( points < 0 )
+			points = 0;
+
+		points = damage - points;
+
+		if ( head == attacker )
+			points = points * 0.5;
+		// no out of water discharge damage if k_dis 2
+		else if ( cvar("k_dis") == 2 && dtLG_DIS == dtype && !head->s.v.waterlevel )
+			points = 0;
+
+		if ( points > 0 )
+		{
+			if ( CanDamage( head, inflictor ) )
+			{
+				head->deathtype = dtype;
+
+				dmg_is_splash = 1; // mark damage as splash
+
+				if ( cvar("k_instagib") || isRACE() ) // in instagib splash applied to inflictor only, for coil jump
+				{
+					if ( head == attacker )
+						T_Damage( head, inflictor, attacker, points );
+				}
+				else
+				{
+					// shamblers only take half damage from rocket/grenade explosions
+					if ( streq(head->classname, "monster_shambler") && !cvar("k_bloodfest") )
+						points = points / 2;
+					T_Damage( head, inflictor, attacker, points );
+				}
+
+				dmg_is_splash = 0; // unmark splash
+			}
+		}
+	}
+}
+
 /*
 ============
 T_RadiusDamage
@@ -915,9 +1027,14 @@ T_RadiusDamage
 */
 void T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage, gedict_t * ignore, deathType_t dtype )
 {
-	float           points;
 	gedict_t       *head;
-	vec3_t          org;
+
+	if (isRACE()) {
+		attacker->s.v.solid = SOLID_BBOX;
+		T_RadiusDamageApply(inflictor, attacker, attacker, damage, dtype);
+		attacker->s.v.solid = SOLID_NOT;
+		return;
+	}
 
 	head = trap_findradius( world, inflictor->s.v.origin, damage + 40 );
 
@@ -925,49 +1042,7 @@ void T_RadiusDamage( gedict_t * inflictor, gedict_t * attacker, float damage, ge
 	{
 		if ( head != ignore )
 		{
-			if ( head->s.v.takedamage )
-			{
-				org[0] = inflictor->s.v.origin[0] - ( head->s.v.origin[0] + ( head->s.v.mins[0] + head->s.v.maxs[0] ) * 0.5 );
-				org[1] = inflictor->s.v.origin[1] - ( head->s.v.origin[1] + ( head->s.v.mins[1] + head->s.v.maxs[1] ) * 0.5 );
-				org[2] = inflictor->s.v.origin[2] - ( head->s.v.origin[2] + ( head->s.v.mins[2] + head->s.v.maxs[2] ) * 0.5 );
-				points = 0.5 * vlen( org );
-
-				if ( points < 0 )
-					points = 0;
-
-				points = damage - points;
-
-				if ( head == attacker )
-					points = points * 0.5;
-				// no out of water discharge damage if k_dis 2
-				else if ( cvar("k_dis") == 2 && dtLG_DIS == dtype && !head->s.v.waterlevel )
-					points = 0;
-
-				if ( points > 0 )
-				{
-					if ( CanDamage( head, inflictor ) )
-					{
-						head->deathtype = dtype;
-
-						dmg_is_splash = 1; // mark damage as splash
-
-						if ( cvar("k_instagib") || isRACE() ) // in instagib splash applied to inflictor only, for coil jump
-						{
-							if ( head == attacker )
-								T_Damage( head, inflictor, attacker, points );
-						}
-						else
-						{
-							// shamblers only take half damage from rocket/grenade explosions
-							if ( streq(head->s.v.classname, "monster_shambler") && !cvar("k_bloodfest") )
-								points = points / 2;
-							T_Damage( head, inflictor, attacker, points );
-						}
-
-						dmg_is_splash = 0; // unmark splash
-					}
-				}
-			}
+			T_RadiusDamageApply( inflictor, attacker, head, damage, dtype );
 		}
 		head = trap_findradius( head, inflictor->s.v.origin, damage + 40 );
 	}

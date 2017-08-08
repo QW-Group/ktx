@@ -29,19 +29,47 @@ void            SP_item_artifact_invisibility();
 void            SP_item_artifact_super_damage();
 void			SP_item_artifact_invulnerability();
 
-void TookWeaponHandler( gedict_t *p, int new_wp );
+void TookWeaponHandler( gedict_t *p, int new_wp, qbool from_backpack );
+void BotsBackpackTouchedNonPlayer (gedict_t* backpack, gedict_t* entity);
+void BotsBackpackDropped (gedict_t* self, gedict_t* pack);
+void BotsPowerupTouchedNonPlayer (gedict_t* powerup, gedict_t* touch_ent);
+void BotsPowerupDropped (gedict_t* player, gedict_t* powerup);
 
-#define AUTOTRACK_POWERUPS_PREDICT_TIME 2
+static qbool ItemTouched(gedict_t* item, gedict_t* player)
+{
+#ifdef BOT_SUPPORT
+	return (self->fb.item_touch && self->fb.item_touch(item, player));
+#else
+	return false;
+#endif
+}
+
+static void ItemTaken(gedict_t* item, gedict_t* player)
+{
+	TeamplayEventItemTaken(player, item);
+
+#ifdef BOT_SUPPORT
+	if (self->fb.item_taken) {
+		self->fb.item_taken(item, player);
+	}
+#endif
+}
 
 void SUB_regen()
 {
 	if ( !deathmatch && skill < 3 )
 		return; // do not respawn items in deathmatch 0 except on nightmare skill
 
-	self->s.v.model = self->mdl;	// restore original model
+	self->model = self->mdl;	// restore original model
 	self->s.v.solid = SOLID_TRIGGER;	// allow it to be touched again
 	sound( self, CHAN_VOICE, "items/itembk2.wav", 1, ATTN_NORM );	// play respawn sound
 	setorigin( self, PASSVEC3( self->s.v.origin ) );
+
+#ifdef BOT_SUPPORT
+	if (self->fb.item_respawned) {
+		self->fb.item_respawned(self);
+	}
+#endif
 }
 
 void SUB_regen_powerups()
@@ -51,7 +79,7 @@ void SUB_regen_powerups()
 	// attempt to predict player which awating such powerup
 	ktpro_autotrack_predict_powerup( );
 
-	self->s.v.think = ( func_t ) SUB_regen;
+	self->think = ( func_t ) SUB_regen;
 	self->s.v.nextthink = g_globalvars.time + AUTOTRACK_POWERUPS_PREDICT_TIME;
 }
 
@@ -60,7 +88,7 @@ void PlaceItem()
 	self->s.v.solid = SOLID_TRIGGER;
 	self->s.v.movetype = MOVETYPE_TOSS;
 	self->s.v.flags = FL_ITEM;
-	self->mdl = strnull( self->s.v.model ) ? self->mdl : self->s.v.model; // save .mdl if .model is not init
+	self->mdl = strnull( self->model ) ? self->mdl : self->model; // save .mdl if .model is not init
 	self->mdl = strnull( self->mdl ) ? "" : self->mdl; // init .mdl with empty string if not set
 
 	SetVector( self->s.v.velocity, 0, 0, 0 );
@@ -83,7 +111,7 @@ void PlaceItem()
 			|| (((int)self->s.v.items & IT_QUAD) && !cvar("k_pow_q"))
 		)
 		{
-			self->s.v.model = "";
+			self->model = "";
 			self->s.v.solid = SOLID_NOT;
 		}
 	}
@@ -103,14 +131,14 @@ void PlaceItemIngame()
 	self->s.v.movetype = MOVETYPE_TOSS;
 	self->s.v.flags = FL_ITEM;
 
-	self->mdl = self->s.v.model; // qqshka - save model ASAP
+	self->mdl = self->model; // qqshka - save model ASAP
 
 	self->s.v.velocity[2] = 300;
 	self->s.v.velocity[0] = -100 + ( g_random() * 200 );
 	self->s.v.velocity[1] = -100 + ( g_random() * 200 );
 
 	self->s.v.nextthink = self->cnt; // remove it with the time left on it
-	self->s.v.think = ( func_t ) SUB_Remove;
+	self->think = ( func_t ) SUB_Remove;
 }
 
 /*
@@ -122,12 +150,12 @@ Sets the clipping size and plants the object on the floor
 */
 void StartItem()
 {
-//	G_bprint(2, "StartItem: %s\n", self->s.v.classname);
+//	G_bprint(2, "StartItem: %s\n", self->classname);
 
-	self->mdl = self->s.v.model; // qqshka - save model ASAP
+	self->mdl = self->model; // qqshka - save model ASAP
 
 	self->s.v.nextthink = g_globalvars.time + 0.2;	// items start after other solids
-	self->s.v.think = ( func_t ) PlaceItem;
+	self->think = ( func_t ) PlaceItem;
 }
 
 /*
@@ -167,7 +195,7 @@ float T_Heal( gedict_t * e, float healamount, float ignore )
 
 	real_healamount = e->s.v.health - real_healamount; // so heal amount is current - old health
 
-	playername = e->s.v.netname;
+	playername = e->netname;
 
 	/*
 	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"health_%d\" player=\"%s\" value=\"%d\"/>\n",
@@ -195,7 +223,7 @@ float T_Heal( gedict_t * e, float healamount, float ignore )
 }
 
 void            health_touch();
-void            item_megahealth_rot();
+void            item_megahealth_rot(void);
 
 /*QUAKED item_health (.3 .3 1) (0 0 0) (32 32 32) rotten megahealth
 Health box. Normally gives 25 points.
@@ -207,26 +235,28 @@ one point per second.
 
 void SP_item_health()
 {
-	self->s.v.touch = ( func_t ) health_touch;
+	self->touch = ( func_t ) health_touch;
+	self->tp_flags = it_health;
 
 	if ( ( int ) self->s.v.spawnflags & H_ROTTEN )
 	{
 		setmodel( self, "maps/b_bh10.bsp" );
-		self->s.v.noise = "items/r_item1.wav";
+		self->noise = "items/r_item1.wav";
 		self->healamount = 15;
 		self->healtype = 0;
 	}
 	else if ( ( int ) self->s.v.spawnflags & H_MEGA )
 	{
 		setmodel( self, "maps/b_bh100.bsp" );
-		self->s.v.noise = "items/r_item2.wav";
+		self->noise = "items/r_item2.wav";
 		self->healamount = 100;
 		self->healtype = 2;
+		self->tp_flags = it_mh;
 	}
 	else
 	{
 		setmodel( self, "maps/b_bh25.bsp" );
-		self->s.v.noise = "items/health1.wav";
+		self->noise = "items/health1.wav";
 		self->healamount = 25;
 		self->healtype = 1;
 	}
@@ -241,6 +271,9 @@ void health_touch()
 		return;
 
 	if ( ISDEAD( other ) )
+		return;
+
+	if (ItemTouched (self, other))
 		return;
 
 	if ( deathmatch == 4 )
@@ -274,11 +307,11 @@ void health_touch()
 	G_sprint( other, PRINT_LOW, "You receive %.0f health\n", self->healamount );
 
 // health touch sound
-	sound( other, CHAN_ITEM, self->s.v.noise, 1, ATTN_NORM );
+	sound( other, CHAN_ITEM, self->noise, 1, ATTN_NORM );
 
 	stuffcmd( other, "bf\n" );
 
-	self->s.v.model = "";
+	self->model = "";
 	self->s.v.solid = SOLID_NOT;
 
 	// Megahealth = rot down the player's super health
@@ -288,7 +321,7 @@ void health_touch()
 		if ( deathmatch != 4 )
 		{
 			self->s.v.nextthink = g_globalvars.time + 5;
-			self->s.v.think = ( func_t ) item_megahealth_rot;
+			self->think = ( func_t ) item_megahealth_rot;
 		}
 		self->s.v.owner = EDICT_TO_PROG( other );
 	} else
@@ -296,15 +329,17 @@ void health_touch()
 		if ( deathmatch != 2 )	// deathmatch 2 is the silly old rules
 		{
 			self->s.v.nextthink = g_globalvars.time + 20;
-			self->s.v.think = ( func_t ) SUB_regen;
+			self->think = ( func_t ) SUB_regen;
 		}
 	}
+
+	ItemTaken (self, other);
 
 	activator = other;
 	SUB_UseTargets();	// fire all targets / killtargets
 }
 
-void item_megahealth_rot()
+void item_megahealth_rot(void)
 {
 	other = PROG_TO_EDICT( self->s.v.owner );
 
@@ -314,6 +349,11 @@ void item_megahealth_rot()
 			other->s.v.health -= 1;
 
 		self->s.v.nextthink = g_globalvars.time + 1;
+#ifdef BOT_SUPPORT
+		if (self->fb.item_affect) {
+			self->fb.item_affect (self, other);
+		}
+#endif
 		return;
 	}
 
@@ -324,8 +364,14 @@ void item_megahealth_rot()
 	if ( deathmatch != 2 )	// deathmatch 2 is silly old rules
 	{
 		self->s.v.nextthink = g_globalvars.time + 20;
-		self->s.v.think = ( func_t ) SUB_regen;
+		self->think = ( func_t ) SUB_regen;
 	}
+
+#ifdef BOT_SUPPORT
+	if (self->fb.item_affect) {
+		self->fb.item_affect (self, other);
+	}
+#endif
 }
 
 /*
@@ -349,6 +395,10 @@ void armor_touch()
 	if ( other->ct != ctPlayer )
 		return;
 
+	if (ItemTouched (self, other)) {
+		return;
+	}
+
 	if ( match_in_progress != 2 || !readytostart() )
         return;
 
@@ -356,21 +406,21 @@ void armor_touch()
 		if ( other->invincible_time > 0 )
 			return;
 
-	if ( !strcmp( self->s.v.classname, "item_armor1" ) )
+	if ( !strcmp( self->classname, "item_armor1" ) )
 	{
 		armor = &(other->ps.itm[itGA].tooks);
 		type = (k_yawnmode ? 0.4 : 0.3); // Yawnmode: changed armor protection
 		value = 100;
 		bit = IT_ARMOR1;
 	}
-	else if ( !strcmp( self->s.v.classname, "item_armor2" ) )
+	else if ( !strcmp( self->classname, "item_armor2" ) )
 	{
 		armor = &(other->ps.itm[itYA].tooks);
 		type = (k_yawnmode ? 0.6 : 0.6); // Yawnmode: changed armor protection
 		value = 150;
 		bit = IT_ARMOR2;
 	}
-	else if ( !strcmp( self->s.v.classname, "item_armorInv" ) )
+	else if ( !strcmp( self->classname, "item_armorInv" ) )
 	{
 		armor = &(other->ps.itm[itRA].tooks);
 		type = (k_yawnmode ? 0.8 : 0.8); // Yawnmode: changed armor protection
@@ -386,7 +436,7 @@ void armor_touch()
 	if ( other->s.v.armortype * other->s.v.armorvalue + 1.0e-6 >= type * value )
 		return;
 
-	mi_print(other, bit, va("%s got %s", getname(other), self->s.v.netname));
+	mi_print(other, bit, va("%s got %s", getname(other), self->netname));
 
 	if ( armor )
 		(*armor)++;
@@ -399,19 +449,19 @@ void armor_touch()
 		-( ( int ) other->s.v.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) ) + bit;
 
 	self->s.v.solid = SOLID_NOT;
-	self->s.v.model = "";
+	self->model = "";
 	if ( deathmatch != 2 )
 		self->s.v.nextthink = g_globalvars.time + 20;
-	self->s.v.think = ( func_t ) SUB_regen;
+	self->think = ( func_t ) SUB_regen;
 
 	real_value = value - real_value;
 
-	playername = other->s.v.netname;
+	playername = other->netname;
 
 	/*
 	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%d\" />\n",
 				g_globalvars.time - match_start_time,
-				self->s.v.classname,
+				self->classname,
 				cleantext(playername),
 				(int)real_value );
 	*/
@@ -425,18 +475,20 @@ void armor_touch()
 		"\t\t\t</pick_mapitem>\n"
 		"\t\t</event>\n",
 		g_globalvars.time - match_start_time,
-		self->s.v.classname,
+		self->classname,
 		cleantext(playername),
 		(int)real_value
 	);
 
-	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
+	G_sprint( other, PRINT_LOW, "You got the %s\n", self->netname );
 // armor touch sound
 	sound( other, CHAN_AUTO, "items/armor1.wav", 1, ATTN_NORM );
 	stuffcmd( other, "bf\n" );
 
 	activator = other;
 	SUB_UseTargets();	// fire all targets / killtargets
+
+	ItemTaken (self, other);
 }
 
 /*QUAKED item_armor1 (0 .5 .8) (-16 -16 0) (16 16 32)
@@ -444,10 +496,11 @@ void armor_touch()
 
 void SP_item_armor1()
 {
-	self->s.v.touch = ( func_t ) armor_touch;
+	self->touch = ( func_t ) armor_touch;
 	setmodel( self, "progs/armor.mdl" );
-	self->s.v.netname = "Green Armor";
+	self->netname = "Green Armor";
 	self->s.v.skin = 0;
+	self->tp_flags = it_ga;
 	setsize( self, -16, -16, 0, 16, 16, 56 );
 	StartItem();
 }
@@ -457,10 +510,11 @@ void SP_item_armor1()
 
 void SP_item_armor2()
 {
-	self->s.v.touch = ( func_t ) armor_touch;
+	self->touch = ( func_t ) armor_touch;
 	setmodel( self, "progs/armor.mdl" );
-	self->s.v.netname = "Yellow Armor";
+	self->netname = "Yellow Armor";
 	self->s.v.skin = 1;
+	self->tp_flags = it_ya;
 	setsize( self, -16, -16, 0, 16, 16, 56 );
 	StartItem();
 }
@@ -470,10 +524,11 @@ void SP_item_armor2()
 
 void SP_item_armorInv()
 {
-	self->s.v.touch = ( func_t ) armor_touch;
+	self->touch = ( func_t ) armor_touch;
 	setmodel( self, "progs/armor.mdl" );
-	self->s.v.netname = "Red Armor";
+	self->netname = "Red Armor";
 	self->s.v.skin = 2;
+	self->tp_flags = it_ra;
 	setsize( self, -16, -16, 0, 16, 16, 56 );
 	StartItem();
 }
@@ -560,6 +615,9 @@ void DoWeaponChange( int new, qbool backpack )
 {
 	int w_switch = iKey( self, backpack ? "b_switch" : "w_switch" );
 
+	if (self->isBot)
+		return;
+
 	if ( !w_switch )
 		w_switch = 8;
 
@@ -599,6 +657,9 @@ void weapon_touch()
 	if ( other->ct != ctPlayer )
 		return;
 
+	if (ItemTouched (self, other))
+		return;
+
 	if ( match_in_progress != 2 || !readytostart() )
         return;
 	
@@ -607,7 +668,7 @@ void weapon_touch()
 	else
 		leave = 0;
 
-	if ( !strcmp( self->s.v.classname, "weapon_nailgun" ) )
+	if ( !strcmp( self->classname, "weapon_nailgun" ) )
 	{
 		if ( leave && ( ( int ) other->s.v.items & IT_NAILGUN ) )
 			return;
@@ -616,7 +677,7 @@ void weapon_touch()
 		new = IT_NAILGUN;
 		other->s.v.ammo_nails += 30;
 	}
-	else if ( !strcmp( self->s.v.classname, "weapon_supernailgun" ) )
+	else if ( !strcmp( self->classname, "weapon_supernailgun" ) )
 	{
 		if ( leave && ( ( int ) other->s.v.items & IT_SUPER_NAILGUN ) )
 			return;
@@ -625,7 +686,7 @@ void weapon_touch()
 		new = IT_SUPER_NAILGUN;
 		other->s.v.ammo_nails += 30;
 	}
-	else if ( !strcmp( self->s.v.classname, "weapon_supershotgun" ) )
+	else if ( !strcmp( self->classname, "weapon_supershotgun" ) )
 	{
 		if ( leave && ( ( int ) other->s.v.items & IT_SUPER_SHOTGUN ) )
 			return;
@@ -634,7 +695,7 @@ void weapon_touch()
 		new = IT_SUPER_SHOTGUN;
 		other->s.v.ammo_shells += 5;
 	}
-	else if ( !strcmp( self->s.v.classname, "weapon_rocketlauncher" ) )
+	else if ( !strcmp( self->classname, "weapon_rocketlauncher" ) )
 	{
 		if ( leave && ( ( int ) other->s.v.items & IT_ROCKET_LAUNCHER ) )
 			return;
@@ -651,7 +712,7 @@ void weapon_touch()
 			first_rl_taken = true;
 		}
 	}
-	else if ( !strcmp( self->s.v.classname, "weapon_grenadelauncher" ) )
+	else if ( !strcmp( self->classname, "weapon_grenadelauncher" ) )
 	{
 		if ( leave && ( ( int ) other->s.v.items & IT_GRENADE_LAUNCHER ) )
 			return;
@@ -660,7 +721,7 @@ void weapon_touch()
 		new = IT_GRENADE_LAUNCHER;
 		other->s.v.ammo_rockets += 5;
 	}
-	else if ( !strcmp( self->s.v.classname, "weapon_lightning" ) )
+	else if ( !strcmp( self->classname, "weapon_lightning" ) )
 	{
 		if ( leave && ( ( int ) other->s.v.items & IT_LIGHTNING ) )
 			return;
@@ -672,35 +733,35 @@ void weapon_touch()
 	else
 		G_Error( "weapon_touch: unknown classname" );
 
-	TookWeaponHandler( other, new );
-	mi_print(other, new, va("%s got %s", getname(other), self->s.v.netname));
+	TookWeaponHandler( other, new, false );
+	mi_print(other, new, va("%s got %s", getname(other), self->netname));
 
-	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
+	G_sprint( other, PRINT_LOW, "You got the %s\n", self->netname );
 // weapon touch sound
 	sound( other, CHAN_AUTO, "weapons/pkup.wav", 1, ATTN_NORM );
 	stuffcmd( other, "bf\n" );
 
 	bound_other_ammo();
 
-	if ( !strcmp( self->s.v.classname, "weapon_nailgun" ) )
+	if ( !strcmp( self->classname, "weapon_nailgun" ) )
 		real_ammo = other->s.v.ammo_nails - hadammo;
-	else if ( !strcmp( self->s.v.classname, "weapon_supernailgun" ) )
+	else if ( !strcmp( self->classname, "weapon_supernailgun" ) )
 		real_ammo = other->s.v.ammo_nails - hadammo;
-	else if ( !strcmp( self->s.v.classname, "weapon_supershotgun" ) )
+	else if ( !strcmp( self->classname, "weapon_supershotgun" ) )
 		real_ammo = other->s.v.ammo_shells - hadammo;
-	else if ( !strcmp( self->s.v.classname, "weapon_rocketlauncher" ) )
+	else if ( !strcmp( self->classname, "weapon_rocketlauncher" ) )
 		real_ammo = other->s.v.ammo_rockets - hadammo;
-	else if ( !strcmp( self->s.v.classname, "weapon_grenadelauncher" ) )
+	else if ( !strcmp( self->classname, "weapon_grenadelauncher" ) )
 		real_ammo = other->s.v.ammo_rockets - hadammo;
-	else if ( !strcmp( self->s.v.classname, "weapon_lightning" ) )
+	else if ( !strcmp( self->classname, "weapon_lightning" ) )
 		real_ammo = other->s.v.ammo_cells - hadammo;
 
-	playername = other->s.v.netname;
+	playername = other->netname;
 
 	/*
 	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%d\" />\n",
 				g_globalvars.time - match_start_time,
-				self->s.v.classname,
+				self->classname,
 				cleantext(playername),
 				real_ammo );
 	*/
@@ -714,7 +775,7 @@ void weapon_touch()
 		"\t\t\t</pick_mapitem>\n"
 		"\t\t</event>\n",
 		g_globalvars.time - match_start_time,
-		self->s.v.classname,
+		self->classname,
 		cleantext(playername),
 		real_ammo
 	);
@@ -729,20 +790,24 @@ void weapon_touch()
 
 	self = stemp;
 
-	if ( leave )
+	if (leave) {
+		ItemTaken (self, other);
 		return;
+	}
 
 	if ( deathmatch != 3 || deathmatch != 5 )
 	{
 		// remove it in single player, or setup for respawning in deathmatch
-		self->s.v.model = "";
+		self->model = "";
 		self->s.v.solid = SOLID_NOT;
 		if ( deathmatch != 2 )
 			self->s.v.nextthink = g_globalvars.time + 30;
-		self->s.v.think = ( func_t ) SUB_regen;
+		self->think = ( func_t ) SUB_regen;
 	}
 	activator = other;
 	SUB_UseTargets();	// fire all targets / killtargets
+
+	ItemTaken (self, other);
 }
 
 /*QUAKED weapon_supershotgun (0 .5 .8) (-16 -16 0) (16 16 32)
@@ -753,8 +818,9 @@ void SP_weapon_supershotgun()
 	setmodel( self, "progs/g_shot.mdl" );
 
 	self->s.v.weapon = IT_SUPER_SHOTGUN;
-	self->s.v.netname = "Double-barrelled Shotgun";
-	self->s.v.touch = ( func_t ) weapon_touch;
+	self->netname = "Double-barrelled Shotgun";
+	self->touch = ( func_t ) weapon_touch;
+	self->tp_flags = it_ssg;
 
 	setsize( self, -16, -16, 0, 16, 16, 56 );
 
@@ -769,11 +835,12 @@ void SP_weapon_nailgun()
 	setmodel( self, "progs/g_nail.mdl" );
 
 	self->s.v.weapon = IT_NAILGUN;
-	self->s.v.netname = "nailgun";
-	self->s.v.touch = ( func_t ) weapon_touch;
+	self->netname = "nailgun";
+	self->touch = ( func_t ) weapon_touch;
+	self->tp_flags = it_ng;
 
 	setsize( self, -16, -16, 0, 16, 16, 56 );
-	
+
 	StartItem();
 }
 
@@ -785,8 +852,9 @@ void SP_weapon_supernailgun()
 	setmodel( self, "progs/g_nail2.mdl" );
 
 	self->s.v.weapon = IT_SUPER_NAILGUN;
-	self->s.v.netname = "Super Nailgun";
-	self->s.v.touch = ( func_t ) weapon_touch;
+	self->netname = "Super Nailgun";
+	self->touch = ( func_t ) weapon_touch;
+	self->tp_flags = it_sng;
 
 	setsize( self, -16, -16, 0, 16, 16, 56 );
 
@@ -802,8 +870,9 @@ void SP_weapon_grenadelauncher()
 	setmodel( self, "progs/g_rock.mdl" );
 
 	self->s.v.weapon = 3;
-	self->s.v.netname = "Grenade Launcher";
-	self->s.v.touch = ( func_t ) weapon_touch;
+	self->netname = "Grenade Launcher";
+	self->touch = ( func_t ) weapon_touch;
+	self->tp_flags = it_gl;
 
 	setsize( self, -16, -16, 0, 16, 16, 56 );
 
@@ -818,8 +887,9 @@ void SP_weapon_rocketlauncher()
 	setmodel( self, "progs/g_rock2.mdl" );
 
 	self->s.v.weapon = 3;
-	self->s.v.netname = "Rocket Launcher";
-	self->s.v.touch = ( func_t ) weapon_touch;
+	self->netname = "Rocket Launcher";
+	self->touch = ( func_t ) weapon_touch;
+	self->tp_flags = it_rl;
 
 	setsize( self, -16, -16, 0, 16, 16, 56 );
 
@@ -835,8 +905,9 @@ void SP_weapon_lightning()
 	setmodel( self, "progs/g_light.mdl" );
 
 	self->s.v.weapon = 3;
-	self->s.v.netname = "Thunderbolt";
-	self->s.v.touch = ( func_t ) weapon_touch;
+	self->netname = "Thunderbolt";
+	self->touch = ( func_t ) weapon_touch;
+	self->tp_flags = it_lg;
 
 	setsize( self, -16, -16, 0, 16, 16, 56 );
 
@@ -865,7 +936,10 @@ void ammo_touch()
 	if ( other->ct != ctPlayer )
 		return;
 
-    if ( match_in_progress != 2 || !readytostart() )
+	if (ItemTouched (self, other))
+		return;
+
+	if ( match_in_progress != 2 || !readytostart() )
         return;
 
 // if the player was using his best weapon, change up to the new one if better          
@@ -921,12 +995,12 @@ void ammo_touch()
 	else if ( weapon == 4 )
 		real_ammo = other->s.v.ammo_cells - real_ammo;
 
-	playername = other->s.v.netname;
+	playername = other->netname;
 
 	/*
 	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%d\" />\n",
 				g_globalvars.time - match_start_time,
-				self->s.v.classname,
+				self->classname,
 				cleantext(playername),
 				real_ammo );
 	*/
@@ -940,12 +1014,12 @@ void ammo_touch()
 		"\t\t\t</pick_mapitem>\n"
 		"\t\t</event>\n",
 		g_globalvars.time - match_start_time,
-		self->s.v.classname,
+		self->classname,
 		cleantext(playername),
 		real_ammo
 	);
 
-	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
+	G_sprint( other, PRINT_LOW, "You got the %s\n", self->netname );
 // ammo touch sound
 	sound( other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM );
 	stuffcmd( other, "bf\n" );
@@ -971,7 +1045,7 @@ void ammo_touch()
 	self = stemp;
 
 // remove it in single player, or setup for respawning in deathmatch
-	self->s.v.model = "";
+	self->model = "";
 	self->s.v.solid = SOLID_NOT;
 	if ( deathmatch != 2 )
 		self->s.v.nextthink = g_globalvars.time + 30;
@@ -981,7 +1055,8 @@ void ammo_touch()
 	if ( deathmatch == 3 || deathmatch == 5 )
 		self->s.v.nextthink = g_globalvars.time + 15;
 
-	self->s.v.think = ( func_t ) SUB_regen;
+	self->think = ( func_t ) SUB_regen;
+	ItemTaken (self, other);
 
 	activator = other;
 	SUB_UseTargets();	// fire all targets / killtargets
@@ -997,7 +1072,7 @@ void ammo_touch()
 
 void SP_item_shells()
 {
-	self->s.v.touch = ( func_t ) ammo_touch;
+	self->touch = ( func_t ) ammo_touch;
 
 	if ( ( int ) ( self->s.v.spawnflags ) & WEAPON_BIG2 )
 	{
@@ -1011,8 +1086,9 @@ void SP_item_shells()
 	}
 
 	self->s.v.weapon = 1;
-	self->s.v.netname = "shells";
-	self->s.v.classname = "item_shells";
+	self->netname = "shells";
+	self->classname = "item_shells";
+	self->tp_flags = it_shells;
 
 	setsize( self, 0, 0, 0, 32, 32, 56 );
 	StartItem();
@@ -1023,9 +1099,9 @@ void SP_item_shells()
 
 void SP_item_spikes()
 {
-	qbool old_style = streq(self->s.v.classname, "item_weapon");
+	qbool old_style = streq(self->classname, "item_weapon");
 
-	self->s.v.touch = ( func_t ) ammo_touch;
+	self->touch = ( func_t ) ammo_touch;
 
 	if ( ( int ) ( self->s.v.spawnflags ) & WEAPON_BIG2 )
 	{
@@ -1038,8 +1114,9 @@ void SP_item_spikes()
 		self->aflag = (old_style ? 20 : 25);
 	}
 	self->s.v.weapon = 2;
-	self->s.v.netname = (old_style ? "spikes" : "nails"); // hehe, different message when u pick different nails ammo
-	self->s.v.classname = "item_spikes";
+	self->netname = (old_style ? "spikes" : "nails"); // hehe, different message when u pick different nails ammo
+	self->classname = "item_spikes";
+	self->tp_flags = it_nails;
 
 	setsize( self, 0, 0, 0, 32, 32, 56 );
 	StartItem();
@@ -1050,7 +1127,7 @@ void SP_item_spikes()
 
 void SP_item_rockets()
 {
-	self->s.v.touch = ( func_t ) ammo_touch;
+	self->touch = ( func_t ) ammo_touch;
 
 	if ( ( int ) ( self->s.v.spawnflags ) & WEAPON_BIG2 )
 	{
@@ -1063,8 +1140,9 @@ void SP_item_rockets()
 		self->aflag = 5;
 	}
 	self->s.v.weapon = 3;
-	self->s.v.netname = "rockets";
-	self->s.v.classname = "item_rockets";
+	self->netname = "rockets";
+	self->classname = "item_rockets";
+	self->tp_flags = it_rockets;
 
 	setsize( self, 0, 0, 0, 32, 32, 56 );
 	StartItem();
@@ -1076,7 +1154,7 @@ void SP_item_rockets()
 
 void SP_item_cells()
 {
-	self->s.v.touch = ( func_t ) ammo_touch;
+	self->touch = ( func_t ) ammo_touch;
 
 	if ( ( int ) ( self->s.v.spawnflags ) & WEAPON_BIG2 )
 	{
@@ -1090,8 +1168,9 @@ void SP_item_cells()
 	}
 
 	self->s.v.weapon = 4;
-	self->s.v.netname = "cells";
-	self->s.v.classname = "item_cells";
+	self->netname = "cells";
+	self->classname = "item_cells";
+	self->tp_flags = it_cells;
 
 	setsize( self, 0, 0, 0, 32, 32, 56 );
 	StartItem();
@@ -1157,12 +1236,12 @@ void key_touch()
 	if ( match_in_progress != 2 || !readytostart() )
         return;
 
-	playername = other->s.v.netname;
+	playername = other->netname;
 
 	/*
 	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%d\" />\n",
 				g_globalvars.time - match_start_time,
-				self->s.v.classname,
+				self->classname,
 				cleantext(playername),
 				0 );
 	*/
@@ -1176,21 +1255,21 @@ void key_touch()
 		"\t\t\t</pick_mapitem>\n"
 		"\t\t</event>\n",
 		g_globalvars.time - match_start_time,
-		self->s.v.classname,
+		self->classname,
 		cleantext(playername),
 		0
 	);
 
-	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
+	G_sprint( other, PRINT_LOW, "You got the %s\n", self->netname );
 
-	sound( other, CHAN_ITEM, self->s.v.noise, 1, ATTN_NORM );
+	sound( other, CHAN_ITEM, self->noise, 1, ATTN_NORM );
 	stuffcmd( other, "bf\n" );
 	other->s.v.items = ( int ) other->s.v.items | ( int ) self->s.v.items;
 
 	if ( !coop )
 	{
 		self->s.v.solid = SOLID_NOT;
-		self->s.v.model = "";
+		self->model = "";
 	}
 
 	activator = other;
@@ -1203,17 +1282,17 @@ void key_setsounds()
 	if ( world->worldtype == 0 )
 	{
 		trap_precache_sound( "misc/medkey.wav" );
-		self->s.v.noise = "misc/medkey.wav";
+		self->noise = "misc/medkey.wav";
 	}
 	if ( world->worldtype == 1 )
 	{
 		trap_precache_sound( "misc/runekey.wav" );
-		self->s.v.noise = "misc/runekey.wav";
+		self->noise = "misc/runekey.wav";
 	}
 	if ( world->worldtype == 2 )
 	{
 		trap_precache_sound( "misc/basekey.wav" );
-		self->s.v.noise = "misc/basekey.wav";
+		self->noise = "misc/basekey.wav";
 	}
 }
 
@@ -1234,20 +1313,20 @@ void SP_item_key1()
 	{
 		trap_precache_model( "progs/w_s_key.mdl" );
 		setmodel( self, "progs/w_s_key.mdl" );
-		self->s.v.netname = "silver key";
+		self->netname = "silver key";
 	} else if ( world->worldtype == 1 )
 	{
 		trap_precache_model( "progs/m_s_key.mdl" );
 		setmodel( self, "progs/m_s_key.mdl" );
-		self->s.v.netname = "silver runekey";
+		self->netname = "silver runekey";
 	} else if ( world->worldtype == 2 )
 	{
 		trap_precache_model( "progs/b_s_key.mdl" );
 		setmodel( self, "progs/b_s_key.mdl" );
-		self->s.v.netname = "silver keycard";
+		self->netname = "silver keycard";
 	}
 	key_setsounds();
-	self->s.v.touch = ( func_t ) key_touch;
+	self->touch = ( func_t ) key_touch;
 	self->s.v.items = IT_KEY1;
 	setsize( self, -16, -16, -24, 16, 16, 32 );
 	StartItem();
@@ -1270,22 +1349,22 @@ void SP_item_key2()
 	{
 		trap_precache_model( "progs/w_g_key.mdl" );
 		setmodel( self, "progs/w_g_key.mdl" );
-		self->s.v.netname = "gold key";
+		self->netname = "gold key";
 	}
 	if ( world->worldtype == 1 )
 	{
 		trap_precache_model( "progs/m_g_key.mdl" );
 		setmodel( self, "progs/m_g_key.mdl" );
-		self->s.v.netname = "gold runekey";
+		self->netname = "gold runekey";
 	}
 	if ( world->worldtype == 2 )
 	{
 		trap_precache_model( "progs/b_g_key.mdl" );
 		setmodel( self, "progs/b_g_key.mdl" );
-		self->s.v.netname = "gold keycard";
+		self->netname = "gold keycard";
 	}
 	key_setsounds();
-	self->s.v.touch = ( func_t ) key_touch;
+	self->touch = ( func_t ) key_touch;
 	self->s.v.items = IT_KEY2;
 	setsize( self, -16, -16, -24, 16, 16, 32 );
 	StartItem();
@@ -1315,12 +1394,12 @@ void sigil_touch()
 	if ( match_in_progress != 2 || !readytostart() )
         return;
 
-	playername = other->s.v.netname;
+	playername = other->netname;
 
 	/*
 	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%d\" />\n",
 				g_globalvars.time - match_start_time,
-				self->s.v.classname,
+				self->classname,
 				cleantext(playername),
 				0 );
 	*/
@@ -1334,20 +1413,20 @@ void sigil_touch()
 		"\t\t\t</pick_mapitem>\n"
 		"\t\t</event>\n",
 		g_globalvars.time - match_start_time,
-		self->s.v.classname,
+		self->classname,
 		cleantext(playername),
 		0
 	);
 
 	G_centerprint( other, "You got the rune!" );
 
-	sound( other, CHAN_ITEM, self->s.v.noise, 1, ATTN_NORM );
+	sound( other, CHAN_ITEM, self->noise, 1, ATTN_NORM );
 	stuffcmd( other, "bf\n" );
 	self->s.v.solid = SOLID_NOT;
-	self->s.v.model = "";
+	self->model = "";
 	g_globalvars.serverflags =
 	    ( int ) ( g_globalvars.serverflags ) | ( ( int ) ( self->s.v.spawnflags ) & 15 );
-	self->s.v.classname = "";	// so rune doors won't find it
+	self->classname = "";	// so rune doors won't find it
 
 	activator = other;
 	SUB_UseTargets();	// fire all targets / killtargets
@@ -1364,7 +1443,7 @@ void SP_item_sigil()
 		G_Error( "item_sigil no spawnflags" );
 
 	trap_precache_sound( "misc/runekey.wav" );
-	self->s.v.noise = "misc/runekey.wav";
+	self->noise = "misc/runekey.wav";
 
 	if ( ( int ) ( self->s.v.spawnflags ) & 1 )
 	{
@@ -1387,9 +1466,10 @@ void SP_item_sigil()
 		setmodel( self, "progs/end4.mdl" );
 	}
 
-	self->s.v.touch = ( func_t ) sigil_touch;
+	self->touch = ( func_t ) sigil_touch;
 	setsize( self, -16, -16, -24, 16, 16, 32 );
 	StartItem();
+	self->tp_flags = it_rune1;
 }
 
 /*
@@ -1428,7 +1508,7 @@ void hide_powerups ( char *classname )
 		}
 
 		p->s.v.solid = SOLID_NOT;
- 		p->s.v.model = "";
+ 		p->model = "";
 		p->s.v.nextthink = 0;  // disable next think
 	}
 }
@@ -1443,20 +1523,20 @@ void show_powerups ( char *classname )
 	for( p = world; (p = find(p, FOFCLSN, classname)); )
 	{
 		// spawn item if needed
-		if ( strnull( p->s.v.model ) || p->s.v.solid != SOLID_TRIGGER )
+		if ( strnull( p->model ) || p->s.v.solid != SOLID_TRIGGER )
 		{
 			if ( match_in_progress == 2 )
 			{
-				// spawn item in 30 seconds if game alredy running
+				// spawn item in 30 seconds if game already running
 				p->s.v.nextthink = g_globalvars.time + 30;
 				p->s.v.nextthink -= AUTOTRACK_POWERUPS_PREDICT_TIME;
-				p->s.v.think = ( func_t ) SUB_regen_powerups;
+				p->think = ( func_t ) SUB_regen_powerups;
 			}
 			else
 			{
 				// spawn item instantly if game is not running
 				p->s.v.nextthink = g_globalvars.time;
-				p->s.v.think = ( func_t ) SUB_regen;
+				p->think = ( func_t ) SUB_regen;
 			}
 		}
 	}
@@ -1489,7 +1569,7 @@ void DropPowerup( float timeleft, int powerup )
 		if ( k_killquad )
 		{
 			self->s.v.nextthink = g_globalvars.time + 10;		
-			self->s.v.think = ( func_t ) KillQuadThink; // ATM just remove self.
+			self->think = ( func_t ) KillQuadThink; // ATM just remove self.
 		}
 	}
 	else if ( powerup == IT_INVISIBILITY )
@@ -1502,7 +1582,7 @@ void DropPowerup( float timeleft, int powerup )
 	if ( k_bloodfest )
 	{
 		// limit amount of dropped powerups of particular class.
-		if ( find_cnt( FOFCLSN, self->s.v.classname ) > 3 )
+		if ( find_cnt( FOFCLSN, self->classname ) > 3 )
 		{
 			ent_remove( self );
 	
@@ -1511,7 +1591,7 @@ void DropPowerup( float timeleft, int powerup )
 		}
 	}
 
-	playername = swp->s.v.netname;
+	playername = swp->netname;
 
 	log_printf(
 		"\t\t<event>\n"
@@ -1523,14 +1603,17 @@ void DropPowerup( float timeleft, int powerup )
 		"\t\t\t</drop_powerup>\n"
 		"\t\t</event>\n",
 		g_globalvars.time - match_start_time,
-		self->s.v.classname,
+		self->classname,
 		cleantext(playername),
 		timeleft
 	);
 
 	if ( swp->ct == ctPlayer )
-		mi_print( swp, powerup, va( "%s dropped a %s with %.0f seconds left", swp->s.v.netname, self->s.v.netname, timeleft ));
+		mi_print( swp, powerup, va( "%s dropped a %s with %.0f seconds left", swp->netname, self->netname, timeleft ));
 
+#ifdef BOT_SUPPORT
+	BotsPowerupDropped(swp, self);
+#endif
 	self = swp;// restore self!!!
 }
 
@@ -1581,13 +1664,20 @@ void powerup_touch()
 	float	old_pu_time = 0;
 	char	*playername;
 
-	if ( strnull ( self->s.v.classname ) )
+	if ( strnull ( self->classname ) )
 		G_Error("powerup_touch: null classname");
 
-	if ( other->ct != ctPlayer )
+	if (other->ct != ctPlayer) {
+#ifdef BOT_SUPPORT
+		BotsPowerupTouchedNonPlayer(self, other);
+#endif
 		return;
+	}
 
 	if ( ISDEAD( other ) )
+		return;
+
+	if ( ItemTouched (self, other) )
 		return;
 
 	if ( !k_practice ) // #practice mode#
@@ -1608,29 +1698,29 @@ void powerup_touch()
 	// powerup if he already has one of the same kind (ie 2 quads)
 	if ( cvar( "k_pow_pickup" ) )
 	{
-		if ( streq( self->s.v.classname, "item_artifact_envirosuit" ) 
+		if ( streq( self->classname, "item_artifact_envirosuit" ) 
 		&& other->radsuit_finished > g_globalvars.time )
 			return;
 
-		if ( streq( self->s.v.classname, "item_artifact_invulnerability" ) 
+		if ( streq( self->classname, "item_artifact_invulnerability" ) 
 		&& other->invincible_finished > g_globalvars.time )
 			return;
 
-		if ( streq( self->s.v.classname, "item_artifact_invisibility" ) 
+		if ( streq( self->classname, "item_artifact_invisibility" ) 
 		&& other->invisible_finished > g_globalvars.time )
 			return;
 
-		if ( streq( self->s.v.classname, "item_artifact_super_damage" ) 
+		if ( streq( self->classname, "item_artifact_super_damage" ) 
 		&& other->super_damage_finished > g_globalvars.time )
 			return;
 	}
 
-	G_sprint( other, PRINT_LOW, "You got the %s\n", self->s.v.netname );
+	G_sprint( other, PRINT_LOW, "You got the %s\n", self->netname );
 
-	self->mdl = self->s.v.model;
+	self->mdl = self->model;
 
-	if ( streq( self->s.v.classname, "item_artifact_invulnerability" ) ||
-	     streq( self->s.v.classname, "item_artifact_invisibility" ) )
+	if ( streq( self->classname, "item_artifact_invulnerability" ) ||
+	     streq( self->classname, "item_artifact_invisibility" ) )
 		self->s.v.nextthink = g_globalvars.time + 60 * 5;
 	else
 		self->s.v.nextthink = g_globalvars.time + 60;
@@ -1641,18 +1731,18 @@ void powerup_touch()
 
 	self->s.v.nextthink -= AUTOTRACK_POWERUPS_PREDICT_TIME;
 
-	self->s.v.think = ( func_t ) SUB_regen_powerups;
+	self->think = ( func_t ) SUB_regen_powerups;
 
 // like ktpro
-//	sound( other, CHAN_VOICE, self->s.v.noise, 1, ATTN_NORM );
-	sound( other, CHAN_ITEM, self->s.v.noise, 1, ATTN_NORM );
+//	sound( other, CHAN_VOICE, self->noise, 1, ATTN_NORM );
+	sound( other, CHAN_ITEM, self->noise, 1, ATTN_NORM );
 	stuffcmd( other, "bf\n" );
 	self->s.v.solid = SOLID_NOT;
 	other->s.v.items = ( ( int ) other->s.v.items ) | ( ( int ) self->s.v.items );
-	self->s.v.model = "";
+	self->model = "";
 
 // do the apropriate action
-	if ( streq( self->s.v.classname, "item_artifact_envirosuit" ) )
+	if ( streq( self->classname, "item_artifact_envirosuit" ) )
 	{
 		old_pu_time = other->radsuit_finished;
 		other->rad_time = 1;
@@ -1661,7 +1751,7 @@ void powerup_touch()
 		if ( self->cnt > g_globalvars.time ) // is this was a dropped powerup
 			p_cnt = &(other->radsuit_finished);
 	}
-	else if ( streq( self->s.v.classname, "item_artifact_invulnerability" ) )
+	else if ( streq( self->classname, "item_artifact_invulnerability" ) )
 	{
 		old_pu_time = other->invincible_finished;
 		adjust_pickup_time( &other->p_pickup_time, &other->ps.itm[itPENT].time );
@@ -1674,7 +1764,7 @@ void powerup_touch()
 		if ( self->cnt > g_globalvars.time ) // is this was a dropped powerup
 			p_cnt = &(other->invincible_finished);
 	}
-	else if ( streq( self->s.v.classname, "item_artifact_invisibility" ) )
+	else if ( streq( self->classname, "item_artifact_invisibility" ) )
 	{
 		old_pu_time = other->invisible_finished;
 		adjust_pickup_time( &other->r_pickup_time, &other->ps.itm[itRING].time );
@@ -1687,7 +1777,7 @@ void powerup_touch()
 		if ( self->cnt > g_globalvars.time ) // is this was a dropped powerup
 			p_cnt = &(other->invisible_finished);
 	}
-	else if ( streq( self->s.v.classname, "item_artifact_super_damage" ) )
+	else if ( streq( self->classname, "item_artifact_super_damage" ) )
 	{
 		old_pu_time = other->super_damage_finished;
 		adjust_pickup_time( &other->q_pickup_time, &other->ps.itm[itQUAD].time );
@@ -1725,19 +1815,19 @@ void powerup_touch()
 		real_time = seconds_left;
 
 //		if ( k_bloodfest )
-//			G_sprint( other, 2, "Your %s have %d seconds left\n", self->s.v.netname, ( int )seconds_left );
+//			G_sprint( other, 2, "Your %s have %d seconds left\n", self->netname, ( int )seconds_left );
 
 		mi_print( other, self->s.v.items, va( "%s got a %s with %d seconds left",
-		  					other->s.v.netname, self->s.v.netname, ( int )seconds_left ));
+		  					other->netname, self->netname, ( int )seconds_left ));
 
 		SUB_RM_01( self );// remove later
 	}
 	else
 	{
-		mi_print(other, self->s.v.items, va("%s got %s", getname(other), self->s.v.netname));
+		mi_print(other, self->s.v.items, va("%s got %s", getname(other), self->netname));
 	}
 
-	playername = other->s.v.netname;
+	playername = other->netname;
 
 	log_printf(
 		"\t\t<event>\n"
@@ -1749,12 +1839,14 @@ void powerup_touch()
 		"\t\t\t</pick_powerup>\n"
 		"\t\t</event>\n",
 		g_globalvars.time - match_start_time,
-		self->s.v.classname,
+		self->classname,
 		cleantext(playername),
 		real_time
 	);
 
 	ktpro_autotrack_on_powerup_take(other);
+
+	ItemTaken (self, other);
 
 	activator = other;
 	SUB_UseTargets();	// fire all targets / killtargets
@@ -1767,16 +1859,17 @@ void SP_item_artifact_invulnerability()
 {
 	qbool b_dp = self->cnt > g_globalvars.time; // dropped powerup by player, not normal spawn
 
-	self->s.v.touch = ( func_t ) powerup_touch;
+	self->touch = ( func_t ) powerup_touch;
 
-	self->s.v.noise = "items/protect.wav";
+	self->noise = "items/protect.wav";
 	setmodel( self, "progs/invulner.mdl" );
-	self->s.v.netname = "Pentagram of Protection";
-	self->s.v.classname = "item_artifact_invulnerability";
+	self->netname = "Pentagram of Protection";
+	self->classname = "item_artifact_invulnerability";
 
 	self->s.v.effects = ( int ) self->s.v.effects | EF_RED;
 
 	self->s.v.items = IT_INVULNERABILITY;
+	self->tp_flags = it_pent;
 	setsize( self, -16, -16, -24, 16, 16, 32 );
 
 	if ( b_dp )
@@ -1790,16 +1883,17 @@ Player takes no damage from water or slime for 30 seconds
 */
 void SP_item_artifact_envirosuit()
 {
-	self->s.v.touch = ( func_t ) powerup_touch;
+	self->touch = ( func_t ) powerup_touch;
 
-	self->s.v.noise = "items/suit.wav";
+	self->noise = "items/suit.wav";
 	setmodel( self, "progs/suit.mdl" );
-	self->s.v.netname = "Biosuit";
-	self->s.v.classname = "item_artifact_envirosuit";
+	self->netname = "Biosuit";
+	self->classname = "item_artifact_envirosuit";
 
 	self->s.v.effects = ( int ) self->s.v.effects | EF_GREEN;
 
 	self->s.v.items = IT_SUIT;
+	self->tp_flags = it_suit;
 	setsize( self, -16, -16, -24, 16, 16, 32 );
 	StartItem();
 }
@@ -1812,13 +1906,14 @@ void SP_item_artifact_invisibility()
 {
 	qbool b_dp = self->cnt > g_globalvars.time; // dropped powerup by player, not normal spawn
 
-	self->s.v.touch = ( func_t ) powerup_touch;
+	self->touch = ( func_t ) powerup_touch;
 
-	self->s.v.noise = "items/inv1.wav";
+	self->noise = "items/inv1.wav";
 	setmodel( self, "progs/invisibl.mdl" );
-	self->s.v.netname = "Ring of Shadows";
-	self->s.v.classname = "item_artifact_invisibility";
+	self->netname = "Ring of Shadows";
+	self->classname = "item_artifact_invisibility";
 	self->s.v.items = IT_INVISIBILITY;
+	self->tp_flags = it_ring;
 	setsize( self, -16, -16, -24, 16, 16, 32 );
 
 	if ( b_dp )
@@ -1834,13 +1929,14 @@ void SP_item_artifact_super_damage()
 {
 	qbool b_dp = self->cnt > g_globalvars.time; // dropped powerup by player, not normal spawn
 
-	self->s.v.touch = ( func_t ) powerup_touch;
+	self->touch = ( func_t ) powerup_touch;
 
-	self->s.v.noise = "items/damage.wav";
+	self->noise = "items/damage.wav";
 	setmodel( self, "progs/quaddama.mdl" );
-	self->s.v.classname = "item_artifact_super_damage";
-	self->s.v.netname = deathmatch == 4 ? "OctaPower" : "Quad Damage";
+	self->classname = "item_artifact_super_damage";
+	self->netname = deathmatch == 4 ? "OctaPower" : "Quad Damage";
 	self->s.v.items = IT_QUAD;
+	self->tp_flags = it_quad;
 
 	self->s.v.effects = ( int ) self->s.v.effects | EF_BLUE;
 
@@ -1868,18 +1964,25 @@ void BackpackTouch()
 	char            *new_wp = "";
 	char		*playername;
 
-    if ( match_in_progress != 2 )
-        return;
+	if (other->ct != ctPlayer) {
+#ifdef BOT_SUPPORT
+		BotsBackpackTouchedNonPlayer(self, other);
+#endif
+		return;
+	}
+
+	if ( ISDEAD( other ) )
+		return;
+
+	if ( ItemTouched(self, other) )
+		return;
+
+	if ( match_in_progress != 2 )
+		return;
 
 	if ( deathmatch == 4 )
 		if ( other->invincible_finished )
 			return; // we have pent, ignore pack
-
-	if ( other->ct != ctPlayer )
-		return;
-
-	if ( ISDEAD( other ) )
-		return;
 
 	//crt -- no backpacks in waiting area
 	if ( isRA() && !isWinner( other ) && !isLoser( other ) ) 
@@ -1935,7 +2038,7 @@ void BackpackTouch()
 
 			ktpro_autotrack_on_powerup_take(other);
 
-			G_bprint( PRINT_HIGH, "%s gained bonus powers!!!\n", other->s.v.netname );
+			G_bprint( PRINT_HIGH, "%s gained bonus powers!!!\n", other->netname );
 			other->ps.i_rings++;
 		}
 
@@ -1946,17 +2049,17 @@ void BackpackTouch()
 	new = self->s.v.items;
 
 	if ( new ) {
-		TookWeaponHandler( other, new );
+		TookWeaponHandler( other, new, true );
 
 		if ( !( ( int ) other->s.v.items & new ) )
 		{ // new weapon - so print u got it
 			acount = 1;
-			G_sprint( other, PRINT_LOW, "the %s", self->s.v.netname );
+			G_sprint( other, PRINT_LOW, "the %s", self->netname );
 
-			new_wp = self->s.v.netname;
+			new_wp = self->netname;
 
 			// FIXME: so specs does't seen this message if player alredy have such weapon, is this BUG?
-			mi_print(other, new, va("%s got backpack with %s", getname(other), self->s.v.netname));
+			mi_print(other, new, va("%s got backpack with %s", getname(other), self->netname));
 		}
 	}
 
@@ -1980,7 +2083,7 @@ void BackpackTouch()
 	new_rockets = other->s.v.ammo_rockets - new_rockets;
 	new_cells   = other->s.v.ammo_cells - new_cells;
 
-	playername = other->s.v.netname;
+	playername = other->netname;
 
 	/*
 	log_printf( "\t\t\t<pickbp time=\"%f\" weapon=\"%s\" shells=\"%d\" nails=\"%d\" rockets=\"%d\" cells=\"%d\" player=\"%s\" />\n",
@@ -2067,6 +2170,8 @@ void BackpackTouch()
 	sound( other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM );
 	stuffcmd( other, "bf\n" );
 
+	ItemTaken (self, other);
+
 	ent_remove( self );
 
 	stemp = self;
@@ -2096,8 +2201,9 @@ void DropBackpack()
 
     f1 = get_fair_pack();
 
-    if ( match_in_progress != 2 || !cvar( "dp" ) )
-        return;
+	if (match_in_progress != 2 || !cvar("dp")) {
+		return;
+	}
 
 	if ( !k_yawnmode ) // Yawnmode: pack dropped in yawn mode independantly from death type
 		if ( dtSUICIDE == self->deathtype )
@@ -2118,6 +2224,7 @@ void DropBackpack()
 	item->s.v.origin[2] -= 24;
 
 	item->s.v.items = self->s.v.weapon;
+	item->tp_flags = it_pack;
 
 // drop best weapon in case of fairpacks 1 (KTEAMS)
 	if( f1 == 1 )
@@ -2150,45 +2257,45 @@ void DropBackpack()
 	setmodel( item, "progs/backpack.mdl" );
 
 	if ( item->s.v.items == IT_AXE ) {
-		item->s.v.netname = "Axe";
+		item->netname = "Axe";
 		self->ps.wpn[wpAXE].drops++;
 	}
 	else if ( item->s.v.items == IT_SHOTGUN ) {
-		item->s.v.netname = "Shotgun";
+		item->netname = "Shotgun";
 		self->ps.wpn[wpSG].drops++;
 	}
 	else if ( item->s.v.items == IT_SUPER_SHOTGUN ) {
-		item->s.v.netname = "Double-barrelled Shotgun";
+		item->netname = "Double-barrelled Shotgun";
 		//item->mdl = "progs/g_shot.mdl";
 		self->ps.wpn[wpSSG].drops++;
 	}
 	else if ( item->s.v.items == IT_NAILGUN ) {
-		item->s.v.netname = "Nailgun";
+		item->netname = "Nailgun";
 		//item->mdl = "progs/g_nail.mdl";
 		self->ps.wpn[wpNG].drops++;
 	}
 	else if ( item->s.v.items == IT_SUPER_NAILGUN ) {
-		item->s.v.netname = "Super Nailgun";
+		item->netname = "Super Nailgun";
 		//item->mdl = "progs/g_nail2.mdl";
 		self->ps.wpn[wpSNG].drops++;
 	}
 	else if ( item->s.v.items == IT_GRENADE_LAUNCHER ) {
-		item->s.v.netname = "Grenade Launcher";
+		item->netname = "Grenade Launcher";
 		//item->mdl = "progs/g_rock.mdl";
 		self->ps.wpn[wpGL].drops++;
 	}
 	else if ( item->s.v.items == IT_ROCKET_LAUNCHER ) {
-		item->s.v.netname = "Rocket Launcher";
+		item->netname = "Rocket Launcher";
 		//item->mdl = "progs/g_rock2.mdl";
 		self->ps.wpn[wpRL].drops++;
 	}
 	else if ( item->s.v.items == IT_LIGHTNING ) {
-		item->s.v.netname = "Thunderbolt";
+		item->netname = "Thunderbolt";
 		//item->mdl = "progs/g_light.mdl";
 		self->ps.wpn[wpLG].drops++;
 	}
 	else
-		item->s.v.netname = "";
+		item->netname = "";
 
 	item->s.v.ammo_shells  = self->s.v.ammo_shells;
 	item->s.v.ammo_nails   = self->s.v.ammo_nails;
@@ -2205,7 +2312,7 @@ void DropBackpack()
 		item->s.v.ammo_cells   = min(25, item->s.v.ammo_cells);
 	}
 
-	playername = self->s.v.netname;
+	playername = self->netname;
 
 	log_printf(
 		"\t\t<event>\n"
@@ -2220,7 +2327,7 @@ void DropBackpack()
 		"\t\t\t</drop_backpack>\n"
 		"\t\t</event>\n",
 		g_globalvars.time - match_start_time,
-		item->s.v.netname,
+		item->netname,
 		(int)item->s.v.ammo_shells,
 		(int)item->s.v.ammo_nails,
 		(int)item->s.v.ammo_rockets,
@@ -2237,19 +2344,23 @@ void DropBackpack()
 	item->s.v.movetype = MOVETYPE_TOSS;
 	//setmodel( item, k_yawnmode ? item->mdl : "progs/backpack.mdl" );
 	setsize( item, -16, -16, 0, 16, 16, 56 );
-	item->s.v.touch = ( func_t ) BackpackTouch;
+	item->touch = ( func_t ) BackpackTouch;
 
 	// remove after 2 minutes, and after 30 seconds if backpack dropped by monster
 	item->s.v.nextthink = g_globalvars.time + ( self->ct == ctPlayer ? 120 : 30 );
-	item->s.v.think = ( func_t ) SUB_Remove;
+	item->think = ( func_t ) SUB_Remove;
 
-	item->s.v.classname = "backpack"; // we do need to be able to get rid of these things between points (hoony mode)
+	item->classname = "backpack"; // we do need to be able to get rid of these things between points (hoony mode)
 
 	if (isTeam())
 	{
 		item->backpack_player_name = playername;
 		strlcpy(item->backpack_team_name, getteam(self), MAX_TEAM_NAME);
 	}
+
+#ifdef BOT_SUPPORT
+	BotsBackpackDropped(self, item);
+#endif
 }
 
 /*
@@ -2260,7 +2371,7 @@ SPAWN POINT MARKERS
 ===============================================================================
 */
 
-gedict_t *Spawn_OnePoint( vec3_t org, int effects )
+gedict_t* Spawn_OnePoint( gedict_t* spawn_point, vec3_t org, int effects )
 {
 	gedict_t	*p;
 
@@ -2269,10 +2380,15 @@ gedict_t *Spawn_OnePoint( vec3_t org, int effects )
 	p->s.v.solid = SOLID_NOT;
 	p->s.v.movetype = MOVETYPE_NONE;
 	setmodel( p, cvar("k_spm_custom_model") ? "progs/spawn.mdl" : "progs/w_g_key.mdl" );
-	p->s.v.netname = "Spawn Point";
-	p->s.v.classname = "spawnpoint";
+	p->netname = "Spawn Point";
+	p->classname = "spawnpoint";
+	p->k_lastspawn = spawn_point;
 
 	p->s.v.effects = ( int ) p->s.v.effects | effects;
+
+	// store references for changing selections in hoonymode
+	spawn_point->wizard = p;
+	p->wizard = spawn_point;
 
 	setorigin( p, PASSVEC3( org ) );
 
@@ -2289,7 +2405,11 @@ void Spawn_SpawnPoints( char *classname, int effects )
 		VectorCopy( e->s.v.origin, org );
 		org[2] += 0; // qqshka: it was 16, but I like more how it looks when it more close to ground
 
-		Spawn_OnePoint( org, effects );
+		if (isHoonyModeDuel()) {
+			effects = (e->hoony_nomination ? (EF_GREEN | EF_RED) : 0);
+		}
+
+		Spawn_OnePoint( e, org, effects );
 	}
 }
 
@@ -2310,6 +2430,9 @@ void HideSpawnPoints()
 
 	for ( e = world; ( e = ez_find( e, "spawnpoint" ) ); )
 	{
+		if (e->wizard)
+			e->wizard->wizard = 0;
+
 		ent_remove( e );
 	}
 }

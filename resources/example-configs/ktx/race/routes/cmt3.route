@@ -1,0 +1,20 @@
+race_route_add_start
+
+	race_add_route_node  518 1192 -520 0 140 
+	race_add_route_node  541 1692 -528 0   0  
+	race_add_route_node 1085 1612 -688 0   0  
+	race_add_route_node  839  713 -896 0   0  
+	race_add_route_node  442  714 -592 0   0  
+	race_add_route_node 1000  839 -520 0   0  
+	race_add_route_node 1300  122 -528 0   0  
+	race_add_route_node  988  122 -816 0   0  
+	race_add_route_node  565 -331 -816 0   0  
+	race_add_route_node -438   97 -344 0   0  
+	race_add_route_node -994   53 -471 0   0  
+
+	race_set_route_name "JohnNy_cz's Deutschmaschine race" "spawn \215 pent \215 lg \215 quad \215 ra \215 rl" 
+	race_set_route_timeout 40 
+	race_set_route_weapon_mode raceWeapon2s 
+	race_set_route_falsestart_mode raceFalseStartNo 
+
+race_route_add_end

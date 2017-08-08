@@ -1,0 +1,38 @@
+race_route_add_start
+	race_add_route_node 1880.1  884.2 -213.0 8.3 -92.1 
+	race_add_route_node  701.0  237.5   89.2   0     0  
+	race_add_route_node  261.0 -709.0  328.0   0     0  
+
+	race_set_route_name "ra fly" "pent mh\215window\215ra top" 
+	race_set_route_timeout 35 
+	race_set_route_weapon_mode raceWeaponAllowed 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node 1499.6  498.9  -88.0 18.4 -3.4 
+	race_add_route_node 1400.3  -30.1 -168.0    0    0  
+	race_add_route_node  581.8    0.2 -168.0    0    0  
+	race_add_route_node  261.0 -709.0  328.0    0    0  
+
+	race_set_route_name "ra run" "rl\215center\215ra top" 
+	race_set_route_timeout 30 
+	race_set_route_weapon_mode raceWeaponNo 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node 1520.0  432.0 -88.0 0 0 
+	race_add_route_node 1252.7 -513.5  20.1 0 0  
+	race_add_route_node  642.0 -511.0  88.0 0 0  
+	race_add_route_node  590.5  125.6  96.6 0 0  
+	race_add_route_node  202.7  593.8  56.0 0 0  
+	race_add_route_node -711.8   95.7 206.4 0 0  
+	race_add_route_node -221.7 -561.6  20.6 0 0  
+	race_add_route_node  261.0 -709.0 328.0 0 0  
+
+	race_set_route_name "around dm3" "rl\215hi bridge\215quad\215ya\215quad\215under lifts\215sng mh\215ra top" 
+	race_set_route_timeout 50 
+	race_set_route_weapon_mode raceWeaponAllowed 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end

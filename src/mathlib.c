@@ -88,7 +88,7 @@ void PerpendicularVector( vec3_t dst, const vec3_t src )
 	VectorNormalize( dst );
 }
 
-#ifdef _WIN32
+#if defined(_WIN32) && defined(_MSC_VER)
 #pragma optimize( "", off )
 #endif
 
@@ -148,7 +148,7 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 	}
 }
 
-#ifdef _WIN32
+#if defined(_WIN32) && defined(_MSC_VER)
 #pragma optimize( "", on )
 #endif
 
@@ -389,6 +389,15 @@ vec_t VectorLength (vec3_t v)
 	length = sqrt (length);		// FIXME
 
 	return length;
+}
+
+float VectorDistance (vec3_t v1, vec3_t v2)
+{
+	vec3_t diff;
+
+	VectorSubtract(v1, v2, diff);
+
+	return vlen(diff);
 }
 
 float VectorNormalize (vec3_t v)

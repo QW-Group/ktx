@@ -1,0 +1,12 @@
+race_route_add_start
+	race_add_route_node 2367 3364  3224 0 -90 
+	race_add_route_node 1597  185 -1256 0   0  
+
+	race_set_route_name "Slide 5" "top \215 bottom" 
+	race_set_route_timeout 40 
+	race_set_route_weapon_mode raceWeaponNo 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
+
+race_set_teleport_flags_by_name "t1" RACEFLAG_TOUCH_RACEFAIL
+race_set_teleport_flags_by_name "t2" RACEFLAG_TOUCH_RACEFAIL

@@ -294,7 +294,7 @@ void _sham_swingl9( void )
 	ai_charge(8);
 	
 	if ( g_random() < 0.5 )  // why so complicated, why not just random it at sham_melee(), who knows...
-		self->s.v.think = ( func_t ) sham_swingr1;
+		self->think = ( func_t ) sham_swingr1;
 }
 ANIM(sham_swingl1, swingl1, sham_swingl2; _sham_swingl1();)
 ANIM(sham_swingl2, swingl2, sham_swingl3; ai_charge(3);)
@@ -317,7 +317,7 @@ void _sham_swingr9( void )
 	ai_charge(11);
 	
 	if ( g_random() < 0.5 )  // why so complicated, why not just random it at sham_melee(), who knows...
-		self->s.v.think = ( func_t ) sham_swingl1;
+		self->think = ( func_t ) sham_swingl1;
 }
 ANIM(sham_swingr1, swingr1, sham_swingr2; _sham_swingr1();)
 ANIM(sham_swingr2, swingr2, sham_swingr3; ai_charge(8);)
@@ -414,7 +414,7 @@ void _sham_magic3( void )
 		setorigin( o, PASSVEC3( self->s.v.origin ) );
 		VectorCopy( self->s.v.angles, o->s.v.angles );
 		o->s.v.nextthink = g_globalvars.time + FRAMETIME;
-		o->s.v.think = ( func_t ) sham_bolt;
+		o->think = ( func_t ) sham_bolt;
 	}
 }
 

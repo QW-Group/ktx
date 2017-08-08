@@ -55,10 +55,10 @@ void InitTrigger()
 	if ( !VectorCompareF( self->s.v.angles, 0, 0, 0 ) )
 		SetMovedir( self );
 	self->s.v.solid = SOLID_TRIGGER;
-	setmodel( self, self->s.v.model );	// set size and link into world
+	setmodel( self, self->model );	// set size and link into world
 	self->s.v.movetype = MOVETYPE_NONE;
 	self->s.v.modelindex = 0;
-	self->s.v.model = "";
+	self->model = "";
 }
 
 
@@ -92,7 +92,7 @@ void SUB_CalcMove( vec3_t tdest, float tspeed, void ( *func ) () )
 
 	self->think1 = func;
 	VectorCopy( tdest, self->finaldest );
-	self->s.v.think = ( func_t ) SUB_CalcMoveDone;
+	self->think = ( func_t ) SUB_CalcMoveDone;
 
 	if ( VectorCompare( tdest, self->s.v.origin ) )
 	{
@@ -240,24 +240,24 @@ void SUB_UseTargets()
 	{
 		// create a temp object to fire at a later time
 		t = spawn();
-		t->s.v.classname = "DelayedUse";
+		t->classname = "DelayedUse";
 		t->s.v.nextthink = g_globalvars.time + self->delay;
-		t->s.v.think = ( func_t ) DelayThink;
+		t->think = ( func_t ) DelayThink;
 		t->s.v.enemy = EDICT_TO_PROG( activator );
-		t->s.v.message = self->s.v.message;
+		t->message = self->message;
 		t->killtarget = self->killtarget;
-		t->s.v.target = self->s.v.target;
+		t->target = self->target;
 		return;
 	}
 
 //
 // print the message
-//activator->s.v.classname && 
-	if ( activator->ct == ctPlayer && self->s.v.message )
-		if ( strneq( self->s.v.message, "" ) )
+//activator->classname && 
+	if ( activator->ct == ctPlayer && self->message )
+		if ( strneq( self->message, "" ) )
 		{
-			G_centerprint( activator, "%s", self->s.v.message );
-			if ( !self->s.v.noise )
+			G_centerprint( activator, "%s", self->message );
+			if ( !self->noise )
 				sound( activator, CHAN_VOICE, "misc/talk.wav", 1,
 					    ATTN_NORM );
 		}
@@ -269,7 +269,7 @@ void SUB_UseTargets()
 		t = world;
 		do
 		{
-			t = find( t, FOFS( s.v.targetname ), self->killtarget );
+			t = find( t, FOFS( targetname ), self->killtarget );
 			if ( !t )
 				return;
 			ent_remove( t );
@@ -279,14 +279,14 @@ void SUB_UseTargets()
 //
 // fire targets
 //
-	if ( self->s.v.target )
+	if ( self->target )
 	{
 		act = activator;
 		t = world;
 		do
 		{
 
-			t = find( t, FOFS( s.v.targetname ), self->s.v.target );
+			t = find( t, FOFS( targetname ), self->target );
 			if ( !t )
 			{
 				return;
@@ -297,8 +297,8 @@ void SUB_UseTargets()
 			other = stemp;
 			//if (self.use != SUB_Null)
 			{
-				if ( self->s.v.use )
-					( ( void ( * )() ) ( self->s.v.use ) ) ();
+				if ( self->use )
+					( ( void ( * )() ) ( self->use ) ) ();
 			}
 			self = stemp;
 			other = otemp;

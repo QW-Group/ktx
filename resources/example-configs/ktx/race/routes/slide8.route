@@ -1,0 +1,25 @@
+race_route_add_start
+	race_add_route_node    0  -85   20 0 90
+	race_add_route_node -777 2527 -360 0  0
+	race_add_route_node -456  -64 -876 0  0
+
+	race_set_route_name "Slide 8" "top \215 bottom" 
+	race_set_route_timeout 40 
+	race_set_route_weapon_mode raceWeaponNo 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
+
+race_set_teleport_flags_by_name "h1" RACEFLAG_TOUCH_RACEFAIL
+race_set_teleport_flags_by_name "d6" RACEFLAG_TOUCH_RACEFAIL
+race_set_teleport_flags_by_name "d1" RACEFLAG_TOUCH_RACEFAIL
+race_set_teleport_flags_by_name "d2" RACEFLAG_TOUCH_RACEFAIL
+race_set_teleport_flags_by_name "d3" RACEFLAG_TOUCH_RACEFAIL
+race_set_teleport_flags_by_name "d4" RACEFLAG_TOUCH_RACEFAIL
+race_set_teleport_flags_by_name "d5" RACEFLAG_TOUCH_RACEFAIL
+race_set_teleport_flags_by_name "r5" RACEFLAG_TOUCH_RACEFAIL
+race_set_teleport_flags_by_name "r4" RACEFLAG_TOUCH_RACEFAIL
+race_set_teleport_flags_by_name "r3" RACEFLAG_TOUCH_RACEFAIL
+race_set_teleport_flags_by_name "r2" RACEFLAG_TOUCH_RACEFAIL
+race_set_teleport_flags_by_name "r1" RACEFLAG_TOUCH_RACEFAIL
+race_set_teleport_flags_by_name "t5" RACEFLAG_TOUCH_RACEFAIL
+race_set_teleport_flags_by_name "t7" RACEFLAG_TOUCH_RACEFAIL

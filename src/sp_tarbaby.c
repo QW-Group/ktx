@@ -180,7 +180,7 @@ void Tar_JumpTouch ()
 {
 	float	ldmg;
 
-	if ( other->s.v.takedamage && strneq( other->s.v.classname, self->s.v.classname ) )
+	if ( other->s.v.takedamage && strneq( other->classname, self->classname ) )
 	{
 		if ( vlen( self->s.v.velocity ) > 400 )
 		{
@@ -200,8 +200,8 @@ void Tar_JumpTouch ()
 		if ( (int )self->s.v.flags & FL_ONGROUND )
 		{	// jump randomly to not get hung up
 			//dprint ("popjump\n");
-			self->s.v.touch = ( func_t) SUB_Null;
-			self->s.v.think = ( func_t ) tbaby_run1;
+			self->touch = ( func_t) SUB_Null;
+			self->think = ( func_t ) tbaby_run1;
 			self->s.v.movetype  = MOVETYPE_STEP;
 			self->s.v.nextthink = g_globalvars.time + FRAMETIME;
 
@@ -213,8 +213,8 @@ void Tar_JumpTouch ()
 		return;	// not on ground yet
 	}
 
-	self->s.v.touch = ( func_t ) SUB_Null;
-	self->s.v.think = ( func_t ) tbaby_run1;
+	self->touch = ( func_t ) SUB_Null;
+	self->think = ( func_t ) tbaby_run1;
 	self->s.v.nextthink = g_globalvars.time + FRAMETIME;
 }
 
@@ -237,7 +237,7 @@ ANIM(tbaby_fly4, fly4, tbaby_fly1;  _tbaby_fly4(); )
 void _tbaby_jump5( void )
 {
 	self->s.v.movetype = MOVETYPE_BOUNCE;
-	self->s.v.touch = ( func_t ) Tar_JumpTouch;
+	self->touch = ( func_t ) Tar_JumpTouch;
 	trap_makevectors( self->s.v.angles );
 	self->s.v.origin[2] += 1; // FIXME: possibile stuck in walls, right?
 	//self->s.v.velocity = v_forward * 600 + '0 0 200';

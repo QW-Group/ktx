@@ -69,7 +69,7 @@
 #include <ctype.h>
 #include <limits.h>
 
-	#if !defined( _WIN32 )
+	#if !defined( _WIN32 ) || !defined(_MSC_VER)
 	// so intptr_t is defined for all non MS compilers
 	#include <stdint.h>
 	#endif
@@ -132,10 +132,11 @@ typedef enum {false, true}	qbool;
 #define NULL ((void *)0)
 #endif
 
-//typedef int	string_t;
 typedef char*	string_t;
 typedef intptr_t func_t;
 
+typedef int      stringref_t;
+typedef int      funcref_t;
 
 typedef float vec_t;
 typedef vec_t vec3_t[3];
