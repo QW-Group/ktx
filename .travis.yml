@@ -43,5 +43,5 @@ script:
   - mkdir build_${TARGET}
   - meson build_${TARGET} --cross-file cross-compilation_${TARGET}.txt
   - ninja -v -C build_${TARGET}
-  - ninja -v test -C build_${TARGET}
+  # - ninja -v test -C build_${TARGET}
 
