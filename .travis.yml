@@ -33,7 +33,7 @@ before_install:
   - export | sort
   - env | sort
   - sudo apt-get update
-  - sudo apt-get -y install build-essential gcc-multilib python3-dev python3-pip ninja-build mingw-w64 wine
+  - sudo apt-get -y install build-essential gcc-multilib python3-dev python3-pip ninja-build mingw-w64
   - virtualenv .env --python=python3
   - . .env/bin/activate
   - pip3 install --upgrade pip
