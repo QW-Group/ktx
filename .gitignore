@@ -19,7 +19,7 @@ src/Makefile.dl32
 src/Makefile.vm
 
 #virtualenv
-.env/
+.venv/
 
 # build output dirs
 build_*/
