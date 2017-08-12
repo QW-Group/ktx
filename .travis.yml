@@ -62,5 +62,6 @@ script:
   - meson build_${TARGET} --cross-file cross-compilation_${TARGET}.txt
   - ninja -v -C build_${TARGET}
   # print basic info about complied files
-  - file build_${TARGET}/*.{so,exe,dll}
+  - find build_${TARGET}/ -type f -name "qwprogs.*" -exec file {} \;
+
 
