@@ -43,11 +43,12 @@ before_install:
   # - sudo apt-get -y upgrade
   # - sudo apt-get -y dist-upgrade
   # install base packages
-  - sudo apt-get -y install build-essential python3-dev python3-pip ninja-build cmake
+  - sudo apt-get -y install build-essential python-virtualenv python3-dev python3-pip ninja-build cmake gcc-multilib
   # install cross complier if we gonna do binaries for windows
   - if [ -z "${TARGET##*win*}" ]; then sudo apt-get -y install mingw-w64 ; fi
   # install cross compiler tools if we gonna do binares for arm/raspberry
-  - if [ -z "${TARGET##*arm*}" ]; then sudo apt-get -y install gcc-multilib-arm-linux-gnueabihf  pkg-config-arm-linux-gnueabihf ;fi
+  # notice it will remove gcc-multilib
+  - if [ -z "${TARGET##*arm*}" ]; then sudo apt-get -y install gcc-arm-linux-gnueabihf  pkg-config-arm-linux-gnueabihf ;fi
   # activate virtualenv with python3, meson requires python3
   - virtualenv .venv --python=python3
   - . .venv/bin/activate
@@ -61,5 +62,5 @@ script:
   - meson build_${TARGET} --cross-file cross-compilation_${TARGET}.txt
   - ninja -v -C build_${TARGET}
   # print basic info about complied files
-  - file build_${TARGET}/*.so
+  - file build_${TARGET}/*.{so,exe,dll}
 
