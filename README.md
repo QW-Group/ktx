@@ -30,8 +30,8 @@ Build from source with meson
 
 In general:
 
-- use Ubuntu 14.04 (but should work under 16.04 aswell) as vvirtual machine, check out source code there
-- install required packages for compliation
+- use Ubuntu 14.04 (but should work under 16.04 as well) as virtual machine, check out source code there
+- install required packages for compilation
 - set up virtualenv and install python packages (required for meson and ninja builders)
 - run meson build for given directory (optionally with cross compilation settings)
 - run ninja to generate .so file
@@ -40,17 +40,17 @@ In general:
 Detailed commands to install packages, tools and compilation can be found in ``.travis.yml`` file.
 You should be able to compile binaries for most popular platforms, such as:
 
-- Linux 32bit and 64bit
-- Windows 32bit and 64 bit
+- Linux 32-bit and 64-bit
+- Windows 32-bit and 64-bit (WoW64)
 - Arm 7 - for RaspBerry Pi 3 with Raspbian
 
 Example for RaspBerry:
 
 ```bash
+$ export TARGET=linux-armv7hl
+$ rm -rf build_${TARGET}
 
-$ rm -rf build_linux-armv7hl
-
-$ meson build_linux-armv7hl --cross-file cross-compilation_linux-armv7hl.txt
+$ meson build_linux-${TARGET} --cross-file cross-compilation_${TARGET}.txt
 The Meson build system
 Version: 0.41.2
 Source dir: /home/kaszpir/src/deurk/ktx
@@ -68,7 +68,7 @@ Build machine cpu: x86_64
 Library m found: YES
 Build targets in project: 1
 
-$ ninja -C build_linux-armv7hl
+$ ninja -C build_${TARGET}
 
 ninja: Entering directory `build_linux-armv7hl'
 [25/99] Compiling C object 'qwprogs@sha/src_bot_movement.c.o'.
