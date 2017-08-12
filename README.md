@@ -28,6 +28,9 @@ Now, you should have the qwprogs.so. Copy it to your ktx game directory of your 
 Build from source with meson
 ----------------------------
 
+Detailed commands to install packages, tools and compilation can be found in ``.travis.yml`` file.
+There are extra conditionals to install desired packages based on the TARGET.
+
 In general:
 
 - use Ubuntu 14.04 (but should work under 16.04 as well) as virtual machine, check out source code there
@@ -37,20 +40,51 @@ In general:
 - run ninja to generate .so file
 - you should have ``qwprogs.so`` file in ``build_*`` directory, put it in your quake server/ktx/ directory.
 
-Detailed commands to install packages, tools and compilation can be found in ``.travis.yml`` file.
 You should be able to compile binaries for most popular platforms, such as:
 
 - Linux 32-bit and 64-bit
 - Windows 32-bit and 64-bit (WoW64)
 - Arm 7 - for RaspBerry Pi 3 with Raspbian
 
-Example for RaspBerry:
+Example builiding under Ubuntu 14.04 binaries for Raspberry Pi 3 (Raspbian):
+
+Install required packages:
+
+```bash
+$ sudo apt-get update
+$ sudo apt-get -y upgrade
+$ sudo apt-get -y install build-essential python-virtualenv python3-dev python3-pip ninja-build cmake gcc-multilib
+```
+
+Install required packaes specifically for arm architecture for Raspberry Pi 3 (Raspbian):
+
+```bash
+$ sudo apt-get -y install gcc-arm-linux-gnueabihf pkg-config-arm-linux-gnueabihf
+```
+
+Check out the code to the current directory:
+
+```bash
+git clone https://github.com/deurk/mvdsv.git .
+```
+
+Create virtualenv + install python packages:
+
+```bash
+$ virtualenv .venv --python=python3
+$ . .venv/bin/activate
+$ pip3 install --upgrade pip
+$ pip3 install -r requirements.txt
+```
+
+Export env var to define what target to compile, run the build commands.
+
 
 ```bash
 $ export TARGET=linux-armv7hl
 $ rm -rf build_${TARGET}
 
-$ meson build_linux-${TARGET} --cross-file cross-compilation_${TARGET}.txt
+$ meson build_${TARGET} --cross-file cross-compilation_${TARGET}.txt
 The Meson build system
 Version: 0.41.2
 Source dir: /home/kaszpir/src/deurk/ktx
@@ -82,11 +116,23 @@ ninja: Entering directory `build_linux-armv7hl'
    float race_time = race_match_mode() ? player_match_info[player_num].best_time : race.currentrace[player_num].time;
          ^
 [99/99] Linking target qwprogs.so.
+```
 
-$ file build_linux-armv7hl/*.so
+Check the output binary file:
+
+```bash
+$ find build_${TARGET}/ -type f -name "qwprogs.*" -exec file {} \;
 build_linux-armv7hl/qwprogs.so: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, BuildID[sha1]=5d5ff9fd0172ef1aa929c1704a6a16b68906641f, not stripped
 
 ```
+
+In ``build_*/`` there will be ``qwprogs.so``  or ``qwprogs.dll`` binary, change permissions to executable and copy it to quake/ktx/ directory to start quake server with ktx mod enabled.
+
+
+Known issues:
+
+- When using cross compiling between 32bit and 64bit architecture make sure to reinstall *dev packages or run in chroot. See ``.travis.yml`` lines, there is ``apt-get remove`` command for this, because curl and pcre are in dependency but not required.
+- When changing architecture builds, for example for arm, apt-get will install/remove conflicting packages. Don't be surprised that you compile ``linux-amd64``, then ``linux-armv7hl`` and then back ``linux-amd64`` and it does not work because files are missing :)
 
 
 Building KTX as VM bytecode
