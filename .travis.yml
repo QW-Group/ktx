@@ -41,7 +41,7 @@ before_install:
   # update base distro
   - sudo apt-get update
   - sudo apt-get -y upgrade
-  - sudo apt-get -y dist-upgrade
+  # - sudo apt-get -y dist-upgrade
   # install base packages
   - sudo apt-get -y install build-essential python3-dev python3-pip ninja-build cmake
   # install cross complier if we gonna do binaries for windows
