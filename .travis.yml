@@ -26,7 +26,7 @@ matrix:
       env: TARGET=linux-amd64
     - os: linux
       dist: trusty
-      env: TARGET=linux-arm7hl
+      env: TARGET=linux-armv7hl
     - os: linux
       dist: trusty
       env: TARGET=win-x86
@@ -48,7 +48,7 @@ before_install:
   - if [ -z "${TARGET##*win*}" ]; then sudo apt-get -y install mingw-w64 ; fi
   # install cross compiler tools if we gonna do binares for arm/raspberry
   # notice it will remove gcc-multilib
-  - if [ -z "${TARGET##*arm*}" ]; then sudo apt-get -y install gcc-arm-linux-gnueabihf  pkg-config-arm-linux-gnueabihf ;fi
+  - if [ -z "${TARGET##*arm*}" ]; then sudo apt-get -y install gcc-arm-linux-gnueabihf pkg-config-arm-linux-gnueabihf ;fi
   # activate virtualenv with python3, meson requires python3
   - virtualenv .venv --python=python3
   - . .venv/bin/activate
