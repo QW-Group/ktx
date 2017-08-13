@@ -26,7 +26,7 @@ TBD
 
 ## Installing
 
-For more detailed information we suggest [nquake/server-linux](https://github.com/nQuake/server-linux), which uses [MVDSV](https://github.com/deurk/mvdsv) ad QuakeWorld server.
+For more detailed information we suggest [nquake/server-linux](https://github.com/nQuake/server-linux), which uses [MVDSV](https://github.com/deurk/mvdsv) and **[KTX](https://github.com/deurk/ktx)** as **QuakeWorld** server.
 
 ## Building binaries
 
