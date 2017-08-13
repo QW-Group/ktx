@@ -26,7 +26,7 @@ TBD
 
 ## Installing
 
-For more detailed information we suggest looking at the [nQuake server][nquake], which uses [MVDSV][mvdsv] and **[KTX][ktx]** as **QuakeWorld** server.
+For more detailed information we suggest looking at the [nQuake server][nquake], which uses **[MVDSV][mvdsv]** and **[KTX][ktx]** as **QuakeWorld** server.
 
 ## Building binaries
 
