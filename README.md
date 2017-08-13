@@ -79,8 +79,8 @@ $ rm -rf build_${TARGET}
 $ meson build_${TARGET} --cross-file tools/cross-compilation/${TARGET}.txt
 The Meson build system
 Version: 0.41.2
-Source dir: /home/kaszpir/src/deurk/ktx
-Build dir: /home/kaszpir/src/deurk/ktx/build_linux-linux-amd64
+Source dir: /ktx/src
+Build dir: /ktx/src/build_linux-linux-amd64
 Build type: cross build
 Project name: ktx
 Native c compiler: cc (gcc 5.4.0)
