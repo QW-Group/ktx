@@ -42,7 +42,7 @@ In general:
 - set up virtualenv and install python packages (required for meson and ninja builders)
 - run meson build for given directory (optionally with cross compilation settings)
 - run ninja to generate the binary file
-- you should have ``qwprogs.so`` file in ``build_*`` directory.
+- you should have ``qwprogs.so``, ``qwprogs.dll`` or ``qwprogs.dylib`` file (depending on the TARGET architecture) in ``build_*`` directory.
 
 Example for Linux amd64 under Ubuntu 14.04 (should be similar under 16.04)
 
