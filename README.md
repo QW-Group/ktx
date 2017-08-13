@@ -1,18 +1,18 @@
 # KTX: a QuakeWorld server modification
 
-**[KTX](https://github.com/deurk/ktx)** (Kombat Teams eXtreme) is a popular **QuakeWorld** server modification, adding numerous features to the core features of the server.
+**[KTX][ktx]** (Kombat Teams eXtreme) is a popular **QuakeWorld** server modification, adding numerous features to the core features of the server.
 
-Although it had been developed to be **Quakeworld** server agnostic, it has over the years been developed very close to **[MVDSV](https://github.com/deurk/mvdsv)** to which it has become an extent, thus compatibility with other **Quakeworld** servers might not have been maintained.
+Although it had been developed to be **Quakeworld** server agnostic, it has over the years been developed very close to **[MVDSV][mvdsv]** to which it has become an extent, thus compatibility with other **Quakeworld** servers might not have been maintained.
 
 _(This README.md file is still a work in progress. bear with us while we polish it!)_
 
 ## Getting Started
 
-The following instructions will help you get **[KTX](https://github.com/deurk/ktx)** installed on a running **[MVDSV](https://github.com/deurk/mvdsv)** server using prebuilt binaries. Details on how to compile your own **[KTX](https://github.com/deurk/ktx)** binary will also be included to match specific architectures or for development purposes.
+The following instructions will help you get **[KTX][ktx]** installed on a running **[MVDSV][mvdsv]** server using prebuilt binaries. Details on how to compile your own **[KTX][ktx]** binary will also be included to match specific architectures or for development purposes.
 
 ## Supported architectures
 
-The following architectures are fully supported by **[KTX](https://github.com/deurk/ktx)** and are available as prebuilt binaries:
+The following architectures are fully supported by **[KTX][ktx]** and are available as prebuilt binaries:
 * Linux i686 (Intel and AMD 32-bit processors)
 * Linux amd64 (Intel and AMD 64-bits processors)
 * Windows x86 (Intel and AMD 32-bit processors)
@@ -26,7 +26,7 @@ TBD
 
 ## Installing
 
-For more detailed information we suggest [nquake/server-linux](https://github.com/nQuake/server-linux), which uses [MVDSV](https://github.com/deurk/mvdsv) and **[KTX](https://github.com/deurk/ktx)** as **QuakeWorld** server.
+For more detailed information we suggest looking at the [nQuake server][nquake], which uses [MVDSV][mvdsv] and **[KTX][ktx]** as **QuakeWorld** server.
 
 ## Building binaries
 
@@ -123,7 +123,7 @@ TBD
 
 ## Versioning
 
-We use a pretty crappy system for versioning for now. For the versions available, see the [tags on this repository](https://github.com/deurk/ktx/tags).
+We use a pretty crappy system for versioning for now. For the versions available, see the [tags on this repository][ktx-tags].
 
 ## Authors
 
@@ -140,7 +140,7 @@ We use a pretty crappy system for versioning for now. For the versions available
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details about how to contribute to **[KTX](https://github.com/deurk/ktx)**.
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details about how to contribute to **[KTX][ktx]**.
 
 ## Code of Conduct
 
@@ -154,3 +154,8 @@ This project is licensed under the GPL-2.0 License - see the [LICENSE.md](LICENS
 
 * Hat tip to anyone who's code was used
 * Inspiration
+
+[ktx]: https://github.com/deurk/ktx
+[ktx-tags]: https://github.com/deurk/ktx/tags
+[mvdsv]: https://github.com/deurk/mvdsv
+[nquake-linux]: https://github.com/nQuake/server-linux
