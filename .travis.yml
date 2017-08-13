@@ -67,8 +67,7 @@ script:
 
 deploy:
   provider: gcs
-  access_key_id:
-    secure: bO4VJyJr1bb07tQiJb7QQIAHS2GGoP5QzoJW6uE+dr19WMhHWwt7tN3I1raSi1LxkVMsaI9Ntx81htQIlTNo+wVfiaNAnSL+dSdryK4+rbXNESw6KW5KvSNsGvjx0Cq1M5arvwEgyK5AvSLJYEa4+iXUXNUUJUa7vqRLgESyshY=
+  access_key_id: GOOGIDU6SZSRYABCDMPF
   secret_access_key:
     secure: HTWAQcITewH6CE6vCmzFvprekbVTwOmI9UrrZCvY60oM5IiCywMzpABGpQb/hw9kn2x7fLkDmEx8/X6Oy7xzbQ4VBBM8/G1ZE3jcpDz7oH0iHoxKvsNIi1HfFm79VYrlZtQI6J3u6UMrBYlF5xgy2W4P1weQKNEmn+rSF5CqsAo=
   bucket: ktx
