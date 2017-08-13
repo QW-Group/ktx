@@ -59,7 +59,7 @@ before_install:
 # each script section is executed in matrix build
 script:
   - mkdir build_${TARGET} || true
-  - meson build_${TARGET} --cross-file cross-compilation_${TARGET}.txt
+  - meson build_${TARGET} --cross-file tools/cross-compilation/${TARGET}.txt
   - ninja -v -C build_${TARGET}
   # print basic info about complied files
   - find build_${TARGET}/ -type f -name "qwprogs.*" -exec file {} \;

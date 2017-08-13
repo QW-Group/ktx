@@ -9,7 +9,8 @@ Current code status: [![Build Status](https://drone.io/github.com/qwassoc/ktx/st
 
 Features
 --------
-*To be detailled*
+
+*To be detailed*
 
 
 Build from source (old way)
@@ -27,6 +28,7 @@ Now, you should have the qwprogs.so. Copy it to your ktx game directory of your 
 
 Build from source with meson
 ----------------------------
+Meson builds produce binaries, not VM bytecode.
 
 Detailed commands to install packages, tools and compilation can be found in ``.travis.yml`` file.
 There are extra conditionals to install desired packages based on the TARGET.
@@ -46,7 +48,7 @@ You should be able to compile binaries for most popular platforms, such as:
 - Windows 32-bit and 64-bit (WoW64)
 - Arm 7 - for RaspBerry Pi 3 with Raspbian
 
-Example builiding under Ubuntu 14.04 binaries for Raspberry Pi 3 (Raspbian):
+Example building under Ubuntu 14.04 binaries for Raspberry Pi 3 (Raspbian):
 
 Install required packages:
 
@@ -79,12 +81,11 @@ $ pip3 install -r requirements.txt
 
 Export env var to define what target to compile, run the build commands.
 
-
 ```bash
 $ export TARGET=linux-armv7hl
 $ rm -rf build_${TARGET}
 
-$ meson build_${TARGET} --cross-file cross-compilation_${TARGET}.txt
+$ meson build_${TARGET} --cross-file tools/cross-compilation/${TARGET}.txt
 The Meson build system
 Version: 0.41.2
 Source dir: /home/kaszpir/src/deurk/ktx
@@ -105,16 +106,6 @@ Build targets in project: 1
 $ ninja -C build_${TARGET}
 
 ninja: Entering directory `build_linux-armv7hl'
-[25/99] Compiling C object 'qwprogs@sha/src_bot_movement.c.o'.
-../src/bot_movement.c: In function ‘ApplyPhysics’:
-../src/bot_movement.c:191:10: warning: unused variable ‘dot_prod’ [-Wunused-variable]
-    float dot_prod = 0.0f;
-          ^
-[80/99] Compiling C object 'qwprogs@sha/src_race.c.o'.
-../src/race.c: In function ‘race_finish_capture’:
-../src/race.c:3766:9: warning: unused variable ‘race_time’ [-Wunused-variable]
-   float race_time = race_match_mode() ? player_match_info[player_num].best_time : race.currentrace[player_num].time;
-         ^
 [99/99] Linking target qwprogs.so.
 ```
 
@@ -126,8 +117,7 @@ build_linux-armv7hl/qwprogs.so: ELF 32-bit LSB shared object, ARM, EABI5 version
 
 ```
 
-In ``build_*/`` there will be ``qwprogs.so``  or ``qwprogs.dll`` binary, change permissions to executable and copy it to quake/ktx/ directory to start quake server with ktx mod enabled.
-
+In ``build_*/`` there will be ``qwprogs.so``  or ``qwprogs.dll`` binary, change permissions to executable and copy it to `quake/ktx/` directory and then start quake server with ktx mod enabled. For more detailed information we suggest [nquake/server-linux](https://github.com/nQuake/server-linux), which uses [mvdsv](https://github.com/deurk/mvdsv) ad QuakeWorld server.
 
 Known issues:
 
