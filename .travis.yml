@@ -75,4 +75,6 @@ deploy:
   on:
     repo: deurk/ktx
   skip_cleanup: true
+  local_dir: build_${TARGET}
+  acl: public-read
 
