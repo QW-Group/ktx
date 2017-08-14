@@ -135,7 +135,7 @@ We use a pretty crappy system for versioning for now. For the versions available
 * **Anton** *"tonik"* **Gavrilov**
 * **Andrew** *"ult"* **Grondalski**
 * **Paul Klumpp**
-* **Niclas* *"empezar"* **Lindström
+* **Niclas** *"empezar"* **Lindström
 * **Dmitry** *"disconnect"* **Musatov**
 * **Peter** *"meag"* **Nicol**
 * **Alexandre** *"deurk"* **Nizoux**
