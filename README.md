@@ -130,20 +130,21 @@ We use a pretty crappy system for versioning for now. For the versions available
 
 (Listed by last name alphabetic order)
 
-* **Ivan Bolshunov** - *qqshka*
-* **Dominic Evans** - *oldman*
-* **Anton Gavrilov** - *tonik*
-* **Andrew Grondalski** - *ult*
-* **Paul Klumpp** - ?
-* **Dmitry Musatov** - *disconnect*
-* **Peter Nicol** - *meag*
-* **Alexandre Nizoux** - *deurk*
-* **Tero Parkkonen** - *Renzo*
-* **Joseph Pecoraro** - ?
-* **Michał Sochoń** - *\_KaszpiR\_*
-* **Jonny Svärd** - *dimman*
-* **Vladimir Vladimirovich** - *VVD*
-* **Florian Zwoch** - *Tuna*
+* **Ivan** *"qqshka"* **Bolshunov**
+* **Dominic** *"oldman"* **Evans**
+* **Anton** *"tonik"* **Gavrilov**
+* **Andrew** *"ult"* **Grondalski**
+* **Paul Klumpp**
+* **Niclas* *"empezar"* **Lindström
+* **Dmitry** *"disconnect"* **Musatov**
+* **Peter** *"meag"* **Nicol**
+* **Alexandre** *"deurk"* **Nizoux**
+* **Tero** *"Renzo"* **Parkkonen**
+* **Joseph** *"bogojoker"* **Pecoraro**
+* **Michał** *"\_KaszpiR\_"* **Sochoń**
+* **Jonny** *"dimman"* **Svärd**
+* **Vladimir** *"VVD"* **Vladimirovich**
+* **Florian** *"Tuna"* **Zwoch**
 
 ## Contributing
 
