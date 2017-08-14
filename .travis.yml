@@ -18,7 +18,7 @@ language:
 
 env:
   global:
-    DATETIME=$(date +%Y%m%d_%H%M%S)
+    DATETIME=$(date +%Y%m%d-%H%M%S)
 
 matrix:
   include:
@@ -73,7 +73,8 @@ script:
   - ninja -v -C build_${TARGET}
   # print basic info about compiled files
   - file build_${TARGET}/qwprogs.${EXTENSION}
-  - mv build_${TARGET}/qwprogs.${EXTENSION} build_${TARGET}/${DATETIME}_${TRAVIS_COMMIT}-qwprogs.${EXTENSION}
+  - mkdir -p uploads_to_gcs
+  - mv build_${TARGET}/qwprogs.${EXTENSION} uploads_to_gcs/${DATETIME}_${TRAVIS_COMMIT}-qwprogs.${EXTENSION}
 
 deploy:
   provider: gcs
@@ -85,7 +86,6 @@ deploy:
     repo: deurk/ktx
   skip_cleanup: true
   upload-dir: commits/${TARGET}
-  local-dir: build_${TARGET}
-  file: build_${TARGET}/${DATETIME}_${TRAVIS_COMMIT}-qwprogs.${EXTENSION}
+  local-dir: uploads_to_gcs
   acl: public-read
 
