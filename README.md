@@ -21,9 +21,13 @@ The following architectures are fully supported by **[KTX][ktx]** and are availa
 * Mac OS X (Intel 64-bit processors)
 * Linux armhf (ARM 32-bit processors)
 
+## Prebuilt binaries
+
+You can find the prebuilt binaries on [this download page][ktx-builds].
+
 ## Prerequisites
 
-TBD
+**[KTX][ktx]** is a server mod and won't run without a proper **Quakeworld** server set up. **[MVDSV][mvdsv]** is the recommended one, but **[FTE][fte]** might work as well (unconfirmed with current code).
 
 ## Installing
 
@@ -165,5 +169,7 @@ This project is licensed under the GPL-2.0 License - see the [LICENSE.md](LICENS
 
 [ktx]: https://github.com/deurk/ktx
 [ktx-tags]: https://github.com/deurk/ktx/tags
+[ktx-builds]: https://builds.deurk.net
 [mvdsv]: https://github.com/deurk/mvdsv
 [nquake-linux]: https://github.com/nQuake/server-linux
+[fte]: http://fte.triptohell.info/
