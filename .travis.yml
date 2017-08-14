@@ -16,33 +16,32 @@ compiler:
 language:
   - c
 
+env:
+  global:
+    DATETIME=$(date +%Y%m%d_%H%M%S)
+
 matrix:
   include:
     - os: linux
-      dist: trusty
       env:
         TARGET=linux-amd64
-        FILE=qwprogs.so
+        EXTENSION=so
     - os: linux
-      dist: trusty
       env: 
         TARGET=linux-armhf
-        FILE=qwprogs.so
+        EXTENSION=so
     - os: linux
-      dist: trusty
       env:
         TARGET=linux-i686
-        FILE=qwprogs.so
+        EXTENSION=so
     - os: linux
-      dist: trusty
       env:
         TARGET=windows-x64
-        FILE=qwprogs.dll
+        EXTENSION=dll
     - os: linux
-      dist: trusty
       env:
         TARGET=windows-x86
-        FILE=qwprogs.dll
+        EXTENSION=dll
 
 before_install:
   # show some extra info
@@ -72,9 +71,9 @@ script:
   - mkdir build_${TARGET} || true
   - meson build_${TARGET} --cross-file tools/cross-compilation/${TARGET}.txt
   - ninja -v -C build_${TARGET}
-  # print basic info about complied files
-  - find build_${TARGET}/ -type f -name "qwprogs.*" -exec file {} \;
-  - mv build_${TARGET}/${FILE} build_${TARGET}/${FILE}.${TRAVIS_COMMIT}
+  # print basic info about compiled files
+  - file build_${TARGET}/qwprogs.${EXTENSION}
+  - mv build_${TARGET}/qwprogs.${EXTENSION} build_${TARGET}/${DATETIME}_${TRAVIS_COMMIT}-qwprogs.${EXTENSION}
 
 deploy:
   provider: gcs
@@ -87,6 +86,6 @@ deploy:
   skip_cleanup: true
   upload-dir: commits/${TARGET}
   local-dir: build_${TARGET}
-  file: build_${TARGET}/${FILE}.${TRAVIS_COMMIT}
+  file: build_${TARGET}/${DATETIME}_${TRAVIS_COMMIT}-qwprogs.${EXTENSION}
   acl: public-read
 
