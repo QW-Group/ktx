@@ -134,11 +134,16 @@ We use a pretty crappy system for versioning for now. For the versions available
 * **Dominic Evans** - *oldman*
 * **Anton Gavrilov** - *tonik*
 * **Andrew Grondalski** - *ult*
+* **Paul Klumpp** - ?
 * **Dmitry Musatov** - *disconnect*
 * **Peter Nicol** - *meag*
 * **Alexandre Nizoux** - *deurk*
 * **Tero Parkkonen** - *Renzo*
+* **Joseph Pecoraro** - ?
+* **Michał Sochoń** - *\_KaszpiR\_*
+* **Jonny Svärd** - *dimman*
 * **Vladimir Vladimirovich** - *VVD*
+* **Florian Zwoch** - *Tuna*
 
 ## Contributing
 
