@@ -25,23 +25,23 @@ matrix:
     - os: linux
       env:
         TARGET=linux-amd64
-        EXTENSION=so
+        EXTENSION=.so
     - os: linux
       env: 
         TARGET=linux-armhf
-        EXTENSION=so
+        EXTENSION=.so
     - os: linux
       env:
         TARGET=linux-i686
-        EXTENSION=so
+        EXTENSION=.so
     - os: linux
       env:
         TARGET=windows-x64
-        EXTENSION=dll
+        EXTENSION=.dll
     - os: linux
       env:
         TARGET=windows-x86
-        EXTENSION=dll
+        EXTENSION=.dll
 
 before_install:
   # show some extra info
@@ -72,9 +72,9 @@ script:
   - meson build_${TARGET} --cross-file tools/cross-compilation/${TARGET}.txt
   - ninja -v -C build_${TARGET}
   # print basic info about compiled files
-  - file build_${TARGET}/qwprogs.${EXTENSION}
+  - file build_${TARGET}/qwprogs${EXTENSION}
   - mkdir -p uploads_to_gcs
-  - mv build_${TARGET}/qwprogs.${EXTENSION} uploads_to_gcs/${DATETIME}_${TRAVIS_COMMIT}-qwprogs.${EXTENSION}
+  - mv build_${TARGET}/qwprogs${EXTENSION} uploads_to_gcs/${DATETIME}_${TRAVIS_COMMIT}_qwprogs${EXTENSION}
 
 deploy:
   provider: gcs
