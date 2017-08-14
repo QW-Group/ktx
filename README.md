@@ -27,7 +27,7 @@ TBD
 
 ## Installing
 
-For more detailed information we suggest looking at the [nQuake server][nquake], which uses **[MVDSV][mvdsv]** and **[KTX][ktx]** as **QuakeWorld** server.
+For more detailed information we suggest looking at the [nQuake server][nquake-linux], which uses **[MVDSV][mvdsv]** and **[KTX][ktx]** as **QuakeWorld** server.
 
 ## Building binaries
 
@@ -135,6 +135,7 @@ We use a pretty crappy system for versioning for now. For the versions available
 * **Anton Gavrilov** - *tonik*
 * **Andrew Grondalski** - *ult*
 * **Dmitry Musatov** - *disconnect*
+* **Peter Nicol** - *meag*
 * **Alexandre Nizoux** - *deurk*
 * **Tero Parkkonen** - *Renzo*
 * **Vladimir Vladimirovich** - *VVD*
