@@ -1,15 +1,9 @@
 dist: trusty
 sudo: required
 
-# branches:
-#   only:
-#   - master
-
 os:
   - linux
 
-# in theory travis should detect what to install,
-# but we use meson, which is not supported by travis yet and we need custom commands
 compiler:
   - gcc
 
@@ -18,7 +12,8 @@ language:
 
 env:
   global:
-    DATETIME=$(date +%Y%m%d-%H%M%S)
+    DATE=$(date +%Y%m%d)
+    TIME=$(date +%H%M%S)
 
 matrix:
   include:
@@ -27,7 +22,7 @@ matrix:
         TARGET=linux-amd64
         EXTENSION=.so
     - os: linux
-      env: 
+      env:
         TARGET=linux-armhf
         EXTENSION=.so
     - os: linux
@@ -73,8 +68,11 @@ script:
   - ninja -v -C build_${TARGET}
   # print basic info about compiled files
   - file build_${TARGET}/qwprogs${EXTENSION}
+  # create hash for download verification
+  - md5sum --tag build_${TARGET}/qwprogs${EXTENSION} > build_${TARGET}/qwprogs.md5
   - mkdir -p uploads_to_gcs
-  - mv build_${TARGET}/qwprogs${EXTENSION} uploads_to_gcs/${DATETIME}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION}
+  - mv build_${TARGET}/qwprogs${EXTENSION} uploads_to_gcs/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION}
+  - mv build_${TARGET}/qwprogs.md5 uploads_to_gcs/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs.md5
 
 deploy:
   provider: gcs
