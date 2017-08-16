@@ -73,6 +73,8 @@ script:
   - mkdir -p uploads_to_gcs
   - mv build_${TARGET}/qwprogs${EXTENSION} uploads_to_gcs/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION}
   - mv build_${TARGET}/qwprogs.md5 uploads_to_gcs/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs.md5
+  # update latest links
+  - cp uploads_to_gcs/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION} uploads_to_gcs/qwprogs${EXTENSION}
 
 deploy:
   provider: gcs
