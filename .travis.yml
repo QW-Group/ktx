@@ -74,7 +74,7 @@ script:
   - mv build_${TARGET}/qwprogs${EXTENSION} uploads_to_gcs/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION}
   - mv build_${TARGET}/qwprogs.md5 uploads_to_gcs/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs.md5
   # update latest links
-  - cp uploads_to_gcs/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION} uploads_to_gcs/qwprogs${EXTENSION}
+  - cp -a uploads_to_gcs/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION} uploads_to_gcs/qwprogs${EXTENSION}
 
 deploy:
   provider: gcs
@@ -85,6 +85,7 @@ deploy:
   on:
     repo: deurk/ktx
   skip_cleanup: true
+  overwrite: true
   upload-dir: commits/${TARGET}
   local-dir: uploads_to_gcs
   acl: public-read
