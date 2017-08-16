@@ -74,7 +74,10 @@ script:
   - mv build_${TARGET}/qwprogs${EXTENSION} uploads_to_gcs/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION}
   - mv build_${TARGET}/qwprogs.md5 uploads_to_gcs/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs.md5
   # update latest links
-  - cp -a uploads_to_gcs/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION} uploads_to_gcs/qwprogs${EXTENSION}
+  - cp uploads_to_gcs/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION} uploads_to_gcs/qwprogs${EXTENSION}
+
+before_deploy:
+  - echo 'testing before_deploy step to see if it is available for gcs'
 
 deploy:
   provider: gcs
