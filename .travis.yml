@@ -69,7 +69,7 @@ script:
   # print basic info about compiled files
   - file build_${TARGET}/qwprogs${EXTENSION}
   # create hash for download verification
-  - md5sum --tag build_${TARGET}/qwprogs${EXTENSION} > build_${TARGET}/qwprogs.md5
+  - md5sum build_${TARGET}/qwprogs${EXTENSION} > build_${TARGET}/qwprogs.md5
   - mkdir -p uploads_to_gcs
   - mv build_${TARGET}/qwprogs${EXTENSION} uploads_to_gcs/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION}
   - mv build_${TARGET}/qwprogs.md5 uploads_to_gcs/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs.md5

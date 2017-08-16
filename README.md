@@ -142,6 +142,7 @@ We use a pretty crappy system for versioning for now. For the versions available
 * **Niclas** *"empezar"* **Lindström**
 * **Dmitry** *"disconnect"* **Musatov**
 * **Peter** *"meag"* **Nicol**
+* **Andreas** *"molgrum"* **Nilsson**
 * **Alexandre** *"deurk"* **Nizoux**
 * **Tero** *"Renzo"* **Parkkonen**
 * **Joseph** *"bogojoker"* **Pecoraro**
