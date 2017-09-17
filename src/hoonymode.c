@@ -36,6 +36,7 @@ const char hm_result_indicator[] = "\0WLswD";
 
 #define HM_WINNING_DIFF        2
 
+static qbool match_break = false;
 static int round_number = 0;        // valid array index
 static int true_round_number = 0;   // keeps increasing, for insane case of > HM_MAX_ROUNDS game
 static char round_explanation[128] = { 0 };
@@ -170,6 +171,11 @@ void HM_draw(void)
 
 qbool HM_is_game_over(void)
 {
+	// If the round ended due to /break then game is over
+	if (match_break) {
+		return true;
+	}
+
 	// Game is over if we've hit frag limit and one player is in lead (HM_PT_FINAL), or
 	//   one player is one frag ahead at the start of a round of spawns and we're past the fraglimit
 	if (HM_current_point_type() == HM_PT_FINAL) {
@@ -1051,4 +1057,9 @@ static void HM_store_spawns(void)
 
 	cvar_set("k_hoonymode_prevmap", strnull(entityFile) ? g_globalvars.mapname : entityFile);
 	cvar_set("k_hoonymode_prevspawns", buffer);
+}
+
+void HM_match_break(void)
+{
+	match_break = true;
 }

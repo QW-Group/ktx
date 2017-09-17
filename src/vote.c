@@ -351,6 +351,10 @@ void vote_check_break ()
 	if( !get_votes_req( OV_BREAK, true ) ) {
 		vote_clear( OV_BREAK );
 
+		if (isHoonyModeAny()) {
+			HM_match_break();
+		}
+
 		G_bprint(2, "%s\n", redtext("Match stopped by majority vote"));
 
 		EndMatch( 0 );

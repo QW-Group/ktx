@@ -816,6 +816,7 @@ void    HM_roundsup(void);
 void    HM_roundsdown(void);
 void    HM_point_stats(void);
 void    HM_restore_spawns(void);
+void    HM_match_break(void);
 const char* HM_round_explanation(void);
 const char* HM_series_explanation(void);
 
