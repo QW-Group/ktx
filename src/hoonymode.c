@@ -788,11 +788,6 @@ void HM_pick_spawn(void)
 		return;
 	}
 
-	if ((teamflag == 1 ? red_spawns : blue_spawns) >= cvar("maxclients") / 2) {
-		G_sprint(self, PRINT_HIGH, "Team already has %d spawns allocated\n", (teamflag == 1 ? red_spawns : blue_spawns));
-		return;
-	}
-
 	if (closest == old_nomination || (isHoonyModeTDM() && closest->hoony_nomination == teamflag)) {
 		// Duel only: we're picking for ourselves, so this unpicks the current option
 		if (isHoonyModeDuel()) {
@@ -818,26 +813,32 @@ void HM_pick_spawn(void)
 		}
 	}
 	else {
-		if (old_nomination != 0) {
-			HM_deselect_spawn(old_nomination);
-		}
-
-		if (isHoonyModeDuel()) {
-			if (!strnull(closest->targetname)) {
-				G_bprint(2, "%s picks spawn %s\n", self->netname, redtext(closest->targetname));
-			}
-			else {
-				G_bprint(2, "%s picks spawn #%d\n", self->netname, closest_spawn_num);
-			}
-		}
-		else if (!strnull(closest->targetname)) {
-			G_bprint(2, "%s picks spawn %s for team \20%s\21\n", self->netname, redtext(closest->targetname), teamflag == 1 ? "red" : "blue");
+		if ((teamflag == 1 ? red_spawns : blue_spawns) >= cvar("maxclients") / 2) {
+			G_sprint(self, PRINT_HIGH, "Team already has %d spawns allocated\n", (teamflag == 1 ? red_spawns : blue_spawns));
+			return;
 		}
 		else {
-			G_bprint(2, "%s picks spawn #%d for team \20%s\21\n", self->netname, closest_spawn_num, teamflag == 1 ? "red" : "blue");
-		}
+			if (old_nomination != 0) {
+				HM_deselect_spawn(old_nomination);
+			}
 
-		HM_select_spawn(closest, self, isHoonyModeDuel() ? EF_GREEN : teamflag == 1 ? EF_RED : EF_BLUE);
+			if (isHoonyModeDuel()) {
+				if (!strnull(closest->targetname)) {
+					G_bprint(2, "%s picks spawn %s\n", self->netname, redtext(closest->targetname));
+				}
+				else {
+					G_bprint(2, "%s picks spawn #%d\n", self->netname, closest_spawn_num);
+				}
+			}
+			else if (!strnull(closest->targetname)) {
+				G_bprint(2, "%s picks spawn %s for team \20%s\21\n", self->netname, redtext(closest->targetname), teamflag == 1 ? "red" : "blue");
+			}
+			else {
+				G_bprint(2, "%s picks spawn #%d for team \20%s\21\n", self->netname, closest_spawn_num, teamflag == 1 ? "red" : "blue");
+			}
+
+			HM_select_spawn(closest, self, isHoonyModeDuel() ? EF_GREEN : teamflag == 1 ? EF_RED : EF_BLUE);
+		}
 	}
 
 	HM_store_spawns();
