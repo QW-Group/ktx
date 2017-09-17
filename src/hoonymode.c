@@ -36,12 +36,14 @@ const char hm_result_indicator[] = "\0WLswD";
 
 #define HM_WINNING_DIFF        2
 
-static int round_number = 0;
+static int round_number = 0;        // valid array index
+static int true_round_number = 0;   // keeps increasing, for insane case of > HM_MAX_ROUNDS game
 static char round_explanation[128] = { 0 };
 static char series_explanation[128] = { 0 };
 
 static void EndRound(void)
 {
+	++true_round_number;
 	if (round_number < HM_MAX_ROUNDS - 1) {
 		++round_number;
 	}
@@ -175,7 +177,7 @@ qbool HM_is_game_over(void)
 	}
 
 	// 
-	if (isHoonyModeDuel() && HM_current_point_type() == HM_PT_SET) {
+	if (isHoonyModeDuel() && HM_current_point_type() == HM_PT_SET && true_round_number % 2 == 0) {
 		gedict_t* p;
 		int maxfrags = -999;
 		int minfrags = 999;
