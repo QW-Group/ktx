@@ -1,3 +1,8 @@
+/*
+bot/botenemy.qc
+
+Copyright (C) 1997-1999 Robert 'Frog' Field
+*/ 
 // Converted from .qc on 05/02/2016
 
 #ifdef BOT_SUPPORT
