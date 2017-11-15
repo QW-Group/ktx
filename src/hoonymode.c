@@ -276,7 +276,7 @@ void respawn_items(char* classname, qbool enabled)
 			if (p->initial_spawn_delay > 0) {
 				// hide, but respawn at future point
 				p->model = NULL;
-				p->s.v.solid = SOLID_NOT;
+				p->s.v.solid = (bots_enabled() ? SOLID_TRIGGER : SOLID_NOT);
 				p->s.v.nextthink = g_globalvars.time + p->initial_spawn_delay;
 				p->think = ( func_t ) SUB_regen;
 			}
@@ -293,7 +293,7 @@ void respawn_items(char* classname, qbool enabled)
 		else {
 			// hide item
 			p->model = NULL;
-			p->s.v.solid = SOLID_NOT;
+			p->s.v.solid = (bots_enabled() ? SOLID_TRIGGER : SOLID_NOT);
 			p->s.v.nextthink = 0;
 #ifdef BOT_SUPPORT
 			p->fb.goal_respawn_time = 0;

@@ -1057,4 +1057,8 @@ void TeamplayGameTick(void);
 void LocationInitialise(void);
 qbool SameTeam(gedict_t* p1, gedict_t* p2);
 
+#ifndef BOT_SUPPORT
+#define bots_enabled() (false)
+#endif
+
 #define AUTOTRACK_POWERUPS_PREDICT_TIME 2
