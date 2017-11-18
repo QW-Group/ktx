@@ -175,7 +175,7 @@ qbool SetAttributesBasedOnSkill (int skill)
 	cvar_fset (FB_CVAR_OWNSPEED_VOLATILITY_THRESHOLD, RangeOverSkill (skill, 360, 450));
 	cvar_fset (FB_CVAR_OWNSPEED_VOLATILITY_INCREASE, RangeOverSkill (skill, 0.2f, 0.1f));
 	cvar_fset (FB_CVAR_ENEMYSPEED_VOLATILITY_THRESHOLD, RangeOverSkill (skill, 360, 450));
-	cvar_fset (FB_CVAR_OWNSPEED_VOLATILITY_INCREASE, RangeOverSkill (skill, 0.4f, 0.2f));
+	cvar_fset (FB_CVAR_ENEMYSPEED_VOLATILITY_INCREASE, RangeOverSkill (skill, 0.4f, 0.2f));
 	cvar_fset (FB_CVAR_ENEMYDIRECTION_VOLATILITY_INCREASE, RangeOverSkill (skill, 0.6f, 0.4f));
 	cvar_fset (FB_CVAR_PAIN_VOLATILITY_INCREASE, RangeOverSkill(skill, 0.5f, 0.1f));
 	cvar_fset (FB_CVAR_SELF_MIDAIR_VOLATILITY_INCREASE, RangeOverSkill(skill, 1.0f, 0.0f));
