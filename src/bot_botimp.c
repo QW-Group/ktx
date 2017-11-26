@@ -32,6 +32,7 @@ Copyright (C) 2000-2007 ParboiL
 #define FB_CVAR_PITCH_SCALE "k_fbskill_aim_pitch_scale"
 #define FB_CVAR_ATTACK_RESPAWNS "k_fbskill_aim_attack_respawns"
 #define FB_CVAR_REACTION_TIME "k_fbskill_reactiontime"
+#define FB_CVAR_REACTION_MOVETIME "k_fbskill_reactionmovetime"
 
 #define FB_CVAR_MIN_VOLATILITY "k_fbskill_vol_min"
 #define FB_CVAR_MAX_VOLATILITY "k_fbskill_vol_max"
@@ -109,6 +110,7 @@ void RegisterSkillVariables(void)
 	RegisterCvar(FB_CVAR_PITCH_SCALE);
 	RegisterCvar(FB_CVAR_ATTACK_RESPAWNS);
 	RegisterCvar(FB_CVAR_REACTION_TIME);
+	RegisterCvar(FB_CVAR_REACTION_MOVETIME);
 
 	RegisterCvar(FB_CVAR_MIN_VOLATILITY);
 	RegisterCvar(FB_CVAR_MAX_VOLATILITY);
@@ -166,6 +168,7 @@ qbool SetAttributesBasedOnSkill (int skill)
 
 	cvar_fset (FB_CVAR_ATTACK_RESPAWNS, skill >= 15 ? 1 : 0);
 	cvar_fset (FB_CVAR_REACTION_TIME, RangeOverSkill (skill, 0.75f, 0.3f));
+	cvar_fset (FB_CVAR_REACTION_MOVETIME, RangeOverSkill(skill, 0.3f, 0.1f));
 
 	// Volatility
 	cvar_fset (FB_CVAR_MIN_VOLATILITY, 1.0f);
@@ -245,6 +248,7 @@ void SetAttribs(gedict_t* self, qbool customised)
 	self->fb.skill.enemyspeed_volatility = bound (0, cvar (FB_CVAR_ENEMYSPEED_VOLATILITY_INCREASE), 5.0f);
 	self->fb.skill.enemydirection_volatility = bound (0, cvar (FB_CVAR_ENEMYDIRECTION_VOLATILITY_INCREASE), 5.0f);
 	self->fb.skill.awareness_delay = bound (0, cvar (FB_CVAR_REACTION_TIME), 1.0f);
+	self->fb.skill.spawn_move_delay = bound (0, cvar (FB_CVAR_REACTION_MOVETIME), 1.0f);
 	self->fb.skill.pain_volatility = bound (0, cvar(FB_CVAR_PAIN_VOLATILITY_INCREASE), 2.0f);
 	self->fb.skill.self_midair_volatility = bound (0, cvar(FB_CVAR_SELF_MIDAIR_VOLATILITY_INCREASE), 2.0f);
 	self->fb.skill.opponent_midair_volatility = bound(0, cvar(FB_CVAR_OPPONENT_MIDAIR_VOLATILITY_INCREASE), 2.0f);

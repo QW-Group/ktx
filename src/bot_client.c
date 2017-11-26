@@ -116,6 +116,7 @@ void BotClientEntersEvent(gedict_t* self, gedict_t* spawn_pos)
 	self->fb.desired_angle[1] = self->s.v.angles[1];
 	self->fb.state = 0;
 	self->fb.min_fire_time = g_globalvars.time + self->fb.skill.awareness_delay;
+	self->fb.min_move_time = g_globalvars.time + self->fb.skill.spawn_move_delay;
 	self->fb.last_rndaim_time = 0;
 	self->fb.wiggle_run_dir = 0;
 

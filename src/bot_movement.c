@@ -452,6 +452,9 @@ void BotSetCommand (gedict_t* self)
 		VectorClear (direction);
 		impulse = 0;
 	}
+	else if (self->fb.min_move_time > g_globalvars.time) {
+		VectorClear (direction);
+	}
 
 	trap_SetBotCMD (
 		NUM_FOR_EDICT (self),

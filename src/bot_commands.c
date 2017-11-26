@@ -1928,20 +1928,16 @@ void BotStartFrame(void)
 					gedict_t* p;
 
 					// Set all players to non-solid so we can avoid hazards
-					if (IsHazardFrame()) {
-						for (p = world; (p = find_plr(p)); ) {
-							p->fb.oldsolid = p->s.v.solid;
-							p->s.v.solid = SOLID_NOT;
-						}
+					for (p = world; (p = find_plr(p)); ) {
+						p->fb.oldsolid = p->s.v.solid;
+						p->s.v.solid = SOLID_NOT;
 					}
 
-					AvoidHazards (self);
+					AvoidHazards(self);
 
 					// Re-instate client entity types
-					if (IsHazardFrame()) {
-						for (p = world; (p = find_plr(p)); ) {
-							p->s.v.solid = p->fb.oldsolid;
-						}
+					for (p = world; (p = find_plr(p)); ) {
+						p->s.v.solid = p->fb.oldsolid;
 					}
 				}
 

@@ -487,6 +487,7 @@ typedef struct fb_botskill_s {
 
 	float current_volatility;
 	float awareness_delay;
+	float spawn_move_delay;
 	float movement_estimate_error;           // % of time the bot gets wrong when predicting player location
 
 	fb_botaim_t aim_params[2];
@@ -709,6 +710,7 @@ typedef struct fb_entvars_s {
 	float               last_rndaim[2];
 	float               last_rndaim_time;
 	float               min_fire_time;   // time before bot will fire
+	float               min_move_time;   // time before bot will move (used off spawn)
 
 	// Stored on missile to detect where item will explode
 	vec3_t              missile_forward;
