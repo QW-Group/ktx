@@ -31,6 +31,7 @@ static void json_player_instagib_stats(fileHandle_t handle, player_stats_t* stat
 static void json_player_midair_stats(fileHandle_t handle, player_stats_t* stats);
 static void json_player_ra_stats(fileHandle_t handle, player_stats_t* stats);
 static void json_player_hoonymode_stats(fileHandle_t handle, gedict_t* player);
+static void json_player_lgc_stats(fileHandle_t handle, gedict_t* player);
 
 #define STATS_VERSION_NUMBER 3
 
@@ -343,6 +344,9 @@ void json_player_detail(fileHandle_t handle, int player_num, gedict_t* player, c
 	if (isHoonyModeAny()) {
 		json_player_hoonymode_stats(handle, player);
 	}
+	if (lgc_enabled()) {
+		json_player_lgc_stats(handle, player);
+	}
 #ifdef BOT_SUPPORT
 	if (player->isBot) {
 		json_player_bot_info(handle, &player->fb.skill);
@@ -496,6 +500,12 @@ static void json_player_ra_stats(fileHandle_t handle, player_stats_t* stats)
 {
 	s2di(handle, "," JSON_CR);
 	s2di(handle, INDENT6 "\"ra\": { \"wins\": %d, \"losses\": %d }", stats->wins, stats->loses);
+}
+
+static void json_player_lgc_stats(fileHandle_t handle, gedict_t* player)
+{
+	s2di(handle, "," JSON_CR);
+	s2di(handle, INDENT6 "\"lgc\": { \"under\": %d, \"over\": %d }" JSON_CR, player->ps.lgc_undershaft, player->ps.lgc_overshaft);
 }
 
 static void json_player_hoonymode_stats(fileHandle_t handle, gedict_t* player)

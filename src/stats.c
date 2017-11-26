@@ -537,8 +537,10 @@ void OnePlayerStats(gedict_t *p, int tp)
 		(e_ssg ? va(" %s%.1f%%", redtext("ssg"), e_ssg) : ""));
 
 	// rockets detail
-	G_bprint(2, "%s: %s:%.1f %s:%.0f\n", redtext("RL skill"),
-		redtext("ad"), vh_rl ? ( dmg_g_rl / vh_rl ) : 0. , redtext("dh"), h_rl);
+	if (! lgc_enabled()) {
+		G_bprint(2, "%s: %s:%.1f %s:%.0f\n", redtext("RL skill"),
+			redtext("ad"), vh_rl ? (dmg_g_rl / vh_rl) : 0., redtext("dh"), h_rl);
+	}
 
 	// velocity
 	if ( isDuel() )
@@ -549,8 +551,10 @@ void OnePlayerStats(gedict_t *p, int tp)
 	}
 
 	// armors + megahealths
-	G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("Armr&mhs"),
-		redtext("ga"), ga, redtext("ya"), ya, redtext("ra"), ra, redtext("mh"), mh);
+	if (! lgc_enabled()) {
+		G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("Armr&mhs"),
+			redtext("ga"), ga, redtext("ya"), ya, redtext("ra"), ra, redtext("mh"), mh);
+	}
 
 	// powerups
 	if ( isTeam() || isCTF() )
@@ -628,13 +632,17 @@ void OnePlayerStats(gedict_t *p, int tp)
 	}
 
 	// spawnfrags
-	if ( !isCTF() )
+	if (!isCTF() && !lgc_enabled()) {
 		G_bprint(2, "  %s: %d\n", redtext("SpawnFrags"), p->ps.spawn_frags);
+	}
 
-	if (isDuel() && deathmatch == 4 && ((int)cvar("k_disallow_weapons") & IT_LIGHTNING) == 0) {
-		qbool illegal = ra || ya || ga || a_rl || a_gl || h_sg || h_ssg || h_axe || h_sng || h_ng;
+	if (lgc_enabled() && a_lg) {
+		int over = p->ps.lgc_overshaft;
+		int under = p->ps.lgc_undershaft;
 
-		G_bprint(PRINT_HIGH, "  %s: %d \20%s\21\n", redtext("LGC Score"), (int)(e_lg * (p->ps.wpn[wpLG].edamage / 100)), illegal ? redtext("not legal") : "legal");
+		G_bprint(PRINT_HIGH, "  %s : \20%d\21\n", redtext("LGC Score"), (int)(e_lg * p->s.v.frags));
+		G_bprint(PRINT_HIGH, "  %s : %.1f%% (%d/%d)\n", redtext("Overshaft"), over * 100.0f / a_lg, (int)over, (int)a_lg);
+		G_bprint(PRINT_HIGH, "  %s: %.1f%% (%d/%d)\n", redtext("Undershaft"), under * 100.0f / a_lg, (int)under, (int)a_lg);
 	}
 
 	//	}

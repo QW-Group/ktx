@@ -219,6 +219,10 @@ void Killed( gedict_t * targ, gedict_t * attacker, gedict_t * inflictor )
 	BotPlayerKilledEvent (targ, attacker, inflictor);
 #endif
 
+	if (lgc_enabled()) {
+		lgc_register_kill(attacker);
+	}
+
 	oself = self;
 	self = targ;
 
@@ -753,7 +757,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 	BotDamageInflictedEvent(attacker, targ);
 #endif
 
-	if ( match_in_progress == 2 && (int)cvar("k_dmgfrags") )
+	if ( match_in_progress == 2 && ((int)cvar("k_dmgfrags") || lgc_enabled()) )
 	{
 		if ( attacker->ct == ctPlayer && targ->ct == ctPlayer && attacker != targ )
 		{

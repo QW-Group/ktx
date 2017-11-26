@@ -21,7 +21,6 @@ void AMPHI2BotInLava(void);
 
 void Bot_Print_Thinking (void);
 static void PeriodicAllClientLogic (void);
-void BotsFireLogic (void);
 void FrogbotEditorMarkerTouched (gedict_t* marker);
 
 static void SetNextThinkTime(gedict_t* ent) {
@@ -214,7 +213,8 @@ static void BotMoveTowardsLinkedMarker(gedict_t* self, vec3_t dir_move) {
 }
 
 // Called when the bot has a touch marker set
-static void BotTouchMarkerLogic() {
+static void BotTouchMarkerLogic()
+{
 	TargetEnemyLogic(self);
 
 	if (PAST(goal_refresh_time)) {

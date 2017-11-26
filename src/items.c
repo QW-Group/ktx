@@ -392,6 +392,10 @@ void armor_touch()
 	if ( ISDEAD( other ) )
 		return;
 
+	if (lgc_enabled()) {
+		return;
+	}
+
 	if ( other->ct != ctPlayer )
 		return;
 
@@ -1993,6 +1997,10 @@ void BackpackTouch()
 
 	if ( cvar("k_instagib") && other->invisible_finished )
 		return; // we have ring, ignore pack
+
+	if (deathmatch == 4 && lgc_enabled() && other->s.v.health >= 300) {
+		return; // don't allow bonus powers, leave pack hanging around
+	}
 	
 	acount = 0;
 	G_sprint( other, PRINT_LOW, "You get " );
@@ -2008,14 +2016,18 @@ void BackpackTouch()
 			sound( other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM );
 
 		stuffcmd( other, "bf\n" );
-		if ( other->s.v.health > 299 )
+
+		if (lgc_enabled() && other->s.v.health > 299) {
+			// cap & don't allow bonus powers
+			other->s.v.health = 300;
+		}
+		else if ( other->s.v.health > 299 )
 		{
 			if ( cvar("k_instagib") )
 			{
 				other->invisible_time = 1;
 				other->invisible_finished = g_globalvars.time + 30;
 				other->s.v.items = ( int ) other->s.v.items | IT_INVISIBILITY;
-
 			}
 			else
 			{

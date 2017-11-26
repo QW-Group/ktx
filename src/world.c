@@ -933,6 +933,8 @@ void FirstFrame	( )
 // }
 #endif
 
+	RegisterCvar("k_lgcmode");
+
 // below globals changed only here
 
 	k_matchLess = cvar( "k_matchless" );

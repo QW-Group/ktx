@@ -111,6 +111,10 @@ void button_killed()
 		return;
 	}
 
+	if (lgc_enabled()) {
+		return;
+	}
+
 	self->s.v.enemy = EDICT_TO_PROG( damage_attacker );
 	self->s.v.health = self->s.v.max_health;
 	self->s.v.takedamage = DAMAGE_NO;	// wil be reset upon return

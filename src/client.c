@@ -1397,6 +1397,7 @@ void PutClientInServer( void )
 	self->spawn_time = g_globalvars.time;
 	self->axhitme = 0;
 	self->lastwepfired = 0;
+	self->lgc_state = lgcUndershaft;
 
 	self->control_start_time = 0;
 	self->q_pickup_time = self->p_pickup_time = self->r_pickup_time = 0;
@@ -1683,6 +1684,17 @@ void PutClientInServer( void )
 
 			items = IT_AXE;
 			items |= IT_SHOTGUN;
+		}
+		else if ( lgc_enabled() )
+		{
+			self->s.v.ammo_cells   = 255;
+
+			self->s.v.armorvalue   = 200;
+			self->s.v.armortype    = 0.8;
+			self->s.v.health       = 250;
+
+			// Red armor + LG
+			items = IT_LIGHTNING | IT_ARMOR3;
 		}
 		else
 		{
@@ -3912,8 +3924,10 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		else
 		{	// normal kill, Kteams version
 
-			if ( !cvar("k_dmgfrags") && !cvar("k_midair") ) // add frag only if not a case of k_dmgfrags
+			if (!cvar("k_dmgfrags") && !cvar("k_midair") && !lgc_enabled()) {
+				// add frag only if not a case of k_dmgfrags
 				attacker->s.v.frags += 1;
+			}
 			logfrag (attacker, targ);
 
 			attacker->victim = targ->netname;

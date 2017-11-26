@@ -445,6 +445,9 @@ void player_light1()
 
 	if ( !self->s.v.button0 || intermission_running || self->s.v.impulse )
 	{
+		if (lgc_enabled()) {
+			lgc_register_fire_stop(self);
+		}
 		self->walkframe = 0;
 		player_run();
 		return;
@@ -470,6 +473,9 @@ void player_light2()
 
 	if ( !self->s.v.button0 || intermission_running || self->s.v.impulse )
 	{
+		if (lgc_enabled()) {
+			lgc_register_fire_stop(self);
+		}
 		self->walkframe = 0;
 		player_run();
 		return;

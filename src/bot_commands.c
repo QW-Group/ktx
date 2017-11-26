@@ -1877,7 +1877,6 @@ float last_frame_time = 0;
 void BotStartFrame(void)
 {
 	static int bot_framecount = 0;
-	extern void BotsFireLogic (void);
 	int min_required_clients = cvar(FB_CVAR_AUTOADD_LIMIT);
 	int max_required_clients = cvar(FB_CVAR_AUTOREMOVE_AT);
 	int auto_delay = cvar(FB_CVAR_AUTO_DELAY);

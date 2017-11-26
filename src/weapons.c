@@ -1031,6 +1031,9 @@ void LightningDamage( vec3_t p1, vec3_t p2, gedict_t *from, float damage )
 
 	if ( PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.takedamage )
 	{
+		if (lgc_enabled()) {
+			lgc_register_hit(from, PROG_TO_EDICT(g_globalvars.trace_ent));
+		}
 		LightningHit( from, damage );
 
 		// this code cause "dm6 secret door bug"
@@ -1044,6 +1047,9 @@ void LightningDamage( vec3_t p1, vec3_t p2, gedict_t *from, float damage )
 			   )
 				PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.velocity[2] += 400;
 		}
+	}
+	else if (lgc_enabled()) {
+		lgc_register_miss(from);
 	}
 }
 

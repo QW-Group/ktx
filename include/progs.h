@@ -63,6 +63,13 @@ typedef enum
 	wpMAX
 } weaponName_t;
 
+typedef enum
+{
+	lgcUndershaft = 0,
+	lgcNormal = 1,
+	lgcOvershaft = 2
+} lgc_state_t;
+
 typedef struct wpType_s {
 	int hits;           // hits with this weapon, for SG and SSG this is count of bullets
 	int rhits;          // real hits for this weapon (direct + splash), used for RL and GL only
@@ -184,6 +191,10 @@ typedef struct player_stats_s {
 	int i_airgibs;		// Number of airgibs
 	int i_maxmultigibs;
 	int i_rings;
+
+	// lgc stats
+	int lgc_undershaft;  // cells fired before hitting target
+	int lgc_overshaft;   // cells fired after killing target
 
 } player_stats_t;
 
@@ -1123,6 +1134,10 @@ typedef struct gedict_s {
 // { teamplay extensions, for server-side mm2
 	teamplay_t   tp;
 	unsigned int tp_flags;
+// }
+
+// { lgc
+	lgc_state_t  lgc_state;
 // }
 } gedict_t;
 

@@ -413,4 +413,6 @@ qbool HasSavedMarker (void);
 #define FB_CVAR_SKILL         "k_fb_skill"
 #define FB_CVAR_DEBUG         "k_fb_debug"
 
+void BotsFireLogic(void);
+
 #endif // ifdef(FB_GLOBALS_H)

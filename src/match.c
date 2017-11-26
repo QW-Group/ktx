@@ -985,6 +985,9 @@ void PrintCountdown( int seconds )
 	else if (isHoonyModeDuel()) {
 		mode = redtext("Hoony");
 	}
+	else if (lgc_enabled()) {
+		mode = redtext("LGC");
+	}
 	else if (isHoonyModeTDM()) {
 		mode = redtext("HoonyTDM");
 	}

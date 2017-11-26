@@ -100,6 +100,7 @@ void ToggleFreeze();
 void ToggleMidair();
 void SetMidairMinHeight();
 void ToggleInstagib();
+void ToggleLGC(void);
 void ToggleCGKickback();
 void TogglePowerups();
 void TogglePuPickup();
@@ -507,6 +508,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_MIDAIR       "turn midair mode on/off"
 #define CD_MIDAIR_MINHEIGHT "midair minimum frag height"
 #define CD_INSTAGIB     "instagib settings"
+#define CD_LGC          "lgc mode"
 #define CD_CG_KB        "toggle coilgun kickback in instagib"
 #define CD_TIME         "show server time"
 #define CD_GREN_MODE    "grenades mode"
@@ -852,6 +854,7 @@ cmd_t cmds[] = {
 	{ "midair",      ToggleMidair,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_MIDAIR },
 	{ "midair_minheight", SetMidairMinHeight,   0    , CF_PLAYER | CF_SPC_ADMIN, CD_MIDAIR_MINHEIGHT },
 	{ "instagib",    ToggleInstagib,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
+	{ "lgcmode",     ToggleLGC,                 0    , CF_PLAYER | CF_SPC_ADMIN, CD_LGC },
 	{ "instagib_coilgun_kickback", ToggleCGKickback, 0, CF_PLAYER | CF_SPC_ADMIN, CD_CG_KB },
 	{ "time",        sv_time,                   0    , CF_BOTH | CF_MATCHLESS, CD_TIME },
 	{ "gren_mode",   GrenadeMode,               0    , CF_PLAYER | CF_SPC_ADMIN, CD_GREN_MODE },
@@ -3053,6 +3056,7 @@ const char common_um_init[] =
 
 	"k_spec_info 1\n"			// allow spectators receive took info during game
 	"k_midair 0\n"				// midair off
+	LGCMODE_VARIABLE " 0\n"     // LGC mode off
 
 	"fraglimit 0\n"				// fraglimit %)
 	"dp 1\n"					// drop pack
@@ -5402,7 +5406,9 @@ void ToggleMidair()
 	// If midair is enabled, disable instagib
 	if (cvar("k_instagib"))
 		cvar_set("k_instagib", "0");
-	
+	if ( cvar(LGCMODE_VARIABLE) )
+		cvar_set(LGCMODE_VARIABLE, "0");
+
 	if ( cvar("k_dmm4_gren_mode") )
 		cvar_set("k_dmm4_gren_mode", "0"); // If midair is enabled, disable gren_mode
 
@@ -5475,6 +5481,8 @@ void ToggleInstagib()
 
 	if ( cvar("k_midair") )
 		cvar_set("k_midair", "0"); // If instagib is enabled, disable midair
+	if ( cvar(LGCMODE_VARIABLE) )
+		cvar_set(LGCMODE_VARIABLE, "0");
 
 	if ( cvar("k_dmm4_gren_mode") )
 		cvar_set("k_dmm4_gren_mode", "0"); // If instagib is enabled, disable gren_mode
@@ -5519,6 +5527,35 @@ void ToggleInstagib()
 
 	if ( k_instagib )
 		cvar_set("k_cg_kb", "1");
+
+	W_SetCurrentAmmo();
+}
+
+void ToggleLGC(void)
+{
+	qbool k_lgc = cvar(LGCMODE_VARIABLE) != 0;
+
+	if (!is_rules_change_allowed()) {
+		return;
+	}
+
+	// Can't enable instagib unless dmm4 is set first
+	if (!k_lgc && deathmatch != 4) {
+		G_sprint(self, 2, "LGC mode requires dmm4\n");
+		return;
+	}
+
+	// Disable incompatible modes
+	if (cvar("k_midair")) {
+		cvar_set("k_midair", "0");
+	}
+	if (cvar("k_instagib")) {
+		cvar_set("k_instagib", "0");
+	}
+
+	cvar_set(LGCMODE_VARIABLE, k_lgc ? "1" : "0");
+
+	cvar_toggle_msg( self, LGCMODE_VARIABLE, redtext("LGC mode") );
 
 	W_SetCurrentAmmo();
 }
@@ -6667,4 +6704,39 @@ static void dumpent()
 	trap_FS_CloseFile( file_handle );
 
 	G_sprint(self, 2, "Dumped %d entities\n", cnt);
+}
+
+qbool lgc_enabled(void)
+{
+	return cvar(LGCMODE_VARIABLE) != 0;
+}
+
+void lgc_register_hit(gedict_t* player, gedict_t* victim)
+{
+	if (victim && victim->ct == ctPlayer) {
+		player->lgc_state = lgcNormal;
+	}
+	else {
+		lgc_register_miss(player);
+	}
+}
+
+void lgc_register_miss(gedict_t* player)
+{
+	if (player->lgc_state == lgcUndershaft) {
+		++player->ps.lgc_undershaft;
+	}
+	else if (player->lgc_state == lgcOvershaft) {
+		++player->ps.lgc_overshaft;
+	}
+}
+
+void lgc_register_kill(gedict_t* player)
+{
+	player->lgc_state = lgcOvershaft;
+}
+
+void lgc_register_fire_stop(gedict_t* player)
+{
+	player->lgc_state = lgcUndershaft;
 }

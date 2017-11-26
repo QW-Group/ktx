@@ -432,6 +432,11 @@ void SetFireButton(gedict_t* self, vec3_t rel_pos, float rel_dist) {
 		return;
 	}
 
+	if (self->fb.enemy_dist > 600 && lgc_enabled()) {
+		self->fb.firing = false;
+		return;
+	}
+
 	if (self->fb.firing) {
 		if (KeepFiringAtEnemy(self)) {
 			return;
@@ -455,7 +460,7 @@ void SetFireButton(gedict_t* self, vec3_t rel_pos, float rel_dist) {
 		return;
 	}
 
-	if (SameTeam (self->fb.look_object, self)) {
+	if (SameTeam(self->fb.look_object, self)) {
 		self->fb.firing = false;
 		return;
 	}
@@ -501,18 +506,18 @@ void SetFireButton(gedict_t* self, vec3_t rel_pos, float rel_dist) {
 		// At this point, bot is looking at enemy
 
 		// FIXME: This is broken, we should use other weapon in water and override with discharge if necessary
-		if (self->fb.desired_weapon_impulse == IT_LIGHTNING && self->s.v.waterlevel > 1) {
+		if (self->fb.desired_weapon_impulse == 8 && self->s.v.waterlevel > 1) {
 			return;
 		}
 
 		{
-			AvoidQuadBore (self);
+			AvoidQuadBore(self);
 
 			if (self->fb.desired_weapon_impulse == 7) {
-				RocketLauncherShot (self);
+				RocketLauncherShot(self);
 			}
 			else {
-				SetFireButtonBasedOnAngles (self, rel_dist);
+				SetFireButtonBasedOnAngles(self, rel_dist);
 			}
 		}
 	}
@@ -564,8 +569,9 @@ static int DesiredWeapon(void) {
 	qbool avoid_rockets = false;
 	qbool firing_lg = self->fb.firing && self->s.v.weapon == IT_LIGHTNING && self->s.v.ammo_cells && g_globalvars.time < self->attack_finished;
 
-	if (TP_CouldDamageTeammate (self))
+	if (TP_CouldDamageTeammate(self)) {
 		return IT_SHOTGUN;
+	}
 
 	// When to always use RL
 	if (self->fb.skill.rl_preference >= g_random() || fb_lg_disabled()) {
