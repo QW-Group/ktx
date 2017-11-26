@@ -945,7 +945,7 @@ cmd_t cmds[] = {
 
 #ifdef BOT_SUPPORT
 // { FROGBOTS
-	{ "botcmd",      FrogbotsCommand,           0    , CF_BOTH | CF_PARAMS, CD_BOTCOMMAND },
+	{ "botcmd",      FrogbotsCommand,           0    , CF_BOTH | CF_MATCHLESS | CF_PARAMS, CD_BOTCOMMAND },
 // }
 #endif
 

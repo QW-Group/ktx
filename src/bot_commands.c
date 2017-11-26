@@ -1706,6 +1706,16 @@ void FrogbotsCommand (void)
 	int num_commands = FrogbotOptionEnabled (FB_OPTION_EDITOR_MODE) ? NUM_EDITOR_COMMANDS : NUM_STANDARD_COMMANDS;
 	char command[64];
 	int i;
+	float admin_rules = cvar(FB_CVAR_ADMIN_ONLY);
+
+	if (admin_rules == 2 && !is_real_adm(self)) {
+		G_sprint(self, PRINT_HIGH, "You must be a server admin to use this command\n");
+		return;
+	}
+	else if (admin_rules && !is_adm(self)) {
+		G_sprint(self, PRINT_HIGH, "You must be an admin to use this command\n");
+		return;
+	}
 
 	if (!bots_enabled()) {
 		trap_CmdArgv (1, command, sizeof (command));

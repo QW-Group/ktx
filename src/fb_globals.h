@@ -412,6 +412,7 @@ qbool HasSavedMarker (void);
 #define FB_CVAR_AUTO_DELAY    "k_fb_auto_delay"
 #define FB_CVAR_SKILL         "k_fb_skill"
 #define FB_CVAR_DEBUG         "k_fb_debug"
+#define FB_CVAR_ADMIN_ONLY    "k_fb_admin_only"
 
 void BotsFireLogic(void);
 
