@@ -1532,11 +1532,11 @@ void StartDemoRecord ()
 
 		if (record) {
 			if (!strnull(cvar_string("serverdemo"))) {
-				localcmd("cancel\n");  // demo is recording, cancel before new one
+				localcmd("sv_democancel\n");  // demo is recording, cancel before new one
 			}
 
 			demoname = CompilateDemoName();
-			localcmd("easyrecord \"%s\"\n", demoname);
+			localcmd("sv_demoeasyrecord \"%s\"\n", demoname);
 		}
 	}
 }
@@ -1681,7 +1681,7 @@ void StopTimer ( int removeDemo )
 		&& ( race_can_cancel_demo() )
 		&& !strnull( cvar_string( "serverdemo" ) )
 	   )
-		localcmd("cancel\n");  // demo is recording and must be removed, do it
+		localcmd("sv_democancel\n");  // demo is recording and must be removed, do it
 
 	match_start_time = 0;
 

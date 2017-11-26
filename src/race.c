@@ -620,12 +620,12 @@ void race_stoprecord( qbool cancel )
 	{
 		if (cancel)
 		{
-			localcmd ("cancel\n");  // stop recording demo and discard it
+			localcmd ("sv_democancel\n");  // stop recording demo and discard it
 		}
 		else
 		{
 			StatsToFile ();
-			localcmd ("stop\n"); // stop recording demo and keep it
+			localcmd ("sv_demostop\n"); // stop recording demo and keep it
 		}
 
 		race.race_recording = false;
