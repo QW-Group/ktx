@@ -1,0 +1,1137 @@
+CreateMarker 571 748 296
+CreateMarker 637 849 296
+CreateMarker 788 852 272
+CreateMarker 884 852 224
+CreateMarker 1000 734 168
+CreateMarker 1006 672 136
+CreateMarker 990 601 104
+CreateMarker 987 509 88
+CreateMarker 925 462 88
+CreateMarker 827 539 88
+CreateMarker 871 692 88
+CreateMarker 738 624 88
+CreateMarker 739 761 88
+CreateMarker 581 726 120
+CreateMarker 614 425 120
+CreateMarker 727 465 88
+CreateMarker 835 278 88
+CreateMarker 837 102 32
+CreateMarker 922 50 32
+CreateMarker 1024 -229 32
+CreateMarker 1058 -347 32
+CreateMarker 946 -369 32
+CreateMarker 921 -206 32
+CreateMarker 807 -323 32
+CreateMarker 856 -491 32
+CreateMarker 960 -672 32
+CreateMarker 793 -657 32
+CreateMarker 695 -755 32
+CreateMarker 682 -884 32
+CreateMarker 590 -710 32
+CreateMarker 566 -867 36
+CreateMarker 440 -850 56
+CreateMarker 343 -853 104
+CreateMarker 283 -839 112
+CreateMarker 211 -723 152
+CreateMarker 213 -625 184
+CreateMarker 73 -591 184
+CreateMarker 75 -490 184
+CreateMarker -62 -500 208
+CreateMarker -63 -615 208
+CreateMarker -199 -593 216
+CreateMarker -190 -492 216
+CreateMarker 230 -478 184
+CreateMarker 287 -346 184
+CreateMarker 52 -349 184
+CreateMarker 193 -355 184
+CreateMarker 328 -50 152
+CreateMarker 312 130 136
+CreateMarker 323 249 136
+CreateMarker 185 168 136
+CreateMarker 89 407 136
+CreateMarker 59 228 136
+CreateMarker 62 75 76
+CreateMarker 93 -77 36
+CreateMarker 57 -161 32
+CreateMarker 181 -170 32
+CreateMarker 200 -50 32
+CreateMarker 346 -61 32
+CreateMarker 348 -208 32
+CreateMarker 351 -336 32
+CreateMarker 496 -385 32
+CreateMarker 498 -253 32
+CreateMarker 496 -133 32
+CreateMarker 610 -188 32
+CreateMarker 724 -192 32
+CreateMarker 841 -126 32
+CreateMarker 843 -253 32
+CreateMarker 487 488 296
+CreateMarker 483 391 296
+CreateMarker 522 291 296
+CreateMarker 598 232 296
+CreateMarker 656 416 296
+CreateMarker 666 530 296
+CreateMarker 666 690 296
+CreateMarker 659 800 296
+CreateMarker 575 472 296
+CreateMarker 581 610 296
+CreateMarker 752 342 296
+CreateMarker 881 336 296
+CreateMarker 999 340 296
+CreateMarker 995 238 296
+CreateMarker 974 141 300
+CreateMarker 1061 91 296
+CreateMarker 1039 -30 296
+CreateMarker 899 10 296
+CreateMarker 804 -72 296
+CreateMarker 784 -195 296
+CreateMarker 923 -113 296
+CreateMarker 928 -237 296
+CreateMarker 792 -527 184
+CreateMarker 934 -557 184
+CreateMarker 1044 -627 188
+CreateMarker 1096 -726 184
+CreateMarker 904 -695 188
+CreateMarker 820 -654 184
+CreateMarker 656 -609 184
+CreateMarker 528 -646 184
+CreateMarker 618 -499 184
+CreateMarker 528 -480 184
+CreateMarker 652 -414 184
+CreateMarker 535 -356 188
+CreateMarker 542 -211 184
+CreateMarker 656 -137 184
+CreateMarker 558 -112 184
+CreateMarker 489 -69 184
+CreateMarker 656 11 200
+CreateMarker 656 129 264
+CreateMarker 563 168 280
+CreateMarker 552 35 216
+CreateMarker 253 128 312
+CreateMarker 52 128 312
+CreateMarker -69 128 312
+CreateMarker -198 125 312
+CreateMarker -276 14 312
+CreateMarker -284 -175 312
+CreateMarker -416 -194 312
+CreateMarker -416 -457 216
+CreateMarker -416 -624 216
+CreateMarker -103 -231 312
+CreateMarker -36 24 312
+CreateMarker -86 -165 32
+CreateMarker -182 -32 32
+CreateMarker -230 -209 32
+CreateMarker -393 -220 32
+CreateMarker -321 -153 32
+CreateMarker -288 -269 32
+CreateMarker 813 -842 188
+CreateMarker 907 -874 184
+CreateMarker 1024 384 88
+CreateMarker 376 126 312
+SetGoal 1 1
+SetZone 1 6
+SetMarkerPath 1 0 134
+SetMarkerPath 1 1 135
+SetMarkerPath 1 2 35
+SetMarkerPath 1 3 170
+SetMarkerPath 1 4 136
+SetMarkerPath 1 5 133
+SetGoal 2 15
+SetZone 2 13
+SetMarkerPath 2 0 68
+SetMarkerPath 2 1 67
+SetMarkerPath 2 2 69
+SetMarkerPath 2 3 70
+SetMarkerPath 2 4 71
+SetMarkerPath 2 5 32
+SetGoal 3 19
+SetZone 3 5
+SetMarkerPath 3 0 60
+SetMarkerPath 3 1 61
+SetGoal 4 16
+SetZone 4 5
+SetMarkerPath 4 0 5
+SetMarkerPath 4 1 62
+SetMarkerPath 4 2 65
+SetMarkerPath 4 3 108
+SetGoal 5 16
+SetZone 5 5
+SetMarkerPath 5 0 6
+SetMarkerPath 5 1 4
+SetMarkerPath 5 2 108
+SetMarkerPath 5 3 65
+SetMarkerPath 5 4 60
+SetGoal 6 16
+SetZone 6 5
+SetMarkerPath 6 0 61
+SetMarkerPath 6 1 5
+SetGoal 7 23
+SetZone 7 14
+SetMarkerPath 7 0 36
+SetMarkerPath 7 1 156
+SetMarkerPath 7 2 155
+SetMarkerPath 7 3 162
+SetMarkerPath 7 4 154
+SetMarkerPath 7 5 161
+SetMarkerPath 7 6 157
+SetGoal 8 20
+SetZone 8 12
+SetMarkerPath 8 0 87
+SetGoal 9 17
+SetZone 9 15
+SetMarkerPath 9 0 172
+SetMarkerPath 9 1 19
+SetMarkerPath 9 2 89
+SetMarkerPath 9 3 147
+SetGoal 10 2
+SetZone 10 15
+SetMarkerPath 10 0 9
+SetMarkerPath 10 1 172
+SetGoal 11 18
+SetZone 11 12
+SetMarkerPath 11 0 12
+SetMarkerPath 11 1 76
+SetGoal 12 16
+SetZone 12 12
+SetMarkerPath 12 0 11
+SetMarkerPath 12 1 76
+SetMarkerPath 12 2 77
+SetGoal 13 3
+SetZone 13 11
+SetMarkerPath 13 1 159
+SetMarkerPath 13 2 160
+SetMarkerPath 13 3 83
+SetMarkerPath 13 4 84
+SetGoal 14 16
+SetZone 14 10
+SetMarkerPath 14 0 15
+SetMarkerPath 14 1 167
+SetMarkerPath 14 2 166
+SetGoal 15 18
+SetZone 15 10
+SetMarkerPath 15 0 163
+SetMarkerPath 15 1 165
+SetMarkerPath 15 2 164
+SetMarkerPath 15 3 167
+SetMarkerPath 15 4 14
+SetGoal 16 21
+SetZone 16 9
+SetMarkerPath 16 0 102
+SetMarkerPath 16 1 34
+SetMarkerPath 16 2 97
+SetMarkerPath 16 3 98
+SetMarkerPath 16 4 101
+SetGoal 17 16
+SetZone 17 8
+SetMarkerPath 17 0 93
+SetMarkerPath 17 1 38
+SetMarkerPath 17 2 18
+SetMarkerPath 17 3 91
+SetMarkerPath 17 4 92
+SetGoal 18 15
+SetZone 18 8
+SetMarkerPath 18 0 93
+SetMarkerPath 18 1 38
+SetMarkerPath 18 2 17
+SetMarkerPath 18 3 91
+SetMarkerPath 18 4 90
+SetMarkerPath 18 5 94
+SetMarkerPath 18 6 92
+SetGoal 19 4
+SetZone 19 8
+SetMarkerPath 19 0 90
+SetMarkerPath 19 1 92
+SetMarkerPath 19 2 95
+SetMarkerPath 19 3 96
+SetMarkerPath 19 4 99
+SetMarkerPath 19 5 89
+SetMarkerPath 19 6 98
+SetGoal 20 19
+SetZone 20 7
+SetMarkerPath 20 0 21
+SetMarkerPath 20 1 142
+SetMarkerPath 20 2 143
+SetMarkerPath 20 3 144
+SetMarkerPath 20 4 102
+SetMarkerPath 20 5 42
+SetGoal 21 23
+SetZone 21 7
+SetMarkerPath 21 0 146
+SetMarkerPath 21 1 145
+SetMarkerPath 21 2 20
+SetMarkerPath 21 3 144
+SetGoal 22 5
+SetZone 22 2
+SetMarkerPath 22 0 129
+SetMarkerPath 22 1 131
+SetMarkerPath 22 2 130
+SetMarkerPath 22 3 126
+SetGoal 23 16
+SetZone 23 1
+SetMarkerPath 23 0 120
+SetMarkerPath 23 1 24
+SetMarkerPath 23 2 121
+SetMarkerPath 23 3 122
+SetMarkerPath 23 4 123
+SetGoal 24 16
+SetZone 24 1
+SetMarkerPath 24 0 25
+SetMarkerPath 24 1 120
+SetMarkerPath 24 2 121
+SetMarkerPath 24 3 23
+SetGoal 25 16
+SetZone 25 1
+SetMarkerPath 25 0 113
+SetMarkerPath 25 1 112
+SetMarkerPath 25 2 111
+SetMarkerPath 25 3 114
+SetMarkerPath 25 4 120
+SetMarkerPath 25 5 24
+SetGoal 26 18
+SetZone 26 1
+SetMarkerPath 26 0 110
+SetMarkerPath 26 1 27
+SetMarkerPath 26 2 119
+SetMarkerPath 26 3 115
+SetMarkerPath 26 4 118
+SetGoal 27 24
+SetZone 27 1
+SetMarkerPath 27 0 26
+SetMarkerPath 27 1 28
+SetMarkerPath 27 2 119
+SetGoal 28 23
+SetZone 28 1
+SetMarkerPath 28 0 27
+SetMarkerPath 28 1 37
+SetMarkerPath 28 2 43
+SetMarkerPath 28 3 119
+SetGoal 29 22
+SetZone 29 3
+SetMarkerPath 29 0 46
+SetMarkerPath 29 1 47
+SetMarkerPath 29 2 53
+SetGoal 30 6
+SetZone 30 4
+SetMarkerPath 30 0 171
+SetMarkerPath 30 1 58
+SetMarkerPath 30 2 52
+SetMarkerPath 30 3 51
+SetMarkerPath 30 4 59
+SetGoal 31 7
+SetZone 31 4
+SetMarkerPath 31 0 58
+SetMarkerPath 31 1 57
+SetMarkerPath 31 2 56
+SetMarkerPath 31 3 54
+SetMarkerPath 31 4 55
+SetMarkerPath 31 5 52
+SetZone 32 13
+SetMarkerPath 32 0 68
+SetMarkerPath 32 1 2
+SetZone 33 2
+SetMarkerPath 33 0 128
+SetMarkerPath 33 1 127
+SetMarkerPath 33 2 125
+SetZone 34 9
+SetMarkerPath 34 0 16
+SetMarkerPath 34 1 97
+SetMarkerPath 34 2 98
+SetZone 35 6
+SetMarkerPath 35 0 135
+SetMarkerPath 35 1 1
+SetMarkerPath 35 2 170
+SetZone 36 14
+SetMarkerPath 36 0 158
+SetMarkerPath 36 1 157
+SetMarkerPath 36 2 7
+SetMarkerPath 36 3 156
+SetMarkerPath 36 4 41
+SetZone 37 1
+SetMarkerPath 37 0 28
+SetMarkerPath 37 1 43
+SetMarkerPath 37 2 117
+SetMarkerPath 37 3 44
+SetZone 38 8
+SetMarkerPath 38 0 93
+SetMarkerPath 38 1 17
+SetMarkerPath 38 2 18
+SetZone 39 10
+SetMarkerPath 39 0 13
+SetZone 40 5
+SetMarkerPath 40 0 134
+SetZone 41 14
+SetMarkerPath 41 0 36
+SetMarkerPath 41 1 156
+SetMarkerPath 41 2 155
+SetZone 42 14
+SetMarkerPath 42 0 41
+SetZone 43 1
+SetMarkerPath 43 0 28
+SetMarkerPath 43 1 37
+SetMarkerPath 43 2 44
+SetMarkerPath 43 3 116
+SetMarkerPath 43 4 117
+SetMarkerPath 43 5 119
+SetZone 44 1
+SetMarkerPath 44 0 37
+SetMarkerPath 44 1 117
+SetMarkerPath 44 2 43
+SetMarkerPath 44 3 45
+SetZone 45 3
+SetMarkerPath 45 0 44
+SetMarkerPath 45 1 117
+SetMarkerPath 45 2 46
+SetMarkerPath 45 3 54
+SetMarkerPath 45 4 52
+SetMarkerPath 45 5 53
+SetZone 46 3
+SetMarkerPath 46 0 45
+SetMarkerPath 46 1 29
+SetMarkerPath 46 2 48
+SetMarkerPath 46 3 53
+SetMarkerPath 46 4 54
+SetZone 47 3
+SetMarkerPath 47 0 29
+SetMarkerPath 47 1 53
+SetMarkerPath 47 2 48
+SetZone 48 3
+SetMarkerPath 48 0 47
+SetMarkerPath 48 1 49
+SetMarkerPath 48 2 53
+SetZone 49 3
+SetMarkerPath 49 0 48
+SetMarkerPath 49 1 50
+SetMarkerPath 49 2 52
+SetMarkerPath 49 3 53
+SetMarkerPath 49 4 54
+SetZone 50 4
+SetMarkerPath 50 0 49
+SetMarkerPath 50 1 51
+SetMarkerPath 50 2 52
+SetMarkerPath 50 3 171
+SetZone 51 4
+SetMarkerPath 51 0 50
+SetMarkerPath 51 1 171
+SetMarkerPath 51 2 30
+SetMarkerPath 51 3 53
+SetMarkerPath 51 4 52
+SetMarkerPath 51 5 119
+SetMarkerPathFlags 51 5 r
+SetRocketJumpPathFields 51 5 80.0 328.0 0
+SetZone 52 4
+SetMarkerPath 52 0 50
+SetMarkerPath 52 1 30
+SetMarkerPath 52 2 58
+SetMarkerPath 52 3 53
+SetMarkerPath 52 4 51
+SetMarkerPath 52 5 54
+SetMarkerPath 52 6 31
+SetZone 53 4
+SetMarkerPath 53 0 54
+SetMarkerPath 53 1 52
+SetMarkerPath 53 2 55
+SetMarkerPath 53 3 51
+SetZone 54 4
+SetMarkerPath 54 0 58
+SetMarkerPath 54 1 57
+SetMarkerPath 54 2 31
+SetMarkerPath 54 3 56
+SetMarkerPath 54 4 53
+SetMarkerPath 54 5 55
+SetMarkerPath 54 6 52
+SetZone 55 4
+SetMarkerPath 55 0 56
+SetMarkerPath 55 1 53
+SetMarkerPath 55 2 54
+SetMarkerPath 55 3 31
+SetZone 56 4
+SetMarkerPath 56 0 31
+SetMarkerPath 56 1 55
+SetMarkerPath 56 2 54
+SetZone 57 4
+SetMarkerPath 57 0 58
+SetMarkerPath 57 1 31
+SetMarkerPath 57 2 54
+SetZone 58 4
+SetMarkerPath 58 0 30
+SetMarkerPath 58 1 57
+SetMarkerPath 58 2 31
+SetMarkerPath 58 3 54
+SetMarkerPath 58 4 52
+SetZone 59 4
+SetMarkerPath 59 0 30
+SetMarkerPath 59 1 60
+SetZone 60 5
+SetMarkerPath 60 0 59
+SetMarkerPath 60 1 61
+SetMarkerPath 60 2 3
+SetMarkerPath 60 3 5
+SetZone 61 5
+SetMarkerPath 61 0 60
+SetMarkerPath 61 1 3
+SetMarkerPath 61 2 6
+SetZone 62 5
+SetMarkerPath 62 0 4
+SetMarkerPath 62 1 63
+SetMarkerPath 62 2 65
+SetMarkerPath 62 3 64
+SetMarkerPath 62 4 109
+SetMarkerPath 62 5 66
+SetZone 63 5
+SetMarkerPath 63 0 62
+SetMarkerPath 63 2 64
+SetMarkerPath 63 3 65
+SetZone 64 5
+SetMarkerPath 64 0 62
+SetMarkerPath 64 1 63
+SetMarkerPath 64 2 67
+SetMarkerPath 64 3 66
+SetMarkerPath 64 4 109
+SetMarkerPath 64 5 65
+SetMarkerPath 64 6 68
+SetMarkerPath 64 7 133
+SetMarkerPathFlags 64 7 r
+SetRocketJumpPathFields 64 7 72.0 90.0 0
+SetZone 65 5
+SetMarkerPath 65 0 5
+SetMarkerPath 65 1 4
+SetMarkerPath 65 2 62
+SetMarkerPath 65 3 63
+SetMarkerPath 65 4 64
+SetMarkerPath 65 5 109
+SetMarkerPath 65 6 107
+SetMarkerPath 65 7 108
+SetZone 66 5
+SetMarkerPath 66 0 64
+SetMarkerPath 66 1 109
+SetMarkerPath 66 2 67
+SetMarkerPath 66 3 62
+SetZone 67 13
+SetMarkerPath 67 0 64
+SetMarkerPath 67 1 68
+SetMarkerPath 67 2 66
+SetMarkerPath 67 3 2
+SetMarkerPath 67 4 69
+SetZone 68 13
+SetMarkerPath 68 0 64
+SetMarkerPath 68 1 32
+SetMarkerPath 68 2 2
+SetMarkerPath 68 3 69
+SetMarkerPath 68 4 67
+SetZone 69 13
+SetMarkerPath 69 0 68
+SetMarkerPath 69 1 67
+SetMarkerPath 69 2 2
+SetMarkerPath 69 3 70
+SetZone 70 13
+SetMarkerPath 70 0 2
+SetMarkerPath 70 1 71
+SetMarkerPath 70 2 73
+SetMarkerPath 70 3 72
+SetMarkerPath 70 4 69
+SetZone 71 13
+SetMarkerPath 71 0 2
+SetMarkerPath 71 1 70
+SetMarkerPath 71 2 72
+SetMarkerPath 71 3 73
+SetZone 72 13
+SetMarkerPath 72 0 71
+SetMarkerPath 72 1 73
+SetMarkerPath 72 2 70
+SetMarkerPath 72 3 74
+SetZone 73 13
+SetMarkerPath 73 0 71
+SetMarkerPath 73 1 72
+SetMarkerPath 73 2 70
+SetMarkerPath 73 3 74
+SetMarkerPath 73 4 169
+SetMarkerPathFlags 73 4 r
+SetRocketJumpPathFields 73 4 67.0 172.0 0
+SetZone 74 12
+SetMarkerPath 74 0 73
+SetMarkerPath 74 1 75
+SetMarkerPath 74 2 72
+SetZone 75 12
+SetMarkerPath 75 0 74
+SetMarkerPath 75 1 76
+SetZone 76 12
+SetMarkerPath 76 0 75
+SetMarkerPath 76 1 11
+SetMarkerPath 76 2 12
+SetZone 77 12
+SetMarkerPath 77 0 12
+SetMarkerPath 77 1 78
+SetZone 78 12
+SetMarkerPath 78 0 77
+SetMarkerPath 78 1 85
+SetMarkerPath 78 2 80
+SetMarkerPath 78 3 79
+SetZone 79 11
+SetMarkerPath 79 0 78
+SetMarkerPath 79 1 80
+SetMarkerPath 79 2 85
+SetMarkerPath 79 3 82
+SetMarkerPath 79 4 81
+SetZone 80 11
+SetMarkerPath 80 0 78
+SetMarkerPath 80 1 79
+SetMarkerPath 80 2 85
+SetMarkerPath 80 3 82
+SetMarkerPath 80 4 81
+SetZone 81 11
+SetMarkerPath 81 0 79
+SetMarkerPath 81 1 80
+SetMarkerPath 81 2 82
+SetMarkerPath 81 3 83
+SetMarkerPath 81 4 84
+SetZone 82 11
+SetMarkerPath 82 0 79
+SetMarkerPath 82 1 80
+SetMarkerPath 82 2 81
+SetMarkerPath 82 3 84
+SetZone 83 11
+SetMarkerPath 83 0 13
+SetMarkerPath 83 1 81
+SetMarkerPath 83 2 84
+SetZone 84 11
+SetMarkerPath 84 1 13
+SetMarkerPath 84 2 81
+SetMarkerPath 84 3 82
+SetMarkerPath 84 4 83
+SetZone 85 12
+SetMarkerPath 85 0 78
+SetMarkerPath 85 1 79
+SetMarkerPath 85 2 80
+SetMarkerPath 85 3 86
+SetMarkerPath 85 4 88
+SetZone 86 12
+SetMarkerPath 86 0 85
+SetMarkerPath 86 1 88
+SetMarkerPath 86 2 143
+SetMarkerPath 86 3 89
+SetMarkerPath 86 4 42
+SetMarkerPath 86 5 102
+SetMarkerPath 86 6 99
+SetMarkerPath 86 7 97
+SetZone 87 12
+SetMarkerPath 87 0 88
+SetMarkerPath 87 1 8
+SetMarkerPath 87 2 97
+SetMarkerPath 87 3 98
+SetZone 88 12
+SetMarkerPath 88 0 86
+SetMarkerPath 88 1 85
+SetMarkerPath 88 2 87
+SetMarkerPath 88 3 98
+SetMarkerPath 88 4 101
+SetMarkerPath 88 5 97
+SetZone 89 8
+SetMarkerPath 89 0 90
+SetMarkerPath 89 1 19
+SetMarkerPath 89 2 101
+SetMarkerPath 89 3 98
+SetMarkerPath 89 4 147
+SetZone 90 8
+SetMarkerPath 90 0 91
+SetMarkerPath 90 1 18
+SetMarkerPath 90 2 92
+SetMarkerPath 90 3 19
+SetMarkerPath 90 4 89
+SetZone 91 8
+SetMarkerPath 91 0 17
+SetMarkerPath 91 1 90
+SetMarkerPath 91 2 92
+SetMarkerPath 91 3 18
+SetZone 92 8
+SetMarkerPath 92 0 17
+SetMarkerPath 92 1 91
+SetMarkerPath 92 2 90
+SetMarkerPath 92 3 19
+SetMarkerPath 92 4 18
+SetMarkerPath 92 5 94
+SetMarkerPath 92 6 95
+SetZone 93 8
+SetMarkerPath 93 0 18
+SetMarkerPath 93 1 94
+SetMarkerPath 93 2 38
+SetMarkerPath 93 3 17
+SetZone 94 8
+SetMarkerPath 94 0 93
+SetMarkerPath 94 1 18
+SetMarkerPath 94 2 92
+SetMarkerPath 94 3 95
+SetZone 95 9
+SetMarkerPath 95 0 94
+SetMarkerPath 95 1 96
+SetZone 96 9
+SetMarkerPath 96 0 97
+SetMarkerPath 96 1 95
+SetMarkerPath 96 2 99
+SetMarkerPath 96 3 98
+SetZone 97 9
+SetMarkerPath 97 0 16
+SetMarkerPath 97 1 34
+SetMarkerPath 97 2 96
+SetMarkerPath 97 3 99
+SetMarkerPath 97 4 98
+SetMarkerPath 97 5 163
+SetZone 98 9
+SetMarkerPath 98 0 16
+SetMarkerPath 98 1 34
+SetMarkerPath 98 2 97
+SetMarkerPath 98 3 96
+SetMarkerPath 98 4 101
+SetMarkerPath 98 5 100
+SetMarkerPath 98 6 102
+SetMarkerPath 98 7 99
+SetZone 99 9
+SetMarkerPath 99 0 97
+SetMarkerPath 99 1 96
+SetMarkerPath 99 2 100
+SetMarkerPath 99 3 98
+SetZone 100 9
+SetMarkerPath 100 0 98
+SetMarkerPath 100 1 105
+SetMarkerPath 100 2 104
+SetMarkerPath 100 3 101
+SetMarkerPath 100 4 99
+SetZone 101 9
+SetMarkerPath 101 0 102
+SetMarkerPath 101 1 16
+SetMarkerPath 101 2 98
+SetMarkerPath 101 3 100
+SetMarkerPath 101 4 105
+SetMarkerPath 101 5 104
+SetMarkerPath 101 6 42
+SetMarkerPath 101 7 88
+SetMarkerPathFlags 101 7 r
+SetRocketJumpPathFields 101 7 79.0 42.0 0
+SetZone 102 9
+SetMarkerPath 102 0 103
+SetMarkerPath 102 1 104
+SetMarkerPath 102 2 101
+SetMarkerPath 102 3 16
+SetMarkerPath 102 4 42
+SetMarkerPath 102 5 98
+SetZone 103 9
+SetMarkerPath 103 0 104
+SetMarkerPath 103 1 102
+SetMarkerPath 103 2 42
+SetZone 104 9
+SetMarkerPath 104 0 103
+SetMarkerPath 104 1 42
+SetMarkerPath 104 2 102
+SetMarkerPath 104 3 101
+SetMarkerPath 104 4 105
+SetMarkerPath 104 5 106
+SetMarkerPath 104 6 100
+SetZone 105 9
+SetMarkerPath 105 0 106
+SetMarkerPath 105 1 100
+SetMarkerPath 105 2 101
+SetMarkerPath 105 3 104
+SetZone 106 9
+SetMarkerPath 106 0 107
+SetMarkerPath 106 1 105
+SetMarkerPath 106 2 104
+SetZone 107 5
+SetMarkerPath 107 0 109
+SetMarkerPath 107 1 108
+SetMarkerPath 107 2 65
+SetMarkerPath 107 3 106
+SetZone 108 5
+SetMarkerPath 108 0 5
+SetMarkerPath 108 1 4
+SetMarkerPath 108 2 109
+SetMarkerPath 108 3 107
+SetMarkerPath 108 4 65
+SetZone 109 5
+SetMarkerPath 109 0 62
+SetMarkerPath 109 1 64
+SetMarkerPath 109 2 66
+SetMarkerPath 109 3 65
+SetMarkerPath 109 4 108
+SetMarkerPath 109 5 107
+SetZone 110 1
+SetMarkerPath 110 0 111
+SetMarkerPath 110 1 26
+SetMarkerPath 110 2 118
+SetMarkerPath 110 3 119
+SetZone 111 1
+SetMarkerPath 111 0 112
+SetMarkerPath 111 1 110
+SetMarkerPath 111 2 118
+SetMarkerPath 111 3 114
+SetMarkerPath 111 4 25
+SetMarkerPath 111 5 120
+SetZone 112 1
+SetMarkerPath 112 0 113
+SetMarkerPath 112 1 150
+SetMarkerPath 112 2 111
+SetMarkerPath 112 3 25
+SetZone 113 1
+SetMarkerPath 113 0 149
+SetMarkerPath 113 1 150
+SetMarkerPath 113 2 112
+SetMarkerPath 113 3 25
+SetMarkerPath 113 4 120
+SetMarkerPath 113 5 114
+SetMarkerPath 113 6 118
+SetZone 114 1
+SetMarkerPath 114 0 113
+SetMarkerPath 114 1 118
+SetMarkerPath 114 2 111
+SetMarkerPath 114 3 115
+SetMarkerPath 114 4 120
+SetMarkerPath 114 5 25
+SetMarkerPath 114 6 30
+SetMarkerPath 114 7 52
+SetZone 115 1
+SetMarkerPath 115 0 26
+SetMarkerPath 115 1 116
+SetMarkerPath 115 2 119
+SetMarkerPath 115 3 118
+SetMarkerPath 115 4 114
+SetMarkerPath 115 5 52
+SetMarkerPath 115 6 30
+SetMarkerPath 115 7 51
+SetZone 116 1
+SetMarkerPath 116 0 117
+SetMarkerPath 116 1 115
+SetMarkerPath 116 2 119
+SetMarkerPath 116 3 43
+SetMarkerPath 116 4 30
+SetMarkerPath 116 5 52
+SetZone 117 1
+SetMarkerPath 117 0 37
+SetMarkerPath 117 1 44
+SetMarkerPath 117 2 116
+SetMarkerPath 117 3 45
+SetMarkerPath 117 4 52
+SetMarkerPath 117 5 43
+SetZone 118 1
+SetMarkerPath 118 0 113
+SetMarkerPath 118 1 111
+SetMarkerPath 118 2 110
+SetMarkerPath 118 3 26
+SetMarkerPath 118 4 115
+SetMarkerPath 118 5 114
+SetMarkerPath 118 6 119
+SetZone 119 1
+SetMarkerPath 119 0 110
+SetMarkerPath 119 1 26
+SetMarkerPath 119 2 27
+SetMarkerPath 119 3 28
+SetMarkerPath 119 4 116
+SetMarkerPath 119 5 115
+SetMarkerPath 119 6 43
+SetMarkerPath 119 7 118
+SetZone 120 1
+SetMarkerPath 120 0 113
+SetMarkerPath 120 1 58
+SetMarkerPath 120 2 111
+SetMarkerPath 120 3 114
+SetMarkerPath 120 4 25
+SetMarkerPath 120 5 121
+SetMarkerPath 120 6 23
+SetMarkerPath 120 7 54
+SetZone 121 1
+SetMarkerPath 121 0 120
+SetMarkerPath 121 1 24
+SetMarkerPath 121 2 23
+SetMarkerPath 121 3 122
+SetMarkerPath 121 4 123
+SetMarkerPath 121 5 58
+SetMarkerPath 121 6 52
+SetMarkerPath 121 7 51
+SetZone 122 1
+SetMarkerPath 122 0 121
+SetMarkerPath 122 1 123
+SetMarkerPath 122 2 23
+SetMarkerPath 122 3 50
+SetMarkerPath 122 4 52
+SetMarkerPath 122 5 58
+SetZone 123 1
+SetMarkerPath 123 0 121
+SetMarkerPath 123 1 122
+SetMarkerPath 123 2 125
+SetMarkerPath 123 3 23
+SetMarkerPath 123 4 124
+SetZone 124 2
+SetMarkerPath 124 0 126
+SetMarkerPath 124 1 125
+SetMarkerPath 124 2 123
+SetZone 125 2
+SetMarkerPath 125 0 127
+SetMarkerPath 125 1 33
+SetMarkerPath 125 2 126
+SetMarkerPath 125 3 124
+SetMarkerPath 125 4 123
+SetZone 126 2
+SetMarkerPath 126 0 22
+SetMarkerPath 126 1 130
+SetMarkerPath 126 2 127
+SetMarkerPath 126 3 124
+SetMarkerPath 126 4 125
+SetZone 127 2
+SetMarkerPath 127 0 130
+SetMarkerPath 127 1 128
+SetMarkerPath 127 2 126
+SetMarkerPath 127 3 125
+SetMarkerPath 127 4 33
+SetZone 128 2
+SetMarkerPath 128 0 129
+SetMarkerPath 128 1 130
+SetMarkerPath 128 2 33
+SetMarkerPath 128 3 127
+SetMarkerPath 128 4 131
+SetZone 129 2
+SetMarkerPath 129 1 128
+SetMarkerPath 129 2 130
+SetMarkerPath 129 3 131
+SetMarkerPath 129 4 22
+SetZone 130 2
+SetMarkerPath 130 0 129
+SetMarkerPath 130 1 22
+SetMarkerPath 130 2 131
+SetMarkerPath 130 3 126
+SetMarkerPath 130 4 127
+SetMarkerPath 130 5 128
+SetZone 131 2
+SetMarkerPath 131 0 129
+SetMarkerPath 131 1 22
+SetMarkerPath 131 2 130
+SetMarkerPath 131 3 128
+SetMarkerPath 131 4 66
+SetMarkerPath 131 5 133
+SetZone 132 6
+SetMarkerPath 132 0 133
+SetMarkerPath 132 1 137
+SetMarkerPath 132 2 138
+SetMarkerPath 132 3 64
+SetMarkerPath 132 5 136
+SetZone 133 6
+SetMarkerPath 133 0 134
+SetMarkerPath 133 1 1
+SetMarkerPath 133 2 136
+SetMarkerPath 133 3 137
+SetMarkerPath 133 4 132
+SetMarkerPath 133 5 130
+SetMarkerPathFlags 133 5 r
+SetRocketJumpPathFields 133 5 57.0 277.0 0
+SetZone 134 6
+SetMarkerPath 134 0 135
+SetMarkerPath 134 1 1
+SetMarkerPath 134 2 136
+SetMarkerPath 134 3 133
+SetZone 135 6
+SetMarkerPath 135 0 134
+SetMarkerPath 135 1 35
+SetMarkerPath 135 2 1
+SetZone 136 6
+SetMarkerPath 136 0 134
+SetMarkerPath 136 1 1
+SetMarkerPath 136 2 170
+SetMarkerPath 136 3 133
+SetMarkerPath 136 4 132
+SetZone 137 6
+SetMarkerPath 137 0 133
+SetMarkerPath 137 1 132
+SetMarkerPath 137 2 138
+SetZone 138 6
+SetMarkerPath 138 0 137
+SetMarkerPath 138 1 139
+SetMarkerPath 138 2 141
+SetMarkerPath 138 3 140
+SetMarkerPath 138 4 132
+SetMarkerPath 138 5 71
+SetMarkerPath 138 6 73
+SetZone 139 6
+SetMarkerPath 139 0 138
+SetMarkerPath 139 1 141
+SetMarkerPath 139 2 140
+SetZone 140 7
+SetMarkerPath 140 0 138
+SetMarkerPath 140 1 143
+SetMarkerPath 140 2 141
+SetMarkerPath 140 3 139
+SetMarkerPath 140 4 142
+SetZone 141 7
+SetMarkerPath 141 0 138
+SetMarkerPath 141 1 143
+SetMarkerPath 141 2 140
+SetMarkerPath 141 3 142
+SetMarkerPath 141 4 139
+SetZone 142 7
+SetMarkerPath 142 0 20
+SetMarkerPath 142 1 143
+SetMarkerPath 142 2 141
+SetMarkerPath 142 3 140
+SetZone 143 7
+SetMarkerPath 143 0 20
+SetMarkerPath 143 1 86
+SetMarkerPath 143 2 144
+SetMarkerPath 143 3 142
+SetMarkerPath 143 4 140
+SetMarkerPath 143 5 141
+SetMarkerPath 143 6 42
+SetZone 144 7
+SetMarkerPath 144 0 146
+SetMarkerPath 144 1 145
+SetMarkerPath 144 2 21
+SetMarkerPath 144 3 20
+SetMarkerPath 144 4 101
+SetMarkerPath 144 5 143
+SetMarkerPath 144 6 102
+SetMarkerPath 144 7 42
+SetZone 145 7
+SetMarkerPath 145 0 146
+SetMarkerPath 145 1 148
+SetMarkerPath 145 2 21
+SetMarkerPath 145 3 144
+SetZone 146 7
+SetMarkerPath 146 0 147
+SetMarkerPath 146 1 144
+SetMarkerPath 146 2 21
+SetMarkerPath 146 3 145
+SetMarkerPath 146 4 148
+SetMarkerPath 146 5 151
+SetMarkerPath 146 6 102
+SetMarkerPath 146 7 79
+SetMarkerPathFlags 146 7 r
+SetRocketJumpPathFields 146 7 40.0 47.0 0
+SetZone 147 8
+SetMarkerPath 147 0 89
+SetMarkerPath 147 1 146
+SetMarkerPath 147 2 101
+SetZone 148 7
+SetMarkerPath 148 0 146
+SetMarkerPath 148 1 145
+SetMarkerPath 148 2 151
+SetMarkerPath 148 3 149
+SetMarkerPath 148 4 150
+SetZone 149 7
+SetMarkerPath 149 0 148
+SetMarkerPath 149 1 151
+SetMarkerPath 149 2 150
+SetMarkerPath 149 3 113
+SetZone 150 7
+SetMarkerPath 150 0 149
+SetMarkerPath 150 1 113
+SetMarkerPath 150 2 112
+SetMarkerPath 150 3 151
+SetMarkerPath 150 4 148
+SetZone 151 7
+SetMarkerPath 151 0 148
+SetMarkerPath 151 1 149
+SetMarkerPath 151 2 150
+SetMarkerPath 151 3 146
+SetZone 152 15
+SetMarkerPath 152 0 153
+SetMarkerPath 152 1 172
+SetMarkerPath 152 2 19
+SetMarkerPath 152 3 89
+SetZone 153 15
+SetMarkerPath 153 0 154
+SetMarkerPath 153 1 152
+SetMarkerPath 153 2 19
+SetMarkerPath 153 3 96
+SetZone 154 14
+SetMarkerPath 154 0 156
+SetMarkerPath 154 1 155
+SetMarkerPath 154 2 7
+SetMarkerPath 154 3 162
+SetMarkerPath 154 4 153
+SetMarkerPath 154 5 19
+SetZone 155 14
+SetMarkerPath 155 0 41
+SetMarkerPath 155 1 156
+SetMarkerPath 155 2 154
+SetMarkerPath 155 3 162
+SetMarkerPath 155 4 7
+SetZone 156 14
+SetMarkerPath 156 0 36
+SetMarkerPath 156 1 41
+SetMarkerPath 156 2 155
+SetMarkerPath 156 3 154
+SetMarkerPath 156 4 162
+SetMarkerPath 156 5 7
+SetMarkerPath 156 6 157
+SetZone 157 14
+SetMarkerPath 157 0 158
+SetMarkerPath 157 1 36
+SetMarkerPath 157 2 156
+SetMarkerPath 157 3 7
+SetMarkerPath 157 4 13
+SetZone 158 14
+SetMarkerPath 158 0 159
+SetMarkerPath 158 1 36
+SetMarkerPath 158 2 157
+SetZone 159 11
+SetMarkerPath 159 0 158
+SetMarkerPath 159 1 13
+SetMarkerPath 159 2 160
+SetZone 160 11
+SetMarkerPath 160 0 159
+SetMarkerPath 160 1 13
+SetZone 161 14
+SetMarkerPath 161 0 7
+SetMarkerPath 161 1 8
+SetZone 162 14
+SetMarkerPath 162 0 156
+SetMarkerPath 162 1 155
+SetMarkerPath 162 2 7
+SetMarkerPath 162 3 154
+SetMarkerPath 162 4 19
+SetZone 163 10
+SetMarkerPath 163 0 97
+SetMarkerPath 163 1 164
+SetMarkerPath 163 2 15
+SetMarkerPath 163 3 167
+SetMarkerPath 163 4 165
+SetZone 164 10
+SetMarkerPath 164 0 163
+SetMarkerPath 164 1 165
+SetMarkerPath 164 2 15
+SetMarkerPath 164 3 167
+SetZone 165 10
+SetMarkerPath 165 0 163
+SetMarkerPath 165 1 168
+SetMarkerPath 165 2 167
+SetMarkerPath 165 3 15
+SetMarkerPath 165 4 164
+SetMarkerPath 165 5 166
+SetZone 166 10
+SetMarkerPath 166 0 14
+SetMarkerPath 166 1 167
+SetMarkerPath 166 2 168
+SetMarkerPath 166 4 165
+SetZone 167 10
+SetMarkerPath 167 0 163
+SetMarkerPath 167 1 165
+SetMarkerPath 167 2 164
+SetMarkerPath 167 3 15
+SetMarkerPath 167 4 14
+SetMarkerPath 167 5 166
+SetMarkerPath 167 6 168
+SetZone 168 10
+SetMarkerPath 168 0 165
+SetMarkerPath 168 1 167
+SetMarkerPath 168 2 166
+SetZone 169 6
+SetMarkerPath 169 0 170
+SetMarkerPath 169 1 139
+SetMarkerPath 169 3 70
+SetZone 170 6
+SetMarkerPath 170 0 35
+SetMarkerPath 170 1 169
+SetMarkerPath 170 2 1
+SetMarkerPath 170 3 136
+SetZone 171 4
+SetMarkerPath 171 0 51
+SetMarkerPath 171 1 50
+SetMarkerPath 171 2 30
+SetZone 172 15
+SetMarkerPath 172 0 152
+SetMarkerPath 172 1 9
+SetMarkerPath 172 2 10
