@@ -334,30 +334,32 @@ static void CustomiseFrogbotMap (void)
 	}
 
 	// Expand bounding box of all items
-	for (ent = world; (ent = nextent (ent)); ) {
-		if (streq (ent->classname, "info_teleport_destination") ||
-			streq (ent->classname, "info_player_deathmatch")) {
-			continue;
-		}
-
-		if (streq (ent->classname, "marker")) {
-			vec3_t mins = { -65, -65, -24 };
-			vec3_t maxs = {  65,  65,  32 };
-			vec3_t viewoffset = { 80, 80, 24 };
-			int i;
-
-			for (i = 0; i < 3; ++i) {
-				if (ent->fb.fixed_size[i]) {
-					mins[i] = -ent->fb.fixed_size[i] / 2 - (i < 2 ? 15 : 0);
-					maxs[i] = ent->fb.fixed_size[i] / 2 - (i < 2 ? 15 : 0);
-					viewoffset[i] = (maxs[i] - mins[i]) / 2;
-				}
+	if (!isRACE()) {
+		for (ent = world; (ent = nextent(ent)); ) {
+			if (streq(ent->classname, "info_teleport_destination") ||
+				streq(ent->classname, "info_player_deathmatch")) {
+				continue;
 			}
-			VectorCopy(viewoffset, ent->s.v.view_ofs);
-			setsize(ent, PASSVEC3(mins), PASSVEC3(maxs));
-		}
-		else if ((int)ent->s.v.flags & FL_ITEM) {
-			PlaceItemFB (ent);
+
+			if (streq(ent->classname, "marker")) {
+				vec3_t mins = { -65, -65, -24 };
+				vec3_t maxs = { 65,  65,  32 };
+				vec3_t viewoffset = { 80, 80, 24 };
+				int i;
+
+				for (i = 0; i < 3; ++i) {
+					if (ent->fb.fixed_size[i]) {
+						mins[i] = -ent->fb.fixed_size[i] / 2 - (i < 2 ? 15 : 0);
+						maxs[i] = ent->fb.fixed_size[i] / 2 - (i < 2 ? 15 : 0);
+						viewoffset[i] = (maxs[i] - mins[i]) / 2;
+					}
+				}
+				VectorCopy(viewoffset, ent->s.v.view_ofs);
+				setsize(ent, PASSVEC3(mins), PASSVEC3(maxs));
+			}
+			else if ((int)ent->s.v.flags & FL_ITEM) {
+				PlaceItemFB(ent);
+			}
 		}
 	}
 
