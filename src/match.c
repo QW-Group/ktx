@@ -406,6 +406,9 @@ void CheckOvertime()
 //	}
 //	else
 
+	if (lgc_enabled()) {
+		k_mb_overtime = 0; // no overtime in lgc mode
+	}
 	if( (isTeam() || isCTF()) && teams != 2 ) {
 		k_mb_overtime = 0; // no overtime in case of less then 2 or more then 2 teams
 	}

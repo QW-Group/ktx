@@ -240,7 +240,7 @@ static void CalculateVolatility(gedict_t* self)
 		vol_flags |= 8;
 
 		// Pain penalty - if they are being attacked, not as accurate
-		if (self->fb.last_hurt && g_globalvars.time - self->fb.last_hurt < 1.0f) {
+		if (!lgc_enabled() && self->fb.last_hurt && g_globalvars.time - self->fb.last_hurt < 1.0f) {
 			volatility += self->fb.skill.pain_volatility;
 		}
 
