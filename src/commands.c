@@ -6167,7 +6167,8 @@ void PausedTic( int duration )
 {
 	pauseduration = duration;
 
-	if ( when_to_unpause && duration >= when_to_unpause )
+	// Unpause on schedule, or if the game has ended for some reason
+	if ((!k_matchLess && match_in_progress != 2) || (when_to_unpause && duration >= when_to_unpause))
 	{
 		when_to_unpause = pauseduration = 0; // reset our globals
 

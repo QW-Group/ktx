@@ -213,14 +213,14 @@ qbool isSayFlood(gedict_t *p)
 	idx = bound(0, p->fp_s.last_cmd, MAX_FP_CMDS-1);
 	say_time = p->fp_s.cmd_time[idx];
 
-	if ( g_globalvars.time < p->fp_s.locked )
+	if (!cvar("sv_paused") && g_globalvars.time < p->fp_s.locked )
 	{
 		G_sprint(p, PRINT_CHAT, "You can't talk for %d more seconds\n",
 										(int)(p->fp_s.locked - g_globalvars.time + 1));
 		return true; // flooder
 	}
 
-	if ( say_time && ( g_globalvars.time - say_time < get_k_say_fp_per( p ) ) )
+	if (!cvar("sv_paused") && say_time && ( g_globalvars.time - say_time < get_k_say_fp_per( p ) ) )
 	{
 		G_sprint(p, PRINT_CHAT, "FloodProt: You can't talk for %d seconds.\n", (int)get_k_say_fp_for( p ));
 
