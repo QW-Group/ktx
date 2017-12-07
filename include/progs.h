@@ -28,6 +28,10 @@
 #define MAX_ROUTE_NODES		20 // max race checkpoints per race (including start and finish checkpoints)
 #define MAX_ROUTES			20 // max race route per map
 
+#define LGCMODE_MAX_DISTANCE 700
+#define LGCMODE_DISTANCE_BUCKETS 20
+#define LGCMODE_BUCKET_DISTANCE  (LGCMODE_MAX_DISTANCE / LGCMODE_DISTANCE_BUCKETS)
+
 typedef struct shared_edict_s {
 	void			*ptr; // this points to sv_edict_t but mod should NOT bother about that...
 	entvars_t       v;	// C exported fields from progs
@@ -1138,6 +1142,8 @@ typedef struct gedict_s {
 
 // { lgc
 	lgc_state_t  lgc_state;
+	int          lgc_distance_misses[LGCMODE_DISTANCE_BUCKETS];
+	int          lgc_distance_hits[LGCMODE_DISTANCE_BUCKETS];
 // }
 } gedict_t;
 

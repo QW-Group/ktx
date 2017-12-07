@@ -1066,7 +1066,7 @@ qbool SameTeam(gedict_t* p1, gedict_t* p2);
 qbool lgc_enabled(void);
 void lgc_register_fire_stop(gedict_t* player);
 void lgc_register_kill(gedict_t* player);
-void lgc_register_miss(gedict_t* player);
-void lgc_register_hit(gedict_t* player, gedict_t* victim);
+void lgc_register_miss(vec3_t start, gedict_t* player);
+void lgc_register_hit(vec3_t start, gedict_t* player, gedict_t* victim);
 
 #define AUTOTRACK_POWERUPS_PREDICT_TIME 2

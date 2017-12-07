@@ -6712,23 +6712,45 @@ qbool lgc_enabled(void)
 	return cvar(LGCMODE_VARIABLE) != 0;
 }
 
-void lgc_register_hit(gedict_t* player, gedict_t* victim)
+void lgc_register_hit(vec3_t start, gedict_t* player, gedict_t* victim)
 {
 	if (victim && victim->ct == ctPlayer) {
 		player->lgc_state = lgcNormal;
+
+		if (isDuel()) {
+			float distance = bound(0, VectorDistance(start, victim->s.v.origin), LGCMODE_MAX_DISTANCE - 1);
+			int bucket = bound(0, (int)(distance / LGCMODE_BUCKET_DISTANCE), LGCMODE_DISTANCE_BUCKETS - 1);
+
+			player->lgc_distance_hits[bucket]++;
+		}
 	}
 	else {
-		lgc_register_miss(player);
+		lgc_register_miss(start, player);
 	}
 }
 
-void lgc_register_miss(gedict_t* player)
+void lgc_register_miss(vec3_t start, gedict_t* player)
 {
 	if (player->lgc_state == lgcUndershaft) {
 		++player->ps.lgc_undershaft;
 	}
 	else if (player->lgc_state == lgcOvershaft) {
 		++player->ps.lgc_overshaft;
+	}
+
+	if (isDuel()) {
+		// Find opponent and register miss according to distance
+		gedict_t* p;
+		for (p = world; p = find_plr(p); ) {
+			if (p != player) {
+				float distance = bound(0, VectorDistance(start, p->s.v.origin), LGCMODE_MAX_DISTANCE - 1);
+				int bucket = bound(0, (int)(distance / LGCMODE_BUCKET_DISTANCE), LGCMODE_DISTANCE_BUCKETS - 1);
+
+				player->lgc_distance_misses[bucket]++;
+
+				break;
+			}
+		}
 	}
 }
 

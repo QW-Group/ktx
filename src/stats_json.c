@@ -504,8 +504,23 @@ static void json_player_ra_stats(fileHandle_t handle, player_stats_t* stats)
 
 static void json_player_lgc_stats(fileHandle_t handle, gedict_t* player)
 {
+	int i;
+
 	s2di(handle, "," JSON_CR);
-	s2di(handle, INDENT6 "\"lgc\": { \"under\": %d, \"over\": %d }" JSON_CR, player->ps.lgc_undershaft, player->ps.lgc_overshaft);
+	s2di(handle, INDENT6 "\"lgc\": {" JSON_CR);
+	s2di(handle, INDENT8 "\"under\": %d," JSON_CR, player->ps.lgc_undershaft);
+	s2di(handle, INDENT8 "\"over\": %d," JSON_CR, player->ps.lgc_overshaft);
+	s2di(handle, INDENT8 "\"hits\": [");
+	for (i = 0; i < LGCMODE_DISTANCE_BUCKETS; ++i) {
+		s2di(handle, "%s%d", i ? ", " : "", player->lgc_distance_hits[i]);
+	}
+	s2di(handle, "]," JSON_CR);
+	s2di(handle, INDENT8 "\"misses\": [");
+	for (i = 0; i < LGCMODE_DISTANCE_BUCKETS; ++i) {
+		s2di(handle, "%s%d", i ? ", " : "", player->lgc_distance_misses[i]);
+	}
+	s2di(handle, "]" JSON_CR);
+	s2di(handle, "}" JSON_CR);
 }
 
 static void json_player_hoonymode_stats(fileHandle_t handle, gedict_t* player)

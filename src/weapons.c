@@ -1032,7 +1032,7 @@ void LightningDamage( vec3_t p1, vec3_t p2, gedict_t *from, float damage )
 	if ( PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.takedamage )
 	{
 		if (lgc_enabled()) {
-			lgc_register_hit(from, PROG_TO_EDICT(g_globalvars.trace_ent));
+			lgc_register_hit(p1, from, PROG_TO_EDICT(g_globalvars.trace_ent));
 		}
 		LightningHit( from, damage );
 
@@ -1049,7 +1049,7 @@ void LightningDamage( vec3_t p1, vec3_t p2, gedict_t *from, float damage )
 		}
 	}
 	else if (lgc_enabled()) {
-		lgc_register_miss(from);
+		lgc_register_miss(p1, from);
 	}
 }
 
