@@ -616,7 +616,7 @@ void InitialiseMarkerRoutes(void) {
 	PathCalculation(Calc_G_time_10_path_apply);
 	Calc_G_time_11();
 
-	{
+	/*{
 		extern gedict_t* markers[];
 		int i = 0, j = 0;
 		for (i = 0; i < NUMBER_MARKERS; ++i) {
@@ -639,7 +639,7 @@ void InitialiseMarkerRoutes(void) {
 				}
 			}
 		}
-	}
+	}*/
 
 	return;
 }

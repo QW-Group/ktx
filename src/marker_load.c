@@ -298,7 +298,6 @@ qbool LoadBotRoutingFromFile (void)
 
 		trap_CmdArgv (0, argument, sizeof (argument));
 
-		Com_Printf ("> %s\n", lineData);
 		if (strnull (argument) || (argument[0] == '/' && argument[1] == '/'))
 			continue;
 
