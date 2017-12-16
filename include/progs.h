@@ -1145,6 +1145,11 @@ typedef struct gedict_s {
 	int          lgc_distance_misses[LGCMODE_DISTANCE_BUCKETS];
 	int          lgc_distance_hits[LGCMODE_DISTANCE_BUCKETS];
 // }
+
+// { 
+	// let mvdsv know when player has teleported, and adjust for high-ping
+	int          teleported;
+// }
 } gedict_t;
 
 typedef enum

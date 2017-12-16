@@ -56,6 +56,7 @@ field_t         expfields[] = {
 	{"trackent",	FOFS( trackent ),	 F_INT},
 	{"hideplayers", FOFS( hideplayers ), F_INT},
 	{"visclients",  FOFS( visclients ),  F_INT},
+	{"teleported",  FOFS( teleported ),  F_INT},
 	{NULL}
 };
 //static char     mapname[64];

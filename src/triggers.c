@@ -679,6 +679,7 @@ void teleport_touch()
 	}
 #endif
 
+	other->teleported = 1;
 	teleport_player( other, t->s.v.origin, t->mangle,
 			 TFLAGS_FOG_SRC | TFLAGS_FOG_DST | TFLAGS_SND_SRC | TFLAGS_SND_DST | TFLAGS_VELOCITY_ADJUST );
 
