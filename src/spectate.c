@@ -43,7 +43,7 @@ int GetSpecWizard ()
 {
 	int k_asw = bound(0, cvar("allow_spec_wizard"), 2);
 
-	if ( match_in_progress || intermission_running )
+	if ( match_in_progress || intermission_running || isRACE() )
 		return 0;
 
 	switch ( k_asw ) {
