@@ -23,3 +23,9 @@ src/Makefile.vm
 
 # build output dirs
 build_*/
+x64/*
+.vs/*
+*.psess
+*.vspx
+*.suobackup
+*.VC.db
