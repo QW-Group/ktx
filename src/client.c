@@ -2294,6 +2294,9 @@ void ClientDisconnect()
 	if ( ! (CountPlayers() - CountBots()) ) {
 		void Spawn_DefMapChecker( float timeout );
 		int old_matchless = k_matchLess;
+#ifdef BOT_SUPPORT
+		int old_bots_enabled = bots_enabled();
+#endif
 
 		// Well, not quite sure if it OK, k_matchLess C global variable really must be set ONCE per map.
 		// At the same time, k_matchless cvar should be set ONCE per whole server run, so it should be OK.
@@ -2315,12 +2318,20 @@ void ClientDisconnect()
 		execute_rules_reset();
 
 		// Change map.
-		if ( old_matchless != k_matchLess )
-			changelevel( g_globalvars.mapname ); // force reload current map ASAP!
-		else if ( !cvar( "lock_practice" ) && k_practice )
-			changelevel( g_globalvars.mapname ); // force reload current map in practice mode anyway, ASAP
-		else
-			Spawn_DefMapChecker( 10 ); // delayed map reload, may be skipped due to different settings
+		if (old_matchless != k_matchLess) {
+			changelevel(g_globalvars.mapname); // force reload current map ASAP!
+		}
+		else if (!cvar("lock_practice") && k_practice) {
+			changelevel(g_globalvars.mapname); // force reload current map in practice mode anyway, ASAP
+		}
+#ifdef BOT_SUPPORT
+		else if (bots_enabled() != old_bots_enabled) {
+			changelevel(g_globalvars.mapname); // need to reload map, dimensions of entities will need to change
+		}
+#endif
+		else {
+			Spawn_DefMapChecker(10); // delayed map reload, may be skipped due to different settings
+		}
 	}
 }
 
