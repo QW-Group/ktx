@@ -1785,6 +1785,8 @@ void race_start( qbool cancelrecord, const char *fmt, ... )
 
 static void race_make_active_racer(gedict_t* r, gedict_t* s)
 {
+	int player_num = NUM_FOR_EDICT(r) - 1;
+
 	// mark him as racer
 	r->racer = r->race_participant = true;
 	r->hideplayers = r->hideplayers_default;
@@ -1810,6 +1812,7 @@ static void race_make_active_racer(gedict_t* r, gedict_t* s)
 
 	// telefrag anyone at this origin
 	teleport_player( r, r->s.v.origin, r->s.v.angles, TFLAGS_SND_DST );
+	memset(&race.currentrace[player_num], 0, sizeof(race.currentrace[player_num]));
 }
 
 //============================================
