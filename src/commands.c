@@ -4231,7 +4231,11 @@ void DoMVDAutoTrack( void )
 	// search best only in case when we do not have hint above "autotrack_hint"
 	if ( !p && !(p = get_ed_best1()) )
 	{
-		ResetMVDAutoTrack( p );
+		// MEAG: We can fall in here if everyone is dead (e.g. frag-trade in duel)... if we can,
+		//   keep tracking current player for now and evaluate again after respawns
+		if (!autotrack_last || autotrack_last->ct != ctPlayer) {
+			ResetMVDAutoTrack(NULL);
+		}
 		return; // can't find best
 	}
 
@@ -6741,7 +6745,7 @@ void lgc_register_miss(vec3_t start, gedict_t* player)
 	if (isDuel()) {
 		// Find opponent and register miss according to distance
 		gedict_t* p;
-		for (p = world; p = find_plr(p); ) {
+		for (p = world; (p = find_plr(p)); ) {
 			if (p != player) {
 				float distance = bound(0, VectorDistance(start, p->s.v.origin), LGCMODE_MAX_DISTANCE - 1);
 				int bucket = bound(0, (int)(distance / LGCMODE_BUCKET_DISTANCE), LGCMODE_DISTANCE_BUCKETS - 1);
