@@ -148,7 +148,7 @@ void Check_LongMapUptime()
 
 	max_map_uptime += (60 * 5); // so if map reloading fail, we repeat it after some time
 
-	if ( CountPlayers() || CountPlayers() == CountBots() ) { // oh, here players, warn but not reload
+	if ( CountPlayers() && CountPlayers() != CountBots() ) { // oh, here players, warn but not reload
 		G_bprint(2, "\x87%s Long map uptime detected, reload map please!\n", redtext( "WARNING:" ));
 		return;
 	}
