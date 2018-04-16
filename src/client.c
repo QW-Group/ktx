@@ -567,6 +567,17 @@ Take the players to the intermission spot
 ============
 */
 
+static void intermission_set_player_flags(gedict_t* player)
+{
+	player->s.v.takedamage = DAMAGE_NO;
+	player->s.v.solid = SOLID_NOT;
+	player->s.v.movetype = MOVETYPE_NONE;
+	player->s.v.modelindex = 0;
+
+	// KTEAMS: make players invisible
+	player->model = "";
+}
+
 void execute_changelevel()
 {
 	intermission_running = 1;
@@ -590,17 +601,12 @@ void execute_changelevel()
 
 	for( other = world; (other = find_plr( other )); )
 	{
-		other->s.v.takedamage = DAMAGE_NO;
-		other->s.v.solid = SOLID_NOT;
-		other->s.v.movetype = MOVETYPE_NONE;
-		other->s.v.modelindex = 0;
+		intermission_set_player_flags(other);
 
-
-// KTEAMS: make players invisible
-        other->model = "";
 		// take screenshot if requested
-        if( iKey( other, "kf" ) & KF_SCREEN )
+		if (iKey(other, "kf") & KF_SCREEN) {
 			stuffcmd_flags(other, STUFFCMD_IGNOREINDEMO, "wait; wait; wait; wait; wait; wait; screenshot\n");
+		}
 	}
 }
 
@@ -1487,6 +1493,10 @@ void PutClientInServer( void )
 
 	setmodel( self, "progs/player.mdl" );
 	modelindex_player = self->s.v.modelindex;
+
+	if (intermission_running) {
+		intermission_set_player_flags(self);
+	}
 
 	setsize( self, PASSVEC3( VEC_HULL_MIN ), PASSVEC3( VEC_HULL_MAX ) );
 	SetVector( self->s.v.view_ofs, 0, 0, 22 );
