@@ -327,20 +327,16 @@ static qbool CanJumpOver(gedict_t* self, vec3_t jump_origin, vec3_t jump_velocit
 			VectorCopy(testplace, last_clear_point);
 		}
 		else {
-			qbool do_jump = true;
 			if ((int)self->s.v.flags & FL_ONGROUND) {
-				gedict_t* test_enemy;
+				gedict_t* ent;
 
-				for (test_enemy = world; (test_enemy = find_plr (test_enemy)); ) {
-					if (test_enemy->fb.T & UNREACHABLE) {
-						if (VectorDistance(test_enemy->s.v.origin, testplace) <= 84) {
-							do_jump = false;
-							break;
-						}
+				for (ent = world; (ent = findradius_ignore_solid(ent, testplace, 84)); ) {
+					if (ent->fb.T & UNREACHABLE) {
+						return false;
 					}
 				}
 			}
-			return do_jump;
+			return true;
 		}
 
 		// Air-control (FIXME: looks like this function runs simulation at 10fps
