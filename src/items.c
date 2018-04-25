@@ -315,19 +315,19 @@ void health_touch()
 	self->s.v.solid = SOLID_NOT;
 
 	// Megahealth = rot down the player's super health
-	if ( self->healtype == 2 )
-	{
+	if ( self->healtype == 2 ) {
 		other->s.v.items = ( int ) other->s.v.items | IT_SUPERHEALTH;
 		if ( deathmatch != 4 )
 		{
 			self->s.v.nextthink = g_globalvars.time + 5;
 			self->think = ( func_t ) item_megahealth_rot;
+			stuffcmd_flags(other, STUFFCMD_DEMOONLY, "//ktx took %d %d %d\n", NUM_FOR_EDICT(self), 0, NUM_FOR_EDICT(other));
 		}
 		self->s.v.owner = EDICT_TO_PROG( other );
-	} else
-	{
-		if ( deathmatch != 2 )	// deathmatch 2 is the silly old rules
-		{
+	}
+	else {
+		if ( deathmatch != 2 ) {
+			// deathmatch 2 is the silly old rules
 			self->s.v.nextthink = g_globalvars.time + 20;
 			self->think = ( func_t ) SUB_regen;
 		}
@@ -364,6 +364,7 @@ void item_megahealth_rot(void)
 	if ( deathmatch != 2 )	// deathmatch 2 is silly old rules
 	{
 		self->s.v.nextthink = g_globalvars.time + 20;
+		stuffcmd_flags(other, STUFFCMD_DEMOONLY, "//ktx timer %d %d\n", NUM_FOR_EDICT(self), 20);
 		self->think = ( func_t ) SUB_regen;
 	}
 
@@ -454,8 +455,10 @@ void armor_touch()
 
 	self->s.v.solid = SOLID_NOT;
 	self->model = "";
-	if ( deathmatch != 2 )
+	if (deathmatch != 2) {
 		self->s.v.nextthink = g_globalvars.time + 20;
+		stuffcmd_flags(other, STUFFCMD_DEMOONLY, "//ktx took %d %d %d\n", NUM_FOR_EDICT(self), 20, NUM_FOR_EDICT(other));
+	}
 	self->think = ( func_t ) SUB_regen;
 
 	real_value = value - real_value;
@@ -804,8 +807,10 @@ void weapon_touch()
 		// remove it in single player, or setup for respawning in deathmatch
 		self->model = "";
 		self->s.v.solid = SOLID_NOT;
-		if ( deathmatch != 2 )
+		if (deathmatch != 2) {
 			self->s.v.nextthink = g_globalvars.time + 30;
+			stuffcmd_flags(other, STUFFCMD_DEMOONLY, "//ktx took %d %d %d\n", NUM_FOR_EDICT(self), 30, NUM_FOR_EDICT(other));
+		}
 		self->think = ( func_t ) SUB_regen;
 	}
 	activator = other;
@@ -1051,13 +1056,15 @@ void ammo_touch()
 // remove it in single player, or setup for respawning in deathmatch
 	self->model = "";
 	self->s.v.solid = SOLID_NOT;
-	if ( deathmatch != 2 )
+	if (deathmatch != 2) {
 		self->s.v.nextthink = g_globalvars.time + 30;
+	}
 
 // Xian -- If playing in DM 3.0 mode, halve the time ammo respawns        
 
-	if ( deathmatch == 3 || deathmatch == 5 )
+	if (deathmatch == 3 || deathmatch == 5) {
 		self->s.v.nextthink = g_globalvars.time + 15;
+	}
 
 	self->think = ( func_t ) SUB_regen;
 	ItemTaken (self, other);
@@ -1723,11 +1730,19 @@ void powerup_touch()
 
 	self->mdl = self->model;
 
-	if ( streq( self->classname, "item_artifact_invulnerability" ) ||
-	     streq( self->classname, "item_artifact_invisibility" ) )
+	if (streq(self->classname, "item_artifact_invulnerability") ||
+		streq(self->classname, "item_artifact_invisibility")) {
 		self->s.v.nextthink = g_globalvars.time + 60 * 5;
-	else
+		if (!k_practice) {
+			stuffcmd_flags(other, STUFFCMD_DEMOONLY, "//ktx took %d %d %d\n", NUM_FOR_EDICT(self), 300, NUM_FOR_EDICT(other));
+		}
+	}
+	else {
 		self->s.v.nextthink = g_globalvars.time + 60;
+		if (!k_practice) {
+			stuffcmd_flags(other, STUFFCMD_DEMOONLY, "//ktx took %d %d %d\n", NUM_FOR_EDICT(self), 60, NUM_FOR_EDICT(other));
+		}
+	}
 
 	// all powerups respawn after 30 seconds in practice mode
 	if ( k_practice ) // #practice mode#
@@ -2001,7 +2016,7 @@ void BackpackTouch()
 	if (deathmatch == 4 && lgc_enabled() && other->s.v.health >= 300) {
 		return; // don't allow bonus powers, leave pack hanging around
 	}
-	
+
 	acount = 0;
 	G_sprint( other, PRINT_LOW, "You get " );
 
@@ -2059,8 +2074,11 @@ void BackpackTouch()
 	}
 
 	new = self->s.v.items;
-
 	if ( new ) {
+		if ((new & IT_ROCKET_LAUNCHER) || (new & IT_LIGHTNING)) {
+			stuffcmd_flags(other, STUFFCMD_DEMOONLY, "//ktx bp %d %d\n", NUM_FOR_EDICT(self), NUM_FOR_EDICT(other));
+		}
+
 		TookWeaponHandler( other, new, true );
 
 		if ( !( ( int ) other->s.v.items & new ) )
@@ -2267,6 +2285,10 @@ void DropBackpack()
 
 	//item->mdl = "progs/backpack.mdl";
 	setmodel( item, "progs/backpack.mdl" );
+
+	if (item->s.v.items == IT_ROCKET_LAUNCHER || item->s.v.items == IT_LIGHTNING) {
+		stuffcmd_flags(self, STUFFCMD_DEMOONLY, "//ktx drop %d %d %d\n", NUM_FOR_EDICT(item), (int)item->s.v.items, NUM_FOR_EDICT(self));
+	}
 
 	if ( item->s.v.items == IT_AXE ) {
 		item->netname = "Axe";

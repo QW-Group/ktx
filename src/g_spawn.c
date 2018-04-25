@@ -154,6 +154,13 @@ void SUB_Remove()
 //	if (self && self->classname )
 //		G_bprint(2, "rm: %s\n", self->classname);
 
+	if (self && streq(self->classname, "backpack")) {
+		if (self->s.v.items == IT_ROCKET_LAUNCHER || self->s.v.items == IT_LIGHTNING) {
+			// Ugh... get away with 'world' because mvdsv will exit before test with STUFFCMD_DEMOONLY
+			stuffcmd_flags(world, STUFFCMD_DEMOONLY, "//ktx expire %d\n", NUM_FOR_EDICT(self));
+		}
+	}
+
 	ent_remove( self );
 }
 

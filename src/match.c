@@ -860,6 +860,7 @@ void StartMatch ()
 		race_match_start();
 	}
 
+	stuffcmd_flags(world, STUFFCMD_DEMOONLY, "//ktx matchstart\n");
 	cvar_fset("qtv_sayenabled", 0);
 }
 
