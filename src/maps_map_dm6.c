@@ -42,7 +42,7 @@ void DM6CampLogic() {
 
 void DM6SelectWeaponToOpenDoor (gedict_t* self)
 {
-	if (self->fb.path_state & DM6_DOOR) {
+	if (dm6_door && (self->fb.path_state & DM6_DOOR)) {
 		int items_ = (int) self->s.v.items;
 		int desired_weapon = 0;
 		if (self->s.v.ammo_shells) {
@@ -64,7 +64,7 @@ void DM6SelectWeaponToOpenDoor (gedict_t* self)
 
 qbool DM6DoorLogic (gedict_t* self, gedict_t* goal_entity)
 {
-	if (goal_entity->fb.Z_ == 1) {
+	if (dm6_door && goal_entity->fb.Z_ == 1) {
 		if (self->fb.touch_marker->fb.zones[0].task & DM6_DOOR) {
 			if (dm6_door->fb.door_entity && dm6_door->fb.door_entity->s.v.takedamage) {
 				gedict_t* enemy = &g_edicts[self->s.v.enemy];
@@ -85,13 +85,17 @@ qbool DM6DoorLogic (gedict_t* self, gedict_t* goal_entity)
 
 qbool DM6DoorClosed (fb_path_eval_t* eval)
 {
+	if (!dm6_door) {
+		return false;
+	}
+
 	return (eval->test_marker == dm6_door && !dm6_door->fb.door_entity->s.v.takedamage) ||
 		   ((eval->description & DM6_DOOR) && dm6_door->fb.door_entity->s.v.origin[0] > -64);
 }
 
 void DM6MarkerTouchLogic (gedict_t* self, gedict_t* goalentity_marker)
 {
-	if (goalentity_marker && goalentity_marker->fb.Z_ == 1) {
+	if (dm6_door && goalentity_marker && goalentity_marker->fb.Z_ == 1) {
 		if (self->fb.touch_marker->fb.zones[0].task & DM6_DOOR) {
 			if (dm6_door->fb.door_entity->s.v.takedamage) {
 				vec3_t temp, src, direction;
@@ -118,7 +122,7 @@ void DM6MarkerTouchLogic (gedict_t* self, gedict_t* goalentity_marker)
 
 qbool DM6LookAtDoor (gedict_t* self)
 {
-	if (self->fb.path_state & DM6_DOOR) {
+	if (dm6_door && (self->fb.path_state & DM6_DOOR)) {
 		self->fb.state |= NOTARGET_ENEMY;
 		self->fb.look_object = dm6_door->fb.door_entity;
 
@@ -132,7 +136,7 @@ qbool DM6LookAtDoor (gedict_t* self)
 
 qbool DM6FireAtDoor (gedict_t* self, vec3_t rel_pos)
 {
-	if (self->fb.path_state & DM6_DOOR) {
+	if (dm6_door && (self->fb.path_state & DM6_DOOR)) {
 		if (dm6_door->fb.door_entity->s.v.takedamage) {
 			rel_pos[2] -= 38;
 		}
@@ -181,9 +185,11 @@ void DM6Debug (gedict_t* self)
 		}
 	}
 
-	G_sprint (self, PRINT_HIGH, "dm6_door->takedamage = %s\n", dm6_door->s.v.takedamage ? "true" : "false");
-	if (dm6_door->fb.door_entity) {
-		G_sprint (self, PRINT_HIGH, "dm6_door->door->takedamage = %s\n", dm6_door->fb.door_entity->s.v.takedamage ? "true" : "false");
+	if (dm6_door) {
+		G_sprint(self, PRINT_HIGH, "dm6_door->takedamage = %s\n", dm6_door->s.v.takedamage ? "true" : "false");
+		if (dm6_door->fb.door_entity) {
+			G_sprint(self, PRINT_HIGH, "dm6_door->door->takedamage = %s\n", dm6_door->fb.door_entity->s.v.takedamage ? "true" : "false");
+		}
 	}
 }
 
