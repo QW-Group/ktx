@@ -275,13 +275,12 @@ void respawn_items(char* classname, qbool enabled)
 		if (enabled) {
 			if (p->initial_spawn_delay > 0) {
 				// hide, but respawn at future point
-				p->model = NULL;
+				setmodel(p, "");
 				p->s.v.solid = (bots_enabled() ? SOLID_TRIGGER : SOLID_NOT);
 				p->s.v.nextthink = g_globalvars.time + p->initial_spawn_delay;
 				p->think = ( func_t ) SUB_regen;
 			}
-			else if (strnull( p->model ) || p->s.v.solid != SOLID_TRIGGER)
-			{
+			else {
 				// respawn now
 				p->s.v.nextthink = g_globalvars.time;
 				p->think = ( func_t ) SUB_regen;
@@ -292,7 +291,7 @@ void respawn_items(char* classname, qbool enabled)
 		}
 		else {
 			// hide item
-			p->model = NULL;
+			setmodel(p, "");
 			p->s.v.solid = (bots_enabled() ? SOLID_TRIGGER : SOLID_NOT);
 			p->s.v.nextthink = 0;
 #ifdef BOT_SUPPORT

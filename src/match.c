@@ -612,9 +612,6 @@ void SM_PrepareMap()
 		}
 	}
 
-	if (isHoonyModeAny()) {
-		HM_reset_map();
-	}
 	ClearBodyQue(); // hide corpses
 }
 
@@ -1324,6 +1321,10 @@ void TimerStartThink ()
 		p->classname = "standby_th";
 		p->s.v.nextthink = g_globalvars.time + 0.8;
 		p->think = ( func_t ) standby_think;
+
+		if (isHoonyModeAny()) {
+			HM_reset_map();
+		}
 	}
     else if( self->cnt2 <= 0 ) {
 		G_cp2all("");
