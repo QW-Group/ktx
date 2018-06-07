@@ -73,8 +73,6 @@ void DoTossRune( int rune )
 		VectorScale( item->s.v.velocity, 300, item->s.v.velocity );
 		item->s.v.velocity[2] = 200;
 	}
-	SetVector( item->s.v.avelocity, 300, 300, 300 );
-	vectoangles( item->s.v.velocity, item->s.v.angles );
 
 	if ( rune & CTF_RUNE_RES )
 		setmodel( item, "progs/end1.mdl" );
