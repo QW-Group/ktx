@@ -3366,6 +3366,13 @@ void UserMode(float umode)
 	if ( streq(um, "ffa") && k_matchLess && cvar("k_use_matchless_dir") )
 		um = "matchless"; // use configs/usermodes/matchless instead of configs/usermodes/ffa in matchless mode
 
+	if (streq(um, "ctf") && bots_enabled() && !sv_invoked) {
+		if (bots_enabled()) {
+			G_sprint(self, PRINT_HIGH, "Disable bots first with %s\n", redtext("/botcmd disable"));
+			return;
+		}
+	}
+
 	//for 1on1 / 2on2 / 4on4 and ffa commands manipulation
 	//0 - no one, 1 - admins, 2 elected admins too
 	//3 - only real real judges, 4 - elected judges too

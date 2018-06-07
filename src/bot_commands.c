@@ -1729,6 +1729,10 @@ void FrogbotsCommand (void)
 				G_sprint(self, PRINT_HIGH, "Cannot enable bots while in race mode\n");
 				return;
 			}
+			if (isCTF()) {
+				G_sprint(self, PRINT_HIGH, "Cannot enable bots while in CTF mode\n");
+				return;
+			}
 
 			cvar_fset(FB_CVAR_ENABLED, 1);
 			GotoNextMap();

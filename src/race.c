@@ -198,6 +198,11 @@ static int read_record_param( int param )
 
 void ToggleRace( void )
 {
+	if (!isRACE() && bots_enabled()) {
+		G_sprint(self, PRINT_HIGH, "Disable bots first with %s\n", redtext("/botcmd disable"));
+		return;
+	}
+
 	if (!isRACE() && !is_rules_change_allowed()) {
 		return;
 	}
