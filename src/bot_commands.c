@@ -1744,12 +1744,12 @@ void FrogbotsCommand (void)
 		return;
 	}
 
-	if (!FrogbotOptionEnabled (FB_OPTION_EDITOR_MODE) && !FrogbotsCheckMapSupport ()) {
-		G_sprint (self, PRINT_HIGH, "Bots not supported on this map.\n");
+	trap_CmdArgv (1, command, sizeof (command));
+
+	if (!FrogbotOptionEnabled(FB_OPTION_EDITOR_MODE) && !streq(command, "disable") && !FrogbotsCheckMapSupport()) {
+		G_sprint(self, PRINT_HIGH, "Bots not supported on this map.\n");
 		return;
 	}
-
-	trap_CmdArgv (1, command, sizeof (command));
 
 	for (i = 0; i < num_commands; ++i) {
 		if (streq (commands[i].name, command)) {
