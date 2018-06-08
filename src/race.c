@@ -2754,7 +2754,7 @@ qbool race_load_route( int route )
 
 	read_topscores();
 
-	if (!strnull(cvar_string("cs_address"))) {
+	if (!strnull(cvar_string("sv_www_address"))) {
 		localcmd("\nsv_web_postfile ServerApi/UploadTopFile \"\" %s\n", race_filename("top"));
 		trap_executecmd();
 	}
@@ -4079,7 +4079,7 @@ static qbool race_end(gedict_t* racer, qbool valid, qbool complete)
 	racer->muted = true;
 	race_set_one_player_movetype_and_etc(racer);
 
-	if (valid && !strnull(cvar_string("cs_address")) && !strnull(racer->netname)) {
+	if (valid && !strnull(cvar_string("sv_www_address")) && !strnull(racer->netname)) {
 		const char* map = cvar_string(RACE_ROUTE_MAPNAME_CVAR);
 		int route_number = cvar(RACE_ROUTE_NUMBER_CVAR);
 
