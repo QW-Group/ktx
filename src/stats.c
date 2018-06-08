@@ -37,6 +37,10 @@ static void CollectTpStats(void)
 		if ( tmStats_cnt < 0 || tmStats_cnt >= MAX_TM_STATS )
 			return; // all slots busy
 
+		if (tmStats[tmStats_cnt].name == NULL) {
+			return;
+		}
+
 		for( from2 = 0, p2 = world; (p2 = find_plrghst ( p2, &from2 )); ) {
 			if( p2->ready || strneq( tmp, getteam( p2 ) ))
 				continue; // served or on different team
