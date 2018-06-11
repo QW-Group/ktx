@@ -183,9 +183,9 @@ qbool HasWeapon(gedict_t* player, int weapon)
 	return ((int)player->s.v.items & weapon);
 }
 
-float enemy_shaft_attack(void)
+float enemy_shaft_attack(gedict_t* self, gedict_t* enemy)
 {
-	return (HasWeapon(enemy_, IT_LIGHTNING) && enemy_->s.v.ammo_cells && (self->fb.enemy_dist < 630) && (g_globalvars.time < enemy_->attack_finished));
+	return (HasWeapon(enemy, IT_LIGHTNING) && enemy->s.v.ammo_cells && (self->fb.enemy_dist < 630) && (g_globalvars.time < enemy->attack_finished));
 }
 
 qbool bots_enabled(void)
