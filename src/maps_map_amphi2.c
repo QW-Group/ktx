@@ -6,6 +6,8 @@
 #include "fb_globals.h"
 
 void AMPHI2BotInLava(void) {
+	gedict_t* enemy = &g_edicts[self->s.v.enemy];
+
 	// TODO: rewrite... essentially if in lava and enemy isn't shafting, jump to target instead of walk
 	//       this is probably true of all lava-burn situations, as long as we're not lava-rjing to escape?
 	if ( self->isBot && streq(g_globalvars.mapname, "amphi2") ) {
@@ -17,7 +19,7 @@ void AMPHI2BotInLava(void) {
 
 				if (trap_pointcontents(PASSVEC3(point)) == CONTENT_LAVA) {
 					if ((int)self->s.v.flags & FL_ONGROUND) {
-						if (!enemy_shaft_attack()) {
+						if (!enemy_shaft_attack(self, enemy)) {
 							if (!self->fb.rocketJumping) {
 								NewVelocityForArrow (self, self->fb.dir_move_, "amphi2");
 								SetJumpFlag (self, true, "AMPHI2 logic");
