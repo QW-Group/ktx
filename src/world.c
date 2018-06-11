@@ -125,7 +125,7 @@ void Spawn_DefMapChecker( float timeout )
 	for( e = world; (e = find(e, FOFCLSN, "mapguard")); )
 		ent_remove( e );
 
-	if ( k_matchLess ) // no defmap in matchLess mode
+	if ( k_matchLess && !isCTF() ) // no defmap in matchLess mode, unless CTF
 		return;
 
 	e = spawn();
@@ -274,7 +274,7 @@ void SP_worldspawn()
 #ifdef CTF_RELOADMAP
 	if ( isCTF() ) // precache only if CTF is really on
 #else
-	if ( k_allowed_free_modes & UM_CTF ) // precache if CTF even only possible, does't matter is it on or off currently
+	if ( k_allowed_free_modes & UM_CTF ) // precache if CTF even only possible, doesn't matter if it is on or off currently
 #endif
 	{
 		trap_precache_sound( "weapons/chain1.wav" );
@@ -1309,12 +1309,22 @@ void FixRules ( )
 		trap_cvar_set_float("deathmatch", (deathmatch = 3));
 
 	if ( k_matchLess ) {
-		// matchless mode MUST be FFA
-		if ( !isFFA() )
+		// matchless mode MUST be FFA or CTF
+		if ( !isFFA() && !isCTF() )
 			trap_cvar_set_float("k_mode", (float)( k_mode = gtFFA ));
-		// matchless mode should have teamplay set to 0 unless coop.
-		if ( teamplay && !coop )
+		else if ( isCTF() )
+			trap_cvar_set_float("k_mode", (float)( k_mode = gtCTF ));
+		// matchless mode should have teamplay set to 0 unless coop or CTF.
+		if ( teamplay && !coop && !isCTF() )
 			trap_cvar_set_float("teamplay", (teamplay = 0));
+		if ( isCTF() )
+		{
+			trap_cvar_set_float("teamplay", (teamplay = 2));
+			// Below commands only needed if "k_matchless 1" and "k_mode 4" are forced via rcon
+			tp = 2;		// Need to set this so that we don't get the "teamplay changed to: 2" warning from the logic below
+			km = 4;		// Need to set this so that we don't get the "k_mode changed to: 2" warning from the logic below
+		}
+
 	}
 
 	// if unknown k_mode - set some appropriate value

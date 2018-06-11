@@ -1283,9 +1283,36 @@ void ClientConnect()
 	}
 
 	// qqshka: force damn colors in CTF.
-	if ( isCTF() && match_in_progress )
-	{
-		qbool red = streq(getteam(self), "red");
+	if (isCTF()) {
+		int red = 0; // Keeps track of which team and colors to set for new player
+
+		// If matchless CTF, make sure team is red or blue
+		if (k_matchLess) {
+			if (!(streq(getteam(self), "red") || streq(getteam(self), "blue"))) {
+				// Compare number of blue and red players. If red > blue (i.e. red > 0), set new player to blue.
+				gedict_t * p;
+				for (p = world; (p = find_plr(p)); ) {
+					if (streq(getteam(p), "red")) {
+						red++;
+					}
+					else {
+						red--;
+					}
+				}
+
+				SetUserInfo(self, "team", red > 0 ? "blue" : "red", 0);
+				if (red > 0) {
+					stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "team " "blue" "\n");
+				}
+				else {
+					stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "team " "red" "\n");
+				}
+				G_bprint(PRINT_HIGH, "%s automatically set to team: %s\n", self->netname, redtext(red > 0 ? "blue" : "red"));
+			}
+			G_sprint(self, PRINT_HIGH, "To change teams, /disconnect, /team red or /team blue, then /reconnect\n");
+		}
+		// Force colors
+		red = streq(getteam(self), "red");
 		// set proper colors.
 		SetUserInfo( self, "topcolor", red ? "4" : "13", 0 );
 		SetUserInfo( self, "bottomcolor", red ? "4" : "13", 0 );

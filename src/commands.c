@@ -721,9 +721,9 @@ cmd_t cmds[] = {
 	{ "n",           DontKick,                  0    , CF_BOTH_ADMIN, CD_N },
 	{ "overtime",    ChangeOvertime,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_OVERTIME },
 	{ "overtimeup",  ChangeOvertimeUp,          0    , CF_PLAYER | CF_SPC_ADMIN, CD_OVERTIMEUP },
-	{ "elect",       VoteAdmin,                 0    , CF_BOTH, CD_ELECT },
-	{ "yes",         VoteYes,                   0    , CF_PLAYER, CD_YES },
-	{ "no",          VoteNo,                    0    , CF_PLAYER, CD_NO },
+	{ "elect",       VoteAdmin,                 0    , CF_BOTH | CF_MATCHLESS, CD_ELECT },
+	{ "yes",         VoteYes,                   0    , CF_PLAYER | CF_MATCHLESS, CD_YES },
+	{ "no",          VoteNo,                    0    , CF_PLAYER | CF_MATCHLESS, CD_NO },
 	{ "captain",     VoteCaptain,               0    , CF_PLAYER, CD_CAPTAIN },
 	{ "freeze",      ToggleFreeze,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_FREEZE },
 	{ "rpickup",     RandomPickup,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_RPICKUP },
@@ -821,16 +821,16 @@ cmd_t cmds[] = {
 //	{ "pos_velocity", DEF(Pos_Set),                   3    , CF_BOTH | CF_PARAMS, CD_POS_VELOCITY },
 	{ "sh_speed",    Sh_Speed,                  0    , CF_BOTH, CD_SH_SPEED },
 // { CTF commands
-	{ "tossrune",    TossRune,                  0    , CF_PLAYER, CD_TOSSRUNE },
-	{ "tossflag",    TossFlag,                  0    , CF_PLAYER, CD_TOSSFLAG },
-	{ "nohook",      nohook,                    0    , CF_BOTH_ADMIN, CD_NOHOOK },
-	{ "norunes",     norunes,                   0    , CF_BOTH_ADMIN, CD_NORUNES },
-	{ "noga",        noga,                      0    , CF_PLAYER | CF_SPC_ADMIN, CD_NOGA },
-	{ "mctf",        mctf,                      0    , CF_BOTH_ADMIN, CD_MCTF },
-	{ "flagstatus",  FlagStatus,                0    , CF_BOTH, CD_FLAGSTATUS },
+	{ "tossrune",    TossRune,                  0    , CF_PLAYER | CF_MATCHLESS, CD_TOSSRUNE },
+	{ "tossflag",    TossFlag,                  0    , CF_PLAYER | CF_MATCHLESS, CD_TOSSFLAG },
+	{ "nohook",      nohook,                    0    , CF_BOTH_ADMIN | CF_MATCHLESS, CD_NOHOOK },
+	{ "norunes",     norunes,                   0    , CF_BOTH_ADMIN | CF_MATCHLESS, CD_NORUNES },
+	{ "noga",        noga,                      0    , CF_BOTH_ADMIN | CF_MATCHLESS, CD_NOGA },
+	{ "mctf",        mctf,                      0    , CF_BOTH_ADMIN | CF_MATCHLESS, CD_MCTF },
+	{ "flagstatus",  FlagStatus,                0    , CF_BOTH | CF_MATCHLESS, CD_FLAGSTATUS },
 	{ "swapall",     AdminSwapAll,              0    , CF_BOTH_ADMIN, CD_SWAPALL },
 
-	{ "ctfbasedspawn", CTFBasedSpawn,           0    , CF_PLAYER | CF_SPC_ADMIN, CD_CTFBASEDSPAWN },
+	{ "ctfbasedspawn", CTFBasedSpawn,           0    , CF_PLAYER | CF_SPC_ADMIN | CF_MATCHLESS, CD_CTFBASEDSPAWN },
 // }
 	{ "motd",        motd_show,                 0    , CF_BOTH | CF_MATCHLESS, CD_MOTD },
 	{ "infolock",    infolock,                  0    , CF_BOTH_ADMIN, CD_INFOLOCK },
@@ -971,7 +971,7 @@ int DoCommand(int icmd)
 		return DO_OUT_OF_RANGE_CMDS;
 
 	if ( k_matchLess && !(cmds[icmd].cf_flags & CF_MATCHLESS) )
-		return DO_CMD_DISALLOWED_MATCHLESS; // cmd does't allowed in matchLess mode
+		return DO_CMD_DISALLOWED_MATCHLESS; // cmd isn't allowed in matchLess mode
 
 	if ( !k_matchLess && (cmds[icmd].cf_flags & CF_MATCHLESS_ONLY) )
 		return DO_CMD_MATCHLESS_ONLY; // cmd allowed in matchLess mode _only_
@@ -3449,6 +3449,10 @@ void UserMode(float umode)
 		G_cprint("%s", buf);
 	}
 	cfg_name = va("configs/usermodes/%s/default.cfg", um);
+	// If CTF matchless mode, load config from /matchless/ctf.cfg instead of /matchless/default.cfg
+	// isCTF() and k_mode aren't reliable to use here, so define "k_use_matchless_dir 2" for this purpose
+	if ( streq(um, "matchless") && (cvar("k_use_matchless_dir") == 2) )
+		cfg_name = va("configs/usermodes/%s/ctf.cfg", um);
 	if ( can_exec( cfg_name ) ) {
 		trap_readcmd( va("exec %s\n", cfg_name), buf, sizeof(buf) );
 		G_cprint("%s", buf);
@@ -6219,7 +6223,7 @@ void TogglePause ()
 			return;
 		}
 
-		when_to_unpause = pauseduration + 2000; // shedule unpause in 2000 ms
+		when_to_unpause = pauseduration + 2000; // schedule unpause in 2000 ms
 
 		G_bprint(2, "%s unpaused the game (will resume in 2 seconds)\n", self->netname);
 	}

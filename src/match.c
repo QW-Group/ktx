@@ -32,6 +32,7 @@ void ClearDemoMarkers();
 void EM_CorrectStats(void);
 void MatchEndStats(void);
 void SM_PrepareTeamsStats(void);
+void SM_PrepareShowscores(void);
 
 void race_match_start(void);
 qbool race_can_cancel_demo(void);
@@ -375,6 +376,12 @@ void SaveOvertimeStats ()
 
 void CheckOvertime()
 {
+	// SM_PrepareShowscores() is called in StartMatch(), but in matchless mode this happens when the first player joins.
+	// Therefore, teams != 2 yet and the function doesn't do anything.
+	// This causes matchless CTF to go into perpetual overtime, since "sc = get_scores1() - get_scores2();" calculated below will always return 0.
+	// So, we call this function here to handle this scenario.
+	SM_PrepareShowscores();
+
 	gedict_t	*timer, *ed1 = get_ed_scores1(), *ed2 = get_ed_scores2();
 	int teams   = CountTeams(), players = CountPlayers();
 	int sc = get_scores1() - get_scores2();
@@ -410,10 +417,10 @@ void CheckOvertime()
 		k_mb_overtime = 0; // no overtime in lgc mode
 	}
 	if( (isTeam() || isCTF()) && teams != 2 ) {
-		k_mb_overtime = 0; // no overtime in case of less then 2 or more then 2 teams
+		k_mb_overtime = 0; // no overtime in case of less than 2 or more than 2 teams
 	}
 	else if(    ( (isDuel() || isFFA()) && ed1 && ed2 ) // duel or ffa
-			 || ( (isTeam() || isCTF()) && teams == 2 && players > 2 ) // Handle a 2v2 or above team game
+			 || ( (isTeam() || isCTF()) && teams == 2 && players > 1 ) // Handle a 2v2 or above team game or 1v1 CTF
 	)
 	{
 		if (    ( k_mb_overtime == 3 && abs( sc ) > 1 ) // tie-break overtime allowed with one frag difference (c) ktpro
@@ -696,10 +703,10 @@ void SM_PrepareShowscores()
 	gedict_t *p;
 	char *team1 = "", *team2 = "";
 
-	if ( k_matchLess ) // skip this in matchLess mode
+	if ( k_matchLess && !isCTF() ) // skip this in matchLess mode, unless CTF matchless (otherwise causes unlimited overtime because "sc" is always = 0 in CheckOvertime())
 		return;
 
-	if ( (!isTeam() && !isCTF()) || CountRTeams() != 2 ) // we need 2 teams
+	if ( ( (!isTeam() && !isCTF()) || CountRTeams() != 2 ) && !(isCTF() && k_matchLess) ) // we need 2 ready teams, unless CTF matchless
 		return;
 
 	if ( (p = find_plr( world )) )
@@ -1243,7 +1250,7 @@ qbool isCanStart ( gedict_t *s, qbool forceMembersWarn )
 		return false;
 	}
 
-	if ( isCTF() )
+	if ( isCTF() && !k_matchLess ) // In matchless CTF, the "this map does not support CTF mode" would get spammed constantly in an unsupported map. So, don't bother returning false.
 	{
 		// can't really play ctf if map doesn't have flags
 		gedict_t *rflag = find( world, FOFCLSN, "item_flag_team1" );

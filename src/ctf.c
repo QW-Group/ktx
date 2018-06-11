@@ -625,7 +625,7 @@ void CTF_CheckFlagsAsKeys( void )
 
 void norunes()
 {
-	if( match_in_progress )
+	if( match_in_progress && !k_matchLess )
 		return;
 
 	if ( !isCTF() ) {
@@ -634,11 +634,25 @@ void norunes()
 	}
 
 	cvar_toggle_msg( self, "k_ctf_runes", redtext("runes") );
+
+	// In matchless mode, toggling runes normally won't do anything since match is already in progress. Call this to handle this scenario.
+	if (k_matchLess)
+	{
+		// If a player is carrying a rune when runes are disabled, get rid of it
+		if (!cvar("k_ctf_runes")) {
+			gedict_t * p;
+			for (p = world; (p = find_plr(p)); ) {
+				p->ctf_flag -= (p->ctf_flag & (CTF_RUNE_MASK));
+				p->maxspeed = cvar("sv_maxspeed"); // Reset speed, in case was carrying haste
+			}
+		}
+		SpawnRunes(cvar("k_ctf_runes")); // Toggle runes
+	}
 }
 
 void nohook()
 {
-	if( match_in_progress )
+	if( match_in_progress && !k_matchLess )
 		return;
 
 	if ( !isCTF() ) {
@@ -647,11 +661,21 @@ void nohook()
 	}
 
 	cvar_toggle_msg( self, "k_ctf_hook", redtext("hook") );
+	
+	// In matchless mode, toggling hook normally won't do anything since match is already in progress. Call this to handle this scenario.
+	if (k_matchLess) {
+		if ( cvar("k_ctf_hook") ) {
+			AddHook( true );
+		}
+		else {
+			AddHook( false );
+		}
+	}
 }
 
 void noga()
 {
-	if( match_in_progress )
+	if( match_in_progress && !k_matchLess )
 		return;
 
 	if ( !isCTF() ) {
@@ -664,7 +688,7 @@ void noga()
 
 void mctf()
 {
-	if( match_in_progress )
+	if( match_in_progress && !k_matchLess )
 		return;
 
 	if ( !isCTF() ) {
@@ -681,11 +705,26 @@ void mctf()
 	cvar_fset("k_ctf_runes", 0);
 
 	G_sprint ( self, 2, "%s turn off: %s\n", getname(self), redtext("hook & runes") );
+
+	// In matchless mode, toggling runes and hook normally won't do anything since match is already in progress. Call this to handle this scenario.
+	if (k_matchLess)
+	{
+		// If a player is carrying a rune when runes are disabled, get rid of it
+		if (!cvar("k_ctf_runes")) {
+			gedict_t * p;
+			for (p = world; (p = find_plr(p)); ) {
+				p->ctf_flag -= (p->ctf_flag & (CTF_RUNE_MASK));
+				p->maxspeed = cvar("sv_maxspeed"); // Reset speed, in case was carrying haste
+			}
+		}
+		SpawnRunes( 0 );
+		AddHook ( false );
+	}
 }
 
 void CTFBasedSpawn()
 {
-	if( match_in_progress )
+	if( match_in_progress && !k_matchLess )
 		return;
 
 	if ( !isCTF() ) {
