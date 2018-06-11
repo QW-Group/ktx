@@ -6,7 +6,6 @@
 #include "fb_globals.h"
 
 float predict_dist = 0;
-gedict_t* enemy_ = 0;
 gedict_t* test_enemy = 0;
 
 gedict_t* current_waiting_bot = 0;
@@ -183,9 +182,13 @@ qbool HasWeapon(gedict_t* player, int weapon)
 	return ((int)player->s.v.items & weapon);
 }
 
-float enemy_shaft_attack(void)
+qbool enemy_shaft_attack(gedict_t* self, gedict_t* enemy)
 {
-	return (HasWeapon(enemy_, IT_LIGHTNING) && enemy_->s.v.ammo_cells && (self->fb.enemy_dist < 630) && (g_globalvars.time < enemy_->attack_finished));
+	if (enemy->ct != ctPlayer) {
+		return false;
+	}
+
+	return (HasWeapon(enemy, IT_LIGHTNING) && enemy->s.v.ammo_cells && (self->fb.enemy_dist < 630) && (g_globalvars.time < enemy->attack_finished));
 }
 
 qbool bots_enabled(void)

@@ -168,7 +168,7 @@ float boomstick_only (void);
 float CountTeams (void);
 qbool EnemyDefenceless (gedict_t* self);
 
-float enemy_shaft_attack (void);
+qbool enemy_shaft_attack (gedict_t* self, gedict_t* enemy);
 float W_BestWeapon (void);
 
 gedict_t* LocateMarker (vec3_t org);
