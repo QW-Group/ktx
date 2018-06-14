@@ -3771,7 +3771,6 @@ static void race_finish_capture(qbool store, int player_num)
 	if (store && player_num >= 0 && player_num < MAX_CLIENTS) {
 		gedict_t* racer = &g_edicts[player_num + 1];
 		race_capture_t* capture = race_match_mode() ? &player_match_info[player_num].best_run_capture : &player_captures[player_num];
-		float race_time = race_match_mode() ? player_match_info[player_num].best_time : race.currentrace[player_num].time;
 
 		race_fwopen("%s", race_filename("pos"));
 		race_fprintf("version %d\n", POS_FILE_VERSION);

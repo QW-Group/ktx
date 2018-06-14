@@ -188,7 +188,6 @@ static void ApplyPhysics (gedict_t* self)
 		if (hor_speed_squared >= max_incr) {
 			vec3_t perpendicular;
 			vec3_t up_vector = { 0, 0, 1 };
-			float dot_prod = 0.0f;
 			float rotation = acos(max_incr / hor_speed_squared) * 180 / M_PI;
 
 			// Find out if rotation should be positive or negative
