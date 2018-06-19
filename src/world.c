@@ -923,6 +923,7 @@ void FirstFrame	( )
 	RegisterCvarEx(FB_CVAR_SKILL, "10");
 	RegisterCvarEx(FB_CVAR_DEBUG, "0");
 	RegisterCvarEx(FB_CVAR_ADMIN_ONLY, "0");
+	RegisterCvarEx(FB_CVAR_FREEZE_PREWAR, "0");
 
 	for (i = 0; i < MAX_CLIENTS; i++) {
 		RegisterCvarEx(va("k_fb_name_%d", i), "");

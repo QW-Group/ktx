@@ -455,6 +455,13 @@ void BotSetCommand (gedict_t* self)
 		VectorClear (direction);
 	}
 
+	// Keep bots on spawns before match start
+	if (match_in_progress != 2 && cvar(FB_CVAR_FREEZE_PREWAR)) {
+		jumping = firing = false;
+		VectorClear(direction);
+		impulse = 0;
+	}
+
 	trap_SetBotCMD (
 		NUM_FOR_EDICT (self),
 		cmd_msec,
