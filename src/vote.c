@@ -466,10 +466,26 @@ void vote_check_rpickup ()
 					p->k_teamnumber = tn;
 					tn = (tn == 1 ? 2 : 1); // next random player will be in other team
 
-            		if( p->k_teamnumber == 1 )
-                		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "break\ncolor  4\nskin \"\"\nteam red\n");
-            		else
-                		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "break\ncolor 13\nskin \"\"\nteam blue\n");
+					if (p->k_teamnumber == 1) {
+						if (p->isBot) {
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "team", "red", 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "topcolor", "4", 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "bottomcolor", "4", 0);
+						}
+						else {
+							stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "break\ncolor  4\nskin \"\"\nteam red\n");
+						}
+					}
+					else {
+						if (p->isBot) {
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "team", "blue", 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "topcolor", "13", 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "bottomcolor", "13", 0);
+						}
+						else {
+							stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "break\ncolor 13\nskin \"\"\nteam blue\n");
+						}
+					}
 
 					break;
 				}
