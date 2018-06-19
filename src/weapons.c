@@ -2413,7 +2413,7 @@ void W_WeaponFrame()
 
 	if ( isRACE() )
 	{
-		if ( self->ct == ctPlayer && !self->race_participant && race.status )
+		if ( self->ct == ctPlayer && !self->racer && race.status )
 		{
 		   	if ( self->s.v.button0 )
 		   		ChasecamToggleButton();

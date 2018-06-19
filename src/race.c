@@ -129,8 +129,6 @@ static qbool race_simultaneous(void);
 static void race_update_closest_positions(void);
 static void race_match_round_end(void);
 
-void StatsToFile ();
-
 static float race_vlen(vec3_t velocity)
 {
 	return sqrt(velocity[0] * velocity[0] + velocity[1] * velocity[1]);
