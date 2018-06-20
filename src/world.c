@@ -1211,25 +1211,27 @@ void FixCmdFloodProtect ()
 void FixSayTeamToSpecs()
 {
 	int k_sayteam_to_spec = bound(0, cvar("k_sayteam_to_spec"), 3);
+	int current_value = cvar("sv_sayteam_to_spec");
+	int desired_value = 0;
 
 	switch ( k_sayteam_to_spec ) {
-		case  0: if ( cvar("sv_sayteam_to_spec") )
-					cvar_fset("sv_sayteam_to_spec", 0);
-				 break;
-		case  1: if ( match_in_progress )
-					cvar_fset("sv_sayteam_to_spec", 1);
-				 else
-					cvar_fset("sv_sayteam_to_spec", 0);
-				 break;
-		case  2: if ( match_in_progress )
-					cvar_fset("sv_sayteam_to_spec", 0);
-				 else
-					cvar_fset("sv_sayteam_to_spec", 1);
-				 break;
+		case  0:
+			desired_value = 0;
+			break;
+		case  1:
+			desired_value = (match_in_progress ? 1 : 0);
+			break;
+		case  2:
+			desired_value = (match_in_progress ? 0 : 1);
+			break;
 		case  3:
-		default: if ( !cvar("sv_sayteam_to_spec") )
-					cvar_fset("sv_sayteam_to_spec", 1);
-				 break;
+		default:
+			desired_value = 1;
+			break;
+	}
+
+	if (current_value != desired_value) {
+		cvar_fset("sv_sayteam_to_spec", desired_value);
 	}
 }
 
