@@ -108,7 +108,7 @@ void xml_players_header(fileHandle_t handle)
 	s2di(handle, INDENT2 "<players>\n");
 }
 
-void xml_players_footer(fileHandle_t handle)
+void xml_players_footer(fileHandle_t handle, int player_count)
 {
 	s2di(handle, INDENT2 "</players>\n");
 }
