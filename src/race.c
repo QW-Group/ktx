@@ -4020,8 +4020,8 @@ static void update_jump_markers(float race_time, int guide_start, int resolution
 			ent_remove(race_jump_indicators[0]);
 		}
 
-		memcpy(race_jump_indicator_times, race_jump_indicator_times + 1, sizeof(race_jump_indicator_times[0]) * (RACE_JUMP_INDICATORS - 1));
-		memcpy(race_jump_indicators, race_jump_indicators + 1, sizeof(race_jump_indicators[0]) * (RACE_JUMP_INDICATORS - 1));
+		memmove(race_jump_indicator_times, race_jump_indicator_times + 1, sizeof(race_jump_indicator_times[0]) * (RACE_JUMP_INDICATORS - 1));
+		memmove(race_jump_indicators, race_jump_indicators + 1, sizeof(race_jump_indicators[0]) * (RACE_JUMP_INDICATORS - 1));
 		race_jump_indicators[RACE_JUMP_INDICATORS - 1] = NULL;
 		race_jump_indicator_times[RACE_JUMP_INDICATORS - 1] = -1.0f;
 	}
