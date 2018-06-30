@@ -38,7 +38,7 @@
 #include "player.h"
 
 #define MOD_NAME			("KTX")
-#define MOD_VERSION			("1.38-rc2")
+#define MOD_VERSION			("1.38")
 #define MOD_BUILD_DATE		(__DATE__ ", " __TIME__)
 #define MOD_SERVERINFO_MOD_KEY		("ktxver")
 #define MOD_SERVERINFO_BUILD_KEY	("ktxbuild")
