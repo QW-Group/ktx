@@ -28,12 +28,13 @@ void SUB_regen_powerups ();
 
 qbool WaitingToRespawn (gedict_t* ent)
 {
-	return (ent->s.v.nextthink >= g_globalvars.time && ent->think == (func_t)SUB_regen_powerups) ||
-	       (ent->s.v.nextthink > g_globalvars.time && ent->think == (func_t)SUB_regen);
+	return ((ent->s.v.nextthink >= g_globalvars.time && ent->think == (func_t)SUB_regen_powerups) ||
+	        (ent->s.v.nextthink >= g_globalvars.time && ent->think == (func_t)SUB_regen)) && strnull(ent->model);
 }
 
 // If an item is picked up, all bots heading for that item should re-evaluate their goals
-void UpdateGoalEntity(gedict_t* item, gedict_t* taker) {
+void UpdateGoalEntity(gedict_t* item, gedict_t* taker)
+{
 	gedict_t* plr;
 	int item_entity = NUM_FOR_EDICT(item);
 
