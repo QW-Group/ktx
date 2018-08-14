@@ -310,7 +310,7 @@ static void BotsModifyAimAtPlayerLogic(gedict_t* self)
 		pitch_rnd = self->fb.last_rndaim[PITCH];
 	}
 
-	self->fb.desired_angle[PITCH] = bound(-89.9, self->fb.desired_angle[PITCH] + pitch_rnd, 89.9);
+	self->fb.desired_angle[PITCH] = bound(-70, self->fb.desired_angle[PITCH] + pitch_rnd, 80);
 	self->fb.desired_angle[YAW] += yaw_rnd;
 }
 
