@@ -380,7 +380,7 @@ void LoadMap(void) {
 	// Need to do this anyway, otherwise teleporters will be broken
 	CreateItemMarkers();
 
-	if (!(isRACE () || isCTF ())) {
+	if (!(isRACE() || isCTF()) && deathmatch) {
 		// If we have a .bot file, use that
 		if (LoadBotRoutingFromFile ()) {
 			map_supported = true;
