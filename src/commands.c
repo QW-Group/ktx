@@ -7991,11 +7991,6 @@ void PausedTic(int duration)
 
 void TogglePause()
 {
-	if (FTE_sv)
-	{
-		return; // unsupported
-	}
-
 	if (!k_matchLess)
 	{
 		// NON matchless
