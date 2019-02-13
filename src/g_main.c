@@ -59,9 +59,9 @@ field_t         expfields[] = {
 	{"teleported",  FOFS( teleported ),  F_INT},
 	{NULL}
 };
-//static char     mapname[64];
+static char     mapname[64];
 //static char     worldmodel[64] = "worldmodel";
-//static char     netnames[MAX_CLIENTS][32];
+static char     netnames[MAX_CLIENTS][32];
 static char     callalias_buf[MAX_CLIENTS][CALLALIAS_SIZE];
 static char     f_checks[MAX_CLIENTS][F_CHECK_SIZE];
 
@@ -84,6 +84,7 @@ void			G_ShutDown();
 void            StartFrame( int time );
 qbool        ClientCommand();
 qbool 		ClientUserInfoChanged();
+qbool       ClientUserInfoChanged_after();
 void            G_EdictTouch();
 void            G_EdictThink();
 void            G_EdictBlocked();
@@ -140,6 +141,7 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 		return ( intptr_t ) ( &gamedata );
 
 	case GAME_LOADENTS:
+        infokey( world, "mapname", mapname, sizeof(mapname) );
 		ClearGlobals();
 		G_SpawnEntitiesFromString();
 		return 1;
@@ -202,6 +204,8 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 	case GAME_PUT_CLIENT_IN_SERVER:
 		ClearGlobals();
 		self = PROG_TO_EDICT( g_globalvars.self );
+        self->netname = netnames[NUM_FOR_EDICT(self)-1]; //Init client names
+        infokey( self, "netname", self->netname,  32);
 
 		if( !self->k_accepted )
 			return 1;
@@ -319,11 +323,14 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 		ClearGlobals();
 		self = PROG_TO_EDICT( g_globalvars.self );
 
-		if ( !self->k_accepted )
-			return 0; // cmon, u r zombie or etc...
-					  // allow change even not connected, or disconnected
-
-		return ClientUserInfoChanged();
+        if( arg0 ){
+            return ClientUserInfoChanged_after();
+        }else{
+            if ( !self->k_accepted )
+                return 0; // cmon, u r zombie or etc...
+            // allow change even not connected, or disconnected
+            return ClientUserInfoChanged();
+        }
 
 	case GAME_SHUTDOWN:
 		// called before level change/spawn
@@ -416,22 +423,21 @@ void Com_Printf( const char *msg, ... )
 
 void G_InitGame( int levelTime, int randomSeed )
 {
-//	int 		i;
+	int 		i;
 
 	srand( randomSeed );
 	framecount = 0;
 	starttime = levelTime * 0.001;
-	g_globalvars.mapname_ = GOFS(mapname);
+	//g_globalvars.mapname_ = GOFS(mapname);
+	g_globalvars.mapname = mapname;
 	G_Printf( "Init Game\n" );
 	G_InitMemory();
 	memset( g_edicts, 0, sizeof( gedict_t ) * MAX_EDICTS );
 
-//	world->model = worldmodel;
-//	g_globalvars.mapname = mapname;
-//	for ( i = 0; i < MAX_CLIENTS; i++ )
-//	{
-//		g_edicts[i + 1].s.v.netname = netnames[i];
-//	}
+    for ( i = 0; i < MAX_CLIENTS; i++ )
+    {
+        g_edicts[i + 1].netname = netnames[i]; //Init client names
+    }
 
 	GetMapList();
 
@@ -567,3 +573,4 @@ static qbool check_ezquake(gedict_t *p)
 
 	return false;
 }
+
