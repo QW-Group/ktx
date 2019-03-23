@@ -134,7 +134,7 @@ We use a pretty crappy system for versioning for now. For the versions available
 
 (Listed by last name alphabetic order)
 
-* **Ivan** *"qqshka"* **Bolshunov**
+* **Ivan** *"qqshka"* **Bolsunov**
 * **Dominic** *"oldman"* **Evans**
 * **Anton** *"tonik"* **Gavrilov**
 * **Andrew** *"ult"* **Grondalski**
