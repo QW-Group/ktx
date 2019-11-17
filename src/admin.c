@@ -578,6 +578,8 @@ void AdminForceStart ()
 
         k_force = 1;
 
+        localcmd("serverinfo status Countdown\n");
+
         mess = spawn();
         mess->classname = "mess";
         mess->s.v.owner = EDICT_TO_PROG( self );
