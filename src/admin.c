@@ -489,6 +489,8 @@ void ReadyThink ()
     {
         k_force = 0;
 
+        localcmd("serverinfo status Standby\n");
+
         G_bprint(2, "%s interrupts countdown\n", p2->netname );
 
         ent_remove ( self );
@@ -502,6 +504,8 @@ void ReadyThink ()
         k_force = 0;
 
         G_bprint(2, "Forcestart canceled\n");
+
+        localcmd("serverinfo status Standby\n");
 
         ent_remove ( self );
 
@@ -578,7 +582,7 @@ void AdminForceStart ()
 
         k_force = 1;
 
-        localcmd("serverinfo status Countdown\n");
+        localcmd("serverinfo status Forcestart\n");
 
         mess = spawn();
         mess->classname = "mess";
@@ -597,6 +601,9 @@ void AdminForceBreak ()
     if( is_adm( self ) && self->ct != ctPlayer && !match_in_progress )
     {
         k_force = 0;
+
+        localcmd("serverinfo status Standby\n");
+
         return;
     }
 
