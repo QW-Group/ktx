@@ -444,12 +444,12 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	// ctf strength rune
 	if ( attacker->ctf_flag & CTF_RUNE_STR )
-		damage *= 2;
+		damage *= 1.5;
 
 	// ctf resistance rune
 	if ( targ->ctf_flag & CTF_RUNE_RES )
 	{
-		damage /= 2;
+		damage /= 1.5;
 		ResistanceSound( targ );
 	}
 
