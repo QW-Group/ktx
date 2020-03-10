@@ -1,0 +1,16 @@
+race_route_add_start
+	race_add_route_node -1168  1632  -552    0   90
+	race_add_route_node    16  -736 -1024    0    0
+	race_add_route_node -1344  2816  -992    0    0
+	race_add_route_node -3424  -464  -864    0    0
+	race_add_route_node -2272  -688  -896    0    0
+	race_add_route_node -2868  3772  -480    0    0
+	race_add_route_node   976 -2032 -2848    0    0
+	race_add_route_node  3488  3504 -3104    0    0
+	race_add_route_node  -640  1568  -544    0    0
+
+	race_set_route_name "Ztricks" "All 7 rooms" 
+	race_set_route_timeout 300
+	race_set_route_weapon_mode raceWeaponNo 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
