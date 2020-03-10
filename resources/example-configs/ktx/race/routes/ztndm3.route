@@ -1,0 +1,38 @@
+race_route_add_start
+	race_add_route_node  -688   240   280    0  270
+	race_add_route_node     0  -200   320    0    0
+	race_add_route_node  -704  -480   256    0    0
+	race_add_route_node  -168   824   352    0    0
+
+	race_set_route_name "ztndm3: from RA to Quad via YA with weapon" "RA-SSG-High RL-GL-Quad with weapon"
+	race_set_route_timeout 15
+	race_set_route_weapon_mode raceWeaponAllowed
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node  -320   576   216    0    0
+	race_add_route_node  -168   824   352    0    0
+	race_add_route_node  -656   192   280    0    0
+	race_add_route_node  -864   -64   224    0    0
+	race_add_route_node   -96  -888   160    0    0
+	race_add_route_node  -224  -480    24    0    0
+	race_add_route_node   -96   624    32    0    0
+
+	race_set_route_name "ztndm3: Quad to LG run" "Quad spawn-Quad-RA-GL-High RL-YA-LG"
+	race_set_route_timeout 20
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node   -96   624    24    0  270
+	race_add_route_node   -96  -448    48    0    0
+	race_add_route_node  -704  -480   256    0    0
+	race_add_route_node  -656   192   280    0    0
+
+	race_set_route_name "ztndm3: LG to RA via YA" "LG-YA-GL-RA with weapon"
+	race_set_route_timeout 15
+	race_set_route_weapon_mode raceWeaponAllowed
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
