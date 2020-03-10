@@ -1,0 +1,33 @@
+race_route_add_start
+	race_add_route_node   544   576   120    0    0
+	race_add_route_node  -304  -552   216    0    0
+
+	race_set_route_name "Monsoon: YA to RA" "from YA to RA with weapon"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponAllowed
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node   544   832   296    0  -45
+	race_add_route_node  1048  -184   304    0    0
+	race_add_route_node   976  -792   192    0    0
+	race_add_route_node  -304  -552   224    0    0
+	race_add_route_node   424    70   320    0    0
+
+	race_set_route_name "Monsoon: YA-Spawn to Quad via Mega and RA" "YA Spawn-High RL-Mega-RA-Quad"
+	race_set_route_timeout 15
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node   800    96   296    0  -45
+	race_add_route_node   616  -328   192    0    0
+	race_add_route_node   1048 -184   304    0    0
+
+	race_set_route_name "Monsoon: High RL Spawn - High Cells - High RL" "High RL Spawn-High Cells-High RL"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
