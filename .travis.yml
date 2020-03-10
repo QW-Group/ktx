@@ -61,32 +61,15 @@ before_install:
 # each script section is executed in matrix build
 script:
   - echo TARGET=${TARGET}
-  - mkdir build_${TARGET} || true
+  - mkdir -p build_${TARGET}
   - meson build_${TARGET} --cross-file tools/cross-compilation/${TARGET}.txt
   - ninja -v -C build_${TARGET}
   # print basic info about compiled files
   - file build_${TARGET}/qwprogs${EXTENSION}
   # create hash for download verification
   - md5sum build_${TARGET}/qwprogs${EXTENSION} > build_${TARGET}/qwprogs.md5
-  - mkdir -p uploads_to_gcs
-  - mv build_${TARGET}/qwprogs${EXTENSION} uploads_to_gcs/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION}
-  - mv build_${TARGET}/qwprogs.md5 uploads_to_gcs/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs.md5
+  - mkdir -p built_assets
+  - mv build_${TARGET}/qwprogs${EXTENSION} built_assets/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION}
+  - mv build_${TARGET}/qwprogs.md5 built_assets/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs.md5
   # update latest links
-  - cp uploads_to_gcs/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION} uploads_to_gcs/qwprogs${EXTENSION}
-
-before_deploy:
-  - echo 'testing before_deploy step to see if it is available for gcs'
-
-deploy:
-  provider: gcs
-  access_key_id: GOOGIDU6SZSRYABCDMPF
-  secret_access_key:
-    secure: HTWAQcITewH6CE6vCmzFvprekbVTwOmI9UrrZCvY60oM5IiCywMzpABGpQb/hw9kn2x7fLkDmEx8/X6Oy7xzbQ4VBBM8/G1ZE3jcpDz7oH0iHoxKvsNIi1HfFm79VYrlZtQI6J3u6UMrBYlF5xgy2W4P1weQKNEmn+rSF5CqsAo=
-  bucket: ktx
-  on:
-    repo: deurk/ktx
-  cleanup: false
-  upload_dir: commits/${TARGET}
-  local_dir: uploads_to_gcs
-  acl: public-read
-
+  - cp built_assets/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION} built_assets/qwprogs${EXTENSION}
