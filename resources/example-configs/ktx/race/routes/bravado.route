@@ -1,0 +1,37 @@
+race_route_add_start
+	race_add_route_node  -288  1184   152    0  -45
+	race_add_route_node   752    24   288    0    0
+
+	race_set_route_name "Bravado: from RA to Quad" "RA to Quad with weapon"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponAllowed
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node   240   896    24    0  180
+	race_add_route_node   -16  1000    32    0    0
+	race_add_route_node   -16   620   288    0    0
+	race_add_route_node   752    24   288    0    0
+	race_add_route_node  -288  1184   160    0    0
+
+	race_set_route_name "Bravado: run over map" "low RL spawn - LG - Quad - RA"
+	race_set_route_timeout 20
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node   -16  -208    24    0   90
+	race_add_route_node  -416   176   256    0    0
+	race_add_route_node  -256   832   256    0    0
+	race_add_route_node   640   800   176    0    0
+	race_add_route_node   240   128   320    0    0
+	race_add_route_node   -16   620   288    0    0
+	race_add_route_node  -288  1184   160    0    0
+
+	race_set_route_name "Bravado: GA to RA over map" "GA - high tele exit - near YA - LG - RA (with weapon)"
+	race_set_route_timeout 20
+	race_set_route_weapon_mode raceWeaponAllowed
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
