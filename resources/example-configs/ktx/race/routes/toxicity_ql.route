@@ -1,0 +1,15 @@
+race_route_add_start
+	race_add_route_node    48   848   -88    0  -45
+	race_add_route_node   180    96     0    0    0
+	race_add_route_node   288   456   128    0    0
+	race_add_route_node  1172   832    96    0    0
+	race_add_route_node  1386   360   112    0    0
+	race_add_route_node  1264  -160   128    0    0
+	race_add_route_node   640   128   128    0    0
+	race_add_route_node  -108   544    64    0    0
+
+	race_set_route_name "Toxicity" "Low Mega - YA-Quad - GL - RL - YA-Low Mega" 
+	race_set_route_timeout 30
+	race_set_route_weapon_mode raceWeaponNo 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
