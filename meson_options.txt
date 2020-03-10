@@ -1,0 +1,1 @@
+option('bot_support', type : 'boolean', value : true)
