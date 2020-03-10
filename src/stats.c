@@ -459,11 +459,11 @@ void StatsToFile(void)
 
 
 float maxfrags, maxdeaths, maxfriend, maxeffi, maxcaps, maxdefends, maxsgeffi;
-int maxspree, maxspree_q, maxdmgg, maxrlkills;
+int maxspree, maxspree_q, maxdmgg, maxdmgtd, maxrlkills;
 
 void OnePlayerStats(gedict_t *p, int tp)
 {
-	float	dmg_g, dmg_t, dmg_team, dmg_self, dmg_eweapon, dmg_g_rl;
+	float	dmg_g, dmg_t, dmg_team, dmg_self, dmg_eweapon, dmg_g_rl, dmg_td;
 	int   ra, ya, ga;
 	int   mh, d_rl, k_rl, t_rl;
 	int   quad, pent, ring;
@@ -477,6 +477,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 	dmg_team = p->ps.dmg_team;
 	dmg_self = p->ps.dmg_self;
 	dmg_eweapon = p->ps.dmg_eweapon;
+    dmg_td = p->deaths <= 0 ? 99999 : (int)(p->ps.dmg_t / p->deaths);
 	ra    = p->ps.itm[itRA].tooks;
 	ya    = p->ps.itm[itYA].tooks;
 	ga    = p->ps.itm[itGA].tooks;
@@ -584,13 +585,13 @@ void OnePlayerStats(gedict_t *p, int tp)
 	// damage
 	if ( isTeam() && deathmatch == 1 )
 	{
-		G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f %s:%.0f %s:%.0f\n", redtext("  Damage"),
-			redtext("Tkn"), dmg_t, redtext("Gvn"), dmg_g, redtext("EWep"), dmg_eweapon, redtext("Tm"), dmg_team, redtext("Self"), dmg_self);
+		G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f %s:%.0f %s:%.0f %s:%.0f\n", redtext("  Damage"),
+			redtext("Tkn"), dmg_t, redtext("Gvn"), dmg_g, redtext("EWep"), dmg_eweapon, redtext("Tm"), dmg_team, redtext("Self"), dmg_self, redtext("ToDie"), dmg_td == -1 ? 99999 : dmg_td);
 	}
 	else
 	{
-		G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f %s:%.0f\n", redtext("  Damage"),
-			redtext("Tkn"), dmg_t, redtext("Gvn"), dmg_g, redtext("Tm"), dmg_team, redtext("Self"), dmg_self);
+		G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f %s:%.0f %s:%.0f\n", redtext("  Damage"),
+			redtext("Tkn"), dmg_t, redtext("Gvn"), dmg_g, redtext("Tm"), dmg_team, redtext("Self"), dmg_self, redtext("ToDie"), dmg_td == -1 ? 99999 : dmg_td);
 	}
 
 	// times
@@ -659,6 +660,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 	maxspree   = max(p->ps.spree_max, maxspree);
 	maxspree_q = max(p->ps.spree_max_q, maxspree_q);
 	maxdmgg    = max(p->ps.dmg_g, maxdmgg);
+    maxdmgtd   = max((int)(p->ps.dmg_t / p->deaths), maxdmgtd);
 	maxrlkills = max(p->ps.wpn[wpRL].ekills, maxrlkills);
 	maxsgeffi  = max(e_sg, maxsgeffi);
 }
@@ -681,7 +683,7 @@ void PlayersStats(void)
 	maxfrags = -999999;
 
 	maxeffi = maxfriend = maxdeaths = maxcaps = maxdefends = maxsgeffi = 0;
-	maxspree = maxspree_q = maxdmgg = maxrlkills = 0;
+	maxspree = maxspree_q = maxdmgtd = maxdmgg = maxrlkills = 0;
 
 	tp = isTeam() || isCTF();
 
@@ -889,20 +891,35 @@ void TopStats(void)
 		}
 	}
 
+    if ( maxdmgtd )
+    {
+        G_bprint( 2, "   Survivor: ");
+        from = f1 = 0;
+        p = find_plrghst( world, &from );
+        while( p ) {
+            if ( (int)(p->deaths <= 0 ? 99999 : p->ps.dmg_t / p->deaths) == maxdmgtd ) {
+                G_bprint(2, "%s%s%s \220%d\221\n", (f1 ? "             " : ""),
+                         ( isghost( p ) ? "\x83" : "" ), getname( p ), maxdmgtd );
+                f1 = 1;
+            }
+            p = find_plrghst( p, &from );
+        }
+    }
+
 	if ( maxdmgg )
-	{
-		G_bprint( 2, "Annihilator: ");
-		from = f1 = 0;
-		p = find_plrghst( world, &from );
-		while( p ) {
-			if ( p->ps.dmg_g == maxdmgg ) {
-				G_bprint(2, "%s%s%s \220%d\221\n", (f1 ? "             " : ""),
-					( isghost( p ) ? "\x83" : "" ), getname( p ), maxdmgg );
-				f1 = 1;
-			}
-			p = find_plrghst( p, &from );
-		}
-	}
+    {
+        G_bprint( 2, "Annihilator: ");
+        from = f1 = 0;
+        p = find_plrghst( world, &from );
+        while( p ) {
+            if ( p->ps.dmg_g == maxdmgg ) {
+                G_bprint(2, "%s%s%s \220%d\221\n", (f1 ? "             " : ""),
+                         ( isghost( p ) ? "\x83" : "" ), getname( p ), maxdmgg );
+                f1 = 1;
+            }
+            p = find_plrghst( p, &from );
+        }
+    }
 
 	if ( isCTF() )
 	{
