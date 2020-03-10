@@ -1,0 +1,62 @@
+race_route_add_start
+	race_add_route_node  -488   624   248    0  270
+	race_add_route_node  -688   496   248    0    0
+	race_add_route_node  -688   -96   160    0    0
+	race_add_route_node  -672  -496   160    0    0
+	race_add_route_node  -272  -448   248    0    0
+	race_add_route_node  -320   256   248    0    0
+	race_add_route_node  -192   480   384    0    0
+
+	race_set_route_name "aerowalk: from GA+RL to RA via YA+MEGA with weapon" "GA-RL-MEGA-YA-RA with weapon"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponAllowed
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node  -488   624   248    0  270
+	race_add_route_node  -656   -96   432    0    0
+	race_add_route_node  -272  -416   432    0    0
+	race_add_route_node   128   272   448    0    0
+	race_add_route_node  -320   480   448    0    0
+
+	race_set_route_name "aerowalk: from GA+RL to RA via TELE - SNG - High RL - LG" "GA-TELE-SNG-High RL-LG-RA"
+	race_set_route_timeout 15
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node  -688   -96   152    0    0
+	race_add_route_node    32  -336   464    0    0
+	race_add_route_node  -320   480   448    0    0
+
+	race_set_route_name "aerowalk: from MEGA to RA via High RL" "MEGA-High RL-RA with weapon"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponAllowed
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node  -328   544   440    0  270
+	race_add_route_node   128   272   448    0    0
+	race_add_route_node  -272  -416   432    0    0
+	race_add_route_node  -920  -904   256    0    0
+
+	race_set_route_name "aerowalk: from RA to Quad" "RA-LG-High RL-Quad"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node  -920  -904   248    0    0
+	race_add_route_node  -272  -416   432    0    0
+	race_add_route_node   128   272   448    0    0
+	race_add_route_node  -320   480   448    0    0
+
+	race_set_route_name "aerowalk: from Quad to RA" "Quad-High RL-LG-RA"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
