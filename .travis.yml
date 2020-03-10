@@ -1,5 +1,4 @@
 dist: trusty
-sudo: required
 
 os:
   - linux
@@ -7,15 +6,14 @@ os:
 compiler:
   - gcc
 
-language:
-  - c
+language: c
 
 env:
   global:
     DATE=$(date +%Y%m%d)
     TIME=$(date +%H%M%S)
 
-matrix:
+jobs:
   include:
     - os: linux
       env:
@@ -87,9 +85,8 @@ deploy:
   bucket: ktx
   on:
     repo: deurk/ktx
-  skip_cleanup: true
-  overwrite: true
-  upload-dir: commits/${TARGET}
-  local-dir: uploads_to_gcs
+  cleanup: false
+  upload_dir: commits/${TARGET}
+  local_dir: uploads_to_gcs
   acl: public-read
 
