@@ -33,7 +33,7 @@
 #define LGCMODE_BUCKET_DISTANCE  (LGCMODE_MAX_DISTANCE / LGCMODE_DISTANCE_BUCKETS)
 
 typedef struct shared_edict_s {
-	void			*ptr; // this points to sv_edict_t but mod should NOT bother about that...
+//	void			*ptr; // this points to sv_edict_t but mod should NOT bother about that...
 	entvars_t       v;	// C exported fields from progs
 // other fields from progs come immediately after
 } edict_t;
