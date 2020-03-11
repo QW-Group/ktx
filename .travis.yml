@@ -68,10 +68,10 @@ script:
   - file build_${TARGET}/qwprogs${EXTENSION}
   # create hash for download verification
   - md5sum build_${TARGET}/qwprogs${EXTENSION} > build_${TARGET}/qwprogs.md5
-  - mkdir -p built_assets
+  - mkdir -p built_assets/{nightlies,stable}
   - mv build_${TARGET}/qwprogs${EXTENSION} built_assets/nightlies/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION}
   - mv build_${TARGET}/qwprogs.md5 built_assets/nightlies/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs.md5
   # update latest links
   - cp built_assets/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION} built_assets/nightlies/qwprogs${EXTENSION}
-  - echo $KTX_PRIV_KEY > ktx_builds.key
+  - echo ${KTX_PRIV_KEY} > ktx_builds.key
   - sftp -i ktx_builds.key -rp -o 'StrictHostKeyChecking no' -o 'UserKnownHostsFile /dev/null' -P ${SFTP_PORT} ${SFTP_USERNAME}@${SFTP_host}:/ <<< $'put -rp built_assets/*'
