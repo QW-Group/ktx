@@ -21,16 +21,11 @@ jobs:
         EXTENSION=.so
     - os: linux
       env:
-        TARGET=linux-armhf
+        TARGET=linux-i686
         EXTENSION=.so
-      addons:
-        apt:
-          packages:
-            - gcc-arm-linux-gnueabihf
-            - pkg-config-arm-linux-gnueabihf
     - os: linux
       env:
-        TARGET=linux-i686
+        TARGET=linux-armhf
         EXTENSION=.so
     - os: linux
       env:
@@ -62,6 +57,8 @@ addons:
       gcc-multilib
 
 before_install:
+  # install cross compiler tools if we are going to compile binares for arm (notice it will remove gcc-multilib and creates a dependency issue if we try to install those packages with the others)
+  - if [ -z "${TARGET##*arm*}" ]; then sudo apt-get -y install gcc-arm-linux-gnueabihf pkg-config-arm-linux-gnueabihf ;fi
   # activate virtualenv with python3, meson requires python3
   - virtualenv .venv --python=python3
   - . .venv/bin/activate
