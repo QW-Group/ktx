@@ -68,12 +68,12 @@ script:
   - md5sum build_${TARGET}/qwprogs${EXTENSION} > build_${TARGET}/qwprogs.md5
   # create built items directories
   - mkdir -p built_assets/{commits,latest}/${TARGET}
-  - if [ -z "${TRAVIS_TAG}" ]; then mkdir -p built_assets/stable/${TRAVIS_TAG} ;fi
+  - if [ -n "${TRAVIS_TAG}" ]; then mkdir -p built_assets/stable/${TRAVIS_TAG} ;fi
   - mv build_${TARGET}/qwprogs${EXTENSION} built_assets/commits/${TARGET}/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION}
   - mv build_${TARGET}/qwprogs.md5 built_assets/commits/${TARGET}/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs.md5
   # update stable links if necessary
-  - if [ -z "${TRAVIS_TAG}" ]; then cp built_assets/commits/${TARGET}/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION} built_assets/stable/${TRAVIS_TAG}/${TARGET}/qwprogs${EXTENSION} ;fi
-  - if [ -z "${TRAVIS_TAG}" ]; then cp built_assets/commits/${TARGET}/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs.md5 built_assets/stable/${TRAVIS_TAG}/${TARGET}/qwprogs.md5 ;fi
+  - if [ -n "${TRAVIS_TAG}" ]; then cp built_assets/commits/${TARGET}/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION} built_assets/stable/${TRAVIS_TAG}/${TARGET}/qwprogs${EXTENSION} ;fi
+  - if [ -n "${TRAVIS_TAG}" ]; then cp built_assets/commits/${TARGET}/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs.md5 built_assets/stable/${TRAVIS_TAG}/${TARGET}/qwprogs.md5 ;fi
   # update latest links
   - cp built_assets/commits/${TARGET}/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION} built_assets/latest/${TARGET}/qwprogs${EXTENSION}
   - cp built_assets/commits/${TARGET}/${DATE}_${TRAVIS_COMMIT:0:7}_qwprogs.md5 built_assets/latest/${TARGET}/qwprogs.md5
