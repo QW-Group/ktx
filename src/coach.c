@@ -104,7 +104,7 @@ void VoteCoach()
 
     if( CountPlayers() < 3 )
     {
-        G_sprint(self, 2, "Not enough players present\n"); -> we have to force a track change to a teammate
+        G_sprint(self, 2, "Not enough players present\n");
         return;
     }
 
