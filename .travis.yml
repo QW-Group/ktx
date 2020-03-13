@@ -18,19 +18,23 @@ jobs:
   include:
     - os: linux
       env:
-        TARGET=linux-amd64
+        OS=linux
+        ARCH=amd64
         EXTENSION=.so
     - os: linux
       env:
-        TARGET=linux-i686
+        OS=linux
+        ARCH=i686
         EXTENSION=.so
     - os: linux
       env:
-        TARGET=linux-armhf
+        OS=linux
+        ARCH=armhf
         EXTENSION=.so
     - os: linux
       env:
-        TARGET=windows-x64
+        OS=windows
+        ARCH=x64
         EXTENSION=.dll
       addons:
         apt:
@@ -38,7 +42,8 @@ jobs:
             - mingw-w64
     - os: linux
       env:
-        TARGET=windows-x86
+        OS=windows
+        ARCH=x86
         EXTENSION=.dll
       addons:
         apt:
@@ -59,7 +64,7 @@ addons:
 
 before_install:
   # install cross compiler tools if we are going to compile binares for arm (notice it will remove gcc-multilib and creates a dependency issue if we try to install those packages with the others)
-  - if [ -z "${TARGET##*arm*}" ]; then sudo apt-get -y install gcc-arm-linux-gnueabihf pkg-config-arm-linux-gnueabihf ;fi
+  - if [ -z "${ARCH##arm*}" ]; then sudo apt-get -y install gcc-arm-linux-gnueabihf pkg-config-arm-linux-gnueabihf ;fi
   # activate virtualenv with python3, meson requires python3
   - virtualenv .venv --python=python3
   - . .venv/bin/activate
@@ -68,30 +73,34 @@ before_install:
   - pip3 install -r requirements.txt
 
 script:
-  # create build target directory and build binary
-  - mkdir -p build_${TARGET}
-  - meson build_${TARGET} --cross-file tools/cross-compilation/${TARGET}.txt
-  - ninja -v -C build_${TARGET}
-  # print basic info about compiled files
-  - file build_${TARGET}/qwprogs${EXTENSION}
-  # create hash for download verification
-  - md5sum build_${TARGET}/qwprogs${EXTENSION} > build_${TARGET}/qwprogs.md5
-  # create built items directories
-  - mkdir -p built_assets/{commits,latest}/${TARGET}
-  - if [ -n "${TRAVIS_TAG}" ]; then mkdir -p built_assets/stable/${TRAVIS_TAG} ;fi
-  - mv build_${TARGET}/qwprogs${EXTENSION} built_assets/commits/${TARGET}/${DATETIME}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION}
-  - mv build_${TARGET}/qwprogs.md5 built_assets/commits/${TARGET}/${DATETIME}_${TRAVIS_COMMIT:0:7}_qwprogs.md5
-  # update stable links if necessary
-  - if [ -n "${TRAVIS_TAG}" ]; then cp built_assets/commits/${TARGET}/${DATETIME}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION} built_assets/stable/${TRAVIS_TAG}/${TARGET}/qwprogs${EXTENSION} ;fi
-  - if [ -n "${TRAVIS_TAG}" ]; then cp built_assets/commits/${TARGET}/${DATETIME}_${TRAVIS_COMMIT:0:7}_qwprogs.md5 built_assets/stable/${TRAVIS_TAG}/${TARGET}/qwprogs.md5 ;fi
-  # update latest links
-  - cp built_assets/commits/${TARGET}/${DATETIME}_${TRAVIS_COMMIT:0:7}_qwprogs${EXTENSION} built_assets/latest/${TARGET}/qwprogs${EXTENSION}
-  - cp built_assets/commits/${TARGET}/${DATETIME}_${TRAVIS_COMMIT:0:7}_qwprogs.md5 built_assets/latest/${TARGET}/qwprogs.md5
+script:
+  # build binary
+  - meson build --buildtype=release --cross-file tools/cross-compilation/${OS}-${ARCH}.txt
+  - ninja -v -C build
 
 after_success:
+  - export BINARY=qwprogs${EXTENSION}
+  - export CHECKSUM=qwprogs.md5
+  # print basic info about compiled files
+  - file build/${BINARY}
+  # create hash for download verification
+  - md5sum build/${BINARY} > build/${CHECKSUM}
+  # update snapshots links
+  - if [ -z "${TRAVIS_TAG}" ]; then mkdir -p upload/snapshots/${OS}/${ARCH} ;fi
+  - if [ -z "${TRAVIS_TAG}" ]; then mkdir -p upload/snapshots/latest/${OS}/${ARCH} ;fi
+  - if [ -z "${TRAVIS_TAG}" ]; then cp build/${BINARY} upload/snapshots/${OS}/${ARCH}/${DATETIME}_${TRAVIS_COMMIT:0:7}_${BINARY} ;fi
+  - if [ -z "${TRAVIS_TAG}" ]; then cp build/${CHECKSUM} upload/snapshots/${OS}/${ARCH}/${DATETIME}_${TRAVIS_COMMIT:0:7}_${CHECKSUM} ;fi
+  - if [ -z "${TRAVIS_TAG}" ]; then cp build/${BINARY} upload/snapshots/latest/${OS}/${ARCH}/${BINARY} ;fi
+  - if [ -z "${TRAVIS_TAG}" ]; then cp build/${CHECKSUM} upload/snapshots/latest/${OS}/${ARCH}/${CHECKSUM} ;fi
+  # update releases links
+  - if [ -n "${TRAVIS_TAG}" ]; then mkdir -p upload/releases/{latest,${TRAVIS_TAG}}/${OS}/${ARCH} ;fi
+  - if [ -n "${TRAVIS_TAG}" ]; then cp build/${BINARY} upload/releases/${TRAVIS_TAG}/${OS}/${ARCH}/${BINARY} ;fi
+  - if [ -n "${TRAVIS_TAG}" ]; then cp build/${CHECKSUM} upload/releases/${TRAVIS_TAG}/${OS}/${ARCH}/${CHECKSUM} ;fi
+  - if [ -n "${TRAVIS_TAG}" ]; then cp build/${BINARY} upload/releases/latest/${OS}/${ARCH}/${BINARY} ;fi
+  - if [ -n "${TRAVIS_TAG}" ]; then cp build/${CHECKSUM} upload/releases/latest/${OS}/${ARCH}/${CHECKSUM} ;fi
   # add SFTP authentication key to the build environment
   - openssl aes-256-cbc -K $encrypted_1e5406d6c11a_key -iv $encrypted_1e5406d6c11a_iv -in ktx_builds.key.enc -out ktx_builds.key -d
   # set correct permissions on private key
   - chmod 600 ktx_builds.key
   # push built items to SFTP storage
-  - sftp -q -i ktx_builds.key -rp -o 'StrictHostKeyChecking no' -o 'UserKnownHostsFile /dev/null' -P ${SFTP_PORT} ${SFTP_USERNAME}@${SFTP_HOST}:/ <<< $'put -rp built_assets/*'
+  - sftp -q -i ktx_builds.key -rp -o 'StrictHostKeyChecking no' -o 'UserKnownHostsFile /dev/null' -P ${SFTP_PORT} ${SFTP_USERNAME}@${SFTP_HOST}:/ <<< $'put -rp upload/*'
