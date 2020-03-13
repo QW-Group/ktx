@@ -71,8 +71,8 @@ before_install:
   # set correct permissions on private key
   - chmod 600 ktx_builds.key
 
-# each script section is executed in matrix build
 script:
+  # create build target directory and build binary
   - mkdir -p build_${TARGET}
   - meson build_${TARGET} --cross-file tools/cross-compilation/${TARGET}.txt
   - ninja -v -C build_${TARGET}
