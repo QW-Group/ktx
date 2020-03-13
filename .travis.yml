@@ -10,9 +10,9 @@ language: c
 
 env:
   global:
-    DATE=$(date +%Y%m%d)
-    TIME=$(date +%H%M%S)
-    DATETIME=${DATE}-${TIME}
+    DATETIME=$(date +%Y%m%d-%H%M%S)
+    DATE=${DATETIME%%-*}
+    TIME=${DATETIME##*-}
 
 jobs:
   include:
