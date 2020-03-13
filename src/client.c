@@ -44,6 +44,7 @@ void CheckAll();
 void PlayerStats();
 void ExitCaptain();
 void CheckFinishCaptain();
+void ExitCoach();
 void MakeMOTD();
 void ImpulseCommands();
 void StartDie ();
@@ -87,16 +88,16 @@ qbool CheckRate (gedict_t *p, char *newrate)
 	{
 	    if ( player_rate > maxrate )
 		{
-			G_sprint(p, 2, "\nYour עבפו setting is too high for this server.\n"
-						   "Rate set to %d\n", (int)maxrate);
+			G_sprint(p, 2, "\nYour %s setting is too high for this server.\n"
+						   "Rate set to %d\n", redtext("rate"), (int)maxrate);
 			stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "rate %d\n", (int)maxrate );
 			ret = true;
 		}
 
 		if ( player_rate < minrate )
 		{
-			G_sprint(p, 2, "\nYour עבפו setting is too low for this server.\n"
-						   "Rate set to %d\n", (int)minrate);
+			G_sprint(p, 2, "\nYour %s setting is too low for this server.\n"
+						   "Rate set to %d\n", redtext("rate"), (int)minrate);
 			stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "rate %d\n", (int)minrate );
 			ret = true;
 		}
@@ -2324,6 +2325,12 @@ void ClientDisconnect()
 
 	if( k_captains == 2 )
 		CheckFinishCaptain();
+
+    if( coach_num( self ) ) {
+        G_bprint(2, "A %s has left\n", redtext("coach"));
+
+        ExitCoach();
+    }
 
 	if( cvar( "k_idletime" ) > 0 )
 		IdlebotCheck();

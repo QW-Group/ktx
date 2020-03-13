@@ -220,6 +220,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;QWPROGS_EXPORTS</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="src\captain.c" />
+    <ClCompile Include="src\coach.c" />
     <ClCompile Include="src\clan_arena.c" />
     <ClCompile Include="src\client.c">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>

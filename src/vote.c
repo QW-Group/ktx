@@ -23,6 +23,7 @@
 
 void	BeginPicking();
 void	BecomeCaptain(gedict_t *p);
+void	BecomeCoach(gedict_t *p);
 
 // AbortElect is used to terminate the voting
 // Important if player to be elected disconnects or levelchange happens
@@ -34,6 +35,9 @@ void AbortElect()
 		if ( p->v.elect_type != etNone ) {
 			if ( is_elected(p, etCaptain) )
 				k_captains = floor( k_captains );
+
+			if ( is_elected(p, etCoach) )
+				k_coaches = floor( k_coaches );
 
 			p->v.elect_type = etNone;
 			p->v.elect_block_till = g_globalvars.time + 30; // block election for some time
@@ -161,6 +165,10 @@ int get_votes_req( int fofs, qbool diff )
 							percent = cvar("k_vp_captain");
 							break;
 						}
+						else if ( el_type == etCoach ) {
+							percent = cvar("k_vp_coach");
+							break;
+						}
 						else {
 							percent = 100; break; // unknown/none election
 							break;
@@ -247,6 +255,9 @@ int get_elect_type ()
 
 		if( is_elected(p, etCaptain) ) // elected captain
 			return etCaptain;
+
+		if( is_elected(p, etCoach) ) // elected coach
+			return etCoach;
 	}
 
 	return etNone;
@@ -258,6 +269,7 @@ char *get_elect_type_str ()
 	switch ( get_elect_type () ) {
 		case etNone: 	return "None";
 		case etCaptain:	return "Captain";
+		case etCoach:	return "Coach";
 		case etAdmin: 	return "Admin";
 	}
 
@@ -373,18 +385,22 @@ void vote_check_elect ()
 			if ( p->v.elect_type != etNone )
 				break;
 
-		if ( !p ) { // nor admin nor captain found - probably bug
+		if ( !p ) { // nor admin nor captain nor coach found - probably bug
 			AbortElect();
 			return;
 		}
 
 		if( !(p->ct == ctSpec && match_in_progress) )
-		if( is_elected(p, etAdmin) ) // s: election was admin election
-			BecomeAdmin(p, AF_ADMIN);
+			if( is_elected(p, etAdmin) ) // s: election was admin election
+				BecomeAdmin(p, AF_ADMIN);
 
 		if( !match_in_progress )
-		if( is_elected(p, etCaptain) ) // s: election was captain election
-			BecomeCaptain(p);
+			if( is_elected(p, etCaptain) ) // s: election was captain election
+				BecomeCaptain(p);
+
+		if( !match_in_progress )
+			if( is_elected(p, etCoach) ) // s: election was coach election
+				BecomeCoach(p);
 
 		AbortElect();
 		return;
@@ -434,7 +450,7 @@ void vote_check_rpickup ()
 	gedict_t *p;
 	int veto;
 
-	if ( match_in_progress || k_captains )
+	if ( match_in_progress || k_captains || k_coaches)
 		return;
 
 	if ( !get_votes( OV_RPICKUP ) )
@@ -568,6 +584,9 @@ void vote_check_nospecs ()
 				if ( is_real_adm(spec) )
 					continue; // don't kick real admin
     
+				if ( is_coach(spec) )
+					continue; // don't kick coaches
+
 				stuffcmd(spec, "disconnect\n");  // FIXME: stupid way
 			}
 		}

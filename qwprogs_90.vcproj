@@ -292,6 +292,10 @@
 				>
 			</File>
 			<File
+				RelativePath="src\coach.c"
+				>
+			</File>
+			<File
 				RelativePath=".\src\clan_arena.c"
 				>
 			</File>

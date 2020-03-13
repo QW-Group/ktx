@@ -29,6 +29,7 @@ ktx_sources = [
 	'src/bot_world.c',
 	'src/buttons.c',
 	'src/captain.c',
+	'src/coach.c',
 	'src/clan_arena.c',
 	'src/client.c',
 	'src/combat.c',

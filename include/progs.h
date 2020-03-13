@@ -207,6 +207,7 @@ typedef enum
 {
 	etNone = 0,
 	etCaptain,
+	etCoach,
 	etAdmin
 } electType_t;
 
@@ -897,6 +898,7 @@ typedef struct gedict_s {
 	int 	k_admin;         // if player is an admin, flags
 	float   k_adm_lasttime;	 // store time of last attempt getting admin rights
 	int		k_captain;       // if player is team captain
+	int     k_coach;         // if player is team coach
 	float	k_flag;          // flagvalue to customise settings such as sounds/autoscreenshot
 	float	k_msgcount;      // NOT_SURE: last time mod printed a message to client?
 	float	k_picked;        // NOT_SURE: 

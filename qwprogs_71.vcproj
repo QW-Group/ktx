@@ -188,6 +188,9 @@
 				RelativePath="src\captain.c">
 			</File>
 			<File
+				RelativePath="src\coach.c">
+			</File>
+			<File
 				RelativePath="src\client.c">
 				<FileConfiguration
 					Name="Debug|Win32">
