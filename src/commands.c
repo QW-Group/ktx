@@ -1349,24 +1349,24 @@ qbool check_perm(gedict_t *p, int perm)
 void ShowOpts()
 {
 	G_sprint(self, 2,
-			"ôéíåäï÷î±.. -1 mins match time\n"
-			"ôéíåõð±.... +1 mins match time\n"
-			"ôéíåäï÷î... -5 mins match time\n"
-			"ôéíåõð..... +5 mins match time\n"
-			"æòáçóäï÷î.. -10 fraglimit\n"
-			"æòáçóõð.... +10 fraglimit\n"
-			"äí......... change deathmatch mode\n"
-			"ôð......... change teamplay mode\n"
-			"äòïðñõáä... drop quad when killed\n"
-			"äòïðòéîç... drop ring when killed\n"
-			"äòïððáãë... drop pack when killed\n"
-			"ìïãë....... change locking mode\n"
-			"óðá÷î...... change spawntype\n"
-			"óðååä...... toggle sv_maxspeed\n"
-			"ðï÷åòõðó... quad, ˜˜˜, ring & suit\n"
-			"æáéòðáãëó.. best/last weapon dropped\n"
-			"äéóãèáòçå.. underwater discharges\n"
-			"óéìåîãå.... toggle spectator talk\n"
+			"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.. -1 mins match time\n"
+			"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.... +1 mins match time\n"
+			"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½... -5 mins match time\n"
+			"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½..... +5 mins match time\n"
+			"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.. -10 fraglimit\n"
+			"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.... +10 fraglimit\n"
+			"ï¿½ï¿½......... change deathmatch mode\n"
+			"ï¿½ï¿½......... change teamplay mode\n"
+			"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½... drop quad when killed\n"
+			"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½... drop ring when killed\n"
+			"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½... drop pack when killed\n"
+			"ï¿½ï¿½ï¿½ï¿½....... change locking mode\n"
+			"ï¿½ï¿½ï¿½ï¿½ï¿½...... change spawntype\n"
+			"ï¿½ï¿½ï¿½ï¿½ï¿½...... toggle sv_maxspeed\n"
+			"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½... quad, ï¿½ï¿½ï¿½, ring & suit\n"
+			"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.. best/last weapon dropped\n"
+			"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.. underwater discharges\n"
+			"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.... toggle spectator talk\n"
 			"%s..... toggle midair mode\n"
 			"%s.. toggle grenade mode\n"
 			"%s... toggle instagib mode\n", redtext("midair"), redtext("gren_mode"), redtext("instagib"));
@@ -1375,9 +1375,9 @@ void ShowOpts()
 void ShowQizmo()
 {
 	G_sprint(self, 2,
-			"ñìáç....... lagsettings\n"
-			"ñåîåíù..... enemy vicinity reporting\n"
-			"ñðïéîô..... point function\n");
+			"ï¿½ï¿½ï¿½ï¿½....... lagsettings\n"
+			"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½..... enemy vicinity reporting\n"
+			"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½..... point function\n");
 }
 
 /*
@@ -1385,9 +1385,9 @@ void ShowQizmo()
 void ShowMessages()
 {
 	G_sprint(self, 2,
-			"ëéììåò..... who killed you last\n"
-			"öéãôéí..... who you last killed\n"
-			"îå÷ãïíåò... last player joined\n");
+			"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½..... who killed you last\n"
+			"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½..... who you last killed\n"
+			"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½... last player joined\n");
 }
 */
 
@@ -1813,7 +1813,7 @@ void PlayerStatus()
 	for ( p = world; (p = find_plr( p )); ) {
 		if ( !found )
 			G_sprint(self, 2, "Players list:\n"
-							  "žžžžžžžžžžžžžžžžžžžžžŸ\n");
+							  "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\n");
 		G_sprint(self, 2, "%s\n", OnePlayerStatus( p, self ));
 		found = true;
 	}
@@ -1829,7 +1829,7 @@ void PlayerStatusS()
 	for ( p = world; (p = find_plr( p )); ) {
 		if ( !found )
 			G_sprint(self, 2, "Players skins list:\n"
-							  "žžžžžžžžžžžžžžžžžžžžžŸ\n");
+							  "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\n");
 		G_sprint(self, 2, "\x90%10s\x91 %s\n", ezinfokey(p, "skin"), p->netname);
 		found = true;
 	}
@@ -1858,7 +1858,7 @@ void PlayerStatusN()
 
 		if ( !found )
 			G_sprint(self, 2, "Players %s ready:\n"
-						  "žžžžžžžžžžžžžžžžžžžžžŸ\n", redtext("not"));
+						  "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\n", redtext("not"));
 
 		G_sprint(self, 2, "%s\n", OnePlayerStatus( p, self ));
 		found = true;
@@ -1904,7 +1904,7 @@ void ListWhoNot()
 
 		if ( !found )
 			G_bprint(2, "Players %s ready:\n"
-					    "žžžžžžžžžžžžžžžžžžžžžŸ\n", redtext("not")); // broadcast
+					    "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\n", redtext("not")); // broadcast
 
 		for ( p2 = world; (p2 = find_client( p2 )); )
 			G_sprint(p2, 2, "%s\n", OnePlayerStatus( p, p2 ));
@@ -2009,11 +2009,11 @@ void ReportMe()
 		G_sprint(p, 3, "  h:%d  %s%d", (int)self->s.v.health, wt, (int)f1);
 
 		if( (int)self->s.v.items & 524288)
-			G_sprint(p, 3, "  …åùåó…‘");
+			G_sprint(p, 3, "  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
 		if( (int)self->s.v.items & 1048576)
-			G_sprint(p, 3, "  …˜˜˜…‘");
+			G_sprint(p, 3, "  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
 		if( (int)self->s.v.items & 4194304)
-			G_sprint(p, 3, "  …ñõáäœ‘");
+			G_sprint(p, 3, "  ï¿½ï¿½ï¿½ï¿½ï¿½äœ‘");
 
 		G_sprint(p, 3, "\n");
 	}
@@ -2454,10 +2454,10 @@ void ShowRules()
 	else if ( isTeam() )
 		G_sprint(self, 2,
 			"Server is in team mode.\n"
-			"Typing óãïòåó during game\n"
+			"Typing ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ during game\n"
 			"will print time left and teamscores.\n"
 			"Also available during game\n"
-			"are óôáôó and åææéãéåîãù.\n");
+			"are ï¿½ï¿½ï¿½ï¿½ï¿½ and ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.\n");
 	else
 		G_sprint(self, 2, "Server is in unknown mode.\n");
 
@@ -2476,11 +2476,11 @@ void ChangeLock()
     if( lock > 2 )
 		lock = 0;
 	if( lock == 0 )
-		G_bprint(2, "Óåòöåò ìïãëéîç off\n");
+		G_bprint(2, "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ off\n");
 	else if( lock == 2 )
-		G_bprint(2, "Óåòöåò ìïãëåä - players cannot connect during game\n");
+		G_bprint(2, "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ - players cannot connect during game\n");
 	else if( lock == 1 )
-		G_bprint(2, "Ôåáíìïãë ïî - only players in existing teams can connect during game\n");
+		G_bprint(2, "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ - only players in existing teams can connect during game\n");
 
 	cvar_fset("k_lockmode", lock);
 }
@@ -3068,7 +3068,7 @@ const char common_um_init[] =
 	"k_spw 4\n"					// affect spawn type
 	"k_dmgfrags 0\n"			// damage frags off
 	"k_dmm4_gren_mode 0\n"		// dmm4 grenade mode off
-	"k_teamoverlay 1\n"			// teamoverlay on
+	"k_teamoverlay 0\n"			// teamoverlay off
 	"k_tp_tele_death 1\n"		// affect frags on team telefrags or not
 	"k_allowcountchange 1\n"	// permissions for upplayers, only real admins
 	"k_maxspectators 4\n"		// some default value
@@ -3869,7 +3869,7 @@ void fpslist ( )
 		if ( !i ) {
 			G_sprint(self, 2, "Players %s list:\n", redtext("FPS") );
 			G_sprint(self, 2, "         name:(cur \x8f max \x8f min \x8f avg)\n");
-			G_sprint(self, 2, "žžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n");
+			G_sprint(self, 2, "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\n");
 		}
 
 		cur = p->fCurrentFrameTime ? ( 1.0f / p->fCurrentFrameTime ) : 0;
