@@ -3083,7 +3083,7 @@ const char common_um_init[] =
 	"k_spw 4\n"					// affect spawn type
 	"k_dmgfrags 0\n"			// damage frags off
 	"k_dmm4_gren_mode 0\n"		// dmm4 grenade mode off
-	"k_teamoverlay 1\n"			// teamoverlay on
+	"k_teamoverlay 0\n"			// teamoverlay off
 	"k_tp_tele_death 1\n"		// affect frags on team telefrags or not
 	"k_allowcountchange 1\n"	// permissions for upplayers, only real admins
 	"k_maxspectators 4\n"		// some default value

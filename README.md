@@ -7,8 +7,6 @@
 
 Although it had been developed to be **Quakeworld** server agnostic, it has over the years been developed very close to **[MVDSV][mvdsv]** to which it has become an extent, thus compatibility with other **Quakeworld** servers might not have been maintained.
 
-_(This README.md file is still a work in progress. bear with us while we polish it!)_
-
 ## Getting Started
 
 The following instructions will help you get **[KTX][ktx]** installed on a running **[MVDSV][mvdsv]** server using prebuilt binaries. Details on how to compile your own **[KTX][ktx]** binary will also be included to match specific architectures or for development purposes.
@@ -16,12 +14,11 @@ The following instructions will help you get **[KTX][ktx]** installed on a runni
 ## Supported architectures
 
 The following architectures are fully supported by **[KTX][ktx]** and are available as prebuilt binaries:
-* Linux i686 (Intel and AMD 32-bit processors)
 * Linux amd64 (Intel and AMD 64-bits processors)
-* Windows x86 (Intel and AMD 32-bit processors)
-* Windows x64 (Intel and AMD 64-bits processors)
-* Mac OS X (Intel 64-bit processors)
+* Linux i686 (Intel and AMD 32-bit processors)
 * Linux armhf (ARM 32-bit processors)
+* Windows x64 (Intel and AMD 64-bits processors)
+* Windows x86 (Intel and AMD 32-bit processors)
 
 ## Prebuilt binaries
 
@@ -123,14 +120,9 @@ Known issues:
 
 - When changing architecture builds, for example for arm, apt-get will install/remove conflicting packages. Don't be surprised that you compile ``linux-amd64``, then ``linux-armv7hl`` and then back ``linux-amd64`` and it does not work because files are missing :)
 
-
-## Built With
-
-TBD
-
 ## Versioning
 
-We use a pretty crappy system for versioning for now. For the versions available, see the [tags on this repository][ktx-tags].
+For the versions available, see the [tags on this repository][ktx-tags].
 
 ## Authors
 
@@ -172,7 +164,7 @@ This project is licensed under the GPL-2.0 License - see the [LICENSE.md](LICENS
 
 [ktx]: https://github.com/deurk/ktx
 [ktx-tags]: https://github.com/deurk/ktx/tags
-[ktx-builds]: https://builds.deurk.net
+[ktx-builds]: https://builds.quakeworld.nu/ktx
 [mvdsv]: https://github.com/deurk/mvdsv
 [nquake-linux]: https://github.com/nQuake/server-linux
 [fte]: http://fte.triptohell.info/
