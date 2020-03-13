@@ -73,7 +73,6 @@ before_install:
   - pip3 install -r requirements.txt
 
 script:
-script:
   # build binary
   - meson build --buildtype=release --cross-file tools/cross-compilation/${OS}-${ARCH}.txt
   - ninja -v -C build
