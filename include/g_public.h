@@ -31,7 +31,7 @@
 //
 // g_public.h -- game module information visible to server
 
-#define	GAME_API_VERSION	16
+#define	GAME_API_VERSION	15
 
 
 //===============================================================
