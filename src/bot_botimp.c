@@ -148,27 +148,27 @@ qbool SetAttributesBasedOnSkill (int skill)
 	cvar_fset (FB_CVAR_ACCURACY, 45 - min (skill, 10) * 2.25);
 	cvar_fset (FB_CVAR_DODGEFACTOR, RangeOverSkill(skill, 0.0f, 1.0f));
 	cvar_fset (FB_CVAR_LOOKANYWHERE, RangeOverSkill(skill, 0.0f, 1.0f));
-	cvar_fset (FB_CVAR_LOOKAHEADTIME, RangeOverSkill(skill, 5.0f, 30.0f));
-	cvar_fset (FB_CVAR_PREDICTIONERROR, RangeOverSkill(skill, 1.0f, 0.0f));
-	cvar_fset (FB_CVAR_DISTANCEERROR, RangeOverSkill(skill, 0.15f, 0.0f));
+	cvar_fset (FB_CVAR_LOOKAHEADTIME, RangeOverSkill(skill, 0.5f, 30.0f));
+	cvar_fset (FB_CVAR_PREDICTIONERROR, RangeOverSkill(skill, 10.0f, 0.0f));
+	cvar_fset (FB_CVAR_DISTANCEERROR, RangeOverSkill(skill, 1.5f, 0.0f));
 
 	// Old, but used to be global
 	cvar_fset (FB_CVAR_LGPREF, RangeOverSkill (skill, 0.2f, 1.0f));
 	cvar_fset (FB_CVAR_VISIBILITY, 0.7071067f - (0.02f * min (skill, 10)));   // equivalent of 90 => 120 fov
 
-	cvar_fset (FB_CVAR_YAW_MIN_ERROR, RangeOverSkill(aimskill, 1.5, 1));
-	cvar_fset (FB_CVAR_YAW_MAX_ERROR, RangeOverSkill(aimskill, 4.5, 3));
-	cvar_fset (FB_CVAR_YAW_MULTIPLIER, RangeOverSkill(aimskill, 4, 2.5));
-	cvar_fset (FB_CVAR_YAW_SCALE, RangeOverSkill(aimskill, 5, 2));
+	cvar_fset (FB_CVAR_YAW_MIN_ERROR, RangeOverSkill(aimskill, 15.0, 1));
+	cvar_fset (FB_CVAR_YAW_MAX_ERROR, RangeOverSkill(aimskill, 45.0, 3));
+	cvar_fset (FB_CVAR_YAW_MULTIPLIER, RangeOverSkill(aimskill, 40.0, 2.5));
+	cvar_fset (FB_CVAR_YAW_SCALE, RangeOverSkill(aimskill, 50.0, 2));
 
-	cvar_fset (FB_CVAR_PITCH_MIN_ERROR, RangeOverSkill(aimskill, 1.5, 1));
-	cvar_fset (FB_CVAR_PITCH_MAX_ERROR, RangeOverSkill(aimskill, 4.5, 3));
-	cvar_fset (FB_CVAR_PITCH_MULTIPLIER, RangeOverSkill(aimskill, 4, 2));
-	cvar_fset (FB_CVAR_PITCH_SCALE, RangeOverSkill (aimskill, 5, 2));
+	cvar_fset (FB_CVAR_PITCH_MIN_ERROR, RangeOverSkill(aimskill, 15.0, 1));
+	cvar_fset (FB_CVAR_PITCH_MAX_ERROR, RangeOverSkill(aimskill, 45.0, 3));
+	cvar_fset (FB_CVAR_PITCH_MULTIPLIER, RangeOverSkill(aimskill, 40.0, 2));
+	cvar_fset (FB_CVAR_PITCH_SCALE, RangeOverSkill (aimskill, 50.0, 2));
 
 	cvar_fset (FB_CVAR_ATTACK_RESPAWNS, skill >= 15 ? 1 : 0);
-	cvar_fset (FB_CVAR_REACTION_TIME, RangeOverSkill (skill, 0.75f, 0.3f));
-	cvar_fset (FB_CVAR_REACTION_MOVETIME, RangeOverSkill(skill, 0.3f, 0.1f));
+	cvar_fset (FB_CVAR_REACTION_TIME, RangeOverSkill (skill, 7.5f, 0.3f));
+	cvar_fset (FB_CVAR_REACTION_MOVETIME, RangeOverSkill(skill, 3.0f, 0.1f));
 
 	// Volatility
 	cvar_fset (FB_CVAR_MIN_VOLATILITY, 1.0f);
