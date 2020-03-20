@@ -71,6 +71,8 @@ cd VM
 @if errorlevel 1 goto quit
 %CC% %CFLAGS% %INCFLAGS% %SRC%\captain.c
 @if errorlevel 1 goto quit
+%CC% %CFLAGS% %INCFLAGS% %SRC%\coach.c
+@if errorlevel 1 goto quit
 %CC% %CFLAGS% %INCFLAGS% %SRC%\commands.c
 @if errorlevel 1 goto quit
 %CC% %CFLAGS% %INCFLAGS% %SRC%\logs.c

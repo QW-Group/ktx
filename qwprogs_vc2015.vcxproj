@@ -396,6 +396,7 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\captain.c" />
+    <ClCompile Include="src\coach.c" />
     <ClCompile Include="src\clan_arena.c" />
     <ClCompile Include="src\client.c">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>

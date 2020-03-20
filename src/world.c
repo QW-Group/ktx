@@ -731,6 +731,7 @@ void FirstFrame	( )
 	RegisterCvar("k_vp_break");   // votes percentage for stopping the match voting
 	RegisterCvar("k_vp_admin");   // votes percentage for admin election
 	RegisterCvar("k_vp_captain"); // votes percentage for captain election
+	RegisterCvar("k_vp_coach");   // votes percentage for coachs election
 	RegisterCvar("k_vp_map");     // votes percentage for map change voting
 	RegisterCvar("k_vp_pickup");  // votes percentage for pickup voting
 	RegisterCvar("k_vp_rpickup"); // votes percentage for rpickup voting
@@ -892,6 +893,8 @@ void FirstFrame	( )
 	RegisterCvar("_k_captcolor1"); // internal mod usage
 	RegisterCvar("_k_captteam2"); // internal mod usage
 	RegisterCvar("_k_captcolor2"); // internal mod usage
+	RegisterCvar("_k_coachteam1"); // internal mod usage
+	RegisterCvar("_k_coachteam2"); // internal mod usage
 	RegisterCvar("_k_team1"); // internal mod usage
 	RegisterCvar("_k_team2"); // internal mod usage
 	RegisterCvar("_k_host"); // internal mod usage

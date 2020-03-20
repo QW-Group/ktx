@@ -276,9 +276,40 @@ qbool FixPlayerTeam ( char *newteam )
 {
 	char *s1, *s2;
 
-	// specs does't have limits
 	if ( self->ct == ctSpec )
+	{
+		// coach or potential coach may not change team
+		if ( coach_num( self ) || is_elected(self, etCoach) ) {
+			if ( strneq( getteam( self ), newteam ) ) {
+				G_sprint(self, 2, "You may %s change team\n", redtext("not"));
+				stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "team \"%s\"\n", getteam(self)); // sends this to client - so he get right team too
+			}
+
+			return true;
+		}
+
+		// do we need this at all?
+		// it is here because the coach stuff was copied from captain
+		if ( k_coaches == 2 ) {
+			// get the strings to compare
+			s1 = newteam;
+
+			if ( self->k_picked == 1 )
+				s2 = cvar_string( "_k_coachteam1" );
+			else if( self->k_picked == 2 )
+				s2 = cvar_string( "_k_coachteam2" );
+			else
+				s2 = "";
+
+			if( strneq( s1, s2 ) ) {
+				G_sprint(self, 2, "You may %s change team\n", redtext("not"));
+				stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "team \"%s\"\n", s2); // sends this to client - so he get right team too
+				return true;
+			}
+		}
+
 		return false;
+	}
 
 	// do not allow change team in game / countdown
 	if( match_in_progress || coop )

@@ -257,6 +257,7 @@ char		*g_himself( gedict_t * ed );
 
 gedict_t	*find_client( gedict_t *start );
 gedict_t	*find_plr( gedict_t *start );
+gedict_t	*find_plr_same_team( gedict_t *start, char *team );
 gedict_t	*find_spc( gedict_t *start );
 gedict_t	*find_plrghst( gedict_t *start, int *from );
 gedict_t	*find_plrspc( gedict_t *start, int *from );
@@ -762,6 +763,11 @@ qbool	CA_can_fire( gedict_t *p );
 
 int		capt_num(gedict_t *p);
 
+// coach.c
+
+int     coach_num(gedict_t *p);
+qbool   is_coach(gedict_t *p);
+
 // maps.c
 
 void	StuffMaps( gedict_t *p );
@@ -875,6 +881,7 @@ extern	float framechecks;	    // if timedemo/uptime bugs are tolerated
 extern	float k_attendees;      // stores number of players on server - used in 'ready' checking
 extern	float k_captains;	    // number of captains
 extern	float k_captainturn;	// which captain comes in line to pick
+extern	float k_coaches;        // number of coaches
 extern	float k_checkx;
 extern	float k_force;          // used in forcing matchstart
 extern	float k_maxspeed;       // used to store server maxspeed to allow switching by admins

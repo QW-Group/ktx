@@ -39,6 +39,8 @@ void AutoTrackRestore();
 
 void Bot_Print_Thinking (void);
 
+qbool TrackChangeCoach(gedict_t *p);
+
 int GetSpecWizard ()
 {
 	int k_asw = bound(0, cvar("allow_spec_wizard"), 2);
@@ -272,6 +274,12 @@ void SpectatorImpulseCommand()
 
 void SpecGoalChanged()
 {
+	if ( self->k_coach )
+	{
+	    if (TrackChangeCoach(self))
+	        return;
+	}
+
 	if ( self->wp_stats )
 		Wp_Stats( 2 ); // force refresh
 	if ( self->sc_stats )

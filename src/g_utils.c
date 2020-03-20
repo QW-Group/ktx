@@ -1171,6 +1171,21 @@ gedict_t *find_plr( gedict_t *start )
 	return NULL;
 }
 
+// little helper function that tries to locate a player within the given team
+// it return the player, or NULL of no player found
+gedict_t *find_plr_same_team( gedict_t *start, char *team)
+{
+	for ( ; (start = trap_nextclient(start)); )
+	{
+		if ( (start->ct == ctPlayer) && (streq(getteam(start), team)) )
+		{
+			return start;
+		}
+	}
+
+	return NULL;
+}
+
 gedict_t *find_spc( gedict_t *start )
 {
 	for ( ; (start = trap_nextclient(start)); )

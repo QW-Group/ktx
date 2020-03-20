@@ -42,7 +42,8 @@ void DontKick ();
 void VoteAdmin();
 void VoteYes();
 void VoteNo();
-void VoteCaptain ();
+void VoteCaptain();
+void VoteCoach();
 void nospecs();
 void teamoverlay();
 void votecoop();
@@ -394,6 +395,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_YES        "give vote"
 #define CD_NO         "withdraws vote"
 #define CD_CAPTAIN    "toggle captain election"
+#define CD_COACH      "toggle coach election"
 #define CD_FREEZE     "(un)freeze the map"
 #define CD_RPICKUP    "vote random team pickup"
 #define CD_1ON1       "duel settings"
@@ -725,6 +727,7 @@ cmd_t cmds[] = {
 	{ "yes",         VoteYes,                   0    , CF_PLAYER | CF_MATCHLESS, CD_YES },
 	{ "no",          VoteNo,                    0    , CF_PLAYER | CF_MATCHLESS, CD_NO },
 	{ "captain",     VoteCaptain,               0    , CF_PLAYER, CD_CAPTAIN },
+	{ "coach",       VoteCoach,                 0    , CF_SPECTATOR, CD_COACH },
 	{ "freeze",      ToggleFreeze,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_FREEZE },
 	{ "rpickup",     RandomPickup,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_RPICKUP },
 
@@ -1349,35 +1352,41 @@ qbool check_perm(gedict_t *p, int perm)
 void ShowOpts()
 {
 	G_sprint(self, 2,
-			"��������.. -1 mins match time\n"
-			"������.... +1 mins match time\n"
-			"��������... -5 mins match time\n"
-			"������..... +5 mins match time\n"
-			"���������.. -10 fraglimit\n"
-			"�������.... +10 fraglimit\n"
-			"��......... change deathmatch mode\n"
-			"��......... change teamplay mode\n"
-			"��������... drop quad when killed\n"
-			"��������... drop ring when killed\n"
-			"��������... drop pack when killed\n"
-			"����....... change locking mode\n"
-			"�����...... change spawntype\n"
-			"�����...... toggle sv_maxspeed\n"
-			"��������... quad, ���, ring & suit\n"
-			"���������.. best/last weapon dropped\n"
-			"���������.. underwater discharges\n"
-			"�������.... toggle spectator talk\n"
+			"%s.. -1 mins match time\n"
+			"%s.... +1 mins match time\n"
+			"%s... -5 mins match time\n"
+			"%s..... +5 mins match time\n"
+			"%s.. -10 fraglimit\n"
+			"%s.... +10 fraglimit\n"
+			"%s......... change deathmatch mode\n"
+			"%s......... change teamplay mode\n"
+			"%s... drop quad when killed\n"
+			"%s... drop ring when killed\n"
+			"%s... drop pack when killed\n"
+			"%s....... change locking mode\n"
+			"%s...... change spawntype\n"
+			"%s...... toggle sv_maxspeed\n"
+			"%s... quad, %s, ring & suit\n"
+			"%s.. best/last weapon dropped\n"
+			"%s.. underwater discharges\n"
+			"%s.... toggle spectator talk\n"
 			"%s..... toggle midair mode\n"
 			"%s.. toggle grenade mode\n"
-			"%s... toggle instagib mode\n", redtext("midair"), redtext("gren_mode"), redtext("instagib"));
+			"%s... toggle instagib mode\n",
+            redtext("timedown1"), redtext("timeup1"), redtext("timedown"), redtext("timeup"),
+            redtext("fragsdown"), redtext("fragsup"), redtext("dm"), redtext("tp"), redtext("dropquad"),
+            redtext("dropring"), redtext("droppacks"), redtext("lock"), redtext("spawn"),
+            redtext("speed"), redtext("powerups"), redtext("666"), redtext("fairpacks"),
+            redtext("discharge"), redtext("silence"), redtext("midair"), redtext("gren_mode"),
+            redtext("instagib"));
 }
 
 void ShowQizmo()
 {
 	G_sprint(self, 2,
-			"����....... lagsettings\n"
-			"������..... enemy vicinity reporting\n"
-			"������..... point function\n");
+			"%s....... lagsettings\n"
+			"%s..... enemy vicinity reporting\n"
+			"%s..... point function\n", redtext("qlag"), redtext("qenemy"), redtext("qpoint"));
 }
 
 /*
@@ -1385,9 +1394,9 @@ void ShowQizmo()
 void ShowMessages()
 {
 	G_sprint(self, 2,
-			"������..... who killed you last\n"
-			"������..... who you last killed\n"
-			"��������... last player joined\n");
+			"%s..... who killed you last\n"
+			"%s..... who you last killed\n"
+			"%s... last player joined\n, redtext("killer"), redtext("victim"), redtext("newcomer")");
 }
 */
 
@@ -1401,6 +1410,7 @@ void ShowVersion()
 
 	G_sprint(self, 2, "\n%s  %s, build %d\n", MOD_NAME, MOD_VERSION, build_number());
 	G_sprint(self, 2, "Build date: %s\n", MOD_BUILD_DATE);
+
 
 	G_sprint(self, 2, "\n%s\n", cvar_string( "version" ));
 
@@ -1564,6 +1574,9 @@ void ModStatus ()
 
 	if( floor( k_captains ) == 1 ) 
 		G_sprint(self, 2, "\x90\x31\x91 %s present\n", redtext("captain"));
+
+	if( floor( k_coaches ) == 1 )
+	    G_sprint(self, 2, "\x90\x31\x91 %s present\n", redtext("coach"));
 
 	if( match_in_progress == 2 )
 	{
@@ -1813,7 +1826,7 @@ void PlayerStatus()
 	for ( p = world; (p = find_plr( p )); ) {
 		if ( !found )
 			G_sprint(self, 2, "Players list:\n"
-							  "�����������������������\n");
+			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
 		G_sprint(self, 2, "%s\n", OnePlayerStatus( p, self ));
 		found = true;
 	}
@@ -1829,7 +1842,7 @@ void PlayerStatusS()
 	for ( p = world; (p = find_plr( p )); ) {
 		if ( !found )
 			G_sprint(self, 2, "Players skins list:\n"
-							  "�����������������������\n");
+			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
 		G_sprint(self, 2, "\x90%10s\x91 %s\n", ezinfokey(p, "skin"), p->netname);
 		found = true;
 	}
@@ -1858,7 +1871,8 @@ void PlayerStatusN()
 
 		if ( !found )
 			G_sprint(self, 2, "Players %s ready:\n"
-						  "�����������������������\n", redtext("not"));
+			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
+			redtext("not"));
 
 		G_sprint(self, 2, "%s\n", OnePlayerStatus( p, self ));
 		found = true;
@@ -1904,7 +1918,8 @@ void ListWhoNot()
 
 		if ( !found )
 			G_bprint(2, "Players %s ready:\n"
-					    "�����������������������\n", redtext("not")); // broadcast
+			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
+			redtext("not")); // broadcast
 
 		for ( p2 = world; (p2 = find_client( p2 )); )
 			G_sprint(p2, 2, "%s\n", OnePlayerStatus( p, p2 ));
@@ -2009,11 +2024,11 @@ void ReportMe()
 		G_sprint(p, 3, "  h:%d  %s%d", (int)self->s.v.health, wt, (int)f1);
 
 		if( (int)self->s.v.items & 524288)
-			G_sprint(p, 3, "  ������");
+			G_sprint(p, 3, "  \220\205%s\205\221", redtext("eyes"));
 		if( (int)self->s.v.items & 1048576)
-			G_sprint(p, 3, "  �������");
+			G_sprint(p, 3, "  \220\205%s\205\221", redtext("666"));
 		if( (int)self->s.v.items & 4194304)
-			G_sprint(p, 3, "  �����䜑");
+			G_sprint(p, 3, "  \220\205%s\205\221", redtext("quad"));
 
 		G_sprint(p, 3, "\n");
 	}
@@ -2454,10 +2469,10 @@ void ShowRules()
 	else if ( isTeam() )
 		G_sprint(self, 2,
 			"Server is in team mode.\n"
-			"Typing ������ during game\n"
+			"Typing %s during game\n"
 			"will print time left and teamscores.\n"
 			"Also available during game\n"
-			"are ����� and ����������.\n");
+			"are %s and %s.\n", redtext("scores"), redtext("stats"), redtext("efficiency"));
 	else
 		G_sprint(self, 2, "Server is in unknown mode.\n");
 
@@ -2476,11 +2491,11 @@ void ChangeLock()
     if( lock > 2 )
 		lock = 0;
 	if( lock == 0 )
-		G_bprint(2, "������ ������� off\n");
+		G_bprint(2, "%s off\n", redtext("Server locking"));
 	else if( lock == 2 )
-		G_bprint(2, "������ ������ - players cannot connect during game\n");
+		G_bprint(2, "%s - players cannot connect during game\n", redtext("Server locked"));
 	else if( lock == 1 )
-		G_bprint(2, "�������� �� - only players in existing teams can connect during game\n");
+		G_bprint(2, "%s - only players in existing teams can connect during game\n", redtext("Teamlock on"));
 
 	cvar_fset("k_lockmode", lock);
 }
@@ -3687,14 +3702,15 @@ void klist ( )
 		if ( !i ) {
 			G_sprint(self, 2, "Clients list: %s\n", redtext( "spectators" ) );
 			G_sprint(self, 2, "%s %s %s %s\n",
- 						redtext( "id" ), redtext( "ad" ), redtext( "vip" ),
+ 						redtext( "id" ), redtext( "ad" ), redtext( "vip" ), redtext( "co" ),
 						redtext( "name" ) );
 		}
 
 		track = TrackWhom( p );
 
-		G_sprint(self, 2, "%2d|%2s|%3d|%s%s\n", GetUserID( p ),
-						(is_real_adm( p ) ? redtext("A") : is_adm( p ) ? redtext("a") : ""), VIP( p ), getname( p ),
+		G_sprint(self, 2, "%2d|%2s|%3d|%2s|%s%s\n", GetUserID( p ),
+						(is_real_adm( p ) ? redtext("A") : is_adm( p ) ? redtext("a") : ""),
+						VIP( p ), (is_coach(p) ? redtext("c") : ""), getname( p ),
 						(strnull(track) ? "" : va(" \x8D %s", track)) );
 	}
 
@@ -3869,7 +3885,10 @@ void fpslist ( )
 		if ( !i ) {
 			G_sprint(self, 2, "Players %s list:\n", redtext("FPS") );
 			G_sprint(self, 2, "         name:(cur \x8f max \x8f min \x8f avg)\n");
-			G_sprint(self, 2, "�������������������������������������\n");
+			G_sprint(self, 2, "\235\236\236\236\236\236\236\236\236\236\236"
+			                  "\236\236\236\236\236\236\236\236\236\236"
+			                  "\236\236\236\236\236\236\236\236\236\236"
+			                  "\236\236\236\236\236\237\n");
 		}
 
 		cur = p->fCurrentFrameTime ? ( 1.0f / p->fCurrentFrameTime ) : 0;
@@ -3900,6 +3919,11 @@ void RandomPickup ()
 
 	if( k_captains ) {
 		G_sprint(self, 2, "No random pickup when captain stuffing\n");
+		return;
+	}
+
+	if( k_coaches ) {
+		G_sprint(self, 2, "No random pickup when coach stuffing\n");
 		return;
 	}
 

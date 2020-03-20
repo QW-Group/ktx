@@ -4,6 +4,7 @@
     <ClCompile Include="src\admin.c" />
     <ClCompile Include="src\buttons.c" />
     <ClCompile Include="src\captain.c" />
+    <ClCompile Include="src\coach.c" />
     <ClCompile Include="src\client.c" />
     <ClCompile Include="src\combat.c" />
     <ClCompile Include="src\commands.c" />
