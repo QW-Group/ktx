@@ -509,9 +509,11 @@ char *SelectRandomMap(char *buf, int buf_size)
 char *SelectMapInCycle(char *buf, int buf_size)
 {
 	char newmap[128] = {0}, mapid[128] = {0};
-	int i;
+	int player_count = CountPlayers (), maxp = 0, minp = 0, i, oi;
+	qbool player_req_met = false;
 
 	buf[0] = 0;
+
 
 	if ( cvar( "k_random_maplist" ) )
 	{
@@ -519,18 +521,37 @@ char *SelectMapInCycle(char *buf, int buf_size)
 			return buf;
 	}
 
-	if ( (i = IsMapInCycle( g_globalvars.mapname )) ) { // ok map found in map list, select next map
+	if ( i = IsMapInCycle( g_globalvars.mapname ) ){ // ok map found in map list, select next map
 
-		snprintf( mapid, sizeof(mapid), "k_ml_%d", i >= 1000 ? 0 : i );
-		trap_cvar_string( mapid, newmap, sizeof(newmap) );
+		oi = i;
+		i++;
 
+		while (!player_req_met && i < 1000 && i != oi) {
+
+			maxp = cvar(va("k_ml_maxp_%d", i >= 1000 ? 0 : i));
+			maxp = maxp == 0 ? MAX_CLIENTS : maxp;
+			minp = cvar(va("k_ml_minp_%d", i >= 1000 ? 0 : i));
+
+			if ( maxp >= player_count && player_count >= minp ) {
+				snprintf( mapid, sizeof(mapid), "k_ml_%d", i >= 1000 ? 0 : i );
+				if (!mapid) {
+					i = 0;
+				}
+				trap_cvar_string( mapid, newmap, sizeof(newmap) );
+				player_req_met=true;
+			} else {
+				G_bprint(2, "Player requirements not met for map #%d in the map cycle, continuing to next map. (Minimum: %d, Maximum: %d)\n", i, minp, maxp);
+			}
+			i++;
+		}
 	}
-	else { // map not found in map cycle
+
+	if (!i && !player_req_met){ // map not found in map cycle or player requirements not met
 		if ( (i = cvar( "_k_last_cycle_map" )) ) { // try to return to map list at proper point
-    
+
 			snprintf( mapid, sizeof(mapid), "k_ml_%d", i );
 			trap_cvar_string( mapid, newmap, sizeof(newmap) );
-    
+
 			if( !IsMapInCycle( newmap ) )
 				newmap[0] = 0; // seems map not in current cycle
 		}
