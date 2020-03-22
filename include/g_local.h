@@ -684,7 +684,7 @@ void	vote_check_map ();
 void	vote_check_break ();
 void	vote_check_elect ();
 void	vote_check_pickup ();
-void	vote_check_rpickup ();
+void	vote_check_rpickup (int maxRecursion);
 void 	vote_check_all ();
 
 #define	VOTE_FOFS(x) ((intptr_t)&(((vote_t *)0)->x))
@@ -698,6 +698,7 @@ void 	vote_check_all ();
 #define OV_TEAMOVERLAY ( VOTE_FOFS ( teamoverlay ) )
 #define OV_COOP ( VOTE_FOFS ( coop ) )
 #define OV_ANTILAG ( VOTE_FOFS ( antilag ) )
+#define MAX_RPICKUP_RECUSION 3
 
 void 	ElectThink();
 void	AbortElect();

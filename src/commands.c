@@ -3941,7 +3941,7 @@ void RandomPickup ()
 							   redtext(va("withdraws %s rpickup vote", g_his(self)))),
 			((votes = get_votes_req( OV_RPICKUP, true )) ? va(" (%d)", votes) : ""));
 
-	vote_check_rpickup ();
+	vote_check_rpickup (MAX_RPICKUP_RECUSION);
 }
 
 // { spec tracking stuff 
