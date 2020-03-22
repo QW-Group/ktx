@@ -359,6 +359,7 @@ void SetChangeParms()
 		PrewarParams();
 
 	g_globalvars.parm11 = self->k_admin;
+	g_globalvars.parm12 = self->k_coach;
 	g_globalvars.parm13 = self->k_stuff;
 	g_globalvars.parm14 = self->ps.handicap;
 }
@@ -374,6 +375,7 @@ void SetNewParms()
 		PrewarParams();
 
 	g_globalvars.parm11 = 0;
+	g_globalvars.parm12 = 0;
 	g_globalvars.parm13 = 0;
 	g_globalvars.parm14 = 0;
 }
@@ -404,6 +406,7 @@ void SetRespawnParms()
 	else
 	{
 		g_globalvars.parm11 = 0;
+		g_globalvars.parm12 = 0;
 		g_globalvars.parm13 = 0;
 		g_globalvars.parm14 = 0;
 	}
@@ -425,6 +428,9 @@ void DecodeLevelParms()
 
 	if ( g_globalvars.parm11 )
 		self->k_admin = g_globalvars.parm11;
+
+	if ( g_globalvars.parm12 )
+	    self->k_coach = g_globalvars.parm12;
 
 	if ( g_globalvars.parm13 )
     	self->k_stuff = g_globalvars.parm13;

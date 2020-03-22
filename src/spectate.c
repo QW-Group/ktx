@@ -95,8 +95,8 @@ void SpecDecodeLevelParms()
 	if ( g_globalvars.parm11 )
 		self->k_admin = g_globalvars.parm11;
 
-//    if( g_globalvars.parm12 )
-//        self->k_accepted = g_globalvars.parm12;
+	if ( g_globalvars.parm12 )
+	    self->k_coach = g_globalvars.parm12;
 
 	if ( g_globalvars.parm13 )
     	self->k_stuff = g_globalvars.parm13;
