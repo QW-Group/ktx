@@ -303,7 +303,7 @@ void GrappleService()
 	VectorNormalize( hookVelocity );
 
 	if ( self->ctf_flag & CTF_RUNE_HST )
-		VectorScale( hookVelocity, 1000, self->s.v.velocity );
+		VectorScale( hookVelocity, 800 + (100 * min(cvar("k_ctf_rune_power_hst"), 1.0)), self->s.v.velocity );
 	else
 		VectorScale( hookVelocity, 800, self->s.v.velocity );
  
@@ -353,7 +353,7 @@ void GrappleThrow()
 	// Removing purectf velocity changes ( 2.5 * self->maxspeed )
 
 	if ( self->ctf_flag & CTF_RUNE_HST )
-		VectorScale( g_globalvars.v_forward, 1000, newmis->s.v.velocity );
+		VectorScale( g_globalvars.v_forward, 800 + (100 * min(cvar("k_ctf_rune_power_hst"), 1.0)), newmis->s.v.velocity );
 	else
 		VectorScale( g_globalvars.v_forward, 800, newmis->s.v.velocity );
 	SetVector( newmis->s.v.avelocity, 0, 0, -500 );
@@ -399,7 +399,7 @@ void UnfreezeGravity( gedict_t *p )
 	p->maxspeed = cvar("sv_maxspeed");
 
 	if ( p->ctf_flag & CTF_RUNE_HST )
-		p->maxspeed *= 1.25;
+		p->maxspeed *= min(cvar("k_ctf_rune_power_hst"), 1.0);
 
 	p->gravity = 1;
 	p->ctf_freeze = 0;

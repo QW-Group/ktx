@@ -160,7 +160,7 @@ static void BotsAimAtPlayerLogic(gedict_t* self, vec3_t rel_pos, float* rel_dist
 	if (IsVelocityWeapon(self->fb.desired_weapon_impulse) && !AttackFinished(self)) {
 		rel_time = *rel_dist / 1000;
 		if (IsNailgun(self->fb.desired_weapon_impulse) && (self->ctf_flag & CTF_RUNE_HST)) {
-			rel_time *= 0.5;
+			rel_time /= min(cvar("k_ctf_rune_power_hst"), 1.0);
 		}
 		else if (self->fb.desired_weapon_impulse == 6) {
 			rel_time = *rel_dist / 600;
