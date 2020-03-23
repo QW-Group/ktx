@@ -2926,7 +2926,7 @@ void PlayerPreThink()
 				self->s.v.health += 5;
 				if ( self->s.v.health > 150 )
 					self->s.v.health = 150;
-				self->regen_time += (1 / min(cvar("k_ctf_rune_power_rgn"), 1.0));
+				self->regen_time += 1 / ((cvar("k_ctf_rune_power_rgn") / 2) + 1);
 #ifdef BOT_SUPPORT
 				FrogbotSetHealthArmour (self);
 #endif

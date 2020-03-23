@@ -82,7 +82,7 @@ void FrogbotSetHealthArmour(gedict_t* client)
 	}
 
 	if ((int)client->ctf_flag & CTF_RUNE_RES) {
-		client->fb.total_damage *= min(cvar("k_ctf_rune_power_res"), 1.0);
+		client->fb.total_damage *= (cvar("k_ctf_rune_power_res") / 2) + 1;
 	}
 }
 
@@ -187,7 +187,7 @@ void FrogbotSetFirepower(gedict_t* self)
 		firepower_ *= (deathmatch == 4 ? 8 : 4);
 	}
 	if (self->ctf_flag & CTF_RUNE_STR) {
-		firepower_ *= min(cvar("k_ctf_rune_power_str"), 1.0);
+		firepower_ *= (cvar("k_ctf_rune_power_str") / 2) + 1;
 	}
 	self->fb.firepower = firepower_;
 }
