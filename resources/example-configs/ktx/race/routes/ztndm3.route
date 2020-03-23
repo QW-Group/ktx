@@ -36,3 +36,14 @@ race_route_add_start
 	race_set_route_weapon_mode raceWeaponAllowed
 	race_set_route_falsestart_mode raceFalseStartNo
 race_route_add_end
+
+race_route_add_start
+	race_add_route_node  -224  -480    24    0    0
+	race_add_route_node     0  -200   320    0    0
+	race_add_route_node  -656   192   280    0    0
+
+	race_set_route_name "ztndm3: YA to RA via SSG with weapon" "YA-SSG-RA with weapon"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponAllowed
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end

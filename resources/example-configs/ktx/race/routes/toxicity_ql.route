@@ -8,8 +8,43 @@ race_route_add_start
 	race_add_route_node   640   128   128    0    0
 	race_add_route_node  -108   544    64    0    0
 
-	race_set_route_name "Toxicity" "Low Mega - YA-Quad - GL - RL - YA-Low Mega" 
+	race_set_route_name "Toxicity: around map" "Low Mega - YA-Quad - GL - RL - YA-Low Mega" 
 	race_set_route_timeout 30
 	race_set_route_weapon_mode raceWeaponNo 
 	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node   352    80    -2    0  -90
+	race_add_route_node   928  -136   144    0    0
+	race_add_route_node  1128   608   -48    0    0
+
+	race_set_route_name "Toxicity: Tele exit stairs to Quad with weapon" "Tele exit stairs-High Mega-Quad"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponAllowed
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node   960   -64   124    0  -90
+	race_add_route_node   928   832   128    0    0
+	race_add_route_node   480   512   128    0    0
+	race_add_route_node    78   808   -96    0    0
+
+	race_set_route_name "Toxicity: High Mega to Low Mega over Quad" "High Mega-over Quad-Low Mega"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node  -108   544    62    0    0
+	race_add_route_node  1172   832    96    0    0
+	race_add_route_node   588  -512   -96    0    0
+	race_add_route_node  -108   666   128    0    0
+
+	race_set_route_name "Toxicity: from Low Mega YA get all 3 YA" "Low Mega YA-Quad YA-Water YA-Low Mega YA"
+	race_set_route_timeout 15
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
 race_route_add_end
