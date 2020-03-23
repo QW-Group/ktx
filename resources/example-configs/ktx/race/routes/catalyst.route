@@ -1,0 +1,58 @@
+race_route_add_start
+	race_add_route_node   588  -448    50    0   45
+	race_add_route_node   848  -416    48    0    0
+	race_add_route_node  1168  -332   256    0    0
+	race_add_route_node   168   224   256    0    0
+	race_add_route_node   656    64   264    0    0
+
+	race_set_route_name "Catalyst: LG to Mega via High YA" "LG Spawn-High YA-Stairs-Mega"
+	race_set_route_timeout 15
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node  1600   304     0    0 -180
+	race_add_route_node   656    64   264    0    0
+
+	race_set_route_name "Catalyst: RA to Mega with weapon" "RA-Mega"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponAllowed
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node   704   112   288    0 -135
+	race_add_route_node  1552   256     0    0    0
+
+	race_set_route_name "Catalyst: Mega to RAL" "Mega-RA"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node   588  -448    50    0   45
+	race_add_route_node   848  -416    48    0    0
+	race_add_route_node  1024   320    32    0    0
+	race_add_route_node   624   224    32    0    0
+	race_add_route_node   224   128    96    0    0
+
+	race_set_route_name "Catalyst: LG to Healths at Low RL" "LG Spawn-Cells-Low RL-Healths"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node   176   400   203    0  -90
+	race_add_route_node   656    64   264    0    0
+	race_add_route_node   144  -192   256    0    0
+	race_add_route_node  1072   192   224    0    0
+	race_add_route_node  1552   256     0    0    0
+
+	race_set_route_name "Catalyst: Mega Stairs to RA via GL and High RL" "Stairs-Mega-GL-High RL-RA"
+	race_set_route_timeout 15
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end

@@ -1,0 +1,83 @@
+race_route_add_start
+	race_add_route_node  -224   672   120    0    0
+	race_add_route_node   888   152   344    0    0
+
+	race_set_route_name "Shifter: from RA to Mega with weapon" "RA-Mega"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponAllowed
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node   944   144   344    0  135
+	race_add_route_node  -224   672   160    0    0
+	race_add_route_node    40   -24   168    0    0
+	race_add_route_node   528   152   168    0    0
+	race_add_route_node   864   -32   168    0    0
+	race_add_route_node   256  -416   -16    0    0
+
+	race_set_route_name "Shifter: from Mega to LG via RA and Quad" "Mega-RA-Quad-Rockets-LG"
+	race_set_route_timeout 20
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node   784  -208   -24    0  180
+	race_add_route_node  -224   672   176    0    0
+
+	race_set_route_name "Shifter: from YA to RA with weapon" "YA-RA"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponAllowed
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node   792  -608   -24    0   90
+	race_add_route_node   784  -256   -24    0    0
+	race_add_route_node   888   152   336    0    0
+	race_add_route_node  -224   672   160    0    0
+
+	race_set_route_name "Shifter: from YA Spawn to RA via Mega" "YA Spawn-YA-Mega-RA"
+	race_set_route_timeout 15
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node   944   144   344    0  135
+	race_add_route_node   720   528   344    0    0
+	race_add_route_node   -32   512   344    0    0
+	race_add_route_node   736  -512   344    0    0
+	race_add_route_node    40   -24   168    0    0
+
+	race_set_route_name "Shifter: from Mega to Quad over map" "Mega-Cells-Over RA-YA Tele Exit-Quad"
+	race_set_route_timeout 20
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node   224   368    24    0   90
+	race_add_route_node   720   528   344    0    0
+	race_add_route_node   888   152   344    0    0
+	race_add_route_node   736  -512   344    0    0
+	race_add_route_node   -32   512   344    0    0
+	race_add_route_node    40   -24   168    0    0
+
+	race_set_route_name "Shifter: from Low Tele to Quad over map" "Low Tele-Cells-Mega-YA Tele Exit-Over RA-Quad"
+	race_set_route_timeout 20
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node  -224   672   120    0 -135
+	race_add_route_node   784  -256   -24    0    0
+
+	race_set_route_name "Shifter: from RA to YA" "RA-YA"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+	
