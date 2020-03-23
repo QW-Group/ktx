@@ -521,10 +521,9 @@ char *SelectMapInCycle(char *buf, int buf_size)
 			return buf;
 	}
 
-	if ( i = IsMapInCycle( g_globalvars.mapname ) ){ // ok map found in map list, select next map
+	if ( (i = IsMapInCycle( g_globalvars.mapname) ) ){ // ok map found in map list, select next map
 
-		oi = i;
-		i++;
+		oi = i > 0 ? i - 1 : 0;
 
 		while (!player_req_met && i < 1000 && i != oi) {
 
@@ -534,11 +533,9 @@ char *SelectMapInCycle(char *buf, int buf_size)
 
 			if ( maxp >= player_count && player_count >= minp ) {
 				snprintf( mapid, sizeof(mapid), "k_ml_%d", i >= 1000 ? 0 : i );
-				if (!mapid) {
-					i = 0;
-				}
 				trap_cvar_string( mapid, newmap, sizeof(newmap) );
 				player_req_met=true;
+				break;
 			} else {
 				G_bprint(2, "Player requirements not met for map #%d in the map cycle, continuing to next map. (Minimum: %d, Maximum: %d)\n", i, minp, maxp);
 			}
