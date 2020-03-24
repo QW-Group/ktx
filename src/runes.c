@@ -223,7 +223,7 @@ void RuneTouch()
 
 	if ( other->ctf_flag & CTF_RUNE_HST )
 	{
-		other->maxspeed *= 1.25;
+		other->maxspeed *= (cvar("k_ctf_rune_power_hst") / 4) + 1;
 		// other->s.v.items = (int) other->s.v.items | CTF_RUNE_HST;
 		G_sprint( other, 2, "You got the %s rune\n", redtext("haste") );
 	}
