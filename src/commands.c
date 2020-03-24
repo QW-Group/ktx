@@ -1408,7 +1408,7 @@ void ShowVersion()
 	G_sprint(self, 2, "\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237" "%s"
 					        "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n", redtext(MOD_NAME));
 
-	G_sprint(self, 2, "\n%s  %s, build %d\n", MOD_NAME, MOD_VERSION, build_number());
+	G_sprint(self, 2, "\n%s  %s (build %s)\n", MOD_NAME, MOD_VERSION, GIT_COMMIT);
 	G_sprint(self, 2, "Build date: %s\n", MOD_BUILD_DATE);
 
 

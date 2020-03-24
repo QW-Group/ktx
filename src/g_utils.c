@@ -1727,19 +1727,6 @@ gedict_t *get_ed_scores2()
 
 // }
 
-// { version stuff
-
-// Matches build number with GIT revision number
-//TODO
-int build_number ()
-{
-	static int b = 0;
-	return b;
-}
-
-
-// }
-
 // { // autotrack stuff
 
 gedict_t *ed_best1 = NULL;

@@ -38,11 +38,12 @@
 #include "player.h"
 
 #define MOD_NAME			("KTX")
-#define MOD_VERSION			("1.38")
+#define MOD_VERSION			("1.39-beta")
 #define MOD_BUILD_DATE		(__DATE__ ", " __TIME__)
 #define MOD_SERVERINFO_MOD_KEY		("ktxver")
 #define MOD_SERVERINFO_BUILD_KEY	("ktxbuild")
 #define MOD_URL    			("https://github.com/deurk/ktx")
+#define GIT_COMMIT "unknown"
 
 // qqshka - hmm, seems in C this is macros
 #undef max
@@ -304,8 +305,6 @@ int			get_scores1();
 int			get_scores2();
 gedict_t	*get_ed_scores1();
 gedict_t	*get_ed_scores2();
-
-int			build_number ();
 
 gedict_t	*get_ed_best1();
 gedict_t	*get_ed_best2();
