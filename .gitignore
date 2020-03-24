@@ -22,7 +22,8 @@ src/Makefile.vm
 .venv/
 
 # build output dirs
-build_*/
+build*/
+built_items/
 x64/*
 .vs/*
 *.psess
