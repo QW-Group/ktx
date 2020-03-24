@@ -443,14 +443,17 @@ void vote_check_pickup ()
 }
 
 // !!! do not confuse rpickup and pickup
-void vote_check_rpickup ()
+void vote_check_rpickup (int maxRecursion)
 {
 	float frnd;
     int i, tn, pl_cnt, pl_idx;
 	gedict_t *p;
 	int veto;
+	qbool needNewRpickup = true;
+	// buffer reserved for 20 players (10on10). If more present, recursive auto-rpickup will not be activated
+	int originalTeams[20];
 
-	if ( match_in_progress || k_captains || k_coaches)
+	if ( match_in_progress || k_captains || k_coaches )
 		return;
 
 	if ( !get_votes( OV_RPICKUP ) )
@@ -459,7 +462,7 @@ void vote_check_rpickup ()
    	// Firstly obtain the number of players we have in total on server
    	pl_cnt = CountPlayers();
 
-	if ( pl_cnt < 4 )
+	if ( ( pl_cnt < 4 ) || ( maxRecursion < 0 ) )
 		return;
 
 	veto = is_admins_vote( OV_RPICKUP );
@@ -467,8 +470,14 @@ void vote_check_rpickup ()
 	if( veto || !get_votes_req( OV_RPICKUP, true ) ) {
 		vote_clear( OV_RPICKUP );
 
-		for( p = world; (p = find_plr( p )); )
+		// Save the original teams, and also clear them
+		i = 0;
+		for( p = world; ( p = find_plr(p) ); ) {
+		    if ( i < 20 ) {
+		        originalTeams[i++] = p->k_teamnumber;
+		    }
 			p->k_teamnumber = 0;
+		}
 
 		for( tn = 1; pl_cnt > 0; pl_cnt-- ) {
 			frnd = g_random(); // bound is macros - so u _can't_ put g_random inside bound
@@ -512,9 +521,23 @@ void vote_check_rpickup ()
 
 		if ( veto )
 			G_bprint(2, "console: admin veto for %s\n", redtext("random pickup"));
-		else
-    		G_bprint(2, "console: %s game it is then\n", redtext("random pickup"));
-
+		else {
+			G_bprint(2, "console: %s game it is then\n", redtext("random pickup"));
+			// check if rpickup really created new teams
+			if ( pl_cnt <= 20 ) {
+				for( p = world, i = 0; (p = find_plr( p )) && i < 20 && needNewRpickup; i++) {
+					if (originalTeams[i] != p->k_teamnumber) {
+						// there is a mismatch, meaning that at least 1 player gets a new team
+						needNewRpickup = false;
+					}
+				}
+				if (needNewRpickup) {
+					G_bprint(2, "console: Team layout did not change. %s again (tries left: %d)\n",
+						redtext("random pickup"), maxRecursion);
+					vote_check_rpickup(maxRecursion-1);
+				}
+			}
+		}
 		return;
 	}
 }
@@ -815,7 +838,7 @@ void vote_check_all ()
 	vote_check_break ();
 	vote_check_elect ();
 	vote_check_pickup ();
-	vote_check_rpickup ();
+	vote_check_rpickup (MAX_RPICKUP_RECUSION);
 	vote_check_nospecs ();
 	vote_check_teamoverlay ();
 	vote_check_coop ();
