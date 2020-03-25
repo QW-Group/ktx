@@ -1828,7 +1828,7 @@ void W_Attack()
 	case IT_AXE:
         if ( self->ctf_flag & CTF_RUNE_HST )
 		{
-			self->attack_finished = g_globalvars.time + 0.3;
+			self->attack_finished = g_globalvars.time + 0.5 - (cvar("k_ctf_rune_power_hst") / 10);
 			HasteSound( self );
 		}
     	else
@@ -1854,7 +1854,7 @@ void W_Attack()
 
 		if ( self->ctf_flag & CTF_RUNE_HST )
 		{
-			self->attack_finished = g_globalvars.time + 0.3;
+			self->attack_finished = g_globalvars.time + 0.5 - (cvar("k_ctf_rune_power_hst") / 10);
 			HasteSound( self );
 		}
 		else
@@ -1875,7 +1875,7 @@ void W_Attack()
 
     if ( self->ctf_flag & CTF_RUNE_HST )
 		{
-			self->attack_finished = g_globalvars.time + 0.4;
+			self->attack_finished = g_globalvars.time + 0.5 - (cvar("k_ctf_rune_power_hst") / 20);
 			HasteSound( self );
 		}
 		else
@@ -1901,7 +1901,7 @@ void W_Attack()
 
 		if ( self->ctf_flag & CTF_RUNE_HST )
 		{
-			self->attack_finished = g_globalvars.time + 0.3;
+			self->attack_finished = g_globalvars.time + 0.5 - (cvar("k_ctf_rune_power_hst") / 10);
 			HasteSound( self );
 		}
 		else
@@ -1915,7 +1915,7 @@ void W_Attack()
 
 		if ( self->ctf_flag & CTF_RUNE_HST )
 		{
-			self->attack_finished = g_globalvars.time + 0.4;
+			self->attack_finished = g_globalvars.time + 0.5 - (cvar("k_ctf_rune_power_hst") / 20);
 			HasteSound( self );
 		}
 		else

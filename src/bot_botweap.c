@@ -60,10 +60,10 @@ static qbool RocketSafe(void) {
 		splash_damage = splash_damage * (deathmatch != 4 ? 4 : 8);
 		if (self->ctf_flag & ITEM_RUNE_MASK) {
 			if (self->ctf_flag & CTF_RUNE_STR) {
-				splash_damage = splash_damage * 2;
+				splash_damage = splash_damage * (cvar("k_ctf_rune_power_str") / 2) + 1;
 			}
 			else if (self->ctf_flag & CTF_RUNE_RES) {
-				splash_damage = splash_damage * 0.5;
+				splash_damage = splash_damage / (cvar("k_ctf_rune_power_res") / 2) + 1;
 			}
 		}
 	}

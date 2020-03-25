@@ -831,6 +831,10 @@ void FirstFrame	( )
 	RegisterCvar("k_ctf_custom_models");
 	RegisterCvar("k_ctf_hook");
 	RegisterCvar("k_ctf_runes");
+	RegisterCvarEx("k_ctf_rune_power_str", "2.0");
+	RegisterCvarEx("k_ctf_rune_power_res", "2.0");
+	RegisterCvarEx("k_ctf_rune_power_rgn", "2.0");
+	RegisterCvarEx("k_ctf_rune_power_hst", "2.0");
 	RegisterCvar("k_ctf_ga");
 	RegisterCvar("k_ctf_based_spawn"); // spawn players on the base (red/blue)
 //}
