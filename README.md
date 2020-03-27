@@ -2,6 +2,7 @@
 ![KTX Logo](https://raw.githubusercontent.com/deurk/ktx/master/resources/logo/ktx.png)
 
 [![Build Status](https://travis-ci.org/deurk/ktx.svg?branch=master)](https://travis-ci.org/deurk/ktx)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](code_of_conduct.md)
 
 **[KTX][ktx]** (Kombat Teams eXtreme) is a popular **QuakeWorld** server modification, adding numerous features to the core features of the server.
 
