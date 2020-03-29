@@ -14,6 +14,7 @@ Copyright (C) 2000-2007 ParboiL
 
 // Cripes.  Fix all these declarations
 void SetAttribs (gedict_t* self, qbool customised);
+void DumpSkill ( fileHandle_t file_handle );
 qbool SetAttributesBasedOnSkill (int skill_level);
 void Bot_Print_Thinking (void);
 void BotsFireInitialTriggers (gedict_t* client);
@@ -212,6 +213,29 @@ static void BuildTeamList ()
 	AddTeamToList (&foundTeams, "yellow", 12, 12);
 	AddTeamToList (&foundTeams, "green", 3, 3);
 }
+
+
+void FrogbotsDumpSkills(void) {
+	for (int skill = 0; skill <= 20; ++skill) {
+		qbool customised_skill = SetAttributesBasedOnSkill (skill);
+		if ( customised_skill ) {
+			G_sprint (self, PRINT_HIGH, "Skipping custom skill %02d\n", skill);
+			continue;
+		}
+		char* cfg_name;
+		cfg_name = va ("bots/configs/skill_%02d.cfg", skill);
+		fileHandle_t file_handle = -1;
+		if ( trap_FS_OpenFile( cfg_name, &file_handle, FS_WRITE_BIN ) < 0 )
+		{
+			G_sprint(self, PRINT_HIGH, "Can't open file for write\n");
+			return;
+		}
+		DumpSkill( file_handle );
+		trap_FS_CloseFile( file_handle );
+		G_sprint (self, PRINT_HIGH, "Saved custom skill %02d\n", skill);
+	}
+}
+
 
 void FrogbotsAddbot(int skill_level, const char* specificteam, qbool error_messages)
 {
@@ -1651,7 +1675,8 @@ static frogbot_cmd_t std_commands[] = {
 	{ "removebot", FrogbotsRemovebot_f, "Removes a single bot" },
 	{ "removeall", FrogbotsRemoveAll, "Removes all bots from server" },
 	{ "debug", FrogbotsDebug, "Debugging commands" },
-	{ "disable", FrogbotsDisable, "Disable frogbots" }
+	{ "disable", FrogbotsDisable, "Disable frogbots" },
+	{ "dump", FrogbotsDumpSkills, "Dump skill CVARS to custom files" },
 };
 
 static frogbot_cmd_t editor_commands[] = {

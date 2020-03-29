@@ -264,6 +264,60 @@ void SetAttribs(gedict_t* self, qbool customised)
 	self->fb.skill.customised = customised;
 }
 
+void _dump_skill ( fileHandle_t file_handle, const char* cvar_name ) {
+	char * text = va ( "set %s %f\n", cvar_name, cvar( cvar_name ) );
+	trap_FS_WriteFile( text, strlen(text), file_handle );
+}
+
+
+void DumpSkill ( fileHandle_t file_handle ) {
+
+	const char* skills[] = {
+		"k_fbskill_movement_dodgefactor",
+		"k_fbskill_aim_lookanywhere",
+		"k_fbskill_goallookaheadtime",
+		"k_fbskill_goalpredictionerror",
+		"k_fbskill_distanceerror",
+		"k_fbskill_visibility",
+		"k_fbskill_aim_lgpref",
+		"k_fbskill_aim_accuracy",
+		"k_fbskill_aim_yaw_min",
+		"k_fbskill_aim_yaw_max",
+		"k_fbskill_aim_yaw_multiplier",
+		"k_fbskill_aim_yaw_scale",
+		"k_fbskill_aim_pitch_min",
+		"k_fbskill_aim_pitch_max",
+		"k_fbskill_aim_pitch_multiplier",
+		"k_fbskill_aim_pitch_scale",
+		"k_fbskill_aim_attack_respawns",
+		"k_fbskill_reactiontime",
+		"k_fbskill_reactionmovetime",
+
+		"k_fbskill_vol_min",
+		"k_fbskill_vol_max",
+		"k_fbskill_vol_init",
+		"k_fbskill_vol_reduce",
+		"k_fbskill_vol_ownvel",
+		"k_fbskill_vol_ownvel_incr",
+		"k_fbskill_vol_oppvel",
+		"k_fbskill_vol_oppvel_incr",
+		"k_fbskill_vol_oppdir_incr",
+		"k_fbskill_vol_pain_incr",
+		"k_fbskill_vol_bot_midair_incr",
+		"k_fbskill_vol_opp_midair_incr",
+
+		"k_fbskill_movement",
+		"k_fbskill_dmm4wiggle",
+		"k_fbskill_dmm4wiggletoggle",
+		"k_fbskill_wiggleframes",
+		"k_fbskill_combatjump",
+		"k_fbskill_missiledodge",
+	};
+	for ( int cvar_idx = 0; cvar_idx < sizeof(skills)/sizeof(skills[0]); ++cvar_idx) {
+		_dump_skill(file_handle, skills[cvar_idx]);
+	}
+}
+
 char* BotNameEnemy(int botNumber) {
 	char* names[] = {
 		": Timber", ": Sujoy", ": Nightwing", ": Cenobite",
