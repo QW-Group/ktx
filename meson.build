@@ -1,4 +1,6 @@
-project('ktx', 'c')
+project('ktx', 'c',
+	default_options : ['c_std=c99']
+)
 
 ktx_sources = [
 	'src/admin.c',
