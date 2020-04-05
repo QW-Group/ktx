@@ -625,8 +625,13 @@ void DoWeaponChange( int new, qbool backpack )
 	if (self->isBot)
 		return;
 
-	if ( !w_switch )
-		w_switch = 8;
+	if ( !w_switch ) {
+		if ( iKey( self, "w_rank_fallback" ) ) {
+			w_switch = W_BestWeapon();
+		} else {
+			w_switch = 8;
+		}
+	}
 
 	if ( WeaponCode( new ) <= w_switch )
 	{
