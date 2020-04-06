@@ -498,7 +498,7 @@ void vote_check_rpickup (int maxRecursion)
 							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "bottomcolor", "4", 0);
 						}
 						else {
-							stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "break\ncolor  4\nskin \"\"\nteam red\n");
+							stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "color  4\nskin \"\"\nteam red\n");
 						}
 					}
 					else {
@@ -508,7 +508,7 @@ void vote_check_rpickup (int maxRecursion)
 							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "bottomcolor", "13", 0);
 						}
 						else {
-							stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "break\ncolor 13\nskin \"\"\nteam blue\n");
+							stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "color 13\nskin \"\"\nteam blue\n");
 						}
 					}
 
