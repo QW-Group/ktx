@@ -59,7 +59,7 @@ void PMOTDThink()
 	if ( strnull( buf ) )
 		strlcat(buf, "Welcome\n\n", sizeof(buf));
 
-	strlcat(buf, "\n�������\n\n", sizeof(buf));
+	strlcat(buf, "\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n\n", sizeof(buf));
 	strlcat(buf, va("Running %s %s (build %s)\nby %s\n\n", redtext(MOD_NAME),
 					dig3s("%s", MOD_VERSION), dig3s("%s", GIT_COMMIT), redtext("KTX development team")), sizeof(buf));
 	strlcat(buf, va("Website: %s\n", redtext(MOD_URL)), sizeof(buf));
