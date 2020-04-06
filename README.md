@@ -43,14 +43,14 @@ There are extra conditionals to install desired packages based on the TARGET.
 
 In general:
 
-- use Ubuntu 14.04 (but should work under 16.04 as well) as virtual machine, check out source code there
+- use Ubuntu 18.04 as virtual machine, check out details about it on code on [Travis CI website][travis-build-env]
 - install required packages for compilation
 - set up virtualenv and install python packages (required for meson and ninja builders)
 - run meson build for given directory (optionally with cross compilation settings)
 - run ninja to generate the binary file
 - you should have ``qwprogs.so``, ``qwprogs.dll`` or ``qwprogs.dylib`` file (depending on the TARGET architecture) in ``build_*`` directory.
 
-Example for Linux amd64 under Ubuntu 14.04 (should be similar under 16.04)
+Example for Linux amd64 under Ubuntu 18.04
 
 Install required packages:
 
@@ -170,3 +170,4 @@ This project is licensed under the GPL-2.0 License - see the [LICENSE.md](LICENS
 [mvdsv]: https://github.com/deurk/mvdsv
 [nquake-linux]: https://github.com/nQuake/server-linux
 [fte]: http://fte.triptohell.info/
+[travis-build-env]: https://docs.travis-ci.com/user/reference/bionic/
