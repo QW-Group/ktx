@@ -25,7 +25,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Environment(please complete the following information):**
  - Operation System: [e.g. Windows, Linux, ...]
- - Processor Architecture: [e.g. x86_64, arm7, win64, ...]
+ - Processor Architecture: [e.g. x86, x86_64, arm7, ...]
  - MVDSV Version: [e.g. 0.31, 0.32, custom or specific commit build reference]
  - KTX Version: [e.g. 1.37, 1.38, custom or specific commit build reference]
 
