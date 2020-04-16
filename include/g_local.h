@@ -39,39 +39,39 @@
 
 #if defined(_WIN32)
 #define QW_PLATFORM		"Windows"
-#define QW_PLATFORM_SHORT       "(w)"
+#define QW_PLATFORM_SHORT       "w"
 
 #elif defined(__FreeBSD__)
 #define QW_PLATFORM             "FreeBSD"
-#define QW_PLATFORM_SHORT       "(f)"
+#define QW_PLATFORM_SHORT       "f"
 
 #elif defined(__OpenBSD__)
 #define QW_PLATFORM             "OpenBSD"
-#define QW_PLATFORM_SHORT       "(o)"
+#define QW_PLATFORM_SHORT       "o"
 
 #elif defined(__NetBSD__)
 #define QW_PLATFORM             "NetBSD"
-#define QW_PLATFORM_SHORT       "(n)"
+#define QW_PLATFORM_SHORT       "n"
 
 #elif defined(__DragonFly__)
 #define QW_PLATFORM             "DragonFly"
-#define QW_PLATFORM_SHORT       "(d)"
+#define QW_PLATFORM_SHORT       "d"
 
 #elif defined(__linux__)
 #define QW_PLATFORM             "Linux"
-#define QW_PLATFORM_SHORT       "(l)"
+#define QW_PLATFORM_SHORT       "l"
 
 #elif defined(__sun__)
 #define QW_PLATFORM             "SunOS"
-#define QW_PLATFORM_SHORT       "(s)"
+#define QW_PLATFORM_SHORT       "s"
 
 #elif defined(__APPLE__)
 #define QW_PLATFORM             "MacOS"
-#define QW_PLATFORM_SHORT       "(m)"
+#define QW_PLATFORM_SHORT       "m"
 
 #else
 #define QW_PLATFORM             "Unknown"
-#define QW_PLATFORM_SHORT       "(u)"
+#define QW_PLATFORM_SHORT       "u"
 #endif
 
 #define MOD_NAME			("KTX")
@@ -82,7 +82,7 @@
 #define MOD_SERVERINFO_DATE_KEY		("ktxdate")
 #define MOD_SERVERINFO_URL_KEY		("ktxurl")
 #define MOD_URL    			("https://github.com/deurk/ktx")
-#define GIT_COMMIT			("unknown")
+#define GIT_COMMIT			("")
 
 // qqshka - hmm, seems in C this is macros
 #undef max

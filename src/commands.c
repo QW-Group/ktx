@@ -1410,13 +1410,17 @@ void ShowVersion()
 
 	G_sprint(self, 2, "\n%s\n", redtext("SERVER:"));
 	G_sprint(self, 2, "%s\n", cvar_string("version"));
+	// mvdsvdate and mvdsvurl keys for now, but maybe should be srvdate and srvurl if any other server can support ktx (is it still the case?)
 	if (strlen(ezinfokey(world, "mvdsvdate")))
 		G_sprint(self, 2, "Build date: %s\n", ezinfokey(world, "mvdsvdate"));
 	if (strlen(ezinfokey(world, "mvdsvurl")))
 		G_sprint(self, 2, "Home Page: %s\n", redtext(ezinfokey(world, "mvdsvurl")));
 
 	G_sprint(self, 2, "\n%s\n", redtext("MOD:"));
-	G_sprint(self, 2, ("%s %s (%s build %s)\n"), MOD_NAME, MOD_VERSION, QW_PLATFORM, GIT_COMMIT);
+	G_sprint(self, 2, ("%s %s "), MOD_NAME, MOD_VERSION);
+	if (strlen(GIT_COMMIT))
+		G_sprint(self, 2, ("(build %s/%s)"), GIT_COMMIT, QW_PLATFORM_SHORT);
+	G_sprint(self, 2, ("\n"));
 	G_sprint(self, 2, "Build date: %s\n", MOD_BUILD_DATE);
 	G_sprint(self, 2, "Home Page: %s\n", redtext(MOD_URL));
 

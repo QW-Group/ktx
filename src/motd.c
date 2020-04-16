@@ -61,7 +61,7 @@ void PMOTDThink()
 
 	strlcat(buf, "\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n\n", sizeof(buf));
 	strlcat(buf, va("Running %s %s\n%s\n\n", redtext(MOD_NAME), dig3s("%s", MOD_VERSION), redtext(MOD_URL)), sizeof(buf));
-	strlcat(buf, va("Type \"%s\" for help on available commands", redtext("commands")), sizeof(buf));
+	strlcat(buf, va("Type \"%s\" for help\non available commands", redtext("commands")), sizeof(buf));
 
 	G_centerprint ( PROG_TO_EDICT( self->s.v.owner ), "%s",  buf);
 
