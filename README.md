@@ -48,9 +48,9 @@ In general:
 - set up virtualenv and install python packages (required for meson and ninja builders)
 - run meson build for given directory (optionally with cross compilation settings)
 - run ninja to generate the binary file
-- you should have ``qwprogs.so``, ``qwprogs.dll`` or ``qwprogs.dylib`` file (depending on the TARGET architecture) in ``build_*`` directory.
+- you should have ``qwprogs.so``, ``qwprogs.dll`` or ``qwprogs.dylib`` file (depending on the TARGET architecture) in ``build`` directory.
 
-Example for Linux amd64 under Ubuntu 18.04
+#### Example for Linux amd64
 
 Install required packages:
 
@@ -80,13 +80,13 @@ Export env var to define what target to compile, run the build commands.
 
 ```bash
 $ export TARGET=linux-amd64
-$ rm -rf build_${TARGET}
+$ rm -rf build
 
-$ meson build_${TARGET} --cross-file tools/cross-compilation/${TARGET}.txt
+$ meson build --cross-file tools/cross-compilation/${TARGET}.txt
 The Meson build system
 Version: 0.41.2
 Source dir: /ktx/src
-Build dir: /ktx/src/build_linux-linux-amd64
+Build dir: /ktx/src/build
 Build type: cross build
 Project name: ktx
 Native c compiler: cc (gcc 5.4.0)
@@ -101,9 +101,9 @@ Dependency threads found: YES
 Library m found: YES
 Build targets in project: 1
 
-$ ninja -C build_${TARGET}
+$ ninja -C build
 
-ninja: Entering directory `build_linux-amd64'
+ninja: Entering directory `build'
 [46/46] Linking target qwprogs.so.
 
 ```
@@ -111,12 +111,12 @@ ninja: Entering directory `build_linux-amd64'
 Check the output binary file:
 
 ```bash
-$ file build_${TARGET}/qwprogs.so
+$ file build/qwprogs.so
 qwprogs.so: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, BuildID[sha1]=5bd27876114dbf4b0dcf6a190c90f5e800ef480c, not stripped
 
 ```
 
-In ``build_*/`` there will be ``qwprogs.so`` binary, copy it to your quake server.
+In ``build/`` there will be ``qwprogs.so`` binary, copy it to your quake server.
 
 Known issues:
 
