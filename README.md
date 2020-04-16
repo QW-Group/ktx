@@ -161,13 +161,14 @@ This project is licensed under the GPL-2.0 License - see the [LICENSE.md](LICENS
 
 ## Acknowledgments
 
-* Hat tip to anyone who's code was used
-* Inspiration
+* Thanks to kemiKal, Cenobite, Sturm and Fang for Kombat teams 2.21 which has served as a base for **[KTX][ktx]**.
+* Thanks to **Jon "bps" Cednert** for the **[KTX][ktx]** logo.
+* Thanks to the fine folks on [Quakeworld Discord][discord-qw] for their support and ideas.
 
 [ktx]: https://github.com/deurk/ktx
 [ktx-tags]: https://github.com/deurk/ktx/tags
 [ktx-builds]: https://builds.quakeworld.nu/ktx
 [mvdsv]: https://github.com/deurk/mvdsv
 [nquake-linux]: https://github.com/nQuake/server-linux
-[fte]: http://fte.triptohell.info/
 [travis-build-env]: https://docs.travis-ci.com/user/reference/bionic/
+[discord-qw]: http://discord.quake.world/

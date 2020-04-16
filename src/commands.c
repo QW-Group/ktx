@@ -1405,28 +1405,29 @@ void ShowVersion()
 	char date[64];
 	size_t sz;
 
-	G_sprint(self, 2, "\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237" "%s"
-					        "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n", redtext(MOD_NAME));
+	G_sprint(self, 2, "\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237" " %s "
+		"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n", redtext("ABOUT"));
 
-	G_sprint(self, 2, "\n%s  %s (build %s)\n", MOD_NAME, MOD_VERSION, GIT_COMMIT);
+	G_sprint(self, 2, "\n%s\n", redtext("SERVER:"));
+	G_sprint(self, 2, "%s\n", cvar_string("version"));
+	if (strlen(ezinfokey(world, "mvdsvdate")))
+		G_sprint(self, 2, "Build date: %s\n", ezinfokey(world, "mvdsvdate"));
+	if (strlen(ezinfokey(world, "mvdsvurl")))
+		G_sprint(self, 2, "Home Page: %s\n", redtext(ezinfokey(world, "mvdsvurl")));
+
+	G_sprint(self, 2, "\n%s\n", redtext("MOD:"));
+	G_sprint(self, 2, ("%s %s (%s build %s)\n"), MOD_NAME, MOD_VERSION, QW_PLATFORM, GIT_COMMIT);
 	G_sprint(self, 2, "Build date: %s\n", MOD_BUILD_DATE);
-
-
-	G_sprint(self, 2, "\n%s\n", cvar_string( "version" ));
-
-	if ( QVMstrftime(date, sizeof(date), "%a %b %d, %H:%M:%S %Y", 0) )
-		G_sprint(self, 2, "Date: %s\n", date);
+	G_sprint(self, 2, "Home Page: %s\n", redtext(MOD_URL));
 
 	if ( (int)cvar( "sv_specprint" ) & SPECPRINT_SPRINT )
 		G_sprint(self, PRINT_CHAT, "\n\x87\x87\x87WARNING: spectators may see team messages (mm2) on this server!\n");
 
-	G_sprint(self, 2, "\nHome Page: %s\n", redtext(MOD_URL));
-
 	sz = (size_t)min((int)strlen(MOD_NAME), (int)sizeof(date)-1);
 	memset(date, '\236', sz);
 	date[sz] = 0;
-	G_sprint(self, 2, "\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236" "%s"
-				            "\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n\n", date);
+	G_sprint(self, 2, "\n\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236" "%s"
+		"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n\n", date);
 }
 
 void ChangeOvertime()
