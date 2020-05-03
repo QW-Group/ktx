@@ -60,8 +60,10 @@ void PMOTDThink()
 		strlcat(buf, "Welcome\n\n", sizeof(buf));
 
 	strlcat(buf, "\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n\n", sizeof(buf));
-	strlcat(buf, va("Running %s %s\n%s\n\n", redtext(MOD_NAME), dig3s("%s", MOD_VERSION), redtext(MOD_URL)), sizeof(buf));
-	strlcat(buf, va("Type \"%s\" for help\non available commands", redtext("commands")), sizeof(buf));
+	strlcat(buf, va("Running %s %s", redtext(cvar_string("qwm_name")), redtext(cvar_string("qwm_version"))), sizeof(buf));
+	if (strlen(cvar_string("qws_name")) && strlen(cvar_string("qws_version")))
+		strlcat(buf, va(" on %s %s", redtext(cvar_string("qws_name")), redtext(cvar_string("qws_version"))), sizeof(buf));
+	strlcat(buf, va("\n\nType \"%s\" for available commands\nType \"%s\" for server details", redtext("commands"), redtext("about")), sizeof(buf));
 
 	G_centerprint ( PROG_TO_EDICT( self->s.v.owner ), "%s",  buf);
 

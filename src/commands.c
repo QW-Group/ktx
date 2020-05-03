@@ -89,6 +89,8 @@ void ShowOpts();
 void ShowQizmo();
 void ShowRules();
 void ShowVersion();
+void ShowCharsetTableOctal();
+void ShowCharsetTableHexa();
 void killquad();
 void bloodfest();
 void antilag();
@@ -321,7 +323,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_LIST       "whonot to everyone"
 #define CD_WHOVOTE    "info on received votes"
 #define CD_SPAWN      "toggle spawn modes"
-#define CD_POWERUPS   "quad, \x98\x98\x98, ring & suit"
+#define CD_POWERUPS   "quad, \230\230\230, ring & suit"
 #define CD_PUPICKUP   "change powerups pickup policy"
 #define CD_ANTILAG    "toggle antilag"
 #define CD_DISCHARGE  "underwater discharges"
@@ -358,6 +360,8 @@ const char CD_NODESC[] = "no desc";
 #define CD_SPEED      "toggle sv_maxspeed"
 #define CD_FAIRPACKS  "best/last weapon dropped"
 #define CD_ABOUT      "mod's info"
+#define CD_CTOCT	  "Show octal charset table"
+#define CD_CTHEX	  "Show hexadecimal charset table"
 #define CD_SHOWNICK   "pointed player's info"
 #define CD_TIME5      "set timelimit to 5 mins"
 #define CD_TIME10     "set timelimit to 10 mins"
@@ -670,7 +674,7 @@ cmd_t cmds[] = {
 	{ "dropquad",    ToggleDropQuad,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_DROPQUAD },
 	{ "dropring",    ToggleDropRing,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_DROPRING },
 	{ "droppack",    ToggleDropPack,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_DROPPACK },
-	                                             
+
 	{ "silence",     ToggleSpecTalk,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_SILENCE },
 	{ "report",      ReportMe,                  0    , CF_PLAYER, CD_REPORT },
 	{ "rules",       ShowRules,                 0    , CF_PLAYER | CF_MATCHLESS, CD_RULES },
@@ -684,6 +688,8 @@ cmd_t cmds[] = {
 	{ "lockmap",     ToggleMapLock,             0    , CF_BOTH_ADMIN, CD_LOCKMAP },
 	{ "speed",       ToggleSpeed,               0    , CF_PLAYER, CD_SPEED },
 	{ "fairpacks",   ToggleFairPacks,           0    , CF_PLAYER, CD_FAIRPACKS },
+	{ "sct_oct",  	 ShowCharsetTableOctal,     0    , CF_BOTH, CD_CTOCT },
+	{ "sct_hex",  	 ShowCharsetTableHexa,      0    , CF_BOTH, CD_CTHEX },
 	{ "about",       ShowVersion,               0    , CF_BOTH | CF_MATCHLESS, CD_ABOUT },
 	{ "shownick",    ShowNick,                  0    , CF_PLAYER | CF_PARAMS, CD_SHOWNICK },
 	{ "time5",       DEF(TimeSet),            5.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIME5 },
@@ -692,21 +698,21 @@ cmd_t cmds[] = {
 	{ "time20",      DEF(TimeSet),           20.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIME20 },
 	{ "time25",      DEF(TimeSet),           25.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIME25 },
 	{ "time30",      DEF(TimeSet),           30.0f   , CF_PLAYER | CF_SPC_ADMIN, CD_TIME30 },
-	                                             
+
 	{ "ksound1",     DEF(TeamSay),              1    , CF_PLAYER, CD_KSOUND1 },
 	{ "ksound2",     DEF(TeamSay),              2    , CF_PLAYER, CD_KSOUND2 },
 	{ "ksound3",     DEF(TeamSay),              3    , CF_PLAYER, CD_KSOUND3 },
 	{ "ksound4",     DEF(TeamSay),              4    , CF_PLAYER, CD_KSOUND4 },
 	{ "ksound5",     DEF(TeamSay),              5    , CF_PLAYER, CD_KSOUND5 },
 	{ "ksound6",     DEF(TeamSay),              6    , CF_PLAYER, CD_KSOUND6 },
-	                                           
+
 	{ "qizmo",       ShowQizmo,                 0    , CF_PLAYER, CD_QIZMO },
-	                                             
+
 //	{ "messages",    ShowMessages,              0    , CF_PLAYER | CF_MATCHLESS, CD_MESSAGES },
 	{ "killer",      SendKillerMsg,             0    , CF_PLAYER | CF_MATCHLESS, CD_KILLER },
 	{ "victim",      SendVictimMsg,             0    , CF_PLAYER | CF_MATCHLESS, CD_VICTIM },
 	{ "newcomer",    SendNewcomerMsg,           0    , CF_BOTH | CF_MATCHLESS, CD_NEWCOMER },
-	                                             
+
 	{ "qlag",        ToggleQLag,                0    , CF_PLAYER | CF_SPC_ADMIN, CD_QLAG },
 	{ "qenemy",      ToggleQEnemy,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_QENEMY },
 	{ "qpoint",      ToggleQPoint,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_QPOINT },
@@ -716,7 +722,7 @@ cmd_t cmds[] = {
 	{ "pitchsl",     TogglePitchSpeedLimit,     0    , CF_PLAYER | CF_SPC_ADMIN, CD_PITCHSP },
 	{ "yawsl",       ToggleYawSpeedLimit,       0    , CF_PLAYER | CF_SPC_ADMIN, CD_YAWSP },
 */
-	                                          
+
 	{ "kick",        AdminKick,                 0    , CF_BOTH_ADMIN/* FIXME: interference with ezq server kick command | CF_PARAMS */, CD_KICK },
 	{ "mkick",       m_kick,                    0    , CF_BOTH_ADMIN | CF_PARAMS, CD_MKICK },
 	{ "y",           YesKick,                   0    , CF_BOTH_ADMIN, CD_Y },
@@ -1073,8 +1079,7 @@ qbool isCmdFlood(gedict_t *p)
 			}
 			else if ( k_cmd_fp_kick - p->fp_c.warnings < 1 ) {
 				if ( p->ct == ctPlayer || ( p->ct == ctSpec && !match_in_progress ) )
-					G_bprint(2,"%s is a command flooooder!!!\n"
-						   	   "and will be kicked\n", getname(p));
+					G_bprint(2,"%s is a command flooooder!!!\nand will be kicked\n", getname(p));
 
 				G_sprint(p, 2, "Go away!\n");
 
@@ -1214,10 +1219,11 @@ void cmdslist_dl()
 		if ( i == 0 )
 			G_sprint( self, 2, "Loading commands list...\n" );
 
-		if (    !isValidCmdForClass( i, spc )   // cmd does't valid for this class of player or matchless mode does't have this command
-			 || cmds[i].f == dummy				// cmd have't function, ie u must not stuff alias for this cmd
-			 || (cmds[i].cf_flags & CF_NOALIAS) // no alias for such command, may be accessed only via /cmd commandname
-		    )
+		if (
+			!isValidCmdForClass( i, spc )   // cmd does't valid for this class of player or matchless mode does't have this command
+			|| cmds[i].f == dummy				// cmd have't function, ie u must not stuff alias for this cmd
+			|| (cmds[i].cf_flags & CF_NOALIAS) // no alias for such command, may be accessed only via /cmd commandname
+			)
 		{
 			to = min( to + 1, cmds_cnt );
 			continue;
@@ -1324,26 +1330,30 @@ void ShowCmds()
 qbool check_perm(gedict_t *p, int perm)
 {
 	switch ( perm ) {
-		case 0:	G_sprint(p, 2, "%s can use this command\n", redtext("no one"));
+		case 0:
+			G_sprint(p, 2, "%s can use this command\n", redtext("no one"));
+			return false;
+		case 1:
+			if ( !is_real_adm( p ) ) {
+				G_sprint(p, 2, "you must be a %s\n", redtext("real admin"));
 				return false;
-		case 1:	if ( !is_real_adm( p ) ) {
-					G_sprint(p, 2, "you must be a %s\n", redtext("real admin"));
-					return false;
-				}
-				break;
-		case 2:	if ( !is_adm( p ) ) {
-					G_sprint(p, 2, "you must be an %s\n", redtext("admin"));
-					return false;
-				}
-				break;
+			}
+			break;
+		case 2:
+			if ( !is_adm( p ) ) {
+				G_sprint(p, 2, "you must be an %s\n", redtext("admin"));
+				return false;
+			}
+			break;
 		case 3:
-		case 4:	G_sprint(p, 2, "%s is not implemented in this mode\n", redtext("judges"));
-				return false;
+		case 4:
+			G_sprint(p, 2, "%s is not implemented in this mode\n", redtext("judges"));
+			return false;
 		case 5:
-				break;
+			break;
 		default:
-				G_sprint(p, 2, "server is misconfigured, command %s\n", redtext("skipped"));
-				return false;
+			G_sprint(p, 2, "server is misconfigured, command %s\n", redtext("skipped"));
+			return false;
 	}
 
 	return true;
@@ -1352,41 +1362,41 @@ qbool check_perm(gedict_t *p, int perm)
 void ShowOpts()
 {
 	G_sprint(self, 2,
-			"%s.. -1 mins match time\n"
-			"%s.... +1 mins match time\n"
-			"%s... -5 mins match time\n"
-			"%s..... +5 mins match time\n"
-			"%s.. -10 fraglimit\n"
-			"%s.... +10 fraglimit\n"
-			"%s......... change deathmatch mode\n"
-			"%s......... change teamplay mode\n"
-			"%s... drop quad when killed\n"
-			"%s... drop ring when killed\n"
-			"%s... drop pack when killed\n"
-			"%s....... change locking mode\n"
-			"%s...... change spawntype\n"
-			"%s...... toggle sv_maxspeed\n"
-			"%s... quad, %s, ring & suit\n"
-			"%s.. best/last weapon dropped\n"
-			"%s.. underwater discharges\n"
-			"%s.... toggle spectator talk\n"
-			"%s..... toggle midair mode\n"
-			"%s.. toggle grenade mode\n"
-			"%s... toggle instagib mode\n",
-            redtext("timedown1"), redtext("timeup1"), redtext("timedown"), redtext("timeup"),
-            redtext("fragsdown"), redtext("fragsup"), redtext("dm"), redtext("tp"), redtext("dropquad"),
-            redtext("dropring"), redtext("droppacks"), redtext("lock"), redtext("spawn"),
-            redtext("speed"), redtext("powerups"), redtext("666"), redtext("fairpacks"),
-            redtext("discharge"), redtext("silence"), redtext("midair"), redtext("gren_mode"),
-            redtext("instagib"));
+		"%s.. -1 mins match time\n"
+		"%s.... +1 mins match time\n"
+		"%s... -5 mins match time\n"
+		"%s..... +5 mins match time\n"
+		"%s.. -10 fraglimit\n"
+		"%s.... +10 fraglimit\n"
+		"%s......... change deathmatch mode\n"
+		"%s......... change teamplay mode\n"
+		"%s... drop quad when killed\n"
+		"%s... drop ring when killed\n"
+		"%s... drop pack when killed\n"
+		"%s....... change locking mode\n"
+		"%s...... change spawntype\n"
+		"%s...... toggle sv_maxspeed\n"
+		"%s... quad, %s, ring & suit\n"
+		"%s.. best/last weapon dropped\n"
+		"%s.. underwater discharges\n"
+		"%s.... toggle spectator talk\n"
+		"%s..... toggle midair mode\n"
+		"%s.. toggle grenade mode\n"
+		"%s... toggle instagib mode\n",
+		redtext("timedown1"), redtext("timeup1"), redtext("timedown"), redtext("timeup"),
+		redtext("fragsdown"), redtext("fragsup"), redtext("dm"), redtext("tp"), redtext("dropquad"),
+		redtext("dropring"), redtext("droppacks"), redtext("lock"), redtext("spawn"),
+		redtext("speed"), redtext("powerups"), redtext("666"), redtext("fairpacks"),
+		redtext("discharge"), redtext("silence"), redtext("midair"), redtext("gren_mode"),
+		redtext("instagib"));
 }
 
 void ShowQizmo()
 {
 	G_sprint(self, 2,
-			"%s....... lagsettings\n"
-			"%s..... enemy vicinity reporting\n"
-			"%s..... point function\n", redtext("qlag"), redtext("qenemy"), redtext("qpoint"));
+		"%s....... lagsettings\n"
+		"%s..... enemy vicinity reporting\n"
+		"%s..... point function\n", redtext("qlag"), redtext("qenemy"), redtext("qpoint"));
 }
 
 /*
@@ -1394,44 +1404,81 @@ void ShowQizmo()
 void ShowMessages()
 {
 	G_sprint(self, 2,
-			"%s..... who killed you last\n"
-			"%s..... who you last killed\n"
-			"%s... last player joined\n, redtext("killer"), redtext("victim"), redtext("newcomer")");
+		"%s..... who killed you last\n"
+		"%s..... who you last killed\n"
+		"%s... last player joined\n, redtext("killer"), redtext("victim"), redtext("newcomer")");
 }
 */
 
+/*
+// Display all printable characters to console in octal table
+*/	
+void ShowCharsetTableHexa()
+{
+	int i;
+	G_sprint(self, 2, "\n%s\n\n%2s0123456789ABCDEF\n", redtext("Hexadecimal charset table:"), "");
+	for( i = 16; i < 256; i++) {
+		if ( i % 16 == 0) 
+			G_sprint(self, 2, "%1X\337", i / 16);
+		G_sprint(self, 2, "%c", i);
+		if ( i % 16 == 15 || i == 255)
+			G_sprint(self, 2, "\n");
+	}
+	G_sprint(self, 2, "\n");
+}
+
+/*
+// Display all printable characters to console in hexadecimal table
+*/	
+void ShowCharsetTableOctal()
+{
+	int i;
+	G_sprint(self, 2, "\n%s\n\n%3s01234567\n", redtext("Octal charset table:"), "");
+	for( i = 16; i < 256; i++) {
+		if ( i % 8 == 0) 
+			G_sprint(self, 2, "%02o\337", i / 8);
+		G_sprint(self, 2, "%c", i);
+		if ( i % 8 == 7 || i == 255)
+			G_sprint(self, 2, "\n");
+	}
+	G_sprint(self, 2, "\n");
+}
+
 void ShowVersion()
 {
-	char date[64];
-	size_t sz;
+	// limiting to 38 chars for VVD...
+	G_sprint(self, 2, "\n\235\236\237 %s \235\236\236\236\236\236\236\236\236"
+		"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n", redtext("ABOUT"));
 
-	G_sprint(self, 2, "\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237" " %s "
-		"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n", redtext("ABOUT"));
+	G_sprint(self, 2, "\n\213\212\212\212%s\212\212\212\212\213\n", "QUAKEWORLD SERVER INFORMATION");
+	if (strlen(cvar_string("qws_fullname")))
+		G_sprint(self, 2, "%s....: %28s\n", redtext("Name"), cvar_string("qws_fullname"));
+	else
+		G_sprint(self, 2, "%s....: %28s\n", redtext("Name"), cvar_string("version"));
+	if (strlen(cvar_string("qws_version")))
+		G_sprint(self, 2, "%s.: %28s\n", redtext("Version"), dig3s(cvar_string("qws_version")));
+	if (strlen(cvar_string("qws_buildnum")))
+		G_sprint(self, 2, "%s...: %26s-%1s\n", redtext("Build"), cvar_string("qws_buildnum"), strlen(cvar_string("qws_platform")) ? cvar_string("qws_platform") : "u");
+	if (strlen(cvar_string("qws_builddate")))
+		G_sprint(self, 2, "%s....: %28s\n", redtext("Date"), dig3s(cvar_string("qws_builddate")));
+	if (strlen(cvar_string("qws_homepage")))
+		G_sprint(self, 2, "%s.: %28s\n", redtext("Webpage"), cvar_string("qws_homepage"));
 
-	G_sprint(self, 2, "\n%s\n", redtext("SERVER:"));
-	G_sprint(self, 2, "%s\n", cvar_string("version"));
-	// mvdsvdate and mvdsvurl keys for now, but maybe should be srvdate and srvurl if any other server can support ktx (is it still the case?)
-	if (strlen(ezinfokey(world, "mvdsvdate")))
-		G_sprint(self, 2, "Build date: %s\n", ezinfokey(world, "mvdsvdate"));
-	if (strlen(ezinfokey(world, "mvdsvurl")))
-		G_sprint(self, 2, "Home Page: %s\n", redtext(ezinfokey(world, "mvdsvurl")));
-
-	G_sprint(self, 2, "\n%s\n", redtext("MOD:"));
-	G_sprint(self, 2, ("%s %s "), MOD_NAME, MOD_VERSION);
-	if (strlen(GIT_COMMIT))
-		G_sprint(self, 2, ("(build %s/%s)"), GIT_COMMIT, QW_PLATFORM_SHORT);
-	G_sprint(self, 2, ("\n"));
-	G_sprint(self, 2, "Build date: %s\n", MOD_BUILD_DATE);
-	G_sprint(self, 2, "Home Page: %s\n", redtext(MOD_URL));
+	G_sprint(self, 2, "\n\213\212\212\212\212\212%s\212\212\212\212\212\213\n", "QUAKEWORLD MOD INFORMATION");
+	G_sprint(self, 2, "%s....: %28s\n", redtext("Name"), cvar_string("qwm_fullname"));
+	G_sprint(self, 2, "%s.: %28s\n", redtext("Version"), dig3s(cvar_string("qwm_version")));
+	if (strlen(cvar_string("qwm_buildnum")))
+		G_sprint(self, 2, "%s...: %26s-%1s\n", redtext("Build"), cvar_string("qwm_buildnum"), strlen(cvar_string("qwm_platform")) ? cvar_string("qwm_platform") : "u");
+	G_sprint(self, 2, "%s....: %28s\n", redtext("Date"), dig3s(cvar_string("qwm_builddate")));
+	G_sprint(self, 2, "%s.: %28s\n", redtext("Webpage"), cvar_string("qwm_homepage"));
+	
+	G_sprint(self, 2, "\n%s\n\n%s\n", MOD_RELEASE_QUOTE, redtext(MOD_RELEASE_HASHTAGS));
 
 	if ( (int)cvar( "sv_specprint" ) & SPECPRINT_SPRINT )
-		G_sprint(self, PRINT_CHAT, "\n\x87\x87\x87WARNING: spectators may see team messages (mm2) on this server!\n");
+		G_sprint(self, PRINT_CHAT, "\n\207\207\207 WARNING: Spectators may see team\nmessages (mm2) on this server!\n");
 
-	sz = (size_t)min((int)strlen(MOD_NAME), (int)sizeof(date)-1);
-	memset(date, '\236', sz);
-	date[sz] = 0;
-	G_sprint(self, 2, "\n\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236" "%s"
-		"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n\n", date);
+	G_sprint(self, 2, "\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+		"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n\n");
 }
 
 void ChangeOvertime()
@@ -1570,18 +1617,18 @@ void ModStatus ()
 	}
 
 	if( (votes = get_votes( OV_ELECT )) )
-		G_sprint(self, 2, "%s election in progress:\x90%d/%d\x91 vote%s\n",
-							 redtext(get_elect_type_str()), votes,
-							 get_votes_req( OV_ELECT, false ), count_s(votes));
+		G_sprint(self, 2, "%s election in progress:\220%d/%d\221 vote%s\n",
+			redtext(get_elect_type_str()), votes,
+			get_votes_req( OV_ELECT, false ), count_s(votes));
 
 	if( k_captains == 2 )
 		G_sprint(self, 2, "%s in progress\n", redtext("Team picking"));
 
 	if( floor( k_captains ) == 1 ) 
-		G_sprint(self, 2, "\x90\x31\x91 %s present\n", redtext("captain"));
+		G_sprint(self, 2, "\2201\221 %s present\n", redtext("captain"));
 
 	if( floor( k_coaches ) == 1 )
-	    G_sprint(self, 2, "\x90\x31\x91 %s present\n", redtext("coach"));
+	    G_sprint(self, 2, "\2201\221 %s present\n", redtext("coach"));
 
 	if( match_in_progress == 2 )
 	{
@@ -1595,7 +1642,7 @@ void ModStatus ()
 			if ( p )
 			{
 				G_sprint(self, 2, "Match in progress\n"
-								  "\x90%s\x91 full minute%s left\n", dig3(p->cnt - 1), count_s(p->cnt));
+					"\220%s\221 full minute%s left\n", dig3(p->cnt - 1), count_s(p->cnt));
 			}
 		}
 	}
@@ -1615,9 +1662,9 @@ void ModStatus2()
 	else if ( isCTF() ) {
 		G_sprint(self, 2, "%s:  CTF\n", redtext("Server mode"));
 		G_sprint(self, 2, "%s: %s\n", redtext("Server locking"),
-					 (!cvar("k_lockmode") ? "off" : (cvar("k_lockmode") == 2 ? "all" : (cvar("k_lockmode") == 1 ? "team" : "unknown"))));
+			(!cvar("k_lockmode") ? "off" : (cvar("k_lockmode") == 2 ? "all" : (cvar("k_lockmode") == 1 ? "team" : "unknown"))));
 		G_sprint(self, 2, "%s: hook %s, runes %s, ga %s\n", redtext("CTF settings"),
-					OnOff(cvar("k_ctf_hook")), OnOff(cvar("k_ctf_runes")), OnOff(cvar("k_ctf_ga")));
+			OnOff(cvar("k_ctf_hook")), OnOff(cvar("k_ctf_runes")), OnOff(cvar("k_ctf_ga")));
 	}
 	else if ( isTeam() ) {
 		G_sprint(self, 2, "%s: team\n", redtext("Server mode"));
@@ -1659,7 +1706,7 @@ void ModStatus2()
 */
 
 	G_sprint(self, 2, "%s: %s\n", redtext("Admin election"),
-							 Allowed(cvar( "k_allowvoteadmin" )));
+		Allowed(cvar( "k_allowvoteadmin" )));
 
 	G_sprint(self, 2, "%s: %s\n", redtext("Check frametimes"), Enabled( framechecks ));
 
@@ -1674,15 +1721,15 @@ void ModStatus2()
 	if ( k_sv_locktime ) {
 		int seconds = k_sv_locktime - g_globalvars.time;
 		G_sprint(self, 2, "%s: %d second%s\n",
-				 redtext("server is temporary locked"), seconds, count_s(seconds));
+			redtext("server is temporary locked"), seconds, count_s(seconds));
 	}
 
 	if ( k_cmd_fp_disabled ) 
 		G_sprint(self, 2, "%s: off\n", redtext("Command floodprot"));
 	else {
 		G_sprint(self, 2, "%s: %d commands allowed per %d sec.,"
-						   " skip commands for %d sec., ", redtext("Command floodprot"), 
-								k_cmd_fp_count, (int)k_cmd_fp_per, (int) k_cmd_fp_for);
+			" skip commands for %d sec., ", redtext("Command floodprot"), 
+			k_cmd_fp_count, (int)k_cmd_fp_per, (int) k_cmd_fp_for);
 
 		if ( k_cmd_fp_dontkick ) 
 			G_sprint(self, 2, "cmdfp kick disabled\n");
@@ -1703,12 +1750,13 @@ void ModStatusVote()
 
 		G_sprint(self, 2, "%s:\n", redtext("Map voting"));
 		
-		for( i = 0; i < MAX_CLIENTS; i++) {
+		for( i = 0; i < MAX_CLIENTS; i++)
+		{
 			if (!maps_voted[i].map_id)
 				break;
 
-			G_sprint(self, 2, "\x90%s\x91 %2d vote%s\n", GetMapName( maps_voted[i].map_id ),
-								maps_voted[i].map_votes, count_s(maps_voted[i].map_votes) );
+			G_sprint(self, 2, "\220%s\221 %2d vote%s\n", GetMapName( maps_voted[i].map_id ),
+				maps_voted[i].map_votes, count_s(maps_voted[i].map_votes) );
 
 			for( p = world; (p = find_client( p )); )
 				if ( p->v.map == maps_voted[i].map_id )
@@ -1720,21 +1768,21 @@ void ModStatusVote()
 	if( (votes = get_votes( OV_ELECT )) ) {
 		voted = true;
 
-		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for %s election:\n", votes, 
+		G_sprint(self, 2, "\220%d/%d\221 vote%s for %s election:\n", votes, 
 			get_votes_req( OV_ELECT, false ), count_s(votes), redtext(get_elect_type_str()) );
 
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.elect )
 				G_sprint(self, 2, "%s%s\n", 
-				(p->v.elect_type != etNone) ? "\x87" : " ", p->netname);
+				(p->v.elect_type != etNone) ? "\207" : " ", p->netname);
 	}
 
 	if ( !match_in_progress )
 	if ( (votes = get_votes( OV_PICKUP ))) {
 		voted = true;
 
-		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for a %s game:\n", votes,
-			 get_votes_req( OV_PICKUP, false ), count_s(votes), redtext("pickup"));
+		G_sprint(self, 2, "\220%d/%d\221 vote%s for a %s game:\n", votes,
+			get_votes_req( OV_PICKUP, false ), count_s(votes), redtext("pickup"));
 
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.pickup )
@@ -1745,8 +1793,8 @@ void ModStatusVote()
 	if ( (votes = get_votes( OV_RPICKUP ))) {
 		voted = true;
 
-		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for a %s game:\n", votes,
-			 get_votes_req( OV_RPICKUP, false ), count_s(votes), redtext("rpickup"));
+		G_sprint(self, 2, "\220%d/%d\221 vote%s for a %s game:\n", votes,
+			get_votes_req( OV_RPICKUP, false ), count_s(votes), redtext("rpickup"));
 
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.rpickup )
@@ -1757,7 +1805,7 @@ void ModStatusVote()
 	if ( (votes = get_votes( OV_BREAK )) ) {
 		voted = true;
 
-		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for %s:\n", votes,
+		G_sprint(self, 2, "\220%d/%d\221 vote%s for %s:\n", votes,
 			get_votes_req( OV_BREAK, false ), count_s(votes), (k_matchLess ? "next map" : "stopping"));
 
 		for( p = world; (p = find_client( p )); )
@@ -1769,8 +1817,8 @@ void ModStatusVote()
 	if ( (votes = get_votes( OV_ANTILAG ))) {
 		voted = true;
 
-		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for a %s mode change:\n", votes,
-			 get_votes_req( OV_ANTILAG, false ), count_s(votes), redtext("antilag"));
+		G_sprint(self, 2, "\220%d/%d\221 vote%s for a %s mode change:\n", votes,
+			get_votes_req( OV_ANTILAG, false ), count_s(votes), redtext("antilag"));
 
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.antilag )
@@ -1781,8 +1829,8 @@ void ModStatusVote()
 	if ( (votes = get_votes( OV_NOSPECS ))) {
 		voted = true;
 
-		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for a %s mode change:\n", votes,
-			 get_votes_req( OV_NOSPECS, false ), count_s(votes), redtext("no spec"));
+		G_sprint(self, 2, "\220%d/%d\221 vote%s for a %s mode change:\n", votes,
+			get_votes_req( OV_NOSPECS, false ), count_s(votes), redtext("no spec"));
 
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.nospecs )
@@ -1793,8 +1841,8 @@ void ModStatusVote()
 	if ( (votes = get_votes( OV_TEAMOVERLAY ))) {
 		voted = true;
 
-		G_sprint(self, 2, "\x90%d/%d\x91 vote%s for a %s change:\n", votes,
-			 get_votes_req( OV_TEAMOVERLAY, false ), count_s(votes), redtext("teamoverlay"));
+		G_sprint(self, 2, "\220%d/%d\221 vote%s for a %s change:\n", votes,
+			get_votes_req( OV_TEAMOVERLAY, false ), count_s(votes), redtext("teamoverlay"));
 
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.teamoverlay )
@@ -1809,13 +1857,13 @@ void ModStatusVote()
 
 char *OnePlayerStatus( gedict_t *p, gedict_t *e_self )
 {
-	char *team_str = (isTeam() ? va(" \x90%4.4s\x91", getteam( p )) : "");
+	char *team_str = (isTeam() ? va(" \220%4.4s\221", getteam( p )) : "");
 
 	e_self = (e_self ? e_self : world);
 
 	return va( "%s%s%s %s%s",
-	 			( p->ready ? "\x86" : "\x87" ),	( is_adm( p ) ? "\xC1" : " " ),
-				team_str, getname( p ), ( p == e_self ? redtext( " \x8D you" ) : "" ) );
+		( p->ready ? "\206" : "\207" ),	( is_adm( p ) ? "\xC1" : " " ),
+		team_str, getname( p ), ( p == e_self ? redtext( " \x8D you" ) : "" ) );
 }
 
 void PlayerStatus()
@@ -1831,7 +1879,7 @@ void PlayerStatus()
 	for ( p = world; (p = find_plr( p )); ) {
 		if ( !found )
 			G_sprint(self, 2, "Players list:\n"
-			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
+				"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
 		G_sprint(self, 2, "%s\n", OnePlayerStatus( p, self ));
 		found = true;
 	}
@@ -1847,8 +1895,8 @@ void PlayerStatusS()
 	for ( p = world; (p = find_plr( p )); ) {
 		if ( !found )
 			G_sprint(self, 2, "Players skins list:\n"
-			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
-		G_sprint(self, 2, "\x90%10s\x91 %s\n", ezinfokey(p, "skin"), p->netname);
+				"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
+		G_sprint(self, 2, "\220%10s\221 %s\n", ezinfokey(p, "skin"), p->netname);
 		found = true;
 	}
 			
@@ -1876,8 +1924,8 @@ void PlayerStatusN()
 
 		if ( !found )
 			G_sprint(self, 2, "Players %s ready:\n"
-			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
-			redtext("not"));
+				"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
+				redtext("not"));
 
 		G_sprint(self, 2, "%s\n", OnePlayerStatus( p, self ));
 		found = true;
@@ -1923,8 +1971,8 @@ void ListWhoNot()
 
 		if ( !found )
 			G_bprint(2, "Players %s ready:\n"
-			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
-			redtext("not")); // broadcast
+				"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
+				redtext("not")); // broadcast
 
 		for ( p2 = world; (p2 = find_client( p2 )); )
 			G_sprint(p2, 2, "%s\n", OnePlayerStatus( p, p2 ));
@@ -1953,8 +2001,8 @@ void VotePickup()
 	self->v.pickup = !self->v.pickup;
 
 	G_bprint(2, "%s %s %s%s\n", self->netname, 
-					redtext("says"), (self->v.pickup ? "pickup!" : "no pickup"),
-					((votes = get_votes_req( OV_PICKUP, true )) ? va(" (%d)", votes) : ""));
+		redtext("says"), (self->v.pickup ? "pickup!" : "no pickup"),
+		((votes = get_votes_req( OV_PICKUP, true )) ? va(" (%d)", votes) : ""));
 
 	vote_check_pickup ();
 }
@@ -2022,18 +2070,18 @@ void ReportMe()
 
 		if( self->s.v.armorvalue )
 			G_sprint(p, 3, "%s:%d", armor_type((int)self->s.v.items),
-							 (int)self->s.v.armorvalue);
+				(int)self->s.v.armorvalue);
 		else
 			G_sprint(p, 3, "a:0");
 
 		G_sprint(p, 3, "  h:%d  %s%d", (int)self->s.v.health, wt, (int)f1);
 
 		if( (int)self->s.v.items & 524288)
-			G_sprint(p, 3, "  \220\205%s\205\221", redtext("eyes"));
+			G_sprint(p, 3, "  \220\212%s\212\221", redtext("eyes"));
 		if( (int)self->s.v.items & 1048576)
-			G_sprint(p, 3, "  \220\205%s\205\221", redtext("666"));
+			G_sprint(p, 3, "  \220\212%s\212\221", redtext("666"));
 		if( (int)self->s.v.items & 4194304)
-			G_sprint(p, 3, "  \220\205%s\205\221", redtext("quad"));
+			G_sprint(p, 3, "  \220\212%s\212\221", redtext("quad"));
 
 		G_sprint(p, 3, "\n");
 	}
@@ -2464,11 +2512,11 @@ void ShowRules()
 		G_sprint(self, 2, "Server is in duel mode.\n");
 	else if ( isCTF() )
 		G_sprint(self, 2, "Server is in CTF mode.\n"
-						  "Additional commands/impulses:\n"
-						  "impulse 22 : Grappling Hook\n"
-						  "tossrune   : Toss your current rune\n"
-						  "tossflag   : Toss carried flag\n"
-						  "flagstatus : Displays flag information\n");
+			"Additional commands/impulses:\n"
+			"impulse 22 : Grappling Hook\n"
+			"tossrune   : Toss your current rune\n"
+			"tossflag   : Toss carried flag\n"
+			"flagstatus : Displays flag information\n");
 	else if ( isFFA() )
 		G_sprint(self, 2, "Server is in FFA mode.\n");
 	else if ( isTeam() )
@@ -2511,10 +2559,12 @@ void TeamSay(float fsndname)
 	char *sndname = va("ktsound%d.wav", (int)fsndname);
 
 	for( p = world; (p = find_plr(p)); ) {
-		if( p != self && (isTeam() || isCTF()) && !strnull( p->netname )
+		if (
+			p != self && (isTeam() || isCTF()) && !strnull( p->netname )
 			&& ( iKey( p, "kf" ) & KF_KTSOUNDS ) 
-		   ) {
-			if( streq( getteam( self ), getteam( p ) ) ) {
+			) 
+		{
+			if ( streq( getteam( self ), getteam( p ) ) ) {
 				char *t1 = ezinfokey(p, "k_sdir");
 				stuffcmd(p, "play %s%s\n", (strnull( t1 ) ? "" : va("%s/", t1)), sndname);
 			}
@@ -2550,7 +2600,7 @@ void PrintScores()
 			int diff = fraglimit - p->s.v.frags;
 
 			if ( diff >= 0 )
-				G_sprint(self, 2, "Frags left: \x90%s\x91\n", dig3s("%2d", diff));
+				G_sprint(self, 2, "Frags left: \220%s\221\n", dig3s("%2d", diff));
 		}
 	}
 
@@ -2563,8 +2613,8 @@ void PrintScores()
 			minutes--;
 
 		// we can't use dig3 here because of zero padding, so using dig3s
-		G_sprint(self, 2, "\x90%s:%s\x91 remaining\n", 
-							dig3s("%02d", minutes), dig3s("%02d", seconds));
+		G_sprint(self, 2, "\220%s:%s\221 remaining\n", 
+			dig3s("%02d", minutes), dig3s("%02d", seconds));
 	}
 
 	if( k_showscores )
@@ -2580,10 +2630,10 @@ void PrintScores()
 			char *t1 = cvar_string( "_k_team1" );
 			char *t2 = cvar_string( "_k_team2" );
 
-			G_sprint(self, 2, "%s \x90%s\x91 = %s\n", redtext("Team"),
-									 (s1 > s2 ? t1 : t2), dig3(s1 > s2 ? s1 : s2));
-			G_sprint(self, 2, "%s \x90%s\x91 = %s\n", redtext("Team"),
-									 (s1 > s2 ? t2 : t1), dig3(s1 > s2 ? s2 : s1));
+			G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"),
+				(s1 > s2 ? t1 : t2), dig3(s1 > s2 ? s1 : s2));
+			G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"),
+				(s1 > s2 ? t2 : t1), dig3(s1 > s2 ? s2 : s1));
 		}
 	}
 }
@@ -2615,14 +2665,14 @@ void PlayerStats()
 	tL = bound( 0, tL, 4 );
 
 	G_sprint(self, 2, "%s:\n"
-					  "%s %s %s \217  %s\n",
-					   redtext("Player statistics"),
-					   redtext("Frags"), redtext("rank"), isTeam() ? redtext("friendkills ") : "  ",
-					   redtext("efficiency"));
+		"%s %s %s \217  %s\n",
+		redtext("Player statistics"),
+		redtext("Frags"), redtext("rank"), isTeam() ? redtext("friendkills ") : "  ",
+		redtext("efficiency"));
 
 	G_sprint(self, 2, "\235\236\236\236\236\236\236\236\236\236\236"
-				  	  "\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236%s\237\n",
-				  	  ((isTeam() || isCTF()) ? "\236\236\236\236\236\236\236\236\236\236" : ""));
+		"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236%s\237\n",
+		((isTeam() || isCTF()) ? "\236\236\236\236\236\236\236\236\236\236" : ""));
 
 	for ( p = world; (p = find_plr( p )); ) {
 		if( p->k_flag )
@@ -2630,15 +2680,16 @@ void PlayerStats()
 
 		tmp = getteam( p );
 
-		for ( p2 = world; (p2 = find_plr( p2 )); ) {
-			if( p2->k_flag || strneq( tmp, getteam( p2 ) ) )
+		for ( p2 = world; (p2 = find_plr( p2 )); )
+		{
+			if ( p2->k_flag || strneq( tmp, getteam( p2 ) ) )
 				continue; // already served or not on the same team
 
-			if ( isTeam() || isCTF() ) { // [team name]
+			if ( isTeam() || isCTF() ) {
 				G_sprint(self, 2, "\220%.4s\221 ", tmp);
 				for ( i = strlen(tmp); i < tL; i++ )
 					G_sprint(self, 2, " ");
- 			}
+			}
 
 			G_sprint(self, 2, "%.10s ", p2->netname); // player name
 			for ( i = strlen(p2->netname); i < pL; i++ )
@@ -2693,7 +2744,7 @@ void ToggleQLag()
 	localcmd("serverinfo fpd %d\n", fpd);
 
 	G_bprint(2, "%s %s\n", 
-			redtext("QiZmo lag settings"), ( (fpd & 8) ? "in effect" : "not in effect" ));
+		redtext("QiZmo lag settings"), ( (fpd & 8) ? "in effect" : "not in effect" ));
 }
 
 void ToggleQEnemy()
@@ -2708,7 +2759,7 @@ void ToggleQEnemy()
 	localcmd("serverinfo fpd %d\n", fpd);
 
 	G_bprint(2, "%s %s\n", 
-			redtext("QiZmo enemy reporting"), Allowed( fpd & 32 ));
+		redtext("QiZmo enemy reporting"), Allowed( fpd & 32 ));
 }
 
 void ToggleQPoint()
@@ -2723,7 +2774,7 @@ void ToggleQPoint()
 	localcmd("serverinfo fpd %d\n", fpd);
 
 	G_bprint(2, "%s %s\n", 
-			redtext("QiZmo pointing"), Enabled( fpd & 128 ));
+		redtext("QiZmo pointing"), Enabled( fpd & 128 ));
 }
 
 /* new FDP bits http://wiki.qwdrama.com/FPD
@@ -2926,7 +2977,6 @@ void ShowNick()
 			if ( g_globalvars.trace_fraction == 1 )
 				goto ok;
 
-
 			continue;	// not visible
 ok:
 			best = rank;
@@ -2958,7 +3008,7 @@ ok:
 			a = bound(0, (int)bp->s.v.armorvalue, 999);
 
 			stuffcmd( self, "//sn %d %d %d %d %d %d %d %d \"%s\"\n", version, i,
-		 		(int)bp->s.v.origin[0], (int)bp->s.v.origin[1], (int)bp->s.v.origin[2], h, a, (int)bp->s.v.items, kn );
+				(int)bp->s.v.origin[0], (int)bp->s.v.origin[1], (int)bp->s.v.origin[2], h, a, (int)bp->s.v.items, kn );
 
 			return;
 		}
@@ -2969,11 +3019,11 @@ ok:
 	pups = "";
 
 	if ( bp->invincible_finished >= g_globalvars.time )
-		pups = va("%s\x90%s\x91", ( *pups ? va("%s ", pups) : ""), redtext("Pent"));
+		pups = va("%s\220%s\221", ( *pups ? va("%s ", pups) : ""), redtext("Pent"));
 	if ( bp->super_damage_finished > g_globalvars.time )
-		pups = va("%s\x90%s\x91", ( *pups ? va("%s ", pups) : ""), redtext("Quad"));
+		pups = va("%s\220%s\221", ( *pups ? va("%s ", pups) : ""), redtext("Quad"));
 	if ( bp->radsuit_finished > g_globalvars.time )
-		pups = va("%s\x90%s\x91", ( *pups ? va("%s ", pups) : ""), redtext("Suit"));
+		pups = va("%s\220%s\221", ( *pups ? va("%s ", pups) : ""), redtext("Suit"));
 
 	if ( *pups )
 		pups = va("%s\n", pups);
@@ -3012,11 +3062,12 @@ ok:
 	if ( match_in_progress != 2 )	// simple shownick in prewar
 		strlcat(buf, va( "%s\n", kn ), sizeof(buf));
 	else
-		strlcat(buf, va(	"%s" // if powerups present \n is too
+		strlcat(buf, va(
+						"%s" // if powerups present \n is too
 						"%s%s:%d%s\n"
-							"%s" , pups,
-						 	s1, redtext("h"), (int)bp->s.v.health, s2,
-									kn), sizeof(buf));
+						"%s" , pups,
+						s1, redtext("h"), (int)bp->s.v.health, s2, kn
+						), sizeof(buf));
 
 	if ( (i = ln) < 0 ) {
 		int offset = strlen(buf);
@@ -3278,11 +3329,11 @@ const char ctf_um_init[] =
 
 usermode um_list[] =
 {
-	{ "1on1",          "\x93 on \x93",          _1on1_um_init,      UM_1ON1,    1 },
-	{ "2on2",          "\x94 on \x94",          _2on2_um_init,      UM_2ON2,    2 },
-	{ "3on3",          "\x95 on \x95",          _3on3_um_init,      UM_3ON3,    3 },
-	{ "4on4",          "\x96 on \x96",          _4on4_um_init,      UM_4ON4,    4 },
-	{ "10on10",        "\x93\x92 on \x93\x92",  _10on10_um_init,    UM_10ON10, 10 },
+	{ "1on1",          "\223 on \223",          _1on1_um_init,      UM_1ON1,    1 },
+	{ "2on2",          "\224 on \224",          _2on2_um_init,      UM_2ON2,    2 },
+	{ "3on3",          "\225 on \225",          _3on3_um_init,      UM_3ON3,    3 },
+	{ "4on4",          "\226 on \226",          _4on4_um_init,      UM_4ON4,    4 },
+	{ "10on10",        "\223\222 on \223\222",  _10on10_um_init,    UM_10ON10, 10 },
 	{ "ffa",           "ffa",                   ffa_um_init,        UM_FFA,    -1 },
 	{ "ctf",           "ctf",                   ctf_um_init,        UM_CTF,     0 },
 	{ "hoonymode",     "HoonyMode",		        _1on1hm_um_init,    UM_1ON1HM,  0 },
@@ -3425,7 +3476,7 @@ void UserMode(float umode)
 
 	if (   ( !isCTF() &&  (um_list[(int)umode].um_flags & UM_CTF) )
 		|| (  isCTF() && !(um_list[(int)umode].um_flags & UM_CTF) )
-	   )
+	)
 		skip_fixrules = 2; // skip FixRules for 2 frames, or we get some teamplay warning
 
 #else
@@ -3443,7 +3494,7 @@ void UserMode(float umode)
 					G_bprint(2, "UserMode: sv %s discarded due to ready players have not red or blue team\n", um);
 				else
 					G_sprint(self, 2, "command discarded due to ready players have not red or blue team\n"
-									  "either force they fix team or be not ready\n" );
+						"either force they fix team or be not ready\n" );
 
 				return;
 			}
@@ -3553,9 +3604,9 @@ void TogglePractice()
 	if ( match_in_progress )
 		return;
 
-	if(     lock_practice == 2 /* server locked in current practice mode */
+	if ( lock_practice == 2 /* server locked in current practice mode */
 		|| (lock_practice != 0 && lock_practice != 1) /* unknown lock type, ignore command */
-	  ) {
+		) {
 		G_sprint(self, 3, "console: command is locked\n");
 		return;
 	}
@@ -3570,26 +3621,29 @@ void TogglePractice()
 // implement how i think this must be, it is like some sort of access control
 
 	switch ( allow_toggle_practice ) {
-		case 0:	G_sprint(self, 2, "%s can use this command\n", redtext("no one"));
-				return;
+		case 0:	
+			G_sprint(self, 2, "%s can use this command\n", redtext("no one"));
+			return;
 		case 1:
-		case 2:	if ( !is_adm( self ) ) {
-					G_sprint(self, 2, "you must be an %s\n", redtext("admin"));
-					return;
-				}
-				break;
-		case 3:
-		case 4:	if ( !is_adm( self ) ) {
-					G_sprint(self, 2, "%s is not implemented in this mode\n", redtext("judges"));
-					G_sprint(self, 2, "you must be an %s\n", redtext("admin"));
-					return;
-				}
-				break;
-		case 5:
-				break;
-		default:
-				G_sprint(self, 2, "server is misconfigured, command %s\n", redtext("skipped"));
+		case 2:
+			if ( !is_adm( self ) ) {
+				G_sprint(self, 2, "you must be an %s\n", redtext("admin"));
 				return;
+			}
+			break;
+		case 3:
+		case 4:
+			if ( !is_adm( self ) ) {
+				G_sprint(self, 2, "%s is not implemented in this mode\n", redtext("judges"));
+				G_sprint(self, 2, "you must be an %s\n", redtext("admin"));
+				return;
+			}
+			break;
+		case 5:
+			break;
+		default:
+			G_sprint(self, 2, "server is misconfigured, command %s\n", redtext("skipped"));
+			return;
 	}
 
 // ok u have access
@@ -3676,7 +3730,7 @@ void t_jump (float j_type)
 
 	trap_cvar_set_float( cv_jt, !cvar( cv_jt ) );
 	G_bprint(2, "%s %s %s\n", self->netname, redtext( Enables( !cvar( cv_jt ) ) ),
-							  redtext( jt ) );
+		redtext( jt ) );
 }
 
 void klist ( )
@@ -3689,15 +3743,15 @@ void klist ( )
 		if ( !i ) {
 			G_sprint(self, 2, "Clients list: %s\n", redtext( "players" ) );
 			G_sprint(self, 2, "%s %s %s %s %s %s\n",
- 						redtext( "id" ), redtext( "ad" ), redtext( "vip" ),
-						redtext( "hdp" ), redtext( "team" ), redtext( "name" ) );
+				redtext( "id" ), redtext( "ad" ), redtext( "vip" ),
+				redtext( "hdp" ), redtext( "team" ), redtext( "name" ) );
 		}
 
 		hdc = GetHandicap(p);
 
 		G_sprint(self, 2, "%2d|%2s|%3d|%3s|%4.4s|%s\n", GetUserID( p ),
-						(is_real_adm( p ) ? redtext("A") : is_adm( p ) ? redtext("a") : ""), VIP( p ),
-						(hdc == 100 ? "off" : va("%d", hdc)), getteam( p ), getname( p ));
+			(is_real_adm( p ) ? redtext("A") : is_adm( p ) ? redtext("a") : ""), VIP( p ),
+			(hdc == 100 ? "off" : va("%d", hdc)), getteam( p ), getname( p ));
 	}
 
 	if (i)
@@ -3707,16 +3761,16 @@ void klist ( )
 		if ( !i ) {
 			G_sprint(self, 2, "Clients list: %s\n", redtext( "spectators" ) );
 			G_sprint(self, 2, "%s %s %s %s\n",
- 						redtext( "id" ), redtext( "ad" ), redtext( "vip" ), redtext( "co" ),
-						redtext( "name" ) );
+				redtext( "id" ), redtext( "ad" ), redtext( "vip" ), redtext( "co" ),
+				redtext( "name" ) );
 		}
 
 		track = TrackWhom( p );
 
 		G_sprint(self, 2, "%2d|%2s|%3d|%2s|%s%s\n", GetUserID( p ),
-						(is_real_adm( p ) ? redtext("A") : is_adm( p ) ? redtext("a") : ""),
-						VIP( p ), (is_coach(p) ? redtext("c") : ""), getname( p ),
-						(strnull(track) ? "" : va(" \x8D %s", track)) );
+			(is_real_adm( p ) ? redtext("A") : is_adm( p ) ? redtext("a") : ""),
+			VIP( p ), (is_coach(p) ? redtext("c") : ""), getname( p ),
+			(strnull(track) ? "" : va(" \x8D %s", track)) );
 	}
 
 	if (i)
@@ -3726,7 +3780,7 @@ void klist ( )
 		if ( !i ) {
 			G_sprint(self, 2, "Clients list: %s\n", redtext( "ghosts" ) );
 			G_sprint(self, 2, "%s %s %s\n",
-						 redtext( "frags" ), redtext( "team" ), redtext( "name" ) );
+				redtext( "frags" ), redtext( "team" ), redtext( "name" ) );
 		}
 		G_sprint(self, 2, "%5d|%4.4s|%s\n",	(int)p->s.v.frags, getteam( p ), getname( p ));
 	}
@@ -3745,12 +3799,12 @@ void klist ( )
 		if ( !i ) {
 			G_sprint(self, 2, "Clients list: %s\n", redtext( "unconnected" ) );
 			G_sprint(self, 2, "%s %s %-10s %s\n",
-						 redtext( "id" ), redtext( "vip" ), redtext( "state" ), redtext( "name" ) );
+				redtext( "id" ), redtext( "vip" ), redtext( "state" ), redtext( "name" ) );
 		}
 
 		G_sprint(self, 2, "%2d|%3d|%-10.10s|%s\n", 
-					iKey(p, "*userid"), // can't use GetUserID here
-					VIP( p ), track, (strnull( p->netname ) ? "!noname!" : p->netname));
+			iKey(p, "*userid"), // can't use GetUserID here
+			VIP( p ), track, (strnull( p->netname ) ? "!noname!" : p->netname));
 
 		i++;
 	}
@@ -3889,11 +3943,11 @@ void fpslist ( )
 	for( i = 0, p = world; (p = find_plr( p )); i++ ) {
 		if ( !i ) {
 			G_sprint(self, 2, "Players %s list:\n", redtext("FPS") );
-			G_sprint(self, 2, "         name:(cur \x8f max \x8f min \x8f avg)\n");
+			G_sprint(self, 2, "         name:(cur \217 max \217 min \217 avg)\n");
 			G_sprint(self, 2, "\235\236\236\236\236\236\236\236\236\236\236"
-			                  "\236\236\236\236\236\236\236\236\236\236"
-			                  "\236\236\236\236\236\236\236\236\236\236"
-			                  "\236\236\236\236\236\237\n");
+				"\236\236\236\236\236\236\236\236\236\236"
+				"\236\236\236\236\236\236\236\236\236\236"
+				"\236\236\236\236\236\237\n");
 		}
 
 		cur = p->fCurrentFrameTime ? ( 1.0f / p->fCurrentFrameTime ) : 0;
@@ -3903,7 +3957,7 @@ void fpslist ( )
 		avg = p->fFrameCount ? ( p->fAverageFrameTime / p->fFrameCount ) : 0;
 		avg = avg ? (1.0f / avg) : 0;
 
-		G_sprint(self, 2, "%13s: %3d \x8f %3d \x8f %3d \x8f%5.1f\n", getname( p ),
+		G_sprint(self, 2, "%13s: %3d \217 %3d \217 %3d \217%5.1f\n", getname( p ),
 				Q_rint(cur), Q_rint(max), Q_rint(min), avg);
 	}
 
@@ -3942,8 +3996,8 @@ void RandomPickup ()
 	self->v.rpickup = !self->v.rpickup;
 
 	G_bprint(2, "%s %s!%s\n", self->netname, 
-			(self->v.rpickup ? redtext("votes for rpickup") :
-							   redtext(va("withdraws %s rpickup vote", g_his(self)))),
+			( self->v.rpickup ? redtext("votes for rpickup") :
+			redtext(va("withdraws %s rpickup vote", g_his(self)))),
 			((votes = get_votes_req( OV_RPICKUP, true )) ? va(" (%d)", votes) : ""));
 
 	vote_check_rpickup (MAX_RPICKUP_RECUSION);
@@ -3980,7 +4034,7 @@ void fav_add( )
 	for ( free_num = -1, fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
 		if ( self->fav[fav_num] == diff ) {
 			G_sprint(self, 2, "fav_add: %s %s added to favourites\n", goal->netname,
-																	redtext("already"));
+				redtext("already"));
 			return;
 		}
 		else if ( free_num < 0 && !self->fav[fav_num] ) { // ok - found free slot
@@ -4014,7 +4068,7 @@ qbool fav_del_do(gedict_t *s, gedict_t *p, char *prefix)
 		if ( s->fav[fav_num] && (world + s->fav[fav_num]) == p ) {
 			if ( removed == false ) // show info one time
 				G_sprint(s, 2, "%s%s removed from favourites\n", 
-							prefix, (strnull(p->netname) ? "-someone-" : p->netname));
+					prefix, (strnull(p->netname) ? "-someone-" : p->netname));
 
 			s->fav[fav_num] = 0;
 			removed = true; // does't break, so if this player multiple times in favourites
@@ -4036,7 +4090,7 @@ qbool favx_del_do(gedict_t *s, gedict_t *p, char *prefix)
 
 	for ( fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
 		if ( s->favx[fav_num] && (world + s->favx[fav_num]) == p ) {
-			G_sprint(s, 2, "%s%s removed from \x90slot %2d\x91\n", 
+			G_sprint(s, 2, "%s%s removed from \220slot %2d\221\n", 
 				prefix, (strnull(p->netname) ? "-someone-" : p->netname), fav_num + 1);
 
 			s->favx[fav_num] = 0;
@@ -4090,7 +4144,7 @@ void favx_add( float fav_num )
 		return;
 	}
 	
-	G_sprint(self, 2, "fav add: %s added to \x90slot %d\x91\n", goal->netname, (int)fav_num);
+	G_sprint(self, 2, "fav add: %s added to \220slot %d\221\n", goal->netname, (int)fav_num);
 
 	self->favx[(int)fav_num - 1] = diff;
 }
@@ -4169,14 +4223,14 @@ void xfav_go( float fav_num )
 	pl_num = self->favx[(int)fav_num - 1];
 
 	if ( pl_num < 1 || pl_num > MAX_CLIENTS ) {
-		G_sprint(self, 2, "fav go: \x90slot %d\x91 is not defined\n", (int)fav_num);
+		G_sprint(self, 2, "fav go: \220slot %d\221 is not defined\n", (int)fav_num);
 		return;
 	}
 
 	p = world + pl_num;
 
 	if ( p->ct != ctPlayer ) {
-		G_sprint(self, 2, "fav go: \x90slot %d\x91 can't find player\n", (int)fav_num);
+		G_sprint(self, 2, "fav go: \220slot %d\221 can't find player\n", (int)fav_num);
 		return;
 	}
 
@@ -4196,17 +4250,17 @@ void fav_show( )
 
 	for ( first = true, fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
 		if ( (diff = self->favx[fav_num]) ) {
-		    p = world + diff;
+			p = world + diff;
 			if ( p->ct != ctPlayer || strnull( p->netname ) )
 				continue;
 
 			if ( first ) {
-				G_sprint(self, 2, "%s \x90%s\x91 %s:\n", redtext("Favourites"),
+				G_sprint(self, 2, "%s \220%s\221 %s:\n", redtext("Favourites"),
 							redtext("slots based"), redtext("list"));
 				first = false;
 			}
 
-			G_sprint(self, 2, " \x90slot %2d\x91 \x8D %s\n", fav_num + 1, p->netname);
+			G_sprint(self, 2, " \220slot %2d\221 \x8D %s\n", fav_num + 1, p->netname);
 			showed = true;
 		}
 
@@ -4215,7 +4269,7 @@ void fav_show( )
 
 	for ( first = true, fav_num = 0; fav_num < MAX_CLIENTS; fav_num++ )
 		if ( (diff = self->fav[fav_num]) ) {
-		    p = world + diff;
+			p = world + diff;
 			if ( p->ct != ctPlayer || strnull( p->netname ) )
 				continue;
 
@@ -4605,8 +4659,7 @@ void next_pow ()
 				|| ( p->super_damage_finished >= g_globalvars.time )
 				|| ( p->invisible_finished >= g_globalvars.time )
 				|| ( p->radsuit_finished >= g_globalvars.time )
-			  )
-		   )
+		))
 			continue;
 
 		if ( nextBreak ) {
@@ -4711,13 +4764,14 @@ qbool Pos_Set_origin (pos_t *pos)
     if (self->ct == ctPlayer)
 	{
 		TraceCapsule( PASSVEC3( pos->origin ), PASSVEC3( pos->origin ), false, self,
-					  PASSVEC3(VEC_HULL_MIN), PASSVEC3(VEC_HULL_MAX));
+			PASSVEC3(VEC_HULL_MIN), PASSVEC3(VEC_HULL_MAX));
 
 		p = PROG_TO_EDICT( g_globalvars.trace_ent );
 
-		if (    g_globalvars.trace_startsolid
-			 || ( p != self && p != world && (p->s.v.solid == SOLID_BSP || p->s.v.solid == SOLID_SLIDEBOX) )
-	       ) {
+		if (
+			g_globalvars.trace_startsolid
+			|| ( p != self && p != world && (p->s.v.solid == SOLID_BSP || p->s.v.solid == SOLID_SLIDEBOX) )
+		) {
 			G_sprint(self, 2, "Can't move, location occupied\n");
 			return true;
 		}
@@ -4728,10 +4782,10 @@ qbool Pos_Set_origin (pos_t *pos)
 	return false;
 }
 #define Pos_Set_angles(pos)		{ \
-									VectorCopy((pos)->v_angle, self->s.v.angles); \
-									VectorCopy((pos)->v_angle, self->s.v.v_angle); \
-									self->s.v.fixangle = true; \
-								}
+	VectorCopy((pos)->v_angle, self->s.v.angles); \
+	VectorCopy((pos)->v_angle, self->s.v.v_angle); \
+	self->s.v.fixangle = true; \
+}
 #define Pos_Set_velocity(pos)	VectorCopy((pos)->velocity, self->s.v.velocity)
 
 // pos_move
@@ -4786,7 +4840,7 @@ void Pos_Set (float set_type)
 
 	if ( trap_CmdArgc() != 4 ) {
 		G_sprint(self, 2, "Usage: pos_{origin|angles"/*|velocity*/"} x1 x2 x3\n"
-						  "use '*' for no changes\n");
+			"use '*' for no changes\n");
 		return;
 	}
 
@@ -4878,12 +4932,11 @@ void krnd ()
 	}
 
 	G_bprint(2, "%s %s %s:\n"
-				"\x90%s\x91\n", redtext("Random select by"), getname( self ), redtext("from"),
-					buf );
+		"\220%s\221\n", redtext("Random select by"), getname( self ), redtext("from"), buf );
 
 	trap_CmdArgv( i_rnd(1, argc-1) , arg_x, sizeof( arg_x ) );
 
-	G_bprint(2, "selected: \x90%s\x91\n", arg_x);
+	G_bprint(2, "selected: \220%s\221\n", arg_x);
 }
 
 void agree_on_map ( )
@@ -5048,11 +5101,12 @@ void lastscores ()
 		if ( cur == lsUnknown || strnull( e1 ) || strnull( e2 ) )
 			continue;
 
-		if (    cur != last // changed game mode
-			 || (strneq(le1 , e1) || strneq(le2 , e2)) // changed teams, duelers
-		   ) {
+		if (
+			cur != last // changed game mode
+			|| (strneq(le1 , e1) || strneq(le2 , e2)) // changed teams, duelers
+		) {
 			lt1 = lt2 = ""; // force show teams members again
-			G_sprint(self, 2, "\x90%s %s %s\x91 %s\n", e1, redtext("vs"), e2, redtext( lastscores2str( cur ) ));
+			G_sprint(self, 2, "\220%s %s %s\221 %s\n", e1, redtext("vs"), e2, redtext( lastscores2str( cur ) ));
 		}
 
 		// if team mode show members.
@@ -5079,7 +5133,7 @@ void lastscores ()
 
 	if ( cnt )
 		G_sprint(self, 2, "\n"
-						  "Lastscores: %d entr%s found\n", cnt, cnt ? "y" : "ies");
+			"Lastscores: %d entr%s found\n", cnt, cnt ? "y" : "ies");
 	else
 		G_sprint(self, 2, "Lastscores data empty\n");
 }
@@ -5101,7 +5155,7 @@ qbool mi_adm_only ()
 #define MI_POW (IT_INVISIBILITY | IT_INVULNERABILITY | IT_SUIT | IT_QUAD)
 #define MI_ARM (IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3)
 #define MI_WPN (IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_NAILGUN | IT_SUPER_NAILGUN \
-		        | IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER | IT_LIGHTNING )
+	| IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER | IT_LIGHTNING )
 #define MI_WPN3 (IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER | IT_LIGHTNING)
 
 typedef struct mi_levels_s {
@@ -5110,7 +5164,7 @@ typedef struct mi_levels_s {
 } mi_levels_t;
 
 mi_levels_t mi_levels[] = {
-	{ 0, "Receiving extra infos: \317\346\346" },
+	{ 0, "Receiving extra infos: \xcf\xe6\xe6" },
 	{ MI_POW | MI_ARM | IT_SUPERHEALTH | IT_ROCKET_LAUNCHER, "Receiving powerups\217armors\217mh\217rl" },
 	{ MI_POW | MI_ARM | IT_SUPERHEALTH | MI_WPN3, "Receiving powerups\217armors\217mh\217rl\217gl\217lg" },
 	{ MI_POW | MI_ARM | IT_SUPERHEALTH | MI_WPN, "Receiving powerups\217armors\217mh\217weapons"},
@@ -5146,7 +5200,7 @@ void mi_print( gedict_t *tooker, int it, char *msg )
 			continue;
 
 		if ( isTeam() || isCTF() )
-			G_sprint(p, 2, "\x84\x90%4.4s\x91 %s\n", t_team, msg);
+			G_sprint(p, 2, "\204\220%4.4s\221 %s\n", t_team, msg);
 		else
 			G_sprint(p, 2, "%s\n", msg);
 	}
@@ -5475,7 +5529,7 @@ void SetMidairMinHeight()
 	if ( ++k_midair_minheight > 4 )
 		k_midair_minheight = 0;
 
-  cvar_fset("k_midair_minheight", k_midair_minheight);
+	cvar_fset("k_midair_minheight", k_midair_minheight);
 
 	if ( k_midair_minheight == 1 )
 		G_bprint(2, "Midair minimum height set to %s enabled level\n", redtext("bronze"));
@@ -5494,7 +5548,7 @@ void W_SetCurrentAmmo();
 void ToggleInstagib()
 {
 	int k_instagib = bound(0, cvar( "k_instagib" ), 3); 
-  char buf[1024*4];
+	char buf[1024*4];
 	char *cfg_name;
 
 	if ( !is_rules_change_allowed() )
@@ -5746,14 +5800,14 @@ void iplist ()
 
 	for( i = 0, p = world; (p = find_plr( p )); ) {
 		if ( !i )
-			G_sprint(self, 2, "\234IPs list\234 %s\n", redtext("players:"));
+			G_sprint(self, 2, "\x9xIPs list\x9x %s\n", redtext("players:"));
 		iplist_one(self, p);
 		i++;
 	}
 
 	for( i = 0, p = world; (p = find_spc( p )); ) {
 		if ( !i )
-			G_sprint(self, 2, "\234IPs list\234 %s\n", redtext("spectators:"));
+			G_sprint(self, 2, "\x9xIPs list\x9x %s\n", redtext("spectators:"));
 		iplist_one(self, p);
 		i++;
 	}
@@ -5838,7 +5892,7 @@ void mv_playback ()
 
 	i = fp - self->plrfrms;
 
-   	if ( i == self->pb_frame || fp->time > self->pb_time )
+	if ( i == self->pb_frame || fp->time > self->pb_time )
 		return;
 
 	self->pb_frame = i;
@@ -6021,7 +6075,7 @@ void fcheck ()
 
 	if ( trap_CmdArgc() != 2 ) {
 		G_sprint(self, 2, "usage: cmd check <f_query>\n"
-						  "for example: cmd check f_version\n");
+			"for example: cmd check f_version\n");
 		return;
 	}
 
@@ -6034,8 +6088,8 @@ void fcheck ()
 
 	if ( !is_real_adm( self ) ) {
 		if ( strneq(arg_x, "f_version") && strneq(arg_x, "f_modified") && strneq(arg_x,  "f_server") ) {
-			G_sprint(self, 2, "You are not allowed to check \20%s\21\n"
-							  "available checks are: f_version, f_modified and f_server\n", arg_x);
+			G_sprint(self, 2, "You are not allowed to check \020%s\021\n"
+				"available checks are: f_version, f_modified and f_server\n", arg_x);
 			return;
 		}
 	}
@@ -6047,7 +6101,7 @@ void fcheck ()
 	f_check = g_globalvars.time + 3;
 	strlcpy(fcheck_name, arg_x, sizeof(fcheck_name)); // remember check name
 
-	G_bprint(2, "%s is checking \20%s\21\n", self->netname, arg_x);
+	G_bprint(2, "%s is checking \020%s\021\n", self->netname, arg_x);
 	if ( streq(arg_x, "f_version") || streq(arg_x, "f_modified") )
 		G_bprint(3, "%s: %s %d%d\n", self->netname, arg_x, i_rnd(1, 9999), i_rnd(0, 9999));
 	else
@@ -6062,7 +6116,7 @@ void check_fcheck ()
 	if ( !f_check || f_check > g_globalvars.time )
 		return;
 
-	G_bprint(2, "player's \20%s\21 replies:\n", fcheck_name);
+	G_bprint(2, "player's \020%s\021 replies:\n", fcheck_name);
 
 	for( p = world; (p = find_plr( p )); ) {
 		if ( strnull( tmp = p->f_checkbuf ) ) {
@@ -6079,7 +6133,7 @@ void check_fcheck ()
 		}
 	}
 
-	G_bprint(2, "end of player's \20%s\21 replies\n", fcheck_name);
+	G_bprint(2, "end of player's \020%s\021 replies\n", fcheck_name);
 
 	f_check = 0;
 }
@@ -6096,7 +6150,7 @@ void mapcycle ()
 
 		if ( !i )
 			G_sprint(self, 2, 	"%s:\n"
-								"%3.3s | %s\n", redtext("Map cycle"), redtext("id"), redtext("name"));
+				"%3.3s | %s\n", redtext("Map cycle"), redtext("id"), redtext("name"));
 
 		G_sprint(self, 2, "%3.3d | %s%s\n", i + 1, newmap, streq(newmap, g_globalvars.mapname) ? " \x8D current" : "");
 	}
@@ -6277,7 +6331,7 @@ void ToggleArena()
 		// seems we trying turn RA on.
 		if ( !isDuel() )
 		{
-			G_sprint(self, 2, "Set %s mode first\n", redtext("\x93 on \x93"));
+			G_sprint(self, 2, "Set %s mode first\n", redtext("\223 on \223"));
 			return;
 		}
 	}
@@ -6286,7 +6340,7 @@ void ToggleArena()
 
 	if ( isRA() )
 	{
-	  char buf[1024*4];
+		char buf[1024*4];
 		char *cfg_name;
 
 		char *um = "1on1";
@@ -6354,9 +6408,9 @@ void noitems()
 void giveme_usage(void)
 {
 	G_sprint(self, 2, "giveme <q|p|r|s> [seconds]\n"
-					  "giveme rune [1|2|3|4]\n"
-					  "giveme runes\n"
-					  "giveme norunes\n");
+		"giveme rune [1|2|3|4]\n"
+		"giveme runes\n"
+		"giveme norunes\n");
 }
 
 void giveme()

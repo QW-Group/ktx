@@ -113,17 +113,19 @@ static void ShowTeamsBanner (void)
 {
 	int i;
 
-	G_bprint(2, "Ÿ\n");
+	G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+		"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
 
 
 	//	for( i = 666 + 1; i <= k_teamid ; i++ )
-	//		G_bprint(2, "%s%s‘", (i != (666+1) ? " vs " : ""), ezinfokey(world, va("%d", i)));
+	//		G_bprint(2, "%sï¿½%sï¿½", (i != (666+1) ? " vs " : ""), ezinfokey(world, va("%d", i)));
 	for( i = 0; i < min(tmStats_cnt, MAX_TM_STATS); i++ )
-		G_bprint(2, "%s%s‘", (i ? " vs " : ""), tmStats[i].name);
+		G_bprint(2, "%sï¿½%sï¿½", (i ? " vs " : ""), tmStats[i].name);
 
 	G_bprint(2, " %s:\n", redtext("match statistics"));
 
-	G_bprint(2, "Ÿ\n");
+	G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+		"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
 }
 
 static void SummaryTPStats(void)
@@ -135,7 +137,8 @@ static void SummaryTPStats(void)
 
 	G_bprint(2, "\n%s, %s, %s, %s\n", redtext("weapons"), redtext("powerups"),
 		redtext("armors&mhs"), redtext("damage"));
-	G_bprint(2, "Ÿ\n");
+	G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+		"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
 
 	for( i = 0; i < min(tmStats_cnt, MAX_TM_STATS); i++ ) {
 
@@ -147,7 +150,7 @@ static void SummaryTPStats(void)
 
 		// weapons
 		if ( !cvar("k_instagib") ) {
-			G_bprint(2, "%s‘: %s:%s%s%s%s%s\n", tmStats[i].name, redtext("Wp"),
+			G_bprint(2, "ï¿½%sï¿½: %s:%s%s%s%s%s\n", tmStats[i].name, redtext("Wp"),
 				(h_lg  ? va(" %s%.0f%%", redtext("lg"),   h_lg) : ""),
 				(h_rl  ? va(" %s%.0f",   redtext("rl"),   h_rl) : ""),
 				(h_gl  ? va(" %s%.0f",   redtext("gl"),   h_gl) : ""),
@@ -165,7 +168,7 @@ static void SummaryTPStats(void)
 				redtext("ra"), tmStats[i].itm[itRA].tooks, redtext("mh"), tmStats[i].itm[itHEALTH_100].tooks);
 		}
 		else {
-			G_bprint(2, "%s‘: %s:%s\n", tmStats[i].name, redtext("Wp"),
+			G_bprint(2, "ï¿½%sï¿½: %s:%s\n", tmStats[i].name, redtext("Wp"),
 				(h_sg  ? va(" %s%.0f%%", redtext("cg"),   h_sg) : ""));
 		}
 
@@ -205,7 +208,8 @@ static void SummaryTPStats(void)
 			redtext("Quad"), (int)tmStats[i].itm[itQUAD].time);
 	}
 
-	G_bprint(2, "Ÿ\n");
+	G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+		"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
 }
 
 static void TeamsStats (void)
@@ -224,33 +228,26 @@ static void TeamsStats (void)
 	// End of summing
 
 	G_bprint(2, "\n%s: %s\n"
-		"Ÿ\n", redtext("Team scores"),
-		redtext("frags  percentage"));
+		"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n", redtext("Team scores"),
+		redtext("frags ï¿½ percentage"));
 
 	for( i = 0; i < min(tmStats_cnt, MAX_TM_STATS); i++ ) {
-		G_bprint(2, "%s‘: %d", tmStats[i].name, tmStats[i].frags );
+		G_bprint(2, "ï¿½%sï¿½: %d", tmStats[i].name, tmStats[i].frags );
 
 		if( tmStats[i].gfrags )
 			G_bprint( 2, " + (%d) = %d", tmStats[i].gfrags, tmStats[i].frags + tmStats[i].gfrags );
 
 		// effi
-		G_bprint(2, "  %.1f%%\n", (sumfrags > 0 ? ((float)(tmStats[i].frags + tmStats[i].gfrags))/sumfrags * 100 : 0.0));
+		G_bprint(2, " ï¿½ %.1f%%\n", (sumfrags > 0 ? ((float)(tmStats[i].frags + tmStats[i].gfrags))/sumfrags * 100 : 0.0));
 
 		wasPrint = 1;
 	}
 
 	if ( wasPrint )
-		G_bprint(2, "Ÿ\n");
+		G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
 }
-
-
-
-
-
-
-
-
-
 
 // Statistic file generation
 const char *GetMode(void)
@@ -477,7 +474,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 	dmg_team = p->ps.dmg_team;
 	dmg_self = p->ps.dmg_self;
 	dmg_eweapon = p->ps.dmg_eweapon;
-    dmg_td = p->deaths <= 0 ? 99999 : (int)(p->ps.dmg_t / p->deaths);
+    dmg_td = p->deaths <= 0 ? (int)(p->ps.dmg_t + p->s.v.health) : (int)(p->ps.dmg_t / p->deaths);
 	ra    = p->ps.itm[itRA].tooks;
 	ya    = p->ps.itm[itYA].tooks;
 	ga    = p->ps.itm[itGA].tooks;
@@ -586,12 +583,12 @@ void OnePlayerStats(gedict_t *p, int tp)
 	if ( isTeam() && deathmatch == 1 )
 	{
 		G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f %s:%.0f %s:%.0f %s:%.0f\n", redtext("  Damage"),
-			redtext("Tkn"), dmg_t, redtext("Gvn"), dmg_g, redtext("EWep"), dmg_eweapon, redtext("Tm"), dmg_team, redtext("Self"), dmg_self, redtext("ToDie"), dmg_td == -1 ? 99999 : dmg_td);
+			redtext("Tkn"), dmg_t, redtext("Gvn"), dmg_g, redtext("EWep"), dmg_eweapon, redtext("Tm"), dmg_team, redtext("Self"), dmg_self, redtext("ToDie"), dmg_td);
 	}
 	else
 	{
 		G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f %s:%.0f %s:%.0f\n", redtext("  Damage"),
-			redtext("Tkn"), dmg_t, redtext("Gvn"), dmg_g, redtext("Tm"), dmg_team, redtext("Self"), dmg_self, redtext("ToDie"), dmg_td == -1 ? 99999 : dmg_td);
+			redtext("Tkn"), dmg_t, redtext("Gvn"), dmg_g, redtext("Tm"), dmg_team, redtext("Self"), dmg_self, redtext("ToDie"), dmg_td);
 	}
 
 	// times
@@ -687,9 +684,10 @@ void PlayersStats(void)
 
 	tp = isTeam() || isCTF();
 
-	G_bprint(2, "\n%s:\nŸ\n", redtext("Player statistics"));
+	G_bprint(2, "\n%s:\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+		"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n", redtext("Player statistics"));
 	if (!cvar("k_midair"))
-		G_bprint(2, "%s (%s) %s %s\n", redtext( "Frags"), redtext( "rank"), ( tp ? redtext("friendkills "): "" ), redtext( "efficiency" ));
+		G_bprint(2, "%s (%s) %sï¿½ %s\n", redtext( "Frags"), redtext( "rank"), ( tp ? redtext("friendkills "): "" ), redtext( "efficiency" ));
 
 	from1 = 0;
 	p = find_plrghst ( world, &from1 );
@@ -712,7 +710,7 @@ void PlayersStats(void)
 						if (first) {
 							first = 0;
 							if (tp) {
-								G_bprint(2, "Team %s‘:\n", tmp);
+								G_bprint(2, "Team ï¿½%sï¿½:\n", tmp);
 							}
 						}
 
@@ -767,15 +765,16 @@ void TopStats(void)
 	float		f1, h_sg, a_sg;
 	int			from;
 
-	G_bprint(2, "%s‘ %s:\n"
-		"Ÿ\n"
+	G_bprint(2, "ï¿½%sï¿½ %s:\n"
+		"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+		"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n"
 		"      Frags: ", g_globalvars.mapname, redtext("top scorers"));
 
 	from = f1 = 0;
 	p = find_plrghst ( world, &from );
 	while( p ) {
 		if( (!isCTF() && p->s.v.frags == maxfrags) || (isCTF() &&  p->s.v.frags - p->ps.ctf_points == maxfrags)) {
-			G_bprint(2, "%s%s%s %d‘\n", (f1 ? "             " : ""),
+			G_bprint(2, "%s%s%s ï¿½%dï¿½\n", (f1 ? "             " : ""),
 				( isghost( p ) ? "\x83" : "" ), getname( p ), (int)maxfrags);
 			f1 = 1;
 		}
@@ -790,7 +789,7 @@ void TopStats(void)
 	p = find_plrghst ( world, &from );
 	while( p ) {
 		if( p->deaths == maxdeaths ) {
-			G_bprint(2, "%s%s%s %d‘\n", (f1 ? "             " : ""),
+			G_bprint(2, "%s%s%s ï¿½%dï¿½\n", (f1 ? "             " : ""),
 				( isghost( p ) ? "\x83" : "" ),	getname( p ), (int)maxdeaths);
 			f1 = 1;
 		}
@@ -805,7 +804,7 @@ void TopStats(void)
 		p = find_plrghst ( world, &from );
 		while( p ) {
 			if( p->friendly == maxfriend ) {
-				G_bprint(2, "%s%s%s %d‘\n", (f1 ? "             " : ""),
+				G_bprint(2, "%s%s%s ï¿½%dï¿½\n", (f1 ? "             " : ""),
 					( isghost( p ) ? "\x83" : "" ),	getname( p ), (int)maxfriend);
 				f1 = 1;
 			}
@@ -820,7 +819,7 @@ void TopStats(void)
 	p = find_plrghst ( world, &from );
 	while( p ) {
 		if( p->efficiency == maxeffi ) {
-			G_bprint(2, "%s%s%s %.1f%%‘\n", (f1 ? "             " : ""),
+			G_bprint(2, "%s%s%s ï¿½%.1f%%ï¿½\n", (f1 ? "             " : ""),
 				( isghost( p ) ? "\x83" : "" ),	getname( p ), maxeffi);
 			f1 = 1;
 		}
@@ -930,7 +929,7 @@ void TopStats(void)
 			p = find_plrghst ( world, &from );
 			while( p ) {
 				if ( p->ps.caps == maxcaps ) {
-					G_bprint(2, "%s%s%s %d‘\n", (f1 ? "             " : ""),
+					G_bprint(2, "%s%s%s ï¿½%dï¿½\n", (f1 ? "             " : ""),
 						( isghost( p ) ? "\x83" : "" ), getname( p ), (int)maxcaps );
 					f1 = 1;
 				}
@@ -945,7 +944,7 @@ void TopStats(void)
 			p = find_plrghst ( world, &from );
 			while( p ) {
 				if ( p->ps.f_defends == maxdefends ) {
-					G_bprint(2, "%s%s%s %d‘\n", (f1 ? "             " : ""),
+					G_bprint(2, "%s%s%s ï¿½%dï¿½\n", (f1 ? "             " : ""),
 						( isghost( p ) ? "\x83" : "" ), getname( p ), (int)maxdefends );
 					f1 = 1;
 				}
@@ -954,7 +953,8 @@ void TopStats(void)
 		}
 	}
 
-	G_bprint(2, "\nŸ\n");
+	G_bprint(2, "\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+		"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
 }
 
 
@@ -984,7 +984,8 @@ void TopMidairStats ( )
 		p = find_plrghst ( p, &from );
 	}
 
-	G_bprint(2, "%s:\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n", redtext("Top performers"));
+	G_bprint(2, "%s:\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+		"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n", redtext("Top performers"));
 
 	from = f1 = 0;
 	p = find_plrghst ( world, &from );
@@ -1105,7 +1106,8 @@ void TopMidairStats ( )
 		p = find_plrghst ( p, &from );
 	}
 
-	G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
+	G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+		"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
 }
 
 void OnePlayerInstagibStats( gedict_t *p, int tp )
@@ -1171,7 +1173,8 @@ void OnePlayerInstagibStats( gedict_t *p, int tp )
 	G_bprint(2, "%s", stats_text);
 
 	if ( !tp )
-		G_bprint(2,"Ÿ\n");
+		G_bprint(2,"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+		"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
 
 	maxfrags   = max((isCTF() ? p->s.v.frags - p->ps.ctf_points : p->s.v.frags), maxfrags);
 	maxdeaths  = max(p->deaths, maxdeaths);
@@ -1208,7 +1211,8 @@ void OnePlayerMidairStats( gedict_t *p, int tp )
 	G_bprint(2, "   %-13s: %.1f\n", redtext("avg height"), (p->ps.mid_maxheight ? p->ps.mid_avgheight : 0));
 	G_bprint(2, "   %-13s: %s\n", redtext("rl efficiency"), (ph_rl ? va("%.1f%%", ph_rl) : "  0.0%"));
 
-	G_bprint(2,"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n" );
+	G_bprint(2,"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+		"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n" );
 }
 
 void EM_CorrectStats(void)

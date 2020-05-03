@@ -443,9 +443,15 @@ void G_InitGame( int levelTime, int randomSeed )
 
 	// put mod version in serverinfo
 	localcmd( "serverinfo \"%s\" \"%s\"\n", MOD_SERVERINFO_MOD_KEY, MOD_VERSION );
-	//localcmd( "serverinfo \"%s\" \"%s\"\n", MOD_SERVERINFO_BUILD_KEY, GIT_COMMIT );
-	//localcmd( "serverinfo \"%s\" \"%s\"\n", MOD_SERVERINFO_DATE_KEY, MOD_BUILD_DATE );
-	//localcmd( "serverinfo \"%s\" \"%s\"\n", MOD_SERVERINFO_URL_KEY, MOD_URL );
+
+	// set mod information cvars
+	cvar_set("qwm_name", MOD_NAME);
+	cvar_set("qwm_fullname", MOD_FULLNAME);
+	cvar_set("qwm_version", MOD_VERSION);
+	cvar_set("qwm_buildnum", (GIT_COMMIT ? GIT_COMMIT : "unknown"));
+	cvar_set("qwm_platform", QW_PLATFORM_SHORT);
+	cvar_set("qwm_builddate", MOD_BUILD_DATE);
+	cvar_set("qwm_homepage", MOD_URL);
 }
 
 void G_ShutDown()
