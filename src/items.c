@@ -626,7 +626,7 @@ void DoWeaponChange( int new, qbool backpack )
 		return;
 
 	if ( !w_switch ) {
-		if ( iKey( self, "w_rank_fallback" ) ) {
+		if ( iKey( self, "w_rank" ) ) {
 			w_switch = W_BestWeapon();
 		} else {
 			w_switch = 8;
