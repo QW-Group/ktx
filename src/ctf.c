@@ -206,7 +206,7 @@ void RegenFlag( gedict_t *flag )
 	flag->cnt2 = 0.0;
 	flag->s.v.owner = EDICT_TO_PROG( world );
 	SetVector( flag->s.v.velocity, 0, 0, 0 );
-	sound( flag, CHAN_VOICE, "items/itembk2.wav", 1, ATTN_NORM);
+	sound( flag, CHAN_FLAG, "items/itembk2.wav", 1, ATTN_NORM);
 	flag->s.v.nextthink = g_globalvars.time + 0.2;
 	flag->s.v.groundentity = EDICT_TO_PROG( world );
 	flag->touch = (func_t) FlagTouch;
@@ -306,7 +306,7 @@ void FlagTouch()
 				other->ctf_flag -= ( (int) other->ctf_flag & CTF_FLAG );
 				other->s.v.effects -= ( (int) other->s.v.effects & (EF_FLAG1 | EF_FLAG2) );
 
-				sound( other, CHAN_VOICE, "misc/flagcap.wav", 1, ATTN_NONE);
+				sound( other, CHAN_FLAG, "misc/flagcap.wav", 1, ATTN_NONE);
 
 				G_bprint( 2, "%s", other->netname );
 				if ( self->k_teamnumber == 1 )
@@ -372,7 +372,7 @@ void FlagTouch()
 			other->ps.ctf_points += RETURN_BONUS;
 			other->ps.returns++;
 			other->return_flag_time = g_globalvars.time;
-			sound (other, CHAN_ITEM, self->noise1, 1, ATTN_NONE);
+			sound (other, CHAN_FLAG, self->noise1, 1, ATTN_NONE);
 			RegenFlag( self );
 
 			G_bprint( 2, "%s", other->netname);
@@ -395,7 +395,7 @@ void FlagTouch()
 	refresh_plus_scores (); // update players status bar faster
 
 	// Pick up the flag
-	sound( other, CHAN_ITEM, self->noise, 1, ATTN_NONE );
+	sound( other, CHAN_FLAG, self->noise, 1, ATTN_NONE );
 	other->ctf_flag |= CTF_FLAG;
 
 	other->s.v.items = (int) other->s.v.items | (int) self->s.v.items;
