@@ -14,3 +14,96 @@ race_route_add_start
 	race_set_route_weapon_mode raceWeaponNo 
 	race_set_route_falsestart_mode raceFalseStartNo 
 race_route_add_end
+
+race_route_add_start
+	race_add_route_node   -45   685  -743    0  -45
+	race_add_route_node    16  -736 -1024    0    0
+
+	race_set_route_name "Ztricks: 1st room" "1st room"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node  3200  2900 -1000    0   90
+	race_add_route_node -1344  2816  -992    0    0
+
+	race_set_route_name "Ztricks: 2nd room" "2nd room"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node -1200  3050 -1000    0 -180
+	race_add_route_node  3200  2945 -1000    0    0
+	race_add_route_node  3250  2945 -1000    0    0
+
+	race_set_route_name "Ztricks: 2nd room back" "2nd room back"
+	race_set_route_timeout 20
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node -3345  3000  -872    0 -180
+	race_add_route_node -3424  -464  -864    0    0
+
+	race_set_route_name "Ztricks: 3rd room" "3rd room"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node -2150  2950  -904    0  180
+	race_add_route_node -2272  -688  -896    0    0
+
+	race_set_route_name "Ztricks: 4th room" "4th room"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node -2070  -640  -904    0   90
+	race_add_route_node -2380  2950  -904    0    0
+	race_add_route_node -2416  3038  -904    0    0
+
+	race_set_route_name "Ztricks: 4th room back" "4th room back"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node -2880 -2336 -2856    0  -90
+	race_add_route_node   976 -2032 -2848    0    0
+
+	race_set_route_name "Ztricks: 6th room" "6th room"
+	race_set_route_timeout 15
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node   900 -2540 -2856    0    0
+	race_add_route_node -2880 -2336 -2856    0    0
+	race_add_route_node -3025 -2336 -2856    0    0
+
+	race_set_route_name "Ztricks: 6th room back" "6th room back"
+	race_set_route_timeout 30
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node  3951  3951  3864    0 -135
+	race_add_route_node  -640  1568  -544    0    0
+
+	race_set_route_name "Ztricks: 7th room" "7th room"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
