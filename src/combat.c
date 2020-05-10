@@ -314,41 +314,43 @@ static float newceil( float f )
 #endif
 
 // this was part of T_Damage(), but I split it, so less mess
-void MidairDamageBonus(gedict_t *attacker, float midheight)
+void MidairDamageBonus(gedict_t *attacker, gedict_t *targ, float midheight)
 {
+	char *rank, *icon;
+	rank = icon = "";
+
 	attacker->ps.mid_total++;
-	G_bprint( 2, "%s got ", attacker->netname );
 
 	if ( midheight > 1024 )
 	{
 		attacker->ps.mid_platinum++;
 		attacker->s.v.frags += 8;
-		G_bprint( 2, "%s", redtext("platinum") );
+		rank = "platinum";
+		icon = "\211";
 	}
 	else if ( midheight > 512 )
 	{
 		attacker->ps.mid_gold++;
 		attacker->s.v.frags += 4;
-		G_bprint( 2, "%s", redtext("gold") );
+		rank = "gold";
+		icon = "\210";
 	}
 	else if ( midheight > 256 )
 	{
 		attacker->ps.mid_silver++;
 		attacker->s.v.frags += 2;
-		G_bprint( 2, "%s", redtext("silver") );
+		rank = "silver";
+		icon = "\204";
 	}
 	else
 	{
 		attacker->ps.mid_bronze++;
 		attacker->s.v.frags += 1;
-		G_bprint( 2, "%s", redtext("bronze") );
+		rank = "bronze";
+		icon = "\213";
 	}
 
-	G_bprint(2, " midair");
-	if (midheight > 128)
-		G_bprint(2, " (height: %s)\n", dig3s( "%.1f", midheight));
-	else
-		G_bprint(2, "\n");
+	G_bprint(2, "%s %-15s \133%s\135 by %s on %s\n", icon, dig3s("%s midair", rank), dig3s( "%7.1f", midheight), attacker->netname, targ->netname);
 
 	if (attacker->ps.mid_total > 1)
 	{
@@ -939,7 +941,7 @@ void T_Damage( gedict_t * targ, gedict_t * inflictor, gedict_t * attacker, float
 
 	// mid air bonuses
 	if ( midair && match_in_progress == 2 && attacker != targ && take && rl_dmg)
-			MidairDamageBonus(attacker, midheight);
+			MidairDamageBonus(attacker, targ, midheight);
 
 	if ( midair && match_in_progress == 2 && stomp_dmg ) {
 		attacker->ps.mid_stomps++;
