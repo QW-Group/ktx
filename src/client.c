@@ -4160,7 +4160,8 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				deathstring2 = " ?\n";
 			}
 
-			G_bprint (PRINT_MEDIUM,"%s%s%s%s", targ->netname, deathstring, attacker->netname, deathstring2);
+			if (!cvar("k_midair"))
+				G_bprint (PRINT_MEDIUM,"%s%s%s%s", targ->netname, deathstring, attacker->netname, deathstring2);
 		}
 
 		if (isHoonyModeDuel()) {
