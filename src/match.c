@@ -188,7 +188,7 @@ void ListDemoMarkers()
 	if ( !demo_marker_index )
 		return;
 
-    G_bprint(2, "%s:\nŸ\n", redtext("Demo markers"));
+    G_bprint(2, "%s:\nï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\n", redtext("Demo markers"));
 
 	for (i = 0; i < demo_marker_index; ++i)
 	{
@@ -196,7 +196,7 @@ void ListDemoMarkers()
 		G_bprint( 2, "%s: %d:%02d \220%s\221\n", redtext("Time"), (total / 60), (total % 60), demo_markers[i].markername);
 	}
 
-	G_bprint(2, "Ÿ\n");
+	G_bprint(2, "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\n");
 }
 
 void EM_on_MatchEndBreak( int isBreak )
@@ -540,7 +540,7 @@ void SM_PrepareMap()
 		// going for the if content record..
 		if (   isRA()
 			|| isRACE()
-			|| ( deathmatch == 4 && cvar("k_instagib") )
+			|| ( deathmatch == 4 && ( cvar("k_instagib") || cvar("k_midair") ) )
 			|| cvar("k_noitems")
 			|| k_bloodfest
 		   )
