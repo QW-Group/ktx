@@ -951,6 +951,9 @@ extern	int   k_teleport_cap;	// cap for keeping velocity through tele
 
 extern	int   k_practice;		// is server in practice mode
 extern	int   k_matchLess;	    // is server in matchLess mode
+extern  int   k_matchLess_idle_time;
+extern  int   k_matchLess_idle_warn;
+
 extern  gameType_t 	  k_mode;   // game type: DUEL, TP, FFA
 extern	int   k_lastvotedmap;	// last voted map, used for agree command?
 // { CTF

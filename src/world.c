@@ -948,6 +948,8 @@ void FirstFrame	( )
 // below globals changed only here
 
 	k_matchLess = cvar( "k_matchless" );
+	k_matchLess_idle_time = cvar( "k_matchless_max_idle_time" ) ? cvar( "k_matchless_max_idle_time" ) : 0;
+	k_matchLess_idle_warn = k_matchLess_idle_time - (k_matchLess_idle_time > 30 ? 30 : (k_matchLess_idle_time/2));
 	if ( !cvar( "deathmatch" ) || cvar( "coop" ) )
 	{
 		k_matchLess = 1; // treat coop or singleplayer as matchLess

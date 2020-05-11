@@ -56,6 +56,8 @@ int k_teleport_cap = 24;	// cap for keeping velocity through tele
 // }
 int	k_practice;			// is server in practice mode
 int	k_matchLess;		// is server in matchLess mode
+int     k_matchLess_idle_time;
+int     k_matchLess_idle_warn;
 gameType_t 	  k_mode;   // game type: DUEL, TP, FFA
 int	k_lastvotedmap;		// last voted map, used for agree command?
 
