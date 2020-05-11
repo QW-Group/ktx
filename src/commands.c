@@ -2117,6 +2117,12 @@ void TogglePowerups()
 		return;
 	}
 
+	if ( cvar("k_midair") )
+	{
+		G_bprint(2, "%s are disabled with Midair\n", redtext("Powerups"));
+		return;
+	}
+
 	if ( trap_CmdArgc() <= 1 )
 	{	// no arguments, just toggle on/off powerups
 		cvar_toggle_msg( self, "k_pow", redtext("powerups") );
