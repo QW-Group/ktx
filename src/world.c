@@ -709,6 +709,7 @@ void FirstFrame	( )
 	RegisterCvar("k_auto_xonx"); // switch XonX mode dependant on players + specs count
 	RegisterCvar("k_matchless");
 	RegisterCvar("k_matchless_countdown");
+	RegisterCvar("k_matchless_max_idle_time"); // maximum time user can be idle in matchless mode
 	RegisterCvar("k_use_matchless_dir"); // use configs/usermodes/matchless instead of configs/usermodes/ffa in matchless mode
 	RegisterCvar("k_disallow_kfjump");
 	RegisterCvar("k_disallow_krjump");

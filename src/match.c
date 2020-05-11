@@ -474,7 +474,30 @@ void CheckOvertime()
 // Tells the time every now and then.
 void TimerThink ()
 {
-//	G_bprint(2, "left %2d:%2d\n", (int)self->cnt, (int)self->cnt2);
+	gedict_t *p;
+	int max_idle_time = cvar( "k_matchless_max_idle_time" ) ? cvar( "k_matchless_max_idle_time" ) : 0;
+
+	//if in matchless mode, check that the user hasn't exceeded k_matchless_max_idle_time
+	if ( k_matchLess && CountPlayers() && match_in_progress && max_idle_time ){
+		for( p = world; (p = find_client( p )); )
+		{
+			if( p->attack_finished != p->attack_finished_last ) {
+				p->attack_finished_last=p->attack_finished;
+				p->attack_idle_time=0;
+			} else {
+				if( p->attack_idle_time > max_idle_time ){
+					G_sprint(p, 2, "You were forced to reconnect as spectator by exceeding the maximum idle time of %i seconds.\n", max_idle_time);
+					stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "spectator 1\n");
+					if ( !strnull( ezinfokey(p, "Qizmo") ) )
+						stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "say ,:dis\nwait;wait;wait; say ,:reconnect\n");
+					else
+						stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "disconnect\nwait;wait;reconnect\n");
+				}
+				p->attack_idle_time++;
+			}
+		}
+	}
+
 
 	if( !k_matchLess && !CountPlayers() ) {
 		EndMatch( 1 );
