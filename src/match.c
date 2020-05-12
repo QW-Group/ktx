@@ -475,30 +475,25 @@ void CheckOvertime()
 void TimerThink ()
 {
 	gedict_t *p;
+	int idle_time;
 
 	//if in matchless mode, check that the user hasn't exceeded k_matchless_max_idle_time
 	if ( k_matchLess && CountPlayers() && match_in_progress && k_matchLess_idle_time){
 		for( p = world; (p = find_client( p )); )
 		{
-			if( p->attack_finished != p->attack_finished_last ) {
-				p->attack_finished_last = p->attack_finished;
-				p->attack_idle_time = 0;
-			} else {
-				if( p->attack_idle_time > k_matchLess_idle_time ){
-					G_sprint(p, 2, "You were forced to reconnect as spectator by exceeding the maximum idle time of %i seconds.\n", k_matchLess_idle_time);
-					stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "spectator 1\n");
-					if ( !strnull( ezinfokey(p, "Qizmo") ) )
-						stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "say ,:dis\nwait;wait;wait; say ,:reconnect\n");
-					else
-						stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "disconnect\nwait;wait;reconnect\n");
-				} else if  ( p->attack_idle_time == k_matchLess_idle_warn ) {
-					G_sprint(p, 2, "\x87%s You will be forced to spectate if you do not fire within %i seconds!\n", redtext( "WARNING:" ), (k_matchLess_idle_time-k_matchLess_idle_warn));
-				}
-				p->attack_idle_time++;
+			idle_time=(int)(g_globalvars.time-p->attack_finished);
+			if( idle_time > k_matchLess_idle_time ){
+				G_sprint(p, 2, "You were forced to reconnect as spectator by exceeding the maximum idle time of %i seconds.\n", k_matchLess_idle_time);
+				stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "spectator 1\n");
+				if ( !strnull( ezinfokey(p, "Qizmo") ) )
+					stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "say ,:dis\nwait;wait;wait; say ,:reconnect\n");
+				else
+					stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "disconnect\nwait;wait;reconnect\n");
+			} else if  ( idle_time == k_matchLess_idle_warn ) {
+				G_sprint(p, 2, "\x87%s You will be forced to spectate if you do not fire within %i seconds!\n", redtext( "WARNING:" ), (k_matchLess_idle_time-k_matchLess_idle_warn));
 			}
 		}
 	}
-
 
 	if( !k_matchLess && !CountPlayers() ) {
 		EndMatch( 1 );
