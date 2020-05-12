@@ -814,8 +814,6 @@ typedef struct gedict_s {
 	float           dmg;
 	float           lip;
 	float           attack_finished;
-	float           attack_finished_last;
-	int             attack_idle_time; // keep track of last time client fired weapon in matchless
 	float           pain_finished;
 
 	float           invincible_finished;
