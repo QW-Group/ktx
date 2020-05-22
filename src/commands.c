@@ -1416,10 +1416,10 @@ void ShowMessages()
 void ShowCharsetTableHexa()
 {
 	int i;
-	G_sprint(self, 2, "\n%s\n\n%2s0123456789ABCDEF\n", redtext("Hexadecimal charset table:"), "");
+	G_sprint(self, 2, "\n%s\n\n   0123456789ABCDEF\n   ................\n", redtext("Hexadecimal charset table:"));
 	for( i = 16; i < 256; i++) {
 		if ( i % 16 == 0) 
-			G_sprint(self, 2, "%1X\337", i / 16);
+			G_sprint(self, 2, "%1X..", i / 16);
 		G_sprint(self, 2, "%c", i);
 		if ( i % 16 == 15 || i == 255)
 			G_sprint(self, 2, "\n");
@@ -1433,10 +1433,10 @@ void ShowCharsetTableHexa()
 void ShowCharsetTableOctal()
 {
 	int i;
-	G_sprint(self, 2, "\n%s\n\n%3s01234567\n", redtext("Octal charset table:"), "");
+	G_sprint(self, 2, "\n%s\n\n    01234567\n    ........\n", redtext("Octal charset table:"));
 	for( i = 16; i < 256; i++) {
 		if ( i % 8 == 0) 
-			G_sprint(self, 2, "%02o\337", i / 8);
+			G_sprint(self, 2, "%02o..", i / 8);
 		G_sprint(self, 2, "%c", i);
 		if ( i % 8 == 7 || i == 255)
 			G_sprint(self, 2, "\n");

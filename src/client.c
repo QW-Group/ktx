@@ -3785,7 +3785,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 		return; // nothing TODO in non match
 
 	if ( isCA() && ra_match_fight != 2 )
-		return; // nothing TODO in CA mode while coutdown
+		return; // nothing TODO in CA mode while countdown
 
     if ( targ->ct != ctPlayer )
 		return;
@@ -3865,7 +3865,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	// mortal trying telefrag someone who has 666
 	if ( dtTELE2 == targ->deathtype )
 	{
-		G_bprint (PRINT_MEDIUM, "Satan's power deflects %s's telefrag\n", targ->netname);
+		G_bprint (PRINT_MEDIUM, "Satan's power deflects %s's telefrag\n", victimname);
 
         targ->s.v.frags -= 1;
 		logfrag (targ, targ);
@@ -3875,7 +3875,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	// double 666 telefrag (can happen often in deathmatch 4)
 	if ( dtTELE3 == targ->deathtype )
 	{
-		G_bprint (PRINT_MEDIUM, "%s was telefragged by %s's Satan's power\n", targ->netname, attacker->netname);
+		G_bprint (PRINT_MEDIUM, "%s was telefragged by %s's Satan's power\n", victimname, attackername);
 
 		targ->s.v.frags -= 1;
 		logfrag (targ, targ);
@@ -3930,7 +3930,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			else
                 deathstring = " somehow becomes bored with life\n"; // hm, and how it is possible?
 
-			G_bprint (PRINT_MEDIUM, "%s%s", targ->netname, deathstring);
+			G_bprint (PRINT_MEDIUM, "%s%s", victimname, deathstring);
 
 			if (isHoonyModeDuel())
 				HM_suicide(targ);
@@ -3953,11 +3953,11 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			// some deathtypes have specific death messages
 
 			if ( dtTELE1 == targ->deathtype ) {
-				G_bprint (PRINT_MEDIUM, "%s was telefragged by %s teammate\n", targ->netname, g_his(targ));
+				G_bprint (PRINT_MEDIUM, "%s was telefragged by %s teammate\n", victimname, g_his(targ));
 				return;
 			}
 			else if ( dtSQUISH == targ->deathtype ) {
-				G_bprint (PRINT_MEDIUM, "%s squished a teammate\n", attacker->netname);
+				G_bprint (PRINT_MEDIUM, "%s squished a teammate\n", attackername);
 				return;
 			}
 			else if ( dtSTOMP == targ->deathtype ) {
@@ -3966,7 +3966,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 					default: deathstring = " was crushed by "; break;
 				}
 
-				G_bprint (PRINT_MEDIUM,"%s%s%s teammate\n",	targ->netname, deathstring, g_his( targ ));
+				G_bprint (PRINT_MEDIUM,"%s%s%s teammate\n",	victimname, deathstring, g_his( targ ));
 				return;
 			}
 
@@ -3979,7 +3979,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				default: deathstring = " mows down a teammate\n"; break;
 			}
 
-			G_bprint (PRINT_MEDIUM, "%s%s", attacker->netname, deathstring);
+			G_bprint (PRINT_MEDIUM, "%s%s", attackername, deathstring);
 			return;
 		}
 		else
@@ -3991,8 +3991,8 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			}
 			logfrag (attacker, targ);
 
-			attacker->victim = targ->netname;
-			targ->killer = attacker->netname;
+			attacker->victim = victimname;
+			targ->killer = attackername;
 
 			if ( targ->spawn_time + 2 > g_globalvars.time )
 				attacker->ps.spawn_frags++;
@@ -4006,7 +4006,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				deathstring = " was telefragged by ";
 			}
 			else if ( dtSQUISH == targ->deathtype )	{
-				G_bprint (PRINT_MEDIUM, "%s squishes %s\n", attacker->netname, targ->netname);
+				G_bprint (PRINT_MEDIUM, "%s squishes %s\n", attackername, victimname);
 
 				if (isHoonyModeDuel()) {
 					HM_next_point(attacker, targ);
@@ -4025,13 +4025,13 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 						case 2:  deathstring = " was jumped by "; break;
 						case 3:  deathstring = " was crushed by "; break;
 						default:
-							 	G_bprint (PRINT_MEDIUM, "%s stomps %s\n", attacker->netname, targ->netname);
+							G_bprint (PRINT_MEDIUM, "%s stomps %s\n", attackername, victimname);
 
-								if (isHoonyModeDuel()) {
-									HM_next_point(attacker, targ);
-								}
+							if (isHoonyModeDuel()) {
+								HM_next_point(attacker, targ);
+							}
 
-								return; // !!! return !!!
+							return; // !!! return !!!
 					}
 				}
 			}
@@ -4069,13 +4069,13 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 				deathstring = ( targ->s.v.health < -40 ? " was gibbed by " : " rides " );
 				deathstring2 = "'s rocket\n";
 
-				if ( attacker->super_damage_finished > 0 && targ->s.v.health < -40 )
+				if ( attacker->super_damage_finished > 0 && targ->s.v.health < -40 && (!cvar("k_midair")))
 				{
 					switch ( (int)(g_random() * 3) ) {
 						case 0: deathstring = " was brutalized by "; break;
 						case 1:	deathstring = " was smeared by "; break;
 						default:
-								G_bprint (PRINT_MEDIUM, "%s rips %s a new one\n", attacker->netname, targ->netname);
+								G_bprint (PRINT_MEDIUM, "%s rips %s a new one\n", attackername, victimname);
 
 								// hoonymode shouldn't have quad but just in case...
 								if (isHoonyModeDuel()) {
@@ -4147,11 +4147,11 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			{
 				switch( (int)(g_random() * 2) ) {
 					case 0:
-							 deathstring = " drains ";
-							 deathstring2 = "'s batteries\n"; break;
+						deathstring = " drains ";
+						deathstring2 = "'s batteries\n"; break;
 					default:
-							 deathstring = " accepts ";
-							 deathstring2 = "'s discharge\n";
+						deathstring = " accepts ";
+						deathstring2 = "'s discharge\n";
 				}
 			}
 			else {
@@ -4161,7 +4161,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			}
 
 			if (!cvar("k_midair"))
-				G_bprint (PRINT_MEDIUM,"%s%s%s%s", targ->netname, deathstring, attacker->netname, deathstring2);
+				G_bprint (PRINT_MEDIUM,"%s%s%s%s", victimname, deathstring, attackername, deathstring2);
 		}
 
 		if (isHoonyModeDuel()) {
@@ -4247,7 +4247,7 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 			deathstring = " died\n";
 		}
 
-		G_bprint (PRINT_MEDIUM, "%s%s", targ->netname, deathstring );
+		G_bprint (PRINT_MEDIUM, "%s%s", victimname, deathstring );
 
 		if (isHoonyModeDuel())
 			HM_suicide(targ);
