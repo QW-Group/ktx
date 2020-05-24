@@ -478,8 +478,8 @@ void TimerThink ()
 	int idle_time;
 
 	//if in matchless mode, check that the user hasn't exceeded k_matchless_max_idle_time
-	if ( k_matchLess && CountPlayers() && match_in_progress && k_matchLess_idle_time){
-		for( p = world; (p = find_client( p )); )
+	if ( k_matchLess && CountPlayers() && match_in_progress && k_matchLess_idle_time ){
+		for( p = world; (p = find_plr( p )); )
 		{
 			idle_time=(int)(g_globalvars.time-p->attack_finished);
 			if( idle_time > k_matchLess_idle_time ){
