@@ -188,7 +188,7 @@ void ListDemoMarkers()
 	if ( !demo_marker_index )
 		return;
 
-    G_bprint(2, "%s:\n�����������������������������������\n", redtext("Demo markers"));
+    G_bprint(2, "%s:\n\n", redtext("Demo markers"));
 
 	for (i = 0; i < demo_marker_index; ++i)
 	{
@@ -196,7 +196,7 @@ void ListDemoMarkers()
 		G_bprint( 2, "%s: %d:%02d \220%s\221\n", redtext("Time"), (total / 60), (total % 60), demo_markers[i].markername);
 	}
 
-	G_bprint(2, "�����������������������������������\n");
+	G_bprint(2, "\n");
 }
 
 void EM_on_MatchEndBreak( int isBreak )
