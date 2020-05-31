@@ -188,7 +188,8 @@ void ListDemoMarkers()
 	if ( !demo_marker_index )
 		return;
 
-    G_bprint(2, "%s:\n�����������������������������������\n", redtext("Demo markers"));
+    G_bprint(2, "%s:\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+		"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n", redtext("Demo markers"));
 
 	for (i = 0; i < demo_marker_index; ++i)
 	{
@@ -196,7 +197,8 @@ void ListDemoMarkers()
 		G_bprint( 2, "%s: %d:%02d \220%s\221\n", redtext("Time"), (total / 60), (total % 60), demo_markers[i].markername);
 	}
 
-	G_bprint(2, "�����������������������������������\n");
+	G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+		"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
 }
 
 void EM_on_MatchEndBreak( int isBreak )
@@ -448,7 +450,7 @@ void CheckOvertime()
 		self->cnt2 = 60;
 		localcmd("serverinfo status \"%d min left\"\n", (int)self->cnt);
 
-		G_bprint(2, "\x90%s\x91 minute%s overtime follows\n", dig3(k_exttime), count_s(k_exttime));
+		G_bprint(2, "\220%s\221 minute%s overtime follows\n", dig3(k_exttime), count_s(k_exttime));
 		self->s.v.nextthink = g_globalvars.time + 1;
 		match_end_time += self->cnt * 60;
 	}
@@ -490,7 +492,7 @@ void TimerThink ()
 				else
 					stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "disconnect\nwait;wait;reconnect\n");
 			} else if  ( idle_time == k_matchLess_idle_warn ) {
-				G_sprint(p, 2, "\x87%s You will be forced to spectate if you do not fire within %i seconds!\n", redtext( "WARNING:" ), (k_matchLess_idle_time-k_matchLess_idle_warn));
+				G_sprint(p, 2, "\207%s You will be forced to spectate if you do not fire within %i seconds!\n", redtext( "WARNING:" ), (k_matchLess_idle_time-k_matchLess_idle_warn));
 			}
 		}
 	}
@@ -519,7 +521,7 @@ void TimerThink ()
 			return;
 		}
 
-		G_bprint(2, "\x90%s\x91 minute%s remaining\n", dig3(self->cnt), count_s(self->cnt));
+		G_bprint(2, "\220%s\221 minute%s remaining\n", dig3(self->cnt), count_s(self->cnt));
 
 		self->s.v.nextthink = g_globalvars.time + 1;
 
@@ -527,7 +529,7 @@ void TimerThink ()
 			int sc = get_scores1() - get_scores2();
 
 			if ( sc ) {
-				G_bprint(2, "%s \x90%s\x91 leads by %s frag%s\n",
+				G_bprint(2, "%s \220%s\221 leads by %s frag%s\n",
 						redtext("Team"), cvar_string ( ( sc > 0 ? "_k_team1" : "_k_team2" ) ),
 						dig3(abs( (int)sc )), count_s( abs( (int)sc ) ) );
 			}
@@ -538,7 +540,7 @@ void TimerThink ()
 	}
 
 	if( self->cnt == 1 && ( self->cnt2 == 30 || self->cnt2 == 15 || self->cnt2 <= 10 ) )
-		G_bprint(2, "\x90%s\x91 second%s\n", dig3( self->cnt2 ), count_s( self->cnt2 ) );
+		G_bprint(2, "\220%s\221 second%s\n", dig3( self->cnt2 ), count_s( self->cnt2 ) );
 
 	self->s.v.nextthink = g_globalvars.time + 1;
 }
@@ -757,9 +759,9 @@ void SM_PrepareHostname()
 	cvar_set( "_k_host", cvar_string("hostname") );  // save host name at match start
 
 	if ( k_showscores && !strnull( team1 ) && !strnull( team2 ) )
-		cvar_set("hostname", va("%s (%.4s vs. %.4s)\x87", cvar_string("hostname"), team1, team2));
+		cvar_set("hostname", va("%s (%.4s vs. %.4s)\207", cvar_string("hostname"), team1, team2));
 	else
-		cvar_set("hostname", va("%s\x87", cvar_string("hostname")));
+		cvar_set("hostname", va("%s\207", cvar_string("hostname")));
 }
 
 void SM_on_MatchStart()
@@ -1954,7 +1956,7 @@ void PlayerReady ()
 	}
 
 	if ( GetHandicap(self) != 100 )
-		G_sprint(self, 2, "\x87%s you are using handicap!\n", redtext( "WARNING:" ));
+		G_sprint(self, 2, "\207%s you are using handicap!\n", redtext( "WARNING:" ));
 
 	self->ready = 1;
 	self->v.brk = 0;
@@ -1971,7 +1973,7 @@ void PlayerReady ()
 
 	if (!isHoonyModeAny() || HM_current_point() == 0) {
 		G_bprint(2, "%s %s%s\n", self->netname, redtext("is ready"),
-			((isTeam() || isCTF()) ? va(" \x90%s\x91", getteam(self)) : ""));
+			((isTeam() || isCTF()) ? va(" \220%s\221", getteam(self)) : ""));
 	}
 
 	nready = CountRPlayers();
