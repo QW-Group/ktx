@@ -1332,9 +1332,10 @@ void FixRules ( )
 			trap_cvar_set_float("teamplay", (teamplay = 0));
 		if ( isCTF() )
 		{
-			trap_cvar_set_float("teamplay", (teamplay = 2));
 			// Below commands only needed if "k_matchless 1" and "k_mode 4" are forced via rcon
-			tp = 2;		// Need to set this so that we don't get the "teamplay changed to: 2" warning from the logic below
+			if ( !teamplay )
+				trap_cvar_set_float("teamplay", (teamplay = 2));
+			tp = teamplay;  // Need to set this so that we don't get the "teamplay changed to: X" warning from the logic below
 			km = 4;		// Need to set this so that we don't get the "k_mode changed to: 2" warning from the logic below
 		}
 
