@@ -51,12 +51,17 @@ field_t expfields[] =
 	{ "gravity", 		FOFS(gravity), 		F_FLOAT },
 	{ "isBot", 			FOFS(isBot), 		F_INT },
 	{ "brokenankle", 	FOFS(brokenankle), 	F_FLOAT },
-	{ "mod_admin", 		FOFS(k_admin), 		F_INT },
 	{ "items2", 		FOFS(items2), 		F_FLOAT },
 	{ "hideentity", 	FOFS(hideentity), 	F_INT },
 	{ "trackent", 		FOFS(trackent), 	F_INT },
 	{ "hideplayers", 	FOFS(hideplayers), 	F_INT },
+// FTE does not support this.
+// We does not really have to explicitly disable them since server engine should ignore unsupported fields.
+// But Spike insists on this. Probably for clarity.
+#ifndef FTESV
+	{ "mod_admin", 		FOFS(k_admin), 		F_INT },
 	{ "teleported", 	FOFS(teleported), 	F_INT },
+#endif
 	{ NULL }
 };
 
@@ -105,6 +110,8 @@ void SaveLevelStartParams(gedict_t *e);
 
 qbool FTE_sv = false;
 
+static qbool G_InitExtensions(void);
+
 /*
  ================
  vmMain
@@ -139,9 +146,12 @@ intptr_t VISIBILITY_VISIBLE vmMain(
 
 			if (strstr(ezinfokey(world, "*version"), "FTE"))
 			{
-				G_cprint("KTX: FTE server detected\n");
+				G_cprint("^2KTX: FTE server detected, yay!\n");
 				FTE_sv = true;
 			}
+
+			if (!G_InitExtensions())
+				return 0;
 
 			G_InitGame(arg0, arg1);
 
@@ -636,3 +646,47 @@ static qbool check_ezquake(gedict_t *p)
 
 	return false;
 }
+
+//===========================================================================
+
+#ifdef FTESV
+
+qbool haveextensiontab[G_EXTENSIONS_LAST-G_EXTENSIONS_FIRST];
+
+static qbool G_InitExtensions(void)
+{
+	qbool success = true;
+	struct
+	{
+		const char *name;
+		int id;
+	} exttraps[] =
+	{
+		{"SetExtField",			G_SETEXTFIELD},
+		{"GetExtField",			G_GETEXTFIELD},
+		{"ChangeLevelHub",		G_CHANGELEVEL_HUB},
+		{"URI_Query",			G_URI_QUERY},
+		{"particleeffectnum",	G_PARTICLEEFFECTNUM},
+		{"trailparticles",		G_TRAILPARTICLES},
+		{"pointparticles",		G_POINTPARTICLES},
+		{"clientstat",			G_CLIENTSTAT},
+		{"pointerstat",			G_POINTERSTAT},
+	};
+	int i;
+	for (i = 0; i < sizeof(exttraps)/sizeof(exttraps[0]); i++)
+	{
+		haveextensiontab[exttraps[i].id-G_EXTENSIONS_FIRST] = trap_Map_Extension(exttraps[i].name, exttraps[i].id)>=0;
+	}
+
+	//
+	// Here you should check extensions which required and terminate server if something is missed.
+	//
+
+	return success;
+}
+#else
+static qbool G_InitExtensions(void)
+{
+	return true;
+}
+#endif

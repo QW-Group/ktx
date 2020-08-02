@@ -5,6 +5,9 @@ project(qwprogs C)
 
 # CMake option for bot support, we check it below and add C preprocessor directive if required.
 option(BOT_SUPPORT "Build with bot support" ON)
+# Option for FTE extensions. We also have some basic support for FTE which does not controlled by this setting.
+# This is en example and extensions unused for now, so its turned off by default. Also turning it ON makes binary incompatibe with MVDSV.
+option(FTESV "Build with FTE extensions support" OFF)
 
 # Set where sources located.
 set(DIR_SRC "src")
@@ -132,6 +135,9 @@ set_target_properties(${PROJECT_NAME}
 	)
 if(BOT_SUPPORT)
 	target_compile_definitions(${PROJECT_NAME} PRIVATE BOT_SUPPORT=1)
+endif()
+if(FTESV)
+	target_compile_definitions(${PROJECT_NAME} PRIVATE FTESV=1)
 endif()
 # If not Miscrosoft compilator - then set additional options for linker.
 if (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
