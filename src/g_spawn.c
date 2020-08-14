@@ -142,6 +142,9 @@ field_t         fields[] = {
 	{"spawn_initial_delay", FOFS( initial_spawn_delay ), F_FLOAT},
 	{"hoony_timelimit", FOFS( hoony_timelimit ), F_INT},
 	{"hoony_defaultwinner", FOFS( hoony_defaultwinner ), F_LSTRING},
+
+// KTX teleporter flags
+	{"ktx_votemap", FOFS(ktx_votemap), F_LSTRING},
 	{NULL}
 };
 typedef struct {

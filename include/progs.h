@@ -1152,6 +1152,11 @@ typedef struct gedict_s {
 	// let mvdsv know when player has teleported, and adjust for high-ping
 	int          teleported;
 // }
+
+// {
+	// Allow teleports to vote for maps
+	string_t     ktx_votemap;
+// }
 } gedict_t;
 
 typedef enum

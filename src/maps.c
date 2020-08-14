@@ -403,14 +403,32 @@ void SelectMap()
 	DoSelectMap ( atoi( arg_1 ) );
 }
 
+qbool VoteMapSpecific(char* mapname)
+{
+	int map_num = GetMapNum(mapname);
+
+	if (map_num == 0) {
+		G_sprint(self, 2, "Map '%s' not available on this server\n", mapname);
+		return false;
+	}
+
+	// Perform vote
+	DoSelectMap(map_num);
+	return true;
+}
 
 void VoteMap()
 {
 	char	arg_1[1024];
 
-	trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
+	if (trap_CmdArgc() < 2) {
+		G_sprint(self, 2, "Usage: %s <mapname>\n", redtext("votemap"));
+		return;
+	}
 
-	DoSelectMap ( GetMapNum( arg_1 ) );
+	// Convert map to index in list
+	trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
+	VoteMapSpecific(arg_1);
 }
 
 void ShowMaps()
