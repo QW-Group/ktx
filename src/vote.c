@@ -710,6 +710,8 @@ void teamoverlay( )
 
 // }
 
+qbool force_map_reset = false;
+
 // { votecoop
 void vote_check_coop ()
 {
@@ -738,10 +740,17 @@ void vote_check_coop ()
 			G_bprint( 2, "%s\n", redtext(va("Coop mode %s by majority vote", OnOff(cvar("coop")))) );
 
 		// and reload map
-		if ( cvar("k_bloodfest") )
-			changelevel( coop ? g_globalvars.mapname : cvar_string( "k_defmap" ) );
-		else
-			changelevel( coop ? "start" : g_globalvars.mapname );
+		if (coop && can_exec(va("configs/usermodes/matchless/%s.cfg", g_globalvars.mapname))) {
+			// Force the config to be executed
+			force_map_reset = true;
+			changelevel(g_globalvars.mapname);
+		}
+		else if (cvar("k_bloodfest")) {
+			changelevel(coop ? g_globalvars.mapname : cvar_string("k_defmap"));
+		}
+		else {
+			changelevel(coop ? "start" : g_globalvars.mapname);
+		}
 			
 		return;
 	}

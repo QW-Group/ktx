@@ -457,6 +457,7 @@ void G_InitGame( int levelTime, int randomSeed )
 void G_ShutDown()
 {
 	extern int IsMapInCycle(char *map);
+	extern qbool force_map_reset;
 
 	char *map = g_globalvars.mapname;
 	int i;
@@ -469,7 +470,7 @@ void G_ShutDown()
 	if ( match_in_progress )
 		EndMatch( 1 ); // skip demo, make some other stuff
 
-	cvar_set( "_k_lastmap", ( strnull( map ) ? "" : map ) );
+	cvar_set( "_k_lastmap", ( strnull( map ) || force_map_reset ? "" : map ) );
 	cvar_fset( "_k_pow_last", Get_Powerups() );
 
 	if ( (i = IsMapInCycle( map )) )
