@@ -553,7 +553,7 @@ char *SelectMapInCycle(char *buf, int buf_size)
 			trap_cvar_string( mapid, newmap, sizeof(newmap) );
 			break;
 		} else {
-			G_bprint(2, "Player requirements not met for map #%d in the map cycle, continuing to next map. (Minimum: %d, Maximum: %d)\n", i, minp, maxp);
+			G_bprint(2, "Player requirements not met for map #%d in the map cycle, continuing to next map. (Minimum: %d, Maximum: %d)\n", (i+1), minp, maxp);
 		}
 		i++;
 	}
