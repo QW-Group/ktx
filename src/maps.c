@@ -19,6 +19,8 @@
 
 #include "g_local.h"
 
+qbool isSupport_Params(gedict_t *p);
+
 static char *fixed_maps_list[] =
 {
 	// episode 1
@@ -243,12 +245,19 @@ void GetMapList(void)
 void mapslist_dl()
 {
 	char arg_2[32];
+	char nomaps[32];
+	qbool skip_maps;
 	int i, from, to;
+
+	skip_maps = atoi(infokey(self, "nomaps", nomaps, sizeof(nomaps))) > 0;
+	if (skip_maps) {
+		goto skip_map_stuffing;
+	}
 
 	// seems we alredy done that
 	if ( self->k_stuff & STUFF_MAPS )
 	{
-		G_sprint( self, 2, "mapslist alredy stuffed\n" );
+		G_sprint( self, 2, "mapslist already stuffed\n" );
 		return;
 	}
 
@@ -262,15 +271,33 @@ void mapslist_dl()
 	trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
 
 	from = bound( 0, atoi( arg_2 ), maps_cnt );
-	to   = bound( from, from + MAX_STUFFED_ALIASES_PER_FRAME, maps_cnt );
+	if (isSupport_Params(self)) {
+		to = bound(from, from + MAX_STUFFED_QUICKMAPS_PER_FRAME, maps_cnt);
+		for (i = from - 1; i < to; i++) {
+			if (to - i >= 8) {
+				stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "ktx_am8 %s %s %s %s %s %s %s %s\n", mapslist[i], mapslist[i+1], mapslist[i+2], mapslist[i+3], mapslist[i+4], mapslist[i+5], mapslist[i+6], mapslist[i+7]);
+				i += 7;
+			}
+			else if (to - i >= 4) {
+				stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "ktx_am4 %s %s %s %s\n", mapslist[i], mapslist[i + 1], mapslist[i + 2], mapslist[i + 3]);
+				i += 3;
+			}
+			else {
+				stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "alias %s \"cmd votemap %s\"\n", mapslist[i], mapslist[i]);
+			}
+		}
+	}
+	else {
+		to = bound(from, from + MAX_STUFFED_ALIASES_PER_FRAME, maps_cnt);
 
-	// stuff portion of aliases
-	for ( i = from; i < to; i++ )
-	{
-		if ( i == 0 )
-		G_sprint( self, 2, "Loading maps list...\n" );
+		// stuff portion of aliases
+		for (i = from; i < to; i++) {
+			if (i == 0) {
+				G_sprint(self, 2, "Loading maps list...\n");
+			}
 
-		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "alias %s cmd cm %d\n", mapslist[i], i + 1);
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "alias %s cmd cm %d\n", mapslist[i], i + 1);
+		}
 	}
 
 	if ( i < maps_cnt )
@@ -280,20 +307,25 @@ void mapslist_dl()
 		return;
 	}
 
+	G_sprint(self, 2, "Maps loaded\n");
+skip_map_stuffing:
 	// we done
 	self->k_stuff = self->k_stuff | STUFF_MAPS; // add flag
-	G_sprint( self, 2, "Maps loaded\n" );
 
 	// request commands
 	if ( !( self->k_stuff & STUFF_COMMANDS ) )
 		StuffModCommands( self );
 }
 
-void StuffMaps( gedict_t *p )
+void StuffMaps(gedict_t *p)
 {
 	p->k_stuff = p->k_stuff & ~STUFF_MAPS; // remove flag
 
-	stuffcmd_flags( p, STUFFCMD_IGNOREINDEMO, "cmd mapslist_dl %d\n", 0 );
+	if (isSupport_Params(p)) {
+		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "alias ktx_am4 \"tempalias %%1 cmd votemap %%1;tempalias %%2 cmd votemap %%2;tempalias %%3 cmd votemap %%3;tempalias %%4 cmd votemap %%4\"\n");
+		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "alias ktx_am8 \"tempalias %%1 cmd votemap %%1;tempalias %%2 cmd votemap %%2;tempalias %%3 cmd votemap %%3;tempalias %%4 cmd votemap %%4;tempalias %%5 cmd votemap %%5;tempalias %%6 cmd votemap %%6;tempalias %%7 cmd votemap %%7;tempalias %%8 cmd votemap %%8\n");
+	}
+	stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "cmd mapslist_dl %d\n", 0);
 }
 
 char *GetMapName(int imp)
