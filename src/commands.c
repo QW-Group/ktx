@@ -4589,7 +4589,7 @@ void ktpro_autotrack_predict_powerup( void )
 		return; // we use this function for quad and pent only, ring and suit is not interesting for us
 
 	best = NULL;
-	best_len = 99999999;
+	best_len = 99999999.0;
 
     for( p = world; (p = find_plr( p )); )
 	{
