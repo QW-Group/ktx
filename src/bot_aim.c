@@ -297,8 +297,8 @@ static void BotsModifyAimAtPlayerLogic(gedict_t* self)
 
 		if (g_random() < 0.8) {
 			// Randomise the amount but not the side that we're aiming on
-			yaw_rnd = (self->fb.last_rndaim[YAW] > 0 ? 1 : -1) * abs(yaw_rnd);
-			pitch_rnd = (self->fb.last_rndaim[PITCH] > 0 ? 1 : -1) * abs(pitch_rnd);
+			yaw_rnd = (self->fb.last_rndaim[YAW] > 0 ? 1 : -1) * fabs(yaw_rnd);
+			pitch_rnd = (self->fb.last_rndaim[PITCH] > 0 ? 1 : -1) * fabs(pitch_rnd);
 		}
 
 		self->fb.last_rndaim_time = g_globalvars.time;
