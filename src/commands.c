@@ -6033,7 +6033,7 @@ void callalias ()
 	}
 
 	trap_CmdArgv( 2, arg_x, sizeof( arg_x ) );
-	tm = fabs( atof(arg_x) );
+	tm = fabsf( atof(arg_x) );
 
 	if ( tm <= 0 || tm > ca_limit2 ) {
 		G_sprint(self, 2, "calling time can't be longer than %d seconds\n", ca_limit2);
