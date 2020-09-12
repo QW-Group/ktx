@@ -460,7 +460,6 @@ void G_ShutDown()
 	extern qbool force_map_reset;
 
 	char *map = g_globalvars.mapname;
-	int i;
 
 	AbortElect();
 
@@ -472,9 +471,6 @@ void G_ShutDown()
 
 	cvar_set( "_k_lastmap", ( strnull( map ) || force_map_reset ? "" : map ) );
 	cvar_fset( "_k_pow_last", Get_Powerups() );
-
-	if ( (i = IsMapInCycle( map )) )
-		cvar_fset( "_k_last_cycle_map", i );
 }
 
 

@@ -537,8 +537,8 @@ char *SelectMapInCycle(char *buf, int buf_size)
 			return buf;
 	}
 
-	if ( !(i = IsMapInCycle( g_globalvars.mapname) ) ){ // ok map found in map list, select next map
-		if ( !(i = cvar( "_k_last_cycle_map" ) ) ){
+	if ( !(i = cvar( "_k_last_cycle_map" ) ) ){
+		if ( !(i = IsMapInCycle( g_globalvars.mapname) ) ){ // ok map found in map list, select next map
 			i=0;
 		}
 	}
@@ -562,6 +562,9 @@ char *SelectMapInCycle(char *buf, int buf_size)
 		trap_cvar_string( "k_ml_0", newmap, sizeof(newmap) );
 
 	strlcpy(buf, newmap, buf_size);
+
+	if ( (i = IsMapInCycle( buf )) )
+		cvar_fset( "_k_last_cycle_map", i );
 
 	return buf;
 }
