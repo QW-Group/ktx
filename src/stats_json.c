@@ -283,6 +283,7 @@ void json_player_detail(fileHandle_t handle, int player_num, gedict_t* player, c
 	s2di(handle, INDENT6 "\"top-color\": %d," JSON_CR, iKey(player, "topcolor"));
 	s2di(handle, INDENT6 "\"bottom-color\": %d," JSON_CR, iKey(player, "bottomcolor"));
 	s2di(handle, INDENT6 "\"ping\": %d," JSON_CR, iKey(player, "ping"));
+	s2di(handle, INDENT6 "\"login\": %d," JSON_CR, ezinfokey(player, "login"));
 	s2di(handle, INDENT6 "\"name\": \"%s\"," JSON_CR, json_string(getname(player)));
 	s2di(handle, INDENT6 "\"team\": \"%s\"," JSON_CR, json_string(team));
 	s2di(handle, INDENT6 "\"stats\": { \"frags\": %d, \"deaths\": %d, \"tk\": %d, \"spawn-frags\": %d, \"kills\": %d, \"suicides\": %d }," JSON_CR, (int)player->s.v.frags, (int)player->deaths, (int)player->friendly, player->ps.spawn_frags, (int)player->kills, (int)player->suicides);
