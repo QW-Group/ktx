@@ -738,6 +738,8 @@ void 	vote_check_all ();
 #define OV_TEAMOVERLAY ( VOTE_FOFS ( teamoverlay ) )
 #define OV_COOP ( VOTE_FOFS ( coop ) )
 #define OV_ANTILAG ( VOTE_FOFS ( antilag ) )
+#define OV_PRIVATE ( VOTE_FOFS ( privategame ) )
+//#define OV_KICKUNAUTHED ( VOTE_FOFS (kick_unauthed) )
 #define MAX_RPICKUP_RECUSION 3
 
 void 	ElectThink();
@@ -759,6 +761,7 @@ void 	BecomeAdmin(gedict_t *p, int adm_flags);
 void 	VoteAdmin();
 
 void	PlayerStopFire(gedict_t *p);
+void do_force_spec(gedict_t* p, gedict_t* admin, qbool spec);
 
 // arena.c
 
@@ -1120,5 +1123,14 @@ void lgc_register_fire_stop(gedict_t* player);
 void lgc_register_kill(gedict_t* player);
 void lgc_register_miss(vec3_t start, gedict_t* player);
 void lgc_register_hit(vec3_t start, gedict_t* player, gedict_t* victim);
+
+// private games
+qbool is_private_game(void);
+qbool is_logged_in(gedict_t* p);
+void private_game_toggle(qbool enable);
+void private_game_vote(void);
+void vote_check_privategame(void);
+qbool private_game_voteable(void);
+qbool private_game_by_default(void);
 
 #define AUTOTRACK_POWERUPS_PREDICT_TIME 2

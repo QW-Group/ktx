@@ -223,6 +223,8 @@ typedef struct vote_s {
 	int nospecs;
 	int coop;
 	int antilag;
+	int privategame;
+	//int kick_unauthed;
 
 	electType_t elect_type; // election type
 	float elect_block_till;	// block election for this time

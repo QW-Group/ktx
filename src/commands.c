@@ -266,6 +266,11 @@ void ToggleCArena();
 void FrogbotsCommand(void);
 // }
 
+// { Private games
+void private_game_vote(void);
+void private_game_toggle(qbool enable);
+// }
+
 // Save the first 5 demo markers to print at the end.
 demo_marker_t demo_markers[10];
 int demo_markers_count = 10;
@@ -618,6 +623,8 @@ const char CD_NODESC[] = "no desc";
 
 #define CD_BOTCOMMAND   "bot configuration"
 
+#define CD_PRIVATEGAME  "private game (logged in users only)"
+
 #define CD_TEAMPLAYMESSAGE "teamplay messages"
 
 #define CD_PICKSPAWN    "nominate hoonymode spawn"
@@ -964,8 +971,10 @@ cmd_t cmds[] = {
 // { HOONYMODE
 	{ "pickspawn",   HM_pick_spawn,             0    , CF_PLAYER, CD_PICKSPAWN },
 	{ "roundsup",    HM_roundsup,               0    , CF_PLAYER, CD_ROUNDSUP },
-	{ "roundsdown",  HM_roundsdown,             0    , CF_PLAYER, CD_ROUNDSDOWN }
+	{ "roundsdown",  HM_roundsdown,             0    , CF_PLAYER, CD_ROUNDSDOWN },
 // }
+
+	{ "voteprivate", private_game_vote,         0    , CF_PLAYER, CD_PRIVATEGAME }
 };
 
 #undef DEF
@@ -1847,6 +1856,23 @@ void ModStatusVote()
 		for( p = world; (p = find_client( p )); )
 			if ( p->v.teamoverlay )
 				G_sprint(self, 2, " %s\n", p->netname);
+	}
+
+	if (!match_in_progress) {
+		if ((votes = get_votes(OV_PRIVATE))) {
+			qbool enable = !cvar("sv_login");
+
+			voted = true;
+			
+			G_sprint(self, 2, "\220%d/%d\221 vote%s for a %s:\n", votes,
+				get_votes_req(OV_PRIVATE, false), count_s(votes), enable ? redtext("private game") : redtext("public game"));
+
+			for (p = world; (p = find_client(p)); ) {
+				if (p->v.privategame) {
+					G_sprint(self, 2, " %s\n", p->netname);
+				}
+			}
+		}
 	}
 
 	if ( voted )
@@ -3568,6 +3594,10 @@ void execute_rules_reset(void)
 	// execute hardcoded reset settings.
 	trap_readcmd( _reset_settings, buf, sizeof(buf) );
 	G_cprint("%s", buf);
+
+	if (is_private_game() != private_game_by_default() && private_game_voteable()) {
+		private_game_toggle(private_game_by_default());
+	}
 
 	// execute configs/reset.cfg.
 	if ( can_exec( cfg_name ) )

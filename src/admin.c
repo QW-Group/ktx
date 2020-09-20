@@ -789,7 +789,8 @@ qbool is_can_forcespec(gedict_t *victim, gedict_t *kicker)
 
 void do_force_spec(gedict_t *p, gedict_t *admin, qbool spec)
 {
-	if (!is_can_forcespec(p, admin))
+	// If admin == NULL, was by vote
+	if (admin != NULL && !is_can_forcespec(p, admin))
 		return;
 
 	G_sprint(p, 2, "You were forced to reconnect as %s by the admin\n", spec ? "spectator" : "player");

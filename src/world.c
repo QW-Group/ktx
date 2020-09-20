@@ -741,6 +741,7 @@ void FirstFrame	( )
 	RegisterCvar("k_vp_coop");    // votes percentage for coop voting
 	RegisterCvar("k_vp_antilag"); // votes percentage for antilag voting
 	RegisterCvar("k_no_vote_map"); // dis allow map voting in matcless mode, also disallow /next_map
+	RegisterCvar("k_vp_privategame"); // temporarily force logins on the server
 
 	RegisterCvar("k_end_tele_spawn"); // don't remove end tele spawn
 
@@ -944,6 +945,13 @@ void FirstFrame	( )
 #endif
 
 	RegisterCvar("k_lgcmode");
+
+	// private games
+	RegisterCvarEx("k_privategame", "0");                 // whether it is currently on or off
+	RegisterCvarEx("k_privategame_default", "0");         // what to set it to when resetting map
+	RegisterCvarEx("k_privategame_voteable", "0");        // if set, players can vote for private games (require logins)
+	RegisterCvarEx("k_privategame_allow_specs", "1");     // set the server to allow unauthed spectators
+	RegisterCvarEx("k_privategame_force_reconnect", "1"); // when voting for private game, kick unauthed players
 
 // below globals changed only here
 

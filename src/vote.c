@@ -180,6 +180,7 @@ int get_votes_req( int fofs, qbool diff )
 		case OV_TEAMOVERLAY: percent = cvar("k_vp_teamoverlay"); break;
 		case OV_COOP:    percent = cvar("k_vp_coop"); break;
 		case OV_ANTILAG: percent = cvar("k_vp_antilag"); break;
+		case OV_PRIVATE: percent = cvar("k_vp_privategame"); break;
 	}
 
 	percent = bound(0.51, bound(51, percent, 100)/100, 1); // calc and bound percentage between 50% to 100%
@@ -209,8 +210,10 @@ int get_votes_req( int fofs, qbool diff )
 		vt_req = max(1, vt_req); // at least 1 votes in this case
 	else if ( fofs == OV_ANTILAG )
 		vt_req = max(2, vt_req); // at least 2 votes in this case
+	else if ( fofs == OV_PRIVATE )
+		vt_req = max(2, vt_req); // at least 2 votes in this case
 
-	if (CountBots () > 0 && CountPlayers () - CountBots () == 1)
+	if (CountBots () > 0 && CountPlayers () - CountBots () == 1 && fofs != OV_PRIVATE)
 		vt_req = 1;
 
 	if ( diff )
@@ -837,6 +840,219 @@ void antilag( )
 			((votes = get_votes_req( OV_ANTILAG, true )) ? va(" (%d)", votes) : ""));
 
 	vote_check_antilag ();
+}
+
+// }
+
+// { private game functionality: players must login to ready up, simple vote to kick unauthed players
+void vote_check_privategame(void)
+{
+	int veto;
+
+	if (match_in_progress || intermission_running || match_over)
+		return;
+
+	if (!get_votes(OV_PRIVATE))
+		return;
+
+	veto = is_admins_vote(OV_PRIVATE);
+
+	if (veto || !get_votes_req(OV_PRIVATE, true)) {
+		qbool enable = !is_private_game();
+
+		vote_clear(OV_PRIVATE);
+
+		// toggle private game
+		private_game_toggle(enable);
+
+		if (veto) {
+			G_bprint(2, "%s\n", redtext(va("%s by admin veto", (is_private_game() ? "private game" : "public game"))));
+		}
+		else {
+			G_bprint(2, "%s\n", redtext(va("%s by majority vote", (is_private_game() ? "private game" : "public game"))));
+		}
+
+		return;
+	}
+}
+
+void private_game_vote(void)
+{
+	int votes;
+	qbool enabled = is_private_game();
+
+	if (!private_game_voteable()) {
+		G_sprint(self, 2, "%s not enabled on this server\n", redtext("Private game"));
+		return;
+	}
+
+	if (match_in_progress) {
+		G_sprint(self, 2, "%s mode %s\n", redtext("Private game"), OnOff(is_private_game()));
+		return;
+	}
+
+	if (!enabled && !is_logged_in(self)) {
+		G_sprint(self, 2, "You must log in to vote for private game\n");
+		return;
+	}
+
+	// admin may turn this status alone on server...
+	if (!is_adm(self)) {
+		// Dont need to bother if less than 2 players
+		if (!enabled && CountPlayers() - CountBots() < 2) {
+			G_sprint(self, 2, "You need at least 2 players to do this.\n");
+			return;
+		}
+	}
+
+	self->v.privategame = !self->v.privategame;
+
+	G_bprint(2, "%s %s!%s\n", self->netname,
+		(self->v.privategame ? redtext(va("votes for %s", enabled ? "public game" : "private game")) :
+			redtext(va("withdraws %s %s game vote", g_his(self), enabled ? "public" : "private"))),
+		((votes = get_votes_req(OV_PRIVATE, true)) ? va(" (%d)", votes) : ""));
+
+	vote_check_privategame();
+}
+
+/*
+// No point to any of this - can just elect admin instead?
+void vote_check_kick_unauthed(void)
+{
+	int veto;
+
+	if (match_in_progress || intermission_running || match_over)
+		return;
+
+	if (!get_votes(OV_KICKUNAUTHED))
+		return;
+
+	veto = is_admins_vote(OV_KICKUNAUTHED);
+	if (veto || !get_votes_req(OV_KICKUNAUTHED, true)) {
+		gedict_t* p;
+		int kicked = 0;
+
+		vote_clear(OV_KICKUNAUTHED);
+
+		for (p = world; (p = find_plr(p)); ) {
+			if (!p->isBot && !is_logged_in(p)) {
+				do_force_spec(p, NULL, true);
+				++kicked;
+			}
+		}
+
+		if (veto) {
+			G_bprint(PRINT_HIGH, "%d players kicked by %s\n", kicked, redtext("admin veto"));
+		}
+		else {
+			G_bprint(PRINT_HIGH, "%d players kicked by %s\n", kicked, redtext("majority vote"));
+		}
+
+		return;
+	}
+}
+
+void kick_unauthed_vote(void)
+{
+	int votes;
+	qbool enabled = is_private_game();
+
+	if (!enabled) {
+		G_sprint(self, 2, "This command not valid for public games\n");
+		return;
+	}
+
+	if (match_in_progress) {
+		return;
+	}
+
+	if (!is_logged_in(self)) {
+		G_sprint(self, 2, "You must log in first\n");
+		return;
+	}
+
+	// admin may turn this status alone on server...
+	if (!is_adm(self)) {
+		// Dont need to bother if less than 2 players
+		if (CountPlayers() < 2) {
+			G_sprint(self, 2, "You need at least 2 players to do this.\n");
+			return;
+		}
+	}
+
+	self->v.kick_unauthed = !self->v.kick_unauthed;
+
+	G_bprint(
+		PRINT_HIGH, 
+		"%s %s!%s\n", 
+		self->netname,
+		(self->v.kick_unauthed ? redtext("votes to kick unauthed players") : redtext(va("withdraws %s kick-unauthed vote", g_his(self)))),
+		((votes = get_votes_req(OV_PRIVATE, true)) ? va(" (%d)", votes) : "")
+	);
+
+	vote_check_kick_unauthed();
+}
+*/
+
+void private_game_toggle(qbool enable)
+{
+	qbool allow_spectators = cvar("k_privategame_allow_specs");
+	qbool force_reconnect = cvar("k_privategame_force_reconnect");
+	int private_login = allow_spectators ? 1 : 2;  // sv_login 1 => players only, sv_login 2 => everyone
+
+	cvar_fset("k_privategame", enable ? 1 : 0);
+	cvar_fset("sv_login", enable ? private_login : 0);  // Assuming here that if server admin said they were voteable, server is public by default
+
+	if (enable && match_in_progress < 2) {
+		gedict_t* p;
+
+		// Kick spectators
+		if (!allow_spectators) {
+			for (p = world; (p = find_spc(p)); ) {
+				G_sprint(p, PRINT_HIGH, "Please reconnect & login\n");
+				stuffcmd(p, "disconnect\n");  // FIXME: stupid way
+			}
+		}
+
+		// Only logged in players can play
+		for (p = world; (p = find_plr(p)); ) {
+			if (!p->isBot && p->ready && !is_logged_in(p)) {
+				p->ready = 0;
+				G_bprint(PRINT_HIGH, "%s is no longer ready\n", p->netname, redtext("is no longer ready"));
+			}
+			if (force_reconnect && !is_logged_in(p)) {
+				if (allow_spectators) {
+					// If this is disabled then they'll essentially get kicked when map changes anyway
+					G_sprint(p, PRINT_HIGH, "You must login to play.\n");
+					do_force_spec(p, NULL, true);
+				}
+				else {
+					G_sprint(p, PRINT_HIGH, "Please reconnect & login\n");
+					stuffcmd(p, "disconnect\n");  // FIXME: stupid way
+				}
+			}
+		}
+	}
+}
+
+qbool is_private_game(void)
+{
+	return cvar("k_privategame") != 0;
+}
+
+qbool is_logged_in(gedict_t* p)
+{
+	return ezinfokey(p, "login")[0];
+}
+
+qbool private_game_voteable(void)
+{
+	return cvar("k_privategame_voteable");
+}
+
+qbool private_game_by_default(void)
+{
+	return cvar("k_privategame_default");
 }
 
 // }

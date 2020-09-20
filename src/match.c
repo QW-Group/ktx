@@ -1923,6 +1923,11 @@ void PlayerReady ()
 		return;
 	}
 
+	if (is_private_game() && !is_logged_in(self)) {
+		G_sprint(self, 2, "You must login first\n");
+		return;
+	}
+
     if ( isCTF() || isHoonyModeTDM() )
 	{
 		if ( !streq(getteam(self), "red") && !streq(getteam(self), "blue") )
