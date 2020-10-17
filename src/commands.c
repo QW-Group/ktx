@@ -3065,16 +3065,16 @@ ok:
 	else
 		s1 = "";
 
-	if      ( itms & IT_ROCKET_LAUNCHER )  s2 = va(" %s:%d", redtext("rl"), (int)bp->s.v.ammo_rockets);
-	else if ( itms & IT_LIGHTNING )        s2 = va(" %s:%d", redtext("lg"), (int)bp->s.v.ammo_cells);
-	else if ( itms & IT_GRENADE_LAUNCHER ) s2 = va(" %s:%d", redtext("gl"), (int)bp->s.v.ammo_rockets);
-	else if ( itms & IT_SUPER_NAILGUN )    s2 = va(" %s:%d", redtext("sng"),(int)bp->s.v.ammo_nails);
-	else if ( itms & IT_SUPER_SHOTGUN )    s2 = va(" %s:%d", redtext("ssg"),(int)bp->s.v.ammo_shells);
-	else if ( itms & IT_NAILGUN )          s2 = va(" %s:%d", redtext("ng"), (int)bp->s.v.ammo_nails);
-	else if ( itms & IT_SHOTGUN )          s2 = va(" %s:%d", redtext("sg"), (int)bp->s.v.ammo_shells);
-	else if ( itms & IT_AXE )              s2 = redtext(" axe!"); // just in case :]
-	else
-		s2 = "";
+	s2 = "";
+	if ((itms & IT_RL_AND_LG) == IT_RL_AND_LG) s2 = va(" %s:%d %s:%d", redtext("rl"), (int)bp->s.v.ammo_rockets, redtext("lg"), (int)bp->s.v.ammo_cells);
+	else if (itms & IT_ROCKET_LAUNCHER)        s2 = va(" %s:%d", redtext("rl"), (int)bp->s.v.ammo_rockets);
+	else if ( itms & IT_LIGHTNING )            s2 = va(" %s:%d", redtext("lg"), (int)bp->s.v.ammo_cells);
+	else if ( itms & IT_GRENADE_LAUNCHER )     s2 = va(" %s:%d", redtext("gl"), (int)bp->s.v.ammo_rockets);
+	else if ( itms & IT_SUPER_NAILGUN )        s2 = va(" %s:%d", redtext("sng"),(int)bp->s.v.ammo_nails);
+	else if ( itms & IT_SUPER_SHOTGUN )        s2 = va(" %s:%d", redtext("ssg"),(int)bp->s.v.ammo_shells);
+	else if ( itms & IT_NAILGUN )              s2 = va(" %s:%d", redtext("ng"), (int)bp->s.v.ammo_nails);
+	else if ( itms & IT_SHOTGUN )              s2 = va(" %s:%d", redtext("sg"), (int)bp->s.v.ammo_shells);
+	else if ( itms & IT_AXE )                  s2 = redtext(" axe!"); // just in case :]
 
 	kn = ezinfokey( bp, "k_nick" );
 	if ( strnull( kn ) )
@@ -3121,6 +3121,7 @@ ok:
 // this settings used when server desire general rules reset: last player disconnects / race toggled / etc.
 const char _reset_settings[] =
 	"serverinfo matchtag \"\"\n" // Hint for QTV what type of event it is. Like: "EQL semifinal" etc.
+	"k_teamoverlay 0\n"          // Teamoverlay off
 	"serverinfo ktxmode \"\"\n"; // No special mode
 
 // common settings for all user modes
@@ -3171,7 +3172,6 @@ const char common_um_init[] =
 	"k_spw 4\n"					// affect spawn type
 	"k_dmgfrags 0\n"			// damage frags off
 	"k_dmm4_gren_mode 0\n"		// dmm4 grenade mode off
-	"k_teamoverlay 0\n"			// teamoverlay off
 	"k_tp_tele_death 1\n"		// affect frags on team telefrags or not
 	"k_allowcountchange 1\n"	// permissions for upplayers, only real admins
 	"k_maxspectators 4\n"		// some default value
