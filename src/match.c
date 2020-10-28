@@ -972,6 +972,7 @@ void PrintCountdown( int seconds )
 // Fraglimit xxx
 // Overtime   xx		Overtime printout, supports sudden death display
 // Powerups   On|Off|QPRS
+// FunStats   On
 // Dmgfrags   On // optional
 // Noweapon
 

@@ -202,6 +202,7 @@ void mapcycle ();
 void airstep();
 void ToggleExclusive();
 void ToggleNewCoopNm();
+void ToggleFunStats();
 void ToggleVwep();
 void TogglePause();
 void ToggleArena();
@@ -615,6 +616,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_CMDSLIST_DL  (CD_NODESC) // skip
 
 #define CD_DEMOMARK     "put mark in the demo"
+#define CD_FUNSTATS     "fun end game stats"
 
 #define CD_BOTCOMMAND   "bot configuration"
 
@@ -950,6 +952,7 @@ cmd_t cmds[] = {
 	{ "dumpent",     dumpent,                   0    , CF_BOTH | CF_PARAMS, CD_DUMPENT },
 	{ "votecoop",    votecoop,                  0    , CF_PLAYER | CF_MATCHLESS, CD_VOTECOOP },
 	{ "coop_nm_pu",	 ToggleNewCoopNm,           0    , CF_PLAYER | CF_MATCHLESS, CD_COOPNMPU },
+	{ "funstats",	 ToggleFunStats,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_FUNSTATS },
 	{ "demomark",	 DemoMark,                  0    , CF_BOTH, CD_DEMOMARK },
 
 #ifdef BOT_SUPPORT
@@ -6214,6 +6217,14 @@ void ToggleNewCoopNm()
 		return;
 
 	cvar_toggle_msg( self, "k_nightmare_pu", redtext("New Nightmare mode (drops powerups)") );
+}
+
+void ToggleFunStats()
+{
+	if ( match_in_progress )
+		return;
+
+	cvar_toggle_msg( self, "k_fun_stats", redtext("fun end game stats") );
 }
 
 // { yawn mode related

@@ -454,7 +454,7 @@ void StatsToFile(void)
 }
 
 
-float maxfrags, maxdeaths, maxfriend, maxeffi, maxcaps, maxdefends, maxsgeffi;
+float maxfrags, maxdeaths, maxfriend, maxeffi, maxcaps, maxdefends, maxsgeffi, maxlastra;
 int maxspree, maxspree_q, maxdmgg, maxdmgtd, maxrlkills;
 
 void OnePlayerStats(gedict_t *p, int tp)
@@ -634,6 +634,11 @@ void OnePlayerStats(gedict_t *p, int tp)
 		G_bprint(2, "  %s: %d\n", redtext("SpawnFrags"), p->ps.spawn_frags);
 	}
 
+	// ra spawns
+	if (!isCTF() && !lgc_enabled()) {
+		G_bprint(2, "  %s: %d\n", redtext(" RA Spawns"), p->ps.ra_spawns);
+	}
+
 	if (lgc_enabled() && a_lg) {
 		int over = p->ps.lgc_overshaft;
 		int under = p->ps.lgc_undershaft;
@@ -659,6 +664,7 @@ void OnePlayerStats(gedict_t *p, int tp)
     maxdmgtd   = max((int)(p->ps.dmg_t / p->deaths), maxdmgtd);
 	maxrlkills = max(p->ps.wpn[wpRL].ekills, maxrlkills);
 	maxsgeffi  = max(e_sg, maxsgeffi);
+	maxlastra  = max(p->ps.last_ra_time, maxlastra);
 }
 
 // Players statistics printout here
@@ -678,7 +684,7 @@ void PlayersStats(void)
 	// Probably low enough for a start value :)
 	maxfrags = -999999;
 
-	maxeffi = maxfriend = maxdeaths = maxcaps = maxdefends = maxsgeffi = 0;
+	maxeffi = maxfriend = maxdeaths = maxcaps = maxdefends = maxsgeffi = maxlastra = 0;
 	maxspree = maxspree_q = maxdmgtd = maxdmgg = maxrlkills = 0;
 
 	tp = isTeam() || isCTF();
@@ -950,6 +956,27 @@ void TopStats(void)
 					f1 = 1;
 				}
 				p = find_plrghst ( p, &from );
+			}
+		}
+	}
+
+	if ( cvar("k_fun_stats") )
+	{
+		G_bprint(2, "\n");
+
+		if ( maxlastra && deathmatch != 1 )
+		{
+			G_bprint( 2, "    Last RA: ");
+			from = f1 = 0;
+			p = find_plrghst( world, &from );
+			float time_remaining = match_end_time - maxlastra;
+			while( p ) {
+				if ( p->ps.last_ra_time == maxlastra ) {
+					G_bprint(2, "%s%s%s \220%1.2fs remaining\221\n", (f1 ? "             " : ""),
+							( isghost( p ) ? "\203" : "" ), getname( p ), time_remaining );
+					f1 = 1;
+				}
+				p = find_plrghst( p, &from );
 			}
 		}
 	}

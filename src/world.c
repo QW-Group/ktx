@@ -945,6 +945,8 @@ void FirstFrame	( )
 
 	RegisterCvar("k_lgcmode");
 
+	RegisterCvarEx("k_fun_stats", "0");
+
 // below globals changed only here
 
 	k_matchLess = cvar( "k_matchless" );

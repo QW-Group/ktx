@@ -465,6 +465,14 @@ void armor_touch()
 
 	playername = other->netname;
 
+	// Record player red armor stats.
+	other->ps.last_ra_time = g_globalvars.time;
+	if (bit & IT_ARMOR3) {
+		if (other->spawn_time + 1 > g_globalvars.time) {
+			other->ps.ra_spawns++;
+		}
+	}
+
 	/*
 	log_printf( "\t\t\t<pickmi time=\"%f\" item=\"%s\" player=\"%s\" value=\"%d\" />\n",
 				g_globalvars.time - match_start_time,

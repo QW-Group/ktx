@@ -176,6 +176,10 @@ typedef struct player_stats_s {
 	// time stats
 	float control_time; // time spent in control
 
+	// red armor stats
+	int ra_spawns; // number of ra spawns
+	float last_ra_time; // last time ra was taken
+
 	// rocket arena
 	int wins;	//number of wins they have
 	int loses;	//number of loses they have
