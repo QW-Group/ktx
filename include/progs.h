@@ -990,7 +990,6 @@ typedef struct gedict_s {
 	qbool on_hook;              // are we on the grapple?
 	qbool hook_out;             // is the grapple in flight?
 	int ctf_flag;                  // do we have a rune or flag?
-	float ctf_freeze;              // removes jitterness from grapple 
 	float regen_time;              // time to update health if regen rune
 	float rune_sound_time;         // dont spam rune sounds (1 per second)
 	float carrier_frag_time;       // used for carrier assists
@@ -998,6 +997,7 @@ typedef struct gedict_s {
 	float rune_notify_time;        // already have a rune spam prevention
 	float carrier_hurt_time;       // time we last hurt enemy carrier
 	float rune_pickup_time;        // time we picked up current rune
+	float hook_damage_time;        // manage dps dealt to hooked enemies
 	char *last_rune;			   // name of last rune we send to client
 	float	items2;				   // using  ZQ_ITEMS2 extension in mvdsv we can use per client sigils for runes
 

@@ -195,6 +195,7 @@ float           g_random( void );
 float           crandom( void );
 int				i_rnd( int from, int to );
 float           dist_random (float minValue, float maxValue, float spreadFactor);
+float           next_frame();
 gedict_t       *spawn( void );
 void            ent_remove( gedict_t * t );
 void            soft_ent_remove (gedict_t* ent);

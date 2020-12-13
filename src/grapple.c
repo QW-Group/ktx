@@ -10,8 +10,6 @@
 #include "g_local.h"
 
 void SpawnBlood( vec3_t dest, float damage );
-void FreezeGravity( gedict_t *p );
-void UnfreezeGravity( gedict_t *p );
 
 //
 // GrappleReset - Removes the hook and resets its owner's state.
@@ -24,7 +22,6 @@ void GrappleReset( gedict_t *rhook )
 	if (owner == world)
 		return;
 
-	UnfreezeGravity( owner );
 	sound ( owner, CHAN_NO_PHS_ADD + CHAN_WEAPON, "weapons/bounce2.wav", 1, ATTN_NORM );
 	owner->on_hook         = false;
 	owner->hook_out        = false;
@@ -34,7 +31,7 @@ void GrappleReset( gedict_t *rhook )
 	owner->attack_finished = g_globalvars.time;
 
 	rhook->think       = (func_t) SUB_Remove;
-	rhook->s.v.nextthink   = g_globalvars.time;
+	rhook->s.v.nextthink   = next_frame();
 }
 
 //
@@ -70,12 +67,17 @@ void GrappleTrack()
 		// move the hook along with the player.  It's invisible, but
 		// we need this to make the sound come from the right spot
 		setorigin( self, PASSVEC3(enemy->s.v.origin) );
-			
-		sound ( self, CHAN_WEAPON, "blob/land1.wav", 1, ATTN_NORM );
-		enemy->deathtype = dtHOOK;
-		T_Damage ( enemy, self, owner, 1 );
-		trap_makevectors ( self->s.v.v_angle );
-		SpawnBlood( enemy->s.v.origin, 1 );
+
+		// only deal damage every 100ms 	
+		if ( g_globalvars.time >= owner->hook_damage_time + 0.1 ) 
+		{
+			owner->hook_damage_time = g_globalvars.time;
+			sound ( self, CHAN_WEAPON, "blob/land1.wav", 1, ATTN_NORM );
+			enemy->deathtype = dtHOOK;
+			T_Damage ( enemy, self, owner, 1 );
+			trap_makevectors ( self->s.v.v_angle );
+			SpawnBlood( enemy->s.v.origin, 1 );
+		}
 	}
 
 	// If the hook is not attached to the player, constantly copy
@@ -84,7 +86,7 @@ void GrappleTrack()
 	if ( enemy->ct != ctPlayer )
 		VectorCopy( enemy->s.v.velocity, self->s.v.velocity );
 
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->s.v.nextthink = next_frame();
 }
 
 //
@@ -121,19 +123,19 @@ gedict_t* MakeLink()
 void RemoveChain()
 {
 	self->think = ( func_t ) SUB_Remove;
-	self->s.v.nextthink = g_globalvars.time;
+	self->s.v.nextthink = next_frame();
 
 	if ( self->s.v.goalentity )
 	{
 		gedict_t *goal = PROG_TO_EDICT( self->s.v.goalentity );
 		goal->think = (func_t) SUB_Remove;
-		goal->s.v.nextthink = g_globalvars.time;
+		goal->s.v.nextthink = next_frame();
 
  		if ( goal->s.v.goalentity )
 		{
 			gedict_t *goal2 = PROG_TO_EDICT( goal->s.v.goalentity );
 			goal2->think = (func_t) SUB_Remove;
-			goal2->s.v.nextthink = g_globalvars.time;
+			goal2->s.v.nextthink = next_frame();
 		}
 	}                
 }
@@ -152,8 +154,15 @@ void UpdateChain()
 	if (!owner->hook_out)
 	{
 		self->think     = (func_t) RemoveChain;
-		self->s.v.nextthink = g_globalvars.time;
+		self->s.v.nextthink = next_frame();
 		return;
+	}
+
+	// allow hook to reset mid-throw if clanring hook is enabled
+	if (cvar("k_ctf_cr_hook"))
+	{
+		if (!owner->s.v.button0 & (owner->s.v.weapon == IT_HOOK) )
+			GrappleReset(owner->hook);
 	}
 
 	VectorSubtract(owner->hook->s.v.origin, owner->s.v.origin, temp);
@@ -172,7 +181,7 @@ void UpdateChain()
 	setorigin (goal,  PASSVEC3(t2));
 	setorigin (goal2, PASSVEC3(t3));
 
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->s.v.nextthink = next_frame();
 }
 
 //
@@ -182,7 +191,7 @@ void BuildChain()
 {
 	self->s.v.goalentity = EDICT_TO_PROG( MakeLink() );
 	PROG_TO_EDICT( self->s.v.goalentity )->think = (func_t) UpdateChain;
-	PROG_TO_EDICT( self->s.v.goalentity )->s.v.nextthink = g_globalvars.time + 0.1;
+	PROG_TO_EDICT( self->s.v.goalentity )->s.v.nextthink = next_frame();
 	PROG_TO_EDICT( self->s.v.goalentity )->s.v.owner = self->s.v.owner;
 	PROG_TO_EDICT( self->s.v.goalentity )->s.v.goalentity = EDICT_TO_PROG( MakeLink() );
 	PROG_TO_EDICT( PROG_TO_EDICT( self->s.v.goalentity )->s.v.goalentity)->s.v.goalentity = EDICT_TO_PROG( MakeLink() );
@@ -215,11 +224,10 @@ void GrappleAnchor()
 			return;
 		}
 
+		owner->hook_damage_time = g_globalvars.time;
 		sound ( self, CHAN_WEAPON, "player/axhit1.wav", 1, ATTN_NORM );
-
-		// previously 10 damage per hit, but at close range that could be exploited
 		other->deathtype = dtHOOK;
-		T_Damage ( other, self, owner, 1 );
+		T_Damage ( other, self, owner, 10 );
 
 		// make hook invisible since we will be pulling directly
 		// towards the player the hook hit. Quakeworld makes it
@@ -264,7 +272,7 @@ void GrappleAnchor()
 
 	self->s.v.enemy     = EDICT_TO_PROG( other );
 	self->think     = (func_t) GrappleTrack;
-	self->s.v.nextthink = g_globalvars.time;
+	self->s.v.nextthink = next_frame();
 	self->s.v.solid     = SOLID_NOT;
 	self->touch     = (func_t) SUB_Null;
 }
@@ -306,10 +314,9 @@ void GrappleService()
 		VectorScale( hookVelocity, 800 + (100 * (cvar("k_ctf_rune_power_hst") / 2 + 1)), self->s.v.velocity );
 	else
 		VectorScale( hookVelocity, 800, self->s.v.velocity );
- 
+
 	if ( vlen(hookVector) <= 100 ) // cancel chain sound
 	{
-		FreezeGravity( self );
 		if ( self->ctf_sound )
 		{
 			// If there is a chain, ditch it now. We're
@@ -318,7 +325,7 @@ void GrappleService()
 			if ( self->hook->s.v.goalentity )
 			{
 				PROG_TO_EDICT(self->hook->s.v.goalentity)->think     = (func_t) RemoveChain;
-				PROG_TO_EDICT(self->hook->s.v.goalentity)->s.v.nextthink = g_globalvars.time;
+				PROG_TO_EDICT(self->hook->s.v.goalentity)->s.v.nextthink = next_frame();
 			}
 
 			sound( self, CHAN_NO_PHS_ADD + CHAN_WEAPON, "weapons/chain3.wav", 1, ATTN_NORM );
@@ -353,14 +360,14 @@ void GrappleThrow()
 	// Removing purectf velocity changes ( 2.5 * self->maxspeed )
 
 	if ( self->ctf_flag & CTF_RUNE_HST )
-		VectorScale( g_globalvars.v_forward, 800 + (100 * (cvar("k_ctf_rune_power_hst") / 2 + 1)), newmis->s.v.velocity );
+		VectorScale(g_globalvars.v_forward, cvar("k_ctf_cr_hook") ? 1200 : 800 + (100 * (cvar("k_ctf_rune_power_hst") / 2 + 1)), newmis->s.v.velocity);
 	else
-		VectorScale( g_globalvars.v_forward, 800, newmis->s.v.velocity );
+		VectorScale(g_globalvars.v_forward, cvar("k_ctf_cr_hook") ? 1200 : 800, newmis->s.v.velocity);
 	SetVector( newmis->s.v.avelocity, 0, 0, -500 );
 
 	newmis->touch     = (func_t) GrappleAnchor;
 	newmis->think     = (func_t) BuildChain;
-	newmis->s.v.nextthink = g_globalvars.time + 0.1;
+	newmis->s.v.nextthink = next_frame();
 
 	if ( k_ctf_custom_models )
 		setmodel ( newmis, "progs/star.mdl" );
@@ -373,36 +380,3 @@ void GrappleThrow()
 	setsize( newmis, 0, 0, 0, 0, 0, 0 );
 	self->hook_out = true;
 }
-
-// code to remove jittery grapple
-void FreezeGravity( gedict_t *p )
-{
-	if ( p->gravity ) 
-	{
-		if ( p->ctf_freeze )              
-			p->ctf_freeze = g_globalvars.time + 0.5;
-		else if ( g_globalvars.time > p->ctf_freeze ) 
-		{
-			if ( p->gravity != 0 )
-			{
-				p->gravity = 0;
-				VectorCopy( p->s.v.origin, p->s.v.oldorigin );
-			}
-			p->ctf_freeze = 0;
-		}
-	}
-}
-
-void UnfreezeGravity( gedict_t *p )
-{
-	p->ctf_freeze = 0;
-	p->maxspeed = cvar("sv_maxspeed");
-
-	if ( p->ctf_flag & CTF_RUNE_HST )
-		p->maxspeed *= 1 + (cvar("k_ctf_rune_power_hst") / 4);
-
-	p->gravity = 1;
-	p->ctf_freeze = 0;
-}
-
-
