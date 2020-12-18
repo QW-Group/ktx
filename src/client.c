@@ -1553,21 +1553,34 @@ void PutClientInServer( void )
 	}
 	else if ( isRA() )
 	{
-		if ( isWinner( self ) || isLoser( self ) )
-		{
-			tele_flags |= TFLAGS_FOG_DST | TFLAGS_SND_DST;
+		if (isWinner(self) || isLoser(self)) {
+			if (initial_match_spawns) {
+				self->spawn_effect_queued = true;
+			}
+			else {
+				tele_flags |= TFLAGS_FOG_DST | TFLAGS_SND_DST;
+			}
 		}
 	}
 	else if ( isCA() )
 	{
-		if ( ISLIVE( self ) )
-		{
-			tele_flags |= TFLAGS_FOG_DST | TFLAGS_SND_DST;
+		if (ISLIVE(self)) {
+			if (initial_match_spawns) {
+				self->spawn_effect_queued = true;
+			}
+			else {
+				tele_flags |= TFLAGS_FOG_DST | TFLAGS_SND_DST;
+			}
 		}
 	}
-	else if ( ! isHoonyModeAny() )
+	else
 	{
-		tele_flags |= TFLAGS_FOG_DST | TFLAGS_SND_DST;
+		if (initial_match_spawns) {
+			self->spawn_effect_queued = true;
+		}
+		else {
+			tele_flags |= TFLAGS_FOG_DST | TFLAGS_SND_DST;
+		}
 	}
 
 	if ( isRA() )

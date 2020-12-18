@@ -1159,6 +1159,10 @@ typedef struct gedict_s {
 	// Allow teleports to vote for maps
 	string_t     ktx_votemap;
 // }
+
+// {
+	qbool spawn_effect_queued;
+// }
 } gedict_t;
 
 typedef enum

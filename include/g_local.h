@@ -1133,4 +1133,7 @@ void vote_check_privategame(void);
 qbool private_game_voteable(void);
 qbool private_game_by_default(void);
 
+// set when match is starting, otherwise a normal spawn
+extern qbool initial_match_spawns;
+
 #define AUTOTRACK_POWERUPS_PREDICT_TIME 2

@@ -33,11 +33,13 @@ void EM_CorrectStats(void);
 void MatchEndStats(void);
 void SM_PrepareTeamsStats(void);
 void SM_PrepareShowscores(void);
+static void SM_ExecuteQueuedSpawnEffects(void);
 
 void race_match_start(void);
 qbool race_can_cancel_demo(void);
 
 extern int g_matchstarttime;
+qbool initial_match_spawns;
 
 // Return count of players which have state cs_connected or cs_spawned.
 // It is weird because used string comparision so I treat it as slow and idiotic but it return more players than CountPlayers().
@@ -545,7 +547,7 @@ void TimerThink ()
 	self->s.v.nextthink = g_globalvars.time + 1;
 }
 
-// remove/add some items from map regardind with dmm and game mode
+// remove/add some items from map regarding dmm and game mode
 void SM_PrepareMap()
 {
 	gedict_t *p;
@@ -644,7 +646,7 @@ void SM_PrepareMap()
 }
 
 // put clients in server and reset some params
-void SM_PrepareClients()
+static void SM_PrepareClients()
 {
 	int hdc, i;
 	char *pl_team;
@@ -655,6 +657,7 @@ void SM_PrepareClients()
 	localcmd("localinfo 666 \"\"\n");
 	trap_executecmd (); // <- this really needed
 
+	initial_match_spawns = true;
 	for( p = world;	(p = find_plr( p )); ) {
 		if( !k_matchLess ) { // skip setup k_teamnum in matchLess mode
 			pl_team = getteam( p );
@@ -717,6 +720,31 @@ void SM_PrepareClients()
 
 		k_respawn( p, false );
 	}
+	initial_match_spawns = false;
+
+	// now that every player is spawned, do sounds & fog effect
+	SM_ExecuteQueuedSpawnEffects();
+}
+
+// This creates visual effect & sound effects for players at start of match
+// See bug #115... if 2 players spawn next to each other, the first player hears the second, but the second only hears the first based on final location during pre-war
+static void SM_ExecuteQueuedSpawnEffects(void)
+{
+	gedict_t* p;
+
+	for (p = world; (p = find_plr(p)); ) {
+		if (p->spawn_effect_queued) {
+			vec3_t			fog_org;
+
+			trap_makevectors(p->s.v.angles);
+			VectorMA(p->s.v.origin, 20, g_globalvars.v_forward, fog_org);
+			spawn_tfog(fog_org);
+
+			play_teleport(p);
+
+			p->spawn_effect_queued = false;
+		}
+	}
 }
 
 void SM_PrepareShowscores()
@@ -775,7 +803,7 @@ void SM_on_MatchStart()
 // Reset player frags and start the timer.
 void HideSpawnPoints();
 
-void StartMatch ()
+void StartMatch()
 {
 	char date[64];
 
@@ -1304,7 +1332,7 @@ void standby_think()
 		for( p = world;	(p = find_plr( p )); ) {
 			if( !strnull ( p->netname ) ) {
 				//set to ghost, 0.2 second before matchstart
-				if (isHoonyModeAny() && p->k_hoony_new_spawn) {
+				if (isHoonyModeDuel() && p->k_hoony_new_spawn) {
 					// move viewpoint to selected spawn
 					VectorCopy( p->k_hoony_new_spawn->s.v.origin, p->s.v.origin );
 					p->s.v.origin[2] += 1;
@@ -1318,7 +1346,7 @@ void standby_think()
 				p->s.v.solid      = 0;
 				p->s.v.movetype   = 0;
 				p->s.v.modelindex = 0;
-				p->model      = "";
+				p->model          = "";
 			}
 		}
 	}
@@ -1846,7 +1874,7 @@ void IdlebotCheck ()
 	if( match_in_progress || intermission_running || k_force )
 		return;
 
-	// no idele bot in practice mode
+	// no idle bot in practice mode
 	if ( k_practice ) // #practice mode#
 		return;
 
