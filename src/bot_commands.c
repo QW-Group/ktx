@@ -1663,7 +1663,7 @@ static frogbot_cmd_t editor_commands[] = {
 	{ "removeallpaths", FrogbotRemoveAllPaths, "Removes all paths from this marker" },
 	{ "setzone", FrogbotSetZone, "Sets a marker's zone #" },
 	{ "setmarkerflag", FrogbotSetMarkerFlag, "Flags a single marker" },
-	{ "clearmarkerflag", FrogbotClearMarkerFlag, "Clears flag on a parth between two markers" },
+	{ "clearmarkerflag", FrogbotClearMarkerFlag, "Clears flag on a path between two markers" },
 	{ "setpathflag", FrogbotSetPathFlag, "Flags a path between two markers" },
 	{ "clearpathflag", FrogbotClearPathFlag, "Clears flag on a path between two markers" },
 	{ "save", FrogbotSaveBotFile, "Saves current routing as a .bot file" },

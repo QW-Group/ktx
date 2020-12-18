@@ -409,8 +409,8 @@ const char CD_NODESC[] = "no desc";
 #define CD_RPICKUP    "vote random team pickup"
 #define CD_1ON1       "duel settings"
 #define CD_1ON1HM     "HoonyMode settings"
-#define CD_2ON2HM     "HoonyMode 2v2"
-#define CD_4ON4HM     "HoonyMode 4v4"
+#define CD_2ON2BLITZ  "Blitz 2v2"
+#define CD_4ON4BLITZ  "Blitz 4v4"
 #define CD_HMSTATS    "show stats per hoonymode point"
 #define CD_2ON2       "2 on 2 settings"
 #define CD_3ON3       "3 on 3 settings"
@@ -752,8 +752,8 @@ cmd_t cmds[] = {
 	{ "ffa",          DEF(UserMode),             6	 , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_FFA },
 	{ "ctf",          DEF(UserMode),             7   , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_CTF },
 	{ "hoonymode",    DEF(UserMode),             8   , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_1ON1HM },
-	{ "hoonymode2v2", DEF(UserMode),             9   , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_2ON2HM },
-	{ "hoonymode4v4", DEF(UserMode),             10  , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_4ON4HM },
+	{ "blitz2v2",     DEF(UserMode),             9   , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_2ON2BLITZ },
+	{ "blitz4v4",     DEF(UserMode),             10  , CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, CD_4ON4BLITZ },
 
 	{ "practice",    TogglePractice,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_PRACTICE },
 	{ "wp_reset",    Wp_Reset,                  0    , CF_PLAYER, CD_WP_RESET },
@@ -3222,12 +3222,13 @@ const char _1on1hm_um_init[] =
 	"k_lockmax 0\n"             // no efect in duel
 	"k_mode 1\n";               //
 
+// 'blitz' now
 const char _2on2hm_um_init[] =
 	"coop 0\n"					// no coop
 	"maxclients 4\n"			// 2on2 = 4 players
 	"k_maxclients 4\n"			// 2on2 = 4 players
 	"timelimit  3\n"			// 3 minute rounds
-	"k_hoonyrounds 4\n"         // 4 rounds (2 rotations)
+	"k_hoonyrounds 4\n"         // 4 rounds (2 sets of spawns)
 	"fraglimit  0\n"            // hoonymode - no fraglimit, time-based
 	"k_hoonymode 1\n"
 	"teamplay   2\n"			// hurt teammates and yourself
@@ -3270,12 +3271,13 @@ const char _3on3_um_init[] =
 	"k_exttime 5\n"				// overtime 5mins
 	"k_mode 2\n";				//
 
+// 'blitz' now
 const char _4on4hm_um_init[] =
 	"coop 0\n"					// no coop
 	"maxclients 8\n"			// 4on4 = 8 players
 	"k_maxclients 8\n"			// 4on4 = 8 players
-	"timelimit  3\n"			// 3 minute rounds
-	"k_hoonyrounds 6\n"         // 6 rounds (3 rotations)
+	"timelimit  5\n"			// 5 minute rounds
+	"k_hoonyrounds 4\n"         // 4 rounds (2 sets of spawns)
 	"fraglimit  0\n"            // no fraglimit, time-based
 	"teamplay   2\n"			// hurt teammates and yourself
 	"deathmatch 1\n"			// weapons wont stay on pickup
@@ -3369,8 +3371,8 @@ usermode um_list[] =
 	{ "ffa",           "ffa",                   ffa_um_init,        UM_FFA,    -1 },
 	{ "ctf",           "ctf",                   ctf_um_init,        UM_CTF,     0 },
 	{ "hoonymode",     "HoonyMode",		        _1on1hm_um_init,    UM_1ON1HM,  0 },
-	{ "hoonymode-2v2", "HoonyMode (2v2)",       _2on2hm_um_init,    UM_1ON1HM,  0 },
-	{ "hoonymode-4v4", "HoonyMode (4v4)",       _4on4hm_um_init,    UM_1ON1HM,  0 }
+	{ "blitz-2v2",     "Blitz (2v2)",           _2on2hm_um_init,    UM_1ON1HM,  0 },
+	{ "blitz-4v4",     "Blitz (4v4)",           _4on4hm_um_init,    UM_1ON1HM,  0 }
 };
 
 int um_cnt = sizeof (um_list) / sizeof (um_list[0]);

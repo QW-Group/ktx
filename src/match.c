@@ -1018,7 +1018,7 @@ void PrintCountdown( int seconds )
 		mode = redtext("LGC");
 	}
 	else if (isHoonyModeTDM()) {
-		mode = redtext("HoonyTDM");
+		mode = redtext("BlitzTDM");
 	}
 	else if (isRACE()) {
 		mode = redtext("R A C E");

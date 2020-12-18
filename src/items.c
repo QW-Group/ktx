@@ -1738,6 +1738,17 @@ void powerup_touch()
 	if (streq(self->classname, "item_artifact_invulnerability") ||
 		streq(self->classname, "item_artifact_invisibility")) {
 		self->s.v.nextthink = g_globalvars.time + 60 * 5;
+		if (isHoonyModeTDM()) {
+			// 5 minute rounds => respawn at 3 minutes
+			// 10 minute rounds => respawn at 4 minutes
+			// otherwise => default
+			if (HM_timelimit() <= 300) {
+				self->s.v.nextthink = g_globalvars.time + 60 * 3;
+			}
+			else if (HM_timelimit() <= 600) {
+				self->s.v.nextthink = g_globalvars.time + 60 * 4;
+			}
+		}
 		if (!k_practice) {
 			stuffcmd_flags(other, STUFFCMD_DEMOONLY, "//ktx took %d %d %d\n", NUM_FOR_EDICT(self), 300, NUM_FOR_EDICT(other));
 		}
