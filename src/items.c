@@ -1762,6 +1762,7 @@ void powerup_touch()
 	sound( other, CHAN_ITEM, self->noise, 1, ATTN_NORM );
 	stuffcmd( other, "bf\n" );
 	self->s.v.solid = SOLID_NOT;
+	setorigin(self, PASSVEC3(self->s.v.origin));
 	other->s.v.items = ( ( int ) other->s.v.items ) | ( ( int ) self->s.v.items );
 	self->model = "";
 
