@@ -119,7 +119,7 @@ extern gedict_t* dropper;
 #define VERTICAL_PLATFORM       (1 << 11)
 #define BOTPATH_DOOR            (1 << 12)
 #define BOTPATH_DOOR_CLOSED     (1 << 13)
-#define REVERSIBLE              (1 << 14)
+#define REVERSIBLE              (1 << 14)             // Set if bi-directional link between markers in the same zone
 #define WATER_PATH              (1 << 15)
 #define DELIBERATE_AIR          (1 << 17)
 #define WAIT_GROUND             (1 << 18)
@@ -145,7 +145,7 @@ extern gedict_t* dropper;
 #define MARKER_DOOR_TOUCHABLE            64   // If set, door will spawn a touchable marker.  If not set, door shouldn't be in bot path definitions
 #define MARKER_ESCAPE_ROUTE             128   // (not currently implemented) bot should head towards marker when in lava or slime (think amphi2/end)
 #define MARKER_DYNAMICALLY_ADDED        256   // Added dynamically by server.  Do not include in .bot file generation
-#define MARKER_EXPLICIT_VIEWOFFSET      512   // Viewoffset has been set by map defintion and should be included in .bot file generation
+#define MARKER_EXPLICIT_VIEWOFFSET      512   // Viewoffset has been set by map definition and should be included in .bot file generation
 #define MARKER_NOTOUCH                 1024   // Not touchable - used when two markers on top of each other
 
 // Bot flags (FIXME: fb.state?  check.  consistent naming, comment with descriptions)
@@ -293,28 +293,6 @@ qbool fb_lg_disabled (void);
 // maps
 void LoadMap (void);
 qbool FrogbotsCheckMapSupport (void);
-
-void map_aerowalk (void);
-void map_amphi2 (void);
-void map_dm4 (void);
-void map_dm3 (void);
-void map_dm6 (void);
-void map_e1m2 (void);
-void map_frobodm2 (void);
-void map_pkeg1 (void);
-void map_povdmm4 (void);
-void map_spinev2 (void);
-void map_ukooldm2 (void);
-void map_ukooldm3 (void);
-void map_ukooldm6 (void);
-void map_ukooldm8 (void);
-void map_ultrav (void);
-void map_ztndm1 (void);
-void map_ztndm2 (void);
-void map_ztndm3 (void);
-void map_ztndm4 (void);
-void map_ztndm5 (void);
-void map_ztndm6 (void);
 
 // 
 float pr1_rint (float f);
