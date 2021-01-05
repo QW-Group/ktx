@@ -60,6 +60,7 @@ void FlagStatus();
 void TossFlag();
 void norunes();
 void nohook();
+void crhook();
 void noga();
 void mctf();
 void CTFBasedSpawn();
@@ -497,6 +498,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_TOSSFLAG     "drop flag (CTF)"
 #define CD_FLAGSTATUS   "show flags status (CTF)"
 #define CD_NOHOOK       "toggle hook (CTF)"
+#define CD_CRHOOK       "toggle CRCTF 3.0 Hook settings (CTF)"
 #define CD_NORUNES      "toggle runes (CTF)"
 #define CD_NOGA         "toggle green armor on spawn (CTF)"
 #define CD_MCTF         "disable hook+runes (CTF)"
@@ -840,6 +842,7 @@ cmd_t cmds[] = {
 	{ "tossrune",    TossRune,                  0    , CF_PLAYER | CF_MATCHLESS, CD_TOSSRUNE },
 	{ "tossflag",    TossFlag,                  0    , CF_PLAYER | CF_MATCHLESS, CD_TOSSFLAG },
 	{ "nohook",      nohook,                    0    , CF_BOTH_ADMIN | CF_MATCHLESS, CD_NOHOOK },
+	{ "crhook",      crhook,                    0    , CF_BOTH_ADMIN | CF_MATCHLESS, CD_CRHOOK },
 	{ "norunes",     norunes,                   0    , CF_BOTH_ADMIN | CF_MATCHLESS, CD_NORUNES },
 	{ "noga",        noga,                      0    , CF_BOTH_ADMIN | CF_MATCHLESS, CD_NOGA },
 	{ "mctf",        mctf,                      0    , CF_BOTH_ADMIN | CF_MATCHLESS, CD_MCTF },

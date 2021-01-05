@@ -673,6 +673,20 @@ void nohook()
 	}
 }
 
+void crhook()
+{
+	if (match_in_progress)
+		return;
+
+	if (!isCTF())
+	{
+		G_sprint(self, 2, "Can't do this in non CTF mode\n");
+		return;
+	}
+
+	cvar_toggle_msg(self, "k_ctf_cr_hook", redtext("clanring 3.0 hook"));
+}
+
 void noga()
 {
 	if( match_in_progress && !k_matchLess )

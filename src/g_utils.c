@@ -116,6 +116,11 @@ void initialise_spawned_ent(gedict_t* ent)
 	PR2SetStringFieldOffset(ent, noise3);
 }
 
+float next_frame( )
+{
+	return g_globalvars.time + g_globalvars.frametime;
+}
+
 gedict_t *spawn(  )
 {
 	gedict_t *t = &g_edicts[trap_spawn(  )];

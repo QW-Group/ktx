@@ -113,7 +113,7 @@ void player_chain1()
 {
 	self->s.v.frame = 137;
 	self->think = ( func_t ) player_chain2;
- 	self->s.v.nextthink = g_globalvars.time + 0.1;
+ 	self->s.v.nextthink = next_frame();
 	self->s.v.weaponframe = 2;
 	GrappleThrow();
 }
@@ -122,20 +122,25 @@ void player_chain2()
 {
 	self->s.v.frame = 138;
 	self->think = ( func_t ) player_chain3;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->s.v.nextthink = next_frame();
 	self->s.v.weaponframe = 3;
 }
 
 void player_chain3()
 {
 	self->s.v.frame = 139;
-	self->think = ( func_t ) player_chain4;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
 	self->s.v.weaponframe = 3;
+
 	if ( !self->hook_out )
 		player_chain5();
+
 	else if ( vlen(self->s.v.velocity) >= 750 )
 		player_chain4();
+
+	else {
+		self->think = ( func_t ) player_chain3;
+		self->s.v.nextthink = next_frame();
+	}
 }
 
 void player_chain4()
@@ -144,22 +149,28 @@ void player_chain4()
 	// Frame 139 is a decent alternative especially given that 73 never looked good anyway
 	// self->s.v.frame = 73;
 	self->s.v.frame = 139;
-	self->think = ( func_t ) player_chain5;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
 	self->s.v.weaponframe = 4;
+
 	if ( !self->hook_out )
 		player_chain5();
+
 	else if ( vlen(self->s.v.velocity) < 750 )  
 		player_chain3(); 
+
+	else {
+		self->think = ( func_t ) player_chain4;
+		self->s.v.nextthink = next_frame();
+	}
 }
 
 void player_chain5()
 {
 	self->s.v.frame = 140;
-	self->walkframe = 0;
-	self->think = ( func_t ) player_run;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
 	self->s.v.weaponframe = 5;
+	self->walkframe = 0;
+
+	self->think = ( func_t ) player_run;
+	self->s.v.nextthink = next_frame();
 }
 
 void player_shot1()
