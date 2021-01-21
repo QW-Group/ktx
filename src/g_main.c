@@ -79,6 +79,8 @@ gameData_t gamedata = {
 
 float           starttime;
 int   g_matchstarttime;
+int   sv_extensions;
+
 void            G_InitGame( int levelTime, int randomSeed );
 void			G_ShutDown();
 void            StartFrame( int time );
@@ -452,6 +454,8 @@ void G_InitGame( int levelTime, int randomSeed )
 	cvar_set("qwm_platform", QW_PLATFORM_SHORT);
 	cvar_set("qwm_builddate", MOD_BUILD_DATE);
 	cvar_set("qwm_homepage", MOD_URL);
+
+	sv_extensions = cvar("sv_mod_extensions");
 }
 
 void G_ShutDown()

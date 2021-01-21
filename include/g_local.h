@@ -141,6 +141,7 @@ extern gedict_t *world;
 extern gedict_t *self, *other;
 extern gedict_t *newmis;
 extern int      timelimit, fraglimit, teamplay, deathmatch, framecount, coop, skill;
+extern int   sv_extensions;
 //extern float	rj;
 
 #define	EDICT_TO_PROG(e) ((byte *)(e) - (byte *)g_edicts)
