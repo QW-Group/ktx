@@ -347,7 +347,21 @@ void s2di(fileHandle_t file_handle, const char *fmt, ...)
 	trap_FS_WriteFile(text, strlen(text), file_handle);
 }
 
-static qbool CreateStatsFile(char* filename, char* ip, int port)
+static stats_format_t* FindStatsFormat(const char* requested_format)
+{
+	int i;
+
+	for (i = 0; i < sizeof(file_formats) / sizeof(file_formats[0]); ++i) {
+		if (streq(requested_format, file_formats[i].name)) {
+			return &file_formats[i];
+		}
+	}
+
+	// default to xml
+	return &file_formats[0];
+}
+
+static qbool CreateStatsFile(char* filename, char* ip, int port, stats_format_t* format)
 {
 	gedict_t	*p, *p2;
 	fileHandle_t di_handle;
@@ -355,22 +369,13 @@ static qbool CreateStatsFile(char* filename, char* ip, int port)
 	char *team = "";
 	int player_num = 0;
 	int i = 0;
-	stats_format_t* format = NULL;
-	const char* requested_format = cvar_string("k_demotxt_format");
 
-	if (trap_FS_OpenFile(filename, &di_handle, FS_WRITE_BIN) < 0) {
+	if (format == NULL) {
 		return false;
 	}
 
-	for (i = 0; i < sizeof(file_formats) / sizeof(file_formats[0]); ++i) {
-		if (streq(requested_format, file_formats[i].name)) {
-			format = &file_formats[i];
-		}
-	}
-
-	if (!format) {
-		// default to xml
-		format = &file_formats[0];
+	if (trap_FS_OpenFile(va("%s.%s", filename, format->name), &di_handle, FS_WRITE_BIN) < 0) {
+		return false;
 	}
 	
 	format->match_header(di_handle, ip, port);
@@ -424,6 +429,11 @@ void StatsToFile(void)
 {
 	char name[256] = { 0 }, *ip = "", *port = "";
 	int i = 0;
+	qbool written = false;
+	qbool send_to_website = !strnull(cvar_string("sv_www_address"));
+	qbool embed_in_mvd = (sv_extensions & SV_EXTENSIONS_MVDHIDDEN);
+	stats_format_t* json_format = NULL;
+	stats_format_t* format = NULL;
 
 	if (strnull(ip = cvar_string("sv_local_addr")) || strnull(port = strchr(ip, ':')) || !(i = atoi(port + 1)))
 		return;
@@ -435,21 +445,43 @@ void StatsToFile(void)
 		return; // doesn't record demo or doesn't want stats to be put in file
 	}
 
-	// This file over-written every time
-	snprintf(name, sizeof(name), "demoinfo_%s_%d.txt", ip, i);
+	format = FindStatsFormat(cvar_string("k_demotxt_format"));
+	json_format = FindStatsFormat("json");
 
-	if (CreateStatsFile(name, ip, i)) {
-		if (!strnull(cvar_string("sv_www_address"))) {
-			localcmd("\n" // why new line?
-				"sv_demoinfoadd ** %s\n"
-				"sv_web_postfile ServerApi/UploadGameStats \"\" * *internal authinfo\n", name);
-			trap_executecmd();
+	// This file over-written every time
+	snprintf(name, sizeof(name), "demoinfo_%s_%d", ip, i);
+
+	// Always write json, so it can be embedded in demo
+	if (json_format != NULL) {
+		written = CreateStatsFile(name, ip, i, json_format);
+
+		if (written) {
+			// submit to central website
+			if (send_to_website) {
+				localcmd("\nsv_web_postfile ServerApi/UploadGameStats \"\" \"%s.%s\" *internal authinfo\n", name, json_format->name);
+				trap_executecmd();
+			}
+
+			// if server supports embedding in .mvd/qtv stream, do that
+			if (embed_in_mvd) {
+				localcmd("\nsv_demoembedinfo \"%s.%s\"\n", name, json_format->name);
+				trap_executecmd();
+			}
 		}
-		else {
-			localcmd("\n" // why new line?
-				"sv_demoinfoadd ** %s\n", name);
-			trap_executecmd();
-		}
+
+		written = true;
+	}
+
+	// If non-json version required, generate now
+	if (!streq(format->name, "json")) {
+		written = CreateStatsFile(name, ip, i, format);
+	}
+
+	// add info
+	if (written) {
+		localcmd("\n" // why new line?
+			"sv_demoinfoadd ** %s.%s\n", name, format->name);
+		trap_executecmd();
 	}
 }
 
