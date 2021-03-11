@@ -557,21 +557,6 @@ void FixNoSpecs( void )
 	}
 }
 
-#define ALLOWED_NOSPECS_VIPS ( VIP_NOTKICKABLE | VIP_ADMIN | VIP_RCON )
-
-qbool nospecs_canconnect( gedict_t *spec )
-{
-	if ( cvar("_k_nospecs") )
-	{
-		// some VIPS able to connect anyway
-		if ( !( VIP( spec ) & ALLOWED_NOSPECS_VIPS ) )
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
 
 void vote_check_nospecs ()
 {
