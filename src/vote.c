@@ -1057,16 +1057,17 @@ qbool private_game_by_default(void)
 
 // }
 
-void vote_check_all ()
+void vote_check_all(void)
 {
-	vote_check_map ();
-	vote_check_break ();
-	vote_check_elect ();
-	vote_check_pickup ();
-	vote_check_rpickup (MAX_RPICKUP_RECUSION);
-	vote_check_nospecs ();
-	vote_check_teamoverlay ();
-	vote_check_coop ();
-	vote_check_antilag ();
+	vote_check_map();
+	vote_check_break();
+	vote_check_elect();
+	vote_check_pickup();
+	vote_check_rpickup(MAX_RPICKUP_RECUSION);
+	vote_check_nospecs();
+	vote_check_teamoverlay();
+	vote_check_coop();
+	vote_check_antilag();
+	vote_check_privategame();
 }
 

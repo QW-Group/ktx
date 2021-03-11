@@ -722,12 +722,12 @@ int 	get_votes( int fofs );
 int		get_votes_by_value( int fofs, int value );
 int		is_admins_vote( int fofs );
 
-void	vote_check_map ();
-void	vote_check_break ();
-void	vote_check_elect ();
-void	vote_check_pickup ();
-void	vote_check_rpickup (int maxRecursion);
-void 	vote_check_all ();
+void	vote_check_map();
+void	vote_check_break();
+void	vote_check_elect();
+void	vote_check_pickup();
+void	vote_check_rpickup(int maxRecursion);
+void 	vote_check_all(void);
 
 #define	VOTE_FOFS(x) ((intptr_t)&(((vote_t *)0)->x))
 
