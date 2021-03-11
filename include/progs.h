@@ -904,6 +904,7 @@ typedef struct gedict_s {
 	float	k_flag;          // flagvalue to customise settings such as sounds/autoscreenshot
 	float	k_msgcount;      // NOT_SURE: last time mod printed a message to client?
 	float	k_picked;        // NOT_SURE: 
+	int     k_pauseRequests;    // number of 'pause' commands the player executed during a match
 	int		k_stuff;         // if player has received stuffed aliases|commands
 // k_stuff flags
 #define STUFF_MAPS     (1<<0)

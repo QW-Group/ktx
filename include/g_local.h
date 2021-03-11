@@ -467,7 +467,9 @@ void            ClientDisconnect();
 void            PlayerPreThink();
 void			BothPostThink(); // <- called for player and spec
 void            PlayerPostThink();
+qbool 			PlayerCanPause();
 void            SuperDamageSound();
+
 
 gedict_t        *SelectSpawnPoint( char *spawnname );
 
@@ -742,6 +744,7 @@ void 	vote_check_all ();
 #define OV_PRIVATE ( VOTE_FOFS ( privategame ) )
 //#define OV_KICKUNAUTHED ( VOTE_FOFS (kick_unauthed) )
 #define MAX_RPICKUP_RECUSION 3
+#define MAX_PAUSE_REQUESTS 3
 
 void 	ElectThink();
 void	AbortElect();

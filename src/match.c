@@ -719,6 +719,8 @@ static void SM_PrepareClients()
 			continue;
 
 		k_respawn( p, false );
+
+		p->k_pauseRequests = MAX_PAUSE_REQUESTS;
 	}
 	initial_match_spawns = false;
 

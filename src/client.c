@@ -4267,3 +4267,21 @@ void ClientObituary (gedict_t *targ, gedict_t *attacker)
 	}
 }
 
+qbool PlayerCanPause(gedict_t *p)
+{
+	qbool playerCanPause = false;
+	char *matchtag = ezinfokey(world, "matchtag");
+
+	// Check for matchtag. If it is set, it is an official (probably), so pause might be allowed.
+	if ((NULL != matchtag) && matchtag[0])
+	{
+		// matchtag is found. Let's see if the player can still pause.
+		if (p->k_pauseRequests > 0)
+		{
+			p->k_pauseRequests--;
+			playerCanPause = true;
+		}
+	}
+
+	return playerCanPause;
+}
