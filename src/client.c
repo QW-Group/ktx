@@ -44,7 +44,6 @@ void CheckAll();
 void PlayerStats();
 void ExitCaptain();
 void CheckFinishCaptain();
-void ExitCoach();
 void MakeMOTD();
 void ImpulseCommands();
 void StartDie ();
@@ -2344,12 +2343,6 @@ void ClientDisconnect()
 
 	if( k_captains == 2 )
 		CheckFinishCaptain();
-
-    if( coach_num( self ) ) {
-        G_bprint(2, "A %s has left\n", redtext("coach"));
-
-        ExitCoach();
-    }
 
 	if( cvar( "k_idletime" ) > 0 )
 		IdlebotCheck();
