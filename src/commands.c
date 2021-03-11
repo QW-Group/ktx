@@ -6316,7 +6316,7 @@ void PausedTic( int duration )
 	}
 }
 
-void TogglePause ()
+void TogglePause()
 {
 	if (FTE_sv)
 		return; // unsupported
@@ -6325,13 +6325,6 @@ void TogglePause ()
 	{ // NON matchless
 		if ( match_in_progress != 2 )
 			return; // apply TogglePause only during actual game
-	}
-
-	// admins may ignore not allowed pause
-	if( !cvar( "pausable" ) && !is_adm(self) )
-	{
-		G_sprint(self, 2, "Pause is not allowed\n");
-		return;
 	}
 
 	if ( (int)cvar("sv_paused") & 1 )
@@ -6355,9 +6348,16 @@ void TogglePause ()
 	{
 		// PAUSE
 
+		// admins may ignore not allowed pause
+		if( !cvar( "pausable" ) && !is_adm(self) && !PlayerCanPause(self))
+		{
+			G_sprint(self, 2, "Pause is not allowed\n");
+			return;
+		}
+
 		pauseduration = when_to_unpause = 0; // reset our globals
 
-		G_bprint(2, "%s paused the game\n", self->netname);
+		G_bprint(2, "%s paused the game. He has %d remaining request(s).\n", self->netname, self->k_pauseRequests);
 		trap_setpause (1);
 	}
 }
