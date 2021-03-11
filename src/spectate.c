@@ -105,10 +105,29 @@ void SpecDecodeLevelParms()
 //    	self->ps.handicap = g_globalvars.parm14;
 }
 
+
+qbool nospecs_canconnect( gedict_t *spec )
+{
+	if ( cvar("_k_nospecs") )
+	{
+		// some VIPS able to connect anyway
+		if ( !( VIP( spec ) & ALLOWED_NOSPECS_VIPS ) && !is_coach(spec))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+////////////////////////////////////////////////////
+// Function checks if a spectator can connect or not
+//
+// return true - if a spec can connect
+//        false - otherwise
+////////////////////////////////////////////////////
 qbool SpecCanConnect( gedict_t *spec )
 {
-	extern qbool nospecs_canconnect( gedict_t *spec );
-
 	if ( !nospecs_canconnect( spec ) )
 	{
 		G_sprint( spec, 2, "%s mode, you can't connect\n", redtext("No spectators") );
@@ -129,13 +148,15 @@ void SpectatorConnect()
 	gedict_t *p;
 	int diff = (int)(PROG_TO_EDICT(self->s.v.goalentity) - world);
 
+	// we need this before the SpecCanConnect() call, as we need to restore admin and/or coach flags
+	SpecDecodeLevelParms();
+
 	if ( !SpecCanConnect( self ) )
 	{
 		stuffcmd(self, "disconnect\n"); // FIXME: stupid way
 		return;
 	}
 
-	SpecDecodeLevelParms();
 
 	self->ct = ctSpec;
 	self->classname = "spectator"; // Added this in for kick code

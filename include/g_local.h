@@ -692,6 +692,8 @@ void s_lr_clear( gedict_t *dsc );
 //		16 - VIP with judge rights
 #define VIP_RCON		(32) // VIP with rcon admin rights
 
+#define ALLOWED_NOSPECS_VIPS ( VIP_NOTKICKABLE | VIP_ADMIN | VIP_RCON )
+
 
 int				VIP(gedict_t* cl);
 int				VIP_IsFlags(gedict_t* cl, int flags);
