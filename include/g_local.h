@@ -480,7 +480,7 @@ void			Print_Scores();
 // { "new weapon stats"
 void			WS_Mark( gedict_t *p, weaponName_t wp );
 void			WS_Reset( gedict_t *p );
-void			WS_OnSpecPovChange( gedict_t *s );
+void			WS_OnSpecPovChange(gedict_t *s, qbool force);
 // }
 
 //spectate.c
