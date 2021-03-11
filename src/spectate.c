@@ -203,6 +203,12 @@ void SpectatorDisconnect()
 		AbortElect();
 	}
 
+    if( coach_num( self ) ) {
+        G_bprint(2, "A %s has left\n", redtext("coach"));
+
+        ExitCoach();
+    }
+
 	if ( self->wizard ) {
 		ent_remove( self->wizard );
 		self->wizard = NULL;
