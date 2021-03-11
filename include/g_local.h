@@ -815,6 +815,7 @@ int		capt_num(gedict_t *p);
 
 int     coach_num(gedict_t *p);
 qbool   is_coach(gedict_t *p);
+void    ExitCoach();
 
 // maps.c
 
