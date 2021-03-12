@@ -1651,7 +1651,7 @@ static qbool NeedDropQuad(void)
 
 void DropPowerups()
 {
-	if ( k_killquad || ( cvar( "dq" ) && Get_Powerups() && cvar("k_pow_q") ) )
+	if ( (k_killquad || ( cvar( "dq" ) && Get_Powerups() && cvar("k_pow_q") )) && !k_berzerk )
 	{
 		if ( k_killquad )
 		{

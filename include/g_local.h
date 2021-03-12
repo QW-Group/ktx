@@ -921,37 +921,39 @@ race_stats_score_t* race_get_player_stats(int* players);
 
 // globals.c
 
-extern  int   k_bloodfest;		// blood fest mode
-extern	float k_killquad;	    // killquad mode
-extern	float framechecks;	    // if timedemo/uptime bugs are tolerated
-extern	float k_attendees;      // stores number of players on server - used in 'ready' checking
-extern	float k_captains;	    // number of captains
-extern	float k_captainturn;	// which captain comes in line to pick
-extern	float k_coaches;        // number of coaches
-extern	float k_checkx;
-extern	float k_force;          // used in forcing matchstart
-extern	float k_maxspeed;       // used to store server maxspeed to allow switching by admins
-extern	float k_oldmaxspeed;    // used to store old value of maxspeed prior to freezing the map
-extern	float k_showscores;     // whether or not should print the scores or not
-extern	float k_nochange;       // used to indicate if frags changes somehow since last time 'scores' command was called
-extern	float k_standby;        // if server is in standy mode
-extern	float k_sudden_death;	// to mark if sudden death overtime is currently the case
-extern	float k_teamid;
-extern	float k_userid;
-extern	float k_whonottime;     // NOT_SURE: 
-extern	float match_in_progress;// if a match has begun
-extern  float match_start_time;	// time when match has been started
+extern  int   k_bloodfest;      // blood fest mode
+extern  float k_killquad;       // killquad mode
+extern  float framechecks;      // if timedemo/uptime bugs are tolerated
+extern  float k_attendees;      // stores number of players on server - used in 'ready' checking
+extern  float k_captains;       // number of captains
+extern  float k_captainturn;    // which captain comes in line to pick
+extern  float k_coaches;        // number of coaches
+extern  float k_checkx;
+extern  float k_force;          // used in forcing matchstart
+extern  float k_maxspeed;       // used to store server maxspeed to allow switching by admins
+extern  float k_oldmaxspeed;    // used to store old value of maxspeed prior to freezing the map
+extern  float k_showscores;     // whether or not should print the scores or not
+extern  float k_nochange;       // used to indicate if frags changes somehow since last time 'scores' command was called
+extern  float k_standby;        // if server is in standy mode
+extern  float k_sudden_death;   // to mark if sudden death overtime is currently the case
+extern  float k_teamid;
+extern  float k_userid;
+extern  float k_whonottime;     // NOT_SURE:
+extern  float match_in_progress;// if a match has begun
+extern  float match_start_time; // time when match has been started
 extern  float match_end_time;   // time when match is expected to end
-extern	float match_over;       // boolean - whether or not the match stats have been printed at end of game
-extern	gedict_t *newcomer;     // stores last player who joined
-extern	int   k_overtime;		// is overtime is going on
+extern  float match_over;       // boolean - whether or not the match stats have been printed at end of game
+extern  int k_berzerk;          // berzerk mode
+extern  float k_berzerktime;    // berzerk mode time left
+extern  gedict_t *newcomer;     // stores last player who joined
+extern  int   k_overtime;       // is overtime is going on
 
-extern	float current_maxfps;	// current value of maxfps
+extern  float current_maxfps;	// current value of maxfps
 
 // { yawn mode
-extern	int   k_yawnmode;		// is server in yawn mode
-extern	int   k_fallbunny_cap;	// fallbunny cap procent in yawn mode
-extern	int   k_teleport_cap;	// cap for keeping velocity through tele
+extern  int   k_yawnmode;		// is server in yawn mode
+extern  int   k_fallbunny_cap;	// fallbunny cap procent in yawn mode
+extern  int   k_teleport_cap;	// cap for keeping velocity through tele
 // }
 
 extern	int   k_practice;		// is server in practice mode

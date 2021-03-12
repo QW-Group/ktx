@@ -811,6 +811,9 @@ void FirstFrame	( )
 	RegisterCvarEx("k_race_route_mapname", "");
 	//RegisterCvarEx("k_race_topscores", "10");
 // }
+	RegisterCvar("k_bzk");
+	RegisterCvar("k_btime");
+
 	RegisterCvar("k_idletime");
 	RegisterCvar("k_timetop");
 	RegisterCvar("k_membercount");
