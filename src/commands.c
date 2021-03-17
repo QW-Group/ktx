@@ -3361,7 +3361,7 @@ const char ffa_um_init[] =
 	"k_overtime 1\n"			// time based
 	"k_exttime 5\n"				// overtime 5mins
 	"k_mode 3\n"				//
-	"k_bzk 1\n";				// berzerk mode on ;)
+	"k_bzk 0\n";				// berzerk mode on ;)
 
 const char ctf_um_init[] =
 	"sv_loadentfiles_dir ctf\n"
