@@ -111,7 +111,7 @@ void TogglePuPickup();
 void ToggleQEnemy();
 void ToggleQLag();
 void ToggleQPoint();
-/* new FDP bits http://wiki.qwdrama.com/FPD
+/* new FDP bits https://www.quakeworld.nu/wiki/FPD
 void ToggleSkinForcing();
 void ToggleColorForcing();
 void TogglePitchSpeedLimit();
@@ -389,7 +389,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_QLAG       "lag settings"
 #define CD_QENEMY     "enemy vicinity reporting"
 #define CD_QPOINT     "point function"
-/* new FDP bits http://wiki.qwdrama.com/FPD
+/* new FDP bits https://www.quakeworld.nu/wiki/FPD
 #define CD_SFORCING   "skin forcing"
 #define CD_CFORCING   "color forcing"
 #define CD_PITCHSP    "pitch speed limiting"
@@ -725,7 +725,7 @@ cmd_t cmds[] = {
 	{ "qlag",        ToggleQLag,                0    , CF_PLAYER | CF_SPC_ADMIN, CD_QLAG },
 	{ "qenemy",      ToggleQEnemy,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_QENEMY },
 	{ "qpoint",      ToggleQPoint,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_QPOINT },
-/* new FDP bits http://wiki.qwdrama.com/FPD
+/* new FDP bits https://www.quakeworld.nu/wiki/FPD
 	{ "skinforce",   ToggleSkinForcing,         0    , CF_PLAYER | CF_SPC_ADMIN, CD_SFORCING },
 	{ "colorforce",  ToggleColorForcing,        0    , CF_PLAYER | CF_SPC_ADMIN, CD_CFORCING },
 	{ "pitchsl",     TogglePitchSpeedLimit,     0    , CF_PLAYER | CF_SPC_ADMIN, CD_PITCHSP },
@@ -1710,7 +1710,7 @@ void ModStatus2()
 	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo timers"), OnOff(i & 2));
 	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo enemy reporting"), OnOff(i & 32));
 	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo pointing"), OnOff(i & 128));
-/* new FDP bits http://wiki.qwdrama.com/FPD
+/* new FDP bits https://www.quakeworld.nu/wiki/FPD
 	G_sprint(self, 2, "%s: %s\n", redtext("Skin forcing"),          OnOff(! (i & 256) ));
 	G_sprint(self, 2, "%s: %s\n", redtext("Color forcing"),         OnOff(! (i & 512) ));
 	G_sprint(self, 2, "%s: %s\n", redtext("Pitch speed limiting"),  OnOff( i & 16384 ));
@@ -2812,7 +2812,7 @@ void ToggleQPoint()
 		redtext("QiZmo pointing"), Enabled( fpd & 128 ));
 }
 
-/* new FDP bits http://wiki.qwdrama.com/FPD
+/* new FDP bits https://www.quakeworld.nu/wiki/FPD
 void ToggleSkinForcing()
 {
 	int fpd = iKey( world, "fpd" );
