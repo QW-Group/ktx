@@ -230,6 +230,7 @@ void EndMatch ( float skip_log )
 		return;
 
 	match_over = 1;
+	k_berzerk = 0;
 
 	remove_projectiles();
 
@@ -480,6 +481,7 @@ void TimerThink ()
 {
 	gedict_t *p;
 	int idle_time;
+	float f1, f2;
 
 	//if in matchless mode, check that the user hasn't exceeded k_matchless_max_idle_time
 	if ( k_matchLess && CountPlayers() && match_in_progress && k_matchLess_idle_time ){
@@ -509,6 +511,30 @@ void TimerThink ()
 
 	if( self->k_teamnum < g_globalvars.time && !k_checkx )
 		k_checkx = 1; // global which set to true when some time spend after match start
+
+	// berzerk
+    if( k_berzerktime != 0) {
+        f1 = k_berzerktime;
+		f2 = floor(f1 / 60);
+		f1 = f1 - (f2 * 60);
+		f2 = f2 + 1;
+		if(self->cnt2 == f1 && self->cnt == f2) {
+			G_bprint(2, "BERZERK!!!!\n");
+			trap_lightstyle(0, "ob");
+			k_berzerk = 1;
+
+			for( p = world; (p = find_plr( p )); )
+			{
+				if (strcmp(p->netname, "") && p->s.v.health > 0) {
+					p->s.v.items = (int)p->s.v.items | (IT_QUAD | IT_INVULNERABILITY);
+					p->super_time = 1;
+					p->super_damage_finished = g_globalvars.time + 3600;
+					p->invincible_time = 1;
+					p->invincible_finished = g_globalvars.time + 2;
+				}
+			}
+		}
+	}
 
 	( self->cnt2 )--;
 
@@ -830,6 +856,18 @@ void StartMatch()
 	match_start_time = g_globalvars.time;
 	g_matchstarttime = (int) (g_globalvars.time*1000);
 	match_in_progress = 2;
+
+	// Disable berzerk at start
+	k_berzerk = 0;
+	// Get berzerk mode time
+	if (cvar( "k_bzk" ))
+	{
+		k_berzerktime = cvar( "k_btime" );
+	}
+	else
+	{
+		k_berzerktime = 0;
+	}
 
 	lastTeamLocationTime = -TEAM_LOCATION_UPDATE_TIME; // update on next frame
 

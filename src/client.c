@@ -1886,6 +1886,15 @@ void PutClientInServer( void )
 	WriteByte(MSG_ONE, 18 /*STAT_MATCHSTARTTIME*/);
 	WriteLong(MSG_ONE, g_matchstarttime);
 
+	if (match_in_progress == 2) {
+		//berzerk will not affect players that logs in during berzerk
+		if (cvar( "k_bzk" ) && k_berzerk) {
+			self->s.v.items = (int)self->s.v.items | IT_QUAD;
+			self->super_time = 1;
+			self->super_damage_finished = g_globalvars.time + 3600;
+		}
+	}
+
 #ifdef BOT_SUPPORT
 	BotClientEntersEvent (self, spot);
 #endif
@@ -3071,7 +3080,7 @@ void CheckPowerups()
 	if ( self->super_damage_finished )
 	{
 // sound and screen flash when items starts to run out
-		if ( self->super_damage_finished < g_globalvars.time + 3 )
+		if ( self->super_damage_finished < g_globalvars.time + 3 && !k_berzerk)
 		{
 			if ( self->super_time == 1 )
 			{
@@ -3091,7 +3100,7 @@ void CheckPowerups()
 			}
 		}
 
-        if ( self->super_damage_finished < g_globalvars.time )
+        if ( self->super_damage_finished < g_globalvars.time && !k_berzerk)
 		{		// just stopped
 			self->s.v.items -= IT_QUAD;
 			if ( !k_practice ) // #practice mode#

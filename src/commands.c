@@ -118,6 +118,7 @@ void TogglePitchSpeedLimit();
 void ToggleYawSpeedLimit();
 */
 void ToggleRespawns();
+void ToggleBerzerk();
 void ToggleSpecTalk();
 void ToggleSpeed();
 void VotePickup();
@@ -521,6 +522,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_MIDAIR       "turn midair mode on/off"
 #define CD_MIDAIR_MINHEIGHT "midair minimum frag height"
 #define CD_INSTAGIB     "instagib settings"
+#define CD_BERZERK      "berzerk settings"
 #define CD_LGC          "lgc mode"
 #define CD_CG_KB        "toggle coilgun kickback in instagib"
 #define CD_TIME         "show server time"
@@ -873,6 +875,7 @@ cmd_t cmds[] = {
 	{ "midair",      ToggleMidair,              0    , CF_PLAYER | CF_SPC_ADMIN, CD_MIDAIR },
 	{ "midair_minheight", SetMidairMinHeight,   0    , CF_PLAYER | CF_SPC_ADMIN, CD_MIDAIR_MINHEIGHT },
 	{ "instagib",    ToggleInstagib,            0    , CF_PLAYER | CF_SPC_ADMIN, CD_INSTAGIB },
+	{ "berzerk",     ToggleBerzerk,             0    , CF_PLAYER | CF_SPC_ADMIN, CD_BERZERK },
 	{ "lgcmode",     ToggleLGC,                 0    , CF_PLAYER | CF_SPC_ADMIN, CD_LGC },
 	{ "instagib_coilgun_kickback", ToggleCGKickback, 0, CF_PLAYER | CF_SPC_ADMIN, CD_CG_KB },
 	{ "time",        sv_time,                   0    , CF_BOTH | CF_MATCHLESS, CD_TIME },
@@ -1374,33 +1377,34 @@ qbool check_perm(gedict_t *p, int perm)
 void ShowOpts()
 {
 	G_sprint(self, 2,
-		"%s.. -1 mins match time\n"
-		"%s.... +1 mins match time\n"
-		"%s... -5 mins match time\n"
-		"%s..... +5 mins match time\n"
-		"%s.. -10 fraglimit\n"
-		"%s.... +10 fraglimit\n"
-		"%s......... change deathmatch mode\n"
-		"%s......... change teamplay mode\n"
-		"%s... drop quad when killed\n"
-		"%s... drop ring when killed\n"
+		"%s... -1 mins match time\n"
+		"%s..... +1 mins match time\n"
+		"%s.... -5 mins match time\n"
+		"%s...... +5 mins match time\n"
+		"%s... -10 fraglimit\n"
+		"%s..... +10 fraglimit\n"
+		"%s.......... change deathmatch mode\n"
+		"%s.......... change teamplay mode\n"
+		"%s.... drop quad when killed\n"
+		"%s.... drop ring when killed\n"
 		"%s... drop pack when killed\n"
-		"%s....... change locking mode\n"
-		"%s...... change spawntype\n"
-		"%s...... toggle sv_maxspeed\n"
-		"%s... quad, %s, ring & suit\n"
-		"%s.. best/last weapon dropped\n"
-		"%s.. underwater discharges\n"
-		"%s.... toggle spectator talk\n"
-		"%s..... toggle midair mode\n"
-		"%s.. toggle grenade mode\n"
-		"%s... toggle instagib mode\n",
+		"%s........ change locking mode\n"
+		"%s....... change spawntype\n"
+		"%s....... toggle sv_maxspeed\n"
+		"%s.... quad, %s, ring & suit\n"
+		"%s... best/last weapon dropped\n"
+		"%s... underwater discharges\n"
+		"%s..... toggle spectator talk\n"
+		"%s...... toggle midair mode\n"
+		"%s... toggle grenade mode\n"
+		"%s.... toggle instagib mode\n"
+		"%s..... toggle berzerk mode\n",
 		redtext("timedown1"), redtext("timeup1"), redtext("timedown"), redtext("timeup"),
 		redtext("fragsdown"), redtext("fragsup"), redtext("dm"), redtext("tp"), redtext("dropquad"),
 		redtext("dropring"), redtext("droppacks"), redtext("lock"), redtext("spawn"),
 		redtext("speed"), redtext("powerups"), redtext("666"), redtext("fairpacks"),
 		redtext("discharge"), redtext("silence"), redtext("midair"), redtext("gren_mode"),
-		redtext("instagib"));
+		redtext("instagib"), redtext("berzerk"));
 }
 
 void ShowQizmo()
@@ -1619,6 +1623,7 @@ void ModStatus ()
 	G_sprint(self, 2, "%-14.14s %-4.4s ",  redtext("spec info perm"),	mi_adm_only() ? "adm" : "all");
 	G_sprint(self, 2, "%-14.14s %-3.3s\n", redtext("more spec info"),	OnOff(mi_on()));
 	G_sprint(self, 2, "%-14.14s %-4.4s\n", redtext("teleteam"),			OnOff(cvar("k_tp_tele_death")));
+	G_sprint(self, 2, "%-14.14s %-3.3s\n", redtext("Berzerk"),		    OnOff(cvar("k_bzk")));
 
 	if( match_in_progress == 1 )
 	{
@@ -2504,6 +2509,14 @@ void ToggleSpeed()
 		p->maxspeed = k_maxspeed;
 }
 
+void ToggleBerzerk()
+{
+	if (match_in_progress)
+		return;
+
+	cvar_toggle_msg( self, "k_bzk", redtext("Berzerk mode") );
+};
+
 void ToggleSpecTalk()
 {
 	int k_spectalk = !cvar( "k_spectalk" ), fpd = iKey( world, "fpd" );
@@ -2563,6 +2576,14 @@ void ShowRules()
 			"are %s and %s.\n", redtext("scores"), redtext("stats"), redtext("efficiency"));
 	else
 		G_sprint(self, 2, "Server is in unknown mode.\n");
+
+	if( cvar( "k_bzk" ) ) {
+		G_sprint(self, 2,
+			"\nBERZERK mode is activated!\n"
+			"This means that when only %d seconds\n"
+			"remains of the game, all players\n"
+			"gets QUAD/OCTA powered.\n", (int)cvar( "k_btime" ));
+	}
 
 	G_sprint(self, 2, "\n");
 }
@@ -3189,7 +3210,8 @@ const char common_um_init[] =
 	"k_pow_p 1\n"				// powerups - pent
 	"k_pow_r 1\n"				// powerups - ring
 	"k_pow_s 1\n"				// powerups - suit
-	"qtv_sayenabled 0\n"       // default blocking of qtv chat
+	"qtv_sayenabled 0\n"		// default blocking of qtv chat
+	"k_bzk 0\n"					// berzerk mode off
 ;
 
 const char _1on1_um_init[] =
@@ -3338,7 +3360,8 @@ const char ffa_um_init[] =
 	"k_lockmax 0\n"				// no effect in ffa
 	"k_overtime 1\n"			// time based
 	"k_exttime 5\n"				// overtime 5mins
-	"k_mode 3\n";				//
+	"k_mode 3\n"				//
+	"k_bzk 0\n";				// berzerk mode on ;)
 
 const char ctf_um_init[] =
 	"sv_loadentfiles_dir ctf\n"

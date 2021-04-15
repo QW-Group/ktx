@@ -44,6 +44,8 @@ float match_in_progress = 0;    // if a match has begun
 float match_start_time; // time when match has been started
 float match_end_time;   // time when match is expected to end
 float match_over;       // boolean - whether or not the match stats have been printed at end of game
+int k_berzerk;          // berzerk mode
+float k_berzerktime; // berzerk mode time left
 gedict_t *newcomer = g_edicts;     // stores last player who joined
 
 int   k_overtime = 0;   // is overtime is going on
