@@ -1009,13 +1009,17 @@ void PrintCountdown( int seconds )
 	char *mode = "";
 	char *ot   = "";
 	char *nowp = "";
-	char *matchtag = ezinfokey(world, "matchtag");
+	char *matchtag = redtext(ezinfokey(world, "matchtag"));
 
 
 	strlcat(text, va("%s: %2s\n\n\n", redtext("Countdown"), dig3(seconds)), sizeof(text));
 
-	if (matchtag[0])
-		strlcat(text, va("%s\n\n\n", matchtag), sizeof(text));
+//	if (matchtag[0]) {
+//		strlcat(text, va("matchtag %s\n\n\n", matchtag), sizeof(text));
+//	}
+//	else {
+//		strlcat(text, "no matchtag\n\n\n", sizeof(text));
+//	}
 
 	if (isHoonyModeDuel() && seconds <= 3) {
 		PersonalisedCountdown(text);
@@ -1192,6 +1196,13 @@ void PrintCountdown( int seconds )
 			strlcat(text, va("\n%-13s\n", redtext("New spawns")), sizeof(text));
 		else
 			strlcat(text, va("\n%-13s\n", redtext("Switch spawns")), sizeof(text));
+	}
+
+	if (matchtag[0]) {
+		strlcat(text, va("\nmatchtag %s\n\n\n", matchtag), sizeof(text));
+	}
+	else {
+		strlcat(text, "\nno matchtag\n\n\n", sizeof(text));
 	}
 
 	G_cp2all(text);
