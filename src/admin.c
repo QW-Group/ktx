@@ -137,7 +137,7 @@ void AdminKick ()
 	}
 
     G_sprint(self, 2, "Kicking process started\n"
-					  "žžžžžžžžžžžžžžžžžžžžžŸ\n"
+			 	 	   "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n"
 					  "Type \371 to kick, \356 for next, %s to leave\n", redtext("kick"));
 
     self->k_kicking = g_globalvars.time;
