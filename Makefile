@@ -42,32 +42,33 @@ vm:			build-vm
 build:		build-dl build-dl32 build-vm
 
 build-dl:
-			cd $(SRCDIR); $(MAKEDL) build
+			+cd $(SRCDIR); $(MAKEDL) build
 
 build-dlbots:
-			cd $(SRCDIR); $(MAKEDL) build BOT_SUPPORT=1
+			+cd $(SRCDIR); $(MAKEDL) build BOT_SUPPORT=1
 
 build-dl32:
-			cd $(SRCDIR); $(MAKEDL32) build
+			+cd $(SRCDIR); $(MAKEDL32) build
 
 build-dl32bots:
-			cd $(SRCDIR); $(MAKEDL32) build BOT_SUPPORT=1
+			+cd $(SRCDIR); $(MAKEDL32) build BOT_SUPPORT=1
 
 build-vm:
-			cd $(SRCDIR); $(MAKEQVM) build
-
+			+cd $(SRCDIR); $(MAKEQVM) build
+build-vmbots:
+			+cd $(SRCDIR); $(MAKEQVM) build BOT_SUPPORT=1
 
 
 install:	install-dl install-dl32 install-vm
 
 install-dl:
-			cd $(SRCDIR); $(MAKEDL) PREFIX=$(PREFIX) install
+			+cd $(SRCDIR); $(MAKEDL) PREFIX=$(PREFIX) install
 
 install-dl32:
-			cd $(SRCDIR); $(MAKEDL32) PREFIX=$(PREFIX) install
+			+cd $(SRCDIR); $(MAKEDL32) PREFIX=$(PREFIX) install
 
 install-vm:
-			cd $(SRCDIR); $(MAKEQVM) PREFIX=$(PREFIX) install
+			+cd $(SRCDIR); $(MAKEQVM) PREFIX=$(PREFIX) install
 
 
 clean:		clean-local clean-include clean-dl clean-dl32 clean-vm
@@ -77,16 +78,16 @@ clean-local:
 			$(RM) -rf autom4te.cache
 
 clean-include:
-			cd $(INCDIR); $(RM) -f *~
+			+cd $(INCDIR); $(RM) -f *~
 
 clean-dl:
-			cd $(SRCDIR); $(MAKEDL) clean
+			+cd $(SRCDIR); $(MAKEDL) clean
 
 clean-dl32:
-			cd $(SRCDIR); $(MAKEDL32) clean
+			+cd $(SRCDIR); $(MAKEDL32) clean
 
 clean-vm:
-			cd $(SRCDIR); $(MAKEQVM) clean
+			+cd $(SRCDIR); $(MAKEQVM) clean
 
 
 distclean:	distclean-local distclean-include distclean-dl distclean-dl32 distclean-vm
@@ -97,13 +98,13 @@ distclean-local:
 			$(RM) -rf autom4te.cache
 
 distclean-include:
-			cd $(INCDIR); $(RM) -f *~ *.orig *.rej *.tmp
+			+cd $(INCDIR); $(RM) -f *~ *.orig *.rej *.tmp
 
 distclean-dl:
-			cd $(SRCDIR); $(MAKEDL) distclean
+			+cd $(SRCDIR); $(MAKEDL) distclean
 
 distclean-dl32:
-			cd $(SRCDIR); $(MAKEDL32) distclean
+			+cd $(SRCDIR); $(MAKEDL32) distclean
 
 distclean-vm:
-			cd $(SRCDIR); $(MAKEQVM) distclean
+			+cd $(SRCDIR); $(MAKEQVM) distclean

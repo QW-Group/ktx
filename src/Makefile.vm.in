@@ -25,8 +25,8 @@ INSTALLDIR=$(PREFIX)/sbin
 
 MODULE=../qwprogs.qvm
 
-CFLAGS=-DQ3_VM -S -Wf-target=bytecode -Wf-g
-INCFLAGS=-I../include
+CFLAGS+=-DQ3_VM -S -Wf-target=bytecode -Wf-g
+INCFLAGS+=-I../include
 BOTFLAGS=
 
 ifdef BOT_SUPPORT
