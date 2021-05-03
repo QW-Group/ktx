@@ -27,34 +27,34 @@
 //
 #include "g_local.h"
 
-
 #define POOLSIZE	(256 * 1024)
 
-static char     memoryPool[POOLSIZE];
-static int      allocPoint;
+static char memoryPool[POOLSIZE];
+static int allocPoint;
 
-void           *G_Alloc( int size )
+void* G_Alloc(int size)
 {
-	char           *p;
+	char *p;
 
-/*	if ( g_debugAlloc.integer ) {
-		G_Printf( "G_Alloc of %i bytes (%i left)\n", size, POOLSIZE - allocPoint - ( ( size + 31 ) & ~31 ) );
-	}*/
+	/*	if ( g_debugAlloc.integer ) {
+	 G_Printf( "G_Alloc of %i bytes (%i left)\n", size, POOLSIZE - allocPoint - ( ( size + 31 ) & ~31 ) );
+	 }*/
 
-	if ( allocPoint + size > POOLSIZE )
+	if (allocPoint + size > POOLSIZE)
 	{
-		G_Error( "G_Alloc: failed on allocation of %i bytes\n", size );	// bk010103 - was %u, but is signed
+		G_Error("G_Alloc: failed on allocation of %i bytes\n", size);// bk010103 - was %u, but is signed
+
 		return NULL;
 	}
 
 	p = &memoryPool[allocPoint];
 
-	allocPoint += ( size + 31 ) & ~31;
+	allocPoint += (size + 31) & ~31;
 
 	return p;
 }
 
-void G_InitMemory( void )
+void G_InitMemory(void)
 {
 	allocPoint = 0;
 }
