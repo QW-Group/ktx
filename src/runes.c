@@ -14,43 +14,53 @@ void DoDropRune(int rune, qbool s)
 {
 	gedict_t *item;
 
-	cl_refresh_plus_scores( self );
+	cl_refresh_plus_scores(self);
 
 	item = spawn();
-	setorigin( item, self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] - 24);
+	setorigin(item, self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] - 24);
 	item->classname = "rune";
 	item->ctf_flag = rune;
-	item->s.v.velocity[0] = i_rnd( -100, 100 );
-	item->s.v.velocity[1] = i_rnd( -100, 100 );
+	item->s.v.velocity[0] = i_rnd(-100, 100);
+	item->s.v.velocity[1] = i_rnd(-100, 100);
 	item->s.v.velocity[2] = 400;
 	item->s.v.flags = FL_ITEM;
 	item->s.v.solid = SOLID_TRIGGER;
 	item->s.v.movetype = MOVETYPE_TOSS;
 
-	if ( rune & CTF_RUNE_RES )
-		setmodel( item, "progs/end1.mdl" );
-	else if ( rune & CTF_RUNE_STR )
-		setmodel( item, "progs/end2.mdl" );
-	else if ( rune & CTF_RUNE_HST )
- 		setmodel( item, "progs/end3.mdl" );
-	else if ( rune & CTF_RUNE_RGN )
-		setmodel( item, "progs/end4.mdl" );
+	if (rune & CTF_RUNE_RES)
+	{
+		setmodel(item, "progs/end1.mdl");
+	}
+	else if (rune & CTF_RUNE_STR)
+	{
+		setmodel(item, "progs/end2.mdl");
+	}
+	else if (rune & CTF_RUNE_HST)
+	{
+		setmodel(item, "progs/end3.mdl");
+	}
+	else if (rune & CTF_RUNE_RGN)
+	{
+		setmodel(item, "progs/end4.mdl");
+	}
 
-	setsize( item, -16, -16, 0, 16, 16, 56 );
+	setsize(item, -16, -16, 0, 16, 16, 56);
 	item->touch = (func_t) RuneTouch;
 	item->s.v.nextthink = g_globalvars.time + 90;
 	item->think = (func_t) RuneRespawn;
 
 	// qqshka, add spawn sound to rune if rune respawned, not for player dropped from corpse rune
-	if ( s )
-		sound( item, CHAN_VOICE, "items/itembk2.wav", 1, ATTN_NORM );	// play respawn sound
+	if (s)
+	{
+		sound(item, CHAN_VOICE, "items/itembk2.wav", 1, ATTN_NORM);	// play respawn sound
+	}
 }
 
-void DoTossRune( int rune )
+void DoTossRune(int rune)
 {
 	gedict_t *item;
 
-	cl_refresh_plus_scores( self );
+	cl_refresh_plus_scores(self);
 
 	item = spawn();
 	item->ctf_flag = rune;
@@ -59,9 +69,9 @@ void DoTossRune( int rune )
 	item->s.v.solid = SOLID_TRIGGER;
 	item->s.v.movetype = MOVETYPE_TOSS;
 
-	trap_makevectors( self->s.v.v_angle );
+	trap_makevectors(self->s.v.v_angle);
 
-	if ( self->s.v.v_angle[0] )
+	if (self->s.v.v_angle[0])
 	{
 		item->s.v.velocity[0] = g_globalvars.v_forward[0] * 300 + g_globalvars.v_up[0] * 200;
 		item->s.v.velocity[1] = g_globalvars.v_forward[1] * 300 + g_globalvars.v_up[1] * 200;
@@ -69,23 +79,31 @@ void DoTossRune( int rune )
 	}
 	else
 	{
-		aim( item->s.v.velocity );
-		VectorScale( item->s.v.velocity, 300, item->s.v.velocity );
+		aim(item->s.v.velocity);
+		VectorScale(item->s.v.velocity, 300, item->s.v.velocity);
 		item->s.v.velocity[2] = 200;
 	}
 
-	if ( rune & CTF_RUNE_RES )
-		setmodel( item, "progs/end1.mdl" );
-	else if ( rune & CTF_RUNE_STR )
-		setmodel( item, "progs/end2.mdl" );
-	else if ( rune & CTF_RUNE_HST )
-		setmodel( item, "progs/end3.mdl" );
-	else if ( rune & CTF_RUNE_RGN )
-		setmodel( item, "progs/end4.mdl" );
-	
-	setorigin( item, self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] - 24);
-	setsize( item, -16, -16, 0, 16, 16, 56 );
-	item->s.v.owner = EDICT_TO_PROG( self );
+	if (rune & CTF_RUNE_RES)
+	{
+		setmodel(item, "progs/end1.mdl");
+	}
+	else if (rune & CTF_RUNE_STR)
+	{
+		setmodel(item, "progs/end2.mdl");
+	}
+	else if (rune & CTF_RUNE_HST)
+	{
+		setmodel(item, "progs/end3.mdl");
+	}
+	else if (rune & CTF_RUNE_RGN)
+	{
+		setmodel(item, "progs/end4.mdl");
+	}
+
+	setorigin(item, self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] - 24);
+	setsize(item, -16, -16, 0, 16, 16, 56);
+	item->s.v.owner = EDICT_TO_PROG(self);
 	item->touch = (func_t) RuneTouch;
 	item->s.v.nextthink = g_globalvars.time + 0.75;
 	item->think = (func_t) RuneResetOwner;
@@ -93,150 +111,175 @@ void DoTossRune( int rune )
 
 void DropRune()
 {
-	if ( self->ctf_flag & CTF_RUNE_RES ) {
-		DoDropRune( CTF_RUNE_RES, false );
+	if (self->ctf_flag & CTF_RUNE_RES)
+	{
+		DoDropRune( CTF_RUNE_RES, false);
 		self->ps.res_time += g_globalvars.time - self->rune_pickup_time;
 	}
-	if ( self->ctf_flag & CTF_RUNE_STR ) {
-		DoDropRune( CTF_RUNE_STR, false );
+
+	if (self->ctf_flag & CTF_RUNE_STR)
+	{
+		DoDropRune( CTF_RUNE_STR, false);
 		self->ps.str_time += g_globalvars.time - self->rune_pickup_time;
 	}
-	if ( self->ctf_flag & CTF_RUNE_HST ) {
-		DoDropRune( CTF_RUNE_HST, false );
+
+	if (self->ctf_flag & CTF_RUNE_HST)
+	{
+		DoDropRune( CTF_RUNE_HST, false);
 		self->ps.hst_time += g_globalvars.time - self->rune_pickup_time;
 	}
-	if ( self->ctf_flag & CTF_RUNE_RGN ) {
-		DoDropRune( CTF_RUNE_RGN, false );
+
+	if (self->ctf_flag & CTF_RUNE_RGN)
+	{
+		DoDropRune( CTF_RUNE_RGN, false);
 		self->ps.rgn_time += g_globalvars.time - self->rune_pickup_time;
 	}
 
-	self->ctf_flag -= ( self->ctf_flag & (CTF_RUNE_MASK) );
+	self->ctf_flag -= (self->ctf_flag & (CTF_RUNE_MASK));
 	// self->s.v.items -= ( (int) self->s.v.items & (CTF_RUNE_MASK) );
 }
 
 void TossRune()
 {
-	if ( self->ctf_flag & CTF_RUNE_RES ) 
+	if (self->ctf_flag & CTF_RUNE_RES)
 	{
-		DoTossRune( CTF_RUNE_RES );
+		DoTossRune( CTF_RUNE_RES);
 		self->ps.res_time += g_globalvars.time - self->rune_pickup_time;
 	}
-	if ( self->ctf_flag & CTF_RUNE_STR ) 
+
+	if (self->ctf_flag & CTF_RUNE_STR)
 	{
-		DoTossRune( CTF_RUNE_STR );
+		DoTossRune( CTF_RUNE_STR);
 		self->ps.str_time += g_globalvars.time - self->rune_pickup_time;
 	}
-	if ( self->ctf_flag & CTF_RUNE_HST )
+
+	if (self->ctf_flag & CTF_RUNE_HST)
 	{
-		DoTossRune( CTF_RUNE_HST );
+		DoTossRune( CTF_RUNE_HST);
 		self->ps.hst_time += g_globalvars.time - self->rune_pickup_time;
 		self->maxspeed = cvar("sv_maxspeed");
 	}
 
-	if ( self->ctf_flag & CTF_RUNE_RGN )
+	if (self->ctf_flag & CTF_RUNE_RGN)
 	{
 		gedict_t *regenrot = spawn();
-		DoTossRune( CTF_RUNE_RGN );
+		DoTossRune( CTF_RUNE_RGN);
 		self->ps.rgn_time += g_globalvars.time - self->rune_pickup_time;
 		regenrot->s.v.nextthink = g_globalvars.time + 5;
 		regenrot->think = (func_t) RegenLostRot;
-		regenrot->s.v.owner = EDICT_TO_PROG( self );
+		regenrot->s.v.owner = EDICT_TO_PROG(self);
 	}
 
-	self->ctf_flag -= ( self->ctf_flag & (CTF_RUNE_MASK) );
+	self->ctf_flag -= (self->ctf_flag & (CTF_RUNE_MASK));
 	//self->s.v.items -= ( (int) self->s.v.items & (CTF_RUNE_MASK) );
 }
 
 void RegenLostRot()
 {
-	other = PROG_TO_EDICT( self->s.v.owner );
-	if ( other->s.v.health < 101 || 
-		other->ctf_flag & CTF_RUNE_RGN || 
-		(int) other->s.v.items & IT_SUPERHEALTH )
+	other = PROG_TO_EDICT(self->s.v.owner);
+	if ((other->s.v.health < 101) || (other->ctf_flag & CTF_RUNE_RGN)
+			|| ((int) other->s.v.items & IT_SUPERHEALTH))
 	{
-		ent_remove( self );
+		ent_remove(self);
+
 		return;
 	}
+
 	other->s.v.health--;
 	self->s.v.nextthink = g_globalvars.time + 1;
 }
 
 void RuneResetOwner()
 {
-	self->s.v.owner     = EDICT_TO_PROG( self );
-	self->think     = (func_t) RuneRespawn;
+	self->s.v.owner = EDICT_TO_PROG(self);
+	self->think = (func_t) RuneRespawn;
 	self->s.v.nextthink = g_globalvars.time + 90;
 }
 
 void RuneRespawn()
 {
 	int rune = self->ctf_flag;
-	ent_remove( self );
+
+	ent_remove(self);
 	self = SelectRuneSpawnPoint();
-	DoDropRune( rune, true );
+	DoDropRune(rune, true);
 }
 
 void RuneTouch()
 {
-	if ( other->ct != ctPlayer )
-		return;
-
-	if ( ISDEAD( other ) )
-		return;
-
-	if( !k_practice )
-	if ( match_in_progress != 2 )
-		return;
-
-	if ( other == PROG_TO_EDICT ( self->s.v.owner ) )
-		return;
-
-	if ( self->think == (func_t) RuneRespawn )
-		self->s.v.nextthink = g_globalvars.time + 90;
-
-	if ( other->ctf_flag & CTF_RUNE_MASK )
+	if (other->ct != ctPlayer)
 	{
-		if ( g_globalvars.time > other->rune_notify_time )
-		{
-			other->rune_notify_time = g_globalvars.time + 10;
-			G_sprint( other, 1, "You already have a rune. Use \"%s\" to drop\n", redtext("tossrune") );
-		}
 		return;
 	}
 
-	cl_refresh_plus_scores( other );
+	if (ISDEAD(other))
+	{
+		return;
+	}
+
+	if (!k_practice)
+	{
+		if (match_in_progress != 2)
+		{
+			return;
+		}
+	}
+
+	if (other == PROG_TO_EDICT(self->s.v.owner))
+	{
+		return;
+	}
+
+	if (self->think == (func_t)RuneRespawn)
+	{
+		self->s.v.nextthink = g_globalvars.time + 90;
+	}
+
+	if (other->ctf_flag & CTF_RUNE_MASK)
+	{
+		if (g_globalvars.time > other->rune_notify_time)
+		{
+			other->rune_notify_time = g_globalvars.time + 10;
+			G_sprint(other, 1, "You already have a rune. Use \"%s\" to drop\n",
+						redtext("tossrune"));
+		}
+
+		return;
+	}
+
+	cl_refresh_plus_scores(other);
 
 	other->ctf_flag |= self->ctf_flag;
 	other->rune_pickup_time = g_globalvars.time;
 
-	if ( other->ctf_flag & CTF_RUNE_RES )
+	if (other->ctf_flag & CTF_RUNE_RES)
 	{
 		// other->s.v.items = (int) other->s.v.items | IT_SIGIL1;
-		G_sprint( other, 2, "You got the %s rune\n", redtext("resistance") );
+		G_sprint(other, 2, "You got the %s rune\n", redtext("resistance"));
 	}
 
-	if ( other->ctf_flag & CTF_RUNE_STR )
+	if (other->ctf_flag & CTF_RUNE_STR)
 	{
 		// other->s.v.items = (int) other->s.v.items | IT_SIGIL2;
-		G_sprint( other, 2, "You got the %s rune\n", redtext("strength") );
+		G_sprint(other, 2, "You got the %s rune\n", redtext("strength"));
 	}
 
-	if ( other->ctf_flag & CTF_RUNE_HST )
+	if (other->ctf_flag & CTF_RUNE_HST)
 	{
 		other->maxspeed *= (cvar("k_ctf_rune_power_hst") / 8) + 1;
 		// other->s.v.items = (int) other->s.v.items | CTF_RUNE_HST;
-		G_sprint( other, 2, "You got the %s rune\n", redtext("haste") );
+		G_sprint(other, 2, "You got the %s rune\n", redtext("haste"));
 	}
 
-	if ( other->ctf_flag & CTF_RUNE_RGN )
+	if (other->ctf_flag & CTF_RUNE_RGN)
 	{
 		// other->s.v.items = (int) other->s.v.items | CTF_RUNE_RGN;
-		G_sprint( other, 2, "You got the %s rune\n", redtext("regeneration") );
+		G_sprint(other, 2, "You got the %s rune\n", redtext("regeneration"));
 	}
 
-	sound( other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM );
-	stuffcmd( other, "bf\n" );
-	ent_remove( self );
+	sound(other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
+	stuffcmd(other, "bf\n");
+	ent_remove(self);
 }
 
 gedict_t* SelectSpawnPoint();
@@ -244,76 +287,80 @@ gedict_t* SelectRuneSpawnPoint()
 {
 	gedict_t *runespawn;
 
-	if ( cvar("k_ctf_based_spawn") )
+	if (cvar("k_ctf_based_spawn"))
 	{
-		runespawn = SelectSpawnPoint( g_random() < 0.5 ? "info_player_team1" : "info_player_team2" );
+		runespawn = SelectSpawnPoint(g_random() < 0.5 ? "info_player_team1" : "info_player_team2");
 	}
 	else
 	{
 		// we'll just use the player spawn point selector for runes as well
-		runespawn = SelectSpawnPoint( "info_player_deathmatch" );
+		runespawn = SelectSpawnPoint("info_player_deathmatch");
 	}
 
 	return runespawn;
 }
 
 // spawn/remove runes
-void SpawnRunes( qbool yes )
+void SpawnRunes(qbool yes)
 {
 	gedict_t *oself, *e;
 
-	for ( e = world; (e = find( e, FOFCLSN, "rune")); )
-		ent_remove( e );
+	for (e = world; (e = find(e, FOFCLSN, "rune"));)
+	{
+		ent_remove(e);
+	}
 
-	if ( !yes )
+	if (!yes)
+	{
 		return;
+	}
 
 	oself = self;
-		
+
 	self = SelectRuneSpawnPoint();
-	DoDropRune( CTF_RUNE_RES, true );
+	DoDropRune( CTF_RUNE_RES, true);
 	self = SelectRuneSpawnPoint();
-	DoDropRune( CTF_RUNE_STR, true );
-	self =  SelectRuneSpawnPoint();
-	DoDropRune( CTF_RUNE_HST, true );
+	DoDropRune( CTF_RUNE_STR, true);
 	self = SelectRuneSpawnPoint();
-	DoDropRune( CTF_RUNE_RGN, true );
+	DoDropRune( CTF_RUNE_HST, true);
+	self = SelectRuneSpawnPoint();
+	DoDropRune( CTF_RUNE_RGN, true);
 
 	self = oself;
 }
 
-void ResistanceSound( gedict_t *player )
+void ResistanceSound(gedict_t *player)
 {
-	if ( player->ctf_flag & CTF_RUNE_RES )
+	if (player->ctf_flag & CTF_RUNE_RES)
 	{
-		if ( player->rune_sound_time < g_globalvars.time )
+		if (player->rune_sound_time < g_globalvars.time)
 		{
 			player->rune_sound_time = g_globalvars.time + 1;
-			sound( player, CHAN_BODY, "rune/rune1.wav", 1, ATTN_NORM );
+			sound(player, CHAN_BODY, "rune/rune1.wav", 1, ATTN_NORM);
 		}
 	}
 }
 
-void HasteSound( gedict_t *player )
+void HasteSound(gedict_t *player)
 {
-	if ( player->ctf_flag & CTF_RUNE_HST )
+	if (player->ctf_flag & CTF_RUNE_HST)
 	{
-		if ( player->rune_sound_time < g_globalvars.time )
-		{	  
+		if (player->rune_sound_time < g_globalvars.time)
+		{
 			player->rune_sound_time = g_globalvars.time + 1;
-			sound( player, CHAN_BODY, "rune/rune3.wav", 1, ATTN_NORM );
+			sound(player, CHAN_BODY, "rune/rune3.wav", 1, ATTN_NORM);
 		}
 	}
 }
 
-void RegenerationSound( gedict_t *player )
+void RegenerationSound(gedict_t *player)
 {
-	if ( player->ctf_flag & CTF_RUNE_RGN )
+	if (player->ctf_flag & CTF_RUNE_RGN)
 	{
-		if ( player->rune_sound_time < g_globalvars.time )
+		if (player->rune_sound_time < g_globalvars.time)
 		{
 			player->rune_sound_time = g_globalvars.time + 1;
-			sound( player, CHAN_BODY, "rune/rune4.wav", 1, ATTN_NORM );
+			sound(player, CHAN_BODY, "rune/rune4.wav", 1, ATTN_NORM);
 		}
 	}
 }
@@ -321,18 +368,23 @@ void RegenerationSound( gedict_t *player )
 void CheckStuffRune()
 {
 	char *rune = "";
-	
-	if ( cvar("k_instagib") ) {
-		if ( self->i_agmr ) {
-			self->items2 = ( int ) self->items2 | (CTF_RUNE_RES << 5);
+
+	if (cvar("k_instagib"))
+	{
+		if (self->i_agmr)
+		{
+			self->items2 = (int) self->items2 | (CTF_RUNE_RES << 5);
+
 			return;
 		}
 	}
 
-	if ( !isCTF() ) {
+	if (!isCTF())
+	{
 		self->items2 = 0; // no runes/sigils in HUD
 
-		if ( self->last_rune && iKey(self, "runes") ) {
+		if (self->last_rune && iKey(self, "runes"))
+		{
 			self->last_rune = NULL;
 			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "set rune \"\"\n");
 		}
@@ -342,23 +394,35 @@ void CheckStuffRune()
 
 	self->items2 = (self->ctf_flag & CTF_RUNE_MASK) << 5;
 
-	if ( !iKey(self, "runes") )
+	if (!iKey(self, "runes"))
+	{
 		return;
+	}
 
-	if ( self->ctf_flag & CTF_RUNE_RES )
+	if (self->ctf_flag & CTF_RUNE_RES)
+	{
 		rune = "res";
-	else if ( self->ctf_flag & CTF_RUNE_STR )
+	}
+	else if (self->ctf_flag & CTF_RUNE_STR)
+	{
 		rune = "str";
-	else if ( self->ctf_flag & CTF_RUNE_HST )
+	}
+	else if (self->ctf_flag & CTF_RUNE_HST)
+	{
 		rune = "hst";
-	else if ( self->ctf_flag & CTF_RUNE_RGN )
+	}
+	else if (self->ctf_flag & CTF_RUNE_RGN)
+	{
 		rune = "rgn";
+	}
 	else
+	{
 		rune = "";
+	}
 
-	if ( !self->last_rune || strneq(rune, self->last_rune) ) {
+	if (!self->last_rune || strneq(rune, self->last_rune))
+	{
 		self->last_rune = rune;
 		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "set rune \"%s\"\n", rune);
 	}
 }
-
