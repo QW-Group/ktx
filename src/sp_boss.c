@@ -28,7 +28,6 @@
 
 enum
 {
-
 	rise1,
 	rise2,
 	rise3,
