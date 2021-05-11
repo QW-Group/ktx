@@ -426,11 +426,11 @@ void spikeshooter_use()
 		sound(self, CHAN_VOICE, "weapons/spike2.wav", 1, ATTN_NORM);
 		launch_spike(self->s.v.origin, self->s.v.movedir);
 		VectorScale(self->s.v.movedir, 500,
-		PROG_TO_EDICT( g_globalvars.newmis )->s.v.velocity);
+		PROG_TO_EDICT(g_globalvars.newmis)->s.v.velocity);
 //  newmis->s.v.velocity = self->s.v.movedir * 500;
 		if ((int)(self->s.v.spawnflags) & SPAWNFLAG_SUPERSPIKE)
 		{
-			PROG_TO_EDICT( g_globalvars.newmis )->touch = (func_t) superspike_touch;
+			PROG_TO_EDICT(g_globalvars.newmis)->touch = (func_t) superspike_touch;
 		}
 	}
 }
@@ -440,7 +440,7 @@ void shooter_think()
 	spikeshooter_use();
 	self->s.v.nextthink = g_globalvars.time + self->wait;
 	VectorScale(self->s.v.movedir, 500,
-	PROG_TO_EDICT( g_globalvars.newmis )->s.v.velocity);
+	PROG_TO_EDICT(g_globalvars.newmis)->s.v.velocity);
 // newmis->s.v.velocity = self->s.v.movedir * 500;
 }
 

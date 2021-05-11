@@ -886,7 +886,7 @@ void DeathBubblesSpawn()
 
 	bubble = spawn();
 	setmodel(bubble, "progs/s_bubble.spr");
-	setorigin(bubble, PROG_TO_EDICT( self->s.v.owner )->s.v.origin[0],
+	setorigin(bubble, PROG_TO_EDICT(self->s.v.owner)->s.v.origin[0],
 	PROG_TO_EDICT(self->s.v.owner)->s.v.origin[1],
 				PROG_TO_EDICT(self->s.v.owner)->s.v.origin[2] + 24);
 

@@ -208,7 +208,7 @@ void HuntTarget()
 
 	self->s.v.goalentity = self->s.v.enemy;
 	self->think = (func_t) self->th_run;
-	VectorSubtract(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, self->s.v.origin, tmpv);
+	VectorSubtract(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, self->s.v.origin, tmpv);
 	self->s.v.ideal_yaw = vectoyaw(tmpv);
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 	SUB_AttackFinished(1);	// wait a while before first attack
@@ -409,7 +409,7 @@ float FindTarget()
 		self->s.v.enemy = PROG_TO_EDICT(self->s.v.enemy)->s.v.enemy;
 
 		if ((PROG_TO_EDICT(self->s.v.enemy)->ct != ctPlayer)
-				|| ((int)PROG_TO_EDICT( self->s.v.enemy )->s.v.flags & FL_NOTARGET))
+				|| ((int)PROG_TO_EDICT(self->s.v.enemy)->s.v.flags & FL_NOTARGET))
 		{
 			self->s.v.enemy = EDICT_TO_PROG(world);
 
@@ -491,7 +491,7 @@ void ai_melee()
 		return;		// removed before stroke
 	}
 
-	VectorSubtract(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, self->s.v.origin, delta);
+	VectorSubtract(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, self->s.v.origin, delta);
 
 	if (vlen(delta) > 60)
 	{
@@ -499,7 +499,7 @@ void ai_melee()
 	}
 
 	ldmg = (g_random() + g_random() + g_random()) * 3;
-	PROG_TO_EDICT( self->s.v.enemy )->deathtype = dtSQUISH; // FIXME
+	PROG_TO_EDICT(self->s.v.enemy)->deathtype = dtSQUISH; // FIXME
 	T_Damage(PROG_TO_EDICT(self->s.v.enemy), self, self, ldmg);
 }
 
@@ -513,7 +513,7 @@ void ai_melee_side()
 		return;		// removed before stroke
 	}
 
-	VectorSubtract(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, self->s.v.origin, delta);
+	VectorSubtract(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, self->s.v.origin, delta);
 
 	if (vlen(delta) > 60)
 	{
@@ -526,7 +526,7 @@ void ai_melee_side()
 	}
 
 	ldmg = (g_random() + g_random() + g_random()) * 3;
-	PROG_TO_EDICT( self->s.v.enemy )->deathtype = dtSQUISH; // FIXME
+	PROG_TO_EDICT(self->s.v.enemy)->deathtype = dtSQUISH; // FIXME
 	T_Damage(PROG_TO_EDICT(self->s.v.enemy), self, self, ldmg);
 }
 
@@ -679,7 +679,7 @@ void ai_face()
 {
 	vec3_t tmpv;
 
-	VectorSubtract(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, self->s.v.origin, tmpv);
+	VectorSubtract(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, self->s.v.origin, tmpv);
 
 	self->s.v.ideal_yaw = vectoyaw(tmpv);
 	changeyaw(self);
@@ -718,13 +718,13 @@ void ai_charge_side()
 
 	// aim to the left of the enemy for a flyby
 
-	VectorSubtract(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, self->s.v.origin, tmpv);
+	VectorSubtract(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, self->s.v.origin, tmpv);
 	self->s.v.ideal_yaw = vectoyaw(tmpv);
 	changeyaw(self);
 
 	trap_makevectors(self->s.v.angles);
 
-	VectorMA( PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, -30, g_globalvars.v_right, tmpv);
+	VectorMA( PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, -30, g_globalvars.v_right, tmpv);
 	VectorSubtract(tmpv, self->s.v.origin, tmpv);
 	heading = vectoyaw(tmpv);
 
@@ -1040,7 +1040,7 @@ void ai_run(float dist)
 
 	enemy_infront = infront(PROG_TO_EDICT(self->s.v.enemy));
 	enemy_range = range(PROG_TO_EDICT(self->s.v.enemy));
-	VectorSubtract(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, self->s.v.origin, tmpv);
+	VectorSubtract(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, self->s.v.origin, tmpv);
 	enemy_yaw = vectoyaw(tmpv);
 
 	if (self->attack_state == AS_MISSILE)

@@ -941,7 +941,7 @@ void monster_start_go(monsterType_t mt)
 
 		self->s.v.goalentity = EDICT_TO_PROG(self->movetarget);
 
-		VectorSubtract(PROG_TO_EDICT( self->s.v.goalentity )->s.v.origin, self->s.v.origin, tmpv);
+		VectorSubtract(PROG_TO_EDICT(self->s.v.goalentity)->s.v.origin, self->s.v.origin, tmpv);
 		self->s.v.ideal_yaw = vectoyaw(tmpv);
 
 		if (!self->movetarget || (self->movetarget == world))

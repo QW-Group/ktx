@@ -314,7 +314,7 @@ void fish_melee(void)
 		return;
 	}
 
-	VectorSubtract(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, self->s.v.origin, delta);
+	VectorSubtract(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, self->s.v.origin, delta);
 
 	if (vlen(delta) > 110)
 	{

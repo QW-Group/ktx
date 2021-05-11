@@ -346,7 +346,7 @@ void boss_missile(float p_x, float p_y, float p_z)
 	vec3_t org, vec, d;
 	float t;
 
-	VectorSubtract(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, self->s.v.origin, offang);
+	VectorSubtract(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, self->s.v.origin, offang);
 	vectoangles(offang, offang);
 	trap_makevectors(offang);
 
@@ -358,15 +358,15 @@ void boss_missile(float p_x, float p_y, float p_z)
 	// lead the player on hard mode
 	if (skill > 1)
 	{
-		VectorSubtract(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, org, vec);
+		VectorSubtract(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, org, vec);
 		t = vlen(vec) / 300;
-		VectorCopy(PROG_TO_EDICT( self->s.v.enemy )->s.v.velocity, vec);
+		VectorCopy(PROG_TO_EDICT(self->s.v.enemy)->s.v.velocity, vec);
 		vec[2] = 0;
-		VectorMA( PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, t, vec, d);
+		VectorMA( PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, t, vec, d);
 	}
 	else
 	{
-		VectorCopy(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, d);
+		VectorCopy(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, d);
 	}
 
 	VectorSubtract(d, org, vec);

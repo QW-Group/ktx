@@ -522,7 +522,7 @@ float SoldierCheckAttack()
 		return false; // sight line crossed contents
 	}
 
-	if ( PROG_TO_EDICT( g_globalvars.trace_ent ) != targ)
+	if ( PROG_TO_EDICT(g_globalvars.trace_ent) != targ)
 	{
 		return false;	// don't have a clear shot
 	}

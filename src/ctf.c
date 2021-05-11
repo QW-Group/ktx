@@ -615,7 +615,7 @@ void FlagStatus()
 
 			case FLAG_CARRIED:
 				G_sprint(self, 2, "%s has the %s flag.\n",
-							PROG_TO_EDICT( flag1->s.v.owner )->netname, redtext("RED"));
+							PROG_TO_EDICT(flag1->s.v.owner)->netname, redtext("RED"));
 				break;
 
 			case FLAG_DROPPED:
@@ -631,7 +631,7 @@ void FlagStatus()
 
 			case FLAG_CARRIED:
 				G_sprint(self, 2, "%s has the %s flag. ",
-							PROG_TO_EDICT( flag1->s.v.owner )->netname, redtext("BLUE"));
+							PROG_TO_EDICT(flag1->s.v.owner)->netname, redtext("BLUE"));
 				break;
 
 			case FLAG_DROPPED:
@@ -657,7 +657,7 @@ void FlagStatus()
 			break;
 
 		case FLAG_CARRIED:
-			G_sprint(self, 2, "%s has your flag. ", PROG_TO_EDICT( flag1->s.v.owner )->netname);
+			G_sprint(self, 2, "%s has your flag. ", PROG_TO_EDICT(flag1->s.v.owner)->netname);
 			break;
 
 		case FLAG_DROPPED:
@@ -676,7 +676,7 @@ void FlagStatus()
 				G_sprint(self, 2, "You have the enemy flag.\n");
 			else
 				G_sprint(self, 2, "%s has the enemy flag.\n",
-							PROG_TO_EDICT( flag2->s.v.owner)->netname);
+							PROG_TO_EDICT(flag2->s.v.owner)->netname);
 			break;
 
 		case FLAG_DROPPED:

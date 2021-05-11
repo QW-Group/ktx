@@ -314,7 +314,7 @@ void enforcer_fire()
 	VectorMA(org, 8.5, g_globalvars.v_right, org);
 	org[2] += 16;
 
-	VectorSubtract(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, self->s.v.origin, delta);
+	VectorSubtract(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, self->s.v.origin, delta);
 
 	LaunchLaser(org, delta);
 }

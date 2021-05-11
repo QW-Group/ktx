@@ -309,7 +309,7 @@ void Demon_Melee(float side)
 	ai_face();
 	walkmove(self, self->s.v.ideal_yaw, 12);	// allow a little closing
 
-	VectorSubtract(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, self->s.v.origin, tmpv);
+	VectorSubtract(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, self->s.v.origin, tmpv);
 
 	if (vlen(tmpv) > 100)
 	{
@@ -323,7 +323,7 @@ void Demon_Melee(float side)
 
 	sound(self, CHAN_WEAPON, "demon/dhit2.wav", 1, ATTN_NORM);
 	ldmg = 10 + 5 * g_random();
-	PROG_TO_EDICT( self->s.v.enemy )->deathtype = dtSQUISH; // FIXME
+	PROG_TO_EDICT(self->s.v.enemy)->deathtype = dtSQUISH; // FIXME
 	T_Damage(PROG_TO_EDICT(self->s.v.enemy), self, self, ldmg);
 
 	trap_makevectors(self->s.v.angles);
@@ -458,7 +458,7 @@ float CheckDemonJump()
 		return false;
 	}
 
-	VectorSubtract(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, self->s.v.origin, dist);
+	VectorSubtract(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, self->s.v.origin, dist);
 	dist[2] = 0;
 
 	d = vlen(dist);

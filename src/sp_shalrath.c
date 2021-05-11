@@ -232,7 +232,7 @@ void ShalMissile()
 	vec3_t dir;
 	float dist, flytime;
 
-	VectorCopy(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, dir);
+	VectorCopy(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, dir);
 	dir[2] += 10;
 	VectorSubtract(dir, self->s.v.origin, dir);
 	dist = vlen(dir);

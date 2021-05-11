@@ -401,7 +401,7 @@ void spawn_tfog(vec3_t org)
  return; // this mean we go through tele after some guy, so we must not be telefragged
  // }
 
- other2 = PROG_TO_EDICT( self->s.v.owner );
+ other2 = PROG_TO_EDICT(self->s.v.owner);
 
  if ( other == other2 )
  return;

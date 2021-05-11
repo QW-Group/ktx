@@ -267,7 +267,7 @@ void dog_bite()
 		return;
 	}
 
-	VectorSubtract(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, self->s.v.origin, delta);
+	VectorSubtract(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, self->s.v.origin, delta);
 
 	if (vlen(delta) > 100)
 	{
@@ -480,22 +480,22 @@ float CheckDogJump()
 	float d;
 
 	if ((self->s.v.origin[2] + self->s.v.mins[2])
-			> (PROG_TO_EDICT( self->s.v.enemy )->s.v.origin[2] +
-			PROG_TO_EDICT( self->s.v.enemy )->s.v.mins[2]
-					+ (0.75 * PROG_TO_EDICT( self->s.v.enemy )->s.v.size[2])))
+			> (PROG_TO_EDICT(self->s.v.enemy)->s.v.origin[2] +
+			PROG_TO_EDICT(self->s.v.enemy)->s.v.mins[2]
+					+ (0.75 * PROG_TO_EDICT(self->s.v.enemy)->s.v.size[2])))
 	{
 		return false;
 	}
 
 	if ((self->s.v.origin[2] + self->s.v.maxs[2])
-			< (PROG_TO_EDICT( self->s.v.enemy )->s.v.origin[2] +
-			PROG_TO_EDICT( self->s.v.enemy )->s.v.mins[2]
-					+ (0.25 * PROG_TO_EDICT( self->s.v.enemy )->s.v.size[2])))
+			< (PROG_TO_EDICT(self->s.v.enemy)->s.v.origin[2] +
+			PROG_TO_EDICT(self->s.v.enemy)->s.v.mins[2]
+					+ (0.25 * PROG_TO_EDICT(self->s.v.enemy)->s.v.size[2])))
 	{
 		return false;
 	}
 
-	VectorSubtract(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, self->s.v.origin, dist);
+	VectorSubtract(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, self->s.v.origin, dist);
 	dist[2] = 0;
 
 	d = vlen(dist);

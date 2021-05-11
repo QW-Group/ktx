@@ -581,7 +581,7 @@ void hknight_shot(float offset)
 	vec3_t offang, delta;
 	vec3_t org, vec;
 
-	VectorSubtract(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, self->s.v.origin, delta);
+	VectorSubtract(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, self->s.v.origin, delta);
 	vectoangles(delta, offang);
 	offang[1] += offset * 6;
 

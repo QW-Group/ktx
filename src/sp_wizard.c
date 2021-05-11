@@ -235,9 +235,9 @@ void Wiz_FastFire()
 
 		self = oself; // restore
 
-		///////trap_makevectors( PROG_TO_EDICT( self->s.v.enemy )->s.v.angles );
+		///////trap_makevectors( PROG_TO_EDICT(self->s.v.enemy)->s.v.angles);
 		//dst = self->s.v.enemy->s.v.origin - 13*self->s.v.movedir;
-		VectorMA( PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, -13, self->s.v.movedir, dst);
+		VectorMA( PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, -13, self->s.v.movedir, dst);
 
 		//vec = normalize(dst - self->s.v.origin);
 		VectorSubtract(dst, self->s.v.origin, vec);

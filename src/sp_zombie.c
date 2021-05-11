@@ -611,7 +611,7 @@ void ZombieFireGrenade(float st_x, float st_y, float st_z)
 	VectorMA(org, st_z, g_globalvars.v_up, org);
 
 	// set missile speed
-	VectorSubtract(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, org, missile->s.v.velocity);
+	VectorSubtract(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, org, missile->s.v.velocity);
 	normalize(missile->s.v.velocity, missile->s.v.velocity);
 	VectorScale(missile->s.v.velocity, 600 + 100 * g_random(), missile->s.v.velocity);
 	missile->s.v.velocity[2] += 200 + 50 * g_random();

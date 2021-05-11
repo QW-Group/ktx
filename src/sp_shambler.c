@@ -305,7 +305,7 @@ void _sham_smash10(void)
 
 	ai_charge(0);
 
-	VectorSubtract(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, self->s.v.origin, delta);
+	VectorSubtract(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, self->s.v.origin, delta);
 
 	if (vlen(delta) > 100)
 	{
@@ -318,7 +318,7 @@ void _sham_smash10(void)
 	}
 
 	ldmg = (g_random() + g_random() + g_random()) * 40;
-	PROG_TO_EDICT( self->s.v.enemy )->deathtype = dtSQUISH; // FIXME
+	PROG_TO_EDICT(self->s.v.enemy)->deathtype = dtSQUISH; // FIXME
 	T_Damage(PROG_TO_EDICT(self->s.v.enemy), self, self, ldmg);
 	sound(self, CHAN_VOICE, "shambler/smack.wav", 1, ATTN_NORM);
 
@@ -355,7 +355,7 @@ void ShamClaw(float side)
 
 	ai_charge(10);
 
-	VectorSubtract(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, self->s.v.origin, delta);
+	VectorSubtract(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, self->s.v.origin, delta);
 
 	if (vlen(delta) > 100)
 	{
@@ -368,7 +368,7 @@ void ShamClaw(float side)
 	}
 
 	ldmg = (g_random() + g_random() + g_random()) * 20;
-	PROG_TO_EDICT( self->s.v.enemy )->deathtype = dtSQUISH; // FIXME
+	PROG_TO_EDICT(self->s.v.enemy)->deathtype = dtSQUISH; // FIXME
 	T_Damage(PROG_TO_EDICT(self->s.v.enemy), self, self, ldmg);
 	sound(self, CHAN_VOICE, "shambler/smack.wav", 1, ATTN_NORM);
 
@@ -467,7 +467,7 @@ void CastLightning()
 	org[2] += 40;
 
 	// to
-	VectorCopy(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, dir);
+	VectorCopy(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, dir);
 	dir[2] += 16;
 	VectorSubtract(dir, org, dir);
 	normalize(dir, dir);

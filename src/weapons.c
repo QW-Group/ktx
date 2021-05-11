@@ -101,7 +101,7 @@ void W_FireAxe()
 	VectorSubtract(g_globalvars.trace_endpos, org, org);
 // org = trace_endpos - v_forward*4;
 
-	if ( PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.takedamage)
+	if ( PROG_TO_EDICT(g_globalvars.trace_ent)->s.v.takedamage)
 	{
 		int damage = 20; // default damage is 20
 
@@ -987,7 +987,7 @@ void T_MissileTouch()
 		if (other->ct == ctPlayer)
 		{
 			WS_Mark(PROG_TO_EDICT(self->s.v.owner), wpRL);
-			PROG_TO_EDICT( self->s.v.owner )->ps.wpn[wpRL].hits++;
+			PROG_TO_EDICT(self->s.v.owner)->ps.wpn[wpRL].hits++;
 		}
 	}
 
@@ -1109,7 +1109,7 @@ void LightningHit(gedict_t *from, float damage)
 	WriteCoord( MSG_MULTICAST, g_globalvars.trace_endpos[2]);
 	trap_multicast(PASSVEC3(g_globalvars.trace_endpos), MULTICAST_PVS);
 
-	PROG_TO_EDICT( g_globalvars.trace_ent )->deathtype = dtLG_BEAM;
+	PROG_TO_EDICT(g_globalvars.trace_ent)->deathtype = dtLG_BEAM;
 	T_Damage(PROG_TO_EDICT(g_globalvars.trace_ent), from, from, damage);
 }
 
@@ -1139,7 +1139,7 @@ void LightningDamage(vec3_t p1, vec3_t p2, gedict_t *from, float damage)
 			if (gre && (gre == PROG_TO_EDICT(g_globalvars.trace_ent))
 					&& streq(gre->classname, "door"))
 			{
-				PROG_TO_EDICT( g_globalvars.trace_ent )->s.v.velocity[2] += 400;
+				PROG_TO_EDICT(g_globalvars.trace_ent)->s.v.velocity[2] += 400;
 			}
 		}
 	}
@@ -1322,7 +1322,7 @@ void GrenadeTouch()
 		if (other->ct == ctPlayer)
 		{
 			WS_Mark(PROG_TO_EDICT(self->s.v.owner), wpGL);
-			PROG_TO_EDICT( self->s.v.owner )->ps.wpn[wpGL].hits++;
+			PROG_TO_EDICT(self->s.v.owner)->ps.wpn[wpGL].hits++;
 		}
 	}
 
@@ -1529,7 +1529,7 @@ void spike_touch()
 		if (other->ct == ctPlayer)
 		{
 			WS_Mark(PROG_TO_EDICT(self->s.v.owner), wpNG);
-			PROG_TO_EDICT( self->s.v.owner )->ps.wpn[wpNG].hits++;
+			PROG_TO_EDICT(self->s.v.owner)->ps.wpn[wpNG].hits++;
 		}
 
 		spawn_touchblood(1);
@@ -1600,7 +1600,7 @@ void superspike_touch()
 		if (other->ct == ctPlayer)
 		{
 			WS_Mark(PROG_TO_EDICT(self->s.v.owner), wpSNG);
-			PROG_TO_EDICT( self->s.v.owner )->ps.wpn[wpSNG].hits++;
+			PROG_TO_EDICT(self->s.v.owner)->ps.wpn[wpSNG].hits++;
 		}
 
 		spawn_touchblood(2);

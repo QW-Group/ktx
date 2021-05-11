@@ -424,7 +424,7 @@ void chainsaw(float side)
 
 	ai_charge(10);
 
-	VectorSubtract(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, self->s.v.origin, delta);
+	VectorSubtract(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, self->s.v.origin, delta);
 
 	if (vlen(delta) > 100)
 	{
@@ -432,7 +432,7 @@ void chainsaw(float side)
 	}
 
 	ldmg = (g_random() + g_random() + g_random()) * 4;
-	PROG_TO_EDICT( self->s.v.enemy )->deathtype = dtSQUISH; // FIXME
+	PROG_TO_EDICT(self->s.v.enemy)->deathtype = dtSQUISH; // FIXME
 	T_Damage(PROG_TO_EDICT(self->s.v.enemy), self, self, ldmg);
 
 	// in most cases chainsaw called as chainsaw( 0 ) so side is 0
@@ -572,7 +572,7 @@ void OgreFireGrenade()
 	// set missile speed
 	trap_makevectors(self->s.v.angles);
 
-	VectorSubtract(PROG_TO_EDICT( self->s.v.enemy )->s.v.origin, self->s.v.origin,
+	VectorSubtract(PROG_TO_EDICT(self->s.v.enemy)->s.v.origin, self->s.v.origin,
 					missile->s.v.velocity);
 	normalize(missile->s.v.velocity, missile->s.v.velocity);
 	VectorScale(missile->s.v.velocity, 600, missile->s.v.velocity);

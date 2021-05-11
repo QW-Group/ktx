@@ -215,8 +215,8 @@ void door_use()
 	gedict_t *oself;
 
 	self->message = "";	// door message are for touch only
-	PROG_TO_EDICT( self->s.v.owner )->message = "";
-	PROG_TO_EDICT( self->s.v.enemy )->message = "";
+	PROG_TO_EDICT(self->s.v.owner)->message = "";
+	PROG_TO_EDICT(self->s.v.enemy)->message = "";
 
 	oself = self;
 	self = PROG_TO_EDICT(self->s.v.owner);
@@ -304,12 +304,12 @@ void door_touch()
 		return;
 	}
 
-	PROG_TO_EDICT( self->s.v.owner )->attack_finished = g_globalvars.time + 2;
-	msg = PROG_TO_EDICT( self->s.v.owner )->message;
+	PROG_TO_EDICT(self->s.v.owner)->attack_finished = g_globalvars.time + 2;
+	msg = PROG_TO_EDICT(self->s.v.owner)->message;
 
 	if (msg && msg[0])
 	{
-		G_centerprint(other, "%s", PROG_TO_EDICT( self->s.v.owner )->message);
+		G_centerprint(other, "%s", PROG_TO_EDICT(self->s.v.owner)->message);
 		sound(other, CHAN_VOICE, "misc/talk.wav", 1, ATTN_NORM);
 	}
 // key door stuff
