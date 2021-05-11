@@ -1,13 +1,12 @@
 /*
-bot/botthink.qc
+ bot/botthink.qc
 
-Copyright (C) 1997-1999 Robert 'Frog' Field
-Copyright (C) 1998-2000 Matt 'asdf' McChesney
-Copyright (C) 2000-2007 ParboiL
-*/
+ Copyright (C) 1997-1999 Robert 'Frog' Field
+ Copyright (C) 1998-2000 Matt 'asdf' McChesney
+ Copyright (C) 2000-2007 ParboiL
+ */
 
 // Converted from .qc on 05/02/2016
-
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
@@ -19,26 +18,33 @@ void AMPHI2BotInLava(void);
 #define CHANCE_EVADE_DUEL 0.08
 #define CHANCE_EVADE_NONDUEL 0.1
 
-void Bot_Print_Thinking (void);
-static void PeriodicAllClientLogic (void);
-void FrogbotEditorMarkerTouched (gedict_t* marker);
+void Bot_Print_Thinking(void);
+static void PeriodicAllClientLogic(void);
+void FrogbotEditorMarkerTouched(gedict_t *marker);
 
-static void SetNextThinkTime(gedict_t* ent) {
-	if (!((int)ent->s.v.flags & FL_ONGROUND)) {
-		ent->fb.frogbot_nextthink += 0.15 + (0.015 * g_random ());
-		if (PAST (frogbot_nextthink)) {
+static void SetNextThinkTime(gedict_t *ent)
+{
+	if (!((int) ent->s.v.flags & FL_ONGROUND))
+	{
+		ent->fb.frogbot_nextthink += 0.15 + (0.015 * g_random());
+		if (PAST(frogbot_nextthink))
+		{
 			ent->fb.frogbot_nextthink = g_globalvars.time + 0.16;
 		}
 	}
 }
 
-static void AvoidLookObjectsMissile(gedict_t* self) {
-	gedict_t* rocket;
+static void AvoidLookObjectsMissile(gedict_t *self)
+{
+	gedict_t *rocket;
 
 	self->fb.missile_dodge = NULL;
-	if (self->fb.look_object && self->fb.look_object->ct == ctPlayer) {
-		for (rocket = world; (rocket = ez_find (rocket, "rocket")); ) {
-			if (rocket->s.v.owner == EDICT_TO_PROG(self->fb.look_object)) {
+	if (self->fb.look_object && (self->fb.look_object->ct == ctPlayer))
+	{
+		for (rocket = world; (rocket = ez_find(rocket, "rocket"));)
+		{
+			if (rocket->s.v.owner == EDICT_TO_PROG(self->fb.look_object))
+			{
 				self->fb.missile_dodge = rocket;
 				break;
 			}
@@ -46,106 +52,143 @@ static void AvoidLookObjectsMissile(gedict_t* self) {
 	}
 }
 
-static void LookingAtEnemyLogic(gedict_t* self) {
-	if (Visible_360(self, self->fb.look_object)) {
-		if (self->fb.look_object == &g_edicts[self->s.v.enemy]) {
-			self->fb.enemy_dist = VectorDistance (self->fb.look_object->s.v.origin, self->s.v.origin);
+static void LookingAtEnemyLogic(gedict_t *self)
+{
+	if (Visible_360(self, self->fb.look_object))
+	{
+		if (self->fb.look_object == &g_edicts[self->s.v.enemy])
+		{
+			self->fb.enemy_dist = VectorDistance(self->fb.look_object->s.v.origin,
+													self->s.v.origin);
 		}
-		else if (PAST(enemy_time)) {
+		else if (PAST(enemy_time))
+		{
 			ClearLookObject(self);
 		}
 	}
-	else {
+	else
+	{
 		ClearLookObject(self);
 	}
 }
 
-static void NewlyPickedEnemyLogic() {
-	gedict_t* goalentity_ = &g_edicts[self->s.v.goalentity];
-	gedict_t* enemy_ = &g_edicts[self->s.v.enemy];
+static void NewlyPickedEnemyLogic()
+{
+	gedict_t *goalentity_ = &g_edicts[self->s.v.goalentity];
+	gedict_t *enemy_ = &g_edicts[self->s.v.enemy];
 
-	if (self->s.v.goalentity == self->s.v.enemy) {
-		if (Visible_360(self, goalentity_)) {
+	if (self->s.v.goalentity == self->s.v.enemy)
+	{
+		if (Visible_360(self, goalentity_))
+		{
 			LookEnemy(self, goalentity_);
 		}
-		else if (PAST(enemy_time)) {
-			if (BotsPickBestEnemy(self)) {
+		else if (PAST(enemy_time))
+		{
+			if (BotsPickBestEnemy(self))
+			{
 				self->fb.goal_refresh_time = 0;
 			}
 		}
 	}
-	else {
-		if (Visible_infront(self, enemy_)) {
+	else
+	{
+		if (Visible_infront(self, enemy_))
+		{
 			LookEnemy(self, enemy_);
 		}
-		else if (PAST(enemy_time)) {
+		else if (PAST(enemy_time))
+		{
 			BotsPickBestEnemy(self);
 		}
 	}
 }
 
-static void TargetEnemyLogic(gedict_t* self) {
+static void TargetEnemyLogic(gedict_t *self)
+{
 	self->fb.missile_dodge = NULL;
 
-	if (!(self->fb.state & NOTARGET_ENEMY)) {
-		if (self->fb.look_object && self->fb.look_object->ct == ctPlayer) {
+	if (!(self->fb.state & NOTARGET_ENEMY))
+	{
+		if (self->fb.look_object && (self->fb.look_object->ct == ctPlayer))
+		{
 			// Interesting - they only avoid missiles from players they are looking at?
 			AvoidLookObjectsMissile(self);
 
 			LookingAtEnemyLogic(self);
 		}
-		else if (self->s.v.enemy) {
+		else if (self->s.v.enemy)
+		{
 			NewlyPickedEnemyLogic();
 		}
-		else {
+		else
+		{
 			BotsPickBestEnemy(self);
 		}
 	}
 }
 
-static void BotDodgeMovement(gedict_t* self, vec3_t dir_move, float dodge_factor) {
-	if (dodge_factor) {
-		if (dodge_factor < 0) {
+static void BotDodgeMovement(gedict_t *self, vec3_t dir_move, float dodge_factor)
+{
+	if (dodge_factor)
+	{
+		if (dodge_factor < 0)
+		{
 			++dodge_factor;
 		}
-		else {
+		else
+		{
 			--dodge_factor;
 		}
+
 		trap_makevectors(self->s.v.v_angle);
-		VectorMA(dir_move, g_random() * self->fb.skill.dodge_amount * dodge_factor, g_globalvars.v_right, dir_move);
+		VectorMA(dir_move, g_random() * self->fb.skill.dodge_amount * dodge_factor,
+					g_globalvars.v_right, dir_move);
 	}
 }
 
-static void BotOnGroundMovement(gedict_t* self, vec3_t dir_move) {
+static void BotOnGroundMovement(gedict_t *self, vec3_t dir_move)
+{
 	float dodge_factor = 0;
 
-	if ((int)self->s.v.flags & FL_ONGROUND) {
-		if (!(self->fb.path_state & NO_DODGE)) {
+	if ((int) self->s.v.flags & FL_ONGROUND)
+	{
+		if (!(self->fb.path_state & NO_DODGE))
+		{
 			// Dodge a rocket our enemy is firing at us
-			if (self->fb.missile_dodge && g_globalvars.time - self->fb.missile_dodge->fb.missile_spawntime >= self->fb.skill.missile_dodge_time) {
-				if (PROG_TO_EDICT(self->fb.missile_dodge->s.v.owner)->ct == ctPlayer) {
+			if (self->fb.missile_dodge
+					&& ((g_globalvars.time - self->fb.missile_dodge->fb.missile_spawntime)
+							>= self->fb.skill.missile_dodge_time))
+			{
+				if (PROG_TO_EDICT(self->fb.missile_dodge->s.v.owner)->ct == ctPlayer)
+				{
 					vec3_t rel_pos;
 
 					VectorSubtract(self->s.v.origin, self->fb.missile_dodge->s.v.origin, rel_pos);
-					if (DotProduct(rel_pos, self->fb.missile_dodge->fb.missile_forward) > 0.7071067) {
+					if (DotProduct(rel_pos, self->fb.missile_dodge->fb.missile_forward) > 0.7071067)
+					{
 						vec3_t temp;
 						normalize(rel_pos, temp);
 						dodge_factor = DotProduct(temp, self->fb.missile_dodge->fb.missile_right);
 					}
 				}
-				else {
+				else
+				{
 					self->fb.missile_dodge = NULL;
 				}
 			}
 
 			// Not dodging a missile, dodge away from the player instead
-			if (self->fb.look_object && self->fb.look_object->ct == ctPlayer) {
-				if (!dodge_factor) {
+			if (self->fb.look_object && (self->fb.look_object->ct == ctPlayer))
+			{
+				if (!dodge_factor)
+				{
 					vec3_t rel_pos;
 
-					VectorSubtract (self->s.v.origin, self->fb.look_object->s.v.origin, rel_pos);
+					VectorSubtract(self->s.v.origin, self->fb.look_object->s.v.origin, rel_pos);
 					trap_makevectors(self->fb.look_object->s.v.v_angle);
-					if (DotProduct(rel_pos, g_globalvars.v_forward) > 0) {
+					if (DotProduct(rel_pos, g_globalvars.v_forward) > 0)
+					{
 						vec3_t temp;
 						normalize(rel_pos, temp);
 						dodge_factor = DotProduct(temp, g_globalvars.v_right);
@@ -158,55 +201,72 @@ static void BotOnGroundMovement(gedict_t* self, vec3_t dir_move) {
 	}
 
 	// If we're not in water, cannot have vertical direction (think of markers heading up stairs)
-	if (self->s.v.waterlevel <= 1) {
+	if (self->s.v.waterlevel <= 1)
+	{
 		dir_move[2] = 0;
 	}
 }
 
-static void BotMoveTowardsLinkedMarker(gedict_t* self, vec3_t dir_move) {
+static void BotMoveTowardsLinkedMarker(gedict_t *self, vec3_t dir_move)
+{
 	vec3_t temp;
-	gedict_t* goalentity_ = &g_edicts[self->s.v.goalentity];
-	gedict_t* linked = self->fb.linked_marker;
-	qbool onGround = ((int)self->s.v.flags & FL_ONGROUND);
-	qbool curlJump = ((int)self->fb.path_state & BOTPATH_CURLJUMP_HINT);
+	gedict_t *goalentity_ = &g_edicts[self->s.v.goalentity];
+	gedict_t *linked = self->fb.linked_marker;
+	qbool onGround = ((int) self->s.v.flags & FL_ONGROUND);
+	qbool curlJump = ((int) self->fb.path_state & BOTPATH_CURLJUMP_HINT);
 
 	VectorAdd(linked->s.v.absmin, linked->s.v.view_ofs, temp);
 	VectorSubtract(temp, self->s.v.origin, temp);
 	normalize(temp, dir_move);
 
-	if (curlJump && (onGround || self->s.v.velocity[2] > 0)) {
-		vec3_t up = { 0, 0, 1 };
+	if (curlJump && (onGround || (self->s.v.velocity[2] > 0)))
+	{
+		vec3_t up =
+			{ 0, 0, 1 };
 
-		if (self->isBot && self->fb.debug_path) {
-			G_bprint (PRINT_HIGH, "%3.2f: Moving %3d > %3d, dir %3.1f %3.1f %3.1f\n", g_globalvars.time, self->fb.touch_marker->fb.index + 1, self->fb.linked_marker->fb.index + 1, PASSVEC3 (dir_move));
+		if (self->isBot && self->fb.debug_path)
+		{
+			G_bprint(PRINT_HIGH, "%3.2f: Moving %3d > %3d, dir %3.1f %3.1f %3.1f\n",
+						g_globalvars.time, self->fb.touch_marker->fb.index + 1,
+						self->fb.linked_marker->fb.index + 1, PASSVEC3(dir_move));
 		}
 
-		RotatePointAroundVector (dir_move, up, dir_move, self->fb.angle_hint);
+		RotatePointAroundVector(dir_move, up, dir_move, self->fb.angle_hint);
 
-		if (self->isBot && self->fb.debug_path) {
-			G_bprint (PRINT_HIGH, "%3.2f: Rotating %d, %3.1f %3.1f %3.1f\n", g_globalvars.time, self->fb.angle_hint, PASSVEC3 (dir_move));
+		if (self->isBot && self->fb.debug_path)
+		{
+			G_bprint(PRINT_HIGH, "%3.2f: Rotating %d, %3.1f %3.1f %3.1f\n", g_globalvars.time,
+						self->fb.angle_hint, PASSVEC3(dir_move));
 		}
 	}
 
-	if (self->isBot && self->fb.debug_path) {
+	if (self->isBot && self->fb.debug_path)
+	{
 		//G_bprint (PRINT_HIGH, "%3.2f: Moving %3d > %3d, dir %3.1f %3.1f %3.1f\n", g_globalvars.time, self->fb.touch_marker->fb.index + 1, self->fb.linked_marker->fb.index + 1, PASSVEC3 (dir_move));
 	}
 
-	if (self->fb.path_state & DELIBERATE_BACKUP) {
-		if (linked->fb.arrow_time > g_globalvars.time) {
-			VectorInverse (dir_move);
+	if (self->fb.path_state & DELIBERATE_BACKUP)
+	{
+		if (linked->fb.arrow_time > g_globalvars.time)
+		{
+			VectorInverse(dir_move);
 		}
-		else {
+		else
+		{
 			self->fb.path_state &= ~DELIBERATE_BACKUP;
 		}
 	}
-	else if (linked == self->fb.touch_marker) {
-		if (goalentity_ == self->fb.touch_marker) {
-			if (WaitingToRespawn(self->fb.touch_marker)) {
+	else if (linked == self->fb.touch_marker)
+	{
+		if (goalentity_ == self->fb.touch_marker)
+		{
+			if (WaitingToRespawn(self->fb.touch_marker))
+			{
 				VectorClear(dir_move);
 			}
 		}
-		else {
+		else
+		{
 			VectorClear(dir_move);
 		}
 	}
@@ -217,52 +277,68 @@ static void BotTouchMarkerLogic()
 {
 	TargetEnemyLogic(self);
 
-	if (PAST(goal_refresh_time)) {
+	if (PAST(goal_refresh_time))
+	{
 		UpdateGoal(self);
 	}
 
-	if (self->fb.path_state & BOTPATH_RJ_IN_PROGRESS) {
-		if (self->s.v.velocity[2] <= 0) {
+	if (self->fb.path_state & BOTPATH_RJ_IN_PROGRESS)
+	{
+		if (self->s.v.velocity[2] <= 0)
+		{
 			self->fb.path_state &= ~BOTPATH_RJ_IN_PROGRESS;
 		}
 	}
 
-	if (! (self->fb.path_state & BOTPATH_RJ_IN_PROGRESS)) {
-		if (PAST (linked_marker_time)) {
+	if (!(self->fb.path_state & BOTPATH_RJ_IN_PROGRESS))
+	{
+		if (PAST(linked_marker_time))
+		{
 			self->fb.old_linked_marker = NULL;
 		}
 
-		if (self->fb.old_linked_marker != self->fb.touch_marker) {
-			ProcessNewLinkedMarker (self);
+		if (self->fb.old_linked_marker != self->fb.touch_marker)
+		{
+			ProcessNewLinkedMarker(self);
 		}
 	}
 
-	if (FUTURE(arrow_time)) {
-		if (self->isBot && self->fb.debug_path) {
-			G_bprint(PRINT_HIGH, "%3.2f: arrow_time is %3.2f\n", g_globalvars.time, self->fb.arrow_time);
+	if (FUTURE(arrow_time))
+	{
+		if (self->isBot && self->fb.debug_path)
+		{
+			G_bprint(PRINT_HIGH, "%3.2f: arrow_time is %3.2f\n", g_globalvars.time,
+						self->fb.arrow_time);
 		}
-		if (FUTURE(arrow_time2)) {
-			if (g_random() < 0.5) {
-				SetLinkedMarker (self, self->fb.touch_marker, "BotTouchMarkerLogic");
+
+		if (FUTURE(arrow_time2))
+		{
+			if (g_random() < 0.5)
+			{
+				SetLinkedMarker(self, self->fb.touch_marker, "BotTouchMarkerLogic");
 				self->fb.old_linked_marker = self->fb.linked_marker;
 				self->fb.path_state = 0;
 				self->fb.linked_marker_time = g_globalvars.time + 0.3;
 			}
 		}
 	}
-	else if (self->fb.linked_marker) {
+	else if (self->fb.linked_marker)
+	{
 		vec3_t dir_move;
 
 		BotMoveTowardsLinkedMarker(self, dir_move);
 		BotOnGroundMovement(self, dir_move);
 
-		SetDirectionMove (self, dir_move, ((int)self->s.v.flags & FL_ONGROUND) ? "OnGround" : "InAir");
+		SetDirectionMove(self, dir_move,
+							((int) self->s.v.flags & FL_ONGROUND) ? "OnGround" : "InAir");
 	}
-	else {
+	else
+	{
 		// The map is, imo, broken at this point, but some old fbca maps are missing links
 		//   and at this point would use 'world'
 		// Deliberately don't move and hope that the fall gets us somewhere
-		vec3_t dir_move = { 0, 0, 0 };
+		vec3_t dir_move =
+			{ 0, 0, 0 };
 
 		SetDirectionMove(self, dir_move, "NoLinkedMarker!");
 	}
@@ -271,24 +347,29 @@ static void BotTouchMarkerLogic()
 }
 
 // Called when a human player touches a marker
-static void HumanTouchMarkerLogic(void) {
-	if (PAST(enemy_time)) {
+static void HumanTouchMarkerLogic(void)
+{
+	if (PAST(enemy_time))
+	{
 		BotsPickBestEnemy(self);
 	}
 
-	if (FrogbotOptionEnabled (FB_OPTION_EDITOR_MODE)) {
-		FrogbotEditorMarkerTouched (self->fb.touch_marker);
+	if (FrogbotOptionEnabled(FB_OPTION_EDITOR_MODE))
+	{
+		FrogbotEditorMarkerTouched(self->fb.touch_marker);
 	}
 }
 
-void BotPathCheck (gedict_t* self, gedict_t* touch_marker)
+void BotPathCheck(gedict_t *self, gedict_t *touch_marker)
 {
-	if (self->fb.debug_path && self->fb.fixed_goal == touch_marker) {
-		G_bprint (2, "at goal, path complete.  %4.3f seconds\n", g_globalvars.time - self->fb.debug_path_start);
+	if (self->fb.debug_path && (self->fb.fixed_goal == touch_marker))
+	{
+		G_bprint(2, "at goal, path complete.  %4.3f seconds\n",
+					g_globalvars.time - self->fb.debug_path_start);
 		self->fb.fixed_goal = NULL;
 		self->fb.debug_path = false;
 		self->fb.debug_path_start = 0;
-		cvar_fset (FB_CVAR_DEBUG, 0);
+		cvar_fset(FB_CVAR_DEBUG, 0);
 	}
 }
 
@@ -297,27 +378,34 @@ static void PeriodicAllClientLogic(void)
 	SetNextThinkTime(self);
 	self->fb.prev_touch_marker = self->fb.touch_marker;
 
-	if (PAST(weapon_refresh_time)) {
+	if (PAST(weapon_refresh_time))
+	{
 		FrogbotSetFirepower(self);
 	}
 
 	// If we haven't touched a marker in a while, find closest marker
-	if (PAST(touch_marker_time)) {
+	if (PAST(touch_marker_time))
+	{
 		SetMarker(self, LocateMarker(self->s.v.origin));
 	}
 
-	if (self->fb.touch_marker) {
-		BotPathCheck (self, self->fb.touch_marker);
+	if (self->fb.touch_marker)
+	{
+		BotPathCheck(self, self->fb.touch_marker);
 
-		if (self->fb.state & AWARE_SURROUNDINGS) {
-			if (self->isBot) {
+		if (self->fb.state & AWARE_SURROUNDINGS)
+		{
+			if (self->isBot)
+			{
 				BotTouchMarkerLogic();
 			}
-			else {
+			else
+			{
 				HumanTouchMarkerLogic();
 			}
 		}
-		else {
+		else
+		{
 			self->fb.goal_refresh_time = 0;
 			self->fb.state |= AWARE_SURROUNDINGS;
 			self->fb.old_linked_marker = (self->isBot ? NULL : self->fb.old_linked_marker);
@@ -325,27 +413,42 @@ static void PeriodicAllClientLogic(void)
 	}
 }
 
-void BotEvadeLogic(gedict_t* self) {
-	gedict_t* enemy_ = &g_edicts[self->s.v.enemy];
+void BotEvadeLogic(gedict_t *self)
+{
+	gedict_t *enemy_ = &g_edicts[self->s.v.enemy];
 
 	self->fb.bot_evade = false;
-	if (deathmatch <= 3 && !isRA()) {
-		if (isDuel() && g_random() < CHANCE_EVADE_DUEL) {
-			if ((self->s.v.origin[2] + 18) > (enemy_->s.v.absmin[2] + enemy_->s.v.view_ofs[2])) {
-				if ((int)self->s.v.items & IT_ROCKET_LAUNCHER && self->s.v.ammo_rockets > 4) {
-					if (!self->s.v.waterlevel) {
-						self->fb.bot_evade = (qbool) (self->s.v.health > 70) && (self->s.v.armorvalue > 100) && !self->fb.enemy_visible;
+	if (deathmatch <= 3 && !isRA())
+	{
+		if (isDuel() && g_random() < CHANCE_EVADE_DUEL)
+		{
+			if ((self->s.v.origin[2] + 18) > (enemy_->s.v.absmin[2] + enemy_->s.v.view_ofs[2]))
+			{
+				if (((int)self->s.v.items & IT_ROCKET_LAUNCHER) && (self->s.v.ammo_rockets > 4))
+				{
+					if (!self->s.v.waterlevel)
+					{
+						self->fb.bot_evade = (qbool)(self->s.v.health > 70)
+								&& (self->s.v.armorvalue > 100) && !self->fb.enemy_visible;
 					}
 				}
 			}
 		}
-		else if (! isDuel() && g_random() < CHANCE_EVADE_NONDUEL) {
-			if ((self->s.v.origin[2] + 18) > (enemy_->s.v.absmin[2] + enemy_->s.v.view_ofs[2])) {
-				if (((int)self->s.v.items & IT_ROCKET_LAUNCHER) || ((int)self->s.v.items & IT_LIGHTNING)) {
-					if ((self->s.v.ammo_cells >= 20) || (self->s.v.ammo_rockets > 3)) {
-						if (!self->s.v.waterlevel) {
-							if ((self->s.v.health > 70) && (self->s.v.armorvalue > 90)) {
-								self->fb.bot_evade = (qbool) (!((int)self->s.v.items & (IT_INVULNERABILITY | IT_INVISIBILITY | IT_QUAD)));
+		else if (!isDuel() && g_random() < CHANCE_EVADE_NONDUEL)
+		{
+			if ((self->s.v.origin[2] + 18) > (enemy_->s.v.absmin[2] + enemy_->s.v.view_ofs[2]))
+			{
+				if (((int)self->s.v.items & IT_ROCKET_LAUNCHER)
+						|| ((int)self->s.v.items & IT_LIGHTNING))
+				{
+					if ((self->s.v.ammo_cells >= 20) || (self->s.v.ammo_rockets > 3))
+					{
+						if (!self->s.v.waterlevel)
+						{
+							if ((self->s.v.health > 70) && (self->s.v.armorvalue > 90))
+							{
+								self->fb.bot_evade = (qbool)(!((int)self->s.v.items
+										& (IT_INVULNERABILITY | IT_INVISIBILITY | IT_QUAD)));
 							}
 						}
 					}
@@ -356,25 +459,32 @@ void BotEvadeLogic(gedict_t* self) {
 }
 
 // Logic that gets called for every player
-void BotsThinkTime(gedict_t* self) {
+void BotsThinkTime(gedict_t *self)
+{
 	self->fb.jumping = false; // Don't call SetJumpFlag here
 
-	if (self->fb.prev_touch_marker != self->fb.touch_marker || PAST(frogbot_nextthink)) {
+	if (self->fb.prev_touch_marker != self->fb.touch_marker || PAST(frogbot_nextthink))
+	{
 		PeriodicAllClientLogic();
 
-		if (self->isBot) {
+		if (self->isBot)
+		{
 			CheckCombatJump(self);
 			AMPHI2BotInLava();
 		}
 	}
 
-	if (self->isBot && FrogbotOptionEnabled(FB_OPTION_DEBUG_MOVEMENT)) {
-		stuffcmd_flags(self, STUFFCMD_DEMOONLY, "//botcmd %f %d %d %d | %d %d %d\n", g_globalvars.time, PASSINTVEC3(self->s.v.v_angle), PASSINTVEC3(self->fb.predict_origin));
+	if (self->isBot && FrogbotOptionEnabled(FB_OPTION_DEBUG_MOVEMENT))
+	{
+		stuffcmd_flags(self, STUFFCMD_DEMOONLY, "//botcmd %f %d %d %d | %d %d %d\n",
+						g_globalvars.time, PASSINTVEC3(self->s.v.v_angle),
+						PASSINTVEC3(self->fb.predict_origin));
 	}
 }
 
 // Sets a client's last marker
-void SetMarker(gedict_t* client, gedict_t* marker) {
+void SetMarker(gedict_t *client, gedict_t *marker)
+{
 	client->fb.touch_distance = 0;
 	client->fb.touch_marker = marker;
 	client->fb.Z_ = marker ? marker->fb.Z_ : 0;

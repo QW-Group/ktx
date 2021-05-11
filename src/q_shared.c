@@ -27,69 +27,69 @@
 #include "q_shared.h"
 
 /*
-============================================================================
+ ============================================================================
 
-					BYTE ORDER FUNCTIONS
+ BYTE ORDER FUNCTIONS
 
-============================================================================
-*/
+ ============================================================================
+ */
 /*
-// can't just use function pointers, or dll linkage can
-// mess up when qcommon is included in multiple places
-static short	(*_BigShort) (short l);
-static short	(*_LittleShort) (short l);
-static int		(*_BigLong) (int l);
-static int		(*_LittleLong) (int l);
-static qint64	(*_BigLong64) (qint64 l);
-static qint64	(*_LittleLong64) (qint64 l);
-static float	(*_BigFloat) (const float *l);
-static float	(*_LittleFloat) (const float *l);
+ // can't just use function pointers, or dll linkage can
+ // mess up when qcommon is included in multiple places
+ static short	(*_BigShort) (short l);
+ static short	(*_LittleShort) (short l);
+ static int		(*_BigLong) (int l);
+ static int		(*_LittleLong) (int l);
+ static qint64	(*_BigLong64) (qint64 l);
+ static qint64	(*_LittleLong64) (qint64 l);
+ static float	(*_BigFloat) (const float *l);
+ static float	(*_LittleFloat) (const float *l);
 
-short	BigShort(short l){return _BigShort(l);}
-short	LittleShort(short l) {return _LittleShort(l);}
-int		BigLong (int l) {return _BigLong(l);}
-int		LittleLong (int l) {return _LittleLong(l);}
-qint64 	BigLong64 (qint64 l) {return _BigLong64(l);}
-qint64 	LittleLong64 (qint64 l) {return _LittleLong64(l);}
-float	BigFloat (const float *l) {return _BigFloat(l);}
-float	LittleFloat (const float *l) {return _LittleFloat(l);}
-*/
+ short	BigShort(short l){return _BigShort(l);}
+ short	LittleShort(short l) {return _LittleShort(l);}
+ int		BigLong (int l) {return _BigLong(l);}
+ int		LittleLong (int l) {return _LittleLong(l);}
+ qint64 	BigLong64 (qint64 l) {return _BigLong64(l);}
+ qint64 	LittleLong64 (qint64 l) {return _LittleLong64(l);}
+ float	BigFloat (const float *l) {return _BigFloat(l);}
+ float	LittleFloat (const float *l) {return _LittleFloat(l);}
+ */
 
-short   ShortSwap (short l)
+short ShortSwap(short l)
 {
-	byte    b1,b2;
+	byte b1, b2;
 
-	b1 = l&255;
-	b2 = (l>>8)&255;
+	b1 = l & 255;
+	b2 = (l >> 8) & 255;
 
-	return (b1<<8) + b2;
+	return (b1 << 8) + b2;
 }
 
-short	ShortNoSwap (short l)
+short ShortNoSwap(short l)
 {
 	return l;
 }
 
-int    LongSwap (int l)
+int LongSwap(int l)
 {
-	byte    b1,b2,b3,b4;
+	byte b1, b2, b3, b4;
 
-	b1 = l&255;
-	b2 = (l>>8)&255;
-	b3 = (l>>16)&255;
-	b4 = (l>>24)&255;
+	b1 = l & 255;
+	b2 = (l >> 8) & 255;
+	b3 = (l >> 16) & 255;
+	b4 = (l >> 24) & 255;
 
-	return ((int)b1<<24) + ((int)b2<<16) + ((int)b3<<8) + b4;
+	return ((int) b1 << 24) + ((int) b2 << 16) + ((int) b3 << 8) + b4;
 }
 
-int	LongNoSwap (int l)
+int LongNoSwap(int l)
 {
 	return l;
 }
 
-qint64 Long64Swap (qint64 ll)
+qint64 Long64Swap(qint64 ll)
 {
-	qint64	result;
+	qint64 result;
 
 	result.b0 = ll.b7;
 	result.b1 = ll.b6;
@@ -103,160 +103,193 @@ qint64 Long64Swap (qint64 ll)
 	return result;
 }
 
-qint64 Long64NoSwap (qint64 ll)
+qint64 Long64NoSwap(qint64 ll)
 {
 	return ll;
 }
 
-typedef union {
-    float	f;
-    unsigned int i;
+typedef union
+{
+	float f;
+	unsigned int i;
 } _FloatByteUnion;
 
-float FloatSwap (const float *f) {
+float FloatSwap(const float *f)
+{
 	const _FloatByteUnion *in;
 	_FloatByteUnion out;
 
-	in = (_FloatByteUnion *)f;
+	in = (_FloatByteUnion*) f;
 	out.i = LongSwap(in->i);
 
 	return out.f;
 }
 
-float FloatNoSwap (const float *f)
+float FloatNoSwap(const float *f)
 {
 	return *f;
 }
 
 /*
-================
-Swap_Init
-================
-*/
+ ================
+ Swap_Init
+ ================
+ */
 /*
-void Swap_Init (void)
-{
-	byte	swaptest[2] = {1,0};
+ void Swap_Init (void)
+ {
+ byte	swaptest[2] = {1,0};
 
-// set the byte swapping variables in a portable manner	
-	if ( *(short *)swaptest == 1)
-	{
-		_BigShort = ShortSwap;
-		_LittleShort = ShortNoSwap;
-		_BigLong = LongSwap;
-		_LittleLong = LongNoSwap;
-		_BigLong64 = Long64Swap;
-		_LittleLong64 = Long64NoSwap;
-		_BigFloat = FloatSwap;
-		_LittleFloat = FloatNoSwap;
-	}
-	else
-	{
-		_BigShort = ShortNoSwap;
-		_LittleShort = ShortSwap;
-		_BigLong = LongNoSwap;
-		_LittleLong = LongSwap;
-		_BigLong64 = Long64NoSwap;
-		_LittleLong64 = Long64Swap;
-		_BigFloat = FloatNoSwap;
-		_LittleFloat = FloatSwap;
-	}
+ // set the byte swapping variables in a portable manner
+ if ( *(short *)swaptest == 1)
+ {
+ _BigShort = ShortSwap;
+ _LittleShort = ShortNoSwap;
+ _BigLong = LongSwap;
+ _LittleLong = LongNoSwap;
+ _BigLong64 = Long64Swap;
+ _LittleLong64 = Long64NoSwap;
+ _BigFloat = FloatSwap;
+ _LittleFloat = FloatNoSwap;
+ }
+ else
+ {
+ _BigShort = ShortNoSwap;
+ _LittleShort = ShortSwap;
+ _BigLong = LongNoSwap;
+ _LittleLong = LongSwap;
+ _BigLong64 = Long64NoSwap;
+ _LittleLong64 = Long64Swap;
+ _BigFloat = FloatNoSwap;
+ _LittleFloat = FloatSwap;
+ }
 
-}
-*/
+ }
+ */
 
 /*
-============================================================================
+ ============================================================================
 
-					LIBRARY REPLACEMENT FUNCTIONS
+ LIBRARY REPLACEMENT FUNCTIONS
 
-============================================================================
-*/
+ ============================================================================
+ */
 
-int Q_isprint( int c )
+int Q_isprint(int c)
 {
-	if ( c >= 0x20 && c <= 0x7E )
-		return ( 1 );
-	return ( 0 );
+	if ((c >= 0x20) && (c <= 0x7E))
+	{
+		return (1);
+	}
+
+	return (0);
 }
 
-int Q_islower( int c )
+int Q_islower(int c)
 {
-	if (c >= 'a' && c <= 'z')
-		return ( 1 );
-	return ( 0 );
+	if ((c >= 'a') && (c <= 'z'))
+	{
+		return (1);
+	}
+
+	return (0);
 }
 
-int Q_isupper( int c )
+int Q_isupper(int c)
 {
-	if (c >= 'A' && c <= 'Z')
-		return ( 1 );
-	return ( 0 );
+	if ((c >= 'A') && (c <= 'Z'))
+	{
+		return (1);
+	}
+
+	return (0);
 }
 
-int Q_isalpha( int c )
+int Q_isalpha(int c)
 {
-	if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
-		return ( 1 );
-	return ( 0 );
+	if (((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z')))
+	{
+		return (1);
+	}
+
+	return (0);
 }
 
-char* Q_strrchr( const char* string, int c )
+char* Q_strrchr(const char *string, int c)
 {
 	char cc = c;
 	char *s;
-	char *sp=(char *)0;
+	char *sp = (char*) 0;
 
-	s = (char*)string;
+	s = (char*) string;
 
 	while (*s)
 	{
 		if (*s == cc)
+		{
 			sp = s;
+		}
+
 		s++;
 	}
+
 	if (cc == 0)
+	{
 		sp = s;
+	}
 
 	return sp;
 }
 
 /*
-=============
-Q_strncpyz
+ =============
+ Q_strncpyz
  
-Safe strncpy that ensures a trailing zero
-=============
-*/
-void Q_strncpyz( char *dest, const char *src, int destsize ) {
-  // bk001129 - also NULL dest
-  if ( !dest ) {
-    Com_Error( ERR_FATAL, "Q_strncpyz: NULL dest" );
-  }
-	if ( !src ) {
-		Com_Error( ERR_FATAL, "Q_strncpyz: NULL src" );
-	}
-	if ( destsize < 1 ) {
-		Com_Error(ERR_FATAL,"Q_strncpyz: destsize < 1" ); 
+ Safe strncpy that ensures a trailing zero
+ =============
+ */
+void Q_strncpyz(char *dest, const char *src, int destsize)
+{
+	// bk001129 - also NULL dest
+	if (!dest)
+	{
+		Com_Error(ERR_FATAL, "Q_strncpyz: NULL dest");
 	}
 
-	strncpy( dest, src, destsize-1 );
-  dest[destsize-1] = 0;
+	if (!src)
+	{
+		Com_Error(ERR_FATAL, "Q_strncpyz: NULL src");
+	}
+
+	if (destsize < 1)
+	{
+		Com_Error(ERR_FATAL, "Q_strncpyz: destsize < 1");
+	}
+
+	strncpy(dest, src, destsize - 1);
+	dest[destsize - 1] = 0;
 }
-                 
-int Q_stricmpn (const char *s1, const char *s2, int n) {
-	int		c1, c2;
+
+int Q_stricmpn(const char *s1, const char *s2, int n)
+{
+	int c1, c2;
 
 	// bk001129 - moved in 1.17 fix not in id codebase
-	if ( s1 == NULL )
+	if (s1 == NULL)
 	{
-		if ( s2 == NULL )
+		if (s2 == NULL)
+		{
 			return 0;
+		}
 		else
+		{
 			return -1;
+		}
 	}
-	else if ( s2 == NULL )
+	else if (s2 == NULL)
+	{
 		return 1;
+	}
 
 	do
 	{
@@ -267,82 +300,95 @@ int Q_stricmpn (const char *s1, const char *s2, int n) {
 		{
 			return 0;		// strings are equal until end point
 		}
-		
+
 		if (c1 != c2)
 		{
-			if (c1 >= 'a' && c1 <= 'z')
+			if ((c1 >= 'a') && (c1 <= 'z'))
 			{
 				c1 -= ('a' - 'A');
 			}
-			if (c2 >= 'a' && c2 <= 'z')
+
+			if ((c2 >= 'a') && (c2 <= 'z'))
 			{
 				c2 -= ('a' - 'A');
 			}
+
 			if (c1 != c2)
 			{
 				return c1 < c2 ? -1 : 1;
 			}
 		}
-
 	} while (c1);
-	
+
 	return 0;		// strings are equal
 }
 
-int Q_strncmp (const char *s1, const char *s2, int n) {
-	int		c1, c2;
-	
-	do {
+int Q_strncmp(const char *s1, const char *s2, int n)
+{
+	int c1, c2;
+
+	do
+	{
 		c1 = *s1++;
 		c2 = *s2++;
 
-		if (!n--) {
+		if (!n--)
+		{
 			return 0;		// strings are equal until end point
 		}
-		
-		if (c1 != c2) {
+
+		if (c1 != c2)
+		{
 			return c1 < c2 ? -1 : 1;
 		}
 	} while (c1);
-	
+
 	return 0;		// strings are equal
 }
 
-int Q_stricmp (const char *s1, const char *s2) {
-	return (s1 && s2) ? Q_stricmpn (s1, s2, 99999) : -1;
+int Q_stricmp(const char *s1, const char *s2)
+{
+	return (s1 && s2) ? Q_stricmpn(s1, s2, 99999) : -1;
 }
 
+char* Q_strlwr(char *s1)
+{
+	char *s;
 
-char *Q_strlwr( char *s1 ) {
-    char	*s;
-
-    s = s1;
-	while ( *s ) {
+	s = s1;
+	while (*s)
+	{
 		*s = tolower(*s);
 		s++;
 	}
-    return s1;
+
+	return s1;
 }
 
-char *Q_strupr( char *s1 ) {
-    char	*s;
+char* Q_strupr(char *s1)
+{
+	char *s;
 
-    s = s1;
-	while ( *s ) {
+	s = s1;
+	while (*s)
+	{
 		*s = toupper(*s);
 		s++;
 	}
-    return s1;
+
+	return s1;
 }
 
-
 // never goes past bounds or leaves without a terminating 0
-void Q_strcat( char *dest, int size, const char *src ) {
-	int		l1;
+void Q_strcat(char *dest, int size, const char *src)
+{
+	int l1;
 
-	l1 = strlen( dest );
-	if ( l1 >= size ) {
-		Com_Error( ERR_FATAL, "Q_strcat: already overflowed" );
+	l1 = strlen(dest);
+	if (l1 >= size)
+	{
+		Com_Error(ERR_FATAL, "Q_strcat: already overflowed");
 	}
-	Q_strncpyz( dest + l1, src, size - l1 );
+
+	Q_strncpyz(dest + l1, src, size - l1);
 }

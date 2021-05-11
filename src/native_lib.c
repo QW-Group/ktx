@@ -11,7 +11,6 @@
 
 #include "g_local.h"
 
-
 #ifdef _WIN32
 
 // ripped from VVD code
@@ -19,8 +18,11 @@
 int Q_vsnprintf(char *buffer, size_t count, const char *format, va_list argptr)
 {
 	int ret;
+
 	if (!count)
+	{
 		return 0;
+	}
 
 	ret = _vsnprintf(buffer, count, format, argptr);
 	buffer[count - 1] = 0;
@@ -35,7 +37,9 @@ int snprintf(char *buffer, size_t count, char const *format, ...)
 	va_list argptr;
 
 	if (!count)
+	{
 		return 0;
+	}
 
 	va_start(argptr, format);
 	ret = _vsnprintf(buffer, count, format, argptr);

@@ -24,81 +24,55 @@ qbool isSupport_Params(gedict_t *p);
 static char *fixed_maps_list[] =
 {
 	// episode 1
-	"e1m1",
-	"e1m2",
-	"e1m3",
-	"e1m4",
-	"e1m5",
-	"e1m6",
-	"e1m7",
-	"e1m8",
+	"e1m1", "e1m2", "e1m3", "e1m4", "e1m5", "e1m6", "e1m7", "e1m8",
 
 	// episode 2
-	"e2m1",
-	"e2m2",
-	"e2m3",
-	"e2m4",
-	"e2m5",
-	"e2m6",
-	"e2m7",
+	"e2m1", "e2m2", "e2m3", "e2m4", "e2m5", "e2m6", "e2m7",
 
 	// episode 3
-	"e3m1",
-	"e3m2",
-	"e3m3",
-	"e3m4",
-	"e3m5",
-	"e3m6",
-	"e3m7",
+	"e3m1", "e3m2", "e3m3", "e3m4", "e3m5", "e3m6", "e3m7",
 
 	// episode 4
-	"e4m1",
-	"e4m2",
-	"e4m3",
-	"e4m4",
-	"e4m5",
-	"e4m6",
-	"e4m7",
-	"e4m8",
+	"e4m1", "e4m2", "e4m3", "e4m4", "e4m5", "e4m6", "e4m7", "e4m8",
 
 	// 
-	"start",
-	"end",
+	"start", "end",
 
 	// DM maps
-	"dm1",
-	"dm2",
-	"dm3",
-	"dm4",
-	"dm5",
-	"dm6"
+	"dm1", "dm2", "dm3", "dm4", "dm5", "dm6"
 };
 
-static int fixed_maps_cnt = sizeof ( fixed_maps_list ) / sizeof ( fixed_maps_list[0] );
+static int fixed_maps_cnt = sizeof(fixed_maps_list) / sizeof(fixed_maps_list[0]);
 
 //===============================================
 
 #define MAX_MAPS 4096
 
-static char		*mapslist[MAX_MAPS] = {0};
-static int		maps_cnt = 0;
+static char *mapslist[MAX_MAPS] =
+{ 0 };
+static int maps_cnt = 0;
 
-static char ml_buf[MAX_MAPS * 32] = {0}; // OUCH OUCH!!! btw, 32 is some average len of map name here, with path
+static char ml_buf[MAX_MAPS * 32] =
+{ 0 }; // OUCH OUCH!!! btw, 32 is some average len of map name here, with path
 
 // NOTE: we did not check is this map alredy in list or not...
-static void Map_AddMapToList( char *name )
+static void Map_AddMapToList(char *name)
 {
 	int l;
 
-	if ( strnull( name ) )
+	if (strnull(name))
+	{
 		return; // fu!
+	}
 
-	if ( maps_cnt < 0 || maps_cnt >= MAX_MAPS )
+	if ((maps_cnt < 0) || (maps_cnt >= MAX_MAPS))
+	{
 		return; // too many
+	}
 
-	l = strlen( name ) + 1;  // + nul
-	mapslist[maps_cnt] = G_Alloc( l );		// alloc mem
-	strlcpy( mapslist[maps_cnt], name, l );	// copy
+	l = strlen(name) + 1;  // + nul
+	mapslist[maps_cnt] = G_Alloc(l);		// alloc mem
+	strlcpy(mapslist[maps_cnt], name, l);	// copy
 
 	maps_cnt++;
 }
@@ -106,7 +80,7 @@ static void Map_AddMapToList( char *name )
 // Extension to allow multiple .ent files for individual maps.
 // We check all *.ent files we can find, and look for format mapName#description.ent, where mapName is a 
 //    standard map we already have in list.
-void GetCustomEntityMapsForDirectory(char* directory)
+void GetCustomEntityMapsForDirectory(char *directory)
 {
 	char *s, name[32], *sep;
 	int i, cnt, l, m;
@@ -114,18 +88,22 @@ void GetCustomEntityMapsForDirectory(char* directory)
 	ml_buf[0] = 0;
 
 	// Find all entity files in the maps directory
-	cnt = trap_FS_GetFileList( directory, ( FTE_sv ? ".ent" : "\\.ent$" ), ml_buf, sizeof(ml_buf), 0 );
-	ml_buf[sizeof(ml_buf)-1] = 0;
+	cnt = trap_FS_GetFileList(directory, (FTE_sv ? ".ent" : "\\.ent$"), ml_buf, sizeof(ml_buf), 0);
+	ml_buf[sizeof(ml_buf) - 1] = 0;
 
-	for ( i = 0, s = ml_buf; i < cnt && s < ml_buf + sizeof(ml_buf); ++i )
+	for (i = 0, s = ml_buf; i < cnt && s < ml_buf + sizeof(ml_buf); ++i)
 	{
-		l = strlen( s );
+		l = strlen(s);
 
-		if ( FTE_sv )
+		if (FTE_sv)
+		{
 			l -= 4; // skip extension
+		}
 
-		if ( l <= 0 )
+		if (l <= 0)
+		{
 			break;
+		}
 
 		l++; // + nul
 
@@ -136,7 +114,7 @@ void GetCustomEntityMapsForDirectory(char* directory)
 			int mapNameLength;
 
 			// copy
-			strlcpy( name, s, min( sizeof(name), l ) );
+			strlcpy(name, s, min(sizeof(name), l));
 
 			// The server could have mapName#entName.ent in more than one directory, so check here for duplicates
 			mapNameLength = sep - s;
@@ -144,19 +122,25 @@ void GetCustomEntityMapsForDirectory(char* directory)
 			{
 				for (m = 0; m < maps_cnt; ++m)
 				{
-					baseMapFound |= (strlen(mapslist[m]) == mapNameLength && !strncmp(mapslist[m], s, mapNameLength));
+					baseMapFound |= (strlen(mapslist[m]) == mapNameLength
+							&& !strncmp(mapslist[m], s, mapNameLength));
 					duplicateFound |= !strcmp(mapslist[m], s);
 				}
 
-				if (baseMapFound && ! duplicateFound)
-					Map_AddMapToList( name );
+				if (baseMapFound && !duplicateFound)
+				{
+					Map_AddMapToList(name);
+				}
 			}
 		}
 
 		// find next map name
 		s = strchr(s, 0);
-		if ( !s )
-			G_Error( "GetMapList: strchr returns NULL" );
+		if (!s)
+		{
+			G_Error("GetMapList: strchr returns NULL");
+		}
+
 		s++;
 	}
 
@@ -165,9 +149,10 @@ void GetCustomEntityMapsForDirectory(char* directory)
 
 void GetCustomEntityMaps(void)
 {
-	char path[1024] = { 0 };
+	char path[1024] =
+		{ 0 };
 
-	char* entityDir = cvar_string("sv_loadentfiles_dir");
+	char *entityDir = cvar_string("sv_loadentfiles_dir");
 	if (entityDir && *entityDir)
 	{
 		snprintf(path, sizeof(path) - 1, "maps/%s", entityDir);
@@ -181,11 +166,13 @@ void AddFixedMaps(void)
 {
 	int i;
 
-	if ( mapslist[0] || maps_cnt )
-		G_Error( "AddFixedMaps: can't do it twice" );
+	if (mapslist[0] || maps_cnt)
+	{
+		G_Error("AddFixedMaps: can't do it twice");
+	}
 
-	for ( i = 0; i < MAX_MAPS && i < fixed_maps_cnt ; i++ )
-		Map_AddMapToList( fixed_maps_list[i] );
+	for (i = 0; i < MAX_MAPS && i < fixed_maps_cnt; i++)
+		Map_AddMapToList(fixed_maps_list[i]);
 }
 
 void GetMapList(void)
@@ -195,39 +182,49 @@ void GetMapList(void)
 
 	ml_buf[0] = 0;
 
-	if ( mapslist[0] || maps_cnt )
-		G_Error( "GetMapList: can't do it twice" );
+	if (mapslist[0] || maps_cnt)
+	{
+		G_Error("GetMapList: can't do it twice");
+	}
 
-	if ( !FTE_sv )
+	if (!FTE_sv)
+	{
 		AddFixedMaps(); // add maps like dm3 dm2 e1m2 etc from paks, FTE doesn't need it.
+	}
 
 	// this is reg exp search, so we escape . with \. in extension, however \ must be escaped in C string too so its \\.
-	cnt = trap_FS_GetFileList( "maps", ( FTE_sv ? ".bsp" : "\\.bsp$" ), ml_buf, sizeof(ml_buf), 0 );
+	cnt = trap_FS_GetFileList("maps", (FTE_sv ? ".bsp" : "\\.bsp$"), ml_buf, sizeof(ml_buf), 0);
 
 	cnt = bound(0, cnt, MAX_MAPS);
 
-	ml_buf[sizeof(ml_buf)-1] = 0; // well, this is optional, just sanity
+	ml_buf[sizeof(ml_buf) - 1] = 0; // well, this is optional, just sanity
 
-	for ( i = 0, s = ml_buf; i < cnt && s < ml_buf + sizeof(ml_buf); i++ )
+	for (i = 0, s = ml_buf; i < cnt && s < ml_buf + sizeof(ml_buf); i++)
 	{
-		l = strlen( s );
+		l = strlen(s);
 
-		if ( FTE_sv )
+		if (FTE_sv)
+		{
 			l -= 4; // skip extension
+		}
 
-		if ( l <= 0 )
+		if (l <= 0)
+		{
 			break;
+		}
 
 		l++; // + nul
 
 		// because of FTE we can't use 's' as is, we need skip extension with this weird strlcpy()
-		strlcpy( name, s, min( sizeof(name), l ) );	// copy
-		Map_AddMapToList( name );
+		strlcpy(name, s, min(sizeof(name), l));	// copy
+		Map_AddMapToList(name);
 
 		// find next map name
 		s = strchr(s, 0);
-		if ( !s )
-			G_Error( "GetMapList: strchr returns NULL" );
+		if (!s)
+		{
+			G_Error("GetMapList: strchr returns NULL");
+		}
 
 		s++;
 	}
@@ -235,10 +232,12 @@ void GetMapList(void)
 	GetCustomEntityMaps();
 
 #if 0 // debug
-	G_cprint( "Maps list\n" );
+	G_cprint("Maps list\n");
 
-	for ( i = 0; i < maps_cnt; i++ )
+	for (i = 0; i < maps_cnt; i++)
+	{
 		G_cprint( "%4d: %s\n", i, mapslist[i] );
+	}
 #endif
 }
 
@@ -250,49 +249,64 @@ void mapslist_dl()
 	int i, from, to;
 
 	skip_maps = atoi(infokey(self, "nomaps", nomaps, sizeof(nomaps))) > 0;
-	if (skip_maps) {
+	if (skip_maps)
+	{
 		goto skip_map_stuffing;
 	}
 
 	// seems we alredy done that
-	if ( self->k_stuff & STUFF_MAPS )
+	if (self->k_stuff & STUFF_MAPS)
 	{
-		G_sprint( self, 2, "mapslist already stuffed\n" );
+		G_sprint(self, 2, "mapslist already stuffed\n");
+
 		return;
 	}
 
 	// no arguments
-	if ( trap_CmdArgc() == 1 )
+	if (trap_CmdArgc() == 1)
 	{
-		G_sprint( self, 2, "mapslist without arguments\n" );
+		G_sprint(self, 2, "mapslist without arguments\n");
+
 		return;
 	}
 
-	trap_CmdArgv( 1, arg_2, sizeof( arg_2 ) );
+	trap_CmdArgv(1, arg_2, sizeof(arg_2));
 
-	from = bound( 0, atoi( arg_2 ), maps_cnt );
-	if (isSupport_Params(self)) {
+	from = bound(0, atoi(arg_2), maps_cnt);
+	if (isSupport_Params(self))
+	{
 		to = bound(from, from + MAX_STUFFED_QUICKMAPS_PER_FRAME, maps_cnt);
-		for (i = from - 1; i < to; i++) {
-			if (to - i >= 8) {
-				stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "ktx_am8 %s %s %s %s %s %s %s %s\n", mapslist[i], mapslist[i+1], mapslist[i+2], mapslist[i+3], mapslist[i+4], mapslist[i+5], mapslist[i+6], mapslist[i+7]);
+		for (i = from - 1; i < to; i++)
+		{
+			if (to - i >= 8)
+			{
+				stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "ktx_am8 %s %s %s %s %s %s %s %s\n",
+								mapslist[i], mapslist[i + 1], mapslist[i + 2], mapslist[i + 3],
+								mapslist[i + 4], mapslist[i + 5], mapslist[i + 6], mapslist[i + 7]);
 				i += 7;
 			}
-			else if (to - i >= 4) {
-				stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "ktx_am4 %s %s %s %s\n", mapslist[i], mapslist[i + 1], mapslist[i + 2], mapslist[i + 3]);
+			else if (to - i >= 4)
+			{
+				stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "ktx_am4 %s %s %s %s\n", mapslist[i],
+								mapslist[i + 1], mapslist[i + 2], mapslist[i + 3]);
 				i += 3;
 			}
-			else {
-				stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "alias %s \"cmd votemap %s\"\n", mapslist[i], mapslist[i]);
+			else
+			{
+				stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "alias %s \"cmd votemap %s\"\n",
+								mapslist[i], mapslist[i]);
 			}
 		}
 	}
-	else {
+	else
+	{
 		to = bound(from, from + MAX_STUFFED_ALIASES_PER_FRAME, maps_cnt);
 
 		// stuff portion of aliases
-		for (i = from; i < to; i++) {
-			if (i == 0) {
+		for (i = from; i < to; i++)
+		{
+			if (i == 0)
+			{
 				G_sprint(self, 2, "Loading maps list...\n");
 			}
 
@@ -300,10 +314,11 @@ void mapslist_dl()
 		}
 	}
 
-	if ( i < maps_cnt )
+	if (i < maps_cnt)
 	{
 		// request next stuffing
-		stuffcmd_flags( self, STUFFCMD_IGNOREINDEMO, "cmd mapslist_dl %d\n", i );
+		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "cmd mapslist_dl %d\n", i);
+
 		return;
 	}
 
@@ -313,31 +328,42 @@ skip_map_stuffing:
 	self->k_stuff = self->k_stuff | STUFF_MAPS; // add flag
 
 	// request commands
-	if ( !( self->k_stuff & STUFF_COMMANDS ) )
-		StuffModCommands( self );
+	if (!(self->k_stuff & STUFF_COMMANDS))
+	{
+		StuffModCommands(self);
+	}
 }
 
 void StuffMaps(gedict_t *p)
 {
 	p->k_stuff = p->k_stuff & ~STUFF_MAPS; // remove flag
 
-	if (isSupport_Params(p)) {
-		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "alias ktx_am4 \"tempalias %%1 cmd votemap %%1;tempalias %%2 cmd votemap %%2;tempalias %%3 cmd votemap %%3;tempalias %%4 cmd votemap %%4\"\n");
-		stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "alias ktx_am8 \"tempalias %%1 cmd votemap %%1;tempalias %%2 cmd votemap %%2;tempalias %%3 cmd votemap %%3;tempalias %%4 cmd votemap %%4;tempalias %%5 cmd votemap %%5;tempalias %%6 cmd votemap %%6;tempalias %%7 cmd votemap %%7;tempalias %%8 cmd votemap %%8\n");
+	if (isSupport_Params(p))
+	{
+		stuffcmd_flags(
+				p,
+				STUFFCMD_IGNOREINDEMO,
+				"alias ktx_am4 \"tempalias %%1 cmd votemap %%1;tempalias %%2 cmd votemap %%2;tempalias %%3 cmd votemap %%3;tempalias %%4 cmd votemap %%4\"\n");
+		stuffcmd_flags(
+				p,
+				STUFFCMD_IGNOREINDEMO,
+				"alias ktx_am8 \"tempalias %%1 cmd votemap %%1;tempalias %%2 cmd votemap %%2;tempalias %%3 cmd votemap %%3;tempalias %%4 cmd votemap %%4;tempalias %%5 cmd votemap %%5;tempalias %%6 cmd votemap %%6;tempalias %%7 cmd votemap %%7;tempalias %%8 cmd votemap %%8\n");
 	}
 	stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "cmd mapslist_dl %d\n", 0);
 }
 
-char *GetMapName(int imp)
+char* GetMapName(int imp)
 {
 	int i;
 
-	if ( imp > 0 )
+	if (imp > 0)
 	{
 		i = imp - 1;
 
-	 	if ( i >= 0 && i < maps_cnt )
+		if ((i >= 0) && (i < maps_cnt))
+		{
 			return mapslist[i];
+		}
 	}
 
 	return "";
@@ -347,12 +373,14 @@ int GetMapNum(char *map)
 {
 	int i;
 
-	if ( strnull( map ) )
-		return 0;
-
-	for( i = 0; i < maps_cnt; i++ )
+	if (strnull(map))
 	{
-		if ( streq( mapslist[i], map ) )
+		return 0;
+	}
+
+	for (i = 0; i < maps_cnt; i++)
+	{
+		if (streq(mapslist[i], map))
 		{
 			return i + 1;
 		}
@@ -363,184 +391,231 @@ int GetMapNum(char *map)
 
 void DoSelectMap(int iMap)
 {
-	char     *m;
+	char *m;
 	gedict_t *p;
-	int 	 till;
+	int till;
 	qbool isVoted = false;
 
-	if( (till = Q_rint( ( k_matchLess ? 15: 7 ) - g_globalvars.time)) > 0  ) {
-		G_sprint(self, 2, "Wait %d second%s!\n", till, count_s(till) );
+	if ((till = Q_rint((k_matchLess ? 15 : 7) - g_globalvars.time)) > 0)
+	{
+		G_sprint(self, 2, "Wait %d second%s!\n", till, count_s(till));
+
 		return;
 	}
 
-	if ( k_matchLess && !k_bloodfest )
+	if (k_matchLess && !k_bloodfest)
 	{
-		if ( cvar("k_no_vote_map") ) {
+		if (cvar("k_no_vote_map"))
+		{
 			G_sprint(self, 2, "Voting map is %s allowed\n", redtext("not"));
+
 			return;
 		}
 
 		// you can select map in matchLess mode, but not in countdown.
-		if ( match_in_progress != 2 )
+		if (match_in_progress != 2)
 			return;
 	}
-	else if ( match_in_progress )
+	else if (match_in_progress)
+	{
 		return;
+	}
 
-	if ( self->ct == ctSpec && !is_adm(self ) ) // only admined specs can select map
+	if ((self->ct == ctSpec) && !is_adm(self)) // only admined specs can select map
+	{
 		return;
+	}
 
-	if ( strnull( m = GetMapName( iMap ) ) )
+	if (strnull(m = GetMapName(iMap)))
+	{
 		return;
+	}
 
-	if( cvar( "k_lockmap" ) && !is_adm( self ) )
+	if (cvar("k_lockmap") && !is_adm(self))
 	{
 		G_sprint(self, 2, "MAP IS LOCKED!\n"
-						  "You are NOT allowed to change!\n");
+					"You are NOT allowed to change!\n");
+
 		return;
 	}
 
-	if ( self->v.map == iMap ) {
+	if (self->v.map == iMap)
+	{
 		G_sprint(self, 2, "--- your vote is still good ---\n");
+
 		return;
 	}
 
-	for ( p = world; (p = find_plr( p )); )
-		if ( p->v.map == iMap ) {
+	for (p = world; (p = find_plr(p));)
+	{
+		if (p->v.map == iMap)
+		{
 			isVoted = true;
 			break;
 		}
-
-	if( !get_votes( OV_MAP ) ) {
-		G_bprint(2, "%s %s %s\n", self->netname, redtext("suggests map"),m);
 	}
-	else if ( isVoted ) {
+
+	if (!get_votes( OV_MAP))
+	{
+		G_bprint(2, "%s %s %s\n", self->netname, redtext("suggests map"), m);
+	}
+	else if (isVoted)
+	{
 		G_bprint(2, "%s %s %s %s %s\n", self->netname, redtext("agrees"),
-			(CountPlayers() < 3 ? redtext("to") : redtext("on") ), redtext("map"), m);
+					(CountPlayers() < 3 ? redtext("to") : redtext("on")), redtext("map"), m);
 	}
 	else
+	{
 		G_bprint(2, "%s %s %s\n", self->netname, redtext("would rather play on"), m);
+	}
 
 	self->v.map = k_lastvotedmap = iMap;
 
-	vote_check_map ();
+	vote_check_map();
 }
 
 void SelectMap()
 {
-	char	arg_1[1024];
+	char arg_1[1024];
 
-	trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
+	trap_CmdArgv(1, arg_1, sizeof(arg_1));
 
-	DoSelectMap ( atoi( arg_1 ) );
+	DoSelectMap(atoi(arg_1));
 }
 
-qbool VoteMapSpecific(char* mapname)
+qbool VoteMapSpecific(char *mapname)
 {
 	int map_num = GetMapNum(mapname);
 
-	if (map_num == 0) {
+	if (map_num == 0)
+	{
 		G_sprint(self, 2, "Map '%s' not available on this server\n", mapname);
+
 		return false;
 	}
 
 	// Perform vote
 	DoSelectMap(map_num);
+
 	return true;
 }
 
 void VoteMap()
 {
-	char	arg_1[1024];
+	char arg_1[1024];
 
-	if (trap_CmdArgc() < 2) {
+	if (trap_CmdArgc() < 2)
+	{
 		G_sprint(self, 2, "Usage: %s <mapname>\n", redtext("votemap"));
+
 		return;
 	}
 
 	// Convert map to index in list
-	trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
+	trap_CmdArgv(1, arg_1, sizeof(arg_1));
 	VoteMapSpecific(arg_1);
 }
 
 void ShowMaps()
 {
 	int i, cnt;
-	char	arg_1[1024];
+	char arg_1[1024];
 
-	trap_CmdArgv( 1, arg_1, sizeof( arg_1 ) );
+	trap_CmdArgv(1, arg_1, sizeof(arg_1));
 
-	G_sprint( self, 2, "Vote for maps by typing the mapname,\n"
-					   "for example \"%s\" or use \"%s\".\n", redtext("dm6"), redtext("votemap dm6"));
+	G_sprint(self, 2, "Vote for maps by typing the mapname,\n"
+				"for example \"%s\" or use \"%s\".\n",
+				redtext("dm6"), redtext("votemap dm6"));
 
-	for( cnt = i = 0; i < maps_cnt; i++ )
+	for (cnt = i = 0; i < maps_cnt; i++)
 	{
-		if ( arg_1[0] && !strstr(mapslist[i], arg_1) )
+		if (arg_1[0] && !strstr(mapslist[i], arg_1))
+		{
 			continue;
+		}
 
-		if ( !cnt )
-			G_sprint( self, 2, "\n---List of maps\n" );
+		if (!cnt)
+		{
+			G_sprint(self, 2, "\n---List of maps\n");
+		}
 
-		G_sprint( self, 2, ((cnt & 1) ? "%s\n" : "%-17s "), mapslist[i]);
+		G_sprint(self, 2, ((cnt & 1) ? "%s\n" : "%-17s "), mapslist[i]);
 		cnt++;
 	}
-	
-	if ( cnt )
-		G_sprint( self, 2, "%s---End of list (%d/%d maps)\n", (cnt & 1) ? "\n" : "", cnt, maps_cnt);
+
+	if (cnt)
+	{
+		G_sprint(self, 2, "%s---End of list (%d/%d maps)\n", (cnt & 1) ? "\n" : "", cnt, maps_cnt);
+	}
 }
 
 int IsMapInCycle(char *map)
 {
-	char newmap[128] = {0}, mapid[128] = {0};
+	char newmap[128] =
+		{ 0 }, mapid[128] =
+		{ 0 };
 	int i;
 
-	if ( strnull( map ) )
+	if (strnull(map))
+	{
 		return 0;
+	}
 
-	for ( i = 0; i < 1000; i++ ) {
+	for (i = 0; i < 1000; i++)
+	{
 		snprintf(mapid, sizeof(mapid), "k_ml_%d", i);
 		// huge for(), so using trap version instead of lazy but unsafe cvar_string()
-		trap_cvar_string( mapid, newmap, sizeof(newmap) );
+		trap_cvar_string(mapid, newmap, sizeof(newmap));
 
-		if ( strnull( newmap ) ) // end of list
+		if (strnull(newmap)) // end of list
+		{
 			return 0;
+		}
 
-		if ( streq( map, newmap ) ) // ok map found in map list
+		if (streq(map, newmap)) // ok map found in map list
+		{
 			return i + 1; // i may be 0, so returning i + 1
+		}
 	}
 
 	return 0;
 }
 
-char *SelectRandomMap(char *buf, int buf_size)
+char* SelectRandomMap(char *buf, int buf_size)
 {
-	char newmap[128] = {0}, mapid[128] = {0};
+	char newmap[128] =
+		{ 0 }, mapid[128] =
+		{ 0 };
 	int cnt, c;
 
 	buf[0] = 0;
 
 	// find how much maps in pool.
-	for ( cnt = 0; cnt < 1000; cnt++ )
+	for (cnt = 0; cnt < 1000; cnt++)
 	{
-		snprintf( mapid, sizeof(mapid), "k_ml_%d", cnt );
+		snprintf(mapid, sizeof(mapid), "k_ml_%d", cnt);
 		// huge for(), so using trap version instead of lazy but unsafe cvar_string()
-		trap_cvar_string( mapid, newmap, sizeof(newmap) );
+		trap_cvar_string(mapid, newmap, sizeof(newmap));
 
-		if ( strnull( newmap ) ) // end of list
+		if (strnull(newmap)) // end of list
+		{
 			break;
+		}
 	}
 
 	// few attempts, to minimize selecting current map.
-	for ( c = 0; c < 5; c++ )
+	for (c = 0; c < 5; c++)
 	{
-		int id = i_rnd( 0, cnt - 1 ); // generate random id
+		int id = i_rnd(0, cnt - 1); // generate random id
 
 		// get map.
-		snprintf( mapid, sizeof(mapid), "k_ml_%d", id );
-		trap_cvar_string( mapid, newmap, sizeof(newmap) );
+		snprintf(mapid, sizeof(mapid), "k_ml_%d", id);
+		trap_cvar_string(mapid, newmap, sizeof(newmap));
 
-		if ( streq( g_globalvars.mapname, newmap) )
+		if (streq(g_globalvars.mapname, newmap))
+		{
 			continue; // same map, lets try again then.
+		}
 
 		// ok, we found it.
 		strlcpy(buf, newmap, buf_size);
@@ -556,47 +631,64 @@ char *SelectRandomMap(char *buf, int buf_size)
 // set k_ml_2 dm2
 // so this mean we have rotation of maps dm6 dm4 dm2 dm6 dm4 dm2 ...
 
-char *SelectMapInCycle(char *buf, int buf_size)
+char* SelectMapInCycle(char *buf, int buf_size)
 {
-	char newmap[128] = {0}, mapid[128] = {0};
-	int player_count = CountPlayers (), maxp = 0, minp = 0, i;
+	char newmap[128] =
+		{ 0 }, mapid[128] =
+		{ 0 };
+	int player_count = CountPlayers(), maxp = 0, minp = 0, i;
 
 	buf[0] = 0;
 
-	if ( cvar( "k_random_maplist" ) )
+	if (cvar("k_random_maplist"))
 	{
-		if ( *SelectRandomMap( buf, buf_size ) )
+		if (*SelectRandomMap(buf, buf_size))
+		{
 			return buf;
-	}
-
-	if ( !(i = cvar( "_k_last_cycle_map" ) ) ){
-		if ( !(i = IsMapInCycle( g_globalvars.mapname) ) ){ // ok map found in map list, select next map
-			i=0;
 		}
 	}
 
-	while (i < 1000) {
+	if (!(i = cvar("_k_last_cycle_map")))
+	{
+		if (!(i = IsMapInCycle(g_globalvars.mapname)))
+		{ // ok map found in map list, select next map
+			i = 0;
+		}
+	}
+
+	while (i < 1000)
+	{
 		maxp = cvar(va("k_ml_maxp_%d", i >= 1000 ? 0 : i));
 		maxp = maxp == 0 ? MAX_CLIENTS : maxp;
 		minp = cvar(va("k_ml_minp_%d", i >= 1000 ? 0 : i));
 
-		if ( maxp >= player_count && player_count >= minp ) {
-			snprintf( mapid, sizeof(mapid), "k_ml_%d", i >= 1000 ? 0 : i );
-			trap_cvar_string( mapid, newmap, sizeof(newmap) );
+		if ((maxp >= player_count) && (player_count >= minp))
+		{
+			snprintf(mapid, sizeof(mapid), "k_ml_%d", i >= 1000 ? 0 : i);
+			trap_cvar_string(mapid, newmap, sizeof(newmap));
 			break;
-		} else {
-			G_bprint(2, "Player requirements not met for map #%d in the map cycle, continuing to next map. (Minimum: %d, Maximum: %d)\n", (i+1), minp, maxp);
+		}
+		else
+		{
+			G_bprint(
+					2,
+					"Player requirements not met for map #%d in the map cycle, continuing to next map. (Minimum: %d, Maximum: %d)\n",
+					(i + 1), minp, maxp);
 		}
 		i++;
 	}
 
-	if ( strnull( newmap ) ) // last resort, trying get first entry in map list
-		trap_cvar_string( "k_ml_0", newmap, sizeof(newmap) );
+	if (strnull(newmap)) // last resort, trying get first entry in map list
+	{
+		trap_cvar_string("k_ml_0", newmap, sizeof(newmap));
+	}
 
 	strlcpy(buf, newmap, buf_size);
 
-	if ( (i = IsMapInCycle( buf )) )
-		cvar_fset( "_k_last_cycle_map", i );
+	if ((i = IsMapInCycle(buf)))
+	{
+		cvar_fset("_k_last_cycle_map", i);
+	}
 
 	return buf;
 }
