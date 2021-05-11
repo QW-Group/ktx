@@ -167,7 +167,7 @@ float anglemod(float a)
 	}
 #endif
 
-	a = (360.0 / 65536) * ((int) (a * (65536 / 360.0)) & 65535);
+	a = (360.0 / 65536) * ((int)(a * (65536 / 360.0)) & 65535);
 
 	return a;
 }
@@ -613,7 +613,7 @@ fixed16_t Invert24To16(fixed16_t val)
 		return (fixed16_t) 0xFFFFFFFF;
 	}
 
-	return (fixed16_t) (((double) 0x10000 * (double) 0x1000000 / (double) val) + 0.5);
+	return (fixed16_t)(((double) 0x10000 * (double) 0x1000000 / (double) val) + 0.5);
 }
 
 #endif

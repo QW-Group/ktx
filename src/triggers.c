@@ -281,7 +281,7 @@ void counter_use()
 
 	if (self->count != 0)
 	{
-		if (activator->ct == ctPlayer && ((int) (self->s.v.spawnflags) & SPAWNFLAG_NOMESSAGE) == 0)
+		if (activator->ct == ctPlayer && ((int)(self->s.v.spawnflags) & SPAWNFLAG_NOMESSAGE) == 0)
 		{
 			if (self->count >= 4)
 			{

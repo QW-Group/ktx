@@ -428,7 +428,7 @@ void BotEvadeLogic(gedict_t *self)
 				{
 					if (!self->s.v.waterlevel)
 					{
-						self->fb.bot_evade = (qbool) (self->s.v.health > 70)
+						self->fb.bot_evade = (qbool)(self->s.v.health > 70)
 								&& (self->s.v.armorvalue > 100) && !self->fb.enemy_visible;
 					}
 				}

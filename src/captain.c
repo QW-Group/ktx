@@ -299,7 +299,7 @@ void VoteCaptain()
 		}
 
 		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "color %d\n",
-						(int) (streq(getteam(self), "blue") ? 13 : 4));
+						(int)(streq(getteam(self), "blue") ? 13 : 4));
 	}
 
 	// search if a captain already has the same team

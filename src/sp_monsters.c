@@ -234,7 +234,7 @@ void bloodfest_wave_calculate(void)
 					1;
 	factor = bound(1, factor, 999999);
 
-	g_bloodfest.monsters_to_spawn = (int) (factor * k_bloodfest_monsters_spawn_initial);
+	g_bloodfest.monsters_to_spawn = (int)(factor * k_bloodfest_monsters_spawn_initial);
 	// if there is still alive monsters, reduce wave by that count.
 	g_bloodfest.monsters_to_spawn -= monsters_count(true, false);
 
@@ -515,7 +515,7 @@ void bloodfest_dead_jump_button(void)
 {
 	if (!self->s.v.button2)
 	{
-		self->s.v.flags = ((int) (self->s.v.flags)) | FL_JUMPRELEASED;
+		self->s.v.flags = ((int)(self->s.v.flags)) | FL_JUMPRELEASED;
 
 		return;
 	}

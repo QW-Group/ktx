@@ -750,7 +750,7 @@ void DoWeaponChange(int new, qbool backpack)
 
 	if (WeaponCode(new) <= w_switch)
 	{
-		if (((int) (self->s.v.flags)) & FL_INWATER)
+		if (((int)(self->s.v.flags)) & FL_INWATER)
 		{
 			if (new != IT_LIGHTNING)
 			{
@@ -1627,8 +1627,8 @@ void sigil_touch()
 	stuffcmd(other, "bf\n");
 	self->s.v.solid = SOLID_NOT;
 	self->model = "";
-	g_globalvars.serverflags = (int) (g_globalvars.serverflags)
-			| ((int) (self->s.v.spawnflags) & 15);
+	g_globalvars.serverflags = (int)(g_globalvars.serverflags)
+			| ((int)(self->s.v.spawnflags) & 15);
 	self->classname = "";	// so rune doors won't find it
 
 	activator = other;

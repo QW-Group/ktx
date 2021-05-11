@@ -505,7 +505,7 @@ void PrintStats(gedict_t *who)
 		int offset = strlen(buf);
 
 		i = bound(0, -i, (int) sizeof(buf) - offset - 1);
-		memset((void*) (buf + offset), (int) '\n', i);
+		memset((void*)(buf + offset), (int) '\n', i);
 		buf[i + offset] = 0;
 	}
 

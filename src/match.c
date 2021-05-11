@@ -593,7 +593,7 @@ void TimerThink()
 	{
 		for (p = world; (p = find_plr(p));)
 		{
-			idle_time = (int) (g_globalvars.time - p->attack_finished);
+			idle_time = (int)(g_globalvars.time - p->attack_finished);
 			if (idle_time > k_matchLess_idle_time)
 			{
 				G_sprint(
@@ -1020,7 +1020,7 @@ void StartMatch()
 	HideSpawnPoints();
 
 	match_start_time = g_globalvars.time;
-	g_matchstarttime = (int) (g_globalvars.time * 1000);
+	g_matchstarttime = (int)(g_globalvars.time * 1000);
 	match_in_progress = 2;
 
 	// Disable berzerk at start

@@ -407,7 +407,7 @@ void AdminImpBot()
 		return;
 	}
 
-	i1 = (int) (self->k_adminc -= 1);
+	i1 = (int)(self->k_adminc -= 1);
 	coef = self->s.v.impulse;
 
 	while (i1 > 0)

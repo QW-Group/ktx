@@ -318,7 +318,7 @@ void SUB_UseTargets()
 			{
 				if (self->use)
 				{
-					((void (*)()) (self->use))();
+					((void (*)())(self->use))();
 				}
 			}
 

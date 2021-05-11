@@ -557,29 +557,29 @@ static void G_ParseField(const char *key, const char *value, gedict_t *ent)
 			switch (f->type)
 			{
 				case F_LSTRING:
-					*(char**) (b + f->ofs) = G_NewString(value);
+					*(char**)(b + f->ofs) = G_NewString(value);
 					break;
 
 				case F_VECTOR:
 					sscanf(value, "%f %f %f", &vec[0], &vec[1], &vec[2]);
-					((float*) (b + f->ofs))[0] = vec[0];
-					((float*) (b + f->ofs))[1] = vec[1];
-					((float*) (b + f->ofs))[2] = vec[2];
+					((float*)(b + f->ofs))[0] = vec[0];
+					((float*)(b + f->ofs))[1] = vec[1];
+					((float*)(b + f->ofs))[2] = vec[2];
 					break;
 
 				case F_INT:
-					*(int*) (b + f->ofs) = atoi(value);
+					*(int*)(b + f->ofs) = atoi(value);
 					break;
 
 				case F_FLOAT:
-					*(float*) (b + f->ofs) = atof(value);
+					*(float*)(b + f->ofs) = atof(value);
 					break;
 
 				case F_ANGLEHACK:
 					v = atof(value);
-					((float*) (b + f->ofs))[0] = 0;
-					((float*) (b + f->ofs))[1] = v;
-					((float*) (b + f->ofs))[2] = 0;
+					((float*)(b + f->ofs))[0] = 0;
+					((float*)(b + f->ofs))[1] = v;
+					((float*)(b + f->ofs))[2] = 0;
 					break;
 
 				default:

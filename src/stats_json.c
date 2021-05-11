@@ -564,9 +564,9 @@ static void json_player_ctf_stats(fileHandle_t handle, player_stats_t *stats)
 	}
 
 	COMMA_CHECK(handle, any);
-	s2di(handle, INDENT8 "\"runes\": [%d, %d, %d, %d]" JSON_CR, (int) (stats->res_time + 0.5f),
-			(int) (stats->str_time + 0.5f), (int) (stats->hst_time + 0.5f),
-			(int) (stats->rgn_time + 0.5f));
+	s2di(handle, INDENT8 "\"runes\": [%d, %d, %d, %d]" JSON_CR, (int)(stats->res_time + 0.5f),
+			(int)(stats->str_time + 0.5f), (int)(stats->hst_time + 0.5f),
+			(int)(stats->rgn_time + 0.5f));
 	s2di(handle, INDENT6 "}");
 }
 

@@ -14,7 +14,7 @@
 // qvm have some bugs/round problem as i get from SD-Angel, so this trick
 float newceil(float f)
 {
-	return ceil(((int) (f * 1000.0)) / 1000.0);
+	return ceil(((int)(f * 1000.0)) / 1000.0);
 }
 #else
 // native use lib ceil function

@@ -85,9 +85,9 @@ void BotCanRocketJump(gedict_t *self)
 	qbool has_quad = self->super_damage_finished > g_globalvars.time;
 	qbool tp_damage = teamplay != 1 && teamplay != 5;
 	//float health_after = TotalStrengthAfterDamage(self->s.v.health, self->s.v.armorvalue, self->s.v.armortype, tp_damage ? 55 * (has_quad ? 4 : 1) : 0);
-	qbool has_rl = (qbool) (((int) self->s.v.items & IT_ROCKET_LAUNCHER)
+	qbool has_rl = (qbool)(((int) self->s.v.items & IT_ROCKET_LAUNCHER)
 			&& (self->s.v.ammo_rockets >= 1));
-	qbool has_pent = (qbool) ((int) self->s.v.items & IT_INVULNERABILITY);
+	qbool has_pent = (qbool)((int) self->s.v.items & IT_INVULNERABILITY);
 	qbool will_pickup = self->fb.linked_marker && !WaitingToRespawn(self->fb.linked_marker);
 	qbool onground = (int) self->s.v.flags & FL_ONGROUND;
 

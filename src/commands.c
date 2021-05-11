@@ -1060,7 +1060,7 @@ int DoCommand(int icmd)
 
 	if (cmds[icmd].arg)
 	{
-		((void (*)(float)) (cmds[icmd].f))(cmds[icmd].arg);
+		((void (*)(float))(cmds[icmd].f))(cmds[icmd].arg);
 	}
 	else
 	{
@@ -3820,7 +3820,7 @@ ok:
 		int offset = strlen(buf);
 
 		i = bound(0, -i, (int)sizeof(buf) - offset - 1);
-		memset((void*) (buf + offset), (int)'\n', i);
+		memset((void*)(buf + offset), (int)'\n', i);
 		buf[i + offset] = 0;
 	}
 
@@ -6030,7 +6030,7 @@ void motd_show()
 	motd->classname = "motd";
 	motd->s.v.owner = EDICT_TO_PROG(self);
 	// select MOTD for spectator or player
-	motd->think = (func_t) (self->ct == ctSpec ? SMOTDThink : PMOTDThink);
+	motd->think = (func_t)(self->ct == ctSpec ? SMOTDThink : PMOTDThink);
 	motd->s.v.nextthink = g_globalvars.time + 0.1;
 	motd->attack_finished = g_globalvars.time + 10;
 }

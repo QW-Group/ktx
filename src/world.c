@@ -1474,7 +1474,7 @@ void FixRules()
 	// turn CTF off if CTF usermode is not allowed, due to precache_sound or precache_model
 	if (isCTF() && !(k_allowed_free_modes & UM_CTF))
 	{
-		cvar_fset("k_mode", (float) (k_mode = gtTeam));
+		cvar_fset("k_mode", (float)(k_mode = gtTeam));
 	}
 
 	if (coop)
@@ -1518,11 +1518,11 @@ void FixRules()
 		// matchless mode MUST be FFA or CTF
 		if (!isFFA() && !isCTF())
 		{
-			trap_cvar_set_float("k_mode", (float) (k_mode = gtFFA));
+			trap_cvar_set_float("k_mode", (float)(k_mode = gtFFA));
 		}
 		else if (isCTF())
 		{
-			trap_cvar_set_float("k_mode", (float) (k_mode = gtCTF));
+			trap_cvar_set_float("k_mode", (float)(k_mode = gtCTF));
 		}
 
 		// matchless mode should have teamplay set to 0 unless coop or CTF.
@@ -1548,7 +1548,7 @@ void FixRules()
 	// if unknown k_mode - set some appropriate value
 	if (isUnknown())
 	{
-		trap_cvar_set_float("k_mode", (float) (k_mode = (teamplay ? gtTeam : gtDuel)));
+		trap_cvar_set_float("k_mode", (float)(k_mode = (teamplay ? gtTeam : gtDuel)));
 	}
 
 	// teamplay set, but gametype is not team, disable teamplay in this case

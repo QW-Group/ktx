@@ -798,7 +798,7 @@ void fd_secret_use(gedict_t *attacker, float take)
 
 	if (!((int)(self->s.v.spawnflags) & SECRET_NO_SHOOT))
 	{
-		self->th_pain = (th_pain_funcref_t) (0);	//SUB_Null;
+		self->th_pain = (th_pain_funcref_t)(0);	//SUB_Null;
 		self->s.v.takedamage = DAMAGE_NO;
 	}
 
@@ -809,7 +809,7 @@ void fd_secret_use(gedict_t *attacker, float take)
 	sound(self, CHAN_VOICE, self->noise1, 1, ATTN_NORM);
 	self->s.v.nextthink = self->s.v.ltime + 0.1;
 
-	temp = 1 - ((int) (self->s.v.spawnflags) & SECRET_1ST_LEFT);	// 1 or -1
+	temp = 1 - ((int)(self->s.v.spawnflags) & SECRET_1ST_LEFT);	// 1 or -1
 	trap_makevectors(self->mangle);
 
 	if (self->t_width == 0)

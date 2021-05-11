@@ -282,7 +282,7 @@ static void TeamsStats(void)
 				2,
 				" \217 %.1f%%\n",
 				(sumfrags > 0 ?
-						((float) (tmStats[i].frags + tmStats[i].gfrags)) / sumfrags * 100 : 0.0));
+						((float)(tmStats[i].frags + tmStats[i].gfrags)) / sumfrags * 100 : 0.0));
 
 		wasPrint = 1;
 	}
@@ -591,7 +591,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 	dmg_team = p->ps.dmg_team;
 	dmg_self = p->ps.dmg_self;
 	dmg_eweapon = p->ps.dmg_eweapon;
-	dmg_td = p->deaths <= 0 ? 99999 : (int) (p->ps.dmg_t / p->deaths);
+	dmg_td = p->deaths <= 0 ? 99999 : (int)(p->ps.dmg_t / p->deaths);
 	ra = p->ps.itm[itRA].tooks;
 	ya = p->ps.itm[itYA].tooks;
 	ga = p->ps.itm[itGA].tooks;
@@ -801,7 +801,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 		int under = p->ps.lgc_undershaft;
 
 		G_bprint(PRINT_HIGH, "  %s : \20%d\21\n", redtext("LGC Score"),
-					(int) (e_lg * p->s.v.frags));
+					(int)(e_lg * p->s.v.frags));
 		G_bprint(PRINT_HIGH, "  %s : %.1f%% (%d/%d)\n", redtext("Overshaft"), over * 100.0f / a_lg,
 					(int) over, (int) a_lg);
 		G_bprint(PRINT_HIGH, "  %s: %.1f%% (%d/%d)\n", redtext("Undershaft"), under * 100.0f / a_lg,
@@ -823,7 +823,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 	maxspree = max(p->ps.spree_max, maxspree);
 	maxspree_q = max(p->ps.spree_max_q, maxspree_q);
 	maxdmgg = max(p->ps.dmg_g, maxdmgg);
-	maxdmgtd = max((int) (p->ps.dmg_t / p->deaths), maxdmgtd);
+	maxdmgtd = max((int)(p->ps.dmg_t / p->deaths), maxdmgtd);
 	maxrlkills = max(p->ps.wpn[wpRL].ekills, maxrlkills);
 	maxsgeffi = max(e_sg, maxsgeffi);
 }

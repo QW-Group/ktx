@@ -155,10 +155,10 @@ static float goal_armor2(gedict_t *self, gedict_t *other)
 	}
 	else
 	{
-		qbool low_armor = (qbool) (self->fb.total_armor <= 100 && self->s.v.health >= 50);
-		qbool has_rl = (qbool) (((int) self->s.v.items & IT_ROCKET_LAUNCHER)
+		qbool low_armor = (qbool)(self->fb.total_armor <= 100 && self->s.v.health >= 50);
+		qbool has_rl = (qbool)(((int) self->s.v.items & IT_ROCKET_LAUNCHER)
 				&& self->s.v.ammo_rockets);
-		qbool has_quad = (qbool) (self->super_damage_finished <= g_globalvars.time);
+		qbool has_quad = (qbool)(self->super_damage_finished <= g_globalvars.time);
 
 		if (low_armor && has_rl && has_quad)
 		{
@@ -178,10 +178,10 @@ static float goal_armorInv(gedict_t *self, gedict_t *other)
 	}
 	else
 	{
-		qbool has_rl = (qbool) (((int) self->s.v.items & IT_ROCKET_LAUNCHER)
+		qbool has_rl = (qbool)(((int) self->s.v.items & IT_ROCKET_LAUNCHER)
 				&& (self->s.v.ammo_rockets));
-		qbool has_quad = (qbool) (self->super_damage_finished <= g_globalvars.time);
-		qbool ok_health = (qbool) (self->s.v.health >= 50);
+		qbool has_quad = (qbool)(self->super_damage_finished <= g_globalvars.time);
+		qbool ok_health = (qbool)(self->s.v.health >= 50);
 
 		if (has_rl && has_quad && ok_health)
 		{
@@ -364,27 +364,27 @@ static float goal_artifact_super_damage(gedict_t *self, gedict_t *other)
 
 qbool pickup_health0(void)
 {
-	return (qbool) (self->s.v.health < 100);
+	return (qbool)(self->s.v.health < 100);
 }
 
 qbool pickup_health2(void)
 {
-	return (qbool) (self->s.v.health < 250);
+	return (qbool)(self->s.v.health < 250);
 }
 
 qbool pickup_armor1(void)
 {
-	return (qbool) (self->fb.total_armor < 30);
+	return (qbool)(self->fb.total_armor < 30);
 }
 
 qbool pickup_armor2(void)
 {
-	return (qbool) (self->fb.total_armor < 90);
+	return (qbool)(self->fb.total_armor < 90);
 }
 
 qbool pickup_armorInv(void)
 {
-	return (qbool) (self->fb.total_armor < 160);
+	return (qbool)(self->fb.total_armor < 160);
 }
 
 qbool pickup_supershotgun2(void)
@@ -424,22 +424,22 @@ qbool pickup_lightning2(void)
 
 qbool pickup_shells(void)
 {
-	return (qbool) (self->s.v.ammo_shells < 100);
+	return (qbool)(self->s.v.ammo_shells < 100);
 }
 
 qbool pickup_spikes(void)
 {
-	return (qbool) (self->s.v.ammo_nails < 200);
+	return (qbool)(self->s.v.ammo_nails < 200);
 }
 
 qbool pickup_rockets(void)
 {
-	return (qbool) (self->s.v.ammo_rockets < 100);
+	return (qbool)(self->s.v.ammo_rockets < 100);
 }
 
 qbool pickup_cells(void)
 {
-	return (qbool) (self->s.v.ammo_cells < 100);
+	return (qbool)(self->s.v.ammo_cells < 100);
 }
 
 void StartItemFB(gedict_t *ent)

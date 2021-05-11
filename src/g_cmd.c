@@ -790,7 +790,7 @@ void s_m_do(char *str, int m)
 			continue; // spec to player or player to spec, disallowed in match
 		}
 
-		bit = 1 << (int) (p - g_edicts - 1);
+		bit = 1 << (int)(p - g_edicts - 1);
 
 		if (!(m & bit))
 		{
@@ -946,7 +946,7 @@ void multi_do(int from_arg, qbool from_mmode)
 					continue;
 				}
 
-				bit = 1 << (int) (p - g_edicts - 1);
+				bit = 1 << (int)(p - g_edicts - 1);
 				if (mmop == MMOP_M)
 				{
 					if (!(m & bit))

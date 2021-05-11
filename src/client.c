@@ -1200,7 +1200,7 @@ gedict_t* Sub_SelectSpawnPoint(char *spawnname)
 			}
 			else
 			{
-				self->spawn_weights[(int) spot->cnt] += (f / (float) (numspots - 1));
+				self->spawn_weights[(int) spot->cnt] += (f / (float)(numspots - 1));
 			}
 
 			spot = PROG_TO_EDICT(spot->s.v.goalentity);
@@ -2911,7 +2911,7 @@ void Print_Wp_Stats()
 	{
 		int offset = strlen(buf);
 		i = bound(0, i, (int) sizeof(buf) - offset - 1);
-		memset((void*) (buf + offset), (int) ' ', i);
+		memset((void*)(buf + offset), (int) ' ', i);
 		buf[i + offset] = 0;
 	}
 
@@ -3005,7 +3005,7 @@ void Print_Wp_Stats()
 		int offset = strlen(buf);
 
 		i = bound(0, -i, (int) sizeof(buf) - offset - 1);
-		memset((void*) (buf + offset), (int) ' ', i);
+		memset((void*)(buf + offset), (int) ' ', i);
 		buf[i + offset] = 0;
 	}
 
@@ -3014,7 +3014,7 @@ void Print_Wp_Stats()
 		int offset = strlen(buf);
 
 		i = bound(0, -i, (int) sizeof(buf) - offset - 1);
-		memset((void*) (buf + offset), (int) '\n', i);
+		memset((void*)(buf + offset), (int) '\n', i);
 		buf[i + offset] = 0;
 	}
 
@@ -3195,7 +3195,7 @@ void Print_Scores()
 		int offset = strlen(buf);
 
 		i = bound(0, i, (int) sizeof(buf) - offset - 1);
-		memset((void*) (buf + offset), (int) ' ', i);
+		memset((void*)(buf + offset), (int) ' ', i);
 		buf[i + offset] = 0;
 	}
 
@@ -3204,7 +3204,7 @@ void Print_Scores()
 		int offset = strlen(buf);
 
 		i = bound(0, -i, (int) sizeof(buf) - offset - 1);
-		memset((void*) (buf + offset), (int) '\n', i);
+		memset((void*)(buf + offset), (int) '\n', i);
 		buf[i + offset] = 0;
 	}
 
@@ -3533,7 +3533,7 @@ void PlayerPreThink()
 	}
 	else
 	{
-		self->s.v.flags = ((int) (self->s.v.flags)) | FL_JUMPRELEASED;
+		self->s.v.flags = ((int)(self->s.v.flags)) | FL_JUMPRELEASED;
 	}
 
 // teleporters can force a non-moving pause time
@@ -4156,12 +4156,12 @@ void PlayerPostThink()
 			{
 				float velocity_vert_abs = fabs(self->s.v.velocity[2]);
 
-				self->s.v.armorvalue = (int) (velocity < 1000 ? velocity + 1000 : -velocity);
-				self->s.v.frags = (int) (velocity) / 1000;
-				self->s.v.ammo_shells = 100 + (int) (velocity_vert_abs) / 100000000;
-				self->s.v.ammo_nails = 100 + (int) (velocity_vert_abs) % 1000000 / 10000;
-				self->s.v.ammo_rockets = 100 + (int) (velocity_vert_abs) % 10000 / 100;
-				self->s.v.ammo_cells = 100 + (int) (velocity_vert_abs) % 100;
+				self->s.v.armorvalue = (int)(velocity < 1000 ? velocity + 1000 : -velocity);
+				self->s.v.frags = (int)(velocity) / 1000;
+				self->s.v.ammo_shells = 100 + (int)(velocity_vert_abs) / 100000000;
+				self->s.v.ammo_nails = 100 + (int)(velocity_vert_abs) % 1000000 / 10000;
+				self->s.v.ammo_rockets = 100 + (int)(velocity_vert_abs) % 10000 / 100;
+				self->s.v.ammo_cells = 100 + (int)(velocity_vert_abs) % 100;
 			}
 			else
 			{
@@ -4759,7 +4759,7 @@ void ClientObituary(gedict_t *targ, gedict_t *attacker)
 			}
 			else if (dtRL == targ->deathtype)
 			{
-				switch ((int) (g_random() * 2))
+				switch ((int)(g_random() * 2))
 				{
 					case 0:
 						deathstring = " discovers blast radius\n";
@@ -5124,7 +5124,7 @@ void ClientObituary(gedict_t *targ, gedict_t *attacker)
 			}
 			else if (dtLG_DIS == targ->deathtype)
 			{
-				switch ((int) (g_random() * 2))
+				switch ((int)(g_random() * 2))
 				{
 					case 0:
 						deathstring = " drains ";

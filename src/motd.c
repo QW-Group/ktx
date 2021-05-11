@@ -106,12 +106,12 @@ void MOTDThinkX()
 			&& ((int)(owner - world - 1) < MAX_CLIENTS))
 	{
 		WriteByte(MSG_ALL, SVC_UPDATEFRAGS); // update frags
-		WriteByte(MSG_ALL, (int) (owner - world - 1));
+		WriteByte(MSG_ALL, (int)(owner - world - 1));
 		WriteShort(MSG_ALL, owner->s.v.frags);
 	}
 
 	// select MOTD for spectator or player
-	self->think = (func_t) (owner->ct == ctSpec ? SMOTDThink : PMOTDThink);
+	self->think = (func_t)(owner->ct == ctSpec ? SMOTDThink : PMOTDThink);
 	self->s.v.nextthink = g_globalvars.time + 0.3;
 
 	if (owner->k_stuff)

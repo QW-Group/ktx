@@ -5052,7 +5052,7 @@ void race_player_pre_think(void)
 				}
 				else
 				{
-					self->s.v.flags = ((int) (self->s.v.flags)) | FL_JUMPRELEASED;
+					self->s.v.flags = ((int)(self->s.v.flags)) | FL_JUMPRELEASED;
 				}
 			}
 		}

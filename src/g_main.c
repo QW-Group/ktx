@@ -173,15 +173,15 @@ intptr_t vmMain(int command, int arg0, int arg1, int arg2, int arg3, int arg4, i
 			self->k_lastspawn = world; // set safe value
 			self->k_msgcount = g_globalvars.time;
 
-			self->wreg = wregs[(int) (self - world) - 1];
-			self->plrfrms = plrfrms[(int) (self - world) - 1];
+			self->wreg = wregs[(int)(self - world) - 1];
+			self->plrfrms = plrfrms[(int)(self - world) - 1];
 
 			memset(self->wreg, 0, sizeof(wreg_t) * MAX_WREGS);     // clear
 			memset(self->plrfrms, 0, sizeof(plrfrm_t) * MAX_PLRFRMS); // clear
 
-			self->callalias = callalias_buf[(int) (self - world) - 1];
+			self->callalias = callalias_buf[(int)(self - world) - 1];
 			self->callalias[0] = 0;
-			self->f_checkbuf = f_checks[(int) (self - world) - 1];
+			self->f_checkbuf = f_checks[(int)(self - world) - 1];
 			self->f_checkbuf[0] = 0;
 
 			check_ezquake(self);
@@ -535,7 +535,7 @@ void G_EdictTouch()
 		 G_bprint(2, "touch %s <-> %s\n", self->classname,other->classname);
 		 #endif
 		 */
-		((void(*)()) (self->touch))();
+		((void(*)())(self->touch))();
 	}
 	else
 	{
@@ -555,7 +555,7 @@ void G_EdictThink()
 	other = PROG_TO_EDICT(g_globalvars.other);
 	if (self->think)
 	{
-		((void(*)()) (self->think))();
+		((void(*)())(self->think))();
 	}
 	else
 	{
@@ -579,7 +579,7 @@ void G_EdictBlocked()
 
 	if (self->blocked)
 	{
-		((void(*)()) (self->blocked))();
+		((void(*)())(self->blocked))();
 	}
 	else
 	{

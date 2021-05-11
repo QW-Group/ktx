@@ -345,7 +345,7 @@ void Killed(gedict_t *targ, gedict_t *attacker, gedict_t *inflictor)
 
 static float newceil(float f)
 {
-	return ceil(((int) (f * 1000.0)) / 1000.0);
+	return ceil(((int)(f * 1000.0)) / 1000.0);
 }
 
 #else
@@ -858,7 +858,7 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 
 				attacker->ps.dmg_frags += dmg_dealt; // add dealt
 				dmg_frags = attacker->ps.dmg_frags / 100; // 1 frag = 100 damage
-				attacker->s.v.frags = (int) (attacker->s.v.frags + dmg_frags);
+				attacker->s.v.frags = (int)(attacker->s.v.frags + dmg_frags);
 				attacker->ps.dmg_frags -= dmg_frags * 100;
 			}
 		}

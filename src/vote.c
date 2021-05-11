@@ -661,7 +661,7 @@ void vote_check_rpickup(int maxRecursion)
 		for (tn = 1; pl_cnt > 0; pl_cnt--)
 		{
 			frnd = g_random(); // bound is macros - so u _can't_ put g_random inside bound
-			pl_idx = bound(0, (int) (frnd * pl_cnt), pl_cnt - 1); // select random player between 0 and pl_cnt
+			pl_idx = bound(0, (int)(frnd * pl_cnt), pl_cnt - 1); // select random player between 0 and pl_cnt
 
 			for (i = 0, p = world; (p = find_plr(p));)
 			{

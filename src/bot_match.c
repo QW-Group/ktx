@@ -58,11 +58,11 @@ void BotsFireInitialTriggers(gedict_t *player)
 			self = ent;
 			if (ent->s.v.takedamage)
 			{
-				((void (*)()) (ent->th_pain))();
+				((void (*)())(ent->th_pain))();
 			}
 			else if (ent->use)
 			{
-				((void (*)()) (ent->use))();
+				((void (*)())(ent->use))();
 			}
 		}
 	}

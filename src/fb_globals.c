@@ -201,7 +201,7 @@ gedict_t *search_entity = 0;
 
 qbool fb_lg_disabled(void)
 {
-	return (qbool) ((int)cvar("k_disallow_weapons") & IT_LIGHTNING) != 0;
+	return (qbool)((int)cvar("k_disallow_weapons") & IT_LIGHTNING) != 0;
 }
 
 // taken from pr1 implementation

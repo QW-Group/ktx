@@ -64,7 +64,7 @@ int i_rnd(int from, int to)
 		return from;
 	}
 
-	r = (int) (from + (1.0 + to - from) * g_random());
+	r = (int)(from + (1.0 + to - from) * g_random());
 
 	return bound(from, r, to);
 }
@@ -651,7 +651,7 @@ char* dig3(int d)
 
 	{
 		// convert digits
-		unsigned char *i = (unsigned char*) (string[index]);
+		unsigned char *i = (unsigned char*)(string[index]);
 
 		for (; *i; i++)
 		{
@@ -681,7 +681,7 @@ char* dig3s(const char *format, ...)
 // <<<<
 	{
 		// convert digits
-		unsigned char *i = (unsigned char*) (string[index]);
+		unsigned char *i = (unsigned char*)(string[index]);
 
 		for (; *i; i++)
 		{
@@ -1164,7 +1164,7 @@ char* getteam(gedict_t *ed)
 	static char string[MAX_STRINGS][128];
 	static int index = 0;
 	char *team = NULL;
-	int num = (int) (ed - g_edicts);
+	int num = (int)(ed - g_edicts);
 
 	index %= MAX_STRINGS;
 
@@ -1193,7 +1193,7 @@ char* getname(gedict_t *ed)
 	static char string[MAX_STRINGS][1024];
 	static int index = 0;
 	char *name = NULL;
-	int num = (int) (ed - g_edicts);
+	int num = (int)(ed - g_edicts);
 
 	index %= MAX_STRINGS;
 
@@ -2291,7 +2291,7 @@ void ghost2scores(gedict_t *g)
 	WriteByte(to, SVC_UPDATEENTERTIME);				// update time
 	WriteByte(to, cl_slot);  						// client number
 // FIXME: !!! qqshka: - must be WriteFloat but API have not it - so use WriteLong - dunno is this ok
-	WriteLong(to, (int) (g_globalvars.time - g->ghost_dt)); // client enter time - here time since player was dropped
+	WriteLong(to, (int)(g_globalvars.time - g->ghost_dt)); // client enter time - here time since player was dropped
 
 	WriteByte(to, SVC_UPDATEPING);      // update ping
 	WriteByte(to, cl_slot);      		// client number

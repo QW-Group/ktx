@@ -767,7 +767,7 @@ void W_FireShotgun()
 	VectorSubtract(g_globalvars.trace_endpos, tmp, puff_org);
 
 	// fire each bullet
-	for (offset = -(float) (bullets - 1) / 2, b = bullets; b > 0; b--, offset++)
+	for (offset = -(float)(bullets - 1) / 2, b = bullets; b > 0; b--, offset++)
 	{
 		// calculate where trace start
 		VectorMA(src, offset, g_globalvars.v_right, o_src);
