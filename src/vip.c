@@ -18,57 +18,62 @@
  */
 
 // vip.c
-
 // qqshka:
 // put here some vip stuff %)
-
 #include "g_local.h"
 
 // get vip bit flags of client, if any
 
-int VIP(gedict_t* cl)
+int VIP(gedict_t *cl)
 {
 	return 0; //atoi(infokey(cl, "*VIP", vip, sizeof(vip)));
 }
 
 // check if client have ALL bit 'flags'
 
-int VIP_IsFlags(gedict_t* cl, int flags)
+int VIP_IsFlags(gedict_t *cl, int flags)
 {
- 	return ( ( VIP( cl ) & flags ) == flags );
+	return ((VIP(cl) & flags) == flags);
 }
 
-void VIP_ShowRights(gedict_t* cl)
+void VIP_ShowRights(gedict_t *cl)
 {
-	int flags = VIP( cl );
+	int flags = VIP(cl);
 	char *rights = "";
 
-	if ( !flags )
+	if (!flags)
+	{
 		return;
+	}
 
-	if ( flags & VIP_NORMAL ) {
+	if (flags & VIP_NORMAL)
+	{
 		flags &= ~VIP_NORMAL;
 		rights = va("%s normal", rights);
 	}
 
-	if ( flags & VIP_NOTKICKABLE ) {
+	if (flags & VIP_NOTKICKABLE)
+	{
 		flags &= ~VIP_NOTKICKABLE;
 		rights = va("%s not_kick", rights);
 	}
 
-	if ( flags & VIP_ADMIN ) {
+	if (flags & VIP_ADMIN)
+	{
 		flags &= ~VIP_ADMIN;
 		rights = va("%s admin", rights);
 	}
 
-	if ( flags & VIP_RCON ) {
+	if (flags & VIP_RCON)
+	{
 		flags &= ~VIP_RCON;
 		rights = va("%s rcon_adm", rights);
 	}
 
-	if ( strnull( rights ) || flags )
+	if (strnull(rights) || flags)
+	{
 		rights = va("%s UNKNOWN", rights);
+	}
 
 	G_sprint(cl, 2, "You are a VIP with rights:%s\n", rights);
 }
-
