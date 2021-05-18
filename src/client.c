@@ -396,6 +396,7 @@ void SetChangeParms()
 	g_globalvars.parm12 = self->k_coach;
 	g_globalvars.parm13 = self->k_stuff;
 	g_globalvars.parm14 = self->ps.handicap;
+	g_globalvars.parm15 = self->ready;
 }
 
 //
@@ -416,6 +417,7 @@ void SetNewParms()
 	g_globalvars.parm12 = 0;
 	g_globalvars.parm13 = 0;
 	g_globalvars.parm14 = 0;
+	g_globalvars.parm15 = 0;
 }
 
 //
@@ -455,6 +457,7 @@ void SetRespawnParms()
 		g_globalvars.parm12 = 0;
 		g_globalvars.parm13 = 0;
 		g_globalvars.parm14 = 0;
+		g_globalvars.parm15 = 0;
 	}
 }
 
@@ -490,6 +493,11 @@ void DecodeLevelParms()
 	if (g_globalvars.parm14)
 	{
 		self->ps.handicap = g_globalvars.parm14;
+	}
+
+	if (g_globalvars.parm15)
+	{
+		self->ready = g_globalvars.parm15;
 	}
 }
 
