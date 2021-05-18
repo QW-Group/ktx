@@ -38,18 +38,18 @@
 #endif
 
 /**********************************************************************
-  VM Considerations
+ VM Considerations
 
-  The VM can not use the standard system headers because we aren't really
-  using the compiler they were meant for.  We use bg_lib.h which contains
-  prototypes for the functions we define for our own use in bg_lib.c.
+ The VM can not use the standard system headers because we aren't really
+ using the compiler they were meant for.  We use bg_lib.h which contains
+ prototypes for the functions we define for our own use in bg_lib.c.
 
-  When writing mods, please add needed headers HERE, do not start including
-  stuff like <stdio.h> in the various .c files that make up each of the VMs
-  since you will be including system headers files can will have issues.
+ When writing mods, please add needed headers HERE, do not start including
+ stuff like <stdio.h> in the various .c files that make up each of the VMs
+ since you will be including system headers files can will have issues.
 
-  Remember, if you use a C library function that is not defined in bg_lib.c,
-  you will have to add your own version for support in the VM.
+ Remember, if you use a C library function that is not defined in bg_lib.c,
+ you will have to add your own version for support in the VM.
 
  **********************************************************************/
 
@@ -69,34 +69,34 @@
 #include <ctype.h>
 #include <limits.h>
 
-	#if !defined( _WIN32 ) || !defined(_MSC_VER)
-	// so intptr_t is defined for all non MS compilers
-	#include <stdint.h>
-	#endif
+#if !defined( _WIN32 ) || !defined(_MSC_VER)
+// so intptr_t is defined for all non MS compilers
+#include <stdint.h>
+#endif
 
-	#if defined( __linux__ ) || defined( _WIN32 ) /* || defined( __APPLE__ ) require?*/
+#if defined( __linux__ ) || defined( _WIN32 ) /* || defined( __APPLE__ ) require?*/
 
-	// this is trap/syscalls, for popular functions like cos/sin/tan prototypes
-	// most likely alredy declared in above included headers, but not for below functions,
-	// because they are BSD originated, so we need declare it.
+// this is trap/syscalls, for popular functions like cos/sin/tan prototypes
+// most likely alredy declared in above included headers, but not for below functions,
+// because they are BSD originated, so we need declare it.
 
-	size_t strlcpy(char *dst, char *src, size_t siz);
-	size_t strlcat(char *dst, char *src, size_t siz);
+size_t strlcpy(char *dst, char *src, size_t siz);
+size_t strlcat(char *dst, char *src, size_t siz);
 
-	#endif
+#endif
 
-	// native_lib.c
+// native_lib.c
 
-	#if defined( _WIN32 )
+#if defined( _WIN32 )
 
 	int Q_vsnprintf(char *buffer, size_t count, const char *format, va_list argptr);
 	int snprintf(char *buffer, size_t count, char const *format, ...);
 
 	#else
 
-	#define Q_vsnprintf vsnprintf
+#define Q_vsnprintf vsnprintf
 
-	#endif // defined( _WIN32 )
+#endif // defined( _WIN32 )
 
 #endif
 
@@ -104,7 +104,6 @@
 
 #define	MAX_QPATH		64			// max length of a quake game pathname
 #define	MAX_OSPATH		128			// max length of a filesystem pathname
-
 
 #define	MAX_EDICTS		768			// FIXME: ouch! ouch! ouch!
 #define	MAX_LIGHTSTYLES	64
@@ -123,29 +122,30 @@
 
 #define	QDECL
 
-typedef unsigned char 		byte;
-typedef enum {false, true}	qbool;
-
-
+typedef unsigned char byte;
+typedef enum
+{
+	false, true
+} qbool;
 
 #ifndef NULL
 #define NULL ((void *)0)
 #endif
 
-typedef char*	string_t;
+typedef char *string_t;
 typedef intptr_t func_t;
 
-typedef int      stringref_t;
-typedef int      funcref_t;
+typedef int stringref_t;
+typedef int funcref_t;
 
 typedef float vec_t;
 typedef vec_t vec3_t[3];
 typedef vec_t vec5_t[5];
 
 //=============================================
-short   ShortSwap (short l);
-int		LongSwap (int l);
-float	FloatSwap (const float *f);
+short ShortSwap(short l);
+int LongSwap(int l);
+float FloatSwap(const float *f);
 
 //=============================================
 
@@ -153,58 +153,56 @@ float	FloatSwap (const float *f);
 // implemented as a struct for qvm compatibility
 typedef struct
 {
-	byte	b0;
-	byte	b1;
-	byte	b2;
-	byte	b3;
-	byte	b4;
-	byte	b5;
-	byte	b6;
-	byte	b7;
+	byte b0;
+	byte b1;
+	byte b2;
+	byte b3;
+	byte b4;
+	byte b5;
+	byte b6;
+	byte b7;
 } qint64;
-
 
 //=============================================
 /*
-short	BigShort(short l);
-short	LittleShort(short l);
-int		BigLong (int l);
-int		LittleLong (int l);
-qint64  BigLong64 (qint64 l);
-qint64  LittleLong64 (qint64 l);
-float	BigFloat (const float *l);
-float	LittleFloat (const float *l);
+ short	BigShort(short l);
+ short	LittleShort(short l);
+ int		BigLong (int l);
+ int		LittleLong (int l);
+ qint64  BigLong64 (qint64 l);
+ qint64  LittleLong64 (qint64 l);
+ float	BigFloat (const float *l);
+ float	LittleFloat (const float *l);
 
-void	Swap_Init (void);
-*/
+ void	Swap_Init (void);
+ */
 
 //=============================================
-
-int Q_isprint( int c );
-int Q_islower( int c );
-int Q_isupper( int c );
-int Q_isalpha( int c );
+int Q_isprint(int c);
+int Q_islower(int c);
+int Q_isupper(int c);
+int Q_isalpha(int c);
 
 // portable case insensitive compare
-int		Q_stricmp (const char *s1, const char *s2);
-int		Q_strncmp (const char *s1, const char *s2, int n);
-int		Q_stricmpn (const char *s1, const char *s2, int n);
-char	*Q_strlwr( char *s1 );
-char	*Q_strupr( char *s1 );
-char	*Q_strrchr( const char* string, int c );
+int Q_stricmp(const char *s1, const char *s2);
+int Q_strncmp(const char *s1, const char *s2, int n);
+int Q_stricmpn(const char *s1, const char *s2, int n);
+char* Q_strlwr(char *s1);
+char* Q_strupr(char *s1);
+char* Q_strrchr(const char *string, int c);
 
 // buffer size safe library replacements
-void	Q_strncpyz( char *dest, const char *src, int destsize );
-void	Q_strcat( char *dest, int size, const char *src );
+void Q_strncpyz(char *dest, const char *src, int destsize);
+void Q_strcat(char *dest, int size, const char *src);
 
 // strlen that discounts Quake color sequences
-int Q_PrintStrlen( const char *string );
+int Q_PrintStrlen(const char *string);
 // removes color sequences from string
-char *Q_CleanStr( char *string );
-
+char* Q_CleanStr(char *string);
 
 // parameters to the main Error routine
-typedef enum {
+typedef enum
+{
 	ERR_FATAL,					// exit the entire game with a popup window
 	ERR_DROP,					// print to console and disconnect from game
 	ERR_SERVERDISCONNECT,		// don't kill server
@@ -212,7 +210,7 @@ typedef enum {
 	ERR_NEED_CD					// pop up the need-cd dialog
 } errorParm_t;
 // this is only here so the functions in q_shared.c and bg_*.c can link
-void	QDECL Com_Error( int level, const char *error, ... );
-void	QDECL Com_Printf( const char *msg, ... );
+void QDECL Com_Error(int level, const char *error, ...);
+void QDECL Com_Printf(const char *msg, ...);
 
 #endif	// __Q_SHARED_H

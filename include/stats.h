@@ -1,10 +1,10 @@
-
 #ifndef STATS_H
 #define STATS_H
 
 #define MAX_TM_STATS (MAX_CLIENTS)
 
-typedef struct teamStats_s {
+typedef struct teamStats_s
+{
 	char *name; // team name
 	int gfrags; // frags from ghosts
 	int frags, deaths, tkills;
@@ -21,20 +21,21 @@ typedef struct teamStats_s {
 extern teamStats_t tmStats[MAX_TM_STATS];
 extern int tmStats_cnt;
 
-typedef struct stats_format_s {
-	char* name;
-	void(*match_header)(fileHandle_t handle, char* ip, int port);
-	void(*match_footer)(fileHandle_t handle);
+typedef struct stats_format_s
+{
+	char *name;
+	void (*match_header)(fileHandle_t handle, char *ip, int port);
+	void (*match_footer)(fileHandle_t handle);
 
-	void(*teams_header)(fileHandle_t handle);
-	void(*team_detail)(fileHandle_t handle, int num, teamStats_t* stats);
-	void(*teams_footer)(fileHandle_t handle, int teams);
+	void (*teams_header)(fileHandle_t handle);
+	void (*team_detail)(fileHandle_t handle, int num, teamStats_t *stats);
+	void (*teams_footer)(fileHandle_t handle, int teams);
 
-	void(*players_header)(fileHandle_t handle);
-	void(*player_detail)(fileHandle_t handle, int num, gedict_t* plr, const char* team);
-	void(*players_footer)(fileHandle_t handle, int players);
+	void (*players_header)(fileHandle_t handle);
+	void (*player_detail)(fileHandle_t handle, int num, gedict_t *plr, const char *team);
+	void (*players_footer)(fileHandle_t handle, int players);
 
-	void(*race_detail)(fileHandle_t handle);
+	void (*race_detail)(fileHandle_t handle);
 } stats_format_t;
 
 #define FILE_FORMAT_DECL(x) \
@@ -63,7 +64,7 @@ void x##_race_detail(fileHandle_t handle);
 
 void s2di(fileHandle_t file_handle, const char *fmt, ...);
 qbool itPowerup(itemName_t it);
-char *ItName(itemName_t it);
-const char *GetMode(void);
+char* ItName(itemName_t it);
+const char* GetMode(void);
 
 #endif // STATS_H
