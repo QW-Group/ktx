@@ -308,6 +308,9 @@ void BecomeAdmin(gedict_t *p, int adm_flags)
 
 	p->k_admin |= adm_flags;
 
+	// Any previous votes should be invalidated
+	memset(&p->v, 0, sizeof(p->v));
+
 	on_admin(p);
 }
 
