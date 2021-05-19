@@ -57,7 +57,7 @@ Install required packages:
 ```bash
 $ sudo apt-get update
 $ sudo apt-get -y upgrade
-$ sudo apt-get -y install build-essential python-virtualenv python3-dev python3-pip ninja-build cmake gcc-multilib
+$ sudo apt-get -y install build-essential python3-virtualenv python3-dev python3-pip ninja-build cmake gcc-multilib
 ```
 
 Check out the code to the current directory:
