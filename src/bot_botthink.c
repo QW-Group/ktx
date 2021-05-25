@@ -24,7 +24,7 @@ void FrogbotEditorMarkerTouched(gedict_t *marker);
 
 static void SetNextThinkTime(gedict_t *ent)
 {
-	if (!((int) ent->s.v.flags & FL_ONGROUND))
+	if (!((int)ent->s.v.flags & FL_ONGROUND))
 	{
 		ent->fb.frogbot_nextthink += 0.15 + (0.015 * g_random());
 		if (PAST(frogbot_nextthink))
@@ -151,7 +151,7 @@ static void BotOnGroundMovement(gedict_t *self, vec3_t dir_move)
 {
 	float dodge_factor = 0;
 
-	if ((int) self->s.v.flags & FL_ONGROUND)
+	if ((int)self->s.v.flags & FL_ONGROUND)
 	{
 		if (!(self->fb.path_state & NO_DODGE))
 		{
@@ -212,8 +212,8 @@ static void BotMoveTowardsLinkedMarker(gedict_t *self, vec3_t dir_move)
 	vec3_t temp;
 	gedict_t *goalentity_ = &g_edicts[self->s.v.goalentity];
 	gedict_t *linked = self->fb.linked_marker;
-	qbool onGround = ((int) self->s.v.flags & FL_ONGROUND);
-	qbool curlJump = ((int) self->fb.path_state & BOTPATH_CURLJUMP_HINT);
+	qbool onGround = ((int)self->s.v.flags & FL_ONGROUND);
+	qbool curlJump = ((int)self->fb.path_state & BOTPATH_CURLJUMP_HINT);
 
 	VectorAdd(linked->s.v.absmin, linked->s.v.view_ofs, temp);
 	VectorSubtract(temp, self->s.v.origin, temp);
@@ -330,7 +330,7 @@ static void BotTouchMarkerLogic()
 		BotOnGroundMovement(self, dir_move);
 
 		SetDirectionMove(self, dir_move,
-							((int) self->s.v.flags & FL_ONGROUND) ? "OnGround" : "InAir");
+							((int)self->s.v.flags & FL_ONGROUND) ? "OnGround" : "InAir");
 	}
 	else
 	{

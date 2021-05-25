@@ -859,7 +859,7 @@ static void HM_deselect_spawn(gedict_t *spawn)
 	// If showing all spawns, just remove the glow.  otherwise remove the marker.
 	if (cvar("k_spm_show"))
 	{
-		spawn->wizard->s.v.effects = (int) spawn->wizard->s.v.effects & ~effects;
+		spawn->wizard->s.v.effects = (int)spawn->wizard->s.v.effects & ~effects;
 	}
 	else
 	{
@@ -878,7 +878,7 @@ static void HM_select_spawn(gedict_t *spawn, gedict_t *player, int effects)
 {
 	if (spawn->wizard)
 	{
-		spawn->wizard->s.v.effects = (int) spawn->wizard->s.v.effects | effects;
+		spawn->wizard->s.v.effects = (int)spawn->wizard->s.v.effects | effects;
 	}
 	else
 	{

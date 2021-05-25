@@ -76,7 +76,7 @@ static void xml_team_header(fileHandle_t handle, int num, teamStats_t *stats)
 	s2di(handle,
 			INDENT4 "<team name=\"%s\" frags=\"%d\" deaths=\"%d\" tkills=\"%d\" dmg_tkn=\"%d\" dmg_gvn=\"%d\" dmg_tm=\"%d\">\n",
 			xml_string(stats->name), stats->frags + stats->gfrags, stats->deaths, stats->tkills,
-			(int) stats->dmg_t, (int) stats->dmg_g, (int) stats->dmg_team);
+			(int)stats->dmg_t, (int)stats->dmg_g, (int)stats->dmg_team);
 }
 
 static void xml_team_footer(fileHandle_t handle)
@@ -96,7 +96,7 @@ static void xml_item_stats(fileHandle_t handle, int j, itType_t *stats)
 
 	if (itPowerup(j))
 	{
-		snprintf(buf, sizeof(buf), " time=\"%d\"", (int) stats->time);
+		snprintf(buf, sizeof(buf), " time=\"%d\"", (int)stats->time);
 	}
 	else
 	{

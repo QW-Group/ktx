@@ -545,8 +545,8 @@ void FloorDivMod(double numer, double denom, int *quotient, int *rem)
 	{
 
 		x = floor(numer / denom);
-		q = (int) x;
-		r = (int) floor(numer - (x * denom));
+		q = (int)x;
+		r = (int)floor(numer - (x * denom));
 	}
 	else
 	{
@@ -554,12 +554,12 @@ void FloorDivMod(double numer, double denom, int *quotient, int *rem)
 		// perform operations with positive values, and fix mod to make floor-based
 		//
 		x = floor(-numer / denom);
-		q = -(int) x;
-		r = (int) floor(-numer - (x * denom));
+		q = -(int)x;
+		r = (int)floor(-numer - (x * denom));
 		if (r != 0)
 		{
 			q--;
-			r = (int) denom - r;
+			r = (int)denom - r;
 		}
 	}
 

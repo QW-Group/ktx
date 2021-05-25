@@ -385,7 +385,7 @@ void TraceAttack(float damage, vec3_t dir, qbool send_effects)
 				WS_Mark(self, wpSG);
 				self->ps.wpn[wpSG].hits++;
 			}
-			else if ((int) self->s.v.weapon == IT_SUPER_SHOTGUN)
+			else if ((int)self->s.v.weapon == IT_SUPER_SHOTGUN)
 			{
 				WS_Mark(self, wpSSG);
 				self->ps.wpn[wpSSG].hits++;
@@ -2587,7 +2587,7 @@ qbool CycleWeaponReverseCommand()
 	for (i = 0; i < 20; i++) // qqshka, 20 is just from head, but prevent infinite loop
 	{
 		am = 0;
-		switch ((int) self->s.v.weapon)
+		switch ((int)self->s.v.weapon)
 		{
 			case IT_LIGHTNING:
 				self->s.v.weapon = IT_ROCKET_LAUNCHER;

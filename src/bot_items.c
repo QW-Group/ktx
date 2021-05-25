@@ -156,7 +156,7 @@ static float goal_armor2(gedict_t *self, gedict_t *other)
 	else
 	{
 		qbool low_armor = (qbool)(self->fb.total_armor <= 100 && self->s.v.health >= 50);
-		qbool has_rl = (qbool)(((int) self->s.v.items & IT_ROCKET_LAUNCHER)
+		qbool has_rl = (qbool)(((int)self->s.v.items & IT_ROCKET_LAUNCHER)
 				&& self->s.v.ammo_rockets);
 		qbool has_quad = (qbool)(self->super_damage_finished <= g_globalvars.time);
 
@@ -178,7 +178,7 @@ static float goal_armorInv(gedict_t *self, gedict_t *other)
 	}
 	else
 	{
-		qbool has_rl = (qbool)(((int) self->s.v.items & IT_ROCKET_LAUNCHER)
+		qbool has_rl = (qbool)(((int)self->s.v.items & IT_ROCKET_LAUNCHER)
 				&& (self->s.v.ammo_rockets));
 		qbool has_quad = (qbool)(self->super_damage_finished <= g_globalvars.time);
 		qbool ok_health = (qbool)(self->s.v.health >= 50);
@@ -389,7 +389,7 @@ qbool pickup_armorInv(void)
 
 qbool pickup_supershotgun2(void)
 {
-	return (qbool) !((int) self->s.v.items & IT_SUPER_SHOTGUN);
+	return (qbool) !((int)self->s.v.items & IT_SUPER_SHOTGUN);
 }
 
 qbool pickup_true(void)
@@ -575,7 +575,7 @@ static qbool fb_armor_touch(gedict_t *item, gedict_t *player)
 	{
 		qbool have_more_armor = player->fb.total_armor >= item->fb.total_armor;
 		qbool want_armor = player->s.v.goalentity == NUM_FOR_EDICT(item);
-		qbool has_rl = ((int) player->s.v.items & IT_ROCKET_LAUNCHER)
+		qbool has_rl = ((int)player->s.v.items & IT_ROCKET_LAUNCHER)
 				&& player->s.v.ammo_rockets > 0;
 		qbool targetting_player = player->fb.look_object && player->fb.look_object->ct == ctPlayer;
 
@@ -655,7 +655,7 @@ static qbool fb_weapon_touch(gedict_t *item, gedict_t *player)
 static void fb_weapon_taken(gedict_t *item, gedict_t *player)
 {
 	player->fb.weapon_refresh_time = 0;
-	switch ((int) item->tp_flags)
+	switch ((int)item->tp_flags)
 	{
 		case it_rl:
 		case it_lg:

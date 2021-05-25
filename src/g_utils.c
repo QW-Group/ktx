@@ -1174,7 +1174,7 @@ char* getteam(gedict_t *ed)
 	}
 	else if (streq(ed->classname, "ghost"))
 	{
-		team = ezinfokey(world, va("%d", (int) ed->k_teamnum));
+		team = ezinfokey(world, va("%d", (int)ed->k_teamnum));
 	}
 	else
 	{
@@ -1203,7 +1203,7 @@ char* getname(gedict_t *ed)
 	}
 	else if (streq(ed->classname, "ghost"))
 	{
-		name = ezinfokey(world, va("%d", (int) ed->cnt2));
+		name = ezinfokey(world, va("%d", (int)ed->cnt2));
 	}
 	else
 	{
@@ -2003,11 +2003,11 @@ void CalculateBestPlayers()
 		best += (p->super_damage_finished >= g_globalvars.time) ? 9000 : 0; // quad
 		best += (p->invisible_finished >= g_globalvars.time
 				|| p->radsuit_finished >= g_globalvars.time) ? 4000 : 0; // ring or suit
-		best += (((int) p->s.v.items & IT_ROCKET_LAUNCHER) && p->s.v.ammo_rockets > 0) ? 1500 : 0; // rl with ammo
-		best += (((int) p->s.v.items & IT_LIGHTNING) && p->s.v.ammo_cells > 0) ? 500 : 0; // lg with ammo
-		best += (((int) p->s.v.items & IT_GRENADE_LAUNCHER) && p->s.v.ammo_rockets > 0) ? 200 : 0; // gl with ammo
-		best += (((int) p->s.v.items & IT_SUPER_NAILGUN) && p->s.v.ammo_nails > 0) ? 100 : 0; // sng with ammo
-		best += (((int) p->s.v.items & IT_SUPER_SHOTGUN) && p->s.v.ammo_shells > 0) ? 50 : 0; // ssg with ammo
+		best += (((int)p->s.v.items & IT_ROCKET_LAUNCHER) && p->s.v.ammo_rockets > 0) ? 1500 : 0; // rl with ammo
+		best += (((int)p->s.v.items & IT_LIGHTNING) && p->s.v.ammo_cells > 0) ? 500 : 0; // lg with ammo
+		best += (((int)p->s.v.items & IT_GRENADE_LAUNCHER) && p->s.v.ammo_rockets > 0) ? 200 : 0; // gl with ammo
+		best += (((int)p->s.v.items & IT_SUPER_NAILGUN) && p->s.v.ammo_nails > 0) ? 100 : 0; // sng with ammo
+		best += (((int)p->s.v.items & IT_SUPER_SHOTGUN) && p->s.v.ammo_shells > 0) ? 50 : 0; // ssg with ammo
 		best += p->s.v.frags;
 
 		if (!ed_best1)
@@ -2281,8 +2281,8 @@ void ghost2scores(gedict_t *g)
 	WriteString(
 			to,
 			va("\\name\\\x83 %s\\team\\%s\\topcolor\\%d\\bottomcolor\\%d", getname(g), getteam(g),
-				(int) bound(0, ((g->ghost_clr >> 8) & 0xF), 13),
-				(int) bound(0, (g->ghost_clr & 0xF), 13)));
+				(int)bound(0, ((g->ghost_clr >> 8) & 0xF), 13),
+				(int)bound(0, (g->ghost_clr & 0xF), 13)));
 
 	WriteByte(to, SVC_UPDATEFRAGS); // update frags
 	WriteByte(to, cl_slot);
@@ -2585,7 +2585,7 @@ char* params_str(int from, int to)
 
 char* SD_type_str()
 {
-	switch ((int) k_sudden_death)
+	switch ((int)k_sudden_death)
 	{
 		case 0:
 			return "none";

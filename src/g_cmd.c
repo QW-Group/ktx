@@ -440,13 +440,13 @@ qbool ClientSay(qbool isTeamSay)
 			}
 		}
 
-		textuncolored[(int) bound(0, j, sizeof(textuncolored) - 1)] = clr[0];
+		textuncolored[(int)bound(0, j, sizeof(textuncolored) - 1)] = clr[0];
 
 		clr++;
 		j++;
 	}
 
-	textuncolored[(int) bound(0, j, sizeof(textuncolored) - 1)] = 0;
+	textuncolored[(int)bound(0, j, sizeof(textuncolored) - 1)] = 0;
 
 	name = (strnull(self->netname) ? "!noname!" : self->netname);
 

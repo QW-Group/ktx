@@ -533,7 +533,7 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 	// get some data before apply damage in mid air mode
 	if (midair)
 	{
-		inwater = (((int) targ->s.v.flags & FL_INWATER) && targ->s.v.waterlevel > 1);
+		inwater = (((int)targ->s.v.flags & FL_INWATER) && targ->s.v.waterlevel > 1);
 
 		if (streq(inflictor->classname, "rocket"))
 		{
@@ -592,7 +592,7 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 	{
 		save = targ->s.v.armorvalue;
 		targ->s.v.armortype = 0;	// lost all armor
-		targ->s.v.items -= ((int) targ->s.v.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3));
+		targ->s.v.items -= ((int)targ->s.v.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3));
 	}
 
 	dmg_dealt += save;
@@ -609,7 +609,7 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 	{
 		int k_midair_minheight, midair_minheight;
 
-		k_midair_minheight = (int) cvar("k_midair_minheight");
+		k_midair_minheight = (int)cvar("k_midair_minheight");
 
 		if (k_midair_minheight == 1)
 		{
@@ -836,7 +836,7 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 
 		if (k_bloodfest && ((int)targ->s.v.flags & FL_MONSTER))
 		{
-			targ->s.v.flags = (int) targ->s.v.flags & ~FL_ONGROUND;
+			targ->s.v.flags = (int)targ->s.v.flags & ~FL_ONGROUND;
 		}
 
 #ifdef BOT_SUPPORT

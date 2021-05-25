@@ -98,7 +98,7 @@ void FrogbotSetHealthArmour(gedict_t *client)
 		}
 	}
 
-	if ((int) client->ctf_flag & CTF_RUNE_RES)
+	if ((int)client->ctf_flag & CTF_RUNE_RES)
 	{
 		client->fb.total_damage *= (cvar("k_ctf_rune_power_res") / 2) + 1;
 	}
@@ -106,7 +106,7 @@ void FrogbotSetHealthArmour(gedict_t *client)
 
 void FrogbotSetFirepower(gedict_t *self)
 {
-	int items_ = (int) self->s.v.items;
+	int items_ = (int)self->s.v.items;
 	float firepower_ = 100.0f;
 	int attackbonus = 0;
 

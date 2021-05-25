@@ -14,7 +14,7 @@ extern gedict_t *markers[];
 
 void DM6CampLogic()
 {
-	qbool has_weapon = (int) self->s.v.items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING);
+	qbool has_weapon = (int)self->s.v.items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING);
 
 	// Camp the red armor...
 	if (NumberOfClients() > 1)
@@ -55,7 +55,7 @@ void DM6SelectWeaponToOpenDoor(gedict_t *self)
 {
 	if (dm6_door && (self->fb.path_state & DM6_DOOR))
 	{
-		int items_ = (int) self->s.v.items;
+		int items_ = (int)self->s.v.items;
 		int desired_weapon = 0;
 
 		if (self->s.v.ammo_shells)

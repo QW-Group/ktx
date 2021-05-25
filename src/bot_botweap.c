@@ -158,8 +158,8 @@ static void SetFireButtonBasedOnAngles(gedict_t *self, float rel_dist)
 // FIXME: take strength of player & enemy into account, player might survive quad splashdamage, to enemy weapon
 static void AvoidQuadBore(gedict_t *self)
 {
-	qbool has_quad = (int) self->s.v.items & IT_QUAD;
-	qbool has_pent = (int) self->s.v.items & IT_INVULNERABILITY;
+	qbool has_quad = (int)self->s.v.items & IT_QUAD;
+	qbool has_pent = (int)self->s.v.items & IT_INVULNERABILITY;
 	qbool could_explode = self->fb.desired_weapon_impulse == 7
 			|| self->fb.desired_weapon_impulse == 6;
 	qbool could_hurt_self = could_explode && !has_pent && teamplay != 1 && teamplay != 5;
@@ -172,7 +172,7 @@ static void AvoidQuadBore(gedict_t *self)
 	if ((self->fb.look_object == &g_edicts[self->s.v.enemy]) && (self->fb.enemy_dist <= 250))
 	{
 		// Enemy is too close for explosion, fire something else instead.
-		int items_ = (int) self->s.v.items;
+		int items_ = (int)self->s.v.items;
 		int desired_weapon = IT_AXE;
 
 		if ((items_ & IT_LIGHTNING) && (self->s.v.ammo_cells))
@@ -239,7 +239,7 @@ static qbool CouldHurtTeammate(gedict_t *me)
 // FIXME: Interesting... if a marker is the look object then it wouldn't explode on that?
 static void SpamRocketShot(gedict_t *self)
 {
-	qbool has_rl = ((int) self->s.v.items & IT_ROCKET_LAUNCHER) && self->s.v.ammo_rockets > 3;
+	qbool has_rl = ((int)self->s.v.items & IT_ROCKET_LAUNCHER) && self->s.v.ammo_rockets > 3;
 	qbool safe_to_fire = self->fb.allowedMakeNoise && !CouldHurtTeammate(self);
 
 	if (self->fb.rocketJumping)
@@ -255,7 +255,7 @@ static void SpamRocketShot(gedict_t *self)
 	if (self->fb.look_object)
 	{
 		// dist_sfl = threshold distance before attempting shot for luck
-		float dist_sfl = cvar("k_midair") ? 0 : ((int) self->s.v.items & IT_QUAD) ? 300.0f : 250.0f;
+		float dist_sfl = cvar("k_midair") ? 0 : ((int)self->s.v.items & IT_QUAD) ? 300.0f : 250.0f;
 		vec3_t testplace;
 		vec3_t rel_pos;
 		float rel_dist;
@@ -669,7 +669,7 @@ static qbool BotShouldDischarge(void)
 		return false;
 	}
 
-	if (!((int) self->s.v.items & IT_LIGHTNING))
+	if (!((int)self->s.v.items & IT_LIGHTNING))
 	{
 		return false;
 	}
@@ -697,13 +697,13 @@ static qbool BotShouldDischarge(void)
 		}
 	}
 
-	if (((int) self->s.v.items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING))
+	if (((int)self->s.v.items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING))
 			&& (self->s.v.ammo_rockets > 25) && (self->s.v.ammo_cells > 25))
 	{
 		return false;
 	}
 
-	if (((int) self->s.v.items & IT_NAILGUN_ROCKET) && (self->s.v.ammo_rockets > 25)
+	if (((int)self->s.v.items & IT_NAILGUN_ROCKET) && (self->s.v.ammo_rockets > 25)
 			&& (self->s.v.ammo_nails > 25))
 	{
 		return false;
@@ -916,7 +916,7 @@ void SelectWeapon(void)
 
 	if (self->fb.state & HURT_SELF)
 	{
-		qbool has_rl = self->s.v.ammo_rockets && ((int) self->s.v.items & IT_ROCKET_LAUNCHER);
+		qbool has_rl = self->s.v.ammo_rockets && ((int)self->s.v.items & IT_ROCKET_LAUNCHER);
 
 		if (has_rl && (self->s.v.health >= 60) && (self->super_damage_finished <= g_globalvars.time))
 		{

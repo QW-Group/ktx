@@ -400,7 +400,7 @@ void setnowep(gedict_t *anent)
 	self = anent;
 
 	// drop down to best weapon actually hold
-	if (!((int) self->s.v.weapon & (int) self->s.v.items))
+	if (!((int)self->s.v.weapon & (int)self->s.v.items))
 	{
 		self->s.v.weapon = W_BestWeapon();
 	}
@@ -423,7 +423,7 @@ void setfullwep(gedict_t *anent)
 	anent->s.v.items = IT_AXE | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_NAILGUN | IT_SUPER_NAILGUN |
 						IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER | IT_LIGHTNING;
 	// armor
-	anent->s.v.items = (int) anent->s.v.items | IT_ARMOR3;
+	anent->s.v.items = (int)anent->s.v.items | IT_ARMOR3;
 	anent->s.v.armorvalue = 200;
 	anent->s.v.armortype = 0.8;
 	// health
@@ -448,7 +448,7 @@ void setfullwep(gedict_t *anent)
 	self = anent;
 
 	// drop down to best weapon actually hold
-	if (!((int) self->s.v.weapon & (int) self->s.v.items))
+	if (!((int)self->s.v.weapon & (int)self->s.v.items))
 	{
 		self->s.v.weapon = W_BestWeapon();
 	}
@@ -490,22 +490,22 @@ void PrintStats(gedict_t *who)
 	if ((i = iKey(who, "lra")) > 0)
 	{
 		i = bound(0, i, sizeof(buf) - 1);
-		memset((void*) buf, (int) '\n', i);
+		memset((void*) buf, (int)'\n', i);
 		buf[i] = 0;
 	}
 
 	strlcat(buf,
 			va("%s%.10s %3d:%3d       %.10s %3d:%3d           ", buf, getname(winner),
-				(int) winner->s.v.armorvalue, (int) winner->s.v.health, getname(loser),
-				(int) loser->s.v.armorvalue, (int) loser->s.v.health),
+				(int)winner->s.v.armorvalue, (int)winner->s.v.health, getname(loser),
+				(int)loser->s.v.armorvalue, (int)loser->s.v.health),
 			sizeof(buf));
 
 	if ((i = iKey(who, "lra")) < 0)
 	{
 		int offset = strlen(buf);
 
-		i = bound(0, -i, (int) sizeof(buf) - offset - 1);
-		memset((void*)(buf + offset), (int) '\n', i);
+		i = bound(0, -i, (int)sizeof(buf) - offset - 1);
+		memset((void*)(buf + offset), (int)'\n', i);
 		buf[i + offset] = 0;
 	}
 
@@ -751,7 +751,7 @@ void ra_PlayerStats()
 			G_sprint(self, 2, " "); // dynamically pad name
 		}
 
-		G_sprint(self, 2, " %5d", (int) p->s.v.frags); // Frags
+		G_sprint(self, 2, " %5d", (int)p->s.v.frags); // Frags
 		G_sprint(self, 2, " %4d", p->ps.wins);        // Wins
 		G_sprint(self, 2, " %5d", p->ps.loses);       // Loses
 

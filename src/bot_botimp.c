@@ -282,8 +282,8 @@ void SetAttribs(gedict_t *self, qbool customised)
 
 	// Movement
 	self->fb.skill.movement = bound(0, cvar(FB_CVAR_MOVEMENT_SKILL), 1.0f);
-	self->fb.skill.wiggle_run_dmm4 = bound(0, (int) cvar(FB_CVAR_MOVEMENT_DMM4WIGGLE), 1.0f);
-	self->fb.skill.wiggle_run_limit = bound(0, (int) cvar(FB_CVAR_MOVEMENT_WIGGLEFRAMES), 45.0f);
+	self->fb.skill.wiggle_run_dmm4 = bound(0, (int)cvar(FB_CVAR_MOVEMENT_DMM4WIGGLE), 1.0f);
+	self->fb.skill.wiggle_run_limit = bound(0, (int)cvar(FB_CVAR_MOVEMENT_WIGGLEFRAMES), 45.0f);
 	self->fb.skill.wiggle_toggle = bound(0, cvar(FB_CVAR_MOVEMENT_DMM4WIGGLETOGGLE), 1.0f);
 	self->fb.skill.combat_jump_chance = bound(0, cvar(FB_CVAR_COMBATJUMP_CHANCE), 1.0f);
 	self->fb.skill.missile_dodge_time = bound(0, cvar(FB_CVAR_MISSILEDODGE_TIME), 1.5f);
@@ -301,7 +301,7 @@ char* BotNameEnemy(int botNumber)
 
 	if (strnull(custom_name))
 	{
-		return names[(int) bound(0, botNumber, sizeof(names) / sizeof(names[0]) - 1)];
+		return names[(int)bound(0, botNumber, sizeof(names) / sizeof(names[0]) - 1)];
 	}
 
 	return custom_name;
@@ -317,7 +317,7 @@ char* BotNameFriendly(int botNumber)
 
 	if (strnull(custom_name))
 	{
-		return names[(int) bound(0, botNumber, sizeof(names) / sizeof(names[0]) - 1)];
+		return names[(int)bound(0, botNumber, sizeof(names) / sizeof(names[0]) - 1)];
 	}
 
 	return custom_name;
@@ -333,7 +333,7 @@ char* BotNameGeneric(int botNumber)
 
 	if (strnull(custom_name))
 	{
-		return names[(int) bound(0, botNumber, sizeof(names) / sizeof(names[0]) - 1)];
+		return names[(int)bound(0, botNumber, sizeof(names) / sizeof(names[0]) - 1)];
 	}
 
 	return custom_name;

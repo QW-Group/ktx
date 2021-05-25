@@ -46,8 +46,8 @@ void SetPlayerParams(gedict_t *p, gedict_t *cap)
 {
 	char *infoteam, *infocolor;
 
-	infoteam = cvar_string(va("_k_captteam%d", (int) k_captainturn));
-	infocolor = cvar_string(va("_k_captcolor%d", (int) k_captainturn));
+	infoteam = cvar_string(va("_k_captteam%d", (int)k_captainturn));
+	infocolor = cvar_string(va("_k_captcolor%d", (int)k_captainturn));
 	if (turn_number != 1) // captains turn rules: c1 c2 c2 c1 c2 c1 c2 etc... i.e. second captain pick twice at beginning
 	{
 		k_captainturn = (k_captainturn == 1 ? 2 : 1);

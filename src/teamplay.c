@@ -603,7 +603,7 @@ static char* TeamplayNeedText(unsigned long needFlags)
 static unsigned long TeamplayNeedFlags(gedict_t *client)
 {
 	unsigned long needflags = 0;
-	int items = (int) client->s.v.items;
+	int items = (int)client->s.v.items;
 	const char *need_weapons = ezinfokey(self, "tp_need_weapon");
 
 	if (strnull(need_weapons))
@@ -787,17 +787,17 @@ static char* ColoredArmor(gedict_t *client)
 {
 	if (HAVE_GA(client))
 	{
-		return va("{&c0b0%d&cfff}", (int) client->s.v.armorvalue);
+		return va("{&c0b0%d&cfff}", (int)client->s.v.armorvalue);
 	}
 
 	if (HAVE_GA(client))
 	{
-		return va("{&c0b0%d&cfff}", (int) client->s.v.armorvalue);
+		return va("{&c0b0%d&cfff}", (int)client->s.v.armorvalue);
 	}
 
 	if (HAVE_GA(client))
 	{
-		return va("{&c0b0%d&cfff}", (int) client->s.v.armorvalue);
+		return va("{&c0b0%d&cfff}", (int)client->s.v.armorvalue);
 	}
 
 	return "0";
@@ -998,12 +998,12 @@ static void TeamplayKillMe(gedict_t *client)
 	if ((int)client->s.v.weapon & IT_ROCKET_LAUNCHER)
 	{
 		strlcat(buffer, TP_NAME_RL, sizeof(buffer));
-		strlcat(buffer, va(":%d ", (int) client->s.v.ammo_rockets), sizeof(buffer));
+		strlcat(buffer, va(":%d ", (int)client->s.v.ammo_rockets), sizeof(buffer));
 	}
 	else if ((int)client->s.v.weapon & IT_LIGHTNING)
 	{
 		strlcat(buffer, TP_NAME_LG, sizeof(buffer));
-		strlcat(buffer, va(":%d ", (int) client->s.v.ammo_cells), sizeof(buffer));
+		strlcat(buffer, va(":%d ", (int)client->s.v.ammo_cells), sizeof(buffer));
 	}
 
 	if (!HAVE_RL(client) && client->s.v.ammo_rockets > 0)
@@ -1270,14 +1270,14 @@ static void TeamplaySetEnemyFlags(gedict_t *client)
 			continue;
 		}
 
-		enemy_items |= ((int) plr->s.v.items & (IT_INVISIBILITY));
+		enemy_items |= ((int)plr->s.v.items & (IT_INVISIBILITY));
 		if (SameTeam(plr, client))
 		{
 			++friend_count;
 		}
 		else
 		{
-			enemy_items |= ((int) plr->s.v.items & (IT_QUAD | IT_INVULNERABILITY));
+			enemy_items |= ((int)plr->s.v.items & (IT_QUAD | IT_INVULNERABILITY));
 			++enemy_count;
 		}
 	}
@@ -1382,7 +1382,7 @@ static void TeamplayPoint(gedict_t *client)
 		return;
 	}
 
-	point_items = (int) point->s.v.items;
+	point_items = (int)point->s.v.items;
 	if ((match_in_progress == 2) && (point_items & (IT_INVISIBILITY | IT_QUAD | IT_INVULNERABILITY)))
 	{
 		TeamplayEnemyPowerup(client);
@@ -1471,8 +1471,8 @@ TEAMPLAY_BASIC(TeamplayComing, "coming")
 void TeamplayDeathEvent(gedict_t *client)
 {
 	VectorCopy(client->s.v.origin, client->tp.death_location);
-	client->tp.death_items = (int) client->s.v.items;
-	client->tp.death_weapon = (int) client->s.v.weapon;
+	client->tp.death_items = (int)client->s.v.items;
+	client->tp.death_weapon = (int)client->s.v.weapon;
 	client->tp.death_time = g_globalvars.time;
 }
 
@@ -1590,7 +1590,7 @@ void LocationInitialise(void)
 		}
 
 		// Replace tokens (don't allow customisation)
-		for (i = 0; i < (int) strlen(name); ++i)
+		for (i = 0; i < (int)strlen(name); ++i)
 		{
 			if (!strncmp(name + i, "$loc_name_", 10))
 			{

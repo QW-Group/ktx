@@ -32,7 +32,7 @@ void TeamplayReportVisiblePowerups(gedict_t *player)
 	for (opponent = world; (opponent = find_plr(opponent));)
 	{
 		qbool diff_team = opponent->k_teamnum != player->k_teamnum;
-		qbool powerups = (int) opponent->s.v.items & (IT_QUAD | IT_INVULNERABILITY);
+		qbool powerups = (int)opponent->s.v.items & (IT_QUAD | IT_INVULNERABILITY);
 		qbool visible = (opponent->visclients & clientFlag);
 
 		if (diff_team && powerups && visible && (opponent->fb.last_mm2_spot < g_globalvars.time))
@@ -310,8 +310,8 @@ static void BotPeriodicMessages(gedict_t *self)
 {
 	if (PAST(last_mm2_status))
 	{
-		qbool has_rl = ((int) self->s.v.items & IT_ROCKET_LAUNCHER) && self->s.v.ammo_rockets >= 3;
-		qbool has_lg = ((int) self->s.v.items & IT_LIGHTNING) && self->s.v.ammo_cells >= 6;
+		qbool has_rl = ((int)self->s.v.items & IT_ROCKET_LAUNCHER) && self->s.v.ammo_rockets >= 3;
+		qbool has_lg = ((int)self->s.v.items & IT_LIGHTNING) && self->s.v.ammo_cells >= 6;
 		qbool is_strong = (has_rl || has_lg) && self->fb.total_damage >= 120;
 
 		if (is_strong && (self->tp.enemy_count == 0))

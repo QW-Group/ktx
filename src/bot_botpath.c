@@ -465,7 +465,7 @@ void ProcessNewLinkedMarker(gedict_t *self)
 	DM6MarkerTouchLogic(self, goalentity_marker);
 
 	self->fb.state &= ~NOTARGET_ENEMY;
-	if (((int) self->s.v.flags & FL_ONGROUND) && self->fb.wasinwater)
+	if (((int)self->s.v.flags & FL_ONGROUND) && self->fb.wasinwater)
 	{
 		self->fb.wasinwater = false;
 		self->fb.path_state &= ~WATERJUMP_;

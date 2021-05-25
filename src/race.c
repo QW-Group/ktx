@@ -1678,7 +1678,7 @@ gedict_t* spawn_race_node(raceRouteNode_t *node)
 	e->race_effects = blink_effects_for_nodeType(node->type);
 	e->touch = (func_t) race_node_touch;
 	e->attack_finished = g_globalvars.time + 1; // + 1 so it not touched immidiatelly, look race_node_touch() for more info
-	e->race_RouteNodeType = (int) node->type; // ah, cast
+	e->race_RouteNodeType = (int)node->type; // ah, cast
 
 	// play spawn sound
 	sound(e, CHAN_AUTO, spawn_sound_for_nodeType(node->type), 1, ATTN_NONE);
@@ -2943,7 +2943,7 @@ void r_changefollowstatus(float t)
 		return;
 	}
 
-	switch ((int) t)
+	switch ((int)t)
 	{
 		case 1: // rfollow
 			set_player_race_follow(self, 1);
@@ -2976,7 +2976,7 @@ void r_changestatus(float t)
 		return;
 	}
 
-	switch ((int) t)
+	switch ((int)t)
 	{
 		case 1: // race_ready
 			if (match_enabled && race.status)
@@ -4795,7 +4795,7 @@ static void race_update_pacemaker(void)
 		int guide_start = 0;
 		int guide_end = 0;
 
-		int resolution = (int) bound(RACE_PACEMAKER_RESOLUTION_MIN,
+		int resolution = (int)bound(RACE_PACEMAKER_RESOLUTION_MIN,
 										cvar(RACE_PACEMAKER_RESOLUTION_CVAR),
 										RACE_PACEMAKER_RESOLUTION_MAX);
 		if (resolution)
@@ -5045,7 +5045,7 @@ void race_player_pre_think(void)
 				{
 					if (((int)(self->s.v.flags)) & FL_JUMPRELEASED)
 					{
-						self->s.v.flags = (int) self->s.v.flags & ~FL_JUMPRELEASED;
+						self->s.v.flags = (int)self->s.v.flags & ~FL_JUMPRELEASED;
 
 						race_advance_chasecam_for_plr(self);
 					}
@@ -5112,7 +5112,7 @@ static race_score_system_t scoring_systems[] =
 
 void race_scoring_system_toggle(void)
 {
-	int current = bound(0, (int) cvar(RACE_SCORINGSYSTEM_CVAR), NUM_SCORING_SYSTEMS - 1);
+	int current = bound(0, (int)cvar(RACE_SCORINGSYSTEM_CVAR), NUM_SCORING_SYSTEMS - 1);
 
 	if (!race_command_checks())
 	{
@@ -5132,7 +5132,7 @@ void race_scoring_system_toggle(void)
 
 int race_award_points(int position, int participants)
 {
-	int current = bound(0, (int) cvar(RACE_SCORINGSYSTEM_CVAR), NUM_SCORING_SYSTEMS - 1);
+	int current = bound(0, (int)cvar(RACE_SCORINGSYSTEM_CVAR), NUM_SCORING_SYSTEMS - 1);
 	race_score_system_t *system = &scoring_systems[current];
 	int points = 0;
 
@@ -5540,7 +5540,7 @@ static void race_match_round_end(void)
 	{
 		// Standard round... in duels and ffa, can finish as soon as leading player has unassailable lead
 		int rounds_remaining = (race.rounds - race.round_number);
-		int system_no = bound(0, (int) cvar(RACE_SCORINGSYSTEM_CVAR), NUM_SCORING_SYSTEMS - 1);
+		int system_no = bound(0, (int)cvar(RACE_SCORINGSYSTEM_CVAR), NUM_SCORING_SYSTEMS - 1);
 
 		race_score_system_t *system = &scoring_systems[system_no];
 		if (system->round_max_diff && ((rounds_remaining * system->round_max_diff) < sc))

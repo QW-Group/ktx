@@ -151,7 +151,7 @@ void* memmove(void *dest, const void *src, size_t count)
 	}
 	else
 	{
-		for (i = 0; i < (int) count; i++)
+		for (i = 0; i < (int)count; i++)
 		{
 			((char*) dest)[i] = ((char*) src)[i];
 		}
@@ -566,7 +566,7 @@ void AddFloat(char **buf_p, float fval, int width, int prec, int flags)
 
 	// write the float number
 	digits = 0;
-	val = (int) fval;
+	val = (int)fval;
 	do
 	{
 		text[digits++] = '0' + val % 10;
@@ -601,9 +601,9 @@ void AddFloat(char **buf_p, float fval, int width, int prec, int flags)
 	digits = 0;
 	while (digits < prec)
 	{
-		fval -= (int) fval;
+		fval -= (int)fval;
 		fval *= 10.0;
-		val = (int) fval;
+		val = (int)fval;
 		text[digits++] = '0' + val % 10;
 	}
 
