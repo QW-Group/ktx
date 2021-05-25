@@ -2767,7 +2767,7 @@ gedict_t* Spawn_OnePoint(gedict_t *spawn_point, vec3_t org, int effects)
 	p->s.v.flags = FL_ITEM;
 	p->s.v.solid = SOLID_NOT;
 	p->s.v.movetype = MOVETYPE_NONE;
-	setmodel(p, cvar("k_spm_custom_model") ? "progs/spawn.mdl" : "progs/w_g_key.mdl");
+	setmodel(p, cvar("k_spm_custom_model") ? "progs/wizard.mdl" : "progs/w_g_key.mdl");
 	p->netname = "Spawn Point";
 	p->classname = "spawnpoint";
 	p->k_lastspawn = spawn_point;
@@ -2779,6 +2779,9 @@ gedict_t* Spawn_OnePoint(gedict_t *spawn_point, vec3_t org, int effects)
 	p->wizard = spawn_point;
 
 	setorigin(p, PASSVEC3(org));
+
+	VectorCopy(spawn_point->s.v.angles, p->s.v.angles);
+	trap_makevectors(p->s.v.angles);
 
 	return p;
 }
