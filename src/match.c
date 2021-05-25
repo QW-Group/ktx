@@ -817,18 +817,6 @@ static void SM_PrepareClients()
 			pl_team = getteam(p);
 			p->k_teamnum = 0;
 
-			// elected admins lose rights when match starts -> they need to be re-elected
-			if (p->k_admin & AF_ADMIN)
-			{
-				p->k_admin = (p->k_admin & ~(AF_ADMIN));
-
-				if (!p->k_admin)
-				{
-					G_bprint(2, "%s is no longer an %s\n", p->netname, redtext("admin"));
-					on_unadmin(p);
-				}
-			}
-
 			if (!strnull(pl_team))
 			{
 				i = 665;
