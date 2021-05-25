@@ -458,24 +458,31 @@ int vote_get_maps()
 
 void vote_check_map()
 {
-	int vt_req = get_votes_req(OV_MAP, true);
+	int vt_req;
+	char *mapname;
+
+	vt_req = get_votes_req(OV_MAP, true);
 	if (maps_voted_idx < 0)
 	{
 		return;
 	}
-	char *mapname = GetMapName(maps_voted[maps_voted_idx].map_id);
+
+	mapname = GetMapName(maps_voted[maps_voted_idx].map_id);
 	if (strnull(mapname))
 	{
 		return;
 	}
+
 	if (!k_matchLess && match_in_progress)
 	{
 		return;
 	}
+
 	if (vt_req)
 	{
 		return;
 	}
+
 	G_bprint(2, "%s votes for mapchange.\n", redtext("Majority"));
 	vote_clear(OV_MAP);
 	changelevel(mapname);
