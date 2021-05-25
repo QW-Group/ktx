@@ -341,7 +341,7 @@ void _wiz_death1(void)
 	self->s.v.velocity[0] = 200 * crandom();
 	self->s.v.velocity[1] = 200 * crandom();
 	self->s.v.velocity[2] = 100 + 100 * g_random();
-	self->s.v.flags = (int) self->s.v.flags & ~FL_ONGROUND;
+	self->s.v.flags = (int)self->s.v.flags & ~FL_ONGROUND;
 
 	sound(self, CHAN_VOICE, "wizard/wdeath.wav", 1, ATTN_NORM);
 }

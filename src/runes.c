@@ -136,7 +136,7 @@ void DropRune()
 	}
 
 	self->ctf_flag -= (self->ctf_flag & (CTF_RUNE_MASK));
-	// self->s.v.items -= ( (int) self->s.v.items & (CTF_RUNE_MASK) );
+	// self->s.v.items -= ( (int)self->s.v.items & (CTF_RUNE_MASK) );
 }
 
 void TossRune()
@@ -171,14 +171,14 @@ void TossRune()
 	}
 
 	self->ctf_flag -= (self->ctf_flag & (CTF_RUNE_MASK));
-	//self->s.v.items -= ( (int) self->s.v.items & (CTF_RUNE_MASK) );
+	//self->s.v.items -= ( (int)self->s.v.items & (CTF_RUNE_MASK) );
 }
 
 void RegenLostRot()
 {
 	other = PROG_TO_EDICT(self->s.v.owner);
 	if ((other->s.v.health < 101) || (other->ctf_flag & CTF_RUNE_RGN)
-			|| ((int) other->s.v.items & IT_SUPERHEALTH))
+			|| ((int)other->s.v.items & IT_SUPERHEALTH))
 	{
 		ent_remove(self);
 
@@ -254,26 +254,26 @@ void RuneTouch()
 
 	if (other->ctf_flag & CTF_RUNE_RES)
 	{
-		// other->s.v.items = (int) other->s.v.items | IT_SIGIL1;
+		// other->s.v.items = (int)other->s.v.items | IT_SIGIL1;
 		G_sprint(other, 2, "You got the %s rune\n", redtext("resistance"));
 	}
 
 	if (other->ctf_flag & CTF_RUNE_STR)
 	{
-		// other->s.v.items = (int) other->s.v.items | IT_SIGIL2;
+		// other->s.v.items = (int)other->s.v.items | IT_SIGIL2;
 		G_sprint(other, 2, "You got the %s rune\n", redtext("strength"));
 	}
 
 	if (other->ctf_flag & CTF_RUNE_HST)
 	{
 		other->maxspeed *= (cvar("k_ctf_rune_power_hst") / 8) + 1;
-		// other->s.v.items = (int) other->s.v.items | CTF_RUNE_HST;
+		// other->s.v.items = (int)other->s.v.items | CTF_RUNE_HST;
 		G_sprint(other, 2, "You got the %s rune\n", redtext("haste"));
 	}
 
 	if (other->ctf_flag & CTF_RUNE_RGN)
 	{
-		// other->s.v.items = (int) other->s.v.items | CTF_RUNE_RGN;
+		// other->s.v.items = (int)other->s.v.items | CTF_RUNE_RGN;
 		G_sprint(other, 2, "You got the %s rune\n", redtext("regeneration"));
 	}
 
@@ -373,7 +373,7 @@ void CheckStuffRune()
 	{
 		if (self->i_agmr)
 		{
-			self->items2 = (int) self->items2 | (CTF_RUNE_RES << 5);
+			self->items2 = (int)self->items2 | (CTF_RUNE_RES << 5);
 
 			return;
 		}

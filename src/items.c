@@ -220,8 +220,8 @@ float T_Heal(gedict_t *e, float healamount, float ignore)
 				"\t\t\t\t<value>%d</value>\n"
 				"\t\t\t</pick_mapitem>\n"
 				"\t\t</event>\n",
-				g_globalvars.time - match_start_time, (int) healamount, cleantext(playername),
-				(int) real_healamount);
+				g_globalvars.time - match_start_time, (int)healamount, cleantext(playername),
+				(int)real_healamount);
 
 	return 1;
 }
@@ -322,7 +322,7 @@ void health_touch()
 			return;
 		}
 
-		switch ((int) self->healamount)
+		switch ((int)self->healamount)
 		{
 			case 15:
 				other->ps.itm[itHEALTH_15].tooks++;
@@ -347,7 +347,7 @@ void health_touch()
 	// Megahealth = rot down the player's super health
 	if (self->healtype == 2)
 	{
-		other->s.v.items = (int) other->s.v.items | IT_SUPERHEALTH;
+		other->s.v.items = (int)other->s.v.items | IT_SUPERHEALTH;
 		if (deathmatch != 4)
 		{
 			self->s.v.nextthink = g_globalvars.time + 5;
@@ -398,7 +398,7 @@ void item_megahealth_rot(void)
 
 // it is possible for a player to die and respawn between rots, so don't
 // just blindly subtract the flag off
-	other->s.v.items -= (int) other->s.v.items & IT_SUPERHEALTH;
+	other->s.v.items -= (int)other->s.v.items & IT_SUPERHEALTH;
 
 	if (deathmatch != 2)	// deathmatch 2 is silly old rules
 	{
@@ -508,7 +508,7 @@ void armor_touch()
 
 	other->s.v.armortype = type;
 	other->s.v.armorvalue = value;
-	other->s.v.items += -((int) other->s.v.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3)) + bit;
+	other->s.v.items += -((int)other->s.v.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3)) + bit;
 
 	self->s.v.solid = SOLID_NOT;
 	self->model = "";
@@ -540,7 +540,7 @@ void armor_touch()
 				"\t\t\t</pick_mapitem>\n"
 				"\t\t</event>\n",
 				g_globalvars.time - match_start_time, self->classname, cleantext(playername),
-				(int) real_value);
+				(int)real_value);
 
 	G_sprint(other, PRINT_LOW, "You got the %s\n", self->netname);
 // armor touch sound
@@ -945,7 +945,7 @@ void weapon_touch()
 				real_ammo);
 
 // change to the weapon
-	other->s.v.items = (int) other->s.v.items | new;
+	other->s.v.items = (int)other->s.v.items | new;
 
 	stemp = self;
 	self = other;
@@ -1461,7 +1461,7 @@ void key_touch()
 
 	sound(other, CHAN_ITEM, self->noise, 1, ATTN_NORM);
 	stuffcmd(other, "bf\n");
-	other->s.v.items = (int) other->s.v.items | (int) self->s.v.items;
+	other->s.v.items = (int)other->s.v.items | (int)self->s.v.items;
 
 	if (!coop)
 	{
@@ -1927,10 +1927,10 @@ void powerup_touch()
 		}
 	}
 
-	if (!Get_Powerups() || (((int) self->s.v.items & IT_INVISIBILITY) && !cvar("k_pow_r"))
-			|| (((int) self->s.v.items & IT_INVULNERABILITY) && !cvar("k_pow_p"))
-			|| (((int) self->s.v.items & IT_SUIT) && !cvar("k_pow_s"))
-			|| (((int) self->s.v.items & IT_QUAD) && !cvar("k_pow_q")))
+	if (!Get_Powerups() || (((int)self->s.v.items & IT_INVISIBILITY) && !cvar("k_pow_r"))
+			|| (((int)self->s.v.items & IT_INVULNERABILITY) && !cvar("k_pow_p"))
+			|| (((int)self->s.v.items & IT_SUIT) && !cvar("k_pow_s"))
+			|| (((int)self->s.v.items & IT_QUAD) && !cvar("k_pow_q")))
 	{
 		return;
 	}
@@ -2019,7 +2019,7 @@ void powerup_touch()
 	stuffcmd(other, "bf\n");
 	self->s.v.solid = SOLID_NOT;
 	setorigin(self, PASSVEC3(self->s.v.origin));
-	other->s.v.items = ((int) other->s.v.items) | ((int) self->s.v.items);
+	other->s.v.items = ((int)other->s.v.items) | ((int)self->s.v.items);
 	self->model = "";
 
 // do the apropriate action
@@ -2111,7 +2111,7 @@ void powerup_touch()
 				other,
 				self->s.v.items,
 				va("%s got a %s with %d seconds left", other->netname, self->netname,
-					(int) seconds_left));
+					(int)seconds_left));
 
 		SUB_RM_01(self); // remove later
 	}
@@ -2155,7 +2155,7 @@ void SP_item_artifact_invulnerability()
 	self->netname = "Pentagram of Protection";
 	self->classname = "item_artifact_invulnerability";
 
-	self->s.v.effects = (int) self->s.v.effects | EF_RED;
+	self->s.v.effects = (int)self->s.v.effects | EF_RED;
 
 	self->s.v.items = IT_INVULNERABILITY;
 	self->tp_flags = it_pent;
@@ -2183,7 +2183,7 @@ void SP_item_artifact_envirosuit()
 	self->netname = "Biosuit";
 	self->classname = "item_artifact_envirosuit";
 
-	self->s.v.effects = (int) self->s.v.effects | EF_GREEN;
+	self->s.v.effects = (int)self->s.v.effects | EF_GREEN;
 
 	self->s.v.items = IT_SUIT;
 	self->tp_flags = it_suit;
@@ -2234,7 +2234,7 @@ void SP_item_artifact_super_damage()
 	self->s.v.items = IT_QUAD;
 	self->tp_flags = it_quad;
 
-	self->s.v.effects = (int) self->s.v.effects | EF_BLUE;
+	self->s.v.effects = (int)self->s.v.effects | EF_BLUE;
 
 	setsize(self, -16, -16, -24, 16, 16, 32);
 
@@ -2346,7 +2346,7 @@ void BackpackTouch()
 			{
 				other->invisible_time = 1;
 				other->invisible_finished = g_globalvars.time + 30;
-				other->s.v.items = (int) other->s.v.items | IT_INVISIBILITY;
+				other->s.v.items = (int)other->s.v.items | IT_INVISIBILITY;
 			}
 			else
 			{
@@ -2354,12 +2354,12 @@ void BackpackTouch()
 				{
 					other->invincible_time = 1;
 					other->invincible_finished = g_globalvars.time + 30;
-					other->s.v.items = (int) other->s.v.items | IT_INVULNERABILITY;
+					other->s.v.items = (int)other->s.v.items | IT_INVULNERABILITY;
 				}
 
 				other->super_time = 1;
 				other->super_damage_finished = g_globalvars.time + 30;
-				other->s.v.items = (int) other->s.v.items | IT_QUAD;
+				other->s.v.items = (int)other->s.v.items | IT_QUAD;
 				other->ps.mid_bonus++;
 			}
 
@@ -2413,7 +2413,7 @@ void BackpackTouch()
 	other->s.v.ammo_rockets = other->s.v.ammo_rockets + self->s.v.ammo_rockets;
 	other->s.v.ammo_cells = other->s.v.ammo_cells + self->s.v.ammo_cells;
 
-	other->s.v.items = (int) other->s.v.items | new;
+	other->s.v.items = (int)other->s.v.items | new;
 
 	bound_other_ammo();
 
@@ -2445,9 +2445,9 @@ void BackpackTouch()
 				"\t\t\t\t<player>%s</player>\n"
 				"\t\t\t</pick_backpack>\n"
 				"\t\t</event>\n",
-				g_globalvars.time - match_start_time, new_wp, (int) self->s.v.ammo_shells,
-				(int) self->s.v.ammo_nails, (int) self->s.v.ammo_rockets,
-				(int) self->s.v.ammo_cells, cleantext(playername));
+				g_globalvars.time - match_start_time, new_wp, (int)self->s.v.ammo_shells,
+				(int)self->s.v.ammo_nails, (int)self->s.v.ammo_rockets,
+				(int)self->s.v.ammo_cells, cleantext(playername));
 
 	if (self->s.v.ammo_shells)
 	{
@@ -2567,8 +2567,8 @@ void DropBackpack()
 	}
 
 	if (!(self->s.v.ammo_shells + self->s.v.ammo_nails + self->s.v.ammo_rockets
-			+ self->s.v.ammo_cells) && !((int) self->s.v.weapon & IT_DROPPABLE_WEAPONS)
-			&& !(f1 == 2 && ((int) self->lastwepfired & IT_DROPPABLE_WEAPONS)))
+			+ self->s.v.ammo_cells) && !((int)self->s.v.weapon & IT_DROPPABLE_WEAPONS)
+			&& !(f1 == 2 && ((int)self->lastwepfired & IT_DROPPABLE_WEAPONS)))
 	{
 		return; // nothing in it
 	}
@@ -2637,7 +2637,7 @@ void DropBackpack()
 	if ((item->s.v.items == IT_ROCKET_LAUNCHER) || (item->s.v.items == IT_LIGHTNING))
 	{
 		stuffcmd_flags(self, STUFFCMD_DEMOONLY, "//ktx drop %d %d %d\n", NUM_FOR_EDICT(item),
-						(int) item->s.v.items, NUM_FOR_EDICT(self));
+						(int)item->s.v.items, NUM_FOR_EDICT(self));
 	}
 
 	if (item->s.v.items == IT_AXE)
@@ -2772,7 +2772,7 @@ gedict_t* Spawn_OnePoint(gedict_t *spawn_point, vec3_t org, int effects)
 	p->classname = "spawnpoint";
 	p->k_lastspawn = spawn_point;
 
-	p->s.v.effects = (int) p->s.v.effects | effects;
+	p->s.v.effects = (int)p->s.v.effects | effects;
 
 	// store references for changing selections in hoonymode
 	spawn_point->wizard = p;

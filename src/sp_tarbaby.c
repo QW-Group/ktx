@@ -295,7 +295,7 @@ void _tbaby_jump5(void)
 	//self->s.v.velocity = v_forward * 600 + '0 0 200';
 	VectorScale(g_globalvars.v_forward, 600, self->s.v.velocity);
 	self->s.v.velocity[2] += 200 + g_random() * 150;
-	self->s.v.flags = (int) self->s.v.flags & ~FL_ONGROUND;
+	self->s.v.flags = (int)self->s.v.flags & ~FL_ONGROUND;
 
 	self->cnt = 0; // this will be used in _tbaby_fly4()
 }

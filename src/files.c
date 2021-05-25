@@ -62,7 +62,7 @@ char* std_fgets(fileHandle_t handle, char *buf, int limit)
 	*string = '\0';
 	//G_bprint( 2, "====> Read string: %s\n", buf );
 
-	return ((c == -1) && (string = buf)) ? NULL : buf;
+	return (((c == -1) && (string = buf)) ? NULL : buf);
 }
 
 void std_fclose(fileHandle_t handle)

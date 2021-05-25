@@ -85,11 +85,11 @@ void BotCanRocketJump(gedict_t *self)
 	qbool has_quad = self->super_damage_finished > g_globalvars.time;
 	qbool tp_damage = teamplay != 1 && teamplay != 5;
 	//float health_after = TotalStrengthAfterDamage(self->s.v.health, self->s.v.armorvalue, self->s.v.armortype, tp_damage ? 55 * (has_quad ? 4 : 1) : 0);
-	qbool has_rl = (qbool)(((int) self->s.v.items & IT_ROCKET_LAUNCHER)
+	qbool has_rl = (qbool)(((int)self->s.v.items & IT_ROCKET_LAUNCHER)
 			&& (self->s.v.ammo_rockets >= 1));
-	qbool has_pent = (qbool)((int) self->s.v.items & IT_INVULNERABILITY);
+	qbool has_pent = (qbool)((int)self->s.v.items & IT_INVULNERABILITY);
 	qbool will_pickup = self->fb.linked_marker && !WaitingToRespawn(self->fb.linked_marker);
-	qbool onground = (int) self->s.v.flags & FL_ONGROUND;
+	qbool onground = (int)self->s.v.flags & FL_ONGROUND;
 
 	if (self->fb.debug_path)
 	{
@@ -304,7 +304,7 @@ static void BotPerformLavaJump(gedict_t *self)
 							/ g_globalvars.frametime;
 
 					self->fb.rocketJumping = true;
-					self->fb.rocketJumpFrameDelay = 12 - (int) frames_to_explosion;
+					self->fb.rocketJumpFrameDelay = 12 - (int)frames_to_explosion;
 					self->fb.lavaJumpState = FB_LAVAJUMP_NOT;
 					self->fb.up_finished = g_globalvars.time + 0.1;
 				}
@@ -391,14 +391,14 @@ void BotPerformRocketJump(gedict_t *self)
 
 static qbool PlayerFiringLG(gedict_t *player)
 {
-	return player && player->s.v.button0 && ((int) player->s.v.weapon & IT_LIGHTNING)
-			&& player->s.v.ammo_cells > 0;
+	return (player && player->s.v.button0 && ((int)player->s.v.weapon & IT_LIGHTNING)
+			&& (player->s.v.ammo_cells > 0));
 }
 
 void CheckCombatJump(gedict_t *self)
 {
 	qbool inWater = self->s.v.waterlevel && self->fb.allowedMakeNoise;
-	qbool onGround = ((int) self->s.v.flags & FL_ONGROUND);
+	qbool onGround = ((int)self->s.v.flags & FL_ONGROUND);
 	qbool lookingAtEnemy = self->fb.look_object
 			&& NUM_FOR_EDICT(self->fb.look_object) == self->s.v.enemy;
 	qbool lookObjectFiringLG = PlayerFiringLG(self->fb.look_object);

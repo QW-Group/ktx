@@ -125,17 +125,17 @@ static int k_say_fp_per_spec = 1, k_say_fp_for_spec = 1, k_say_fp_count_spec = 9
 
 static int get_k_say_fp_per(gedict_t *p)
 {
-	return p->ct == ctPlayer ? k_say_fp_per : k_say_fp_per_spec;
+	return ((p->ct == ctPlayer) ? k_say_fp_per : k_say_fp_per_spec);
 }
 
 static int get_k_say_fp_for(gedict_t *p)
 {
-	return p->ct == ctPlayer ? k_say_fp_for : k_say_fp_for_spec;
+	return ((p->ct == ctPlayer) ? k_say_fp_for : k_say_fp_for_spec);
 }
 
 static int get_k_say_fp_count(gedict_t *p)
 {
-	return p->ct == ctPlayer ? k_say_fp_count : k_say_fp_count_spec;
+	return ((p->ct == ctPlayer) ? k_say_fp_count : k_say_fp_count_spec);
 }
 
 typedef struct say_fp_level_s
@@ -263,15 +263,15 @@ static int HexToInt(char c)
 {
 	if (isdigit(c))
 	{
-		return c - '0';
+		return (c - '0');
 	}
 	else if ((c >= 'a') && (c <= 'f'))
 	{
-		return 10 + c - 'a';
+		return (10 + c - 'a');
 	}
 	else if ((c >= 'A') && (c <= 'F'))
 	{
-		return 10 + c - 'A';
+		return (10 + c - 'A');
 	}
 	else
 	{
@@ -440,13 +440,13 @@ qbool ClientSay(qbool isTeamSay)
 			}
 		}
 
-		textuncolored[(int) bound(0, j, sizeof(textuncolored) - 1)] = clr[0];
+		textuncolored[(int)bound(0, j, sizeof(textuncolored) - 1)] = clr[0];
 
 		clr++;
 		j++;
 	}
 
-	textuncolored[(int) bound(0, j, sizeof(textuncolored) - 1)] = 0;
+	textuncolored[(int)bound(0, j, sizeof(textuncolored) - 1)] = 0;
 
 	name = (strnull(self->netname) ? "!noname!" : self->netname);
 

@@ -62,7 +62,7 @@ short ShortSwap(short l)
 	b1 = l & 255;
 	b2 = (l >> 8) & 255;
 
-	return (b1 << 8) + b2;
+	return ((b1 << 8) + b2);
 }
 
 short ShortNoSwap(short l)
@@ -79,7 +79,7 @@ int LongSwap(int l)
 	b3 = (l >> 16) & 255;
 	b4 = (l >> 24) & 255;
 
-	return ((int) b1 << 24) + ((int) b2 << 16) + ((int) b3 << 8) + b4;
+	return (((int)b1 << 24) + ((int)b2 << 16) + ((int)b3 << 8) + b4);
 }
 
 int LongNoSwap(int l)
@@ -315,7 +315,7 @@ int Q_stricmpn(const char *s1, const char *s2, int n)
 
 			if (c1 != c2)
 			{
-				return c1 < c2 ? -1 : 1;
+				return ((c1 < c2) ? -1 : 1);
 			}
 		}
 	} while (c1);
@@ -339,7 +339,7 @@ int Q_strncmp(const char *s1, const char *s2, int n)
 
 		if (c1 != c2)
 		{
-			return c1 < c2 ? -1 : 1;
+			return ((c1 < c2) ? -1 : 1);
 		}
 	} while (c1);
 
@@ -348,7 +348,7 @@ int Q_strncmp(const char *s1, const char *s2, int n)
 
 int Q_stricmp(const char *s1, const char *s2)
 {
-	return (s1 && s2) ? Q_stricmpn(s1, s2, 99999) : -1;
+	return ((s1 && s2) ? Q_stricmpn(s1, s2, 99999) : -1);
 }
 
 char* Q_strlwr(char *s1)

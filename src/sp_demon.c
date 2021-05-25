@@ -277,7 +277,7 @@ void _demon1_jump4(void)
 	self->s.v.origin[2] += 1; // FIXME: possibile stuck in walls, right?
 	VectorScale(g_globalvars.v_forward, 600, self->s.v.velocity);
 	self->s.v.velocity[2] += 250;
-	self->s.v.flags = (int) self->s.v.flags & ~FL_ONGROUND;
+	self->s.v.flags = (int)self->s.v.flags & ~FL_ONGROUND;
 }
 void _demon1_jump10(void)
 {

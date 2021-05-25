@@ -236,7 +236,7 @@ qbool enemy_shaft_attack(gedict_t *self, gedict_t *enemy)
 
 qbool bots_enabled(void)
 {
-	return cvar(FB_CVAR_ENABLED) == 1;
+	return (cvar(FB_CVAR_ENABLED) == 1);
 }
 
 static qbool HasRLOrLG(gedict_t *self)

@@ -28,8 +28,8 @@ void SUB_regen_powerups();
 
 qbool WaitingToRespawn(gedict_t *ent)
 {
-	return ((ent->s.v.nextthink >= g_globalvars.time && ent->think == (func_t) SUB_regen_powerups)
-			|| (ent->s.v.nextthink >= g_globalvars.time && ent->think == (func_t) SUB_regen))
+	return (((ent->s.v.nextthink >= g_globalvars.time) && (ent->think == (func_t)SUB_regen_powerups))
+			|| ((ent->s.v.nextthink >= g_globalvars.time) && (ent->think == (func_t)SUB_regen)))
 			&& strnull(ent->model);
 }
 

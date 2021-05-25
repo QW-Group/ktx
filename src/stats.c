@@ -237,7 +237,7 @@ static void SummaryTPStats(void)
 
 		// times
 		G_bprint(2, "%s: %s:%d\n", redtext("    Time"), redtext("Quad"),
-					(int) tmStats[i].itm[itQUAD].time);
+					(int)tmStats[i].itm[itQUAD].time);
 	}
 
 	G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
@@ -655,7 +655,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 	//	if ( !tp || cvar( "tp_players_stats" ) ) {
 	// weapons
 	G_bprint(2, "%s:%s%s%s%s%s\n", redtext("Wp"),
-				(a_lg ? va(" %s%.1f%% (%d/%d)", redtext("lg"), e_lg, (int) h_lg, (int) a_lg) : ""),
+				(a_lg ? va(" %s%.1f%% (%d/%d)", redtext("lg"), e_lg, (int)h_lg, (int)a_lg) : ""),
 				(ph_rl ? va(" %s%.1f%%", redtext("rl"), ph_rl) : ""),
 				(ph_gl ? va(" %s%.1f%%", redtext("gl"), ph_gl) : ""),
 				(e_sg ? va(" %s%.1f%%", redtext("sg"), e_sg) : ""),
@@ -757,11 +757,11 @@ void OnePlayerStats(gedict_t *p, int tp)
 	if (isDuel())
 	{
 		//  endgame h & a
-		G_bprint(2, " %s: %s:%d %s:", redtext("EndGame"), redtext("H"), (int) p->s.v.health,
+		G_bprint(2, " %s: %s:%d %s:", redtext("EndGame"), redtext("H"), (int)p->s.v.health,
 					redtext("A"));
 		if ((int)p->s.v.armorvalue)
 		{
-			G_bprint(2, "%s%d\n", armor_type(p->s.v.items), (int) p->s.v.armorvalue);
+			G_bprint(2, "%s%d\n", armor_type(p->s.v.items), (int)p->s.v.armorvalue);
 		}
 		else
 		{
@@ -771,11 +771,11 @@ void OnePlayerStats(gedict_t *p, int tp)
 		// overtime h & a
 		if (k_overtime)
 		{
-			G_bprint(2, " %s: %s:%d %s:", redtext("OverTime"), redtext("H"), (int) p->ps.ot_h,
+			G_bprint(2, " %s: %s:%d %s:", redtext("OverTime"), redtext("H"), (int)p->ps.ot_h,
 						redtext("A"));
 			if ((int)p->ps.ot_a)
 			{
-				G_bprint(2, "%s%d\n", armor_type(p->ps.ot_items), (int) p->ps.ot_a);
+				G_bprint(2, "%s%d\n", armor_type(p->ps.ot_items), (int)p->ps.ot_a);
 			}
 			else
 			{
@@ -803,9 +803,9 @@ void OnePlayerStats(gedict_t *p, int tp)
 		G_bprint(PRINT_HIGH, "  %s : \20%d\21\n", redtext("LGC Score"),
 					(int)(e_lg * p->s.v.frags));
 		G_bprint(PRINT_HIGH, "  %s : %.1f%% (%d/%d)\n", redtext("Overshaft"), over * 100.0f / a_lg,
-					(int) over, (int) a_lg);
+					(int)over, (int)a_lg);
 		G_bprint(PRINT_HIGH, "  %s: %.1f%% (%d/%d)\n", redtext("Undershaft"), under * 100.0f / a_lg,
-					(int) under, (int) a_lg);
+					(int)under, (int)a_lg);
 	}
 
 	//	}
@@ -972,7 +972,7 @@ void TopStats(void)
 				|| (isCTF() && ((p->s.v.frags - p->ps.ctf_points) == maxfrags)))
 		{
 			G_bprint(2, "%s%s%s \220%d\221\n", (f1 ? "             " : ""),
-						(isghost(p) ? "\203" : ""), getname(p), (int) maxfrags);
+						(isghost(p) ? "\203" : ""), getname(p), (int)maxfrags);
 			f1 = 1;
 		}
 
@@ -988,7 +988,7 @@ void TopStats(void)
 		if (p->deaths == maxdeaths)
 		{
 			G_bprint(2, "%s%s%s \220%d\221\n", (f1 ? "             " : ""),
-						(isghost(p) ? "\203" : ""), getname(p), (int) maxdeaths);
+						(isghost(p) ? "\203" : ""), getname(p), (int)maxdeaths);
 			f1 = 1;
 		}
 
@@ -1006,7 +1006,7 @@ void TopStats(void)
 			if (p->friendly == maxfriend)
 			{
 				G_bprint(2, "%s%s%s \220%d\221\n", (f1 ? "             " : ""),
-							(isghost(p) ? "\203" : ""), getname(p), (int) maxfriend);
+							(isghost(p) ? "\203" : ""), getname(p), (int)maxfriend);
 				f1 = 1;
 			}
 
@@ -1153,7 +1153,7 @@ void TopStats(void)
 				if (p->ps.caps == maxcaps)
 				{
 					G_bprint(2, "%s%s%s \220%d\221\n", (f1 ? "             " : ""),
-								(isghost(p) ? "\203" : ""), getname(p), (int) maxcaps);
+								(isghost(p) ? "\203" : ""), getname(p), (int)maxcaps);
 					f1 = 1;
 				}
 
@@ -1171,7 +1171,7 @@ void TopStats(void)
 				if (p->ps.f_defends == maxdefends)
 				{
 					G_bprint(2, "%s%s%s \220%d\221\n", (f1 ? "             " : ""),
-								(isghost(p) ? "\203" : ""), getname(p), (int) maxdefends);
+								(isghost(p) ? "\203" : ""), getname(p), (int)maxdefends);
 					f1 = 1;
 				}
 
@@ -1406,12 +1406,12 @@ void OnePlayerInstagibStats(gedict_t *p, int tp)
 
 	stats_text = va("%s \220%s\221\n", stats_text, "SCORES");
 	stats_text = va("%s  %s: %.1f\n", stats_text, redtext("Efficiency"), p->efficiency);
-	stats_text = va("%s  %s: %d\n", stats_text, redtext("Points"), (int) p->s.v.frags);
+	stats_text = va("%s  %s: %d\n", stats_text, redtext("Points"), (int)p->s.v.frags);
 	stats_text = va("%s  %s: %d\n", stats_text, redtext("Frags"),
 					p->ps.i_cggibs + p->ps.i_axegibs + p->ps.i_stompgibs);
 	if (tp)
-		stats_text = va("%s  %s: %d\n", stats_text, redtext("Teamkills"), (int) p->friendly);
-	stats_text = va("%s  %s: %d\n", stats_text, redtext("Deaths"), (int) p->deaths);
+		stats_text = va("%s  %s: %d\n", stats_text, redtext("Teamkills"), (int)p->friendly);
+	stats_text = va("%s  %s: %d\n", stats_text, redtext("Deaths"), (int)p->deaths);
 
 	stats_text = va("%s  %s: %d\n", stats_text, redtext("Streaks"), p->ps.spree_max);
 	stats_text = va("%s  %s: %d\n", stats_text, redtext("Spawns"), p->ps.spawn_frags);
@@ -1480,7 +1480,7 @@ void OnePlayerMidairStats(gedict_t *p, int tp)
 	a_rl = p->ps.wpn[wpRL].attacks;
 	ph_rl = 100.0 * vh_rl / max(1, a_rl);
 
-	G_bprint(2, "\207 %s%s: %d\n", (isghost(p) ? "\203" : ""), getname(p), (int) p->s.v.frags);
+	G_bprint(2, "\207 %s%s: %d\n", (isghost(p) ? "\203" : ""), getname(p), (int)p->s.v.frags);
 	G_bprint(2, "   %-13s: %d\n", redtext("total midairs"), p->ps.mid_total);
 	G_bprint(2, "    %12s: %d\n", "bronze", p->ps.mid_bronze);
 	G_bprint(2, "    %12s: %d\n", "silver", p->ps.mid_silver);
@@ -1507,9 +1507,9 @@ void EM_CorrectStats(void)
 	for (p = world; (p = find_plr(p));)
 	{
 		// take away powerups so scoreboard looks normal
-		p->s.v.items = (int) p->s.v.items
+		p->s.v.items = (int)p->s.v.items
 				& ~(IT_INVISIBILITY | IT_INVULNERABILITY | IT_SUIT | IT_QUAD);
-		p->s.v.effects = (int) p->s.v.effects
+		p->s.v.effects = (int)p->s.v.effects
 				& ~(EF_DIMLIGHT | EF_BRIGHTLIGHT | EF_BLUE | EF_RED | EF_GREEN);
 		p->invisible_finished = 0;
 		p->invincible_finished = 0;

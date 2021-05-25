@@ -63,7 +63,7 @@ gedict_t* IdentifyMostVisibleTeammate(gedict_t *me)
 		}
 	}
 
-	return g ? g : world;
+	return (g ? g : world);
 }
 
 qbool VisibleEntity(gedict_t *ent)
@@ -123,10 +123,10 @@ gedict_t* HelpTeammate()
 	{
 		if (SameTeam(goalent, self))
 		{
-			if ((goalent->s.v.health < 30) && !((int) goalent->s.v.items & IT_INVULNERABILITY)
+			if ((goalent->s.v.health < 30) && !((int)goalent->s.v.items & IT_INVULNERABILITY)
 					&& (goalent->s.v.waterlevel == 0))
 			{
-				if (((int) self->s.v.items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING))
+				if (((int)self->s.v.items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING))
 						&& (self->s.v.health > 65))
 				{
 					if ((self->s.v.ammo_rockets > 2) || (self->s.v.ammo_cells > 10))
@@ -167,11 +167,11 @@ gedict_t* HelpTeammate()
 					{
 						if (d < best_dist1)
 						{
-							if (VisibleEntity(head) && !((int) head->s.v.items & IT_INVULNERABILITY)
+							if (VisibleEntity(head) && !((int)head->s.v.items & IT_INVULNERABILITY)
 									&& (head->s.v.health < 40) && (head->s.v.armorvalue < 11)
 									&& (head->s.v.waterlevel == 0))
 							{
-								if ((int) self->s.v.items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING))
+								if ((int)self->s.v.items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING))
 								{
 									if ((self->s.v.ammo_cells > 10) || (self->s.v.ammo_rockets > 2))
 									{
@@ -191,11 +191,11 @@ gedict_t* HelpTeammate()
 							if (d < best_dist2)
 							{
 								if (VisibleEntity(head)
-										&& !((int) head->s.v.items & IT_INVULNERABILITY)
+										&& !((int)head->s.v.items & IT_INVULNERABILITY)
 										&& (head->s.v.health < 30) && (head->s.v.armorvalue < 20)
 										&& (head->s.v.waterlevel == 0))
 								{
-									if ((int) self->s.v.items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING))
+									if ((int)self->s.v.items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING))
 									{
 										if ((self->s.v.ammo_cells > 10)
 												|| (self->s.v.ammo_rockets > 2))

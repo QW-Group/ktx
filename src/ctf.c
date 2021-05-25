@@ -74,7 +74,7 @@ void spawn_item_flag()
 	self->cnt = FLAG_AT_BASE;
 	self->cnt2 = 0.0;
 	VectorCopy(self->s.v.angles, self->mangle);
-	self->s.v.effects = (int) self->s.v.effects | EF_DIMLIGHT;
+	self->s.v.effects = (int)self->s.v.effects | EF_DIMLIGHT;
 
 	if (!droptofloor(self))
 	{
@@ -97,7 +97,7 @@ void SP_item_flag_team1()
 	self->k_teamnumber = 1;
 	self->s.v.items = IT_KEY2;
 	self->s.v.skin = 0;
-	self->s.v.effects = (int) self->s.v.effects | EF_RED;
+	self->s.v.effects = (int)self->s.v.effects | EF_RED;
 
 	if (!k_ctf_custom_models)
 	{
@@ -112,7 +112,7 @@ void SP_item_flag_team2()
 	self->k_teamnumber = 2;
 	self->s.v.items = IT_KEY1;
 	self->s.v.skin = 1;
-	self->s.v.effects = (int) self->s.v.effects | EF_BLUE;
+	self->s.v.effects = (int)self->s.v.effects | EF_BLUE;
 
 	if (!k_ctf_custom_models)
 	{
@@ -189,7 +189,7 @@ void AddHook(qbool yes)
 
 	for (e = world; (e = find_plr(e));)
 	{
-		e->s.v.items = (yes ? ((int) e->s.v.items | IT_HOOK) : ((int) e->s.v.items & ~IT_HOOK));
+		e->s.v.items = (yes ? ((int)e->s.v.items | IT_HOOK) : ((int)e->s.v.items & ~IT_HOOK));
 
 		self = e; // warning
 
@@ -284,7 +284,7 @@ void FlagThink()
 		{
 			RegenFlag(self);
 			G_bprint(2, "The %s flag has been returned\n",
-						redtext(((int) self->s.v.items & IT_KEY1) ? "BLUE" : "RED"));
+						redtext(((int)self->s.v.items & IT_KEY1) ? "BLUE" : "RED"));
 		}
 
 		return;
@@ -345,8 +345,8 @@ void FlagTouch()
 				gedict_t *cflag = NULL;
 
 				// capture
-				other->ctf_flag -= ((int) other->ctf_flag & CTF_FLAG);
-				other->s.v.effects -= ((int) other->s.v.effects & (EF_FLAG1 | EF_FLAG2));
+				other->ctf_flag -= ((int)other->ctf_flag & CTF_FLAG);
+				other->s.v.effects -= ((int)other->s.v.effects & (EF_FLAG1 | EF_FLAG2));
 
 				sound(other, CHAN_FLAG, "misc/flagcap.wav", 1, ATTN_NONE);
 
@@ -374,7 +374,7 @@ void FlagTouch()
 				// loop through all players on team to give bonus
 				for (p = world; (p = find_plr(p));)
 				{
-					p->s.v.items -= ((int) p->s.v.items & (IT_KEY1 | IT_KEY2));
+					p->s.v.items -= ((int)p->s.v.items & (IT_KEY1 | IT_KEY2));
 					if (streq(getteam(p), getteam(other)))
 					{
 						if (p->return_flag_time + RETURN_ASSIST_TIME > g_globalvars.time)
@@ -454,7 +454,7 @@ void FlagTouch()
 	sound(other, CHAN_FLAG, self->noise, 1, ATTN_NONE);
 	other->ctf_flag |= CTF_FLAG;
 
-	other->s.v.items = (int) other->s.v.items | (int) self->s.v.items;
+	other->s.v.items = (int)other->s.v.items | (int)self->s.v.items;
 
 	self->cnt = FLAG_CARRIED;
 	self->s.v.solid = SOLID_NOT;
@@ -467,12 +467,12 @@ void FlagTouch()
 	if (streq(getteam(other), "red"))
 	{
 		G_bprint(2, " %s the %s flag!\n", redtext("got"), redtext("BLUE"));
-		owner->s.v.effects = (int) owner->s.v.effects | EF_FLAG2;
+		owner->s.v.effects = (int)owner->s.v.effects | EF_FLAG2;
 	}
 	else
 	{
 		G_bprint(2, " %s the %s flag!\n", redtext("got"), redtext("RED"));
-		owner->s.v.effects = (int) owner->s.v.effects | EF_FLAG1;
+		owner->s.v.effects = (int)owner->s.v.effects | EF_FLAG1;
 	}
 	setmodel(self, "");
 }
@@ -522,8 +522,8 @@ void DropFlag(gedict_t *flag, qbool tossed)
 	gedict_t *p1;
 
 	p->ctf_flag -= (p->ctf_flag & CTF_FLAG);
-	p->s.v.effects -= ((int) p->s.v.effects & ( EF_FLAG1 | EF_FLAG2));
-	p->s.v.items -= ((int) p->s.v.items & (int) flag->s.v.items);
+	p->s.v.effects -= ((int)p->s.v.effects & ( EF_FLAG1 | EF_FLAG2));
+	p->s.v.items -= ((int)p->s.v.items & (int)flag->s.v.items);
 
 	setorigin(flag, PASSVEC3(p->s.v.origin));
 	flag->s.v.origin[2] -= 24;
@@ -607,7 +607,7 @@ void FlagStatus()
 
 	if (self->ct == ctSpec)
 	{
-		switch ((int) flag1->cnt)
+		switch ((int)flag1->cnt)
 		{
 			case FLAG_AT_BASE:
 				G_sprint(self, 2, "The %s flag is in base.\n", redtext("RED"));
@@ -623,7 +623,7 @@ void FlagStatus()
 				break;
 		}
 
-		switch ((int) flag2->cnt)
+		switch ((int)flag2->cnt)
 		{
 			case FLAG_AT_BASE:
 				G_sprint(self, 2, "The %s flag is in base. ", redtext("BLUE"));
@@ -650,7 +650,7 @@ void FlagStatus()
 		flag2 = swap;
 	}
 
-	switch ((int) flag1->cnt)
+	switch ((int)flag1->cnt)
 	{
 		case FLAG_AT_BASE:
 			G_sprint(self, 2, "Your flag is in base. ");
@@ -665,7 +665,7 @@ void FlagStatus()
 			break;
 	}
 
-	switch ((int) flag2->cnt)
+	switch ((int)flag2->cnt)
 	{
 		case FLAG_AT_BASE:
 			G_sprint(self, 2, "The enemy flag is in their base.\n");
@@ -706,18 +706,18 @@ void CTF_CheckFlagsAsKeys(void)
 	}
 
 	// remove keys/flags.
-	self->s.v.items = (int) self->s.v.items & ~(IT_KEY1 | IT_KEY2);
+	self->s.v.items = (int)self->s.v.items & ~(IT_KEY1 | IT_KEY2);
 
 	// add gold/RED.
 	if (flag1->cnt != FLAG_AT_BASE)
 	{
-		self->s.v.items = (int) self->s.v.items | IT_KEY2;
+		self->s.v.items = (int)self->s.v.items | IT_KEY2;
 	}
 
 	// add silver/BLUE.
 	if (flag2->cnt != FLAG_AT_BASE)
 	{
-		self->s.v.items = (int) self->s.v.items | IT_KEY1;
+		self->s.v.items = (int)self->s.v.items | IT_KEY1;
 	}
 }
 

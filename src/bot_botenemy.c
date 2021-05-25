@@ -181,7 +181,7 @@ qbool BotsPickBestEnemy(gedict_t *self)
 	self->s.v.enemy = (enemy_ == NULL ? 0 : NUM_FOR_EDICT(enemy_));
 	self->fb.enemy_dist = predict_dist;
 
-	return self->s.v.enemy != old_enemy;
+	return (self->s.v.enemy != old_enemy);
 }
 
 #endif
