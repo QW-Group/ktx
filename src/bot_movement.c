@@ -73,8 +73,8 @@ static qbool BotRequestRespawn(gedict_t *self)
 {
 	float time_dead = min(g_globalvars.time - self->fb.last_death, MAX_DEAD_TIME);
 
-	return self->s.v.deadflag == DEAD_RESPAWNABLE && time_dead > MIN_DEAD_TIME
-			&& (g_random() < (time_dead / MAX_DEAD_TIME));
+	return ((self->s.v.deadflag == DEAD_RESPAWNABLE) && (time_dead > MIN_DEAD_TIME)
+			&& (g_random() < (time_dead / MAX_DEAD_TIME)));
 }
 
 static void PM_Accelerate(vec3_t vel_after_friction, qbool onGround, vec3_t orig_wishdir,

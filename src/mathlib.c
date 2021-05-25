@@ -381,7 +381,7 @@ void VectorMA(vec3_t veca, float scale, vec3_t vecb, vec3_t vecc)
 
 vec_t _DotProduct(vec3_t v1, vec3_t v2)
 {
-	return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
+	return (v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2]);
 }
 
 void _VectorSubtract(vec3_t veca, vec3_t vecb, vec3_t out)
@@ -610,10 +610,10 @@ fixed16_t Invert24To16(fixed16_t val)
 {
 	if (val < 256)
 	{
-		return (fixed16_t) 0xFFFFFFFF;
+		return (fixed16_t)0xFFFFFFFF;
 	}
 
-	return (fixed16_t)(((double) 0x10000 * (double) 0x1000000 / (double) val) + 0.5);
+	return (fixed16_t)(((double)0x10000 * (double)0x1000000 / (double)val) + 0.5);
 }
 
 #endif

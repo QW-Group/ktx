@@ -162,7 +162,7 @@ static float goal_armor2(gedict_t *self, gedict_t *other)
 
 		if (low_armor && has_rl && has_quad)
 		{
-			return self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_armor2 : 0;
+			return (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_armor2 : 0);
 		}
 
 		return 0;
@@ -185,7 +185,7 @@ static float goal_armorInv(gedict_t *self, gedict_t *other)
 
 		if (has_rl && has_quad && ok_health)
 		{
-			return self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_armorInv : 0;
+			return (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_armorInv : 0);
 		}
 
 		return 0;
@@ -194,8 +194,8 @@ static float goal_armorInv(gedict_t *self, gedict_t *other)
 
 static float goal_supershotgun1(gedict_t *self, gedict_t *other)
 {
-	return self->fb.desire_supershotgun
-			+ (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_supershotgun * 0.5 : 0);
+	return (self->fb.desire_supershotgun
+			+ (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_supershotgun * 0.5 : 0));
 }
 
 static float goal_supershotgun2(gedict_t *self, gedict_t *other)
@@ -210,8 +210,8 @@ static float goal_supershotgun2(gedict_t *self, gedict_t *other)
 
 static float goal_nailgun1(gedict_t *self, gedict_t *other)
 {
-	return self->fb.desire_nailgun
-			+ (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_nailgun * 0.5 : 0);
+	return (self->fb.desire_nailgun
+			+ (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_nailgun * 0.5 : 0));
 }
 
 static float goal_nailgun2(gedict_t *self, gedict_t *other)
@@ -226,8 +226,8 @@ static float goal_nailgun2(gedict_t *self, gedict_t *other)
 
 static float goal_supernailgun1(gedict_t *self, gedict_t *other)
 {
-	return self->fb.desire_supernailgun
-			+ (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_supernailgun * 0.5 : 0);
+	return (self->fb.desire_supernailgun
+			+ (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_supernailgun * 0.5 : 0));
 }
 
 static float goal_supernailgun2(gedict_t *self, gedict_t *other)
@@ -242,8 +242,8 @@ static float goal_supernailgun2(gedict_t *self, gedict_t *other)
 
 static float goal_grenadelauncher1(gedict_t *self, gedict_t *other)
 {
-	return self->fb.desire_grenadelauncher
-			+ (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_grenadelauncher * 0.5 : 0);
+	return (self->fb.desire_grenadelauncher
+			+ (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_grenadelauncher * 0.5 : 0));
 }
 
 static float goal_grenadelauncher2(gedict_t *self, gedict_t *other)
@@ -258,8 +258,8 @@ static float goal_grenadelauncher2(gedict_t *self, gedict_t *other)
 
 static float goal_rocketlauncher1(gedict_t *self, gedict_t *other)
 {
-	return self->fb.desire_rocketlauncher
-			+ (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_rocketlauncher : 0);
+	return (self->fb.desire_rocketlauncher
+			+ (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_rocketlauncher : 0));
 }
 
 static float goal_rocketlauncher2(gedict_t *self, gedict_t *other)
@@ -274,8 +274,8 @@ static float goal_rocketlauncher2(gedict_t *self, gedict_t *other)
 
 static float goal_lightning1(gedict_t *self, gedict_t *other)
 {
-	return self->fb.desire_lightning
-			+ (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_lightning * 0.5 : 0);
+	return (self->fb.desire_lightning
+			+ (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_lightning * 0.5 : 0));
 }
 
 static float goal_lightning2(gedict_t *self, gedict_t *other)
@@ -312,8 +312,8 @@ static float goal_rockets(gedict_t *self, gedict_t *other)
 {
 	if (self->s.v.ammo_rockets < 100)
 	{
-		return self->fb.desire_rockets
-				+ (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_rockets : 0);
+		return (self->fb.desire_rockets
+				+ (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_rockets : 0));
 	}
 
 	return 0;
@@ -323,8 +323,8 @@ static float goal_cells(gedict_t *self, gedict_t *other)
 {
 	if (self->s.v.ammo_cells < 100)
 	{
-		return self->fb.desire_cells
-				+ (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_cells * 0.5 : 0);
+		return (self->fb.desire_cells
+				+ (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_cells * 0.5 : 0));
 	}
 
 	return 0;
@@ -334,7 +334,7 @@ static float goal_artifact_invulnerability(gedict_t *self, gedict_t *other)
 {
 	if (Get_Powerups())
 	{
-		return 200 + self->fb.total_damage;
+		return (200 + self->fb.total_damage);
 	}
 
 	return 0;
@@ -344,7 +344,7 @@ static float goal_artifact_invisibility(gedict_t *self, gedict_t *other)
 {
 	if (Get_Powerups())
 	{
-		return 200 + self->fb.total_damage;
+		return (200 + self->fb.total_damage);
 	}
 
 	return 0;
@@ -354,7 +354,7 @@ static float goal_artifact_super_damage(gedict_t *self, gedict_t *other)
 {
 	if (Get_Powerups())
 	{
-		return 200 + self->fb.total_damage;
+		return (200 + self->fb.total_damage);
 	}
 
 	return 0;
@@ -399,27 +399,27 @@ qbool pickup_true(void)
 
 qbool pickup_nailgun2(void)
 {
-	return deathmatch == 1 || (qbool) !((int) self->s.v.items & IT_NAILGUN);
+	return ((deathmatch == 1) || (qbool) !((int)self->s.v.items & IT_NAILGUN));
 }
 
 qbool pickup_supernailgun2(void)
 {
-	return deathmatch == 1 || (qbool) !((int) self->s.v.items & IT_SUPER_NAILGUN);
+	return ((deathmatch == 1) || (qbool) !((int)self->s.v.items & IT_SUPER_NAILGUN));
 }
 
 qbool pickup_grenadelauncher2(void)
 {
-	return deathmatch == 1 || (qbool) !((int) self->s.v.items & IT_GRENADE_LAUNCHER);
+	return ((deathmatch == 1) || (qbool) !((int)self->s.v.items & IT_GRENADE_LAUNCHER));
 }
 
 qbool pickup_rocketlauncher2(void)
 {
-	return deathmatch == 1 || (qbool) !((int) self->s.v.items & IT_ROCKET_LAUNCHER);
+	return ((deathmatch == 1) || (qbool) !((int)self->s.v.items & IT_ROCKET_LAUNCHER));
 }
 
 qbool pickup_lightning2(void)
 {
-	return deathmatch == 1 || (qbool) !((int) self->s.v.items & IT_LIGHTNING);
+	return ((deathmatch == 1) || (qbool) !((int)self->s.v.items & IT_LIGHTNING));
 }
 
 qbool pickup_shells(void)
@@ -965,7 +965,7 @@ fb_spawn_t* ItemSpawnFunction(int i)
 
 int ItemSpawnFunctionCount(void)
 {
-	return sizeof(itemSpawnFunctions) / sizeof(itemSpawnFunctions[0]);
+	return (sizeof(itemSpawnFunctions) / sizeof(itemSpawnFunctions[0]));
 }
 
 qbool NoItemTouch(gedict_t *self, gedict_t *other)

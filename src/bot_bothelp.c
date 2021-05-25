@@ -63,7 +63,7 @@ gedict_t* IdentifyMostVisibleTeammate(gedict_t *me)
 		}
 	}
 
-	return g ? g : world;
+	return (g ? g : world);
 }
 
 qbool VisibleEntity(gedict_t *ent)

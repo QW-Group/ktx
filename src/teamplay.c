@@ -211,47 +211,47 @@ void TeamplayEventItemTaken(gedict_t *client, gedict_t *item)
 
 static qbool TookEmpty(gedict_t *client)
 {
-	return client->tp.took.time == 0 || client->tp.took.time < g_globalvars.time - TOOK_TIMEOUT;
+	return ((client->tp.took.time == 0) || (client->tp.took.time < (g_globalvars.time - TOOK_TIMEOUT)));
 }
 
 static qbool Took(gedict_t *client, unsigned long flag)
 {
-	return !TookEmpty(client) && client->tp.took.item == flag;
+	return (!TookEmpty(client) && (client->tp.took.item == flag));
 }
 
 static qbool TookSpecific(gedict_t *client, unsigned long flag, unsigned long specific)
 {
-	return Took(client, flag) && client->tp.took.flags == specific;
+	return (Took(client, flag) && (client->tp.took.flags == specific));
 }
 
 static qbool NEED(unsigned long player_flags, unsigned long flags)
 {
-	return player_flags & flags;
+	return (player_flags & flags);
 }
 
 static qbool HAVE_POWERUP(gedict_t *client)
 {
-	return client && ((int)client->s.v.items & (IT_QUAD | IT_INVULNERABILITY | IT_INVISIBILITY));
+	return (client && ((int)client->s.v.items & (IT_QUAD | IT_INVULNERABILITY | IT_INVISIBILITY)));
 }
 
 static qbool HAVE_RING(gedict_t *client)
 {
-	return client && ((int)client->s.v.items & IT_INVISIBILITY);
+	return (client && ((int)client->s.v.items & IT_INVISIBILITY));
 }
 
 static qbool HAVE_QUAD(gedict_t *client)
 {
-	return client && ((int)client->s.v.items & IT_QUAD);
+	return (client && ((int)client->s.v.items & IT_QUAD));
 }
 
 static qbool HAVE_PENT(gedict_t *client)
 {
-	return client && ((int)client->s.v.items & IT_INVULNERABILITY);
+	return (client && ((int)client->s.v.items & IT_INVULNERABILITY));
 }
 
 static qbool HAVE_GA(gedict_t *client)
 {
-	return client && ((int)client->s.v.items & IT_ARMOR1);
+	return (client && ((int)client->s.v.items & IT_ARMOR1));
 }
 /*
  static qbool HAVE_YA (gedict_t* client)
@@ -266,32 +266,32 @@ static qbool HAVE_GA(gedict_t *client)
  */
 static qbool HAVE_RL(gedict_t *client)
 {
-	return (int)client->s.v.items & IT_ROCKET_LAUNCHER;
+	return ((int)client->s.v.items & IT_ROCKET_LAUNCHER);
 }
 
 static qbool HAVE_LG(gedict_t *client)
 {
-	return (int)client->s.v.items & IT_LIGHTNING;
+	return ((int)client->s.v.items & IT_LIGHTNING);
 }
 
 static qbool HAVE_SNG(gedict_t *client)
 {
-	return (int)client->s.v.items & IT_SUPER_NAILGUN;
+	return ((int)client->s.v.items & IT_SUPER_NAILGUN);
 }
 /*
  static qbool HAVE_NG (gedict_t* client)
  {
- return (int)client->s.v.items & IT_NAILGUN;
+ return ((int)client->s.v.items & IT_NAILGUN);
  }
  */
 static qbool HAVE_GL(gedict_t *client)
 {
-	return (int)client->s.v.items & IT_GRENADE_LAUNCHER;
+	return ((int)client->s.v.items & IT_GRENADE_LAUNCHER);
 }
 
 static qbool HAVE_SSG(gedict_t *client)
 {
-	return (int)client->s.v.items & IT_SUPER_SHOTGUN;
+	return ((int)client->s.v.items & IT_SUPER_SHOTGUN);
 }
 
 typedef struct item_vis_s
@@ -333,7 +333,7 @@ static float TeamplayRankPoint(item_vis_t *visitem)
 
 	if (visitem->dist < (3000.0 / 8.0))
 	{
-		return miss * (visitem->dist * 8.0 * 0.0002f + 0.3f);
+		return (miss * (visitem->dist * 8.0 * 0.0002f + 0.3f));
 	}
 	else
 	{
@@ -405,7 +405,7 @@ static qbool TP_IsItemVisible(item_vis_t *visitem)
 
 unsigned int ClientFlag(gedict_t *client)
 {
-	return (unsigned int) 1 << (NUM_FOR_EDICT(client) - 1);
+	return ((unsigned int)1 << (NUM_FOR_EDICT(client) - 1));
 }
 
 static gedict_t* TeamplayFindPoint(gedict_t *client)

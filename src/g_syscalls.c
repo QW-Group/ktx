@@ -62,7 +62,7 @@ intptr_t trap_GetApiVersion()
 
 qbool trap_GetEntityToken(char *token, intptr_t size)
 {
-	return (qbool) syscall(G_GetEntityToken, (intptr_t) token, size);
+	return (qbool)syscall(G_GetEntityToken, (intptr_t) token, size);
 }
 
 void trap_DPrintf(const char *fmt)

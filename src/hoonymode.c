@@ -86,7 +86,7 @@ const char* HM_round_results(gedict_t *player)
 
 qbool isHoonyModeDuel(void)
 {
-	return isDuel() && cvar("k_hoonymode");
+	return (isDuel() && cvar("k_hoonymode"));
 }
 
 qbool isHoonyModeAny(void)
@@ -96,14 +96,14 @@ qbool isHoonyModeAny(void)
 
 qbool isHoonyModeTDM(void)
 {
-	return isTeam() && cvar("k_hoonymode");
+	return (isTeam() && cvar("k_hoonymode"));
 }
 
 int HM_rounds(void)
 {
 	int rounds = cvar("k_hoonyrounds");
 
-	return rounds ? rounds : 6;
+	return (rounds ? rounds : 6);
 }
 
 void HM_initialise_rounds(void)
@@ -115,7 +115,7 @@ int HM_timelimit(void)
 {
 	if (timelimit)
 	{
-		return timelimit * 60;
+		return (timelimit * 60);
 	}
 
 	return world->hoony_timelimit;
@@ -221,7 +221,7 @@ qbool HM_is_game_over(void)
 			minfrags = min(p->s.v.frags, minfrags);
 		}
 
-		return maxfrags != minfrags && maxfrags > HM_rounds() / 2;
+		return ((maxfrags != minfrags) && (maxfrags > (HM_rounds() / 2)));
 	}
 
 	return false;

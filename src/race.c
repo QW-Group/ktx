@@ -195,7 +195,7 @@ qbool isRACE(void)
 
 static qbool is_valid_record(raceRecord_t *record)
 {
-	return record->time < RACE_INVALID_RECORD_TIME;
+	return (record->time < RACE_INVALID_RECORD_TIME);
 }
 
 static int read_record_param(int param)
@@ -370,7 +370,7 @@ int race_time(void)
 		return 0; // count time only when race in state raceActive
 	}
 
-	return (g_globalvars.time - race.start_time) * 1000;
+	return ((g_globalvars.time - race.start_time) * 1000);
 }
 
 void setwepall(gedict_t *p)
@@ -767,7 +767,7 @@ qbool race_weapon_allowed(gedict_t *p)
 			return true;
 
 		case raceWeapon2s:
-			return (race_time() >= 2000 ? true : false);
+			return ((race_time() >= 2000) ? true : false);
 
 		default:
 			G_Error("race_weapon_allowed: wrong race.weapon %d", race.weapon);
@@ -3482,7 +3482,7 @@ int race_fgetc(void)
 	retval = trap_FS_ReadFile(&c, 1, race_fhandle);
 	//G_bprint( 2, "====> Read char: %d\n", c );
 
-	return (retval == 1 ? c : -1);
+	return ((retval == 1) ? c : -1);
 }
 
 char* race_fgets(char *buf, int limit)
@@ -4974,7 +4974,7 @@ static char* race_position_string(int position)
 static qbool race_simultaneous(void)
 {
 	// We don't support matches where the players go turn about
-	return race_match_mode() || cvar(RACE_SIMULTANEOUS_CVAR);
+	return (race_match_mode() || cvar(RACE_SIMULTANEOUS_CVAR));
 }
 
 void race_player_post_think(void)
@@ -5397,7 +5397,7 @@ void race_match_start(void)
 
 qbool race_match_started(void)
 {
-	return race_match_mode() && (race.status || match_in_progress);
+	return (race_match_mode() && (race.status || match_in_progress));
 }
 
 void race_switch_usermode(const char *displayName, int players_per_team)
@@ -5567,7 +5567,7 @@ qbool race_can_cancel_demo(void)
 	}
 
 	// Always save demos as soon as a run is completed
-	return race.round_number == 0 && race.racers_complete == 0;
+	return ((race.round_number == 0) && (race.racers_complete == 0));
 }
 
 int race_count_votes_req(float percentage)
@@ -5593,7 +5593,7 @@ qbool race_allow_map_vote(gedict_t *player)
 		return true;
 	}
 
-	return (racers_ready == 0 || player->race_ready);
+	return ((racers_ready == 0) || player->race_ready);
 }
 
 void race_hide_players_toggle(void)

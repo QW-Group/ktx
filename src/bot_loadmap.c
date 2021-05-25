@@ -224,7 +224,7 @@ static void SpawnMarkerIndicator(gedict_t *item)
 
 static qbool ProcessedItem(gedict_t *item)
 {
-	return item->fb.fl_marker || item->fb.index;
+	return (item->fb.fl_marker || item->fb.index);
 }
 
 static void CreateItemMarkers()

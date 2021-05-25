@@ -202,21 +202,21 @@ static float goal_client(gedict_t *self, gedict_t *other)
 
 	if (self->fb.look_object && (self->s.v.enemy == NUM_FOR_EDICT(self->fb.look_object)))
 	{
-		return ((self->fb.total_damage + 100) * self->fb.firepower
+		return (((self->fb.total_damage + 100) * self->fb.firepower
 				- self->fb.virtual_enemy->fb.total_damage * self->fb.virtual_enemy->fb.firepower)
-				* 0.01;
+				* 0.01);
 	}
 	else if (EnemyDefenceless(self))
 	{
-		return ((self->fb.total_damage + 120) * self->fb.firepower
+		return (((self->fb.total_damage + 120) * self->fb.firepower
 				- self->fb.virtual_enemy->fb.total_damage * self->fb.virtual_enemy->fb.firepower)
-				* 0.01;
+				* 0.01);
 	}
 	else
 	{
-		return (self->fb.total_damage * self->fb.firepower
+		return ((self->fb.total_damage * self->fb.firepower
 				- self->fb.virtual_enemy->fb.total_damage * self->fb.virtual_enemy->fb.firepower)
-				* 0.01;
+				* 0.01);
 	}
 }
 

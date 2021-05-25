@@ -21,7 +21,7 @@ qbool DM6LookAtDoor(gedict_t *self);
 
 static qbool HasItem(gedict_t *player, int mask)
 {
-	return ((int) player->s.v.items & mask);
+	return ((int)player->s.v.items & mask);
 }
 
 // FIXME: Globals
@@ -176,12 +176,12 @@ static qbool OnLift(gedict_t *self)
 
 static qbool LookingAtPlayer(gedict_t *self)
 {
-	return self->fb.look_object && self->fb.look_object->ct == ctPlayer;
+	return (self->fb.look_object && (self->fb.look_object->ct == ctPlayer));
 }
 
 qbool WaitingToHitGround(gedict_t *self)
 {
-	return (self->fb.path_state & WAIT_GROUND) && !((int) self->s.v.flags & FL_ONGROUND);
+	return (self->fb.path_state & WAIT_GROUND) && !((int)self->s.v.flags & FL_ONGROUND);
 }
 
 static qbool WalkTowardsDroppedItem(gedict_t *self)

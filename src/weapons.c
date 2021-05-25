@@ -2032,7 +2032,7 @@ float W_BestWeapon()
 
 	 */
 
-	return (it & IT_AXE ? IT_AXE : 0);
+	return ((it & IT_AXE) ? IT_AXE : 0);
 }
 
 int W_CheckNoAmmo()

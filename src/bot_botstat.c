@@ -45,7 +45,7 @@ float TotalStrengthAfterDamage(float health, float armorValue, float armorType, 
 	damage = newceil(damage - damage_saved);
 	health -= damage;
 
-	return health <= 0 ? 0 : TotalStrength(health, armorValue, armorType);
+	return (health <= 0 ? 0 : TotalStrength(health, armorValue, armorType));
 }
 
 // Called every time the player's statistics change (item pickups etc)

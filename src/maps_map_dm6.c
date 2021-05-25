@@ -116,8 +116,8 @@ qbool DM6DoorClosed(fb_path_eval_t *eval)
 		return false;
 	}
 
-	return (eval->test_marker == dm6_door && !dm6_door->fb.door_entity->s.v.takedamage)
-			|| ((eval->description & DM6_DOOR) && dm6_door->fb.door_entity->s.v.origin[0] > -64);
+	return ((eval->test_marker == dm6_door) && !dm6_door->fb.door_entity->s.v.takedamage)
+			|| ((eval->description & DM6_DOOR) && (dm6_door->fb.door_entity->s.v.origin[0] > -64));
 }
 
 void DM6MarkerTouchLogic(gedict_t *self, gedict_t *goalentity_marker)

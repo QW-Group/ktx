@@ -57,10 +57,10 @@ qbool ISLIVE(gedict_t *e)
 
 	if (e->ct == ctPlayer)
 	{
-		return (e->s.v.health > 0 && e->ca_alive);
+		return ((e->s.v.health > 0) && e->ca_alive);
 	}
 
-	return e->s.v.health > 0;
+	return (e->s.v.health > 0);
 }
 
 qbool ISDEAD(gedict_t *e)

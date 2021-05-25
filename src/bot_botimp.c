@@ -57,7 +57,7 @@ static float RangeOverSkill(int skill_level, float minimum, float maximum)
 {
 	float skill = skill_level * 1.0f / (MAX_FROGBOT_SKILL - MIN_FROGBOT_SKILL);
 
-	return minimum + skill * (maximum - minimum);
+	return (minimum + skill * (maximum - minimum));
 }
 
 void RunRandomTrials(float min, float max, float mult)

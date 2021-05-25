@@ -36,7 +36,7 @@ static qbool TP_CouldDamageTeammate(gedict_t *self)
 						if (VectorDistance(search_entity->s.v.origin,
 											g_edicts[self->s.v.enemy].s.v.origin) < 150)
 						{
-							return self->s.v.ammo_shells > 0;
+							return (self->s.v.ammo_shells > 0);
 						}
 					}
 				}

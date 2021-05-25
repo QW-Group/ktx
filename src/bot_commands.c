@@ -76,7 +76,7 @@ static team_t teams[4];
 
 qbool HasSavedMarker(void)
 {
-	return saved_marker != NULL;
+	return (saved_marker != NULL);
 }
 
 qbool IsMarkerFrame(void)
@@ -113,7 +113,7 @@ bot_t bots[MAX_BOTS] =
 
 static int FrogbotSkillLevel(void)
 {
-	return (int) cvar(FB_CVAR_SKILL);
+	return (int)cvar(FB_CVAR_SKILL);
 }
 
 static team_t* AddTeamToList(int *teamsFound, char *team, int topColor, int bottomColor)
@@ -2596,7 +2596,7 @@ int BotVersionNumber(void)
 
 qbool FrogbotOptionEnabled(int option)
 {
-	return ((int)cvar(FB_CVAR_OPTIONS)) & option;
+	return (((int)cvar(FB_CVAR_OPTIONS)) & option);
 }
 
 #endif // BOT_SUPPORT

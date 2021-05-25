@@ -464,7 +464,7 @@ qbool readytostart()
 		return true;
 	}
 
-	return (time_to_start && g_globalvars.time >= time_to_start && getWinner() && getLoser());
+	return (time_to_start && (g_globalvars.time >= time_to_start) && getWinner() && getLoser());
 }
 
 void PrintStats(gedict_t *who)

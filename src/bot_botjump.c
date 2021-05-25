@@ -391,8 +391,8 @@ void BotPerformRocketJump(gedict_t *self)
 
 static qbool PlayerFiringLG(gedict_t *player)
 {
-	return player && player->s.v.button0 && ((int) player->s.v.weapon & IT_LIGHTNING)
-			&& player->s.v.ammo_cells > 0;
+	return (player && player->s.v.button0 && ((int)player->s.v.weapon & IT_LIGHTNING)
+			&& (player->s.v.ammo_cells > 0));
 }
 
 void CheckCombatJump(gedict_t *self)

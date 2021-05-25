@@ -27,7 +27,7 @@ int CA_wins_required(void)
 
 	k_clan_arena_rounds += (k_clan_arena_rounds % 2) ? 0 : 1;
 
-	return (k_clan_arena_rounds + 1) / 2;
+	return ((k_clan_arena_rounds + 1) / 2);
 }
 
 qbool isCA()
@@ -167,7 +167,7 @@ qbool CA_can_fire(gedict_t *p)
 		return true;
 	}
 
-	return (ISLIVE(p) && ra_match_fight == 2 && time_to_start && g_globalvars.time >= time_to_start);
+	return (ISLIVE(p) && (ra_match_fight == 2) && time_to_start && (g_globalvars.time >= time_to_start));
 }
 
 // return 0 if there no alive teams
