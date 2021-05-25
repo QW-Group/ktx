@@ -745,6 +745,34 @@ void AdminForceBreak()
 	EndMatch(0);
 }
 
+void AdminForceMap()
+{
+	if (!is_adm(self))
+	{
+		return;
+	}
+	if (!k_matchLess && match_in_progress)
+	{
+		G_sprint(self, 2, "Match currently in progress. Use %s or %s to terminate.\n", redtext("break"), redtext("forcebreak"));
+		return;
+	}
+	if (trap_CmdArgc() < 2)
+	{
+		G_sprint(self, 2, "Usage: forcemap %s\n", redtext("<mapname>"));
+		return;
+	}
+	char mapname[128];
+	trap_CmdArgv(1, mapname, sizeof(mapname));
+	extern int GetMapNum(char *);
+	if (GetMapNum(mapname) <= 0)
+	{
+		G_sprint(self, 2, "Map %s not available on this server.\n", redtext(mapname));
+		return;
+	}
+	G_bprint(2, "%s forces a map change to %s!\n", self->netname, redtext(mapname));
+	changelevel(mapname);
+}
+
 void PlayerStopFire(gedict_t *p)
 {
 	stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "-attack\n");
