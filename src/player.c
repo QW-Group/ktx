@@ -1156,7 +1156,7 @@ void PlayerDie()
 	BotPlayerDeathEvent(self);
 #endif
 
-	self->s.v.items -= (int) self->s.v.items & IT_INVISIBILITY;
+	self->s.v.items -= (int)self->s.v.items & IT_INVISIBILITY;
 	self->invisible_finished = 0;	// don't die as eyes
 	self->invincible_finished = 0;
 // so we have quad few milleseconds after death

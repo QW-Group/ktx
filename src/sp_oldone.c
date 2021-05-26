@@ -257,7 +257,7 @@ void finale_1()
 	gedict_t *pl;
 	gedict_t *timer;
 
-	self->s.v.effects = (int) self->s.v.effects | EF_RED;
+	self->s.v.effects = (int)self->s.v.effects | EF_RED;
 
 	g_globalvars.killed_monsters++;
 	WriteByte( MSG_ALL, SVC_KILLEDMONSTER);
@@ -465,7 +465,7 @@ void finale_4()
 	n->think = (func_t) player_stand1;
 	n->s.v.nextthink = g_globalvars.time;
 	n->s.v.weapon = IT_AXE;
-	n->s.v.effects = (int) n->s.v.effects | EF_BLUE;
+	n->s.v.effects = (int)n->s.v.effects | EF_BLUE;
 
 	ent_remove(self);
 
@@ -504,7 +504,7 @@ void SP_monster_oldone()
 
 	self->s.v.solid = SOLID_SLIDEBOX;
 	self->s.v.movetype = MOVETYPE_STEP;
-	self->s.v.effects = (int) self->s.v.effects | EF_RED;
+	self->s.v.effects = (int)self->s.v.effects | EF_RED;
 
 	setmodel(self, "progs/oldone.mdl");
 	setsize(self, -160, -128, -24, 160, 128, 256);

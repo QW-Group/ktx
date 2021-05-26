@@ -73,8 +73,8 @@ static qbool BotRequestRespawn(gedict_t *self)
 {
 	float time_dead = min(g_globalvars.time - self->fb.last_death, MAX_DEAD_TIME);
 
-	return self->s.v.deadflag == DEAD_RESPAWNABLE && time_dead > MIN_DEAD_TIME
-			&& (g_random() < (time_dead / MAX_DEAD_TIME));
+	return ((self->s.v.deadflag == DEAD_RESPAWNABLE) && (time_dead > MIN_DEAD_TIME)
+			&& (g_random() < (time_dead / MAX_DEAD_TIME)));
 }
 
 static void PM_Accelerate(vec3_t vel_after_friction, qbool onGround, vec3_t orig_wishdir,
@@ -131,7 +131,7 @@ static void ApplyPhysics(gedict_t *self)
 	float vel_length = 0;
 	float hor_speed_squared;
 	float movement_skill = bound(0, self->fb.skill.movement, 1.0);
-	qbool onGround = (int) self->s.v.flags & FL_ONGROUND;
+	qbool onGround = (int)self->s.v.flags & FL_ONGROUND;
 
 	// Just perform the move if we're backing away
 	if (FUTURE(arrow_time2))
@@ -286,9 +286,9 @@ static void ApplyPhysics(gedict_t *self)
 				RotatePointAroundVector(proposed_dir, up_vector, current_direction, rotation);
 
 				// Calculate what mvdsv will do (roughly)
-				PM_Accelerate(expected_velocity, (int) self->s.v.flags & FL_ONGROUND, proposed_dir,
+				PM_Accelerate(expected_velocity, (int)self->s.v.flags & FL_ONGROUND, proposed_dir,
 								vel_after_rot, false);
-				PM_Accelerate(expected_velocity, (int) self->s.v.flags & FL_ONGROUND,
+				PM_Accelerate(expected_velocity, (int)self->s.v.flags & FL_ONGROUND,
 								current_direction, vel_std, false);
 
 				// Only rotate if 'better' than moving normally
@@ -300,13 +300,13 @@ static void ApplyPhysics(gedict_t *self)
 					VectorCopy(proposed_dir, self->fb.dir_move_);
 					if (self->fb.debug_path)
 					{
-						PM_Accelerate(expected_velocity, (int) self->s.v.flags & FL_ONGROUND,
+						PM_Accelerate(expected_velocity, (int)self->s.v.flags & FL_ONGROUND,
 										proposed_dir, vel_after_rot, true);
 					}
 				}
 				else if (self->fb.debug_path)
 				{
-					PM_Accelerate(expected_velocity, (int) self->s.v.flags & FL_ONGROUND,
+					PM_Accelerate(expected_velocity, (int)self->s.v.flags & FL_ONGROUND,
 									current_direction, vel_std, true);
 				}
 			}
@@ -427,7 +427,7 @@ void BotSetCommand(gedict_t *self)
 {
 	extern float last_frame_time;
 	float msec_since_last = (last_frame_time - self->fb.last_cmd_sent) * 1000;
-	int cmd_msec = (int) msec_since_last;
+	int cmd_msec = (int)msec_since_last;
 	int weapon_script_impulse = 0;
 	int impulse = 0;
 	qbool jumping;

@@ -81,7 +81,7 @@ static void fb_spawn_door(gedict_t *ent)
 		// TODO: ?
 		return;
 	}
-	else if ((int) ent->s.v.spawnflags & SECRET_OPEN_ONCE)
+	else if ((int)ent->s.v.spawnflags & SECRET_OPEN_ONCE)
 	{
 		// TODO: ?
 		return;
@@ -224,7 +224,7 @@ static void SpawnMarkerIndicator(gedict_t *item)
 
 static qbool ProcessedItem(gedict_t *item)
 {
-	return item->fb.fl_marker || item->fb.index;
+	return (item->fb.fl_marker || item->fb.index);
 }
 
 static void CreateItemMarkers()
@@ -424,7 +424,7 @@ static void CustomiseFrogbotMap(void)
 				VectorCopy(viewoffset, ent->s.v.view_ofs);
 				setsize(ent, PASSVEC3(mins), PASSVEC3(maxs));
 			}
-			else if ((int) ent->s.v.flags & FL_ITEM)
+			else if ((int)ent->s.v.flags & FL_ITEM)
 			{
 				PlaceItemFB(ent);
 			}
@@ -475,7 +475,7 @@ void LoadMap(void)
 		// We don't want spawnpoint markers or powerups to mess with colours
 		for (e = world; (e = nextent(e));)
 		{
-			e->s.v.effects = (int) e->s.v.effects & ~(EF_BLUE | EF_GREEN | EF_RED);
+			e->s.v.effects = (int)e->s.v.effects & ~(EF_BLUE | EF_GREEN | EF_RED);
 		}
 
 		AssignGoalNumbers();

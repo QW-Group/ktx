@@ -448,7 +448,7 @@ void AdminImpBot()
 	}
 	else
 	{
-		G_sprint(self, 2, "%d %s\n", (int) self->k_adminc, redtext("more to go"));
+		G_sprint(self, 2, "%d %s\n", (int)self->k_adminc, redtext("more to go"));
 	}
 }
 

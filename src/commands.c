@@ -118,6 +118,7 @@ void ToggleQPoint();
  void ToggleYawSpeedLimit();
  */
 void ToggleRespawns();
+void ToggleSpawnPoints();
 void ToggleBerzerk();
 void ToggleSpecTalk();
 void ToggleSpeed();
@@ -319,327 +320,328 @@ void DemoMark()
 
 const char CD_NODESC[] = "no desc";
 
-#define CD_VOTEMAP    "alternative map vote system"
-#define CD_COMMANDS   "show commands list"
-#define CD_SCORES     "print match time/scores"
-#define CD_STATS      "show player stats"
-#define CD_EFFI       "show player efficiencies"
-#define CD_OPTIONS    "match control commands"
-#define CD_READY      "when you feel ready"
-#define CD_BREAK      "unready / vote matchend"
-#define CD_STATUS     "show server settings"
-#define CD_STATUS2    "more server settings"
-#define CD_WHO        "player teamlist"
-#define CD_WHOSKIN    "player skinlist"
-#define CD_WHONOT     "players not ready"
-#define CD_LIST       "whonot to everyone"
-#define CD_WHOVOTE    "info on received votes"
-#define CD_SPAWN      "toggle spawn modes"
-#define CD_POWERUPS   "quad, \230\230\230, ring & suit"
-#define CD_PUPICKUP   "change powerups pickup policy"
-#define CD_ANTILAG    "toggle antilag"
-#define CD_DISCHARGE  "underwater discharges"
-#define CD_DM         "show deathmatch mode"
-#define CD_DMM1       "set deathmatch mode 1"
-#define CD_DMM2       "set deathmatch mode 2"
-#define CD_DMM3       "set deathmatch mode 3"
-#define CD_DMM4       "set deathmatch mode 4"
-#define CD_DMM5       "set deathmatch mode 5"
-#define CD_TP         "change teamplay mode"
-#define CD_TIMEDOWN1  "-1 mins match time"
-#define CD_TIMEUP1    "+1 mins match time"
-#define CD_TIMEDOWN   "-5 mins match time"
-#define CD_TIMEUP     "+5 mins match time"
-#define CD_FALLBUNNY  "toggle fallbunny"
-#define CD_FRAGSDOWN  "-10 fraglimit"
-#define CD_FRAGSUP    "+10 fraglimit"
-#define CD_KILLQUAD   "kill the quad mode"
-#define CD_BLOODFEST  "blood fest mode (coop/single only)"
-#define CD_DROPQUAD   "drop quad when killed"
-#define CD_DROPRING   "drop ring when killed"
-#define CD_DROPPACK   "drop pack when killed"
-#define CD_SILENCE    "toggle spectator talk"
-#define CD_REPORT     "simple teamplay report"
-#define CD_RULES      "show game rules"
-#define CD_LOCKMODE   "change locking mode"
-#define CD_MAPS       "list custom maps"
-#define CD_ADMIN      "toggle admin-mode"
-#define CD_FORCESTART "force match to start"
-#define CD_FORCEBREAK "force match to end"
-#define CD_FORCEMAP   "force change of map"
-#define CD_PICKUP     "vote for pickup game"
-#define CD_PREWAR     "playerfire before game"
-#define CD_LOCKMAP    "(un)lock current map"
-#define CD_SPEED      "toggle sv_maxspeed"
-#define CD_FAIRPACKS  "best/last weapon dropped"
-#define CD_ABOUT      "mod's info"
-#define CD_CTOCT	  "Show octal charset table"
-#define CD_CTHEX	  "Show hexadecimal charset table"
-#define CD_SHOWNICK   "pointed player's info"
-#define CD_TIME5      "set timelimit to 5 mins"
-#define CD_TIME10     "set timelimit to 10 mins"
-#define CD_TIME15     "set timelimit to 15 mins"
-#define CD_TIME20     "set timelimit to 20 mins"
-#define CD_TIME25     "set timelimit to 25 mins"
-#define CD_TIME30     "set timelimit to 30 mins"
-#define CD_KSOUND1    (CD_NODESC) // useless command now
-#define CD_KSOUND2    (CD_NODESC) // useless command now
-#define CD_KSOUND3    (CD_NODESC) // useless command now
-#define CD_KSOUND4    (CD_NODESC) // useless command now
-#define CD_KSOUND5    (CD_NODESC) // useless command now
-#define CD_KSOUND6    (CD_NODESC) // useless command now
-#define CD_QIZMO      "qizmo related commands"
-#define CD_MESSAGES   "fun message commands"
-#define CD_KILLER     "message to killer"
-#define CD_VICTIM     "message to victim"
-#define CD_NEWCOMER   "message to last player joined"
-#define CD_QLAG       "lag settings"
-#define CD_QENEMY     "enemy vicinity reporting"
-#define CD_QPOINT     "point function"
+#define CD_VOTEMAP			"alternative map vote system"
+#define CD_COMMANDS			"show commands list"
+#define CD_SCORES			"print match time/scores"
+#define CD_STATS			"show player stats"
+#define CD_EFFI				"show player efficiencies"
+#define CD_OPTIONS			"match control commands"
+#define CD_READY			"when you feel ready"
+#define CD_BREAK			"unready / vote matchend"
+#define CD_STATUS			"show server settings"
+#define CD_STATUS2			"more server settings"
+#define CD_WHO				"player teamlist"
+#define CD_WHOSKIN			"player skinlist"
+#define CD_WHONOT			"players not ready"
+#define CD_LIST				"whonot to everyone"
+#define CD_WHOVOTE			"info on received votes"
+#define CD_SPAWN			"toggle spawn modes"
+#define CD_SPAWNPOINTS		"toggle visible spawn points"
+#define CD_POWERUPS			"quad, \230\230\230, ring & suit"
+#define CD_PUPICKUP			"change powerups pickup policy"
+#define CD_ANTILAG			"toggle antilag"
+#define CD_DISCHARGE		"underwater discharges"
+#define CD_DM				"show deathmatch mode"
+#define CD_DMM1				"set deathmatch mode 1"
+#define CD_DMM2				"set deathmatch mode 2"
+#define CD_DMM3				"set deathmatch mode 3"
+#define CD_DMM4				"set deathmatch mode 4"
+#define CD_DMM5				"set deathmatch mode 5"
+#define CD_TP				"change teamplay mode"
+#define CD_TIMEDOWN1		"-1 mins match time"
+#define CD_TIMEUP1			"+1 mins match time"
+#define CD_TIMEDOWN			"-5 mins match time"
+#define CD_TIMEUP			"+5 mins match time"
+#define CD_FALLBUNNY		"toggle fallbunny"
+#define CD_FRAGSDOWN		"-10 fraglimit"
+#define CD_FRAGSUP			"+10 fraglimit"
+#define CD_KILLQUAD			"kill the quad mode"
+#define CD_BLOODFEST		"blood fest mode (coop/single only)"
+#define CD_DROPQUAD			"drop quad when killed"
+#define CD_DROPRING			"drop ring when killed"
+#define CD_DROPPACK			"drop pack when killed"
+#define CD_SILENCE			"toggle spectator talk"
+#define CD_REPORT			"simple teamplay report"
+#define CD_RULES			"show game rules"
+#define CD_LOCKMODE			"change locking mode"
+#define CD_MAPS				"list custom maps"
+#define CD_ADMIN			"toggle admin-mode"
+#define CD_FORCESTART		"force match to start"
+#define CD_FORCEBREAK		"force match to end"
+#define CD_FORCEMAP			"force change of map"
+#define CD_PICKUP			"vote for pickup game"
+#define CD_PREWAR			"playerfire before game"
+#define CD_LOCKMAP			"(un)lock current map"
+#define CD_SPEED			"toggle sv_maxspeed"
+#define CD_FAIRPACKS		"best/last weapon dropped"
+#define CD_ABOUT			"mod's info"
+#define CD_CTOCT			"Show octal charset table"
+#define CD_CTHEX			"Show hexadecimal charset table"
+#define CD_SHOWNICK			"pointed player's info"
+#define CD_TIME5			"set timelimit to 5 mins"
+#define CD_TIME10			"set timelimit to 10 mins"
+#define CD_TIME15			"set timelimit to 15 mins"
+#define CD_TIME20			"set timelimit to 20 mins"
+#define CD_TIME25			"set timelimit to 25 mins"
+#define CD_TIME30			"set timelimit to 30 mins"
+#define CD_KSOUND1			(CD_NODESC) // useless command now
+#define CD_KSOUND2			(CD_NODESC) // useless command now
+#define CD_KSOUND3			(CD_NODESC) // useless command now
+#define CD_KSOUND4			(CD_NODESC) // useless command now
+#define CD_KSOUND5			(CD_NODESC) // useless command now
+#define CD_KSOUND6			(CD_NODESC) // useless command now
+#define CD_QIZMO			"qizmo related commands"
+#define CD_MESSAGES			"fun message commands"
+#define CD_KILLER			"message to killer"
+#define CD_VICTIM			"message to victim"
+#define CD_NEWCOMER			"message to last player joined"
+#define CD_QLAG				"lag settings"
+#define CD_QENEMY			"enemy vicinity reporting"
+#define CD_QPOINT			"point function"
 /* new FDP bits https://www.quakeworld.nu/wiki/FPD
- #define CD_SFORCING   "skin forcing"
- #define CD_CFORCING   "color forcing"
- #define CD_PITCHSP    "pitch speed limiting"
- #define CD_YAWSP      "yaw speed limiting"
- */
-#define CD_KICK       "toggle kick mode"
-#define CD_MKICK      "multi kick"
-#define CD_Y          "yes kick"
-#define CD_N          "don't kick"
-#define CD_OVERTIME   "toggle overtime mode"
-#define CD_OVERTIMEUP "change overtime length"
-#define CD_ELECT      "toggle admin election"
-#define CD_YES        "give vote"
-#define CD_NO         "withdraws vote"
-#define CD_CAPTAIN    "toggle captain election"
-#define CD_COACH      "toggle coach election"
-#define CD_FREEZE     "(un)freeze the map"
-#define CD_RPICKUP    "vote random team pickup"
-#define CD_1ON1       "duel settings"
-#define CD_1ON1HM     "HoonyMode settings"
-#define CD_2ON2BLITZ  "Blitz 2v2"
-#define CD_4ON4BLITZ  "Blitz 4v4"
-#define CD_HMSTATS    "show stats per hoonymode point"
-#define CD_2ON2       "2 on 2 settings"
-#define CD_3ON3       "3 on 3 settings"
-#define CD_4ON4       "4 on 4 settings"
-#define CD_10ON10     "10 on 10 settings"
-#define CD_FFA        "FFA settings"
-#define CD_CTF        "CTF settings"
-#define CD_PRACTICE   "toggle practice mode"
-#define CD_WP_RESET   "clear weapon stats"
-#define CD_PLS_WP_STATS "start print weapon stats"
-#define CD_MNS_WP_STATS (CD_NODESC) // obvious
-#define CD_TKFJUMP      "toggle allow kfjump"
-#define CD_TKRJUMP      "toggle allow krjump"
-#define CD_KLIST        "mod's list of users"
-#define CD_HDPTOGGLE    "toggle allow handicap"
-#define CD_HANDICAP     "toggle handicap level"
-#define CD_NOWEAPON     "toggle allow any weapon"
-#define CD_CAM          "camera help text"
-#define CD_TRACKLIST    "trackers list"
-#define CD_FPSLIST      "fps list"
-#define CD_FAV1_ADD     "add player to slot  1"
-#define CD_FAV2_ADD     "add player to slot  2"
-#define CD_FAV3_ADD     "........etc.........."
-#define CD_FAV4_ADD     (CD_NODESC) // skip
-#define CD_FAV5_ADD     (CD_NODESC) // skip
-#define CD_FAV6_ADD     (CD_NODESC) // skip
-#define CD_FAV7_ADD     (CD_NODESC) // skip
-#define CD_FAV8_ADD     (CD_NODESC) // skip
-#define CD_FAV9_ADD     (CD_NODESC) // skip
-#define CD_FAV10_ADD    (CD_NODESC) // skip
-#define CD_FAV11_ADD    (CD_NODESC) // skip
-#define CD_FAV12_ADD    (CD_NODESC) // skip
-#define CD_FAV13_ADD    (CD_NODESC) // skip
-#define CD_FAV14_ADD    (CD_NODESC) // skip
-#define CD_FAV15_ADD    (CD_NODESC) // skip
-#define CD_FAV16_ADD    (CD_NODESC) // skip
-#define CD_FAV17_ADD    (CD_NODESC) // skip
-#define CD_FAV18_ADD    (CD_NODESC) // skip
-#define CD_FAV19_ADD    "add player to slot 19"
-#define CD_FAV20_ADD    "add player to slot 20"
-#define CD_1FAV_GO      "set pov to slot  1"
-#define CD_2FAV_GO      "set pov to slot  2"
-#define CD_3FAV_GO      ".......etc........"
-#define CD_4FAV_GO      (CD_NODESC) // skip
-#define CD_5FAV_GO      (CD_NODESC) // skip
-#define CD_6FAV_GO      (CD_NODESC) // skip
-#define CD_7FAV_GO      (CD_NODESC) // skip
-#define CD_8FAV_GO      (CD_NODESC) // skip
-#define CD_9FAV_GO      (CD_NODESC) // skip
-#define CD_10FAV_GO     (CD_NODESC) // skip
-#define CD_11FAV_GO     (CD_NODESC) // skip
-#define CD_12FAV_GO     (CD_NODESC) // skip
-#define CD_13FAV_GO     (CD_NODESC) // skip
-#define CD_14FAV_GO     (CD_NODESC) // skip
-#define CD_15FAV_GO     (CD_NODESC) // skip
-#define CD_16FAV_GO     (CD_NODESC) // skip
-#define CD_17FAV_GO     (CD_NODESC) // skip
-#define CD_18FAV_GO     (CD_NODESC) // skip
-#define CD_19FAV_GO     "set pov to slot 19"
-#define CD_20FAV_GO     "set pov to slot 20"
-#define CD_FAV_ADD      "add player to fav list"
-#define CD_FAV_DEL      "remove player from fav list"
-#define CD_FAV_ALL_DEL  "clear fav list"
-#define CD_FAV_NEXT     "set pov to next fav"
-#define CD_FAV_SHOW     "show fav list"
-#define CD_PLS_SCORES   "show match time and score"
-#define CD_MNS_SCORES   (CD_NODESC) // obvious
-#define CD_AUTOTRACK    "auto tracking"
-#define CD_AUTOTRACKKTX "auto tracking, ktx version"
-#define CD_AUTO_POW     "auto tracking powerups"
-#define CD_NEXT_BEST    "set pov to next best player"
-#define CD_NEXT_POW     "set pov to next powerup"
-#define CD_LASTSCORES   "print last games scores"
-#define CD_RND          "select random value"
-#define CD_AGREE        "agree on last map vote"
-#define CD_POS_SHOW     "info about saved position"
-#define CD_POS_SAVE     "save current position"
-#define CD_POS_MOVE     "move to saved position"
-#define CD_POS_ORIGIN   "set position origin"
-#define CD_POS_ANGLES   "set position angles"
-#define CD_POS_VELOCITY "set position velocity"
-#define CD_SH_SPEED     "toggle use show speed"
-#define CD_TOSSRUNE     "drop rune (CTF)"
-#define CD_TOSSFLAG     "drop flag (CTF)"
-#define CD_FLAGSTATUS   "show flags status (CTF)"
-#define CD_NOHOOK       "toggle hook (CTF)"
-#define CD_CRHOOK       "toggle CRCTF 3.0 Hook settings (CTF)"
-#define CD_NORUNES      "toggle runes (CTF)"
-#define CD_NOGA         "toggle green armor on spawn (CTF)"
-#define CD_MCTF         "disable hook+runes (CTF)"
-#define CD_CTFBASEDSPAWN "spawn players on the base (CTF)"
-#define CD_MOTD         "show motd"
-#define CD_INFOLOCK     "toggle specinfo perms"
-#define CD_INFOSPEC     "toggle spectator infos"
-#define CD_MOREINFO     "receiving more info"
-#define CD_S_P			"direct player say"
-#define CD_S_L          "continue last s-p u done"
-#define CD_S_R          "reply to last s-p u got"
-#define CD_S_T          "say to group of players"
-#define CD_S_M          "multi say" // anyone have better description?
-#define CD_MMODE        "switch message mode"
-#define CD_MULTI        "change/print multi set"
-#define CD_KINFO        "set self params for mod"
-#define CD_KUINFO       "examine someone params"
-#define CD_WREG         "register reliable wpns"
-#define CD_KILL         "invoke suicide"
-#define CD_MIDAIR       "turn midair mode on/off"
-#define CD_MIDAIR_MINHEIGHT "midair minimum frag height"
-#define CD_INSTAGIB     "instagib settings"
-#define CD_BERZERK      "berzerk settings"
-#define CD_LGC          "lgc mode"
-#define CD_CG_KB        "toggle coilgun kickback in instagib"
-#define CD_TIME         "show server time"
-#define CD_GREN_MODE    "grenades mode"
-#define CD_TOGGLEREADY  "just toggle ready"
-#define CD_FP           "change floodprot level for players"
-#define CD_FP_SPEC      "change floodprot level for specs"
-#define CD_DLIST        "show demo list"
-#define CD_DINFO        "show demo info"
-#define CD_LOCK         "temprorary lock server"
-#define CD_SWAPALL      "swap teams for ctf"
+#define CD_SFORCING			"skin forcing"
+#define CD_CFORCING			"color forcing"
+#define CD_PITCHSP			"pitch speed limiting"
+#define CD_YAWSP			"yaw speed limiting"
+*/
+#define CD_KICK				"toggle kick mode"
+#define CD_MKICK			"multi kick"
+#define CD_Y				"yes kick"
+#define CD_N				"don't kick"
+#define CD_OVERTIME			"toggle overtime mode"
+#define CD_OVERTIMEUP		"change overtime length"
+#define CD_ELECT			"toggle admin election"
+#define CD_YES				"give vote"
+#define CD_NO				"withdraws vote"
+#define CD_CAPTAIN			"toggle captain election"
+#define CD_COACH			"toggle coach election"
+#define CD_FREEZE			"(un)freeze the map"
+#define CD_RPICKUP			"vote random team pickup"
+#define CD_1ON1				"duel settings"
+#define CD_1ON1HM			"HoonyMode settings"
+#define CD_2ON2BLITZ		"Blitz 2v2"
+#define CD_4ON4BLITZ		"Blitz 4v4"
+#define CD_HMSTATS			"show stats per hoonymode point"
+#define CD_2ON2				"2 on 2 settings"
+#define CD_3ON3				"3 on 3 settings"
+#define CD_4ON4				"4 on 4 settings"
+#define CD_10ON10			"10 on 10 settings"
+#define CD_FFA				"FFA settings"
+#define CD_CTF				"CTF settings"
+#define CD_PRACTICE			"toggle practice mode"
+#define CD_WP_RESET			"clear weapon stats"
+#define CD_PLS_WP_STATS		"start print weapon stats"
+#define CD_MNS_WP_STATS		(CD_NODESC) // obvious
+#define CD_TKFJUMP			"toggle allow kfjump"
+#define CD_TKRJUMP			"toggle allow krjump"
+#define CD_KLIST			"mod's list of users"
+#define CD_HDPTOGGLE		"toggle allow handicap"
+#define CD_HANDICAP			"toggle handicap level"
+#define CD_NOWEAPON			"toggle allow any weapon"
+#define CD_CAM				"camera help text"
+#define CD_TRACKLIST		"trackers list"
+#define CD_FPSLIST			"fps list"
+#define CD_FAV1_ADD			"add player to slot  1"
+#define CD_FAV2_ADD			"add player to slot  2"
+#define CD_FAV3_ADD			"........etc.........."
+#define CD_FAV4_ADD			(CD_NODESC) // skip
+#define CD_FAV5_ADD			(CD_NODESC) // skip
+#define CD_FAV6_ADD			(CD_NODESC) // skip
+#define CD_FAV7_ADD			(CD_NODESC) // skip
+#define CD_FAV8_ADD			(CD_NODESC) // skip
+#define CD_FAV9_ADD			(CD_NODESC) // skip
+#define CD_FAV10_ADD		(CD_NODESC) // skip
+#define CD_FAV11_ADD		(CD_NODESC) // skip
+#define CD_FAV12_ADD		(CD_NODESC) // skip
+#define CD_FAV13_ADD		(CD_NODESC) // skip
+#define CD_FAV14_ADD		(CD_NODESC) // skip
+#define CD_FAV15_ADD		(CD_NODESC) // skip
+#define CD_FAV16_ADD		(CD_NODESC) // skip
+#define CD_FAV17_ADD		(CD_NODESC) // skip
+#define CD_FAV18_ADD		(CD_NODESC) // skip
+#define CD_FAV19_ADD		"add player to slot 19"
+#define CD_FAV20_ADD		"add player to slot 20"
+#define CD_1FAV_GO			"set pov to slot  1"
+#define CD_2FAV_GO			"set pov to slot  2"
+#define CD_3FAV_GO			".......etc........"
+#define CD_4FAV_GO			(CD_NODESC) // skip
+#define CD_5FAV_GO			(CD_NODESC) // skip
+#define CD_6FAV_GO			(CD_NODESC) // skip
+#define CD_7FAV_GO			(CD_NODESC) // skip
+#define CD_8FAV_GO			(CD_NODESC) // skip
+#define CD_9FAV_GO			(CD_NODESC) // skip
+#define CD_10FAV_GO			(CD_NODESC) // skip
+#define CD_11FAV_GO			(CD_NODESC) // skip
+#define CD_12FAV_GO			(CD_NODESC) // skip
+#define CD_13FAV_GO			(CD_NODESC) // skip
+#define CD_14FAV_GO			(CD_NODESC) // skip
+#define CD_15FAV_GO			(CD_NODESC) // skip
+#define CD_16FAV_GO			(CD_NODESC) // skip
+#define CD_17FAV_GO			(CD_NODESC) // skip
+#define CD_18FAV_GO			(CD_NODESC) // skip
+#define CD_19FAV_GO			"set pov to slot 19"
+#define CD_20FAV_GO			"set pov to slot 20"
+#define CD_FAV_ADD			"add player to fav list"
+#define CD_FAV_DEL			"remove player from fav list"
+#define CD_FAV_ALL_DEL		"clear fav list"
+#define CD_FAV_NEXT			"set pov to next fav"
+#define CD_FAV_SHOW			"show fav list"
+#define CD_PLS_SCORES		"show match time and score"
+#define CD_MNS_SCORES		(CD_NODESC) // obvious
+#define CD_AUTOTRACK		"auto tracking"
+#define CD_AUTOTRACKKTX		"auto tracking, ktx version"
+#define CD_AUTO_POW			"auto tracking powerups"
+#define CD_NEXT_BEST		"set pov to next best player"
+#define CD_NEXT_POW			"set pov to next powerup"
+#define CD_LASTSCORES		"print last games scores"
+#define CD_RND				"select random value"
+#define CD_AGREE			"agree on last map vote"
+#define CD_POS_SHOW			"info about saved position"
+#define CD_POS_SAVE			"save current position"
+#define CD_POS_MOVE			"move to saved position"
+#define CD_POS_ORIGIN		"set position origin"
+#define CD_POS_ANGLES		"set position angles"
+#define CD_POS_VELOCITY		"set position velocity"
+#define CD_SH_SPEED			"toggle use show speed"
+#define CD_TOSSRUNE			"drop rune (CTF)"
+#define CD_TOSSFLAG			"drop flag (CTF)"
+#define CD_FLAGSTATUS		"show flags status (CTF)"
+#define CD_NOHOOK			"toggle hook (CTF)"
+#define CD_CRHOOK			"toggle CRCTF 3.0 Hook settings (CTF)"
+#define CD_NORUNES			"toggle runes (CTF)"
+#define CD_NOGA				"toggle green armor on spawn (CTF)"
+#define CD_MCTF				"disable hook+runes (CTF)"
+#define CD_CTFBASEDSPAWN	"spawn players on the base (CTF)"
+#define CD_MOTD				"show motd"
+#define CD_INFOLOCK			"toggle specinfo perms"
+#define CD_INFOSPEC			"toggle spectator infos"
+#define CD_MOREINFO			"receiving more info"
+#define CD_S_P				"direct player say"
+#define CD_S_L				"continue last s-p u done"
+#define CD_S_R				"reply to last s-p u got"
+#define CD_S_T				"say to group of players"
+#define CD_S_M				"multi say" // anyone have better description?
+#define CD_MMODE			"switch message mode"
+#define CD_MULTI			"change/print multi set"
+#define CD_KINFO			"set self params for mod"
+#define CD_KUINFO			"examine someone params"
+#define CD_WREG				"register reliable wpns"
+#define CD_KILL				"invoke suicide"
+#define CD_MIDAIR			"turn midair mode on/off"
+#define CD_MIDAIR_MINHEIGHT	"midair minimum frag height"
+#define CD_INSTAGIB			"instagib settings"
+#define CD_BERZERK			"berzerk settings"
+#define CD_LGC				"lgc mode"
+#define CD_CG_KB			"toggle coilgun kickback in instagib"
+#define CD_TIME				"show server time"
+#define CD_GREN_MODE		"grenades mode"
+#define CD_TOGGLEREADY		"just toggle ready"
+#define CD_FP				"change floodprot level for players"
+#define CD_FP_SPEC			"change floodprot level for specs"
+#define CD_DLIST			"show demo list"
+#define CD_DINFO			"show demo info"
+#define CD_LOCK				"temprorary lock server"
+#define CD_SWAPALL			"swap teams for ctf"
 // { RA
-#define CD_RA_BREAK     "toggle RA line status"
-#define CD_RA_POS       "RA line position"
-#define CD_ARENA        "toggle rocket arena"
+#define CD_RA_BREAK			"toggle RA line status"
+#define CD_RA_POS			"RA line position"
+#define CD_ARENA			"toggle rocket arena"
 // }
 // { Clan Arena
-#define CD_CARENA       "toggle clan arena"
+#define CD_CARENA			"toggle clan arena"
 // }
-#define CD_FORCE_SPEC   "force spec players"
+#define CD_FORCE_SPEC		"force spec players"
 // { server side bans
-#define CD_BAN          "timed ban by uid/nick"
-#define CD_BANIP        "timed ban by ip"
-#define CD_BANREM       "remove ban / banlist"
+#define CD_BAN				"timed ban by uid/nick"
+#define CD_BANIP			"timed ban by ip"
+#define CD_BANREM			"remove ban / banlist"
 // }
-#define CD_TELETEAM     "team telefrag behaviour"
-#define CD_UPPLAYERS    "increase maxclients"
-#define CD_DOWNPLAYERS  "decrease maxclients"
-#define CD_UPSPECS      "increase maxspectators"
-#define CD_DOWNSPECS    "decrease maxspectators"
-#define CD_IPLIST       "list clients ips"
-#define CD_DMGFRAGS     "toggle damage frags"
-#define CD_NO_LG        "alias for /noweapon lg"
-#define CD_NO_GL		"alias for /noweapon gl"
+#define CD_TELETEAM			"team telefrag behaviour"
+#define CD_UPPLAYERS		"increase maxclients"
+#define CD_DOWNPLAYERS		"decrease maxclients"
+#define CD_UPSPECS			"increase maxspectators"
+#define CD_DOWNSPECS		"decrease maxspectators"
+#define CD_IPLIST			"list clients ips"
+#define CD_DMGFRAGS			"toggle damage frags"
+#define CD_NO_LG			"alias for /noweapon lg"
+#define CD_NO_GL			"alias for /noweapon gl"
 // {
-#define CD_TRX_REC      "trick tmp record"
-#define CD_TRX_PLAY     "trick tmp playback"
-#define CD_TRX_STOP     "stop playback/recording"
+#define CD_TRX_REC			"trick tmp record"
+#define CD_TRX_PLAY			"trick tmp playback"
+#define CD_TRX_STOP			"stop playback/recording"
 // }
-#define CD_CALLALIAS    "call alias after few secs"
-#define CD_CHECK        "better f_checks handle"
-#define CD_NEXT_MAP     "vote for next map"
-#define CD_MAPCYCLE     "list map cycle"
-#define CD_YAWNMODE     "toggle yawnmode"
-#define CD_FALLBUNNYCAP "set fallbunny cap (yawn)"
-#define CD_TELEPORTCAP  "set teleport cap (yawn)"
-#define CD_AIRSTEP      "toggle airstep"
-#define CD_EXCLUSIVE    "toggle exclusive mode"
-#define CD_VWEP         "toggle vweps"
-#define CD_PAUSE        "toggle pause"
+#define CD_CALLALIAS		"call alias after few secs"
+#define CD_CHECK			"better f_checks handle"
+#define CD_NEXT_MAP			"vote for next map"
+#define CD_MAPCYCLE			"list map cycle"
+#define CD_YAWNMODE			"toggle yawnmode"
+#define CD_FALLBUNNYCAP		"set fallbunny cap (yawn)"
+#define CD_TELEPORTCAP		"set teleport cap (yawn)"
+#define CD_AIRSTEP			"toggle airstep"
+#define CD_EXCLUSIVE		"toggle exclusive mode"
+#define CD_VWEP				"toggle vweps"
+#define CD_PAUSE			"toggle pause"
 // { RACE
-#define CD_RACE       	"toggle race mode"
-#define CD_R_SSET       "set race start checkpoint"
-#define CD_R_CSET       "set race checkpoint"
-#define CD_R_ESET       "set race end checkpoint"
-#define CD_R_CDEL       "remove race current checkpoint"
-#define CD_R_ROUTE      "load predefined routes for map"
-#define CD_C_ROUTE      "clear current route completely"
-#define CD_R_PRINT      "show race route info"
-#define CD_RREADY       "ready for race"
-#define CD_RBREAK       "not ready for race"
-#define CD_RBREAKALL    "force all racers to break"
-#define CD_RTOGGLE      "toggle ready status for race"
-#define CD_RCANCEL      "cancel current race, for racer"
-#define CD_RTIMEOUT     "set race timeout"
-#define CD_RFALSESTART  "set race starting mode"
-#define CD_RMODE        "set race weapon mode"
-#define CD_RFOLLOW      "follow racers with chasecam while waiting in line"
-#define CD_RNOFOLLOW    "don't follow racers with chasecam while waiting in line"
-#define CD_RFTOGGLE	    "toggle chasecam status"
-#define CD_RCHASECAM	"cycle between chasecam views"
-#define CD_RCHASECAMFL	"toggle chasecam freelook"
-#define CD_RLINEUP		"show current race line-up"
-#define CD_RSCORES		"show top race times for current map"
-#define CD_RSCOREDETAIL "show details about a record"
-#define CD_RDLDEMO      "download demo for a record"
-#define CD_RPACEMAKER   "set pacemaker"
-#define CD_RSIMULMODE   "toggle simultaneous racing"
-#define CD_RMATCHMODE   "toggle race match mode"
-#define CD_RSCORINGMODE "toggle between scoring systems"
-#define CD_RHIDEPLAYERS "toggle visible players during race"
+#define CD_RACE				"toggle race mode"
+#define CD_R_SSET			"set race start checkpoint"
+#define CD_R_CSET			"set race checkpoint"
+#define CD_R_ESET			"set race end checkpoint"
+#define CD_R_CDEL			"remove race current checkpoint"
+#define CD_R_ROUTE			"load predefined routes for map"
+#define CD_C_ROUTE			"clear current route completely"
+#define CD_R_PRINT			"show race route info"
+#define CD_RREADY			"ready for race"
+#define CD_RBREAK			"not ready for race"
+#define CD_RBREAKALL		"force all racers to break"
+#define CD_RTOGGLE			"toggle ready status for race"
+#define CD_RCANCEL			"cancel current race, for racer"
+#define CD_RTIMEOUT			"set race timeout"
+#define CD_RFALSESTART		"set race starting mode"
+#define CD_RMODE			"set race weapon mode"
+#define CD_RFOLLOW			"follow racers with chasecam while waiting in line"
+#define CD_RNOFOLLOW		"don't follow racers with chasecam while waiting in line"
+#define CD_RFTOGGLE			"toggle chasecam status"
+#define CD_RCHASECAM		"cycle between chasecam views"
+#define CD_RCHASECAMFL		"toggle chasecam freelook"
+#define CD_RLINEUP			"show current race line-up"
+#define CD_RSCORES			"show top race times for current map"
+#define CD_RSCOREDETAIL		"show details about a record"
+#define CD_RDLDEMO			"download demo for a record"
+#define CD_RPACEMAKER		"set pacemaker"
+#define CD_RSIMULMODE		"toggle simultaneous racing"
+#define CD_RMATCHMODE		"toggle race match mode"
+#define CD_RSCORINGMODE		"toggle between scoring systems"
+#define CD_RHIDEPLAYERS		"toggle visible players during race"
 // }
 
-#define CD_NOSPECS      "allow/disallow spectators"
-#define CD_NOITEMS      "allow/disallow items in game"
-#define CD_TEAMOVERLAY  "allow/disallow teamoverlay"
+#define CD_NOSPECS			"allow/disallow spectators"
+#define CD_NOITEMS			"allow/disallow items in game"
+#define CD_TEAMOVERLAY		"allow/disallow teamoverlay"
 
-#define CD_SPAWN666TIME "set spawn pent time (dmm4 atm)"
+#define CD_SPAWN666TIME		"set spawn pent time (dmm4 atm)"
 
-#define CD_GIVEME       (CD_NODESC) // skip
-#define CD_DROPITEM     (CD_NODESC) // skip
-#define CD_REMOVEITEM   (CD_NODESC) // skip
-#define CD_DUMPENT      (CD_NODESC) // skip
+#define CD_GIVEME			(CD_NODESC) // skip
+#define CD_DROPITEM			(CD_NODESC) // skip
+#define CD_REMOVEITEM		(CD_NODESC) // skip
+#define CD_DUMPENT			(CD_NODESC) // skip
 
-#define CD_VOTECOOP     "vote for coop on/off"
-#define CD_COOPNMPU     "new nightmare mode (pu drops) on/off"
+#define CD_VOTECOOP			"vote for coop on/off"
+#define CD_COOPNMPU			"new nightmare mode (pu drops) on/off"
 
-#define CD_MAPSLIST_DL  (CD_NODESC) // skip
-#define CD_CMDSLIST_DL  (CD_NODESC) // skip
+#define CD_MAPSLIST_DL		(CD_NODESC) // skip
+#define CD_CMDSLIST_DL		(CD_NODESC) // skip
 
-#define CD_DEMOMARK     "put mark in the demo"
+#define CD_DEMOMARK			"put mark in the demo"
 
-#define CD_BOTCOMMAND   "bot configuration"
+#define CD_BOTCOMMAND		"bot configuration"
 
-#define CD_PRIVATEGAME  "private game (logged in users only)"
+#define CD_PRIVATEGAME		"private game (logged in users only)"
 
-#define CD_TEAMPLAYMESSAGE "teamplay messages"
+#define CD_TEAMPLAYMESSAGE	"teamplay messages"
 
-#define CD_PICKSPAWN    "nominate hoonymode spawn"
-#define CD_ROUNDSUP     "increase rounds in match"
-#define CD_ROUNDSDOWN   "decrease rounds in match"
+#define CD_PICKSPAWN		"nominate hoonymode spawn"
+#define CD_ROUNDSUP			"increase rounds in match"
+#define CD_ROUNDSDOWN		"decrease rounds in match"
 
 void dummy()
 {
@@ -670,6 +672,7 @@ cmd_t cmds[] =
 	{ "list", 						ListWhoNot, 					0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_LIST },
 	{ "whovote", 					ModStatusVote, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_WHOVOTE },
 	{ "spawn", 						ToggleRespawns, 				0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_SPAWN },
+	{ "spawn_show", 				ToggleSpawnPoints, 				0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_SPAWNPOINTS },
 	{ "powerups", 					TogglePowerups, 				0, 			CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, 									CD_POWERUPS },
 	{ "powerups_pickup", 			TogglePuPickup, 				0, 			CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, 									CD_PUPICKUP },
 	{ "antilag", 					antilag, 						0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_ANTILAG },
@@ -887,7 +890,7 @@ cmd_t cmds[] =
 	{ "instagib", 					ToggleInstagib, 				0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_INSTAGIB },
 	{ "berzerk", 					ToggleBerzerk, 					0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_BERZERK },
 	{ "lgcmode", 					ToggleLGC, 						0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_LGC },
-	{ "instagib_coilgun_kickback", 	ToggleCGKickback, 				0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_CG_KB },
+	{ "instagib_coilgun_kickback",	ToggleCGKickback, 				0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_CG_KB },
 	{ "time", 						sv_time, 						0, 			CF_BOTH | CF_MATCHLESS, 												CD_TIME },
 	{ "gren_mode", 					GrenadeMode, 					0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_GREN_MODE },
 	{ "toggleready", 				ToggleReady, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_TOGGLEREADY },
@@ -977,7 +980,7 @@ cmd_t cmds[] =
 
 #ifdef BOT_SUPPORT
 	// { FROGBOTS
-	{ "botcmd", 					FrogbotsCommand, 				0 , 			CF_BOTH | CF_MATCHLESS | CF_PARAMS, 								CD_BOTCOMMAND },
+	{ "botcmd", 					FrogbotsCommand, 				0, 			CF_BOTH | CF_MATCHLESS | CF_PARAMS, 								CD_BOTCOMMAND },
 	// }
 #endif
 
@@ -2541,6 +2544,25 @@ void ToggleRespawns()
 	G_bprint(2, "%s\n", respawn_model_name(k_spw));
 }
 
+void ToggleSpawnPoints()
+{
+	if (match_in_progress)
+	{
+		return;
+	}
+
+	cvar_toggle_msg(self, "k_spm_show", redtext("visible spawn points"));
+
+	if (cvar("k_spm_show"))
+	{
+		ShowSpawnPoints();
+	}
+	else
+	{
+		HideSpawnPoints();
+	}
+}
+
 void TogglePowerups()
 {
 	char arg[64];
@@ -3016,7 +3038,6 @@ void ToggleBerzerk()
 
 	cvar_toggle_msg(self, "k_bzk", redtext("Berzerk mode"));
 }
-;
 
 void ToggleSpecTalk()
 {

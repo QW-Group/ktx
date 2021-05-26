@@ -16,11 +16,11 @@ float SubZoneArrivalTime(float zone_time, gedict_t *middle_marker, gedict_t *fro
 {
 	if (rl_routes)
 	{
-		return zone_time + middle_marker->fb.subzones[from_marker->fb.S_].rj_time;
+		return (zone_time + middle_marker->fb.subzones[from_marker->fb.S_].rj_time);
 	}
 	else
 	{
-		return zone_time + middle_marker->fb.subzones[from_marker->fb.S_].time;
+		return (zone_time + middle_marker->fb.subzones[from_marker->fb.S_].time);
 	}
 }
 
@@ -43,8 +43,8 @@ gedict_t* HigherSightFromFunction(gedict_t *from_marker, gedict_t *to_marker)
 
 float SightFromTime(gedict_t *from_marker, gedict_t *to_marker)
 {
-	return to_marker && from_marker && from_marker->fb.Z_ ?
-			to_marker->fb.zones[from_marker->fb.Z_ - 1].sight_from_time : 0.0f;
+	return (to_marker && from_marker && from_marker->fb.Z_ ?
+			to_marker->fb.zones[from_marker->fb.Z_ - 1].sight_from_time : 0.0f);
 }
 
 void ZoneMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_normal, qbool rl_jump_routes)

@@ -1065,7 +1065,7 @@ void FirstFrame()
 	k_ctf_custom_models = cvar("k_ctf_custom_models") && (k_allowed_free_modes & UM_CTF);
 
 // use k_defmode or reuse last mode from _k_last_xonx
-	cvar_fset("_k_worldspawns", (int) cvar("_k_worldspawns") + 1);
+	cvar_fset("_k_worldspawns", (int)cvar("_k_worldspawns") + 1);
 
 	if (cvar("_k_worldspawns") == 1)
 	{ // server spawn first map
@@ -1633,7 +1633,7 @@ void FixRules()
 
 	if (deathmatch)
 	{
-		g_globalvars.serverflags = (int) g_globalvars.serverflags & ~15; // remove runes
+		g_globalvars.serverflags = (int)g_globalvars.serverflags & ~15; // remove runes
 	}
 
 	if (cvar("k_midair") && deathmatch != 4)
@@ -1650,7 +1650,7 @@ void FixRules()
 	// and must not happen on well configured servers, k?
 	if (km != k_mode)
 	{
-		G_bprint(2, "%s: k_mode changed to: %d\n", redtext("WARNING"), (int) k_mode);
+		G_bprint(2, "%s: k_mode changed to: %d\n", redtext("WARNING"), (int)k_mode);
 	}
 
 	if (tp != teamplay)

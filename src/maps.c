@@ -382,7 +382,7 @@ int GetMapNum(char *map)
 	{
 		if (streq(mapslist[i], map))
 		{
-			return i + 1;
+			return (i + 1);
 		}
 	}
 
@@ -574,7 +574,7 @@ int IsMapInCycle(char *map)
 
 		if (streq(map, newmap)) // ok map found in map list
 		{
-			return i + 1; // i may be 0, so returning i + 1
+			return (i + 1); // i may be 0, so returning i + 1
 		}
 	}
 

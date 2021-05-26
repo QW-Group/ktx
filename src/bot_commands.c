@@ -76,7 +76,7 @@ static team_t teams[4];
 
 qbool HasSavedMarker(void)
 {
-	return saved_marker != NULL;
+	return (saved_marker != NULL);
 }
 
 qbool IsMarkerFrame(void)
@@ -113,7 +113,7 @@ bot_t bots[MAX_BOTS] =
 
 static int FrogbotSkillLevel(void)
 {
-	return (int) cvar(FB_CVAR_SKILL);
+	return (int)cvar(FB_CVAR_SKILL);
 }
 
 static team_t* AddTeamToList(int *teamsFound, char *team, int topColor, int bottomColor)
@@ -545,7 +545,7 @@ static void FrogbotsDebug(void)
 			int i = 0;
 
 			trap_CmdArgv(3, sub_command, sizeof(sub_command));
-			marker = markers[(int) bound(0, atoi(sub_command) - 1, NUMBER_MARKERS - 1)];
+			marker = markers[(int)bound(0, atoi(sub_command) - 1, NUMBER_MARKERS - 1)];
 
 			if (marker == NULL)
 			{
@@ -728,7 +728,7 @@ static void FrogbotsDebug(void)
 			}
 
 			trap_CmdArgv(3, sub_command, sizeof(sub_command));
-			marker = markers[(int) bound(0, atoi(sub_command) - 1, NUMBER_MARKERS - 1)];
+			marker = markers[(int)bound(0, atoi(sub_command) - 1, NUMBER_MARKERS - 1)];
 
 			if ((marker == NULL) || ((marker->fb.index + 1) != atoi(sub_command)))
 			{
@@ -738,7 +738,7 @@ static void FrogbotsDebug(void)
 			}
 
 			trap_CmdArgv(4, sub_command, sizeof(sub_command));
-			target = markers[(int) bound(0, atoi(sub_command) - 1, NUMBER_MARKERS - 1)];
+			target = markers[(int)bound(0, atoi(sub_command) - 1, NUMBER_MARKERS - 1)];
 
 			if ((target == NULL) || ((target->fb.index + 1) != atoi(sub_command)))
 			{
@@ -808,7 +808,7 @@ static void FrogbotGoto(void)
 	}
 
 	trap_CmdArgv(2, buffer, sizeof(buffer));
-	marker = markers[(int) bound(0, atoi(buffer) - 1, NUMBER_MARKERS - 1)];
+	marker = markers[(int)bound(0, atoi(buffer) - 1, NUMBER_MARKERS - 1)];
 	if (!marker)
 	{
 		G_sprint(self, PRINT_HIGH, "Marker #%3d not found\n", atoi(buffer));
@@ -936,7 +936,7 @@ static void BotFileGenerate(void)
 		if (markers[i]->fb.T & MARKER_EXPLICIT_VIEWOFFSET)
 		{
 			std_fprintf(file, "SetMarkerViewOfs %d %d\n", markers[i]->fb.index + 1,
-						(int) markers[i]->s.v.view_ofs[2]);
+						(int)markers[i]->s.v.view_ofs[2]);
 		}
 
 		for (p = 0; p < NUMBER_PATHS; ++p)
@@ -1012,7 +1012,7 @@ static void SelectMarker(gedict_t *marker)
 	indicator = MarkerIndicator(marker);
 	if (indicator)
 	{
-		indicator->s.v.effects = (int) indicator->s.v.effects | EDITOR_SELECTED_NODE;
+		indicator->s.v.effects = (int)indicator->s.v.effects | EDITOR_SELECTED_NODE;
 		setmodel(indicator, CURRENT_MARKER_MODEL);
 	}
 
@@ -1036,7 +1036,7 @@ static void SelectMarker(gedict_t *marker)
 					}
 				}
 
-				next_indicator->s.v.effects = ((int) next_indicator->s.v.effects
+				next_indicator->s.v.effects = ((int)next_indicator->s.v.effects
 						& ~(EDITOR_UNIDIRECTIONAL_COLOUR | EDITOR_BIDIRECTIONAL_COLOUR)) | effect;
 				setmodel(next_indicator, LINKED_MARKER_MODEL);
 			}
@@ -1051,7 +1051,7 @@ static void DeselectMarker(gedict_t *marker)
 
 	if (indicator)
 	{
-		indicator->s.v.effects = (int) indicator->s.v.effects & ~EDITOR_SELECTED_NODE;
+		indicator->s.v.effects = (int)indicator->s.v.effects & ~EDITOR_SELECTED_NODE;
 	}
 
 	for (i = 0; i < NUMBER_PATHS; ++i)
@@ -1063,7 +1063,7 @@ static void DeselectMarker(gedict_t *marker)
 			gedict_t *next_indicator = MarkerIndicator(next);
 			if (next_indicator)
 			{
-				next_indicator->s.v.effects = (int) next_indicator->s.v.effects
+				next_indicator->s.v.effects = (int)next_indicator->s.v.effects
 						& ~(EDITOR_UNIDIRECTIONAL_COLOUR | EDITOR_BIDIRECTIONAL_COLOUR);
 				setmodel(next_indicator, UNLINKED_MARKER_MODEL);
 			}
@@ -1103,7 +1103,7 @@ static void FrogbotMapInfo(void)
 
 			G_sprint(self, PRINT_HIGH, "Found quad damage, marker #%3d, goal %d, zone %d\n",
 						quad->fb.index + 1, quad->fb.G_, quad->fb.Z_);
-			G_sprint(self, PRINT_HIGH, " solid = %d, fl_marker = %s\n", (int) quad->s.v.solid,
+			G_sprint(self, PRINT_HIGH, " solid = %d, fl_marker = %s\n", (int)quad->s.v.solid,
 						quad->fb.fl_marker ? "true" : "false");
 
 			if (indicator)
@@ -1284,7 +1284,7 @@ static void FrogbotAddPath(void)
 		nearest_indicator = MarkerIndicator(nearest);
 		if (nearest_indicator)
 		{
-			nearest_indicator->s.v.effects = (int) nearest_indicator->s.v.effects
+			nearest_indicator->s.v.effects = (int)nearest_indicator->s.v.effects
 					& ~(EDITOR_BIDIRECTIONAL_COLOUR | EDITOR_UNIDIRECTIONAL_COLOUR);
 			setmodel(nearest_indicator, UNLINKED_MARKER_MODEL);
 		}
@@ -1303,7 +1303,7 @@ static void FrogbotAddPath(void)
 			nearest_indicator = MarkerIndicator(nearest);
 			if (nearest_indicator)
 			{
-				nearest_indicator->s.v.effects = ((int) nearest_indicator->s.v.effects
+				nearest_indicator->s.v.effects = ((int)nearest_indicator->s.v.effects
 						& ~EDITOR_UNIDIRECTIONAL_COLOUR) | EDITOR_BIDIRECTIONAL_COLOUR;
 				setmodel(nearest_indicator, LINKED_MARKER_MODEL);
 			}
@@ -1323,7 +1323,7 @@ static void FrogbotAddPath(void)
 		nearest_indicator = MarkerIndicator(nearest);
 		if (nearest_indicator)
 		{
-			nearest_indicator->s.v.effects = ((int) nearest_indicator->s.v.effects
+			nearest_indicator->s.v.effects = ((int)nearest_indicator->s.v.effects
 					& ~EDITOR_BIDIRECTIONAL_COLOUR) | EDITOR_UNIDIRECTIONAL_COLOUR;
 			setmodel(nearest_indicator, LINKED_MARKER_MODEL);
 		}
@@ -1368,7 +1368,7 @@ static void FrogbotRemovePath(void)
 	nearest_indicator = MarkerIndicator(nearest);
 	if (nearest_indicator)
 	{
-		nearest_indicator->s.v.effects = (int) nearest_indicator->s.v.effects
+		nearest_indicator->s.v.effects = (int)nearest_indicator->s.v.effects
 				& ~(EDITOR_UNIDIRECTIONAL_COLOUR | EDITOR_BIDIRECTIONAL_COLOUR);
 		setmodel(nearest_indicator, UNLINKED_MARKER_MODEL);
 	}
@@ -1394,7 +1394,7 @@ static void FrogbotRemoveAllPaths(void)
 			gedict_t *indicator = MarkerIndicator(next);
 			if (indicator)
 			{
-				indicator->s.v.effects = (int) indicator->s.v.effects
+				indicator->s.v.effects = (int)indicator->s.v.effects
 						& ~(EDITOR_UNIDIRECTIONAL_COLOUR | EDITOR_BIDIRECTIONAL_COLOUR);
 				setmodel(indicator, UNLINKED_MARKER_MODEL);
 			}
@@ -2318,16 +2318,16 @@ void Bot_Print_Thinking(void)
 	{
 		strlcat(data, "\n", sizeof(data));
 		strlcat(data,
-				va("  %s: armor %d, damage %d\n", redtext("Strength"), (int) bot->fb.total_armor,
-					(int) bot->fb.total_damage),
+				va("  %s: armor %d, damage %d\n", redtext("Strength"), (int)bot->fb.total_armor,
+					(int)bot->fb.total_damage),
 				sizeof(data));
 		strlcat(data,
-				va("  %s: RA %d YA %d GA %d\n", redtext("Desire"), (int) bot->fb.desire_armorInv,
-					(int) bot->fb.desire_armor2, (int) bot->fb.desire_armor1),
+				va("  %s: RA %d YA %d GA %d\n", redtext("Desire"), (int)bot->fb.desire_armorInv,
+					(int)bot->fb.desire_armor2, (int)bot->fb.desire_armor1),
 				sizeof(data));
 		strlcat(data,
-				va("  %s: LG %d RL %d\n", redtext("Desire"), (int) bot->fb.desire_lightning,
-					(int) bot->fb.desire_rocketlauncher),
+				va("  %s: LG %d RL %d\n", redtext("Desire"), (int)bot->fb.desire_lightning,
+					(int)bot->fb.desire_rocketlauncher),
 				sizeof(data));
 
 		if (bot->s.v.enemy)
@@ -2337,16 +2337,16 @@ void Bot_Print_Thinking(void)
 			strlcat(data, va("\n%s: %s\n", redtext("Enemy"), enemy->netname), sizeof(data));
 			strlcat(data,
 					va("  %s: armor %d, damage %d\n", redtext("Strength"),
-						(int) enemy->fb.total_armor, (int) enemy->fb.total_damage),
+						(int)enemy->fb.total_armor, (int)enemy->fb.total_damage),
 					sizeof(data));
 			strlcat(data,
 					va("  %s: RA %d YA %d GA %d\n", redtext("Desire"),
-						(int) enemy->fb.desire_armorInv, (int) enemy->fb.desire_armor2,
-						(int) bot->fb.desire_armor1),
+						(int)enemy->fb.desire_armorInv, (int)enemy->fb.desire_armor2,
+						(int)bot->fb.desire_armor1),
 					sizeof(data));
 			strlcat(data,
-					va("  %s: LG %d RL %d\n", redtext("Desire"), (int) enemy->fb.desire_lightning,
-						(int) enemy->fb.desire_rocketlauncher),
+					va("  %s: LG %d RL %d\n", redtext("Desire"), (int)enemy->fb.desire_lightning,
+						(int)enemy->fb.desire_rocketlauncher),
 					sizeof(data));
 		}
 	}
@@ -2385,7 +2385,7 @@ void Bot_Print_Thinking(void)
 					{
 						name = "quad";
 					}
-					else if (streq(name, "item_health") && ((int) goal->s.v.spawnflags & H_MEGA))
+					else if (streq(name, "item_health") && ((int)goal->s.v.spawnflags & H_MEGA))
 					{
 						name = "mega";
 					}
@@ -2401,7 +2401,7 @@ void Bot_Print_Thinking(void)
 
 					strlcat(data,
 							va("%2d: %s (%3.1f) %d\n", i + 1, name, goal->fb.desire(bot, goal),
-								(int) max(0, goal->fb.goal_respawn_time - g_globalvars.time)),
+								(int)max(0, goal->fb.goal_respawn_time - g_globalvars.time)),
 							sizeof(data));
 				}
 			}
@@ -2560,7 +2560,7 @@ void BotStartFrame(void)
 							yaw += 360;
 						}
 
-						G_sprint(self, PRINT_HIGH, "Jumpflags: %d %d %d\n", (int) pitch, (int) yaw,
+						G_sprint(self, PRINT_HIGH, "Jumpflags: %d %d %d\n", (int)pitch, (int)yaw,
 									framecount - self->fb.last_jump_frame);
 						self->fb.last_jump_frame = 1;
 					}
@@ -2596,7 +2596,7 @@ int BotVersionNumber(void)
 
 qbool FrogbotOptionEnabled(int option)
 {
-	return ((int)cvar(FB_CVAR_OPTIONS)) & option;
+	return (((int)cvar(FB_CVAR_OPTIONS)) & option);
 }
 
 #endif // BOT_SUPPORT

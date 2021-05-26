@@ -195,7 +195,7 @@ qbool isRACE(void)
 
 static qbool is_valid_record(raceRecord_t *record)
 {
-	return record->time < RACE_INVALID_RECORD_TIME;
+	return (record->time < RACE_INVALID_RECORD_TIME);
 }
 
 static int read_record_param(int param)
@@ -370,7 +370,7 @@ int race_time(void)
 		return 0; // count time only when race in state raceActive
 	}
 
-	return (g_globalvars.time - race.start_time) * 1000;
+	return ((g_globalvars.time - race.start_time) * 1000);
 }
 
 void setwepall(gedict_t *p)
@@ -767,7 +767,7 @@ qbool race_weapon_allowed(gedict_t *p)
 			return true;
 
 		case raceWeapon2s:
-			return (race_time() >= 2000 ? true : false);
+			return ((race_time() >= 2000) ? true : false);
 
 		default:
 			G_Error("race_weapon_allowed: wrong race.weapon %d", race.weapon);
@@ -1678,7 +1678,7 @@ gedict_t* spawn_race_node(raceRouteNode_t *node)
 	e->race_effects = blink_effects_for_nodeType(node->type);
 	e->touch = (func_t) race_node_touch;
 	e->attack_finished = g_globalvars.time + 1; // + 1 so it not touched immidiatelly, look race_node_touch() for more info
-	e->race_RouteNodeType = (int) node->type; // ah, cast
+	e->race_RouteNodeType = (int)node->type; // ah, cast
 
 	// play spawn sound
 	sound(e, CHAN_AUTO, spawn_sound_for_nodeType(node->type), 1, ATTN_NONE);
@@ -2943,7 +2943,7 @@ void r_changefollowstatus(float t)
 		return;
 	}
 
-	switch ((int) t)
+	switch ((int)t)
 	{
 		case 1: // rfollow
 			set_player_race_follow(self, 1);
@@ -2976,7 +2976,7 @@ void r_changestatus(float t)
 		return;
 	}
 
-	switch ((int) t)
+	switch ((int)t)
 	{
 		case 1: // race_ready
 			if (match_enabled && race.status)
@@ -3482,7 +3482,7 @@ int race_fgetc(void)
 	retval = trap_FS_ReadFile(&c, 1, race_fhandle);
 	//G_bprint( 2, "====> Read char: %d\n", c );
 
-	return (retval == 1 ? c : -1);
+	return ((retval == 1) ? c : -1);
 }
 
 char* race_fgets(char *buf, int limit)
@@ -4795,7 +4795,7 @@ static void race_update_pacemaker(void)
 		int guide_start = 0;
 		int guide_end = 0;
 
-		int resolution = (int) bound(RACE_PACEMAKER_RESOLUTION_MIN,
+		int resolution = (int)bound(RACE_PACEMAKER_RESOLUTION_MIN,
 										cvar(RACE_PACEMAKER_RESOLUTION_CVAR),
 										RACE_PACEMAKER_RESOLUTION_MAX);
 		if (resolution)
@@ -4974,7 +4974,7 @@ static char* race_position_string(int position)
 static qbool race_simultaneous(void)
 {
 	// We don't support matches where the players go turn about
-	return race_match_mode() || cvar(RACE_SIMULTANEOUS_CVAR);
+	return (race_match_mode() || cvar(RACE_SIMULTANEOUS_CVAR));
 }
 
 void race_player_post_think(void)
@@ -5045,7 +5045,7 @@ void race_player_pre_think(void)
 				{
 					if (((int)(self->s.v.flags)) & FL_JUMPRELEASED)
 					{
-						self->s.v.flags = (int) self->s.v.flags & ~FL_JUMPRELEASED;
+						self->s.v.flags = (int)self->s.v.flags & ~FL_JUMPRELEASED;
 
 						race_advance_chasecam_for_plr(self);
 					}
@@ -5112,7 +5112,7 @@ static race_score_system_t scoring_systems[] =
 
 void race_scoring_system_toggle(void)
 {
-	int current = bound(0, (int) cvar(RACE_SCORINGSYSTEM_CVAR), NUM_SCORING_SYSTEMS - 1);
+	int current = bound(0, (int)cvar(RACE_SCORINGSYSTEM_CVAR), NUM_SCORING_SYSTEMS - 1);
 
 	if (!race_command_checks())
 	{
@@ -5132,7 +5132,7 @@ void race_scoring_system_toggle(void)
 
 int race_award_points(int position, int participants)
 {
-	int current = bound(0, (int) cvar(RACE_SCORINGSYSTEM_CVAR), NUM_SCORING_SYSTEMS - 1);
+	int current = bound(0, (int)cvar(RACE_SCORINGSYSTEM_CVAR), NUM_SCORING_SYSTEMS - 1);
 	race_score_system_t *system = &scoring_systems[current];
 	int points = 0;
 
@@ -5397,7 +5397,7 @@ void race_match_start(void)
 
 qbool race_match_started(void)
 {
-	return race_match_mode() && (race.status || match_in_progress);
+	return (race_match_mode() && (race.status || match_in_progress));
 }
 
 void race_switch_usermode(const char *displayName, int players_per_team)
@@ -5540,7 +5540,7 @@ static void race_match_round_end(void)
 	{
 		// Standard round... in duels and ffa, can finish as soon as leading player has unassailable lead
 		int rounds_remaining = (race.rounds - race.round_number);
-		int system_no = bound(0, (int) cvar(RACE_SCORINGSYSTEM_CVAR), NUM_SCORING_SYSTEMS - 1);
+		int system_no = bound(0, (int)cvar(RACE_SCORINGSYSTEM_CVAR), NUM_SCORING_SYSTEMS - 1);
 
 		race_score_system_t *system = &scoring_systems[system_no];
 		if (system->round_max_diff && ((rounds_remaining * system->round_max_diff) < sc))
@@ -5567,7 +5567,7 @@ qbool race_can_cancel_demo(void)
 	}
 
 	// Always save demos as soon as a run is completed
-	return race.round_number == 0 && race.racers_complete == 0;
+	return ((race.round_number == 0) && (race.racers_complete == 0));
 }
 
 int race_count_votes_req(float percentage)
@@ -5593,7 +5593,7 @@ qbool race_allow_map_vote(gedict_t *player)
 		return true;
 	}
 
-	return (racers_ready == 0 || player->race_ready);
+	return ((racers_ready == 0) || player->race_ready);
 }
 
 void race_hide_players_toggle(void)

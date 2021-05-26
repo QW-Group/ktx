@@ -100,8 +100,8 @@ qbool CheckRate(gedict_t *p, char *newrate)
 		{
 			G_sprint(p, 2, "\nYour %s setting is too high for this server.\n"
 						"Rate set to %d\n",
-						redtext("rate"), (int) maxrate);
-			stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "rate %d\n", (int) maxrate);
+						redtext("rate"), (int)maxrate);
+			stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "rate %d\n", (int)maxrate);
 			ret = true;
 		}
 
@@ -109,8 +109,8 @@ qbool CheckRate(gedict_t *p, char *newrate)
 		{
 			G_sprint(p, 2, "\nYour %s setting is too low for this server.\n"
 						"Rate set to %d\n",
-						redtext("rate"), (int) minrate);
-			stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "rate %d\n", (int) minrate);
+						redtext("rate"), (int)minrate);
+			stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "rate %d\n", (int)minrate);
 			ret = true;
 		}
 	}
@@ -128,7 +128,7 @@ qbool CheckRate(gedict_t *p, char *newrate)
 void CheckTiming()
 {
 	float timing_players_time = bound(0, cvar("timing_players_time"), 30);
-	int timing_players_action = TA_ALL & (int) cvar("timing_players_action");
+	int timing_players_action = TA_ALL & (int)cvar("timing_players_action");
 	gedict_t *p;
 
 	if (!cvar("allow_timing"))
@@ -184,7 +184,7 @@ void CheckTiming()
 			if (timing_players_action & TA_GLOW)
 			{
 				// we can't set this in CheckLightEffects() because CheckLightEffects() will not called if client lagged
-				p->s.v.effects = (int) p->s.v.effects | EF_DIMLIGHT;
+				p->s.v.effects = (int)p->s.v.effects | EF_DIMLIGHT;
 			}
 		}
 		else
@@ -1180,7 +1180,7 @@ gedict_t* Sub_SelectSpawnPoint(char *spawnname)
 		// Get a random spawn point
 		for (spot = spots; i < numspots; i++)
 		{
-			f = f - self->spawn_weights[(int) spot->cnt];
+			f = f - self->spawn_weights[(int)spot->cnt];
 
 			// Finished randomizing
 			if (f < 0)
@@ -1199,16 +1199,16 @@ gedict_t* Sub_SelectSpawnPoint(char *spawnname)
 		spot = spots;
 
 		// Fix weights
-		f = self->spawn_weights[(int) spawnp->cnt] / 2;
+		f = self->spawn_weights[(int)spawnp->cnt] / 2;
 		for (i = 0; i < numspots; i++)
 		{
 			if (spot == spawnp)
 			{
-				self->spawn_weights[(int) spot->cnt] -= f;
+				self->spawn_weights[(int)spot->cnt] -= f;
 			}
 			else
 			{
-				self->spawn_weights[(int) spot->cnt] += (f / (float)(numspots - 1));
+				self->spawn_weights[(int)spot->cnt] += (f / (float)(numspots - 1));
 			}
 
 			spot = PROG_TO_EDICT(spot->s.v.goalentity);
@@ -1380,7 +1380,7 @@ qbool CanConnect()
 
 	for (usrid = 1; usrid < k_userid; usrid++) // search for ghost for this player (localinfo)
 	{
-		if (streq(ezinfokey(world, va("%d", (int) usrid)), self->netname))
+		if (streq(ezinfokey(world, va("%d", (int)usrid)), self->netname))
 		{
 			break;
 		}
@@ -1417,14 +1417,14 @@ qbool CanConnect()
 			{
 				self->k_teamnum = p->k_teamnum; // we alredy have team in localinfo
 				G_bprint(2, "%s \220%s\221 %s %d %s%s\n", self->netname, getteam(self),
-							redtext("rejoins the game with"), (int) self->s.v.frags,
+							redtext("rejoins the game with"), (int)self->s.v.frags,
 							redtext("frag"), redtext(count_s(self->s.v.frags)));
 			}
 			else
 			{
 				self->k_teamnum = 0; // force check is we have team in localinfo or not below
 				G_bprint(2, "%s %s %d %s%s\n", self->netname, redtext("rejoins the game with"),
-							(int) self->s.v.frags, redtext("frag"),
+							(int)self->s.v.frags, redtext("frag"),
 							redtext(count_s(self->s.v.frags)));
 			}
 
@@ -1712,7 +1712,7 @@ void PutClientInServer(void)
 
 	DecodeLevelParms();
 
-	if (!((int) self->s.v.weapon & (int) self->s.v.items))
+	if (!((int)self->s.v.weapon & (int)self->s.v.items))
 		self->s.v.weapon = W_BestWeapon();
 	W_SetCurrentAmmo();
 
@@ -2142,14 +2142,14 @@ void PutClientInServer(void)
 	{
 		if (cvar("k_ctf_hook"))
 		{
-			self->s.v.items = (int) self->s.v.items | IT_HOOK;
+			self->s.v.items = (int)self->s.v.items | IT_HOOK;
 		}
 
 		if (cvar("k_ctf_ga") && deathmatch < 4 && match_in_progress == 2)
 		{
 			self->s.v.armorvalue = 50;
 			self->s.v.armortype = 0.3;
-			self->s.v.items = (int) self->s.v.items | IT_ARMOR1; // add green armor
+			self->s.v.items = (int)self->s.v.items | IT_ARMOR1; // add green armor
 		}
 	}
 
@@ -2161,9 +2161,9 @@ void PutClientInServer(void)
 	// remove particular weapons in dmm4
 	if (deathmatch == 4 && match_in_progress == 2)
 	{
-		int k_disallow_weapons = (int) cvar("k_disallow_weapons") & DA_WPNS;
+		int k_disallow_weapons = (int)cvar("k_disallow_weapons") & DA_WPNS;
 
-		self->s.v.items = (int) self->s.v.items & ~k_disallow_weapons;
+		self->s.v.items = (int)self->s.v.items & ~k_disallow_weapons;
 	}
 
 	// drop down to best weapon actually hold
@@ -2197,7 +2197,7 @@ void PutClientInServer(void)
 		//berzerk will not affect players that logs in during berzerk
 		if (cvar("k_bzk") && k_berzerk)
 		{
-			self->s.v.items = (int) self->s.v.items | IT_QUAD;
+			self->s.v.items = (int)self->s.v.items | IT_QUAD;
 			self->super_time = 1;
 			self->super_damage_finished = g_globalvars.time + 3600;
 		}
@@ -2236,7 +2236,7 @@ void Check_SD(gedict_t *p)
 		return;
 	}
 
-	switch ((int) k_sudden_death)
+	switch ((int)k_sudden_death)
 	{
 		case SD_NORMAL:
 			EndMatch(0);
@@ -2634,7 +2634,7 @@ void MakeGhost()
 
 	while ((f1 < k_userid) && !f2)
 	{
-		if (strnull(ezinfokey(world, va("%d", (int) f1))))
+		if (strnull(ezinfokey(world, va("%d", (int)f1))))
 		{
 			f2 = 1;
 		}
@@ -2673,12 +2673,12 @@ void MakeGhost()
 
 	ghost->ps = self->ps; // save player stats
 	ghost->ghost_dt = g_globalvars.time; // save drop time
-	ghost->ghost_clr = (int) bound(0, iKey(self, "topcolor"), 13) << 8;
-	ghost->ghost_clr |= (int) bound(0, iKey(self, "bottomcolor"), 13); // save colors
+	ghost->ghost_clr = (int)bound(0, iKey(self, "topcolor"), 13) << 8;
+	ghost->ghost_clr |= (int)bound(0, iKey(self, "bottomcolor"), 13); // save colors
 
 //	G_bprint( PRINT_HIGH, "name num: %d team num %d\n", (int)ghost->cnt2, (int)ghost->k_teamnum);
 
-	localcmd("localinfo %d \"%s\"\n", (int) f1, self->netname);
+	localcmd("localinfo %d \"%s\"\n", (int)f1, self->netname);
 	trap_executecmd();
 }
 
@@ -2819,7 +2819,7 @@ void ClientDisconnect()
 
 void BackFromLag()
 {
-	int timing_players_action = TA_ALL & (int) cvar("timing_players_action");
+	int timing_players_action = TA_ALL & (int)cvar("timing_players_action");
 
 	self->k_timingWarnTime = 0;
 
@@ -2895,7 +2895,7 @@ void Print_Wp_Stats()
 	if ((i = lw) > 0)
 	{
 		i = bound(0, i, sizeof(buf) - 1);
-		memset((void*) buf, (int) '\n', i);
+		memset((void*) buf, (int)'\n', i);
 		buf[i] = 0;
 	}
 
@@ -2918,8 +2918,8 @@ void Print_Wp_Stats()
 	if ((i = lw_x) > 0)
 	{
 		int offset = strlen(buf);
-		i = bound(0, i, (int) sizeof(buf) - offset - 1);
-		memset((void*)(buf + offset), (int) ' ', i);
+		i = bound(0, i, (int)sizeof(buf) - offset - 1);
+		memset((void*)(buf + offset), (int)' ', i);
 		buf[i + offset] = 0;
 	}
 
@@ -3012,8 +3012,8 @@ void Print_Wp_Stats()
 	{
 		int offset = strlen(buf);
 
-		i = bound(0, -i, (int) sizeof(buf) - offset - 1);
-		memset((void*)(buf + offset), (int) ' ', i);
+		i = bound(0, -i, (int)sizeof(buf) - offset - 1);
+		memset((void*)(buf + offset), (int)' ', i);
 		buf[i + offset] = 0;
 	}
 
@@ -3021,8 +3021,8 @@ void Print_Wp_Stats()
 	{
 		int offset = strlen(buf);
 
-		i = bound(0, -i, (int) sizeof(buf) - offset - 1);
-		memset((void*)(buf + offset), (int) '\n', i);
+		i = bound(0, -i, (int)sizeof(buf) - offset - 1);
+		memset((void*)(buf + offset), (int)'\n', i);
 		buf[i + offset] = 0;
 	}
 
@@ -3053,7 +3053,7 @@ void Print_Scores()
 	if ((i = ls) > 0)
 	{
 		i = bound(0, i, sizeof(buf) - 1);
-		memset((void*) buf, (int) '\n', i);
+		memset((void*) buf, (int)'\n', i);
 		buf[i] = 0;
 	}
 
@@ -3089,7 +3089,7 @@ void Print_Scores()
 
 		if (flag1 && flag2)
 		{
-			switch ((int) flag1->cnt)
+			switch ((int)flag1->cnt)
 			{
 				case FLAG_AT_BASE:
 					r_f = " ";
@@ -3107,7 +3107,7 @@ void Print_Scores()
 					r_f = " ";
 			}
 
-			switch ((int) flag2->cnt)
+			switch ((int)flag2->cnt)
 			{
 				case FLAG_AT_BASE:
 					b_f = " ";
@@ -3202,8 +3202,8 @@ void Print_Scores()
 	{
 		int offset = strlen(buf);
 
-		i = bound(0, i, (int) sizeof(buf) - offset - 1);
-		memset((void*)(buf + offset), (int) ' ', i);
+		i = bound(0, i, (int)sizeof(buf) - offset - 1);
+		memset((void*)(buf + offset), (int)' ', i);
 		buf[i + offset] = 0;
 	}
 
@@ -3211,8 +3211,8 @@ void Print_Scores()
 	{
 		int offset = strlen(buf);
 
-		i = bound(0, -i, (int) sizeof(buf) - offset - 1);
-		memset((void*)(buf + offset), (int) '\n', i);
+		i = bound(0, -i, (int)sizeof(buf) - offset - 1);
+		memset((void*)(buf + offset), (int)'\n', i);
 		buf[i + offset] = 0;
 	}
 
@@ -3651,7 +3651,7 @@ void CheckPowerups()
 
 		if (self->invisible_finished < g_globalvars.time)
 		{		// just stopped
-			self->s.v.items = (int) self->s.v.items & ~IT_INVISIBILITY;
+			self->s.v.items = (int)self->s.v.items & ~IT_INVISIBILITY;
 			if (cvar("k_instagib"))
 			{
 				G_bprint( PRINT_HIGH, "%s lost his powers\n", self->netname);
@@ -3821,7 +3821,7 @@ void CheckLightEffects(void)
 #endif
 
 	// remove particular EF_xxx
-	self->s.v.effects = (int) self->s.v.effects
+	self->s.v.effects = (int)self->s.v.effects
 			& ~(EF_DIMLIGHT | EF_BRIGHTLIGHT | EF_BLUE | EF_RED | EF_GREEN);
 
 	// well, EF_xxx may originate from different sources, check it all
@@ -3863,27 +3863,27 @@ void CheckLightEffects(void)
 
 	if (dim)
 	{
-		self->s.v.effects = (int) self->s.v.effects | EF_DIMLIGHT;
+		self->s.v.effects = (int)self->s.v.effects | EF_DIMLIGHT;
 	}
 
 	if (brl)
 	{
-		self->s.v.effects = (int) self->s.v.effects | EF_BRIGHTLIGHT;
+		self->s.v.effects = (int)self->s.v.effects | EF_BRIGHTLIGHT;
 	}
 
 	if (r)
 	{
-		self->s.v.effects = (int) self->s.v.effects | EF_RED;
+		self->s.v.effects = (int)self->s.v.effects | EF_RED;
 	}
 
 	if (g)
 	{
-		self->s.v.effects = (int) self->s.v.effects | EF_GREEN;
+		self->s.v.effects = (int)self->s.v.effects | EF_GREEN;
 	}
 
 	if (b)
 	{
-		self->s.v.effects = (int) self->s.v.effects | EF_BLUE;
+		self->s.v.effects = (int)self->s.v.effects | EF_BLUE;
 	}
 }
 
@@ -4247,12 +4247,12 @@ void SendTeamInfo(gedict_t *t)
 		cnt++;
 
 		cl = NUM_FOR_EDICT(p) - 1;
-		h = bound(0, (int) p->s.v.health, 999);
-		a = bound(0, (int) p->s.v.armorvalue, 999);
+		h = bound(0, (int)p->s.v.health, 999);
+		a = bound(0, (int)p->s.v.armorvalue, 999);
 
 		stuffcmd_flags(t, STUFFCMD_IGNOREINDEMO, "//tinfo %d %d %d %d %d %d %d \"%s\"\n", cl,
-						(int) p->s.v.origin[0], (int) p->s.v.origin[1], (int) p->s.v.origin[2], h,
-						a, (int) p->s.v.items, nick);
+						(int)p->s.v.origin[0], (int)p->s.v.origin[1], (int)p->s.v.origin[2], h,
+						a, (int)p->s.v.items, nick);
 	}
 }
 
@@ -4694,7 +4694,7 @@ void ClientObituary(gedict_t *targ, gedict_t *attacker)
 				g_globalvars.time - match_start_time, cleantext(attackername),
 				cleantext(victimname), death_type(targ->deathtype),
 				(int)(attacker->super_damage_finished > g_globalvars.time ? 1 : 0),
-				(int)targ->s.v.armorvalue, (int) playerheight,
+				(int)targ->s.v.armorvalue, (int)playerheight,
 				g_globalvars.time - targ->spawn_time);
 
 	if (isRA())

@@ -47,12 +47,12 @@ int NUM_FOR_EDICT(gedict_t *e)
 
 float g_random()
 {
-	return (rand() & 0x7fff) / ((float) 0x8000);
+	return ((rand() & 0x7fff) / ((float)0x8000));
 }
 
 float crandom()
 {
-	return 2 * (g_random() - 0.5);
+	return (2 * (g_random() - 0.5));
 }
 
 int i_rnd(int from, int to)
@@ -91,7 +91,7 @@ float dist_random(float minValue, float maxValue, float spreadFactor)
 	sum /= 6.0f;
 
 	// Move to be around the average
-	return minValue + (maxValue - minValue) * sum;
+	return (minValue + (maxValue - minValue) * sum);
 }
 
 // Should be "" but too many references in code simply checking for 0 to mean null string...
@@ -345,7 +345,7 @@ float max(float a, float b)
 
 float bound(float a, float b, float c)
 {
-	return (a >= c ? a : b < a ? a : b > c ? c : b);
+	return ((a >= c) ? a : (b < a) ? a : (b > c) ? c : b);
 }
 
 /*
@@ -1174,7 +1174,7 @@ char* getteam(gedict_t *ed)
 	}
 	else if (streq(ed->classname, "ghost"))
 	{
-		team = ezinfokey(world, va("%d", (int) ed->k_teamnum));
+		team = ezinfokey(world, va("%d", (int)ed->k_teamnum));
 	}
 	else
 	{
@@ -1203,7 +1203,7 @@ char* getname(gedict_t *ed)
 	}
 	else if (streq(ed->classname, "ghost"))
 	{
-		name = ezinfokey(world, va("%d", (int) ed->cnt2));
+		name = ezinfokey(world, va("%d", (int)ed->cnt2));
 	}
 	else
 	{
@@ -1559,12 +1559,12 @@ qbool isghost(gedict_t *ed)
 // gametype >>>
 qbool isDuel()
 {
-	return (k_mode == gtDuel ? true : false);
+	return ((k_mode == gtDuel) ? true : false);
 }
 
 qbool isTeam()
 {
-	return (k_mode == gtTeam ? true : false);
+	return ((k_mode == gtTeam) ? true : false);
 }
 
 int tp_num()
@@ -1574,7 +1574,7 @@ int tp_num()
 
 qbool isFFA()
 {
-	return (k_mode == gtFFA ? true : false);
+	return ((k_mode == gtFFA) ? true : false);
 }
 
 qbool isCTF()
@@ -1582,7 +1582,7 @@ qbool isCTF()
 #ifdef CTF_RELOADMAP
 	return k_ctf; // once setup at map load
 #else
-	return (k_mode == gtCTF ? true : false);
+	return ((k_mode == gtCTF) ? true : false);
 #endif
 }
 
@@ -1774,9 +1774,9 @@ int Get_Powerups()
 
 	if (!k_pow_new || !k_matchLess || !k_pow_min_players || !deathmatch)
 	{
-		return k_pow = k_pow_new; // no k_pow_min_players if server in normal match mode
-								  // no powerups if k_pow == 0
-								  // return current value of key 'k_pow' if k_pow_min_players == 0
+		return (k_pow = k_pow_new);	// no k_pow_min_players if server in normal match mode
+									// no powerups if k_pow == 0
+									// return current value of key 'k_pow' if k_pow_min_players == 0
 	}
 
 	if (k_pow_check > g_globalvars.time)
@@ -1810,7 +1810,7 @@ int Get_Powerups()
 
 char* count_s(int cnt)
 {
-	return (cnt == 1 ? "" : "s");
+	return ((cnt == 1) ? "" : "s");
 }
 
 char* Enables(float f)
@@ -2003,11 +2003,11 @@ void CalculateBestPlayers()
 		best += (p->super_damage_finished >= g_globalvars.time) ? 9000 : 0; // quad
 		best += (p->invisible_finished >= g_globalvars.time
 				|| p->radsuit_finished >= g_globalvars.time) ? 4000 : 0; // ring or suit
-		best += (((int) p->s.v.items & IT_ROCKET_LAUNCHER) && p->s.v.ammo_rockets > 0) ? 1500 : 0; // rl with ammo
-		best += (((int) p->s.v.items & IT_LIGHTNING) && p->s.v.ammo_cells > 0) ? 500 : 0; // lg with ammo
-		best += (((int) p->s.v.items & IT_GRENADE_LAUNCHER) && p->s.v.ammo_rockets > 0) ? 200 : 0; // gl with ammo
-		best += (((int) p->s.v.items & IT_SUPER_NAILGUN) && p->s.v.ammo_nails > 0) ? 100 : 0; // sng with ammo
-		best += (((int) p->s.v.items & IT_SUPER_SHOTGUN) && p->s.v.ammo_shells > 0) ? 50 : 0; // ssg with ammo
+		best += (((int)p->s.v.items & IT_ROCKET_LAUNCHER) && p->s.v.ammo_rockets > 0) ? 1500 : 0; // rl with ammo
+		best += (((int)p->s.v.items & IT_LIGHTNING) && p->s.v.ammo_cells > 0) ? 500 : 0; // lg with ammo
+		best += (((int)p->s.v.items & IT_GRENADE_LAUNCHER) && p->s.v.ammo_rockets > 0) ? 200 : 0; // gl with ammo
+		best += (((int)p->s.v.items & IT_SUPER_NAILGUN) && p->s.v.ammo_nails > 0) ? 100 : 0; // sng with ammo
+		best += (((int)p->s.v.items & IT_SUPER_SHOTGUN) && p->s.v.ammo_shells > 0) ? 50 : 0; // ssg with ammo
 		best += p->s.v.frags;
 
 		if (!ed_best1)
@@ -2281,8 +2281,8 @@ void ghost2scores(gedict_t *g)
 	WriteString(
 			to,
 			va("\\name\\\x83 %s\\team\\%s\\topcolor\\%d\\bottomcolor\\%d", getname(g), getteam(g),
-				(int) bound(0, ((g->ghost_clr >> 8) & 0xF), 13),
-				(int) bound(0, (g->ghost_clr & 0xF), 13)));
+				(int)bound(0, ((g->ghost_clr >> 8) & 0xF), 13),
+				(int)bound(0, (g->ghost_clr & 0xF), 13)));
 
 	WriteByte(to, SVC_UPDATEFRAGS); // update frags
 	WriteByte(to, cl_slot);
@@ -2585,7 +2585,7 @@ char* params_str(int from, int to)
 
 char* SD_type_str()
 {
-	switch ((int) k_sudden_death)
+	switch ((int)k_sudden_death)
 	{
 		case 0:
 			return "none";
@@ -2663,7 +2663,7 @@ int get_fair_pack()
 int get_fallbunny()
 {
 	// Yawnmode/race: no broken ankle
-	return k_yawnmode || isRACE() ? 1 : cvar("k_fallbunny");
+	return (k_yawnmode || isRACE() ? 1 : cvar("k_fallbunny"));
 }
 
 //======================================

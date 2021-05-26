@@ -375,12 +375,12 @@ void EndMatch(float skip_log)
 	{
 		for (f1 = 666; k_teamid >= f1; f1++)
 		{
-			localcmd("localinfo %d \"\"\n", (int) f1); //removing key
+			localcmd("localinfo %d \"\"\n", (int)f1); //removing key
 		}
 
 		for (f1 = 1; k_userid >= f1; f1++)
 		{
-			localcmd("localinfo %d \"\"\n", (int) f1); //removing key
+			localcmd("localinfo %d \"\"\n", (int)f1); //removing key
 		}
 	}
 
@@ -460,9 +460,9 @@ void SaveOvertimeStats()
 		for (p = world; (p = find_plr(p));)
 		{
 			// save overtime stats
-			p->ps.ot_a = (int) p->s.v.armorvalue;
+			p->ps.ot_a = (int)p->s.v.armorvalue;
 			p->ps.ot_items = p->s.v.items; // float
-			p->ps.ot_h = (int) p->s.v.health;
+			p->ps.ot_h = (int)p->s.v.health;
 		}
 	}
 }
@@ -551,7 +551,7 @@ void CheckOvertime()
 		// Ok its increase time
 		self->cnt = k_exttime;
 		self->cnt2 = 60;
-		localcmd("serverinfo status \"%d min left\"\n", (int) self->cnt);
+		localcmd("serverinfo status \"%d min left\"\n", (int)self->cnt);
 
 		G_bprint(2, "\220%s\221 minute%s overtime follows\n", dig3(k_exttime), count_s(k_exttime));
 		self->s.v.nextthink = g_globalvars.time + 1;
@@ -674,7 +674,7 @@ void TimerThink()
 		self->cnt2 = 60;
 		self->cnt -= 1;
 
-		localcmd("serverinfo status \"%d min left\"\n", (int) self->cnt);
+		localcmd("serverinfo status \"%d min left\"\n", (int)self->cnt);
 
 		if (!self->cnt)
 		{
@@ -694,8 +694,8 @@ void TimerThink()
 			if (sc)
 			{
 				G_bprint(2, "%s \220%s\221 leads by %s frag%s\n", redtext("Team"),
-							cvar_string((sc > 0 ? "_k_team1" : "_k_team2")), dig3(abs((int) sc)),
-							count_s(abs((int) sc)));
+							cvar_string((sc > 0 ? "_k_team1" : "_k_team2")), dig3(abs((int)sc)),
+							count_s(abs((int)sc)));
 			}
 			else
 			{
@@ -778,7 +778,7 @@ void SM_PrepareMap()
 			{
 				if (streq(p->classname, "item_shells") || streq(p->classname, "item_spikes")
 						|| streq(p->classname, "item_rockets") || streq(p->classname, "item_cells")
-						|| (streq(p->classname, "item_health") && ((int) p->s.v.spawnflags & H_MEGA)))
+						|| (streq(p->classname, "item_health") && ((int)p->s.v.spawnflags & H_MEGA)))
 				{ // no weapon ammo and megahealth for dmm4
 					soft_ent_remove(p);
 					continue;
@@ -816,18 +816,6 @@ static void SM_PrepareClients()
 			// skip setup k_teamnum in matchLess mode
 			pl_team = getteam(p);
 			p->k_teamnum = 0;
-
-			// elected admins lose rights when match starts -> they need to be re-elected
-			if (p->k_admin & AF_ADMIN)
-			{
-				p->k_admin = (p->k_admin & ~(AF_ADMIN));
-
-				if (!p->k_admin)
-				{
-					G_bprint(2, "%s is no longer an %s\n", p->netname, redtext("admin"));
-					on_unadmin(p);
-				}
-			}
 
 			if (!strnull(pl_team))
 			{
@@ -1108,7 +1096,7 @@ void StartMatch()
 	{
 		self->cnt = bound(0, timelimit, 9999);
 		self->cnt2 = 60;
-		localcmd("serverinfo status \"%d min left\"\n", (int) timelimit);
+		localcmd("serverinfo status \"%d min left\"\n", (int)timelimit);
 		match_end_time = match_start_time + self->cnt * 60;
 	}
 
@@ -1368,7 +1356,7 @@ void PrintCountdown(int seconds)
 
 		if (cvar("sv_antilag"))
 		{
-			strlcat(text, va("%s %5s\n", "Antilag", dig3((int) cvar("sv_antilag"))), sizeof(text));
+			strlcat(text, va("%s %5s\n", "Antilag", dig3((int)cvar("sv_antilag"))), sizeof(text));
 		}
 
 		if (cvar("k_noitems") && !isRACE())
@@ -1455,7 +1443,7 @@ void PrintCountdown(int seconds)
 		strlcat(text, va("%s %3s\n", "Fraglimit", dig3(fraglimit)), sizeof(text));
 	}
 
-	switch ((int) cvar("k_overtime"))
+	switch ((int)cvar("k_overtime"))
 	{
 		case 0:
 			ot = redtext("off");
@@ -1497,7 +1485,7 @@ void PrintCountdown(int seconds)
 	}
 
 	if ((deathmatch == 4) && !cvar("k_midair") && !cvar("k_instagib")
-			&& !strnull(nowp = str_noweapon((int) cvar("k_disallow_weapons") & DA_WPNS)))
+			&& !strnull(nowp = str_noweapon((int)cvar("k_disallow_weapons") & DA_WPNS)))
 	{
 		strlcat(text, va("\n%s %4s\n", "Noweapon", redtext(nowp[0] == 32 ? (nowp + 1) : nowp)),
 				sizeof(text));
@@ -1879,7 +1867,7 @@ char* CompilateDemoName()
 	demoname[0] = 0;
 	if (isRA())
 	{
-		strlcat(demoname, va("ra_%d", (int) CountPlayers()), sizeof(demoname));
+		strlcat(demoname, va("ra_%d", (int)CountPlayers()), sizeof(demoname));
 	}
 	else if (isRACE() && !race_match_mode())
 	{
@@ -1983,7 +1971,7 @@ char* CompilateDemoName()
 			strlcat(demoname, "race_", sizeof(demoname));
 		}
 
-		strlcat(demoname, va("ffa_%d", (int) CountPlayers()), sizeof(demoname));
+		strlcat(demoname, va("ffa_%d", (int)CountPlayers()), sizeof(demoname));
 	}
 	else
 	{
@@ -1992,7 +1980,7 @@ char* CompilateDemoName()
 			strlcat(demoname, "race_", sizeof(demoname));
 		}
 
-		strlcat(demoname, va("unknown_%d", (int) CountPlayers()), sizeof(demoname));
+		strlcat(demoname, va("unknown_%d", (int)CountPlayers()), sizeof(demoname));
 	}
 
 	if (isRACE())
@@ -2111,7 +2099,7 @@ void StartTimer()
 	timer->classname = "timer";
 	timer->cnt = 0;
 
-	timer->cnt2 = max(3, (int) cvar("k_count"));  // at the least we want a 3 second countdown
+	timer->cnt2 = max(3, (int)cvar("k_count"));  // at the least we want a 3 second countdown
 
 	if (isHoonyModeDuel() && (HM_current_point() > 0))
 	{
@@ -2121,7 +2109,7 @@ void StartTimer()
 	if (k_bloodfest)
 	{
 		// at the least 5 second countdown in bloodfest mode.
-		timer->cnt2 = max(5, (int) cvar("k_count"));
+		timer->cnt2 = max(5, (int)cvar("k_count"));
 	}
 	else if (!deathmatch)
 	{

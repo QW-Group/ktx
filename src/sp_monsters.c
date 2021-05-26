@@ -359,7 +359,7 @@ void bloodfest_spawn_monsters(void)
 			if (g_bloodfest.spawn_boss && bloodfest_monster_array[idx].boss_able)
 			{
 				p->s.v.health *= k_bloodfest_boss_hp_factor;
-				p->s.v.effects = (int) p->s.v.effects | EF_BLUE | EF_RED;
+				p->s.v.effects = (int)p->s.v.effects | EF_BLUE | EF_RED;
 				p->bloodfest_boss = true;
 
 				g_bloodfest.spawn_boss = false;
@@ -448,7 +448,7 @@ void bloodfest_monsters_content_damage(void)
 		}
 		else if (p->s.v.watertype == CONTENT_WATER)
 		{			// do damage - if monster can't swim
-			if (p->dmgtime < g_globalvars.time && !((int) p->s.v.flags & FL_SWIM))
+			if (p->dmgtime < g_globalvars.time && !((int)p->s.v.flags & FL_SWIM))
 			{
 				p->dmgtime = g_globalvars.time + 0.2;
 				p->deathtype = dtWATER_DMG;
@@ -525,7 +525,7 @@ void bloodfest_dead_jump_button(void)
 		return;
 	}
 
-	self->s.v.flags = (int) self->s.v.flags & ~FL_JUMPRELEASED;
+	self->s.v.flags = (int)self->s.v.flags & ~FL_JUMPRELEASED;
 
 	// switch pov.
 	bloodfest_change_pov();
@@ -998,7 +998,7 @@ void swimmonster_start_go()
 
 static void common_monster_start(char *model, int flags)
 {
-	self->s.v.flags = (int) self->s.v.flags & ~FL_ONGROUND;
+	self->s.v.flags = (int)self->s.v.flags & ~FL_ONGROUND;
 
 	self->s.v.movetype = MOVETYPE_STEP;
 
@@ -1026,7 +1026,7 @@ static void common_monster_start(char *model, int flags)
 	self->model = "";
 
 	// always set FL_MONSTER and possibily add some additional flags
-	self->s.v.flags = (int) self->s.v.flags | FL_MONSTER | flags;
+	self->s.v.flags = (int)self->s.v.flags | FL_MONSTER | flags;
 }
 
 void bloodfest_speedup_monster_spawn(void)

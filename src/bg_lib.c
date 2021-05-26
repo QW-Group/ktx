@@ -18,7 +18,7 @@ size_t strlen(const char *string)
 		s++;
 	}
 
-	return s - string;
+	return (s - string);
 }
 
 char* strcat(char *strDestination, const char *strSource)
@@ -62,17 +62,17 @@ char* strchr(const char *string, int c)
 	{
 		if (*string == c)
 		{
-			return (char*) string;
+			return (char*)string;
 		}
 		string++;
 	}
 
 	if (!c)
 	{
-		return (char*) string;
+		return (char*)string;
 	}
 
-	return (char*) 0;
+	return (char*)0;
 }
 
 // qqshka: have no example, so do my'n own, dunno good or bad
@@ -90,7 +90,7 @@ char* strrchr(const char *string, int c)
 		from--;
 	}
 
-	return (char*) 0;
+	return (char*)0;
 }
 
 char* strstr(const char *string, const char *strCharSet)
@@ -109,13 +109,13 @@ char* strstr(const char *string, const char *strCharSet)
 
 		if (!strCharSet[i])
 		{
-			return (char*) string;
+			return (char*)string;
 		}
 
 		string++;
 	}
 
-	return (char*) 0;
+	return (char*)0;
 }
 
 int tolower(int c)
@@ -151,7 +151,7 @@ void* memmove(void *dest, const void *src, size_t count)
 	}
 	else
 	{
-		for (i = 0; i < (int) count; i++)
+		for (i = 0; i < (int)count; i++)
 		{
 			((char*) dest)[i] = ((char*) src)[i];
 		}
@@ -163,17 +163,17 @@ void* memmove(void *dest, const void *src, size_t count)
 //=====================================
 double tan(double x)
 {
-	return sin(x) / cos(x);
+	return (sin(x) / cos(x));
 }
 
 int abs(int n)
 {
-	return n < 0 ? -n : n;
+	return (n < 0 ? -n : n);
 }
 
 double fabs(double x)
 {
-	return x < 0 ? -x : x;
+	return (x < 0 ? -x : x);
 }
 
 //=====================================
@@ -187,7 +187,8 @@ void srand(unsigned seed)
 int rand(void)
 {
 	randSeed = (69069 * randSeed + 1);
-	return randSeed & 0x7fff;
+
+	return (randSeed & 0x7fff);
 }
 
 //=====================================
@@ -271,7 +272,7 @@ double atof(const char *string)
 
 	// not handling 10e10 notation...
 
-	return value * sign;
+	return (value * sign);
 }
 
 double _atof(const char **stringPtr)
@@ -355,7 +356,7 @@ double _atof(const char **stringPtr)
 	// not handling 10e10 notation...
 	*stringPtr = string;
 
-	return value * sign;
+	return (value * sign);
 }
 
 int atoi(const char *string)
@@ -409,7 +410,7 @@ int atoi(const char *string)
 
 	// not handling 10e10 notation...
 
-	return value * sign;
+	return (value * sign);
 }
 
 int _atoi(const char **stringPtr)
@@ -468,7 +469,7 @@ int _atoi(const char **stringPtr)
 
 	*stringPtr = string;
 
-	return value * sign;
+	return (value * sign);
 }
 
 //=========================================================
@@ -565,7 +566,7 @@ void AddFloat(char **buf_p, float fval, int width, int prec, int flags)
 
 	// write the float number
 	digits = 0;
-	val = (int) fval;
+	val = (int)fval;
 	do
 	{
 		text[digits++] = '0' + val % 10;
@@ -600,9 +601,9 @@ void AddFloat(char **buf_p, float fval, int width, int prec, int flags)
 	digits = 0;
 	while (digits < prec)
 	{
-		fval -= (int) fval;
+		fval -= (int)fval;
 		fval *= 10.0;
-		val = (int) fval;
+		val = (int)fval;
 		text[digits++] = '0' + val % 10;
 	}
 
@@ -810,7 +811,7 @@ reswitch:
 done:
 	*buf_p = 0;
 
-	return buf_p - buffer;
+	return (buf_p - buffer);
 }
 
 /* this is really crappy */
