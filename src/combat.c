@@ -432,7 +432,7 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 	float save;
 	float take;
 	int i, c1 = 8, c2 = 4, hdp;
-	float dmg_dealt = 0, virtual_take = 0;
+	float dmg_dealt = 0, virtual_take = 0, unbound_dmg_dealt = 0;
 	float non_hdp_damage; // save damage before handicap apply for kickback calculation
 	float native_damage = damage; // save damage before apply any modificator
 	char *attackerteam, *targteam, *attackername, *victimname;
@@ -718,6 +718,7 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 
 	take = max(0, take); // avoid negative take, if any
 
+	unbound_dmg_dealt = dmg_dealt;
 	if (cvar("k_dmgfrags"))
 	{
 		if (TELEDEATH(targ))
@@ -728,17 +729,20 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 		else if (targ->invincible_finished >= g_globalvars.time)
 		{
 			// damage dealt _not_ capped by victim's health if victim has pent
+			unbound_dmg_dealt += virtual_take;
 			dmg_dealt += virtual_take;
 		}
 		else
 		{
 			// damage dealt capped by victim's health
+			unbound_dmg_dealt += virtual_take;
 			dmg_dealt += bound(0, virtual_take, targ->s.v.health);
 		}
 	}
 	else
 	{
 		// damage dealt capped by victim's health
+		unbound_dmg_dealt += virtual_take;
 		dmg_dealt += bound(0, take, targ->s.v.health);
 	}
 
@@ -750,6 +754,37 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 		targ->s.v.dmg_take += take;
 		targ->s.v.dmg_save += save;
 		targ->s.v.dmg_inflictor = EDICT_TO_PROG(inflictor);
+	}
+
+	unbound_dmg_dealt = bound(0, unbound_dmg_dealt, 9999);
+	if ((sv_extensions & SV_EXTENSIONS_MVDHIDDEN) && ((int)unbound_dmg_dealt > 0)
+			&& ((attacker->ct == ctPlayer) || (targ->ct == ctPlayer)))
+	{
+		// MVD damage: always send
+		WriteShort(MSG_MULTICAST, mvdhidden_dmgdone);
+		WriteShort(MSG_MULTICAST,
+					(dmg_is_splash ? MVDHIDDEN_DMGDONE_SPLASHDAMAGE : 0) | targ->deathtype);
+		WriteShort(MSG_MULTICAST, NUM_FOR_EDICT(attacker));
+		WriteShort(MSG_MULTICAST, NUM_FOR_EDICT(targ));
+		WriteShort(MSG_MULTICAST, (short)unbound_dmg_dealt);
+		trap_multicast(PASSVEC3(targ->s.v.origin), MULTICAST_MVD_HIDDEN);
+	}
+
+	// Only send to clients during standby
+	if (!match_in_progress && ((int)unbound_dmg_dealt > 0) && (attacker->ct == ctPlayer)
+			&& (targ->ct == ctPlayer))
+	{
+		int di = atoi(ezinfokey(attacker, "di"));
+
+		if (di && ((di == 2) || (attacker != targ)))
+		{
+			qbool has_eyes = ((int)targ->s.v.items) & IT_INVISIBILITY;
+
+			stuffcmd_flags(attacker, STUFFCMD_IGNOREINDEMO, "//ktx di %d %d %d %d %d %d %d\n",
+							PASSINTVEC3(targ->s.v.origin), targ->deathtype,
+							(short)unbound_dmg_dealt, dmg_is_splash ? 1 : 0,
+							SameTeam(attacker, targ) && !has_eyes ? 1 : 0);
+		}
 	}
 
 	if (save)

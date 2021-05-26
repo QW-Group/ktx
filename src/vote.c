@@ -1354,7 +1354,7 @@ qbool private_game_by_default(void)
 
 // }
 
-void vote_check_all()
+void vote_check_all(void)
 {
 	vote_check_map();
 	vote_check_break();
@@ -1365,4 +1365,5 @@ void vote_check_all()
 	vote_check_teamoverlay();
 	vote_check_coop();
 	vote_check_antilag();
+	vote_check_privategame();
 }

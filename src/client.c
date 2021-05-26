@@ -3951,23 +3951,21 @@ void WS_Reset(gedict_t *p)
 }
 
 // spec changed pov, we need update him with new stats
-void WS_OnSpecPovChange(gedict_t *s)
+void WS_OnSpecPovChange(gedict_t *s, qbool force)
 {
 	int i;
-	gedict_t *p;
+	gedict_t *p = s;
 
-	if (s->ct != ctSpec)
+	if (s->ct == ctSpec)
 	{
-		return; // someone joking BADLY! U R NOT A SPEC!
+		p = PROG_TO_EDICT(s->s.v.goalentity);
+		if (p->ct != ctPlayer)
+		{
+			return; // spec tracking whatever but not a player
+		}
 	}
 
-	p = PROG_TO_EDICT(s->s.v.goalentity);
-	if (p->ct != ctPlayer)
-	{
-		return; // spec tracking whatever but not a player
-	}
-
-	if (!iKey(s, "wpsx"))
+	if (!(force || iKey(s, "wpsx")))
 	{
 		return; // spec not interesting in new weapon stats
 	}
@@ -4046,6 +4044,17 @@ void WS_CheckUpdate(gedict_t *p)
 
 	p->wpstats_mask = 0;
 }
+
+void info_wpsx_update(gedict_t* p, char* from, char* to)
+{
+	qbool newly_enabled = atoi(to) && !atoi(from);
+
+	if (newly_enabled)
+	{
+		WS_OnSpecPovChange(p, true);
+	}
+}
+
 // } end of new weapon stats
 // ====================================
 
