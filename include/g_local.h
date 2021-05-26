@@ -601,7 +601,7 @@ extern int cmds_cnt; // count of commands in 'cmds'
 //
 // DoCommand/DoCommand_Name return codes
 // return non-negative value if command success
-// 
+//
 #define DO_OUT_OF_RANGE_CMDS			(-1) // if command is out of range in 'cmds' array or not found
 #define DO_WRONG_CLASS					(-2) // if wrong class
 #define DO_ACCESS_DENIED				(-3) // if access denied
@@ -817,6 +817,7 @@ void StuffMaps(gedict_t *p);
 void GetMapList(void);
 
 char* GetMapName(int imp);
+int GetMapNum(char *mapname);
 void DoSelectMap(int iMap);
 void SelectMap();
 void VoteMap();

@@ -31,6 +31,7 @@ void PlayerBreak();
 void ReqAdmin();
 void AdminForceStart();
 void AdminForceBreak();
+void AdminForceMap();
 void AdminSwapAll();
 void TogglePreWar();
 void ToggleMapLock();
@@ -367,6 +368,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_ADMIN			"toggle admin-mode"
 #define CD_FORCESTART		"force match to start"
 #define CD_FORCEBREAK		"force match to end"
+#define CD_FORCEMAP			"force change of map"
 #define CD_PICKUP			"vote for pickup game"
 #define CD_PREWAR			"playerfire before game"
 #define CD_LOCKMAP			"(un)lock current map"
@@ -704,6 +706,7 @@ cmd_t cmds[] =
 	{ "admin", 						ReqAdmin, 						0, 			CF_BOTH | CF_MATCHLESS | CF_PARAMS, 									CD_ADMIN },
 	{ "forcestart", 				AdminForceStart, 				0, 			CF_BOTH_ADMIN, 															CD_FORCESTART },
 	{ "forcebreak", 				AdminForceBreak, 				0, 			CF_BOTH_ADMIN, 															CD_FORCEBREAK },
+	{ "forcemap",					AdminForceMap,					0,			CF_BOTH_ADMIN | CF_PARAMS,												CD_FORCEMAP },
 	{ "pickup", 					VotePickup, 					0, 			CF_PLAYER, 																CD_PICKUP },
 	{ "prewar", 					TogglePreWar, 					0, 			CF_BOTH_ADMIN, 															CD_PREWAR },
 	{ "lockmap", 					ToggleMapLock, 					0, 			CF_BOTH_ADMIN, 															CD_LOCKMAP },
@@ -1189,7 +1192,7 @@ void redirect()
 // check if players client support params in aliases
 qbool isSupport_Params(gedict_t *p)
 {
-	// seems only ezQuake support 
+	// seems only ezQuake support
 	return (p->ezquake_version > 0 ? true : false); // have no idea at which point ezquake start support it
 }
 
@@ -4951,7 +4954,7 @@ void RandomPickup()
 	vote_check_rpickup(MAX_RPICKUP_RECUSION);
 }
 
-// { spec tracking stuff 
+// { spec tracking stuff
 
 qbool fav_del_do(gedict_t *s, gedict_t *p, char *prefix);
 qbool favx_del_do(gedict_t *s, gedict_t *p, char *prefix);
@@ -5529,14 +5532,14 @@ void AutoTrackRestore()
 }
 // >> start ktpro compatible autotrack
 
-// When issueing this command, KTeams Pro will switch the view to the next_best 
-// player. The view will then automtically switch to the next_best player when 
-// one of the following events occurs: 
+// When issueing this command, KTeams Pro will switch the view to the next_best
+// player. The view will then automtically switch to the next_best player when
+// one of the following events occurs:
 
 // 1. the first rl in the game is taken
 // 2. the player currently being observed dies
 // 3. any player takes a powerup
-// 4. when the currently observed player has a powerup which runs out and he has 
+// 4. when the currently observed player has a powerup which runs out and he has
 //    neither the rocket launcher nor the lightning gun
 
 // will force spec who used ktpro autotrack switch track
@@ -5701,7 +5704,7 @@ void ktpro_autotrack_predict_powerup(void)
 	ktpro_autotrack_on_powerup_predict(best);
 }
 
-// << end  ktpro compatible autotrack 
+// << end  ktpro compatible autotrack
 
 void next_best()
 {
@@ -5792,7 +5795,7 @@ void next_pow()
 	}
 }
 
-// }  spec tracking stuff 
+// }  spec tracking stuff
 
 //================================================
 // pos_show/pos_save/pos_move/pos_set_* commands {
@@ -6851,7 +6854,7 @@ void SetMidairMinHeight()
 		return;
 	}
 
-	// Can't set minheight if midair is not turned on 
+	// Can't set minheight if midair is not turned on
 	if (!cvar("k_midair"))
 	{
 		G_sprint(self, 2, "Midair must be turned on to set minimal frag height\n");
@@ -6941,7 +6944,7 @@ void ToggleInstagib()
 
 	if (k_instagib == 0)
 	{
-		cvar_fset("dmm4_invinc_time", 1.0f); // default invic respawn time is 1s in instagib 
+		cvar_fset("dmm4_invinc_time", 1.0f); // default invic respawn time is 1s in instagib
 	}
 
 	if (++k_instagib > 3)
