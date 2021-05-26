@@ -152,6 +152,29 @@ static int next_route = -1; // STATIC
 
 //============================================
 
+static void set_usercmd_trace(gedict_t* p, qbool on)
+{
+	int userId = atoi(ezinfokey(p, "*userid"));
+
+	if (userId)
+	{
+		localcmd("sv_usercmdtrace %d %s\n", userId, on ? "on" : "off");
+		trap_executecmd();
+	}
+}
+
+static void clearall_usercmds_settings(void)
+{
+	gedict_t* p;
+
+	for (p = world; (p = find_plr(p)); )
+	{
+		set_usercmd_trace(p, false);
+	}
+}
+
+//============================================
+
 static int get_server_port(void)
 {
 	char *ip, *port;
@@ -282,6 +305,8 @@ void apply_race_settings(void)
 {
 	char buf[1024 * 4];
 	char *cfg_name;
+
+	clearall_usercmds_settings();
 
 	if (!isRACE())
 	{
@@ -1305,6 +1330,7 @@ static void race_over(void)
 	}
 
 	read_topscores();
+	clearall_usercmds_settings();
 
 	if (debug)
 	{
@@ -2151,6 +2177,7 @@ void race_set_one_player_movetype_and_etc(gedict_t *p)
 
 			p->muted = false;
 			setmodel(p, "progs/player.mdl");
+			set_usercmd_trace(p, false);
 			break;
 
 		case raceCD:
@@ -2171,6 +2198,7 @@ void race_set_one_player_movetype_and_etc(gedict_t *p)
 
 			p->muted = (p->racer ? false : true);
 			setmodel(p, (p->racer ? "progs/player.mdl" : ""));
+			set_usercmd_trace(p, false);
 			break;
 
 		case raceActive:
@@ -2183,6 +2211,7 @@ void race_set_one_player_movetype_and_etc(gedict_t *p)
 
 			p->muted = (p->racer ? false : true);
 			setmodel(p, (p->racer ? "progs/player.mdl" : ""));
+			set_usercmd_trace(p, p->racer);
 			break;
 
 		default:
@@ -5058,8 +5087,12 @@ void race_player_pre_think(void)
 		}
 		else if ((self->ct == ctPlayer) && self->racer && race.status)
 		{
-			stuffcmd_flags(self, STUFFCMD_DEMOONLY, "//ucmd %f %d %d\n", g_globalvars.time,
-							race_encode_user_command(self), NUM_FOR_EDICT(self));
+			// If server supports storing user commands in hidden packets, don't bother with these
+			if (!(sv_extensions & SV_EXTENSIONS_MVDHIDDEN))
+			{
+				stuffcmd_flags(self, STUFFCMD_DEMOONLY, "//ucmd %f %d %d\n", g_globalvars.time,
+								race_encode_user_command(self), NUM_FOR_EDICT(self));
+			}
 		}
 	}
 }

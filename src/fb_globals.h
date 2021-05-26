@@ -5,22 +5,22 @@
 
 #define PATH_SCORE_NULL -1000000
 
-#define FB_OPTION_SHOW_MARKERS         1
-#define FB_OPTION_EDITOR_MODE          2
-#define FB_OPTION_SHOW_DUEL_LOGIC      4
-#define FB_OPTION_SHOW_GOAL_LOGIC      8
-#define FB_OPTION_SHOW_ROUTING_LOGIC   16
-#define FB_OPTION_SHOW_MOVEMENT_LOGIC  32
-#define FB_OPTION_DEMOMARK_ROCKETJUMPS 64
-#define FB_OPTION_DEBUG_MOVEMENT       128
-#define FB_OPTION_SHOW_THINKING     (FB_OPTION_SHOW_DUEL_LOGIC | FB_OPTION_SHOW_GOAL_LOGIC | FB_OPTION_SHOW_ROUTING_LOGIC | FB_OPTION_SHOW_MOVEMENT_LOGIC)
+#define FB_OPTION_SHOW_MARKERS			1
+#define FB_OPTION_EDITOR_MODE			2
+#define FB_OPTION_SHOW_DUEL_LOGIC		4
+#define FB_OPTION_SHOW_GOAL_LOGIC		8
+#define FB_OPTION_SHOW_ROUTING_LOGIC	16
+#define FB_OPTION_SHOW_MOVEMENT_LOGIC	32
+#define FB_OPTION_DEMOMARK_ROCKETJUMPS	64
+#define FB_OPTION_DEBUG_MOVEMENT		128
+#define FB_OPTION_SHOW_THINKING			(FB_OPTION_SHOW_DUEL_LOGIC | FB_OPTION_SHOW_GOAL_LOGIC | FB_OPTION_SHOW_ROUTING_LOGIC | FB_OPTION_SHOW_MOVEMENT_LOGIC)
 
 typedef void (*fb_spawn_funcref_t)(gedict_t *ent);
 
 typedef struct fb_spawn_s
 {
-	char *name;                 // classname
-	fb_spawn_funcref_t func;       // initialisation function
+	char *name;					// classname
+	fb_spawn_funcref_t func;	// initialisation function
 } fb_spawn_t;
 
 typedef struct fb_path_eval_s
@@ -63,106 +63,106 @@ extern float sv_accelerate;
 extern gedict_t *dropper;
 
 // FIXME: A lot of these not used anymore
-#define FL_ONGROUND_PARTIALGROUND (FL_ONGROUND | FL_PARTIALGROUND)
-#define IT_EITHER_NAILGUN (IT_NAILGUN | IT_SUPER_NAILGUN)
-#define IT_NAILGUN_ROCKET (IT_ROCKET_LAUNCHER | IT_SUPER_NAILGUN | IT_NAILGUN)
-#define IT_CONTINUOUS (IT_LIGHTNING | IT_SUPER_NAILGUN | IT_NAILGUN)
-#define IT_AXE_SHOTGUN (IT_AXE | IT_SHOTGUN)
-#define IT_ALL_BUT_GRENADE (IT_AXE | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_NAILGUN | IT_SUPER_NAILGUN | IT_ROCKET_LAUNCHER | IT_LIGHTNING)
-#define IT_ALL (IT_AXE | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_NAILGUN | IT_SUPER_NAILGUN | IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER | IT_LIGHTNING)
-#define IT_NOT_AMMO 16773375
-#define IT_ARMOR (IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3)
-#define IT_NOT_ARMOR (~IT_ARMOR)
-#define IT_INVULNERABILITY_QUAD (IT_INVULNERABILITY | IT_QUAD)
-#define IT_NOT_INVISIBILITY (~IT_INVISIBILITY)
-#define IT_NOT_INVULNERABILITY (~IT_INVULNERABILITY)
-#define IT_NOT_SUIT (~IT_SUIT)
-#define IT_NOT_QUAD (~IT_QUAD)
-#define ITEM_RUNE_MASK (CTF_RUNE_RES | CTF_RUNE_STR | CTF_RUNE_HST | CTF_RUNE_RGN)
-#define NOT_EF_DIMLIGHT 16777207
-#define EF_DIMLIGHT_BLUE (EF_DIMLIGHT | EF_BLUE)
-#define EF_DIMLIGHT_RED (EF_DIMLIGHT | EF_RED)
-#define CLIENTKILL 11
+#define FL_ONGROUND_PARTIALGROUND	(FL_ONGROUND | FL_PARTIALGROUND)
+#define IT_EITHER_NAILGUN			(IT_NAILGUN | IT_SUPER_NAILGUN)
+#define IT_NAILGUN_ROCKET			(IT_ROCKET_LAUNCHER | IT_SUPER_NAILGUN | IT_NAILGUN)
+#define IT_CONTINUOUS				(IT_LIGHTNING | IT_SUPER_NAILGUN | IT_NAILGUN)
+#define IT_AXE_SHOTGUN				(IT_AXE | IT_SHOTGUN)
+#define IT_ALL_BUT_GRENADE			(IT_AXE | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_NAILGUN | IT_SUPER_NAILGUN | IT_ROCKET_LAUNCHER | IT_LIGHTNING)
+#define IT_ALL						(IT_AXE | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_NAILGUN | IT_SUPER_NAILGUN | IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER | IT_LIGHTNING)
+#define IT_NOT_AMMO					16773375
+#define IT_ARMOR					(IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3)
+#define IT_NOT_ARMOR				(~IT_ARMOR)
+#define IT_INVULNERABILITY_QUAD		(IT_INVULNERABILITY | IT_QUAD)
+#define IT_NOT_INVISIBILITY			(~IT_INVISIBILITY)
+#define IT_NOT_INVULNERABILITY		(~IT_INVULNERABILITY)
+#define IT_NOT_SUIT					(~IT_SUIT)
+#define IT_NOT_QUAD					(~IT_QUAD)
+#define ITEM_RUNE_MASK				(CTF_RUNE_RES | CTF_RUNE_STR | CTF_RUNE_HST | CTF_RUNE_RGN)
+#define NOT_EF_DIMLIGHT				16777207
+#define EF_DIMLIGHT_BLUE			(EF_DIMLIGHT | EF_BLUE)
+#define EF_DIMLIGHT_RED				(EF_DIMLIGHT | EF_RED)
+#define CLIENTKILL					11
 
-#define FB_PREFER_ROCKET_LAUNCHER 1
-#define FB_PREFER_LIGHTNING_GUN   2
+#define FB_PREFER_ROCKET_LAUNCHER	1
+#define FB_PREFER_LIGHTNING_GUN		2
 
-#define GAME_ENABLE_POWERUPS 1
-#define GAME_ENABLE_RUNES 2
-#define GAME_RUNE_RJ 4
-#define GAME_MATCH 64
-#define GAME_ENABLE_DROPWEAP 512
-#define GAME_ENABLE_AUTOREPORT 1024
-#define GAME_ENABLE_AUTOSTEAMS 2048
-#define FORWARD 1
-#define BACK 2
-#define LEFT 4
-#define RIGHT 8
-#define FORWARD_LEFT 5
-#define FORWARD_RIGHT 9
-#define BACK_LEFT 6
-#define BACK_RIGHT 10
-#define UP 16
-#define DOWN 32
-#define JUMPSPEED 270
+#define GAME_ENABLE_POWERUPS		1
+#define GAME_ENABLE_RUNES			2
+#define GAME_RUNE_RJ				4
+#define GAME_MATCH					64
+#define GAME_ENABLE_DROPWEAP		512
+#define GAME_ENABLE_AUTOREPORT		1024
+#define GAME_ENABLE_AUTOSTEAMS		2048
+#define FORWARD						1
+#define BACK						2
+#define LEFT						4
+#define RIGHT						8
+#define FORWARD_LEFT				5
+#define FORWARD_RIGHT				9
+#define BACK_LEFT					6
+#define BACK_RIGHT					10
+#define UP							16
+#define DOWN						32
+#define JUMPSPEED					270
 
 // Fall results
-#define FALL_FALSE 0
-#define FALL_BLOCKED 1
-#define FALL_LAND 2
-#define FALL_DEATH 3
+#define FALL_FALSE					0
+#define FALL_BLOCKED				1
+#define FALL_LAND					2
+#define FALL_DEATH					3
 
 // Path flags
 // NOTE: Editor won't save newly-added flags unless added to EXTERNAL_MARKER_PATH_FLAGS
-#define WATERJUMP_              (1 <<  1)
-#define DM6_DOOR                (1 <<  8)
-#define ROCKET_JUMP             (1 <<  9)
-#define JUMP_LEDGE              (1 << 10)             // Implies NO_DODGE
-#define VERTICAL_PLATFORM       (1 << 11)
-#define BOTPATH_DOOR            (1 << 12)
-#define BOTPATH_DOOR_CLOSED     (1 << 13)
-#define REVERSIBLE              (1 << 14)
-#define WATER_PATH              (1 << 15)
-#define DELIBERATE_AIR          (1 << 17)
-#define WAIT_GROUND             (1 << 18)
-#define STUCK_PATH              (1 << 19)
-#define AIR_ACCELERATION        (1 << 20)
-#define NO_DODGE                (1 << 21)
-#define DELIBERATE_BACKUP       (1 << 22)
-#define BOTPATH_CURLJUMP_HINT   (1 << 23)
-#define BOTPATH_FULL_AIRCONTROL (1 << 24)
-#define BOTPATH_RJ_IN_PROGRESS  (1 << 25)
-#define DELIBERATE_AIR_WAIT_GROUND (DELIBERATE_AIR | WAIT_GROUND)
-#define SAVED_DESCRIPTION (DM6_DOOR | ROCKET_JUMP | JUMP_LEDGE | VERTICAL_PLATFORM | BOTPATH_DOOR | BOTPATH_DOOR_CLOSED | NO_DODGE)
-#define NOT_ROCKET_JUMP (~ROCKET_JUMP)
+#define WATERJUMP_					(1 <<  1)
+#define DM6_DOOR					(1 <<  8)
+#define ROCKET_JUMP					(1 <<  9)
+#define JUMP_LEDGE					(1 << 10)	// Implies NO_DODGE
+#define VERTICAL_PLATFORM			(1 << 11)
+#define BOTPATH_DOOR				(1 << 12)
+#define BOTPATH_DOOR_CLOSED			(1 << 13)
+#define REVERSIBLE					(1 << 14)	// Set if bi-directional link between markers in the same zone
+#define WATER_PATH					(1 << 15)
+#define DELIBERATE_AIR				(1 << 17)
+#define WAIT_GROUND					(1 << 18)
+#define STUCK_PATH					(1 << 19)
+#define AIR_ACCELERATION			(1 << 20)
+#define NO_DODGE					(1 << 21)
+#define DELIBERATE_BACKUP			(1 << 22)
+#define BOTPATH_CURLJUMP_HINT		(1 << 23)
+#define BOTPATH_FULL_AIRCONTROL		(1 << 24)
+#define BOTPATH_RJ_IN_PROGRESS		(1 << 25)
+#define DELIBERATE_AIR_WAIT_GROUND	(DELIBERATE_AIR | WAIT_GROUND)
+#define SAVED_DESCRIPTION			(DM6_DOOR | ROCKET_JUMP | JUMP_LEDGE | VERTICAL_PLATFORM | BOTPATH_DOOR | BOTPATH_DOOR_CLOSED | NO_DODGE)
+#define NOT_ROCKET_JUMP				(~ROCKET_JUMP)
 
 // Marker flags (FIXME: fb.T?  check.  consistent naming)
 // NOTE: Editor won't save newly-added flags unless added to EXTERNAL_MARKER_FLAGS
-#define UNREACHABLE                       1   // Typically set for markers that are lava, waterlevel 3?  (automate?)
-#define T_WATER                           2   // Set by server if the marker is in liquid
-#define T_NO_AIR                          4   // Set by server (means the bot would be trapped underwater - dm3 tunnel for instance)
-#define MARKER_IS_DM6_DOOR                8   // Should only be set for DM6 door to LG at the moment (logic needs generalised to all shootable doors)
-#define MARKER_BLOCKED_ON_STATE_TOP      16   // If set, door is considered 'closed' when STATE_TOP.
-#define MARKER_FIRE_ON_MATCH_START       32   // Used to automatically fire triggers (open secret doors etc).  Ignored if no bots spawned.
-#define MARKER_DOOR_TOUCHABLE            64   // If set, door will spawn a touchable marker.  If not set, door shouldn't be in bot path definitions
-#define MARKER_ESCAPE_ROUTE             128   // (not currently implemented) bot should head towards marker when in lava or slime (think amphi2/end)
-#define MARKER_DYNAMICALLY_ADDED        256   // Added dynamically by server.  Do not include in .bot file generation
-#define MARKER_EXPLICIT_VIEWOFFSET      512   // Viewoffset has been set by map defintion and should be included in .bot file generation
-#define MARKER_NOTOUCH                 1024   // Not touchable - used when two markers on top of each other
+#define UNREACHABLE					1		// Typically set for markers that are lava, waterlevel 3?  (automate?)
+#define T_WATER						2		// Set by server if the marker is in liquid
+#define T_NO_AIR					4		// Set by server (means the bot would be trapped underwater - dm3 tunnel for instance)
+#define MARKER_IS_DM6_DOOR			8		// Should only be set for DM6 door to LG at the moment (logic needs generalised to all shootable doors)
+#define MARKER_BLOCKED_ON_STATE_TOP	16		// If set, door is considered 'closed' when STATE_TOP.
+#define MARKER_FIRE_ON_MATCH_START	32		// Used to automatically fire triggers (open secret doors etc).  Ignored if no bots spawned.
+#define MARKER_DOOR_TOUCHABLE		64		// If set, door will spawn a touchable marker.  If not set, door shouldn't be in bot path definitions
+#define MARKER_ESCAPE_ROUTE			128		// (not currently implemented) bot should head towards marker when in lava or slime (think amphi2/end)
+#define MARKER_DYNAMICALLY_ADDED	256		// Added dynamically by server.  Do not include in .bot file generation
+#define MARKER_EXPLICIT_VIEWOFFSET	512		// Viewoffset has been set by map definition and should be included in .bot file generation
+#define MARKER_NOTOUCH				1024	// Not touchable - used when two markers on top of each other
 
 // Bot flags (FIXME: fb.state?  check.  consistent naming, comment with descriptions)
-#define CAMPBOT 1
-#define SHOT_FOR_LUCK 2
-#define BACKPACK_IS_UNREACHABLE 4
-#define NOTARGET_ENEMY 32
-#define AWARE_SURROUNDINGS 128
-#define HURT_SELF 1024
-#define RUNAWAY 4096
-#define WAIT 8192
-#define NOT_NOTARGET_ENEMY ~(NOTARGET_ENEMY)
-#define NOT_AWARE_SURROUNDINGS ~(AWARE_SURROUNDINGS)
+#define CAMPBOT						1
+#define SHOT_FOR_LUCK				2
+#define BACKPACK_IS_UNREACHABLE		4
+#define NOTARGET_ENEMY				32
+#define AWARE_SURROUNDINGS			128
+#define HURT_SELF					1024
+#define RUNAWAY						4096
+#define WAIT						8192
+#define NOT_NOTARGET_ENEMY			~(NOTARGET_ENEMY)
+#define NOT_AWARE_SURROUNDINGS		~(AWARE_SURROUNDINGS)
 
-#define HELP_TEAMMATE 128   // FIXME: same as AWARE_SURROUNDINGS... deliberate?
+#define HELP_TEAMMATE				128	// FIXME: same as AWARE_SURROUNDINGS... deliberate?
 
 qbool ExistsPath(gedict_t *from_marker, gedict_t *to_marker, int *new_path_state);
 float boomstick_only(void);
@@ -299,28 +299,6 @@ qbool fb_lg_disabled(void);
 // maps
 void LoadMap(void);
 qbool FrogbotsCheckMapSupport(void);
-
-void map_aerowalk(void);
-void map_amphi2(void);
-void map_dm4(void);
-void map_dm3(void);
-void map_dm6(void);
-void map_e1m2(void);
-void map_frobodm2(void);
-void map_pkeg1(void);
-void map_povdmm4(void);
-void map_spinev2(void);
-void map_ukooldm2(void);
-void map_ukooldm3(void);
-void map_ukooldm6(void);
-void map_ukooldm8(void);
-void map_ultrav(void);
-void map_ztndm1(void);
-void map_ztndm2(void);
-void map_ztndm3(void);
-void map_ztndm4(void);
-void map_ztndm5(void);
-void map_ztndm6(void);
 
 // 
 float pr1_rint(float f);

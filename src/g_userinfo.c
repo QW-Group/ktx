@@ -22,6 +22,7 @@
 extern qbool isSupport_Params(gedict_t *p);
 
 extern void info_sys_mm_update(gedict_t *p, char *from, char *to);
+void info_wpsx_update(gedict_t* p, char* from, char* to);
 
 //========================================================
 //
@@ -52,6 +53,7 @@ cmdinfo_t cinfos[] =
 
 //    { "e-mail", 0 },
 	{ "ev", info_ev_update },
+	{ "wpsx", info_wpsx_update },
 
 //    { "fs", 0 }, // for force_spec 
 

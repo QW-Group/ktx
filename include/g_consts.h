@@ -181,14 +181,6 @@
 #define PRINT_HIGH						2			// critical messages
 #define PRINT_CHAT						3			// also goes to chat console
 
-// multicast sets
-#define MULTICAST_ALL					0			// every client
-#define MULTICAST_PHS					1			// within hearing
-#define MULTICAST_PVS					2			// within sight
-#define MULTICAST_ALL_R					3			// every client, reliable
-#define MULTICAST_PHS_R					4			// within hearing, reliable
-#define MULTICAST_PVS_R					5			// within sight, reliable
-
 #define AS_STRAIGHT						1
 #define AS_SLIDING						2
 #define AS_MELEE						3
@@ -241,6 +233,8 @@
 #define MULTICAST_ALL_R					3	// every client, reliable
 #define MULTICAST_PHS_R					4	// within hearing, reliable
 #define MULTICAST_PVS_R					5	// within sight, reliable
+#define MULTICAST_KTX1_EXT				6	// Only send to those using ktx1 protocol extension (todo)
+#define MULTICAST_MVD_HIDDEN			7	// Insert into MVD stream only, as dem_multiple(0)
 
 // health flags
 #define H_ROTTEN						(1)
@@ -322,3 +316,22 @@
 #define MAX_STUFFED_ALIASES_PER_FRAME	(15)
 
 #define MAX_STUFFED_QUICKMAPS_PER_FRAME	(32)
+
+enum
+{
+	mvdhidden_antilag_position = 0x0000,		// mvdhidden_antilag_position_header_t mvdhidden_antilag_position_t*
+	mvdhidden_usercmd = 0x0001,					// <byte: playernum> <byte:dropnum> <byte: msec, vec3_t: angles, short[3]: forward side up> <byte: buttons> <byte: impulse>
+	mvdhidden_usercmd_weapons = 0x0002,			// <byte: source playernum> <int: items> <byte[4]: ammo> <byte: result> <byte*: weapon priority (nul terminated)>
+	mvdhidden_demoinfo = 0x0003,				// <short: block#> <byte[] content>
+	mvdhidden_commentary_track = 0x0004,		// <byte: track#> [todo... <byte: audioformat> <string: short-name> <string: author(s)> <float: start-offset>?]
+	mvdhidden_commentary_data = 0x0005,			// <byte: track#> [todo... format-specific]
+	mvdhidden_commentary_text_segment = 0x0006,	// <byte: track#> [todo... <float: duration> <string: text (utf8)>]
+	mvdhidden_dmgdone = 0x0007,					// <byte: damaging ent#> <byte: damaged ent#> <byte: damage>
+	mvdhidden_usercmd_weapons_ss = 0x0008,		// (same format as mvdhidden_usercmd_weapons)
+	mvdhidden_extended = 0xFFFF					// doubt we'll ever get here: read next short...
+};
+
+#define SV_EXTENSIONS_KTXEXTENSION1		1
+#define SV_EXTENSIONS_MVDHIDDEN			2
+
+#define MVDHIDDEN_DMGDONE_SPLASHDAMAGE	(1 << 15)

@@ -139,6 +139,7 @@ extern gedict_t *world;
 extern gedict_t *self, *other;
 extern gedict_t *newmis;
 extern int timelimit, fraglimit, teamplay, deathmatch, framecount, coop, skill;
+extern int sv_extensions;
 //extern float	rj;
 
 #define	EDICT_TO_PROG(e) ((byte *)(e) - (byte *)g_edicts)
@@ -471,7 +472,7 @@ void Print_Scores();
 // { "new weapon stats"
 void WS_Mark(gedict_t *p, weaponName_t wp);
 void WS_Reset(gedict_t *p);
-void WS_OnSpecPovChange(gedict_t *s);
+void WS_OnSpecPovChange(gedict_t *s, qbool force);
 // }
 
 //spectate.c
@@ -721,7 +722,7 @@ void vote_check_break();
 void vote_check_elect();
 void vote_check_pickup();
 void vote_check_rpickup(int maxRecursion);
-void vote_check_all();
+void vote_check_all(void);
 
 #define	VOTE_FOFS(x) ((intptr_t)&(((vote_t *)0)->x))
 
