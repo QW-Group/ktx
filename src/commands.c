@@ -274,6 +274,8 @@ void private_game_vote(void);
 void private_game_toggle(qbool enable);
 // }
 
+void ListGameModes(void);
+
 // Save the first 5 demo markers to print at the end.
 demo_marker_t demo_markers[10];
 int demo_markers_count = 10;
@@ -643,6 +645,8 @@ const char CD_NODESC[] = "no desc";
 #define CD_ROUNDSUP			"increase rounds in match"
 #define CD_ROUNDSDOWN		"decrease rounds in match"
 
+#define CD_GAMEMODES		"list available game modes"
+
 void dummy()
 {
 }
@@ -993,7 +997,9 @@ cmd_t cmds[] =
 	{ "roundsdown", 				HM_roundsdown, 					0, 			CF_PLAYER, 																CD_ROUNDSDOWN },
 	// }
 
-	{ "voteprivate", 				private_game_vote, 				0, 			CF_PLAYER, 																CD_PRIVATEGAME }
+	{ "voteprivate", 				private_game_vote, 				0, 			CF_PLAYER, 																CD_PRIVATEGAME },
+
+	{ "gamemodes",					ListGameModes,					0,			CF_BOTH,																CD_GAMEMODES },
 };
 
 #undef DEF
@@ -8473,4 +8479,43 @@ void lgc_register_kill(gedict_t *player)
 void lgc_register_fire_stop(gedict_t *player)
 {
 	player->lgc_state = lgcUndershaft;
+}
+
+void ListGameModes()
+{
+	const char *known[] =
+	{
+		"race",
+		"1on1",
+		"2on2",
+		"3on3",
+		"4on4",
+		"10on10",
+		"ffa",
+		"ctf",
+		"hoonymode",
+		"blitz2v2",
+		"blitz4v4",
+		"practice",
+		"midair",
+		"instagib",
+		"berzerk",
+		"lgcmode",
+		"arena",
+		"carena",
+		"yawnmode",
+	};
+	int i, j;
+
+	for (i = 0; i < sizeof(cmds) / sizeof(cmds[0]); i++)
+	{
+		for (j = 0; j < sizeof(known) / sizeof(known[0]); j++)
+		{
+			if (streq(cmds[i].name, known[j]))
+			{
+				G_sprint(self, 2, "%s\n", known[j]);
+				break;
+			}
+		}
+	}
 }
