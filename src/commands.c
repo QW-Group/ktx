@@ -423,6 +423,9 @@ const char CD_NODESC[] = "no desc";
 #define CD_1ON1HM			"HoonyMode settings"
 #define CD_2ON2BLITZ		"Blitz 2v2"
 #define CD_4ON4BLITZ		"Blitz 4v4"
+#define CD_2ON2ON2			"2 on 2 on 2 settings"
+#define CD_3ON3ON3			"3 on 3 on 3 settings"
+#define CD_4ON4ON4			"4 on 4 on 4 settings"
 #define CD_HMSTATS			"show stats per hoonymode point"
 #define CD_2ON2				"2 on 2 settings"
 #define CD_3ON3				"3 on 3 settings"
@@ -775,6 +778,9 @@ cmd_t cmds[] =
 	{ "hoonymode", 					DEF(UserMode), 					8, 			CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, 									CD_1ON1HM },
 	{ "blitz2v2", 					DEF(UserMode), 					9, 			CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, 									CD_2ON2BLITZ },
 	{ "blitz4v4", 					DEF(UserMode), 					10, 		CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, 									CD_4ON4BLITZ },
+	{ "2on2on2", 					DEF(UserMode), 					11, 		CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, 									CD_2ON2ON2 },
+	{ "3on3on3", 					DEF(UserMode), 					12, 		CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, 									CD_3ON3ON3 },
+	{ "4on4on4", 					DEF(UserMode), 					13, 		CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, 									CD_4ON4ON4 },
 
 	{ "practice", 					TogglePractice, 				0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_PRACTICE },
 	{ "wp_reset", 					Wp_Reset, 						0, 			CF_PLAYER, 																CD_WP_RESET },
@@ -3979,8 +3985,8 @@ const char _2on2hm_um_init[] =
 	"k_exttime 3\n"					// overtime 3mins
 	"k_pow 1\n"						// use powerups
 	"k_membercount 1\n"				// minimum number of players in each team
-	"k_lockmin 1\n"
-	"k_lockmax 2\n"
+	"k_lockmin 1\n"					// minimum number of teams
+	"k_lockmax 2\n"					// maximum number of teams
 	"k_mode 2\n"
 ;
 
@@ -3995,8 +4001,24 @@ const char _2on2_um_init[] =
 	"k_exttime 3\n"					// overtime 3mins
 	"k_pow 1\n"						// use powerups
 	"k_membercount 1\n"				// minimum number of players in each team
-	"k_lockmin 1\n"
-	"k_lockmax 2\n"
+	"k_lockmin 1\n"					// minimum number of teams
+	"k_lockmax 2\n"					// maximum number of teams
+	"k_mode 2\n"
+;
+
+const char _2on2on2_um_init[] =
+	"coop 0\n"						// no coop
+	"maxclients 6\n"				// 2on2on2 = 6 players
+	"k_maxclients 6\n"				// 2on2on2 = 6 players
+	"timelimit  10\n"				// 10 minute rounds
+	"teamplay   2\n"				// hurt teammates and yourself
+	"deathmatch 3\n"				// weapons stay
+	"k_overtime 1\n"				// time based
+	"k_exttime 3\n"					// overtime 3mins
+	"k_pow 1\n"						// use powerups
+	"k_membercount 1\n"				// minimum number of players in each team
+	"k_lockmin 1\n"					// minimum number of teams
+	"k_lockmax 3\n"					// maximum number of teams
 	"k_mode 2\n"
 ;
 
@@ -4009,8 +4031,24 @@ const char _3on3_um_init[] =
 	"deathmatch 1\n"				// weapons wont stay on pickup
 	"k_pow 1\n"						// use powerups
 	"k_membercount 2\n"				// minimum number of players in each team
-	"k_lockmin 1\n"
-	"k_lockmax 2\n"
+	"k_lockmin 1\n"					// minimum number of teams
+	"k_lockmax 2\n"					// maximum number of teams
+	"k_overtime 1\n"				// time based
+	"k_exttime 5\n"					// overtime 5mins
+	"k_mode 2\n"
+;
+
+const char _3on3on3_um_init[] =
+	"coop 0\n"						// no coop
+	"maxclients 9\n"				// 3on3on3 = 9 players
+	"k_maxclients 9\n"				// 3on3on3 = 9 players
+	"timelimit  15\n"				// 15 minute rounds
+	"teamplay   2\n"				// hurt teammates and yourself
+	"deathmatch 1\n"				// weapons wont stay on pickup
+	"k_pow 1\n"						// use powerups
+	"k_membercount 2\n"				// minimum number of players in each team
+	"k_lockmin 1\n"					// minimum number of teams
+	"k_lockmax 3\n"					// maximum number of teams
 	"k_overtime 1\n"				// time based
 	"k_exttime 5\n"					// overtime 5mins
 	"k_mode 2\n"
@@ -4029,8 +4067,8 @@ const char _4on4hm_um_init[] =
 	"k_hoonymode 1\n"
 	"k_pow 1\n"						// use powerups
 	"k_membercount 3\n"				// minimum number of players in each team
-	"k_lockmin 1\n"
-	"k_lockmax 2\n"
+	"k_lockmin 1\n"					// minimum number of teams
+	"k_lockmax 2\n"					// maximum number of teams
 	"k_overtime 1\n"				// time based
 	"k_exttime 5\n"					// overtime 5mins
 	"k_mode 2\n"
@@ -4045,8 +4083,24 @@ const char _4on4_um_init[] =
 	"deathmatch 1\n"				// weapons wont stay on pickup
 	"k_pow 1\n"						// use powerups
 	"k_membercount 3\n"				// minimum number of players in each team
-	"k_lockmin 1\n"
-	"k_lockmax 2\n"
+	"k_lockmin 1\n"					// minimum number of teams
+	"k_lockmax 2\n"					// maximum number of teams
+	"k_overtime 1\n"				// time based
+	"k_exttime 5\n"					// overtime 5mins
+	"k_mode 2\n"
+;
+
+const char _4on4on4_um_init[] =
+	"coop 0\n"						// no coop
+	"maxclients 12\n"				// 4on4on4 = 12 players
+	"k_maxclients 12\n"				// 4on4on4 = 12 players
+	"timelimit  20\n"				// 20 minute rounds
+	"teamplay   2\n"				// hurt teammates and yourself
+	"deathmatch 1\n"				// weapons wont stay on pickup
+	"k_pow 1\n"						// use powerups
+	"k_membercount 3\n"				// minimum number of players in each team
+	"k_lockmin 1\n"					// minimum number of teams
+	"k_lockmax 3\n"					// maximum number of teams
 	"k_overtime 1\n"				// time based
 	"k_exttime 5\n"					// overtime 5mins
 	"k_mode 2\n"
@@ -4061,8 +4115,8 @@ const char _10on10_um_init[] =
 	"deathmatch 1\n"				// wpons dowont stay on pickup
 	"k_pow 1\n"						// user powerups
 	"k_membercount 5\n"				// minimum number of players in each team
-	"k_lockmin 1\n"
-	"k_lockmax 2\n"
+	"k_lockmin 1\n"					// minimum number of teams
+	"k_lockmax 2\n"					// maximum number of teams
 	"k_overtime 1\n"				// time based
 	"k_exttime 5\n"					// overtime 5mins
 	"k_mode 2\n"
@@ -4113,16 +4167,19 @@ const char ctf_um_init[] =
 
 usermode um_list[] =
 {
-	{ "1on1", 		"\223 on \223", 		_1on1_um_init, 		UM_1ON1, 	1 },
-	{ "2on2", 		"\224 on \224", 		_2on2_um_init, 		UM_2ON2, 	2 },
-	{ "3on3", 		"\225 on \225", 		_3on3_um_init, 		UM_3ON3, 	3 },
-	{ "4on4", 		"\226 on \226", 		_4on4_um_init, 		UM_4ON4, 	4 },
+	{ "1on1", 		"\223 on \223", 		_1on1_um_init, 		UM_1ON1, 	 1 },
+	{ "2on2", 		"\224 on \224", 		_2on2_um_init, 		UM_2ON2, 	 2 },
+	{ "3on3", 		"\225 on \225", 		_3on3_um_init, 		UM_3ON3, 	 3 },
+	{ "4on4", 		"\226 on \226", 		_4on4_um_init, 		UM_4ON4, 	 4 },
 	{ "10on10", 	"\223\222 on \223\222", _10on10_um_init, 	UM_10ON10, 	10 },
 	{ "ffa", 		"ffa", 					ffa_um_init, 		UM_FFA, 	-1 },
-	{ "ctf", 		"ctf", 					ctf_um_init, 		UM_CTF, 	0 },
-	{ "hoonymode", 	"HoonyMode", 			_1on1hm_um_init, 	UM_1ON1HM, 	0 },
-	{ "blitz-2v2", 	"Blitz (2v2)", 			_2on2hm_um_init, 	UM_1ON1HM, 	0 },
-	{ "blitz-4v4", 	"Blitz (4v4)", 			_4on4hm_um_init, 	UM_1ON1HM, 	0 }
+	{ "ctf", 		"ctf", 					ctf_um_init, 		UM_CTF, 	 0 },
+	{ "hoonymode", 	"HoonyMode", 			_1on1hm_um_init, 	UM_1ON1HM, 	 0 },
+	{ "blitz-2v2", 	"Blitz (2v2)", 			_2on2hm_um_init, 	UM_1ON1HM, 	 0 },
+	{ "blitz-4v4", 	"Blitz (4v4)", 			_4on4hm_um_init, 	UM_1ON1HM, 	 0 },
+	{ "2on2on2", 	"\224 on \224 on \224", _2on2on2_um_init, 	UM_2ON2ON2,	 0 },
+	{ "3on3on3", 	"\225 on \225 on \225", _3on3on3_um_init, 	UM_3ON3ON3,	 0 },
+	{ "4on4on4", 	"\226 on \226 on \226", _4on4on4_um_init, 	UM_4ON4ON4,	 0 },
 };
 
 int um_cnt = sizeof(um_list) / sizeof(um_list[0]);
@@ -8490,6 +8547,9 @@ void ListGameModes()
 		"2on2",
 		"3on3",
 		"4on4",
+		"2on2on2",
+		"3on3on3",
+		"4on4on4",
 		"10on10",
 		"ffa",
 		"ctf",
