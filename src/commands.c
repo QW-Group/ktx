@@ -426,6 +426,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_2ON2ON2			"2 on 2 on 2 settings"
 #define CD_3ON3ON3			"3 on 3 on 3 settings"
 #define CD_4ON4ON4			"4 on 4 on 4 settings"
+#define CD_XONX				"X on X settings"
 #define CD_HMSTATS			"show stats per hoonymode point"
 #define CD_2ON2				"2 on 2 settings"
 #define CD_3ON3				"3 on 3 settings"
@@ -781,6 +782,7 @@ cmd_t cmds[] =
 	{ "2on2on2", 					DEF(UserMode), 					11, 		CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, 									CD_2ON2ON2 },
 	{ "3on3on3", 					DEF(UserMode), 					12, 		CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, 									CD_3ON3ON3 },
 	{ "4on4on4", 					DEF(UserMode), 					13, 		CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, 									CD_4ON4ON4 },
+	{ "XonX", 						DEF(UserMode), 					14, 		CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, 									CD_XONX },
 
 	{ "practice", 					TogglePractice, 				0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_PRACTICE },
 	{ "wp_reset", 					Wp_Reset, 						0, 			CF_PLAYER, 																CD_WP_RESET },
@@ -4122,6 +4124,22 @@ const char _10on10_um_init[] =
 	"k_mode 2\n"
 ;
 
+const char _XonX_um_init[] =
+	"coop 0\n"						// no coop
+	"maxclients 32\n"				// allow up to 32 players
+	"k_maxclients 32\n"				// allow up to 32 players
+	"timelimit  20\n"				// 20 minute rounds
+	"teamplay   2\n"				// hurt teammates and yourself
+	"deathmatch 1\n"				// weapons wont stay on pickup
+	"k_pow 1\n"						// use powerups
+	"k_membercount 1\n"				// minimum number of players in each team
+	"k_lockmin 1\n"					// minimum number of teams
+	"k_lockmax 2\n"					// maximum number of teams
+	"k_overtime 1\n"				// time based
+	"k_exttime 5\n"					// overtime 5mins
+	"k_mode 2\n"
+;
+
 const char ffa_um_init[] =
 //	"coop 0\n"						// NO WE CAN'T DO IT SO, FFA MATCHLESS USED IN COOP MODE
 	"maxclients 26\n"				// some limit
@@ -4180,6 +4198,7 @@ usermode um_list[] =
 	{ "2on2on2", 	"\224 on \224 on \224", _2on2on2_um_init, 	UM_2ON2ON2,	 0 },
 	{ "3on3on3", 	"\225 on \225 on \225", _3on3on3_um_init, 	UM_3ON3ON3,	 0 },
 	{ "4on4on4", 	"\226 on \226 on \226", _4on4on4_um_init, 	UM_4ON4ON4,	 0 },
+	{ "XonX", 		"X on X", 				_XonX_um_init, 		UM_XONX,	 0 },
 };
 
 int um_cnt = sizeof(um_list) / sizeof(um_list[0]);
@@ -8551,6 +8570,7 @@ void ListGameModes()
 		"3on3on3",
 		"4on4on4",
 		"10on10",
+		"XonX",
 		"ffa",
 		"ctf",
 		"hoonymode",
