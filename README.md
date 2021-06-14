@@ -84,27 +84,29 @@ $ rm -rf build
 
 $ meson build --cross-file tools/cross-compilation/${TARGET}.txt
 The Meson build system
-Version: 0.41.2
-Source dir: /ktx/src
-Build dir: /ktx/src/build
+Version: 0.58.0
+Source dir: /home/taps/workspace/ktx
+Build dir: /home/taps/workspace/ktx/build
 Build type: cross build
 Project name: ktx
-Native c compiler: cc (gcc 5.4.0)
-Cross c compiler: gcc (gcc 5.4.0)
+Project version: undefined
+C compiler for the host machine: gcc (gcc 9.3.0 "gcc (Ubuntu 9.3.0-17ubuntu1~20.04) 9.3.0")
+C linker for the host machine: gcc ld.bfd 2.34
+C compiler for the build machine: cc (gcc 9.3.0 "cc (Ubuntu 9.3.0-17ubuntu1~20.04) 9.3.0")
+C linker for the build machine: cc ld.bfd 2.34
+Build machine cpu family: x86_64
+Build machine cpu: x86_64
 Host machine cpu family: x86_64
 Host machine cpu: x86_64
 Target machine cpu family: x86_64
 Target machine cpu: x86_64
-Build machine cpu family: x86_64
-Build machine cpu: x86_64
-Dependency threads found: YES
 Library m found: YES
 Build targets in project: 1
 
 $ ninja -C build
 
 ninja: Entering directory `build'
-[46/46] Linking target qwprogs.so.
+[100/100] Linking target qwprogs.so.
 
 ```
 
