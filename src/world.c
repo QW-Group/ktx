@@ -212,7 +212,7 @@ void SP_worldspawn()
 
 // the area based ambient sounds MUST be the first precache_sounds
 
-// player precaches     
+// player precaches
 	W_Precache();		// get weapon precaches
 
 // sounds used from C physics code
@@ -269,7 +269,7 @@ void SP_worldspawn()
 
 	trap_precache_sound("boss1/sight1.wav");
 
-// ax sounds    
+// ax sounds
 	trap_precache_sound("weapons/ax1.wav");	// ax swoosh
 	trap_precache_sound("player/axhit1.wav");	// ax hit meat
 	trap_precache_sound("player/axhit2.wav");	// ax hit world
@@ -591,7 +591,7 @@ void Customize_Maps()
 
 	if (!cvar("k_end_tele_spawn") && streq("end", g_globalvars.mapname)
 #ifdef BOT_SUPPORT
-		&& !bots_enabled() 
+		&& !bots_enabled()
 #endif
 		)
 	{
@@ -1685,7 +1685,7 @@ void FixRules()
 	}
 }
 
-int timelimit, fraglimit, teamplay, deathmatch, framecount, coop, skill;
+int timelimit, fraglimit, teamplay, deathmatch, old_deathmatch, framecount, coop, skill;
 
 extern float intermission_exittime;
 
@@ -1711,6 +1711,12 @@ void StartFrame(int time)
 	{
 		SecondFrame();
 		FixRules();
+	}
+
+	if (deathmatch != old_deathmatch)
+	{
+		old_deathmatch = deathmatch;
+		ResetTimings();
 	}
 
 	FixNoSpecs(); // if no players left turn off "no spectators" mode

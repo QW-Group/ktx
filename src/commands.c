@@ -276,6 +276,8 @@ void private_game_toggle(qbool enable);
 
 void ListGameModes(void);
 
+void TimingControl(void);
+
 // Save the first 5 demo markers to print at the end.
 demo_marker_t demo_markers[10];
 int demo_markers_count = 10;
@@ -651,6 +653,8 @@ const char CD_NODESC[] = "no desc";
 
 #define CD_GAMEMODES		"list available game modes"
 
+#define CD_TIMING			"control item timings"
+
 void dummy()
 {
 }
@@ -1008,6 +1012,8 @@ cmd_t cmds[] =
 	{ "voteprivate", 				private_game_vote, 				0, 			CF_PLAYER, 																CD_PRIVATEGAME },
 
 	{ "gamemodes",					ListGameModes,					0,			CF_BOTH,																CD_GAMEMODES },
+
+	{ "timing",						TimingControl,					0,			CF_BOTH | CF_PARAMS,													CD_TIMING },
 };
 
 #undef DEF

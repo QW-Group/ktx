@@ -534,6 +534,9 @@ void DropBackpack();
 
 void adjust_pickup_time(float *current, float *total);
 
+void ResetTimings();
+qbool CustomTimingsActive();
+
 //triggers.c
 void play_teleport(gedict_t *sndspot);
 void spawn_tfog(vec3_t org);

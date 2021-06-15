@@ -1238,6 +1238,8 @@ void PrintCountdown(int seconds)
 // Dmgfrags   On // optional
 // Noweapon
 
+// Custom timings  // optional
+
 // Handicap in use // optional
 
 	char text[1024] =
@@ -1489,6 +1491,11 @@ void PrintCountdown(int seconds)
 	{
 		strlcat(text, va("\n%s %4s\n", "Noweapon", redtext(nowp[0] == 32 ? (nowp + 1) : nowp)),
 				sizeof(text));
+	}
+
+	if (CustomTimingsActive())
+	{
+		strlcat(text, va("\n%s\n", redtext("Custom timings")), sizeof(text));
 	}
 
 	if (handicap_in_use())

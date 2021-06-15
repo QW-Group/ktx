@@ -25,6 +25,33 @@
 
 #include "g_local.h"
 
+enum
+{
+	ITEM_CLASS_HEALTH,
+	ITEM_CLASS_AMMO,
+	ITEM_CLASS_ARMOR,
+	ITEM_CLASS_WEAPON,
+	ITEM_CLASS_MEGA,
+	ITEM_CLASS_QUAD,
+	ITEM_CLASS_EYES,
+	ITEM_CLASS_PENT,
+
+	// sentinel
+	NUM_ITEM_CLASSES,
+};
+
+static float respawn_times[NUM_ITEM_CLASSES];
+
+static const float default_respawn_times[][NUM_ITEM_CLASSES] =
+{
+	{20, 30, 20, 30, 20, 60, 300, 300}, // DMM0
+	{20, 30, 20, 30, 20, 60, 300, 300}, // DMM1
+	{-1, -1, -1, -2, -1, 60, 300, 300}, // DMM2
+	{20, 15, 20, -2, 20, 60, 300, 300}, // DMM3
+	{20, 30, 20, 30, -1, 60, 300, 300}, // DMM4
+	{20, 15, 20, -2, 20, 60, 300, 300}, // DMM5
+};
+
 void SP_item_artifact_invisibility();
 void SP_item_artifact_super_damage();
 void SP_item_artifact_invulnerability();
@@ -363,7 +390,7 @@ void health_touch()
 		if (deathmatch != 2)
 		{
 			// deathmatch 2 is the silly old rules
-			self->s.v.nextthink = g_globalvars.time + 20;
+			self->s.v.nextthink = g_globalvars.time + respawn_times[ITEM_CLASS_HEALTH];
 			self->think = (func_t) SUB_regen;
 		}
 	}
@@ -402,7 +429,7 @@ void item_megahealth_rot(void)
 
 	if (deathmatch != 2)	// deathmatch 2 is silly old rules
 	{
-		self->s.v.nextthink = g_globalvars.time + 20;
+		self->s.v.nextthink = g_globalvars.time + respawn_times[ITEM_CLASS_MEGA];
 		stuffcmd_flags(other, STUFFCMD_DEMOONLY, "//ktx timer %d %d\n", NUM_FOR_EDICT(self), 20);
 		self->think = (func_t) SUB_regen;
 	}
@@ -514,7 +541,7 @@ void armor_touch()
 	self->model = "";
 	if (deathmatch != 2)
 	{
-		self->s.v.nextthink = g_globalvars.time + 20;
+		self->s.v.nextthink = g_globalvars.time + respawn_times[ITEM_CLASS_ARMOR];
 		stuffcmd_flags(other, STUFFCMD_DEMOONLY, "//ktx took %d %d %d\n", NUM_FOR_EDICT(self), 20,
 						NUM_FOR_EDICT(other));
 	}
@@ -968,7 +995,7 @@ void weapon_touch()
 		self->s.v.solid = SOLID_NOT;
 		if (deathmatch != 2)
 		{
-			self->s.v.nextthink = g_globalvars.time + 30;
+			self->s.v.nextthink = g_globalvars.time + respawn_times[ITEM_CLASS_WEAPON];
 			stuffcmd_flags(other, STUFFCMD_DEMOONLY, "//ktx took %d %d %d\n", NUM_FOR_EDICT(self),
 							30, NUM_FOR_EDICT(other));
 		}
@@ -1120,7 +1147,7 @@ void ammo_touch()
 		return;
 	}
 
-// if the player was using his best weapon, change up to the new one if better          
+// if the player was using his best weapon, change up to the new one if better
 	stemp = self;
 	self = other;
 	best = W_BestWeapon(); // save best weapon before update ammo
@@ -1239,14 +1266,7 @@ void ammo_touch()
 	self->s.v.solid = SOLID_NOT;
 	if (deathmatch != 2)
 	{
-		self->s.v.nextthink = g_globalvars.time + 30;
-	}
-
-// Xian -- If playing in DM 3.0 mode, halve the time ammo respawns        
-
-	if ((deathmatch == 3) || (deathmatch == 5))
-	{
-		self->s.v.nextthink = g_globalvars.time + 15;
+		self->s.v.nextthink = g_globalvars.time + respawn_times[ITEM_CLASS_AMMO];
 	}
 
 	self->think = (func_t) SUB_regen;
@@ -1971,7 +1991,15 @@ void powerup_touch()
 	if (streq(self->classname, "item_artifact_invulnerability")
 			|| streq(self->classname, "item_artifact_invisibility"))
 	{
-		self->s.v.nextthink = g_globalvars.time + 60 * 5;
+		if (streq(self->classname, "item_artifact_invulnerability"))
+		{
+			self->s.v.nextthink = g_globalvars.time + respawn_times[ITEM_CLASS_PENT];
+		}
+		else
+		{
+			self->s.v.nextthink = g_globalvars.time + respawn_times[ITEM_CLASS_EYES];
+		}
+
 		if (isHoonyModeTDM())
 		{
 			// 5 minute rounds => respawn at 3 minutes
@@ -1995,7 +2023,7 @@ void powerup_touch()
 	}
 	else
 	{
-		self->s.v.nextthink = g_globalvars.time + 60;
+		self->s.v.nextthink = g_globalvars.time + respawn_times[ITEM_CLASS_QUAD];
 		if (!k_practice)
 		{
 			stuffcmd_flags(other, STUFFCMD_DEMOONLY, "//ktx took %d %d %d\n", NUM_FOR_EDICT(self),
@@ -2831,3 +2859,249 @@ void HideSpawnPoints()
 	}
 }
 
+static void SetTiming(int item_class, float seconds, float lcl, float ucl)
+{
+	if (seconds == 0)
+	{
+		respawn_times[item_class] = default_respawn_times[deathmatch][item_class];
+	}
+	else if (default_respawn_times[deathmatch][item_class] < 0)
+	{
+		G_sprint(self, 2, "Error: item does not respawn in current deathmatch mode\n");
+	}
+	else if (seconds < lcl || seconds > ucl)
+	{
+		G_sprint(self, 2, "Error: duration out of range\n");
+	}
+	else
+	{
+		respawn_times[item_class] = seconds;
+	}
+}
+
+static void PrintTiming(int item_class, const char *prefix)
+{
+	float seconds;
+
+	seconds = respawn_times[item_class];
+	G_sprint(self, 2, "%s%s\n", prefix, seconds == -1 ? "never" : seconds == -2 ? "stay" : va("%0.3fs", seconds));
+}
+
+void ResetTimings()
+{
+	int i;
+
+	for (i = 0; i < NUM_ITEM_CLASSES; i++)
+	{
+		respawn_times[i] = default_respawn_times[deathmatch][i];
+	}
+}
+
+void TimingControl()
+{
+	int argc, allow;
+	float seconds;
+	char buf[64], *end;
+
+	argc = trap_CmdArgc();
+	if (argc < 2)
+	{
+		G_sprint(self, 2,
+			"Usage: timing %s|%s|%s|%s|%s|%s|%s|%s|%s [<%s>|%s]\n",
+			redtext("health"),
+			redtext("ammo"),
+			redtext("armor"),
+			redtext("weapon"),
+			redtext("mega"),
+			redtext("quad"),
+			redtext("eyes"),
+			redtext("pent"),
+			redtext("all"),
+			redtext("seconds"),
+			redtext("default")
+		);
+
+		return;
+	}
+
+	seconds = 0;
+	if (argc > 2)
+	{
+		allow = cvar("allow_custom_timings");
+		if (allow <= 0)
+		{
+			G_sprint(self, 2, "Error: custom timings not allowed on server\n");
+
+			return;
+		}
+
+		if (allow == 1)
+		{
+			if (!is_adm(self))
+			{
+				G_sprint(self, 2, "Error: administrator privileges required\n");
+
+				return;
+			}
+		}
+		else if (allow == 2)
+		{
+			if (self->ct != ctPlayer)
+			{
+				G_sprint(self, 2, "Error: spectators cannot change timings\n");
+
+				return;
+			}
+		}
+
+		if (!k_matchLess && match_in_progress)
+		{
+			G_sprint(self, 2, "Error: match currently in progress\n");
+
+			return;
+		}
+
+		trap_CmdArgv(2, buf, sizeof(buf));
+		if (!streq(buf, "default"))
+		{
+			seconds = strtof(buf, &end);
+			if (end == buf || seconds <= 0)
+			{
+				G_sprint(self, 2, "Error: invalid duration\n");
+
+				return;
+			}
+		}
+	}
+
+	trap_CmdArgv(1, buf, sizeof(buf));
+	if (streq(buf, "health"))
+	{
+		if (argc == 2)
+		{
+			PrintTiming(ITEM_CLASS_HEALTH, "Health respawn time: ");
+		}
+		else
+		{
+			SetTiming(ITEM_CLASS_HEALTH, seconds, 5, 1500);
+		}
+	}
+	else if (streq(buf, "ammo"))
+	{
+		if (argc == 2)
+		{
+			PrintTiming(ITEM_CLASS_AMMO, "Ammo respawn time: ");
+		}
+		else
+		{
+			SetTiming(ITEM_CLASS_AMMO, seconds, 5, 1500);
+		}
+	}
+	else if (streq(buf, "armor"))
+	{
+		if (argc == 2)
+		{
+			PrintTiming(ITEM_CLASS_ARMOR, "Armor respawn time: ");
+		}
+		else
+		{
+			SetTiming(ITEM_CLASS_ARMOR, seconds, 5, 1500);
+		}
+	}
+	else if (streq(buf, "weapon"))
+	{
+		if (argc == 2)
+		{
+			PrintTiming(ITEM_CLASS_WEAPON, "Weapon respawn time: ");
+		}
+		else
+		{
+			SetTiming(ITEM_CLASS_WEAPON, seconds, 5, 1500);
+		}
+	}
+	else if (streq(buf, "mega"))
+	{
+		if (argc == 2)
+		{
+			PrintTiming(ITEM_CLASS_MEGA, "Mega respawn time: ");
+		}
+		else
+		{
+			SetTiming(ITEM_CLASS_MEGA, seconds, 5, 1500);
+		}
+	}
+	else if (streq(buf, "quad"))
+	{
+		if (argc == 2)
+		{
+			PrintTiming(ITEM_CLASS_QUAD, "Quad respawn time: ");
+		}
+		else
+		{
+			SetTiming(ITEM_CLASS_QUAD, seconds, 5, 1500);
+		}
+	}
+	else if (streq(buf, "eyes"))
+	{
+		if (argc == 2)
+		{
+			PrintTiming(ITEM_CLASS_EYES, "Eyes respawn time: ");
+		}
+		else
+		{
+			SetTiming(ITEM_CLASS_EYES, seconds, 5, 1500);
+		}
+	}
+	else if (streq(buf, "pent"))
+	{
+		if (argc == 2)
+		{
+			PrintTiming(ITEM_CLASS_PENT, "Pent respawn time: ");
+		}
+		else
+		{
+			SetTiming(ITEM_CLASS_PENT, seconds, 5, 1500);
+		}
+	}
+	else if (streq(buf, "all"))
+	{
+		if (argc == 2)
+		{
+			G_sprint(self, 2, "Respawn times:\n");
+			PrintTiming(ITEM_CLASS_HEALTH, " Health: ");
+			PrintTiming(ITEM_CLASS_AMMO,   " Ammo:   ");
+			PrintTiming(ITEM_CLASS_ARMOR,  " Armor:  ");
+			PrintTiming(ITEM_CLASS_WEAPON, " Weapon: ");
+			PrintTiming(ITEM_CLASS_MEGA,   " Mega:   ");
+			PrintTiming(ITEM_CLASS_QUAD,   " Quad:   ");
+			PrintTiming(ITEM_CLASS_EYES,   " Eyes:   ");
+			PrintTiming(ITEM_CLASS_PENT,   " Pent:   ");
+		}
+		else if (seconds == 0)
+		{
+			ResetTimings();
+		}
+		else
+		{
+			G_sprint(self, 2, "Error: invalid duration\n");
+		}
+	}
+	else
+	{
+		G_sprint(self, 2, "Error: invalid item class\n");
+	}
+}
+
+qbool CustomTimingsActive()
+{
+	int i;
+
+	for (i = 0; i < NUM_ITEM_CLASSES; i++)
+	{
+		if (respawn_times[i] != default_respawn_times[deathmatch][i])
+		{
+			return 1;
+		}
+	}
+	return 0;
+}
