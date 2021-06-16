@@ -40,9 +40,9 @@ enum
 	NUM_ITEM_CLASSES,
 };
 
-static float respawn_times[NUM_ITEM_CLASSES];
+float respawn_times[NUM_ITEM_CLASSES];
 
-static const float default_respawn_times[][NUM_ITEM_CLASSES] =
+const float default_respawn_times[][NUM_ITEM_CLASSES] =
 {
 	{20, 30, 20, 30, 20, 60, 300, 300}, // DMM0
 	{20, 30, 20, 30, 20, 60, 300, 300}, // DMM1

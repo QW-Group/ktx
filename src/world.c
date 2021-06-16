@@ -1424,6 +1424,8 @@ void FixSayTeamToSpecs()
 
 int skip_fixrules = 0;
 
+static int old_deathmatch = -1;
+
 // check if server is misconfigured somehow, made some minimum fixage
 void FixRules()
 {
@@ -1511,6 +1513,12 @@ void FixRules()
 			&& (deathmatch != 5))
 	{
 		trap_cvar_set_float("deathmatch", (deathmatch = 3));
+	}
+
+	if (deathmatch != old_deathmatch)
+	{
+		old_deathmatch = deathmatch;
+		ResetTimings();
 	}
 
 	if (k_matchLess)
@@ -1685,7 +1693,7 @@ void FixRules()
 	}
 }
 
-int timelimit, fraglimit, teamplay, deathmatch, old_deathmatch, framecount, coop, skill;
+int timelimit, fraglimit, teamplay, deathmatch, framecount, coop, skill;
 
 extern float intermission_exittime;
 
@@ -1711,12 +1719,6 @@ void StartFrame(int time)
 	{
 		SecondFrame();
 		FixRules();
-	}
-
-	if (deathmatch != old_deathmatch)
-	{
-		old_deathmatch = deathmatch;
-		ResetTimings();
 	}
 
 	FixNoSpecs(); // if no players left turn off "no spectators" mode
