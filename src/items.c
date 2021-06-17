@@ -2927,7 +2927,7 @@ void TimingControl()
 	seconds = 0;
 	if (argc > 2)
 	{
-		allow = cvar("allow_custom_timings");
+		allow = cvar("k_allow_custom_timings");
 		if (allow <= 0)
 		{
 			G_sprint(self, 2, "Error: custom timings not allowed on server\n");
@@ -3103,5 +3103,6 @@ qbool CustomTimingsActive()
 			return 1;
 		}
 	}
+
 	return 0;
 }
