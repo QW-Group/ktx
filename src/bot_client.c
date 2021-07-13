@@ -16,7 +16,7 @@
 
 #define PERIODIC_MM2_STATUS 4
 
-void PlayerReady();
+void PlayerReady(qbool startIdlebot);
 void BotBlocked(void);
 
 int weapon_impulse_codes[] =
@@ -250,7 +250,7 @@ void BotClientConnectedEvent(gedict_t *self)
 
 	if (self->isBot)
 	{
-		PlayerReady();
+		PlayerReady(true);
 	}
 
 	// Assign all flags again
@@ -348,7 +348,7 @@ void BotPreThink(gedict_t *self)
 
 		if (self->isBot && (match_in_progress == 0) && !self->ready)
 		{
-			PlayerReady();
+			PlayerReady(true);
 		}
 
 		if (teamplay && (match_in_progress == 2))
