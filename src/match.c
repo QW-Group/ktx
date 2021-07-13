@@ -2405,7 +2405,7 @@ void CheckAutoXonX(qbool use_time);
 void r_changestatus(float t);
 
 // Called by a player to inform that (s)he is ready for a match.
-void PlayerReady()
+void PlayerReady(qbool startIdlebot)
 {
 	gedict_t *p;
 	float nready;
@@ -2565,7 +2565,10 @@ void PlayerReady()
 		if (nready != k_attendees)
 		{
 			// not all players ready, check idlebot and return
-			IdlebotCheck();
+			if (startIdlebot)
+			{
+				IdlebotCheck();
+			}
 
 			return;
 		}
@@ -2593,6 +2596,11 @@ void PlayerReady()
 	}
 
 	StartTimer();
+}
+
+void PlayerSlowReady()
+{
+	PlayerReady(false);
 }
 
 void PlayerBreak()

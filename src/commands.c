@@ -26,7 +26,8 @@ qbool is_rules_change_allowed(void);
 void SendMessage(char *name);
 float CountRPlayers();
 float CountTeams();
-void PlayerReady();
+void PlayerReady(qbool startIdlebot);
+void PlayerSlowReady();
 void PlayerBreak();
 void ReqAdmin();
 void AdminForceStart();
@@ -329,6 +330,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_EFFI				"show player efficiencies"
 #define CD_OPTIONS			"match control commands"
 #define CD_READY			"when you feel ready"
+#define CD_SLOWREADY		"like ready, but don't activate the idlebot"
 #define CD_BREAK			"unready / vote matchend"
 #define CD_STATUS			"show server settings"
 #define CD_STATUS2			"more server settings"
@@ -671,6 +673,7 @@ cmd_t cmds[] =
 	{ "effi", 						PlayerStats, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_EFFI },
 	{ "options", 					ShowOpts, 						0, 			CF_PLAYER, 																CD_OPTIONS },
 	{ "ready", 						PlayerReady, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_READY },
+	{ "slowready", 					PlayerSlowReady, 				0, 			CF_BOTH | CF_MATCHLESS, 												CD_SLOWREADY },
 	{ "break", 						PlayerBreak, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_BREAK },
 	{ "status", 					ModStatus, 						0, 			CF_BOTH | CF_MATCHLESS, 												CD_STATUS },
 	{ "status2", 					ModStatus2, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_STATUS2 },
@@ -7186,7 +7189,7 @@ void ToggleReady()
 	}
 	else
 	{
-		PlayerReady();
+		PlayerReady(true);
 	}
 }
 

@@ -2,7 +2,7 @@
 #include "g_local.h"
 
 void AdminMatchStart();
-void PlayerReady();
+void PlayerReady(qbool startIdlebot);
 void NextClient();
 qbool DoKick(gedict_t *victim, gedict_t *kicker);
 
@@ -664,7 +664,7 @@ void AdminForceStart()
 
 	if ((self->ct == ctPlayer) && !self->ready)
 	{
-		PlayerReady();
+		PlayerReady(true);
 
 		if (!self->ready)
 		{
