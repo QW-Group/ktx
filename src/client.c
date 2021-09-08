@@ -3036,7 +3036,9 @@ void Print_Wp_Stats()
 
 	G_centerprint(self, "%s", buf);
 }
-
+/*
+ * Function is called when a player or spectator enables continuous score display with +scores console command.
+ * */
 void Print_Scores()
 {
 	char buf[1024] =
@@ -3191,8 +3193,41 @@ void Print_Scores()
 		}
 		else
 		{
-			strlcat(buf, last_va = va("  \364:%d  \345:%d  \x90%d\x91", ts, es, ts - es),
-					sizeof(buf));
+			if ((current_umode < 11) || (current_umode > 13))
+			{
+				strlcat(buf, last_va = va("  \364:%d  \345:%d  \x90%d\x91", ts, es, ts - es),
+						sizeof(buf));
+			}
+			else
+			{
+				// if the current UserMode is 2on2on2, 3on3on3, 4on4on4, we have 3 teams
+				int s1 = get_scores1();
+				int s2 = get_scores2();
+				int s3 = get_scores3();
+				char *t1 = cvar_string("_k_team1");
+				char *t2 = cvar_string("_k_team2");
+				char *t3 = cvar_string("_k_team3");
+				char *t = getteam(e);
+
+				if (streq(t1, t))
+				{
+					// the tracked player is in Team 1
+					strlcat(buf, last_va = va("  \364:%d  \345:%d  \x90%d\x91  \345:%d  \x90%d\x91",
+							s1, s2, s1 - s2 , s3, s1 - s3), sizeof(buf));
+				}
+				else if (streq(t2, t))
+				{
+					// the tracked player is in Team 2
+					strlcat(buf, last_va = va("  \364:%d  \345:%d  \x90%d\x91  \345:%d  \x90%d\x91",
+							s2, s1, s2 - s1 , s3, s2 - s3), sizeof(buf));
+				}
+				else if (streq(t3, t))
+				{
+					// the tracked player is in Team 3
+					strlcat(buf, last_va = va("  \364:%d  \345:%d  \x90%d\x91  \345:%d  \x90%d\x91",
+							s3, s1, s3 - s1 , s2, s3 - s2), sizeof(buf));
+				}
+			}
 		}
 	}
 

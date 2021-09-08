@@ -990,6 +990,7 @@ void FirstFrame()
 	RegisterCvar("_k_coachteam2"); // internal mod usage
 	RegisterCvar("_k_team1"); // internal mod usage
 	RegisterCvar("_k_team2"); // internal mod usage
+	RegisterCvar("_k_team3"); // internal mod usage
 	RegisterCvar("_k_host"); // internal mod usage
 
 // { lastscores support

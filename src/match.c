@@ -689,17 +689,81 @@ void TimerThink()
 
 		if (k_showscores)
 		{
-			int sc = get_scores1() - get_scores2();
-
-			if (sc)
+			if ((current_umode < 11) || (current_umode > 13))
 			{
-				G_bprint(2, "%s \220%s\221 leads by %s frag%s\n", redtext("Team"),
-							cvar_string((sc > 0 ? "_k_team1" : "_k_team2")), dig3(abs((int)sc)),
-							count_s(abs((int)sc)));
+				int sc = get_scores1() - get_scores2();
+
+				if (sc)
+				{
+					G_bprint(2, "%s \220%s\221 leads by %s frag%s\n", redtext("Team"),
+								cvar_string((sc > 0 ? "_k_team1" : "_k_team2")), dig3(abs((int)sc)),
+								count_s(abs((int)sc)));
+				}
+				else
+				{
+					G_bprint(2, "The game is currently a tie\n");
+				}
 			}
 			else
 			{
-				G_bprint(2, "The game is currently a tie\n");
+				// if the current UserMode is 2on2on2, 3on3on3, 4on4on4, we have 3 teams
+				int s1 = get_scores1();
+				int s2 = get_scores2();
+				int s3 = get_scores3();
+				int sc;
+
+				if ((s1 > s2) && (s1 > s3))
+				{
+					// Team 1 is leading
+					if (s2 > s3)
+					{
+						sc = get_scores1() - get_scores2();
+					}
+					else
+					{
+						sc = get_scores1() - get_scores3();
+					}
+
+					G_bprint(2, "%s \220%s\221 leads by %s frag%s\n", redtext("Team"),
+								cvar_string("_k_team1"), dig3(abs((int)sc)),
+								count_s(abs((int)sc)));
+				}
+				else if ((s2 > s1) && (s2 > s3))
+				{
+					// Team 2 is leading
+					if (s1 > s3)
+					{
+						sc = get_scores2() - get_scores1();
+					}
+					else
+					{
+						sc = get_scores2() - get_scores3();
+					}
+
+					G_bprint(2, "%s \220%s\221 leads by %s frag%s\n", redtext("Team"),
+								cvar_string("_k_team2"), dig3(abs((int)sc)),
+								count_s(abs((int)sc)));
+				}
+				else if ((s3 > s1) && (s3 > s2))
+				{
+					// Team 3 is leading
+					if (s1 > s2)
+					{
+						sc = get_scores3() - get_scores1();
+					}
+					else
+					{
+						sc = get_scores3() - get_scores3();
+					}
+
+					G_bprint(2, "%s \220%s\221 leads by %s frag%s\n", redtext("Team"),
+								cvar_string("_k_team3"), dig3(abs((int)sc)),
+								count_s(abs((int)sc)));
+				}
+				else
+				{
+					G_bprint(2, "The game is currently a tie\n");
+				}
 			}
 		}
 
@@ -925,14 +989,18 @@ static void SM_ExecuteQueuedSpawnEffects(void)
 void SM_PrepareShowscores()
 {
 	gedict_t *p;
-	char *team1 = "", *team2 = "";
+	char *team1 = "";
+	char *team2 = "";
+	char *team3 = "";
 
 	if (k_matchLess && !isCTF()) // skip this in matchLess mode, unless CTF matchless (otherwise causes unlimited overtime because "sc" is always = 0 in CheckOvertime())
 	{
 		return;
 	}
 
-	if (((!isTeam() && !isCTF()) || (CountRTeams() != 2)) && !(isCTF() && k_matchLess)) // we need 2 ready teams, unless CTF matchless
+	if (((!isTeam() && !isCTF())
+			|| ((CountRTeams() != 2) && (CountRTeams() != 3)))
+			&& !(isCTF() && k_matchLess)) // we need 2 ready teams, unless CTF matchless
 	{
 		return;
 	}
@@ -966,17 +1034,47 @@ void SM_PrepareShowscores()
 
 	cvar_set("_k_team1", team1);
 	cvar_set("_k_team2", team2);
+	if ((current_umode >= 11) && (current_umode <= 13))
+	{
+		// let's see if there is a player with a 3rd team
+		while ((p = find_plr(p)))
+		{
+			team3 = getteam(p);
+
+			if (strneq(team1, team3) && strneq(team2, team3))
+			{
+				break;
+			}
+		}
+
+		if (strnull(team3) || streq(team1, team3) || streq(team2, team3))
+		{
+			return;
+		}
+
+		cvar_set("_k_team3", team3);
+	}
 }
 
 void SM_PrepareHostname()
 {
-	char *team1 = cvar_string("_k_team1"), *team2 = cvar_string("_k_team2");
+	char *team1 = cvar_string("_k_team1");
+	char *team2 = cvar_string("_k_team2");
 
 	cvar_set("_k_host", cvar_string("hostname"));  // save host name at match start
 
 	if (k_showscores && !strnull(team1) && !strnull(team2))
 	{
-		cvar_set("hostname", va("%s (%.4s vs. %.4s)\207", cvar_string("hostname"), team1, team2));
+		if ((current_umode < 11) || (current_umode > 13))
+		{
+			cvar_set("hostname", va("%s (%.4s vs. %.4s)\207", cvar_string("hostname"), team1, team2));
+		}
+		else
+		{
+			char *team3 = cvar_string("_k_team3");
+
+			cvar_set("hostname", va("%s (%.4s vs. %.4s vs. %.4s)\207", cvar_string("hostname"), team1, team2, team3));
+		}
 	}
 	else
 	{

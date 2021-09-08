@@ -3272,13 +3272,78 @@ void PrintScores()
 		{
 			int s1 = get_scores1();
 			int s2 = get_scores2();
+			int s3;
 			char *t1 = cvar_string("_k_team1");
 			char *t2 = cvar_string("_k_team2");
+			char *t3;
 
-			G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), (s1 > s2 ? t1 : t2),
+			if ((current_umode < 11) || (current_umode > 13))
+			{
+				G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), (s1 > s2 ? t1 : t2),
 						dig3(s1 > s2 ? s1 : s2));
-			G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), (s1 > s2 ? t2 : t1),
+				G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), (s1 > s2 ? t2 : t1),
 						dig3(s1 > s2 ? s2 : s1));
+			}
+			else
+			{
+				// if the current UserMode is 2on2on2, 3on3on3, 4on4on4, we have 3 teams
+				s3 = get_scores3();
+				t3 = cvar_string("_k_team3");
+
+				if ((s1 > s2) && (s1 > s3))
+				{
+					// Team 1 is leading
+					G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), t1, dig3(s1));
+					// Team 2 and 3
+					G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), (s2 > s3 ? t2 : t3),
+							dig3(s2 > s3 ? s2 : s3));
+					G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), (s2 > s3 ? t3 : t2),
+							dig3(s2 > s3 ? s3 : s2));
+				}
+				else if ((s2 > s1) && (s2 > s3))
+				{
+					// Team 2 is leading
+					G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), t2, dig3(s2));
+					// Team 1 and 3
+					G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), (s1 > s3 ? t1 : t3),
+							dig3(s1 > s3 ? s1 : s3));
+					G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), (s1 > s3 ? t3 : t1),
+							dig3(s1 > s3 ? s3 : s1));
+
+				}
+				else if ((s3 > s1) && (s3 > s2))
+				{
+					// Team 3 is leading
+					G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), t3, dig3(s3));
+					// Team 1 and 2
+					G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), (s1 > s2 ? t1 : t2),
+							dig3(s1 > s2 ? s1 : s2));
+					G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), (s1 > s2 ? t2 : t1),
+							dig3(s1 > s2 ? s2 : s1));
+				}
+				else if (s1 == s3)
+				{
+					// Team 1 and Team 3 have equal scores
+					G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), t1, dig3(s1));
+					G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), t3, dig3(s3));
+					G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), t2, dig3(s2));
+
+				}
+				else if (s2 == s3)
+				{
+					// Team 2 and Team 3 have equal scores
+					G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), t2, dig3(s2));
+					G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), t3, dig3(s3));
+					G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), t1, dig3(s1));
+				}
+				else
+				{
+					// Team 1 and Team 2 have equal scores, but this is the 'catch all' case also
+					G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), t1, dig3(s1));
+					G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), t2, dig3(s2));
+					G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), t3, dig3(s3));
+				}
+			}
 		}
 	}
 }
@@ -4205,6 +4270,7 @@ usermode um_list[] =
 };
 
 int um_cnt = sizeof(um_list) / sizeof(um_list[0]);
+int current_umode;
 
 // return -1 if not found
 int um_idx_byname(char *name)
@@ -4269,6 +4335,8 @@ void UserMode(float umode)
 	qbool sv_invoked = false;
 
 	int k_free_mode = (k_matchLess ? 5 : cvar("k_free_mode"));
+
+	current_umode = 0;
 
 	if (umode < 0)
 	{
@@ -4481,6 +4549,7 @@ void UserMode(float umode)
 	}
 
 	cvar_fset("_k_last_xonx", umode + 1); // save last XonX command
+	current_umode = umode+1;
 }
 
 void execute_rules_reset(void)
@@ -6224,16 +6293,27 @@ char* lastscores2str(lsType_t lst)
 
 void lastscore_add()
 {
-	gedict_t *p, *ed1 = get_ed_scores1(), *ed2 = get_ed_scores2();
+	gedict_t *p;
+	gedict_t *ed1 = get_ed_scores1();
+	gedict_t *ed2 = get_ed_scores2();
 	int from;
-	int i, s1 = 0, s2 = 0;
+	int i;
+	int s1 = 0;
+	int s2 = 0;
+	int s3 = 0;
 	int k_ls = bound(0, cvar("__k_ls"), MAX_LASTSCORES - 1);
-	char *e1, *e2, t1[128] =
-		{ 0 }, t2[128] =
-		{ 0 }, *name, date[64], *extra;
+	char *e1;
+	char *e2;
+	char *e3;
+	char t1[128] = { 0 };
+	char t2[128] = { 0 };
+	char t3[128] = { 0 };
+	char *name;
+	char date[64];
+	char *extra;
 	lsType_t lst = lsUnknown;
 
-	e1 = e2 = extra = "";
+	e1 = e2 = e3 = extra = "";
 
 	if ((isRA() || isFFA()) && ed1 && ed2)
 	{ // not the best way since get_ed_scores do not serve ghosts, so...
@@ -6311,6 +6391,21 @@ void lastscore_add()
 				strlcat(t2, va(" %s", name), sizeof(t2));
 			}
 		}
+
+		if ((current_umode >= 11) && (current_umode <= 13))
+		{
+			e3 = cvar_string("_k_team3");
+			s3 = get_scores3();
+
+			// players from third team
+			for (t3[0] = from = 0, p = world; (p = find_plrghst(p, &from));)
+			{
+				if (streq(getteam(p), e3) && !strnull(name = getname(p)))
+				{
+					strlcat(t3, va(" %s", name), sizeof(t3));
+				}
+			}
+		}
 	}
 
 	if (strnull(e1) || strnull(e2))
@@ -6338,8 +6433,18 @@ void lastscore_add()
 	cvar_set(va("__k_ls_e2_%d", k_ls), e2);
 	cvar_set(va("__k_ls_t1_%d", k_ls), t1);
 	cvar_set(va("__k_ls_t2_%d", k_ls), t2);
-	cvar_set(va("__k_ls_s_%d", k_ls),
-				va("%3d:%-3d \x8D %-8.8s %13.13s%s", s1, s2, g_globalvars.mapname, date, extra));
+	if ((current_umode < 10) || (current_umode > 13))
+	{
+		cvar_set(va("__k_ls_s_%d", k_ls),
+				 va("%3d:%-3d \x8D %-8.8s %13.13s%s", s1, s2, g_globalvars.mapname, date, extra));
+	}
+	else
+	{
+		cvar_set(va("__k_ls_e3_%d", k_ls), e3);
+		cvar_set(va("__k_ls_t3_%d", k_ls), t3);
+		cvar_set(va("__k_ls_s_%d", k_ls),
+				 va("%3d:%-3d:%-3d \x8D %-8.8s %13.13s%s", s1, s2, s3, g_globalvars.mapname, date, extra));
+	}
 
 	cvar_fset("__k_ls", ++k_ls % MAX_LASTSCORES);
 
