@@ -1843,6 +1843,7 @@ char* OnOff(float f)
 // for team games
 int k_scores1 = 0;
 int k_scores2 = 0;
+int k_scores3 = 0;
 
 // for ffa and duel
 gedict_t *ed_scores1 = NULL;
@@ -1852,7 +1853,10 @@ void ReScores()
 {
 	gedict_t *p;
 	int from;
-	char *team1, *team2;
+	char *team1;
+	char *team2;
+	char *team3;
+	char *team;
 
 	// DO this by checking if k_nochange is 0. 
 	// which is set in ClientObituary in client.c
@@ -1867,22 +1871,33 @@ void ReScores()
 
 	k_scores1 = 0;
 	k_scores2 = 0;
+	k_scores3 = 0;
 
 	if (k_showscores)
 	{
 		team1 = cvar_string("_k_team1");
+		team2 = cvar_string("_k_team2");
+		team3 = cvar_string("_k_team3");
 
 		for (from = 0, p = world; (p = find_plrghst(p, &from));)
 		{
-			team2 = getteam(p);
+			team = getteam(p);
 
-			if (streq(team1, team2))
+			if (streq(team1, team))
 			{
 				k_scores1 += p->s.v.frags;
 			}
-			else
+			else if (streq(team2, team))
 			{
 				k_scores2 += p->s.v.frags;
+			}
+			else if (streq(team3, team))
+			{
+				k_scores3 += p->s.v.frags;
+			}
+			else
+			{
+
 			}
 		}
 	}
@@ -1935,6 +1950,13 @@ int get_scores2()
 	ReScores();
 
 	return k_scores2;
+}
+
+int get_scores3()
+{
+	ReScores();
+
+	return k_scores3;
 }
 
 gedict_t* get_ed_scores1()

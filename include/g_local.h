@@ -343,6 +343,7 @@ char* OnOff(float f);
 
 int get_scores1();
 int get_scores2();
+int get_scores3();
 gedict_t* get_ed_scores1();
 gedict_t* get_ed_scores2();
 
@@ -653,6 +654,7 @@ typedef struct usermode_s
 
 extern usermode um_list[];
 extern int um_cnt;  // count of entrys in 'um_list'
+extern int current_umode; // current UserMode
 
 // for user call this like UserMode( 1 )
 // for server call like UserMode( -1 )
