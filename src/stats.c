@@ -220,6 +220,11 @@ static void SummaryTPStats(void)
 					redtext("Dropped"), tmStats[i].wpn[wpRL].drops, redtext("Xfer"),
 					tmStats[i].transferred_packs);
 
+		// lg
+		G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("      LG"), redtext("Took"),
+					tmStats[i].wpn[wpLG].tooks, redtext("Killed"), tmStats[i].wpn[wpLG].ekills,
+					redtext("Dropped"), tmStats[i].wpn[wpLG].drops);
+
 		// damage
 		if (deathmatch == 1)
 		{
@@ -613,13 +618,46 @@ int maxspree, maxspree_q, maxdmgg, maxdmgtd, maxrlkills;
 
 void OnePlayerStats(gedict_t *p, int tp)
 {
-	float dmg_g, dmg_t, dmg_team, dmg_self, dmg_eweapon, dmg_g_rl, dmg_td;
-	int ra, ya, ga;
-	int mh, d_rl, k_rl, t_rl;
-	int quad, pent, ring;
-	float ph_rl, vh_rl, h_rl, a_rl, ph_gl, vh_gl, a_gl, h_lg, a_lg, h_sg, a_sg, h_ssg, a_ssg;
-	float e_sg, e_ssg, e_lg;
-	int res, str, hst, rgn;
+	float dmg_g;
+	float dmg_t;
+	float dmg_team;
+	float dmg_self;
+	float dmg_eweapon;
+	float dmg_g_rl;
+	float dmg_td;
+	int ra;
+	int ya;
+	int ga;
+	int mh;
+	int d_rl;
+	int k_rl;
+	int t_rl;
+	int d_lg;
+	int k_lg;
+	int t_lg;
+	int quad;
+	int pent;
+	int ring;
+	float ph_rl;
+	float vh_rl;
+	float h_rl;
+	float a_rl;
+	float ph_gl;
+	float vh_gl;
+	float a_gl;
+	float h_lg;
+	float a_lg;
+	float h_sg;
+	float a_sg;
+	float h_ssg;
+	float a_ssg;
+	float e_sg;
+	float e_ssg;
+	float e_lg;
+	int res;
+	int str;
+	int hst;
+	int rgn;
 
 	dmg_g = p->ps.dmg_g;
 	dmg_g_rl = p->ps.dmg_g_rl;
@@ -657,6 +695,10 @@ void OnePlayerStats(gedict_t *p, int tp)
 	d_rl = p->ps.wpn[wpRL].drops;
 	k_rl = p->ps.wpn[wpRL].ekills;
 	t_rl = p->ps.wpn[wpRL].tooks;
+
+	d_lg = p->ps.wpn[wpLG].drops;
+	k_lg = p->ps.wpn[wpLG].ekills;
+	t_lg = p->ps.wpn[wpLG].tooks;
 
 	if (isCTF() && ((g_globalvars.time - match_start_time) > 0))
 	{
@@ -756,6 +798,21 @@ void OnePlayerStats(gedict_t *p, int tp)
 				d_rl,
 				(p->ps.transferred_packs ?
 						va(" %s:%d", redtext("Xfer"), p->ps.transferred_packs) : ""));
+	}
+
+	// lg
+	if (isTeam())
+	{
+		G_bprint(
+				2,
+				"%s: %s:%d %s:%d %s:%d\n",
+				redtext("      LG"),
+				redtext("Took"),
+				t_lg,
+				redtext("Killed"),
+				k_lg,
+				redtext("Dropped"),
+				d_lg);
 	}
 
 	// damage
