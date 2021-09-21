@@ -75,10 +75,10 @@
 
 #define MOD_NAME				("KTX")
 #define MOD_FULLNAME			("KTX: Kombat Teams eXtreme")
-#define MOD_VERSION				("1.40-beta")
+#define MOD_VERSION				("1.40")
 #define MOD_BUILD_DATE			(__DATE__ ", " __TIME__)
 #define MOD_SERVERINFO_MOD_KEY	("ktxver")
-#define MOD_URL					("https://ktx.deurk.net")
+#define MOD_URL					("https://github.com/deurk/ktx")
 #define GIT_COMMIT				("")
 
 // keep lines to 38 chars max
