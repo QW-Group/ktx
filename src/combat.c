@@ -26,6 +26,9 @@
 #include "g_local.h"
 #ifdef BOT_SUPPORT
 #include "fb_globals.h"
+#else
+	#define PASSINTVEC3(x) ((int)x[0]),((int)x[1]),((int)x[2])
+	#define PASSSCALEDINTVEC3(x,y) ((int)(x[0]*y)),((int)(x[1]*y)),((int)(x[2]*y))
 #endif
 
 void ClientObituary(gedict_t *e1, gedict_t *e2);
