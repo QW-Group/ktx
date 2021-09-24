@@ -29,17 +29,17 @@ MAKEDL=$(MAKE) -f Makefile.dl
 MAKEDL32=$(MAKE) -f Makefile.dl32
 MAKEQVM=$(MAKE) -f Makefile.vm
 
+default:    dl
 
-all:		build
+all:        build
 
-dl:			build-dl
+dl:         check build-dlbots
 
-dl32:			build-dl32
+dl32:       check build-dl32bots
 
-vm:			build-vm
+vm:         check build-vmbots
 
-
-build:		build-dl build-dl32 build-vm
+build:      check build-dlbots build-dl32bots build-vmbots
 
 build-dl:
 			+cd $(SRCDIR); $(MAKEDL) build
@@ -108,3 +108,8 @@ distclean-dl32:
 
 distclean-vm:
 			+cd $(SRCDIR); $(MAKEQVM) distclean
+
+check:
+ifeq (,$(wildcard $(SRCDIR)/Makefile.dl))
+			+./configure
+endif
