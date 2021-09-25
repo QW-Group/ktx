@@ -7,7 +7,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 // Handles all "botcmd x" commands from the user
 

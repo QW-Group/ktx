@@ -8,7 +8,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 // Removes the look object for the given player
 void ClearLookObject(gedict_t *player)

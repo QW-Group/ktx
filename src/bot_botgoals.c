@@ -11,7 +11,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 //static float best_score;
 #define BACKPACK_CLASSNAME "backpack"

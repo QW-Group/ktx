@@ -6,7 +6,6 @@
 // - If client supports it, send raw stats to client and allow it to construct format of message
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 // Time before we forget item (ezquake allows this to be specified)
 #define TOOK_TIMEOUT     5

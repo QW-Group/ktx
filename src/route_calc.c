@@ -17,7 +17,6 @@
 // TODO: 5/6/10 have near-identical body, can be ForAllZones(func)
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 typedef qbool (*fb_path_calc_funcref_t)(gedict_t *m, fb_path_t *path);
 extern gedict_t *markers[];

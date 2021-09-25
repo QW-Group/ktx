@@ -11,7 +11,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 #define FB_CVAR_DODGEFACTOR "k_fbskill_movement_dodgefactor"
 #define FB_CVAR_LOOKANYWHERE "k_fbskill_aim_lookanywhere"

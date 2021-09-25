@@ -1,7 +1,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 /*
  Okay, some explanation required here.

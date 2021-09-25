@@ -1,7 +1,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 #define ARROW_TIME_INCREASE       0.15  // Seconds to advance after NewVelocityForArrow
 #define MIN_DEAD_TIME 0.2f

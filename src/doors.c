@@ -24,7 +24,6 @@
  */
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 #define DOOR_START_OPEN   1
 #define DOOR_DONT_LINK    4

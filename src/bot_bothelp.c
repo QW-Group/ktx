@@ -9,7 +9,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 // Checks if self > point is not blocked
 static qbool PointVisible(vec3_t vec)

@@ -10,7 +10,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 // A lot of this is the bot 'cheating'?..
 #define ARROW_TIME_AFTER_TELEPORT 0.20  // was 0.5

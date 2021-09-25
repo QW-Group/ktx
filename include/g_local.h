@@ -103,6 +103,10 @@ float max(float a, float b);
 float bound(float a, float b, float c);
 //#define bound(a,b,c) ((a) >= (c) ? (a) : (b) < (a) ? (a) : (b) > (c) ? (c) : (b))
 
+//used for bots and combat
+#define PASSINTVEC3(x) ((int)x[0]),((int)x[1]),((int)x[2])
+#define PASSSCALEDINTVEC3(x,y) ((int)(x[0]*y)),((int)(x[1]*y)),((int)(x[2]*y))
+
 #if defined(DEBUG) || defined(_DEBUG)
 #define DebugTrap(x) *(char**)0=x
 #else
@@ -1119,6 +1123,8 @@ qbool SameTeam(gedict_t *p1, gedict_t *p2);
 
 #ifndef BOT_SUPPORT
 #define bots_enabled() (false)
+#else
+#include "fb_globals.h"
 #endif
 
 #define LGCMODE_VARIABLE "k_lgcmode"
