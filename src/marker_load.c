@@ -9,7 +9,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 static int marker_index = 0;
 static int mapDeathHeight = FB_MAPDEATHHEIGHT_DEFAULT;

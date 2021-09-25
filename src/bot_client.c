@@ -12,7 +12,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 #define PERIODIC_MM2_STATUS 4
 

@@ -24,7 +24,6 @@
  */
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 void Sc_Stats(float on);
 void race_stoprecord(qbool cancel);

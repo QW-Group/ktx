@@ -18,7 +18,6 @@
  */
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 void NextLevel();
 void IdlebotForceStart();

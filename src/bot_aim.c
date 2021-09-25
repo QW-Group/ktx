@@ -2,7 +2,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 #define YAW_SNAP_THRESHOLD     4
 #define PITCH_SNAP_THRESHOLD   6

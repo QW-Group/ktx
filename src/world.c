@@ -26,7 +26,6 @@
 #include "g_local.h"
 
 #ifdef BOT_SUPPORT
-#include "fb_globals.h"
 #endif
 
 void RegisterSkillVariables(void);

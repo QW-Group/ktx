@@ -2,7 +2,6 @@
 
 // Converted from .qc on 05/02/2016
 #include "g_local.h"
-#include "fb_globals.h"
 
 float predict_dist = 0;
 gedict_t *test_enemy = 0;
