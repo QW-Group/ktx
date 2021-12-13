@@ -543,8 +543,15 @@ static void FrogbotsDebug(void)
 			gedict_t *marker = NULL;
 			int i = 0;
 
-			trap_CmdArgv(3, sub_command, sizeof(sub_command));
-			marker = markers[(int)bound(0, atoi(sub_command) - 1, NUMBER_MARKERS - 1)];
+			if (trap_CmdArgc() == 4)
+			{
+				trap_CmdArgv(3, sub_command, sizeof(sub_command));
+				marker = markers[(int)bound(0, atoi(sub_command) - 1, NUMBER_MARKERS - 1)];
+			}
+			else
+			{
+				marker = LocateMarker(self->s.v.origin);
+			}
 
 			if (marker == NULL)
 			{
