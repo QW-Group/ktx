@@ -310,7 +310,6 @@ spawn_t spawns[] =
 	{ "info_player_start", 				SUB_Null },
 	{ "info_player_start2", 			SUB_Null },
 	{ "info_player_deathmatch", 		SP_info_player_deathmatch },
-	{ "info_player_deathmatch", 		SUB_Null },
 	{ "info_player_coop", 				SUB_Null },
 	{ "info_intermission", 				SP_info_intermission },
 	{ "trigger_changelevel", 			SP_trigger_changelevel },
