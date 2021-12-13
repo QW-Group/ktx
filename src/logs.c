@@ -132,7 +132,7 @@ void StartLogs()
 				"\t\t<map>%s</map>\n"
 				"\t\t<mode>%s</mode>\n"
 				"\t</match_info>\n",
-				date, cleantext(cvar_string("_k_host")), ip, i, g_globalvars.mapname, GetMode());
+				date, cleantext(cvar_string("_k_host")), ip, i, mapname, GetMode());
 	log_printf("\t<events>\n");
 }
 

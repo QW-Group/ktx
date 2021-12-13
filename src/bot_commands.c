@@ -486,7 +486,7 @@ static void FrogbotsDebug(void)
 		}
 		else if (streq(sub_command, "door"))
 		{
-			if (streq(g_globalvars.mapname, "povdmm4"))
+			if (streq(mapname, "povdmm4"))
 			{
 				if (markers[0]->fb.door_entity && markers[4]->fb.door_entity)
 				{
@@ -891,7 +891,7 @@ static void BotFileGenerate(void)
 	}
 
 	snprintf(fileName, sizeof(fileName), "bots/maps/%s[%s].bot",
-				strnull(entityFile) ? g_globalvars.mapname : entityFile, date);
+				strnull(entityFile) ? mapname : entityFile, date);
 	file = std_fwopen(fileName);
 	if (file == -1)
 	{
@@ -1097,7 +1097,7 @@ void FrogbotEditorMarkerTouched(gedict_t *marker)
 
 static void FrogbotMapInfo(void)
 {
-	if (streq(g_globalvars.mapname, "aerowalk"))
+	if (streq(mapname, "aerowalk"))
 	{
 		gedict_t *quad = ez_find(world, "item_artifact_super_damage");
 		gedict_t *tele_exit = markers[10];

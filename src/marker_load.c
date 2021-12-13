@@ -383,10 +383,10 @@ qbool LoadBotRoutingFromFile(void)
 
 	if (file == -1)
 	{
-		file = std_fropen("maps/%s.bot", g_globalvars.mapname);
+		file = std_fropen("maps/%s.bot", mapname);
 		if (file == -1)
 		{
-			file = std_fropen("bots/maps/%s.bot", g_globalvars.mapname);
+			file = std_fropen("bots/maps/%s.bot", mapname);
 		}
 	}
 

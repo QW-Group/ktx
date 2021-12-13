@@ -972,19 +972,19 @@ void vote_check_coop()
 		}
 
 		// and reload map
-		if (coop && can_exec(va("configs/usermodes/matchless/%s.cfg", g_globalvars.mapname)))
+		if (coop && can_exec(va("configs/usermodes/matchless/%s.cfg", mapname)))
 		{
 			// Force the config to be executed
 			force_map_reset = true;
-			changelevel(g_globalvars.mapname);
+			changelevel(mapname);
 		}
 		else if (cvar("k_bloodfest"))
 		{
-			changelevel(coop ? g_globalvars.mapname : cvar_string("k_defmap"));
+			changelevel(coop ? mapname : cvar_string("k_defmap"));
 		}
 		else
 		{
-			changelevel(coop ? "start" : g_globalvars.mapname);
+			changelevel(coop ? "start" : mapname);
 		}
 
 		return;

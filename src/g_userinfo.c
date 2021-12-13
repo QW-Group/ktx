@@ -247,7 +247,7 @@ void cmdinfo_infoset(gedict_t *p)
 qbool FixPlayerTeam(char *newteam);
 qbool FixPlayerColor(char *newcolor);
 
-qbool ClientUserInfoChanged()
+qbool ClientUserInfoChanged(int after)
 {
 	char arg_0[1024], arg_1[1024], arg_2[1024], *old;
 	int i;
@@ -263,6 +263,10 @@ qbool ClientUserInfoChanged()
 
 //	G_bprint(2, "'%s' '%s' '%s'\n", arg_0, arg_1, arg_2 );
 
+  if (after && !strcmp(arg_1, "name")) {
+    trap_CmdArgv(2, self->s.v.netname, 64);
+    return 0;
+  }
 	if (streq("team", arg_1))
 	{
 		return FixPlayerTeam(arg_2);

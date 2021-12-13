@@ -93,6 +93,7 @@ float dist_random(float minValue, float maxValue, float spreadFactor)
 	return (minValue + (maxValue - minValue) * sum);
 }
 
+
 // Should be "" but too many references in code simply checking for 0 to mean null string...
 #define PR2SetStringFieldOffset(ent, field) \
 	ent->s.v.field ## _ = NUM_FOR_EDICT(ent) * sizeof(gedict_t) + FOFS(field); \
@@ -104,6 +105,7 @@ float dist_random(float minValue, float maxValue, float spreadFactor)
 
 void initialise_spawned_ent(gedict_t *ent)
 {
+#ifdef idx64
 	PR2SetStringFieldOffset(ent, classname);
 	PR2SetStringFieldOffset(ent, model);
 	PR2SetFuncFieldOffset(ent, touch);
@@ -119,6 +121,7 @@ void initialise_spawned_ent(gedict_t *ent)
 	PR2SetStringFieldOffset(ent, noise1);
 	PR2SetStringFieldOffset(ent, noise2);
 	PR2SetStringFieldOffset(ent, noise3);
+#endif
 }
 
 float next_frame()

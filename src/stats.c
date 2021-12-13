@@ -1055,7 +1055,7 @@ void TopStats(void)
 				"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
 				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n"
 				"      Frags: ",
-				g_globalvars.mapname, redtext("top scorers"));
+				mapname, redtext("top scorers"));
 
 	from = f1 = 0;
 	p = find_plrghst(world, &from);

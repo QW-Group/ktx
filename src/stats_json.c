@@ -465,7 +465,7 @@ void json_match_header(fileHandle_t handle, char *ip, int port)
 	s2di(handle, "{" JSON_CR);
 	s2di(handle, INDENT2 "\"version\": %d," JSON_CR, STATS_VERSION_NUMBER);
 	s2di(handle, INDENT2 "\"date\": \"%s\"," JSON_CR, date);
-	s2di(handle, INDENT2 "\"map\": \"%s\"," JSON_CR, json_string(g_globalvars.mapname));
+	s2di(handle, INDENT2 "\"map\": \"%s\"," JSON_CR, json_string(mapname));
 	s2di(handle, INDENT2 "\"hostname\": \"%s\"," JSON_CR,
 			json_string(striphigh(cvar_string("hostname"))));
 	s2di(handle, INDENT2 "\"ip\": \"%s\"," JSON_CR, json_string(ip));

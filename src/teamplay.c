@@ -1552,12 +1552,12 @@ void LocationInitialise(void)
 
 	if (file == -1)
 	{
-		file = std_fropen("locs/%s.loc", g_globalvars.mapname);
+		file = std_fropen("locs/%s.loc", mapname);
 	}
 
 	if (file == -1)
 	{
-		Com_Printf("Couldn't load %s.loc\n", g_globalvars.mapname);
+		Com_Printf("Couldn't load %s.loc\n", mapname);
 
 		return;
 	}

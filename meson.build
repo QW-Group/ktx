@@ -106,8 +106,15 @@ ktx_sources = [
 ]
 
 c_args = []
+
+if target_machine.cpu_family() == 'x86_64' 
+	c_args += '-Didx64'
+elif target_machine.cpu_family() == 'x86' 
+	c_args += '-Didx386'
+endif
+
 if get_option('bot_support')
-	c_args = '-DBOT_SUPPORT=1'
+	c_args += '-DBOT_SUPPORT=1'
 endif
 
 library('qwprogs', ktx_sources,

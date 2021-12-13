@@ -138,6 +138,7 @@ extern qbool FTE_sv; // is we run on FTE server
 
 extern gameData_t gamedata;
 extern gedict_t g_edicts[];
+extern char mapname[64];
 extern globalvars_t g_globalvars;
 extern gedict_t *world;
 extern gedict_t *self, *other;

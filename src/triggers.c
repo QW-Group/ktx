@@ -955,7 +955,7 @@ void hurt_touch()
  */
 void SP_trigger_hurt()
 {
-	if (streq("end", g_globalvars.mapname) && cvar("k_remove_end_hurt"))
+	if (streq("end", mapname) && cvar("k_remove_end_hurt"))
 	{
 		soft_ent_remove(self);
 
