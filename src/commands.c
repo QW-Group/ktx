@@ -8315,6 +8315,9 @@ static dropitem_spawn_t dropitems[] =
 	{ "fl_b", 	"item_flag_team2", 					0, 1 },
 	{ "sp_r", 	"info_player_team1", 				0, 1, dropitem_spawn_spawnpoint },
 	{ "sp_b", 	"info_player_team2", 				0, 1, dropitem_spawn_spawnpoint },
+	{ "sp_dm", 	"info_player_deathmatch",			0, 1, dropitem_spawn_spawnpoint },
+	{ "sp_cp",	"info_player_coop",					0, 1, dropitem_spawn_spawnpoint },
+	{ "sp_sp",	"info_player_start",				0, 1, dropitem_spawn_spawnpoint },
 };
 
 static const int dropitems_count = sizeof(dropitems) / sizeof(dropitems[0]);
