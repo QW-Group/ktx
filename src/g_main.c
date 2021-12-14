@@ -457,7 +457,7 @@ void Com_Printf(const char *msg, ...)
 
 void G_InitGame(int levelTime, int randomSeed)
 {
-//	int 		i;
+	int 		i;
 
 	srand(randomSeed);
 	framecount = 0;
