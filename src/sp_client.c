@@ -39,7 +39,7 @@ void ExitIntermission()
 
 	if (intermission_running == 2)
 	{
-		if (streq(g_globalvars.mapname, "e1m7"))
+		if (streq(mapname, "e1m7"))
 		{
 			WriteByte( MSG_ALL, SVC_CDTRACK);
 			WriteByte( MSG_ALL, 2);
@@ -58,7 +58,7 @@ void ExitIntermission()
 
 			return;
 		}
-		else if (streq(g_globalvars.mapname, "e2m6"))
+		else if (streq(mapname, "e2m6"))
 		{
 			WriteByte( MSG_ALL, SVC_CDTRACK);
 			WriteByte( MSG_ALL, 2);
@@ -80,7 +80,7 @@ void ExitIntermission()
 
 			return;
 		}
-		else if (streq(g_globalvars.mapname, "e3m6"))
+		else if (streq(mapname, "e3m6"))
 		{
 			WriteByte( MSG_ALL, SVC_CDTRACK);
 			WriteByte( MSG_ALL, 2);
@@ -100,7 +100,7 @@ void ExitIntermission()
 
 			return;
 		}
-		else if (streq(g_globalvars.mapname, "e4m7"))
+		else if (streq(mapname, "e4m7"))
 		{
 			WriteByte( MSG_ALL, SVC_CDTRACK);
 			WriteByte( MSG_ALL, 2);

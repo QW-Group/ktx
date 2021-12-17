@@ -61,9 +61,15 @@ field_t expfields[] =
 	{ NULL }
 };
 
-//static char     mapname[64];
-//static char     worldmodel[64] = "worldmodel";
-//static char     netnames[MAX_CLIENTS][32];
+char mapname[64];
+static char worldmodel[64] = "worldmodel"; // FIXME: consider replacing usage of this with mapname.
+
+// Client names assigned in:
+// * G_InitGame()
+// * GAME_CLIENT_CONNECT
+// * ClientUserInfoChanged()
+static char netnames[MAX_CLIENTS][CLIENT_NAME_LEN];
+
 static char callalias_buf[MAX_CLIENTS][CALLALIAS_SIZE];
 static char f_checks[MAX_CLIENTS][F_CHECK_SIZE];
 
@@ -82,7 +88,7 @@ void G_InitGame(int levelTime, int randomSeed);
 void G_ShutDown();
 void StartFrame(int time);
 qbool ClientCommand();
-qbool ClientUserInfoChanged();
+qbool ClientUserInfoChanged(int after);
 void G_EdictTouch();
 void G_EdictThink();
 void G_EdictBlocked();
@@ -118,8 +124,10 @@ intptr_t vmMain(int command, int arg0, int arg1, int arg2, int arg3, int arg4, i
 		case GAME_INIT:
 			ClearGlobals();
 			api_ver = trap_GetApiVersion();
+#if defined(idx64) || defined(PR_ALWAYS_REFS)
 			// We set references
 			cvar_fset("sv_pr2references", 1);
+#endif
 			if (api_ver < GAME_API_VERSION)
 			{
 				G_cprint("Mod requires API_VERSION %d or higher, server have %d\n",
@@ -139,6 +147,10 @@ intptr_t vmMain(int command, int arg0, int arg1, int arg2, int arg3, int arg4, i
 			return (intptr_t)(&gamedata);
 
 		case GAME_LOADENTS:
+			infokey(world, "mapname", mapname, sizeof(mapname));
+			infokey(world, "modelname", worldmodel, sizeof(worldmodel));
+			world->model = worldmodel;
+
 			ClearGlobals();
 			G_SpawnEntitiesFromString();
 
@@ -167,6 +179,10 @@ intptr_t vmMain(int command, int arg0, int arg1, int arg2, int arg3, int arg4, i
 		case GAME_CLIENT_CONNECT:
 			ClearGlobals();
 			self = PROG_TO_EDICT(g_globalvars.self);
+
+			// Init client name.
+			self->netname = netnames[NUM_FOR_EDICT(self)-1];
+			infokey(self, "netname", self->netname, CLIENT_NAME_LEN);
 
 			self->last_rune = "setme";
 			self->classname = ""; // at least empty classname
@@ -344,9 +360,13 @@ intptr_t vmMain(int command, int arg0, int arg1, int arg2, int arg3, int arg4, i
 			return ClientCommand();
 
 		case GAME_CLIENT_USERINFO_CHANGED:
-			// called on user /cmd setinfo	if value changed
-			// return not zero dont allow change
-			// params like GAME_CLIENT_COMMAND, but argv(0) always "setinfo" and argc always 3
+			// Called when client userinfo is changed.
+			// Return non zero zero if such userinfo invalid.
+			// argv(0) = "setinfo", argv(1) = key, argv(2) = value.
+			// Userinfo change performed in two stages,
+			// first stage is when server and mod validating if new userinfo is allowed,
+			// during this stage argument 'after' is zero, after userinfo allowed
+			// server execute this function second time with non zero 'after' argument.
 			ClearGlobals();
 			self = PROG_TO_EDICT(g_globalvars.self);
 			if (!self->k_accepted)
@@ -355,7 +375,7 @@ intptr_t vmMain(int command, int arg0, int arg1, int arg2, int arg3, int arg4, i
 			}
 
 			// allow change even not connected, or disconnected
-			return ClientUserInfoChanged();
+			return ClientUserInfoChanged(arg0);
 
 		case GAME_SHUTDOWN:
 			// called before level change/spawn
@@ -452,22 +472,17 @@ void Com_Printf(const char *msg, ...)
 
 void G_InitGame(int levelTime, int randomSeed)
 {
-//	int 		i;
+	int 		i;
 
 	srand(randomSeed);
 	framecount = 0;
 	starttime = levelTime * 0.001;
-	g_globalvars.mapname_ = GOFS(mapname);
 	G_Printf("Init Game\n");
 	G_InitMemory();
 	memset(g_edicts, 0, sizeof(gedict_t) * MAX_EDICTS);
-
-//	world->model = worldmodel;
-//	g_globalvars.mapname = mapname;
-//	for ( i = 0; i < MAX_CLIENTS; i++ )
-//	{
-//		g_edicts[i + 1].s.v.netname = netnames[i];
-//	}
+	for ( i = 0; i < MAX_CLIENTS; i++ ) {
+		g_edicts[i + 1].netname = netnames[i];
+	}
 
 	GetMapList();
 
@@ -497,7 +512,7 @@ void G_ShutDown()
 	extern int IsMapInCycle(char *map);
 	extern qbool force_map_reset;
 
-	char *map = g_globalvars.mapname;
+	char *map = mapname;
 
 	AbortElect();
 

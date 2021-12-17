@@ -687,8 +687,6 @@ static void HM_name_spawn(gedict_t *spawn, hm_spawn_name *spawns, int spawncount
 
 void HM_name_map_spawn(gedict_t *spawn)
 {
-	char *mapname = g_globalvars.mapname;
-
 	if (streq(mapname, "dm2"))
 	{
 		hm_spawn_name spawns[] =
@@ -1262,7 +1260,7 @@ void HM_restore_spawns(void)
 	}
 
 	if (streq(cvar_string("k_hoonymode_prevmap"),
-				strnull(entityFile) ? g_globalvars.mapname : entityFile))
+				strnull(entityFile) ? mapname : entityFile))
 	{
 		char *spawns = cvar_string("k_hoonymode_prevspawns");
 		int spawn_count = 0;
@@ -1318,7 +1316,7 @@ static void HM_store_spawns(void)
 
 	*next = '\0';
 
-	cvar_set("k_hoonymode_prevmap", strnull(entityFile) ? g_globalvars.mapname : entityFile);
+	cvar_set("k_hoonymode_prevmap", strnull(entityFile) ? mapname : entityFile);
 	cvar_set("k_hoonymode_prevspawns", buffer);
 }
 

@@ -104,6 +104,7 @@ float dist_random(float minValue, float maxValue, float spreadFactor)
 
 void initialise_spawned_ent(gedict_t *ent)
 {
+#if defined(idx64) || defined(PR_ALWAYS_REFS)
 	PR2SetStringFieldOffset(ent, classname);
 	PR2SetStringFieldOffset(ent, model);
 	PR2SetFuncFieldOffset(ent, touch);
@@ -119,6 +120,7 @@ void initialise_spawned_ent(gedict_t *ent)
 	PR2SetStringFieldOffset(ent, noise1);
 	PR2SetStringFieldOffset(ent, noise2);
 	PR2SetStringFieldOffset(ent, noise3);
+#endif
 }
 
 float next_frame()

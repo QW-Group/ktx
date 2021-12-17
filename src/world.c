@@ -114,13 +114,13 @@ void CheckDefMap()
 		char *s1 = cvar_string("k_defmap");
 
 		// reload map to default one if we are not on it alredy, in case of intermission reload anyway
-		if (!strnull(s1) && strneq(s1, g_globalvars.mapname))
+		if (!strnull(s1) && strneq(s1, mapname))
 		{
 			changelevel(s1);
 		}
 		else if (intermission_running || (player_count == bot_count && bot_count))
 		{
-			changelevel(g_globalvars.mapname);
+			changelevel(mapname);
 		}
 	}
 
@@ -174,7 +174,7 @@ void Check_LongMapUptime()
 	}
 
 	G_bprint(2, "Long map uptime, reloading\n");
-	changelevel(g_globalvars.mapname);
+	changelevel(mapname);
 }
 
 void SP_item_artifact_super_damage();
@@ -570,13 +570,13 @@ void Customize_Maps()
 
 	jumpf_flag = -650;
 
-	if (streq("q1dm17", g_globalvars.mapname))
+	if (streq("q1dm17", mapname))
 	{
 		jumpf_flag = -1000;
 	}
 
 	// spawn quad if map is aerowalk in this case
-	if (cvar("add_q_aerowalk") && streq("aerowalk", g_globalvars.mapname))
+	if (cvar("add_q_aerowalk") && streq("aerowalk", mapname))
 	{
 		gedict_t *swp = self;
 
@@ -588,7 +588,7 @@ void Customize_Maps()
 		self = swp; // restore self
 	}
 
-	if (!cvar("k_end_tele_spawn") && streq("end", g_globalvars.mapname)
+	if (!cvar("k_end_tele_spawn") && streq("end", mapname)
 #ifdef BOT_SUPPORT
 		&& !bots_enabled() 
 #endif
@@ -608,7 +608,7 @@ void Customize_Maps()
 	}
 
 	// correcting some teleport destintions on death32c (c) ktpro
-	if (streq("death32c", g_globalvars.mapname))
+	if (streq("death32c", mapname))
 	{
 		for (p = world; (p = find(p, FOFCLSN, "trigger_teleport"));)
 		{
@@ -628,7 +628,7 @@ void Customize_Maps()
 			cvar_fset("k_ctf_based_spawn", 1);
 		}
 
-		if (streq("ctf8", g_globalvars.mapname))
+		if (streq("ctf8", mapname))
 		{
 			// fix/remove some bad spawns from ctf8
 			vec3_t spawn1 =
@@ -668,7 +668,7 @@ void Customize_Maps()
 	}
 
 	// modify slide8 to make it possible to complete in race mode
-	if (streq(g_globalvars.mapname, "slide8"))
+	if (streq(mapname, "slide8"))
 	{
 		gedict_t *push, *oldself, *ent;
 
@@ -1092,7 +1092,7 @@ void FirstFrame()
 		}
 	}
 
-	if ((cvar("_k_last_xonx") > 0) && strneq(cvar_string("_k_lastmap"), g_globalvars.mapname))
+	if ((cvar("_k_last_xonx") > 0) && strneq(cvar_string("_k_lastmap"), mapname))
 	{
 		UserMode(-cvar("_k_last_xonx")); // auto call XonX command if map switched to another
 	}
@@ -1227,7 +1227,7 @@ void FixCTFItems()
 #ifdef CTF_RELOADMAP
 	if ((old_k_mode != k_mode) && ((old_k_mode == gtCTF) || (k_mode == gtCTF)))
 	{
-		changelevel(g_globalvars.mapname);
+		changelevel(mapname);
 	}
 #endif
 
@@ -1277,7 +1277,7 @@ void FixRA()
 	{
 		old_k_rocketarena = isRA();
 		G_bprint(2, "%s: RA settings changed, map will be reloaded\n", redtext("WARNING"));
-		changelevel(g_globalvars.mapname);
+		changelevel(mapname);
 	}
 }
 
@@ -1302,7 +1302,7 @@ void FixRace()
 	{
 		old_k_race = isRACE();
 		G_bprint(2, "%s: Race settings changed, map will be reloaded\n", redtext("WARNING"));
-		changelevel(g_globalvars.mapname);
+		changelevel(mapname);
 	}
 }
 

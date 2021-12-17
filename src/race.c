@@ -198,13 +198,13 @@ static const char* race_filename(const char *extension)
 	if (cvar("k_race_times_per_port"))
 	{
 		snprintf(filename, sizeof(filename), "race/race[%s_r%02d]-w%1ds%1d_%d.%s",
-					g_globalvars.mapname, race.active_route, race.weapon, race.falsestart,
+					mapname, race.active_route, race.weapon, race.falsestart,
 					get_server_port(), extension);
 	}
 	else
 	{
 		snprintf(filename, sizeof(filename), "race/race[%s_r%02d]-w%1ds%1d.%s",
-					g_globalvars.mapname, race.active_route, race.weapon, race.falsestart,
+					mapname, race.active_route, race.weapon, race.falsestart,
 					extension);
 	}
 
@@ -337,7 +337,7 @@ void apply_race_settings(void)
 		G_cprint("%s", buf);
 	}
 
-	cfg_name = va("configs/usermodes/race/%s.cfg", g_globalvars.mapname);
+	cfg_name = va("configs/usermodes/race/%s.cfg", mapname);
 	if (can_exec(cfg_name))
 	{
 		trap_readcmd(va("exec %s\n", cfg_name), buf, sizeof(buf));
@@ -3328,7 +3328,7 @@ void r_route(void)
 	}
 
 	// If server-side toggle and map matches, load correct route
-	if ((self->ct != ctPlayer) && streq(cvar_string(RACE_ROUTE_MAPNAME_CVAR), g_globalvars.mapname))
+	if ((self->ct != ctPlayer) && streq(cvar_string(RACE_ROUTE_MAPNAME_CVAR), mapname))
 	{
 		next_route = cvar(RACE_ROUTE_NUMBER_CVAR);
 	}
@@ -3372,7 +3372,7 @@ void r_route(void)
 	}
 
 	cvar_fset(RACE_ROUTE_NUMBER_CVAR, next_route);
-	cvar_set(RACE_ROUTE_MAPNAME_CVAR, g_globalvars.mapname);
+	cvar_set(RACE_ROUTE_MAPNAME_CVAR, mapname);
 	race_clear_pacemaker();
 }
 
@@ -3813,7 +3813,7 @@ void race_add_standard_routes(void)
 	}
 	else
 	{
-		race_fropen("race/routes/%s.route", g_globalvars.mapname);
+		race_fropen("race/routes/%s.route", mapname);
 	}
 
 	if (race_fhandle >= 0)

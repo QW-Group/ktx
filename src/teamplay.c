@@ -869,7 +869,7 @@ static void TeamplayReportPersonalStatus(gedict_t *client)
 // Cmd_AddCommand ("tp_msgsafe", TP_Msg_Safe_f);
 static void TeamplayAreaSecure(gedict_t *client)
 {
-	qbool have_armor = (int)client->s.v.items & IT_ARMOR;
+	qbool have_armor = (int)client->s.v.items & (IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3);
 	qbool have_weapon = (int)client->s.v.items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING);
 	char buffer[128];
 
@@ -1552,12 +1552,12 @@ void LocationInitialise(void)
 
 	if (file == -1)
 	{
-		file = std_fropen("locs/%s.loc", g_globalvars.mapname);
+		file = std_fropen("locs/%s.loc", mapname);
 	}
 
 	if (file == -1)
 	{
-		Com_Printf("Couldn't load %s.loc\n", g_globalvars.mapname);
+		Com_Printf("Couldn't load %s.loc\n", mapname);
 
 		return;
 	}
@@ -1606,7 +1606,7 @@ void LocationInitialise(void)
 
 						if (new_length < old_length)
 						{
-							strncpy(name + i, locmacros[j].value, new_length);
+							memmove(name + i, locmacros[j].value, new_length);
 							memmove(name + i + new_length, name + i + old_length,
 									strlen(name + i + old_length) + 1);
 							found = true;

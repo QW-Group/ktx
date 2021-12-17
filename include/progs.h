@@ -34,7 +34,6 @@
 
 typedef struct shared_edict_s
 {
-	void *ptr;		// this points to sv_edict_t but mod should NOT bother about that...
 	entvars_t v;	// C exported fields from progs
 // other fields from progs come immediately after
 } edict_t;

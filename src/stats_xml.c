@@ -233,7 +233,7 @@ void xml_match_header(fileHandle_t handle, char *ip, int port)
 	s2di(handle, "%s", "<?xml version=\"1.0\"?>\n");
 	s2di(handle,
 			"<match version=\"3\" date=\"%s\" map=\"%s\" hostname=\"%s\" ip=\"%s\" port=\"%d\" mode=\"%s\" tl=\"%d\" fl=\"%d\" dmm=\"%d\" tp=\"%d\">\n",
-			date, g_globalvars.mapname, xml_string(cvar_string("hostname")), ip, port, mode,
+			date, mapname, xml_string(cvar_string("hostname")), ip, port, mode,
 			timelimit, fraglimit, deathmatch, teamplay);
 	if (!strnull(cvar_string("serverdemo")))
 	{

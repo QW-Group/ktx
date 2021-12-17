@@ -337,7 +337,7 @@ static void CustomiseFrogbotMap(void)
 	gedict_t *ent = NULL;
 
 	// KTX may have added a quad, so to keep routes compatible with PR1-version, we add it as a marker after others
-	if (streq(g_globalvars.mapname, "aerowalk") && !FrogbotOptionEnabled(FB_OPTION_EDITOR_MODE))
+	if (streq(mapname, "aerowalk") && !FrogbotOptionEnabled(FB_OPTION_EDITOR_MODE))
 	{
 		gedict_t *quad = ez_find(world, "item_artifact_super_damage");
 		if (quad)
@@ -361,7 +361,7 @@ static void CustomiseFrogbotMap(void)
 	}
 
 	// We stopped it from removing the telespawn earlier on...
-	if (!cvar("k_end_tele_spawn") && streq("end", g_globalvars.mapname))
+	if (!cvar("k_end_tele_spawn") && streq("end", mapname))
 	{
 		vec3_t TS_ORIGIN =
 			{ -392, 608, 40 }; // tele spawn
@@ -485,7 +485,7 @@ qbool FrogbotsCheckMapSupport(void)
 {
 	if (!map_supported && self)
 	{
-		G_sprint(self, 2, "Map %s not supported for bots\n", g_globalvars.mapname);
+		G_sprint(self, 2, "Map %s not supported for bots\n", mapname);
 	}
 
 	return map_supported;

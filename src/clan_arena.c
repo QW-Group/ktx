@@ -65,7 +65,7 @@ void apply_CA_settings(void)
 		G_cprint("%s", buf);
 	}
 
-	cfg_name = va("configs/usermodes/ca/%s.cfg", g_globalvars.mapname);
+	cfg_name = va("configs/usermodes/ca/%s.cfg", mapname);
 	if (can_exec(cfg_name))
 	{
 		trap_readcmd(va("exec %s\n", cfg_name), buf, sizeof(buf));

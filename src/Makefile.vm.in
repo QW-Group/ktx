@@ -67,4 +67,4 @@ distclean:	clean
 			$(LCC) $(CFLAGS) $(INCFLAGS) $(BOTFLAGS) -c -o $@ $<
 
 $(MODULE):	$(OBJECTS)
-			$(Q3ASM) -vq3 -o $(MODULE) $(OBJECTS) g_syscalls.asm
+			$(Q3ASM) -m -o $(MODULE) $(OBJECTS) g_syscalls.asm

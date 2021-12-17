@@ -4523,14 +4523,14 @@ void UserMode(float umode)
 		G_cprint("%s", buf);
 	}
 
-	cfg_name = va("configs/usermodes/%s.cfg", g_globalvars.mapname);
+	cfg_name = va("configs/usermodes/%s.cfg", mapname);
 	if (can_exec(cfg_name))
 	{
 		trap_readcmd(va("exec %s\n", cfg_name), buf, sizeof(buf));
 		G_cprint("%s", buf);
 	}
 
-	cfg_name = va("configs/usermodes/%s/%s.cfg", um, g_globalvars.mapname);
+	cfg_name = va("configs/usermodes/%s/%s.cfg", um, mapname);
 	if (can_exec(cfg_name))
 	{
 		trap_readcmd(va("exec %s\n", cfg_name), buf, sizeof(buf));
@@ -4606,7 +4606,7 @@ void SetPractice(int srv_practice_mode, const char *mapname)
 		G_bprint(2, "%s\n", redtext("Server in normal mode"));
 		if (mapname) // mapname may be "" i.e empty, reload current map in this case
 		{
-			changelevel((strnull(mapname) ? g_globalvars.mapname : mapname));
+			changelevel((strnull(mapname) ? mapname : mapname));
 		}
 	}
 }
@@ -6436,14 +6436,14 @@ void lastscore_add()
 	if ((current_umode < 10) || (current_umode > 13))
 	{
 		cvar_set(va("__k_ls_s_%d", k_ls),
-				 va("%3d:%-3d \x8D %-8.8s %13.13s%s", s1, s2, g_globalvars.mapname, date, extra));
+				 va("%3d:%-3d \x8D %-8.8s %13.13s%s", s1, s2, mapname, date, extra));
 	}
 	else
 	{
 		cvar_set(va("__k_ls_e3_%d", k_ls), e3);
 		cvar_set(va("__k_ls_t3_%d", k_ls), t3);
 		cvar_set(va("__k_ls_s_%d", k_ls),
-				 va("%3d:%-3d:%-3d \x8D %-8.8s %13.13s%s", s1, s2, s3, g_globalvars.mapname, date, extra));
+				 va("%3d:%-3d:%-3d \x8D %-8.8s %13.13s%s", s1, s2, s3, mapname, date, extra));
 	}
 
 	cvar_fset("__k_ls", ++k_ls % MAX_LASTSCORES);
@@ -6461,7 +6461,7 @@ void lastscore_add()
 		if (cl && !strnull(qtvdate))
 		{
 			stuffcmd(cl, "//finalscores \"%s\" \"%s\" \"%s\" \"%s\" %d \"%s\" %d\n", qtvdate,
-						lastscores2str(lst), g_globalvars.mapname, e1, s1, e2, s2);
+						lastscores2str(lst), mapname, e1, s1, e2, s2);
 		}
 	}
 }
@@ -7108,7 +7108,7 @@ void ToggleInstagib()
 		G_cprint("%s", buf);
 	}
 
-	cfg_name = va("configs/usermodes/instagib/%s.cfg", g_globalvars.mapname);
+	cfg_name = va("configs/usermodes/instagib/%s.cfg", mapname);
 	if (can_exec(cfg_name))
 	{
 		trap_readcmd(va("exec %s\n", cfg_name), buf, sizeof(buf));
@@ -7843,7 +7843,7 @@ void mapcycle()
 		}
 
 		G_sprint(self, 2, "%3.3d | %s%s\n", i + 1, newmap,
-					streq(newmap, g_globalvars.mapname) ? " \x8D current" : "");
+					streq(newmap, mapname) ? " \x8D current" : "");
 	}
 
 	if (!i)
@@ -8077,7 +8077,7 @@ void ToggleArena()
 			G_cprint("%s", buf);
 		}
 
-		cfg_name = va("configs/usermodes/%s/ra/%s.cfg", um, g_globalvars.mapname);
+		cfg_name = va("configs/usermodes/%s/ra/%s.cfg", um, mapname);
 		if (can_exec(cfg_name))
 		{
 			trap_readcmd(va("exec %s\n", cfg_name), buf, sizeof(buf));
