@@ -27,8 +27,8 @@ MODULE=../qwprogs.so
 
 FORCE32BITFLAGS=
 
-CFLAGS+=-g -Wall -O2 -fPIC $(FORCE32BITFLAGS)
-LDFLAGS+=-shared $(FORCE32BITFLAGS)
+CFLAGS+=-g -Wall -fvisibility=hidden -O2 -fPIC $(FORCE32BITFLAGS)
+LDFLAGS+=-shared $(FORCE32BITFLAGS) -Wl,--no-undefined
 INCFLAGS=-I../include
 BOTFLAGS=
 

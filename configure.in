@@ -9,7 +9,7 @@ AC_ISC_POSIX
 AC_CANONICAL_SYSTEM
 AC_AIX
 AC_PROG_MAKE_SET
-AC_PATH_PROG(LCC,lcc)
+AC_PATH_PROG(LCC,q3lcc)
 AC_PATH_PROG(Q3ASM,q3asm)
 AC_PATH_PROG(RM,rm)
 AC_PATH_PROG(MKDEP,mkdep)
@@ -21,6 +21,7 @@ AC_HEADER_STDC
 
 dnl Checks for library functions.
 AC_PROG_GCC_TRADITIONAL
+AC_CHECK_LIB([m],[cos])
 
 dnl Make the files.
 AC_OUTPUT(Makefile src/Makefile.dl src/Makefile.vm)

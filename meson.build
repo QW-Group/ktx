@@ -119,7 +119,7 @@ endif
 
 library('qwprogs', ktx_sources,
 	include_directories : include_directories('include'),
-	c_args : c_args,
+	c_args : [c_args, '-fvisibility=hidden'],
 	dependencies : [
 		meson.get_compiler('c').find_library('m', required : false)
 	],

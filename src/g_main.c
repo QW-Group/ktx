@@ -114,8 +114,10 @@ qbool FTE_sv = false;
  This must be the very first function compiled into the .q3vm file
  ================
  */
-intptr_t vmMain(int command, int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6,
-				int arg7, int arg8, int arg9, int arg10, int arg11)
+intptr_t VISIBILITY_VISIBLE vmMain(
+				int command,
+				int arg0, int arg1, int arg2, int arg3,	int arg4,
+				int arg5, int arg6,	int arg7, int arg8, int arg9, int arg10, int arg11)
 {
 	int api_ver;
 

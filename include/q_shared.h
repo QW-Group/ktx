@@ -55,9 +55,19 @@
 
 #ifdef Q3_VM
 
+// QVM does not have such thing as visibility, using empty value to make compiler happy.
+#define VISIBILITY_VISIBLE
+
 #include "bg_lib.h"
 
 #else
+
+// Visibility for native library.
+#ifdef _WIN32
+	#define VISIBILITY_VISIBLE __declspec(dllexport)
+#else
+	#define VISIBILITY_VISIBLE __attribute__((visibility("default")))
+#endif
 
 #include <assert.h>
 #include <math.h>
