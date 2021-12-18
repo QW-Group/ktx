@@ -26,7 +26,7 @@ INCDIR=include
 PREFIX=@prefix@
 
 MAKEDL=$(MAKE) -f Makefile.dl
-MAKEDL32=$(MAKE) -f Makefile.dl32
+MAKEDL32=$(MAKEDL) FORCE32BITFLAGS=-m32
 MAKEQVM=$(MAKE) -f Makefile.vm
 
 default:    dl

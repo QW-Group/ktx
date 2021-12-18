@@ -18,7 +18,7 @@
 #
 #   $Id$
 
-RM=/bin/rm
+RM=/usr/bin/rm
 
 
 SRCDIR=src
@@ -26,7 +26,7 @@ INCDIR=include
 PREFIX=/usr/local
 
 MAKEDL=$(MAKE) -f Makefile.dl
-MAKEDL32=$(MAKE) -f Makefile.dl32
+MAKEDL32=$(MAKEDL) FORCE32BITFLAGS=-m32
 MAKEQVM=$(MAKE) -f Makefile.vm
 
 default:    dl
