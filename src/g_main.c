@@ -149,10 +149,6 @@ intptr_t VISIBILITY_VISIBLE vmMain(
 			return (intptr_t)(&gamedata);
 
 		case GAME_LOADENTS:
-			infokey(world, "mapname", mapname, sizeof(mapname));
-			infokey(world, "modelname", worldmodel, sizeof(worldmodel));
-			world->model = worldmodel;
-
 			ClearGlobals();
 			G_SpawnEntitiesFromString();
 
@@ -173,6 +169,13 @@ intptr_t VISIBILITY_VISIBLE vmMain(
 			}
 			else
 			{
+				if (framecount == 0)
+				{
+					infokey(world, "mapname", mapname, sizeof(mapname));
+					infokey(world, "modelname", worldmodel, sizeof(worldmodel));
+					world->model = worldmodel;
+				}
+
 				StartFrame(arg0);
 			}
 
