@@ -187,7 +187,7 @@ intptr_t VISIBILITY_VISIBLE vmMain(
 
 			// Init client name.
 			self->netname = netnames[NUM_FOR_EDICT(self)-1];
-			infokey(self, "netname", self->netname, CLIENT_NAME_LEN);
+			infokey(self, "name", self->netname, CLIENT_NAME_LEN);
 
 			self->last_rune = "setme";
 			self->classname = ""; // at least empty classname
