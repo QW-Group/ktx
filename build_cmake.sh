@@ -18,26 +18,32 @@ mkdir -p ${BUILDIR}
 
 # Define target platforms, feel free to comment out if you does not require some of it.
 BUILD_LIST=(
-    linux-amd64
-    linux-aarch64
-    linux-armhf
-    linux-i686
-    windows-x64
-    windows-x86
-    qvm
+	linux-amd64
+	linux-aarch64
+	linux-armhf
+	linux-i686
+	windows-x64
+	windows-x86
+	qvm
 )
+
+MAKE_PROGRAM=
+if hash ninja >/dev/null 2>&1
+then 
+	MAKE_PROGRAM="-G Ninja"
+fi
 
 # Build platforms one by one.
 for name in "${BUILD_LIST[@]}"; do
-    mkdir -p ${BUILDIR}/$name
-    case "$name" in
-    "qvm" ) # Build QVM library.
-        cmake -B ${BUILDIR}/$name -S . -DBOT_SUPPORT=${BOT_SUPPORT} -G Ninja
-        cmake --build ${BUILDIR}/$name --config Release --target qvm ${V}
-    ;;
-    * ) # Build native library.
-        cmake -B ${BUILDIR}/$name -S . -DBOT_SUPPORT=${BOT_SUPPORT} -G Ninja -DCMAKE_TOOLCHAIN_FILE=tools/cross-cmake/$name.cmake
-        cmake --build ${BUILDIR}/$name --config Release ${V}
-    ;;
-    esac
+	mkdir -p ${BUILDIR}/$name
+	case "$name" in
+	"qvm" ) # Build QVM library.
+	cmake -B ${BUILDIR}/$name -S . -DBOT_SUPPORT=${BOT_SUPPORT} $MAKE_PROGRAM
+	cmake --build ${BUILDIR}/$name --config Release --target qvm ${V}
+	;;
+* ) # Build native library.
+		cmake -B ${BUILDIR}/$name -S . -DBOT_SUPPORT=${BOT_SUPPORT} $MAKE_PROGRAM -DCMAKE_TOOLCHAIN_FILE=tools/cross-cmake/$name.cmake
+		cmake --build ${BUILDIR}/$name --config Release ${V}
+		;;
+	esac
 done
