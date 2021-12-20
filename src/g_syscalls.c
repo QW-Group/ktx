@@ -460,3 +460,8 @@ intptr_t trap_SetUserInfo(intptr_t edn, const char *varname, const char *value, 
 {
 	return syscall(G_SETUSERINFO, edn, (intptr_t) varname, (intptr_t) value, flags);
 }
+
+void trap_VisibleTo(intptr_t viewer, intptr_t first, intptr_t len, byte *visible)
+{
+	syscall(G_VISIBLETO, viewer, first, len, (intptr_t) visible);
+}

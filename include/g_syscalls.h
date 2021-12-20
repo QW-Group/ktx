@@ -140,3 +140,5 @@ void trap_makevectors(float *v);
 intptr_t trap_SetUserInfo(intptr_t edn, const char *varname, const char *value, intptr_t flags);
 
 intptr_t trap_movetogoal(float dist);
+
+void trap_VisibleTo(intptr_t viewer, intptr_t first, intptr_t len, byte *visible);

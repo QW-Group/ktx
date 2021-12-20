@@ -408,6 +408,8 @@ char* cl_ip(gedict_t *p);
 
 char* clean_string(char *s);
 
+void visible_to(gedict_t *viewer, gedict_t *first, int len, byte *visible);
+
 //
 // subs.c
 void SUB_CalcMove(vec3_t tdest, float tspeed, void (*func)());

@@ -141,6 +141,7 @@ typedef enum
 	G_SETPAUSE,
 	G_SETUSERINFO,
 	G_MOVETOGOAL,
+	G_VISIBLETO,
 } gameImport_t;
 
 // !!! new things comes to end of list !!!

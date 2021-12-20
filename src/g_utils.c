@@ -2767,3 +2767,8 @@ char* clean_string(char *string)
 
 	return string;
 }
+
+void visible_to(gedict_t *viewer, gedict_t *first, int len, byte *visible)
+{
+	trap_VisibleTo(NUM_FOR_EDICT(viewer), NUM_FOR_EDICT(first), len, visible);
+}
