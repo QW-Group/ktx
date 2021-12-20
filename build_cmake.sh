@@ -19,6 +19,7 @@ mkdir -p ${BUILDIR}
 # Define target platforms, feel free to comment out if you does not require some of it.
 BUILD_LIST=(
     linux-amd64
+    linux-aarch64
     linux-armhf
     linux-i686
     windows-x64
