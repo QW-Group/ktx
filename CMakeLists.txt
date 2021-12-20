@@ -134,7 +134,10 @@ if(BOT_SUPPORT)
 	target_compile_definitions(${PROJECT_NAME} PRIVATE BOT_SUPPORT=1)
 endif()
 # If not Miscrosoft compilator - then set additional options for linker.
-if (NOT CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+if (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+	target_compile_options(${PROJECT_NAME} PRIVATE /W4)
+else()
+	target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
 	target_link_options(${PROJECT_NAME} PRIVATE "-Wl,--no-undefined") # Do not allow undefined symbols while linking.
 	target_link_libraries(${PROJECT_NAME} PRIVATE m) # Link with libm.
 endif()
