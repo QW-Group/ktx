@@ -725,6 +725,7 @@ typedef struct fb_entvars_s {
 	// Teamplay
 	float last_mm2_status;						// last time this bot reported
 	float last_mm2_spot;						// last time this player had powerup reported by enemy
+	float last_mm2_spot_attempt;				// last time this bot tried to report enemy powerup
 
 	qbool waterjumping;							// true if the bot should waterjump
 	int dbg_countdown;							// bot will be stationary for x frames
@@ -1139,10 +1140,6 @@ typedef struct gedict_s
 	fb_entvars_t fb;
 // }
 #endif
-
-// { highlights which clients this entity was visible to
-	unsigned int visclients;
-// }
 
 // { teamplay extensions, for server-side mm2
 	teamplay_t tp;

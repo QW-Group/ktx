@@ -56,7 +56,6 @@ field_t expfields[] =
 	{ "hideentity", 	FOFS(hideentity), 	F_INT },
 	{ "trackent", 		FOFS(trackent), 	F_INT },
 	{ "hideplayers", 	FOFS(hideplayers), 	F_INT },
-	{ "visclients", 	FOFS(visclients), 	F_INT },
 	{ "teleported", 	FOFS(teleported), 	F_INT },
 	{ NULL }
 };

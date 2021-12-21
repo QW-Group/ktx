@@ -402,20 +402,15 @@ static qbool TP_IsItemVisible(item_vis_t *visitem)
 	return false;
 }
 
-unsigned int ClientFlag(gedict_t *client)
-{
-	return ((unsigned int)1 << (NUM_FOR_EDICT(client) - 1));
-}
-
 static gedict_t* TeamplayFindPoint(gedict_t *client)
 {
-	gedict_t *e = world;
+	int i;
 	unsigned long pointflags = ~0U;
 	vec3_t ang;
 	item_vis_t visitem;
-	unsigned int clientflag = ClientFlag(client);
 	float best = -1;
 	gedict_t *bestent = NULL;
+	byte visible[MAX_EDICTS];
 
 	if (deathmatch >= 1 && deathmatch <= 4)
 	{
@@ -437,22 +432,23 @@ static gedict_t* TeamplayFindPoint(gedict_t *client)
 	visitem.viewent = client;
 	VectorAdd(visitem.vieworg, client->s.v.view_ofs, visitem.vieworg); // FIXME: v_viewheight not taken into account
 
-	for (e = world; (e = nextent(e));)
+	visible_to(client, g_edicts, MAX_EDICTS, visible);
+
+	for (i = 0; i < MAX_EDICTS; i++)
 	{
+		gedict_t *e = &g_edicts[i];
 		vec3_t size;
 		float rank;
 
-		if ((e->ct == ctPlayer) && !ISLIVE(e))
+		if (!visible[i])
+			continue;
+
+		if ((e->ct == ctPlayer && !ISLIVE(e)) || e->ct == ctSpec)
 		{
 			continue;
 		}
 
 		if (strnull(e->model))
-		{
-			continue;
-		}
-
-		if (!(e->visclients & clientflag))
 		{
 			continue;
 		}
@@ -1253,18 +1249,21 @@ static void TeamplayEnemyPowerup(gedict_t *client)
 static void TeamplaySetEnemyFlags(gedict_t *client)
 {
 	gedict_t *plr = world;
-	unsigned int clientFlag = ClientFlag(client);
 	int enemy_items = 0;
 	int enemy_count = 0;
 	int friend_count = 0;
-	for (plr = world; (plr = find_plr(plr));)
+	byte visible[MAX_CLIENTS];
+
+	visible_to(client, g_edicts + 1, MAX_CLIENTS, visible);
+
+	for (plr = g_edicts + 1; plr <= g_edicts + MAX_CLIENTS; plr++)
 	{
-		if (plr == client)
+		if (plr == client || plr->ct == ctSpec)
 		{
 			continue;
 		}
 
-		if (!(plr->visclients & clientFlag))
+		if (!visible[plr - (g_edicts + 1)])
 		{
 			continue;
 		}

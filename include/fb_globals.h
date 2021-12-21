@@ -195,7 +195,6 @@ char* BotNameEnemy(int botNumber);
 
 qbool Visible_360(gedict_t *self, gedict_t *visible_object);
 qbool Visible_infront(gedict_t *self, gedict_t *visible_object);
-unsigned int ClientFlag(gedict_t *client);
 
 // marker_util.qc
 void marker_touch(void);

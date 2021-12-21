@@ -28,14 +28,16 @@ static qbool PointVisible(vec3_t vec)
 gedict_t* IdentifyMostVisibleTeammate(gedict_t *me)
 {
 	gedict_t *p, *g = NULL;
-	unsigned long clientFlag = ClientFlag(me);
 	float closeness = -1;
 	vec3_t diff, point;
 	float currclose;
+	byte visible[MAX_CLIENTS];
 
-	for (p = world; (p = find_plr(p));)
+	visible_to(me, g_edicts + 1, MAX_CLIENTS, visible);
+
+	for (p = g_edicts + 1; p <= g_edicts + MAX_CLIENTS; p++)
 	{
-		if ((me != p) && (p->visclients & clientFlag) && SameTeam(me, p))
+		if ((me != p) && p->ct == ctPlayer && visible[p - (g_edicts + 1)] && SameTeam(me, p))
 		{
 			// Find difference in angles between aim & aiming at teammate
 			VectorSubtract(p->s.v.origin, me->s.v.origin, diff);
