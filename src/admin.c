@@ -741,7 +741,7 @@ void AdminForceBreak()
 
 void AdminForceMap()
 {
-	char mapname[128];
+	char map[128];
 
 	if (!is_adm(self))
 	{
@@ -762,16 +762,16 @@ void AdminForceMap()
 		return;
 	}
 
-	trap_CmdArgv(1, mapname, sizeof(mapname));
-	if (GetMapNum(mapname) <= 0)
+	trap_CmdArgv(1, map, sizeof(map));
+	if (GetMapNum(map) <= 0)
 	{
-		G_sprint(self, 2, "Map %s not available on this server.\n", redtext(mapname));
+		G_sprint(self, 2, "Map %s not available on this server.\n", redtext(map));
 
 		return;
 	}
 
-	G_bprint(2, "%s forces a map change to %s!\n", self->netname, redtext(mapname));
-	changelevel(mapname);
+	G_bprint(2, "%s forces a map change to %s!\n", self->netname, redtext(map));
+	changelevel(map);
 }
 
 void PlayerStopFire(gedict_t *p)

@@ -459,7 +459,7 @@ int vote_get_maps()
 void vote_check_map()
 {
 	int vt_req;
-	char *mapname;
+	char *map;
 
 	vt_req = get_votes_req(OV_MAP, true);
 	if (maps_voted_idx < 0)
@@ -467,8 +467,8 @@ void vote_check_map()
 		return;
 	}
 
-	mapname = GetMapName(maps_voted[maps_voted_idx].map_id);
-	if (strnull(mapname))
+	map = GetMapName(maps_voted[maps_voted_idx].map_id);
+	if (strnull(map))
 	{
 		return;
 	}
@@ -485,7 +485,7 @@ void vote_check_map()
 
 	G_bprint(2, "%s votes for mapchange.\n", redtext("Majority"));
 	vote_clear(OV_MAP);
-	changelevel(mapname);
+	changelevel(map);
 }
 
 void vote_check_break()

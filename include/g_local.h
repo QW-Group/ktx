@@ -863,7 +863,7 @@ int GetMapNum(char *mapname);
 void DoSelectMap(int iMap);
 void SelectMap();
 void VoteMap();
-qbool VoteMapSpecific(char *mapname);
+qbool VoteMapSpecific(char *map);
 
 // match.c
 
