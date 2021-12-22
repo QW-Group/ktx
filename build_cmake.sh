@@ -40,11 +40,11 @@ for name in "${BUILD_LIST[@]}"; do
 	case "$name" in
 	"qvm" ) # Build QVM library.
 		cmake -B ${BUILDIR}/$name -S . -DBOT_SUPPORT=${BOT_SUPPORT} ${CMAKE_GENERATOR}
-		cmake --build ${BUILDIR}/$name --config Release --target qvm ${V}
+		cmake --build ${BUILDIR}/$name --target qvm ${V}
 	;;
 	* ) # Build native library.
-		cmake -B ${BUILDIR}/$name -S . -DBOT_SUPPORT=${BOT_SUPPORT} ${CMAKE_GENERATOR} -DCMAKE_TOOLCHAIN_FILE=tools/cross-cmake/$name.cmake
-		cmake --build ${BUILDIR}/$name --config Release ${V}
+		cmake -B ${BUILDIR}/$name -S . -DBOT_SUPPORT=${BOT_SUPPORT} -DCMAKE_BUILD_TYPE=Release ${CMAKE_GENERATOR} -DCMAKE_TOOLCHAIN_FILE=tools/cross-cmake/$name.cmake
+		cmake --build ${BUILDIR}/$name ${V}
 	;;
 	esac
 done
