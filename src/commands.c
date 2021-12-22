@@ -1632,7 +1632,7 @@ void ShowVersion()
 
 	if (strlen(cvar_string("qws_buildnum")))
 	{
-		G_sprint(self, 2, "%s...: %26s-%1s\n", redtext("Build"), cvar_string("qws_buildnum"),
+		G_sprint(self, 2, "%s...: %26s-%1.1s\n", redtext("Build"), cvar_string("qws_buildnum"),
 					strlen(cvar_string("qws_platform")) ? cvar_string("qws_platform") : "u");
 	}
 
@@ -1652,7 +1652,7 @@ void ShowVersion()
 	G_sprint(self, 2, "%s.: %28s\n", redtext("Version"), dig3s(cvar_string("qwm_version")));
 	if (strlen(cvar_string("qwm_buildnum")))
 	{
-		G_sprint(self, 2, "%s...: %26s-%1s\n", redtext("Build"), cvar_string("qwm_buildnum"),
+		G_sprint(self, 2, "%s...: %26s-%1.1s\n", redtext("Build"), cvar_string("qwm_buildnum"),
 					strlen(cvar_string("qwm_platform")) ? cvar_string("qwm_platform") : "u");
 	}
 
