@@ -434,6 +434,10 @@ char* clean_string(char *s);
 
 void visible_to(gedict_t *viewer, gedict_t *first, int len, byte *visible);
 
+// Work around for the fact that QVM dos not support ".*s" in printf() family functions.
+// It retuns dots array filled with dots, amount of dots depends of how long cmd name and longest cmd name.
+char* make_dots(char *dots, size_t dots_len, int cmd_max_len, char *cmd);
+
 //
 // subs.c
 void SUB_CalcMove(vec3_t tdest, float tspeed, void (*func)());

@@ -1687,6 +1687,7 @@ qbool TeamplayMessageByName(gedict_t *client, const char *message)
 void TeamplayMessage(void)
 {
 	int i, max_len = 0;
+	char dots[64];
 
 	if (trap_CmdArgc() == 2)
 	{
@@ -1711,10 +1712,8 @@ void TeamplayMessage(void)
 	G_sprint(self, 2, "Usage:\n");
 	for (i = 0; i < (sizeof(messages) / sizeof(messages[0])); ++i)
 	{
-		int len = max_len - strlen(messages[i].cmdname);
-
-		G_sprint(self, 2, "  &cff0%s&r %.*s %s\n", messages[i].cmdname, len, "................",
-					messages[i].description);
+		make_dots(dots, sizeof(dots), max_len, messages[i].cmdname);
+		G_sprint(self, 2, "  &cff0%s&r %s %s\n", messages[i].cmdname, dots, messages[i].description);
 	}
 }
 

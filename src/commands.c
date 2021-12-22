@@ -1411,7 +1411,7 @@ void Init_cmds(void)
 void Do_ShowCmds(qbool adm_req)
 {
 	qbool first = true;
-	int i, l;
+	int i;
 	char *name, dots[64];
 	char arg_1[1024];
 
@@ -1441,11 +1441,6 @@ void Do_ShowCmds(qbool adm_req)
 			continue;
 		}
 
-		l = max_cmd_len - strlen(name);
-		l = bound(0, l, sizeof(dots) - 1);
-		memset((void*) dots, (int)'.', l);
-		dots[l] = 0;
-
 		if (first)
 		{
 			first = false;
@@ -1455,6 +1450,7 @@ void Do_ShowCmds(qbool adm_req)
 						(self->ct == ctSpec ? redtext("spectator") : redtext("player")));
 		}
 
+		make_dots(dots, sizeof(dots), max_cmd_len, name);
 		G_sprint(self, 2, "%s%s %s\n", redtext(name), dots, cmds[i].description);
 	}
 }
