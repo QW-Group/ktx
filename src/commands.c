@@ -4581,9 +4581,9 @@ void execute_rules_reset(void)
 	}
 }
 
-// ok, a bit complicated
-// this routine may change map if srv_practice_mode == 0 and mapname is not NULL
-void SetPractice(int srv_practice_mode, const char *mapname)
+// This routine change map if srv_practice_mode == 0 and 'map' is not NULL,
+// empty string mean realod to the current map.
+void SetPractice(int srv_practice_mode, const char *map)
 {
 	if (match_in_progress)
 	{
@@ -4600,9 +4600,10 @@ void SetPractice(int srv_practice_mode, const char *mapname)
 	else
 	{
 		G_bprint(2, "%s\n", redtext("Server in normal mode"));
-		if (mapname) // mapname may be "" i.e empty, reload current map in this case
+		if (map)
 		{
-			changelevel((strnull(mapname) ? mapname : mapname));
+			// If map equal to "" then reload current map in this case.
+			changelevel((strnull(map) ? mapname : map));
 		}
 	}
 }

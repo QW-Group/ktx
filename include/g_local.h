@@ -656,7 +656,7 @@ void Init_cmds(void);
 
 void StuffModCommands(gedict_t *p);
 
-void SetPractice(int srv_practice_mode, const char *mapname);
+void SetPractice(int srv_practice_mode, const char *map);
 
 void execute_rules_reset(void);
 
