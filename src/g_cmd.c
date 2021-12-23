@@ -485,8 +485,8 @@ qbool ClientSay(qbool isTeamSay)
 	if (spec_talk) // this should go to demo only
 	{
 		// if k_keepspectalkindemos == 0 then this goes to qtv mvd stream only
-		flags = BPRINT_IGNORECONSOLE | BPRINT_IGNORECLIENTS
-				| (cvar("k_keepspectalkindemos") ? 0 : BPRINT_QTVONLY);
+		flags = BPRINT_IGNORECONSOLE | BPRINT_IGNORECLIENTS;
+		flags |= (cvar("k_keepspectalkindemos") ? 0 : BPRINT_QTVONLY);
 
 		G_bprint_flags(PRINT_CHAT, flags, "%s %s\n", prefix, str);
 	}
