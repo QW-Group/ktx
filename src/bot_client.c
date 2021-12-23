@@ -269,6 +269,8 @@ void BotOutOfWater(gedict_t *self)
 {
 	return;
 
+// qqshka: meag turned it off for some reason. I commented it out completely so compiler does not emit warnings.
+#if 0
 	if (self->s.v.waterlevel == 2)
 	{
 		vec3_t start;
@@ -308,6 +310,7 @@ void BotOutOfWater(gedict_t *self)
 			}
 		}
 	}
+#endif
 }
 
 static void BotPeriodicMessages(gedict_t *self)
