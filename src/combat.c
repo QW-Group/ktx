@@ -757,10 +757,10 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 	if ((sv_extensions & SV_EXTENSIONS_MVDHIDDEN) && ((int)unbound_dmg_dealt > 0)
 			&& ((attacker->ct == ctPlayer) || (targ->ct == ctPlayer)))
 	{
+		int damage_flags = (dmg_is_splash ? MVDHIDDEN_DMGDONE_SPLASHDAMAGE : 0);
 		// MVD damage: always send
 		WriteShort(MSG_MULTICAST, mvdhidden_dmgdone);
-		WriteShort(MSG_MULTICAST,
-					(dmg_is_splash ? MVDHIDDEN_DMGDONE_SPLASHDAMAGE : 0) | targ->deathtype);
+		WriteShort(MSG_MULTICAST, damage_flags | targ->deathtype);
 		WriteShort(MSG_MULTICAST, NUM_FOR_EDICT(attacker));
 		WriteShort(MSG_MULTICAST, NUM_FOR_EDICT(targ));
 		WriteShort(MSG_MULTICAST, (short)unbound_dmg_dealt);
