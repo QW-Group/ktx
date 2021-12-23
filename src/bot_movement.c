@@ -428,7 +428,7 @@ void BotSetCommand(gedict_t *self)
 	float msec_since_last = (last_frame_time - self->fb.last_cmd_sent) * 1000;
 	int cmd_msec = (int)msec_since_last;
 	int weapon_script_impulse = 0;
-	int impulse = 0;
+	int impulse = 0, buttons = 0;
 	qbool jumping;
 	qbool firing;
 	vec3_t direction;
@@ -556,8 +556,10 @@ void BotSetCommand(gedict_t *self)
 		impulse = 0;
 	}
 
+	buttons |= (firing ? 1 : 0);
+	buttons |= (jumping ? 2 : 0);
 	trap_SetBotCMD(NUM_FOR_EDICT(self), cmd_msec, PASSVEC3(self->fb.desired_angle),
-					PASSVEC3(direction), (firing ? 1 : 0) | (jumping ? 2 : 0), impulse);
+					PASSVEC3(direction), buttons, impulse);
 
 	self->fb.next_impulse = 0;
 	self->fb.botchose = false;
