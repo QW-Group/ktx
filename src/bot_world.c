@@ -126,11 +126,11 @@ qbool BotDoorIsClosed(gedict_t *door)
 	{
 		if (door->fb.T & MARKER_BLOCKED_ON_STATE_TOP)
 		{
-			return (door->state & STATE_TOP);
+			return (door->state == STATE_TOP);
 		}
 		else
 		{
-			return (door->state & STATE_BOTTOM);
+			return (door->state == STATE_BOTTOM);
 		}
 	}
 
