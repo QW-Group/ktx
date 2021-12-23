@@ -173,7 +173,7 @@ void UpdateChain()
 	// allow hook to reset mid-throw if clanring hook is enabled
 	if (cvar("k_ctf_cr_hook"))
 	{
-		if (!owner->s.v.button0 & (owner->s.v.weapon == IT_HOOK))
+		if (!owner->s.v.button0 && (owner->s.v.weapon == IT_HOOK))
 		{
 			GrappleReset(owner->hook);
 		}
