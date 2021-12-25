@@ -16,7 +16,7 @@ void SP_info_intermission();
 
 #define RACE_MAX_CAPTURES     600
 #define RACE_CAPTURE_FPS       10
-#define RACE_GUIDE_BASE_ENT    32
+#define RACE_GUIDE_BASE_ENT    (MAX_CLIENTS + 1)
 #define RACE_JUMP_INDICATORS    4
 
 #define RACE_PACEMAKER_JUMPS_CVAR      "k_race_pace_jumps"
@@ -4850,13 +4850,13 @@ static void race_update_pacemaker(void)
 						guide.capture.position_count));
 
 			// Create lightning trail for next part of route
-			if (guide_start || guide_end)
+			if (guide_start >= 0 && guide_end > 0)
 			{
 				int num = 0;
 
 				for (i = guide_start; i < guide_end; i += resolution, ++num)
 				{
-					int next = min(i + resolution, guide.capture.position_count - 1);
+					int next = (int)bound(0, i + resolution, guide.capture.position_count - 1);
 
 					WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
 					WriteByte(MSG_MULTICAST, TE_LIGHTNING2);
