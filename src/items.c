@@ -954,6 +954,7 @@ void weapon_touch()
 
 	self = stemp;
 
+	// If dmm2 or dmm3 or dmm5 or coop.
 	if (leave)
 	{
 		ItemTaken(self, other);
@@ -961,20 +962,19 @@ void weapon_touch()
 		return;
 	}
 
-	if (deathmatch != 3 || deathmatch != 5)
+	// remove it in single player, or setup for respawning in deathmatch
+	self->model = "";
+	self->s.v.solid = SOLID_NOT;
+	// At this point it is either dmm0 (singleplayer) or dmm1 or perhaps dmm4 (if for some reason weapon was not removed at match start),
+	// we still try to use SUB_regen and do final decision there if we should regen item.
+	if (deathmatch != 2)
 	{
-		// remove it in single player, or setup for respawning in deathmatch
-		self->model = "";
-		self->s.v.solid = SOLID_NOT;
-		if (deathmatch != 2)
-		{
-			self->s.v.nextthink = g_globalvars.time + 30;
-			stuffcmd_flags(other, STUFFCMD_DEMOONLY, "//ktx took %d %d %d\n", NUM_FOR_EDICT(self),
-							30, NUM_FOR_EDICT(other));
-		}
-
-		self->think = (func_t) SUB_regen;
+		self->s.v.nextthink = g_globalvars.time + 30;
+		stuffcmd_flags(other, STUFFCMD_DEMOONLY, "//ktx took %d %d %d\n", NUM_FOR_EDICT(self),
+						30, NUM_FOR_EDICT(other));
 	}
+
+	self->think = (func_t) SUB_regen;
 
 	activator = other;
 	SUB_UseTargets();	// fire all targets / killtargets
