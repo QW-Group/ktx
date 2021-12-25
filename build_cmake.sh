@@ -36,7 +36,7 @@ export CMAKE_BUILD_PARALLEL_LEVEL="${CMAKE_BUILD_PARALLEL_LEVEL:-8}"
 # Use specified (with G variable) CMake generator or use default generator (most of the time its make) or ninja if found.
 G="${G:-}"
 [ -z "${G}" ] && hash ninja >/dev/null 2>&1 && G="Ninja"
-[ ! -z "${G}" ] && GENERATOR=("-G" "${G}")
+[ ! -z "${G}" ] && export CMAKE_GENERATOR="${G}"
 
 rm -rf ${BUILDIR}
 mkdir -p ${BUILDIR}
@@ -47,11 +47,11 @@ for name in "${PLATFORMS[@]}"; do
 	mkdir -p "${P}"
 	case "${name}" in
 	"qvm" ) # Build QVM library.
-		cmake -B "${P}" -S . ${BOT_SUPPORT} "${GENERATOR[@]}"
+		cmake -B "${P}" -S . ${BOT_SUPPORT}
 		cmake --build "${P}" --target qvm ${V}
 	;;
 	* ) # Build native library.
-		cmake -B "${P}" -S . ${BOT_SUPPORT} ${BUILD} "${GENERATOR[@]}" -DCMAKE_TOOLCHAIN_FILE=tools/cross-cmake/${name}.cmake
+		cmake -B "${P}" -S . ${BOT_SUPPORT} ${BUILD} -DCMAKE_TOOLCHAIN_FILE="tools/cross-cmake/${name}.cmake"
 		cmake --build "${P}" ${V}
 	;;
 	esac
