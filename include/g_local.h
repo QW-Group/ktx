@@ -150,8 +150,8 @@ extern int sv_extensions;
 #define	EDICT_TO_PROG(e) ((byte *)(e) - (byte *)g_edicts)
 #define PROG_TO_EDICT(e) ((gedict_t *)((byte *)g_edicts + (e)))
 
-void G_Printf(const char *fmt, ...);
-void G_Error(const char *fmt, ...);
+void G_Printf(const char *fmt, ...) PRINTF_FUNC(1);
+void G_Error(const char *fmt, ...) PRINTF_FUNC(1);
 
 #define PASSVEC3(x) (x[0]),(x[1]),(x[2])
 #define SetVector(v,x,y,z) (v[0]=x,v[1]=y,v[2]=z)
@@ -241,26 +241,26 @@ float vectoyaw(vec3_t value1);
 void vectoangles(vec3_t value1, vec3_t ret);
 void changeyaw(gedict_t *ent);
 
-char* va(char *format, ...);
+char* va(char *format, ...) PRINTF_FUNC(1);
 char* redtext(char *format);
 char* cleantext(char *format);
 char* dig3(int d);
-char* dig3s(const char *format, ...);
+char* dig3s(const char *format, ...) PRINTF_FUNC(1);
 char* striphigh(char *format);
 char* stripcaps(char *format);
 
-void G_sprint(gedict_t *ed, int level, const char *fmt, ...);
-void G_sprint_flags(gedict_t *ed, int level, int flags, const char *fmt, ...);
-void G_bprint(int level, const char *fmt, ...);
-void G_bprint_flags(int level, int flags, const char *fmt, ...);
-void G_centerprint(gedict_t *ed, const char *fmt, ...);
+void G_sprint(gedict_t *ed, int level, const char *fmt, ...)  PRINTF_FUNC(3);
+void G_sprint_flags(gedict_t *ed, int level, int flags, const char *fmt, ...)  PRINTF_FUNC(4);
+void G_bprint(int level, const char *fmt, ...)  PRINTF_FUNC(2);
+void G_bprint_flags(int level, int flags, const char *fmt, ...) PRINTF_FUNC(3);
+void G_centerprint(gedict_t *ed, const char *fmt, ...) PRINTF_FUNC(2);
 /* centerprint too all clients */
-void G_cp2all(const char *fmt, ...);
+void G_cp2all(const char *fmt, ...) PRINTF_FUNC(1);
 
-void G_cprint(const char *fmt, ...);
-void G_dprint(const char *fmt, ...);
+void G_cprint(const char *fmt, ...) PRINTF_FUNC(1);
+void G_dprint(const char *fmt, ...) PRINTF_FUNC(1);
 
-void localcmd(const char *fmt, ...);
+void localcmd(const char *fmt, ...) PRINTF_FUNC(1);
 
 int streq(const char *s1, const char *s2);
 int strneq(const char *s1, const char *s2);
@@ -285,8 +285,8 @@ void TraceCapsule(float v1_x, float v1_y, float v1_z, float v2_x, float v2_y, fl
 					int nomonst, gedict_t *ed, float min_x, float min_y, float min_z, float max_x,
 					float max_y, float max_z);
 
-void stuffcmd(gedict_t *ed, const char *fmt, ...);
-void stuffcmd_flags(gedict_t *ed, int flags, const char *fmt, ...);
+void stuffcmd(gedict_t *ed, const char *fmt, ...) PRINTF_FUNC(2);
+void stuffcmd_flags(gedict_t *ed, int flags, const char *fmt, ...) PRINTF_FUNC(3);
 int droptofloor(gedict_t *ed);
 int walkmove(gedict_t *ed, float yaw, float dist);
 int movetogoal(float dist);
@@ -601,8 +601,8 @@ void CTF_Obituary(gedict_t *targ, gedict_t *attacker);
 void CTF_CheckFlagsAsKeys(void);
 
 // logs.c
-void log_open(const char *fmt, ...);
-void log_printf(const char *fmt, ...);
+void log_open(const char *fmt, ...) PRINTF_FUNC(1);
+void log_printf(const char *fmt, ...) PRINTF_FUNC(1);
 void log_close(void);
 
 extern fileHandle_t log_handle;
@@ -1136,12 +1136,12 @@ void LaunchLaser(vec3_t org, vec3_t vec);
 qbool bots_enabled();
 
 // files
-fileHandle_t std_fropen(const char *fmt, ...);
-fileHandle_t std_fwopen(const char *fmt, ...);
+fileHandle_t std_fropen(const char *fmt, ...) PRINTF_FUNC(1);
+fileHandle_t std_fwopen(const char *fmt, ...) PRINTF_FUNC(1);
 int std_fgetc(fileHandle_t handle);
 char* std_fgets(fileHandle_t handle, char *buf, int limit);
 void std_fclose(fileHandle_t handle);
-void std_fprintf(fileHandle_t handle, const char *fmt, ...);
+void std_fprintf(fileHandle_t handle, const char *fmt, ...) PRINTF_FUNC(2);
 
 // teamplay
 void TeamplayEventItemTaken(gedict_t *client, gedict_t *item);

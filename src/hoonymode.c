@@ -1210,8 +1210,8 @@ void HM_point_stats(void)
 					blue_frags - red_frags > 1 ? "s" : "");
 	}
 
-	G_bprint(PRINT_HIGH, round_explanation);
-	G_bprint(PRINT_HIGH, series_explanation);
+	G_bprint(PRINT_HIGH, "%s", round_explanation);
+	G_bprint(PRINT_HIGH, "%s", series_explanation);
 }
 
 const char* HM_round_explanation(void)

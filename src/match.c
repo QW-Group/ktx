@@ -1623,7 +1623,7 @@ void PrintCountdown(int seconds)
 		strlcat(text, "\nno matchtag\n\n\n", sizeof(text));
 	}
 
-	G_cp2all(text);
+	G_cp2all("%s", text);
 }
 
 qbool isCanStart(gedict_t *s, qbool forceMembersWarn)
@@ -1857,7 +1857,7 @@ void TimerStartThink()
 	}
 	else if (self->cnt2 <= 0)
 	{
-		G_cp2all("");
+		G_cp2all("%s", "");
 
 		StartMatch();
 
@@ -2282,7 +2282,7 @@ void StopTimer(int removeDemo)
 	gedict_t *timer, *p;
 
 	if (match_in_progress == 1)
-		G_cp2all(""); // clear center print
+		G_cp2all("%s", ""); // clear center print
 
 	k_force = 0;
 	match_in_progress = 0;

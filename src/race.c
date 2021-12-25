@@ -94,8 +94,11 @@ static gedict_t *race_jump_indicators[RACE_JUMP_INDICATORS];
 static float race_jump_indicator_times[RACE_JUMP_INDICATORS];
 
 void ktpro_autotrack_on_powerup_take(gedict_t *racer);
-void race_cancel(qbool cancelrecord, const char *fmt, ...);
-void race_start(qbool cancelrecord, const char *fmt, ...);
+static void race_cancel(qbool cancelrecord, const char *fmt, ...) PRINTF_FUNC(2);
+static void race_start(qbool cancelrecord, const char *fmt, ...) PRINTF_FUNC(2);
+static void race_fwopen(const char *fmt, ...) PRINTF_FUNC(1);
+static void race_fropen(const char *fmt, ...) PRINTF_FUNC(1);
+static void race_fprintf(const char *fmt, ...) PRINTF_FUNC(1);
 void race_unready_all(void);
 void r_route(void);
 void race_record(void);
@@ -507,7 +510,7 @@ void race_init(void)
 // clean up, so we can start actual match and there will be no some shit around
 void race_shutdown(char *msg)
 {
-	race_cancel(true, msg);
+	race_cancel(true, "%s", msg);
 	race_remove_ent();
 	race_unready_all();
 	if (cvar("k_spm_show"))
@@ -1273,7 +1276,7 @@ static void race_end_point_touched(gedict_t *self, gedict_t *other)
 		else
 		{
 			positionString = race_position_string(race.racers_complete);
-			G_bprint(PRINT_HIGH, "\20%s\21 also finished%s \20%.3f\21\n", other->netname,
+			G_bprint(PRINT_HIGH, "\20%s\21 also finished%s%s \20%.3fs\21\n", other->netname,
 						strnull(positionString) ? "" : " in ", positionString,
 						race_time() / 1000.0f);
 			++race.last_completion_eq;
@@ -1432,9 +1435,7 @@ static void race_over(void)
 
 							if (demo_references == 1)
 							{
-								localcmd(
-										va("sv_demoremove %s\n",
-											race.records[nameposition].demoname));
+								localcmd("sv_demoremove %s\n", race.records[nameposition].demoname);
 							}
 						}
 					}
@@ -1534,7 +1535,7 @@ static void race_over(void)
 	{
 		// Continue match with next run
 		race_finish_capture(best_time_position == 0 && !blocked_record, best_player_num);
-		race_start(!keep_demo, "");
+		race_start(!keep_demo, "%s", "");
 	}
 }
 
@@ -1741,7 +1742,7 @@ void race_clear_race_fields(void)
 	}
 }
 
-void race_cancel(qbool cancelrecord, const char *fmt, ...)
+static void race_cancel(qbool cancelrecord, const char *fmt, ...)
 {
 	va_list argptr;
 	char text[1024];
@@ -1754,7 +1755,7 @@ void race_cancel(qbool cancelrecord, const char *fmt, ...)
 
 		race_stoprecord(cancelrecord);
 
-		G_cp2all(""); // clear centerprint
+		G_cp2all("%s", ""); // clear centerprint
 
 		if (!strnull(text))
 		{
@@ -2021,7 +2022,7 @@ qbool race_can_go(qbool cancel)
 // qbool restart:
 // true  - means continue current competition, just select next racer in line, keep best results.
 // false - means start completely new race, reset best result and etc.
-void race_start(qbool cancelrecord, const char *fmt, ...)
+static void race_start(qbool cancelrecord, const char *fmt, ...)
 {
 	va_list argptr;
 	char text[1024];
@@ -2034,7 +2035,7 @@ void race_start(qbool cancelrecord, const char *fmt, ...)
 	va_end(argptr);
 
 	// cancel it first, this will clear something what probably wasn't cleared before
-	race_cancel(cancelrecord, text);
+	race_cancel(cancelrecord, "%s", text);
 
 	// switch status to coutdown
 	race.status = raceCD;
@@ -2485,7 +2486,7 @@ void race_think(void)
 			}
 
 			// advance race status to countdown
-			race_start(true, "");
+			race_start(true, "%s", "");
 
 			return;
 
@@ -2576,7 +2577,7 @@ void race_think(void)
 						}
 					}
 
-					G_cp2all(cp_buf);
+					G_cp2all("%s", cp_buf);
 
 					// check for falsestarts
 					race_check_racer_falsestart(false);
@@ -3397,7 +3398,7 @@ void race_fclose(void)
 	race_fhandle = -1;
 }
 
-void race_fwopen(const char *fmt, ...)
+static void race_fwopen(const char *fmt, ...)
 {
 	va_list argptr;
 	char text[MAX_TXTLEN] =
@@ -3420,7 +3421,7 @@ void race_fwopen(const char *fmt, ...)
 	//G_bprint( 2, "Succesfully opened file: %s\n", text );
 }
 
-void race_fropen(const char *fmt, ...)
+static void race_fropen(const char *fmt, ...)
 {
 	va_list argptr;
 	char text[MAX_TXTLEN] =
@@ -3443,7 +3444,7 @@ void race_fropen(const char *fmt, ...)
 	//G_bprint( 2, "Succesfully opened file: %s\n", text );
 }
 
-void race_fprintf(const char *fmt, ...)
+static void race_fprintf(const char *fmt, ...)
 {
 	va_list argptr;
 	char text[MAX_TXTLEN] =
@@ -4337,7 +4338,7 @@ void race_pacemaker(void)
 	race_fropen("%s", race_filename("pos"));
 	if (race_fhandle < 0)
 	{
-		G_sprint(self, PRINT_HIGH, "Unable to load pacemaker record.\n", position + 1);
+		G_sprint(self, PRINT_HIGH, "Unable to load pacemaker record.\n");
 
 		return;
 	}
@@ -5250,7 +5251,7 @@ static void race_match_stats_print(char *title, race_stats_score_t *scores, int 
 
 	G_bprint(
 			2,
-			"\n%s\n%s\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+			"\n%s\n\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
 			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
 			redtext(title));
 
@@ -5425,7 +5426,7 @@ void race_match_start(void)
 
 	race.round_number = 0;
 	memset(player_match_info, 0, sizeof(player_match_info));
-	race_start(false, "");
+	race_start(false, "%s", "");
 }
 
 qbool race_match_started(void)
@@ -5589,7 +5590,7 @@ static void race_match_round_end(void)
 	}
 
 	// Start next run
-	race_start(false, "");
+	race_start(false, "%s", "");
 }
 
 qbool race_can_cancel_demo(void)

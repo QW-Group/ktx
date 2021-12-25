@@ -1310,8 +1310,7 @@ void private_game_toggle(qbool enable)
 			if (!p->isBot && p->ready && !is_logged_in(p))
 			{
 				p->ready = 0;
-				G_bprint(PRINT_HIGH, "%s is no longer ready\n", p->netname,
-							redtext("is no longer ready"));
+				G_bprint(PRINT_HIGH, "%s is no longer ready\n", p->netname);
 			}
 
 			if (force_reconnect && !is_logged_in(p))

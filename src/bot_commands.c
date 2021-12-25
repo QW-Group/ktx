@@ -892,7 +892,7 @@ static void BotFileGenerate(void)
 
 	snprintf(fileName, sizeof(fileName), "bots/maps/%s[%s].bot",
 				strnull(entityFile) ? mapname : entityFile, date);
-	file = std_fwopen(fileName);
+	file = std_fwopen("%s", fileName);
 	if (file == -1)
 	{
 		G_sprint(self, PRINT_HIGH,
@@ -1765,7 +1765,7 @@ static void FrogbotShowInfo(void)
 		}
 	}
 
-	G_centerprint(self, message);
+	G_centerprint(self, "%s", message);
 	self->fb.last_spec_cp = g_globalvars.time + 0.2;
 }
 
@@ -1853,7 +1853,7 @@ static void FrogbotPathList(void)
 		}
 	}
 
-	G_sprint(self, PRINT_HIGH, message);
+	G_sprint(self, PRINT_HIGH, "%s", message);
 }
 
 static void FrogbotsFillServer(void)
@@ -2159,6 +2159,7 @@ static void PrintAvailableCommands(frogbot_cmd_t *commands, int num_commands)
 {
 	int i;
 	int max_length = 0;
+	char dots[64];
 
 	G_sprint(self, PRINT_HIGH, "Available commands:\n");
 	for (i = 0; i < num_commands; ++i)
@@ -2168,8 +2169,9 @@ static void PrintAvailableCommands(frogbot_cmd_t *commands, int num_commands)
 
 	for (i = 0; i < num_commands; ++i)
 	{
-		G_sprint(self, PRINT_HIGH, "  &cff0%s&cfff %*s%s\n", commands[i].name,
-					max_length - strlen(commands[i].name), "", commands[i].description);
+		make_dots(dots, sizeof(dots), max_length, commands[i].name);
+		G_sprint(self, PRINT_HIGH, "  &cff0%s&cfff %s %s\n", commands[i].name,
+					dots, commands[i].description);
 	}
 }
 
@@ -2420,7 +2422,7 @@ void Bot_Print_Thinking(void)
 
 	if (data[0])
 	{
-		G_centerprint(self, data);
+		G_centerprint(self, "%s", data);
 	}
 
 	self->fb.last_spec_cp = g_globalvars.time + 0.2;

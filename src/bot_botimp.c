@@ -213,7 +213,7 @@ qbool SetAttributesBasedOnSkill(int skill)
 	{
 		char buf[1024 * 4];
 
-		cfg_name = va("bots/configs/skill_all.cfg", skill);
+		cfg_name = va("bots/configs/skill_all.cfg");
 		if (can_exec(cfg_name))
 		{
 			trap_readcmd(va("exec %s\n", cfg_name), buf, sizeof(buf));

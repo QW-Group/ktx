@@ -1623,7 +1623,7 @@ void ShowVersion()
 
 	if (strlen(cvar_string("qws_version")))
 	{
-		G_sprint(self, 2, "%s.: %28s\n", redtext("Version"), dig3s(cvar_string("qws_version")));
+		G_sprint(self, 2, "%s.: %28s\n", redtext("Version"), dig3s("%s", cvar_string("qws_version")));
 	}
 
 	if (strlen(cvar_string("qws_buildnum")))
@@ -1634,7 +1634,7 @@ void ShowVersion()
 
 	if (strlen(cvar_string("qws_builddate")))
 	{
-		G_sprint(self, 2, "%s....: %28s\n", redtext("Date"), dig3s(cvar_string("qws_builddate")));
+		G_sprint(self, 2, "%s....: %28s\n", redtext("Date"), dig3s("%s", cvar_string("qws_builddate")));
 	}
 
 	if (strlen(cvar_string("qws_homepage")))
@@ -1645,14 +1645,14 @@ void ShowVersion()
 	G_sprint(self, 2, "\n\213\212\212\212\212\212%s\212\212\212\212\212\213\n",
 				"QUAKEWORLD MOD INFORMATION");
 	G_sprint(self, 2, "%s....: %28s\n", redtext("Name"), cvar_string("qwm_fullname"));
-	G_sprint(self, 2, "%s.: %28s\n", redtext("Version"), dig3s(cvar_string("qwm_version")));
+	G_sprint(self, 2, "%s.: %28s\n", redtext("Version"), dig3s("%s", cvar_string("qwm_version")));
 	if (strlen(cvar_string("qwm_buildnum")))
 	{
 		G_sprint(self, 2, "%s...: %26s-%1.1s\n", redtext("Build"), cvar_string("qwm_buildnum"),
 					strlen(cvar_string("qwm_platform")) ? cvar_string("qwm_platform") : "u");
 	}
 
-	G_sprint(self, 2, "%s....: %28s\n", redtext("Date"), dig3s(cvar_string("qwm_builddate")));
+	G_sprint(self, 2, "%s....: %28s\n", redtext("Date"), dig3s("%s", cvar_string("qwm_builddate")));
 	G_sprint(self, 2, "%s.: %28s\n", redtext("Webpage"), cvar_string("qwm_homepage"));
 
 	G_sprint(self, 2, "\n%s\n\n%s\n", MOD_RELEASE_QUOTE, redtext(MOD_RELEASE_HASHTAGS));
@@ -4800,8 +4800,8 @@ void klist()
 		if (!i)
 		{
 			G_sprint(self, 2, "Clients list: %s\n", redtext("spectators"));
-			G_sprint(self, 2, "%s %s %s %s\n", redtext("id"), redtext("ad"), redtext("vip"),
-						redtext("co"), redtext("name"));
+			G_sprint(self, 2, "%s %s %s %s %s\n",
+				redtext("id"), redtext("ad"), redtext("vip"), redtext("co"), redtext("name"));
 		}
 
 		track = TrackWhom(p);

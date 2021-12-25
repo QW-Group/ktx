@@ -358,7 +358,7 @@ float AverageTraceAngle(gedict_t *self, qbool debug, qbool report)
 	if (debug)
 	{
 		G_bprint(2, "Current origin: %d %d %d\n", PASSINTVEC3(self->s.v.origin));
-		G_bprint(2, "Current angles: %d %d\n", PASSINTVEC3(self->s.v.angles));
+		G_bprint(2, "Current angles: %d %d\n", PASSINTVEC2(self->s.v.angles));
 	}
 
 	for (i = 0; i < sizeof(angles) / sizeof(angles[0]); ++i)
@@ -397,7 +397,7 @@ float AverageTraceAngle(gedict_t *self, qbool debug, qbool report)
 
 	if (debug)
 	{
-		G_bprint(2, "Best angle: %d\n", best_angle);
+		G_bprint(2, "Best angle: %f\n", best_angle);
 		G_bprint(2, "Total angle: %f\n", avg_angle);
 	}
 

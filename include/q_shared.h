@@ -37,6 +37,14 @@
 #pragma warning(disable : 4267)		// conversion from 'size_t' to 'int', possible loss of data
 #endif
 
+#if defined(__GNUC__)
+#define PRINTF_FUNC( fmtargnumber ) __attribute__ (( format( __printf__, fmtargnumber, fmtargnumber+1 )))
+#define SCANF_FUNC( fmtargnumber ) __attribute__ (( format( __scanf__, fmtargnumber, fmtargnumber+1 )))
+#else
+#define PRINTF_FUNC( fmtargnumber )
+#define SCANF_FUNC( fmtargnumber )
+#endif
+
 /**********************************************************************
  VM Considerations
 
@@ -220,7 +228,7 @@ typedef enum
 	ERR_NEED_CD					// pop up the need-cd dialog
 } errorParm_t;
 // this is only here so the functions in q_shared.c and bg_*.c can link
-void QDECL Com_Error(int level, const char *error, ...);
-void QDECL Com_Printf(const char *msg, ...);
+void QDECL Com_Error(int level, const char *error, ...) PRINTF_FUNC(2);
+void QDECL Com_Printf(const char *msg, ...) PRINTF_FUNC(1);
 
 #endif	// __Q_SHARED_H

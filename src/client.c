@@ -3949,7 +3949,7 @@ void BothPostThink()
 	if (self->need_clearCP && !self->shownick_time && !self->wp_stats_time && !self->sc_stats_time)
 	{
 		self->need_clearCP = 0;
-		G_centerprint(self, ""); // clear center print
+		G_centerprint(self, "%s", ""); // clear center print
 	}
 
 	KickThink();
