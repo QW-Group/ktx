@@ -755,7 +755,7 @@ void InitialiseMarkerRoutes(void)
 	 gedict_t* m = markers[i];
 
 	 if (m) {
-	 Com_Printf ("M %d %d %d \"%s\" %d %d %d %d %d %d\n",
+	 G_Printf ("M %d %d %d \"%s\" %d %d %d %d %d %d\n",
 	 m->fb.index,
 	 m->fb.Z_,
 	 m->fb.G_,
@@ -766,7 +766,7 @@ void InitialiseMarkerRoutes(void)
 
 	 for (j = 0; j < NUMBER_PATHS; ++j) {
 	 if (m->fb.paths[j].next_marker) {
-	 Com_Printf ("P %d %d %d %d\n", m->fb.index, j, m->fb.paths[j].next_marker->fb.index, m->fb.paths[j].flags);
+	 G_Printf ("P %d %d %d %d\n", m->fb.index, j, m->fb.paths[j].next_marker->fb.index, m->fb.paths[j].flags);
 	 }
 	 }
 	 }

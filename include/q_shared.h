@@ -218,17 +218,4 @@ int Q_PrintStrlen(const char *string);
 // removes color sequences from string
 char* Q_CleanStr(char *string);
 
-// parameters to the main Error routine
-typedef enum
-{
-	ERR_FATAL,					// exit the entire game with a popup window
-	ERR_DROP,					// print to console and disconnect from game
-	ERR_SERVERDISCONNECT,		// don't kill server
-	ERR_DISCONNECT,				// client disconnected from the server
-	ERR_NEED_CD					// pop up the need-cd dialog
-} errorParm_t;
-// this is only here so the functions in q_shared.c and bg_*.c can link
-void QDECL Com_Error(int level, const char *error, ...) PRINTF_FUNC(2);
-void QDECL Com_Printf(const char *msg, ...) PRINTF_FUNC(1);
-
 #endif	// __Q_SHARED_H

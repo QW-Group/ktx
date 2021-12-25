@@ -342,7 +342,7 @@ void SetMarkerPath(int source_marker, int path_index, int next_marker)
 
 	if ((markers[source_marker] == NULL) || (markers[next_marker] == NULL))
 	{
-		Com_Printf("Invalid path: %d to %d\n", source_marker, next_marker);
+		G_Printf("Invalid path: %d to %d\n", source_marker, next_marker);
 
 		return;
 	}
@@ -561,7 +561,7 @@ qbool LoadBotRoutingFromFile(void)
 
 			trap_CmdArgv(1, argument, sizeof(argument));
 			mapDeathHeight = atoi(argument);
-			Com_Printf("Set death height to %d\n", mapDeathHeight);
+			G_Printf("Set death height to %d\n", mapDeathHeight);
 		}
 		else if (streq(argument, "SetRocketJumpPathFields"))
 		{

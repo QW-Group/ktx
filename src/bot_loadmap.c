@@ -130,12 +130,12 @@ static void fb_spawn_trigger_teleport(gedict_t *ent)
 {
 	AddToQue(ent);
 
-	//Com_Printf ("fb_trigger_tele([%f %f %f] > [%f %f %f])\n", PASSVEC3 (ent->s.v.mins), PASSVEC3 (ent->s.v.maxs));
+	//G_Printf ("fb_trigger_tele([%f %f %f] > [%f %f %f])\n", PASSVEC3 (ent->s.v.mins), PASSVEC3 (ent->s.v.maxs));
 	VectorSet(ent->fb.virtual_mins, ent->s.v.absmin[0] - 18, ent->s.v.absmin[1] - 18,
 				ent->s.v.absmin[2] - 34);
 	VectorSet(ent->fb.virtual_maxs, ent->s.v.absmax[0] + 18, ent->s.v.absmax[1] + 18,
 				ent->s.v.absmax[2] + 26);
-	//Com_Printf("> virtual [%f %f %f] [%f %f %f]\n", PASSVEC3(ent->fb.virtual_mins), PASSVEC3(ent->fb.virtual_maxs));
+	//G_Printf("> virtual [%f %f %f] [%f %f %f]\n", PASSVEC3(ent->fb.virtual_mins), PASSVEC3(ent->fb.virtual_maxs));
 	setsize(ent, ent->s.v.mins[0] - 32, ent->s.v.mins[1] - 32, ent->s.v.mins[2],
 			ent->s.v.maxs[0] + 32, ent->s.v.maxs[1] + 32, ent->s.v.maxs[2]);
 	VectorSet(ent->s.v.view_ofs, 0.5 * (ent->s.v.absmax[0] - ent->s.v.absmin[0]),

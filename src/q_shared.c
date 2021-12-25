@@ -55,6 +55,8 @@
  float	LittleFloat (const float *l) {return _LittleFloat(l);}
  */
 
+extern void G_Error(const char *fmt, ...) PRINTF_FUNC(1);
+
 short ShortSwap(short l)
 {
 	byte b1, b2;
@@ -253,17 +255,17 @@ void Q_strncpyz(char *dest, const char *src, int destsize)
 	// bk001129 - also NULL dest
 	if (!dest)
 	{
-		Com_Error(ERR_FATAL, "Q_strncpyz: NULL dest");
+		G_Error("Q_strncpyz: NULL dest");
 	}
 
 	if (!src)
 	{
-		Com_Error(ERR_FATAL, "Q_strncpyz: NULL src");
+		G_Error("Q_strncpyz: NULL src");
 	}
 
 	if (destsize < 1)
 	{
-		Com_Error(ERR_FATAL, "Q_strncpyz: destsize < 1");
+		G_Error("Q_strncpyz: destsize < 1");
 	}
 
 	strncpy(dest, src, destsize - 1);
@@ -387,7 +389,7 @@ void Q_strcat(char *dest, int size, const char *src)
 	l1 = strlen(dest);
 	if (l1 >= size)
 	{
-		Com_Error(ERR_FATAL, "Q_strcat: already overflowed");
+		G_Error("Q_strcat: already overflowed");
 	}
 
 	Q_strncpyz(dest + l1, src, size - l1);

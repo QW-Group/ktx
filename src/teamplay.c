@@ -1556,7 +1556,7 @@ void LocationInitialise(void)
 
 	if (file == -1)
 	{
-		Com_Printf("Couldn't load %s.loc\n", mapname);
+		G_Printf("Couldn't load %s.loc\n", mapname);
 
 		return;
 	}
@@ -1630,7 +1630,7 @@ void LocationInitialise(void)
 		}
 	}
 
-	Com_Printf("Loaded %d locations\n", node_count);
+	G_Printf("Loaded %d locations\n", node_count);
 
 	std_fclose(file);
 }
