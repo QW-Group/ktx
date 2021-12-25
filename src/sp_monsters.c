@@ -961,7 +961,7 @@ void monster_start_go(monsterType_t mt)
 		}
 		else
 		{
-			self->pausetime = 99999999;
+			self->pausetime = 10e+32;
 			if (self->th_stand)
 			{
 				self->th_stand();
@@ -970,7 +970,7 @@ void monster_start_go(monsterType_t mt)
 	}
 	else
 	{
-		self->pausetime = 99999999;
+		self->pausetime = 10e+32;
 		if (self->th_stand)
 		{
 			self->th_stand();

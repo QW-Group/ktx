@@ -5815,7 +5815,7 @@ void ktpro_autotrack_predict_powerup(void)
 	}
 
 	best = NULL;
-	best_len = 99999999;
+	best_len = 10e+32;
 
 	for (p = world; (p = find_plr(p));)
 	{
