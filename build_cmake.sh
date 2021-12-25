@@ -1,23 +1,13 @@
 #!/bin/bash
 
-# Useful if you willing to stop on first error, also print what is executed.
+# Useful if you willing to stop on first error, also prints what is executed.
 #set -ex
 
 BUILDIR="${BUILDIR:-build}" # Default build dir.
 
-# Default bot support, CMake already have it as ON,
-# provided here just for possibility to turn it OFF without modification of CMake or this script file.
-BOT_SUPPORT="${BOT_SUPPORT:-ON}"
-
-# If V variable is not empty then provide -v argument to Ninja (verbose output).
-V="${V:-}"
-[ ! -z ${V} ] && V="-v"
-
-rm -rf ${BUILDIR}
-mkdir -p ${BUILDIR}
-
-# Define target platforms, feel free to comment out if you does not require some of it.
-BUILD_LIST=(
+# Define target platforms, feel free to comment out if you does not require some of it,
+# or you can call this script with plaforms list you willing to build on the command line.
+DEFAULT_PLATFORMS=(
 	linux-amd64
 	linux-aarch64
 	linux-armhf
@@ -26,25 +16,43 @@ BUILD_LIST=(
 	windows-x86
 	qvm
 )
+PLATFORMS=("${@:-${DEFAULT_PLATFORMS[@]}}")
 
-# Either use default CMake generator (most of the time its make) or ninja if found.
-CMAKE_GENERATOR=
-if hash ninja >/dev/null 2>&1
-then
-	CMAKE_GENERATOR="-G Ninja"
-fi
+# CMake option for bot support, CMake default used if not specified here.
+BOT_SUPPORT="${BOT_SUPPORT:-}"
+[ ! -z ${BOT_SUPPORT} ] && BOT_SUPPORT="-DBOT_SUPPORT=${BOT_SUPPORT}"
+
+# If V variable is not empty then provide -v argument to cmake --build command (verbose output).
+V="${V:-}"
+[ ! -z ${V} ] && V="-v"
+
+# Overwrite build type with B variable.
+B="${B:-Release}"
+[ ! -z ${B} ] && BUILD="-DCMAKE_BUILD_TYPE=${B}"
+
+# The maximum number of concurrent processes to use when building.
+export CMAKE_BUILD_PARALLEL_LEVEL="${CMAKE_BUILD_PARALLEL_LEVEL:-8}"
+
+# Use specified (with G variable) CMake generator or use default generator (most of the time its make) or ninja if found.
+G="${G:-}"
+[ -z "${G}" ] && hash ninja >/dev/null 2>&1 && G="Ninja"
+[ ! -z "${G}" ] && GENERATOR=("-G" "${G}")
+
+rm -rf ${BUILDIR}
+mkdir -p ${BUILDIR}
 
 # Build platforms one by one.
-for name in "${BUILD_LIST[@]}"; do
-	mkdir -p ${BUILDIR}/$name
-	case "$name" in
+for name in "${PLATFORMS[@]}"; do
+	P="${BUILDIR}/$name"
+	mkdir -p "${P}"
+	case "${name}" in
 	"qvm" ) # Build QVM library.
-		cmake -B ${BUILDIR}/$name -S . -DBOT_SUPPORT=${BOT_SUPPORT} ${CMAKE_GENERATOR}
-		cmake --build ${BUILDIR}/$name --target qvm ${V}
+		cmake -B "${P}" -S . ${BOT_SUPPORT} "${GENERATOR[@]}"
+		cmake --build "${P}" --target qvm ${V}
 	;;
 	* ) # Build native library.
-		cmake -B ${BUILDIR}/$name -S . -DBOT_SUPPORT=${BOT_SUPPORT} -DCMAKE_BUILD_TYPE=Release ${CMAKE_GENERATOR} -DCMAKE_TOOLCHAIN_FILE=tools/cross-cmake/$name.cmake
-		cmake --build ${BUILDIR}/$name ${V}
+		cmake -B "${P}" -S . ${BOT_SUPPORT} ${BUILD} "${GENERATOR[@]}" -DCMAKE_TOOLCHAIN_FILE=tools/cross-cmake/${name}.cmake
+		cmake --build "${P}" ${V}
 	;;
 	esac
 done
