@@ -3,6 +3,8 @@ set(CMAKE_SYSTEM_NAME Windows)
 
 # which compilers to use for C and C++
 set(CMAKE_C_COMPILER i686-w64-mingw32-gcc)
+# Turn off excess precision with -mfpmath=sse -msse2, otherwise KTX compiled with bots will hang.
+set(CMAKE_C_FLAGS "-mfpmath=sse -msse2")
 set(CMAKE_CXX_COMPILER i686-w64-mingw32-g++)
 set(CMAKE_RC_COMPILER i686-w64-mingw32-windres)
 
