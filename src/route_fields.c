@@ -9,7 +9,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 static int subzone_indexes[NUMBER_ZONES] =
 	{ 0 };

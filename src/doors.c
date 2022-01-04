@@ -24,7 +24,6 @@
  */
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 #define DOOR_START_OPEN   1
 #define DOOR_DONT_LINK    4
@@ -203,7 +202,7 @@ void door_fire()
 	do
 	{
 		self->s.v.goalentity = EDICT_TO_PROG(activator);	// Who fired us
-		door_go_up(self);
+		door_go_up();
 		self = PROG_TO_EDICT(self->s.v.enemy);
 	} while ((self != starte) && (self != world));
 

@@ -28,7 +28,6 @@
 //
 //===========================================================================
 #include "g_local.h"
-#include "fb_globals.h"
 
 vec3_t VEC_ORIGIN =
 	{ 0, 0, 0 };
@@ -209,7 +208,7 @@ char nextmap[64] = "";
 
 void set_nextmap(char *map)
 {
-	strlcpy(nextmap, strnull(map) ? g_globalvars.mapname : map, sizeof(nextmap));
+	strlcpy(nextmap, strnull(map) ? mapname : map, sizeof(nextmap));
 }
 
 /*QUAKED info_intermission (1 0.5 0.5) (-16 -16 -16) (16 16 16)
@@ -427,7 +426,7 @@ void SetRespawnParms()
 {
 	if (!deathmatch)
 	{
-		if (streq(g_globalvars.mapname, "start"))
+		if (streq(mapname, "start"))
 		{
 			InGameParams(); // take away all stuff on starting new episode
 		}
@@ -569,7 +568,7 @@ void GotoNextMap()
 		}
 		else
 		{
-			strlcpy(newmap, g_globalvars.mapname, sizeof(newmap));
+			strlcpy(newmap, mapname, sizeof(newmap));
 		}
 	}
 	else
@@ -590,9 +589,9 @@ void GotoNextMap()
 	{
 		changelevel(nextmap);
 	}
-	else if (!strnull(g_globalvars.mapname))
+	else if (!strnull(mapname))
 	{
-		changelevel(g_globalvars.mapname);
+		changelevel(mapname);
 	}
 	else
 	{
@@ -770,7 +769,7 @@ void SP_trigger_changelevel()
 
 	// qqshka: yeah, treat k_remove_end_hurt as hint to remove some shit from this level,
 	//         not only hurt trigger
-	if (streq("end", g_globalvars.mapname) && cvar("k_remove_end_hurt")
+	if (streq("end", mapname) && cvar("k_remove_end_hurt")
 			&& (cvar("k_remove_end_hurt") != 2))
 	{
 		soft_ent_remove(self);
@@ -807,49 +806,49 @@ void NextLevel()
 	}
 	else
 	{
-		set_nextmap(g_globalvars.mapname);
+		set_nextmap(mapname);
 	}
 
 	o = spawn();
-	o->map = g_globalvars.mapname;
+	o->map = mapname;
 	o->classname = "trigger_changelevel";
 	o->think = (func_t) execute_changelevel;
 	o->s.v.nextthink = g_globalvars.time + 0.1;
 
 	/*
-	 if ( streq( g_globalvars.mapname, "start" ) )
+	 if ( streq( mapname, "start" ) )
 	 {
 	 if ( !trap_cvar( "registered" ) )
 	 {
-	 strlcpy( g_globalvars.mapname, "e1m1", sizeof(g_globalvars.mapname) );
+	 strlcpy( mapname, "e1m1", sizeof(mapname) );
 
 	 } else if ( !( ( int ) ( g_globalvars.serverflags ) & 1 ) )
 	 {
-	 strlcpy( g_globalvars.mapname, "e1m1", sizeof(g_globalvars.mapname) );
+	 strlcpy( mapname, "e1m1", sizeof(mapname) );
 	 g_globalvars.serverflags =
 	 ( int ) ( g_globalvars.serverflags ) | 1;
 
 	 } else if ( !( ( int ) ( g_globalvars.serverflags ) & 2 ) )
 	 {
-	 strlcpy( g_globalvars.mapname, "e2m1", sizeof(g_globalvars.mapname) );
+	 strlcpy( mapname, "e2m1", sizeof(mapname) );
 	 g_globalvars.serverflags =
 	 ( int ) ( g_globalvars.serverflags ) | 2;
 
 	 } else if ( !( ( int ) ( g_globalvars.serverflags ) & 4 ) )
 	 {
-	 strlcpy( g_globalvars.mapname, "e3m1", sizeof(g_globalvars.mapname) );
+	 strlcpy( mapname, "e3m1", sizeof(mapname) );
 	 g_globalvars.serverflags =
 	 ( int ) ( g_globalvars.serverflags ) | 4;
 
 	 } else if ( !( ( int ) ( g_globalvars.serverflags ) & 8 ) )
 	 {
-	 strlcpy( g_globalvars.mapname, "e4m1", sizeof(g_globalvars.mapname) );
+	 strlcpy( mapname, "e4m1", sizeof(mapname) );
 	 g_globalvars.serverflags =
 	 ( int ) ( g_globalvars.serverflags ) - 7;
 	 }
 
 	 o = spawn();
-	 o->map = g_globalvars.mapname;
+	 o->map = mapname;
 	 } else
 	 {
 	 // find a trigger changelevel
@@ -857,7 +856,7 @@ void NextLevel()
 	 if ( !o )
 	 {		// go back to same map if no trigger_changelevel
 	 o = spawn();
-	 o->map = g_globalvars.mapname;
+	 o->map = mapname;
 	 }
 	 }
 
@@ -1730,7 +1729,7 @@ void PutClientInServer(void)
 	}
 #ifdef BOT_SUPPORT
 	else if (FrogbotOptionEnabled(FB_OPTION_DEBUG_MOVEMENT) && self->isBot && match_in_progress
-			&& streq(g_globalvars.mapname, "povdmm4"))
+			&& streq(mapname, "povdmm4"))
 	{
 		gedict_t *highest = NULL;
 		for (spot = world; (spot = ez_find(spot, "info_player_deathmatch"));)
@@ -2798,16 +2797,16 @@ void ClientDisconnect()
 		// Change map.
 		if (old_matchless != k_matchLess)
 		{
-			changelevel(g_globalvars.mapname); // force reload current map ASAP!
+			changelevel(mapname); // force reload current map ASAP!
 		}
 		else if (!cvar("lock_practice") && k_practice)
 		{
-			changelevel(g_globalvars.mapname); // force reload current map in practice mode anyway, ASAP
+			changelevel(mapname); // force reload current map in practice mode anyway, ASAP
 		}
 #ifdef BOT_SUPPORT
 		else if (bots_enabled() != old_bots_enabled)
 		{
-			changelevel(g_globalvars.mapname); // need to reload map, dimensions of entities will need to change
+			changelevel(mapname); // need to reload map, dimensions of entities will need to change
 		}
 #endif
 		else
@@ -3950,7 +3949,7 @@ void BothPostThink()
 	if (self->need_clearCP && !self->shownick_time && !self->wp_stats_time && !self->sc_stats_time)
 	{
 		self->need_clearCP = 0;
-		G_centerprint(self, ""); // clear center print
+		G_centerprint(self, "%s", ""); // clear center print
 	}
 
 	KickThink();

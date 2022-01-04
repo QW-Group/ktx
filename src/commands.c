@@ -1411,7 +1411,7 @@ void Init_cmds(void)
 void Do_ShowCmds(qbool adm_req)
 {
 	qbool first = true;
-	int i, l;
+	int i;
 	char *name, dots[64];
 	char arg_1[1024];
 
@@ -1441,11 +1441,6 @@ void Do_ShowCmds(qbool adm_req)
 			continue;
 		}
 
-		l = max_cmd_len - strlen(name);
-		l = bound(0, l, sizeof(dots) - 1);
-		memset((void*) dots, (int)'.', l);
-		dots[l] = 0;
-
 		if (first)
 		{
 			first = false;
@@ -1455,6 +1450,7 @@ void Do_ShowCmds(qbool adm_req)
 						(self->ct == ctSpec ? redtext("spectator") : redtext("player")));
 		}
 
+		make_dots(dots, sizeof(dots), max_cmd_len, name);
 		G_sprint(self, 2, "%s%s %s\n", redtext(name), dots, cmds[i].description);
 	}
 }
@@ -1627,18 +1623,18 @@ void ShowVersion()
 
 	if (strlen(cvar_string("qws_version")))
 	{
-		G_sprint(self, 2, "%s.: %28s\n", redtext("Version"), dig3s(cvar_string("qws_version")));
+		G_sprint(self, 2, "%s.: %28s\n", redtext("Version"), dig3s("%s", cvar_string("qws_version")));
 	}
 
 	if (strlen(cvar_string("qws_buildnum")))
 	{
-		G_sprint(self, 2, "%s...: %26s-%1s\n", redtext("Build"), cvar_string("qws_buildnum"),
+		G_sprint(self, 2, "%s...: %26s-%1.1s\n", redtext("Build"), cvar_string("qws_buildnum"),
 					strlen(cvar_string("qws_platform")) ? cvar_string("qws_platform") : "u");
 	}
 
 	if (strlen(cvar_string("qws_builddate")))
 	{
-		G_sprint(self, 2, "%s....: %28s\n", redtext("Date"), dig3s(cvar_string("qws_builddate")));
+		G_sprint(self, 2, "%s....: %28s\n", redtext("Date"), dig3s("%s", cvar_string("qws_builddate")));
 	}
 
 	if (strlen(cvar_string("qws_homepage")))
@@ -1649,14 +1645,14 @@ void ShowVersion()
 	G_sprint(self, 2, "\n\213\212\212\212\212\212%s\212\212\212\212\212\213\n",
 				"QUAKEWORLD MOD INFORMATION");
 	G_sprint(self, 2, "%s....: %28s\n", redtext("Name"), cvar_string("qwm_fullname"));
-	G_sprint(self, 2, "%s.: %28s\n", redtext("Version"), dig3s(cvar_string("qwm_version")));
+	G_sprint(self, 2, "%s.: %28s\n", redtext("Version"), dig3s("%s", cvar_string("qwm_version")));
 	if (strlen(cvar_string("qwm_buildnum")))
 	{
-		G_sprint(self, 2, "%s...: %26s-%1s\n", redtext("Build"), cvar_string("qwm_buildnum"),
+		G_sprint(self, 2, "%s...: %26s-%1.1s\n", redtext("Build"), cvar_string("qwm_buildnum"),
 					strlen(cvar_string("qwm_platform")) ? cvar_string("qwm_platform") : "u");
 	}
 
-	G_sprint(self, 2, "%s....: %28s\n", redtext("Date"), dig3s(cvar_string("qwm_builddate")));
+	G_sprint(self, 2, "%s....: %28s\n", redtext("Date"), dig3s("%s", cvar_string("qwm_builddate")));
 	G_sprint(self, 2, "%s.: %28s\n", redtext("Webpage"), cvar_string("qwm_homepage"));
 
 	G_sprint(self, 2, "\n%s\n\n%s\n", MOD_RELEASE_QUOTE, redtext(MOD_RELEASE_HASHTAGS));
@@ -4523,14 +4519,14 @@ void UserMode(float umode)
 		G_cprint("%s", buf);
 	}
 
-	cfg_name = va("configs/usermodes/%s.cfg", g_globalvars.mapname);
+	cfg_name = va("configs/usermodes/%s.cfg", mapname);
 	if (can_exec(cfg_name))
 	{
 		trap_readcmd(va("exec %s\n", cfg_name), buf, sizeof(buf));
 		G_cprint("%s", buf);
 	}
 
-	cfg_name = va("configs/usermodes/%s/%s.cfg", um, g_globalvars.mapname);
+	cfg_name = va("configs/usermodes/%s/%s.cfg", um, mapname);
 	if (can_exec(cfg_name))
 	{
 		trap_readcmd(va("exec %s\n", cfg_name), buf, sizeof(buf));
@@ -4585,9 +4581,9 @@ void execute_rules_reset(void)
 	}
 }
 
-// ok, a bit complicated
-// this routine may change map if srv_practice_mode == 0 and mapname is not NULL
-void SetPractice(int srv_practice_mode, const char *mapname)
+// This routine change map if srv_practice_mode == 0 and 'map' is not NULL,
+// empty string mean realod to the current map.
+void SetPractice(int srv_practice_mode, const char *map)
 {
 	if (match_in_progress)
 	{
@@ -4604,9 +4600,10 @@ void SetPractice(int srv_practice_mode, const char *mapname)
 	else
 	{
 		G_bprint(2, "%s\n", redtext("Server in normal mode"));
-		if (mapname) // mapname may be "" i.e empty, reload current map in this case
+		if (map)
 		{
-			changelevel((strnull(mapname) ? g_globalvars.mapname : mapname));
+			// If map equal to "" then reload current map in this case.
+			changelevel((strnull(map) ? mapname : map));
 		}
 	}
 }
@@ -4803,8 +4800,8 @@ void klist()
 		if (!i)
 		{
 			G_sprint(self, 2, "Clients list: %s\n", redtext("spectators"));
-			G_sprint(self, 2, "%s %s %s %s\n", redtext("id"), redtext("ad"), redtext("vip"),
-						redtext("co"), redtext("name"));
+			G_sprint(self, 2, "%s %s %s %s %s\n",
+				redtext("id"), redtext("ad"), redtext("vip"), redtext("co"), redtext("name"));
 		}
 
 		track = TrackWhom(p);
@@ -5818,7 +5815,7 @@ void ktpro_autotrack_predict_powerup(void)
 	}
 
 	best = NULL;
-	best_len = 99999999;
+	best_len = 10e+32;
 
 	for (p = world; (p = find_plr(p));)
 	{
@@ -6436,14 +6433,14 @@ void lastscore_add()
 	if ((current_umode < 10) || (current_umode > 13))
 	{
 		cvar_set(va("__k_ls_s_%d", k_ls),
-				 va("%3d:%-3d \x8D %-8.8s %13.13s%s", s1, s2, g_globalvars.mapname, date, extra));
+				 va("%3d:%-3d \x8D %-8.8s %13.13s%s", s1, s2, mapname, date, extra));
 	}
 	else
 	{
 		cvar_set(va("__k_ls_e3_%d", k_ls), e3);
 		cvar_set(va("__k_ls_t3_%d", k_ls), t3);
 		cvar_set(va("__k_ls_s_%d", k_ls),
-				 va("%3d:%-3d:%-3d \x8D %-8.8s %13.13s%s", s1, s2, s3, g_globalvars.mapname, date, extra));
+				 va("%3d:%-3d:%-3d \x8D %-8.8s %13.13s%s", s1, s2, s3, mapname, date, extra));
 	}
 
 	cvar_fset("__k_ls", ++k_ls % MAX_LASTSCORES);
@@ -6461,7 +6458,7 @@ void lastscore_add()
 		if (cl && !strnull(qtvdate))
 		{
 			stuffcmd(cl, "//finalscores \"%s\" \"%s\" \"%s\" \"%s\" %d \"%s\" %d\n", qtvdate,
-						lastscores2str(lst), g_globalvars.mapname, e1, s1, e2, s2);
+						lastscores2str(lst), mapname, e1, s1, e2, s2);
 		}
 	}
 }
@@ -7108,7 +7105,7 @@ void ToggleInstagib()
 		G_cprint("%s", buf);
 	}
 
-	cfg_name = va("configs/usermodes/instagib/%s.cfg", g_globalvars.mapname);
+	cfg_name = va("configs/usermodes/instagib/%s.cfg", mapname);
 	if (can_exec(cfg_name))
 	{
 		trap_readcmd(va("exec %s\n", cfg_name), buf, sizeof(buf));
@@ -7843,7 +7840,7 @@ void mapcycle()
 		}
 
 		G_sprint(self, 2, "%3.3d | %s%s\n", i + 1, newmap,
-					streq(newmap, g_globalvars.mapname) ? " \x8D current" : "");
+					streq(newmap, mapname) ? " \x8D current" : "");
 	}
 
 	if (!i)
@@ -7991,11 +7988,6 @@ void PausedTic(int duration)
 
 void TogglePause()
 {
-	if (FTE_sv)
-	{
-		return; // unsupported
-	}
-
 	if (!k_matchLess)
 	{
 		// NON matchless
@@ -8077,7 +8069,7 @@ void ToggleArena()
 			G_cprint("%s", buf);
 		}
 
-		cfg_name = va("configs/usermodes/%s/ra/%s.cfg", um, g_globalvars.mapname);
+		cfg_name = va("configs/usermodes/%s/ra/%s.cfg", um, mapname);
 		if (can_exec(cfg_name))
 		{
 			trap_readcmd(va("exec %s\n", cfg_name), buf, sizeof(buf));
@@ -8315,6 +8307,9 @@ static dropitem_spawn_t dropitems[] =
 	{ "fl_b", 	"item_flag_team2", 					0, 1 },
 	{ "sp_r", 	"info_player_team1", 				0, 1, dropitem_spawn_spawnpoint },
 	{ "sp_b", 	"info_player_team2", 				0, 1, dropitem_spawn_spawnpoint },
+	{ "sp_dm", 	"info_player_deathmatch",			0, 1, dropitem_spawn_spawnpoint },
+	{ "sp_cp",	"info_player_coop",					0, 1, dropitem_spawn_spawnpoint },
+	{ "sp_sp",	"info_player_start",				0, 1, dropitem_spawn_spawnpoint },
 };
 
 static const int dropitems_count = sizeof(dropitems) / sizeof(dropitems[0]);

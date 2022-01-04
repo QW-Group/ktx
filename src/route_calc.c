@@ -17,7 +17,6 @@
 // TODO: 5/6/10 have near-identical body, can be ForAllZones(func)
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 typedef qbool (*fb_path_calc_funcref_t)(gedict_t *m, fb_path_t *path);
 extern gedict_t *markers[];
@@ -756,7 +755,7 @@ void InitialiseMarkerRoutes(void)
 	 gedict_t* m = markers[i];
 
 	 if (m) {
-	 Com_Printf ("M %d %d %d \"%s\" %d %d %d %d %d %d\n",
+	 G_Printf ("M %d %d %d \"%s\" %d %d %d %d %d %d\n",
 	 m->fb.index,
 	 m->fb.Z_,
 	 m->fb.G_,
@@ -767,7 +766,7 @@ void InitialiseMarkerRoutes(void)
 
 	 for (j = 0; j < NUMBER_PATHS; ++j) {
 	 if (m->fb.paths[j].next_marker) {
-	 Com_Printf ("P %d %d %d %d\n", m->fb.index, j, m->fb.paths[j].next_marker->fb.index, m->fb.paths[j].flags);
+	 G_Printf ("P %d %d %d %d\n", m->fb.index, j, m->fb.paths[j].next_marker->fb.index, m->fb.paths[j].flags);
 	 }
 	 }
 	 }

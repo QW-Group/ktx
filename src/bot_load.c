@@ -1,7 +1,6 @@
 // Converted from .qc on 05/02/2016
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 #if 0
 

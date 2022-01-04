@@ -24,7 +24,6 @@
  */
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 void Sc_Stats(float on);
 void race_stoprecord(qbool cancel);
@@ -105,6 +104,7 @@ float dist_random(float minValue, float maxValue, float spreadFactor)
 
 void initialise_spawned_ent(gedict_t *ent)
 {
+#if defined(idx64) || defined(PR_ALWAYS_REFS)
 	PR2SetStringFieldOffset(ent, classname);
 	PR2SetStringFieldOffset(ent, model);
 	PR2SetFuncFieldOffset(ent, touch);
@@ -120,6 +120,7 @@ void initialise_spawned_ent(gedict_t *ent)
 	PR2SetStringFieldOffset(ent, noise1);
 	PR2SetStringFieldOffset(ent, noise2);
 	PR2SetStringFieldOffset(ent, noise3);
+#endif
 }
 
 float next_frame()
@@ -2765,4 +2766,20 @@ char* clean_string(char *string)
 	}
 
 	return string;
+}
+
+void visible_to(gedict_t *viewer, gedict_t *first, int len, byte *visible)
+{
+	trap_VisibleTo(NUM_FOR_EDICT(viewer), NUM_FOR_EDICT(first), len, visible);
+}
+
+// Work around for the fact that QVM dos not support ".*s" in printf() family functions.
+// It retuns dots array filled with dots, amount of dots depends of how long cmd name and longest cmd name.
+char* make_dots(char *dots, size_t dots_len, int cmd_max_len, char *cmd)
+{
+	int len = cmd_max_len - strlen(cmd);
+	len = bound(0, len, dots_len - 1);
+	memset((void*) dots, (int)'.', len);
+	dots[len] = 0;
+	return dots;
 }

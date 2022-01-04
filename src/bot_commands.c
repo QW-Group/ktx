@@ -7,7 +7,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 // Handles all "botcmd x" commands from the user
 
@@ -487,7 +486,7 @@ static void FrogbotsDebug(void)
 		}
 		else if (streq(sub_command, "door"))
 		{
-			if (streq(g_globalvars.mapname, "povdmm4"))
+			if (streq(mapname, "povdmm4"))
 			{
 				if (markers[0]->fb.door_entity && markers[4]->fb.door_entity)
 				{
@@ -544,8 +543,15 @@ static void FrogbotsDebug(void)
 			gedict_t *marker = NULL;
 			int i = 0;
 
-			trap_CmdArgv(3, sub_command, sizeof(sub_command));
-			marker = markers[(int)bound(0, atoi(sub_command) - 1, NUMBER_MARKERS - 1)];
+			if (trap_CmdArgc() == 4)
+			{
+				trap_CmdArgv(3, sub_command, sizeof(sub_command));
+				marker = markers[(int)bound(0, atoi(sub_command) - 1, NUMBER_MARKERS - 1)];
+			}
+			else
+			{
+				marker = LocateMarker(self->s.v.origin);
+			}
 
 			if (marker == NULL)
 			{
@@ -876,7 +882,7 @@ static void BotFileGenerate(void)
 	fileHandle_t file;
 	char *entityFile = cvar_string("k_entityfile");
 	char date[64];
-	char fileName[128];
+	char fileName[256];
 	int i;
 
 	if (!QVMstrftime(date, sizeof(date), "%Y%m%d-%H%M%S", 0))
@@ -885,8 +891,8 @@ static void BotFileGenerate(void)
 	}
 
 	snprintf(fileName, sizeof(fileName), "bots/maps/%s[%s].bot",
-				strnull(entityFile) ? g_globalvars.mapname : entityFile, date);
-	file = std_fwopen(fileName);
+				strnull(entityFile) ? mapname : entityFile, date);
+	file = std_fwopen("%s", fileName);
 	if (file == -1)
 	{
 		G_sprint(self, PRINT_HIGH,
@@ -1091,7 +1097,7 @@ void FrogbotEditorMarkerTouched(gedict_t *marker)
 
 static void FrogbotMapInfo(void)
 {
-	if (streq(g_globalvars.mapname, "aerowalk"))
+	if (streq(mapname, "aerowalk"))
 	{
 		gedict_t *quad = ez_find(world, "item_artifact_super_damage");
 		gedict_t *tele_exit = markers[10];
@@ -1759,7 +1765,7 @@ static void FrogbotShowInfo(void)
 		}
 	}
 
-	G_centerprint(self, message);
+	G_centerprint(self, "%s", message);
 	self->fb.last_spec_cp = g_globalvars.time + 0.2;
 }
 
@@ -1847,7 +1853,7 @@ static void FrogbotPathList(void)
 		}
 	}
 
-	G_sprint(self, PRINT_HIGH, message);
+	G_sprint(self, PRINT_HIGH, "%s", message);
 }
 
 static void FrogbotsFillServer(void)
@@ -2153,6 +2159,7 @@ static void PrintAvailableCommands(frogbot_cmd_t *commands, int num_commands)
 {
 	int i;
 	int max_length = 0;
+	char dots[64];
 
 	G_sprint(self, PRINT_HIGH, "Available commands:\n");
 	for (i = 0; i < num_commands; ++i)
@@ -2162,8 +2169,9 @@ static void PrintAvailableCommands(frogbot_cmd_t *commands, int num_commands)
 
 	for (i = 0; i < num_commands; ++i)
 	{
-		G_sprint(self, PRINT_HIGH, "  &cff0%s&cfff %*s%s\n", commands[i].name,
-					max_length - strlen(commands[i].name), "", commands[i].description);
+		make_dots(dots, sizeof(dots), max_length, commands[i].name);
+		G_sprint(self, PRINT_HIGH, "  &cff0%s&cfff %s %s\n", commands[i].name,
+					dots, commands[i].description);
 	}
 }
 
@@ -2305,7 +2313,7 @@ void Bot_Print_Thinking(void)
 								goal->fb.saved_goal_desire) :
 							"(none)"),
 				sizeof(data));
-		if (goal && !strcmp(goal->classname, "player"))
+		if (goal && !streq(goal->classname, "player"))
 		{
 			strlcat(data,
 					va("   %s (touch %d)", goal->netname,
@@ -2414,7 +2422,7 @@ void Bot_Print_Thinking(void)
 
 	if (data[0])
 	{
-		G_centerprint(self, data);
+		G_centerprint(self, "%s", data);
 	}
 
 	self->fb.last_spec_cp = g_globalvars.time + 0.2;

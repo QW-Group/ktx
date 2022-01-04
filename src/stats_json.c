@@ -36,7 +36,7 @@ static void json_player_lgc_stats(fileHandle_t handle, gedict_t *player);
 
 #define SIMPLE_CHECK(handle, any, string) {\
 	if (any) { \
-		s2di(handle, string); \
+		s2di(handle, "%s", string); \
 	} \
 	any = true; \
 }
@@ -220,7 +220,7 @@ static void json_weap_footer(fileHandle_t handle, int num)
 {
 	if (num)
 	{
-		s2di(handle, JSON_CR);
+		s2di(handle, "%s", JSON_CR);
 	}
 
 	s2di(handle, INDENT6 "}," JSON_CR);
@@ -296,7 +296,7 @@ static void json_items_footer(fileHandle_t handle, int item_num)
 {
 	if (item_num)
 	{
-		s2di(handle, "" JSON_CR);
+		s2di(handle, "%s", JSON_CR);
 	}
 
 	s2di(handle, INDENT6 "}");
@@ -311,7 +311,7 @@ void json_players_footer(fileHandle_t handle, int player_count)
 {
 	if (player_count)
 	{
-		s2di(handle, JSON_CR);
+		s2di(handle, "%s", JSON_CR);
 	}
 
 	s2di(handle, INDENT2 "]" JSON_CR);
@@ -442,7 +442,7 @@ void json_player_detail(fileHandle_t handle, int player_num, gedict_t *player, c
 	}
 #endif
 
-	s2di(handle, JSON_CR);
+	s2di(handle, "%s", JSON_CR);
 	s2di(handle, INDENT4 "}");
 }
 
@@ -465,7 +465,7 @@ void json_match_header(fileHandle_t handle, char *ip, int port)
 	s2di(handle, "{" JSON_CR);
 	s2di(handle, INDENT2 "\"version\": %d," JSON_CR, STATS_VERSION_NUMBER);
 	s2di(handle, INDENT2 "\"date\": \"%s\"," JSON_CR, date);
-	s2di(handle, INDENT2 "\"map\": \"%s\"," JSON_CR, json_string(g_globalvars.mapname));
+	s2di(handle, INDENT2 "\"map\": \"%s\"," JSON_CR, json_string(mapname));
 	s2di(handle, INDENT2 "\"hostname\": \"%s\"," JSON_CR,
 			json_string(striphigh(cvar_string("hostname"))));
 	s2di(handle, INDENT2 "\"ip\": \"%s\"," JSON_CR, json_string(ip));

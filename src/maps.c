@@ -483,13 +483,13 @@ void SelectMap()
 	DoSelectMap(atoi(arg_1));
 }
 
-qbool VoteMapSpecific(char *mapname)
+qbool VoteMapSpecific(char *map)
 {
-	int map_num = GetMapNum(mapname);
+	int map_num = GetMapNum(map);
 
 	if (map_num == 0)
 	{
-		G_sprint(self, 2, "Map '%s' not available on this server\n", mapname);
+		G_sprint(self, 2, "Map '%s' not available on this server\n", map);
 
 		return false;
 	}
@@ -612,7 +612,7 @@ char* SelectRandomMap(char *buf, int buf_size)
 		snprintf(mapid, sizeof(mapid), "k_ml_%d", id);
 		trap_cvar_string(mapid, newmap, sizeof(newmap));
 
-		if (streq(g_globalvars.mapname, newmap))
+		if (streq(mapname, newmap))
 		{
 			continue; // same map, lets try again then.
 		}
@@ -650,7 +650,7 @@ char* SelectMapInCycle(char *buf, int buf_size)
 
 	if (!(i = cvar("_k_last_cycle_map")))
 	{
-		if (!(i = IsMapInCycle(g_globalvars.mapname)))
+		if (!(i = IsMapInCycle(mapname)))
 		{ // ok map found in map list, select next map
 			i = 0;
 		}

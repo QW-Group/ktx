@@ -18,7 +18,6 @@
  */
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 void NextLevel();
 void IdlebotForceStart();
@@ -473,13 +472,20 @@ void CheckOvertime()
 	// Therefore, teams != 2 yet and the function doesn't do anything.
 	// This causes matchless CTF to go into perpetual overtime, since "sc = get_scores1() - get_scores2();" calculated below will always return 0.
 	// So, we call this function here to handle this scenario.
+	gedict_t *timer, *ed1, *ed2 ;
+	int teams, players ;
+	int sc;
+	int k_mb_overtime;
+	int k_exttime; 
+
 	SM_PrepareShowscores();
 
-	gedict_t *timer, *ed1 = get_ed_scores1(), *ed2 = get_ed_scores2();
-	int teams = CountTeams(), players = CountPlayers();
-	int sc = get_scores1() - get_scores2();
-	int k_mb_overtime = cvar("k_overtime");
-	int k_exttime = bound(1, cvar("k_exttime"), 999); // at least some reasonable values
+	ed1 = get_ed_scores1(); ed2 = get_ed_scores2();
+	teams = CountTeams();
+	players = CountPlayers();
+	sc = get_scores1() - get_scores2();
+	k_mb_overtime = cvar("k_overtime");
+	k_exttime = bound(1, cvar("k_exttime"), 999); // at least some reasonable values
 
 	// In hoonymode the round is timing out, not the match - we're effectively always in suddendeath mode
 	if (isHoonyModeAny())
@@ -1617,7 +1623,7 @@ void PrintCountdown(int seconds)
 		strlcat(text, "\nno matchtag\n\n\n", sizeof(text));
 	}
 
-	G_cp2all(text);
+	G_cp2all("%s", text);
 }
 
 qbool isCanStart(gedict_t *s, qbool forceMembersWarn)
@@ -1851,7 +1857,7 @@ void TimerStartThink()
 	}
 	else if (self->cnt2 <= 0)
 	{
-		G_cp2all("");
+		G_cp2all("%s", "");
 
 		StartMatch();
 
@@ -2083,12 +2089,12 @@ char* CompilateDemoName()
 
 	if (isRACE())
 	{
-		strlcat(demoname, va("[%s_r%02d]", g_globalvars.mapname, race.active_route),
+		strlcat(demoname, va("[%s_r%02d]", mapname, race.active_route),
 				sizeof(demoname));
 	}
 	else
 	{
-		strlcat(demoname, va("[%s]", g_globalvars.mapname), sizeof(demoname));
+		strlcat(demoname, va("[%s]", mapname), sizeof(demoname));
 	}
 
 	fmt = cvar_string("k_demoname_date");
@@ -2276,7 +2282,7 @@ void StopTimer(int removeDemo)
 	gedict_t *timer, *p;
 
 	if (match_in_progress == 1)
-		G_cp2all(""); // clear center print
+		G_cp2all("%s", ""); // clear center print
 
 	k_force = 0;
 	match_in_progress = 0;

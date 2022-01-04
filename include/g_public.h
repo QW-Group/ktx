@@ -30,7 +30,7 @@
 //
 // g_public.h -- game module information visible to server
 
-#define	GAME_API_VERSION	15
+#define	GAME_API_VERSION	16
 
 //===============================================================
 
@@ -141,6 +141,7 @@ typedef enum
 	G_SETPAUSE,
 	G_SETUSERINFO,
 	G_MOVETOGOAL,
+	G_VISIBLETO,
 } gameImport_t;
 
 // !!! new things comes to end of list !!!

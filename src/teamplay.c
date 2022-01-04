@@ -6,7 +6,6 @@
 // - If client supports it, send raw stats to client and allow it to construct format of message
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 // Time before we forget item (ezquake allows this to be specified)
 #define TOOK_TIMEOUT     5
@@ -403,20 +402,15 @@ static qbool TP_IsItemVisible(item_vis_t *visitem)
 	return false;
 }
 
-unsigned int ClientFlag(gedict_t *client)
-{
-	return ((unsigned int)1 << (NUM_FOR_EDICT(client) - 1));
-}
-
 static gedict_t* TeamplayFindPoint(gedict_t *client)
 {
-	gedict_t *e = world;
+	int i;
 	unsigned long pointflags = ~0U;
 	vec3_t ang;
 	item_vis_t visitem;
-	unsigned int clientflag = ClientFlag(client);
 	float best = -1;
 	gedict_t *bestent = NULL;
+	byte visible[MAX_EDICTS];
 
 	if (deathmatch >= 1 && deathmatch <= 4)
 	{
@@ -438,22 +432,23 @@ static gedict_t* TeamplayFindPoint(gedict_t *client)
 	visitem.viewent = client;
 	VectorAdd(visitem.vieworg, client->s.v.view_ofs, visitem.vieworg); // FIXME: v_viewheight not taken into account
 
-	for (e = world; (e = nextent(e));)
+	visible_to(client, g_edicts, MAX_EDICTS, visible);
+
+	for (i = 0; i < MAX_EDICTS; i++)
 	{
+		gedict_t *e = &g_edicts[i];
 		vec3_t size;
 		float rank;
 
-		if ((e->ct == ctPlayer) && !ISLIVE(e))
+		if (!visible[i])
+			continue;
+
+		if ((e->ct == ctPlayer && !ISLIVE(e)) || e->ct == ctSpec)
 		{
 			continue;
 		}
 
 		if (strnull(e->model))
-		{
-			continue;
-		}
-
-		if (!(e->visclients & clientflag))
 		{
 			continue;
 		}
@@ -870,7 +865,7 @@ static void TeamplayReportPersonalStatus(gedict_t *client)
 // Cmd_AddCommand ("tp_msgsafe", TP_Msg_Safe_f);
 static void TeamplayAreaSecure(gedict_t *client)
 {
-	qbool have_armor = (int)client->s.v.items & IT_ARMOR;
+	qbool have_armor = (int)client->s.v.items & (IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3);
 	qbool have_weapon = (int)client->s.v.items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING);
 	char buffer[128];
 
@@ -1254,18 +1249,21 @@ static void TeamplayEnemyPowerup(gedict_t *client)
 static void TeamplaySetEnemyFlags(gedict_t *client)
 {
 	gedict_t *plr = world;
-	unsigned int clientFlag = ClientFlag(client);
 	int enemy_items = 0;
 	int enemy_count = 0;
 	int friend_count = 0;
-	for (plr = world; (plr = find_plr(plr));)
+	byte visible[MAX_CLIENTS];
+
+	visible_to(client, g_edicts + 1, MAX_CLIENTS, visible);
+
+	for (plr = g_edicts + 1; plr <= g_edicts + MAX_CLIENTS; plr++)
 	{
-		if (plr == client)
+		if (plr == client || plr->ct == ctSpec)
 		{
 			continue;
 		}
 
-		if (!(plr->visclients & clientFlag))
+		if (!visible[plr - (g_edicts + 1)])
 		{
 			continue;
 		}
@@ -1553,12 +1551,12 @@ void LocationInitialise(void)
 
 	if (file == -1)
 	{
-		file = std_fropen("locs/%s.loc", g_globalvars.mapname);
+		file = std_fropen("locs/%s.loc", mapname);
 	}
 
 	if (file == -1)
 	{
-		Com_Printf("Couldn't load %s.loc\n", g_globalvars.mapname);
+		G_Printf("Couldn't load %s.loc\n", mapname);
 
 		return;
 	}
@@ -1607,7 +1605,7 @@ void LocationInitialise(void)
 
 						if (new_length < old_length)
 						{
-							strncpy(name + i, locmacros[j].value, new_length);
+							memmove(name + i, locmacros[j].value, new_length);
 							memmove(name + i + new_length, name + i + old_length,
 									strlen(name + i + old_length) + 1);
 							found = true;
@@ -1632,7 +1630,7 @@ void LocationInitialise(void)
 		}
 	}
 
-	Com_Printf("Loaded %d locations\n", node_count);
+	G_Printf("Loaded %d locations\n", node_count);
 
 	std_fclose(file);
 }
@@ -1689,6 +1687,7 @@ qbool TeamplayMessageByName(gedict_t *client, const char *message)
 void TeamplayMessage(void)
 {
 	int i, max_len = 0;
+	char dots[64];
 
 	if (trap_CmdArgc() == 2)
 	{
@@ -1713,10 +1712,8 @@ void TeamplayMessage(void)
 	G_sprint(self, 2, "Usage:\n");
 	for (i = 0; i < (sizeof(messages) / sizeof(messages[0])); ++i)
 	{
-		int len = max_len - strlen(messages[i].cmdname);
-
-		G_sprint(self, 2, "  &cff0%s&r %.*s %s\n", messages[i].cmdname, len, "................",
-					messages[i].description);
+		make_dots(dots, sizeof(dots), max_len, messages[i].cmdname);
+		G_sprint(self, 2, "  &cff0%s&r %s %s\n", messages[i].cmdname, dots, messages[i].description);
 	}
 }
 

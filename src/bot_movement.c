@@ -1,7 +1,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 #define ARROW_TIME_INCREASE       0.15  // Seconds to advance after NewVelocityForArrow
 #define MIN_DEAD_TIME 0.2f
@@ -359,7 +358,7 @@ float AverageTraceAngle(gedict_t *self, qbool debug, qbool report)
 	if (debug)
 	{
 		G_bprint(2, "Current origin: %d %d %d\n", PASSINTVEC3(self->s.v.origin));
-		G_bprint(2, "Current angles: %d %d\n", PASSINTVEC3(self->s.v.angles));
+		G_bprint(2, "Current angles: %d %d\n", PASSINTVEC2(self->s.v.angles));
 	}
 
 	for (i = 0; i < sizeof(angles) / sizeof(angles[0]); ++i)
@@ -398,7 +397,7 @@ float AverageTraceAngle(gedict_t *self, qbool debug, qbool report)
 
 	if (debug)
 	{
-		G_bprint(2, "Best angle: %d\n", best_angle);
+		G_bprint(2, "Best angle: %f\n", best_angle);
 		G_bprint(2, "Total angle: %f\n", avg_angle);
 	}
 
@@ -429,7 +428,7 @@ void BotSetCommand(gedict_t *self)
 	float msec_since_last = (last_frame_time - self->fb.last_cmd_sent) * 1000;
 	int cmd_msec = (int)msec_since_last;
 	int weapon_script_impulse = 0;
-	int impulse = 0;
+	int impulse = 0, buttons = 0;
 	qbool jumping;
 	qbool firing;
 	vec3_t direction;
@@ -557,8 +556,10 @@ void BotSetCommand(gedict_t *self)
 		impulse = 0;
 	}
 
+	buttons |= (firing ? 1 : 0);
+	buttons |= (jumping ? 2 : 0);
 	trap_SetBotCMD(NUM_FOR_EDICT(self), cmd_msec, PASSVEC3(self->fb.desired_angle),
-					PASSVEC3(direction), (firing ? 1 : 0) | (jumping ? 2 : 0), impulse);
+					PASSVEC3(direction), buttons, impulse);
 
 	self->fb.next_impulse = 0;
 	self->fb.botchose = false;

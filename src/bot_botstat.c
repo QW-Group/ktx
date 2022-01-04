@@ -7,7 +7,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 // FIXME: Copy/paste from combat.c
 #ifndef Q3_VM

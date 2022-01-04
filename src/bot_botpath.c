@@ -11,7 +11,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 void DM3CampLogic();
 void DM4CampLogic();
@@ -438,15 +437,15 @@ void ProcessNewLinkedMarker(gedict_t *self)
 	// FIXME: Map specific waiting points
 	if (!self->fb.debug_path)
 	{
-		if (streq(g_globalvars.mapname, "dm3"))
+		if (streq(mapname, "dm3"))
 		{
 			DM3CampLogic();
 		}
-		else if (streq(g_globalvars.mapname, "dm4"))
+		else if (streq(mapname, "dm4"))
 		{
 			DM4CampLogic();
 		}
-		else if (streq(g_globalvars.mapname, "dm6"))
+		else if (streq(mapname, "dm6"))
 		{
 			DM6CampLogic();
 		}

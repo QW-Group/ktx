@@ -37,6 +37,14 @@
 #pragma warning(disable : 4267)		// conversion from 'size_t' to 'int', possible loss of data
 #endif
 
+#if defined(__GNUC__)
+#define PRINTF_FUNC( fmtargnumber ) __attribute__ (( format( __printf__, fmtargnumber, fmtargnumber+1 )))
+#define SCANF_FUNC( fmtargnumber ) __attribute__ (( format( __scanf__, fmtargnumber, fmtargnumber+1 )))
+#else
+#define PRINTF_FUNC( fmtargnumber )
+#define SCANF_FUNC( fmtargnumber )
+#endif
+
 /**********************************************************************
  VM Considerations
 
@@ -55,9 +63,19 @@
 
 #ifdef Q3_VM
 
+// QVM does not have such thing as visibility, using empty value to make compiler happy.
+#define VISIBILITY_VISIBLE
+
 #include "bg_lib.h"
 
 #else
+
+// Visibility for native library.
+#ifdef _WIN32
+	#define VISIBILITY_VISIBLE __declspec(dllexport)
+#else
+	#define VISIBILITY_VISIBLE __attribute__((visibility("default")))
+#endif
 
 #include <assert.h>
 #include <math.h>
@@ -199,18 +217,5 @@ void Q_strcat(char *dest, int size, const char *src);
 int Q_PrintStrlen(const char *string);
 // removes color sequences from string
 char* Q_CleanStr(char *string);
-
-// parameters to the main Error routine
-typedef enum
-{
-	ERR_FATAL,					// exit the entire game with a popup window
-	ERR_DROP,					// print to console and disconnect from game
-	ERR_SERVERDISCONNECT,		// don't kill server
-	ERR_DISCONNECT,				// client disconnected from the server
-	ERR_NEED_CD					// pop up the need-cd dialog
-} errorParm_t;
-// this is only here so the functions in q_shared.c and bg_*.c can link
-void QDECL Com_Error(int level, const char *error, ...);
-void QDECL Com_Printf(const char *msg, ...);
 
 #endif	// __Q_SHARED_H

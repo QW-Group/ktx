@@ -103,6 +103,10 @@ float max(float a, float b);
 float bound(float a, float b, float c);
 //#define bound(a,b,c) ((a) >= (c) ? (a) : (b) < (a) ? (a) : (b) > (c) ? (c) : (b))
 
+//used for bots and combat
+#define PASSINTVEC3(x) ((int)x[0]),((int)x[1]),((int)x[2])
+#define PASSSCALEDINTVEC3(x,y) ((int)(x[0]*y)),((int)(x[1]*y)),((int)(x[2]*y))
+
 #if defined(DEBUG) || defined(_DEBUG)
 #define DebugTrap(x) *(char**)0=x
 #else
@@ -134,6 +138,7 @@ extern qbool FTE_sv; // is we run on FTE server
 
 extern gameData_t gamedata;
 extern gedict_t g_edicts[];
+extern char mapname[64];
 extern globalvars_t g_globalvars;
 extern gedict_t *world;
 extern gedict_t *self, *other;
@@ -145,8 +150,8 @@ extern int sv_extensions;
 #define	EDICT_TO_PROG(e) ((byte *)(e) - (byte *)g_edicts)
 #define PROG_TO_EDICT(e) ((gedict_t *)((byte *)g_edicts + (e)))
 
-void G_Printf(const char *fmt, ...);
-void G_Error(const char *fmt, ...);
+void G_Printf(const char *fmt, ...) PRINTF_FUNC(1);
+void G_Error(const char *fmt, ...) PRINTF_FUNC(1);
 
 #define PASSVEC3(x) (x[0]),(x[1]),(x[2])
 #define SetVector(v,x,y,z) (v[0]=x,v[1]=y,v[2]=z)
@@ -173,6 +178,30 @@ typedef enum
 	lsHM,
 	lsRACE
 } lsType_t; // lastscores type
+
+#ifdef FTESV
+// Spike:
+// Extension builtins.
+// The order of these don't matter (qqshka: what about QVM builds? look g_syscalls.asm, we need something similar for extensions I guess),
+// they'll be blindly assigned to slots without conflicting with extras other engines try to add to core.
+// They do need indexes that don't conflict with gameImport_t though.
+#define G_EXTENSIONS_FIRST 256
+enum
+{
+	G_SETEXTFIELD = G_EXTENSIONS_FIRST,
+	G_GETEXTFIELD,
+	G_CHANGELEVEL_HUB,
+	G_URI_QUERY,
+	G_PARTICLEEFFECTNUM,
+	G_TRAILPARTICLES,
+	G_POINTPARTICLES,
+	G_CLIENTSTAT,
+	G_POINTERSTAT,
+	G_EXTENSIONS_LAST
+};
+extern qbool haveextensiontab[G_EXTENSIONS_LAST-G_EXTENSIONS_FIRST];
+#define HAVEEXTENSION(idx) haveextensiontab[(idx) - G_EXTENSIONS_FIRST]
+#endif
 
 #define DEATHTYPE( _dt_, _dt_str_ ) _dt_,
 typedef enum
@@ -212,26 +241,26 @@ float vectoyaw(vec3_t value1);
 void vectoangles(vec3_t value1, vec3_t ret);
 void changeyaw(gedict_t *ent);
 
-char* va(char *format, ...);
+char* va(char *format, ...) PRINTF_FUNC(1);
 char* redtext(char *format);
 char* cleantext(char *format);
 char* dig3(int d);
-char* dig3s(const char *format, ...);
+char* dig3s(const char *format, ...) PRINTF_FUNC(1);
 char* striphigh(char *format);
 char* stripcaps(char *format);
 
-void G_sprint(gedict_t *ed, int level, const char *fmt, ...);
-void G_sprint_flags(gedict_t *ed, int level, int flags, const char *fmt, ...);
-void G_bprint(int level, const char *fmt, ...);
-void G_bprint_flags(int level, int flags, const char *fmt, ...);
-void G_centerprint(gedict_t *ed, const char *fmt, ...);
+void G_sprint(gedict_t *ed, int level, const char *fmt, ...)  PRINTF_FUNC(3);
+void G_sprint_flags(gedict_t *ed, int level, int flags, const char *fmt, ...)  PRINTF_FUNC(4);
+void G_bprint(int level, const char *fmt, ...)  PRINTF_FUNC(2);
+void G_bprint_flags(int level, int flags, const char *fmt, ...) PRINTF_FUNC(3);
+void G_centerprint(gedict_t *ed, const char *fmt, ...) PRINTF_FUNC(2);
 /* centerprint too all clients */
-void G_cp2all(const char *fmt, ...);
+void G_cp2all(const char *fmt, ...) PRINTF_FUNC(1);
 
-void G_cprint(const char *fmt, ...);
-void G_dprint(const char *fmt, ...);
+void G_cprint(const char *fmt, ...) PRINTF_FUNC(1);
+void G_dprint(const char *fmt, ...) PRINTF_FUNC(1);
 
-void localcmd(const char *fmt, ...);
+void localcmd(const char *fmt, ...) PRINTF_FUNC(1);
 
 int streq(const char *s1, const char *s2);
 int strneq(const char *s1, const char *s2);
@@ -256,8 +285,8 @@ void TraceCapsule(float v1_x, float v1_y, float v1_z, float v2_x, float v2_y, fl
 					int nomonst, gedict_t *ed, float min_x, float min_y, float min_z, float max_x,
 					float max_y, float max_z);
 
-void stuffcmd(gedict_t *ed, const char *fmt, ...);
-void stuffcmd_flags(gedict_t *ed, int flags, const char *fmt, ...);
+void stuffcmd(gedict_t *ed, const char *fmt, ...) PRINTF_FUNC(2);
+void stuffcmd_flags(gedict_t *ed, int flags, const char *fmt, ...) PRINTF_FUNC(3);
 int droptofloor(gedict_t *ed);
 int walkmove(gedict_t *ed, float yaw, float dist);
 int movetogoal(float dist);
@@ -402,6 +431,12 @@ void safe_precache_sound(char *name);
 char* cl_ip(gedict_t *p);
 
 char* clean_string(char *s);
+
+void visible_to(gedict_t *viewer, gedict_t *first, int len, byte *visible);
+
+// Work around for the fact that QVM dos not support ".*s" in printf() family functions.
+// It retuns dots array filled with dots, amount of dots depends of how long cmd name and longest cmd name.
+char* make_dots(char *dots, size_t dots_len, int cmd_max_len, char *cmd);
 
 //
 // subs.c
@@ -566,8 +601,8 @@ void CTF_Obituary(gedict_t *targ, gedict_t *attacker);
 void CTF_CheckFlagsAsKeys(void);
 
 // logs.c
-void log_open(const char *fmt, ...);
-void log_printf(const char *fmt, ...);
+void log_open(const char *fmt, ...) PRINTF_FUNC(1);
+void log_printf(const char *fmt, ...) PRINTF_FUNC(1);
 void log_close(void);
 
 extern fileHandle_t log_handle;
@@ -621,7 +656,7 @@ void Init_cmds(void);
 
 void StuffModCommands(gedict_t *p);
 
-void SetPractice(int srv_practice_mode, const char *mapname);
+void SetPractice(int srv_practice_mode, const char *map);
 
 void execute_rules_reset(void);
 
@@ -828,7 +863,7 @@ int GetMapNum(char *mapname);
 void DoSelectMap(int iMap);
 void SelectMap();
 void VoteMap();
-qbool VoteMapSpecific(char *mapname);
+qbool VoteMapSpecific(char *map);
 
 // match.c
 
@@ -1101,12 +1136,12 @@ void LaunchLaser(vec3_t org, vec3_t vec);
 qbool bots_enabled();
 
 // files
-fileHandle_t std_fropen(const char *fmt, ...);
-fileHandle_t std_fwopen(const char *fmt, ...);
+fileHandle_t std_fropen(const char *fmt, ...) PRINTF_FUNC(1);
+fileHandle_t std_fwopen(const char *fmt, ...) PRINTF_FUNC(1);
 int std_fgetc(fileHandle_t handle);
 char* std_fgets(fileHandle_t handle, char *buf, int limit);
 void std_fclose(fileHandle_t handle);
-void std_fprintf(fileHandle_t handle, const char *fmt, ...);
+void std_fprintf(fileHandle_t handle, const char *fmt, ...) PRINTF_FUNC(2);
 
 // teamplay
 void TeamplayEventItemTaken(gedict_t *client, gedict_t *item);
@@ -1119,6 +1154,8 @@ qbool SameTeam(gedict_t *p1, gedict_t *p2);
 
 #ifndef BOT_SUPPORT
 #define bots_enabled() (false)
+#else
+#include "fb_globals.h"
 #endif
 
 #define LGCMODE_VARIABLE "k_lgcmode"

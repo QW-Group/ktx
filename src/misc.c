@@ -129,7 +129,7 @@ void SP_light_globe()
 	makestatic(self);
 }
 
-void FireAmbient()
+void FireAmbient(gedict_t *self)
 {
 	trap_precache_sound("ambience/fire1.wav");
 // attenuate fast

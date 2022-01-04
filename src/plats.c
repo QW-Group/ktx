@@ -24,7 +24,6 @@
  */
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 void plat_center_touch();
 void plat_outside_touch();

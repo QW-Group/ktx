@@ -335,3 +335,5 @@ enum
 #define SV_EXTENSIONS_MVDHIDDEN			2
 
 #define MVDHIDDEN_DMGDONE_SPLASHDAMAGE	(1 << 15)
+
+#define CLIENT_NAME_LEN					32		// Maximum client name, same value as in server.

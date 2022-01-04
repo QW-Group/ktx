@@ -12,7 +12,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 #define PERIODIC_MM2_STATUS 4
 
@@ -23,23 +22,28 @@ int weapon_impulse_codes[] =
 	{ 0, IT_AXE, IT_SHOTGUN, IT_SUPER_SHOTGUN, IT_NAILGUN, IT_SUPER_NAILGUN, IT_GRENADE_LAUNCHER,
 			IT_ROCKET_LAUNCHER, IT_LIGHTNING };
 
-void TeamplayReportVisiblePowerups(gedict_t *player)
+void TeamplayReportVisiblePowerups(gedict_t *self)
 {
-	unsigned int clientFlag = ClientFlag(player);
+	byte visible[MAX_CLIENTS];
 	gedict_t *opponent;
 
-	// Assumes that visclients match
-	for (opponent = world; (opponent = find_plr(opponent));)
-	{
-		qbool diff_team = opponent->k_teamnum != player->k_teamnum;
-		qbool powerups = (int)opponent->s.v.items & (IT_QUAD | IT_INVULNERABILITY);
-		qbool visible = (opponent->visclients & clientFlag);
+	if (FUTURE(last_mm2_spot_attempt))
+		return;
+	self->fb.last_mm2_spot_attempt = g_globalvars.time + 0.5 + g_random() * 0.2; // Don't burn CPU with frequent visible_to() calls.
 
-		if (diff_team && powerups && visible && (opponent->fb.last_mm2_spot < g_globalvars.time))
+	visible_to(self, g_edicts + 1, MAX_CLIENTS, visible);
+
+	for (opponent = g_edicts + 1; opponent <= g_edicts + MAX_CLIENTS; opponent++)
+	{
+		qbool diff_team = opponent->k_teamnum != self->k_teamnum;
+		qbool powerups = (int)opponent->s.v.items & (IT_QUAD | IT_INVULNERABILITY);
+
+		if (diff_team && powerups && opponent->ct == ctPlayer
+			&& visible[opponent - (g_edicts + 1)] && (opponent->fb.last_mm2_spot < g_globalvars.time))
 		{
 			if (VisibleEntity(opponent))
 			{
-				TeamplayMessageByName(player, "enemypwr");
+				TeamplayMessageByName(self, "enemypwr");
 				opponent->fb.last_mm2_spot = g_globalvars.time + 2;
 				break;
 			}
@@ -265,6 +269,8 @@ void BotOutOfWater(gedict_t *self)
 {
 	return;
 
+// qqshka: meag turned it off for some reason. I commented it out completely so compiler does not emit warnings.
+#if 0
 	if (self->s.v.waterlevel == 2)
 	{
 		vec3_t start;
@@ -304,6 +310,7 @@ void BotOutOfWater(gedict_t *self)
 			}
 		}
 	}
+#endif
 }
 
 static void BotPeriodicMessages(gedict_t *self)

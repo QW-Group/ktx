@@ -35,7 +35,7 @@ void PMOTDThink()
 	{
 		if (self->attack_finished < g_globalvars.time)
 		{
-			G_centerprint(PROG_TO_EDICT(self->s.v.owner), "");
+			G_centerprint(PROG_TO_EDICT(self->s.v.owner), "%s", "");
 		}
 
 		ent_remove(self);

@@ -10,7 +10,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 // A lot of this is the bot 'cheating'?..
 #define ARROW_TIME_AFTER_TELEPORT 0.20  // was 0.5
@@ -637,9 +636,8 @@ static void ObstructionLogic(gedict_t *self, vec3_t new_velocity)
 
 static void DumpDebugLines(char lines[10][128], int count, const char *explanation)
 {
+#if 0
 	int i;
-
-	return;
 
 	for (i = 0; i < count; ++i)
 	{
@@ -647,6 +645,7 @@ static void DumpDebugLines(char lines[10][128], int count, const char *explanati
 	}
 
 	G_bprint(PRINT_HIGH, "    %s\n", explanation);
+#endif
 }
 
 static void AvoidHazardsOnGround(gedict_t *self, float hor_speed, vec3_t new_origin,

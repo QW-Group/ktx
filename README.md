@@ -124,6 +124,51 @@ Known issues:
 
 - When changing architecture builds, for example for arm, apt-get will install/remove conflicting packages. Don't be surprised that you compile ``linux-amd64``, then ``linux-armv7hl`` and then back ``linux-amd64`` and it does not work because files are missing :)
 
+### Build from source with CMake
+
+Assuming you have installed essential build tools and ``CMake``
+```bash
+mkdir build && cmake -B build . && cmake --build build
+```
+Build artifacts would be inside ``build/`` directory, for unix like systems it would be ``qwprogs.so``.
+
+You can also use ``build_cmake.sh`` script, it mostly suitable for cross compilation
+and probably useless for experienced CMake user.
+Some examples:
+```
+./build_cmake.sh linux-amd64
+```
+should build KTX for ``linux-amd64`` platform, release version, check [cross-cmake](tools/cross-cmake) directory for all platforms
+
+```
+B=Debug ./build_cmake.sh linux-amd64
+```
+should build KTX for linux-amd64 platform with debug
+
+```
+V=1 B=Debug ./build_cmake.sh linux-amd64
+```
+should build KTX for linux-amd64 platform with debug, verbose (useful if you need validate compiler flags)
+
+```
+V=1 B=Debug BOT_SUPPORT=OFF ./build_cmake.sh linux-amd64
+```
+
+same as above but compile without bot support
+
+```
+G="Unix Makefiles" ./build_cmake.sh linux-amd64
+```
+
+force CMake generator to be unix makefiles
+
+```
+./build_cmake.sh linux-amd64 qvm
+```
+
+build KTX for ``linux-amd64`` and ``QVM`` version, you can provide
+any platform combinations.
+
 ## Versioning
 
 For the versions available, see the [tags on this repository][ktx-tags].

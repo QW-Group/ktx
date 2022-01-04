@@ -9,7 +9,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 void button_use();
 void fd_secret_use(gedict_t *attacked, float take);

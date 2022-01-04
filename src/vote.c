@@ -459,7 +459,7 @@ int vote_get_maps()
 void vote_check_map()
 {
 	int vt_req;
-	char *mapname;
+	char *map;
 
 	vt_req = get_votes_req(OV_MAP, true);
 	if (maps_voted_idx < 0)
@@ -467,8 +467,8 @@ void vote_check_map()
 		return;
 	}
 
-	mapname = GetMapName(maps_voted[maps_voted_idx].map_id);
-	if (strnull(mapname))
+	map = GetMapName(maps_voted[maps_voted_idx].map_id);
+	if (strnull(map))
 	{
 		return;
 	}
@@ -485,7 +485,7 @@ void vote_check_map()
 
 	G_bprint(2, "%s votes for mapchange.\n", redtext("Majority"));
 	vote_clear(OV_MAP);
-	changelevel(mapname);
+	changelevel(map);
 }
 
 void vote_check_break()
@@ -972,19 +972,19 @@ void vote_check_coop()
 		}
 
 		// and reload map
-		if (coop && can_exec(va("configs/usermodes/matchless/%s.cfg", g_globalvars.mapname)))
+		if (coop && can_exec(va("configs/usermodes/matchless/%s.cfg", mapname)))
 		{
 			// Force the config to be executed
 			force_map_reset = true;
-			changelevel(g_globalvars.mapname);
+			changelevel(mapname);
 		}
 		else if (cvar("k_bloodfest"))
 		{
-			changelevel(coop ? g_globalvars.mapname : cvar_string("k_defmap"));
+			changelevel(coop ? mapname : cvar_string("k_defmap"));
 		}
 		else
 		{
-			changelevel(coop ? "start" : g_globalvars.mapname);
+			changelevel(coop ? "start" : mapname);
 		}
 
 		return;
@@ -1310,8 +1310,7 @@ void private_game_toggle(qbool enable)
 			if (!p->isBot && p->ready && !is_logged_in(p))
 			{
 				p->ready = 0;
-				G_bprint(PRINT_HIGH, "%s is no longer ready\n", p->netname,
-							redtext("is no longer ready"));
+				G_bprint(PRINT_HIGH, "%s is no longer ready\n", p->netname);
 			}
 
 			if (force_reconnect && !is_logged_in(p))

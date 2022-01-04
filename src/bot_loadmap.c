@@ -9,7 +9,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 static qbool map_supported = false;
 
@@ -131,12 +130,12 @@ static void fb_spawn_trigger_teleport(gedict_t *ent)
 {
 	AddToQue(ent);
 
-	//Com_Printf ("fb_trigger_tele([%f %f %f] > [%f %f %f])\n", PASSVEC3 (ent->s.v.mins), PASSVEC3 (ent->s.v.maxs));
+	//G_Printf ("fb_trigger_tele([%f %f %f] > [%f %f %f])\n", PASSVEC3 (ent->s.v.mins), PASSVEC3 (ent->s.v.maxs));
 	VectorSet(ent->fb.virtual_mins, ent->s.v.absmin[0] - 18, ent->s.v.absmin[1] - 18,
 				ent->s.v.absmin[2] - 34);
 	VectorSet(ent->fb.virtual_maxs, ent->s.v.absmax[0] + 18, ent->s.v.absmax[1] + 18,
 				ent->s.v.absmax[2] + 26);
-	//Com_Printf("> virtual [%f %f %f] [%f %f %f]\n", PASSVEC3(ent->fb.virtual_mins), PASSVEC3(ent->fb.virtual_maxs));
+	//G_Printf("> virtual [%f %f %f] [%f %f %f]\n", PASSVEC3(ent->fb.virtual_mins), PASSVEC3(ent->fb.virtual_maxs));
 	setsize(ent, ent->s.v.mins[0] - 32, ent->s.v.mins[1] - 32, ent->s.v.mins[2],
 			ent->s.v.maxs[0] + 32, ent->s.v.maxs[1] + 32, ent->s.v.maxs[2]);
 	VectorSet(ent->s.v.view_ofs, 0.5 * (ent->s.v.absmax[0] - ent->s.v.absmin[0]),
@@ -338,7 +337,7 @@ static void CustomiseFrogbotMap(void)
 	gedict_t *ent = NULL;
 
 	// KTX may have added a quad, so to keep routes compatible with PR1-version, we add it as a marker after others
-	if (streq(g_globalvars.mapname, "aerowalk") && !FrogbotOptionEnabled(FB_OPTION_EDITOR_MODE))
+	if (streq(mapname, "aerowalk") && !FrogbotOptionEnabled(FB_OPTION_EDITOR_MODE))
 	{
 		gedict_t *quad = ez_find(world, "item_artifact_super_damage");
 		if (quad)
@@ -362,7 +361,7 @@ static void CustomiseFrogbotMap(void)
 	}
 
 	// We stopped it from removing the telespawn earlier on...
-	if (!cvar("k_end_tele_spawn") && streq("end", g_globalvars.mapname))
+	if (!cvar("k_end_tele_spawn") && streq("end", mapname))
 	{
 		vec3_t TS_ORIGIN =
 			{ -392, 608, 40 }; // tele spawn
@@ -486,7 +485,7 @@ qbool FrogbotsCheckMapSupport(void)
 {
 	if (!map_supported && self)
 	{
-		G_sprint(self, 2, "Map %s not supported for bots\n", g_globalvars.mapname);
+		G_sprint(self, 2, "Map %s not supported for bots\n", mapname);
 	}
 
 	return map_supported;

@@ -8,7 +8,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 #define BOT_DROWN_SAFETY_TIME           2  // Time before air running out that the bot starts searching for air
 

@@ -10,7 +10,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 static float unstick_time = 0;
 static qbool no_bots_stuck = 0;

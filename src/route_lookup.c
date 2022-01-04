@@ -9,7 +9,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 float SubZoneArrivalTime(float zone_time, gedict_t *middle_marker, gedict_t *from_marker,
 							qbool rl_routes)

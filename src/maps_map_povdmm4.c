@@ -3,7 +3,6 @@
 #ifdef BOT_SUPPORT
 
 #include "g_local.h"
-#include "fb_globals.h"
 
 qbool BotDoorIsClosed(gedict_t *door);
 
@@ -11,7 +10,7 @@ qbool BotDoorIsClosed(gedict_t *door);
 //        should know that the path is blocked, rather than thinking "bot doesn't want yellow armour"
 qbool POVDMM4DontWalkThroughDoor(gedict_t *goal_entity)
 {
-	if (!streq(g_globalvars.mapname, "povdmm4"))
+	if (!streq(mapname, "povdmm4"))
 	{
 		return false;
 	}

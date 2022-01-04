@@ -59,7 +59,7 @@ void InitTrigger()
 // to mean no restrictions, so use a yaw of 360 instead.
 	if (!VectorCompareF(self->s.v.angles, 0, 0, 0))
 	{
-		SetMovedir(self);
+		SetMovedir();
 	}
 
 	self->s.v.solid = SOLID_TRIGGER;
