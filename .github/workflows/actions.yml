@@ -6,7 +6,7 @@ jobs:
     strategy:
       matrix:
 #        target: [linux-amd64, linux-i686, linux-armhf, linux-aarch64, windows-x64, windows-x86]
-        target: [linux-amd64, linux-i686]
+        target: [linux-amd64]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
