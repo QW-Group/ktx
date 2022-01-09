@@ -20,37 +20,6 @@ jobs:
              pip3 install -r requirements.txt
       - name: Build
         run: |
-             meson build-${{ matrix.target }} --buildtype=release --cross-file tools/cross-compilation/${{ matrix.target }}.txt
-             ninja -v -C build-
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             
-             ${{ matrix.target }}
+             venv/bin/meson build-${{ matrix.target }} --buildtype=release --cross-file tools/cross-compilation/${{ matrix.target }}.txt
+             ninja -v -C build-${{ matrix.target }}
              
