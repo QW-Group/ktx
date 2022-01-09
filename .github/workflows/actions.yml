@@ -14,5 +14,5 @@ jobs:
              . .venv/bin/activate
              pip3 install --upgrade pip
              pip3 install -r requirements.txt
-             meson build --cross-file tools/cross-compilation/linux-amd64.txt
+             meson build-linux-amd64 --cross-file tools/cross-compilation/linux-amd64.txt
              ninja -C build-linux-amd64
