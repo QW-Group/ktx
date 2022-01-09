@@ -1,0 +1,19 @@
+name: actions
+on: [push, pull_request]
+  branches:
+    - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build
+        run: sudo apt-get update
+             sudo apt-get -y install build-essential python3-virtualenv python3-dev python3-pip ninja-build cmake gcc-multilib
+             virtualenv .venv --python=python3
+             . .venv/bin/activate
+             pip3 install --upgrade pip
+             pip3 install -r requirements.txt
+             meson build --cross-file tools/cross-compilation/linux-amd64.txt
+             ninja -C build-linux-amd64
