@@ -3,10 +3,13 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [linux-amd64, linux-i686, linux-armhf, linux-aarch64, windows-x64, windows-x86]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Build
+      - name: Prepare
         run: |
              sudo apt-get update
              sudo apt-get -y install build-essential python3-virtualenv python3-dev python3-pip ninja-build cmake gcc-multilib
@@ -14,5 +17,8 @@ jobs:
              . .venv/bin/activate
              pip3 install --upgrade pip
              pip3 install -r requirements.txt
-             meson build-linux-amd64 --cross-file tools/cross-compilation/linux-amd64.txt
-             ninja -C build-linux-amd64
+      - name: Build
+        run: |
+             meson build${{ matrix.target }} --buildtype=release --cross-file tools/cross-compilation/${{ matrix.target }}.txt
+             ninja -v -C build${{ matrix.target }}
+             
