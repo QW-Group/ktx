@@ -5,7 +5,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: [linux-amd64, linux-i686, linux-armhf, linux-aarch64, windows-x64, windows-x86]
+#        target: [linux-amd64, linux-i686, linux-armhf, linux-aarch64, windows-x64, windows-x86]
+        target: [linux-amd64, linux-i686]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -19,6 +20,37 @@ jobs:
              pip3 install -r requirements.txt
       - name: Build
         run: |
-             meson build${{ matrix.target }} --buildtype=release --cross-file tools/cross-compilation/${{ matrix.target }}.txt
-             ninja -v -C build${{ matrix.target }}
+             meson build-${{ matrix.target }} --buildtype=release --cross-file tools/cross-compilation/${{ matrix.target }}.txt
+             ninja -v -C build-
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             ${{ matrix.target }}
              
