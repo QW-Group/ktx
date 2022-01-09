@@ -20,6 +20,7 @@ jobs:
       - name: Prepare2
         if: ${{ matrix.target }}==linux-armhf
         run: sudo apt-get -y install gcc-arm-linux-gnueabihf pkg-config-arm-linux-gnueabihf libc6-dev-armhf-cross
+      - name: Prepare3
         if: ${{ matrix.target }}==linux-aarch64
         run: sudo apt-get -y install gcc-aarch64-linux-gnu libc6-dev-arm64-cross
       - name: Build
