@@ -28,5 +28,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.target }}
-          path: build-${{ matrix.target }}/qwprogs.so build-${{ matrix.target }}/qwprogs.dll
-          if-no-files-found: ignore
+          path: build-${{ matrix.target }}/qwprogs.*
