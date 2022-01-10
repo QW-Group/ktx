@@ -1,4 +1,4 @@
-name: actions
+name: build-all-targets
 on: [push, pull_request]
 jobs:
   build:
