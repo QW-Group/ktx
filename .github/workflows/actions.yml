@@ -24,9 +24,9 @@ jobs:
         run: |
              ./.venv/bin/meson build-${{ matrix.target }} --buildtype=release --cross-file tools/cross-compilation/${{ matrix.target }}.txt
              ninja -v -C build-${{ matrix.target }}
-      - name: Upload
+      - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.target }}
-          if: contains(${{ matrix.target}}, 'linux')
-          path: build-${{ matrix.target }}/qwprogs.so
+          path: build-${{ matrix.target }}/qwprogs.so build-${{ matrix.target }}/qwprogs.dll
+          if-no-files-found: ignore
