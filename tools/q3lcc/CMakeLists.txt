@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.4.0)
 
 project(q3lcc C)
 
-add_executable(lburg lburg/gram.c lburg/lburg.c)
+add_executable(lburg lburg.dir/gram.c lburg.dir/lburg.c)
 target_include_directories(lburg  PRIVATE "lburg ")
 
 set(DAGCHECK_SRC dagcheck.c)

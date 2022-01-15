@@ -12,6 +12,8 @@ Release_*/
 *.sdf
 *.user
 ./Makefile
+./tools/q3lcc/Makefile
+./tools/q3asm/Makefile
 config.log
 config.status
 src/Makefile.dl
