@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.4.0)
 
 project(q3lcc C)
 
-add_executable(lburg lburg/gram.c lburg/lburg.c)
-target_include_directories(lburg  PRIVATE "lburg ")
+add_executable(q3lburg lburg/gram.c lburg/lburg.c)
+target_include_directories(q3lburg PRIVATE "lburg")
 
 set(DAGCHECK_SRC dagcheck.c)
 set(RCC_SOURCES
@@ -39,8 +39,8 @@ set(RCC_SOURCES
     )
 
 add_custom_command(OUTPUT ${DAGCHECK_SRC}
-    COMMAND lburg "${CMAKE_CURRENT_SOURCE_DIR}/src/dagcheck.md" ${DAGCHECK_SRC}
-        DEPENDS lburg 
+        COMMAND q3lburg "${CMAKE_CURRENT_SOURCE_DIR}/src/dagcheck.md" ${DAGCHECK_SRC}
+        DEPENDS q3lburg "${CMAKE_CURRENT_SOURCE_DIR}/src/dagcheck.md"
     )
 add_executable(q3rcc ${RCC_SOURCES} ${DAGCHECK_SRC})
 target_include_directories (q3rcc PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
