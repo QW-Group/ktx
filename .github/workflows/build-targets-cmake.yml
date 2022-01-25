@@ -1,4 +1,4 @@
-name: build-targets-cmake
+name: build all targets with cmake
 on: [push, pull_request]
 jobs:
   build:
@@ -24,6 +24,6 @@ jobs:
         with:
           name: ${{ matrix.target }}
           path: |
-                build-${{ matrix.target }}/qwprogs.so
-                build-${{ matrix.target }}/qwprogs.dll
+                build/${{ matrix.target }}/qwprogs.so
+                build/${{ matrix.target }}/qwprogs.dll
           if-no-files-found: ignore

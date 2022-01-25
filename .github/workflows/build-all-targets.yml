@@ -1,4 +1,4 @@
-name: build-all-targets
+name: build all targets with meson+ninja
 on: [push, pull_request]
 jobs:
   build:
