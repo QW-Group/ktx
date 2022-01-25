@@ -2,9 +2,9 @@
 set(CMAKE_SYSTEM_NAME Linux)
 
 # which compilers to use for C and C++
-set(CMAKE_C_COMPILER x86_64-linux-gnu-gcc)
+set(CMAKE_C_COMPILER i686-linux-gnu-gcc)
 # Turn off excess precision with -mfpmath=sse -msse2, otherwise KTX compiled with bots will hang.
-set(CMAKE_C_FLAGS "-m32 -mfpmath=sse -msse2")
+set(CMAKE_C_FLAGS "-mfpmath=sse -msse2")
 #set(CMAKE_CXX_COMPILER x86_64-linux-gnu-g++)
 #set(CMAKE_CXX_FLAGS -m32)
 
