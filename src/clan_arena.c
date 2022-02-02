@@ -112,6 +112,7 @@ void CA_PutClientInServer(void)
 	if (match_in_progress == 2)
 	{
 		int items;
+		char *color;
 
 		self->s.v.ammo_nails = 200;
 		self->s.v.ammo_shells = 100;
@@ -144,17 +145,54 @@ void CA_PutClientInServer(void)
 
 		// default to spawning with rl
 		self->s.v.weapon = IT_ROCKET_LAUNCHER;
+
+		// if team is red of blue, set color to match
+		if (streq(getteam(self), "red") || streq(getteam(self), "blue"))
+		{
+			color = streq(getteam(self), "red") ? "4" : "13";
+		}
+		else if (streq(cvar_string("_k_team1"), "red") || streq(cvar_string("_k_team2"), "red"))
+		{
+			color = "13";
+		}
+		else if (streq(cvar_string("_k_team1"), "blue") || streq(cvar_string("_k_team2"), "blue"))
+		{
+			color = "4";
+		}
+		else 
+		{
+			color = streq(cvar_string("_k_team1"), getteam(self)) ? "4" : "13";
+		}
+
+		SetUserInfo(self, "topcolor", color, 0);
+		SetUserInfo(self, "bottomcolor", color, 0);
+		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "color %s\n", color);
 	}
 
 	// set to ghost if dead
 	if (ISDEAD(self))
 	{
 		self->s.v.solid = SOLID_NOT;
-		self->s.v.movetype = MOVETYPE_NOCLIP;
+		self->s.v.movetype = MOVETYPE_NOCLIP;d
+
+		self->s.v.ammo_nails = 0;
+		self->s.v.ammo_shells = 0;
+		self->s.v.ammo_rockets = 0;
+		self->s.v.ammo_cells = 0;
+
+		self->s.v.armorvalue = 0;
+		self->s.v.armortype = 0;
+		self->s.v.health = 100;
+		self->s.v.items = 0;
 		self->vw_index = 0;
 		setmodel(self, "");
 
 		setorigin(self, PASSVEC3(self->s.v.origin));
+
+		// Change color to white if dead
+		SetUserInfo(self, "topcolor", "0", 0);
+		SetUserInfo(self, "bottomcolor", "0", 0);
+		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "color %s\n", "0");
 	}
 }
 
