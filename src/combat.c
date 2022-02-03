@@ -452,7 +452,7 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 		{
 			return;
 		}
-	}a
+	}
 
 	if (isCA())
 	{

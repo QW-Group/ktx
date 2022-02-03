@@ -1189,7 +1189,7 @@ void PlayerDie()
 	}
 
 	if ((self->s.v.health < -40) || (dtSQUISH == self->deathtype) || (dtSUICIDE == self->deathtype)
-			|| isRA() || isCA())
+			|| isRA())
 	{
 		GibPlayer();
 
