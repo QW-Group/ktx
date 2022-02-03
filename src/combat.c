@@ -452,17 +452,25 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 		{
 			return;
 		}
-	}
+	}a
 
-	// ignore almost all damage in CA while coutdown
-	if (isCA() && match_in_progress && (ra_match_fight != 2))
+	if (isCA())
 	{
-		if (!(dtTELE1 == targ->deathtype	// always do tele damage
+		if (dtWATER_DMG == targ->deathtype		// No drowning in CA
+				|| dtFALL == targ->deathtype)	// No fall damage in CA
+		{
+			return;
+		}
+		// ignore almost all damage in CA while coutdown
+		else if (match_in_progress && (ra_match_fight != 2))
+		{
+			if (!(dtTELE1 == targ->deathtype	// always do tele damage
 				|| dtTELE2 == targ->deathtype	// always do tele damage
 				|| dtTELE3 == targ->deathtype	// always do tele damage
 				|| dtSUICIDE == targ->deathtype)) // do suicide damage anyway
-		{
-			return;
+			{
+				return;
+			}
 		}
 	}
 

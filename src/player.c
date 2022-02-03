@@ -850,7 +850,7 @@ void player_pain(struct gedict_s *attacker, float take)
 
 	if (isCA() && streq(getteam(self), getteam(attacker)))
 	{
-		return;
+		return; // No pain when shooting teammates in CA
 	}
 
 	if (self->s.v.weaponframe)
