@@ -146,7 +146,7 @@ void CA_PutClientInServer(void)
 		// default to spawning with rl
 		self->s.v.weapon = IT_ROCKET_LAUNCHER;
 
-		// if team is red of blue, set color to match
+		// if team is red or blue, set color to match
 		if (streq(getteam(self), "red") || streq(getteam(self), "blue"))
 		{
 			color = streq(getteam(self), "red") ? "4" : "13";
@@ -173,7 +173,7 @@ void CA_PutClientInServer(void)
 	if (ISDEAD(self))
 	{
 		self->s.v.solid = SOLID_NOT;
-		self->s.v.movetype = MOVETYPE_NOCLIP;d
+		self->s.v.movetype = MOVETYPE_NOCLIP;
 
 		self->s.v.ammo_nails = 0;
 		self->s.v.ammo_shells = 0;
