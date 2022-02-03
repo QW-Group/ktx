@@ -848,6 +848,11 @@ void player_pain(struct gedict_s *attacker, float take)
 		return; // no pain at all in prewar
 	}
 
+	if (isCA() && streq(getteam(self), getteam(attacker)))
+	{
+		return;
+	}
+
 	if (self->s.v.weaponframe)
 	{
 		return;
