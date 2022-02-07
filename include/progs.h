@@ -1040,10 +1040,10 @@ typedef struct gedict_s
 // }
 
 // { Clan Arena
+	struct gedict_s *track_target;			// who are we tracking?
 	qbool ca_alive;
 	qbool in_play;							// is player still fighting?
 	int tracking_enabled;
-	int track_index;
 // }
 
 // {

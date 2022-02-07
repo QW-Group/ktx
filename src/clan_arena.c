@@ -64,32 +64,6 @@ static char ca_settings[] = "k_clan_arena_rounds 9\n"
 		"k_dmgfrags 1\n"
 		"k_noitems 1\n";
 
-static gedict_t* find_chasecam_for_plr(gedict_t *observer, gedict_t *player)
-{
-	if (observer->track_index)
-	{
-		int player_num = observer->track_index;
-
-		if ((player_num >= 1) && (player_num <= MAX_CLIENTS))
-		{
-			gedict_t *tracked = &g_edicts[player_num];
-			while (tracked && (tracked->ct == ctPlayer) && tracked->in_play)
-			{
-				tracked = ca_find_player(tracked);
-			}
-
-			if (tracked)
-			{
-				player = tracked;
-			}
-		}
-	}
-
-	observer->track_index = NUM_FOR_EDICT(player);
-
-	return player;
-}
-
 void track_player(gedict_t *observer)
 {
 	gedict_t *player = ca_get_player();
@@ -103,9 +77,12 @@ void track_player(gedict_t *observer)
 		return;
 	}
 
-	if (!self->in_play && observer->tracking_enabled)
+	if (!observer->in_play && observer->tracking_enabled)
 	{
-		player = find_chasecam_for_plr(observer, player);
+		if (observer->track_target && observer->track_target->in_play)
+		{
+			player = observer->track_target;
+		}
 
 		// { spectate in 1st person
 		follow_distance = -10;
@@ -185,7 +162,7 @@ void enable_player_tracking(gedict_t *e, int follow)
 			return;
 		}
 
-		G_sprint(self, 2, "Your %s is now %s\n", redtext("chasecam"), redtext("enabled"));
+		G_sprint(self, 2, "tracking %s\n" redtext("enabled"));
 		e->tracking_enabled = 1;
 	}
 	else
@@ -195,7 +172,7 @@ void enable_player_tracking(gedict_t *e, int follow)
 			return;
 		}
 
-		G_sprint(self, 2, "Your %s is now %s\n", redtext("chasecam"), redtext("disabled"));
+		G_sprint(self, 2, "tracking %s\n", redtext("disabled"));
 
 		e->tracking_enabled = 0;
 		SetVector(e->s.v.velocity, 0, 0, 0);
@@ -547,26 +524,27 @@ static void track_player_next(gedict_t *observer)
 		return;
 	}
 
-	if (observer->track_index && (g_edicts[observer->track_index].ct != ctPlayer))
+	if (observer->track_target && ((observer->track_target)->ct != ctPlayer))
 	{
-		observer->track_index = NUM_FOR_EDICT(player);
+		observer->track_target = player;
 	}
 
-	if (!observer->track_index)
+	if (!observer->track_target)
 	{
-		observer->track_index = NUM_FOR_EDICT(player);
+		observer->track_target = player;
 	}
 	else
 	{
-		player = ca_find_player(&g_edicts[observer->track_index]);
+		player = ca_find_player(observer->track_target);
 		if (!player)
 		{
 			player = first_player;
 		}
 
-		observer->track_index = NUM_FOR_EDICT(player);
+		observer->track_target = player;
 	}
 
+	G_sprint(self, 2, "Tracking: %s\n", redtext(player->netname));
 }
 
 void CA_player_pre_think(void)
