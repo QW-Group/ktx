@@ -11,6 +11,22 @@ static int pause_count;
 static int pause_time;
 static int round_pause;
 
+gedict_t* ca_find_player(gedict_t *p)
+{
+	p = find_plr(p);
+	while (p && !p->in_play)
+	{
+		p = find_plr(p);
+	}
+
+	return p;
+}
+
+gedict_t* ca_get_player(void)
+{
+	return ca_find_player(world);
+}
+
 qbool is_rules_change_allowed(void);
 
 void SM_PrepareCA(void)
@@ -47,6 +63,178 @@ static char ca_settings[] = "k_clan_arena_rounds 9\n"
 		"k_spw 1\n"
 		"k_dmgfrags 1\n"
 		"k_noitems 1\n";
+
+static gedict_t* find_chasecam_for_plr(gedict_t *observer, gedict_t *player)
+{
+	if (observer->track_index)
+	{
+		int player_num = observer->track_index;
+
+		if ((player_num >= 1) && (player_num <= MAX_CLIENTS))
+		{
+			gedict_t *tracked = &g_edicts[player_num];
+			while (tracked && (tracked->ct == ctPlayer) && tracked->in_play)
+			{
+				tracked = ca_find_player(tracked);
+			}
+
+			if (tracked)
+			{
+				player = tracked;
+			}
+		}
+	}
+
+	observer->track_index = NUM_FOR_EDICT(player);
+
+	return player;
+}
+
+void track_player(gedict_t *observer)
+{
+	gedict_t *player = ca_get_player();
+	vec3_t delta;
+	float vlen;
+	int follow_distance;
+	int upward_distance;
+
+	if (!player) 
+	{
+		return;
+	}
+
+	if (!self->in_play && observer->tracking_enabled)
+	{
+		player = find_chasecam_for_plr(observer, player);
+
+		// { spectate in 1st person
+		follow_distance = -10;
+		upward_distance = 0;
+		observer->hideentity = EDICT_TO_PROG(player); // in this mode we want to hide player model for watcher's view
+		VectorCopy(player->s.v.v_angle, observer->s.v.angles);
+		// }
+
+		observer->s.v.fixangle = true; // force client v_angle (disable in 3rd person view)
+
+		trap_makevectors(player->s.v.angles);
+		VectorMA(player->s.v.origin, follow_distance, g_globalvars.v_forward, observer->s.v.origin);
+		VectorMA(observer->s.v.origin, upward_distance, g_globalvars.v_up, observer->s.v.origin);
+
+		// avoid positionning in walls
+		traceline(PASSVEC3(player->s.v.origin), PASSVEC3(observer->s.v.origin), false, player);
+		VectorCopy(g_globalvars.trace_endpos, observer->s.v.origin);
+
+		if (g_globalvars.trace_fraction == 1)
+		{
+			VectorCopy(g_globalvars.trace_endpos, observer->s.v.origin);
+			VectorMA(observer->s.v.origin, 10, g_globalvars.v_forward, observer->s.v.origin);
+		}
+		else
+		{
+			VectorSubtract(g_globalvars.trace_endpos, player->s.v.origin, delta);
+			vlen = VectorLength(delta);
+			vlen = vlen - 40;
+			VectorNormalize(delta);
+			VectorScale(delta, vlen, delta);
+			VectorAdd(player->s.v.origin, delta, observer->s.v.origin);
+		}
+
+		// set observer's health/armor/ammo/weapon to match the player's
+		observer->s.v.ammo_nails = player->s.v.ammo_nails;
+		observer->s.v.ammo_shells = player->s.v.ammo_shells;
+		observer->s.v.ammo_rockets = player->s.v.ammo_rockets;
+		observer->s.v.ammo_cells = player->s.v.ammo_cells;
+		observer->s.v.currentammo = player->s.v.currentammo;
+		observer->s.v.armorvalue = player->s.v.armorvalue;
+		observer->s.v.armortype = player->s.v.armortype;
+		observer->s.v.health = player->s.v.health;
+		observer->s.v.items = player->s.v.items;
+		observer->s.v.weapon = player->s.v.weapon;
+		observer->weaponmodel = player->weaponmodel;
+		observer->s.v.weaponframe = player->s.v.weaponframe;
+
+		// smooth playing for ezq / zq
+		observer->s.v.movetype = MOVETYPE_LOCK;
+	}
+
+	if (!observer->tracking_enabled)
+	{
+		// restore movement and show racer entity
+		observer->s.v.movetype = MOVETYPE_NOCLIP;
+		observer->hideentity = 0;
+
+		// set health/item values back to nothing
+		observer->s.v.ammo_nails = 0;
+		observer->s.v.ammo_shells = 0;
+		observer->s.v.ammo_rockets = 0;
+		observer->s.v.ammo_cells = 0;
+		observer->s.v.currentammo = 0;
+		observer->s.v.armorvalue = 0;
+		observer->s.v.armortype = 0;
+		observer->s.v.health = 100;
+		observer->s.v.items = 0;
+	}
+}
+
+void enable_player_tracking(gedict_t *e, int follow)
+{
+	if (follow)
+	{
+		if (e->tracking_enabled)
+		{
+			return;
+		}
+
+		G_sprint(self, 2, "Your %s is now %s\n", redtext("chasecam"), redtext("enabled"));
+		e->tracking_enabled = 1;
+	}
+	else
+	{
+		if (!e->tracking_enabled)
+		{
+			return;
+		}
+
+		G_sprint(self, 2, "Your %s is now %s\n", redtext("chasecam"), redtext("disabled"));
+
+		e->tracking_enabled = 0;
+		SetVector(e->s.v.velocity, 0, 0, 0);
+	}
+}
+
+void r_changetrackingstatus(float t)
+{
+	switch ((int)t)
+	{
+		case 1: // rfollow
+			enable_player_tracking(self, 1);
+			return;
+
+		case 2: // rnofollow
+			enable_player_tracking(self, 0);
+			return;
+
+		case 3: // rftoggle
+			enable_player_tracking(self, !self->tracking_enabled);
+			return;
+
+		default:
+			return;
+	}
+}
+
+void ClanArenaTrackingToggleButton(void)
+{
+	if (!(((int)(self->s.v.flags)) & FL_ATTACKRELEASED))
+	{
+		return;
+	}
+
+	self->s.v.flags = (int)self->s.v.flags & ~FL_ATTACKRELEASED;
+
+	r_changetrackingstatus((float) 3);
+}
+
 
 void apply_CA_settings(void)
 {
@@ -143,8 +331,14 @@ void CA_PutClientInServer(void)
 		self->super_damage_finished = 0;
 		// }
 
+		// must reset this to 0 or spectated player from 
+		// previous round will be invisible
+		self->hideentity = 0;
+
 		// default to spawning with rl
 		self->s.v.weapon = IT_ROCKET_LAUNCHER;
+
+		self->in_play = true;
 
 		// if team is red or blue, set color to match
 		if (streq(getteam(self), "red") || streq(getteam(self), "blue"))
@@ -174,19 +368,17 @@ void CA_PutClientInServer(void)
 	{
 		self->s.v.solid = SOLID_NOT;
 		self->s.v.movetype = MOVETYPE_NOCLIP;
-
-		self->s.v.ammo_nails = 0;
-		self->s.v.ammo_shells = 0;
-		self->s.v.ammo_rockets = 0;
-		self->s.v.ammo_cells = 0;
+		self->vw_index = 0;
 
 		self->s.v.armorvalue = 0;
-		self->s.v.armortype = 0;
 		self->s.v.health = 100;
-		self->s.v.items = 0;
-		self->vw_index = 0;
-		setmodel(self, "");
 
+		// tracking enabled by default
+		self->tracking_enabled = 1;
+
+		self->in_play = false;
+
+		setmodel(self, "");
 		setorigin(self, PASSVEC3(self->s.v.origin));
 
 		// Change color to white if dead
@@ -343,6 +535,87 @@ void EndRound(int alive_team)
 			ra_match_fight = 1; // disable firing
 		}
 	}
+}
+
+static void track_player_next(gedict_t *observer)
+{
+	gedict_t *first_player = ca_get_player();
+	gedict_t *player = first_player;
+
+	if (!first_player)
+	{
+		return;
+	}
+
+	if (observer->track_index && (g_edicts[observer->track_index].ct != ctPlayer))
+	{
+		observer->track_index = NUM_FOR_EDICT(player);
+	}
+
+	if (!observer->track_index)
+	{
+		observer->track_index = NUM_FOR_EDICT(player);
+	}
+	else
+	{
+		player = ca_find_player(&g_edicts[observer->track_index]);
+		if (!player)
+		{
+			player = first_player;
+		}
+
+		observer->track_index = NUM_FOR_EDICT(player);
+	}
+
+}
+
+void CA_player_pre_think(void)
+{
+	if (isCA())
+	{
+		// Set this player to solid so we trigger checkpoints & teleports during move
+		self->s.v.solid = (ISDEAD(self) ? SOLID_NOT : SOLID_SLIDEBOX);
+		
+		if ((self->s.v.mins[0] == 0) || (self->s.v.mins[1] == 0))
+		{
+			// This can happen if the world 'squashes' a SOLID_NOT entity, mvdsv will turn into corpse
+			setsize(self, PASSVEC3(VEC_HULL_MIN), PASSVEC3(VEC_HULL_MAX));
+		}
+
+		setorigin(self, PASSVEC3(self->s.v.origin));
+
+		if ((self->ct == ctPlayer) && ISDEAD(self))
+		{
+			if (self->tracking_enabled)
+			{
+				if (self->s.v.button2)
+				{
+					if (((int)(self->s.v.flags)) & FL_JUMPRELEASED)
+					{
+				 		self->s.v.flags = (int)self->s.v.flags & ~FL_JUMPRELEASED;
+
+						track_player_next(self);
+					}
+				}
+				else
+				{
+					self->s.v.flags = ((int)(self->s.v.flags)) | FL_JUMPRELEASED;
+				}
+			}
+		}
+	}
+}
+
+void CA_player_post_think(void)
+{
+	if (isCA())
+	{
+		if (ra_match_fight > 0 && !self->in_play)
+		{
+			track_player(self);
+		}
+	}
+	
 }
 
 void CA_Frame(void)

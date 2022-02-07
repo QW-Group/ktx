@@ -838,6 +838,8 @@ void SM_PrepareCA(void);
 void apply_CA_settings(void);
 void CA_PrintScores(void);
 void CA_TeamsStats(void);
+void CA_player_pre_think(void);
+void CA_player_post_think(void);
 void CA_Frame(void);
 void CA_PutClientInServer(void);
 qbool CA_can_fire(gedict_t *p);

@@ -1041,6 +1041,9 @@ typedef struct gedict_s
 
 // { Clan Arena
 	qbool ca_alive;
+	qbool in_play;							// is player still fighting?
+	int tracking_enabled;
+	int track_index;
 // }
 
 // {

@@ -3566,6 +3566,8 @@ void PlayerPreThink()
 
 	}
 
+	CA_player_pre_think();
+
 	race_player_pre_think();
 
 // brokenankle included here
@@ -4193,6 +4195,8 @@ void PlayerPostThink()
 #endif
 
 	W_WeaponFrame();
+
+	CA_player_post_think();
 
 	race_player_post_think();
 

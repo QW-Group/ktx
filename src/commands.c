@@ -264,6 +264,7 @@ static void dumpent();
 
 // { Clan Arena
 void ToggleCArena();
+void r_changetrackingstatus(float t);
 // }
 
 // { Frogbots
