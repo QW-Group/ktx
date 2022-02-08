@@ -836,6 +836,7 @@ qbool isCA();
 int CA_wins_required(void);
 void SM_PrepareCA(void);
 void apply_CA_settings(void);
+void CA_ClientObituary(gedict_t *targ, gedict_t *attacker);
 void CA_PrintScores(void);
 void CA_TeamsStats(void);
 void CA_player_pre_think(void);

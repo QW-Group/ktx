@@ -4751,6 +4751,13 @@ void ClientObituary(gedict_t *targ, gedict_t *attacker)
 		return;
 	}
 
+	if (isCA())
+	{
+		CA_ClientObituary(targ, attacker);
+
+		return;
+	}
+
 	if (k_bloodfest && !targ->ready)
 	{
 		return; // someone connecting during round of bloodfest and got pseudo death.

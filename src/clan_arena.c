@@ -380,6 +380,42 @@ qbool CA_can_fire(gedict_t *p)
 	return (ISLIVE(p) && (ra_match_fight == 2) && time_to_start && (g_globalvars.time >= time_to_start));
 }
 
+void CA_ClientObituary(gedict_t *targ, gedict_t *attacker)
+{
+	int ah, aa;
+
+	if (!isCA())
+	{
+		return;
+	}
+
+	if (targ->ct != ctPlayer)
+	{
+		return; // so below targ is player
+	}
+
+	if (attacker->ct != ctPlayer)
+	{
+		attacker = targ; // seems killed self
+	}
+
+	ah = attacker->s.v.health;
+	aa = attacker->s.v.armorvalue;
+
+	if (attacker->ct == ctPlayer)
+	{
+		if (attacker != targ)
+		{
+			if ((ah == 100) && (aa == 200))
+			{
+				G_bprint(PRINT_HIGH, "%s %s %d %s %d %s\n",
+							attacker->netname, redtext("had"), aa,
+							redtext("armor and"), ah, redtext("health"));
+			}
+		}
+	}
+}
+
 // return 0 if there no alive teams
 // return 1 if there one alive team and alive_team point to 1 or 2 wich refering to _k_team1 or _k_team2 cvars
 // return 2 if there at least two alive teams
