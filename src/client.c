@@ -971,12 +971,12 @@ void ClientKill()
 		return;
 	}
 
-	/*
-	 if ( isCA() && match_in_progress && ra_match_fight != 2 ) {
-	 G_sprint (self, PRINT_HIGH, "Can't suicide in CA mode while coutdown\n");
-	 return;
-	 }
-	 */
+	if (isCA() && match_in_progress && ra_match_fight != 2) 
+	{
+		G_sprint (self, PRINT_HIGH, "Can't suicide during coutdown\n");
+
+		return;
+	}
 
 	if (isCTF() && (match_in_progress == 2) && ((g_globalvars.time - match_start_time) < 10))
 	{
