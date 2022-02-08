@@ -464,10 +464,14 @@ void CA_TeamsStats(void)
 
 void EndRound(int alive_team)
 {
+	gedict_t *p;
+	static int last_count;
+	
 	if(!round_pause)
 	{
 		round_pause = 1;
-		pause_time = g_globalvars.time + 6;
+		last_count = 999999999;
+		pause_time = g_globalvars.time + 8;
 
 		if (alive_team == 1)
 		{
@@ -486,11 +490,12 @@ void EndRound(int alive_team)
 		round_pause = 0;
 		round_num++;
 		ra_match_fight = 0;
-		G_cp2all("round %d", round_num);
 	}
-	else 
+	else if (pause_count != last_count)
 	{
-		if (pause_count < 6)
+		last_count = pause_count;
+
+		if (pause_count < 8)
 		{
 			if (alive_team == 0)
 			{
@@ -507,7 +512,32 @@ void EndRound(int alive_team)
 						cvar_string(va("_k_team%d", alive_team))); // CA_wins_required
 			}
 		}
-		if (pause_count < 5)
+
+		if (pause_count == 7)
+		{
+			for (p = world; (p = find_plr(p));)
+			{
+				if (streq(getteam(p), cvar_string(va("_k_team%d", alive_team))))
+				{
+					stuffcmd(p, "play misc/flagcap.wav\n");
+				}
+
+				if (streq(getteam(p), cvar_string(va("_k_team%d", alive_team))) && p->in_play)
+				{
+					if (streq(ezinfokey(p, "topcolor"), "13") && streq(ezinfokey(p, "bottomcolor"), "13"))
+					{
+						p->super_time = 8;
+						p->super_damage_finished = 8;
+					}
+					else
+					{
+						p->s.v.items += IT_INVULNERABILITY;
+					}
+				}
+			}
+		}
+
+		if (pause_count < 4)
 		{
 			ra_match_fight = 1; // disable firing
 		}
@@ -665,8 +695,11 @@ void CA_Frame(void)
 		{
 			char *fight = redtext("FIGHT!");
 
-			// TODO replace RA sounds (but world precached)
-			//sound (world, CHAN_AUTO + CHAN_NO_PHS_ADD, "ra/fight.wav", 1, ATTN_NONE);
+			for (p = world; (p = find_client(p));)
+			{
+				stuffcmd(p, "play ca/sffight.wav\n");
+			}
+			
 			G_cp2all("%s", fight);
 
 			ra_match_fight = 2;
@@ -678,22 +711,34 @@ void CA_Frame(void)
 		{
 			last_r = r;
 
-			if (r < 6)
-			{
-				// TODO replace RA sounds (but world precached)
-				//sound (world, CHAN_AUTO + CHAN_NO_PHS_ADD, va("ra/%d.wav", r), 1, ATTN_NONE);
-				for (p = world; (p = find_client(p));)
-				{
-					stuffcmd(p, "play buttons/switch04.wav\n");
-				}
-			}
-
 			if (r < 6) // was 11
 			{
+				for (p = world; (p = find_client(p));)
+				{
+					stuffcmd(p, "play ca/sf%d.wav\n", r);
+				}
+				
 				G_cp2all("%d\n\n"
 							"\x90%s\x91:%s \x90%s\x91:%s",
 							r, cvar_string("_k_team1"), dig3(team1_score), cvar_string("_k_team2"),
 							dig3(team2_score)); // CA_wins_required
+			}
+
+			if (r == 6)
+			{
+				for (p = world; (p = find_client(p));)
+				{
+					stuffcmd(p, "play ca/sf%d.wav\n", round_num);
+				}
+			}
+
+			if (r == 7)
+			{
+				for (p = world; (p = find_client(p));)
+				{
+					stuffcmd(p, "play ca/sfround.wav\n");
+				}
+				G_cp2all("round %d", round_num);
 			}
 		}
 	}
