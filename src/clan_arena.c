@@ -499,8 +499,13 @@ void EndRound(int alive_team)
 		{
 			if (alive_team == 0)
 			{
-				//G_bprint(2, "%s\n", redtext("draw"));
+				G_bprint(2, "%s\n", redtext("round draw"));
 				G_cp2all("Round draw!");
+
+				for (p = world; (p = find_client(p));)
+				{
+					stuffcmd(p, "play ca/sfdraw.wav\n");
+				}
 			}
 			
 			else
