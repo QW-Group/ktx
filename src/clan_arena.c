@@ -162,7 +162,7 @@ void enable_player_tracking(gedict_t *e, int follow)
 			return;
 		}
 
-		G_sprint(self, 2, "tracking %s\n" redtext("enabled"));
+		G_sprint(self, 2, "tracking %s\n", redtext("enabled"));
 		e->tracking_enabled = 1;
 	}
 	else
