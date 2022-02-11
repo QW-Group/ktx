@@ -56,9 +56,12 @@ qbool isCA()
 
 // hard coded default settings for CA
 static char ca_settings[] = "k_clan_arena_rounds 9\n"
+		"k_clan_arena_max_respawns 0\n"
 		"dp 0\n"
 		"teamplay 4\n"
 		"deathmatch 5\n"
+		"timelimit 30"
+		"k_pow 0"
 		"k_overtime 0\n"
 		"k_spw 1\n"
 		"k_dmgfrags 1\n"
@@ -162,7 +165,7 @@ void enable_player_tracking(gedict_t *e, int follow)
 			return;
 		}
 
-		G_sprint(self, 2, "tracking %s\n", redtext("enabled"));
+		G_sprint(e, 2, "tracking %s\n", redtext("enabled"));
 		e->tracking_enabled = 1;
 	}
 	else
@@ -172,7 +175,7 @@ void enable_player_tracking(gedict_t *e, int follow)
 			return;
 		}
 
-		G_sprint(self, 2, "tracking %s\n", redtext("disabled"));
+		G_sprint(e, 2, "tracking %s\n", redtext("disabled"));
 
 		e->tracking_enabled = 0;
 		SetVector(e->s.v.velocity, 0, 0, 0);
@@ -245,7 +248,15 @@ void apply_CA_settings(void)
 
 void ToggleCArena()
 {
+	int k_clan_arena = bound(0, cvar("k_clan_arena"), 2);
+	int max_respawns = 0;
+	
 	if (!is_rules_change_allowed())
+	{
+		return;
+	}
+
+	if (match_in_progress)
 	{
 		return;
 	}
@@ -261,9 +272,32 @@ void ToggleCArena()
 		}
 	}
 
-	cvar_toggle_msg(self, "k_clan_arena", redtext("Clan Arena"));
+	if (++k_clan_arena > 2)
+	{
+		k_clan_arena = 0;
+	}
+
+	if (!k_clan_arena)
+	{
+		G_bprint(2, "%s %s %s\n", self->netname, "disables", redtext("Clan Arena"));
+	}
+	else if (k_clan_arena == 1)
+	{
+		G_bprint(2, "%s %s %s\n", self->netname, "enables", redtext("Clan Arena"));
+	}
+	else if (k_clan_arena == 2)
+	{
+		G_bprint(2, "%s %s %s\n", self->netname, "enables", redtext("Clan Arena: Wipeout"));
+		max_respawns = 4;
+	}
+	else
+	{
+		G_bprint(2, "%s unknown\n", redtext("Clan Arena"));
+	}
 
 	apply_CA_settings();
+	cvar_fset("k_clan_arena", k_clan_arena);
+	cvar_fset("k_clan_arena_max_respawns", max_respawns);
 }
 
 void CA_PutClientInServer(void)
@@ -277,7 +311,6 @@ void CA_PutClientInServer(void)
 	if (match_in_progress == 2)
 	{
 		int items;
-		char *color;
 
 		self->s.v.ammo_nails = 200;
 		self->s.v.ammo_shells = 100;
@@ -316,33 +349,39 @@ void CA_PutClientInServer(void)
 		self->s.v.weapon = IT_ROCKET_LAUNCHER;
 
 		self->in_play = true;
+		self->in_limbo = false;
 
-		// if team is red or blue, set color to match
-		if (streq(getteam(self), "red") || streq(getteam(self), "blue"))
+		if (!self->teamcolor)
 		{
-			color = streq(getteam(self), "red") ? "4" : "13";
-		}
-		else if (streq(cvar_string("_k_team1"), "red") || streq(cvar_string("_k_team2"), "red"))
-		{
-			color = "13";
-		}
-		else if (streq(cvar_string("_k_team1"), "blue") || streq(cvar_string("_k_team2"), "blue"))
-		{
-			color = "4";
-		}
-		else 
-		{
-			color = streq(cvar_string("_k_team1"), getteam(self)) ? "4" : "13";
+			// if team is red or blue, set color to match
+			if (streq(getteam(self), "red") || streq(getteam(self), "blue"))
+			{
+				self->teamcolor = streq(getteam(self), "red") ? "4" : "13";
+			}
+			else if (streq(cvar_string("_k_team1"), "red") || streq(cvar_string("_k_team2"), "red"))
+			{
+				self->teamcolor = "13";
+			}
+			else if (streq(cvar_string("_k_team1"), "blue") || streq(cvar_string("_k_team2"), "blue"))
+			{
+				self->teamcolor = "4";
+			}
+			else 
+			{
+				self->teamcolor = streq(cvar_string("_k_team1"), getteam(self)) ? "4" : "13";
+			}
 		}
 
-		SetUserInfo(self, "topcolor", color, 0);
-		SetUserInfo(self, "bottomcolor", color, 0);
-		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "color %s\n", color);
+		SetUserInfo(self, "topcolor", self->teamcolor, 0);
+		SetUserInfo(self, "bottomcolor", self->teamcolor, 0);
+		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "color %s\n", self->teamcolor);
 	}
 
 	// set to ghost if dead
 	if (ISDEAD(self))
 	{
+		int max_deaths = cvar("k_clan_arena_max_respawns");
+
 		self->s.v.solid = SOLID_NOT;
 		self->s.v.movetype = MOVETYPE_NOCLIP;
 		self->vw_index = 0;
@@ -354,14 +393,34 @@ void CA_PutClientInServer(void)
 		self->tracking_enabled = 1;
 
 		self->in_play = false;
+		self->round_deaths++; //increment death count for wipeout
+		self->spawn_delay = 0;
 
 		setmodel(self, "");
 		setorigin(self, PASSVEC3(self->s.v.origin));
 
-		// Change color to white if dead
-		SetUserInfo(self, "topcolor", "0", 0);
-		SetUserInfo(self, "bottomcolor", "0", 0);
-		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "color %s\n", "0");
+		if (self->round_deaths <= max_deaths)
+		{
+			//change colors to light versions
+			if (streq(self->teamcolor, "13"))
+			{
+				SetUserInfo(self, "topcolor", "2", 0);
+				SetUserInfo(self, "bottomcolor", "2", 0);
+			}
+			else
+			{
+				SetUserInfo(self, "topcolor", "6", 0);
+				SetUserInfo(self, "bottomcolor", "6", 0);
+			}
+		}
+		else
+		{
+			// Change color to white if dead
+			SetUserInfo(self, "topcolor", "0", 0);
+			SetUserInfo(self, "bottomcolor", "0", 0);
+			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "color %s\n", "0");
+		}
+		
 	}
 }
 
@@ -408,7 +467,7 @@ void CA_ClientObituary(gedict_t *targ, gedict_t *attacker)
 		{
 			if ((ah == 100) && (aa == 200))
 			{
-				G_bprint(PRINT_HIGH, "%s %s %d %s %d %s\n",
+				G_sprint(targ, PRINT_HIGH, "%s %s %d %s %d %s\n",
 							attacker->netname, redtext("had"), aa,
 							redtext("armor and"), ah, redtext("health"));
 			}
@@ -535,7 +594,6 @@ void EndRound(int alive_team)
 		{
 			if (alive_team == 0)
 			{
-				G_bprint(2, "%s\n", redtext("round draw"));
 				G_cp2all("Round draw!");
 
 				for (p = world; (p = find_client(p));)
@@ -546,9 +604,6 @@ void EndRound(int alive_team)
 			
 			else
 			{
-				//G_bprint(2, "%s \x90%s\x91 wins round\n", redtext("Team"),
-				//				cvar_string(va("_k_team%d", alive_team)));
-				
 				G_cp2all("Team \x90%s\x91 wins the round!",
 						cvar_string(va("_k_team%d", alive_team))); // CA_wins_required
 			}
@@ -574,6 +629,13 @@ void EndRound(int alive_team)
 					{
 						p->s.v.items += IT_INVULNERABILITY;
 					}
+				}
+
+				if (!streq(getteam(p), cvar_string(va("_k_team%d", alive_team))) && 
+						!p->in_play && p->in_limbo)
+				{
+					SetUserInfo(self, "topcolor", "0", 0);
+					SetUserInfo(self, "bottomcolor", "0", 0);
 				}
 			}
 		}
@@ -670,6 +732,7 @@ void CA_player_post_think(void)
 void CA_Frame(void)
 {
 	static int last_r;
+	static int last_respawn_count;
 	int r;
 	gedict_t *p;
 
@@ -681,6 +744,49 @@ void CA_Frame(void)
 	if (match_in_progress != 2)
 	{
 		return;
+	}
+
+	// if max_respawns are greater than 0, we're playing wipeout
+	if (ra_match_fight == 2 && !round_pause && cvar("k_clan_arena_max_respawns"))
+	{
+		int max_deaths = cvar("k_clan_arena_max_respawns");
+
+		for (p = world; (p = find_plr(p));)
+		{
+			if (!p->in_play && p->round_deaths <= max_deaths)
+			{
+				p->in_limbo = true;
+
+				if (!p->spawn_delay)
+				{
+					int delay = p->round_deaths * 7;
+
+					last_respawn_count = 999999999;
+					p->spawn_delay = g_globalvars.time + delay;
+				}
+
+				p->seconds_to_respawn = Q_rint(p->spawn_delay - g_globalvars.time);
+
+				if (p->seconds_to_respawn <= 0)
+				{
+					p->spawn_delay = 0;
+					G_centerprint(p, "%s\n", "FIGHT!");
+					k_respawn(p, true);
+
+					p->seconds_to_respawn = g_globalvars.time;
+				}
+				
+				else if (p->seconds_to_respawn != last_respawn_count)
+				{
+					last_respawn_count = p->seconds_to_respawn;
+
+					if (p->seconds_to_respawn > 0)
+					{
+						G_centerprint(p, "%d\n\n\n seconds to respawn!\n", p->seconds_to_respawn);
+					}
+				}	
+			}
+		}
 	}
 
 	// check if there exist only one team with alive players and others are eluminated, if so then its time to start ca countdown
@@ -726,7 +832,9 @@ void CA_Frame(void)
 
 			for (p = world; (p = find_plr(p));)
 			{
+				p->round_deaths = 0;
 				k_respawn(p, false);
+				G_sprint(p, 2, "round \x90%d\x91 starts in 5 seconds.\n", round_num);
 			}
 		}
 
@@ -734,14 +842,12 @@ void CA_Frame(void)
 
 		if (r <= 0)
 		{
-			char *fight = redtext("FIGHT!");
-
 			for (p = world; (p = find_client(p));)
 			{
 				stuffcmd(p, "play ca/sffight.wav\n");
 			}
 			
-			G_cp2all("%s", fight);
+			G_cp2all("%s", "FIGHT!");
 
 			ra_match_fight = 2;
 
@@ -752,7 +858,7 @@ void CA_Frame(void)
 		{
 			last_r = r;
 
-			if (r < 6) // was 11
+			if (r < 6)
 			{
 				for (p = world; (p = find_client(p));)
 				{

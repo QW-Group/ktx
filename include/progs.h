@@ -1043,7 +1043,12 @@ typedef struct gedict_s
 	struct gedict_s *track_target;			// who are we tracking?
 	qbool ca_alive;
 	qbool in_play;							// is player still fighting?
+	qbool in_limbo;							// waiting to respawn during wipeout
+	char *teamcolor;						
 	int tracking_enabled;
+	int round_deaths;						// number of times player has died in the round
+	int seconds_to_respawn;					// number of seconds until respawn
+	int spawn_delay;						// total delay between death and spawn
 // }
 
 // {
