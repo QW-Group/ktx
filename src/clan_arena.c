@@ -11,6 +11,14 @@ static int pause_count;
 static int pause_time;
 static int round_pause;
 
+void track_player(gedict_t *observer);
+void enable_player_tracking(gedict_t *e, int follow);
+void r_changetrackingstatus(float t);
+void CA_PrintScores(void);
+void CA_TeamsStats(void);
+void EndRound(int alive_team);
+void show_tracking_info(gedict_t *p);
+
 gedict_t* ca_find_player(gedict_t *p)
 {
 	p = find_plr(p);
@@ -86,6 +94,10 @@ void track_player(gedict_t *observer)
 		{
 			player = observer->track_target;
 		}
+		else
+		{
+			observer->track_target = player;
+		}
 
 		// { spectate in 1st person
 		follow_distance = -10;
@@ -135,6 +147,8 @@ void track_player(gedict_t *observer)
 
 		// smooth playing for ezq / zq
 		observer->s.v.movetype = MOVETYPE_LOCK;
+
+		show_tracking_info(observer);
 	}
 
 	if (!observer->tracking_enabled)
@@ -603,7 +617,6 @@ void EndRound(int alive_team)
 					stuffcmd(p, "play ca/sfdraw.wav\n");
 				}
 			}
-			
 			else
 			{
 				G_cp2all("Team \x90%s\x91 wins the round!",
@@ -657,6 +670,25 @@ void EndRound(int alive_team)
 	}
 }
 
+void show_tracking_info(gedict_t *p)
+{
+	int max_respawns = cvar("k_clan_arena_max_respawns");
+
+	if (!round_pause)
+	{
+		if (max_respawns && p->round_deaths <= max_respawns && !round_pause)
+		{
+			G_centerprint(p, "\n\n\n\n\n\n%s\n\n\n%d\n\n\n seconds to respawn!\n", 
+								redtext(p->track_target->netname), p->seconds_to_respawn);
+		}
+		else
+		{
+			G_centerprint(p, "\n\n\n\n\n\n%s\n\n\n\n\n\n\n", 
+								redtext(p->track_target->netname));
+		}
+	}
+}
+
 static void track_player_next(gedict_t *observer)
 {
 	gedict_t *first_player = ca_get_player();
@@ -686,8 +718,6 @@ static void track_player_next(gedict_t *observer)
 
 		observer->track_target = player;
 	}
-
-	G_sprint(self, 2, "Tracking: %s\n", redtext(player->netname));
 }
 
 void CA_player_pre_think(void)
@@ -742,7 +772,6 @@ void CA_player_post_think(void)
 void CA_Frame(void)
 {
 	static int last_r;
-	static int last_respawn_count;
 	int r;
 	gedict_t *p;
 
@@ -770,8 +799,6 @@ void CA_Frame(void)
 				if (!p->spawn_delay)
 				{
 					int delay = p->round_deaths * 7;
-
-					last_respawn_count = 999999999;
 					p->spawn_delay = g_globalvars.time + delay;
 				}
 
@@ -785,16 +812,13 @@ void CA_Frame(void)
 
 					p->seconds_to_respawn = g_globalvars.time;
 				}
-				
-				else if (p->seconds_to_respawn != last_respawn_count)
+				else
 				{
-					last_respawn_count = p->seconds_to_respawn;
-
-					if (p->seconds_to_respawn > 0)
+					if (!p->tracking_enabled)
 					{
-						G_centerprint(p, "%d\n\n\n seconds to respawn!\n", p->seconds_to_respawn);
+						G_centerprint(p, "\n\n\n\n\n\n\n\n\n%d\n\n\n seconds to respawn!\n", p->seconds_to_respawn);
 					}
-				}	
+				}
 			}
 		}
 	}
