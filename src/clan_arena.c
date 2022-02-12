@@ -561,6 +561,7 @@ void EndRound(int alive_team)
 {
 	gedict_t *p;
 	static int last_count;
+	static qbool do_endround_stuff = false;
 	
 	if(!round_pause)
 	{
@@ -585,6 +586,7 @@ void EndRound(int alive_team)
 		round_pause = 0;
 		round_num++;
 		ra_match_fight = 0;
+		do_endround_stuff = false;
 	}
 	else if (pause_count != last_count)
 	{
@@ -611,33 +613,41 @@ void EndRound(int alive_team)
 
 		if (pause_count == 7)
 		{
-			for (p = world; (p = find_plr(p));)
+			if (!do_endround_stuff)
 			{
-				if (streq(getteam(p), cvar_string(va("_k_team%d", alive_team))))
-				{
-					stuffcmd(p, "play misc/flagcap.wav\n");
-				}
+				do_endround_stuff = true;
 
-				if (streq(getteam(p), cvar_string(va("_k_team%d", alive_team))) && p->in_play)
+				for (p = world; (p = find_plr(p));)
 				{
-					if (streq(ezinfokey(p, "topcolor"), "13") && streq(ezinfokey(p, "bottomcolor"), "13"))
+					if (cvar("k_clan_arena_max_respawns"))
 					{
-						p->super_time = 8;
-						p->super_damage_finished = 8;
-					}
-					else
-					{
-						p->s.v.items += IT_INVULNERABILITY;
-					}
-				}
+						if (streq(getteam(p), cvar_string(va("_k_team%d", alive_team))))
+						{
+							stuffcmd(p, "play misc/flagcap.wav\n");
+						}
 
-				if (!streq(getteam(p), cvar_string(va("_k_team%d", alive_team))) && 
-						!p->in_play && p->in_limbo)
-				{
-					SetUserInfo(self, "topcolor", "0", 0);
-					SetUserInfo(self, "bottomcolor", "0", 0);
+						if (streq(getteam(p), cvar_string(va("_k_team%d", alive_team))) && p->in_play)
+						{
+							if (streq(ezinfokey(p, "topcolor"), "13") && streq(ezinfokey(p, "bottomcolor"), "13"))
+							{
+								p->super_time = 8;
+								p->super_damage_finished = 8;
+							}
+							else
+							{
+								p->s.v.items += IT_INVULNERABILITY;
+							}
+						}
+
+						if (strneq(ezinfokey(p, "bottomcolor"), p->teamcolor))
+						{
+							SetUserInfo(p, "topcolor", "0", 0);
+							SetUserInfo(p, "bottomcolor", "0", 0);
+						}
+					}
 				}
 			}
+			
 		}
 
 		if (pause_count < 4)
