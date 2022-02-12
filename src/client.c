@@ -4281,6 +4281,11 @@ void SendTeamInfo(gedict_t *t)
 			continue; // we pseudo speccing such player, no point to send info about him
 		}
 
+		if (isCA() && !ISLIVE(p))
+		{
+			continue; // do not send if player is dead in clan arena mode
+		}
+
 		if (strnull(nick = ezinfokey(p, "k_nick"))) // get nick, if any, do not send name, client can guess it too
 		{
 			nick = ezinfokey(p, "k");
