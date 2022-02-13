@@ -68,13 +68,17 @@ static char ca_settings[] = "k_clan_arena_rounds 9\n"
 		"dp 0\n"
 		"teamplay 4\n"
 		"deathmatch 5\n"
-		"timelimit 30"
-		"k_pow 0"
+		"timelimit 30\n"
+		"maxclients 8\n"
+		"k_maxclients 8\n"
+		"k_pow 0\n"
 		"k_overtime 0\n"
+		"k_exttime 0\n"	
 		"k_spw 1\n"
 		"k_dmgfrags 1\n"
+		"k_teamoverlay 1\n"
 		"k_noitems 1\n";
-
+		
 void track_player(gedict_t *observer)
 {
 	gedict_t *player = ca_get_player();
@@ -229,7 +233,6 @@ void ClanArenaTrackingToggleButton(void)
 	r_changetrackingstatus((float) 3);
 }
 
-
 void apply_CA_settings(void)
 {
 	char buf[1024 * 4];
@@ -242,6 +245,11 @@ void apply_CA_settings(void)
 
 	trap_readcmd(ca_settings, buf, sizeof(buf));
 	G_cprint("%s", buf);
+
+	if (cvar("k_clan_arena") == 2)
+	{
+		cvar_fset("k_clan_arena_max_respawns", 4);
+	}
 
 	cfg_name = va("configs/usermodes/ca/default.cfg");
 	if (can_exec(cfg_name))
@@ -263,7 +271,6 @@ void apply_CA_settings(void)
 void ToggleCArena()
 {
 	int k_clan_arena = bound(0, cvar("k_clan_arena"), 2);
-	int max_respawns = 0;
 	
 	if (!is_rules_change_allowed())
 	{
@@ -297,21 +304,19 @@ void ToggleCArena()
 	}
 	else if (k_clan_arena == 1)
 	{
-		G_bprint(2, "%s %s %s\n", self->netname, "enables", redtext("Clan Arena"));
+		G_bprint(2, "%s %s %s\n", self->netname, "enables", redtext("Clan Arena (classic)"));
 	}
 	else if (k_clan_arena == 2)
 	{
-		G_bprint(2, "%s %s %s\n", self->netname, "enables", redtext("Clan Arena: Wipeout"));
-		max_respawns = 4;
+		G_bprint(2, "%s %s %s\n", self->netname, "enables", redtext("Clan Arena (wipeout)"));
 	}
 	else
 	{
 		G_bprint(2, "%s unknown\n", redtext("Clan Arena"));
 	}
 
-	apply_CA_settings();
 	cvar_fset("k_clan_arena", k_clan_arena);
-	cvar_fset("k_clan_arena_max_respawns", max_respawns);
+	apply_CA_settings();
 }
 
 void CA_PutClientInServer(void)
