@@ -418,7 +418,7 @@ void CA_PutClientInServer(void)
 		setmodel(self, "");
 		setorigin(self, PASSVEC3(self->s.v.origin));
 
-		if (self->round_deaths <= max_deaths)
+		if (self->round_deaths <= max_deaths && !round_pause)
 		{
 			//change colors to light versions
 			if (streq(self->teamcolor, "13"))
@@ -657,7 +657,7 @@ void EndRound(int alive_team)
 							}
 						}
 
-						if (strneq(ezinfokey(p, "bottomcolor"), p->teamcolor))
+						if (p->in_limbo)
 						{
 							SetUserInfo(p, "topcolor", "0", 0);
 							SetUserInfo(p, "bottomcolor", "0", 0);
@@ -904,8 +904,7 @@ void CA_Frame(void)
 					stuffcmd(p, "play ca/sf%d.wav\n", r);
 				}
 				
-				G_cp2all("%d\n\n"
-							"\x90%s\x91:%s \x90%s\x91:%s",
+				G_cp2all("%d\n\n\n \x90%s\x91:%s \x90%s\x91:%s\n",
 							r, cvar_string("_k_team1"), dig3(team1_score), cvar_string("_k_team2"),
 							dig3(team2_score)); // CA_wins_required
 			}
