@@ -4811,7 +4811,7 @@ void ClientObituary(gedict_t *targ, gedict_t *attacker)
 		if (targ == attacker)
 		{
 			// killed self
-			if (!isHoonyModeDuel())
+			if (!isHoonyModeDuel() && !isCA())
 			{
 				targ->s.v.frags -= (dtSUICIDE == targ->deathtype ? 2 : 1);
 			}
