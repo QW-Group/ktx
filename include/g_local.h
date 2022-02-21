@@ -1037,6 +1037,12 @@ extern int ra_match_fight;	// have winner and loser fighting
 
 // }
 
+// { clan arena
+
+extern int ca_round_pause;
+
+// }
+
 extern int jumpf_flag; // falling velocity criteria
 
 extern float f_check; // is we in state of some f_xxx check

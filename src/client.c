@@ -971,9 +971,9 @@ void ClientKill()
 		return;
 	}
 
-	if (isCA() && match_in_progress && ra_match_fight != 2) 
+	if (isCA() && match_in_progress && (ra_match_fight != 2 || ca_round_pause)) 
 	{
-		G_sprint (self, PRINT_HIGH, "Can't suicide during coutdown\n");
+		G_sprint (self, PRINT_HIGH, "Can't suicide at this time\n");
 
 		return;
 	}

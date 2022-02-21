@@ -9,7 +9,6 @@ static int team1_score;
 static int team2_score;
 static int pause_count;
 static int pause_time;
-static int round_pause;
 
 void track_player(gedict_t *observer);
 void enable_player_tracking(gedict_t *e, int follow);
@@ -420,7 +419,7 @@ void CA_PutClientInServer(void)
 		setmodel(self, "");
 		setorigin(self, PASSVEC3(self->s.v.origin));
 
-		if (self->round_deaths <= max_deaths && !round_pause)
+		if (self->round_deaths <= max_deaths && !ca_round_pause)
 		{
 			//change colors to light versions
 			if (streq(self->teamcolor, "13"))
@@ -846,9 +845,9 @@ void EndRound(int alive_team)
 	static qbool do_endround_stuff = false;
 	static qbool print_stats = false;
 	
-	if(!round_pause)
+	if(!ca_round_pause)
 	{
-		round_pause = 1;
+		ca_round_pause = 1;
 		last_count = 999999999;
 		pause_time = g_globalvars.time + 8;
 	}
@@ -857,7 +856,7 @@ void EndRound(int alive_team)
 
 	if (pause_count <= 0)
 	{
-		round_pause = 0;
+		ca_round_pause = 0;
 		round_num++;
 		ra_match_fight = 0;
 		do_endround_stuff = false;
@@ -983,9 +982,9 @@ void show_tracking_info(gedict_t *p)
 {
 	int max_respawns = cvar("k_clan_arena_max_respawns");
 
-	if (!round_pause)
+	if (!ca_round_pause)
 	{
-		if (max_respawns && p->round_deaths <= max_respawns && !round_pause)
+		if (max_respawns && p->round_deaths <= max_respawns && !ca_round_pause)
 		{
 			G_centerprint(p, "\n\n\n\n\n\n%s\n\n\n%d\n\n\n seconds to respawn!\n", 
 								redtext(p->track_target->netname), p->seconds_to_respawn);
@@ -1095,7 +1094,7 @@ void CA_Frame(void)
 	}
 
 	// if max_respawns are greater than 0, we're playing wipeout
-	if (ra_match_fight == 2 && !round_pause && cvar("k_clan_arena_max_respawns"))
+	if (ra_match_fight == 2 && !ca_round_pause && cvar("k_clan_arena_max_respawns"))
 	{
 		int max_deaths = cvar("k_clan_arena_max_respawns");
 
@@ -1133,7 +1132,7 @@ void CA_Frame(void)
 	}
 
 	// check if there exist only one team with alive players and others are eluminated, if so then its time to start ca countdown
-	if (ra_match_fight == 2 || (ra_match_fight == 1 && round_pause == 1))
+	if (ra_match_fight == 2 || (ra_match_fight == 1 && ca_round_pause == 1))
 	{
 		int alive_team = 0;
 
@@ -1175,7 +1174,7 @@ void CA_Frame(void)
 		return;
 	}
 
-	if (!round_pause)
+	if (!ca_round_pause)
 	{
 		if (!ra_match_fight)
 		{
