@@ -4968,6 +4968,12 @@ void ClientObituary(gedict_t *targ, gedict_t *attacker)
 				attacker->s.v.frags += 1;
 			}
 
+			if (isCA())
+			{
+				//Clan Arena give points for frags even with k_dmgfrags
+				attacker->s.v.frags += 1;
+			}
+
 			logfrag(attacker, targ);
 
 			attacker->victim = victimname;
