@@ -16,6 +16,8 @@ void enable_player_tracking(gedict_t *e, int follow);
 void r_changetrackingstatus(float t);
 void CA_PrintScores(void);
 void CA_TeamsStats(void);
+void print_player_stats(qbool series_over);
+void CA_OnePlayerStats(gedict_t *p, qbool series_over);
 void EndRound(int alive_team);
 void show_tracking_info(gedict_t *p);
 
@@ -576,26 +578,279 @@ void CA_TeamsStats(void)
 	}
 }
 
+void team_round_summary(int alive_team)
+{
+	char *team1 = cvar_string(va("_k_team1"));
+	char *team2 = cvar_string(va("_k_team2"));
+	char t1score[5];
+	char t2score[5];
+	char t1need[5];
+	char t2need[5];
+	char t1status[20];
+	char t2status[20];
+	
+	sprintf(t1score, "%d", team1_score);
+	sprintf(t2score, "%d", team2_score);
+	sprintf(t1need, "%d", CA_wins_required() - team1_score);
+	sprintf(t2need, "%d", CA_wins_required() - team2_score);
+	sprintf(t1status, "%s", !alive_team ? "tied round" : (alive_team == 1 ? "round winner" : ""));
+	sprintf(t2status, "%s", !alive_team ? "tied round" : (alive_team == 2 ? "round winner" : ""));
+
+	G_bprint(2, "team   wins need status\n");
+	G_bprint(2, "%s\n", redtext("------ ---- ---- ------------"));
+	
+	G_bprint(2, "%s ", team1);
+	for (int i = 0; i < (strlen("team  ") - strlen(team1)); i++)
+	{
+		G_bprint(2, " "); // add padding so columns line up
+	}
+
+	for (int i = 0; i < (strlen("wins") - strlen(t1score)); i++)
+	{
+		G_bprint(2, " "); // add padding so columns line up
+	}
+	G_bprint(2, "%s ", t1score);
+
+	for (int i = 0; i < (strlen("need") - strlen(t1need)); i++)
+	{
+		G_bprint(2, " "); // add padding so columns line up
+	}
+	G_bprint(2, "%s ", t1need);
+
+	G_bprint(2, "%s\n", t1status);
+
+	G_bprint(2, "%s ", team2);
+	for (int i = 0; i < (strlen("team  ") - strlen(team2)); i++)
+	{
+		G_bprint(2, " "); // add padding so columns line up
+	}
+	
+	for (int i = 0; i < (strlen("wins") - strlen(t2score)); i++)
+	{
+		G_bprint(2, " "); // add padding so columns line up
+	}
+	G_bprint(2, "%s ", t2score);
+
+	for (int i = 0; i < (strlen("need") - strlen(t2need)); i++)
+	{
+		G_bprint(2, " "); // add padding so columns line up
+	}
+	G_bprint(2, "%s ", t2need);
+
+	G_bprint(2, "%s\n", t2status);
+
+	G_bprint(2, "\n");
+}
+
+void print_player_stats(qbool series_over)
+{
+	gedict_t *p;
+
+	G_bprint(2, "\n");
+	G_bprint(2, "sco  damg took dmg%%  k  d  gl  rh  rd  lg%% player\n");
+	G_bprint(2, "%s\n", redtext("--- ----- ---- ---- -- -- --- --- --- ---- --------"));
+	
+	for (p = world; (p = find_plr(p));)
+	{
+		if (p->ready && 
+				(streq(getteam(p), cvar_string(va("_k_team1"))) || 
+				streq(getteam(p), cvar_string(va("_k_team2"))) ))
+		{
+			CA_OnePlayerStats(p, series_over);
+		}
+	}
+
+	G_bprint(2, "\n");
+}
+
+void CA_OnePlayerStats(gedict_t *p, qbool series_over)
+{
+	qbool use_totals = (round_num == 1 || series_over);
+	float frags;
+	float rkills;
+	float dmg_g;
+	float dmg_t;
+	float dmg_e;
+	float round_dmg_g;
+	float round_dmg_t;
+	float round_dmg_e;
+	float vh_rl;
+	float h_rl;
+	float vh_gl;
+	float h_lg;
+	float a_lg;
+	float e_lg;
+	float round_elg;
+
+	frags = p->s.v.frags;
+	dmg_g = p->ps.dmg_g;
+	dmg_t = p->ps.dmg_t;
+	
+	if (!dmg_t && dmg_g)
+	{
+		dmg_e = 100;
+	}
+	else if (dmg_g > dmg_t)
+	{
+		dmg_e = fabs(max(1, dmg_t) / max(1, dmg_g) * 100 - 100);
+	}
+	else
+	{
+		dmg_e = 0;
+	}
+
+	if (!use_totals)
+	{
+		round_dmg_g = dmg_g - p->ca_round_dmg;
+		round_dmg_t = dmg_t - p->ca_round_dmgt;
+
+		if (!round_dmg_t && round_dmg_g)
+		{
+			round_dmg_e = 100;
+		}
+		else if (round_dmg_g > round_dmg_t)
+		{
+			round_dmg_e = fabs(max(1, round_dmg_t) / max(1, round_dmg_g) * 100 - 100);
+		}
+		else
+		{
+			round_dmg_e = 0;
+		}
+	}
+	
+	rkills = frags - ((int)(dmg_g/100.0));
+	h_rl = p->ps.wpn[wpRL].hits;
+	vh_rl = p->ps.wpn[wpRL].vhits;
+	vh_gl = p->ps.wpn[wpGL].vhits;
+	h_lg = p->ps.wpn[wpLG].hits;
+	a_lg = p->ps.wpn[wpLG].attacks;
+	e_lg = 100.0 * h_lg / max(1, a_lg);
+
+	if (!use_totals)
+	{
+		round_elg = 100 * (h_lg - p->ca_round_lghit) / max(1, a_lg - p->ca_round_lgfired);
+	}
+
+	char score[10];
+	char damage[10];
+	char dmg_took[10];
+	char dmg_eff[10];
+	char kills[10];
+	char deaths[10];
+	char gl_hits[10];
+	char rl_hits[10];
+	char rl_directs[10];
+	char lg_eff[10];
+	
+	sprintf(score, "%.0f", use_totals ? p->s.v.frags : p->s.v.frags - p->ca_round_frags);
+	sprintf(damage, "%.0f", use_totals ? dmg_g : dmg_g - p->ca_round_dmg);
+	sprintf(dmg_took, "%.0f", use_totals ? dmg_t : dmg_t - p->ca_round_dmgt);
+	sprintf(dmg_eff, "%.0f", use_totals ? dmg_e : round_dmg_e);
+	sprintf(kills, "%.0f", use_totals ? rkills : rkills - p->ca_round_kills);
+	sprintf(deaths, "%.0f", use_totals ? p->deaths : p->deaths - p->ca_round_deaths);
+	sprintf(gl_hits, "%.0f", use_totals ? vh_gl : vh_gl - p->ca_round_glhit);
+	sprintf(rl_hits, "%.0f", use_totals ? vh_rl : vh_rl - p->ca_round_rlhit);
+	sprintf(rl_directs, "%.0f", use_totals ? h_rl : h_rl - p->ca_round_rldirect);
+	sprintf(lg_eff, "%.0f", use_totals ? e_lg : round_elg);
+	
+	for (int i = 0; i < (strlen("sco") - strlen(score)); i++)
+	{
+		G_bprint(2, " ");
+	}
+	G_bprint(2, "%s ", strneq(score, "0") ? score : "-");
+
+	for (int i = 0; i < (strlen(" damg") - strlen(damage)); i++)
+	{
+		G_bprint(2, " "); // add padding so columns line up
+	}
+	G_bprint(2, "%s ", strneq(damage, "0") ? damage : "-");
+
+	for (int i = 0; i < (strlen("took") - strlen(dmg_took)); i++)
+	{
+		G_bprint(2, " "); // add padding so columns line up
+	}
+	G_bprint(2, "%s ", strneq(dmg_took, "0") ? dmg_took : "-");
+
+	for (int i = 0; i < (strlen("dmg_") - strlen(dmg_eff)-1); i++)
+	{
+		G_bprint(2, " "); // add padding so columns line up
+	}
+	if (strneq(dmg_eff, "0"))
+	{
+		G_bprint(2, "%s%s ", dmg_eff, "%");
+	}
+	else{
+		G_bprint(2, " - ");
+	}
+
+	for (int i = 0; i < (strlen(" k") - strlen(kills)); i++)
+	{
+		G_bprint(2, " "); // add padding so columns line up
+	}
+	G_bprint(2, "%s ",  strneq(kills, "0") ? kills : "-");
+
+	for (int i = 0; i < (strlen(" d") - strlen(deaths)); i++)
+	{
+		G_bprint(2, " "); // add padding so columns line up
+	}
+	G_bprint(2, "%s ", strneq(deaths, "0") ? deaths : "-");
+
+	for (int i = 0; i < (strlen(" gl") - strlen(gl_hits)); i++)
+	{
+		G_bprint(2, " "); // add padding so columns line up
+	}
+	G_bprint(2, "%s ", strneq(gl_hits, "0") ? gl_hits : "-");
+
+	for (int i = 0; i < (strlen(" rh") - strlen(rl_hits)); i++)
+	{
+		G_bprint(2, " "); // add padding so columns line up
+	}
+	G_bprint(2, "%s ", strneq(rl_hits, "0") ? rl_hits : "-");
+
+	for (int i = 0; i < (strlen(" rd") - strlen(rl_directs)); i++)
+	{
+		G_bprint(2, " "); // add padding so columns line up
+	}
+	G_bprint(2, "%s ", strneq(rl_directs, "0") ? rl_directs : "-");
+
+	for (int i = 0; i < (strlen(" lg") - strlen(lg_eff)); i++)
+	{
+		G_bprint(2, " "); // add padding so columns line up
+	}
+	if (strneq(lg_eff, "0"))
+	{
+		G_bprint(2, "%s%s ", lg_eff, redtext("%"));
+	}
+	else{
+		G_bprint(2, " - ");
+	}
+
+	G_bprint(2, "%s\n", getname(p));
+
+	p->ca_round_frags = p->s.v.frags;
+	p->ca_round_kills = rkills;
+	p->ca_round_dmg = dmg_g;
+	p->ca_round_dmgt = dmg_t;
+	p->ca_round_deaths = p->deaths;
+	p->ca_round_glhit = vh_gl;
+	p->ca_round_rlhit = vh_rl;
+	p->ca_round_rldirect = h_rl;
+	p->ca_round_lghit = h_lg;
+	p->ca_round_lgfired = a_lg;
+}
+
 void EndRound(int alive_team)
 {
 	gedict_t *p;
 	static int last_count;
 	static qbool do_endround_stuff = false;
+	static qbool print_stats = false;
 	
 	if(!round_pause)
 	{
 		round_pause = 1;
 		last_count = 999999999;
 		pause_time = g_globalvars.time + 8;
-
-		if (alive_team == 1)
-		{
-			team1_score++;
-		}
-		else
-		{
-			team2_score++;
-		}
 	}
 
 	pause_count = Q_rint(pause_time - g_globalvars.time);
@@ -606,21 +861,17 @@ void EndRound(int alive_team)
 		round_num++;
 		ra_match_fight = 0;
 		do_endround_stuff = false;
+		print_stats = false;
 	}
 	else if (pause_count != last_count)
 	{
 		last_count = pause_count;
 
-		if (pause_count < 8)
+		if (pause_count < 7)
 		{
-			if (alive_team == 0)
+			if (!alive_team)
 			{
 				G_cp2all("Round draw!");
-
-				for (p = world; (p = find_client(p));)
-				{
-					stuffcmd(p, "play ca/sfdraw.wav\n");
-				}
 			}
 			else
 			{
@@ -666,6 +917,59 @@ void EndRound(int alive_team)
 				}
 			}
 			
+		}
+
+		if (pause_count < 5 && !print_stats)
+		{
+			print_stats = true;
+
+			if (alive_team)
+			{
+				// print health of last standing players
+				for (p = world; (p = find_plr(p));)
+				{
+					if (p->in_play && streq(getteam(p), cvar_string(va("_k_team%d", alive_team))))
+					{
+						G_bprint(2, "%s %s %.0f%s%.0f\n", 
+							p->netname, 
+							redtext("had"), 
+							p->s.v.armorvalue,
+							redtext("/"),
+							p->s.v.health);
+					}
+				}
+
+				G_bprint(2, "\n%s %s %s", 
+							redtext("Team"), 
+							cvar_string(va("_k_team%d", alive_team)), 
+							redtext("has won the round\n"));
+			}
+			else
+			{
+				G_bprint(2, "\n%s", 
+							redtext("The round is a draw!\n"));
+				
+				for (p = world; (p = find_plr(p));)
+				{	
+					stuffcmd(p, "play ca/sfdraw.wav\n");
+				}
+			}
+
+			if (!alive_team)
+			{
+				round_num--; // the round repeats in the case of a draw
+			}
+			else if (alive_team == 1)
+			{
+				team1_score++;
+			}
+			else
+			{
+				team2_score++;
+			}
+
+			print_player_stats(false);
+			team_round_summary(alive_team);
 		}
 
 		if (pause_count < 4)
@@ -854,7 +1158,18 @@ void CA_Frame(void)
 	}
 
 	if ((team1_score >= CA_wins_required()) || (team2_score >= CA_wins_required()))
-	{
+	{		
+		int winning_team;
+
+		winning_team = team1_score >= CA_wins_required() ? 1 : 2;
+
+		G_bprint(2, "%s", redtext("series statistics:\n"));
+		print_player_stats(true);
+		G_bprint(2, "%s %s %s", 
+							redtext("Team"), 
+							cvar_string(va("_k_team%d", winning_team)), 
+							redtext("has won the series!\n\n"));
+
 		EndMatch(0);
 
 		return;
