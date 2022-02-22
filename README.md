@@ -1,9 +1,5 @@
 # KTX: a QuakeWorld server modification
-![KTX Logo](https://raw.githubusercontent.com/deurk/ktx/master/resources/logo/ktx.png)
-
-[![Build Status](https://travis-ci.org/deurk/ktx.svg?branch=master)](https://travis-ci.org/deurk/ktx)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](code_of_conduct.md)
-[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/1256/badge)](https://bestpractices.coreinfrastructure.org/projects/1256)
+![KTX Logo](https://raw.githubusercontent.com/QW-Group/ktx/master/resources/logo/ktx.png)
 
 **[KTX][ktx]** (Kombat Teams eXtreme) is a popular **QuakeWorld** server modification, adding numerous features to the core features of the server.
 
@@ -122,6 +118,7 @@ This project is licensed under the GPL-2.0 License - see the [LICENSE.md](LICENS
 * Thanks to the fine folks on [Quakeworld Discord][discord-qw] for their support and ideas.
 
 [ktx]: https://github.com/QW-Group/ktx
+[ktx-tags]: https://github.com/QW-Group/ktx/tags
 [ktx-builds]: https://builds.quakeworld.nu/ktx
 [mvdsv]: https://github.com/QW-Group/mvdsv
 [nquake-linux]: https://github.com/nQuake/server-linux
