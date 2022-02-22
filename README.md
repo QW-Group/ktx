@@ -18,6 +18,7 @@ The following instructions will help you get **[KTX][ktx]** installed on a runni
 The following architectures are fully supported by **[KTX][ktx]** and are available as prebuilt binaries:
 * Linux amd64 (Intel and AMD 64-bits processors)
 * Linux i686 (Intel and AMD 32-bit processors)
+* Linux aarch (ARM 64-bit processors)
 * Linux armhf (ARM 32-bit processors)
 * Windows x64 (Intel and AMD 64-bits processors)
 * Windows x86 (Intel and AMD 32-bit processors)
@@ -105,10 +106,6 @@ For the versions available, see the [tags on this repository][ktx-tags].
 * **Jonny** *"dimman"* **Svärd**
 * **Vladimir** *"VVD"* **Vladimirovich**
 * **Florian** *"Tuna"* **Zwoch**
-
-## Contributing
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details about how to contribute to **[KTX][ktx]**.
 
 ## Code of Conduct
 
