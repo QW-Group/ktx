@@ -98,6 +98,7 @@ void CA_MatchBreak(void)
 		if (p->ct == ctPlayer)
 		{
 			k_respawn(p, false);
+			p->teamcolor = NULL;
 		}
 	}
 }

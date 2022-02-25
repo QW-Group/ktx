@@ -1056,7 +1056,7 @@ typedef struct gedict_s
 	float ca_round_rldirect;
 	float ca_round_lghit;
 	float ca_round_lgfired;
-	char *teamcolor;						
+	char *teamcolor;						// color of player's team
 	int tracking_enabled;
 	int round_deaths;						// number of times player has died in the round
 	int seconds_to_respawn;					// number of seconds until respawn
