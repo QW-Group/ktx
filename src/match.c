@@ -354,7 +354,10 @@ void EndMatch(float skip_log)
 
 		if (is_real_match_end)
 		{
-			MatchEndStats();
+			if (!isCA())
+			{
+				MatchEndStats();
+			}
 
 			lastscore_add(); // save game result somewhere, so we can show it later
 		}
@@ -439,7 +442,7 @@ void EndMatch(float skip_log)
 	}
 
 	// allow ready/break in bloodfest without map reloading.
-	if (k_bloodfest)
+	if (k_bloodfest || cvar("k_clan_arena"))
 	{
 		match_over = 0;
 	}
@@ -1387,7 +1390,17 @@ void PrintCountdown(int seconds)
 	}
 	else if (isCA())
 	{
-		mode = redtext("CA");
+		if (cvar("k_clan_arena") == 2)
+		{
+			mode = redtext("CA:W");	
+		}
+		else if (cvar("k_clan_arena") == 1)
+		{
+			mode = redtext("CA:C");
+		}
+		else {
+			mode = redtext("CA");
+		}
 	}
 	else if (isHoonyModeDuel())
 	{

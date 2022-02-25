@@ -789,7 +789,7 @@ void NextLevel()
 	gedict_t *o;
 	char *entityfile;
 
-	if (k_bloodfest)
+	if (k_bloodfest || cvar("k_clan_arena"))
 	{
 		return;
 	}
@@ -4196,8 +4196,6 @@ void PlayerPostThink()
 
 	W_WeaponFrame();
 
-	CA_player_post_think();
-
 	race_player_post_think();
 
 	{
@@ -4217,6 +4215,10 @@ void PlayerPostThink()
 				self->s.v.ammo_nails = 100 + (int)(velocity_vert_abs) % 1000000 / 10000;
 				self->s.v.ammo_rockets = 100 + (int)(velocity_vert_abs) % 10000 / 100;
 				self->s.v.ammo_cells = 100 + (int)(velocity_vert_abs) % 100;
+			}
+			else if (cvar("k_clan_arena"))
+			{
+				// do nothing
 			}
 			else
 			{

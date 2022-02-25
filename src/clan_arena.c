@@ -9,6 +9,8 @@ static int team1_score;
 static int team2_score;
 static int pause_count;
 static int pause_time;
+static qbool do_endround_stuff = false;
+static qbool print_stats = false;
 
 void track_player(gedict_t *observer);
 void enable_player_tracking(gedict_t *e, int follow);
@@ -79,7 +81,27 @@ static char ca_settings[] = "k_clan_arena_rounds 9\n"
 		"k_dmgfrags 1\n"
 		"k_teamoverlay 1\n"
 		"k_noitems 1\n";
-		
+
+void CA_MatchBreak(void)
+{
+	gedict_t *p;
+
+	// reset these so a new game can be started right away
+	ca_round_pause = 0;
+	ra_match_fight = 0;
+	print_stats = false;
+	do_endround_stuff = false;
+
+	// respawn all players
+	for (p = world; (p = find_plr(p));)
+	{
+		if (p->ct == ctPlayer)
+		{
+			k_respawn(p, false);
+		}
+	}
+}
+
 void track_player(gedict_t *observer)
 {
 	gedict_t *player = ca_get_player();
@@ -459,6 +481,26 @@ qbool CA_can_fire(gedict_t *p)
 	return (ISLIVE(p) && (ra_match_fight == 2) && time_to_start && (g_globalvars.time >= time_to_start));
 }
 
+void CA_show_greeting(gedict_t *self)
+{
+	if (self->ct == ctPlayer && !match_in_progress)
+	{
+		if (!self->ready)
+		{
+			G_centerprint(self, "%s\n\n\n%s %s", 
+							"Welcome to Clan Arena!",
+							"set your team and type",
+							redtext("/ready"));
+		}
+		else{
+			G_centerprint(self, "%s\n\n\n%s", 
+							"You are ready!",
+							"waiting for other players");
+		}
+		
+	}
+}
+
 void CA_ClientObituary(gedict_t *targ, gedict_t *attacker)
 {
 	int ah, aa;
@@ -579,6 +621,8 @@ void CA_TeamsStats(void)
 
 void team_round_summary(int alive_team)
 {
+	int t1_score = alive_team == 1 ? team1_score + 1 : team1_score;
+	int t2_score = alive_team == 2 ? team2_score + 1 : team2_score;
 	char *team1 = cvar_string(va("_k_team1"));
 	char *team2 = cvar_string(va("_k_team2"));
 	char t1score[5];
@@ -588,10 +632,10 @@ void team_round_summary(int alive_team)
 	char t1status[20];
 	char t2status[20];
 	
-	sprintf(t1score, "%d", team1_score);
-	sprintf(t2score, "%d", team2_score);
-	sprintf(t1need, "%d", CA_wins_required() - team1_score);
-	sprintf(t2need, "%d", CA_wins_required() - team2_score);
+	sprintf(t1score, "%d", t1_score);
+	sprintf(t2score, "%d", t2_score);
+	sprintf(t1need, "%d", CA_wins_required() - t1_score);
+	sprintf(t2need, "%d", CA_wins_required() - t2_score);
 	sprintf(t1status, "%s", !alive_team ? "tied round" : (alive_team == 1 ? "round winner" : ""));
 	sprintf(t2status, "%s", !alive_team ? "tied round" : (alive_team == 2 ? "round winner" : ""));
 
@@ -842,8 +886,6 @@ void EndRound(int alive_team)
 {
 	gedict_t *p;
 	static int last_count;
-	static qbool do_endround_stuff = false;
-	static qbool print_stats = false;
 	
 	if(!ca_round_pause)
 	{
@@ -861,6 +903,19 @@ void EndRound(int alive_team)
 		ra_match_fight = 0;
 		do_endround_stuff = false;
 		print_stats = false;
+
+		if (!alive_team)
+		{
+			round_num--; // the round repeats in the case of a draw
+		}
+		else if (alive_team == 1)
+		{
+			team1_score++;
+		}
+		else
+		{
+			team2_score++;
+		}
 	}
 	else if (pause_count != last_count)
 	{
@@ -954,19 +1009,6 @@ void EndRound(int alive_team)
 				}
 			}
 
-			if (!alive_team)
-			{
-				round_num--; // the round repeats in the case of a draw
-			}
-			else if (alive_team == 1)
-			{
-				team1_score++;
-			}
-			else
-			{
-				team2_score++;
-			}
-
 			print_player_stats(false);
 			team_round_summary(alive_team);
 		}
@@ -1032,6 +1074,8 @@ void CA_player_pre_think(void)
 {
 	if (isCA())
 	{
+		CA_show_greeting(self);
+		
 		// Set this player to solid so we trigger checkpoints & teleports during move
 		self->s.v.solid = (ISDEAD(self) ? SOLID_NOT : SOLID_SLIDEBOX);
 		
@@ -1062,19 +1106,12 @@ void CA_player_pre_think(void)
 				}
 			}
 		}
-	}
-}
 
-void CA_player_post_think(void)
-{
-	if (isCA())
-	{
-		if (ra_match_fight > 0 && !self->in_play)
+		if (self->ct == ctPlayer && ra_match_fight > 0 && !self->in_play)
 		{
 			track_player(self);
 		}
 	}
-	
 }
 
 void CA_Frame(void)
@@ -1169,8 +1206,9 @@ void CA_Frame(void)
 							cvar_string(va("_k_team%d", winning_team)), 
 							redtext("has won the series!\n\n"));
 
+		CA_MatchBreak(); // reset stuff
 		EndMatch(0);
-
+		
 		return;
 	}
 
