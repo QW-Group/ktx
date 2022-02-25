@@ -1990,6 +1990,31 @@ char* CompilateDemoName()
 	{
 		strlcat(demoname, va("ra_%d", (int)CountPlayers()), sizeof(demoname));
 	}
+	else if (isCA())
+	{
+		if (cvar("k_clan_arena") == 1)
+		{
+			strlcat(demoname, "ca", sizeof(demoname));
+		}
+		else
+		{
+			strlcat(demoname, "wipeout", sizeof(demoname));
+		}
+
+		char teams[MAX_CLIENTS][MAX_TEAM_NAME];
+
+		for (vs = "_", i = 0; i < MAX_CLIENTS; i++)
+        {
+            if (strnull(teams[i]))
+            {
+                break;
+            }
+
+            strlcat(demoname, vs, sizeof(demoname));
+            strlcat(demoname, teams[i], sizeof(demoname));
+            vs = "_vs_";
+        }
+	}
 	else if (isRACE() && !race_match_mode())
 	{
 		int players = 0;
