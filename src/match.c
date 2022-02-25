@@ -692,11 +692,15 @@ void TimerThink()
 			return;
 		}
 
-		G_bprint(2, "\220%s\221 minute%s remaining\n", dig3(self->cnt), count_s(self->cnt));
+		// don't show match time reminders in clan arena
+		if (!isCA())
+		{
+			G_bprint(2, "\220%s\221 minute%s remaining\n", dig3(self->cnt), count_s(self->cnt));
+		}
 
 		self->s.v.nextthink = g_globalvars.time + 1;
 
-		if (k_showscores)
+		if (k_showscores && !isCA())
 		{
 			if ((current_umode < 11) || (current_umode > 13))
 			{
