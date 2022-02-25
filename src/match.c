@@ -2002,7 +2002,8 @@ char* CompilateDemoName()
 		}
 
 		char teams[MAX_CLIENTS][MAX_TEAM_NAME];
-
+		getteams(teams);
+		
 		for (vs = "_", i = 0; i < MAX_CLIENTS; i++)
         {
             if (strnull(teams[i]))
