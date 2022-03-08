@@ -310,6 +310,11 @@ void EndMatch(float skip_log)
 		cvar_fset("sv_spectalk", 1);
 	}
 
+	if (isCA())
+	{
+		CA_MatchBreak();
+	}
+
 	if (isHoonyModeAny())
 	{
 		G_bprint(2, "The point is over\n");

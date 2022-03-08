@@ -504,11 +504,6 @@ void vote_check_break()
 			HM_match_break();
 		}
 
-		if (isCA())
-		{
-			CA_MatchBreak();
-		}
-
 		G_bprint(2, "%s\n", redtext("Match stopped by majority vote"));
 
 		EndMatch(0);

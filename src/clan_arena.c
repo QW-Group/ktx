@@ -1217,7 +1217,6 @@ void CA_Frame(void)
 							cvar_string(va("_k_team%d", winning_team)), 
 							redtext("has won the series!\n\n"));
 
-		CA_MatchBreak(); // reset stuff
 		EndMatch(0);
 		
 		return;
