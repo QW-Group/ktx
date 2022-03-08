@@ -931,8 +931,17 @@ void EndRound(int alive_team)
 			}
 			else
 			{
-				G_cp2all("Team \x90%s\x91 wins the round!",
-						cvar_string(va("_k_team%d", alive_team))); // CA_wins_required
+				if ((alive_team == 1 && team1_score == (CA_wins_required()-1)) || 
+					(alive_team == 2 && team2_score == (CA_wins_required()-1)))
+				{
+					G_cp2all("Team \x90%s\x91 wins the series!",
+							cvar_string(va("_k_team%d", alive_team))); 
+				}
+				else
+				{
+					G_cp2all("Team \x90%s\x91 wins the round!",
+							cvar_string(va("_k_team%d", alive_team)));
+				}
 			}
 		}
 
