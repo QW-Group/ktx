@@ -56,6 +56,16 @@ int CA_count_ready_players(void)
 	return cnt;
 }
 
+int CA_get_score_1(void)
+{
+	return team1_score;
+}
+
+int CA_get_score_2(void)
+{
+	return team2_score;
+}
+
 void SM_PrepareCA(void)
 {
 	gedict_t *p;
