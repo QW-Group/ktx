@@ -1309,6 +1309,10 @@ qbool CanConnect()
 				return false; // _can't_ connect
 			}
 		}
+		else if (isCA())
+		{
+			// do nothing here
+		}
 		else if ((isTeam() || isCTF()))
 		{
 			// kick if no ghost or player with team as for self
@@ -1342,7 +1346,7 @@ qbool CanConnect()
 	}
 
 	// don't allow empty team in any case
-	if (tp_num() && strnull(getteam(self)))
+	if (tp_num() && strnull(getteam(self)) && !isCA())
 	{
 		G_sprint(self, 2, "Match in progress,\n"
 					"Set your team before connecting\n"
@@ -1398,37 +1402,50 @@ qbool CanConnect()
 		if (p) // found ghost entity
 		{
 			// check teams only for team mode
-			if ((isTeam() || isCTF()) && strneq(getteam(self), getteam(p)))
+			if ((isTeam() || isCTF()) && strneq(getteam(self), getteam(p)) && !isCA())
 			{
 				G_sprint(self, 2, "Please join your old team and reconnect\n");
 
 				return false; // _can't_ connect
 			}
-
-			ghostClearScores(p);
-
-			self->ps = p->ps; // restore player stats
-			self->s.v.frags = p->s.v.frags;
-			self->deaths = p->deaths;
-			self->friendly = p->friendly;
-
-			if (isTeam() || isCTF())
+			// In CA, if current team doesn't match old team then just don't restore stats/gamestate
+			// Otherwise restore frags and set ca_ready
+			else if (isCA() && strneq(getteam(self), getteam(p)))
 			{
-				self->k_teamnum = p->k_teamnum; // we alredy have team in localinfo
-				G_bprint(2, "%s \220%s\221 %s %d %s%s\n", self->netname, getteam(self),
-							redtext("rejoins the game with"), (int)self->s.v.frags,
-							redtext("frag"), redtext(count_s(self->s.v.frags)));
+				// if player's team isn't what it was before, then he will be a "dead" player until the match is over
+				self->ca_ready = 0;
+
+				G_bprint(2, "%s entered the game\n", self->netname);
 			}
 			else
 			{
-				self->k_teamnum = 0; // force check is we have team in localinfo or not below
-				G_bprint(2, "%s %s %d %s%s\n", self->netname, redtext("rejoins the game with"),
-							(int)self->s.v.frags, redtext("frag"),
-							redtext(count_s(self->s.v.frags)));
-			}
+				ghostClearScores(p);
 
-			localcmd("localinfo %d \"\"\n", usrid); // remove ghost in localinfo
-			ent_remove(p); // remove ghost entity
+				self->ps = p->ps; // restore player stats
+				self->s.v.frags = p->s.v.frags;
+				self->deaths = p->deaths;
+				self->friendly = p->friendly;
+
+				self->ca_ready = isCA() ? true : 0; // return to the game if playing clan arena
+
+				if (isTeam() || isCTF())
+				{
+					self->k_teamnum = p->k_teamnum; // we alredy have team in localinfo
+					G_bprint(2, "%s \220%s\221 %s %d %s%s\n", self->netname, getteam(self),
+								redtext("rejoins the game with"), (int)self->s.v.frags,
+								redtext("frag"), redtext(count_s(self->s.v.frags)));
+				}
+				else
+				{
+					self->k_teamnum = 0; // force check is we have team in localinfo or not below
+					G_bprint(2, "%s %s %d %s%s\n", self->netname, redtext("rejoins the game with"),
+								(int)self->s.v.frags, redtext("frag"),
+								redtext(count_s(self->s.v.frags)));
+				}
+
+				localcmd("localinfo %d \"\"\n", usrid); // remove ghost in localinfo
+				ent_remove(p); // remove ghost entity
+			}
 		}
 		else // ghost entity not found
 		{
@@ -1446,7 +1463,11 @@ qbool CanConnect()
 	}
 	else
 	{ // ghost not found (localinfo)
-		if (isTeam() || isCTF())
+		if (isCA())
+		{
+			G_bprint(2, "%s entered the game\n", self->netname);
+		}
+		else if (isTeam() || isCTF())
 		{
 			G_bprint(2, "%s \220%s\221 %s\n", self->netname, getteam(self),
 						redtext("arrives late"));
@@ -1667,7 +1688,7 @@ void PutClientInServer(void)
 
 	self->trackent = 0;
 
-	self->ca_alive = (isCA() ? (ra_match_fight != 2 || self->in_limbo) : true);
+	self->ca_alive = (isCA() ? CA_CheckAlive(self) : true);
 	self->deathtype = dtNONE;
 	self->classname = "player";
 	self->s.v.health = 100;

@@ -833,7 +833,9 @@ void ra_break();
 // clan_arena.c
 
 qbool isCA();
+qbool CA_CheckAlive(gedict_t *p);
 int CA_wins_required(void);
+int CA_count_ready_players(void);
 void SM_PrepareCA(void);
 void apply_CA_settings(void);
 void CA_ClientObituary(gedict_t *targ, gedict_t *attacker);

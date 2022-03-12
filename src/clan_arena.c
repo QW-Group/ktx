@@ -40,8 +40,26 @@ gedict_t* ca_get_player(void)
 
 qbool is_rules_change_allowed(void);
 
+int CA_count_ready_players(void)
+{
+	int cnt;
+	gedict_t *p;
+
+	for (cnt = 0, p = world; (p = find_plr(p));)
+	{
+		if (p->ca_ready)
+		{
+			cnt++;
+		}
+	}
+
+	return cnt;
+}
+
 void SM_PrepareCA(void)
 {
+	gedict_t *p;
+
 	if (!isCA())
 	{
 		return;
@@ -49,6 +67,14 @@ void SM_PrepareCA(void)
 
 	team1_score = team2_score = 0;
 	round_num = 1;
+
+	for (p = world; (p = find_plr(p));)
+	{
+		if (p->ct == ctPlayer && p->ready)
+		{
+			p->ca_ready = p->ready;
+		}
+	}
 }
 
 int CA_wins_required(void)
@@ -63,6 +89,32 @@ int CA_wins_required(void)
 qbool isCA()
 {
 	return (isTeam() && cvar("k_clan_arena"));
+}
+
+qbool CA_CheckAlive(gedict_t *p)
+{
+	if (p)
+	{
+		if (!match_in_progress)
+		{
+			return true;
+		}
+		else if (!p->ca_ready && !match_over)
+		{
+			return false;
+		}
+		else if (ra_match_fight != 2 || p->in_limbo)
+		{
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
 }
 
 // hard coded default settings for CA
@@ -97,8 +149,8 @@ void CA_MatchBreak(void)
 	{
 		if (p->ct == ctPlayer)
 		{
-			k_respawn(p, false);
 			p->teamcolor = NULL;
+			k_respawn(p, false);
 		}
 	}
 }
@@ -395,30 +447,38 @@ void CA_PutClientInServer(void)
 		self->in_play = true;
 		self->in_limbo = false;
 
-		if (!self->teamcolor)
+		if (!self->teamcolor && self->ca_ready)
 		{
-			// if team is red or blue, set color to match
-			if (streq(getteam(self), "red") || streq(getteam(self), "blue"))
+			// if you're not playing, you're always color 0
+			if (!self->ca_ready)
+			{
+				self->teamcolor = "0"; 
+			}
+			// if your team is "red" or "blue", set color to match
+			else if (streq(getteam(self), "red") || streq(getteam(self), "blue"))
 			{
 				self->teamcolor = streq(getteam(self), "red") ? "4" : "13";
 			}
+			// if a "red" team exists, you aren't on it, so set color to blue
 			else if (streq(cvar_string("_k_team1"), "red") || streq(cvar_string("_k_team2"), "red"))
 			{
 				self->teamcolor = "13";
 			}
+			// if a "blue" team exists, you aren't on it, so set color to red
 			else if (streq(cvar_string("_k_team1"), "blue") || streq(cvar_string("_k_team2"), "blue"))
 			{
 				self->teamcolor = "4";
 			}
+			// neither "red" nor "blue" teams exist, so default to team1 being red and team2 blue
 			else 
 			{
 				self->teamcolor = streq(cvar_string("_k_team1"), getteam(self)) ? "4" : "13";
 			}
 		}
 
-		SetUserInfo(self, "topcolor", self->teamcolor, 0);
-		SetUserInfo(self, "bottomcolor", self->teamcolor, 0);
-		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "color %s\n", self->teamcolor);
+		SetUserInfo(self, "topcolor", self->teamcolor ? self->teamcolor : "0", 0);
+		SetUserInfo(self, "bottomcolor", self->teamcolor ? self->teamcolor : "0", 0);
+		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "color %s\n", self->teamcolor ? self->teamcolor : "0");
 	}
 
 	// set to ghost if dead
@@ -443,7 +503,7 @@ void CA_PutClientInServer(void)
 		setmodel(self, "");
 		setorigin(self, PASSVEC3(self->s.v.origin));
 
-		if (self->round_deaths <= max_deaths && !ca_round_pause)
+		if (self->ca_ready && self->round_deaths <= max_deaths && !ca_round_pause)
 		{
 			//change colors to light versions
 			if (streq(self->teamcolor, "13"))
@@ -459,7 +519,7 @@ void CA_PutClientInServer(void)
 		}
 		else
 		{
-			// Change color to white if dead
+			// Change color to white if dead or not playing
 			SetUserInfo(self, "topcolor", "0", 0);
 			SetUserInfo(self, "bottomcolor", "0", 0);
 			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "color %s\n", "0");
@@ -1098,7 +1158,7 @@ void CA_player_pre_think(void)
 
 		setorigin(self, PASSVEC3(self->s.v.origin));
 
-		if ((self->ct == ctPlayer) && ISDEAD(self))
+		if ((self->ct == ctPlayer) && (ISDEAD(self) || !self->in_play))
 		{
 			if (self->tracking_enabled)
 			{
@@ -1118,7 +1178,7 @@ void CA_player_pre_think(void)
 			}
 		}
 
-		if (self->ct == ctPlayer && ra_match_fight > 0 && !self->in_play)
+		if (self->ct == ctPlayer && ra_match_fight && !self->in_play)
 		{
 			track_player(self);
 		}
@@ -1233,8 +1293,12 @@ void CA_Frame(void)
 
 			for (p = world; (p = find_plr(p));)
 			{
-				p->round_deaths = 0;
-				k_respawn(p, false);
+				if (p->ca_ready)
+				{
+					p->round_deaths = 0;
+					k_respawn(p, false);
+				}
+
 				G_sprint(p, 2, "round \x90%d\x91 starts in 5 seconds.\n", round_num);
 			}
 		}

@@ -2796,6 +2796,13 @@ void PlayerBreak()
 		return;
 	}
 
+	if ( isCA() && match_in_progress == 2 && !self->ca_ready)
+	{
+		G_sprint(self, 2, "You must be in the game to vote\n");
+
+		return;
+	}
+
 	if (k_matchLess && !k_bloodfest)
 	{
 		// do not allow break/next_map commands in some cases.
