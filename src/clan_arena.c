@@ -1214,7 +1214,7 @@ void CA_Frame(void)
 
 				if (!p->spawn_delay)
 				{
-					int delay = p->round_deaths * 7;
+					int delay = p->round_deaths * 5;
 					p->spawn_delay = g_globalvars.time + delay;
 				}
 
