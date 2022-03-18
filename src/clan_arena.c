@@ -22,20 +22,36 @@ void CA_OnePlayerStats(gedict_t *p, qbool series_over);
 void EndRound(int alive_team);
 void show_tracking_info(gedict_t *p);
 
-gedict_t* ca_find_player(gedict_t *p)
+gedict_t* ca_find_player(gedict_t *p, gedict_t *observer)
 {
-	p = find_plr(p);
-	while (p && !p->in_play)
+	char *team = getteam(observer);
+	
+	// if the observer is just spectating, or if the round is over
+	// then any player can be watched.
+	// otherwise, you can only spec teammates
+	if (!observer->ca_ready || ca_round_pause)
 	{
 		p = find_plr(p);
+		while (p && !p->in_play)
+		{
+			p = find_plr(p);
+		}
+	}
+	else
+	{
+		p = find_plr_same_team(p, team);
+		while (p && !p->in_play)
+		{
+			p = find_plr_same_team(p, team);
+		}
 	}
 
 	return p;
 }
 
-gedict_t* ca_get_player(void)
+gedict_t* ca_get_player(gedict_t *observer)
 {
-	return ca_find_player(world);
+	return ca_find_player(world, observer);
 }
 
 qbool is_rules_change_allowed(void);
@@ -170,7 +186,7 @@ void CA_MatchBreak(void)
 
 void track_player(gedict_t *observer)
 {
-	gedict_t *player = ca_get_player();
+	gedict_t *player = ca_get_player(observer);
 	vec3_t delta;
 	float vlen;
 	int follow_distance;
@@ -185,7 +201,21 @@ void track_player(gedict_t *observer)
 	{
 		if (observer->track_target && observer->track_target->in_play)
 		{
-			player = observer->track_target;
+			// is the observer not playing or is the round over?
+			if (!observer->ca_ready || ca_round_pause)
+			{	
+				player = observer->track_target;
+			}
+			// otherwise is the target on the observer's team?
+			else if (streq(getteam(observer), getteam(observer->track_target)))
+			{
+				player = observer->track_target;
+			}
+			// if not, find a different player to watch
+			else
+			{
+				observer->track_target = player;
+			}
 		}
 		else
 		{
@@ -1162,7 +1192,7 @@ void show_tracking_info(gedict_t *p)
 
 static void track_player_next(gedict_t *observer)
 {
-	gedict_t *first_player = ca_get_player();
+	gedict_t *first_player = ca_get_player(observer);
 	gedict_t *player = first_player;
 
 	if (!first_player)
@@ -1181,7 +1211,7 @@ static void track_player_next(gedict_t *observer)
 	}
 	else
 	{
-		player = ca_find_player(observer->track_target);
+		player = ca_find_player(observer->track_target, observer);
 		if (!player)
 		{
 			player = first_player;
