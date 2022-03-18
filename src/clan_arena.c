@@ -154,6 +154,9 @@ void CA_MatchBreak(void)
 	print_stats = false;
 	do_endround_stuff = false;
 
+	// stop recording demo
+	localcmd("sv_demostop\n"); 
+
 	// respawn all players
 	for (p = world; (p = find_plr(p));)
 	{
