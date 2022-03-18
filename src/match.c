@@ -1401,11 +1401,7 @@ void PrintCountdown(int seconds)
 	{
 		if (cvar("k_clan_arena") == 2)
 		{
-			mode = redtext("CA:W");	
-		}
-		else if (cvar("k_clan_arena") == 1)
-		{
-			mode = redtext("CA:C");
+			mode = redtext("Wipeout");	
 		}
 		else {
 			mode = redtext("CA");

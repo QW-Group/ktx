@@ -391,15 +391,50 @@ void ToggleCArena()
 	}
 	else if (k_clan_arena == 1)
 	{
-		G_bprint(2, "%s %s %s\n", self->netname, "enables", redtext("Clan Arena (classic)"));
+		G_bprint(2, "%s %s %s\n", self->netname, "enables", redtext("Clan Arena"));
 	}
 	else if (k_clan_arena == 2)
 	{
-		G_bprint(2, "%s %s %s\n", self->netname, "enables", redtext("Clan Arena (wipeout)"));
+		G_bprint(2, "%s %s %s\n", self->netname, "enables", redtext("Wipeout"));
 	}
 	else
 	{
 		G_bprint(2, "%s unknown\n", redtext("Clan Arena"));
+	}
+
+	cvar_fset("k_clan_arena", k_clan_arena);
+	apply_CA_settings();
+}
+
+void ToggleWipeout()
+{
+	int k_clan_arena = bound(0, cvar("k_clan_arena"), 2);
+
+	if (!is_rules_change_allowed())
+	{
+		return;
+	}
+
+	if (!isCA())
+	{
+		// seems we trying turn CA on.
+		if (!isTeam())
+		{
+			G_sprint(self, 2, "Set %s mode first\n", redtext("team"));
+
+			return;
+		}
+	}
+
+	if (k_clan_arena == 2)
+	{
+		k_clan_arena = 0;
+		G_bprint(2, "%s %s %s\n", self->netname, "disables", redtext("Wipeout"));
+	}
+	else
+	{
+		k_clan_arena = 2;
+		G_bprint(2, "%s %s %s\n", self->netname, "enables", redtext("Wipeout"));
 	}
 
 	cvar_fset("k_clan_arena", k_clan_arena);
@@ -555,12 +590,14 @@ qbool CA_can_fire(gedict_t *p)
 
 void CA_show_greeting(gedict_t *self)
 {
+	char* mode = cvar("k_clan_arena") == 2 ? "Wipeout!" : "Clan Arena!";
+
 	if (self->ct == ctPlayer && !match_in_progress)
 	{
 		if (!self->ready)
 		{
-			G_centerprint(self, "%s\n\n\n%s %s", 
-							"Welcome to Clan Arena!",
+			G_centerprint(self, "Welcome to %s\n\n\n%s %s", 
+							mode,
 							"set your team and type",
 							redtext("/ready"));
 		}

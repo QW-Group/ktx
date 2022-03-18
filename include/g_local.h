@@ -176,6 +176,7 @@ typedef enum
 	lsCTF,
 	lsRA, // note no correspoding gameType_t for lsType
 	lsCA,
+	lsWO,
 	lsHM,
 	lsRACE
 } lsType_t; // lastscores type

@@ -264,6 +264,7 @@ static void dumpent();
 
 // { Clan Arena
 void ToggleCArena();
+void ToggleWipeout();
 void r_changetrackingstatus(float t);
 // }
 
@@ -558,6 +559,7 @@ const char CD_NODESC[] = "no desc";
 // }
 // { Clan Arena
 #define CD_CARENA			"toggle clan arena"
+#define CD_WIPEOUT			"toggle wipeout"
 // }
 #define CD_FORCE_SPEC		"force spec players"
 // { server side bans
@@ -922,6 +924,7 @@ cmd_t cmds[] =
 	// }
 	// { Clan Arena
 	{ "carena", 					ToggleCArena, 					0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_CARENA },
+	{ "wipeout", 					ToggleWipeout, 					0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_WIPEOUT },
 	// }
 	{ "force_spec", 				force_spec, 					0, 			CF_BOTH_ADMIN | CF_PARAMS, 												CD_FORCE_SPEC },
 	// { bans
@@ -6281,6 +6284,9 @@ char* lastscores2str(lsType_t lst)
 		case lsCA:
 			return "Clan Arena";
 
+		case lsWO:
+			return "Wipeout";
+
 		case lsHM:
 			return "HoonyMode";
 
@@ -6370,7 +6376,7 @@ void lastscore_add()
 	{
 		if (isCA())
 		{
-			lst = lsCA;
+			lst = cvar("k_clan_arena") == 2 ? lsWO : lsCA;
 		}
 		else if (isTeam())
 		{
@@ -8701,6 +8707,7 @@ void ListGameModes()
 		"lgcmode",
 		"arena",
 		"carena",
+		"wipeout",
 		"yawnmode",
 	};
 	int i, j;
