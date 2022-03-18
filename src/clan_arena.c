@@ -669,12 +669,13 @@ void CA_ClientObituary(gedict_t *targ, gedict_t *attacker)
 	{
 		if (attacker != targ)
 		{
-			if ((ah == 100) && (aa == 200))
-			{
-				G_sprint(targ, PRINT_HIGH, "%s %s %d %s %d %s\n",
-							attacker->netname, redtext("had"), aa,
-							redtext("armor and"), ah, redtext("health"));
-			}
+			// This is classic CA behavior, but maybe we
+			// don't want players to know their killer's
+			// stats before the round is over. Commenting this
+			// out for now.
+			// G_sprint(targ, PRINT_HIGH, "%s %s %d %s %d %s\n",
+			// 			attacker->netname, redtext("had"), aa,
+			// 			redtext("armor and"), ah, redtext("health"));
 		}
 	}
 }
