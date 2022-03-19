@@ -978,6 +978,11 @@ void ClientKill()
 		return;
 	}
 
+	if (isCA() && match_in_progress && ra_match_fight == 2 && !ca_round_pause)
+	{
+		self->round_deaths = 99;	// No respawning after suicide in wipeout mode
+	}
+
 	if (isCTF() && (match_in_progress == 2) && ((g_globalvars.time - match_start_time) < 10))
 	{
 		G_sprint(self, PRINT_HIGH, "Can't suicide during first 10 seconds of CTF match\n");
