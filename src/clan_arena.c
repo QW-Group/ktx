@@ -82,6 +82,61 @@ int CA_get_score_2(void)
 	return team2_score;
 }
 
+// returns 0 if player has at least one alive teammate
+// otherwise returns number of seconds until next teammate respawns
+int last_alive_time(gedict_t *player)
+{
+	gedict_t *p;
+	int time = 0;
+
+	for (p = world; (p = find_plr_same_team(p, getteam(player)));)
+	{
+		if (p->ca_ready)
+		{
+			if (p->in_play && p != player)
+			{
+				return 0;
+			}
+			else if (!p->in_play)
+			{
+				if (!time || p->seconds_to_respawn < time)
+				{
+					time = p->seconds_to_respawn;
+				}
+			}
+		}
+	}
+
+	return time;
+}
+
+int enemy_last_alive_time(gedict_t *player)
+{
+	gedict_t *p;
+	int time = 0;
+	int alive_enemies = 0;
+
+	for (p = world; (p = find_plr(p));)
+	{
+		if (p->ca_ready && strneq(getteam(p), getteam(player)))
+		{
+			if (p->in_play)
+			{
+				alive_enemies++;
+			}
+			else if (!p->in_play)
+			{
+				if (!time || p->seconds_to_respawn < time)
+				{
+					time = p->seconds_to_respawn;
+				}
+			}
+		}
+	}
+
+	return alive_enemies > 1 ? 0 : time;
+}
+
 void SM_PrepareCA(void)
 {
 	gedict_t *p;
@@ -99,6 +154,7 @@ void SM_PrepareCA(void)
 		if (p->ct == ctPlayer && p->ready)
 		{
 			p->ca_ready = p->ready;
+			p->seconds_to_respawn = 0;
 		}
 	}
 }
@@ -1091,6 +1147,7 @@ void EndRound(int alive_team)
 			if (!do_endround_stuff)
 			{
 				do_endround_stuff = true;
+				G_cp2all(" "); // clear any centerprint from during the round
 
 				for (p = world; (p = find_plr(p));)
 				{
@@ -1283,12 +1340,19 @@ void CA_Frame(void)
 	}
 
 	// if max_respawns are greater than 0, we're playing wipeout
-	if (ra_match_fight == 2 && !ca_round_pause && cvar("k_clan_arena_max_respawns"))
+	if (ra_match_fight == 2 && !ca_round_pause && cvar("k_clan_arena") == 2)
 	{
 		int max_deaths = cvar("k_clan_arena_max_respawns");
+		int last_alive;
+		int e_last_alive;
+		char str_last_alive[5];
+		char str_e_last_alive[5];
 
 		for (p = world; (p = find_plr(p));)
 		{
+			last_alive = last_alive_time(p);
+			e_last_alive = enemy_last_alive_time(p);
+			
 			if (!p->in_play && p->round_deaths <= max_deaths)
 			{
 				p->in_limbo = true;
@@ -1307,7 +1371,7 @@ void CA_Frame(void)
 					G_centerprint(p, "%s\n", "FIGHT!");
 					k_respawn(p, true);
 
-					p->seconds_to_respawn = g_globalvars.time;
+					p->seconds_to_respawn = 999;
 				}
 				else
 				{
@@ -1316,6 +1380,20 @@ void CA_Frame(void)
 						G_centerprint(p, "\n\n\n\n\n\n\n\n\n%d\n\n\n seconds to respawn!\n", p->seconds_to_respawn);
 					}
 				}
+			}
+			else if (p->in_play && last_alive)
+			{
+				sprintf(str_last_alive, "%d", last_alive);
+
+				G_centerprint(p, "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n", 
+								redtext("stay alive!"), last_alive == 999 ? " " : str_last_alive);
+			}
+			else if (p->in_play && e_last_alive)
+			{
+				sprintf(str_e_last_alive, "%d", e_last_alive);
+
+				G_centerprint(p, "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n", 
+								"one enemy left", e_last_alive == 999 ? " " : str_e_last_alive);
 			}
 		}
 	}
