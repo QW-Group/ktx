@@ -1060,6 +1060,8 @@ typedef struct gedict_s
 	int tracking_enabled;
 	int round_deaths;						// number of times player has died in the round
 	int seconds_to_respawn;					// number of seconds until respawn
+	int alive_time;							// number of seconds player is in play
+	int time_of_respawn;					// server time player respawned or round started
 	int spawn_delay;						// total delay between death and spawn
 // }
 

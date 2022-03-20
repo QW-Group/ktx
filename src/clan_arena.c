@@ -1320,6 +1320,11 @@ void CA_player_pre_think(void)
 		{
 			track_player(self);
 		}
+
+		if (self->in_play)
+		{
+			self->alive_time = Q_rint(g_globalvars.time - self->time_of_respawn);
+		}
 	}
 }
 
@@ -1372,6 +1377,7 @@ void CA_Frame(void)
 					k_respawn(p, true);
 
 					p->seconds_to_respawn = 999;
+					p->time_of_respawn = g_globalvars.time; // resets alive_time to 0
 				}
 				else
 				{
@@ -1381,19 +1387,23 @@ void CA_Frame(void)
 					}
 				}
 			}
-			else if (p->in_play && last_alive)
+			else if (p->in_play && p->alive_time > 2 && last_alive)
 			{
 				sprintf(str_last_alive, "%d", last_alive);
 
 				G_centerprint(p, "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n", 
 								redtext("stay alive!"), last_alive == 999 ? " " : str_last_alive);
 			}
-			else if (p->in_play && e_last_alive)
+			else if (p->in_play && p->alive_time > 2 && e_last_alive)
 			{
 				sprintf(str_e_last_alive, "%d", e_last_alive);
 
 				G_centerprint(p, "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n", 
 								"one enemy left", e_last_alive == 999 ? " " : str_e_last_alive);
+			}
+			else if (p->in_play && p->alive_time > 2)
+			{
+				G_centerprint(p, " ");
 			}
 		}
 	}
@@ -1449,6 +1459,7 @@ void CA_Frame(void)
 			ra_match_fight = 1; // ra countdown
 			last_r = 999999999;
 			time_to_start = g_globalvars.time + 9;
+			G_cp2all(" ");
 
 			for (p = world; (p = find_plr(p));)
 			{
@@ -1469,6 +1480,11 @@ void CA_Frame(void)
 			for (p = world; (p = find_client(p));)
 			{
 				stuffcmd(p, "play ca/sffight.wav\n");
+
+				if (p->ca_ready)
+				{
+					p->time_of_respawn = g_globalvars.time; // resets alive_time to 0
+				}
 			}
 			
 			G_cp2all("%s", "FIGHT!");
