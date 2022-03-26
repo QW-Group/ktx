@@ -971,16 +971,18 @@ void ClientKill()
 		return;
 	}
 
-	if (isCA() && match_in_progress && (ra_match_fight != 2 || ca_round_pause)) 
+	if (isCA() && match_in_progress)
 	{
-		G_sprint (self, PRINT_HIGH, "Can't suicide at this time\n");
+		if ((ra_match_fight != 2) || ca_round_pause)
+		{
+			G_sprint (self, PRINT_HIGH, "Can't suicide at this time\n");
 
-		return;
-	}
-
-	if (isCA() && match_in_progress && ra_match_fight == 2 && !ca_round_pause)
-	{
-		self->round_deaths = 99;	// No respawning after suicide in wipeout mode
+			return;
+		}
+		else if ((ra_match_fight == 2) && !ca_round_pause)
+		{
+			self->round_deaths = 99;	// No respawning after suicide in wipeout mode
+		}
 	}
 
 	if (isCTF() && (match_in_progress == 2) && ((g_globalvars.time - match_start_time) < 10))
@@ -1406,8 +1408,11 @@ qbool CanConnect()
 
 		if (p) // found ghost entity
 		{
+			qbool isCa = isCA();
+			qbool teamEqual = streq(getteam(self), getteam(p));
+
 			// check teams only for team mode
-			if ((isTeam() || isCTF()) && strneq(getteam(self), getteam(p)) && !isCA())
+			if ((isTeam() || isCTF()) && !teamEqual && !isCa)
 			{
 				G_sprint(self, 2, "Please join your old team and reconnect\n");
 
@@ -1415,7 +1420,7 @@ qbool CanConnect()
 			}
 			// In CA, if current team doesn't match old team then just don't restore stats/gamestate
 			// Otherwise restore frags and set ca_ready
-			else if (isCA() && strneq(getteam(self), getteam(p)))
+			else if (isCa && !teamEqual)
 			{
 				// if player's team isn't what it was before, then he will be a "dead" player until the match is over
 				self->ca_ready = 0;
@@ -4242,7 +4247,7 @@ void PlayerPostThink()
 				self->s.v.ammo_rockets = 100 + (int)(velocity_vert_abs) % 10000 / 100;
 				self->s.v.ammo_cells = 100 + (int)(velocity_vert_abs) % 100;
 			}
-			else if (cvar("k_clan_arena"))
+			else if (isCA())
 			{
 				// do nothing
 			}

@@ -447,7 +447,7 @@ void EndMatch(float skip_log)
 	}
 
 	// allow ready/break in bloodfest without map reloading.
-	if (k_bloodfest || cvar("k_clan_arena"))
+	if (k_bloodfest || isCA())
 	{
 		match_over = 0;
 	}
@@ -1403,7 +1403,8 @@ void PrintCountdown(int seconds)
 		{
 			mode = redtext("Wipeout");	
 		}
-		else {
+		else 
+		{
 			mode = redtext("CA");
 		}
 	}
@@ -1981,8 +1982,10 @@ char* CompilateDemoName()
 {
 	static char demoname[60];
 	char date[128], *fmt;
+	char teams[MAX_CLIENTS][MAX_TEAM_NAME];
 
 	int i;
+	int players;
 	gedict_t *p;
 	char *name, *vs;
 
@@ -2002,24 +2005,23 @@ char* CompilateDemoName()
 			strlcat(demoname, "wipeout", sizeof(demoname));
 		}
 
-		char teams[MAX_CLIENTS][MAX_TEAM_NAME];
 		getteams(teams);
 		
 		for (vs = "_", i = 0; i < MAX_CLIENTS; i++)
-        {
-            if (strnull(teams[i]))
+    	{
+        	if (strnull(teams[i]))
             {
-                break;
+            	break;
             }
 
-            strlcat(demoname, vs, sizeof(demoname));
-            strlcat(demoname, teams[i], sizeof(demoname));
-            vs = "_vs_";
+        	strlcat(demoname, vs, sizeof(demoname));
+        	strlcat(demoname, teams[i], sizeof(demoname));
+        	vs = "_vs_";
         }
 	}
 	else if (isRACE() && !race_match_mode())
 	{
-		int players = 0;
+		players = 0;
 
 		strlcat(demoname, "race", sizeof(demoname));
 		for (vs = "_", p = world; (p = find_plr(p));)
@@ -2792,7 +2794,7 @@ void PlayerBreak()
 		return;
 	}
 
-	if ( isCA() && match_in_progress == 2 && !self->ca_ready)
+	if (isCA() && (match_in_progress == 2) && !self->ca_ready)
 	{
 		G_sprint(self, 2, "You must be in the game to vote\n");
 

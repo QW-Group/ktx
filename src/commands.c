@@ -6374,7 +6374,8 @@ void lastscore_add()
 	}
 	else if ((isTeam() || isCTF() || isCA()) && k_showscores)
 	{
-		if (isCA())
+		qbool isCa = isCA();
+		if (isCa)
 		{
 			lst = cvar("k_clan_arena") == 2 ? lsWO : lsCA;
 		}
@@ -6388,9 +6389,9 @@ void lastscore_add()
 		}
 
 		e1 = cvar_string("_k_team1");
-		s1 = isCA() ? CA_get_score_1() : get_scores1();
+		s1 = isCa ? CA_get_score_1() : get_scores1();
 		e2 = cvar_string("_k_team2");
-		s2 = isCA() ? CA_get_score_2() : get_scores2();
+		s2 = isCa ? CA_get_score_2() : get_scores2();
 
 		// players from first team
 		for (t1[0] = from = 0, p = world; (p = find_plrghst(p, &from));)
