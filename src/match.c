@@ -958,13 +958,13 @@ static void SM_PrepareClients()
 			continue;
 		}
 
-		// ignore  k_respawn() in case of CA
+		// ignore k_respawn() in case of CA
 		if (isCA())
 		{
 			continue;
 		}
 
-		// ignore  k_respawn() in case of race mode
+		// ignore k_respawn() in case of race mode
 		if (isRACE())
 		{
 			continue;
@@ -1079,7 +1079,7 @@ void SM_PrepareHostname()
 	char *team1 = cvar_string("_k_team1");
 	char *team2 = cvar_string("_k_team2");
 
-	cvar_set("_k_host", cvar_string("hostname"));  // save host name at match start
+	cvar_set("_k_host", cvar_string("hostname")); // save host name at match start
 
 	if (k_showscores && !strnull(team1) && !strnull(team2))
 	{
@@ -1186,8 +1186,8 @@ void StartMatch()
 		localcmd("serverinfo fpd %d\n", fpd);
 	}
 
-	self->k_teamnum = g_globalvars.time + 3;  //dirty i know, but why waste space?
-											  // FIXME: waste space, but be clean
+	self->k_teamnum = g_globalvars.time + 3; //dirty i know, but why waste space?
+											 // FIXME: waste space, but be clean
 
 	if (isHoonyModeAny() && HM_timelimit() > 0)
 	{
@@ -1336,22 +1336,22 @@ void PrintCountdown(int seconds)
 //
 // EQL semifinal
 //
-// Deathmatch  x
-// Mode		  D u e l | T e a m | F F A | C O O P | BLOODFST | C T F | RA | CA
-// Spawnmodel KTX | bla bla bla // optional
-// Antilag    On|Off
-// NoItems    On // optional
-// Midair     On // optional
-// Instagib   On // optional
-// Yawnmode   On // optional
-// Airstep    On // optional
-// TmOverlay  On // optional
-// Teamplay    x
-// Timelimit  xx
-// Fraglimit xxx
-// Overtime   xx		Overtime printout, supports sudden death display
-// Powerups   On|Off|QPRS
-// Dmgfrags   On // optional
+// Deathmatch	x
+// Mode			D u e l | T e a m | F F A | C O O P | BLOODFST | C T F | RA | CA
+// Spawnmodel	KTX | bla bla bla // optional
+// Antilag		On|Off
+// NoItems		On // optional
+// Midair		On // optional
+// Instagib		On // optional
+// Yawnmode		On // optional
+// Airstep		On // optional
+// TmOverlay	On // optional
+// Teamplay		x
+// Timelimit	xx
+// Fraglimit	xxx
+// Overtime		xx		Overtime printout, supports sudden death display
+// Powerups		On|Off|QPRS
+// Dmgfrags		On // optional
 // Noweapon
 
 // Handicap in use // optional
@@ -2008,16 +2008,16 @@ char* CompilateDemoName()
 		getteams(teams);
 		
 		for (vs = "_", i = 0; i < MAX_CLIENTS; i++)
-    	{
-        	if (strnull(teams[i]))
-            {
-            	break;
-            }
+		{
+			if (strnull(teams[i]))
+			{
+				break;
+			}
 
-        	strlcat(demoname, vs, sizeof(demoname));
-        	strlcat(demoname, teams[i], sizeof(demoname));
-        	vs = "_vs_";
-        }
+			strlcat(demoname, vs, sizeof(demoname));
+			strlcat(demoname, teams[i], sizeof(demoname));
+			vs = "_vs_";
+		}
 	}
 	else if (isRACE() && !race_match_mode())
 	{
@@ -2190,7 +2190,7 @@ void StartDemoRecord()
 		{
 			if (!strnull(cvar_string("serverdemo")))
 			{
-				localcmd("sv_democancel\n");  // demo is recording, cancel before new one
+				localcmd("sv_democancel\n"); // demo is recording, cancel before new one
 			}
 
 			demoname = CompilateDemoName();
@@ -2249,7 +2249,7 @@ void StartTimer()
 	timer->classname = "timer";
 	timer->cnt = 0;
 
-	timer->cnt2 = max(3, (int)cvar("k_count"));  // at the least we want a 3 second countdown
+	timer->cnt2 = max(3, (int)cvar("k_count")); // at the least we want a 3 second countdown
 
 	if (isHoonyModeDuel() && (HM_current_point() > 0))
 	{
@@ -2363,7 +2363,7 @@ void StopTimer(int removeDemo)
 	if (removeDemo && (match_can_cancel_demo()) && (race_can_cancel_demo())
 			&& !strnull(cvar_string("serverdemo")))
 	{
-		localcmd("sv_democancel\n");  // demo is recording and must be removed, do it
+		localcmd("sv_democancel\n"); // demo is recording and must be removed, do it
 	}
 
 	match_start_time = 0;
@@ -2823,7 +2823,7 @@ void PlayerBreak()
 
 	if (!k_matchLess || k_bloodfest)
 	{
-		// try stop countdown.  (countdown between hoony-mode points can't be stopped, treat as standard break request).
+		// try stop countdown. (countdown between hoony-mode points can't be stopped, treat as standard break request).
 		qbool can_stop_hoonymode = (!isHoonyModeAny() || HM_current_point() == 0);
 
 		if (match_in_progress == 1 && can_stop_hoonymode)
