@@ -2,6 +2,7 @@ name: build targets
 on: [pull_request]
 jobs:
   build:
+    if: github.repository == 'QW-Group/ktx'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
