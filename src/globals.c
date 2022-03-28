@@ -97,6 +97,12 @@ int ra_match_fight;				// have winner and loser fighting
 
 // }
 
+// { clan arena
+
+int ca_round_pause;
+
+// }
+
 int jumpf_flag;					// falling velocity criteria
 
 float f_check;					// is we in state of some f_xxx check

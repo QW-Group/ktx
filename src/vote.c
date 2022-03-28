@@ -249,6 +249,11 @@ int get_votes_req(int fofs, qbool diff)
 	{
 		vt_req = race_count_votes_req(percent);
 	}
+	else if (isCA() && (fofs == OV_BREAK))
+	{
+		// CA players who aren't playing in the current series can't vote to break
+		vt_req = ceil(percent * (CA_count_ready_players() - CountBots()));
+	}
 	else
 	{
 		vt_req = ceil(percent * (CountPlayers() - CountBots()));

@@ -946,6 +946,7 @@ void FirstFrame()
 // { Clan Arena
 	RegisterCvarEx("k_clan_arena", "0");
 	RegisterCvarEx("k_clan_arena_rounds", "9");
+	RegisterCvarEx("k_clan_arena_max_respawns", "0");
 // }
 // { upplayers/upspecs
 	RegisterCvar("k_allowcountchange");

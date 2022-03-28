@@ -175,6 +175,8 @@ typedef enum
 	lsFFA,
 	lsCTF,
 	lsRA, // note no correspoding gameType_t for lsType
+	lsCA,
+	lsWO,
 	lsHM,
 	lsRACE
 } lsType_t; // lastscores type
@@ -833,11 +835,18 @@ void ra_break();
 // clan_arena.c
 
 qbool isCA();
+qbool CA_CheckAlive(gedict_t *p);
 int CA_wins_required(void);
+int CA_count_ready_players(void);
+int CA_get_score_1(void);
+int CA_get_score_2(void);
 void SM_PrepareCA(void);
 void apply_CA_settings(void);
+void CA_ClientObituary(gedict_t *targ, gedict_t *attacker);
+void CA_MatchBreak(void);
 void CA_PrintScores(void);
 void CA_TeamsStats(void);
+void CA_player_pre_think(void);
 void CA_Frame(void);
 void CA_PutClientInServer(void);
 qbool CA_can_fire(gedict_t *p);
@@ -1031,6 +1040,12 @@ extern qbool vw_enabled; // vweps enabled
 
 extern float time_to_start;	//time to start match
 extern int ra_match_fight;	// have winner and loser fighting
+
+// }
+
+// { clan arena
+
+extern int ca_round_pause;
 
 // }
 
