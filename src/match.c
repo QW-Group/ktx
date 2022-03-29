@@ -310,6 +310,11 @@ void EndMatch(float skip_log)
 		cvar_fset("sv_spectalk", 1);
 	}
 
+	if (isCA())
+	{
+		CA_MatchBreak();
+	}
+
 	if (isHoonyModeAny())
 	{
 		G_bprint(2, "The point is over\n");
@@ -354,7 +359,10 @@ void EndMatch(float skip_log)
 
 		if (is_real_match_end)
 		{
-			MatchEndStats();
+			if (!isCA())
+			{
+				MatchEndStats();
+			}
 
 			lastscore_add(); // save game result somewhere, so we can show it later
 		}
@@ -439,7 +447,7 @@ void EndMatch(float skip_log)
 	}
 
 	// allow ready/break in bloodfest without map reloading.
-	if (k_bloodfest)
+	if (k_bloodfest || isCA())
 	{
 		match_over = 0;
 	}
@@ -689,11 +697,15 @@ void TimerThink()
 			return;
 		}
 
-		G_bprint(2, "\220%s\221 minute%s remaining\n", dig3(self->cnt), count_s(self->cnt));
+		// don't show match time reminders in clan arena
+		if (!isCA())
+		{
+			G_bprint(2, "\220%s\221 minute%s remaining\n", dig3(self->cnt), count_s(self->cnt));
+		}
 
 		self->s.v.nextthink = g_globalvars.time + 1;
 
-		if (k_showscores)
+		if (k_showscores && !isCA())
 		{
 			if ((current_umode < 11) || (current_umode > 13))
 			{
@@ -1387,7 +1399,14 @@ void PrintCountdown(int seconds)
 	}
 	else if (isCA())
 	{
-		mode = redtext("CA");
+		if (cvar("k_clan_arena") == 2)
+		{
+			mode = redtext("Wipeout");	
+		}
+		else 
+		{
+			mode = redtext("CA");
+		}
 	}
 	else if (isHoonyModeDuel())
 	{
@@ -1963,8 +1982,10 @@ char* CompilateDemoName()
 {
 	static char demoname[60];
 	char date[128], *fmt;
+	char teams[MAX_CLIENTS][MAX_TEAM_NAME];
 
 	int i;
+	int players;
 	gedict_t *p;
 	char *name, *vs;
 
@@ -1973,9 +1994,34 @@ char* CompilateDemoName()
 	{
 		strlcat(demoname, va("ra_%d", (int)CountPlayers()), sizeof(demoname));
 	}
+	else if (isCA())
+	{
+		if (cvar("k_clan_arena") == 1)
+		{
+			strlcat(demoname, "ca", sizeof(demoname));
+		}
+		else
+		{
+			strlcat(demoname, "wipeout", sizeof(demoname));
+		}
+
+		getteams(teams);
+		
+		for (vs = "_", i = 0; i < MAX_CLIENTS; i++)
+    	{
+        	if (strnull(teams[i]))
+            {
+            	break;
+            }
+
+        	strlcat(demoname, vs, sizeof(demoname));
+        	strlcat(demoname, teams[i], sizeof(demoname));
+        	vs = "_vs_";
+        }
+	}
 	else if (isRACE() && !race_match_mode())
 	{
-		int players = 0;
+		players = 0;
 
 		strlcat(demoname, "race", sizeof(demoname));
 		for (vs = "_", p = world; (p = find_plr(p));)
@@ -2745,6 +2791,13 @@ void PlayerBreak()
 
 	if (!self->ready || intermission_running || match_over)
 	{
+		return;
+	}
+
+	if (isCA() && (match_in_progress == 2) && !self->ca_ready)
+	{
+		G_sprint(self, 2, "You must be in the game to vote\n");
+
 		return;
 	}
 

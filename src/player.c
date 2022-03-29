@@ -848,6 +848,11 @@ void player_pain(struct gedict_s *attacker, float take)
 		return; // no pain at all in prewar
 	}
 
+	if (isCA() && streq(getteam(self), getteam(attacker)))
+	{
+		return; // No pain when shooting teammates in CA
+	}
+
 	if (self->s.v.weaponframe)
 	{
 		return;
@@ -1184,7 +1189,7 @@ void PlayerDie()
 	}
 
 	if ((self->s.v.health < -40) || (dtSQUISH == self->deathtype) || (dtSUICIDE == self->deathtype)
-			|| isRA() || isCA())
+			|| isRA())
 	{
 		GibPlayer();
 

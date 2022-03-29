@@ -29,6 +29,7 @@ void ReportMe();
 void AdminImpBot();
 void CaptainPickPlayer();
 void ChasecamToggleButton(void);
+void ClanArenaTrackingToggleButton(void);
 
 // Bots support
 void BotsRocketSpawned(gedict_t *newmis);
@@ -2870,6 +2871,23 @@ void W_WeaponFrame()
 			if (self->s.v.button0)
 			{
 				ChasecamToggleButton();
+			}
+			else
+			{
+				self->s.v.flags = ((int)(self->s.v.flags)) | FL_ATTACKRELEASED;
+			}
+
+			return;
+		}
+	}
+
+	if (isCA())
+	{
+		if ((self->ct == ctPlayer) && ISDEAD(self))
+		{
+			if (self->s.v.button0)
+			{
+				ClanArenaTrackingToggleButton();
 			}
 			else
 			{

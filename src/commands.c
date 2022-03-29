@@ -264,6 +264,8 @@ static void dumpent();
 
 // { Clan Arena
 void ToggleCArena();
+void ToggleWipeout();
+void r_changetrackingstatus(float t);
 // }
 
 // { Frogbots
@@ -557,6 +559,7 @@ const char CD_NODESC[] = "no desc";
 // }
 // { Clan Arena
 #define CD_CARENA			"toggle clan arena"
+#define CD_WIPEOUT			"toggle wipeout"
 // }
 #define CD_FORCE_SPEC		"force spec players"
 // { server side bans
@@ -921,6 +924,7 @@ cmd_t cmds[] =
 	// }
 	// { Clan Arena
 	{ "carena", 					ToggleCArena, 					0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_CARENA },
+	{ "wipeout", 					ToggleWipeout, 					0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_WIPEOUT },
 	// }
 	{ "force_spec", 				force_spec, 					0, 			CF_BOTH_ADMIN | CF_PARAMS, 												CD_FORCE_SPEC },
 	// { bans
@@ -6276,6 +6280,12 @@ char* lastscores2str(lsType_t lst)
 
 		case lsRA:
 			return "RA";
+		
+		case lsCA:
+			return "Clan Arena";
+
+		case lsWO:
+			return "Wipeout";
 
 		case lsHM:
 			return "HoonyMode";
@@ -6362,14 +6372,26 @@ void lastscore_add()
 			}
 		}
 	}
-	else if ((isTeam() || isCTF()) && k_showscores)
+	else if ((isTeam() || isCTF() || isCA()) && k_showscores)
 	{
-		lst = isTeam() ? lsTeam : lsCTF;
+		qbool isCa = isCA();
+		if (isCa)
+		{
+			lst = cvar("k_clan_arena") == 2 ? lsWO : lsCA;
+		}
+		else if (isTeam())
+		{
+			lst = lsTeam;
+		}
+		else
+		{
+			lst = lsCTF;
+		}
 
 		e1 = cvar_string("_k_team1");
-		s1 = get_scores1();
+		s1 = isCa ? CA_get_score_1() : get_scores1();
 		e2 = cvar_string("_k_team2");
-		s2 = get_scores2();
+		s2 = isCa ? CA_get_score_2() : get_scores2();
 
 		// players from first team
 		for (t1[0] = from = 0, p = world; (p = find_plrghst(p, &from));)
@@ -6500,7 +6522,7 @@ void lastscores()
 		// generally show members one time while show scores for each played map,
 		// but if squad changed from previuos map, show members again,
 		// so we know which squad played each map.
-		if (extended && ((cur == lsTeam) || (cur == lsCTF)))
+		if (extended && ((cur == lsTeam) || (cur == lsCTF) || (cur == lsCA)))
 		{
 			if (strneq(lt1, t1)) // first team
 			{
@@ -8686,6 +8708,7 @@ void ListGameModes()
 		"lgcmode",
 		"arena",
 		"carena",
+		"wipeout",
 		"yawnmode",
 	};
 	int i, j;

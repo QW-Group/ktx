@@ -1040,7 +1040,29 @@ typedef struct gedict_s
 // }
 
 // { Clan Arena
+	struct gedict_s *track_target;			// who are we tracking?
 	qbool ca_alive;
+	qbool ca_ready;
+	qbool in_play;							// is player still fighting?
+	qbool in_limbo;							// waiting to respawn during wipeout
+	float ca_round_frags;
+	float ca_round_kills;
+	float ca_round_dmg;
+	float ca_round_dmgt;
+	float ca_round_deaths;
+	float ca_round_glhit;
+	float ca_round_glfired;
+	float ca_round_rlhit;
+	float ca_round_rldirect;
+	float ca_round_lghit;
+	float ca_round_lgfired;
+	char *teamcolor;						// color of player's team
+	int tracking_enabled;
+	int round_deaths;						// number of times player has died in the round
+	int seconds_to_respawn;					// number of seconds until respawn
+	int alive_time;							// number of seconds player is in play
+	int time_of_respawn;					// server time player respawned or round started
+	int spawn_delay;						// total delay between death and spawn
 // }
 
 // {

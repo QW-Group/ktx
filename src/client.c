@@ -789,7 +789,7 @@ void NextLevel()
 	gedict_t *o;
 	char *entityfile;
 
-	if (k_bloodfest)
+	if (k_bloodfest || cvar("k_clan_arena"))
 	{
 		return;
 	}
@@ -971,12 +971,19 @@ void ClientKill()
 		return;
 	}
 
-	/*
-	 if ( isCA() && match_in_progress && ra_match_fight != 2 ) {
-	 G_sprint (self, PRINT_HIGH, "Can't suicide in CA mode while coutdown\n");
-	 return;
-	 }
-	 */
+	if (isCA() && match_in_progress)
+	{
+		if ((ra_match_fight != 2) || ca_round_pause)
+		{
+			G_sprint (self, PRINT_HIGH, "Can't suicide at this time\n");
+
+			return;
+		}
+		else if ((ra_match_fight == 2) && !ca_round_pause)
+		{
+			self->round_deaths = 99;	// No respawning after suicide in wipeout mode
+		}
+	}
 
 	if (isCTF() && (match_in_progress == 2) && ((g_globalvars.time - match_start_time) < 10))
 	{
@@ -1309,6 +1316,10 @@ qbool CanConnect()
 				return false; // _can't_ connect
 			}
 		}
+		else if (isCA())
+		{
+			// do nothing here
+		}
 		else if ((isTeam() || isCTF()))
 		{
 			// kick if no ghost or player with team as for self
@@ -1342,7 +1353,7 @@ qbool CanConnect()
 	}
 
 	// don't allow empty team in any case
-	if (tp_num() && strnull(getteam(self)))
+	if (tp_num() && strnull(getteam(self)) && !isCA())
 	{
 		G_sprint(self, 2, "Match in progress,\n"
 					"Set your team before connecting\n"
@@ -1397,38 +1408,54 @@ qbool CanConnect()
 
 		if (p) // found ghost entity
 		{
+			qbool isCa = isCA();
+			qbool teamEqual = streq(getteam(self), getteam(p));
+
 			// check teams only for team mode
-			if ((isTeam() || isCTF()) && strneq(getteam(self), getteam(p)))
+			if ((isTeam() || isCTF()) && !teamEqual && !isCa)
 			{
 				G_sprint(self, 2, "Please join your old team and reconnect\n");
 
 				return false; // _can't_ connect
 			}
-
-			ghostClearScores(p);
-
-			self->ps = p->ps; // restore player stats
-			self->s.v.frags = p->s.v.frags;
-			self->deaths = p->deaths;
-			self->friendly = p->friendly;
-
-			if (isTeam() || isCTF())
+			// In CA, if current team doesn't match old team then just don't restore stats/gamestate
+			// Otherwise restore frags and set ca_ready
+			else if (isCa && !teamEqual)
 			{
-				self->k_teamnum = p->k_teamnum; // we alredy have team in localinfo
-				G_bprint(2, "%s \220%s\221 %s %d %s%s\n", self->netname, getteam(self),
-							redtext("rejoins the game with"), (int)self->s.v.frags,
-							redtext("frag"), redtext(count_s(self->s.v.frags)));
+				// if player's team isn't what it was before, then he will be a "dead" player until the match is over
+				self->ca_ready = 0;
+
+				G_bprint(2, "%s entered the game\n", self->netname);
 			}
 			else
 			{
-				self->k_teamnum = 0; // force check is we have team in localinfo or not below
-				G_bprint(2, "%s %s %d %s%s\n", self->netname, redtext("rejoins the game with"),
-							(int)self->s.v.frags, redtext("frag"),
-							redtext(count_s(self->s.v.frags)));
-			}
+				ghostClearScores(p);
 
-			localcmd("localinfo %d \"\"\n", usrid); // remove ghost in localinfo
-			ent_remove(p); // remove ghost entity
+				self->ps = p->ps; // restore player stats
+				self->s.v.frags = p->s.v.frags;
+				self->deaths = p->deaths;
+				self->friendly = p->friendly;
+
+				self->ca_ready = isCA() ? true : 0; // return to the game if playing clan arena
+
+				if (isTeam() || isCTF())
+				{
+					self->k_teamnum = p->k_teamnum; // we alredy have team in localinfo
+					G_bprint(2, "%s \220%s\221 %s %d %s%s\n", self->netname, getteam(self),
+								redtext("rejoins the game with"), (int)self->s.v.frags,
+								redtext("frag"), redtext(count_s(self->s.v.frags)));
+				}
+				else
+				{
+					self->k_teamnum = 0; // force check is we have team in localinfo or not below
+					G_bprint(2, "%s %s %d %s%s\n", self->netname, redtext("rejoins the game with"),
+								(int)self->s.v.frags, redtext("frag"),
+								redtext(count_s(self->s.v.frags)));
+				}
+
+				localcmd("localinfo %d \"\"\n", usrid); // remove ghost in localinfo
+				ent_remove(p); // remove ghost entity
+			}
 		}
 		else // ghost entity not found
 		{
@@ -1446,7 +1473,11 @@ qbool CanConnect()
 	}
 	else
 	{ // ghost not found (localinfo)
-		if (isTeam() || isCTF())
+		if (isCA())
+		{
+			G_bprint(2, "%s entered the game\n", self->netname);
+		}
+		else if (isTeam() || isCTF())
 		{
 			G_bprint(2, "%s \220%s\221 %s\n", self->netname, getteam(self),
 						redtext("arrives late"));
@@ -1667,7 +1698,7 @@ void PutClientInServer(void)
 
 	self->trackent = 0;
 
-	self->ca_alive = (isCA() ? (ra_match_fight != 2) : true);
+	self->ca_alive = (isCA() ? CA_CheckAlive(self) : true);
 	self->deathtype = dtNONE;
 	self->classname = "player";
 	self->s.v.health = 100;
@@ -3566,6 +3597,8 @@ void PlayerPreThink()
 
 	}
 
+	CA_player_pre_think();
+
 	race_player_pre_think();
 
 // brokenankle included here
@@ -4214,6 +4247,10 @@ void PlayerPostThink()
 				self->s.v.ammo_rockets = 100 + (int)(velocity_vert_abs) % 10000 / 100;
 				self->s.v.ammo_cells = 100 + (int)(velocity_vert_abs) % 100;
 			}
+			else if (isCA())
+			{
+				// do nothing
+			}
 			else
 			{
 				self->s.v.armorvalue = 1000;
@@ -4275,6 +4312,11 @@ void SendTeamInfo(gedict_t *t)
 		if (t->trackent && t->trackent == NUM_FOR_EDICT(p))
 		{
 			continue; // we pseudo speccing such player, no point to send info about him
+		}
+
+		if (isCA() && !ISLIVE(p))
+		{
+			continue; // do not send if player is dead in clan arena mode
 		}
 
 		if (strnull(nick = ezinfokey(p, "k_nick"))) // get nick, if any, do not send name, client can guess it too
@@ -4747,6 +4789,11 @@ void ClientObituary(gedict_t *targ, gedict_t *attacker)
 		return;
 	}
 
+	if (isCA())
+	{
+		CA_ClientObituary(targ, attacker);
+	}
+
 	if (k_bloodfest && !targ->ready)
 	{
 		return; // someone connecting during round of bloodfest and got pseudo death.
@@ -4797,7 +4844,7 @@ void ClientObituary(gedict_t *targ, gedict_t *attacker)
 		if (targ == attacker)
 		{
 			// killed self
-			if (!isHoonyModeDuel())
+			if (!isHoonyModeDuel() && !isCA())
 			{
 				targ->s.v.frags -= (dtSUICIDE == targ->deathtype ? 2 : 1);
 			}
@@ -4951,6 +4998,12 @@ void ClientObituary(gedict_t *targ, gedict_t *attacker)
 			if (!cvar("k_dmgfrags") && !cvar("k_midair") && !lgc_enabled())
 			{
 				// add frag only if not a case of k_dmgfrags
+				attacker->s.v.frags += 1;
+			}
+
+			if (isCA())
+			{
+				//Clan Arena give points for frags even with k_dmgfrags
 				attacker->s.v.frags += 1;
 			}
 
