@@ -210,6 +210,7 @@ static char ca_settings[] = "k_clan_arena_rounds 9\n"
 		"k_maxclients 8\n"
 		"k_pow 0\n"
 		"k_overtime 0\n"
+		"k_spectalk 1\n"
 		"k_exttime 0\n"	
 		"k_spw 1\n"
 		"k_dmgfrags 1\n"
@@ -424,7 +425,7 @@ void apply_CA_settings(void)
 
 	if (cvar("k_clan_arena") == 2)
 	{
-		cvar_fset("k_clan_arena_max_respawns", 4);
+		cvar_fset("k_clan_arena_max_respawns", 10);
 	}
 
 	cfg_name = va("configs/usermodes/ca/default.cfg");
