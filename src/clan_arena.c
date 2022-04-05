@@ -1186,7 +1186,7 @@ void show_tracking_info(gedict_t *p)
 
 	if (!ca_round_pause)
 	{
-		if (max_respawns && p->round_deaths <= max_respawns && !ca_round_pause)
+		if (p->ca_ready && p->round_deaths <= max_respawns && !ca_round_pause)
 		{
 			G_centerprint(p, "\n\n\n\n\n\n%s\n\n\n%d\n\n\n seconds to respawn!\n", 
 								redtext(p->track_target->netname), p->seconds_to_respawn);
@@ -1309,7 +1309,7 @@ void CA_Frame(void)
 			last_alive = last_alive_time(p);
 			e_last_alive = enemy_last_alive_time(p);
 			
-			if (!p->in_play && p->round_deaths <= max_deaths)
+			if (p->ca_ready && !p->in_play && p->round_deaths <= max_deaths)
 			{
 				p->in_limbo = true;
 
