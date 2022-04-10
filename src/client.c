@@ -1437,9 +1437,13 @@ qbool CanConnect()
 				self->deaths = p->deaths;
 				self->friendly = p->friendly;
 
-				self->ca_ready = isCA() ? true : 0; // return to the game if playing clan arena
+				self->ca_ready = isCa ? p->ca_ready : 0; // return to the game if playing clan arena
 
-				if (isTeam() || isCTF())
+				if (isCa && !self->ca_ready)
+				{
+					G_bprint(2, "%s entered the game\n", self->netname);
+				}
+				else if (isTeam() || isCTF())
 				{
 					self->k_teamnum = p->k_teamnum; // we alredy have team in localinfo
 					G_bprint(2, "%s \220%s\221 %s %d %s%s\n", self->netname, getteam(self),
