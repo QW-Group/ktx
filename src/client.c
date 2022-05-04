@@ -1436,9 +1436,13 @@ qbool CanConnect()
 				self->deaths = p->deaths;
 				self->friendly = p->friendly;
 
-				self->ca_ready = isCA() ? true : 0; // return to the game if playing clan arena
+				self->ca_ready = isCa ? p->ca_ready : 0; // return to the game if playing clan arena
 
-				if (isTeam() || isCTF())
+				if (isCa && !self->ca_ready)
+				{
+					G_bprint(2, "%s entered the game\n", self->netname);
+				}
+				else if (isTeam() || isCTF())
 				{
 					self->k_teamnum = p->k_teamnum; // we alredy have team in localinfo
 					G_bprint(2, "%s \220%s\221 %s %d %s%s\n", self->netname, getteam(self),
@@ -4275,7 +4279,7 @@ void PlayerPostThink()
 // clnum origin(3 ints) health armor items nick
 void SendTeamInfo(gedict_t *t)
 {
-	int cl, cnt, h, a;
+	int cl, cnt, h, a, shells, nails, rockets, cells;
 	gedict_t *p, *s;
 	char *tm, *nick;
 
@@ -4334,10 +4338,15 @@ void SendTeamInfo(gedict_t *t)
 		cl = NUM_FOR_EDICT(p) - 1;
 		h = bound(0, (int)p->s.v.health, 999);
 		a = bound(0, (int)p->s.v.armorvalue, 999);
+		
+		shells = bound(0, (int)p->s.v.ammo_shells, 999);
+		nails = bound(0, (int)p->s.v.ammo_nails, 999);
+		rockets = bound(0, (int)p->s.v.ammo_rockets, 999);
+		cells = bound(0, (int)p->s.v.ammo_cells, 999);
 
-		stuffcmd_flags(t, STUFFCMD_IGNOREINDEMO, "//tinfo %d %d %d %d %d %d %d \"%s\"\n", cl,
+		stuffcmd_flags(t, STUFFCMD_IGNOREINDEMO, "//tinfo %d %d %d %d %d %d %d \"%s\" %d %d %d %d\n", cl,
 						(int)p->s.v.origin[0], (int)p->s.v.origin[1], (int)p->s.v.origin[2], h,
-						a, (int)p->s.v.items, nick);
+						a, (int)p->s.v.items, nick, shells, nails, rockets, cells);
 	}
 }
 

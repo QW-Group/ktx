@@ -3791,7 +3791,7 @@ ok:
 	{
 		case 1:
 		{
-			int h, a;
+			int h, a, shells, nails, rockets, cells;
 
 			if (strnull(kn = ezinfokey(bp, "k_nick"))) // get nick, if any, do not send name, client can guess it too
 			{
@@ -3807,9 +3807,14 @@ ok:
 			h = bound(0, (int)bp->s.v.health, 999);
 			a = bound(0, (int)bp->s.v.armorvalue, 999);
 
-			stuffcmd(self, "//sn %d %d %d %d %d %d %d %d \"%s\"\n", version, i,
+			shells = bound(0, (int)bp->s.v.ammo_shells, 999);
+			nails = bound(0, (int)bp->s.v.ammo_nails, 999);
+			rockets = bound(0, (int)bp->s.v.ammo_rockets, 999);
+			cells = bound(0, (int)bp->s.v.ammo_cells, 999);
+
+			stuffcmd(self, "//sn %d %d %d %d %d %d %d %d \"%s\" %d %d %d %d\n", version, i,
 						(int)bp->s.v.origin[0], (int)bp->s.v.origin[1], (int)bp->s.v.origin[2],
-						h, a, (int)bp->s.v.items, kn);
+						h, a, (int)bp->s.v.items, kn, shells, nails, rockets, cells);
 
 			return;
 		}
