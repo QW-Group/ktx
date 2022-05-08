@@ -1397,7 +1397,7 @@ void Init_cmds(void)
 
 		if (cmds[i].cf_flags & CF_PLR_ADMIN)
 		{
-			cmds[i].cf_flags |= CF_PLAYER;    // this let simplify cmds[] table
+			cmds[i].cf_flags |= CF_PLAYER; // this let simplify cmds[] table
 		}
 
 		if (cmds[i].cf_flags & CF_SPC_ADMIN)
@@ -1462,7 +1462,7 @@ void Do_ShowCmds(qbool adm_req)
 void ShowCmds()
 {
 	Do_ShowCmds(false); // show common commands
-	Do_ShowCmds(true);  // show admin commands
+	Do_ShowCmds(true); // show admin commands
 }
 
 qbool check_perm(gedict_t *p, int perm)
@@ -1966,10 +1966,10 @@ void ModStatus2()
 	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo enemy reporting"), OnOff(i & 32));
 	G_sprint(self, 2, "%s: %s\n", redtext("QiZmo pointing"), OnOff(i & 128));
 	/* new FDP bits https://www.quakeworld.nu/wiki/FPD
-	 G_sprint(self, 2, "%s: %s\n", redtext("Skin forcing"),          OnOff(! (i & 256) ));
-	 G_sprint(self, 2, "%s: %s\n", redtext("Color forcing"),         OnOff(! (i & 512) ));
-	 G_sprint(self, 2, "%s: %s\n", redtext("Pitch speed limiting"),  OnOff( i & 16384 ));
-	 G_sprint(self, 2, "%s: %s\n", redtext("Yaw speed limiting"),    OnOff( i & 32768 ));
+	 G_sprint(self, 2, "%s: %s\n", redtext("Skin forcing"), OnOff(! (i & 256) ));
+	 G_sprint(self, 2, "%s: %s\n", redtext("Color forcing"), OnOff(! (i & 512) ));
+	 G_sprint(self, 2, "%s: %s\n", redtext("Pitch speed limiting"), OnOff( i & 16384 ));
+	 G_sprint(self, 2, "%s: %s\n", redtext("Yaw speed limiting"), OnOff( i & 32768 ));
 	 */
 
 	G_sprint(self, 2, "%s: %s\n", redtext("Admin election"), Allowed(cvar("k_allowvoteadmin")));
@@ -3613,7 +3613,7 @@ void ShowNick()
 
 	if (!match_in_progress)
 	{
-		;  // allow shownick in prewar anyway
+		; // allow shownick in prewar anyway
 	}
 	else if (!isTeam() && !isCTF())
 	{
@@ -3664,7 +3664,7 @@ void ShowNick()
 
 		if (!match_in_progress)
 		{
-			;  // allow shownick in prewar anyway
+			; // allow shownick in prewar anyway
 		}
 		else if (strneq(s1, s2))
 		{
@@ -3978,7 +3978,7 @@ const char common_um_init[] =
 //	"localinfo k_new_spw 0\n"		// ktpro feature
 	"k_clan_arena 0\n"				// disable Clan Arena by default
 	"k_rocketarena 0\n"				// disable Rocket Arena by default
-	"k_race 0\n"					// disable Race  by default
+	"k_race 0\n"					// disable Race by default
 	"k_hoonymode 0\n"				// disable HoonyMode by default
 	"k_spec_info 1\n"				// allow spectators receive took info during game
 	"k_midair 0\n"					// midair off
@@ -4014,8 +4014,8 @@ const char _1on1_um_init[] =
 	"coop 0\n"						// no coop
 	"maxclients 2\n"				// duel = two players
 	"k_maxclients 2\n"				// duel = two players
-	"timelimit  10\n"				// 10 minute rounds
-	"teamplay   0\n"				// hurt yourself, no teammates here
+	"timelimit 10\n"				// 10 minute rounds
+	"teamplay 0\n"					// hurt yourself, no teammates here
 	"deathmatch 3\n"				// weapons stay
 	"k_overtime 1\n"				// overtime type = time based
 	"k_exttime 3\n"					// overtime 3mins
@@ -4032,7 +4032,7 @@ const char _1on1hm_um_init[] =
 	"k_maxclients 2\n"				// duel = two players
 	"fraglimit 1\n"					// hoonymode - every 1 frag we toggle spawns
 	"timelimit 0\n"					// hoonymode - timelimit 0
-	"k_hoonymode 1\n"
+	"k_hoonymode 1\n"				//
 	"k_hoonyrounds 12\n"			// first to seven
 	"teamplay 0\n"					// hurt yourself, no teammates here
 	"deathmatch 3\n"				// weapons stay
@@ -4050,11 +4050,11 @@ const char _2on2hm_um_init[] =
 	"coop 0\n"						// no coop
 	"maxclients 4\n"				// 2on2 = 4 players
 	"k_maxclients 4\n"				// 2on2 = 4 players
-	"timelimit  3\n"				// 3 minute rounds
+	"timelimit 3\n"					// 3 minute rounds
 	"k_hoonyrounds 4\n"				// 4 rounds (2 sets of spawns)
-	"fraglimit  0\n"				// hoonymode - no fraglimit, time-based
-	"k_hoonymode 1\n"
-	"teamplay   2\n"				// hurt teammates and yourself
+	"fraglimit 0\n"					// hoonymode - no fraglimit, time-based
+	"k_hoonymode 1\n"				//
+	"teamplay 2\n"					// hurt teammates and yourself
 	"deathmatch 3\n"				// weapons stay
 	"k_overtime 0\n"				// time based
 	"k_exttime 3\n"					// overtime 3mins
@@ -4069,8 +4069,8 @@ const char _2on2_um_init[] =
 	"coop 0\n"						// no coop
 	"maxclients 4\n"				// 2on2 = 4 players
 	"k_maxclients 4\n"				// 2on2 = 4 players
-	"timelimit  10\n"				// 10 minute rounds
-	"teamplay   2\n"				// hurt teammates and yourself
+	"timelimit 10\n"				// 10 minute rounds
+	"teamplay 2\n"					// hurt teammates and yourself
 	"deathmatch 3\n"				// weapons stay
 	"k_overtime 1\n"				// time based
 	"k_exttime 3\n"					// overtime 3mins
@@ -4085,8 +4085,8 @@ const char _2on2on2_um_init[] =
 	"coop 0\n"						// no coop
 	"maxclients 6\n"				// 2on2on2 = 6 players
 	"k_maxclients 6\n"				// 2on2on2 = 6 players
-	"timelimit  10\n"				// 10 minute rounds
-	"teamplay   2\n"				// hurt teammates and yourself
+	"timelimit 10\n"				// 10 minute rounds
+	"teamplay 2\n"					// hurt teammates and yourself
 	"deathmatch 3\n"				// weapons stay
 	"k_overtime 1\n"				// time based
 	"k_exttime 3\n"					// overtime 3mins
@@ -4101,8 +4101,8 @@ const char _3on3_um_init[] =
 	"coop 0\n"						// no coop
 	"maxclients 6\n"				// 3on3 = 6 players
 	"k_maxclients 6\n"				// 3on3 = 6 players
-	"timelimit  15\n"				// 15 minute rounds
-	"teamplay   2\n"				// hurt teammates and yourself
+	"timelimit 15\n"				// 15 minute rounds
+	"teamplay 2\n"					// hurt teammates and yourself
 	"deathmatch 1\n"				// weapons wont stay on pickup
 	"k_pow 1\n"						// use powerups
 	"k_membercount 2\n"				// minimum number of players in each team
@@ -4117,8 +4117,8 @@ const char _3on3on3_um_init[] =
 	"coop 0\n"						// no coop
 	"maxclients 9\n"				// 3on3on3 = 9 players
 	"k_maxclients 9\n"				// 3on3on3 = 9 players
-	"timelimit  15\n"				// 15 minute rounds
-	"teamplay   2\n"				// hurt teammates and yourself
+	"timelimit 15\n"				// 15 minute rounds
+	"teamplay 2\n"					// hurt teammates and yourself
 	"deathmatch 1\n"				// weapons wont stay on pickup
 	"k_pow 1\n"						// use powerups
 	"k_membercount 2\n"				// minimum number of players in each team
@@ -4134,10 +4134,10 @@ const char _4on4hm_um_init[] =
 	"coop 0\n"						// no coop
 	"maxclients 8\n"				// 4on4 = 8 players
 	"k_maxclients 8\n"				// 4on4 = 8 players
-	"timelimit  5\n"				// 5 minute rounds
+	"timelimit 5\n"					// 5 minute rounds
 	"k_hoonyrounds 4\n"				// 4 rounds (2 sets of spawns)
-	"fraglimit  0\n"				// no fraglimit, time-based
-	"teamplay   2\n"				// hurt teammates and yourself
+	"fraglimit 0\n"					// no fraglimit, time-based
+	"teamplay 2\n"					// hurt teammates and yourself
 	"deathmatch 1\n"				// weapons wont stay on pickup
 	"k_hoonymode 1\n"
 	"k_pow 1\n"						// use powerups
@@ -4153,8 +4153,8 @@ const char _4on4_um_init[] =
 	"coop 0\n"						// no coop
 	"maxclients 8\n"				// 4on4 = 8 players
 	"k_maxclients 8\n"				// 4on4 = 8 players
-	"timelimit  20\n"				// 20 minute rounds
-	"teamplay   2\n"				// hurt teammates and yourself
+	"timelimit 20\n"				// 20 minute rounds
+	"teamplay 2\n"					// hurt teammates and yourself
 	"deathmatch 1\n"				// weapons wont stay on pickup
 	"k_pow 1\n"						// use powerups
 	"k_membercount 3\n"				// minimum number of players in each team
@@ -4169,8 +4169,8 @@ const char _4on4on4_um_init[] =
 	"coop 0\n"						// no coop
 	"maxclients 12\n"				// 4on4on4 = 12 players
 	"k_maxclients 12\n"				// 4on4on4 = 12 players
-	"timelimit  20\n"				// 20 minute rounds
-	"teamplay   2\n"				// hurt teammates and yourself
+	"timelimit 20\n"				// 20 minute rounds
+	"teamplay 2\n"					// hurt teammates and yourself
 	"deathmatch 1\n"				// weapons wont stay on pickup
 	"k_pow 1\n"						// use powerups
 	"k_membercount 3\n"				// minimum number of players in each team
@@ -4185,8 +4185,8 @@ const char _10on10_um_init[] =
 	"coop 0\n"						// no coop
 	"maxclients 20\n"				// 10on10 = 20 players
 	"k_maxclients 20\n"				// 10on10 = 20 players
-	"timelimit  20\n"				// 20 minute rounds
-	"teamplay   2\n"				// hurt yourself and teammates
+	"timelimit 20\n"				// 20 minute rounds
+	"teamplay 2\n"					// hurt yourself and teammates
 	"deathmatch 1\n"				// wpons dowont stay on pickup
 	"k_pow 1\n"						// user powerups
 	"k_membercount 5\n"				// minimum number of players in each team
@@ -4201,8 +4201,8 @@ const char _XonX_um_init[] =
 	"coop 0\n"						// no coop
 	"maxclients 32\n"				// allow up to 32 players
 	"k_maxclients 32\n"				// allow up to 32 players
-	"timelimit  20\n"				// 20 minute rounds
-	"teamplay   2\n"				// hurt teammates and yourself
+	"timelimit 20\n"				// 20 minute rounds
+	"teamplay 2\n"					// hurt teammates and yourself
 	"deathmatch 1\n"				// weapons wont stay on pickup
 	"k_pow 1\n"						// use powerups
 	"k_membercount 1\n"				// minimum number of players in each team
@@ -4217,8 +4217,8 @@ const char ffa_um_init[] =
 //	"coop 0\n"						// NO WE CAN'T DO IT SO, FFA MATCHLESS USED IN COOP MODE
 	"maxclients 26\n"				// some limit
 	"k_maxclients 26\n"				// some limit
-	"timelimit  20\n"				// some limit
-	"teamplay   0\n"				// hurt yourself, no teammates
+	"timelimit 20\n"				// some limit
+	"teamplay 0\n"					// hurt yourself, no teammates
 	"deathmatch 3\n"				// weapons stay
 	"dq 1\n"						// drop quad
 	"dr 1\n"						// drop ring
@@ -4637,7 +4637,7 @@ void TogglePractice()
 
 	if (k_force || find(world, FOFCLSN, "idlebot"))
 	{
-		return;  // cmon, no practice if forcestart or idlebot active
+		return; // cmon, no practice if forcestart or idlebot active
 	}
 
 //0 - no one, 1 - admins, 2 elected admins too
@@ -4753,12 +4753,12 @@ void krjump()
 		return; // sanity
 	}
 
-	self->s.v.impulse = 7;		 // select switch to rl
-	self->s.v.button0 = 1;		 // force attack button
-	self->s.v.v_angle[0] = 80;   // look down much as possible, qw block this at 80
-	W_WeaponFrame();			 // switch to rl and fire
-	self->s.v.v_angle[0] = va_x; // restore
-	self->s.v.button0 = button0; // restore button state
+	self->s.v.impulse = 7;			// select switch to rl
+	self->s.v.button0 = 1;			// force attack button
+	self->s.v.v_angle[0] = 80;		// look down much as possible, qw block this at 80
+	W_WeaponFrame();				// switch to rl and fire
+	self->s.v.v_angle[0] = va_x;	// restore
+	self->s.v.button0 = button0;	// restore button state
 }
 
 void t_jump(float j_type)
@@ -5519,7 +5519,7 @@ void DoMVDAutoTrack(void)
 	if (!p && !(p = get_ed_best1()))
 	{
 		// MEAG: We can fall in here if everyone is dead (e.g. frag-trade in duel)... if we can,
-		//   keep tracking current player for now and evaluate again after respawns
+		// keep tracking current player for now and evaluate again after respawns
 		if (!autotrack_last || (autotrack_last->ct != ctPlayer))
 		{
 			ResetMVDAutoTrack(NULL);
@@ -5700,7 +5700,7 @@ void AutoTrackRestore()
 // 2. the player currently being observed dies
 // 3. any player takes a powerup
 // 4. when the currently observed player has a powerup which runs out and he has
-//    neither the rocket launcher nor the lightning gun
+//	  neither the rocket launcher nor the lightning gun
 
 // will force spec who used ktpro autotrack switch track
 static void ktpro_autotrack_mark_spec(gedict_t *spec, gedict_t *dude)
@@ -5794,7 +5794,7 @@ void ktpro_autotrack_on_powerup_out(gedict_t *dude)
 	 if (dude == autotrack_last)
 	 {
 	 autotrack_update = true; // this is for mvd autotrack
-	 autotrack_hint   = NULL; // yeah, we have no idea whom will be tracked
+	 autotrack_hint  = NULL; // yeah, we have no idea whom will be tracked
 	 autotrack_reason = "powerup_out";
 	 }
 
@@ -6366,12 +6366,14 @@ void lastscore_add()
 		for (i = from = 0, p = world; (p = find_plrghst(p, &from)) && i < 2; i++)
 		{
 			if (!i)
-			{ // info about first dueler
+			{
+				// info about first dueler
 				e1 = getname(p);
 				s1 = p->s.v.frags;
 			}
 			else
-			{	   // about second
+			{
+				// about second
 				e2 = getname(p);
 				s2 = p->s.v.frags;
 			}
@@ -7560,8 +7562,8 @@ void mv_playback()
 
 void mv_cmd_playback()
 {
-	mv_stop_record();   // stop record first
-	mv_stop_playback(); // stop playback first
+	mv_stop_record();	// stop record first
+	mv_stop_playback();	// stop playback first
 
 	self->pb_frame = 0;
 
@@ -7652,8 +7654,8 @@ void mv_record()
 
 void mv_cmd_record()
 {
-	mv_stop_record();   // stop record first
-	mv_stop_playback(); // stop playback first
+	mv_stop_record();	// stop record first
+	mv_stop_playback();	// stop playback first
 
 	self->rec_count = 0;
 
@@ -7672,8 +7674,8 @@ void mv_cmd_record()
 
 void mv_cmd_stop()
 {
-	mv_stop_record();   // stop record
-	mv_stop_playback(); // stop playback
+	mv_stop_record();	// stop record
+	mv_stop_playback();	// stop playback
 }
 
 // }
@@ -8030,7 +8032,8 @@ void TogglePause()
 
 		// pause release is not applied immediately, but after a countdown
 		if (when_to_unpause)
-		{  // unpause is pending alredy
+		{
+			// unpause is pending alredy
 			int sec = max(0, (when_to_unpause - pauseduration) / 1000);
 
 			G_sprint(self, 2, "Unpause is pending, %d second%s\n", sec, count_s(sec));
@@ -8279,10 +8282,10 @@ typedef struct
 	char *classname;
 	int spawnflags;
 	int angle;			// should we set angles or not.
-	void (*spawn)();  // custom spawn function, called after actual spawn.
+	void (*spawn)();	// custom spawn function, called after actual spawn.
 } dropitem_spawn_t;
 
-#define  WEAPON_BIG2  1
+#define WEAPON_BIG2 1
 
 static void dropitem_spawn_spawnpoint()
 {
