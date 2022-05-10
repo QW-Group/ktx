@@ -228,6 +228,7 @@ typedef struct vote_s
 	int antilag;
 	int privategame;
 	//int kick_unauthed;
+	int swapall;
 
 	electType_t elect_type;	// election type
 	float elect_block_till;	// block election for this time

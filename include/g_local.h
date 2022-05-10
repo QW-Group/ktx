@@ -765,6 +765,7 @@ void vote_check_break();
 void vote_check_elect();
 void vote_check_pickup();
 void vote_check_rpickup(int maxRecursion);
+void vote_check_swapall();
 void vote_check_all(void);
 
 #define	VOTE_FOFS(x) ((intptr_t)&(((vote_t *)0)->x))
@@ -780,6 +781,7 @@ void vote_check_all(void);
 #define OV_ANTILAG ( VOTE_FOFS ( antilag ) )
 #define OV_PRIVATE ( VOTE_FOFS ( privategame ) )
 //#define OV_KICKUNAUTHED ( VOTE_FOFS (kick_unauthed) )
+#define OV_SWAPALL ( VOTE_FOFS ( swapall ) )
 #define MAX_RPICKUP_RECUSION 3
 #define MAX_PAUSE_REQUESTS 3
 

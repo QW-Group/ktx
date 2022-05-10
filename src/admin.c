@@ -926,42 +926,6 @@ void sv_lock()
 	}
 }
 
-// convienence command for ctf admins
-// often times you play a game on non-symmetrical map as one color then swap teams and play again to be fair
-void AdminSwapAll()
-{
-	gedict_t *p;
-
-	if (!is_adm(self))
-	{
-		return;
-	}
-
-	if (match_in_progress)
-	{
-		return;
-	}
-
-	if (!isCTF())
-	{
-		return;
-	}
-
-	for (p = world; (p = find_plr(p));)
-	{
-		if (streq(getteam(p), "blue"))
-		{
-			stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "team \"red\"\ncolor 4\n");
-		}
-		else if (streq(getteam(p), "red"))
-		{
-			stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "team \"blue\"\ncolor 13\n");
-		}
-	}
-
-	G_bprint(2, "%s swapped the teams\n", getname(self));
-}
-
 // assuming kicker is admin
 qbool is_can_forcespec(gedict_t *victim, gedict_t *kicker)
 {
