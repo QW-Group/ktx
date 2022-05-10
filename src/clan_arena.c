@@ -210,6 +210,7 @@ static char ca_settings[] = "k_clan_arena_rounds 9\n"
 		"k_maxclients 8\n"
 		"k_pow 0\n"
 		"k_overtime 0\n"
+		"k_spectalk 1\n"
 		"k_exttime 0\n"	
 		"k_spw 1\n"
 		"k_dmgfrags 1\n"
@@ -424,7 +425,7 @@ void apply_CA_settings(void)
 
 	if (cvar("k_clan_arena") == 2)
 	{
-		cvar_fset("k_clan_arena_max_respawns", 4);
+		cvar_fset("k_clan_arena_max_respawns", 10);
 	}
 
 	cfg_name = va("configs/usermodes/ca/default.cfg");
@@ -889,8 +890,8 @@ void print_player_stats(qbool series_over)
 	gedict_t *p;
 
 	G_bprint(2, "\n");
-	G_bprint(2, "sco  damg took dmg%%  k  d  gl  rh  rd  lg%% player\n");
-	G_bprint(2, "%s\n", redtext("--- ----- ---- ---- -- -- --- --- --- ---- --------"));
+	G_bprint(2, "sco  damg took  k  d  gl  rh  rd  lg%% player\n");
+	G_bprint(2, "%s\n", redtext("--- ----- ---- -- -- --- --- --- ---- --------"));
 	
 	for (p = world; (p = find_plr(p));)
 	{
@@ -912,10 +913,6 @@ void CA_OnePlayerStats(gedict_t *p, qbool series_over)
 	float rkills;
 	float dmg_g;
 	float dmg_t;
-	float dmg_e;
-	float round_dmg_g;
-	float round_dmg_t;
-	float round_dmg_e;
 	float vh_rl;
 	float h_rl;
 	float vh_gl;
@@ -927,38 +924,6 @@ void CA_OnePlayerStats(gedict_t *p, qbool series_over)
 	frags = p->s.v.frags;
 	dmg_g = p->ps.dmg_g;
 	dmg_t = p->ps.dmg_t;
-	
-	if (!dmg_t && dmg_g)
-	{
-		dmg_e = 100;
-	}
-	else if (dmg_g > dmg_t)
-	{
-		dmg_e = fabs(max(1, dmg_t) / max(1, dmg_g) * 100 - 100);
-	}
-	else
-	{
-		dmg_e = 0;
-	}
-
-	if (!use_totals)
-	{
-		round_dmg_g = dmg_g - p->ca_round_dmg;
-		round_dmg_t = dmg_t - p->ca_round_dmgt;
-
-		if (!round_dmg_t && round_dmg_g)
-		{
-			round_dmg_e = 100;
-		}
-		else if (round_dmg_g > round_dmg_t)
-		{
-			round_dmg_e = fabs(max(1, round_dmg_t) / max(1, round_dmg_g) * 100 - 100);
-		}
-		else
-		{
-			round_dmg_e = 0;
-		}
-	}
 	
 	rkills = frags - ((int)(dmg_g/100.0));
 	h_rl = p->ps.wpn[wpRL].hits;
@@ -976,7 +941,6 @@ void CA_OnePlayerStats(gedict_t *p, qbool series_over)
 	char score[10];
 	char damage[10];
 	char dmg_took[10];
-	char dmg_eff[10];
 	char kills[10];
 	char deaths[10];
 	char gl_hits[10];
@@ -987,7 +951,6 @@ void CA_OnePlayerStats(gedict_t *p, qbool series_over)
 	sprintf(score, "%.0f", use_totals ? p->s.v.frags : p->s.v.frags - p->ca_round_frags);
 	sprintf(damage, "%.0f", use_totals ? dmg_g : dmg_g - p->ca_round_dmg);
 	sprintf(dmg_took, "%.0f", use_totals ? dmg_t : dmg_t - p->ca_round_dmgt);
-	sprintf(dmg_eff, "%.0f", use_totals ? dmg_e : round_dmg_e);
 	sprintf(kills, "%.0f", use_totals ? rkills : rkills - p->ca_round_kills);
 	sprintf(deaths, "%.0f", use_totals ? p->deaths : p->deaths - p->ca_round_deaths);
 	sprintf(gl_hits, "%.0f", use_totals ? vh_gl : vh_gl - p->ca_round_glhit);
@@ -1012,18 +975,6 @@ void CA_OnePlayerStats(gedict_t *p, qbool series_over)
 		G_bprint(2, " "); // add padding so columns line up
 	}
 	G_bprint(2, "%s ", strneq(dmg_took, "0") ? dmg_took : "-");
-
-	for (int i = 0; i < (strlen("dmg_") - strlen(dmg_eff)-1); i++)
-	{
-		G_bprint(2, " "); // add padding so columns line up
-	}
-	if (strneq(dmg_eff, "0"))
-	{
-		G_bprint(2, "%s%s ", dmg_eff, "%");
-	}
-	else{
-		G_bprint(2, " - ");
-	}
 
 	for (int i = 0; i < (strlen(" k") - strlen(kills)); i++)
 	{
@@ -1235,7 +1186,7 @@ void show_tracking_info(gedict_t *p)
 
 	if (!ca_round_pause)
 	{
-		if (max_respawns && p->round_deaths <= max_respawns && !ca_round_pause)
+		if (p->ca_ready && p->round_deaths <= max_respawns && !ca_round_pause)
 		{
 			G_centerprint(p, "\n\n\n\n\n\n%s\n\n\n%d\n\n\n seconds to respawn!\n", 
 								redtext(p->track_target->netname), p->seconds_to_respawn);
@@ -1358,7 +1309,7 @@ void CA_Frame(void)
 			last_alive = last_alive_time(p);
 			e_last_alive = enemy_last_alive_time(p);
 			
-			if (!p->in_play && p->round_deaths <= max_deaths)
+			if (p->ca_ready && !p->in_play && p->round_deaths <= max_deaths)
 			{
 				p->in_limbo = true;
 
