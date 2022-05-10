@@ -719,24 +719,25 @@ void vote_check_rpickup(int maxRecursion)
 		else
 		{
 			G_bprint(2, "console: %s game it is then\n", redtext("random pickup"));
-			// check if rpickup really created new teams
-			if (pl_cnt <= 20)
-			{
-				for (p = world, i = 0; (p = find_plr(p)) && i < 20 && needNewRpickup; i++)
-				{
-					if (originalTeams[i] != p->k_teamnumber)
-					{
-						// there is a mismatch, meaning that at least 1 player gets a new team
-						needNewRpickup = false;
-					}
-				}
+		}
 
-				if (needNewRpickup)
+		// check if rpickup really created new teams
+		if (pl_cnt <= 20)
+		{
+			for (p = world, i = 0; (p = find_plr(p)) && i < 20 && needNewRpickup; i++)
+			{
+				if (originalTeams[i] != p->k_teamnumber)
 				{
-					G_bprint(2, "console: Team layout did not change. %s again (tries left: %d)\n",
-								redtext("random pickup"), maxRecursion);
-					vote_check_rpickup(maxRecursion - 1);
+					// there is a mismatch, meaning that at least 1 player gets a new team
+					needNewRpickup = false;
 				}
+			}
+
+			if (needNewRpickup)
+			{
+				G_bprint(2, "console: Team layout did not change. %s again (tries left: %d)\n",
+							redtext("random pickup"), maxRecursion);
+				vote_check_rpickup(maxRecursion - 1);
 			}
 		}
 
