@@ -831,8 +831,19 @@ void G_cp2all(const char *fmt, ...)
 	text[sizeof(text) - 1] = 0;
 	va_end(argptr);
 
-	WriteByte(MSG_ALL, SVC_CENTERPRINT);
-	WriteString(MSG_ALL, text);
+	if (FTE_sv)
+	{
+		gedict_t *p;
+		for (p = world; (p = find_client(p));)
+		{
+			G_centerprint(p, "%s", text);
+		}
+	}
+	else
+	{
+		WriteByte(MSG_ALL, SVC_CENTERPRINT);
+		WriteString(MSG_ALL, text);
+	}
 }
 
 void G_dprint(const char *fmt, ...)
