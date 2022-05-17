@@ -702,39 +702,39 @@ void CA_show_greeting(gedict_t *self)
 
 void CA_ClientObituary(gedict_t *targ, gedict_t *attacker)
 {
-	int ah, aa;
+	// int ah, aa;
 
-	if (!isCA())
-	{
-		return;
-	}
+	// if (!isCA())
+	// {
+	// 	return;
+	// }
 
-	if (targ->ct != ctPlayer)
-	{
-		return; // so below targ is player
-	}
+	// if (targ->ct != ctPlayer)
+	// {
+	// 	return; // so below targ is player
+	// }
 
-	if (attacker->ct != ctPlayer)
-	{
-		attacker = targ; // seems killed self
-	}
+	// if (attacker->ct != ctPlayer)
+	// {
+	// 	attacker = targ; // seems killed self
+	// }
 
-	ah = attacker->s.v.health;
-	aa = attacker->s.v.armorvalue;
+	// ah = attacker->s.v.health;
+	// aa = attacker->s.v.armorvalue;
 
-	if (attacker->ct == ctPlayer)
-	{
-		if (attacker != targ)
-		{
-			// This is classic CA behavior, but maybe we
-			// don't want players to know their killer's
-			// stats before the round is over. Commenting this
-			// out for now.
-			// G_sprint(targ, PRINT_HIGH, "%s %s %d %s %d %s\n",
-			// 			attacker->netname, redtext("had"), aa,
-			// 			redtext("armor and"), ah, redtext("health"));
-		}
-	}
+	// if (attacker->ct == ctPlayer)
+	// {
+	// 	if (attacker != targ)
+	// 	{
+	// 		// This is classic CA behavior, but maybe we
+	// 		// don't want players to know their killer's
+	// 		// stats before the round is over. Commenting this
+	// 		// out for now.
+	// 		// G_sprint(targ, PRINT_HIGH, "%s %s %d %s %d %s\n",
+	// 		// 			attacker->netname, redtext("had"), aa,
+	// 		// 			redtext("armor and"), ah, redtext("health"));
+	// 	}
+	// }
 }
 
 // return 0 if there no alive teams
@@ -1269,13 +1269,33 @@ void CA_player_pre_think(void)
 
 		if (self->ct == ctPlayer && ra_match_fight && !self->in_play)
 		{
-			track_player(self);
+			track_player(self); // enable tracking by default while dead
 		}
 
 		if (self->in_play)
 		{
 			self->alive_time = Q_rint(g_globalvars.time - self->time_of_respawn);
 		}
+	}
+}
+
+void CA_spectator_think(void)
+{
+	gedict_t *p;
+
+	p = PROG_TO_EDICT(self->s.v.goalentity);
+
+	if (p->ct == ctPlayer && !p->in_play && p->tracking_enabled)
+	{
+		if (!p->in_play && p->tracking_enabled)
+		{
+			//If the player you're observing is following someone else, hide the player model
+			self->hideentity = EDICT_TO_PROG(p->track_target);
+		}
+	}
+	else
+	{
+		self->hideentity = 0;
 	}
 }
 
