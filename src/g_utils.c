@@ -2234,6 +2234,11 @@ void ghostClearScores(gedict_t *g)
 	int to = MSG_ALL;
 	int cl_slot = g->ghost_slot;
 
+	if (cvar_string("k_no_scoreboard_ghosts")[0])
+	{
+		return; // Scoreboard ghosts disabled, probably for QE compatibility.
+	}
+
 	if (strneq(g->classname, "ghost"))
 	{
 		return;
@@ -2262,6 +2267,11 @@ void ghost2scores(gedict_t *g)
 {
 	int to = MSG_ALL;
 	int cl_slot;
+
+	if (cvar_string("k_no_scoreboard_ghosts")[0])
+	{
+		return; // Scoreboard ghosts disabled, probably for QE compatibility.
+	}
 
 	if (isRA())
 	{

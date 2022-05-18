@@ -1034,6 +1034,8 @@ void FirstFrame()
 // }
 #endif
 
+	RegisterCvar("k_no_scoreboard_ghosts");
+
 	RegisterCvar("k_lgcmode");
 
 	// private games
