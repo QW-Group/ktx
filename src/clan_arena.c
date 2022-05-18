@@ -9,6 +9,7 @@ static int team1_score;
 static int team2_score;
 static int pause_count;
 static int pause_time;
+static int round_time;
 static qbool do_endround_stuff = false;
 static qbool print_stats = false;
 
@@ -370,7 +371,8 @@ void enable_player_tracking(gedict_t *e, int follow)
 		}
 
 		G_sprint(e, 2, "tracking %s\n", redtext("disabled"));
-		G_centerprint(e, "%s", "");
+		sprintf(e->cptext, "%s", "");
+		G_centerprint(e, e->cptext);
 
 		e->tracking_enabled = 0;
 		SetVector(e->s.v.velocity, 0, 0, 0);
@@ -1188,13 +1190,17 @@ void show_tracking_info(gedict_t *p)
 	{
 		if (p->ca_ready && p->round_deaths <= max_respawns && !ca_round_pause)
 		{
-			G_centerprint(p, "\n\n\n\n\n\n%s\n\n\n%d\n\n\n seconds to respawn!\n", 
+			sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n%d\n\n\n seconds to respawn!\n", 
 								redtext(p->track_target->netname), p->seconds_to_respawn);
+
+			G_centerprint(p, p->cptext);
 		}
 		else
 		{
-			G_centerprint(p, "\n\n\n\n\n\n%s\n\n\n\n\n\n\n", 
+			sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n\n\n\n\n", 
 								redtext(p->track_target->netname));
+
+			G_centerprint(p, p->cptext);
 		}
 	}
 }
@@ -1283,19 +1289,25 @@ void CA_spectator_think(void)
 {
 	gedict_t *p;
 
-	p = PROG_TO_EDICT(self->s.v.goalentity);
+	p = PROG_TO_EDICT(self->s.v.goalentity); // who we are spectating
 
 	if (p->ct == ctPlayer && !p->in_play && p->tracking_enabled)
 	{
-		if (!p->in_play && p->tracking_enabled)
-		{
-			//If the player you're observing is following someone else, hide the player model
-			self->hideentity = EDICT_TO_PROG(p->track_target);
-		}
+		// if the player you're observing is following someone else, hide the player model
+		self->hideentity = EDICT_TO_PROG(p->track_target);
 	}
 	else
 	{
 		self->hideentity = 0;
+	}
+	
+	if (p->ct == ctPlayer)
+	{
+		if (match_in_progress == 2 && ra_match_fight == 2 && round_time > 2 && !ca_round_pause)
+		{
+			// any centerprint the player sees is sent to the spec
+			G_centerprint(self, "%s\n", p->cptext);
+		}
 	}
 }
 
@@ -1314,6 +1326,8 @@ void CA_Frame(void)
 	{
 		return;
 	}
+
+	round_time = Q_rint(g_globalvars.time - time_to_start);
 
 	// if max_respawns are greater than 0, we're playing wipeout
 	if (ra_match_fight == 2 && !ca_round_pause && cvar("k_clan_arena") == 2)
@@ -1344,7 +1358,8 @@ void CA_Frame(void)
 				if (p->seconds_to_respawn <= 0)
 				{
 					p->spawn_delay = 0;
-					G_centerprint(p, "%s\n", "FIGHT!");
+					sprintf(p->cptext, "%s\n", "FIGHT!");
+					G_centerprint(p, p->cptext);
 					k_respawn(p, true);
 
 					p->seconds_to_respawn = 999;
@@ -1354,27 +1369,31 @@ void CA_Frame(void)
 				{
 					if (!p->tracking_enabled)
 					{
-						G_centerprint(p, "\n\n\n\n\n\n\n\n\n%d\n\n\n seconds to respawn!\n", p->seconds_to_respawn);
+						sprintf(p->cptext, "\n\n\n\n\n\n\n\n\n%d\n\n\n seconds to respawn!\n", p->seconds_to_respawn);
+						G_centerprint(p, p->cptext);
 					}
 				}
 			}
 			else if (p->in_play && p->alive_time > 2 && last_alive)
 			{
 				sprintf(str_last_alive, "%d", last_alive);
-
-				G_centerprint(p, "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n", 
+				sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n", 
 								redtext("stay alive!"), last_alive == 999 ? " " : str_last_alive);
+
+				G_centerprint(p, p->cptext);
 			}
 			else if (p->in_play && p->alive_time > 2 && e_last_alive)
 			{
 				sprintf(str_e_last_alive, "%d", e_last_alive);
-
-				G_centerprint(p, "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n", 
+				sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n", 
 								"one enemy left", e_last_alive == 999 ? " " : str_e_last_alive);
+
+				G_centerprint(p, p->cptext);
 			}
 			else if (p->in_play && p->alive_time > 2)
 			{
-				G_centerprint(p, " ");
+				sprintf(p->cptext, " ");
+				G_centerprint(p, p->cptext);
 			}
 		}
 	}
@@ -1441,6 +1460,7 @@ void CA_Frame(void)
 				}
 
 				G_sprint(p, 2, "round \x90%d\x91 starts in 5 seconds.\n", round_num);
+				sprintf(p->cptext, " "); // reset any server print from last round
 			}
 		}
 
