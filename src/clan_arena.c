@@ -833,6 +833,8 @@ void team_round_summary(int alive_team)
 	char t2need[5];
 	char t1status[20];
 	char t2status[20];
+	char tmp[50];
+	char result[300];
 	
 	sprintf(t1score, "%d", t1_score);
 	sprintf(t2score, "%d", t2_score);
@@ -841,59 +843,64 @@ void team_round_summary(int alive_team)
 	sprintf(t1status, "%s", !alive_team ? "tied round" : (alive_team == 1 ? "round winner" : ""));
 	sprintf(t2status, "%s", !alive_team ? "tied round" : (alive_team == 2 ? "round winner" : ""));
 
-	G_bprint(2, "team   wins need status\n");
-	G_bprint(2, "%s\n", redtext("------ ---- ---- ------------"));
+	sprintf(result, "%s", "team   wins need status\n");
+	sprintf(tmp, "%s\n", redtext("------ ---- ---- ------------"));
+	strcat(result, tmp);
 	
-	G_bprint(2, "%s ", team1);
+	sprintf(tmp, "%s ", team1);
+	strcat(result, tmp);
 	for (int i = 0; i < (strlen("team  ") - strlen(team1)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
 
 	for (int i = 0; i < (strlen("wins") - strlen(t1score)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
-	G_bprint(2, "%s ", t1score);
+	sprintf(tmp, "%s ", t1score);
+	strcat(result, tmp);
 
 	for (int i = 0; i < (strlen("need") - strlen(t1need)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
-	G_bprint(2, "%s ", t1need);
+	sprintf(tmp, "%s %s\n%s ", t1need, t1status, team2);
+	strcat(result, tmp);
 
-	G_bprint(2, "%s\n", t1status);
-
-	G_bprint(2, "%s ", team2);
 	for (int i = 0; i < (strlen("team  ") - strlen(team2)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
 	
 	for (int i = 0; i < (strlen("wins") - strlen(t2score)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
-	G_bprint(2, "%s ", t2score);
+	sprintf(tmp, "%s ", t2score);
+	strcat(result, tmp);
 
 	for (int i = 0; i < (strlen("need") - strlen(t2need)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
-	G_bprint(2, "%s ", t2need);
+	sprintf(tmp, "%s %s\n\n", t2need, t2status);
+	strcat(result, tmp);
 
-	G_bprint(2, "%s\n", t2status);
-
-	G_bprint(2, "\n");
+	G_bprint(2, result);
 }
 
 void print_player_stats(qbool series_over)
 {
 	gedict_t *p;
+	char tmp[50];
+	char header[200];
 
-	G_bprint(2, "\n");
-	G_bprint(2, "sco  damg took  k  d  gl  rh  rd  lg%% player\n");
-	G_bprint(2, "%s\n", redtext("--- ----- ---- -- -- --- --- --- ---- --------"));
+	sprintf(header, "%s", "\n");
+	strcat(header, "sco  damg took  k  d  gl  rh  rd  lg%% player\n");
+	sprintf(tmp, "%s\n", redtext("--- ----- ---- -- -- --- --- --- ---- --------"));
+	strcat(header, tmp);
+	G_bprint(2, header);
 	
 	for (p = world; (p = find_plr(p));)
 	{
@@ -922,6 +929,17 @@ void CA_OnePlayerStats(gedict_t *p, qbool series_over)
 	float a_lg;
 	float e_lg;
 	float round_elg;
+	char score[10];
+	char damage[10];
+	char dmg_took[10];
+	char kills[10];
+	char deaths[10];
+	char gl_hits[10];
+	char rl_hits[10];
+	char rl_directs[10];
+	char lg_eff[10];
+	char tmp[18];
+	char result[300];
 
 	frags = p->s.v.frags;
 	dmg_g = p->ps.dmg_g;
@@ -939,16 +957,6 @@ void CA_OnePlayerStats(gedict_t *p, qbool series_over)
 	{
 		round_elg = 100 * (h_lg - p->ca_round_lghit) / max(1, a_lg - p->ca_round_lgfired);
 	}
-
-	char score[10];
-	char damage[10];
-	char dmg_took[10];
-	char kills[10];
-	char deaths[10];
-	char gl_hits[10];
-	char rl_hits[10];
-	char rl_directs[10];
-	char lg_eff[10];
 	
 	sprintf(score, "%.0f", use_totals ? p->s.v.frags : p->s.v.frags - p->ca_round_frags);
 	sprintf(damage, "%.0f", use_totals ? dmg_g : dmg_g - p->ca_round_dmg);
@@ -962,65 +970,77 @@ void CA_OnePlayerStats(gedict_t *p, qbool series_over)
 	
 	for (int i = 0; i < (strlen("sco") - strlen(score)); i++)
 	{
-		G_bprint(2, " ");
+		strcat(result, " ");
 	}
-	G_bprint(2, "%s ", strneq(score, "0") ? score : "-");
+	sprintf(tmp, "%s ", strneq(score, "0") ? score : "-");
+	strcat(result, tmp);
 
 	for (int i = 0; i < (strlen(" damg") - strlen(damage)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
-	G_bprint(2, "%s ", strneq(damage, "0") ? damage : "-");
+	sprintf(tmp, "%s ", strneq(damage, "0") ? damage : "-");
+	strcat(result, tmp);
 
 	for (int i = 0; i < (strlen("took") - strlen(dmg_took)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
-	G_bprint(2, "%s ", strneq(dmg_took, "0") ? dmg_took : "-");
+	sprintf(tmp, "%s ", strneq(dmg_took, "0") ? dmg_took : "-");
+	strcat(result, tmp);
 
 	for (int i = 0; i < (strlen(" k") - strlen(kills)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
-	G_bprint(2, "%s ",  strneq(kills, "0") ? kills : "-");
+	sprintf(tmp, "%s ",  strneq(kills, "0") ? kills : "-");
+	strcat(result, tmp);
 
 	for (int i = 0; i < (strlen(" d") - strlen(deaths)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
-	G_bprint(2, "%s ", strneq(deaths, "0") ? deaths : "-");
+	sprintf(tmp, "%s ", strneq(deaths, "0") ? deaths : "-");
+	strcat(result, tmp);
 
 	for (int i = 0; i < (strlen(" gl") - strlen(gl_hits)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
-	G_bprint(2, "%s ", strneq(gl_hits, "0") ? gl_hits : "-");
+	sprintf(tmp, "%s ", strneq(gl_hits, "0") ? gl_hits : "-");
+	strcat(result, tmp);
 
 	for (int i = 0; i < (strlen(" rh") - strlen(rl_hits)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
-	G_bprint(2, "%s ", strneq(rl_hits, "0") ? rl_hits : "-");
+	sprintf(tmp, "%s ", strneq(rl_hits, "0") ? rl_hits : "-");
+	strcat(result, tmp);
 
 	for (int i = 0; i < (strlen(" rd") - strlen(rl_directs)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
-	G_bprint(2, "%s ", strneq(rl_directs, "0") ? rl_directs : "-");
+	sprintf(tmp, "%s ", strneq(rl_directs, "0") ? rl_directs : "-");
+	strcat(result, tmp);
 
 	for (int i = 0; i < (strlen(" lg") - strlen(lg_eff)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
 	if (strneq(lg_eff, "0"))
 	{
-		G_bprint(2, "%s%s ", lg_eff, redtext("%"));
+		sprintf(tmp, "%s%s ", lg_eff, redtext("%"));
+		strcat(result, tmp);
 	}
 	else{
-		G_bprint(2, " - ");
+		strcat(result, " - ");
 	}
 
-	G_bprint(2, "%s\n", getname(p));
+	snprintf(tmp, 18, "%s\n", getname(p));
+	strcat(result, tmp);
+
+	G_bprint(2, result);
 
 	p->ca_round_frags = p->s.v.frags;
 	p->ca_round_kills = rkills;
