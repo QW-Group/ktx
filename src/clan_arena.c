@@ -427,7 +427,7 @@ void apply_CA_settings(void)
 
 	if (cvar("k_clan_arena") == 2)
 	{
-		cvar_fset("k_clan_arena_max_respawns", 10);
+		cvar_fset("k_clan_arena_max_respawns", 4);
 	}
 
 	cfg_name = va("configs/usermodes/ca/default.cfg");
@@ -1369,7 +1369,7 @@ void CA_Frame(void)
 
 				if (!p->spawn_delay)
 				{
-					int delay = p->round_deaths * 5;
+					int delay = p->round_deaths == 1 ? 5 : (p->round_deaths-1) * 10;
 					p->spawn_delay = g_globalvars.time + delay;
 				}
 
