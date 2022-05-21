@@ -1359,7 +1359,12 @@ void W_FireGrenade()
 
 	if (match_in_progress == 2)
 	{
-		if ((deathmatch != 4) && !k_bloodfest)
+		if (isCA())
+		{
+			self->s.v.currentammo = self->ca_ammo_grenades = self->ca_ammo_grenades - 1;
+			AmmoUsed(self);
+		}		
+		else if ((deathmatch != 4) && !k_bloodfest)
 		{
 			self->s.v.currentammo = self->s.v.ammo_rockets = self->s.v.ammo_rockets - 1;
 			AmmoUsed(self);
@@ -1862,7 +1867,14 @@ void W_SetCurrentAmmo()
 			break;
 
 		case IT_GRENADE_LAUNCHER:
-			self->s.v.currentammo = self->s.v.ammo_rockets;
+			if (isCA())
+			{
+				self->s.v.currentammo = self->ca_ammo_grenades;
+			}
+			else
+			{
+				self->s.v.currentammo = self->s.v.ammo_rockets;
+			}
 			self->weaponmodel = "progs/v_rock.mdl";
 			self->s.v.weaponframe = 0;
 			items |= IT_ROCKETS;

@@ -554,6 +554,8 @@ void CA_PutClientInServer(void)
 		self->s.v.armortype = 0.8;
 		self->s.v.health = 100;
 
+		self->ca_ammo_grenades = 6;
+
 		items = 0;
 		items |= IT_AXE;
 		items |= IT_SHOTGUN;

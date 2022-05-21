@@ -1039,7 +1039,7 @@ typedef struct gedict_s
 	raPlayerType_t ra_pt;					// ra player type
 // }
 
-// { Clan Arena
+// { Clan Arena/Wipepout
 	struct gedict_s *track_target;			// who are we tracking?
 	qbool ca_alive;
 	qbool ca_ready;
@@ -1057,7 +1057,8 @@ typedef struct gedict_s
 	float ca_round_lghit;
 	float ca_round_lgfired;
 	char *teamcolor;						// color of player's team
-	char cptext[100];
+	char cptext[100];						// centerprint for player
+	int ca_ammo_grenades;					// grenade ammo
 	int tracking_enabled;
 	int round_deaths;						// number of times player has died in the round
 	int seconds_to_respawn;					// number of seconds until respawn
