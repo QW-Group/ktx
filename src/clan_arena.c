@@ -547,7 +547,7 @@ void CA_PutClientInServer(void)
 
 		self->s.v.ammo_nails = 200;
 		self->s.v.ammo_shells = 100;
-		self->s.v.ammo_rockets = 60;
+		self->s.v.ammo_rockets = 50;
 		self->s.v.ammo_cells = 150;
 
 		self->s.v.armorvalue = 200;
