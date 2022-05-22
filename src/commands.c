@@ -33,7 +33,6 @@ void ReqAdmin();
 void AdminForceStart();
 void AdminForceBreak();
 void AdminForceMap();
-void AdminSwapAll();
 void TogglePreWar();
 void ToggleMapLock();
 void AdminKick();
@@ -154,6 +153,7 @@ void Pos_Move();
 void Pos_Set(float set_type);
 void Sh_Speed();
 void lastscores();
+void SwapAll();
 
 void motd_show();
 
@@ -880,7 +880,7 @@ cmd_t cmds[] =
 	{ "noga", 						noga, 							0, 			CF_BOTH_ADMIN | CF_MATCHLESS, 											CD_NOGA },
 	{ "mctf", 						mctf, 							0, 			CF_BOTH_ADMIN | CF_MATCHLESS, 											CD_MCTF },
 	{ "flagstatus", 				FlagStatus, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_FLAGSTATUS },
-	{ "swapall", 					AdminSwapAll, 					0, 			CF_BOTH_ADMIN, 															CD_SWAPALL },
+	{ "swapall", 					SwapAll, 						0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_SWAPALL },
 
 	{ "ctfbasedspawn", 				CTFBasedSpawn, 					0, 			CF_PLAYER | CF_SPC_ADMIN | CF_MATCHLESS, 								CD_CTFBASEDSPAWN },
 	// }
@@ -2064,7 +2064,7 @@ void ModStatusVote()
 			voted = true;
 
 			G_sprint(self, 2, "\220%d/%d\221 vote%s for %s election:\n", votes,
-						get_votes_req( OV_ELECT, false), count_s(votes),
+						get_votes_req(OV_ELECT, false), count_s(votes),
 						redtext(get_elect_type_str()));
 
 			for (p = world; (p = find_client(p));)
@@ -2085,7 +2085,7 @@ void ModStatusVote()
 			voted = true;
 
 			G_sprint(self, 2, "\220%d/%d\221 vote%s for a %s game:\n", votes,
-						get_votes_req( OV_PICKUP, false), count_s(votes), redtext("pickup"));
+						get_votes_req(OV_PICKUP, false), count_s(votes), redtext("pickup"));
 
 			for (p = world; (p = find_client(p));)
 			{
@@ -2104,7 +2104,7 @@ void ModStatusVote()
 			voted = true;
 
 			G_sprint(self, 2, "\220%d/%d\221 vote%s for a %s game:\n", votes,
-						get_votes_req( OV_RPICKUP, false), count_s(votes), redtext("rpickup"));
+						get_votes_req(OV_RPICKUP, false), count_s(votes), redtext("rpickup"));
 
 			for (p = world; (p = find_client(p));)
 			{
@@ -2123,7 +2123,7 @@ void ModStatusVote()
 			voted = true;
 
 			G_sprint(self, 2, "\220%d/%d\221 vote%s for %s:\n", votes,
-						get_votes_req( OV_BREAK, false), count_s(votes),
+						get_votes_req(OV_BREAK, false), count_s(votes),
 						(k_matchLess ? "next map" : "stopping"));
 
 			for (p = world; (p = find_client(p));)
@@ -2143,7 +2143,7 @@ void ModStatusVote()
 			voted = true;
 
 			G_sprint(self, 2, "\220%d/%d\221 vote%s for a %s mode change:\n", votes,
-						get_votes_req( OV_ANTILAG, false), count_s(votes), redtext("antilag"));
+						get_votes_req(OV_ANTILAG, false), count_s(votes), redtext("antilag"));
 
 			for (p = world; (p = find_client(p));)
 			{
@@ -2162,7 +2162,7 @@ void ModStatusVote()
 			voted = true;
 
 			G_sprint(self, 2, "\220%d/%d\221 vote%s for a %s mode change:\n", votes,
-						get_votes_req( OV_NOSPECS, false), count_s(votes), redtext("no spec"));
+						get_votes_req(OV_NOSPECS, false), count_s(votes), redtext("no spec"));
 
 			for (p = world; (p = find_client(p));)
 			{
@@ -2181,7 +2181,7 @@ void ModStatusVote()
 			voted = true;
 
 			G_sprint(self, 2, "\220%d/%d\221 vote%s for a %s change:\n", votes,
-						get_votes_req( OV_TEAMOVERLAY, false), count_s(votes),
+						get_votes_req(OV_TEAMOVERLAY, false), count_s(votes),
 						redtext("teamoverlay"));
 
 			for (p = world; (p = find_client(p));)
@@ -2209,6 +2209,25 @@ void ModStatusVote()
 			for (p = world; (p = find_client(p));)
 			{
 				if (p->v.privategame)
+				{
+					G_sprint(self, 2, " %s\n", p->netname);
+				}
+			}
+		}
+	}
+
+	if (!match_in_progress)
+	{
+		if ((votes = get_votes(OV_SWAPALL)))
+		{
+			voted = true;
+
+			G_sprint(self, 2, "\220%d/%d\221 vote%s for a %s game:\n", votes,
+						get_votes_req(OV_SWAPALL, false), count_s(votes), redtext("swapall"));
+
+			for (p = world; (p = find_client(p));)
+			{
+				if (p->v.swapall)
 				{
 					G_sprint(self, 2, " %s\n", p->netname);
 				}
@@ -5109,7 +5128,7 @@ void RandomPickup()
 			(self->v.rpickup ?
 					redtext("votes for rpickup") :
 					redtext(va("withdraws %s rpickup vote", g_his(self)))),
-			((votes = get_votes_req( OV_RPICKUP, true)) ? va(" (%d)", votes) : ""));
+			((votes = get_votes_req(OV_RPICKUP, true)) ? va(" (%d)", votes) : ""));
 
 	vote_check_rpickup(MAX_RPICKUP_RECUSION);
 }
@@ -6186,6 +6205,49 @@ void Sh_Speed()
 
 void PMOTDThink();
 void SMOTDThink();
+
+// often times you play a game on non-symmetrical map as one color then swap teams and play again to be fair
+void SwapAll()
+{
+	int votes;
+
+	if (match_in_progress)
+	{
+		return;
+	}
+
+	if (!isCTF())
+	{
+		return;
+	}
+
+	if (k_captains)
+	{
+		G_sprint(self, 2, "No swapall when captain stuffing\n");
+
+		return;
+	}
+
+	if (k_coaches)
+	{
+		G_sprint(self, 2, "No swapall when coach stuffing\n");
+
+		return;
+	}
+
+	self->v.swapall = !self->v.swapall;
+
+	G_bprint(
+			2,
+			"%s %s!%s\n",
+			self->netname,
+			(self->v.swapall ?
+					redtext(va("votes for swapall")) :
+					redtext(va("withdraws %s swapall vote", g_his(self)))),
+			((votes = get_votes_req(OV_SWAPALL, true)) ? va(" (%d)", votes) : ""));
+
+	vote_check_swapall();
+}
 
 void motd_show()
 {

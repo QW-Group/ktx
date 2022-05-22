@@ -831,8 +831,19 @@ void G_cp2all(const char *fmt, ...)
 	text[sizeof(text) - 1] = 0;
 	va_end(argptr);
 
-	WriteByte(MSG_ALL, SVC_CENTERPRINT);
-	WriteString(MSG_ALL, text);
+	if (FTE_sv)
+	{
+		gedict_t *p;
+		for (p = world; (p = find_client(p));)
+		{
+			G_centerprint(p, "%s", text);
+		}
+	}
+	else
+	{
+		WriteByte(MSG_ALL, SVC_CENTERPRINT);
+		WriteString(MSG_ALL, text);
+	}
 }
 
 void G_dprint(const char *fmt, ...)
@@ -2223,6 +2234,11 @@ void ghostClearScores(gedict_t *g)
 	int to = MSG_ALL;
 	int cl_slot = g->ghost_slot;
 
+	if (cvar_string("k_no_scoreboard_ghosts")[0])
+	{
+		return; // Scoreboard ghosts disabled, probably for QE compatibility.
+	}
+
 	if (strneq(g->classname, "ghost"))
 	{
 		return;
@@ -2251,6 +2267,11 @@ void ghost2scores(gedict_t *g)
 {
 	int to = MSG_ALL;
 	int cl_slot;
+
+	if (cvar_string("k_no_scoreboard_ghosts")[0])
+	{
+		return; // Scoreboard ghosts disabled, probably for QE compatibility.
+	}
 
 	if (isRA())
 	{

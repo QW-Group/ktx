@@ -20,7 +20,7 @@
 // vote.c: election functions by rc\sturm
 #include "g_local.h"
 
-void BeginPicking();
+//void BeginPicking();
 void BecomeCaptain(gedict_t *p);
 void BecomeCoach(gedict_t *p);
 
@@ -49,7 +49,7 @@ void AbortElect()
 		}
 	}
 
-	vote_clear( OV_ELECT); // clear vote
+	vote_clear(OV_ELECT); // clear vote
 
 //	Kill timeout checker entity
 	for (p = world; (p = find(p, FOFCLSN, "electguard"));)
@@ -71,7 +71,7 @@ void VoteYes()
 {
 	int votes;
 
-	if (!get_votes( OV_ELECT))
+	if (!get_votes(OV_ELECT))
 	{
 		return;
 	}
@@ -96,7 +96,7 @@ void VoteYes()
 	G_bprint(2, "%s gives %s vote\n", self->netname, g_his(self));
 
 //	calculate how many more votes are needed
-	if ((votes = get_votes_req( OV_ELECT, true)))
+	if ((votes = get_votes_req(OV_ELECT, true)))
 	{
 		G_bprint(2, "\x90%d\x91 more vote%s needed\n", votes, count_s(votes));
 	}
@@ -108,19 +108,19 @@ void VoteNo()
 {
 	int votes;
 
-//	withdraw one's vote
+	// withdraw one's vote
 	if (!get_votes(OV_ELECT) || (self->v.elect_type != etNone) || !self->v.elect)
 	{
 		return;
 	}
 
-//	unregister the vote
+	// unregister the vote
 	self->v.elect = 0;
 
 	G_bprint(2, "%s withdraws %s vote\n", self->netname, g_his(self));
 
-//	calculate how many more votes are needed
-	if ((votes = get_votes_req( OV_ELECT, true)))
+	// calculate how many more votes are needed
+	if ((votes = get_votes_req(OV_ELECT, true)))
 	{
 		G_bprint(2, "\x90%d\x91 more vote%s needed\n", votes, count_s(votes));
 	}
@@ -180,6 +180,7 @@ int get_votes_req(int fofs, qbool diff)
 			break;
 
 		case OV_RPICKUP:
+		case OV_SWAPALL: // don't need a dedicated 'swapall' percentage
 			percent = cvar("k_vp_rpickup");
 			break;
 
@@ -194,7 +195,6 @@ int get_votes_req(int fofs, qbool diff)
 			{
 				votes = 0;
 			}
-
 			break;
 
 		case OV_ELECT:
@@ -219,7 +219,6 @@ int get_votes_req(int fofs, qbool diff)
 				break; // unknown/none election
 				break;
 			}
-
 			break;
 
 		case OV_NOSPECS:
@@ -271,7 +270,7 @@ int get_votes_req(int fofs, qbool diff)
 	{
 		vt_req = max(1, vt_req); // at least 1 vote in any case
 	}
-	else if (fofs == OV_RPICKUP)
+	else if ((fofs == OV_RPICKUP) || (fofs == OV_SWAPALL))
 	{
 		vt_req = max(3, vt_req); // at least 3 votes in this case
 	}
@@ -500,9 +499,9 @@ void vote_check_break()
 		return;
 	}
 
-	if (!get_votes_req( OV_BREAK, true))
+	if (!get_votes_req(OV_BREAK, true))
 	{
-		vote_clear( OV_BREAK);
+		vote_clear(OV_BREAK);
 
 		if (isHoonyModeAny())
 		{
@@ -512,8 +511,6 @@ void vote_check_break()
 		G_bprint(2, "%s\n", redtext("Match stopped by majority vote"));
 
 		EndMatch(0);
-
-		return;
 	}
 }
 
@@ -521,7 +518,7 @@ void vote_check_elect()
 {
 	gedict_t *p;
 
-	if (!get_votes_req( OV_ELECT, true))
+	if (!get_votes_req(OV_ELECT, true))
 	{
 		for (p = world; (p = find_client(p));)
 		{
@@ -564,8 +561,6 @@ void vote_check_elect()
 		}
 
 		AbortElect();
-
-		return;
 	}
 }
 
@@ -587,9 +582,9 @@ void vote_check_pickup()
 
 	veto = is_admins_vote(OV_PICKUP);
 
-	if (veto || !get_votes_req( OV_PICKUP, true))
+	if (veto || !get_votes_req(OV_PICKUP, true))
 	{
-		vote_clear( OV_PICKUP);
+		vote_clear(OV_PICKUP);
 
 		if (veto)
 		{
@@ -607,8 +602,6 @@ void vote_check_pickup()
 							"team \"\"\n"
 							"skin base\n");
 		}
-
-		return;
 	}
 }
 
@@ -628,7 +621,7 @@ void vote_check_rpickup(int maxRecursion)
 		return;
 	}
 
-	if (!get_votes( OV_RPICKUP))
+	if (!get_votes(OV_RPICKUP))
 	{
 		return;
 	}
@@ -641,11 +634,11 @@ void vote_check_rpickup(int maxRecursion)
 		return;
 	}
 
-	veto = is_admins_vote( OV_RPICKUP);
+	veto = is_admins_vote(OV_RPICKUP);
 
-	if (veto || !get_votes_req( OV_RPICKUP, true))
+	if (veto || !get_votes_req(OV_RPICKUP, true))
 	{
-		vote_clear( OV_RPICKUP);
+		vote_clear(OV_RPICKUP);
 
 		// Save the original teams, and also clear them
 		i = 0;
@@ -719,28 +712,27 @@ void vote_check_rpickup(int maxRecursion)
 		else
 		{
 			G_bprint(2, "console: %s game it is then\n", redtext("random pickup"));
-			// check if rpickup really created new teams
-			if (pl_cnt <= 20)
-			{
-				for (p = world, i = 0; (p = find_plr(p)) && i < 20 && needNewRpickup; i++)
-				{
-					if (originalTeams[i] != p->k_teamnumber)
-					{
-						// there is a mismatch, meaning that at least 1 player gets a new team
-						needNewRpickup = false;
-					}
-				}
-
-				if (needNewRpickup)
-				{
-					G_bprint(2, "console: Team layout did not change. %s again (tries left: %d)\n",
-								redtext("random pickup"), maxRecursion);
-					vote_check_rpickup(maxRecursion - 1);
-				}
-			}
 		}
 
-		return;
+		// check if rpickup really created new teams
+		if (pl_cnt <= 20)
+		{
+			for (p = world, i = 0; (p = find_plr(p)) && i < 20 && needNewRpickup; i++)
+			{
+				if (originalTeams[i] != p->k_teamnumber)
+				{
+					// there is a mismatch, meaning that at least 1 player gets a new team
+					needNewRpickup = false;
+				}
+			}
+
+			if (needNewRpickup)
+			{
+				G_bprint(2, "console: Team layout did not change. %s again (tries left: %d)\n",
+							redtext("random pickup"), maxRecursion);
+				vote_check_rpickup(maxRecursion - 1);
+			}
+		}
 	}
 }
 
@@ -765,16 +757,16 @@ void vote_check_nospecs()
 		return;
 	}
 
-	if (!get_votes( OV_NOSPECS))
+	if (!get_votes(OV_NOSPECS))
 	{
 		return;
 	}
 
-	veto = is_admins_vote( OV_NOSPECS);
+	veto = is_admins_vote(OV_NOSPECS);
 
-	if (veto || !get_votes_req( OV_NOSPECS, true))
+	if (veto || !get_votes_req(OV_NOSPECS, true))
 	{
-		vote_clear( OV_NOSPECS);
+		vote_clear(OV_NOSPECS);
 
 		// set no specs mode
 		cvar_fset("_k_nospecs", !cvar("_k_nospecs"));
@@ -819,8 +811,6 @@ void vote_check_nospecs()
 				stuffcmd(spec, "disconnect\n");  // FIXME: stupid way
 			}
 		}
-
-		return;
 	}
 }
 
@@ -895,8 +885,6 @@ void vote_check_teamoverlay()
 					2, "%s\n",
 					redtext(va("Teamoverlay %s by majority vote", OnOff(cvar("k_teamoverlay")))));
 		}
-
-		return;
 	}
 }
 
@@ -932,12 +920,10 @@ void teamoverlay()
 			(self->v.teamoverlay ?
 					redtext(va("votes for teamoverlay %s", OnOff(!cvar("k_teamoverlay")))) :
 					redtext(va("withdraws %s teamoverlay vote", g_his(self)))),
-			((votes = get_votes_req( OV_TEAMOVERLAY, true)) ? va(" (%d)", votes) : ""));
+			((votes = get_votes_req(OV_TEAMOVERLAY, true)) ? va(" (%d)", votes) : ""));
 
 	vote_check_teamoverlay();
 }
-
-// }
 
 qbool force_map_reset = false;
 
@@ -951,16 +937,16 @@ void vote_check_coop()
 		return;
 	}
 
-	if (!get_votes( OV_COOP))
+	if (!get_votes(OV_COOP))
 	{
 		return;
 	}
 
-	veto = is_admins_vote( OV_COOP);
+	veto = is_admins_vote(OV_COOP);
 
-	if (veto || !get_votes_req( OV_COOP, true))
+	if (veto || !get_votes_req(OV_COOP, true))
 	{
-		vote_clear( OV_COOP);
+		vote_clear(OV_COOP);
 
 		// toggle coop mode
 		cvar_fset("coop", coop = !cvar("coop"));
@@ -991,8 +977,6 @@ void vote_check_coop()
 		{
 			changelevel(coop ? "start" : mapname);
 		}
-
-		return;
 	}
 }
 
@@ -1017,7 +1001,7 @@ void votecoop()
 			(self->v.coop ?
 					redtext(va("votes for coop %s", OnOff(!cvar("coop")))) :
 					redtext(va("withdraws %s coop vote", g_his(self)))),
-			((votes = get_votes_req( OV_COOP, true)) ? va(" (%d)", votes) : ""));
+			((votes = get_votes_req(OV_COOP, true)) ? va(" (%d)", votes) : ""));
 
 	vote_check_coop();
 }
@@ -1035,16 +1019,16 @@ void vote_check_antilag()
 		return;
 	}
 
-	if (!get_votes( OV_ANTILAG))
+	if (!get_votes(OV_ANTILAG))
 	{
 		return;
 	}
 
-	veto = is_admins_vote( OV_ANTILAG);
+	veto = is_admins_vote(OV_ANTILAG);
 
-	if (veto || !get_votes_req( OV_ANTILAG, true))
+	if (veto || !get_votes_req(OV_ANTILAG, true))
 	{
-		vote_clear( OV_ANTILAG);
+		vote_clear(OV_ANTILAG);
 
 		// toggle antilag mode.
 		trap_cvar_set_float("sv_antilag", (float)(cvar("sv_antilag") ? 0 : 2));
@@ -1063,8 +1047,6 @@ void vote_check_antilag()
 					redtext(va("Antilag mode %s by majority vote",
 								OnOff(2 == cvar("sv_antilag")))));
 		}
-
-		return;
 	}
 }
 
@@ -1100,7 +1082,7 @@ void antilag()
 			(self->v.antilag ?
 					redtext(va("votes for antilag %s", OnOff(!(2 == cvar("sv_antilag"))))) :
 					redtext(va("withdraws %s antilag vote", g_his(self)))),
-			((votes = get_votes_req( OV_ANTILAG, true)) ? va(" (%d)", votes) : ""));
+			((votes = get_votes_req(OV_ANTILAG, true)) ? va(" (%d)", votes) : ""));
 
 	vote_check_antilag();
 }
@@ -1149,8 +1131,6 @@ void vote_check_privategame(void)
 					redtext(va("%s by majority vote",
 								(is_private_game() ? "private game" : "public game"))));
 		}
-
-		return;
 	}
 }
 
@@ -1206,85 +1186,6 @@ void private_game_vote(void)
 
 	vote_check_privategame();
 }
-
-/*
- // No point to any of this - can just elect admin instead?
- void vote_check_kick_unauthed(void)
- {
- int veto;
-
- if (match_in_progress || intermission_running || match_over)
- return;
-
- if (!get_votes(OV_KICKUNAUTHED))
- return;
-
- veto = is_admins_vote(OV_KICKUNAUTHED);
- if (veto || !get_votes_req(OV_KICKUNAUTHED, true)) {
- gedict_t* p;
- int kicked = 0;
-
- vote_clear(OV_KICKUNAUTHED);
-
- for (p = world; (p = find_plr(p)); ) {
- if (!p->isBot && !is_logged_in(p)) {
- do_force_spec(p, NULL, true);
- ++kicked;
- }
- }
-
- if (veto) {
- G_bprint(PRINT_HIGH, "%d players kicked by %s\n", kicked, redtext("admin veto"));
- }
- else {
- G_bprint(PRINT_HIGH, "%d players kicked by %s\n", kicked, redtext("majority vote"));
- }
-
- return;
- }
- }
-
- void kick_unauthed_vote(void)
- {
- int votes;
- qbool enabled = is_private_game();
-
- if (!enabled) {
- G_sprint(self, 2, "This command not valid for public games\n");
- return;
- }
-
- if (match_in_progress) {
- return;
- }
-
- if (!is_logged_in(self)) {
- G_sprint(self, 2, "You must log in first\n");
- return;
- }
-
- // admin may turn this status alone on server...
- if (!is_adm(self)) {
- // Dont need to bother if less than 2 players
- if (CountPlayers() < 2) {
- G_sprint(self, 2, "You need at least 2 players to do this.\n");
- return;
- }
- }
-
- self->v.kick_unauthed = !self->v.kick_unauthed;
-
- G_bprint(
- PRINT_HIGH,
- "%s %s!%s\n",
- self->netname,
- (self->v.kick_unauthed ? redtext("votes to kick unauthed players") : redtext(va("withdraws %s kick-unauthed vote", g_his(self)))),
- ((votes = get_votes_req(OV_PRIVATE, true)) ? va(" (%d)", votes) : "")
- );
-
- vote_check_kick_unauthed();
- }
- */
 
 void private_game_toggle(qbool enable)
 {
@@ -1356,7 +1257,49 @@ qbool private_game_by_default(void)
 	return cvar("k_privategame_default");
 }
 
-// }
+void vote_check_swapall()
+{
+	int veto;
+	gedict_t *p;
+
+	if (match_in_progress || k_captains || k_coaches)
+	{
+		return;
+	}
+
+	if (!get_votes(OV_SWAPALL))
+	{
+		return;
+	}
+
+	veto = is_admins_vote(OV_SWAPALL);
+
+	if (veto || !get_votes_req(OV_SWAPALL, true))
+	{
+		vote_clear(OV_SWAPALL);
+
+		if (veto)
+		{
+			G_bprint(2, "Admin veto for %s\n", redtext("Swapall"));
+		}
+		else
+		{
+			G_bprint(2, "Majority vote for %s\n", redtext("Swapall"));
+		}
+
+		for (p = world; (p = find_plr(p));)
+		{
+			if (streq(getteam(p), "blue"))
+			{
+				stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "team \"red\"\ncolor 4\n");
+			}
+			else if (streq(getteam(p), "red"))
+			{
+				stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "team \"blue\"\ncolor 13\n");
+			}
+		}
+	}
+}
 
 void vote_check_all(void)
 {
@@ -1370,4 +1313,5 @@ void vote_check_all(void)
 	vote_check_coop();
 	vote_check_antilag();
 	vote_check_privategame();
+	vote_check_swapall();
 }
