@@ -835,8 +835,8 @@ void team_round_summary(int alive_team)
 	char t2need[5];
 	char t1status[20];
 	char t2status[20];
-	char tmp[50];
-	char result[300];
+	char tmp[36] = "";
+	char result[100] = "";
 	
 	sprintf(t1score, "%d", t1_score);
 	sprintf(t2score, "%d", t2_score);
@@ -940,8 +940,8 @@ void CA_OnePlayerStats(gedict_t *p, qbool series_over)
 	char rl_hits[10];
 	char rl_directs[10];
 	char lg_eff[10];
-	char tmp[18];
-	char result[300];
+	char tmp[18] = "";
+	char result[100] = "";
 
 	frags = p->s.v.frags;
 	dmg_g = p->ps.dmg_g;
