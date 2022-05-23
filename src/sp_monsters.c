@@ -214,7 +214,9 @@ void bloodfest_wave_calculate(void)
 		g_bloodfest.monsters_spawn_time = 0;
 	}
 
-	if (g_bloodfest.monsters_spawn_time > g_globalvars.time)
+	// Check if its the time to calculate a new wave
+	// or skip this check and keep monsters count as high as possible if k_bloodfest_waves is not active.
+	if (g_bloodfest.monsters_spawn_time > g_globalvars.time && cvar("k_bloodfest_waves"))
 	{
 		return; // not ready to calculate wave.
 	}

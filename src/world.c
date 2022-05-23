@@ -933,6 +933,7 @@ void FirstFrame()
 	RegisterCvarEx("k_killquad", "0");
 
 	RegisterCvarEx("k_bloodfest", "0");
+	RegisterCvarEx("k_bloodfest_waves", "1");
 
 	RegisterCvarEx("k_nightmare_pu", "0");
 	RegisterCvarEx("k_nightmare_pu_droprate", "0.15");

@@ -94,6 +94,7 @@ void ShowCharsetTableOctal();
 void ShowCharsetTableHexa();
 void killquad();
 void bloodfest();
+void bloodfest_waves(void);
 void antilag();
 void ToggleDischarge();
 void ToggleDropPack();
@@ -363,6 +364,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_FRAGSUP			"+10 fraglimit"
 #define CD_KILLQUAD			"kill the quad mode"
 #define CD_BLOODFEST		"blood fest mode (coop/single only)"
+#define CD_BLOODFEST_WAVES	"toggle blood fest waves"
 #define CD_DROPQUAD			"drop quad when killed"
 #define CD_DROPRING			"drop ring when killed"
 #define CD_DROPPACK			"drop pack when killed"
@@ -708,6 +710,7 @@ cmd_t cmds[] =
 	{ "killquad", 					killquad, 						0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_KILLQUAD },
 	// qqshka: Pointless to have it, XonX command will turn it off anyway.
 //	{ "bloodfest", 					bloodfest, 						0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_BLOODFEST },
+	{ "bloodfest_waves", 			bloodfest_waves, 				0, 			CF_PLAYER | CF_SPC_ADMIN | CF_MATCHLESS, 								CD_BLOODFEST_WAVES },
 	{ "dropquad", 					ToggleDropQuad, 				0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_DROPQUAD },
 	{ "dropring", 					ToggleDropRing, 				0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_DROPRING },
 	{ "droppack", 					ToggleDropPack, 				0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_DROPPACK },
@@ -2968,6 +2971,16 @@ void bloodfest()
 	k_bloodfest = cvar("k_bloodfest");
 }
 
+void bloodfest_waves(void)
+{
+	if (match_in_progress)
+	{
+		return;
+	}
+
+	cvar_toggle_msg(self, "k_bloodfest_waves", redtext("Blood Fest Waves"));
+}
+
 void ToggleDropQuad()
 {
 	if (match_in_progress)
@@ -3977,6 +3990,7 @@ const char common_um_init[] =
 	"sv_loadentfiles_dir \"\"\n"
 	"sv_antilag 2\n"				// antilag on
 	"k_bloodfest 0\n"
+	"k_bloodfest_waves 1\n"		    // turn on waves in bloodfest mode
 	"k_killquad 0\n"
 	"pm_airstep \"\"\n"				// airstep off by default
 	"samelevel 1\n"					// change levels off

@@ -1352,6 +1352,7 @@ void PrintCountdown(int seconds)
 // Overtime		xx		Overtime printout, supports sudden death display
 // Powerups		On|Off|QPRS
 // Dmgfrags		On // optional
+// Waves		On // optional (bloodfest specific)
 // Noweapon
 
 // Handicap in use // optional
@@ -1605,6 +1606,11 @@ void PrintCountdown(int seconds)
 	if (cvar("k_dmgfrags"))
 	{
 		strlcat(text, va("%s %4s\n", "Dmgfrags", redtext("on")), sizeof(text));
+	}
+
+	if (k_bloodfest && cvar("k_bloodfest_waves"))
+	{
+		strlcat(text, va("%s %7s\n", "Waves", redtext("on")), sizeof(text));
 	}
 
 	if ((deathmatch == 4) && !cvar("k_midair") && !cvar("k_instagib")
