@@ -216,6 +216,7 @@ static char ca_settings[] = "k_clan_arena_rounds 9\n"
 		"k_spw 1\n"
 		"k_dmgfrags 1\n"
 		"k_teamoverlay 1\n"
+		"k_membercount 1\n"
 		"k_noitems 1\n";
 
 void CA_MatchBreak(void)
