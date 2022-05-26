@@ -156,6 +156,7 @@ void SM_PrepareCA(void)
 		{
 			p->ca_ready = p->ready;
 			p->seconds_to_respawn = 0;
+			p->teamcolor = NULL;
 		}
 	}
 }
@@ -237,7 +238,6 @@ void CA_MatchBreak(void)
 	{
 		if (p->ct == ctPlayer)
 		{
-			p->teamcolor = NULL;
 			k_respawn(p, false);
 		}
 	}
@@ -589,13 +589,8 @@ void CA_PutClientInServer(void)
 
 		if (!self->teamcolor && self->ca_ready)
 		{
-			// if you're not playing, you're always color 0
-			if (!self->ca_ready)
-			{
-				self->teamcolor = "0"; 
-			}
 			// if your team is "red" or "blue", set color to match
-			else if (streq(getteam(self), "red") || streq(getteam(self), "blue"))
+			if (streq(getteam(self), "red") || streq(getteam(self), "blue"))
 			{
 				self->teamcolor = streq(getteam(self), "red") ? "4" : "13";
 			}
