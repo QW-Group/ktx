@@ -403,14 +403,26 @@ void r_changetrackingstatus(float t)
 
 void ClanArenaTrackingToggleButton(void)
 {
-	if (!(((int)(self->s.v.flags)) & FL_ATTACKRELEASED))
+	if ((self->ct == ctPlayer) && ISDEAD(self) && !self->ca_ready)
 	{
+		if (self->s.v.button0)
+		{
+			if (!(((int)(self->s.v.flags)) & FL_ATTACKRELEASED))
+			{
+				return;
+			}
+
+			self->s.v.flags = (int)self->s.v.flags & ~FL_ATTACKRELEASED;
+
+			r_changetrackingstatus((float) 3);
+		}
+		else
+		{
+			self->s.v.flags = ((int)(self->s.v.flags)) | FL_ATTACKRELEASED;
+		}
+
 		return;
 	}
-
-	self->s.v.flags = (int)self->s.v.flags & ~FL_ATTACKRELEASED;
-
-	r_changetrackingstatus((float) 3);
 }
 
 void apply_CA_settings(void)

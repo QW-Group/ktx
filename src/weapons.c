@@ -2895,19 +2895,7 @@ void W_WeaponFrame()
 
 	if (isCA())
 	{
-		if ((self->ct == ctPlayer) && ISDEAD(self))
-		{
-			if (self->s.v.button0)
-			{
-				ClanArenaTrackingToggleButton();
-			}
-			else
-			{
-				self->s.v.flags = ((int)(self->s.v.flags)) | FL_ATTACKRELEASED;
-			}
-
-			return;
-		}
+		ClanArenaTrackingToggleButton();
 	}
 
 	ImpulseCommands();
