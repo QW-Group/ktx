@@ -215,7 +215,7 @@ static char ca_settings[] = "k_clan_arena_rounds 9\n"
 		"k_spectalk 1\n"		// enable spec talk by default
 		"k_exttime 0\n"	
 		"k_spw 1\n"				// KT Safety spawns (important for CA)
-		"k_dmgfrags 1\n"		// 1 "frag" for every 100 dagame dealt
+		"k_dmgfrags 1\n"		// 1 "frag" for every 100 damage dealt
 		"k_teamoverlay 1\n"
 		"k_membercount 1\n"		// no minimum team size
 		"k_noitems 1\n";
