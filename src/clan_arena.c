@@ -204,20 +204,20 @@ qbool CA_CheckAlive(gedict_t *p)
 // hard coded default settings for CA
 static char ca_settings[] = "k_clan_arena_rounds 9\n"
 		"k_clan_arena_max_respawns 0\n"
-		"dp 0\n"
+		"dp 0\n"				// don't drop packs
 		"teamplay 4\n"
 		"deathmatch 5\n"
-		"timelimit 30\n"
+		"timelimit 60\n"		// hopefully matches won't take this long
 		"maxclients 8\n"
 		"k_maxclients 8\n"
 		"k_pow 0\n"
 		"k_overtime 0\n"
-		"k_spectalk 1\n"
+		"k_spectalk 1\n"		// enable spec talk by default
 		"k_exttime 0\n"	
-		"k_spw 1\n"
-		"k_dmgfrags 1\n"
+		"k_spw 1\n"				// KT Safety spawns (important for CA)
+		"k_dmgfrags 1\n"		// 1 "frag" for every 100 dagame dealt
 		"k_teamoverlay 1\n"
-		"k_membercount 1\n"
+		"k_membercount 1\n"		// no minimum team size
 		"k_noitems 1\n";
 
 void CA_MatchBreak(void)
