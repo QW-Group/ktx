@@ -207,7 +207,7 @@ static char ca_settings[] = "k_clan_arena_rounds 9\n"
 		"dp 0\n"				// don't drop packs
 		"teamplay 4\n"
 		"deathmatch 5\n"
-		"timelimit 60\n"		// hopefully matches won't take this long
+		"timelimit 0\n"			// no time limit
 		"maxclients 8\n"
 		"k_maxclients 8\n"
 		"k_pow 0\n"
