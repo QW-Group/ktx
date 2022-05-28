@@ -251,12 +251,7 @@ void track_player(gedict_t *observer)
 	int follow_distance;
 	int upward_distance;
 
-	if (!player) 
-	{
-		return;
-	}
-
-	if (!observer->in_play && observer->tracking_enabled)
+	if (player && !observer->in_play && observer->tracking_enabled)
 	{
 		if (observer->track_target && observer->track_target->in_play)
 		{
@@ -333,7 +328,7 @@ void track_player(gedict_t *observer)
 		show_tracking_info(observer);
 	}
 
-	if (!observer->tracking_enabled)
+	if (!player || !observer->tracking_enabled)
 	{
 		// restore movement and show racer entity
 		observer->s.v.movetype = MOVETYPE_NOCLIP;
