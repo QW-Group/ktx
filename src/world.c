@@ -1439,7 +1439,7 @@ void FixRules()
 	int fl = fraglimit = cvar("fraglimit");
 	int dm = deathmatch = cvar("deathmatch");
 	int k_minr = bound(0, cvar("k_minrate"), 100000);
-	int k_maxr = bound(0, cvar("sv_maxrate"), 100000);
+	int k_maxr = bound(0, cvar("sv_maxrate"), 500000);
 
 	k_bloodfest = cvar("k_bloodfest");
 
