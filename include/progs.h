@@ -1047,6 +1047,7 @@ typedef struct gedict_s
 	qbool ca_ready;
 	qbool in_play;							// is player still fighting?
 	qbool in_limbo;							// waiting to respawn during wipeout
+	qbool last_alive_active;				// if last alive timer is active
 	float ca_round_frags;
 	float ca_round_kills;
 	float ca_round_dmg;

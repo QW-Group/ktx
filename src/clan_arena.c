@@ -96,7 +96,8 @@ int last_alive_time(gedict_t *player)
 		{
 			if (p->in_play && p != player)
 			{
-				return 0;
+				time = 0;
+				break;
 			}
 			else if (!p->in_play)
 			{
@@ -106,6 +107,18 @@ int last_alive_time(gedict_t *player)
 				}
 			}
 		}
+	}
+
+	if (!player->last_alive_active && (time > 0))
+	{
+		player->last_alive_active = true;
+
+		stuffcmd(player, "play misc/medkey.wav\n");
+	}
+
+	else if (time == 0)
+	{
+		player->last_alive_active = false;
 	}
 
 	return time;
