@@ -1416,7 +1416,7 @@ void CA_Frame(void)
 			{
 				sprintf(str_last_alive, "%d", last_alive);
 				sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n", 
-								redtext("stay alive!"), last_alive == 999 ? " " : str_last_alive);
+								redtext("stay alive!"), last_alive == 999 ? " " : redtext(str_last_alive));
 
 				G_centerprint(p, p->cptext);
 			}
