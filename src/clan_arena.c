@@ -1126,7 +1126,7 @@ void EndRound(int alive_team)
 	{
 		last_count = pause_count;
 
-		if (pause_count < 7)
+		if (pause_count <= 7)
 		{
 			if (!alive_team)
 			{
