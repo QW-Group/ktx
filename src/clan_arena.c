@@ -1082,6 +1082,16 @@ void EndRound(int alive_team)
 		ca_round_pause = 1;
 		last_count = 999999999;
 		pause_time = g_globalvars.time + 8;
+
+		// once a team is dead, nobody can take anymore damage
+		// round draws will be very rare
+		if (alive_team)
+		{
+			for (p = world; (p = find_plr(p));)
+			{
+				p->no_pain = true;
+			}
+		}
 	}
 
 	pause_count = Q_rint(pause_time - g_globalvars.time);
@@ -1105,6 +1115,11 @@ void EndRound(int alive_team)
 		else
 		{
 			team2_score++;
+		}
+
+		for (p = world; (p = find_plr(p));)
+		{
+			p->no_pain = false;	// players can take damage
 		}
 	}
 	else if (pause_count != last_count)
@@ -1131,10 +1146,7 @@ void EndRound(int alive_team)
 							cvar_string(va("_k_team%d", alive_team)));
 				}
 			}
-		}
 
-		if (pause_count == 7)
-		{
 			if (!do_endround_stuff)
 			{
 				do_endround_stuff = true;
@@ -1144,12 +1156,12 @@ void EndRound(int alive_team)
 				{
 					if (cvar("k_clan_arena_max_respawns"))
 					{
-						if (streq(getteam(p), cvar_string(va("_k_team%d", alive_team))))
+						if (alive_team && streq(getteam(p), cvar_string(va("_k_team%d", alive_team))))
 						{
 							stuffcmd(p, "play misc/flagcap.wav\n");
 						}
 
-						if (streq(getteam(p), cvar_string(va("_k_team%d", alive_team))) && p->in_play)
+						if (alive_team && streq(getteam(p), cvar_string(va("_k_team%d", alive_team))) && p->in_play)
 						{
 							if (streq(ezinfokey(p, "topcolor"), "13") && streq(ezinfokey(p, "bottomcolor"), "13"))
 							{
