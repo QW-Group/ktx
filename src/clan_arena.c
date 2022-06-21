@@ -1318,7 +1318,13 @@ void CA_player_pre_think(void)
 
 		if (self->in_play)
 		{
-			self->alive_time = Q_rint(g_globalvars.time - self->time_of_respawn);
+			self->alive_time = g_globalvars.time - self->time_of_respawn;
+		}
+
+		// take no damage to health/armor during respawn
+		if (self->alive_time >= 0.5)
+		{
+			self->no_pain = false;
 		}
 	}
 }
@@ -1399,6 +1405,9 @@ void CA_Frame(void)
 					sprintf(p->cptext, "%s\n", "FIGHT!");
 					G_centerprint(p, p->cptext);
 					k_respawn(p, true);
+
+					// Don't take damage while respawning
+					p->no_pain = true;
 
 					p->seconds_to_respawn = 999;
 					p->time_of_respawn = g_globalvars.time; // resets alive_time to 0

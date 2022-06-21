@@ -1048,6 +1048,7 @@ typedef struct gedict_s
 	qbool in_play;							// is player still fighting?
 	qbool in_limbo;							// waiting to respawn during wipeout
 	qbool last_alive_active;				// if last alive timer is active
+	qbool no_pain;							// if player can take any damage to health or armor
 	float ca_round_frags;
 	float ca_round_kills;
 	float ca_round_dmg;
@@ -1059,14 +1060,14 @@ typedef struct gedict_s
 	float ca_round_rldirect;
 	float ca_round_lghit;
 	float ca_round_lgfired;
+	float alive_time;						// number of seconds player is in play
+	float time_of_respawn;					// server time player respawned or round started
 	char *teamcolor;						// color of player's team
 	char cptext[100];						// centerprint for player
 	int ca_ammo_grenades;					// grenade ammo
 	int tracking_enabled;
 	int round_deaths;						// number of times player has died in the round
 	int seconds_to_respawn;					// number of seconds until respawn
-	int alive_time;							// number of seconds player is in play
-	int time_of_respawn;					// server time player respawned or round started
 	int spawn_delay;						// total delay between death and spawn
 // }
 
