@@ -1334,7 +1334,7 @@ void CA_player_pre_think(void)
 		}
 
 		// take no damage to health/armor during respawn
-		if (self->alive_time >= 0.5)
+		if (self->alive_time >= 1)
 		{
 			self->no_pain = false;
 		}
