@@ -10,8 +10,10 @@ static int team2_score;
 static int pause_count;
 static int pause_time;
 static int round_time;
+static int loser_team;
 static qbool do_endround_stuff = false;
 static qbool print_stats = false;
+static float loser_respawn_time = 999; 	// number of seconds before a teammate would've respawned
 
 void track_player(gedict_t *observer);
 void enable_player_tracking(gedict_t *e, int follow);
@@ -85,10 +87,10 @@ int CA_get_score_2(void)
 
 // returns 0 if player has at least one alive teammate
 // otherwise returns number of seconds until next teammate respawns
-int last_alive_time(gedict_t *player)
+float last_alive_time(gedict_t *player)
 {
 	gedict_t *p;
-	int time = 0;
+	float time = 0;
 
 	for (p = world; (p = find_plr_same_team(p, getteam(player)));)
 	{
@@ -109,6 +111,8 @@ int last_alive_time(gedict_t *player)
 		}
 	}
 
+	// this checks to see if there's already a last_alive_countdown in progress
+	// because we only want to play the audio once at the begining of the countdown
 	if (!player->last_alive_active && (time > 0))
 	{
 		player->last_alive_active = true;
@@ -124,10 +128,10 @@ int last_alive_time(gedict_t *player)
 	return time;
 }
 
-int enemy_last_alive_time(gedict_t *player)
+float enemy_last_alive_time(gedict_t *player)
 {
 	gedict_t *p;
-	int time = 0;
+	float time = 0;
 	int alive_enemies = 0;
 
 	for (p = world; (p = find_plr(p));)
@@ -149,6 +153,26 @@ int enemy_last_alive_time(gedict_t *player)
 	}
 
 	return alive_enemies > 1 ? 0 : time;
+}
+
+float team_last_alive_time(int team)
+{
+	gedict_t *p;
+	float time = 999;
+	char* team_name = team ? (team == 1 ? cvar_string("_k_team1") : cvar_string("_k_team2")) : "";
+
+	for (p = world; (p = find_plr_same_team(p, team_name));)
+	{
+		if (p->ca_ready && !p->in_play)
+		{
+			if (p->seconds_to_respawn < time)
+			{
+				time = p->seconds_to_respawn;
+			}
+		}
+	}
+
+	return time;
 }
 
 void SM_PrepareCA(void)
@@ -1076,12 +1100,15 @@ void EndRound(int alive_team)
 {
 	gedict_t *p;
 	static int last_count;
+	char round_or_series[10] = "";
 	
 	if(!ca_round_pause)
 	{
 		ca_round_pause = 1;
 		last_count = 999999999;
 		pause_time = g_globalvars.time + 8;
+		loser_team = alive_team ? (alive_team == 1 ? 2 : 1) : 0;
+		loser_respawn_time = loser_team ? team_last_alive_time(loser_team) : 999;
 
 		// once a team is dead, nobody can take anymore damage
 		// round draws will be very rare
@@ -1134,17 +1161,18 @@ void EndRound(int alive_team)
 			}
 			else
 			{
-				if ((alive_team == 1 && team1_score == (CA_wins_required()-1)) || 
-					(alive_team == 2 && team2_score == (CA_wins_required()-1)))
+				sprintf(round_or_series, "%s", ((alive_team == 1 && team1_score == (CA_wins_required()-1)) || 
+					(alive_team == 2 && team2_score == (CA_wins_required()-1))) ? "series" : "round");
+
+				if (loser_respawn_time < 2)
 				{
-					G_cp2all("Team \x90%s\x91 wins the series!",
-							cvar_string(va("_k_team%d", alive_team))); 
+					G_cp2all("Team \x90%s\x91 wins the %s!\n\n\nTeam %s needed %.2f seconds to respawn",
+						cvar_string(va("_k_team%d", alive_team)), round_or_series, cvar_string(va("_k_team%d", loser_team)), loser_respawn_time); 
 				}
-				else
-				{
-					G_cp2all("Team \x90%s\x91 wins the round!",
-							cvar_string(va("_k_team%d", alive_team)));
-				}
+				else {
+					G_cp2all("Team \x90%s\x91 wins the %s!",
+						cvar_string(va("_k_team%d", alive_team)), round_or_series); 
+				}	
 			}
 
 			if (!do_endround_stuff)
@@ -1240,8 +1268,8 @@ void show_tracking_info(gedict_t *p)
 	{
 		if (p->ca_ready && p->round_deaths <= max_respawns && !ca_round_pause)
 		{
-			sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n%d\n\n\n seconds to respawn!\n", 
-								redtext(p->track_target->netname), p->seconds_to_respawn);
+			sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n%d\n\n\n seconds to respawn\n", 
+								redtext(p->track_target->netname), (int)ceil(p->seconds_to_respawn));
 
 			G_centerprint(p, p->cptext);
 		}
@@ -1396,8 +1424,8 @@ void CA_Frame(void)
 
 		for (p = world; (p = find_plr(p));)
 		{
-			last_alive = last_alive_time(p);
-			e_last_alive = enemy_last_alive_time(p);
+			last_alive = (int)ceil(last_alive_time(p));
+			e_last_alive = (int)ceil(enemy_last_alive_time(p));
 			
 			if (p->ca_ready && !p->in_play && p->round_deaths <= max_deaths)
 			{
@@ -1409,7 +1437,7 @@ void CA_Frame(void)
 					p->spawn_delay = g_globalvars.time + delay;
 				}
 
-				p->seconds_to_respawn = Q_rint(p->spawn_delay - g_globalvars.time);
+				p->seconds_to_respawn = p->spawn_delay - g_globalvars.time;
 
 				if (p->seconds_to_respawn <= 0)
 				{
@@ -1428,7 +1456,7 @@ void CA_Frame(void)
 				{
 					if (!p->tracking_enabled)
 					{
-						sprintf(p->cptext, "\n\n\n\n\n\n\n\n\n%d\n\n\n seconds to respawn!\n", p->seconds_to_respawn);
+						sprintf(p->cptext, "\n\n\n\n\n\n\n\n\n%d\n\n\n seconds to respawn\n", (int)ceil(p->seconds_to_respawn));
 						G_centerprint(p, p->cptext);
 					}
 				}
