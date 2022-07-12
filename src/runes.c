@@ -8,7 +8,6 @@ void RegenLostRot();
 void RuneRespawn();
 void RuneTouch();
 void RuneResetOwner();
-gedict_t* SelectSpawnPoint();
 char* GetRuneSpawnName();
 
 void DoDropRune(int rune, qbool s)
@@ -328,10 +327,52 @@ char* GetRuneSpawnName()
 	return runespawn;
 }
 
+// try to find a unique spawn position for a rune given the NULL-terminated
+// list of other runes
+gedict_t* UniqueRuneSpawn(int rune_type, int nrunes, gedict_t **runes)
+{
+	char *spawnname;
+	int i, nspawns;
+	qbool unique;
+	gedict_t *e;
+
+	spawnname = GetRuneSpawnName();
+
+	for (e = world, nspawns = 0; (e = ez_find(e, spawnname)); nspawns++);
+
+	for (i = 0; i < nspawns; i++)
+	{
+		self = SelectSpawnPoint(spawnname);
+
+		unique = true;
+
+		for (i = 0; i < nrunes; i++)
+		{
+			if (runes && self == runes[i])
+			{
+				unique = false;
+				break;
+			}
+		}
+
+		if (unique)
+		{
+			DoDropRune(rune_type, true);
+			return self;
+		}
+	}
+
+	// Unable to find a unique spawn, drop anyway
+	DoDropRune(rune_type, true);
+
+	return self;
+}
+
 // spawn/remove runes
 void SpawnRunes(qbool yes)
 {
-	gedict_t *oself, *e;
+	gedict_t *oself, *e, *runes[4];
+	int nrunes = 0;
 
 	for (e = world; (e = find(e, FOFCLSN, "rune"));)
 	{
@@ -345,28 +386,29 @@ void SpawnRunes(qbool yes)
 
 	oself = self;
 
+	memset(runes, 0, sizeof(runes));
+
 	if (cvar("k_ctf_rune_power_res") > 0)
 	{
-		self = SelectSpawnPoint(GetRuneSpawnName());
-		DoDropRune( CTF_RUNE_RES, true);
+		runes[nrunes] = UniqueRuneSpawn(CTF_RUNE_RES, nrunes, runes);
+		nrunes++;
 	}
 
 	if (cvar("k_ctf_rune_power_str") > 0)
 	{
-		self = SelectSpawnPoint(GetRuneSpawnName());
-		DoDropRune( CTF_RUNE_STR, true);
+		runes[nrunes] = UniqueRuneSpawn(CTF_RUNE_STR, nrunes, runes);
+		nrunes++;
 	}
 
 	if (cvar("k_ctf_rune_power_hst") > 0)
 	{
-		self = SelectSpawnPoint(GetRuneSpawnName());
-		DoDropRune( CTF_RUNE_HST, true);
+		runes[nrunes] = UniqueRuneSpawn(CTF_RUNE_HST, nrunes, runes);
+		nrunes++;
 	}
 
 	if (cvar("k_ctf_rune_power_rgn") > 0)
 	{
-		self = SelectSpawnPoint(GetRuneSpawnName());
-		DoDropRune( CTF_RUNE_RGN, true);
+		UniqueRuneSpawn(CTF_RUNE_RGN, nrunes, runes);
 	}
 
 	self = oself;
