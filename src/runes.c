@@ -8,7 +8,8 @@ void RegenLostRot();
 void RuneRespawn();
 void RuneTouch();
 void RuneResetOwner();
-gedict_t* SelectRuneSpawnPoint();
+gedict_t* SelectSpawnPoint();
+char* GetRuneSpawnName();
 
 void DoDropRune(int rune, qbool s)
 {
@@ -229,7 +230,7 @@ void RuneRespawn()
 	int rune = self->ctf_flag;
 
 	ent_remove(self);
-	self = SelectRuneSpawnPoint();
+	self = SelectSpawnPoint(GetRuneSpawnName());
 	DoDropRune(rune, true);
 }
 
@@ -310,19 +311,18 @@ void RuneTouch()
 	ent_remove(self);
 }
 
-gedict_t* SelectSpawnPoint();
-gedict_t* SelectRuneSpawnPoint()
+char* GetRuneSpawnName()
 {
-	gedict_t *runespawn;
+	char *runespawn;
 
 	if (cvar("k_ctf_based_spawn") == 1)
 	{
-		runespawn = SelectSpawnPoint(g_random() < 0.5 ? "info_player_team1" : "info_player_team2");
+		runespawn = g_random() < 0.5 ? "info_player_team1" : "info_player_team2";
 	}
 	else
 	{
 		// we'll just use the player spawn point selector for runes as well
-		runespawn = SelectSpawnPoint("info_player_deathmatch");
+		runespawn = "info_player_deathmatch";
 	}
 
 	return runespawn;
@@ -347,25 +347,25 @@ void SpawnRunes(qbool yes)
 
 	if (cvar("k_ctf_rune_power_res") > 0)
 	{
-		self = SelectRuneSpawnPoint();
+		self = SelectSpawnPoint(GetRuneSpawnName());
 		DoDropRune( CTF_RUNE_RES, true);
 	}
 
 	if (cvar("k_ctf_rune_power_str") > 0)
 	{
-		self = SelectRuneSpawnPoint();
+		self = SelectSpawnPoint(GetRuneSpawnName());
 		DoDropRune( CTF_RUNE_STR, true);
 	}
 
 	if (cvar("k_ctf_rune_power_hst") > 0)
 	{
-		self = SelectRuneSpawnPoint();
+		self = SelectSpawnPoint(GetRuneSpawnName());
 		DoDropRune( CTF_RUNE_HST, true);
 	}
 
 	if (cvar("k_ctf_rune_power_rgn") > 0)
 	{
-		self = SelectRuneSpawnPoint();
+		self = SelectSpawnPoint(GetRuneSpawnName());
 		DoDropRune( CTF_RUNE_RGN, true);
 	}
 
