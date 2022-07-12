@@ -41,7 +41,7 @@ void DoDropRune(int rune, qbool s)
 	if (pos == NULL)
 	{
 		pos = self;
-		movetype = MOVETYPE_TOSS;
+		movetype = (int) cvar("k_ctf_rune_bounce") & 1 ? MOVETYPE_BOUNCE : MOVETYPE_TOSS;
 	}
 
 	item = spawn();
@@ -95,7 +95,7 @@ void DoTossRune(int rune)
 	item->classname = "rune";
 	item->s.v.flags = FL_ITEM;
 	item->s.v.solid = SOLID_TRIGGER;
-	item->s.v.movetype = MOVETYPE_TOSS;
+	item->s.v.movetype = (int) cvar("k_ctf_rune_bounce") & 2 ? MOVETYPE_BOUNCE : MOVETYPE_TOSS;
 
 	trap_makevectors(self->s.v.v_angle);
 
