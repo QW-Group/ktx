@@ -31,6 +31,8 @@ typedef char *va_list;
 #define LONG_MAX		2147483647L			/* maximum (signed) long value */
 #define ULONG_MAX		0xffffffffUL		/* maximum unsigned long value */
 
+#define RAND_MAX		0x7fff				/* maximum random value */
+
 // Misc functions
 void srand(unsigned seed);
 int rand(void);

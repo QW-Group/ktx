@@ -46,7 +46,7 @@ int NUM_FOR_EDICT(gedict_t *e)
 
 float g_random()
 {
-	return ((rand() & 0x7fff) / ((float)0x8000));
+	return (float) rand() / RAND_MAX;
 }
 
 float crandom()
