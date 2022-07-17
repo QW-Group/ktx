@@ -15,7 +15,8 @@ typedef struct teamStats_s
 	// }
 	wpType_t wpn[wpMAX];
 	itType_t itm[itMAX];
-	int transferred_packs;
+	int transferred_RLpacks;
+	int transferred_LGpacks;
 } teamStats_t;
 
 extern teamStats_t tmStats[MAX_TM_STATS];

@@ -143,7 +143,8 @@ typedef struct player_stats_s
 
 	int spawn_frags;
 	int handicap;
-	int transferred_packs;
+	int transferred_RLpacks;
+	int transferred_LGpacks;
 
 	// ctf stats
 	int ctf_points;			// use frags - this to calculate efficiency for ctf

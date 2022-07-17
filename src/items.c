@@ -2499,7 +2499,7 @@ void BackpackTouch()
 		other->s.v.ammo_rockets = 5;
 	}
 
-	// detect transferred packs, credit the player who dropped the pack with the transfer
+	// detect transferred RL packs, credit the player who dropped the pack with the transfer
 	if (isTeam() && (self->s.v.items == IT_ROCKET_LAUNCHER))
 	{
 		if (streq(self->backpack_team_name, getteam(other)))
@@ -2508,7 +2508,23 @@ void BackpackTouch()
 			{
 				if (streq(getname(p), self->backpack_player_name))
 				{
-					p->ps.transferred_packs++;
+					p->ps.transferred_RLpacks++;
+					break;
+				}
+			}
+		}
+	}
+
+	// detect transferred LG packs, credit the player who dropped the pack with the transfer
+	if (isTeam() && (self->s.v.items == IT_LIGHTNING))
+	{
+		if (streq(self->backpack_team_name, getteam(other)))
+		{
+			for (p = world; (p = find_plr(p));)
+			{
+				if (streq(getname(p), self->backpack_player_name))
+				{
+					p->ps.transferred_LGpacks++;
 					break;
 				}
 			}
