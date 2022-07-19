@@ -92,7 +92,8 @@ static void CollectTpStats(void)
 				tmStats[tmStats_cnt].wpn[i].ttooks += p2->ps.wpn[i].ttooks;
 			}
 
-			tmStats[tmStats_cnt].transferred_packs += p2->ps.transferred_packs;
+			tmStats[tmStats_cnt].transferred_RLpacks += p2->ps.transferred_RLpacks;
+			tmStats[tmStats_cnt].transferred_LGpacks += p2->ps.transferred_LGpacks;
 
 			// { ctf related
 			tmStats[tmStats_cnt].res += p2->ps.res_time;
@@ -218,12 +219,13 @@ static void SummaryTPStats(void)
 		G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("      RL"), redtext("Took"),
 					tmStats[i].wpn[wpRL].tooks, redtext("Killed"), tmStats[i].wpn[wpRL].ekills,
 					redtext("Dropped"), tmStats[i].wpn[wpRL].drops, redtext("Xfer"),
-					tmStats[i].transferred_packs);
+					tmStats[i].transferred_RLpacks);
 
 		// lg
-		G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("      LG"), redtext("Took"),
+		G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("      LG"), redtext("Took"),
 					tmStats[i].wpn[wpLG].tooks, redtext("Killed"), tmStats[i].wpn[wpLG].ekills,
-					redtext("Dropped"), tmStats[i].wpn[wpLG].drops);
+					redtext("Dropped"), tmStats[i].wpn[wpLG].drops, redtext("Xfer"),
+					tmStats[i].transferred_LGpacks);
 
 		// damage
 		if (deathmatch == 1)
@@ -796,8 +798,8 @@ void OnePlayerStats(gedict_t *p, int tp)
 				k_rl,
 				redtext("Dropped"),
 				d_rl,
-				(p->ps.transferred_packs ?
-						va(" %s:%d", redtext("Xfer"), p->ps.transferred_packs) : ""));
+				(p->ps.transferred_RLpacks ?
+						va(" %s:%d", redtext("Xfer"), p->ps.transferred_RLpacks) : ""));
 	}
 
 	// lg
@@ -805,14 +807,17 @@ void OnePlayerStats(gedict_t *p, int tp)
 	{
 		G_bprint(
 				2,
-				"%s: %s:%d %s:%d %s:%d\n",
+				"%s: %s:%d %s:%d %s:%d%s\n",
 				redtext("      LG"),
 				redtext("Took"),
 				t_lg,
 				redtext("Killed"),
 				k_lg,
 				redtext("Dropped"),
-				d_lg);
+				d_lg,
+				(p->ps.transferred_LGpacks ?
+						va(" %s:%d", redtext("Xfer"), p->ps.transferred_LGpacks) : ""));
+
 	}
 
 	// damage

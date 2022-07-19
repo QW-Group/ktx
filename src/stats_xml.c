@@ -124,13 +124,13 @@ void xml_players_footer(fileHandle_t handle, int player_count)
 static void xml_player_header(fileHandle_t handle, gedict_t *player, const char *team)
 {
 	s2di(handle, INDENT4 "<player name=\"%s\" team=\"%s\" frags=\"%d\" deaths=\"%d\" tkills=\"%d\""
-			" dmg_tkn=\"%d\" dmg_gvn=\"%d\" dmg_tm=\"%d\" spawnfrags=\"%d\" xfer_packs=\"%d\""
-			" spree=\"%d\" qspree=\"%d\" control_time=\"%f\" login=\"%s\">\n",
+			" dmg_tkn=\"%d\" dmg_gvn=\"%d\" dmg_tm=\"%d\" spawnfrags=\"%d\" xfer_RLpacks=\"%d\""
+			" xfer_LGpacks=\"%d\" spree=\"%d\" qspree=\"%d\" control_time=\"%f\" login=\"%s\">\n",
 			xml_string(getname(player)), xml_string(team), (int)player->s.v.frags,
 			(int)player->deaths, (int)player->friendly, (int)player->ps.dmg_t,
 			(int)player->ps.dmg_g, (int)player->ps.dmg_team, player->ps.spawn_frags,
-			player->ps.transferred_packs, player->ps.spree_max, player->ps.spree_max_q,
-			player->ps.control_time, xml_string(ezinfokey(player, "login")));
+			player->ps.transferred_RLpacks, player->ps.transferred_LGpacks, player->ps.spree_max,
+			player->ps.spree_max_q, player->ps.control_time, xml_string(ezinfokey(player, "login")));
 }
 
 static void xml_player_footer(fileHandle_t handle)

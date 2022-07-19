@@ -355,7 +355,8 @@ void json_player_detail(fileHandle_t handle, int player_num, gedict_t *player, c
 			(int)player->ps.dmg_t, (int)player->ps.dmg_g, (int)player->ps.dmg_team,
 			(int)player->ps.dmg_self, (int)player->ps.dmg_tweapon, (int)player->ps.dmg_eweapon,
 			(int)player->deaths == 0 ? 99999 : (int)player->ps.dmg_t / (int)player->deaths);
-	s2di(handle, INDENT6 "\"xfer\": %d," JSON_CR, player->ps.transferred_packs);
+	s2di(handle, INDENT6 "\"xferRL\": %d," JSON_CR, player->ps.transferred_RLpacks);
+	s2di(handle, INDENT6 "\"xferLG\": %d," JSON_CR, player->ps.transferred_LGpacks);
 	s2di(handle, INDENT6 "\"spree\": { \"max\": %d, \"quad\": %d }," JSON_CR, player->ps.spree_max,
 			player->ps.spree_max_q);
 	s2di(handle, INDENT6 "\"control\": %f," JSON_CR, player->ps.control_time);
