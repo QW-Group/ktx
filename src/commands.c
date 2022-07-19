@@ -3367,6 +3367,7 @@ void PrintScores()
 	}
 }
 
+// This player statistics is triggered by the ingame /stats command. Nothing to do with the endgame stats.
 void PlayerStats()
 {
 	gedict_t *p, *p2;
@@ -3383,7 +3384,7 @@ void PlayerStats()
 	if (match_in_progress != 2)
 	{
 		G_sprint(self, 2, "no game - no statistics\n");
-
+		MatchEndStats();
 		return;
 	}
 

@@ -86,7 +86,7 @@ typedef struct wpType_s
 	int tkills;			// team kills with this weapon
 	int suicides;		// suicides with this weapon
 
-	int ekills;			// killed enemys which contain this weapon in inventory
+	int ekills;			// killed enemies which contain this weapon in inventory
 	int drops;			// number of packs dropped which contain this weapon
 	int tooks;			// took this weapon and does't have this weapon before took (weapon from packs counted too)
 	int stooks;			// spawned items taken (backpacks not included), and didn't have weapon beforehand
@@ -217,7 +217,6 @@ typedef enum
 // store player votes here
 typedef struct vote_s
 {
-
 	int brk;
 	int elect;
 	int map;
