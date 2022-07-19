@@ -1166,7 +1166,7 @@ void EndRound(int alive_team)
 
 				if (loser_respawn_time < 2)
 				{
-					G_cp2all("Team \x90%s\x91 wins the %s!\n\n\nTeam %s needed %.2f seconds to respawn",
+					G_cp2all("Team \x90%s\x91 wins the %s!\n\n\nTeam %s needed %.3f more seconds",
 						cvar_string(va("_k_team%d", alive_team)), round_or_series, cvar_string(va("_k_team%d", loser_team)), loser_respawn_time); 
 				}
 				else {
