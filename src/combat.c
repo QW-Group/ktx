@@ -472,6 +472,12 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 				return;
 			}
 		}
+		
+		// don't accept any damage in CA modes if no_pain is true (ie during respawn in wipeout)
+		if (targ->no_pain)
+		{
+			tp4teamdmg = true; // don't take damage but still get stopped/bounced by weapon fire
+		}
 	}
 
 	// used by buttons and triggers to set activator for target firing
