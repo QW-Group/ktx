@@ -9,8 +9,11 @@ static int team1_score;
 static int team2_score;
 static int pause_count;
 static int pause_time;
+static int round_time;
+static int loser_team;
 static qbool do_endround_stuff = false;
 static qbool print_stats = false;
+static float loser_respawn_time = 999; 	// number of seconds before a teammate would've respawned
 
 void track_player(gedict_t *observer);
 void enable_player_tracking(gedict_t *e, int follow);
@@ -84,10 +87,10 @@ int CA_get_score_2(void)
 
 // returns 0 if player has at least one alive teammate
 // otherwise returns number of seconds until next teammate respawns
-int last_alive_time(gedict_t *player)
+float last_alive_time(gedict_t *player)
 {
 	gedict_t *p;
-	int time = 0;
+	float time = 0;
 
 	for (p = world; (p = find_plr_same_team(p, getteam(player)));)
 	{
@@ -95,7 +98,8 @@ int last_alive_time(gedict_t *player)
 		{
 			if (p->in_play && p != player)
 			{
-				return 0;
+				time = 0;
+				break;
 			}
 			else if (!p->in_play)
 			{
@@ -107,13 +111,27 @@ int last_alive_time(gedict_t *player)
 		}
 	}
 
+	// this checks to see if there's already a last_alive_countdown in progress
+	// because we only want to play the audio once at the begining of the countdown
+	if (!player->last_alive_active && (time > 0))
+	{
+		player->last_alive_active = true;
+
+		stuffcmd(player, "play misc/medkey.wav\n");
+	}
+
+	else if (time == 0)
+	{
+		player->last_alive_active = false;
+	}
+
 	return time;
 }
 
-int enemy_last_alive_time(gedict_t *player)
+float enemy_last_alive_time(gedict_t *player)
 {
 	gedict_t *p;
-	int time = 0;
+	float time = 0;
 	int alive_enemies = 0;
 
 	for (p = world; (p = find_plr(p));)
@@ -137,6 +155,26 @@ int enemy_last_alive_time(gedict_t *player)
 	return alive_enemies > 1 ? 0 : time;
 }
 
+float team_last_alive_time(int team)
+{
+	gedict_t *p;
+	float time = 999;
+	char* team_name = team ? (team == 1 ? cvar_string("_k_team1") : cvar_string("_k_team2")) : "";
+
+	for (p = world; (p = find_plr_same_team(p, team_name));)
+	{
+		if (p->ca_ready && !p->in_play)
+		{
+			if (p->seconds_to_respawn < time)
+			{
+				time = p->seconds_to_respawn;
+			}
+		}
+	}
+
+	return time;
+}
+
 void SM_PrepareCA(void)
 {
 	gedict_t *p;
@@ -155,6 +193,7 @@ void SM_PrepareCA(void)
 		{
 			p->ca_ready = p->ready;
 			p->seconds_to_respawn = 0;
+			p->teamcolor = NULL;
 		}
 	}
 }
@@ -202,19 +241,20 @@ qbool CA_CheckAlive(gedict_t *p)
 // hard coded default settings for CA
 static char ca_settings[] = "k_clan_arena_rounds 9\n"
 		"k_clan_arena_max_respawns 0\n"
-		"dp 0\n"
+		"dp 0\n"				// don't drop packs
 		"teamplay 4\n"
 		"deathmatch 5\n"
-		"timelimit 30\n"
+		"timelimit 0\n"			// no time limit
 		"maxclients 8\n"
 		"k_maxclients 8\n"
 		"k_pow 0\n"
 		"k_overtime 0\n"
-		"k_spectalk 1\n"
+		"k_spectalk 1\n"		// enable spec talk by default
 		"k_exttime 0\n"	
-		"k_spw 1\n"
-		"k_dmgfrags 1\n"
+		"k_spw 1\n"				// KT Safety spawns (important for CA)
+		"k_dmgfrags 1\n"		// 1 "frag" for every 100 damage dealt
 		"k_teamoverlay 1\n"
+		"k_membercount 1\n"		// no minimum team size
 		"k_noitems 1\n";
 
 void CA_MatchBreak(void)
@@ -235,7 +275,6 @@ void CA_MatchBreak(void)
 	{
 		if (p->ct == ctPlayer)
 		{
-			p->teamcolor = NULL;
 			k_respawn(p, false);
 		}
 	}
@@ -249,12 +288,7 @@ void track_player(gedict_t *observer)
 	int follow_distance;
 	int upward_distance;
 
-	if (!player) 
-	{
-		return;
-	}
-
-	if (!observer->in_play && observer->tracking_enabled)
+	if (player && !observer->in_play && observer->tracking_enabled)
 	{
 		if (observer->track_target && observer->track_target->in_play)
 		{
@@ -331,7 +365,7 @@ void track_player(gedict_t *observer)
 		show_tracking_info(observer);
 	}
 
-	if (!observer->tracking_enabled)
+	if (!player || !observer->tracking_enabled)
 	{
 		// restore movement and show racer entity
 		observer->s.v.movetype = MOVETYPE_NOCLIP;
@@ -370,7 +404,8 @@ void enable_player_tracking(gedict_t *e, int follow)
 		}
 
 		G_sprint(e, 2, "tracking %s\n", redtext("disabled"));
-		G_centerprint(e, "%s", "");
+		sprintf(e->cptext, "%s", "");
+		G_centerprint(e, e->cptext);
 
 		e->tracking_enabled = 0;
 		SetVector(e->s.v.velocity, 0, 0, 0);
@@ -400,14 +435,26 @@ void r_changetrackingstatus(float t)
 
 void ClanArenaTrackingToggleButton(void)
 {
-	if (!(((int)(self->s.v.flags)) & FL_ATTACKRELEASED))
+	if ((self->ct == ctPlayer) && ISDEAD(self) && !self->ca_ready)
 	{
+		if (self->s.v.button0)
+		{
+			if (!(((int)(self->s.v.flags)) & FL_ATTACKRELEASED))
+			{
+				return;
+			}
+
+			self->s.v.flags = (int)self->s.v.flags & ~FL_ATTACKRELEASED;
+
+			r_changetrackingstatus((float) 3);
+		}
+		else
+		{
+			self->s.v.flags = ((int)(self->s.v.flags)) | FL_ATTACKRELEASED;
+		}
+
 		return;
 	}
-
-	self->s.v.flags = (int)self->s.v.flags & ~FL_ATTACKRELEASED;
-
-	r_changetrackingstatus((float) 3);
 }
 
 void apply_CA_settings(void)
@@ -425,7 +472,7 @@ void apply_CA_settings(void)
 
 	if (cvar("k_clan_arena") == 2)
 	{
-		cvar_fset("k_clan_arena_max_respawns", 10);
+		cvar_fset("k_clan_arena_max_respawns", 4);
 	}
 
 	cfg_name = va("configs/usermodes/ca/default.cfg");
@@ -545,12 +592,14 @@ void CA_PutClientInServer(void)
 
 		self->s.v.ammo_nails = 200;
 		self->s.v.ammo_shells = 100;
-		self->s.v.ammo_rockets = 60;
+		self->s.v.ammo_rockets = 50;
 		self->s.v.ammo_cells = 150;
 
 		self->s.v.armorvalue = 200;
 		self->s.v.armortype = 0.8;
 		self->s.v.health = 100;
+
+		self->ca_ammo_grenades = 6;
 
 		items = 0;
 		items |= IT_AXE;
@@ -584,13 +633,8 @@ void CA_PutClientInServer(void)
 
 		if (!self->teamcolor && self->ca_ready)
 		{
-			// if you're not playing, you're always color 0
-			if (!self->ca_ready)
-			{
-				self->teamcolor = "0"; 
-			}
 			// if your team is "red" or "blue", set color to match
-			else if (streq(getteam(self), "red") || streq(getteam(self), "blue"))
+			if (streq(getteam(self), "red") || streq(getteam(self), "blue"))
 			{
 				self->teamcolor = streq(getteam(self), "red") ? "4" : "13";
 			}
@@ -702,39 +746,39 @@ void CA_show_greeting(gedict_t *self)
 
 void CA_ClientObituary(gedict_t *targ, gedict_t *attacker)
 {
-	int ah, aa;
+	// int ah, aa;
 
-	if (!isCA())
-	{
-		return;
-	}
+	// if (!isCA())
+	// {
+	// 	return;
+	// }
 
-	if (targ->ct != ctPlayer)
-	{
-		return; // so below targ is player
-	}
+	// if (targ->ct != ctPlayer)
+	// {
+	// 	return; // so below targ is player
+	// }
 
-	if (attacker->ct != ctPlayer)
-	{
-		attacker = targ; // seems killed self
-	}
+	// if (attacker->ct != ctPlayer)
+	// {
+	// 	attacker = targ; // seems killed self
+	// }
 
-	ah = attacker->s.v.health;
-	aa = attacker->s.v.armorvalue;
+	// ah = attacker->s.v.health;
+	// aa = attacker->s.v.armorvalue;
 
-	if (attacker->ct == ctPlayer)
-	{
-		if (attacker != targ)
-		{
-			// This is classic CA behavior, but maybe we
-			// don't want players to know their killer's
-			// stats before the round is over. Commenting this
-			// out for now.
-			// G_sprint(targ, PRINT_HIGH, "%s %s %d %s %d %s\n",
-			// 			attacker->netname, redtext("had"), aa,
-			// 			redtext("armor and"), ah, redtext("health"));
-		}
-	}
+	// if (attacker->ct == ctPlayer)
+	// {
+	// 	if (attacker != targ)
+	// 	{
+	// 		// This is classic CA behavior, but maybe we
+	// 		// don't want players to know their killer's
+	// 		// stats before the round is over. Commenting this
+	// 		// out for now.
+	// 		// G_sprint(targ, PRINT_HIGH, "%s %s %d %s %d %s\n",
+	// 		// 			attacker->netname, redtext("had"), aa,
+	// 		// 			redtext("armor and"), ah, redtext("health"));
+	// 	}
+	// }
 }
 
 // return 0 if there no alive teams
@@ -831,6 +875,8 @@ void team_round_summary(int alive_team)
 	char t2need[5];
 	char t1status[20];
 	char t2status[20];
+	char tmp[36] = "";
+	char result[100] = "";
 	
 	sprintf(t1score, "%d", t1_score);
 	sprintf(t2score, "%d", t2_score);
@@ -839,59 +885,64 @@ void team_round_summary(int alive_team)
 	sprintf(t1status, "%s", !alive_team ? "tied round" : (alive_team == 1 ? "round winner" : ""));
 	sprintf(t2status, "%s", !alive_team ? "tied round" : (alive_team == 2 ? "round winner" : ""));
 
-	G_bprint(2, "team   wins need status\n");
-	G_bprint(2, "%s\n", redtext("------ ---- ---- ------------"));
+	sprintf(result, "%s", "team   wins need status\n");
+	sprintf(tmp, "%s\n", redtext("------ ---- ---- ------------"));
+	strcat(result, tmp);
 	
-	G_bprint(2, "%s ", team1);
+	sprintf(tmp, "%s ", team1);
+	strcat(result, tmp);
 	for (int i = 0; i < (strlen("team  ") - strlen(team1)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
 
 	for (int i = 0; i < (strlen("wins") - strlen(t1score)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
-	G_bprint(2, "%s ", t1score);
+	sprintf(tmp, "%s ", t1score);
+	strcat(result, tmp);
 
 	for (int i = 0; i < (strlen("need") - strlen(t1need)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
-	G_bprint(2, "%s ", t1need);
+	sprintf(tmp, "%s %s\n%s ", t1need, t1status, team2);
+	strcat(result, tmp);
 
-	G_bprint(2, "%s\n", t1status);
-
-	G_bprint(2, "%s ", team2);
 	for (int i = 0; i < (strlen("team  ") - strlen(team2)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
 	
 	for (int i = 0; i < (strlen("wins") - strlen(t2score)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
-	G_bprint(2, "%s ", t2score);
+	sprintf(tmp, "%s ", t2score);
+	strcat(result, tmp);
 
 	for (int i = 0; i < (strlen("need") - strlen(t2need)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
-	G_bprint(2, "%s ", t2need);
+	sprintf(tmp, "%s %s\n\n", t2need, t2status);
+	strcat(result, tmp);
 
-	G_bprint(2, "%s\n", t2status);
-
-	G_bprint(2, "\n");
+	G_bprint(2, result);
 }
 
 void print_player_stats(qbool series_over)
 {
 	gedict_t *p;
+	char tmp[50];
+	char header[200];
 
-	G_bprint(2, "\n");
-	G_bprint(2, "sco  damg took  k  d  gl  rh  rd  lg%% player\n");
-	G_bprint(2, "%s\n", redtext("--- ----- ---- -- -- --- --- --- ---- --------"));
+	sprintf(header, "%s", "\n");
+	strcat(header, "sco  damg took  k  d  gl  rh  rd  lg%% player\n");
+	sprintf(tmp, "%s\n", redtext("--- ----- ---- -- -- --- --- --- ---- --------"));
+	strcat(header, tmp);
+	G_bprint(2, header);
 	
 	for (p = world; (p = find_plr(p));)
 	{
@@ -920,6 +971,17 @@ void CA_OnePlayerStats(gedict_t *p, qbool series_over)
 	float a_lg;
 	float e_lg;
 	float round_elg;
+	char score[10];
+	char damage[10];
+	char dmg_took[10];
+	char kills[10];
+	char deaths[10];
+	char gl_hits[10];
+	char rl_hits[10];
+	char rl_directs[10];
+	char lg_eff[10];
+	char tmp[18] = "";
+	char result[100] = "";
 
 	frags = p->s.v.frags;
 	dmg_g = p->ps.dmg_g;
@@ -937,16 +999,6 @@ void CA_OnePlayerStats(gedict_t *p, qbool series_over)
 	{
 		round_elg = 100 * (h_lg - p->ca_round_lghit) / max(1, a_lg - p->ca_round_lgfired);
 	}
-
-	char score[10];
-	char damage[10];
-	char dmg_took[10];
-	char kills[10];
-	char deaths[10];
-	char gl_hits[10];
-	char rl_hits[10];
-	char rl_directs[10];
-	char lg_eff[10];
 	
 	sprintf(score, "%.0f", use_totals ? p->s.v.frags : p->s.v.frags - p->ca_round_frags);
 	sprintf(damage, "%.0f", use_totals ? dmg_g : dmg_g - p->ca_round_dmg);
@@ -960,65 +1012,77 @@ void CA_OnePlayerStats(gedict_t *p, qbool series_over)
 	
 	for (int i = 0; i < (strlen("sco") - strlen(score)); i++)
 	{
-		G_bprint(2, " ");
+		strcat(result, " ");
 	}
-	G_bprint(2, "%s ", strneq(score, "0") ? score : "-");
+	sprintf(tmp, "%s ", strneq(score, "0") ? score : "-");
+	strcat(result, tmp);
 
 	for (int i = 0; i < (strlen(" damg") - strlen(damage)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
-	G_bprint(2, "%s ", strneq(damage, "0") ? damage : "-");
+	sprintf(tmp, "%s ", strneq(damage, "0") ? damage : "-");
+	strcat(result, tmp);
 
 	for (int i = 0; i < (strlen("took") - strlen(dmg_took)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
-	G_bprint(2, "%s ", strneq(dmg_took, "0") ? dmg_took : "-");
+	sprintf(tmp, "%s ", strneq(dmg_took, "0") ? dmg_took : "-");
+	strcat(result, tmp);
 
 	for (int i = 0; i < (strlen(" k") - strlen(kills)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
-	G_bprint(2, "%s ",  strneq(kills, "0") ? kills : "-");
+	sprintf(tmp, "%s ",  strneq(kills, "0") ? kills : "-");
+	strcat(result, tmp);
 
 	for (int i = 0; i < (strlen(" d") - strlen(deaths)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
-	G_bprint(2, "%s ", strneq(deaths, "0") ? deaths : "-");
+	sprintf(tmp, "%s ", strneq(deaths, "0") ? deaths : "-");
+	strcat(result, tmp);
 
 	for (int i = 0; i < (strlen(" gl") - strlen(gl_hits)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
-	G_bprint(2, "%s ", strneq(gl_hits, "0") ? gl_hits : "-");
+	sprintf(tmp, "%s ", strneq(gl_hits, "0") ? gl_hits : "-");
+	strcat(result, tmp);
 
 	for (int i = 0; i < (strlen(" rh") - strlen(rl_hits)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
-	G_bprint(2, "%s ", strneq(rl_hits, "0") ? rl_hits : "-");
+	sprintf(tmp, "%s ", strneq(rl_hits, "0") ? rl_hits : "-");
+	strcat(result, tmp);
 
 	for (int i = 0; i < (strlen(" rd") - strlen(rl_directs)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
-	G_bprint(2, "%s ", strneq(rl_directs, "0") ? rl_directs : "-");
+	sprintf(tmp, "%s ", strneq(rl_directs, "0") ? rl_directs : "-");
+	strcat(result, tmp);
 
 	for (int i = 0; i < (strlen(" lg") - strlen(lg_eff)); i++)
 	{
-		G_bprint(2, " "); // add padding so columns line up
+		strcat(result, " "); // add padding so columns line up
 	}
 	if (strneq(lg_eff, "0"))
 	{
-		G_bprint(2, "%s%s ", lg_eff, redtext("%"));
+		sprintf(tmp, "%s%s ", lg_eff, redtext("%"));
+		strcat(result, tmp);
 	}
 	else{
-		G_bprint(2, " - ");
+		strcat(result, " - ");
 	}
 
-	G_bprint(2, "%s\n", getname(p));
+	snprintf(tmp, 18, "%s\n", getname(p));
+	strcat(result, tmp);
+
+	G_bprint(2, result);
 
 	p->ca_round_frags = p->s.v.frags;
 	p->ca_round_kills = rkills;
@@ -1036,12 +1100,25 @@ void EndRound(int alive_team)
 {
 	gedict_t *p;
 	static int last_count;
+	char round_or_series[10] = "";
 	
 	if(!ca_round_pause)
 	{
 		ca_round_pause = 1;
 		last_count = 999999999;
 		pause_time = g_globalvars.time + 8;
+		loser_team = alive_team ? (alive_team == 1 ? 2 : 1) : 0;
+		loser_respawn_time = loser_team ? team_last_alive_time(loser_team) : 999;
+
+		// once a team is dead, nobody can take anymore damage
+		// round draws will be very rare
+		if (alive_team)
+		{
+			for (p = world; (p = find_plr(p));)
+			{
+				p->no_pain = true;
+			}
+		}
 	}
 
 	pause_count = Q_rint(pause_time - g_globalvars.time);
@@ -1066,12 +1143,17 @@ void EndRound(int alive_team)
 		{
 			team2_score++;
 		}
+
+		for (p = world; (p = find_plr(p));)
+		{
+			p->no_pain = false;	// players can take damage
+		}
 	}
 	else if (pause_count != last_count)
 	{
 		last_count = pause_count;
 
-		if (pause_count < 7)
+		if (pause_count <= 7)
 		{
 			if (!alive_team)
 			{
@@ -1079,22 +1161,20 @@ void EndRound(int alive_team)
 			}
 			else
 			{
-				if ((alive_team == 1 && team1_score == (CA_wins_required()-1)) || 
-					(alive_team == 2 && team2_score == (CA_wins_required()-1)))
-				{
-					G_cp2all("Team \x90%s\x91 wins the series!",
-							cvar_string(va("_k_team%d", alive_team))); 
-				}
-				else
-				{
-					G_cp2all("Team \x90%s\x91 wins the round!",
-							cvar_string(va("_k_team%d", alive_team)));
-				}
-			}
-		}
+				sprintf(round_or_series, "%s", ((alive_team == 1 && team1_score == (CA_wins_required()-1)) || 
+					(alive_team == 2 && team2_score == (CA_wins_required()-1))) ? "series" : "round");
 
-		if (pause_count == 7)
-		{
+				if (loser_respawn_time < 2)
+				{
+					G_cp2all("Team \x90%s\x91 wins the %s!\n\n\nTeam %s needed %.3f more seconds",
+						cvar_string(va("_k_team%d", alive_team)), round_or_series, cvar_string(va("_k_team%d", loser_team)), loser_respawn_time); 
+				}
+				else {
+					G_cp2all("Team \x90%s\x91 wins the %s!",
+						cvar_string(va("_k_team%d", alive_team)), round_or_series); 
+				}	
+			}
+
 			if (!do_endround_stuff)
 			{
 				do_endround_stuff = true;
@@ -1104,12 +1184,12 @@ void EndRound(int alive_team)
 				{
 					if (cvar("k_clan_arena_max_respawns"))
 					{
-						if (streq(getteam(p), cvar_string(va("_k_team%d", alive_team))))
+						if (alive_team && streq(getteam(p), cvar_string(va("_k_team%d", alive_team))))
 						{
 							stuffcmd(p, "play misc/flagcap.wav\n");
 						}
 
-						if (streq(getteam(p), cvar_string(va("_k_team%d", alive_team))) && p->in_play)
+						if (alive_team && streq(getteam(p), cvar_string(va("_k_team%d", alive_team))) && p->in_play)
 						{
 							if (streq(ezinfokey(p, "topcolor"), "13") && streq(ezinfokey(p, "bottomcolor"), "13"))
 							{
@@ -1188,13 +1268,17 @@ void show_tracking_info(gedict_t *p)
 	{
 		if (p->ca_ready && p->round_deaths <= max_respawns && !ca_round_pause)
 		{
-			G_centerprint(p, "\n\n\n\n\n\n%s\n\n\n%d\n\n\n seconds to respawn!\n", 
-								redtext(p->track_target->netname), p->seconds_to_respawn);
+			sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n%d\n\n\n seconds to respawn\n", 
+								redtext(p->track_target->netname), (int)ceil(p->seconds_to_respawn));
+
+			G_centerprint(p, p->cptext);
 		}
 		else
 		{
-			G_centerprint(p, "\n\n\n\n\n\n%s\n\n\n\n\n\n\n", 
+			sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n\n\n\n\n", 
 								redtext(p->track_target->netname));
+
+			G_centerprint(p, p->cptext);
 		}
 	}
 }
@@ -1269,12 +1353,44 @@ void CA_player_pre_think(void)
 
 		if (self->ct == ctPlayer && ra_match_fight && !self->in_play)
 		{
-			track_player(self);
+			track_player(self); // enable tracking by default while dead
 		}
 
 		if (self->in_play)
 		{
-			self->alive_time = Q_rint(g_globalvars.time - self->time_of_respawn);
+			self->alive_time = g_globalvars.time - self->time_of_respawn;
+		}
+
+		// take no damage to health/armor during respawn
+		if (self->alive_time >= 1)
+		{
+			self->no_pain = false;
+		}
+	}
+}
+
+void CA_spectator_think(void)
+{
+	gedict_t *p;
+
+	p = PROG_TO_EDICT(self->s.v.goalentity); // who we are spectating
+
+	if (p->ct == ctPlayer && !p->in_play && p->tracking_enabled)
+	{
+		// if the player you're observing is following someone else, hide the player model
+		self->hideentity = EDICT_TO_PROG(p->track_target);
+	}
+	else
+	{
+		self->hideentity = 0;
+	}
+	
+	if (p->ct == ctPlayer)
+	{
+		if (match_in_progress == 2 && ra_match_fight == 2 && round_time > 2 && !ca_round_pause)
+		{
+			// any centerprint the player sees is sent to the spec
+			G_centerprint(self, "%s\n", p->cptext);
 		}
 	}
 }
@@ -1295,6 +1411,8 @@ void CA_Frame(void)
 		return;
 	}
 
+	round_time = Q_rint(g_globalvars.time - time_to_start);
+
 	// if max_respawns are greater than 0, we're playing wipeout
 	if (ra_match_fight == 2 && !ca_round_pause && cvar("k_clan_arena") == 2)
 	{
@@ -1306,8 +1424,8 @@ void CA_Frame(void)
 
 		for (p = world; (p = find_plr(p));)
 		{
-			last_alive = last_alive_time(p);
-			e_last_alive = enemy_last_alive_time(p);
+			last_alive = (int)ceil(last_alive_time(p));
+			e_last_alive = (int)ceil(enemy_last_alive_time(p));
 			
 			if (p->ca_ready && !p->in_play && p->round_deaths <= max_deaths)
 			{
@@ -1315,17 +1433,21 @@ void CA_Frame(void)
 
 				if (!p->spawn_delay)
 				{
-					int delay = p->round_deaths * 5;
+					int delay = p->round_deaths == 1 ? 5 : (p->round_deaths-1) * 10;
 					p->spawn_delay = g_globalvars.time + delay;
 				}
 
-				p->seconds_to_respawn = Q_rint(p->spawn_delay - g_globalvars.time);
+				p->seconds_to_respawn = p->spawn_delay - g_globalvars.time;
 
 				if (p->seconds_to_respawn <= 0)
 				{
 					p->spawn_delay = 0;
-					G_centerprint(p, "%s\n", "FIGHT!");
+					sprintf(p->cptext, "%s\n", "FIGHT!");
+					G_centerprint(p, p->cptext);
 					k_respawn(p, true);
+
+					// Don't take damage while respawning
+					p->no_pain = true;
 
 					p->seconds_to_respawn = 999;
 					p->time_of_respawn = g_globalvars.time; // resets alive_time to 0
@@ -1334,27 +1456,31 @@ void CA_Frame(void)
 				{
 					if (!p->tracking_enabled)
 					{
-						G_centerprint(p, "\n\n\n\n\n\n\n\n\n%d\n\n\n seconds to respawn!\n", p->seconds_to_respawn);
+						sprintf(p->cptext, "\n\n\n\n\n\n\n\n\n%d\n\n\n seconds to respawn\n", (int)ceil(p->seconds_to_respawn));
+						G_centerprint(p, p->cptext);
 					}
 				}
 			}
 			else if (p->in_play && p->alive_time > 2 && last_alive)
 			{
 				sprintf(str_last_alive, "%d", last_alive);
+				sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n", 
+								redtext("stay alive!"), last_alive == 999 ? " " : redtext(str_last_alive));
 
-				G_centerprint(p, "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n", 
-								redtext("stay alive!"), last_alive == 999 ? " " : str_last_alive);
+				G_centerprint(p, p->cptext);
 			}
 			else if (p->in_play && p->alive_time > 2 && e_last_alive)
 			{
 				sprintf(str_e_last_alive, "%d", e_last_alive);
-
-				G_centerprint(p, "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n", 
+				sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n", 
 								"one enemy left", e_last_alive == 999 ? " " : str_e_last_alive);
+
+				G_centerprint(p, p->cptext);
 			}
 			else if (p->in_play && p->alive_time > 2)
 			{
-				G_centerprint(p, " ");
+				sprintf(p->cptext, " ");
+				G_centerprint(p, p->cptext);
 			}
 		}
 	}
@@ -1421,6 +1547,7 @@ void CA_Frame(void)
 				}
 
 				G_sprint(p, 2, "round \x90%d\x91 starts in 5 seconds.\n", round_num);
+				sprintf(p->cptext, " "); // reset any server print from last round
 			}
 		}
 

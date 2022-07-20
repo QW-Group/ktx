@@ -848,9 +848,9 @@ void player_pain(struct gedict_s *attacker, float take)
 		return; // no pain at all in prewar
 	}
 
-	if (isCA() && streq(getteam(self), getteam(attacker)))
+	if (isCA() && (streq(getteam(self), getteam(attacker)) || self->no_pain))
 	{
-		return; // No pain when shooting teammates in CA
+		return; // No pain when shooting teammates in CA or when respawning (wipeout)
 	}
 
 	if (self->s.v.weaponframe)
