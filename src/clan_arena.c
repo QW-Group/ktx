@@ -1079,7 +1079,8 @@ void CA_OnePlayerStats(gedict_t *p, qbool series_over)
 		strcat(result, " - ");
 	}
 
-	snprintf(tmp, 18, "%s\n", getname(p));
+	snprintf(tmp, 18, "%s", getname(p));
+	strcat(tmp, "\n");
 	strcat(result, tmp);
 
 	G_bprint(2, result);
