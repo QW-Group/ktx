@@ -63,9 +63,8 @@ void x##_race_detail(fileHandle_t handle);
 	x##_race_detail \
 }
 
-void s2di(fileHandle_t file_handle, const char *fmt, ...) PRINTF_FUNC(2);
-qbool itPowerup(itemName_t it);
-char* ItName(itemName_t it);
 const char* GetMode(void);
+char* ItName(itemName_t it);
+void S2di(fileHandle_t file_handle, const char *fmt, ...) PRINTF_FUNC(2);
 
 #endif // STATS_H

@@ -4,6 +4,47 @@
 FILE_FORMAT_DECL(xml)
 FILE_FORMAT_DECL(json)
 
+static stats_format_t* FindStatsFormat(const char* requested_format);
+static qbool CreateStatsFile(char* filename, char* ip, int port, stats_format_t* format);
+static void OnePlayerMidairStats(gedict_t *p);
+static void OnePlayerMidairKillStats(gedict_t *p);
+static void OnePlayerInstagibStats(gedict_t *p);
+static void OnePlayerInstagibKillStats(gedict_t *p);
+static void OnePlayerLGCStats(gedict_t *p);
+static void OnePlayerKillStats(gedict_t *p, int tp);
+static void OnePlayerItemStats(gedict_t *p, int tp);
+static void OnePlayerWeaponEffiStats(gedict_t *p);
+static void OnePlayerWeaponTakenStats(gedict_t *p);
+static void OnePlayerWeaponDroppedStats(gedict_t *p);
+static void OnePlayerWeaponKillStats(gedict_t *p);
+static void OnePlayerEnemyWeaponKillStats(gedict_t *p);
+static void OnePlayerDamageStats(gedict_t *p);
+static void OnePlayerTimeStats(gedict_t *p);
+static void OnePlayerCTFStats(gedict_t *p);
+static void CalculateEfficiency(gedict_t *player);
+static void PlayerMidairStats(void);
+static void PlayerMidairKillStats(void);
+static void PlayerInstagibStats();
+static void PlayerInstagibKillStats();
+static void PlayerLGCStats();
+static void PlayersKillStats(void);
+static void PlayersItemStats(void);
+static void PlayersWeaponEffiStats(void);
+static void PlayersWeaponTakenStats(void);
+static void PlayersWeaponDroppedStats(void);
+static void PlayersWeaponKillStats(void);
+static void PlayersEnemyWeaponKillStats(void);
+static void PlayersDamageStats(void);
+static void PlayersTimeStats(void);
+static void PlayersCTFStats(void);
+
+static void TopStats(void);
+static void TopMidairStats();
+static void CollectTpStats(void);
+static void ShowTeamsBanner(void);
+static void SummaryTPStats(void);
+static void TeamsStats(void);
+
 static stats_format_t file_formats[] =
 {
 	FILE_FORMAT_DEF(xml),
@@ -13,290 +54,6 @@ static stats_format_t file_formats[] =
 char tmStats_names[MAX_TM_STATS][MAX_TEAM_NAME]; // u can't put this in struct in QVM
 teamStats_t tmStats[MAX_TM_STATS];
 int tmStats_cnt = 0;
-
-static void CollectTpStats(void)
-{
-	gedict_t *p, *p2;
-	int from1, from2;
-	int i, *frags;
-	char *tmp = "";
-
-	for (from1 = 0, p = world; (p = find_plrghst(p, &from1));)
-	{
-		p->ready = 0; // clear mark
-	}
-
-	//	get one player and search all his mates, mark served players via ->ready field
-	//  ghosts is served too
-
-	for (from1 = 0, p = world; (p = find_plrghst(p, &from1));)
-	{
-		if (p->ready || strnull(tmp = getteam(p)))
-		{
-			continue; // served or wrong team
-		}
-
-		if ((tmStats_cnt < 0) || (tmStats_cnt >= MAX_TM_STATS))
-		{
-			return; // all slots busy
-		}
-
-		if (tmStats[tmStats_cnt].name == NULL)
-		{
-			return;
-		}
-
-		for (from2 = 0, p2 = world; (p2 = find_plrghst(p2, &from2));)
-		{
-			if (p2->ready || strneq(tmp, getteam(p2)))
-			{
-				continue; // served or on different team
-			}
-
-			if (strnull(tmStats[tmStats_cnt].name)) // we not yet done that, do that once
-			{
-				strlcpy(tmStats[tmStats_cnt].name, tmp, MAX_TEAM_NAME);
-			}
-
-			frags = (p2->ct == ctPlayer ? &tmStats[tmStats_cnt].frags : &tmStats[tmStats_cnt].gfrags);
-			frags[0] += p2->s.v.frags;
-			tmStats[tmStats_cnt].deaths += p2->deaths;
-			tmStats[tmStats_cnt].tkills += p2->friendly;
-
-			tmStats[tmStats_cnt].dmg_t += p2->ps.dmg_t;
-			tmStats[tmStats_cnt].dmg_g += p2->ps.dmg_g;
-			tmStats[tmStats_cnt].dmg_team += p2->ps.dmg_team;
-			tmStats[tmStats_cnt].dmg_eweapon += p2->ps.dmg_eweapon;
-
-			for (i = itNONE; i < itMAX; i++)
-			{ // summ each field of items
-				tmStats[tmStats_cnt].itm[i].tooks += p2->ps.itm[i].tooks;
-				tmStats[tmStats_cnt].itm[i].time += p2->ps.itm[i].time;
-			}
-
-			for (i = wpNONE; i < wpMAX; i++)
-			{ // summ each field of weapons
-				tmStats[tmStats_cnt].wpn[i].hits += p2->ps.wpn[i].hits;
-				tmStats[tmStats_cnt].wpn[i].attacks += p2->ps.wpn[i].attacks;
-
-				tmStats[tmStats_cnt].wpn[i].kills += p2->ps.wpn[i].kills;
-				tmStats[tmStats_cnt].wpn[i].deaths += p2->ps.wpn[i].deaths;
-				tmStats[tmStats_cnt].wpn[i].tkills += p2->ps.wpn[i].tkills;
-				tmStats[tmStats_cnt].wpn[i].ekills += p2->ps.wpn[i].ekills;
-				tmStats[tmStats_cnt].wpn[i].drops += p2->ps.wpn[i].drops;
-				tmStats[tmStats_cnt].wpn[i].tooks += p2->ps.wpn[i].tooks;
-				tmStats[tmStats_cnt].wpn[i].ttooks += p2->ps.wpn[i].ttooks;
-			}
-
-			tmStats[tmStats_cnt].transferred_RLpacks += p2->ps.transferred_RLpacks;
-			tmStats[tmStats_cnt].transferred_LGpacks += p2->ps.transferred_LGpacks;
-
-			// { ctf related
-			tmStats[tmStats_cnt].res += p2->ps.res_time;
-			tmStats[tmStats_cnt].str += p2->ps.str_time;
-			tmStats[tmStats_cnt].hst += p2->ps.hst_time;
-			tmStats[tmStats_cnt].rgn += p2->ps.rgn_time;
-
-			tmStats[tmStats_cnt].caps += p2->ps.caps;
-			tmStats[tmStats_cnt].pickups += p2->ps.pickups;
-			tmStats[tmStats_cnt].returns += p2->ps.returns;
-			tmStats[tmStats_cnt].f_defends += p2->ps.f_defends;
-			tmStats[tmStats_cnt].c_defends += p2->ps.c_defends;
-			// }
-
-			p2->ready = 1; // set mark
-		}
-
-		if (strnull(tmStats[tmStats_cnt].name))
-		{
-			continue; // wtf, empty team?
-		}
-
-		if (isCTF() && g_globalvars.time - match_start_time > 0)
-		{
-			tmStats[tmStats_cnt].res = (tmStats[tmStats_cnt].res
-					/ (g_globalvars.time - match_start_time)) * 100;
-			tmStats[tmStats_cnt].str = (tmStats[tmStats_cnt].str
-					/ (g_globalvars.time - match_start_time)) * 100;
-			tmStats[tmStats_cnt].hst = (tmStats[tmStats_cnt].hst
-					/ (g_globalvars.time - match_start_time)) * 100;
-			tmStats[tmStats_cnt].rgn = (tmStats[tmStats_cnt].rgn
-					/ (g_globalvars.time - match_start_time)) * 100;
-		}
-
-		tmStats_cnt++;
-	}
-}
-
-static void ShowTeamsBanner(void)
-{
-	int i;
-
-	G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
-				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
-
-	//	for( i = 666 + 1; i <= k_teamid ; i++ )
-	//		G_bprint(2, "%s\220%s\221", (i != (666+1) ? " vs " : ""), ezinfokey(world, va("%d", i)));
-	for (i = 0; i < min(tmStats_cnt, MAX_TM_STATS); i++)
-	{
-		G_bprint(2, "%s\220%s\221", (i ? " vs " : ""), tmStats[i].name);
-	}
-
-	G_bprint(2, " %s:\n", redtext("match statistics"));
-
-	G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
-				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
-}
-
-static void SummaryTPStats(void)
-{
-	int i;
-	float h_sg, h_ssg, h_gl, h_rl, h_lg;
-
-	ShowTeamsBanner();
-
-	G_bprint(2, "\n%s, %s, %s, %s\n", redtext("weapons"), redtext("powerups"),
-				redtext("armors&mhs"), redtext("damage"));
-	G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
-				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
-
-	for (i = 0; i < min(tmStats_cnt, MAX_TM_STATS); i++)
-	{
-		h_sg = 100.0 * tmStats[i].wpn[wpSG].hits / max(1, tmStats[i].wpn[wpSG].attacks);
-		h_ssg = 100.0 * tmStats[i].wpn[wpSSG].hits / max(1, tmStats[i].wpn[wpSSG].attacks);
-		h_gl = tmStats[i].wpn[wpGL].hits;
-		h_rl = tmStats[i].wpn[wpRL].hits;
-		h_lg = 100.0 * tmStats[i].wpn[wpLG].hits / max(1, tmStats[i].wpn[wpLG].attacks);
-
-		// weapons
-		if (!cvar("k_instagib"))
-		{
-			G_bprint(2, "\220%s\221: %s:%s%s%s%s%s\n", tmStats[i].name, redtext("Wp"),
-						(h_lg ? va(" %s%.0f%%", redtext("lg"), h_lg) : ""),
-						(h_rl ? va(" %s%.0f", redtext("rl"), h_rl) : ""),
-						(h_gl ? va(" %s%.0f", redtext("gl"), h_gl) : ""),
-						(h_sg ? va(" %s%.0f%%", redtext("sg"), h_sg) : ""),
-						(h_ssg ? va(" %s%.0f%%", redtext("ssg"), h_ssg) : ""));
-
-			// powerups
-			G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("Powerups"), redtext("Q"),
-						tmStats[i].itm[itQUAD].tooks, redtext("P"), tmStats[i].itm[itPENT].tooks,
-						redtext("R"), tmStats[i].itm[itRING].tooks);
-
-			// armors + megahealths
-			G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("Armr&mhs"), redtext("ga"),
-						tmStats[i].itm[itGA].tooks, redtext("ya"), tmStats[i].itm[itYA].tooks,
-						redtext("ra"), tmStats[i].itm[itRA].tooks, redtext("mh"),
-						tmStats[i].itm[itHEALTH_100].tooks);
-		}
-		else
-		{
-			G_bprint(2, "\220%s\221: %s:%s\n", tmStats[i].name, redtext("Wp"),
-						(h_sg ? va(" %s%.0f%%", redtext("cg"), h_sg) : ""));
-		}
-
-		if (isCTF())
-		{
-			if (cvar("k_ctf_runes"))
-			{
-				G_bprint(2, "%s: %s:%.0f%% %s:%.0f%% %s:%.0f%% %s:%.0f%%\n", redtext("RuneTime"),
-							redtext("res"), tmStats[i].res, redtext("str"), tmStats[i].str,
-							redtext("hst"), tmStats[i].hst, redtext("rgn"), tmStats[i].rgn);
-			}
-
-			G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("     CTF"), redtext("pickups"),
-						tmStats[i].pickups, redtext("caps"), tmStats[i].caps, redtext("returns"),
-						tmStats[i].returns);
-			G_bprint(2, "%s: %s:%d %s:%d\n", redtext(" Defends"), redtext("flag"),
-						tmStats[i].f_defends, redtext("carrier"), tmStats[i].c_defends);
-		}
-
-		// rl
-		G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("      RL"), redtext("Took"),
-					tmStats[i].wpn[wpRL].tooks, redtext("Killed"), tmStats[i].wpn[wpRL].ekills,
-					redtext("Dropped"), tmStats[i].wpn[wpRL].drops, redtext("Xfer"),
-					tmStats[i].transferred_RLpacks);
-
-		// lg
-		G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("      LG"), redtext("Took"),
-					tmStats[i].wpn[wpLG].tooks, redtext("Killed"), tmStats[i].wpn[wpLG].ekills,
-					redtext("Dropped"), tmStats[i].wpn[wpLG].drops, redtext("Xfer"),
-					tmStats[i].transferred_LGpacks);
-
-		// damage
-		if (deathmatch == 1)
-		{
-			G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f %s:%.0f\n", redtext("  Damage"),
-						redtext("Tkn"), tmStats[i].dmg_t, redtext("Gvn"), tmStats[i].dmg_g,
-						redtext("EWep"), tmStats[i].dmg_eweapon, redtext("Tm"),
-						tmStats[i].dmg_team);
-		}
-		else
-		{
-			G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f\n", redtext("  Damage"), redtext("Tkn"),
-						tmStats[i].dmg_t, redtext("Gvn"), tmStats[i].dmg_g, redtext("Tm"),
-						tmStats[i].dmg_team);
-		}
-
-		// times
-		G_bprint(2, "%s: %s:%d\n", redtext("    Time"), redtext("Quad"),
-					(int)tmStats[i].itm[itQUAD].time);
-	}
-
-	G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
-				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
-}
-
-static void TeamsStats(void)
-{
-	int i, sumfrags = 0, wasPrint = 0;
-
-	if (isCA())
-	{
-		CA_TeamsStats();
-
-		return;
-	}
-
-	// Summing up the frags to calculate team percentages
-	for (i = 0; i < min(tmStats_cnt, MAX_TM_STATS); i++)
-	{
-		sumfrags += max(0, tmStats[i].frags + tmStats[i].gfrags);
-	}
-	// End of summing
-
-	G_bprint(
-			2,
-			"\n%s: %s\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
-			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
-			redtext("Team scores"), redtext("frags \217 percentage"));
-
-	for (i = 0; i < min(tmStats_cnt, MAX_TM_STATS); i++)
-	{
-		G_bprint(2, "\220%s\221: %d", tmStats[i].name, tmStats[i].frags);
-
-		if (tmStats[i].gfrags)
-		{
-			G_bprint(2, " + (%d) = %d", tmStats[i].gfrags, tmStats[i].frags + tmStats[i].gfrags);
-		}
-
-		// effi
-		G_bprint(
-				2,
-				" \217 %.1f%%\n",
-				(sumfrags > 0 ?
-						((float)(tmStats[i].frags + tmStats[i].gfrags)) / sumfrags * 100 : 0.0));
-
-		wasPrint = 1;
-	}
-
-	if (wasPrint)
-	{
-		G_bprint(
-				2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
-				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
-	}
-}
 
 // Statistic file generation
 const char* GetMode(void)
@@ -425,12 +182,7 @@ char* ItName(itemName_t it)
 	return "unknown";
 }
 
-qbool itPowerup(itemName_t it)
-{
-	return ((it == itQUAD) || (it == itPENT) || (it == itRING));
-}
-
-void s2di(fileHandle_t file_handle, const char *fmt, ...)
+void S2di(fileHandle_t file_handle, const char *fmt, ...)
 {
 	va_list argptr;
 	char text[1024];
@@ -442,6 +194,211 @@ void s2di(fileHandle_t file_handle, const char *fmt, ...)
 	text[sizeof(text) - 1] = 0;
 
 	trap_FS_WriteFile(text, strlen(text), file_handle);
+}
+
+void StatsToFile(void)
+{
+	char name[256] =
+		{ 0 }, *ip = "", *port = "";
+	int i = 0;
+	qbool written = false;
+	qbool send_to_website = !strnull(cvar_string("sv_www_address"));
+	qbool embed_in_mvd = (sv_extensions & SV_EXTENSIONS_MVDHIDDEN);
+	stats_format_t* json_format = NULL;
+	stats_format_t* format = NULL;
+
+	if (strnull(ip = cvar_string("sv_local_addr")) || strnull(port = strchr(ip, ':'))
+			|| !(i = atoi(port + 1)))
+	{
+		return;
+	}
+
+	port[0] = 0;
+	port++;
+
+	if (strnull(cvar_string("serverdemo")) || (cvar("sv_demotxt") != 2))
+	{
+		return; // doesn't record demo or doesn't want stats to be put in file
+	}
+
+	format = FindStatsFormat(cvar_string("k_demotxt_format"));
+	json_format = FindStatsFormat("json");
+
+	// This file over-written every time
+	snprintf(name, sizeof(name), "demoinfo_%s_%d", ip, i);
+
+	// Always write json, so it can be embedded in demo
+	if (json_format != NULL)
+	{
+		written = CreateStatsFile(name, ip, i, json_format);
+
+		if (written)
+		{
+			// submit to central website
+			if (send_to_website)
+			{
+				localcmd(
+						"\nsv_web_postfile ServerApi/UploadGameStats \"\" \"%s.%s\" *internal authinfo\n",
+						name, json_format->name);
+				trap_executecmd();
+			}
+
+			// if server supports embedding in .mvd/qtv stream, do that
+			if (embed_in_mvd)
+			{
+				localcmd("\nsv_demoembedinfo \"%s.%s\"\n", name, json_format->name);
+				trap_executecmd();
+			}
+		}
+
+		written = true;
+	}
+
+	// If non-json version required, generate now
+	if (!streq(format->name, "json"))
+	{
+		written = CreateStatsFile(name, ip, i, format);
+	}
+
+	// add info
+	if (written)
+	{
+		localcmd("\n" // why new line?
+			"sv_demoinfoadd ** %s.%s\n", name, format->name);
+		trap_executecmd();
+	}
+}
+
+void EM_CorrectStats(void)
+{
+	gedict_t *p;
+
+	for (p = world; (p = find_plr(p));)
+	{
+		// take away powerups so scoreboard looks normal
+		p->s.v.items = (int)p->s.v.items
+				& ~(IT_INVISIBILITY | IT_INVULNERABILITY | IT_SUIT | IT_QUAD);
+		p->s.v.effects = (int)p->s.v.effects
+				& ~(EF_DIMLIGHT | EF_BRIGHTLIGHT | EF_BLUE | EF_RED | EF_GREEN);
+		p->invisible_finished = 0;
+		p->invincible_finished = 0;
+		p->super_damage_finished = 0;
+		p->radsuit_finished = 0;
+
+		p->ps.spree_max = max(p->ps.spree_current, p->ps.spree_max);
+		p->ps.spree_max_q = max(p->ps.spree_current_q, p->ps.spree_max_q);
+
+		adjust_pickup_time(&p->q_pickup_time, &p->ps.itm[itQUAD].time);
+		adjust_pickup_time(&p->p_pickup_time, &p->ps.itm[itPENT].time);
+		adjust_pickup_time(&p->r_pickup_time, &p->ps.itm[itRING].time);
+
+		if (p->control_start_time)
+		{
+			p->ps.control_time += g_globalvars.time - p->control_start_time;
+			p->control_start_time = 0;
+		}
+
+		if (isCTF())
+		{
+			// if a player ends the game with a rune adjust their rune time
+			if (p->ctf_flag & CTF_RUNE_RES)
+			{
+				p->ps.res_time += g_globalvars.time - p->rune_pickup_time;
+			}
+			else if (p->ctf_flag & CTF_RUNE_STR)
+			{
+				p->ps.str_time += g_globalvars.time - p->rune_pickup_time;
+			}
+			else if (p->ctf_flag & CTF_RUNE_HST)
+			{
+				p->ps.hst_time += g_globalvars.time - p->rune_pickup_time;
+			}
+			else if (p->ctf_flag & CTF_RUNE_RGN)
+			{
+				p->ps.rgn_time += g_globalvars.time - p->rune_pickup_time;
+			}
+		}
+	}
+}
+
+void MatchEndStats(void)
+{
+	gedict_t *p;
+
+	if (isHoonyModeAny() && !HM_is_game_over())
+	{
+		return;
+	}
+
+	if (isRACE())
+	{
+		race_match_stats();
+	}
+	else if (cvar("k_midair"))
+	{
+		PlayerMidairStats();
+		PlayerMidairKillStats();
+		TopMidairStats();
+	}
+	else if (cvar("k_instagib"))
+	{
+		PlayerInstagibStats();
+		PlayerInstagibKillStats();
+	}
+	else if (lgc_enabled())
+	{
+		PlayerLGCStats();
+	}
+	else
+	{
+		PlayersKillStats();
+		PlayersItemStats();
+		PlayersWeaponEffiStats();
+		PlayersWeaponTakenStats();
+		PlayersWeaponDroppedStats();
+		PlayersWeaponKillStats();
+		PlayersEnemyWeaponKillStats();
+		PlayersDamageStats();
+		PlayersTimeStats();
+
+		if (isCTF())
+		{
+			PlayersCTFStats();
+		}
+
+		if (isTeam() || isCTF())
+		{
+			CollectTpStats();
+			SummaryTPStats(); // print summary stats like armos powerups weapons etc..
+			TeamsStats(); // print basic info like frags for each team
+		}
+
+		if (!isDuel()) // top stats only in non duel modes
+		{
+			TopStats(); // print top frags tkills deaths...
+		}
+
+		if ((p = find(world, FOFCLSN, "ghost"))) // show legend :)
+		{
+			G_bprint(2, "\n\203 - %s player\n\n", redtext("disconnected"));
+		}
+	}
+
+	StatsToFile();
+}
+
+void SM_PrepareTeamsStats(void)
+{
+	int i;
+
+	tmStats_cnt = 0;
+	memset(tmStats, 0, sizeof(tmStats));
+	memset(tmStats_names, 0, sizeof(tmStats_names));
+
+	for (i = 0; i < MAX_TM_STATS; i++)
+	{
+		tmStats[i].name = tmStats_names[i];
+	}
 }
 
 static stats_format_t* FindStatsFormat(const char* requested_format)
@@ -538,84 +495,11 @@ static qbool CreateStatsFile(char* filename, char* ip, int port, stats_format_t*
 	return true;
 }
 
-void StatsToFile(void)
-{
-	char name[256] =
-		{ 0 }, *ip = "", *port = "";
-	int i = 0;
-	qbool written = false;
-	qbool send_to_website = !strnull(cvar_string("sv_www_address"));
-	qbool embed_in_mvd = (sv_extensions & SV_EXTENSIONS_MVDHIDDEN);
-	stats_format_t* json_format = NULL;
-	stats_format_t* format = NULL;
-
-	if (strnull(ip = cvar_string("sv_local_addr")) || strnull(port = strchr(ip, ':'))
-			|| !(i = atoi(port + 1)))
-	{
-		return;
-	}
-
-	port[0] = 0;
-	port++;
-
-	if (strnull(cvar_string("serverdemo")) || (cvar("sv_demotxt") != 2))
-	{
-		return; // doesn't record demo or doesn't want stats to be put in file
-	}
-
-	format = FindStatsFormat(cvar_string("k_demotxt_format"));
-	json_format = FindStatsFormat("json");
-
-	// This file over-written every time
-	snprintf(name, sizeof(name), "demoinfo_%s_%d", ip, i);
-
-	// Always write json, so it can be embedded in demo
-	if (json_format != NULL)
-	{
-		written = CreateStatsFile(name, ip, i, json_format);
-
-		if (written)
-		{
-			// submit to central website
-			if (send_to_website)
-			{
-				localcmd(
-						"\nsv_web_postfile ServerApi/UploadGameStats \"\" \"%s.%s\" *internal authinfo\n",
-						name, json_format->name);
-				trap_executecmd();
-			}
-
-			// if server supports embedding in .mvd/qtv stream, do that
-			if (embed_in_mvd)
-			{
-				localcmd("\nsv_demoembedinfo \"%s.%s\"\n", name, json_format->name);
-				trap_executecmd();
-			}
-		}
-
-		written = true;
-	}
-
-	// If non-json version required, generate now
-	if (!streq(format->name, "json"))
-	{
-		written = CreateStatsFile(name, ip, i, format);
-	}
-
-	// add info
-	if (written)
-	{
-		localcmd("\n" // why new line?
-			"sv_demoinfoadd ** %s.%s\n", name, format->name);
-		trap_executecmd();
-	}
-}
-
 float maxfrags, maxdeaths, maxfriend, maxeffi, maxcaps, maxdefends, maxsgeffi;
 int maxspree, maxspree_q, maxdmgg, maxdmgtd, maxrlkills;
 
 // This is the old Endgame stats, which has been split into individual tables.
-void OnePlayerStats(gedict_t *p, int tp)
+void Obsolete_OnePlayerStats(gedict_t *p, int tp)
 {
 	float dmg_g;
 	float dmg_t;
@@ -923,7 +807,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 	maxsgeffi = max(e_sg, maxsgeffi);
 }
 
-void OnePlayerMidairStats(gedict_t *p)
+static void OnePlayerMidairStats(gedict_t *p)
 {
 	G_bprint(2,
 			 "%s%-20s|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%5s|%5s|\n",
@@ -939,7 +823,7 @@ void OnePlayerMidairStats(gedict_t *p)
 			va("%.1f", (p->ps.mid_maxheight ? p->ps.mid_avgheight : 0)));
 }
 
-void OnePlayerMidairKillStats(gedict_t *p)
+static void OnePlayerMidairKillStats(gedict_t *p)
 {
 	float vh_rl;
 	float a_rl;
@@ -958,73 +842,8 @@ void OnePlayerMidairKillStats(gedict_t *p)
 			(e_rl == 100 ? va("%.0f%%", e_rl) : va("%.1f%%", e_rl)));
 }
 
-void OnePlayerInstagibStats(gedict_t *p)
+static void OnePlayerInstagibStats(gedict_t *p)
 {
-//	float h_ax;
-//	float a_ax;
-//	float h_sg;
-//	float a_sg;
-//	float h_ssg;
-//	float a_ssg;
-//	char *stats_text;
-
-//	h_sg = p->ps.wpn[wpSG].hits;
-//	a_sg = p->ps.wpn[wpSG].attacks;
-//	h_ssg = p->ps.wpn[wpSSG].hits;
-//	a_ssg = p->ps.wpn[wpSSG].attacks;
-//	h_ax = p->ps.wpn[wpAXE].hits;
-//	a_ax = p->ps.wpn[wpAXE].attacks;
-//
-//	h_ax = 100.0 * h_ax / max(1, a_ax);
-//	h_sg = 100.0 * h_sg / max(1, a_sg);
-//	h_ssg = 100.0 * h_ssg / max(1, a_ssg);
-
-//	stats_text = va("\n\207 %s: %s%s \207\n", "PLAYER", (isghost(p) ? "\203" : ""), getname(p));
-//
-//	stats_text = va("%s \220%s\221\n", stats_text, "SCORES");
-//	stats_text = va("%s  %s: %.1f\n", stats_text, redtext("Efficiency"), p->efficiency);
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Points"), (int)p->s.v.frags);
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Frags"), p->ps.i_cggibs + p->ps.i_axegibs + p->ps.i_stompgibs);
-//	if (tp)
-//	{
-//		stats_text = va("%s  %s: %d\n", stats_text, redtext("Teamkills"), (int)p->friendly);
-//	}
-//
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Deaths"), (int)p->deaths);
-//
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Streaks"), p->ps.spree_max);
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Spawns"), p->ps.spawn_frags);
-//
-//	stats_text = va("%s \220%s\221\n", stats_text, "SPEED");
-//	stats_text = va("%s  %s: %.1f\n", stats_text, redtext("Maximum"), p->ps.velocity_max);
-//	stats_text = va("%s  %s: %.1f\n", stats_text, redtext("Average"), p->ps.vel_frames > 0 ? p->ps.velocity_sum / p->ps.vel_frames : 0.);
-//
-//	stats_text = va("%s \220%s\221\n", stats_text, "WEAPONS");
-//	stats_text = va("%s  %s: %s", stats_text, redtext("Coilgun"), (a_sg ? va("%.1f%% (%d)", h_sg, p->ps.i_cggibs) : ""));
-//	stats_text = va("%s%s", stats_text, (a_sg ? "" : "n/u"));
-//
-//	stats_text = va("%s\n", stats_text);
-//	stats_text = va("%s  %s: %s", stats_text, redtext("Axe"), (a_ax ? va("%.1f%% (%d)", h_ax, p->ps.i_axegibs) : ""));
-//	stats_text = va("%s%s", stats_text, (a_ax ? "" : "n/u"));
-//	stats_text = va("%s\n", stats_text);
-//
-//	stats_text = va("%s \220%s\221\n", stats_text, "GIBS");
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Coilgun"), p->ps.i_cggibs);
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Axe"), p->ps.i_axegibs);
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Stomps"), p->ps.i_stompgibs);
-//
-//	stats_text = va("%s \220%s\221\n", stats_text, "MULTIGIBS");
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Total Multigibs"), p->ps.i_multigibs);
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Maximum Victims"), p->ps.i_maxmultigibs);
-//
-//	stats_text = va("%s \220%s\221\n", stats_text, "AIRGIBS");
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Total"), p->ps.i_airgibs);
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Total Height"), p->ps.i_height);
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Maximum Height"), p->ps.i_maxheight);
-//	stats_text = va("%s  %s: %.1f\n", stats_text, redtext("Average Height"), p->ps.i_airgibs ? p->ps.i_height / p->ps.i_airgibs : 0.);
-//	G_bprint(2, "%s", stats_text);
-
-	// Coilgun Axe Stomps Multigibs MaxMG Victims Airgibs TotalH. MaxH. Ring
 	G_bprint(2,
 			 "%s%-20s|%4d|%4d|%4d|%4d|%4d|%4d|%4d|%4d|%4d|\n",
 			(isghost(p) ? "\203" : ""), getname(p),
@@ -1039,73 +858,14 @@ void OnePlayerInstagibStats(gedict_t *p)
 			p->ps.i_rings);
 }
 
-void OnePlayerInstagibKillStats(gedict_t *p)
+static void OnePlayerInstagibKillStats(gedict_t *p)
 {
-//	float h_ax;
-//	float a_ax;
 	float h_sg;
 	float a_sg;
-//	float h_ssg;
-//	float a_ssg;
-//	char *stats_text;
 
 	h_sg = p->ps.wpn[wpSG].hits;
 	a_sg = p->ps.wpn[wpSG].attacks;
-//	h_ssg = p->ps.wpn[wpSSG].hits;
-//	a_ssg = p->ps.wpn[wpSSG].attacks;
-//	h_ax = p->ps.wpn[wpAXE].hits;
-//	a_ax = p->ps.wpn[wpAXE].attacks;
-//
-//	h_ax = 100.0 * h_ax / max(1, a_ax);
-//	h_sg = 100.0 * h_sg / max(1, a_sg);
-//	h_ssg = 100.0 * h_ssg / max(1, a_ssg);
 
-//	stats_text = va("\n\207 %s: %s%s \207\n", "PLAYER", (isghost(p) ? "\203" : ""), getname(p));
-
-//	stats_text = va("%s \220%s\221\n", stats_text, "SCORES");
-//	stats_text = va("%s  %s: %.1f\n", stats_text, redtext("Efficiency"), p->efficiency);
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Points"), (int)p->s.v.frags);
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Frags"), p->ps.i_cggibs + p->ps.i_axegibs + p->ps.i_stompgibs);
-//	if (tp)
-//	{
-//		stats_text = va("%s  %s: %d\n", stats_text, redtext("Teamkills"), (int)p->friendly);
-//	}
-//
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Deaths"), (int)p->deaths);
-//
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Streaks"), p->ps.spree_max);
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Spawns"), p->ps.spawn_frags);
-//
-//	stats_text = va("%s \220%s\221\n", stats_text, "SPEED");
-//	stats_text = va("%s  %s: %.1f\n", stats_text, redtext("Maximum"), p->ps.velocity_max);
-//	stats_text = va("%s  %s: %.1f\n", stats_text, redtext("Average"), p->ps.vel_frames > 0 ? p->ps.velocity_sum / p->ps.vel_frames : 0.);
-//
-//	stats_text = va("%s \220%s\221\n", stats_text, "WEAPONS");
-//	stats_text = va("%s  %s: %s", stats_text, redtext("Coilgun"), (a_sg ? va("%.1f%% (%d)", h_sg, p->ps.i_cggibs) : ""));
-//	stats_text = va("%s%s", stats_text, (a_sg ? "" : "n/u"));
-//
-//	stats_text = va("%s\n", stats_text);
-//	stats_text = va("%s  %s: %s", stats_text, redtext("Axe"), (a_ax ? va("%.1f%% (%d)", h_ax, p->ps.i_axegibs) : ""));
-//	stats_text = va("%s%s", stats_text, (a_ax ? "" : "n/u"));
-//	stats_text = va("%s\n", stats_text);
-//
-//	stats_text = va("%s \220%s\221\n", stats_text, "GIBS");
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Coilgun"), p->ps.i_cggibs);
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Axe"), p->ps.i_axegibs);
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Stomps"), p->ps.i_stompgibs);
-//
-//	stats_text = va("%s \220%s\221\n", stats_text, "MULTIGIBS");
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Total Multigibs"), p->ps.i_multigibs);
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Maximum Victims"), p->ps.i_maxmultigibs);
-//
-//	stats_text = va("%s \220%s\221\n", stats_text, "AIRGIBS");
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Total"), p->ps.i_airgibs);
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Total Height"), p->ps.i_height);
-//	stats_text = va("%s  %s: %d\n", stats_text, redtext("Maximum Height"), p->ps.i_maxheight);
-//	stats_text = va("%s  %s: %.1f\n", stats_text, redtext("Average Height"), p->ps.i_airgibs ? p->ps.i_height / p->ps.i_airgibs : 0.);
-//	G_bprint(2, "%s", stats_text);
-
-	// Points Frags Death Streaks Spawns CG %
 	G_bprint(2,
 			 "%s%-20s|%5d|%5d|%5d|%5d|%5d|%5s|\n",
 			(isghost(p) ? "\203" : ""), getname(p),
@@ -1129,7 +889,7 @@ void OnePlayerInstagibKillStats(gedict_t *p)
 //	maxsgeffi = max(h_sg, maxsgeffi);
 }
 
-void OnePlayerLGCStats(gedict_t *p)
+static void OnePlayerLGCStats(gedict_t *p)
 {
 	int over;
 	int under;
@@ -1152,7 +912,7 @@ void OnePlayerLGCStats(gedict_t *p)
 			(e_lg == 100 ? va("%.0f%%", e_lg) : va("%.1f%%", e_lg)));
 }
 
-void OnePlayerKillStats(gedict_t *p, int tp)
+static void OnePlayerKillStats(gedict_t *p, int tp)
 {
 	G_bprint(
 			2,
@@ -1168,7 +928,7 @@ void OnePlayerKillStats(gedict_t *p, int tp)
 			((p->efficiency == 0)? va(" %.1f%%", p->efficiency) : va("%.1f%%", p->efficiency))));
 }
 
-void OnePlayerItemStats(gedict_t *p, int tp)
+static void OnePlayerItemStats(gedict_t *p, int tp)
 {
 	G_bprint(2,
 			"%s%-20s|%5d|%5d|%5d|%5d|%5s|%5s|%5s|\n",
@@ -1182,7 +942,7 @@ void OnePlayerItemStats(gedict_t *p, int tp)
 			(tp ? va("%d", p->ps.itm[itRING].tooks) : "-"));
 }
 
-void OnePlayerWeaponEffiStats(gedict_t *p)
+static void OnePlayerWeaponEffiStats(gedict_t *p)
 {
 	float h_lg;
 	float a_lg;
@@ -1227,7 +987,7 @@ void OnePlayerWeaponEffiStats(gedict_t *p)
 			(a_sg ? ((e_sg >= 100) ? va("%.0f%%", e_sg) : va("%.1f%%", e_sg)) : "-"));
 }
 
-void OnePlayerWeaponTakenStats(gedict_t *p)
+static void OnePlayerWeaponTakenStats(gedict_t *p)
 {
 	G_bprint(2,
 			"%s%-20s|%5d|%5d|%5d|%5d|\n",
@@ -1238,7 +998,7 @@ void OnePlayerWeaponTakenStats(gedict_t *p)
 			p->ps.wpn[wpSSG].tooks);
 }
 
-void OnePlayerWeaponDroppedStats(gedict_t *p)
+static void OnePlayerWeaponDroppedStats(gedict_t *p)
 {
 	G_bprint(2,
 			"%s%-20s|%5d|%5d|%5d|%5d|\n",
@@ -1249,7 +1009,7 @@ void OnePlayerWeaponDroppedStats(gedict_t *p)
 			p->ps.wpn[wpSSG].drops);
 }
 
-void OnePlayerWeaponKillStats(gedict_t *p)
+static void OnePlayerWeaponKillStats(gedict_t *p)
 {
 	G_bprint(2,
 			"%s%-20s|%5d|%5d|%5d|%5d|%5d|\n",
@@ -1261,7 +1021,7 @@ void OnePlayerWeaponKillStats(gedict_t *p)
 			p->ps.wpn[wpSG].kills);
 }
 
-void OnePlayerEnemyWeaponKillStats(gedict_t *p)
+static void OnePlayerEnemyWeaponKillStats(gedict_t *p)
 {
 	G_bprint(2,
 			"%s%-20s|%5d|%5d|%5d|%5d|\n",
@@ -1272,7 +1032,7 @@ void OnePlayerEnemyWeaponKillStats(gedict_t *p)
 			p->ps.wpn[wpSSG].ekills);
 }
 
-void OnePlayerDamageStats(gedict_t *p)
+static void OnePlayerDamageStats(gedict_t *p)
 {
 	G_bprint(2,
 			 "%s%-20s|%5d|%5d|%5d|%5d|%5d|%5d|\n",
@@ -1285,7 +1045,32 @@ void OnePlayerDamageStats(gedict_t *p)
 			(p->deaths <= 0 ? 99999 : (int)(p->ps.dmg_t / p->deaths)));
 }
 
-void OnePlayerCTFStats(gedict_t *p)
+static void OnePlayerTimeStats(gedict_t *p)
+{
+//		G_bprint(2, "%s: %s:%d\n", redtext("    Time"), redtext("Quad"),
+//					(int)p->ps.itm[itQUAD].time);
+
+	p->ps.itm[itHEALTH_100].time;
+	p->ps.itm[itGA].time;
+	p->ps.itm[itYA].time;
+	p->ps.itm[itRA].time;
+	p->ps.itm[itQUAD].time;
+	p->ps.itm[itPENT].time;
+	p->ps.itm[itRING].time;
+	p->ps.wpn[wpSSG].;
+
+	G_bprint(2,
+			 "%s%-20s|%5d|%5d|%5d|%5d|%5d|%5d|\n",
+			(isghost(p) ? "\203" : ""), getname(p),
+			(int)p->ps.dmg_t,
+			(int)p->ps.dmg_g,
+			(int)p->ps.dmg_eweapon,
+			(int)p->ps.dmg_team,
+			(int)p->ps.dmg_self,
+			(p->deaths <= 0 ? 99999 : (int)(p->ps.dmg_t / p->deaths)));
+}
+
+static void OnePlayerCTFStats(gedict_t *p)
 {
 	int res = 0;
 	int str = 0;
@@ -1314,7 +1099,7 @@ void OnePlayerCTFStats(gedict_t *p)
 			((cvar("k_ctf_runes") ? va("%d%%", rgn) : " - ")));
 }
 
-void CalculateEfficiency(gedict_t *player)
+static void CalculateEfficiency(gedict_t *player)
 {
 	if (isCTF())
 	{
@@ -1348,7 +1133,7 @@ void CalculateEfficiency(gedict_t *player)
 	}
 }
 
-void PlayerMidairStats(void)
+static void PlayerMidairStats(void)
 {
 	gedict_t *p;
 	gedict_t *p2;
@@ -1405,7 +1190,7 @@ void PlayerMidairStats(void)
 	}
 }
 
-void PlayerMidairKillStats(void)
+static void PlayerMidairKillStats(void)
 {
 	gedict_t *p;
 	gedict_t *p2;
@@ -1460,7 +1245,209 @@ void PlayerMidairKillStats(void)
 	}
 }
 
-void PlayerInstagibStats()
+static void TopMidairStats()
+{
+	gedict_t *p;
+	float f1, vh_rl, a_rl, ph_rl, maxtopheight = 0, maxtopavgheight = 0, maxrlefficiency = 0;
+	int from, maxscore = -99999, maxkills = 0, maxmidairs = 0, maxstomps = 0, maxstreak = 0,
+			maxspawnfrags = 0, maxbonus = 0;
+
+	from = f1 = 0;
+	p = find_plrghst(world, &from);
+	while (p)
+	{
+		maxscore = max(p->s.v.frags, maxscore);
+		maxkills = max(p->ps.mid_total + p->ps.mid_stomps, maxkills);
+		maxmidairs = max(p->ps.mid_total, maxmidairs);
+		maxstomps = max(p->ps.mid_stomps, maxstomps);
+		maxstreak = max(p->ps.spree_max, maxstreak);
+		maxspawnfrags = max(p->ps.spawn_frags, maxspawnfrags);
+		maxbonus = max(p->ps.mid_bonus, maxbonus);
+		maxtopheight = max(p->ps.mid_maxheight, maxtopheight);
+		maxtopavgheight = max(p->ps.mid_avgheight, maxtopavgheight);
+		vh_rl = p->ps.wpn[wpRL].vhits;
+		a_rl = p->ps.wpn[wpRL].attacks;
+		ph_rl = 100.0 * vh_rl / max(1, a_rl);
+		maxrlefficiency = max(ph_rl, maxrlefficiency);
+
+		p = find_plrghst(p, &from);
+	}
+
+	G_bprint(2, "\n%s:\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
+				redtext("Top performers"));
+
+	from = f1 = 0;
+	p = find_plrghst(world, &from);
+	while (p)
+	{
+		if (p->s.v.frags == maxscore)
+		{
+			G_bprint(2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("score")),
+						(isghost(p) ? "\203" : ""), getname(p), maxscore);
+			f1 = 1;
+		}
+
+		p = find_plrghst(p, &from);
+	}
+
+	if (maxkills)
+	{
+		from = f1 = 0;
+		p = find_plrghst(world, &from);
+		while (p)
+		{
+			if ((p->ps.mid_total + p->ps.mid_stomps) == maxkills)
+			{
+				G_bprint(2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("kills")),
+							(isghost(p) ? "\203" : ""), getname(p), maxkills);
+				f1 = 1;
+			}
+
+			p = find_plrghst(p, &from);
+		}
+	}
+
+	if (maxmidairs)
+	{
+		from = f1 = 0;
+		p = find_plrghst(world, &from);
+		while (p)
+		{
+			if ((p->ps.mid_total) == maxmidairs)
+			{
+				G_bprint(2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("midairs")),
+							(isghost(p) ? "\203" : ""), getname(p), maxmidairs);
+				f1 = 1;
+			}
+
+			p = find_plrghst(p, &from);
+		}
+	}
+
+	if (maxstomps)
+	{
+		from = f1 = 0;
+		p = find_plrghst(world, &from);
+		while (p)
+		{
+			if ((p->ps.mid_stomps) == maxstomps)
+			{
+				G_bprint(2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("head stomps")),
+							(isghost(p) ? "\203" : ""), getname(p), maxstomps);
+				f1 = 1;
+			}
+			p = find_plrghst(p, &from);
+		}
+	}
+
+	if (maxstreak)
+	{
+		from = f1 = 0;
+		p = find_plrghst(world, &from);
+		while (p)
+		{
+			if ((p->ps.spree_max) == maxstreak)
+			{
+				G_bprint(2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("streak")),
+							(isghost(p) ? "\203" : ""), getname(p), maxmidairs);
+				f1 = 1;
+			}
+
+			p = find_plrghst(p, &from);
+		}
+	}
+
+	if (maxspawnfrags)
+	{
+		from = f1 = 0;
+		p = find_plrghst(world, &from);
+		while (p)
+		{
+			if ((p->ps.spawn_frags) == maxspawnfrags)
+			{
+				G_bprint(2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("spawn frags")),
+							(isghost(p) ? "\203" : ""), getname(p), maxspawnfrags);
+				f1 = 1;
+			}
+
+			p = find_plrghst(p, &from);
+		}
+	}
+
+	if (maxbonus)
+	{
+		from = f1 = 0;
+		p = find_plrghst(world, &from);
+		while (p)
+		{
+			if ((p->ps.mid_bonus) == maxbonus)
+			{
+				G_bprint(2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("bonus fiend")),
+							(isghost(p) ? "\203" : ""), getname(p), maxbonus);
+				f1 = 1;
+			}
+
+			p = find_plrghst(p, &from);
+		}
+	}
+
+	if (maxtopheight)
+	{
+		from = f1 = 0;
+		p = find_plrghst(world, &from);
+		while (p)
+		{
+			if ((p->ps.mid_maxheight) == maxtopheight)
+			{
+				G_bprint(2, "   %-13s: %s%s (%.1f)\n", (f1 ? "" : redtext("highest kill")),
+							(isghost(p) ? "\203" : ""), getname(p), maxtopheight);
+				f1 = 1;
+			}
+
+			p = find_plrghst(p, &from);
+		}
+	}
+
+	if (maxtopavgheight)
+	{
+		from = f1 = 0;
+		p = find_plrghst(world, &from);
+		while (p)
+		{
+			if ((p->ps.mid_avgheight) == maxtopavgheight)
+			{
+				G_bprint(2, "   %-13s: %s%s (%.1f)\n", (f1 ? "" : redtext("avg height")),
+							(isghost(p) ? "\203" : ""), getname(p), maxtopavgheight);
+				f1 = 1;
+			}
+
+			p = find_plrghst(p, &from);
+		}
+	}
+
+	from = f1 = 0;
+	p = find_plrghst(world, &from);
+	while (p)
+	{
+		vh_rl = p->ps.wpn[wpRL].vhits;
+		a_rl = p->ps.wpn[wpRL].attacks;
+		ph_rl = 100.0 * vh_rl / max(1, a_rl);
+		if ((ph_rl) == maxrlefficiency)
+		{
+			G_bprint(2, "   %-13s: %s%s (%.1f%%)\n", (f1 ? "" : redtext("rl efficiency")),
+						(isghost(p) ? "\203" : ""), getname(p), maxrlefficiency);
+			f1 = 1;
+		}
+
+		p = find_plrghst(p, &from);
+	}
+
+	G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
+}
+
+static void PlayerInstagibStats()
 {
 	gedict_t *p;
 	gedict_t *p2;
@@ -1518,7 +1505,7 @@ void PlayerInstagibStats()
 	}
 }
 
-void PlayerInstagibKillStats()
+static void PlayerInstagibKillStats()
 {
 	gedict_t *p;
 	gedict_t *p2;
@@ -1542,8 +1529,6 @@ void PlayerInstagibKillStats()
 			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
 			redtext("Kill statistics"), redtext("Point"), redtext(" Frag"), redtext("Death"),
 			redtext("SpwnF"), redtext(" Strk"), redtext(" CG %"));
-
-	// Points Frags Death Streaks Spawns CG %
 
 	from1 = 0;
 	p = find_plrghst(world, &from1);
@@ -1576,7 +1561,7 @@ void PlayerInstagibKillStats()
 	}
 }
 
-void PlayerLGCStats()
+static void PlayerLGCStats()
 {
 	gedict_t *p;
 	gedict_t *p2;
@@ -1632,7 +1617,7 @@ void PlayerLGCStats()
 	}
 }
 
-void PlayersKillStats(void)
+static void PlayersKillStats(void)
 {
 	gedict_t *p;
 	gedict_t *p2;
@@ -1692,7 +1677,7 @@ void PlayersKillStats(void)
 	}
 }
 
-void PlayersItemStats(void)
+static void PlayersItemStats(void)
 {
 	gedict_t *p;
 	gedict_t *p2;
@@ -1751,7 +1736,7 @@ void PlayersItemStats(void)
 	}
 }
 
-void PlayersWeaponEffiStats(void)
+static void PlayersWeaponEffiStats(void)
 {
 	gedict_t *p;
 	gedict_t *p2;
@@ -1807,7 +1792,7 @@ void PlayersWeaponEffiStats(void)
 	}
 }
 
-void PlayersWeaponTakenStats(void)
+static void PlayersWeaponTakenStats(void)
 {
 	gedict_t *p;
 	gedict_t *p2;
@@ -1863,7 +1848,7 @@ void PlayersWeaponTakenStats(void)
 	}
 }
 
-void PlayersWeaponDroppedStats(void)
+static void PlayersWeaponDroppedStats(void)
 {
 	gedict_t *p;
 	gedict_t *p2;
@@ -1919,7 +1904,7 @@ void PlayersWeaponDroppedStats(void)
 	}
 }
 
-void PlayersWeaponKillStats(void)
+static void PlayersWeaponKillStats(void)
 {
 	gedict_t *p;
 	gedict_t *p2;
@@ -1975,7 +1960,7 @@ void PlayersWeaponKillStats(void)
 	}
 }
 
-void PlayersEnemyWeaponKillStats(void)
+static void PlayersEnemyWeaponKillStats(void)
 {
 	gedict_t *p;
 	gedict_t *p2;
@@ -2031,7 +2016,7 @@ void PlayersEnemyWeaponKillStats(void)
 	}
 }
 
-void PlayersDamageStats(void)
+static void PlayersDamageStats(void)
 {
 	gedict_t *p;
 	gedict_t *p2;
@@ -2087,7 +2072,63 @@ void PlayersDamageStats(void)
 	}
 }
 
-void PlayersCTFStats(void)
+static void PlayersTimeStats(void)
+{
+	gedict_t *p;
+	gedict_t *p2;
+	char *tmp;
+	char *tmp2;
+	int from1;
+	int from2;
+
+	from1 = 0;
+	p = find_plrghst(world, &from1);
+	while (p)
+	{
+		p->ready = 0; // clear mark
+		p = find_plrghst(p, &from1);
+	}
+
+	G_bprint(
+			2, "\n%s   |%s|%s|%s|%s|%s|%s|\n"
+			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
+			redtext("Damage statistics"), redtext("Taken"), redtext("Given"), redtext("EWeap"),
+			redtext(" Team"), redtext(" Self"), redtext("ToDie"));
+
+	from1 = 0;
+	p = find_plrghst(world, &from1);
+	while (p)
+	{
+		if (!p->ready)
+		{
+			from2 = 0;
+			p2 = find_plrghst(world, &from2);
+			while (p2)
+			{
+				if (!p2->ready)
+				{
+					// sort by team
+					tmp = getteam(p);
+					tmp2 = getteam(p2);
+
+					if (streq(tmp, tmp2))
+					{
+						p2->ready = 1; // set mark
+						OnePlayerTimeStats(p2);
+					}
+				}
+
+				p2 = find_plrghst(p2, &from2);
+			}
+		}
+
+		p = find_plrghst(p, &from1);
+	}
+}
+
+static void PlayersCTFStats(void)
 {
 	gedict_t *p;
 	gedict_t *p2;
@@ -2144,8 +2185,295 @@ void PlayersCTFStats(void)
 	}
 }
 
+static void CollectTpStats(void)
+{
+	gedict_t *p;
+	gedict_t *p2;
+	int from1;
+	int from2;
+	int i;
+	int *frags;
+	char *tmp = "";
+
+	for (from1 = 0, p = world; (p = find_plrghst(p, &from1));)
+	{
+		p->ready = 0; // clear mark
+	}
+
+	//	get one player and search all his mates, mark served players via ->ready field
+	//  ghosts is served too
+	for (from1 = 0, p = world; (p = find_plrghst(p, &from1));)
+	{
+		if (p->ready || strnull(tmp = getteam(p)))
+		{
+			continue; // served or wrong team
+		}
+
+		if ((tmStats_cnt < 0) || (tmStats_cnt >= MAX_TM_STATS))
+		{
+			return; // all slots busy
+		}
+
+		if (tmStats[tmStats_cnt].name == NULL)
+		{
+			return;
+		}
+
+		for (from2 = 0, p2 = world; (p2 = find_plrghst(p2, &from2));)
+		{
+			if (p2->ready || strneq(tmp, getteam(p2)))
+			{
+				continue; // served or on different team
+			}
+
+			if (strnull(tmStats[tmStats_cnt].name)) // we not yet done that, do that once
+			{
+				strlcpy(tmStats[tmStats_cnt].name, tmp, MAX_TEAM_NAME);
+			}
+
+			frags = (p2->ct == ctPlayer ? &tmStats[tmStats_cnt].frags : &tmStats[tmStats_cnt].gfrags);
+			frags[0] += p2->s.v.frags;
+			tmStats[tmStats_cnt].deaths += p2->deaths;
+			tmStats[tmStats_cnt].tkills += p2->friendly;
+
+			tmStats[tmStats_cnt].dmg_t += p2->ps.dmg_t;
+			tmStats[tmStats_cnt].dmg_g += p2->ps.dmg_g;
+			tmStats[tmStats_cnt].dmg_team += p2->ps.dmg_team;
+			tmStats[tmStats_cnt].dmg_eweapon += p2->ps.dmg_eweapon;
+
+			for (i = itNONE; i < itMAX; i++)
+			{
+				// summ each field of items
+				tmStats[tmStats_cnt].itm[i].tooks += p2->ps.itm[i].tooks;
+				tmStats[tmStats_cnt].itm[i].time += p2->ps.itm[i].time;
+			}
+
+			for (i = wpNONE; i < wpMAX; i++)
+			{
+				// summ each field of weapons
+				tmStats[tmStats_cnt].wpn[i].hits += p2->ps.wpn[i].hits;
+				tmStats[tmStats_cnt].wpn[i].attacks += p2->ps.wpn[i].attacks;
+
+				tmStats[tmStats_cnt].wpn[i].kills += p2->ps.wpn[i].kills;
+				tmStats[tmStats_cnt].wpn[i].deaths += p2->ps.wpn[i].deaths;
+				tmStats[tmStats_cnt].wpn[i].tkills += p2->ps.wpn[i].tkills;
+				tmStats[tmStats_cnt].wpn[i].ekills += p2->ps.wpn[i].ekills;
+				tmStats[tmStats_cnt].wpn[i].drops += p2->ps.wpn[i].drops;
+				tmStats[tmStats_cnt].wpn[i].tooks += p2->ps.wpn[i].tooks;
+				tmStats[tmStats_cnt].wpn[i].ttooks += p2->ps.wpn[i].ttooks;
+			}
+
+			tmStats[tmStats_cnt].transferred_RLpacks += p2->ps.transferred_RLpacks;
+			tmStats[tmStats_cnt].transferred_LGpacks += p2->ps.transferred_LGpacks;
+
+			// ctf related
+			tmStats[tmStats_cnt].res += p2->ps.res_time;
+			tmStats[tmStats_cnt].str += p2->ps.str_time;
+			tmStats[tmStats_cnt].hst += p2->ps.hst_time;
+			tmStats[tmStats_cnt].rgn += p2->ps.rgn_time;
+
+			tmStats[tmStats_cnt].caps += p2->ps.caps;
+			tmStats[tmStats_cnt].pickups += p2->ps.pickups;
+			tmStats[tmStats_cnt].returns += p2->ps.returns;
+			tmStats[tmStats_cnt].f_defends += p2->ps.f_defends;
+			tmStats[tmStats_cnt].c_defends += p2->ps.c_defends;
+
+			p2->ready = 1; // set mark
+		}
+
+		if (strnull(tmStats[tmStats_cnt].name))
+		{
+			continue; // wtf, empty team?
+		}
+
+		if (isCTF() && g_globalvars.time - match_start_time > 0)
+		{
+			tmStats[tmStats_cnt].res = (tmStats[tmStats_cnt].res
+					/ (g_globalvars.time - match_start_time)) * 100;
+			tmStats[tmStats_cnt].str = (tmStats[tmStats_cnt].str
+					/ (g_globalvars.time - match_start_time)) * 100;
+			tmStats[tmStats_cnt].hst = (tmStats[tmStats_cnt].hst
+					/ (g_globalvars.time - match_start_time)) * 100;
+			tmStats[tmStats_cnt].rgn = (tmStats[tmStats_cnt].rgn
+					/ (g_globalvars.time - match_start_time)) * 100;
+		}
+
+		tmStats_cnt++;
+	}
+}
+
+static void ShowTeamsBanner(void)
+{
+	int i;
+
+	G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
+
+	//	for( i = 666 + 1; i <= k_teamid ; i++ )
+	//		G_bprint(2, "%s\220%s\221", (i != (666+1) ? " vs " : ""), ezinfokey(world, va("%d", i)));
+	for (i = 0; i < min(tmStats_cnt, MAX_TM_STATS); i++)
+	{
+		G_bprint(2, "%s\220%s\221", (i ? " vs " : ""), tmStats[i].name);
+	}
+
+	G_bprint(2, " %s:\n", redtext("match statistics"));
+
+	G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
+}
+
+static void SummaryTPStats(void)
+{
+	int i;
+	float h_sg, h_ssg, h_gl, h_rl, h_lg;
+
+	ShowTeamsBanner();
+
+	G_bprint(2, "\n%s, %s, %s, %s\n", redtext("weapons"), redtext("powerups"),
+				redtext("armors&mhs"), redtext("damage"));
+	G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
+
+	for (i = 0; i < min(tmStats_cnt, MAX_TM_STATS); i++)
+	{
+		h_sg = 100.0 * tmStats[i].wpn[wpSG].hits / max(1, tmStats[i].wpn[wpSG].attacks);
+		h_ssg = 100.0 * tmStats[i].wpn[wpSSG].hits / max(1, tmStats[i].wpn[wpSSG].attacks);
+		h_gl = tmStats[i].wpn[wpGL].hits;
+		h_rl = tmStats[i].wpn[wpRL].hits;
+		h_lg = 100.0 * tmStats[i].wpn[wpLG].hits / max(1, tmStats[i].wpn[wpLG].attacks);
+
+		// weapons
+		if (!cvar("k_instagib"))
+		{
+			G_bprint(2, "\220%s\221: %s:%s%s%s%s%s\n", tmStats[i].name, redtext("Wp"),
+						(h_lg ? va(" %s%.0f%%", redtext("lg"), h_lg) : ""),
+						(h_rl ? va(" %s%.0f", redtext("rl"), h_rl) : ""),
+						(h_gl ? va(" %s%.0f", redtext("gl"), h_gl) : ""),
+						(h_sg ? va(" %s%.0f%%", redtext("sg"), h_sg) : ""),
+						(h_ssg ? va(" %s%.0f%%", redtext("ssg"), h_ssg) : ""));
+
+			// powerups
+			G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("Powerups"), redtext("Q"),
+						tmStats[i].itm[itQUAD].tooks, redtext("P"), tmStats[i].itm[itPENT].tooks,
+						redtext("R"), tmStats[i].itm[itRING].tooks);
+
+			// armors + megahealths
+			G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("Armr&mhs"), redtext("ga"),
+						tmStats[i].itm[itGA].tooks, redtext("ya"), tmStats[i].itm[itYA].tooks,
+						redtext("ra"), tmStats[i].itm[itRA].tooks, redtext("mh"),
+						tmStats[i].itm[itHEALTH_100].tooks);
+		}
+		else
+		{
+			G_bprint(2, "\220%s\221: %s:%s\n", tmStats[i].name, redtext("Wp"),
+						(h_sg ? va(" %s%.0f%%", redtext("cg"), h_sg) : ""));
+		}
+
+		if (isCTF())
+		{
+			if (cvar("k_ctf_runes"))
+			{
+				G_bprint(2, "%s: %s:%.0f%% %s:%.0f%% %s:%.0f%% %s:%.0f%%\n", redtext("RuneTime"),
+							redtext("res"), tmStats[i].res, redtext("str"), tmStats[i].str,
+							redtext("hst"), tmStats[i].hst, redtext("rgn"), tmStats[i].rgn);
+			}
+
+			G_bprint(2, "%s: %s:%d %s:%d %s:%d\n", redtext("     CTF"), redtext("pickups"),
+						tmStats[i].pickups, redtext("caps"), tmStats[i].caps, redtext("returns"),
+						tmStats[i].returns);
+			G_bprint(2, "%s: %s:%d %s:%d\n", redtext(" Defends"), redtext("flag"),
+						tmStats[i].f_defends, redtext("carrier"), tmStats[i].c_defends);
+		}
+
+		// rl
+		G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("      RL"), redtext("Took"),
+					tmStats[i].wpn[wpRL].tooks, redtext("Killed"), tmStats[i].wpn[wpRL].ekills,
+					redtext("Dropped"), tmStats[i].wpn[wpRL].drops, redtext("Xfer"),
+					tmStats[i].transferred_RLpacks);
+
+		// lg
+		G_bprint(2, "%s: %s:%d %s:%d %s:%d %s:%d\n", redtext("      LG"), redtext("Took"),
+					tmStats[i].wpn[wpLG].tooks, redtext("Killed"), tmStats[i].wpn[wpLG].ekills,
+					redtext("Dropped"), tmStats[i].wpn[wpLG].drops, redtext("Xfer"),
+					tmStats[i].transferred_LGpacks);
+
+		// damage
+		if (deathmatch == 1)
+		{
+			G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f %s:%.0f\n", redtext("  Damage"),
+						redtext("Tkn"), tmStats[i].dmg_t, redtext("Gvn"), tmStats[i].dmg_g,
+						redtext("EWep"), tmStats[i].dmg_eweapon, redtext("Tm"),
+						tmStats[i].dmg_team);
+		}
+		else
+		{
+			G_bprint(2, "%s: %s:%.0f %s:%.0f %s:%.0f\n", redtext("  Damage"), redtext("Tkn"),
+						tmStats[i].dmg_t, redtext("Gvn"), tmStats[i].dmg_g, redtext("Tm"),
+						tmStats[i].dmg_team);
+		}
+
+		// times
+		G_bprint(2, "%s: %s:%d\n", redtext("    Time"), redtext("Quad"),
+					(int)tmStats[i].itm[itQUAD].time);
+	}
+
+	G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
+}
+
+static void TeamsStats(void)
+{
+	int i, sumfrags = 0, wasPrint = 0;
+
+	if (isCA())
+	{
+		CA_TeamsStats();
+
+		return;
+	}
+
+	// Summing up the frags to calculate team percentages
+	for (i = 0; i < min(tmStats_cnt, MAX_TM_STATS); i++)
+	{
+		sumfrags += max(0, tmStats[i].frags + tmStats[i].gfrags);
+	}
+	// End of summing
+
+	G_bprint(
+			2,
+			"\n%s: %s\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
+			redtext("Team scores"), redtext("frags \217 percentage"));
+
+	for (i = 0; i < min(tmStats_cnt, MAX_TM_STATS); i++)
+	{
+		G_bprint(2, "\220%s\221: %d", tmStats[i].name, tmStats[i].frags);
+
+		if (tmStats[i].gfrags)
+		{
+			G_bprint(2, " + (%d) = %d", tmStats[i].gfrags, tmStats[i].frags + tmStats[i].gfrags);
+		}
+
+		// effi
+		G_bprint(
+				2,
+				" \217 %.1f%%\n",
+				(sumfrags > 0 ?
+						((float)(tmStats[i].frags + tmStats[i].gfrags)) / sumfrags * 100 : 0.0));
+
+		wasPrint = 1;
+	}
+
+	if (wasPrint)
+	{
+		G_bprint(
+				2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
+	}
+}
+
 // Print the high score table
-void TopStats(void)
+static void TopStats(void)
 {
 	gedict_t *p;
 	float f1, h_sg, a_sg;
@@ -2375,346 +2703,4 @@ void TopStats(void)
 
 	G_bprint(2, "\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
 				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
-}
-
-void TopMidairStats()
-{
-	gedict_t *p;
-	float f1, vh_rl, a_rl, ph_rl, maxtopheight = 0, maxtopavgheight = 0, maxrlefficiency = 0;
-	int from, maxscore = -99999, maxkills = 0, maxmidairs = 0, maxstomps = 0, maxstreak = 0,
-			maxspawnfrags = 0, maxbonus = 0;
-
-	from = f1 = 0;
-	p = find_plrghst(world, &from);
-	while (p)
-	{
-		maxscore = max(p->s.v.frags, maxscore);
-		maxkills = max(p->ps.mid_total + p->ps.mid_stomps, maxkills);
-		maxmidairs = max(p->ps.mid_total, maxmidairs);
-		maxstomps = max(p->ps.mid_stomps, maxstomps);
-		maxstreak = max(p->ps.spree_max, maxstreak);
-		maxspawnfrags = max(p->ps.spawn_frags, maxspawnfrags);
-		maxbonus = max(p->ps.mid_bonus, maxbonus);
-		maxtopheight = max(p->ps.mid_maxheight, maxtopheight);
-		maxtopavgheight = max(p->ps.mid_avgheight, maxtopavgheight);
-		vh_rl = p->ps.wpn[wpRL].vhits;
-		a_rl = p->ps.wpn[wpRL].attacks;
-		ph_rl = 100.0 * vh_rl / max(1, a_rl);
-		maxrlefficiency = max(ph_rl, maxrlefficiency);
-
-		p = find_plrghst(p, &from);
-	}
-
-	G_bprint(2, "%s:\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
-				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
-				redtext("Top performers"));
-
-	from = f1 = 0;
-	p = find_plrghst(world, &from);
-	while (p)
-	{
-		if (p->s.v.frags == maxscore)
-		{
-			G_bprint(2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("score")),
-						(isghost(p) ? "\203" : ""), getname(p), maxscore);
-			f1 = 1;
-		}
-
-		p = find_plrghst(p, &from);
-	}
-
-	if (maxkills)
-	{
-		from = f1 = 0;
-		p = find_plrghst(world, &from);
-		while (p)
-		{
-			if ((p->ps.mid_total + p->ps.mid_stomps) == maxkills)
-			{
-				G_bprint(2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("kills")),
-							(isghost(p) ? "\203" : ""), getname(p), maxkills);
-				f1 = 1;
-			}
-
-			p = find_plrghst(p, &from);
-		}
-	}
-
-	if (maxmidairs)
-	{
-		from = f1 = 0;
-		p = find_plrghst(world, &from);
-		while (p)
-		{
-			if ((p->ps.mid_total) == maxmidairs)
-			{
-				G_bprint(2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("midairs")),
-							(isghost(p) ? "\203" : ""), getname(p), maxmidairs);
-				f1 = 1;
-			}
-
-			p = find_plrghst(p, &from);
-		}
-	}
-
-	if (maxstomps)
-	{
-		from = f1 = 0;
-		p = find_plrghst(world, &from);
-		while (p)
-		{
-			if ((p->ps.mid_stomps) == maxstomps)
-			{
-				G_bprint(2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("head stomps")),
-							(isghost(p) ? "\203" : ""), getname(p), maxstomps);
-				f1 = 1;
-			}
-			p = find_plrghst(p, &from);
-		}
-	}
-
-	if (maxstreak)
-	{
-		from = f1 = 0;
-		p = find_plrghst(world, &from);
-		while (p)
-		{
-			if ((p->ps.spree_max) == maxstreak)
-			{
-				G_bprint(2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("streak")),
-							(isghost(p) ? "\203" : ""), getname(p), maxmidairs);
-				f1 = 1;
-			}
-
-			p = find_plrghst(p, &from);
-		}
-	}
-
-	if (maxspawnfrags)
-	{
-		from = f1 = 0;
-		p = find_plrghst(world, &from);
-		while (p)
-		{
-			if ((p->ps.spawn_frags) == maxspawnfrags)
-			{
-				G_bprint(2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("spawn frags")),
-							(isghost(p) ? "\203" : ""), getname(p), maxspawnfrags);
-				f1 = 1;
-			}
-
-			p = find_plrghst(p, &from);
-		}
-	}
-
-	if (maxbonus)
-	{
-		from = f1 = 0;
-		p = find_plrghst(world, &from);
-		while (p)
-		{
-			if ((p->ps.mid_bonus) == maxbonus)
-			{
-				G_bprint(2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("bonus fiend")),
-							(isghost(p) ? "\203" : ""), getname(p), maxbonus);
-				f1 = 1;
-			}
-
-			p = find_plrghst(p, &from);
-		}
-	}
-
-	if (maxtopheight)
-	{
-		from = f1 = 0;
-		p = find_plrghst(world, &from);
-		while (p)
-		{
-			if ((p->ps.mid_maxheight) == maxtopheight)
-			{
-				G_bprint(2, "   %-13s: %s%s (%.1f)\n", (f1 ? "" : redtext("highest kill")),
-							(isghost(p) ? "\203" : ""), getname(p), maxtopheight);
-				f1 = 1;
-			}
-
-			p = find_plrghst(p, &from);
-		}
-	}
-
-	if (maxtopavgheight)
-	{
-		from = f1 = 0;
-		p = find_plrghst(world, &from);
-		while (p)
-		{
-			if ((p->ps.mid_avgheight) == maxtopavgheight)
-			{
-				G_bprint(2, "   %-13s: %s%s (%.1f)\n", (f1 ? "" : redtext("avg height")),
-							(isghost(p) ? "\203" : ""), getname(p), maxtopavgheight);
-				f1 = 1;
-			}
-
-			p = find_plrghst(p, &from);
-		}
-	}
-
-	from = f1 = 0;
-	p = find_plrghst(world, &from);
-	while (p)
-	{
-		vh_rl = p->ps.wpn[wpRL].vhits;
-		a_rl = p->ps.wpn[wpRL].attacks;
-		ph_rl = 100.0 * vh_rl / max(1, a_rl);
-		if ((ph_rl) == maxrlefficiency)
-		{
-			G_bprint(2, "   %-13s: %s%s (%.1f%%)\n", (f1 ? "" : redtext("rl efficiency")),
-						(isghost(p) ? "\203" : ""), getname(p), maxrlefficiency);
-			f1 = 1;
-		}
-
-		p = find_plrghst(p, &from);
-	}
-
-	G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
-				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
-}
-
-void EM_CorrectStats(void)
-{
-	gedict_t *p;
-
-	for (p = world; (p = find_plr(p));)
-	{
-		// take away powerups so scoreboard looks normal
-		p->s.v.items = (int)p->s.v.items
-				& ~(IT_INVISIBILITY | IT_INVULNERABILITY | IT_SUIT | IT_QUAD);
-		p->s.v.effects = (int)p->s.v.effects
-				& ~(EF_DIMLIGHT | EF_BRIGHTLIGHT | EF_BLUE | EF_RED | EF_GREEN);
-		p->invisible_finished = 0;
-		p->invincible_finished = 0;
-		p->super_damage_finished = 0;
-		p->radsuit_finished = 0;
-
-		p->ps.spree_max = max(p->ps.spree_current, p->ps.spree_max);
-		p->ps.spree_max_q = max(p->ps.spree_current_q, p->ps.spree_max_q);
-
-		adjust_pickup_time(&p->q_pickup_time, &p->ps.itm[itQUAD].time);
-		adjust_pickup_time(&p->p_pickup_time, &p->ps.itm[itPENT].time);
-		adjust_pickup_time(&p->r_pickup_time, &p->ps.itm[itRING].time);
-
-		if (p->control_start_time)
-		{
-			p->ps.control_time += g_globalvars.time - p->control_start_time;
-			p->control_start_time = 0;
-		}
-
-		if (isCTF())
-		{
-			// if a player ends the game with a rune adjust their rune time
-			if (p->ctf_flag & CTF_RUNE_RES)
-			{
-				p->ps.res_time += g_globalvars.time - p->rune_pickup_time;
-			}
-			else if (p->ctf_flag & CTF_RUNE_STR)
-			{
-				p->ps.str_time += g_globalvars.time - p->rune_pickup_time;
-			}
-			else if (p->ctf_flag & CTF_RUNE_HST)
-			{
-				p->ps.hst_time += g_globalvars.time - p->rune_pickup_time;
-			}
-			else if (p->ctf_flag & CTF_RUNE_RGN)
-			{
-				p->ps.rgn_time += g_globalvars.time - p->rune_pickup_time;
-			}
-		}
-	}
-}
-
-void MatchEndStats(void)
-{
-	gedict_t *p;
-
-	if (isHoonyModeAny() && !HM_is_game_over())
-	{
-		return;
-	}
-
-	if (isTeam() || isCTF())
-	{
-		CollectTpStats();
-	}
-
-	if (isRACE())
-	{
-		race_match_stats();
-	}
-	else if (cvar("k_midair"))
-	{
-		PlayerMidairStats();
-		PlayerMidairKillStats();
-		TopMidairStats();
-	}
-	else if (cvar("k_instagib"))
-	{
-		PlayerInstagibStats();
-		PlayerInstagibKillStats();
-	}
-	else if (lgc_enabled())
-	{
-		PlayerLGCStats();
-	}
-	else
-	{
-		PlayersKillStats();
-		PlayersItemStats();
-		PlayersWeaponEffiStats();
-		PlayersWeaponTakenStats();
-		PlayersWeaponDroppedStats();
-		PlayersWeaponKillStats();
-		PlayersEnemyWeaponKillStats();
-		PlayersDamageStats();
-		// (quad)time
-		if (isCTF())
-		{
-			PlayersCTFStats();
-		}
-
-
-		if (isTeam() || isCTF())
-		{
-			SummaryTPStats(); // print summary stats like armos powerups weapons etc..
-		}
-
-		if (!isDuel()) // top stats only in non duel modes
-		{
-			TopStats(); // print top frags tkills deaths...
-		}
-
-		if (isTeam() || isCTF())
-		{
-			TeamsStats(); // print basic info like frags for each team
-		}
-
-		if ((p = find(world, FOFCLSN, "ghost"))) // show legend :)
-		{
-			G_bprint(2, "\n\203 - %s player\n\n", redtext("disconnected"));
-		}
-	}
-
-	StatsToFile();
-}
-
-void SM_PrepareTeamsStats(void)
-{
-	int i;
-
-	tmStats_cnt = 0;
-	memset(tmStats, 0, sizeof(tmStats));
-	memset(tmStats_names, 0, sizeof(tmStats_names));
-
-	for (i = 0; i < MAX_TM_STATS; i++)
-	{
-		tmStats[i].name = tmStats_names[i];
-	}
 }

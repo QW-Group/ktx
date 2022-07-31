@@ -3383,7 +3383,6 @@ void PlayerStats()
 	if (match_in_progress != 2)
 	{
 		G_sprint(self, 2, "no game - no statistics\n");
-		MatchEndStats();
 		return;
 	}
 
