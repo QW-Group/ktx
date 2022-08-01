@@ -95,6 +95,8 @@ typedef struct wpType_s
 
 	int edamage;		// damage to enemies
 	int tdamage;		// damage to team-mates
+
+	float time;			// total time u have some weapon
 } wpType_t;
 
 typedef enum
@@ -116,7 +118,6 @@ typedef struct itType_s
 {
 	int tooks;	// taken count
 	float time;	// total time u have some item
-
 } itType_t;
 
 // store player statistic here, like taken armors etc...
@@ -958,9 +959,8 @@ typedef struct gedict_s
 	player_stats_t ps;						// store player statistic here, like taken armors etc...
 
 	float control_start_time;				// time when player gained control
-	float q_pickup_time;					// time then u took quad
-	float p_pickup_time;					// time then u took pent
-	float r_pickup_time;					// time then u took ring
+	float it_pickup_time[itMAX];			// total possession time of items
+	float wp_pickup_time[wpMAX];			// total possession time of weapons
 // }
 
 // { mvd demo weapon stats

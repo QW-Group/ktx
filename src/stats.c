@@ -19,7 +19,8 @@ static void OnePlayerWeaponDroppedStats(gedict_t *p);
 static void OnePlayerWeaponKillStats(gedict_t *p);
 static void OnePlayerEnemyWeaponKillStats(gedict_t *p);
 static void OnePlayerDamageStats(gedict_t *p);
-static void OnePlayerTimeStats(gedict_t *p);
+static void OnePlayerItemTimeStats(gedict_t *p, int tp);
+static void OnePlayerWeaponTimeStats(gedict_t *p);
 static void OnePlayerCTFStats(gedict_t *p);
 static void CalculateEfficiency(gedict_t *player);
 static void PlayerMidairStats(void);
@@ -35,7 +36,8 @@ static void PlayersWeaponDroppedStats(void);
 static void PlayersWeaponKillStats(void);
 static void PlayersEnemyWeaponKillStats(void);
 static void PlayersDamageStats(void);
-static void PlayersTimeStats(void);
+static void PlayersItemTimeStats(void);
+static void PlayersWeaponTimeStats(void);
 static void PlayersCTFStats(void);
 
 static void TopStats(void);
@@ -272,6 +274,7 @@ void StatsToFile(void)
 void EM_CorrectStats(void)
 {
 	gedict_t *p;
+	int i;
 
 	for (p = world; (p = find_plr(p));)
 	{
@@ -288,9 +291,14 @@ void EM_CorrectStats(void)
 		p->ps.spree_max = max(p->ps.spree_current, p->ps.spree_max);
 		p->ps.spree_max_q = max(p->ps.spree_current_q, p->ps.spree_max_q);
 
-		adjust_pickup_time(&p->q_pickup_time, &p->ps.itm[itQUAD].time);
-		adjust_pickup_time(&p->p_pickup_time, &p->ps.itm[itPENT].time);
-		adjust_pickup_time(&p->r_pickup_time, &p->ps.itm[itRING].time);
+		for (i = itNONE; i < itMAX; i++)
+		{
+			adjust_pickup_time(&p->it_pickup_time[i], &p->ps.itm[i].time);
+		}
+		for (i = wpNONE; i < wpMAX; i++)
+		{
+			adjust_pickup_time(&p->wp_pickup_time[i], &p->ps.wpn[i].time);
+		}
 
 		if (p->control_start_time)
 		{
@@ -359,7 +367,8 @@ void MatchEndStats(void)
 		PlayersWeaponKillStats();
 		PlayersEnemyWeaponKillStats();
 		PlayersDamageStats();
-		PlayersTimeStats();
+		PlayersItemTimeStats();
+		PlayersWeaponTimeStats();
 
 		if (isCTF())
 		{
@@ -1045,29 +1054,37 @@ static void OnePlayerDamageStats(gedict_t *p)
 			(p->deaths <= 0 ? 99999 : (int)(p->ps.dmg_t / p->deaths)));
 }
 
-static void OnePlayerTimeStats(gedict_t *p)
+static void OnePlayerItemTimeStats(gedict_t *p, int tp)
 {
-//		G_bprint(2, "%s: %s:%d\n", redtext("    Time"), redtext("Quad"),
-//					(int)p->ps.itm[itQUAD].time);
-
-	p->ps.itm[itHEALTH_100].time;
-	p->ps.itm[itGA].time;
-	p->ps.itm[itYA].time;
-	p->ps.itm[itRA].time;
-	p->ps.itm[itQUAD].time;
-	p->ps.itm[itPENT].time;
-	p->ps.itm[itRING].time;
-	p->ps.wpn[wpSSG].;
-
 	G_bprint(2,
-			 "%s%-20s|%5d|%5d|%5d|%5d|%5d|%5d|\n",
+			 "%s%-20s|%.2d:%.2d|%.2d:%.2d|%.2d:%.2d|%.2d:%.2d|%5s|%5s|%5s|\n",
 			(isghost(p) ? "\203" : ""), getname(p),
-			(int)p->ps.dmg_t,
-			(int)p->ps.dmg_g,
-			(int)p->ps.dmg_eweapon,
-			(int)p->ps.dmg_team,
-			(int)p->ps.dmg_self,
-			(p->deaths <= 0 ? 99999 : (int)(p->ps.dmg_t / p->deaths)));
+			(int)(p->ps.itm[itRA].time / 60), ((int)(p->ps.itm[itRA].time)) % 60,
+			(int)(p->ps.itm[itYA].time / 60), ((int)(p->ps.itm[itYA].time)) % 60,
+			(int)(p->ps.itm[itGA].time / 60), ((int)(p->ps.itm[itGA].time)) % 60,
+			(int)(p->ps.itm[itHEALTH_100].time / 60), ((int)(p->ps.itm[itHEALTH_100].time)) % 60,
+			tp ? va("%.2d:%.2d", (int)(p->ps.itm[itQUAD].time / 60),
+					((int)(p->ps.itm[itQUAD].time)) % 60) :
+					"    -",
+			tp ? va("%.2d:%.2d", (int)(p->ps.itm[itPENT].time / 60),
+					((int)(p->ps.itm[itPENT].time)) % 60) :
+					"    -",
+			tp ? va("%.2d:%.2d", (int)(p->ps.itm[itRING].time / 60),
+					((int)(p->ps.itm[itRING].time)) % 60) :
+					"    -");
+}
+
+static void OnePlayerWeaponTimeStats(gedict_t *p)
+{
+	G_bprint(2,
+			 "%s%-20s|%.2d:%.2d|%.2d:%.2d|%.2d:%.2d|%.2d:%.2d|%.2d:%.2d|%.2d:%.2d|\n",
+			(isghost(p) ? "\203" : ""), getname(p),
+			(int)(p->ps.wpn[wpLG].time / 60), ((int)(p->ps.wpn[wpLG].time)) % 60,
+			(int)(p->ps.wpn[wpRL].time / 60), ((int)(p->ps.wpn[wpRL].time)) % 60,
+			(int)(p->ps.wpn[wpGL].time / 60), ((int)(p->ps.wpn[wpGL].time)) % 60,
+			(int)(p->ps.wpn[wpSNG].time / 60), ((int)(p->ps.wpn[wpSNG].time)) % 60,
+			(int)(p->ps.wpn[wpNG].time / 60), ((int)(p->ps.wpn[wpNG].time)) % 60,
+			(int)(p->ps.wpn[wpSSG].time / 60), ((int)(p->ps.wpn[wpSSG].time)) % 60);
 }
 
 static void OnePlayerCTFStats(gedict_t *p)
@@ -2072,7 +2089,7 @@ static void PlayersDamageStats(void)
 	}
 }
 
-static void PlayersTimeStats(void)
+static void PlayersItemTimeStats(void)
 {
 	gedict_t *p;
 	gedict_t *p2;
@@ -2080,6 +2097,7 @@ static void PlayersTimeStats(void)
 	char *tmp2;
 	int from1;
 	int from2;
+	int tp;
 
 	from1 = 0;
 	p = find_plrghst(world, &from1);
@@ -2090,12 +2108,15 @@ static void PlayersTimeStats(void)
 	}
 
 	G_bprint(
-			2, "\n%s   |%s|%s|%s|%s|%s|%s|\n"
+			2, "\n%s          |%s|%s|%s|%s|%s|%s|%s|\n"
 			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
 			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
-			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
-			redtext("Damage statistics"), redtext("Taken"), redtext("Given"), redtext("EWeap"),
-			redtext(" Team"), redtext(" Self"), redtext("ToDie"));
+			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+			"\237\n",
+			redtext("Item times"), redtext("   RA"), redtext("   YA"), redtext("   GA"),redtext(" Mega"),
+			redtext(" Quad"), redtext(" Pent"), redtext(" Ring"));
+
+	tp = isTeam() || isCTF();
 
 	from1 = 0;
 	p = find_plrghst(world, &from1);
@@ -2116,7 +2137,63 @@ static void PlayersTimeStats(void)
 					if (streq(tmp, tmp2))
 					{
 						p2->ready = 1; // set mark
-						OnePlayerTimeStats(p2);
+						OnePlayerItemTimeStats(p2, tp);
+					}
+				}
+
+				p2 = find_plrghst(p2, &from2);
+			}
+		}
+
+		p = find_plrghst(p, &from1);
+	}
+}
+
+static void PlayersWeaponTimeStats(void)
+{
+	gedict_t *p;
+	gedict_t *p2;
+	char *tmp;
+	char *tmp2;
+	int from1;
+	int from2;
+
+	from1 = 0;
+	p = find_plrghst(world, &from1);
+	while (p)
+	{
+		p->ready = 0; // clear mark
+		p = find_plrghst(p, &from1);
+	}
+
+	G_bprint(
+			2, "\n%s        |%s|%s|%s|%s|%s|%s|\n"
+			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
+			redtext("Weapon times"), redtext("   LG"), redtext("   RL"), redtext("   GL"),redtext("  SNG"),
+			redtext("   NG"), redtext("  SSG"));
+
+	from1 = 0;
+	p = find_plrghst(world, &from1);
+	while (p)
+	{
+		if (!p->ready)
+		{
+			from2 = 0;
+			p2 = find_plrghst(world, &from2);
+			while (p2)
+			{
+				if (!p2->ready)
+				{
+					// sort by team
+					tmp = getteam(p);
+					tmp2 = getteam(p2);
+
+					if (streq(tmp, tmp2))
+					{
+						p2->ready = 1; // set mark
+						OnePlayerWeaponTimeStats(p2);
 					}
 				}
 
