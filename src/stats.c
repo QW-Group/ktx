@@ -962,6 +962,12 @@ static void OnePlayerWeaponEffiStats(gedict_t *p)
 	float vh_gl;
 	float a_gl;
 	float e_gl;
+	float a_sng;
+	float e_sng;
+	float h_sng;
+	float a_ng;
+	float e_ng;
+	float h_ng;
 	float a_ssg;
 	float e_ssg;
 	float h_ssg;
@@ -975,6 +981,10 @@ static void OnePlayerWeaponEffiStats(gedict_t *p)
 	a_rl = p->ps.wpn[wpRL].attacks;
 	vh_gl = p->ps.wpn[wpGL].vhits;
 	a_gl = p->ps.wpn[wpGL].attacks;
+	h_sng = p->ps.wpn[wpSNG].hits;
+	a_sng = p->ps.wpn[wpSNG].attacks;
+	h_ng = p->ps.wpn[wpNG].hits;
+	a_ng = p->ps.wpn[wpNG].attacks;
 	h_ssg = p->ps.wpn[wpSSG].hits;
 	a_ssg = p->ps.wpn[wpSSG].attacks;
 	h_sg = p->ps.wpn[wpSG].hits;
@@ -983,15 +993,19 @@ static void OnePlayerWeaponEffiStats(gedict_t *p)
 	e_lg = 100.0 * h_lg / max(1, a_lg);
 	e_rl = 100.0 * vh_rl / max(1, a_rl);
 	e_gl = 100.0 * vh_gl / max(1, a_gl);
+	e_sng = 100.0 * h_sng / max(1, a_sng);
+	e_ng = 100.0 * h_ng / max(1, a_ng);
 	e_ssg = 100.0 * h_ssg / max(1, a_ssg);
 	e_sg = 100.0 * h_sg / max(1, a_sg);
 
 	G_bprint(2,
-			"%s%-20s|%5s|%5s|%5s|%5s|%5s|\n",
+			"%s%-20s|%5s|%5s|%5s|%5s|%5s|%5s|%5s|\n",
 			(isghost(p) ? "\203" : ""), getname(p),
 			(a_lg ? ((e_lg >= 100)? va("%.0f%%", e_lg) : va("%.1f%%", e_lg)) : "-"),
 			(a_rl ? ((e_rl >= 100) ? va("%.0f%%", e_rl) : va("%.1f%%", e_rl)) : "-"),
 			(a_gl ? ((e_gl >= 100) ? va("%.0f%%", e_gl) : va("%.1f%%", e_gl)) : "-"),
+			(a_sng ? ((e_sng >= 100) ? va("%.0f%%", e_sng) : va("%.1f%%", e_sng)) : "-"),
+			(a_ng ? ((e_ng >= 100) ? va("%.0f%%", e_ng) : va("%.1f%%", e_ng)) : "-"),
 			(a_ssg ? ((e_ssg >= 100) ? va("%.0f%%", e_ssg) : va("%.1f%%", e_ssg)) : "-"),
 			(a_sg ? ((e_sg >= 100) ? va("%.0f%%", e_sg) : va("%.1f%%", e_sg)) : "-"));
 }
@@ -999,45 +1013,52 @@ static void OnePlayerWeaponEffiStats(gedict_t *p)
 static void OnePlayerWeaponTakenStats(gedict_t *p)
 {
 	G_bprint(2,
-			"%s%-20s|%5d|%5d|%5d|%5d|\n",
+			"%s%-20s|%5d|%5d|%5d|%5d|%5d|%5d|\n",
 			(isghost(p) ? "\203" : ""), getname(p),
 			p->ps.wpn[wpLG].tooks,
 			p->ps.wpn[wpRL].tooks,
 			p->ps.wpn[wpGL].tooks,
+			p->ps.wpn[wpSNG].tooks,
+			p->ps.wpn[wpNG].tooks,
 			p->ps.wpn[wpSSG].tooks);
 }
 
 static void OnePlayerWeaponDroppedStats(gedict_t *p)
 {
 	G_bprint(2,
-			"%s%-20s|%5d|%5d|%5d|%5d|\n",
+			"%s%-20s|%5d|%5d|%5d|%5d|%5d|%5d|\n",
 			(isghost(p) ? "\203" : ""), getname(p),
 			p->ps.wpn[wpLG].drops,
 			p->ps.wpn[wpRL].drops,
 			p->ps.wpn[wpGL].drops,
+			p->ps.wpn[wpSNG].drops,
+			p->ps.wpn[wpNG].drops,
 			p->ps.wpn[wpSSG].drops);
 }
 
 static void OnePlayerWeaponKillStats(gedict_t *p)
 {
 	G_bprint(2,
-			"%s%-20s|%5d|%5d|%5d|%5d|%5d|\n",
+			"%s%-20s|%5d|%5d|%5d|%5d|%5d|%5d|\n",
 			(isghost(p) ? "\203" : ""), getname(p),
 			p->ps.wpn[wpLG].kills,
 			p->ps.wpn[wpRL].kills,
 			p->ps.wpn[wpGL].kills,
-			p->ps.wpn[wpSSG].kills,
-			p->ps.wpn[wpSG].kills);
+			p->ps.wpn[wpSNG].kills,
+			p->ps.wpn[wpNG].kills,
+			p->ps.wpn[wpSSG].kills);
 }
 
 static void OnePlayerEnemyWeaponKillStats(gedict_t *p)
 {
 	G_bprint(2,
-			"%s%-20s|%5d|%5d|%5d|%5d|\n",
+			"%s%-20s|%5d|%5d|%5d|%5d|%5d|%5d|\n",
 			(isghost(p) ? "\203" : ""), getname(p),
 			p->ps.wpn[wpLG].ekills,
 			p->ps.wpn[wpRL].ekills,
 			p->ps.wpn[wpGL].ekills,
+			p->ps.wpn[wpSNG].ekills,
+			p->ps.wpn[wpNG].ekills,
 			p->ps.wpn[wpSSG].ekills);
 }
 
@@ -1771,12 +1792,13 @@ static void PlayersWeaponEffiStats(void)
 	}
 
 	G_bprint(
-			2, "\n%s   |%s|%s|%s|%s|%s|\n"
+			2, "\n%s   |%s|%s|%s|%s|%s|%s|%s|\n"
 			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
 			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
-			"\236\236\236\236\236\236\236\236\237\n",
+			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+			"\237\n",
 			redtext("Weapon Efficiency"), redtext("  LG%"), redtext("  RL%"), redtext("  GL%"),
-			redtext(" SSG%"), redtext("  SG%"));
+			redtext(" SNG%"), redtext("  NG%"), redtext(" SSG%"), redtext("  SG%"));
 
 	from1 = 0;
 	p = find_plrghst(world, &from1);
@@ -1827,12 +1849,12 @@ static void PlayersWeaponTakenStats(void)
 	}
 
 	G_bprint(
-			2, "\n%s        |%s|%s|%s|%s|\n"
+			2, "\n%s        |%s|%s|%s|%s|%s|%s|\n"
 			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
 			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
-			"\236\236\237\n",
+			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
 			redtext("Weapon Taken"), redtext("   LG"), redtext("   RL"), redtext("   GL"),
-			redtext("  SSG"));
+			redtext("  SNG"), redtext("   NG"), redtext("  SSG"));
 
 	from1 = 0;
 	p = find_plrghst(world, &from1);
@@ -1883,12 +1905,12 @@ static void PlayersWeaponDroppedStats(void)
 	}
 
 	G_bprint(
-			2, "\n%s      |%s|%s|%s|%s|\n"
+			2, "\n%s      |%s|%s|%s|%s|%s|%s|\n"
 			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
 			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
-			"\236\236\237\n",
+			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
 			redtext("Weapon Dropped"), redtext("   LG"), redtext("   RL"), redtext("   GL"),
-			redtext("  SSG"));
+			redtext("  SNG"), redtext("   NG"), redtext("  SSG"));
 
 	from1 = 0;
 	p = find_plrghst(world, &from1);
@@ -1939,12 +1961,12 @@ static void PlayersWeaponKillStats(void)
 	}
 
 	G_bprint(
-			2, "\n%s        |%s|%s|%s|%s|%s|\n"
+			2, "\n%s        |%s|%s|%s|%s|%s|%s|\n"
 			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
 			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
-			"\236\236\236\236\236\236\236\236\237\n",
+			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
 			redtext("Weapon Kills"), redtext("   LG"), redtext("   RL"), redtext("   GL"),
-			redtext("  SSG"), redtext("   SG"));
+			redtext("  SNG"), redtext("   NG"), redtext("  SSG"));
 
 	from1 = 0;
 	p = find_plrghst(world, &from1);
@@ -1995,12 +2017,12 @@ static void PlayersEnemyWeaponKillStats(void)
 	}
 
 	G_bprint(
-			2, "\n%s |%s|%s|%s|%s|\n"
+			2, "\n%s |%s|%s|%s|%s|%s|%s|\n"
 			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
 			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
-			"\236\236\237\n",
+			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
 			redtext("Enemy Weapon Killed"), redtext("   LG"), redtext("   RL"), redtext("   GL"),
-			redtext("  SSG"));
+			redtext("  SNG"), redtext("   NG"), redtext("  SSG"));
 
 	from1 = 0;
 	p = find_plrghst(world, &from1);

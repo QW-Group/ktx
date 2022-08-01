@@ -472,7 +472,6 @@ void armor_touch()
 		type = (k_yawnmode ? 0.4 : 0.3); // Yawnmode: changed armor protection
 		value = 100;
 		bit = IT_ARMOR1;
-		G_bprint(2, "%s took GA; total time: %f\n", getname(other), other->ps.itm[itGA].time);
 
 	}
 	else if (!strcmp(self->classname, "item_armor2"))
@@ -483,7 +482,6 @@ void armor_touch()
 		type = (k_yawnmode ? 0.6 : 0.6); // Yawnmode: changed armor protection
 		value = 150;
 		bit = IT_ARMOR2;
-		G_bprint(2, "%s took YA; total time: %f\n", getname(other), other->ps.itm[itYA].time);
 	}
 	else if (!strcmp(self->classname, "item_armorInv"))
 	{
@@ -493,7 +491,6 @@ void armor_touch()
 		type = (k_yawnmode ? 0.8 : 0.8); // Yawnmode: changed armor protection
 		value = 200;
 		bit = IT_ARMOR3;
-		G_bprint(2, "%s took RA; total time: %f\n", getname(other), other->ps.itm[itRA].time);
 	}
 	else
 	{
