@@ -7,12 +7,22 @@ typedef struct teamStats_s
 {
 	char *name; // team name
 	int gfrags; // frags from ghosts
-	int frags, deaths, tkills;
-	float dmg_t, dmg_g, dmg_team, dmg_eweapon;
-	// { ctf
-	float res, str, rgn, hst;
-	int caps, pickups, returns, f_defends, c_defends;
-	// }
+	int frags;
+	int deaths;
+	int tkills;
+	float dmg_t;
+	float dmg_g;
+	float dmg_team;
+	float dmg_eweapon;
+	float res;
+	float str;
+	float rgn;
+	float hst;
+	int caps;
+	int pickups;
+	int returns;
+	int f_defends;
+	int c_defends;
 	wpType_t wpn[wpMAX];
 	itType_t itm[itMAX];
 	int transferred_RLpacks;

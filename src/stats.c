@@ -25,9 +25,10 @@ static void OnePlayerCTFStats(gedict_t *p);
 static void CalculateEfficiency(gedict_t *player);
 static void PlayerMidairStats(void);
 static void PlayerMidairKillStats(void);
-static void PlayerInstagibStats();
-static void PlayerInstagibKillStats();
-static void PlayerLGCStats();
+static void TopMidairStats(void);
+static void PlayerInstagibStats(void);
+static void PlayerInstagibKillStats(void);
+static void PlayerLGCStats(void);
 static void PlayersKillStats(void);
 static void PlayersItemStats(void);
 static void PlayersWeaponEffiStats(void);
@@ -40,12 +41,12 @@ static void PlayersItemTimeStats(void);
 static void PlayersWeaponTimeStats(void);
 static void PlayersCTFStats(void);
 
-static void TopStats(void);
-static void TopMidairStats();
 static void CollectTpStats(void);
 static void ShowTeamsBanner(void);
 static void SummaryTPStats(void);
+
 static void TeamsStats(void);
+static void TopStats(void);
 
 static stats_format_t file_formats[] =
 {
@@ -379,7 +380,7 @@ void MatchEndStats(void)
 		{
 			CollectTpStats();
 			SummaryTPStats(); // print summary stats like armos powerups weapons etc..
-			TeamsStats(); // print basic info like frags for each team
+//			TeamsStats(); // print basic info like frags for each team
 		}
 
 		if (!isDuel()) // top stats only in non duel modes
@@ -1482,7 +1483,7 @@ static void TopMidairStats()
 	}
 
 	G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
-				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
+				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n\n");
 }
 
 static void PlayerInstagibStats()
@@ -1736,11 +1737,11 @@ static void PlayersItemStats(void)
 	tp = isTeam() || isCTF();
 
 	G_bprint(
-			2, "\n%s |%s|%s|%s|%s|%s|%s|%s|\n"
+			2, "\n%s          |%s|%s|%s|%s|%s|%s|%s|\n"
 			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
 			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
 			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
-			redtext("Armor+Powerup Taken"), redtext("   GA"), redtext("   YA"), redtext("   RA"),
+			redtext("Item Taken"), redtext("   GA"), redtext("   YA"), redtext("   RA"),
 			redtext("   MH"), redtext(" Quad"), redtext(" Pent"), redtext(" Ring"));
 
 	from1 = 0;
@@ -2408,8 +2409,6 @@ static void ShowTeamsBanner(void)
 	G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
 				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
 
-	//	for( i = 666 + 1; i <= k_teamid ; i++ )
-	//		G_bprint(2, "%s\220%s\221", (i != (666+1) ? " vs " : ""), ezinfokey(world, va("%d", i)));
 	for (i = 0; i < min(tmStats_cnt, MAX_TM_STATS); i++)
 	{
 		G_bprint(2, "%s\220%s\221", (i ? " vs " : ""), tmStats[i].name);
@@ -2421,7 +2420,7 @@ static void ShowTeamsBanner(void)
 				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
 }
 
-static void SummaryTPStats(void)
+static void Obsolete_SummaryTPStats(void)
 {
 	int i;
 	float h_sg, h_ssg, h_gl, h_rl, h_lg;
@@ -2518,6 +2517,105 @@ static void SummaryTPStats(void)
 
 	G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
 				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
+}
+
+static void SummaryTPStats(void)
+{
+	int i;
+
+//	ShowTeamsBanner();
+
+	G_bprint(
+			2, "\n%s    |%s|%s|%s|%s|%s|%s|%s|\n"
+			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+			"\237\n",
+			redtext("Team Items Taken"), redtext("RA"), redtext("YA"), redtext("GA"),
+			redtext("MH"), redtext(" Q"), redtext(" P"), redtext(" R"));
+	for (i = 0; i < min(tmStats_cnt, MAX_TM_STATS); i++)
+	{
+		G_bprint(2,
+				"%-20s|%2d|%2d|%2d|%2d|%2d|%2d|%2d|\n",
+				va("\220%s\221", tmStats[i].name),
+				tmStats[i].itm[itRA].tooks,
+				tmStats[i].itm[itYA].tooks,
+				tmStats[i].itm[itGA].tooks,
+				tmStats[i].itm[itHEALTH_100].tooks,
+				tmStats[i].itm[itQUAD].tooks,
+				tmStats[i].itm[itPENT].tooks,
+				tmStats[i].itm[itRING].tooks);
+	}
+
+	G_bprint(
+			2, "\n%s        |%s|%s|%s|%s|%s|%s|%s|%s|\n"
+			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+			"\236\236\236\236\236\236\236\236\236\236\237\n",
+			redtext("Team Weapons"), redtext("LGT"), redtext("LGK"), redtext("LGD"),
+			redtext("LGX"), redtext("RLT"), redtext("RLK"), redtext("RLD"), redtext("RLX"));
+	for (i = 0; i < min(tmStats_cnt, MAX_TM_STATS); i++)
+	{
+		G_bprint(2,
+				"%-20s|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%3d|\n",
+				va("\220%s\221", tmStats[i].name),
+				tmStats[i].wpn[wpLG].tooks,
+				tmStats[i].wpn[wpLG].ekills,
+				tmStats[i].wpn[wpLG].drops,
+				tmStats[i].transferred_LGpacks,
+				tmStats[i].wpn[wpRL].tooks,
+				tmStats[i].wpn[wpRL].ekills,
+				tmStats[i].wpn[wpRL].drops,
+				tmStats[i].transferred_RLpacks);
+	}
+
+	G_bprint(
+			2, "\n%s   |%s|%s|%s|%s|\n"
+			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+			"\236\236\237\n",
+			redtext("Team Frags+Damage"), redtext("Frags"), redtext("Given"), redtext("Taken"),
+			redtext(" EWep"), redtext(" Team"));
+	for (i = 0; i < min(tmStats_cnt, MAX_TM_STATS); i++)
+	{
+		G_bprint(2,
+				"%-20s|%5d|%5d|%5d|%5d|%5d|\n",
+				va("\220%s\221", tmStats[i].name),
+				tmStats[i].frags,
+				(int)tmStats[i].dmg_g,
+				(int)tmStats[i].dmg_t,
+				(int)tmStats[i].dmg_eweapon,
+				(int)tmStats[i].dmg_team);
+	}
+
+	if (isCTF())
+	{
+		G_bprint(
+				2, "\n%s |%s|%s|%s|%s|%s|%s|%s|%s|%s|\n"
+				"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n",
+				redtext("Team CTF statistics"), redtext("Fla"), redtext("Cap"), redtext("Ret"),
+				redtext("DFl"), redtext("DCa"), redtext("Res"), redtext("Str"), redtext("Hst"),
+				redtext("Rgn"));
+		for (i = 0; i < min(tmStats_cnt, MAX_TM_STATS); i++)
+		{
+			G_bprint(2,
+					"%-20s|%3d|%3d|%3d|%3d|%3d|%3s|%3s|%3s|%3s|\n",
+					va("\220%s\221", tmStats[i].name),
+					tmStats[i].pickups,
+					tmStats[i].caps,
+					tmStats[i].returns,
+					tmStats[i].f_defends,
+					tmStats[i].c_defends,
+					((cvar("k_ctf_runes") ? va("%d%%", (int)tmStats[i].res) : " - ")),
+					((cvar("k_ctf_runes") ? va("%d%%", (int)tmStats[i].str) : " - ")),
+					((cvar("k_ctf_runes") ? va("%d%%", (int)tmStats[i].hst) : " - ")),
+					((cvar("k_ctf_runes") ? va("%d%%", (int)tmStats[i].rgn) : " - ")));
+		}
+	}
+
+//	G_bprint(2, "\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+//				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
 }
 
 static void TeamsStats(void)
