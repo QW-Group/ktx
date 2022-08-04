@@ -42,11 +42,8 @@ static void PlayersWeaponTimeStats(void);
 static void PlayersCTFStats(void);
 
 static void CollectTpStats(void);
-static void ShowTeamsBanner(void);
 static void SummaryTPStats(void);
 static void TopStats(void);
-
-static void TeamsStats(void);
 
 static stats_format_t file_formats[] =
 {
@@ -380,7 +377,6 @@ void MatchEndStats(void)
 		{
 			CollectTpStats();
 			SummaryTPStats(); // print summary stats like armos powerups weapons etc..
-//			TeamsStats(); // print basic info like frags for each team
 		}
 
 		if (!isDuel()) // top stats only in non duel modes
@@ -461,10 +457,6 @@ static qbool CreateStatsFile(char* filename, char* ip, int port, stats_format_t*
 
 		format->teams_footer(di_handle, i);
 
-		// } TEAMS
-
-		// { PLAYERS
-
 		for (from1 = 0, p = world; (p = find_plrghst(p, &from1));)
 		{
 			p->ready = 0; // clear mark
@@ -472,7 +464,6 @@ static qbool CreateStatsFile(char* filename, char* ip, int port, stats_format_t*
 
 		//	get one player and search all his mates, mark served players via ->ready field
 		//  ghosts is served too
-
 		format->players_header(di_handle);
 		for (from1 = 0, p = world; (p = find_plrghst(p, &from1));)
 		{
@@ -496,7 +487,6 @@ static qbool CreateStatsFile(char* filename, char* ip, int port, stats_format_t*
 		}
 
 		format->players_footer(di_handle, player_num);
-		// } PLAYERS
 	}
 
 	format->match_footer(di_handle);
@@ -573,18 +563,6 @@ static void OnePlayerInstagibKillStats(gedict_t *p)
 			p->ps.spawn_frags,
 			p->ps.spree_max,
 			(a_sg ? va("%.1f%%", h_sg) : "-"));
-
-//	maxfrags = max((isCTF() ? p->s.v.frags - p->ps.ctf_points : p->s.v.frags), maxfrags);
-//	maxdeaths = max(p->deaths, maxdeaths);
-//	maxfriend = max(p->friendly, maxfriend);
-//	maxeffi = max(p->efficiency, maxeffi);
-//	maxcaps = max(p->ps.caps, maxcaps);
-//	maxdefends = max(p->ps.f_defends, maxdefends);
-//	maxspree = max(p->ps.spree_max, maxspree);
-//	maxspree_q = max(p->ps.spree_max_q, maxspree_q);
-//	maxdmgg = max(p->ps.dmg_g, maxdmgg);
-//	maxrlkills = max(p->ps.wpn[wpRL].ekills, maxrlkills);
-//	maxsgeffi = max(h_sg, maxsgeffi);
 }
 
 static void OnePlayerLGCStats(gedict_t *p)
@@ -2106,8 +2084,6 @@ static void SummaryTPStats(void)
 {
 	int i;
 
-//	ShowTeamsBanner();
-
 	G_bprint(
 			2, "\n%s    |%s|%s|%s|%s|%s|%s|%s|\n"
 			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
@@ -2201,9 +2177,6 @@ static void TopStats(void)
 {
 	gedict_t *p;
 	float f1;
-//	float vh_rl;
-//	float a_rl;
-//	float ph_rl;
 	int from;
 	float maxfrags = -99999;
 	float maxdeaths = -1;
@@ -2428,6 +2401,9 @@ static void TopStats(void)
 		}
 	}
 }
+
+/*
+// Below are the obsolete Endgame Stats functions. Stay here for references for a time being
 
 static void ShowTeamsBanner(void)
 {
@@ -3140,3 +3116,5 @@ static void Obsolete_TopStats(void)
 	G_bprint(2, "\n\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
 				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
 }
+*/
+
