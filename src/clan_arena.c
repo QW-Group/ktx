@@ -1562,7 +1562,7 @@ void CA_Frame(void)
 					// Don't take damage while respawning
 					p->no_pain = true;
 
-					p->seconds_to_respawn = 0;
+					p->seconds_to_respawn = 999;
 					p->time_of_respawn = g_globalvars.time; // resets alive_time to 0
 				}
 				else
