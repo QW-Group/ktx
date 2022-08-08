@@ -4318,9 +4318,9 @@ void SendTeamInfo(gedict_t *t)
 			continue; // we pseudo speccing such player, no point to send info about him
 		}
 
-		if (isCA())
+		if (isCA() && !ISLIVE(p))
 		{
-			continue; // CA/wipeout info is sent from CA_SendTeamInfo
+			continue; // see CA_SendTeamInfo for custom CA/wipeout teaminfo
 		}
 
 		if (strnull(nick = ezinfokey(p, "k_nick"))) // get nick, if any, do not send name, client can guess it too
