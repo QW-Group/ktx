@@ -282,7 +282,6 @@ static char race_settings[] =
 	"k_spw 1\n"
 	"k_noitems 1\n"
 	"pm_airstep 0\n"
-	"serverinfo ktxmode race\n"
 	"k_race_pace_jumps 0\n"
 	"k_race_pace_legal 0\n"
 	"k_race_pace_headstart 0.5\n"
@@ -301,7 +300,6 @@ static char norace_settings[] =
 	"lock_practice 0\n"
 	"srv_practice_mode 0\n"
 	"allow_toggle_practice 5\n"
-	"serverinfo ktxmode \"\"\n"
 	"qtv_sayenabled 0\n";
 
 void apply_race_settings(void)

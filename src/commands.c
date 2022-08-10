@@ -3967,7 +3967,6 @@ ok:
 const char _reset_settings[] =
 	"serverinfo matchtag \"\"\n" 	// Hint for QTV what type of event it is. Like: "EQL semifinal" etc.
 	"k_teamoverlay 0\n"				// Teamoverlay off
-	"serverinfo ktxmode \"\"\n"		// No special mode
 ;
 
 // common settings for all user modes
@@ -3979,7 +3978,6 @@ const char common_um_init[] =
 	"k_killquad 0\n"
 	"pm_airstep \"\"\n"				// airstep off by default
 	"samelevel 1\n"					// change levels off
-//	"k_vwep 1\n"					// disable VWEP by default
 	"maxclients 8\n"				// maxclients
 	"k_yawnmode 0\n"				// disable SHITMODE by default (c)Renzo
 	"k_instagib 0\n"				// instagib off
@@ -3990,10 +3988,6 @@ const char common_um_init[] =
 	"k_fp_spec 1\n"					// floodprot for specs
 	"dmm4_invinc_time \"\"\n"		// reset to default
 	"k_noitems \"\"\n"				// reset to default
-//	"localinfo k_new_mode 0\n"		// UNKNOWN ktpro
-//	"localinfo k_fast_mode 0\n		// UNKNOWN ktpro
-//	"localinfo k_safe_rj 0\n"		// UNKNOWN ktpro
-//	"localinfo k_new_spw 0\n"		// ktpro feature
 	"k_clan_arena 0\n"				// disable Clan Arena by default
 	"k_rocketarena 0\n"				// disable Rocket Arena by default
 	"k_race 0\n"					// disable Race by default
@@ -4026,7 +4020,6 @@ const char common_um_init[] =
 	"k_pow_s 1\n"					// powerups - suit
 	"qtv_sayenabled 0\n"			// default blocking of qtv chat
 	"k_bzk 0\n"						// berzerk mode off
-	"serverinfo ktxmode \"\"\n"		// reset ktxmode
 ;
 
 const char _1on1_um_init[] =
@@ -4043,7 +4036,6 @@ const char _1on1_um_init[] =
 	"k_lockmin 0\n"					// no efect in duel
 	"k_lockmax 0\n"					// no efect in duel
 	"k_mode 1\n"
-	"serverinfo ktxmode 1on1\n"		// set ktxmode
 ;
 
 const char _1on1hm_um_init[] =
@@ -4063,7 +4055,6 @@ const char _1on1hm_um_init[] =
 	"k_lockmin 0\n"					// no efect in duel
 	"k_lockmax 0\n"					// no efect in duel
 	"k_mode 1\n"
-	"serverinfo ktxmode 1on1hm\n"	// set ktxmode
 ;
 
 // 'blitz' now
@@ -4084,7 +4075,6 @@ const char _2on2hm_um_init[] =
 	"k_lockmin 1\n"					// minimum number of teams
 	"k_lockmax 2\n"					// maximum number of teams
 	"k_mode 2\n"
-	"serverinfo ktxmode 2on2hm\n"	// set ktxmode
 ;
 
 const char _2on2_um_init[] =
@@ -4101,7 +4091,6 @@ const char _2on2_um_init[] =
 	"k_lockmin 1\n"					// minimum number of teams
 	"k_lockmax 2\n"					// maximum number of teams
 	"k_mode 2\n"
-	"serverinfo ktxmode 2on2\n"		// set ktxmode
 ;
 
 const char _2on2on2_um_init[] =
@@ -4118,7 +4107,6 @@ const char _2on2on2_um_init[] =
 	"k_lockmin 1\n"					// minimum number of teams
 	"k_lockmax 3\n"					// maximum number of teams
 	"k_mode 2\n"
-	"serverinfo ktxmode 2on2hm\n"	// set ktxmode
 ;
 
 const char _3on3_um_init[] =
@@ -4135,7 +4123,6 @@ const char _3on3_um_init[] =
 	"k_overtime 1\n"				// time based
 	"k_exttime 5\n"					// overtime 5mins
 	"k_mode 2\n"
-	"serverinfo ktxmode 3on3\n"		// set ktxmode
 ;
 
 const char _3on3on3_um_init[] =
@@ -4152,7 +4139,6 @@ const char _3on3on3_um_init[] =
 	"k_overtime 1\n"				// time based
 	"k_exttime 5\n"					// overtime 5mins
 	"k_mode 2\n"
-	"serverinfo ktxmode 3on3on3\n"	// set ktxmode
 ;
 
 // 'blitz' now
@@ -4173,7 +4159,6 @@ const char _4on4hm_um_init[] =
 	"k_overtime 1\n"				// time based
 	"k_exttime 5\n"					// overtime 5mins
 	"k_mode 2\n"
-	"serverinfo ktxmode 4on4hm\n"	// set ktxmode
 ;
 
 const char _4on4_um_init[] =
@@ -4190,7 +4175,6 @@ const char _4on4_um_init[] =
 	"k_overtime 1\n"				// time based
 	"k_exttime 5\n"					// overtime 5mins
 	"k_mode 2\n"
-	"serverinfo ktxmode 4on4\n"		// set ktxmode
 ;
 
 const char _4on4on4_um_init[] =
@@ -4207,7 +4191,6 @@ const char _4on4on4_um_init[] =
 	"k_overtime 1\n"				// time based
 	"k_exttime 5\n"					// overtime 5mins
 	"k_mode 2\n"
-	"serverinfo ktxmode 4on4on4\n"	// set ktxmode
 ;
 
 const char _10on10_um_init[] =
@@ -4224,7 +4207,6 @@ const char _10on10_um_init[] =
 	"k_overtime 1\n"				// time based
 	"k_exttime 5\n"					// overtime 5mins
 	"k_mode 2\n"
-	"serverinfo ktxmode 10on10\n"	// set ktxmode
 ;
 
 const char _XonX_um_init[] =
@@ -4241,7 +4223,6 @@ const char _XonX_um_init[] =
 	"k_overtime 1\n"				// time based
 	"k_exttime 5\n"					// overtime 5mins
 	"k_mode 2\n"
-	"serverinfo ktxmode XonX\n"		// set ktxmode
 ;
 
 const char ffa_um_init[] =
@@ -4261,7 +4242,6 @@ const char ffa_um_init[] =
 	"k_exttime 5\n"					// overtime 5mins
 	"k_mode 3\n"
 	"k_bzk 0\n"						// berzerk mode on ;)
-	"serverinfo ktxmode ffa\n"		// set ktxmode
 ;
 
 const char ctf_um_init[] =
@@ -4286,7 +4266,6 @@ const char ctf_um_init[] =
 	"k_ctf_hook 0\n"				// hook off
 	"k_ctf_runes 0\n"				// runes off
 	"k_ctf_ga 1\n"					// green armor on
-	"serverinfo ktxmode ctf\n"		// set ktxmode
 ;
 
 usermode um_list[] =
