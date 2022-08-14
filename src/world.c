@@ -1409,7 +1409,6 @@ void FixSayTeamToSpecs()
 			desired_value = (match_in_progress ? 1 : 0);
 			break;
 
-		case 2:
 			desired_value = (match_in_progress ? 0 : 1);
 			break;
 
@@ -1426,6 +1425,138 @@ void FixSayTeamToSpecs()
 }
 
 int skip_fixrules = 0;
+
+// This function determines the actual game mode, include game type, and sub-mode,
+// which is part of the serverinfo reply.
+// Format is: mode-submode[-submode]
+void SetMode(void)
+{
+	char mode[64] = {};
+
+	switch (current_umode)
+	{
+		case um1on1:
+			strcat(mode, "1on1");
+			break;
+
+		case um2on2:
+			strcat(mode, "2on2");
+			break;
+
+		case um3on3:
+			strcat(mode, "3on3");
+			break;
+
+		case um4on4:
+			strcat(mode, "4on4");
+			break;
+
+		case um10on10:
+			strcat(mode, "10on10");
+			break;
+
+		case umFfa:
+			strcat(mode, "ffa");
+			break;
+
+		case umCtf:
+			strcat(mode, "ctf");
+			break;
+
+		case umHooneyM:
+			strcat(mode, "1on1-hm");
+			break;
+
+		case umBlitz2v2:
+			strcat(mode, "2on2-hm");
+			break;
+
+		case umBlitz4v4:
+			strcat(mode, "4on4-hm");
+			break;
+
+		case um2on2on2:
+			strcat(mode, "2on2on2");
+			break;
+
+		case um3on3on3:
+			strcat(mode, "3on3on3");
+			break;
+
+		case um4on4on4:
+			strcat(mode, "4on4on4");
+			break;
+
+		case umXonX:
+			strcat(mode, "XonX");
+			break;
+
+		default:
+			;
+	}
+
+	if (isRACE())
+	{
+		strcat(mode, "-race");
+	}
+
+	if (isRACE())
+	{
+		strcat(mode, "-race");
+	}
+
+	if (cvar("k_midair"))
+	{
+		strcat(mode, "-midair");
+	}
+
+	if (cvar("k_instagib"))
+	{
+		strcat(mode, "-instagib");
+	}
+
+	if (lgc_enabled())
+	{
+		strcat(mode, "-lgc");
+	}
+
+	if (cvar("k_clan_arena") == 1)
+	{
+		strcat(mode, "-ca");
+	}
+
+	if (cvar("k_clan_arena") == 2)
+	{
+		strcat(mode, "-wo");
+	}
+
+	if (isRA())
+	{
+		strcat(mode, "-ra");
+	}
+
+	if (cvar("k_dmm4_gren_mode"))
+	{
+		strcat(mode, "-gm");
+	}
+
+	if (cvar("k_dmgfrags"))
+	{
+		strcat(mode, "-df");
+	}
+
+	if (cvar("k_yawnmode"))
+	{
+		strcat(mode, "-yw");
+	}
+
+	if (cvar("k_rocketarena"))
+	{
+		strcat(mode, "-ra");
+	}
+
+	localcmd("serverinfo mode %s\n", mode);
+}
 
 // check if server is misconfigured somehow, made some minimum fixage
 void FixRules()
@@ -1686,6 +1817,8 @@ void FixRules()
 	{
 		trap_executecmd();
 	}
+
+	SetMode();
 }
 
 int timelimit, fraglimit, teamplay, deathmatch, framecount, coop, skill;

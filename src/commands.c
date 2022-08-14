@@ -3295,7 +3295,7 @@ void PrintScores()
 			char *t2 = cvar_string("_k_team2");
 			char *t3;
 
-			if ((current_umode < 11) || (current_umode > 13))
+			if ((current_umode < um2on2on2) || (current_umode > um4on4on4))
 			{
 				G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), (s1 > s2 ? t1 : t2),
 						dig3(s1 > s2 ? s1 : s2));
@@ -4287,7 +4287,7 @@ usermode um_list[] =
 };
 
 int um_cnt = sizeof(um_list) / sizeof(um_list[0]);
-int current_umode;
+UserModes_t current_umode;
 
 // return -1 if not found
 int um_idx_byname(char *name)
@@ -4353,7 +4353,7 @@ void UserMode(float umode)
 
 	int k_free_mode = (k_matchLess ? 5 : cvar("k_free_mode"));
 
-	current_umode = 0;
+	current_umode = umUnknown;
 
 	if (umode < 0)
 	{
@@ -6473,7 +6473,7 @@ void lastscore_add()
 			}
 		}
 
-		if ((current_umode >= 11) && (current_umode <= 13))
+		if ((current_umode >= um2on2on2) && (current_umode <= um4on4on4))
 		{
 			e3 = cvar_string("_k_team3");
 			s3 = get_scores3();
@@ -6514,7 +6514,7 @@ void lastscore_add()
 	cvar_set(va("__k_ls_e2_%d", k_ls), e2);
 	cvar_set(va("__k_ls_t1_%d", k_ls), t1);
 	cvar_set(va("__k_ls_t2_%d", k_ls), t2);
-	if ((current_umode < 10) || (current_umode > 13))
+	if ((current_umode < umBlitz4v4) || (current_umode > um4on4on4))
 	{
 		cvar_set(va("__k_ls_s_%d", k_ls),
 				 va("%3d:%-3d \x8D %-8.8s %13.13s%s", s1, s2, mapname, date, extra));

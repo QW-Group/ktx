@@ -169,6 +169,25 @@ typedef enum
 
 typedef enum
 {
+	umUnknown = 0,
+	um1on1,
+	um2on2,
+	um3on3,
+	um4on4,
+	um10on10,
+	umFfa,
+	umCtf,
+	umHooneyM,
+	umBlitz2v2,
+	umBlitz4v4,
+	um2on2on2,
+	um3on3on3,
+	um4on4on4,
+	umXonX
+} UserModes_t;
+
+typedef enum
+{
 	lsUnknown = 0,
 	lsDuel,
 	lsTeam,
@@ -691,7 +710,7 @@ typedef struct usermode_s
 
 extern usermode um_list[];
 extern int um_cnt;  // count of entrys in 'um_list'
-extern int current_umode; // current UserMode
+extern UserModes_t current_umode; // current UserMode
 
 // for user call this like UserMode( 1 )
 // for server call like UserMode( -1 )
