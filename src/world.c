@@ -1409,10 +1409,10 @@ void FixSayTeamToSpecs()
 			desired_value = (match_in_progress ? 1 : 0);
 			break;
 
+		case 2:
 			desired_value = (match_in_progress ? 0 : 1);
 			break;
 
-		case 3:
 		default:
 			desired_value = 1;
 			break;
@@ -1424,8 +1424,6 @@ void FixSayTeamToSpecs()
 	}
 }
 
-int skip_fixrules = 0;
-
 // This function determines the actual game mode, include game type, and sub-mode,
 // which is part of the serverinfo reply.
 // Format is: mode-submode[-submode]
@@ -1436,59 +1434,59 @@ void SetMode(void)
 	switch (current_umode)
 	{
 		case um1on1:
-			strcat(mode, "1on1");
+			strlcat(mode, "1on1", sizeof(mode));
 			break;
 
 		case um2on2:
-			strcat(mode, "2on2");
+			strlcat(mode, "2on2", sizeof(mode));
 			break;
 
 		case um3on3:
-			strcat(mode, "3on3");
+			strlcat(mode, "3on3", sizeof(mode));
 			break;
 
 		case um4on4:
-			strcat(mode, "4on4");
+			strlcat(mode, "4on4", sizeof(mode));
 			break;
 
 		case um10on10:
-			strcat(mode, "10on10");
+			strlcat(mode, "10on10", sizeof(mode));
 			break;
 
 		case umFfa:
-			strcat(mode, "ffa");
+			strlcat(mode, "ffa", sizeof(mode));
 			break;
 
 		case umCtf:
-			strcat(mode, "ctf");
+			strlcat(mode, "ctf", sizeof(mode));
 			break;
 
 		case umHooneyM:
-			strcat(mode, "1on1-hm");
+			strlcat(mode, "1on1-hm", sizeof(mode));
 			break;
 
 		case umBlitz2v2:
-			strcat(mode, "2on2-hm");
+			strlcat(mode, "2on2-hm", sizeof(mode));
 			break;
 
 		case umBlitz4v4:
-			strcat(mode, "4on4-hm");
+			strlcat(mode, "4on4-hm", sizeof(mode));
 			break;
 
 		case um2on2on2:
-			strcat(mode, "2on2on2");
+			strlcat(mode, "2on2on2", sizeof(mode));
 			break;
 
 		case um3on3on3:
-			strcat(mode, "3on3on3");
+			strlcat(mode, "3on3on3", sizeof(mode));
 			break;
 
 		case um4on4on4:
-			strcat(mode, "4on4on4");
+			strlcat(mode, "4on4on4", sizeof(mode));
 			break;
 
 		case umXonX:
-			strcat(mode, "XonX");
+			strlcat(mode, "XonX", sizeof(mode));
 			break;
 
 		default:
@@ -1497,66 +1495,58 @@ void SetMode(void)
 
 	if (isRACE())
 	{
-		strcat(mode, "-race");
-	}
-
-	if (isRACE())
-	{
-		strcat(mode, "-race");
+		strlcat(mode, "-race", sizeof(mode));
 	}
 
 	if (cvar("k_midair"))
 	{
-		strcat(mode, "-midair");
+		strlcat(mode, "-midair", sizeof(mode));
 	}
 
 	if (cvar("k_instagib"))
 	{
-		strcat(mode, "-instagib");
+		strlcat(mode, "-instagib", sizeof(mode));
 	}
 
 	if (lgc_enabled())
 	{
-		strcat(mode, "-lgc");
+		strlcat(mode, "-lgc", sizeof(mode));
 	}
 
 	if (cvar("k_clan_arena") == 1)
 	{
-		strcat(mode, "-ca");
+		strlcat(mode, "-ca", sizeof(mode));
 	}
 
 	if (cvar("k_clan_arena") == 2)
 	{
-		strcat(mode, "-wo");
+		strlcat(mode, "-wo", sizeof(mode));
 	}
 
 	if (isRA())
 	{
-		strcat(mode, "-ra");
+		strlcat(mode, "-ra", sizeof(mode));
 	}
 
 	if (cvar("k_dmm4_gren_mode"))
 	{
-		strcat(mode, "-gm");
+		strlcat(mode, "-gm", sizeof(mode));
 	}
 
 	if (cvar("k_dmgfrags"))
 	{
-		strcat(mode, "-df");
+		strlcat(mode, "-df", sizeof(mode));
 	}
 
 	if (cvar("k_yawnmode"))
 	{
-		strcat(mode, "-yw");
-	}
-
-	if (cvar("k_rocketarena"))
-	{
-		strcat(mode, "-ra");
+		strlcat(mode, "-yw", sizeof(mode));
 	}
 
 	localcmd("serverinfo mode %s\n", mode);
 }
+
+int skip_fixrules = 0;
 
 // check if server is misconfigured somehow, made some minimum fixage
 void FixRules()
