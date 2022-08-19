@@ -1427,71 +1427,13 @@ void FixSayTeamToSpecs()
 // This function determines the actual game mode, include game type, and sub-mode,
 // which is part of the serverinfo reply.
 // Format is: mode-submode[-submode]
-void SetMode(void)
+void SetMode4ServerInfo(void)
 {
 	char mode[64] = {};
 
-	switch (current_umode)
-	{
-		case um1on1:
-			strlcat(mode, "1on1", sizeof(mode));
-			break;
-
-		case um2on2:
-			strlcat(mode, "2on2", sizeof(mode));
-			break;
-
-		case um3on3:
-			strlcat(mode, "3on3", sizeof(mode));
-			break;
-
-		case um4on4:
-			strlcat(mode, "4on4", sizeof(mode));
-			break;
-
-		case um10on10:
-			strlcat(mode, "10on10", sizeof(mode));
-			break;
-
-		case umFfa:
-			strlcat(mode, "ffa", sizeof(mode));
-			break;
-
-		case umCtf:
-			strlcat(mode, "ctf", sizeof(mode));
-			break;
-
-		case umHooneyM:
-			strlcat(mode, "1on1-hm", sizeof(mode));
-			break;
-
-		case umBlitz2v2:
-			strlcat(mode, "2on2-hm", sizeof(mode));
-			break;
-
-		case umBlitz4v4:
-			strlcat(mode, "4on4-hm", sizeof(mode));
-			break;
-
-		case um2on2on2:
-			strlcat(mode, "2on2on2", sizeof(mode));
-			break;
-
-		case um3on3on3:
-			strlcat(mode, "3on3on3", sizeof(mode));
-			break;
-
-		case um4on4on4:
-			strlcat(mode, "4on4on4", sizeof(mode));
-			break;
-
-		case umXonX:
-			strlcat(mode, "XonX", sizeof(mode));
-			break;
-
-		default:
-			;
-	}
+	// The parameter is (current_umode-1), because the UserModes_t enum has `umUnknown` as first element,
+	// but the um_list[] array doesn't have an 'empty' first row
+	strlcat(mode, (char *)um_name_byidx(current_umode-1), sizeof(mode));
 
 	if (isRACE())
 	{
@@ -1808,7 +1750,7 @@ void FixRules()
 		trap_executecmd();
 	}
 
-	SetMode();
+	SetMode4ServerInfo();
 }
 
 int timelimit, fraglimit, teamplay, deathmatch, framecount, coop, skill;

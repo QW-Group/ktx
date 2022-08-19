@@ -4278,8 +4278,8 @@ usermode um_list[] =
 	{ "ffa", 		"ffa", 					ffa_um_init, 		UM_FFA, 	-1 },
 	{ "ctf", 		"ctf", 					ctf_um_init, 		UM_CTF, 	 0 },
 	{ "hoonymode", 	"HoonyMode", 			_1on1hm_um_init, 	UM_1ON1HM, 	 0 },
-	{ "blitz-2v2", 	"Blitz (2v2)", 			_2on2hm_um_init, 	UM_1ON1HM, 	 0 },
-	{ "blitz-4v4", 	"Blitz (4v4)", 			_4on4hm_um_init, 	UM_1ON1HM, 	 0 },
+	{ "blitz2v2", 	"Blitz (2v2)", 			_2on2hm_um_init, 	UM_1ON1HM, 	 0 },
+	{ "blitz4v4", 	"Blitz (4v4)", 			_4on4hm_um_init, 	UM_1ON1HM, 	 0 },
 	{ "2on2on2", 	"\224 on \224 on \224", _2on2on2_um_init, 	UM_2ON2ON2,	 0 },
 	{ "3on3on3", 	"\225 on \225 on \225", _3on3on3_um_init, 	UM_3ON3ON3,	 0 },
 	{ "4on4on4", 	"\226 on \226 on \226", _4on4on4_um_init, 	UM_4ON4ON4,	 0 },
@@ -4308,6 +4308,19 @@ int um_idx_byname(char *name)
 	}
 
 	return -1; // not found
+}
+
+// Returns the name of a UserMode
+const char *um_name_byidx(UserModes_t umode)
+{
+	if ((umode >= 0) && (umode < um_cnt))
+	{
+		return um_list[umode].name;
+	}
+	else
+	{
+		return NULL;
+	}
 }
 
 extern int skip_fixrules;

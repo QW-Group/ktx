@@ -717,6 +717,7 @@ extern UserModes_t current_umode; // current UserMode
 void UserMode(float umode);
 
 int um_idx_byname(char *name); // return -1 if not found
+const char *um_name_byidx(UserModes_t idx);
 
 // }
 
