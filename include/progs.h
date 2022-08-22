@@ -86,15 +86,17 @@ typedef struct wpType_s
 	int tkills;			// team kills with this weapon
 	int suicides;		// suicides with this weapon
 
-	int ekills;			// killed enemys which contain this weapon in inventory
+	int ekills;			// killed enemies which contain this weapon in inventory
 	int drops;			// number of packs dropped which contain this weapon
-	int tooks;			// took this weapon and does't have this weapon before took (weapon from packs counted too)
+	int tooks;			// took this weapon and doesn't have this weapon before took (weapon from packs counted too)
 	int stooks;			// spawned items taken (backpacks not included), and didn't have weapon beforehand
 	int ttooks;			// total taken, even if you already had this weapon
 	int sttooks;		// spawned items taken (backpacks not included), even if you already had this weapon
 
 	int edamage;		// damage to enemies
 	int tdamage;		// damage to team-mates
+
+	float time;			// total time u have some weapon
 } wpType_t;
 
 typedef enum
@@ -116,7 +118,6 @@ typedef struct itType_s
 {
 	int tooks;	// taken count
 	float time;	// total time u have some item
-
 } itType_t;
 
 // store player statistic here, like taken armors etc...
@@ -192,13 +193,13 @@ typedef struct player_stats_s
 	// instagib stats
 	int i_height;			// Cumulated height  of airgibs
 	int i_maxheight;
-	int i_cggibs;
-	int i_axegibs;
-	int i_stompgibs;
-	int i_multigibs;
+	int i_cggibs;			// Kills with coil gun
+	int i_axegibs;			// Kills with axe
+	int i_stompgibs;		// Kills with stomp
+	int i_multigibs;		//
 	int i_airgibs;			// Number of airgibs
-	int i_maxmultigibs;
-	int i_rings;
+	int i_maxmultigibs;		//
+	int i_rings;			//
 
 	// lgc stats
 	int lgc_undershaft;		// cells fired before hitting target
@@ -217,7 +218,6 @@ typedef enum
 // store player votes here
 typedef struct vote_s
 {
-
 	int brk;
 	int elect;
 	int map;
@@ -959,9 +959,8 @@ typedef struct gedict_s
 	player_stats_t ps;						// store player statistic here, like taken armors etc...
 
 	float control_start_time;				// time when player gained control
-	float q_pickup_time;					// time then u took quad
-	float p_pickup_time;					// time then u took pent
-	float r_pickup_time;					// time then u took ring
+	float it_pickup_time[itMAX];			// total possession time of items
+	float wp_pickup_time[wpMAX];			// total possession time of weapons
 // }
 
 // { mvd demo weapon stats

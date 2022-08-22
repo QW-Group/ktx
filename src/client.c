@@ -1696,10 +1696,10 @@ void ClientConnect()
 ///////////////
 void PutClientInServer(void)
 {
-
 	gedict_t *spot;
 	int items;
 	int tele_flags;
+	int i;
 
 	self->trackent = 0;
 
@@ -1726,7 +1726,14 @@ void PutClientInServer(void)
 	self->lgc_state = lgcUndershaft;
 
 	self->control_start_time = 0;
-	self->q_pickup_time = self->p_pickup_time = self->r_pickup_time = 0;
+	for (i = itNONE; i < itMAX; i++)
+	{
+		self->it_pickup_time[i] = 0;
+	}
+	for (i = wpNONE; i < wpMAX; i++)
+	{
+		self->wp_pickup_time[i] = 0;
+	}
 
 // the spawn falling damage bug workaround
 	self->jump_flag = 0;
@@ -2655,6 +2662,7 @@ void MakeGhost()
 	gedict_t *ghost;
 	float f1 = 1;
 	float f2 = 0;
+	int i;
 
 	if (k_matchLess) // no ghost in matchless mode
 	{
@@ -2683,9 +2691,14 @@ void MakeGhost()
 		k_userid++;
 	}
 
-	adjust_pickup_time(&self->q_pickup_time, &self->ps.itm[itQUAD].time);
-	adjust_pickup_time(&self->p_pickup_time, &self->ps.itm[itPENT].time);
-	adjust_pickup_time(&self->r_pickup_time, &self->ps.itm[itRING].time);
+	for (i = itNONE; i < itMAX; i++)
+	{
+		adjust_pickup_time(&self->it_pickup_time[i], &self->ps.itm[i].time);
+	}
+	for (i = wpNONE; i < wpMAX; i++)
+	{
+		adjust_pickup_time(&self->wp_pickup_time[i], &self->ps.wpn[i].time);
+	}
 
 	if (self->control_start_time)
 	{
@@ -3738,7 +3751,7 @@ void CheckPowerups()
 
 			self->s.v.modelindex = modelindex_player;	// don't use eyes
 
-			adjust_pickup_time(&self->r_pickup_time, &self->ps.itm[itRING].time);
+			adjust_pickup_time(&self->it_pickup_time[itRING], &self->ps.itm[itRING].time);
 
 			ktpro_autotrack_on_powerup_out(self);
 		}
@@ -3783,7 +3796,7 @@ void CheckPowerups()
 			self->invincible_time = 0;
 			self->invincible_finished = 0;
 
-			adjust_pickup_time(&self->p_pickup_time, &self->ps.itm[itPENT].time);
+			adjust_pickup_time(&self->it_pickup_time[itPENT], &self->ps.itm[itPENT].time);
 
 			ktpro_autotrack_on_powerup_out(self);
 		}
@@ -3835,7 +3848,7 @@ void CheckPowerups()
 			self->super_damage_finished = 0;
 			self->super_time = 0;
 
-			adjust_pickup_time(&self->q_pickup_time, &self->ps.itm[itQUAD].time);
+			adjust_pickup_time(&self->it_pickup_time[itQUAD], &self->ps.itm[itQUAD].time);
 
 			ktpro_autotrack_on_powerup_out(self);
 		}
@@ -4456,6 +4469,9 @@ void TookWeaponHandler(gedict_t *p, int new_wp, qbool from_backpack)
 		}
 
 		p->ps.wpn[wp].tooks++;
+		adjust_pickup_time(&p->wp_pickup_time[wp], &p->ps.wpn[wp].time);
+		p->wp_pickup_time[wp] = g_globalvars.time;
+		G_bprint(2, "%s took %d; total time: %f\n", getname(p), wp, p->ps.wpn[wp].time);
 	}
 }
 
@@ -4464,13 +4480,19 @@ void StatsHandler(gedict_t *targ, gedict_t *attacker)
 	int items = targ->s.v.items;
 	weaponName_t wp;
 	char *attackerteam, *targteam;
+	int i;
 
 	attackerteam = getteam(attacker);
 	targteam = getteam(targ);
 
-	adjust_pickup_time(&targ->q_pickup_time, &targ->ps.itm[itQUAD].time);
-	adjust_pickup_time(&targ->p_pickup_time, &targ->ps.itm[itPENT].time);
-	adjust_pickup_time(&targ->r_pickup_time, &targ->ps.itm[itRING].time);
+	for (i = itNONE; i < itMAX; i++)
+	{
+		adjust_pickup_time(&targ->it_pickup_time[i], &targ->ps.itm[i].time);
+	}
+	for (i = wpNONE; i < wpMAX; i++)
+	{
+		adjust_pickup_time(&targ->wp_pickup_time[i], &targ->ps.wpn[i].time);
+	}
 
 	// update spree stats
 	if (strneq(attackerteam, targteam) || !tp_num())
