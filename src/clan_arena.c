@@ -876,8 +876,8 @@ void team_round_summary(int alive_team)
 	char t1status[20];
 	char t2status[20];
 	char tmp[36] = "";
-	char result[100] = "";
-	
+	char result[110] = "";
+
 	sprintf(t1score, "%d", t1_score);
 	sprintf(t2score, "%d", t2_score);
 	sprintf(t1need, "%d", CA_wins_required() - t1_score);
@@ -888,7 +888,7 @@ void team_round_summary(int alive_team)
 	sprintf(result, "%s", "team   wins need status\n");
 	sprintf(tmp, "%s\n", redtext("------ ---- ---- ------------"));
 	strcat(result, tmp);
-	
+
 	sprintf(tmp, "%s ", team1);
 	strcat(result, tmp);
 	for (int i = 0; i < (strlen("team  ") - strlen(team1)); i++)
@@ -900,32 +900,33 @@ void team_round_summary(int alive_team)
 	{
 		strcat(result, " "); // add padding so columns line up
 	}
+
 	sprintf(tmp, "%s ", t1score);
 	strcat(result, tmp);
-
 	for (int i = 0; i < (strlen("need") - strlen(t1need)); i++)
 	{
 		strcat(result, " "); // add padding so columns line up
 	}
+
 	sprintf(tmp, "%s %s\n%s ", t1need, t1status, team2);
 	strcat(result, tmp);
-
 	for (int i = 0; i < (strlen("team  ") - strlen(team2)); i++)
 	{
 		strcat(result, " "); // add padding so columns line up
 	}
-	
+
 	for (int i = 0; i < (strlen("wins") - strlen(t2score)); i++)
 	{
 		strcat(result, " "); // add padding so columns line up
 	}
+
 	sprintf(tmp, "%s ", t2score);
 	strcat(result, tmp);
-
 	for (int i = 0; i < (strlen("need") - strlen(t2need)); i++)
 	{
 		strcat(result, " "); // add padding so columns line up
 	}
+
 	sprintf(tmp, "%s %s\n\n", t2need, t2status);
 	strcat(result, tmp);
 
