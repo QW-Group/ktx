@@ -4471,7 +4471,6 @@ void TookWeaponHandler(gedict_t *p, int new_wp, qbool from_backpack)
 		p->ps.wpn[wp].tooks++;
 		adjust_pickup_time(&p->wp_pickup_time[wp], &p->ps.wpn[wp].time);
 		p->wp_pickup_time[wp] = g_globalvars.time;
-		G_bprint(2, "%s took %d; total time: %f\n", getname(p), wp, p->ps.wpn[wp].time);
 	}
 }
 
