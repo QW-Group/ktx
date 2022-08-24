@@ -403,6 +403,9 @@ spawn_t spawns[] =
 	{ "func_ctf_wall", 					SP_func_ctf_wall },
 	{ "info_player_team1", 				SUB_Null },
 	{ "info_player_team2", 				SUB_Null },
+// k_ctf_based_spawn 2 "within home base" spawns.
+	{ "info_player_team1_deathmatch", 	SUB_Null },
+	{ "info_player_team2_deathmatch", 	SUB_Null },
 //
 // TF -- well, we does not support TF but require it for loading TF map as CTF map.
 //

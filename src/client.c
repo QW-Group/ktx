@@ -1669,7 +1669,9 @@ void ClientConnect()
 
 	// Yawnmode: reset spawn weights at server join (can handle max MAX_SPAWN_WEIGHTS spawn points atm)
 	// Just count the spots
-	totalspots = find_cnt(FOFCLSN, "info_player_deathmatch");
+	totalspots = find_cnt(FOFCLSN, "info_player_deathmatch") +
+		find_cnt(FOFCLSN, "info_player_team1_deathmatch") +
+		find_cnt(FOFCLSN, "info_player_team2_deathmatch");
 
 	// Don't use this spawn model for maps with more than MAX_SPAWN_WEIGHTS spawns (shouldn't even happen)
 	if (totalspots <= MAX_SPAWN_WEIGHTS)
@@ -1792,10 +1794,19 @@ void PutClientInServer(void)
 		// qqshka: I found that it sux and added variable which force players spawn ONLY on the base,
 		// so maps like qwq3wcp9 works fine!
 
-		if (isCTF() && ((match_start_time == g_globalvars.time) || cvar("k_ctf_based_spawn")))
+		if (isCTF() && ((match_start_time == g_globalvars.time) || (cvar("k_ctf_based_spawn") == 1)))
 		{
 			spot = SelectSpawnPoint(
 					streq(getteam(self), "red") ? "info_player_team1" : "info_player_team2");
+		}
+		// Pick between neutral spawn points in the mid of the map and spawn points within home base
+		// to avoid the fish in a barrel problem where flag position is overrun by str/quad/pent and
+		// players are instagibbed over and over again.
+		else if (isCTF() && (cvar("k_ctf_based_spawn") == 2))
+		{
+			spot = SelectSpawnPoint(g_random() <= 0.5 ?
+				"info_player_deathmatch" : streq(getteam(self), "red") ?
+				"info_player_team1_deathmatch" : "info_player_team2_deathmatch");
 		}
 		else if (isRA() && (isWinner(self) || isLoser(self)))
 		{
