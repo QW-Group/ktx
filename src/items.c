@@ -426,10 +426,12 @@ void item_megahealth_rot(void)
  */
 void armor_touch()
 {
-	float type = 0, value = 0;
+	float type = 0;
+	float value = 0;
 	float real_value = 0;
 	int bit = 0;
 	char *playername;
+	itemName_t armorType = itNONE;
 
 	if (ISDEAD(other))
 	{
@@ -466,28 +468,21 @@ void armor_touch()
 
 	if (!strcmp(self->classname, "item_armor1"))
 	{
-		adjust_pickup_time(&other->it_pickup_time[itGA], &other->ps.itm[itGA].time);
-		other->it_pickup_time[itGA] = g_globalvars.time;
-		other->ps.itm[itGA].tooks++;
+		armorType = itGA;
 		type = (k_yawnmode ? 0.4 : 0.3); // Yawnmode: changed armor protection
 		value = 100;
 		bit = IT_ARMOR1;
-
 	}
 	else if (!strcmp(self->classname, "item_armor2"))
 	{
-		adjust_pickup_time(&other->it_pickup_time[itYA], &other->ps.itm[itYA].time);
-		other->it_pickup_time[itYA] = g_globalvars.time;
-		other->ps.itm[itYA].tooks++;
+		armorType = itYA;
 		type = (k_yawnmode ? 0.6 : 0.6); // Yawnmode: changed armor protection
 		value = 150;
 		bit = IT_ARMOR2;
 	}
 	else if (!strcmp(self->classname, "item_armorInv"))
 	{
-		adjust_pickup_time(&other->it_pickup_time[itRA], &other->ps.itm[itRA].time);
-		other->it_pickup_time[itRA] = g_globalvars.time;
-		other->ps.itm[itRA].tooks++;
+		armorType = itRA;
 		type = (k_yawnmode ? 0.8 : 0.8); // Yawnmode: changed armor protection
 		value = 200;
 		bit = IT_ARMOR3;
@@ -506,6 +501,13 @@ void armor_touch()
 	}
 
 	mi_print(other, bit, va("%s got %s", getname(other), self->netname));
+
+	if (armorType != itNONE)
+	{
+		adjust_pickup_time(&other->it_pickup_time[armorType], &other->ps.itm[armorType].time);
+		other->it_pickup_time[armorType] = g_globalvars.time;
+		other->ps.itm[armorType].tooks++;
+	}
 
 	real_value = other->s.v.armorvalue;
 
