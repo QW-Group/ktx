@@ -925,6 +925,7 @@ void FirstFrame()
 	RegisterCvarEx("k_ctf_rune_power_hst", "2.0");
 	RegisterCvar("k_ctf_ga");
 	RegisterCvar("k_ctf_based_spawn"); // spawn players on the base (red/blue)
+	RegisterCvar("k_ctf_hurt_items");
 //}
 	RegisterCvar("k_spec_info");
 	RegisterCvar("k_midair");

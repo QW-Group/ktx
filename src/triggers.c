@@ -932,12 +932,31 @@ void hurt_on()
 	self->s.v.solid = SOLID_TRIGGER;
 	self->s.v.nextthink = -1;
 	setorigin(self, PASSVEC3(self->s.v.origin)); // it matter
+	g_globalvars.force_retouch = 2; // make sure even still objects get hit
+}
+
+void hurt_items()
+{
+	if (cvar("k_ctf_hurt_items"))
+	{
+		if (streq(other->classname, "item_flag_team1") || streq(other->classname, "item_flag_team2"))
+		{
+			// Cause flag to return to spawn position.
+			other->super_time = g_globalvars.time;
+		}
+		else if (streq(other->classname, "rune"))
+		{
+			// Cause rune to respawn.
+			other->s.v.nextthink = g_globalvars.time;
+		}
+	}
 }
 
 void hurt_touch()
 {
 	if (!other->s.v.takedamage)
 	{
+		hurt_items();
 		return;
 	}
 
