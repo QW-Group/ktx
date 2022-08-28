@@ -287,7 +287,7 @@ gedict_t* SelectRuneSpawnPoint()
 {
 	gedict_t *runespawn;
 
-	if (cvar("k_ctf_based_spawn"))
+	if (cvar("k_ctf_based_spawn") == 1)
 	{
 		runespawn = SelectSpawnPoint(g_random() < 0.5 ? "info_player_team1" : "info_player_team2");
 	}
