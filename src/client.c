@@ -3251,7 +3251,7 @@ void Print_Scores()
 		}
 		else
 		{
-			if ((current_umode < 11) || (current_umode > 13))
+			if ((current_umode < um2on2on2) || (current_umode > um4on4on4))
 			{
 				strlcat(buf, last_va = va("  \364:%d  \345:%d  \x90%d\x91", ts, es, ts - es),
 						sizeof(buf));

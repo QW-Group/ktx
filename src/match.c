@@ -703,7 +703,7 @@ void TimerThink()
 
 		if (k_showscores && !isCA())
 		{
-			if ((current_umode < 11) || (current_umode > 13))
+			if ((current_umode < um2on2on2) || (current_umode > um4on4on4))
 			{
 				int sc = get_scores1() - get_scores2();
 
@@ -1048,7 +1048,7 @@ void SM_PrepareShowscores()
 
 	cvar_set("_k_team1", team1);
 	cvar_set("_k_team2", team2);
-	if ((current_umode >= 11) && (current_umode <= 13))
+	if ((current_umode >= um2on2on2) && (current_umode <= um4on4on4))
 	{
 		// let's see if there is a player with a 3rd team
 		while ((p = find_plr(p)))
@@ -1079,7 +1079,7 @@ void SM_PrepareHostname()
 
 	if (k_showscores && !strnull(team1) && !strnull(team2))
 	{
-		if ((current_umode < 11) || (current_umode > 13))
+		if ((current_umode < um2on2on2) || (current_umode > um4on4on4))
 		{
 			cvar_set("hostname", va("%s (%.4s vs. %.4s)\207", cvar_string("hostname"), team1, team2));
 		}
