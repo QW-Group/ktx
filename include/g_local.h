@@ -1215,5 +1215,7 @@ qbool private_game_by_default(void);
 
 // set when match is starting, otherwise a normal spawn
 extern qbool initial_match_spawns;
+// highest number of players in all teams, used to allow (re)connect during match
+extern float maxPlayerCount;
 
 #define AUTOTRACK_POWERUPS_PREDICT_TIME 2

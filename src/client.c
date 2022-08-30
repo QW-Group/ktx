@@ -1261,45 +1261,50 @@ qbool CanConnect()
 {
 	gedict_t *p;
 	char *t;
-	int from, usrid, tmid;
+	int from;
+	int usrid;
+	int tmid;
+	int playerCount = 0;
 
 	if (k_sv_locktime && !VIP(self))
-	{ // kick non vip in this case
+	{
+		// don't allow none vip in this case
 		int seconds = k_sv_locktime - g_globalvars.time;
 
 		G_sprint(self, 2, "%s: %d second%s\n", redtext("server is temporary locked"), seconds,
 					count_s(seconds));
 
-		return false; // _can't_ connect
+		// can't connect
+		return false;
 	}
-
-	// no ghost, team, etc checks in matchLess mode.
-	if (!match_in_progress || k_matchLess || k_bloodfest)
+	else if (!match_in_progress || k_matchLess || k_bloodfest)
 	{
-		// in non bloodfest mode always anonce but do not anonce during bloodfest round.
+		// no checks in matchLess mode, in bloodfest, or if there is no game in progress
+
 		if (!k_bloodfest || !match_in_progress)
 		{
+			// in non bloodfest mode always announce but do not announce during bloodfest round.
 			G_bprint(2, "%s entered the game\n", self->netname);
 		}
 
-		return true; // can connect
+		// can connect
+		return true;
 	}
-
-	// If the game is running already then . . .
-	// guess is player can enter/re-enter the game if server locked or not
-
-	if (cvar("k_lockmode") == 2)
-	{ // kick anyway
+	else if (cvar("k_lockmode") == 2)
+	{
+		// don't allow anyway
 		G_sprint(self, 2, "Match in progress, server locked\n"
 					"Please reconnect as spectator\n");
 
-		return false; // _can't_ connect
+		// can't connect
+		return false;
 	}
-	else if ((cvar("k_lockmode") == 1) || isCA()) // different behavior for team/duel/ffa
+	else if ((cvar("k_lockmode") == 1) || isCA())
 	{
+		// allow players in existing teams, but different behavior for team/duel/ffa/CA
 		if (isDuel() || isFFA())
 		{
-			// kick if no ghost with same name as for self
+			// don't allow if no ghost with same name as for self
 			for (from = 1, p = world; (p = find_plrghst(p, &from));)
 			{
 				if (streq(getname(p), self->netname))
@@ -1314,7 +1319,8 @@ qbool CanConnect()
 							"Please reconnect as spectator\n",
 							isDuel() ? "Duel" : "Match");
 
-				return false; // _can't_ connect
+				// can't connect
+				return false;
 			}
 		}
 		else if (isCA())
@@ -1323,7 +1329,7 @@ qbool CanConnect()
 		}
 		else if ((isTeam() || isCTF()))
 		{
-			// kick if no ghost or player with team as for self
+			// don't allow if no ghost or player with team as for self
 			t = getteam(self);
 
 			for (from = 0, p = world; (p = find_plrghst(p, &from));)
@@ -1340,7 +1346,26 @@ qbool CanConnect()
 							"Set your team before connecting\n"
 							"or reconnect as spectator\n");
 
-				return false; // _can't_ connect
+				// can't connect
+				return false;
+			}
+
+			// only allow a player to (re)connect, if the
+			// maximum number of player per team is not yet reached
+			for (p = world; (p = find_plr_same_team(p, t));)
+			{
+				// count players in the team where we are about to join
+				++playerCount;
+			}
+
+			if (playerCount >= maxPlayerCount)
+			{
+				G_sprint(self, 2, "Match in progress, server locked\n"
+							"Your team has already maximum player count\n"
+							"Reconnect as spectator\n");
+
+				// can't connect
+				return false;
 			}
 		}
 		else
@@ -1349,7 +1374,8 @@ qbool CanConnect()
 			G_sprint(self, 2, "Match in progress, server locked\n"
 						"Please reconnect as spectator\n");
 
-			return false; // _can't_ connect
+			// can't connect
+			return false;
 		}
 	}
 
@@ -1360,7 +1386,8 @@ qbool CanConnect()
 					"Set your team before connecting\n"
 					"or reconnect as spectator\n");
 
-		return false; // _can't_ connect
+		// can't connect
+		return false;
 	}
 
 	// you have to be on read or blue team in CTF mode
@@ -1370,23 +1397,26 @@ qbool CanConnect()
 					"Set your team (red or blue) before connecting\n"
 					"or reconnect as spectator\n");
 
-		return false; // _can't_ connect
+		// can't connect
+		return false;
 	}
 
-	// kick if exclusive
+	// don't allow if exclusive
 	if ((CountPlayers() >= k_attendees) && cvar("k_exclusive"))
 	{
 		G_sprint(self, 2, "Sorry, server is full\n"
 					"Please reconnect as spectator\n");
 
-		return false; // _can't_ connect
+		// can't connect
+		return false;
 	}
 
 	if (match_in_progress != 2) // actually that match_in_progress == 1
 	{
 		G_bprint(2, "%s entered the game\n", self->netname);
 
-		return true; // can connect
+		// can connect
+		return true;
 	}
 
 	for (usrid = 1; usrid < k_userid; usrid++) // search for ghost for this player (localinfo)

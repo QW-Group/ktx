@@ -39,6 +39,7 @@ qbool race_can_cancel_demo(void);
 
 extern int g_matchstarttime;
 qbool initial_match_spawns;
+float maxPlayerCount;
 
 // Return count of players which have state cs_connected or cs_spawned.
 // It is weird because used string comparision so I treat it as slow and idiotic but it return more players than CountPlayers().
@@ -179,16 +180,17 @@ float CountRTeams()
 	return num;
 }
 
-// check count of members in each team i'm guess
+// count the members in each team and store the max in maxPlayerCount
 // and return 0 if at least one team has less members than 'memcnt'
-// else return 1 (even we have more mebers than memcnt, dunno is this bug <- FIXME)
-
+// else return 1 (even we have more members than memcnt, dunno is this bug <- FIXME)
 float CheckMembers(float memcnt)
 {
 	gedict_t *p, *p2;
 	float f1;
+	float retVal = 1;
 	char *s = "";
 
+	maxPlayerCount = 0;
 	for (p = world; (p = find_plr(p));)
 	{
 		p->k_flag = 0;
@@ -216,13 +218,14 @@ float CheckMembers(float memcnt)
 			}
 		}
 
+		maxPlayerCount = max(f1, maxPlayerCount);
 		if (f1 < memcnt)
 		{
-			return 0;
+			retVal = 0;
 		}
 	}
 
-	return 1;
+	return retVal;
 }
 
 extern demo_marker_t demo_markers[];
@@ -1647,7 +1650,8 @@ qbool isCanStart(gedict_t *s, qbool forceMembersWarn)
 	int k_lockmax = (isCA() || isRACE()) ? 2 : cvar("k_lockmax");
 	int k_membercount = cvar("k_membercount");
 	int i = CountRTeams();
-	int sub, nready;
+	int sub;
+	int nready;
 	char *txt = "";
 	gedict_t *p;
 
