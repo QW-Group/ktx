@@ -1430,14 +1430,14 @@ void FixSayTeamToSpecs()
 void SetMode4ServerInfo(void)
 {
 	char mode[64] = {};
-	char *strCurrentUmode;
+	const char *strCurrentUmode;
 
 	// The parameter is (current_umode-1), because the UserModes_t enum has `umUnknown` as first element,
 	// but the um_list[] array doesn't have an 'empty' first row
 	strCurrentUmode = um_name_byidx(current_umode-1);
 	if (strCurrentUmode != NULL)
 	{
-		strlcat(mode, strCurrentUmode, sizeof(mode));
+		strlcat(mode, (char *)strCurrentUmode, sizeof(mode));
 
 		if (isRACE())
 		{
