@@ -39,7 +39,7 @@ qbool race_can_cancel_demo(void);
 
 extern int g_matchstarttime;
 qbool initial_match_spawns;
-float maxPlayerCount;
+int maxPlayerCount;
 
 // Return count of players which have state cs_connected or cs_spawned.
 // It is weird because used string comparision so I treat it as slow and idiotic but it return more players than CountPlayers().
@@ -183,11 +183,11 @@ float CountRTeams()
 // count the members in each team and store the max in maxPlayerCount
 // and return 0 if at least one team has less members than 'memcnt'
 // else return 1 (even we have more members than memcnt, dunno is this bug <- FIXME)
-float CheckMembers(float memcnt)
+int CheckMembers(float memcnt)
 {
 	gedict_t *p, *p2;
 	float f1;
-	float retVal = 1;
+	int retVal = 1;
 	char *s = "";
 
 	maxPlayerCount = 0;
