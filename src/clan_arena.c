@@ -404,8 +404,7 @@ void enable_player_tracking(gedict_t *e, int follow)
 		}
 
 		G_sprint(e, 2, "tracking %s\n", redtext("disabled"));
-		sprintf(e->cptext, "%s", "");
-		G_centerprint(e, e->cptext);
+		G_centerprint(e, "%s", "");
 
 		e->tracking_enabled = 0;
 		SetVector(e->s.v.velocity, 0, 0, 0);
@@ -1156,17 +1155,13 @@ void show_tracking_info(gedict_t *p)
 	{
 		if (p->ca_ready && p->round_deaths <= max_respawns && !ca_round_pause)
 		{
-			sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n%d\n\n\n seconds to respawn\n", 
-								redtext(p->track_target->netname), (int)ceil(p->seconds_to_respawn));
-
-			G_centerprint(p, p->cptext);
+			G_centerprint(p, "\n\n\n\n\n\n%s\n\n\n%d\n\n\n seconds to respawn\n",
+				redtext(p->track_target->netname), (int)ceil(p->seconds_to_respawn));
 		}
 		else
 		{
-			sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n\n\n\n\n", 
-								redtext(p->track_target->netname));
-
-			G_centerprint(p, p->cptext);
+			G_centerprint(p, "\n\n\n\n\n\n%s\n\n\n\n\n\n\n",
+				redtext(p->track_target->netname));
 		}
 	}
 }
@@ -1330,8 +1325,7 @@ void CA_Frame(void)
 				if (p->seconds_to_respawn <= 0)
 				{
 					p->spawn_delay = 0;
-					sprintf(p->cptext, "%s\n", "FIGHT!");
-					G_centerprint(p, p->cptext);
+					G_centerprint(p, "%s\n", "FIGHT!");
 					k_respawn(p, true);
 
 					// Don't take damage while respawning
@@ -1344,31 +1338,25 @@ void CA_Frame(void)
 				{
 					if (!p->tracking_enabled)
 					{
-						sprintf(p->cptext, "\n\n\n\n\n\n\n\n\n%d\n\n\n seconds to respawn\n", (int)ceil(p->seconds_to_respawn));
-						G_centerprint(p, p->cptext);
+						G_centerprint(p, "\n\n\n\n\n\n\n\n\n%d\n\n\n seconds to respawn\n", (int)ceil(p->seconds_to_respawn));
 					}
 				}
 			}
 			else if (p->in_play && p->alive_time > 2 && last_alive)
 			{
 				sprintf(str_last_alive, "%d", last_alive);
-				sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n", 
-								redtext("stay alive!"), last_alive == 999 ? " " : redtext(str_last_alive));
-
-				G_centerprint(p, p->cptext);
+				G_centerprint(p, "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n",
+					redtext("stay alive!"), last_alive == 999 ? " " : redtext(str_last_alive));
 			}
 			else if (p->in_play && p->alive_time > 2 && e_last_alive)
 			{
 				sprintf(str_e_last_alive, "%d", e_last_alive);
-				sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n", 
-								"one enemy left", e_last_alive == 999 ? " " : str_e_last_alive);
-
-				G_centerprint(p, p->cptext);
+				G_centerprint(p, "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n",
+					"one enemy left", e_last_alive == 999 ? " " : str_e_last_alive);
 			}
 			else if (p->in_play && p->alive_time > 2)
 			{
-				sprintf(p->cptext, " ");
-				G_centerprint(p, p->cptext);
+				G_centerprint(p, " ");
 			}
 		}
 	}
