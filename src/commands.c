@@ -549,7 +549,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_FP_SPEC			"change floodprot level for specs"
 #define CD_DLIST			"show demo list"
 #define CD_DINFO			"show demo info"
-#define CD_LOCK				"temprorary lock server"
+#define CD_LOCK				"temporary lock server"
 #define CD_SWAPALL			"swap teams for ctf"
 // { RA
 #define CD_RA_BREAK			"toggle RA line status"
