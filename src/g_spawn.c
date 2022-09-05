@@ -400,6 +400,10 @@ spawn_t spawns[] =
 // ctf ents
 	{ "item_flag_team1", 				SP_item_flag_team1 },
 	{ "item_flag_team2", 				SP_item_flag_team2 },
+	{ "item_rune_res", 					SUB_Null },
+	{ "item_rune_str", 					SUB_Null },
+	{ "item_rune_hst", 					SUB_Null },
+	{ "item_rune_rgn", 					SUB_Null },
 	{ "func_ctf_wall", 					SP_func_ctf_wall },
 	{ "info_player_team1", 				SUB_Null },
 	{ "info_player_team2", 				SUB_Null },
