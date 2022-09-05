@@ -317,14 +317,29 @@ void SpawnRunes(qbool yes)
 
 	oself = self;
 
-	self = SelectRuneSpawnPoint();
-	DoDropRune( CTF_RUNE_RES, true);
-	self = SelectRuneSpawnPoint();
-	DoDropRune( CTF_RUNE_STR, true);
-	self = SelectRuneSpawnPoint();
-	DoDropRune( CTF_RUNE_HST, true);
-	self = SelectRuneSpawnPoint();
-	DoDropRune( CTF_RUNE_RGN, true);
+	if (cvar("k_ctf_rune_power_res") > 0)
+	{
+		self = SelectRuneSpawnPoint();
+		DoDropRune( CTF_RUNE_RES, true);
+	}
+
+	if (cvar("k_ctf_rune_power_str") > 0)
+	{
+		self = SelectRuneSpawnPoint();
+		DoDropRune( CTF_RUNE_STR, true);
+	}
+
+	if (cvar("k_ctf_rune_power_hst") > 0)
+	{
+		self = SelectRuneSpawnPoint();
+		DoDropRune( CTF_RUNE_HST, true);
+	}
+
+	if (cvar("k_ctf_rune_power_rgn") > 0)
+	{
+		self = SelectRuneSpawnPoint();
+		DoDropRune( CTF_RUNE_RGN, true);
+	}
 
 	self = oself;
 }
