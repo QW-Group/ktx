@@ -75,15 +75,15 @@
 
 #define MOD_NAME				("KTX")
 #define MOD_FULLNAME			("KTX: Kombat Teams eXtreme")
-#define MOD_VERSION				("1.41-dev")
+#define MOD_VERSION				("1.41")
 #define MOD_BUILD_DATE			(__DATE__ ", " __TIME__)
 #define MOD_SERVERINFO_MOD_KEY	("ktxver")
 #define MOD_URL					("https://github.com/QW-Group/ktx")
 #define GIT_COMMIT				("")
 
 // keep lines to 38 chars max
-#define MOD_RELEASE_QUOTE		("This KTX version was released during\nthe COVID-19 pandemic, historic time\nof worldwide confinement. Our thoughts\ngo out to all the victims of the virus\nand to their families and loved ones.")
-#define MOD_RELEASE_HASHTAGS	("#COVID19 #StayHomeStaySafe #PlaySomeQW")
+//#define MOD_RELEASE_QUOTE		("This KTX version was released during\nthe COVID-19 pandemic, historic time\nof worldwide confinement. Our thoughts\ngo out to all the victims of the virus\nand to their families and loved ones.")
+//#define MOD_RELEASE_HASHTAGS	("#COVID19 #StayHomeStaySafe #PlaySomeQW")
 
 // qqshka - hmm, seems in C this is macros
 #undef max

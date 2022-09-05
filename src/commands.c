@@ -1658,7 +1658,7 @@ void ShowVersion()
 	G_sprint(self, 2, "%s....: %28s\n", redtext("Date"), dig3s("%s", cvar_string("qwm_builddate")));
 	G_sprint(self, 2, "%s.: %28s\n", redtext("Webpage"), cvar_string("qwm_homepage"));
 
-	G_sprint(self, 2, "\n%s\n\n%s\n", MOD_RELEASE_QUOTE, redtext(MOD_RELEASE_HASHTAGS));
+//	G_sprint(self, 2, "\n%s\n\n%s\n", MOD_RELEASE_QUOTE, redtext(MOD_RELEASE_HASHTAGS));
 
 	if ((int)cvar("sv_specprint") & SPECPRINT_SPRINT)
 	{
