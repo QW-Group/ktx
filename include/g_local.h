@@ -275,7 +275,7 @@ void G_sprint_flags(gedict_t *ed, int level, int flags, const char *fmt, ...)  P
 void G_bprint(int level, const char *fmt, ...)  PRINTF_FUNC(2);
 void G_bprint_flags(int level, int flags, const char *fmt, ...) PRINTF_FUNC(3);
 void G_centerprint(gedict_t *ed, const char *fmt, ...) PRINTF_FUNC(2);
-/* centerprint too all clients */
+/* centerprint to all clients */
 void G_cp2all(const char *fmt, ...) PRINTF_FUNC(1);
 
 void G_cprint(const char *fmt, ...) PRINTF_FUNC(1);
