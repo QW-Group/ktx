@@ -405,7 +405,7 @@ void enable_player_tracking(gedict_t *e, int follow)
 
 		G_sprint(e, 2, "tracking %s\n", redtext("disabled"));
 		sprintf(e->cptext, "%s", "");
-		G_centerprint(e, e->cptext);
+		G_centerprint(e, "%s", e->cptext);
 
 		e->tracking_enabled = 0;
 		SetVector(e->s.v.velocity, 0, 0, 0);
@@ -1159,14 +1159,14 @@ void show_tracking_info(gedict_t *p)
 			sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n%d\n\n\n seconds to respawn\n", 
 								redtext(p->track_target->netname), (int)ceil(p->seconds_to_respawn));
 
-			G_centerprint(p, p->cptext);
+			G_centerprint(p, "%s", p->cptext);
 		}
 		else
 		{
 			sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n\n\n\n\n", 
 								redtext(p->track_target->netname));
 
-			G_centerprint(p, p->cptext);
+			G_centerprint(p, "%s", p->cptext);
 		}
 	}
 }
@@ -1331,7 +1331,7 @@ void CA_Frame(void)
 				{
 					p->spawn_delay = 0;
 					sprintf(p->cptext, "%s\n", "FIGHT!");
-					G_centerprint(p, p->cptext);
+					G_centerprint(p, "%s", p->cptext);
 					k_respawn(p, true);
 
 					// Don't take damage while respawning
@@ -1345,7 +1345,7 @@ void CA_Frame(void)
 					if (!p->tracking_enabled)
 					{
 						sprintf(p->cptext, "\n\n\n\n\n\n\n\n\n%d\n\n\n seconds to respawn\n", (int)ceil(p->seconds_to_respawn));
-						G_centerprint(p, p->cptext);
+						G_centerprint(p, "%s", p->cptext);
 					}
 				}
 			}
@@ -1355,7 +1355,7 @@ void CA_Frame(void)
 				sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n", 
 								redtext("stay alive!"), last_alive == 999 ? " " : redtext(str_last_alive));
 
-				G_centerprint(p, p->cptext);
+				G_centerprint(p, "%s", p->cptext);
 			}
 			else if (p->in_play && p->alive_time > 2 && e_last_alive)
 			{
@@ -1363,12 +1363,12 @@ void CA_Frame(void)
 				sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n", 
 								"one enemy left", e_last_alive == 999 ? " " : str_e_last_alive);
 
-				G_centerprint(p, p->cptext);
+				G_centerprint(p, "%s", p->cptext);
 			}
 			else if (p->in_play && p->alive_time > 2)
 			{
 				sprintf(p->cptext, " ");
-				G_centerprint(p, p->cptext);
+				G_centerprint(p, "%s", p->cptext);
 			}
 		}
 	}
