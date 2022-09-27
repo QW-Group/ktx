@@ -2245,7 +2245,7 @@ static void TopStats(void)
 		}
 	}
 
-	if (maxfriend != -1)
+	if (maxfriend > 0)
 	{
 		from = f1 = 0;
 		p = find_plrghst(world, &from);
@@ -2270,7 +2270,7 @@ static void TopStats(void)
 		{
 			if (p->efficiency == maxeffi)
 			{
-				G_bprint(2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("Efficiency")),
+				G_bprint(2, "   %-13s: %s%s (%d%%)\n", (f1 ? "" : redtext("Efficiency")),
 							(isghost(p) ? "\203" : ""), getname(p), (int)maxeffi);
 				f1 = 1;
 			}
@@ -2347,7 +2347,7 @@ static void TopStats(void)
 		}
 	}
 
-	if (maxspawnfrags != -1)
+	if (maxspawnfrags > 0)
 	{
 		from = f1 = 0;
 		p = find_plrghst(world, &from);
