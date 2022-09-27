@@ -14,6 +14,7 @@ static void OnePlayerLGCStats(gedict_t *p);
 static void OnePlayerKillStats(gedict_t *p, int tp);
 static void OnePlayerItemStats(gedict_t *p, int tp);
 static void OnePlayerWeaponEffiStats(gedict_t *p);
+static void OnePlayerWeaponDmgStats(gedict_t *p);
 static void OnePlayerWeaponTakenStats(gedict_t *p);
 static void OnePlayerWeaponDroppedStats(gedict_t *p);
 static void OnePlayerWeaponKillStats(gedict_t *p);
@@ -32,6 +33,7 @@ static void PlayerLGCStats(void);
 static void PlayersKillStats(void);
 static void PlayersItemStats(void);
 static void PlayersWeaponEffiStats(void);
+static void PlayersWeaponDmgStats(void);
 static void PlayersWeaponTakenStats(void);
 static void PlayersWeaponDroppedStats(void);
 static void PlayersWeaponKillStats(void);
@@ -360,6 +362,7 @@ void MatchEndStats(void)
 		PlayersKillStats();
 		PlayersItemStats();
 		PlayersWeaponEffiStats();
+		PlayersWeaponDmgStats();
 		PlayersWeaponTakenStats();
 		PlayersWeaponDroppedStats();
 		PlayersWeaponKillStats();
@@ -675,6 +678,20 @@ static void OnePlayerWeaponEffiStats(gedict_t *p)
 			(a_ng ? ((e_ng >= 100) ? va("%.0f%%", e_ng) : va("%.1f%%", e_ng)) : "-"),
 			(a_ssg ? ((e_ssg >= 100) ? va("%.0f%%", e_ssg) : va("%.1f%%", e_ssg)) : "-"),
 			(a_sg ? ((e_sg >= 100) ? va("%.0f%%", e_sg) : va("%.1f%%", e_sg)) : "-"));
+}
+
+static void OnePlayerWeaponDmgStats(gedict_t *p)
+{
+	G_bprint(2,
+			"%s%-20s|%5d|%5d|%5d|%5d|%5d|%5d|%5d|\n",
+			(isghost(p) ? "\203" : ""), getname(p),
+			p->ps.wpn[wpLG].edamage,
+			p->ps.wpn[wpRL].edamage,
+			p->ps.wpn[wpGL].edamage,
+			p->ps.wpn[wpSNG].edamage,
+			p->ps.wpn[wpNG].edamage,
+			p->ps.wpn[wpSSG].edamage,
+			p->ps.wpn[wpSG].edamage);
 }
 
 static void OnePlayerWeaponTakenStats(gedict_t *p)
@@ -1499,6 +1516,63 @@ static void PlayersWeaponEffiStats(void)
 					{
 						p2->ready = 1; // set mark
 						OnePlayerWeaponEffiStats(p2);
+					}
+				}
+
+				p2 = find_plrghst(p2, &from2);
+			}
+		}
+
+		p = find_plrghst(p, &from1);
+	}
+}
+
+static void PlayersWeaponDmgStats(void)
+{
+	gedict_t *p;
+	gedict_t *p2;
+	char *tmp;
+	char *tmp2;
+	int from1;
+	int from2;
+
+	from1 = 0;
+	p = find_plrghst(world, &from1);
+	while (p)
+	{
+		p->ready = 0; // clear mark
+		p = find_plrghst(p, &from1);
+	}
+
+	G_bprint(
+			2, "\n%s       |%s|%s|%s|%s|%s|%s|%s|\n"
+			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+			"\237\n",
+			redtext("Weapon Damage"), redtext("   LG"), redtext("   RL"), redtext("   GL"),
+			redtext("  SNG"), redtext("   NG"), redtext("  SSG"), redtext("   SG"));
+
+	from1 = 0;
+	p = find_plrghst(world, &from1);
+	while (p)
+	{
+		if (!p->ready)
+		{
+			from2 = 0;
+			p2 = find_plrghst(world, &from2);
+			while (p2)
+			{
+				if (!p2->ready)
+				{
+					// sort by team
+					tmp = getteam(p);
+					tmp2 = getteam(p2);
+
+					if (streq(tmp, tmp2))
+					{
+						p2->ready = 1; // set mark
+						OnePlayerWeaponDmgStats(p2);
 					}
 				}
 
