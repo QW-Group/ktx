@@ -2296,7 +2296,7 @@ static void TopStats(void)
 		}
 	}
 
-	if (maxspree_q != -1)
+	if (maxspree_q > 0)
 	{
 		from = f1 = 0;
 		p = find_plrghst(world, &from);
