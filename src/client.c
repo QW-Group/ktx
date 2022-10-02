@@ -1261,45 +1261,50 @@ qbool CanConnect()
 {
 	gedict_t *p;
 	char *t;
-	int from, usrid, tmid;
+	int from;
+	int usrid;
+	int tmid;
+	int playerCount = 0;
 
 	if (k_sv_locktime && !VIP(self))
-	{ // kick non vip in this case
+	{
+		// don't allow none vip in this case
 		int seconds = k_sv_locktime - g_globalvars.time;
 
 		G_sprint(self, 2, "%s: %d second%s\n", redtext("server is temporary locked"), seconds,
 					count_s(seconds));
 
-		return false; // _can't_ connect
+		// can't connect
+		return false;
 	}
-
-	// no ghost, team, etc checks in matchLess mode.
-	if (!match_in_progress || k_matchLess || k_bloodfest)
+	else if (!match_in_progress || k_matchLess || k_bloodfest)
 	{
-		// in non bloodfest mode always anonce but do not anonce during bloodfest round.
+		// no checks in matchLess mode, in bloodfest, or if there is no game in progress
+
 		if (!k_bloodfest || !match_in_progress)
 		{
+			// in non bloodfest mode always announce but do not announce during bloodfest round.
 			G_bprint(2, "%s entered the game\n", self->netname);
 		}
 
-		return true; // can connect
+		// can connect
+		return true;
 	}
-
-	// If the game is running already then . . .
-	// guess is player can enter/re-enter the game if server locked or not
-
-	if (cvar("k_lockmode") == 2)
-	{ // kick anyway
+	else if (cvar("k_lockmode") == 2)
+	{
+		// don't allow anyway
 		G_sprint(self, 2, "Match in progress, server locked\n"
 					"Please reconnect as spectator\n");
 
-		return false; // _can't_ connect
+		// can't connect
+		return false;
 	}
-	else if ((cvar("k_lockmode") == 1) || isCA()) // different behavior for team/duel/ffa
+	else if ((cvar("k_lockmode") == 1) || isCA())
 	{
+		// allow players in existing teams, but different behavior for team/duel/ffa/CA
 		if (isDuel() || isFFA())
 		{
-			// kick if no ghost with same name as for self
+			// don't allow if no ghost with same name as for self
 			for (from = 1, p = world; (p = find_plrghst(p, &from));)
 			{
 				if (streq(getname(p), self->netname))
@@ -1314,7 +1319,8 @@ qbool CanConnect()
 							"Please reconnect as spectator\n",
 							isDuel() ? "Duel" : "Match");
 
-				return false; // _can't_ connect
+				// can't connect
+				return false;
 			}
 		}
 		else if (isCA())
@@ -1323,7 +1329,7 @@ qbool CanConnect()
 		}
 		else if ((isTeam() || isCTF()))
 		{
-			// kick if no ghost or player with team as for self
+			// don't allow if no ghost or player with team as for self
 			t = getteam(self);
 
 			for (from = 0, p = world; (p = find_plrghst(p, &from));)
@@ -1340,7 +1346,26 @@ qbool CanConnect()
 							"Set your team before connecting\n"
 							"or reconnect as spectator\n");
 
-				return false; // _can't_ connect
+				// can't connect
+				return false;
+			}
+
+			// only allow a player to (re)connect, if the
+			// maximum number of player per team is not yet reached
+			for (p = world; (p = find_plr_same_team(p, t));)
+			{
+				// count players in the team where we are about to join
+				++playerCount;
+			}
+
+			if (playerCount >= maxPlayerCount)
+			{
+				G_sprint(self, 2, "Match in progress, server locked\n"
+							"Your team has already maximum player count\n"
+							"Reconnect as spectator\n");
+
+				// can't connect
+				return false;
 			}
 		}
 		else
@@ -1349,7 +1374,8 @@ qbool CanConnect()
 			G_sprint(self, 2, "Match in progress, server locked\n"
 						"Please reconnect as spectator\n");
 
-			return false; // _can't_ connect
+			// can't connect
+			return false;
 		}
 	}
 
@@ -1360,7 +1386,8 @@ qbool CanConnect()
 					"Set your team before connecting\n"
 					"or reconnect as spectator\n");
 
-		return false; // _can't_ connect
+		// can't connect
+		return false;
 	}
 
 	// you have to be on read or blue team in CTF mode
@@ -1370,23 +1397,26 @@ qbool CanConnect()
 					"Set your team (red or blue) before connecting\n"
 					"or reconnect as spectator\n");
 
-		return false; // _can't_ connect
+		// can't connect
+		return false;
 	}
 
-	// kick if exclusive
+	// don't allow if exclusive
 	if ((CountPlayers() >= k_attendees) && cvar("k_exclusive"))
 	{
 		G_sprint(self, 2, "Sorry, server is full\n"
 					"Please reconnect as spectator\n");
 
-		return false; // _can't_ connect
+		// can't connect
+		return false;
 	}
 
 	if (match_in_progress != 2) // actually that match_in_progress == 1
 	{
 		G_bprint(2, "%s entered the game\n", self->netname);
 
-		return true; // can connect
+		// can connect
+		return true;
 	}
 
 	for (usrid = 1; usrid < k_userid; usrid++) // search for ghost for this player (localinfo)
@@ -1669,7 +1699,9 @@ void ClientConnect()
 
 	// Yawnmode: reset spawn weights at server join (can handle max MAX_SPAWN_WEIGHTS spawn points atm)
 	// Just count the spots
-	totalspots = find_cnt(FOFCLSN, "info_player_deathmatch");
+	totalspots = find_cnt(FOFCLSN, "info_player_deathmatch") +
+		find_cnt(FOFCLSN, "info_player_team1_deathmatch") +
+		find_cnt(FOFCLSN, "info_player_team2_deathmatch");
 
 	// Don't use this spawn model for maps with more than MAX_SPAWN_WEIGHTS spawns (shouldn't even happen)
 	if (totalspots <= MAX_SPAWN_WEIGHTS)
@@ -1696,10 +1728,10 @@ void ClientConnect()
 ///////////////
 void PutClientInServer(void)
 {
-
 	gedict_t *spot;
 	int items;
 	int tele_flags;
+	int i;
 
 	self->trackent = 0;
 
@@ -1726,7 +1758,14 @@ void PutClientInServer(void)
 	self->lgc_state = lgcUndershaft;
 
 	self->control_start_time = 0;
-	self->q_pickup_time = self->p_pickup_time = self->r_pickup_time = 0;
+	for (i = itNONE; i < itMAX; i++)
+	{
+		self->it_pickup_time[i] = 0;
+	}
+	for (i = wpNONE; i < wpMAX; i++)
+	{
+		self->wp_pickup_time[i] = 0;
+	}
 
 // the spawn falling damage bug workaround
 	self->jump_flag = 0;
@@ -1785,10 +1824,19 @@ void PutClientInServer(void)
 		// qqshka: I found that it sux and added variable which force players spawn ONLY on the base,
 		// so maps like qwq3wcp9 works fine!
 
-		if (isCTF() && ((match_start_time == g_globalvars.time) || cvar("k_ctf_based_spawn")))
+		if (isCTF() && ((match_start_time == g_globalvars.time) || (cvar("k_ctf_based_spawn") == 1)))
 		{
 			spot = SelectSpawnPoint(
 					streq(getteam(self), "red") ? "info_player_team1" : "info_player_team2");
+		}
+		// Pick between neutral spawn points in the mid of the map and spawn points within home base
+		// to avoid the fish in a barrel problem where flag position is overrun by str/quad/pent and
+		// players are instagibbed over and over again.
+		else if (isCTF() && (cvar("k_ctf_based_spawn") == 2))
+		{
+			spot = SelectSpawnPoint(g_random() <= 0.5 ?
+				"info_player_deathmatch" : streq(getteam(self), "red") ?
+				"info_player_team1_deathmatch" : "info_player_team2_deathmatch");
 		}
 		else if (isRA() && (isWinner(self) || isLoser(self)))
 		{
@@ -2655,6 +2703,7 @@ void MakeGhost()
 	gedict_t *ghost;
 	float f1 = 1;
 	float f2 = 0;
+	int i;
 
 	if (k_matchLess) // no ghost in matchless mode
 	{
@@ -2683,9 +2732,14 @@ void MakeGhost()
 		k_userid++;
 	}
 
-	adjust_pickup_time(&self->q_pickup_time, &self->ps.itm[itQUAD].time);
-	adjust_pickup_time(&self->p_pickup_time, &self->ps.itm[itPENT].time);
-	adjust_pickup_time(&self->r_pickup_time, &self->ps.itm[itRING].time);
+	for (i = itNONE; i < itMAX; i++)
+	{
+		adjust_pickup_time(&self->it_pickup_time[i], &self->ps.itm[i].time);
+	}
+	for (i = wpNONE; i < wpMAX; i++)
+	{
+		adjust_pickup_time(&self->wp_pickup_time[i], &self->ps.wpn[i].time);
+	}
 
 	if (self->control_start_time)
 	{
@@ -3227,7 +3281,7 @@ void Print_Scores()
 		}
 		else
 		{
-			if ((current_umode < 11) || (current_umode > 13))
+			if ((current_umode < um2on2on2) || (current_umode > um4on4on4))
 			{
 				strlcat(buf, last_va = va("  \364:%d  \345:%d  \x90%d\x91", ts, es, ts - es),
 						sizeof(buf));
@@ -3738,7 +3792,7 @@ void CheckPowerups()
 
 			self->s.v.modelindex = modelindex_player;	// don't use eyes
 
-			adjust_pickup_time(&self->r_pickup_time, &self->ps.itm[itRING].time);
+			adjust_pickup_time(&self->it_pickup_time[itRING], &self->ps.itm[itRING].time);
 
 			ktpro_autotrack_on_powerup_out(self);
 		}
@@ -3783,7 +3837,7 @@ void CheckPowerups()
 			self->invincible_time = 0;
 			self->invincible_finished = 0;
 
-			adjust_pickup_time(&self->p_pickup_time, &self->ps.itm[itPENT].time);
+			adjust_pickup_time(&self->it_pickup_time[itPENT], &self->ps.itm[itPENT].time);
 
 			ktpro_autotrack_on_powerup_out(self);
 		}
@@ -3835,7 +3889,7 @@ void CheckPowerups()
 			self->super_damage_finished = 0;
 			self->super_time = 0;
 
-			adjust_pickup_time(&self->q_pickup_time, &self->ps.itm[itQUAD].time);
+			adjust_pickup_time(&self->it_pickup_time[itQUAD], &self->ps.itm[itQUAD].time);
 
 			ktpro_autotrack_on_powerup_out(self);
 		}
@@ -4456,6 +4510,8 @@ void TookWeaponHandler(gedict_t *p, int new_wp, qbool from_backpack)
 		}
 
 		p->ps.wpn[wp].tooks++;
+		adjust_pickup_time(&p->wp_pickup_time[wp], &p->ps.wpn[wp].time);
+		p->wp_pickup_time[wp] = g_globalvars.time;
 	}
 }
 
@@ -4464,13 +4520,19 @@ void StatsHandler(gedict_t *targ, gedict_t *attacker)
 	int items = targ->s.v.items;
 	weaponName_t wp;
 	char *attackerteam, *targteam;
+	int i;
 
 	attackerteam = getteam(attacker);
 	targteam = getteam(targ);
 
-	adjust_pickup_time(&targ->q_pickup_time, &targ->ps.itm[itQUAD].time);
-	adjust_pickup_time(&targ->p_pickup_time, &targ->ps.itm[itPENT].time);
-	adjust_pickup_time(&targ->r_pickup_time, &targ->ps.itm[itRING].time);
+	for (i = itNONE; i < itMAX; i++)
+	{
+		adjust_pickup_time(&targ->it_pickup_time[i], &targ->ps.itm[i].time);
+	}
+	for (i = wpNONE; i < wpMAX; i++)
+	{
+		adjust_pickup_time(&targ->wp_pickup_time[i], &targ->ps.wpn[i].time);
+	}
 
 	// update spree stats
 	if (strneq(attackerteam, targteam) || !tp_num())

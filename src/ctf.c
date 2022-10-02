@@ -920,7 +920,7 @@ void CTF_Obituary(gedict_t *targ, gedict_t *attacker)
 		attacker->s.v.frags += 2;
 		attacker->ps.ctf_points += 2;
 		// Yes, aggressive is spelled wrong.. but dont want to fix now and break stat parsers
-		G_bprint(2, "%s defends %s's flag carrier against an agressive enemy\n", attacker->netname,
+		G_bprint(2, "%s defends %s's flag carrier against an aggressive enemy\n", attacker->netname,
 					streq(getteam(attacker), "red") ? redtext("RED") : redtext("BLUE"));
 	}
 

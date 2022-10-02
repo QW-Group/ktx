@@ -12,12 +12,40 @@ gedict_t* SelectRuneSpawnPoint();
 
 void DoDropRune(int rune, qbool s)
 {
-	gedict_t *item;
+	gedict_t *item, *pos = NULL;
+	float movetype = MOVETYPE_NONE;
 
 	cl_refresh_plus_scores(self);
 
+	if (s)
+	{
+		if (rune & CTF_RUNE_RES)
+		{
+			pos = ez_find(world, "item_rune_res");
+		}
+		else if (rune & CTF_RUNE_STR)
+		{
+			pos = ez_find(world, "item_rune_str");
+		}
+		else if (rune & CTF_RUNE_HST)
+		{
+			pos = ez_find(world, "item_rune_hst");
+		}
+		else if (rune & CTF_RUNE_RGN)
+		{
+			pos = ez_find(world, "item_rune_rgn");
+		}
+	}
+
+	// No dedicated rune position found, just toss on self
+	if (pos == NULL)
+	{
+		pos = self;
+		movetype = MOVETYPE_TOSS;
+	}
+
 	item = spawn();
-	setorigin(item, self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] - 24);
+	setorigin(item, pos->s.v.origin[0], pos->s.v.origin[1], pos->s.v.origin[2] - 24);
 	item->classname = "rune";
 	item->ctf_flag = rune;
 	item->s.v.velocity[0] = i_rnd(-100, 100);
@@ -25,7 +53,7 @@ void DoDropRune(int rune, qbool s)
 	item->s.v.velocity[2] = 400;
 	item->s.v.flags = FL_ITEM;
 	item->s.v.solid = SOLID_TRIGGER;
-	item->s.v.movetype = MOVETYPE_TOSS;
+	item->s.v.movetype = movetype;
 
 	if (rune & CTF_RUNE_RES)
 	{
@@ -287,7 +315,7 @@ gedict_t* SelectRuneSpawnPoint()
 {
 	gedict_t *runespawn;
 
-	if (cvar("k_ctf_based_spawn"))
+	if (cvar("k_ctf_based_spawn") == 1)
 	{
 		runespawn = SelectSpawnPoint(g_random() < 0.5 ? "info_player_team1" : "info_player_team2");
 	}
@@ -317,14 +345,29 @@ void SpawnRunes(qbool yes)
 
 	oself = self;
 
-	self = SelectRuneSpawnPoint();
-	DoDropRune( CTF_RUNE_RES, true);
-	self = SelectRuneSpawnPoint();
-	DoDropRune( CTF_RUNE_STR, true);
-	self = SelectRuneSpawnPoint();
-	DoDropRune( CTF_RUNE_HST, true);
-	self = SelectRuneSpawnPoint();
-	DoDropRune( CTF_RUNE_RGN, true);
+	if (cvar("k_ctf_rune_power_res") > 0)
+	{
+		self = SelectRuneSpawnPoint();
+		DoDropRune( CTF_RUNE_RES, true);
+	}
+
+	if (cvar("k_ctf_rune_power_str") > 0)
+	{
+		self = SelectRuneSpawnPoint();
+		DoDropRune( CTF_RUNE_STR, true);
+	}
+
+	if (cvar("k_ctf_rune_power_hst") > 0)
+	{
+		self = SelectRuneSpawnPoint();
+		DoDropRune( CTF_RUNE_HST, true);
+	}
+
+	if (cvar("k_ctf_rune_power_rgn") > 0)
+	{
+		self = SelectRuneSpawnPoint();
+		DoDropRune( CTF_RUNE_RGN, true);
+	}
 
 	self = oself;
 }

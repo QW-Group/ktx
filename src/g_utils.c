@@ -820,7 +820,7 @@ void G_centerprint(gedict_t *ed, const char *fmt, ...)
 	trap_CenterPrint(NUM_FOR_EDICT(ed), text);
 }
 
-// centerprint too all clients
+// centerprint to all clients
 void G_cp2all(const char *fmt, ...)
 {
 	va_list argptr;

@@ -311,6 +311,8 @@ void health_touch()
 			return;
 		}
 
+		adjust_pickup_time(&other->it_pickup_time[itHEALTH_100], &other->ps.itm[itHEALTH_100].time);
+		other->it_pickup_time[itHEALTH_100] = g_globalvars.time;
 		other->ps.itm[itHEALTH_100].tooks++;
 
 		mi_print(other, IT_SUPERHEALTH, va("%s got Megahealth", getname(other)));
@@ -424,11 +426,12 @@ void item_megahealth_rot(void)
  */
 void armor_touch()
 {
-	float type = 0, value = 0;
+	float type = 0;
+	float value = 0;
 	float real_value = 0;
 	int bit = 0;
-	int *armor = NULL;
 	char *playername;
+	itemName_t armorType = itNONE;
 
 	if (ISDEAD(other))
 	{
@@ -465,21 +468,21 @@ void armor_touch()
 
 	if (!strcmp(self->classname, "item_armor1"))
 	{
-		armor = &(other->ps.itm[itGA].tooks);
+		armorType = itGA;
 		type = (k_yawnmode ? 0.4 : 0.3); // Yawnmode: changed armor protection
 		value = 100;
 		bit = IT_ARMOR1;
 	}
 	else if (!strcmp(self->classname, "item_armor2"))
 	{
-		armor = &(other->ps.itm[itYA].tooks);
+		armorType = itYA;
 		type = (k_yawnmode ? 0.6 : 0.6); // Yawnmode: changed armor protection
 		value = 150;
 		bit = IT_ARMOR2;
 	}
 	else if (!strcmp(self->classname, "item_armorInv"))
 	{
-		armor = &(other->ps.itm[itRA].tooks);
+		armorType = itRA;
 		type = (k_yawnmode ? 0.8 : 0.8); // Yawnmode: changed armor protection
 		value = 200;
 		bit = IT_ARMOR3;
@@ -499,9 +502,11 @@ void armor_touch()
 
 	mi_print(other, bit, va("%s got %s", getname(other), self->netname));
 
-	if (armor)
+	if (armorType != itNONE)
 	{
-		(*armor)++;
+		adjust_pickup_time(&other->it_pickup_time[armorType], &other->ps.itm[armorType].time);
+		other->it_pickup_time[armorType] = g_globalvars.time;
+		other->ps.itm[armorType].tooks++;
 	}
 
 	real_value = other->s.v.armorvalue;
@@ -2037,8 +2042,8 @@ void powerup_touch()
 	else if (streq(self->classname, "item_artifact_invulnerability"))
 	{
 		old_pu_time = other->invincible_finished;
-		adjust_pickup_time(&other->p_pickup_time, &other->ps.itm[itPENT].time);
-		other->p_pickup_time = g_globalvars.time;
+		adjust_pickup_time(&other->it_pickup_time[itPENT], &other->ps.itm[itPENT].time);
+		other->it_pickup_time[itPENT] = g_globalvars.time;
 
 		other->ps.itm[itPENT].tooks++;
 		other->invincible_time = 1;
@@ -2052,8 +2057,8 @@ void powerup_touch()
 	else if (streq(self->classname, "item_artifact_invisibility"))
 	{
 		old_pu_time = other->invisible_finished;
-		adjust_pickup_time(&other->r_pickup_time, &other->ps.itm[itRING].time);
-		other->r_pickup_time = g_globalvars.time;
+		adjust_pickup_time(&other->it_pickup_time[itRING], &other->ps.itm[itRING].time);
+		other->it_pickup_time[itRING] = g_globalvars.time;
 
 		other->ps.itm[itRING].tooks++;
 		other->invisible_time = 1;
@@ -2065,8 +2070,8 @@ void powerup_touch()
 	else if (streq(self->classname, "item_artifact_super_damage"))
 	{
 		old_pu_time = other->super_damage_finished;
-		adjust_pickup_time(&other->q_pickup_time, &other->ps.itm[itQUAD].time);
-		other->q_pickup_time = g_globalvars.time;
+		adjust_pickup_time(&other->it_pickup_time[itQUAD], &other->ps.itm[itQUAD].time);
+		other->it_pickup_time[itQUAD] = g_globalvars.time;
 
 		other->ps.itm[itQUAD].tooks++;
 		other->ps.spree_max_q = max(other->ps.spree_current_q, other->ps.spree_max_q);

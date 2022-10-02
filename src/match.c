@@ -39,6 +39,7 @@ qbool race_can_cancel_demo(void);
 
 extern int g_matchstarttime;
 qbool initial_match_spawns;
+int maxPlayerCount;
 
 // Return count of players which have state cs_connected or cs_spawned.
 // It is weird because used string comparision so I treat it as slow and idiotic but it return more players than CountPlayers().
@@ -179,16 +180,17 @@ float CountRTeams()
 	return num;
 }
 
-// check count of members in each team i'm guess
+// count the members in each team and store the max in maxPlayerCount
 // and return 0 if at least one team has less members than 'memcnt'
-// else return 1 (even we have more mebers than memcnt, dunno is this bug <- FIXME)
-
-float CheckMembers(float memcnt)
+// else return 1 (even we have more members than memcnt, dunno is this bug <- FIXME)
+int CheckMembers(float memcnt)
 {
 	gedict_t *p, *p2;
 	float f1;
+	int retVal = 1;
 	char *s = "";
 
+	maxPlayerCount = 0;
 	for (p = world; (p = find_plr(p));)
 	{
 		p->k_flag = 0;
@@ -216,13 +218,14 @@ float CheckMembers(float memcnt)
 			}
 		}
 
+		maxPlayerCount = max(f1, maxPlayerCount);
 		if (f1 < memcnt)
 		{
-			return 0;
+			retVal = 0;
 		}
 	}
 
-	return 1;
+	return retVal;
 }
 
 extern demo_marker_t demo_markers[];
@@ -703,7 +706,7 @@ void TimerThink()
 
 		if (k_showscores && !isCA())
 		{
-			if ((current_umode < 11) || (current_umode > 13))
+			if ((current_umode < um2on2on2) || (current_umode > um4on4on4))
 			{
 				int sc = get_scores1() - get_scores2();
 
@@ -1048,7 +1051,7 @@ void SM_PrepareShowscores()
 
 	cvar_set("_k_team1", team1);
 	cvar_set("_k_team2", team2);
-	if ((current_umode >= 11) && (current_umode <= 13))
+	if ((current_umode >= um2on2on2) && (current_umode <= um4on4on4))
 	{
 		// let's see if there is a player with a 3rd team
 		while ((p = find_plr(p)))
@@ -1079,7 +1082,7 @@ void SM_PrepareHostname()
 
 	if (k_showscores && !strnull(team1) && !strnull(team2))
 	{
-		if ((current_umode < 11) || (current_umode > 13))
+		if ((current_umode < um2on2on2) || (current_umode > um4on4on4))
 		{
 			cvar_set("hostname", va("%s (%.4s vs. %.4s)\207", cvar_string("hostname"), team1, team2));
 		}
@@ -1647,7 +1650,8 @@ qbool isCanStart(gedict_t *s, qbool forceMembersWarn)
 	int k_lockmax = (isCA() || isRACE()) ? 2 : cvar("k_lockmax");
 	int k_membercount = cvar("k_membercount");
 	int i = CountRTeams();
-	int sub, nready;
+	int sub;
+	int nready;
 	char *txt = "";
 	gedict_t *p;
 

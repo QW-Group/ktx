@@ -75,15 +75,15 @@
 
 #define MOD_NAME				("KTX")
 #define MOD_FULLNAME			("KTX: Kombat Teams eXtreme")
-#define MOD_VERSION				("1.41-dev")
+#define MOD_VERSION				("1.42-dev")
 #define MOD_BUILD_DATE			(__DATE__ ", " __TIME__)
 #define MOD_SERVERINFO_MOD_KEY	("ktxver")
 #define MOD_URL					("https://github.com/QW-Group/ktx")
 #define GIT_COMMIT				("")
 
 // keep lines to 38 chars max
-#define MOD_RELEASE_QUOTE		("This KTX version was released during\nthe COVID-19 pandemic, historic time\nof worldwide confinement. Our thoughts\ngo out to all the victims of the virus\nand to their families and loved ones.")
-#define MOD_RELEASE_HASHTAGS	("#COVID19 #StayHomeStaySafe #PlaySomeQW")
+//#define MOD_RELEASE_QUOTE		("This KTX version was released during\nthe COVID-19 pandemic, historic time\nof worldwide confinement. Our thoughts\ngo out to all the victims of the virus\nand to their families and loved ones.")
+//#define MOD_RELEASE_HASHTAGS	("#COVID19 #StayHomeStaySafe #PlaySomeQW")
 
 // qqshka - hmm, seems in C this is macros
 #undef max
@@ -166,6 +166,25 @@ typedef enum
 	gtFFA,
 	gtCTF
 } gameType_t;
+
+typedef enum
+{
+	umUnknown = 0,
+	um1on1,
+	um2on2,
+	um3on3,
+	um4on4,
+	um10on10,
+	umFfa,
+	umCtf,
+	umHooneyM,
+	umBlitz2v2,
+	umBlitz4v4,
+	um2on2on2,
+	um3on3on3,
+	um4on4on4,
+	umXonX
+} UserModes_t;
 
 typedef enum
 {
@@ -256,7 +275,7 @@ void G_sprint_flags(gedict_t *ed, int level, int flags, const char *fmt, ...)  P
 void G_bprint(int level, const char *fmt, ...)  PRINTF_FUNC(2);
 void G_bprint_flags(int level, int flags, const char *fmt, ...) PRINTF_FUNC(3);
 void G_centerprint(gedict_t *ed, const char *fmt, ...) PRINTF_FUNC(2);
-/* centerprint too all clients */
+/* centerprint to all clients */
 void G_cp2all(const char *fmt, ...) PRINTF_FUNC(1);
 
 void G_cprint(const char *fmt, ...) PRINTF_FUNC(1);
@@ -691,13 +710,14 @@ typedef struct usermode_s
 
 extern usermode um_list[];
 extern int um_cnt;  // count of entrys in 'um_list'
-extern int current_umode; // current UserMode
+extern UserModes_t current_umode; // current UserMode
 
 // for user call this like UserMode( 1 )
 // for server call like UserMode( -1 )
 void UserMode(float umode);
 
 int um_idx_byname(char *name); // return -1 if not found
+const char *um_name_byidx(UserModes_t idx);
 
 // }
 
@@ -1195,5 +1215,7 @@ qbool private_game_by_default(void);
 
 // set when match is starting, otherwise a normal spawn
 extern qbool initial_match_spawns;
+// highest number of players in all teams, used to allow (re)connect during match
+extern int maxPlayerCount;
 
 #define AUTOTRACK_POWERUPS_PREDICT_TIME 2

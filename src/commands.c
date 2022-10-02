@@ -549,7 +549,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_FP_SPEC			"change floodprot level for specs"
 #define CD_DLIST			"show demo list"
 #define CD_DINFO			"show demo info"
-#define CD_LOCK				"temprorary lock server"
+#define CD_LOCK				"temporary lock server"
 #define CD_SWAPALL			"swap teams for ctf"
 // { RA
 #define CD_RA_BREAK			"toggle RA line status"
@@ -1658,7 +1658,7 @@ void ShowVersion()
 	G_sprint(self, 2, "%s....: %28s\n", redtext("Date"), dig3s("%s", cvar_string("qwm_builddate")));
 	G_sprint(self, 2, "%s.: %28s\n", redtext("Webpage"), cvar_string("qwm_homepage"));
 
-	G_sprint(self, 2, "\n%s\n\n%s\n", MOD_RELEASE_QUOTE, redtext(MOD_RELEASE_HASHTAGS));
+//	G_sprint(self, 2, "\n%s\n\n%s\n", MOD_RELEASE_QUOTE, redtext(MOD_RELEASE_HASHTAGS));
 
 	if ((int)cvar("sv_specprint") & SPECPRINT_SPRINT)
 	{
@@ -3295,7 +3295,7 @@ void PrintScores()
 			char *t2 = cvar_string("_k_team2");
 			char *t3;
 
-			if ((current_umode < 11) || (current_umode > 13))
+			if ((current_umode < um2on2on2) || (current_umode > um4on4on4))
 			{
 				G_sprint(self, 2, "%s \220%s\221 = %s\n", redtext("Team"), (s1 > s2 ? t1 : t2),
 						dig3(s1 > s2 ? s1 : s2));
@@ -3366,6 +3366,7 @@ void PrintScores()
 	}
 }
 
+// This player statistics is triggered by the ingame /stats command. Nothing to do with the endgame stats.
 void PlayerStats()
 {
 	gedict_t *p, *p2;
@@ -3382,7 +3383,6 @@ void PlayerStats()
 	if (match_in_progress != 2)
 	{
 		G_sprint(self, 2, "no game - no statistics\n");
-
 		return;
 	}
 
@@ -3967,7 +3967,6 @@ ok:
 const char _reset_settings[] =
 	"serverinfo matchtag \"\"\n" 	// Hint for QTV what type of event it is. Like: "EQL semifinal" etc.
 	"k_teamoverlay 0\n"				// Teamoverlay off
-	"serverinfo ktxmode \"\"\n"		// No special mode
 ;
 
 // common settings for all user modes
@@ -3979,7 +3978,6 @@ const char common_um_init[] =
 	"k_killquad 0\n"
 	"pm_airstep \"\"\n"				// airstep off by default
 	"samelevel 1\n"					// change levels off
-//	"k_vwep 1\n"					// disable VWEP by default
 	"maxclients 8\n"				// maxclients
 	"k_yawnmode 0\n"				// disable SHITMODE by default (c)Renzo
 	"k_instagib 0\n"				// instagib off
@@ -3990,10 +3988,6 @@ const char common_um_init[] =
 	"k_fp_spec 1\n"					// floodprot for specs
 	"dmm4_invinc_time \"\"\n"		// reset to default
 	"k_noitems \"\"\n"				// reset to default
-//	"localinfo k_new_mode 0\n"		// UNKNOWN ktpro
-//	"localinfo k_fast_mode 0\n		// UNKNOWN ktpro
-//	"localinfo k_safe_rj 0\n"		// UNKNOWN ktpro
-//	"localinfo k_new_spw 0\n"		// ktpro feature
 	"k_clan_arena 0\n"				// disable Clan Arena by default
 	"k_rocketarena 0\n"				// disable Rocket Arena by default
 	"k_race 0\n"					// disable Race by default
@@ -4284,8 +4278,8 @@ usermode um_list[] =
 	{ "ffa", 		"ffa", 					ffa_um_init, 		UM_FFA, 	-1 },
 	{ "ctf", 		"ctf", 					ctf_um_init, 		UM_CTF, 	 0 },
 	{ "hoonymode", 	"HoonyMode", 			_1on1hm_um_init, 	UM_1ON1HM, 	 0 },
-	{ "blitz-2v2", 	"Blitz (2v2)", 			_2on2hm_um_init, 	UM_1ON1HM, 	 0 },
-	{ "blitz-4v4", 	"Blitz (4v4)", 			_4on4hm_um_init, 	UM_1ON1HM, 	 0 },
+	{ "blitz2v2", 	"Blitz (2v2)", 			_2on2hm_um_init, 	UM_1ON1HM, 	 0 },
+	{ "blitz4v4", 	"Blitz (4v4)", 			_4on4hm_um_init, 	UM_1ON1HM, 	 0 },
 	{ "2on2on2", 	"\224 on \224 on \224", _2on2on2_um_init, 	UM_2ON2ON2,	 0 },
 	{ "3on3on3", 	"\225 on \225 on \225", _3on3on3_um_init, 	UM_3ON3ON3,	 0 },
 	{ "4on4on4", 	"\226 on \226 on \226", _4on4on4_um_init, 	UM_4ON4ON4,	 0 },
@@ -4293,7 +4287,7 @@ usermode um_list[] =
 };
 
 int um_cnt = sizeof(um_list) / sizeof(um_list[0]);
-int current_umode;
+UserModes_t current_umode;
 
 // return -1 if not found
 int um_idx_byname(char *name)
@@ -4314,6 +4308,19 @@ int um_idx_byname(char *name)
 	}
 
 	return -1; // not found
+}
+
+// Returns the name of a UserMode
+const char *um_name_byidx(UserModes_t umode)
+{
+	if ((umode >= 0) && (umode < um_cnt))
+	{
+		return um_list[umode].name;
+	}
+	else
+	{
+		return NULL;
+	}
 }
 
 extern int skip_fixrules;
@@ -4359,7 +4366,7 @@ void UserMode(float umode)
 
 	int k_free_mode = (k_matchLess ? 5 : cvar("k_free_mode"));
 
-	current_umode = 0;
+	current_umode = umUnknown;
 
 	if (umode < 0)
 	{
@@ -6479,7 +6486,7 @@ void lastscore_add()
 			}
 		}
 
-		if ((current_umode >= 11) && (current_umode <= 13))
+		if ((current_umode >= um2on2on2) && (current_umode <= um4on4on4))
 		{
 			e3 = cvar_string("_k_team3");
 			s3 = get_scores3();
@@ -6520,7 +6527,7 @@ void lastscore_add()
 	cvar_set(va("__k_ls_e2_%d", k_ls), e2);
 	cvar_set(va("__k_ls_t1_%d", k_ls), t1);
 	cvar_set(va("__k_ls_t2_%d", k_ls), t2);
-	if ((current_umode < 10) || (current_umode > 13))
+	if ((current_umode < umBlitz4v4) || (current_umode > um4on4on4))
 	{
 		cvar_set(va("__k_ls_s_%d", k_ls),
 				 va("%3d:%-3d \x8D %-8.8s %13.13s%s", s1, s2, mapname, date, extra));

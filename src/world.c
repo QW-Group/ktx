@@ -925,6 +925,7 @@ void FirstFrame()
 	RegisterCvarEx("k_ctf_rune_power_hst", "2.0");
 	RegisterCvar("k_ctf_ga");
 	RegisterCvar("k_ctf_based_spawn"); // spawn players on the base (red/blue)
+	RegisterCvar("k_ctf_hurt_items");
 //}
 	RegisterCvar("k_spec_info");
 	RegisterCvar("k_midair");
@@ -1413,7 +1414,6 @@ void FixSayTeamToSpecs()
 			desired_value = (match_in_progress ? 0 : 1);
 			break;
 
-		case 3:
 		default:
 			desired_value = 1;
 			break;
@@ -1422,6 +1422,80 @@ void FixSayTeamToSpecs()
 	if (current_value != desired_value)
 	{
 		cvar_fset("sv_sayteam_to_spec", desired_value);
+	}
+}
+
+// This function determines the actual game mode, include game type, and sub-mode,
+// which is part of the serverinfo reply.
+// Format is: mode-submode[-submode]
+void SetMode4ServerInfo(void)
+{
+	char mode[64] = {};
+	const char *strCurrentUmode;
+
+	// The parameter is (current_umode-1), because the UserModes_t enum has `umUnknown` as first element,
+	// but the um_list[] array doesn't have an 'empty' first row
+	strCurrentUmode = um_name_byidx(current_umode-1);
+	if (strCurrentUmode != NULL)
+	{
+		strlcat(mode, (char *)strCurrentUmode, sizeof(mode));
+
+		if (isRACE())
+		{
+			strlcat(mode, "-race", sizeof(mode));
+		}
+
+		if (cvar("k_midair"))
+		{
+			strlcat(mode, "-midair", sizeof(mode));
+		}
+
+		if (cvar("k_instagib"))
+		{
+			strlcat(mode, "-instagib", sizeof(mode));
+		}
+
+		if (lgc_enabled())
+		{
+			strlcat(mode, "-lgc", sizeof(mode));
+		}
+
+		if (cvar("k_clan_arena") == 1)
+		{
+			strlcat(mode, "-ca", sizeof(mode));
+		}
+
+		if (cvar("k_clan_arena") == 2)
+		{
+			strlcat(mode, "-wo", sizeof(mode));
+		}
+
+		if (isRA())
+		{
+			strlcat(mode, "-ra", sizeof(mode));
+		}
+
+		if (cvar("k_dmm4_gren_mode"))
+		{
+			strlcat(mode, "-gm", sizeof(mode));
+		}
+
+		if (cvar("k_dmgfrags"))
+		{
+			strlcat(mode, "-df", sizeof(mode));
+		}
+
+		if (cvar("k_yawnmode"))
+		{
+			strlcat(mode, "-yw", sizeof(mode));
+		}
+
+		if (cvar("k_bloodfest"))
+		{
+			strlcat(mode, "-bf", sizeof(mode));
+		}
+
+		localcmd("serverinfo mode %s\n", mode);
 	}
 }
 
@@ -1686,6 +1760,8 @@ void FixRules()
 	{
 		trap_executecmd();
 	}
+
+	SetMode4ServerInfo();
 }
 
 int timelimit, fraglimit, teamplay, deathmatch, framecount, coop, skill;

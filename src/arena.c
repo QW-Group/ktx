@@ -412,6 +412,7 @@ void setnowep(gedict_t *anent)
 void setfullwep(gedict_t *anent)
 {
 	gedict_t *swap;
+	int i;
 	qbool add = (match_start_time == g_globalvars.time ? false : true);
 
 	// ammo
@@ -440,9 +441,15 @@ void setfullwep(gedict_t *anent)
 	anent->s.v.effects = 0;
 	anent->lastwepfired = 0;
 
-	adjust_pickup_time(&anent->q_pickup_time, &anent->ps.itm[itQUAD].time);
-	adjust_pickup_time(&anent->p_pickup_time, &anent->ps.itm[itPENT].time);
-	adjust_pickup_time(&anent->r_pickup_time, &anent->ps.itm[itRING].time);
+	for (i = itNONE; i < itMAX; i++)
+	{
+		adjust_pickup_time(&anent->it_pickup_time[i], &anent->ps.itm[i].time);
+	}
+	for (i = wpNONE; i < wpMAX; i++)
+	{
+		adjust_pickup_time(&anent->wp_pickup_time[i], &anent->ps.wpn[i].time);
+	}
+
 
 	swap = self;
 	self = anent;
