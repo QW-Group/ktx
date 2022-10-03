@@ -580,6 +580,11 @@ qbool CA_can_fire(gedict_t *p)
 		return true;
 	}
 
+	if (!ra_match_fight && p->ready)
+	{
+		return true;	// allow fire during prewar if /ready
+	}
+
 	return (ISLIVE(p) && (ra_match_fight == 2) && time_to_start && (g_globalvars.time >= time_to_start));
 }
 
