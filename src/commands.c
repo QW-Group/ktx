@@ -262,11 +262,6 @@ static void removeitem();
 static void dumpent();
 // }
 
-// { Clan Arena
-void ToggleCArena();
-void ToggleWipeout();
-// }
-
 // { Frogbots
 void FrogbotsCommand(void);
 // }
@@ -788,6 +783,8 @@ cmd_t cmds[] =
 	{ "3on3on3", 					DEF(UserMode), 					12, 		CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, 									CD_3ON3ON3 },
 	{ "4on4on4", 					DEF(UserMode), 					13, 		CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, 									CD_4ON4ON4 },
 	{ "XonX", 						DEF(UserMode), 					14, 		CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, 									CD_XONX },
+	{ "wipeout", 					DEF(UserMode), 					15, 		CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, 									CD_WIPEOUT },
+	{ "carena", 					DEF(UserMode), 					16, 		CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, 									CD_CARENA },
 
 	{ "practice", 					TogglePractice, 				0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_PRACTICE },
 	{ "wp_reset", 					Wp_Reset, 						0, 			CF_PLAYER, 																CD_WP_RESET },
@@ -920,10 +917,6 @@ cmd_t cmds[] =
 	{ "ra_break", 					ra_break, 						0, 			CF_PLAYER, 																CD_RA_BREAK },
 	{ "ra_pos", 					ra_PrintPos, 					0, 			CF_PLAYER, 																CD_RA_POS },
 	{ "arena", 						ToggleArena, 					0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_ARENA },
-	// }
-	// { Clan Arena
-	{ "carena", 					ToggleCArena, 					0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_CARENA },
-	{ "wipeout", 					ToggleWipeout, 					0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_WIPEOUT },
 	// }
 	{ "force_spec", 				force_spec, 					0, 			CF_BOTH_ADMIN | CF_PARAMS, 												CD_FORCE_SPEC },
 	// { bans
@@ -4268,6 +4261,55 @@ const char ctf_um_init[] =
 	"k_ctf_ga 1\n"					// green armor on
 ;
 
+const char wipeout_um_init[] =
+	"k_clan_arena 2\n"				// enable wipeout
+	"k_clan_arena_rounds 9\n"		// number of rounds in a series
+	"k_clan_arena_max_respawns 4\n"	// number of respawns per round
+	"coop 0\n"						// no coop
+	"dp 0\n"						// don't drop packs
+	"teamplay 4\n"
+	"deathmatch 5\n"
+	"timelimit 0\n"					// no time limit
+	"maxclients 8\n"				// no more than 8 players in ca/wipeout
+	"k_maxclients 8\n"				// no more than 8 players in ca/wipeout
+	"k_pow 0\n"
+	"k_overtime 0\n"
+	"k_spectalk 1\n"				// enable spec talk by default
+	"k_exttime 0\n"					// zero overtime length
+	"k_spw 1\n"						// KT Safety spawns (important for CA)
+	"k_dmgfrags 1\n"				// 1 "frag" for every 100 damage dealt
+	"k_teamoverlay 1\n"				// enable teamoverlay by default
+	"k_membercount 1\n"				// no minimum team size
+	"k_noitems 1\n"					// no items on the map
+	"k_lockmin 1\n"					// minimum number of teams
+	"k_lockmax 2\n"					// maximum number of teams
+	"k_mode 2\n"
+;
+
+const char carena_um_init[] =
+	"k_clan_arena 1\n"				// enable clan arena
+	"k_clan_arena_rounds 9\n"		// number of rounds in a series
+	"k_clan_arena_max_respawns 0\n"	// number of respawns per round
+	"dp 0\n"						// don't drop packs
+	"teamplay 4\n"
+	"deathmatch 5\n"
+	"timelimit 0\n"					// no time limit
+	"maxclients 8\n"				// no more than 8 players in ca/wipeout
+	"k_maxclients 8\n"				// no more than 8 players in ca/wipeout
+	"k_pow 0\n"
+	"k_overtime 0\n"
+	"k_spectalk 1\n"				// enable spec talk by default
+	"k_exttime 0\n"					// zero overtime length
+	"k_spw 1\n"						// KT Safety spawns (important for CA)
+	"k_dmgfrags 1\n"				// 1 "frag" for every 100 damage dealt
+	"k_teamoverlay 1\n"				// enable teamoverlay by default
+	"k_membercount 1\n"				// no minimum team size
+	"k_noitems 1\n"					// no items on the map
+	"coop 0\n"						// no coop
+	"k_lockmax 2\n"					// maximum number of teams
+	"k_mode 2\n"
+;
+
 usermode um_list[] =
 {
 	{ "1on1", 		"\223 on \223", 		_1on1_um_init, 		UM_1ON1, 	 1 },
@@ -4284,6 +4326,8 @@ usermode um_list[] =
 	{ "3on3on3", 	"\225 on \225 on \225", _3on3on3_um_init, 	UM_3ON3ON3,	 0 },
 	{ "4on4on4", 	"\226 on \226 on \226", _4on4on4_um_init, 	UM_4ON4ON4,	 0 },
 	{ "XonX", 		"X on X", 				_XonX_um_init, 		UM_XONX,	 0 },
+	{ "wipeout", 	"Wipeout", 				wipeout_um_init, 	UM_4ON4,	 0 },
+	{ "ca", 		"Clan Arena", 			carena_um_init, 	UM_4ON4,	 0 },
 };
 
 int um_cnt = sizeof(um_list) / sizeof(um_list[0]);
@@ -4568,7 +4612,6 @@ void UserMode(float umode)
 	}
 
 	HM_unpick_all_spawns();
-	apply_CA_settings();
 
 	G_cprint("\n");
 
