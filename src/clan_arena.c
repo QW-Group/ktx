@@ -969,16 +969,6 @@ void EndRound(int alive_team)
 		pause_time = g_globalvars.time + 8;
 		loser_team = alive_team ? (alive_team == 1 ? 2 : 1) : 0;
 		loser_respawn_time = loser_team ? team_last_alive_time(loser_team) : 999;
-
-		// once a team is dead, nobody can take anymore damage
-		// round draws will be very rare
-		if (alive_team)
-		{
-			for (p = world; (p = find_plr(p));)
-			{
-				p->no_pain = true;
-			}
-		}
 	}
 
 	pause_count = Q_rint(pause_time - g_globalvars.time);
@@ -1002,11 +992,6 @@ void EndRound(int alive_team)
 		else
 		{
 			team2_score++;
-		}
-
-		for (p = world; (p = find_plr(p));)
-		{
-			p->no_pain = false;	// players can take damage
 		}
 	}
 	else if (pause_count != last_count)
@@ -1221,10 +1206,15 @@ void CA_player_pre_think(void)
 			self->alive_time = g_globalvars.time - self->time_of_respawn;
 		}
 
-		// take no damage to health/armor during respawn
-		if (self->alive_time >= 1)
+		// take no damage to health/armor withing 1 second of respawn
+		// or during endround
+		if ((self->alive_time >= 1 || !self->round_deaths) && !ca_round_pause)
 		{
 			self->no_pain = false;
+		}
+		else
+		{
+			self->no_pain = true;
 		}
 	}
 }
@@ -1305,9 +1295,6 @@ void CA_Frame(void)
 					sprintf(p->cptext, "%s\n", "FIGHT!");
 					G_centerprint(p, "%s", p->cptext);
 					k_respawn(p, true);
-
-					// Don't take damage while respawning
-					p->no_pain = true;
 
 					p->seconds_to_respawn = 999;
 					p->time_of_respawn = g_globalvars.time; // resets alive_time to 0
