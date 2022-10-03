@@ -127,7 +127,8 @@ float last_alive_time(gedict_t *player)
 
 	// this checks to see if there's already a last_alive_countdown in progress
 	// because we only want to play the audio once at the begining of the countdown
-	if (!player->last_alive_active && (time > 0))
+	// Only play the audio if the player is alive
+	if (!player->last_alive_active && (time > 0) && player->in_play)
 	{
 		player->last_alive_active = true;
 
