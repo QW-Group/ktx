@@ -20,6 +20,7 @@ void enable_player_tracking(gedict_t *e, int follow);
 void r_changetrackingstatus(float t);
 void CA_PrintScores(void);
 void CA_TeamsStats(void);
+void CA_SendTeamInfo(gedict_t *t);
 void print_player_stats(qbool series_over);
 void CA_OnePlayerStats(gedict_t *p, qbool series_over);
 void EndRound(int alive_team);
@@ -238,25 +239,6 @@ qbool CA_CheckAlive(gedict_t *p)
 	}
 }
 
-// hard coded default settings for CA
-static char ca_settings[] = "k_clan_arena_rounds 9\n"
-		"k_clan_arena_max_respawns 0\n"
-		"dp 0\n"				// don't drop packs
-		"teamplay 4\n"
-		"deathmatch 5\n"
-		"timelimit 0\n"			// no time limit
-		"maxclients 8\n"
-		"k_maxclients 8\n"
-		"k_pow 0\n"
-		"k_overtime 0\n"
-		"k_spectalk 1\n"		// enable spec talk by default
-		"k_exttime 0\n"	
-		"k_spw 1\n"				// KT Safety spawns (important for CA)
-		"k_dmgfrags 1\n"		// 1 "frag" for every 100 damage dealt
-		"k_teamoverlay 1\n"
-		"k_membercount 1\n"		// no minimum team size
-		"k_noitems 1\n";
-
 void CA_MatchBreak(void)
 {
 	gedict_t *p;
@@ -457,127 +439,6 @@ void ClanArenaTrackingToggleButton(void)
 	}
 }
 
-void apply_CA_settings(void)
-{
-	char buf[1024 * 4];
-	char *cfg_name;
-
-	if (!isCA())
-	{
-		return;
-	}
-
-	trap_readcmd(ca_settings, buf, sizeof(buf));
-	G_cprint("%s", buf);
-
-	if (cvar("k_clan_arena") == 2)
-	{
-		cvar_fset("k_clan_arena_max_respawns", 4);
-	}
-
-	cfg_name = va("configs/usermodes/ca/default.cfg");
-	if (can_exec(cfg_name))
-	{
-		trap_readcmd(va("exec %s\n", cfg_name), buf, sizeof(buf));
-		G_cprint("%s", buf);
-	}
-
-	cfg_name = va("configs/usermodes/ca/%s.cfg", mapname);
-	if (can_exec(cfg_name))
-	{
-		trap_readcmd(va("exec %s\n", cfg_name), buf, sizeof(buf));
-		G_cprint("%s", buf);
-	}
-
-	G_cprint("\n");
-}
-
-void ToggleCArena()
-{
-	int k_clan_arena = bound(0, cvar("k_clan_arena"), 2);
-	
-	if (!is_rules_change_allowed())
-	{
-		return;
-	}
-
-	if (match_in_progress)
-	{
-		return;
-	}
-
-	if (!isCA())
-	{
-		// seems we trying turn CA on.
-		if (!isTeam())
-		{
-			G_sprint(self, 2, "Set %s mode first\n", redtext("team"));
-
-			return;
-		}
-	}
-
-	if (++k_clan_arena > 2)
-	{
-		k_clan_arena = 0;
-	}
-
-	if (!k_clan_arena)
-	{
-		G_bprint(2, "%s %s %s\n", self->netname, "disables", redtext("Clan Arena"));
-	}
-	else if (k_clan_arena == 1)
-	{
-		G_bprint(2, "%s %s %s\n", self->netname, "enables", redtext("Clan Arena"));
-	}
-	else if (k_clan_arena == 2)
-	{
-		G_bprint(2, "%s %s %s\n", self->netname, "enables", redtext("Wipeout"));
-	}
-	else
-	{
-		G_bprint(2, "%s unknown\n", redtext("Clan Arena"));
-	}
-
-	cvar_fset("k_clan_arena", k_clan_arena);
-	apply_CA_settings();
-}
-
-void ToggleWipeout()
-{
-	int k_clan_arena = bound(0, cvar("k_clan_arena"), 2);
-
-	if (!is_rules_change_allowed())
-	{
-		return;
-	}
-
-	if (!isCA())
-	{
-		// seems we trying turn CA on.
-		if (!isTeam())
-		{
-			G_sprint(self, 2, "Set %s mode first\n", redtext("team"));
-
-			return;
-		}
-	}
-
-	if (k_clan_arena == 2)
-	{
-		k_clan_arena = 0;
-		G_bprint(2, "%s %s %s\n", self->netname, "disables", redtext("Wipeout"));
-	}
-	else
-	{
-		k_clan_arena = 2;
-		G_bprint(2, "%s %s %s\n", self->netname, "enables", redtext("Wipeout"));
-	}
-
-	cvar_fset("k_clan_arena", k_clan_arena);
-	apply_CA_settings();
-}
-
 void CA_PutClientInServer(void)
 {
 	if (!isCA())
@@ -677,6 +538,7 @@ void CA_PutClientInServer(void)
 
 		self->in_play = false;
 		self->round_deaths++; //increment death count for wipeout
+		self->in_limbo = (self->ca_ready) && (self->round_deaths <= max_deaths);
 		self->spawn_delay = 0;
 
 		setmodel(self, "");
@@ -741,6 +603,127 @@ void CA_show_greeting(gedict_t *self)
 							"waiting for other players");
 		}
 		
+	}
+}
+
+void CA_UpdateClients(void)
+{
+	gedict_t *p;
+	static double lastupdate = 0;
+
+	if (g_globalvars.time - lastupdate < 0.5)
+	{
+		return;
+	}
+
+	lastupdate = g_globalvars.time;
+
+	for (p = world; (p = find_client(p));)
+	{
+		CA_SendTeamInfo(p);
+	}
+}
+
+// sends player state information to client for use in teaminfo or other hud elements
+void CA_SendTeamInfo(gedict_t *t)
+{
+	int cl;
+	int cnt;
+	int h;
+	int a;
+	int shells;
+	int nails;
+	int rockets;
+	int cells;
+	int camode;
+	int deadtype;
+	int timetospawn;
+	gedict_t *p, *s;
+	char *tm, *nick;
+
+	s = ((t->ct == ctSpec) ? PROG_TO_EDICT(t->s.v.goalentity) : t);
+	if (s->ct != ctPlayer)
+	{
+		return;
+	}
+
+	tm = getteam(s);
+
+	camode = 1;		// 1 is the only mode right now
+	deadtype = 0;
+	timetospawn = 0;
+
+	for (cnt = 0, p = world; (p = find_plr(p));)
+	{
+		if (cnt >= 10)
+		{
+			break;
+		}
+
+		if (p == s)
+		{
+			continue; // ignore self
+		}
+
+		if (strneq(tm, getteam(p)))
+		{
+			continue; // on different team
+		}
+
+		if (t->trackent && (t->trackent == NUM_FOR_EDICT(p)))
+		{
+			continue; // we pseudo speccing such player, no point to send info about him
+		}
+
+		if (p->ca_ready || match_in_progress != 2) // be sure to send info if in prewar
+		{
+			if (match_in_progress == 2)
+			{
+				if (p->in_play)
+				{
+					deadtype = 0;	// player is alive/active in round
+				}
+				else if (p->in_limbo)
+				{
+					deadtype = 1;	// player is dead but will respawn
+				}
+				else
+				{
+					deadtype = 2;	// player is dead and won't respawn
+				}
+
+				timetospawn = (int)ceil(p->seconds_to_respawn);
+			}
+		}
+		else
+		{
+			continue; // don't send if player isn't ready/playing
+		}
+		
+		if (strnull(nick = ezinfokey(p, "k_nick"))) // get nick, if any, do not send name, client can guess it too
+		{
+			nick = ezinfokey(p, "k");
+		}
+
+		if (nick[0] && nick[1] && nick[2] && nick[3])
+		{
+			nick[4] = 0; // truncate nick to 4 symbols
+		}
+
+		cnt++;
+
+		cl = NUM_FOR_EDICT(p) - 1;
+		h = bound(0, (int)p->s.v.health, 999);
+		a = bound(0, (int)p->s.v.armorvalue, 999);
+		
+		shells = bound(0, (int)p->s.v.ammo_shells, 999);
+		nails = bound(0, (int)p->s.v.ammo_nails, 999);
+		rockets = bound(0, (int)p->s.v.ammo_rockets, 999);
+		cells = bound(0, (int)p->s.v.ammo_cells, 999);
+
+		stuffcmd(t, "//cainfo %d %d %d %d %d %d %d \"%s\" %d %d %d %d %d %d %d\n", cl,
+						(int)p->s.v.origin[0], (int)p->s.v.origin[1], (int)p->s.v.origin[2], h,
+						a, (int)p->s.v.items, nick, shells, nails, rockets, cells, camode, deadtype, timetospawn);
 	}
 }
 
@@ -997,16 +980,6 @@ void EndRound(int alive_team)
 		pause_time = g_globalvars.time + 8;
 		loser_team = alive_team ? (alive_team == 1 ? 2 : 1) : 0;
 		loser_respawn_time = loser_team ? team_last_alive_time(loser_team) : 999;
-
-		// once a team is dead, nobody can take anymore damage
-		// round draws will be very rare
-		if (alive_team)
-		{
-			for (p = world; (p = find_plr(p));)
-			{
-				p->no_pain = true;
-			}
-		}
 	}
 
 	pause_count = Q_rint(pause_time - g_globalvars.time);
@@ -1031,11 +1004,6 @@ void EndRound(int alive_team)
 		{
 			team2_score++;
 		}
-
-		for (p = world; (p = find_plr(p));)
-		{
-			p->no_pain = false;	// players can take damage
-		}
 	}
 	else if (pause_count != last_count)
 	{
@@ -1052,7 +1020,7 @@ void EndRound(int alive_team)
 				sprintf(round_or_series, "%s", ((alive_team == 1 && team1_score == (CA_wins_required()-1)) || 
 					(alive_team == 2 && team2_score == (CA_wins_required()-1))) ? "series" : "round");
 
-				if (loser_respawn_time < 2)
+				if ((loser_respawn_time < 2) && (loser_respawn_time > 0))
 				{
 					G_cp2all("Team \x90%s\x91 wins the %s!\n\n\nTeam %s needed %.3f more seconds",
 						cvar_string(va("_k_team%d", alive_team)), round_or_series, cvar_string(va("_k_team%d", loser_team)), loser_respawn_time); 
@@ -1249,10 +1217,15 @@ void CA_player_pre_think(void)
 			self->alive_time = g_globalvars.time - self->time_of_respawn;
 		}
 
-		// take no damage to health/armor during respawn
-		if (self->alive_time >= 1)
+		// take no damage to health/armor withing 1 second of respawn
+		// or during endround
+		if (((self->alive_time >= 1) || !self->round_deaths) && !ca_round_pause)
 		{
 			self->no_pain = false;
+		}
+		else
+		{
+			self->no_pain = true;
 		}
 	}
 }
@@ -1294,6 +1267,8 @@ void CA_Frame(void)
 		return;
 	}
 
+	CA_UpdateClients();
+
 	if (match_in_progress != 2)
 	{
 		return;
@@ -1317,8 +1292,6 @@ void CA_Frame(void)
 			
 			if (p->ca_ready && !p->in_play && p->round_deaths <= max_deaths)
 			{
-				p->in_limbo = true;
-
 				if (!p->spawn_delay)
 				{
 					int delay = p->round_deaths == 1 ? 5 : (p->round_deaths-1) * 10;
@@ -1333,9 +1306,6 @@ void CA_Frame(void)
 					sprintf(p->cptext, "%s\n", "FIGHT!");
 					G_centerprint(p, "%s", p->cptext);
 					k_respawn(p, true);
-
-					// Don't take damage while respawning
-					p->no_pain = true;
 
 					p->seconds_to_respawn = 999;
 					p->time_of_respawn = g_globalvars.time; // resets alive_time to 0

@@ -863,7 +863,6 @@ int CA_count_ready_players(void);
 int CA_get_score_1(void);
 int CA_get_score_2(void);
 void SM_PrepareCA(void);
-void apply_CA_settings(void);
 void CA_ClientObituary(gedict_t *targ, gedict_t *attacker);
 void CA_MatchBreak(void);
 void CA_PrintScores(void);

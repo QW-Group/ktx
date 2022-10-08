@@ -1448,7 +1448,7 @@ void PrintCountdown(int seconds)
 
 	if (isCA())
 	{
-		strlcat(text, va("%s %8s\n", "Wins", dig3(CA_wins_required())), sizeof(text));
+		strlcat(text, va("%s %3s\n", "RoundWins", dig3(CA_wins_required())), sizeof(text));
 	}
 	else if (isHoonyModeTDM() && HM_current_point())
 	{

@@ -4311,7 +4311,7 @@ void PlayerPostThink()
 			}
 			else
 			{
-				self->s.v.armorvalue = 1000;
+				self->s.v.armorvalue = 0;
 				self->s.v.frags = 0;
 			}
 		}
@@ -4374,7 +4374,7 @@ void SendTeamInfo(gedict_t *t)
 
 		if (isCA() && !ISLIVE(p))
 		{
-			continue; // do not send if player is dead in clan arena mode
+			continue; // see CA_SendTeamInfo for custom CA/wipeout teaminfo
 		}
 
 		if (strnull(nick = ezinfokey(p, "k_nick"))) // get nick, if any, do not send name, client can guess it too
