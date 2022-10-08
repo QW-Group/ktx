@@ -538,7 +538,7 @@ void CA_PutClientInServer(void)
 
 		self->in_play = false;
 		self->round_deaths++; //increment death count for wipeout
-		self->in_limbo = self->ca_ready && self->round_deaths <= max_deaths;
+		self->in_limbo = (self->ca_ready) && (self->round_deaths <= max_deaths);
 		self->spawn_delay = 0;
 
 		setmodel(self, "");
@@ -609,11 +609,12 @@ void CA_show_greeting(gedict_t *self)
 void CA_UpdateClients(void)
 {
 	gedict_t *p;
-
 	static double lastupdate = 0;
 
 	if (g_globalvars.time - lastupdate < 0.5)
+	{
 		return;
+	}
 
 	lastupdate = g_globalvars.time;
 
@@ -626,11 +627,21 @@ void CA_UpdateClients(void)
 // sends player state information to client for use in teaminfo or other hud elements
 void CA_SendTeamInfo(gedict_t *t)
 {
-	int cl, cnt, h, a, shells, nails, rockets, cells, camode, deadtype, timetospawn;
+	int cl;
+	int cnt;
+	int h;
+	int a;
+	int shells;
+	int nails;
+	int rockets;
+	int cells;
+	int camode;
+	int deadtype;
+	int timetospawn;
 	gedict_t *p, *s;
 	char *tm, *nick;
 
-	s = (t->ct == ctSpec ? PROG_TO_EDICT(t->s.v.goalentity) : t);
+	s = ((t->ct == ctSpec) ? PROG_TO_EDICT(t->s.v.goalentity) : t);
 	if (s->ct != ctPlayer)
 	{
 		return;
@@ -659,7 +670,7 @@ void CA_SendTeamInfo(gedict_t *t)
 			continue; // on different team
 		}
 
-		if (t->trackent && t->trackent == NUM_FOR_EDICT(p))
+		if (t->trackent && (t->trackent == NUM_FOR_EDICT(p)))
 		{
 			continue; // we pseudo speccing such player, no point to send info about him
 		}
@@ -1009,7 +1020,7 @@ void EndRound(int alive_team)
 				sprintf(round_or_series, "%s", ((alive_team == 1 && team1_score == (CA_wins_required()-1)) || 
 					(alive_team == 2 && team2_score == (CA_wins_required()-1))) ? "series" : "round");
 
-				if (loser_respawn_time < 2 && loser_respawn_time > 0)
+				if ((loser_respawn_time < 2) && (loser_respawn_time > 0))
 				{
 					G_cp2all("Team \x90%s\x91 wins the %s!\n\n\nTeam %s needed %.3f more seconds",
 						cvar_string(va("_k_team%d", alive_team)), round_or_series, cvar_string(va("_k_team%d", loser_team)), loser_respawn_time); 
@@ -1208,7 +1219,7 @@ void CA_player_pre_think(void)
 
 		// take no damage to health/armor withing 1 second of respawn
 		// or during endround
-		if ((self->alive_time >= 1 || !self->round_deaths) && !ca_round_pause)
+		if (((self->alive_time >= 1) || !self->round_deaths) && !ca_round_pause)
 		{
 			self->no_pain = false;
 		}
