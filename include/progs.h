@@ -1067,6 +1067,7 @@ typedef struct gedict_s
 	int ca_ammo_grenades;					// grenade ammo
 	int tracking_enabled;
 	int round_deaths;						// number of times player has died in the round
+	int round_kills;						// number of kills in the round
 	int spawn_delay;						// total delay between death and spawn
 // }
 

@@ -629,8 +629,12 @@ void CA_SendTeamInfo(gedict_t *t)
 {
 	int cl;
 	int cnt;
+	int origin0;
+	int origin1;
+	int origin2;
 	int h;
 	int a;
+	int items;
 	int shells;
 	int nails;
 	int rockets;
@@ -638,6 +642,8 @@ void CA_SendTeamInfo(gedict_t *t)
 	int camode;
 	int deadtype;
 	int timetospawn;
+	int kills;
+	int deaths;
 	gedict_t *p, *s;
 	char *tm, *nick;
 
@@ -658,16 +664,6 @@ void CA_SendTeamInfo(gedict_t *t)
 		if (cnt >= 10)
 		{
 			break;
-		}
-
-		if (p == s)
-		{
-			continue; // ignore self
-		}
-
-		if (strneq(tm, getteam(p)))
-		{
-			continue; // on different team
 		}
 
 		if (t->trackent && (t->trackent == NUM_FOR_EDICT(p)))
@@ -713,22 +709,39 @@ void CA_SendTeamInfo(gedict_t *t)
 		cnt++;
 
 		cl = NUM_FOR_EDICT(p) - 1;
-		h = bound(0, (int)p->s.v.health, 999);
-		a = bound(0, (int)p->s.v.armorvalue, 999);
-		
-		shells = bound(0, (int)p->s.v.ammo_shells, 999);
-		nails = bound(0, (int)p->s.v.ammo_nails, 999);
-		rockets = bound(0, (int)p->s.v.ammo_rockets, 999);
-		cells = bound(0, (int)p->s.v.ammo_cells, 999);
 
-		stuffcmd(t, "//cainfo %d %d %d %d %d %d %d \"%s\" %d %d %d %d %d %d %d\n", cl,
-						(int)p->s.v.origin[0], (int)p->s.v.origin[1], (int)p->s.v.origin[2], h,
-						a, (int)p->s.v.items, nick, shells, nails, rockets, cells, camode, deadtype, timetospawn);
+		if (streq(tm, getteam(p)))
+		{
+			// only teammates should get health/armor/loc/items information
+			origin0 = (int)p->s.v.origin[0];
+			origin1 = (int)p->s.v.origin[1];
+			origin2 = (int)p->s.v.origin[2];
+			h = bound(0, (int)p->s.v.health, 999);
+			a = bound(0, (int)p->s.v.armorvalue, 999);
+			items = (int)p->s.v.items;
+			shells = bound(0, (int)p->s.v.ammo_shells, 999);
+			nails = bound(0, (int)p->s.v.ammo_nails, 999);
+			rockets = bound(0, (int)p->s.v.ammo_rockets, 999);
+			cells = bound(0, (int)p->s.v.ammo_cells, 999);
+		}
+		else
+		{
+			origin0 = origin1 = origin2 = h = a = items = shells = nails = rockets = cells = 0;
+		}
+		
+		kills = bound(0, (int)p->round_kills, 999);
+		deaths = bound(0, (int)p->round_deaths, 999);
+
+		stuffcmd(t, "//cainfo %d %d %d %d %d %d %d \"%s\" %d %d %d %d %d %d %d %d %d\n", cl,
+						origin0, origin1, origin2, h, a, items, nick, shells, nails, rockets, cells, 
+						camode, deadtype, timetospawn, kills, deaths);
 	}
 }
 
 void CA_ClientObituary(gedict_t *targ, gedict_t *attacker)
 {
+	attacker->round_kills++;
+	
 	// int ah, aa;
 
 	// if (!isCA())
@@ -1401,6 +1414,7 @@ void CA_Frame(void)
 				if (p->ca_ready)
 				{
 					p->round_deaths = 0;
+					p->round_kills = 0;
 					k_respawn(p, false);
 				}
 
