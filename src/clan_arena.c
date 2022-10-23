@@ -538,27 +538,13 @@ void CA_PutClientInServer(void)
 
 		self->in_play = false;
 		self->round_deaths++; //increment death count for wipeout
-		self->in_limbo = (self->ca_ready) && (self->round_deaths <= max_deaths);
+		self->in_limbo = (!self->in_play) && (self->ca_ready) && (self->round_deaths <= max_deaths) && self->can_respawn;
 		self->spawn_delay = 0;
 
 		setmodel(self, "");
 		setorigin(self, PASSVEC3(self->s.v.origin));
 
-		if (self->ca_ready && self->round_deaths <= max_deaths && !ca_round_pause)
-		{
-			//change colors to light versions
-			if (streq(self->teamcolor, "13"))
-			{
-				SetUserInfo(self, "topcolor", "2", 0);
-				SetUserInfo(self, "bottomcolor", "2", 0);
-			}
-			else
-			{
-				SetUserInfo(self, "topcolor", "6", 0);
-				SetUserInfo(self, "bottomcolor", "6", 0);
-			}
-		}
-		else
+		if (!self->in_limbo || ca_round_pause)
 		{
 			// Change color to white if dead or not playing
 			SetUserInfo(self, "topcolor", "0", 0);
@@ -1051,7 +1037,7 @@ void EndRound(int alive_team)
 
 				for (p = world; (p = find_plr(p));)
 				{
-					if (cvar("k_clan_arena_max_respawns"))
+					if (cvar("k_clan_arena") == 2)
 					{
 						if (alive_team && streq(getteam(p), cvar_string(va("_k_team%d", alive_team))))
 						{
@@ -1069,12 +1055,6 @@ void EndRound(int alive_team)
 							{
 								p->s.v.items += IT_INVULNERABILITY;
 							}
-						}
-
-						if (p->in_limbo)
-						{
-							SetUserInfo(p, "topcolor", "0", 0);
-							SetUserInfo(p, "bottomcolor", "0", 0);
 						}
 					}
 				}
@@ -1131,11 +1111,9 @@ void EndRound(int alive_team)
 
 void show_tracking_info(gedict_t *p)
 {
-	int max_respawns = cvar("k_clan_arena_max_respawns");
-
 	if (!ca_round_pause)
 	{
-		if (p->ca_ready && p->round_deaths <= max_respawns && !ca_round_pause)
+		if (p->in_limbo)
 		{
 			sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n%d\n\n\n seconds to respawn\n", 
 								redtext(p->track_target->netname), (int)ceil(p->seconds_to_respawn));
@@ -1240,6 +1218,29 @@ void CA_player_pre_think(void)
 		{
 			self->no_pain = true;
 		}
+
+		// players can't change their color
+		if (self->teamcolor && (self->in_play || (!ca_round_pause && self->in_limbo)) && 
+			(strneq(ezinfokey(self, "topcolor"), self->teamcolor) || strneq(ezinfokey(self, "bottomcolor"), self->teamcolor)))
+		{
+			SetUserInfo(self, "topcolor", self->teamcolor, 0);
+			SetUserInfo(self, "bottomcolor", self->teamcolor, 0);
+		}
+		// perma-dead players can't change their color
+		else if (self->teamcolor && !self->in_play && (!self->in_limbo || !self->can_respawn || ca_round_pause) && 
+			(strneq(ezinfokey(self, "topcolor"), "0") || strneq(ezinfokey(self, "bottomcolor"), "0")))
+		{
+			SetUserInfo(self, "topcolor", "0", 0);
+			SetUserInfo(self, "bottomcolor", "0", 0);
+		}
+		// players who aren't in the game must be white and have no team
+		else if (!self->teamcolor && !self->ca_ready && (match_in_progress == 2) &&
+			(strneq(ezinfokey(self, "topcolor"), "0") || strneq(ezinfokey(self, "bottomcolor"), "0") || strneq(ezinfokey(self, "team"), "")))
+		{
+			SetUserInfo(self, "topcolor", "0", 0);
+			SetUserInfo(self, "bottomcolor", "0", 0);
+			SetUserInfo(self, "team", "", 0);
+		}
 	}
 }
 
@@ -1289,10 +1290,9 @@ void CA_Frame(void)
 
 	round_time = Q_rint(g_globalvars.time - time_to_start);
 
-	// if max_respawns are greater than 0, we're playing wipeout
+	// if k_clan_arena is 2, we're playing wipeout
 	if (ra_match_fight == 2 && !ca_round_pause && cvar("k_clan_arena") == 2)
 	{
-		int max_deaths = cvar("k_clan_arena_max_respawns");
 		int last_alive;
 		int e_last_alive;
 		char str_last_alive[5];
@@ -1303,7 +1303,7 @@ void CA_Frame(void)
 			last_alive = (int)ceil(last_alive_time(p));
 			e_last_alive = (int)ceil(enemy_last_alive_time(p));
 			
-			if (p->ca_ready && !p->in_play && p->round_deaths <= max_deaths)
+			if (p->in_limbo)
 			{
 				if (!p->spawn_delay)
 				{
@@ -1413,6 +1413,7 @@ void CA_Frame(void)
 			{
 				if (p->ca_ready)
 				{
+					p->can_respawn = true;
 					p->round_deaths = 0;
 					p->round_kills = 0;
 					k_respawn(p, false);

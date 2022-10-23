@@ -1044,6 +1044,7 @@ typedef struct gedict_s
 	struct gedict_s *track_target;			// who are we tracking?
 	qbool ca_alive;
 	qbool ca_ready;
+	qbool can_respawn;
 	qbool in_play;							// is player still fighting?
 	qbool in_limbo;							// waiting to respawn during wipeout
 	qbool last_alive_active;				// if last alive timer is active
