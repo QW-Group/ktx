@@ -86,6 +86,19 @@ int CA_get_score_2(void)
 	return team2_score;
 }
 
+int calc_respawn_time(gedict_t *p, int offset)
+{
+	qbool isWipeout = (cvar("k_clan_arena") == 2);
+	int max_deaths = cvar("k_clan_arena_max_respawns");
+	int time = 999;
+
+	if (isWipeout && p->round_deaths+offset <= max_deaths){
+		time = p->round_deaths+offset == 1 ? 5 : (p->round_deaths-1+offset) * 10;
+	}
+
+	return time;
+}
+
 // returns 0 if player has at least one alive teammate
 // otherwise returns number of seconds until next teammate respawns
 float last_alive_time(gedict_t *player)
@@ -538,7 +551,7 @@ void CA_PutClientInServer(void)
 
 		self->in_play = false;
 		self->round_deaths++; //increment death count for wipeout
-		self->in_limbo = (!self->in_play) && (self->ca_ready) && (self->round_deaths <= max_deaths) && self->can_respawn;
+		self->in_limbo = (self->ca_ready) && (self->round_deaths <= max_deaths) && self->can_respawn;
 		self->spawn_delay = 0;
 
 		setmodel(self, "");
@@ -630,6 +643,7 @@ void CA_SendTeamInfo(gedict_t *t)
 	int timetospawn;
 	int kills;
 	int deaths;
+	int max_deaths;
 	gedict_t *p, *s;
 	char *tm, *nick;
 
@@ -644,6 +658,7 @@ void CA_SendTeamInfo(gedict_t *t)
 	camode = 1;		// 1 is the only mode right now
 	deadtype = 0;
 	timetospawn = 0;
+	max_deaths = cvar("k_clan_arena_max_respawns");
 
 	for (cnt = 0, p = world; (p = find_plr(p));)
 	{
@@ -661,17 +676,18 @@ void CA_SendTeamInfo(gedict_t *t)
 		{
 			if (match_in_progress == 2)
 			{
-				if (p->in_play)
+				if (ISLIVE(p))
 				{
 					deadtype = 0;	// player is alive/active in round
 				}
-				else if (p->in_limbo)
-				{
-					deadtype = 1;	// player is dead but will respawn
-				}
 				else
 				{
-					deadtype = 2;	// player is dead and won't respawn
+					deadtype = 1;	// player is dead but will respawn
+
+					if ((p->round_deaths > max_deaths) || (p->seconds_to_respawn == 999))
+					{
+						deadtype = 2;	// player is dead and won't respawn
+					}
 				}
 
 				timetospawn = (int)ceil(p->seconds_to_respawn);
@@ -1307,7 +1323,7 @@ void CA_Frame(void)
 			{
 				if (!p->spawn_delay)
 				{
-					int delay = p->round_deaths == 1 ? 5 : (p->round_deaths-1) * 10;
+					int delay = calc_respawn_time(p, 0);
 					p->spawn_delay = g_globalvars.time + delay;
 				}
 
@@ -1320,7 +1336,7 @@ void CA_Frame(void)
 					G_centerprint(p, "%s", p->cptext);
 					k_respawn(p, true);
 
-					p->seconds_to_respawn = 999;
+					p->seconds_to_respawn = calc_respawn_time(p, 1);
 					p->time_of_respawn = g_globalvars.time; // resets alive_time to 0
 				}
 				else
@@ -1416,6 +1432,7 @@ void CA_Frame(void)
 					p->can_respawn = true;
 					p->round_deaths = 0;
 					p->round_kills = 0;
+					p->seconds_to_respawn = calc_respawn_time(p, 1);
 					k_respawn(p, false);
 				}
 

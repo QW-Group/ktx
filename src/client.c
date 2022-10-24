@@ -982,7 +982,8 @@ void ClientKill()
 		}
 		else if ((ra_match_fight == 2) && !ca_round_pause)
 		{
-			self->can_respawn = false;	// No respawning after suicide in wipeout mode
+			self->can_respawn = false;		// No respawning after suicide in wipeout mode
+			self->seconds_to_respawn = 999; // no countdown
 		}
 	}
 
