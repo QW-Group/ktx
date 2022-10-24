@@ -1362,6 +1362,11 @@ void W_FireGrenade()
 		if (isCA())
 		{
 			self->s.v.currentammo = self->ca_ammo_grenades = self->ca_ammo_grenades - 1;
+
+			if (!self->ca_ammo_grenades)
+			{
+				self->s.v.items -= IT_GRENADE_LAUNCHER;
+			}
 			AmmoUsed(self);
 		}		
 		else if ((deathmatch != 4) && !k_bloodfest)
