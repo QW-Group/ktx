@@ -92,7 +92,8 @@ int calc_respawn_time(gedict_t *p, int offset)
 	int max_deaths = cvar("k_clan_arena_max_respawns");
 	int time = 999;
 
-	if (isWipeout && p->round_deaths+offset <= max_deaths){
+	if (isWipeout && (p->round_deaths+offset <= max_deaths))
+	{
 		time = p->round_deaths+offset == 1 ? 5 : (p->round_deaths-1+offset) * 10;
 	}
 
