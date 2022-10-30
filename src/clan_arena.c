@@ -86,6 +86,20 @@ int CA_get_score_2(void)
 	return team2_score;
 }
 
+int calc_respawn_time(gedict_t *p, int offset)
+{
+	qbool isWipeout = (cvar("k_clan_arena") == 2);
+	int max_deaths = cvar("k_clan_arena_max_respawns");
+	int time = 999;
+
+	if (isWipeout && (p->round_deaths+offset <= max_deaths))
+	{
+		time = p->round_deaths+offset == 1 ? 5 : (p->round_deaths-1+offset) * 10;
+	}
+
+	return time;
+}
+
 // returns 0 if player has at least one alive teammate
 // otherwise returns number of seconds until next teammate respawns
 float last_alive_time(gedict_t *player)
@@ -114,7 +128,8 @@ float last_alive_time(gedict_t *player)
 
 	// this checks to see if there's already a last_alive_countdown in progress
 	// because we only want to play the audio once at the begining of the countdown
-	if (!player->last_alive_active && (time > 0))
+	// Only play the audio if the player is alive
+	if (!player->last_alive_active && (time > 0) && player->in_play)
 	{
 		player->last_alive_active = true;
 
@@ -538,27 +553,13 @@ void CA_PutClientInServer(void)
 
 		self->in_play = false;
 		self->round_deaths++; //increment death count for wipeout
-		self->in_limbo = (self->ca_ready) && (self->round_deaths <= max_deaths);
+		self->in_limbo = (self->ca_ready) && (self->round_deaths <= max_deaths) && self->can_respawn;
 		self->spawn_delay = 0;
 
 		setmodel(self, "");
 		setorigin(self, PASSVEC3(self->s.v.origin));
 
-		if (self->ca_ready && self->round_deaths <= max_deaths && !ca_round_pause)
-		{
-			//change colors to light versions
-			if (streq(self->teamcolor, "13"))
-			{
-				SetUserInfo(self, "topcolor", "2", 0);
-				SetUserInfo(self, "bottomcolor", "2", 0);
-			}
-			else
-			{
-				SetUserInfo(self, "topcolor", "6", 0);
-				SetUserInfo(self, "bottomcolor", "6", 0);
-			}
-		}
-		else
+		if (!self->in_limbo || ca_round_pause)
 		{
 			// Change color to white if dead or not playing
 			SetUserInfo(self, "topcolor", "0", 0);
@@ -579,6 +580,11 @@ qbool CA_can_fire(gedict_t *p)
 	if (!isCA())
 	{
 		return true;
+	}
+
+	if (!ra_match_fight && p->ready)
+	{
+		return true;	// allow fire during prewar if /ready
 	}
 
 	return (ISLIVE(p) && (ra_match_fight == 2) && time_to_start && (g_globalvars.time >= time_to_start));
@@ -629,8 +635,12 @@ void CA_SendTeamInfo(gedict_t *t)
 {
 	int cl;
 	int cnt;
+	int origin0;
+	int origin1;
+	int origin2;
 	int h;
 	int a;
+	int items;
 	int shells;
 	int nails;
 	int rockets;
@@ -638,6 +648,9 @@ void CA_SendTeamInfo(gedict_t *t)
 	int camode;
 	int deadtype;
 	int timetospawn;
+	int kills;
+	int deaths;
+	int max_deaths;
 	gedict_t *p, *s;
 	char *tm, *nick;
 
@@ -652,22 +665,13 @@ void CA_SendTeamInfo(gedict_t *t)
 	camode = 1;		// 1 is the only mode right now
 	deadtype = 0;
 	timetospawn = 0;
+	max_deaths = cvar("k_clan_arena_max_respawns");
 
 	for (cnt = 0, p = world; (p = find_plr(p));)
 	{
 		if (cnt >= 10)
 		{
 			break;
-		}
-
-		if (p == s)
-		{
-			continue; // ignore self
-		}
-
-		if (strneq(tm, getteam(p)))
-		{
-			continue; // on different team
 		}
 
 		if (t->trackent && (t->trackent == NUM_FOR_EDICT(p)))
@@ -679,17 +683,18 @@ void CA_SendTeamInfo(gedict_t *t)
 		{
 			if (match_in_progress == 2)
 			{
-				if (p->in_play)
+				if (ISLIVE(p))
 				{
 					deadtype = 0;	// player is alive/active in round
 				}
-				else if (p->in_limbo)
-				{
-					deadtype = 1;	// player is dead but will respawn
-				}
 				else
 				{
-					deadtype = 2;	// player is dead and won't respawn
+					deadtype = 1;	// player is dead but will respawn
+
+					if ((p->round_deaths > max_deaths) || (p->seconds_to_respawn == 999))
+					{
+						deadtype = 2;	// player is dead and won't respawn
+					}
 				}
 
 				timetospawn = (int)ceil(p->seconds_to_respawn);
@@ -713,22 +718,39 @@ void CA_SendTeamInfo(gedict_t *t)
 		cnt++;
 
 		cl = NUM_FOR_EDICT(p) - 1;
-		h = bound(0, (int)p->s.v.health, 999);
-		a = bound(0, (int)p->s.v.armorvalue, 999);
-		
-		shells = bound(0, (int)p->s.v.ammo_shells, 999);
-		nails = bound(0, (int)p->s.v.ammo_nails, 999);
-		rockets = bound(0, (int)p->s.v.ammo_rockets, 999);
-		cells = bound(0, (int)p->s.v.ammo_cells, 999);
 
-		stuffcmd(t, "//cainfo %d %d %d %d %d %d %d \"%s\" %d %d %d %d %d %d %d\n", cl,
-						(int)p->s.v.origin[0], (int)p->s.v.origin[1], (int)p->s.v.origin[2], h,
-						a, (int)p->s.v.items, nick, shells, nails, rockets, cells, camode, deadtype, timetospawn);
+		if (streq(tm, getteam(p)))
+		{
+			// only teammates should get health/armor/loc/items information
+			origin0 = (int)p->s.v.origin[0];
+			origin1 = (int)p->s.v.origin[1];
+			origin2 = (int)p->s.v.origin[2];
+			h = bound(0, (int)p->s.v.health, 999);
+			a = bound(0, (int)p->s.v.armorvalue, 999);
+			items = (int)p->s.v.items;
+			shells = bound(0, (int)p->s.v.ammo_shells, 999);
+			nails = bound(0, (int)p->s.v.ammo_nails, 999);
+			rockets = bound(0, (int)p->s.v.ammo_rockets, 999);
+			cells = bound(0, (int)p->s.v.ammo_cells, 999);
+		}
+		else
+		{
+			origin0 = origin1 = origin2 = h = a = items = shells = nails = rockets = cells = 0;
+		}
+		
+		kills = bound(0, (int)p->round_kills, 999);
+		deaths = bound(0, (int)p->round_deaths, 999);
+
+		stuffcmd(t, "//cainfo %d %d %d %d %d %d %d \"%s\" %d %d %d %d %d %d %d %d %d\n", cl,
+						origin0, origin1, origin2, h, a, items, nick, shells, nails, rockets, cells, 
+						camode, deadtype, timetospawn, kills, deaths);
 	}
 }
 
 void CA_ClientObituary(gedict_t *targ, gedict_t *attacker)
 {
+	attacker->round_kills++;
+	
 	// int ah, aa;
 
 	// if (!isCA())
@@ -1038,7 +1060,7 @@ void EndRound(int alive_team)
 
 				for (p = world; (p = find_plr(p));)
 				{
-					if (cvar("k_clan_arena_max_respawns"))
+					if (cvar("k_clan_arena") == 2)
 					{
 						if (alive_team && streq(getteam(p), cvar_string(va("_k_team%d", alive_team))))
 						{
@@ -1056,12 +1078,6 @@ void EndRound(int alive_team)
 							{
 								p->s.v.items += IT_INVULNERABILITY;
 							}
-						}
-
-						if (p->in_limbo)
-						{
-							SetUserInfo(p, "topcolor", "0", 0);
-							SetUserInfo(p, "bottomcolor", "0", 0);
 						}
 					}
 				}
@@ -1118,11 +1134,9 @@ void EndRound(int alive_team)
 
 void show_tracking_info(gedict_t *p)
 {
-	int max_respawns = cvar("k_clan_arena_max_respawns");
-
 	if (!ca_round_pause)
 	{
-		if (p->ca_ready && p->round_deaths <= max_respawns && !ca_round_pause)
+		if (p->in_limbo)
 		{
 			sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n%d\n\n\n seconds to respawn\n", 
 								redtext(p->track_target->netname), (int)ceil(p->seconds_to_respawn));
@@ -1227,6 +1241,29 @@ void CA_player_pre_think(void)
 		{
 			self->no_pain = true;
 		}
+
+		// players can't change their color
+		if (self->teamcolor && (self->in_play || (!ca_round_pause && self->in_limbo)) && 
+			(strneq(ezinfokey(self, "topcolor"), self->teamcolor) || strneq(ezinfokey(self, "bottomcolor"), self->teamcolor)))
+		{
+			SetUserInfo(self, "topcolor", self->teamcolor, 0);
+			SetUserInfo(self, "bottomcolor", self->teamcolor, 0);
+		}
+		// perma-dead players can't change their color
+		else if (self->teamcolor && !self->in_play && (!self->in_limbo || !self->can_respawn || ca_round_pause) && 
+			(strneq(ezinfokey(self, "topcolor"), "0") || strneq(ezinfokey(self, "bottomcolor"), "0")))
+		{
+			SetUserInfo(self, "topcolor", "0", 0);
+			SetUserInfo(self, "bottomcolor", "0", 0);
+		}
+		// players who aren't in the game must be white and have no team
+		else if (!self->teamcolor && !self->ca_ready && (match_in_progress == 2) &&
+			(strneq(ezinfokey(self, "topcolor"), "0") || strneq(ezinfokey(self, "bottomcolor"), "0") || strneq(ezinfokey(self, "team"), "")))
+		{
+			SetUserInfo(self, "topcolor", "0", 0);
+			SetUserInfo(self, "bottomcolor", "0", 0);
+			SetUserInfo(self, "team", "", 0);
+		}
 	}
 }
 
@@ -1276,10 +1313,9 @@ void CA_Frame(void)
 
 	round_time = Q_rint(g_globalvars.time - time_to_start);
 
-	// if max_respawns are greater than 0, we're playing wipeout
+	// if k_clan_arena is 2, we're playing wipeout
 	if (ra_match_fight == 2 && !ca_round_pause && cvar("k_clan_arena") == 2)
 	{
-		int max_deaths = cvar("k_clan_arena_max_respawns");
 		int last_alive;
 		int e_last_alive;
 		char str_last_alive[5];
@@ -1290,11 +1326,11 @@ void CA_Frame(void)
 			last_alive = (int)ceil(last_alive_time(p));
 			e_last_alive = (int)ceil(enemy_last_alive_time(p));
 			
-			if (p->ca_ready && !p->in_play && p->round_deaths <= max_deaths)
+			if (p->in_limbo)
 			{
 				if (!p->spawn_delay)
 				{
-					int delay = p->round_deaths == 1 ? 5 : (p->round_deaths-1) * 10;
+					int delay = calc_respawn_time(p, 0);
 					p->spawn_delay = g_globalvars.time + delay;
 				}
 
@@ -1307,7 +1343,7 @@ void CA_Frame(void)
 					G_centerprint(p, "%s", p->cptext);
 					k_respawn(p, true);
 
-					p->seconds_to_respawn = 999;
+					p->seconds_to_respawn = calc_respawn_time(p, 1);
 					p->time_of_respawn = g_globalvars.time; // resets alive_time to 0
 				}
 				else
@@ -1400,7 +1436,10 @@ void CA_Frame(void)
 			{
 				if (p->ca_ready)
 				{
+					p->can_respawn = true;
 					p->round_deaths = 0;
+					p->round_kills = 0;
+					p->seconds_to_respawn = calc_respawn_time(p, 1);
 					k_respawn(p, false);
 				}
 
