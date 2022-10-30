@@ -311,8 +311,6 @@ void health_touch()
 			return;
 		}
 
-		adjust_pickup_time(&other->it_pickup_time[itHEALTH_100], &other->ps.itm[itHEALTH_100].time);
-		other->it_pickup_time[itHEALTH_100] = g_globalvars.time;
 		other->ps.itm[itHEALTH_100].tooks++;
 
 		mi_print(other, IT_SUPERHEALTH, va("%s got Megahealth", getname(other)));
@@ -507,6 +505,26 @@ void armor_touch()
 		adjust_pickup_time(&other->it_pickup_time[armorType], &other->ps.itm[armorType].time);
 		other->it_pickup_time[armorType] = g_globalvars.time;
 		other->ps.itm[armorType].tooks++;
+		switch (armorType)
+		{
+			case itGA:
+				adjust_pickup_time(&other->it_pickup_time[itYA], &other->ps.itm[itYA].time);
+				adjust_pickup_time(&other->it_pickup_time[itRA], &other->ps.itm[itRA].time);
+				break;
+
+			case itYA:
+				adjust_pickup_time(&other->it_pickup_time[itGA], &other->ps.itm[itGA].time);
+				adjust_pickup_time(&other->it_pickup_time[itRA], &other->ps.itm[itRA].time);
+				break;
+
+			case itRA:
+				adjust_pickup_time(&other->it_pickup_time[itGA], &other->ps.itm[itGA].time);
+				adjust_pickup_time(&other->it_pickup_time[itYA], &other->ps.itm[itYA].time);
+				break;
+
+			default:
+				break;
+		}
 	}
 
 	real_value = other->s.v.armorvalue;
@@ -2065,7 +2083,9 @@ void powerup_touch()
 		other->invisible_finished = g_globalvars.time + 30;
 
 		if (self->cnt > g_globalvars.time) // is this was a dropped powerup
+		{
 			p_cnt = &(other->invisible_finished);
+		}
 	}
 	else if (streq(self->classname, "item_artifact_super_damage"))
 	{
