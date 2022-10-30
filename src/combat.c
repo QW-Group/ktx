@@ -328,6 +328,16 @@ void Killed(gedict_t *targ, gedict_t *attacker, gedict_t *inflictor)
 		{
 			EndMatch(0);
 		}
+
+		if (isTeam())
+		{
+			// in team modes fraglimit can be a sum of frags of all players in the team
+			if ((get_scores1() >= fraglimit) || (get_scores2() >= fraglimit)
+					|| (get_scores3() >= fraglimit))
+			{
+				EndMatch(0);
+			}
+		}
 	}
 
 	if (k_bloodfest)
