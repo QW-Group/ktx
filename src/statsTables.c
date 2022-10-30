@@ -367,12 +367,11 @@ static void onePlayerDamageStats(gedict_t *p)
 
 static void onePlayerItemTimeStats(gedict_t *p, int tp)
 {
-	G_sprint(self, 2, "%s%-20s|%.2d:%.2d|%.2d:%.2d|%.2d:%.2d|%.2d:%.2d|%5s|%5s|%5s|\n",
+	G_sprint(self, 2, "%s%-20s|%.2d:%.2d|%.2d:%.2d|%.2d:%.2d|%5s|%5s|%5s|\n",
 			(isghost(p) ? "\203" : ""), getname(p),
 			(int)(p->ps.itm[itRA].time / 60), ((int)(p->ps.itm[itRA].time)) % 60,
 			(int)(p->ps.itm[itYA].time / 60), ((int)(p->ps.itm[itYA].time)) % 60,
 			(int)(p->ps.itm[itGA].time / 60), ((int)(p->ps.itm[itGA].time)) % 60,
-			(int)(p->ps.itm[itHEALTH_100].time / 60), ((int)(p->ps.itm[itHEALTH_100].time)) % 60,
 			tp ? va("%.2d:%.2d", (int)(p->ps.itm[itQUAD].time / 60),
 					((int)(p->ps.itm[itQUAD].time)) % 60) :
 					"    -",
@@ -1471,12 +1470,12 @@ static void playersItemTimeStats(void)
 		p = find_plrghst(p, &from1);
 	}
 
-	G_sprint(self, 2, "\n%s          |%s|%s|%s|%s|%s|%s|%s|\n"
+	G_sprint(self, 2, "\n%s          |%s|%s|%s|%s|%s|%s|\n"
 			"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
 			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
-			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
+			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
 			"\237\n",
-			redtext("Item times"), redtext("   RA"), redtext("   YA"), redtext("   GA"),redtext(" Mega"),
+			redtext("Item times"), redtext("   RA"), redtext("   YA"), redtext("   GA"),
 			redtext(" Quad"), redtext(" Pent"), redtext(" Ring"));
 
 	tp = isTeam() || isCTF();
