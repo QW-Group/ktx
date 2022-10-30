@@ -31,6 +31,7 @@ typedef struct teamStats_s
 
 extern teamStats_t tmStats[MAX_TM_STATS];
 extern int tmStats_cnt;
+extern qbool lastStatsData;
 
 typedef struct stats_format_s
 {
@@ -76,5 +77,7 @@ void x##_race_detail(fileHandle_t handle);
 const char* GetMode(void);
 char* ItName(itemName_t it);
 void S2di(fileHandle_t file_handle, const char *fmt, ...) PRINTF_FUNC(2);
+void MatchEndStatsTables(void);
+
 
 #endif // STATS_H

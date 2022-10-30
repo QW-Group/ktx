@@ -115,6 +115,7 @@ set(SRC_COMMON
 	"${DIR_SRC}/sp_wizard.c"
 	"${DIR_SRC}/sp_zombie.c"
 	"${DIR_SRC}/stats.c"
+	"${DIR_SRC}/statsTables.c"
 	"${DIR_SRC}/stats_json.c"
 	"${DIR_SRC}/stats_xml.c"
 	"${DIR_SRC}/subs.c"

@@ -19,6 +19,7 @@
 
 // commands.c
 #include "g_local.h"
+#include "stats.h"
 
 int max_cmd_len = 0;
 
@@ -73,6 +74,7 @@ void ListWhoNot();
 void ModStatus();
 void ModStatus2();
 void ModStatusVote();
+void LastStats();
 void PlayerStats();
 void PlayerStatus();
 void PlayerStatusN();
@@ -497,6 +499,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_AUTO_POW			"auto tracking powerups"
 #define CD_NEXT_BEST		"set pov to next best player"
 #define CD_NEXT_POW			"set pov to next powerup"
+#define CD_LASTSTATS		"show endgame stats"
 #define CD_LASTSCORES		"print last games scores"
 #define CD_RND				"select random value"
 #define CD_AGREE			"agree on last map vote"
@@ -854,6 +857,7 @@ cmd_t cmds[] =
 	{ "auto_pow", 					DEF(AutoTrack), 				atPow, 		CF_SPECTATOR | CF_MATCHLESS, 											CD_AUTO_POW },
 	{ "next_best", 					next_best, 						0, 			CF_SPECTATOR | CF_MATCHLESS, 											CD_NEXT_BEST },
 	{ "next_pow", 					next_pow, 						0, 			CF_SPECTATOR | CF_MATCHLESS, 											CD_NEXT_POW },
+	{ "laststats", 					LastStats, 						0, 			CF_BOTH | CF_MATCHLESS, 												CD_LASTSTATS },
 	{ "lastscores", 				lastscores, 					0, 			CF_BOTH | CF_MATCHLESS | CF_PARAMS, 									CD_LASTSCORES },
 	{ "rnd", 						krnd, 							0, 			CF_BOTH | CF_PARAMS, 													CD_RND },
 	{ "agree", 						agree_on_map, 					0, 			CF_PLAYER | CF_MATCHLESS, 												CD_AGREE },
@@ -3357,6 +3361,19 @@ void PrintScores()
 			}
 		}
 	}
+}
+
+// This Endgame statistics is triggered by the ingame /laststats command.
+void LastStats()
+{
+	if (match_in_progress)
+	{
+		G_sprint(self, 2, "Game in progress\n");
+
+		return;
+	}
+
+	MatchEndStatsTables();
 }
 
 // This player statistics is triggered by the ingame /stats command. Nothing to do with the endgame stats.
