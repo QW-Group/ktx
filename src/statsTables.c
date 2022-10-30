@@ -685,7 +685,7 @@ static void topMidairStats()
 			if ((p->ps.spree_max) == maxstreak)
 			{
 				G_sprint(self, 2, "   %-13s: %s%s (%d)\n", (f1 ? "" : redtext("streak")),
-							(isghost(p) ? "\203" : ""), getname(p), maxmidairs);
+							(isghost(p) ? "\203" : ""), getname(p), maxstreak);
 				f1 = 1;
 			}
 
