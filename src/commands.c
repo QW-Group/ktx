@@ -71,7 +71,7 @@ void CTFBasedSpawn();
 void FragsDown();
 void FragsUp();
 void ListWhoNot();
-void ModStatus();
+void ModStatus1();
 void ModStatus2();
 void ModStatusVote();
 void LastStats();
@@ -330,7 +330,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_READY			"when you feel ready"
 #define CD_SLOWREADY		"like ready, but don't activate the idlebot"
 #define CD_BREAK			"unready / vote matchend"
-#define CD_STATUS			"show server settings"
+#define CD_STATUS1			"show server settings"
 #define CD_STATUS2			"more server settings"
 #define CD_WHO				"player teamlist"
 #define CD_WHOSKIN			"player skinlist"
@@ -675,7 +675,7 @@ cmd_t cmds[] =
 	{ "ready", 						PlayerReady, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_READY },
 	{ "slowready", 					PlayerSlowReady, 				0, 			CF_BOTH | CF_MATCHLESS, 												CD_SLOWREADY },
 	{ "break", 						PlayerBreak, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_BREAK },
-	{ "status", 					ModStatus, 						0, 			CF_BOTH | CF_MATCHLESS, 												CD_STATUS },
+	{ "status1", 					ModStatus1, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_STATUS1 },
 	{ "status2", 					ModStatus2, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_STATUS2 },
 	{ "who", 						PlayerStatus, 					0, 			CF_BOTH, 																CD_WHO },
 	{ "whoskin", 					PlayerStatusS, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_WHOSKIN },
@@ -1802,7 +1802,7 @@ static char* get_frp_str()
 	}
 }
 
-void ModStatus()
+void ModStatus1()
 {
 	int votes;
 	gedict_t *p;
