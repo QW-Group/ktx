@@ -667,7 +667,19 @@ void vote_check_rpickup(int maxRecursion)
 				if (i == pl_idx)
 				{
 					p->k_teamnumber = tn;
-					tn = (tn == 1 ? 2 : 1); // next random player will be in other team
+					if ((current_umode >= um2on2on2) && (current_umode <= um4on4on4))
+					{
+						// game modes with 3 teams
+						++tn;
+						if (tn > 3)
+						{
+							tn = 1;
+						}
+					}
+					else
+					{
+						tn = (tn == 1 ? 2 : 1); // next random player will be in other team
+					}
 
 					if (p->k_teamnumber == 1)
 					{
@@ -683,7 +695,7 @@ void vote_check_rpickup(int maxRecursion)
 											"color  4\nskin \"\"\nteam red\n");
 						}
 					}
-					else
+					else if (p->k_teamnumber == 2)
 					{
 						if (p->isBot)
 						{
@@ -695,6 +707,20 @@ void vote_check_rpickup(int maxRecursion)
 						{
 							stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO,
 											"color 13\nskin \"\"\nteam blue\n");
+						}
+					}
+					else
+					{
+						if (p->isBot)
+						{
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "team", "yellow", 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "topcolor", "12", 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "bottomcolor", "12", 0);
+						}
+						else
+						{
+							stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO,
+											"color 12\nskin \"\"\nteam yellow\n");
 						}
 					}
 
