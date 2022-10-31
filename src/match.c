@@ -2095,8 +2095,28 @@ char* CompilateDemoName()
 			clt = 0; // no
 		}
 
-		strlcat(demoname, (isTeam() ? (clt ? va("%don%d", clt, clt) : "team") : "ctf"),
-				sizeof(demoname));
+		if (isTeam())
+		{
+			const char *strCurrentUmode;
+
+			// The parameter is (current_umode-1), because the UserModes_t enum has `umUnknown` as first element,
+			// but the um_list[] array doesn't have an 'empty' first row
+			strCurrentUmode = um_name_byidx(current_umode-1);
+			if (strCurrentUmode != NULL)
+			{
+				strlcat(demoname, (char *)strCurrentUmode, sizeof(demoname));
+			}
+			else
+			{
+				// Something is wrong with current_umode. Let's use the legacy format
+				strlcat(demoname, (clt ? va("%don%d", clt, clt) : "team"), sizeof(demoname));
+			}
+		}
+		else
+		{
+			strlcat(demoname, "ctf", sizeof(demoname));
+		}
+
 		if (isRACE())
 		{
 			strlcat(demoname, "_race", sizeof(demoname));
