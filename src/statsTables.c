@@ -121,8 +121,8 @@ void MatchEndStatsTables(void)
 
 static void onePlayerMidairStats(gedict_t *p)
 {
-	G_sprint(self, 2, "%s%-20s|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%5s|%5s|\n",
-			(isghost(p) ? "\203" : ""), getname(p),
+	G_sprint(self, 2, "%-20s|%3d|%3d|%3d|%3d|%3d|%3d|%3d|%5s|%5s|\n",
+			va("%s%s", isghost(p) ? "\203" : "", getname(p)),
 			p->ps.mid_total,
 			p->ps.mid_bronze,
 			p->ps.mid_silver,
@@ -144,8 +144,8 @@ static void onePlayerMidairKillStats(gedict_t *p)
 	a_rl = p->ps.wpn[wpRL].attacks;
 	e_rl = 100.0 * vh_rl / max(1, a_rl);
 
-	G_sprint(self, 2, "%s%-20s|%5d|%5d|%5d|%5s|\n",
-			(isghost(p) ? "\203" : ""), getname(p),
+	G_sprint(self, 2, "%-20s|%5d|%5d|%5d|%5s|\n",
+			va("%s%s", isghost(p) ? "\203" : "", getname(p)),
 			(int)p->s.v.frags,
 			p->ps.spawn_frags,
 			p->ps.spree_max,
@@ -154,8 +154,8 @@ static void onePlayerMidairKillStats(gedict_t *p)
 
 static void onePlayerInstagibStats(gedict_t *p)
 {
-	G_sprint(self, 2, "%s%-20s|%4d|%4d|%4d|%4d|%4d|%4d|%4d|%4d|%4d|\n",
-			(isghost(p) ? "\203" : ""), getname(p),
+	G_sprint(self, 2, "%-20s|%4d|%4d|%4d|%4d|%4d|%4d|%4d|%4d|%4d|\n",
+			va("%s%s", isghost(p) ? "\203" : "", getname(p)),
 			p->ps.i_cggibs,
 			p->ps.i_axegibs,
 			p->ps.i_stompgibs,
@@ -175,8 +175,8 @@ static void onePlayerInstagibKillStats(gedict_t *p)
 	h_sg = p->ps.wpn[wpSG].hits;
 	a_sg = p->ps.wpn[wpSG].attacks;
 
-	G_sprint(self, 2, "%s%-20s|%5d|%5d|%5d|%5d|%5d|%5s|\n",
-			(isghost(p) ? "\203" : ""), getname(p),
+	G_sprint(self, 2, "%-20s|%5d|%5d|%5d|%5d|%5d|%5s|\n",
+			va("%s%s", isghost(p) ? "\203" : "", getname(p)),
 			(int)p->s.v.frags,
 			p->ps.i_cggibs + p->ps.i_axegibs + p->ps.i_stompgibs,
 			(int)p->deaths,
@@ -199,8 +199,8 @@ static void onePlayerLGCStats(gedict_t *p)
 	h_lg = p->ps.wpn[wpLG].hits;
 	e_lg = 100.0 * h_lg / max(1, a_lg);
 
-	G_sprint(self, 2, "%s%-20s|%5d|%5s|%5s|%5s|\n",
-			(isghost(p) ? "\203" : ""), getname(p),
+	G_sprint(self, 2, "%-20s|%5d|%5s|%5s|%5s|\n",
+			va("%s%s", isghost(p) ? "\203" : "", getname(p)),
 			(int)(e_lg * p->s.v.frags),
 			(a_lg != 0 ? va("%.1f%%", ((over * 100.0f) / a_lg)) : "0.0%"),
 			(a_lg != 0 ? va("%.1f%%", ((under * 100.0f) / a_lg)) : "0.0%"),
@@ -209,8 +209,8 @@ static void onePlayerLGCStats(gedict_t *p)
 
 static void onePlayerKillStats(gedict_t *p, int tp)
 {
-	G_sprint(self, 2, "%s%-20s|%5d|%5d|%5d|%5d|%5s|%5d|%5s|\n",
-			(isghost(p) ? "\203" : ""), getname(p),
+	G_sprint(self, 2, "%-20s|%5d|%5d|%5d|%5d|%5s|%5d|%5s|\n",
+			va("%s%s", isghost(p) ? "\203" : "", getname(p)),
 			(isCTF() ? (int)(p->s.v.frags - p->ps.ctf_points) : (int)p->s.v.frags),
 			(int)(p->kills),
 			(isCTF() ? (int)(p->ps.ctf_points - p->deaths) : (int)(p->deaths)),
@@ -223,8 +223,8 @@ static void onePlayerKillStats(gedict_t *p, int tp)
 
 static void onePlayerItemStats(gedict_t *p, int tp)
 {
-	G_sprint(self, 2, "%s%-20s|%5d|%5d|%5d|%5d|%5s|%5s|%5s|\n",
-			(isghost(p) ? "\203" : ""), getname(p),
+	G_sprint(self, 2, "%-20s|%5d|%5d|%5d|%5d|%5s|%5s|%5s|\n",
+			va("%s%s", isghost(p) ? "\203" : "", getname(p)),
 			p->ps.itm[itGA].tooks,
 			p->ps.itm[itYA].tooks,
 			p->ps.itm[itRA].tooks,
@@ -281,8 +281,8 @@ static void onePlayerWeaponEffiStats(gedict_t *p)
 	e_ssg = 100.0 * h_ssg / max(1, a_ssg);
 	e_sg = 100.0 * h_sg / max(1, a_sg);
 
-	G_sprint(self, 2, "%s%-20s|%5s|%5s|%5s|%5s|%5s|%5s|%5s|\n",
-			(isghost(p) ? "\203" : ""), getname(p),
+	G_sprint(self, 2, "%-20s|%5s|%5s|%5s|%5s|%5s|%5s|%5s|\n",
+			va("%s%s", isghost(p) ? "\203" : "", getname(p)),
 			(a_lg ? ((e_lg >= 100)? va("%.0f%%", e_lg) : va("%.1f%%", e_lg)) : "-"),
 			(a_rl ? ((e_rl >= 100) ? va("%.0f%%", e_rl) : va("%.1f%%", e_rl)) : "-"),
 			(a_gl ? ((e_gl >= 100) ? va("%.0f%%", e_gl) : va("%.1f%%", e_gl)) : "-"),
@@ -294,8 +294,8 @@ static void onePlayerWeaponEffiStats(gedict_t *p)
 
 static void onePlayerWeaponDmgStats(gedict_t *p)
 {
-	G_sprint(self, 2, "%s%-20s|%5d|%5d|%5d|%5d|%5d|%5d|%5d|\n",
-			(isghost(p) ? "\203" : ""), getname(p),
+	G_sprint(self, 2, "%-20s|%5d|%5d|%5d|%5d|%5d|%5d|%5d|\n",
+			va("%s%s", isghost(p) ? "\203" : "", getname(p)),
 			p->ps.wpn[wpLG].edamage,
 			p->ps.wpn[wpRL].edamage,
 			p->ps.wpn[wpGL].edamage,
@@ -307,8 +307,8 @@ static void onePlayerWeaponDmgStats(gedict_t *p)
 
 static void onePlayerWeaponTakenStats(gedict_t *p)
 {
-	G_sprint(self, 2, "%s%-20s|%5d|%5d|%5d|%5d|%5d|%5d|\n",
-			(isghost(p) ? "\203" : ""), getname(p),
+	G_sprint(self, 2, "%-20s|%5d|%5d|%5d|%5d|%5d|%5d|\n",
+			va("%s%s", isghost(p) ? "\203" : "", getname(p)),
 			p->ps.wpn[wpLG].tooks,
 			p->ps.wpn[wpRL].tooks,
 			p->ps.wpn[wpGL].tooks,
@@ -319,8 +319,8 @@ static void onePlayerWeaponTakenStats(gedict_t *p)
 
 static void onePlayerWeaponDroppedStats(gedict_t *p)
 {
-	G_sprint(self, 2, "%s%-20s|%5d|%5d|%5d|%5d|%5d|%5d|\n",
-			(isghost(p) ? "\203" : ""), getname(p),
+	G_sprint(self, 2, "%-20s|%5d|%5d|%5d|%5d|%5d|%5d|\n",
+			va("%s%s", isghost(p) ? "\203" : "", getname(p)),
 			p->ps.wpn[wpLG].drops,
 			p->ps.wpn[wpRL].drops,
 			p->ps.wpn[wpGL].drops,
@@ -331,8 +331,8 @@ static void onePlayerWeaponDroppedStats(gedict_t *p)
 
 static void onePlayerWeaponKillStats(gedict_t *p)
 {
-	G_sprint(self, 2, "%s%-20s|%5d|%5d|%5d|%5d|%5d|%5d|\n",
-			(isghost(p) ? "\203" : ""), getname(p),
+	G_sprint(self, 2, "%-20s|%5d|%5d|%5d|%5d|%5d|%5d|\n",
+			va("%s%s", isghost(p) ? "\203" : "", getname(p)),
 			p->ps.wpn[wpLG].kills,
 			p->ps.wpn[wpRL].kills,
 			p->ps.wpn[wpGL].kills,
@@ -343,8 +343,8 @@ static void onePlayerWeaponKillStats(gedict_t *p)
 
 static void onePlayerEnemyWeaponKillStats(gedict_t *p)
 {
-	G_sprint(self, 2, "%s%-20s|%5d|%5d|%5d|%5d|%5d|%5d|\n",
-			(isghost(p) ? "\203" : ""), getname(p),
+	G_sprint(self, 2, "%-20s|%5d|%5d|%5d|%5d|%5d|%5d|\n",
+			va("%s%s", isghost(p) ? "\203" : "", getname(p)),
 			p->ps.wpn[wpLG].ekills,
 			p->ps.wpn[wpRL].ekills,
 			p->ps.wpn[wpGL].ekills,
@@ -355,8 +355,8 @@ static void onePlayerEnemyWeaponKillStats(gedict_t *p)
 
 static void onePlayerDamageStats(gedict_t *p)
 {
-	G_sprint(self, 2, "%s%-20s|%5d|%5d|%5d|%5d|%5d|%5d|\n",
-			(isghost(p) ? "\203" : ""), getname(p),
+	G_sprint(self, 2, "%-20s|%5d|%5d|%5d|%5d|%5d|%5d|\n",
+			va("%s%s", isghost(p) ? "\203" : "", getname(p)),
 			(int)p->ps.dmg_t,
 			(int)p->ps.dmg_g,
 			(int)p->ps.dmg_eweapon,
@@ -367,8 +367,8 @@ static void onePlayerDamageStats(gedict_t *p)
 
 static void onePlayerItemTimeStats(gedict_t *p, int tp)
 {
-	G_sprint(self, 2, "%s%-20s|%.2d:%.2d|%.2d:%.2d|%.2d:%.2d|%5s|%5s|%5s|\n",
-			(isghost(p) ? "\203" : ""), getname(p),
+	G_sprint(self, 2, "%-20s|%.2d:%.2d|%.2d:%.2d|%.2d:%.2d|%5s|%5s|%5s|\n",
+			va("%s%s", isghost(p) ? "\203" : "", getname(p)),
 			(int)(p->ps.itm[itRA].time / 60), ((int)(p->ps.itm[itRA].time)) % 60,
 			(int)(p->ps.itm[itYA].time / 60), ((int)(p->ps.itm[itYA].time)) % 60,
 			(int)(p->ps.itm[itGA].time / 60), ((int)(p->ps.itm[itGA].time)) % 60,
@@ -385,8 +385,8 @@ static void onePlayerItemTimeStats(gedict_t *p, int tp)
 
 static void onePlayerWeaponTimeStats(gedict_t *p)
 {
-	G_sprint(self, 2, "%s%-20s|%.2d:%.2d|%.2d:%.2d|%.2d:%.2d|%.2d:%.2d|%.2d:%.2d|%.2d:%.2d|\n",
-			(isghost(p) ? "\203" : ""), getname(p),
+	G_sprint(self, 2, "%-20s|%.2d:%.2d|%.2d:%.2d|%.2d:%.2d|%.2d:%.2d|%.2d:%.2d|%.2d:%.2d|\n",
+			va("%s%s", isghost(p) ? "\203" : "", getname(p)),
 			(int)(p->ps.wpn[wpLG].time / 60), ((int)(p->ps.wpn[wpLG].time)) % 60,
 			(int)(p->ps.wpn[wpRL].time / 60), ((int)(p->ps.wpn[wpRL].time)) % 60,
 			(int)(p->ps.wpn[wpGL].time / 60), ((int)(p->ps.wpn[wpGL].time)) % 60,
@@ -410,8 +410,8 @@ static void onePlayerCTFStats(gedict_t *p)
 		rgn = (p->ps.rgn_time / (g_globalvars.time - match_start_time)) * 100;
 	}
 
-	G_sprint(self, 2, "%s%-20s|%3d|%3d|%3d|%3d|%3d|%3s|%3s|%3s|%3s|\n",
-			(isghost(p) ? "\203" : ""), getname(p),
+	G_sprint(self, 2, "%-20s|%3d|%3d|%3d|%3d|%3d|%3s|%3s|%3s|%3s|\n",
+			va("%s%s", isghost(p) ? "\203" : "", getname(p)),
 			p->ps.pickups,
 			p->ps.caps,
 			p->ps.returns,

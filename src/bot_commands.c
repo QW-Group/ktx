@@ -2104,6 +2104,7 @@ static void FrogbotsDisable(void)
 	{
 		cvar_fset(FB_CVAR_ENABLED, 0);
 		GotoNextMap();
+		UserMode(-cvar("_k_last_xonx"));
 	}
 }
 
@@ -2228,6 +2229,7 @@ void FrogbotsCommand(void)
 
 			cvar_fset(FB_CVAR_ENABLED, 1);
 			GotoNextMap();
+			UserMode(-cvar("_k_last_xonx"));
 
 			return;
 		}
