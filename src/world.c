@@ -1430,7 +1430,7 @@ void FixSayTeamToSpecs()
 // Format is: mode-submode[-submode]
 void SetMode4ServerInfo(void)
 {
-	char mode[64] = {};
+	char mode[64] = "";
 	const char *strCurrentUmode;
 
 	// The parameter is (current_umode-1), because the UserModes_t enum has `umUnknown` as first element,
