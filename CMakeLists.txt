@@ -153,7 +153,6 @@ endif()
 # Build QVM tools.
 # EXCLUDE_FROM_ALL tells to not build tools if they does not required, for example if you build native library only.
 add_subdirectory(tools/q3asm EXCLUDE_FROM_ALL)
-add_subdirectory(tools/q3lcc EXCLUDE_FROM_ALL)
 
 # Set up vars for QVM library.
 set(VM_DIR "vm")
