@@ -798,6 +798,9 @@ void vote_check_all(void);
 #define OV_NOSPECS ( VOTE_FOFS ( nospecs ) )
 #define OV_TEAMOVERLAY ( VOTE_FOFS ( teamoverlay ) )
 #define OV_COOP ( VOTE_FOFS ( coop ) )
+#define OV_HOOKSMOOTH (VOTE_FOFS ( hooksmooth ) )
+#define OV_HOOKFAST (VOTE_FOFS ( hookfast ) )
+#define OV_HOOKCLASSIC (VOTE_FOFS ( hookclassic ) )
 #define OV_ANTILAG ( VOTE_FOFS ( antilag ) )
 #define OV_PRIVATE ( VOTE_FOFS ( privategame ) )
 //#define OV_KICKUNAUTHED ( VOTE_FOFS (kick_unauthed) )
@@ -905,6 +908,9 @@ void StatsToFile(void);
 void GrappleThrow();
 void GrappleService();
 void GrappleReset(gedict_t *rhook);
+void CancelHook(gedict_t *owner);
+float IncreasePullSpeed(float speed, float incr);
+float DecreasePullSpeed(float speed, float decr);
 
 // hoonymode.c
 

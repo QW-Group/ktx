@@ -61,7 +61,9 @@ void FlagStatus();
 void TossFlag();
 void norunes();
 void nohook();
-void crhook();
+void hooksmooth();
+void hookfast();
+void hookclassic();
 void noga();
 void mctf();
 void CTFBasedSpawn();
@@ -514,7 +516,9 @@ const char CD_NODESC[] = "no desc";
 #define CD_TOSSFLAG			"drop flag (CTF)"
 #define CD_FLAGSTATUS		"show flags status (CTF)"
 #define CD_NOHOOK			"toggle hook (CTF)"
-#define CD_CRHOOK			"toggle CRCTF 3.0 Hook settings (CTF)"
+#define CD_HOOKSMOOTH			"switch Hook style settings: Smooth Hook (CTF)"
+#define CD_HOOKFAST			"switch Hook style settings: Fast Hook (CTF)"
+#define CD_HOOKCLASSIC			"switch Hook style settings: Classic Hook (CTF)"
 #define CD_NORUNES			"toggle runes (CTF)"
 #define CD_NOGA				"toggle green armor on spawn (CTF)"
 #define CD_MCTF				"disable hook+runes (CTF)"
@@ -874,9 +878,11 @@ cmd_t cmds[] =
 	// { CTF commands
 	{ "tossrune", 					TossRune, 						0, 			CF_PLAYER | CF_MATCHLESS, 												CD_TOSSRUNE },
 	{ "tossflag", 					TossFlag, 						0, 			CF_PLAYER | CF_MATCHLESS, 												CD_TOSSFLAG },
-	{ "nohook", 					nohook, 						0, 			CF_BOTH_ADMIN | CF_MATCHLESS, 											CD_NOHOOK },
-	{ "crhook", 					crhook, 						0, 			CF_BOTH_ADMIN | CF_MATCHLESS, 											CD_CRHOOK },
-	{ "norunes", 					norunes, 						0, 			CF_BOTH_ADMIN | CF_MATCHLESS, 											CD_NORUNES },
+	{ "nohook", 					nohook, 						0, 			CF_PLAYER | CF_MATCHLESS, 											CD_NOHOOK },
+	{ "hook_smooth", 				hooksmooth, 					0, 			CF_PLAYER | CF_MATCHLESS, 											CD_HOOKSMOOTH },
+  { "hook_fast", 					hookfast, 					0, 			CF_PLAYER | CF_MATCHLESS, 											CD_HOOKFAST },
+  { "hook_classic", 				hookclassic, 					0, 			CF_PLAYER | CF_MATCHLESS, 											CD_HOOKCLASSIC },
+	{ "norunes", 					norunes, 						0, 			CF_PLAYER | CF_MATCHLESS, 											CD_NORUNES },
 	{ "noga", 						noga, 							0, 			CF_BOTH_ADMIN | CF_MATCHLESS, 											CD_NOGA },
 	{ "mctf", 						mctf, 							0, 			CF_BOTH_ADMIN | CF_MATCHLESS, 											CD_MCTF },
 	{ "flagstatus", 				FlagStatus, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_FLAGSTATUS },
@@ -2225,6 +2231,63 @@ void ModStatusVote()
 			for (p = world; (p = find_client(p));)
 			{
 				if (p->v.swapall)
+				{
+					G_sprint(self, 2, " %s\n", p->netname);
+				}
+			}
+		}
+	}
+
+  if (!match_in_progress)
+	{
+		if ((votes = get_votes(OV_HOOKSMOOTH)))
+		{
+			voted = true;
+
+			G_sprint(self, 2, "\220%d/%d\221 vote%s to change hookstyle to %s\n", votes,
+						get_votes_req(OV_HOOKSMOOTH, false), count_s(votes), redtext("smooth"));
+
+			for (p = world; (p = find_client(p));)
+			{
+				if (p->v.hooksmooth)
+				{
+					G_sprint(self, 2, " %s\n", p->netname);
+				}
+			}
+		}
+	}
+
+	if (!match_in_progress)
+	{
+		if ((votes = get_votes(OV_HOOKFAST)))
+		{
+			voted = true;
+
+			G_sprint(self, 2, "\220%d/%d\221 vote%s to change hookstyle to %s\n", votes,
+						get_votes_req(OV_HOOKFAST, false), count_s(votes), redtext("fast"));
+
+			for (p = world; (p = find_client(p));)
+			{
+				if (p->v.hookfast)
+				{
+					G_sprint(self, 2, " %s\n", p->netname);
+				}
+			}
+		}
+	}
+
+if (!match_in_progress)
+	{
+		if ((votes = get_votes(OV_HOOKCLASSIC)))
+		{
+			voted = true;
+
+			G_sprint(self, 2, "\220%d/%d\221 vote%s to change hookstyle to %s\n", votes,
+						get_votes_req(OV_HOOKCLASSIC, false), count_s(votes), redtext("classic"));
+
+			for (p = world; (p = find_client(p));)
+			{
+				if (p->v.hookclassic)
 				{
 					G_sprint(self, 2, " %s\n", p->netname);
 				}
