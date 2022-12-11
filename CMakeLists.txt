@@ -64,6 +64,7 @@ set(SRC_COMMON
 	"${DIR_SRC}/doors.c"
 	"${DIR_SRC}/fb_globals.c"
 	"${DIR_SRC}/files.c"
+	"${DIR_SRC}/func_bob.c"
 	"${DIR_SRC}/g_cmd.c"
 	"${DIR_SRC}/globals.c"
 	"${DIR_SRC}/g_mem.c"

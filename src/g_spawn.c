@@ -167,6 +167,10 @@ field_t fields[] =
 	{ "rotate", 					FOFS(rotate), 					F_VECTOR },
 	{ "path", 						FOFS(path), 					F_LSTRING },
 	{ "event", 						FOFS(event), 					F_LSTRING },
+
+// Bob
+	{ "waitmin", 					FOFS(waitmin), 						F_FLOAT},
+	{ "waitmin2", 					FOFS(waitmin2), 					F_FLOAT},
 	{ NULL }
 };
 
@@ -243,6 +247,8 @@ void SP_func_plat();
 void SP_func_train();
 void SP_misc_teleporttrain();
 void SP_func_button();
+
+void SP_func_bob();
 
 void SP_trigger_multiple();
 void SP_trigger_once();
@@ -381,6 +387,8 @@ spawn_t spawns[] =
 	{ "func_train", 					SP_func_train },
 	{ "misc_teleporttrain", 			SP_misc_teleporttrain },
 	{ "func_button", 					SP_func_button },
+
+	{ "func_bob", 						SP_func_bob },
 
 	{ "trigger_multiple", 				SP_trigger_multiple },
 	{ "trigger_once", 					SP_trigger_once },

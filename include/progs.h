@@ -1212,6 +1212,12 @@ typedef struct gedict_s
 	string_t path;
 	string_t event;
 // }
+
+// { func_bob
+	float distance;
+	float waitmin;
+	float waitmin2;
+// }
 } gedict_t;
 
 typedef enum
