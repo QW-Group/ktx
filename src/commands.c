@@ -6588,10 +6588,11 @@ void lastscore_add()
 	cvar_set(va("__k_ls_e2_%d", k_ls), e2);
 	cvar_set(va("__k_ls_t1_%d", k_ls), t1);
 	cvar_set(va("__k_ls_t2_%d", k_ls), t2);
+
 	if ((current_umode < umBlitz4v4) || (current_umode > um4on4on4))
 	{
 		cvar_set(va("__k_ls_s_%d", k_ls),
-				 va("%3d:%-3d \x8D %-8.8s %13.13s%s", s1, s2, mapname, date, extra));
+				 va("%3d:%-3d %s \x8D %-8.8s %13.13s%s", s1, s2, (k_overtime ? "OT" : "  "), mapname, date, extra));
 	}
 	else
 	{
@@ -6623,9 +6624,19 @@ void lastscore_add()
 
 void lastscores()
 {
-	int i, j, cnt;
+	int i;
+	int j;
+	int cnt;
 	int k_ls = bound(0, cvar("__k_ls"), MAX_LASTSCORES - 1);
-	char *e1, *e2, *le1, *le2, *t1, *t2, *lt1, *lt2, *sc;
+	char *e1;
+	char *e2;
+	char *le1;
+	char *le2;
+	char *t1;
+	char *t2;
+	char *lt1;
+	char *lt2;
+	char *sc;
 	qbool extended = (trap_CmdArgc() > 1); // if they specified some params, then use extended version
 	lsType_t last = lsUnknown;
 	lsType_t cur = lsUnknown;
