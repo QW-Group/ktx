@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{1b27ba54-712d-4803-9d15-62928c01c2c1}</ProjectGuid>
+    <RootNamespace>ktx</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <TargetName>qwprogs.dll</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <TargetName>qwprogs.dll</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <TargetName>qwprogs.dll</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetName>qwprogs.dll</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;KTX_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);BOT_SUPPORT=1</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>C:\Users\Toma\source\repos\ktx\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeaderOutputFile />
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;KTX_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);BOT_SUPPORT=1</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>C:\Users\Toma\source\repos\ktx\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeaderOutputFile />
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;KTX_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);BOT_SUPPORT=1</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>C:\Users\Toma\source\repos\ktx\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeaderOutputFile />
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;KTX_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);BOT_SUPPORT=1</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>C:\Users\Toma\source\repos\ktx\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeaderOutputFile />
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\deathtype.h" />
+    <ClInclude Include="..\..\include\fb_globals.h" />
+    <ClInclude Include="..\..\include\g_consts.h" />
+    <ClInclude Include="..\..\include\g_local.h" />
+    <ClInclude Include="..\..\include\g_public.h" />
+    <ClInclude Include="..\..\include\g_syscalls.h" />
+    <ClInclude Include="..\..\include\mathlib.h" />
+    <ClInclude Include="..\..\include\player.h" />
+    <ClInclude Include="..\..\include\progdefs.h" />
+    <ClInclude Include="..\..\include\progs.h" />
+    <ClInclude Include="..\..\include\q_shared.h" />
+    <ClInclude Include="..\..\include\stats.h" />
+    <ClInclude Include="framework.h" />
+    <ClInclude Include="pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\admin.c" />
+    <ClCompile Include="..\..\src\arena.c" />
+    <ClCompile Include="..\..\src\bot_aim.c" />
+    <ClCompile Include="..\..\src\bot_blocked.c" />
+    <ClCompile Include="..\..\src\bot_botenemy.c" />
+    <ClCompile Include="..\..\src\bot_botgoals.c" />
+    <ClCompile Include="..\..\src\bot_bothazd.c" />
+    <ClCompile Include="..\..\src\bot_bothelp.c" />
+    <ClCompile Include="..\..\src\bot_botimp.c" />
+    <ClCompile Include="..\..\src\bot_botjump.c" />
+    <ClCompile Include="..\..\src\bot_botpath.c" />
+    <ClCompile Include="..\..\src\bot_botphys.c" />
+    <ClCompile Include="..\..\src\bot_botstat.c" />
+    <ClCompile Include="..\..\src\bot_botthink.c" />
+    <ClCompile Include="..\..\src\bot_botwater.c" />
+    <ClCompile Include="..\..\src\bot_botweap.c" />
+    <ClCompile Include="..\..\src\bot_client.c" />
+    <ClCompile Include="..\..\src\bot_commands.c" />
+    <ClCompile Include="..\..\src\bot_items.c" />
+    <ClCompile Include="..\..\src\bot_load.c" />
+    <ClCompile Include="..\..\src\bot_loadmap.c" />
+    <ClCompile Include="..\..\src\bot_match.c" />
+    <ClCompile Include="..\..\src\bot_movement.c" />
+    <ClCompile Include="..\..\src\bot_routing.c" />
+    <ClCompile Include="..\..\src\bot_world.c" />
+    <ClCompile Include="..\..\src\buttons.c" />
+    <ClCompile Include="..\..\src\captain.c" />
+    <ClCompile Include="..\..\src\clan_arena.c" />
+    <ClCompile Include="..\..\src\client.c" />
+    <ClCompile Include="..\..\src\coach.c" />
+    <ClCompile Include="..\..\src\combat.c" />
+    <ClCompile Include="..\..\src\commands.c" />
+    <ClCompile Include="..\..\src\ctf.c" />
+    <ClCompile Include="..\..\src\doors.c" />
+    <ClCompile Include="..\..\src\fb_globals.c" />
+    <ClCompile Include="..\..\src\files.c" />
+    <ClCompile Include="..\..\src\globals.c" />
+    <ClCompile Include="..\..\src\grapple.c" />
+    <ClCompile Include="..\..\src\g_cmd.c" />
+    <ClCompile Include="..\..\src\g_main.c" />
+    <ClCompile Include="..\..\src\g_mem.c" />
+    <ClCompile Include="..\..\src\g_spawn.c" />
+    <ClCompile Include="..\..\src\g_syscalls.c" />
+    <ClCompile Include="..\..\src\g_userinfo.c" />
+    <ClCompile Include="..\..\src\g_utils.c" />
+    <ClCompile Include="..\..\src\hoonymode.c" />
+    <ClCompile Include="..\..\src\items.c" />
+    <ClCompile Include="..\..\src\logs.c" />
+    <ClCompile Include="..\..\src\maps.c" />
+    <ClCompile Include="..\..\src\maps_map_amphi2.c" />
+    <ClCompile Include="..\..\src\maps_map_dm3.c" />
+    <ClCompile Include="..\..\src\maps_map_dm4.c" />
+    <ClCompile Include="..\..\src\maps_map_dm6.c" />
+    <ClCompile Include="..\..\src\maps_map_povdmm4.c" />
+    <ClCompile Include="..\..\src\marker_load.c" />
+    <ClCompile Include="..\..\src\marker_util.c" />
+    <ClCompile Include="..\..\src\match.c" />
+    <ClCompile Include="..\..\src\mathlib.c" />
+    <ClCompile Include="..\..\src\misc.c" />
+    <ClCompile Include="..\..\src\motd.c" />
+    <ClCompile Include="..\..\src\native_lib.c" />
+    <ClCompile Include="..\..\src\plats.c" />
+    <ClCompile Include="..\..\src\player.c" />
+    <ClCompile Include="..\..\src\q_shared.c" />
+    <ClCompile Include="..\..\src\race.c" />
+    <ClCompile Include="..\..\src\route_calc.c" />
+    <ClCompile Include="..\..\src\route_fields.c" />
+    <ClCompile Include="..\..\src\route_lookup.c" />
+    <ClCompile Include="..\..\src\runes.c" />
+    <ClCompile Include="..\..\src\server.c" />
+    <ClCompile Include="..\..\src\spectate.c" />
+    <ClCompile Include="..\..\src\sp_ai.c" />
+    <ClCompile Include="..\..\src\sp_boss.c" />
+    <ClCompile Include="..\..\src\sp_client.c" />
+    <ClCompile Include="..\..\src\sp_demon.c" />
+    <ClCompile Include="..\..\src\sp_dog.c" />
+    <ClCompile Include="..\..\src\sp_enforcer.c" />
+    <ClCompile Include="..\..\src\sp_fish.c" />
+    <ClCompile Include="..\..\src\sp_hknight.c" />
+    <ClCompile Include="..\..\src\sp_knight.c" />
+    <ClCompile Include="..\..\src\sp_monsters.c" />
+    <ClCompile Include="..\..\src\sp_ogre.c" />
+    <ClCompile Include="..\..\src\sp_oldone.c" />
+    <ClCompile Include="..\..\src\sp_shalrath.c" />
+    <ClCompile Include="..\..\src\sp_shambler.c" />
+    <ClCompile Include="..\..\src\sp_soldier.c" />
+    <ClCompile Include="..\..\src\sp_tarbaby.c" />
+    <ClCompile Include="..\..\src\sp_wizard.c" />
+    <ClCompile Include="..\..\src\sp_zombie.c" />
+    <ClCompile Include="..\..\src\stats.c" />
+    <ClCompile Include="..\..\src\statsTables.c" />
+    <ClCompile Include="..\..\src\stats_json.c" />
+    <ClCompile Include="..\..\src\stats_xml.c" />
+    <ClCompile Include="..\..\src\subs.c" />
+    <ClCompile Include="..\..\src\teamplay.c" />
+    <ClCompile Include="..\..\src\triggers.c" />
+    <ClCompile Include="..\..\src\vip.c" />
+    <ClCompile Include="..\..\src\vote.c" />
+    <ClCompile Include="..\..\src\weapons.c" />
+    <ClCompile Include="..\..\src\world.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\g_syscalls.asm" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
