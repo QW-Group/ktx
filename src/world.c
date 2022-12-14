@@ -821,9 +821,7 @@ void FirstFrame()
 	RegisterCvar("k_vp_nospecs"); // votes percentage for nospecs voting
 	RegisterCvar("k_vp_teamoverlay"); // votes percentage for teamoverlay voting
 	RegisterCvar("k_vp_coop");    // votes percentage for coop voting
-	RegisterCvar("k_vp_hook_smooth"); // votes percentage for hookstyle voting
-	RegisterCvar("k_vp_hook_fast"); // votes percentage for hookstyle voting
-	RegisterCvar("k_vp_hook_classic"); // votes percentage for hookstyle voting
+	RegisterCvar("k_vp_hookstyle"); // votes percentage for hookstyle voting
 	RegisterCvar("k_vp_antilag"); // votes percentage for antilag voting
 	RegisterCvar("k_no_vote_map"); // dis allow map voting in matcless mode, also disallow /next_map
 	RegisterCvar("k_vp_privategame"); // temporarily force logins on the server
