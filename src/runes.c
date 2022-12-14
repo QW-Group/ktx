@@ -379,7 +379,7 @@ void ResistanceSound(gedict_t *player)
 		if (player->rune_sound_time < g_globalvars.time)
 		{
 			player->rune_sound_time = g_globalvars.time + 1;
-			sound(player, CHAN_BODY, "rune/rune1.wav", 1, ATTN_NORM);
+			sound(player, CHAN_ITEM, "rune/rune1.wav", 1, ATTN_NORM);
 		}
 	}
 }
@@ -391,7 +391,7 @@ void HasteSound(gedict_t *player)
 		if (player->rune_sound_time < g_globalvars.time)
 		{
 			player->rune_sound_time = g_globalvars.time + 1;
-			sound(player, CHAN_BODY, "rune/rune3.wav", 1, ATTN_NORM);
+			sound(player, CHAN_ITEM, "rune/rune3.wav", 1, ATTN_NORM);
 		}
 	}
 }
@@ -403,7 +403,7 @@ void RegenerationSound(gedict_t *player)
 		if (player->rune_sound_time < g_globalvars.time)
 		{
 			player->rune_sound_time = g_globalvars.time + 1;
-			sound(player, CHAN_BODY, "rune/rune4.wav", 1, ATTN_NORM);
+			sound(player, CHAN_ITEM, "rune/rune4.wav", 1, ATTN_NORM);
 		}
 	}
 }

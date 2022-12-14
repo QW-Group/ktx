@@ -821,6 +821,7 @@ void FirstFrame()
 	RegisterCvar("k_vp_nospecs"); // votes percentage for nospecs voting
 	RegisterCvar("k_vp_teamoverlay"); // votes percentage for teamoverlay voting
 	RegisterCvar("k_vp_coop");    // votes percentage for coop voting
+	RegisterCvar("k_vp_hookstyle"); // votes percentage for hookstyle voting
 	RegisterCvar("k_vp_antilag"); // votes percentage for antilag voting
 	RegisterCvar("k_no_vote_map"); // dis allow map voting in matcless mode, also disallow /next_map
 	RegisterCvar("k_vp_privategame"); // temporarily force logins on the server
@@ -917,7 +918,7 @@ void FirstFrame()
 //{ ctf
 	RegisterCvar("k_ctf_custom_models");
 	RegisterCvar("k_ctf_hook");
-	RegisterCvar("k_ctf_cr_hook"); // toggle for clan-ring style hook
+	RegisterCvar("k_ctf_hookstyle"); // loop through hookstyle settings
 	RegisterCvar("k_ctf_runes");
 	RegisterCvarEx("k_ctf_rune_power_str", "2.0");
 	RegisterCvarEx("k_ctf_rune_power_res", "2.0");

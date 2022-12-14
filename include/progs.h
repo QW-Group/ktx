@@ -226,6 +226,9 @@ typedef struct vote_s
 	int teamoverlay;
 	int nospecs;
 	int coop;
+	int hooksmooth;
+	int hookfast;
+	int hookclassic;
 	int antilag;
 	int privategame;
 	//int kick_unauthed;
@@ -993,11 +996,10 @@ typedef struct gedict_s
 
 // { CTF
 	struct gedict_s *hook;					// grapple
-	qbool ctf_sound;						// sound stuff
-	qbool on_hook;							// are we on the grapple?
-	qbool hook_out;							// is the grapple in flight?
-	int ctf_flag;							// do we have a rune or flag?
-	float regen_time;						// time to update health if regen rune
+	qbool on_hook;						// are we on the grapple?
+	qbool hook_out;						// is the grapple in flight?
+	int ctf_flag;						// do we have a rune or flag?
+	float regen_time;					// time to update health if regen rune
 	float rune_sound_time;					// dont spam rune sounds (1 per second)
 	float carrier_frag_time;				// used for carrier assists
 	float return_flag_time;					// used for flag return assists
@@ -1005,8 +1007,12 @@ typedef struct gedict_s
 	float carrier_hurt_time;				// time we last hurt enemy carrier
 	float rune_pickup_time;					// time we picked up current rune
 	float hook_damage_time;					// manage dps dealt to hooked enemies
-	char *last_rune;						// name of last rune we send to client
-	float items2;							// using  ZQ_ITEMS2 extension in mvdsv we can use per client sigils for runes
+	float hook_cancel_time;					// delay cancel on throw with smooth hook
+	float hook_reset_time;					// marker for grapple reset (decoupled from `attack_finished`)
+	float hook_pullspeed;					// accelerate grapple velocity
+	float hook_pullspeed_accel;				// number by which to increment velocity
+	char *last_rune;					// name of last rune we send to client
+	float items2;						// using  ZQ_ITEMS2 extension in mvdsv we can use per client sigils for runes
 
 //
 // TF -- well, we does not support TF but require it for loading TF map as CTF map.
