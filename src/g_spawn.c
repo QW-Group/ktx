@@ -171,6 +171,9 @@ field_t fields[] =
 // Bob
 	{ "waitmin", 					FOFS(waitmin), 						F_FLOAT},
 	{ "waitmin2", 					FOFS(waitmin2), 					F_FLOAT},
+
+// ambient_general
+	{ "volume", 					FOFS(volume), 						F_FLOAT },
 	{ NULL }
 };
 
@@ -334,6 +337,8 @@ void SP_func_movewall();
 void SP_rotate_object();
 void SP_func_rotate_door();
 
+void SP_ambient_general();
+
 spawn_t spawns[] =
 {
 // info entities don't do anything at all, but provide positional
@@ -371,6 +376,7 @@ spawn_t spawns[] =
 	{ "ambient_light_buzz", 			SP_ambient_light_buzz },
 	{ "ambient_swamp1", 				SP_ambient_swamp1 },
 	{ "ambient_swamp2", 				SP_ambient_swamp2 },
+	{ "ambient_general", 				SP_ambient_general },
 	{ "misc_noisemaker", 				SP_misc_noisemaker },
 	{ "misc_explobox", 					SP_misc_explobox },
 	{ "misc_explobox2", 				SP_misc_explobox2 },

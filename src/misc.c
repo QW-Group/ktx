@@ -799,6 +799,37 @@ void SP_ambient_swamp2()
 	ATTN_STATIC);
 }
 
+void SP_ambient_general()
+{
+	if (strnull(self->noise))
+	{
+		G_Error ("No soundfile set in noise!\n");
+		ent_remove(self);
+		return;
+	}
+
+	trap_precache_sound (self->noise);
+
+	switch ((int) ceilf(self->speed))
+	{
+		case 0:
+			self->speed = ATTN_NORM;
+			break;
+		case -1:
+			self->speed = ATTN_NONE;
+			break;
+		default:
+			break;
+	}
+
+	if (!self->volume)
+	{
+		self->volume = 0.5;
+	}
+	trap_ambientsound (PASSVEC3(self->s.v.origin), self->noise, self->volume, self->speed);
+	ent_remove(self);
+}
+
 //============================================================================
 
 void noise_think()

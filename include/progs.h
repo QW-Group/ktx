@@ -1218,6 +1218,10 @@ typedef struct gedict_s
 	float waitmin;
 	float waitmin2;
 // }
+
+// { ambient_general
+	float volume;
+// }
 } gedict_t;
 
 typedef enum
