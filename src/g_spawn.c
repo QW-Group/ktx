@@ -151,6 +151,9 @@ field_t fields[] =
 
 // KTX teleporter flags
 	{ "ktx_votemap", 				FOFS(ktx_votemap), 					F_LSTRING },
+
+// Transparent entities in map
+	{ "alpha", 						-1, 								F_FLOAT },
 	{ NULL }
 };
 
