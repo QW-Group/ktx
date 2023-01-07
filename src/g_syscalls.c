@@ -466,7 +466,6 @@ void trap_VisibleTo(intptr_t viewer, intptr_t first, intptr_t len, byte *visible
 	syscall(G_VISIBLETO, viewer, first, len, (intptr_t) visible);
 }
 
-#ifdef FTESV
 void trap_SetExtField_i(gedict_t *ed, const char *fieldname, int val)
 {
 	syscall(G_SETEXTFIELD, (intptr_t)ed, (intptr_t)fieldname, val);
@@ -527,4 +526,3 @@ int trap_pointerstat(int statidx, int stattype, void *offset)
 {
 	return syscall(G_POINTERSTAT, statidx, stattype, (intptr_t)offset);
 }
-#endif
