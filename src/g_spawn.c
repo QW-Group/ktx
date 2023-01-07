@@ -574,11 +574,25 @@ static void G_ParseField(const char *key, const char *value, gedict_t *ent)
 					break;
 
 				case F_INT:
-					*(int*)(b + f->ofs) = atoi(value);
+					if (f->ofs >= 0)
+					{
+						*(int*)(b + f->ofs) = atoi(value);
+					}
+					else
+					{
+						trap_SetExtField_i(ent, key, atoi(value));
+					}
 					break;
 
 				case F_FLOAT:
-					*(float*)(b + f->ofs) = atof(value);
+					if (f->ofs >= 0)
+					{
+						*(float*)(b + f->ofs) = atof(value);
+					}
+					else
+					{
+						trap_SetExtField_f(ent, key, atof(value));
+					}
 					break;
 
 				case F_ANGLEHACK:
