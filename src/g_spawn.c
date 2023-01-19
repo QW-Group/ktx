@@ -252,6 +252,7 @@ void SP_misc_teleporttrain();
 void SP_func_button();
 
 void SP_func_bob();
+void SP_func_laser();
 
 void SP_trigger_multiple();
 void SP_trigger_once();
@@ -395,6 +396,7 @@ spawn_t spawns[] =
 	{ "func_button", 					SP_func_button },
 
 	{ "func_bob", 						SP_func_bob },
+	{ "func_laser", 					SP_func_laser },
 
 	{ "trigger_multiple", 				SP_trigger_multiple },
 	{ "trigger_once", 					SP_trigger_once },
