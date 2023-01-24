@@ -200,7 +200,6 @@ typedef enum
 	lsRACE
 } lsType_t; // lastscores type
 
-#ifdef FTESV
 // Spike:
 // Extension builtins.
 // The order of these don't matter (qqshka: what about QVM builds? look g_syscalls.asm, we need something similar for extensions I guess),
@@ -222,7 +221,6 @@ enum
 };
 extern qbool haveextensiontab[G_EXTENSIONS_LAST-G_EXTENSIONS_FIRST];
 #define HAVEEXTENSION(idx) haveextensiontab[(idx) - G_EXTENSIONS_FIRST]
-#endif
 
 #define DEATHTYPE( _dt_, _dt_str_ ) _dt_,
 typedef enum

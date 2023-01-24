@@ -625,8 +625,6 @@ static qbool check_ezquake(gedict_t *p)
 
 //===========================================================================
 
-#ifdef FTESV
-
 qbool haveextensiontab[G_EXTENSIONS_LAST-G_EXTENSIONS_FIRST];
 
 static qbool G_InitExtensions(void)
@@ -660,9 +658,3 @@ static qbool G_InitExtensions(void)
 
 	return success;
 }
-#else
-static qbool G_InitExtensions(void)
-{
-	return true;
-}
-#endif

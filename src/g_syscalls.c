@@ -466,15 +466,28 @@ void trap_VisibleTo(intptr_t viewer, intptr_t first, intptr_t len, byte *visible
 	syscall(G_VISIBLETO, viewer, first, len, (intptr_t) visible);
 }
 
-#ifdef FTESV
 void trap_SetExtField_i(gedict_t *ed, const char *fieldname, int val)
 {
-	syscall(G_SETEXTFIELD, (intptr_t)ed, (intptr_t)fieldname, val);
+	if (HAVEEXTENSION(G_SETEXTFIELD))
+	{
+		syscall(G_SETEXTFIELD, (intptr_t)ed, (intptr_t)fieldname, val);
+	}
+	else
+	{
+		G_bprint(PRINT_HIGH, "SetExtField(%s, %s, %d) not supported by server\n", ed->classname, fieldname, val);
+	}
 }
 
 void trap_SetExtField_f(gedict_t *ed, const char *fieldname, float val)
 {
-	syscall(G_SETEXTFIELD, (intptr_t)ed, (intptr_t)fieldname, PASSFLOAT(val));
+	if (HAVEEXTENSION(G_SETEXTFIELD))
+	{
+		syscall(G_SETEXTFIELD, (intptr_t)ed, (intptr_t)fieldname, PASSFLOAT(val));
+	}
+	else
+	{
+		G_bprint(PRINT_HIGH, "SetExtField(%s, %s, %f) not supported by server\n", ed->classname, fieldname, val);
+	}
 }
 
 int trap_GetExtField_i(gedict_t *ed, const char *fieldname)
@@ -527,4 +540,3 @@ int trap_pointerstat(int statidx, int stattype, void *offset)
 {
 	return syscall(G_POINTERSTAT, statidx, stattype, (intptr_t)offset);
 }
-#endif
