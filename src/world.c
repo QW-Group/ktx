@@ -920,6 +920,7 @@ void FirstFrame()
 	RegisterCvar("k_ctf_hook");
 	RegisterCvar("k_ctf_hookstyle"); // loop through hookstyle settings
 	RegisterCvar("k_ctf_runes");
+	RegisterCvarEx("k_ctf_rune_bounce", "3");
 	RegisterCvarEx("k_ctf_rune_power_str", "2.0");
 	RegisterCvarEx("k_ctf_rune_power_res", "2.0");
 	RegisterCvarEx("k_ctf_rune_power_rgn", "2.0");
