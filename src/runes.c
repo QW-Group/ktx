@@ -10,14 +10,14 @@ void RuneTouch();
 void RuneResetOwner();
 char* GetRuneSpawnName();
 
-void DoDropRune(int rune, qbool s)
+void DoDropRune(int rune, qbool on_respawn)
 {
 	gedict_t *item, *pos = NULL;
 	float movetype = MOVETYPE_NONE;
 
 	cl_refresh_plus_scores(self);
 
-	if (s)
+	if (on_respawn)
 	{
 		if (rune & CTF_RUNE_RES)
 		{
@@ -41,7 +41,16 @@ void DoDropRune(int rune, qbool s)
 	if (pos == NULL)
 	{
 		pos = self;
-		movetype = (int) cvar("k_ctf_rune_bounce") & 1 ? MOVETYPE_BOUNCE : MOVETYPE_TOSS;
+		if (on_respawn)
+		{
+			// Rune respawn, bounce adds randomization.
+			movetype = (int) cvar("k_ctf_rune_bounce") & 1 ? MOVETYPE_BOUNCE : MOVETYPE_TOSS;
+		}
+		else
+		{
+			// Drop rune due to player died.
+			movetype = MOVETYPE_TOSS;
+		}
 	}
 
 	item = spawn();
@@ -78,7 +87,7 @@ void DoDropRune(int rune, qbool s)
 	item->think = (func_t) RuneRespawn;
 
 	// qqshka, add spawn sound to rune if rune respawned, not for player dropped from corpse rune
-	if (s)
+	if (on_respawn)
 	{
 		sound(item, CHAN_VOICE, "items/itembk2.wav", 1, ATTN_NORM);	// play respawn sound
 	}
