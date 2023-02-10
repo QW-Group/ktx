@@ -1,0 +1,85 @@
+race_route_add_start 
+	race_add_route_node  2512.0  3632.0  344.0 -0.4 116.1
+	race_add_route_node   113.8  2349.1 -616.0    0     0
+	race_add_route_node  1747.6  -606.7 -168.0    0     0
+	race_add_route_node  2298.9  1513.4 -264.0    0     0
+	race_add_route_node   961.3  1692.7  536.0    0     0
+	race_add_route_node  -483.4   642.0  632.0    0     0
+	race_add_route_node -1983.2  3314.1  704.0    0     0
+	race_add_route_node  3032.0  3632.0  344.0    0     0
+
+	race_set_route_name "Full Map" "start\215finish"
+	race_set_route_timeout 300 
+	race_set_route_weapon_mode raceWeaponNo 
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node 112.5  -634.3   24.0  12.0 90.0
+	race_add_route_node 113.8  2349.1  -616.0    0    0
+
+	race_set_route_name "Room 1" ""
+	race_set_route_timeout 20
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node 768.4  -639.5 -168.0 1.0 89.0
+	race_add_route_node 1747.6 -606.7 -168.0   0    0
+
+	race_set_route_name "Room 2" ""
+	race_set_route_timeout 20
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node 2304.0 -640.5  -232.0 1.3 90.0
+	race_add_route_node 2298.9  1513.4 -264.0   0    0
+
+	race_set_route_name "Room 3" ""
+	race_set_route_timeout 20
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node 1093.5  1725.5  728.0   0    0
+	race_add_route_node  961.3  1692.7  536.0   0    0
+
+	race_set_route_name "Room 4" ""
+	race_set_route_timeout 20
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node -1442.6 1930.9 632.0 6.7 -91.0
+	race_add_route_node  -483.4  642.0 632.0 0    0
+
+	race_set_route_name "Room 5" ""
+	race_set_route_timeout 20
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node -3743.6   600.5  952.0  6.4 90.2
+	race_add_route_node -1983.2  3314.1  704.0    0    0
+
+	race_set_route_name "Room 6" ""
+	race_set_route_timeout 20
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node 2960.5  368.0 888.0 1.0 89.0
+	race_add_route_node 2960.5 2251.2 888.0   0    0
+
+	race_set_route_name "Room 7" ""
+	race_set_route_timeout 20
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
