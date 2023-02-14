@@ -408,7 +408,7 @@ void fish_pain(struct gedict_s *attacker, float damage)
  */
 void SP_monster_fish()
 {
-	if (deathmatch)
+	if (!AllowMonster(self))
 	{
 		ent_remove(self);
 

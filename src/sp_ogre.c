@@ -835,7 +835,7 @@ float OgreCheckAttack()
  */
 void SP_monster_ogre()
 {
-	if (deathmatch)
+	if (!AllowMonster(self))
 	{
 		ent_remove(self);
 

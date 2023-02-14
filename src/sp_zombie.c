@@ -936,7 +936,7 @@ void zombie_die()
  */
 void SP_monster_zombie()
 {
-	if (deathmatch)
+	if (!AllowMonster(self))
 	{
 		ent_remove(self);
 

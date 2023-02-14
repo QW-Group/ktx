@@ -576,7 +576,7 @@ float SoldierCheckAttack()
  */
 void SP_monster_army()
 {
-	if (deathmatch)
+	if (!AllowMonster(self))
 	{
 		ent_remove(self);
 

@@ -500,7 +500,7 @@ void boss_awake()
  */
 void SP_monster_boss()
 {
-	if (deathmatch)
+	if (!AllowMonster(self))
 	{
 		ent_remove(self);
 

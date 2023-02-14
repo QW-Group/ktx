@@ -686,7 +686,7 @@ float ShamCheckAttack()
  */
 void SP_monster_shambler()
 {
-	if (deathmatch)
+	if (!AllowMonster(self))
 	{
 		ent_remove(self);
 

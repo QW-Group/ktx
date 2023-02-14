@@ -1222,3 +1222,5 @@ extern qbool initial_match_spawns;
 extern int maxPlayerCount;
 
 #define AUTOTRACK_POWERUPS_PREDICT_TIME 2
+
+qbool AllowMonster(gedict_t *e);

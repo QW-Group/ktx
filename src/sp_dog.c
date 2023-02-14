@@ -540,7 +540,7 @@ float DogCheckAttack()
  */
 void SP_monster_dog()
 {
-	if (deathmatch)
+	if (!AllowMonster(self))
 	{
 		ent_remove(self);
 

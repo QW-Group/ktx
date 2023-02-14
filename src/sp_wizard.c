@@ -480,7 +480,7 @@ float WizardCheckAttack()
  */
 void SP_monster_wizard()
 {
-	if (deathmatch)
+	if (!AllowMonster(self))
 	{
 		ent_remove(self);
 
