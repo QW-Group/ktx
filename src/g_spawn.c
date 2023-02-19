@@ -162,6 +162,11 @@ field_t fields[] =
 
 // Transparent entities in map
 	{ "alpha", 						-1, 								F_FLOAT },
+
+// Rotate
+	{ "rotate", 					FOFS(rotate), 					F_VECTOR },
+	{ "path", 						FOFS(path), 					F_LSTRING },
+	{ "event", 						FOFS(event), 					F_LSTRING },
 	{ NULL }
 };
 
@@ -314,6 +319,15 @@ void SP_i_p_t();
 // Races
 void SP_race_route_start();
 
+// Rotate
+void SP_info_rotate();
+void SP_path_rotate();
+void SP_func_rotate_entity();
+void SP_func_rotate_train();
+void SP_func_movewall();
+void SP_rotate_object();
+void SP_func_rotate_door();
+
 spawn_t spawns[] =
 {
 // info entities don't do anything at all, but provide positional
@@ -455,6 +469,15 @@ spawn_t spawns[] =
 // race routes
 	{ "race_route_start", 				SP_race_route_start },
 	{ "race_route_marker", 				SUB_Null },
+
+// rotate
+	{ "info_rotate",  SP_info_rotate },
+	{ "path_rotate",  SP_path_rotate },
+	{ "rotate_object", SP_rotate_object },
+	{ "func_movewall", SP_func_movewall },
+	{ "func_rotate_door", SP_func_rotate_door },
+	{ "func_rotate_train", SP_func_rotate_train },
+	{ "func_rotate_entity", SP_func_rotate_entity },
 
 	{ 0, 0 }
 };

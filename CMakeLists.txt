@@ -71,6 +71,7 @@ set(SRC_COMMON
 	"${DIR_SRC}/g_spawn.c"
 	"${DIR_SRC}/g_userinfo.c"
 	"${DIR_SRC}/g_utils.c"
+	"${DIR_SRC}/hiprot.c"
 	"${DIR_SRC}/hoonymode.c"
 	"${DIR_SRC}/items.c"
 	"${DIR_SRC}/logs.c"

@@ -1200,6 +1200,18 @@ typedef struct gedict_s
 // {
 	qbool spawn_effect_queued;
 // }
+
+// { hiprot fields
+	int rotate_type;
+	vec3_t neworigin;
+	vec3_t rotate;
+	vec3_t finalangle;
+	float endtime;
+	float duration;
+	string_t group;
+	string_t path;
+	string_t event;
+// }
 } gedict_t;
 
 typedef enum
