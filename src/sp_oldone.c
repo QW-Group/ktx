@@ -488,7 +488,7 @@ void nopain(gedict_t *attacker, float damage)
  */
 void SP_monster_oldone()
 {
-	if (deathmatch)
+	if (!AllowMonster(self))
 	{
 		ent_remove(self);
 

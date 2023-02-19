@@ -340,7 +340,7 @@ ANIM(tbaby_die2, exp1, tbaby_die2; _tbaby_die2();)
  */
 void SP_monster_tarbaby()
 {
-	if (deathmatch)
+	if (!AllowMonster(self))
 	{
 		ent_remove(self);
 

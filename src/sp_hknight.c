@@ -771,7 +771,7 @@ void hknight_melee()
  */
 void SP_monster_hell_knight()
 {
-	if (deathmatch)
+	if (!AllowMonster(self))
 	{
 		ent_remove(self);
 

@@ -1859,3 +1859,26 @@ void StartFrame(int time)
 
 	TeamplayGameTick();
 }
+
+// Check the same spawnflags as items only visible in DM for monsters as well.
+// 1. Disabled for all SP modes
+// 2. Not disabled for DM
+qbool AllowMonster(gedict_t *e)
+{
+	if (!deathmatch)
+	{
+		return true;
+	}
+
+	if (((int) e->s.v.spawnflags & SPAWNFLAG_NOT_SP) != SPAWNFLAG_NOT_SP)
+	{
+		return false;
+	}
+
+	if (((int) e->s.v.spawnflags & SPAWNFLAG_NOT_DEATHMATCH) == SPAWNFLAG_NOT_DEATHMATCH)
+	{
+		return false;
+	}
+
+	return true;
+}

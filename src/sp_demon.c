@@ -506,7 +506,7 @@ float DemonCheckAttack()
  */
 void SP_monster_demon1()
 {
-	if (deathmatch)
+	if (!AllowMonster(self))
 	{
 		ent_remove(self);
 

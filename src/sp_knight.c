@@ -442,7 +442,7 @@ void knight_die()
  */
 void SP_monster_knight()
 {
-	if (deathmatch)
+	if (!AllowMonster(self))
 	{
 		ent_remove(self);
 

@@ -493,7 +493,7 @@ void enf_die()
  */
 void SP_monster_enforcer()
 {
-	if (deathmatch)
+	if (!AllowMonster(self))
 	{
 		ent_remove(self);
 

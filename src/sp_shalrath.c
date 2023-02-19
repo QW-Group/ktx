@@ -333,7 +333,7 @@ void shalrath_die()
  */
 void SP_monster_shalrath()
 {
-	if (deathmatch)
+	if (!AllowMonster(self))
 	{
 		ent_remove(self);
 
