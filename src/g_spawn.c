@@ -124,6 +124,14 @@ field_t fields[] =
 	{ "angle", 						FOFS(s.v.angles), 					F_ANGLEHACK },
 	{ "light", 						0, 									F_IGNORE },
 	{ "wad", 						0, 									F_IGNORE },
+	{ "noise",						FOFS(noise), 						F_LSTRING },
+	{ "noise1",						FOFS(noise1), 						F_LSTRING },
+	{ "noise2",						FOFS(noise2), 						F_LSTRING },
+	{ "noise3",						FOFS(noise3), 						F_LSTRING },
+	{ "noise4",						FOFS(noise4), 						F_LSTRING },
+	{ "deathtype",					FOFS(deathtype), 					F_LSTRING },
+	{ "t_length",					FOFS(t_length), 					F_FLOAT },
+	{ "t_width",					FOFS(t_width), 						F_FLOAT },
 // TF
 	{ "team_no", 					FOFS(team_no), 						F_INT },
 // custom teleporters
