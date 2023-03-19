@@ -3,7 +3,7 @@ on: [push]
 jobs:
   build:
     if: github.repository == 'QW-Group/ktx'
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
