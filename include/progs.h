@@ -1222,6 +1222,11 @@ typedef struct gedict_s
 // { ambient_general
 	float volume;
 // }
+
+// { trigger_heal
+	float healmax;
+	float healtimer;
+// }
 } gedict_t;
 
 typedef enum

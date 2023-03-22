@@ -174,6 +174,9 @@ field_t fields[] =
 
 // ambient_general
 	{ "volume", 					FOFS(volume), 						F_FLOAT },
+
+// trigger_heal
+	{ "heal_amount", 				FOFS(healamount), 					F_FLOAT },
 	{ NULL }
 };
 
@@ -340,6 +343,8 @@ void SP_func_rotate_door();
 
 void SP_ambient_general();
 
+void SP_trigger_heal();
+
 spawn_t spawns[] =
 {
 // info entities don't do anything at all, but provide positional
@@ -494,6 +499,8 @@ spawn_t spawns[] =
 	{ "func_rotate_door", SP_func_rotate_door },
 	{ "func_rotate_train", SP_func_rotate_train },
 	{ "func_rotate_entity", SP_func_rotate_entity },
+
+	{ "trigger_heal", SP_trigger_heal },
 
 	{ 0, 0 }
 };
