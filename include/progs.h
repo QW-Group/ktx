@@ -24,6 +24,7 @@
  */
 
 #include "progdefs.h"
+#include "protocol.h"
 
 #define MAX_ROUTE_NODES		20 // max race checkpoints per race (including start and finish checkpoints)
 #define MAX_ROUTES			20 // max race route per map

@@ -118,8 +118,6 @@ size_t strlcat(char *dst, char *src, size_t siz);
 
 #endif
 
-#define	MAX_CLIENTS		32
-
 #define	MAX_QPATH		64			// max length of a quake game pathname
 #define	MAX_OSPATH		128			// max length of a filesystem pathname
 
