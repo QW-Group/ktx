@@ -4454,6 +4454,53 @@ void CheckTeamStatus()
 	}
 }
 
+void SendSpecInfo()
+{
+	gedict_t *t, *p;
+	int cl;
+	char *tracking, *nick;
+
+	static double lastupdate = 0;
+
+	if (g_globalvars.time - lastupdate < 2)
+	{
+		return;
+	}
+
+	lastupdate = g_globalvars.time;
+
+	for (t = world; (t = find_spc(t));)
+	{
+		if (t->ct != ctSpec)
+		{
+			continue;
+		}
+
+		cl = NUM_FOR_EDICT(t) - 1;
+		tracking = TrackWhom(t);
+
+		if (strnull(nick = ezinfokey(t, "k_nick"))) // get nick, if any, do not send name, client can guess it too
+		{
+			nick = ezinfokey(t, "k");
+		}
+
+		if (nick[0] && nick[1] && nick[2] && nick[3])
+		{
+			nick[4] = 0; // truncate nick to 4 symbols
+		}
+
+		for (p = world; (p = find_client(p));)
+		{
+			if (p == t)
+			{
+				continue; // ignore self
+			}
+
+			stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "//specinfo %d \"%s\" \"%s\"\n", cl, nick, tracking);
+		}
+	}
+}
+
 void TookWeaponHandler(gedict_t *p, int new_wp, qbool from_backpack)
 {
 	weaponName_t wp;
