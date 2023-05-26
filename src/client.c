@@ -4454,6 +4454,37 @@ void CheckTeamStatus()
 	}
 }
 
+void SendSpecInfo()
+{
+	gedict_t *t, *p;
+	int cl, tr;
+
+	static double lastupdate = 0;
+
+	if (g_globalvars.time - lastupdate < 2)
+	{
+		return;
+	}
+
+	lastupdate = g_globalvars.time;
+
+	for (t = world; (t = find_spc(t));)
+	{
+		cl = NUM_FOR_EDICT(t) - 1;
+		tr = NUM_FOR_EDICT(PROG_TO_EDICT(t->s.v.goalentity)) - 1;	// num for player spec is tracking
+
+		for (p = world; (p = find_client(p));)
+		{
+			if (p == t)
+			{
+				continue; // ignore self
+			}
+
+			stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "//spi %d %d\n", cl, tr);
+		}
+	}
+}
+
 void TookWeaponHandler(gedict_t *p, int new_wp, qbool from_backpack)
 {
 	weaponName_t wp;
