@@ -229,6 +229,7 @@ typedef struct vote_s
 	int hooksmooth;
 	int hookfast;
 	int hookclassic;
+	int hookcrhook;
 	int antilag;
 	int privategame;
 	//int kick_unauthed;
