@@ -802,6 +802,10 @@ void weapon_touch()
 	gedict_t *stemp;
 	int leave;
 	int real_ammo = 0;
+	int k_freshteams = cvar("k_freshteams");
+	int limit_sweep_ammo = cvar("k_freshteams_limit_sweep_ammo");
+	int k_nosweep = cvar("k_nosweep");
+	int weapon_time = k_freshteams ? cvar("k_freshteams_weapon_time") : 30;
 	char *playername;
 
 	if (ISDEAD(other))
@@ -835,47 +839,79 @@ void weapon_touch()
 
 	if (!strcmp(self->classname, "weapon_nailgun"))
 	{
-		if (leave && ((int)other->s.v.items & IT_NAILGUN))
+		if ((leave || k_nosweep) && ((int)other->s.v.items & IT_NAILGUN))
 		{
 			return;
 		}
 
 		hadammo = other->s.v.ammo_nails;
 		new = IT_NAILGUN;
-		other->s.v.ammo_nails += 30;
+
+		if (k_freshteams && limit_sweep_ammo && ((int)other->s.v.items & IT_NAILGUN))
+		{
+			other->s.v.ammo_nails += cvar("k_freshteams_sweep_ng_ammo");
+		}
+		else
+		{
+			other->s.v.ammo_nails += 30;
+		}
 	}
 	else if (!strcmp(self->classname, "weapon_supernailgun"))
 	{
-		if (leave && ((int)other->s.v.items & IT_SUPER_NAILGUN))
+		if ((leave || k_nosweep) && ((int)other->s.v.items & IT_SUPER_NAILGUN))
 		{
 			return;
 		}
 
 		hadammo = other->s.v.ammo_nails;
 		new = IT_SUPER_NAILGUN;
-		other->s.v.ammo_nails += 30;
+
+		if (k_freshteams && limit_sweep_ammo && ((int)other->s.v.items & IT_SUPER_NAILGUN))
+		{
+			other->s.v.ammo_nails += cvar("k_freshteams_sweep_sng_ammo");
+		}
+		else
+		{
+			other->s.v.ammo_nails += 30;
+		}
 	}
 	else if (!strcmp(self->classname, "weapon_supershotgun"))
 	{
-		if (leave && ((int)other->s.v.items & IT_SUPER_SHOTGUN))
+		if ((leave || k_nosweep) && ((int)other->s.v.items & IT_SUPER_SHOTGUN))
 		{
 			return;
 		}
 
 		hadammo = other->s.v.ammo_shells;
 		new = IT_SUPER_SHOTGUN;
-		other->s.v.ammo_shells += 5;
+
+		if (k_freshteams && limit_sweep_ammo && ((int)other->s.v.items & IT_SUPER_SHOTGUN))
+		{
+			other->s.v.ammo_shells += cvar("k_freshteams_sweep_ssg_ammo");
+		}
+		else
+		{
+			other->s.v.ammo_shells += 5;
+		}
 	}
 	else if (!strcmp(self->classname, "weapon_rocketlauncher"))
 	{
-		if (leave && ((int)other->s.v.items & IT_ROCKET_LAUNCHER))
+		if ((leave || k_nosweep) && ((int)other->s.v.items & IT_ROCKET_LAUNCHER))
 		{
 			return;
 		}
 
 		hadammo = other->s.v.ammo_rockets;
 		new = IT_ROCKET_LAUNCHER;
-		other->s.v.ammo_rockets += 5;
+
+		if (k_freshteams && limit_sweep_ammo && ((int)other->s.v.items & IT_ROCKET_LAUNCHER))
+		{
+			other->s.v.ammo_rockets += cvar("k_freshteams_sweep_rl_ammo");
+		}
+		else
+		{
+			other->s.v.ammo_rockets += 5;
+		}
 
 		if (!first_rl_taken)
 		{
@@ -887,25 +923,41 @@ void weapon_touch()
 	}
 	else if (!strcmp(self->classname, "weapon_grenadelauncher"))
 	{
-		if (leave && ((int)other->s.v.items & IT_GRENADE_LAUNCHER))
+		if ((leave || k_nosweep) && ((int)other->s.v.items & IT_GRENADE_LAUNCHER))
 		{
 			return;
 		}
 
 		hadammo = other->s.v.ammo_rockets;
 		new = IT_GRENADE_LAUNCHER;
-		other->s.v.ammo_rockets += 5;
+
+		if (k_freshteams && limit_sweep_ammo && ((int)other->s.v.items & IT_GRENADE_LAUNCHER))
+		{
+			other->s.v.ammo_rockets += cvar("k_freshteams_sweep_gl_ammo");
+		}
+		else
+		{
+			other->s.v.ammo_rockets += 5;
+		}
 	}
 	else if (!strcmp(self->classname, "weapon_lightning"))
 	{
-		if (leave && ((int)other->s.v.items & IT_LIGHTNING))
+		if ((leave || k_nosweep) && ((int)other->s.v.items & IT_LIGHTNING))
 		{
 			return;
 		}
 
 		hadammo = other->s.v.ammo_cells;
 		new = IT_LIGHTNING;
-		other->s.v.ammo_cells += 15;
+
+		if (k_freshteams && limit_sweep_ammo && ((int)other->s.v.items & IT_LIGHTNING))
+		{
+			other->s.v.ammo_cells += cvar("k_freshteams_sweep_lg_ammo");
+		}
+		else
+		{
+			other->s.v.ammo_cells += 15;
+		}
 	}
 	else
 	{
@@ -992,9 +1044,9 @@ void weapon_touch()
 	// we still try to use SUB_regen and do final decision there if we should regen item.
 	if (deathmatch != 2)
 	{
-		self->s.v.nextthink = g_globalvars.time + 30;
+		self->s.v.nextthink = g_globalvars.time + weapon_time;
 		stuffcmd_flags(other, STUFFCMD_DEMOONLY, "//ktx took %d %d %d\n", NUM_FOR_EDICT(self),
-						30, NUM_FOR_EDICT(other));
+						weapon_time, NUM_FOR_EDICT(other));
 	}
 
 	self->think = (func_t) SUB_regen;
@@ -1120,6 +1172,7 @@ void ammo_touch()
 {
 	int ammo, weapon, best;
 	int real_ammo = 0;
+	qbool freshteams_fast_ammo = (cvar("k_freshteams") && cvar("k_freshteams_fast_ammo"));
 	gedict_t *stemp;
 	char *playername;
 
@@ -1270,6 +1323,12 @@ void ammo_touch()
 	if ((deathmatch == 3) || (deathmatch == 5))
 	{
 		self->s.v.nextthink = g_globalvars.time + 15;
+	}
+
+	// If playing freshteams and fast_ammo is enabled, set ammo respawn time same as weapons
+	if (freshteams_fast_ammo)
+	{
+		self->s.v.nextthink = g_globalvars.time + cvar("k_freshteams_weapon_time");
 	}
 
 	self->think = (func_t) SUB_regen;
@@ -2586,6 +2645,7 @@ void DropBackpack()
 	gedict_t *item;
 	float f1;
 	char *playername;
+	qbool fresh_packs = (cvar("k_freshteams") && cvar("k_freshteams_limit_packs"));
 
 	if (k_bloodfest)
 	{
@@ -2745,6 +2805,14 @@ void DropBackpack()
 		item->s.v.ammo_nails = min(50, item->s.v.ammo_nails);
 		item->s.v.ammo_rockets = min(25, item->s.v.ammo_rockets);
 		item->s.v.ammo_cells = min(25, item->s.v.ammo_cells);
+	}
+
+	if (fresh_packs)
+	{
+		item->s.v.ammo_shells = bound(0, item->s.v.ammo_shells, cvar("k_freshteams_pack_shells"));
+		item->s.v.ammo_nails = bound(0, item->s.v.ammo_nails, cvar("k_freshteams_pack_nails"));
+		item->s.v.ammo_rockets = bound(0, item->s.v.ammo_rockets, cvar("k_freshteams_pack_rockets"));
+		item->s.v.ammo_cells = bound(0, item->s.v.ammo_cells, cvar("k_freshteams_pack_cells"));
 	}
 
 	playername = self->netname;
