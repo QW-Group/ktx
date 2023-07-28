@@ -167,6 +167,7 @@ field_t fields[] =
 	{ "rotate", 					FOFS(rotate), 					F_VECTOR },
 	{ "path", 						FOFS(path), 					F_LSTRING },
 	{ "event", 						FOFS(event), 					F_LSTRING },
+	{ "group", 						FOFS(group), 					F_LSTRING },
 
 // Bob
 	{ "waitmin", 					FOFS(waitmin), 						F_FLOAT},
