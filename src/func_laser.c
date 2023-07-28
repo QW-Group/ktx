@@ -10,10 +10,10 @@ static void laser_helper_think()
 
 	if (!((int) owner->s.v.spawnflags & START_OFF))
 	{
-		trap_SetExtField_f(self, "alpha", alpha * 0.8 + alpha * g_random() * 0.4);
+		trap_SetExtField_f(self, "alpha", alpha * 0.8f + alpha * g_random() * 0.4f);
 	}
 
-	self->s.v.nextthink = g_globalvars.time + 0.05;
+	self->s.v.nextthink = g_globalvars.time + 0.05f;
 }
 
 static void init_laser_noise()
@@ -23,7 +23,7 @@ static void init_laser_noise()
 	sound(owner, CHAN_VOICE, owner->noise, 1, ATTN_NORM);
 
 	self->think = (func_t) laser_helper_think;
-	self->s.v.nextthink = g_globalvars.time + 0.05;
+	self->s.v.nextthink = g_globalvars.time + 0.05f;
 }
 
 static void func_laser_touch()
@@ -39,7 +39,7 @@ static void func_laser_touch()
 		T_Damage (other, self, self, self->dmg);
 		// add "zap" sound when damage is dealt
 		sound (self, CHAN_WEAPON, self->noise2, 1, ATTN_NORM);
-		self->attack_finished = g_globalvars.time + 0.333;
+		self->attack_finished = g_globalvars.time + 0.333f;
 	}
 }
 
@@ -95,7 +95,7 @@ void SP_func_laser()
 	alpha = trap_GetExtField_f(self, "alpha");
 	if (!alpha)
 	{
-		alpha = 0.5;
+		alpha = 0.5f;
 	}
 	trap_SetExtField_f(self, "alpha", alpha);
 

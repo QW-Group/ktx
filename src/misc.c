@@ -822,9 +822,9 @@ void SP_ambient_general()
 			break;
 	}
 
-	if (!self->volume)
+	if (self->volume <= 0)
 	{
-		self->volume = 0.5;
+		self->volume = 0.5f;
 	}
 	trap_ambientsound (PASSVEC3(self->s.v.origin), self->noise, self->volume, self->speed);
 	ent_remove(self);

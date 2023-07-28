@@ -11,7 +11,7 @@ static void func_bob_timer()
 	{
 		// Setup bob cycle and half way point for slowdown
 		self->endtime = g_globalvars.time + self->count;
-		self->distance = g_globalvars.time + (self->count * 0.5);
+		self->distance = g_globalvars.time + (self->count * 0.5f);
 
 		// Flip direction of bmodel bob
 		self->lefty = 1 - self->lefty;
@@ -41,7 +41,7 @@ static void func_bob_timer()
 		VectorAdd(self->s.v.velocity, delta, self->s.v.velocity);
 	}
 
-	self->s.v.nextthink = self->s.v.ltime + 0.1;
+	self->s.v.nextthink = self->s.v.ltime + 0.1f;
 }
 
 void SP_func_bob()
@@ -69,7 +69,7 @@ void SP_func_bob()
 	}
 	if (self->waitmin2 <= 0)
 	{
-		self->waitmin2 = 0.75; // Slow down
+		self->waitmin2 = 0.75f; // Slow down
 	}
 	if (self->delay < 0)
 	{
