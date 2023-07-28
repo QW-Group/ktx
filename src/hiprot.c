@@ -518,7 +518,7 @@ static void rotate_train_next()
 {
 	gedict_t *targ, *current, *goalentity;
 	vec3_t vdestdelta;
-	float len, traveltime, div;
+	float len, traintraveltime, div;
 	char *temp;
 
 	self->state = STATE_NEXT;
@@ -631,7 +631,7 @@ static void rotate_train_next()
 
 		if ((int) current->s.v.spawnflags & MOVETIME)
 		{
-			traveltime = current->speed;
+			traintraveltime = current->speed;
 		}
 		else
 		{
@@ -647,10 +647,10 @@ static void rotate_train_next()
 			}
 
 			// divide by speed to get time to reach dest
-			traveltime = len / self->speed;
+			traintraveltime = len / self->speed;
 		}
 
-		if (traveltime < 0.1)
+		if (traintraveltime < 0.1f)
 		{
 			SetVector(self->s.v.velocity, 0, 0, 0);
 			self->endtime = self->s.v.ltime + 0.1;
@@ -662,7 +662,7 @@ static void rotate_train_next()
 		}
 
 		// qcc won't take vec/float
-		div = 1 / traveltime;
+		div = 1.0f / traintraveltime;
 
 		if ((int) targ->s.v.spawnflags & ANGLES)
 		{
@@ -674,7 +674,7 @@ static void rotate_train_next()
 		}
 
 		// set endtime to trigger a think when dest is reached
-		self->endtime = self->s.v.ltime + traveltime;
+		self->endtime = self->s.v.ltime + traintraveltime;
 
 		// scale the destdelta vector by the time spent traveling to get velocity
 		VectorScale(vdestdelta, div, self->s.v.velocity);
