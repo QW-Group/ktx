@@ -1202,30 +1202,30 @@ typedef struct gedict_s
 // }
 
 // { hiprot fields
-	int rotate_type;
-	vec3_t neworigin;
-	vec3_t rotate;
-	vec3_t finalangle;
-	float endtime;
-	float duration;
-	string_t group;
-	string_t path;
-	string_t event;
+	int rotate_type;                        // internal, rotate(0), movewall(1), setorigin(2), see hiprot.c
+	vec3_t neworigin;                       // internal, origin tracking
+	vec3_t rotate;                          // rotation angle
+	vec3_t finalangle;                      // normalized version of 'angles'
+	float endtime;                          // internal, animation tracking
+	float duration;                         // internal, animation tracking
+	string_t group;                         // linking of rotating brushes
+	string_t path;                          // from ent field 'target', as 'path' to mirror original source
+	string_t event;                         // events that may happen at path corners
 // }
 
 // { func_bob
-	float distance;
-	float waitmin;
-	float waitmin2;
+	float distance;                         // distance between vantage points
+	float waitmin;                          // speed-up factor, >0, see func_bob.c for defaults
+	float waitmin2;                         // slowdown factor, >0, see func_bob.c for defaults
 // }
 
 // { ambient_general
-	float volume;
+	float volume;                           // attenuation, see misc.c for defaults
 // }
 
 // { trigger_heal
-	float healmax;
-	float healtimer;
+	float healmax;                          // maximum health see triggers.c for defaults
+	float healtimer;                        // internal timer for tracking health replenishment interval
 // }
 } gedict_t;
 
