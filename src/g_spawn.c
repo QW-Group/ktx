@@ -124,6 +124,14 @@ field_t fields[] =
 	{ "angle", 						FOFS(s.v.angles), 					F_ANGLEHACK },
 	{ "light", 						0, 									F_IGNORE },
 	{ "wad", 						0, 									F_IGNORE },
+	{ "noise",						FOFS(noise), 						F_LSTRING },
+	{ "noise1",						FOFS(noise1), 						F_LSTRING },
+	{ "noise2",						FOFS(noise2), 						F_LSTRING },
+	{ "noise3",						FOFS(noise3), 						F_LSTRING },
+	{ "noise4",						FOFS(noise4), 						F_LSTRING },
+	{ "deathtype",					FOFS(deathtype), 					F_LSTRING },
+	{ "t_length",					FOFS(t_length), 					F_FLOAT },
+	{ "t_width",					FOFS(t_width), 						F_FLOAT },
 // TF
 	{ "team_no", 					FOFS(team_no), 						F_INT },
 // custom teleporters
@@ -154,6 +162,22 @@ field_t fields[] =
 
 // Transparent entities in map
 	{ "alpha", 						-1, 								F_FLOAT },
+
+// Rotate
+	{ "rotate", 					FOFS(rotate), 					F_VECTOR },
+	{ "path", 						FOFS(path), 					F_LSTRING },
+	{ "event", 						FOFS(event), 					F_LSTRING },
+	{ "group", 						FOFS(group), 					F_LSTRING },
+
+// Bob
+	{ "waitmin", 					FOFS(waitmin), 						F_FLOAT},
+	{ "waitmin2", 					FOFS(waitmin2), 					F_FLOAT},
+
+// ambient_general
+	{ "volume", 					FOFS(volume), 						F_FLOAT },
+
+// trigger_heal
+	{ "heal_amount", 				FOFS(healamount), 					F_FLOAT },
 	{ NULL }
 };
 
@@ -231,6 +255,9 @@ void SP_func_train();
 void SP_misc_teleporttrain();
 void SP_func_button();
 
+void SP_func_bob();
+void SP_func_laser();
+
 void SP_trigger_multiple();
 void SP_trigger_once();
 void SP_trigger_relay();
@@ -306,6 +333,19 @@ void SP_i_p_t();
 // Races
 void SP_race_route_start();
 
+// Rotate
+void SP_info_rotate();
+void SP_path_rotate();
+void SP_func_rotate_entity();
+void SP_func_rotate_train();
+void SP_func_movewall();
+void SP_rotate_object();
+void SP_func_rotate_door();
+
+void SP_ambient_general();
+
+void SP_trigger_heal();
+
 spawn_t spawns[] =
 {
 // info entities don't do anything at all, but provide positional
@@ -343,6 +383,7 @@ spawn_t spawns[] =
 	{ "ambient_light_buzz", 			SP_ambient_light_buzz },
 	{ "ambient_swamp1", 				SP_ambient_swamp1 },
 	{ "ambient_swamp2", 				SP_ambient_swamp2 },
+	{ "ambient_general", 				SP_ambient_general },
 	{ "misc_noisemaker", 				SP_misc_noisemaker },
 	{ "misc_explobox", 					SP_misc_explobox },
 	{ "misc_explobox2", 				SP_misc_explobox2 },
@@ -359,6 +400,9 @@ spawn_t spawns[] =
 	{ "func_train", 					SP_func_train },
 	{ "misc_teleporttrain", 			SP_misc_teleporttrain },
 	{ "func_button", 					SP_func_button },
+
+	{ "func_bob", 						SP_func_bob },
+	{ "func_laser", 					SP_func_laser },
 
 	{ "trigger_multiple", 				SP_trigger_multiple },
 	{ "trigger_once", 					SP_trigger_once },
@@ -447,6 +491,17 @@ spawn_t spawns[] =
 // race routes
 	{ "race_route_start", 				SP_race_route_start },
 	{ "race_route_marker", 				SUB_Null },
+
+// rotate
+	{ "info_rotate",  SP_info_rotate },
+	{ "path_rotate",  SP_path_rotate },
+	{ "rotate_object", SP_rotate_object },
+	{ "func_movewall", SP_func_movewall },
+	{ "func_rotate_door", SP_func_rotate_door },
+	{ "func_rotate_train", SP_func_rotate_train },
+	{ "func_rotate_entity", SP_func_rotate_entity },
+
+	{ "trigger_heal", SP_trigger_heal },
 
 	{ 0, 0 }
 };

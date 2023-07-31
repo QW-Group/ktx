@@ -1113,3 +1113,69 @@ void SP_trigger_custom_monsterjump()
 	// reset origin, well, you have to set origin each time you change solid type...
 	setorigin(self, PASSVEC3(self->s.v.origin));
 }
+
+float T_Heal(gedict_t *e, float healamount, float ignore);
+
+static void trigger_heal_touch()
+{
+	if ((match_in_progress == 1) || (!match_in_progress && cvar("k_freeze")))
+	{
+		return;
+	}
+
+	if (!streq(other->classname, "player") || ISDEAD(other))
+	{
+		return;
+	}
+
+	if (other->healtimer > g_globalvars.time)
+	{
+		return;
+	}
+
+	if (other->s.v.takedamage && (other->s.v.health < self->healmax))
+	{
+		sound (self, CHAN_AUTO, self->noise, 1, ATTN_NORM);
+
+		if ((other->s.v.health + self->healamount) > self->healmax)
+		{
+			T_Heal (other, (self->healmax - other->s.v.health), 1);
+		}
+		else
+		{
+			T_Heal (other, self->healamount, 1);
+		}
+
+		other->healtimer = g_globalvars.time + self->wait;
+	}
+}
+
+void SP_trigger_heal()
+{
+	if (strnull(self->noise))
+		self->noise = "items/r_item1.wav";
+
+	trap_precache_sound (self->noise);
+
+	InitTrigger ();
+
+	if (self->wait == 0)
+	{
+		self->wait = 1;
+	}
+	if (self->healamount == 0)
+	{
+		self->healamount = 5;
+	}
+	if (self->healmax == 0)
+	{
+		self->healmax = 100;
+	}
+	else if (self->healmax > 250)
+	{
+		self->healmax = 250;
+	}
+
+	self->healtimer = g_globalvars.time;
+	self->touch = (func_t) trigger_heal_touch;
+}
