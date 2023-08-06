@@ -138,6 +138,11 @@ float last_alive_time(gedict_t *player)
 
 	else if (time == 0)
 	{
+		if (player->last_alive_active && player->in_play)
+		{
+			player->escape_time = g_globalvars.time; // start timer for escape time
+		}
+
 		player->last_alive_active = false;
 	}
 
@@ -501,6 +506,10 @@ void CA_PutClientInServer(void)
 		// previous round will be invisible
 		self->hideentity = 0;
 
+		// reset escape time and last_alive every spawn
+		self->escape_time = 0;
+		self->last_alive_active = false;
+
 		// default to spawning with rl
 		self->s.v.weapon = IT_ROCKET_LAUNCHER;
 
@@ -747,10 +756,43 @@ void CA_SendTeamInfo(gedict_t *t)
 	}
 }
 
+// wipeout: check if dying player survived just long enough for teammate to spawn
+void CA_check_escape(gedict_t *targ, gedict_t *attacker)
+{
+	float escape_time = g_globalvars.time - targ->escape_time;
+	gedict_t *p;
+
+	if (escape_time > 0 && escape_time < 0.2)
+	{
+		for (p = world; (p = find_plr_same_team(p, getteam(targ)));)
+		{
+			stuffcmd(p, "play ca/hero.wav\n");
+		}
+
+		for (p = world; (p = find_plr_same_team(p, getteam(attacker)));)
+		{
+			stuffcmd(p, "play boss2/idle.wav\n");
+		}
+
+		// Player is rewarded with an extra life.
+		// Escaping a wipe on the first life results in instant respawn.
+		// That's cool, but could be written cleaner in calc_respawn_time(). 
+		targ->round_deaths--;
+
+		G_bprint(2, "%s survives by &cff0%.3f&r seconds!\n", targ->netname, escape_time);
+	}
+}
+
 void CA_ClientObituary(gedict_t *targ, gedict_t *attacker)
 {
 	attacker->round_kills++;
 	
+	if (cvar("k_clan_arena") == 2)	// Wipeout only
+	{
+		// check if targ was a lone survivor waiting for teammate to spawn
+		CA_check_escape(targ, attacker);
+	}
+
 	// int ah, aa;
 
 	// if (!isCA())
