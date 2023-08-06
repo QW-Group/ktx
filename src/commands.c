@@ -7331,13 +7331,6 @@ void W_SetCurrentAmmo();
 
 void ToggleFreshTeams()
 {
-	int k_freshteams = bound(0, cvar("k_freshteams"), 2);
-
-	if (match_in_progress)
-	{
-		return;
-	}
-
 	if (!is_rules_change_allowed())
 	{
 		return;
@@ -7351,27 +7344,12 @@ void ToggleFreshTeams()
 		return;
 	}
 
-	if (!k_freshteams)
-	{
-		cvar_set("k_freshteams", "1");
-		G_bprint(2, "%s enabled\n", "&c08fFreshTeams&r");
-	}
-	else
-	{
-		cvar_set("k_freshteams", "0");
-		G_bprint(2, "%s disabled\n", "&c08fFreshTeams&r");
-	}
+	cvar_toggle_msg(self, "k_freshteams", "&c08fFreshTeams&r");
 }
 
 void ToggleFreshPacks()		// FreshPacks is enabled by default when playing freshteams
 {
 	int k_freshteams = cvar("k_freshteams");
-	int k_freshpacks = bound(0, cvar("k_freshteams_limit_packs"), 1);
-
-	if (match_in_progress)
-	{
-		return;
-	}
 
 	if (!is_rules_change_allowed())
 	{
@@ -7386,27 +7364,12 @@ void ToggleFreshPacks()		// FreshPacks is enabled by default when playing fresht
 		return;
 	}
 
-	if (k_freshpacks)
-	{
-		cvar_set("k_freshteams_limit_packs", "0");
-		G_bprint(2, "%s disabled (standard dmm1 backpack ammo)\n", "&c08fFreshPacks&r");
-	}
-	else
-	{
-		cvar_set("k_freshteams_limit_packs", "1");
-		G_bprint(2, "%s enabled (FreshTeams default - limit backpack ammo)\n", "&c08fFreshPacks&r");
-	}
+	cvar_toggle_msg(self, "k_freshteams_limit_packs", "&c08fFreshPacks&r (limited backpack ammo)");
 }
 
 void ToggleFreshGuns() // FreshGuns is enabled by default when playing freshteams
 {
 	int k_freshteams = cvar("k_freshteams");
-	int k_freshguns = bound(0, cvar("k_freshteams_limit_sweep_ammo"), 1);
-
-	if (match_in_progress)
-	{
-		return;
-	}
 
 	if (!is_rules_change_allowed())
 	{
@@ -7421,27 +7384,13 @@ void ToggleFreshGuns() // FreshGuns is enabled by default when playing freshteam
 		return;
 	}
 
-	if (k_freshguns)
-	{
-		cvar_set("k_freshteams_limit_sweep_ammo", "0");
-		G_bprint(2, "%s disabled (standard dmm1 ammo distribution)\n", "&c08fFreshGuns&r");
-	}
-	else
-	{
-		cvar_set("k_freshteams_limit_sweep_ammo", "1");
-		G_bprint(2, "%s enabled (FreshTeams default - limit weapon ammo on sweep)\n", "&c08fFreshGuns&r");
-	}
+	cvar_toggle_msg(self, "k_freshteams_limit_sweep_ammo", "&c08fFreshGuns&r (limited weapon ammo on sweep)");
 }
 
 void ToggleFreshTime()
 {
 	int k_freshteams = cvar("k_freshteams");
 	int k_freshtime = bound(0, cvar("k_freshteams_weapon_time"), 60);
-
-	if (match_in_progress)
-	{
-		return;
-	}
 
 	if (!is_rules_change_allowed())
 	{
@@ -7474,13 +7423,6 @@ void ToggleFreshTime()
 
 void ToggleNoSweep()
 {
-	int k_nosweep = bound(0, cvar("k_nosweep"), 1);
-
-	if (match_in_progress)
-	{
-		return;
-	}
-
 	if (!is_rules_change_allowed())
 	{
 		return;
@@ -7494,16 +7436,7 @@ void ToggleNoSweep()
 		return;
 	}
 
-	if (k_nosweep)
-	{
-		cvar_set("k_nosweep", "0");
-		G_bprint(2, "%s disabled\n", redtext("NoSweep"));
-	}
-	else
-	{
-		cvar_set("k_nosweep", "1");
-		G_bprint(2, "%s enabled (players cannot pick up weapons they already have)\n", redtext("NoSweep"));
-	}
+	cvar_toggle_msg(self, "k_nosweep", redtext("NoSweep"));
 }
 
 void ToggleInstagib()
