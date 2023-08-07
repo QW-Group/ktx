@@ -1606,6 +1606,16 @@ void PrintCountdown(int seconds)
 		strlcat(text, va("%s %4s\n", "Dmgfrags", redtext("on")), sizeof(text));
 	}
 
+	if (cvar("k_freshteams"))
+	{
+		strlcat(text, va("%s %2s\n", "&c07fFreshTeams&r", redtext("on")), sizeof(text));
+	}
+
+	if (cvar("k_nosweep"))
+	{
+		strlcat(text, va("%s %5s\n", "NoSweep", redtext("on")), sizeof(text));
+	}
+
 	if ((deathmatch == 4) && !cvar("k_midair") && !cvar("k_instagib")
 			&& !strnull(nowp = str_noweapon((int)cvar("k_disallow_weapons") & DA_WPNS)))
 	{
