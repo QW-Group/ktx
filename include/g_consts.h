@@ -318,20 +318,6 @@
 
 #define MAX_STUFFED_QUICKMAPS_PER_FRAME	(32)
 
-enum
-{
-	mvdhidden_antilag_position = 0x0000,		// mvdhidden_antilag_position_header_t mvdhidden_antilag_position_t*
-	mvdhidden_usercmd = 0x0001,					// <byte: playernum> <byte:dropnum> <byte: msec, vec3_t: angles, short[3]: forward side up> <byte: buttons> <byte: impulse>
-	mvdhidden_usercmd_weapons = 0x0002,			// <byte: source playernum> <int: items> <byte[4]: ammo> <byte: result> <byte*: weapon priority (nul terminated)>
-	mvdhidden_demoinfo = 0x0003,				// <short: block#> <byte[] content>
-	mvdhidden_commentary_track = 0x0004,		// <byte: track#> [todo... <byte: audioformat> <string: short-name> <string: author(s)> <float: start-offset>?]
-	mvdhidden_commentary_data = 0x0005,			// <byte: track#> [todo... format-specific]
-	mvdhidden_commentary_text_segment = 0x0006,	// <byte: track#> [todo... <float: duration> <string: text (utf8)>]
-	mvdhidden_dmgdone = 0x0007,					// <byte: damaging ent#> <byte: damaged ent#> <byte: damage>
-	mvdhidden_usercmd_weapons_ss = 0x0008,		// (same format as mvdhidden_usercmd_weapons)
-	mvdhidden_extended = 0xFFFF					// doubt we'll ever get here: read next short...
-};
-
 #define SV_EXTENSIONS_KTXEXTENSION1		1
 #define SV_EXTENSIONS_MVDHIDDEN			2
 

@@ -1,0 +1,6 @@
+[submodule "qwprot"]
+	path = src/qwprot
+	url = https://github.com/QW-Group/qwprot.git
+[submodule "src\\qwprot"]
+	path = src\\qwprot
+	url = https://github.com/QW-Group/qwprot.git
