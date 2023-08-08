@@ -876,6 +876,24 @@ void FirstFrame()
 	RegisterCvarEx("k_hoonymode_prevmap", "");
 	RegisterCvarEx("k_hoonymode_prevspawns", "");
 // }
+// { freshteams dmm1
+	RegisterCvarEx("k_freshteams", "0");
+	RegisterCvarEx("k_freshteams_weapon_time", "20");
+	RegisterCvarEx("k_freshteams_fast_ammo", "0");			// ammo spawn times match weapons
+	RegisterCvarEx("k_freshteams_limit_packs", "1");		// limit ammo in packs
+	RegisterCvarEx("k_freshteams_pack_shells", "20");		// max shells in droppacks
+	RegisterCvarEx("k_freshteams_pack_nails", "30");		// max nails in droppacks
+	RegisterCvarEx("k_freshteams_pack_rockets", "5");		// max rockets in droppacks
+	RegisterCvarEx("k_freshteams_pack_cells", "10");		// max cells in droppacks
+	RegisterCvarEx("k_freshteams_limit_sweep_ammo", "1");	// limit ammo gained when sweeping a weapon
+	RegisterCvarEx("k_freshteams_sweep_ng_ammo", "6");
+	RegisterCvarEx("k_freshteams_sweep_ssg_ammo", "1");
+	RegisterCvarEx("k_freshteams_sweep_sng_ammo", "6");
+	RegisterCvarEx("k_freshteams_sweep_gl_ammo", "1");
+	RegisterCvarEx("k_freshteams_sweep_rl_ammo", "1");
+	RegisterCvarEx("k_freshteams_sweep_lg_ammo", "3");
+	RegisterCvarEx("k_nosweep", "0");						// can't pick up weapons you already have in dmm1
+// }
 // { race
 	RegisterCvarEx("k_race", "0");
 	RegisterCvarEx("k_race_custom_models", "0");
@@ -1725,6 +1743,16 @@ void FixRules()
 		cvar_fset("k_instagib", 0); // instagib only in dmm4
 	}
 
+	if (cvar("k_freshteams") && deathmatch != 1)
+	{
+		cvar_fset("k_freshteams", 0); // freshteams only in dmm1
+	}
+
+	if (cvar("k_nosweep") && deathmatch != 1)
+	{
+		cvar_fset("k_nosweep", 0); // nosweep only in dmm1
+	}
+
 	// ok, broadcast changes if any, a bit tech info, but this is misconfigured server
 	// and must not happen on well configured servers, k?
 	if (km != k_mode)
@@ -1773,6 +1801,7 @@ extern float intermission_exittime;
 void CheckTiming();
 void check_fcheck();
 void CheckTeamStatus();
+void SendSpecInfo();
 void DoMVDAutoTrack(void);
 
 void FixNoSpecs(void);
@@ -1850,6 +1879,8 @@ void StartFrame(int time)
 	check_monsters_respawn();
 
 	CheckTeamStatus();
+
+	SendSpecInfo();
 
 	CheckAutoXonX(true); // switch XonX mode dependant on players + specs count
 

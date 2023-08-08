@@ -492,13 +492,21 @@ void trap_SetExtField_f(gedict_t *ed, const char *fieldname, float val)
 
 int trap_GetExtField_i(gedict_t *ed, const char *fieldname)
 {
-	return syscall(G_GETEXTFIELD, (intptr_t)ed, (intptr_t)fieldname);
+	int ival = -1;
+	if (HAVEEXTENSION(G_GETEXTFIELD))
+	{
+		ival = syscall(G_GETEXTFIELD, (intptr_t)ed, (intptr_t)fieldname);
+	}
+	return ival;
 }
 
 float trap_GetExtField_f(gedict_t *ed, const char *fieldname)
 {
-	fi_t tmp;
-	tmp._int = syscall(G_GETEXTFIELD, (intptr_t)ed, (intptr_t)fieldname);
+	fi_t tmp = { ._float = -1 };
+	if (HAVEEXTENSION(G_GETEXTFIELD))
+	{
+		tmp._int = syscall(G_GETEXTFIELD, (intptr_t)ed, (intptr_t)fieldname);
+	}
 	return tmp._float;
 }
 
