@@ -22,6 +22,21 @@
 
 #define MAX_PLAYERCOUNT_RPICKUP 32
 
+// These are the built-in teams for rpickup to choose from
+rpickupTeams_t builtinTeamInfo[] =
+{
+	{"Bone", "10",  "0", "color 10 0\nskin \"\"\nteam Bone\n"},
+	{"Teal", "11", "11", "color 11 11\nskin \"\"\nteam Teal\n"},
+	{"Pink",  "6",  "6", "color 6 6\nskin \"\"\nteam Pink\n"},
+	{"Gold",  "5", "12", "color 5 12\nskin \"\"\nteam Gold\n"},
+	{"Plum",  "8",  "8", "color 8 8\nskin \"\"\nteam Plum\n"},
+	{"Wine",  "4",  "4", "color 4 4\nskin \"\"\nteam Wine\n"},
+	{"Beer",  "0",  "1", "color 0 1\nskin \"\"\nteam Beer\n"},
+	{"Weed",  "3",  "3", "color 3 3\nskin \"\"\nteam Weed\n"}
+};
+
+rpickupTeams_t rpTeams[3];
+
 //void BeginPicking();
 void BecomeCaptain(gedict_t *p);
 void BecomeCoach(gedict_t *p);
@@ -625,103 +640,17 @@ void vote_check_pickup()
 	}
 }
 
-// These are the built-in teams for rpickup to choose from
-rpickupTeams_t builtinTeamInfo[] =
-{
-	{"Bone", "10",  "0", "color 10 0\nskin \"\"\nteam Bone\n"},
-	{"Teal", "11", "11", "color 11 11\nskin \"\"\nteam Teal\n"},
-	{"Pink",  "6",  "6", "color 6 6\nskin \"\"\nteam Pink\n"},
-	{"Gold",  "5", "12", "color 5 12\nskin \"\"\nteam Gold\n"},
-	{"Plum",  "8",  "8", "color 8 8\nskin \"\"\nteam Plum\n"},
-	{"Wine",  "4",  "4", "color 4 4\nskin \"\"\nteam Wine\n"},
-	{"Beer",  "0",  "1", "color 0 1\nskin \"\"\nteam Beer\n"},
-	{"Weed",  "3",  "3", "color 3 3\nskin \"\"\nteam Weed\n"}
-};
-
-rpickupTeams_t rpTeams[3];
-
+// This function will randomly select an entry from 'builtinTeamInfo', and copy its content
+// to the '_rpTeam' parameter.
 void generateTeamInfo(rpickupTeams_t *_rpTeam)
 {
-//	switch ((int)(g_random() * 5))
-//	{
-//		case 0:
-//			strlcpy(_rpTeam->name, "Bone", sizeof(_rpTeam->name));
-//			strlcpy(_rpTeam->topColor, "10", sizeof(_rpTeam->topColor));
-//			strlcpy(_rpTeam->bottomColor, "0", sizeof(_rpTeam->bottomColor));
-//			strlcpy(_rpTeam->stuffCmd, "color 10 0\nskin \"\"\nteam Bone\n", sizeof(_rpTeam->stuffCmd));
-//			break;
-//
-//		case 1:
-//			strlcpy(_rpTeam->name, "Teal", sizeof(_rpTeam->name));
-//			strlcpy(_rpTeam->topColor, "11", sizeof(_rpTeam->topColor));
-//			strlcpy(_rpTeam->bottomColor, "11", sizeof(_rpTeam->bottomColor));
-//			strlcpy(_rpTeam->stuffCmd, "color 11 11\nskin \"\"\nteam Teal\n", sizeof(_rpTeam->stuffCmd));
-//			break;
-//
-//		case 2:
-//			strlcpy(_rpTeam->name, "Pink", sizeof(_rpTeam->name));
-//			strlcpy(_rpTeam->topColor, "6", sizeof(_rpTeam->topColor));
-//			strlcpy(_rpTeam->bottomColor, "6", sizeof(_rpTeam->bottomColor));
-//			strlcpy(_rpTeam->stuffCmd, "color 6 6\nskin \"\"\nteam Pink\n", sizeof(_rpTeam->stuffCmd));
-//			break;
-//
-//		case 3:
-//			strlcpy(_rpTeam->name, "Gold", sizeof(_rpTeam->name));
-//			strlcpy(_rpTeam->topColor, "5", sizeof(_rpTeam->topColor));
-//			strlcpy(_rpTeam->bottomColor, "12", sizeof(_rpTeam->bottomColor));
-//			strlcpy(_rpTeam->stuffCmd, "color 5 12\nskin \"\"\nteam Gold\n", sizeof(_rpTeam->stuffCmd));
-//			break;
-//
-//		case 4:
-//		default:
-//			strlcpy(_rpTeam->name, "Plum", sizeof(_rpTeam->name));
-//			strlcpy(_rpTeam->topColor, "8", sizeof(_rpTeam->topColor));
-//			strlcpy(_rpTeam->bottomColor, "8", sizeof(_rpTeam->bottomColor));
-//			strlcpy(_rpTeam->stuffCmd, "color 8 8\nskin \"\"\nteam Plum\n", sizeof(_rpTeam->stuffCmd));
-//			break;
-//	}
-
-//	switch ((int)(g_random() * (sizeof(builtinTeamInfo) / sizeof(rpickupTeams_t))))
-//	{
-//		case 0:
-//			memcpy(_rpTeam, &builtinTeamInfo[0], sizeof(rpickupTeams_t));
-//			break;
-//
-//		case 1:
-//			memcpy(_rpTeam, &builtinTeamInfo[1], sizeof(rpickupTeams_t));
-//			break;
-//
-//		case 2:
-//			memcpy(_rpTeam, &builtinTeamInfo[2], sizeof(rpickupTeams_t));
-//			break;
-//
-//		case 3:
-//			memcpy(_rpTeam, &builtinTeamInfo[3], sizeof(rpickupTeams_t));
-//			break;
-//
-//		case 4:
-//			memcpy(_rpTeam, &builtinTeamInfo[4], sizeof(rpickupTeams_t));
-//			break;
-//
-//		case 5:
-//			memcpy(_rpTeam, &builtinTeamInfo[5], sizeof(rpickupTeams_t));
-//			break;
-//
-//		case 6:
-//			memcpy(_rpTeam, &builtinTeamInfo[6], sizeof(rpickupTeams_t));
-//			break;
-//
-//		case 7:
-//		default:
-//			memcpy(_rpTeam, &builtinTeamInfo[7], sizeof(rpickupTeams_t));
-//			break;
-//	}
-
 	memcpy(_rpTeam,
 			&builtinTeamInfo[(int)(g_random() * (sizeof(builtinTeamInfo) / sizeof(rpickupTeams_t)))],
 			sizeof(rpickupTeams_t));
 }
 
+// This function will fill up 'rpTeams' with new content.
+// 'rpTeams' is an array with 3 members, which contains the Team info (name and color) for rpickup
 void create_rpickup_teaminfo(void)
 {
 	memset(rpTeams, 0, sizeof(rpTeams));
