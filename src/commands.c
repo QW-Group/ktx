@@ -5215,9 +5215,6 @@ void fpslist()
 }
 
 // This is designed for pickup games and creates totally random teams(ish)
-// It creates teams thus :
-// Team red  color  4 skin ""
-// team blue color 13 skin ""
 void RandomPickup()
 {
 	int votes;
