@@ -107,6 +107,11 @@ void ToggleFairPacks();
 void ToggleFreeze();
 void ToggleMidair();
 void SetMidairMinHeight();
+void ToggleFreshTeams();
+void ToggleFreshPacks();
+void ToggleFreshGuns();
+void ToggleFreshTime();
+void ToggleNoSweep();
 void ToggleInstagib();
 void ToggleLGC(void);
 void ToggleCGKickback();
@@ -540,6 +545,11 @@ const char CD_NODESC[] = "no desc";
 #define CD_KILL				"invoke suicide"
 #define CD_MIDAIR			"turn midair mode on/off"
 #define CD_MIDAIR_MINHEIGHT	"midair minimum frag height"
+#define CD_FRESHTEAMS		"freshteams dmm1 settings"
+#define CD_FRESHPACKS		"limit ammo in backpacks"
+#define CD_FRESHGUNS		"limit ammo when sweeping weapons"
+#define CD_FRESHTIME		"toggle weapon time in freshteams"
+#define CD_NOSWEEP			"restrict players from sweeping weapons"
 #define CD_INSTAGIB			"instagib settings"
 #define CD_BERZERK			"berzerk settings"
 #define CD_LGC				"lgc mode"
@@ -911,6 +921,11 @@ cmd_t cmds[] =
 	{ "kill", 						ClientKill, 					0, 			CF_PLAYER | CF_MATCHLESS, 												CD_KILL },
 	{ "midair", 					ToggleMidair, 					0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_MIDAIR },
 	{ "midair_minheight", 			SetMidairMinHeight, 			0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_MIDAIR_MINHEIGHT },
+	{ "fresh", 						ToggleFreshTeams, 				0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_FRESHTEAMS },
+	{ "freshpacks", 				ToggleFreshPacks, 				0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_FRESHPACKS },
+	{ "freshguns", 					ToggleFreshGuns, 				0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_FRESHGUNS },
+	{ "freshtime", 					ToggleFreshTime, 				0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_FRESHTIME },
+	{ "nosweep", 					ToggleNoSweep, 					0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_NOSWEEP },
 	{ "instagib", 					ToggleInstagib, 				0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_INSTAGIB },
 	{ "berzerk", 					ToggleBerzerk, 					0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_BERZERK },
 	{ "lgcmode", 					ToggleLGC, 						0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_LGC },
@@ -4066,6 +4081,8 @@ const char common_um_init[] =
 	"k_rocketarena 0\n"				// disable Rocket Arena by default
 	"k_race 0\n"					// disable Race by default
 	"k_hoonymode 0\n"				// disable HoonyMode by default
+	"k_freshteams 0\n"				// disable FreshTeams by default
+	"k_nosweep 0\n"					// disable nosweep by default
 	"k_spec_info 1\n"				// allow spectators receive took info during game
 	"k_midair 0\n"					// midair off
 	LGCMODE_VARIABLE " 0\n"			// LGC mode off
@@ -7308,6 +7325,117 @@ void SetMidairMinHeight()
 }
 
 void W_SetCurrentAmmo();
+
+void ToggleFreshTeams()
+{
+	if (!is_rules_change_allowed())
+	{
+		return;
+	}
+
+	// Can't enable freshteams unless dmm1 is set first
+	if (deathmatch != 1)
+	{
+		G_sprint(self, 2, "FreshTeams requires dmm1\n");
+
+		return;
+	}
+
+	cvar_toggle_msg(self, "k_freshteams", "&c08fFreshTeams&r");
+}
+
+void ToggleFreshPacks()		// FreshPacks is enabled by default when playing freshteams
+{
+	int k_freshteams = cvar("k_freshteams");
+
+	if (!is_rules_change_allowed())
+	{
+		return;
+	}
+
+	// Can't enable nosweep unless dmm1 is set first
+	if (!k_freshteams)
+	{
+		G_sprint(self, 2, "FreshPacks requires FreshTeams (/fresh)\n");
+
+		return;
+	}
+
+	cvar_toggle_msg(self, "k_freshteams_limit_packs", "&c08fFreshPacks&r (limited backpack ammo)");
+}
+
+void ToggleFreshGuns() // FreshGuns is enabled by default when playing freshteams
+{
+	int k_freshteams = cvar("k_freshteams");
+
+	if (!is_rules_change_allowed())
+	{
+		return;
+	}
+
+	// Can't enable nosweep unless dmm1 is set first
+	if (!k_freshteams)
+	{
+		G_sprint(self, 2, "FreshGuns requires FreshTeams (/fresh)\n");
+
+		return;
+	}
+
+	cvar_toggle_msg(self, "k_freshteams_limit_sweep_ammo", "&c08fFreshGuns&r (limited weapon ammo on sweep)");
+}
+
+void ToggleFreshTime()
+{
+	int k_freshteams = cvar("k_freshteams");
+	int k_freshtime = bound(0, cvar("k_freshteams_weapon_time"), 60);
+
+	if (!is_rules_change_allowed())
+	{
+		return;
+	}
+
+	// Can't enable nosweep unless dmm1 is set first
+	if (!k_freshteams)
+	{
+		G_sprint(self, 2, "FreshTime requires FreshTeams (/fresh)\n");
+
+		return;
+	}
+
+	if (k_freshtime == 20)
+	{
+		cvar_set("k_freshteams_weapon_time", "15");
+		G_bprint(2, "%s 15 second weapons\n", "&c08fFreshTeams&r");
+	}
+	else if (k_freshtime == 15)
+	{
+		cvar_set("k_freshteams_weapon_time", "10");
+		G_bprint(2, "%s 10 second weapons\n", "&c08fFreshTeams&r");
+	}
+	else {
+		cvar_set("k_freshteams_weapon_time", "20");
+		G_bprint(2, "%s 20 second weapons (default)\n", "&c08fFreshTeams&r");
+	}
+}
+
+void ToggleNoSweep()
+{
+	if (!is_rules_change_allowed())
+	{
+		return;
+	}
+
+	// Can't enable nosweep unless dmm1 is set first
+	if (deathmatch != 1)
+	{
+		G_sprint(self, 2, "nosweep requires dmm1\n");
+
+		return;
+	}
+
+	cvar_toggle_msg(self, "k_nosweep", redtext("NoSweep"));
+}
+
 void ToggleInstagib()
 {
 	int k_instagib = bound(0, cvar("k_instagib"), 3);
