@@ -35,3 +35,17 @@ race_route_add_start
 	race_set_route_weapon_mode raceWeaponAllowed
 	race_set_route_falsestart_mode raceFalseStartNo
 race_route_add_end
+
+race_route_add_start
+	race_add_route_node   240   896    24    0  180
+	race_add_route_node   -16  1000    32    0    0
+	race_add_route_node   -16   620   288    0    0
+	race_add_route_node   752    24   288    0    0
+	race_add_route_node   448   880   168    0    0
+	race_add_route_node  -288  1184   160    0    0
+
+	race_set_route_name "Bravado: run over map (fixed)" "low RL spawn - LG - Quad - NG - RA"
+	race_set_route_timeout 20
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
