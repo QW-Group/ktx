@@ -1184,6 +1184,50 @@ void hookclassic()
 	}
 }
 
+void hookcrhook()
+{
+	int votes, veto;
+
+	if (match_in_progress)
+	{
+		G_sprint(self, 2, "hook style can not be changed while match is in progress\n");
+
+		return;
+	}
+
+	if (!isCTF())
+	{
+		G_sprint(self, 2, "hook style can only be set in CTF mode\n");
+
+		return;
+	}
+	if (intermission_running || match_over)
+	{
+		return;
+	}
+
+	self->v.hookcrhook = !self->v.hookcrhook;
+
+	G_bprint(
+		2,
+		"%s %s!%s\n",
+		self->netname,
+		(self->v.hookcrhook ?
+			redtext("votes for crhook") :
+			redtext(va("withdraws %s hookstyle vote", g_his(self)))),
+		((votes = get_votes_req(OV_HOOKCRHOOK, true)) ? va(" (%d)", votes) : ""));
+
+	veto = is_admins_vote(OV_HOOKCRHOOK);
+
+	if (veto || !get_votes_req(OV_HOOKCRHOOK, true))
+	{
+		cvar_fset("k_ctf_hookstyle", 4);
+		G_bprint(2, "%s\n", redtext(va("hook style set to crhook by %s", veto ? "admin veto" : "majority vote")));
+		vote_clear(OV_HOOKCRHOOK);
+		return;
+	}
+}
+
 // }
 
 // { antilag vote feature
