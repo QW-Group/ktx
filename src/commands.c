@@ -884,7 +884,7 @@ cmd_t cmds[] =
 	{ "hook_smooth", 				hooksmooth, 					0, 			CF_PLAYER | CF_MATCHLESS, 											CD_HOOKSMOOTH },
 	{ "hook_fast", 					hookfast, 					0, 			CF_PLAYER | CF_MATCHLESS, 											CD_HOOKFAST },
 	{ "hook_classic", 				hookclassic, 					0, 			CF_PLAYER | CF_MATCHLESS, 											CD_HOOKCLASSIC },
-	{ "crhook", 					hookcrhook, 					0, 			CF_PLAYER | CF_MATCHLESS, 											CD_HOOKCRHOOK },
+	{ "hook_crhook",				hookcrhook, 					0, 			CF_PLAYER | CF_MATCHLESS, 											CD_HOOKCRHOOK },
 	{ "norunes", 					norunes, 						0, 			CF_PLAYER | CF_MATCHLESS, 											CD_NORUNES },
 	{ "noga", 						noga, 							0, 			CF_BOTH_ADMIN | CF_MATCHLESS, 											CD_NOGA },
 	{ "mctf", 						mctf, 							0, 			CF_BOTH_ADMIN | CF_MATCHLESS, 											CD_MCTF },

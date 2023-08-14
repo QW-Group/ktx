@@ -222,6 +222,11 @@ void UpdateChain()
 		{
 			CancelHook(owner);
 		}
+
+		if (cvar("k_ctf_hookstyle") == 4)
+		{
+			CancelHook(owner);
+		}
 	}
 
 	VectorSubtract(owner->hook->s.v.origin, owner->s.v.origin, temp);
@@ -430,10 +435,18 @@ void GrappleThrow()
 	}
 
 	float hasteMultiplier =	(cvar("k_ctf_rune_power_hst") / 16) + 1;
-	float throwSpeed = cvar("k_ctf_hookstyle") != 3 ? NEW_THROW_SPEED : THROW_SPEED;	
-	
-	if (cvar("k_ctf_hookstyle") == 4) throwSpeed = CR_THROW_SPEED;
 
+	float throwSpeed = NEW_THROW_SPEED;
+
+	if (cvar("k_ctf_hookstyle") == 3)
+	{
+		throwSpeed = THROW_SPEED;
+	}
+	else if (cvar("k_ctf_hookstyle") == 4)
+	{
+		throwSpeed = CR_THROW_SPEED;
+	}
+	
 	g_globalvars.msg_entity = EDICT_TO_PROG(self);
 	WriteByte( MSG_ONE, SVC_SMALLKICK);
 
