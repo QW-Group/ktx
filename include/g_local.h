@@ -764,6 +764,14 @@ typedef struct votemap_s
 	int admins;
 } votemap_t;
 
+typedef struct rpickupTeams_s
+{
+	char name[5];
+	char topColor[3];
+	char bottomColor[3];
+	char stuffCmd[30];
+} rpickupTeams_t;
+
 extern votemap_t maps_voted[];
 int vote_get_maps();
 
