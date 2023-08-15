@@ -20,6 +20,23 @@
 // vote.c: election functions by rc\sturm
 #include "g_local.h"
 
+#define MAX_PLAYERCOUNT_RPICKUP 32
+
+// These are the built-in teams for rpickup to choose from
+rpickupTeams_t builtinTeamInfo[] =
+{
+	{"Bone", "10",  "0", "color 10 0\nskin \"\"\nteam Bone\n"},
+	{"Teal", "11", "11", "color 11 11\nskin \"\"\nteam Teal\n"},
+	{"Pink",  "6",  "6", "color 6 6\nskin \"\"\nteam Pink\n"},
+	{"Gold",  "5", "12", "color 5 12\nskin \"\"\nteam Gold\n"},
+	{"Plum",  "8",  "8", "color 8 8\nskin \"\"\nteam Plum\n"},
+	{"Wine",  "4",  "4", "color 4 4\nskin \"\"\nteam Wine\n"},
+	{"Beer",  "0",  "1", "color 0 1\nskin \"\"\nteam Beer\n"},
+	{"Weed",  "3",  "3", "color 3 3\nskin \"\"\nteam Weed\n"}
+};
+
+rpickupTeams_t rpTeams[3];
+
 //void BeginPicking();
 void BecomeCaptain(gedict_t *p);
 void BecomeCoach(gedict_t *p);
@@ -623,6 +640,34 @@ void vote_check_pickup()
 	}
 }
 
+// This function will randomly select an entry from 'builtinTeamInfo', and copy its content
+// to the '_rpTeam' parameter.
+void generateTeamInfo(rpickupTeams_t *_rpTeam)
+{
+	memcpy(_rpTeam,
+			&builtinTeamInfo[(int)(g_random() * (sizeof(builtinTeamInfo) / sizeof(rpickupTeams_t)))],
+			sizeof(rpickupTeams_t));
+}
+
+// This function will fill up 'rpTeams' with new content.
+// 'rpTeams' is an array with 3 members, which contains the Team info (name and color) for rpickup
+void create_rpickup_teaminfo(void)
+{
+	memset(rpTeams, 0, sizeof(rpTeams));
+
+	generateTeamInfo(&rpTeams[0]);
+
+	do
+	{
+		generateTeamInfo(&rpTeams[1]);
+	} while (strcmp(rpTeams[0].name, rpTeams[1].name) == 0);
+
+	do
+	{
+		generateTeamInfo(&rpTeams[2]);
+	} while ((strcmp(rpTeams[0].name, rpTeams[2].name) == 0) || (strcmp(rpTeams[1].name, rpTeams[2].name) == 0));
+}
+
 // !!! do not confuse rpickup and pickup
 void vote_check_rpickup(int maxRecursion)
 {
@@ -631,8 +676,8 @@ void vote_check_rpickup(int maxRecursion)
 	gedict_t *p;
 	int veto;
 	qbool needNewRpickup = true;
-	// buffer reserved for 20 players (10on10). If more present, recursive auto-rpickup will not be activated
-	int originalTeams[20];
+	// buffer reserved for 32 players (16on16). If more present, recursive auto-rpickup will not be activated
+	int originalTeams[MAX_PLAYERCOUNT_RPICKUP];
 
 	if (match_in_progress || k_captains || k_coaches)
 	{
@@ -656,13 +701,18 @@ void vote_check_rpickup(int maxRecursion)
 
 	if (veto || !get_votes_req(OV_RPICKUP, true))
 	{
-		vote_clear(OV_RPICKUP);
+		// Real rpickup is happening
+		if (MAX_RPICKUP_RECUSION == maxRecursion)
+		{
+			// We create the teaminfo, but only at the first time (from the occasional repetition)
+			create_rpickup_teaminfo();
+		}
 
 		// Save the original teams, and also clear them
 		i = 0;
 		for (p = world; (p = find_plr(p));)
 		{
-			if (i < 20)
+			if (i < MAX_PLAYERCOUNT_RPICKUP)
 			{
 				originalTeams[i++] = p->k_teamnumber;
 			}
@@ -679,6 +729,7 @@ void vote_check_rpickup(int maxRecursion)
 			{
 				if (p->k_teamnumber)
 				{
+					// This is a player that we already handled
 					continue;
 				}
 
@@ -703,42 +754,39 @@ void vote_check_rpickup(int maxRecursion)
 					{
 						if (p->isBot)
 						{
-							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "team", "red", 0);
-							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "topcolor", "4", 0);
-							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "bottomcolor", "4", 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "team", rpTeams[0].name, 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "topcolor", rpTeams[0].topColor, 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "bottomcolor", rpTeams[0].bottomColor, 0);
 						}
 						else
 						{
-							stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO,
-											"color  4\nskin \"\"\nteam red\n");
+							stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "%s", rpTeams[0].stuffCmd);
 						}
 					}
 					else if (p->k_teamnumber == 2)
 					{
 						if (p->isBot)
 						{
-							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "team", "blue", 0);
-							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "topcolor", "13", 0);
-							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "bottomcolor", "13", 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "team", rpTeams[1].name, 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "topcolor", rpTeams[1].topColor, 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "bottomcolor", rpTeams[1].bottomColor, 0);
 						}
 						else
 						{
-							stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO,
-											"color 13\nskin \"\"\nteam blue\n");
+							stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "%s", rpTeams[1].stuffCmd);
 						}
 					}
 					else
 					{
 						if (p->isBot)
 						{
-							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "team", "yellow", 0);
-							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "topcolor", "12", 0);
-							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "bottomcolor", "12", 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "team", rpTeams[2].name, 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "topcolor", rpTeams[2].topColor, 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "bottomcolor", rpTeams[2].bottomColor, 0);
 						}
 						else
 						{
-							stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO,
-											"color 12\nskin \"\"\nteam yellow\n");
+							stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "%s", rpTeams[2].stuffCmd);
 						}
 					}
 
@@ -759,9 +807,9 @@ void vote_check_rpickup(int maxRecursion)
 		}
 
 		// check if rpickup really created new teams
-		if (pl_cnt <= 20)
+		if (pl_cnt <= MAX_PLAYERCOUNT_RPICKUP)
 		{
-			for (p = world, i = 0; (p = find_plr(p)) && i < 20 && needNewRpickup; i++)
+			for (p = world, i = 0; (p = find_plr(p)) && i < MAX_PLAYERCOUNT_RPICKUP && needNewRpickup; i++)
 			{
 				if (originalTeams[i] != p->k_teamnumber)
 				{
@@ -775,6 +823,11 @@ void vote_check_rpickup(int maxRecursion)
 				G_bprint(2, "console: Team layout did not change. %s again (tries left: %d)\n",
 							redtext("random pickup"), maxRecursion);
 				vote_check_rpickup(maxRecursion - 1);
+			}
+			else
+			{
+				// we have a new team layout, let's clear the rpickup flag
+				vote_clear(OV_RPICKUP);
 			}
 		}
 	}
