@@ -658,6 +658,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 	float a_ssg;
 	float e_sg;
 	float e_ssg;
+	float e_rl;
 	float e_lg;
 	int res;
 	int str;
@@ -696,6 +697,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 	ph_gl = 100.0 * vh_gl / max(1, a_gl);
 	ph_rl = 100.0 * vh_rl / max(1, a_rl);
 	e_lg = 100.0 * h_lg / max(1, a_lg);
+	e_rl = 100.0 * h_rl / max(1, a_rl);
 
 	d_rl = p->ps.wpn[wpRL].drops;
 	k_rl = p->ps.wpn[wpRL].ekills;
@@ -739,7 +741,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 	// weapons
 	G_bprint(2, "%s:%s%s%s%s%s\n", redtext("Wp"),
 				(a_lg ? va(" %s%.1f%% (%d/%d)", redtext("lg"), e_lg, (int)h_lg, (int)a_lg) : ""),
-				(ph_rl ? va(" %s%.1f%%", redtext("rl"), ph_rl) : ""),
+				(a_rl ? va(" %s%.1f%% (%d/%d)", redtext("rl"), e_rl, (int)h_rl, (int)a_rl) : ""),
 				(ph_gl ? va(" %s%.1f%%", redtext("gl"), ph_gl) : ""),
 				(e_sg ? va(" %s%.1f%%", redtext("sg"), e_sg) : ""),
 				(e_ssg ? va(" %s%.1f%%", redtext("ssg"), e_ssg) : ""));
