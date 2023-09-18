@@ -98,8 +98,8 @@
 // most likely alredy declared in above included headers, but not for below functions,
 // because they are BSD originated, so we need declare it.
 
-size_t strlcpy(char *dst, char *src, size_t siz);
-size_t strlcat(char *dst, char *src, size_t siz);
+size_t strlcpy(char *dst, const char *src, size_t siz);
+size_t strlcat(char *dst, const char *src, size_t siz);
 
 #endif
 
