@@ -1,8 +1,9 @@
 #include "rng_gen_impl.h"
 
 //// Start imported code.
-// Code in this section copied verbatim from
+// Code in this section copied from
 // https://prng.di.unimi.it/xoshiro128starstar.c
+// It was lightly edited to change a global variable to a local variable.
 
 /*  Written in 2018 by David Blackman and Sebastiano Vigna (vigna@acm.org)
 
