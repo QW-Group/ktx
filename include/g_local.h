@@ -238,6 +238,7 @@ typedef enum
 // K_SPW_0_NONRANDOM changes "Normal QW respawns" to "pre-qtest nonrandom respawns"
 #define K_SPW_0_NONRANDOM
 
+void g_random_seed(int);
 float g_random(void);
 float crandom(void);
 int i_rnd(int from, int to);

@@ -88,6 +88,7 @@ For the versions available, see the [tags on this repository][ktx-tags].
 
 * **Ivan** *"qqshka"* **Bolsunov**
 * **Dominic** *"oldman"* **Evans**
+* **Foobar**
 * **Anton** *"tonik"* **Gavrilov**
 * **Andrew** *"ult"* **Grondalski**
 * **Paul Klumpp**

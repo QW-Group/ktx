@@ -464,7 +464,7 @@ void G_InitGame(int levelTime, int randomSeed)
 {
 	int 		i;
 
-	srand(randomSeed);
+	g_random_seed(randomSeed);
 	framecount = 0;
 	starttime = levelTime * 0.001;
 	G_Printf("Init Game\n");
