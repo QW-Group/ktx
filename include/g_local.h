@@ -35,6 +35,7 @@
 #include "g_consts.h"
 #include "g_syscalls.h"
 #include "player.h"
+#include "rng.h"
 
 #if defined(_WIN32)
 #define QW_PLATFORM				"Windows"

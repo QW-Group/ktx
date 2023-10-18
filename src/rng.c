@@ -11,23 +11,31 @@
    xoroshiro128** PRNG expects 16 bytes of entropy, this function uses the
    splitmix64 algorithm to expand the seed. This approach is recommended by
    the authors of xoroshiro128**, as described here: https://prng.di.unimi.it .
+
+   You must initialize your RngStates with rng_seed/rng_seed_global!
+   (The all-zeros state has bad statistics.)
 */
-void rng_seed(int seed) {
+void rng_seed(RngState* s, int seed) {
 	uint64_t x = (uint64_t)(seed);
 
-	uint32_t a = (uint32_t)rng_seed_impl_next(&x);
-	uint32_t b = (uint32_t)rng_seed_impl_next(&x);
-	uint32_t c = (uint32_t)rng_seed_impl_next(&x);
-	uint32_t d = (uint32_t)rng_seed_impl_next(&x);
-
-	rng_gen_impl_set_initial_state(a, b, c, d);
+	s->s[0] = (uint32_t)rng_seed_impl_next(&x);
+	s->s[1] = (uint32_t)rng_seed_impl_next(&x);
+	s->s[2] = (uint32_t)rng_seed_impl_next(&x);
+	s->s[3] = (uint32_t)rng_seed_impl_next(&x);
 }
 
-/* Update the internal PRNG state and return the next value.
+uint32_t rng_next(RngState* state) {
+	return rng_gen_impl_next(state);
+}
 
-   Uses the xoroshiro128** algorithm.
-*/
-uint32_t rng_next(void) {
-	return rng_gen_impl_next();
+// You must initialize this with rng_seed/rng_seed_global!
+static RngState global_rng = { 0 };
+
+void rng_seed_global(int seed) {
+	return rng_seed(&global_rng, seed);
+}
+
+uint32_t rng_next_global(void) {
+	return rng_next(&global_rng);
 }
 

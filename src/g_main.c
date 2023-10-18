@@ -24,6 +24,7 @@
  */
 
 #include "g_local.h"
+#include "rng.h"
 /* global 4 fix
  entity          self;
  entity          other;

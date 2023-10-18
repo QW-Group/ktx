@@ -177,18 +177,16 @@ double fabs(double x)
 }
 
 //=====================================
-static int randSeed = 0;
+static RngState rng_state = { 0 };
 
 void srand(unsigned seed)
 {
-	randSeed = seed;
+	rng_seed(&rng_state, (int)seed);
 }
 
 int rand(void)
 {
-	randSeed = (69069 * randSeed + 1);
-
-	return (randSeed & 0x7fff);
+	return (int)rng_next(&rng_state);
 }
 
 //=====================================

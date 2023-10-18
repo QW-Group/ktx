@@ -24,7 +24,6 @@
  */
 
 #include "g_local.h"
-#include "rng.h"
 
 void Sc_Stats(float on);
 void race_stoprecord(qbool cancel);
@@ -46,12 +45,12 @@ int NUM_FOR_EDICT(gedict_t *e)
 }
 
 void g_random_seed(int seed) {
-	rng_seed(seed);
+	rng_seed_global(seed);
 }
 
 float g_random()
 {
-	return ((rng_next() & 0x7fff) / ((float)0x8000));
+	return ((rng_next_global() & 0x7fff) / ((float)0x8000));
 }
 
 float crandom()

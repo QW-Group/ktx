@@ -5,7 +5,9 @@
 
 #include <stdint.h>
 
-void rng_gen_impl_set_initial_state(uint32_t, uint32_t, uint32_t, uint32_t);
-uint32_t rng_gen_impl_next(void);
+#include "rng_gen_state.h"
+
+RngState rng_gen_impl_initial_state(int seed);
+uint32_t rng_gen_impl_next(RngState* state);
 
 #endif

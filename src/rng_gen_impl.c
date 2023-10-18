@@ -33,34 +33,25 @@ static inline uint32_t rotl(const uint32_t x, int k) {
 }
 
 
-static uint32_t s[4];
+static inline uint32_t next(RngState* s) {
+	const uint32_t result = rotl(s->s[1] * 5, 7) * 9;
 
-static inline uint32_t next(void) {
-	const uint32_t result = rotl(s[1] * 5, 7) * 9;
+	const uint32_t t = s->s[1] << 9;
 
-	const uint32_t t = s[1] << 9;
+	s->s[2] ^= s->s[0];
+	s->s[3] ^= s->s[1];
+	s->s[1] ^= s->s[2];
+	s->s[0] ^= s->s[3];
 
-	s[2] ^= s[0];
-	s[3] ^= s[1];
-	s[1] ^= s[2];
-	s[0] ^= s[3];
+	s->s[2] ^= t;
 
-	s[2] ^= t;
-
-	s[3] = rotl(s[3], 11);
+	s->s[3] = rotl(s->s[3], 11);
 
 	return result;
 }
 //// End imported code.
 
 // Code in this section wraps the PRNG implementation.
-void rng_gen_impl_set_initial_state(uint32_t a, uint32_t b, uint32_t c, uint32_t d) {
-	s[0] = a;
-	s[1] = b;
-	s[2] = c;
-	s[3] = d;
-}
-
-uint32_t rng_gen_impl_next(void) {
-	return next();
+uint32_t rng_gen_impl_next(RngState* state) {
+	return next(state);
 }
