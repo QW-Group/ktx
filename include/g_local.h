@@ -974,6 +974,7 @@ typedef struct race_stats_score_s
 qbool isRACE(void);
 void apply_race_settings(void);
 void ToggleRace(void);
+void RaceCountdownChange(float t);
 void StartDemoRecord();
 
 qbool race_weapon_allowed(gedict_t *p);

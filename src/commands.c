@@ -607,6 +607,8 @@ const char CD_NODESC[] = "no desc";
 #define CD_PAUSE			"toggle pause"
 // { RACE
 #define CD_RACE				"toggle race mode"
+#define	CD_R_COUNTDOWN_UP		"+1 sec race cowntdown time"
+#define	CD_R_COUNTDOWN_DOWN		"-1 sec race cowntdown time"
 #define CD_R_SSET			"set race start checkpoint"
 #define CD_R_CSET			"set race checkpoint"
 #define CD_R_ESET			"set race end checkpoint"
@@ -679,6 +681,8 @@ void redirect();
 cmd_t cmds[] =
 {
 	{ "race", 						ToggleRace, 					0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_RACE },
+	{ "race_countdown_up",					DEF(RaceCountdownChange),			1,			CF_PLAYER | CF_SPC_ADMIN,												CD_R_COUNTDOWN_UP},
+	{ "race_countdown_down",				DEF(RaceCountdownChange),			-1,			CF_PLAYER | CF_SPC_ADMIN,												CD_R_COUNTDOWN_DOWN},
 	{ "cm", 						SelectMap, 						0, 			CF_BOTH | CF_MATCHLESS | CF_NOALIAS, 									CD_NODESC },
 	{ "mapslist_dl", 				mapslist_dl, 					0, 			CF_BOTH | CF_MATCHLESS | CF_PARAMS | CF_NOALIAS | CF_CONNECTION_FLOOD, 	CD_MAPSLIST_DL },
 	{ "cmdslist_dl", 				cmdslist_dl, 					0, 			CF_BOTH | CF_MATCHLESS | CF_PARAMS | CF_NOALIAS | CF_CONNECTION_FLOOD, 	CD_CMDSLIST_DL },
