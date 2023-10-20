@@ -1,0 +1,95 @@
+race_route_add_start
+	race_add_route_node   784   808   200    0 -135
+	race_add_route_node   -96     8   488    0    0
+
+	race_set_route_name "e1m2" "RL to MEGA"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeaponAllowed
+	race_set_route_falsestart_mode raceFalseStartNo 
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node   -96     8   488    0    0
+	race_add_route_node   680   728   200    0    0
+
+	race_set_route_name "e1m2" "MEGA to RL"
+	race_set_route_timeout 10
+	race_set_route_weapon_mode raceWeapon2s
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node  1320  -488   400    0  -90
+	race_add_route_node   880 -1080   440    0    0
+	race_add_route_node   -96     8   488    0    0
+
+	race_set_route_name "e1m2" "YA to MEGA"
+	race_set_route_timeout 15
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node   -96     8   488    0    0
+	race_add_route_node   880 -1080   440    0    0
+	race_add_route_node  1340  -544   400    0    0
+
+	race_set_route_name "e1m2" "MEGA to YA"
+	race_set_route_timeout 15
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node  1320  -600   400    0   90
+	race_add_route_node  1480   400   320    0    0
+	race_add_route_node  1112  1292   344    0    0
+
+	race_set_route_name "e1m2" "YA to Start via spikes"
+	race_set_route_timeout 20
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node   400 -1360   432    0   90
+	race_add_route_node  1480   400   320    0    0
+	race_add_route_node  1340  -544   400    0    0
+
+	race_set_route_name "e1m2" "QUAD to YA via spikes"
+	race_set_route_timeout 20
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node   400 -1360   432    0   90
+	race_add_route_node   680   728   200    0    0
+
+	race_set_route_name "e1m2" "QUAD to RL"
+	race_set_route_timeout 15
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node   400 -1360   432    0   90
+	race_add_route_node  1536  -384   320    0    0
+	race_add_route_node  1480   400   320    0    0
+	race_add_route_node   -96   288   320    0    0
+
+	race_set_route_name "e1m2" "QUAD to MEGA room button via spikes"
+	race_set_route_timeout 25
+	race_set_route_weapon_mode raceWeaponNo
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
+
+race_route_add_start
+	race_add_route_node   576  -416   320    0  -90
+	race_add_route_node   400 -1360   432    0    0
+
+	race_set_route_name "e1m2" "Cross to QUAD with RL"
+	race_set_route_timeout 5
+	race_set_route_weapon_mode raceWeaponAllowed
+	race_set_route_falsestart_mode raceFalseStartNo
+race_route_add_end
