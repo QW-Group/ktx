@@ -279,6 +279,8 @@ void CA_MatchBreak(void)
 		{
 			k_respawn(p, false);
 		}
+
+		p->ca_ready = 0;	// this needs to be reset
 	}
 }
 
@@ -762,7 +764,7 @@ void CA_check_escape(gedict_t *targ, gedict_t *attacker)
 	float escape_time = g_globalvars.time - targ->escape_time;
 	gedict_t *p;
 
-	if (escape_time > 0 && escape_time < 0.2)
+	if (escape_time > 0 && escape_time < 0.3)
 	{
 		for (p = world; (p = find_plr_same_team(p, getteam(targ)));)
 		{
@@ -1362,6 +1364,7 @@ void CA_Frame(void)
 		int e_last_alive;
 		char str_last_alive[5];
 		char str_e_last_alive[5];
+		char spawncount[5];
 
 		for (p = world; (p = find_plr(p));)
 		{
@@ -1397,6 +1400,33 @@ void CA_Frame(void)
 					}
 				}
 			}
+			// both you and the enemy are the last alive on your team
+			else if (p->in_play && p->alive_time > 2 && last_alive && e_last_alive)
+			{
+				// if teammate will spawn before or at the same time as enemy
+				if (last_alive != 999 && last_alive <= e_last_alive)
+				{
+					sprintf(spawncount, "%d", last_alive);
+				}
+				// if enemy spawns before teammate
+				else if (e_last_alive != 999 && e_last_alive < last_alive)
+				{
+					sprintf(str_e_last_alive, "%d", e_last_alive);
+					sprintf(spawncount, "%s", redtext(str_e_last_alive));
+				}
+				// nobody else is spawning
+				else
+				{
+					sprintf(spawncount, "%s", " ");
+				}
+
+				//sprintf(str_last_alive, "%d", last_alive);
+				sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n", 
+								redtext("1 on 1"), spawncount);
+
+				G_centerprint(p, "%s", p->cptext);
+			}
+			// you're the last alive on your team versus two or more enemies... hide!
 			else if (p->in_play && p->alive_time > 2 && last_alive)
 			{
 				sprintf(str_last_alive, "%d", last_alive);
@@ -1405,6 +1435,7 @@ void CA_Frame(void)
 
 				G_centerprint(p, "%s", p->cptext);
 			}
+			// only one enemy remains... find him!
 			else if (p->in_play && p->alive_time > 2 && e_last_alive)
 			{
 				sprintf(str_e_last_alive, "%d", e_last_alive);
