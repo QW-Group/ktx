@@ -64,6 +64,8 @@ set(SRC_COMMON
 	"${DIR_SRC}/doors.c"
 	"${DIR_SRC}/fb_globals.c"
 	"${DIR_SRC}/files.c"
+	"${DIR_SRC}/func_bob.c"
+	"${DIR_SRC}/func_laser.c"
 	"${DIR_SRC}/g_cmd.c"
 	"${DIR_SRC}/globals.c"
 	"${DIR_SRC}/g_mem.c"
@@ -71,6 +73,7 @@ set(SRC_COMMON
 	"${DIR_SRC}/g_spawn.c"
 	"${DIR_SRC}/g_userinfo.c"
 	"${DIR_SRC}/g_utils.c"
+	"${DIR_SRC}/hiprot.c"
 	"${DIR_SRC}/hoonymode.c"
 	"${DIR_SRC}/items.c"
 	"${DIR_SRC}/logs.c"
@@ -145,7 +148,12 @@ if (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
 	target_compile_options(${PROJECT_NAME} PRIVATE /W4)
 else()
 	target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
-	target_link_options(${PROJECT_NAME} PRIVATE "-Wl,--no-undefined") # Do not allow undefined symbols while linking.
+	# Do not allow undefined symbols while linking.
+	if(APPLE)
+		target_link_options(${PROJECT_NAME} PRIVATE "-Wl,-undefined,error")
+	else()
+		target_link_options(${PROJECT_NAME} PRIVATE "-Wl,--no-undefined")
+	endif()
 	target_link_libraries(${PROJECT_NAME} PRIVATE m) # Link with libm.
 endif()
 

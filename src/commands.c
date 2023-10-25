@@ -64,6 +64,7 @@ void nohook();
 void hooksmooth();
 void hookfast();
 void hookclassic();
+void hookcrhook();
 void noga();
 void mctf();
 void CTFBasedSpawn();
@@ -524,6 +525,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_HOOKSMOOTH			"switch Hook style settings: Smooth Hook (CTF)"
 #define CD_HOOKFAST			"switch Hook style settings: Fast Hook (CTF)"
 #define CD_HOOKCLASSIC			"switch Hook style settings: Classic Hook (CTF)"
+#define CD_HOOKCRHOOK			"switch Hook style settings: crhook (CTF)"
 #define CD_NORUNES			"toggle runes (CTF)"
 #define CD_NOGA				"toggle green armor on spawn (CTF)"
 #define CD_MCTF				"disable hook+runes (CTF)"
@@ -892,6 +894,7 @@ cmd_t cmds[] =
 	{ "hook_smooth", 				hooksmooth, 					0, 			CF_PLAYER | CF_MATCHLESS, 											CD_HOOKSMOOTH },
 	{ "hook_fast", 					hookfast, 					0, 			CF_PLAYER | CF_MATCHLESS, 											CD_HOOKFAST },
 	{ "hook_classic", 				hookclassic, 					0, 			CF_PLAYER | CF_MATCHLESS, 											CD_HOOKCLASSIC },
+	{ "hook_crhook",				hookcrhook, 					0, 			CF_PLAYER | CF_MATCHLESS, 											CD_HOOKCRHOOK },
 	{ "norunes", 					norunes, 						0, 			CF_PLAYER | CF_MATCHLESS, 											CD_NORUNES },
 	{ "noga", 						noga, 							0, 			CF_BOTH_ADMIN | CF_MATCHLESS, 											CD_NOGA },
 	{ "mctf", 						mctf, 							0, 			CF_BOTH_ADMIN | CF_MATCHLESS, 											CD_MCTF },
@@ -5232,9 +5235,6 @@ void fpslist()
 }
 
 // This is designed for pickup games and creates totally random teams(ish)
-// It creates teams thus :
-// Team red  color  4 skin ""
-// team blue color 13 skin ""
 void RandomPickup()
 {
 	int votes;

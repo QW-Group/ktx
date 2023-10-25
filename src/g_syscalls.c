@@ -445,12 +445,12 @@ void trap_makevectors(float *v)
 }
 
 #if defined( __linux__ ) || defined( _WIN32 ) /* || defined( __APPLE__ ) require?*/
-size_t strlcpy(char *dst, char *src, size_t siz)
+size_t strlcpy(char *dst, const char *src, size_t siz)
 {
 	return syscall(g_strlcpy, (intptr_t) dst, (intptr_t) src, (intptr_t) siz);
 }
 
-size_t strlcat(char *dst, char *src, size_t siz)
+size_t strlcat(char *dst, const char *src, size_t siz)
 {
 	return syscall(g_strlcat, (intptr_t) dst, (intptr_t) src, (intptr_t) siz);
 }
@@ -492,13 +492,21 @@ void trap_SetExtField_f(gedict_t *ed, const char *fieldname, float val)
 
 int trap_GetExtField_i(gedict_t *ed, const char *fieldname)
 {
-	return syscall(G_GETEXTFIELD, (intptr_t)ed, (intptr_t)fieldname);
+	int ival = -1;
+	if (HAVEEXTENSION(G_GETEXTFIELD))
+	{
+		ival = syscall(G_GETEXTFIELD, (intptr_t)ed, (intptr_t)fieldname);
+	}
+	return ival;
 }
 
 float trap_GetExtField_f(gedict_t *ed, const char *fieldname)
 {
-	fi_t tmp;
-	tmp._int = syscall(G_GETEXTFIELD, (intptr_t)ed, (intptr_t)fieldname);
+	fi_t tmp = { ._float = -1 };
+	if (HAVEEXTENSION(G_GETEXTFIELD))
+	{
+		tmp._int = syscall(G_GETEXTFIELD, (intptr_t)ed, (intptr_t)fieldname);
+	}
 	return tmp._float;
 }
 

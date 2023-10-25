@@ -98,8 +98,8 @@
 // most likely alredy declared in above included headers, but not for below functions,
 // because they are BSD originated, so we need declare it.
 
-size_t strlcpy(char *dst, char *src, size_t siz);
-size_t strlcat(char *dst, char *src, size_t siz);
+size_t strlcpy(char *dst, const char *src, size_t siz);
+size_t strlcat(char *dst, const char *src, size_t siz);
 
 #endif
 
@@ -123,7 +123,7 @@ size_t strlcat(char *dst, char *src, size_t siz);
 #define	MAX_QPATH		64			// max length of a quake game pathname
 #define	MAX_OSPATH		128			// max length of a filesystem pathname
 
-#define	MAX_EDICTS		768			// FIXME: ouch! ouch! ouch!
+#define	MAX_EDICTS		2048
 #define	MAX_LIGHTSTYLES	64
 #define	MAX_MODELS		256			// these are sent over the net as bytes
 #define	MAX_SOUNDS		256			// so they cannot be blindly increased

@@ -11,7 +11,8 @@
 
 #define PULL_SPEED      800
 #define THROW_SPEED     800
-#define CR_THROW_SPEED  1050
+#define NEW_THROW_SPEED 1050
+#define CR_THROW_SPEED  1200
 #define HOOK_FIRE_RATE  0.192
 
 void SpawnBlood(vec3_t dest, float damage);
@@ -218,6 +219,11 @@ void UpdateChain()
 		}
 
 		if(cvar("k_ctf_hookstyle") == 2 && owner->hook_cancel_time > 6)
+		{
+			CancelHook(owner);
+		}
+
+		if (cvar("k_ctf_hookstyle") == 4)
 		{
 			CancelHook(owner);
 		}
@@ -429,7 +435,18 @@ void GrappleThrow()
 	}
 
 	float hasteMultiplier =	(cvar("k_ctf_rune_power_hst") / 16) + 1;
-	float throwSpeed = cvar("k_ctf_hookstyle") != 3 ? CR_THROW_SPEED : THROW_SPEED;	
+
+	float throwSpeed = NEW_THROW_SPEED;
+
+	if (cvar("k_ctf_hookstyle") == 3)
+	{
+		throwSpeed = THROW_SPEED;
+	}
+	else if (cvar("k_ctf_hookstyle") == 4)
+	{
+		throwSpeed = CR_THROW_SPEED;
+	}
+	
 	g_globalvars.msg_entity = EDICT_TO_PROG(self);
 	WriteByte( MSG_ONE, SVC_SMALLKICK);
 
