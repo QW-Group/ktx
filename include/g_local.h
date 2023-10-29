@@ -82,7 +82,7 @@
 #define GIT_COMMIT				("")
 
 // keep lines to 38 chars max
-#define MOD_RELEASE_QUOTE		("This KTX version is dedicated to the\n2022 November QuakeWorld LAN Parties!\nRadomsko QW Lan, Poland, November 9-13\nQHLAN-22, Stockholm, November 17-20\n")
+//#define MOD_RELEASE_QUOTE		("This KTX version is dedicated to the\n2022 November QuakeWorld LAN Parties!\nRadomsko QW Lan, Poland, November 9-13\nQHLAN-22, Stockholm, November 17-20\n")
 //#define MOD_RELEASE_HASHTAGS	("#COVID19 #StayHomeStaySafe #PlaySomeQW")
 
 // qqshka - hmm, seems in C this is macros
