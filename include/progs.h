@@ -1070,6 +1070,7 @@ typedef struct gedict_s
 	float alive_time;						// number of seconds player is in play
 	float time_of_respawn;					// server time player respawned or round started
 	float seconds_to_respawn;				// number of seconds until respawn
+	float escape_time;						// number of seconds after "escaping"
 	char *teamcolor;						// color of player's team
 	char cptext[100];						// centerprint for player
 	int ca_ammo_grenades;					// grenade ammo

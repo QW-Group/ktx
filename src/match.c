@@ -2686,7 +2686,7 @@ void PlayerReady(qbool startIdlebot)
 	}
 
 	// do not allow empty team in team mode, because it cause problems
-	if ((isTeam() || isCTF()) && strnull(getteam(self)))
+	if ((isTeam() || isCTF() || isCA()) && strnull(getteam(self)))
 	{
 		G_sprint(self, 2, "Set your %s before ready!\n", redtext("team"));
 
