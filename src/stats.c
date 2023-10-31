@@ -747,8 +747,8 @@ void OnePlayerStats(gedict_t *p, int tp)
 	// rockets detail
 	if (!lgc_enabled())
 	{
-		G_bprint(2, "%s: %s:%.1f %s:%.0f\n", redtext("RL skill"), redtext("ad"),
-					vh_rl ? (dmg_g_rl / vh_rl) : 0., redtext("dh"), h_rl);
+		G_bprint(2, "%s: %s:%.1f %s:%.0f/%.0f\n", redtext("RL skill"), redtext("ad"),
+					vh_rl ? (dmg_g_rl / vh_rl) : 0., redtext("dh"), h_rl, a_rl);
 	}
 
 	// velocity
