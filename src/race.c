@@ -273,12 +273,13 @@ void ToggleRace(void)
 
 void RaceCountdownChange(float t)
 {
+	float rcd = cvar("k_race_countdown") + t;
+
 	if (match_in_progress || !isRACE() || race_is_started())
         {
 		return;
 	}
 
-	float rcd = cvar("k_race_countdown") + t;
 	if (rcd < 6 && rcd > 0)
 	{
 		cvar_fset("k_race_countdown", (int)rcd);
