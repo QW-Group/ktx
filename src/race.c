@@ -280,7 +280,7 @@ void RaceCountdownChange(float t)
 		return;
 	}
 
-	if (rcd < 6 && rcd > 0)
+	if ((rcd < 6) && (rcd > 0))
 	{
 		cvar_fset("k_race_countdown", (int)rcd);
 		G_bprint(2, "%s %s %s\n", redtext("Race countdown length set to"), dig3(rcd), redtext("seconds"));
