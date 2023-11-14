@@ -739,7 +739,7 @@ void OnePlayerStats(gedict_t *p, int tp)
 	// weapons
 	G_bprint(2, "%s:%s%s%s%s%s\n", redtext("Wp"),
 				(a_lg ? va(" %s%.1f%% (%d/%d)", redtext("lg"), e_lg, (int)h_lg, (int)a_lg) : ""),
-				(ph_rl ? va(" %s%.1f%%", redtext("rl"), ph_rl) : ""),
+				(ph_rl ? va(" %s%.1f%% (%d/%d)", redtext("rl"), ph_rl, (int)vh_rl, (int)a_rl) : ""),
 				(ph_gl ? va(" %s%.1f%%", redtext("gl"), ph_gl) : ""),
 				(e_sg ? va(" %s%.1f%%", redtext("sg"), e_sg) : ""),
 				(e_ssg ? va(" %s%.1f%%", redtext("ssg"), e_ssg) : ""));
@@ -747,8 +747,8 @@ void OnePlayerStats(gedict_t *p, int tp)
 	// rockets detail
 	if (!lgc_enabled())
 	{
-		G_bprint(2, "%s: %s:%.1f %s:%.0f/%.0f\n", redtext("RL skill"), redtext("ad"),
-					vh_rl ? (dmg_g_rl / vh_rl) : 0., redtext("dh"), h_rl, a_rl);
+		G_bprint(2, "%s: %s:%.1f %s:%.0f\n", redtext("RL skill"), redtext("ad"),
+					vh_rl ? (dmg_g_rl / vh_rl) : 0., redtext("dh"), h_rl);
 	}
 
 	// velocity
