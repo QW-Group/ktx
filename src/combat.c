@@ -483,10 +483,23 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 			}
 		}
 		
-		// don't accept any damage in CA modes if no_pain is true (ie during respawn in wipeout)
+		// don't accept any damage in CA modes if no_pain is true 
 		if (targ->no_pain)
-		{
-			tp4teamdmg = true; // don't take damage but still get stopped/bounced by weapon fire
+		{	
+			if (attacker == targ)
+			{
+				tp4teamdmg = true; // don't take damage but still get stopped/bounced by weapon fire
+			}
+			else 
+			{
+				if (targ->invincible_sound < g_globalvars.time)
+				{
+					sound(targ, CHAN_AUTO, "items/protect3.wav", 0.75, ATTN_NORM);
+					targ->invincible_sound = g_globalvars.time + 2;
+				}
+	
+				return;
+			}
 		}
 	}
 
