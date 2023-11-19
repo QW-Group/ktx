@@ -271,6 +271,24 @@ void ToggleRace(void)
 	apply_race_settings();
 }
 
+void RaceCountdownChange(float t)
+{
+	float rcd = cvar("k_race_countdown") + t;
+
+	if (match_in_progress || !isRACE() || race_is_started())
+        {
+		return;
+	}
+
+	if ((rcd < 6) && (rcd > 0))
+	{
+		cvar_fset("k_race_countdown", (int)rcd);
+		G_bprint(2, "%s %s %s\n", redtext("Race countdown length set to"), dig3(rcd), redtext("seconds"));
+		return;
+	}
+	G_sprint(self, 2, "%s still %s\n", redtext("race countdown"), dig3(rcd - t));
+}
+
 // hard coded default settings for RACE
 static char race_settings[] =
 	"sv_silentrecord 1\n"
@@ -2039,7 +2057,7 @@ static void race_start(qbool cancelrecord, const char *fmt, ...)
 	race.status = raceCD;
 
 	// set countdown timer
-	race.cd_cnt = 3;
+	race.cd_cnt = cvar("k_race_countdown");
 
 	race.cd_next_think = g_globalvars.time;
 
