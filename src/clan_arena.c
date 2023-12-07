@@ -662,6 +662,7 @@ void CA_SendTeamInfo(gedict_t *t)
 	int kills;
 	int deaths;
 	int max_deaths;
+	int track_target;
 	gedict_t *p, *s;
 	char *tm, *nick;
 
@@ -751,10 +752,11 @@ void CA_SendTeamInfo(gedict_t *t)
 		
 		kills = bound(0, (int)p->round_kills, 999);
 		deaths = bound(0, (int)p->round_deaths, 999);
+		track_target = p->track_target ? NUM_FOR_EDICT(p->track_target) : -1;
 
-		stuffcmd(t, "//cainfo %d %d %d %d %d %d %d \"%s\" %d %d %d %d %d %d %d %d %d\n", cl,
+		stuffcmd(t, "//cainfo %d %d %d %d %d %d %d \"%s\" %d %d %d %d %d %d %d %d %d %d\n", cl,
 						origin0, origin1, origin2, h, a, items, nick, shells, nails, rockets, cells, 
-						camode, deadtype, timetospawn, kills, deaths);
+						camode, deadtype, timetospawn, kills, deaths, track_target);
 	}
 }
 
