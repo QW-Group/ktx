@@ -25,17 +25,10 @@
 // These are the built-in teams for rpickup to choose from
 rpickupTeams_t builtinTeamInfo[] =
 {
-	{"Bone", "10",  "0", "color 10 0\nskin \"\"\nteam Bone\n"},
-	{"Teal", "11", "11", "color 11 11\nskin \"\"\nteam Teal\n"},
-	{"Pink",  "6",  "6", "color 6 6\nskin \"\"\nteam Pink\n"},
-	{"Gold",  "5", "12", "color 5 12\nskin \"\"\nteam Gold\n"},
-	{"Plum",  "8",  "8", "color 8 8\nskin \"\"\nteam Plum\n"},
-	{"Wine",  "4",  "4", "color 4 4\nskin \"\"\nteam Wine\n"},
-	{"Beer",  "0",  "1", "color 0 1\nskin \"\"\nteam Beer\n"},
-	{"Weed",  "3",  "3", "color 3 3\nskin \"\"\nteam Weed\n"}
+	{"red",  "4",  "4", "color 4 4\nskin \"\"\nteam red\n"},
+	{"blue",  "13",  "13", "color 13 13\nskin \"\"\nteam blue\n"},
+	{"yell",  "12",  "12", "color 12 12\nskin \"\"\nteam yell\n"}
 };
-
-rpickupTeams_t rpTeams[3];
 
 //void BeginPicking();
 void BecomeCaptain(gedict_t *p);
@@ -640,34 +633,6 @@ void vote_check_pickup()
 	}
 }
 
-// This function will randomly select an entry from 'builtinTeamInfo', and copy its content
-// to the '_rpTeam' parameter.
-void generateTeamInfo(rpickupTeams_t *_rpTeam)
-{
-	memcpy(_rpTeam,
-			&builtinTeamInfo[(int)(g_random() * (sizeof(builtinTeamInfo) / sizeof(rpickupTeams_t)))],
-			sizeof(rpickupTeams_t));
-}
-
-// This function will fill up 'rpTeams' with new content.
-// 'rpTeams' is an array with 3 members, which contains the Team info (name and color) for rpickup
-void create_rpickup_teaminfo(void)
-{
-	memset(rpTeams, 0, sizeof(rpTeams));
-
-	generateTeamInfo(&rpTeams[0]);
-
-	do
-	{
-		generateTeamInfo(&rpTeams[1]);
-	} while (strcmp(rpTeams[0].name, rpTeams[1].name) == 0);
-
-	do
-	{
-		generateTeamInfo(&rpTeams[2]);
-	} while ((strcmp(rpTeams[0].name, rpTeams[2].name) == 0) || (strcmp(rpTeams[1].name, rpTeams[2].name) == 0));
-}
-
 // !!! do not confuse rpickup and pickup
 void vote_check_rpickup(int maxRecursion)
 {
@@ -701,13 +666,6 @@ void vote_check_rpickup(int maxRecursion)
 
 	if (veto || !get_votes_req(OV_RPICKUP, true))
 	{
-		// Real rpickup is happening
-		if (MAX_RPICKUP_RECUSION == maxRecursion)
-		{
-			// We create the teaminfo, but only at the first time (from the occasional repetition)
-			create_rpickup_teaminfo();
-		}
-
 		// Save the original teams, and also clear them
 		i = 0;
 		for (p = world; (p = find_plr(p));)
@@ -754,39 +712,39 @@ void vote_check_rpickup(int maxRecursion)
 					{
 						if (p->isBot)
 						{
-							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "team", rpTeams[0].name, 0);
-							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "topcolor", rpTeams[0].topColor, 0);
-							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "bottomcolor", rpTeams[0].bottomColor, 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "team", builtinTeamInfo[0].name, 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "topcolor", builtinTeamInfo[0].topColor, 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "bottomcolor", builtinTeamInfo[0].bottomColor, 0);
 						}
 						else
 						{
-							stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "%s", rpTeams[0].stuffCmd);
+							stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "%s", builtinTeamInfo[0].stuffCmd);
 						}
 					}
 					else if (p->k_teamnumber == 2)
 					{
 						if (p->isBot)
 						{
-							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "team", rpTeams[1].name, 0);
-							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "topcolor", rpTeams[1].topColor, 0);
-							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "bottomcolor", rpTeams[1].bottomColor, 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "team", builtinTeamInfo[1].name, 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "topcolor", builtinTeamInfo[1].topColor, 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "bottomcolor", builtinTeamInfo[1].bottomColor, 0);
 						}
 						else
 						{
-							stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "%s", rpTeams[1].stuffCmd);
+							stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "%s", builtinTeamInfo[1].stuffCmd);
 						}
 					}
 					else
 					{
 						if (p->isBot)
 						{
-							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "team", rpTeams[2].name, 0);
-							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "topcolor", rpTeams[2].topColor, 0);
-							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "bottomcolor", rpTeams[2].bottomColor, 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "team", builtinTeamInfo[2].name, 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "topcolor", builtinTeamInfo[2].topColor, 0);
+							trap_SetBotUserInfo(NUM_FOR_EDICT(p), "bottomcolor", builtinTeamInfo[2].bottomColor, 0);
 						}
 						else
 						{
-							stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "%s", rpTeams[2].stuffCmd);
+							stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "%s", builtinTeamInfo[2].stuffCmd);
 						}
 					}
 
