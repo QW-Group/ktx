@@ -2,6 +2,16 @@
 
 // Stripped down port of dumptruckDS's func_bob.qc
 
+// progsdump / Arcane Dimensions spawnflags
+#define BOB_COLLISION      2
+#define BOB_NONSOLID       4
+
+// Dimension of the Machine spawnflags
+// Not yet supported, uses different easing function, might be possible to detect.
+// https://github.com/id-Software/quake-rerelease-qc/blob/main/quakec_mg1/func_bob.qc
+#define FUNC_BOB_NONSOLID  1
+#define FUNC_BOB_START_ON  2
+
 static void func_bob_timer()
 {
 	vec3_t delta;
@@ -46,6 +56,12 @@ static void func_bob_timer()
 
 void SP_func_bob()
 {
+	// Non-solid bobs not implemented yet, remove for now to not block player.
+	if ((int) self->s.v.spawnflags & (BOB_NONSOLID | FUNC_BOB_NONSOLID)) {
+		ent_remove(self);
+		return;
+	}
+
 	self->s.v.movetype = MOVETYPE_PUSH;
 	self->s.v.solid = SOLID_BSP;
 
