@@ -35,6 +35,7 @@
 #include "g_consts.h"
 #include "g_syscalls.h"
 #include "player.h"
+#include "rng.h"
 
 #if defined(_WIN32)
 #define QW_PLATFORM				"Windows"
@@ -238,6 +239,7 @@ typedef enum
 // K_SPW_0_NONRANDOM changes "Normal QW respawns" to "pre-qtest nonrandom respawns"
 #define K_SPW_0_NONRANDOM
 
+void g_random_seed(int);
 float g_random(void);
 float crandom(void);
 int i_rnd(int from, int to);
