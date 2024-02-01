@@ -1278,7 +1278,7 @@ void CA_player_pre_think(void)
 		}
 
 		// take no damage to health/armor within 1 second of respawn or during endround
-		if ((match_in_progress == 2) && self->in_play && ((self->alive_time >= 1) || !self->round_deaths) && !ca_round_pause)
+		if (self->in_play && ((self->alive_time >= 1) || !self->round_deaths) && !ca_round_pause)
 		{
 			self->no_pain = false;
 		}

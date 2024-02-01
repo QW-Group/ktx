@@ -484,7 +484,7 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 		}
 		
 		// don't accept any damage in CA modes if no_pain is true 
-		if (targ->no_pain)
+		if (targ->no_pain && (match_in_progress == 2))
 		{	
 			if (attacker == targ)
 			{
