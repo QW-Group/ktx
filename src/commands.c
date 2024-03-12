@@ -879,6 +879,7 @@ cmd_t cmds[] =
 	{ "next_pow", 					next_pow, 						0, 			CF_SPECTATOR | CF_MATCHLESS, 											CD_NEXT_POW },
 	{ "laststats", 					LastStats, 						0, 			CF_BOTH | CF_MATCHLESS, 												CD_LASTSTATS },
 	{ "lastscores", 				lastscores, 					0, 			CF_BOTH | CF_MATCHLESS | CF_PARAMS, 									CD_LASTSCORES },
+	{ "lastscoresktx", 				lastscores, 					0, 			CF_BOTH | CF_MATCHLESS | CF_PARAMS, 									CD_LASTSCORES },
 	{ "rnd", 						krnd, 							0, 			CF_BOTH | CF_PARAMS, 													CD_RND },
 	{ "agree", 						agree_on_map, 					0, 			CF_PLAYER | CF_MATCHLESS, 												CD_AGREE },
 	{ "pos_show", 					Pos_Show, 						0, 			CF_BOTH | CF_PARAMS, 													CD_POS_SHOW },
