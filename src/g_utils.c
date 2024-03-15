@@ -1170,6 +1170,8 @@ int getteams(char teams[MAX_CLIENTS][MAX_TEAM_NAME])
 		}
 	}
 
+	qsort(teams, j, sizeof(teams[0]), sort_alphanumeric);
+
 	return j;
 }
 
@@ -2813,4 +2815,34 @@ char* make_dots(char *dots, size_t dots_len, int cmd_max_len, char *cmd)
 	memset((void*) dots, (int)'.', len);
 	dots[len] = 0;
 	return dots;
+}
+
+void trim_non_alphanumeric(char *input)
+{
+	char *src = input;
+	char *dst = input;
+
+	while (*src) {
+		if (isalnum(*src))
+			*dst++ = *src;
+		src++;
+        }
+
+	*dst = '\0';
+}
+
+int sort_alphanumeric(const void *a, const void *b)
+{
+	char *aa = strdup(a);
+	char *bb = strdup(b);
+
+	trim_non_alphanumeric(aa);
+	trim_non_alphanumeric(bb);
+
+	int ret = strcasecmp((const char *)aa,(const char *)bb);
+
+	free(aa);
+	free(bb);
+
+	return ret;
 }

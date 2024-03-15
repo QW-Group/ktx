@@ -1236,3 +1236,6 @@ extern int maxPlayerCount;
 #define AUTOTRACK_POWERUPS_PREDICT_TIME 2
 
 qbool AllowMonster(gedict_t *e);
+
+void trim_non_alphanumeric(char *str);
+int sort_alphanumeric(const void *a, const void *b);

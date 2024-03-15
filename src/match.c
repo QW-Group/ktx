@@ -2057,6 +2057,9 @@ char* CompilateDemoName()
 	}
 	else if (isDuel())
 	{
+		char players[MAX_CLIENTS][CLIENT_NAME_LEN];
+		int pc = 0;
+
 		strlcat(demoname, "duel", sizeof(demoname));
 		if (isRACE())
 		{
@@ -2073,7 +2076,7 @@ char* CompilateDemoName()
 			strlcat(demoname, "_instagib", sizeof(demoname));
 		}
 
-		for (vs = "_", p = world; (p = find_plr(p));)
+		for (pc = 0, p = world; (p = find_plr(p));)
 		{
 			if (strnull(name = getname(p)))
 			{
@@ -2084,8 +2087,15 @@ char* CompilateDemoName()
 				continue;
 			}
 
+			strncpy(players[pc++], name, CLIENT_NAME_LEN);
+		}
+
+		qsort(players, pc, sizeof(players[0]), sort_alphanumeric);
+
+		for (vs = "_", i = 0; i < pc; i++)
+		{
 			strlcat(demoname, vs, sizeof(demoname));
-			strlcat(demoname, name, sizeof(demoname));
+			strlcat(demoname, players[i], sizeof(demoname));
 			vs = "_vs_";
 		}
 	}
