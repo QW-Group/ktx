@@ -2087,7 +2087,7 @@ char* CompilateDemoName()
 				continue;
 			}
 
-			strncpy(players[pc++], name, CLIENT_NAME_LEN);
+			strlcpy(players[pc++], name, CLIENT_NAME_LEN);
 		}
 
 		qsort(players, pc, sizeof(players[0]), sort_alphanumeric);
