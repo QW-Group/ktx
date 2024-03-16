@@ -2833,16 +2833,14 @@ void trim_non_alphanumeric(char *input)
 
 int sort_alphanumeric(const void *a, const void *b)
 {
-	char *aa = strdup(a);
-	char *bb = strdup(b);
+	char aa[CLIENT_NAME_LEN > MAX_TEAM_NAME ? CLIENT_NAME_LEN : MAX_TEAM_NAME];
+	char bb[CLIENT_NAME_LEN > MAX_TEAM_NAME ? CLIENT_NAME_LEN : MAX_TEAM_NAME];
+
+	strlcpy(aa, a, sizeof(aa));
+	strlcpy(bb, b, sizeof(bb));
 
 	trim_non_alphanumeric(aa);
 	trim_non_alphanumeric(bb);
 
-	int ret = strcasecmp((const char *)aa,(const char *)bb);
-
-	free(aa);
-	free(bb);
-
-	return ret;
+	return strcasecmp((const char *)aa,(const char *)bb);
 }
