@@ -1363,8 +1363,8 @@ void CA_Frame(void)
 	{
 		int last_alive;
 		int e_last_alive;
-		char str_last_alive[5];
-		char str_e_last_alive[5];
+		char str_last_alive[25];
+		char str_e_last_alive[25];
 		char spawncount[5];
 
 		for (p = world; (p = find_plr(p));)

@@ -449,6 +449,13 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 	float playerheight = 0, midheight = 0;
 	qbool midair = false, inwater = false, do_dmg = false, rl_dmg = false, stomp_dmg = false;
 
+	// used by buttons and triggers to set activator for target firing
+	damage_attacker = attacker;
+	damage_inflictor = inflictor;
+
+	attackerteam = getteam(attacker);
+	targteam = getteam(targ);
+
 	// can't apply damage to dead
 	if (!targ->s.v.takedamage || ISDEAD(targ))
 	{
@@ -492,7 +499,7 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 			}
 			else 
 			{
-				if (targ->invincible_sound < g_globalvars.time)
+				if (targ->in_play && (targ->invincible_sound < g_globalvars.time) && strneq(targteam, attackerteam))
 				{
 					sound(targ, CHAN_AUTO, "items/protect3.wav", 0.75, ATTN_NORM);
 					targ->invincible_sound = g_globalvars.time + 2;
@@ -502,13 +509,6 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 			}
 		}
 	}
-
-	// used by buttons and triggers to set activator for target firing
-	damage_attacker = attacker;
-	damage_inflictor = inflictor;
-
-	attackerteam = getteam(attacker);
-	targteam = getteam(targ);
 
 	if ((int)cvar("k_midair"))
 	{
