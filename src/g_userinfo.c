@@ -398,6 +398,10 @@ qbool FixPlayerTeam(char *newteam)
 
 		return false;
 	}
+	if (isCA() && !match_in_progress)
+	{
+		return false;
+	}
 
 	// do not allow change team in game / countdown
 	if (match_in_progress || coop)
