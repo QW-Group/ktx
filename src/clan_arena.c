@@ -1365,7 +1365,6 @@ void CA_Frame(void)
 		int e_last_alive;
 		char str_last_alive[25];
 		char str_e_last_alive[25];
-		char spawncount[5];
 
 		for (p = world; (p = find_plr(p));)
 		{
@@ -1404,26 +1403,9 @@ void CA_Frame(void)
 			// both you and the enemy are the last alive on your team
 			else if (p->in_play && p->alive_time > 2 && last_alive && e_last_alive)
 			{
-				// if teammate will spawn before or at the same time as enemy
-				if (last_alive != 999 && last_alive <= e_last_alive)
-				{
-					sprintf(spawncount, "%d", last_alive);
-				}
-				// if enemy spawns before teammate
-				else if (e_last_alive != 999 && e_last_alive < last_alive)
-				{
-					sprintf(str_e_last_alive, "%d", e_last_alive);
-					sprintf(spawncount, "%s", redtext(str_e_last_alive));
-				}
-				// nobody else is spawning
-				else
-				{
-					sprintf(spawncount, "%s", " ");
-				}
-
-				//sprintf(str_last_alive, "%d", last_alive);
+				sprintf(str_last_alive, "%d", last_alive);
 				sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n", 
-								redtext("1 on 1"), spawncount);
+								redtext("1 on 1"), last_alive == 999 ? " " : redtext(str_last_alive));
 
 				G_centerprint(p, "%s", p->cptext);
 			}
