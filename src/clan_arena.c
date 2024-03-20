@@ -91,10 +91,24 @@ int calc_respawn_time(gedict_t *p, int offset)
 	qbool isWipeout = (cvar("k_clan_arena") == 2);
 	int max_deaths = cvar("k_clan_arena_max_respawns");
 	int time = 999;
+	int teamsize = 0;
+	int multiple;
+	gedict_t *p2;
+
+	// count players on team
+	for (p2 = world; (p2 = find_plr_same_team(p2, getteam(p)));)
+	{
+		teamsize++;
+	}
+
+	multiple = teamsize + 1;
 
 	if (isWipeout && (p->round_deaths+offset <= max_deaths))
 	{
-		time = p->round_deaths+offset == 1 ? 5 : (p->round_deaths-1+offset) * 10;
+		// if 4 players on team, the spawn times are 5, 10, 20, 30
+		// if 3 players on team, the spawn times are 4, 8, 16, 24
+		// if 2 players on team, the spawn times are 3, 6, 12, 18
+		time = p->round_deaths+offset == 1 ? multiple : (p->round_deaths-1+offset) * (multiple*2);
 	}
 
 	return time;
