@@ -101,7 +101,7 @@ int calc_respawn_time(gedict_t *p, int offset)
 		teamsize++;
 	}
 
-	multiple = teamsize + 1;
+	multiple = bound(3, teamsize+1, 6);	// first respawn won't take more than 6 seconds regardless of team size
 
 	if (isWipeout && (p->round_deaths+offset <= max_deaths))
 	{
