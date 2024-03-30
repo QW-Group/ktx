@@ -91,10 +91,24 @@ int calc_respawn_time(gedict_t *p, int offset)
 	qbool isWipeout = (cvar("k_clan_arena") == 2);
 	int max_deaths = cvar("k_clan_arena_max_respawns");
 	int time = 999;
+	int teamsize = 0;
+	int multiple;
+	gedict_t *p2;
+
+	// count players on team
+	for (p2 = world; (p2 = find_plr_same_team(p2, getteam(p)));)
+	{
+		teamsize++;
+	}
+
+	multiple = bound(3, teamsize+1, 6);	// first respawn won't take more than 6 seconds regardless of team size
 
 	if (isWipeout && (p->round_deaths+offset <= max_deaths))
 	{
-		time = p->round_deaths+offset == 1 ? 5 : (p->round_deaths-1+offset) * 10;
+		// if 4 players on team, the spawn times are 5, 10, 20, 30
+		// if 3 players on team, the spawn times are 4, 8, 16, 24
+		// if 2 players on team, the spawn times are 3, 6, 12, 18
+		time = p->round_deaths+offset == 1 ? multiple : (p->round_deaths-1+offset) * (multiple*2);
 	}
 
 	return time;
@@ -1277,8 +1291,7 @@ void CA_player_pre_think(void)
 			self->alive_time = g_globalvars.time - self->time_of_respawn;
 		}
 
-		// take no damage to health/armor withing 1 second of respawn
-		// or during endround
+		// take no damage to health/armor within 1 second of respawn or during endround
 		if (self->in_play && ((self->alive_time >= 1) || !self->round_deaths) && !ca_round_pause)
 		{
 			self->no_pain = false;
@@ -1364,9 +1377,8 @@ void CA_Frame(void)
 	{
 		int last_alive;
 		int e_last_alive;
-		char str_last_alive[5];
-		char str_e_last_alive[5];
-		char spawncount[5];
+		char str_last_alive[25];
+		char str_e_last_alive[25];
 
 		for (p = world; (p = find_plr(p));)
 		{
@@ -1405,26 +1417,9 @@ void CA_Frame(void)
 			// both you and the enemy are the last alive on your team
 			else if (p->in_play && p->alive_time > 2 && last_alive && e_last_alive)
 			{
-				// if teammate will spawn before or at the same time as enemy
-				if (last_alive != 999 && last_alive <= e_last_alive)
-				{
-					sprintf(spawncount, "%d", last_alive);
-				}
-				// if enemy spawns before teammate
-				else if (e_last_alive != 999 && e_last_alive < last_alive)
-				{
-					sprintf(str_e_last_alive, "%d", e_last_alive);
-					sprintf(spawncount, "%s", redtext(str_e_last_alive));
-				}
-				// nobody else is spawning
-				else
-				{
-					sprintf(spawncount, "%s", " ");
-				}
-
-				//sprintf(str_last_alive, "%d", last_alive);
+				sprintf(str_last_alive, "%d", last_alive);
 				sprintf(p->cptext, "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n", 
-								redtext("1 on 1"), spawncount);
+								redtext("1 on 1"), last_alive == 999 ? " " : redtext(str_last_alive));
 
 				G_centerprint(p, "%s", p->cptext);
 			}
