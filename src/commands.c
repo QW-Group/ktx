@@ -8354,7 +8354,7 @@ void PausedTic(int duration)
 
 		if (time != prevtime) {
 			for (p = world; (p = find_client(p));)
-			{	
+			{
 				stuffcmd(p, "play buttons/switch04.wav\n");
 			}
 
@@ -8448,7 +8448,7 @@ void TogglePause()
 		}
 
 		when_to_pause = g_globalvars.time + 3;
-		snprintf(pause_name, sizeof(pause_name), self->netname);
+		strlcpy(pause_name, self->netname, sizeof(pause_name));
 		pauses_remaining = self->k_pauseRequests;
 	}
 }
