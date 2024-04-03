@@ -630,6 +630,8 @@ void OnePlayerStats(gedict_t *p, int tp)
 	float dmg_eweapon;
 	float dmg_g_rl;
 	float dmg_td;
+	int dmg_sg;
+	int dmg_ssg;
 	int ra;
 	int ya;
 	int ga;
@@ -688,6 +690,8 @@ void OnePlayerStats(gedict_t *p, int tp)
 	a_lg = p->ps.wpn[wpLG].attacks;
 	h_sg = p->ps.wpn[wpSG].hits;
 	a_sg = p->ps.wpn[wpSG].attacks;
+	dmg_sg = p->ps.wpn[wpSG].edamage;
+	dmg_ssg = p->ps.wpn[wpSSG].edamage;
 	h_ssg = p->ps.wpn[wpSSG].hits;
 	a_ssg = p->ps.wpn[wpSSG].attacks;
 
@@ -741,8 +745,8 @@ void OnePlayerStats(gedict_t *p, int tp)
 				(a_lg ? va(" %s%.1f%% (%d/%d)", redtext("lg"), e_lg, (int)h_lg, (int)a_lg) : ""),
 				(ph_rl ? va(" %s%.1f%% (%d/%d)", redtext("rl"), ph_rl, (int)vh_rl, (int)a_rl) : ""),
 				(ph_gl ? va(" %s%.1f%%", redtext("gl"), ph_gl) : ""),
-				(e_sg ? va(" %s%.1f%%", redtext("sg"), e_sg) : ""),
-				(e_ssg ? va(" %s%.1f%%", redtext("ssg"), e_ssg) : ""));
+				(e_sg ? va(" %s%.1f%% (%d)", redtext("sg"), e_sg, dmg_sg) : ""),
+				(e_ssg ? va(" %s%.1f%% (%d)", redtext("ssg"), e_ssg,  dmg_ssg) : ""));
 
 	// rockets detail
 	if (!lgc_enabled())
@@ -1057,7 +1061,7 @@ void TopStats(void)
 {
 	gedict_t *p;
 	float f1, h_sg, a_sg;
-	int from;
+	int from, dmg_sg;
 
 	G_bprint(2, "\220%s\221 %s:\n"
 				"\235\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236"
@@ -1194,11 +1198,12 @@ void TopStats(void)
 		{
 			h_sg = p->ps.wpn[wpSG].hits;
 			a_sg = p->ps.wpn[wpSG].attacks;
+			dmg_sg = p->ps.wpn[wpSG].edamage;
 			h_sg = 100.0 * h_sg / max(1, a_sg);
 			if (h_sg == maxsgeffi)
 			{
-				G_bprint(2, "%s%s%s \220%.1f%%\221\n", (f1 ? "             " : ""),
-							(isghost(p) ? "\203" : ""), getname(p), maxsgeffi);
+				G_bprint(2, "%s%s%s \220%.1f%% (%d)\221\n", (f1 ? "             " : ""),
+							(isghost(p) ? "\203" : ""), getname(p), maxsgeffi, dmg_sg);
 				f1 = 1;
 			}
 
