@@ -122,7 +122,7 @@ intptr_t trap_Map_Extension(const char *ext_name, intptr_t mapto);
  -2	cannot map
  */
 
-intptr_t trap_AddBot(const char *name, intptr_t bottomcolor, intptr_t topcolor, const char *skin);
+intptr_t trap_AddBot(const char *name, intptr_t bottomcolor, intptr_t topcolor, const char *skin, intptr_t skill);
 intptr_t trap_RemoveBot(intptr_t edn);
 intptr_t trap_SetBotUserInfo(intptr_t edn, const char *varname, const char *value, intptr_t flags);
 intptr_t trap_SetBotCMD(intptr_t edn, intptr_t msec, float angles_x, float angles_y, float angles_z,
