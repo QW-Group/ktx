@@ -928,6 +928,8 @@ void SelectWeapon(void)
 	}
 
 	CheckNewWeapon(DesiredWeapon());
+
+	self->fb.desired_weapon_impulse = FrogbotWeapon();
 }
 
 #endif // BOT_SUPPORT
