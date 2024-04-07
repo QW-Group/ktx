@@ -2139,7 +2139,7 @@ void PutClientInServer(void)
 
 			self->s.v.armorvalue = self->isBot ? 0 : 200;
 			self->s.v.armortype = self->isBot ? 0 : 0.8;
-			self->s.v.health = self->isBot ? 100 : 250;
+			self->s.v.health = self->isBot ? FrogbotHealth() : 250;
 
 			items = self->s.v.items;
 			items |= IT_NAILGUN;
