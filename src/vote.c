@@ -327,7 +327,7 @@ int get_votes_req(int fofs, qbool diff)
 		vt_req = max(2, vt_req); // at least 2 votes in this case
 	}
 
-	if ((CountBots() > 0) && ((CountPlayers() - CountBots()) == 1) && (fofs != OV_PRIVATE))
+	if ((CountBots() > 0) && ((CountPlayers() - CountBots()) == 1) && (fofs != OV_PRIVATE) && (fofs != OV_ELECT))
 	{
 		vt_req = 1;
 	}
