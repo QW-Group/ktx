@@ -2110,7 +2110,9 @@ void CalculateBestPowPlayers()
 		best += (p->invincible_finished >= g_globalvars.time) ? 4000 : 0; // pent
 		best += (p->super_damage_finished >= g_globalvars.time) ? 2000 : 0; // quad
 		best += (p->invisible_finished >= g_globalvars.time) ? 1000 : 0; // ring
-		best += (p->radsuit_finished >= g_globalvars.time) ? 500 : 0; // suit
+		// Disabled biosuit to trigger autotrack, as recent gameplays of new 2024 maps with
+		// biosuit showed that this is unwanted
+//		best += (p->radsuit_finished >= g_globalvars.time) ? 500 : 0; // suit
 		best += p->s.v.frags;
 
 		if (!ed_bestPow || best1 < best)
