@@ -33,15 +33,17 @@ jobs:
            os: windows
            arch: x86
            ext: ".dll"
+    container:
+      image: debian:stable
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Prepare Build Environemnt
         run: |
-             sudo apt-get update
-             sudo apt-get -y install build-essential cmake gcc-i686-linux-gnu
-             sudo apt-get -y install gcc-arm-linux-gnueabihf libc6-dev-armhf-cross gcc-aarch64-linux-gnu libc6-dev-arm64-cross
-             sudo apt-get -y install gcc-mingw-w64-x86-64 gcc-mingw-w64-i686
+             apt-get update
+             apt-get -y install build-essential cmake gcc-i686-linux-gnu
+             apt-get -y install gcc-arm-linux-gnueabihf libc6-dev-armhf-cross gcc-aarch64-linux-gnu libc6-dev-arm64-cross
+             apt-get -y install gcc-mingw-w64-x86-64 gcc-mingw-w64-i686
       - name: Build
         run: |
              ./build_cmake.sh ${{ matrix.target }}

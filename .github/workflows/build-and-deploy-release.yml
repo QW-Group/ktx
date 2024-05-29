@@ -35,15 +35,17 @@ jobs:
            os: windows
            arch: x86
            ext: ".dll"
+    container:
+      image: debian:stable
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Prepare Build Environemnt
         run: |
-             sudo apt-get update
-             sudo apt-get -y install build-essential cmake gcc-i686-linux-gnu
-             sudo apt-get -y install gcc-arm-linux-gnueabihf libc6-dev-armhf-cross gcc-aarch64-linux-gnu libc6-dev-arm64-cross
-             sudo apt-get -y install gcc-mingw-w64-x86-64 gcc-mingw-w64-i686
+             apt-get update
+             apt-get -y install build-essential cmake gcc-i686-linux-gnu openssh-client
+             apt-get -y install gcc-arm-linux-gnueabihf libc6-dev-armhf-cross gcc-aarch64-linux-gnu libc6-dev-arm64-cross
+             apt-get -y install gcc-mingw-w64-x86-64 gcc-mingw-w64-i686
       - name: Build
         run: |
              ./build_cmake.sh ${{ matrix.target }}
@@ -53,16 +55,17 @@ jobs:
       - name: Setup SSH
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        shell: bash
         run: |
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
           ssh-add - <<< "${{ secrets.SSH_PRIVATE_KEY }}"
       - name: Set date
         run: |
-          sudo timedatectl set-timezone Europe/Amsterdam
-          echo "DATE=$(date "+%Y%m%d-%H%M%S")" >> $GITHUB_ENV
+          echo "DATE=$(TZ="Europe/Amsterdam" date "+%Y%m%d-%H%M%S")" >> $GITHUB_ENV
       - name: Deploy
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        shell: bash
         run: |
              mkdir -p upload/releases/${{ github.ref_name }}/${{ matrix.os }}/${{ matrix.arch }}
              mkdir -p upload/releases/latest/${{ matrix.os }}/${{ matrix.arch }}
