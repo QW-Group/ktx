@@ -406,9 +406,9 @@ intptr_t trap_Map_Extension(const char *ext_name, intptr_t mapto)
 	return syscall(G_Map_Extension, (intptr_t) ext_name, mapto);
 }
 
-intptr_t trap_AddBot(const char *name, intptr_t bottomcolor, intptr_t topcolor, const char *skin)
+intptr_t trap_AddBot(const char *name, intptr_t bottomcolor, intptr_t topcolor, const char *skin, intptr_t skill)
 {
-	return syscall(G_Add_Bot, (intptr_t) name, bottomcolor, topcolor, (intptr_t) skin);
+	return syscall(G_Add_Bot, (intptr_t) name, bottomcolor, topcolor, (intptr_t) skin, skill);
 }
 
 intptr_t trap_RemoveBot(intptr_t edn)
