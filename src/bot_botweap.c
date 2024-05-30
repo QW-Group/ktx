@@ -929,7 +929,10 @@ void SelectWeapon(void)
 
 	CheckNewWeapon(DesiredWeapon());
 
-	self->fb.desired_weapon_impulse = FrogbotWeapon();
+	if (tot_mode_enabled())
+	{
+		self->fb.desired_weapon_impulse = FrogbotWeapon();
+	}
 }
 
 #endif // BOT_SUPPORT

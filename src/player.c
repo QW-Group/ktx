@@ -1136,7 +1136,7 @@ void GibPlayer(void)
 }
 
 void StartDie(void);
-void PlayerBreak();
+void PlayerBreak(void);
 
 void PlayerDie(void)
 {
