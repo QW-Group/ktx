@@ -887,3 +887,17 @@ int snprintf(char *buffer, size_t count, char const *format, ...)
 
 	return ret;
 }
+
+double fmod(double x, double y) {
+	double result = x;
+	if (y == 0.0) {
+		return 0.0 / 0.0; // Undefined
+	}
+	while (result >= y) {
+		result -= y;
+	}
+	while (result < 0) {
+		result += y;
+	}
+	return result;
+}
