@@ -72,3 +72,48 @@ jobs:
              cp build/${{ matrix.target }}/qwprogs${{ matrix.ext }} upload/snapshots/latest/${{ matrix.os }}/${{ matrix.arch }}/qwprogs${{ matrix.ext }}
              cp build/${{ matrix.target }}/qwprogs.md5 upload/snapshots/latest/${{ matrix.os }}/${{ matrix.arch }}/qwprogs.md5
              sftp -rp -o 'StrictHostKeyChecking no' -o 'UserKnownHostsFile /dev/null' -P ${{ secrets.SFTP_PORT }} ${{ secrets.SFTP_USERNAME }}@${{ secrets.SFTP_HOST }}:/snapshots <<< $'put -rp upload/snapshots/*'
+  build-qvm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get number of CPU cores
+        uses: SimenB/github-actions-cpu-cores@v2
+        id: cpu-cores
+      - name: Checkout ktx
+        uses: actions/checkout@v4
+        with:
+          path: ktx
+      - name: Checkout q3lcc
+        uses: actions/checkout@v4
+        with:
+          repository: ec-/q3lcc
+          path: q3lcc
+      - name: Build q3lcc
+        run: |
+          make -j ${{ steps.cpu-cores.outputs.count }} PLATFORM=$(uname -s) ARCH=$(uname -m) &> /dev/null
+          mv build*/q3lcc build*/q3rcc build*/q3cpp /usr/local/bin
+        working-directory: q3lcc
+      - name: Checkout q3asm
+        uses: actions/checkout@v4
+        with:
+          repository: ec-/q3asm
+          path: q3asm
+      - name: Build q3asm
+        run: |
+          make -j ${{ steps.cpu-cores.outputs.count }} PLATFORM=$(uname -s) ARCH=$(uname -m) &> /dev/null
+          mv q3asm /usr/local/bin
+        working-directory: q3asm
+      - name: Configure qvm
+        run: cmake -B cmake-build-release -DCMAKE_BUILD_TYPE=Release
+        working-directory: ktx
+      - name: Build qvm
+        run: |
+          cmake --build cmake-build-release --config Release --target qvm --parallel
+          mv cmake-build-release/qwprogs.{qvm,map} ..
+        working-directory: ktx
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qwprogs-qvm
+          path: |
+            qwprogs.qvm
+            qwprogs.map
+          compression-level: 9
