@@ -8341,10 +8341,11 @@ char pause_name[50];
 
 void PausedTic(int duration)
 {
-	pauseduration = duration;
 	gedict_t *p;
 	int time = 0;
 	static int prevtime = 0;
+
+	pauseduration = duration;
 
 	if (when_to_unpause && when_to_unpause > duration)
 	{
