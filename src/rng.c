@@ -1,5 +1,3 @@
-#include <stdint.h>
-
 #include "rng.h"
 
 #include "rng_gen_impl.h"
@@ -16,15 +14,15 @@
    (The all-zeros state has bad statistics.)
 */
 void rng_seed(RngState* s, int seed) {
-	uint64_t x = (uint64_t)(seed);
+	rng_seed_t x = (rng_seed_t)(seed);
 
-	s->s[0] = (uint32_t)rng_seed_impl_next(&x);
-	s->s[1] = (uint32_t)rng_seed_impl_next(&x);
-	s->s[2] = (uint32_t)rng_seed_impl_next(&x);
-	s->s[3] = (uint32_t)rng_seed_impl_next(&x);
+	s->s[0] = (unsigned int)rng_seed_impl_next(&x);
+	s->s[1] = (unsigned int)rng_seed_impl_next(&x);
+	s->s[2] = (unsigned int)rng_seed_impl_next(&x);
+	s->s[3] = (unsigned int)rng_seed_impl_next(&x);
 }
 
-uint32_t rng_next(RngState* state) {
+unsigned int rng_next(RngState* state) {
 	return rng_gen_impl_next(state);
 }
 
@@ -32,10 +30,10 @@ uint32_t rng_next(RngState* state) {
 static RngState global_rng = { 0 };
 
 void rng_seed_global(int seed) {
-	return rng_seed(&global_rng, seed);
+	rng_seed(&global_rng, seed);
 }
 
-uint32_t rng_next_global(void) {
+unsigned int rng_next_global(void) {
 	return rng_next(&global_rng);
 }
 

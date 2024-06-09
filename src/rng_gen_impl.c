@@ -13,8 +13,6 @@ worldwide. This software is distributed without any warranty.
 
 See <http://creativecommons.org/publicdomain/zero/1.0/>. */
 
-#include <stdint.h>
-
 /* This is xoshiro128** 1.1, one of our 32-bit all-purpose, rock-solid
    generators. It has excellent speed, a state size (128 bits) that is
    large enough for mild parallelism, and it passes all tests we are aware
@@ -28,16 +26,21 @@ See <http://creativecommons.org/publicdomain/zero/1.0/>. */
 
    The state must be seeded so that it is not everywhere zero. */
 
+#ifdef Q3_VM
+# define Q_INLINE
+#else
+# define Q_INLINE inline
+#endif
 
-static inline uint32_t rotl(const uint32_t x, int k) {
+static Q_INLINE unsigned int rotl(const unsigned int x, int k) {
 	return (x << k) | (x >> (32 - k));
 }
 
 
-static inline uint32_t next(RngState* s) {
-	const uint32_t result = rotl(s->s[1] * 5, 7) * 9;
+static Q_INLINE unsigned int next(RngState* s) {
+	const unsigned int result = rotl(s->s[1] * 5, 7) * 9;
 
-	const uint32_t t = s->s[1] << 9;
+	const unsigned int t = s->s[1] << 9;
 
 	s->s[2] ^= s->s[0];
 	s->s[3] ^= s->s[1];
@@ -53,6 +56,6 @@ static inline uint32_t next(RngState* s) {
 //// End imported code.
 
 // Code in this section wraps the PRNG implementation.
-uint32_t rng_gen_impl_next(RngState* state) {
+unsigned int rng_gen_impl_next(RngState* state) {
 	return next(state);
 }
