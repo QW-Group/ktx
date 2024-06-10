@@ -73,6 +73,7 @@ set(SRC_COMMON
 	"${DIR_SRC}/g_spawn.c"
 	"${DIR_SRC}/g_userinfo.c"
 	"${DIR_SRC}/g_utils.c"
+	"${DIR_SRC}/g_syscalls_extra.c"
 	"${DIR_SRC}/hiprot.c"
 	"${DIR_SRC}/hoonymode.c"
 	"${DIR_SRC}/items.c"
@@ -176,7 +177,9 @@ set(QVM_C_FLAGS -DQ3_VM -S -Wf-target=bytecode -Wf-g)
 if(BOT_SUPPORT)
 	set(QVM_C_FLAGS ${QVM_C_FLAGS} -DBOT_SUPPORT=1)
 endif()
-set(QVM_INCFLAGS -I${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+file(RELATIVE_PATH QVM_RELATIVE_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set(QVM_INCFLAGS "-I${QVM_RELATIVE_INCLUDE_DIR}")
 
 # Write first chunk of QVM_LIST_FILE.
 set(QVM_LIST_FILE "${CMAKE_CURRENT_BINARY_DIR}/game.q3asm")

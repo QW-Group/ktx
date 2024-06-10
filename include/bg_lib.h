@@ -76,3 +76,4 @@ double tan(double x);
 int abs(int n);
 double fabs(double x);
 double acos(double x);
+double fmod(double x, double y);

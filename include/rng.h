@@ -6,9 +6,9 @@
 #include "rng_gen_state.h"
 
 void rng_seed(RngState*, int seed);
-uint32_t rng_next(RngState*);
+unsigned int rng_next(RngState*);
 
 void rng_seed_global(int seed);
-uint32_t rng_next_global(void);
+unsigned int rng_next_global(void);
 
 #endif

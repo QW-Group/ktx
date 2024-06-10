@@ -11,7 +11,7 @@ worldwide. This software is distributed without any warranty.
 
 See <http://creativecommons.org/publicdomain/zero/1.0/>. */
 
-#include <stdint.h>
+#include "rng_seed_impl.h"
 
 /* This is a fixed-increment version of Java 8's SplittableRandom generator
    See http://dx.doi.org/10.1145/2714064.2660195 and
@@ -20,10 +20,24 @@ See <http://creativecommons.org/publicdomain/zero/1.0/>. */
    It is a very fast generator passing BigCrush, and it can be useful if
    for some reason you absolutely want 64 bits of state. */
 
-uint64_t rng_seed_impl_next(uint64_t* x) {
-	uint64_t z = (*x += 0x9e3779b97f4a7c15);
-	z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
-	z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
-	return z ^ (z >> 31);
+#ifdef Q3_VM
+# define C1 0x9e3779b9
+# define C2 0xbf58476d
+# define C3 0x94d049bb
+#else
+# define C1 0x9e3779b97f4a7c15
+# define C2 0xbf58476d1ce4e5b9
+# define C3 0x94d049bb133111eb
+#endif
+
+#define SHIFT1 (sizeof(rng_seed_t) == 8 ? 30 : 15)
+#define SHIFT2 (sizeof(rng_seed_t) == 8 ? 27 : 13)
+#define SHIFT3 (sizeof(rng_seed_t) == 8 ? 31 : 16)
+
+rng_seed_t rng_seed_impl_next(rng_seed_t* x) {
+	rng_seed_t z = (*x += C1);
+	z = (z ^ (z >> SHIFT1)) * C2;
+	z = (z ^ (z >> SHIFT2)) * C3;
+	return z ^ (z >> SHIFT3);
 }
 //// End imported code.

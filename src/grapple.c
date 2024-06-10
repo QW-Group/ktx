@@ -429,14 +429,16 @@ void GrappleService()
 // Called from weapons.c
 void GrappleThrow()
 {
+	float hasteMultiplier, throwSpeed;
+
 	if (self->hook_out || self->hook_reset_time > g_globalvars.time) // only throw once & wait for cooldown time to complete
 	{
 		return;
 	}
 
-	float hasteMultiplier =	(cvar("k_ctf_rune_power_hst") / 16) + 1;
+	hasteMultiplier =	(cvar("k_ctf_rune_power_hst") / 16) + 1;
 
-	float throwSpeed = NEW_THROW_SPEED;
+	throwSpeed = NEW_THROW_SPEED;
 
 	if (cvar("k_ctf_hookstyle") == 3)
 	{
