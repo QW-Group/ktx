@@ -47,7 +47,7 @@ for name in "${PLATFORMS[@]}"; do
 	mkdir -p "${P}"
 	case "${name}" in
 	"qvm" ) # Build QVM library.
-		cmake -B "${P}" -S . ${BOT_SUPPORT}
+		cmake -B "${P}" -S . ${BOT_SUPPORT} ${BUILD}
 		cmake --build "${P}" --target qvm ${V}
 	;;
 	* ) # Build native library.
