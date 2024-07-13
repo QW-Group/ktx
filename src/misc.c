@@ -810,7 +810,7 @@ void SP_ambient_general()
 
 	trap_precache_sound (self->noise);
 
-	switch ((int) ceilf(self->speed))
+	switch ((int) ceil((double) self->speed))
 	{
 		case 0:
 			self->speed = ATTN_NORM;

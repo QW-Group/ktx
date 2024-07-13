@@ -1,0 +1,212 @@
+name: main
+
+on: [ push, pull_request, workflow_dispatch ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [ linux-amd64, linux-i686, linux-armhf, linux-aarch64, windows-x64, windows-x86, qvm ]
+        include:
+          - target: linux-amd64
+            os: linux
+            arch: amd64
+            ext: ".so"
+            packages: [ ]
+          - target: linux-i686
+            os: linux
+            arch: i686
+            ext: ".so"
+            packages: [ "gcc-i686-linux-gnu" ]
+          - target: linux-armhf
+            os: linux
+            arch: armhf
+            ext: ".so"
+            packages: [ "gcc-arm-linux-gnueabihf", "libc6-dev-armhf-cross" ]
+          - target: linux-aarch64
+            os: linux
+            arch: aarch64
+            ext: ".so"
+            packages: [ "gcc-aarch64-linux-gnu", "libc6-dev-arm64-cross" ]
+          - target: windows-x64
+            os: windows
+            arch: x64
+            ext: ".dll"
+            packages: [ "gcc-mingw-w64-x86-64" ]
+          - target: windows-x86
+            os: windows
+            arch: x86
+            ext: ".dll"
+            packages: [ "gcc-mingw-w64-i686" ]
+          - target: qvm
+            os: linux
+            arch: qvm
+            ext: ".qvm"
+            packages: [ ]
+    container:
+      image: "debian:stable"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: ktx
+
+      - name: Prepare Build Environemnt
+        run: |
+          apt-get -qq update
+          apt-get -qq install build-essential cmake ninja-build ${{ join(matrix.packages, ' ') }}
+
+      - name: Get number of CPU cores
+        uses: SimenB/github-actions-cpu-cores@v2
+        id: cpu-cores
+        if: matrix.target == 'qvm'
+
+      - name: Checkout q3lcc
+        uses: actions/checkout@v4
+        with:
+          repository: ec-/q3lcc
+          path: q3lcc
+        if: matrix.target == 'qvm'
+
+      - name: Build q3lcc
+        run: |
+          make -j ${{ steps.cpu-cores.outputs.count }} PLATFORM=$(uname -s) ARCH=$(uname -m)
+          mv build*/q3lcc build*/q3rcc build*/q3cpp /usr/local/bin
+        working-directory: q3lcc
+        if: matrix.target == 'qvm'
+
+      - name: Build
+        run: |
+          ./build_cmake.sh ${{ matrix.target }}
+          mv build/*/qwprogs.* ..
+        working-directory: ktx
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qwprogs-${{ matrix.target }}
+          path: |
+            qwprogs.*
+          compression-level: 9
+
+  upload:
+    needs: build
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    if: github.repository == 'QW-Group/ktx' && ((github.event_name == 'push' && github.ref == 'refs/heads/master') || github.event_name == 'release')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: ktx
+
+      - name: Get release date
+        run: |
+          RELEASE_DATE=$(git log -1 --format=%cI "${{ github.ref_name }}")
+          echo "RELEASE_DATE=$RELEASE_DATE" >> $GITHUB_ENV
+        working-directory: ktx
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Collect GitHub release artifacts
+        run: |
+          dist_dir=$(pwd)/dist
+          mkdir $dist_dir
+          find qwprogs* -type f -exec sha256sum {} \; > "${dist_dir}/checksums.txt"
+
+          # Reset timestamp to time of tag
+          find qwprogs* -print0 | xargs -0r touch --date="${RELEASE_DATE}"
+          touch --date="${RELEASE_DATE}" "${dist_dir}/checksums.txt"
+
+          for target in qwprogs*; do
+            (cd $target; zip -o -9 "${dist_dir}/${target}.zip" *)
+          done
+          echo "GITHUB_ARTIFACTS=$dist_dir" >> $GITHUB_ENV
+        if: github.event_name == 'release'
+
+      - name: Attach artifacts to GitHub release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ env.GITHUB_ARTIFACTS }}/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: github.event_name == 'release'
+
+      - name: Prepare Upload Environemnt
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq --no-install-recommends install openssh-client
+
+      - name: Setup SSH
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        shell: bash
+        run: |
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add - <<< "${{ secrets.SSH_PRIVATE_KEY }}"
+
+      - name: Prepare upload to builds.quakeworld.nu
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        shell: bash
+        run: |
+          # Build file structure for uploading
+          # snapshots:
+          #  upload/snapshots/latest/$os/$arch/$filename
+          #  upload/snapshots/$os/$arch/$prefix_$filename
+          # releases:
+          #  upload/releases/latest/$os/$arch/$filename
+          #  upload/releases/$tag/$os/$arch/$filename
+          
+          upload_dir="$(pwd)/upload"
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            main_dir="${upload_dir}/releases/${{ github.ref_name }}"
+            latest_dir="${upload_dir}/releases/latest"
+            prefix=""
+          else
+            main_dir="${upload_dir}/snapshots"
+            latest_dir="${upload_dir}/snapshots/latest"
+            date=$(TZ="Europe/Amsterdam" date "+%Y%m%d-%H%M%S")
+            prefix="${date}_${GITHUB_SHA::7}_"
+          fi
+          
+          for target in qwprogs*; do
+            os_arch="${target#qwprogs-}"
+            os_arch_dir="${os_arch//-//}"
+            main_target_dir="${main_dir}/${os_arch_dir}"
+            latest_target_dir="${latest_dir}/${os_arch_dir}"
+            mkdir -p "${main_target_dir}" "${latest_target_dir}"
+            for src in $(find "${target}" -type f); do
+              filename=$(basename "${src}")
+              cp "${src}" "${main_target_dir}/${prefix}${filename}"
+              cp "${src}" "${latest_target_dir}/${filename}"
+            done
+            (cd "${main_target_dir}" && md5sum * > "${prefix}qwprogs.md5")
+            (cd "${latest_target_dir}" && md5sum * > "qwprogs.md5")
+          done
+
+          # Reset timestamp to time of tag
+          find "${upload_dir}" -print0 | xargs -0r touch --date="${RELEASE_DATE}"
+
+          echo "Artifacts to upload:"
+          find upload
+          echo
+
+      - name: Upload to builds.quakeworld.nu/ktx/snapshots
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        shell: bash
+        run: |
+          sftp -rp -o 'StrictHostKeyChecking no' -o 'UserKnownHostsFile /dev/null' -P ${{ secrets.SFTP_PORT }} ${{ secrets.SFTP_USERNAME }}@${{ secrets.SFTP_HOST }}:/snapshots <<< $'put -rp upload/snapshots/*'
+        if: github.event_name == 'push'
+
+      - name: Upload to builds.quakeworld.nu/ktx/releases
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        shell: bash
+        run: |
+          sftp -rp -o 'StrictHostKeyChecking no' -o 'UserKnownHostsFile /dev/null' -P ${{ secrets.SFTP_PORT }} ${{ secrets.SFTP_USERNAME }}@${{ secrets.SFTP_HOST }}:/releases <<< $'put -rp upload/releases/*'
+        if: github.event_name == 'release'

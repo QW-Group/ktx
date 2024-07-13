@@ -7,6 +7,7 @@
 // bg_lib.c -- standard C library replacement routines used by code
 // compiled for the virtual machine
 #include "q_shared.h"
+#include "rng.h"
 
 size_t strlen(const char *string)
 {
@@ -885,4 +886,18 @@ int snprintf(char *buffer, size_t count, char const *format, ...)
 	va_end(argptr);
 
 	return ret;
+}
+
+double fmod(double x, double y) {
+	double result = x;
+	if (y == 0.0) {
+		return 0.0 / 0.0; // Undefined
+	}
+	while (result >= y) {
+		result -= y;
+	}
+	while (result < 0) {
+		result += y;
+	}
+	return result;
 }

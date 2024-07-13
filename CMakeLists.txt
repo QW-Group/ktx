@@ -73,6 +73,7 @@ set(SRC_COMMON
 	"${DIR_SRC}/g_spawn.c"
 	"${DIR_SRC}/g_userinfo.c"
 	"${DIR_SRC}/g_utils.c"
+	"${DIR_SRC}/g_syscalls_extra.c"
 	"${DIR_SRC}/hiprot.c"
 	"${DIR_SRC}/hoonymode.c"
 	"${DIR_SRC}/items.c"
@@ -176,7 +177,7 @@ set(QVM_C_FLAGS -DQ3_VM -S -Wf-target=bytecode -Wf-g)
 if(BOT_SUPPORT)
 	set(QVM_C_FLAGS ${QVM_C_FLAGS} -DBOT_SUPPORT=1)
 endif()
-set(QVM_INCFLAGS -I${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(QVM_INCDIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 # Write first chunk of QVM_LIST_FILE.
 set(QVM_LIST_FILE "${CMAKE_CURRENT_BINARY_DIR}/game.q3asm")
@@ -188,9 +189,11 @@ foreach(file ${SRC_COMMON} ${SRC_VM})
 	string(CONCAT file_asm ${file_asm} ".asm") # Add asm extension.
 	list(APPEND SRC_ASM ${file_asm}) # Fill in SRC_ASM list. 
 	file(APPEND ${QVM_LIST_FILE} "${VM_DIR}/${file_asm}\n") # Continue generate QVM_LIST_FILE.
+	get_filename_component(src_dir ${file} DIRECTORY)
+	file(RELATIVE_PATH QVM_RELINCDIR "${CMAKE_CURRENT_SOURCE_DIR}/${src_dir}" "${QVM_INCDIR}")
 	# Add command to compile c to asm.
 	add_custom_target(${file_asm}
-		COMMAND ${QVM_COMPILER} ${QVM_C_FLAGS} ${QVM_INCFLAGS} "${CMAKE_CURRENT_SOURCE_DIR}/${file}" -o "${VM_DIR}/${file_asm}"
+		COMMAND ${QVM_COMPILER} ${QVM_C_FLAGS} -I${QVM_RELINCDIR} "${CMAKE_CURRENT_SOURCE_DIR}/${file}" -o "${VM_DIR}/${file_asm}"
 		DEPENDS vmdir
 		SOURCES ${file}
 	)
