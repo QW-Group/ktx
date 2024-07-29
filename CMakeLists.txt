@@ -160,6 +160,11 @@ else()
 		target_compile_options(${PROJECT_NAME} PRIVATE -Werror=strict-prototypes)
 	endif()
 
+	check_c_compiler_flag("-Wstrlcpy-strlcat-size" HAS_STRLCPY_STRLCAT_SIZE)
+	if (HAS_STRLCPY_STRLCAT_SIZE)
+		target_compile_options(${PROJECT_NAME} PRIVATE -Werror=strlcpy-strlcat-size)
+	endif()
+
 	# Do not allow undefined symbols while linking.
 	if(APPLE)
 		target_link_options(${PROJECT_NAME} PRIVATE "-Wl,-undefined,error")

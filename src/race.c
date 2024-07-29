@@ -3584,9 +3584,9 @@ void read_topscores(void)
 			race_fgets(line, MAX_TXTLEN);
 			race.records[cnt].time = atof(line);
 			race_fgets(line, MAX_TXTLEN);
-			strlcpy(race.records[cnt].racername, line, strlen(line));
+			strlcpy(race.records[cnt].racername, line, sizeof(race.records[cnt].racername));
 			race_fgets(line, MAX_TXTLEN);
-			strlcpy(race.records[cnt].demoname, line, strlen(line));
+			strlcpy(race.records[cnt].demoname, line, sizeof(race.records[cnt].demoname));
 			race_fgets(line, MAX_TXTLEN);
 			race.records[cnt].distance = atof(line);
 			race_fgets(line, MAX_TXTLEN);
@@ -3594,7 +3594,7 @@ void read_topscores(void)
 			race_fgets(line, MAX_TXTLEN);
 			race.records[cnt].avgspeed = atof(line);
 			race_fgets(line, MAX_TXTLEN);
-			strlcpy(race.records[cnt].date, line, strlen(line));
+			strlcpy(race.records[cnt].date, line, sizeof(race.records[cnt].date));
 			race_fgets(line, MAX_TXTLEN);
 			race.records[cnt].weaponmode = atoi(line);
 			race_fgets(line, MAX_TXTLEN);
