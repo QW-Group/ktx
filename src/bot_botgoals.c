@@ -23,7 +23,7 @@ qbool POVDMM4DontWalkThroughDoor(gedict_t *goal_entity);
 qbool DM6DoorLogic(gedict_t *self, gedict_t *goal_entity);
 
 void SUB_regen(void);
-void SUB_regen_powerups();
+void SUB_regen_powerups(void);
 
 qbool WaitingToRespawn(gedict_t *ent)
 {

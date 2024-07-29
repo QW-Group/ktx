@@ -113,7 +113,7 @@ static void safe_ent_remove(gedict_t *t)
 	ent_remove(t);
 }
 
-void SP_info_monster_start()
+void SP_info_monster_start(void)
 {
 	if (deathmatch)
 	{
@@ -638,7 +638,7 @@ void bloodfest_think(void)
 
 //============================================================================
 
-void MonsterDropPowerups()
+void MonsterDropPowerups(void)
 {
 	int i;
 
@@ -694,7 +694,7 @@ void MonsterDropPowerups()
  Using a monster makes it angry at the current activator
  ================
  */
-void monster_use()
+void monster_use(void)
 {
 	if (self->s.v.enemy)
 	{
@@ -735,7 +735,7 @@ void monster_use()
  enemy as activator.
  ================
  */
-void monster_death_use()
+void monster_death_use(void)
 {
 	if (!((int)self->s.v.flags & FL_MONSTER))
 	{
@@ -981,17 +981,17 @@ void monster_start_go(monsterType_t mt)
 	self->s.v.nextthink = g_globalvars.time + g_random() * 0.5;
 }
 
-void walkmonster_start_go()
+void walkmonster_start_go(void)
 {
 	monster_start_go(mtWalk);
 }
 
-void flymonster_start_go()
+void flymonster_start_go(void)
 {
 	monster_start_go(mtFly);
 }
 
-void swimmonster_start_go()
+void swimmonster_start_go(void)
 {
 	monster_start_go(mtSwim);
 }
@@ -1037,7 +1037,7 @@ void bloodfest_speedup_monster_spawn(void)
 	}
 
 	self->s.v.nextthink = g_globalvars.time;
-	((void (*)())(self->think))();
+	((void (*)(void))(self->think))();
 }
 
 void walkmonster_start(char *model)

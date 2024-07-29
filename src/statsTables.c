@@ -567,7 +567,7 @@ static void playerMidairKillStats(void)
 	}
 }
 
-static void topMidairStats()
+static void topMidairStats(void)
 {
 	gedict_t *p;
 	float f1;
@@ -781,7 +781,7 @@ static void topMidairStats()
 			"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n\n");
 }
 
-static void playerInstagibStats()
+static void playerInstagibStats(void)
 {
 	gedict_t *p;
 	gedict_t *p2;
@@ -838,7 +838,7 @@ static void playerInstagibStats()
 	}
 }
 
-static void playerInstagibKillStats()
+static void playerInstagibKillStats(void)
 {
 	gedict_t *p;
 	gedict_t *p2;
@@ -893,7 +893,7 @@ static void playerInstagibKillStats()
 	}
 }
 
-static void playerLGCStats()
+static void playerLGCStats(void)
 {
 	gedict_t *p;
 	gedict_t *p2;

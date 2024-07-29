@@ -39,11 +39,11 @@ typedef struct shared_edict_s
 } edict_t;
 
 struct gedict_s;
-typedef void (*th_die_funcref_t)();
+typedef void (*th_die_funcref_t)(void);
 typedef void (*th_pain_funcref_t)(struct gedict_s*, float);
 
 // { SP
-typedef void (*th_sp_funcref_t)();
+typedef void (*th_sp_funcref_t)(void);
 // }
 
 typedef enum
@@ -822,7 +822,7 @@ typedef struct gedict_s
 //
 	float cnt;								// misc flag
 
-	void (*think1)();						//calcmove
+	void (*think1)(void);						//calcmove
 	vec3_t finaldest;
 //combat
 	float dmg;

@@ -29,7 +29,7 @@ typedef struct fb_mapping_s
 
 fb_spawn_t* ItemSpawnFunction(int i);
 
-void InvalidMap()
+void InvalidMap(void)
 {
 	G_sprint(self, 2, "This map does not have bot-support.\n");
 }
@@ -226,7 +226,7 @@ static qbool ProcessedItem(gedict_t *item)
 	return (item->fb.fl_marker || item->fb.index);
 }
 
-static void CreateItemMarkers()
+static void CreateItemMarkers(void)
 {
 	// Old frogbot method was to call during item spawns, we just 
 	//    catch up afterwards once we know the map is valid

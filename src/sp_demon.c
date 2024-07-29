@@ -106,75 +106,75 @@ enum
 
 };
 
-void demon1_stand1();
-void demon1_stand2();
-void demon1_stand3();
-void demon1_stand4();
-void demon1_stand5();
-void demon1_stand6();
-void demon1_stand7();
-void demon1_stand8();
-void demon1_stand9();
-void demon1_stand10();
-void demon1_stand11();
-void demon1_stand12();
-void demon1_stand13();
-void demon1_walk1();
-void demon1_walk2();
-void demon1_walk3();
-void demon1_walk4();
-void demon1_walk5();
-void demon1_walk6();
-void demon1_walk7();
-void demon1_walk8();
-void demon1_run1();
-void demon1_run2();
-void demon1_run3();
-void demon1_run4();
-void demon1_run5();
-void demon1_run6();
-void demon1_jump1();
-void demon1_jump2();
-void demon1_jump3();
-void demon1_jump4();
-void demon1_jump5();
-void demon1_jump6();
-void demon1_jump7();
-void demon1_jump8();
-void demon1_jump9();
-void demon1_jump10();
-void demon1_jump11();
-void demon1_jump12();
-void demon1_atta1();
-void demon1_atta2();
-void demon1_atta3();
-void demon1_atta4();
-void demon1_atta5();
-void demon1_atta6();
-void demon1_atta7();
-void demon1_atta8();
-void demon1_atta9();
-void demon1_atta10();
-void demon1_atta11();
-void demon1_atta12();
-void demon1_atta13();
-void demon1_atta14();
-void demon1_atta15();
-void demon1_pain1();
-void demon1_pain2();
-void demon1_pain3();
-void demon1_pain4();
-void demon1_pain5();
-void demon1_pain6();
-void demon1_die1();
-void demon1_die2();
-void demon1_die3();
-void demon1_die4();
-void demon1_die5();
-void demon1_die6();
-void demon1_die7();
-void demon1_die8();
-void demon1_die9();
+void demon1_stand1(void);
+void demon1_stand2(void);
+void demon1_stand3(void);
+void demon1_stand4(void);
+void demon1_stand5(void);
+void demon1_stand6(void);
+void demon1_stand7(void);
+void demon1_stand8(void);
+void demon1_stand9(void);
+void demon1_stand10(void);
+void demon1_stand11(void);
+void demon1_stand12(void);
+void demon1_stand13(void);
+void demon1_walk1(void);
+void demon1_walk2(void);
+void demon1_walk3(void);
+void demon1_walk4(void);
+void demon1_walk5(void);
+void demon1_walk6(void);
+void demon1_walk7(void);
+void demon1_walk8(void);
+void demon1_run1(void);
+void demon1_run2(void);
+void demon1_run3(void);
+void demon1_run4(void);
+void demon1_run5(void);
+void demon1_run6(void);
+void demon1_jump1(void);
+void demon1_jump2(void);
+void demon1_jump3(void);
+void demon1_jump4(void);
+void demon1_jump5(void);
+void demon1_jump6(void);
+void demon1_jump7(void);
+void demon1_jump8(void);
+void demon1_jump9(void);
+void demon1_jump10(void);
+void demon1_jump11(void);
+void demon1_jump12(void);
+void demon1_atta1(void);
+void demon1_atta2(void);
+void demon1_atta3(void);
+void demon1_atta4(void);
+void demon1_atta5(void);
+void demon1_atta6(void);
+void demon1_atta7(void);
+void demon1_atta8(void);
+void demon1_atta9(void);
+void demon1_atta10(void);
+void demon1_atta11(void);
+void demon1_atta12(void);
+void demon1_atta13(void);
+void demon1_atta14(void);
+void demon1_atta15(void);
+void demon1_pain1(void);
+void demon1_pain2(void);
+void demon1_pain3(void);
+void demon1_pain4(void);
+void demon1_pain5(void);
+void demon1_pain6(void);
+void demon1_die1(void);
+void demon1_die2(void);
+void demon1_die3(void);
+void demon1_die4(void);
+void demon1_die5(void);
+void demon1_die6(void);
+void demon1_die7(void);
+void demon1_die8(void);
+void demon1_die9(void);
 
 //============================================================================
 
@@ -226,7 +226,7 @@ ANIM(demon1_run4, run4, demon1_run5; ai_run(20);)
 ANIM(demon1_run5, run5, demon1_run6; ai_run(15);)
 ANIM(demon1_run6, run6, demon1_run1; ai_run(36);)
 
-void Demon_JumpTouch()
+void Demon_JumpTouch(void)
 {
 	float ldmg;
 
@@ -389,7 +389,7 @@ ANIM(demon1_die7, death7, demon1_die8)
 ANIM(demon1_die8, death8, demon1_die9)
 ANIM(demon1_die9, death9, demon1_die9)
 
-void demon_die()
+void demon_die(void)
 {
 	// check for gib
 	if (self->s.v.health < -80)
@@ -418,7 +418,7 @@ void demon_die()
  Returns true if a melee attack would hit right now
  ==============
  */
-float CheckDemonMelee()
+float CheckDemonMelee(void)
 {
 	if (enemy_range == RANGE_MELEE)
 	{
@@ -437,7 +437,7 @@ float CheckDemonMelee()
 
  ==============
  */
-float CheckDemonJump()
+float CheckDemonJump(void)
 {
 	vec3_t dist;
 	float d;
@@ -479,7 +479,7 @@ float CheckDemonJump()
 	return true;
 }
 
-float DemonCheckAttack()
+float DemonCheckAttack(void)
 {
 	// if close enough for slashing, go for it
 	if (CheckDemonMelee())
@@ -504,7 +504,7 @@ float DemonCheckAttack()
 /*QUAKED monster_demon1 (1 0 0) (-32 -32 -24) (32 32 64) Ambush
 
  */
-void SP_monster_demon1()
+void SP_monster_demon1(void)
 {
 	if (!AllowMonster(self))
 	{

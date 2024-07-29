@@ -43,7 +43,7 @@
 /*QUAKED info_rotate (0 0.5 0) (-4 -4 -4) (4 4 4)
 Used as the point of rotation for rotatable objects.
 */
-void SP_info_rotate()
+void SP_info_rotate(void)
 {
 	// remove self after a little while, to make sure that entities that
 	// have targeted it have had a chance to spawn
@@ -51,7 +51,7 @@ void SP_info_rotate()
 	self->think = (func_t) SUB_Remove;
 }
 
-static void RotateTargets()
+static void RotateTargets(void)
 {
 	gedict_t *ent;
 	vec3_t vx, vy, vz, org;
@@ -93,7 +93,7 @@ static void RotateTargets()
 	}
 }
 
-static void RotateTargetsFinal()
+static void RotateTargetsFinal(void)
 {
 	gedict_t *ent;
 
@@ -109,7 +109,7 @@ static void RotateTargetsFinal()
 	}
 }
 
-static void SetTargetOrigin()
+static void SetTargetOrigin(void)
 {
 	gedict_t *ent;
 	vec3_t org;
@@ -133,7 +133,7 @@ static void SetTargetOrigin()
 	}
 }
 
-static void LinkRotateTargets()
+static void LinkRotateTargets(void)
 {
 	gedict_t *ent;
 	vec3_t tempvec;
@@ -218,7 +218,7 @@ static void SUB_NormalizeAngles(vec3_t v)
 	v[2] = (float) fmod(v[2], 360.0);
 }
 
-static void rotate_entity_think()
+static void rotate_entity_think(void)
 {
 	vec3_t delta;
 	float t;
@@ -259,7 +259,7 @@ static void rotate_entity_think()
 	self->s.v.nextthink = g_globalvars.time + 0.02f;
 }
 
-static void rotate_entity_use()
+static void rotate_entity_use(void)
 {
 	// change to alternate textures
 	self->s.v.frame = 1 - self->s.v.frame;
@@ -308,7 +308,7 @@ static void rotate_entity_use()
 	}
 }
 
-static void rotate_entity_firstthink()
+static void rotate_entity_firstthink(void)
 {
 	LinkRotateTargets();
 	if ((int) self->s.v.spawnflags & START_ON )
@@ -341,7 +341,7 @@ If "deathtype" is set with a string, this is the message that will appear when a
 "speed"	 is how long the entity takes to go from standing still to full speed and vice-versa.
 */
 
-void SP_func_rotate_entity()
+void SP_func_rotate_entity(void)
 {
 	self->s.v.solid = SOLID_NOT;
 	self->s.v.movetype = MOVETYPE_NONE;
@@ -386,7 +386,7 @@ void SP_func_rotate_entity()
  "noise1" contains the name of the sound to play when train moves.
  "event" is a target to trigger when train arrives at path_rotate.
 */
-void SP_path_rotate()
+void SP_path_rotate(void)
 {
 	if (self->noise)
 	{
@@ -399,10 +399,10 @@ void SP_path_rotate()
 }
 
 
-static void rotate_train_next();
-static void rotate_train_find();
+static void rotate_train_next(void);
+static void rotate_train_find(void);
 
-static void rotate_train_think()
+static void rotate_train_think(void)
 {
 	float t, timeelapsed;
 	vec3_t delta;
@@ -445,7 +445,7 @@ static void rotate_train_think()
 	self->s.v.nextthink = g_globalvars.time + 0.02f;
 }
 
-static void rotate_train_use()
+static void rotate_train_use(void)
 {
 	if (self->think1 != rotate_train_find)
 	{
@@ -460,7 +460,7 @@ static void rotate_train_use()
 	}
 }
 
-static void rotate_train_wait()
+static void rotate_train_wait(void)
 {
 	gedict_t *goalentity = PROG_TO_EDICT(self->s.v.goalentity);
 	self->state = STATE_WAIT;
@@ -486,7 +486,7 @@ static void rotate_train_wait()
 	self->think1 = rotate_train_next;
 }
 
-static void rotate_train_stop()
+static void rotate_train_stop(void)
 {
 	gedict_t *goalentity = PROG_TO_EDICT(self->s.v.goalentity);
 
@@ -514,7 +514,7 @@ static void rotate_train_stop()
 	self->think1 = rotate_train_next;
 }
 
-static void rotate_train_next()
+static void rotate_train_next(void)
 {
 	gedict_t *targ, *current, *goalentity;
 	vec3_t vdestdelta;
@@ -686,7 +686,7 @@ static void rotate_train_next()
 	}
 }
 
-static void rotate_train_find()
+static void rotate_train_find(void)
 {
 	gedict_t *targ;
 
@@ -761,7 +761,7 @@ sounds
 1) ratchet metal
 */
 
-void SP_func_rotate_train()
+void SP_func_rotate_train(void)
 {
 	if (!self->speed)
 	{
@@ -832,10 +832,10 @@ void SP_func_rotate_train()
 //
 //************************************************
 
-static void rotate_door_reversedirection();
-static void rotate_door_group_reversedirection();
+static void rotate_door_reversedirection(void);
+static void rotate_door_group_reversedirection(void);
 
-static void movewall_touch()
+static void movewall_touch(void)
 {
 	gedict_t *owner = PROG_TO_EDICT(self->s.v.owner);
 
@@ -856,7 +856,7 @@ static void movewall_touch()
 	}
 }
 
-static void movewall_blocked()
+static void movewall_blocked(void)
 {
 	gedict_t *owner = PROG_TO_EDICT(self->s.v.owner);
 	gedict_t *temp;
@@ -888,7 +888,7 @@ static void movewall_blocked()
 	}
 }
 
-static void movewall_think()
+static void movewall_think(void)
 {
 	self->s.v.ltime = g_globalvars.time;
 	self->s.v.nextthink = g_globalvars.time + 0.02f;
@@ -905,7 +905,7 @@ NONBLOCKING makes the brush non-solid.	This is useless if VISIBLE is set.
 
 "dmg" specifies the damage to cause when touched or blocked.
 */
-void SP_func_movewall()
+void SP_func_movewall(void)
 {
 	SetVector(self->s.v.angles, 0, 0, 0);
 	self->s.v.movetype = MOVETYPE_PUSH;
@@ -935,7 +935,7 @@ void SP_func_movewall()
 /*QUAKED rotate_object (0 .5 .8) ?
 This defines an object to be rotated.  Used as the target of func_rotate_door.
 */
-void SP_rotate_object()
+void SP_rotate_object(void)
 {
 	self->classname = "rotate_object";
 	self->s.v.solid = SOLID_NOT;
@@ -951,7 +951,7 @@ void SP_rotate_object()
 //
 //************************************************
 
-static void rotate_door_think2()
+static void rotate_door_think2(void)
 {
 	self->s.v.ltime = g_globalvars.time;
 
@@ -980,7 +980,7 @@ static void rotate_door_think2()
 	RotateTargetsFinal();
 }
 
-static void rotate_door_think()
+static void rotate_door_think(void)
 {
 	float t;
 	vec3_t delta;
@@ -1004,7 +1004,7 @@ static void rotate_door_think()
 	self->s.v.nextthink = g_globalvars.time + 0.01f;
 }
 
-static void rotate_door_reversedirection()
+static void rotate_door_reversedirection(void)
 {
 	vec3_t start;
 
@@ -1035,7 +1035,7 @@ static void rotate_door_reversedirection()
 	self->s.v.ltime = g_globalvars.time;
 }
 
-static void rotate_door_group_reversedirection()
+static void rotate_door_group_reversedirection(void)
 {
 	char *name;
 
@@ -1056,7 +1056,7 @@ static void rotate_door_group_reversedirection()
 	}
 }
 
-static void rotate_door_use()
+static void rotate_door_use(void)
 {
 	vec3_t start;
 
@@ -1114,7 +1114,7 @@ once door from closing again when it's blocked.
 3) base
 */
 
-void SP_func_rotate_door()
+void SP_func_rotate_door(void)
 {
 	if (strnull(self->target))
 	{

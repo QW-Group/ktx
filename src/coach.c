@@ -40,7 +40,7 @@ qbool is_coach(gedict_t *p)
 	return false;
 }
 
-void CancelCoaches()
+void CancelCoaches(void)
 {
 	gedict_t *p;
 
@@ -62,7 +62,7 @@ void CancelCoaches()
 	}
 }
 
-void ExitCoach()
+void ExitCoach(void)
 {
 	if (!coach_num(self))
 	{
@@ -82,7 +82,7 @@ void ExitCoach()
 	}
 }
 
-void VoteCoach()
+void VoteCoach(void)
 {
 	int till;
 	gedict_t *p, *electguard;

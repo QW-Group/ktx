@@ -89,66 +89,66 @@ enum
 
 };
 
-void wiz_stand1();
-void wiz_stand2();
-void wiz_stand3();
-void wiz_stand4();
-void wiz_stand5();
-void wiz_stand6();
-void wiz_stand7();
-void wiz_stand8();
-void wiz_walk1();
-void wiz_walk2();
-void wiz_walk3();
-void wiz_walk4();
-void wiz_walk5();
-void wiz_walk6();
-void wiz_walk7();
-void wiz_walk8();
-void wiz_side1();
-void wiz_side2();
-void wiz_side3();
-void wiz_side4();
-void wiz_side5();
-void wiz_side6();
-void wiz_side7();
-void wiz_side8();
-void wiz_run1();
-void wiz_run2();
-void wiz_run3();
-void wiz_run4();
-void wiz_run5();
-void wiz_run6();
-void wiz_run7();
-void wiz_run8();
-void wiz_run9();
-void wiz_run10();
-void wiz_run11();
-void wiz_run12();
-void wiz_run13();
-void wiz_run14();
-void wiz_fast1();
-void wiz_fast2();
-void wiz_fast3();
-void wiz_fast4();
-void wiz_fast5();
-void wiz_fast6();
-void wiz_fast7();
-void wiz_fast8();
-void wiz_fast9();
-void wiz_fast10();
-void wiz_pain1();
-void wiz_pain2();
-void wiz_pain3();
-void wiz_pain4();
-void wiz_death1();
-void wiz_death2();
-void wiz_death3();
-void wiz_death4();
-void wiz_death5();
-void wiz_death6();
-void wiz_death7();
-void wiz_death8();
+void wiz_stand1(void);
+void wiz_stand2(void);
+void wiz_stand3(void);
+void wiz_stand4(void);
+void wiz_stand5(void);
+void wiz_stand6(void);
+void wiz_stand7(void);
+void wiz_stand8(void);
+void wiz_walk1(void);
+void wiz_walk2(void);
+void wiz_walk3(void);
+void wiz_walk4(void);
+void wiz_walk5(void);
+void wiz_walk6(void);
+void wiz_walk7(void);
+void wiz_walk8(void);
+void wiz_side1(void);
+void wiz_side2(void);
+void wiz_side3(void);
+void wiz_side4(void);
+void wiz_side5(void);
+void wiz_side6(void);
+void wiz_side7(void);
+void wiz_side8(void);
+void wiz_run1(void);
+void wiz_run2(void);
+void wiz_run3(void);
+void wiz_run4(void);
+void wiz_run5(void);
+void wiz_run6(void);
+void wiz_run7(void);
+void wiz_run8(void);
+void wiz_run9(void);
+void wiz_run10(void);
+void wiz_run11(void);
+void wiz_run12(void);
+void wiz_run13(void);
+void wiz_run14(void);
+void wiz_fast1(void);
+void wiz_fast2(void);
+void wiz_fast3(void);
+void wiz_fast4(void);
+void wiz_fast5(void);
+void wiz_fast6(void);
+void wiz_fast7(void);
+void wiz_fast8(void);
+void wiz_fast9(void);
+void wiz_fast10(void);
+void wiz_pain1(void);
+void wiz_pain2(void);
+void wiz_pain3(void);
+void wiz_pain4(void);
+void wiz_death1(void);
+void wiz_death2(void);
+void wiz_death3(void);
+void wiz_death4(void);
+void wiz_death5(void);
+void wiz_death6(void);
+void wiz_death7(void);
+void wiz_death8(void);
 
 /*
  ==============================================================================
@@ -158,7 +158,7 @@ void wiz_death8();
  ==============================================================================
  */
 
-void Wiz_IdleSound()
+void Wiz_IdleSound(void)
 {
 	float wr = g_random() * 5;
 
@@ -218,7 +218,7 @@ ANIM(wiz_run12, fly12, wiz_run13; ai_run(16);)
 ANIM(wiz_run13, fly13, wiz_run14; ai_run(16);)
 ANIM(wiz_run14, fly14, wiz_run1; ai_run(16);)
 
-void Wiz_FastFire()
+void Wiz_FastFire(void)
 {
 	vec3_t vec;
 	vec3_t dst;
@@ -256,7 +256,7 @@ void Wiz_FastFire()
 	ent_remove(self);
 }
 
-void Wiz_StartFast()
+void Wiz_StartFast(void)
 {
 	gedict_t *missile;
 
@@ -294,7 +294,7 @@ void Wiz_StartFast()
 	VectorScale(g_globalvars.v_right, -1, missile->s.v.movedir);
 }
 
-void WizardAttackFinished()
+void WizardAttackFinished(void)
 {
 	if ((enemy_range >= RANGE_MID) || !enemy_vis)
 	{
@@ -355,7 +355,7 @@ ANIM(wiz_death6, death6, wiz_death7;)
 ANIM(wiz_death7, death7, wiz_death8;)
 ANIM(wiz_death8, death8, wiz_death8;)
 
-void wiz_die()
+void wiz_die(void)
 {
 	// check for gib
 	if (self->s.v.health < -40)
@@ -381,7 +381,7 @@ void wiz_die()
  WizardCheckAttack
  =================
  */
-float WizardCheckAttack()
+float WizardCheckAttack(void)
 {
 	vec3_t spot1, spot2;
 	gedict_t *targ;
@@ -478,7 +478,7 @@ float WizardCheckAttack()
 
 /*QUAKED monster_wizard (1 0 0) (-16 -16 -24) (16 16 40) Ambush
  */
-void SP_monster_wizard()
+void SP_monster_wizard(void)
 {
 	if (!AllowMonster(self))
 	{

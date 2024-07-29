@@ -184,10 +184,10 @@ field_t fields[] =
 typedef struct
 {
 	char *name;
-	void (*spawn)();
+	void (*spawn)(void);
 } spawn_t;
 
-void SUB_Remove()
+void SUB_Remove(void)
 {
 //	if (self && self->classname )
 //		G_bprint(2, "rm: %s\n", self->classname);
@@ -213,138 +213,138 @@ void SUB_RM_01(gedict_t *ent)
 	}
 }
 
-void SUB_Null()
+void SUB_Null(void)
 {
 }
 
-void SP_light();
-void SP_light_fluoro();
-void SP_light_fluorospark();
-void SP_light_globe();
-void SP_light_torch_small_walltorch();
-void SP_light_flame_large_yellow();
-void SP_light_flame_small_yellow();
-void SP_light_flame_small_white();
+void SP_light(void);
+void SP_light_fluoro(void);
+void SP_light_fluorospark(void);
+void SP_light_globe(void);
+void SP_light_torch_small_walltorch(void);
+void SP_light_flame_large_yellow(void);
+void SP_light_flame_small_yellow(void);
+void SP_light_flame_small_white(void);
 
-void SP_ambient_suck_wind();
-void SP_ambient_drone();
-void SP_ambient_flouro_buzz();
-void SP_ambient_drip();
-void SP_ambient_comp_hum();
-void SP_ambient_thunder();
-void SP_ambient_light_buzz();
-void SP_ambient_swamp1();
-void SP_ambient_swamp2();
-void SP_misc_noisemaker();
-void SP_misc_explobox();
-void SP_misc_explobox2();
-void SP_air_bubbles();
+void SP_ambient_suck_wind(void);
+void SP_ambient_drone(void);
+void SP_ambient_flouro_buzz(void);
+void SP_ambient_drip(void);
+void SP_ambient_comp_hum(void);
+void SP_ambient_thunder(void);
+void SP_ambient_light_buzz(void);
+void SP_ambient_swamp1(void);
+void SP_ambient_swamp2(void);
+void SP_misc_noisemaker(void);
+void SP_misc_explobox(void);
+void SP_misc_explobox2(void);
+void SP_air_bubbles(void);
 
-void SP_trap_spikeshooter();
-void SP_trap_shooter();
-void SP_func_wall();
-void SP_func_ctf_wall();
-void SP_func_illusionary();
-void SP_func_episodegate();
-void SP_func_bossgate();
+void SP_trap_spikeshooter(void);
+void SP_trap_shooter(void);
+void SP_func_wall(void);
+void SP_func_ctf_wall(void);
+void SP_func_illusionary(void);
+void SP_func_episodegate(void);
+void SP_func_bossgate(void);
 
-void SP_func_door();
-void SP_func_door_secret();
-void SP_func_plat();
-void SP_func_train();
-void SP_misc_teleporttrain();
-void SP_func_button();
+void SP_func_door(void);
+void SP_func_door_secret(void);
+void SP_func_plat(void);
+void SP_func_train(void);
+void SP_misc_teleporttrain(void);
+void SP_func_button(void);
 
-void SP_func_bob();
-void SP_func_laser();
+void SP_func_bob(void);
+void SP_func_laser(void);
 
-void SP_trigger_multiple();
-void SP_trigger_once();
-void SP_trigger_relay();
-void SP_trigger_secret();
-void SP_trigger_counter();
-void SP_info_teleport_destination();
-void SP_trigger_teleport();
-void SP_trigger_custom_teleport();
-void SP_trigger_setskill();
-void SP_trigger_onlyregistered();
-void SP_trigger_hurt();
-void SP_trigger_push();
-void SP_trigger_custom_push();
-void SP_trigger_monsterjump();
-void SP_trigger_custom_monsterjump();
-void SP_trigger_changelevel();
-void SP_path_corner();
+void SP_trigger_multiple(void);
+void SP_trigger_once(void);
+void SP_trigger_relay(void);
+void SP_trigger_secret(void);
+void SP_trigger_counter(void);
+void SP_info_teleport_destination(void);
+void SP_trigger_teleport(void);
+void SP_trigger_custom_teleport(void);
+void SP_trigger_setskill(void);
+void SP_trigger_onlyregistered(void);
+void SP_trigger_hurt(void);
+void SP_trigger_push(void);
+void SP_trigger_custom_push(void);
+void SP_trigger_monsterjump(void);
+void SP_trigger_custom_monsterjump(void);
+void SP_trigger_changelevel(void);
+void SP_path_corner(void);
 
-void SP_item_health();
-void SP_item_armor1();
-void SP_item_armor2();
-void SP_item_armorInv();
-void SP_weapon_supershotgun();
-void SP_weapon_nailgun();
-void SP_weapon_supernailgun();
-void SP_weapon_grenadelauncher();
-void SP_weapon_rocketlauncher();
-void SP_weapon_lightning();
-void SP_item_shells();
-void SP_item_spikes();
-void SP_item_rockets();
-void SP_item_cells();
-void SP_item_weapon();
+void SP_item_health(void);
+void SP_item_armor1(void);
+void SP_item_armor2(void);
+void SP_item_armorInv(void);
+void SP_weapon_supershotgun(void);
+void SP_weapon_nailgun(void);
+void SP_weapon_supernailgun(void);
+void SP_weapon_grenadelauncher(void);
+void SP_weapon_rocketlauncher(void);
+void SP_weapon_lightning(void);
+void SP_item_shells(void);
+void SP_item_spikes(void);
+void SP_item_rockets(void);
+void SP_item_cells(void);
+void SP_item_weapon(void);
 
-void SP_item_artifact_invulnerability();
-void SP_item_artifact_envirosuit();
-void SP_item_artifact_invisibility();
-void SP_item_artifact_super_damage();
-void SP_item_flag_team1();
-void SP_item_flag_team2();
-void SP_item_sigil();
-void SP_item_key1();
-void SP_item_key2();
+void SP_item_artifact_invulnerability(void);
+void SP_item_artifact_envirosuit(void);
+void SP_item_artifact_invisibility(void);
+void SP_item_artifact_super_damage(void);
+void SP_item_flag_team1(void);
+void SP_item_flag_team2(void);
+void SP_item_sigil(void);
+void SP_item_key1(void);
+void SP_item_key2(void);
 
-void SP_misc_fireball();
-void SP_info_intermission();
-void SP_info_player_deathmatch();
+void SP_misc_fireball(void);
+void SP_info_intermission(void);
+void SP_info_player_deathmatch(void);
 
-void SP_monster_dog();
-void SP_monster_demon1();
-void SP_monster_enforcer();
-void SP_monster_fish();
-void SP_monster_hell_knight();
-void SP_monster_knight();
-void SP_monster_ogre();
-void SP_monster_shalrath();
-void SP_monster_shambler();
-void SP_monster_army();
-void SP_monster_tarbaby();
-void SP_monster_wizard();
-void SP_monster_zombie();
-void SP_monster_boss();
-void SP_monster_oldone();
-void SP_event_lightning();
+void SP_monster_dog(void);
+void SP_monster_demon1(void);
+void SP_monster_enforcer(void);
+void SP_monster_fish(void);
+void SP_monster_hell_knight(void);
+void SP_monster_knight(void);
+void SP_monster_ogre(void);
+void SP_monster_shalrath(void);
+void SP_monster_shambler(void);
+void SP_monster_army(void);
+void SP_monster_tarbaby(void);
+void SP_monster_wizard(void);
+void SP_monster_zombie(void);
+void SP_monster_boss(void);
+void SP_monster_oldone(void);
+void SP_event_lightning(void);
 
-void SP_info_monster_start();
+void SP_info_monster_start(void);
 
 // TF
-void SP_item_tfgoal();
-void SP_info_player_teamspawn();
-void SP_i_p_t();
+void SP_item_tfgoal(void);
+void SP_info_player_teamspawn(void);
+void SP_i_p_t(void);
 
 // Races
-void SP_race_route_start();
+void SP_race_route_start(void);
 
 // Rotate
-void SP_info_rotate();
-void SP_path_rotate();
-void SP_func_rotate_entity();
-void SP_func_rotate_train();
-void SP_func_movewall();
-void SP_rotate_object();
-void SP_func_rotate_door();
+void SP_info_rotate(void);
+void SP_path_rotate(void);
+void SP_func_rotate_entity(void);
+void SP_func_rotate_train(void);
+void SP_func_movewall(void);
+void SP_rotate_object(void);
+void SP_func_rotate_door(void);
 
-void SP_ambient_general();
+void SP_ambient_general(void);
 
-void SP_trigger_heal();
+void SP_trigger_heal(void);
 
 spawn_t spawns[] =
 {
@@ -813,7 +813,7 @@ qbool G_ParseSpawnVars(void)
 	return true;
 }
 
-void SP_worldspawn();
+void SP_worldspawn(void);
 
 /*
  ==============

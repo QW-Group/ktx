@@ -30,7 +30,7 @@
 
 static int turn_number;
 
-void CancelCaptains();
+void CancelCaptains(void);
 
 int capt_num(gedict_t *p)
 {
@@ -70,7 +70,7 @@ void SetPlayerParams(gedict_t *p, gedict_t *cap)
 	p->k_picked = capt_num(cap);
 }
 
-void PrintCaptainInTurn()
+void PrintCaptainInTurn(void)
 {
 	gedict_t *p;
 
@@ -90,7 +90,7 @@ void PrintCaptainInTurn()
 	}
 }
 
-void CancelCaptains()
+void CancelCaptains(void)
 {
 	gedict_t *p;
 
@@ -112,7 +112,7 @@ void CancelCaptains()
 	}
 }
 
-void CheckFinishCaptain()
+void CheckFinishCaptain(void)
 {
 	int pl_free = 0;
 	gedict_t *p, *lastone = NULL;
@@ -153,7 +153,7 @@ void CheckFinishCaptain()
 	}
 }
 
-void CaptainPickPlayer()
+void CaptainPickPlayer(void)
 {
 	gedict_t *p;
 
@@ -186,7 +186,7 @@ void CaptainPickPlayer()
 	}
 }
 
-void ExitCaptain()
+void ExitCaptain(void)
 {
 	gedict_t *p;
 
@@ -215,7 +215,7 @@ void ExitCaptain()
 	G_bprint(2, "%s captain present\n", (floor(k_captains) ? "\x90\x31\x91" : redtext("No")));
 }
 
-void VoteCaptain()
+void VoteCaptain(void)
 {
 	int till;
 	gedict_t *p, *electguard;
@@ -357,7 +357,7 @@ void VoteCaptain()
 	electguard->s.v.nextthink = g_globalvars.time + 60;
 }
 
-void BeginPicking()
+void BeginPicking(void)
 {
 	gedict_t *p;
 	int num;

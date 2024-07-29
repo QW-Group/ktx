@@ -210,178 +210,178 @@ enum
 
 };
 
-void hknight_stand1();
-void hknight_stand2();
-void hknight_stand3();
-void hknight_stand4();
-void hknight_stand5();
-void hknight_stand6();
-void hknight_stand7();
-void hknight_stand8();
-void hknight_stand9();
-void hknight_walk1();
-void hknight_walk2();
-void hknight_walk3();
-void hknight_walk4();
-void hknight_walk5();
-void hknight_walk6();
-void hknight_walk7();
-void hknight_walk8();
-void hknight_walk9();
-void hknight_walk10();
-void hknight_walk11();
-void hknight_walk12();
-void hknight_walk13();
-void hknight_walk14();
-void hknight_walk15();
-void hknight_walk16();
-void hknight_walk17();
-void hknight_walk18();
-void hknight_walk19();
-void hknight_walk20();
-void hknight_run1();
-void hknight_run2();
-void hknight_run3();
-void hknight_run4();
-void hknight_run5();
-void hknight_run6();
-void hknight_run7();
-void hknight_run8();
-void hknight_pain1();
-void hknight_pain2();
-void hknight_pain3();
-void hknight_pain4();
-void hknight_pain5();
-void hknight_die1();
-void hknight_die2();
-void hknight_die3();
-void hknight_die4();
-void hknight_die5();
-void hknight_die6();
-void hknight_die7();
-void hknight_die8();
-void hknight_die9();
-void hknight_die10();
-void hknight_die11();
-void hknight_die12();
-void hknight_dieb1();
-void hknight_dieb2();
-void hknight_dieb3();
-void hknight_dieb4();
-void hknight_dieb5();
-void hknight_dieb6();
-void hknight_dieb7();
-void hknight_dieb8();
-void hknight_dieb9();
-void hknight_magica1();
-void hknight_magica2();
-void hknight_magica3();
-void hknight_magica4();
-void hknight_magica5();
-void hknight_magica6();
-void hknight_magica7();
-void hknight_magica8();
-void hknight_magica9();
-void hknight_magica10();
-void hknight_magica11();
-void hknight_magica12();
-void hknight_magica13();
-void hknight_magica14();
-void hknight_magicb1();
-void hknight_magicb2();
-void hknight_magicb3();
-void hknight_magicb4();
-void hknight_magicb5();
-void hknight_magicb6();
-void hknight_magicb7();
-void hknight_magicb8();
-void hknight_magicb9();
-void hknight_magicb10();
-void hknight_magicb11();
-void hknight_magicb12();
-void hknight_magicb13();
-void hknight_magicc1();
-void hknight_magicc2();
-void hknight_magicc3();
-void hknight_magicc4();
-void hknight_magicc5();
-void hknight_magicc6();
-void hknight_magicc7();
-void hknight_magicc8();
-void hknight_magicc9();
-void hknight_magicc10();
-void hknight_magicc11();
-void hknight_char_a1();
-void hknight_char_a2();
-void hknight_char_a3();
-void hknight_char_a4();
-void hknight_char_a5();
-void hknight_char_a6();
-void hknight_char_a7();
-void hknight_char_a8();
-void hknight_char_a9();
-void hknight_char_a10();
-void hknight_char_a11();
-void hknight_char_a12();
-void hknight_char_a13();
-void hknight_char_a14();
-void hknight_char_a15();
-void hknight_char_a16();
-void hknight_char_b1();
-void hknight_char_b2();
-void hknight_char_b3();
-void hknight_char_b4();
-void hknight_char_b5();
-void hknight_char_b6();
-void hknight_slice1();
-void hknight_slice2();
-void hknight_slice3();
-void hknight_slice4();
-void hknight_slice5();
-void hknight_slice6();
-void hknight_slice7();
-void hknight_slice8();
-void hknight_slice9();
-void hknight_slice10();
-void hknight_smash1();
-void hknight_smash2();
-void hknight_smash3();
-void hknight_smash4();
-void hknight_smash5();
-void hknight_smash6();
-void hknight_smash7();
-void hknight_smash8();
-void hknight_smash9();
-void hknight_smash10();
-void hknight_smash11();
-void hknight_watk1();
-void hknight_watk2();
-void hknight_watk3();
-void hknight_watk4();
-void hknight_watk5();
-void hknight_watk6();
-void hknight_watk7();
-void hknight_watk8();
-void hknight_watk9();
-void hknight_watk10();
-void hknight_watk11();
-void hknight_watk12();
-void hknight_watk13();
-void hknight_watk14();
-void hknight_watk15();
-void hknight_watk16();
-void hknight_watk17();
-void hknight_watk18();
-void hknight_watk19();
-void hknight_watk20();
-void hknight_watk21();
-void hknight_watk22();
+void hknight_stand1(void);
+void hknight_stand2(void);
+void hknight_stand3(void);
+void hknight_stand4(void);
+void hknight_stand5(void);
+void hknight_stand6(void);
+void hknight_stand7(void);
+void hknight_stand8(void);
+void hknight_stand9(void);
+void hknight_walk1(void);
+void hknight_walk2(void);
+void hknight_walk3(void);
+void hknight_walk4(void);
+void hknight_walk5(void);
+void hknight_walk6(void);
+void hknight_walk7(void);
+void hknight_walk8(void);
+void hknight_walk9(void);
+void hknight_walk10(void);
+void hknight_walk11(void);
+void hknight_walk12(void);
+void hknight_walk13(void);
+void hknight_walk14(void);
+void hknight_walk15(void);
+void hknight_walk16(void);
+void hknight_walk17(void);
+void hknight_walk18(void);
+void hknight_walk19(void);
+void hknight_walk20(void);
+void hknight_run1(void);
+void hknight_run2(void);
+void hknight_run3(void);
+void hknight_run4(void);
+void hknight_run5(void);
+void hknight_run6(void);
+void hknight_run7(void);
+void hknight_run8(void);
+void hknight_pain1(void);
+void hknight_pain2(void);
+void hknight_pain3(void);
+void hknight_pain4(void);
+void hknight_pain5(void);
+void hknight_die1(void);
+void hknight_die2(void);
+void hknight_die3(void);
+void hknight_die4(void);
+void hknight_die5(void);
+void hknight_die6(void);
+void hknight_die7(void);
+void hknight_die8(void);
+void hknight_die9(void);
+void hknight_die10(void);
+void hknight_die11(void);
+void hknight_die12(void);
+void hknight_dieb1(void);
+void hknight_dieb2(void);
+void hknight_dieb3(void);
+void hknight_dieb4(void);
+void hknight_dieb5(void);
+void hknight_dieb6(void);
+void hknight_dieb7(void);
+void hknight_dieb8(void);
+void hknight_dieb9(void);
+void hknight_magica1(void);
+void hknight_magica2(void);
+void hknight_magica3(void);
+void hknight_magica4(void);
+void hknight_magica5(void);
+void hknight_magica6(void);
+void hknight_magica7(void);
+void hknight_magica8(void);
+void hknight_magica9(void);
+void hknight_magica10(void);
+void hknight_magica11(void);
+void hknight_magica12(void);
+void hknight_magica13(void);
+void hknight_magica14(void);
+void hknight_magicb1(void);
+void hknight_magicb2(void);
+void hknight_magicb3(void);
+void hknight_magicb4(void);
+void hknight_magicb5(void);
+void hknight_magicb6(void);
+void hknight_magicb7(void);
+void hknight_magicb8(void);
+void hknight_magicb9(void);
+void hknight_magicb10(void);
+void hknight_magicb11(void);
+void hknight_magicb12(void);
+void hknight_magicb13(void);
+void hknight_magicc1(void);
+void hknight_magicc2(void);
+void hknight_magicc3(void);
+void hknight_magicc4(void);
+void hknight_magicc5(void);
+void hknight_magicc6(void);
+void hknight_magicc7(void);
+void hknight_magicc8(void);
+void hknight_magicc9(void);
+void hknight_magicc10(void);
+void hknight_magicc11(void);
+void hknight_char_a1(void);
+void hknight_char_a2(void);
+void hknight_char_a3(void);
+void hknight_char_a4(void);
+void hknight_char_a5(void);
+void hknight_char_a6(void);
+void hknight_char_a7(void);
+void hknight_char_a8(void);
+void hknight_char_a9(void);
+void hknight_char_a10(void);
+void hknight_char_a11(void);
+void hknight_char_a12(void);
+void hknight_char_a13(void);
+void hknight_char_a14(void);
+void hknight_char_a15(void);
+void hknight_char_a16(void);
+void hknight_char_b1(void);
+void hknight_char_b2(void);
+void hknight_char_b3(void);
+void hknight_char_b4(void);
+void hknight_char_b5(void);
+void hknight_char_b6(void);
+void hknight_slice1(void);
+void hknight_slice2(void);
+void hknight_slice3(void);
+void hknight_slice4(void);
+void hknight_slice5(void);
+void hknight_slice6(void);
+void hknight_slice7(void);
+void hknight_slice8(void);
+void hknight_slice9(void);
+void hknight_slice10(void);
+void hknight_smash1(void);
+void hknight_smash2(void);
+void hknight_smash3(void);
+void hknight_smash4(void);
+void hknight_smash5(void);
+void hknight_smash6(void);
+void hknight_smash7(void);
+void hknight_smash8(void);
+void hknight_smash9(void);
+void hknight_smash10(void);
+void hknight_smash11(void);
+void hknight_watk1(void);
+void hknight_watk2(void);
+void hknight_watk3(void);
+void hknight_watk4(void);
+void hknight_watk5(void);
+void hknight_watk6(void);
+void hknight_watk7(void);
+void hknight_watk8(void);
+void hknight_watk9(void);
+void hknight_watk10(void);
+void hknight_watk11(void);
+void hknight_watk12(void);
+void hknight_watk13(void);
+void hknight_watk14(void);
+void hknight_watk15(void);
+void hknight_watk16(void);
+void hknight_watk17(void);
+void hknight_watk18(void);
+void hknight_watk19(void);
+void hknight_watk20(void);
+void hknight_watk21(void);
+void hknight_watk22(void);
 
 //===========================================================================
 
 // used by both walk and run
 
-void hk_idle_sound()
+void hk_idle_sound(void)
 {
 	if (g_random() < 0.2)
 		sound(self, CHAN_VOICE, "hknight/idle.wav", 1, ATTN_NORM);
@@ -431,7 +431,7 @@ ANIM(hknight_walk20, walk20, hknight_walk1; ai_walk(2);)
 
 //===========================================================================
 
-void CheckForCharge()
+void CheckForCharge(void)
 {
 	vec3_t delta;
 
@@ -544,7 +544,7 @@ ANIM(hknight_dieb7, deathb7, hknight_dieb8;)
 ANIM(hknight_dieb8, deathb8, hknight_dieb9;)
 ANIM(hknight_dieb9, deathb9, hknight_dieb9;)
 
-void hknight_die()
+void hknight_die(void)
 {
 	// check for gib
 	if (self->s.v.health < -40)
@@ -665,7 +665,7 @@ ANIM(hknight_char_a14, char_a14, hknight_char_a15; ai_charge(25);)
 ANIM(hknight_char_a15, char_a15, hknight_char_a16; ai_charge(21);)
 ANIM(hknight_char_a16, char_a16, hknight_run1; ai_charge(13);)
 
-void CheckContinueCharge()
+void CheckContinueCharge(void)
 {
 	if (g_globalvars.time > self->attack_finished)
 	{
@@ -742,7 +742,7 @@ ANIM(hknight_watk22, w_attack22, hknight_run1; ai_charge(3);)
 
 static int hknight_type; // FIXME; may be made it per one knight, but not shared for all knights right it now?
 
-void hknight_melee()
+void hknight_melee(void)
 {
 	hknight_type++;
 	hknight_type %= 3;
@@ -769,7 +769,7 @@ void hknight_melee()
 
 /*QUAKED monster_hell_knight (1 0 0) (-16 -16 -24) (16 16 40) Ambush
  */
-void SP_monster_hell_knight()
+void SP_monster_hell_knight(void)
 {
 	if (!AllowMonster(self))
 	{

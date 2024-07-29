@@ -244,7 +244,7 @@ float g_random(void);
 float crandom(void);
 int i_rnd(int from, int to);
 float dist_random(float minValue, float maxValue, float spreadFactor);
-float next_frame();
+float next_frame(void);
 gedict_t* spawn(void);
 void ent_remove(gedict_t *t);
 void soft_ent_remove(gedict_t *ent);
@@ -299,7 +299,7 @@ void setsize(gedict_t *ed, float min_x, float min_y, float min_z, float max_x, f
 				float max_z);
 void setmodel(gedict_t *ed, char *model);
 void sound(gedict_t *ed, int channel, char *samp, float vol, float att);
-gedict_t* checkclient();
+gedict_t* checkclient(void);
 void traceline(float v1_x, float v1_y, float v1_z, float v2_x, float v2_y, float v2_z, int nomonst,
 				gedict_t *ed);
 void TraceCapsule(float v1_x, float v1_y, float v1_z, float v2_x, float v2_y, float v2_z,
@@ -370,19 +370,19 @@ char* armor_type(int items);
 
 qbool isghost(gedict_t *ed);
 
-qbool isDuel();
-qbool isTeam();
-qbool isFFA();
-qbool isCTF();
-qbool isUnknown();
-int tp_num();
+qbool isDuel(void);
+qbool isTeam(void);
+qbool isFFA(void);
+qbool isCTF(void);
+qbool isUnknown(void);
+int tp_num(void);
 int GetUserID(gedict_t *p);
 char* TrackWhom(gedict_t *p);
 int GetHandicap(gedict_t *p);
 qbool SetHandicap(gedict_t *p, int nhdc);
 void changelevel(const char *name);
 char* Get_PowerupsStr(void);
-int Get_Powerups();
+int Get_Powerups(void);
 
 char* count_s(int cnt);
 char* Enables(float f);
@@ -391,15 +391,15 @@ char* Allows(float f);
 char* Allowed(float f);
 char* OnOff(float f);
 
-int get_scores1();
-int get_scores2();
-int get_scores3();
-gedict_t* get_ed_scores1();
-gedict_t* get_ed_scores2();
+int get_scores1(void);
+int get_scores2(void);
+int get_scores3(void);
+gedict_t* get_ed_scores1(void);
+gedict_t* get_ed_scores2(void);
 
-gedict_t* get_ed_best1();
-gedict_t* get_ed_best2();
-gedict_t* get_ed_bestPow();
+gedict_t* get_ed_best1(void);
+gedict_t* get_ed_best2(void);
+gedict_t* get_ed_bestPow(void);
 
 char* str_noweapon(int k_disallow_weapons);
 
@@ -408,12 +408,12 @@ void cvar_toggle_msg(gedict_t *p, char *cvarName, char *msg);
 qbool can_exec(char *name);
 
 void ghostClearScores(gedict_t *g);
-void update_ghosts();
+void update_ghosts(void);
 
 // { events
 
-void on_enter();
-void on_connect();
+void on_enter(void);
+void on_connect(void);
 void on_match_start(gedict_t *p);
 void on_match_end(gedict_t *p);
 void on_match_break(gedict_t *p);
@@ -426,7 +426,7 @@ void info_kf_update(gedict_t *p, char *from, char *to);
 // }
 
 void cl_refresh_plus_scores(gedict_t *p);
-void refresh_plus_scores();
+void refresh_plus_scores(void);
 
 void disableupdates(gedict_t *ed, float time);
 
@@ -434,13 +434,13 @@ int only_digits(const char *s);
 
 char* params_str(int from, int to);
 
-char* SD_type_str(); // sudden death type string
+char* SD_type_str(void); // sudden death type string
 
 char* respawn_model_name(int mdl_num);
 char* respawn_model_name_short(int mdl_num);
 
-int get_fair_pack();
-int get_fallbunny();
+int get_fair_pack(void);
+int get_fallbunny(void);
 
 void remove_projectiles(void);
 
@@ -461,11 +461,11 @@ char* make_dots(char *dots, size_t dots_len, int cmd_max_len, char *cmd);
 
 //
 // subs.c
-void SUB_CalcMove(vec3_t tdest, float tspeed, void (*func)());
-void SUB_CalcMoveEnt(gedict_t *ent, vec3_t tdest, float tspeed, void (*func)());
-void SUB_UseTargets();
-void SetMovedir();
-void InitTrigger();
+void SUB_CalcMove(vec3_t tdest, float tspeed, void (*func)(void));
+void SUB_CalcMoveEnt(gedict_t *ent, vec3_t tdest, float tspeed, void (*func)(void));
+void SUB_UseTargets(void);
+void SetMovedir(void);
+void InitTrigger(void);
 extern gedict_t *activator;
 
 //
@@ -480,13 +480,13 @@ qbool G_SpawnString(const char *key, const char *defaultString, char **out);
 qbool G_SpawnFloat(const char *key, const char *defaultString, float *out);
 qbool G_SpawnInt(const char *key, const char *defaultString, int *out);
 qbool G_SpawnVector(const char *key, const char *defaultString, float *out);
-void SUB_Remove();
+void SUB_Remove(void);
 void SUB_RM_01(gedict_t *ent);
-void SUB_Null();
+void SUB_Null(void);
 
 //world.c
 void CopyToBodyQue(gedict_t *ent);
-void ClearBodyQue();
+void ClearBodyQue(void);
 
 // client.c
 extern vec3_t VEC_ORIGIN;
@@ -500,31 +500,31 @@ extern gedict_t *intermission_spot;
 extern int modelindex_eyes, modelindex_player;
 
 void set_nextmap(char *map);
-void GotoNextMap();
+void GotoNextMap(void);
 
 qbool CheckRate(gedict_t *p, char *newrate);
 
-int tiecount();
+int tiecount(void);
 void Check_SD(gedict_t *p);
 
-void SetChangeParms();
-void SetNewParms();
-void ClientConnect();
+void SetChangeParms(void);
+void SetNewParms(void);
+void ClientConnect(void);
 void k_respawn(gedict_t *p, qbool body);
 void PutClientInServer(void);
-void ClientDisconnect();
-void PlayerPreThink();
-void BothPostThink(); // <- called for player and spec
-void PlayerPostThink();
-void SuperDamageSound();
+void ClientDisconnect(void);
+void PlayerPreThink(void);
+void BothPostThink(void); // <- called for player and spec
+void PlayerPostThink(void);
 qbool PlayerCanPause(gedict_t *p);
+void SuperDamageSound(void);
 
 gedict_t* SelectSpawnPoint(char *spawnname);
 
 #define         WP_STATS_UPDATE (0.3f)
-void Print_Wp_Stats();
+void Print_Wp_Stats(void);
 #define         SC_STATS_UPDATE (0.8f)
-void Print_Scores();
+void Print_Scores(void);
 
 // { "new weapon stats"
 void WS_Mark(gedict_t *p, weaponName_t wp);
@@ -533,21 +533,21 @@ void WS_OnSpecPovChange(gedict_t *s, qbool force);
 // }
 
 //spectate.c
-void SpectatorConnect();
-void PutSpectatorInServer();
-void SpectatorDisconnect();
-void SpectatorThink();
+void SpectatorConnect(void);
+void PutSpectatorInServer(void);
+void SpectatorDisconnect(void);
+void SpectatorThink(void);
 
 // weapons.c
 extern int impulse;
-float W_BestWeapon();
-void W_Precache();
-void W_SetCurrentAmmo();
+float W_BestWeapon(void);
+void W_Precache(void);
+void W_SetCurrentAmmo(void);
 void SpawnBlood(vec3_t, float);
 void SpawnMeatSpray(vec3_t org, vec3_t vel);
-void W_FireAxe();
+void W_FireAxe(void);
 void W_FireSpikes(float ox);
-void W_FireLightning();
+void W_FireLightning(void);
 void LightningDamage(vec3_t p1, vec3_t p2, gedict_t *from, float damage);
 qbool W_CanSwitch(int wp, qbool warn);
 
@@ -558,11 +558,11 @@ void launch_spike(vec3_t org, vec3_t dir);
 
 // match.c
 int WeirdCountPlayers(void);
-float CountPlayers();
+float CountPlayers(void);
 float CountBots(void);
-float CountRTeams();
+float CountRTeams(void);
 qbool isCanStart(gedict_t *s, qbool forceMembersWarn);
-void StartTimer();
+void StartTimer(void);
 void StopTimer(int removeDemo);
 
 char* WpName(weaponName_t wp);
@@ -584,10 +584,10 @@ void T_BeamDamage(gedict_t *attacker, float damage);
 
 //items.c
 void DropPowerup(float timeleft, int powerup);
-void DropPowerups();
-void ShowSpawnPoints();
-void HideSpawnPoints();
-void DropBackpack();
+void DropPowerups(void);
+void ShowSpawnPoints(void);
+void HideSpawnPoints(void);
+void DropBackpack(void);
 
 void adjust_pickup_time(float *current, float *total);
 
@@ -607,9 +607,9 @@ void teleport_player(gedict_t *player, vec3_t origin, vec3_t angles, int flags);
 #define TELEDEATH(e) ((e)->deathtype == dtTELE1 || (e)->deathtype == dtTELE2 || (e)->deathtype == dtTELE3)
 
 // runes.c
-void DropRune();
+void DropRune(void);
 void SpawnRunes(qbool yes);
-void TossRune();
+void TossRune(void);
 void ResistanceSound(gedict_t *player);
 void HasteSound(gedict_t *player);
 void RegenerationSound(gedict_t *player);
@@ -629,12 +629,12 @@ void log_close(void);
 extern fileHandle_t log_handle;
 
 // commands.c
-void WillPause();
+void WillPause(void);
 typedef struct cmd_s
 {
 	char *name;
 //	funcref_t	f;
-	void (*f)();
+	void (*f)(void);
 	float arg;
 	int cf_flags;
 	const char *description;
@@ -724,8 +724,8 @@ const char *um_name_byidx(UserModes_t idx);
 
 // { spec more info
 
-qbool mi_on();
-qbool mi_adm_only();
+qbool mi_on(void);
+qbool mi_adm_only(void);
 void mi_print(gedict_t *tooker, int it, char *msg);
 void info_mi_update(gedict_t *p, char *from, char *to);
 
@@ -776,12 +776,12 @@ typedef struct rpickupTeams_s
 } rpickupTeams_t;
 
 extern votemap_t maps_voted[];
-int vote_get_maps();
+int vote_get_maps(void);
 
 qbool is_elected(gedict_t *p, electType_t et);
 
-int get_elect_type();
-char* get_elect_type_str();
+int get_elect_type(void);
+char* get_elect_type_str(void);
 
 void vote_clear(int fofs);
 int get_votes_req(int fofs, qbool diff);
@@ -789,12 +789,12 @@ int get_votes(int fofs);
 int get_votes_by_value(int fofs, int value);
 int is_admins_vote(int fofs);
 
-void vote_check_map();
-void vote_check_break();
-void vote_check_elect();
-void vote_check_pickup();
+void vote_check_map(void);
+void vote_check_break(void);
+void vote_check_elect(void);
+void vote_check_pickup(void);
 void vote_check_rpickup(int maxRecursion);
-void vote_check_swapall();
+void vote_check_swapall(void);
 void vote_check_all(void);
 
 #define	VOTE_FOFS(x) ((intptr_t)&(((vote_t *)0)->x))
@@ -818,8 +818,8 @@ void vote_check_all(void);
 #define MAX_RPICKUP_RECUSION 3
 #define MAX_PAUSE_REQUESTS 3
 
-void ElectThink();
-void AbortElect();
+void ElectThink(void);
+void AbortElect(void);
 
 // admin.c
 
@@ -830,46 +830,46 @@ void AbortElect();
 qbool is_real_adm(gedict_t *p); // is pass/vip granted admin (real admin in terms of ktpro)
 qbool is_adm(gedict_t *p);      // is elected admin (admin rigths granted by /elect command)
 
-void KickThink();
+void KickThink(void);
 void ExitKick(gedict_t *kicker);
 
 void BecomeAdmin(gedict_t *p, int adm_flags);
-void VoteAdmin();
+void VoteAdmin(void);
 
 void PlayerStopFire(gedict_t *p);
 void do_force_spec(gedict_t *p, gedict_t *admin, qbool spec);
 
 // arena.c
 
-void ra_init_que();
-gedict_t* ra_que_first();
+void ra_init_que(void);
+gedict_t* ra_que_first(void);
 void ra_in_que(gedict_t *p);
 void ra_out_que(gedict_t *p);
 qbool ra_isin_que(gedict_t *p);
 int ra_pos_que(gedict_t *p);
-qbool isRA(); // not game mode, but just modificator of duel
+qbool isRA(void); // not game mode, but just modificator of duel
 qbool isWinner(gedict_t *p);
 qbool isLoser(gedict_t *p);
-gedict_t* getWinner();
-gedict_t* getLoser();
-void ra_ClientDisconnect();
+gedict_t* getWinner(void);
+gedict_t* getLoser(void);
+void ra_ClientDisconnect(void);
 void ra_ClientObituary(gedict_t *targ, gedict_t *attacker);
-void ra_PutClientInServer();
-void RocketArenaPre();
-qbool readytostart();
-void ra_Frame();
+void ra_PutClientInServer(void);
+void RocketArenaPre(void);
+qbool readytostart(void);
+void ra_Frame(void);
 void setfullwep(gedict_t *anent);
 void setnowep(gedict_t *anent);
 
 // { ra commands
-void ra_PlayerStats();
-void ra_PrintPos();
-void ra_break();
+void ra_PlayerStats(void);
+void ra_PrintPos(void);
+void ra_break(void);
 // }
 
 // clan_arena.c
 
-qbool isCA();
+qbool isCA(void);
 qbool CA_CheckAlive(gedict_t *p);
 int CA_wins_required(void);
 int CA_count_ready_players(void);
@@ -894,7 +894,7 @@ int capt_num(gedict_t *p);
 
 int coach_num(gedict_t *p);
 qbool is_coach(gedict_t *p);
-void ExitCoach();
+void ExitCoach(void);
 
 // maps.c
 
@@ -905,8 +905,8 @@ void GetMapList(void);
 char* GetMapName(int imp);
 int GetMapNum(char *mapname);
 void DoSelectMap(int iMap);
-void SelectMap();
-void VoteMap();
+void SelectMap(void);
+void VoteMap(void);
 qbool VoteMapSpecific(char *map);
 
 // match.c
@@ -915,8 +915,8 @@ void EndMatch(float skip_log);
 void StatsToFile(void);
 
 // grapple.c
-void GrappleThrow();
-void GrappleService();
+void GrappleThrow(void);
+void GrappleService(void);
 void GrappleReset(gedict_t *rhook);
 void CancelHook(gedict_t *owner);
 float IncreasePullSpeed(float speed, float incr);
@@ -978,7 +978,7 @@ qbool isRACE(void);
 void apply_race_settings(void);
 void ToggleRace(void);
 void RaceCountdownChange(float t);
-void StartDemoRecord();
+void StartDemoRecord(void);
 
 qbool race_weapon_allowed(gedict_t *p);
 
@@ -1104,58 +1104,58 @@ extern int sv_minping; // used to broadcast changes
 
 // ANIM() macro idea I got from Tonik
 #define ANIM(name, _frame, _next)		\
-void name () {				\
+void name (void) {				\
 	self->s.v.frame = _frame;				\
 	self->s.v.nextthink = g_globalvars.time + FRAMETIME;	\
 	self->think = ( func_t ) _next; }
 
 // sp_client.c
-void ExitIntermission();
+void ExitIntermission(void);
 char* ObituaryForMonster(char *attacker_class);
 
 // sp_dog.c
-float DogCheckAttack();
+float DogCheckAttack(void);
 
 // sp_demon.c
-float DemonCheckAttack();
+float DemonCheckAttack(void);
 
 // sp_ogre.c
-float OgreCheckAttack();
+float OgreCheckAttack(void);
 
 // sp_shambler.c
-float ShamCheckAttack();
+float ShamCheckAttack(void);
 
 // sp_soldier.c
-float SoldierCheckAttack();
+float SoldierCheckAttack(void);
 
 // sp_wizard.c
-float WizardCheckAttack();
+float WizardCheckAttack(void);
 
 // sp_ai.c
 // FIXME: make them static or get rid of globals...
 extern float enemy_vis, enemy_infront, enemy_range;
 extern float enemy_yaw;
 
-void FoundTarget();
+void FoundTarget(void);
 
 void GetMadAtAttacker(gedict_t *attacker);
 
 void SUB_AttackFinished(float normal);
 void SUB_CheckRefire(func_t thinkst);
 
-void ai_stand();
+void ai_stand(void);
 void ai_walk(float dist);
 void ai_run(float dist);
 void ai_pain(float dist);
-void ai_face();
+void ai_face(void);
 void ai_charge(float d);
-void ai_charge_side();
+void ai_charge_side(void);
 void ai_forward(float dist);
 void ai_back(float dist);
-void ai_turn();
+void ai_turn(void);
 void ai_painforward(float dist);
-void ai_melee();
-void ai_melee_side();
+void ai_melee(void);
+void ai_melee_side(void);
 
 // sp_monsters.c
 typedef struct bloodfest_s
@@ -1170,7 +1170,7 @@ extern bloodfest_t g_bloodfest;
 // reset bloodfest runtime variables to default values.
 void bloodfest_reset(void);
 
-void monster_death_use();
+void monster_death_use(void);
 
 void check_monsters_respawn(void);
 
@@ -1187,7 +1187,7 @@ void LaunchLaser(vec3_t org, vec3_t vec);
 #define K_ENTITYFILE_SEPARATOR '#'
 
 // bots
-qbool bots_enabled();
+qbool bots_enabled(void);
 
 // files
 fileHandle_t std_fropen(const char *fmt, ...) PRINTF_FUNC(1);

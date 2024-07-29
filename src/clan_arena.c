@@ -242,7 +242,7 @@ int CA_wins_required(void)
 	return ((k_clan_arena_rounds + 1) / 2);
 }
 
-qbool isCA()
+qbool isCA(void)
 {
 	return (isTeam() && cvar("k_clan_arena"));
 }
