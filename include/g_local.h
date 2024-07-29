@@ -516,8 +516,8 @@ void ClientDisconnect();
 void PlayerPreThink();
 void BothPostThink(); // <- called for player and spec
 void PlayerPostThink();
-qbool PlayerCanPause();
 void SuperDamageSound();
+qbool PlayerCanPause(gedict_t *p);
 
 gedict_t* SelectSpawnPoint(char *spawnname);
 
