@@ -27,7 +27,6 @@ qbool is_rules_change_allowed(void);
 void SendMessage(char *name);
 float CountRPlayers();
 float CountTeams();
-void PlayerReady(qbool startIdlebot);
 void PlayerSlowReady();
 void PlayerBreak();
 void ReqAdmin();
@@ -50,6 +49,7 @@ void teamoverlay();
 void votecoop();
 void RandomPickup();
 void ShowDMM();
+void PlayerFastReady(void);
 void ChangeDM(float dmm);
 void ChangeLock();
 void ChangeOvertime();
@@ -692,7 +692,7 @@ cmd_t cmds[] =
 	{ "stats", 						PlayerStats, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_STATS },
 	{ "effi", 						PlayerStats, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_EFFI },
 	{ "options", 					ShowOpts, 						0, 			CF_PLAYER, 																CD_OPTIONS },
-	{ "ready", 						PlayerReady, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_READY },
+	{ "ready", 						PlayerFastReady, 				0, 			CF_BOTH | CF_MATCHLESS, 												CD_READY },
 	{ "slowready", 					PlayerSlowReady, 				0, 			CF_BOTH | CF_MATCHLESS, 												CD_SLOWREADY },
 	{ "break", 						PlayerBreak, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_BREAK },
 	{ "status1", 					ModStatus1, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_STATUS1 },
@@ -7656,7 +7656,7 @@ void ToggleReady()
 	}
 	else
 	{
-		PlayerReady(true);
+		PlayerFastReady();
 	}
 }
 

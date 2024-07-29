@@ -2783,6 +2783,11 @@ void PlayerSlowReady()
 	PlayerReady(false);
 }
 
+void PlayerFastReady(void)
+{
+	PlayerReady(true);
+}
+
 void PlayerBreak()
 {
 	int votes;
