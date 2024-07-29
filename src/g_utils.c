@@ -50,7 +50,7 @@ void g_random_seed(int seed) {
 
 float g_random()
 {
-	return ((rng_next_global() & 0x7fff) / ((float)0x8000));
+	return (rng_next_global() >> 8 & 0xffffff) / 16777216.0f;
 }
 
 float crandom()
