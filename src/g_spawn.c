@@ -841,7 +841,7 @@ void G_SpawnEntitiesFromString(void)
 		G_ParseField(spawnVars[i][0], spawnVars[i][1], world);
 	}
 
-	SP_worldspawn(world);
+	SP_worldspawn();
 
 	// parse ents
 
