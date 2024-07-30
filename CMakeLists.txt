@@ -5,6 +5,8 @@ project(qwprogs C)
 
 include(CheckCCompilerFlag)
 
+set(CMAKE_COLOR_DIAGNOSTICS ON)
+
 # CMake option for bot support, we check it below and add C preprocessor directive if required.
 option(BOT_SUPPORT "Build with bot support" ON)
 # Option for FTE extensions. We also have some basic support for FTE which does not controlled by this setting.
