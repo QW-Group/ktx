@@ -31,3 +31,6 @@ x64/*
 *.suobackup
 *.VC.db
 /.cache
+/tools/vs/.vs/
+/tools/vs/ktx/x64/
+/tools/vs/x64/

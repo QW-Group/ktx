@@ -1658,6 +1658,16 @@ void ClientConnect()
 		SendIntermissionToClient();
 	}
 
+// SOCD
+	self->socdChecksCount = 0;
+	self->socdDetected = 0;
+	self->fStrafeChangeCount = 0;
+	self->fFramePerfectStrafeChangeCount = 0;
+	self->fLastSideMoveSpeed = 0;
+	self->matchStrafeChangeCount = 0;
+	self->matchPerfectStrafeCount = 0;
+	self->nullStrafeCount = 0;
+
 // ILLEGALFPS[
 
 	// Zibbo's frametime checking code
@@ -3519,6 +3529,57 @@ void PlayerPreThink()
 		BotPreThink(self);
 	}
 #endif
+
+// SOCD detection
+	{
+		float fSideMoveSpeed = self->movement[1];
+
+		if ((fSideMoveSpeed != 0) && (fSideMoveSpeed != self->fLastSideMoveSpeed) && (self->nullStrafeCount < 3)) //strafechange
+		{
+			self->fStrafeChangeCount += 1;
+			if (match_in_progress)
+				self->matchStrafeChangeCount += 1;
+
+			if ((fSideMoveSpeed != 0) && (self->fLastSideMoveSpeed != 0))
+			{
+				self->fFramePerfectStrafeChangeCount += 1;
+				if (match_in_progress)
+					self->matchPerfectStrafeCount += 1;
+			}
+
+			self->nullStrafeCount = 0;
+		}
+		else
+		{
+			if (0 == fSideMoveSpeed)
+				self->nullStrafeCount += 1;
+			else
+				self->nullStrafeCount = 0;
+		}
+
+		self->fLastSideMoveSpeed = fSideMoveSpeed;
+
+		if (self->fStrafeChangeCount >= 16)
+		{
+			if (self->fFramePerfectStrafeChangeCount / self->fStrafeChangeCount >= 0.75)
+			{
+				int k_allow_socd_warning = cvar("k_allow_socd_warning");
+
+				self->socdDetected += 1;
+
+				if ((!match_in_progress) && (!self->isBot) && k_allow_socd_warning)
+				{
+					G_bprint(PRINT_HIGH,
+						"Warning! %s: SOCD movement assistance detected. Please disable iDrive or keyboard SOCD features.\n",
+						self->netname);
+				}
+			}
+
+			self->socdChecksCount += 1;
+			self->fStrafeChangeCount = 0;
+			self->fFramePerfectStrafeChangeCount = 0;
+		}
+	}
 
 // ILLEGALFPS[
 
