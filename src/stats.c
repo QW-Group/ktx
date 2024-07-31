@@ -763,14 +763,6 @@ void OnePlayerStats(gedict_t *p, int tp)
 					p->ps.vel_frames > 0 ? p->ps.velocity_sum / p->ps.vel_frames : 0.);
 	}
 
-	if (!p->isBot)
-	{
-		G_bprint(2, "%s: %s:%d/%d %s:%d/%d\n", redtext("Movement"), redtext("Perfect strafes"),
-			p->matchPerfectStrafeCount, p->matchStrafeChangeCount, redtext("SOCD detections"),
-			p->socdDetected, p->socdChecksCount);
-	}
-
-
 	// armors + megahealths
 	if (!lgc_enabled())
 	{
