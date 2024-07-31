@@ -944,17 +944,6 @@ typedef struct gedict_s
 	float fIllegalFPSWarnings;
 // ILLEGALFPS]
 
-// SOCD detectioin
-	float fStrafeChangeCount;
-	float fFramePerfectStrafeChangeCount;
-	int   socdDetected;
-	int   socdChecksCount;
-	float fLastSideMoveSpeed;
-	int   matchStrafeChangeCount;
-	int   matchPerfectStrafeCount;
-	int   nullStrafeCount;
-// SOCD
-
 	float shownick_time;					// used to force centerprint is off at desired time
 	clientType_t ct;						// client type for client edicts
 // { timing

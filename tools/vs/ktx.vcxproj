@@ -71,16 +71,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <TargetName>qwprogs</TargetName>
+    <TargetName>qwprogs.dll</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <TargetName>qwprogs</TargetName>
+    <TargetName>qwprogs.dll</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <TargetName>qwprogs</TargetName>
+    <TargetName>qwprogs.dll</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <TargetName>qwprogs</TargetName>
+    <TargetName>qwprogs.dll</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -91,7 +91,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Toma\source\repos\ktx\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeaderOutputFile />
     </ClCompile>
     <Link>
@@ -111,7 +111,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Toma\source\repos\ktx\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeaderOutputFile />
     </ClCompile>
     <Link>
@@ -131,7 +131,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Toma\source\repos\ktx\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeaderOutputFile />
     </ClCompile>
     <Link>
@@ -151,7 +151,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Toma\source\repos\ktx\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeaderOutputFile />
     </ClCompile>
     <Link>
@@ -163,7 +163,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\bg_lib.h" />
     <ClInclude Include="..\..\include\deathtype.h" />
     <ClInclude Include="..\..\include\fb_globals.h" />
     <ClInclude Include="..\..\include\g_consts.h" />
@@ -175,10 +174,6 @@
     <ClInclude Include="..\..\include\progdefs.h" />
     <ClInclude Include="..\..\include\progs.h" />
     <ClInclude Include="..\..\include\q_shared.h" />
-    <ClInclude Include="..\..\include\rng.h" />
-    <ClInclude Include="..\..\include\rng_gen_impl.h" />
-    <ClInclude Include="..\..\include\rng_gen_state.h" />
-    <ClInclude Include="..\..\include\rng_seed_impl.h" />
     <ClInclude Include="..\..\include\stats.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
@@ -186,12 +181,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\admin.c" />
     <ClCompile Include="..\..\src\arena.c" />
-    <ClCompile Include="..\..\src\bg_lib.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\src\bot_aim.c" />
     <ClCompile Include="..\..\src\bot_blocked.c" />
     <ClCompile Include="..\..\src\bot_botenemy.c" />
@@ -226,8 +215,6 @@
     <ClCompile Include="..\..\src\doors.c" />
     <ClCompile Include="..\..\src\fb_globals.c" />
     <ClCompile Include="..\..\src\files.c" />
-    <ClCompile Include="..\..\src\func_bob.c" />
-    <ClCompile Include="..\..\src\func_laser.c" />
     <ClCompile Include="..\..\src\globals.c" />
     <ClCompile Include="..\..\src\grapple.c" />
     <ClCompile Include="..\..\src\g_cmd.c" />
@@ -235,10 +222,8 @@
     <ClCompile Include="..\..\src\g_mem.c" />
     <ClCompile Include="..\..\src\g_spawn.c" />
     <ClCompile Include="..\..\src\g_syscalls.c" />
-    <ClCompile Include="..\..\src\g_syscalls_extra.c" />
     <ClCompile Include="..\..\src\g_userinfo.c" />
     <ClCompile Include="..\..\src\g_utils.c" />
-    <ClCompile Include="..\..\src\hiprot.c" />
     <ClCompile Include="..\..\src\hoonymode.c" />
     <ClCompile Include="..\..\src\items.c" />
     <ClCompile Include="..\..\src\logs.c" />
@@ -259,9 +244,6 @@
     <ClCompile Include="..\..\src\player.c" />
     <ClCompile Include="..\..\src\q_shared.c" />
     <ClCompile Include="..\..\src\race.c" />
-    <ClCompile Include="..\..\src\rng.c" />
-    <ClCompile Include="..\..\src\rng_gen_impl.c" />
-    <ClCompile Include="..\..\src\rng_seed_impl.c" />
     <ClCompile Include="..\..\src\route_calc.c" />
     <ClCompile Include="..\..\src\route_fields.c" />
     <ClCompile Include="..\..\src\route_lookup.c" />
