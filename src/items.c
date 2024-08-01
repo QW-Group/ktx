@@ -2156,7 +2156,7 @@ void powerup_touch()
 		other->ps.spree_max_q = max(other->ps.spree_current_q, other->ps.spree_max_q);
 		other->ps.spree_current_q = 0;
 
-		if (deathmatch == 4)
+		if (deathmatch == 4 && !tot_mode_enabled())
 		{
 			other->s.v.armortype = 0;
 			other->s.v.armorvalue = 0;
@@ -2419,7 +2419,7 @@ void BackpackTouch()
 
 		stuffcmd(other, "bf\n");
 
-		if (lgc_enabled() && (other->s.v.health > 299))
+		if ((lgc_enabled() || tot_mode_enabled()) && (other->s.v.health > 299))
 		{
 			// cap & don't allow bonus powers
 			other->s.v.health = 300;
