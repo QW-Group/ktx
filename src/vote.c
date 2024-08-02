@@ -36,7 +36,7 @@ void BecomeCoach(gedict_t *p);
 
 // AbortElect is used to terminate the voting
 // Important if player to be elected disconnects or levelchange happens
-void AbortElect()
+void AbortElect(void)
 {
 	gedict_t *p;
 
@@ -68,7 +68,7 @@ void AbortElect()
 	}
 }
 
-void ElectThink()
+void ElectThink(void)
 {
 	G_bprint(2, "The voting has timed out.\n"
 				"Election aborted\n");
@@ -77,7 +77,7 @@ void ElectThink()
 	AbortElect();
 }
 
-void VoteYes()
+void VoteYes(void)
 {
 	int votes;
 
@@ -114,7 +114,7 @@ void VoteYes()
 	vote_check_elect();
 }
 
-void VoteNo()
+void VoteNo(void)
 {
 	int votes;
 
@@ -372,7 +372,7 @@ qbool is_elected(gedict_t *p, electType_t et)
 	return (p->v.elect_type == et);
 }
 
-int get_elect_type()
+int get_elect_type(void)
 {
 	gedict_t *p;
 
@@ -397,7 +397,7 @@ int get_elect_type()
 	return etNone;
 }
 
-char* get_elect_type_str()
+char* get_elect_type_str(void)
 {
 	switch (get_elect_type())
 	{
@@ -425,7 +425,7 @@ votemap_t maps_voted[MAX_CLIENTS];
 // return the index in maps_voted[] of most voted map
 // return -1 inf no votes at all or some failures
 // if admin votes for map - map will be treated as most voted
-int vote_get_maps()
+int vote_get_maps(void)
 {
 	int best_idx = -1, i;
 	gedict_t *p;
@@ -488,7 +488,7 @@ int vote_get_maps()
 	return (maps_voted_idx = best_idx);
 }
 
-void vote_check_map()
+void vote_check_map(void)
 {
 	int vt_req;
 	char *map;
@@ -520,7 +520,7 @@ void vote_check_map()
 	changelevel(map);
 }
 
-void vote_check_break()
+void vote_check_break(void)
 {
 	if (!match_in_progress || intermission_running || match_over)
 	{
@@ -542,7 +542,7 @@ void vote_check_break()
 	}
 }
 
-void vote_check_elect()
+void vote_check_elect(void)
 {
 	gedict_t *p;
 
@@ -593,7 +593,7 @@ void vote_check_elect()
 }
 
 // !!! do not confuse rpickup and pickup
-void vote_check_pickup()
+void vote_check_pickup(void)
 {
 	gedict_t *p;
 	int veto;
@@ -803,7 +803,7 @@ void FixNoSpecs(void)
 	}
 }
 
-void vote_check_nospecs()
+void vote_check_nospecs(void)
 {
 	int veto;
 
@@ -869,7 +869,7 @@ void vote_check_nospecs()
 	}
 }
 
-void nospecs()
+void nospecs(void)
 {
 	int votes;
 
@@ -906,7 +906,7 @@ void nospecs()
 	vote_check_nospecs();
 }
 
-void vote_check_teamoverlay()
+void vote_check_teamoverlay(void)
 {
 	int veto;
 
@@ -943,7 +943,7 @@ void vote_check_teamoverlay()
 	}
 }
 
-void teamoverlay()
+void teamoverlay(void)
 {
 	int votes;
 
@@ -983,7 +983,7 @@ void teamoverlay()
 qbool force_map_reset = false;
 
 // { votecoop
-void vote_check_coop()
+void vote_check_coop(void)
 {
 	int veto;
 
@@ -1035,7 +1035,7 @@ void vote_check_coop()
 	}
 }
 
-void votecoop()
+void votecoop(void)
 {
 	int votes;
 
@@ -1064,7 +1064,7 @@ void votecoop()
 // }
 
 // { votehook
-void hooksmooth()
+void hooksmooth(void)
 {
 	int votes, veto;
 
@@ -1107,7 +1107,7 @@ void hooksmooth()
 	}
 }
 
-void hookfast()
+void hookfast(void)
 {
 	int votes, veto;
 	
@@ -1151,7 +1151,7 @@ void hookfast()
 	}
 }
 
-void hookclassic()
+void hookclassic(void)
 {
 	int votes, veto;
 	
@@ -1195,7 +1195,7 @@ void hookclassic()
 	}
 }
 
-void hookcrhook()
+void hookcrhook(void)
 {
 	int votes, veto;
 
@@ -1243,7 +1243,7 @@ void hookcrhook()
 
 // { antilag vote feature
 
-void vote_check_antilag()
+void vote_check_antilag(void)
 {
 	int veto;
 
@@ -1283,7 +1283,7 @@ void vote_check_antilag()
 	}
 }
 
-void antilag()
+void antilag(void)
 {
 	int votes;
 
@@ -1490,7 +1490,7 @@ qbool private_game_by_default(void)
 	return cvar("k_privategame_default");
 }
 
-void vote_check_swapall()
+void vote_check_swapall(void)
 {
 	int veto;
 	gedict_t *p;

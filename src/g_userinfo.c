@@ -83,7 +83,7 @@ cmdinfo_t cinfos[] =
 
 int cinfos_cnt = sizeof(cinfos) / sizeof(cinfos[0]);
 
-void cmdinfo()
+void cmdinfo(void)
 {
 	int argc = trap_CmdArgc();
 	char arg_1[128], arg_2[128];
@@ -121,7 +121,7 @@ void cmdinfo()
 	}
 }
 
-void cmduinfo()
+void cmduinfo(void)
 {
 	gedict_t *p;
 	int argc = trap_CmdArgc();

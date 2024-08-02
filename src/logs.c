@@ -90,7 +90,7 @@ void log_printf(const char *fmt, ...)
 	trap_FS_WriteFile(text, strlen(text), log_handle);
 }
 
-void StartLogs()
+void StartLogs(void)
 {
 	char date[64] =
 		{ 0 }, date_c[64] =
@@ -136,7 +136,7 @@ void StartLogs()
 	log_printf("\t<events>\n");
 }
 
-void StopLogs()
+void StopLogs(void)
 {
 	log_printf("\t</events>\n");
 	log_printf("</ktxlog>\n");

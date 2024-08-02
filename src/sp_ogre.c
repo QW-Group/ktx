@@ -191,143 +191,143 @@ enum
 
 };
 
-void ogre_stand1();
-void ogre_stand2();
-void ogre_stand3();
-void ogre_stand4();
-void ogre_stand5();
-void ogre_stand6();
-void ogre_stand7();
-void ogre_stand8();
-void ogre_stand9();
-void ogre_walk1();
-void ogre_walk2();
-void ogre_walk3();
-void ogre_walk4();
-void ogre_walk5();
-void ogre_walk6();
-void ogre_walk7();
-void ogre_walk8();
-void ogre_walk9();
-void ogre_walk10();
-void ogre_walk11();
-void ogre_walk12();
-void ogre_walk13();
-void ogre_walk14();
-void ogre_walk15();
-void ogre_walk16();
-void ogre_run1();
-void ogre_run2();
-void ogre_run3();
-void ogre_run4();
-void ogre_run5();
-void ogre_run6();
-void ogre_run7();
-void ogre_run8();
-void ogre_swing1();
-void ogre_swing2();
-void ogre_swing3();
-void ogre_swing4();
-void ogre_swing5();
-void ogre_swing6();
-void ogre_swing7();
-void ogre_swing8();
-void ogre_swing9();
-void ogre_swing10();
-void ogre_swing11();
-void ogre_swing12();
-void ogre_swing13();
-void ogre_swing14();
-void ogre_smash1();
-void ogre_smash2();
-void ogre_smash3();
-void ogre_smash4();
-void ogre_smash5();
-void ogre_smash6();
-void ogre_smash7();
-void ogre_smash8();
-void ogre_smash9();
-void ogre_smash10();
-void ogre_smash11();
-void ogre_smash12();
-void ogre_smash13();
-void ogre_smash14();
-void ogre_nail1();
-void ogre_nail2();
-void ogre_nail3();
-void ogre_nail4();
-void ogre_nail5();
-void ogre_nail6();
-void ogre_nail7();
-void ogre_pain1();
-void ogre_pain2();
-void ogre_pain3();
-void ogre_pain4();
-void ogre_pain5();
-void ogre_painb1();
-void ogre_painb2();
-void ogre_painb3();
-void ogre_painc1();
-void ogre_painc2();
-void ogre_painc3();
-void ogre_painc4();
-void ogre_painc5();
-void ogre_painc6();
-void ogre_paind1();
-void ogre_paind2();
-void ogre_paind3();
-void ogre_paind4();
-void ogre_paind5();
-void ogre_paind6();
-void ogre_paind7();
-void ogre_paind8();
-void ogre_paind9();
-void ogre_paind10();
-void ogre_paind11();
-void ogre_paind12();
-void ogre_paind13();
-void ogre_paind14();
-void ogre_paind15();
-void ogre_paind16();
-void ogre_paine1();
-void ogre_paine2();
-void ogre_paine3();
-void ogre_paine4();
-void ogre_paine5();
-void ogre_paine6();
-void ogre_paine7();
-void ogre_paine8();
-void ogre_paine9();
-void ogre_paine10();
-void ogre_paine11();
-void ogre_paine12();
-void ogre_paine13();
-void ogre_paine14();
-void ogre_paine15();
-void ogre_die1();
-void ogre_die2();
-void ogre_die3();
-void ogre_die4();
-void ogre_die5();
-void ogre_die6();
-void ogre_die7();
-void ogre_die8();
-void ogre_die9();
-void ogre_die10();
-void ogre_die11();
-void ogre_die12();
-void ogre_die13();
-void ogre_die14();
-void ogre_bdie1();
-void ogre_bdie2();
-void ogre_bdie3();
-void ogre_bdie4();
-void ogre_bdie5();
-void ogre_bdie6();
-void ogre_bdie7();
-void ogre_bdie8();
-void ogre_bdie9();
-void ogre_bdie10();
+void ogre_stand1(void);
+void ogre_stand2(void);
+void ogre_stand3(void);
+void ogre_stand4(void);
+void ogre_stand5(void);
+void ogre_stand6(void);
+void ogre_stand7(void);
+void ogre_stand8(void);
+void ogre_stand9(void);
+void ogre_walk1(void);
+void ogre_walk2(void);
+void ogre_walk3(void);
+void ogre_walk4(void);
+void ogre_walk5(void);
+void ogre_walk6(void);
+void ogre_walk7(void);
+void ogre_walk8(void);
+void ogre_walk9(void);
+void ogre_walk10(void);
+void ogre_walk11(void);
+void ogre_walk12(void);
+void ogre_walk13(void);
+void ogre_walk14(void);
+void ogre_walk15(void);
+void ogre_walk16(void);
+void ogre_run1(void);
+void ogre_run2(void);
+void ogre_run3(void);
+void ogre_run4(void);
+void ogre_run5(void);
+void ogre_run6(void);
+void ogre_run7(void);
+void ogre_run8(void);
+void ogre_swing1(void);
+void ogre_swing2(void);
+void ogre_swing3(void);
+void ogre_swing4(void);
+void ogre_swing5(void);
+void ogre_swing6(void);
+void ogre_swing7(void);
+void ogre_swing8(void);
+void ogre_swing9(void);
+void ogre_swing10(void);
+void ogre_swing11(void);
+void ogre_swing12(void);
+void ogre_swing13(void);
+void ogre_swing14(void);
+void ogre_smash1(void);
+void ogre_smash2(void);
+void ogre_smash3(void);
+void ogre_smash4(void);
+void ogre_smash5(void);
+void ogre_smash6(void);
+void ogre_smash7(void);
+void ogre_smash8(void);
+void ogre_smash9(void);
+void ogre_smash10(void);
+void ogre_smash11(void);
+void ogre_smash12(void);
+void ogre_smash13(void);
+void ogre_smash14(void);
+void ogre_nail1(void);
+void ogre_nail2(void);
+void ogre_nail3(void);
+void ogre_nail4(void);
+void ogre_nail5(void);
+void ogre_nail6(void);
+void ogre_nail7(void);
+void ogre_pain1(void);
+void ogre_pain2(void);
+void ogre_pain3(void);
+void ogre_pain4(void);
+void ogre_pain5(void);
+void ogre_painb1(void);
+void ogre_painb2(void);
+void ogre_painb3(void);
+void ogre_painc1(void);
+void ogre_painc2(void);
+void ogre_painc3(void);
+void ogre_painc4(void);
+void ogre_painc5(void);
+void ogre_painc6(void);
+void ogre_paind1(void);
+void ogre_paind2(void);
+void ogre_paind3(void);
+void ogre_paind4(void);
+void ogre_paind5(void);
+void ogre_paind6(void);
+void ogre_paind7(void);
+void ogre_paind8(void);
+void ogre_paind9(void);
+void ogre_paind10(void);
+void ogre_paind11(void);
+void ogre_paind12(void);
+void ogre_paind13(void);
+void ogre_paind14(void);
+void ogre_paind15(void);
+void ogre_paind16(void);
+void ogre_paine1(void);
+void ogre_paine2(void);
+void ogre_paine3(void);
+void ogre_paine4(void);
+void ogre_paine5(void);
+void ogre_paine6(void);
+void ogre_paine7(void);
+void ogre_paine8(void);
+void ogre_paine9(void);
+void ogre_paine10(void);
+void ogre_paine11(void);
+void ogre_paine12(void);
+void ogre_paine13(void);
+void ogre_paine14(void);
+void ogre_paine15(void);
+void ogre_die1(void);
+void ogre_die2(void);
+void ogre_die3(void);
+void ogre_die4(void);
+void ogre_die5(void);
+void ogre_die6(void);
+void ogre_die7(void);
+void ogre_die8(void);
+void ogre_die9(void);
+void ogre_die10(void);
+void ogre_die11(void);
+void ogre_die12(void);
+void ogre_die13(void);
+void ogre_die14(void);
+void ogre_bdie1(void);
+void ogre_bdie2(void);
+void ogre_bdie3(void);
+void ogre_bdie4(void);
+void ogre_bdie5(void);
+void ogre_bdie6(void);
+void ogre_bdie7(void);
+void ogre_bdie8(void);
+void ogre_bdie9(void);
+void ogre_bdie10(void);
 
 //=============================================================================
 
@@ -499,7 +499,7 @@ ANIM(ogre_smash12, smash12, ogre_smash13; ai_charge(0);)
 ANIM(ogre_smash13, smash13, ogre_smash14; ai_charge(4);)
 ANIM(ogre_smash14, smash14, ogre_run1; ai_charge(12);)
 
-void ogre_melee()
+void ogre_melee(void)
 {
 	if (g_random() > 0.5)
 	{
@@ -513,7 +513,7 @@ void ogre_melee()
 
 //=============================================================================
 
-void OgreGrenadeExplode()
+void OgreGrenadeExplode(void)
 {
 	T_RadiusDamage(self, PROG_TO_EDICT(self->s.v.owner), 40, world, dtSQUISH);
 	sound(self, CHAN_VOICE, "weapons/r_exp3.wav", 1, ATTN_NORM);
@@ -528,7 +528,7 @@ void OgreGrenadeExplode()
 	ent_remove(self);
 }
 
-void OgreGrenadeTouch()
+void OgreGrenadeTouch(void)
 {
 	if (other == PROG_TO_EDICT(self->s.v.owner))
 	{
@@ -555,7 +555,7 @@ void OgreGrenadeTouch()
  OgreFireGrenade
  ================
  */
-void OgreFireGrenade()
+void OgreFireGrenade(void)
 {
 	gedict_t *missile;
 
@@ -733,7 +733,7 @@ ANIM(ogre_bdie8, bdeath8, ogre_bdie9;)
 ANIM(ogre_bdie9, bdeath9, ogre_bdie10;)
 ANIM(ogre_bdie10, bdeath10, ogre_bdie10;)
 
-void ogre_die()
+void ogre_die(void)
 {
 	// check for gib
 	if (self->s.v.health < -80)
@@ -773,7 +773,7 @@ void ogre_die()
  Returns false if movement should continue
  ============
  */
-float OgreCheckAttack()
+float OgreCheckAttack(void)
 {
 	vec3_t spot1, spot2;
 	gedict_t *targ;
@@ -833,7 +833,7 @@ float OgreCheckAttack()
 /*QUAKED monster_ogre (1 0 0) (-32 -32 -24) (32 32 64) Ambush
 
  */
-void SP_monster_ogre()
+void SP_monster_ogre(void)
 {
 	if (!AllowMonster(self))
 	{

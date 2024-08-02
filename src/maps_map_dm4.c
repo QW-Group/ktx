@@ -4,7 +4,7 @@
 
 #include "g_local.h"
 
-void DM4CampLogic()
+void DM4CampLogic(void)
 {
 	gedict_t *enemy_ = &g_edicts[self->s.v.enemy];
 

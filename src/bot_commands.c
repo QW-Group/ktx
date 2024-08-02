@@ -201,7 +201,7 @@ void FrogbotListPaths(void)
 	G_sprint(self, PRINT_HIGH, "%3d paths found matching %s\n", path_count, argument);
 }
 
-static void BuildTeamList()
+static void BuildTeamList(void)
 {
 	int foundTeams = 0;
 

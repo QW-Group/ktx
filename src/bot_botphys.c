@@ -98,7 +98,7 @@ void BotDetectTrapped(gedict_t *self)
 	}
 }
 
-void FrogbotPrePhysics2()
+void FrogbotPrePhysics2(void)
 {
 	no_bots_stuck = true;
 

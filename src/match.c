@@ -19,14 +19,14 @@
 
 #include "g_local.h"
 
-void NextLevel();
-void IdlebotForceStart();
-void StartMatch();
-void remove_specs_wizards();
-void lastscore_add();
-void StartLogs();
-void StopLogs();
-void ClearDemoMarkers();
+void NextLevel(void);
+void IdlebotForceStart(void);
+void StartMatch(void);
+void remove_specs_wizards(void);
+void lastscore_add(void);
+void StartLogs(void);
+void StopLogs(void);
+void ClearDemoMarkers(void);
 
 void EM_CorrectStats(void);
 void MatchEndStats(void);
@@ -69,7 +69,7 @@ int WeirdCountPlayers(void)
 	return num;
 }
 
-float CountPlayers()
+float CountPlayers(void)
 {
 	gedict_t *p;
 	float num = 0;
@@ -98,7 +98,7 @@ float CountBots(void)
 	return num;
 }
 
-float CountRPlayers()
+float CountRPlayers(void)
 {
 	gedict_t *p;
 	float num = 0;
@@ -114,7 +114,7 @@ float CountRPlayers()
 	return num;
 }
 
-float CountTeams()
+float CountTeams(void)
 {
 	gedict_t *p, *p2;
 	float num = 0;
@@ -147,7 +147,7 @@ float CountTeams()
 }
 
 // return number of teams where at least one member is ready?
-float CountRTeams()
+float CountRTeams(void)
 {
 	gedict_t *p, *p2;
 	float num = 0;
@@ -231,7 +231,7 @@ int CheckMembers(float memcnt)
 extern demo_marker_t demo_markers[];
 extern int demo_marker_index;
 
-void ListDemoMarkers()
+void ListDemoMarkers(void)
 {
 	int i = 0;
 
@@ -461,7 +461,7 @@ void EndMatch(float skip_log)
 	}
 }
 
-void SaveOvertimeStats()
+void SaveOvertimeStats(void)
 {
 	gedict_t *p;
 
@@ -477,7 +477,7 @@ void SaveOvertimeStats()
 	}
 }
 
-void CheckOvertime()
+void CheckOvertime(void)
 {
 	// SM_PrepareShowscores() is called in StartMatch(), but in matchless mode this happens when the first player joins.
 	// Therefore, teams != 2 yet and the function doesn't do anything.
@@ -599,7 +599,7 @@ void CheckOvertime()
 
 // Called every second during a match. cnt = minutes, cnt2 = seconds left.
 // Tells the time every now and then.
-void TimerThink()
+void TimerThink(void)
 {
 	gedict_t *p;
 	int idle_time;
@@ -796,7 +796,7 @@ void TimerThink()
 }
 
 // remove/add some items from map regarding dmm and game mode
-void SM_PrepareMap()
+void SM_PrepareMap(void)
 {
 	gedict_t *p;
 
@@ -878,7 +878,7 @@ void SM_PrepareMap()
 }
 
 // put clients in server and reset some params
-static void SM_PrepareClients()
+static void SM_PrepareClients(void)
 {
 	int hdc, i;
 	char *pl_team;
@@ -1003,7 +1003,7 @@ static void SM_ExecuteQueuedSpawnEffects(void)
 	}
 }
 
-void SM_PrepareShowscores()
+void SM_PrepareShowscores(void)
 {
 	gedict_t *p;
 	char *team1 = "";
@@ -1073,7 +1073,7 @@ void SM_PrepareShowscores()
 	}
 }
 
-void SM_PrepareHostname()
+void SM_PrepareHostname(void)
 {
 	char *team1 = cvar_string("_k_team1");
 	char *team2 = cvar_string("_k_team2");
@@ -1099,7 +1099,7 @@ void SM_PrepareHostname()
 	}
 }
 
-void SM_on_MatchStart()
+void SM_on_MatchStart(void)
 {
 	gedict_t *p;
 
@@ -1110,9 +1110,9 @@ void SM_on_MatchStart()
 }
 
 // Reset player frags and start the timer.
-void HideSpawnPoints();
+void HideSpawnPoints(void);
 
-void StartMatch()
+void StartMatch(void)
 {
 	char date[64];
 
@@ -1816,7 +1816,7 @@ qbool isCanStart(gedict_t *s, qbool forceMembersWarn)
 	return true;
 }
 
-void standby_think()
+void standby_think(void)
 {
 	gedict_t *p;
 
@@ -1854,7 +1854,7 @@ void standby_think()
 }
 
 // Called every second during the countdown.
-void TimerStartThink()
+void TimerStartThink(void)
 {
 	gedict_t *p;
 
@@ -1913,7 +1913,7 @@ void TimerStartThink()
 	self->s.v.nextthink = g_globalvars.time + 1;
 }
 
-void ShowMatchSettings()
+void ShowMatchSettings(void)
 {
 	int i;
 	char *txt = "";
@@ -1988,7 +1988,7 @@ void ShowMatchSettings()
 // ra_10[dm3] // where 10 is count of players
 // unknown_10[dm3] // where 10 is count of players
 
-char* CompilateDemoName()
+char* CompilateDemoName(void)
 {
 	static char demoname[60];
 	char date[128], *fmt;
@@ -2183,7 +2183,7 @@ char* CompilateDemoName()
 	return demoname;
 }
 
-void StartDemoRecord()
+void StartDemoRecord(void)
 {
 	char *demoname;
 
@@ -2230,7 +2230,7 @@ void StartDemoRecord()
 }
 
 // Spawns the timer and starts the countdown.
-void StartTimer()
+void StartTimer(void)
 {
 	gedict_t *timer;
 
@@ -2405,7 +2405,7 @@ void StopTimer(int removeDemo)
 	}
 }
 
-void IdlebotForceStart()
+void IdlebotForceStart(void)
 {
 	gedict_t *p;
 	int i;
@@ -2442,7 +2442,7 @@ void IdlebotForceStart()
 	}
 }
 
-void IdlebotThink()
+void IdlebotThink(void)
 {
 	gedict_t *p;
 	int i;
@@ -2508,7 +2508,7 @@ void IdlebotThink()
 	self->s.v.nextthink = g_globalvars.time + 1;
 }
 
-void IdlebotCheck()
+void IdlebotCheck(void)
 {
 	gedict_t *p;
 	int i;
@@ -2778,12 +2778,17 @@ void PlayerReady(qbool startIdlebot)
 	StartTimer();
 }
 
-void PlayerSlowReady()
+void PlayerSlowReady(void)
 {
 	PlayerReady(false);
 }
 
-void PlayerBreak()
+void PlayerFastReady(void)
+{
+	PlayerReady(true);
+}
+
+void PlayerBreak(void)
 {
 	int votes;
 	gedict_t *p;

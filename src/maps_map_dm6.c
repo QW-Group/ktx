@@ -11,7 +11,7 @@ qbool CheckNewWeapon(int weapon);
 // FIXME: Globals
 extern gedict_t *markers[];
 
-void DM6CampLogic()
+void DM6CampLogic(void)
 {
 	qbool has_weapon = (int)self->s.v.items & (IT_ROCKET_LAUNCHER | IT_LIGHTNING);
 

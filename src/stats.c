@@ -1290,7 +1290,7 @@ void TopStats(void)
 				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n");
 }
 
-void TopMidairStats()
+void TopMidairStats(void)
 {
 	gedict_t *p;
 	float f1, vh_rl, a_rl, ph_rl, maxtopheight = 0, maxtopavgheight = 0, maxrlefficiency = 0;

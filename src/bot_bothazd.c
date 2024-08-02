@@ -198,7 +198,7 @@ static void GrenadeAlert(void)
 	ExplodeAlert(self->s.v.origin, self->s.v.nextthink);
 }
 
-static void Missile_Remove()
+static void Missile_Remove(void)
 {
 	self->s.v.owner = NUM_FOR_EDICT(world);
 	ent_remove(self);

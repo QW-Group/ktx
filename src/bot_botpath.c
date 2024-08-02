@@ -12,9 +12,9 @@
 
 #include "g_local.h"
 
-void DM3CampLogic();
-void DM4CampLogic();
-void DM6CampLogic();
+void DM3CampLogic(void);
+void DM4CampLogic(void);
+void DM6CampLogic(void);
 void DM6MarkerTouchLogic(gedict_t *self, gedict_t *goalentity_marker);
 qbool DM6LookAtDoor(gedict_t *self);
 

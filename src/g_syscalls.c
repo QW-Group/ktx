@@ -55,7 +55,7 @@ static intptr_t PASSFLOAT(float x)
 	return rc._int;
 }
 
-intptr_t trap_GetApiVersion()
+intptr_t trap_GetApiVersion(void)
 {
 	return syscall(G_GETAPIVERSION);
 }
@@ -95,7 +95,7 @@ void trap_Error(const char *fmt)
 	syscall(G_ERROR, (intptr_t) fmt);
 }
 
-intptr_t trap_spawn()
+intptr_t trap_spawn(void)
 {
 	return syscall(G_SPAWN_ENT);
 }
@@ -146,7 +146,7 @@ void trap_sound(intptr_t edn, intptr_t channel, char *samp, float vol, float att
 	syscall(G_SOUND, edn, channel, (intptr_t) samp, PASSFLOAT(vol), PASSFLOAT(att));
 }
 
-intptr_t trap_checkclient()
+intptr_t trap_checkclient(void)
 {
 	return syscall(G_CHECKCLIENT);
 }
@@ -168,7 +168,7 @@ void trap_localcmd(const char *fmt)
 	syscall(G_LOCALCMD, (intptr_t) fmt);
 }
 
-void trap_executecmd()
+void trap_executecmd(void)
 {
 	syscall(G_executecmd);
 }
@@ -331,7 +331,7 @@ void trap_WriteEntity(intptr_t to, intptr_t edn)
 	syscall(G_WRITEENTITY, to, edn);
 }
 
-void trap_FlushSignon()
+void trap_FlushSignon(void)
 {
 	syscall(G_FLUSHSIGNON);
 }
@@ -341,7 +341,7 @@ void trap_disableupdates(intptr_t edn, float time)
 	syscall(G_DISABLEUPDATES, edn, PASSFLOAT(time));
 }
 
-intptr_t trap_CmdArgc()
+intptr_t trap_CmdArgc(void)
 {
 	return syscall(G_CMD_ARGC);
 }

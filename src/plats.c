@@ -25,16 +25,16 @@
 
 #include "g_local.h"
 
-void plat_center_touch();
-void plat_outside_touch();
-void plat_trigger_use();
-void plat_go_up();
-void plat_go_down();
-void plat_crush();
+void plat_center_touch(void);
+void plat_outside_touch(void);
+void plat_trigger_use(void);
+void plat_go_up(void);
+void plat_go_down(void);
+void plat_crush(void);
 
 #define PLAT_LOW_TRIGGER 1
 
-void plat_spawn_inside_trigger()
+void plat_spawn_inside_trigger(void)
 {
 	gedict_t *trigger;
 	vec3_t tmin, tmax;
@@ -76,7 +76,7 @@ void plat_spawn_inside_trigger()
 	setsize(trigger, PASSVEC3(tmin), PASSVEC3(tmax));
 }
 
-void plat_hit_top()
+void plat_hit_top(void)
 {
 	sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->noise1, 1, ATTN_NORM);
 	self->state = STATE_TOP;
@@ -91,7 +91,7 @@ void plat_hit_top()
 #endif
 }
 
-void plat_hit_bottom()
+void plat_hit_bottom(void)
 {
 	sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->noise1, 1, ATTN_NORM);
 	self->state = STATE_BOTTOM;
@@ -104,21 +104,21 @@ void plat_hit_bottom()
 #endif
 }
 
-void plat_go_down()
+void plat_go_down(void)
 {
 	sound(self, CHAN_VOICE, self->noise, 1, ATTN_NORM);
 	self->state = STATE_DOWN;
 	SUB_CalcMove(self->pos2, self->speed, plat_hit_bottom);
 }
 
-void plat_go_up()
+void plat_go_up(void)
 {
 	sound(self, CHAN_VOICE, self->noise, 1, ATTN_NORM);
 	self->state = STATE_UP;
 	SUB_CalcMove(self->pos1, self->speed, plat_hit_top);
 }
 
-void plat_center_touch()
+void plat_center_touch(void)
 {
 	// return if countdown or map frozen
 	if (!k_practice) // #practice mode#
@@ -154,7 +154,7 @@ void plat_center_touch()
 	}
 }
 
-void plat_outside_touch()
+void plat_outside_touch(void)
 {
 	// return if countdown or map frozen
 	if (!k_practice) // #practice mode#
@@ -183,7 +183,7 @@ void plat_outside_touch()
 	}
 }
 
-void plat_trigger_use()
+void plat_trigger_use(void)
 {
 	if (self->think)
 	{
@@ -193,7 +193,7 @@ void plat_trigger_use()
 	plat_go_down();
 }
 
-void plat_crush()
+void plat_crush(void)
 {
 //dprint ("plat_crush\n");
 
@@ -214,7 +214,7 @@ void plat_crush()
 	}
 }
 
-void plat_use()
+void plat_use(void)
 {
 	self->use = (func_t) SUB_Null;
 	if (self->state != STATE_UP)
@@ -238,7 +238,7 @@ void plat_use()
  2) chain slow
  */
 
-void SP_func_plat()
+void SP_func_plat(void)
 {
 //gedict_t* t;
 
@@ -323,10 +323,10 @@ void SP_func_plat()
 
 //============================================================================
 
-void train_next();
-void funcref_train_find();
+void train_next(void);
+void funcref_train_find(void);
 
-void train_blocked()
+void train_blocked(void)
 {
 	if (g_globalvars.time < self->attack_finished)
 	{
@@ -338,7 +338,7 @@ void train_blocked()
 	T_Damage(other, self, self, self->dmg);
 }
 
-void train_use()
+void train_use(void)
 {
 	if (self->think != (func_t) funcref_train_find)
 	{
@@ -348,7 +348,7 @@ void train_use()
 	train_next();
 }
 
-void train_wait()
+void train_wait(void)
 {
 	if (self->wait)
 	{
@@ -367,7 +367,7 @@ void train_wait()
 	}
 }
 
-void train_next()
+void train_next(void)
 {
 	gedict_t *targ;
 	vec3_t tmpv;
@@ -398,7 +398,7 @@ void train_next()
 	SUB_CalcMove(tmpv, self->speed, train_wait);
 }
 
-void funcref_train_find()
+void funcref_train_find(void)
 {
 	gedict_t *targ;
 
@@ -433,7 +433,7 @@ void funcref_train_find()
  1) ratchet metal
 
  */
-void SP_func_train()
+void SP_func_train(void)
 {
 	if (!self->speed)
 	{
@@ -489,7 +489,7 @@ void SP_func_train()
 /*QUAKED misc_teleporttrain (0 .5 .8) (-8 -8 -8) (8 8 8)
  This is used for the final bos
  */
-void SP_misc_teleporttrain()
+void SP_misc_teleporttrain(void)
 {
 	if (!self->speed)
 	{

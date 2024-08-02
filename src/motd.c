@@ -20,7 +20,7 @@
 // motd.c
 #include "g_local.h"
 
-void PMOTDThink()
+void PMOTDThink(void)
 {
 	int i;
 	char buf[2048] =
@@ -92,12 +92,12 @@ void PMOTDThink()
 	self->s.v.nextthink = g_globalvars.time + 0.7;
 }
 
-void SMOTDThink()
+void SMOTDThink(void)
 {
 	PMOTDThink(); // equal motd for player and spectator now
 }
 
-void MOTDThinkX()
+void MOTDThinkX(void)
 {
 	gedict_t *owner = PROG_TO_EDICT(self->s.v.owner);
 
@@ -133,7 +133,7 @@ void MOTDThinkX()
 	}
 }
 
-void MakeMOTD()
+void MakeMOTD(void)
 {
 	gedict_t *motd;
 	int i = bound(0, cvar("k_motd_time"), 30);
@@ -146,7 +146,7 @@ void MakeMOTD()
 	motd->attack_finished = g_globalvars.time + (i ? i : (k_matchLess ? 3 : 7));
 }
 
-void RemoveMOTD()
+void RemoveMOTD(void)
 {
 	gedict_t *motd;
 	int owner = EDICT_TO_PROG(self);

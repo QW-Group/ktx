@@ -15,13 +15,13 @@ void SetNone(gedict_t *p);
 
 gedict_t *ra_que[MAX_CLIENTS];
 
-void ra_init_que()
+void ra_init_que(void)
 {
 	memset(ra_que, 0, sizeof(ra_que));
 }
 
 // return first element in ra queue, return NULL if queue empty
-gedict_t* ra_que_first()
+gedict_t* ra_que_first(void)
 {
 	return ra_que[0];
 }
@@ -127,7 +127,7 @@ int ra_pos_que(gedict_t *p)
 }
 
 // ra is just modificator of duel
-qbool isRA()
+qbool isRA(void)
 {
 	return (isDuel() && cvar("k_rocketarena"));
 }
@@ -142,7 +142,7 @@ qbool isLoser(gedict_t *p)
 	return (p->ra_pt == raLoser);
 }
 
-gedict_t* getWinner()
+gedict_t* getWinner(void)
 {
 	gedict_t *p;
 
@@ -157,7 +157,7 @@ gedict_t* getWinner()
 	return NULL;
 }
 
-gedict_t* getLoser()
+gedict_t* getLoser(void)
 {
 	gedict_t *p;
 
@@ -187,7 +187,7 @@ void SetNone(gedict_t *p)
 	p->ra_pt = raNone;
 }
 
-void ra_ClientDisconnect()
+void ra_ClientDisconnect(void)
 {
 	gedict_t *p = NULL;
 
@@ -351,7 +351,7 @@ void ra_ClientObituary(gedict_t *targ, gedict_t *attacker)
 	}
 }
 
-void ra_PutClientInServer()
+void ra_PutClientInServer(void)
 {
 	if (!isRA())
 	{
@@ -464,7 +464,7 @@ void setfullwep(gedict_t *anent)
 	self = swap;
 }
 
-qbool readytostart()
+qbool readytostart(void)
 {
 	if (!isRA())
 	{
@@ -535,7 +535,7 @@ void PrintStats(gedict_t *who)
 	who->laststattime = g_globalvars.time + PLAYERSTATTIME;
 }
 
-void ra_Frame()
+void ra_Frame(void)
 {
 	static int last_r;
 	int r;
@@ -644,7 +644,7 @@ void ra_Frame()
 	}
 }
 
-void RocketArenaPre()
+void RocketArenaPre(void)
 {
 	if (!isRA())
 	{
@@ -703,7 +703,7 @@ void RocketArenaPre()
 
 // { ra commands
 
-void ra_PlayerStats()
+void ra_PlayerStats(void)
 {
 	gedict_t *p;
 	int i, pL = 0;
@@ -768,7 +768,7 @@ void ra_PlayerStats()
 	}
 }
 
-void ra_PrintPos()
+void ra_PrintPos(void)
 {
 	int pos;
 
@@ -808,7 +808,7 @@ void ra_PrintPos()
 	}
 }
 
-void ra_break()
+void ra_break(void)
 {
 	if (!isRA() || isWinner(self) || isLoser(self))
 	{

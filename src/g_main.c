@@ -90,20 +90,20 @@ float starttime;
 int g_matchstarttime;
 int sv_extensions;
 void G_InitGame(int levelTime, int randomSeed);
-void G_ShutDown();
+void G_ShutDown(void);
 void StartFrame(int time);
-qbool ClientCommand();
+qbool ClientCommand(void);
 qbool ClientUserInfoChanged(int after);
-void G_EdictTouch();
-void G_EdictThink();
-void G_EdictBlocked();
-void ClearGlobals();
+void G_EdictTouch(void);
+void G_EdictThink(void);
+void G_EdictBlocked(void);
+void ClearGlobals(void);
 void PausedTic(int duration);
 
 qbool ClientSay(qbool isTeamSay);
 
-void RemoveMOTD();
-void ShowVersion();
+void RemoveMOTD(void);
+void ShowVersion(void);
 
 static qbool check_ezquake(gedict_t *p);
 
@@ -498,7 +498,7 @@ void G_InitGame(int levelTime, int randomSeed)
 	sv_extensions = cvar("sv_mod_extensions");
 }
 
-void G_ShutDown()
+void G_ShutDown(void)
 {
 	extern int IsMapInCycle(char *map);
 	extern qbool force_map_reset;
@@ -531,7 +531,7 @@ void G_ShutDown()
 // self
 // other
 ///////////////
-void G_EdictTouch()
+void G_EdictTouch(void)
 {
 	self = PROG_TO_EDICT(g_globalvars.self);
 	other = PROG_TO_EDICT(g_globalvars.other);
@@ -544,7 +544,7 @@ void G_EdictTouch()
 		 G_bprint(2, "touch %s <-> %s\n", self->classname,other->classname);
 		 #endif
 		 */
-		((void(*)())(self->touch))();
+		((void(*)(void))(self->touch))();
 	}
 	else
 	{
@@ -558,13 +558,13 @@ void G_EdictTouch()
 // self
 // other=world
 ///////////////
-void G_EdictThink()
+void G_EdictThink(void)
 {
 	self = PROG_TO_EDICT(g_globalvars.self);
 	other = PROG_TO_EDICT(g_globalvars.other);
 	if (self->think)
 	{
-		((void(*)())(self->think))();
+		((void(*)(void))(self->think))();
 	}
 	else
 	{
@@ -581,14 +581,14 @@ void G_EdictThink()
 // if the pusher has a "blocked" function, call it
 // otherwise, just stay in place until the obstacle is gone
 ///////////////
-void G_EdictBlocked()
+void G_EdictBlocked(void)
 {
 	self = PROG_TO_EDICT(g_globalvars.self);
 	other = PROG_TO_EDICT(g_globalvars.other);
 
 	if (self->blocked)
 	{
-		((void(*)())(self->blocked))();
+		((void(*)(void))(self->blocked))();
 	}
 	else
 	{
@@ -597,7 +597,7 @@ void G_EdictBlocked()
 
 }
 
-void ClearGlobals()
+void ClearGlobals(void)
 {
 	damage_attacker = damage_inflictor = activator = self = other = newmis = world;
 }

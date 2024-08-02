@@ -154,109 +154,109 @@ enum
 
 };
 
-void army_stand1();
-void army_stand2();
-void army_stand3();
-void army_stand4();
-void army_stand5();
-void army_stand6();
-void army_stand7();
-void army_stand8();
-void army_walk1();
-void army_walk2();
-void army_walk3();
-void army_walk4();
-void army_walk5();
-void army_walk6();
-void army_walk7();
-void army_walk8();
-void army_walk9();
-void army_walk10();
-void army_walk11();
-void army_walk12();
-void army_walk13();
-void army_walk14();
-void army_walk15();
-void army_walk16();
-void army_walk17();
-void army_walk18();
-void army_walk19();
-void army_walk20();
-void army_walk21();
-void army_walk22();
-void army_walk23();
-void army_walk24();
-void army_run1();
-void army_run2();
-void army_run3();
-void army_run4();
-void army_run5();
-void army_run6();
-void army_run7();
-void army_run8();
-void army_atk1();
-void army_atk2();
-void army_atk3();
-void army_atk4();
-void army_atk5();
-void army_atk6();
-void army_atk7();
-void army_atk8();
-void army_atk9();
-void army_pain1();
-void army_pain2();
-void army_pain3();
-void army_pain4();
-void army_pain5();
-void army_pain6();
-void army_painb1();
-void army_painb2();
-void army_painb3();
-void army_painb4();
-void army_painb5();
-void army_painb6();
-void army_painb7();
-void army_painb8();
-void army_painb9();
-void army_painb10();
-void army_painb11();
-void army_painb12();
-void army_painb13();
-void army_painb14();
-void army_painc1();
-void army_painc2();
-void army_painc3();
-void army_painc4();
-void army_painc5();
-void army_painc6();
-void army_painc7();
-void army_painc8();
-void army_painc9();
-void army_painc10();
-void army_painc11();
-void army_painc12();
-void army_painc13();
-void army_die1();
-void army_die2();
-void army_die3();
-void army_die4();
-void army_die5();
-void army_die6();
-void army_die7();
-void army_die8();
-void army_die9();
-void army_die10();
-void army_cdie1();
-void army_cdie2();
-void army_cdie3();
-void army_cdie4();
-void army_cdie5();
-void army_cdie6();
-void army_cdie7();
-void army_cdie8();
-void army_cdie9();
-void army_cdie10();
-void army_cdie11();
+void army_stand1(void);
+void army_stand2(void);
+void army_stand3(void);
+void army_stand4(void);
+void army_stand5(void);
+void army_stand6(void);
+void army_stand7(void);
+void army_stand8(void);
+void army_walk1(void);
+void army_walk2(void);
+void army_walk3(void);
+void army_walk4(void);
+void army_walk5(void);
+void army_walk6(void);
+void army_walk7(void);
+void army_walk8(void);
+void army_walk9(void);
+void army_walk10(void);
+void army_walk11(void);
+void army_walk12(void);
+void army_walk13(void);
+void army_walk14(void);
+void army_walk15(void);
+void army_walk16(void);
+void army_walk17(void);
+void army_walk18(void);
+void army_walk19(void);
+void army_walk20(void);
+void army_walk21(void);
+void army_walk22(void);
+void army_walk23(void);
+void army_walk24(void);
+void army_run1(void);
+void army_run2(void);
+void army_run3(void);
+void army_run4(void);
+void army_run5(void);
+void army_run6(void);
+void army_run7(void);
+void army_run8(void);
+void army_atk1(void);
+void army_atk2(void);
+void army_atk3(void);
+void army_atk4(void);
+void army_atk5(void);
+void army_atk6(void);
+void army_atk7(void);
+void army_atk8(void);
+void army_atk9(void);
+void army_pain1(void);
+void army_pain2(void);
+void army_pain3(void);
+void army_pain4(void);
+void army_pain5(void);
+void army_pain6(void);
+void army_painb1(void);
+void army_painb2(void);
+void army_painb3(void);
+void army_painb4(void);
+void army_painb5(void);
+void army_painb6(void);
+void army_painb7(void);
+void army_painb8(void);
+void army_painb9(void);
+void army_painb10(void);
+void army_painb11(void);
+void army_painb12(void);
+void army_painb13(void);
+void army_painb14(void);
+void army_painc1(void);
+void army_painc2(void);
+void army_painc3(void);
+void army_painc4(void);
+void army_painc5(void);
+void army_painc6(void);
+void army_painc7(void);
+void army_painc8(void);
+void army_painc9(void);
+void army_painc10(void);
+void army_painc11(void);
+void army_painc12(void);
+void army_painc13(void);
+void army_die1(void);
+void army_die2(void);
+void army_die3(void);
+void army_die4(void);
+void army_die5(void);
+void army_die6(void);
+void army_die7(void);
+void army_die8(void);
+void army_die9(void);
+void army_die10(void);
+void army_cdie1(void);
+void army_cdie2(void);
+void army_cdie3(void);
+void army_cdie4(void);
+void army_cdie5(void);
+void army_cdie6(void);
+void army_cdie7(void);
+void army_cdie8(void);
+void army_cdie9(void);
+void army_cdie10(void);
+void army_cdie11(void);
 
 //==============================================================================
 
@@ -323,7 +323,7 @@ ANIM(army_run6, run6, army_run7; ai_run(15);)
 ANIM(army_run7, run7, army_run8; ai_run(10);)
 ANIM(army_run8, run8, army_run1; ai_run(8);)
 
-void army_fire()
+void army_fire(void)
 {
 	vec3_t dir;
 	gedict_t *en;
@@ -457,7 +457,7 @@ ANIM(army_cdie9, deathc9, army_cdie10;)
 ANIM(army_cdie10, deathc10, army_cdie11;)
 ANIM(army_cdie11, deathc11, army_cdie11;)
 
-void army_die()
+void army_die(void)
 {
 	// check for gib
 	if (self->s.v.health < -35)
@@ -498,7 +498,7 @@ void army_die()
  Returns false if movement should continue
  ============
  */
-float SoldierCheckAttack()
+float SoldierCheckAttack(void)
 {
 	vec3_t spot1, spot2;
 	gedict_t *targ;
@@ -574,7 +574,7 @@ float SoldierCheckAttack()
 
 /*QUAKED monster_army (1 0 0) (-16 -16 -24) (16 16 40) Ambush
  */
-void SP_monster_army()
+void SP_monster_army(void)
 {
 	if (!AllowMonster(self))
 	{

@@ -25,22 +25,22 @@
 
 #include "g_local.h"
 
-void cmdinfo();
-void cmduinfo();
+void cmdinfo(void);
+void cmduinfo(void);
 void cmd_wreg_do(byte c);
-void cmd_ack();
-void cmd_al();
+void cmd_ack(void);
+void cmd_al(void);
 
 void s_common(gedict_t *from, gedict_t *to, char *msg);
-void s_p();
+void s_p(void);
 void s_lr(float l);
 void s_t_do(char *str, char *tname);
-void s_t();
+void s_t(void);
 void s_m_do(char *str, int m); // do multi print
-void s_m();
+void s_m(void);
 void multi_do(int from_arg, qbool from_mmode); // set up multi set
 
-qbool ClientCommand()
+qbool ClientCommand(void)
 {
 	char cmd_command[1024];
 
@@ -93,7 +93,7 @@ qbool ClientCommand()
 	return false;
 }
 
-void cmd_ack()
+void cmd_ack(void)
 {
 	int argc = trap_CmdArgc();
 	char arg_1[64];
@@ -156,7 +156,7 @@ say_fp_level_t say_fp_levels[] =
 
 int say_fp_levels_cnt = sizeof(say_fp_levels) / sizeof(say_fp_levels[0]);
 
-void FixSayFloodProtect()
+void FixSayFloodProtect(void)
 {
 	static int k_fp_last = -1;
 
@@ -598,7 +598,7 @@ void s_common(gedict_t *from, gedict_t *to, char *msg)
 	G_sprint_flags(from, PRINT_CHAT, SPRINT_IGNOREINDEMO, "[->%s]: %s\n", getname(to), msg);
 }
 
-void s_p()
+void s_p(void)
 {
 	int argc = trap_CmdArgc();
 	gedict_t *p;
@@ -736,7 +736,7 @@ void s_t_do(char *str, char *tname)
 	G_sprint(self, PRINT_CHAT, "[<t:%s>]: %s\n", tname, str);
 }
 
-void s_t()
+void s_t(void)
 {
 	int argc = trap_CmdArgc();
 	char arg_3[1024], *str;
@@ -812,7 +812,7 @@ void s_m_do(char *str, int m)
 	G_sprint(self, PRINT_CHAT, "[<m:%d>]: %s\n", m, str);
 }
 
-void s_m()
+void s_m(void)
 {
 	if (trap_CmdArgc() < 3)
 	{
@@ -825,12 +825,12 @@ void s_m()
 }
 
 // "/multi"
-void multi()
+void multi(void)
 {
 	multi_do(1, false);
 }
 
-void multi_usage()
+void multi_usage(void)
 {
 	G_sprint(self, 2, "Usage: multi <=/+/-/\?/\?\?> id1/name1 id2/name2 ...\n");
 }
@@ -1040,7 +1040,7 @@ void multi_do(int from_arg, qbool from_mmode)
 	}
 }
 
-void mmode_usage()
+void mmode_usage(void)
 {
 	G_sprint(self, 2, "Usage: mmode <player . , team multi name last off rcon> [params]\n");
 }
@@ -1089,7 +1089,7 @@ char* mmode_str(int mmode)
 	return "unknown";
 }
 
-void mmode()
+void mmode(void)
 {
 	qbool set;
 	gedict_t *p = NULL;

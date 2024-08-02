@@ -1,9 +1,9 @@
 // admin.c
 #include "g_local.h"
 
-void AdminMatchStart();
+void AdminMatchStart(void);
 void PlayerReady(qbool startIdlebot);
-void NextClient();
+void NextClient(void);
 qbool DoKick(gedict_t *victim, gedict_t *kicker);
 
 // is real admin
@@ -18,7 +18,7 @@ qbool is_adm(gedict_t *p)
 	return (is_real_adm(p) || (p->k_admin & AF_ADMIN));
 }
 
-void KickThink()
+void KickThink(void)
 {
 	if (!self->k_kicking)
 	{
@@ -116,7 +116,7 @@ qbool DoKick(gedict_t *victim, gedict_t *kicker)
 	return true;
 }
 
-void AdminKick()
+void AdminKick(void)
 {
 	int argc = trap_CmdArgc();
 
@@ -171,7 +171,7 @@ void AdminKick()
 }
 
 // multi kick
-void m_kick()
+void m_kick(void)
 {
 	int i, k;
 	gedict_t *p;
@@ -228,7 +228,7 @@ void m_kick()
 	}
 }
 
-void NextClient()
+void NextClient(void)
 {
 	int from = 0;
 
@@ -261,7 +261,7 @@ void NextClient()
 				getname(self->k_playertokick));
 }
 
-void YesKick()
+void YesKick(void)
 {
 	if (!self->k_kicking)
 	{
@@ -283,7 +283,7 @@ void YesKick()
 	NextClient();
 }
 
-void DontKick()
+void DontKick(void)
 {
 	if (!self->k_kicking)
 	{
@@ -310,7 +310,7 @@ void BecomeAdmin(gedict_t *p, int adm_flags)
 
 // "admin" command
 
-void ReqAdmin()
+void ReqAdmin(void)
 {
 	//  check for election
 	if (is_elected(self, etAdmin))
@@ -393,7 +393,7 @@ void ReqAdmin()
 	G_sprint(self, 2, "Use %s or %s to enter code\n", redtext("numbers"), redtext("impulses"));
 }
 
-void AdminImpBot()
+void AdminImpBot(void)
 {
 	float coef, i1;
 
@@ -447,7 +447,7 @@ void AdminImpBot()
 }
 
 // "ellect" command
-void VoteAdmin()
+void VoteAdmin(void)
 {
 	gedict_t *p;
 	int till;
@@ -536,7 +536,7 @@ void VoteAdmin()
 	electguard->s.v.nextthink = g_globalvars.time + 60;
 }
 
-void AdminMatchStart()
+void AdminMatchStart(void)
 {
 	gedict_t *p;
 	int i = 0;
@@ -569,7 +569,7 @@ void AdminMatchStart()
 	}
 }
 
-void ReadyThink()
+void ReadyThink(void)
 {
 	float i1;
 	char *txt, *gr;
@@ -639,7 +639,7 @@ void ReadyThink()
 	self->s.v.nextthink = g_globalvars.time + 1;
 }
 
-void AdminForceStart()
+void AdminForceStart(void)
 {
 	gedict_t *mess;
 
@@ -705,7 +705,7 @@ void AdminForceStart()
 	}
 }
 
-void AdminForceBreak()
+void AdminForceBreak(void)
 {
 	if (is_adm(self) && (self->ct != ctPlayer) && !match_in_progress)
 	{
@@ -739,7 +739,7 @@ void AdminForceBreak()
 	EndMatch(0);
 }
 
-void AdminForceMap()
+void AdminForceMap(void)
 {
 	char map[128];
 
@@ -780,7 +780,7 @@ void PlayerStopFire(gedict_t *p)
 	p->wreg_attack = 0;
 }
 
-void PlayersStopFire()
+void PlayersStopFire(void)
 {
 	gedict_t *p;
 
@@ -790,7 +790,7 @@ void PlayersStopFire()
 	}
 }
 
-void TogglePreWar()
+void TogglePreWar(void)
 {
 	int k_prewar = bound(0, cvar("k_prewar"), 2);
 
@@ -846,7 +846,7 @@ void TogglePreWar()
 	cvar_fset("k_prewar", k_prewar);
 }
 
-void ToggleMapLock()
+void ToggleMapLock(void)
 {
 	float tmp;
 
@@ -885,7 +885,7 @@ void ToggleMapLock()
 	}
 }
 
-void ToggleFallBunny()
+void ToggleFallBunny(void)
 {
 	if (match_in_progress)
 	{
@@ -909,7 +909,7 @@ void ToggleFallBunny()
 	cvar_toggle_msg(self, "k_fallbunny", redtext("fallbunny"));
 }
 
-void sv_lock()
+void sv_lock(void)
 {
 	int lock_time = 15;
 
@@ -971,7 +971,7 @@ void do_force_spec(gedict_t *p, gedict_t *admin, qbool spec)
 }
 
 // ktpro (c)
-void force_spec()
+void force_spec(void)
 {
 	qbool found = false;
 	gedict_t *p = NULL;

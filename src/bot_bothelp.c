@@ -88,7 +88,7 @@ qbool VisibleEntity(gedict_t *ent)
 	return PointVisible(vec);
 }
 
-gedict_t* HelpTeammate()
+gedict_t* HelpTeammate(void)
 {
 	gedict_t *goalent;
 	gedict_t *head, *selected1, *selected2;

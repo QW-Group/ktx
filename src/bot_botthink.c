@@ -71,7 +71,7 @@ static void LookingAtEnemyLogic(gedict_t *self)
 	}
 }
 
-static void NewlyPickedEnemyLogic()
+static void NewlyPickedEnemyLogic(void)
 {
 	gedict_t *goalentity_ = &g_edicts[self->s.v.goalentity];
 	gedict_t *enemy_ = &g_edicts[self->s.v.enemy];
@@ -272,7 +272,7 @@ static void BotMoveTowardsLinkedMarker(gedict_t *self, vec3_t dir_move)
 }
 
 // Called when the bot has a touch marker set
-static void BotTouchMarkerLogic()
+static void BotTouchMarkerLogic(void)
 {
 	TargetEnemyLogic(self);
 
