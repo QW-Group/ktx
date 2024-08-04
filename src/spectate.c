@@ -158,7 +158,7 @@ qbool SpecCanConnect(gedict_t *spec)
 ///////////////
 void SpectatorConnect(void)
 {
-	gedict_t *p;
+	gedict_t *p, *id;
 	int diff = (int)(PROG_TO_EDICT(self->s.v.goalentity) - world);
 
 	// we need this before the SpecCanConnect() call, as we need to restore admin and/or coach flags
@@ -197,6 +197,12 @@ void SpectatorConnect(void)
 		self->wizard->classname = "spectator_wizard";
 		self->wizard->think = (func_t) wizard_think;
 		self->wizard->s.v.nextthink = g_globalvars.time + 0.1;
+	}
+
+	// resume tracking player from before map change
+	if ((id = PROG_TO_EDICT(self->s.v.goalentity)) != world)
+	{
+		stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "track %d\n", NUM_FOR_EDICT(id));
 	}
 
 	// Wait until you do stuffing
