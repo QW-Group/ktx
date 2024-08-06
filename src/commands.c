@@ -8114,14 +8114,42 @@ void fcheck()
 
 	if (!is_real_adm(self))
 	{
-		if (strneq(arg_x, "f_version") && strneq(arg_x, "f_modified") && strneq(arg_x, "f_server"))
+		if (strneq(arg_x, "f_version") && strneq(arg_x, "f_modified") && strneq(arg_x, "f_server") && strneq(arg_x, "f_movement"))
 		{
 			G_sprint(self, 2, "You are not allowed to check \020%s\021\n"
-						"available checks are: f_version, f_modified and f_server\n",
+						"available checks are: f_version, f_modified, f_server and f_movement\n",
 						arg_x);
 
 			return;
 		}
+	}
+
+	if (streq(arg_x, "f_movement"))
+	{
+		G_bprint(2, "%s is checking \020%s\021\n", self->netname, arg_x);
+
+		for (i = 1; i <= MAX_CLIENTS; i++)
+		{
+			if (!strnull(g_edicts[i].netname))
+			{
+				if (g_edicts[i].socdDetected > 0)
+				{
+					G_bprint(2, "%s: SOCD movement assistance detected!\n", g_edicts[i].netname);
+				}
+				else
+				{
+					if (g_edicts[i].socdChecksCount >= 2)
+					{
+						G_bprint(2, "%s: no assistance detected.\n", g_edicts[i].netname);
+					}
+					else
+					{
+						G_bprint(2, "%s: not enough movement captured yet to run SOCD detection.\n", g_edicts[i].netname);
+					}
+				}
+			}
+		}
+		return;
 	}
 
 	for (i = 1; i <= MAX_CLIENTS; i++)
