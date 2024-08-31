@@ -56,14 +56,14 @@
 //#define   STATE_BOTTOM             1;
 //#define   STATE_UP                 2;
 //#define   STATE_DOWN               3;
-void door_blocked();
-void door_hit_top();
-void door_hit_bottom();
-void door_go_down();
-void door_go_up();
-void door_fire();
+void door_blocked(void);
+void door_hit_top(void);
+void door_hit_bottom(void);
+void door_go_down(void);
+void door_go_up(void);
+void door_fire(void);
 
-void door_blocked()
+void door_blocked(void)
 {
 	other->deathtype = dtSQUISH;
 	T_Damage(other, self, PROG_TO_EDICT(self->s.v.goalentity), self->dmg);
@@ -83,7 +83,7 @@ void door_blocked()
 	}
 }
 
-void door_hit_top()
+void door_hit_top(void)
 {
 	sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->noise1, 1, ATTN_NORM);
 	self->state = STATE_TOP;
@@ -104,7 +104,7 @@ void door_hit_top()
 	self->s.v.nextthink = self->s.v.ltime + self->wait;
 }
 
-void door_hit_bottom()
+void door_hit_bottom(void)
 {
 	sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->noise1, 1, ATTN_NORM);
 	self->state = STATE_BOTTOM;
@@ -117,7 +117,7 @@ void door_hit_bottom()
 #endif
 }
 
-void door_go_down()
+void door_go_down(void)
 {
 	sound(self, CHAN_VOICE, self->noise2, 1, ATTN_NORM);
 	if (self->s.v.max_health)
@@ -130,7 +130,7 @@ void door_go_down()
 	SUB_CalcMove(self->pos1, self->speed, door_hit_bottom);
 }
 
-void door_go_up()
+void door_go_up(void)
 {
 	if (self->state == STATE_UP)
 	{
@@ -160,7 +160,7 @@ void door_go_up()
  =============================================================================
  */
 
-void door_fire()
+void door_fire(void)
 {
 	gedict_t *oself, *starte;
 
@@ -209,7 +209,7 @@ void door_fire()
 	self = oself;
 }
 
-void door_use()
+void door_use(void)
 {
 	gedict_t *oself;
 
@@ -223,7 +223,7 @@ void door_use()
 	self = oself;
 }
 
-void door_trigger_touch()
+void door_trigger_touch(void)
 {
 // return if countdown or map frozen
 	if (!k_practice) // #practice mode#
@@ -252,7 +252,7 @@ void door_trigger_touch()
 	door_use();
 }
 
-void door_killed()
+void door_killed(void)
 {
 	gedict_t *oself;
 
@@ -280,7 +280,7 @@ void door_killed()
  Prints messages and opens key doors
  ================
  */
-void door_touch()
+void door_touch(void)
 {
 	char *msg;
 
@@ -443,7 +443,7 @@ qbool EntitiesTouching(gedict_t *e1, gedict_t *e2)
 
  =============
  */
-void LinkDoors()
+void LinkDoors(void)
 {
 	gedict_t *t, *starte;
 	vec3_t cmins, cmaxs;
@@ -587,7 +587,7 @@ void LinkDoors()
  4)      screechy metal
  */
 
-void SP_func_door()
+void SP_func_door(void)
 {
 	float tmp;
 
@@ -751,13 +751,13 @@ void SP_func_door()
  =============================================================================
  */
 
-void fd_secret_move1();
-void fd_secret_move2();
-void fd_secret_move3();
-void fd_secret_move4();
-void fd_secret_move5();
-void fd_secret_move6();
-void fd_secret_done();
+void fd_secret_move1(void);
+void fd_secret_move2(void);
+void fd_secret_move3(void);
+void fd_secret_move4(void);
+void fd_secret_move5(void);
+void fd_secret_move6(void);
+void fd_secret_done(void);
 
 #define SECRET_OPEN_ONCE 1	// stays open
 #define SECRET_1ST_LEFT 2	// 1st move is left of arrow
@@ -850,7 +850,7 @@ void fd_secret_use(gedict_t *attacker, float take)
 }
 
 // Wait after first movement...
-void fd_secret_move1()
+void fd_secret_move1(void)
 {
 	self->s.v.nextthink = self->s.v.ltime + 1.0;
 	self->think = (func_t) fd_secret_move2;
@@ -858,14 +858,14 @@ void fd_secret_move1()
 }
 
 // Start moving sideways w/sound...
-void fd_secret_move2()
+void fd_secret_move2(void)
 {
 	sound(self, CHAN_VOICE, self->noise2, 1, ATTN_NORM);
 	SUB_CalcMove(self->dest2, self->speed, fd_secret_move3);
 }
 
 // Wait here until time to go back...
-void fd_secret_move3()
+void fd_secret_move3(void)
 {
 	sound(self, CHAN_VOICE, self->noise3, 1, ATTN_NORM);
 	if (!((int)(self->s.v.spawnflags) & SECRET_OPEN_ONCE))
@@ -876,40 +876,40 @@ void fd_secret_move3()
 }
 
 // Move backward...
-void fd_secret_move4()
+void fd_secret_move4(void)
 {
 	sound(self, CHAN_VOICE, self->noise2, 1, ATTN_NORM);
 	SUB_CalcMove(self->dest1, self->speed, fd_secret_move5);
 }
 
 // Wait 1 second...
-void fd_secret_move5()
+void fd_secret_move5(void)
 {
 	self->s.v.nextthink = self->s.v.ltime + 1.0;
 	self->think = (func_t) fd_secret_move6;
 	sound(self, CHAN_VOICE, self->noise3, 1, ATTN_NORM);
 }
 
-void fd_secret_move6()
+void fd_secret_move6(void)
 {
 	sound(self, CHAN_VOICE, self->noise2, 1, ATTN_NORM);
 	SUB_CalcMove(self->s.v.oldorigin, self->speed, fd_secret_done);
 }
 
-void fd_secret_done()
+void fd_secret_done(void)
 {
 	if (!self->targetname || ((int)(self->s.v.spawnflags) & SECRET_YES_SHOOT))
 	{
 		self->s.v.health = 10000;
 		self->s.v.takedamage = DAMAGE_YES;
 		self->th_pain = fd_secret_use;
-		self->th_die = (void (*)()) fd_secret_use;
+		self->th_die = (void (*)(void)) fd_secret_use;
 	}
 
 	sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->noise3, 1, ATTN_NORM);
 }
 
-void secret_blocked()
+void secret_blocked(void)
 {
 	if (g_globalvars.time < self->attack_finished)
 	{
@@ -936,7 +936,7 @@ void secret_blocked()
  Prints messages
  ================
  */
-void secret_touch()
+void secret_touch(void)
 {
 // return if countdown or map frozen
 	if (!k_practice) // #practice mode#
@@ -983,7 +983,7 @@ void secret_touch()
  3) base
  */
 
-void SP_func_door_secret()
+void SP_func_door_secret(void)
 {
 	if (self->s.v.sounds == 0)
 	{

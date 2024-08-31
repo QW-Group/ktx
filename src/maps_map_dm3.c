@@ -4,7 +4,7 @@
 
 #include "g_local.h"
 
-void DM3CampLogic()
+void DM3CampLogic(void)
 {
 	if (NumberOfClients() > 1)
 	{

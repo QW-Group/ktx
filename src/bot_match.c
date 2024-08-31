@@ -10,11 +10,11 @@
 
 #include "g_local.h"
 
-void button_use();
+void button_use(void);
 void fd_secret_use(gedict_t *attacked, float take);
-void door_use();
-void door_killed();
-void multi_use();
+void door_use(void);
+void door_killed(void);
+void multi_use(void);
 
 // Can also be called via "botcmd debug startmap"
 void BotsFireInitialTriggers(gedict_t *player)
@@ -57,11 +57,11 @@ void BotsFireInitialTriggers(gedict_t *player)
 			self = ent;
 			if (ent->s.v.takedamage)
 			{
-				((void (*)())(ent->th_pain))();
+				((void (*)(void))(ent->th_pain))();
 			}
 			else if (ent->use)
 			{
-				((void (*)())(ent->use))();
+				((void (*)(void))(ent->use))();
 			}
 		}
 	}

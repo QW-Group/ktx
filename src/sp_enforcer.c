@@ -142,112 +142,112 @@ enum
 
 };
 
-void enf_stand1();
-void enf_stand2();
-void enf_stand3();
-void enf_stand4();
-void enf_stand5();
-void enf_stand6();
-void enf_stand7();
-void enf_walk1();
-void enf_walk2();
-void enf_walk3();
-void enf_walk4();
-void enf_walk5();
-void enf_walk6();
-void enf_walk7();
-void enf_walk8();
-void enf_walk9();
-void enf_walk10();
-void enf_walk11();
-void enf_walk12();
-void enf_walk13();
-void enf_walk14();
-void enf_walk15();
-void enf_walk16();
-void enf_run1();
-void enf_run2();
-void enf_run3();
-void enf_run4();
-void enf_run5();
-void enf_run6();
-void enf_run7();
-void enf_run8();
-void enf_atk1();
-void enf_atk2();
-void enf_atk3();
-void enf_atk4();
-void enf_atk5();
-void enf_atk6();
-void enf_atk7();
-void enf_atk8();
-void enf_atk9();
-void enf_atk10();
-void enf_atk11();
-void enf_atk12();
-void enf_atk13();
-void enf_atk14();
-void enf_paina1();
-void enf_paina2();
-void enf_paina3();
-void enf_paina4();
-void enf_painb1();
-void enf_painb2();
-void enf_painb3();
-void enf_painb4();
-void enf_painb5();
-void enf_painc1();
-void enf_painc2();
-void enf_painc3();
-void enf_painc4();
-void enf_painc5();
-void enf_painc6();
-void enf_painc7();
-void enf_painc8();
-void enf_paind1();
-void enf_paind2();
-void enf_paind3();
-void enf_paind4();
-void enf_paind5();
-void enf_paind6();
-void enf_paind7();
-void enf_paind8();
-void enf_paind9();
-void enf_paind10();
-void enf_paind11();
-void enf_paind12();
-void enf_paind13();
-void enf_paind14();
-void enf_paind15();
-void enf_paind16();
-void enf_paind17();
-void enf_paind18();
-void enf_paind19();
-void enf_die1();
-void enf_die2();
-void enf_die3();
-void enf_die4();
-void enf_die5();
-void enf_die6();
-void enf_die7();
-void enf_die8();
-void enf_die9();
-void enf_die10();
-void enf_die11();
-void enf_die12();
-void enf_die13();
-void enf_die14();
-void enf_fdie1();
-void enf_fdie2();
-void enf_fdie3();
-void enf_fdie4();
-void enf_fdie5();
-void enf_fdie6();
-void enf_fdie7();
-void enf_fdie8();
-void enf_fdie9();
-void enf_fdie10();
-void enf_fdie11();
+void enf_stand1(void);
+void enf_stand2(void);
+void enf_stand3(void);
+void enf_stand4(void);
+void enf_stand5(void);
+void enf_stand6(void);
+void enf_stand7(void);
+void enf_walk1(void);
+void enf_walk2(void);
+void enf_walk3(void);
+void enf_walk4(void);
+void enf_walk5(void);
+void enf_walk6(void);
+void enf_walk7(void);
+void enf_walk8(void);
+void enf_walk9(void);
+void enf_walk10(void);
+void enf_walk11(void);
+void enf_walk12(void);
+void enf_walk13(void);
+void enf_walk14(void);
+void enf_walk15(void);
+void enf_walk16(void);
+void enf_run1(void);
+void enf_run2(void);
+void enf_run3(void);
+void enf_run4(void);
+void enf_run5(void);
+void enf_run6(void);
+void enf_run7(void);
+void enf_run8(void);
+void enf_atk1(void);
+void enf_atk2(void);
+void enf_atk3(void);
+void enf_atk4(void);
+void enf_atk5(void);
+void enf_atk6(void);
+void enf_atk7(void);
+void enf_atk8(void);
+void enf_atk9(void);
+void enf_atk10(void);
+void enf_atk11(void);
+void enf_atk12(void);
+void enf_atk13(void);
+void enf_atk14(void);
+void enf_paina1(void);
+void enf_paina2(void);
+void enf_paina3(void);
+void enf_paina4(void);
+void enf_painb1(void);
+void enf_painb2(void);
+void enf_painb3(void);
+void enf_painb4(void);
+void enf_painb5(void);
+void enf_painc1(void);
+void enf_painc2(void);
+void enf_painc3(void);
+void enf_painc4(void);
+void enf_painc5(void);
+void enf_painc6(void);
+void enf_painc7(void);
+void enf_painc8(void);
+void enf_paind1(void);
+void enf_paind2(void);
+void enf_paind3(void);
+void enf_paind4(void);
+void enf_paind5(void);
+void enf_paind6(void);
+void enf_paind7(void);
+void enf_paind8(void);
+void enf_paind9(void);
+void enf_paind10(void);
+void enf_paind11(void);
+void enf_paind12(void);
+void enf_paind13(void);
+void enf_paind14(void);
+void enf_paind15(void);
+void enf_paind16(void);
+void enf_paind17(void);
+void enf_paind18(void);
+void enf_paind19(void);
+void enf_die1(void);
+void enf_die2(void);
+void enf_die3(void);
+void enf_die4(void);
+void enf_die5(void);
+void enf_die6(void);
+void enf_die7(void);
+void enf_die8(void);
+void enf_die9(void);
+void enf_die10(void);
+void enf_die11(void);
+void enf_die12(void);
+void enf_die13(void);
+void enf_die14(void);
+void enf_fdie1(void);
+void enf_fdie2(void);
+void enf_fdie3(void);
+void enf_fdie4(void);
+void enf_fdie5(void);
+void enf_fdie6(void);
+void enf_fdie7(void);
+void enf_fdie8(void);
+void enf_fdie9(void);
+void enf_fdie10(void);
+void enf_fdie11(void);
 
 //============================================================================
 
@@ -303,7 +303,7 @@ ANIM(enf_run6, run6, enf_run7; ai_run(14);)
 ANIM(enf_run7, run7, enf_run8; ai_run(7);)
 ANIM(enf_run8, run8, enf_run1; ai_run(11);)
 
-void enforcer_fire()
+void enforcer_fire(void)
 {
 	vec3_t org, delta;
 
@@ -456,7 +456,7 @@ ANIM(enf_fdie9, fdeath9, enf_fdie10)
 ANIM(enf_fdie10, fdeath10, enf_fdie11)
 ANIM(enf_fdie11, fdeath11, enf_fdie11)
 
-void enf_die()
+void enf_die(void)
 {
 	// check for gib
 	if (self->s.v.health < -35)
@@ -491,7 +491,7 @@ void enf_die()
 /*QUAKED monster_enforcer (1 0 0) (-16 -16 -24) (16 16 40) Ambush
 
  */
-void SP_monster_enforcer()
+void SP_monster_enforcer(void)
 {
 	if (!AllowMonster(self))
 	{

@@ -2,6 +2,6 @@
 #define __RNG_STATE_H__
 
 // You must initialize this with rng_seed/rng_seed_global!
-typedef struct RngState { uint32_t s[4]; } RngState;
+typedef struct RngState { unsigned int s[4]; } RngState;
 
 #endif

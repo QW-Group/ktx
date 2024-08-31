@@ -3,7 +3,7 @@
 #define START_OFF 1
 #define LASER_SOLID 2
 
-static void laser_helper_think()
+static void laser_helper_think(void)
 {
 	gedict_t *owner = PROG_TO_EDICT(self->s.v.owner);
 	float alpha = trap_GetExtField_f(self, "alpha");
@@ -16,7 +16,7 @@ static void laser_helper_think()
 	self->s.v.nextthink = g_globalvars.time + 0.05f;
 }
 
-static void init_laser_noise()
+static void init_laser_noise(void)
 {
 	gedict_t *owner = PROG_TO_EDICT(self->s.v.owner);
 
@@ -26,7 +26,7 @@ static void init_laser_noise()
 	self->s.v.nextthink = g_globalvars.time + 0.05f;
 }
 
-static void func_laser_touch()
+static void func_laser_touch(void)
 {
 	// from Copper -- dumptruck_ds
 	if (other->s.v.movetype == MOVETYPE_NOCLIP)
@@ -43,7 +43,7 @@ static void func_laser_touch()
 	}
 }
 
-static void func_laser_use()
+static void func_laser_use(void)
 {
 	if ((int) self->s.v.spawnflags & START_OFF)
 	{
@@ -70,7 +70,7 @@ static void func_laser_use()
  * "message" message to display when activated (not supported)
  * "message2" message to display when deactivated (not supported)
  */
-void SP_func_laser()
+void SP_func_laser(void)
 {
 	gedict_t *helper;
 	float alpha;

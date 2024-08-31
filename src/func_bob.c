@@ -12,7 +12,7 @@
 #define FUNC_BOB_NONSOLID  1
 #define FUNC_BOB_START_ON  2
 
-static void func_bob_timer()
+static void func_bob_timer(void)
 {
 	vec3_t delta;
 
@@ -54,7 +54,7 @@ static void func_bob_timer()
 	self->s.v.nextthink = self->s.v.ltime + 0.1f;
 }
 
-void SP_func_bob()
+void SP_func_bob(void)
 {
 	// Non-solid bobs not implemented yet, remove for now to not block player.
 	if ((int) self->s.v.spawnflags & (BOB_NONSOLID | FUNC_BOB_NONSOLID)) {

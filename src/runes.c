@@ -4,11 +4,11 @@
 
 #include "g_local.h"
 
-void RegenLostRot();
-void RuneRespawn();
-void RuneTouch();
-void RuneResetOwner();
-char* GetRuneSpawnName();
+void RegenLostRot(void);
+void RuneRespawn(void);
+void RuneTouch(void);
+void RuneResetOwner(void);
+char* GetRuneSpawnName(void);
 
 void DoDropRune(int rune, qbool on_respawn)
 {
@@ -146,7 +146,7 @@ void DoTossRune(int rune)
 	item->think = (func_t) RuneResetOwner;
 }
 
-void DropRune()
+void DropRune(void)
 {
 	if (self->ctf_flag & CTF_RUNE_RES)
 	{
@@ -176,7 +176,7 @@ void DropRune()
 	// self->s.v.items -= ( (int)self->s.v.items & (CTF_RUNE_MASK) );
 }
 
-void TossRune()
+void TossRune(void)
 {
 	if (self->ctf_flag & CTF_RUNE_RES)
 	{
@@ -211,7 +211,7 @@ void TossRune()
 	//self->s.v.items -= ( (int)self->s.v.items & (CTF_RUNE_MASK) );
 }
 
-void RegenLostRot()
+void RegenLostRot(void)
 {
 	other = PROG_TO_EDICT(self->s.v.owner);
 	if ((other->s.v.health < 101) || (other->ctf_flag & CTF_RUNE_RGN)
@@ -226,14 +226,14 @@ void RegenLostRot()
 	self->s.v.nextthink = g_globalvars.time + 1;
 }
 
-void RuneResetOwner()
+void RuneResetOwner(void)
 {
 	self->s.v.owner = EDICT_TO_PROG(self);
 	self->think = (func_t) RuneRespawn;
 	self->s.v.nextthink = g_globalvars.time + 90;
 }
 
-void RuneRespawn()
+void RuneRespawn(void)
 {
 	int rune = self->ctf_flag;
 
@@ -242,7 +242,7 @@ void RuneRespawn()
 	DoDropRune(rune, true);
 }
 
-void RuneTouch()
+void RuneTouch(void)
 {
 	if (other->ct != ctPlayer)
 	{
@@ -319,7 +319,7 @@ void RuneTouch()
 	ent_remove(self);
 }
 
-char* GetRuneSpawnName()
+char* GetRuneSpawnName(void)
 {
 	char *runespawn;
 
@@ -459,7 +459,7 @@ void RegenerationSound(gedict_t *player)
 	}
 }
 
-void CheckStuffRune()
+void CheckStuffRune(void)
 {
 	char *rune = "";
 

@@ -23,7 +23,7 @@
  *  $Id$
  */
 
-intptr_t trap_GetApiVersion();
+intptr_t trap_GetApiVersion(void);
 qbool trap_GetEntityToken(char *token, intptr_t size);
 void trap_DPrintf(const char *fmt);
 void trap_conprint(const char *fmt);
@@ -39,7 +39,7 @@ void trap_BPrint(intptr_t level, const char *fmt, intptr_t flags);
 void trap_SPrint(intptr_t edn, intptr_t level, const char *fmt, intptr_t flags);
 void trap_CenterPrint(intptr_t edn, const char *fmt);
 void trap_Error(const char *fmt);
-intptr_t trap_spawn();
+intptr_t trap_spawn(void);
 void trap_remove(intptr_t edn);
 void trap_precache_sound(char *name);
 void trap_precache_model(char *name);
@@ -50,7 +50,7 @@ void trap_setsize(intptr_t edn, float min_x, float min_y, float min_z, float max
 void trap_setmodel(intptr_t edn, char *model);
 void trap_ambientsound(float pos_x, float pos_y, float pos_z, char *samp, float vol, float atten);
 void trap_sound(intptr_t edn, intptr_t channel, char *samp, float vol, float att);
-intptr_t trap_checkclient();
+intptr_t trap_checkclient(void);
 void trap_traceline(float v1_x, float v1_y, float v1_z, float v2_x, float v2_y, float v2_z,
 					intptr_t nomonst, intptr_t edn);
 
@@ -58,7 +58,7 @@ void trap_traceline(float v1_x, float v1_y, float v1_z, float v2_x, float v2_y, 
 #define STUFFCMD_DEMOONLY     (   1<<1) // put in mvd demo only
 void trap_stuffcmd(intptr_t edn, const char *fmt, intptr_t flags);
 void trap_localcmd(const char *fmt);
-void trap_executecmd();
+void trap_executecmd(void);
 void trap_readcmd(const char *str, char *buf, intptr_t size);
 void trap_redirectcmd(gedict_t *ent, char *str);
 
@@ -91,9 +91,9 @@ void trap_WriteAngle(intptr_t to, float data);
 void trap_WriteCoord(intptr_t to, float data);
 void trap_WriteString(intptr_t to, char *data);
 void trap_WriteEntity(intptr_t to, intptr_t edn);
-void trap_FlushSignon();
+void trap_FlushSignon(void);
 void trap_disableupdates(intptr_t edn, float time);
-intptr_t trap_CmdArgc();
+intptr_t trap_CmdArgc(void);
 void trap_CmdArgv(intptr_t arg, char *valbuff, intptr_t sizebuff);
 void trap_CmdArgs(char *valbuff, intptr_t sizebuff);
 void trap_CmdTokenize(char *str);
@@ -143,10 +143,16 @@ intptr_t trap_movetogoal(float dist);
 
 void trap_VisibleTo(intptr_t viewer, intptr_t first, intptr_t len, byte *visible);
 
+// Raw calls, use _i and _f helpers instead.
+void trap_SetExtField(gedict_t *ed, const char *fieldname, int val);
+int trap_GetExtField(gedict_t *ed, const char *fieldname);
+
+// Checks for server support before call
 void trap_SetExtField_i(gedict_t *ed, const char *fieldname, int val);
 void trap_SetExtField_f(gedict_t *ed, const char *fieldname, float val);
 int trap_GetExtField_i(gedict_t *ed, const char *fieldname);
 float trap_GetExtField_f(gedict_t *ed, const char *fieldname);
+
 void trap_changelevelHub(const char *name, const char *entityname, const char *startspot);
 int trap_URI_Query(const char *uri, int vmentry/*GAME_...*/, void *cbcontext, const char *mimetype, const char *data, size_t datasize);
 int trap_particleeffectnum(const char *effectname);

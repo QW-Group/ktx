@@ -24,10 +24,10 @@
  */
 
 #include "g_local.h"
-void button_wait();
-void button_return();
+void button_wait(void);
+void button_return(void);
 
-void button_wait()
+void button_wait(void)
 {
 	self->state = STATE_TOP;
 	self->s.v.nextthink = self->s.v.ltime + self->wait;
@@ -39,12 +39,12 @@ void button_wait()
 	self->s.v.frame = 1;	// use alternate textures
 }
 
-void button_done()
+void button_done(void)
 {
 	self->state = STATE_BOTTOM;
 }
 
-void button_return()
+void button_return(void)
 {
 	self->state = STATE_DOWN;
 
@@ -58,11 +58,11 @@ void button_return()
 	}
 }
 
-void button_blocked()
+void button_blocked(void)
 {	// do nothing, just don't ome all the way back out
 }
 
-void button_fire()
+void button_fire(void)
 {
 	if (!k_practice) // #practice mode#
 	{
@@ -84,7 +84,7 @@ void button_fire()
 	SUB_CalcMove(self->pos2, self->speed, button_wait);
 }
 
-void button_use()
+void button_use(void)
 {
 	// #practice mode#
 	if (!k_practice && (match_in_progress != 2))
@@ -96,7 +96,7 @@ void button_use()
 	button_fire();
 }
 
-void button_touch()
+void button_touch(void)
 {
 	// #practice mode#
 	if (!k_practice && (match_in_progress != 2))
@@ -114,7 +114,7 @@ void button_touch()
 	button_fire();
 }
 
-void button_killed()
+void button_killed(void)
 {
 	if (!k_practice && (match_in_progress != 2))
 	{
@@ -148,7 +148,7 @@ void button_killed()
  2) metallic click
  3) in-out
  */
-void SP_func_button()
+void SP_func_button(void)
 {
 	float ftemp;
 

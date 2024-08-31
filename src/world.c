@@ -29,21 +29,21 @@
 #endif
 
 void RegisterSkillVariables(void);
-void SUB_regen();
-void CheckAll();
-void FixSpecWizards();
-void FixSayFloodProtect();
-void FixRules();
-void ShowSpawnPoints();
-void r_route();
+void SUB_regen(void);
+void CheckAll(void);
+void FixSpecWizards(void);
+void FixSayFloodProtect(void);
+void FixRules(void);
+void ShowSpawnPoints(void);
+void r_route(void);
 void LoadMap(void);
-void SP_trigger_custom_push();
+void SP_trigger_custom_push(void);
 
 #define MAX_BODYQUE 4
 gedict_t *bodyque[MAX_BODYQUE];
 int bodyque_head;
 
-void InitBodyQue()
+void InitBodyQue(void)
 {
 	int i;
 
@@ -89,7 +89,7 @@ void CopyToBodyQue(gedict_t *ent)
 	}
 }
 
-void ClearBodyQue()
+void ClearBodyQue(void)
 {
 	int i;
 
@@ -104,7 +104,7 @@ void ClearBodyQue()
 	bodyque_head = 0;
 }
 
-void CheckDefMap()
+void CheckDefMap(void)
 {
 	int player_count = CountPlayers();
 	int bot_count = CountBots();
@@ -151,7 +151,7 @@ void Spawn_DefMapChecker(float timeout)
 
 float max_map_uptime = 3600 * 12; // 12 hours
 
-void Check_LongMapUptime()
+void Check_LongMapUptime(void)
 {
 	if (match_in_progress)
 	{
@@ -177,9 +177,9 @@ void Check_LongMapUptime()
 	changelevel(mapname);
 }
 
-void SP_item_artifact_super_damage();
+void SP_item_artifact_super_damage(void);
 
-void SP_worldspawn()
+void SP_worldspawn(void)
 {
 	char *s;
 
@@ -563,8 +563,8 @@ void SP_worldspawn()
 	}
 }
 
-void ShowSpawnPoints();
-void Customize_Maps()
+void ShowSpawnPoints(void);
+void Customize_Maps(void)
 {
 	gedict_t *p;
 
@@ -752,7 +752,7 @@ qbool RegisterCvar(const char *var)
 }
 
 // in the first frame - even world is not spawned yet
-void FirstFrame()
+void FirstFrame(void)
 {
 	int i, um_idx;
 	qbool matchless_was_forced = false;
@@ -1145,7 +1145,7 @@ void FirstFrame()
 }
 
 // items spawned, but probably not solid yet
-void SecondFrame()
+void SecondFrame(void)
 {
 	if (framecount != 2)
 	{
@@ -1159,7 +1159,7 @@ void SecondFrame()
 	HM_restore_spawns();
 }
 
-void CheckSvUnlock()
+void CheckSvUnlock(void)
 {
 	if (k_sv_locktime && (k_sv_locktime < g_globalvars.time))
 	{
@@ -1238,7 +1238,7 @@ void CheckAutoXonX(qbool use_time)
 }
 
 // called when switching to/from ctf mode.
-void FixCTFItems()
+void FixCTFItems(void)
 {
 	static gameType_t old_k_mode = 0;	// static
 	static int k_ctf_runes = 0;			// static
@@ -1285,7 +1285,7 @@ void FixCTFItems()
 	k_ctf_hook = cvar("k_ctf_hook");
 }
 
-void FixRA()
+void FixRA(void)
 {
 	static qbool old_k_rocketarena = false;	// static
 
@@ -1310,7 +1310,7 @@ void FixRA()
 	}
 }
 
-void FixRace()
+void FixRace(void)
 {
 	static qbool old_k_race = false;	// static
 
@@ -1336,7 +1336,7 @@ void FixRace()
 }
 
 // serve k_pow and k_pow_min_players
-void FixPowerups()
+void FixPowerups(void)
 {
 	static int k_pow = -1; // static
 	static int k_pow_q = -1; // static
@@ -1405,7 +1405,7 @@ void FixPowerups()
 	}
 }
 
-void FixCmdFloodProtect()
+void FixCmdFloodProtect(void)
 {
 	k_cmd_fp_count = bound(0, cvar("k_cmd_fp_count"), MAX_FP_CMDS);
 	k_cmd_fp_count = (k_cmd_fp_count ? k_cmd_fp_count : min(10, MAX_FP_CMDS));
@@ -1419,7 +1419,7 @@ void FixCmdFloodProtect()
 	k_cmd_fp_disabled = bound(0, cvar("k_cmd_fp_disabled"), 1);
 }
 
-void FixSayTeamToSpecs()
+void FixSayTeamToSpecs(void)
 {
 	int k_sayteam_to_spec = bound(0, cvar("k_sayteam_to_spec"), 3);
 	int current_value = cvar("sv_sayteam_to_spec");
@@ -1527,9 +1527,9 @@ void SetMode4ServerInfo(void)
 int skip_fixrules = 0;
 
 // check if server is misconfigured somehow, made some minimum fixage
-void FixRules()
+void FixRules(void)
 {
-	extern void FixYawnMode();
+	extern void FixYawnMode(void);
 
 	gameType_t km = k_mode = cvar("k_mode");
 	int k_tt = bound(0, cvar("k_timetop"), 600);
@@ -1803,10 +1803,10 @@ int timelimit, fraglimit, teamplay, deathmatch, framecount, coop, skill;
 
 extern float intermission_exittime;
 
-void CheckTiming();
-void check_fcheck();
-void CheckTeamStatus();
-void SendSpecInfo();
+void CheckTiming(void);
+void check_fcheck(void);
+void CheckTeamStatus(void);
+void SendSpecInfo(void);
 void DoMVDAutoTrack(void);
 
 void FixNoSpecs(void);

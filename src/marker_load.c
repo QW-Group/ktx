@@ -265,7 +265,7 @@ gedict_t* CreateMarker(float x, float y, float z)
 	return marker;
 }
 
-void AllMarkersLoaded()
+void AllMarkersLoaded(void)
 {
 	self = NULL;
 	path_normal = true;

@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.9.0)
 # Set project name and languge.
 project(qwprogs C)
 
+include(CheckCCompilerFlag)
+
+set(CMAKE_COLOR_DIAGNOSTICS ON)
+
 # CMake option for bot support, we check it below and add C preprocessor directive if required.
 option(BOT_SUPPORT "Build with bot support" ON)
 # Option for FTE extensions. We also have some basic support for FTE which does not controlled by this setting.
@@ -73,6 +77,7 @@ set(SRC_COMMON
 	"${DIR_SRC}/g_spawn.c"
 	"${DIR_SRC}/g_userinfo.c"
 	"${DIR_SRC}/g_utils.c"
+	"${DIR_SRC}/g_syscalls_extra.c"
 	"${DIR_SRC}/hiprot.c"
 	"${DIR_SRC}/hoonymode.c"
 	"${DIR_SRC}/items.c"
@@ -151,6 +156,17 @@ if (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
 	target_compile_options(${PROJECT_NAME} PRIVATE /W4)
 else()
 	target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
+
+	check_c_compiler_flag("-Wstrict-prototypes" HAS_CFLAG_STRICT_PROTOTYPES)
+	if (HAS_CFLAG_STRICT_PROTOTYPES)
+		target_compile_options(${PROJECT_NAME} PRIVATE -Werror=strict-prototypes)
+	endif()
+
+	check_c_compiler_flag("-Wstrlcpy-strlcat-size" HAS_STRLCPY_STRLCAT_SIZE)
+	if (HAS_STRLCPY_STRLCAT_SIZE)
+		target_compile_options(${PROJECT_NAME} PRIVATE -Werror=strlcpy-strlcat-size)
+	endif()
+
 	# Do not allow undefined symbols while linking.
 	if(APPLE)
 		target_link_options(${PROJECT_NAME} PRIVATE "-Wl,-undefined,error")
@@ -176,7 +192,7 @@ set(QVM_C_FLAGS -DQ3_VM -S -Wf-target=bytecode -Wf-g)
 if(BOT_SUPPORT)
 	set(QVM_C_FLAGS ${QVM_C_FLAGS} -DBOT_SUPPORT=1)
 endif()
-set(QVM_INCFLAGS -I${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(QVM_INCDIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 # Write first chunk of QVM_LIST_FILE.
 set(QVM_LIST_FILE "${CMAKE_CURRENT_BINARY_DIR}/game.q3asm")
@@ -188,9 +204,11 @@ foreach(file ${SRC_COMMON} ${SRC_VM})
 	string(CONCAT file_asm ${file_asm} ".asm") # Add asm extension.
 	list(APPEND SRC_ASM ${file_asm}) # Fill in SRC_ASM list. 
 	file(APPEND ${QVM_LIST_FILE} "${VM_DIR}/${file_asm}\n") # Continue generate QVM_LIST_FILE.
+	get_filename_component(src_dir ${file} DIRECTORY)
+	file(RELATIVE_PATH QVM_RELINCDIR "${CMAKE_CURRENT_SOURCE_DIR}/${src_dir}" "${QVM_INCDIR}")
 	# Add command to compile c to asm.
 	add_custom_target(${file_asm}
-		COMMAND ${QVM_COMPILER} ${QVM_C_FLAGS} ${QVM_INCFLAGS} "${CMAKE_CURRENT_SOURCE_DIR}/${file}" -o "${VM_DIR}/${file_asm}"
+		COMMAND ${QVM_COMPILER} ${QVM_C_FLAGS} -I${QVM_RELINCDIR} "${CMAKE_CURRENT_SOURCE_DIR}/${file}" -o "${VM_DIR}/${file_asm}"
 		DEPENDS vmdir
 		SOURCES ${file}
 	)

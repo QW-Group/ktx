@@ -143,117 +143,117 @@ enum
 
 };
 
-void boss_rise1();
-void boss_rise2();
-void boss_rise3();
-void boss_rise4();
-void boss_rise5();
-void boss_rise6();
-void boss_rise7();
-void boss_rise8();
-void boss_rise9();
-void boss_rise10();
-void boss_rise11();
-void boss_rise12();
-void boss_rise13();
-void boss_rise14();
-void boss_rise15();
-void boss_rise16();
-void boss_rise17();
-void boss_idle1();
-void boss_idle2();
-void boss_idle3();
-void boss_idle4();
-void boss_idle5();
-void boss_idle6();
-void boss_idle7();
-void boss_idle8();
-void boss_idle9();
-void boss_idle10();
-void boss_idle11();
-void boss_idle12();
-void boss_idle13();
-void boss_idle14();
-void boss_idle15();
-void boss_idle16();
-void boss_idle17();
-void boss_idle18();
-void boss_idle19();
-void boss_idle20();
-void boss_idle21();
-void boss_idle22();
-void boss_idle23();
-void boss_idle24();
-void boss_idle25();
-void boss_idle26();
-void boss_idle27();
-void boss_idle28();
-void boss_idle29();
-void boss_idle30();
-void boss_idle31();
-void boss_missile1();
-void boss_missile2();
-void boss_missile3();
-void boss_missile4();
-void boss_missile5();
-void boss_missile6();
-void boss_missile7();
-void boss_missile8();
-void boss_missile9();
-void boss_missile10();
-void boss_missile11();
-void boss_missile12();
-void boss_missile13();
-void boss_missile14();
-void boss_missile15();
-void boss_missile16();
-void boss_missile17();
-void boss_missile18();
-void boss_missile19();
-void boss_missile20();
-void boss_missile21();
-void boss_missile22();
-void boss_missile23();
-void boss_shocka1();
-void boss_shocka2();
-void boss_shocka3();
-void boss_shocka4();
-void boss_shocka5();
-void boss_shocka6();
-void boss_shocka7();
-void boss_shocka8();
-void boss_shocka9();
-void boss_shocka10();
-void boss_shockb1();
-void boss_shockb2();
-void boss_shockb3();
-void boss_shockb4();
-void boss_shockb5();
-void boss_shockb6();
-void boss_shockb7();
-void boss_shockb8();
-void boss_shockb9();
-void boss_shockb10();
-void boss_shockc1();
-void boss_shockc2();
-void boss_shockc3();
-void boss_shockc4();
-void boss_shockc5();
-void boss_shockc6();
-void boss_shockc7();
-void boss_shockc8();
-void boss_shockc9();
-void boss_shockc10();
-void boss_death1();
-void boss_death2();
-void boss_death3();
-void boss_death4();
-void boss_death5();
-void boss_death6();
-void boss_death7();
-void boss_death8();
-void boss_death9();
-void boss_death10();
+void boss_rise1(void);
+void boss_rise2(void);
+void boss_rise3(void);
+void boss_rise4(void);
+void boss_rise5(void);
+void boss_rise6(void);
+void boss_rise7(void);
+void boss_rise8(void);
+void boss_rise9(void);
+void boss_rise10(void);
+void boss_rise11(void);
+void boss_rise12(void);
+void boss_rise13(void);
+void boss_rise14(void);
+void boss_rise15(void);
+void boss_rise16(void);
+void boss_rise17(void);
+void boss_idle1(void);
+void boss_idle2(void);
+void boss_idle3(void);
+void boss_idle4(void);
+void boss_idle5(void);
+void boss_idle6(void);
+void boss_idle7(void);
+void boss_idle8(void);
+void boss_idle9(void);
+void boss_idle10(void);
+void boss_idle11(void);
+void boss_idle12(void);
+void boss_idle13(void);
+void boss_idle14(void);
+void boss_idle15(void);
+void boss_idle16(void);
+void boss_idle17(void);
+void boss_idle18(void);
+void boss_idle19(void);
+void boss_idle20(void);
+void boss_idle21(void);
+void boss_idle22(void);
+void boss_idle23(void);
+void boss_idle24(void);
+void boss_idle25(void);
+void boss_idle26(void);
+void boss_idle27(void);
+void boss_idle28(void);
+void boss_idle29(void);
+void boss_idle30(void);
+void boss_idle31(void);
+void boss_missile1(void);
+void boss_missile2(void);
+void boss_missile3(void);
+void boss_missile4(void);
+void boss_missile5(void);
+void boss_missile6(void);
+void boss_missile7(void);
+void boss_missile8(void);
+void boss_missile9(void);
+void boss_missile10(void);
+void boss_missile11(void);
+void boss_missile12(void);
+void boss_missile13(void);
+void boss_missile14(void);
+void boss_missile15(void);
+void boss_missile16(void);
+void boss_missile17(void);
+void boss_missile18(void);
+void boss_missile19(void);
+void boss_missile20(void);
+void boss_missile21(void);
+void boss_missile22(void);
+void boss_missile23(void);
+void boss_shocka1(void);
+void boss_shocka2(void);
+void boss_shocka3(void);
+void boss_shocka4(void);
+void boss_shocka5(void);
+void boss_shocka6(void);
+void boss_shocka7(void);
+void boss_shocka8(void);
+void boss_shocka9(void);
+void boss_shocka10(void);
+void boss_shockb1(void);
+void boss_shockb2(void);
+void boss_shockb3(void);
+void boss_shockb4(void);
+void boss_shockb5(void);
+void boss_shockb6(void);
+void boss_shockb7(void);
+void boss_shockb8(void);
+void boss_shockb9(void);
+void boss_shockb10(void);
+void boss_shockc1(void);
+void boss_shockc2(void);
+void boss_shockc3(void);
+void boss_shockc4(void);
+void boss_shockc5(void);
+void boss_shockc6(void);
+void boss_shockc7(void);
+void boss_shockc8(void);
+void boss_shockc9(void);
+void boss_shockc10(void);
+void boss_death1(void);
+void boss_death2(void);
+void boss_death3(void);
+void boss_death4(void);
+void boss_death5(void);
+void boss_death6(void);
+void boss_death7(void);
+void boss_death8(void);
+void boss_death9(void);
+void boss_death10(void);
 
 //=============================================================================
 
@@ -275,7 +275,7 @@ ANIM(boss_rise15, rise15, boss_rise16;)
 ANIM(boss_rise16, rise16, boss_rise17;)
 ANIM(boss_rise17, rise17, boss_missile1;)
 
-void boss_face()
+void boss_face(void)
 {
 	gedict_t *e = PROG_TO_EDICT(self->s.v.enemy);
 
@@ -338,7 +338,7 @@ ANIM(boss_idle29, walk29, boss_idle30; boss_face();)
 ANIM(boss_idle30, walk30, boss_idle31; boss_face();)
 ANIM(boss_idle31, walk31, boss_idle1; boss_face();)
 
-extern void T_MissileTouch();
+extern void T_MissileTouch(void);
 
 void boss_missile(float p_x, float p_y, float p_z)
 {
@@ -472,7 +472,7 @@ ANIM(boss_death8, death8, boss_death9;)
 ANIM(boss_death9, death9, boss_death10; _boss_death9();)
 ANIM(boss_death10, death9, boss_death10; _boss_death10();)
 
-void boss_awake()
+void boss_awake(void)
 {
 	self->s.v.solid = SOLID_SLIDEBOX;
 	self->s.v.movetype = MOVETYPE_STEP;
@@ -498,7 +498,7 @@ void boss_awake()
 
 /*QUAKED monster_boss (1 0 0) (-128 -128 -24) (128 128 256)
  */
-void SP_monster_boss()
+void SP_monster_boss(void)
 {
 	if (!AllowMonster(self))
 	{
@@ -527,8 +527,8 @@ void SP_monster_boss()
 
 static float lightning_end;
 
-extern void door_go_down();
-void lightning_fire()
+extern void door_go_down(void);
+void lightning_fire(void)
 {
 	gedict_t *le1, *le2, *oself;
 	vec3_t p1, p2, tmpv;
@@ -594,7 +594,7 @@ void lightning_fire()
 	WriteCoord( MSG_ALL, p2[2]);
 }
 
-void lightning_use()
+void lightning_use(void)
 {
 	gedict_t *le1, *le2, *oself, *boss;
 
@@ -672,7 +672,7 @@ void lightning_use()
 /*QUAKED event_lightning (0 1 1) (-16 -16 -16) (16 16 16)
  Just for boss level.
  */
-void SP_event_lightning()
+void SP_event_lightning(void)
 {
 	self->use = (func_t)lightning_use;
 }

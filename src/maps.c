@@ -241,7 +241,7 @@ void GetMapList(void)
 #endif
 }
 
-void mapslist_dl()
+void mapslist_dl(void)
 {
 	char arg_2[32];
 	char nomaps[32];
@@ -474,7 +474,7 @@ void DoSelectMap(int iMap)
 	vote_check_map();
 }
 
-void SelectMap()
+void SelectMap(void)
 {
 	char arg_1[1024];
 
@@ -500,7 +500,7 @@ qbool VoteMapSpecific(char *map)
 	return true;
 }
 
-void VoteMap()
+void VoteMap(void)
 {
 	char arg_1[1024];
 
@@ -516,7 +516,7 @@ void VoteMap()
 	VoteMapSpecific(arg_1);
 }
 
-void ShowMaps()
+void ShowMaps(void)
 {
 	int i, cnt;
 	char arg_1[1024];

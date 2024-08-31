@@ -83,7 +83,7 @@ void GrappleReset(gedict_t *rhook)
 //                 a player that is not on the same team as the hook's
 //                 owner.
 //
-void GrappleTrack()
+void GrappleTrack(void)
 {
 	gedict_t *enemy = PROG_TO_EDICT(self->s.v.enemy);
 	gedict_t *owner = PROG_TO_EDICT(self->s.v.owner);
@@ -141,7 +141,7 @@ void GrappleTrack()
 //
 // MakeLink - spawns the chain link entities
 //
-gedict_t* MakeLink()
+gedict_t* MakeLink(void)
 {
 	newmis = spawn();
 	g_globalvars.newmis = EDICT_TO_PROG(newmis);
@@ -171,7 +171,7 @@ gedict_t* MakeLink()
 //                to remove the chain. Only one function required to
 //                remove all links.
 //
-void RemoveChain()
+void RemoveChain(void)
 {
 	self->think = (func_t) SUB_Remove;
 	self->s.v.nextthink = next_frame();
@@ -196,7 +196,7 @@ void RemoveChain()
 //                maintains the positions of all of the links. Only one link
 //                is thinking every frame. 
 //
-void UpdateChain()
+void UpdateChain(void)
 {
 	vec3_t t1, t2, t3;
 	vec3_t temp;
@@ -273,7 +273,7 @@ void CancelHook(gedict_t *owner)
 //
 // BuildChain - Builds the chain (linked list)
 //
-void BuildChain()
+void BuildChain(void)
 {
 	self->s.v.goalentity = EDICT_TO_PROG(MakeLink());
 	PROG_TO_EDICT(self->s.v.goalentity)->think = (func_t)UpdateChain;
@@ -284,7 +284,7 @@ void BuildChain()
 			EDICT_TO_PROG(MakeLink());
 }
 
-void GrappleAnchor()
+void GrappleAnchor(void)
 {
 	gedict_t *owner = PROG_TO_EDICT(self->s.v.owner);
 
@@ -365,7 +365,7 @@ void GrappleAnchor()
 }
 
 // Called from client.c
-void GrappleService()
+void GrappleService(void)
 {
 	vec3_t hookVector, hookVelocity;
 	gedict_t *enemy;
@@ -427,16 +427,18 @@ void GrappleService()
 }
 
 // Called from weapons.c
-void GrappleThrow()
+void GrappleThrow(void)
 {
+	float hasteMultiplier, throwSpeed;
+
 	if (self->hook_out || self->hook_reset_time > g_globalvars.time) // only throw once & wait for cooldown time to complete
 	{
 		return;
 	}
 
-	float hasteMultiplier =	(cvar("k_ctf_rune_power_hst") / 16) + 1;
+	hasteMultiplier =	(cvar("k_ctf_rune_power_hst") / 16) + 1;
 
-	float throwSpeed = NEW_THROW_SPEED;
+	throwSpeed = NEW_THROW_SPEED;
 
 	if (cvar("k_ctf_hookstyle") == 3)
 	{

@@ -32,11 +32,11 @@
 #define CARRIER_DEFEND_TIME  4
 
 void DropFlag(gedict_t *flag, qbool tossed);
-void PlaceFlag();
-void FlagThink();
-void FlagTouch();
-void SP_item_flag_team1();
-void SP_item_flag_team2();
+void PlaceFlag(void);
+void FlagThink(void);
+void FlagTouch(void);
+void SP_item_flag_team1(void);
+void SP_item_flag_team2(void);
 
 // Allows us to add flags (or other items) to dm maps when ctfing without actually changing bsp
 void G_CallSpawn(gedict_t *ent);
@@ -52,7 +52,7 @@ void SpawnCTFItem(char *classname, float x, float y, float z, float angle)
 	G_CallSpawn(item);
 }
 
-void spawn_item_flag()
+void spawn_item_flag(void)
 {
 	if (k_ctf_custom_models)
 	{
@@ -92,7 +92,7 @@ void spawn_item_flag()
 	}
 }
 
-void SP_item_flag_team1()
+void SP_item_flag_team1(void)
 {
 	self->k_teamnumber = 1;
 	self->s.v.items = IT_KEY2;
@@ -107,7 +107,7 @@ void SP_item_flag_team1()
 	spawn_item_flag();
 }
 
-void SP_item_flag_team2()
+void SP_item_flag_team2(void)
 {
 	self->k_teamnumber = 2;
 	self->s.v.items = IT_KEY1;
@@ -123,7 +123,7 @@ void SP_item_flag_team2()
 }
 
 // would love to know what a ctf wall is :O!
-void SP_func_ctf_wall()
+void SP_func_ctf_wall(void)
 {
 	SetVector(self->s.v.angles, 0, 0, 0);
 	self->s.v.movetype = MOVETYPE_PUSH;
@@ -134,7 +134,7 @@ void SP_func_ctf_wall()
 #define TF_TEAM_BLUE 1
 #define TF_TEAM_RED 2
 
-void SP_item_tfgoal()
+void SP_item_tfgoal(void)
 {
 	// NOTE: team_no inverted for flags!!!
 
@@ -156,7 +156,7 @@ void SP_item_tfgoal()
 	}
 }
 
-void SP_info_player_teamspawn()
+void SP_info_player_teamspawn(void)
 {
 	if (self->team_no == TF_TEAM_RED)
 	{
@@ -174,7 +174,7 @@ void SP_info_player_teamspawn()
 	}
 }
 
-void SP_i_p_t()
+void SP_i_p_t(void)
 {
 	self->classname = "info_player_teamspawn";
 	SP_info_player_teamspawn();
@@ -263,7 +263,7 @@ void RegenFlags(qbool yes)
 	}
 }
 
-void FlagThink()
+void FlagThink(void)
 {
 	if (!isCTF())
 	{
@@ -301,7 +301,7 @@ void FlagThink()
 	self->cnt2 += 0.1;
 }
 
-void FlagTouch()
+void FlagTouch(void)
 {
 	gedict_t *p, *owner;
 
@@ -477,7 +477,7 @@ void FlagTouch()
 	setmodel(self, "");
 }
 
-void FlagResetOwner()
+void FlagResetOwner(void)
 {
 	self->think = (func_t) FlagThink;
 	self->touch = (func_t) FlagTouch;
@@ -485,7 +485,7 @@ void FlagResetOwner()
 	self->s.v.owner = EDICT_TO_PROG(self);
 }
 
-void TossFlag()
+void TossFlag(void)
 {
 	PlayerDropFlag(self, true);
 }
@@ -588,7 +588,7 @@ void DropFlag(gedict_t *flag, qbool tossed)
 	refresh_plus_scores(); // update players status bar faster
 }
 
-void FlagStatus()
+void FlagStatus(void)
 {
 	gedict_t *flag1, *flag2;
 
@@ -721,7 +721,7 @@ void CTF_CheckFlagsAsKeys(void)
 	}
 }
 
-void norunes()
+void norunes(void)
 {
 	if (match_in_progress && !k_matchLess)
 	{
@@ -755,7 +755,7 @@ void norunes()
 	}
 }
 
-void nohook()
+void nohook(void)
 {
 	if (match_in_progress && !k_matchLess)
 	{
@@ -785,7 +785,7 @@ void nohook()
 	}
 }
 
-void noga()
+void noga(void)
 {
 	if (match_in_progress && !k_matchLess)
 	{
@@ -802,7 +802,7 @@ void noga()
 	cvar_toggle_msg(self, "k_ctf_ga", redtext("green armor"));
 }
 
-void mctf()
+void mctf(void)
 {
 	if (match_in_progress && !k_matchLess)
 	{
@@ -846,7 +846,7 @@ void mctf()
 	}
 }
 
-void CTFBasedSpawn()
+void CTFBasedSpawn(void)
 {
 	if (match_in_progress && !k_matchLess)
 	{

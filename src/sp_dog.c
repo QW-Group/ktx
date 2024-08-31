@@ -125,92 +125,92 @@ enum
 
 };
 
-void dog_stand1();
-void dog_stand2();
-void dog_stand3();
-void dog_stand4();
-void dog_stand5();
-void dog_stand6();
-void dog_stand7();
-void dog_stand8();
-void dog_stand9();
-void dog_walk1();
-void dog_walk2();
-void dog_walk3();
-void dog_walk4();
-void dog_walk5();
-void dog_walk6();
-void dog_walk7();
-void dog_walk8();
-void dog_run1();
-void dog_run2();
-void dog_run3();
-void dog_run4();
-void dog_run5();
-void dog_run6();
-void dog_run7();
-void dog_run8();
-void dog_run9();
-void dog_run10();
-void dog_run11();
-void dog_run12();
-void dog_atta1();
-void dog_atta2();
-void dog_atta3();
-void dog_atta4();
-void dog_atta5();
-void dog_atta6();
-void dog_atta7();
-void dog_atta8();
-void dog_leap1();
-void dog_leap2();
-void dog_leap3();
-void dog_leap4();
-void dog_leap5();
-void dog_leap6();
-void dog_leap7();
-void dog_leap8();
-void dog_leap9();
-void dog_pain1();
-void dog_pain2();
-void dog_pain3();
-void dog_pain4();
-void dog_pain5();
-void dog_pain6();
-void dog_painb1();
-void dog_painb2();
-void dog_painb3();
-void dog_painb4();
-void dog_painb5();
-void dog_painb6();
-void dog_painb7();
-void dog_painb8();
-void dog_painb9();
-void dog_painb10();
-void dog_painb11();
-void dog_painb12();
-void dog_painb13();
-void dog_painb14();
-void dog_painb15();
-void dog_painb16();
-void dog_die1();
-void dog_die2();
-void dog_die3();
-void dog_die4();
-void dog_die5();
-void dog_die6();
-void dog_die7();
-void dog_die8();
-void dog_die9();
-void dog_dieb1();
-void dog_dieb2();
-void dog_dieb3();
-void dog_dieb4();
-void dog_dieb5();
-void dog_dieb6();
-void dog_dieb7();
-void dog_dieb8();
-void dog_dieb9();
+void dog_stand1(void);
+void dog_stand2(void);
+void dog_stand3(void);
+void dog_stand4(void);
+void dog_stand5(void);
+void dog_stand6(void);
+void dog_stand7(void);
+void dog_stand8(void);
+void dog_stand9(void);
+void dog_walk1(void);
+void dog_walk2(void);
+void dog_walk3(void);
+void dog_walk4(void);
+void dog_walk5(void);
+void dog_walk6(void);
+void dog_walk7(void);
+void dog_walk8(void);
+void dog_run1(void);
+void dog_run2(void);
+void dog_run3(void);
+void dog_run4(void);
+void dog_run5(void);
+void dog_run6(void);
+void dog_run7(void);
+void dog_run8(void);
+void dog_run9(void);
+void dog_run10(void);
+void dog_run11(void);
+void dog_run12(void);
+void dog_atta1(void);
+void dog_atta2(void);
+void dog_atta3(void);
+void dog_atta4(void);
+void dog_atta5(void);
+void dog_atta6(void);
+void dog_atta7(void);
+void dog_atta8(void);
+void dog_leap1(void);
+void dog_leap2(void);
+void dog_leap3(void);
+void dog_leap4(void);
+void dog_leap5(void);
+void dog_leap6(void);
+void dog_leap7(void);
+void dog_leap8(void);
+void dog_leap9(void);
+void dog_pain1(void);
+void dog_pain2(void);
+void dog_pain3(void);
+void dog_pain4(void);
+void dog_pain5(void);
+void dog_pain6(void);
+void dog_painb1(void);
+void dog_painb2(void);
+void dog_painb3(void);
+void dog_painb4(void);
+void dog_painb5(void);
+void dog_painb6(void);
+void dog_painb7(void);
+void dog_painb8(void);
+void dog_painb9(void);
+void dog_painb10(void);
+void dog_painb11(void);
+void dog_painb12(void);
+void dog_painb13(void);
+void dog_painb14(void);
+void dog_painb15(void);
+void dog_painb16(void);
+void dog_die1(void);
+void dog_die2(void);
+void dog_die3(void);
+void dog_die4(void);
+void dog_die5(void);
+void dog_die6(void);
+void dog_die7(void);
+void dog_die8(void);
+void dog_die9(void);
+void dog_dieb1(void);
+void dog_dieb2(void);
+void dog_dieb3(void);
+void dog_dieb4(void);
+void dog_dieb5(void);
+void dog_dieb6(void);
+void dog_dieb7(void);
+void dog_dieb8(void);
+void dog_dieb9(void);
 
 ANIM(dog_stand1, stand1, dog_stand2; ai_stand();)
 ANIM(dog_stand2, stand2, dog_stand3; ai_stand();)
@@ -248,7 +248,7 @@ ANIM(dog_run10, run10, dog_run11; ai_run(32);)
 ANIM(dog_run11, run11, dog_run12; ai_run(32);)
 ANIM(dog_run12, run12, dog_run1; ai_run(32);)
 
-void dog_bite()
+void dog_bite(void)
 {
 	vec3_t delta;
 	float ldmg;
@@ -289,7 +289,7 @@ ANIM(dog_atta6, attack6, dog_atta7; ai_charge(10);)
 ANIM(dog_atta7, attack7, dog_atta8; ai_charge(10);)
 ANIM(dog_atta8, attack8, dog_run1; ai_charge(10);)
 
-void Dog_JumpTouch()
+void Dog_JumpTouch(void)
 {
 	float ldmg;
 
@@ -331,7 +331,7 @@ void Dog_JumpTouch()
 	self->s.v.nextthink = g_globalvars.time + FRAMETIME;
 }
 
-void _dog_leap2()
+void _dog_leap2(void)
 {
 	ai_face();
 
@@ -342,7 +342,7 @@ void _dog_leap2()
 	self->s.v.velocity[2] += 200;
 	self->s.v.flags = (int)self->s.v.flags & ~FL_ONGROUND;
 }
-void _dog_leap9()
+void _dog_leap9(void)
 {
 	// put monster back in run state after 3 seconds, actually it should never/rare happend
 	self->s.v.nextthink = g_globalvars.time + 3;
@@ -416,7 +416,7 @@ ANIM(dog_dieb7, deathb7, dog_dieb8)
 ANIM(dog_dieb8, deathb8, dog_dieb9)
 ANIM(dog_dieb9, deathb9, dog_dieb9)
 
-void dog_die()
+void dog_die(void)
 {
 	// check for gib
 	if (self->s.v.health < -35)
@@ -455,7 +455,7 @@ void dog_die()
  Returns true if a melee attack would hit right now
  ==============
  */
-float CheckDogMelee()
+float CheckDogMelee(void)
 {
 	if (enemy_range == RANGE_MELEE)
 	{
@@ -474,7 +474,7 @@ float CheckDogMelee()
 
  ==============
  */
-float CheckDogJump()
+float CheckDogJump(void)
 {
 	vec3_t dist;
 	float d;
@@ -513,7 +513,7 @@ float CheckDogJump()
 	return true;
 }
 
-float DogCheckAttack()
+float DogCheckAttack(void)
 {
 // if close enough for slashing, go for it
 	if (CheckDogMelee())
@@ -538,7 +538,7 @@ float DogCheckAttack()
 /*QUAKED monster_dog (1 0 0) (-32 -32 -24) (32 32 40) Ambush
 
  */
-void SP_monster_dog()
+void SP_monster_dog(void)
 {
 	if (!AllowMonster(self))
 	{

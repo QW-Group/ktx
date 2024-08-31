@@ -25,95 +25,93 @@ int max_cmd_len = 0;
 
 qbool is_rules_change_allowed(void);
 void SendMessage(char *name);
-float CountRPlayers();
-float CountTeams();
-void PlayerReady(qbool startIdlebot);
-void PlayerSlowReady();
-void PlayerBreak();
-void ReqAdmin();
-void AdminForceStart();
-void AdminForceBreak();
-void AdminForceMap();
-void TogglePreWar();
-void ToggleMapLock();
-void AdminKick();
-void m_kick();
-void YesKick();
-void DontKick();
-void VoteAdmin();
-void VoteYes();
-void VoteNo();
-void VoteCaptain();
-void VoteCoach();
-void nospecs();
-void teamoverlay();
-void votecoop();
-void RandomPickup();
-void ShowDMM();
+float CountRPlayers(void);
+float CountTeams(void);
+void PlayerFastReady(void);
+void PlayerSlowReady(void);
+void PlayerBreak(void);
+void ReqAdmin(void);
+void AdminForceStart(void);
+void AdminForceBreak(void);
+void AdminForceMap(void);
+void TogglePreWar(void);
+void ToggleMapLock(void);
+void AdminKick(void);
+void m_kick(void);
+void YesKick(void);
+void DontKick(void);
+void VoteAdmin(void);
+void VoteYes(void);
+void VoteNo(void);
+void VoteCaptain(void);
+void VoteCoach(void);
+void nospecs(void);
+void teamoverlay(void);
+void votecoop(void);
+void RandomPickup(void);
+void ShowDMM(void);
 void ChangeDM(float dmm);
-void ChangeLock();
-void ChangeOvertime();
-void ChangeOvertimeUp();
-void ChangeTP();
-void ToggleFallBunny();
+void ChangeLock(void);
+void ChangeOvertime(void);
+void ChangeOvertimeUp(void);
+void ChangeTP(void);
+void ToggleFallBunny(void);
 // { CTF
-void FlagStatus();
-void TossFlag();
-void norunes();
-void nohook();
-void hooksmooth();
-void hookfast();
-void hookclassic();
-void hookcrhook();
-void noga();
-void mctf();
-void CTFBasedSpawn();
-// also: TossRune()
-//       swapall()
+void FlagStatus(void);
+void TossFlag(void);
+void norunes(void);
+void nohook(void);
+void hooksmooth(void);
+void hookfast(void);
+void hookclassic(void);
+void hookcrhook(void);
+void noga(void);
+void mctf(void);
+void CTFBasedSpawn(void);
 // } CTF
-void FragsDown();
-void FragsUp();
-void ListWhoNot();
-void ModStatus1();
-void ModStatus2();
-void ModStatusVote();
-void LastStats();
-void PlayerStats();
-void PlayerStatus();
-void PlayerStatusN();
-void PlayerStatusS();
-void PrintScores();
-void ReportMe();
-void SendKillerMsg();
-void SendNewcomerMsg();
-void SendVictimMsg();
-void ShowNick();
-void ShowCmds();
-void ShowMaps();
-//void ShowMessages();
-void ShowOpts();
-void ShowQizmo();
-void ShowRules();
-void ShowVersion();
-void ShowCharsetTableOctal();
-void ShowCharsetTableHexa();
-void killquad();
-void bloodfest();
-void antilag();
-void ToggleDischarge();
-void ToggleDropPack();
-void ToggleDropQuad();
-void ToggleDropRing();
-void ToggleFairPacks();
-void ToggleFreeze();
-void ToggleMidair();
-void SetMidairMinHeight();
-void ToggleFreshTeams();
-void ToggleFreshPacks();
-void ToggleFreshGuns();
-void ToggleFreshTime();
-void ToggleNoSweep();
-void ToggleInstagib();
+void FragsDown(void);
+void FragsUp(void);
+void ListWhoNot(void);
+void ModStatus1(void);
+void ModStatus2(void);
+void ModStatusVote(void);
+void LastStats(void);
+void PlayerStats(void);
+void PlayerStatus(void);
+void PlayerStatusN(void);
+void PlayerStatusS(void);
+void PrintScores(void);
+void ReportMe(void);
+void SendKillerMsg(void);
+void SendNewcomerMsg(void);
+void SendVictimMsg(void);
+void ShowNick(void);
+void ShowCmds(void);
+void ShowMaps(void);
+//void ShowMessages(void);
+void ShowOpts(void);
+void ShowQizmo(void);
+void ShowRules(void);
+void ShowVersion(void);
+void ShowCharsetTableOctal(void);
+void ShowCharsetTableHexa(void);
+void killquad(void);
+void bloodfest(void);
+void antilag(void);
+void ToggleDischarge(void);
+void ToggleDropPack(void);
+void ToggleDropQuad(void);
+void ToggleDropRing(void);
+void ToggleFairPacks(void);
+void ToggleFreeze(void);
+void ToggleMidair(void);
+void SetMidairMinHeight(void);
+void ToggleFreshTeams(void);
+void ToggleFreshPacks(void);
+void ToggleFreshGuns(void);
+void ToggleFreshTime(void);
+void ToggleNoSweep(void);
+void ToggleInstagib(void);
 void ToggleLGC(void);
 void ToggleCGKickback();
 void ToggleToT(void);
@@ -123,140 +121,140 @@ void ToggleQEnemy();
 void ToggleQLag();
 void ToggleQPoint();
 /* new FDP bits https://www.quakeworld.nu/wiki/FPD
- void ToggleSkinForcing();
- void ToggleColorForcing();
- void TogglePitchSpeedLimit();
- void ToggleYawSpeedLimit();
+ void ToggleSkinForcing(void);
+ void ToggleColorForcing(void);
+ void TogglePitchSpeedLimit(void);
+ void ToggleYawSpeedLimit(void);
  */
-void ToggleRespawns();
-void ToggleSpawnPoints();
-void ToggleBerzerk();
-void ToggleSpecTalk();
-void ToggleSpeed();
-void VotePickup();
+void ToggleRespawns(void);
+void ToggleSpawnPoints(void);
+void ToggleBerzerk(void);
+void ToggleSpecTalk(void);
+void ToggleSpeed(void);
+void VotePickup(void);
 void UserMode(float umode);
-void Wp_Reset();
+void Wp_Reset(void);
 void Wp_Stats(float on);
 void Sc_Stats(float on);
 void t_jump(float j_type);
-void klist();
-void hdptoggle();
-void handicap();
-void noweapon();
-void tracklist();
-void fpslist();
-void krnd();
-void agree_on_map();
+void klist(void);
+void hdptoggle(void);
+void handicap(void);
+void noweapon(void);
+void tracklist(void);
+void fpslist(void);
+void krnd(void);
+void agree_on_map(void);
 
 void favx_add(float fav_num);
 void xfav_go(float fav_num);
-void fav_add();
-void fav_del();
-void fav_all_del();
-void fav_next();
-void fav_show();
+void fav_add(void);
+void fav_del(void);
+void fav_all_del(void);
+void fav_next(void);
+void fav_show(void);
 void AutoTrack(float autoTrackType);
-void next_best();
-void next_pow();
-void Pos_Show();
-void Pos_Save();
-void Pos_Move();
+void next_best(void);
+void next_pow(void);
+void Pos_Show(void);
+void Pos_Save(void);
+void Pos_Move(void);
 void Pos_Set(float set_type);
-void Sh_Speed();
-void lastscores();
-void SwapAll();
+void Sh_Speed(void);
+void lastscores(void);
+void SwapAll(void);
 
-void motd_show();
+void motd_show(void);
 
-void TogglePractice();
+void TogglePractice(void);
 
 // { yawn mode
-void ToggleYawnMode();
-void setTeleportCap();
+void ToggleYawnMode(void);
+void setTeleportCap(void);
 // }
 
-void infolock();
-void infospec();
-void moreinfo();
+void infolock(void);
+void infospec(void);
+void moreinfo(void);
 
-void s_p_cmd();
+void s_p_cmd(void);
 void s_lr_cmd(float l);
-void s_t_cmd();
-void mmode();
-void multi();
-void cmdinfo();
-void cmduinfo();
-void cmd_wreg();
+void s_t_cmd(void);
+void mmode(void);
+void multi(void);
+void cmdinfo(void);
+void cmduinfo(void);
+void cmd_wreg(void);
 
-void ClientKill();
+void ClientKill(void);
 
-void sv_time();
-void GrenadeMode();
-void ToggleReady();
+void sv_time(void);
+void GrenadeMode(void);
+void ToggleReady(void);
 
 void fp_toggle(float type);
 
-void dlist();
-void dinfo();
+void dlist(void);
+void dinfo(void);
 
-void sv_lock();
-void force_spec();
-void teleteam();
+void sv_lock(void);
+void force_spec(void);
+void teleteam(void);
 void upplayers(float type);
 void downplayers(float type);
-void iplist();
-void dmgfrags();
-void no_lg();
-void no_gl();
-void mv_cmd_playback();
-void mv_cmd_record();
-void mv_cmd_stop();
-void callalias();
-void fcheck();
-void mapcycle();
-void airstep();
-void ToggleExclusive();
-void ToggleNewCoopNm();
-void ToggleVwep();
-void TogglePause();
-void ToggleArena();
+void iplist(void);
+void dmgfrags(void);
+void no_lg(void);
+void no_gl(void);
+void mv_cmd_playback(void);
+void mv_cmd_record(void);
+void mv_cmd_stop(void);
+void callalias(void);
+void fcheck(void);
+void mapcycle(void);
+void airstep(void);
+void ToggleExclusive(void);
+void ToggleNewCoopNm(void);
+void ToggleVwep(void);
+void TogglePause(void);
+void ToggleArena(void);
 
-void Spawn666Time();
+void Spawn666Time(void);
 
-void noitems();
+void noitems(void);
 
 // spec
-void ShowCamHelp();
+void ShowCamHelp(void);
 
 void TeamSay(float fsndname);
 void TimeDown(float t);
 void TimeUp(float t);
 void TimeSet(float t);
 
-void cmdslist_dl();
-void mapslist_dl();
+void cmdslist_dl(void);
+void mapslist_dl(void);
 
 // { RACE
-void r_cdel();
+void r_cdel(void);
 void r_clear_route(void);
 void r_Xset(float t);
 void r_changestatus(float t);
 void r_changefollowstatus(float t);
 
-void r_timeout();
-void r_falsestart();
-void r_mode();
-void r_all_break();
+void r_timeout(void);
+void r_falsestart(void);
+void r_mode(void);
+void r_all_break(void);
 
-void r_route();
-void r_print();
+void r_route(void);
+void r_print(void);
 
-void race_display_line();
-void display_scores();
-void display_record_details();
-void race_chasecam_change();
-void race_chasecam_freelook_change();
-void race_download_record_demo();
+void race_display_line(void);
+void display_scores(void);
+void display_record_details(void);
+void race_chasecam_change(void);
+void race_chasecam_freelook_change(void);
+void race_download_record_demo(void);
 void race_pacemaker(void);
 void race_simultaneous_toggle(void);
 void race_match_toggle(void);
@@ -267,10 +265,10 @@ void race_hide_players_toggle(void);
 // }
 
 // { CHEATS
-void giveme();
-static void dropitem();
-static void removeitem();
-static void dumpent();
+void giveme(void);
+static void dropitem(void);
+static void removeitem(void);
+static void dumpent(void);
 // }
 
 // { Frogbots
@@ -289,12 +287,12 @@ demo_marker_t demo_markers[10];
 int demo_markers_count = 10;
 int demo_marker_index = 0;
 
-void ClearDemoMarkers()
+void ClearDemoMarkers(void)
 {
 	demo_marker_index = 0;
 }
 
-void DemoMark()
+void DemoMark(void)
 {
 	stuffcmd(self, "//demomark\n");
 
@@ -675,12 +673,12 @@ const char CD_NODESC[] = "no desc";
 
 #define CD_GAMEMODES		"list available game modes"
 
-void dummy()
+void dummy(void)
 {
 }
-void redirect();
+void redirect(void);
 
-#define DEF(ptr) ((void (*)())(ptr))
+#define DEF(ptr) ((void (*)(void))(ptr))
 
 cmd_t cmds[] =
 {
@@ -696,7 +694,7 @@ cmd_t cmds[] =
 	{ "stats", 						PlayerStats, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_STATS },
 	{ "effi", 						PlayerStats, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_EFFI },
 	{ "options", 					ShowOpts, 						0, 			CF_PLAYER, 																CD_OPTIONS },
-	{ "ready", 						PlayerReady, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_READY },
+	{ "ready", 						PlayerFastReady, 				0, 			CF_BOTH | CF_MATCHLESS, 												CD_READY },
 	{ "slowready", 					PlayerSlowReady, 				0, 			CF_BOTH | CF_MATCHLESS, 												CD_SLOWREADY },
 	{ "break", 						PlayerBreak, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_BREAK },
 	{ "status1", 					ModStatus1, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_STATUS1 },
@@ -1227,7 +1225,7 @@ qbool isCmdFlood(gedict_t *p)
 	return false;
 }
 
-void redirect()
+void redirect(void)
 {
 	int i;
 	char cmd_command[1024];
@@ -1336,7 +1334,7 @@ qbool isCmdRequireAdmin(int icmd, qbool isSpec)
 	return false;
 }
 
-void cmdslist_dl()
+void cmdslist_dl(void)
 {
 	int i, from, to;
 	char *name, *params, arg_2[32];
@@ -1490,7 +1488,7 @@ void Do_ShowCmds(qbool adm_req)
 	}
 }
 
-void ShowCmds()
+void ShowCmds(void)
 {
 	Do_ShowCmds(false); // show common commands
 	Do_ShowCmds(true); // show admin commands
@@ -1536,7 +1534,7 @@ qbool check_perm(gedict_t *p, int perm)
 	return true;
 }
 
-void ShowOpts()
+void ShowOpts(void)
 {
 	G_sprint(self, 2, "%s... -1 mins match time\n"
 				"%s..... +1 mins match time\n"
@@ -1568,7 +1566,7 @@ void ShowOpts()
 				redtext("gren_mode"), redtext("instagib"), redtext("berzerk"));
 }
 
-void ShowQizmo()
+void ShowQizmo(void)
 {
 	G_sprint(self, 2, "%s....... lagsettings\n"
 				"%s..... enemy vicinity reporting\n"
@@ -1578,7 +1576,7 @@ void ShowQizmo()
 
 /*
  // ShowMessages and SendMessage command implementations added
- void ShowMessages()
+ void ShowMessages(void)
  {
  G_sprint(self, 2,
  "%s..... who killed you last\n"
@@ -1590,7 +1588,7 @@ void ShowQizmo()
 /*
  // Display all printable characters to console in octal table
  */
-void ShowCharsetTableHexa()
+void ShowCharsetTableHexa(void)
 {
 	int i;
 
@@ -1616,7 +1614,7 @@ void ShowCharsetTableHexa()
 /*
  // Display all printable characters to console in hexadecimal table
  */
-void ShowCharsetTableOctal()
+void ShowCharsetTableOctal(void)
 {
 	int i;
 
@@ -1638,7 +1636,7 @@ void ShowCharsetTableOctal()
 	G_sprint(self, 2, "\n");
 }
 
-void ShowVersion()
+void ShowVersion(void)
 {
 	// limiting to 38 chars for VVD...
 	G_sprint(self, 2, "\n\235\236\237 %s \235\236\236\236\236\236\236\236\236"
@@ -1706,7 +1704,7 @@ void ShowVersion()
 				"\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\236\237\n\n");
 }
 
-void ChangeOvertime()
+void ChangeOvertime(void)
 {
 	int f1, f2;
 
@@ -1748,7 +1746,7 @@ void ChangeOvertime()
 
 }
 
-void ChangeOvertimeUp()
+void ChangeOvertimeUp(void)
 {
 	int k_exttime = cvar("k_exttime");
 
@@ -1770,17 +1768,17 @@ void ChangeOvertimeUp()
 				redtext(count_s(k_exttime)));
 }
 
-void SendKillerMsg()
+void SendKillerMsg(void)
 {
 	SendMessage(self->killer);
 }
 
-void SendVictimMsg()
+void SendVictimMsg(void)
 {
 	SendMessage(self->victim);
 }
 
-void SendNewcomerMsg()
+void SendNewcomerMsg(void)
 {
 	SendMessage(newcomer->netname);
 }
@@ -1820,7 +1818,7 @@ void SendMessage(char *name)
 	G_sprint(self, 2, "No name to display\n");
 }
 
-static char* get_frp_str()
+static char* get_frp_str(void)
 {
 	switch (get_fair_pack())
 	{
@@ -1838,7 +1836,7 @@ static char* get_frp_str()
 	}
 }
 
-void ModStatus1()
+void ModStatus1(void)
 {
 	int votes;
 	gedict_t *p;
@@ -1910,7 +1908,7 @@ void ModStatus1()
 	}
 }
 
-void ModStatus2()
+void ModStatus2(void)
 {
 	int i;
 	char *ot = "";
@@ -2056,7 +2054,7 @@ void ModStatus2()
 	}
 }
 
-void ModStatusVote()
+void ModStatusVote(void)
 {
 	qbool voted = false;
 	int votes, i;
@@ -2344,7 +2342,7 @@ char* OnePlayerStatus(gedict_t *p, gedict_t *e_self)
 				getname(p), (p == e_self ? redtext(" \x8D you") : ""));
 }
 
-void PlayerStatus()
+void PlayerStatus(void)
 {
 	qbool found = false;
 	gedict_t *p;
@@ -2374,7 +2372,7 @@ void PlayerStatus()
 	G_sprint(self, 2, "%s\n", (found ? "" : "no players"));
 }
 
-void PlayerStatusS()
+void PlayerStatusS(void)
 {
 	qbool found = false;
 	gedict_t *p;
@@ -2397,7 +2395,7 @@ void PlayerStatusS()
 	G_sprint(self, 2, "%s\n", (found ? "" : "no players"));
 }
 
-void PlayerStatusN()
+void PlayerStatusN(void)
 {
 	qbool found = false;
 	gedict_t *p;
@@ -2442,7 +2440,7 @@ void PlayerStatusN()
 
 // broadcast not ready players
 
-void ListWhoNot()
+void ListWhoNot(void)
 {
 	qbool found = false;
 	gedict_t *p, *p2;
@@ -2511,7 +2509,7 @@ void ListWhoNot()
 	}
 }
 
-void VotePickup()
+void VotePickup(void)
 {
 	int votes;
 
@@ -2536,7 +2534,7 @@ void VotePickup()
 	vote_check_pickup();
 }
 
-void ReportMe()
+void ReportMe(void)
 {
 	gedict_t *p;
 	char *t1, *t2, *wt, *pa1, *pa2;
@@ -2650,7 +2648,7 @@ void ReportMe()
 	}
 }
 
-void ToggleRespawns()
+void ToggleRespawns(void)
 {
 	int k_spw = bound(0, cvar("k_spw"), 4);
 
@@ -2669,7 +2667,7 @@ void ToggleRespawns()
 	G_bprint(2, "%s\n", respawn_model_name(k_spw));
 }
 
-void ToggleSpawnPoints()
+void ToggleSpawnPoints(void)
 {
 	if (match_in_progress)
 	{
@@ -2688,7 +2686,7 @@ void ToggleSpawnPoints()
 	}
 }
 
-void TogglePowerups()
+void TogglePowerups(void)
 {
 	char arg[64];
 	int i;
@@ -2758,7 +2756,7 @@ void TogglePowerups()
 	}
 }
 
-void TogglePuPickup()
+void TogglePuPickup(void)
 {
 	if (match_in_progress)
 	{
@@ -2768,7 +2766,7 @@ void TogglePuPickup()
 	cvar_toggle_msg(self, "k_pow_pickup", redtext("new powerups pickup (no multi pickup)"));
 }
 
-void ToggleDischarge()
+void ToggleDischarge(void)
 {
 	if (match_in_progress)
 	{
@@ -2778,7 +2776,7 @@ void ToggleDischarge()
 	cvar_toggle_msg(self, "k_dis", redtext("discharges"));
 }
 
-void ShowDMM()
+void ShowDMM(void)
 {
 	G_sprint(self, 2, "Deathmatch %s\n", dig3(deathmatch));
 }
@@ -2814,7 +2812,7 @@ void ChangeDM(float dmm)
 	G_bprint(2, "Deathmatch %s\n", dig3(deathmatch));
 }
 
-void ChangeTP()
+void ChangeTP(void)
 {
 	if (match_in_progress)
 	{
@@ -2959,7 +2957,7 @@ void AdjustFragLimit(int delta)
 	fraglimit = bound(isHoonyModeAny() ? 0 : 1, fraglimit, isHoonyModeDuel() ? 20 : 100);
 }
 
-void FragsDown()
+void FragsDown(void)
 {
 	if (match_in_progress)
 	{
@@ -3007,7 +3005,7 @@ void FragsDown()
 	}
 }
 
-void FragsUp()
+void FragsUp(void)
 {
 	if (match_in_progress)
 	{
@@ -3035,7 +3033,7 @@ void FragsUp()
 	}
 }
 
-void killquad()
+void killquad(void)
 {
 	if (match_in_progress)
 	{
@@ -3046,7 +3044,7 @@ void killquad()
 	k_killquad = cvar("k_killquad");
 }
 
-void bloodfest()
+void bloodfest(void)
 {
 	if (match_in_progress)
 	{
@@ -3057,7 +3055,7 @@ void bloodfest()
 	k_bloodfest = cvar("k_bloodfest");
 }
 
-void ToggleDropQuad()
+void ToggleDropQuad(void)
 {
 	if (match_in_progress)
 	{
@@ -3067,7 +3065,7 @@ void ToggleDropQuad()
 	cvar_toggle_msg(self, "dq", redtext("DropQuad"));
 }
 
-void ToggleDropRing()
+void ToggleDropRing(void)
 {
 	if (match_in_progress)
 	{
@@ -3077,7 +3075,7 @@ void ToggleDropRing()
 	cvar_toggle_msg(self, "dr", redtext("DropRing"));
 }
 
-void ToggleDropPack()
+void ToggleDropPack(void)
 {
 	if (match_in_progress)
 	{
@@ -3087,7 +3085,7 @@ void ToggleDropPack()
 	cvar_toggle_msg(self, "dp", redtext("DropPacks"));
 }
 
-void ToggleFairPacks()
+void ToggleFairPacks(void)
 {
 	int k_frp = bound(0, cvar("k_frp"), 2);
 
@@ -3127,7 +3125,7 @@ void ToggleFairPacks()
 	}
 }
 
-void ToggleSpeed()
+void ToggleSpeed(void)
 {
 	gedict_t *p;
 
@@ -3154,7 +3152,7 @@ void ToggleSpeed()
 	}
 }
 
-void ToggleBerzerk()
+void ToggleBerzerk(void)
 {
 	if (match_in_progress)
 	{
@@ -3164,7 +3162,7 @@ void ToggleBerzerk()
 	cvar_toggle_msg(self, "k_bzk", redtext("Berzerk mode"));
 }
 
-void ToggleSpecTalk()
+void ToggleSpecTalk(void)
 {
 	int k_spectalk = !cvar("k_spectalk"), fpd = iKey(world, "fpd");
 
@@ -3211,7 +3209,7 @@ void ToggleSpecTalk()
 	}
 }
 
-void ShowRules()
+void ShowRules(void)
 {
 	if (isDuel())
 	{
@@ -3256,7 +3254,7 @@ void ShowRules()
 	G_sprint(self, 2, "\n");
 }
 
-void ChangeLock()
+void ChangeLock(void)
 {
 	int lock = bound(0, cvar("k_lockmode"), 2);
 
@@ -3309,7 +3307,7 @@ void TeamSay(float fsndname)
 	}
 }
 
-void PrintScores()
+void PrintScores(void)
 {
 	int minutes, seconds;
 	gedict_t *p;
@@ -3457,7 +3455,7 @@ void PrintScores()
 }
 
 // This Endgame statistics is triggered by the ingame /laststats command.
-void LastStats()
+void LastStats(void)
 {
 	if (match_in_progress)
 	{
@@ -3470,7 +3468,7 @@ void LastStats()
 }
 
 // This player statistics is triggered by the ingame /stats command. Nothing to do with the endgame stats.
-void PlayerStats()
+void PlayerStats(void)
 {
 	gedict_t *p, *p2;
 	char *tmp, *stats;
@@ -3598,7 +3596,7 @@ void PlayerStats()
 	}
 }
 
-void ToggleQLag()
+void ToggleQLag(void)
 {
 	int fpd = iKey(world, "fpd");
 
@@ -3615,7 +3613,7 @@ void ToggleQLag()
 				((fpd & 8) ? "in effect" : "not in effect"));
 }
 
-void ToggleQEnemy()
+void ToggleQEnemy(void)
 {
 	int fpd = iKey(world, "fpd");
 
@@ -3631,7 +3629,7 @@ void ToggleQEnemy()
 	G_bprint(2, "%s %s\n", redtext("QiZmo enemy reporting"), Allowed(fpd & 32));
 }
 
-void ToggleQPoint()
+void ToggleQPoint(void)
 {
 	int fpd = iKey(world, "fpd");
 
@@ -3648,7 +3646,7 @@ void ToggleQPoint()
 }
 
 /* new FDP bits https://www.quakeworld.nu/wiki/FPD
- void ToggleSkinForcing()
+ void ToggleSkinForcing(void)
  {
  int fpd = iKey( world, "fpd" );
 
@@ -3663,7 +3661,7 @@ void ToggleQPoint()
  redtext("Skin forcing"), Enabled( !(fpd & 256) ));
  }
 
- void ToggleColorForcing()
+ void ToggleColorForcing(void)
  {
  int fpd = iKey( world, "fpd" );
 
@@ -3678,7 +3676,7 @@ void ToggleQPoint()
  redtext("Color forcing"), Enabled( !(fpd & 512) ));
  }
 
- void TogglePitchSpeedLimit()
+ void TogglePitchSpeedLimit(void)
  {
  int fpd = iKey( world, "fpd" );
 
@@ -3693,7 +3691,7 @@ void ToggleQPoint()
  redtext("Pitch speed limit"), Enabled( fpd & 16384 ));
  }
 
- void ToggleYawSpeedLimit()
+ void ToggleYawSpeedLimit(void)
  {
  int fpd = iKey( world, "fpd" );
 
@@ -3709,7 +3707,7 @@ void ToggleQPoint()
  }
  */
 
-void ToggleFreeze()
+void ToggleFreeze(void)
 {
 	if (match_in_progress)
 	{
@@ -3721,7 +3719,7 @@ void ToggleFreeze()
 
 // qqshka: pointing code stolen from Zquake
 
-void ShowNick()
+void ShowNick(void)
 {
 	gedict_t *p, *bp = NULL;
 	char *s1, *s2, *pups, *kn, buf[256] =
@@ -4822,7 +4820,7 @@ void SetPractice(int srv_practice_mode, const char *map)
 	}
 }
 
-void TogglePractice()
+void TogglePractice(void)
 {
 	int lock_practice = cvar("lock_practice");
 	int allow_toggle_practice = cvar("allow_toggle_practice");
@@ -4889,7 +4887,7 @@ void TogglePractice()
 }
 
 // allow reset weapon stats in prewar
-void Wp_Reset()
+void Wp_Reset(void)
 {
 	if (match_in_progress)
 	{
@@ -4915,9 +4913,9 @@ void Sc_Stats(float on)
 	self->sc_stats_time = g_globalvars.time; // force show/hide
 }
 
-void W_WeaponFrame();
+void W_WeaponFrame(void);
 
-void kfjump()
+void kfjump(void)
 {
 	int button0 = self->s.v.button0;
 
@@ -4941,7 +4939,7 @@ void kfjump()
 	self->s.v.button0 = button0; // restore button state
 }
 
-void krjump()
+void krjump(void)
 {
 	int button0 = self->s.v.button0;
 	float va_x = self->s.v.v_angle[0];
@@ -4982,7 +4980,7 @@ void t_jump(float j_type)
 	G_bprint(2, "%s %s %s\n", self->netname, redtext(Enables(!cvar(cv_jt))), redtext(jt));
 }
 
-void klist()
+void klist(void)
 {
 	int i, hdc;
 	gedict_t *p = world;
@@ -5080,7 +5078,7 @@ void klist()
 	}
 }
 
-void hdptoggle()
+void hdptoggle(void)
 {
 	if (match_in_progress)
 	{
@@ -5092,7 +5090,7 @@ void hdptoggle()
 				redtext("handicap"));
 }
 
-void handicap()
+void handicap(void)
 {
 	char arg_2[1024];
 
@@ -5115,7 +5113,7 @@ void show_disallowed_weapons(int k_disallow_weapons)
 	G_sprint(self, 2, "weapons disallowed:%s\n", (strnull(dwp) ? redtext(" none") : redtext(dwp)));
 }
 
-void noweapon()
+void noweapon(void)
 {
 	char arg_2[1024];
 	int k_disallow_weapons = (int)cvar("k_disallow_weapons") & DA_WPNS;
@@ -5200,17 +5198,17 @@ void noweapon()
 	}
 }
 
-void no_lg()
+void no_lg(void)
 {
 	stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "cmd noweapon lg\n");
 }
 
-void no_gl()
+void no_gl(void)
 {
 	stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "cmd noweapon gl\n");
 }
 
-void tracklist()
+void tracklist(void)
 {
 	int i;
 	gedict_t *p;
@@ -5235,7 +5233,7 @@ void tracklist()
 	}
 }
 
-void fpslist()
+void fpslist(void)
 {
 	int i;
 	gedict_t *p;
@@ -5271,7 +5269,7 @@ void fpslist()
 }
 
 // This is designed for pickup games and creates totally random teams(ish)
-void RandomPickup()
+void RandomPickup(void)
 {
 	int votes;
 
@@ -5334,7 +5332,7 @@ void del_from_specs_favourites(gedict_t *rm)
 	}
 }
 
-void fav_add()
+void fav_add(void)
 {
 	int fav_num, free_num;
 	gedict_t *goal = PROG_TO_EDICT(self->s.v.goalentity);
@@ -5433,7 +5431,7 @@ qbool favx_del_do(gedict_t *s, gedict_t *p, char *prefix)
 	return removed;
 }
 
-void fav_del()
+void fav_del(void)
 {
 	gedict_t *goal = PROG_TO_EDICT(self->s.v.goalentity);
 	int diff = (int)(goal - world);
@@ -5453,7 +5451,7 @@ void fav_del()
 	G_sprint(self, 2, "fav_del: %s is %s favourites\n", goal->netname, redtext("not in"));
 }
 
-void fav_all_del()
+void fav_all_del(void)
 {
 	qbool deleted = false;
 	int fav_num;
@@ -5492,7 +5490,7 @@ void favx_add(float fav_num)
 	self->favx[(int)fav_num - 1] = diff;
 }
 
-void fav_next()
+void fav_next(void)
 {
 	int pl_num, fav_num, first_fav, desired_fav;
 	gedict_t *goal = PROG_TO_EDICT(self->s.v.goalentity), *p;
@@ -5616,7 +5614,7 @@ void xfav_go(float fav_num)
 	stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "track %d\n", GetUserID(p));
 }
 
-void fav_show()
+void fav_show(void)
 {
 	gedict_t *p;
 	qbool first, showed = false;
@@ -5763,7 +5761,7 @@ static void ResetNormalAutoTrack(gedict_t *cl)
 	cl->autotrack_hint = NULL;
 }
 
-void DoAutoTrack()
+void DoAutoTrack(void)
 {
 	gedict_t *p = NULL, *goal;
 	int id;
@@ -5878,7 +5876,7 @@ void AutoTrack(float autoTrackType)
 	G_sprint(self, 2, "%s %s\n", redtext(at_txt), OnOff(self->autotrack));
 }
 
-void AutoTrackRestore()
+void AutoTrackRestore(void)
 {
 	autoTrackType_t at = iKey(self, "*at");
 
@@ -6068,7 +6066,7 @@ void ktpro_autotrack_predict_powerup(void)
 
 // << end  ktpro compatible autotrack
 
-void next_best()
+void next_best(void)
 {
 	gedict_t *b1 = get_ed_best1(), *b2 = get_ed_best2();
 	gedict_t *goal = PROG_TO_EDICT(self->s.v.goalentity), *to;
@@ -6099,7 +6097,7 @@ void next_best()
 	}
 }
 
-void next_pow()
+void next_pow(void)
 {
 	gedict_t *goal = PROG_TO_EDICT(self->s.v.goalentity), *to, *first, *p;
 	qbool nextBreak = false;
@@ -6165,7 +6163,7 @@ void next_pow()
 // common functions
 #define Pos_Disallowed()	(match_in_progress || intermission_running || cvar( "sv_paused" ) || (isRACE() && race.status))
 // parse pos_show/pos_save/pos_move <number>
-int Pos_Get_idx()
+int Pos_Get_idx(void)
 {
 	char arg_2[1024];
 
@@ -6179,7 +6177,7 @@ int Pos_Get_idx()
 	return 0;
 }
 // Show functions
-void Pos_Show()
+void Pos_Show(void)
 {
 	int idx;
 	pos_t *pos;
@@ -6201,7 +6199,7 @@ void Pos_Show()
 #define Pos_Save_angles(pos)	VectorCopy(self->s.v.v_angle, (pos)->v_angle)
 #define Pos_Save_velocity(pos)	VectorCopy(self->s.v.velocity, (pos)->velocity)
 // pos_save
-void Pos_Save()
+void Pos_Save(void)
 {
 	int idx;
 	pos_t *pos;
@@ -6266,7 +6264,7 @@ qbool Pos_Set_origin(pos_t *pos)
 #define Pos_Set_velocity(pos)	VectorCopy((pos)->velocity, self->s.v.velocity)
 
 // pos_move
-void Pos_Move()
+void Pos_Move(void)
 {
 	int idx;
 	pos_t *pos;
@@ -6379,18 +6377,18 @@ void Pos_Set(float set_type)
 // pos_show/pos_save/pos_move/pos_set_* commands }
 //================================================
 
-void Sh_Speed()
+void Sh_Speed(void)
 {
 	stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "cmd info kf %d\n", (iKey(self, "kf") ^ KF_SPEED));
 }
 
 // /motd command
 
-void PMOTDThink();
-void SMOTDThink();
+void PMOTDThink(void);
+void SMOTDThink(void);
 
 // often times you play a game on non-symmetrical map as one color then swap teams and play again to be fair
-void SwapAll()
+void SwapAll(void)
 {
 	int votes;
 
@@ -6432,7 +6430,7 @@ void SwapAll()
 	vote_check_swapall();
 }
 
-void motd_show()
+void motd_show(void)
 {
 	gedict_t *motd;
 	int owner = EDICT_TO_PROG(self);
@@ -6464,7 +6462,7 @@ void motd_show()
 	motd->attack_finished = g_globalvars.time + 10;
 }
 
-void krnd()
+void krnd(void)
 {
 	int argc, i;
 	char arg_x[1024], buf[2048] =
@@ -6499,7 +6497,7 @@ void krnd()
 	G_bprint(2, "selected: \220%s\221\n", arg_x);
 }
 
-void agree_on_map()
+void agree_on_map(void)
 {
 	if (!k_lastvotedmap)
 	{
@@ -6548,7 +6546,7 @@ char* lastscores2str(lsType_t lst)
 	}
 }
 
-void lastscore_add()
+void lastscore_add(void)
 {
 	gedict_t *p;
 	gedict_t *ed1 = get_ed_scores1();
@@ -6738,7 +6736,7 @@ void lastscore_add()
 	}
 }
 
-void lastscores()
+void lastscores(void)
 {
 	int i;
 	int j;
@@ -6824,12 +6822,12 @@ void lastscores()
 
 // { spec moreinfo
 
-qbool mi_on()
+qbool mi_on(void)
 {
 	return ((int)cvar("k_spec_info") & MI_ON);
 }
 
-qbool mi_adm_only()
+qbool mi_adm_only(void)
 {
 	return ((int)cvar("k_spec_info") & MI_ADM_ONLY);
 }
@@ -6908,7 +6906,7 @@ void mi_print(gedict_t *tooker, int it, char *msg)
 	}
 }
 
-void moreinfo()
+void moreinfo(void)
 {
 	int level;
 
@@ -6962,7 +6960,7 @@ void info_mi_update(gedict_t *p, char *from, char *to)
 	G_sprint(p, 2, "%s\n", mi_levels[level].desc);
 }
 
-void infolock()
+void infolock(void)
 {
 	int k_spec_info = cvar("k_spec_info");
 
@@ -6991,7 +6989,7 @@ void infolock()
 	}
 }
 
-void infospec()
+void infospec(void)
 {
 	int k_spec_info = cvar("k_spec_info");
 
@@ -7010,7 +7008,7 @@ void infospec()
 
 // { wreg
 
-void wreg_usage()
+void wreg_usage(void)
 {
 	G_sprint(self, 2, "usage: cmd wreg [[char] [[+/-]weapon order]]\n");
 }
@@ -7047,7 +7045,7 @@ void wreg_showslot(wreg_t *w, int slot)
 	G_sprint(self, 2, "slot \"%c\" - \"%s%s\"\n", (char) slot, sign, order);
 }
 
-void cmd_wreg()
+void cmd_wreg(void)
 {
 	int argc = trap_CmdArgc(), attack = 0, imp[MAX_WREG_IMP], i, cnt;
 	char arg_1[64], arg_2[64], *tmp = arg_2;
@@ -7283,7 +7281,7 @@ void cmd_wreg_do(byte c)
 
 // }
 
-void ToggleMidair()
+void ToggleMidair(void)
 {
 	if (!is_rules_change_allowed())
 	{
@@ -7322,7 +7320,7 @@ void ToggleMidair()
 	cvar_toggle_msg(self, "k_midair", redtext("Midair"));
 }
 
-void SetMidairMinHeight()
+void SetMidairMinHeight(void)
 {
 	int k_midair_minheight = bound(0, cvar("k_midair_minheight"), 4);
 
@@ -7368,9 +7366,9 @@ void SetMidairMinHeight()
 	}
 }
 
-void W_SetCurrentAmmo();
+void W_SetCurrentAmmo(void);
 
-void ToggleFreshTeams()
+void ToggleFreshTeams(void)
 {
 	if (!is_rules_change_allowed())
 	{
@@ -7388,7 +7386,7 @@ void ToggleFreshTeams()
 	cvar_toggle_msg(self, "k_freshteams", "&c08fFreshTeams&r");
 }
 
-void ToggleFreshPacks()		// FreshPacks is enabled by default when playing freshteams
+void ToggleFreshPacks(void)		// FreshPacks is enabled by default when playing freshteams
 {
 	int k_freshteams = cvar("k_freshteams");
 
@@ -7408,7 +7406,7 @@ void ToggleFreshPacks()		// FreshPacks is enabled by default when playing fresht
 	cvar_toggle_msg(self, "k_freshteams_limit_packs", "&c08fFreshPacks&r (limited backpack ammo)");
 }
 
-void ToggleFreshGuns() // FreshGuns is enabled by default when playing freshteams
+void ToggleFreshGuns(void) // FreshGuns is enabled by default when playing freshteams
 {
 	int k_freshteams = cvar("k_freshteams");
 
@@ -7428,7 +7426,7 @@ void ToggleFreshGuns() // FreshGuns is enabled by default when playing freshteam
 	cvar_toggle_msg(self, "k_freshteams_limit_sweep_ammo", "&c08fFreshGuns&r (limited weapon ammo on sweep)");
 }
 
-void ToggleFreshTime()
+void ToggleFreshTime(void)
 {
 	int k_freshteams = cvar("k_freshteams");
 	int k_freshtime = bound(0, cvar("k_freshteams_weapon_time"), 60);
@@ -7462,7 +7460,7 @@ void ToggleFreshTime()
 	}
 }
 
-void ToggleNoSweep()
+void ToggleNoSweep(void)
 {
 	if (!is_rules_change_allowed())
 	{
@@ -7480,7 +7478,7 @@ void ToggleNoSweep()
 	cvar_toggle_msg(self, "k_nosweep", redtext("NoSweep"));
 }
 
-void ToggleInstagib()
+void ToggleInstagib(void)
 {
 	int k_instagib = bound(0, cvar("k_instagib"), 3);
 	char buf[1024 * 4];
@@ -7632,7 +7630,7 @@ void ToggleLGC(void)
 	W_SetCurrentAmmo();
 }
 
-void ToggleCGKickback()
+void ToggleCGKickback(void)
 {
 	if (match_in_progress)
 	{
@@ -7682,7 +7680,7 @@ void ToggleToT(void)
 	W_SetCurrentAmmo();
 }
 
-void sv_time()
+void sv_time(void)
 {
 	char date[64];
 
@@ -7692,7 +7690,7 @@ void sv_time()
 	}
 }
 
-void GrenadeMode()
+void GrenadeMode(void)
 {
 	if (!is_rules_change_allowed())
 	{
@@ -7716,7 +7714,7 @@ void GrenadeMode()
 	}
 }
 
-void ToggleReady()
+void ToggleReady(void)
 {
 	if (isRACE())
 	{
@@ -7730,22 +7728,22 @@ void ToggleReady()
 	}
 	else
 	{
-		PlayerReady(true);
+		PlayerFastReady();
 	}
 }
 
-void dlist()
+void dlist(void)
 {
 	stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "cmd demolist %s\n", params_str(1, -1));
 }
 
-void dinfo()
+void dinfo(void)
 {
 	stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "cmd demoinfo %s\n", params_str(1, -1));
 }
 
 // ktpro (c)
-void teleteam()
+void teleteam(void)
 {
 	int k_tp_tele_death = bound(0, cvar("k_tp_tele_death"), 1);
 
@@ -7823,7 +7821,7 @@ void iplist_one(gedict_t *s, gedict_t *p)
 }
 
 // ktpro (c)
-void iplist()
+void iplist(void)
 {
 	int i;
 	gedict_t *p;
@@ -7858,7 +7856,7 @@ void iplist()
 	}
 }
 
-void dmgfrags()
+void dmgfrags(void)
 {
 	if (!is_rules_change_allowed())
 	{
@@ -7871,15 +7869,15 @@ void dmgfrags()
 // { movie, for trix record in memory
 // code is partially wroten by Tonik
 
-void mv_stop_record();
-qbool mv_is_recording();
+void mv_stop_record(void);
+qbool mv_is_recording(void);
 
-qbool mv_is_playback()
+qbool mv_is_playback(void)
 {
 	return self->is_playback;
 }
 
-void mv_stop_playback()
+void mv_stop_playback(void)
 {
 	if (!mv_is_playback())
 	{
@@ -7897,7 +7895,7 @@ void mv_stop_playback()
 	self->is_playback = false;
 }
 
-qbool mv_can_playback()
+qbool mv_can_playback(void)
 {
 	if (match_in_progress || intermission_running)
 	{
@@ -7917,7 +7915,7 @@ qbool mv_can_playback()
 	return true;
 }
 
-void mv_playback()
+void mv_playback(void)
 {
 	gedict_t *pb_ent = self->pb_ent;
 	float scale;
@@ -7970,7 +7968,7 @@ void mv_playback()
 	pb_ent->s.v.colormap = fp->colormap;
 }
 
-void mv_cmd_playback()
+void mv_cmd_playback(void)
 {
 	mv_stop_record();	// stop record first
 	mv_stop_playback();	// stop playback first
@@ -7995,12 +7993,12 @@ void mv_cmd_playback()
 	self->is_playback = true;
 }
 
-qbool mv_is_recording()
+qbool mv_is_recording(void)
 {
 	return self->is_recording;
 }
 
-void mv_stop_record()
+void mv_stop_record(void)
 {
 	if (!mv_is_recording())
 	{
@@ -8012,7 +8010,7 @@ void mv_stop_record()
 	self->is_recording = false;
 }
 
-qbool mv_can_record()
+qbool mv_can_record(void)
 {
 	if (match_in_progress || intermission_running)
 	{
@@ -8032,7 +8030,7 @@ qbool mv_can_record()
 	return true;
 }
 
-void mv_record()
+void mv_record(void)
 {
 	plrfrm_t *f;
 
@@ -8062,7 +8060,7 @@ void mv_record()
 	self->rec_count++;
 }
 
-void mv_cmd_record()
+void mv_cmd_record(void)
 {
 	mv_stop_record();	// stop record first
 	mv_stop_playback();	// stop playback first
@@ -8082,7 +8080,7 @@ void mv_cmd_record()
 	self->is_recording = true;
 }
 
-void mv_cmd_stop()
+void mv_cmd_stop(void)
 {
 	mv_stop_record();	// stop record
 	mv_stop_playback();	// stop playback
@@ -8092,7 +8090,7 @@ void mv_cmd_stop()
 
 // ktpro (c)
 // /cmd callalias <aliasname time>
-void callalias()
+void callalias(void)
 {
 	const int ca_limit = 15, ca_limit2 = 30;
 	char arg_x[1024];
@@ -8143,7 +8141,7 @@ void callalias()
 	self->callalias_time = g_globalvars.time + tm;
 }
 
-void check_callalias()
+void check_callalias(void)
 {
 	if (!self->callalias_time || (self->callalias_time > g_globalvars.time))
 	{
@@ -8159,7 +8157,7 @@ void check_callalias()
 
 char fcheck_name[128];
 
-void fcheck()
+void fcheck(void)
 {
 	char arg_x[1024];
 	int i;
@@ -8220,7 +8218,7 @@ void fcheck()
 	}
 }
 
-void check_fcheck()
+void check_fcheck(void)
 {
 	gedict_t *p;
 	char *nl, *tmp;
@@ -8258,7 +8256,7 @@ void check_fcheck()
 	f_check = 0;
 }
 
-void mapcycle()
+void mapcycle(void)
 {
 	char var[128], *newmap = "";
 	int i;
@@ -8295,7 +8293,7 @@ void mapcycle()
 	}
 }
 
-void airstep()
+void airstep(void)
 {
 	if (match_in_progress || isRACE())
 	{
@@ -8305,7 +8303,7 @@ void airstep()
 	cvar_toggle_msg(self, "pm_airstep", redtext("pm_airstep"));
 }
 
-void ToggleVwep()
+void ToggleVwep(void)
 {
 	gedict_t *p, *oself;
 
@@ -8335,7 +8333,7 @@ void ToggleVwep()
 	self = oself;
 }
 
-void ToggleExclusive()
+void ToggleExclusive(void)
 {
 	if (match_in_progress)
 	{
@@ -8345,7 +8343,7 @@ void ToggleExclusive()
 	cvar_toggle_msg(self, "k_exclusive", redtext("exclusive mode"));
 }
 
-void ToggleNewCoopNm()
+void ToggleNewCoopNm(void)
 {
 	if (match_in_progress)
 	{
@@ -8358,14 +8356,14 @@ void ToggleNewCoopNm()
 // { yawn mode related
 // { yawn mode related
 
-void FixYawnMode()
+void FixYawnMode(void)
 {
 	k_yawnmode = cvar("k_yawnmode");
 	k_teleport_cap = bound(0, cvar("k_teleport_cap"), 100);
 }
 
 // Toggle yawnmode, implemented by Molgrum
-void ToggleYawnMode()
+void ToggleYawnMode(void)
 {
 	if (!is_rules_change_allowed())
 	{
@@ -8377,7 +8375,7 @@ void ToggleYawnMode()
 	FixYawnMode(); // apply changes ASAP
 }
 
-void setTeleportCap()
+void setTeleportCap(void)
 {
 	char arg[256];
 
@@ -8415,10 +8413,11 @@ char pause_name[50];
 
 void PausedTic(int duration)
 {
-	pauseduration = duration;
 	gedict_t *p;
 	int time = 0;
 	static int prevtime = 0;
+
+	pauseduration = duration;
 
 	if (when_to_unpause && when_to_unpause > duration)
 	{
@@ -8447,7 +8446,7 @@ void PausedTic(int duration)
 	}
 }
 
-void TogglePause()
+void TogglePause(void)
 {
 	int minutes, seconds;
 	gedict_t *p;
@@ -8527,7 +8526,7 @@ void TogglePause()
 	}
 }
 
-void WillPause()
+void WillPause(void)
 {
 	gedict_t *p;
 	int time = when_to_pause - g_globalvars.time+1;
@@ -8563,7 +8562,7 @@ void WillPause()
 	trap_setpause(1);
 }
 
-void ToggleArena()
+void ToggleArena(void)
 {
 	if (!is_rules_change_allowed())
 	{
@@ -8611,7 +8610,7 @@ void ToggleArena()
 	}
 }
 
-void Spawn666Time()
+void Spawn666Time(void)
 {
 	char arg_2[1024];
 	float dmm4_invinc_time;
@@ -8647,7 +8646,7 @@ void Spawn666Time()
 	trap_cvar_set_float("dmm4_invinc_time", dmm4_invinc_time ? dmm4_invinc_time : -1);
 }
 
-void noitems()
+void noitems(void)
 {
 	if (match_in_progress)
 	{
@@ -8665,7 +8664,7 @@ void giveme_usage(void)
 				"giveme norunes\n");
 }
 
-void giveme()
+void giveme(void)
 {
 	char arg_2[128];
 	char arg_3[128];
@@ -8780,12 +8779,12 @@ typedef struct
 	char *classname;
 	int spawnflags;
 	int angle;			// should we set angles or not.
-	void (*spawn)();	// custom spawn function, called after actual spawn.
+	void (*spawn)(void);	// custom spawn function, called after actual spawn.
 } dropitem_spawn_t;
 
 #define WEAPON_BIG2 1
 
-static void dropitem_spawn_spawnpoint()
+static void dropitem_spawn_spawnpoint(void)
 {
 	int effects = EF_GREEN | EF_RED; // default effects.
 
@@ -8926,7 +8925,7 @@ static void dropitem_usage(void)
 	}
 }
 
-static void dropitem()
+static void dropitem(void)
 {
 	dropitem_spawn_t *di;
 	char arg_1[128];
@@ -8973,7 +8972,7 @@ static void dropitem()
 	}
 }
 
-static void removeitem()
+static void removeitem(void)
 {
 	gedict_t *ent;
 	gedict_t *p = NULL;
@@ -9051,7 +9050,7 @@ static void dump_print(fileHandle_t file_handle, const char *fmt, ...)
 	trap_FS_WriteFile(text, strlen(text), file_handle);
 }
 
-static void dumpent()
+static void dumpent(void)
 {
 	int cnt = 0;
 	gedict_t *p;
@@ -9193,7 +9192,7 @@ qbool tot_mode_enabled(void)
 	return cvar(TOT_MODE_VARIABLE) != 0;
 }
 
-void ListGameModes()
+void ListGameModes(void)
 {
 	const char *known[] =
 	{

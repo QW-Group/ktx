@@ -52,7 +52,7 @@
  moving towards it, change the next destination and continue.
  ==============
  */
-void t_movetarget()
+void t_movetarget(void)
 {
 	gedict_t *temp;
 	vec3_t tmpv;
@@ -107,7 +107,7 @@ void t_movetarget()
 	}
 }
 
-void movetarget_f()
+void movetarget_f(void)
 {
 	if (!self->targetname)
 	{
@@ -123,7 +123,7 @@ void movetarget_f()
 /*QUAKED path_corner (0.5 0.3 0) (-8 -8 -8) (8 8 8)
  Monsters will continue walking towards the next target corner.
  */
-void SP_path_corner()
+void SP_path_corner(void)
 {
 	movetarget_f();
 }

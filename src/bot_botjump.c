@@ -12,7 +12,7 @@
 
 #include "g_local.h"
 
-void DemoMark();
+void DemoMark(void);
 
 #define FB_LAVAJUMP_NOT    0      // not lava-jumping
 #define FB_LAVAJUMP_SINK   1      // deliberately sinking, waiting for waterlevel == 3

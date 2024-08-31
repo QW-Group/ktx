@@ -55,7 +55,7 @@ static intptr_t PASSFLOAT(float x)
 	return rc._int;
 }
 
-intptr_t trap_GetApiVersion()
+intptr_t trap_GetApiVersion(void)
 {
 	return syscall(G_GETAPIVERSION);
 }
@@ -95,7 +95,7 @@ void trap_Error(const char *fmt)
 	syscall(G_ERROR, (intptr_t) fmt);
 }
 
-intptr_t trap_spawn()
+intptr_t trap_spawn(void)
 {
 	return syscall(G_SPAWN_ENT);
 }
@@ -146,7 +146,7 @@ void trap_sound(intptr_t edn, intptr_t channel, char *samp, float vol, float att
 	syscall(G_SOUND, edn, channel, (intptr_t) samp, PASSFLOAT(vol), PASSFLOAT(att));
 }
 
-intptr_t trap_checkclient()
+intptr_t trap_checkclient(void)
 {
 	return syscall(G_CHECKCLIENT);
 }
@@ -168,7 +168,7 @@ void trap_localcmd(const char *fmt)
 	syscall(G_LOCALCMD, (intptr_t) fmt);
 }
 
-void trap_executecmd()
+void trap_executecmd(void)
 {
 	syscall(G_executecmd);
 }
@@ -331,7 +331,7 @@ void trap_WriteEntity(intptr_t to, intptr_t edn)
 	syscall(G_WRITEENTITY, to, edn);
 }
 
-void trap_FlushSignon()
+void trap_FlushSignon(void)
 {
 	syscall(G_FLUSHSIGNON);
 }
@@ -341,7 +341,7 @@ void trap_disableupdates(intptr_t edn, float time)
 	syscall(G_DISABLEUPDATES, edn, PASSFLOAT(time));
 }
 
-intptr_t trap_CmdArgc()
+intptr_t trap_CmdArgc(void)
 {
 	return syscall(G_CMD_ARGC);
 }
@@ -466,48 +466,14 @@ void trap_VisibleTo(intptr_t viewer, intptr_t first, intptr_t len, byte *visible
 	syscall(G_VISIBLETO, viewer, first, len, (intptr_t) visible);
 }
 
-void trap_SetExtField_i(gedict_t *ed, const char *fieldname, int val)
+void trap_SetExtField(gedict_t *ed, const char *fieldname, int val)
 {
-	if (HAVEEXTENSION(G_SETEXTFIELD))
-	{
-		syscall(G_SETEXTFIELD, (intptr_t)ed, (intptr_t)fieldname, val);
-	}
-	else
-	{
-		G_bprint(PRINT_HIGH, "SetExtField(%s, %s, %d) not supported by server\n", ed->classname, fieldname, val);
-	}
+	syscall(G_SETEXTFIELD, (intptr_t)ed, (intptr_t)fieldname, val);
 }
 
-void trap_SetExtField_f(gedict_t *ed, const char *fieldname, float val)
+int trap_GetExtField(gedict_t *ed, const char *fieldname)
 {
-	if (HAVEEXTENSION(G_SETEXTFIELD))
-	{
-		syscall(G_SETEXTFIELD, (intptr_t)ed, (intptr_t)fieldname, PASSFLOAT(val));
-	}
-	else
-	{
-		G_bprint(PRINT_HIGH, "SetExtField(%s, %s, %f) not supported by server\n", ed->classname, fieldname, val);
-	}
-}
-
-int trap_GetExtField_i(gedict_t *ed, const char *fieldname)
-{
-	int ival = -1;
-	if (HAVEEXTENSION(G_GETEXTFIELD))
-	{
-		ival = syscall(G_GETEXTFIELD, (intptr_t)ed, (intptr_t)fieldname);
-	}
-	return ival;
-}
-
-float trap_GetExtField_f(gedict_t *ed, const char *fieldname)
-{
-	fi_t tmp = { ._float = -1 };
-	if (HAVEEXTENSION(G_GETEXTFIELD))
-	{
-		tmp._int = syscall(G_GETEXTFIELD, (intptr_t)ed, (intptr_t)fieldname);
-	}
-	return tmp._float;
+	return syscall(G_GETEXTFIELD, (intptr_t)ed, (intptr_t)fieldname);
 }
 
 void trap_changelevelHub(const char *name, const char *entityname, const char *startspot)

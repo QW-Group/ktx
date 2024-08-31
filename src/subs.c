@@ -29,7 +29,7 @@
  QuakeEd only writes a single float for angles (bad idea), so up and down are
  just constant angles.
  */
-void SetMovedir()
+void SetMovedir(void)
 {
 	if (VectorCompareF(self->s.v.angles, 0, -1, 0))
 	{
@@ -53,7 +53,7 @@ void SetMovedir()
  InitTrigger
  ================
  */
-void InitTrigger()
+void InitTrigger(void)
 {
 // trigger angles are used for one-way touches.  An angle of 0 is assumed
 // to mean no restrictions, so use a yaw of 360 instead.
@@ -77,8 +77,8 @@ void InitTrigger()
  self.origin traveling at speed
  ===============
  */
-void SUB_CalcMoveDone();
-void SUB_CalcMoveEnt(gedict_t *ent, vec3_t tdest, float tspeed, void (*func)())
+void SUB_CalcMoveDone(void);
+void SUB_CalcMoveEnt(gedict_t *ent, vec3_t tdest, float tspeed, void (*func)(void))
 {
 	gedict_t *stemp;
 
@@ -89,7 +89,7 @@ void SUB_CalcMoveEnt(gedict_t *ent, vec3_t tdest, float tspeed, void (*func)())
 	self = stemp;
 }
 
-void SUB_CalcMove(vec3_t tdest, float tspeed, void (*func)())
+void SUB_CalcMove(vec3_t tdest, float tspeed, void (*func)(void))
 {
 	vec3_t vdestdelta;
 	float len, traveltime;
@@ -137,7 +137,7 @@ void SUB_CalcMove(vec3_t tdest, float tspeed, void (*func)())
  After moving, set origin to exact final destination
  ============
  */
-void SUB_CalcMoveDone()
+void SUB_CalcMoveDone(void)
 {
 	setorigin(self, PASSVEC3(self->finaldest));
 
@@ -212,10 +212,10 @@ void SUB_CalcMoveDone()
  }*/
 
 //=============================================================================
-void SUB_UseTargets();
+void SUB_UseTargets(void);
 gedict_t *activator;
 
-void DelayThink()
+void DelayThink(void)
 {
 	activator = PROG_TO_EDICT(self->s.v.enemy);
 
@@ -242,7 +242,7 @@ void DelayThink()
 
  ==============================
  */
-void SUB_UseTargets()
+void SUB_UseTargets(void)
 {
 	gedict_t *t, *stemp, *otemp, *act;
 
@@ -318,7 +318,7 @@ void SUB_UseTargets()
 			{
 				if (self->use)
 				{
-					((void (*)())(self->use))();
+					((void (*)(void))(self->use))();
 				}
 			}
 
