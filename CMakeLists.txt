@@ -153,7 +153,11 @@ if(FTESV)
 endif()
 # If not Miscrosoft compilator - then set additional options for linker.
 if (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
-	target_compile_options(${PROJECT_NAME} PRIVATE /W4)
+	# 4100 - unused parameter
+	# 4210 - using extern keyword in functions
+	# 4456 - shadowing locals, broadly used
+	# 4459 - shadowing globals, broadly used
+	target_compile_options(${PROJECT_NAME} PRIVATE /W4 /wd4100 /wd4210 /wd4456 /wd4459)
 else()
 	target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
 
