@@ -3533,54 +3533,55 @@ void PlayerPreThink()
 #endif
 
 // SOCD detection
-
-	float fSideMoveSpeed = self->movement[1];
-
-	if ((fSideMoveSpeed != 0) && (fSideMoveSpeed != self->fLastSideMoveSpeed) && (self->nullStrafeCount < 3)) //strafechange
 	{
-		self->fStrafeChangeCount += 1;
-		self->totalStrafeChangeCount += 1;
-		if (match_in_progress)
-			self->matchStrafeChangeCount += 1;
+		float fSideMoveSpeed = self->movement[1];
 
-		if ((fSideMoveSpeed != 0) && (self->fLastSideMoveSpeed != 0))
+		if ((fSideMoveSpeed != 0) && (((fSideMoveSpeed > 0) - (fSideMoveSpeed < 0)) != ((self->fLastSideMoveSpeed > 0) - (self->fLastSideMoveSpeed < 0))) && (self->nullStrafeCount < 4)) //strafechange
 		{
-			self->fFramePerfectStrafeChangeCount += 1;
-			self->totalPerfectStrafeCount += 1;
+			self->fStrafeChangeCount += 1;
+			self->totalStrafeChangeCount += 1;
 			if (match_in_progress)
-				self->matchPerfectStrafeCount += 1;
-		}
+				self->matchStrafeChangeCount += 1;
 
-		self->nullStrafeCount = 0;
-	}
-	else
-	{
-		if (0 == fSideMoveSpeed)
-			self->nullStrafeCount += 1;
-		else
-			self->nullStrafeCount = 0;
-	}
-
-	self->fLastSideMoveSpeed = fSideMoveSpeed;
-
-	if (self->fStrafeChangeCount >= 25)
-	{
-		if (self->fFramePerfectStrafeChangeCount / self->fStrafeChangeCount >= 0.75)
-		{
-			int k_allow_socd_warning = cvar("k_allow_socd_warning");
-
-			self->socdDetected += 1;
-			if ((!match_in_progress) && (!self->isBot) && k_allow_socd_warning && (self->ct == ctPlayer))
+			if ((fSideMoveSpeed != 0) && (self->fLastSideMoveSpeed != 0))
 			{
-				G_bprint(PRINT_HIGH,
-					"Warning! %s: Movement assistance detected. Please disable iDrive or keyboard strafe assistance features.\n",
-					self->netname);
+				self->fFramePerfectStrafeChangeCount += 1;
+				self->totalPerfectStrafeCount += 1;
+				if (match_in_progress)
+					self->matchPerfectStrafeCount += 1;
 			}
+
+			self->nullStrafeCount = 0;
+		}
+		else
+		{
+			if (0 == fSideMoveSpeed)
+				self->nullStrafeCount += 1;
+			else
+				self->nullStrafeCount = 0;
 		}
 
-		self->socdChecksCount += 1;
-		self->fStrafeChangeCount = 0;
-		self->fFramePerfectStrafeChangeCount = 0;
+		self->fLastSideMoveSpeed = fSideMoveSpeed;
+
+		if (self->fStrafeChangeCount >= 25)
+		{
+			if (self->fFramePerfectStrafeChangeCount / self->fStrafeChangeCount >= 0.75)
+			{
+				int k_allow_socd_warning = cvar("k_allow_socd_warning");
+
+				self->socdDetected += 1;
+				if ((!match_in_progress) && (!self->isBot) && k_allow_socd_warning && (self->ct == ctPlayer))
+				{
+					G_bprint(PRINT_HIGH,
+						"Warning! %s: Movement assistance detected. Please disable iDrive or keyboard strafe assistance features.\n",
+						self->netname);
+				}
+			}
+
+			self->socdChecksCount += 1;
+			self->fStrafeChangeCount = 0;
+			self->fFramePerfectStrafeChangeCount = 0;
+		}
 	}
 
 // ILLEGALFPS[
