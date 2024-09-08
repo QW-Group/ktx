@@ -346,6 +346,9 @@ void SP_ambient_general(void);
 
 void SP_trigger_heal(void);
 
+void SP_func_counter(void);
+void SP_func_oncount(void);
+
 spawn_t spawns[] =
 {
 // info entities don't do anything at all, but provide positional
@@ -502,6 +505,10 @@ spawn_t spawns[] =
 	{ "func_rotate_entity", SP_func_rotate_entity },
 
 	{ "trigger_heal", SP_trigger_heal },
+
+// hipcount
+    { "func_counter", SP_func_counter },
+    { "func_oncount", SP_func_oncount },
 
 	{ 0, 0 }
 };
