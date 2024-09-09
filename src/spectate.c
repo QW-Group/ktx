@@ -37,6 +37,8 @@ void AutoTrackRestore(void);
 
 void Bot_Print_Thinking(void);
 
+void SendSpecInfo(gedict_t *spec, gedict_t *target_client);
+
 qbool TrackChangeCoach(gedict_t *p);
 
 int GetSpecWizard(void)
@@ -199,6 +201,8 @@ void SpectatorConnect(void)
 		self->wizard->s.v.nextthink = g_globalvars.time + 0.1;
 	}
 
+	SendSpecInfo(NULL, self); // Get all spectator info
+
 	// Wait until you do stuffing
 	MakeMOTD();
 }
@@ -357,6 +361,8 @@ void SpecGoalChanged(void)
 	}
 
 	WS_OnSpecPovChange(self, false); // refresh "new weapon stats"
+
+	SendSpecInfo(self, NULL); // update tracking info with all clients
 }
 
 ////////////////

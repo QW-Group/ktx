@@ -1881,8 +1881,6 @@ void StartFrame(int time)
 
 	CheckTeamStatus();
 
-	SendSpecInfo();
-
 	CheckAutoXonX(true); // switch XonX mode dependant on players + specs count
 
 	Check_LongMapUptime(); // reload map after some long up time, so our float time variables are happy
