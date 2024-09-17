@@ -134,7 +134,7 @@ static void BestEnemy_apply(gedict_t *test_enemy, float *best_score, gedict_t **
 		enemy_score = look_traveltime + g_random();
 	}
 
-	if (enemy_score < *best_score)
+	if (enemy_score < *best_score && look_marker != NULL)
 	{
 		vec3_t marker_view;
 		vec3_t to_marker_view;
