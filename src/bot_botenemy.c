@@ -134,7 +134,7 @@ static void BestEnemy_apply(gedict_t *test_enemy, float *best_score, gedict_t **
 		enemy_score = look_traveltime + g_random();
 	}
 
-	if (enemy_score < *best_score)
+	if (enemy_score < *best_score && look_marker != NULL)
 	{
 		vec3_t marker_view;
 		vec3_t to_marker_view;
@@ -145,6 +145,21 @@ static void BestEnemy_apply(gedict_t *test_enemy, float *best_score, gedict_t **
 		*best_score = enemy_score;
 		*enemy_ = test_enemy;
 		*predict_dist = VectorDistance(marker_view, to_marker_view);
+	}
+	else if (look_marker == NULL)
+	{
+		// No sight marker exists between these two markers, so the enemy can't be
+		// scored and is skipped. This normally means a marker has no zone, i.e. the
+		// loaded .bot file is out of sync with the markers ktx built for this map.
+		// Rate-limited so a bad map doesn't flood the console.
+		static float next_complaint = 0;
+
+		if (g_globalvars.time > next_complaint)
+		{
+			next_complaint = g_globalvars.time + 10;
+			G_Printf("frogbot: no sight marker from marker %d (zone %d) - .bot file may be out of sync with the map\n",
+						from_marker->fb.index + 1, from_marker->fb.Z_);
+		}
 	}
 }
 
