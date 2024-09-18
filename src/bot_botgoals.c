@@ -57,6 +57,8 @@ void UpdateGoalEntity(gedict_t *item, gedict_t *taker)
 // FIXME: If teammate is considerably weaker and bot needs/wants item, shout COMING instead
 static qbool GoalLeaveForTeammate(gedict_t *self, gedict_t *goal_entity)
 {
+	gedict_t *plr;
+
 	if ((g_globalvars.time < goal_entity->fb.touchPlayerTime) && goal_entity->fb.touchPlayer
 			&& (goal_entity->fb.touchPlayer != self))
 	{
@@ -68,6 +70,63 @@ static qbool GoalLeaveForTeammate(gedict_t *self, gedict_t *goal_entity)
 		}
 	}
 
+	// Check bot teammates so the bots don't all gang up for items
+	for (plr = world; (plr = find_plr(plr));)
+	{
+		if (plr->isBot && SameTeam(self, plr))
+		{
+			// Don't ever leave these items!
+			char *ignore[] = {
+				"item_artifact_invulnerability",
+				"item_artifact_invisibility",
+				"item_artifact_super_damage",
+				"item_flag_team1",
+				"item_flag_team2",
+			};
+
+			int i;
+			for (i = 0; i < sizeof(ignore) / sizeof(ignore[0]); ++i)
+			{
+				if (streq(goal_entity->classname, ignore[i]))
+				{
+					return false;
+				}
+			}
+
+			// Let the bot with the highest desire take the item, if the bots can see each other.
+			if (goal_entity == plr->fb.best_goal
+				&& Visible_360(self, plr)
+				&& goal_entity->fb.saved_goal_desire <= plr->fb.best_goal->fb.saved_goal_desire)
+			{
+				goal_entity->fb.saved_goal_desire = 0;
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+static qbool ShouldGoalIgnoreDistance(gedict_t *goal_entity)
+{
+	if (isCTF())
+	{
+		if ((streq(goal_entity->classname, "item_flag_team1") || streq(goal_entity->classname, "item_flag_team2"))
+			&& (self->fb.skill.ctf_role == FB_CTF_ROLE_ATTACK || goal_entity->fb.saved_goal_desire > 5000))
+		{
+			return true;
+		}
+		else if (streq(goal_entity->classname, "item_artifact_super_damage")
+			&& self->fb.skill.ctf_role == FB_CTF_ROLE_MIDFIELD)
+		{
+			return true;
+		}
+		else if (streq(goal_entity->classname, "marker") && (goal_entity->fb.T & MARKER_FLAG1_DEFEND || goal_entity->fb.T & MARKER_FLAG2_DEFEND)
+			&& self->fb.skill.ctf_role == FB_CTF_ROLE_DEFEND)
+		{
+			return true;
+		}
+	}
 	return false;
 }
 
@@ -77,6 +136,7 @@ void EvalGoal(gedict_t *self, gedict_t *goal_entity)
 	float goal_desire =
 			goal_entity && goal_entity->fb.desire ? goal_entity->fb.desire(self, goal_entity) : 0;
 	float goal_time = 0.0f;
+	qbool ignoreDistance;
 
 	if (!goal_entity)
 	{
@@ -176,11 +236,12 @@ void EvalGoal(gedict_t *self, gedict_t *goal_entity)
 			}
 		}
 
+		ignoreDistance = ShouldGoalIgnoreDistance(goal_entity);
+
 		// If the bot can think far enough ahead...
-		if (goal_time < self->fb.skill.lookahead_time)
+		if (goal_time < self->fb.skill.lookahead_time || ignoreDistance)
 		{
-			float goal_score = goal_desire * (self->fb.skill.lookahead_time - goal_time)
-					/ (goal_time + 5);
+			float goal_score = ignoreDistance ? goal_desire : goal_desire * (self->fb.skill.lookahead_time - goal_time) / (goal_time + 5);
 
 			if (goal_score > self->fb.best_goal_score)
 			{
@@ -196,6 +257,7 @@ static void EvalGoal2(gedict_t *goal_entity, gedict_t *best_goal_marker, qbool c
 {
 	float goal_desire = 0.0f;
 	float traveltime2 = 0.0f;
+	qbool ignoreDistance;
 
 	if (goal_entity == NULL)
 	{
@@ -251,9 +313,11 @@ static void EvalGoal2(gedict_t *goal_entity, gedict_t *best_goal_marker, qbool c
 				}
 			}
 
-			if (traveltime2 < self->fb.skill.lookahead_time)
+			ignoreDistance = ShouldGoalIgnoreDistance(goal_entity);
+
+			if (traveltime2 < self->fb.skill.lookahead_time || ignoreDistance)
 			{
-				float goal_score2 = self->fb.best_goal_score
+				float goal_score2 = ignoreDistance ? goal_desire : self->fb.best_goal_score
 						+ (goal_desire * (self->fb.skill.lookahead_time - traveltime2)
 								/ (traveltime2 + 5));
 
@@ -356,7 +420,7 @@ void UpdateGoal(gedict_t *self)
 
 	BotEvadeLogic(self);
 
-	if (enemy_->fb.touch_marker)
+	if (enemy_->fb.touch_marker && !(self->ctf_flag & CTF_FLAG)) // Don't chase if carrying flag
 	{
 		self->fb.virtual_enemy = enemy_;
 		self->fb.goal_enemy_desire =
@@ -416,6 +480,36 @@ void UpdateGoal(gedict_t *self)
 		for (goal_entity = world; (goal_entity = ez_find(goal_entity, dropped_powerup_names[i]));)
 		{
 			if ((goal_entity->cnt > g_globalvars.time) && goal_entity->fb.touch_marker)
+			{
+				EvalGoal(self, goal_entity);
+			}
+		}
+	}
+
+	if (isCTF())
+	{
+		// Dropped flags
+		for (goal_entity = world; (goal_entity = ez_find(goal_entity, "item_flag_team1"));)
+		{
+			EvalGoal(self, goal_entity);
+		}
+		for (goal_entity = world; (goal_entity = ez_find(goal_entity, "item_flag_team2"));)
+		{
+			EvalGoal(self, goal_entity);
+		}
+
+		// Dropped runes
+		for (goal_entity = world; (goal_entity = ez_find(goal_entity, "rune"));)
+		{
+			EvalGoal(self, goal_entity);
+		}
+
+		// Defense Markers
+		// TODO hiipe - might be more efficient to make these goals instead and then they would be checked above?
+		// but this would be mixing generic behaviour the ctf and map specific goals.
+		for (goal_entity = world; (goal_entity = ez_find(goal_entity, "marker"));)
+		{
+			if (goal_entity->fb.T & MARKER_FLAG1_DEFEND || goal_entity->fb.T & MARKER_FLAG2_DEFEND)
 			{
 				EvalGoal(self, goal_entity);
 			}

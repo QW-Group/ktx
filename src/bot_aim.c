@@ -50,7 +50,7 @@ static void BotSetDesiredAngles(gedict_t *self, vec3_t rel_pos)
 static void BotStopFiring(gedict_t *bot)
 {
 	qbool continuous = bot->fb.desired_weapon_impulse == 4 || bot->fb.desired_weapon_impulse == 5
-			|| bot->fb.desired_weapon_impulse == 8;
+			|| bot->fb.desired_weapon_impulse == 8 || bot->fb.desired_weapon_impulse == 22;
 	qbool correct_weapon = BotUsingCorrectWeapon(bot);
 	qbool enemy_alive = bot->s.v.enemy && ISLIVE(&g_edicts[bot->s.v.enemy]);
 

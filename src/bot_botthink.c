@@ -127,6 +127,56 @@ static void TargetEnemyLogic(gedict_t *self)
 	}
 }
 
+static void SurrenderCTFItemsLogic(gedict_t *self)
+{
+	gedict_t *teammate = IdentifyMostVisibleTeammate(self);
+	if (teammate != world && !teammate->isBot)
+	{
+		vec3_t toTeam;
+		float distance;
+
+		VectorSubtract(teammate->s.v.origin, self->s.v.origin, toTeam);
+		distance = VectorLength(toTeam);
+
+		// If close to a human player, and if no enemies are near
+		// aim at the teammate so the toss is thrown their way
+		if (distance < 150 && self->fb.enemy_dist >= 500)
+		{
+			vec3_t oldAngles;
+			vec3_t predictedOffset;
+
+			VectorCopy(self->s.v.v_angle, oldAngles);
+
+			VectorScale(teammate->s.v.velocity, 0.1, predictedOffset);
+			VectorAdd(toTeam, predictedOffset, toTeam);
+
+			vectoangles(toTeam, self->s.v.v_angle);
+			if (self->s.v.v_angle[0] > 180)
+			{
+				self->s.v.v_angle[0] = 360 - self->s.v.v_angle[0];
+			}
+			else
+			{
+				self->s.v.v_angle[0] = 0 - self->s.v.v_angle[0];
+			}
+
+			if (self->ctf_flag & CTF_RUNE_MASK && !(teammate->ctf_flag & CTF_RUNE_MASK))
+			{
+				TeamplayMessageByName(self, "tossrune");
+				TossRune();
+			}
+
+			if (self->ctf_flag & CTF_FLAG)
+			{
+				TeamplayMessageByName(self, "tossflag");
+				TossFlag();
+			}
+
+			VectorCopy(oldAngles, self->s.v.v_angle);
+		}
+	}
+}
+
 static void BotDodgeMovement(gedict_t *self, vec3_t dir_move, float dodge_factor)
 {
 	if (dodge_factor)
@@ -275,6 +325,11 @@ static void BotMoveTowardsLinkedMarker(gedict_t *self, vec3_t dir_move)
 static void BotTouchMarkerLogic(void)
 {
 	TargetEnemyLogic(self);
+
+	if (isCTF())
+	{
+		SurrenderCTFItemsLogic(self);
+	}
 
 	if (PAST(goal_refresh_time))
 	{

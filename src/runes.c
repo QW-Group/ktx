@@ -9,6 +9,7 @@ void RuneRespawn(void);
 void RuneTouch(void);
 void RuneResetOwner(void);
 char* GetRuneSpawnName(void);
+void BotsRuneDropped(gedict_t *rune);
 
 void DoDropRune(int rune, qbool on_respawn)
 {
@@ -95,6 +96,13 @@ void DoDropRune(int rune, qbool on_respawn)
 	{
 		sound(item, CHAN_VOICE, "items/itembk2.wav", 1, ATTN_NORM);	// play respawn sound
 	}
+
+#ifdef BOT_SUPPORT
+	if (bots_enabled())
+	{
+		BotsRuneDropped(item);
+	}
+#endif
 }
 
 void DoTossRune(int rune)
@@ -152,6 +160,13 @@ void DoTossRune(int rune)
 	item->touch = (func_t) RuneTouch;
 	item->s.v.nextthink = g_globalvars.time + 0.75;
 	item->think = (func_t) RuneResetOwner;
+
+#ifdef BOT_SUPPORT
+	if (bots_enabled())
+	{
+		BotsRuneDropped(item);
+	}
+#endif
 }
 
 void DropRune(void)
@@ -278,6 +293,11 @@ void RuneTouch(void)
 	if (self->think == (func_t)RuneRespawn)
 	{
 		self->s.v.nextthink = g_globalvars.time + 90;
+	}
+
+	if (ItemTouched(self, other))
+	{
+		return;
 	}
 
 	if (other->ctf_flag & CTF_RUNE_MASK)

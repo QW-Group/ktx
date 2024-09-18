@@ -17,6 +17,7 @@ qbool LoadBotRoutingFromFile(void);
 qbool pickup_true(void);
 int AddPath(gedict_t *marker, gedict_t *next_marker);
 void AssignGoalNumbers(void);
+void BotsSetUpDefenseMarker(gedict_t *marker);
 
 // fixme: also in doors.c
 #define SECRET_OPEN_ONCE 1	// stays open
@@ -38,15 +39,8 @@ static void fb_spawn_button(gedict_t *ent)
 {
 	AddToQue(ent);
 
-	if (ent->s.v.health)
-	{
-		//Add_takedamage(ent);
-	}
-	else
-	{
-		BecomeMarker(ent);
-		adjust_view_ofs_z(ent);
-	}
+	BecomeMarker(ent);
+	adjust_view_ofs_z(ent);
 }
 
 static void fb_spawn_spawnpoint(gedict_t *ent)
@@ -172,6 +166,10 @@ static fb_spawn_t stdSpawnFunctions[] =
 	{ "door", fb_spawn_door },  // covers func_door and func_door_secret
 	{ "func_button", fb_spawn_button },
 	{ "info_player_deathmatch", fb_spawn_spawnpoint },
+	{ "info_player_team1", fb_spawn_spawnpoint },
+	{ "info_player_team2", fb_spawn_spawnpoint },
+	{ "info_player_team1_deathmatch", fb_spawn_spawnpoint },
+	{ "info_player_team2_deathmatch", fb_spawn_spawnpoint },
 	{ "info_teleport_destination", fb_spawn_teleport_destination },
 	{ "plat", fb_spawn_plat },
 	{ "train", fb_spawn_simple },
@@ -237,8 +235,21 @@ static void CreateItemMarkers(void)
 		int i = 0;
 		qbool found = false;
 
+		// Door markers don't spawn an indicator when doors spawn
+		if (item->fb.door_entity)
+		{
+			SpawnMarkerIndicator(item);
+		}
+
 		// Don't bother with search if it's already processed
 		if (ProcessedItem(item))
+		{
+			continue;
+		}
+
+
+		// Flags are dynamic, so don't create a marker for them!
+		if (streq(item->classname, "item_flag_team1") || streq(item->classname, "item_flag_team2"))
 		{
 			continue;
 		}
@@ -444,6 +455,18 @@ static void CustomiseFrogbotMap(void)
 			}
 		}
 	}
+
+	// Assign goals for defense markers in CTF
+	if (isCTF())
+	{
+		for (ent = world; (ent = ez_find(ent, "marker"));)
+		{
+			if (ent->fb.T & MARKER_FLAG1_DEFEND || ent->fb.T & MARKER_FLAG2_DEFEND)
+			{
+				BotsSetUpDefenseMarker(ent);
+			}
+		}
+	}
 }
 
 void LoadMap(void)
@@ -451,7 +474,7 @@ void LoadMap(void)
 	// Need to do this anyway, otherwise teleporters will be broken
 	CreateItemMarkers();
 
-	if (!(isRACE() || isCTF()) && deathmatch)
+	if ((!isRACE() && deathmatch) || isCTF())
 	{
 		// If we have a .bot file, use that
 		if (LoadBotRoutingFromFile())

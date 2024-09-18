@@ -74,6 +74,16 @@ const char* EncodeMarkerFlags(int marker_flags)
 		*s++ = 'n';
 	}
 
+	if (marker_flags & MARKER_FLAG1_DEFEND)
+	{
+		*s++ = '1';
+	}
+
+	if (marker_flags & MARKER_FLAG2_DEFEND)
+	{
+		*s++ = '2';
+	}
+
 	if (s == buffer)
 	{
 		return "(none)";
@@ -119,6 +129,14 @@ int DecodeMarkerFlagString(const char *s)
 
 			case 'n':
 				marker_flags |= MARKER_NOTOUCH;
+				break;
+
+			case '1':
+				marker_flags |= MARKER_FLAG1_DEFEND;
+				break;
+
+			case '2':
+				marker_flags |= MARKER_FLAG2_DEFEND;
 				break;
 		}
 	}

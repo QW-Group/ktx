@@ -274,6 +274,22 @@ static qbool WalkTowardsDroppedItem(gedict_t *self)
 
 		return true;
 	}
+	else if (streq(goalentity_->classname, "rune"))
+	{
+		SetLinkedMarker(self, goalentity_, "ProcNewLinked(rune)");
+		self->fb.linked_marker_time = g_globalvars.time + 5;
+		self->fb.old_linked_marker = self->fb.touch_marker;
+
+		return true;
+	}
+	else if (streq(goalentity_->classname, "item_flag_team1") || streq(goalentity_->classname, "item_flag_team2"))
+	{
+		SetLinkedMarker(self, goalentity_, "ProcNewLinked(flag)");
+		self->fb.linked_marker_time = g_globalvars.time + 5;
+		self->fb.old_linked_marker = self->fb.touch_marker;
+
+		return true;
+	}
 	else if (goalentity_->cnt)
 	{
 		SetLinkedMarker(self, goalentity_, "ProcNewLinked(dropped-powerup)");

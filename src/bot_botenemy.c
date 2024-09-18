@@ -134,6 +134,12 @@ static void BestEnemy_apply(gedict_t *test_enemy, float *best_score, gedict_t **
 		enemy_score = look_traveltime + g_random();
 	}
 
+	// Prioritize enemy with flag
+	if (test_enemy->ctf_flag & CTF_FLAG)
+	{
+		enemy_score /= 2;
+	}
+
 	if (enemy_score < *best_score && look_marker != NULL)
 	{
 		vec3_t marker_view;

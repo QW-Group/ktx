@@ -45,7 +45,7 @@ static qbool customised_skill = false;
 
 // If the marker/path flag isn't set here, won't be included in .bot file
 #define EXTERNAL_MARKER_PATH_FLAGS (WATERJUMP_ | DM6_DOOR | ROCKET_JUMP | JUMP_LEDGE | VERTICAL_PLATFORM | LOOK_BUTTON)
-#define EXTERNAL_MARKER_FLAGS (UNREACHABLE | MARKER_IS_DM6_DOOR | MARKER_FIRE_ON_MATCH_START | MARKER_DOOR_TOUCHABLE | MARKER_ESCAPE_ROUTE | MARKER_NOTOUCH)
+#define EXTERNAL_MARKER_FLAGS (UNREACHABLE | MARKER_IS_DM6_DOOR | MARKER_FIRE_ON_MATCH_START | MARKER_DOOR_TOUCHABLE | MARKER_ESCAPE_ROUTE | MARKER_NOTOUCH | MARKER_FLAG1_DEFEND | MARKER_FLAG2_DEFEND )
 
 #define MIN_DISTANCE_BETWEEN_MARKERS 30
 
@@ -630,6 +630,7 @@ static void FrogbotsDebug(void)
 									zone->next_rj->fb.index + 1, zone->next_rj->classname,
 									zone->rj_time);
 					}
+
 				}
 
 				G_sprint(self, 2, "Goals:\n");
@@ -2511,13 +2512,6 @@ void FrogbotsCommand(void)
 			if (isRACE())
 			{
 				G_sprint(self, PRINT_HIGH, "Cannot enable bots while in race mode\n");
-
-				return;
-			}
-
-			if (isCTF())
-			{
-				G_sprint(self, PRINT_HIGH, "Cannot enable bots while in CTF mode\n");
 
 				return;
 			}

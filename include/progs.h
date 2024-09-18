@@ -428,7 +428,7 @@ typedef void (*fb_entity_funcref_t)(struct gedict_s* item);
 #define NUMBER_PATHS	8
 #endif
 #ifndef NUMBER_SUBZONES
-#define NUMBER_SUBZONES	32
+#define NUMBER_SUBZONES	128 // TODO hiipe - check this, should be ok though?
 #endif
 
 typedef struct fb_runaway_route_s {
@@ -534,6 +534,8 @@ typedef struct fb_botskill_s {
 	qbool use_rocketjumps;
 	float combat_jump_chance;
 	float missile_dodge_time;				// minimum time in seconds before bot dodges missile
+
+	int   ctf_role;                         // attack, midfield or defense
 
 	qbool customised;						// if set, customised file
 
