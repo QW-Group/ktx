@@ -7661,8 +7661,6 @@ void ToggleToT(void)
 {
 	qbool k_tot = cvar(TOT_MODE_VARIABLE) != 0;
 
-	printf("K_TOT: %d\n", k_tot);
-
 	if (!is_rules_change_allowed())
 	{
 		return;
