@@ -87,6 +87,7 @@ set(SRC_COMMON
 	"${DIR_SRC}/maps_map_dm3.c"
 	"${DIR_SRC}/maps_map_dm4.c"
 	"${DIR_SRC}/maps_map_dm6.c"
+	"${DIR_SRC}/maps_map_e2m2.c"
 	"${DIR_SRC}/maps_map_povdmm4.c"
 	"${DIR_SRC}/marker_load.c"
 	"${DIR_SRC}/marker_util.c"

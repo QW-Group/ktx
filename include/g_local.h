@@ -620,6 +620,7 @@ void RegenFlags(qbool yes);
 void AddHook(qbool yes);
 void CTF_Obituary(gedict_t *targ, gedict_t *attacker);
 void CTF_CheckFlagsAsKeys(void);
+void TossFlag(void);
 
 // logs.c
 void log_open(const char *fmt, ...) PRINTF_FUNC(1);

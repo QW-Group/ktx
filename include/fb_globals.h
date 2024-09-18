@@ -87,6 +87,10 @@ extern gedict_t *dropper;
 #define FB_PREFER_ROCKET_LAUNCHER	1
 #define FB_PREFER_LIGHTNING_GUN		2
 
+#define FB_CTF_ROLE_ATTACK          0
+#define FB_CTF_ROLE_MIDFIELD        1
+#define FB_CTF_ROLE_DEFEND          2
+
 #define GAME_ENABLE_POWERUPS		1
 #define GAME_ENABLE_RUNES			2
 #define GAME_RUNE_RJ				4
@@ -132,6 +136,9 @@ extern gedict_t *dropper;
 #define BOTPATH_CURLJUMP_HINT		(1 << 23)
 #define BOTPATH_FULL_AIRCONTROL		(1 << 24)
 #define BOTPATH_RJ_IN_PROGRESS		(1 << 25)
+#define HOOK                        (1 << 26)
+#define LOOK_BUTTON                 (1 << 27)	// Indicates path which points to a button to shoot 
+#define FIRE_BUTTON                 (1 << 28)   // Set when a bot should try shooting a button
 #define DELIBERATE_AIR_WAIT_GROUND	(DELIBERATE_AIR | WAIT_GROUND)
 #define SAVED_DESCRIPTION			(DM6_DOOR | ROCKET_JUMP | JUMP_LEDGE | VERTICAL_PLATFORM | BOTPATH_DOOR | BOTPATH_DOOR_CLOSED | NO_DODGE)
 #define NOT_ROCKET_JUMP				(~ROCKET_JUMP)
@@ -149,6 +156,10 @@ extern gedict_t *dropper;
 #define MARKER_DYNAMICALLY_ADDED	256		// Added dynamically by server.  Do not include in .bot file generation
 #define MARKER_EXPLICIT_VIEWOFFSET	512		// Viewoffset has been set by map definition and should be included in .bot file generation
 #define MARKER_NOTOUCH				1024	// Not touchable - used when two markers on top of each other
+#define MARKER_FLAG1_DEFEND         2048    // Point used to defend flag 1 (red)
+#define MARKER_FLAG2_DEFEND         4096    // Point used to defend flag 1 (blue)
+#define MARKER_LOOK_BUTTON          8192    // A button can be shot from this marker - set automatically
+#define MARKER_E2M2_DISCHARGE       16384   // Bots on red team will run here then discharge at the start of the map
 
 // Bot flags (FIXME: fb.state?  check.  consistent naming, comment with descriptions)
 #define CAMPBOT						1
@@ -169,6 +180,7 @@ float boomstick_only(void);
 
 float CountTeams(void);
 qbool EnemyDefenceless(gedict_t *self);
+qbool EnemyHasFlag (gedict_t* self);
 
 qbool enemy_shaft_attack(gedict_t *self, gedict_t *enemy);
 float W_BestWeapon(void);
@@ -181,6 +193,7 @@ float WeaponCode(float w);
 float crandom(void);
 
 void BotCanRocketJump(gedict_t *self);
+void BotCanHook(gedict_t *self);
 qbool VisibleEntity(gedict_t *ent);
 gedict_t* IdentifyMostVisibleTeammate(gedict_t *self);
 float anglemod(float v);
@@ -237,11 +250,11 @@ gedict_t* HigherSightFromFunction(gedict_t *from_marker, gedict_t *to_marker);
 gedict_t* SightFromMarkerFunction(gedict_t *from_marker, gedict_t *to_marker);
 gedict_t* SubZoneNextPathMarker(gedict_t *from_marker, gedict_t *to_marker);
 float SubZoneArrivalTime(float zone_time, gedict_t *middle_marker, gedict_t *to_marker,
-							qbool rl_routes);
+							qbool rl_routes, qbool hook_routes);
 float SightFromTime(gedict_t *from_marker, gedict_t *to_marker);
-void ZoneMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_normal, qbool rj_routes);
+void ZoneMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_normal, qbool rj_routes, qbool hook_routes);
 gedict_t* ZonePathMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_normal,
-							qbool rl_jump_routes);
+							qbool rl_jump_routes, qbool hook_routes);
 
 // botweap.qc
 void FrogbotSetFirepower(gedict_t *self);
@@ -267,6 +280,7 @@ void BotDamageInflictedEvent(gedict_t *attacker, gedict_t *targ);
 void CheckCombatJump(gedict_t *self);
 //void BotInLava(void);
 void BotPerformRocketJump(gedict_t *self);
+void BotPerformHook(gedict_t *self);
 
 // botgoal.qc
 void UpdateGoal(gedict_t *self);
@@ -288,8 +302,8 @@ void SetMarkerPathFlags(int marker_number, int path_index, int flags);
 void SetMarkerPath(int source_marker, int path_index, int next_marker);
 void SetMarkerViewOffset(int marker, float zOffset);
 
-#define FROGBOT_PATH_FLAG_OPTIONS "w6rjva"
-#define FROGBOT_MARKER_FLAG_OPTIONS "u6fbte"
+#define FROGBOT_PATH_FLAG_OPTIONS "w6rjvahl"
+#define FROGBOT_MARKER_FLAG_OPTIONS "u6fbte12"
 
 // added for ktx
 qbool fb_lg_disabled(void);
@@ -343,7 +357,7 @@ void SetJumpFlag(gedict_t *player, qbool jumping, const char *explanation);
 void PathScoringLogic(float goal_respawn_time, qbool be_quiet, float lookahead_time,
 						qbool path_normal, vec3_t player_origin, vec3_t player_direction,
 						gedict_t *touch_marker_, gedict_t *goalentity_marker, qbool rocket_alert,
-						qbool rocket_jump_routes_allowed, qbool trace_bprint, gedict_t *player,
+						qbool rocket_jump_routes_allowed, qbool hook_routes_allowed, qbool trace_bprint, gedict_t *player,
 						float *best_score, gedict_t **linked_marker_, int *new_path_state,
 						int *new_angle_hint, int *new_rj_frame_delay, float new_rj_angles[2]);
 

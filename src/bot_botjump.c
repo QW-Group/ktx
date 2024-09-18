@@ -133,6 +133,13 @@ void BotCanRocketJump(gedict_t *self)
 	}
 }
 
+void BotCanHook(gedict_t* self) 
+{
+	// TODO hiipe - is this slow?
+	if (cvar("k_ctf_hook") > 0 && isCTF()) self->fb.canHook = true;
+	else self->fb.canHook = false;
+}
+
 /*
  // FIXME: If teammate is strong (RA etc), fire anyway?  Also if boomsticker and we are strong
  // FIXME: Use find_radius?  Currently ignores teammates behind them.
@@ -202,6 +209,21 @@ static void SetRocketJumpAngles(gedict_t *self)
 		{
 			self->fb.desired_angle[YAW] = self->fb.rocketJumpAngles[YAW];
 		}
+	}
+}
+
+static void SetHookAngles(gedict_t* self)
+{
+	vec3_t toTarget;
+	VectorSubtract(self->fb.hookTarget->s.v.origin, self->s.v.origin, toTarget);
+	vectoangles(toTarget, self->fb.desired_angle);
+	if (self->fb.desired_angle[0] > 180)
+	{
+		self->fb.desired_angle[0] = 360 - self->fb.desired_angle[0];
+	}
+	else
+	{
+		self->fb.desired_angle[0] = 0 - self->fb.desired_angle[0];
 	}
 }
 
@@ -384,6 +406,80 @@ void BotPerformRocketJump(gedict_t *self)
 		{
 			// Make sure we don't start firing
 			self->fb.firing = false;
+		}
+	}
+}
+
+// Performs hook
+// TODO hiipe - maybe put this in a new file?
+void BotPerformHook(gedict_t* self)
+{
+	if (!(self->fb.touch_marker && self->fb.linked_marker))
+	{
+		return;
+	}
+
+	BotPerformLavaJump(self);
+
+	if (self->fb.hooking)
+	{
+		// Stop if close to the target
+		vec3_t toTarget;
+		vec3_t differenceFromPreviousPosition;
+		qbool stop_early = false;
+		float distanceToTarget = VectorLength(toTarget);
+
+		VectorSubtract(self->fb.hookTarget->s.v.origin, self->s.v.origin, toTarget);
+
+		// Stop if obscured by a wall etc
+		traceline(PASSVEC3(self->fb.hookTarget->s.v.origin), PASSVEC3(self->s.v.origin), true, world);
+
+		// Stop if not moved much since last frame (stuck near marker)
+		VectorSubtract(self->s.v.origin, self->fb.hookOldPosition, differenceFromPreviousPosition);
+
+		if (self->fb.touch_marker->fb.paths[0].flags & HOOK && self->fb.touch_marker->fb.paths[0].time < 0.2)
+			stop_early = false;
+		else if (distanceToTarget < 20) stop_early = true;
+
+		if (VectorLength(differenceFromPreviousPosition) < 0.01f || stop_early || g_globalvars.trace_fraction != 1)
+		{
+			self->fb.hooking = false;
+			self->fb.firing = false;
+			self->fb.state &= ~NOTARGET_ENEMY;
+			self->fb.state &= ~WAIT;
+		}
+		else
+		{
+			SetHookAngles(self);
+			VectorCopy(self->s.v.origin, self->fb.hookOldPosition);
+		}
+	}
+	else if (self->on_hook)
+	{
+		// Does this break demos?? TODO
+		GrappleReset(self->hook);
+	}
+	else if (self->fb.canHook)
+	{
+		qbool path_is_hook = self->fb.path_state & HOOK;
+
+		float touch_dist = VectorDistance(self->s.v.origin, self->fb.touch_marker->s.v.origin);
+
+		// Close enough to marker
+		qbool ok_distance = touch_dist >= 10 && touch_dist <= 100;
+
+		// Don't hook to the same marker we are on
+		qbool ok_target = self->fb.touch_marker != self->fb.linked_marker;
+
+		if (path_is_hook && /*ok_to_fire &&*/ ok_distance && ok_target)
+		{
+			self->fb.desired_weapon_impulse = 22;
+			self->fb.firing = true;
+			self->fb.hooking = true;
+			//self->fb.path_state |= DELIBERATE_AIR_WAIT_GROUND;
+			self->fb.state |= NOTARGET_ENEMY;
+			self->fb.hookTarget = self->fb.linked_marker;
+			SetHookAngles(self);
 		}
 	}
 }

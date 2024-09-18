@@ -71,7 +71,7 @@ static qbool VisibilityTest(gedict_t *self, gedict_t *visible_object, float min_
 {
 	vec3_t temp;
 
-	if (visible_object->s.v.takedamage)
+	if (visible_object->s.v.takedamage || visible_object->ctf_flag & CTF_RUNE_MASK)
 	{
 		// Can only see invisible objects when they're attacking
 		if ((g_globalvars.time < visible_object->invisible_finished)

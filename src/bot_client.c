@@ -139,6 +139,10 @@ void BotClientEntersEvent(gedict_t *self, gedict_t *spawn_pos)
 	self->fb.wiggle_run_dir = 0;
 
 	SetMarker(self, spawn_pos);
+	if (isCTF()) {
+		// TODO hiipe - team1 and team2 spawns aren't markers! (yet)
+		SetMarker(self, LocateMarker(self->s.v.origin));
+	}
 
 	self->fb.arrow = 0;
 	ClearLookObject(self);
@@ -156,8 +160,9 @@ void BotClientEntersEvent(gedict_t *self, gedict_t *spawn_pos)
 
 qbool BotUsingCorrectWeapon(gedict_t *self)
 {
-	return ((self->fb.desired_weapon_impulse >= 1) && (self->fb.desired_weapon_impulse <= 8)
-			&& (self->s.v.weapon == weapon_impulse_codes[self->fb.desired_weapon_impulse]));
+	return (((self->fb.desired_weapon_impulse >= 1) && (self->fb.desired_weapon_impulse <= 8)
+			&& (self->s.v.weapon == weapon_impulse_codes[self->fb.desired_weapon_impulse]))
+		    || (self->fb.desired_weapon_impulse == 22 && self->s.v.weapon == IT_HOOK));
 }
 
 static float goal_client(gedict_t *self, gedict_t *other)
@@ -209,6 +214,12 @@ static float goal_client(gedict_t *self, gedict_t *other)
 		return (((self->fb.total_damage + 100) * self->fb.firepower
 				- self->fb.virtual_enemy->fb.total_damage * self->fb.virtual_enemy->fb.firepower)
 				* 0.01);
+	}
+	else if (EnemyHasFlag(self))
+	{
+		return (((self->fb.total_damage + 20) * self->fb.firepower
+			- self->fb.virtual_enemy->fb.total_damage * self->fb.virtual_enemy->fb.firepower)
+			* 0.01);
 	}
 	else if (EnemyDefenceless(self))
 	{
@@ -321,13 +332,40 @@ static void BotPeriodicMessages(gedict_t *self)
 		qbool has_lg = ((int)self->s.v.items & IT_LIGHTNING) && self->s.v.ammo_cells >= 6;
 		qbool is_strong = (has_rl || has_lg) && self->fb.total_damage >= 120;
 
-		if (is_strong && (self->tp.enemy_count == 0))
+		if (isCTF() 
+			&& self->fb.best_goal 
+			&& (streq(self->fb.best_goal->classname, "item_flag_team1") || streq(self->fb.best_goal->classname, "item_flag_team2"))
+			&& !(self->ctf_flag & CTF_FLAG)
+			&& (self->fb.best_goal->cnt == FLAG_AT_BASE)
+			&& self->fb.best_goal->fb.saved_goal_time < 5)
 		{
-			TeamplayMessageByName(self, "secure");
+			TeamplayMessageByName(self, "goingflag");
 		}
-		else if (is_strong && (self->tp.enemy_count > self->tp.teammate_count))
+		else if (is_strong && (self->tp.enemy_count == 0))
 		{
-			TeamplayMessageByName(self, "help");
+			if (isCTF() && self->fb.best_goal
+				&& (self->fb.best_goal->fb.T & MARKER_FLAG1_DEFEND || self->fb.best_goal->fb.T & MARKER_FLAG2_DEFEND)
+				&& VectorDistance(self->s.v.origin, self->fb.best_goal->s.v.origin) <= 500)
+			{
+				TeamplayMessageByName(self, "basesafe");
+			}
+			else
+			{
+				TeamplayMessageByName(self, "secure");
+			}
+		}
+		else if (self->tp.enemy_count > self->tp.teammate_count)
+		{
+			if (isCTF() && self->fb.best_goal
+				&& (self->fb.best_goal->fb.T & MARKER_FLAG1_DEFEND || self->fb.best_goal->fb.T & MARKER_FLAG2_DEFEND)
+				&& VectorDistance(self->s.v.origin, self->fb.best_goal->s.v.origin) <= 500)
+			{
+				TeamplayMessageByName(self, "basenotsafe");
+			}
+			else if (is_strong)
+			{
+				TeamplayMessageByName(self, "help");
+			}
 		}
 		else if (self->tp.enemy_count == 0)
 		{

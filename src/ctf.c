@@ -32,11 +32,15 @@
 #define CARRIER_DEFEND_TIME  4
 
 void DropFlag(gedict_t *flag, qbool tossed);
-void PlaceFlag(void);
 void FlagThink(void);
 void FlagTouch(void);
 void SP_item_flag_team1(void);
 void SP_item_flag_team2(void);
+
+#ifdef BOT_SUPPORT
+void BotsFlag1Dropped(gedict_t* ent);
+void BotsFlag2Dropped(gedict_t* ent);
+#endif
 
 // Allows us to add flags (or other items) to dm maps when ctfing without actually changing bsp
 void G_CallSpawn(gedict_t *ent);
@@ -105,6 +109,10 @@ void SP_item_flag_team1(void)
 	}
 
 	spawn_item_flag();
+
+#ifdef BOT_SUPPORT
+	BotsFlag1Dropped(self);
+#endif
 }
 
 void SP_item_flag_team2(void)
@@ -120,6 +128,13 @@ void SP_item_flag_team2(void)
 	}
 
 	spawn_item_flag();
+
+#ifdef BOT_SUPPORT
+	if (bots_enabled())
+	{
+		BotsFlag2Dropped(self);
+	}
+#endif
 }
 
 // would love to know what a ctf wall is :O!
@@ -282,6 +297,12 @@ void FlagThink(void)
 		self->cnt2 += 0.1;
 		if (g_globalvars.time > self->super_time)
 		{
+#ifdef BOT_SUPPORT
+			if (bots_enabled())
+			{
+				self->fb.item_taken(self, other);
+			}
+#endif
 			RegenFlag(self);
 			G_bprint(2, "The %s flag has been returned\n",
 						redtext(((int)self->s.v.items & IT_KEY1) ? "BLUE" : "RED"));
@@ -439,6 +460,13 @@ void FlagTouch(void)
 			k_nochange = 0;	// Set it so it should update scores at next attempt.
 			refresh_plus_scores();
 
+#ifdef BOT_SUPPORT
+			if (bots_enabled())
+			{
+				self->fb.item_taken(self, other);
+			}
+#endif
+
 			return;
 		}
 	}
@@ -475,6 +503,13 @@ void FlagTouch(void)
 		owner->s.v.effects = (int)owner->s.v.effects | EF_FLAG1;
 	}
 	setmodel(self, "");
+
+#ifdef BOT_SUPPORT
+	if (bots_enabled())
+	{
+		self->fb.item_taken(self, other);
+	}
+#endif
 }
 
 void FlagResetOwner(void)

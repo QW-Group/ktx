@@ -46,10 +46,10 @@
 #define TP_NAME_RING       "{&cff0ring&cfff}"
 #define TP_NAME_SUIT       "suit"
 #define TP_NAME_FLAG       "flag"
-#define TP_NAME_RUNE1      "{&c0f0resistance&cfff}"
-#define TP_NAME_RUNE2      "{&cf00strength&cfff}"
-#define TP_NAME_RUNE3      "{&cff0haste&cfff}"
-#define TP_NAME_RUNE4      "{&c0ffregeneration&cfff}"
+#define TP_NAME_RUNE1      "{&c0f0res&cfff}"
+#define TP_NAME_RUNE2      "{&cf00str&cfff}"
+#define TP_NAME_RUNE3      "{&cff0hst&cfff}"
+#define TP_NAME_RUNE4      "{&c0ffrgn&cfff}"
 #define TP_NAME_ARMOR      "armor"
 #define TP_SEPARATOR       "/"
 #define TP_NAME_HEALTH     "health"
@@ -199,6 +199,25 @@ void TeamplayEventItemTaken(gedict_t *client, gedict_t *item)
 	{
 		client->tp.took.item = (item->healamount >= 100 ? it_mh : it_health);
 	}
+	else if (streq(item->classname, "rune"))
+	{
+		if (item->ctf_flag & CTF_RUNE_RES)
+		{
+			client->tp.took.item = it_rune1;
+		}
+		else if (item->ctf_flag & CTF_RUNE_STR)
+		{
+			client->tp.took.item = it_rune2;
+		}
+		else if (item->ctf_flag & CTF_RUNE_HST)
+		{
+			client->tp.took.item = it_rune3;
+		}
+		else if (item->ctf_flag & CTF_RUNE_RGN)
+		{
+			client->tp.took.item = it_rune4;
+		}
+	}
 	else
 	{
 		return;
@@ -231,6 +250,16 @@ static qbool NEED(unsigned long player_flags, unsigned long flags)
 static qbool HAVE_POWERUP(gedict_t *client)
 {
 	return (client && ((int)client->s.v.items & (IT_QUAD | IT_INVULNERABILITY | IT_INVISIBILITY)));
+}
+
+static qbool HAVE_FLAG(gedict_t* client)
+{
+	return client->ctf_flag & CTF_FLAG;
+}
+
+static qbool HAVE_RUNE(gedict_t* client)
+{
+	return client->ctf_flag & CTF_RUNE_MASK;
 }
 
 static qbool HAVE_RING(gedict_t *client)
@@ -514,6 +543,28 @@ static char* PowerupText(gedict_t *client)
 	return buffer;
 }
 
+static char* CTFItemText(gedict_t* client)
+{
+	static char buffer[128];
+
+	buffer[0] = '\0';
+	if (HAVE_FLAG(client))
+	{
+		if (streq(getteam(client), "red")) strlcat(buffer, "{&c57fFLAG&cfff}", sizeof(buffer));
+		if (streq(getteam(client), "blue")) strlcat(buffer, "{&cf00FLAG&cfff}", sizeof(buffer));
+		strlcat(buffer, " ", sizeof(buffer));
+	}
+	if (HAVE_RUNE(client)) 
+	{
+		if (client->ctf_flag & CTF_RUNE_RES) strlcat(buffer, TP_NAME_RUNE1, sizeof(buffer));
+		if (client->ctf_flag & CTF_RUNE_STR) strlcat(buffer, TP_NAME_RUNE2, sizeof(buffer));
+		if (client->ctf_flag & CTF_RUNE_HST) strlcat(buffer, TP_NAME_RUNE3, sizeof(buffer));
+		if (client->ctf_flag & CTF_RUNE_RGN) strlcat(buffer, TP_NAME_RUNE4, sizeof(buffer));
+	}
+
+	return buffer;
+}
+
 static void TeamplayMM2(gedict_t *client, char *text)
 {
 	extern qbool ClientSay(qbool isTeamSay);
@@ -713,20 +764,38 @@ static void TeamplayReportTaken(gedict_t *client)
 		}
 		else if ((NEED(needFlags, it_health) || NEED(needFlags, it_armor) || NEED(needFlags, it_rl)
 				|| NEED(needFlags, it_lg) || NEED(needFlags, it_rockets)
-				|| NEED(needFlags, it_cells)) && HAVE_POWERUP(client))
+				|| NEED(needFlags, it_cells)))
 		{
 			// Note that we check if you are holding powerup. This is because TOOK remembers for 15 seconds.
 			// So a case could arise where you took quad then died less than 15 seconds later, and you'd be reporting "team need %u" (because $colored_powerups would be empty)
 			strlcpy(message, "{&c0b0team&cfff} ", sizeof(message));
-			strlcat(message, PowerupText(client), sizeof(message));
-			strlcat(message, " need ", sizeof(message));
+			if (HAVE_POWERUP(client))
+			{
+				strlcat(message, PowerupText(client), sizeof(message));
+				strlcat(message, " ", sizeof(message));
+			}
+			if (isCTF() && (HAVE_FLAG(client) || HAVE_RUNE(client)))
+			{
+				strlcat(message, CTFItemText(client), sizeof(message));
+				strlcat(message, " ", sizeof(message));
+			}
+			strlcat(message, "need ", sizeof(message));
 			strlcat(message, TeamplayNeedText(needFlags), sizeof(message));
 		}
 		else if (HAVE_QUAD(client) || HAVE_RING(client))
 		{
 			// notice we can't send this check to tp_msgenemypwr, because if enemy with powerup is in your view, tp_enemypwr reports enemypwr first, but in this function you want to report TEAM powerup.
 			strlcpy(message, "{&c0b0team&cfff} ", sizeof(message));
-			strlcat(message, PowerupText(client), sizeof(message));
+			if (HAVE_POWERUP(client))
+			{
+				strlcat(message, PowerupText(client), sizeof(message));
+				strlcat(message, " ", sizeof(message));
+			}
+			if (isCTF() && (HAVE_FLAG(client) || HAVE_RUNE(client)))
+			{
+				strlcat(message, CTFItemText(client), sizeof(message));
+				strlcat(message, " ", sizeof(message));
+			}
 		}
 		else
 		{ // In this case, you took quad or ring and died before 15 secs later. So just report what you need, nothing about powerups.
@@ -741,6 +810,12 @@ static void TeamplayReportTaken(gedict_t *client)
 		if (HAVE_POWERUP(client))
 		{
 			strlcpy(message, PowerupText(client), sizeof(message));
+			strlcat(message, " ", sizeof(message));
+		}
+
+		if (isCTF() && (HAVE_FLAG(client) || HAVE_RUNE(client)))
+		{
+			strlcpy(message, CTFItemText(client), sizeof(message));
 			strlcat(message, " ", sizeof(message));
 		}
 
@@ -817,6 +892,12 @@ static void TeamplayReportPersonalStatus(gedict_t *client)
 		strlcpy(buffer, PowerupText(client), sizeof(buffer));
 	}
 
+	if (isCTF() && (HAVE_FLAG(client) || HAVE_RUNE(client)))
+	{
+		strlcpy(buffer, CTFItemText(client), sizeof(buffer));
+		strlcat(buffer, " ", sizeof(buffer));
+	}
+
 	strlcat(buffer, va("%s/%d ", ColoredArmor(client), (int)max(0, client->s.v.health)),
 			sizeof(buffer));
 	if (HAVE_RL(client) && HAVE_LG(client))
@@ -875,9 +956,20 @@ static void TeamplayAreaSecure(gedict_t *client)
 		return;
 	}
 
+	if (HAVE_POWERUP(client))
+	{
+		strlcpy(buffer, PowerupText(client), sizeof(buffer));
+		strlcat(buffer, " ", sizeof(buffer));
+	}
+	if (isCTF() && (HAVE_RUNE(client) || HAVE_RUNE(client)))
+	{
+		strlcpy(buffer, CTFItemText(client), sizeof(buffer));
+		strlcat(buffer, " ", sizeof(buffer));
+	}
+
 	// TODO: if pointing at enemy, degrade to TP_EnemyPowerup or no-op
 
-	strlcpy(buffer, "{&c0b0safe&cfff} {&c0b0[&cfff}{", sizeof(buffer));
+	strlcat(buffer, "{&c0b0safe&cfff} {&c0b0[&cfff}{", sizeof(buffer));
 	strlcat(buffer, LocationName(PASSVEC3(client->s.v.origin)), sizeof(buffer));
 	strlcat(buffer, "}{&c0b0]&cfff} ", sizeof(buffer));
 	if (have_armor)
@@ -912,7 +1004,16 @@ static void TeamplayAreaHelp(gedict_t *client)
 	char buffer[128];
 
 	buffer[0] = '\0';
-	strlcpy(buffer, PowerupText(client), sizeof(buffer));
+	if (HAVE_POWERUP(client))
+	{
+		strlcpy(buffer, PowerupText(client), sizeof(buffer));
+		strlcat(buffer, " ", sizeof(buffer));
+	}
+	if (isCTF() && (HAVE_RUNE(client) || HAVE_RUNE(client)))
+	{
+		strlcpy(buffer, CTFItemText(client), sizeof(buffer));
+		strlcat(buffer, " ", sizeof(buffer));
+	}
 	strlcat(buffer, "{&cff0help&cfff} {&cff0[&cfff}{", sizeof(buffer));
 	strlcat(buffer, LocationName(PASSVEC3(client->s.v.origin)), sizeof(buffer));
 	strlcat(buffer, va("}{&cff0]&cfff} {%d}", client->tp.enemy_count), sizeof(buffer));
@@ -1063,6 +1164,12 @@ static void TeamplayReportNeeds(gedict_t *client)
 			strlcat(buffer, " ", sizeof(buffer));
 		}
 
+		if (isCTF() && (HAVE_FLAG(client) || HAVE_RUNE(client)))
+		{
+			strlcat(buffer, CTFItemText(client), sizeof(buffer));
+			strlcat(buffer, " ", sizeof(buffer));
+		}
+
 		strlcat(buffer, "need ", sizeof(buffer));
 		strlcat(buffer, TeamplayNeedText(needFlags), sizeof(buffer));
 		strlcat(buffer, " \20{", sizeof(buffer));
@@ -1195,8 +1302,17 @@ static void TeamplayEnemyPowerup(gedict_t *client)
 		}
 
 		strlcpy(buffer, "{&c0b0team&cfff} ", sizeof(buffer));
-		strlcat(buffer, PowerupText(client), sizeof(buffer));
-		strlcat(buffer, " ", sizeof(buffer));
+
+		if (HAVE_POWERUP(client))
+		{
+			strlcpy(buffer, PowerupText(client), sizeof(buffer));
+			strlcat(buffer, " ", sizeof(buffer));
+		}
+		if (isCTF() && (HAVE_RUNE(client) || HAVE_RUNE(client)))
+		{
+			strlcpy(buffer, CTFItemText(client), sizeof(buffer));
+			strlcat(buffer, " ", sizeof(buffer));
+		}
 	}
 	else if (point && point->ct == ctPlayer && SameTeam(point, client))
 	{
@@ -1440,10 +1556,50 @@ static void TeamplayBasicCommand(gedict_t *client, char *text)
 		strlcat(buffer, " ", sizeof(buffer));
 	}
 
+	if (isCTF() && (HAVE_FLAG(client) || HAVE_RUNE(client)))
+	{
+		strlcpy(buffer, CTFItemText(client), sizeof(buffer));
+		strlcat(buffer, " ", sizeof(buffer));
+	}
+
 	strlcat(buffer, text, sizeof(buffer));
 	strlcat(buffer, " \20{", sizeof(buffer));
 	strlcat(buffer, LocationName(PASSVEC3(client->s.v.origin)), sizeof(buffer));
 	strlcat(buffer, "}\21", sizeof(buffer));
+	TeamplayMM2(client, buffer);
+}
+
+static void TeamplayTossingRune(gedict_t* client)
+{
+	char buffer[128];
+	const char* rune = "";
+
+	if (client->ctf_flag & CTF_RUNE_RES) rune = TP_NAME_RUNE1;
+	if (client->ctf_flag & CTF_RUNE_STR) rune = TP_NAME_RUNE2;
+	if (client->ctf_flag & CTF_RUNE_HST) rune = TP_NAME_RUNE3;
+	if (client->ctf_flag & CTF_RUNE_RGN) rune = TP_NAME_RUNE4;
+
+
+	buffer[0] = '\0';
+
+	if (HAVE_POWERUP(client))
+	{
+		strlcpy(buffer, PowerupText(client), sizeof(buffer));
+		strlcat(buffer, " ", sizeof(buffer));
+	}
+
+	if (isCTF() && (HAVE_FLAG(client) || HAVE_RUNE(client)))
+	{
+		strlcpy(buffer, CTFItemText(client), sizeof(buffer));
+		strlcat(buffer, " ", sizeof(buffer));
+	}
+
+	strlcat(buffer, "tossed ", sizeof(buffer));
+	strlcat(buffer, rune, sizeof(buffer));
+	strlcat(buffer, " \20{", sizeof(buffer));
+	strlcat(buffer, LocationName(PASSVEC3(client->s.v.origin)), sizeof(buffer));
+	strlcat(buffer, "}\21", sizeof(buffer));
+
 	TeamplayMM2(client, buffer);
 }
 
@@ -1465,6 +1621,11 @@ TEAMPLAY_BASIC(TeamplayReplace, "replace")
 TEAMPLAY_BASIC(TeamplayTrick, "trick")
 // Cmd_AddCommand ("tp_msgcoming", TP_Msg_Coming_f);
 TEAMPLAY_BASIC(TeamplayComing, "coming")
+
+TEAMPLAY_BASIC(TeamplayTossingFlag, "tossed " TP_NAME_FLAG)
+TEAMPLAY_BASIC(TeamplayBaseSafe, "{&c0f0base safe&cfff}")
+TEAMPLAY_BASIC(TeamplayBaseNotSafe, "{&cf00base not safe&cfff}")
+TEAMPLAY_BASIC(TeamplayGoingForFlag, "{&c5afgoing for flag&cfff}")
 
 void TeamplayDeathEvent(gedict_t *client)
 {
@@ -1664,7 +1825,12 @@ static teamplay_message_t messages[] =
 	{ "need", "report needs", TeamplayReportNeeds },
 	{ "report", "report status", TeamplayReportPersonalStatus },
 	{ "took", "item taken", TeamplayReportTaken },
-	{ "point", "player/item point", TeamplayPoint }
+	{ "point", "player/item point", TeamplayPoint },
+	{ "tossflag", "tossing flag", TeamplayTossingFlag },
+	{ "tossrune", "tossing rune", TeamplayTossingRune},
+	{ "basesafe", "base safe", TeamplayBaseSafe},
+	{ "basenotsafe", "base not safe", TeamplayBaseNotSafe},
+	{ "goingflag", "going for flag", TeamplayGoingForFlag}
 };
 
 qbool TeamplayMessageByName(gedict_t *client, const char *message)

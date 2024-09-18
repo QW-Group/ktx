@@ -44,8 +44,8 @@ static qbool customised_skill = false;
 #define EDITOR_SELECTED_NODE         EF_GREEN
 
 // If the marker/path flag isn't set here, won't be included in .bot file
-#define EXTERNAL_MARKER_PATH_FLAGS (WATERJUMP_ | DM6_DOOR | ROCKET_JUMP | JUMP_LEDGE | VERTICAL_PLATFORM)
-#define EXTERNAL_MARKER_FLAGS (UNREACHABLE | MARKER_IS_DM6_DOOR | MARKER_FIRE_ON_MATCH_START | MARKER_DOOR_TOUCHABLE | MARKER_ESCAPE_ROUTE | MARKER_NOTOUCH)
+#define EXTERNAL_MARKER_PATH_FLAGS (WATERJUMP_ | DM6_DOOR | ROCKET_JUMP | JUMP_LEDGE | VERTICAL_PLATFORM | HOOK | LOOK_BUTTON)
+#define EXTERNAL_MARKER_FLAGS (UNREACHABLE | MARKER_IS_DM6_DOOR | MARKER_FIRE_ON_MATCH_START | MARKER_DOOR_TOUCHABLE | MARKER_ESCAPE_ROUTE | MARKER_NOTOUCH | MARKER_FLAG1_DEFEND | MARKER_FLAG2_DEFEND | MARKER_E2M2_DISCHARGE )
 
 #define MIN_DISTANCE_BETWEEN_MARKERS 30
 
@@ -58,6 +58,7 @@ static vec3_t saved_marker_pos =
 	{ -999999, -999999, -999999 };
 static gedict_t *saved_marker = NULL;
 static gedict_t *last_touched_marker = NULL;
+static gedict_t* debug_marker;
 
 // FIXME: Globals
 extern gedict_t *markers[];
@@ -573,9 +574,9 @@ static void FrogbotsDebug(void)
 
 					if (next != NULL)
 					{
-						G_sprint(self, 2, "  %d: %d (%s), time %3.1f, rj time %3.1f\n", i + 1,
+						G_sprint(self, 2, "  %d: %d (%s), time %3.1f, rj time %3.1f, hook time %3.1f\n", i + 1,
 									next->fb.index + 1, next->classname, marker->fb.paths[i].time,
-									marker->fb.paths[i].rj_time);
+									marker->fb.paths[i].rj_time, marker->fb.paths[i].hook_time);
 					}
 				}
 
@@ -596,6 +597,13 @@ static void FrogbotsDebug(void)
 									zone->next_rj->fb.index + 1, zone->next_rj->classname,
 									zone->rj_time);
 					}
+
+					if (zone->next_hook)
+					{
+						G_sprint(self, 2, "  HK%2d: %d (%s), time %3.1f\n", i + 1,
+							zone->next_hook->fb.index + 1, zone->next_hook->classname,
+							zone->hook_time);
+					}
 				}
 
 				G_sprint(self, 2, "Goals:\n");
@@ -615,6 +623,12 @@ static void FrogbotsDebug(void)
 									goal->next_marker_rj->fb.index + 1,
 									goal->next_marker_rj->classname, goal->rj_time);
 					}
+					if (goal->next_marker_hook)
+					{
+						G_sprint(self, 2, "  HK%2d: %d (%s), time %3.1f\n", i + 1,
+							goal->next_marker_hook->fb.index + 1,
+							goal->next_marker_hook->classname, goal->hook_time);
+					}
 				}
 			}
 		}
@@ -623,6 +637,9 @@ static void FrogbotsDebug(void)
 		{
 			int start, end;
 			qbool allow_rj = streq(sub_command, "path/rj");
+
+			// TODO - debugging does not check hooking at all! Maybe in the future?
+			qbool allow_hook = false;
 
 			trap_CmdArgv(3, sub_command, sizeof(sub_command));
 			start = atoi(sub_command);
@@ -642,8 +659,8 @@ static void FrogbotsDebug(void)
 					G_sprint(self, 2, "From zone %d, subzone %d to zone %d subzone %d\n",
 								from->fb.Z_, from->fb.S_, to->fb.Z_, to->fb.S_);
 					from_marker = from;
-					ZoneMarker(from_marker, to, path_normal, allow_rj);
-					traveltime = SubZoneArrivalTime(zone_time, middle_marker, to, allow_rj);
+					ZoneMarker(from_marker, to, path_normal, allow_rj, allow_hook);
+					traveltime = SubZoneArrivalTime(zone_time, middle_marker, to, allow_rj, allow_hook);
 					G_sprint(self, 2, "Travel time %f, zone_time %f\n", traveltime, zone_time);
 					G_sprint(self, 2, "Middle marker %d \20%s\21 (zone %d subzone %d), time %f\n",
 								middle_marker->fb.index + 1,
@@ -664,7 +681,7 @@ static void FrogbotsDebug(void)
 
 						PathScoringLogic(to->fb.goal_respawn_time, false, 30, true,
 											from->s.v.origin, player_direction, from, to, false,
-											allow_rj, true, NULL, &best_score, &linked_marker_,
+											allow_rj, allow_hook, true, NULL, &best_score, &linked_marker_,
 											&new_path_state, &new_angle_hint, &new_rj_frame_delay,
 											new_rj_angles);
 
@@ -890,8 +907,8 @@ static void BotFileGenerate(void)
 		snprintf(date, sizeof(date), "%d", i_rnd(0, 9999));
 	}
 
-	snprintf(fileName, sizeof(fileName), "bots/maps/%s[%s].bot",
-				strnull(entityFile) ? mapname : entityFile, date);
+	snprintf(fileName, sizeof(fileName), "bots/maps/%s%s[%s].bot",
+				strnull(entityFile) ? mapname : entityFile, isCTF() ? "_ctf" : "", date);
 	file = std_fwopen("%s", fileName);
 	if (file == -1)
 	{
@@ -1278,6 +1295,13 @@ static void FrogbotAddPath(void)
 	if (nearest == saved_marker)
 	{
 		G_sprint(self, PRINT_HIGH, "Cannot link a marker to itself\n");
+
+		return;
+	}
+
+	if (nearest->fb.T & MARKER_DYNAMICALLY_ADDED)
+	{
+		G_sprint(self, PRINT_HIGH, "Cannot link a marker to a dynamically created marker!\n");
 
 		return;
 	}
@@ -1862,7 +1886,8 @@ static void FrogbotsFillServer(void)
 	int plr_count = CountPlayers();
 	int i;
 
-	for (i = 0; i < min(max_clients - plr_count, 8); ++i)
+	// spawn a maximum of 8
+	for (i = 0; i < min(max_clients - plr_count, 8 - plr_count); ++i)
 	{
 		FrogbotsAddbot(FrogbotSkillLevel(), "", true);
 	}
@@ -2051,9 +2076,9 @@ static void FrogbotSummary(void)
 {
 	int marker_count = 0;
 	int goal_count[NUMBER_GOALS] =
-		{ 0 };
+	{ 0 };
 	int zone_count[NUMBER_ZONES] =
-		{ 0 };
+	{ 0 };
 	int i, j;
 
 	G_sprint(self, PRINT_HIGH, "Marker summary:\n");
@@ -2075,12 +2100,12 @@ static void FrogbotSummary(void)
 			if (path_count == 0)
 			{
 				G_sprint(self, PRINT_HIGH, "  %3d: %s: no paths%s\n", markers[i]->fb.index + 1,
-							markers[i]->classname, markers[i]->fb.Z_ ? "" : " and no zone");
+					markers[i]->classname, markers[i]->fb.Z_ ? "" : " and no zone");
 			}
 			else if (!markers[i]->fb.Z_)
 			{
 				G_sprint(self, PRINT_HIGH, "  %3d: %s: no zone\n", markers[i]->fb.index + 1,
-							markers[i]->classname);
+					markers[i]->classname);
 			}
 
 			if (markers[i]->fb.G_)
@@ -2108,6 +2133,59 @@ static void FrogbotsDisable(void)
 	}
 }
 
+static void FrogbotsGoMarker(void)
+{
+	vec3_t direction;
+	vec3_t src, dst, tmp;
+	vec3_t endpoint;
+	gedict_t* nearest;
+	gedict_t* player;
+
+	if (!is_adm(self))
+	{
+		G_sprint(self, PRINT_HIGH, "You must be an admin to use this command\n");
+		return;
+	}
+
+	trap_makevectors(self->s.v.v_angle);
+	aim(direction);
+
+	VectorScale(g_globalvars.v_forward, 10, tmp);
+	VectorAdd(self->s.v.origin, tmp, src);
+	src[2] = self->s.v.absmin[2] + self->s.v.size[2] * 0.7;
+
+	VectorCopy(src, dst);
+	VectorScale(direction, 8192, tmp);
+	VectorAdd(dst, tmp, dst);
+
+	traceline(PASSVEC3(src), PASSVEC3(dst), false, self);
+	
+	if (!g_globalvars.trace_fraction) return;
+
+	VectorSubtract(g_globalvars.trace_endpos, src, tmp);
+	VectorNormalize(tmp);
+	VectorScale(tmp, 10, tmp);
+	VectorSubtract(g_globalvars.trace_endpos, tmp, endpoint);
+
+	nearest = LocateMarker(endpoint);
+	if (nearest == debug_marker) debug_marker = NULL;
+	else debug_marker = nearest;
+
+	if (debug_marker)
+	{
+		G_sprint(self, PRINT_HIGH, "Sending all bots to %s\n", debug_marker->classname);
+	}
+
+	for (player = world; (player = find_plr(player));)
+	{
+		if (player->isBot)
+		{
+			player->fb.fixed_goal = debug_marker;
+			TeamplayMessageByName(player, "coming");
+		}
+	}
+}
+
 typedef struct frogbot_cmd_s
 {
 	char *name;
@@ -2123,7 +2201,8 @@ static frogbot_cmd_t std_commands[] =
 		{ "removebot", FrogbotsRemovebot_f, "Removes a single bot" },
 		{ "removeall", FrogbotsRemoveAll, "Removes all bots from server" },
 		{ "debug", FrogbotsDebug, "Debugging commands" },
-		{ "disable", FrogbotsDisable, "Disable frogbots" } };
+		{ "disable", FrogbotsDisable, "Disable frogbots" },
+		{ "gomarker", FrogbotsGoMarker, "Send all bots to the location pointed at" } };
 
 static frogbot_cmd_t editor_commands[] =
 	{
@@ -2216,13 +2295,6 @@ void FrogbotsCommand(void)
 			if (isRACE())
 			{
 				G_sprint(self, PRINT_HIGH, "Cannot enable bots while in race mode\n");
-
-				return;
-			}
-
-			if (isCTF())
-			{
-				G_sprint(self, PRINT_HIGH, "Cannot enable bots while in CTF mode\n");
 
 				return;
 			}
@@ -2508,6 +2580,8 @@ void BotStartFrame(void)
 			if (self->isBot)
 			{
 				BotCanRocketJump(self);
+
+				BotCanHook(self);
 
 				SelectWeapon();
 

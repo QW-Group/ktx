@@ -127,6 +127,56 @@ static void TargetEnemyLogic(gedict_t *self)
 	}
 }
 
+static void SurrenderCTFItemsLogic(gedict_t* self) 
+{
+	gedict_t* teammate = IdentifyMostVisibleTeammate(self);
+	if (teammate != world && !teammate->isBot) {
+		vec3_t toTeam;
+		float distance;
+
+		VectorSubtract(teammate->s.v.origin, self->s.v.origin, toTeam);
+		distance = VectorLength(toTeam);
+
+		// If close to a human player, and if no enemies are near
+		if (distance < 150 && self->fb.enemy_dist >= 500)
+		{
+			// yikes! maybe a better way to do this? Not sure if changing the angles like this breaks demos. TODO!
+			vec3_t oldAngles;
+			vec3_t predictedOffset;
+
+			VectorCopy(self->s.v.v_angle, oldAngles);
+
+			VectorScale(teammate->s.v.velocity, 0.1, predictedOffset);
+			VectorAdd(toTeam, predictedOffset, toTeam);
+
+			vectoangles(toTeam, self->s.v.v_angle);
+			if (self->s.v.v_angle[0] > 180)
+			{
+				self->s.v.v_angle[0] = 360 - self->s.v.v_angle[0];
+			}
+			else
+			{
+				self->s.v.v_angle[0] = 0 - self->s.v.v_angle[0];
+			}
+
+			if (self->ctf_flag & CTF_RUNE_MASK && !(teammate->ctf_flag & CTF_RUNE_MASK)) 
+			{
+				// Could take into account rune priorities?
+				TeamplayMessageByName(self, "tossrune");
+				TossRune();
+			}
+
+			if (self->ctf_flag & CTF_FLAG) 
+			{
+				TeamplayMessageByName(self, "tossflag");
+				TossFlag();
+			}
+
+			VectorCopy(oldAngles, self->s.v.v_angle);
+		}
+	}
+}
+
 static void BotDodgeMovement(gedict_t *self, vec3_t dir_move, float dodge_factor)
 {
 	if (dodge_factor)
@@ -214,6 +264,16 @@ static void BotMoveTowardsLinkedMarker(gedict_t *self, vec3_t dir_move)
 	qbool onGround = ((int)self->s.v.flags & FL_ONGROUND);
 	qbool curlJump = ((int)self->fb.path_state & BOTPATH_CURLJUMP_HINT);
 
+	if (self->fb.hooking)
+	{
+		// Stop before starting to hook
+		if (VectorDistance(self->s.v.origin, self->fb.linked_marker->s.v.origin) < VectorDistance(self->fb.touch_marker->s.v.origin, self->fb.linked_marker->s.v.origin))
+		{
+			VectorClear(dir_move);
+			return;
+		}
+	}
+
 	VectorAdd(linked->s.v.absmin, linked->s.v.view_ofs, temp);
 	VectorSubtract(temp, self->s.v.origin, temp);
 	normalize(temp, dir_move);
@@ -275,6 +335,11 @@ static void BotMoveTowardsLinkedMarker(gedict_t *self, vec3_t dir_move)
 static void BotTouchMarkerLogic(void)
 {
 	TargetEnemyLogic(self);
+
+	if (isCTF())
+	{
+		SurrenderCTFItemsLogic(self);
+	}
 
 	if (PAST(goal_refresh_time))
 	{

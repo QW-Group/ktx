@@ -359,6 +359,169 @@ static float goal_artifact_super_damage(gedict_t *self, gedict_t *other)
 	return 0;
 }
 
+static float goal_flag_team(gedict_t* player, gedict_t* flag)
+{
+	if (flag->cnt == FLAG_DROPPED)
+	{
+		return 9999;
+	}
+	else if (player->ctf_flag & CTF_FLAG && flag->cnt == FLAG_AT_BASE) 
+	{
+		return 9999;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+static float goal_flag_enemy(gedict_t* player, gedict_t* flag)
+{
+	if (flag->cnt == FLAG_DROPPED)
+	{
+		return 9999;
+	}
+	else if (flag->cnt == FLAG_AT_BASE) 
+	{
+		gedict_t* teammate = IdentifyMostVisibleTeammate(self);
+		if (self->fb.skill.ctf_role == FB_CTF_ROLE_DEFEND) return 0;
+		if (teammate != world && !teammate->isBot)
+		{
+			vec3_t toTeam;
+			float distance;
+			VectorSubtract(flag->s.v.origin, teammate->s.v.origin, toTeam);
+			distance = VectorLength(toTeam);
+			// If a human is near and no enemies are, let them take the flag
+			if (distance < 500 && (self->fb.enemy_dist >= 1500 || self->fb.enemy_dist == 600)) return 0;
+		}
+		return 200 + 700 * (self->fb.firepower / 100.0f);
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+static float goal_flag(gedict_t* player, gedict_t* flag)
+{
+	if (!isCTF()) return 0;
+
+	flag->fb.touch_marker = LocateNextMarker(flag->s.v.origin, NULL);
+
+	if (flag->fb.touch_marker)
+	{
+		flag->fb.Z_ = flag->fb.touch_marker->fb.Z_;
+	}
+	else
+	{
+		return 0;
+	}
+
+	if (((flag->k_teamnumber == 1) && streq(getteam(player), "red"))
+	 || ((flag->k_teamnumber == 2) && streq(getteam(player), "blue")))
+	{
+		return goal_flag_team(player, flag);
+	}
+	else
+	{
+		return goal_flag_enemy(player, flag);
+	}
+}
+
+static float goal_rune(gedict_t* self, gedict_t* rune)
+{
+	int newRune = rune->ctf_flag;
+	int currentRune = self->ctf_flag & CTF_RUNE_MASK;
+	gedict_t* teammate;
+
+	if (!isCTF()) return 0;
+
+	// Already have a rune
+	if (self->ctf_flag & CTF_RUNE_MASK)
+	{
+		if (newRune >= currentRune)
+			return 0;
+	}
+
+	if (!Visible_360(self, rune)) return 0;
+
+	rune->fb.touch_marker = LocateNextMarker(rune->s.v.origin, NULL);
+
+	// Not reachable 
+	if (rune->s.v.origin[2] - rune->fb.touch_marker->s.v.origin[2] > 40)
+	{
+		return 0;
+	}
+
+	if (rune->fb.touch_marker)
+	{
+		rune->fb.Z_ = rune->fb.touch_marker->fb.Z_;
+	}
+	else
+	{
+		return 0;
+	}
+
+	teammate = IdentifyMostVisibleTeammate(self);
+	if (teammate != world && !teammate->isBot && !(teammate->ctf_flag & CTF_RUNE_MASK))
+	{
+		// If a human is near and no enemies are, let them take the rune
+		vec3_t toTeam;
+		float distance;
+		VectorSubtract(rune->s.v.origin, teammate->s.v.origin, toTeam);
+		distance = VectorLength(toTeam);
+		if (distance < 400 && !(teammate->ctf_flag & CTF_RUNE_MASK) && (self->fb.enemy_dist >= 1500 || self->fb.enemy_dist == 600))
+			return 0;
+	}
+
+	return 1200 + 100 / newRune;
+}
+
+static float goal_defend_marker(gedict_t* self, gedict_t* marker) 
+{
+	gedict_t *flag1, *flag2, *teamFlag, *enemyFlag;
+
+	if (!isCTF()) return 0;
+
+	// Don't try and defend if you are carrying the flag!
+	if (self->ctf_flag & CTF_FLAG) return 0;
+
+	// Ignore other teams markers.
+	if (marker->fb.T & MARKER_FLAG1_DEFEND && streq(getteam(self), "blue")) return 0;
+	if (marker->fb.T & MARKER_FLAG2_DEFEND && streq(getteam(self), "red")) return 0;
+
+	if (VectorDistance(self->s.v.origin, marker->s.v.origin) < 300) return 0; // BAD!
+
+
+	flag1 = find(world, FOFCLSN, "item_flag_team1");
+	flag2 = find(world, FOFCLSN, "item_flag_team2");
+
+	if (streq(getteam(self), "red")) 
+	{
+		teamFlag = flag1;
+		enemyFlag = flag2;
+	}
+	else
+	{
+		teamFlag = flag2;
+		enemyFlag = flag1;
+	}
+
+	if (teamFlag->cnt == FLAG_AT_BASE)
+	{
+		if (enemyFlag->cnt == FLAG_AT_BASE)
+		{
+			if (self->fb.skill.ctf_role == FB_CTF_ROLE_DEFEND) return 1200 * (self->fb.firepower / 100.0f);
+		}
+		else
+		{
+			return 400 + 800 * (self->fb.firepower / 100.0f);
+		}
+	}
+	
+	return 0;
+}
+
 // Pickup functions (TODO)
 
 qbool pickup_health0(void)
@@ -935,6 +1098,77 @@ static void fb_spawn_quad(gedict_t *ent)
 	}
 }
 
+static void fb_flag_taken(gedict_t* item, gedict_t* player)
+{
+	UpdateGoalEntity(item, player);
+	AssignVirtualGoal(item);
+}
+
+static void fb_rune_taken(gedict_t* item, gedict_t* player)
+{
+	BotTookMessage(item, player);
+	UpdateGoalEntity(item, player);
+	AssignVirtualGoal(item);
+}
+
+static qbool fb_rune_touch(gedict_t* rune, gedict_t* player)
+{
+	if (player->ctf_flag & CTF_RUNE_MASK)
+	{
+		int newRune = rune->ctf_flag;
+		int currentRune = player->ctf_flag & 15;
+		if (newRune < currentRune)
+		{
+			self = player;
+			TossRune();
+			self = rune;
+		}
+	}
+
+	return false;
+}
+
+static void fb_spawn_flag1(gedict_t* ent)
+{
+	ent->netname = "Flag1";
+
+	ent->fb.desire = goal_flag;
+	ent->fb.pickup = pickup_true;
+	ent->fb.item_taken = fb_flag_taken;
+	ent->fb.item_respawned = AssignVirtualGoal;
+}
+
+static void fb_spawn_flag2(gedict_t* ent)
+{
+	ent->netname = "Flag2";
+
+	ent->fb.desire = goal_flag;
+	ent->fb.pickup = pickup_true;
+	ent->fb.item_taken = fb_flag_taken;
+	ent->fb.item_respawned = AssignVirtualGoal;
+}
+
+static void fb_spawn_rune(gedict_t* ent)
+{
+	ent->fb.desire = goal_rune;
+	ent->fb.pickup = pickup_true;
+	ent->fb.item_touch = fb_rune_touch;
+	ent->fb.item_taken = fb_rune_taken;
+	ent->fb.item_respawned = AssignVirtualGoal;
+}
+
+static qbool fb_defense_marker_touch(gedict_t* ent, gedict_t* player)
+{
+	AssignVirtualGoal(ent);
+	return false;
+}
+
+static void fb_spawn_defense_marker(gedict_t* ent)
+{
+	ent->fb.desire = goal_defend_marker;
+	ent->fb.item_touch = fb_defense_marker_touch;
+}
+
 static fb_spawn_t itemSpawnFunctions[] =
 	{
 		{ "item_armor1", fb_spawn_armor },
@@ -955,7 +1189,11 @@ static fb_spawn_t itemSpawnFunctions[] =
 		{ "weapon_supernailgun", fb_spawn_sng },
 		{ "weapon_grenadelauncher", fb_spawn_gl },
 		{ "weapon_rocketlauncher", fb_spawn_rl },
-		{ "weapon_lightning", fb_spawn_lg }, };
+		{ "weapon_lightning", fb_spawn_lg },
+
+		// CTF
+		{ "item_flag_team1", fb_spawn_flag1},
+		{ "item_flag_team2", fb_spawn_flag2} };
 
 fb_spawn_t* ItemSpawnFunction(int i)
 {
@@ -1124,9 +1362,33 @@ void BotsPowerupDropped(gedict_t *player, gedict_t *powerup)
 	AssignVirtualGoal(powerup);
 }
 
+void BotsFlag1Dropped(gedict_t* flag)
+{
+	VectorSet(flag->s.v.absmin, flag->s.v.origin[0], flag->s.v.origin[1], flag->s.v.origin[2]);
+
+	fb_spawn_flag1(flag);
+}
+
+void BotsFlag2Dropped(gedict_t* flag)
+{
+	VectorSet(flag->s.v.absmin, flag->s.v.origin[0], flag->s.v.origin[1], flag->s.v.origin[2]);
+
+	fb_spawn_flag2(flag);
+}
+
+void BotsRuneDropped(gedict_t* rune)
+{
+	fb_spawn_rune(rune);
+}
+
 void BotsPowerupTouchedNonPlayer(gedict_t *powerup, gedict_t *touch_ent)
 {
 	LocateDynamicItem(powerup);
+}
+
+void BotsSetUpDefenseMarker(gedict_t* marker)
+{
+	fb_spawn_defense_marker(marker);
 }
 
 #endif // BOT_SUPPORT
