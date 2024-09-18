@@ -1047,6 +1047,7 @@ void FirstFrame(void)
 	RegisterCvarEx(FB_CVAR_HEALTH, "100");
 	RegisterCvarEx(FB_CVAR_WEAPON, "2");
 	RegisterCvarEx(FB_CVAR_BREAK_ON_DEATH, "1");
+	RegisterCvarEx(FB_CVAR_QUAD_MULTIPLIER, "4");
 
 	for (i = 0; i < MAX_CLIENTS; i++)
 	{

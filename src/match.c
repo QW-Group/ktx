@@ -1651,7 +1651,7 @@ void PrintCountdown(int seconds)
 		strlcat(text, va("Bot weapon %15s\n", redtext(WpName(FrogbotWeapon()))), sizeof(text));
 		strlcat(text, va("Bot health %15s\n", dig3(FrogbotHealth())), sizeof(text));
 		strlcat(text, va("Bot skill %16s\n", dig3(FrogbotSkillLevel())), sizeof(text));
-		strlcat(text, va("Quad damage multiplier %3s\n", dig3(4)), sizeof(text));
+		strlcat(text, va("Quad damage multiplier %3s\n", dig3(FrogbotQuadMultiplier())), sizeof(text));
 	}
 
 	if (matchtag[0])

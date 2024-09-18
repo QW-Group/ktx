@@ -3879,7 +3879,7 @@ void CheckPowerups(void)
 		{
 			if (self->super_time == 1)
 			{
-				if (deathmatch == 4)
+				if (deathmatch == 4 && !tot_mode_enabled())
 				{
 					G_sprint(self, PRINT_HIGH, "OctaPower is wearing off\n");
 				}

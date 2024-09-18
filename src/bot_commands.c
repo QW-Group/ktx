@@ -125,6 +125,11 @@ int FrogbotWeapon(void)
 	return (int)cvar(FB_CVAR_WEAPON);
 }
 
+int FrogbotQuadMultiplier(void)
+{
+	return (int)cvar(FB_CVAR_QUAD_MULTIPLIER);
+}
+
 static team_t* AddTeamToList(int *teamsFound, char *team, int topColor, int bottomColor)
 {
 	int i;
@@ -2221,6 +2226,37 @@ static void FrogbotsToggleQuad(void)
 	}
 }
 
+static void FrogbotsSetQuadMultiplier(void)
+{
+	if (!bots_enabled())
+	{
+		G_sprint(self, 2, "Bots are disabled by the server.\n");
+		return;
+	}
+
+	if (trap_CmdArgc() <= 2)
+	{
+		G_sprint(self, 2, "Usage: /botcmd quadmultiplier <multiplier>\n");
+		G_sprint(self, 2, "       <multiplier> must be in range %d and %d\n", 1, 10);
+		G_sprint(self, 2, "multiplier is currently \"%d\"\n", FrogbotQuadMultiplier());
+	}
+	else
+	{
+		char argument[32];
+		int new_multiplier = 0;
+		int old_multiplier = FrogbotQuadMultiplier();
+
+		trap_CmdArgv(2, argument, sizeof(argument));
+		new_multiplier = bound(1, atoi(argument), 10);
+
+		if (new_multiplier != old_multiplier)
+		{
+			cvar_fset(FB_CVAR_QUAD_MULTIPLIER, new_multiplier);
+			G_sprint(self, 2, "quad multiplier changed to \"%d\"\n", new_multiplier);
+		}
+	}
+}
+
 typedef struct frogbot_cmd_s
 {
 	char *name;
@@ -2240,7 +2276,8 @@ static frogbot_cmd_t std_commands[] =
 		{ "health", FrogbotsSetHealth, "Set initial health for the bot" },
 		{ "weapon", FrogbotsSetWeapon, "Set which weapon the bot should use" },
 		{ "breakondeath", FrogbotsSetBreakOnDeath, "Automatically break when you die" },
-		{ "togglequad", FrogbotsToggleQuad, "Toggle quad damage" } };
+		{ "togglequad", FrogbotsToggleQuad, "Toggle quad damage" },
+		{ "quadmultiplier", FrogbotsSetQuadMultiplier, "Set quad damage multiplier" }};
 
 static frogbot_cmd_t editor_commands[] =
 	{
