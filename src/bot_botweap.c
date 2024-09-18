@@ -15,6 +15,7 @@
 
 // FIXME: globals, this is just setting
 void DM6SelectWeaponToOpenDoor(gedict_t *self);
+qbool E2M2DischargeLogic(gedict_t* self);
 
 // FIXME: This is just stopping quad damage rocket shot, always replacing with shotgun
 // Can do far better than this
@@ -348,9 +349,11 @@ static void RocketLauncherShot(gedict_t *self)
 					from_marker = g_edicts[self->s.v.enemy].fb.touch_marker;
 					path_normal = true;
 					ZoneMarker(from_marker, self->fb.look_object, path_normal,
-								g_edicts[self->s.v.enemy].fb.canRocketJump);
+								g_edicts[self->s.v.enemy].fb.canRocketJump,
+								g_edicts[self->s.v.enemy].fb.canHook);
 					traveltime = SubZoneArrivalTime(zone_time, middle_marker, self->fb.look_object,
-													g_edicts[self->s.v.enemy].fb.canRocketJump);
+													g_edicts[self->s.v.enemy].fb.canRocketJump,
+													g_edicts[self->s.v.enemy].fb.canHook);
 					predict_dist = (traveltime * sv_maxspeed)
 							+ VectorDistance(testplace, self->fb.rocket_endpos);
 				}
@@ -444,9 +447,17 @@ static qbool PreWarBlockFiring(gedict_t *self)
 		qbool looking_at_enemy = enemy == self->fb.look_object;
 		qbool enemy_attacked = self->s.v.enemy && g_globalvars.time < enemy->attack_finished + 0.5;
 		qbool debugging_door = (self->fb.debug_path && enemy_is_world);
+		qbool firing_at_button = (self->fb.path_state & FIRE_BUTTON);
+
+		if (!k_practice && firing_at_button)
+		{
+			self->fb.firing = false;
+
+			return true;
+		}
 
 		// Don't fire at other bots
-		if ((self->s.v.enemy == 0) || enemy->isBot || !self->fb.look_object)
+		if ((self->s.v.enemy == 0 && !firing_at_button) || enemy->isBot || !self->fb.look_object)
 		{
 			self->fb.firing = false;
 
@@ -494,6 +505,35 @@ static qbool KeepFiringAtEnemy(gedict_t *self)
 	// Keep fire button down if tracking enemy
 	return ((self->fb.look_object == &g_edicts[self->s.v.enemy]) && (g_random() < 0.666667f)
 			&& BotUsingCorrectWeapon(self));
+}
+
+static void SelectWeaponToShootButton(gedict_t* self)
+{
+	if (self->fb.path_state & FIRE_BUTTON)
+	{
+		int items_ = (int)self->s.v.items;
+		int desired_weapon = 0;
+
+		if (self->s.v.ammo_shells)
+		{
+			desired_weapon = IT_SHOTGUN;
+		}
+		else if ((items_ & IT_NAILGUN) && (self->s.v.ammo_nails))
+		{
+			desired_weapon = IT_NAILGUN;
+		}
+		else if ((items_ & IT_SUPER_NAILGUN) && (self->s.v.ammo_nails))
+		{
+			desired_weapon = IT_SUPER_NAILGUN;
+		}
+		else if ((items_ & IT_LIGHTNING) && (self->s.v.ammo_cells))
+		{
+			desired_weapon = IT_LIGHTNING;
+		}
+
+		self->fb.firing |= CheckNewWeapon(desired_weapon);
+	}
+
 }
 
 static qbool MidairAimLogic(gedict_t *self, float rel_dist)
@@ -589,6 +629,8 @@ void SetFireButton(gedict_t *self, vec3_t rel_pos, float rel_dist)
 
 	DM6SelectWeaponToOpenDoor(self);
 
+	SelectWeaponToShootButton(self);
+
 	if (HurtSelfLogic(self))
 	{
 		return;
@@ -663,6 +705,11 @@ static qbool BotShouldDischarge(void)
 {
 	gedict_t *enemy = &g_edicts[self->s.v.enemy];
 
+	if (E2M2DischargeLogic(self)) 
+	{
+		return true;
+	}
+
 	if (self->s.v.waterlevel != 3)
 	{
 		return false;
@@ -725,6 +772,13 @@ static int DesiredWeapon(void)
 	qbool avoid_rockets = false;
 	qbool firing_lg = self->fb.firing && self->s.v.weapon == IT_LIGHTNING && self->s.v.ammo_cells
 			&& g_globalvars.time < self->attack_finished;
+
+
+	// If hooking, continue firing hook
+	if (self->fb.hooking)
+	{
+		return IT_HOOK;
+	}
 
 	if (TP_CouldDamageTeammate(self))
 	{
@@ -909,6 +963,11 @@ static int DesiredWeapon(void)
 void SelectWeapon(void)
 {
 	if (self->fb.path_state & DM6_DOOR)
+	{
+		return;
+	}
+
+	if (self->fb.path_state & FIRE_BUTTON)
 	{
 		return;
 	}

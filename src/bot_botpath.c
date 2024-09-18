@@ -78,12 +78,12 @@ static void EvalCloseRunAway(float runaway_time, gedict_t *enemy_touch_marker,
 	float traveltime2;
 
 	from_marker = enemy_touch_marker;
-	ZoneMarker(from_marker, to_marker, path_normal, false);
-	traveltime = SubZoneArrivalTime(zone_time, middle_marker, to_marker, false);
+	ZoneMarker(from_marker, to_marker, path_normal, false, false);
+	traveltime = SubZoneArrivalTime(zone_time, middle_marker, to_marker, false, false);
 	traveltime2 = traveltime;
 	from_marker = touch_marker;
-	ZoneMarker(from_marker, to_marker, path_normal, false);
-	traveltime = SubZoneArrivalTime(zone_time, middle_marker, to_marker, false);
+	ZoneMarker(from_marker, to_marker, path_normal, false, false);
+	traveltime = SubZoneArrivalTime(zone_time, middle_marker, to_marker, false, false);
 	if (look_traveltime)
 	{
 		test_away_score = g_random() * runaway_time
@@ -178,6 +178,84 @@ static qbool LookingAtPlayer(gedict_t *self)
 	return (self->fb.look_object && (self->fb.look_object->ct == ctPlayer));
 }
 
+void LookAtButton(gedict_t* button, qbool buttonIsDoor)
+{
+	gedict_t *target = buttonIsDoor ? button->fb.door_entity : button;
+	gedict_t *trigger = PROG_TO_EDICT(target->s.v.enemy);
+
+	vec3_t target_origin;
+	VectorScale(target->s.v.absmin, 0.5, target_origin);
+	VectorMA(target_origin, 0.5, target->s.v.absmax, target_origin);
+
+	traceline(self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] + 16,
+		target_origin[0], target_origin[1], target_origin[2],
+		true, self);
+
+	if (g_globalvars.trace_fraction == 1 ||
+		PROG_TO_EDICT(g_globalvars.trace_ent) == target ||
+		PROG_TO_EDICT(g_globalvars.trace_ent) == button)
+	{
+		if ((target->s.v.takedamage))
+		{
+			if ((buttonIsDoor && (target->state == STATE_TOP || target->state == STATE_UP)) ||
+			   (target->s.v.enemy && (trigger->state == STATE_TOP || trigger->state == STATE_UP)) ||
+			   (!target->s.v.enemy && !buttonIsDoor))
+			{
+				self->fb.path_state |= FIRE_BUTTON;
+				self->fb.state |= NOTARGET_ENEMY;
+				self->fb.look_object = target;
+			}
+		}
+	}
+}
+
+qbool CheckLookAtButton(gedict_t* self)
+{
+	// First check if the bot is in front of a shootable door
+	gedict_t* marker = self->fb.linked_marker;
+	if (marker && marker->fb.door_entity && marker->fb.door_entity->s.v.takedamage)
+	{
+		LookAtButton(marker, true);
+		return true;
+	}
+
+	marker = self->fb.touch_marker;
+	if (marker && marker->fb.door_entity && marker->fb.door_entity->s.v.takedamage)
+	{
+		LookAtButton(marker, true);
+		return true;
+	}
+
+	// Now check if there is a button linked to the current or next marker
+	if (self->fb.linked_marker && self->fb.linked_marker->fb.T & MARKER_LOOK_BUTTON)
+	{
+		marker = self->fb.linked_marker;
+	}
+	else if (self->fb.touch_marker && self->fb.touch_marker->fb.T & MARKER_LOOK_BUTTON)
+	{
+		marker = self->fb.touch_marker;
+	}
+	
+	if (marker)
+	{
+		int i;
+		for (i = 0; i < NUMBER_PATHS; i++)
+		{
+			fb_path_t* path = &marker->fb.paths[i];
+
+			if (path->next_marker && (path->flags & LOOK_BUTTON)) {
+				LookAtButton(path->next_marker, false);
+				return true;
+			}
+		}
+	}
+
+	self->fb.path_state &= ~FIRE_BUTTON;
+	self->fb.state &= ~NOTARGET_ENEMY;
+
+	return false;
+}
+
 qbool WaitingToHitGround(gedict_t *self)
 {
 	return (self->fb.path_state & WAIT_GROUND) && !((int)self->s.v.flags & FL_ONGROUND);
@@ -190,6 +268,22 @@ static qbool WalkTowardsDroppedItem(gedict_t *self)
 	if (streq(goalentity_->classname, "backpack") && VisibleEntity(goalentity_))
 	{
 		SetLinkedMarker(self, goalentity_, "ProcNewLinked(backpack)");
+		self->fb.linked_marker_time = g_globalvars.time + 5;
+		self->fb.old_linked_marker = self->fb.touch_marker;
+
+		return true;
+	}
+	else if (streq(goalentity_->classname, "rune"))
+	{
+		SetLinkedMarker(self, goalentity_, "ProcNewLinked(rune)");
+		self->fb.linked_marker_time = g_globalvars.time + 5;
+		self->fb.old_linked_marker = self->fb.touch_marker;
+
+		return true;
+	}
+	else if (streq(goalentity_->classname, "item_flag_team1") || streq(goalentity_->classname, "item_flag_team2"))
+	{
+		SetLinkedMarker(self, goalentity_, "ProcNewLinked(flag)");
 		self->fb.linked_marker_time = g_globalvars.time + 5;
 		self->fb.old_linked_marker = self->fb.touch_marker;
 
@@ -223,9 +317,9 @@ static qbool PredictionShotLogic(gedict_t *self, gedict_t *goalentity_marker)
 			if (look_marker)
 			{
 				path_normal = true;
-				ZoneMarker(from_marker, look_marker, path_normal, self->fb.canRocketJump);
+				ZoneMarker(from_marker, look_marker, path_normal, self->fb.canRocketJump, self->fb.canHook);
 				traveltime = SubZoneArrivalTime(zone_time, middle_marker, look_marker,
-												self->fb.canRocketJump);
+												self->fb.canRocketJump, self->fb.canHook);
 				look_traveltime = traveltime;
 			}
 			else
@@ -238,9 +332,9 @@ static qbool PredictionShotLogic(gedict_t *self, gedict_t *goalentity_marker)
 				to_marker = from_marker;
 				from_marker = self->fb.linked_marker;
 				path_normal = true;
-				ZoneMarker(from_marker, to_marker, path_normal, self->fb.canRocketJump);
+				ZoneMarker(from_marker, to_marker, path_normal, self->fb.canRocketJump, self->fb.canHook);
 				traveltime = SubZoneArrivalTime(zone_time, middle_marker, to_marker,
-												self->fb.canRocketJump);
+												self->fb.canRocketJump, self->fb.canHook);
 				if (look_traveltime < traveltime)
 				{
 					self->fb.look_object = look_marker;
@@ -263,6 +357,7 @@ void ProcessNewLinkedMarker(gedict_t *self)
 					NULL : goalentity_->fb.touch_marker);
 	qbool trace_bprint = self->fb.debug;
 	qbool rocket_jump_routes_allowed = self->fb.canRocketJump;
+	qbool hook_routes_allowed = self->fb.canHook;
 	qbool rocket_alert = false;
 	float best_score = PATH_SCORE_NULL;
 	vec3_t player_direction;
@@ -418,7 +513,7 @@ void ProcessNewLinkedMarker(gedict_t *self)
 	PathScoringLogic(self->fb.goal_respawn_time, self->fb.be_quiet, self->fb.skill.lookahead_time,
 						self->fb.path_normal_, self->s.v.origin, player_direction,
 						self->fb.touch_marker, goalentity_marker, rocket_alert,
-						rocket_jump_routes_allowed, trace_bprint, self, &best_score,
+						rocket_jump_routes_allowed, hook_routes_allowed, trace_bprint, self, &best_score,
 						&new_linked_marker, &new_path_state, &new_angle_hint, &new_rj_delay,
 						new_rj_angles);
 	SetLinkedMarker(self, new_linked_marker, "ProcNewLinked(std)");
@@ -484,7 +579,7 @@ void ProcessNewLinkedMarker(gedict_t *self)
 	}
 
 	// FIXME: Map-specific
-	if (DM6LookAtDoor(self) || LookingAtPlayer(self))
+	if (DM6LookAtDoor(self) || LookingAtPlayer(self) || CheckLookAtButton(self))
 	{
 		return;
 	}

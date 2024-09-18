@@ -123,9 +123,9 @@ static void BestEnemy_apply(gedict_t *test_enemy, float *best_score, gedict_t **
 	look_marker = SightFromMarkerFunction(from_marker, to_marker);
 	if (look_marker != NULL)
 	{
-		ZoneMarker(from_marker, look_marker, path_normal, test_enemy->fb.canRocketJump);
+		ZoneMarker(from_marker, look_marker, path_normal, test_enemy->fb.canRocketJump, test_enemy->fb.canHook);
 		traveltime = SubZoneArrivalTime(zone_time, middle_marker, look_marker,
-										test_enemy->fb.canRocketJump);
+										test_enemy->fb.canRocketJump, test_enemy->fb.canHook);
 		enemy_score = traveltime + g_random();
 	}
 	else
@@ -134,7 +134,10 @@ static void BestEnemy_apply(gedict_t *test_enemy, float *best_score, gedict_t **
 		enemy_score = look_traveltime + g_random();
 	}
 
-	if (enemy_score < *best_score && look_marker != NULL)
+	// Prioritize enemy with flag
+	if (test_enemy->ctf_flag & CTF_FLAG) enemy_score /= 2;
+
+	if (enemy_score < *best_score && look_marker != NULL) // TODO hiipe - crashes here sometimes! Surely it should be possible for look_marker to be NULL?
 	{
 		vec3_t marker_view;
 		vec3_t to_marker_view;

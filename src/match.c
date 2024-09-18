@@ -2703,7 +2703,8 @@ void PlayerReady(qbool startIdlebot)
 	self->k_teamnum = 0;
 
 	// force red or blue color if ctf
-	if (isCTF())
+	// doing this seems to stop the bots from doing it properly
+	if (isCTF() && !self->isBot)
 	{
 		if (streq(getteam(self), "blue"))
 		{

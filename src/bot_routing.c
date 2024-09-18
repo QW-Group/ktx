@@ -43,15 +43,17 @@ static qbool AvoidTeleport(fb_path_eval_t *eval)
 	return SameTeam(eval->test_marker->fb.arrow_time_setby, eval->player);
 }
 
-static float EvalPath(fb_path_eval_t *eval, qbool allowRocketJumps, qbool trace_bprint,
+static float EvalPath(fb_path_eval_t *eval, qbool allowRocketJumps, qbool allowHook, qbool trace_bprint,
 						float current_goal_time, float current_goal_time_125)
 {
 	float path_score;
 	float same_dir;
 	vec3_t marker_position;
 
-	// don't try and pass through closed doors
-	if (BotDoorIsClosed(eval->test_marker))
+	// don't try and pass through closed doors, unless a button is linked
+	// TODO hiipe - shouldn't go this way at all - at the moment, bots will get to the door and just stop.
+	if (BotDoorIsClosed(eval->test_marker) &&
+		((match_in_progress <= 1 && !k_practice) || !(eval->test_marker->fb.T & MARKER_LOOK_BUTTON)))
 	{
 		return PATH_SCORE_NULL;
 	}
@@ -76,6 +78,16 @@ static float EvalPath(fb_path_eval_t *eval, qbool allowRocketJumps, qbool trace_
 		return PATH_SCORE_NULL;
 	}
 
+	if ((eval->description & HOOK) && allowHook)
+	{
+		vec3_t m_pos;
+
+		VectorAdd(eval->touch_marker->s.v.absmin, eval->touch_marker->s.v.view_ofs, m_pos);
+
+		// TODO hiipe - work out actual speed
+		eval->path_time = (VectorDistance(marker_position, m_pos) / (sv_maxspeed * 1.5));
+	}
+
 	// FIXME: Map specific logic
 	if (DM6DoorClosed(eval))
 	{
@@ -83,6 +95,17 @@ static float EvalPath(fb_path_eval_t *eval, qbool allowRocketJumps, qbool trace_
 	}
 
 	if ((eval->description & ROCKET_JUMP) && !allowRocketJumps)
+	{
+		return PATH_SCORE_NULL;
+	}
+
+	if ((eval->description & HOOK) && !allowHook)
+	{
+		return PATH_SCORE_NULL;
+	}
+
+	// These just point to a button, don't need to actually go there!
+	if (eval->description & LOOK_BUTTON)
 	{
 		return PATH_SCORE_NULL;
 	}
@@ -123,9 +146,9 @@ static float EvalPath(fb_path_eval_t *eval, qbool allowRocketJumps, qbool trace_
 		// Calculate time from marker > goal entity
 		from_marker = eval->test_marker;
 		path_normal = eval->path_normal;
-		ZoneMarker(from_marker, eval->goalentity_marker, path_normal, allowRocketJumps);
+		ZoneMarker(from_marker, eval->goalentity_marker, path_normal, allowRocketJumps, allowHook);
 		traveltime = SubZoneArrivalTime(zone_time, middle_marker, eval->goalentity_marker,
-										allowRocketJumps);
+										allowRocketJumps, allowHook);
 		total_goal_time = eval->path_time + traveltime;
 
 		if (total_goal_time > eval->goal_late_time)
@@ -147,7 +170,7 @@ static float EvalPath(fb_path_eval_t *eval, qbool allowRocketJumps, qbool trace_
 // FIXME: Breaking it up like this was useful for initial testing
 static void BotRouteEvaluation(qbool be_quiet, float lookahead_time, gedict_t *from_marker,
 								gedict_t *to_marker, qbool rocket_alert,
-								qbool rocket_jump_routes_allowed, vec3_t player_origin,
+								qbool rocket_jump_routes_allowed, qbool hook_routes_allowed, vec3_t player_origin,
 								vec3_t player_direction, qbool path_normal, qbool trace_bprint,
 								float current_goal_time, float current_goal_time_125,
 								float goal_late_time, gedict_t *player, float *best_score,
@@ -179,7 +202,7 @@ static void BotRouteEvaluation(qbool be_quiet, float lookahead_time, gedict_t *f
 		{
 			float path_score = 0;
 
-			path_score = EvalPath(&eval, rocket_jump_routes_allowed, trace_bprint,
+			path_score = EvalPath(&eval, rocket_jump_routes_allowed, hook_routes_allowed, trace_bprint,
 									current_goal_time, current_goal_time_125);
 			if (path_score > *best_score)
 			{
@@ -198,7 +221,7 @@ static void BotRouteEvaluation(qbool be_quiet, float lookahead_time, gedict_t *f
 void PathScoringLogic(float goal_respawn_time, qbool be_quiet, float lookahead_time,
 						qbool path_normal, vec3_t player_origin, vec3_t player_direction,
 						gedict_t *touch_marker_, gedict_t *goalentity_marker, qbool rocket_alert,
-						qbool rocket_jump_routes_allowed, qbool trace_bprint, gedict_t *player,
+						qbool rocket_jump_routes_allowed, qbool hook_routes_allowed, qbool trace_bprint, gedict_t *player,
 						float *best_score, gedict_t **linked_marker_, int *new_path_state,
 						int *new_angle_hint, int *new_rj_frame_delay, float new_rj_angles[2])
 {
@@ -213,9 +236,9 @@ void PathScoringLogic(float goal_respawn_time, qbool be_quiet, float lookahead_t
 	if (goalentity_marker)
 	{
 		from_marker = touch_marker_;
-		ZoneMarker(from_marker, goalentity_marker, path_normal, rocket_jump_routes_allowed);
+		ZoneMarker(from_marker, goalentity_marker, path_normal, rocket_jump_routes_allowed, hook_routes_allowed);
 		traveltime = SubZoneArrivalTime(zone_time, middle_marker, goalentity_marker,
-										rocket_jump_routes_allowed);
+										rocket_jump_routes_allowed, hook_routes_allowed);
 		current_goal_time = traveltime;
 		current_goal_time_125 = traveltime + 1.25;
 
@@ -250,7 +273,7 @@ void PathScoringLogic(float goal_respawn_time, qbool be_quiet, float lookahead_t
 
 		eval.test_marker = touch_marker_;
 
-		path_score = EvalPath(&eval, rocket_jump_routes_allowed, trace_bprint, current_goal_time,
+		path_score = EvalPath(&eval, rocket_jump_routes_allowed, hook_routes_allowed,  trace_bprint, current_goal_time,
 								current_goal_time_125);
 		if (path_score > *best_score)
 		{
@@ -264,7 +287,7 @@ void PathScoringLogic(float goal_respawn_time, qbool be_quiet, float lookahead_t
 
 	// Evaluate all paths from touched marker to the goal entity
 	BotRouteEvaluation(be_quiet, lookahead_time, touch_marker_, goalentity_marker, rocket_alert,
-						rocket_jump_routes_allowed, player_origin, player_direction, path_normal,
+						rocket_jump_routes_allowed, hook_routes_allowed, player_origin, player_direction, path_normal,
 						trace_bprint, current_goal_time, current_goal_time_125, goal_late_time,
 						player, best_score, linked_marker_, new_path_state, new_angle_hint,
 						new_rj_frame_delay, new_rj_angles);

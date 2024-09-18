@@ -1577,7 +1577,8 @@ void ClientConnect(void)
 	}
 
 	// qqshka: force damn colors in CTF.
-	if (isCTF())
+	// doing this seems to stop the bots from doing it properly
+	if (isCTF() && !self->isBot)
 	{
 		int red = 0; // Keeps track of which team and colors to set for new player
 

@@ -49,6 +49,11 @@ const char* EncodeMarkerFlags(int marker_flags)
 		*s++ = '6';
 	}
 
+	if (marker_flags & MARKER_E2M2_DISCHARGE)
+	{
+		*s++ = 'd';
+	}
+
 	if (marker_flags & MARKER_BLOCKED_ON_STATE_TOP)
 	{
 		*s++ = 'b';
@@ -72,6 +77,16 @@ const char* EncodeMarkerFlags(int marker_flags)
 	if (marker_flags & MARKER_NOTOUCH)
 	{
 		*s++ = 'n';
+	}
+
+	if (marker_flags & MARKER_FLAG1_DEFEND)
+	{
+		*s++ = '1';
+	}
+
+	if (marker_flags & MARKER_FLAG2_DEFEND)
+	{
+		*s++ = '2';
 	}
 
 	if (s == buffer)
@@ -101,6 +116,10 @@ int DecodeMarkerFlagString(const char *s)
 				marker_flags |= MARKER_IS_DM6_DOOR;
 				break;
 
+			case 'd':
+				marker_flags |= MARKER_E2M2_DISCHARGE;
+				break;
+
 			case 'f':
 				marker_flags |= MARKER_FIRE_ON_MATCH_START;
 				break;
@@ -119,6 +138,14 @@ int DecodeMarkerFlagString(const char *s)
 
 			case 'n':
 				marker_flags |= MARKER_NOTOUCH;
+				break;
+
+			case '1':
+				marker_flags |= MARKER_FLAG1_DEFEND;
+				break;
+
+			case '2':
+				marker_flags |= MARKER_FLAG2_DEFEND;
 				break;
 		}
 	}
@@ -144,6 +171,16 @@ const char* EncodeMarkerPathFlags(int path_flags)
 	if (path_flags & ROCKET_JUMP)
 	{
 		*s++ = 'r';
+	}
+
+	if (path_flags & HOOK)
+	{
+		*s++ = 'h';
+	}
+
+	if (path_flags & LOOK_BUTTON)
+	{
+		*s++ = 'l';
 	}
 
 	if (path_flags & JUMP_LEDGE)
@@ -190,6 +227,14 @@ int DecodeMarkerPathFlagString(const char *s)
 
 			case 'r':
 				path_flags |= ROCKET_JUMP;
+				break;
+
+			case 'h':
+				path_flags |= HOOK;
+				break;
+
+			case 'l':
+				path_flags |= LOOK_BUTTON;
 				break;
 
 			case 'j':
@@ -318,6 +363,11 @@ void SetMarkerPathFlags(int marker_number, int path_index, int flags)
 		markers[marker_number]->fb.paths[path_index].rj_pitch = 78.25;
 		markers[marker_number]->fb.paths[path_index].rj_yaw = -1;
 	}
+
+	if (flags & LOOK_BUTTON)
+	{
+		markers[marker_number]->fb.T |= MARKER_LOOK_BUTTON;
+	}
 }
 
 void SetMarkerPath(int source_marker, int path_index, int next_marker)
@@ -368,10 +418,12 @@ qbool LoadBotRoutingFromFile(void)
 	fileHandle_t file = -1;
 	char lineData[128];
 	char argument[128];
+	char botFileName[128];
 
 	// Load bot definition file: frogbots rely on objects spawning 
 	//    markers, so be aware of alternative .ent files
 	char *entityFile = cvar_string("k_entityfile");
+	if (isCTF()) strlcat(entityFile, "_ctf", sizeof(entityFile));
 	if (!strnull(entityFile))
 	{
 		file = std_fropen("maps/%s.bot", entityFile);
@@ -381,12 +433,14 @@ qbool LoadBotRoutingFromFile(void)
 		}
 	}
 
+	strlcpy(botFileName, mapname, sizeof(botFileName));
+	if (isCTF()) strlcat(botFileName, "_ctf", sizeof(botFileName));
 	if (file == -1)
 	{
-		file = std_fropen("maps/%s.bot", mapname);
+		file = std_fropen("maps/%s.bot", botFileName);
 		if (file == -1)
 		{
-			file = std_fropen("bots/maps/%s.bot", mapname);
+			file = std_fropen("bots/maps/%s.bot", botFileName);
 		}
 	}
 

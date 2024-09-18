@@ -434,6 +434,7 @@ void BotSetCommand(gedict_t *self)
 	vec3_t direction;
 
 	BotPerformRocketJump(self);
+	BotPerformHook(self);
 
 	if (cmd_msec)
 	{

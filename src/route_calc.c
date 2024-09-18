@@ -52,9 +52,38 @@ static void TravelTimeForPath(gedict_t *m, int i)
 		player_speed = sv_maxspeed * (1 + max(0, DotProduct(distance, hor_distance)));
 
 		// FIXME: RJ time is guideline, but we can do better than this?
-		m->fb.paths[i].time = 100000;
+		m->fb.paths[i].time = 1000000;
 		m->fb.paths[i].rj_time = (total_distance / player_speed);
 
+		return;
+	}
+
+	if (m->fb.paths[i].flags & HOOK)
+	{
+		vec3_t m_P_pos;
+		vec3_t distance;
+		vec3_t hor_distance;
+		float player_speed;
+		float total_distance;
+
+		VectorAdd(m_P->s.v.absmin, m_P->s.v.view_ofs, m_P_pos);
+		VectorSubtract(m_P_pos, m_pos, distance);
+		VectorCopy(distance, hor_distance);
+		total_distance = VectorNormalize(distance);
+		VectorNormalize(hor_distance);
+		player_speed = sv_maxspeed * (1 + max(0, DotProduct(distance, hor_distance)));
+
+		// TODO hiipe - work out time correctly!
+		m->fb.paths[i].time = /*1000000*/(total_distance / player_speed);
+		//m->fb.paths[i].hook_time = (total_distance / player_speed);
+
+		return;
+	}
+
+	// Just points to a button, can't go this way!
+	if (m->fb.paths[i].flags & LOOK_BUTTON)
+	{
+		m->fb.paths[i].hook_time = m->fb.paths[i].rj_time = m->fb.paths[i].time = 1000000;
 		return;
 	}
 
@@ -76,12 +105,12 @@ static void TravelTimeForPath(gedict_t *m, int i)
 		if ((m->fb.T & T_WATER) || (m_P->fb.T & T_WATER))
 		{
 			m->fb.paths[i].flags |= WATER_PATH;
-			m->fb.paths[i].rj_time = m->fb.paths[i].time = (VectorDistance(m_P_pos, m_pos)
+			m->fb.paths[i].hook_time = m->fb.paths[i].rj_time = m->fb.paths[i].time = (VectorDistance(m_P_pos, m_pos)
 					/ sv_maxwaterspeed);
 		}
 		else
 		{
-			m->fb.paths[i].rj_time = m->fb.paths[i].time = (VectorDistance(m_P_pos, m_pos)
+			m->fb.paths[i].hook_time = m->fb.paths[i].rj_time = m->fb.paths[i].time = (VectorDistance(m_P_pos, m_pos)
 					/ sv_maxspeed);
 		}
 	}
@@ -131,12 +160,29 @@ static qbool IdentifyFastestSubzoneRoute(gedict_t *m, fb_path_t *path)
 				//   ... not for now...
 			}
 
+			if (m_D & HOOK)
+			{
+				// Hook this link, then standard path. Prefer hook to RJ
+				if (sub->hook_time > (path->hook_time + next_sub->hook_time))
+				{
+					no_change = false;
+					sub->hook_time = path->hook_time + next_sub->hook_time;
+					sub->next_marker_hook = path->next_marker;
+				}
+			}
+
 			// If it's faster to walk than RJ, do that instead
 			if (sub->rj_time > sub->time)
 			{
 				no_change = false;
 				sub->rj_time = sub->time;
 				sub->next_marker_rj = sub->next_marker;
+			}
+			if (sub->hook_time > sub->time)
+			{
+				no_change = false;
+				sub->hook_time = sub->time;
+				sub->next_marker_hook = sub->next_marker;
 			}
 		}
 	}
@@ -173,6 +219,13 @@ static qbool IdentifyFastestGoalRoute(gedict_t *m, fb_path_t *path)
 		{
 			goal->next_marker_rj = next_goal->next_marker_rj;
 			goal->rj_time = path->rj_time + next_goal->rj_time;
+			no_change = false;
+		}
+
+		if (goal->hook_time > (path->hook_time + next_goal->hook_time))
+		{
+			goal->next_marker_hook = next_goal->next_marker_hook;
+			goal->hook_time = path->hook_time + next_goal->hook_time;
 			no_change = false;
 		}
 	}
@@ -219,12 +272,28 @@ static qbool IdentifyFastestZoneRoute(gedict_t *m, fb_path_t *path)
 
 			no_change = false;
 		}
+		if (zone->hook_time > (path->hook_time + next_zone->hook_time))
+		{
+			zone->hook_time = path->hook_time + next_zone->hook_time;
+			zone->marker_hook = next_zone->marker_hook;
+			zone->next_hook = path->next_marker;
+
+			no_change = false;
+		}
 
 		if (zone->rj_time > zone->time)
 		{
 			zone->rj_time = zone->time;
 			zone->marker_rj = zone->marker;
 			zone->next_rj = zone->next;
+
+			no_change = false;
+		}
+		if (zone->hook_time > zone->time)
+		{
+			zone->hook_time = zone->time;
+			zone->marker_hook = zone->marker;
+			zone->next_hook = zone->next;
 
 			no_change = false;
 		}
@@ -526,7 +595,7 @@ static void Calc_G_time_11(void)
 			}
 
 			from_marker = m;
-			ZoneMarker(m, m_zone, path_normal, false);
+			ZoneMarker(m, m_zone, path_normal, false, false);
 			if ((middle_marker != dropper) && (middle_marker != m))
 			{
 				gedict_t *runaway_dest = middle_marker;
@@ -538,10 +607,10 @@ static void Calc_G_time_11(void)
 				do
 				{
 					from_marker = prev_marker = next_marker;
-					next_marker = ZonePathMarker(from_marker, runaway_dest, path_normal, false);
+					next_marker = ZonePathMarker(from_marker, runaway_dest, path_normal, false, false);
 					from_marker = m;
-					ZoneMarker(m, next_marker, path_normal, false);
-					traveltime = SubZoneArrivalTime(zone_time, middle_marker, next_marker, false);
+					ZoneMarker(m, next_marker, path_normal, false, false);
+					traveltime = SubZoneArrivalTime(zone_time, middle_marker, next_marker, false, false);
 					if (traveltime >= min_traveltime)
 					{
 						if (strneq(next_marker->classname, "trigger_teleport"))
@@ -592,7 +661,7 @@ static void Calc_G_time_12(void)
 			if (runaway_dest != m)
 			{
 				from_marker = m;
-				traveltime = SubZoneArrivalTime(zone_time, middle_marker, runaway_dest, false);
+				traveltime = SubZoneArrivalTime(zone_time, middle_marker, runaway_dest, false, false);
 				if (traveltime < 1000000)
 				{
 					runaway_score = runaway_time = traveltime;
@@ -611,7 +680,7 @@ static void Calc_G_time_12(void)
 						{
 							from_marker = m;
 							traveltime = SubZoneArrivalTime(zone_time, middle_marker, next_marker,
-															false);
+															false, false);
 							if (traveltime >= min_traveltime)
 							{
 								if (strneq(next_marker->classname, "trigger_teleport"))
@@ -711,8 +780,8 @@ void InitialiseMarkerRoutes(void)
 		{
 			if (!m->fb.goals[j].next_marker)
 			{
-				m->fb.goals[j].rj_time = m->fb.goals[j].time = 1000000;
-				m->fb.goals[j].next_marker_rj = m->fb.goals[j].next_marker = dropper;
+				m->fb.goals[j].hook_time = m->fb.goals[j].rj_time = m->fb.goals[j].time = 1000000;
+				m->fb.goals[j].next_marker_hook = m->fb.goals[j].next_marker_rj = m->fb.goals[j].next_marker = dropper;
 			}
 		}
 
@@ -720,9 +789,9 @@ void InitialiseMarkerRoutes(void)
 		{
 			if (!m->fb.zones[j].marker)
 			{
-				m->fb.zones[j].rj_time = m->fb.zones[j].time = m->fb.zones[j].reverse_time =
+				m->fb.zones[j].hook_time = m->fb.zones[j].rj_time = m->fb.zones[j].time = m->fb.zones[j].reverse_time =
 						m->fb.zones[j].from_time = 1000000;
-				m->fb.zones[j].marker_rj = m->fb.zones[j].marker = m->fb.zones[j].reverse_marker =
+				m->fb.zones[j].marker_hook = m->fb.zones[j].marker_rj = m->fb.zones[j].marker = m->fb.zones[j].reverse_marker =
 						dropper;
 			}
 
@@ -733,7 +802,7 @@ void InitialiseMarkerRoutes(void)
 		{
 			if (m->fb.S_ != j)
 			{
-				m->fb.subzones[j].rj_time = m->fb.subzones[j].time = 1000000;
+				m->fb.subzones[j].hook_time = m->fb.subzones[j].rj_time = m->fb.subzones[j].time = 1000000;
 			}
 		}
 	}

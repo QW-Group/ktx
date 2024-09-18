@@ -290,6 +290,16 @@ qbool EnemyDefenceless(gedict_t *self)
 	return false;
 }
 
+qbool EnemyHasFlag(gedict_t* self)
+{
+	gedict_t* enemy = &g_edicts[self->s.v.enemy];
+	if (self->s.v.enemy == 0)
+	{
+		return false;
+	}
+	return enemy->ctf_flag & CTF_FLAG;
+}
+
 gedict_t* FirstZoneMarker(int zone)
 {
 	return zone_head[zone - 1];

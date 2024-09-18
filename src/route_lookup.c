@@ -11,9 +11,13 @@
 #include "g_local.h"
 
 float SubZoneArrivalTime(float zone_time, gedict_t *middle_marker, gedict_t *from_marker,
-							qbool rl_routes)
+							qbool rl_routes, qbool hook_routes)
 {
-	if (rl_routes)
+	if (hook_routes)
+	{
+		return (zone_time + middle_marker->fb.subzones[from_marker->fb.S_].hook_time);
+	}
+	else if (rl_routes)
 	{
 		return (zone_time + middle_marker->fb.subzones[from_marker->fb.S_].rj_time);
 	}
@@ -46,7 +50,7 @@ float SightFromTime(gedict_t *from_marker, gedict_t *to_marker)
 			to_marker->fb.zones[from_marker->fb.Z_ - 1].sight_from_time : 0.0f);
 }
 
-void ZoneMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_normal, qbool rl_jump_routes)
+void ZoneMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_normal, qbool rl_jump_routes, qbool hook_routes)
 {
 	fb_zone_t *zone;
 
@@ -68,6 +72,9 @@ void ZoneMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_normal, q
 	{
 		middle_marker = rl_jump_routes ? zone->marker_rj : zone->marker;
 		zone_time = rl_jump_routes ? zone->rj_time : zone->time;
+
+		middle_marker = hook_routes ? zone->marker_hook : zone->marker;
+		zone_time = hook_routes ? zone->hook_time : zone->time;
 	}
 	else
 	{
@@ -77,7 +84,7 @@ void ZoneMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_normal, q
 }
 
 gedict_t* ZonePathMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_normal,
-							qbool rl_jump_routes)
+							qbool rl_jump_routes, qbool hook_routes)
 {
 	if ((from_marker == NULL) || (to_marker == NULL) || (to_marker->fb.Z_ == 0))
 	{
@@ -89,6 +96,11 @@ gedict_t* ZonePathMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_
 		if (rl_jump_routes)
 		{
 			return from_marker->fb.zones[to_marker->fb.Z_ - 1].next_rj;
+		}
+
+		if (hook_routes)
+		{
+			return from_marker->fb.zones[to_marker->fb.Z_ - 1].next_hook;
 		}
 
 		return from_marker->fb.zones[to_marker->fb.Z_ - 1].next;
@@ -133,7 +145,7 @@ gedict_t* SightMarker(gedict_t *from_marker, gedict_t *to_marker, float max_dist
 				if (g_globalvars.trace_fraction == 1)
 				{
 					// 
-					traveltime = SubZoneArrivalTime(zone_time, middle_marker, marker_, false);
+					traveltime = SubZoneArrivalTime(zone_time, middle_marker, marker_, false, false);
 					if (look_traveltime > traveltime)
 					{
 						// Teleports don't count

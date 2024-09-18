@@ -52,6 +52,8 @@
 #define FB_CVAR_COMBATJUMP_CHANCE "k_fbskill_combatjump"
 #define FB_CVAR_MISSILEDODGE_TIME "k_fbskill_missiledodge"
 
+#define FB_CVAR_CTF_ROLE "k_fbskill_ctf_role"
+
 static float RangeOverSkill(int skill_level, float minimum, float maximum)
 {
 	float skill = skill_level * 1.0f / (MAX_FROGBOT_SKILL - MIN_FROGBOT_SKILL);
@@ -145,6 +147,8 @@ void RegisterSkillVariables(void)
 	RegisterCvar(FB_CVAR_COMBATJUMP_CHANCE);
 	RegisterCvar(FB_CVAR_MISSILEDODGE_TIME);
 
+	RegisterCvar(FB_CVAR_CTF_ROLE);
+
 	RegisterCvar(FB_CVAR_DISTANCEERROR);
 	RegisterCvar(FB_CVAR_PAIN_VOLATILITY_INCREASE);
 	RegisterCvar(FB_CVAR_SELF_MIDAIR_VOLATILITY_INCREASE);
@@ -208,6 +212,14 @@ qbool SetAttributesBasedOnSkill(int skill)
 	cvar_fset(FB_CVAR_MOVEMENT_WIGGLEFRAMES, RangeOverSkill(skill, 30, 20));
 	cvar_fset(FB_CVAR_COMBATJUMP_CHANCE, RangeOverSkill(skill, 0.03f, 0.1f));
 	cvar_fset(FB_CVAR_MISSILEDODGE_TIME, RangeOverSkill(skill, 1.0f, 0.5f));
+
+	// CTF skill
+	if (isCTF())
+	{
+		// Must have much lookahead time in CTF to be able to reach flags etc. Is variation even needed?
+		cvar_fset(FB_CVAR_LOOKAHEADTIME, RangeOverSkill(skill, 40.0f, 50.0f));
+		cvar_fset(FB_CVAR_CTF_ROLE, (int)CountBots() % 3);
+	}
 
 	// Customise
 	{
@@ -292,14 +304,21 @@ void SetAttribs(gedict_t *self, qbool customised)
 
 char* BotNameEnemy(int botNumber)
 {
-	char *names[] =
+	char* names[] =
 		{ ": Timber", ": Sujoy", ": Nightwing", ": Cenobite", ": Thresh", ": Frick", ": Unholy",
-				": Reptile", ": Nikodemus", ": Paralyzer", ": Xenon", ": Spice"
-						": Kornelia", ": Rix", ": Batch", ": Gollum" };
+			": Reptile", ": Nikodemus", ": Paralyzer", ": Xenon", ": Spice"
+					": Kornelia", ": Rix", ": Batch", ": Gollum" };
+
+	char *ctf_names[] = { ": Hippo", ": Velokitty", ": Shiny", ": Zagg" };
+
 	char *custom_name = cvar_string(va("k_fb_name_enemy_%d", botNumber));
 
 	if (strnull(custom_name))
 	{
+		if (isCTF())
+		{
+			return ctf_names[(int)bound(0, botNumber, sizeof(ctf_names) / sizeof(ctf_names[0]) - 1)];
+		}
 		return names[(int)bound(0, botNumber, sizeof(names) / sizeof(names[0]) - 1)];
 	}
 
@@ -308,14 +327,21 @@ char* BotNameEnemy(int botNumber)
 
 char* BotNameFriendly(int botNumber)
 {
-	char *names[] =
+	char* names[] =
 		{ "> MrJustice", "> DanJ", "> Gunner", "> Tele", "> Jakey", "> Parrais", "> Thurg",
-				"> Kool", "> Zaphod", "> Dreamer", "> Mandrixx", "> Skill5", "> Vid", "> Soul99",
-				"> Jon", "> Gaz" };
+			"> Kool", "> Zaphod", "> Dreamer", "> Mandrixx", "> Skill5", "> Vid", "> Soul99",
+			"> Jon", "> Gaz" };
+
+	char *ctf_names[] = { "> Micro", "> Elfeo", "> Malice", "> Killton" };
+
 	char *custom_name = cvar_string(va("k_fb_name_team_%d", botNumber));
 
 	if (strnull(custom_name))
 	{
+		if (isCTF())
+		{
+			return ctf_names[(int)bound(0, botNumber, sizeof(ctf_names) / sizeof(ctf_names[0]) - 1)];
+		}
 		return names[(int)bound(0, botNumber, sizeof(names) / sizeof(names[0]) - 1)];
 	}
 
@@ -324,14 +350,22 @@ char* BotNameFriendly(int botNumber)
 
 char* BotNameGeneric(int botNumber)
 {
-	char *names[] =
+	char* names[] =
 		{ "/ bro", "/ goldenboy", "/ tincan", "/ grue", "/ dizzy", "/ daisy", "/ denzil", "/ dora",
-				"/ shortie", "/ machina", "/ gudgie", "/ scoosh", "/ frazzle", "/ pop", "/ junk",
-				"/ overflow" };
+			"/ shortie", "/ machina", "/ gudgie", "/ scoosh", "/ frazzle", "/ pop", "/ junk",
+			"/ overflow" };
+
+	char *ctf_names[] =
+		{ "/ Hippo", "/ Velokitty", "/ Shiny", "/ Zagg", "/ Micro", "/ Elfeo", "/ Malice", "/ Killton" };
+
 	char *custom_name = cvar_string(va("k_fb_name_%d", botNumber));
 
 	if (strnull(custom_name))
 	{
+		if (isCTF())
+		{
+			return ctf_names[(int)bound(0, botNumber, sizeof(ctf_names) / sizeof(ctf_names[0]) - 1)];
+		}
 		return names[(int)bound(0, botNumber, sizeof(names) / sizeof(names[0]) - 1)];
 	}
 
