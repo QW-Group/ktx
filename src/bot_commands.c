@@ -313,7 +313,7 @@ void FrogbotsAddbot(int skill_level, const char *specificteam, qbool error_messa
 				bottomColor = tot_mode_enabled() ? 12 : i_rnd(0, 13);
 			}
 
-			entity = trap_AddBot(bots[i].name, bottomColor, topColor, "base", skill_level);
+			entity = trap_AddBot(bots[i].name, bottomColor, topColor, "base");
 
 			if (entity == 0)
 			{
