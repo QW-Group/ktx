@@ -4439,7 +4439,6 @@ const char tot_um_init[] =
 	"k_spw 1\n"
 	"k_tot_mode 1\n"
 	"maxclients 9\n"
-	"sv_antilag 2\n"
 	"teamplay 0\n"
 	"timelimit 5\n"
 ;
