@@ -2132,6 +2132,31 @@ void PutClientInServer(void)
 			// Red armor + LG
 			items = IT_LIGHTNING | IT_ARMOR3;
 		}
+		else if (tot_mode_enabled())
+		{
+			self->s.v.ammo_nails = 255;
+			self->s.v.ammo_shells = 255;
+			self->s.v.ammo_rockets = 255;
+			self->s.v.ammo_cells = 255;
+
+			self->s.v.armorvalue = self->isBot ? 0 : 200;
+			self->s.v.armortype = self->isBot ? 0 : 0.8;
+			self->s.v.health = self->isBot ? FrogbotHealth() : 250;
+
+			items = self->s.v.items;
+			items |= IT_NAILGUN;
+			items |= IT_SUPER_NAILGUN;
+			items |= IT_SUPER_SHOTGUN;
+			items |= IT_ROCKET_LAUNCHER;
+			items |= IT_GRENADE_LAUNCHER;
+
+			if (streq(mapname, "dm3") || streq(mapname, "dm4"))
+				items |= IT_LIGHTNING;
+
+			items &= ~( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3);
+			if (!self->isBot)
+				items |= IT_ARMOR3;
+		}
 		else
 		{
 			self->s.v.ammo_nails = 255;
@@ -3854,7 +3879,7 @@ void CheckPowerups(void)
 		{
 			if (self->super_time == 1)
 			{
-				if (deathmatch == 4)
+				if (deathmatch == 4 && !tot_mode_enabled())
 				{
 					G_sprint(self, PRINT_HIGH, "OctaPower is wearing off\n");
 				}
@@ -3880,7 +3905,7 @@ void CheckPowerups(void)
 			self->s.v.items -= IT_QUAD;
 			if (!k_practice) // #practice mode#
 			{
-				if (deathmatch == 4)
+				if (deathmatch == 4 && !tot_mode_enabled())
 				{
 					self->s.v.ammo_cells = 255;
 					self->s.v.armorvalue = 1;

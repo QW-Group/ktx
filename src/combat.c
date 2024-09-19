@@ -526,7 +526,9 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 	if ((attacker->super_damage_finished > g_globalvars.time) && strneq(inflictor->classname, "door")
 			&& (dtSTOMP != targ->deathtype) && !midair)
 	{
-		damage *= (deathmatch == 4 ? 8 : 4); // in dmm4 quad is octa actually
+		// in dmm4 quad is octa actually, unless tot_mode_enabled(),
+		// then it's possible to set custom multiplier
+		damage *= (deathmatch != 4 ? 4 : tot_mode_enabled() ? FrogbotQuadMultiplier() : 8);
 	}
 
 	// ctf strength rune

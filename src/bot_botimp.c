@@ -328,11 +328,19 @@ char* BotNameGeneric(int botNumber)
 		{ "/ bro", "/ goldenboy", "/ tincan", "/ grue", "/ dizzy", "/ daisy", "/ denzil", "/ dora",
 				"/ shortie", "/ machina", "/ gudgie", "/ scoosh", "/ frazzle", "/ pop", "/ junk",
 				"/ overflow" };
+	char *hf_names[] =
+		{
+			"mutilator", "drejfus", "griffin", "heddan", "legio", "wigorf", "madmax",
+			"mrlame", "aptiva", "nepra", "nikke", "parasite", "rushing",
+			"lipton", "xorcist" };
+
 	char *custom_name = cvar_string(va("k_fb_name_%d", botNumber));
 
 	if (strnull(custom_name))
 	{
-		return names[(int)bound(0, botNumber, sizeof(names) / sizeof(names[0]) - 1)];
+		return tot_mode_enabled()
+			? hf_names[(int)bound(0, botNumber, sizeof(hf_names) / sizeof(hf_names[0]) - 1)]
+			: names[(int)bound(0, botNumber, sizeof(names) / sizeof(names[0]) - 1)];
 	}
 
 	return custom_name;

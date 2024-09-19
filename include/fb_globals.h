@@ -363,6 +363,10 @@ void BotsBackpackTouchedNonPlayer(gedict_t *backpack, gedict_t *entity);
 void BotsMatchStart(void);
 void BotsAssignTeamFlags(void);
 qbool HasWeapon(gedict_t *player, int weapon);
+int FrogbotSkillLevel(void);
+int FrogbotHealth(void);
+int FrogbotWeapon(void);
+int FrogbotQuadMultiplier(void);
 
 // botthink.qc
 void SetMarker(gedict_t *client, gedict_t *marker);
@@ -389,15 +393,19 @@ void RunRandomTrials(float min, float max, float mult);
 // editor
 qbool HasSavedMarker(void);
 
-#define FB_CVAR_ENABLED       "k_fb_enabled"
-#define FB_CVAR_OPTIONS       "k_fb_options"
-#define FB_CVAR_AUTOADD_LIMIT "k_fb_autoadd_limit"
-#define FB_CVAR_AUTOREMOVE_AT "k_fb_autoremove_at"
-#define FB_CVAR_AUTO_DELAY    "k_fb_auto_delay"
-#define FB_CVAR_SKILL         "k_fb_skill"
-#define FB_CVAR_DEBUG         "k_fb_debug"
-#define FB_CVAR_ADMIN_ONLY    "k_fb_admin_only"
-#define FB_CVAR_FREEZE_PREWAR "k_fb_freeze_prewar"
+#define FB_CVAR_ENABLED         "k_fb_enabled"
+#define FB_CVAR_OPTIONS         "k_fb_options"
+#define FB_CVAR_AUTOADD_LIMIT   "k_fb_autoadd_limit"
+#define FB_CVAR_AUTOREMOVE_AT   "k_fb_autoremove_at"
+#define FB_CVAR_AUTO_DELAY      "k_fb_auto_delay"
+#define FB_CVAR_SKILL           "k_fb_skill"
+#define FB_CVAR_DEBUG           "k_fb_debug"
+#define FB_CVAR_ADMIN_ONLY      "k_fb_admin_only"
+#define FB_CVAR_FREEZE_PREWAR   "k_fb_freeze_prewar"
+#define FB_CVAR_HEALTH          "k_fb_health"
+#define FB_CVAR_WEAPON          "k_fb_weapon"
+#define FB_CVAR_BREAK_ON_DEATH  "k_fb_break_on_death"
+#define FB_CVAR_QUAD_MULTIPLIER "k_fb_quad_multiplier"
 
 void BotsFireLogic(void);
 
