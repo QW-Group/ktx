@@ -1249,7 +1249,7 @@ gedict_t* SelectSpawnPoint(char *spawnname)
 	gedict_t *spot = Sub_SelectSpawnPoint(spawnname);
 
 	// k_spw 4 feature, recheck spawn poit second time if we select same spawn point in row, so it low chance to get same spawn point
-	if ((match_in_progress == 2) && (k_lastspawn == spot) && (cvar("k_spw") == 4))
+	if ((match_in_progress == 2) && (k_lastspawn == spot) && (cvar("k_spw") == 4 || cvar("k_clan_arena") == 2))
 	{
 		self->k_lastspawn = k_lastspawn;
 		spot = Sub_SelectSpawnPoint(spawnname);
