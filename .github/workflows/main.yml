@@ -1,6 +1,14 @@
 name: main
 
-on: [ push, pull_request, workflow_dispatch ]
+on:
+  push:
+    # Only build branches on push, tags will be handled by 'release' job.
+    branches:
+    - '**'
+  pull_request:
+  workflow_dispatch:
+  release:
+    types: [created]
 
 jobs:
   build:
