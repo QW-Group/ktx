@@ -8159,6 +8159,7 @@ void fcheck(void)
 {
 	char arg_x[1024];
 	int i;
+	gedict_t* p;
 
 	if (match_in_progress)
 	{
@@ -8184,14 +8185,39 @@ void fcheck(void)
 
 	if (!is_real_adm(self))
 	{
-		if (strneq(arg_x, "f_version") && strneq(arg_x, "f_modified") && strneq(arg_x, "f_server"))
+		if (strneq(arg_x, "f_version") && strneq(arg_x, "f_modified") && strneq(arg_x, "f_server") && strneq(arg_x, "f_movement"))
 		{
 			G_sprint(self, 2, "You are not allowed to check \020%s\021\n"
-						"available checks are: f_version, f_modified and f_server\n",
+						"available checks are: f_version, f_modified, f_server and f_movement\n",
 						arg_x);
 
 			return;
 		}
+	}
+
+	if (streq(arg_x, "f_movement"))
+	{
+		G_bprint(2, "%s is checking \020%s\021\n", self->netname, arg_x);
+
+		for (p = world; (p = find_client(p));)
+		{
+			if ((p->ct == ctPlayer) && (!p->isBot))
+			{
+				if (p->socdDetected > 0)
+				{
+					G_bprint(2, "%s: %s:%.1f%% (%d/%d). SOCD movement assistance detected!\n", p->netname, redtext("Perfect strafes"),
+						p->totalStrafeChangeCount > 0 ? 100.0 * p->totalPerfectStrafeCount / p->totalStrafeChangeCount : 0.0,
+						p->totalPerfectStrafeCount, p->totalStrafeChangeCount);
+				}
+				else
+				{
+					G_bprint(2, "%s: %s:%.1f%% (%d/%d)\n", p->netname, redtext("Perfect strafes"),
+						p->totalStrafeChangeCount > 0 ? 100.0 * p->totalPerfectStrafeCount / p->totalStrafeChangeCount : 0.0,
+						p->totalPerfectStrafeCount, p->totalStrafeChangeCount);
+				}
+			}
+		}
+		return;
 	}
 
 	for (i = 1; i <= MAX_CLIENTS; i++)
