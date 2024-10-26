@@ -4427,6 +4427,7 @@ const char tot_um_init[] =
 	"dq 0\n"
 	"dr 0\n"
 	"k_bzk 0\n"
+	"k_disallow_weapons 80\n"
 	"k_exttime 0\n"
 	"k_fb_enabled 1\n"
 	"k_fb_quad_multiplier 8\n"
