@@ -181,9 +181,17 @@ else()
 endif()
 
 
-# Build QVM tools.
-# EXCLUDE_FROM_ALL tells to not build tools if they does not required, for example if you build native library only.
-add_subdirectory(tools/q3asm EXCLUDE_FROM_ALL)
+# Build QVM tools if needed.
+find_program(Q3ASM q3asm)
+if(Q3ASM)
+	message(STATUS "q3asm found at ${Q3ASM}")
+	set(QVM_LINKER "${Q3ASM}")
+else()
+	message(STATUS "q3asm not found, compiling bundled q3asm.")
+	# EXCLUDE_FROM_ALL tells to not build tools if they does not required, for example if you build native library only.
+	add_subdirectory(tools/q3asm EXCLUDE_FROM_ALL)
+	set(QVM_LINKER "q3asm")
+endif()
 
 # Set up vars for QVM library.
 set(VM_DIR "vm")
@@ -191,7 +199,6 @@ add_custom_target(vmdir
 	COMMAND ${CMAKE_COMMAND} -E make_directory ${VM_DIR}
 	)
 set(QVM_COMPILER "q3lcc")
-set(QVM_LINKER "q3asm")
 set(QVM_C_FLAGS -DQ3_VM -S -Wf-target=bytecode -Wf-g)
 if(BOT_SUPPORT)
 	set(QVM_C_FLAGS ${QVM_C_FLAGS} -DBOT_SUPPORT=1)
