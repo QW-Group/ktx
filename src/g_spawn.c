@@ -632,14 +632,7 @@ static void G_ParseField(const char *key, const char *value, gedict_t *ent)
 					break;
 
 				case F_INT:
-					if (f->ofs >= 0)
-					{
-						*(int*)(b + f->ofs) = atoi(value);
-					}
-					else
-					{
-						trap_SetExtField_i(ent, key, atoi(value));
-					}
+					*(int*)(b + f->ofs) = atoi(value);
 					break;
 
 				case F_FLOAT:
@@ -647,9 +640,9 @@ static void G_ParseField(const char *key, const char *value, gedict_t *ent)
 					{
 						*(float*)(b + f->ofs) = atof(value);
 					}
-					else
+					else if (!strcmp(f->name, "alpha"))
 					{
-						trap_SetExtField_f(ent, key, atof(value));
+						ExtFieldSetAlpha(ent, atof(value));
 					}
 					break;
 

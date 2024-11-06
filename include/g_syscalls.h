@@ -144,14 +144,16 @@ intptr_t trap_movetogoal(float dist);
 void trap_VisibleTo(intptr_t viewer, intptr_t first, intptr_t len, byte *visible);
 
 // Raw calls, use _i and _f helpers instead.
-void trap_SetExtField(gedict_t *ed, const char *fieldname, int val);
+void trap_SetExtField(gedict_t *ed, const char *fieldname, intptr_t val);
 int trap_GetExtField(gedict_t *ed, const char *fieldname);
+intptr_t trap_MapExtFieldPtr(const char *fieldname);
+intptr_t trap_SetExtFieldPtr(gedict_t *ed, intptr_t fieldref, intptr_t *data, intptr_t size);
+intptr_t trap_GetExtFieldPtr(gedict_t *ed, intptr_t fieldref, intptr_t *data, intptr_t size);
 
 // Checks for server support before call
-void trap_SetExtField_i(gedict_t *ed, const char *fieldname, int val);
-void trap_SetExtField_f(gedict_t *ed, const char *fieldname, float val);
-int trap_GetExtField_i(gedict_t *ed, const char *fieldname);
-float trap_GetExtField_f(gedict_t *ed, const char *fieldname);
+void ExtFieldSetAlpha(gedict_t *ed, float alpha);
+float ExtFieldGetAlpha(gedict_t *ed);
+void ExtFieldSetColorMod(gedict_t *ed, float r, float g, float b);
 
 void trap_changelevelHub(const char *name, const char *entityname, const char *startspot);
 int trap_URI_Query(const char *uri, int vmentry/*GAME_...*/, void *cbcontext, const char *mimetype, const char *data, size_t datasize);

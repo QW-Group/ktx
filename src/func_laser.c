@@ -6,11 +6,11 @@
 static void laser_helper_think(void)
 {
 	gedict_t *owner = PROG_TO_EDICT(self->s.v.owner);
-	float alpha = trap_GetExtField_f(self, "alpha");
+	float alpha = ExtFieldGetAlpha(self);
 
 	if (!((int) owner->s.v.spawnflags & START_OFF))
 	{
-		trap_SetExtField_f(self, "alpha", alpha * 0.8f + alpha * g_random() * 0.4f);
+		ExtFieldSetAlpha(self, alpha * 0.8f + alpha * g_random() * 0.4f);
 	}
 
 	self->s.v.nextthink = g_globalvars.time + 0.05f;
@@ -92,12 +92,12 @@ void SP_func_laser(void)
 		self->s.v.movetype = MOVETYPE_NONE;
 	}
 
-	alpha = trap_GetExtField_f(self, "alpha");
+	alpha = ExtFieldGetAlpha(self);
 	if (!alpha)
 	{
 		alpha = 0.5f;
 	}
-	trap_SetExtField_f(self, "alpha", alpha);
+	ExtFieldSetAlpha(self, alpha);
 
 	if (!self->dmg)
 	{
@@ -148,7 +148,7 @@ void SP_func_laser(void)
 	helper->s.v.owner = EDICT_TO_PROG(self);
 	helper->s.v.nextthink = g_globalvars.time + 2;
 
-	trap_SetExtField_f(helper, "alpha", alpha);
+	ExtFieldSetAlpha(helper, alpha);
 
 	helper->think = (func_t) init_laser_noise;
 }
