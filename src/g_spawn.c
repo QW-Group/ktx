@@ -178,6 +178,8 @@ field_t fields[] =
 
 // trigger_heal
 	{ "heal_amount", 				FOFS(healamount), 					F_FLOAT },
+// Colorized entities in map
+	{ "colormod" 					-1, 								F_VECTOR },
 	{ NULL }
 };
 
@@ -626,9 +628,16 @@ static void G_ParseField(const char *key, const char *value, gedict_t *ent)
 
 				case F_VECTOR:
 					sscanf(value, "%f %f %f", &vec[0], &vec[1], &vec[2]);
-					((float*)(b + f->ofs))[0] = vec[0];
-					((float*)(b + f->ofs))[1] = vec[1];
-					((float*)(b + f->ofs))[2] = vec[2];
+					if (f->ofs >= 0)
+					{
+						((float*)(b + f->ofs))[0] = vec[0];
+						((float*)(b + f->ofs))[1] = vec[1];
+						((float*)(b + f->ofs))[2] = vec[2];
+					}
+					else if (!strcmp(f->name, "colormod"))
+					{
+						ExtFieldSetColorMod(ent, vec[0], vec[1], vec[2]);
+					}
 					break;
 
 				case F_INT:

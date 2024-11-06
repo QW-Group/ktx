@@ -8,6 +8,7 @@ typedef union fi_s
 } fi_t;
 
 static unsigned int field_ref_alpha = 0;
+static unsigned int field_ref_colormod = 0;
 
 void ExtFieldSetAlpha(gedict_t *ed, float alpha)
 {
@@ -53,4 +54,24 @@ float ExtFieldGetAlpha(gedict_t *ed)
 		G_bprint(PRINT_HIGH, "alpha needs GetExtField or MapExtFieldPtr and GetExtFieldPtr support in server\n");
 	}
 	return tmp._float;
+}
+
+void ExtFieldSetColorMod(gedict_t *ed, float r, float g, float b)
+{
+	if (!field_ref_colormod && HAVEEXTENSION(G_MAPEXTFIELDPTR) && HAVEEXTENSION(G_SETEXTFIELDPTR))
+	{
+		field_ref_colormod = trap_MapExtFieldPtr("colormod");
+	}
+	if (field_ref_colormod)
+	{
+		float rgb[3];
+		rgb[0] = max(0.0f, r);
+		rgb[1] = max(0.0f, g);
+		rgb[2] = max(0.0f, b);
+		trap_SetExtFieldPtr(ed, field_ref_colormod, (void*)&rgb, sizeof(rgb));
+	}
+	else if (cvar("developer"))
+	{
+		G_bprint(PRINT_HIGH, "colormod needs MapExtFieldPtr and SetExtFieldPtr support in server\n");
+	}
 }
