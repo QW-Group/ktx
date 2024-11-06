@@ -2868,20 +2868,69 @@ void DropBackpack(void)
  ===============================================================================
  */
 
+char *Spawn_GetModel(void)
+{
+	// Can't rely on cvar_string response for setmodel/precache_model so caching here
+	static char spawn_model[128];
+	if (!spawn_model[0])
+	{
+		char *mdl = cvar_string("k_spm_custom_model");
+		if (!strcmp(mdl, "0") || strlen(mdl) == 0)
+		{
+			strlcpy(spawn_model, "progs/w_g_key.mdl", sizeof(spawn_model));
+		}
+		else if (!strcmp(mdl, "1"))
+		{
+			strlcpy(spawn_model, "progs/wizard.mdl", sizeof(spawn_model));
+		}
+		else
+		{
+			strlcpy(spawn_model, mdl, sizeof(spawn_model));
+		}
+	}
+	return spawn_model;
+}
+
 gedict_t* Spawn_OnePoint(gedict_t *spawn_point, vec3_t org, int effects)
 {
+	unsigned int nargs;
+	char *color_tint;
 	gedict_t *p;
 
 	p = spawn();
 	p->s.v.flags = FL_ITEM;
 	p->s.v.solid = SOLID_NOT;
 	p->s.v.movetype = MOVETYPE_NONE;
-	setmodel(p, cvar("k_spm_custom_model") ? "progs/wizard.mdl" : "progs/w_g_key.mdl");
+
+	setmodel(p, Spawn_GetModel());
+
 	p->netname = "Spawn Point";
 	p->classname = "spawnpoint";
 	p->k_lastspawn = spawn_point;
 
 	p->s.v.effects = (int)p->s.v.effects | effects;
+
+	color_tint = cvar_string("k_spm_color_rgba");
+
+	trap_CmdTokenize(color_tint);
+	nargs = trap_CmdArgc();
+	if (nargs >= 3) {
+		char argument[128];
+		float r, g, b;
+
+		trap_CmdArgv(0, argument, sizeof(argument));
+		r = max(0.0f, atof(argument));
+		trap_CmdArgv(1, argument, sizeof(argument));
+		g = max(0.0f, atof(argument));
+		trap_CmdArgv(2, argument, sizeof(argument));
+		b = max(0.0f, atof(argument));
+		ExtFieldSetColorMod(p, r, g, b);
+
+		if (nargs == 4) {
+			trap_CmdArgv(3, argument, sizeof(argument));
+			ExtFieldSetAlpha(p, atof(argument));
+		}
+	}
 
 	// store references for changing selections in hoonymode
 	spawn_point->wizard = p;
