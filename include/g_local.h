@@ -218,6 +218,9 @@ enum
 	G_POINTPARTICLES,
 	G_CLIENTSTAT,
 	G_POINTERSTAT,
+	G_MAPEXTFIELDPTR,
+	G_SETEXTFIELDPTR,
+	G_GETEXTFIELDPTR,
 	G_EXTENSIONS_LAST
 };
 extern qbool haveextensiontab[G_EXTENSIONS_LAST-G_EXTENSIONS_FIRST];
@@ -519,6 +522,7 @@ void PlayerPostThink(void);
 qbool PlayerCanPause(gedict_t *p);
 void SuperDamageSound(void);
 
+char *Spawn_GetModel(void);
 gedict_t* SelectSpawnPoint(char *spawnname);
 
 #define         WP_STATS_UPDATE (0.3f)

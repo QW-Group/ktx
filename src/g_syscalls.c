@@ -466,7 +466,22 @@ void trap_VisibleTo(intptr_t viewer, intptr_t first, intptr_t len, byte *visible
 	syscall(G_VISIBLETO, viewer, first, len, (intptr_t) visible);
 }
 
-void trap_SetExtField(gedict_t *ed, const char *fieldname, int val)
+intptr_t trap_MapExtFieldPtr(const char *fieldname)
+{
+	return syscall(G_MAPEXTFIELDPTR, (intptr_t)fieldname);
+}
+
+intptr_t trap_SetExtFieldPtr(gedict_t *ed, intptr_t fieldref, intptr_t *data, intptr_t size)
+{
+	return syscall(G_SETEXTFIELDPTR, (intptr_t)ed, fieldref, (intptr_t)data, size);
+}
+
+intptr_t trap_GetExtFieldPtr(gedict_t *ed, intptr_t fieldref, intptr_t *data, intptr_t size)
+{
+	return syscall(G_GETEXTFIELDPTR, (intptr_t)ed, fieldref, (intptr_t)data, size);
+}
+
+void trap_SetExtField(gedict_t *ed, const char *fieldname, intptr_t val)
 {
 	syscall(G_SETEXTFIELD, (intptr_t)ed, (intptr_t)fieldname, val);
 }

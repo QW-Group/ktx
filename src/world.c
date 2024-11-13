@@ -330,10 +330,7 @@ void SP_worldspawn(void)
 
 	trap_precache_sound("ambience/windfly.wav");
 
-	if (cvar("k_spm_custom_model"))
-	{
-		trap_precache_model("progs/spawn.mdl");
-	}
+	trap_precache_model(Spawn_GetModel());
 
 	trap_precache_model("progs/player.mdl");
 
@@ -869,6 +866,7 @@ void FirstFrame(void)
 	RegisterCvarEx("k_spm_show", "1");
 	RegisterCvarEx("k_spm_glow", "0");
 	RegisterCvarEx("k_spm_custom_model", "0");
+	RegisterCvarEx("k_spm_color_rgba", "1.0 1.0 1.0 1.0");
 	RegisterCvar("k_entityfile");
 // { hoonymode
 	RegisterCvarEx("k_hoonymode", "0");
