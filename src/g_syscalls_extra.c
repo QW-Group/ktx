@@ -75,3 +75,13 @@ void ExtFieldSetColorMod(gedict_t *ed, float r, float g, float b)
 		G_bprint(PRINT_HIGH, "colormod needs MapExtFieldPtr and SetExtFieldPtr support in server\n");
 	}
 }
+
+void SetSendNeeded(gedict_t *ed, int sendflags, int unicast)
+{
+	if (!HAVEEXTENSION(G_SETSENDNEEDED))
+	{
+		G_bprint(PRINT_HIGH, "SetSendNeeded needs support in server\n");
+		return;
+	}
+	trap_SetSendNeeded(NUM_FOR_EDICT(ed), sendflags, unicast);
+}

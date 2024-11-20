@@ -529,3 +529,8 @@ int trap_pointerstat(int statidx, int stattype, void *offset)
 {
 	return syscall(G_POINTERSTAT, statidx, stattype, (intptr_t)offset);
 }
+
+intptr_t trap_SetSendNeeded(intptr_t subject, intptr_t flags, intptr_t to)
+{
+	return syscall(G_SETSENDNEEDED, subject, flags, to);
+}
