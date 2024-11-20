@@ -394,6 +394,7 @@ char* Enabled(float f);
 char* Allows(float f);
 char* Allowed(float f);
 char* OnOff(float f);
+char* AntilagModeString(float f);
 
 int get_scores1(void);
 int get_scores2(void);

@@ -1854,6 +1854,16 @@ char* OnOff(float f)
 	return (f ? "on" : "off");
 }
 
+char* AntilagModeString(float f)
+{
+	char *new_antilag_string = "'0 - disabled'";
+	if (f == 1)
+		new_antilag_string = "'1 - KTX'";
+	else if (f == 2)
+		new_antilag_string = "'2 - MVDSV'";
+	return new_antilag_string;
+}
+
 // { some scores stuff
 
 // for team games
