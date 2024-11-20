@@ -9,6 +9,8 @@ typedef union fi_s
 
 static unsigned int field_ref_alpha = 0;
 static unsigned int field_ref_colormod = 0;
+static unsigned int field_ref_sendentity = 0;
+static unsigned int field_ref_pvsflags = 0;
 
 void ExtFieldSetAlpha(gedict_t *ed, float alpha)
 {
@@ -73,6 +75,52 @@ void ExtFieldSetColorMod(gedict_t *ed, float r, float g, float b)
 	else if (cvar("developer"))
 	{
 		G_bprint(PRINT_HIGH, "colormod needs MapExtFieldPtr and SetExtFieldPtr support in server\n");
+	}
+}
+
+void ExtFieldSetSendEntity(gedict_t *ed, func_t callback)
+{
+	if (!field_ref_sendentity && HAVEEXTENSION(G_MAPEXTFIELDPTR) && HAVEEXTENSION(G_SETEXTFIELDPTR))
+	{
+		field_ref_sendentity = trap_MapExtFieldPtr("SendEntity");
+	}
+	if (field_ref_sendentity)
+	{
+		int enable = 1;
+		trap_SetExtFieldPtr(ed, field_ref_sendentity, (void*)&enable, sizeof(int));
+		ed->SendEntity = callback; // invoked via GAME_EDICT_CSQCSEND
+
+	}
+	else if (HAVEEXTENSION(G_SETEXTFIELD))
+	{
+		trap_SetExtField(ed, "SendEntity", 1);
+		ed->SendEntity = callback; // invoked via GAME_EDICT_CSQCSEND
+	}
+	else if (cvar("developer"))
+	{
+		G_bprint(PRINT_HIGH, "SendEntity needs SetExtField or MapExtFieldPtr and SetExtFieldPtr support in server\n");
+	}
+}
+
+void ExtFieldSetPvsFlags(gedict_t *ed, float pvsflags)
+{
+	if (!field_ref_pvsflags && HAVEEXTENSION(G_MAPEXTFIELDPTR) && HAVEEXTENSION(G_SETEXTFIELDPTR))
+	{
+		field_ref_pvsflags = trap_MapExtFieldPtr("pvsflags");
+	}
+	if (field_ref_pvsflags)
+	{
+		trap_SetExtFieldPtr(ed, field_ref_pvsflags, (void*)&pvsflags, sizeof(float));
+	}
+	else if (HAVEEXTENSION(G_SETEXTFIELD))
+	{
+		fi_t tmp;
+		tmp._float = pvsflags;
+		trap_SetExtField(ed, "pvsflags", tmp._int);
+	}
+	else if (cvar("developer"))
+	{
+		G_bprint(PRINT_HIGH, "pvsflags needs SetExtField or MapExtFieldPtr and SetExtFieldPtr support in server\n");
 	}
 }
 
