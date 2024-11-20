@@ -330,6 +330,7 @@ void WriteEntity(int to, gedict_t *ed);
 void WriteByte(int to, int data);
 void WriteShort(int to, int data);
 void WriteLong(int to, int data);
+void WriteFloat(int to, float data);
 void WriteString(int to, char *data);
 void WriteAngle(int to, float data);
 void WriteCoord(int to, float data);
