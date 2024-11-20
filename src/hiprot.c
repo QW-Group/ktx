@@ -930,6 +930,8 @@ void SP_func_movewall(void)
 	self->think = (func_t) movewall_think;
 	self->s.v.nextthink = g_globalvars.time + 0.02f;
 	self->s.v.ltime = g_globalvars.time;
+
+	self->antilag_data = antilag_create_world(self);
 }
 
 /*QUAKED rotate_object (0 .5 .8) ?

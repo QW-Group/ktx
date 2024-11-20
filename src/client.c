@@ -1553,6 +1553,140 @@ qbool CanConnect(void)
 	return true;
 }
 
+qbool WeaponPrediction_SendEntity(int sendflags)
+{
+	self = PROG_TO_EDICT(self->s.v.owner);
+
+	if (self != other)
+	{
+		return false;
+	}
+
+	WriteByte(MSG_CSQC, EZCSQC_WEAPONINFO);
+	WriteByte(MSG_CSQC, sendflags);
+
+	if (sendflags & WEAPONINFO_INDEX)
+	{
+		WriteByte(MSG_CSQC, self->s.v.impulse);
+		WriteByte(MSG_CSQC, self->weapon_index);
+	}
+
+	if (sendflags & WEAPONINFO_AMMO_SHELLS)
+	{
+		WriteByte(MSG_CSQC, self->s.v.ammo_shells);
+	}
+
+	if (sendflags & WEAPONINFO_AMMO_NAILS)
+	{
+		WriteByte(MSG_CSQC, self->s.v.ammo_nails);
+	}
+
+	if (sendflags & WEAPONINFO_AMMO_ROCKETS)
+	{
+		WriteByte(MSG_CSQC, self->s.v.ammo_rockets);
+	}
+
+	if (sendflags & WEAPONINFO_AMMO_CELLS)
+	{
+		WriteByte(MSG_CSQC, self->s.v.ammo_cells);
+	}
+
+	if (sendflags & WEAPONINFO_ATTACK)
+	{
+		WriteFloat(MSG_CSQC, self->attack_finished);
+		WriteFloat(MSG_CSQC, self->client_nextthink);
+		WriteByte(MSG_CSQC, self->client_thinkindex);
+	}
+
+	if (sendflags & WEAPONINFO_TIMING)
+	{
+		WriteFloat(MSG_CSQC, self->client_time);
+		WriteByte(MSG_CSQC, self->s.v.weaponframe);
+	}
+
+	if (sendflags & WEAPONINFO_PRED_PING)
+	{
+		WriteByte(MSG_CSQC, self->client_predflags);
+		WriteByte(MSG_CSQC, self->client_ping);
+	}
+
+	return true;
+}
+
+void WeaponPrediction_MarkSendFlags(void)
+{
+	gedict_t *wep = self->weapon_pred;
+	int sendflags = WEAPONINFO_TIMING;
+
+	if (wep->s.v.impulse != self->s.v.impulse || wep->s.v.weapon != self->s.v.weapon)
+	{
+		sendflags |= WEAPONINFO_INDEX;
+		wep->s.v.impulse = self->s.v.impulse;
+		wep->s.v.weapon = self->s.v.weapon;
+	}
+
+	if (wep->s.v.ammo_shells != self->s.v.ammo_shells)
+	{
+		sendflags |= WEAPONINFO_AMMO_SHELLS;
+		wep->s.v.ammo_shells = self->s.v.ammo_shells;
+	}
+
+	if (wep->s.v.ammo_nails != self->s.v.ammo_nails)
+	{
+		sendflags |= WEAPONINFO_AMMO_NAILS;
+		wep->s.v.ammo_nails = self->s.v.ammo_nails;
+	}
+
+	if (wep->s.v.ammo_rockets != self->s.v.ammo_rockets)
+	{
+		sendflags |= WEAPONINFO_AMMO_ROCKETS;
+		wep->s.v.ammo_rockets = self->s.v.ammo_rockets;
+	}
+
+	if (wep->s.v.ammo_cells != self->s.v.ammo_cells)
+	{
+		sendflags |= WEAPONINFO_AMMO_CELLS;
+		wep->s.v.ammo_cells = self->s.v.ammo_cells;
+	}
+
+	if (wep->attack_finished != self->attack_finished || wep->client_think != self->client_think || wep->client_nextthink != self->client_nextthink)
+	{
+		sendflags |= WEAPONINFO_ATTACK;
+		wep->attack_finished = self->attack_finished;
+		wep->client_think = self->client_think;
+		wep->client_nextthink = self->client_nextthink;
+	}
+
+	if (wep->client_predflags != self->client_predflags || wep->client_ping != self->client_ping)
+	{
+		sendflags |= WEAPONINFO_PRED_PING;
+		wep->client_predflags = self->client_predflags;
+		wep->client_ping = self->client_ping;
+	}
+
+	SetSendNeeded(wep, sendflags, 0);
+}
+
+void WeaponPrediction_Cleanup(void)
+{
+	if (self->weapon_pred != NULL)
+	{
+		ent_remove(self->weapon_pred);
+		self->weapon_pred = NULL;
+	}
+}
+
+void WeaponPrediction_CreateEnt(void)
+{
+
+	gedict_t *wep_values = spawn();
+	wep_values->s.v.owner = EDICT_TO_PROG(self);
+	ExtFieldSetSendEntity(wep_values, (func_t)WeaponPrediction_SendEntity);
+	ExtFieldSetPvsFlags(wep_values, 3);
+	SetSendNeeded(wep_values, 0xFFFFFF, 0);
+	self->weapon_pred = wep_values;
+}
+
 ////////////////
 // GlobalParams:
 // time
@@ -1716,6 +1850,9 @@ void ClientConnect(void)
 
 	SendSpecInfo(NULL, self); // get all spectator info
 
+	self->antilag_data = antilag_create_player(self);
+	WeaponPrediction_CreateEnt();
+
 	MakeMOTD();
 
 #ifdef BOT_SUPPORT
@@ -1777,6 +1914,9 @@ void PutClientInServer(void)
 // brokenankle
 	self->brokenankle = 0;
 
+// antilag
+	antilag_clearstates(self->antilag_data); // clear antilag states, so we don't get shot at our pre-respawn location
+
 // ctf
 	self->on_hook = false;
 	self->hook_out = false;
@@ -1793,7 +1933,7 @@ void PutClientInServer(void)
 		self->s.v.weapon = W_BestWeapon();
 	W_SetCurrentAmmo();
 
-	self->attack_finished = g_globalvars.time;
+	self->attack_finished = self->client_time;
 	self->th_pain = player_pain;
 	self->th_die = PlayerDie;
 
@@ -2857,6 +2997,9 @@ void ClientDisconnect(void)
 
 	set_important_fields(self); // set classname == "" and etc
 
+	antilag_delete_player(self);
+	WeaponPrediction_Cleanup();
+
 // s: added conditional function call here
 	if (self->k_kicking)
 	{
@@ -3536,6 +3679,11 @@ void PlayerPreThink(void)
 		BackFromLag();
 	}
 
+	self->client_predflags = 0;
+	self->client_time += g_globalvars.frametime;
+	self->client_lastupdated = g_globalvars.time;
+	time_corrected = g_globalvars.time;
+
 	if (self->sc_stats && self->sc_stats_time && (self->sc_stats_time <= g_globalvars.time)
 			&& (match_in_progress != 1) && !isRACE())
 	{
@@ -3717,7 +3865,7 @@ void PlayerPreThink(void)
 		SetVector(self->s.v.velocity, 0, 0, 0);
 	}
 
-	if ((g_globalvars.time > self->attack_finished) && (self->s.v.currentammo == 0)
+	if ((self->client_time > self->attack_finished) && (self->s.v.currentammo == 0)
 			&& (self->s.v.weapon != IT_AXE) && (self->s.v.weapon != IT_HOOK))
 	{
 		self->s.v.weapon = W_BestWeapon();
@@ -4301,6 +4449,17 @@ void PlayerPostThink(void)
 		return;
 	}
 
+	if (self->client_nextthink && self->client_time >= self->client_nextthink)
+	{
+		float held_client_time = self->client_time;
+
+		self->client_time = self->client_nextthink;
+		self->client_nextthink = 0;
+		((void(*)(void))(self->client_think))();
+
+		self->client_time = held_client_time;
+	}
+
 //team
 
 // WaterMove function call moved here from PlayerPreThink to avoid
@@ -4326,6 +4485,47 @@ void PlayerPostThink(void)
 #endif
 
 	W_WeaponFrame();
+
+	// Antilag and Weapon Prediction
+
+	antilag_log(self, self->antilag_data);
+	if (cvar("sv_antilag") == 1)
+	{
+		self->client_ping = atof(ezinfokey(self, "ping"));
+		if (cvar("k_midair") && (self->super_damage_finished > g_globalvars.time - (self->client_ping)/1000.0f))
+		{
+			self->client_predflags = (int)self->client_predflags | PRDFL_MIDAIR;
+		}
+		self->client_ping = min(self->client_ping, ANTILAG_REWIND_MAXPROJECTILE * 1000.0f);
+	}
+	else
+	{
+		self->client_ping = 0;
+	}
+	if (cvar("k_instagib") && cvar("k_instagib_custom_models"))
+	{
+		self->client_predflags = (int)self->client_predflags | PRDFL_COILGUN;
+		if (cvar("k_instagib") == 3)
+		{
+			self->client_predflags = (int)self->client_predflags | PRDFL_MIDAIR;
+		}
+	}
+
+	// force weapon prediction off when neccesary
+	if (!readytostart())
+	{
+		self->client_predflags = PRDFL_FORCEOFF;
+	}
+	else if (!CA_can_fire(self))
+	{
+		self->client_predflags = PRDFL_FORCEOFF;
+	}
+	else if ((match_in_progress == 1) || !can_prewar(true))
+	{
+		self->client_predflags = PRDFL_FORCEOFF;
+	}
+
+	WeaponPrediction_MarkSendFlags();
 
 	race_player_post_think();
 

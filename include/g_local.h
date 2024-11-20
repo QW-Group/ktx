@@ -465,6 +465,31 @@ void visible_to(gedict_t *viewer, gedict_t *first, int len, byte *visible);
 // It retuns dots array filled with dots, amount of dots depends of how long cmd name and longest cmd name.
 char* make_dots(char *dots, size_t dots_len, int cmd_max_len, char *cmd);
 
+//     antilag.c
+//
+#define PRDFL_MIDAIR   1
+#define PRDFL_COILGUN  2
+#define PRDFL_FORCEOFF 255
+extern float   time_corrected;
+void                   WPredict_Initialize(void);
+qbool                  WeaponDefinition_SendEntity(int sendflags);
+void                   antilag_lagmove(antilag_t *data, float goal_time);
+void                   antilag_lagmove_all(gedict_t *e, float goal_time);
+void                   antilag_lagmove_all_hitscan(gedict_t *e);
+void                   antilag_lagmove_all_proj(gedict_t *owner, gedict_t *e);
+void                   antilag_lagmove_all_proj_bounce(gedict_t *owner, gedict_t *e);
+void                   antilag_platform_move(antilag_t *list, float ms);
+void                   antilag_unmove_all(void);
+void                   antilag_clearflags_all(void);
+int                            antilag_getseek(antilag_t *data, float ms);
+antilag_t              *antilag_create_player(gedict_t *e);
+antilag_t              *antilag_create_world(gedict_t *e);
+void                   antilag_delete_player(gedict_t *e);
+void                   antilag_delete_world(gedict_t *e);
+void                   antilag_clearstates(antilag_t *antilag);
+void                   antilag_addflags(gedict_t *e, antilag_t *antilag, byte flags);
+void                   antilag_log(gedict_t *e, antilag_t *antilag);
+
 //
 // subs.c
 void SUB_CalcMove(vec3_t tdest, float tspeed, void (*func)(void));
@@ -555,7 +580,7 @@ void SpawnMeatSpray(vec3_t org, vec3_t vel);
 void W_FireAxe(void);
 void W_FireSpikes(float ox);
 void W_FireLightning(void);
-void LightningDamage(vec3_t p1, vec3_t p2, gedict_t *from, float damage);
+void LightningDamage(vec3_t p1, vec3_t p2, gedict_t *from, float damage, qbool is_antilagged);
 qbool W_CanSwitch(int wp, qbool warn);
 
 void FireBullets(float shotcount, vec3_t dir, float spread_x, float spread_y, float spread_z,
@@ -585,9 +610,10 @@ qbool ISDEAD(gedict_t *e);
 qbool CanDamage(gedict_t *targ, gedict_t *inflictor);
 
 void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float damage);
-void T_RadiusDamage(gedict_t *inflictor, gedict_t *attacker, float damage, gedict_t *ignore,
-					deathType_t dtype);
-void T_BeamDamage(gedict_t *attacker, float damage);
+void T_RadiusDamage(gedict_t *inflictor, gedict_t *attacker, float damage, gedict_t *ignore, deathType_t dtype);
+void T_RadiusDamage_Ignore2(gedict_t *inflictor, gedict_t *attacker, float damage, gedict_t *ignore, gedict_t *ignore2, deathType_t dtype);
+void T_RadiusDamageApply(gedict_t *inflictor, gedict_t *attacker, gedict_t *head, float damage, deathType_t dtype);
+void T_BeamDamage(gedict_t * attacker, float damage);
 
 //items.c
 void DropPowerup(float timeleft, int powerup);

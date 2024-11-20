@@ -75,7 +75,7 @@ static qbool VisibilityTest(gedict_t *self, gedict_t *visible_object, float min_
 	{
 		// Can only see invisible objects when they're attacking
 		if ((g_globalvars.time < visible_object->invisible_finished)
-				&& (g_globalvars.time >= visible_object->attack_finished))
+				&& (visible_object->client_time >= visible_object->attack_finished))
 		{
 			return false;
 		}
