@@ -2875,13 +2875,9 @@ char *Spawn_GetModel(void)
 	if (!spawn_model[0])
 	{
 		char *mdl = cvar_string("k_spm_custom_model");
-		if (!strcmp(mdl, "0") || strlen(mdl) == 0)
+		if (only_digits(mdl))
 		{
-			strlcpy(spawn_model, "progs/w_g_key.mdl", sizeof(spawn_model));
-		}
-		else if (!strcmp(mdl, "1"))
-		{
-			strlcpy(spawn_model, "progs/wizard.mdl", sizeof(spawn_model));
+			strlcpy(spawn_model, atoi(mdl) ? "progs/wizard.mdl" : "progs/w_g_key.mdl", sizeof(spawn_model));
 		}
 		else
 		{
