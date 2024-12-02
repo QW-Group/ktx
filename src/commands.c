@@ -5092,6 +5092,15 @@ void hdptoggle(void)
 
 void handicap(void)
 {
+	qbool k_lgc = cvar(LGCMODE_VARIABLE) != 0;
+
+	if (k_lgc)
+	{
+		G_sprint(self, 2, "Handicap is not allowed in LGC mode\n");
+
+		return;
+	}
+
 	char arg_2[1024];
 
 	if (trap_CmdArgc() != 2)
@@ -7623,6 +7632,15 @@ void ToggleLGC(void)
 		cvar_set("k_instagib", "0");
 	}
 
+	// disable dmgfrags
+	if (cvar("k_dmgfrags"))
+	{
+		cvar_set("k_dmgfrags", "0");
+	}
+
+	// turn off handicap
+	SetHandicap(self, 100);
+
 	cvar_set(LGCMODE_VARIABLE, k_lgc ? "1" : "0");
 
 	cvar_toggle_msg(self, LGCMODE_VARIABLE, redtext("LGC mode"));
@@ -7858,6 +7876,15 @@ void dmgfrags(void)
 {
 	if (!is_rules_change_allowed())
 	{
+		return;
+	}
+
+	qbool k_lgc = cvar(LGCMODE_VARIABLE) != 0;
+
+	if (k_lgc)
+	{
+		G_sprint(self, 2, "Dmgfrags is not allowed in LGC mode\n");
+
 		return;
 	}
 
