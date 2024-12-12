@@ -795,6 +795,12 @@ void FirstFrame(void)
 	RegisterCvar("k_lock_hdp");
 	RegisterCvar("k_disallow_weapons");
 	RegisterCvar("k_force_mapcycle"); // will use mapcycle even when /deathmatch 0
+	RegisterCvarEx("k_on_start_f_modified", "1");
+	RegisterCvarEx("k_on_start_f_ruleset", "1");
+	RegisterCvarEx("k_on_start_f_version", "1");
+	RegisterCvarEx("k_on_end_f_modified", "1");
+	RegisterCvarEx("k_on_end_f_ruleset", "1");
+	RegisterCvarEx("k_on_end_f_version", "1");
 
 	RegisterCvar("k_pow");
 	RegisterCvarEx("k_pow_q", "1"); // quad
