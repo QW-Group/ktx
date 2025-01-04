@@ -897,9 +897,10 @@ void SM_PrepareMap(void)
 // put clients in server and reset some params
 static void SM_PrepareClients(void)
 {
-	int hdc, i;
+	int hdc, i, j, player_count = 0;
 	char *pl_team;
-	gedict_t *p;
+	gedict_t *p, *temp;
+	gedict_t *players[MAX_CLIENTS];
 	qbool hoonymode_reset = isHoonyModeAny() && HM_current_point() > 0;
 
 	k_teamid = 666;
@@ -907,8 +908,23 @@ static void SM_PrepareClients(void)
 	trap_executecmd(); // <- this really needed
 
 	initial_match_spawns = true;
+
 	for (p = world; (p = find_plr(p));)
 	{
+		players[player_count++] = p;
+	}
+
+	for (i = player_count - 1; i > 0; i--)
+	{
+		j = rand() % (i + 1);
+		temp = players[i];
+		players[i] = players[j];
+		players[j] = temp;
+	}
+
+	for (j = 0; j < player_count; j++)
+	{
+		p = players[j];
 		if (!k_matchLess)
 		{
 			// skip setup k_teamnum in matchLess mode
