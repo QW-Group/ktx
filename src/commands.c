@@ -5092,6 +5092,7 @@ void hdptoggle(void)
 
 void handicap(void)
 {
+	char arg_2[1024];
 	qbool k_lgc = cvar(LGCMODE_VARIABLE) != 0;
 
 	if (k_lgc)
@@ -5101,7 +5102,6 @@ void handicap(void)
 		return;
 	}
 
-	char arg_2[1024];
 
 	if (trap_CmdArgc() != 2)
 	{
@@ -7874,12 +7874,12 @@ void iplist(void)
 
 void dmgfrags(void)
 {
+	qbool k_lgc = cvar(LGCMODE_VARIABLE) != 0;
+
 	if (!is_rules_change_allowed())
 	{
 		return;
 	}
-
-	qbool k_lgc = cvar(LGCMODE_VARIABLE) != 0;
 
 	if (k_lgc)
 	{
