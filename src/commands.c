@@ -137,11 +137,12 @@ void Wp_Reset(void);
 void Wp_Stats(float on);
 void Sc_Stats(float on);
 void t_jump(float j_type);
-void klist(void);
 void hdptoggle(void);
 void handicap(void);
 void noweapon(void);
+void toggleklist(void);
 void tracklist(void);
+void klist(void);
 void fpslist(void);
 void krnd(void);
 void agree_on_map(void);
@@ -819,6 +820,8 @@ cmd_t cmds[] =
 	{ "tkfjump", 					DEF(t_jump), 					1, 			CF_BOTH_ADMIN, 															CD_TKFJUMP },
 	{ "tkrjump", 					DEF(t_jump), 					2, 			CF_BOTH_ADMIN, 															CD_TKRJUMP },
 	{ "klist", 						klist, 							0, 			CF_BOTH | CF_MATCHLESS, 												CD_KLIST },
+	{ "toggleklist", 					toggleklist, 						0, 			CF_BOTH | CF_MATCHLESS, 												CD_TRACKLIST },
+	{ "toggletracklist", 					toggleklist, 						0, 			CF_BOTH | CF_MATCHLESS, 												CD_TRACKLIST },
 	{ "hdptoggle", 					hdptoggle, 						0, 			CF_BOTH_ADMIN, 															CD_HDPTOGGLE },
 	{ "handicap", 					handicap, 						0, 			CF_PLAYER | CF_PARAMS | CF_MATCHLESS, 									CD_HANDICAP },
 	{ "noweapon", 					noweapon, 						0, 			CF_PLAYER | CF_PARAMS | CF_SPC_ADMIN, 									CD_NOWEAPON },
@@ -4987,6 +4990,12 @@ void klist(void)
 	gedict_t *p = world;
 	char *track;
 
+	if (!cvar("k_allowklist") && match_in_progress && self->ct == ctPlayer)
+	{
+		G_sprint(self, 2, "klist is disabled\n");
+		return;
+	}
+
 	for (i = 0, p = world; (p = find_plr(p)); i++)
 	{
 		if (!i)
@@ -5225,6 +5234,12 @@ void tracklist(void)
 	char *track;
 	char *nt = redtext(" not tracking");
 
+	if (!cvar("k_allowklist") && match_in_progress && self->ct == ctPlayer)
+	{
+		G_sprint(self, 2, "tracklist is disabled\n");
+		return;
+	}
+
 	for (i = 0, p = world; (p = find_spc(p)); i++)
 	{
 		if (!i)
@@ -5240,6 +5255,27 @@ void tracklist(void)
 	if (!i)
 	{
 		G_sprint(self, 2, "No spectators present\n");
+	}
+}
+
+void toggleklist(void)
+{
+	int k_allowklist = !cvar("k_allowklist");
+
+	if (match_in_progress)
+	{
+		return;
+	}
+
+	cvar_fset("k_allowklist", k_allowklist);
+
+	if (k_allowklist)
+	{
+		G_bprint(2, "klist: %s\n", redtext("on"));
+	}
+	else
+	{
+		G_bprint(2, "klist: %s\n", redtext("off"));
 	}
 }
 
