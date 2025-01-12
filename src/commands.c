@@ -140,8 +140,9 @@ void t_jump(float j_type);
 void hdptoggle(void);
 void handicap(void);
 void noweapon(void);
-void toggleklist(void);
+void toggletracklist(void);
 void tracklist(void);
+void toggleklist(void);
 void klist(void);
 void fpslist(void);
 void krnd(void);
@@ -821,7 +822,6 @@ cmd_t cmds[] =
 	{ "tkrjump", 					DEF(t_jump), 					2, 			CF_BOTH_ADMIN, 															CD_TKRJUMP },
 	{ "klist", 						klist, 							0, 			CF_BOTH | CF_MATCHLESS, 												CD_KLIST },
 	{ "toggleklist", 					toggleklist, 						0, 			CF_BOTH | CF_MATCHLESS, 												CD_TRACKLIST },
-	{ "toggletracklist", 					toggleklist, 						0, 			CF_BOTH | CF_MATCHLESS, 												CD_TRACKLIST },
 	{ "hdptoggle", 					hdptoggle, 						0, 			CF_BOTH_ADMIN, 															CD_HDPTOGGLE },
 	{ "handicap", 					handicap, 						0, 			CF_PLAYER | CF_PARAMS | CF_MATCHLESS, 									CD_HANDICAP },
 	{ "noweapon", 					noweapon, 						0, 			CF_PLAYER | CF_PARAMS | CF_SPC_ADMIN, 									CD_NOWEAPON },
@@ -829,6 +829,7 @@ cmd_t cmds[] =
 	{ "cam", 						ShowCamHelp, 					0, 			CF_SPECTATOR | CF_MATCHLESS, 											CD_CAM },
 
 	{ "tracklist", 					tracklist, 						0, 			CF_BOTH | CF_MATCHLESS, 												CD_TRACKLIST },
+	{ "toggletracklist", 					toggletracklist, 						0, 			CF_BOTH | CF_MATCHLESS, 												CD_TRACKLIST },
 	{ "fpslist", 					fpslist, 						0, 			CF_BOTH | CF_MATCHLESS, 												CD_FPSLIST },
 
 	{ "fav1_add", 					DEF(favx_add), 					1, 			CF_SPECTATOR, 															CD_FAV1_ADD },
@@ -5088,6 +5089,27 @@ void klist(void)
 	}
 }
 
+void toggleklist(void)
+{
+	int k_allowklist = !cvar("k_allowklist");
+
+	if (match_in_progress)
+	{
+		return;
+	}
+
+	cvar_fset("k_allowklist", k_allowklist);
+
+	if (k_allowklist)
+	{
+		G_bprint(2, "klist: %s - remember to also toggle tracklist\n", redtext("on"));
+	}
+	else
+	{
+		G_bprint(2, "klist: %s - remember to also toggle tracklist\n", redtext("off"));
+	}
+}
+
 void hdptoggle(void)
 {
 	if (match_in_progress)
@@ -5234,7 +5256,7 @@ void tracklist(void)
 	char *track;
 	char *nt = redtext(" not tracking");
 
-	if (!cvar("k_allowklist") && match_in_progress && self->ct == ctPlayer)
+	if (!cvar("k_allowtracklist") && match_in_progress && self->ct == ctPlayer)
 	{
 		G_sprint(self, 2, "tracklist is disabled\n");
 		return;
@@ -5258,24 +5280,24 @@ void tracklist(void)
 	}
 }
 
-void toggleklist(void)
+void toggletracklist(void)
 {
-	int k_allowklist = !cvar("k_allowklist");
+	int k_allowtracklist = !cvar("k_allowtracklist");
 
 	if (match_in_progress)
 	{
 		return;
 	}
 
-	cvar_fset("k_allowklist", k_allowklist);
+	cvar_fset("k_allowtracklist", k_allowtracklist);
 
-	if (k_allowklist)
+	if (k_allowtracklist)
 	{
-		G_bprint(2, "klist: %s\n", redtext("on"));
+		G_bprint(2, "tracklist: %s - remember to also toggle klist\n", redtext("on"));
 	}
 	else
 	{
-		G_bprint(2, "klist: %s\n", redtext("off"));
+		G_bprint(2, "tracklist: %s - remember to also toggle klist\n", redtext("off"));
 	}
 }
 
