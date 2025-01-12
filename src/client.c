@@ -2149,9 +2149,7 @@ void PutClientInServer(void)
 			items |= IT_SUPER_SHOTGUN;
 			items |= IT_ROCKET_LAUNCHER;
 			items |= IT_GRENADE_LAUNCHER;
-
-			if (streq(mapname, "dm3") || streq(mapname, "dm4"))
-				items |= IT_LIGHTNING;
+			items |= IT_LIGHTNING;
 
 			items &= ~( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3);
 			if (!self->isBot)
