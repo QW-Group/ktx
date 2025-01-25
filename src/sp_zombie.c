@@ -974,6 +974,8 @@ void SP_monster_zombie(void)
 	{
 		self->s.v.solid = SOLID_SLIDEBOX;
 		self->s.v.movetype = MOVETYPE_NONE;
+		walkmonster_start("progs/zombie.mdl");
+		// This zombie is crucified, and will never start walking so restore model here.
 		setmodel(self, "progs/zombie.mdl");
 		zombie_cruc1();
 	}
