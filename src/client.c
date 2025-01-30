@@ -2958,8 +2958,9 @@ void BackFromLag(void)
 #define S_GL	( 1<<5 )
 #define S_RL	( 1<<6 )
 #define S_LG	( 1<<7 )
+#define S_LGLastFrag	( 1<<8 )
 
-#define S_ALL	( S_AXE | S_SG | S_SSG | S_NG | S_SNG | S_GL | S_RL | S_LG )
+#define S_ALL	( S_AXE | S_SG | S_SSG | S_NG | S_SNG | S_GL | S_RL | S_LG | S_LGLastFrag )
 
 #define S_DEF	( S_GL | S_RL | S_LG ) /* default */
 
@@ -3006,6 +3007,11 @@ void Print_Wp_Stats(void)
 			wps & S_LG ?
 					max(0.001, 100.0 * e->ps.wpn[wpLG].hits / max(1, e->ps.wpn[wpLG].attacks)) : 0;
 
+	float lgLastFrag =
+			wps & S_LGLastFrag ?
+					max(0.001, 100.0 * e->ps.wpn[wpLG].lastfragdisplayhits / max(1, e->ps.wpn[wpLG].lastfragdisplayattacks)) : 0;
+
+
 	if ((i = lw) > 0)
 	{
 		i = bound(0, i, sizeof(buf) - 1);
@@ -3024,7 +3030,7 @@ void Print_Wp_Stats(void)
 		return;
 	}
 
-	if (!axe && !sg && !ssg && !ng && !sng && !gl && !rl && !lg)
+	if (!axe && !sg && !ssg && !ng && !sng && !gl && !rl && !lg && !lgLastFrag)
 	{
 		return; // sanity
 	}
@@ -3042,6 +3048,11 @@ void Print_Wp_Stats(void)
 		if (lg)
 		{
 			strlcat(buf, lg ? va("%s:%.1f ", redtext("lg"), lg) : "", sizeof(buf));
+		}
+
+		if (lgLastFrag)
+		{
+			strlcat(buf, lgLastFrag ? va("%s:%.1f ", redtext("lglf"), lgLastFrag) : "", sizeof(buf));
 		}
 
 		if (rl)
@@ -3084,6 +3095,11 @@ void Print_Wp_Stats(void)
 		if (lg)
 		{
 			wp_wrap_cat(lg ? va("%s:%.1f", redtext("lg"), lg) : "", buf, sizeof(buf));
+		}
+
+		if (lgLastFrag)
+		{
+			wp_wrap_cat(lgLastFrag ? va("%s:%.1f", redtext("lglf"), lgLastFrag) : "", buf, sizeof(buf));
 		}
 
 		if (rl)

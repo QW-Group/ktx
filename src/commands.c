@@ -9264,11 +9264,23 @@ void lgc_register_miss(vec3_t start, gedict_t *player)
 void lgc_register_kill(gedict_t *player)
 {
 	player->lgc_state = lgcOvershaft;
+	player->ps.wpn[wpLG].enemyjustkilled = 1;
 }
 
 void lgc_register_fire_stop(gedict_t *player)
 {
 	player->lgc_state = lgcUndershaft;
+
+	if (player->ps.wpn[wpLG].enemyjustkilled == 1)
+	{
+		player->ps.wpn[wpLG].enemyjustkilled = 0;
+		
+		// last frag lg statistics
+		player->ps.wpn[wpLG].lastfragdisplayattacks = player->ps.wpn[wpLG].lastfragattacks;
+		player->ps.wpn[wpLG].lastfragdisplayhits = player->ps.wpn[wpLG].lastfraghits;
+		player->ps.wpn[wpLG].lastfragattacks = 0;
+		player->ps.wpn[wpLG].lastfraghits = 0;
+	}
 }
 
 void ListGameModes(void)
