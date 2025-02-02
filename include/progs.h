@@ -1235,6 +1235,10 @@ typedef struct gedict_s
 	float healmax;                          // maximum health see triggers.c for defaults
 	float healtimer;                        // internal timer for tracking health replenishment interval
 // }
+
+// { csqc
+	func_t SendEntity;
+// }
 } gedict_t;
 
 typedef enum
