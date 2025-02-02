@@ -567,7 +567,7 @@ void teleport_player(gedict_t *player, vec3_t origin, vec3_t angles, int flags)
 		if ((player->s.v.weapon == IT_HOOK) && player->hook_out)
 		{
 			GrappleReset(player->hook);
-			player->attack_finished = g_globalvars.time + 0.25;
+			player->attack_finished = player->client_time + 0.25f;
 		}
 
 		player->s.v.fixangle = 1;	// turn this way immediately
@@ -756,6 +756,9 @@ void teleport_touch(void)
 	}
 
 	other->teleported = 1;
+	other->teleport_time = g_globalvars.time;
+	antilag_addflags(other, other->antilag_data, ANTILAG_FL_KNOCKBACKPROTECT | ANTILAG_FL_FATALPROTECT);
+
 	teleport_player(other, t->s.v.origin, t->mangle,
 	TFLAGS_FOG_SRC | TFLAGS_FOG_DST | TFLAGS_SND_SRC | TFLAGS_SND_DST | TFLAGS_VELOCITY_ADJUST);
 
