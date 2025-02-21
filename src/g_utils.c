@@ -644,6 +644,27 @@ char* cleantext(char *format)
 	}
 }
 
+char* dig1(int d)
+{
+	static char string[MAX_STRINGS][32];
+	static int index = 0;
+	snprintf(string[index], sizeof(string[0]), "%d", d);
+	return string[index++ % MAX_STRINGS];
+}
+
+char* dig1s(const char *format, ...)
+{
+	static char string[MAX_STRINGS][32];
+	static int index = 0;
+	va_list argptr;
+
+	va_start(argptr, format);
+	Q_vsnprintf(string[index], sizeof(string[0]), format, argptr);
+	va_end(argptr);
+
+	return string[index++ % MAX_STRINGS];
+}
+
 char* dig3(int d)
 {
 	static char string[MAX_STRINGS][32];

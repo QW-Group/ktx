@@ -269,6 +269,8 @@ void changeyaw(gedict_t *ent);
 char* va(char *format, ...) PRINTF_FUNC(1);
 char* redtext(char *format);
 char* cleantext(char *format);
+char* dig1(int d);
+char* dig1s(const char *format, ...) PRINTF_FUNC(1);
 char* dig3(int d);
 char* dig3s(const char *format, ...) PRINTF_FUNC(1);
 char* striphigh(char *format);
