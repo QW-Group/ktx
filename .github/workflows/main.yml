@@ -89,6 +89,20 @@ jobs:
         working-directory: q3lcc
         if: matrix.target == 'qvm'
 
+      - name: Checkout q3asm
+        uses: actions/checkout@v4
+        with:
+          repository: ec-/q3asm
+          path: q3asm
+        if: matrix.target == 'qvm'
+
+      - name: Build q3asm
+        run: |
+          make -j ${{ steps.cpu-cores.outputs.count }}
+          mv q3asm /usr/local/bin
+        working-directory: q3asm
+        if: matrix.target == 'qvm'
+
       - name: Build
         run: |
           ./build_cmake.sh ${{ matrix.target }}

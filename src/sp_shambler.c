@@ -486,7 +486,7 @@ void CastLightning(void)
 	WriteCoord( MSG_BROADCAST, g_globalvars.trace_endpos[1]);
 	WriteCoord( MSG_BROADCAST, g_globalvars.trace_endpos[2]);
 
-	LightningDamage(org, g_globalvars.trace_endpos, self, 10);
+	LightningDamage(org, g_globalvars.trace_endpos, self, 10, false);
 }
 
 // shambler's bolt have 3 frames, I guess
