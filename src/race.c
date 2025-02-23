@@ -3546,6 +3546,7 @@ char* race_fgets(char *buf, int limit)
 	{
 		if ((*string++ = c) == '\n')
 		{
+			string--;
 			break;
 		}
 	}
