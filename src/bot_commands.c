@@ -2179,8 +2179,8 @@ static void FrogbotsSetWeapon(void)
 
 	if (trap_CmdArgc() <= 2)
 	{
-		G_sprint(self, 2, "Usage: /botcmd  weapon <weapon>\n");
-		G_sprint(self, 2, "       <weapon> must be in range %d and %d\n", 2, 8);
+		G_sprint(self, 2, "Usage: /botcmd  weapon <weapon|random>\n");
+		G_sprint(self, 2, "       <weapon> must be in range 1 to 8 or \"random\"\n");
 		G_sprint(self, 2, "weapon is currently \"%d\"\n", FrogbotWeapon());
 	}
 	else
@@ -2190,12 +2190,15 @@ static void FrogbotsSetWeapon(void)
 		int old_weapon = FrogbotWeapon();
 
 		trap_CmdArgv(2, argument, sizeof(argument));
-		new_weapon = bound(2, atoi(argument), 8);
+		new_weapon = strcmp(argument, "0") == 0 || strcmp(argument, "random") == 0
+			? 0
+			: bound(1, atoi(argument), 8);
 
 		if (new_weapon != old_weapon)
 		{
 			cvar_fset(FB_CVAR_WEAPON, new_weapon);
-			G_sprint(self, 2, "weapon changed to \"%d\"\n", new_weapon);
+			G_sprint(self, 2, "weapon changed to \"%s\"\n",
+				new_weapon ? WpName(new_weapon) : "random");
 		}
 	}
 }
