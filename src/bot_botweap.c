@@ -906,8 +906,31 @@ static int DesiredWeapon(void)
 	return IT_AXE;
 }
 
+static int WeaponToImpulse(int weapon)
+{
+	static int weapons[] = {
+		IT_AXE, IT_SHOTGUN, IT_SUPER_SHOTGUN,
+		IT_NAILGUN, IT_SUPER_NAILGUN, IT_GRENADE_LAUNCHER,
+		IT_ROCKET_LAUNCHER, IT_LIGHTNING };
+	int i;
+
+	for (i = 0; i < sizeof(weapons) / sizeof(weapons[0]); ++i)
+	{
+		if (weapons[i] == weapon)
+		{
+			return i + 1;
+		}
+	}
+
+	return -1;
+}
+
 void SelectWeapon(void)
 {
+	int desired_weapon;
+	int fb_weapon;
+	int impulse;
+
 	if (self->fb.path_state & DM6_DOOR)
 	{
 		return;
@@ -927,11 +950,21 @@ void SelectWeapon(void)
 		self->fb.state &= ~HURT_SELF;
 	}
 
-	CheckNewWeapon(DesiredWeapon());
+	desired_weapon = DesiredWeapon();
+	CheckNewWeapon(desired_weapon);
 
 	if (tot_mode_enabled())
 	{
-		self->fb.desired_weapon_impulse = FrogbotWeapon();
+		if ((fb_weapon = FrogbotWeapon()))
+		{
+			self->fb.desired_weapon_impulse = fb_weapon;
+		}
+		else
+		{
+			impulse = WeaponToImpulse(desired_weapon);
+			self->fb.desired_weapon_impulse =
+				self->fb.random_desired_weapon_impulse == impulse ? impulse : 2;
+		}
 	}
 }
 

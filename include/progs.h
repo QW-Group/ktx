@@ -659,6 +659,7 @@ typedef struct fb_entvars_s {
 	qbool firing;								// does the bot want to attack this frame?
 	qbool jumping;								// does the bot want to jump this frame?
 	int desired_weapon_impulse;					// impulse to send the next time the player
+	int random_desired_weapon_impulse;
 	vec3_t desired_angle;						// for 'perfect' aim, this is where the bot wants to be aiming
 	qbool botchose;								// next_impulse is valid
 	int next_impulse;							// the impulse to send in next command
