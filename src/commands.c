@@ -3368,8 +3368,9 @@ void PrintScores(void)
 		}
 
 		// we can't use dig3 here because of zero padding, so using dig3s
-		G_sprint(self, 2, "\220%s:%s\221 remaining\n", dig3s("%02d", minutes),
-					dig3s("%02d", seconds));
+		G_sprint(self, 2, "\220%s:%s\221 remaining\n",
+			cvar("k_kteam_messages") ? dig1s("%02d", minutes) : dig3s("%02d", minutes),
+			cvar("k_kteam_messages") ? dig1s("%02d", seconds) : dig3s("%02d", seconds));
 	}
 
 	if (k_showscores)
