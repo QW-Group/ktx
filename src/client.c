@@ -1740,7 +1740,7 @@ void PutClientInServer(void)
 	self->classname = "player";
 	self->s.v.health = 100;
 	self->s.v.takedamage = DAMAGE_AIM;
-	self->s.v.solid = SOLID_SLIDEBOX;
+	self->s.v.solid = self->leavemealone ? SOLID_TRIGGER : SOLID_SLIDEBOX;
 	self->s.v.movetype = MOVETYPE_WALK;
 	self->show_hostile = 0;
 	self->s.v.max_health = 100;
@@ -3697,6 +3697,16 @@ void PlayerPreThink(void)
 	CA_player_pre_think();
 
 	race_player_pre_think();
+
+	if (self->leavemealone)
+	{
+		if ((self->s.v.mins[0] == 0) || (self->s.v.mins[1] == 0))
+		{
+			// This can happen if the world 'squashes' a SOLID_NOT entity, mvdsv will turn into corpse
+			setsize(self, PASSVEC3(VEC_HULL_MIN), PASSVEC3(VEC_HULL_MAX));
+		}
+		setorigin(self, PASSVEC3(self->s.v.origin));
+	}	
 
 // brokenankle included here
 	if (self->s.v.button2 || self->brokenankle)

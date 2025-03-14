@@ -953,6 +953,7 @@ typedef struct gedict_s
 	float fIllegalFPSWarnings;
 // ILLEGALFPS]
 
+	qbool leavemealone;
 	float shownick_time;					// used to force centerprint is off at desired time
 	clientType_t ct;						// client type for client edicts
 // { timing
