@@ -818,6 +818,7 @@ void FirstFrame(void)
 	RegisterCvar("k_vp_admin");   // votes percentage for admin election
 	RegisterCvar("k_vp_captain"); // votes percentage for captain election
 	RegisterCvar("k_vp_coach");   // votes percentage for coachs election
+	RegisterCvarEx("k_vp_suggestcolor", "51"); // votes percentage for color suggestion election
 	RegisterCvar("k_vp_map");     // votes percentage for map change voting
 	RegisterCvar("k_vp_pickup");  // votes percentage for pickup voting
 	RegisterCvar("k_vp_rpickup"); // votes percentage for rpickup voting

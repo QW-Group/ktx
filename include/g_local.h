@@ -780,6 +780,14 @@ typedef struct rpickupTeams_s
 	char stuffCmd[30];
 } rpickupTeams_t;
 
+typedef struct suggestcolor_s
+{
+	int top;
+	int bottom;
+	int num_userids;
+	int userids[MAX_CLIENTS];
+} suggestcolor_t;
+
 extern votemap_t maps_voted[];
 int vote_get_maps(void);
 

@@ -30,6 +30,10 @@ rpickupTeams_t builtinTeamInfo[] =
 	{"yell",  "12",  "12", "color 12 12\nskin \"\"\nteam yell\n"}
 };
 
+// Color suggestion
+suggestcolor_t suggestcolor;
+void SuggestColorApply(void);
+
 //void BeginPicking();
 void BecomeCaptain(gedict_t *p);
 void BecomeCoach(gedict_t *p);
@@ -223,6 +227,11 @@ int get_votes_req(int fofs, qbool diff)
 				percent = cvar("k_vp_coach");
 				break;
 			}
+			else if (el_type == etSuggestColor)
+			{
+				percent = cvar("k_vp_suggestcolor");
+				break;
+			}
 			else
 			{
 				percent = 100;
@@ -391,6 +400,11 @@ int get_elect_type(void)
 		if (is_elected(p, etCoach)) // elected coach
 		{
 			return etCoach;
+		}
+
+		if (is_elected(p, etSuggestColor))
+		{
+			return etSuggestColor;
 		}
 	}
 
@@ -585,6 +599,14 @@ void vote_check_elect(void)
 			if (is_elected(p, etCoach)) // s: election was coach election
 			{
 				BecomeCoach(p);
+			}
+		}
+
+		if (!match_in_progress)
+		{
+			if (is_elected(p, etSuggestColor))
+			{
+				SuggestColorApply();
 			}
 		}
 
@@ -1547,4 +1569,138 @@ void vote_check_all(void)
 	vote_check_antilag();
 	vote_check_privategame();
 	vote_check_swapall();
+}
+
+void SuggestColorVote(void)
+{
+	gedict_t *p, *electguard, *users[MAX_CLIENTS];
+	char temp[32], message[1024];
+	int i, j, till, argc = trap_CmdArgc();
+
+	if (self->ct == ctSpec && match_in_progress)
+	{
+		return;
+	}
+
+	if (is_elected(self, etSuggestColor))
+	{
+		G_bprint(2, "%s %s!\n", self->netname, redtext("aborts election"));
+		AbortElect();
+		return;
+	}
+
+	if (CountPlayers() < 3)
+	{
+		G_sprint(self, 2, "Not enough players\n");
+		return;
+	}
+
+	if (get_votes(OV_ELECT))
+	{
+		G_sprint(self, 2, "An election is already in progress\n");
+		return;
+	}
+
+	if ((till = Q_rint(self->v.elect_block_till - g_globalvars.time)) > 0)
+	{
+		G_sprint(self, 2, "Wait %d second%s!\n", till, count_s(till));
+		return;
+	}
+
+	if (argc < 4)
+	{
+		G_sprint(self, 2, "suggestcolor <top color> <bottom color> <name / user id>...\n");
+		return;
+	}
+
+	memset(&suggestcolor, 0, sizeof(suggestcolor));
+
+	trap_CmdArgv(1, temp, sizeof(temp));
+	suggestcolor.top = bound(0, atoi(temp), 16);
+
+	trap_CmdArgv(2, temp, sizeof(temp));
+	suggestcolor.bottom = bound(0, atoi(temp), 16);
+
+	suggestcolor.num_userids = 0;
+
+	for (i = 3, j = 0; i < argc && j < MAX_CLIENTS; i++, j++)
+	{
+		trap_CmdArgv(i, temp, sizeof(temp));
+
+		p = player_by_IDorName(temp);
+		if (p == NULL)
+		{
+			G_bprint(2, "%s is not connected to the server\n", temp);
+			return;
+		}
+		else if (p == self)
+		{
+			G_bprint(2, "You can't suggest a color for yourself\n");
+			return;
+		}
+
+		users[j] = p;
+		suggestcolor.userids[j] = GetUserID(p);
+		suggestcolor.num_userids++;
+	}
+
+	snprintf(message, sizeof(message), "%s has requested color %d %d for ",
+		self->netname, suggestcolor.top, suggestcolor.bottom);
+	if (suggestcolor.num_userids == 1)
+	{
+		strlcat(message, users[0]->netname, sizeof(message));
+	}
+	else if (suggestcolor.num_userids == 2)
+	{
+		snprintf(message + strlen(message), sizeof(message) - strlen(message), "%s and %s",
+			users[0]->netname, users[1]->netname);
+	}
+	else
+	{
+		for (i = 0; i < suggestcolor.num_userids - 1; i++)
+		{
+			snprintf(message + strlen(message), sizeof(message) - strlen(message), "%s, ",
+				users[i]->netname);
+		}
+
+		snprintf(message + strlen(message), sizeof(message) - strlen(message), "and %s",
+			users[suggestcolor.num_userids - 1]->netname);
+	}
+	G_bprint(2, "%s\n", message);
+
+	for (p = world; (p = find_plr(p));)
+	{
+		if (p != self)
+		{
+			G_sprint(p, 2, "Type %s in console to approve\n", redtext("yes"));
+		}
+	}
+
+	G_sprint(self, 2, "Type %s to abort election\n", redtext("suggestcolor"));
+
+	self->v.elect = 1;
+	self->v.elect_type = etSuggestColor;
+
+	electguard = spawn();
+	electguard->s.v.owner = EDICT_TO_PROG(world);
+	electguard->classname = "electguard";
+	electguard->think = (func_t)ElectThink;
+	electguard->s.v.nextthink = g_globalvars.time + 60;
+}
+
+void SuggestColorApply(void)
+{
+	gedict_t *p;
+	int i;
+
+	for (i = 0; i < suggestcolor.num_userids; i++)
+	{
+		if ((p = player_by_id(suggestcolor.userids[i])) != NULL)
+		{
+			G_bprint(2, "Setting color %d %d on %s\n",
+				suggestcolor.top, suggestcolor.bottom, p->netname);
+			stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "color %d %d\n",
+				suggestcolor.top, suggestcolor.bottom);
+		}
+	}
 }
