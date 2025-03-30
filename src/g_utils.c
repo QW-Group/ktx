@@ -2661,13 +2661,11 @@ char* respawn_model_name(int mdl_num)
 {
 	switch (mdl_num)
 	{
-// K_SPW_0_NONRANDOM changes "Normal QW respawns" to "pre-qtest nonrandom respawns"
-#ifdef K_SPW_0_NONRANDOM
-		case 0:
+		case -1:
 			return "pre-qtest nonrandom respawns";
-#else
-		case 0:  return "Normal QW respawns";
-#endif
+
+		case 0:
+			return "Normal QW respawns";
 
 		case 1:
 			return "KT SpawnSafety";
@@ -2690,6 +2688,9 @@ char* respawn_model_name_short(int mdl_num)
 {
 	switch (mdl_num)
 	{
+		case -1:
+			return "QTEST";
+
 		case 0:
 			return "QW";
 

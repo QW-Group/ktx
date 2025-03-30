@@ -1037,9 +1037,7 @@ gedict_t* Sub_SelectSpawnPoint(char *spawnname)
 		return spot;
 	}
 
-// K_SPW_0_NONRANDOM changes "Normal QW respawns" to "pre-qtest nonrandom respawns"
-#ifdef K_SPW_0_NONRANDOM
-	if (k_spw == 0)
+	if (k_spw == -1)
 	{
 		static gedict_t *last_spot = g_edicts; // basically, g_edicts is same as world, but we can't initialize static variable with world.
 
@@ -1051,7 +1049,6 @@ gedict_t* Sub_SelectSpawnPoint(char *spawnname)
 
 		return last_spot;
 	}
-#endif
 
 // ok, find all spots that don't have players nearby
 
