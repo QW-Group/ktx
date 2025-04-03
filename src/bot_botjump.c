@@ -94,6 +94,10 @@ void BotCanRocketJump(gedict_t *self)
 	{
 		self->fb.canRocketJump = self->fb.debug_path_rj;
 	}
+	else if (!self->fb.skill.use_rocketjumps)
+	{
+		self->fb.canRocketJump = false;
+	}
 	else if (has_rl && (self->s.v.waterlevel > 1)
 			&& (trap_pointcontents(self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2])
 					== CONTENT_LAVA))
