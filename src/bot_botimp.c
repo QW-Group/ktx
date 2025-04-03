@@ -153,15 +153,62 @@ void RegisterSkillVariables(void)
 	RegisterCvar(FB_CVAR_OPPONENT_MIDAIR_VOLATILITY_INCREASE);
 }
 
-qbool SetAttributesBasedOnSkill(int skill)
-{
-	char *cfg_name;
-	qbool customised = false;
-	int aimskill;
+void setLgcModeSkillAttributes(int skill, int aimskill) {
+	// Keep LGC bot skill attributes separate so we can change
+	// general skill attributes without affecting LGC mode, so players
+	// can still play LGC mode on same terms as old records.
 
-	skill = bound(MIN_FROGBOT_SKILL, skill, MAX_FROGBOT_SKILL);
-	aimskill = bound(MIN_FROGBOT_SKILL, skill, MAX_FROGBOT_AIM_SKILL);
+	// Old frogbot settings (items generally)
+	cvar_fset(FB_CVAR_ACCURACY, 45 - min(skill, 10) * 2.25);
+	cvar_fset(FB_CVAR_DODGEFACTOR, RangeOverSkill(skill, 0.0f, 1.0f));
+	cvar_fset(FB_CVAR_LOOKANYWHERE, RangeOverSkill(skill, 0.0f, 1.0f));
+	cvar_fset(FB_CVAR_LOOKAHEADTIME, RangeOverSkill(skill, 5.0f, 30.0f));
+	cvar_fset(FB_CVAR_PREDICTIONERROR, RangeOverSkill(skill, 1.0f, 0.0f));
+	cvar_fset(FB_CVAR_DISTANCEERROR, RangeOverSkill(skill, 0.15f, 0.0f));
 
+	// Old, but used to be global
+	cvar_fset(FB_CVAR_LGPREF, RangeOverSkill(skill, 0.2f, 1.0f));
+	cvar_fset(FB_CVAR_VISIBILITY, 0.7071067f - (0.02f * min(skill, 10))); // equivalent of 90 => 120 fov
+
+	cvar_fset(FB_CVAR_YAW_MIN_ERROR, RangeOverSkill(aimskill, 1.5, 1));
+	cvar_fset(FB_CVAR_YAW_MAX_ERROR, RangeOverSkill(aimskill, 4.5, 3));
+	cvar_fset(FB_CVAR_YAW_MULTIPLIER, RangeOverSkill(aimskill, 4, 2.5));
+	cvar_fset(FB_CVAR_YAW_SCALE, RangeOverSkill(aimskill, 5, 2));
+
+	cvar_fset(FB_CVAR_PITCH_MIN_ERROR, RangeOverSkill(aimskill, 1.5, 1));
+	cvar_fset(FB_CVAR_PITCH_MAX_ERROR, RangeOverSkill(aimskill, 4.5, 3));
+	cvar_fset(FB_CVAR_PITCH_MULTIPLIER, RangeOverSkill(aimskill, 4, 2));
+	cvar_fset(FB_CVAR_PITCH_SCALE, RangeOverSkill(aimskill, 5, 2));
+
+	cvar_fset(FB_CVAR_ATTACK_RESPAWNS, skill >= 15 ? 1 : 0);
+	cvar_fset(FB_CVAR_REACTION_TIME, RangeOverSkill(skill, 0.75f, 0.3f));
+	cvar_fset(FB_CVAR_REACTION_MOVETIME, RangeOverSkill(skill, 0.3f, 0.1f));
+
+	// Volatility
+	cvar_fset(FB_CVAR_MIN_VOLATILITY, 1.0f);
+	cvar_fset(FB_CVAR_MAX_VOLATILITY, RangeOverSkill(skill, 4.0f, 2.5f));
+	cvar_fset(FB_CVAR_INITIAL_VOLATILITY, RangeOverSkill(skill, 3.0f, 1.4f));
+	cvar_fset(FB_CVAR_REDUCE_VOLATILITY, RangeOverSkill(skill, 0.98f, 0.96f));
+	cvar_fset(FB_CVAR_OWNSPEED_VOLATILITY_THRESHOLD, RangeOverSkill(skill, 360, 450));
+	cvar_fset(FB_CVAR_OWNSPEED_VOLATILITY_INCREASE, RangeOverSkill(skill, 0.2f, 0.1f));
+	cvar_fset(FB_CVAR_ENEMYSPEED_VOLATILITY_THRESHOLD, RangeOverSkill(skill, 360, 450));
+	cvar_fset(FB_CVAR_ENEMYSPEED_VOLATILITY_INCREASE, RangeOverSkill(skill, 0.4f, 0.2f));
+	cvar_fset(FB_CVAR_ENEMYDIRECTION_VOLATILITY_INCREASE, RangeOverSkill(skill, 0.6f, 0.4f));
+	cvar_fset(FB_CVAR_PAIN_VOLATILITY_INCREASE, RangeOverSkill(skill, 0.5f, 0.1f));
+	cvar_fset(FB_CVAR_SELF_MIDAIR_VOLATILITY_INCREASE, RangeOverSkill(skill, 1.0f, 0.0f));
+	cvar_fset(FB_CVAR_OPPONENT_MIDAIR_VOLATILITY_INCREASE, RangeOverSkill(skill, 1.0f, 0.0f));
+
+	// Movement
+	cvar_fset(FB_CVAR_MOVEMENT_SKILL, RangeOverSkill(skill, 0.3f, 1.0f));
+	cvar_fset(FB_CVAR_MOVEMENT_DMM4WIGGLE, skill > 10 ? 1 : 0);
+	cvar_fset(FB_CVAR_MOVEMENT_DMM4WIGGLETOGGLE,
+				skill > 10 ? RangeOverSkill((skill - 10) * 2, 0.0f, 0.25f) : 0);
+	cvar_fset(FB_CVAR_MOVEMENT_WIGGLEFRAMES, RangeOverSkill(skill, 30, 20));
+	cvar_fset(FB_CVAR_COMBATJUMP_CHANCE, RangeOverSkill(skill, 0.03f, 0.1f));
+	cvar_fset(FB_CVAR_MISSILEDODGE_TIME, RangeOverSkill(skill, 1.0f, 0.5f));
+}
+
+void setSkillAttributes(int skill, int aimskill) {
 	// Old frogbot settings (items generally)
 	cvar_fset(FB_CVAR_ACCURACY, 45 - min(skill, 10) * 2.25);
 	cvar_fset(FB_CVAR_DODGEFACTOR, RangeOverSkill(skill, 0.0f, 1.0f));
@@ -211,6 +258,23 @@ qbool SetAttributesBasedOnSkill(int skill)
 	cvar_fset(FB_CVAR_MOVEMENT_WIGGLEFRAMES, RangeOverSkill(skill, 30, 20));
 	cvar_fset(FB_CVAR_COMBATJUMP_CHANCE, RangeOverSkill(skill, 0.0f, 0.1f));
 	cvar_fset(FB_CVAR_MISSILEDODGE_TIME, RangeOverSkill(skill, 1.0f, 0.5f));
+}
+
+qbool SetAttributesBasedOnSkill(int skill)
+{
+	char *cfg_name;
+	qbool customised = false;
+	int aimskill;
+
+	skill = bound(MIN_FROGBOT_SKILL, skill, MAX_FROGBOT_SKILL);
+	aimskill = bound(MIN_FROGBOT_SKILL, skill, MAX_FROGBOT_AIM_SKILL);
+
+	if (lgc_enabled()) {
+		G_bprint(2, "LGC mode enabled - using legacy bot skill attributes.\n");
+		setLgcModeSkillAttributes(skill, aimskill);
+	} else {
+		setSkillAttributes(skill, aimskill);
+	}
 
 	// Customise
 	{
