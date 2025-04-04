@@ -218,7 +218,8 @@ typedef enum
 	etNone = 0,
 	etCaptain,
 	etCoach,
-	etAdmin
+	etAdmin,
+	etSuggestColor
 } electType_t;
 
 // store player votes here
