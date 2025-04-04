@@ -2657,7 +2657,7 @@ void ReportMe(void)
 
 void ToggleRespawns(void)
 {
-	int k_spw = bound(0, cvar("k_spw"), 4);
+	int k_spw = bound(-1, cvar("k_spw"), 4);
 
 	if (match_in_progress)
 	{
@@ -2666,7 +2666,7 @@ void ToggleRespawns(void)
 
 	if (++k_spw > 4)
 	{
-		k_spw = 0;
+		k_spw = -1;
 	}
 
 	cvar_fset("k_spw", k_spw);
