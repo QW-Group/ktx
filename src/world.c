@@ -1071,6 +1071,7 @@ void FirstFrame(void)
 
 	RegisterCvar("k_lgcmode");
 	RegisterCvar("k_tot_mode");
+	RegisterCvar("k_kteam_messages");
 
 	// private games
 	RegisterCvarEx("k_privategame", "0");                 // whether it is currently on or off
