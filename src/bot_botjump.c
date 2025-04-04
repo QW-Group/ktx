@@ -345,7 +345,7 @@ void BotPerformRocketJump(gedict_t *self)
 		// Going at reasonable pace
 		qbool ok_vel = VectorLength(self->s.v.velocity) > sv_maxspeed * 0.9;
 		// Fire will trigger (technically we could jump anyway if framedelay enabled, but leave for now)
-		qbool ok_to_fire = !self->s.v.button0 && self->attack_finished < g_globalvars.time;
+		qbool ok_to_fire = !self->s.v.button0 && self->attack_finished < self->client_time;
 
 		// FIXME: TODO: Also used to check they wouldn't kill teammate, but think that should be fuzzy logic
 		qbool can_start_rj = ok_to_rj && path_is_rj && ok_distance && ok_direction && ok_to_fire

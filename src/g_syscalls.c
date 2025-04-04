@@ -105,13 +105,13 @@ void trap_remove(intptr_t edn)
 	syscall(G_REMOVE_ENT, edn);
 }
 
-void trap_precache_sound(char *name)
+intptr_t trap_precache_sound(char *name)
 {
-	syscall(G_PRECACHE_SOUND, (intptr_t) name);
+	return syscall(G_PRECACHE_SOUND, (intptr_t) name);
 }
-void trap_precache_model(char *name)
+intptr_t trap_precache_model(char *name)
 {
-	syscall(G_PRECACHE_MODEL, (intptr_t) name);
+	return syscall(G_PRECACHE_MODEL, (intptr_t) name);
 }
 intptr_t trap_precache_vwep_model(char *name)
 {
