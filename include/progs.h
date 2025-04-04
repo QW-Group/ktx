@@ -529,6 +529,7 @@ typedef struct fb_botskill_s {
 	fb_botaim_t aim_params[2];
 
 	float movement;
+	qbool use_rocketjumps;
 	float combat_jump_chance;
 	float missile_dodge_time;				// minimum time in seconds before bot dodges missile
 
@@ -573,7 +574,7 @@ typedef struct fb_entvars_s {
 
 	int oldsolid;								// need to keep track of this for hazard calculations
 
-	// these determine the desire for items for each player 
+	// these determine the desire for items for each player
 	//   (not just for bots ... bot's desire can take enemy's desire into consideration)
 	fb_desire_funcref_t desire;
 	float desire_armor1;
@@ -609,7 +610,7 @@ typedef struct fb_entvars_s {
 
 	qbool fl_marker;							// true if the current item is considered a marker (used when finding all objects in given radius)
 	//struct gedict_s* next;
-	
+
 	// Goal evaluation
 	struct gedict_s* best_goal;
 	float best_goal_score;
@@ -1197,7 +1198,7 @@ typedef struct gedict_s
 	int lgc_distance_hits[LGCMODE_DISTANCE_BUCKETS];
 // }
 
-// { 
+// {
 	// let mvdsv know when player has teleported, and adjust for high-ping
 	int teleported;
 // }
