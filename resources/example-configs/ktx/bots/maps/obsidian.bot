@@ -421,7 +421,6 @@ SetMarkerPath 80 2 49
 SetMarkerPath 80 3 26
 SetMarkerPath 80 4 14
 SetZone 81 3
-SetMarkerPath 81 0 10
 SetMarkerPath 81 1 82
 SetMarkerPath 81 2 83
 SetZone 82 3
