@@ -104,6 +104,9 @@ CreateMarker -252 -558 -40
 CreateMarker -173 552 -456
 CreateMarker -176 624 -456
 CreateMarker -38 612 -456
+CreateMarker 104 483 -456
+CreateMarker 148 512 -488
+CreateMarker 59 520 -488
 SetZone 1 1
 SetMarkerPath 1 0 58
 SetMarkerPath 1 1 57
@@ -652,6 +655,7 @@ SetZone 136 8
 SetMarkerPath 136 0 134
 SetMarkerPath 136 1 133
 SetMarkerPath 136 2 137
+SetMarkerPath 136 3 162
 SetZone 137 8
 SetMarkerPath 137 0 136
 SetMarkerPath 137 1 133
@@ -746,3 +750,9 @@ SetZone 161 8
 SetMarkerPath 161 0 160
 SetMarkerPath 161 1 137
 SetMarkerPath 161 2 138
+SetZone 162 8
+SetMarkerPath 162 0 136
+SetZone 163 8
+SetMarkerPath 163 0 162
+SetZone 164 8
+SetMarkerPath 164 0 162
