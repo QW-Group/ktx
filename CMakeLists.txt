@@ -33,6 +33,7 @@ set(SRC_NATIVE
 set(SRC_COMMON
 	"${DIR_SRC}/g_main.c" # WARNING: should be first in list for QVM, since it contains vmMain().
 	"${DIR_SRC}/admin.c"
+	"${DIR_SRC}/antilag.c"
 	"${DIR_SRC}/arena.c"
 	"${DIR_SRC}/bot_aim.c"
 	"${DIR_SRC}/bot_blocked.c"
