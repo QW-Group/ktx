@@ -5077,13 +5077,8 @@ void ClientObituary(gedict_t *targ, gedict_t *attacker)
 
 			if ((dtTELE1 != targ->deathtype) || cvar("k_tp_tele_death"))
 			{
-				// -1 frag always if non "teledeath", and -1 on "teledeath" if allowed
-				// also relax this rules on first seconds of match
-				if ((g_globalvars.time - match_start_time) > 1)
-				{
-					attacker->s.v.frags -= 1;
-					logfrag(attacker, attacker); //ZOID 12-13-96: killing a teammate logs as suicide
-				}
+				attacker->s.v.frags -= 1;
+				logfrag(attacker, attacker); //ZOID 12-13-96: killing a teammate logs as suicide
 			}
 
 			// some deathtypes have specific death messages
