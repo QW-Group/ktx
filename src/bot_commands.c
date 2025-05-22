@@ -259,9 +259,11 @@ static void BuildTeamList(void)
 
 void FrogbotsAddbot(int skill_level, const char *specificteam, qbool error_messages)
 {
+	char skill_level_str[3];
 	int i;
 
 	skill_level = bound(MIN_FROGBOT_SKILL, skill_level, MAX_FROGBOT_SKILL);
+	snprintf(skill_level_str, sizeof(skill_level_str), "%d", skill_level);
 
 	for (i = 0; i < sizeof(bots) / sizeof(bots[0]); ++i)
 	{
@@ -335,6 +337,7 @@ void FrogbotsAddbot(int skill_level, const char *specificteam, qbool error_messa
 			G_bprint(2, "skill &cf00%d&r\n", self->fb.skill.skill_level);
 			SetAttribs(&g_edicts[entity], customised_skill);
 			trap_SetBotUserInfo(entity, "k_nick", bots[i].name, 0);
+			trap_SetBotUserInfo(entity, "*skill", skill_level_str, SETUSERINFO_STAR);
 
 			return;
 		}
