@@ -1740,7 +1740,7 @@ void PutClientInServer(void)
 	self->classname = "player";
 	self->s.v.health = 100;
 	self->s.v.takedamage = DAMAGE_AIM;
-	self->s.v.solid = SOLID_SLIDEBOX;
+	self->s.v.solid = isCA() ? SOLID_NOT : self->leavemealone ? SOLID_TRIGGER : SOLID_SLIDEBOX;
 	self->s.v.movetype = MOVETYPE_WALK;
 	self->show_hostile = 0;
 	self->s.v.max_health = 100;
@@ -1937,6 +1937,37 @@ void PutClientInServer(void)
 		{
 			tele_flags |= TFLAGS_FOG_DST | TFLAGS_SND_DST;
 		}
+	}
+
+	if (isCA())
+	{
+		CA_PutClientInServer();
+		W_SetCurrentAmmo(); // important shit, not only ammo
+		teleport_player(self, self->s.v.origin, self->s.v.angles, tele_flags);
+
+		g_globalvars.msg_entity = EDICT_TO_PROG(self);
+		WriteByte(MSG_ONE, 38 /*svc_updatestatlong*/);
+		WriteByte(MSG_ONE, 18 /*STAT_MATCHSTARTTIME*/);
+		WriteLong(MSG_ONE, g_matchstarttime);
+
+#ifdef BOT_SUPPORT
+		BotClientEntersEvent(self, spot);
+#endif
+
+		// dusty: CA/wipeout must set solid state AFTER the spawn/teleport_player()
+		// otherwise player will become "solid" while tracking other players and
+		// get hit by projectiles.
+		if (match_in_progress)
+		{
+			self->s.v.solid = self->in_play ? SOLID_SLIDEBOX : SOLID_NOT;
+		}
+		else
+		{
+			self->s.v.solid = self->leavemealone ? SOLID_TRIGGER : SOLID_SLIDEBOX;
+		}
+		setorigin(self, PASSVEC3(self->s.v.origin));
+
+		return;
 	}
 
 	if (isRA())
@@ -2257,11 +2288,6 @@ void PutClientInServer(void)
 			self->s.v.armortype = 0.3;
 			self->s.v.items = (int)self->s.v.items | IT_ARMOR1; // add green armor
 		}
-	}
-
-	if (isCA())
-	{
-		CA_PutClientInServer();
 	}
 
 	// remove particular weapons in dmm4
