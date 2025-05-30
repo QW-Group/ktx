@@ -111,7 +111,7 @@ static qbool CheckForRocketEnemyAim(gedict_t *self)
 			&& !HasItem(self, IT_INVULNERABILITY))
 	{
 		// FIXME: random() call to determine behaviour, move threshold to bot's skill
-		if ((enemy_->attack_finished <= (g_globalvars.time + 0.2)) && enemy_->s.v.ammo_rockets
+		if ((enemy_->attack_finished <= (enemy_->client_time + 0.2)) && enemy_->s.v.ammo_rockets
 				&& (g_random() < 0.5))
 		{
 			vec3_t src;

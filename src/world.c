@@ -1816,6 +1816,7 @@ void check_fcheck(void);
 void CheckTeamStatus(void);
 void SendSpecInfo(void);
 void DoMVDAutoTrack(void);
+void antilag_updateworld(void);
 
 void FixNoSpecs(void);
 
@@ -1834,6 +1835,7 @@ void StartFrame(int time)
 	{
 		SecondFrame();
 		FixRules();
+		WPredict_Initialize();
 	}
 
 	FixNoSpecs(); // if no players left turn off "no spectators" mode
@@ -1900,6 +1902,9 @@ void StartFrame(int time)
 	check_fcheck();
 
 	TeamplayGameTick();
+
+	time_corrected = (float)time;
+	antilag_updateworld();
 
 	WillPause();
 }

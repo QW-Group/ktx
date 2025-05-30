@@ -339,6 +339,7 @@ void track_player(gedict_t *observer)
 		// }
 
 		observer->s.v.fixangle = true; // force client v_angle (disable in 3rd person view)
+		observer->client_predflags = PRDFL_FORCEOFF;
 
 		trap_makevectors(player->s.v.angles);
 		VectorMA(player->s.v.origin, follow_distance, g_globalvars.v_forward, observer->s.v.origin);

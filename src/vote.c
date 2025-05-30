@@ -1283,35 +1283,40 @@ void vote_check_antilag(void)
 
 	if (veto || !get_votes_req(OV_ANTILAG, true))
 	{
+		float new_antilag_value;
 		vote_clear(OV_ANTILAG);
 
 		// toggle antilag mode.
-		trap_cvar_set_float("sv_antilag", (float)(cvar("sv_antilag") ? 0 : 2));
+		new_antilag_value = cvar("sv_antilag") + 1;
+		if (new_antilag_value > 2)
+		{
+			new_antilag_value = 0;
+		}
+		trap_cvar_set_float("sv_antilag", new_antilag_value);
 
 		if (veto)
 		{
-			G_bprint(
-					2, "%s\n",
-					redtext(va("Antilag mode %s by admin veto", OnOff(2 == cvar("sv_antilag")))));
+			G_bprint(PRINT_HIGH, "%s\n", redtext(
+				va("Antilag mode %s by admin veto", AntilagModeString(new_antilag_value))
+			));
 		}
 		else
 		{
-			G_bprint(
-					2,
-					"%s\n",
-					redtext(va("Antilag mode %s by majority vote",
-								OnOff(2 == cvar("sv_antilag")))));
+			G_bprint(PRINT_HIGH, "%s\n", redtext(
+				va("Antilag mode %s by majority vote", AntilagModeString(new_antilag_value))
+			));
 		}
 	}
 }
 
 void antilag(void)
 {
+	float antilag_new_value;
 	int votes;
 
 	if (match_in_progress)
 	{
-		G_sprint(self, 2, "%s mode %s\n", redtext("Antilag"), OnOff(2 == cvar("sv_antilag")));
+		G_sprint(self, PRINT_HIGH, "%s mode %s\n", redtext("Antilag"), AntilagModeString(cvar("sv_antilag")));
 
 		return;
 	}
@@ -1330,12 +1335,16 @@ void antilag(void)
 
 	self->v.antilag = !self->v.antilag;
 
+	antilag_new_value = cvar("sv_antilag") + 1;
+	if (antilag_new_value > 2)
+		antilag_new_value = 0;
+
 	G_bprint(
-			2,
+			PRINT_HIGH,
 			"%s %s!%s\n",
 			self->netname,
 			(self->v.antilag ?
-					redtext(va("votes for antilag %s", OnOff(!(2 == cvar("sv_antilag"))))) :
+					redtext(va("votes for antilag %s", AntilagModeString(antilag_new_value))) :
 					redtext(va("withdraws %s antilag vote", g_his(self)))),
 			((votes = get_votes_req(OV_ANTILAG, true)) ? va(" (%d)", votes) : ""));
 

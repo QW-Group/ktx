@@ -1,0 +1,8 @@
+../csprogs.dat
+
+#pragma target fte
+#define CSQC
+fteextensions.qc
+
+weaponpred.qc
+main.qc

@@ -430,7 +430,7 @@ void MidairDamageBonus(gedict_t *attacker, gedict_t *targ, float midheight)
 
 gedict_t *damage_attacker, *damage_inflictor;
 
-static int dmg_is_splash = 0;
+int dmg_is_splash = 0;
 
 void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float damage)
 {
@@ -639,6 +639,12 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 	}
 
 	take = newceil(damage - save);
+
+	// protect against rewind kills through teleporters
+	if (damage >= targ->s.v.health && targ->antilag_data && (targ->antilag_data->state_flags & ANTILAG_FL_FATALPROTECT))
+	{
+		return;
+	}
 
 	// mid air damage modificators
 	if (midair)
@@ -860,6 +866,7 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 
 	// figure momentum add
 	if ((inflictor != world)
+			&& (targ->antilag_data && !(targ->antilag_data->state_flags & ANTILAG_FL_KNOCKBACKPROTECT))
 			&& ((targ->s.v.movetype == MOVETYPE_WALK)
 					|| (k_bloodfest && ((int)targ->s.v.flags & FL_MONSTER))))
 	{
@@ -1149,6 +1156,22 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 	}
 
 	self = oldself;
+}
+
+void T_RadiusDamage_Ignore2(gedict_t *inflictor, gedict_t *attacker, float damage, gedict_t *ignore, gedict_t *ignore2, deathType_t dtype)
+{
+	gedict_t *head;
+	head = trap_findradius(world, inflictor->s.v.origin, damage + 40);
+
+	while (head)
+	{
+		if (head != ignore && head != ignore2)
+		{
+			T_RadiusDamageApply(inflictor, attacker, head, damage, dtype);
+		}
+
+		head = trap_findradius(head, inflictor->s.v.origin, damage + 40);
+	}
 }
 
 void T_RadiusDamageApply(gedict_t *inflictor, gedict_t *attacker, gedict_t *head, float damage,

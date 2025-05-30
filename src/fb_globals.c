@@ -230,7 +230,7 @@ qbool enemy_shaft_attack(gedict_t *self, gedict_t *enemy)
 	}
 
 	return (HasWeapon(enemy, IT_LIGHTNING) && enemy->s.v.ammo_cells && (self->fb.enemy_dist < 630)
-			&& (g_globalvars.time < enemy->attack_finished));
+			&& (self->client_time < enemy->attack_finished));
 }
 
 qbool bots_enabled(void)

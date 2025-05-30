@@ -741,6 +741,8 @@ void SP_func_door(void)
 // the sizes can be detected properly.
 	self->think = (func_t) LinkDoors;
 	self->s.v.nextthink = self->s.v.ltime + 0.1;
+
+	self->antilag_data = antilag_create_world(self);
 }
 
 /*
@@ -1049,4 +1051,6 @@ void SP_func_door_secret(void)
 	{
 		self->wait = 5;	// 5 seconds before closing
 	}
+
+	self->antilag_data = antilag_create_world(self);
 }
