@@ -3642,6 +3642,7 @@ void PlayerPreThink(void)
 {
 	float r;
 	qbool zeroFps = false;
+	int k_socd = cvar("k_socd");
 
 	if (self->k_timingWarnTime)
 	{
@@ -3708,15 +3709,21 @@ void PlayerPreThink(void)
 		{
 			if (self->fFramePerfectStrafeChangeCount / self->fStrafeChangeCount >= 0.75)
 			{
-				int k_allow_socd_warning = cvar("k_allow_socd_warning");
-
 				self->socdDetectionCount += 1;
 
-				if ((!match_in_progress) && (!self->isBot) && k_allow_socd_warning && (self->ct == ctPlayer) && (self->socdDetectionCount >= 3))
+				if ((!match_in_progress) && (!self->isBot) && k_socd == SOCD_WARN && (self->ct == ctPlayer) && (self->socdDetectionCount >= 3))
 				{
 					G_bprint(PRINT_HIGH,
 						"[%s] Warning! %s: Movement assistance detected. Please disable iDrive or keyboard strafe assistance features.\n",
 						SOCD_DETECTION_VERSION, self->netname);
+				}
+
+				if ((!self->isBot) && k_socd == SOCD_KICK && (self->ct == ctPlayer) && (self->socdDetectionCount >= 3))
+				{
+					G_bprint(PRINT_HIGH,
+						"[%s] Kicked! %s: Movement assistance detected. Please disable iDrive or keyboard strafe assistance features.\n",
+						SOCD_DETECTION_VERSION, self->netname);
+					stuffcmd(self, "disconnect\n");
 				}
 			}
 

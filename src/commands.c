@@ -274,6 +274,7 @@ void giveme(void);
 static void dropitem(void);
 static void removeitem(void);
 static void dumpent(void);
+static void socd(void);
 // }
 
 // { Frogbots
@@ -660,6 +661,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_DROPITEM			(CD_NODESC) // skip
 #define CD_REMOVEITEM		(CD_NODESC) // skip
 #define CD_DUMPENT			(CD_NODESC) // skip
+#define CD_SOCD			"cycle between SOCD detection modes"
 
 #define CD_VOTECOOP			"vote for coop on/off"
 #define CD_COOPNMPU			"new nightmare mode (pu drops) on/off"
@@ -1035,6 +1037,7 @@ cmd_t cmds[] =
 	{ "dropitem", 					dropitem, 						0, 			CF_BOTH | CF_PARAMS, 													CD_DROPITEM },
 	{ "removeitem", 				removeitem, 					0, 			CF_BOTH | CF_PARAMS, 													CD_REMOVEITEM },
 	{ "dumpent", 					dumpent, 						0, 			CF_BOTH | CF_PARAMS, 													CD_DUMPENT },
+	{ "socd", 					socd, 							0, 			CF_PLAYER,														CD_SOCD },
 	{ "votecoop", 					votecoop, 						0, 			CF_PLAYER | CF_MATCHLESS, 												CD_VOTECOOP },
 	{ "coop_nm_pu", 				ToggleNewCoopNm, 				0, 			CF_PLAYER | CF_MATCHLESS, 												CD_COOPNMPU },
 	{ "demomark", 					DemoMark, 						0, 			CF_BOTH, 																CD_DEMOMARK },
@@ -9346,6 +9349,40 @@ static void dumpent(void)
 	trap_FS_CloseFile(file_handle);
 
 	G_sprint(self, 2, "Dumped %d entities\n", cnt);
+}
+
+static void socd(void)
+{
+	int k_socd;
+
+	if (match_in_progress)
+	{
+		return;
+	}
+
+	k_socd = cvar("k_socd") + 1;
+	if (k_socd < SOCD_ALLOW || k_socd > SOCD_KICK)
+	{
+		k_socd = SOCD_ALLOW;
+	}
+
+	switch (k_socd)
+	{
+		case SOCD_ALLOW:
+			G_bprint(2, "%s: allow\n", redtext("SOCD"));
+			break;
+		case SOCD_STATS:
+			G_bprint(2, "%s: stats after game\n", redtext("SOCD"));
+			break;
+		case SOCD_WARN:
+			G_bprint(2, "%s: warn on violation\n", redtext("SOCD"));
+			break;
+		case SOCD_KICK:
+			G_bprint(2, "%s: kick on violation\n", redtext("SOCD"));
+			break;
+	}
+
+	cvar_set("k_socd", va("%d", (int)k_socd));
 }
 
 qbool lgc_enabled(void)
