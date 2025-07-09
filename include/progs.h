@@ -219,7 +219,8 @@ typedef enum
 	etCaptain,
 	etCoach,
 	etAdmin,
-	etSuggestColor
+	etSuggestColor,
+	etLateJoin
 } electType_t;
 
 // store player votes here
@@ -1065,6 +1066,7 @@ typedef struct gedict_s
 	qbool in_limbo;							// waiting to respawn during wipeout
 	qbool last_alive_active;				// if last alive timer is active
 	qbool no_pain;							// if player can take any damage to health or armor
+	qbool lj_accepted;						// if late-join request was accepted
 	float ca_round_frags;
 	float ca_round_kills;
 	float ca_round_dmg;
@@ -1081,7 +1083,8 @@ typedef struct gedict_s
 	float seconds_to_respawn;				// number of seconds until respawn
 	float escape_time;						// number of seconds after "escaping"
 	char *teamcolor;						// color of player's team
-	char cptext[100];						// centerprint for player
+	char cptext[1024];						// centerprint for player
+	char ljteam[1024];						// team that player is requesting to join
 	int ca_ammo_grenades;					// grenade ammo
 	int tracking_enabled;
 	int round_deaths;						// number of times player has died in the round

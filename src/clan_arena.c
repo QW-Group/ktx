@@ -23,6 +23,7 @@ void CA_TeamsStats(void);
 void CA_SendTeamInfo(gedict_t *t);
 void print_player_stats(qbool series_over);
 void CA_OnePlayerStats(gedict_t *p, qbool series_over);
+void CA_AddLatePlayer(gedict_t *p, char *team);
 void EndRound(int alive_team);
 void show_tracking_info(gedict_t *p);
 
@@ -271,6 +272,22 @@ qbool CA_CheckAlive(gedict_t *p)
 	{
 		return false;
 	}
+}
+
+void CA_AddLatePlayer(gedict_t *p, char *team)
+{
+	p->ready = 1;
+	p->ca_ready = 1;
+	p->lj_accepted = 1; // Set flag to allow team change in FixPlayerTeam
+
+	SetUserInfo(p, "team", team, 0);
+	stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "team \"%s\"\n", team);
+	G_bprint(2, "%s late-joined team \x90%s\x91\n", p->netname, team);
+
+	p->lj_accepted = 0;  			// clear the flag immediately
+	p->ljteam[0] = '\0';			// clear the requested team name
+	p->can_respawn = false;			// can't join mid-round
+	p->seconds_to_respawn = 999; 	// don't show countdown
 }
 
 void CA_MatchBreak(void)

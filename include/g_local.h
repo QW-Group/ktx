@@ -894,6 +894,7 @@ void CA_player_pre_think(void);
 void CA_spectator_think(void);
 void CA_Frame(void);
 void CA_PutClientInServer(void);
+void CA_AddLatePlayer(gedict_t *p, char *team);
 qbool CA_can_fire(gedict_t *p);
 
 // captain.c
