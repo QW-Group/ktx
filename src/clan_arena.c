@@ -102,6 +102,8 @@ int calc_respawn_time(gedict_t *p, int offset)
 		teamsize++;
 	}
 
+	p->is_solo = teamsize == 1 ? 1 : 0;
+
 	multiple = bound(3, teamsize+1, 6);	// first respawn won't take more than 6 seconds regardless of team size
 
 	if (isWipeout && (p->round_deaths+offset <= max_deaths))
@@ -110,6 +112,11 @@ int calc_respawn_time(gedict_t *p, int offset)
 		// if 3 players on team, the spawn times are 4, 8, 16, 24
 		// if 2 players on team, the spawn times are 3, 6, 12, 18
 		time = p->round_deaths+offset == 1 ? multiple : (p->round_deaths-1+offset) * (multiple*2);
+	}
+
+	// If you're the only player on your team, you get one free instant respawn on first death
+	if (isWipeout && p->is_solo && p->round_deaths+offset == 1) {
+		time = 0;
 	}
 
 	return time;
@@ -248,6 +255,7 @@ qbool isCA(void)
 	return (isTeam() && cvar("k_clan_arena"));
 }
 
+// Used to determine value of ca_alive when PutClientInServer() is called
 qbool CA_CheckAlive(gedict_t *p)
 {
 	if (p)
@@ -539,9 +547,10 @@ void CA_PutClientInServer(void)
 		// previous round will be invisible
 		self->hideentity = 0;
 
-		// reset escape time and last_alive every spawn
+		// reset escape_time, last_alive, and regen_timer every spawn
 		self->escape_time = 0;
 		self->last_alive_active = false;
+		self->regen_timer = 0;
 
 		// default to spawning with rl
 		self->s.v.weapon = IT_ROCKET_LAUNCHER;
@@ -814,7 +823,43 @@ void CA_check_escape(gedict_t *targ, gedict_t *attacker)
 		// That's cool, but could be written cleaner in calc_respawn_time(). 
 		targ->round_deaths--;
 
-		G_bprint(2, "%s survives by &cff0%.3f&r seconds!\n", targ->netname, escape_time);
+		G_bprint(2, "%s survives by &cff0%.0f&r seconds!\n", targ->netname, escape_time*1000);
+	}
+}
+
+// wipeout: solo players (one-man teams) who don't take damage for 5 seconds
+// after earning a frag get their health/armor/ammo regenerated.
+void check_solo_regen(gedict_t *p)
+{
+	int required_time = p->round_kills * 5;
+	int time_since_kill = p->regen_timer ? g_globalvars.time - p->regen_timer : 0;
+
+	if (!p->is_solo)
+	{
+		return;
+	}
+
+	if (p->regen_timer && time_since_kill > required_time)
+	{
+		// regenerate health/armore/ammo. play megahealth sound or secret sound
+		stuffcmd(p, "play misc/secret.wav\n");
+
+		if (!((int)self->s.v.items & IT_ARMOR3))
+		{
+			p->s.v.items += IT_ARMOR3;
+		}
+		
+		p->s.v.armorvalue = 200;
+		p->s.v.armortype = 0.8;
+		p->s.v.health = 100;
+		p->s.v.ammo_nails = 200;
+		p->s.v.ammo_shells = 100;
+		p->s.v.ammo_rockets = 50;
+		p->s.v.ammo_cells = 150;
+		p->ca_ammo_grenades = 6;
+
+		// reset the timer
+		p->regen_timer = 0;	
 	}
 }
 
@@ -824,6 +869,12 @@ void CA_ClientObituary(gedict_t *targ, gedict_t *attacker)
 	
 	if (cvar("k_clan_arena") == 2)	// Wipeout only
 	{
+		// check if attacker is a solo player and start regen timer
+		if (attacker->is_solo && !attacker->regen_timer)
+		{
+			attacker->regen_timer = g_globalvars.time;
+		}
+
 		// check if targ was a lone survivor waiting for teammate to spawn
 		CA_check_escape(targ, attacker);
 	}
@@ -863,6 +914,39 @@ void CA_ClientObituary(gedict_t *targ, gedict_t *attacker)
 	// }
 }
 
+// check if a team is a solo player on first death
+static qbool is_solo_team_first_death(char *team)
+{
+	gedict_t *p;
+	int team_size = 0;
+	gedict_t *team_player = NULL;
+
+	if (!team || cvar("k_clan_arena") != 2) // Only applies to wipeout
+	{
+		return false;
+	}
+
+	for (p = world; (p = find_plr_same_team(p, team));)
+	{
+		if (p->ca_ready)
+		{
+			team_player = p;
+			team_size++;
+
+			if (team_size > 1)
+			{
+				return false;
+			}
+		}
+	}
+
+	return (team_player
+		&& team_player->is_solo				// redundant but free, so why not
+		&& team_player->round_deaths <= 1	// "<= 1" avoids a race condition
+		&& team_player->can_respawn			// makes sures player didn't /kill
+	);
+}
+
 // return 0 if there no alive teams
 // return 1 if there one alive team and alive_team point to 1 or 2 wich refering to _k_team1 or _k_team2 cvars
 // return 2 if there at least two alive teams
@@ -871,6 +955,7 @@ static int CA_check_alive_teams(int *alive_team)
 	gedict_t *p;
 	qbool few_alive_teams = false;
 	char *first_team = NULL;
+	char *dead_team = NULL;
 
 	if (alive_team)
 	{
@@ -911,7 +996,25 @@ static int CA_check_alive_teams(int *alive_team)
 			*alive_team = streq(first_team, cvar_string("_k_team1")) ? 1 : 2;
 		}
 
+		// Wipeout only:
+		// Check if the "dead" team is actually a solo player on first death
+		dead_team = streq(first_team, cvar_string("_k_team1")) ? cvar_string("_k_team2") : cvar_string("_k_team1");
+		if (is_solo_team_first_death(dead_team))
+		{
+			return 2; // Both teams still in play - solo player gets instant respawn
+		}
+
 		return 1;
+	}
+	else
+	{	
+		// Wipeout only:
+		// Both teams are "dead" but one or both teams may be a solo player on his first death
+		if (is_solo_team_first_death(cvar_string("_k_team1")) || 
+		    is_solo_team_first_death(cvar_string("_k_team2")))
+		{
+			return 2; // At least one team consists of a solo player on first death
+		}
 	}
 
 	return 0;
@@ -1120,10 +1223,10 @@ void EndRound(int alive_team)
 						 "%s", ((alive_team == 1 && team1_score == (CA_wins_required()-1)) ||
 						 (alive_team == 2 && team2_score == (CA_wins_required()-1))) ? "series" : "round");
 
-				if ((loser_respawn_time < 2) && (loser_respawn_time > 0))
+				if ((loser_respawn_time < 1) && (loser_respawn_time > 0))
 				{
-					G_cp2all("Team \x90%s\x91 wins the %s!\n\n\nTeam %s needed %.3f more seconds",
-						cvar_string(va("_k_team%d", alive_team)), round_or_series, cvar_string(va("_k_team%d", loser_team)), loser_respawn_time); 
+					G_cp2all("Team \x90%s\x91 wins the %s!\n\n\nTeam %s needed %.0f ms longer",
+						cvar_string(va("_k_team%d", alive_team)), round_or_series, cvar_string(va("_k_team%d", loser_team)), loser_respawn_time*1000); 
 				}
 				else {
 					G_cp2all("Team \x90%s\x91 wins the %s!",
@@ -1305,6 +1408,12 @@ void CA_player_pre_think(void)
 			self->alive_time = g_globalvars.time - self->time_of_respawn;
 		}
 
+		// wipeout: if you're a solo and waiting for health regen
+		if (cvar("k_clan_arena") == 2 && self->is_solo && self->regen_timer)
+		{
+			check_solo_regen(self);
+		}
+
 		// take no damage to health/armor within 1 second of respawn or during endround
 		if (self->in_play && ((self->alive_time >= 1) || !self->round_deaths) && !ca_round_pause)
 		{
@@ -1429,6 +1538,16 @@ void CA_Frame(void)
 					}
 				}
 			}
+
+			// you're a solo player... prioritize regen info
+			else if (p->is_solo && p->regen_timer)
+			{
+				int countdown = max(1, (p->round_kills*5) - (int)(g_globalvars.time - p->regen_timer) + 1 );
+				snprintf(p->cptext, sizeof(p->cptext), "\n\n\n\n\n\n%s: %d\n\n\n\n",
+								"regenerating health", countdown);
+
+				G_centerprint(p, "%s", p->cptext);
+			}
 			// both you and the enemy are the last alive on your team
 			else if (p->in_play && p->alive_time > 2 && last_alive && e_last_alive)
 			{
@@ -1464,7 +1583,7 @@ void CA_Frame(void)
 		}
 	}
 
-	// check if there exist only one team with alive players and others are eluminated, if so then its time to start ca countdown
+	// check if there exist only one team with alive players and others are eliminated, if so then its time to start ca countdown
 	if (ra_match_fight == 2 || (ra_match_fight == 1 && ca_round_pause == 1))
 	{
 		int alive_team = 0;
