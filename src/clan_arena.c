@@ -1369,6 +1369,8 @@ void CA_player_pre_think(void)
 {
 	if (isCA())
 	{
+		float alive_time = self->in_play ? g_globalvars.time - self->time_of_respawn : 0;
+
 		CA_show_greeting(self);
 		
 		if ((self->s.v.mins[0] == 0) || (self->s.v.mins[1] == 0))
@@ -1403,11 +1405,6 @@ void CA_player_pre_think(void)
 			track_player(self); // enable tracking by default while dead
 		}
 
-		if (self->in_play)
-		{
-			self->alive_time = g_globalvars.time - self->time_of_respawn;
-		}
-
 		// wipeout: if you're a solo and waiting for health regen
 		if (cvar("k_clan_arena") == 2 && self->is_solo && self->regen_timer)
 		{
@@ -1415,7 +1412,7 @@ void CA_player_pre_think(void)
 		}
 
 		// take no damage to health/armor within 1 second of respawn or during endround
-		if (self->in_play && ((self->alive_time >= 1) || !self->round_deaths) && !ca_round_pause)
+		if (self->in_play && ((alive_time >= 1) || !self->round_deaths) && !ca_round_pause)
 		{
 			self->no_pain = false;
 		}
@@ -1498,6 +1495,7 @@ void CA_Frame(void)
 	// if k_clan_arena is 2, we're playing wipeout
 	if (ra_match_fight == 2 && !ca_round_pause && cvar("k_clan_arena") == 2)
 	{
+		float alive_time;
 		int last_alive;
 		int e_last_alive;
 		char str_last_alive[25];
@@ -1505,6 +1503,7 @@ void CA_Frame(void)
 
 		for (p = world; (p = find_plr(p));)
 		{
+			alive_time = p->in_play ? g_globalvars.time - p->time_of_respawn : 0;
 			last_alive = (int)ceil(last_alive_time(p));
 			e_last_alive = (int)ceil(enemy_last_alive_time(p));
 			
@@ -1526,7 +1525,7 @@ void CA_Frame(void)
 					k_respawn(p, true);
 
 					p->seconds_to_respawn = calc_respawn_time(p, 1);
-					p->time_of_respawn = g_globalvars.time; // resets alive_time to 0
+					p->time_of_respawn = g_globalvars.time; // resets alive_time calculations to 0
 				}
 				else
 				{
@@ -1538,7 +1537,6 @@ void CA_Frame(void)
 					}
 				}
 			}
-
 			// you're a solo player... prioritize regen info
 			else if (p->is_solo && p->regen_timer)
 			{
@@ -1549,7 +1547,7 @@ void CA_Frame(void)
 				G_centerprint(p, "%s", p->cptext);
 			}
 			// both you and the enemy are the last alive on your team
-			else if (p->in_play && p->alive_time > 2 && last_alive && e_last_alive)
+			else if (p->in_play && alive_time > 2 && last_alive && e_last_alive)
 			{
 				snprintf(str_last_alive, sizeof(str_last_alive), "%d", last_alive);
 				snprintf(p->cptext, sizeof(p->cptext), "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n",
@@ -1558,7 +1556,7 @@ void CA_Frame(void)
 				G_centerprint(p, "%s", p->cptext);
 			}
 			// you're the last alive on your team versus two or more enemies... hide!
-			else if (p->in_play && p->alive_time > 2 && last_alive)
+			else if (p->in_play && alive_time > 2 && last_alive)
 			{
 				snprintf(str_last_alive, sizeof(str_last_alive), "%d", last_alive);
 				snprintf(p->cptext, sizeof(p->cptext), "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n",
@@ -1567,7 +1565,7 @@ void CA_Frame(void)
 				G_centerprint(p, "%s", p->cptext);
 			}
 			// only one enemy remains... find him!
-			else if (p->in_play && p->alive_time > 2 && e_last_alive)
+			else if (p->in_play && alive_time > 2 && e_last_alive)
 			{
 				snprintf(str_e_last_alive, sizeof(str_e_last_alive), "%d", e_last_alive);
 				snprintf(p->cptext, sizeof(p->cptext), "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n",
@@ -1575,7 +1573,7 @@ void CA_Frame(void)
 
 				G_centerprint(p, "%s", p->cptext);
 			}
-			else if (p->in_play && p->alive_time > 2)
+			else if (p->in_play && alive_time > 2)
 			{
 				snprintf(p->cptext, sizeof(p->cptext), " ");
 				G_centerprint(p, "%s", p->cptext);
@@ -1662,7 +1660,7 @@ void CA_Frame(void)
 
 				if (p->ca_ready)
 				{
-					p->time_of_respawn = g_globalvars.time; // resets alive_time to 0
+					p->time_of_respawn = g_globalvars.time; // resets alive_time calculations to 0
 				}
 			}
 			

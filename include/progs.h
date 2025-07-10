@@ -1079,7 +1079,6 @@ typedef struct gedict_s
 	float ca_round_rldirect;
 	float ca_round_lghit;
 	float ca_round_lgfired;
-	float alive_time;						// number of seconds player is in play
 	float regen_timer;						// when the regen timer is started
 	float time_of_respawn;					// server time player respawned or round started
 	float seconds_to_respawn;				// number of seconds until respawn
