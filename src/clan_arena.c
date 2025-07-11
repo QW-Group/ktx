@@ -366,10 +366,6 @@ void CA_MatchBreak(void)
 void track_player(gedict_t *observer)
 {
 	gedict_t *player = ca_get_player(observer);
-	vec3_t delta;
-	float vlen;
-	int follow_distance;
-	int upward_distance;
 
 	if (player && !observer->in_play && observer->tracking_enabled)
 	{
@@ -396,37 +392,12 @@ void track_player(gedict_t *observer)
 			observer->track_target = player;
 		}
 
-		// { spectate in 1st person
-		follow_distance = -10;
-		upward_distance = 0;
-		observer->hideentity = EDICT_TO_PROG(player); // in this mode we want to hide player model for watcher's view
-		VectorCopy(player->s.v.v_angle, observer->s.v.angles);
-		// }
+		// Use trackent for smooth tracking
+		observer->trackent = NUM_FOR_EDICT(player);
+		observer->hideentity = EDICT_TO_PROG(player); // Hide tracked player model
 
-		observer->s.v.fixangle = true; // force client v_angle (disable in 3rd person view)
-
-		trap_makevectors(player->s.v.angles);
-		VectorMA(player->s.v.origin, follow_distance, g_globalvars.v_forward, observer->s.v.origin);
-		VectorMA(observer->s.v.origin, upward_distance, g_globalvars.v_up, observer->s.v.origin);
-
-		// avoid positionning in walls
-		traceline(PASSVEC3(player->s.v.origin), PASSVEC3(observer->s.v.origin), false, player);
-		VectorCopy(g_globalvars.trace_endpos, observer->s.v.origin);
-
-		if (g_globalvars.trace_fraction == 1)
-		{
-			VectorCopy(g_globalvars.trace_endpos, observer->s.v.origin);
-			VectorMA(observer->s.v.origin, 10, g_globalvars.v_forward, observer->s.v.origin);
-		}
-		else
-		{
-			VectorSubtract(g_globalvars.trace_endpos, player->s.v.origin, delta);
-			vlen = VectorLength(delta);
-			vlen = vlen - 40;
-			VectorNormalize(delta);
-			VectorScale(delta, vlen, delta);
-			VectorAdd(player->s.v.origin, delta, observer->s.v.origin);
-		}
+		// Lock observer's orientation to player POV
+		observer->s.v.movetype = MOVETYPE_LOCK;
 
 		// set observer's health/armor/ammo/weapon to match the player's
 		observer->s.v.ammo_nails = player->s.v.ammo_nails;
@@ -442,17 +413,14 @@ void track_player(gedict_t *observer)
 		observer->weaponmodel = player->weaponmodel;
 		observer->s.v.weaponframe = player->s.v.weaponframe;
 
-		// smooth playing for ezq / zq
-		observer->s.v.movetype = MOVETYPE_LOCK;
-
 		show_tracking_info(observer);
 	}
-
-	if (!player || !observer->tracking_enabled)
+	else
 	{
-		// restore movement and show racer entity
-		observer->s.v.movetype = MOVETYPE_NOCLIP;
+		// Clear tracking
+		observer->trackent = 0;
 		observer->hideentity = 0;
+		observer->s.v.movetype = MOVETYPE_NOCLIP;
 
 		// set health/item values back to nothing
 		observer->s.v.ammo_nails = 0;
@@ -641,6 +609,7 @@ void CA_PutClientInServer(void)
 
 		// tracking enabled by default
 		self->tracking_enabled = 1;
+		self->trackent = 0; // Initialize trackent for dead players
 
 		self->in_play = false;
 		self->round_deaths++; //increment death count for wipeout
@@ -766,9 +735,9 @@ void CA_SendTeamInfo(gedict_t *t)
 			break;
 		}
 
-		if (t->trackent && (t->trackent == NUM_FOR_EDICT(p)))
+		if (t->ct == ctSpec && t->trackent && (t->trackent == NUM_FOR_EDICT(p)))
 		{
-			continue; // we pseudo speccing such player, no point to send info about him
+			continue; // if we're spectating the player, don't send info about him
 		}
 
 		if (p->ca_ready || match_in_progress != 2) // be sure to send info if in prewar
@@ -1488,26 +1457,34 @@ void CA_player_pre_think(void)
 
 void CA_spectator_think(void)
 {
-	gedict_t *p;
+	gedict_t *target, *teammate;
+	int id;
 
-	p = PROG_TO_EDICT(self->s.v.goalentity); // who we are spectating
+	target = PROG_TO_EDICT(self->s.v.goalentity); // who we are spectating
 
-	if (p->ct == ctPlayer && !p->in_play && p->tracking_enabled)
+	// If spectating a dead player, switch to an alive teammate
+	if (target && target->ct == ctPlayer && !target->in_play)
 	{
-		// if the player you're observing is following someone else, hide the player model
-		self->hideentity = EDICT_TO_PROG(p->track_target);
-	}
-	else
-	{
-		self->hideentity = 0;
+		// Find any alive teammate
+		teammate = ca_find_player(world, target);
+		if (teammate && teammate->in_play && teammate != target)
+		{
+			// Use stuffcmd to switch the spectator to the alive teammate
+			if ((id = GetUserID(teammate)) > 0)
+			{
+				stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "track %d\n", id);
+			}
+		}
 	}
 	
-	if (p->ct == ctPlayer)
+	// Get the current viewing target (may have changed due to stuffcmd)
+	target = PROG_TO_EDICT(self->s.v.goalentity);
+	if (target && target->ct == ctPlayer)
 	{
 		if (match_in_progress == 2 && ra_match_fight == 2 && round_time > 2 && !ca_round_pause)
 		{
 			// any centerprint the player sees is sent to the spec
-			G_centerprint(self, "%s\n", p->cptext);
+			G_centerprint(self, "%s\n", target->cptext);
 		}
 	}
 }

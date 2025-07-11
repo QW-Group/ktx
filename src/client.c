@@ -2895,6 +2895,7 @@ void set_important_fields(gedict_t *p)
 void ClientDisconnect(void)
 {
 	extern void mv_stop_playback(void);
+	gedict_t *spec;
 
 	k_nochange = 0; // force recalculate frags scores
 
@@ -2908,6 +2909,25 @@ void ClientDisconnect(void)
 	mv_stop_playback();
 
 	del_from_specs_favourites(self);
+
+	// Clean up spectators tracking this player
+	for (spec = world; (spec = find_client(spec));)
+	{
+		if (spec->ct == ctSpec)
+		{
+			// Check if spectator is tracking the disconnecting player
+			if (spec->trackent == NUM_FOR_EDICT(self))
+			{
+				spec->trackent = 0;
+			}
+
+			// Check if spectator's goalentity is the disconnecting player
+			if (PROG_TO_EDICT(spec->s.v.goalentity) == self)
+			{
+				spec->s.v.goalentity = EDICT_TO_PROG(world);
+			}
+		}
+	}
 
 	ra_ClientDisconnect();
 
