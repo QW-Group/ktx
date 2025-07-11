@@ -57,6 +57,8 @@ void SendSpecInfo(gedict_t *spec, gedict_t *target_client);
 void del_from_specs_favourites(gedict_t *rm);
 void item_megahealth_rot(void);
 
+float WO_GetSpawnRadius(vec3_t origin);
+
 extern int g_matchstarttime;
 
 void CheckAll(void)
@@ -1014,6 +1016,26 @@ float CheckSpawnPoint(vec3_t v)
 
 /*
  ============
+ GetEffectiveSpawnRadius
+
+ Returns the effective spawn radius for a spawn point, considering wipeout custom radius
+ ============
+ */
+static float GetEffectiveSpawnRadius(gedict_t *spot, float default_radius)
+{
+	if (cvar("k_clan_arena") == 2)
+	{
+		float custom_radius = WO_GetSpawnRadius(spot->s.v.origin);
+		if (custom_radius > 0)
+		{
+			return custom_radius;
+		}
+	}
+	return default_radius;
+}
+
+/*
+ ============
  SelectSpawnPoint
 
  Returns the entity to spawn at
@@ -1029,6 +1051,7 @@ gedict_t* Sub_SelectSpawnPoint(char *spawnname)
 	int pcount;
 	int k_spw = cvar("k_spw");
 	int weight_sum = 0;	// used by "fair spawns"
+	float spawn_radius = 84;	// default spawn check radius
 
 // testinfo_player_start is only found in regioned levels
 	spot = find(world, FOFCLSN, "testplayerstart");
@@ -1060,8 +1083,11 @@ gedict_t* Sub_SelectSpawnPoint(char *spawnname)
 		totalspots++;
 		pcount = 0;
 
+		// Get spawn-specific radius if defined
+		float spot_radius = GetEffectiveSpawnRadius(spot, spawn_radius);
+
 		// find count of nearby players for 'spot'
-		for (thing = world; (thing = trap_findradius(thing, spot->s.v.origin, 84));)
+		for (thing = world; (thing = trap_findradius(thing, spot->s.v.origin, spot_radius));)
 		{
 			if ((thing->ct != ctPlayer) || ISDEAD(thing) || (thing == self))
 			{
@@ -1132,7 +1158,10 @@ gedict_t* Sub_SelectSpawnPoint(char *spawnname)
 
 			trap_makevectors(isRA() ? spot->mangle : spot->s.v.angles); // stupid ra uses mangles instead of angles
 
-			for (thing = world; (thing = trap_findradius(thing, spot->s.v.origin, 84));)
+			// Get spawn-specific radius for fallback spawn too
+			float fallback_radius = GetEffectiveSpawnRadius(spot, spawn_radius);
+
+			for (thing = world; (thing = trap_findradius(thing, spot->s.v.origin, fallback_radius));)
 			{
 				if ((thing->ct != ctPlayer) || ISDEAD(thing) || (thing == self))
 				{

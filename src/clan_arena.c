@@ -4,6 +4,36 @@
 
 #include "g_local.h"
 
+typedef struct wipeout_spawn_config_t
+{
+	vec3_t origin;          // spawn point coordinates
+	char *name;             // spawn point name (for debugging)
+	float custom_radius;    // custom radius for this spawn (0 = use default)
+} wipeout_spawn_config;
+
+typedef struct wipeout_map_spawns_t
+{
+	char *mapname;
+	wipeout_spawn_config *spawns;
+	int spawn_count;
+} wipeout_map_spawns;
+
+// Some spawns require a custom radius to prevent abuse
+// Using 0 defaults to a radius of 84 units
+static wipeout_spawn_config dm3_spawns[] = {
+	{ { -880, -232, -16 },	"tele/sng",	128 },
+	{ { 192, -208, -176 },	"big>ra",	0   },
+	{ { 1472, -928, -24 },	"ya box",	0   },
+	{ { 1520, 432, -88 },	"rl",		190 },
+	{ { -632, -680, -16 },	"tele/ra",	128 },
+	{ { 512, 768, 216 }, 	"lifts",	128 }
+};
+
+static wipeout_map_spawns wipeout_spawn_configs[] = {
+	{ "dm3", dm3_spawns, sizeof(dm3_spawns) / sizeof(dm3_spawns[0]) },
+	{ NULL, NULL, 0 }  // terminator
+};
+
 static int round_num;
 static int team1_score;
 static int team2_score;
@@ -26,6 +56,11 @@ void CA_OnePlayerStats(gedict_t *p, qbool series_over);
 void CA_AddLatePlayer(gedict_t *p, char *team);
 void EndRound(int alive_team);
 void show_tracking_info(gedict_t *p);
+
+// Wipeout spawn management functions
+static wipeout_spawn_config* WO_FindSpawnConfig(vec3_t origin);
+float WO_GetSpawnRadius(vec3_t origin);
+void WO_InitializeSpawns(void);
 
 gedict_t* ca_find_player(gedict_t *p, gedict_t *observer)
 {
@@ -225,6 +260,11 @@ void SM_PrepareCA(void)
 	if (!isCA())
 	{
 		return;
+	}
+
+	if (cvar("k_clan_arena") == 2)
+	{
+		WO_InitializeSpawns(); // init wipeout spawns
 	}
 
 	team1_score = team2_score = 0;
@@ -1702,6 +1742,71 @@ void CA_Frame(void)
 					stuffcmd(p, "play ca/sfround.wav\n");
 				}
 				G_cp2all("round %d", round_num);
+			}
+		}
+	}
+}
+
+// Find spawn configuration for a given origin
+static wipeout_spawn_config* WO_FindSpawnConfig(vec3_t origin)
+{
+	int i, j;
+	
+	if (cvar("k_clan_arena") != 2)  // Only for wipeout mode
+	{
+		return NULL;
+	}
+	
+	// Find current map configuration
+	for (i = 0; wipeout_spawn_configs[i].mapname; i++)
+	{
+		if (streq(mapname, wipeout_spawn_configs[i].mapname))
+		{
+			// Search for matching spawn point
+			for (j = 0; j < wipeout_spawn_configs[i].spawn_count; j++)
+			{
+				if (VectorCompare(origin, wipeout_spawn_configs[i].spawns[j].origin))
+				{
+					return &wipeout_spawn_configs[i].spawns[j];
+				}
+			}
+			break;
+		}
+	}
+	
+	return NULL;
+}
+
+// Get custom spawn radius for a spawn point
+float WO_GetSpawnRadius(vec3_t origin)
+{
+	wipeout_spawn_config *config = WO_FindSpawnConfig(origin);
+	
+	if (config && config->custom_radius > 0)
+	{
+		return config->custom_radius;
+	}
+	
+	return 0;  // Use default radius
+}
+
+// Initialize wipeout spawns (can be called to reload configurations)
+void WO_InitializeSpawns(void)
+{
+	if (cvar("k_clan_arena") == 2)
+	{
+		int i;
+		for (i = 0; wipeout_spawn_configs[i].mapname; i++)
+		{
+			if (streq(mapname, wipeout_spawn_configs[i].mapname))
+			{	
+				if (cvar("developer"))
+				{
+					G_bprint(2, "Wipeout: Using custom spawn configuration for %s (%d spawns)\n",
+                	mapname, wipeout_spawn_configs[i].spawn_count);
+				}
+                
+				break;
 			}
 		}
 	}
