@@ -1080,11 +1080,13 @@ gedict_t* Sub_SelectSpawnPoint(char *spawnname)
 
 	for (spot = world; (spot = find(spot, FOFCLSN, spawnname));)
 	{
+		float spot_radius;
+		
 		totalspots++;
 		pcount = 0;
 
 		// Get spawn-specific radius if defined
-		float spot_radius = GetEffectiveSpawnRadius(spot, spawn_radius);
+		spot_radius = GetEffectiveSpawnRadius(spot, spawn_radius);
 
 		// find count of nearby players for 'spot'
 		for (thing = world; (thing = trap_findradius(thing, spot->s.v.origin, spot_radius));)
@@ -1092,6 +1094,16 @@ gedict_t* Sub_SelectSpawnPoint(char *spawnname)
 			if ((thing->ct != ctPlayer) || ISDEAD(thing) || (thing == self))
 			{
 				continue; // ignore non player, or dead played, or self
+			}
+
+			// For wipeout mode, check line of sight before blocking spawn
+			if (cvar("k_clan_arena") == 2)
+			{
+				traceline(PASSVEC3(spot->s.v.origin), PASSVEC3(thing->s.v.origin), true, self);
+				if (g_globalvars.trace_fraction < 1)
+				{
+					continue; // Wall/obstruction between spawn and player, don't discard spawn
+				}
 			}
 
 			// k_spw 2 and 3 and 4 feature, if player is spawned not far away and run
@@ -1155,17 +1167,28 @@ gedict_t* Sub_SelectSpawnPoint(char *spawnname)
 		if (!match_in_progress || k_spw == 1 || (k_spw == 2 && !k_checkx))
 		{
 			vec3_t v1, v2;
+			float fallback_radius;
 
 			trap_makevectors(isRA() ? spot->mangle : spot->s.v.angles); // stupid ra uses mangles instead of angles
 
 			// Get spawn-specific radius for fallback spawn too
-			float fallback_radius = GetEffectiveSpawnRadius(spot, spawn_radius);
+			fallback_radius = GetEffectiveSpawnRadius(spot, spawn_radius);
 
 			for (thing = world; (thing = trap_findradius(thing, spot->s.v.origin, fallback_radius));)
 			{
 				if ((thing->ct != ctPlayer) || ISDEAD(thing) || (thing == self))
 				{
 					continue; // ignore non player, or dead played, or self
+				}
+
+				// For wipeout mode, check line of sight before moving player
+				if (cvar("k_clan_arena") == 2)
+				{
+					traceline(PASSVEC3(spot->s.v.origin), PASSVEC3(thing->s.v.origin), true, self);
+					if (g_globalvars.trace_fraction < 1)
+					{
+						continue; // Wall/obstruction between spawn and player, don't move them
+					}
 				}
 
 				VectorMA(thing->s.v.origin, -15.0, g_globalvars.v_up, v1);
