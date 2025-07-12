@@ -832,7 +832,7 @@ void CA_check_escape(gedict_t *targ, gedict_t *attacker)
 		// That's cool, but could be written cleaner in calc_respawn_time(). 
 		targ->round_deaths--;
 
-		G_bprint(2, "%s survives by &cff0%.0f&r seconds!\n", targ->netname, escape_time*1000);
+		G_bprint(2, "%s survives by &cff0%.0f&r milliseconds!\n", targ->netname, escape_time*1000);
 	}
 }
 
@@ -1234,7 +1234,7 @@ void EndRound(int alive_team)
 
 				if ((loser_respawn_time < 1) && (loser_respawn_time > 0))
 				{
-					G_cp2all("Team \x90%s\x91 wins the %s!\n\n\nTeam %s needed %.0f ms longer",
+					G_cp2all("Team \x90%s\x91 wins the %s!\n\n\nTeam %s needed %.0f ms to respawn",
 						cvar_string(va("_k_team%d", alive_team)), round_or_series, cvar_string(va("_k_team%d", loser_team)), loser_respawn_time*1000); 
 				}
 				else {
