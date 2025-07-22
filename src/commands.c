@@ -210,6 +210,7 @@ void iplist(void);
 void dmgfrags(void);
 void no_lg(void);
 void no_gl(void);
+void latejoin(void);
 void mv_cmd_playback(void);
 void mv_cmd_record(void);
 void mv_cmd_stop(void);
@@ -457,6 +458,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_HDPTOGGLE		"toggle allow handicap"
 #define CD_HANDICAP			"toggle handicap level"
 #define CD_NOWEAPON			"toggle allow any weapon"
+#define CD_LATEJOIN			"join a team after the game started"
 #define CD_CAM				"camera help text"
 #define CD_TRACKLIST		"trackers list"
 #define CD_FPSLIST			"fps list"
@@ -831,6 +833,7 @@ cmd_t cmds[] =
 	{ "hdptoggle", 					hdptoggle, 						0, 			CF_BOTH_ADMIN, 															CD_HDPTOGGLE },
 	{ "handicap", 					handicap, 						0, 			CF_PLAYER | CF_PARAMS | CF_MATCHLESS, 									CD_HANDICAP },
 	{ "noweapon", 					noweapon, 						0, 			CF_PLAYER | CF_PARAMS | CF_SPC_ADMIN, 									CD_NOWEAPON },
+	{ "latejoin", 					latejoin, 						0, 			CF_PLAYER | CF_PARAMS | CF_SPC_ADMIN, 									CD_LATEJOIN },
 
 	{ "cam", 						ShowCamHelp, 					0, 			CF_SPECTATOR | CF_MATCHLESS, 											CD_CAM },
 
@@ -2313,7 +2316,7 @@ void ModStatusVote(void)
 		}
 	}
 
-if (!match_in_progress)
+	if (!match_in_progress)
 	{
 		if ((votes = get_votes(OV_HOOKCLASSIC)))
 		{
@@ -5280,6 +5283,97 @@ void no_lg(void)
 void no_gl(void)
 {
 	stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "cmd noweapon gl\n");
+}
+
+void latejoin(void)
+{
+	int till;
+	char arg_2[1024];
+	gedict_t *p, *electguard;
+	int team_players = 0, other_team_players = 0;
+	
+	if (!match_in_progress) {
+		return;
+	}
+
+	if (!isCA()) {
+		G_sprint(self, 2, "Late-join requests are only allowed during CA or Wipeout.\n");
+		return;
+	}
+
+	if (self->ca_ready) {
+		G_sprint(self, 2, "You're already on a team.\n");
+		return;
+	}
+	
+	// Check if player is already being elected
+	if (is_elected(self, etLateJoin)) {
+		G_bprint(2, "%s %s!\n", self->netname, redtext("aborts late join request"));
+		AbortElect();
+		return;
+	}
+	
+	// Check if any election is in progress
+	if (get_votes(OV_ELECT)) {
+		G_sprint(self, 2, "An election is already in progress\n");
+		return;
+	}
+	
+	// Check election timeout
+	if ((till = Q_rint(self->v.elect_block_till - g_globalvars.time)) > 0) {
+		G_sprint(self, 2, "Wait %d second%s!\n", till, count_s(till));
+		return;
+	}
+	
+	// Get team argument
+	if (trap_CmdArgc() < 2) {
+		G_sprint(self, 2, "Usage: latejoin <team>\n");
+		G_sprint(self, 2, "Available teams: %s, %s \n", cvar_string("_k_team1"), cvar_string("_k_team2"));
+		return;
+	}
+	
+	trap_CmdArgv(1, arg_2, sizeof(arg_2));
+	
+	// Validate team name
+	if (!streq(arg_2, cvar_string("_k_team1")) && !streq(arg_2, cvar_string("_k_team2"))) {
+		G_sprint(self, 2, "Invalid team. Must be %s or %s \n", cvar_string("_k_team1"), cvar_string("_k_team2"));
+		return;
+	}
+	
+	// Count players on each team
+	for (p = world; (p = find_plr(p));) {
+		if (p->ca_ready) {
+			if (streq(getteam(p), arg_2)) {
+				team_players++;
+			} else {
+				other_team_players++;
+			}
+		}
+	}
+	
+	if (team_players > other_team_players) {
+		G_sprint(self, 2, "Team %s already has more players\n", arg_2);
+		return;
+	}
+	
+	// Store the requested team for later use
+	snprintf(self->ljteam, sizeof(self->ljteam), arg_2);
+	//self->ljteam = arg_2;
+	
+	// Start the election
+	self->v.elect = 1;
+	self->v.elect_type = etLateJoin;
+	
+	G_bprint(2, "%s has requested to %s team \x90%s\x91\n", 
+		self->netname, redtext("late-join"), arg_2);
+	G_bprint(2, "Team \x90%s\x91 members: type %s to approve\n", arg_2, redtext("yes"));
+	
+	// Spawn election timeout entity
+	electguard = spawn();
+	electguard->s.v.owner = EDICT_TO_PROG(world);
+	electguard->classname = "electguard";
+	electguard->think = (func_t) ElectThink;
+	electguard->s.v.nextthink = g_globalvars.time + 30; // 30 second timeout
 }
 
 void tracklist(void)

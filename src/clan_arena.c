@@ -4,6 +4,36 @@
 
 #include "g_local.h"
 
+typedef struct wipeout_spawn_config_t
+{
+	vec3_t origin;          // spawn point coordinates
+	char *name;             // spawn point name (for debugging)
+	float custom_radius;    // custom radius for this spawn (0 = use default)
+} wipeout_spawn_config;
+
+typedef struct wipeout_map_spawns_t
+{
+	char *mapname;
+	wipeout_spawn_config *spawns;
+	int spawn_count;
+} wipeout_map_spawns;
+
+// Some spawns require a custom radius to prevent abuse
+// Using 0 defaults to a radius of 84 units
+static wipeout_spawn_config dm3_spawns[] = {
+	{ { -880, -232, -16 },	"tele/sng",	128 },
+	{ { 192, -208, -176 },	"big>ra",	0   },
+	{ { 1472, -928, -24 },	"ya box",	0   },
+	{ { 1520, 432, -88 },	"rl",		300 },
+	{ { -632, -680, -16 },	"tele/ra",	128 },
+	{ { 512, 768, 216 }, 	"lifts",	128 }
+};
+
+static wipeout_map_spawns wipeout_spawn_configs[] = {
+	{ "dm3", dm3_spawns, sizeof(dm3_spawns) / sizeof(dm3_spawns[0]) },
+	{ NULL, NULL, 0 }  // terminator
+};
+
 static int round_num;
 static int team1_score;
 static int team2_score;
@@ -23,8 +53,14 @@ void CA_TeamsStats(void);
 void CA_SendTeamInfo(gedict_t *t);
 void print_player_stats(qbool series_over);
 void CA_OnePlayerStats(gedict_t *p, qbool series_over);
+void CA_AddLatePlayer(gedict_t *p, char *team);
 void EndRound(int alive_team);
 void show_tracking_info(gedict_t *p);
+
+// Wipeout spawn management functions
+static wipeout_spawn_config* WO_FindSpawnConfig(vec3_t origin);
+float WO_GetSpawnRadius(vec3_t origin);
+void WO_InitializeSpawns(void);
 
 gedict_t* ca_find_player(gedict_t *p, gedict_t *observer)
 {
@@ -101,6 +137,8 @@ int calc_respawn_time(gedict_t *p, int offset)
 		teamsize++;
 	}
 
+	p->is_solo = teamsize == 1 ? 1 : 0;
+
 	multiple = bound(3, teamsize+1, 6);	// first respawn won't take more than 6 seconds regardless of team size
 
 	if (isWipeout && (p->round_deaths+offset <= max_deaths))
@@ -109,6 +147,11 @@ int calc_respawn_time(gedict_t *p, int offset)
 		// if 3 players on team, the spawn times are 4, 8, 16, 24
 		// if 2 players on team, the spawn times are 3, 6, 12, 18
 		time = p->round_deaths+offset == 1 ? multiple : (p->round_deaths-1+offset) * (multiple*2);
+	}
+
+	// If you're the only player on your team, you get one free instant respawn on first death
+	if (isWipeout && p->is_solo && p->round_deaths+offset == 1) {
+		time = 0;
 	}
 
 	return time;
@@ -219,6 +262,11 @@ void SM_PrepareCA(void)
 		return;
 	}
 
+	if (cvar("k_clan_arena") == 2)
+	{
+		WO_InitializeSpawns(); // init wipeout spawns
+	}
+
 	team1_score = team2_score = 0;
 	round_num = 1;
 
@@ -247,6 +295,7 @@ qbool isCA(void)
 	return (isTeam() && cvar("k_clan_arena"));
 }
 
+// Used to determine value of ca_alive when PutClientInServer() is called
 qbool CA_CheckAlive(gedict_t *p)
 {
 	if (p)
@@ -271,6 +320,22 @@ qbool CA_CheckAlive(gedict_t *p)
 	{
 		return false;
 	}
+}
+
+void CA_AddLatePlayer(gedict_t *p, char *team)
+{
+	p->ready = 1;
+	p->ca_ready = 1;
+	p->lj_accepted = 1; // Set flag to allow team change in FixPlayerTeam
+
+	SetUserInfo(p, "team", team, 0);
+	stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "team \"%s\"\n", team);
+	G_bprint(2, "%s late-joined team \x90%s\x91\n", p->netname, team);
+
+	p->lj_accepted = 0;  			// clear the flag immediately
+	p->ljteam[0] = '\0';			// clear the requested team name
+	p->can_respawn = false;			// can't join mid-round
+	p->seconds_to_respawn = 999; 	// don't show countdown
 }
 
 void CA_MatchBreak(void)
@@ -301,10 +366,6 @@ void CA_MatchBreak(void)
 void track_player(gedict_t *observer)
 {
 	gedict_t *player = ca_get_player(observer);
-	vec3_t delta;
-	float vlen;
-	int follow_distance;
-	int upward_distance;
 
 	if (player && !observer->in_play && observer->tracking_enabled)
 	{
@@ -331,37 +392,12 @@ void track_player(gedict_t *observer)
 			observer->track_target = player;
 		}
 
-		// { spectate in 1st person
-		follow_distance = -10;
-		upward_distance = 0;
-		observer->hideentity = EDICT_TO_PROG(player); // in this mode we want to hide player model for watcher's view
-		VectorCopy(player->s.v.v_angle, observer->s.v.angles);
-		// }
+		// Use trackent for smooth tracking
+		observer->trackent = NUM_FOR_EDICT(player);
+		observer->hideentity = EDICT_TO_PROG(player); // Hide tracked player model
 
-		observer->s.v.fixangle = true; // force client v_angle (disable in 3rd person view)
-
-		trap_makevectors(player->s.v.angles);
-		VectorMA(player->s.v.origin, follow_distance, g_globalvars.v_forward, observer->s.v.origin);
-		VectorMA(observer->s.v.origin, upward_distance, g_globalvars.v_up, observer->s.v.origin);
-
-		// avoid positionning in walls
-		traceline(PASSVEC3(player->s.v.origin), PASSVEC3(observer->s.v.origin), false, player);
-		VectorCopy(g_globalvars.trace_endpos, observer->s.v.origin);
-
-		if (g_globalvars.trace_fraction == 1)
-		{
-			VectorCopy(g_globalvars.trace_endpos, observer->s.v.origin);
-			VectorMA(observer->s.v.origin, 10, g_globalvars.v_forward, observer->s.v.origin);
-		}
-		else
-		{
-			VectorSubtract(g_globalvars.trace_endpos, player->s.v.origin, delta);
-			vlen = VectorLength(delta);
-			vlen = vlen - 40;
-			VectorNormalize(delta);
-			VectorScale(delta, vlen, delta);
-			VectorAdd(player->s.v.origin, delta, observer->s.v.origin);
-		}
+		// Lock observer's orientation to player POV
+		observer->s.v.movetype = MOVETYPE_LOCK;
 
 		// set observer's health/armor/ammo/weapon to match the player's
 		observer->s.v.ammo_nails = player->s.v.ammo_nails;
@@ -377,17 +413,14 @@ void track_player(gedict_t *observer)
 		observer->weaponmodel = player->weaponmodel;
 		observer->s.v.weaponframe = player->s.v.weaponframe;
 
-		// smooth playing for ezq / zq
-		observer->s.v.movetype = MOVETYPE_LOCK;
-
 		show_tracking_info(observer);
 	}
-
-	if (!player || !observer->tracking_enabled)
+	else
 	{
-		// restore movement and show racer entity
-		observer->s.v.movetype = MOVETYPE_NOCLIP;
+		// Clear tracking
+		observer->trackent = 0;
 		observer->hideentity = 0;
+		observer->s.v.movetype = MOVETYPE_NOCLIP;
 
 		// set health/item values back to nothing
 		observer->s.v.ammo_nails = 0;
@@ -522,9 +555,10 @@ void CA_PutClientInServer(void)
 		// previous round will be invisible
 		self->hideentity = 0;
 
-		// reset escape time and last_alive every spawn
+		// reset escape_time, last_alive, and regen_timer every spawn
 		self->escape_time = 0;
 		self->last_alive_active = false;
+		self->regen_timer = 0;
 
 		// default to spawning with rl
 		self->s.v.weapon = IT_ROCKET_LAUNCHER;
@@ -575,6 +609,7 @@ void CA_PutClientInServer(void)
 
 		// tracking enabled by default
 		self->tracking_enabled = 1;
+		self->trackent = 0; // Initialize trackent for dead players
 
 		self->in_play = false;
 		self->round_deaths++; //increment death count for wipeout
@@ -700,9 +735,9 @@ void CA_SendTeamInfo(gedict_t *t)
 			break;
 		}
 
-		if (t->trackent && (t->trackent == NUM_FOR_EDICT(p)))
+		if (t->ct == ctSpec && t->trackent && (t->trackent == NUM_FOR_EDICT(p)))
 		{
-			continue; // we pseudo speccing such player, no point to send info about him
+			continue; // if we're spectating the player, don't send info about him
 		}
 
 		if (p->ca_ready || match_in_progress != 2) // be sure to send info if in prewar
@@ -797,7 +832,43 @@ void CA_check_escape(gedict_t *targ, gedict_t *attacker)
 		// That's cool, but could be written cleaner in calc_respawn_time(). 
 		targ->round_deaths--;
 
-		G_bprint(2, "%s survives by &cff0%.3f&r seconds!\n", targ->netname, escape_time);
+		G_bprint(2, "%s survives by &cff0%.0f&r milliseconds!\n", targ->netname, escape_time*1000);
+	}
+}
+
+// wipeout: solo players (one-man teams) who don't take damage for 5 seconds
+// after earning a frag get their health/armor/ammo regenerated.
+void check_solo_regen(gedict_t *p)
+{
+	int required_time = p->round_kills * 5;
+	int time_since_kill = p->regen_timer ? g_globalvars.time - p->regen_timer : 0;
+
+	if (!p->is_solo)
+	{
+		return;
+	}
+
+	if (p->regen_timer && time_since_kill > required_time)
+	{
+		// regenerate health/armore/ammo. play megahealth sound or secret sound
+		stuffcmd(p, "play misc/secret.wav\n");
+
+		if (!((int)self->s.v.items & IT_ARMOR3))
+		{
+			p->s.v.items += IT_ARMOR3;
+		}
+		
+		p->s.v.armorvalue = 200;
+		p->s.v.armortype = 0.8;
+		p->s.v.health = 100;
+		p->s.v.ammo_nails = 200;
+		p->s.v.ammo_shells = 100;
+		p->s.v.ammo_rockets = 50;
+		p->s.v.ammo_cells = 150;
+		p->ca_ammo_grenades = 6;
+
+		// reset the timer
+		p->regen_timer = 0;	
 	}
 }
 
@@ -807,6 +878,12 @@ void CA_ClientObituary(gedict_t *targ, gedict_t *attacker)
 	
 	if (cvar("k_clan_arena") == 2)	// Wipeout only
 	{
+		// check if attacker is a solo player and start regen timer
+		if (attacker->is_solo && !attacker->regen_timer)
+		{
+			attacker->regen_timer = g_globalvars.time;
+		}
+
 		// check if targ was a lone survivor waiting for teammate to spawn
 		CA_check_escape(targ, attacker);
 	}
@@ -846,6 +923,39 @@ void CA_ClientObituary(gedict_t *targ, gedict_t *attacker)
 	// }
 }
 
+// check if a team is a solo player on first death
+static qbool is_solo_team_first_death(char *team)
+{
+	gedict_t *p;
+	int team_size = 0;
+	gedict_t *team_player = NULL;
+
+	if (!team || cvar("k_clan_arena") != 2) // Only applies to wipeout
+	{
+		return false;
+	}
+
+	for (p = world; (p = find_plr_same_team(p, team));)
+	{
+		if (p->ca_ready)
+		{
+			team_player = p;
+			team_size++;
+
+			if (team_size > 1)
+			{
+				return false;
+			}
+		}
+	}
+
+	return (team_player
+		&& team_player->is_solo				// redundant but free, so why not
+		&& team_player->round_deaths <= 1	// "<= 1" avoids a race condition
+		&& team_player->can_respawn			// makes sures player didn't /kill
+	);
+}
+
 // return 0 if there no alive teams
 // return 1 if there one alive team and alive_team point to 1 or 2 wich refering to _k_team1 or _k_team2 cvars
 // return 2 if there at least two alive teams
@@ -854,6 +964,7 @@ static int CA_check_alive_teams(int *alive_team)
 	gedict_t *p;
 	qbool few_alive_teams = false;
 	char *first_team = NULL;
+	char *dead_team = NULL;
 
 	if (alive_team)
 	{
@@ -894,7 +1005,25 @@ static int CA_check_alive_teams(int *alive_team)
 			*alive_team = streq(first_team, cvar_string("_k_team1")) ? 1 : 2;
 		}
 
+		// Wipeout only:
+		// Check if the "dead" team is actually a solo player on first death
+		dead_team = streq(first_team, cvar_string("_k_team1")) ? cvar_string("_k_team2") : cvar_string("_k_team1");
+		if (is_solo_team_first_death(dead_team))
+		{
+			return 2; // Both teams still in play - solo player gets instant respawn
+		}
+
 		return 1;
+	}
+	else
+	{	
+		// Wipeout only:
+		// Both teams are "dead" but one or both teams may be a solo player on his first death
+		if (is_solo_team_first_death(cvar_string("_k_team1")) || 
+		    is_solo_team_first_death(cvar_string("_k_team2")))
+		{
+			return 2; // At least one team consists of a solo player on first death
+		}
 	}
 
 	return 0;
@@ -1103,10 +1232,10 @@ void EndRound(int alive_team)
 						 "%s", ((alive_team == 1 && team1_score == (CA_wins_required()-1)) ||
 						 (alive_team == 2 && team2_score == (CA_wins_required()-1))) ? "series" : "round");
 
-				if ((loser_respawn_time < 2) && (loser_respawn_time > 0))
+				if ((loser_respawn_time < 1) && (loser_respawn_time > 0))
 				{
-					G_cp2all("Team \x90%s\x91 wins the %s!\n\n\nTeam %s needed %.3f more seconds",
-						cvar_string(va("_k_team%d", alive_team)), round_or_series, cvar_string(va("_k_team%d", loser_team)), loser_respawn_time); 
+					G_cp2all("Team \x90%s\x91 wins the %s!\n\n\nTeam %s needed %.0f ms to respawn",
+						cvar_string(va("_k_team%d", alive_team)), round_or_series, cvar_string(va("_k_team%d", loser_team)), loser_respawn_time*1000); 
 				}
 				else {
 					G_cp2all("Team \x90%s\x91 wins the %s!",
@@ -1249,17 +1378,15 @@ void CA_player_pre_think(void)
 {
 	if (isCA())
 	{
+		float alive_time = self->in_play ? g_globalvars.time - self->time_of_respawn : 0;
+
 		CA_show_greeting(self);
-		
-		// Set this player to solid so we trigger checkpoints & teleports during move
-		self->s.v.solid = (ISDEAD(self) ? SOLID_NOT : SOLID_SLIDEBOX);
 		
 		if ((self->s.v.mins[0] == 0) || (self->s.v.mins[1] == 0))
 		{
 			// This can happen if the world 'squashes' a SOLID_NOT entity, mvdsv will turn into corpse
 			setsize(self, PASSVEC3(VEC_HULL_MIN), PASSVEC3(VEC_HULL_MAX));
 		}
-
 		setorigin(self, PASSVEC3(self->s.v.origin));
 
 		if ((self->ct == ctPlayer) && (ISDEAD(self) || !self->in_play))
@@ -1287,13 +1414,14 @@ void CA_player_pre_think(void)
 			track_player(self); // enable tracking by default while dead
 		}
 
-		if (self->in_play)
+		// wipeout: if you're a solo and waiting for health regen
+		if (cvar("k_clan_arena") == 2 && self->is_solo && self->regen_timer)
 		{
-			self->alive_time = g_globalvars.time - self->time_of_respawn;
+			check_solo_regen(self);
 		}
 
 		// take no damage to health/armor within 1 second of respawn or during endround
-		if (self->in_play && ((self->alive_time >= 1) || !self->round_deaths) && !ca_round_pause)
+		if (self->in_play && ((alive_time >= 1) || !self->round_deaths) && !ca_round_pause)
 		{
 			self->no_pain = false;
 		}
@@ -1329,26 +1457,34 @@ void CA_player_pre_think(void)
 
 void CA_spectator_think(void)
 {
-	gedict_t *p;
+	gedict_t *target, *teammate;
+	int id;
 
-	p = PROG_TO_EDICT(self->s.v.goalentity); // who we are spectating
+	target = PROG_TO_EDICT(self->s.v.goalentity); // who we are spectating
 
-	if (p->ct == ctPlayer && !p->in_play && p->tracking_enabled)
+	// If spectating a dead player, switch to an alive teammate
+	if (target && target->ct == ctPlayer && !target->in_play)
 	{
-		// if the player you're observing is following someone else, hide the player model
-		self->hideentity = EDICT_TO_PROG(p->track_target);
-	}
-	else
-	{
-		self->hideentity = 0;
+		// Find any alive teammate
+		teammate = ca_find_player(world, target);
+		if (teammate && teammate->in_play && teammate != target)
+		{
+			// Use stuffcmd to switch the spectator to the alive teammate
+			if ((id = GetUserID(teammate)) > 0)
+			{
+				stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "track %d\n", id);
+			}
+		}
 	}
 	
-	if (p->ct == ctPlayer)
+	// Get the current viewing target (may have changed due to stuffcmd)
+	target = PROG_TO_EDICT(self->s.v.goalentity);
+	if (target && target->ct == ctPlayer)
 	{
 		if (match_in_progress == 2 && ra_match_fight == 2 && round_time > 2 && !ca_round_pause)
 		{
 			// any centerprint the player sees is sent to the spec
-			G_centerprint(self, "%s\n", p->cptext);
+			G_centerprint(self, "%s\n", target->cptext);
 		}
 	}
 }
@@ -1376,6 +1512,7 @@ void CA_Frame(void)
 	// if k_clan_arena is 2, we're playing wipeout
 	if (ra_match_fight == 2 && !ca_round_pause && cvar("k_clan_arena") == 2)
 	{
+		float alive_time;
 		int last_alive;
 		int e_last_alive;
 		char str_last_alive[25];
@@ -1383,6 +1520,7 @@ void CA_Frame(void)
 
 		for (p = world; (p = find_plr(p));)
 		{
+			alive_time = p->in_play ? g_globalvars.time - p->time_of_respawn : 0;
 			last_alive = (int)ceil(last_alive_time(p));
 			e_last_alive = (int)ceil(enemy_last_alive_time(p));
 			
@@ -1404,7 +1542,7 @@ void CA_Frame(void)
 					k_respawn(p, true);
 
 					p->seconds_to_respawn = calc_respawn_time(p, 1);
-					p->time_of_respawn = g_globalvars.time; // resets alive_time to 0
+					p->time_of_respawn = g_globalvars.time; // resets alive_time calculations to 0
 				}
 				else
 				{
@@ -1416,8 +1554,17 @@ void CA_Frame(void)
 					}
 				}
 			}
+			// you're a solo player... prioritize regen info
+			else if (p->is_solo && p->regen_timer)
+			{
+				int countdown = max(1, (p->round_kills*5) - (int)(g_globalvars.time - p->regen_timer) + 1 );
+				snprintf(p->cptext, sizeof(p->cptext), "\n\n\n\n\n\n%s: %d\n\n\n\n",
+								"regenerating health", countdown);
+
+				G_centerprint(p, "%s", p->cptext);
+			}
 			// both you and the enemy are the last alive on your team
-			else if (p->in_play && p->alive_time > 2 && last_alive && e_last_alive)
+			else if (p->in_play && alive_time > 2 && last_alive && e_last_alive)
 			{
 				snprintf(str_last_alive, sizeof(str_last_alive), "%d", last_alive);
 				snprintf(p->cptext, sizeof(p->cptext), "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n",
@@ -1426,7 +1573,7 @@ void CA_Frame(void)
 				G_centerprint(p, "%s", p->cptext);
 			}
 			// you're the last alive on your team versus two or more enemies... hide!
-			else if (p->in_play && p->alive_time > 2 && last_alive)
+			else if (p->in_play && alive_time > 2 && last_alive)
 			{
 				snprintf(str_last_alive, sizeof(str_last_alive), "%d", last_alive);
 				snprintf(p->cptext, sizeof(p->cptext), "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n",
@@ -1435,7 +1582,7 @@ void CA_Frame(void)
 				G_centerprint(p, "%s", p->cptext);
 			}
 			// only one enemy remains... find him!
-			else if (p->in_play && p->alive_time > 2 && e_last_alive)
+			else if (p->in_play && alive_time > 2 && e_last_alive)
 			{
 				snprintf(str_e_last_alive, sizeof(str_e_last_alive), "%d", e_last_alive);
 				snprintf(p->cptext, sizeof(p->cptext), "\n\n\n\n\n\n%s\n\n\n%s\n\n\n\n",
@@ -1443,7 +1590,7 @@ void CA_Frame(void)
 
 				G_centerprint(p, "%s", p->cptext);
 			}
-			else if (p->in_play && p->alive_time > 2)
+			else if (p->in_play && alive_time > 2)
 			{
 				snprintf(p->cptext, sizeof(p->cptext), " ");
 				G_centerprint(p, "%s", p->cptext);
@@ -1451,7 +1598,7 @@ void CA_Frame(void)
 		}
 	}
 
-	// check if there exist only one team with alive players and others are eluminated, if so then its time to start ca countdown
+	// check if there exist only one team with alive players and others are eliminated, if so then its time to start ca countdown
 	if (ra_match_fight == 2 || (ra_match_fight == 1 && ca_round_pause == 1))
 	{
 		int alive_team = 0;
@@ -1530,7 +1677,7 @@ void CA_Frame(void)
 
 				if (p->ca_ready)
 				{
-					p->time_of_respawn = g_globalvars.time; // resets alive_time to 0
+					p->time_of_respawn = g_globalvars.time; // resets alive_time calculations to 0
 				}
 			}
 			
@@ -1572,6 +1719,71 @@ void CA_Frame(void)
 					stuffcmd(p, "play ca/sfround.wav\n");
 				}
 				G_cp2all("round %d", round_num);
+			}
+		}
+	}
+}
+
+// Find spawn configuration for a given origin
+static wipeout_spawn_config* WO_FindSpawnConfig(vec3_t origin)
+{
+	int i, j;
+	
+	if (cvar("k_clan_arena") != 2)  // Only for wipeout mode
+	{
+		return NULL;
+	}
+	
+	// Find current map configuration
+	for (i = 0; wipeout_spawn_configs[i].mapname; i++)
+	{
+		if (streq(mapname, wipeout_spawn_configs[i].mapname))
+		{
+			// Search for matching spawn point
+			for (j = 0; j < wipeout_spawn_configs[i].spawn_count; j++)
+			{
+				if (VectorCompare(origin, wipeout_spawn_configs[i].spawns[j].origin))
+				{
+					return &wipeout_spawn_configs[i].spawns[j];
+				}
+			}
+			break;
+		}
+	}
+	
+	return NULL;
+}
+
+// Get custom spawn radius for a spawn point
+float WO_GetSpawnRadius(vec3_t origin)
+{
+	wipeout_spawn_config *config = WO_FindSpawnConfig(origin);
+	
+	if (config && config->custom_radius > 0)
+	{
+		return config->custom_radius;
+	}
+	
+	return 0;  // Use default radius
+}
+
+// Initialize wipeout spawns (can be called to reload configurations)
+void WO_InitializeSpawns(void)
+{
+	if (cvar("k_clan_arena") == 2)
+	{
+		int i;
+		for (i = 0; wipeout_spawn_configs[i].mapname; i++)
+		{
+			if (streq(mapname, wipeout_spawn_configs[i].mapname))
+			{	
+				if (cvar("developer"))
+				{
+					G_bprint(2, "Wipeout: Using custom spawn configuration for %s (%d spawns)\n",
+                	mapname, wipeout_spawn_configs[i].spawn_count);
+				}
+                
+				break;
 			}
 		}
 	}

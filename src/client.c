@@ -57,6 +57,8 @@ void SendSpecInfo(gedict_t *spec, gedict_t *target_client);
 void del_from_specs_favourites(gedict_t *rm);
 void item_megahealth_rot(void);
 
+float WO_GetSpawnRadius(vec3_t origin);
+
 extern int g_matchstarttime;
 
 void CheckAll(void)
@@ -1014,6 +1016,26 @@ float CheckSpawnPoint(vec3_t v)
 
 /*
  ============
+ GetEffectiveSpawnRadius
+
+ Returns the effective spawn radius for a spawn point, considering wipeout custom radius
+ ============
+ */
+static float GetEffectiveSpawnRadius(gedict_t *spot, float default_radius)
+{
+	if (cvar("k_clan_arena") == 2)
+	{
+		float custom_radius = WO_GetSpawnRadius(spot->s.v.origin);
+		if (custom_radius > 0)
+		{
+			return custom_radius;
+		}
+	}
+	return default_radius;
+}
+
+/*
+ ============
  SelectSpawnPoint
 
  Returns the entity to spawn at
@@ -1029,6 +1051,7 @@ gedict_t* Sub_SelectSpawnPoint(char *spawnname)
 	int pcount;
 	int k_spw = cvar("k_spw");
 	int weight_sum = 0;	// used by "fair spawns"
+	float spawn_radius = 84;	// default spawn check radius
 
 // testinfo_player_start is only found in regioned levels
 	spot = find(world, FOFCLSN, "testplayerstart");
@@ -1057,15 +1080,30 @@ gedict_t* Sub_SelectSpawnPoint(char *spawnname)
 
 	for (spot = world; (spot = find(spot, FOFCLSN, spawnname));)
 	{
+		float spot_radius;
+		
 		totalspots++;
 		pcount = 0;
 
+		// Get spawn-specific radius if defined
+		spot_radius = GetEffectiveSpawnRadius(spot, spawn_radius);
+
 		// find count of nearby players for 'spot'
-		for (thing = world; (thing = trap_findradius(thing, spot->s.v.origin, 84));)
+		for (thing = world; (thing = trap_findradius(thing, spot->s.v.origin, spot_radius));)
 		{
 			if ((thing->ct != ctPlayer) || ISDEAD(thing) || (thing == self))
 			{
 				continue; // ignore non player, or dead played, or self
+			}
+
+			// For wipeout mode, check line of sight before blocking spawn
+			if (cvar("k_clan_arena") == 2)
+			{
+				traceline(PASSVEC3(spot->s.v.origin), PASSVEC3(thing->s.v.origin), true, self);
+				if (g_globalvars.trace_fraction < 1)
+				{
+					continue; // Wall/obstruction between spawn and player, don't discard spawn
+				}
 			}
 
 			// k_spw 2 and 3 and 4 feature, if player is spawned not far away and run
@@ -1129,14 +1167,28 @@ gedict_t* Sub_SelectSpawnPoint(char *spawnname)
 		if (!match_in_progress || k_spw == 1 || (k_spw == 2 && !k_checkx))
 		{
 			vec3_t v1, v2;
+			float fallback_radius;
 
 			trap_makevectors(isRA() ? spot->mangle : spot->s.v.angles); // stupid ra uses mangles instead of angles
 
-			for (thing = world; (thing = trap_findradius(thing, spot->s.v.origin, 84));)
+			// Get spawn-specific radius for fallback spawn too
+			fallback_radius = GetEffectiveSpawnRadius(spot, spawn_radius);
+
+			for (thing = world; (thing = trap_findradius(thing, spot->s.v.origin, fallback_radius));)
 			{
 				if ((thing->ct != ctPlayer) || ISDEAD(thing) || (thing == self))
 				{
 					continue; // ignore non player, or dead played, or self
+				}
+
+				// For wipeout mode, check line of sight before moving player
+				if (cvar("k_clan_arena") == 2)
+				{
+					traceline(PASSVEC3(spot->s.v.origin), PASSVEC3(thing->s.v.origin), true, self);
+					if (g_globalvars.trace_fraction < 1)
+					{
+						continue; // Wall/obstruction between spawn and player, don't move them
+					}
 				}
 
 				VectorMA(thing->s.v.origin, -15.0, g_globalvars.v_up, v1);
@@ -1740,7 +1792,7 @@ void PutClientInServer(void)
 	self->classname = "player";
 	self->s.v.health = 100;
 	self->s.v.takedamage = DAMAGE_AIM;
-	self->s.v.solid = self->leavemealone ? SOLID_TRIGGER : SOLID_SLIDEBOX;
+	self->s.v.solid = isCA() ? SOLID_NOT : self->leavemealone ? SOLID_TRIGGER : SOLID_SLIDEBOX;
 	self->s.v.movetype = MOVETYPE_WALK;
 	self->show_hostile = 0;
 	self->s.v.max_health = 100;
@@ -1937,6 +1989,37 @@ void PutClientInServer(void)
 		{
 			tele_flags |= TFLAGS_FOG_DST | TFLAGS_SND_DST;
 		}
+	}
+
+	if (isCA())
+	{
+		CA_PutClientInServer();
+		W_SetCurrentAmmo(); // important shit, not only ammo
+		teleport_player(self, self->s.v.origin, self->s.v.angles, tele_flags);
+
+		g_globalvars.msg_entity = EDICT_TO_PROG(self);
+		WriteByte(MSG_ONE, 38 /*svc_updatestatlong*/);
+		WriteByte(MSG_ONE, 18 /*STAT_MATCHSTARTTIME*/);
+		WriteLong(MSG_ONE, g_matchstarttime);
+
+#ifdef BOT_SUPPORT
+		BotClientEntersEvent(self, spot);
+#endif
+
+		// dusty: CA/wipeout must set solid state AFTER the spawn/teleport_player()
+		// otherwise player will become "solid" while tracking other players and
+		// get hit by projectiles.
+		if (match_in_progress)
+		{
+			self->s.v.solid = self->in_play ? SOLID_SLIDEBOX : SOLID_NOT;
+		}
+		else
+		{
+			self->s.v.solid = self->leavemealone ? SOLID_TRIGGER : SOLID_SLIDEBOX;
+		}
+		setorigin(self, PASSVEC3(self->s.v.origin));
+
+		return;
 	}
 
 	if (isRA())
@@ -2257,11 +2340,6 @@ void PutClientInServer(void)
 			self->s.v.armortype = 0.3;
 			self->s.v.items = (int)self->s.v.items | IT_ARMOR1; // add green armor
 		}
-	}
-
-	if (isCA())
-	{
-		CA_PutClientInServer();
 	}
 
 	// remove particular weapons in dmm4
@@ -2817,6 +2895,7 @@ void set_important_fields(gedict_t *p)
 void ClientDisconnect(void)
 {
 	extern void mv_stop_playback(void);
+	gedict_t *spec;
 
 	k_nochange = 0; // force recalculate frags scores
 
@@ -2830,6 +2909,25 @@ void ClientDisconnect(void)
 	mv_stop_playback();
 
 	del_from_specs_favourites(self);
+
+	// Clean up spectators tracking this player
+	for (spec = world; (spec = find_client(spec));)
+	{
+		if (spec->ct == ctSpec)
+		{
+			// Check if spectator is tracking the disconnecting player
+			if (spec->trackent == NUM_FOR_EDICT(self))
+			{
+				spec->trackent = 0;
+			}
+
+			// Check if spectator's goalentity is the disconnecting player
+			if (PROG_TO_EDICT(spec->s.v.goalentity) == self)
+			{
+				spec->s.v.goalentity = EDICT_TO_PROG(world);
+			}
+		}
+	}
 
 	ra_ClientDisconnect();
 
