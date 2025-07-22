@@ -462,6 +462,21 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 		return;
 	}
 
+	// don't bounce around players in prewar who wish to be left alone
+	if (match_in_progress != 2 && targ->leavemealone)
+	{
+		if (attacker != targ && ((targ->ct == ctPlayer) && (attacker->ct == ctPlayer)))
+		{
+			return;
+		}
+		else if (dtTELE1 == targ->deathtype	// always do tele damage
+				|| dtTELE2 == targ->deathtype	// always do tele damage
+				|| dtTELE3 == targ->deathtype)	// always do tele damage
+		{
+			// telefrags still work, to avoid getting stuck
+		}
+	}
+
 	// can't damage other players in race
 	if (isRACE() && (attacker != targ))
 	{

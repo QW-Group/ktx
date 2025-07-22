@@ -914,6 +914,7 @@ static void SM_PrepareClients(void)
 	for (p = world; (p = find_plr(p));)
 	{
 		players[player_count++] = p;
+		p->leavemealone = false;		// can't have this enabled during match
 	}
 
 	for (i = player_count - 1; i > 0; i--)
