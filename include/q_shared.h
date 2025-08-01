@@ -143,7 +143,7 @@ size_t strlcat(char *dst, const char *src, size_t siz);
 typedef unsigned char byte;
 typedef enum
 {
-	false, true
+	qfalse, qtrue
 } qbool;
 
 #ifndef NULL
