@@ -78,6 +78,21 @@ force CMake generator to be unix makefiles
 build KTX for ``linux-amd64`` and ``QVM`` version, you can provide
 any platform combinations.
 
+### Build with Visual Studio
+
+While CMake is supported by Visual Studio nowadays, CMake can also generate
+a solution via:
+
+```
+cmake -B builddir -G "Visual Studio 17 2022"
+```
+
+This produces a multi-config build that can be invoked as MSBuild from command line via:
+
+```
+cmake --build builddir --config Release
+```
+
 ## Versioning
 
 For the versions available, see the [tags on this repository][ktx-tags].
