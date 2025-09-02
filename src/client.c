@@ -43,23 +43,25 @@ vec3_t VEC_HULL2_MAX =
 int modelindex_eyes, modelindex_player, vwep_index;
 
 qbool can_prewar(qbool fire);
-void IdlebotCheck();
-void CheckAll();
-void PlayerStats();
-void ExitCaptain();
-void CheckFinishCaptain();
-void MakeMOTD();
-void ImpulseCommands();
-void StartDie();
-void ZeroFpsStats();
-void item_megahealth_rot();
-
+void IdlebotCheck(void);
+void CheckAll(void);
+void PlayerStats(void);
+void ExitCaptain(void);
+void CheckFinishCaptain(void);
+void MakeMOTD(void);
+void ImpulseCommands(void);
+void StartDie(void);
+void ZeroFpsStats(void);
+void item_megahealth_rot(void);
+void SendSpecInfo(gedict_t *spec, gedict_t *target_client);
 void del_from_specs_favourites(gedict_t *rm);
 void item_megahealth_rot(void);
 
+float WO_GetSpawnRadius(vec3_t origin);
+
 extern int g_matchstarttime;
 
-void CheckAll()
+void CheckAll(void)
 {
 	static float next_check = -1;
 	gedict_t *p;
@@ -124,7 +126,7 @@ qbool CheckRate(gedict_t *p, char *newrate)
 #define TA_ALL			( TA_INFO | TA_GLOW | TA_INVINCIBLE )
 
 // check if client lagged or returned from lag
-void CheckTiming()
+void CheckTiming(void)
 {
 	float timing_players_time = bound(0, cvar("timing_players_time"), 30);
 	int timing_players_action = TA_ALL & (int)cvar("timing_players_action");
@@ -215,7 +217,7 @@ void set_nextmap(char *map)
  This is the camera point for the intermission.
  Use mangle instead of angle, so you can set pitch or roll as well as yaw. 'pitch roll yaw'
  */
-void SP_info_intermission()
+void SP_info_intermission(void)
 {
 	// so C can get at it
 	VectorCopy(self->mangle, self->s.v.angles);	//self.angles = self.mangle;
@@ -299,7 +301,7 @@ void SaveLevelStartParams(gedict_t *e)
 	player_params[cl].parm16 = g_globalvars.parm16;
 }
 
-void InGameParams()
+void InGameParams(void)
 {
 	// NOTE: DO NOT USE self THERE
 
@@ -314,7 +316,7 @@ void InGameParams()
 	g_globalvars.parm9 = 0;
 }
 
-void PrewarParams()
+void PrewarParams(void)
 {
 	// NOTE: DO NOT USE self THERE
 
@@ -331,7 +333,7 @@ void PrewarParams()
 }
 
 // used before changing map in non deathmatch mode
-void NonDMParams()
+void NonDMParams(void)
 {
 	if (ISDEAD(self))
 	{
@@ -371,7 +373,7 @@ void NonDMParams()
 //
 // called ONLY on map reload, self is valid there
 //
-void SetChangeParms()
+void SetChangeParms(void)
 {
 	// ok, server want to change map
 	// check, if matchless mode is active, set ingame params,
@@ -401,7 +403,7 @@ void SetChangeParms()
 //
 // called ONLY before player connected, self is _NOT_ valid there
 //
-void SetNewParms()
+void SetNewParms(void)
 {
 	if ((match_in_progress == 2) || k_matchLess)
 	{
@@ -422,7 +424,7 @@ void SetNewParms()
 //
 // used in k_respawn()
 //
-void SetRespawnParms()
+void SetRespawnParms(void)
 {
 	if (!deathmatch)
 	{
@@ -462,7 +464,7 @@ void SetRespawnParms()
 
 // called from PutClientInServer
 
-void DecodeLevelParms()
+void DecodeLevelParms(void)
 {
 	self->s.v.items = g_globalvars.parm1;
 	self->s.v.health = g_globalvars.parm2;
@@ -518,7 +520,7 @@ gedict_t* Do_FindIntermission(char *info_name)
  Returns the entity to view from
  ============
  */
-gedict_t* FindIntermission()
+gedict_t* FindIntermission(void)
 {
 	gedict_t *spot;
 
@@ -552,7 +554,7 @@ gedict_t* FindIntermission()
 	return world;
 }
 
-void GotoNextMap()
+void GotoNextMap(void)
 {
 	char newmap[64] =
 		{ 0 };
@@ -606,7 +608,7 @@ void GotoNextMap()
  When the player presses attack or jump, change to the next level
  ============
  */
-void IntermissionThink()
+void IntermissionThink(void)
 {
 	if (g_globalvars.time < intermission_exittime)
 	{
@@ -636,7 +638,7 @@ void IntermissionThink()
  to him personally
  ============
  */
-void SendIntermissionToClient()
+void SendIntermissionToClient(void)
 {
 	if (!intermission_spot)
 	{
@@ -680,7 +682,7 @@ static void intermission_set_player_flags(gedict_t *player)
 	player->model = "";
 }
 
-void execute_changelevel()
+void execute_changelevel(void)
 {
 	intermission_running = 1;
 
@@ -714,7 +716,7 @@ void execute_changelevel()
 	}
 }
 
-void changelevel_touch()
+void changelevel_touch(void)
 {
 	if (other->ct != ctPlayer)
 	{
@@ -761,7 +763,7 @@ void changelevel_touch()
  When the player touches this, he gets sent to the map listed in the "map" variable.
  Unless the NO_INTERMISSION flag is set, the view will go to the info_intermission spot and display stats.
  */
-void SP_trigger_changelevel()
+void SP_trigger_changelevel(void)
 {
 	if (!self->map)
 	{
@@ -785,7 +787,7 @@ void SP_trigger_changelevel()
 /*
  go to the next level for deathmatch
  */
-void NextLevel()
+void NextLevel(void)
 {
 	gedict_t *o;
 	char *entityfile;
@@ -879,7 +881,7 @@ void NextLevel()
  =============================================================================
  */
 
-void SP_info_player_deathmatch()
+void SP_info_player_deathmatch(void)
 {
 	gedict_t *spot;
 	vec3_t saved_org;
@@ -938,7 +940,7 @@ void k_respawn(gedict_t *p, qbool body)
  Player entered the suicide command
  ============
  */
-void ClientKill()
+void ClientKill(void)
 {
 	if (cvar("sv_paused"))
 	{
@@ -1014,6 +1016,26 @@ float CheckSpawnPoint(vec3_t v)
 
 /*
  ============
+ GetEffectiveSpawnRadius
+
+ Returns the effective spawn radius for a spawn point, considering wipeout custom radius
+ ============
+ */
+static float GetEffectiveSpawnRadius(gedict_t *spot, float default_radius)
+{
+	if (cvar("k_clan_arena") == 2)
+	{
+		float custom_radius = WO_GetSpawnRadius(spot->s.v.origin);
+		if (custom_radius > 0)
+		{
+			return custom_radius;
+		}
+	}
+	return default_radius;
+}
+
+/*
+ ============
  SelectSpawnPoint
 
  Returns the entity to spawn at
@@ -1029,6 +1051,7 @@ gedict_t* Sub_SelectSpawnPoint(char *spawnname)
 	int pcount;
 	int k_spw = cvar("k_spw");
 	int weight_sum = 0;	// used by "fair spawns"
+	float spawn_radius = 84;	// default spawn check radius
 
 // testinfo_player_start is only found in regioned levels
 	spot = find(world, FOFCLSN, "testplayerstart");
@@ -1037,9 +1060,7 @@ gedict_t* Sub_SelectSpawnPoint(char *spawnname)
 		return spot;
 	}
 
-// K_SPW_0_NONRANDOM changes "Normal QW respawns" to "pre-qtest nonrandom respawns"
-#ifdef K_SPW_0_NONRANDOM
-	if (k_spw == 0)
+	if (k_spw == -1)
 	{
 		static gedict_t *last_spot = g_edicts; // basically, g_edicts is same as world, but we can't initialize static variable with world.
 
@@ -1051,7 +1072,6 @@ gedict_t* Sub_SelectSpawnPoint(char *spawnname)
 
 		return last_spot;
 	}
-#endif
 
 // ok, find all spots that don't have players nearby
 
@@ -1060,15 +1080,30 @@ gedict_t* Sub_SelectSpawnPoint(char *spawnname)
 
 	for (spot = world; (spot = find(spot, FOFCLSN, spawnname));)
 	{
+		float spot_radius;
+		
 		totalspots++;
 		pcount = 0;
 
+		// Get spawn-specific radius if defined
+		spot_radius = GetEffectiveSpawnRadius(spot, spawn_radius);
+
 		// find count of nearby players for 'spot'
-		for (thing = world; (thing = trap_findradius(thing, spot->s.v.origin, 84));)
+		for (thing = world; (thing = trap_findradius(thing, spot->s.v.origin, spot_radius));)
 		{
 			if ((thing->ct != ctPlayer) || ISDEAD(thing) || (thing == self))
 			{
 				continue; // ignore non player, or dead played, or self
+			}
+
+			// For wipeout mode, check line of sight before blocking spawn
+			if (cvar("k_clan_arena") == 2)
+			{
+				traceline(PASSVEC3(spot->s.v.origin), PASSVEC3(thing->s.v.origin), true, self);
+				if (g_globalvars.trace_fraction < 1)
+				{
+					continue; // Wall/obstruction between spawn and player, don't discard spawn
+				}
 			}
 
 			// k_spw 2 and 3 and 4 feature, if player is spawned not far away and run
@@ -1132,14 +1167,28 @@ gedict_t* Sub_SelectSpawnPoint(char *spawnname)
 		if (!match_in_progress || k_spw == 1 || (k_spw == 2 && !k_checkx))
 		{
 			vec3_t v1, v2;
+			float fallback_radius;
 
 			trap_makevectors(isRA() ? spot->mangle : spot->s.v.angles); // stupid ra uses mangles instead of angles
 
-			for (thing = world; (thing = trap_findradius(thing, spot->s.v.origin, 84));)
+			// Get spawn-specific radius for fallback spawn too
+			fallback_radius = GetEffectiveSpawnRadius(spot, spawn_radius);
+
+			for (thing = world; (thing = trap_findradius(thing, spot->s.v.origin, fallback_radius));)
 			{
 				if ((thing->ct != ctPlayer) || ISDEAD(thing) || (thing == self))
 				{
 					continue; // ignore non player, or dead played, or self
+				}
+
+				// For wipeout mode, check line of sight before moving player
+				if (cvar("k_clan_arena") == 2)
+				{
+					traceline(PASSVEC3(spot->s.v.origin), PASSVEC3(thing->s.v.origin), true, self);
+					if (g_globalvars.trace_fraction < 1)
+					{
+						continue; // Wall/obstruction between spawn and player, don't move them
+					}
 				}
 
 				VectorMA(thing->s.v.origin, -15.0, g_globalvars.v_up, v1);
@@ -1249,7 +1298,7 @@ gedict_t* SelectSpawnPoint(char *spawnname)
 	gedict_t *spot = Sub_SelectSpawnPoint(spawnname);
 
 	// k_spw 4 feature, recheck spawn poit second time if we select same spawn point in row, so it low chance to get same spawn point
-	if ((match_in_progress == 2) && (k_lastspawn == spot) && (cvar("k_spw") == 4))
+	if ((match_in_progress == 2) && (k_lastspawn == spot) && (cvar("k_spw") == 4 || cvar("k_clan_arena") == 2))
 	{
 		self->k_lastspawn = k_lastspawn;
 		spot = Sub_SelectSpawnPoint(spawnname);
@@ -1258,7 +1307,7 @@ gedict_t* SelectSpawnPoint(char *spawnname)
 	return spot;
 }
 
-qbool CanConnect()
+qbool CanConnect(void)
 {
 	gedict_t *p;
 	char *t;
@@ -1559,7 +1608,7 @@ qbool CanConnect()
 // self
 // params
 ///////////////
-void ClientConnect()
+void ClientConnect(void)
 {
 	gedict_t *p;
 	int i, totalspots;
@@ -1726,6 +1775,8 @@ void ClientConnect()
 		}
 	}
 
+	SendSpecInfo(NULL, self); // get all spectator info
+
 	MakeMOTD();
 
 #ifdef BOT_SUPPORT
@@ -1753,7 +1804,7 @@ void PutClientInServer(void)
 	self->classname = "player";
 	self->s.v.health = 100;
 	self->s.v.takedamage = DAMAGE_AIM;
-	self->s.v.solid = SOLID_SLIDEBOX;
+	self->s.v.solid = isCA() ? SOLID_NOT : self->leavemealone ? SOLID_TRIGGER : SOLID_SLIDEBOX;
 	self->s.v.movetype = MOVETYPE_WALK;
 	self->show_hostile = 0;
 	self->s.v.max_health = 100;
@@ -1952,6 +2003,37 @@ void PutClientInServer(void)
 		}
 	}
 
+	if (isCA())
+	{
+		CA_PutClientInServer();
+		W_SetCurrentAmmo(); // important shit, not only ammo
+		teleport_player(self, self->s.v.origin, self->s.v.angles, tele_flags);
+
+		g_globalvars.msg_entity = EDICT_TO_PROG(self);
+		WriteByte(MSG_ONE, 38 /*svc_updatestatlong*/);
+		WriteByte(MSG_ONE, 18 /*STAT_MATCHSTARTTIME*/);
+		WriteLong(MSG_ONE, g_matchstarttime);
+
+#ifdef BOT_SUPPORT
+		BotClientEntersEvent(self, spot);
+#endif
+
+		// dusty: CA/wipeout must set solid state AFTER the spawn/teleport_player()
+		// otherwise player will become "solid" while tracking other players and
+		// get hit by projectiles.
+		if (match_in_progress)
+		{
+			self->s.v.solid = self->in_play ? SOLID_SLIDEBOX : SOLID_NOT;
+		}
+		else
+		{
+			self->s.v.solid = self->leavemealone ? SOLID_TRIGGER : SOLID_SLIDEBOX;
+		}
+		setorigin(self, PASSVEC3(self->s.v.origin));
+
+		return;
+	}
+
 	if (isRA())
 	{
 		ra_PutClientInServer();
@@ -2142,6 +2224,29 @@ void PutClientInServer(void)
 			// Red armor + LG
 			items = IT_LIGHTNING | IT_ARMOR3;
 		}
+		else if (tot_mode_enabled())
+		{
+			self->s.v.ammo_nails = 255;
+			self->s.v.ammo_shells = 255;
+			self->s.v.ammo_rockets = 255;
+			self->s.v.ammo_cells = 255;
+
+			self->s.v.armorvalue = self->isBot ? 0 : 200;
+			self->s.v.armortype = self->isBot ? 0 : 0.8;
+			self->s.v.health = self->isBot ? FrogbotHealth() : 250;
+
+			items = self->s.v.items;
+			items |= IT_NAILGUN;
+			items |= IT_SUPER_NAILGUN;
+			items |= IT_SUPER_SHOTGUN;
+			items |= IT_ROCKET_LAUNCHER;
+			items |= IT_GRENADE_LAUNCHER;
+			items |= IT_LIGHTNING;
+
+			items &= ~( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3);
+			if (!self->isBot)
+				items |= IT_ARMOR3;
+		}
 		else
 		{
 			self->s.v.ammo_nails = 255;
@@ -2249,11 +2354,6 @@ void PutClientInServer(void)
 		}
 	}
 
-	if (isCA())
-	{
-		CA_PutClientInServer();
-	}
-
 	// remove particular weapons in dmm4
 	if (deathmatch == 4 && match_in_progress == 2)
 	{
@@ -2313,7 +2413,7 @@ void PutClientInServer(void)
  */
 
 // frag difference to win on tiebreak overtime
-int tiecount()
+int tiecount(void)
 {
 	return (deathmatch == 4 ? 2 : 3);
 }
@@ -2373,7 +2473,7 @@ void Check_SD(gedict_t *p)
  Exit deathmatch games upon conditions
  ============
  */
-void CheckRules()
+void CheckRules(void)
 {
 	if (!match_in_progress)
 	{
@@ -2387,7 +2487,7 @@ void CheckRules()
 }
 
 //============================================================================
-void PlayerDeathThink()
+void PlayerDeathThink(void)
 {
 	float forward;
 	float respawn_time;
@@ -2462,7 +2562,7 @@ void PlayerDeathThink()
 	k_respawn(self, true);
 }
 
-void PlayerJump()
+void PlayerJump(void)
 {
 	//vec3_t start, end;
 
@@ -2561,7 +2661,7 @@ void PlayerJump()
  ============
  */
 
-void WaterMove()
+void WaterMove(void)
 {
 //dprint (ftos(self->s.v.waterlevel));
 	if (self->s.v.movetype == MOVETYPE_NOCLIP)
@@ -2711,7 +2811,7 @@ void WaterMove()
 	}
 }
 
-void MakeGhost()
+void MakeGhost(void)
 {
 	gedict_t *ghost;
 	float f1 = 1;
@@ -2804,9 +2904,10 @@ void set_important_fields(gedict_t *p)
 // GlobalParams:
 // self
 ///////////////
-void ClientDisconnect()
+void ClientDisconnect(void)
 {
-	extern void mv_stop_playback();
+	extern void mv_stop_playback(void);
+	gedict_t *spec;
 
 	k_nochange = 0; // force recalculate frags scores
 
@@ -2820,6 +2921,25 @@ void ClientDisconnect()
 	mv_stop_playback();
 
 	del_from_specs_favourites(self);
+
+	// Clean up spectators tracking this player
+	for (spec = world; (spec = find_client(spec));)
+	{
+		if (spec->ct == ctSpec)
+		{
+			// Check if spectator is tracking the disconnecting player
+			if (spec->trackent == NUM_FOR_EDICT(self))
+			{
+				spec->trackent = 0;
+			}
+
+			// Check if spectator's goalentity is the disconnecting player
+			if (PROG_TO_EDICT(spec->s.v.goalentity) == self)
+			{
+				spec->s.v.goalentity = EDICT_TO_PROG(world);
+			}
+		}
+	}
 
 	ra_ClientDisconnect();
 
@@ -2918,7 +3038,7 @@ void ClientDisconnect()
 	}
 }
 
-void BackFromLag()
+void BackFromLag(void)
 {
 	int timing_players_action = TA_ALL & (int)cvar("timing_players_action");
 
@@ -2945,8 +3065,9 @@ void BackFromLag()
 #define S_GL	( 1<<5 )
 #define S_RL	( 1<<6 )
 #define S_LG	( 1<<7 )
+#define S_LGLastFrag	( 1<<8 )
 
-#define S_ALL	( S_AXE | S_SG | S_SSG | S_NG | S_SNG | S_GL | S_RL | S_LG )
+#define S_ALL	( S_AXE | S_SG | S_SSG | S_NG | S_SNG | S_GL | S_RL | S_LG | S_LGLastFrag )
 
 #define S_DEF	( S_GL | S_RL | S_LG ) /* default */
 
@@ -2960,7 +3081,7 @@ void wp_wrap_cat(char *s, char *buf, int size)
 	strlcat(buf, s, size);
 }
 
-void Print_Wp_Stats()
+void Print_Wp_Stats(void)
 {
 	char buf[1024] =
 		{ 0 };
@@ -2993,6 +3114,11 @@ void Print_Wp_Stats()
 			wps & S_LG ?
 					max(0.001, 100.0 * e->ps.wpn[wpLG].hits / max(1, e->ps.wpn[wpLG].attacks)) : 0;
 
+	float lgLastFrag =
+			wps & S_LGLastFrag ?
+					max(0.001, 100.0 * e->ps.wpn[wpLG].lastfragdisplayhits / max(1, e->ps.wpn[wpLG].lastfragdisplayattacks)) : 0;
+
+
 	if ((i = lw) > 0)
 	{
 		i = bound(0, i, sizeof(buf) - 1);
@@ -3011,7 +3137,7 @@ void Print_Wp_Stats()
 		return;
 	}
 
-	if (!axe && !sg && !ssg && !ng && !sng && !gl && !rl && !lg)
+	if (!axe && !sg && !ssg && !ng && !sng && !gl && !rl && !lg && !lgLastFrag)
 	{
 		return; // sanity
 	}
@@ -3029,6 +3155,11 @@ void Print_Wp_Stats()
 		if (lg)
 		{
 			strlcat(buf, lg ? va("%s:%.1f ", redtext("lg"), lg) : "", sizeof(buf));
+		}
+
+		if (lgLastFrag)
+		{
+			strlcat(buf, lgLastFrag ? va("%s:%.1f ", redtext("lglf"), lgLastFrag) : "", sizeof(buf));
 		}
 
 		if (rl)
@@ -3071,6 +3202,11 @@ void Print_Wp_Stats()
 		if (lg)
 		{
 			wp_wrap_cat(lg ? va("%s:%.1f", redtext("lg"), lg) : "", buf, sizeof(buf));
+		}
+
+		if (lgLastFrag)
+		{
+			wp_wrap_cat(lgLastFrag ? va("%s:%.1f", redtext("lglf"), lgLastFrag) : "", buf, sizeof(buf));
 		}
 
 		if (rl)
@@ -3140,7 +3276,7 @@ void Print_Wp_Stats()
 /*
  * Function is called when a player or spectator enables continuous score display with +scores console command.
  * */
-void Print_Scores()
+void Print_Scores(void)
 {
 	char buf[1024] =
 		{ 0 }, *last_va;
@@ -3472,7 +3608,7 @@ float v_for_jump(int frametime_ms)
 	}
 }
 
-void ZeroFpsStats()
+void ZeroFpsStats(void)
 {
 	// zero these so the average/highest FPS is calculated for each delay period.
 	self->fAverageFrameTime = 0;
@@ -3481,7 +3617,7 @@ void ZeroFpsStats()
 	self->fHighestFrameTime = 0.0001f;
 }
 
-void mv_playback();
+void mv_playback(void);
 
 ////////////////
 // GlobalParams:
@@ -3497,7 +3633,7 @@ void mv_playback();
  ================
  */
 
-void PlayerPreThink()
+void PlayerPreThink(void)
 {
 	float r;
 	qbool zeroFps = false;
@@ -3723,6 +3859,16 @@ void PlayerPreThink()
 
 	race_player_pre_think();
 
+	if (self->leavemealone)
+	{
+		if ((self->s.v.mins[0] == 0) || (self->s.v.mins[1] == 0))
+		{
+			// This can happen if the world 'squashes' a SOLID_NOT entity, mvdsv will turn into corpse
+			setsize(self, PASSVEC3(VEC_HULL_MIN), PASSVEC3(VEC_HULL_MAX));
+		}
+		setorigin(self, PASSVEC3(self->s.v.origin));
+	}	
+
 // brokenankle included here
 	if (self->s.v.button2 || self->brokenankle)
 	{
@@ -3804,7 +3950,7 @@ void PlayerPreThink()
  */
 extern void ktpro_autotrack_on_powerup_out(gedict_t *dude);
 
-void CheckPowerups()
+void CheckPowerups(void)
 {
 	if (ISDEAD(self))
 	{
@@ -3915,7 +4061,7 @@ void CheckPowerups()
 		{
 			if (self->super_time == 1)
 			{
-				if (deathmatch == 4)
+				if (deathmatch == 4 && !tot_mode_enabled())
 				{
 					G_sprint(self, PRINT_HIGH, "OctaPower is wearing off\n");
 				}
@@ -3941,7 +4087,7 @@ void CheckPowerups()
 			self->s.v.items -= IT_QUAD;
 			if (!k_practice) // #practice mode#
 			{
-				if (deathmatch == 4)
+				if (deathmatch == 4 && !tot_mode_enabled())
 				{
 					self->s.v.ammo_cells = 255;
 					self->s.v.armorvalue = 1;
@@ -4076,7 +4222,7 @@ void CheckLightEffects(void)
 	}
 }
 
-void check_callalias();
+void check_callalias(void);
 
 ///////////
 // BothPostThink
@@ -4084,7 +4230,7 @@ void check_callalias();
 // called for players and specs
 //
 //////////
-void BothPostThink()
+void BothPostThink(void)
 {
 	if (self->shownick_time && (self->shownick_time <= g_globalvars.time))
 	{
@@ -4112,9 +4258,9 @@ void BothPostThink()
 	check_callalias();
 }
 
-void W_WeaponFrame();
-void mv_record();
-void CheckStuffRune();
+void W_WeaponFrame(void);
+void mv_record(void);
+void CheckStuffRune(void);
 
 // ====================================
 // { new weapon stats WS_
@@ -4247,7 +4393,7 @@ void info_wpsx_update(gedict_t* p, char* from, char* to)
 // } end of new weapon stats
 // ====================================
 
-void CheckLand()
+void CheckLand(void)
 {
 // clear the flag if we landed
 	if ((int)self->s.v.flags & FL_ONGROUND)
@@ -4304,7 +4450,7 @@ void CheckLand()
 // time
 // self
 ///////////////
-void PlayerPostThink()
+void PlayerPostThink(void)
 {
 //dprint ("post think\n");
 
@@ -4468,7 +4614,7 @@ void SendTeamInfo(gedict_t *t)
 	}
 }
 
-void CheckTeamStatus()
+void CheckTeamStatus(void)
 {
 	gedict_t *p;
 	int k_teamoverlay;
@@ -4517,33 +4663,44 @@ void CheckTeamStatus()
 	}
 }
 
-void SendSpecInfo()
+void SendSpecInfo(gedict_t *spec, gedict_t *target_client)
 {
 	gedict_t *t, *p;
 	int cl, tr;
 
-	static double lastupdate = 0;
-
-	if (g_globalvars.time - lastupdate < 2)
+	if (spec)	// if spec has a value, we only want to send that spec's info
 	{
-		return;
-	}
-
-	lastupdate = g_globalvars.time;
-
-	for (t = world; (t = find_spc(t));)
-	{
-		cl = NUM_FOR_EDICT(t) - 1;
-		tr = NUM_FOR_EDICT(PROG_TO_EDICT(t->s.v.goalentity)) - 1;	// num for player spec is tracking
+		cl = NUM_FOR_EDICT(spec) - 1;
+		tr = NUM_FOR_EDICT(PROG_TO_EDICT(spec->s.v.goalentity)) - 1;	// num for player spec is tracking
 
 		for (p = world; (p = find_client(p));)
 		{
-			if (p == t)
-			{
+			if (p == spec)
 				continue; // ignore self
-			}
 
 			stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "//spi %d %d\n", cl, tr);
+		}
+	}
+	else {
+		for (t = world; (t = find_spc(t));)
+		{
+			cl = NUM_FOR_EDICT(t) - 1;
+			tr = NUM_FOR_EDICT(PROG_TO_EDICT(t->s.v.goalentity)) - 1;	// num for player spec is tracking
+
+			if (target_client && target_client != t)
+			{
+				stuffcmd_flags(target_client, STUFFCMD_IGNOREINDEMO, "//spi %d %d\n", cl, tr);
+			}
+			else // if no target client is specified, send to everyone
+			{
+				for (p = world; (p = find_client(p));)
+				{
+					if (p == t)
+						continue; // ignore self
+
+					stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "//spi %d %d\n", cl, tr);
+				}
+			}
 		}
 	}
 }
@@ -5091,13 +5248,8 @@ void ClientObituary(gedict_t *targ, gedict_t *attacker)
 
 			if ((dtTELE1 != targ->deathtype) || cvar("k_tp_tele_death"))
 			{
-				// -1 frag always if non "teledeath", and -1 on "teledeath" if allowed
-				// also relax this rules on first seconds of match
-				if ((g_globalvars.time - match_start_time) > 1)
-				{
-					attacker->s.v.frags -= 1;
-					logfrag(attacker, attacker); //ZOID 12-13-96: killing a teammate logs as suicide
-				}
+				attacker->s.v.frags -= 1;
+				logfrag(attacker, attacker); //ZOID 12-13-96: killing a teammate logs as suicide
 			}
 
 			// some deathtypes have specific death messages

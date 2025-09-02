@@ -96,73 +96,73 @@ enum
 
 };
 
-void tbaby_stand1();
-void tbaby_stand2();
-void tbaby_stand3();
-void tbaby_stand4();
+void tbaby_stand1(void);
+void tbaby_stand2(void);
+void tbaby_stand3(void);
+void tbaby_stand4(void);
 
-void tbaby_walk1();
-void tbaby_walk2();
-void tbaby_walk3();
-void tbaby_walk4();
-void tbaby_walk5();
-void tbaby_walk6();
-void tbaby_walk7();
-void tbaby_walk8();
-void tbaby_walk9();
-void tbaby_walk10();
-void tbaby_walk11();
-void tbaby_walk12();
-void tbaby_walk13();
-void tbaby_walk14();
-void tbaby_walk15();
-void tbaby_walk16();
-void tbaby_walk17();
-void tbaby_walk18();
-void tbaby_walk19();
-void tbaby_walk20();
-void tbaby_walk21();
-void tbaby_walk22();
-void tbaby_walk23();
-void tbaby_walk24();
-void tbaby_walk25();
-void tbaby_run1();
-void tbaby_run2();
-void tbaby_run3();
-void tbaby_run4();
-void tbaby_run5();
-void tbaby_run6();
-void tbaby_run7();
-void tbaby_run8();
-void tbaby_run9();
-void tbaby_run10();
-void tbaby_run11();
-void tbaby_run12();
-void tbaby_run13();
-void tbaby_run14();
-void tbaby_run15();
-void tbaby_run16();
-void tbaby_run17();
-void tbaby_run18();
-void tbaby_run19();
-void tbaby_run20();
-void tbaby_run21();
-void tbaby_run22();
-void tbaby_run23();
-void tbaby_run24();
-void tbaby_run25();
-void tbaby_fly1();
-void tbaby_fly2();
-void tbaby_fly3();
-void tbaby_fly4();
-void tbaby_jump1();
-void tbaby_jump2();
-void tbaby_jump3();
-void tbaby_jump4();
-void tbaby_jump5();
-void tbaby_jump6();
-void tbaby_die1();
-void tbaby_die2();
+void tbaby_walk1(void);
+void tbaby_walk2(void);
+void tbaby_walk3(void);
+void tbaby_walk4(void);
+void tbaby_walk5(void);
+void tbaby_walk6(void);
+void tbaby_walk7(void);
+void tbaby_walk8(void);
+void tbaby_walk9(void);
+void tbaby_walk10(void);
+void tbaby_walk11(void);
+void tbaby_walk12(void);
+void tbaby_walk13(void);
+void tbaby_walk14(void);
+void tbaby_walk15(void);
+void tbaby_walk16(void);
+void tbaby_walk17(void);
+void tbaby_walk18(void);
+void tbaby_walk19(void);
+void tbaby_walk20(void);
+void tbaby_walk21(void);
+void tbaby_walk22(void);
+void tbaby_walk23(void);
+void tbaby_walk24(void);
+void tbaby_walk25(void);
+void tbaby_run1(void);
+void tbaby_run2(void);
+void tbaby_run3(void);
+void tbaby_run4(void);
+void tbaby_run5(void);
+void tbaby_run6(void);
+void tbaby_run7(void);
+void tbaby_run8(void);
+void tbaby_run9(void);
+void tbaby_run10(void);
+void tbaby_run11(void);
+void tbaby_run12(void);
+void tbaby_run13(void);
+void tbaby_run14(void);
+void tbaby_run15(void);
+void tbaby_run16(void);
+void tbaby_run17(void);
+void tbaby_run18(void);
+void tbaby_run19(void);
+void tbaby_run20(void);
+void tbaby_run21(void);
+void tbaby_run22(void);
+void tbaby_run23(void);
+void tbaby_run24(void);
+void tbaby_run25(void);
+void tbaby_fly1(void);
+void tbaby_fly2(void);
+void tbaby_fly3(void);
+void tbaby_fly4(void);
+void tbaby_jump1(void);
+void tbaby_jump2(void);
+void tbaby_jump3(void);
+void tbaby_jump4(void);
+void tbaby_jump5(void);
+void tbaby_jump6(void);
+void tbaby_die1(void);
+void tbaby_die2(void);
 
 //============================================================================
 
@@ -227,7 +227,7 @@ ANIM(tbaby_run25, run25, tbaby_run1; ai_run(2);)
 
 //============================================================================
 
-void Tar_JumpTouch()
+void Tar_JumpTouch(void)
 {
 	float ldmg;
 
@@ -338,7 +338,7 @@ ANIM(tbaby_die2, exp1, tbaby_die2; _tbaby_die2();)
 
 /*QUAKED monster_tarbaby (1 0 0) (-16 -16 -24) (16 16 24) Ambush
  */
-void SP_monster_tarbaby()
+void SP_monster_tarbaby(void)
 {
 	if (!AllowMonster(self))
 	{

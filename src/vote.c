@@ -30,13 +30,17 @@ rpickupTeams_t builtinTeamInfo[] =
 	{"yell",  "12",  "12", "color 12 12\nskin \"\"\nteam yell\n"}
 };
 
+// Color suggestion
+suggestcolor_t suggestcolor;
+void SuggestColorApply(void);
+
 //void BeginPicking();
 void BecomeCaptain(gedict_t *p);
 void BecomeCoach(gedict_t *p);
 
 // AbortElect is used to terminate the voting
 // Important if player to be elected disconnects or levelchange happens
-void AbortElect()
+void AbortElect(void)
 {
 	gedict_t *p;
 
@@ -68,7 +72,7 @@ void AbortElect()
 	}
 }
 
-void ElectThink()
+void ElectThink(void)
 {
 	G_bprint(2, "The voting has timed out.\n"
 				"Election aborted\n");
@@ -77,9 +81,10 @@ void ElectThink()
 	AbortElect();
 }
 
-void VoteYes()
+void VoteYes(void)
 {
 	int votes;
+	gedict_t *p;
 
 	if (!get_votes(OV_ELECT))
 	{
@@ -100,6 +105,27 @@ void VoteYes()
 		return;
 	}
 
+	// For late join elections, check if voter is on the requested team
+	if (get_elect_type() == etLateJoin)
+	{
+		// Find the player being elected
+		for (p = world; (p = find_client(p));)
+		{
+			if (is_elected(p, etLateJoin))
+			{
+				char *requested_team = p->ljteam;
+				
+				// Only players on the requested team can vote
+				if (!self->ca_ready || !streq(getteam(self), requested_team))
+				{
+					G_sprint(self, 2, "Only members of team %s can vote\n", requested_team);
+					return;
+				}
+				break;
+			}
+		}
+	}
+
 //	register the vote
 	self->v.elect = 1;
 
@@ -114,7 +140,7 @@ void VoteYes()
 	vote_check_elect();
 }
 
-void VoteNo()
+void VoteNo(void)
 {
 	int votes;
 
@@ -172,6 +198,40 @@ int get_votes_by_value(int fofs, int value)
 	return votes;
 }
 
+// Count votes from members of a specific team for late join
+int get_latejoin_votes(char *team)
+{
+	int votes = 0;
+	gedict_t *p;
+
+	for (p = world; (p = find_client(p));)
+	{
+		if (p->v.elect && p->ca_ready && streq(getteam(p), team))
+		{
+			votes++;
+		}
+	}
+
+	return votes;
+}
+
+// Count eligible voters on a team for late join
+int count_team_voters(char *team)
+{
+	int count = 0;
+	gedict_t *p;
+
+	for (p = world; (p = find_plr(p));)
+	{
+		if (p->ca_ready && streq(getteam(p), team) && !p->s.v.owner)
+		{
+			count++;
+		}
+	}
+
+	return count;
+}
+
 int get_votes_req(int fofs, qbool diff)
 {
 	float percent = 51;
@@ -223,11 +283,20 @@ int get_votes_req(int fofs, qbool diff)
 				percent = cvar("k_vp_coach");
 				break;
 			}
+			else if (el_type == etSuggestColor)
+			{
+				percent = cvar("k_vp_suggestcolor");
+				break;
+			}
+			else if (el_type == etLateJoin)
+			{
+				percent = 51; // Default to 51% for late join
+				break;
+			}
 			else
 			{
 				percent = 100;
 				break; // unknown/none election
-				break;
 			}
 			break;
 
@@ -274,7 +343,28 @@ int get_votes_req(int fofs, qbool diff)
 		vt_req = ceil(percent * (CountPlayers() - CountBots()));
 	}
 
-	if (fofs == OV_ELECT)
+	// Special handling for late join elections
+	if ((fofs == OV_ELECT) && (get_elect_type() == etLateJoin))
+	{
+		gedict_t *p;
+		// Find the player being elected
+		for (p = world; (p = find_client(p));)
+		{
+			if (is_elected(p, etLateJoin))
+			{
+				char *requested_team = p->ljteam;
+				if (requested_team[0])
+				{
+					// Count only team votes and require majority from that team
+					votes = get_latejoin_votes(requested_team);
+					vt_req = ceil(percent * count_team_voters(requested_team));
+					vt_req = max(1, vt_req); // at least 1 vote needed
+				}
+				break;
+			}
+		}
+	}
+	else if (fofs == OV_ELECT)
 	{
 		vt_req = max(2, vt_req); // if election, at least 2 votes needed
 	}
@@ -372,7 +462,7 @@ qbool is_elected(gedict_t *p, electType_t et)
 	return (p->v.elect_type == et);
 }
 
-int get_elect_type()
+int get_elect_type(void)
 {
 	gedict_t *p;
 
@@ -392,12 +482,22 @@ int get_elect_type()
 		{
 			return etCoach;
 		}
+
+		if (is_elected(p, etSuggestColor))
+		{
+			return etSuggestColor;
+		}
+
+		if (is_elected(p, etLateJoin))
+		{
+			return etLateJoin;
+		}
 	}
 
 	return etNone;
 }
 
-char* get_elect_type_str()
+char* get_elect_type_str(void)
 {
 	switch (get_elect_type())
 	{
@@ -412,6 +512,12 @@ char* get_elect_type_str()
 
 		case etAdmin:
 			return "Admin";
+
+		case etLateJoin:
+			return "Late Join";
+
+		case etSuggestColor:
+			return "Suggest Color";
 	}
 
 	return "Unknown";
@@ -425,7 +531,7 @@ votemap_t maps_voted[MAX_CLIENTS];
 // return the index in maps_voted[] of most voted map
 // return -1 inf no votes at all or some failures
 // if admin votes for map - map will be treated as most voted
-int vote_get_maps()
+int vote_get_maps(void)
 {
 	int best_idx = -1, i;
 	gedict_t *p;
@@ -488,7 +594,7 @@ int vote_get_maps()
 	return (maps_voted_idx = best_idx);
 }
 
-void vote_check_map()
+void vote_check_map(void)
 {
 	int vt_req;
 	char *map;
@@ -520,7 +626,7 @@ void vote_check_map()
 	changelevel(map);
 }
 
-void vote_check_break()
+void vote_check_break(void)
 {
 	if (!match_in_progress || intermission_running || match_over)
 	{
@@ -542,7 +648,7 @@ void vote_check_break()
 	}
 }
 
-void vote_check_elect()
+void vote_check_elect(void)
 {
 	gedict_t *p;
 
@@ -588,12 +694,33 @@ void vote_check_elect()
 			}
 		}
 
+		if (!match_in_progress)
+		{
+			if (is_elected(p, etSuggestColor))
+			{
+				SuggestColorApply();
+			}
+		}
+
+		if (match_in_progress && isCA())
+		{
+			if (is_elected(p, etLateJoin))
+			{
+				// Get the requested team from userinfo
+				char *team = p->ljteam;
+				if (team[0])
+				{
+					CA_AddLatePlayer(p, team);
+				}
+			}
+		}
+
 		AbortElect();
 	}
 }
 
 // !!! do not confuse rpickup and pickup
-void vote_check_pickup()
+void vote_check_pickup(void)
 {
 	gedict_t *p;
 	int veto;
@@ -803,7 +930,7 @@ void FixNoSpecs(void)
 	}
 }
 
-void vote_check_nospecs()
+void vote_check_nospecs(void)
 {
 	int veto;
 
@@ -869,7 +996,7 @@ void vote_check_nospecs()
 	}
 }
 
-void nospecs()
+void nospecs(void)
 {
 	int votes;
 
@@ -906,7 +1033,7 @@ void nospecs()
 	vote_check_nospecs();
 }
 
-void vote_check_teamoverlay()
+void vote_check_teamoverlay(void)
 {
 	int veto;
 
@@ -943,7 +1070,7 @@ void vote_check_teamoverlay()
 	}
 }
 
-void teamoverlay()
+void teamoverlay(void)
 {
 	int votes;
 
@@ -983,7 +1110,7 @@ void teamoverlay()
 qbool force_map_reset = false;
 
 // { votecoop
-void vote_check_coop()
+void vote_check_coop(void)
 {
 	int veto;
 
@@ -1035,7 +1162,7 @@ void vote_check_coop()
 	}
 }
 
-void votecoop()
+void votecoop(void)
 {
 	int votes;
 
@@ -1064,7 +1191,7 @@ void votecoop()
 // }
 
 // { votehook
-void hooksmooth()
+void hooksmooth(void)
 {
 	int votes, veto;
 
@@ -1107,7 +1234,7 @@ void hooksmooth()
 	}
 }
 
-void hookfast()
+void hookfast(void)
 {
 	int votes, veto;
 	
@@ -1151,7 +1278,7 @@ void hookfast()
 	}
 }
 
-void hookclassic()
+void hookclassic(void)
 {
 	int votes, veto;
 	
@@ -1195,7 +1322,7 @@ void hookclassic()
 	}
 }
 
-void hookcrhook()
+void hookcrhook(void)
 {
 	int votes, veto;
 
@@ -1243,7 +1370,7 @@ void hookcrhook()
 
 // { antilag vote feature
 
-void vote_check_antilag()
+void vote_check_antilag(void)
 {
 	int veto;
 
@@ -1283,7 +1410,7 @@ void vote_check_antilag()
 	}
 }
 
-void antilag()
+void antilag(void)
 {
 	int votes;
 
@@ -1490,7 +1617,7 @@ qbool private_game_by_default(void)
 	return cvar("k_privategame_default");
 }
 
-void vote_check_swapall()
+void vote_check_swapall(void)
 {
 	int veto;
 	gedict_t *p;
@@ -1547,4 +1674,138 @@ void vote_check_all(void)
 	vote_check_antilag();
 	vote_check_privategame();
 	vote_check_swapall();
+}
+
+void SuggestColorVote(void)
+{
+	gedict_t *p, *electguard, *users[MAX_CLIENTS];
+	char temp[32], message[1024];
+	int i, j, till, argc = trap_CmdArgc();
+
+	if (self->ct == ctSpec && match_in_progress)
+	{
+		return;
+	}
+
+	if (is_elected(self, etSuggestColor))
+	{
+		G_bprint(2, "%s %s!\n", self->netname, redtext("aborts election"));
+		AbortElect();
+		return;
+	}
+
+	if (CountPlayers() < 3)
+	{
+		G_sprint(self, 2, "Not enough players\n");
+		return;
+	}
+
+	if (get_votes(OV_ELECT))
+	{
+		G_sprint(self, 2, "An election is already in progress\n");
+		return;
+	}
+
+	if ((till = Q_rint(self->v.elect_block_till - g_globalvars.time)) > 0)
+	{
+		G_sprint(self, 2, "Wait %d second%s!\n", till, count_s(till));
+		return;
+	}
+
+	if (argc < 4)
+	{
+		G_sprint(self, 2, "suggestcolor <top color> <bottom color> <name / user id>...\n");
+		return;
+	}
+
+	memset(&suggestcolor, 0, sizeof(suggestcolor));
+
+	trap_CmdArgv(1, temp, sizeof(temp));
+	suggestcolor.top = bound(0, atoi(temp), 16);
+
+	trap_CmdArgv(2, temp, sizeof(temp));
+	suggestcolor.bottom = bound(0, atoi(temp), 16);
+
+	suggestcolor.num_userids = 0;
+
+	for (i = 3, j = 0; i < argc && j < MAX_CLIENTS; i++, j++)
+	{
+		trap_CmdArgv(i, temp, sizeof(temp));
+
+		p = player_by_IDorName(temp);
+		if (p == NULL)
+		{
+			G_bprint(2, "%s is not connected to the server\n", temp);
+			return;
+		}
+		else if (p == self)
+		{
+			G_bprint(2, "You can't suggest a color for yourself\n");
+			return;
+		}
+
+		users[j] = p;
+		suggestcolor.userids[j] = GetUserID(p);
+		suggestcolor.num_userids++;
+	}
+
+	snprintf(message, sizeof(message), "%s has requested color %d %d for ",
+		self->netname, suggestcolor.top, suggestcolor.bottom);
+	if (suggestcolor.num_userids == 1)
+	{
+		strlcat(message, users[0]->netname, sizeof(message));
+	}
+	else if (suggestcolor.num_userids == 2)
+	{
+		snprintf(message + strlen(message), sizeof(message) - strlen(message), "%s and %s",
+			users[0]->netname, users[1]->netname);
+	}
+	else
+	{
+		for (i = 0; i < suggestcolor.num_userids - 1; i++)
+		{
+			snprintf(message + strlen(message), sizeof(message) - strlen(message), "%s, ",
+				users[i]->netname);
+		}
+
+		snprintf(message + strlen(message), sizeof(message) - strlen(message), "and %s",
+			users[suggestcolor.num_userids - 1]->netname);
+	}
+	G_bprint(2, "%s\n", message);
+
+	for (p = world; (p = find_plr(p));)
+	{
+		if (p != self)
+		{
+			G_sprint(p, 2, "Type %s in console to approve\n", redtext("yes"));
+		}
+	}
+
+	G_sprint(self, 2, "Type %s to abort election\n", redtext("suggestcolor"));
+
+	self->v.elect = 1;
+	self->v.elect_type = etSuggestColor;
+
+	electguard = spawn();
+	electguard->s.v.owner = EDICT_TO_PROG(world);
+	electguard->classname = "electguard";
+	electguard->think = (func_t)ElectThink;
+	electguard->s.v.nextthink = g_globalvars.time + 60;
+}
+
+void SuggestColorApply(void)
+{
+	gedict_t *p;
+	int i;
+
+	for (i = 0; i < suggestcolor.num_userids; i++)
+	{
+		if ((p = player_by_id(suggestcolor.userids[i])) != NULL)
+		{
+			G_bprint(2, "Setting color %d %d on %s\n",
+				suggestcolor.top, suggestcolor.bottom, p->netname);
+			stuffcmd_flags(p, STUFFCMD_IGNOREINDEMO, "color %d %d\n",
+				suggestcolor.top, suggestcolor.bottom);
+		}
+	}
 }

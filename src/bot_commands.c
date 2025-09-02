@@ -110,9 +110,24 @@ bot_t bots[MAX_BOTS] =
 		{ 0 }
 };
 
-static int FrogbotSkillLevel(void)
+int FrogbotSkillLevel(void)
 {
 	return (int)cvar(FB_CVAR_SKILL);
+}
+
+int FrogbotHealth(void)
+{
+	return (int)cvar(FB_CVAR_HEALTH);
+}
+
+int FrogbotWeapon(void)
+{
+	return (int)cvar(FB_CVAR_WEAPON);
+}
+
+int FrogbotQuadMultiplier(void)
+{
+	return (int)cvar(FB_CVAR_QUAD_MULTIPLIER);
 }
 
 static team_t* AddTeamToList(int *teamsFound, char *team, int topColor, int bottomColor)
@@ -201,7 +216,7 @@ void FrogbotListPaths(void)
 	G_sprint(self, PRINT_HIGH, "%3d paths found matching %s\n", path_count, argument);
 }
 
-static void BuildTeamList()
+static void BuildTeamList(void)
 {
 	int foundTeams = 0;
 
@@ -244,9 +259,11 @@ static void BuildTeamList()
 
 void FrogbotsAddbot(int skill_level, const char *specificteam, qbool error_messages)
 {
+	char skill_level_str[3];
 	int i;
 
 	skill_level = bound(MIN_FROGBOT_SKILL, skill_level, MAX_FROGBOT_SKILL);
+	snprintf(skill_level_str, sizeof(skill_level_str), "%d", skill_level);
 
 	for (i = 0; i < sizeof(bots) / sizeof(bots[0]); ++i)
 	{
@@ -294,8 +311,8 @@ void FrogbotsAddbot(int skill_level, const char *specificteam, qbool error_messa
 			{
 				strlcpy(bots[i].name, BotNameGeneric(i), sizeof(bots[i].name));
 
-				topColor = i_rnd(0, 13);
-				bottomColor = i_rnd(0, 13);
+				topColor = tot_mode_enabled() ? 11 : i_rnd(0, 13);
+				bottomColor = tot_mode_enabled() ? 12 : i_rnd(0, 13);
 			}
 
 			entity = trap_AddBot(bots[i].name, bottomColor, topColor, "base");
@@ -320,6 +337,7 @@ void FrogbotsAddbot(int skill_level, const char *specificteam, qbool error_messa
 			G_bprint(2, "skill &cf00%d&r\n", self->fb.skill.skill_level);
 			SetAttribs(&g_edicts[entity], customised_skill);
 			trap_SetBotUserInfo(entity, "k_nick", bots[i].name, 0);
+			trap_SetBotUserInfo(entity, "*skill", skill_level_str, SETUSERINFO_STAR);
 
 			return;
 		}
@@ -1860,12 +1878,27 @@ static void FrogbotsFillServer(void)
 {
 	int max_clients = cvar("maxclients");
 	int plr_count = CountPlayers();
+	int skill_level = FrogbotSkillLevel();
 	int i;
+	
+	if (trap_CmdArgc() >= 3)
+	{
+		char temp[10];
+
+		trap_CmdArgv(2, temp, sizeof(temp));
+
+		if (isdigit(temp[0]))
+		{
+			skill_level = atoi(temp);
+		}
+	}
 
 	for (i = 0; i < min(max_clients - plr_count, 8); ++i)
 	{
-		FrogbotsAddbot(FrogbotSkillLevel(), "", true);
+		FrogbotsAddbot(skill_level, "", true);
 	}
+
+	cvar_fset(FB_CVAR_SKILL, skill_level);
 }
 
 static void FrogbotsRemoveAll(void)
@@ -2108,6 +2141,128 @@ static void FrogbotsDisable(void)
 	}
 }
 
+static void FrogbotsSetHealth(void)
+{
+	if (!bots_enabled())
+	{
+		G_sprint(self, 2, "Bots are disabled by the server.\n");
+		return;
+	}
+
+	if (trap_CmdArgc() <= 2)
+	{
+		G_sprint(self, 2, "Usage: /botcmd  health <health>\n");
+		G_sprint(self, 2, "       <health> must be in range %d and %d\n", 1, 300);
+		G_sprint(self, 2, "health is currently \"%d\"\n", FrogbotHealth());
+	}
+	else
+	{
+		char argument[32];
+		int new_health = 0;
+		int old_health = FrogbotHealth();
+
+		trap_CmdArgv(2, argument, sizeof(argument));
+		new_health = bound(1, atoi(argument), 300);
+
+		if (new_health != old_health)
+		{
+			cvar_fset(FB_CVAR_HEALTH, new_health);
+			G_sprint(self, 2, "health changed to \"%d\"\n", new_health);
+		}
+	}
+}
+
+static void FrogbotsSetWeapon(void)
+{
+	if (!bots_enabled())
+	{
+		G_sprint(self, 2, "Bots are disabled by the server.\n");
+		return;
+	}
+
+	if (trap_CmdArgc() <= 2)
+	{
+		G_sprint(self, 2, "Usage: /botcmd  weapon <weapon|random>\n");
+		G_sprint(self, 2, "       <weapon> must be in range 1 to 8 or \"random\"\n");
+		G_sprint(self, 2, "weapon is currently \"%d\"\n", FrogbotWeapon());
+	}
+	else
+	{
+		char argument[32];
+		int new_weapon = 0;
+		int old_weapon = FrogbotWeapon();
+
+		trap_CmdArgv(2, argument, sizeof(argument));
+		new_weapon = strcmp(argument, "0") == 0 || strcmp(argument, "random") == 0
+			? 0
+			: bound(1, atoi(argument), 8);
+
+		if (new_weapon != old_weapon)
+		{
+			cvar_fset(FB_CVAR_WEAPON, new_weapon);
+			G_sprint(self, 2, "weapon changed to \"%s\"\n",
+				new_weapon ? WpName(new_weapon) : "random");
+		}
+	}
+}
+
+static void FrogbotsSetBreakOnDeath(void)
+{
+	if (!bots_enabled())
+	{
+		G_sprint(self, 2, "Bots are disabled by the server.\n");
+		return;
+	}
+
+	cvar_fset(FB_CVAR_BREAK_ON_DEATH, !cvar(FB_CVAR_BREAK_ON_DEATH));
+	G_sprint(self, 2, "break on death changed to \"%s\"\n", (int)cvar(FB_CVAR_BREAK_ON_DEATH) ? "on" : "off");
+
+}
+
+static void FrogbotsToggleQuad(void)
+{
+	if ((int)self->s.v.items & IT_QUAD) {
+		self->s.v.items = (int)self->s.v.items & ~IT_QUAD;
+		self->super_time = 0;
+		self->super_damage_finished = 0;
+	} else {
+		self->s.v.items = (int)self->s.v.items | IT_QUAD;
+		self->super_time = 1;
+		self->super_damage_finished = g_globalvars.time + 3600 * 20;
+	}
+}
+
+static void FrogbotsSetQuadMultiplier(void)
+{
+	if (!bots_enabled())
+	{
+		G_sprint(self, 2, "Bots are disabled by the server.\n");
+		return;
+	}
+
+	if (trap_CmdArgc() <= 2)
+	{
+		G_sprint(self, 2, "Usage: /botcmd quadmultiplier <multiplier>\n");
+		G_sprint(self, 2, "       <multiplier> must be in range %d and %d\n", 1, 10);
+		G_sprint(self, 2, "multiplier is currently \"%d\"\n", FrogbotQuadMultiplier());
+	}
+	else
+	{
+		char argument[32];
+		int new_multiplier = 0;
+		int old_multiplier = FrogbotQuadMultiplier();
+
+		trap_CmdArgv(2, argument, sizeof(argument));
+		new_multiplier = bound(1, atoi(argument), 10);
+
+		if (new_multiplier != old_multiplier)
+		{
+			cvar_fset(FB_CVAR_QUAD_MULTIPLIER, new_multiplier);
+			G_sprint(self, 2, "quad multiplier changed to \"%d\"\n", new_multiplier);
+		}
+	}
+}
+
 typedef struct frogbot_cmd_s
 {
 	char *name;
@@ -2123,7 +2278,12 @@ static frogbot_cmd_t std_commands[] =
 		{ "removebot", FrogbotsRemovebot_f, "Removes a single bot" },
 		{ "removeall", FrogbotsRemoveAll, "Removes all bots from server" },
 		{ "debug", FrogbotsDebug, "Debugging commands" },
-		{ "disable", FrogbotsDisable, "Disable frogbots" } };
+		{ "disable", FrogbotsDisable, "Disable frogbots" },
+		{ "health", FrogbotsSetHealth, "Set initial health for the bot" },
+		{ "weapon", FrogbotsSetWeapon, "Set which weapon the bot should use" },
+		{ "breakondeath", FrogbotsSetBreakOnDeath, "Automatically break when you die" },
+		{ "togglequad", FrogbotsToggleQuad, "Toggle quad damage" },
+		{ "quadmultiplier", FrogbotsSetQuadMultiplier, "Set quad damage multiplier" }};
 
 static frogbot_cmd_t editor_commands[] =
 	{

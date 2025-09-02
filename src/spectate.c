@@ -29,17 +29,19 @@
 void Wp_Stats(float on);
 void Sc_Stats(float on);
 
-void DoAutoTrack();
-void AdminImpBot();
+void DoAutoTrack(void);
+void AdminImpBot(void);
 
-void MakeMOTD();
-void AutoTrackRestore();
+void MakeMOTD(void);
+void AutoTrackRestore(void);
 
 void Bot_Print_Thinking(void);
 
+void SendSpecInfo(gedict_t *spec, gedict_t *target_client);
+
 qbool TrackChangeCoach(gedict_t *p);
 
-int GetSpecWizard()
+int GetSpecWizard(void)
 {
 	int k_asw = bound(0, cvar("allow_spec_wizard"), 2);
 
@@ -63,7 +65,7 @@ int GetSpecWizard()
 	return 0;
 }
 
-void ShowCamHelp()
+void ShowCamHelp(void)
 {
 	G_sprint(self, 2, "use %s %s to jump between spawn points\n"
 				"use [attack] to change cam mode\n"
@@ -71,7 +73,7 @@ void ShowCamHelp()
 				redtext("impulse"), dig3(1));
 }
 
-void wizard_think()
+void wizard_think(void)
 {
 	if (!cvar("k_no_wizard_animation")) // animate if allowed
 	{
@@ -86,7 +88,7 @@ void wizard_think()
 	self->s.v.nextthink = g_globalvars.time + 0.1;
 }
 
-void SpecDecodeLevelParms()
+void SpecDecodeLevelParms(void)
 {
 	/*
 	 self->s.v.items			= g_globalvars.parm1;
@@ -156,7 +158,7 @@ qbool SpecCanConnect(gedict_t *spec)
 // self
 // params
 ///////////////
-void SpectatorConnect()
+void SpectatorConnect(void)
 {
 	gedict_t *p;
 	int diff = (int)(PROG_TO_EDICT(self->s.v.goalentity) - world);
@@ -199,6 +201,8 @@ void SpectatorConnect()
 		self->wizard->s.v.nextthink = g_globalvars.time + 0.1;
 	}
 
+	SendSpecInfo(NULL, self); // Get all spectator info
+
 	// Wait until you do stuffing
 	MakeMOTD();
 }
@@ -209,7 +213,7 @@ void SpectatorConnect()
 // self
 ///////////////
 extern int g_matchstarttime;
-void PutSpectatorInServer()
+void PutSpectatorInServer(void)
 {
 //	G_sprint(self, 2, "Hellow %s\n", getname(self));
 
@@ -225,7 +229,7 @@ void PutSpectatorInServer()
 // GlobalParams:
 // self
 ///////////////
-void SpectatorDisconnect()
+void SpectatorDisconnect(void)
 {
 	gedict_t *p;
 
@@ -279,7 +283,7 @@ void SpectatorDisconnect()
  Called by SpectatorThink if the spectator entered an impulse
  ================
  */
-void SpectatorImpulseCommand()
+void SpectatorImpulseCommand(void)
 {
 	gedict_t *goal;
 
@@ -336,7 +340,7 @@ void SpectatorImpulseCommand()
 	self->s.v.impulse = 0;
 }
 
-void SpecGoalChanged()
+void SpecGoalChanged(void)
 {
 	if (self->k_coach)
 	{
@@ -357,6 +361,8 @@ void SpecGoalChanged()
 	}
 
 	WS_OnSpecPovChange(self, false); // refresh "new weapon stats"
+
+	SendSpecInfo(self, NULL); // update tracking info with all clients
 }
 
 ////////////////
@@ -364,7 +370,7 @@ void SpecGoalChanged()
 // time
 // self
 ///////////////
-void SpectatorThink()
+void SpectatorThink(void)
 {
 	gedict_t *wizard = self->wizard;
 
@@ -447,7 +453,7 @@ void SpectatorThink()
 	}
 }
 
-void remove_specs_wizards()
+void remove_specs_wizards(void)
 {
 	gedict_t *p;
 
@@ -461,7 +467,7 @@ void remove_specs_wizards()
 	}
 }
 
-void hide_specs_wizards()
+void hide_specs_wizards(void)
 {
 	gedict_t *p;
 
@@ -471,7 +477,7 @@ void hide_specs_wizards()
 	}
 }
 
-void show_specs_wizards()
+void show_specs_wizards(void)
 {
 	gedict_t *p;
 
@@ -481,7 +487,7 @@ void show_specs_wizards()
 	}
 }
 
-void FixSpecWizards()
+void FixSpecWizards(void)
 {
 	static int k_asw = -1; // static
 

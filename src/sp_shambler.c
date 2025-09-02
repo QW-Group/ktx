@@ -133,98 +133,98 @@ enum
 
 };
 
-void sham_stand1();
-void sham_stand2();
-void sham_stand3();
-void sham_stand4();
-void sham_stand5();
-void sham_stand6();
-void sham_stand7();
-void sham_stand8();
-void sham_stand9();
-void sham_stand10();
-void sham_stand11();
-void sham_stand12();
-void sham_stand13();
-void sham_stand14();
-void sham_stand15();
-void sham_stand16();
-void sham_stand17();
-void sham_walk1();
-void sham_walk2();
-void sham_walk3();
-void sham_walk4();
-void sham_walk5();
-void sham_walk6();
-void sham_walk7();
-void sham_walk8();
-void sham_walk9();
-void sham_walk10();
-void sham_walk11();
-void sham_walk12();
-void sham_run1();
-void sham_run2();
-void sham_run3();
-void sham_run4();
-void sham_run5();
-void sham_run6();
-void sham_smash1();
-void sham_smash2();
-void sham_smash3();
-void sham_smash4();
-void sham_smash5();
-void sham_smash6();
-void sham_smash7();
-void sham_smash8();
-void sham_smash9();
-void sham_smash10();
-void sham_smash11();
-void sham_smash12();
-void sham_swingl1();
-void sham_swingl2();
-void sham_swingl3();
-void sham_swingl4();
-void sham_swingl5();
-void sham_swingl6();
-void sham_swingl7();
-void sham_swingl8();
-void sham_swingl9();
-void sham_swingr1();
-void sham_swingr2();
-void sham_swingr3();
-void sham_swingr4();
-void sham_swingr5();
-void sham_swingr6();
-void sham_swingr7();
-void sham_swingr8();
-void sham_swingr9();
-void sham_magic1();
-void sham_magic2();
-void sham_magic3();
-void sham_magic4();
-void sham_magic5();
-void sham_magic6();
-void sham_magic9();
-void sham_magic10();
-void sham_magic11();
-void sham_magic12();
-void sham_pain1();
-void sham_pain2();
-void sham_pain3();
-void sham_pain4();
-void sham_pain5();
-void sham_pain6();
-void sham_death1();
-void sham_death2();
-void sham_death3();
-void sham_death4();
-void sham_death5();
-void sham_death6();
-void sham_death7();
-void sham_death8();
-void sham_death9();
-void sham_death10();
-void sham_death11();
+void sham_stand1(void);
+void sham_stand2(void);
+void sham_stand3(void);
+void sham_stand4(void);
+void sham_stand5(void);
+void sham_stand6(void);
+void sham_stand7(void);
+void sham_stand8(void);
+void sham_stand9(void);
+void sham_stand10(void);
+void sham_stand11(void);
+void sham_stand12(void);
+void sham_stand13(void);
+void sham_stand14(void);
+void sham_stand15(void);
+void sham_stand16(void);
+void sham_stand17(void);
+void sham_walk1(void);
+void sham_walk2(void);
+void sham_walk3(void);
+void sham_walk4(void);
+void sham_walk5(void);
+void sham_walk6(void);
+void sham_walk7(void);
+void sham_walk8(void);
+void sham_walk9(void);
+void sham_walk10(void);
+void sham_walk11(void);
+void sham_walk12(void);
+void sham_run1(void);
+void sham_run2(void);
+void sham_run3(void);
+void sham_run4(void);
+void sham_run5(void);
+void sham_run6(void);
+void sham_smash1(void);
+void sham_smash2(void);
+void sham_smash3(void);
+void sham_smash4(void);
+void sham_smash5(void);
+void sham_smash6(void);
+void sham_smash7(void);
+void sham_smash8(void);
+void sham_smash9(void);
+void sham_smash10(void);
+void sham_smash11(void);
+void sham_smash12(void);
+void sham_swingl1(void);
+void sham_swingl2(void);
+void sham_swingl3(void);
+void sham_swingl4(void);
+void sham_swingl5(void);
+void sham_swingl6(void);
+void sham_swingl7(void);
+void sham_swingl8(void);
+void sham_swingl9(void);
+void sham_swingr1(void);
+void sham_swingr2(void);
+void sham_swingr3(void);
+void sham_swingr4(void);
+void sham_swingr5(void);
+void sham_swingr6(void);
+void sham_swingr7(void);
+void sham_swingr8(void);
+void sham_swingr9(void);
+void sham_magic1(void);
+void sham_magic2(void);
+void sham_magic3(void);
+void sham_magic4(void);
+void sham_magic5(void);
+void sham_magic6(void);
+void sham_magic9(void);
+void sham_magic10(void);
+void sham_magic11(void);
+void sham_magic12(void);
+void sham_pain1(void);
+void sham_pain2(void);
+void sham_pain3(void);
+void sham_pain4(void);
+void sham_pain5(void);
+void sham_pain6(void);
+void sham_death1(void);
+void sham_death2(void);
+void sham_death3(void);
+void sham_death4(void);
+void sham_death5(void);
+void sham_death6(void);
+void sham_death7(void);
+void sham_death8(void);
+void sham_death9(void);
+void sham_death10(void);
+void sham_death11(void);
 
 //=============================================================================
 
@@ -432,7 +432,7 @@ ANIM(sham_swingr7, swingr7, sham_swingr8; ai_charge(6); ShamClaw(-250);)
 ANIM(sham_swingr8, swingr8, sham_swingr9; ai_charge(3);)
 ANIM(sham_swingr9, swingr9, sham_run1; _sham_swingr9();)
 
-void sham_melee()
+void sham_melee(void)
 {
 	float chance;
 
@@ -454,7 +454,7 @@ void sham_melee()
 
 //============================================================================
 
-void CastLightning()
+void CastLightning(void)
 {
 	vec3_t org, dir;
 
@@ -490,7 +490,7 @@ void CastLightning()
 }
 
 // shambler's bolt have 3 frames, I guess
-void sham_bolt()
+void sham_bolt(void)
 {
 	if ((self->s.v.frame == 2) || ((self->spawn_time + 0.7) < g_globalvars.time))
 	{
@@ -586,7 +586,7 @@ ANIM(sham_death9, death9, sham_death10;)
 ANIM(sham_death10, death10, sham_death11;)
 ANIM(sham_death11, death11, sham_death11;)
 
-void sham_die()
+void sham_die(void)
 {
 	// check for gib
 	if (self->s.v.health < -60)
@@ -618,7 +618,7 @@ void sham_die()
  Returns false if movement should continue
  ============
  */
-float ShamCheckAttack()
+float ShamCheckAttack(void)
 {
 	vec3_t spot1, spot2, delta;
 	gedict_t *targ;
@@ -684,7 +684,7 @@ float ShamCheckAttack()
 
 /*QUAKED monster_shambler (1 0 0) (-32 -32 -24) (32 32 64) Ambush
  */
-void SP_monster_shambler()
+void SP_monster_shambler(void)
 {
 	if (!AllowMonster(self))
 	{

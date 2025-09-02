@@ -98,72 +98,72 @@ enum
 
 };
 
-void old_idle1();
-void old_idle2();
-void old_idle3();
-void old_idle4();
-void old_idle5();
-void old_idle6();
-void old_idle7();
-void old_idle8();
-void old_idle9();
-void old_idle10();
-void old_idle11();
-void old_idle12();
-void old_idle13();
-void old_idle14();
-void old_idle15();
-void old_idle16();
-void old_idle17();
-void old_idle18();
-void old_idle19();
-void old_idle20();
-void old_idle21();
-void old_idle22();
-void old_idle23();
-void old_idle24();
-void old_idle25();
-void old_idle26();
-void old_idle27();
-void old_idle28();
-void old_idle29();
-void old_idle30();
-void old_idle31();
-void old_idle32();
-void old_idle33();
-void old_idle34();
-void old_idle35();
-void old_idle36();
-void old_idle37();
-void old_idle38();
-void old_idle39();
-void old_idle40();
-void old_idle41();
-void old_idle42();
-void old_idle43();
-void old_idle44();
-void old_idle45();
-void old_idle46();
-void old_thrash1();
-void old_thrash2();
-void old_thrash3();
-void old_thrash4();
-void old_thrash5();
-void old_thrash6();
-void old_thrash7();
-void old_thrash8();
-void old_thrash9();
-void old_thrash10();
-void old_thrash11();
-void old_thrash12();
-void old_thrash13();
-void old_thrash14();
-void old_thrash15();
-void old_thrash16();
-void old_thrash17();
-void old_thrash18();
-void old_thrash19();
-void old_thrash20();
+void old_idle1(void);
+void old_idle2(void);
+void old_idle3(void);
+void old_idle4(void);
+void old_idle5(void);
+void old_idle6(void);
+void old_idle7(void);
+void old_idle8(void);
+void old_idle9(void);
+void old_idle10(void);
+void old_idle11(void);
+void old_idle12(void);
+void old_idle13(void);
+void old_idle14(void);
+void old_idle15(void);
+void old_idle16(void);
+void old_idle17(void);
+void old_idle18(void);
+void old_idle19(void);
+void old_idle20(void);
+void old_idle21(void);
+void old_idle22(void);
+void old_idle23(void);
+void old_idle24(void);
+void old_idle25(void);
+void old_idle26(void);
+void old_idle27(void);
+void old_idle28(void);
+void old_idle29(void);
+void old_idle30(void);
+void old_idle31(void);
+void old_idle32(void);
+void old_idle33(void);
+void old_idle34(void);
+void old_idle35(void);
+void old_idle36(void);
+void old_idle37(void);
+void old_idle38(void);
+void old_idle39(void);
+void old_idle40(void);
+void old_idle41(void);
+void old_idle42(void);
+void old_idle43(void);
+void old_idle44(void);
+void old_idle45(void);
+void old_idle46(void);
+void old_thrash1(void);
+void old_thrash2(void);
+void old_thrash3(void);
+void old_thrash4(void);
+void old_thrash5(void);
+void old_thrash6(void);
+void old_thrash7(void);
+void old_thrash8(void);
+void old_thrash9(void);
+void old_thrash10(void);
+void old_thrash11(void);
+void old_thrash12(void);
+void old_thrash13(void);
+void old_thrash14(void);
+void old_thrash15(void);
+void old_thrash16(void);
+void old_thrash17(void);
+void old_thrash18(void);
+void old_thrash19(void);
+void old_thrash20(void);
 
 //=============================================================================
 
@@ -214,10 +214,10 @@ ANIM(old_idle44, old44, old_idle45;)
 ANIM(old_idle45, old45, old_idle46;)
 ANIM(old_idle46, old46, old_idle1;)
 
-void finale_1();
-void finale_2();
-void finale_3();
-void finale_4();
+void finale_1(void);
+void finale_2(void);
+void finale_3(void);
+void finale_4(void);
 
 void _old_thrash15(void)
 {
@@ -252,7 +252,7 @@ ANIM(old_thrash20, shake20, old_thrash20; finale_4();)
 
 //============================================================================
 
-void finale_1()
+void finale_1(void)
 {
 	gedict_t *pl;
 	gedict_t *timer;
@@ -334,7 +334,7 @@ gedict_t* shub_find(char *msg)
 	return shub;
 }
 
-void finale_2()
+void finale_2(void)
 {
 	vec3_t o;
 	gedict_t *shub = shub_find("finale_2");
@@ -356,7 +356,7 @@ void finale_2()
 	self->think = (func_t) finale_3;
 }
 
-void finale_3()
+void finale_3(void)
 {
 	gedict_t *shub = shub_find("finale_3");
 
@@ -370,7 +370,7 @@ void finale_3()
 	ent_remove(self);
 }
 
-void kill_all_monsters()
+void kill_all_monsters(void)
 {
 	gedict_t *monster;
 
@@ -394,7 +394,7 @@ void kill_all_monsters()
 	self->s.v.nextthink = g_globalvars.time + 0.2;
 }
 
-void finale_4()
+void finale_4(void)
 {
 	// throw tons of meat chunks
 	vec3_t oldo;
@@ -486,7 +486,7 @@ void nopain(gedict_t *attacker, float damage)
 
 /*QUAKED monster_oldone (1 0 0) (-16 -16 -24) (16 16 32)
  */
-void SP_monster_oldone()
+void SP_monster_oldone(void)
 {
 	if (!AllowMonster(self))
 	{

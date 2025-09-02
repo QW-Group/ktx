@@ -112,7 +112,7 @@ float range(gedict_t *targ)
  =============
  visible
 
- returns 1 if the entity is visible to self, even if not infront ()
+ returns 1 if the entity is visible to self, even if not infront (void)
  =============
  */
 float visible(gedict_t *targ)
@@ -202,7 +202,7 @@ void SUB_CheckRefire(func_t thinkst)
 
 //============================================================================
 
-void HuntTarget()
+void HuntTarget(void)
 {
 	vec3_t tmpv;
 
@@ -214,7 +214,7 @@ void HuntTarget()
 	SUB_AttackFinished(1);	// wait a while before first attack
 }
 
-void SightSound()
+void SightSound(void)
 {
 	if (streq(self->classname, "monster_ogre"))
 	{
@@ -287,7 +287,7 @@ void SightSound()
 	}
 }
 
-void FoundTarget()
+void FoundTarget(void)
 {
 	if (PROG_TO_EDICT(self->s.v.enemy)->ct == ctPlayer)
 	{	// let other monsters see this monster for a while
@@ -318,7 +318,7 @@ void FoundTarget()
  slower noticing monsters.
  ============
  */
-float FindTarget()
+float FindTarget(void)
 {
 	gedict_t *client = NULL;
 
@@ -481,7 +481,7 @@ void GetMadAtAttacker(gedict_t *attacker)
 
  =============
  */
-void ai_melee()
+void ai_melee(void)
 {
 	vec3_t delta;
 	float ldmg;
@@ -503,7 +503,7 @@ void ai_melee()
 	T_Damage(PROG_TO_EDICT(self->s.v.enemy), self, self, ldmg);
 }
 
-void ai_melee_side()
+void ai_melee_side(void)
 {
 	vec3_t delta;
 	float ldmg;
@@ -608,7 +608,7 @@ void ai_walk(float dist)
  The monster is staying in one place for a while, with slight angle turns
  =============
  */
-void ai_stand()
+void ai_stand(void)
 {
 	if (FindTarget())
 	{
@@ -636,7 +636,7 @@ void ai_stand()
  don't move, but turn towards ideal_yaw
  =============
  */
-void ai_turn()
+void ai_turn(void)
 {
 	if (FindTarget())
 	{
@@ -652,7 +652,7 @@ void ai_turn()
 
  ============
  */
-float FacingIdeal()
+float FacingIdeal(void)
 {
 	float delta;
 
@@ -675,7 +675,7 @@ float FacingIdeal()
  Stay facing the enemy
  =============
  */
-void ai_face()
+void ai_face(void)
 {
 	vec3_t tmpv;
 
@@ -711,7 +711,7 @@ void ai_charge(float d)
 	movetogoal(d);		// done in C code...
 }
 
-void ai_charge_side()
+void ai_charge_side(void)
 {
 	vec3_t tmpv;
 	float heading;
@@ -741,7 +741,7 @@ void ai_charge_side()
  Returns false if movement should continue
  ============
  */
-float CheckAttack()
+float CheckAttack(void)
 {
 	vec3_t spot1, spot2;
 	gedict_t *targ;
@@ -836,7 +836,7 @@ float CheckAttack()
 	return false;
 }
 
-float CheckAnyAttack()
+float CheckAnyAttack(void)
 {
 	if (!enemy_vis)
 	{
@@ -883,7 +883,7 @@ float CheckAnyAttack()
  Turn and close until within an angle to launch a melee attack
  =============
  */
-void ai_run_melee()
+void ai_run_melee(void)
 {
 	self->s.v.ideal_yaw = enemy_yaw;
 	changeyaw(self);
@@ -906,7 +906,7 @@ void ai_run_melee()
  Turn in place until within an angle to launch a missile attack
  =============
  */
-void ai_run_missile()
+void ai_run_missile(void)
 {
 	self->s.v.ideal_yaw = enemy_yaw;
 	changeyaw(self);
@@ -929,7 +929,7 @@ void ai_run_missile()
  Strafe sideways, but stay at aproximately the same range
  =============
  */
-void ai_run_slide()
+void ai_run_slide(void)
 {
 	float ofs;
 

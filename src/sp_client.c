@@ -20,7 +20,7 @@
 // sp_client.c - single player specific functions
 #include "g_local.h"
 
-void ExitIntermission()
+void ExitIntermission(void)
 {
 	// skip any text in deathmatch
 	if (deathmatch)

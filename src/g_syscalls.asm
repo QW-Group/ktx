@@ -116,3 +116,7 @@ equ		trap_trailparticles    -262
 equ		trap_pointparticles    -263
 equ		trap_clientstat        -264
 equ		trap_pointerstat       -265
+equ		trap_MapExtFieldPtr    -266
+equ		trap_SetExtFieldPtr    -267
+equ		trap_GetExtFieldPtr    -268
+equ		trap_SetSendNeeded     -269

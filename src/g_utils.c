@@ -48,12 +48,12 @@ void g_random_seed(int seed) {
 	rng_seed_global(seed);
 }
 
-float g_random()
+float g_random(void)
 {
 	return (rng_next_global() >> 8 & 0xffffff) / 16777216.0f;
 }
 
-float crandom()
+float crandom(void)
 {
 	return (2 * (g_random() - 0.5));
 }
@@ -127,12 +127,12 @@ void initialise_spawned_ent(gedict_t *ent)
 #endif
 }
 
-float next_frame()
+float next_frame(void)
 {
 	return g_globalvars.time + g_globalvars.frametime;
 }
 
-gedict_t* spawn()
+gedict_t* spawn(void)
 {
 	gedict_t *t = &g_edicts[trap_spawn()];
 
@@ -932,7 +932,7 @@ void sound(gedict_t *ed, int channel, char *samp, float vol, float att)
 	trap_sound(NUM_FOR_EDICT(ed), channel, samp, vol, att);
 }
 
-gedict_t* checkclient()
+gedict_t* checkclient(void)
 {
 	return &g_edicts[trap_checkclient()];
 }
@@ -1573,27 +1573,27 @@ qbool isghost(gedict_t *ed)
 	return (streq(ed->classname, "ghost") ? true : false);
 }
 // gametype >>>
-qbool isDuel()
+qbool isDuel(void)
 {
 	return ((k_mode == gtDuel) ? true : false);
 }
 
-qbool isTeam()
+qbool isTeam(void)
 {
 	return ((k_mode == gtTeam) ? true : false);
 }
 
-int tp_num()
+int tp_num(void)
 {
 	return ((isTeam() || isCTF() || coop) ? teamplay : 0);
 }
 
-qbool isFFA()
+qbool isFFA(void)
 {
 	return ((k_mode == gtFFA) ? true : false);
 }
 
-qbool isCTF()
+qbool isCTF(void)
 {
 #ifdef CTF_RELOADMAP
 	return k_ctf; // once setup at map load
@@ -1602,7 +1602,7 @@ qbool isCTF()
 #endif
 }
 
-qbool isUnknown()
+qbool isUnknown(void)
 {
 #ifdef CTF_RELOADMAP
 	if (cvar("k_mode") == gtCTF)
@@ -1777,7 +1777,7 @@ char* Get_PowerupsStr(void)
 	return str;
 }
 
-int Get_Powerups()
+int Get_Powerups(void)
 {
 	static float k_pow_check = 0;
 	static int k_pow = 0;
@@ -1865,7 +1865,7 @@ int k_scores3 = 0;
 gedict_t *ed_scores1 = NULL;
 gedict_t *ed_scores2 = NULL;
 
-void ReScores()
+void ReScores(void)
 {
 	gedict_t *p;
 	int from;
@@ -1954,35 +1954,35 @@ void ReScores()
 	}
 }
 
-int get_scores1()
+int get_scores1(void)
 {
 	ReScores();
 
 	return k_scores1;
 }
 
-int get_scores2()
+int get_scores2(void)
 {
 	ReScores();
 
 	return k_scores2;
 }
 
-int get_scores3()
+int get_scores3(void)
 {
 	ReScores();
 
 	return k_scores3;
 }
 
-gedict_t* get_ed_scores1()
+gedict_t* get_ed_scores1(void)
 {
 	ReScores();
 
 	return ed_scores1;
 }
 
-gedict_t* get_ed_scores2()
+gedict_t* get_ed_scores2(void)
 {
 	ReScores();
 
@@ -1997,7 +1997,7 @@ gedict_t *ed_best1 = NULL;
 gedict_t *ed_best2 = NULL;
 gedict_t *ed_bestPow = NULL;
 
-void CalculateBestPlayers()
+void CalculateBestPlayers(void)
 {
 	gedict_t *p;
 	int best, best1, best2;
@@ -2073,7 +2073,7 @@ void CalculateBestPlayers()
 	}
 }
 
-void CalculateBestPowPlayers()
+void CalculateBestPowPlayers(void)
 {
 	gedict_t *p;
 	int best, best1;
@@ -2124,21 +2124,21 @@ void CalculateBestPowPlayers()
 	}
 }
 
-gedict_t* get_ed_best1()
+gedict_t* get_ed_best1(void)
 {
 	CalculateBestPlayers();
 
 	return ed_best1;
 }
 
-gedict_t* get_ed_best2()
+gedict_t* get_ed_best2(void)
 {
 	CalculateBestPlayers();
 
 	return ed_best2;
 }
 
-gedict_t* get_ed_bestPow()
+gedict_t* get_ed_bestPow(void)
 {
 	CalculateBestPowPlayers();
 
@@ -2354,7 +2354,7 @@ void ghost2scores(gedict_t *g)
 	WriteShort(to, 39);  				// client ping
 }
 
-void update_ghosts()
+void update_ghosts(void)
 {
 	gedict_t *p;
 	int from;
@@ -2369,7 +2369,7 @@ void update_ghosts()
 
 // { events
 
-void on_connect()
+void on_connect(void)
 {
 	char *newteam;
 
@@ -2415,7 +2415,7 @@ void on_connect()
 	}
 }
 
-void on_enter()
+void on_enter(void)
 {
 	if (iKey(self, "kf") & KF_ON_ENTER) // client doesn't want on_enter
 	{
@@ -2576,7 +2576,7 @@ void cl_refresh_plus_scores(gedict_t *p)
 	}
 }
 
-void refresh_plus_scores()
+void refresh_plus_scores(void)
 {
 	gedict_t *p;
 
@@ -2639,7 +2639,7 @@ char* params_str(int from, int to)
 	return string[index++];
 }
 
-char* SD_type_str()
+char* SD_type_str(void)
 {
 	switch ((int)k_sudden_death)
 	{
@@ -2661,13 +2661,11 @@ char* respawn_model_name(int mdl_num)
 {
 	switch (mdl_num)
 	{
-// K_SPW_0_NONRANDOM changes "Normal QW respawns" to "pre-qtest nonrandom respawns"
-#ifdef K_SPW_0_NONRANDOM
-		case 0:
+		case -1:
 			return "pre-qtest nonrandom respawns";
-#else
-		case 0:  return "Normal QW respawns";
-#endif
+
+		case 0:
+			return "Normal QW respawns";
 
 		case 1:
 			return "KT SpawnSafety";
@@ -2690,6 +2688,9 @@ char* respawn_model_name_short(int mdl_num)
 {
 	switch (mdl_num)
 	{
+		case -1:
+			return "QTEST";
+
 		case 0:
 			return "QW";
 
@@ -2710,13 +2711,13 @@ char* respawn_model_name_short(int mdl_num)
 	}
 }
 
-int get_fair_pack()
+int get_fair_pack(void)
 {
 	// Yawnmode: always 2 aka last weapon
 	return bound(0, k_yawnmode ? 2 : cvar("k_frp"), 2);
 }
 
-int get_fallbunny()
+int get_fallbunny(void)
 {
 	// Yawnmode/race: no broken ankle
 	return (k_yawnmode || isRACE() ? 1 : cvar("k_fallbunny"));

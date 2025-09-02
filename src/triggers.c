@@ -29,7 +29,7 @@ gedict_t *stemp, *otemp, *old;
 qbool BotsPreTeleport(gedict_t *self, gedict_t *other);
 void BotsPostTeleport(gedict_t *self, gedict_t *other, gedict_t *teleport_destination);
 
-void trigger_reactivate()
+void trigger_reactivate(void)
 {
 	self->s.v.solid = SOLID_TRIGGER;
 }
@@ -40,7 +40,7 @@ void trigger_reactivate()
 #define SPAWNFLAG_NOTOUCH  1
 
 // the wait g_globalvars.time has passed, so set back up for another activation
-void multi_wait()
+void multi_wait(void)
 {
 	if (self->s.v.max_health)
 	{
@@ -53,7 +53,7 @@ void multi_wait()
 // the trigger was just touched/killed/used
 // self->s.v.enemy should be set to the activator so it can be held through a delay
 // so wait for the delay g_globalvars.time before firing
-void multi_trigger()
+void multi_trigger(void)
 {
 	if (self->s.v.nextthink > g_globalvars.time)
 	{
@@ -97,19 +97,19 @@ void multi_trigger()
 	}
 }
 
-void multi_killed()
+void multi_killed(void)
 {
 	self->s.v.enemy = EDICT_TO_PROG(damage_attacker);
 	multi_trigger();
 }
 
-void multi_use()
+void multi_use(void)
 {
 	self->s.v.enemy = EDICT_TO_PROG(activator);
 	multi_trigger();
 }
 
-void multi_touch()
+void multi_touch(void)
 {
 	// #practice mode#
 	if (!k_practice && (match_in_progress != 2))
@@ -154,7 +154,7 @@ void multi_touch()
  4)
  set "message" to text string
  */
-void SP_trigger_multiple()
+void SP_trigger_multiple(void)
 {
 	if (self->s.v.sounds == 1)
 	{
@@ -216,7 +216,7 @@ void SP_trigger_multiple()
  4)
  set "message" to text string
  */
-void SP_trigger_once()
+void SP_trigger_once(void)
 {
 	self->wait = -1;
 	SP_trigger_multiple();
@@ -227,7 +227,7 @@ void SP_trigger_once()
 /*QUAKED trigger_relay (.5 .5 .5) (-8 -8 -8) (8 8 8)
  This fixed size trigger cannot be touched, it can only be fired by other events.  It can contain killtargets, targets, delays, and messages.
  */
-void SP_trigger_relay()
+void SP_trigger_relay(void)
 {
 	self->use = (func_t) SUB_UseTargets;
 }
@@ -243,7 +243,7 @@ void SP_trigger_relay()
  4)
  set "message" to text string
  */
-void SP_trigger_secret()
+void SP_trigger_secret(void)
 {
 	g_globalvars.total_secrets = g_globalvars.total_secrets + 1;
 	self->wait = -1;
@@ -269,7 +269,7 @@ void SP_trigger_secret()
 
 //=============================================================================
 
-void counter_use()
+void counter_use(void)
 {
 // char* junk;
 
@@ -320,7 +320,7 @@ void counter_use()
 
  After the counter has been triggered "count" g_globalvars.times (default 2), it will fire all of it's targets and remove itself.
  */
-void SP_trigger_counter()
+void SP_trigger_counter(void)
 {
 	self->wait = -1;
 	if (!self->count)
@@ -392,7 +392,7 @@ void spawn_tfog(vec3_t org)
 }
 
 /*
- void tdeath_touch()
+ void tdeath_touch(void)
  {
  gedict_t       *other2;
 
@@ -445,7 +445,7 @@ void spawn_tfog(vec3_t org)
  */
 
 // { NOTE: retarded code, just so monsters able double telefrag each other, for example "e1m7"
-void tdeath_touch()
+void tdeath_touch(void)
 {
 	gedict_t *other2;
 
@@ -694,7 +694,7 @@ void teleport_player(gedict_t *player, vec3_t origin, vec3_t angles, int flags)
 	}
 }
 
-void teleport_touch()
+void teleport_touch(void)
 {
 	gedict_t *t;
 
@@ -715,7 +715,7 @@ void teleport_touch()
 	}
 
 // only teleport living creatures
-	if (ISDEAD(other) || (!isRACE() && (other->s.v.solid != SOLID_SLIDEBOX)))
+	if (ISDEAD(other) || (!isRACE() && (other->s.v.solid != SOLID_SLIDEBOX) && !other->leavemealone))
 	{
 		return;
 	}
@@ -770,7 +770,7 @@ void teleport_touch()
 /*QUAKED info_teleport_destination (.5 .5 .5) (-8 -8 -8) (8 8 32)
  This is the destination marker for a teleporter.  It should have a "targetname" field with the same value as a teleporter's "target" field.
  */
-void SP_info_teleport_destination()
+void SP_info_teleport_destination(void)
 {
 // this does nothing, just serves as a target spot
 	VectorCopy(self->s.v.angles, self->mangle);
@@ -784,7 +784,7 @@ void SP_info_teleport_destination()
 	}
 }
 
-void teleport_use()
+void teleport_use(void)
 {
 	self->s.v.nextthink = g_globalvars.time + 0.2;
 	g_globalvars.force_retouch = 2;	// make sure even still objects get hit
@@ -796,7 +796,7 @@ void teleport_use()
 
  If the trigger_teleport has a targetname, it will only teleport entities when it has been fired.
  */
-void SP_trigger_teleport()
+void SP_trigger_teleport(void)
 {
 	vec3_t o;
 
@@ -820,7 +820,7 @@ void SP_trigger_teleport()
 	}
 }
 
-void SP_trigger_custom_teleport()
+void SP_trigger_custom_teleport(void)
 {
 	// set real classname
 	self->classname = "trigger_teleport";
@@ -845,7 +845,7 @@ void SP_trigger_custom_teleport()
  ==============================================================================
  */
 
-void trigger_skill_touch()
+void trigger_skill_touch(void)
 {
 	if (other->ct != ctPlayer)
 	{
@@ -859,7 +859,7 @@ void trigger_skill_touch()
  sets skill level to the value of "message".
  Only used on start map.
  */
-void SP_trigger_setskill()
+void SP_trigger_setskill(void)
 {
 	if (deathmatch)
 	{
@@ -885,7 +885,7 @@ void SP_trigger_setskill()
  ==============================================================================
  */
 
-void trigger_onlyregistered_touch()
+void trigger_onlyregistered_touch(void)
 {
 	if (other->ct != ctPlayer)
 	{
@@ -918,7 +918,7 @@ void trigger_onlyregistered_touch()
 /*QUAKED trigger_onlyregistered (.5 .5 .5) ?
  Only fires if playing the registered version, otherwise prints the message
  */
-void SP_trigger_onlyregistered()
+void SP_trigger_onlyregistered(void)
 {
 	trap_precache_sound("misc/talk.wav");
 	InitTrigger();
@@ -927,7 +927,7 @@ void SP_trigger_onlyregistered()
 
 //============================================================================
 
-void hurt_on()
+void hurt_on(void)
 {
 	self->s.v.solid = SOLID_TRIGGER;
 	self->s.v.nextthink = -1;
@@ -935,7 +935,7 @@ void hurt_on()
 	g_globalvars.force_retouch = 2; // make sure even still objects get hit
 }
 
-void hurt_items()
+void hurt_items(void)
 {
 	if (cvar("k_ctf_hurt_items"))
 	{
@@ -952,7 +952,7 @@ void hurt_items()
 	}
 }
 
-void hurt_touch()
+void hurt_touch(void)
 {
 	if (!other->s.v.takedamage)
 	{
@@ -972,7 +972,7 @@ void hurt_touch()
  set dmg to damage amount
  defalt dmg = 5
  */
-void SP_trigger_hurt()
+void SP_trigger_hurt(void)
 {
 	if (streq("end", mapname) && cvar("k_remove_end_hurt"))
 	{
@@ -993,7 +993,7 @@ void SP_trigger_hurt()
 
 #define PUSH_ONCE  1
 
-void trigger_push_touch()
+void trigger_push_touch(void)
 {
 	if (streq(other->classname, "grenade"))
 	{
@@ -1027,7 +1027,7 @@ void trigger_push_touch()
 /*QUAKED trigger_push (.5 .5 .5) ? PUSH_ONCE
  Pushes the player
  */
-void SP_trigger_push()
+void SP_trigger_push(void)
 {
 	InitTrigger();
 	self->touch = (func_t) trigger_push_touch;
@@ -1037,7 +1037,7 @@ void SP_trigger_push()
 	}
 }
 
-void SP_trigger_custom_push()
+void SP_trigger_custom_push(void)
 {
 	// set real classname
 	self->classname = "trigger_push";
@@ -1053,7 +1053,7 @@ void SP_trigger_custom_push()
 
 //============================================================================
 
-void trigger_monsterjump_touch()
+void trigger_monsterjump_touch(void)
 {
 	if (((int)other->s.v.flags & (FL_MONSTER | FL_FLY | FL_SWIM)) != FL_MONSTER)
 	{
@@ -1079,7 +1079,7 @@ void trigger_monsterjump_touch()
  "speed" default to 200, the speed thrown forward
  "height" default to 200, the speed thrown upwards
  */
-void SP_trigger_monsterjump()
+void SP_trigger_monsterjump(void)
 {
 	if (!self->speed)
 	{
@@ -1100,7 +1100,7 @@ void SP_trigger_monsterjump()
 	self->touch = (func_t) trigger_monsterjump_touch;
 }
 
-void SP_trigger_custom_monsterjump()
+void SP_trigger_custom_monsterjump(void)
 {
 	// set real classname
 	self->classname = "trigger_monsterjump";
@@ -1116,7 +1116,7 @@ void SP_trigger_custom_monsterjump()
 
 float T_Heal(gedict_t *e, float healamount, float ignore);
 
-static void trigger_heal_touch()
+static void trigger_heal_touch(void)
 {
 	if ((match_in_progress == 1) || (!match_in_progress && cvar("k_freeze")))
 	{
@@ -1150,7 +1150,7 @@ static void trigger_heal_touch()
 	}
 }
 
-void SP_trigger_heal()
+void SP_trigger_heal(void)
 {
 	if (strnull(self->noise))
 		self->noise = "items/r_item1.wav";

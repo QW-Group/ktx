@@ -135,93 +135,93 @@ enum
 
 };
 
-void knight_stand1();
-void knight_stand2();
-void knight_stand3();
-void knight_stand4();
-void knight_stand5();
-void knight_stand6();
-void knight_stand7();
-void knight_stand8();
-void knight_stand9();
-void knight_walk1();
-void knight_walk2();
-void knight_walk3();
-void knight_walk4();
-void knight_walk5();
-void knight_walk6();
-void knight_walk7();
-void knight_walk8();
-void knight_walk9();
-void knight_walk10();
-void knight_walk11();
-void knight_walk12();
-void knight_walk13();
-void knight_walk14();
-void knight_run1();
-void knight_run2();
-void knight_run3();
-void knight_run4();
-void knight_run5();
-void knight_run6();
-void knight_run7();
-void knight_run8();
-void knight_runatk1();
-void knight_runatk2();
-void knight_runatk3();
-void knight_runatk4();
-void knight_runatk5();
-void knight_runatk6();
-void knight_runatk7();
-void knight_runatk8();
-void knight_runatk9();
-void knight_runatk10();
-void knight_runatk11();
-void knight_atk1();
-void knight_atk2();
-void knight_atk3();
-void knight_atk4();
-void knight_atk5();
-void knight_atk6();
-void knight_atk7();
-void knight_atk8();
-void knight_atk9();
-void knight_atk10();
-void knight_pain1();
-void knight_pain2();
-void knight_pain3();
-void knight_painb1();
-void knight_painb2();
-void knight_painb3();
-void knight_painb4();
-void knight_painb5();
-void knight_painb6();
-void knight_painb7();
-void knight_painb8();
-void knight_painb9();
-void knight_painb10();
-void knight_painb11();
-void knight_die1();
-void knight_die2();
-void knight_die3();
-void knight_die4();
-void knight_die5();
-void knight_die6();
-void knight_die7();
-void knight_die8();
-void knight_die9();
-void knight_die10();
-void knight_dieb1();
-void knight_dieb2();
-void knight_dieb3();
-void knight_dieb4();
-void knight_dieb5();
-void knight_dieb6();
-void knight_dieb7();
-void knight_dieb8();
-void knight_dieb9();
-void knight_dieb10();
-void knight_dieb11();
+void knight_stand1(void);
+void knight_stand2(void);
+void knight_stand3(void);
+void knight_stand4(void);
+void knight_stand5(void);
+void knight_stand6(void);
+void knight_stand7(void);
+void knight_stand8(void);
+void knight_stand9(void);
+void knight_walk1(void);
+void knight_walk2(void);
+void knight_walk3(void);
+void knight_walk4(void);
+void knight_walk5(void);
+void knight_walk6(void);
+void knight_walk7(void);
+void knight_walk8(void);
+void knight_walk9(void);
+void knight_walk10(void);
+void knight_walk11(void);
+void knight_walk12(void);
+void knight_walk13(void);
+void knight_walk14(void);
+void knight_run1(void);
+void knight_run2(void);
+void knight_run3(void);
+void knight_run4(void);
+void knight_run5(void);
+void knight_run6(void);
+void knight_run7(void);
+void knight_run8(void);
+void knight_runatk1(void);
+void knight_runatk2(void);
+void knight_runatk3(void);
+void knight_runatk4(void);
+void knight_runatk5(void);
+void knight_runatk6(void);
+void knight_runatk7(void);
+void knight_runatk8(void);
+void knight_runatk9(void);
+void knight_runatk10(void);
+void knight_runatk11(void);
+void knight_atk1(void);
+void knight_atk2(void);
+void knight_atk3(void);
+void knight_atk4(void);
+void knight_atk5(void);
+void knight_atk6(void);
+void knight_atk7(void);
+void knight_atk8(void);
+void knight_atk9(void);
+void knight_atk10(void);
+void knight_pain1(void);
+void knight_pain2(void);
+void knight_pain3(void);
+void knight_painb1(void);
+void knight_painb2(void);
+void knight_painb3(void);
+void knight_painb4(void);
+void knight_painb5(void);
+void knight_painb6(void);
+void knight_painb7(void);
+void knight_painb8(void);
+void knight_painb9(void);
+void knight_painb10(void);
+void knight_painb11(void);
+void knight_die1(void);
+void knight_die2(void);
+void knight_die3(void);
+void knight_die4(void);
+void knight_die5(void);
+void knight_die6(void);
+void knight_die7(void);
+void knight_die8(void);
+void knight_die9(void);
+void knight_die10(void);
+void knight_dieb1(void);
+void knight_dieb2(void);
+void knight_dieb3(void);
+void knight_dieb4(void);
+void knight_dieb5(void);
+void knight_dieb6(void);
+void knight_dieb7(void);
+void knight_dieb8(void);
+void knight_dieb9(void);
+void knight_dieb10(void);
+void knight_dieb11(void);
 
 //==============================================================================
 
@@ -322,7 +322,7 @@ ANIM(knight_atk8, attackb8, knight_atk9; ai_charge(3); ai_melee();)
 ANIM(knight_atk9, attackb9, knight_atk10; ai_charge(1);)
 ANIM(knight_atk10, attackb10, knight_run1; ai_charge(5);)
 
-void knight_melee()
+void knight_melee(void)
 {
 	vec3_t delta;
 
@@ -407,7 +407,7 @@ ANIM(knight_dieb9, deathb9, knight_dieb10)
 ANIM(knight_dieb10, deathb10, knight_dieb11)
 ANIM(knight_dieb11, deathb11, knight_dieb11)
 
-void knight_die()
+void knight_die(void)
 {
 	// check for gib
 	if (self->s.v.health < -40)
@@ -440,7 +440,7 @@ void knight_die()
 
 /*QUAKED monster_knight (1 0 0) (-16 -16 -24) (16 16 40) Ambush
  */
-void SP_monster_knight()
+void SP_monster_knight(void)
 {
 	if (!AllowMonster(self))
 	{

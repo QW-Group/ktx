@@ -69,54 +69,54 @@ enum
 
 };
 
-void shal_stand();
-void shal_walk1();
-void shal_walk2();
-void shal_walk3();
-void shal_walk4();
-void shal_walk5();
-void shal_walk6();
-void shal_walk7();
-void shal_walk8();
-void shal_walk9();
-void shal_walk10();
-void shal_walk11();
-void shal_walk12();
-void shal_run1();
-void shal_run2();
-void shal_run3();
-void shal_run4();
-void shal_run5();
-void shal_run6();
-void shal_run7();
-void shal_run8();
-void shal_run9();
-void shal_run10();
-void shal_run11();
-void shal_run12();
-void shal_attack1();
-void shal_attack2();
-void shal_attack3();
-void shal_attack4();
-void shal_attack5();
-void shal_attack6();
-void shal_attack7();
-void shal_attack8();
-void shal_attack9();
-void shal_attack10();
-void shal_attack11();
-void shal_pain1();
-void shal_pain2();
-void shal_pain3();
-void shal_pain4();
-void shal_pain5();
-void shal_death1();
-void shal_death2();
-void shal_death3();
-void shal_death4();
-void shal_death5();
-void shal_death6();
-void shal_death7();
+void shal_stand(void);
+void shal_walk1(void);
+void shal_walk2(void);
+void shal_walk3(void);
+void shal_walk4(void);
+void shal_walk5(void);
+void shal_walk6(void);
+void shal_walk7(void);
+void shal_walk8(void);
+void shal_walk9(void);
+void shal_walk10(void);
+void shal_walk11(void);
+void shal_walk12(void);
+void shal_run1(void);
+void shal_run2(void);
+void shal_run3(void);
+void shal_run4(void);
+void shal_run5(void);
+void shal_run6(void);
+void shal_run7(void);
+void shal_run8(void);
+void shal_run9(void);
+void shal_run10(void);
+void shal_run11(void);
+void shal_run12(void);
+void shal_attack1(void);
+void shal_attack2(void);
+void shal_attack3(void);
+void shal_attack4(void);
+void shal_attack5(void);
+void shal_attack6(void);
+void shal_attack7(void);
+void shal_attack8(void);
+void shal_attack9(void);
+void shal_attack10(void);
+void shal_attack11(void);
+void shal_pain1(void);
+void shal_pain2(void);
+void shal_pain3(void);
+void shal_pain4(void);
+void shal_pain5(void);
+void shal_death1(void);
+void shal_death2(void);
+void shal_death3(void);
+void shal_death4(void);
+void shal_death5(void);
+void shal_death6(void);
+void shal_death7(void);
 
 //=============================================================================
 
@@ -170,7 +170,7 @@ ANIM(shal_run12, walk1, shal_run1; ai_run(5);)
 
 //=============================================================================
 
-void ShalMissileTouch()
+void ShalMissileTouch(void)
 {
 	if (other == PROG_TO_EDICT(self->s.v.owner))
 	{
@@ -196,7 +196,7 @@ void ShalMissileTouch()
 	ent_remove(self);
 }
 
-void ShalHome()
+void ShalHome(void)
 {
 	vec3_t dir, vtemp;
 
@@ -226,7 +226,7 @@ void ShalHome()
  ShalMissile
  ================
  */
-void ShalMissile()
+void ShalMissile(void)
 {
 	gedict_t *missile;
 	vec3_t dir;
@@ -306,7 +306,7 @@ ANIM(shal_death5, death5, shal_death6;)
 ANIM(shal_death6, death6, shal_death7;)
 ANIM(shal_death7, death7, shal_death7;)
 
-void shalrath_die()
+void shalrath_die(void)
 {
 	// check for gib
 	if (self->s.v.health < -90)
@@ -331,7 +331,7 @@ void shalrath_die()
 
 /*QUAKED monster_shalrath (1 0 0) (-32 -32 -24) (32 32 48) Ambush
  */
-void SP_monster_shalrath()
+void SP_monster_shalrath(void)
 {
 	if (!AllowMonster(self))
 	{

@@ -12,7 +12,7 @@
 
 #include "g_local.h"
 
-void DemoMark();
+void DemoMark(void);
 
 #define FB_LAVAJUMP_NOT    0      // not lava-jumping
 #define FB_LAVAJUMP_SINK   1      // deliberately sinking, waiting for waterlevel == 3
@@ -93,6 +93,10 @@ void BotCanRocketJump(gedict_t *self)
 	if (self->fb.debug_path)
 	{
 		self->fb.canRocketJump = self->fb.debug_path_rj;
+	}
+	else if (!self->fb.skill.use_rocketjumps)
+	{
+		self->fb.canRocketJump = false;
 	}
 	else if (has_rl && (self->s.v.waterlevel > 1)
 			&& (trap_pointcontents(self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2])

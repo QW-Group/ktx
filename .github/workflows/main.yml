@@ -1,6 +1,14 @@
 name: main
 
-on: [ push, pull_request, workflow_dispatch ]
+on:
+  push:
+    # Only build branches on push, tags will be handled by 'release' job.
+    branches:
+    - '**'
+  pull_request:
+  workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
   build:
@@ -64,6 +72,9 @@ jobs:
         id: cpu-cores
         if: matrix.target == 'qvm'
 
+      - uses: ammaraskar/gcc-problem-matcher@0.3.0
+        if: matrix.target != 'qvm'
+
       - name: Checkout q3lcc
         uses: actions/checkout@v4
         with:
@@ -90,6 +101,34 @@ jobs:
           path: |
             qwprogs.*
           compression-level: 9
+
+  verify-macos:
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: ammaraskar/gcc-problem-matcher@0.3.0
+
+      - name: Build
+        run: |
+          cmake -B builddir -S . -G Xcode -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+          cmake --build builddir --config Release --parallel
+
+  verify-msvc:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: ammaraskar/msvc-problem-matcher@0.3.0
+
+      - name: Build
+        run: |
+          cmake -B builddir -S . -G "Visual Studio 17 2022"
+          cmake --build builddir --config Release --parallel
 
   upload:
     needs: build

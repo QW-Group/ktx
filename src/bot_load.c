@@ -4,11 +4,11 @@
 
 #if 0
 
-void a_think()
+void a_think(void)
 {
 }
 
-void spawn_load()
+void spawn_load(void)
 {
 	load_position = dropper;
 	while (load_position)
@@ -35,7 +35,7 @@ void spawn_load()
 		++total_entity_count;
 	}
 }
-void set_load()
+void set_load(void)
 {
 	load_position = current_load_position;
 	while (load_position)
@@ -45,7 +45,7 @@ void set_load()
 	}
 }
 
-void remove_load()
+void remove_load(void)
 {
 	gedict_t *marker_;
 

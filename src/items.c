@@ -25,9 +25,9 @@
 
 #include "g_local.h"
 
-void SP_item_artifact_invisibility();
-void SP_item_artifact_super_damage();
-void SP_item_artifact_invulnerability();
+void SP_item_artifact_invisibility(void);
+void SP_item_artifact_super_damage(void);
+void SP_item_artifact_invulnerability(void);
 
 void TookWeaponHandler(gedict_t *p, int new_wp, qbool from_backpack);
 void BotsBackpackTouchedNonPlayer(gedict_t *backpack, gedict_t *entity);
@@ -56,7 +56,7 @@ static void ItemTaken(gedict_t *item, gedict_t *player)
 #endif
 }
 
-void SUB_regen()
+void SUB_regen(void)
 {
 	if (!deathmatch && (skill < 3))
 	{
@@ -76,7 +76,7 @@ void SUB_regen()
 #endif
 }
 
-void SUB_regen_powerups()
+void SUB_regen_powerups(void)
 {
 	extern void ktpro_autotrack_predict_powerup(void);
 
@@ -87,7 +87,7 @@ void SUB_regen_powerups()
 	self->s.v.nextthink = g_globalvars.time + AUTOTRACK_POWERUPS_PREDICT_TIME;
 }
 
-void PlaceItem()
+void PlaceItem(void)
 {
 	self->s.v.solid = SOLID_TRIGGER;
 	self->s.v.movetype = MOVETYPE_TOSS;
@@ -127,7 +127,7 @@ void PlaceItem()
  used for dropable powerups.
  ============
  */
-void PlaceItemIngame()
+void PlaceItemIngame(void)
 {
 	self->s.v.solid = SOLID_TRIGGER;
 	self->s.v.movetype = MOVETYPE_TOSS;
@@ -150,7 +150,7 @@ void PlaceItemIngame()
  Sets the clipping size and plants the object on the floor
  ============
  */
-void StartItem()
+void StartItem(void)
 {
 //	G_bprint(2, "StartItem: %s\n", self->classname);
 
@@ -226,7 +226,7 @@ float T_Heal(gedict_t *e, float healamount, float ignore)
 	return 1;
 }
 
-void health_touch();
+void health_touch(void);
 void item_megahealth_rot(void);
 
 /*QUAKED item_health (.3 .3 1) (0 0 0) (32 32 32) rotten megahealth
@@ -237,7 +237,7 @@ void item_megahealth_rot(void);
  one point per second.
  */
 
-void SP_item_health()
+void SP_item_health(void)
 {
 	self->touch = (func_t) health_touch;
 	self->tp_flags = it_health;
@@ -269,7 +269,7 @@ void SP_item_health()
 	StartItem();
 }
 
-void health_touch()
+void health_touch(void)
 {
 	if (other->ct != ctPlayer)
 	{
@@ -422,7 +422,7 @@ void item_megahealth_rot(void)
 
  ===============================================================================
  */
-void armor_touch()
+void armor_touch(void)
 {
 	float type = 0;
 	float value = 0;
@@ -579,7 +579,7 @@ void armor_touch()
 /*QUAKED item_armor1 (0 .5 .8) (-16 -16 0) (16 16 32)
  */
 
-void SP_item_armor1()
+void SP_item_armor1(void)
 {
 	self->touch = (func_t) armor_touch;
 	setmodel(self, "progs/armor.mdl");
@@ -593,7 +593,7 @@ void SP_item_armor1()
 /*QUAKED item_armor2 (0 .5 .8) (-16 -16 0) (16 16 32)
  */
 
-void SP_item_armor2()
+void SP_item_armor2(void)
 {
 	self->touch = (func_t) armor_touch;
 	setmodel(self, "progs/armor.mdl");
@@ -607,7 +607,7 @@ void SP_item_armor2()
 /*QUAKED item_armorInv (0 .5 .8) (-16 -16 0) (16 16 32)
  */
 
-void SP_item_armorInv()
+void SP_item_armorInv(void)
 {
 	self->touch = (func_t) armor_touch;
 	setmodel(self, "progs/armor.mdl");
@@ -626,7 +626,7 @@ void SP_item_armorInv()
  ===============================================================================
  */
 
-void bound_other_ammo()
+void bound_other_ammo(void)
 {
 	if (other->s.v.ammo_shells > 100)
 	{
@@ -794,9 +794,9 @@ void DoWeaponChange(int new, qbool backpack)
  weapon_touch
  =============
  */
-float W_BestWeapon();
+float W_BestWeapon(void);
 
-void weapon_touch()
+void weapon_touch(void)
 {
 	int hadammo = 0, new = 0;
 	gedict_t *stemp;
@@ -1060,7 +1060,7 @@ void weapon_touch()
 /*QUAKED weapon_supershotgun (0 .5 .8) (-16 -16 0) (16 16 32)
  */
 
-void SP_weapon_supershotgun()
+void SP_weapon_supershotgun(void)
 {
 	setmodel(self, "progs/g_shot.mdl");
 
@@ -1077,7 +1077,7 @@ void SP_weapon_supershotgun()
 /*QUAKED weapon_nailgun (0 .5 .8) (-16 -16 0) (16 16 32)
  */
 
-void SP_weapon_nailgun()
+void SP_weapon_nailgun(void)
 {
 	setmodel(self, "progs/g_nail.mdl");
 
@@ -1094,7 +1094,7 @@ void SP_weapon_nailgun()
 /*QUAKED weapon_supernailgun (0 .5 .8) (-16 -16 0) (16 16 32)
  */
 
-void SP_weapon_supernailgun()
+void SP_weapon_supernailgun(void)
 {
 	setmodel(self, "progs/g_nail2.mdl");
 
@@ -1112,7 +1112,7 @@ void SP_weapon_supernailgun()
 /*QUAKED weapon_grenadelauncher (0 .5 .8) (-16 -16 0) (16 16 32)
  */
 
-void SP_weapon_grenadelauncher()
+void SP_weapon_grenadelauncher(void)
 {
 	setmodel(self, "progs/g_rock.mdl");
 
@@ -1129,7 +1129,7 @@ void SP_weapon_grenadelauncher()
 /*QUAKED weapon_rocketlauncher (0 .5 .8) (-16 -16 0) (16 16 32)
  */
 
-void SP_weapon_rocketlauncher()
+void SP_weapon_rocketlauncher(void)
 {
 	setmodel(self, "progs/g_rock2.mdl");
 
@@ -1146,7 +1146,7 @@ void SP_weapon_rocketlauncher()
 /*QUAKED weapon_lightning (0 .5 .8) (-16 -16 0) (16 16 32)
  */
 
-void SP_weapon_lightning()
+void SP_weapon_lightning(void)
 {
 	setmodel(self, "progs/g_light.mdl");
 
@@ -1168,7 +1168,7 @@ void SP_weapon_lightning()
  ===============================================================================
  */
 
-void ammo_touch()
+void ammo_touch(void)
 {
 	int ammo, weapon, best;
 	int real_ammo = 0;
@@ -1343,7 +1343,7 @@ void ammo_touch()
 /*QUAKED item_shells (0 .5 .8) (0 0 0) (32 32 32) big
  */
 
-void SP_item_shells()
+void SP_item_shells(void)
 {
 	self->touch = (func_t) ammo_touch;
 
@@ -1370,7 +1370,7 @@ void SP_item_shells()
 /*QUAKED item_spikes (0 .5 .8) (0 0 0) (32 32 32) big
  */
 
-void SP_item_spikes()
+void SP_item_spikes(void)
 {
 	qbool old_style = streq(self->classname, "item_weapon");
 
@@ -1399,7 +1399,7 @@ void SP_item_spikes()
 /*QUAKED item_rockets (0 .5 .8) (0 0 0) (32 32 32) big
  */
 
-void SP_item_rockets()
+void SP_item_rockets(void)
 {
 	self->touch = (func_t) ammo_touch;
 
@@ -1426,7 +1426,7 @@ void SP_item_rockets()
 /*QUAKED item_cells (0 .5 .8) (0 0 0) (32 32 32) big
  */
 
-void SP_item_cells()
+void SP_item_cells(void)
 {
 	self->touch = (func_t) ammo_touch;
 
@@ -1458,7 +1458,7 @@ void SP_item_cells()
 #define WEAPON_ROCKET  2
 #define WEAPON_SPIKES  4
 #define WEAPON_BIG  8
-void SP_item_weapon()
+void SP_item_weapon(void)
 {
 	if ((int)(self->s.v.spawnflags) & WEAPON_SHOTGUN)
 	{
@@ -1494,7 +1494,7 @@ void SP_item_weapon()
 
  ===============================================================================
  */
-void key_touch()
+void key_touch(void)
 {
 //gedict_t*    stemp;
 //float             best;
@@ -1555,7 +1555,7 @@ void key_touch()
 	SUB_UseTargets();	// fire all targets / killtargets
 }
 
-void key_setsounds()
+void key_setsounds(void)
 {
 	if (world->worldtype == 0)
 	{
@@ -1587,7 +1587,7 @@ void key_setsounds()
  2: base
  */
 
-void SP_item_key1()
+void SP_item_key1(void)
 {
 	if (world->worldtype == 0)
 	{
@@ -1626,7 +1626,7 @@ void SP_item_key1()
  2: base
  */
 
-void SP_item_key2()
+void SP_item_key2(void)
 {
 	if (world->worldtype == 0)
 	{
@@ -1663,7 +1663,7 @@ void SP_item_key2()
 
  ===============================================================================
  */
-void sigil_touch()
+void sigil_touch(void)
 {
 //gedict_t*    stemp;
 //float             best;
@@ -1721,7 +1721,7 @@ void sigil_touch()
  End of level sigil, pick up to end episode and return to jrstart.
  */
 
-void SP_item_sigil()
+void SP_item_sigil(void)
 {
 	if (!(int)(self->s.v.spawnflags))
 	{
@@ -1837,7 +1837,7 @@ void show_powerups(char *classname)
 	}
 }
 
-static void KillQuadThink()
+static void KillQuadThink(void)
 {
 	ent_remove(self);
 }
@@ -1945,7 +1945,7 @@ static qbool NeedDropQuad(void)
 	return !ez_find(world, "item_artifact_super_damage");
 }
 
-void DropPowerups()
+void DropPowerups(void)
 {
 	if ((k_killquad || (cvar("dq") && Get_Powerups() && cvar("k_pow_q"))) && !k_berzerk)
 	{
@@ -1971,7 +1971,7 @@ void DropPowerups()
 	}
 }
 
-void powerup_touch()
+void powerup_touch(void)
 {
 	float *p_cnt = NULL;
 	float real_time = 30;
@@ -2156,7 +2156,7 @@ void powerup_touch()
 		other->ps.spree_max_q = max(other->ps.spree_current_q, other->ps.spree_max_q);
 		other->ps.spree_current_q = 0;
 
-		if (deathmatch == 4)
+		if (deathmatch == 4 && !tot_mode_enabled())
 		{
 			other->s.v.armortype = 0;
 			other->s.v.armorvalue = 0;
@@ -2228,7 +2228,7 @@ void powerup_touch()
 /*QUAKED item_artifact_invulnerability (0 .5 .8) (-16 -16 -24) (16 16 32)
  Player is invulnerable for 30 seconds
  */
-void SP_item_artifact_invulnerability()
+void SP_item_artifact_invulnerability(void)
 {
 	qbool b_dp = self->cnt > g_globalvars.time; // dropped powerup by player, not normal spawn
 
@@ -2258,7 +2258,7 @@ void SP_item_artifact_invulnerability()
 /*QUAKED item_artifact_envirosuit (0 .5 .8) (-16 -16 -24) (16 16 32)
  Player takes no damage from water or slime for 30 seconds
  */
-void SP_item_artifact_envirosuit()
+void SP_item_artifact_envirosuit(void)
 {
 	self->touch = (func_t) powerup_touch;
 
@@ -2278,7 +2278,7 @@ void SP_item_artifact_envirosuit()
 /*QUAKED item_artifact_invisibility (0 .5 .8) (-16 -16 -24) (16 16 32)
  Player is invisible for 30 seconds
  */
-void SP_item_artifact_invisibility()
+void SP_item_artifact_invisibility(void)
 {
 	qbool b_dp = self->cnt > g_globalvars.time; // dropped powerup by player, not normal spawn
 
@@ -2305,7 +2305,7 @@ void SP_item_artifact_invisibility()
 /*QUAKED item_artifact_super_damage (0 .5 .8) (-16 -16 -24) (16 16 32)
  The next attack from the player will do 4x damage
  */
-void SP_item_artifact_super_damage()
+void SP_item_artifact_super_damage(void)
 {
 	qbool b_dp = self->cnt > g_globalvars.time; // dropped powerup by player, not normal spawn
 
@@ -2340,7 +2340,7 @@ void SP_item_artifact_super_damage()
  ===============================================================================
  */
 
-void BackpackTouch()
+void BackpackTouch(void)
 {
 	int new;
 	gedict_t *stemp, *p;
@@ -2419,7 +2419,7 @@ void BackpackTouch()
 
 		stuffcmd(other, "bf\n");
 
-		if (lgc_enabled() && (other->s.v.health > 299))
+		if ((lgc_enabled() || tot_mode_enabled()) && (other->s.v.health > 299))
 		{
 			// cap & don't allow bonus powers
 			other->s.v.health = 300;
@@ -2640,7 +2640,7 @@ void BackpackTouch()
 
 #define IT_DROPPABLE_WEAPONS (IT_SUPER_SHOTGUN|IT_NAILGUN|IT_SUPER_NAILGUN|IT_GRENADE_LAUNCHER|IT_ROCKET_LAUNCHER|IT_LIGHTNING)
 
-void DropBackpack()
+void DropBackpack(void)
 {
 	gedict_t *item;
 	float f1;
@@ -2868,20 +2868,65 @@ void DropBackpack()
  ===============================================================================
  */
 
+char *Spawn_GetModel(void)
+{
+	// Can't rely on cvar_string response for setmodel/precache_model so caching here
+	static char spawn_model[128];
+	if (!spawn_model[0])
+	{
+		char *mdl = cvar_string("k_spm_custom_model");
+		if (only_digits(mdl))
+		{
+			strlcpy(spawn_model, atoi(mdl) ? "progs/wizard.mdl" : "progs/w_g_key.mdl", sizeof(spawn_model));
+		}
+		else
+		{
+			strlcpy(spawn_model, mdl, sizeof(spawn_model));
+		}
+	}
+	return spawn_model;
+}
+
 gedict_t* Spawn_OnePoint(gedict_t *spawn_point, vec3_t org, int effects)
 {
+	unsigned int nargs;
+	char *color_tint;
 	gedict_t *p;
 
 	p = spawn();
 	p->s.v.flags = FL_ITEM;
 	p->s.v.solid = SOLID_NOT;
 	p->s.v.movetype = MOVETYPE_NONE;
-	setmodel(p, cvar("k_spm_custom_model") ? "progs/wizard.mdl" : "progs/w_g_key.mdl");
+
+	setmodel(p, Spawn_GetModel());
+
 	p->netname = "Spawn Point";
 	p->classname = "spawnpoint";
 	p->k_lastspawn = spawn_point;
 
 	p->s.v.effects = (int)p->s.v.effects | effects;
+
+	color_tint = cvar_string("k_spm_color_rgba");
+
+	trap_CmdTokenize(color_tint);
+	nargs = trap_CmdArgc();
+	if (nargs >= 3) {
+		char argument[128];
+		float r, g, b;
+
+		trap_CmdArgv(0, argument, sizeof(argument));
+		r = max(0.0f, atof(argument));
+		trap_CmdArgv(1, argument, sizeof(argument));
+		g = max(0.0f, atof(argument));
+		trap_CmdArgv(2, argument, sizeof(argument));
+		b = max(0.0f, atof(argument));
+		ExtFieldSetColorMod(p, r, g, b);
+
+		if (nargs == 4) {
+			trap_CmdArgv(3, argument, sizeof(argument));
+			ExtFieldSetAlpha(p, atof(argument));
+		}
+	}
 
 	// store references for changing selections in hoonymode
 	spawn_point->wizard = p;
@@ -2914,7 +2959,7 @@ void Spawn_SpawnPoints(char *classname, int effects)
 	}
 }
 
-void ShowSpawnPoints()
+void ShowSpawnPoints(void)
 {
 	Spawn_SpawnPoints("info_player_deathmatch", cvar("k_spm_glow") ? ( EF_GREEN | EF_RED) : 0);
 
@@ -2925,7 +2970,7 @@ void ShowSpawnPoints()
 	}
 }
 
-void HideSpawnPoints()
+void HideSpawnPoints(void)
 {
 	gedict_t *e;
 

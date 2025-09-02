@@ -83,7 +83,7 @@ cmdinfo_t cinfos[] =
 
 int cinfos_cnt = sizeof(cinfos) / sizeof(cinfos[0]);
 
-void cmdinfo()
+void cmdinfo(void)
 {
 	int argc = trap_CmdArgc();
 	char arg_1[128], arg_2[128];
@@ -121,7 +121,7 @@ void cmdinfo()
 	}
 }
 
-void cmduinfo()
+void cmduinfo(void)
 {
 	gedict_t *p;
 	int argc = trap_CmdArgc();
@@ -388,7 +388,8 @@ qbool FixPlayerTeam(char *newteam)
 	{
 		// in CA/wipeout, non-participating players are forced to not have a team.
 		// so we must allow team change if player isn't ca_ready and newteam is ""
-		if (self->ca_ready || strneq(newteam, ""))
+		// Exception: Allow team change for approved late join players (lj_accepted flag set by CA_AddLatePlayer)
+		if ((self->ca_ready || strneq(newteam, "")) && !(self->lj_accepted && streq(newteam, self->ljteam)))
 		{
 			G_sprint(self, 2, "You may %s change team during game\n", redtext("not"));
 			stuffcmd_flags(self, STUFFCMD_IGNOREINDEMO, "team \"%s\"\n", getteam(self)); // sends this to client - so he get right team too

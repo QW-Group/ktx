@@ -19,14 +19,14 @@
 
 #include "g_local.h"
 
-void NextLevel();
-void IdlebotForceStart();
-void StartMatch();
-void remove_specs_wizards();
-void lastscore_add();
-void StartLogs();
-void StopLogs();
-void ClearDemoMarkers();
+void NextLevel(void);
+void IdlebotForceStart(void);
+void StartMatch(void);
+void remove_specs_wizards(void);
+void lastscore_add(void);
+void StartLogs(void);
+void StopLogs(void);
+void ClearDemoMarkers(void);
 
 void EM_CorrectStats(void);
 void MatchEndStats(void);
@@ -69,7 +69,7 @@ int WeirdCountPlayers(void)
 	return num;
 }
 
-float CountPlayers()
+float CountPlayers(void)
 {
 	gedict_t *p;
 	float num = 0;
@@ -98,7 +98,7 @@ float CountBots(void)
 	return num;
 }
 
-float CountRPlayers()
+float CountRPlayers(void)
 {
 	gedict_t *p;
 	float num = 0;
@@ -114,7 +114,7 @@ float CountRPlayers()
 	return num;
 }
 
-float CountTeams()
+float CountTeams(void)
 {
 	gedict_t *p, *p2;
 	float num = 0;
@@ -147,7 +147,7 @@ float CountTeams()
 }
 
 // return number of teams where at least one member is ready?
-float CountRTeams()
+float CountRTeams(void)
 {
 	gedict_t *p, *p2;
 	float num = 0;
@@ -231,7 +231,7 @@ int CheckMembers(float memcnt)
 extern demo_marker_t demo_markers[];
 extern int demo_marker_index;
 
-void ListDemoMarkers()
+void ListDemoMarkers(void)
 {
 	int i = 0;
 
@@ -282,6 +282,9 @@ void EndMatch(float skip_log)
 	char *tmp;
 	float f1;
 	qbool is_real_match_end = !isHoonyModeAny() || HM_is_game_over();
+	qbool f_modified_done = false, f_ruleset_done = false, f_version_done = false;
+	char *matchtag = ezinfokey(world, "matchtag");
+	qbool has_matchtag = matchtag != NULL && matchtag[0];
 
 	if (match_over || !match_in_progress)
 	{
@@ -399,6 +402,22 @@ void EndMatch(float skip_log)
 		for (p = world; (p = find_plr(p));)
 		{
 			p->ready = 0; // force players be not ready after match is end.
+
+			if (has_matchtag && cvar("k_on_end_f_modified") && !f_modified_done)
+			{
+				stuffcmd(p, "say f_modified\n");
+				f_modified_done = true;
+			}
+			if (has_matchtag && cvar("k_on_end_f_ruleset") && !f_ruleset_done)
+			{
+				stuffcmd(p, "say f_ruleset\n");
+				f_ruleset_done = true;
+			}
+			if (has_matchtag && cvar("k_on_end_f_version") && !f_version_done)
+			{
+				stuffcmd(p, "say f_version\n");
+				f_version_done = true;
+			}
 		}
 	}
 
@@ -461,7 +480,7 @@ void EndMatch(float skip_log)
 	}
 }
 
-void SaveOvertimeStats()
+void SaveOvertimeStats(void)
 {
 	gedict_t *p;
 
@@ -477,7 +496,7 @@ void SaveOvertimeStats()
 	}
 }
 
-void CheckOvertime()
+void CheckOvertime(void)
 {
 	// SM_PrepareShowscores() is called in StartMatch(), but in matchless mode this happens when the first player joins.
 	// Therefore, teams != 2 yet and the function doesn't do anything.
@@ -599,7 +618,7 @@ void CheckOvertime()
 
 // Called every second during a match. cnt = minutes, cnt2 = seconds left.
 // Tells the time every now and then.
-void TimerThink()
+void TimerThink(void)
 {
 	gedict_t *p;
 	int idle_time;
@@ -796,7 +815,7 @@ void TimerThink()
 }
 
 // remove/add some items from map regarding dmm and game mode
-void SM_PrepareMap()
+void SM_PrepareMap(void)
 {
 	gedict_t *p;
 
@@ -878,11 +897,12 @@ void SM_PrepareMap()
 }
 
 // put clients in server and reset some params
-static void SM_PrepareClients()
+static void SM_PrepareClients(void)
 {
-	int hdc, i;
+	int hdc, i, j, player_count = 0;
 	char *pl_team;
-	gedict_t *p;
+	gedict_t *p, *temp;
+	gedict_t *players[MAX_CLIENTS];
 	qbool hoonymode_reset = isHoonyModeAny() && HM_current_point() > 0;
 
 	k_teamid = 666;
@@ -907,6 +927,21 @@ static void SM_PrepareClients()
 
 	for (p = world; (p = find_plr(p));)
 	{
+		players[player_count++] = p;
+		p->leavemealone = false;		// can't have this enabled during match
+	}
+
+	for (i = player_count - 1; i > 0; i--)
+	{
+		j = rand() % (i + 1);
+		temp = players[i];
+		players[i] = players[j];
+		players[j] = temp;
+	}
+
+	for (j = 0; j < player_count; j++)
+	{
+		p = players[j];
 		if (!k_matchLess)
 		{
 			// skip setup k_teamnum in matchLess mode
@@ -1018,7 +1053,7 @@ static void SM_ExecuteQueuedSpawnEffects(void)
 	}
 }
 
-void SM_PrepareShowscores()
+void SM_PrepareShowscores(void)
 {
 	gedict_t *p;
 	char *team1 = "";
@@ -1088,7 +1123,7 @@ void SM_PrepareShowscores()
 	}
 }
 
-void SM_PrepareHostname()
+void SM_PrepareHostname(void)
 {
 	char *team1 = cvar_string("_k_team1");
 	char *team2 = cvar_string("_k_team2");
@@ -1114,7 +1149,7 @@ void SM_PrepareHostname()
 	}
 }
 
-void SM_on_MatchStart()
+void SM_on_MatchStart(void)
 {
 	gedict_t *p;
 
@@ -1125,9 +1160,9 @@ void SM_on_MatchStart()
 }
 
 // Reset player frags and start the timer.
-void HideSpawnPoints();
+void HideSpawnPoints(void);
 
-void StartMatch()
+void StartMatch(void)
 {
 	char date[64];
 
@@ -1657,6 +1692,19 @@ void PrintCountdown(int seconds)
 		}
 	}
 
+	if (tot_mode_enabled())
+	{
+		int weapon = FrogbotWeapon();
+		strlcat(text, va("\nTribe of Tjernobyl mode %2s\n", redtext("on")), sizeof(text));
+		strlcat(text, va("Break on death %11s\n",
+			(int)cvar(FB_CVAR_BREAK_ON_DEATH) ? redtext("on") : redtext("off")),
+			sizeof(text));
+		strlcat(text, va("Bot weapon %15s\n", redtext(weapon ? WpName(weapon) : "random")), sizeof(text));
+		strlcat(text, va("Bot health %15s\n", dig3(FrogbotHealth())), sizeof(text));
+		strlcat(text, va("Bot skill %16s\n", dig3(FrogbotSkillLevel())), sizeof(text));
+		strlcat(text, va("Quad damage multiplier %3s\n", dig3(FrogbotQuadMultiplier())), sizeof(text));
+	}
+
 	if (matchtag[0])
 	{
 		strlcat(text, va("\nmatchtag %s\n\n\n", matchtag), sizeof(text));
@@ -1831,7 +1879,7 @@ qbool isCanStart(gedict_t *s, qbool forceMembersWarn)
 	return true;
 }
 
-void standby_think()
+void standby_think(void)
 {
 	gedict_t *p;
 
@@ -1869,7 +1917,7 @@ void standby_think()
 }
 
 // Called every second during the countdown.
-void TimerStartThink()
+void TimerStartThink(void)
 {
 	gedict_t *p;
 
@@ -1928,7 +1976,7 @@ void TimerStartThink()
 	self->s.v.nextthink = g_globalvars.time + 1;
 }
 
-void ShowMatchSettings()
+void ShowMatchSettings(void)
 {
 	int i;
 	char *txt = "";
@@ -2003,7 +2051,7 @@ void ShowMatchSettings()
 // ra_10[dm3] // where 10 is count of players
 // unknown_10[dm3] // where 10 is count of players
 
-char* CompilateDemoName()
+char* CompilateDemoName(void)
 {
 	static char demoname[60];
 	char date[128], *fmt;
@@ -2198,7 +2246,7 @@ char* CompilateDemoName()
 	return demoname;
 }
 
-void StartDemoRecord()
+void StartDemoRecord(void)
 {
 	char *demoname;
 
@@ -2245,7 +2293,7 @@ void StartDemoRecord()
 }
 
 // Spawns the timer and starts the countdown.
-void StartTimer()
+void StartTimer(void)
 {
 	gedict_t *timer;
 
@@ -2420,7 +2468,7 @@ void StopTimer(int removeDemo)
 	}
 }
 
-void IdlebotForceStart()
+void IdlebotForceStart(void)
 {
 	gedict_t *p;
 	int i;
@@ -2457,7 +2505,7 @@ void IdlebotForceStart()
 	}
 }
 
-void IdlebotThink()
+void IdlebotThink(void)
 {
 	gedict_t *p;
 	int i;
@@ -2523,7 +2571,7 @@ void IdlebotThink()
 	self->s.v.nextthink = g_globalvars.time + 1;
 }
 
-void IdlebotCheck()
+void IdlebotCheck(void)
 {
 	gedict_t *p;
 	int i;
@@ -2604,6 +2652,8 @@ void PlayerReady(qbool startIdlebot)
 {
 	gedict_t *p;
 	float nready;
+	char *matchtag = ezinfokey(world, "matchtag");
+	qbool has_matchtag = matchtag != NULL && matchtag[0];
 
 	if (isRACE() && !race_match_mode())
 	{
@@ -2787,18 +2837,38 @@ void PlayerReady(qbool startIdlebot)
 			G_bprint(2, "All players ready\n");
 		}
 
+		if (has_matchtag && cvar("k_on_start_f_modified"))
+		{
+			stuffcmd(self, "say f_modified\n");
+		}
+
+		if (has_matchtag && cvar("k_on_start_f_ruleset"))
+		{
+			stuffcmd(self, "say f_ruleset\n");
+		}
+
+		if (has_matchtag && cvar("k_on_start_f_version"))
+		{
+			stuffcmd(self, "say f_version\n");
+		}
+
 		G_bprint(2, "Timer started\n");
 	}
 
 	StartTimer();
 }
 
-void PlayerSlowReady()
+void PlayerSlowReady(void)
 {
 	PlayerReady(false);
 }
 
-void PlayerBreak()
+void PlayerFastReady(void)
+{
+	PlayerReady(true);
+}
+
+void PlayerBreak(void)
 {
 	int votes;
 	gedict_t *p;
