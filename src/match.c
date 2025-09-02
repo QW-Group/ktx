@@ -890,6 +890,21 @@ static void SM_PrepareClients()
 	trap_executecmd(); // <- this really needed
 
 	initial_match_spawns = true;
+
+	for (p = world; (p = find_plr(p));)
+	{
+		p->socdDetectionCount = 0;
+		p->socdValidationCount = 0;
+		p->fStrafeChangeCount = 0;
+		p->fFramePerfectStrafeChangeCount = 0;
+		p->fLastSideMoveSpeed = 0;
+		p->matchStrafeChangeCount = 0;
+		p->matchPerfectStrafeCount = 0;
+		p->totalStrafeChangeCount = 0;
+		p->totalPerfectStrafeCount = 0;
+		p->nullStrafeCount = 0;
+	}
+
 	for (p = world; (p = find_plr(p));)
 	{
 		if (!k_matchLess)

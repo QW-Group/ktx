@@ -766,10 +766,11 @@ void OnePlayerStats(gedict_t *p, int tp)
 	// movement
 	if (!p->isBot)
 	{
-		G_bprint(2, "%s: %s:%.1f%% (%d/%d) %s:%d/%d\n", redtext("Movement"), redtext("Perfect strafes"),
+		G_bprint(2, "%s: %s:%.1f%% (%d/%d) %s:%d/%d%s [%s]\n", redtext("Movement"), redtext("Perfect strafes"),
 			p->matchStrafeChangeCount > 0 ? 100.0 * p->matchPerfectStrafeCount / p->matchStrafeChangeCount : 0.0,
 			p->matchPerfectStrafeCount, p->matchStrafeChangeCount, redtext("SOCD detections"),
-			p->socdDetected, p->socdChecksCount);
+			p->socdDetectionCount, p->socdValidationCount,
+			socd_movement_assisted(p) ? ". SOCD movement assistance detected!" : "", SOCD_DETECTION_VERSION);
 	}
 
 

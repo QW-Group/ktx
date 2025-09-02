@@ -8133,18 +8133,11 @@ void fcheck()
 		{
 			if ((p->ct == ctPlayer) && (!p->isBot))
 			{
-				if (p->socdDetected > 0)
-				{
-					G_bprint(2, "%s: %s:%.1f%% (%d/%d). SOCD movement assistance detected!\n", p->netname, redtext("Perfect strafes"),
-						p->totalStrafeChangeCount > 0 ? 100.0 * p->totalPerfectStrafeCount / p->totalStrafeChangeCount : 0.0,
-						p->totalPerfectStrafeCount, p->totalStrafeChangeCount);
-				}
-				else
-				{
-					G_bprint(2, "%s: %s:%.1f%% (%d/%d)\n", p->netname, redtext("Perfect strafes"),
-						p->totalStrafeChangeCount > 0 ? 100.0 * p->totalPerfectStrafeCount / p->totalStrafeChangeCount : 0.0,
-						p->totalPerfectStrafeCount, p->totalStrafeChangeCount);
-				}
+				G_bprint(2, "[%s] %s: %s:%.1f%% (%d/%d) %s:%d/%d%s\n", SOCD_DETECTION_VERSION, p->netname, redtext("Perfect strafes"),
+					p->totalStrafeChangeCount > 0 ? 100.0 * p->totalPerfectStrafeCount / p->totalStrafeChangeCount : 0.0,
+					p->totalPerfectStrafeCount, p->totalStrafeChangeCount, redtext("SOCD detections"),
+					p->socdDetectionCount, p->socdValidationCount,
+					socd_movement_assisted(p) ? ". SOCD movement assistance detected!" : "");
 			}
 		}
 		return;

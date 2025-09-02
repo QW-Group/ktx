@@ -1659,8 +1659,8 @@ void ClientConnect()
 	}
 
 // SOCD
-	self->socdChecksCount = 0;
-	self->socdDetected = 0;
+	self->socdValidationCount = 0;
+	self->socdDetectionCount = 0;
 	self->fStrafeChangeCount = 0;
 	self->fFramePerfectStrafeChangeCount = 0;
 	self->fLastSideMoveSpeed = 0;
@@ -3569,16 +3569,15 @@ void PlayerPreThink()
 			{
 				int k_allow_socd_warning = cvar("k_allow_socd_warning");
 
-				self->socdDetected += 1;
-				if ((!match_in_progress) && (!self->isBot) && k_allow_socd_warning && (self->ct == ctPlayer))
+				if ((!match_in_progress) && (!self->isBot) && k_allow_socd_warning && (self->ct == ctPlayer) && (self->socdDetectionCount >= 3))
 				{
 					G_bprint(PRINT_HIGH,
-						"Warning! %s: Movement assistance detected. Please disable iDrive or keyboard strafe assistance features.\n",
-						self->netname);
+						"[%s] Warning! %s: Movement assistance detected. Please disable iDrive or keyboard strafe assistance features.\n",
+						SOCD_DETECTION_VERSION, self->netname);
 				}
 			}
 
-			self->socdChecksCount += 1;
+			self->socdValidationCount += 1;
 			self->fStrafeChangeCount = 0;
 			self->fFramePerfectStrafeChangeCount = 0;
 		}
