@@ -1707,6 +1707,18 @@ void ClientConnect(void)
 		SendIntermissionToClient();
 	}
 
+// SOCD
+	self->socdValidationCount = 0;
+	self->socdDetectionCount = 0;
+	self->fStrafeChangeCount = 0;
+	self->fFramePerfectStrafeChangeCount = 0;
+	self->fLastSideMoveSpeed = 0;
+	self->matchStrafeChangeCount = 0;
+	self->matchPerfectStrafeCount = 0;
+	self->totalStrafeChangeCount = 0;
+	self->totalPerfectStrafeCount = 0;
+	self->nullStrafeCount = 0;
+
 // ILLEGALFPS[
 
 	// Zibbo's frametime checking code
@@ -3655,6 +3667,57 @@ void PlayerPreThink(void)
 		BotPreThink(self);
 	}
 #endif
+
+// SOCD detection
+	{
+		float fSideMoveSpeed = self->movement[1];
+
+		if ((fSideMoveSpeed != 0) && (((fSideMoveSpeed > 0) - (fSideMoveSpeed < 0)) != ((self->fLastSideMoveSpeed > 0) - (self->fLastSideMoveSpeed < 0))) && (self->nullStrafeCount < 4)) //strafechange
+		{
+			self->fStrafeChangeCount += 1;
+			self->totalStrafeChangeCount += 1;
+			if (match_in_progress)
+				self->matchStrafeChangeCount += 1;
+
+			if ((fSideMoveSpeed != 0) && (self->fLastSideMoveSpeed != 0))
+			{
+				self->fFramePerfectStrafeChangeCount += 1;
+				self->totalPerfectStrafeCount += 1;
+				if (match_in_progress)
+					self->matchPerfectStrafeCount += 1;
+			}
+
+			self->nullStrafeCount = 0;
+		}
+		else
+		{
+			if (0 == fSideMoveSpeed)
+				self->nullStrafeCount += 1;
+			else
+				self->nullStrafeCount = 0;
+		}
+
+		self->fLastSideMoveSpeed = fSideMoveSpeed;
+
+		if (self->fStrafeChangeCount >= 25)
+		{
+			if (self->fFramePerfectStrafeChangeCount / self->fStrafeChangeCount >= 0.75)
+			{
+				int k_allow_socd_warning = cvar("k_allow_socd_warning");
+
+				if ((!match_in_progress) && (!self->isBot) && k_allow_socd_warning && (self->ct == ctPlayer) && (self->socdDetectionCount >= 3))
+				{
+					G_bprint(PRINT_HIGH,
+						"[%s] Warning! %s: Movement assistance detected. Please disable iDrive or keyboard strafe assistance features.\n",
+						SOCD_DETECTION_VERSION, self->netname);
+				}
+			}
+
+			self->socdValidationCount += 1;
+			self->fStrafeChangeCount = 0;
+			self->fFramePerfectStrafeChangeCount = 0;
+		}
+	}
 
 // ILLEGALFPS[
 

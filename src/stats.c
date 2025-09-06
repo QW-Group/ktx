@@ -763,6 +763,17 @@ void OnePlayerStats(gedict_t *p, int tp)
 					p->ps.vel_frames > 0 ? p->ps.velocity_sum / p->ps.vel_frames : 0.);
 	}
 
+	// movement
+	if (!p->isBot)
+	{
+		G_bprint(2, "%s: %s:%.1f%% (%d/%d) %s:%d/%d%s [%s]\n", redtext("Movement"), redtext("Perfect strafes"),
+			p->matchStrafeChangeCount > 0 ? 100.0 * p->matchPerfectStrafeCount / p->matchStrafeChangeCount : 0.0,
+			p->matchPerfectStrafeCount, p->matchStrafeChangeCount, redtext("SOCD detections"),
+			p->socdDetectionCount, p->socdValidationCount,
+			socd_movement_assisted(p) ? ". SOCD movement assistance detected!" : "", SOCD_DETECTION_VERSION);
+	}
+
+
 	// armors + megahealths
 	if (!lgc_enabled())
 	{

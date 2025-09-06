@@ -31,6 +31,7 @@
 #define LGCMODE_MAX_DISTANCE 700
 #define LGCMODE_DISTANCE_BUCKETS 20
 #define LGCMODE_BUCKET_DISTANCE  (LGCMODE_MAX_DISTANCE / LGCMODE_DISTANCE_BUCKETS)
+#define SOCD_DETECTION_VERSION "SOCDv2"
 
 typedef struct shared_edict_s
 {
@@ -953,6 +954,19 @@ typedef struct gedict_s
 	float fHighestFrameTime;
 	float fIllegalFPSWarnings;
 // ILLEGALFPS]
+
+// SOCD detectioin
+	float fStrafeChangeCount;
+	float fFramePerfectStrafeChangeCount;
+	int   socdDetectionCount;
+	int   socdValidationCount;
+	float fLastSideMoveSpeed;
+	int   matchStrafeChangeCount;
+	int   matchPerfectStrafeCount;
+	int   totalStrafeChangeCount;
+	int   totalPerfectStrafeCount;
+	int   nullStrafeCount;
+// SOCD
 
 	qbool leavemealone;
 	float shownick_time;					// used to force centerprint is off at desired time
