@@ -170,9 +170,11 @@ void CheckTiming(void)
 					p->s.v.solid = 0;
 					p->s.v.movetype = 0;
 					SetVector(p->s.v.velocity, 0, 0, 0); // speed is zeroed and not restored
+
+					// Relink after solid change to avoid stale area list membership
+					setorigin(p, PASSVEC3(p->s.v.origin));
 				}
 			}
-
 		}
 		else
 		{
@@ -3054,6 +3056,9 @@ void BackFromLag(void)
 		self->s.v.takedamage = self->k_timingTakedmg;
 		self->s.v.solid = self->k_timingSolid;
 		self->s.v.movetype = self->k_timingMovetype;
+
+		// Relink after solid change to ensure proper area list placement
+		setorigin(self, PASSVEC3(self->s.v.origin));
 	}
 }
 
