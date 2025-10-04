@@ -1159,6 +1159,16 @@ void SM_on_MatchStart(void)
 	}
 }
 
+void SM_on_Countdown(void)
+{
+	gedict_t *p;
+
+	for (p = world; (p = find_client(p));)
+	{
+		on_countdown(p);
+	}
+}
+
 // Reset player frags and start the timer.
 void HideSpawnPoints(void);
 
@@ -2379,6 +2389,7 @@ void StartTimer(void)
 
 	localcmd("serverinfo status Countdown\n");
 
+	SM_on_Countdown();
 	StartDemoRecord(); // if allowed
 }
 
