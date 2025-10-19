@@ -159,7 +159,7 @@ if (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
 	# 4459 - shadowing globals, broadly used
 	target_compile_options(${PROJECT_NAME} PRIVATE /W4 /wd4100 /wd4210 /wd4456 /wd4459)
 else()
-	target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
+	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -std=gnu17)
 
 	check_c_compiler_flag("-Wstrict-prototypes" HAS_CFLAG_STRICT_PROTOTYPES)
 	if (HAS_CFLAG_STRICT_PROTOTYPES)
