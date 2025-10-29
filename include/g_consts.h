@@ -264,6 +264,7 @@
 //										(  64)			deathmatch mode change
 #define EV_ON_ADMIN						( 128)			// admin
 #define EV_ON_UNADMIN					( 256)			// unadmin
+#define EV_ON_COUNTDOWN					( 512)			// countdown end
 
 // CTF
 #define CTF_RUNE_RES					1			// IT_SIGIL1
