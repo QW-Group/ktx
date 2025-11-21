@@ -338,3 +338,8 @@ enum
 #define MVDHIDDEN_DMGDONE_SPLASHDAMAGE	(1 << 15)
 
 #define CLIENT_NAME_LEN					32		// Maximum client name, same value as in server.
+
+#define SOCD_ALLOW	0
+#define SOCD_STATS	1
+#define SOCD_WARN	2
+#define SOCD_KICK	3
