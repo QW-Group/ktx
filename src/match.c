@@ -1411,6 +1411,7 @@ void PrintCountdown(int seconds)
 	char *ot = "";
 	char *nowp = "";
 	char *matchtag = redtext(ezinfokey(world, "matchtag"));
+	int k_socd = cvar("k_socd");
 
 	strlcat(text, va("%s: %2s\n\n\n", redtext("Countdown"), dig3(seconds)), sizeof(text));
 
@@ -1650,6 +1651,12 @@ void PrintCountdown(int seconds)
 	{
 		strlcat(text, va("%s %4s\n", "Powerups", redtext(Get_PowerupsStr())), sizeof(text));
 	}
+
+	strlcat(text, va("%s %6s\n", SOCD_DETECTION_VERSION,
+		k_socd == SOCD_ALLOW ? redtext("allow")
+		: k_socd == SOCD_STATS ? redtext("stats")
+		: k_socd == SOCD_WARN ? redtext("warn")
+		: redtext("kick")), sizeof(text));
 
 	if (cvar("k_dmgfrags"))
 	{
