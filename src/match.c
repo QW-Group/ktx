@@ -864,22 +864,74 @@ void SM_PrepareMap(void)
 
 		if (deathmatch >= 4)
 		{
-			if (streq(p->classname, "weapon_nailgun") || streq(p->classname, "weapon_supernailgun")
-					|| streq(p->classname, "weapon_supershotgun")
-					|| streq(p->classname, "weapon_rocketlauncher")
-					|| streq(p->classname, "weapon_grenadelauncher")
-					|| streq(p->classname, "weapon_lightning"))
-			{ // no weapons for any of this deathmatches (4 or 5)
+			int disallowed_weapons = (int)cvar("k_disallow_weapons") & DA_WPNS;
+
+			// no weapons for any of this deathmatches (4 or 5),
+			// unless ToT mode with item pickup bonus is enabled and
+			// the weapon isn't disallowed.
+			if (streq(p->classname, "weapon_nailgun"))
+			{
+				soft_ent_remove(p);
+				continue;
+			}
+			else if (streq(p->classname, "weapon_supernailgun"))
+			{
+				soft_ent_remove(p);
+				continue;
+			}
+			else if (streq(p->classname, "weapon_supershotgun"))
+			{
+				soft_ent_remove(p);
+				continue;
+			}
+			else if (streq(p->classname, "weapon_grenadelauncher"))
+			{
+				soft_ent_remove(p);
+				continue;
+			}
+			else if (streq(p->classname, "weapon_rocketlauncher") &&
+				(!FrogbotItemPickupBonus() ||
+				(disallowed_weapons & IT_ROCKET_LAUNCHER)))
+			{
+				soft_ent_remove(p);
+				continue;
+			}
+			else if (streq(p->classname, "weapon_lightning") &&
+				(!FrogbotItemPickupBonus() ||
+				(disallowed_weapons & IT_LIGHTNING)))
+			{
 				soft_ent_remove(p);
 				continue;
 			}
 
 			if (deathmatch == 4)
 			{
-				if (streq(p->classname, "item_shells") || streq(p->classname, "item_spikes")
-						|| streq(p->classname, "item_rockets") || streq(p->classname, "item_cells")
-						|| (streq(p->classname, "item_health") && ((int)p->s.v.spawnflags & H_MEGA)))
-				{ // no weapon ammo and megahealth for dmm4
+				// no weapon ammo and megahealth for dmm4
+				if (streq(p->classname, "item_shells"))
+				{
+					soft_ent_remove(p);
+					continue;
+				}
+				else if (streq(p->classname, "item_spikes"))
+				{
+					soft_ent_remove(p);
+					continue;
+				}
+				else if (streq(p->classname, "item_rockets") &&
+					!FrogbotItemPickupBonus())
+				{
+					soft_ent_remove(p);
+					continue;
+				}
+				else if (streq(p->classname, "item_cells"))
+				{
+					soft_ent_remove(p);
+					continue;
+				}
+				else if ((streq(p->classname, "item_health") &&
+					((int)p->s.v.spawnflags & H_MEGA)) &&
+					!FrogbotItemPickupBonus())
+				{
 					soft_ent_remove(p);
 					continue;
 				}
@@ -1710,6 +1762,9 @@ void PrintCountdown(int seconds)
 		strlcat(text, va("Bot health %15s\n", dig3(FrogbotHealth())), sizeof(text));
 		strlcat(text, va("Bot skill %16s\n", dig3(FrogbotSkillLevel())), sizeof(text));
 		strlcat(text, va("Quad damage multiplier %3s\n", dig3(FrogbotQuadMultiplier())), sizeof(text));
+		strlcat(text, va("Item Pickup Bonus %8s\n",
+			redtext(FrogbotItemPickupBonus() ? "on": "off")), sizeof(text));
+
 	}
 
 	if (matchtag[0])
