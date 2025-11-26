@@ -130,6 +130,7 @@ void ToggleQPoint(void);
  */
 void ToggleRespawns(void);
 void ToggleSpawnPoints(void);
+void ToggleSpawnicide(void);
 void ToggleBerzerk(void);
 void ToggleSpecTalk(void);
 void ToggleSpeed(void);
@@ -352,6 +353,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_WHOVOTE			"info on received votes"
 #define CD_SPAWN			"toggle spawn modes"
 #define CD_SPAWNPOINTS		"toggle visible spawn points"
+#define CD_SPAWNICIDE			"toggle spawnicide"
 #define CD_POWERUPS			"quad, \230\230\230, ring & suit"
 #define CD_PUPICKUP			"change powerups pickup policy"
 #define CD_ANTILAG			"toggle antilag"
@@ -716,6 +718,7 @@ cmd_t cmds[] =
 	{ "whovote", 					ModStatusVote, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_WHOVOTE },
 	{ "spawn", 						ToggleRespawns, 				0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_SPAWN },
 	{ "spawn_show", 				ToggleSpawnPoints, 				0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_SPAWNPOINTS },
+	{ "spawnicide", 				ToggleSpawnicide, 				0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_SPAWNICIDE },
 	{ "powerups", 					TogglePowerups, 				0, 			CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, 									CD_POWERUPS },
 	{ "powerups_pickup", 			TogglePuPickup, 				0, 			CF_PLAYER | CF_SPC_ADMIN | CF_PARAMS, 									CD_PUPICKUP },
 	{ "antilag", 					antilag, 						0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_ANTILAG },
@@ -2699,6 +2702,48 @@ void ToggleSpawnPoints(void)
 	else
 	{
 		HideSpawnPoints();
+	}
+}
+
+void ToggleSpawnicide(void)
+{
+	int spawnicide = cvar("k_spawnicide");
+
+	if (match_in_progress)
+	{
+		return;
+	}
+
+	spawnicide++;
+	if (spawnicide > SPAWNICIDE_MATCH)
+	{
+		spawnicide = SPAWNICIDE_DISABLED;
+	}
+
+	cvar_set("k_spawnicide", va("%d", spawnicide));
+
+	// We are using the show spawn point code to display teleporter exit
+	// spawns as well, so to trigger it we need to reset it.
+	if (cvar("k_spm_show"))
+	{
+		HideSpawnPoints();
+		ShowSpawnPoints();
+	}
+
+	SpawnicideDisable();
+
+	switch (spawnicide)
+	{
+		case SPAWNICIDE_DISABLED:
+			G_sprint(self, 2, "Spawnicide %s\n", redtext("off"));
+			break;
+		case SPAWNICIDE_PREWAR:
+			SpawnicideEnable();
+			G_sprint(self, 2, "Spawnicide %s\n", redtext("prewar"));
+			break;
+		case SPAWNICIDE_MATCH:
+			G_sprint(self, 2, "Spawnicide %s\n", redtext("match"));
+			break;
 	}
 }
 

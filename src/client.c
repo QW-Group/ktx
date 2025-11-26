@@ -5174,8 +5174,31 @@ void ClientObituary(gedict_t *targ, gedict_t *attacker)
 
 		return;
 	}
-// }
 
+	// can only occur if k_spawnicide is enabled
+	if (dtTELE4 == targ->deathtype)
+	{
+		switch ((int)(g_random() * 3))
+		{
+			case 0:
+				G_bprint(PRINT_MEDIUM,
+					"%s couldn't resist the shiny spawn point\n", victimname);
+				break;
+			case 1:
+				G_bprint(PRINT_MEDIUM,
+					"%s got too close to the baby factory\n", victimname);
+				break;
+			default:
+				G_bprint(PRINT_MEDIUM,
+					"%s was fragged by poor life choices\n", victimname);
+				break;
+		}
+
+		targ->s.v.frags -= 1;
+		logfrag(targ, targ);
+		return;
+	}
+// }
 	if (attacker->ct == ctPlayer) // so, inside this "if" targ and attacker is players
 	{
 		if (targ == attacker)
