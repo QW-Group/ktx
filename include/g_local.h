@@ -1254,3 +1254,11 @@ extern int maxPlayerCount;
 #define AUTOTRACK_POWERUPS_PREDICT_TIME 2
 
 qbool AllowMonster(gedict_t *e);
+
+#define SPAWNICIDE_DISABLED 0
+#define SPAWNICIDE_PREWAR 1
+#define SPAWNICIDE_MATCH 2
+
+int SpawnicideStatus(void);
+void SpawnicideEnable(void);
+void SpawnicideDisable(void);

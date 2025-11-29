@@ -2966,7 +2966,7 @@ gedict_t* Spawn_OnePoint(gedict_t *spawn_point, vec3_t org, int effects)
 
 void Spawn_SpawnPoints(char *classname, int effects)
 {
-	gedict_t *e;
+	gedict_t *e, *s;
 	vec3_t org;
 
 	for (e = world; (e = ez_find(e, classname));)
@@ -2980,6 +2980,32 @@ void Spawn_SpawnPoints(char *classname, int effects)
 		}
 
 		Spawn_OnePoint(e, org, effects);
+	}
+
+	if (SpawnicideStatus())
+	{
+		for (e = world; (e = ez_find(e, "trigger_teleport"));)
+		{
+			if (e->targetname)
+			{
+				continue;
+			}
+
+			if (!(s = find(world, FOFS(targetname), e->target)))
+			{
+				continue;
+			}
+
+			VectorCopy(s->s.v.origin, org);
+			org[2] += 0;
+
+			if (isHoonyModeDuel())
+			{
+				effects = (e->hoony_nomination ? (EF_GREEN | EF_RED) : 0);
+			}
+
+			Spawn_OnePoint(s, org, effects);
+		}
 	}
 }
 
@@ -3005,6 +3031,105 @@ void HideSpawnPoints(void)
 			e->wizard->wizard = 0;
 		}
 
+		ent_remove(e);
+	}
+}
+
+int SpawnicideStatus(void)
+{
+	return (int)cvar("k_spawnicide");
+}
+
+static void SpawnicideTouch(void)
+{
+	gedict_t *p;
+
+	for (p = world; (p = find_plr(p));)
+	{
+		if (p->isBot)
+		{
+			continue;
+		}
+
+		if (g_globalvars.time - p->spawn_time < 1)
+		{
+			continue;
+		}
+
+		if (g_globalvars.time - p->teleport_time < 1)
+		{
+			continue;
+		}
+
+		if ((self->s.v.absmin[0] > p->s.v.absmax[0]) || (self->s.v.absmin[1] > p->s.v.absmax[1])
+				|| (self->s.v.absmin[2] > p->s.v.absmax[2])
+				|| (self->s.v.absmax[0] < p->s.v.absmin[0])
+				|| (self->s.v.absmax[1] < p->s.v.absmin[1])
+				|| (self->s.v.absmax[2] < p->s.v.absmin[2]))
+		{
+			continue;
+		}
+
+		if (ISLIVE(p))
+		{
+			p->deathtype = dtTELE4;
+			T_Damage(p, p, p, 50000);
+		}
+	}
+}
+
+static void SpawnicideCreate(gedict_t *spawn_point, vec3_t org)
+{
+	gedict_t *p = spawn();
+
+	p->s.v.solid = SOLID_TRIGGER;
+	p->s.v.movetype = MOVETYPE_NONE;
+	p->touch = (func_t)SpawnicideTouch;
+	p->netname = "Spawnicide";
+	p->classname = "spawnicide";
+
+	setsize(p, -16, -16, -24, 16, 16, 32);
+	setorigin(p, PASSVEC3(org));
+	VectorCopy(spawn_point->s.v.angles, p->s.v.angles);
+	trap_makevectors(p->s.v.angles);
+}
+
+void SpawnicideEnable(void)
+{
+	gedict_t *e, *s;
+	vec3_t org;
+
+	for (e = world; (e = ez_find(e, "info_player_deathmatch"));)
+	{
+		VectorCopy(e->s.v.origin, org);
+		org[2] += 0;
+		SpawnicideCreate(e, org);
+	}
+
+	for (e = world; (e = ez_find(e, "trigger_teleport"));)
+	{
+		if (e->targetname)
+		{
+			continue;
+		}
+
+		if (!(s = find(world, FOFS(targetname), e->target)))
+		{
+			continue;
+		}
+
+		VectorCopy(s->s.v.origin, org);
+		org[2] += 0;
+		SpawnicideCreate(e, org);
+	}
+}
+
+void SpawnicideDisable(void)
+{
+	gedict_t *e;
+
+	for (e = world; (e = ez_find(e, "spawnicide"));)
+	{
 		ent_remove(e);
 	}
 }

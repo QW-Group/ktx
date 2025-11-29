@@ -756,6 +756,7 @@ void teleport_touch(void)
 	}
 
 	other->teleported = 1;
+	other->teleport_time = g_globalvars.time;
 	teleport_player(other, t->s.v.origin, t->mangle,
 	TFLAGS_FOG_SRC | TFLAGS_FOG_DST | TFLAGS_SND_SRC | TFLAGS_SND_DST | TFLAGS_VELOCITY_ADJUST);
 

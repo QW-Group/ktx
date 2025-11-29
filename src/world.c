@@ -696,6 +696,11 @@ void Customize_Maps(void)
 		}
 	}
 
+	if (SpawnicideStatus() == SPAWNICIDE_PREWAR)
+	{
+		SpawnicideEnable();
+	}
+
 	if (cvar("k_spm_show"))
 	{
 		ShowSpawnPoints();
@@ -848,6 +853,7 @@ void FirstFrame(void)
 	RegisterCvar("k_overtime");
 	RegisterCvar("k_exttime");
 	RegisterCvar("k_spw");
+	RegisterCvar("k_spawnicide");
 	RegisterCvar("k_lockmin");
 	RegisterCvar("k_lockmax");
 	RegisterCvar("k_spectalk");
