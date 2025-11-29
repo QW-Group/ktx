@@ -2869,8 +2869,9 @@ void PlayerReady(qbool startIdlebot)
 
 	if (!isHoonyModeAny() || (HM_current_point() == 0))
 	{
-		G_bprint(2, "%s %s%s\n", self->netname, redtext("is ready"),
-					((isTeam() || isCTF()) ? va(" \220%s\221", getteam(self)) : ""));
+		G_bprint(2, "%s %s%s%s\n", self->netname, redtext("is ready"),
+					((isTeam() || isCTF()) ? va(" \220%s\221", getteam(self)) : ""),
+					(matchtag[0] ? va(" - %s", matchtag) : " - no matchtag set"));
 	}
 
 	nready = CountRPlayers();
