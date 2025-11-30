@@ -5734,10 +5734,10 @@ qbool PlayerCanPause(gedict_t *p)
 	qbool playerCanPause = false;
 	char *matchtag = ezinfokey(world, "matchtag");
 
-	// Check for matchtag. If it is set, it is an official (probably), so pause might be allowed.
-	if ((NULL != matchtag) && matchtag[0])
+	// Check for matchtag, OR allow if k_pause_without_matchtag is set.
+	if (cvar("k_pause_without_matchtag") || ((matchtag != NULL) && matchtag[0]))
 	{
-		// matchtag is found. Let's see if the player can still pause.
+		// Let's see if the player can still pause.
 		if (p->k_pauseRequests > 0)
 		{
 			p->k_pauseRequests--;
