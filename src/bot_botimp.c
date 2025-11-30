@@ -153,11 +153,7 @@ void RegisterSkillVariables(void)
 	RegisterCvar(FB_CVAR_OPPONENT_MIDAIR_VOLATILITY_INCREASE);
 }
 
-void setLgcModeSkillAttributes(int skill, int aimskill) {
-	// Keep LGC bot skill attributes separate so we can change
-	// general skill attributes without affecting LGC mode, so players
-	// can still play LGC mode on same terms as old records.
-
+void setSkillAttributes(int skill, int aimskill) {
 	// Old frogbot settings (items generally)
 	cvar_fset(FB_CVAR_ACCURACY, 45 - min(skill, 10) * 2.25);
 	cvar_fset(FB_CVAR_DODGEFACTOR, RangeOverSkill(skill, 0.0f, 1.0f));
@@ -208,7 +204,7 @@ void setLgcModeSkillAttributes(int skill, int aimskill) {
 	cvar_fset(FB_CVAR_MISSILEDODGE_TIME, RangeOverSkill(skill, 1.0f, 0.5f));
 }
 
-void setSkillAttributes(int skill, int aimskill) {
+void setSkillAttributesEasySkillMode(int skill, int aimskill) {
 	// Old frogbot settings (items generally)
 	cvar_fset(FB_CVAR_ACCURACY, 45 - min(skill, 10) * 2.25);
 	cvar_fset(FB_CVAR_DODGEFACTOR, RangeOverSkill(skill, 0.0f, 1.0f));
@@ -269,10 +265,14 @@ qbool SetAttributesBasedOnSkill(int skill)
 	skill = bound(MIN_FROGBOT_SKILL, skill, MAX_FROGBOT_SKILL);
 	aimskill = bound(MIN_FROGBOT_SKILL, skill, MAX_FROGBOT_AIM_SKILL);
 
-	if (lgc_enabled()) {
-		G_bprint(2, "LGC mode enabled - using legacy bot skill attributes.\n");
-		setLgcModeSkillAttributes(skill, aimskill);
-	} else {
+	if (FrogbotEasySkillMode())
+	{
+		G_bprint(2, "%s\n", redtext("Using easy bot skill mode"));
+		setSkillAttributesEasySkillMode(skill, aimskill);
+	}
+	else
+	{
+		G_bprint(2, "%s\n", redtext("Using default bot skill mode"));
 		setSkillAttributes(skill, aimskill);
 	}
 

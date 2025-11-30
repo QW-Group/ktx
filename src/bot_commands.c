@@ -135,6 +135,11 @@ qbool FrogbotItemPickupBonus(void)
 	return tot_mode_enabled() && (qbool)cvar(FB_CVAR_ITEM_PICKUP_BONUS);
 }
 
+qbool FrogbotEasySkillMode(void)
+{
+	return (qbool)cvar(FB_CVAR_EASY_SKILL_MODE);
+}
+
 static team_t* AddTeamToList(int *teamsFound, char *team, int topColor, int bottomColor)
 {
 	int i;
@@ -2287,6 +2292,19 @@ static void FrogbotsSetItemPickupBonus(void)
 		(int)cvar(FB_CVAR_ITEM_PICKUP_BONUS) ? redtext("on") : redtext("off"));
 }
 
+static void FrogbotsSetEasySkillMode(void)
+{
+	if (!bots_enabled())
+	{
+		G_sprint(self, 2, "Bots are disabled by the server.\n");
+		return;
+	}
+
+	cvar_fset(FB_CVAR_EASY_SKILL_MODE, !cvar(FB_CVAR_EASY_SKILL_MODE));
+	G_sprint(self, 2, "easy skill mode changed to %s\n",
+		(int)cvar(FB_CVAR_EASY_SKILL_MODE) ? redtext("on") : redtext("off"));
+}
+
 typedef struct frogbot_cmd_s
 {
 	char *name;
@@ -2308,7 +2326,8 @@ static frogbot_cmd_t std_commands[] =
 		{ "breakondeath", FrogbotsSetBreakOnDeath, "Automatically break when you die" },
 		{ "togglequad", FrogbotsToggleQuad, "Toggle quad damage" },
 		{ "quadmultiplier", FrogbotsSetQuadMultiplier, "Set quad damage multiplier" },
-		{ "itempickupbonus", FrogbotsSetItemPickupBonus, "Toggle item pickup bonus" }};
+		{ "itempickupbonus", FrogbotsSetItemPickupBonus, "Toggle item pickup bonus" },
+		{ "easyskillmode", FrogbotsSetEasySkillMode, "Toggle easy skill mode" }};
 
 static frogbot_cmd_t editor_commands[] =
 	{
