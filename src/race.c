@@ -529,7 +529,7 @@ void race_shutdown(char *msg)
 	race_cancel(true, "%s", msg);
 	race_remove_ent();
 	race_unready_all();
-	if (cvar("k_spm_show"))
+	if (SpawnShowStatus() > SPAWN_SHOW_DISABLED)
 	{
 		ShowSpawnPoints();
 	}

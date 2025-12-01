@@ -1255,10 +1255,15 @@ extern int maxPlayerCount;
 
 qbool AllowMonster(gedict_t *e);
 
+#define SPAWN_SHOW_DISABLED 0
+#define SPAWN_SHOW_PREWAR 1
+#define SPAWN_SHOW_MATCH 2
+
 #define SPAWNICIDE_DISABLED 0
 #define SPAWNICIDE_PREWAR 1
 #define SPAWNICIDE_MATCH 2
 
+int SpawnShowStatus(void);
 int SpawnicideStatus(void);
 void SpawnicideEnable(void);
 void SpawnicideDisable(void);

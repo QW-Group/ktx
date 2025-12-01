@@ -855,7 +855,7 @@ static void HM_deselect_spawn(gedict_t *spawn)
 	}
 
 	// If showing all spawns, just remove the glow.  otherwise remove the marker.
-	if (cvar("k_spm_show"))
+	if (SpawnShowStatus() > SPAWN_SHOW_DISABLED)
 	{
 		spawn->wizard->s.v.effects = (int)spawn->wizard->s.v.effects & ~effects;
 	}
