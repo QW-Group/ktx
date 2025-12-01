@@ -2686,22 +2686,42 @@ void ToggleRespawns(void)
 	G_bprint(2, "%s\n", respawn_model_name(k_spw));
 }
 
+int SpawnShowStatus(void)
+{
+	return (int)cvar("k_spm_show");
+}
+
 void ToggleSpawnPoints(void)
 {
+	int spawn_show = cvar("k_spm_show");
+
 	if (match_in_progress)
 	{
 		return;
 	}
 
-	cvar_toggle_msg(self, "k_spm_show", redtext("visible spawn points"));
+	spawn_show++;
 
-	if (cvar("k_spm_show"))
+	if (spawn_show > SPAWN_SHOW_MATCH)
 	{
-		ShowSpawnPoints();
+		spawn_show = SPAWN_SHOW_DISABLED;
 	}
-	else
+
+	cvar_set("k_spm_show", va("%d", spawn_show));
+	switch (spawn_show)
 	{
-		HideSpawnPoints();
+		case SPAWNICIDE_DISABLED:
+			HideSpawnPoints();
+			G_sprint(self, 2, "Visible spawns %s\n", redtext("off"));
+			break;
+		case SPAWNICIDE_PREWAR:
+			ShowSpawnPoints();
+			G_sprint(self, 2, "Visible spawns %s\n", redtext("prewar"));
+			break;
+		case SPAWNICIDE_MATCH:
+			ShowSpawnPoints();
+			G_sprint(self, 2, "Visible spawns %s\n", redtext("match"));
+			break;
 	}
 }
 
