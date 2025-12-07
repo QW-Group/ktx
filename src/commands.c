@@ -5425,7 +5425,7 @@ void latejoin(void)
 	}
 	
 	// Store the requested team for later use
-	snprintf(self->ljteam, sizeof(self->ljteam), arg_2);
+	snprintf(self->ljteam, sizeof(self->ljteam), "%s", arg_2);
 	//self->ljteam = arg_2;
 	
 	// Start the election
