@@ -701,7 +701,7 @@ void Customize_Maps(void)
 		SpawnicideEnable();
 	}
 
-	if (cvar("k_spm_show"))
+	if (SpawnShowStatus() > SPAWN_SHOW_DISABLED)
 	{
 		ShowSpawnPoints();
 	}

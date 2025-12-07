@@ -1239,7 +1239,10 @@ void StartMatch(void)
 
 	SM_PrepareMap(); // remove/add some items from map regardind with dmm and game mode
 
-	HideSpawnPoints();
+	if (SpawnShowStatus() != SPAWN_SHOW_MATCH)
+	{
+		HideSpawnPoints();
+	}
 
 	if (SpawnicideStatus() == SPAWNICIDE_MATCH)
 	{
