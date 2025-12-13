@@ -170,11 +170,9 @@ void CheckTiming(void)
 					p->s.v.solid = 0;
 					p->s.v.movetype = 0;
 					SetVector(p->s.v.velocity, 0, 0, 0); // speed is zeroed and not restored
-
-					// Relink after solid change to avoid stale area list membership
-					setorigin(p, PASSVEC3(p->s.v.origin));
 				}
 			}
+
 		}
 		else
 		{
@@ -1806,7 +1804,7 @@ void PutClientInServer(void)
 	self->classname = "player";
 	self->s.v.health = 100;
 	self->s.v.takedamage = DAMAGE_AIM;
-	self->s.v.solid = isCA() ? SOLID_NOT : self->leavemealone ? SOLID_TRIGGER : SOLID_SLIDEBOX;
+	self->s.v.solid = isCA() ? SOLID_NOT : SOLID_SLIDEBOX;
 	self->s.v.movetype = MOVETYPE_WALK;
 	self->show_hostile = 0;
 	self->s.v.max_health = 100;
@@ -2029,7 +2027,7 @@ void PutClientInServer(void)
 		}
 		else
 		{
-			self->s.v.solid = self->leavemealone ? SOLID_TRIGGER : SOLID_SLIDEBOX;
+			self->s.v.solid = SOLID_SLIDEBOX;
 		}
 		setorigin(self, PASSVEC3(self->s.v.origin));
 
@@ -3056,9 +3054,6 @@ void BackFromLag(void)
 		self->s.v.takedamage = self->k_timingTakedmg;
 		self->s.v.solid = self->k_timingSolid;
 		self->s.v.movetype = self->k_timingMovetype;
-
-		// Relink after solid change to ensure proper area list placement
-		setorigin(self, PASSVEC3(self->s.v.origin));
 	}
 }
 
@@ -3872,16 +3867,6 @@ void PlayerPreThink(void)
 	CA_player_pre_think();
 
 	race_player_pre_think();
-
-	if (self->leavemealone)
-	{
-		if ((self->s.v.mins[0] == 0) || (self->s.v.mins[1] == 0))
-		{
-			// This can happen if the world 'squashes' a SOLID_NOT entity, mvdsv will turn into corpse
-			setsize(self, PASSVEC3(VEC_HULL_MIN), PASSVEC3(VEC_HULL_MAX));
-		}
-		setorigin(self, PASSVEC3(self->s.v.origin));
-	}	
 
 // brokenankle included here
 	if (self->s.v.button2 || self->brokenankle)

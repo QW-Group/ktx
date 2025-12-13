@@ -985,7 +985,6 @@ static void SM_PrepareClients(void)
 	for (p = world; (p = find_plr(p));)
 	{
 		players[player_count++] = p;
-		p->leavemealone = false;		// can't have this enabled during match
 	}
 
 	for (i = player_count - 1; i > 0; i--)
@@ -1999,9 +1998,6 @@ void standby_think(void)
 				p->s.v.movetype = 0;
 				p->s.v.modelindex = 0;
 				p->model = "";
-
-				// Relink after solid change to keep area lists consistent
-				setorigin(p, PASSVEC3(p->s.v.origin));
 			}
 		}
 	}
@@ -2533,9 +2529,6 @@ void StopTimer(int removeDemo)
 			p->s.v.solid = SOLID_SLIDEBOX;
 			p->s.v.movetype = MOVETYPE_WALK;
 			setmodel(p, "progs/player.mdl");
-
-			// Relink after solid change so players are returned to the correct list
-			setorigin(p, PASSVEC3(p->s.v.origin));
 		}
 	}
 

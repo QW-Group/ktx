@@ -715,7 +715,7 @@ void teleport_touch(void)
 	}
 
 // only teleport living creatures
-	if (ISDEAD(other) || (!isRACE() && (other->s.v.solid != SOLID_SLIDEBOX) && !other->leavemealone))
+	if (ISDEAD(other) || (!isRACE() && (other->s.v.solid != SOLID_SLIDEBOX)))
 	{
 		return;
 	}
