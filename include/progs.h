@@ -968,7 +968,6 @@ typedef struct gedict_s
 	int   nullStrafeCount;
 // SOCD
 
-	qbool leavemealone;
 	float shownick_time;					// used to force centerprint is off at desired time
 	clientType_t ct;						// client type for client edicts
 // { timing
