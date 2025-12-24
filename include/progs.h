@@ -702,7 +702,7 @@ typedef struct fb_entvars_s {
 	qbool canHook;
 	qbool hooking;
 	struct gedict_s* hookTarget;
-	vec3_t hookOldPosition;
+	vec3_t hookOldPosition;                     // position from the last frame, used to cancel hook if bot gets stuck
 
 	// Editor
 	int last_jump_frame;						// framecount when player last jumped.  used to help setting rj fields
