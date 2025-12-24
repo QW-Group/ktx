@@ -348,11 +348,10 @@ void RuneTouch(void)
 	stuffcmd(other, "bf\n");
 	ent_remove(self);
 
-	TeamplayEventItemTaken(other, self);
-
 #ifdef BOT_SUPPORT
 	if (bots_enabled() && other->isBot)
 	{
+		TeamplayEventItemTaken(other, self);
 		self->fb.item_taken(self, other);
 	}
 #endif

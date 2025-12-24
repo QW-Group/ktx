@@ -481,34 +481,36 @@ void UpdateGoal(gedict_t *self)
 		}
 	}
 
-	// Dropped flags
-	for (goal_entity = world; (goal_entity = ez_find(goal_entity, "item_flag_team1"));)
-	{
-		EvalGoal(self, goal_entity);
-	}
-	for (goal_entity = world; (goal_entity = ez_find(goal_entity, "item_flag_team2"));)
-	{
-		EvalGoal(self, goal_entity);
-	}
-
-	// Dropped runes
-	for (goal_entity = world; (goal_entity = ez_find(goal_entity, "rune"));)
-	{
-		EvalGoal(self, goal_entity);
-	}
-
-	// Defense Markers and Discharge
-	// TODO hiipe - might be more efficient to make these goals instead and then they would be checked above?
-	// but this would be mixing generic behaviour the ctf and map specific goals.
-	for (goal_entity = world; (goal_entity = ez_find(goal_entity, "marker"));)
-	{
-		if (goal_entity->fb.T & MARKER_FLAG1_DEFEND || goal_entity->fb.T & MARKER_FLAG2_DEFEND)
+	if (isCTF()) {
+		// Dropped flags
+		for (goal_entity = world; (goal_entity = ez_find(goal_entity, "item_flag_team1"));)
 		{
 			EvalGoal(self, goal_entity);
 		}
-		if (goal_entity->fb.T & MARKER_E2M2_DISCHARGE)
+		for (goal_entity = world; (goal_entity = ez_find(goal_entity, "item_flag_team2"));)
 		{
 			EvalGoal(self, goal_entity);
+		}
+
+		// Dropped runes
+		for (goal_entity = world; (goal_entity = ez_find(goal_entity, "rune"));)
+		{
+			EvalGoal(self, goal_entity);
+		}
+
+		// Defense Markers and Discharge
+		// TODO hiipe - might be more efficient to make these goals instead and then they would be checked above?
+		// but this would be mixing generic behaviour the ctf and map specific goals.
+		for (goal_entity = world; (goal_entity = ez_find(goal_entity, "marker"));)
+		{
+			if (goal_entity->fb.T & MARKER_FLAG1_DEFEND || goal_entity->fb.T & MARKER_FLAG2_DEFEND)
+			{
+				EvalGoal(self, goal_entity);
+			}
+			if (goal_entity->fb.T & MARKER_E2M2_DISCHARGE)
+			{
+				EvalGoal(self, goal_entity);
+			}
 		}
 	}
 

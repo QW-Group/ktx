@@ -251,7 +251,8 @@ static void CreateItemMarkers(void)
 		}
 
 		// TODO hiipe - these dont work properly at the moment, so skip them
-		if (streq(item->classname, "info_player_team1") || streq(item->classname, "info_player_team2"))
+		if (streq(item->classname, "info_player_team1") || streq(item->classname, "info_player_team2") ||
+			streq(item->classname, "info_player_team1_deathmatch ") || streq(item->classname, "info_player_team2_deathmatch "))
 		{
 			continue;
 		}
