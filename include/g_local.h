@@ -1259,6 +1259,13 @@ qbool AllowMonster(gedict_t *e);
 #define SPAWN_SHOW_PREWAR 1
 #define SPAWN_SHOW_MATCH 2
 
+typedef struct {
+	int player1_score;
+	int player2_score;
+} golden_frag_score_snapshot_t;
+
+extern golden_frag_score_snapshot_t golden_frag_score_snapshot;
+
 #define SPAWNICIDE_DISABLED 0
 #define SPAWNICIDE_PREWAR 1
 #define SPAWNICIDE_MATCH 2

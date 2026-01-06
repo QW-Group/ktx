@@ -532,7 +532,7 @@ void CheckOvertime(void)
 
 	// If 0 no overtime, 1 overtime, 2 sudden death
 	// And if its neither then well we exit
-	if (!k_mb_overtime || ((k_mb_overtime != 1) && (k_mb_overtime != 2) && (k_mb_overtime != 3)))
+	if (!k_mb_overtime || ((k_mb_overtime != 1) && (k_mb_overtime != 2) && (k_mb_overtime != 3) && (k_mb_overtime != SD_GOLDEN_FRAG)))
 	{
 		EndMatch(0);
 
@@ -565,7 +565,8 @@ void CheckOvertime(void)
 			|| ((isTeam() || isCTF()) && (teams == 2) && (players > 1))) // Handle a 2v2 or above team game or 1v1 CTF
 	{
 		if (((k_mb_overtime == 3) && abs(sc) > 1) // tie-break overtime allowed with one frag difference (c) ktpro
-			|| ((k_mb_overtime != 3) && abs(sc) > 0)) // time based or sudden death overtime allowed with zero frag difference
+			|| (k_mb_overtime != 3 && k_mb_overtime != SD_GOLDEN_FRAG && abs(sc) > 0)) // time based
+				//or sudden death overtime not including golden frag allowed with zero frag difference
 		{
 			k_mb_overtime = 0;
 		}
@@ -601,6 +602,10 @@ void CheckOvertime(void)
 	else if (k_overtime == 2)
 	{
 		k_sudden_death = SD_NORMAL;
+		match_end_time = 0;
+	}
+	else if (k_overtime == SD_GOLDEN_FRAG) {
+		k_sudden_death = SD_GOLDEN_FRAG;
 		match_end_time = 0;
 	}
 	else
@@ -1701,6 +1706,10 @@ void PrintCountdown(int seconds)
 
 		case 3:
 			ot = va("%s %s", dig3(tiecount()), redtext("tb"));
+			break;
+
+		case SD_GOLDEN_FRAG:
+			ot = va("gold");
 			break;
 
 		default:

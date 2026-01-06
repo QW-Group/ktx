@@ -1732,7 +1732,7 @@ void ChangeOvertime(void)
 		return;
 	}
 
-	f1 = bound(0, cvar("k_overtime"), 3);
+	f1 = bound(0, cvar("k_overtime"), 4);
 	f2 = bound(0, cvar("k_exttime"), 999);
 
 	if (!f1)
@@ -1758,6 +1758,11 @@ void ChangeOvertime(void)
 		G_bprint(2, "%s: tie-break\n", redtext("Overtime"));
 	}
 	else if (f1 == 3)
+	{
+		cvar_fset("k_overtime", SD_GOLDEN_FRAG);
+		G_bprint(2, "%s: golden frag\n", redtext("Overtime"));
+	}
+	else if (f1 == SD_GOLDEN_FRAG)
 	{
 		cvar_fset("k_overtime", 0);
 		G_bprint(2, "%s: off\n", redtext("Overtime"));
@@ -1999,6 +2004,10 @@ void ModStatus2(void)
 
 		case 3:
 			ot = va("%d tie-break", tiecount());
+			break;
+
+		case SD_GOLDEN_FRAG:
+			ot = va("golden frag");
 			break;
 
 		default:

@@ -2420,10 +2420,38 @@ int tiecount(void)
 	return (deathmatch == 4 ? 2 : 3);
 }
 
+int GetGoldenFragSnapshotDifference(void)
+{
+	return abs(golden_frag_score_snapshot.player1_score - golden_frag_score_snapshot.player2_score);
+}
+
+int GetCurrentFragDifference(const gedict_t *ed1, const gedict_t *ed2) {
+	return abs((int) ed1->s.v.frags - (int) ed2->s.v.frags);
+}
+
+qbool shouldUpdateGoldenFragMidMatch(void) {
+	const int overtime_cvar = (int) cvar("k_overtime");
+	const qbool shouldUpdate = overtime_cvar == SD_GOLDEN_FRAG && (int) k_sudden_death != SD_GOLDEN_FRAG;
+	return shouldUpdate;
+}
+
+void updateGoldenFragSnapshot(const gedict_t *ed1, const gedict_t *ed2) {
+	golden_frag_score_snapshot.player1_score = (int) ed1->s.v.frags;
+	golden_frag_score_snapshot.player2_score = (int) ed2->s.v.frags;
+}
+
 // check sudden death end
 // call this on player death
 void Check_SD(gedict_t *p)
 {
+	if (shouldUpdateGoldenFragMidMatch()) {
+		const gedict_t *ed1 = get_ed_scores1();
+		const gedict_t *ed2 = get_ed_scores2();
+		if (ed1 && ed2) {
+			updateGoldenFragSnapshot(ed1, ed2);
+		}
+	}
+
 	if (!match_in_progress)
 	{
 		return;
@@ -2464,6 +2492,23 @@ void Check_SD(gedict_t *p)
 				EndMatch(0);
 			}
 			return;
+		}
+
+		case SD_GOLDEN_FRAG: {
+			const gedict_t *ed1 = get_ed_scores1();
+			const gedict_t *ed2 = get_ed_scores2();
+			if (isDuel() && ed1 && ed2)
+			{
+				if (GetCurrentFragDifference(ed1, ed2) > GetGoldenFragSnapshotDifference()) {
+					EndMatch(0);
+				} else {
+					updateGoldenFragSnapshot(ed1, ed2);
+				}
+			} // unknown so end match
+			else
+			{
+				EndMatch(0);
+			}
 		}
 	}
 }

@@ -112,3 +112,9 @@ float lastTeamLocationTime;		// next udate for CheckTeamStatus()
 qbool first_rl_taken;			// true when some one alredy took rl
 
 int sv_minping;					// used to broadcast changes
+
+ // { golden frag, setup with values that return large absolute value
+golden_frag_score_snapshot_t golden_frag_score_snapshot = {
+ -GOLDEN_FRAG_SNAPSHOT_INITIAL_VALUE, GOLDEN_FRAG_SNAPSHOT_INITIAL_VALUE
+};
+ // }
