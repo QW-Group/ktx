@@ -1,0 +1,112 @@
+CreateMarker 94 226 24
+CreateMarker -74 234 24
+CreateMarker -218 73 24
+CreateMarker -207 -71 24
+CreateMarker -84 -229 24
+CreateMarker 118 -234 24
+CreateMarker 245 -95 24
+CreateMarker 245 82 24
+CreateMarker 105 84 24
+CreateMarker 109 -84 24
+CreateMarker -83 -81 24
+CreateMarker -79 76 24
+SetZone 1 3
+SetMarkerPath 1 0 8
+SetMarkerPath 1 1 15
+SetMarkerPath 1 2 9
+SetZone 2 4
+SetMarkerPath 2 0 10
+SetMarkerPath 2 1 14
+SetMarkerPath 2 2 11
+SetZone 3 2
+SetMarkerPath 3 0 6
+SetMarkerPath 3 1 16
+SetMarkerPath 3 2 7
+SetZone 4 1
+SetMarkerPath 4 0 12
+SetMarkerPath 4 1 13
+SetMarkerPath 4 2 5
+SetZone 5 1
+SetMarkerPath 5 0 4
+SetMarkerPath 5 1 13
+SetMarkerPath 5 2 12
+SetMarkerPath 5 3 16
+SetMarkerPath 5 4 6
+SetZone 6 2
+SetMarkerPath 6 0 5
+SetMarkerPath 6 1 3
+SetMarkerPath 6 2 16
+SetMarkerPath 6 3 7
+SetMarkerPath 6 4 13
+SetZone 7 2
+SetMarkerPath 7 0 6
+SetMarkerPath 7 1 3
+SetMarkerPath 7 2 8
+SetMarkerPath 7 3 16
+SetMarkerPath 7 4 15
+SetZone 8 3
+SetMarkerPath 8 0 7
+SetMarkerPath 8 1 16
+SetMarkerPath 8 2 15
+SetMarkerPath 8 3 1
+SetMarkerPath 8 4 9
+SetZone 9 3
+SetMarkerPath 9 0 8
+SetMarkerPath 9 1 1
+SetMarkerPath 9 2 15
+SetMarkerPath 9 3 14
+SetMarkerPath 9 4 10
+SetZone 10 4
+SetMarkerPath 10 0 9
+SetMarkerPath 10 1 15
+SetMarkerPath 10 2 14
+SetMarkerPath 10 3 11
+SetMarkerPath 10 4 2
+SetZone 11 4
+SetMarkerPath 11 0 10
+SetMarkerPath 11 1 2
+SetMarkerPath 11 2 14
+SetMarkerPath 11 3 13
+SetMarkerPath 11 4 12
+SetZone 12 1
+SetMarkerPath 12 0 4
+SetMarkerPath 12 1 5
+SetMarkerPath 12 2 11
+SetMarkerPath 12 3 13
+SetMarkerPath 12 4 14
+SetZone 13 1
+SetMarkerPath 13 0 4
+SetMarkerPath 13 1 5
+SetMarkerPath 13 2 6
+SetMarkerPath 13 3 16
+SetMarkerPath 13 4 11
+SetMarkerPath 13 5 12
+SetMarkerPath 13 6 14
+SetMarkerPath 13 7 15
+SetZone 14 4
+SetMarkerPath 14 0 16
+SetMarkerPath 14 1 9
+SetMarkerPath 14 2 10
+SetMarkerPath 14 3 2
+SetMarkerPath 14 4 11
+SetMarkerPath 14 5 12
+SetMarkerPath 14 6 15
+SetMarkerPath 14 7 13
+SetZone 15 3
+SetMarkerPath 15 0 7
+SetMarkerPath 15 1 16
+SetMarkerPath 15 2 8
+SetMarkerPath 15 3 1
+SetMarkerPath 15 4 9
+SetMarkerPath 15 5 10
+SetMarkerPath 15 6 14
+SetMarkerPath 15 7 13
+SetZone 16 2
+SetMarkerPath 16 0 5
+SetMarkerPath 16 1 6
+SetMarkerPath 16 2 3
+SetMarkerPath 16 3 7
+SetMarkerPath 16 4 14
+SetMarkerPath 16 5 13
+SetMarkerPath 16 6 15
+SetMarkerPath 16 7 8
