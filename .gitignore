@@ -26,8 +26,10 @@ build*/
 built_items/
 x64/*
 .vs/*
+.idea/*
 *.psess
 *.vspx
 *.suobackup
 *.VC.db
 /.cache
+cmake-*
