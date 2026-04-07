@@ -767,12 +767,12 @@ void SP_trigger_changelevel(void)
 {
 	if (!self->map)
 	{
-		G_Error("chagnelevel trigger doesn't have map");
+		G_Printf("changelevel trigger doesn't have map\n");
+		soft_ent_remove(self);
 	}
-
 	// qqshka: yeah, treat k_remove_end_hurt as hint to remove some shit from this level,
 	//		   not only hurt trigger
-	if (streq("end", mapname) && cvar("k_remove_end_hurt")
+	else if (streq("end", mapname) && cvar("k_remove_end_hurt")
 			&& (cvar("k_remove_end_hurt") != 2))
 	{
 		soft_ent_remove(self);
@@ -1081,7 +1081,7 @@ gedict_t* Sub_SelectSpawnPoint(char *spawnname)
 	for (spot = world; (spot = find(spot, FOFCLSN, spawnname));)
 	{
 		float spot_radius;
-		
+
 		totalspots++;
 		pcount = 0;
 
@@ -4601,7 +4601,7 @@ void SendTeamInfo(gedict_t *t)
 		cl = NUM_FOR_EDICT(p) - 1;
 		h = bound(0, (int)p->s.v.health, 999);
 		a = bound(0, (int)p->s.v.armorvalue, 999);
-		
+
 		shells = bound(0, (int)p->s.v.ammo_shells, 999);
 		nails = bound(0, (int)p->s.v.ammo_nails, 999);
 		rockets = bound(0, (int)p->s.v.ammo_rockets, 999);
