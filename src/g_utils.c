@@ -2652,6 +2652,9 @@ char* SD_type_str(void)
 		case SD_TIEBREAK:
 			return "tie-break";
 
+		case SD_GOLDEN_FRAG:
+			return "Golden Frag";
+
 		default:
 			return "unknown";
 	}
