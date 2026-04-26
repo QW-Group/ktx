@@ -181,7 +181,8 @@ field_t fields[] =
 	{ "volume", 					FOFS(volume), 						F_FLOAT },
 
 // trigger_heal
-	{ "heal_amount", 				FOFS(healamount), 					F_FLOAT },
+	{ "heal_amount", 				FOFS(healamount),						F_FLOAT },
+	{ "health_max", 				FOFS(healmax),							F_FLOAT },
 // Colorized entities in map
 	{ "colormod" 					-1, 								F_VECTOR },
 	{ NULL }
