@@ -2418,10 +2418,77 @@ int tiecount(void)
 	return (deathmatch == 4 ? 2 : 3);
 }
 
+/**
+ * Gets the absolute score difference from the golden frag snapshot.
+ * @return The absolute difference between team1 and team2 snapshot scores.
+ */
+int GetGoldenFragSnapshotDifference(void)
+{
+	return abs(golden_frag_score_snapshot.team1_score - golden_frag_score_snapshot.team2_score);
+}
+
+/**
+ * Checks if the current game mode is solo (duel or FFA).
+ * @return true if the mode is duel or FFA, false otherwise.
+ */
+qbool isDuelOrFFA(void) {
+	return (isDuel() || isFFA());
+}
+
+/**
+ * Gets the current absolute frag difference between the top two players / teams.
+ * @return The absolute difference in frags. For solo modes (duel/FFA), returns difference
+ *         between the top two players' frags. For team modes, returns difference between team scores.
+ */
+int GetCurrentFragDifference(void) {
+	if (isDuelOrFFA()) {
+		const gedict_t *ed1 = get_ed_scores1();
+		const gedict_t *ed2 = get_ed_scores2();
+		if (ed1 && ed2) {
+			return abs((int)ed1->s.v.frags - (int)ed2->s.v.frags);
+		}
+	}
+	return abs(get_scores1() - get_scores2());
+}
+
+/**
+ * Checks if the golden frag snapshot should be updated mid-match.
+ * @return true if k_overtime is set to SD_GOLDEN_FRAG but k_sudden_death is not yet,
+ *         indicating the match is still in regulation but will use golden frag for overtime.
+ */
+qbool shouldUpdateGoldenFragMidMatch(void) {
+	return (int) cvar("k_overtime") == SD_GOLDEN_FRAG
+	       && (int) k_sudden_death != SD_GOLDEN_FRAG;
+}
+
+/**
+ * Updates the golden frag score snapshot with current scores.
+ * For solo modes (duel/FFA), stores individual player frags.
+ *          For team modes, stores team scores. This snapshot is used to track
+ *          the score difference when golden frag overtime begins.
+ */
+void updateGoldenFragSnapshot(void) {
+	if (isDuelOrFFA()) {
+		const gedict_t *ed1 = get_ed_scores1();
+		const gedict_t *ed2 = get_ed_scores2();
+		if (ed1 && ed2) {
+			golden_frag_score_snapshot.team1_score = (int) ed1->s.v.frags;
+			golden_frag_score_snapshot.team2_score = (int) ed2->s.v.frags;
+		}
+	} else {
+		golden_frag_score_snapshot.team1_score = get_scores1();
+		golden_frag_score_snapshot.team2_score = get_scores2();
+	}
+}
+
 // check sudden death end
 // call this on player death
 void Check_SD(gedict_t *p)
 {
+	if (shouldUpdateGoldenFragMidMatch()) {
+		updateGoldenFragSnapshot();
+	}
+
 	if (!match_in_progress)
 	{
 		return;
@@ -2462,6 +2529,15 @@ void Check_SD(gedict_t *p)
 				EndMatch(0);
 			}
 			return;
+		}
+
+		case SD_GOLDEN_FRAG: {
+			// End when the leader extends the frag lead
+			if (GetCurrentFragDifference() > GetGoldenFragSnapshotDifference()) {
+				EndMatch(0);
+			} else {
+				updateGoldenFragSnapshot();
+			}
 		}
 	}
 }

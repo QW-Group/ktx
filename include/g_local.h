@@ -1259,6 +1259,21 @@ qbool AllowMonster(gedict_t *e);
 #define SPAWN_SHOW_PREWAR 1
 #define SPAWN_SHOW_MATCH 2
 
+/**
+ * Stores the score state used to evaluate golden-frag overtime.
+ *
+ * The snapshot represents the score difference at the moment golden-frag
+ * tracking starts or is refreshed. A later score difference can be compared
+ * against this snapshot to determine whether a frag changed the lead enough
+ * to end the match.
+ */
+typedef struct {
+	int team1_score;
+	int team2_score;
+} golden_frag_score_snapshot_t;
+
+extern golden_frag_score_snapshot_t golden_frag_score_snapshot;
+
 #define SPAWNICIDE_DISABLED 0
 #define SPAWNICIDE_PREWAR 1
 #define SPAWNICIDE_MATCH 2
