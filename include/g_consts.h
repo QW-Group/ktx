@@ -302,6 +302,10 @@
 // k_sudden_death types
 #define SD_NORMAL						(1)
 #define SD_TIEBREAK						(2)
+#define SD_GOLDEN_FRAG					(4)
+
+
+#define GOLDEN_FRAG_SNAPSHOT_INITIAL_VALUE (9999)
 
 //
 #define CALLALIAS_SIZE					(128)
