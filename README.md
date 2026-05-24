@@ -31,6 +31,14 @@ You can find the prebuilt binaries on [this download page][ktx-builds].
 
 For more detailed information we suggest looking at the [nQuake server][nquake-linux], which uses **[MVDSV][mvdsv]** and **[KTX][ktx]** as **QuakeWorld** server.
 
+## Contributing
+
+After cloning the repository, install the pre-commit hook to ensure consistent line endings and trailing newlines:
+
+```bash
+pre-commit install
+```
+
 ## Building binaries
 
 ### Build from source with CMake
