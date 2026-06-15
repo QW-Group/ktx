@@ -80,6 +80,8 @@ void W_FireAxe(void)
 	vec3_t source, dest;
 	vec3_t org;
 
+	antilag_lagmove_all_hitscan(self);
+
 	WS_Mark(self, wpAXE);
 
 	self->ps.wpn[wpAXE].attacks++;
@@ -95,6 +97,7 @@ void W_FireAxe(void)
 	traceline(PASSVEC3(source), PASSVEC3(dest), false, self);
 	if (g_globalvars.trace_fraction == 1.0)
 	{
+		antilag_unmove_all();
 		return;
 	}
 
@@ -152,6 +155,8 @@ void W_FireAxe(void)
 		WriteCoord( MSG_MULTICAST, org[2]);
 		trap_multicast(PASSVEC3(org), MULTICAST_PVS);
 	}
+
+	antilag_unmove_all();
 }
 
 //============================================================================
@@ -549,6 +554,7 @@ void FireBullets(float shotcount, vec3_t dir, float spread_x, float spread_y, fl
 	qbool classic_shotgun = cvar("k_classic_shotgun");
 	qbool non_random_bullets = (k_yawnmode
 			|| (!match_in_progress && self && (self->ct == ctPlayer) && iKey(self, "nrb")));
+	qbool do_antilag = (self->ct == ctPlayer);
 
 	trap_makevectors(self->s.v.v_angle);
 	VectorScale(g_globalvars.v_forward, 10, tmp);
@@ -558,6 +564,9 @@ void FireBullets(float shotcount, vec3_t dir, float spread_x, float spread_y, fl
 
 	ClearMultiDamage();
 	multi_damage_type = deathtype;
+
+	if (do_antilag)
+		antilag_lagmove_all_hitscan(self);
 
 	if (cvar("k_instagib"))
 	{
@@ -720,6 +729,9 @@ void FireBullets(float shotcount, vec3_t dir, float spread_x, float spread_y, fl
 		shotcount = shotcount - 1;
 	}
 
+	if (do_antilag)
+		antilag_unmove_all();
+
 	ApplyMultiDamage();
 	if (!classic_shotgun)
 	{
@@ -838,7 +850,9 @@ void W_FireShotgun(void)
 	aim(dir);
 	if (cvar("k_instagib"))
 	{
+		antilag_lagmove_all_hitscan(self);
 		FireInstaBullet(dir, dtSG);
+		antilag_unmove_all();
 	}
 	else
 	{
@@ -1084,8 +1098,11 @@ void W_FireRocket(void)
 				self->s.v.origin[1] + g_globalvars.v_forward[1] * 8,
 				self->s.v.origin[2] + g_globalvars.v_forward[2] * 8 + 16);
 
-	// midair 
+	// midair
 	VectorCopy(self->s.v.origin, newmis->s.v.oldorigin);
+
+	antilag_lagmove_all_proj(self, newmis);
+	antilag_unmove_all();
 
 #ifdef BOT_SUPPORT
 	BotsRocketSpawned(newmis);
@@ -1125,7 +1142,14 @@ void LightningHit(gedict_t *from, float damage)
  */
 void LightningDamage(vec3_t p1, vec3_t p2, gedict_t *from, float damage)
 {
+	qbool do_antilag = (from->ct == ctPlayer);
+	if (do_antilag)
+		antilag_lagmove_all_hitscan(from);
+
 	traceline(PASSVEC3(p1), PASSVEC3(p2), false, from);
+
+	if (do_antilag)
+		antilag_unmove_all();
 
 	if (PROG_TO_EDICT(g_globalvars.trace_ent)->s.v.takedamage)
 	{
@@ -1205,7 +1229,9 @@ void W_FireLightning(void)
 					return;
 				}
 
+				antilag_lagmove_all_hitscan(self);
 				T_RadiusDamage(self, self, 35 * cells, world, dtLG_DIS);
+				antilag_unmove_all();
 
 				return;
 			}
@@ -1222,7 +1248,9 @@ void W_FireLightning(void)
 				return;
 			}
 
+			antilag_lagmove_all_hitscan(self);
 			T_RadiusDamage(self, self, 35 * cells, world, dtLG_DIS);
+			antilag_unmove_all();
 
 			return;
 		}
@@ -1438,6 +1466,9 @@ void W_FireGrenade(void)
 	setmodel(newmis, "progs/grenade.mdl");
 	setsize(newmis, 0, 0, 0, 0, 0, 0);
 	setorigin(newmis, PASSVEC3(self->s.v.origin));
+
+	antilag_lagmove_all_proj_bounce(self, newmis);
+	antilag_unmove_all();
 
 #ifdef BOT_SUPPORT
 	BotsGrenadeSpawned(newmis);
@@ -1667,6 +1698,9 @@ void W_FireSuperSpikes(void)
 	setsize(newmis, 0, 0, 0, 0, 0, 0);
 	g_globalvars.msg_entity = EDICT_TO_PROG(self);
 	WriteByte( MSG_ONE, SVC_SMALLKICK);
+
+	antilag_lagmove_all_proj(self, newmis);
+	antilag_unmove_all();
 }
 
 void W_FireSpikes(float ox)
@@ -1724,6 +1758,9 @@ void W_FireSpikes(float ox)
 
 	g_globalvars.msg_entity = EDICT_TO_PROG(self);
 	WriteByte( MSG_ONE, SVC_SMALLKICK);
+
+	antilag_lagmove_all_proj(self, newmis);
+	antilag_unmove_all();
 }
 
 /*

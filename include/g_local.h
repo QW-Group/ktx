@@ -222,6 +222,7 @@ enum
 	G_SETEXTFIELDPTR,
 	G_GETEXTFIELDPTR,
 	G_SETSENDNEEDED,
+	G_SETLASTRUNTIME,
 	G_EXTENSIONS_LAST
 };
 extern qbool haveextensiontab[G_EXTENSIONS_LAST-G_EXTENSIONS_FIRST];
@@ -237,6 +238,16 @@ typedef enum
 #undef DEATHTYPE
 
 // g_cmd.c
+
+// antilag.c
+extern float time_corrected;
+antilag_t *antilag_create_player(gedict_t *e);
+void antilag_delete_player(gedict_t *e);
+void antilag_log(gedict_t *e, antilag_t *antilag);
+void antilag_lagmove_all_hitscan(gedict_t *e);
+void antilag_lagmove_all_proj(gedict_t *owner, gedict_t *e);
+void antilag_lagmove_all_proj_bounce(gedict_t *owner, gedict_t *e);
+void antilag_unmove_all(void);
 
 // g_utils.c
 

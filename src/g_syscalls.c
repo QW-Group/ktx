@@ -534,3 +534,8 @@ intptr_t trap_SetSendNeeded(intptr_t subject, intptr_t flags, intptr_t to)
 {
 	return syscall(G_SETSENDNEEDED, subject, flags, to);
 }
+
+void trap_SetLastRuntime(intptr_t edn)
+{
+	syscall(G_SETLASTRUNTIME, edn);
+}

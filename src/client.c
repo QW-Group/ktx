@@ -1779,6 +1779,8 @@ void ClientConnect(void)
 
 	MakeMOTD();
 
+	self->antilag_data = antilag_create_player(self);
+
 #ifdef BOT_SUPPORT
 	BotClientConnectedEvent (self);
 #endif
@@ -2989,6 +2991,8 @@ void ClientDisconnect(void)
 
 	if (!self->k_accepted)
 	{
+		if (self->antilag_data)
+			antilag_delete_player(self);
 		set_important_fields(self); // set classname == "" and etc
 
 		return;
@@ -3038,6 +3042,7 @@ void ClientDisconnect(void)
 		AbortElect();
 	}
 
+	antilag_delete_player(self);
 	set_important_fields(self); // set classname == "" and etc
 
 // s: added conditional function call here
@@ -3714,6 +3719,9 @@ void PlayerPreThink(void)
 	float r;
 	qbool zeroFps = false;
 	int k_socd = cvar("k_socd");
+
+	self->client_lastupdated = g_globalvars.time;
+	time_corrected = g_globalvars.time;
 
 	if (self->k_timingWarnTime)
 	{
@@ -4611,6 +4619,8 @@ void PlayerPostThink(void)
 			}
 		}
 	}
+
+	antilag_log(self, self->antilag_data);
 }
 
 #define MAX_MEMBERS (10) // max members per team

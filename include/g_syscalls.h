@@ -166,3 +166,4 @@ int trap_trailparticles(int effecttype, int entnum, float start_x, float start_y
 int trap_pointparticles(int effecttype, float org_x, float org_y, float org_z, float vel_x, float vel_y, float vel_z, int count);
 int trap_clientstat(int statidx, int stattype, int fieldoffset);
 int trap_pointerstat(int statidx, int stattype, void *offset);
+void trap_SetLastRuntime(intptr_t edn);
