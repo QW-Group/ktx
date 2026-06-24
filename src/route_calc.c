@@ -58,6 +58,13 @@ static void TravelTimeForPath(gedict_t *m, int i)
 		return;
 	}
 
+	// Just points to a button, can't go this way!
+	if (m->fb.paths[i].flags & LOOK_BUTTON)
+	{
+		m->fb.paths[i].rj_time = m->fb.paths[i].time = TRAVEL_UNREACHABLE;
+		return;
+	}
+
 	if (m->fb.paths[i].flags & JUMP_LEDGE)
 	{
 		m->fb.paths[i].flags |= NO_DODGE;

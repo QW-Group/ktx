@@ -146,6 +146,11 @@ const char* EncodeMarkerPathFlags(int path_flags)
 		*s++ = 'r';
 	}
 
+	if (path_flags & LOOK_BUTTON)
+	{
+		*s++ = 'l';
+	}
+
 	if (path_flags & JUMP_LEDGE)
 	{
 		*s++ = 'j';
@@ -190,6 +195,10 @@ int DecodeMarkerPathFlagString(const char *s)
 
 			case 'r':
 				path_flags |= ROCKET_JUMP;
+				break;
+
+			case 'l':
+				path_flags |= LOOK_BUTTON;
 				break;
 
 			case 'j':
@@ -317,6 +326,11 @@ void SetMarkerPathFlags(int marker_number, int path_index, int flags)
 	{
 		markers[marker_number]->fb.paths[path_index].rj_pitch = 78.25;
 		markers[marker_number]->fb.paths[path_index].rj_yaw = -1;
+	}
+
+	if (flags & LOOK_BUTTON)
+	{
+		markers[marker_number]->fb.T |= MARKER_LOOK_BUTTON;
 	}
 }
 

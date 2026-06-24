@@ -143,6 +143,11 @@ static void BotsFireAtWorldLogic(gedict_t *self, vec3_t rel_pos, float *rel_dist
 		return;
 	}
 
+	if (self->fb.path_state & FIRE_BUTTON)
+	{
+		return;
+	}
+
 	if (*rel_dist < 160)
 	{
 		vec3_t rel_pos2;

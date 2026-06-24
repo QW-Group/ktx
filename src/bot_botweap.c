@@ -444,9 +444,17 @@ static qbool PreWarBlockFiring(gedict_t *self)
 		qbool looking_at_enemy = enemy == self->fb.look_object;
 		qbool enemy_attacked = self->s.v.enemy && g_globalvars.time < enemy->attack_finished + 0.5;
 		qbool debugging_door = (self->fb.debug_path && enemy_is_world);
+		qbool firing_at_button = (self->fb.path_state & FIRE_BUTTON);
+
+		if (!k_practice && firing_at_button)
+		{
+			self->fb.firing = false;
+
+			return true;
+		}
 
 		// Don't fire at other bots
-		if ((self->s.v.enemy == 0) || enemy->isBot || !self->fb.look_object)
+		if ((self->s.v.enemy == 0 && !firing_at_button) || enemy->isBot || !self->fb.look_object)
 		{
 			self->fb.firing = false;
 
@@ -494,6 +502,35 @@ static qbool KeepFiringAtEnemy(gedict_t *self)
 	// Keep fire button down if tracking enemy
 	return ((self->fb.look_object == &g_edicts[self->s.v.enemy]) && (g_random() < 0.666667f)
 			&& BotUsingCorrectWeapon(self));
+}
+
+static void SelectWeaponToShootButton(gedict_t *self)
+{
+	if (self->fb.path_state & FIRE_BUTTON)
+	{
+		int items_ = (int)self->s.v.items;
+		int desired_weapon = 0;
+
+		if (self->s.v.ammo_shells)
+		{
+			desired_weapon = IT_SHOTGUN;
+		}
+		else if ((items_ & IT_NAILGUN) && (self->s.v.ammo_nails))
+		{
+			desired_weapon = IT_NAILGUN;
+		}
+		else if ((items_ & IT_SUPER_NAILGUN) && (self->s.v.ammo_nails))
+		{
+			desired_weapon = IT_SUPER_NAILGUN;
+		}
+		else if ((items_ & IT_LIGHTNING) && (self->s.v.ammo_cells))
+		{
+			desired_weapon = IT_LIGHTNING;
+		}
+
+		self->fb.firing |= CheckNewWeapon(desired_weapon);
+	}
+
 }
 
 static qbool MidairAimLogic(gedict_t *self, float rel_dist)
@@ -588,6 +625,8 @@ void SetFireButton(gedict_t *self, vec3_t rel_pos, float rel_dist)
 	}
 
 	DM6SelectWeaponToOpenDoor(self);
+
+	SelectWeaponToShootButton(self);
 
 	if (HurtSelfLogic(self))
 	{
@@ -932,6 +971,11 @@ void SelectWeapon(void)
 	int impulse;
 
 	if (self->fb.path_state & DM6_DOOR)
+	{
+		return;
+	}
+
+	if (self->fb.path_state & FIRE_BUTTON)
 	{
 		return;
 	}

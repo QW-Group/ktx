@@ -136,6 +136,8 @@ extern gedict_t *dropper;
 #define BOTPATH_CURLJUMP_HINT		(1 << 23)
 #define BOTPATH_FULL_AIRCONTROL		(1 << 24)
 #define BOTPATH_RJ_IN_PROGRESS		(1 << 25)
+#define LOOK_BUTTON                 (1 << 27)	// Indicates path which points to a button to shoot
+#define FIRE_BUTTON                 (1 << 28)   // Set when a bot should try shooting a button
 #define DELIBERATE_AIR_WAIT_GROUND	(DELIBERATE_AIR | WAIT_GROUND)
 #define SAVED_DESCRIPTION			(DM6_DOOR | ROCKET_JUMP | JUMP_LEDGE | VERTICAL_PLATFORM | BOTPATH_DOOR | BOTPATH_DOOR_CLOSED | NO_DODGE)
 #define NOT_ROCKET_JUMP				(~ROCKET_JUMP)
@@ -153,6 +155,7 @@ extern gedict_t *dropper;
 #define MARKER_DYNAMICALLY_ADDED	256		// Added dynamically by server.  Do not include in .bot file generation
 #define MARKER_EXPLICIT_VIEWOFFSET	512		// Viewoffset has been set by map definition and should be included in .bot file generation
 #define MARKER_NOTOUCH				1024	// Not touchable - used when two markers on top of each other
+#define MARKER_LOOK_BUTTON          8192    // A button can be shot from this marker - set automatically
 
 // Bot flags (FIXME: fb.state?  check.  consistent naming, comment with descriptions)
 #define CAMPBOT						1
@@ -292,7 +295,7 @@ void SetMarkerPathFlags(int marker_number, int path_index, int flags);
 void SetMarkerPath(int source_marker, int path_index, int next_marker);
 void SetMarkerViewOffset(int marker, float zOffset);
 
-#define FROGBOT_PATH_FLAG_OPTIONS "w6rjva"
+#define FROGBOT_PATH_FLAG_OPTIONS "w6rjval"
 #define FROGBOT_MARKER_FLAG_OPTIONS "u6fbte"
 
 // added for ktx

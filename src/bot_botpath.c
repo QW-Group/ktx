@@ -178,6 +178,85 @@ static qbool LookingAtPlayer(gedict_t *self)
 	return (self->fb.look_object && (self->fb.look_object->ct == ctPlayer));
 }
 
+void LookAtButton(gedict_t *button, qbool buttonIsDoor)
+{
+	gedict_t *target = buttonIsDoor ? button->fb.door_entity : button;
+	gedict_t *trigger = PROG_TO_EDICT(target->s.v.enemy);
+
+	vec3_t target_origin;
+	VectorScale(target->s.v.absmin, 0.5, target_origin);
+	VectorMA(target_origin, 0.5, target->s.v.absmax, target_origin);
+
+	traceline(self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] + 16,
+		target_origin[0], target_origin[1], target_origin[2],
+		true, self);
+
+	if (g_globalvars.trace_fraction == 1 ||
+		PROG_TO_EDICT(g_globalvars.trace_ent) == target ||
+		PROG_TO_EDICT(g_globalvars.trace_ent) == button)
+	{
+		if ((target->s.v.takedamage))
+		{
+			if ((buttonIsDoor && (target->state == STATE_TOP || target->state == STATE_UP)) ||
+			   (target->s.v.enemy && (trigger->state == STATE_TOP || trigger->state == STATE_UP)) ||
+			   (!target->s.v.enemy && !buttonIsDoor))
+			{
+				self->fb.path_state |= FIRE_BUTTON;
+				self->fb.state |= NOTARGET_ENEMY;
+				self->fb.look_object = target;
+			}
+		}
+	}
+}
+
+qbool CheckLookAtButton(gedict_t *self)
+{
+	// First check if the bot is in front of a shootable door
+	gedict_t *marker = self->fb.linked_marker;
+	if (marker && marker->fb.door_entity && marker->fb.door_entity->s.v.takedamage)
+	{
+		LookAtButton(marker, true);
+		return true;
+	}
+
+	marker = self->fb.touch_marker;
+	if (marker && marker->fb.door_entity && marker->fb.door_entity->s.v.takedamage)
+	{
+		LookAtButton(marker, true);
+		return true;
+	}
+
+	// Now check if there is a button linked to the current or next marker
+	if (self->fb.linked_marker && self->fb.linked_marker->fb.T & MARKER_LOOK_BUTTON)
+	{
+		marker = self->fb.linked_marker;
+	}
+	else if (self->fb.touch_marker && self->fb.touch_marker->fb.T & MARKER_LOOK_BUTTON)
+	{
+		marker = self->fb.touch_marker;
+	}
+
+	if (marker)
+	{
+		int i;
+		for (i = 0; i < NUMBER_PATHS; i++)
+		{
+			fb_path_t *path = &marker->fb.paths[i];
+
+			if (path->next_marker && (path->flags & LOOK_BUTTON))
+			{
+				LookAtButton(path->next_marker, false);
+				return true;
+			}
+		}
+	}
+
+	self->fb.path_state &= ~FIRE_BUTTON;
+	self->fb.state &= ~NOTARGET_ENEMY;
+
+	return false;
+}
+
 qbool WaitingToHitGround(gedict_t *self)
 {
 	return (self->fb.path_state & WAIT_GROUND) && !((int)self->s.v.flags & FL_ONGROUND);
@@ -484,7 +563,7 @@ void ProcessNewLinkedMarker(gedict_t *self)
 	}
 
 	// FIXME: Map-specific
-	if (DM6LookAtDoor(self) || LookingAtPlayer(self))
+	if (DM6LookAtDoor(self) || LookingAtPlayer(self) || CheckLookAtButton(self))
 	{
 		return;
 	}
