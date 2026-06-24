@@ -58,6 +58,7 @@ static vec3_t saved_marker_pos =
 	{ -999999, -999999, -999999 };
 static gedict_t *saved_marker = NULL;
 static gedict_t *last_touched_marker = NULL;
+static gedict_t *debug_marker;
 
 // FIXME: Globals
 extern gedict_t *markers[];
@@ -2310,6 +2311,68 @@ static void FrogbotsSetEasySkillMode(void)
 		(int)cvar(FB_CVAR_EASY_SKILL_MODE) ? redtext("on") : redtext("off"));
 }
 
+static void FrogbotsGoMarker(void)
+{
+	vec3_t direction;
+	vec3_t src, dst, tmp;
+	vec3_t endpoint;
+	gedict_t *nearest;
+	gedict_t *player;
+
+	if (!is_adm(self))
+	{
+		G_sprint(self, PRINT_HIGH, "You must be an admin to use this command\n");
+		return;
+	}
+
+	trap_makevectors(self->s.v.v_angle);
+	aim(direction);
+
+	VectorScale(g_globalvars.v_forward, 10, tmp);
+	VectorAdd(self->s.v.origin, tmp, src);
+	src[2] = self->s.v.absmin[2] + self->s.v.size[2] * 0.7;
+
+	VectorCopy(src, dst);
+	VectorScale(direction, 8192, tmp);
+	VectorAdd(dst, tmp, dst);
+
+	traceline(PASSVEC3(src), PASSVEC3(dst), false, self);
+
+	if (!g_globalvars.trace_fraction)
+	{
+		return;
+	}
+
+	VectorSubtract(g_globalvars.trace_endpos, src, tmp);
+	VectorNormalize(tmp);
+	VectorScale(tmp, 10, tmp);
+	VectorSubtract(g_globalvars.trace_endpos, tmp, endpoint);
+
+	nearest = LocateMarker(endpoint);
+	if (nearest == debug_marker)
+	{
+		debug_marker = NULL;
+	}
+	else
+	{
+		debug_marker = nearest;
+	}
+
+	if (debug_marker)
+	{
+		G_sprint(self, PRINT_HIGH, "Sending all bots to %s\n", debug_marker->classname);
+	}
+
+	for (player = world; (player = find_plr(player));)
+	{
+		if (player->isBot)
+		{
+			player->fb.fixed_goal = debug_marker;
+			TeamplayMessageByName(player, "coming");
+		}
+	}
+}
+
 typedef struct frogbot_cmd_s
 {
 	char *name;
@@ -2332,7 +2395,8 @@ static frogbot_cmd_t std_commands[] =
 		{ "togglequad", FrogbotsToggleQuad, "Toggle quad damage" },
 		{ "quadmultiplier", FrogbotsSetQuadMultiplier, "Set quad damage multiplier" },
 		{ "itempickupbonus", FrogbotsSetItemPickupBonus, "Toggle item pickup bonus" },
-		{ "easyskillmode", FrogbotsSetEasySkillMode, "Toggle easy skill mode" }};
+		{ "easyskillmode", FrogbotsSetEasySkillMode, "Toggle easy skill mode" },
+		{ "gomarker", FrogbotsGoMarker, "Send all bots to the location pointed at" } };
 
 static frogbot_cmd_t editor_commands[] =
 	{
