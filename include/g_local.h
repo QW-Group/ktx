@@ -1210,6 +1210,9 @@ char* std_fgets(fileHandle_t handle, char *buf, int limit);
 void std_fclose(fileHandle_t handle);
 void std_fprintf(fileHandle_t handle, const char *fmt, ...) PRINTF_FUNC(2);
 
+// items
+void ItemTaken(gedict_t *item, gedict_t *player);
+
 // teamplay
 void TeamplayEventItemTaken(gedict_t *client, gedict_t *item);
 void TeamplayDeathEvent(gedict_t *client);

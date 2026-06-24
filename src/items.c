@@ -44,7 +44,7 @@ static qbool ItemTouched(gedict_t *item, gedict_t *player)
 #endif
 }
 
-static void ItemTaken(gedict_t *item, gedict_t *player)
+void ItemTaken(gedict_t *item, gedict_t *player)
 {
 	TeamplayEventItemTaken(player, item);
 

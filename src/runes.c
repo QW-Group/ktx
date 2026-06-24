@@ -67,18 +67,22 @@ void DoDropRune(int rune, qbool on_respawn)
 	if (rune & CTF_RUNE_RES)
 	{
 		setmodel(item, "progs/end1.mdl");
+		item->tp_flags = it_rune1;
 	}
 	else if (rune & CTF_RUNE_STR)
 	{
 		setmodel(item, "progs/end2.mdl");
+		item->tp_flags = it_rune2;
 	}
 	else if (rune & CTF_RUNE_HST)
 	{
 		setmodel(item, "progs/end3.mdl");
+		item->tp_flags = it_rune3;
 	}
 	else if (rune & CTF_RUNE_RGN)
 	{
 		setmodel(item, "progs/end4.mdl");
+		item->tp_flags = it_rune4;
 	}
 
 	setsize(item, -16, -16, 0, 16, 16, 56);
@@ -124,18 +128,22 @@ void DoTossRune(int rune)
 	if (rune & CTF_RUNE_RES)
 	{
 		setmodel(item, "progs/end1.mdl");
+		item->tp_flags = it_rune1;
 	}
 	else if (rune & CTF_RUNE_STR)
 	{
 		setmodel(item, "progs/end2.mdl");
+		item->tp_flags = it_rune2;
 	}
 	else if (rune & CTF_RUNE_HST)
 	{
 		setmodel(item, "progs/end3.mdl");
+		item->tp_flags = it_rune3;
 	}
 	else if (rune & CTF_RUNE_RGN)
 	{
 		setmodel(item, "progs/end4.mdl");
+		item->tp_flags = it_rune4;
 	}
 
 	setorigin(item, self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] - 24);
@@ -317,6 +325,8 @@ void RuneTouch(void)
 	sound(other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
 	stuffcmd(other, "bf\n");
 	ent_remove(self);
+
+	ItemTaken(self, other);
 }
 
 char* GetRuneSpawnName(void)
