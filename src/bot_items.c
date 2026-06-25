@@ -559,6 +559,12 @@ static float goal_defend_marker(gedict_t *self, gedict_t *marker)
 			return 400 + 800 * (self->fb.firepower / 100.0f);
 		}
 	}
+	else if (self->fb.skill.ctf_role == FB_CTF_ROLE_DEFEND)
+	{
+		// Our flag has been taken: keep holding the chokepoint to intercept the
+		// carrier on its way out and to cover the base for the return.
+		return 1200 * (self->fb.firepower / 100.0f);
+	}
 
 	return 0;
 }
