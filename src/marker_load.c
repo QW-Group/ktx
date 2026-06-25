@@ -49,6 +49,16 @@ const char* EncodeMarkerFlags(int marker_flags)
 		*s++ = '6';
 	}
 
+	if (marker_flags & MARKER_DISCHARGE_AT_START_RED)
+	{
+		*s++ = 'd';
+	}
+
+	if (marker_flags & MARKER_DISCHARGE_AT_START_BLUE)
+	{
+		*s++ = 'D';
+	}
+
 	if (marker_flags & MARKER_BLOCKED_ON_STATE_TOP)
 	{
 		*s++ = 'b';
@@ -109,6 +119,14 @@ int DecodeMarkerFlagString(const char *s)
 
 			case '6':
 				marker_flags |= MARKER_IS_DM6_DOOR;
+				break;
+
+			case 'd':
+				marker_flags |= MARKER_DISCHARGE_AT_START_RED;
+				break;
+
+			case 'D':
+				marker_flags |= MARKER_DISCHARGE_AT_START_BLUE;
 				break;
 
 			case 'f':

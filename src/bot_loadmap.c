@@ -18,6 +18,7 @@ qbool pickup_true(void);
 int AddPath(gedict_t *marker, gedict_t *next_marker);
 void AssignGoalNumbers(void);
 void BotsSetUpDefenseMarker(gedict_t *marker);
+void BotsSetUpDischargeMarker(gedict_t *marker);
 
 // fixme: also in doors.c
 #define SECRET_OPEN_ONCE 1	// stays open
@@ -456,7 +457,7 @@ static void CustomiseFrogbotMap(void)
 		}
 	}
 
-	// Assign goals for defense markers in CTF
+	// Assign goals for defense markers and discharge in CTF
 	if (isCTF())
 	{
 		for (ent = world; (ent = ez_find(ent, "marker"));)
@@ -464,6 +465,10 @@ static void CustomiseFrogbotMap(void)
 			if (ent->fb.T & MARKER_FLAG1_DEFEND || ent->fb.T & MARKER_FLAG2_DEFEND)
 			{
 				BotsSetUpDefenseMarker(ent);
+			}
+			if (ent->fb.T & (MARKER_DISCHARGE_AT_START_RED | MARKER_DISCHARGE_AT_START_BLUE))
+			{
+				BotsSetUpDischargeMarker(ent);
 			}
 		}
 	}

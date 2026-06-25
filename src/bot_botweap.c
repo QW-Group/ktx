@@ -15,6 +15,7 @@
 
 // FIXME: globals, this is just setting
 void DM6SelectWeaponToOpenDoor(gedict_t *self);
+qbool DischargeAtStartLogic(gedict_t *self);
 
 // FIXME: This is just stopping quad damage rocket shot, always replacing with shotgun
 // Can do far better than this
@@ -701,6 +702,11 @@ void SetFireButton(gedict_t *self, vec3_t rel_pos, float rel_dist)
 static qbool BotShouldDischarge(void)
 {
 	gedict_t *enemy = &g_edicts[self->s.v.enemy];
+
+	if (DischargeAtStartLogic(self))
+	{
+		return true;
+	}
 
 	if (self->s.v.waterlevel != 3)
 	{

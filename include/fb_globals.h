@@ -162,6 +162,8 @@ extern gedict_t *dropper;
 #define MARKER_FLAG1_DEFEND         2048    // Point used to defend flag 1 (red)
 #define MARKER_FLAG2_DEFEND         4096    // Point used to defend flag 1 (blue)
 #define MARKER_LOOK_BUTTON          8192    // A button can be shot from this marker - set automatically
+#define MARKER_DISCHARGE_AT_START_RED   16384   // Bots on red team will run here then discharge at the start of the map
+#define MARKER_DISCHARGE_AT_START_BLUE  32768   // Bots on blue team will run here then discharge at the start of the map
 
 // Bot flags (FIXME: fb.state?  check.  consistent naming, comment with descriptions)
 #define CAMPBOT						1
@@ -303,7 +305,7 @@ void SetMarkerPath(int source_marker, int path_index, int next_marker);
 void SetMarkerViewOffset(int marker, float zOffset);
 
 #define FROGBOT_PATH_FLAG_OPTIONS "w6rjval"
-#define FROGBOT_MARKER_FLAG_OPTIONS "u6fbte12"
+#define FROGBOT_MARKER_FLAG_OPTIONS "u6dDfbte12"
 
 // added for ktx
 qbool fb_lg_disabled(void);
