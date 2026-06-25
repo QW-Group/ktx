@@ -782,7 +782,8 @@ static void TeamplayReportTaken(gedict_t *client)
 		}
 		else if ((NEED(needFlags, it_health) || NEED(needFlags, it_armor) || NEED(needFlags, it_rl)
 				|| NEED(needFlags, it_lg) || NEED(needFlags, it_rockets)
-				|| NEED(needFlags, it_cells)))
+				|| NEED(needFlags, it_cells))
+				&& (HAVE_POWERUP(client) || (isCTF() && (HAVE_FLAG(client) || HAVE_RUNE(client)))))
 		{
 			// Note that we check if you are holding powerup. This is because TOOK remembers for 15 seconds.
 			// So a case could arise where you took quad then died less than 15 seconds later, and you'd be reporting "team need %u" (because $colored_powerups would be empty)
