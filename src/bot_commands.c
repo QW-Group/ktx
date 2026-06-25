@@ -288,6 +288,7 @@ void FrogbotsAddbot(int skill_level, const char *specificteam, qbool error_messa
 			int entity = 0;
 			int topColor = 0;
 			int bottomColor = 0;
+			int ctfRole = -1;
 			const char *teamName = specificteam;
 
 			customised_skill = SetAttributesBasedOnSkill(skill_level);
@@ -322,6 +323,13 @@ void FrogbotsAddbot(int skill_level, const char *specificteam, qbool error_messa
 				topColor = team->topColor;
 				bottomColor = team->bottomColor;
 				teamName = team->name;
+
+				if (isCTF())
+				{
+					// Per-team round-robin so each side gets its own attack/
+					// midfield/defend spread regardless of overall join order.
+					ctfRole = team->bots % 3;
+				}
 			}
 			else
 			{
@@ -352,6 +360,10 @@ void FrogbotsAddbot(int skill_level, const char *specificteam, qbool error_messa
 			trap_SetBotUserInfo(entity, "team", teamName, 0);
 			G_bprint(2, "skill &cf00%d&r\n", self->fb.skill.skill_level);
 			SetAttribs(&g_edicts[entity], customised_skill);
+			if (ctfRole >= 0)
+			{
+				g_edicts[entity].fb.skill.ctf_role = ctfRole;
+			}
 			trap_SetBotUserInfo(entity, "k_nick", bots[i].name, 0);
 			trap_SetBotUserInfo(entity, "*skill", skill_level_str, SETUSERINFO_STAR);
 
