@@ -367,6 +367,9 @@ void SetAttribs(gedict_t *self, qbool customised)
 	self->fb.skill.combat_jump_chance = bound(0, cvar(FB_CVAR_COMBATJUMP_CHANCE), 1.0f);
 	self->fb.skill.missile_dodge_time = bound(0, cvar(FB_CVAR_MISSILEDODGE_TIME), 1.5f);
 
+	// CTF role (attack/midfield/defend), assigned per-bot in SetAttributesBasedOnSkill
+	self->fb.skill.ctf_role = (int)cvar(FB_CVAR_CTF_ROLE);
+
 	self->fb.skill.customised = customised;
 }
 
