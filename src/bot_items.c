@@ -448,7 +448,9 @@ static float goal_rune(gedict_t *self, gedict_t *rune)
 		return 0;
 	}
 
-	// Already have a rune
+	// Rune priority follows the bit values: RES(1) > STR(2) > HST(4) > RGN(8),
+	// so a lower ctf_flag value is a better rune. If we already carry a rune,
+	// only go for one with a strictly higher priority (lower value).
 	if (self->ctf_flag & CTF_RUNE_MASK)
 	{
 		if (newRune >= currentRune)
@@ -492,6 +494,8 @@ static float goal_rune(gedict_t *self, gedict_t *rune)
 		}
 	}
 
+	// Higher desire for higher-priority (lower-valued) runes:
+	// RES->1300, STR->1250, HST->1225, RGN->1212.
 	return 1200 + 100 / newRune;
 }
 
