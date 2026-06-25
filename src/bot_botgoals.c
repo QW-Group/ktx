@@ -73,7 +73,7 @@ static qbool GoalLeaveForTeammate(gedict_t *self, gedict_t *goal_entity)
 	// Check bot teammates so the bots don't all gang up for items
 	for (plr = world; (plr = find_plr(plr));)
 	{
-		if (plr->isBot && SameTeam(self, plr))
+		if (plr != self && plr->isBot && SameTeam(self, plr))
 		{
 			// Don't ever leave these items!
 			char *ignore[] = {
