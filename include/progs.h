@@ -428,7 +428,7 @@ typedef void (*fb_entity_funcref_t)(struct gedict_s* item);
 #define NUMBER_PATHS	8
 #endif
 #ifndef NUMBER_SUBZONES
-#define NUMBER_SUBZONES	128 // TODO hiipe - check this, should be ok though?
+#define NUMBER_SUBZONES	128 // max markers per zone; raised from 32 for dense CTF maps
 #endif
 
 typedef struct fb_runaway_route_s {
