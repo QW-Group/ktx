@@ -94,9 +94,9 @@ extern gedict_t *dropper;
 #define FB_PREFER_ROCKET_LAUNCHER	1
 #define FB_PREFER_LIGHTNING_GUN		2
 
-#define FB_CTF_ROLE_ATTACK          0
-#define FB_CTF_ROLE_MIDFIELD        1
-#define FB_CTF_ROLE_DEFEND          2
+#define FB_CTF_ROLE_ATTACK			0
+#define FB_CTF_ROLE_MIDFIELD		1
+#define FB_CTF_ROLE_DEFEND			2
 
 #define GAME_ENABLE_POWERUPS		1
 #define GAME_ENABLE_RUNES			2
@@ -143,9 +143,9 @@ extern gedict_t *dropper;
 #define BOTPATH_CURLJUMP_HINT		(1 << 23)
 #define BOTPATH_FULL_AIRCONTROL		(1 << 24)
 #define BOTPATH_RJ_IN_PROGRESS		(1 << 25)
-#define HOOK                        (1 << 26)
-#define LOOK_BUTTON                 (1 << 27)	// Indicates path which points to a button to shoot
-#define FIRE_BUTTON                 (1 << 28)   // Set when a bot should try shooting a button
+#define HOOK						(1 << 26)
+#define LOOK_BUTTON					(1 << 27)	// Indicates path which points to a button to shoot
+#define FIRE_BUTTON					(1 << 28)	// Set when a bot should try shooting a button
 #define DELIBERATE_AIR_WAIT_GROUND	(DELIBERATE_AIR | WAIT_GROUND)
 #define SAVED_DESCRIPTION			(DM6_DOOR | ROCKET_JUMP | JUMP_LEDGE | VERTICAL_PLATFORM | BOTPATH_DOOR | BOTPATH_DOOR_CLOSED | NO_DODGE)
 #define NOT_ROCKET_JUMP				(~ROCKET_JUMP)
@@ -163,11 +163,11 @@ extern gedict_t *dropper;
 #define MARKER_DYNAMICALLY_ADDED	256		// Added dynamically by server.  Do not include in .bot file generation
 #define MARKER_EXPLICIT_VIEWOFFSET	512		// Viewoffset has been set by map definition and should be included in .bot file generation
 #define MARKER_NOTOUCH				1024	// Not touchable - used when two markers on top of each other
-#define MARKER_FLAG1_DEFEND         2048    // Point used to defend flag 1 (red)
-#define MARKER_FLAG2_DEFEND         4096    // Point used to defend flag 2 (blue)
-#define MARKER_LOOK_BUTTON          8192    // A button can be shot from this marker - set automatically
-#define MARKER_DISCHARGE_AT_START_RED   16384   // Bots on red team will run here then discharge at the start of the map
-#define MARKER_DISCHARGE_AT_START_BLUE  32768   // Bots on blue team will run here then discharge at the start of the map
+#define MARKER_FLAG1_DEFEND			2048	// Point used to defend flag 1 (red)
+#define MARKER_FLAG2_DEFEND			4096	// Point used to defend flag 2 (blue)
+#define MARKER_LOOK_BUTTON			8192	// A button can be shot from this marker - set automatically
+#define MARKER_DISCHARGE_AT_START_RED	16384	// Bots on red team will run here then discharge at the start of the map
+#define MARKER_DISCHARGE_AT_START_BLUE	32768	// Bots on blue team will run here then discharge at the start of the map
 
 // Bot flags (FIXME: fb.state?  check.  consistent naming, comment with descriptions)
 #define CAMPBOT						1
