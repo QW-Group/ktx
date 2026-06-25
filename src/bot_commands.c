@@ -1324,6 +1324,13 @@ static void FrogbotAddPath(void)
 		return;
 	}
 
+	if (nearest->fb.T & MARKER_DYNAMICALLY_ADDED)
+	{
+		G_sprint(self, PRINT_HIGH, "Cannot link a marker to a dynamically created marker!\n");
+
+		return;
+	}
+
 	if (source_to_target_path >= 0 && target_to_source_path >= 0)
 	{
 		RemovePath(saved_marker, source_to_target_path);
