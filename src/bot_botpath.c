@@ -204,6 +204,12 @@ void LookAtButton(gedict_t *button, qbool buttonIsDoor)
 				self->fb.path_state |= FIRE_BUTTON;
 				self->fb.state |= NOTARGET_ENEMY;
 				self->fb.look_object = target;
+				// The firing logic aims at look_object->absmin + view_ofs, but
+				// buttons/doors carry no view_ofs, so it would aim at a corner.
+				// Point view_ofs at the brush centre we just traced to.
+				target->s.v.view_ofs[0] = (target->s.v.absmax[0] - target->s.v.absmin[0]) * 0.5;
+				target->s.v.view_ofs[1] = (target->s.v.absmax[1] - target->s.v.absmin[1]) * 0.5;
+				target->s.v.view_ofs[2] = (target->s.v.absmax[2] - target->s.v.absmin[2]) * 0.5;
 			}
 		}
 	}
