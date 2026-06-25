@@ -436,9 +436,10 @@ void BotPerformHook(gedict_t *self)
 		vec3_t toTarget;
 		vec3_t differenceFromPreviousPosition;
 		qbool stop_early = false;
-		float distanceToTarget = VectorLength(toTarget);
+		float distanceToTarget;
 
 		VectorSubtract(self->fb.hookTarget->s.v.origin, self->s.v.origin, toTarget);
+		distanceToTarget = VectorLength(toTarget);
 
 		// Stop if obscured by a wall etc
 		traceline(PASSVEC3(self->fb.hookTarget->s.v.origin), PASSVEC3(self->s.v.origin), true, world);
