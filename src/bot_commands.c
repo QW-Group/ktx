@@ -140,6 +140,11 @@ qbool FrogbotEasySkillMode(void)
 	return (qbool)cvar(FB_CVAR_EASY_SKILL_MODE);
 }
 
+qbool FrogbotBreakOnDeath(void)
+{
+	return (qbool)cvar(FB_CVAR_BREAK_ON_DEATH);
+}
+
 static team_t* AddTeamToList(int *teamsFound, char *team, int topColor, int bottomColor)
 {
 	int i;
