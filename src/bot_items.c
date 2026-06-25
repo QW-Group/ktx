@@ -529,6 +529,11 @@ static float goal_defend_marker(gedict_t *self, gedict_t *marker)
 	flag1 = find(world, FOFCLSN, "item_flag_team1");
 	flag2 = find(world, FOFCLSN, "item_flag_team2");
 
+	if (flag1 == NULL || flag2 == NULL)
+	{
+		return 0;
+	}
+
 	if (streq(getteam(self), "red"))
 	{
 		teamFlag = flag1;
