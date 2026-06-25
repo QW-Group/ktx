@@ -979,7 +979,7 @@ static void TeamplayAreaSecure(gedict_t *client)
 		strlcpy(buffer, PowerupText(client), sizeof(buffer));
 		strlcat(buffer, " ", sizeof(buffer));
 	}
-	if (isCTF() && (HAVE_RUNE(client) || HAVE_RUNE(client)))
+	if (isCTF() && (HAVE_FLAG(client) || HAVE_RUNE(client)))
 	{
 		strlcpy(buffer, CTFItemText(client), sizeof(buffer));
 		strlcat(buffer, " ", sizeof(buffer));
@@ -1027,7 +1027,7 @@ static void TeamplayAreaHelp(gedict_t *client)
 		strlcpy(buffer, PowerupText(client), sizeof(buffer));
 		strlcat(buffer, " ", sizeof(buffer));
 	}
-	if (isCTF() && (HAVE_RUNE(client) || HAVE_RUNE(client)))
+	if (isCTF() && (HAVE_FLAG(client) || HAVE_RUNE(client)))
 	{
 		strlcpy(buffer, CTFItemText(client), sizeof(buffer));
 		strlcat(buffer, " ", sizeof(buffer));
@@ -1326,7 +1326,7 @@ static void TeamplayEnemyPowerup(gedict_t *client)
 			strlcpy(buffer, PowerupText(client), sizeof(buffer));
 			strlcat(buffer, " ", sizeof(buffer));
 		}
-		if (isCTF() && (HAVE_RUNE(client) || HAVE_RUNE(client)))
+		if (isCTF() && (HAVE_FLAG(client) || HAVE_RUNE(client)))
 		{
 			strlcpy(buffer, CTFItemText(client), sizeof(buffer));
 			strlcat(buffer, " ", sizeof(buffer));
