@@ -50,8 +50,9 @@ static float EvalPath(fb_path_eval_t *eval, qbool allowRocketJumps, qbool allowH
 	float same_dir;
 	vec3_t marker_position;
 
-	// don't try and pass through closed doors, unless a button is linked
-	// TODO hiipe - shouldn't go this way at all - at the moment, bots will get to the door and just stop.
+	// Don't route through a closed door unless a linked button can be shot to
+	// open it, and only during a match (shootable doors can't be opened in
+	// warmup). A closed door with no button blocks the route entirely.
 	if (BotDoorIsClosed(eval->test_marker) &&
 		((match_in_progress <= 1 && !k_practice) || !(eval->test_marker->fb.T & MARKER_LOOK_BUTTON)))
 	{
