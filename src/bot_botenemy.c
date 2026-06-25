@@ -176,7 +176,7 @@ qbool BotsPickBestEnemy(gedict_t *self)
 {
 	float best_score = 1000000;
 	gedict_t *enemy_ = NULL;
-	float predict_dist = 600;
+	float predict_dist = FB_NO_ENEMY_DIST;
 	gedict_t *test_enemy;
 	int old_enemy = self->s.v.enemy;
 	qbool team_game = isTeam();

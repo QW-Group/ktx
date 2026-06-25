@@ -395,7 +395,7 @@ static float goal_flag_enemy(gedict_t *player, gedict_t *flag)
 			VectorSubtract(flag->s.v.origin, teammate->s.v.origin, toTeam);
 			distance = VectorLength(toTeam);
 			// If a human is near and no enemies are, let them take the flag
-			if (distance < 500 && (self->fb.enemy_dist >= 1500 || self->fb.enemy_dist == 600))
+			if (distance < 500 && (self->fb.enemy_dist >= 1500 || self->fb.enemy_dist == FB_NO_ENEMY_DIST))
 			{
 				return 0;
 			}
@@ -486,7 +486,7 @@ static float goal_rune(gedict_t *self, gedict_t *rune)
 		float distance;
 		VectorSubtract(rune->s.v.origin, teammate->s.v.origin, toTeam);
 		distance = VectorLength(toTeam);
-		if (distance < 400 && !(teammate->ctf_flag & CTF_RUNE_MASK) && (self->fb.enemy_dist >= 1500 || self->fb.enemy_dist == 600))
+		if (distance < 400 && !(teammate->ctf_flag & CTF_RUNE_MASK) && (self->fb.enemy_dist >= 1500 || self->fb.enemy_dist == FB_NO_ENEMY_DIST))
 		{
 			return 0;
 		}

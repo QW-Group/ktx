@@ -5,6 +5,9 @@
 
 #define PATH_SCORE_NULL -1000000
 
+// Default value of fb.enemy_dist when BestEnemy found no enemy this frame.
+#define FB_NO_ENEMY_DIST 600
+
 // Travel time assigned to a link/route that can't be taken, treated as "no path"
 // by the route search (anything < TRAVEL_UNREACHABLE is considered reachable).
 #define TRAVEL_UNREACHABLE 1000000
