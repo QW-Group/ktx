@@ -70,11 +70,21 @@ void ZoneMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_normal, q
 	zone = &from_marker->fb.zones[to_marker->fb.Z_ - 1];
 	if (path_normal)
 	{
-		middle_marker = rl_jump_routes ? zone->marker_rj : zone->marker;
-		zone_time = rl_jump_routes ? zone->rj_time : zone->time;
-
-		middle_marker = hook_routes ? zone->marker_hook : zone->marker;
-		zone_time = hook_routes ? zone->hook_time : zone->time;
+		if (rl_jump_routes)
+		{
+			middle_marker = zone->marker_rj;
+			zone_time = zone->rj_time;
+		}
+		else if (hook_routes)
+		{
+			middle_marker = zone->marker_hook;
+			zone_time = zone->hook_time;
+		}
+		else
+		{
+			middle_marker = zone->marker;
+			zone_time = zone->time;
+		}
 	}
 	else
 	{
