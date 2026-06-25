@@ -38,7 +38,7 @@ void BotsPowerupDropped(gedict_t *player, gedict_t *powerup);
 qbool ItemTouched(gedict_t *item, gedict_t *player)
 {
 #ifdef BOT_SUPPORT
-	return (self->fb.item_touch && self->fb.item_touch(item, player));
+	return (item->fb.item_touch && item->fb.item_touch(item, player));
 #else
 	return false;
 #endif
@@ -49,9 +49,9 @@ void ItemTaken(gedict_t *item, gedict_t *player)
 	TeamplayEventItemTaken(player, item);
 
 #ifdef BOT_SUPPORT
-	if (self->fb.item_taken)
+	if (item->fb.item_taken)
 	{
-		self->fb.item_taken(item, player);
+		item->fb.item_taken(item, player);
 	}
 #endif
 }
