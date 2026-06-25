@@ -161,7 +161,7 @@ extern gedict_t *dropper;
 #define MARKER_EXPLICIT_VIEWOFFSET	512		// Viewoffset has been set by map definition and should be included in .bot file generation
 #define MARKER_NOTOUCH				1024	// Not touchable - used when two markers on top of each other
 #define MARKER_FLAG1_DEFEND         2048    // Point used to defend flag 1 (red)
-#define MARKER_FLAG2_DEFEND         4096    // Point used to defend flag 1 (blue)
+#define MARKER_FLAG2_DEFEND         4096    // Point used to defend flag 2 (blue)
 #define MARKER_LOOK_BUTTON          8192    // A button can be shot from this marker - set automatically
 #define MARKER_DISCHARGE_AT_START_RED   16384   // Bots on red team will run here then discharge at the start of the map
 #define MARKER_DISCHARGE_AT_START_BLUE  32768   // Bots on blue team will run here then discharge at the start of the map
