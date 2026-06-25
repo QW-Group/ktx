@@ -197,8 +197,11 @@ void LookAtButton(gedict_t *button, qbool buttonIsDoor)
 	{
 		if ((target->s.v.takedamage))
 		{
-			if ((buttonIsDoor && (target->state == STATE_TOP || target->state == STATE_UP)) ||
-			   (target->s.v.enemy && (trigger->state == STATE_TOP || trigger->state == STATE_UP)) ||
+			// Fire to open it: a shootable door/button is damageable only while
+			// closed (takedamage is cleared once it opens), so fire on the
+			// closed/closing states, not the open ones.
+			if ((buttonIsDoor && (target->state == STATE_BOTTOM || target->state == STATE_DOWN)) ||
+			   (target->s.v.enemy && (trigger->state == STATE_BOTTOM || trigger->state == STATE_DOWN)) ||
 			   (!target->s.v.enemy && !buttonIsDoor))
 			{
 				self->fb.path_state |= FIRE_BUTTON;
