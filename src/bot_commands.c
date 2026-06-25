@@ -963,8 +963,11 @@ static void BotFileGenerate(void)
 	file = std_fwopen("%s", fileName);
 	if (file == -1)
 	{
+		// The server won't create the directory; any sv_loadbotfiles_dir
+		// subdirectory under bots/maps/ has to exist already.
 		G_sprint(self, PRINT_HIGH,
-					"Failed to open botfile.  Check bots/maps/ directory is writable\n");
+					"Failed to open botfile.  Check bots/maps/%s%s is writable\n",
+					strnull(botDir) ? "" : botDir, strnull(botDir) ? "" : "/");
 
 		return;
 	}
