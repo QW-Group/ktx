@@ -1895,6 +1895,7 @@ static void FrogbotsFillServer(void)
 	int max_clients = cvar("maxclients");
 	int plr_count = CountPlayers();
 	int skill_level = FrogbotSkillLevel();
+	int target;
 	int i;
 	
 	if (trap_CmdArgc() >= 3)
@@ -1909,7 +1910,13 @@ static void FrogbotsFillServer(void)
 		}
 	}
 
-	for (i = 0; i < min(max_clients - plr_count, 8); ++i)
+	// Fill the player count (humans + bots) up to the next multiple of 8,
+	// capped at maxclients: e.g. 3 -> 8, a repeat -> 16, and a server already
+	// at a full team size jumps straight to the next one. Run again to keep
+	// filling.
+	target = min((plr_count / 8 + 1) * 8, max_clients);
+
+	for (i = 0; i < target - plr_count; ++i)
 	{
 		FrogbotsAddbot(skill_level, "", true);
 	}
