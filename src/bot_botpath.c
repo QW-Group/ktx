@@ -236,11 +236,11 @@ qbool CheckLookAtButton(gedict_t *self)
 	}
 
 	// Now check if there is a button linked to the current or next marker
-	if (self->fb.linked_marker && self->fb.linked_marker->fb.T & MARKER_LOOK_BUTTON)
+	if (self->fb.linked_marker && (self->fb.linked_marker->fb.T & MARKER_LOOK_BUTTON))
 	{
 		marker = self->fb.linked_marker;
 	}
-	else if (self->fb.touch_marker && self->fb.touch_marker->fb.T & MARKER_LOOK_BUTTON)
+	else if (self->fb.touch_marker && (self->fb.touch_marker->fb.T & MARKER_LOOK_BUTTON))
 	{
 		marker = self->fb.touch_marker;
 	}
