@@ -377,31 +377,54 @@ void SetMarkerViewOffset(int marker, float zOffset)
 	markers[marker]->s.v.view_ofs[2] = zOffset;
 }
 
+// Open a .bot file for the given base name, preferring the sv_loadbotfiles_dir
+//   subdirectory (used for alternative entity sets such as CTF, mirroring
+//   sv_loadentfiles_dir for .ent files) before the default location.
+static fileHandle_t OpenBotFile(char *dir, char *name)
+{
+	fileHandle_t file = -1;
+
+	if (!strnull(dir))
+	{
+		file = std_fropen("maps/%s/%s.bot", dir, name);
+		if (file == -1)
+		{
+			file = std_fropen("bots/maps/%s/%s.bot", dir, name);
+		}
+	}
+
+	if (file == -1)
+	{
+		file = std_fropen("maps/%s.bot", name);
+		if (file == -1)
+		{
+			file = std_fropen("bots/maps/%s.bot", name);
+		}
+	}
+
+	return file;
+}
+
 qbool LoadBotRoutingFromFile(void)
 {
 	fileHandle_t file = -1;
 	char lineData[128];
 	char argument[128];
 
-	// Load bot definition file: frogbots rely on objects spawning 
-	//    markers, so be aware of alternative .ent files
+	// Load bot definition file: frogbots rely on objects spawning markers, so
+	//   be aware of alternative .ent files. Bot files for alternative entity
+	//   sets (e.g. CTF) live in the sv_loadbotfiles_dir subdirectory.
 	char *entityFile = cvar_string("k_entityfile");
+	char *botDir = cvar_string("sv_loadbotfiles_dir");
+
 	if (!strnull(entityFile))
 	{
-		file = std_fropen("maps/%s.bot", entityFile);
-		if (file == -1)
-		{
-			file = std_fropen("bots/maps/%s.bot", entityFile);
-		}
+		file = OpenBotFile(botDir, entityFile);
 	}
 
 	if (file == -1)
 	{
-		file = std_fropen("maps/%s.bot", mapname);
-		if (file == -1)
-		{
-			file = std_fropen("bots/maps/%s.bot", mapname);
-		}
+		file = OpenBotFile(botDir, mapname);
 	}
 
 	if (file == -1)

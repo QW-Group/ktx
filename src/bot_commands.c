@@ -915,6 +915,8 @@ static void BotFileGenerate(void)
 {
 	fileHandle_t file;
 	char *entityFile = cvar_string("k_entityfile");
+	char *botDir = cvar_string("sv_loadbotfiles_dir");
+	char *botName = strnull(entityFile) ? mapname : entityFile;
 	char date[64];
 	char fileName[256];
 	int i;
@@ -924,8 +926,14 @@ static void BotFileGenerate(void)
 		snprintf(date, sizeof(date), "%d", i_rnd(0, 9999));
 	}
 
-	snprintf(fileName, sizeof(fileName), "bots/maps/%s[%s].bot",
-				strnull(entityFile) ? mapname : entityFile, date);
+	if (!strnull(botDir))
+	{
+		snprintf(fileName, sizeof(fileName), "bots/maps/%s/%s[%s].bot", botDir, botName, date);
+	}
+	else
+	{
+		snprintf(fileName, sizeof(fileName), "bots/maps/%s[%s].bot", botName, date);
+	}
 	file = std_fwopen("%s", fileName);
 	if (file == -1)
 	{

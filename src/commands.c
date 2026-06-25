@@ -4161,6 +4161,7 @@ const char _reset_settings[] =
 const char common_um_init[] =
 	"k_pow_pickup 0\n"
 	"sv_loadentfiles_dir \"\"\n"
+	"sv_loadbotfiles_dir \"\"\n"
 	"sv_antilag 2\n"				// antilag on
 	"k_bloodfest 0\n"
 	"k_killquad 0\n"
