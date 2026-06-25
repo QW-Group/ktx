@@ -383,8 +383,8 @@ static float goal_flag_enemy(gedict_t *player, gedict_t *flag)
 	}
 	else if (flag->cnt == FLAG_AT_BASE)
 	{
-		gedict_t *teammate = IdentifyMostVisibleTeammate(self);
-		if (self->fb.skill.ctf_role == FB_CTF_ROLE_DEFEND)
+		gedict_t *teammate = IdentifyMostVisibleTeammate(player);
+		if (player->fb.skill.ctf_role == FB_CTF_ROLE_DEFEND)
 		{
 			return 0;
 		}
@@ -395,12 +395,12 @@ static float goal_flag_enemy(gedict_t *player, gedict_t *flag)
 			VectorSubtract(flag->s.v.origin, teammate->s.v.origin, toTeam);
 			distance = VectorLength(toTeam);
 			// If a human is near and no enemies are, let them take the flag
-			if (distance < 500 && (self->fb.enemy_dist >= 1500 || self->fb.enemy_dist == FB_NO_ENEMY_DIST))
+			if (distance < 500 && (player->fb.enemy_dist >= 1500 || player->fb.enemy_dist == FB_NO_ENEMY_DIST))
 			{
 				return 0;
 			}
 		}
-		return 200 + 700 * (self->fb.firepower / 100.0f);
+		return 200 + 700 * (player->fb.firepower / 100.0f);
 	}
 	else
 	{
