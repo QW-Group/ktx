@@ -673,10 +673,6 @@ static void BotTookMessage(gedict_t *item, gedict_t *player)
 	}
 }
 
-static void BotDroppedMessage(gedict_t *item, gedict_t *player)
-{
-}
-
 //
 // Health
 static void fb_health_taken(gedict_t *item, gedict_t *player)
@@ -1383,7 +1379,6 @@ void BotsBackpackDropped(gedict_t *self, gedict_t *pack)
 	if (!(self->fb.state & BACKPACK_IS_UNREACHABLE))
 	{
 		LocateDynamicItem(pack);
-		BotDroppedMessage(self, pack);
 	}
 }
 
