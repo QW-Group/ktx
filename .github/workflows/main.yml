@@ -130,6 +130,20 @@ jobs:
           cmake -B builddir -S . -G "Visual Studio 18 2026"
           cmake --build builddir --config Release --parallel
 
+  verify-no-bot-support:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: ammaraskar/gcc-problem-matcher@0.3.0
+
+      - name: Build
+        run: |
+          cmake -B builddir -S . -DBOT_SUPPORT=OFF
+          cmake --build builddir --config Release --parallel
+
   upload:
     needs: build
     timeout-minutes: 10
