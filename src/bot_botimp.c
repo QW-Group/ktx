@@ -380,7 +380,8 @@ char* BotNameEnemy(int botNumber)
 				": Reptile", ": Nikodemus", ": Paralyzer", ": Xenon", ": Spice"
 						": Kornelia", ": Rix", ": Batch", ": Gollum" };
 
-	char *ctf_names[] = { ": Hippo", ": Velokitty", ": Shiny", ": Zagg" };
+	char *ctf_names[] = { ": Hippo", ": Velokitty", ": Shiny", ": Zagg", ": Micro", ": Elfeo",
+			": Malice", ": Killton" };
 
 	char *custom_name = cvar_string(va("k_fb_name_enemy_%d", botNumber));
 
@@ -403,7 +404,8 @@ char* BotNameFriendly(int botNumber)
 				"> Kool", "> Zaphod", "> Dreamer", "> Mandrixx", "> Skill5", "> Vid", "> Soul99",
 				"> Jon", "> Gaz" };
 
-	char *ctf_names[] = { "> Micro", "> Elfeo", "> Malice", "> Killton" };
+	char *ctf_names[] = { "> Hippo", "> Velokitty", "> Shiny", "> Zagg", "> Micro", "> Elfeo",
+			"> Malice", "> Killton" };
 
 	char *custom_name = cvar_string(va("k_fb_name_team_%d", botNumber));
 
