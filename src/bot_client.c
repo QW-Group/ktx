@@ -351,7 +351,7 @@ static void BotPeriodicMessages(gedict_t *self)
 				TeamplayMessageByName(self, "secure");
 			}
 		}
-		else if (self->tp.enemy_count > self->tp.teammate_count)
+		else if ((isCTF() || is_strong) && (self->tp.enemy_count > self->tp.teammate_count))
 		{
 			if (isCTF() && self->fb.best_goal
 				&& (self->fb.best_goal->fb.T & MARKER_FLAG1_DEFEND || self->fb.best_goal->fb.T & MARKER_FLAG2_DEFEND)
