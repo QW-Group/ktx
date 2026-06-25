@@ -464,20 +464,19 @@ static float goal_rune(gedict_t *self, gedict_t *rune)
 
 	rune->fb.touch_marker = LocateNextMarker(rune->s.v.origin, NULL);
 
+	// No marker nearby (e.g. rune dropped in a pit) - unreachable
+	if (rune->fb.touch_marker == NULL)
+	{
+		return 0;
+	}
+
 	// Not reachable
 	if (rune->s.v.origin[2] - rune->fb.touch_marker->s.v.origin[2] > 40)
 	{
 		return 0;
 	}
 
-	if (rune->fb.touch_marker)
-	{
-		rune->fb.Z_ = rune->fb.touch_marker->fb.Z_;
-	}
-	else
-	{
-		return 0;
-	}
+	rune->fb.Z_ = rune->fb.touch_marker->fb.Z_;
 
 	teammate = IdentifyMostVisibleTeammate(self);
 	if (teammate != world && !teammate->isBot && !(teammate->ctf_flag & CTF_RUNE_MASK))
