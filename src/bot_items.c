@@ -1176,9 +1176,9 @@ static qbool fb_rune_touch(gedict_t *rune, gedict_t *player)
 	return false;
 }
 
-static void fb_spawn_flag1(gedict_t *ent)
+static void fb_spawn_flag(gedict_t *ent, char *netname)
 {
-	ent->netname = "Flag1";
+	ent->netname = netname;
 
 	ent->fb.desire = goal_flag;
 	ent->fb.pickup = pickup_true;
@@ -1186,14 +1186,14 @@ static void fb_spawn_flag1(gedict_t *ent)
 	ent->fb.item_respawned = AssignVirtualGoal;
 }
 
+static void fb_spawn_flag1(gedict_t *ent)
+{
+	fb_spawn_flag(ent, "Flag1");
+}
+
 static void fb_spawn_flag2(gedict_t *ent)
 {
-	ent->netname = "Flag2";
-
-	ent->fb.desire = goal_flag;
-	ent->fb.pickup = pickup_true;
-	ent->fb.item_taken = fb_flag_taken;
-	ent->fb.item_respawned = AssignVirtualGoal;
+	fb_spawn_flag(ent, "Flag2");
 }
 
 static void fb_spawn_rune(gedict_t *ent)
