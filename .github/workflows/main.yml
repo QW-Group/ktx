@@ -127,7 +127,7 @@ jobs:
 
       - name: Build
         run: |
-          cmake -B builddir -S . -G "Visual Studio 17 2022"
+          cmake -B builddir -S . -G "Visual Studio 18 2026"
           cmake --build builddir --config Release --parallel
 
   upload:
