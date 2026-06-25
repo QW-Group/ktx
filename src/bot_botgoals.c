@@ -507,9 +507,9 @@ void UpdateGoal(gedict_t *self)
 			EvalGoal(self, goal_entity);
 		}
 
-		// Defense Markers and Discharge
-		// TODO hiipe - might be more efficient to make these goals instead and then they would be checked above?
-		// but this would be mixing generic behaviour the ctf and map specific goals.
+		// Defense Markers and Discharge. These are kept as a separate marker
+		// scan rather than goal entities to avoid mixing the generic goal
+		// handling with CTF/map-specific behaviour.
 		for (goal_entity = world; (goal_entity = ez_find(goal_entity, "marker"));)
 		{
 			if (goal_entity->fb.T & MARKER_FLAG1_DEFEND || goal_entity->fb.T & MARKER_FLAG2_DEFEND)

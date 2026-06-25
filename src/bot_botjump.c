@@ -420,7 +420,6 @@ void BotPerformRocketJump(gedict_t *self)
 }
 
 // Performs hook
-// TODO hiipe - maybe put this in a new file?
 void BotPerformHook(gedict_t *self)
 {
 	if (!(self->fb.touch_marker && self->fb.linked_marker))
