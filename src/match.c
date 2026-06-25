@@ -2866,7 +2866,9 @@ void PlayerReady(qbool startIdlebot)
 	self->k_teamnum = 0;
 
 	// force red or blue color if ctf
-	// doing this seems to stop the bots from doing it properly
+	// Bots get their team/colours assigned when added (FrogbotsAddbot), so only
+	// force a red/blue team for human players here; forcing it on bots overrides
+	// and breaks that setup.
 	if (isCTF() && !self->isBot)
 	{
 		if (streq(getteam(self), "blue"))
