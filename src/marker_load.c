@@ -182,6 +182,11 @@ const char* EncodeMarkerPathFlags(int path_flags)
 		*s++ = 'r';
 	}
 
+	if (path_flags & HOOK)
+	{
+		*s++ = 'h';
+	}
+
 	if (path_flags & LOOK_BUTTON)
 	{
 		*s++ = 'l';
@@ -231,6 +236,10 @@ int DecodeMarkerPathFlagString(const char *s)
 
 			case 'r':
 				path_flags |= ROCKET_JUMP;
+				break;
+
+			case 'h':
+				path_flags |= HOOK;
 				break;
 
 			case 'l':

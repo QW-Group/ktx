@@ -349,9 +349,11 @@ static void RocketLauncherShot(gedict_t *self)
 					from_marker = g_edicts[self->s.v.enemy].fb.touch_marker;
 					path_normal = true;
 					ZoneMarker(from_marker, self->fb.look_object, path_normal,
-								g_edicts[self->s.v.enemy].fb.canRocketJump);
+								g_edicts[self->s.v.enemy].fb.canRocketJump,
+								g_edicts[self->s.v.enemy].fb.canHook);
 					traveltime = SubZoneArrivalTime(zone_time, middle_marker, self->fb.look_object,
-													g_edicts[self->s.v.enemy].fb.canRocketJump);
+													g_edicts[self->s.v.enemy].fb.canRocketJump,
+													g_edicts[self->s.v.enemy].fb.canHook);
 					predict_dist = (traveltime * sv_maxspeed)
 							+ VectorDistance(testplace, self->fb.rocket_endpos);
 				}
@@ -770,6 +772,13 @@ static int DesiredWeapon(void)
 	qbool avoid_rockets = false;
 	qbool firing_lg = self->fb.firing && self->s.v.weapon == IT_LIGHTNING && self->s.v.ammo_cells
 			&& g_globalvars.time < self->attack_finished;
+
+
+	// If hooking, continue firing hook
+	if (self->fb.hooking)
+	{
+		return IT_HOOK;
+	}
 
 	if (TP_CouldDamageTeammate(self))
 	{

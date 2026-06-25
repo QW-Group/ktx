@@ -78,12 +78,12 @@ static void EvalCloseRunAway(float runaway_time, gedict_t *enemy_touch_marker,
 	float traveltime2;
 
 	from_marker = enemy_touch_marker;
-	ZoneMarker(from_marker, to_marker, path_normal, false);
-	traveltime = SubZoneArrivalTime(zone_time, middle_marker, to_marker, false);
+	ZoneMarker(from_marker, to_marker, path_normal, false, false);
+	traveltime = SubZoneArrivalTime(zone_time, middle_marker, to_marker, false, false);
 	traveltime2 = traveltime;
 	from_marker = touch_marker;
-	ZoneMarker(from_marker, to_marker, path_normal, false);
-	traveltime = SubZoneArrivalTime(zone_time, middle_marker, to_marker, false);
+	ZoneMarker(from_marker, to_marker, path_normal, false, false);
+	traveltime = SubZoneArrivalTime(zone_time, middle_marker, to_marker, false, false);
 	if (look_traveltime)
 	{
 		test_away_score = g_random() * runaway_time
@@ -318,9 +318,9 @@ static qbool PredictionShotLogic(gedict_t *self, gedict_t *goalentity_marker)
 			if (look_marker)
 			{
 				path_normal = true;
-				ZoneMarker(from_marker, look_marker, path_normal, self->fb.canRocketJump);
+				ZoneMarker(from_marker, look_marker, path_normal, self->fb.canRocketJump, self->fb.canHook);
 				traveltime = SubZoneArrivalTime(zone_time, middle_marker, look_marker,
-												self->fb.canRocketJump);
+												self->fb.canRocketJump, self->fb.canHook);
 				look_traveltime = traveltime;
 			}
 			else
@@ -333,9 +333,9 @@ static qbool PredictionShotLogic(gedict_t *self, gedict_t *goalentity_marker)
 				to_marker = from_marker;
 				from_marker = self->fb.linked_marker;
 				path_normal = true;
-				ZoneMarker(from_marker, to_marker, path_normal, self->fb.canRocketJump);
+				ZoneMarker(from_marker, to_marker, path_normal, self->fb.canRocketJump, self->fb.canHook);
 				traveltime = SubZoneArrivalTime(zone_time, middle_marker, to_marker,
-												self->fb.canRocketJump);
+												self->fb.canRocketJump, self->fb.canHook);
 				if (look_traveltime < traveltime)
 				{
 					self->fb.look_object = look_marker;
@@ -358,6 +358,7 @@ void ProcessNewLinkedMarker(gedict_t *self)
 					NULL : goalentity_->fb.touch_marker);
 	qbool trace_bprint = self->fb.debug;
 	qbool rocket_jump_routes_allowed = self->fb.canRocketJump;
+	qbool hook_routes_allowed = self->fb.canHook;
 	qbool rocket_alert = false;
 	float best_score = PATH_SCORE_NULL;
 	vec3_t player_direction;
@@ -513,7 +514,7 @@ void ProcessNewLinkedMarker(gedict_t *self)
 	PathScoringLogic(self->fb.goal_respawn_time, self->fb.be_quiet, self->fb.skill.lookahead_time,
 						self->fb.path_normal_, self->s.v.origin, player_direction,
 						self->fb.touch_marker, goalentity_marker, rocket_alert,
-						rocket_jump_routes_allowed, trace_bprint, self, &best_score,
+						rocket_jump_routes_allowed, hook_routes_allowed, trace_bprint, self, &best_score,
 						&new_linked_marker, &new_path_state, &new_angle_hint, &new_rj_delay,
 						new_rj_angles);
 	SetLinkedMarker(self, new_linked_marker, "ProcNewLinked(std)");

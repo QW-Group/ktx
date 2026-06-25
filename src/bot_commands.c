@@ -44,7 +44,7 @@ static qbool customised_skill = false;
 #define EDITOR_SELECTED_NODE         EF_GREEN
 
 // If the marker/path flag isn't set here, won't be included in .bot file
-#define EXTERNAL_MARKER_PATH_FLAGS (WATERJUMP_ | DM6_DOOR | ROCKET_JUMP | JUMP_LEDGE | VERTICAL_PLATFORM | LOOK_BUTTON)
+#define EXTERNAL_MARKER_PATH_FLAGS (WATERJUMP_ | DM6_DOOR | ROCKET_JUMP | JUMP_LEDGE | VERTICAL_PLATFORM | HOOK | LOOK_BUTTON)
 #define EXTERNAL_MARKER_FLAGS (UNREACHABLE | MARKER_IS_DM6_DOOR | MARKER_FIRE_ON_MATCH_START | MARKER_DOOR_TOUCHABLE | MARKER_ESCAPE_ROUTE | MARKER_NOTOUCH | MARKER_FLAG1_DEFEND | MARKER_FLAG2_DEFEND | MARKER_DISCHARGE_AT_START_RED | MARKER_DISCHARGE_AT_START_BLUE )
 
 #define MIN_DISTANCE_BETWEEN_MARKERS 30
@@ -607,9 +607,9 @@ static void FrogbotsDebug(void)
 
 					if (next != NULL)
 					{
-						G_sprint(self, 2, "  %d: %d (%s), time %3.1f, rj time %3.1f\n", i + 1,
+						G_sprint(self, 2, "  %d: %d (%s), time %3.1f, rj time %3.1f, hook time %3.1f\n", i + 1,
 									next->fb.index + 1, next->classname, marker->fb.paths[i].time,
-									marker->fb.paths[i].rj_time);
+									marker->fb.paths[i].rj_time, marker->fb.paths[i].hook_time);
 					}
 				}
 
@@ -631,6 +631,12 @@ static void FrogbotsDebug(void)
 									zone->rj_time);
 					}
 
+					if (zone->next_hook)
+					{
+						G_sprint(self, 2, "  HK%2d: %d (%s), time %3.1f\n", i + 1,
+							zone->next_hook->fb.index + 1, zone->next_hook->classname,
+							zone->hook_time);
+					}
 				}
 
 				G_sprint(self, 2, "Goals:\n");
@@ -650,14 +656,21 @@ static void FrogbotsDebug(void)
 									goal->next_marker_rj->fb.index + 1,
 									goal->next_marker_rj->classname, goal->rj_time);
 					}
+					if (goal->next_marker_hook)
+					{
+						G_sprint(self, 2, "  HK%2d: %d (%s), time %3.1f\n", i + 1,
+							goal->next_marker_hook->fb.index + 1,
+							goal->next_marker_hook->classname, goal->hook_time);
+					}
 				}
 			}
 		}
-		else if ((streq(sub_command, "path") || streq(sub_command, "path/rj"))
-				&& (trap_CmdArgc() == 5))
+		else if ((streq(sub_command, "path") || streq(sub_command, "path/rj")
+				|| streq(sub_command, "path/hook")) && (trap_CmdArgc() == 5))
 		{
 			int start, end;
 			qbool allow_rj = streq(sub_command, "path/rj");
+			qbool allow_hook = streq(sub_command, "path/hook");
 
 			trap_CmdArgv(3, sub_command, sizeof(sub_command));
 			start = atoi(sub_command);
@@ -677,8 +690,8 @@ static void FrogbotsDebug(void)
 					G_sprint(self, 2, "From zone %d, subzone %d to zone %d subzone %d\n",
 								from->fb.Z_, from->fb.S_, to->fb.Z_, to->fb.S_);
 					from_marker = from;
-					ZoneMarker(from_marker, to, path_normal, allow_rj);
-					traveltime = SubZoneArrivalTime(zone_time, middle_marker, to, allow_rj);
+					ZoneMarker(from_marker, to, path_normal, allow_rj, allow_hook);
+					traveltime = SubZoneArrivalTime(zone_time, middle_marker, to, allow_rj, allow_hook);
 					G_sprint(self, 2, "Travel time %f, zone_time %f\n", traveltime, zone_time);
 					G_sprint(self, 2, "Middle marker %d \20%s\21 (zone %d subzone %d), time %f\n",
 								middle_marker->fb.index + 1,
@@ -699,7 +712,7 @@ static void FrogbotsDebug(void)
 
 						PathScoringLogic(to->fb.goal_respawn_time, false, 30, true,
 											from->s.v.origin, player_direction, from, to, false,
-											allow_rj, true, NULL, &best_score, &linked_marker_,
+											allow_rj, allow_hook, true, NULL, &best_score, &linked_marker_,
 											&new_path_state, &new_angle_hint, &new_rj_frame_delay,
 											new_rj_angles);
 
@@ -2797,6 +2810,8 @@ void BotStartFrame(void)
 			if (self->isBot)
 			{
 				BotCanRocketJump(self);
+
+				BotCanHook(self);
 
 				SelectWeapon();
 

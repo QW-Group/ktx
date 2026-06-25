@@ -140,6 +140,7 @@ extern gedict_t *dropper;
 #define BOTPATH_CURLJUMP_HINT		(1 << 23)
 #define BOTPATH_FULL_AIRCONTROL		(1 << 24)
 #define BOTPATH_RJ_IN_PROGRESS		(1 << 25)
+#define HOOK                        (1 << 26)
 #define LOOK_BUTTON                 (1 << 27)	// Indicates path which points to a button to shoot
 #define FIRE_BUTTON                 (1 << 28)   // Set when a bot should try shooting a button
 #define DELIBERATE_AIR_WAIT_GROUND	(DELIBERATE_AIR | WAIT_GROUND)
@@ -197,6 +198,7 @@ float WeaponCode(float w);
 float crandom(void);
 
 void BotCanRocketJump(gedict_t *self);
+void BotCanHook(gedict_t *self);
 qbool VisibleEntity(gedict_t *ent);
 gedict_t* IdentifyMostVisibleTeammate(gedict_t *self);
 float anglemod(float v);
@@ -253,11 +255,11 @@ gedict_t* HigherSightFromFunction(gedict_t *from_marker, gedict_t *to_marker);
 gedict_t* SightFromMarkerFunction(gedict_t *from_marker, gedict_t *to_marker);
 gedict_t* SubZoneNextPathMarker(gedict_t *from_marker, gedict_t *to_marker);
 float SubZoneArrivalTime(float zone_time, gedict_t *middle_marker, gedict_t *to_marker,
-							qbool rl_routes);
+							qbool rl_routes, qbool hook_routes);
 float SightFromTime(gedict_t *from_marker, gedict_t *to_marker);
-void ZoneMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_normal, qbool rj_routes);
+void ZoneMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_normal, qbool rj_routes, qbool hook_routes);
 gedict_t* ZonePathMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_normal,
-							qbool rl_jump_routes);
+							qbool rl_jump_routes, qbool hook_routes);
 
 // botweap.qc
 void FrogbotSetFirepower(gedict_t *self);
@@ -283,6 +285,7 @@ void BotDamageInflictedEvent(gedict_t *attacker, gedict_t *targ);
 void CheckCombatJump(gedict_t *self);
 //void BotInLava(void);
 void BotPerformRocketJump(gedict_t *self);
+void BotPerformHook(gedict_t *self);
 
 // botgoal.qc
 void UpdateGoal(gedict_t *self);
@@ -304,7 +307,7 @@ void SetMarkerPathFlags(int marker_number, int path_index, int flags);
 void SetMarkerPath(int source_marker, int path_index, int next_marker);
 void SetMarkerViewOffset(int marker, float zOffset);
 
-#define FROGBOT_PATH_FLAG_OPTIONS "w6rjval"
+#define FROGBOT_PATH_FLAG_OPTIONS "w6rjvahl"
 #define FROGBOT_MARKER_FLAG_OPTIONS "u6dDfbte12"
 
 // added for ktx
@@ -359,7 +362,7 @@ void SetJumpFlag(gedict_t *player, qbool jumping, const char *explanation);
 void PathScoringLogic(float goal_respawn_time, qbool be_quiet, float lookahead_time,
 						qbool path_normal, vec3_t player_origin, vec3_t player_direction,
 						gedict_t *touch_marker_, gedict_t *goalentity_marker, qbool rocket_alert,
-						qbool rocket_jump_routes_allowed, qbool trace_bprint, gedict_t *player,
+						qbool rocket_jump_routes_allowed, qbool hook_routes_allowed, qbool trace_bprint, gedict_t *player,
 						float *best_score, gedict_t **linked_marker_, int *new_path_state,
 						int *new_angle_hint, int *new_rj_frame_delay, float new_rj_angles[2]);
 

@@ -157,8 +157,9 @@ void BotClientEntersEvent(gedict_t *self, gedict_t *spawn_pos)
 
 qbool BotUsingCorrectWeapon(gedict_t *self)
 {
-	return ((self->fb.desired_weapon_impulse >= 1) && (self->fb.desired_weapon_impulse <= 8)
-			&& (self->s.v.weapon == weapon_impulse_codes[self->fb.desired_weapon_impulse]));
+	return (((self->fb.desired_weapon_impulse >= 1) && (self->fb.desired_weapon_impulse <= 8)
+			&& (self->s.v.weapon == weapon_impulse_codes[self->fb.desired_weapon_impulse]))
+		    || (self->fb.desired_weapon_impulse == 22 && self->s.v.weapon == IT_HOOK));
 }
 
 static float goal_client(gedict_t *self, gedict_t *other)

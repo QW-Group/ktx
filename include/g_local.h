@@ -929,6 +929,7 @@ void EndMatch(float skip_log);
 void StatsToFile(void);
 
 // grapple.c
+#define PULL_SPEED 800	// nominal grapple pull velocity (steady state; see grapple.c)
 void GrappleThrow(void);
 void GrappleService(void);
 void GrappleReset(gedict_t *rhook);

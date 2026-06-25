@@ -55,7 +55,7 @@ static void BotStopFiring(gedict_t *bot)
 	qbool correct_weapon = BotUsingCorrectWeapon(bot);
 	qbool enemy_alive = bot->s.v.enemy && ISLIVE(&g_edicts[bot->s.v.enemy]);
 
-	bot->fb.firing &= (continuous && correct_weapon && enemy_alive) || bot->fb.rocketJumping;
+	bot->fb.firing &= (continuous && correct_weapon && enemy_alive) || bot->fb.rocketJumping || bot->fb.hooking;
 }
 
 // Magic numbers here: 400 = 0.5 * sv_gravity
@@ -488,7 +488,7 @@ void BotsFireLogic(void)
 	AttackRespawns(self);
 
 	// a_attackfix()
-	if (!self->fb.rocketJumping && (self->s.v.enemy == 0) && !(self->fb.state & SHOT_FOR_LUCK) && !DischargeAtStartLogic(self))
+	if (!self->fb.rocketJumping && !self->fb.hooking && (self->s.v.enemy == 0) && !(self->fb.state & SHOT_FOR_LUCK) && !DischargeAtStartLogic(self))
 	{
 		self->fb.firing = false;
 	}
@@ -508,7 +508,7 @@ void BotsFireLogic(void)
 
 		BotsAimAtFloor(self, rel_pos, rel_dist);
 
-		if (!self->fb.rocketJumping)
+		if (!self->fb.rocketJumping && !self->fb.hooking)
 		{
 			SetFireButton(self, rel_pos, rel_dist);
 		}

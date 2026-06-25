@@ -264,6 +264,16 @@ static void BotMoveTowardsLinkedMarker(gedict_t *self, vec3_t dir_move)
 	qbool onGround = ((int)self->s.v.flags & FL_ONGROUND);
 	qbool curlJump = ((int)self->fb.path_state & BOTPATH_CURLJUMP_HINT);
 
+	if (self->fb.hooking)
+	{
+		// Stop before starting to hook
+		if (VectorDistance(self->s.v.origin, self->fb.linked_marker->s.v.origin) < VectorDistance(self->fb.touch_marker->s.v.origin, self->fb.linked_marker->s.v.origin))
+		{
+			VectorClear(dir_move);
+			return;
+		}
+	}
+
 	VectorAdd(linked->s.v.absmin, linked->s.v.view_ofs, temp);
 	VectorSubtract(temp, self->s.v.origin, temp);
 	normalize(temp, dir_move);
