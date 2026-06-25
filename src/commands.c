@@ -4161,6 +4161,7 @@ const char _reset_settings[] =
 const char common_um_init[] =
 	"k_pow_pickup 0\n"
 	"sv_loadentfiles_dir \"\"\n"
+	"sv_loadbotfiles_dir \"\"\n"
 	"sv_antilag 2\n"				// antilag on
 	"k_bloodfest 0\n"
 	"k_killquad 0\n"
@@ -4437,6 +4438,7 @@ const char ffa_um_init[] =
 
 const char ctf_um_init[] =
 	"sv_loadentfiles_dir ctf\n"
+	"sv_loadbotfiles_dir ctf\n"
 	"pm_airstep 1\n"
 	"coop 0\n"
 	"maxclients 16\n"
@@ -4692,16 +4694,6 @@ void UserMode(float umode)
 	if (streq(um, "ffa") && k_matchLess && cvar("k_use_matchless_dir"))
 	{
 		um = "matchless"; // use configs/usermodes/matchless instead of configs/usermodes/ffa in matchless mode
-	}
-
-	if (streq(um, "ctf") && bots_enabled() && !sv_invoked)
-	{
-		if (bots_enabled())
-		{
-			G_sprint(self, PRINT_HIGH, "Disable bots first with %s\n", redtext("/botcmd disable"));
-
-			return;
-		}
 	}
 
 	//for 1on1 / 2on2 / 4on4 and ffa commands manipulation

@@ -428,7 +428,7 @@ typedef void (*fb_entity_funcref_t)(struct gedict_s* item);
 #define NUMBER_PATHS	8
 #endif
 #ifndef NUMBER_SUBZONES
-#define NUMBER_SUBZONES	32
+#define NUMBER_SUBZONES	128 // max markers per zone; raised from 32 for dense CTF maps
 #endif
 
 typedef struct fb_runaway_route_s {
@@ -442,6 +442,7 @@ typedef struct fb_path_s {
 	struct gedict_s* next_marker;	// next marker in the graph
 	float time;						// time to travel if walking (0 if teleporting)
 	float rj_time;					// time to travel if using rocket jump
+	float hook_time;				// time to travel if using hook
 	int flags;						// hints on how to travel to next marker
 
 	short angle_hint;				// When travelling to marker, offset to standard angle (+ = anti-clockwise)
@@ -454,14 +455,18 @@ typedef struct fb_goal_s {
 	struct gedict_s* next_marker;
 	float time;
 	struct gedict_s* next_marker_rj;
+	struct gedict_s *next_marker_hook;
 	float rj_time;
+	float hook_time;
 } fb_goal_t;
 
 typedef struct fb_subzone_s {
 	struct gedict_s* next_marker;
 	float time;
 	struct gedict_s* next_marker_rj;
+	struct gedict_s *next_marker_hook;
 	float rj_time;
+	float hook_time;
 } fb_subzone_t;
 
 typedef struct fb_zone_s {
@@ -475,6 +480,11 @@ typedef struct fb_zone_s {
 	struct gedict_s* marker_rj;
 	float rj_time;
 	struct gedict_s* next_rj;
+
+	// Hook
+	struct gedict_s *marker_hook;
+	float hook_time;
+	struct gedict_s *next_hook;
 
 	float reverse_time;
 	struct gedict_s* reverse_marker;
@@ -534,6 +544,8 @@ typedef struct fb_botskill_s {
 	qbool use_rocketjumps;
 	float combat_jump_chance;
 	float missile_dodge_time;				// minimum time in seconds before bot dodges missile
+
+	int   ctf_role;                         // attack, midfield or defense
 
 	qbool customised;						// if set, customised file
 
@@ -696,6 +708,12 @@ typedef struct fb_entvars_s {
 	int rocketJumpFrameDelay;					// active delay between jumping and firing
 	int rocketJumpAngles[2];					// pitch/yaw for rocket jump angle
 	int lavaJumpState;							// keep track of submerge/rise/fire sequence
+
+	// Hook logic
+	qbool canHook;
+	qbool hooking;
+	struct gedict_s *hookTarget;
+	vec3_t hookOldPosition;                     // position from the last frame, used to cancel hook if bot gets stuck
 
 	// Editor
 	int last_jump_frame;						// framecount when player last jumped.  used to help setting rj fields
