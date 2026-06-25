@@ -111,7 +111,10 @@ void SP_item_flag_team1(void)
 	spawn_item_flag();
 
 #ifdef BOT_SUPPORT
-	BotsFlag1Dropped(self);
+	if (bots_enabled())
+	{
+		BotsFlag1Dropped(self);
+	}
 #endif
 }
 
