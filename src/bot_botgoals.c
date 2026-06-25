@@ -186,7 +186,8 @@ void EvalGoal(gedict_t *self, gedict_t *goal_entity)
 						g_edicts[self->s.v.enemy].fb.canRocketJump,
 						g_edicts[self->s.v.enemy].fb.canHook);
 			traveltime = SubZoneArrivalTime(zone_time, middle_marker, to_marker,
-											g_edicts[self->s.v.enemy].fb.canRocketJump, self->fb.canHook);
+											g_edicts[self->s.v.enemy].fb.canRocketJump,
+											g_edicts[self->s.v.enemy].fb.canHook);
 
 			// If enemy will get there much faster than we will...
 			if (traveltime <= (goal_time - 1.25))
