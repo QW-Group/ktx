@@ -1221,6 +1221,16 @@ qbool SameTeam(gedict_t *p1, gedict_t *p2);
 
 #ifndef BOT_SUPPORT
 #define bots_enabled() (false)
+// Frogbot tuning helpers are also called from mode-agnostic code (tot mode,
+// combat, item filtering). Without bot support they fall back to the same
+// defaults the k_fb_* cvars are registered with, so behaviour is preserved.
+#define FrogbotSkillLevel()      (10)
+#define FrogbotHealth()          (100)
+#define FrogbotWeapon()          (2)
+#define FrogbotQuadMultiplier()  (4)
+#define FrogbotItemPickupBonus() (false)
+#define FrogbotEasySkillMode()   (true)
+#define FrogbotBreakOnDeath()    (true)
 #else
 #include "fb_globals.h"
 #endif

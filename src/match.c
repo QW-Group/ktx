@@ -1786,7 +1786,7 @@ void PrintCountdown(int seconds)
 		int weapon = FrogbotWeapon();
 		strlcat(text, va("\nTribe of Tjernobyl mode %2s\n", redtext("on")), sizeof(text));
 		strlcat(text, va("Break on death %11s\n",
-			(int)cvar(FB_CVAR_BREAK_ON_DEATH) ? redtext("on") : redtext("off")),
+			FrogbotBreakOnDeath() ? redtext("on") : redtext("off")),
 			sizeof(text));
 		strlcat(text, va("Bot weapon %15s\n", redtext(weapon ? WpName(weapon) : "random")), sizeof(text));
 		strlcat(text, va("Bot health %15s\n", dig3(FrogbotHealth())), sizeof(text));

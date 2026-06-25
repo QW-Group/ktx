@@ -1142,7 +1142,7 @@ void PlayerDie(void)
 {
 	self->ca_alive = false;
 
-	if (!self->isBot && tot_mode_enabled() && cvar(FB_CVAR_BREAK_ON_DEATH))
+	if (!self->isBot && tot_mode_enabled() && FrogbotBreakOnDeath())
 	{
 		PlayerBreak();
 	}

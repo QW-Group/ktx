@@ -369,6 +369,7 @@ int FrogbotWeapon(void);
 int FrogbotQuadMultiplier(void);
 qbool FrogbotItemPickupBonus(void);
 qbool FrogbotEasySkillMode(void);
+qbool FrogbotBreakOnDeath(void);
 
 // botthink.qc
 void SetMarker(gedict_t *client, gedict_t *marker);
