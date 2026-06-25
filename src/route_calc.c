@@ -52,7 +52,7 @@ static void TravelTimeForPath(gedict_t *m, int i)
 		player_speed = sv_maxspeed * (1 + max(0, DotProduct(distance, hor_distance)));
 
 		// FIXME: RJ time is guideline, but we can do better than this?
-		m->fb.paths[i].time = 100000;
+		m->fb.paths[i].time = TRAVEL_UNREACHABLE;
 		m->fb.paths[i].rj_time = (total_distance / player_speed);
 
 		return;
@@ -593,7 +593,7 @@ static void Calc_G_time_12(void)
 			{
 				from_marker = m;
 				traveltime = SubZoneArrivalTime(zone_time, middle_marker, runaway_dest, false);
-				if (traveltime < 1000000)
+				if (traveltime < TRAVEL_UNREACHABLE)
 				{
 					runaway_score = runaway_time = traveltime;
 					next_marker = m;
@@ -711,7 +711,7 @@ void InitialiseMarkerRoutes(void)
 		{
 			if (!m->fb.goals[j].next_marker)
 			{
-				m->fb.goals[j].rj_time = m->fb.goals[j].time = 1000000;
+				m->fb.goals[j].rj_time = m->fb.goals[j].time = TRAVEL_UNREACHABLE;
 				m->fb.goals[j].next_marker_rj = m->fb.goals[j].next_marker = dropper;
 			}
 		}
@@ -721,19 +721,19 @@ void InitialiseMarkerRoutes(void)
 			if (!m->fb.zones[j].marker)
 			{
 				m->fb.zones[j].rj_time = m->fb.zones[j].time = m->fb.zones[j].reverse_time =
-						m->fb.zones[j].from_time = 1000000;
+						m->fb.zones[j].from_time = TRAVEL_UNREACHABLE;
 				m->fb.zones[j].marker_rj = m->fb.zones[j].marker = m->fb.zones[j].reverse_marker =
 						dropper;
 			}
 
-			m->fb.zones[j].sight_from_time = 1000000;
+			m->fb.zones[j].sight_from_time = TRAVEL_UNREACHABLE;
 		}
 
 		for (j = 0; j < NUMBER_SUBZONES; ++j)
 		{
 			if (m->fb.S_ != j)
 			{
-				m->fb.subzones[j].rj_time = m->fb.subzones[j].time = 1000000;
+				m->fb.subzones[j].rj_time = m->fb.subzones[j].time = TRAVEL_UNREACHABLE;
 			}
 		}
 	}

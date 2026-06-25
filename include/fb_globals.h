@@ -5,6 +5,10 @@
 
 #define PATH_SCORE_NULL -1000000
 
+// Travel time assigned to a link/route that can't be taken, treated as "no path"
+// by the route search (anything < TRAVEL_UNREACHABLE is considered reachable).
+#define TRAVEL_UNREACHABLE 1000000
+
 #define FB_OPTION_SHOW_MARKERS			1
 #define FB_OPTION_EDITOR_MODE			2
 #define FB_OPTION_SHOW_DUEL_LOGIC		4
