@@ -9,7 +9,6 @@
 
 #include "g_local.h"
 
-#define PULL_SPEED      800
 #define THROW_SPEED     800
 #define NEW_THROW_SPEED 1050
 #define CR_THROW_SPEED  1200

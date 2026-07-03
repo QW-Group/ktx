@@ -9,6 +9,7 @@
 #define ATTACK_RESPAWN_TIME 3
 
 qbool DM6FireAtDoor(gedict_t *self, vec3_t rel_pos);
+qbool DischargeAtStartLogic(gedict_t *self);
 static void BotsModifyAimAtPlayerLogic(gedict_t *self);
 
 static void BotSetDesiredAngles(gedict_t *self, vec3_t rel_pos)
@@ -50,11 +51,11 @@ static void BotSetDesiredAngles(gedict_t *self, vec3_t rel_pos)
 static void BotStopFiring(gedict_t *bot)
 {
 	qbool continuous = bot->fb.desired_weapon_impulse == 4 || bot->fb.desired_weapon_impulse == 5
-			|| bot->fb.desired_weapon_impulse == 8;
+			|| bot->fb.desired_weapon_impulse == 8 || bot->fb.desired_weapon_impulse == 22;
 	qbool correct_weapon = BotUsingCorrectWeapon(bot);
 	qbool enemy_alive = bot->s.v.enemy && ISLIVE(&g_edicts[bot->s.v.enemy]);
 
-	bot->fb.firing &= (continuous && correct_weapon && enemy_alive) || bot->fb.rocketJumping;
+	bot->fb.firing &= (continuous && correct_weapon && enemy_alive) || bot->fb.rocketJumping || bot->fb.hooking;
 }
 
 // Magic numbers here: 400 = 0.5 * sv_gravity
@@ -134,11 +135,32 @@ static qbool PredictEnemyLocationInFuture(gedict_t *enemy, float rel_time)
 // This is when firing at buttons/doors etc
 static void BotsFireAtWorldLogic(gedict_t *self, vec3_t rel_pos, float *rel_dist)
 {
-	VectorAdd(self->fb.look_object->s.v.absmin, self->fb.look_object->s.v.view_ofs, rel_pos);
+	if (self->fb.path_state & FIRE_BUTTON)
+	{
+		// Aim at the centre of the button/door brush, computed here from its
+		// bounds rather than from view_ofs (which for a marker entity is
+		// load-bearing routing data we must not overwrite).
+		VectorAdd(self->fb.look_object->s.v.absmin, self->fb.look_object->s.v.absmax, rel_pos);
+		VectorScale(rel_pos, 0.5, rel_pos);
+	}
+	else
+	{
+		VectorAdd(self->fb.look_object->s.v.absmin, self->fb.look_object->s.v.view_ofs, rel_pos);
+	}
 	VectorSubtract(rel_pos, self->s.v.origin, rel_pos);
 	*rel_dist = vlen(rel_pos);
 
 	if (DM6FireAtDoor(self, rel_pos))
+	{
+		return;
+	}
+
+	if (DischargeAtStartLogic(self))
+	{
+		return;
+	}
+
+	if (self->fb.path_state & FIRE_BUTTON)
 	{
 		return;
 	}
@@ -477,7 +499,7 @@ void BotsFireLogic(void)
 	AttackRespawns(self);
 
 	// a_attackfix()
-	if (!self->fb.rocketJumping && (self->s.v.enemy == 0) && !(self->fb.state & SHOT_FOR_LUCK))
+	if (!self->fb.rocketJumping && !self->fb.hooking && (self->s.v.enemy == 0) && !(self->fb.state & SHOT_FOR_LUCK) && !DischargeAtStartLogic(self))
 	{
 		self->fb.firing = false;
 	}
@@ -497,12 +519,17 @@ void BotsFireLogic(void)
 
 		BotsAimAtFloor(self, rel_pos, rel_dist);
 
-		if (!self->fb.rocketJumping)
+		if (!self->fb.rocketJumping && !self->fb.hooking)
 		{
 			SetFireButton(self, rel_pos, rel_dist);
 		}
 
 		BotSetDesiredAngles(self, rel_pos);
+	}
+
+	if (DischargeAtStartLogic(self))
+	{
+		self->fb.firing = true;
 	}
 }
 

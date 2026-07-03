@@ -21,6 +21,10 @@ extern gedict_t *markers[];
 void AddToQue(gedict_t *ent)
 {
 	markers[marker_index] = ent;
+	// subzone_row is this marker's stable slot in the marker_subzones[] pool. Keep
+	// it separate from fb.index, which FrogbotSaveBotFile renumbers - the subzone
+	// tables must not be re-keyed underneath the routing data.
+	ent->fb.subzone_row = marker_index;
 	ent->fb.index = marker_index++;
 }
 
@@ -49,6 +53,16 @@ const char* EncodeMarkerFlags(int marker_flags)
 		*s++ = '6';
 	}
 
+	if (marker_flags & MARKER_DISCHARGE_AT_START_RED)
+	{
+		*s++ = 'd';
+	}
+
+	if (marker_flags & MARKER_DISCHARGE_AT_START_BLUE)
+	{
+		*s++ = 'D';
+	}
+
 	if (marker_flags & MARKER_BLOCKED_ON_STATE_TOP)
 	{
 		*s++ = 'b';
@@ -72,6 +86,16 @@ const char* EncodeMarkerFlags(int marker_flags)
 	if (marker_flags & MARKER_NOTOUCH)
 	{
 		*s++ = 'n';
+	}
+
+	if (marker_flags & MARKER_FLAG1_DEFEND)
+	{
+		*s++ = '1';
+	}
+
+	if (marker_flags & MARKER_FLAG2_DEFEND)
+	{
+		*s++ = '2';
 	}
 
 	if (s == buffer)
@@ -101,6 +125,14 @@ int DecodeMarkerFlagString(const char *s)
 				marker_flags |= MARKER_IS_DM6_DOOR;
 				break;
 
+			case 'd':
+				marker_flags |= MARKER_DISCHARGE_AT_START_RED;
+				break;
+
+			case 'D':
+				marker_flags |= MARKER_DISCHARGE_AT_START_BLUE;
+				break;
+
 			case 'f':
 				marker_flags |= MARKER_FIRE_ON_MATCH_START;
 				break;
@@ -119,6 +151,14 @@ int DecodeMarkerFlagString(const char *s)
 
 			case 'n':
 				marker_flags |= MARKER_NOTOUCH;
+				break;
+
+			case '1':
+				marker_flags |= MARKER_FLAG1_DEFEND;
+				break;
+
+			case '2':
+				marker_flags |= MARKER_FLAG2_DEFEND;
 				break;
 		}
 	}
@@ -144,6 +184,16 @@ const char* EncodeMarkerPathFlags(int path_flags)
 	if (path_flags & ROCKET_JUMP)
 	{
 		*s++ = 'r';
+	}
+
+	if (path_flags & HOOK)
+	{
+		*s++ = 'h';
+	}
+
+	if (path_flags & LOOK_BUTTON)
+	{
+		*s++ = 'l';
 	}
 
 	if (path_flags & JUMP_LEDGE)
@@ -190,6 +240,14 @@ int DecodeMarkerPathFlagString(const char *s)
 
 			case 'r':
 				path_flags |= ROCKET_JUMP;
+				break;
+
+			case 'h':
+				path_flags |= HOOK;
+				break;
+
+			case 'l':
+				path_flags |= LOOK_BUTTON;
 				break;
 
 			case 'j':
@@ -318,6 +376,11 @@ void SetMarkerPathFlags(int marker_number, int path_index, int flags)
 		markers[marker_number]->fb.paths[path_index].rj_pitch = 78.25;
 		markers[marker_number]->fb.paths[path_index].rj_yaw = -1;
 	}
+
+	if (flags & LOOK_BUTTON)
+	{
+		markers[marker_number]->fb.T |= MARKER_LOOK_BUTTON;
+	}
 }
 
 void SetMarkerPath(int source_marker, int path_index, int next_marker)
@@ -363,31 +426,54 @@ void SetMarkerViewOffset(int marker, float zOffset)
 	markers[marker]->s.v.view_ofs[2] = zOffset;
 }
 
+// Open a .bot file for the given base name, preferring the sv_loadbotfiles_dir
+//   subdirectory (used for alternative entity sets such as CTF, mirroring
+//   sv_loadentfiles_dir for .ent files) before the default location.
+static fileHandle_t OpenBotFile(char *dir, char *name)
+{
+	fileHandle_t file = -1;
+
+	if (!strnull(dir))
+	{
+		file = std_fropen("maps/%s/%s.bot", dir, name);
+		if (file == -1)
+		{
+			file = std_fropen("bots/maps/%s/%s.bot", dir, name);
+		}
+	}
+
+	if (file == -1)
+	{
+		file = std_fropen("maps/%s.bot", name);
+		if (file == -1)
+		{
+			file = std_fropen("bots/maps/%s.bot", name);
+		}
+	}
+
+	return file;
+}
+
 qbool LoadBotRoutingFromFile(void)
 {
 	fileHandle_t file = -1;
 	char lineData[128];
 	char argument[128];
 
-	// Load bot definition file: frogbots rely on objects spawning 
-	//    markers, so be aware of alternative .ent files
+	// Load bot definition file: frogbots rely on objects spawning markers, so
+	//   be aware of alternative .ent files. Bot files for alternative entity
+	//   sets (e.g. CTF) live in the sv_loadbotfiles_dir subdirectory.
 	char *entityFile = cvar_string("k_entityfile");
+	char *botDir = cvar_string("sv_loadbotfiles_dir");
+
 	if (!strnull(entityFile))
 	{
-		file = std_fropen("maps/%s.bot", entityFile);
-		if (file == -1)
-		{
-			file = std_fropen("bots/maps/%s.bot", entityFile);
-		}
+		file = OpenBotFile(botDir, entityFile);
 	}
 
 	if (file == -1)
 	{
-		file = std_fropen("maps/%s.bot", mapname);
-		if (file == -1)
-		{
-			file = std_fropen("bots/maps/%s.bot", mapname);
-		}
+		file = OpenBotFile(botDir, mapname);
 	}
 
 	if (file == -1)

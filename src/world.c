@@ -1067,6 +1067,12 @@ void FirstFrame(void)
 	RegisterCvarEx(FB_CVAR_ITEM_PICKUP_BONUS, "0");
 	RegisterCvarEx(FB_CVAR_EASY_SKILL_MODE, "1");
 
+	// KTX-owned (not an engine cvar): selects the bots/maps subdirectory .bot
+	// files are loaded from. Must be registered so the bare "sv_loadbotfiles_dir
+	// <dir>" lines in the usermode init strings set it instead of being rejected
+	// as an unknown command (which would also leave CTF .bot files unloaded).
+	RegisterCvar("sv_loadbotfiles_dir");
+
 	for (i = 0; i < MAX_CLIENTS; i++)
 	{
 		RegisterCvarEx(va("k_fb_name_%d", i), "");

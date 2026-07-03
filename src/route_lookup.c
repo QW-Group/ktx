@@ -11,21 +11,29 @@
 #include "g_local.h"
 
 float SubZoneArrivalTime(float zone_time, gedict_t *middle_marker, gedict_t *from_marker,
-							qbool rl_routes)
+							qbool rl_routes, qbool hook_routes)
 {
+	// Must resolve the route table in the same order as ZoneMarker/ZonePathMarker
+	// (rocket-jump before hook). Those pick the middle_marker and next marker, so
+	// reading a different table here would sum a zone_time and a subzone leg from
+	// two different route trees for a bot that can both rocket-jump and hook.
 	if (rl_routes)
 	{
-		return (zone_time + middle_marker->fb.subzones[from_marker->fb.S_].rj_time);
+		return (zone_time + marker_subzones[middle_marker->fb.subzone_row][from_marker->fb.S_].rj_time);
+	}
+	else if (hook_routes)
+	{
+		return (zone_time + marker_subzones[middle_marker->fb.subzone_row][from_marker->fb.S_].hook_time);
 	}
 	else
 	{
-		return (zone_time + middle_marker->fb.subzones[from_marker->fb.S_].time);
+		return (zone_time + marker_subzones[middle_marker->fb.subzone_row][from_marker->fb.S_].time);
 	}
 }
 
 gedict_t* SubZoneNextPathMarker(gedict_t *from_marker, gedict_t *to_marker)
 {
-	return (from_marker && to_marker ? from_marker->fb.subzones[to_marker->fb.S_].next_marker : NULL);
+	return (from_marker && to_marker ? marker_subzones[from_marker->fb.subzone_row][to_marker->fb.S_].next_marker : NULL);
 }
 
 gedict_t* SightFromMarkerFunction(gedict_t *from_marker, gedict_t *to_marker)
@@ -46,7 +54,7 @@ float SightFromTime(gedict_t *from_marker, gedict_t *to_marker)
 			to_marker->fb.zones[from_marker->fb.Z_ - 1].sight_from_time : 0.0f);
 }
 
-void ZoneMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_normal, qbool rl_jump_routes)
+void ZoneMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_normal, qbool rl_jump_routes, qbool hook_routes)
 {
 	fb_zone_t *zone;
 
@@ -66,8 +74,21 @@ void ZoneMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_normal, q
 	zone = &from_marker->fb.zones[to_marker->fb.Z_ - 1];
 	if (path_normal)
 	{
-		middle_marker = rl_jump_routes ? zone->marker_rj : zone->marker;
-		zone_time = rl_jump_routes ? zone->rj_time : zone->time;
+		if (rl_jump_routes)
+		{
+			middle_marker = zone->marker_rj;
+			zone_time = zone->rj_time;
+		}
+		else if (hook_routes)
+		{
+			middle_marker = zone->marker_hook;
+			zone_time = zone->hook_time;
+		}
+		else
+		{
+			middle_marker = zone->marker;
+			zone_time = zone->time;
+		}
 	}
 	else
 	{
@@ -77,7 +98,7 @@ void ZoneMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_normal, q
 }
 
 gedict_t* ZonePathMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_normal,
-							qbool rl_jump_routes)
+							qbool rl_jump_routes, qbool hook_routes)
 {
 	if ((from_marker == NULL) || (to_marker == NULL) || (to_marker->fb.Z_ == 0))
 	{
@@ -89,6 +110,11 @@ gedict_t* ZonePathMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_
 		if (rl_jump_routes)
 		{
 			return from_marker->fb.zones[to_marker->fb.Z_ - 1].next_rj;
+		}
+
+		if (hook_routes)
+		{
+			return from_marker->fb.zones[to_marker->fb.Z_ - 1].next_hook;
 		}
 
 		return from_marker->fb.zones[to_marker->fb.Z_ - 1].next;
@@ -133,7 +159,7 @@ gedict_t* SightMarker(gedict_t *from_marker, gedict_t *to_marker, float max_dist
 				if (g_globalvars.trace_fraction == 1)
 				{
 					// 
-					traveltime = SubZoneArrivalTime(zone_time, middle_marker, marker_, false);
+					traveltime = SubZoneArrivalTime(zone_time, middle_marker, marker_, false, false);
 					if (look_traveltime > traveltime)
 					{
 						// Teleports don't count

@@ -624,6 +624,7 @@ void RegenFlags(qbool yes);
 void AddHook(qbool yes);
 void CTF_Obituary(gedict_t *targ, gedict_t *attacker);
 void CTF_CheckFlagsAsKeys(void);
+void TossFlag(void);
 
 // logs.c
 void log_open(const char *fmt, ...) PRINTF_FUNC(1);
@@ -928,6 +929,7 @@ void EndMatch(float skip_log);
 void StatsToFile(void);
 
 // grapple.c
+#define PULL_SPEED 800	// nominal grapple pull velocity (steady state; see grapple.c)
 void GrappleThrow(void);
 void GrappleService(void);
 void GrappleReset(gedict_t *rhook);
@@ -1209,6 +1211,10 @@ int std_fgetc(fileHandle_t handle);
 char* std_fgets(fileHandle_t handle, char *buf, int limit);
 void std_fclose(fileHandle_t handle);
 void std_fprintf(fileHandle_t handle, const char *fmt, ...) PRINTF_FUNC(2);
+
+// items
+qbool ItemTouched(gedict_t *item, gedict_t *player);
+void ItemTaken(gedict_t *item, gedict_t *player);
 
 // teamplay
 void TeamplayEventItemTaken(gedict_t *client, gedict_t *item);

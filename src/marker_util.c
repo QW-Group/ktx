@@ -200,6 +200,14 @@ void AssignVirtualGoal(gedict_t *item)
 {
 	gedict_t *marker_;
 
+	// Zones are 1-based; Z_ stays 0 until a bot first evaluates the item's goal
+	// function. FirstZoneMarker(0) would index zone_head[-1], so bail out until
+	// the item has been assigned to a zone.
+	if (item->fb.Z_ == 0)
+	{
+		return;
+	}
+
 	for (marker_ = FirstZoneMarker(item->fb.Z_); marker_; marker_ = marker_->fb.Z_next)
 	{
 		AssignVirtualGoal_apply(marker_);

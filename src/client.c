@@ -1626,7 +1626,10 @@ void ClientConnect(void)
 	}
 
 	// qqshka: force damn colors in CTF.
-	if (isCTF())
+	// Bots get their team/colours assigned when added (FrogbotsAddbot), so only
+	// force a red/blue team for human players here; forcing it on bots overrides
+	// and breaks that setup.
+	if (isCTF() && !self->isBot)
 	{
 		int red = 0; // Keeps track of which team and colors to set for new player
 
