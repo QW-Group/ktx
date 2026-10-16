@@ -74,6 +74,13 @@ void ZoneMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_normal, q
 		middle_marker = from_marker->fb.zones[to_marker->fb.Z_ - 1].reverse_marker;
 		zone_time = from_marker->fb.zones[to_marker->fb.Z_ - 1].reverse_time;
 	}
+
+	// no route between the zones; SubZoneArrivalTime reads through middle_marker
+	if (middle_marker == NULL)
+	{
+		middle_marker = dropper;
+		zone_time = 1000000;
+	}
 }
 
 gedict_t* ZonePathMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_normal,
