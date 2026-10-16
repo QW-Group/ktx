@@ -113,6 +113,11 @@ gedict_t* SightMarker(gedict_t *from_marker, gedict_t *to_marker, float max_dist
 	middle_marker = from_marker;
 	zone_time = 0;
 
+	if ((from_marker == NULL) || (to_marker == NULL))
+	{
+		return NULL;
+	}
+
 	VectorAdd(to_marker->s.v.absmin, to_marker->s.v.view_ofs, to_marker_pos);
 	to_marker_pos[2] += 32;
 
