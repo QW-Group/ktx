@@ -783,12 +783,15 @@ static int DesiredWeapon(void)
 
 							VectorSubtract(self->fb.look_object->s.v.origin, self->s.v.origin, diff);
 							vectoangles(diff, enemy_angles);
+							// vectoangles gives 0 to 360: an enemy below the bot is near 360
+							if (enemy_angles[0] > 180)
+							{
+								enemy_angles[0] = 360 - enemy_angles[0];
+							}
+
 							if (enemy_angles[0] < 15)
 							{
-								if (enemy_angles[0] > -15)
-								{
-									return IT_LIGHTNING;
-								}
+								return IT_LIGHTNING;
 							}
 						}
 						else
