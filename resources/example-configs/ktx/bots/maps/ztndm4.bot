@@ -199,6 +199,7 @@ SetGoal 35 13
 SetZone 35 4
 SetMarkerPath 35 0 33
 SetMarkerPath 35 1 41
+SetMarkerPath 35 2 6
 SetGoal 36 14
 SetZone 36 7
 SetMarkerPath 36 0 39
