@@ -111,6 +111,14 @@ void button_touch(void)
 
 	self->s.v.enemy = EDICT_TO_PROG(other);
 
+#ifdef BOT_SUPPORT
+	// the button is its own marker and is solid, so pressing it is the only way a bot touches it
+	if (bots_enabled() && self->fb.fl_marker && (other->fb.linked_marker == self))
+	{
+		SetMarker(other, self);
+	}
+#endif
+
 	button_fire();
 }
 
