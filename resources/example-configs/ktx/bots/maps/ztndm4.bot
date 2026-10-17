@@ -126,7 +126,6 @@ SetGoal 17 20
 SetZone 17 7
 SetMarkerPath 17 0 39
 SetMarkerPath 17 1 18
-SetMarkerPathFlags 17 1 j
 SetGoal 18 4
 SetZone 18 7
 SetMarkerPath 18 0 92
