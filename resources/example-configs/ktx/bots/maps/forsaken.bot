@@ -1032,6 +1032,8 @@ SetMarkerPath 196 1 26
 SetZone 197 10
 SetMarkerPath 197 0 198
 SetMarkerPath 197 1 18
+SetMarkerPath 197 2 196
+SetMarkerPath 197 3 195
 SetZone 198 10
 SetMarkerPath 198 0 199
 SetMarkerPath 198 1 197
