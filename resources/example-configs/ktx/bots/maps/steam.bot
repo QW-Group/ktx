@@ -181,6 +181,8 @@ SetMarkerPath 3 0 109
 SetZone 4 13
 SetMarkerPath 4 0 96
 SetMarkerPath 4 1 97
+SetZone 5 1
+SetMarkerPath 5 0 136
 SetZone 6 14
 SetMarkerPath 6 0 203
 SetMarkerPath 6 1 45
@@ -658,10 +660,12 @@ SetZone 138 11
 SetMarkerPath 138 0 178
 SetZone 139 15
 SetMarkerPath 139 0 140
+SetMarkerPathFlags 139 0 j
 SetMarkerPath 139 1 14
 SetMarkerPath 139 2 230
 SetZone 140 15
 SetMarkerPath 140 0 16
+SetMarkerPathFlags 140 0 j
 SetZone 141 15
 SetMarkerPath 141 0 88
 SetZone 142 7
