@@ -959,7 +959,7 @@ SetZone 197 2
 SetMarkerPath 197 0 47
 SetMarkerPath 197 1 34
 SetMarkerPath 197 3 196
-SetMarkerPathFlags 197 3 wj
+SetMarkerPathFlags 197 3 w
 SetZone 198 2
 SetMarkerPath 198 0 189
 SetMarkerPath 198 1 164
@@ -1005,7 +1005,6 @@ SetMarkerPath 208 0 207
 SetMarkerPath 208 1 206
 SetZone 209 9
 SetMarkerPath 209 0 210
-SetMarkerPathFlags 209 0 j
 SetMarkerPath 209 1 207
 SetZone 210 9
 SetMarkerPath 210 0 209
