@@ -169,6 +169,11 @@ const char* EncodeMarkerPathFlags(int path_flags)
 		*s++ = 'a';
 	}
 
+	if (path_flags & BOTPATH_KEEP_LINKED)
+	{
+		*s++ = 'k';
+	}
+
 	if (s == buffer)
 	{
 		return "(none)";
@@ -210,6 +215,10 @@ int DecodeMarkerPathFlagString(const char *s)
 
 			case 'a':
 				path_flags |= BOTPATH_CURLJUMP_HINT;
+				break;
+
+			case 'k':
+				path_flags |= BOTPATH_KEEP_LINKED;
 				break;
 		}
 	}

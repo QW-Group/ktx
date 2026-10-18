@@ -295,6 +295,13 @@ void ProcessNewLinkedMarker(gedict_t *self)
 	}
 	else
 	{
+		// e.g. from a button to the door it opens, where a marker on the way could route the bot
+		// back to the button
+		if ((self->fb.path_state & BOTPATH_KEEP_LINKED) && FUTURE(linked_marker_time))
+		{
+			return;
+		}
+
 		new_path_state = 0;
 		if (ExistsPath(self->fb.old_linked_marker, self->fb.touch_marker, &new_path_state))
 		{

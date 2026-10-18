@@ -132,6 +132,7 @@ extern gedict_t *dropper;
 #define BOTPATH_CURLJUMP_HINT		(1 << 23)
 #define BOTPATH_FULL_AIRCONTROL		(1 << 24)
 #define BOTPATH_RJ_IN_PROGRESS		(1 << 25)
+#define BOTPATH_KEEP_LINKED			(1 << 26)	// Don't re-route on touching other markers before reaching the next one
 #define DELIBERATE_AIR_WAIT_GROUND	(DELIBERATE_AIR | WAIT_GROUND)
 #define SAVED_DESCRIPTION			(DM6_DOOR | ROCKET_JUMP | JUMP_LEDGE | VERTICAL_PLATFORM | BOTPATH_DOOR | BOTPATH_DOOR_CLOSED | NO_DODGE)
 #define NOT_ROCKET_JUMP				(~ROCKET_JUMP)
