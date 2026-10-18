@@ -49,7 +49,9 @@ SetZone 2 3
 SetMarkerPath 2 0 1
 SetMarkerPath 2 1 39
 SetZone 3 2
-SetMarkerPath 3 0 7
+SetMarkerPath 3 0 28
+SetMarkerPath 3 1 9
+SetMarkerPath 3 2 32
 SetZone 4 3
 SetMarkerPath 4 0 3
 SetMarkerPath 4 1 10
