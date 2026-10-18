@@ -324,8 +324,10 @@ SetMarkerPath 34 1 28
 SetMarkerPath 34 2 171
 SetZone 35 14
 SetMarkerPath 35 0 231
+SetZone 36 3
 SetMarkerPath 36 0 21
 SetMarkerPath 36 1 22
+SetZone 37 1
 SetMarkerPath 37 0 259
 SetGoal 38 19
 SetZone 38 7
@@ -438,6 +440,7 @@ SetZone 89 3
 SetMarkerPath 89 0 2
 SetMarkerPath 89 1 88
 SetMarkerPath 89 2 178
+SetZone 90 8
 SetMarkerPath 90 0 258
 SetZone 91 9
 SetMarkerPath 91 0 92
