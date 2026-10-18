@@ -114,7 +114,6 @@ SetZone 14 2
 SetMarkerPath 14 0 63
 SetMarkerPath 14 1 96
 SetMarkerPath 14 2 46
-SetMarkerPath 14 3 62
 SetMarkerPath 14 4 53
 SetMarkerPathFlags 14 4 r
 SetRocketJumpPathFields 14 4 78.3 -1.0 0
@@ -371,7 +370,6 @@ SetMarkerPath 57 0 103
 SetMarkerPath 57 1 56
 SetMarkerPath 57 2 63
 SetZone 58 12
-SetMarkerPath 58 0 43
 SetMarkerPath 58 1 34
 SetMarkerPath 58 2 103
 SetMarkerPath 58 3 63
@@ -395,7 +393,6 @@ SetZone 62 2
 SetMarkerPath 62 0 97
 SetMarkerPath 62 1 63
 SetMarkerPath 62 2 8
-SetMarkerPath 62 3 14
 SetMarkerPath 62 4 51
 SetMarkerPathFlags 62 4 r
 SetRocketJumpPathFields 62 4 78.3 -1.0 0
