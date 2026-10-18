@@ -256,7 +256,7 @@ static void rotate_entity_think(void)
 	VectorAdd(self->s.v.angles, delta, self->s.v.angles);
 	SUB_NormalizeAngles(self->s.v.angles);
 	RotateTargets();
-	self->s.v.nextthink = g_globalvars.time + 0.02f;
+	self->s.v.nextthink = g_globalvars.time + g_globalvars.frametime;
 }
 
 static void rotate_entity_use(void)
@@ -283,7 +283,7 @@ static void rotate_entity_use(void)
 	else if (self->state == STATE_INACTIVE)
 	{
 		self->think = (func_t) rotate_entity_think;
-		self->s.v.nextthink = g_globalvars.time + 0.02f;
+		self->s.v.nextthink = g_globalvars.time + g_globalvars.frametime;
 		self->s.v.ltime = g_globalvars.time;
 		if (self->speed)
 		{
@@ -315,7 +315,7 @@ static void rotate_entity_firstthink(void)
 	{
 		self->state = STATE_ACTIVE;
 		self->think = (func_t) rotate_entity_think;
-		self->s.v.nextthink = g_globalvars.time + 0.02f;
+		self->s.v.nextthink = g_globalvars.time + g_globalvars.frametime;
 		self->s.v.ltime = g_globalvars.time;
 	}
 	else
@@ -355,7 +355,7 @@ void SP_func_rotate_entity(void)
 	}
 
 	self->think = (func_t) rotate_entity_firstthink;
-	self->s.v.nextthink = g_globalvars.time + 0.1f;
+	self->s.v.nextthink = g_globalvars.time + g_globalvars.frametime;
 	self->s.v.ltime = g_globalvars.time;
 }
 
@@ -442,7 +442,7 @@ static void rotate_train_think(void)
 
 	RotateTargets();
 
-	self->s.v.nextthink = g_globalvars.time + 0.02f;
+	self->s.v.nextthink = g_globalvars.time + g_globalvars.frametime;
 }
 
 static void rotate_train_use(void)
@@ -592,7 +592,7 @@ static void rotate_train_next(void)
 	{
 		// Warp to the next path_corner
 		setorigin( self, PASSVEC3(targ->s.v.origin));
-		self->endtime = self->s.v.ltime + 0.01f;
+		self->endtime = self->s.v.ltime + g_globalvars.frametime;
 		SetTargetOrigin();
 
 		if ((int) targ->s.v.spawnflags & ANGLES)
@@ -891,7 +891,7 @@ static void movewall_blocked(void)
 static void movewall_think(void)
 {
 	self->s.v.ltime = g_globalvars.time;
-	self->s.v.nextthink = g_globalvars.time + 0.02f;
+	self->s.v.nextthink = g_globalvars.time + g_globalvars.frametime;
 }
 
 /*QUAKED func_movewall (0 .5 .8) ? VISIBLE TOUCH NONBLOCKING
@@ -928,7 +928,7 @@ void SP_func_movewall(void)
 		self->model = NULL;
 	}
 	self->think = (func_t) movewall_think;
-	self->s.v.nextthink = g_globalvars.time + 0.02f;
+	self->s.v.nextthink = g_globalvars.time + g_globalvars.frametime;
 	self->s.v.ltime = g_globalvars.time;
 }
 
@@ -1001,7 +1001,7 @@ static void rotate_door_think(void)
 		self->think = (func_t) rotate_door_think2;
 	}
 
-	self->s.v.nextthink = g_globalvars.time + 0.01f;
+	self->s.v.nextthink = g_globalvars.time + g_globalvars.frametime;
 }
 
 static void rotate_door_reversedirection(void)
@@ -1030,7 +1030,7 @@ static void rotate_door_reversedirection(void)
 	VectorScale(self->rotate, 1.0f / self->speed, self->rotate);
 
 	self->think = (func_t) rotate_door_think;
-	self->s.v.nextthink = g_globalvars.time + 0.02f;
+	self->s.v.nextthink = g_globalvars.time + g_globalvars.frametime;
 	self->endtime = g_globalvars.time + self->speed - (self->endtime - g_globalvars.time);
 	self->s.v.ltime = g_globalvars.time;
 }
@@ -1092,7 +1092,7 @@ static void rotate_door_use(void)
 	VectorSubtract(self->dest, start, self->rotate);
 	VectorScale(self->rotate, 1.0f / self->speed, self->rotate);
 	self->think = (func_t) rotate_door_think;
-	self->s.v.nextthink = g_globalvars.time + 0.01f;
+	self->s.v.nextthink = g_globalvars.time + g_globalvars.frametime;
 	self->endtime = g_globalvars.time + self->speed;
 	self->s.v.ltime = g_globalvars.time;
 }
