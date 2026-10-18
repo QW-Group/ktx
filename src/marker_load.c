@@ -20,6 +20,14 @@ extern gedict_t *markers[];
 
 void AddToQue(gedict_t *ent)
 {
+	if (marker_index >= NUMBER_MARKERS)
+	{
+		G_Printf("Too many markers, %s at %d %d %d ignored\n", ent->classname,
+				(int)ent->s.v.origin[0], (int)ent->s.v.origin[1], (int)ent->s.v.origin[2]);
+
+		return;
+	}
+
 	markers[marker_index] = ent;
 	ent->fb.index = marker_index++;
 }

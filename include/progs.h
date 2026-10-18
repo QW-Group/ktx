@@ -416,7 +416,7 @@ typedef void (*fb_taken_funcref_t)(struct gedict_s* item, struct gedict_s* playe
 typedef void (*fb_entity_funcref_t)(struct gedict_s* item);
 
 #ifndef NUMBER_MARKERS
-#define NUMBER_MARKERS	300
+#define NUMBER_MARKERS	350
 #endif
 #ifndef NUMBER_GOALS
 #define NUMBER_GOALS	24
