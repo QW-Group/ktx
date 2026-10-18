@@ -71,6 +71,13 @@ void SetZone(int zone, int marker_number)
 		return;
 	}
 
+	if (subzone_indexes[zone] >= NUMBER_SUBZONES)
+	{
+		G_Printf("Too many markers in zone %d, marker %d ignored\n", zone + 1, marker_number + 1);
+
+		return;
+	}
+
 	z = &marker->fb.zones[zone];
 
 	marker->fb.S_ = subzone_indexes[zone]++;

@@ -74,6 +74,13 @@ void ZoneMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_normal, q
 		middle_marker = from_marker->fb.zones[to_marker->fb.Z_ - 1].reverse_marker;
 		zone_time = from_marker->fb.zones[to_marker->fb.Z_ - 1].reverse_time;
 	}
+
+	// no route between the zones; SubZoneArrivalTime reads through middle_marker
+	if (middle_marker == NULL)
+	{
+		middle_marker = dropper;
+		zone_time = 1000000;
+	}
 }
 
 gedict_t* ZonePathMarker(gedict_t *from_marker, gedict_t *to_marker, qbool path_normal,
@@ -112,6 +119,11 @@ gedict_t* SightMarker(gedict_t *from_marker, gedict_t *to_marker, float max_dist
 	look_traveltime = 1000000;
 	middle_marker = from_marker;
 	zone_time = 0;
+
+	if ((from_marker == NULL) || (to_marker == NULL))
+	{
+		return NULL;
+	}
 
 	VectorAdd(to_marker->s.v.absmin, to_marker->s.v.view_ofs, to_marker_pos);
 	to_marker_pos[2] += 32;

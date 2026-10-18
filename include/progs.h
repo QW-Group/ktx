@@ -416,7 +416,7 @@ typedef void (*fb_taken_funcref_t)(struct gedict_s* item, struct gedict_s* playe
 typedef void (*fb_entity_funcref_t)(struct gedict_s* item);
 
 #ifndef NUMBER_MARKERS
-#define NUMBER_MARKERS	300
+#define NUMBER_MARKERS	350
 #endif
 #ifndef NUMBER_GOALS
 #define NUMBER_GOALS	24
@@ -428,7 +428,7 @@ typedef void (*fb_entity_funcref_t)(struct gedict_s* item);
 #define NUMBER_PATHS	8
 #endif
 #ifndef NUMBER_SUBZONES
-#define NUMBER_SUBZONES	32
+#define NUMBER_SUBZONES	64
 #endif
 
 typedef struct fb_runaway_route_s {
