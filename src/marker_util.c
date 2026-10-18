@@ -37,6 +37,27 @@ void check_marker(gedict_t *self, gedict_t *other)
 	VectorSubtract(temp, other->s.v.origin, temp);
 	distance = vlen(temp);
 
+	// markers on the same spot are equally close, so take the one the bot is heading for
+	//   (otherwise a bot touching the other one never reaches it and stands still)
+	if ((other->fb.touch_distance < 1000000) && other->fb.touch_marker && (other->fb.touch_marker != self))
+	{
+		vec3_t touched;
+
+		VectorAdd(other->fb.touch_marker->s.v.absmin, other->fb.touch_marker->s.v.view_ofs, touched);
+		VectorAdd(self->s.v.absmin, self->s.v.view_ofs, temp);
+		if (VectorDistance(touched, temp) < 1)
+		{
+			if (other->fb.linked_marker == self)
+			{
+				distance = other->fb.touch_distance - 1;
+			}
+			else if (other->fb.linked_marker == other->fb.touch_marker)
+			{
+				return;
+			}
+		}
+	}
+
 	// touch_distance is set to max value at start of every frame, so this will fire for multiple markers only
 	//   if it is closer than previous
 	if ((distance < other->fb.touch_distance) && ((self->s.v.absmin[2] - 20) < other->s.v.absmin[2])
