@@ -517,7 +517,7 @@ static void Calc_G_time_11(void)
 			continue;
 		}
 
-		for (zone = 0; zone < NUMBER_ZONES; ++zone)
+		for (zone = 1; zone <= NUMBER_ZONES; ++zone)
 		{
 			m_zone = FirstZoneMarker(zone);
 			if (m_zone == NULL)
