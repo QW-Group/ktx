@@ -184,8 +184,9 @@ qbool BotDoorIsClosed(gedict_t *door)
 }
 
 // A door that only a button or another entity opens can stay shut for a long time, and a bot can't
-//   open it by walking up to it, so a path into it counts as very slow while it is shut.  Doors
-//   that open as a player comes near, or that bots shoot open, don't hold up the path.
+//   open it by walking up to it, so while it is shut a path into it takes as long as a trip to
+//   the button, see BotDoorButton().  Doors that open as a player comes near, or that bots shoot
+//   open, don't hold up the path.
 static qbool BotDoorCanHoldUpPath(gedict_t *from_marker, gedict_t *to_marker)
 {
 	gedict_t *door = to_marker->fb.door_entity;
@@ -226,6 +227,89 @@ static qbool BotDoorCanHoldUpPath(gedict_t *from_marker, gedict_t *to_marker)
 qbool BotDoorHoldsUpPath(gedict_t *from_marker, gedict_t *to_marker)
 {
 	return BotDoorCanHoldUpPath(from_marker, to_marker) && BotDoorIsClosed(to_marker);
+}
+
+// leaves the middle_marker and zone_time globals that ZoneMarker() sets alone
+static float BotRouteTime(gedict_t *from_marker, gedict_t *to_marker)
+{
+	fb_zone_t *zone;
+
+	if (!to_marker->fb.Z_)
+	{
+		return 1000000;
+	}
+
+	zone = &from_marker->fb.zones[to_marker->fb.Z_ - 1];
+
+	return SubZoneArrivalTime(zone->time, zone->marker, to_marker, false);
+}
+
+// The button that opens to_marker's door with the shortest trip there and back from from_marker,
+//   or NULL if they are all behind the door
+gedict_t* BotDoorButton(gedict_t *from_marker, gedict_t *to_marker, float *detour_time)
+{
+	gedict_t *master = PROG_TO_EDICT(to_marker->fb.door_entity->s.v.owner);
+	gedict_t *best_button = NULL;
+	float best_time = CLOSED_DOOR_PATH_TIME;
+	gedict_t *opener;
+
+	for (opener = world; (opener = find(opener, FOFS(target), master->targetname));)
+	{
+		float opener_time;
+
+		// bots don't shoot buttons on purpose
+		if (!opener->fb.fl_marker || !streq(opener->classname, "func_button") || ISLIVE(opener))
+		{
+			continue;
+		}
+
+		opener_time = BotRouteTime(from_marker, opener) + BotRouteTime(opener, from_marker);
+		if (opener_time < best_time)
+		{
+			best_time = opener_time;
+			best_button = opener;
+		}
+	}
+
+	if (detour_time)
+	{
+		*detour_time = best_time;
+	}
+
+	return best_button;
+}
+
+// Follows the route from from_marker to to_marker and returns the button to press for the first
+//   door on it that holds up the path
+gedict_t* BotDoorButtonOnRoute(gedict_t *from_marker, gedict_t *to_marker, qbool rl_routes)
+{
+	gedict_t *m = from_marker;
+	int i;
+
+	for (i = 0; m && (m != to_marker) && (i < NUMBER_MARKERS); ++i)
+	{
+		gedict_t *next;
+
+		if (m->fb.Z_ == to_marker->fb.Z_)
+		{
+			fb_subzone_t *sub = &m->fb.subzones[to_marker->fb.S_];
+
+			next = (rl_routes ? sub->next_marker_rj : sub->next_marker);
+		}
+		else
+		{
+			next = ZonePathMarker(m, to_marker, true, rl_routes);
+		}
+
+		if (next && BotDoorHoldsUpPath(m, next))
+		{
+			return BotDoorButton(m, next, NULL);
+		}
+
+		m = next;
+	}
+
+	return NULL;
 }
 
 #endif

@@ -357,7 +357,13 @@ void BotEventPlatformHitTop(gedict_t *self);
 void BotEventPlatformHitBottom(gedict_t *self);
 void BotEventDoorHitTop(gedict_t *self);
 void BotEventDoorHitBottom(gedict_t *self);
+// Extra travel time for a path into a shut door when no button can be reached first, see
+//   BotDoorHoldsUpPath()
+#define CLOSED_DOOR_PATH_TIME 1000
+
 qbool BotDoorHoldsUpPath(gedict_t *from_marker, gedict_t *to_marker);
+gedict_t* BotDoorButton(gedict_t *from_marker, gedict_t *to_marker, float *detour_time);
+gedict_t* BotDoorButtonOnRoute(gedict_t *from_marker, gedict_t *to_marker, qbool rl_routes);
 void BotDoorRoutesFrame(void);
 void RecalculateMarkerRouteTimes(void);
 void BotPlatformTouched(gedict_t *platform, gedict_t *player);
