@@ -428,7 +428,7 @@ typedef void (*fb_entity_funcref_t)(struct gedict_s* item);
 #define NUMBER_PATHS	8
 #endif
 #ifndef NUMBER_SUBZONES
-#define NUMBER_SUBZONES	32
+#define NUMBER_SUBZONES	64
 #endif
 
 typedef struct fb_runaway_route_s {
