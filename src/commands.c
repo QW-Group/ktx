@@ -115,6 +115,7 @@ void ToggleNoSweep(void);
 void ToggleInstagib(void);
 void ToggleLGC(void);
 void ToggleCGKickback(void);
+void ToggleNoKnockback(void);
 void ToggleToT(void);
 void TogglePowerups(void);
 void TogglePuPickup(void);
@@ -564,6 +565,7 @@ const char CD_NODESC[] = "no desc";
 #define CD_BERZERK			"berzerk settings"
 #define CD_LGC				"lgc mode"
 #define CD_CG_KB			"toggle coilgun kickback in instagib"
+#define CD_NO_KB			"no knockback from other players LG/all weapons"
 #define CD_TIME				"show server time"
 #define CD_GREN_MODE		"grenades mode"
 #define CD_TOGGLEREADY		"just toggle ready"
@@ -957,6 +959,7 @@ cmd_t cmds[] =
 	{ "lgcmode", 					ToggleLGC, 						0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_LGC },
 	{ "totmode", 					ToggleToT, 						0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_TOT },
 	{ "instagib_coilgun_kickback",	ToggleCGKickback, 				0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_CG_KB },
+	{ "noknockback",				ToggleNoKnockback, 				0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_NO_KB },
 	{ "time", 						sv_time, 						0, 			CF_BOTH | CF_MATCHLESS, 												CD_TIME },
 	{ "gren_mode", 					GrenadeMode, 					0, 			CF_PLAYER | CF_SPC_ADMIN, 												CD_GREN_MODE },
 	{ "toggleready", 				ToggleReady, 					0, 			CF_BOTH | CF_MATCHLESS, 												CD_TOGGLEREADY },
@@ -1877,6 +1880,10 @@ void ModStatus1(void)
 	G_sprint(self, 2, "%-14.14s %-3.3s\n", redtext("more spec info"), OnOff(mi_on()));
 	G_sprint(self, 2, "%-14.14s %-4.4s\n", redtext("teleteam"), OnOff(cvar("k_tp_tele_death")));
 	G_sprint(self, 2, "%-14.14s %-3.3s\n", redtext("Berzerk"), OnOff(cvar("k_bzk")));
+	if (cvar("k_no_knockback"))
+	{
+		G_sprint(self, 2, "%-14.14s %s\n", redtext("No knockback"), NoKnockbackStr());
+	}
 
 	if (match_in_progress == 1)
 	{
@@ -4170,6 +4177,7 @@ const char common_um_init[] =
 	"k_yawnmode 0\n"				// disable SHITMODE by default (c)Renzo
 	"k_instagib 0\n"				// instagib off
 	"k_cg_kb 1\n"					// coilgun kickback in instagib
+	"k_no_knockback 0\n"			// normal knockback
 	"k_disallow_weapons 16\n"		// disallow gl in dmm4 by default
 	"floodprot 10 1 1\n"			// 10 messages in 1 seconds, 1 second silence
 	"k_fp 1\n"						// floodprot for players
@@ -7559,6 +7567,11 @@ void ToggleMidair(void)
 		cvar_set("k_dmm4_gren_mode", "0"); // If midair is enabled, disable gren_mode
 	}
 
+	if (!cvar("k_midair") && cvar("k_no_knockback"))
+	{
+		cvar_set("k_no_knockback", "0");
+	}
+
 	cvar_toggle_msg(self, "k_midair", redtext("Midair"));
 }
 
@@ -7896,6 +7909,47 @@ void ToggleCGKickback(void)
 	}
 
 	cvar_toggle_msg(self, "k_cg_kb", redtext("Coilgun kickback"));
+}
+
+char* NoKnockbackStr(void)
+{
+	switch ((int)cvar("k_no_knockback"))
+	{
+		case 1:
+			return "lg";
+
+		case 2:
+			return "all";
+
+		default:
+			return "off";
+	}
+}
+
+void ToggleNoKnockback(void)
+{
+	int mode = bound(0, cvar("k_no_knockback"), 2);
+
+	if (!is_rules_change_allowed())
+	{
+		return;
+	}
+
+	mode = (mode + 1) % 3;
+	cvar_fset("k_no_knockback", mode);
+
+	if (mode == 0)
+	{
+		G_bprint(2, "%s %s\n", redtext("Knockback"), "normal");
+	}
+	else if (mode == 1)
+	{
+		G_bprint(2, "%s - LG of other players doesn't push you\n", redtext("No knockback"));
+	}
+	else
+	{
+		G_bprint(2, "%s - weapons of other players don't push you\n", redtext("No knockback"));
+	}
 }
 
 void sv_time(void)

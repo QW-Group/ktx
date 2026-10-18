@@ -975,6 +975,7 @@ void FirstFrame(void)
 	RegisterCvarEx("k_instagib", "0");
 	RegisterCvarEx("k_instagib_custom_models", "0");
 	RegisterCvarEx("k_cg_kb", "1");
+	RegisterCvarEx("k_no_knockback", "0");
 
 	RegisterCvar("k_rocketarena"); // rocket arena
 	RegisterCvar("k_dmgfrags");

@@ -430,6 +430,24 @@ void MidairDamageBonus(gedict_t *attacker, gedict_t *targ, float midheight)
 
 gedict_t *damage_attacker, *damage_inflictor;
 
+// k_no_knockback: 1 - no push from lg of other players, 2 - no push from any of their weapons
+static qbool NoKnockback(gedict_t *targ, gedict_t *attacker)
+{
+	int mode = cvar("k_no_knockback");
+
+	if (!mode || (attacker == targ) || (attacker->ct != ctPlayer))
+	{
+		return false;
+	}
+
+	if (mode == 1)
+	{
+		return (targ->deathtype == dtLG_BEAM) || (targ->deathtype == dtLG_DIS);
+	}
+
+	return true;
+}
+
 static int dmg_is_splash = 0;
 
 void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float damage)
@@ -875,7 +893,8 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 	// figure momentum add
 	if ((inflictor != world)
 			&& ((targ->s.v.movetype == MOVETYPE_WALK)
-					|| (k_bloodfest && ((int)targ->s.v.flags & FL_MONSTER))))
+					|| (k_bloodfest && ((int)targ->s.v.flags & FL_MONSTER)))
+			&& !NoKnockback(targ, attacker))
 	{
 		float nailkick;
 
