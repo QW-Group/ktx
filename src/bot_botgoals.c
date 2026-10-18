@@ -91,6 +91,13 @@ void EvalGoal(gedict_t *self, gedict_t *goal_entity)
 	goal_entity->fb.saved_goal_desire = goal_desire;
 	if (goal_desire > 0)
 	{
+		if ((goal_entity == self->fb.avoid_goal) && (g_globalvars.time < self->fb.avoid_goal_time))
+		{
+			goal_entity->fb.saved_goal_desire = 0;
+
+			return;
+		}
+
 		if (POVDMM4DontWalkThroughDoor(goal_entity))
 		{
 			return;
@@ -466,6 +473,27 @@ void UpdateGoal(gedict_t *self)
 	else
 	{
 		self->s.v.goalentity = NUM_FOR_EDICT(world);
+	}
+
+	// Give up on an item the bot stops getting closer to, and leave it alone
+	// for a while. Time spent fighting or waiting for the item to spawn
+	// doesn't count
+	goal_entity = &g_edicts[self->s.v.goalentity];
+	if ((goal_entity != self->fb.goal_tracked)
+			|| (goal_entity->fb.saved_goal_time < self->fb.goal_best_time)
+			|| self->fb.enemy_visible || WaitingToRespawn(goal_entity))
+	{
+		self->fb.goal_tracked = goal_entity;
+		self->fb.goal_best_time = goal_entity->fb.saved_goal_time;
+		self->fb.goal_deadline = g_globalvars.time + 5 + (2 * goal_entity->fb.saved_goal_time);
+	}
+	else if ((goal_entity != world) && (goal_entity->ct != ctPlayer)
+			&& (g_globalvars.time > self->fb.goal_deadline))
+	{
+		self->fb.avoid_goal = goal_entity;
+		self->fb.avoid_goal_time = g_globalvars.time + 15;
+		self->fb.goal_tracked = NULL;
+		self->fb.goal_refresh_time = 0;
 	}
 }
 

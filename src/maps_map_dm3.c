@@ -33,6 +33,7 @@ void DM3CampLogic(void)
 										if (g_random() < 0.9)
 										{
 											self->fb.camp_state |= CAMPBOT;
+											self->fb.goal_tracked = NULL;	// camping isn't being stuck
 											SetLinkedMarker(self, self->fb.touch_marker,
 															"dm3-camp");
 										}

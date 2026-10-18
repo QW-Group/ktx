@@ -27,12 +27,14 @@ void DM4CampLogic(void)
 								&& (VectorDistance(above_lg, self->s.v.origin) < 200))
 						{
 							self->fb.camp_state |= CAMPBOT;
+							self->fb.goal_tracked = NULL;	// camping isn't being stuck
 							SetLinkedMarker(self, self->fb.touch_marker, "dm4-camp1");
 						}
 						else if ((enemy_->s.v.origin[0] >= 700)
 								&& (VectorDistance(on_quad_stairs, self->s.v.origin) < 200))
 						{
 							self->fb.camp_state |= CAMPBOT;
+							self->fb.goal_tracked = NULL;	// camping isn't being stuck
 							SetLinkedMarker(self, self->fb.touch_marker, "dm4-camp2");
 						}
 						else

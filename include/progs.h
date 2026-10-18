@@ -627,6 +627,11 @@ typedef struct fb_entvars_s {
 	struct gedict_s* best_goal2;
 	float best_score2;
 	float best_goal_time;
+	struct gedict_s* goal_tracked;				// the goal entity the bot is after, see goal_deadline
+	float goal_deadline;						// the bot should have had goal_tracked by this time
+	float goal_best_time;						// the shortest time to goal_tracked so far
+	struct gedict_s* avoid_goal;				// the goal the bot gave up on
+	float avoid_goal_time;						// the bot stays away from avoid_goal until this time
 
 	struct gedict_s* linked_marker;				// the next path in the route to goalentity
 	struct gedict_s* old_linked_marker;			// the previous linked marker
