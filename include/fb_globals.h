@@ -357,6 +357,9 @@ void BotEventPlatformHitTop(gedict_t *self);
 void BotEventPlatformHitBottom(gedict_t *self);
 void BotEventDoorHitTop(gedict_t *self);
 void BotEventDoorHitBottom(gedict_t *self);
+qbool BotDoorHoldsUpPath(gedict_t *from_marker, gedict_t *to_marker);
+void BotDoorRoutesFrame(void);
+void RecalculateMarkerRouteTimes(void);
 void BotPlatformTouched(gedict_t *platform, gedict_t *player);
 
 void BotsBackpackTouchedNonPlayer(gedict_t *backpack, gedict_t *entity);

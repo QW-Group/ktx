@@ -2706,6 +2706,7 @@ void BotStartFrame(void)
 		marker_time = TimeTrigger(&next_marker_time, 0.03);
 		hazard_time = TimeTrigger(&next_hazard_time, 0.025);
 
+		BotDoorRoutesFrame();
 		FrogbotPrePhysics1();
 		FrogbotPrePhysics2();
 

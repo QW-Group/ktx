@@ -442,6 +442,8 @@ typedef struct fb_path_s {
 	struct gedict_s* next_marker;	// next marker in the graph
 	float time;						// time to travel if walking (0 if teleporting)
 	float rj_time;					// time to travel if using rocket jump
+	float base_time;				// time, rj_time as measured at map load, without CLOSED_DOOR_PATH_TIME
+	float base_rj_time;
 	int flags;						// hints on how to travel to next marker
 
 	short angle_hint;				// When travelling to marker, offset to standard angle (+ = anti-clockwise)
