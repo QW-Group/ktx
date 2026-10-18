@@ -299,7 +299,6 @@ SetMarkerPath 44 0 112
 SetGoal 45 3
 SetZone 45 1
 SetMarkerPath 45 0 60
-SetMarkerPath 45 1 59
 SetGoal 46 22
 SetZone 46 2
 SetMarkerPath 46 0 14
@@ -383,7 +382,6 @@ SetRocketJumpPathFields 58 5 47.0 185.0 0
 SetZone 59 1
 SetMarkerPath 59 0 104
 SetMarkerPath 59 1 60
-SetMarkerPath 59 2 45
 SetMarkerPath 59 3 94
 SetZone 60 1
 SetMarkerPath 60 0 45
