@@ -2,6 +2,8 @@
 
 #include "g_local.h"
 
+extern gedict_t *markers[];
+
 void BotEventPlatformHitTop(gedict_t *self)
 {
 	int i = 0;
@@ -46,14 +48,58 @@ void BotEventPlatformHitBottom(gedict_t *self)
 	}
 }
 
+static qbool BotDoorCanHoldUpPath(gedict_t *from_marker, gedict_t *to_marker);
+
+static qbool door_routes_stale = false;
+
+// Route times through a door depend on whether it is shut, see BotDoorHoldsUpPath()
+static void BotDoorRoutesChanged(gedict_t *door)
+{
+	int i, j;
+
+	for (i = 0; i < NUMBER_MARKERS; ++i)
+	{
+		gedict_t *m = markers[i];
+
+		if (!m)
+		{
+			continue;
+		}
+
+		for (j = 0; j < NUMBER_PATHS; ++j)
+		{
+			gedict_t *next = m->fb.paths[j].next_marker;
+
+			if (next && (next->fb.door_entity == door) && BotDoorCanHoldUpPath(m, next))
+			{
+				door_routes_stale = true;
+
+				return;
+			}
+		}
+	}
+}
+
 void BotEventDoorHitTop(gedict_t *self)
 {
 	//G_bprint (2, "DoorHitTop... %s\n", (self->state & STATE_BOTTOM ? "bottom" : "non-bottom"));
+	BotDoorRoutesChanged(self);
 }
 
 void BotEventDoorHitBottom(gedict_t *self)
 {
 	//G_bprint (2, "DoorHitBottom... %s\n", (self->state & STATE_BOTTOM ? "bottom" : "non-bottom"));
+	BotDoorRoutesChanged(self);
+}
+
+// Recalculate route times once a frame at most, however many doors moved
+void BotDoorRoutesFrame(void)
+{
+	if (door_routes_stale)
+	{
+		door_routes_stale = false;
+		RecalculateMarkerRouteTimes();
+	}
 }
 
 void BotPlatformTouched(gedict_t *platform, gedict_t *player)
@@ -135,6 +181,51 @@ qbool BotDoorIsClosed(gedict_t *door)
 	}
 
 	return false;
+}
+
+// A door that only a button or another entity opens can stay shut for a long time, and a bot can't
+//   open it by walking up to it, so a path into it counts as very slow while it is shut.  Doors
+//   that open as a player comes near, or that bots shoot open, don't hold up the path.
+static qbool BotDoorCanHoldUpPath(gedict_t *from_marker, gedict_t *to_marker)
+{
+	gedict_t *door = to_marker->fb.door_entity;
+	gedict_t *master;
+	gedict_t *opener;
+
+	if (!door)
+	{
+		return false;
+	}
+
+	// linked doors share the targetname and health of the master door
+	master = PROG_TO_EDICT(door->s.v.owner);
+	if (strnull(master->targetname) || ISLIVE(master))
+	{
+		return false;
+	}
+
+	// from another part of the same door
+	if (from_marker->fb.door_entity
+			&& (PROG_TO_EDICT(from_marker->fb.door_entity->s.v.owner) == master))
+	{
+		return false;
+	}
+
+	for (opener = world; (opener = find(opener, FOFS(target), master->targetname));)
+	{
+		// from the button that opens it, or a trigger opens it as a player comes near
+		if ((opener == from_marker) || !strncmp(opener->classname, "trigger_", 8))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+qbool BotDoorHoldsUpPath(gedict_t *from_marker, gedict_t *to_marker)
+{
+	return BotDoorCanHoldUpPath(from_marker, to_marker) && BotDoorIsClosed(to_marker);
 }
 
 #endif
