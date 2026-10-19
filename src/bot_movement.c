@@ -5,6 +5,7 @@
 #define ARROW_TIME_INCREASE       0.15  // Seconds to advance after NewVelocityForArrow
 #define MIN_DEAD_TIME 0.2f
 #define MAX_DEAD_TIME 1.0f
+#define CURLJUMP_BRAKE_DROP 32    // Curl jump target this far below the takeoff marker to pull back in the air
 
 //#define DEBUG_MOVEMENT
 
@@ -123,6 +124,56 @@ static void PM_Accelerate(vec3_t vel_after_friction, qbool onGround, vec3_t orig
 #endif
 }
 
+// Pulls back in the air if the bot would fly past the curl jump target before dropping to its height,
+//   as a player does to land on it.  Returns false if the bot needs more speed, not less
+static qbool CurlJumpBrake(gedict_t *self, vec3_t velocity, vec3_t dir_command)
+{
+	gedict_t *linked = self->fb.linked_marker;
+	gedict_t *from = self->fb.touch_marker;
+	float gravity = cvar("sv_gravity");
+	vec3_t target;
+	vec3_t wish;
+	float drop_time;
+	float above;
+
+	VectorAdd(linked->s.v.absmin, linked->s.v.view_ofs, target);
+
+	// only when dropping to a lower floor (otherwise it can fall short into the gap of a level jump)
+	if (!from
+			|| (from->s.v.absmin[2] + from->s.v.view_ofs[2] - target[2] < CURLJUMP_BRAKE_DROP))
+	{
+		return false;
+	}
+
+	above = self->s.v.origin[2] - target[2];
+	if ((gravity <= 0) || (velocity[2] * velocity[2] + 2 * gravity * above <= 0))
+	{
+		return false;
+	}
+
+	drop_time = (velocity[2] + sqrt(velocity[2] * velocity[2] + 2 * gravity * above)) / gravity;
+	if (drop_time < g_globalvars.frametime)
+	{
+		return false;
+	}
+
+	// the horizontal velocity that is over the target when the bot drops to its height
+	VectorSubtract(target, self->s.v.origin, wish);
+	VectorScale(wish, 1 / drop_time, wish);
+	wish[2] = 0;
+	if ((wish[0] * wish[0] + wish[1] * wish[1])
+			>= (velocity[0] * velocity[0] + velocity[1] * velocity[1]))
+	{
+		return false;
+	}
+
+	VectorSubtract(wish, velocity, wish);
+	wish[2] = 0;
+	normalize(wish, dir_command);
+
+	return true;
+}
+
 // Points dir_command, which starts out as dir_move_, where the bot speeds up most toward dir_move_
 static void ApplyPhysics(gedict_t *self, vec3_t dir_command)
 {
@@ -208,6 +259,12 @@ static void ApplyPhysics(gedict_t *self, vec3_t dir_command)
 		hor_speed_squared = (expected_velocity[0] * expected_velocity[0]
 				+ expected_velocity[1] * expected_velocity[1]);
 		if (onGround && hor_speed_squared < sv_maxspeed * sv_maxspeed * 0.8 * 0.8)
+		{
+			return;
+		}
+
+		if ((self->fb.path_state & BOTPATH_CURLJUMP_HINT) && !onGround && self->fb.linked_marker
+				&& CurlJumpBrake(self, expected_velocity, dir_command))
 		{
 			return;
 		}
