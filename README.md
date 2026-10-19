@@ -86,6 +86,26 @@ force CMake generator to be unix makefiles
 build KTX for ``linux-amd64`` and ``QVM`` version, you can provide
 any platform combinations.
 
+The ``QVM`` build needs ``q3lcc``, ``q3rcc`` and ``q3cpp`` from
+[q3lcc][q3lcc] on your ``PATH``:
+
+```
+git clone https://github.com/ec-/q3lcc.git
+make -C q3lcc PLATFORM=$(uname -s) ARCH=$(uname -m)
+cp q3lcc/build-*/q3lcc q3lcc/build-*/q3rcc q3lcc/build-*/q3cpp ~/.local/bin/
+```
+
+On macOS add ``CC="cc -D_FORTIFY_SOURCE=0"`` to the ``make`` command,
+as the SDK's ``memmove`` macro breaks the build of ``q3cpp``.
+
+Alternatively, the [ktx-qvm][ktx-qvm] container image has the toolchain
+already installed. Run it from the KTX checkout and it writes the ``QVM``
+to ``build/qvm/qwprogs.qvm``:
+
+```
+docker run --rm --user "$(id -u):$(id -g)" -v "$PWD":/src ghcr.io/qw-group/ktx-qvm
+```
+
 ## Versioning
 
 For the versions available, see the [tags on this repository][ktx-tags].
@@ -130,5 +150,7 @@ This project is licensed under the GPL-2.0 License - see the [LICENSE.md](LICENS
 [ktx-tags]: https://github.com/QW-Group/ktx/tags
 [ktx-builds]: https://builds.quakeworld.nu/ktx
 [mvdsv]: https://github.com/QW-Group/mvdsv
+[q3lcc]: https://github.com/ec-/q3lcc
+[ktx-qvm]: https://github.com/QW-Group/ktx-qvm
 [nquake-linux]: https://github.com/nQuake/server-linux
 [discord-qw]: http://discord.quake.world/
