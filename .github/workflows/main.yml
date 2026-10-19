@@ -113,7 +113,7 @@ jobs:
 
       - name: Build
         run: |
-          cmake -B builddir -S . -G Xcode -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+          cmake -B builddir -S . -G Xcode -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DSANITIZE=ON
           cmake --build builddir --config Release --parallel
 
   verify-msvc:
