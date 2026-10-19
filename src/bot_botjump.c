@@ -381,7 +381,7 @@ void BotPerformRocketJump(gedict_t *self)
 
 			// Finish rocket jumping
 			self->fb.rocketJumping = false;
-			self->fb.path_state &= ROCKET_JUMP;
+			self->fb.path_state &= ~ROCKET_JUMP;
 			self->fb.path_state |= BOTPATH_RJ_IN_PROGRESS;
 		}
 		else
