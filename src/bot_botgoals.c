@@ -15,6 +15,7 @@
 //static float best_score;
 #define BACKPACK_CLASSNAME "backpack"
 #define FROGBOT_CHANCE_HELP_TEAMMATE 0.25
+#define FROGBOT_CLAIM_CONVICTION 1.5	// desire multiplier for the goal a bot has claimed
 
 // FIXME: Local Globals
 static float best_respawn_time = 0;
@@ -71,6 +72,56 @@ static qbool GoalLeaveForTeammate(gedict_t *self, gedict_t *goal_entity)
 	return false;
 }
 
+static qbool OwnClaim(gedict_t *self, gedict_t *goal_entity)
+{
+	return teamplay && (goal_entity->fb.claim_player == self)
+			&& (g_globalvars.time < goal_entity->fb.claim_time);
+}
+
+// Ends the dead player's claim and lets its teammates look again
+void ReleaseGoalClaim(gedict_t *self)
+{
+	gedict_t *goal_entity = &g_edicts[self->s.v.goalentity];
+	gedict_t *plr;
+
+	if (!OwnClaim(self, goal_entity))
+	{
+		return;
+	}
+
+	goal_entity->fb.claim_time = 0;
+	for (plr = world; (plr = find_plr(plr));)
+	{
+		if (plr->isBot && (plr != self) && SameTeam(plr, self))
+		{
+			plr->fb.goal_refresh_time = min(plr->fb.goal_refresh_time, g_globalvars.time);
+		}
+	}
+}
+
+// Claims the goal, so the bot doesn't drop it for something only a little better
+static void ClaimGoal(gedict_t *self, gedict_t *goal_entity)
+{
+	gedict_t *claimant;
+
+	if (!teamplay || (goal_entity == world) || (goal_entity->ct == ctPlayer))
+	{
+		return;
+	}
+
+	// a teammate losing the claim loses its conviction too, so it should look again
+	claimant = goal_entity->fb.claim_player;
+	if (claimant && (claimant != self) && (g_globalvars.time < goal_entity->fb.claim_time)
+			&& ISLIVE(claimant) && SameTeam(claimant, self)
+			&& (claimant->s.v.goalentity == NUM_FOR_EDICT(goal_entity)))
+	{
+		claimant->fb.goal_refresh_time = g_globalvars.time;
+	}
+
+	goal_entity->fb.claim_player = self;
+	goal_entity->fb.claim_time = self->fb.goal_refresh_time + 1;
+}
+
 // Evaluates a goal 
 void EvalGoal(gedict_t *self, gedict_t *goal_entity)
 {
@@ -86,6 +137,11 @@ void EvalGoal(gedict_t *self, gedict_t *goal_entity)
 	if (self->fb.fixed_goal != NULL)
 	{
 		goal_desire = (self->fb.fixed_goal == goal_entity ? 1000 : 0);
+	}
+
+	if (OwnClaim(self, goal_entity))
+	{
+		goal_desire *= FROGBOT_CLAIM_CONVICTION;
 	}
 
 	goal_entity->fb.saved_goal_desire = goal_desire;
@@ -422,7 +478,8 @@ void UpdateGoal(gedict_t *self)
 		}
 	}
 
-	if (teamplay && !isRA())
+	// not while the bot sticks to a claimed goal
+	if (teamplay && !isRA() && !OwnClaim(self, &g_edicts[self->s.v.goalentity]))
 	{
 		gedict_t *search_entity = HelpTeammate();
 
@@ -462,6 +519,7 @@ void UpdateGoal(gedict_t *self)
 
 		self->s.v.goalentity = NUM_FOR_EDICT(self->fb.best_goal2);
 		self->fb.goal_respawn_time = g_globalvars.time + self->fb.best_goal2->fb.saved_respawn_time;
+		ClaimGoal(self, self->fb.best_goal2);
 	}
 	else
 	{

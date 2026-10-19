@@ -562,6 +562,8 @@ typedef struct fb_entvars_s {
 	struct gedict_s* touchPlayer;				// last player to touch this object (see below)
 	float touchPlayerTime;						// how long the current item will be considered touched by touchPlayer
 	int   teamflag;								// This is used to add a teamflag to a goal entity, so it bots on same team ignore item
+	struct gedict_s* claim_player;				// last bot to pick this as its goal, which sticks to it
+	float claim_time;							// the claim lapses at this time unless claim_player renews it
 
 	float oldwaterlevel;						// used to detect FL_WATERJUMP waterjump...  may not be required?  server will set...
 	float oldwatertype;							// FIXME: never read.  server will set, this is in MOVETYPE_STEP code...

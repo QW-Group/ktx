@@ -106,6 +106,7 @@ void BotPlayerKilledEvent(gedict_t *targ, gedict_t *attacker, gedict_t *inflicto
 // Called whenever a player dies
 void BotPlayerDeathEvent(gedict_t *self)
 {
+	ReleaseGoalClaim(self);
 	ResetGoalEntity(self);
 	ResetEnemy(self);
 
