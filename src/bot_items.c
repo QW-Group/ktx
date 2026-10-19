@@ -876,6 +876,12 @@ static void fb_powerup_taken(gedict_t *item, gedict_t *player)
 	item->fb.goal_respawn_time = item->s.v.nextthink + AUTOTRACK_POWERUPS_PREDICT_TIME;
 	AssignVirtualGoal(item);
 	item->s.v.solid = SOLID_TRIGGER;
+	// powerup_touch unlinked it as SOLID_NOT; relink it (otherwise bots can't touch its marker until it respawns).
+	//   Not a dropped one: it has no fb_powerup_touch, so it could be picked up again before it is removed
+	if (item->fb.fl_marker)
+	{
+		setorigin(item, PASSVEC3(item->s.v.origin));
+	}
 	player->fb.last_mm2_spot = 0;
 	BotTookMessage(item, player);
 }
