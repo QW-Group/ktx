@@ -147,6 +147,8 @@ void BotClientEntersEvent(gedict_t *self, gedict_t *spawn_pos)
 	self->fb.firing = false;
 	self->fb.desired_weapon_impulse = 2;
 	self->fb.goal_refresh_time = 0;
+	self->fb.goal_tracked = NULL;
+	self->fb.avoid_goal = NULL;
 	self->fb.allowedMakeNoise = true;
 
 	FrogbotSetHealthArmour(self);
