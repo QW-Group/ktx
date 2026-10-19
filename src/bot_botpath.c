@@ -348,6 +348,19 @@ void ProcessNewLinkedMarker(gedict_t *self)
 		}
 	}
 
+	// EvalPath() skips paths into a shut door, so head for the button that opens the one on the route.
+	//   Not when running away, nor before the match starts (button_touch() ignores presses then)
+	if (goalentity_marker && !(self->fb.state & RUNAWAY) && (k_practice || (match_in_progress == 2)))
+	{
+		gedict_t *button = BotDoorButtonOnRoute(self->fb.touch_marker, goalentity_marker,
+												rocket_jump_routes_allowed);
+
+		if (button)
+		{
+			goalentity_marker = button;
+		}
+	}
+
 	// FIXME: have RL and weaker than enemy... set goal entity to marker on edge of zone that the bot can see?
 	//    Almost looks like this is picking a rocket-spam location?
 	if (g_random() < 0.5)

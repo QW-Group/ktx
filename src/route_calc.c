@@ -29,9 +29,6 @@ static float min_traveltime = 0;
 static float runaway_time = 0;
 static float P_time = 0;
 
-// Extra travel time for a path into a shut door, see BotDoorHoldsUpPath()
-#define CLOSED_DOOR_PATH_TIME 1000
-
 static void TravelTimeForPath(gedict_t *m, int i)
 {
 	gedict_t *m_P = m->fb.paths[i].next_marker;
@@ -671,6 +668,102 @@ static void PathCalculation(fb_path_calc_funcref_t func)
 	}
 }
 
+// Redoes the travel times between subzones, goals and zones from the path times
+static void CalculateMarkerRouteTimes(void)
+{
+	int i, j;
+
+	for (i = 0; i < NUMBER_MARKERS; ++i)
+	{
+		gedict_t *m = markers[i];
+
+		if (!m)
+		{
+			continue;
+		}
+
+		for (j = 0; j < NUMBER_GOALS; ++j)
+		{
+			fb_goal_t *goal = &m->fb.goals[j];
+
+			if (m->fb.G_ == j + 1)
+			{
+				goal->next_marker_rj = goal->next_marker = m;
+				goal->rj_time = goal->time = 0;
+			}
+			else
+			{
+				goal->next_marker_rj = goal->next_marker = dropper;
+				goal->rj_time = goal->time = 1000000;
+			}
+		}
+
+		for (j = 0; j < NUMBER_ZONES; ++j)
+		{
+			fb_zone_t *zone = &m->fb.zones[j];
+
+			zone->next_zone = NULL;
+			if (m->fb.Z_ == j + 1)
+			{
+				zone->marker_rj = zone->next_rj = zone->marker = zone->next = m;
+				zone->rj_time = zone->time = zone->from_time = 0;
+			}
+			else
+			{
+				zone->marker_rj = zone->marker = dropper;
+				zone->next_rj = zone->next = NULL;
+				zone->rj_time = zone->time = zone->from_time = 1000000;
+			}
+		}
+
+		for (j = 0; j < NUMBER_SUBZONES; ++j)
+		{
+			fb_subzone_t *sub = &m->fb.subzones[j];
+
+			sub->next_marker_rj = sub->next_marker = NULL;
+			sub->rj_time = sub->time = ((m->fb.S_ == j) ? 0 : 1000000);
+		}
+	}
+
+	PathCalculation(IdentifyFastestSubzoneRoute);
+	PathCalculation(IdentifyFastestGoalRoute);
+	PathCalculation(IdentifyFastestZoneRoute);
+	PathCalculation(Calc_G_time_6_path_apply);
+}
+
+// Swaps CLOSED_DOOR_PATH_TIME on paths into shut doors for the trip to press the button, which
+//   needs route times worked out with the doors shut.  Returns false if no path changed.
+static qbool AddDoorButtonTimes(void)
+{
+	qbool changed = false;
+	int i, j;
+
+	for (i = 0; i < NUMBER_MARKERS; ++i)
+	{
+		gedict_t *m = markers[i];
+
+		if (!m)
+		{
+			continue;
+		}
+
+		for (j = 0; j < NUMBER_PATHS; ++j)
+		{
+			gedict_t *m_P = m->fb.paths[j].next_marker;
+			float detour_time;
+
+			if (m_P && BotDoorHoldsUpPath(m, m_P) && BotDoorButton(m, m_P, &detour_time))
+			{
+				m->fb.paths[j].time += detour_time - CLOSED_DOOR_PATH_TIME;
+				m->fb.paths[j].rj_time += detour_time - CLOSED_DOOR_PATH_TIME;
+				changed = true;
+			}
+		}
+	}
+
+	return changed;
+}
+
 void InitialiseMarkerRoutes(void)
 {
 	int i;
@@ -761,6 +854,11 @@ void InitialiseMarkerRoutes(void)
 	PathCalculation(IdentifyFastestGoalRoute);
 	PathCalculation(IdentifyFastestZoneRoute);
 	PathCalculation(Calc_G_time_6_path_apply);
+	if (AddDoorButtonTimes())
+	{
+		CalculateMarkerRouteTimes();
+	}
+
 	Calc_G_time_7();
 	PathCalculation(Calc_G_time_8_path_apply);
 	Calc_G_time_9();
@@ -795,9 +893,8 @@ void InitialiseMarkerRoutes(void)
 	return;
 }
 
-// Called when a door that holds up paths opens or shuts.  Redoes the travel times between
-//   subzones, goals and zones as InitialiseMarkerRoutes() first worked them out.  The sight and
-//   runaway tables are left as they are: they take far longer to work out.
+// Called when a door that holds up paths opens or shuts.  The sight and runaway tables keep what
+//   InitialiseMarkerRoutes() built, as they are far slower to build.
 void RecalculateMarkerRouteTimes(void)
 {
 	int i, j;
@@ -818,54 +915,13 @@ void RecalculateMarkerRouteTimes(void)
 				DoorPathTime(m, j);
 			}
 		}
-
-		for (j = 0; j < NUMBER_GOALS; ++j)
-		{
-			fb_goal_t *goal = &m->fb.goals[j];
-
-			if (m->fb.G_ == j + 1)
-			{
-				goal->next_marker_rj = goal->next_marker = m;
-				goal->rj_time = goal->time = 0;
-			}
-			else
-			{
-				goal->next_marker_rj = goal->next_marker = dropper;
-				goal->rj_time = goal->time = 1000000;
-			}
-		}
-
-		for (j = 0; j < NUMBER_ZONES; ++j)
-		{
-			fb_zone_t *zone = &m->fb.zones[j];
-
-			zone->next_zone = NULL;
-			if (m->fb.Z_ == j + 1)
-			{
-				zone->marker_rj = zone->next_rj = zone->marker = zone->next = m;
-				zone->rj_time = zone->time = zone->from_time = 0;
-			}
-			else
-			{
-				zone->marker_rj = zone->marker = dropper;
-				zone->next_rj = zone->next = NULL;
-				zone->rj_time = zone->time = zone->from_time = 1000000;
-			}
-		}
-
-		for (j = 0; j < NUMBER_SUBZONES; ++j)
-		{
-			fb_subzone_t *sub = &m->fb.subzones[j];
-
-			sub->next_marker_rj = sub->next_marker = NULL;
-			sub->rj_time = sub->time = ((m->fb.S_ == j) ? 0 : 1000000);
-		}
 	}
 
-	PathCalculation(IdentifyFastestSubzoneRoute);
-	PathCalculation(IdentifyFastestGoalRoute);
-	PathCalculation(IdentifyFastestZoneRoute);
-	PathCalculation(Calc_G_time_6_path_apply);
+	CalculateMarkerRouteTimes();
+	if (AddDoorButtonTimes())
+	{
+		CalculateMarkerRouteTimes();
+	}
 }
 
 #endif
