@@ -98,9 +98,13 @@ cp q3lcc/build-*/q3lcc q3lcc/build-*/q3rcc q3lcc/build-*/q3cpp ~/.local/bin/
 On macOS add ``CC="cc -D_FORTIFY_SOURCE=0"`` to the ``make`` command,
 as the SDK's ``memmove`` macro breaks the build of ``q3cpp``.
 
-Alternatively, [ktx-qvm][ktx-qvm] builds the ``QVM`` in a Docker container;
-clone it with ``--recursive``, build the image, and run it from the KTX
-checkout.
+Alternatively, the [ktx-qvm][ktx-qvm] container image has the toolchain
+already installed. Run it from the KTX checkout and it writes the ``QVM``
+to ``build/qvm/qwprogs.qvm``:
+
+```
+docker run --rm --user "$(id -u):$(id -g)" -v "$PWD":/src ghcr.io/qw-group/ktx-qvm
+```
 
 ## Versioning
 
