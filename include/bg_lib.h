@@ -16,6 +16,8 @@ typedef char *va_list;
 #define va_arg(ap,t)	( *(t *)((ap += _INTSIZEOF(t)) - _INTSIZEOF(t)) )
 #define va_end(ap)		( ap = (va_list)0 )
 
+#define offsetof(type, member)	( (size_t)&((type *)0)->member )
+
 #define CHAR_BIT		8					/* number of bits in a char */
 #define SCHAR_MIN		(-128)				/* minimum signed char value */
 #define SCHAR_MAX		127					/* maximum signed char value */
