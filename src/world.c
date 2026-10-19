@@ -788,6 +788,7 @@ void FirstFrame(void)
 	RegisterCvarEx("k_pause_without_matchtag", "0");
 
 	RegisterCvar("k_random_maplist"); // select random map from k_ml_XXX variables.
+	RegisterCvar("k_random_seed"); // nonzero: the same random numbers on every map load, for repeatable bot tests
 
 	RegisterCvar("k_mode");
 	RegisterCvar("k_defmode");

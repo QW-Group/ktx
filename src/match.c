@@ -994,7 +994,7 @@ static void SM_PrepareClients(void)
 
 	for (i = player_count - 1; i > 0; i--)
 	{
-		j = rand() % (i + 1);
+		j = i_rnd(0, i);
 		temp = players[i];
 		players[i] = players[j];
 		players[j] = temp;

@@ -475,8 +475,10 @@ void G_Error(const char *fmt, ...)
 void G_InitGame(int levelTime, int randomSeed)
 {
 	int 		i;
+	// set before the map loads, as mod cvars are only registered on its first frame
+	int			fixed_seed = (int)cvar("k_random_seed");
 
-	g_random_seed(randomSeed);
+	g_random_seed(fixed_seed ? fixed_seed : randomSeed);
 	framecount = 0;
 	starttime = levelTime * 0.001;
 	G_Printf("Init Game\n");
