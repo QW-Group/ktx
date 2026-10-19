@@ -5,6 +5,7 @@
 #define ARROW_TIME_INCREASE       0.15  // Seconds to advance after NewVelocityForArrow
 #define MIN_DEAD_TIME 0.2f
 #define MAX_DEAD_TIME 1.0f
+#define CURLJUMP_BRAKE_DROP 32    // Curl jump target this far below the takeoff marker to pull back in the air
 
 //#define DEBUG_MOVEMENT
 
@@ -123,7 +124,58 @@ static void PM_Accelerate(vec3_t vel_after_friction, qbool onGround, vec3_t orig
 #endif
 }
 
-static void ApplyPhysics(gedict_t *self)
+// Pulls back in the air if the bot would fly past the curl jump target before dropping to its height,
+//   as a player does to land on it.  Returns false if the bot needs more speed, not less
+static qbool CurlJumpBrake(gedict_t *self, vec3_t velocity, vec3_t dir_command)
+{
+	gedict_t *linked = self->fb.linked_marker;
+	gedict_t *from = self->fb.touch_marker;
+	float gravity = cvar("sv_gravity");
+	vec3_t target;
+	vec3_t wish;
+	float drop_time;
+	float above;
+
+	VectorAdd(linked->s.v.absmin, linked->s.v.view_ofs, target);
+
+	// only when dropping to a lower floor (otherwise it can fall short into the gap of a level jump)
+	if (!from
+			|| (from->s.v.absmin[2] + from->s.v.view_ofs[2] - target[2] < CURLJUMP_BRAKE_DROP))
+	{
+		return false;
+	}
+
+	above = self->s.v.origin[2] - target[2];
+	if ((gravity <= 0) || (velocity[2] * velocity[2] + 2 * gravity * above <= 0))
+	{
+		return false;
+	}
+
+	drop_time = (velocity[2] + sqrt(velocity[2] * velocity[2] + 2 * gravity * above)) / gravity;
+	if (drop_time < g_globalvars.frametime)
+	{
+		return false;
+	}
+
+	// the horizontal velocity that is over the target when the bot drops to its height
+	VectorSubtract(target, self->s.v.origin, wish);
+	VectorScale(wish, 1 / drop_time, wish);
+	wish[2] = 0;
+	if ((wish[0] * wish[0] + wish[1] * wish[1])
+			>= (velocity[0] * velocity[0] + velocity[1] * velocity[1]))
+	{
+		return false;
+	}
+
+	VectorSubtract(wish, velocity, wish);
+	wish[2] = 0;
+	normalize(wish, dir_command);
+
+	return true;
+}
+
+// Points dir_command, which starts out as dir_move_, where the bot speeds up most toward dir_move_
+static void ApplyPhysics(gedict_t *self, vec3_t dir_command)
 {
 	float drop = 0;
 	vec3_t expected_velocity;
@@ -211,8 +263,15 @@ static void ApplyPhysics(gedict_t *self)
 			return;
 		}
 
-		self->fb.dir_move_[2] = 0;
-		normalize(self->fb.dir_move_, original_direction);
+		if ((self->fb.path_state & BOTPATH_CURLJUMP_HINT) && !onGround && self->fb.linked_marker
+				&& CurlJumpBrake(self, expected_velocity, dir_command))
+		{
+			return;
+		}
+
+		VectorCopy(self->fb.dir_move_, original_direction);
+		original_direction[2] = 0;
+		normalize(original_direction, original_direction);
 		normalize(expected_velocity, current_direction);
 		used_numerator = min_numerator + movement_skill * (max_numerator - min_numerator);
 		max_incr = used_numerator * used_numerator;
@@ -228,13 +287,8 @@ static void ApplyPhysics(gedict_t *self)
 
 			if ((self->fb.path_state & BOTPATH_CURLJUMP_HINT) && !onGround)
 			{
-				// Once in the air, we rotate in opposite direction
-				// FIXME: THIS IS UGLY HACK
-				if (framecount % 3)
-				{
-					rotation = 0;
-				}
-				else if (self->fb.angle_hint > 0)
+				// curl back toward the target every frame, as a player strafe-turning in the air
+				if (perpendicular[2] < 0)
 				{
 					rotation = -rotation;
 				}
@@ -296,7 +350,7 @@ static void ApplyPhysics(gedict_t *self)
 
 				if ((dp_rot > dp_std) || (dp_rot >= 0.9))
 				{
-					VectorCopy(proposed_dir, self->fb.dir_move_);
+					VectorCopy(proposed_dir, dir_command);
 					if (self->fb.debug_path)
 					{
 						PM_Accelerate(expected_velocity, (int)self->s.v.flags & FL_ONGROUND,
@@ -404,7 +458,7 @@ float AverageTraceAngle(gedict_t *self, qbool debug, qbool report)
 	return avg_angle;
 }
 
-static void BestJumpingDirection(gedict_t *self)
+static void BestJumpingDirection(gedict_t *self, vec3_t dir_command)
 {
 	float raw_avg_angle = AverageTraceAngle(self, false, self->fb.debug_path);
 	float avg_angle;
@@ -418,8 +472,7 @@ static void BestJumpingDirection(gedict_t *self)
 		avg_angle = max(raw_avg_angle, 15);
 	}
 
-	RotatePointAroundVector(self->fb.dir_move_, g_globalvars.v_up, g_globalvars.v_forward,
-							avg_angle);
+	RotatePointAroundVector(dir_command, g_globalvars.v_up, g_globalvars.v_forward, avg_angle);
 }
 
 void BotSetCommand(gedict_t *self)
@@ -432,6 +485,7 @@ void BotSetCommand(gedict_t *self)
 	qbool jumping;
 	qbool firing;
 	vec3_t direction;
+	vec3_t dir_command;
 
 	BotPerformRocketJump(self);
 
@@ -498,20 +552,23 @@ void BotSetCommand(gedict_t *self)
 	}
 	else
 	{
+		// leave dir_move_ alone: bots in the air only set it every 0.15s, and each frame would turn
+		//   further from it
+		VectorCopy(self->fb.dir_move_, dir_command);
 		if (jumping && ((int)self->s.v.flags & FL_ONGROUND))
 		{
-			BestJumpingDirection(self);
+			BestJumpingDirection(self, dir_command);
 		}
 		else
 		{
-			ApplyPhysics(self);
+			ApplyPhysics(self, dir_command);
 		}
 
 		if (self->s.v.waterlevel <= 1)
 		{
 			vec3_t hor;
 
-			VectorCopy(self->fb.dir_move_, hor);
+			VectorCopy(dir_command, hor);
 			hor[2] = 0;
 			VectorNormalize(hor);
 			VectorScale(hor, 800, hor);
@@ -522,14 +579,14 @@ void BotSetCommand(gedict_t *self)
 		}
 		else
 		{
-			direction[0] = DotProduct (g_globalvars.v_forward, self->fb.dir_move_) * 800;
-			direction[1] = DotProduct (g_globalvars.v_right, self->fb.dir_move_) * 800;
-			direction[2] = DotProduct (g_globalvars.v_up, self->fb.dir_move_) * 800;
+			direction[0] = DotProduct (g_globalvars.v_forward, dir_command) * 800;
+			direction[1] = DotProduct (g_globalvars.v_right, dir_command) * 800;
+			direction[2] = DotProduct (g_globalvars.v_up, dir_command) * 800;
 		}
 
 #ifdef DEBUG_MOVEMENT
 		if (self->fb.debug_path) {
-			G_bprint (PRINT_HIGH, "     : final direction sent [%4.1f %4.1f %4.1f]\n", PASSVEC3 (self->fb.dir_move_));
+			G_bprint (PRINT_HIGH, "     : final direction sent [%4.1f %4.1f %4.1f]\n", PASSVEC3 (dir_command));
 		}
 #endif
 	}

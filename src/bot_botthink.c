@@ -218,7 +218,8 @@ static void BotMoveTowardsLinkedMarker(gedict_t *self, vec3_t dir_move)
 	VectorSubtract(temp, self->s.v.origin, temp);
 	normalize(temp, dir_move);
 
-	if (curlJump && (onGround || (self->s.v.velocity[2] > 0)))
+	// run up at the hinted angle, then curl in the air, see ApplyPhysics()
+	if (curlJump && onGround)
 	{
 		vec3_t up =
 			{ 0, 0, 1 };
