@@ -221,6 +221,11 @@ void AssignVirtualGoal(gedict_t *item)
 {
 	gedict_t *marker_;
 
+	if (!item->fb.Z_)
+	{
+		return; // no marker near the item
+	}
+
 	for (marker_ = FirstZoneMarker(item->fb.Z_); marker_; marker_ = marker_->fb.Z_next)
 	{
 		AssignVirtualGoal_apply(marker_);

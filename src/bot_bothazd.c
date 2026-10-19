@@ -694,6 +694,11 @@ static void AvoidHazardsOnGround(gedict_t *self, float hor_speed, vec3_t new_ori
 			VectorCopy(new_velocity, hor_velocity);
 			hor_velocity[2] = 0;
 			hor_speed = vlen(hor_velocity);
+			if (hor_speed < 1)
+			{
+				return; // running straight into the wall
+			}
+
 			VectorMA(testplace, (16 / hor_speed) * (1 - first_trace_fraction), new_velocity,
 						testplace);
 		}
@@ -1027,9 +1032,10 @@ void AvoidHazards(gedict_t *self)
 	VectorCopy(new_velocity, hor_velocity);
 	hor_velocity[2] = 0;
 	hor_speed = vlen(hor_velocity);
-	if (!hor_speed)
+	// the checks below divide by hor_speed, so near zero gives absurd jump velocities
+	if (hor_speed < 1)
 	{
-		return; // falling straight down
+		return; // falling straight down or standing still
 	}
 
 	VectorCopy(self->s.v.origin, new_origin);

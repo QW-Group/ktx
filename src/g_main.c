@@ -472,6 +472,21 @@ void G_Error(const char *fmt, ...)
 
 //===================================================================
 
+#if defined(__APPLE__) && defined(__has_feature)
+#if __has_feature(address_sanitizer)
+// dyld never runs the __mod_term_func destructor that ASan uses to unregister
+// our globals, so they would still be registered when the server loads us
+// again for the next map and ASan reports false ODR violations and overflows
+extern uintptr_t asan_globals_registered __asm__("____asan_globals_registered");
+void __asan_unregister_image_globals(uintptr_t *flag);
+
+__attribute__((destructor)) static void G_UnregisterAsanGlobals(void)
+{
+	__asan_unregister_image_globals(&asan_globals_registered);
+}
+#endif
+#endif
+
 void G_InitGame(int levelTime, int randomSeed)
 {
 	int 		i;

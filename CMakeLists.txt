@@ -12,6 +12,8 @@ option(BOT_SUPPORT "Build with bot support" ON)
 # Option for FTE extensions. We also have some basic support for FTE which does not controlled by this setting.
 # This is en example and extensions unused for now, so its turned off by default. Also turning it ON makes binary incompatibe with MVDSV.
 option(FTESV "Build with FTE extensions support" OFF)
+# Build with AddressSanitizer and UndefinedBehaviorSanitizer, for debugging only.
+option(SANITIZE "Build with -fsanitize=address,undefined" OFF)
 
 # Set where sources located.
 set(DIR_SRC "src")
@@ -169,6 +171,15 @@ else()
 	check_c_compiler_flag("-Wstrlcpy-strlcat-size" HAS_STRLCPY_STRLCAT_SIZE)
 	if (HAS_STRLCPY_STRLCAT_SIZE)
 		target_compile_options(${PROJECT_NAME} PRIVATE -Werror=strlcpy-strlcat-size)
+	endif()
+
+	if(SANITIZE)
+		target_compile_options(${PROJECT_NAME} PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer)
+		# clang links the shared sanitizer runtime into a shared library only when asked
+		if(CMAKE_C_COMPILER_ID MATCHES "Clang" AND NOT APPLE)
+			target_link_options(${PROJECT_NAME} PRIVATE -shared-libsan)
+		endif()
+		target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=address,undefined)
 	endif()
 
 	# Do not allow undefined symbols while linking.
