@@ -1231,6 +1231,7 @@ qbool SameTeam(gedict_t *p1, gedict_t *p2);
 #define FrogbotItemPickupBonus() (false)
 #define FrogbotEasySkillMode()   (true)
 #define FrogbotBreakOnDeath()    (true)
+#define FrogbotExitIntermission() (false)
 #else
 #include "fb_globals.h"
 #endif
