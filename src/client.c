@@ -615,7 +615,10 @@ void IntermissionThink(void)
 		return;
 	}
 
-	if (!self->s.v.button0 && !self->s.v.button1 && !self->s.v.button2)
+	// bots never press buttons, so with only bots left this waits for a map
+	// reload; leaving lets the bots start another match by themselves
+	if (!self->s.v.button0 && !self->s.v.button1 && !self->s.v.button2
+			&& !(FrogbotExitIntermission() && (CountPlayers() == CountBots())))
 	{
 		return;
 	}

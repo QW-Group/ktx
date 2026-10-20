@@ -145,6 +145,11 @@ qbool FrogbotBreakOnDeath(void)
 	return (qbool)cvar(FB_CVAR_BREAK_ON_DEATH);
 }
 
+qbool FrogbotExitIntermission(void)
+{
+	return (qbool)cvar(FB_CVAR_EXIT_INTERMISSION);
+}
+
 static team_t* AddTeamToList(int *teamsFound, char *team, int topColor, int bottomColor)
 {
 	int i;
