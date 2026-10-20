@@ -71,6 +71,31 @@ static qbool GoalLeaveForTeammate(gedict_t *self, gedict_t *goal_entity)
 	return false;
 }
 
+// If a teammate bot heading for the item is closer to it, leave it for them
+// unless nothing else is worth much
+static qbool GoalCloserTeammate(gedict_t *self, gedict_t *goal_entity)
+{
+	float dist = VectorDistance(self->s.v.origin, goal_entity->s.v.origin);
+	int goal = NUM_FOR_EDICT(goal_entity);
+	gedict_t *p;
+
+	if (!teamplay || (goal_entity->ct == ctPlayer))
+	{
+		return false;
+	}
+
+	for (p = world; (p = find_plr(p));)
+	{
+		if ((p != self) && p->isBot && ISLIVE(p) && SameTeam(p, self) && (p->s.v.goalentity == goal)
+				&& (VectorDistance(p->s.v.origin, goal_entity->s.v.origin) < dist))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 // Evaluates a goal 
 void EvalGoal(gedict_t *self, gedict_t *goal_entity)
 {
@@ -86,6 +111,11 @@ void EvalGoal(gedict_t *self, gedict_t *goal_entity)
 	if (self->fb.fixed_goal != NULL)
 	{
 		goal_desire = (self->fb.fixed_goal == goal_entity ? 1000 : 0);
+	}
+
+	if ((goal_desire > 0) && GoalCloserTeammate(self, goal_entity))
+	{
+		goal_desire *= 0.5;
 	}
 
 	goal_entity->fb.saved_goal_desire = goal_desire;
