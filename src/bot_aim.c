@@ -6,10 +6,20 @@
 #define YAW_SNAP_THRESHOLD     4
 #define PITCH_SNAP_THRESHOLD   6
 
+#define LOOK_TRAVEL_SPEED      200
+#define LOOK_EASE              12
+
 #define ATTACK_RESPAWN_TIME 3
 
 qbool DM6FireAtDoor(gedict_t *self, vec3_t rel_pos);
 static void BotsModifyAimAtPlayerLogic(gedict_t *self);
+static void BotLookAlongTravel(gedict_t *self);
+
+static qbool BotAttackingRespawn(gedict_t *self)
+{
+	return self->s.v.enemy && ISDEAD(&g_edicts[self->s.v.enemy])
+			&& streq(self->fb.look_object->classname, "info_player_deathmatch");
+}
 
 static void BotSetDesiredAngles(gedict_t *self, vec3_t rel_pos)
 {
@@ -33,6 +43,17 @@ static void BotSetDesiredAngles(gedict_t *self, vec3_t rel_pos)
 	{
 		stuffcmd_flags(self, STUFFCMD_DEMOONLY, "//botcmd-desired %f %f %f %f\n", g_globalvars.time,
 						PASSVEC3(self->fb.desired_angle));
+	}
+
+	// a marker the enemy was heard at is where they will show up, so keep aiming there, and a
+	// spawn point being attacked is only fired at once the bot faces it
+	if ((self->fb.look_object->ct != ctPlayer) && !self->fb.firing && !self->fb.rocketJumping
+			&& !self->fb.predict_shoot && !self->s.v.waterlevel
+			&& !(self->s.v.enemy
+					&& (self->fb.look_object == g_edicts[self->s.v.enemy].fb.touch_marker))
+			&& !BotAttackingRespawn(self))
+	{
+		BotLookAlongTravel(self);
 	}
 
 	if (self->fb.look_object->ct == ctPlayer)
@@ -316,6 +337,26 @@ static float anglefix(float angle)
 	}
 
 	return angle;
+}
+
+// people look roughly where they are heading and turn their view there smoothly
+static void BotLookAlongTravel(gedict_t *self)
+{
+	float yaw = self->fb.desired_angle[YAW];
+	float diff;
+
+	if (sqrt(self->s.v.velocity[0] * self->s.v.velocity[0]
+			+ self->s.v.velocity[1] * self->s.v.velocity[1]) >= LOOK_TRAVEL_SPEED)
+	{
+		vec3_t dir;
+
+		VectorSet(dir, self->s.v.velocity[0], self->s.v.velocity[1], 0);
+		yaw = vectoyaw(dir);
+	}
+
+	diff = anglefix(anglemod(yaw) - anglemod(self->s.v.v_angle[YAW]));
+	self->fb.desired_angle[YAW] = self->s.v.v_angle[YAW]
+			+ diff * min(1, LOOK_EASE * g_globalvars.frametime);
 }
 
 // Called after desired angles have been set to aim at the player
