@@ -136,12 +136,6 @@ gedict_t* LocateNextMarker(vec3_t org, gedict_t *ignore_ent)
 			continue;
 		}
 
-		if (!editor_mode && streq(marker_->classname, "door")
-				&& !(marker_->fb.T & MARKER_DOOR_TOUCHABLE))
-		{
-			continue;
-		}
-
 		if (marker_->fb.fl_marker || (editor_mode && marker_->fb.index))
 		{
 			VectorAdd(marker_->s.v.absmin, marker_->s.v.absmax, marker_center);

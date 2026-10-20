@@ -137,42 +137,6 @@ static qbool CheckForRocketEnemyAim(gedict_t *self)
 	return false;
 }
 
-static qbool OnLift(gedict_t *self)
-{
-	if (streq(self->fb.touch_marker->classname, "door") && (self->deathtype == dtSQUISH))
-	{
-		if ((self->fb.linked_marker->s.v.absmin[2] + self->fb.linked_marker->s.v.view_ofs[2])
-				> (self->s.v.origin[2] + 18))
-		{
-			if (teamplay)
-			{
-				self->fb.state &= ~HELP_TEAMMATE;
-			}
-
-			if (self->s.v.absmin[0] >= self->fb.touch_marker->s.v.absmin[0])
-			{
-				if (self->s.v.absmax[0] <= self->fb.touch_marker->s.v.absmax[0])
-				{
-					if (self->s.v.absmin[1] >= self->fb.touch_marker->s.v.absmin[1])
-					{
-						if (self->s.v.absmax[1] <= self->fb.touch_marker->s.v.absmax[1])
-						{
-							SetLinkedMarker(self, self->fb.touch_marker, "OnLift");
-							self->fb.path_state = 0;
-							self->fb.linked_marker_time = g_globalvars.time + 5;
-							self->fb.old_linked_marker = NULL;
-						}
-					}
-				}
-			}
-
-			return true;
-		}
-	}
-
-	return false;
-}
-
 static qbool LookingAtPlayer(gedict_t *self)
 {
 	return (self->fb.look_object && (self->fb.look_object->ct == ctPlayer));
@@ -442,12 +406,6 @@ void ProcessNewLinkedMarker(gedict_t *self)
 						&new_linked_marker, &new_path_state, &new_angle_hint, &new_rj_delay,
 						new_rj_angles);
 	SetLinkedMarker(self, new_linked_marker, "ProcNewLinked(std)");
-
-	// "check if fully on lift - if not then continue moving to linked_marker_"
-	if (OnLift(self))
-	{
-		return;
-	}
 
 	if (self->fb.state & WAIT)
 	{
