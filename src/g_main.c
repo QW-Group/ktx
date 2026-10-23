@@ -678,6 +678,7 @@ static qbool G_InitExtensions(void)
 		{"SetExtFieldPtr",		G_SETEXTFIELDPTR},
 		{"GetExtFieldPtr",		G_GETEXTFIELDPTR},
 		{"setsendneeded",		G_SETSENDNEEDED},
+		{"SkipEntityPhysics",	G_SKIPENTITYPHYSICS},
 	};
 	int i;
 	for (i = 0; i < sizeof(exttraps)/sizeof(exttraps[0]); i++)

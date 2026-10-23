@@ -151,4 +151,6 @@ void SP_func_laser(void)
 	ExtFieldSetAlpha(helper, alpha);
 
 	helper->think = (func_t) init_laser_noise;
+
+	self->antilag_data = antilag_create_world(self);
 }

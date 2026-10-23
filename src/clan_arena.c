@@ -398,6 +398,7 @@ void track_player(gedict_t *observer)
 
 		// Lock observer's orientation to player POV
 		observer->s.v.movetype = MOVETYPE_LOCK;
+		observer->client_predflags = PRDFL_FORCEOFF;
 
 		// set observer's health/armor/ammo/weapon to match the player's
 		observer->s.v.ammo_nails = player->s.v.ammo_nails;

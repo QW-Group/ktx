@@ -133,3 +133,16 @@ void SetSendNeeded(gedict_t *ed, int sendflags, int unicast)
 	}
 	trap_SetSendNeeded(NUM_FOR_EDICT(ed), sendflags, unicast);
 }
+
+// Marks the entity as already run for the current server frame so the engine
+// skips its physics/think. Used when we step an entity ourselves (antilagged
+// projectiles). Called per-projectile per-frame, so it stays silent when the
+// server lacks the extension rather than spamming warnings.
+void SkipEntityPhysics(gedict_t *ed)
+{
+	if (!HAVEEXTENSION(G_SKIPENTITYPHYSICS))
+	{
+		return;
+	}
+	trap_SkipEntityPhysics(NUM_FOR_EDICT(ed));
+}
