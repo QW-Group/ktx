@@ -1757,8 +1757,7 @@ void PrintCountdown(int seconds)
 
 	if (cvar("k_no_knockback"))
 	{
-		strlcat(text, va("%s %3s\n", "Knockback", redtext(cvar("k_no_knockback") == 1 ? "-lg" : "off")),
-				sizeof(text));
+		strlcat(text, va("%s %3s\n", "No knockback", redtext(NoKnockbackStr())), sizeof(text));
 	}
 
 	if ((deathmatch == 4) && !cvar("k_midair") && !cvar("k_instagib")
