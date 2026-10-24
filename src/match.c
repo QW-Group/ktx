@@ -1755,6 +1755,11 @@ void PrintCountdown(int seconds)
 		strlcat(text, va("%s %5s\n", "NoSweep", redtext("on")), sizeof(text));
 	}
 
+	if (cvar("k_no_knockback"))
+	{
+		strlcat(text, va("%s %3s\n", "No knockback", redtext(NoKnockbackStr())), sizeof(text));
+	}
+
 	if ((deathmatch == 4) && !cvar("k_midair") && !cvar("k_instagib")
 			&& !strnull(nowp = str_noweapon((int)cvar("k_disallow_weapons") & DA_WPNS)))
 	{
