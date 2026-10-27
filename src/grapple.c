@@ -1,5 +1,5 @@
 /*
- * Original 'Morning Star' (Grapple Hook) by "Mike" <amichael@asu.alasu.edu> 
+ * Original 'Morning Star' (Grapple Hook) by "Mike" <amichael@asu.alasu.edu>
  * Quakeworld-friendly grapple by Wedge (Steve Bond)
  * PureCTF changes by Methabol
  *
@@ -62,15 +62,15 @@ void GrappleReset(gedict_t *rhook)
 	if (cvar("k_ctf_hookstyle") == 1)
 	{
 		owner->attack_finished = (self->ctf_flag & CTF_RUNE_HST) ? 
-			g_globalvars.time + ((HOOK_FIRE_RATE / 2) / cvar("k_ctf_rune_power_hst")) : g_globalvars.time + (HOOK_FIRE_RATE / 2);
+			owner->client_time + ((HOOK_FIRE_RATE / 2) / cvar("k_ctf_rune_power_hst")) : owner->client_time + (HOOK_FIRE_RATE / 2);
 		owner->hook_reset_time = (self->ctf_flag & CTF_RUNE_HST) ? 
-			g_globalvars.time + (HOOK_FIRE_RATE / cvar("k_ctf_rune_power_hst")) : g_globalvars.time + HOOK_FIRE_RATE;
+			owner->client_time + (HOOK_FIRE_RATE / cvar("k_ctf_rune_power_hst")) : owner->client_time + HOOK_FIRE_RATE;
 	}
 
 	else
 	{
-		owner->attack_finished = g_globalvars.time;
-		owner->hook_reset_time = g_globalvars.time;
+		owner->attack_finished = owner->client_time;
+		owner->hook_reset_time = owner->client_time;
 	}
 
 	rhook->think = (func_t) SUB_Remove;
@@ -146,7 +146,7 @@ gedict_t* MakeLink(void)
 	newmis = spawn();
 	g_globalvars.newmis = EDICT_TO_PROG(newmis);
 
-	newmis->s.v.movetype = MOVETYPE_FLYMISSILE;
+	newmis->s.v.movetype = MOVETYPE_FLY;
 	newmis->s.v.solid = SOLID_NOT;
 	newmis->s.v.owner = EDICT_TO_PROG(self);
 

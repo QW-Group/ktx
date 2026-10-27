@@ -319,6 +319,8 @@ void SP_func_plat(void)
 		setorigin(self, PASSVEC3(self->pos2));
 		self->state = STATE_BOTTOM;
 	}
+
+	self->antilag_data = antilag_create_world(self);
 }
 
 //============================================================================
@@ -484,6 +486,8 @@ void SP_func_train(void)
 // a chance to spawn
 	self->s.v.nextthink = self->s.v.ltime + 0.1;
 	self->think = (func_t) funcref_train_find;
+
+	self->antilag_data = antilag_create_world(self);
 }
 
 /*QUAKED misc_teleporttrain (0 .5 .8) (-8 -8 -8) (8 8 8)

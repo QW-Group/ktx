@@ -120,3 +120,4 @@ equ		trap_MapExtFieldPtr    -266
 equ		trap_SetExtFieldPtr    -267
 equ		trap_GetExtFieldPtr    -268
 equ		trap_SetSendNeeded     -269
+equ		trap_SkipEntityPhysics -270

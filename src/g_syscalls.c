@@ -105,13 +105,13 @@ void trap_remove(intptr_t edn)
 	syscall(G_REMOVE_ENT, edn);
 }
 
-void trap_precache_sound(char *name)
+intptr_t trap_precache_sound(char *name)
 {
-	syscall(G_PRECACHE_SOUND, (intptr_t) name);
+	return syscall(G_PRECACHE_SOUND, (intptr_t) name);
 }
-void trap_precache_model(char *name)
+intptr_t trap_precache_model(char *name)
 {
-	syscall(G_PRECACHE_MODEL, (intptr_t) name);
+	return syscall(G_PRECACHE_MODEL, (intptr_t) name);
 }
 intptr_t trap_precache_vwep_model(char *name)
 {
@@ -533,4 +533,9 @@ int trap_pointerstat(int statidx, int stattype, void *offset)
 intptr_t trap_SetSendNeeded(intptr_t subject, intptr_t flags, intptr_t to)
 {
 	return syscall(G_SETSENDNEEDED, subject, flags, to);
+}
+
+intptr_t trap_SkipEntityPhysics(intptr_t entnum)
+{
+	return syscall(G_SKIPENTITYPHYSICS, entnum);
 }

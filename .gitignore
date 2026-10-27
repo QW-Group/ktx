@@ -4,6 +4,8 @@
 *.dll
 *.qvm
 *.map
+csprogs.dat
+csprogs.lno
 *.suo
 *.ncb
 VM/
