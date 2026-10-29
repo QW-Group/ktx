@@ -339,20 +339,30 @@ static float anglefix(float angle)
 	return angle;
 }
 
+// turn the view smoothly from where it is towards angle
+static float BotEaseView(gedict_t *self, int axis, float angle)
+{
+	float diff = anglefix(anglemod(angle) - anglemod(self->s.v.v_angle[axis]));
+
+	return self->s.v.v_angle[axis] + diff * min(1, LOOK_EASE * g_globalvars.frametime);
+}
+
 // people look roughly where they are heading and turn their view there smoothly
 static void BotLookAlongTravel(gedict_t *self, vec3_t rel_pos)
 {
 	float yaw = self->fb.desired_angle[YAW];
-	float ease = min(1, LOOK_EASE * g_globalvars.frametime);
-	float diff;
-	vec3_t from_eye, angles;
 
-	// markers sit at origin height, so from the origin the view would be dead level
-	VectorCopy(rel_pos, from_eye);
-	from_eye[2] -= self->s.v.view_ofs[2];
-	vectoangles(from_eye, angles);
-	diff = anglefix(anglemod(-angles[PITCH]) - anglemod(self->s.v.v_angle[PITCH]));
-	self->fb.desired_angle[PITCH] = self->s.v.v_angle[PITCH] + diff * ease;
+	// HurtSelfLogic fires the rocket at the bot's feet only once it looks down
+	if (!(self->fb.state & HURT_SELF))
+	{
+		vec3_t from_eye, angles;
+
+		// markers sit at origin height, so from the origin the view would be dead level
+		VectorCopy(rel_pos, from_eye);
+		from_eye[2] -= self->s.v.view_ofs[2];
+		vectoangles(from_eye, angles);
+		self->fb.desired_angle[PITCH] = BotEaseView(self, PITCH, -angles[PITCH]);
+	}
 
 	if (sqrt(self->s.v.velocity[0] * self->s.v.velocity[0]
 			+ self->s.v.velocity[1] * self->s.v.velocity[1]) >= LOOK_TRAVEL_SPEED)
@@ -363,8 +373,7 @@ static void BotLookAlongTravel(gedict_t *self, vec3_t rel_pos)
 		yaw = vectoyaw(dir);
 	}
 
-	diff = anglefix(anglemod(yaw) - anglemod(self->s.v.v_angle[YAW]));
-	self->fb.desired_angle[YAW] = self->s.v.v_angle[YAW] + diff * ease;
+	self->fb.desired_angle[YAW] = BotEaseView(self, YAW, yaw);
 }
 
 // Called after desired angles have been set to aim at the player
