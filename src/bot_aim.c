@@ -13,7 +13,7 @@
 
 qbool DM6FireAtDoor(gedict_t *self, vec3_t rel_pos);
 static void BotsModifyAimAtPlayerLogic(gedict_t *self);
-static void BotLookAlongTravel(gedict_t *self);
+static void BotLookAlongTravel(gedict_t *self, vec3_t rel_pos);
 
 static qbool BotAttackingRespawn(gedict_t *self)
 {
@@ -53,7 +53,7 @@ static void BotSetDesiredAngles(gedict_t *self, vec3_t rel_pos)
 					&& (self->fb.look_object == g_edicts[self->s.v.enemy].fb.touch_marker))
 			&& !BotAttackingRespawn(self))
 	{
-		BotLookAlongTravel(self);
+		BotLookAlongTravel(self, rel_pos);
 	}
 
 	if (self->fb.look_object->ct == ctPlayer)
@@ -340,10 +340,19 @@ static float anglefix(float angle)
 }
 
 // people look roughly where they are heading and turn their view there smoothly
-static void BotLookAlongTravel(gedict_t *self)
+static void BotLookAlongTravel(gedict_t *self, vec3_t rel_pos)
 {
 	float yaw = self->fb.desired_angle[YAW];
+	float ease = min(1, LOOK_EASE * g_globalvars.frametime);
 	float diff;
+	vec3_t from_eye, angles;
+
+	// markers sit at origin height, so from the origin the view would be dead level
+	VectorCopy(rel_pos, from_eye);
+	from_eye[2] -= self->s.v.view_ofs[2];
+	vectoangles(from_eye, angles);
+	diff = anglefix(anglemod(-angles[PITCH]) - anglemod(self->s.v.v_angle[PITCH]));
+	self->fb.desired_angle[PITCH] = self->s.v.v_angle[PITCH] + diff * ease;
 
 	if (sqrt(self->s.v.velocity[0] * self->s.v.velocity[0]
 			+ self->s.v.velocity[1] * self->s.v.velocity[1]) >= LOOK_TRAVEL_SPEED)
@@ -355,8 +364,7 @@ static void BotLookAlongTravel(gedict_t *self)
 	}
 
 	diff = anglefix(anglemod(yaw) - anglemod(self->s.v.v_angle[YAW]));
-	self->fb.desired_angle[YAW] = self->s.v.v_angle[YAW]
-			+ diff * min(1, LOOK_EASE * g_globalvars.frametime);
+	self->fb.desired_angle[YAW] = self->s.v.v_angle[YAW] + diff * ease;
 }
 
 // Called after desired angles have been set to aim at the player
