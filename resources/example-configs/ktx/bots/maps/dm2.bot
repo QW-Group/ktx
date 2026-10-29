@@ -84,7 +84,7 @@ CreateMarker 2320 -1984 120
 CreateMarker 2368 -800 56
 CreateMarker 2352 -1648 24
 CreateMarker 1904 -1312 104
-CreateMarker 2464 -144 56
+CreateMarker 2464 -128 56
 CreateMarker 1392 -1120 136
 CreateMarker 2608 -2256 120
 CreateMarker 2448 -1264 24
@@ -116,7 +116,7 @@ CreateMarker 2160 -2400 200
 CreateMarker 1360 -384 184
 CreateMarker 1808 -400 184
 CreateMarker 2352 -80 72
-CreateMarker 2384 -144 56
+CreateMarker 2384 -128 56
 CreateMarker 2000 -1168 184
 CreateMarker 2784 -2032 120
 CreateMarker 2416 -2256 120
@@ -129,7 +129,7 @@ CreateMarker 1376 -1152 184
 CreateMarker 2208 -2032 88
 CreateMarker 1760 -1328 32
 CreateMarker 2432 -192 24
-CreateMarker 2400 -144 56
+CreateMarker 2400 -128 56
 CreateMarker 1824 -576 184
 CreateMarker 1856 -368 184
 CreateMarker 1456 -1024 344
@@ -846,8 +846,10 @@ SetZone 208 18
 SetMarkerPath 208 0 28
 SetMarkerPath 208 1 209
 SetMarkerPathFlags 208 1 j
+SetMarkerPath 208 2 107
 SetZone 209 18
 SetMarkerPath 209 0 164
+SetMarkerPath 209 1 196
 SetZone 210 19
 SetMarkerPath 210 0 76
 SetMarkerPath 210 1 211
