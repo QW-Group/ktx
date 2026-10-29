@@ -82,16 +82,16 @@ void FrogbotSetHealthArmour(gedict_t *client)
 	{
 		float new_health = min(client->s.v.health + 100, 250);
 
-		client->fb.desire_mega_health = TotalStrength(new_health, client->s.v.armorvalue,
-														client->s.v.armortype)
-				- client->fb.total_damage;
+		client->fb.desire_mega_health = 0.75
+				* (TotalStrength(new_health, client->s.v.armorvalue, client->s.v.armortype)
+						- client->fb.total_damage);
 
 		client->fb.desire_health0 = 0;
 		if (client->s.v.health < 100)
 		{
 			new_health = min(client->s.v.health + 25, 100);
 
-			client->fb.desire_health0 = 2
+			client->fb.desire_health0 = 3
 					* (TotalStrength(new_health, client->s.v.armorvalue, client->s.v.armortype)
 							- client->fb.total_damage);
 		}
