@@ -91,9 +91,13 @@ void FrogbotSetHealthArmour(gedict_t *client)
 		{
 			new_health = min(client->s.v.health + 25, 100);
 
-			client->fb.desire_health0 = 3
-					* (TotalStrength(new_health, client->s.v.armorvalue, client->s.v.armortype)
-							- client->fb.total_damage);
+			// no more than the mega's own desire, so with armor a pack can't outrank the mega
+			client->fb.desire_health0 = min(
+					3
+							* (TotalStrength(new_health, client->s.v.armorvalue,
+												client->s.v.armortype)
+									- client->fb.total_damage),
+					client->fb.desire_mega_health);
 		}
 	}
 
