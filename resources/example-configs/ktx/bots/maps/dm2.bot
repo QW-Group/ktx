@@ -817,6 +817,8 @@ SetZone 198 23
 SetMarkerPath 198 0 102
 SetZone 199 23
 SetMarkerPath 199 0 94
+SetMarkerPath 199 2 34
+SetMarkerPath 199 3 33
 SetZone 200 24
 SetMarkerPath 200 0 104
 SetMarkerPath 200 1 71
