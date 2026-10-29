@@ -134,7 +134,7 @@ static float goal_health2(gedict_t *self, gedict_t *other)
 {
 	// taking the mega also keeps it from the enemy
 	return self->fb.desire_mega_health
-			+ (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_mega_health / 2 : 0);
+			+ (self->fb.virtual_enemy ? self->fb.virtual_enemy->fb.desire_mega_health / 4 : 0);
 }
 
 float goal_NULL(gedict_t *self, gedict_t *other)
