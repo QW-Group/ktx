@@ -19,11 +19,16 @@
 
 #define ATTACK_RESPAWN_TIME 3
 
+// people already aiming where a player appears react far faster
+#define PREAIM_ANGLE           15
+#define PREAIM_REACTION        0.25
+
 qbool DM6FireAtDoor(gedict_t *self, vec3_t rel_pos);
 static void BotsModifyAimAtPlayerLogic(gedict_t *self);
 static void BotLookAlongTravel(gedict_t *self, vec3_t rel_pos);
 static void BotTurnToTarget(gedict_t *self, float max_delay, float max_speed);
 static void BotPitchFromEye(gedict_t *self, vec3_t rel_pos);
+static float anglefix(float angle);
 
 static qbool BotAttackingRespawn(gedict_t *self)
 {
@@ -277,6 +282,14 @@ static qbool HorizontalVelocityCheck(vec3_t velocity, float threshold)
 	return (value > (threshold * threshold));
 }
 
+static qbool BotPreAimed(gedict_t *self)
+{
+	return (fabs(anglefix(anglemod(self->fb.desired_angle[YAW]) - anglemod(self->s.v.v_angle[YAW])))
+			< PREAIM_ANGLE)
+			&& (fabs(anglefix(anglemod(self->fb.desired_angle[PITCH])
+					- anglemod(self->s.v.v_angle[PITCH]))) < PREAIM_ANGLE);
+}
+
 static void CalculateVolatility(gedict_t *self)
 {
 	float volatility = self->fb.skill.current_volatility;
@@ -287,7 +300,8 @@ static void CalculateVolatility(gedict_t *self)
 	{
 		// Treat as if they hadn't seen player before
 		volatility = self->fb.skill.initial_volatility;
-		self->fb.min_fire_time = g_globalvars.time + self->fb.skill.awareness_delay;
+		self->fb.min_fire_time = g_globalvars.time + self->fb.skill.awareness_delay
+				* (BotPreAimed(self) ? PREAIM_REACTION : 1);
 		self->fb.last_rndaim_time = 0;
 
 		vol_flags = 1;
