@@ -577,6 +577,9 @@ typedef struct fb_entvars_s {
 	float firepower;
 
 	float enemy_time;							// Time before bot re-evaluates who is its primary enemy
+	float travel_yaw;							// heading the view follows while moving
+	float travel_time;							// when the view last followed it
+	float predict_until;						// until when to keep looking where the enemy may appear
 	float enemy_dist;							// Distance to primary enemy
 
 	int oldsolid;								// need to keep track of this for hazard calculations

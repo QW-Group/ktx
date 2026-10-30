@@ -171,9 +171,26 @@ static qbool WalkTowardsDroppedItem(gedict_t *self)
 	return false;
 }
 
+static qbool BotAheadOfTravel(gedict_t *self, gedict_t *ent)
+{
+	return ((ent->s.v.origin[0] - self->s.v.origin[0]) * self->s.v.velocity[0]
+			+ (ent->s.v.origin[1] - self->s.v.origin[1]) * self->s.v.velocity[1]) >= 0;
+}
+
+// seconds a bot keeps looking where the enemy may appear
+#define PREDICT_HOLD 1.5
+
 // FIXME: Move to bot_aim
 static qbool PredictionShotLogic(gedict_t *self, gedict_t *goalentity_marker)
 {
+	// keep looking where the enemy may appear a while, so the view doesn't flick back to the route,
+	//   but not once the bot has run past it, as watching it then means running backwards
+	if (g_globalvars.time < self->fb.predict_until && self->fb.predict_shoot && self->fb.look_object
+			&& (self->fb.look_object->ct != ctPlayer) && BotAheadOfTravel(self, self->fb.look_object))
+	{
+		return true;
+	}
+
 	if ((match_in_progress == 2) && (g_random() < self->fb.skill.look_anywhere))
 	{
 		gedict_t *from_marker = g_edicts[self->s.v.enemy].fb.touch_marker;
@@ -209,6 +226,7 @@ static qbool PredictionShotLogic(gedict_t *self, gedict_t *goalentity_marker)
 				{
 					self->fb.look_object = look_marker;
 					self->fb.predict_shoot = true;
+					self->fb.predict_until = g_globalvars.time + PREDICT_HOLD;
 
 					return true;
 				}
