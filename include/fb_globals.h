@@ -364,7 +364,9 @@ void BotEventDoorHitBottom(gedict_t *self);
 
 qbool BotDoorHoldsUpPath(gedict_t *from_marker, gedict_t *to_marker);
 gedict_t* BotDoorButton(gedict_t *from_marker, gedict_t *to_marker, float *detour_time);
-gedict_t* BotDoorButtonOnRoute(gedict_t *from_marker, gedict_t *to_marker, qbool rl_routes);
+gedict_t* BotDoorButtonOnRoute(gedict_t *from_marker, gedict_t *to_marker, qbool rl_routes,
+								gedict_t **door_from);
+qbool BotLookAtButton(gedict_t *self, gedict_t *button);
 void BotDoorRoutesFrame(void);
 void RecalculateMarkerRouteTimes(void);
 void BotPlatformTouched(gedict_t *platform, gedict_t *player);

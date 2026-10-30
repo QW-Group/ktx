@@ -46,12 +46,14 @@ static void BotSetDesiredAngles(gedict_t *self, vec3_t rel_pos)
 	}
 
 	// a marker the enemy was heard at is where they will show up, so keep aiming there, and a
-	// spawn point being attacked is only fired at once the bot faces it
+	// spawn point being attacked or a button being shot is only fired at once the bot faces it
 	if ((self->fb.look_object->ct != ctPlayer) && !self->fb.firing && !self->fb.rocketJumping
 			&& !self->fb.predict_shoot && !self->s.v.waterlevel
 			&& !(self->s.v.enemy
 					&& (self->fb.look_object == g_edicts[self->s.v.enemy].fb.touch_marker))
-			&& !BotAttackingRespawn(self))
+			&& !BotAttackingRespawn(self)
+			&& !(streq(self->fb.look_object->classname, "func_button")
+					&& self->fb.look_object->s.v.takedamage))
 	{
 		BotLookAlongTravel(self);
 	}

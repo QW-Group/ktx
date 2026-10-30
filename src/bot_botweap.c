@@ -589,6 +589,17 @@ void SetFireButton(gedict_t *self, vec3_t rel_pos, float rel_dist)
 
 	DM6SelectWeaponToOpenDoor(self);
 
+	if (streq(self->fb.look_object->classname, "func_button") && self->fb.look_object->s.v.takedamage)
+	{
+		// fired once facing it, see BotSetDesiredAngles()
+		if (self->s.v.ammo_shells && CheckNewWeapon(IT_SHOTGUN))
+		{
+			SetFireButtonBasedOnAngles(self, rel_dist);
+		}
+
+		return;
+	}
+
 	if (HurtSelfLogic(self))
 	{
 		return;
