@@ -14,13 +14,15 @@
 #define AIM_TURN_NEAR          10
 #define AIM_TURN_NEAR_SPEED    30
 #define AIM_TURN_TRACK_MAX     1000
+// people flick faster to cover a corner than onto a player
+#define AIM_TURN_PREDICT_SCALE 1.5
 
 #define ATTACK_RESPAWN_TIME 3
 
 qbool DM6FireAtDoor(gedict_t *self, vec3_t rel_pos);
 static void BotsModifyAimAtPlayerLogic(gedict_t *self);
 static void BotLookAlongTravel(gedict_t *self, vec3_t rel_pos);
-static void BotTurnToPlayer(gedict_t *self);
+static void BotTurnToTarget(gedict_t *self, float max_delay, float max_speed);
 static void BotPitchFromEye(gedict_t *self, vec3_t rel_pos);
 
 static qbool BotAttackingRespawn(gedict_t *self)
@@ -79,7 +81,12 @@ static void BotSetDesiredAngles(gedict_t *self, vec3_t rel_pos)
 							g_globalvars.time, PASSVEC3(self->fb.desired_angle));
 		}
 
-		BotTurnToPlayer(self);
+		BotTurnToTarget(self, self->fb.skill.aim_turn_delay, self->fb.skill.aim_turn_max);
+	}
+	else if (self->fb.predict_shoot && !self->fb.rocketJumping)
+	{
+		// the bot chose to look there, so there is nothing to react to
+		BotTurnToTarget(self, 0, self->fb.skill.aim_turn_max * AIM_TURN_PREDICT_SCALE);
 	}
 	else
 	{
@@ -414,7 +421,7 @@ static void BotLookAlongTravel(gedict_t *self, vec3_t rel_pos)
 }
 
 // people react after a moment and flick onto a player, often past them, but keep up once tracking
-static void BotTurnToPlayer(gedict_t *self)
+static void BotTurnToTarget(gedict_t *self, float max_delay, float max_speed)
 {
 	float dt = max(0.001, g_globalvars.frametime);
 	float freq = self->fb.skill.aim_turn_speed;
@@ -423,7 +430,7 @@ static void BotTurnToPlayer(gedict_t *self)
 
 	if (fresh)
 	{
-		self->fb.aim_turn_time = g_globalvars.time + g_random() * self->fb.skill.aim_turn_delay;
+		self->fb.aim_turn_time = g_globalvars.time + g_random() * max_delay;
 		VectorCopy(self->fb.desired_angle, self->fb.aim_target);
 	}
 
@@ -449,7 +456,7 @@ static void BotTurnToPlayer(gedict_t *self)
 
 			*speed += (f * f * error + 2 * AIM_TURN_DAMPING * f * (track - *speed)) * dt;
 			// no faster than a hard flick of the mouse
-			*speed = bound(-self->fb.skill.aim_turn_max, *speed, self->fb.skill.aim_turn_max);
+			*speed = bound(-max_speed, *speed, max_speed);
 		}
 
 		self->fb.desired_angle[i] = self->s.v.v_angle[i] + *speed * dt;
