@@ -455,7 +455,8 @@ void CheckCombatJump(gedict_t *self)
 	}
 
 	// Now just down to bot characteristics
-	SetJumpFlag(self, (g_random() < self->fb.skill.combat_jump_chance), "CombatJump");
+	SetJumpFlag(self, (g_random() < self->fb.skill.combat_jump_chance) && !BotJumpLandsInLava(self),
+				"CombatJump");
 }
 
 #endif

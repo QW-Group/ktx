@@ -229,6 +229,8 @@ void FrogbotPrePhysics2(void);
 
 // bothazd.qc
 void AvoidHazards(gedict_t *self);
+qbool BotDeadlyEdgeAhead(gedict_t *self, vec3_t dir, float dist);
+qbool BotJumpLandsInLava(gedict_t *self);
 void NewVelocityForArrow(gedict_t *self, vec3_t dir_move, const char *explanation);
 
 // route_lookup.qc
