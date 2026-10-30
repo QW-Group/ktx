@@ -1085,6 +1085,92 @@ static qbool BotHopsTrainHole(gedict_t *self, float hor_speed, vec3_t dir_forwar
 	return true;
 }
 
+// whether moving along dir would take self into lava or off the map within dist units
+qbool BotDeadlyEdgeAhead(gedict_t *self, vec3_t dir, float dist)
+{
+	vec3_t hor, testplace;
+	float fallheight = StandardFallHeight(self);
+	float hor_speed = max(160, sqrt(self->s.v.velocity[0] * self->s.v.velocity[0]
+			+ self->s.v.velocity[1] * self->s.v.velocity[1]));
+	int i;
+
+	VectorCopy(dir, hor);
+	hor[2] = 0;
+	if (VectorNormalize(hor) < 0.01)
+	{
+		return false;
+	}
+
+	for (i = 1; i <= 2; ++i)
+	{
+		int fall;
+
+		VectorMA(self->s.v.origin, dist * i / 2, hor, testplace);
+		fall = FallSpotGround(testplace, fallheight);
+		if (fall == FALL_DEATH)
+		{
+			return true;
+		}
+
+		// FallSpotGround() drops straight down, but a falling bot keeps going and can miss the floor
+		if (fall == FALL_LAND)
+		{
+			float drop_time = sqrt(2 * max(0, testplace[2] - dropper->s.v.origin[2]) / 800);
+
+			VectorMA(testplace, hor_speed * drop_time, hor, testplace);
+			if (FallSpotGround(testplace, fallheight) == FALL_DEATH)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+// a jump carries a bot about 0.7s at its speed, with no stopping in the air
+qbool BotJumpLandsInLava(gedict_t *self)
+{
+	float hor_speed = sqrt(self->s.v.velocity[0] * self->s.v.velocity[0]
+			+ self->s.v.velocity[1] * self->s.v.velocity[1]);
+
+	return BotDeadlyEdgeAhead(self, self->s.v.velocity, 32 + hor_speed * 0.7);
+}
+
+// AvoidHazardsOnGround() finds lava 16 units ahead, too late for a fighting bot to stop at speed
+static qbool BotFightingTowardsLava(gedict_t *self, float hor_speed, vec3_t dir_forward)
+{
+	vec3_t to_linked;
+
+	if (!self->fb.look_object || (self->fb.look_object->ct != ctPlayer) || !self->fb.linked_marker
+			|| (self->fb.path_state & (JUMP_LEDGE | BOTPATH_CURLJUMP_HINT | ROCKET_JUMP)))
+	{
+		return false;
+	}
+
+	if (self->fb.linked_marker != self->fb.touch_marker)
+	{
+		VectorAdd(self->fb.linked_marker->s.v.absmin, self->fb.linked_marker->s.v.view_ofs,
+					to_linked);
+		VectorSubtract(to_linked, self->s.v.origin, to_linked);
+		to_linked[2] = 0;
+		VectorNormalize(to_linked);
+		if (DotProduct(to_linked, dir_forward) >= 0.7)
+		{
+			return false;
+		}
+	}
+
+	// already going over, leave it to AvoidHazardsOnGround()
+	if (BotDeadlyEdgeAhead(self, dir_forward, 1))
+	{
+		return false;
+	}
+
+	// stopping takes about 0.1s
+	return BotDeadlyEdgeAhead(self, dir_forward, 32 + hor_speed * 0.1);
+}
+
 // FIXME: Globals.
 // FIXME: Magic numbers all over the place.
 void AvoidHazards(gedict_t *self)
@@ -1146,6 +1232,13 @@ void AvoidHazards(gedict_t *self)
 		normalize(hor_velocity, dir_forward);
 		if (BotHopsTrainHole(self, hor_speed, dir_forward))
 		{
+			return;
+		}
+
+		if (BotFightingTowardsLava(self, hor_speed, dir_forward))
+		{
+			AvoidEdge(self);
+
 			return;
 		}
 
