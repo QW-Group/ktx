@@ -18,8 +18,9 @@
 
 qbool DM6FireAtDoor(gedict_t *self, vec3_t rel_pos);
 static void BotsModifyAimAtPlayerLogic(gedict_t *self);
-static void BotLookAlongTravel(gedict_t *self);
+static void BotLookAlongTravel(gedict_t *self, vec3_t rel_pos);
 static void BotTurnToPlayer(gedict_t *self);
+static void BotPitchFromEye(gedict_t *self, vec3_t rel_pos);
 
 static qbool BotAttackingRespawn(gedict_t *self)
 {
@@ -59,7 +60,12 @@ static void BotSetDesiredAngles(gedict_t *self, vec3_t rel_pos)
 					&& (self->fb.look_object == g_edicts[self->s.v.enemy].fb.touch_marker))
 			&& !BotAttackingRespawn(self))
 	{
-		BotLookAlongTravel(self);
+		BotLookAlongTravel(self, rel_pos);
+	}
+	else if ((self->fb.look_object->ct != ctPlayer) && self->fb.predict_shoot && !self->fb.firing
+			&& !self->fb.rocketJumping)
+	{
+		BotPitchFromEye(self, rel_pos);
 	}
 
 	if (self->fb.look_object->ct == ctPlayer)
@@ -351,11 +357,38 @@ static float anglefix(float angle)
 	return angle;
 }
 
+// turn the view smoothly from where it is towards angle
+static float BotEaseView(gedict_t *self, int axis, float angle)
+{
+	float diff = anglefix(anglemod(angle) - anglemod(self->s.v.v_angle[axis]));
+
+	return self->s.v.v_angle[axis] + diff * min(1, LOOK_EASE * g_globalvars.frametime);
+}
+
+// pitch the view towards rel_pos as seen from the eye
+static void BotPitchFromEye(gedict_t *self, vec3_t rel_pos)
+{
+	vec3_t from_eye, angles;
+
+	// HurtSelfLogic fires the rocket at the bot's feet only once it looks down
+	if (self->fb.state & HURT_SELF)
+	{
+		return;
+	}
+
+	// markers sit at origin height, so from the origin the view would be dead level
+	VectorCopy(rel_pos, from_eye);
+	from_eye[2] -= self->s.v.view_ofs[2];
+	vectoangles(from_eye, angles);
+	self->fb.desired_angle[PITCH] = BotEaseView(self, PITCH, -angles[PITCH]);
+}
+
 // people look roughly where they are heading and turn their view there smoothly
-static void BotLookAlongTravel(gedict_t *self)
+static void BotLookAlongTravel(gedict_t *self, vec3_t rel_pos)
 {
 	float yaw = self->fb.desired_angle[YAW];
-	float diff;
+
+	BotPitchFromEye(self, rel_pos);
 
 	if (sqrt(self->s.v.velocity[0] * self->s.v.velocity[0]
 			+ self->s.v.velocity[1] * self->s.v.velocity[1]) >= LOOK_TRAVEL_SPEED)
@@ -366,9 +399,7 @@ static void BotLookAlongTravel(gedict_t *self)
 		yaw = vectoyaw(dir);
 	}
 
-	diff = anglefix(anglemod(yaw) - anglemod(self->s.v.v_angle[YAW]));
-	self->fb.desired_angle[YAW] = self->s.v.v_angle[YAW]
-			+ diff * min(1, LOOK_EASE * g_globalvars.frametime);
+	self->fb.desired_angle[YAW] = BotEaseView(self, YAW, yaw);
 }
 
 // people react after a moment and flick onto a player, often past them, but keep up once tracking
