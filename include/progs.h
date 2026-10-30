@@ -528,6 +528,9 @@ typedef struct fb_botskill_s {
 	float current_volatility;
 	float awareness_delay;
 	float spawn_move_delay;
+	float aim_turn_speed;					// how quickly the view swings onto a player
+	float aim_turn_delay;					// most it waits before turning to a new player
+	float aim_turn_max;						// fastest the view turns onto a player, degrees per second
 	float movement_estimate_error;			// % of time the bot gets wrong when predicting player location
 
 	fb_botaim_t aim_params[2];
@@ -759,6 +762,9 @@ typedef struct fb_entvars_s {
 	float last_rndaim_time;
 	float min_fire_time;						// time before bot will fire
 	float min_move_time;						// time before bot will move (used off spawn)
+	vec3_t aim_target;							// angles to the player being aimed at
+	vec3_t aim_turn_rate;						// how fast the view is turning towards them
+	float aim_turn_time;						// time the view starts turning to a new player
 
 	// Stored on missile to detect where item will explode
 	vec3_t missile_forward;

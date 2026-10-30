@@ -31,6 +31,9 @@
 #define FB_CVAR_ATTACK_RESPAWNS "k_fbskill_aim_attack_respawns"
 #define FB_CVAR_REACTION_TIME "k_fbskill_reactiontime"
 #define FB_CVAR_REACTION_MOVETIME "k_fbskill_reactionmovetime"
+#define FB_CVAR_AIM_TURN_SPEED "k_fbskill_aim_turnspeed"
+#define FB_CVAR_AIM_TURN_DELAY "k_fbskill_aim_turndelay"
+#define FB_CVAR_AIM_TURN_MAX "k_fbskill_aim_turnmax"
 
 #define FB_CVAR_MIN_VOLATILITY "k_fbskill_vol_min"
 #define FB_CVAR_MAX_VOLATILITY "k_fbskill_vol_max"
@@ -127,6 +130,9 @@ void RegisterSkillVariables(void)
 	RegisterCvar(FB_CVAR_PITCH_SCALE);
 	RegisterCvar(FB_CVAR_ATTACK_RESPAWNS);
 	RegisterCvar(FB_CVAR_REACTION_TIME);
+	RegisterCvar(FB_CVAR_AIM_TURN_SPEED);
+	RegisterCvar(FB_CVAR_AIM_TURN_DELAY);
+	RegisterCvar(FB_CVAR_AIM_TURN_MAX);
 	RegisterCvar(FB_CVAR_REACTION_MOVETIME);
 
 	RegisterCvar(FB_CVAR_MIN_VOLATILITY);
@@ -179,6 +185,9 @@ void setSkillAttributes(int skill, int aimskill) {
 	cvar_fset(FB_CVAR_ATTACK_RESPAWNS, skill >= 15 ? 1 : 0);
 	cvar_fset(FB_CVAR_REACTION_TIME, RangeOverSkill(skill, 0.75f, 0.3f));
 	cvar_fset(FB_CVAR_REACTION_MOVETIME, RangeOverSkill(skill, 0.3f, 0.1f));
+	cvar_fset(FB_CVAR_AIM_TURN_SPEED, RangeOverSkill(aimskill, 8, 16));
+	cvar_fset(FB_CVAR_AIM_TURN_DELAY, RangeOverSkill(skill, 0.35f, 0.1f));
+	cvar_fset(FB_CVAR_AIM_TURN_MAX, RangeOverSkill(aimskill, 600, 1000));
 
 	// Volatility
 	cvar_fset(FB_CVAR_MIN_VOLATILITY, 1.0f);
@@ -230,6 +239,9 @@ void setSkillAttributesEasySkillMode(int skill, int aimskill) {
 	cvar_fset(FB_CVAR_ATTACK_RESPAWNS, skill >= 15 ? 1 : 0);
 	cvar_fset(FB_CVAR_REACTION_TIME, RangeOverSkill(skill, 1.5f, 0.3f));
 	cvar_fset(FB_CVAR_REACTION_MOVETIME, RangeOverSkill(skill, 0.3f, 0.1f));
+	cvar_fset(FB_CVAR_AIM_TURN_SPEED, RangeOverSkill(aimskill, 8, 16));
+	cvar_fset(FB_CVAR_AIM_TURN_DELAY, RangeOverSkill(skill, 0.35f, 0.1f));
+	cvar_fset(FB_CVAR_AIM_TURN_MAX, RangeOverSkill(aimskill, 600, 1000));
 
 	// Volatility
 	cvar_fset(FB_CVAR_MIN_VOLATILITY, 1.0f);
@@ -340,6 +352,9 @@ void SetAttribs(gedict_t *self, qbool customised)
 			0, cvar(FB_CVAR_ENEMYDIRECTION_VOLATILITY_INCREASE), 5.0f);
 	self->fb.skill.awareness_delay = bound(0, cvar(FB_CVAR_REACTION_TIME), 1.5f);
 	self->fb.skill.spawn_move_delay = bound(0, cvar(FB_CVAR_REACTION_MOVETIME), 1.0f);
+	self->fb.skill.aim_turn_speed = bound(1, cvar(FB_CVAR_AIM_TURN_SPEED), 30);
+	self->fb.skill.aim_turn_delay = bound(0, cvar(FB_CVAR_AIM_TURN_DELAY), 1.0f);
+	self->fb.skill.aim_turn_max = bound(90, cvar(FB_CVAR_AIM_TURN_MAX), 3600);
 	self->fb.skill.pain_volatility = bound(0, cvar(FB_CVAR_PAIN_VOLATILITY_INCREASE), 2.0f);
 	self->fb.skill.self_midair_volatility = bound(0, cvar(FB_CVAR_SELF_MIDAIR_VOLATILITY_INCREASE),
 													2.0f);
