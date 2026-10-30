@@ -8,6 +8,7 @@
 
 #define LOOK_TRAVEL_SPEED      200
 #define LOOK_EASE              12
+#define LOOK_HEADING_EASE      6
 
 #define AIM_TURN_DAMPING       0.6
 #define AIM_TURN_NEAR          10
@@ -398,6 +399,16 @@ static void BotLookAlongTravel(gedict_t *self, vec3_t rel_pos)
 		VectorSet(dir, self->s.v.velocity[0], self->s.v.velocity[1], 0);
 		yaw = vectoyaw(dir);
 	}
+
+	// follow the heading loosely, so a swerve, a bounce or slowing to a walk doesn't swing the view
+	if (g_globalvars.time - self->fb.travel_time > 0.5)
+	{
+		self->fb.travel_yaw = self->s.v.v_angle[YAW];
+	}
+	self->fb.travel_time = g_globalvars.time;
+	self->fb.travel_yaw += anglefix(anglemod(yaw) - anglemod(self->fb.travel_yaw))
+			* min(1, LOOK_HEADING_EASE * g_globalvars.frametime);
+	yaw = self->fb.travel_yaw;
 
 	self->fb.desired_angle[YAW] = BotEaseView(self, YAW, yaw);
 }
