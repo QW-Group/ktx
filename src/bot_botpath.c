@@ -222,7 +222,8 @@ static qbool PredictionShotLogic(gedict_t *self, gedict_t *goalentity_marker)
 				ZoneMarker(from_marker, to_marker, path_normal, self->fb.canRocketJump);
 				traveltime = SubZoneArrivalTime(zone_time, middle_marker, to_marker,
 												self->fb.canRocketJump);
-				if (look_traveltime < traveltime)
+				// a spot behind turns the bot round to run backwards
+				if ((look_traveltime < traveltime) && BotAheadOfTravel(self, look_marker))
 				{
 					self->fb.look_object = look_marker;
 					self->fb.predict_shoot = true;
