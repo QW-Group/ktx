@@ -182,6 +182,8 @@ float WeaponCode(float w);
 float crandom(void);
 
 void BotCanRocketJump(gedict_t *self);
+qbool BotRocketJumpForArmor(gedict_t *self, gedict_t *item);
+qbool BotArmorJumpGoal(gedict_t *self);
 qbool VisibleEntity(gedict_t *ent);
 gedict_t* IdentifyMostVisibleTeammate(gedict_t *self);
 float anglemod(float v);
