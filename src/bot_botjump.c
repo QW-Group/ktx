@@ -79,6 +79,51 @@ static float BotCheckSpaceAbove(gedict_t *self)
  }
  */
 
+// True if the bot may rocket jump for the armor item: it keeps at least 75 health, its enemy is
+// out of sight, and with the armor it is past the jump threshold. The armor is what makes the
+// jump worth it, so a bot short of health can still jump for it.
+qbool BotRocketJumpForArmor(gedict_t *self, gedict_t *item)
+{
+	qbool has_quad = self->super_damage_finished > g_globalvars.time;
+	qbool tp_damage = teamplay != 1 && teamplay != 5;
+	float damage = tp_damage ? 55 * (has_quad ? 4 : 1) : 0;
+	float value, type, saved, health;
+
+	if (!item || !(item->tp_flags & it_armor) || !self->fb.skill.use_rocketjumps
+			|| self->fb.be_quiet || !((int)self->s.v.items & IT_ROCKET_LAUNCHER)
+			|| (self->s.v.ammo_rockets < 1))
+	{
+		return false;
+	}
+
+	value = (item->tp_flags & it_ra) ? 200 : (item->tp_flags & it_ya) ? 150 : 100;
+	type = (item->tp_flags & it_ra) ? 0.8 : (item->tp_flags & it_ya) ? 0.6 : 0.3;
+	if (self->s.v.armortype * self->s.v.armorvalue >= type * value)
+	{
+		return false;
+	}
+
+	saved = min(ceil(damage * self->s.v.armortype), self->s.v.armorvalue);
+	health = self->s.v.health - ceil(damage - saved);
+
+	return health >= 75 && !self->fb.enemy_visible && TotalStrength(health, value, type) > 110;
+}
+
+// True if the bot's goal is armor it may rocket jump for; it routes along rocket jump paths but
+// only jumps on the one that lands on the armor
+qbool BotArmorJumpGoal(gedict_t *self)
+{
+	return self->s.v.goalentity && BotRocketJumpForArmor(self, &g_edicts[self->s.v.goalentity]);
+}
+
+static qbool BotArmorJumpHere(gedict_t *self)
+{
+	gedict_t *goal = &g_edicts[self->s.v.goalentity];
+
+	return BotArmorJumpGoal(self)
+			&& (self->fb.linked_marker == goal || self->fb.linked_marker == goal->fb.touch_marker);
+}
+
 void BotCanRocketJump(gedict_t *self)
 {
 	qbool has_quad = self->super_damage_finished > g_globalvars.time;
@@ -331,7 +376,8 @@ void BotPerformRocketJump(gedict_t *self)
 		// In middle of rocket jumping
 		--self->fb.rocketJumpFrameDelay;
 	}
-	else if (self->fb.canRocketJump && ((int)self->s.v.flags & FL_ONGROUND))
+	else if ((self->fb.canRocketJump || BotArmorJumpHere(self))
+			&& ((int)self->s.v.flags & FL_ONGROUND))
 	{
 		qbool path_is_rj = self->fb.path_state & ROCKET_JUMP;
 		qbool ok_to_rj = match_in_progress == 2 || (self->fb.debug_path && self->fb.debug_path_rj);

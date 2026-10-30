@@ -102,6 +102,7 @@ void EvalGoal(gedict_t *self, gedict_t *goal_entity)
 	float goal_desire =
 			goal_entity && goal_entity->fb.desire ? goal_entity->fb.desire(self, goal_entity) : 0;
 	float goal_time = 0.0f;
+	qbool rocket_jump;
 
 	if (!goal_entity)
 	{
@@ -148,11 +149,11 @@ void EvalGoal(gedict_t *self, gedict_t *goal_entity)
 		}
 
 		// Calculate travel time to the goal
+		rocket_jump = self->fb.canRocketJump || BotRocketJumpForArmor(self, goal_entity);
 		from_marker = self->fb.touch_marker;
 		to_marker = goal_entity->fb.touch_marker;
-		ZoneMarker(from_marker, to_marker, path_normal, self->fb.canRocketJump);
-		traveltime = SubZoneArrivalTime(zone_time, middle_marker, to_marker,
-										self->fb.canRocketJump);
+		ZoneMarker(from_marker, to_marker, path_normal, rocket_jump);
+		traveltime = SubZoneArrivalTime(zone_time, middle_marker, to_marker, rocket_jump);
 		goal_time = traveltime;
 
 		if (self->fb.goal_enemy_repel)
