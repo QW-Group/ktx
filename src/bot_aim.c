@@ -8,12 +8,27 @@
 
 #define LOOK_TRAVEL_SPEED      200
 #define LOOK_EASE              12
+#define LOOK_HEADING_EASE      6
+
+#define AIM_TURN_DAMPING       0.6
+#define AIM_TURN_NEAR          10
+#define AIM_TURN_NEAR_SPEED    30
+#define AIM_TURN_TRACK_MAX     1000
+// people flick faster to cover a corner than onto a player
+#define AIM_TURN_PREDICT_SCALE 1.5
 
 #define ATTACK_RESPAWN_TIME 3
 
+// people already aiming where a player appears react far faster
+#define PREAIM_ANGLE           15
+#define PREAIM_REACTION        0.25
+
 qbool DM6FireAtDoor(gedict_t *self, vec3_t rel_pos);
 static void BotsModifyAimAtPlayerLogic(gedict_t *self);
-static void BotLookAlongTravel(gedict_t *self);
+static void BotLookAlongTravel(gedict_t *self, vec3_t rel_pos);
+static void BotTurnToTarget(gedict_t *self, float max_delay, float max_speed);
+static void BotPitchFromEye(gedict_t *self, vec3_t rel_pos);
+static float anglefix(float angle);
 
 static qbool BotAttackingRespawn(gedict_t *self)
 {
@@ -53,7 +68,12 @@ static void BotSetDesiredAngles(gedict_t *self, vec3_t rel_pos)
 					&& (self->fb.look_object == g_edicts[self->s.v.enemy].fb.touch_marker))
 			&& !BotAttackingRespawn(self))
 	{
-		BotLookAlongTravel(self);
+		BotLookAlongTravel(self, rel_pos);
+	}
+	else if ((self->fb.look_object->ct != ctPlayer) && self->fb.predict_shoot && !self->fb.firing
+			&& !self->fb.rocketJumping)
+	{
+		BotPitchFromEye(self, rel_pos);
 	}
 
 	if (self->fb.look_object->ct == ctPlayer)
@@ -65,6 +85,17 @@ static void BotSetDesiredAngles(gedict_t *self, vec3_t rel_pos)
 			stuffcmd_flags(self, STUFFCMD_DEMOONLY, "//botcmd-modified %f %f %f %f\n",
 							g_globalvars.time, PASSVEC3(self->fb.desired_angle));
 		}
+
+		BotTurnToTarget(self, self->fb.skill.aim_turn_delay, self->fb.skill.aim_turn_max);
+	}
+	else if (self->fb.predict_shoot && !self->fb.rocketJumping)
+	{
+		// the bot chose to look there, so there is nothing to react to
+		BotTurnToTarget(self, 0, self->fb.skill.aim_turn_max * AIM_TURN_PREDICT_SCALE);
+	}
+	else
+	{
+		VectorClear(self->fb.aim_turn_rate);
 	}
 }
 
@@ -251,6 +282,14 @@ static qbool HorizontalVelocityCheck(vec3_t velocity, float threshold)
 	return (value > (threshold * threshold));
 }
 
+static qbool BotPreAimed(gedict_t *self)
+{
+	return (fabs(anglefix(anglemod(self->fb.desired_angle[YAW]) - anglemod(self->s.v.v_angle[YAW])))
+			< PREAIM_ANGLE)
+			&& (fabs(anglefix(anglemod(self->fb.desired_angle[PITCH])
+					- anglemod(self->s.v.v_angle[PITCH]))) < PREAIM_ANGLE);
+}
+
 static void CalculateVolatility(gedict_t *self)
 {
 	float volatility = self->fb.skill.current_volatility;
@@ -261,7 +300,8 @@ static void CalculateVolatility(gedict_t *self)
 	{
 		// Treat as if they hadn't seen player before
 		volatility = self->fb.skill.initial_volatility;
-		self->fb.min_fire_time = g_globalvars.time + self->fb.skill.awareness_delay;
+		self->fb.min_fire_time = g_globalvars.time + self->fb.skill.awareness_delay
+				* (BotPreAimed(self) ? PREAIM_REACTION : 1);
 		self->fb.last_rndaim_time = 0;
 
 		vol_flags = 1;
@@ -339,11 +379,38 @@ static float anglefix(float angle)
 	return angle;
 }
 
+// turn the view smoothly from where it is towards angle
+static float BotEaseView(gedict_t *self, int axis, float angle)
+{
+	float diff = anglefix(anglemod(angle) - anglemod(self->s.v.v_angle[axis]));
+
+	return self->s.v.v_angle[axis] + diff * min(1, LOOK_EASE * g_globalvars.frametime);
+}
+
+// pitch the view towards rel_pos as seen from the eye
+static void BotPitchFromEye(gedict_t *self, vec3_t rel_pos)
+{
+	vec3_t from_eye, angles;
+
+	// HurtSelfLogic fires the rocket at the bot's feet only once it looks down
+	if (self->fb.state & HURT_SELF)
+	{
+		return;
+	}
+
+	// markers sit at origin height, so from the origin the view would be dead level
+	VectorCopy(rel_pos, from_eye);
+	from_eye[2] -= self->s.v.view_ofs[2];
+	vectoangles(from_eye, angles);
+	self->fb.desired_angle[PITCH] = BotEaseView(self, PITCH, -angles[PITCH]);
+}
+
 // people look roughly where they are heading and turn their view there smoothly
-static void BotLookAlongTravel(gedict_t *self)
+static void BotLookAlongTravel(gedict_t *self, vec3_t rel_pos)
 {
 	float yaw = self->fb.desired_angle[YAW];
-	float diff;
+
+	BotPitchFromEye(self, rel_pos);
 
 	if (sqrt(self->s.v.velocity[0] * self->s.v.velocity[0]
 			+ self->s.v.velocity[1] * self->s.v.velocity[1]) >= LOOK_TRAVEL_SPEED)
@@ -354,9 +421,60 @@ static void BotLookAlongTravel(gedict_t *self)
 		yaw = vectoyaw(dir);
 	}
 
-	diff = anglefix(anglemod(yaw) - anglemod(self->s.v.v_angle[YAW]));
-	self->fb.desired_angle[YAW] = self->s.v.v_angle[YAW]
-			+ diff * min(1, LOOK_EASE * g_globalvars.frametime);
+	// follow the heading loosely, so a swerve, a bounce or slowing to a walk doesn't swing the view
+	if (g_globalvars.time - self->fb.travel_time > 0.5)
+	{
+		self->fb.travel_yaw = self->s.v.v_angle[YAW];
+	}
+	self->fb.travel_time = g_globalvars.time;
+	self->fb.travel_yaw += anglefix(anglemod(yaw) - anglemod(self->fb.travel_yaw))
+			* min(1, LOOK_HEADING_EASE * g_globalvars.frametime);
+	yaw = self->fb.travel_yaw;
+
+	self->fb.desired_angle[YAW] = BotEaseView(self, YAW, yaw);
+}
+
+// people react after a moment and flick onto a player, often past them, but keep up once tracking
+static void BotTurnToTarget(gedict_t *self, float max_delay, float max_speed)
+{
+	float dt = max(0.001, g_globalvars.frametime);
+	float freq = self->fb.skill.aim_turn_speed;
+	qbool fresh = (self->fb.look_object != self->fb.prev_look_object);
+	int i;
+
+	if (fresh)
+	{
+		self->fb.aim_turn_time = g_globalvars.time + g_random() * max_delay;
+		VectorCopy(self->fb.desired_angle, self->fb.aim_target);
+	}
+
+	for (i = PITCH; i <= YAW; ++i)
+	{
+		float target = self->fb.desired_angle[i];
+		float track = bound(-AIM_TURN_TRACK_MAX,
+				anglefix(anglemod(target) - anglemod(self->fb.aim_target[i])) / dt,
+				AIM_TURN_TRACK_MAX);
+		float error = anglefix(anglemod(target) - anglemod(self->s.v.v_angle[i]));
+		float *speed = &self->fb.aim_turn_rate[i];
+
+		self->fb.aim_target[i] = target;
+
+		if (g_globalvars.time < self->fb.aim_turn_time)
+		{
+			*speed = 0;
+		}
+		else
+		{
+			// people track a player far more tightly than they flick onto one
+			float f = (fabs(error) < AIM_TURN_NEAR) ? AIM_TURN_NEAR_SPEED : freq;
+
+			*speed += (f * f * error + 2 * AIM_TURN_DAMPING * f * (track - *speed)) * dt;
+			// no faster than a hard flick of the mouse
+			*speed = bound(-max_speed, *speed, max_speed);
+		}
+
+		self->fb.desired_angle[i] = self->s.v.v_angle[i] + *speed * dt;
+	}
 }
 
 // Called after desired angles have been set to aim at the player
