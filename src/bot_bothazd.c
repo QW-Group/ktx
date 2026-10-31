@@ -984,6 +984,107 @@ static void AvoidHazardsInAir(gedict_t *self, float hor_speed, vec3_t new_origin
 	}
 }
 
+// seconds in the air on a standing jump, 2 * 270 / 800
+#define TRAIN_HOP_AIR_TIME 0.675f
+
+// a train running between two corners, so it turns back when the current leg ends
+static void TrainOffsetAt(gedict_t *train, float when, vec3_t offset)
+{
+	float left = max(0, train->s.v.nextthink - train->s.v.ltime);
+
+	VectorScale(train->s.v.velocity, (when <= left) ? when : (2 * left - when), offset);
+}
+
+static qbool TrainHoldsSpot(gedict_t *train, vec3_t spot, vec3_t offset)
+{
+	return (spot[0] >= train->s.v.absmin[0] + offset[0] + 8)
+			&& (spot[0] <= train->s.v.absmax[0] + offset[0] - 8)
+			&& (spot[1] >= train->s.v.absmin[1] + offset[1] + 8)
+			&& (spot[1] <= train->s.v.absmax[1] + offset[1] - 8);
+}
+
+static qbool TrainIsFloor(gedict_t *self, gedict_t *train)
+{
+	return fabs(train->s.v.absmax[2] - self->s.v.absmin[2]) < 8;
+}
+
+// the holes between trains move too fast to see from the edge, so judge the landing up front
+static qbool BotHopsTrainHole(gedict_t *self, float hor_speed, vec3_t dir_forward)
+{
+	static const vec3_t no_offset = { 0, 0, 0 };
+	float fallheight = StandardFallHeight(self);
+	vec3_t testplace, offset;
+	gedict_t *train;
+	qbool near_train = false;
+	qbool hole_ahead = false;
+	int i;
+
+	if (hor_speed < 200)
+	{
+		return false;
+	}
+
+	for (train = world; (train = find(train, FOFS(classname), "train"));)
+	{
+		if (TrainIsFloor(self, train) && (self->s.v.origin[0] > train->s.v.absmin[0] - 128)
+				&& (self->s.v.origin[0] < train->s.v.absmax[0] + 128)
+				&& (self->s.v.origin[1] > train->s.v.absmin[1] - 128)
+				&& (self->s.v.origin[1] < train->s.v.absmax[1] + 128))
+		{
+			near_train = true;
+			break;
+		}
+	}
+
+	if (!near_train)
+	{
+		return false;
+	}
+
+	for (i = 1; (i <= 3) && !hole_ahead; ++i)
+	{
+		VectorMA(self->s.v.origin, 24 * i, dir_forward, testplace);
+		hole_ahead = (FallSpotGround(testplace, fallheight) == FALL_DEATH);
+	}
+
+	if (!hole_ahead)
+	{
+		return false;
+	}
+
+	VectorMA(self->s.v.origin, hor_speed * TRAIN_HOP_AIR_TIME, dir_forward, testplace);
+	for (train = world; (train = find(train, FOFS(classname), "train"));)
+	{
+		TrainOffsetAt(train, TRAIN_HOP_AIR_TIME, offset);
+		if (TrainIsFloor(self, train) && TrainHoldsSpot(train, testplace, offset))
+		{
+			SetJumpFlag(self, true, "TrainHop");
+			self->fb.path_state |= DELIBERATE_AIR_WAIT_GROUND;
+
+			return true;
+		}
+	}
+
+	for (train = world; (train = find(train, FOFS(classname), "train"));)
+	{
+		// there now, gone by the time the bot lands
+		if (TrainIsFloor(self, train) && TrainHoldsSpot(train, testplace, (float *)no_offset))
+		{
+			return false;
+		}
+	}
+
+	if (FallSpotGround(testplace, fallheight) == FALL_DEATH)
+	{
+		return false;
+	}
+
+	SetJumpFlag(self, true, "TrainHop");
+	self->fb.path_state |= DELIBERATE_AIR_WAIT_GROUND;
+
+	return true;
+}
+
 // FIXME: Globals.
 // FIXME: Magic numbers all over the place.
 void AvoidHazards(gedict_t *self)
@@ -1043,6 +1144,11 @@ void AvoidHazards(gedict_t *self)
 	if ((int)self->s.v.flags & FL_ONGROUND)
 	{
 		normalize(hor_velocity, dir_forward);
+		if (BotHopsTrainHole(self, hor_speed, dir_forward))
+		{
+			return;
+		}
+
 		AvoidHazardsOnGround(self, hor_speed, new_origin, new_velocity, dir_forward);
 	}
 	else
