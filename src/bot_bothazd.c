@@ -984,6 +984,193 @@ static void AvoidHazardsInAir(gedict_t *self, float hor_speed, vec3_t new_origin
 	}
 }
 
+// seconds in the air on a standing jump, 2 * 270 / 800
+#define TRAIN_HOP_AIR_TIME 0.675f
+
+// a train running between two corners, so it turns back when the current leg ends
+static void TrainOffsetAt(gedict_t *train, float when, vec3_t offset)
+{
+	float left = max(0, train->s.v.nextthink - train->s.v.ltime);
+
+	VectorScale(train->s.v.velocity, (when <= left) ? when : (2 * left - when), offset);
+}
+
+static qbool TrainHoldsSpot(gedict_t *train, vec3_t spot, vec3_t offset)
+{
+	return (spot[0] >= train->s.v.absmin[0] + offset[0] + 8)
+			&& (spot[0] <= train->s.v.absmax[0] + offset[0] - 8)
+			&& (spot[1] >= train->s.v.absmin[1] + offset[1] + 8)
+			&& (spot[1] <= train->s.v.absmax[1] + offset[1] - 8);
+}
+
+static qbool TrainIsFloor(gedict_t *self, gedict_t *train)
+{
+	return fabs(train->s.v.absmax[2] - self->s.v.absmin[2]) < 8;
+}
+
+// the holes between trains move too fast to see from the edge, so judge the landing up front
+static qbool BotHopsTrainHole(gedict_t *self, float hor_speed, vec3_t dir_forward)
+{
+	static const vec3_t no_offset = { 0, 0, 0 };
+	float fallheight = StandardFallHeight(self);
+	vec3_t testplace, offset;
+	gedict_t *train;
+	qbool near_train = false;
+	qbool hole_ahead = false;
+	int i;
+
+	if (hor_speed < 200)
+	{
+		return false;
+	}
+
+	for (train = world; (train = find(train, FOFS(classname), "train"));)
+	{
+		if (TrainIsFloor(self, train) && (self->s.v.origin[0] > train->s.v.absmin[0] - 128)
+				&& (self->s.v.origin[0] < train->s.v.absmax[0] + 128)
+				&& (self->s.v.origin[1] > train->s.v.absmin[1] - 128)
+				&& (self->s.v.origin[1] < train->s.v.absmax[1] + 128))
+		{
+			near_train = true;
+			break;
+		}
+	}
+
+	if (!near_train)
+	{
+		return false;
+	}
+
+	for (i = 1; (i <= 3) && !hole_ahead; ++i)
+	{
+		VectorMA(self->s.v.origin, 24 * i, dir_forward, testplace);
+		hole_ahead = (FallSpotGround(testplace, fallheight) == FALL_DEATH);
+	}
+
+	if (!hole_ahead)
+	{
+		return false;
+	}
+
+	VectorMA(self->s.v.origin, hor_speed * TRAIN_HOP_AIR_TIME, dir_forward, testplace);
+	for (train = world; (train = find(train, FOFS(classname), "train"));)
+	{
+		TrainOffsetAt(train, TRAIN_HOP_AIR_TIME, offset);
+		if (TrainIsFloor(self, train) && TrainHoldsSpot(train, testplace, offset))
+		{
+			SetJumpFlag(self, true, "TrainHop");
+			self->fb.path_state |= DELIBERATE_AIR_WAIT_GROUND;
+
+			return true;
+		}
+	}
+
+	for (train = world; (train = find(train, FOFS(classname), "train"));)
+	{
+		// there now, gone by the time the bot lands
+		if (TrainIsFloor(self, train) && TrainHoldsSpot(train, testplace, (float *)no_offset))
+		{
+			return false;
+		}
+	}
+
+	if (FallSpotGround(testplace, fallheight) == FALL_DEATH)
+	{
+		return false;
+	}
+
+	SetJumpFlag(self, true, "TrainHop");
+	self->fb.path_state |= DELIBERATE_AIR_WAIT_GROUND;
+
+	return true;
+}
+
+// whether moving along dir would take self into lava or off the map within dist units
+qbool BotDeadlyEdgeAhead(gedict_t *self, vec3_t dir, float dist)
+{
+	vec3_t hor, testplace;
+	float fallheight = StandardFallHeight(self);
+	float hor_speed = max(160, sqrt(self->s.v.velocity[0] * self->s.v.velocity[0]
+			+ self->s.v.velocity[1] * self->s.v.velocity[1]));
+	int i;
+
+	VectorCopy(dir, hor);
+	hor[2] = 0;
+	if (VectorNormalize(hor) < 0.01)
+	{
+		return false;
+	}
+
+	for (i = 1; i <= 2; ++i)
+	{
+		int fall;
+
+		VectorMA(self->s.v.origin, dist * i / 2, hor, testplace);
+		fall = FallSpotGround(testplace, fallheight);
+		if (fall == FALL_DEATH)
+		{
+			return true;
+		}
+
+		// FallSpotGround() drops straight down, but a falling bot keeps going and can miss the floor
+		if (fall == FALL_LAND)
+		{
+			float drop_time = sqrt(2 * max(0, testplace[2] - dropper->s.v.origin[2]) / 800);
+
+			VectorMA(testplace, hor_speed * drop_time, hor, testplace);
+			if (FallSpotGround(testplace, fallheight) == FALL_DEATH)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+// a jump carries a bot about 0.7s at its speed, with no stopping in the air
+qbool BotJumpLandsInLava(gedict_t *self)
+{
+	float hor_speed = sqrt(self->s.v.velocity[0] * self->s.v.velocity[0]
+			+ self->s.v.velocity[1] * self->s.v.velocity[1]);
+
+	return BotDeadlyEdgeAhead(self, self->s.v.velocity, 32 + hor_speed * 0.7);
+}
+
+// AvoidHazardsOnGround() finds lava 16 units ahead, too late for a fighting bot to stop at speed
+static qbool BotFightingTowardsLava(gedict_t *self, float hor_speed, vec3_t dir_forward)
+{
+	vec3_t to_linked;
+
+	if (!self->fb.look_object || (self->fb.look_object->ct != ctPlayer) || !self->fb.linked_marker
+			|| (self->fb.path_state & (JUMP_LEDGE | BOTPATH_CURLJUMP_HINT | ROCKET_JUMP)))
+	{
+		return false;
+	}
+
+	if (self->fb.linked_marker != self->fb.touch_marker)
+	{
+		VectorAdd(self->fb.linked_marker->s.v.absmin, self->fb.linked_marker->s.v.view_ofs,
+					to_linked);
+		VectorSubtract(to_linked, self->s.v.origin, to_linked);
+		to_linked[2] = 0;
+		VectorNormalize(to_linked);
+		if (DotProduct(to_linked, dir_forward) >= 0.7)
+		{
+			return false;
+		}
+	}
+
+	// already going over, leave it to AvoidHazardsOnGround()
+	if (BotDeadlyEdgeAhead(self, dir_forward, 1))
+	{
+		return false;
+	}
+
+	// stopping takes about 0.1s
+	return BotDeadlyEdgeAhead(self, dir_forward, 32 + hor_speed * 0.1);
+}
+
 // FIXME: Globals.
 // FIXME: Magic numbers all over the place.
 void AvoidHazards(gedict_t *self)
@@ -1043,6 +1230,18 @@ void AvoidHazards(gedict_t *self)
 	if ((int)self->s.v.flags & FL_ONGROUND)
 	{
 		normalize(hor_velocity, dir_forward);
+		if (BotHopsTrainHole(self, hor_speed, dir_forward))
+		{
+			return;
+		}
+
+		if (BotFightingTowardsLava(self, hor_speed, dir_forward))
+		{
+			AvoidEdge(self);
+
+			return;
+		}
+
 		AvoidHazardsOnGround(self, hor_speed, new_origin, new_velocity, dir_forward);
 	}
 	else

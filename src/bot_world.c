@@ -244,8 +244,45 @@ static float BotRouteTime(gedict_t *from_marker, gedict_t *to_marker)
 	return SubZoneArrivalTime(zone->time, zone->marker, to_marker, false);
 }
 
+// Whether a bot at marker can shoot button, a func_button with health
+static qbool BotButtonInSight(gedict_t *marker, gedict_t *button)
+{
+	vec3_t from, to;
+
+	VectorAdd(marker->s.v.absmin, marker->s.v.view_ofs, from);
+	from[2] += 16;
+	VectorAdd(button->s.v.absmin, button->s.v.view_ofs, to);
+	traceline(PASSVEC3(from), PASSVEC3(to), true, world);
+
+	return (g_globalvars.trace_fraction == 1) || (PROG_TO_EDICT(g_globalvars.trace_ent) == button);
+}
+
+// Looks at a button with health on the route to shoot it, see SetFireButton()
+qbool BotLookAtButton(gedict_t *self, gedict_t *button)
+{
+	vec3_t to;
+
+	if (!button || !button->s.v.takedamage)
+	{
+		return false;
+	}
+
+	VectorAdd(button->s.v.absmin, button->s.v.view_ofs, to);
+	traceline(self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] + 16, PASSVEC3(to), true,
+				self);
+	if ((g_globalvars.trace_fraction != 1) && (PROG_TO_EDICT(g_globalvars.trace_ent) != button))
+	{
+		return false;
+	}
+
+	self->fb.look_object = button;
+
+	return true;
+}
+
 // The button that opens to_marker's door with the shortest trip there and back from from_marker,
-//   or NULL if they are all behind the door
+//   or NULL if they are all behind the door.  A button with health is only used if it can be shot
+//   from from_marker.
 gedict_t* BotDoorButton(gedict_t *from_marker, gedict_t *to_marker, float *detour_time)
 {
 	gedict_t *master = PROG_TO_EDICT(to_marker->fb.door_entity->s.v.owner);
@@ -257,13 +294,30 @@ gedict_t* BotDoorButton(gedict_t *from_marker, gedict_t *to_marker, float *detou
 	{
 		float opener_time;
 
-		// bots don't shoot buttons on purpose
-		if (!opener->fb.fl_marker || !streq(opener->classname, "func_button") || ISLIVE(opener))
+		if (!streq(opener->classname, "func_button"))
 		{
 			continue;
 		}
 
-		opener_time = BotRouteTime(from_marker, opener) + BotRouteTime(opener, from_marker);
+		if (ISLIVE(opener))
+		{
+			if (!BotButtonInSight(from_marker, opener))
+			{
+				continue;
+			}
+
+			// turn, shoot and wait for the door
+			opener_time = 1;
+		}
+		else if (opener->fb.fl_marker)
+		{
+			opener_time = BotRouteTime(from_marker, opener) + BotRouteTime(opener, from_marker);
+		}
+		else
+		{
+			continue;
+		}
+
 		if (opener_time < best_time)
 		{
 			best_time = opener_time;
@@ -280,8 +334,9 @@ gedict_t* BotDoorButton(gedict_t *from_marker, gedict_t *to_marker, float *detou
 }
 
 // Follows the route from from_marker to to_marker and returns the button to press for the first
-//   door on it that holds up the path
-gedict_t* BotDoorButtonOnRoute(gedict_t *from_marker, gedict_t *to_marker, qbool rl_routes)
+//   door on it that holds up the path, and in door_from the marker before that door
+gedict_t* BotDoorButtonOnRoute(gedict_t *from_marker, gedict_t *to_marker, qbool rl_routes,
+								gedict_t **door_from)
 {
 	gedict_t *m = from_marker;
 	int i;
@@ -303,6 +358,8 @@ gedict_t* BotDoorButtonOnRoute(gedict_t *from_marker, gedict_t *to_marker, qbool
 
 		if (next && BotDoorHoldsUpPath(m, next))
 		{
+			*door_from = m;
+
 			return BotDoorButton(m, next, NULL);
 		}
 

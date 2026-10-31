@@ -231,6 +231,7 @@ void ProcessNewLinkedMarker(gedict_t *self)
 	float best_score = PATH_SCORE_NULL;
 	vec3_t player_direction;
 	gedict_t *new_linked_marker;
+	gedict_t *shoot_button = NULL;
 	int new_path_state = 0;
 	int new_angle_hint = 0;
 	int new_rj_delay = 0;
@@ -316,10 +317,17 @@ void ProcessNewLinkedMarker(gedict_t *self)
 	//   Not when running away, nor before the match starts (button_touch() ignores presses then)
 	if (goalentity_marker && !(self->fb.state & RUNAWAY) && (k_practice || (match_in_progress == 2)))
 	{
+		gedict_t *door_from = NULL;
 		gedict_t *button = BotDoorButtonOnRoute(self->fb.touch_marker, goalentity_marker,
-												rocket_jump_routes_allowed);
+												rocket_jump_routes_allowed, &door_from);
 
-		if (button)
+		if (button && ISLIVE(button))
+		{
+			// shot from the marker before the door
+			shoot_button = button;
+			goalentity_marker = door_from;
+		}
+		else if (button)
 		{
 			goalentity_marker = button;
 		}
@@ -462,7 +470,7 @@ void ProcessNewLinkedMarker(gedict_t *self)
 	}
 
 	// FIXME: Map-specific
-	if (DM6LookAtDoor(self) || LookingAtPlayer(self))
+	if (DM6LookAtDoor(self) || LookingAtPlayer(self) || BotLookAtButton(self, shoot_button))
 	{
 		return;
 	}
