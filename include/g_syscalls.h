@@ -81,6 +81,9 @@ void trap_makestatic(intptr_t edn);
 void trap_setspawnparam(intptr_t edn);
 void trap_changelevel(const char *name, const char *entityname);
 intptr_t trap_multicast(float origin_x, float origin_y, float origin_z, intptr_t to);
+// Request a PHS rail effect; requires the optional "railtrail" extension.
+void trap_railtrail(float start_x, float start_y, float start_z, float end_x, float end_y,
+					float end_z, intptr_t player, intptr_t color);
 void trap_logfrag(intptr_t killer, intptr_t killee);
 void trap_infokey(intptr_t edn, char *key, char *valbuff, intptr_t sizebuff);
 void trap_WriteByte(intptr_t to, intptr_t data);
