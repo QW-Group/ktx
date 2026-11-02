@@ -276,7 +276,7 @@ void mapslist_dl(void)
 	if (isSupport_Params(self))
 	{
 		to = bound(from, from + MAX_STUFFED_QUICKMAPS_PER_FRAME, maps_cnt);
-		for (i = from - 1; i < to; i++)
+		for (i = from; i < to; i++)
 		{
 			if (to - i >= 8)
 			{
