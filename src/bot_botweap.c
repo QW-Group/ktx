@@ -429,7 +429,8 @@ static void JumpToAttack(vec3_t rel_pos)
 			traceline(self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] + 32,
 						self->s.v.origin[0] + rel_pos[0], self->s.v.origin[1] + rel_pos[1],
 						self->s.v.origin[2] + rel_pos[2] + 32, false, self);
-			SetJumpFlag(self, (g_globalvars.trace_fraction == 1), "JumpToAttack");
+			SetJumpFlag(self, (g_globalvars.trace_fraction == 1) && !BotJumpLandsInLava(self),
+						"JumpToAttack");
 		}
 	}
 }
@@ -588,6 +589,17 @@ void SetFireButton(gedict_t *self, vec3_t rel_pos, float rel_dist)
 	}
 
 	DM6SelectWeaponToOpenDoor(self);
+
+	if (streq(self->fb.look_object->classname, "func_button") && self->fb.look_object->s.v.takedamage)
+	{
+		// fired once facing it, see BotSetDesiredAngles()
+		if (self->s.v.ammo_shells && CheckNewWeapon(IT_SHOTGUN))
+		{
+			SetFireButtonBasedOnAngles(self, rel_dist);
+		}
+
+		return;
+	}
 
 	if (HurtSelfLogic(self))
 	{

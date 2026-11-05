@@ -40,7 +40,9 @@ static void fb_spawn_button(gedict_t *ent)
 
 	if (ent->s.v.health)
 	{
-		//Add_takedamage(ent);
+		// bots aim at the middle to shoot it
+		VectorSubtract(ent->s.v.absmax, ent->s.v.absmin, ent->s.v.view_ofs);
+		VectorScale(ent->s.v.view_ofs, 0.5f, ent->s.v.view_ofs);
 	}
 	else
 	{
