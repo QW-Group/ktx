@@ -9,6 +9,7 @@
 #define LOOK_TRAVEL_SPEED      200
 #define LOOK_EASE              12
 #define LOOK_HEADING_EASE      6
+#define LOOK_AHEAD             160    // look past a waypoint this close, to the next on the route
 
 #define AIM_TURN_DAMPING       0.6
 #define AIM_TURN_NEAR          10
@@ -405,7 +406,48 @@ static void BotPitchFromEye(gedict_t *self, vec3_t rel_pos)
 	self->fb.desired_angle[PITCH] = BotEaseView(self, PITCH, -angles[PITCH]);
 }
 
-// people look roughly where they are heading and turn their view there smoothly
+// where the route leads a little ahead of the bot
+static qbool BotRouteLookSpot(gedict_t *self, vec3_t spot)
+{
+	gedict_t *goal = &g_edicts[self->s.v.goalentity];
+	gedict_t *goal_marker = (goal == world || (self->fb.state & RUNAWAY)) ? NULL : goal->fb.touch_marker;
+	gedict_t *m = self->fb.linked_marker;
+	vec3_t to;
+	int i;
+
+	if (!m)
+	{
+		return false;
+	}
+
+	for (i = 0; i < 3; ++i)
+	{
+		gedict_t *next;
+
+		VectorAdd(m->s.v.absmin, m->s.v.view_ofs, spot);
+		VectorSubtract(spot, self->s.v.origin, to);
+		to[2] = 0;
+		if ((VectorLength(to) >= LOOK_AHEAD) || !goal_marker || (m == goal_marker))
+		{
+			break;
+		}
+
+		next = RouteNextMarker(m, goal_marker, self->fb.canRocketJump);
+		if (!next)
+		{
+			break;
+		}
+
+		m = next;
+	}
+
+	VectorSubtract(spot, self->s.v.origin, to);
+	to[2] = 0;
+
+	return (VectorLength(to) > 32);
+}
+
+// people look along the way they are going, past the next turn, and turn their view there smoothly
 static void BotLookAlongTravel(gedict_t *self, vec3_t rel_pos)
 {
 	float yaw = self->fb.desired_angle[YAW];
@@ -415,9 +457,18 @@ static void BotLookAlongTravel(gedict_t *self, vec3_t rel_pos)
 	if (sqrt(self->s.v.velocity[0] * self->s.v.velocity[0]
 			+ self->s.v.velocity[1] * self->s.v.velocity[1]) >= LOOK_TRAVEL_SPEED)
 	{
-		vec3_t dir;
+		vec3_t dir, spot;
 
-		VectorSet(dir, self->s.v.velocity[0], self->s.v.velocity[1], 0);
+		if (BotRouteLookSpot(self, spot))
+		{
+			VectorSubtract(spot, self->s.v.origin, dir);
+			dir[2] = 0;
+		}
+		else
+		{
+			VectorSet(dir, self->s.v.velocity[0], self->s.v.velocity[1], 0);
+		}
+
 		yaw = vectoyaw(dir);
 	}
 
