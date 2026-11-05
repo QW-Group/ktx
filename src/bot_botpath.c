@@ -226,7 +226,7 @@ void ProcessNewLinkedMarker(gedict_t *self)
 			(goalentity_ == world || (self->fb.state & RUNAWAY) ?
 					NULL : goalentity_->fb.touch_marker);
 	qbool trace_bprint = self->fb.debug;
-	qbool rocket_jump_routes_allowed = self->fb.canRocketJump;
+	qbool rocket_jump_routes_allowed = self->fb.canRocketJump || BotArmorJumpGoal(self);
 	qbool rocket_alert = false;
 	float best_score = PATH_SCORE_NULL;
 	vec3_t player_direction;
