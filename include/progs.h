@@ -682,6 +682,7 @@ typedef struct fb_entvars_s {
 	float dir_speed;							// the magnitude of vector the bot wants to move in
 	int wiggle_run_dir;							// when wiggle-running, going left or right
 	qbool wiggle_increasing;					// dictates direction, positive or negative
+	float bunny_hop_time;						// last bunny hop take-off
 	vec3_t last_cmd_direction;					// the direction the bot did move in (scaled for speed)
 	float ledge_backup_time;
 

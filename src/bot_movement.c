@@ -475,6 +475,343 @@ static void BestJumpingDirection(gedict_t *self, vec3_t dir_command)
 	RotatePointAroundVector(dir_command, g_globalvars.v_up, g_globalvars.v_forward, avg_angle);
 }
 
+// players keep jumping on landing to hold speed on open runs
+#define BUNNY_HOP_SPEED 300
+#define BUNNY_HOP_TOP 600
+#define BUNNY_HOP_EAGER 450			// from here a first hop may bend like a later one
+#define BUNNY_HOP_AIRTIME 0.675		// standing jump at sv_gravity 800
+#define BUNNY_HOP_AIM 0.5			// cos 60 degrees, how far off the heading the linked marker may be
+#define BUNNY_HOP_ROUTE 4			// markers to look along the route
+#define BUNNY_HOP_STEPS 15			// flight simulation steps for a hop that lands level
+#define BUNNY_HOP_MAX_STEPS 25		// and for one that drops BUNNY_HOP_DROP
+#define BUNNY_HOP_DROP 160			// players jump down ledges rather than walk off; this lands under fall damage
+#define BUNNY_HOP_STEP (BUNNY_HOP_AIRTIME / BUNNY_HOP_STEPS)
+#define BUNNY_HOP_AIR_TURN 2000		// sideways acceleration air control gives, a bit under 30 per 13 ms frame
+#define BUNNY_HOP_TOUCH 64			// steer for the next spot this close to one
+#define BUNNY_HOP_ITEM_HEIGHT 16		// higher than this over an item, the bot misses it
+#define BUNNY_HOP_RUN_ON 0.2			// seconds of running after landing that need floor too
+#define BUNNY_HOP_FIRST_TURN 0.35	// radians, about 20 degrees of steering in a first hop
+#define BUNNY_HOP_SIDE 32			// floor needed either side of the flight
+#define BUNNY_HOP_MARGIN 6			// room the flight needs beside the player box
+#define BUNNY_HOP_PATHS (JUMP_LEDGE | BOTPATH_CURLJUMP_HINT | DELIBERATE_AIR | WAIT_GROUND | ROCKET_JUMP \
+		| VERTICAL_PLATFORM | NO_DODGE | BOTPATH_DOOR | BOTPATH_RJ_IN_PROGRESS | WATER_PATH | STUCK_PATH \
+		| DELIBERATE_BACKUP)
+
+static int PathFlags(gedict_t *from_marker, gedict_t *to_marker)
+{
+	int i;
+
+	for (i = 0; i < NUMBER_PATHS; ++i)
+	{
+		if (from_marker->fb.paths[i].next_marker == to_marker)
+		{
+			return from_marker->fb.paths[i].flags;
+		}
+	}
+
+	return 0;
+}
+
+static gedict_t* StraightestPath(gedict_t *from_marker, vec3_t heading)
+{
+	gedict_t *best = NULL;
+	float best_dot = -2;
+	int i;
+
+	for (i = 0; i < NUMBER_PATHS; ++i)
+	{
+		gedict_t *next = from_marker->fb.paths[i].next_marker;
+		vec3_t dir;
+		float dot;
+
+		if (!next)
+		{
+			continue;
+		}
+
+		VectorSubtract(next->s.v.origin, from_marker->s.v.origin, dir);
+		dir[2] = 0;
+		VectorNormalize(dir);
+		dot = DotProduct(dir, heading);
+		if (dot > best_dot)
+		{
+			best = next;
+			best_dot = dot;
+		}
+	}
+
+	return best;
+}
+
+// Up to BUNNY_HOP_ROUTE spots along the route on plain paths, the linked marker first,
+//   and in item the first that is an item the bot would pick up, or -1
+static int RouteAhead(gedict_t *self, vec3_t heading, vec3_t *spots, int *item)
+{
+	gedict_t *goal = &g_edicts[self->s.v.goalentity];
+	gedict_t *goal_marker = (goal == world || (self->fb.state & RUNAWAY)) ? NULL : goal->fb.touch_marker;
+	gedict_t *m = self->fb.linked_marker;
+	int n = 0;
+
+	*item = -1;
+	while (m && (n < BUNNY_HOP_ROUTE))
+	{
+		gedict_t *next;
+
+		VectorAdd(m->s.v.absmin, m->s.v.view_ofs, spots[n]);
+		if ((spots[n][2] - self->s.v.origin[2] > 40) || (self->s.v.origin[2] - spots[n][2] > BUNNY_HOP_DROP))
+		{
+			break;
+		}
+
+		// a marker can have no classname, so check before comparing it; the bot can fly over
+		//   an item that is respawning or that it has no use for
+		if ((*item < 0) && m->classname
+				&& (!strncmp(m->classname, "item_", 5) || !strncmp(m->classname, "weapon_", 7))
+				&& !WaitingToRespawn(m) && m->fb.desire && (m->fb.desire(self, m) > 0))
+		{
+			*item = n;
+		}
+
+		++n;
+		if (m == goal_marker)
+		{
+			break;
+		}
+
+		// with no goal the route is unknown, so carry on along the path closest to straight ahead
+		next = goal_marker ? RouteNextMarker(m, goal_marker, self->fb.canRocketJump) : StraightestPath(m, heading);
+		if (!next || (PathFlags(m, next) & BUNNY_HOP_PATHS))
+		{
+			break;
+		}
+
+		m = next;
+	}
+
+	return n;
+}
+
+// True if there is floor within depth below point that is neither lava nor slime, with its height in floor_z
+static qbool FloorBelow(gedict_t *self, vec3_t point, float depth, float *floor_z)
+{
+	int contents;
+
+	traceline(PASSVEC3(point), point[0], point[1], point[2] - depth, true, self);
+	if (g_globalvars.trace_fraction == 1)
+	{
+		return false;
+	}
+
+	*floor_z = g_globalvars.trace_endpos[2];
+	contents = trap_pointcontents(g_globalvars.trace_endpos[0], g_globalvars.trace_endpos[1],
+									g_globalvars.trace_endpos[2] + 4);
+
+	return (contents != CONTENT_LAVA) && (contents != CONTENT_SLIME);
+}
+
+// True if a hop now, steering round the route in the air as fast as air control turns,
+//   stays clear of walls and over safe floor until it lands, at most BUNNY_HOP_DROP lower,
+//   turning no more than max_total radians
+static qbool BunnyHopFlightClear(gedict_t *self, vec3_t velocity, vec3_t *spots, int n, int item, float max_total)
+{
+	vec3_t pos, vel;
+	float speed = VectorLength(velocity);
+	float total = 0, t, floor_z = 0;
+	float max_turn = BUNNY_HOP_AIR_TURN / speed * BUNNY_HOP_STEP;
+	float lowest = self->s.v.origin[2] + VEC_HULL_MIN[2] - BUNNY_HOP_DROP;
+	qbool landed = false;
+	int i, k = 0, side;
+
+	VectorCopy(self->s.v.origin, pos);
+	VectorCopy(velocity, vel);
+	for (i = 1; (i <= BUNNY_HOP_MAX_STEPS) && !landed; ++i)
+	{
+		vec3_t to_spot, next;
+		float turn;
+
+		VectorSubtract(spots[k], pos, to_spot);
+		to_spot[2] = 0;
+		if ((VectorLength(to_spot) < BUNNY_HOP_TOUCH) && (k < n - 1))
+		{
+			++k;
+			VectorSubtract(spots[k], pos, to_spot);
+			to_spot[2] = 0;
+		}
+
+		// signed angle from the velocity to the spot, limited to what air control turns in a step
+		turn = atan2(vel[0] * to_spot[1] - vel[1] * to_spot[0], DotProduct(vel, to_spot));
+		turn = bound(-max_turn, turn, max_turn);
+		total += fabs(turn);
+		if (total > max_total)
+		{
+			return false;
+		}
+
+		next[0] = vel[0] * cos(turn) - vel[1] * sin(turn);
+		next[1] = vel[0] * sin(turn) + vel[1] * cos(turn);
+		vel[0] = next[0];
+		vel[1] = next[1];
+
+		VectorMA(pos, BUNNY_HOP_STEP, vel, next);
+		t = i * BUNNY_HOP_STEP;
+		next[2] = self->s.v.origin[2] + (JUMPSPEED - 400 * t) * t;
+
+		// the floor under this step, from where the arc is down to the lowest landing allowed
+		{
+			vec3_t probe;
+
+			VectorCopy(next, probe);
+			probe[2] = max(next[2], pos[2]);
+			if (!FloorBelow(self, probe, probe[2] - lowest, &floor_z))
+			{
+				return false;
+			}
+		}
+
+		// past the top of the arc, the feet reaching the floor is the landing
+		if ((t > JUMPSPEED / 800.0) && (next[2] + VEC_HULL_MIN[2] <= floor_z + 1))
+		{
+			next[2] = floor_z - VEC_HULL_MIN[2] + 1;
+			landed = true;
+		}
+
+		// the whole player box along the jump's arc, so walls beside the line and steps under it count,
+		//   also a few units to each side as the flown path drifts from this one; other players count
+		//   in the middle trace
+		for (side = -1; side <= 1; ++side)
+		{
+			vec3_t from, to;
+			float dx = -side * vel[1] / speed * BUNNY_HOP_MARGIN, dy = side * vel[0] / speed * BUNNY_HOP_MARGIN;
+
+			VectorCopy(pos, from);
+			VectorCopy(next, to);
+			from[0] += dx;
+			from[1] += dy;
+			to[0] += dx;
+			to[1] += dy;
+			TraceCapsule(PASSVEC3(from), PASSVEC3(to), side != 0, self, PASSVEC3(VEC_HULL_MIN), PASSVEC3(VEC_HULL_MAX));
+			if ((g_globalvars.trace_fraction != 1) || g_globalvars.trace_startsolid)
+			{
+				return false;
+			}
+		}
+
+		VectorCopy(next, pos);
+
+		// sailing over an item on the route misses it, and the bot turns back for it in the air
+		if ((k == item) && (pos[2] + VEC_HULL_MIN[2] - floor_z > BUNNY_HOP_ITEM_HEIGHT))
+		{
+			VectorSubtract(spots[k], pos, to_spot);
+			to_spot[2] = 0;
+			if (VectorLength(to_spot) < BUNNY_HOP_TOUCH)
+			{
+				return false;
+			}
+		}
+
+		if (i % (BUNNY_HOP_STEPS / 3))
+		{
+			continue;
+		}
+
+		// air control drifts the bot sideways, so a walkway over lava is no place to hop
+		for (side = -1; side <= 1; ++side)
+		{
+			vec3_t point;
+			float side_z;
+
+			VectorCopy(pos, point);
+			point[0] -= side * vel[1] / speed * BUNNY_HOP_SIDE;
+			point[1] += side * vel[0] / speed * BUNNY_HOP_SIDE;
+			if (!FloorBelow(self, point, point[2] - lowest, &side_z))
+			{
+				return false;
+			}
+		}
+	}
+
+	if (!landed)
+	{
+		return false;
+	}
+
+	// fast landings run on, and an edge there is a fall the bot cannot stop for
+	for (i = 1; i <= 4; ++i)
+	{
+		vec3_t point;
+		float run_z;
+
+		VectorMA(pos, BUNNY_HOP_RUN_ON * i / 4, vel, point);
+		if (!FloorBelow(self, point, 64, &run_z))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+// True if the bot can jump now and land on clear floor, steering round its route in the air.
+//   Without ground friction between hops, air control keeps adding speed
+static qbool BotBunnyHop(gedict_t *self)
+{
+	vec3_t velocity, heading, to_spot;
+	vec3_t spots[BUNNY_HOP_ROUTE];
+	float speed;
+	int n, item;
+
+	if ((match_in_progress != 2) || !((int)self->s.v.flags & FL_ONGROUND) || self->s.v.waterlevel
+			|| self->fb.rocketJumping || self->fb.debug_path || !self->fb.linked_marker
+			|| (self->fb.path_state & BUNNY_HOP_PATHS) || self->fb.enemy_visible || FUTURE(arrow_time2))
+	{
+		return false;
+	}
+
+	VectorCopy(self->s.v.velocity, velocity);
+	velocity[2] = 0;
+	speed = VectorLength(velocity);
+	// players rarely carry more than about 600 u/s, however long the run
+	if ((speed < BUNNY_HOP_SPEED) || (speed > BUNNY_HOP_TOP))
+	{
+		return false;
+	}
+
+	VectorScale(velocity, 1 / speed, heading);
+	n = RouteAhead(self, heading, spots, &item);
+	if (!n)
+	{
+		return false;
+	}
+
+	VectorSubtract(spots[0], self->s.v.origin, to_spot);
+	to_spot[2] = 0;
+	VectorNormalize(to_spot);
+	if (DotProduct(heading, to_spot) < BUNNY_HOP_AIM)
+	{
+		return false;
+	}
+
+	// head room
+	traceline(PASSVEC3(self->s.v.origin), self->s.v.origin[0], self->s.v.origin[1], self->s.v.origin[2] + 48,
+				true, self);
+	if (g_globalvars.trace_fraction != 1)
+	{
+		return false;
+	}
+
+	// a first hop wants a straight run unless the bot is already fast, as players start chains readily
+	//   at speed; once hopping, the bot keeps it up round bends
+	if (!BunnyHopFlightClear(self, velocity, spots, n, item,
+			(g_globalvars.time - self->fb.bunny_hop_time < 1) || (speed >= BUNNY_HOP_EAGER) ? M_PI : BUNNY_HOP_FIRST_TURN))
+	{
+		return false;
+	}
+
+	self->fb.bunny_hop_time = g_globalvars.time;
+
+	return true;
+}
+
 void BotSetCommand(gedict_t *self)
 {
 	extern float last_frame_time;
@@ -483,6 +820,7 @@ void BotSetCommand(gedict_t *self)
 	int weapon_script_impulse = 0;
 	int impulse = 0, buttons = 0;
 	qbool jumping;
+	qbool bunny_hop;
 	qbool firing;
 	vec3_t direction;
 	vec3_t dir_command;
@@ -540,6 +878,8 @@ void BotSetCommand(gedict_t *self)
 	}
 
 	jumping = self->fb.jumping || self->fb.waterjumping;
+	bunny_hop = !jumping && BotBunnyHop(self);
+	jumping |= bunny_hop;
 	firing = self->fb.firing;
 
 	self->fb.waterjumping = false;
@@ -555,7 +895,7 @@ void BotSetCommand(gedict_t *self)
 		// leave dir_move_ alone: bots in the air only set it every 0.15s, and each frame would turn
 		//   further from it
 		VectorCopy(self->fb.dir_move_, dir_command);
-		if (jumping && ((int)self->s.v.flags & FL_ONGROUND))
+		if (jumping && !bunny_hop && ((int)self->s.v.flags & FL_ONGROUND))
 		{
 			BestJumpingDirection(self, dir_command);
 		}
