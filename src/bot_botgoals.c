@@ -387,6 +387,14 @@ void UpdateGoal(gedict_t *self)
 		return;
 	}
 
+	// no marker touched yet, so no goals to look through: try again next frame
+	if (!self->fb.touch_marker)
+	{
+		self->fb.goal_refresh_time = g_globalvars.time;
+
+		return;
+	}
+
 	self->fb.best_goal_score = 0;
 	self->fb.best_goal = NULL;
 	self->fb.goal_enemy_repel = self->fb.goal_enemy_desire = 0;
