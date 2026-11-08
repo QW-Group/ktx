@@ -340,6 +340,12 @@ void CoilgunTrail(vec3_t org, vec3_t endpos, int entnum, int color)
 		entnum = 0;
 	}
 
+	if (HAVEEXTENSION(G_RAILTRAIL))
+	{
+		trap_railtrail(PASSVEC3(org), PASSVEC3(endpos), entnum, color);
+		return;
+	}
+
 	WriteByte( MSG_MULTICAST, SVC_TEMPENTITY);
 	WriteByte( MSG_MULTICAST, TE_LIGHTNING1);
 	WriteShort( MSG_MULTICAST, -264 + 8 * entnum + color);

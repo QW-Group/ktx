@@ -281,6 +281,14 @@ intptr_t trap_multicast(float origin_x, float origin_y, float origin_z, intptr_t
 	return syscall(G_MULTICAST, PASSFLOAT(origin_x), PASSFLOAT(origin_y), PASSFLOAT(origin_z), to);
 }
 
+// Let the server select the wire format for clients and recordings.
+void trap_railtrail(float start_x, float start_y, float start_z, float end_x, float end_y,
+					float end_z, intptr_t player, intptr_t color)
+{
+	syscall(G_RAILTRAIL, PASSFLOAT(start_x), PASSFLOAT(start_y), PASSFLOAT(start_z),
+			PASSFLOAT(end_x), PASSFLOAT(end_y), PASSFLOAT(end_z), player, color);
+}
+
 void trap_logfrag(intptr_t killer, intptr_t killee)
 {
 	syscall(G_LOGFRAG, killer, killee);
