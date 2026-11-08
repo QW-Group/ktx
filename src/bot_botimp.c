@@ -52,6 +52,7 @@
 #define FB_CVAR_MOVEMENT_WIGGLEFRAMES "k_fbskill_wiggleframes"
 #define FB_CVAR_COMBATJUMP_CHANCE "k_fbskill_combatjump"
 #define FB_CVAR_MISSILEDODGE_TIME "k_fbskill_missiledodge"
+#define FB_CVAR_AIM_HITRATE "k_fbskill_aim_hitrate"
 
 static float RangeOverSkill(int skill_level, float minimum, float maximum)
 {
@@ -146,6 +147,7 @@ void RegisterSkillVariables(void)
 	RegisterCvar(FB_CVAR_MOVEMENT_DMM4WIGGLETOGGLE);
 	RegisterCvar(FB_CVAR_COMBATJUMP_CHANCE);
 	RegisterCvar(FB_CVAR_MISSILEDODGE_TIME);
+	RegisterCvar(FB_CVAR_AIM_HITRATE);
 
 	RegisterCvar(FB_CVAR_DISTANCEERROR);
 	RegisterCvar(FB_CVAR_PAIN_VOLATILITY_INCREASE);
@@ -202,6 +204,7 @@ void setSkillAttributes(int skill, int aimskill) {
 	cvar_fset(FB_CVAR_MOVEMENT_WIGGLEFRAMES, RangeOverSkill(skill, 30, 20));
 	cvar_fset(FB_CVAR_COMBATJUMP_CHANCE, RangeOverSkill(skill, 0.03f, 0.1f));
 	cvar_fset(FB_CVAR_MISSILEDODGE_TIME, RangeOverSkill(skill, 1.0f, 0.5f));
+	cvar_fset(FB_CVAR_AIM_HITRATE, RangeOverSkill(aimskill, 0.5f, 1.5f));
 }
 
 void setSkillAttributesEasySkillMode(int skill, int aimskill) {
@@ -254,6 +257,7 @@ void setSkillAttributesEasySkillMode(int skill, int aimskill) {
 	cvar_fset(FB_CVAR_MOVEMENT_WIGGLEFRAMES, RangeOverSkill(skill, 30, 20));
 	cvar_fset(FB_CVAR_COMBATJUMP_CHANCE, RangeOverSkill(skill, 0.0f, 0.1f));
 	cvar_fset(FB_CVAR_MISSILEDODGE_TIME, RangeOverSkill(skill, 1.0f, 0.5f));
+	cvar_fset(FB_CVAR_AIM_HITRATE, RangeOverSkill(aimskill, 0.5f, 1.5f));
 }
 
 qbool SetAttributesBasedOnSkill(int skill)
@@ -354,6 +358,7 @@ void SetAttribs(gedict_t *self, qbool customised)
 	self->fb.skill.wiggle_toggle = bound(0, cvar(FB_CVAR_MOVEMENT_DMM4WIGGLETOGGLE), 1.0f);
 	self->fb.skill.combat_jump_chance = bound(0, cvar(FB_CVAR_COMBATJUMP_CHANCE), 1.0f);
 	self->fb.skill.missile_dodge_time = bound(0, cvar(FB_CVAR_MISSILEDODGE_TIME), 1.5f);
+	self->fb.skill.aim_hitrate = bound(0, cvar(FB_CVAR_AIM_HITRATE), 2);
 
 	self->fb.skill.customised = customised;
 }
