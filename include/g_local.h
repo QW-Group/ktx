@@ -383,6 +383,7 @@ int GetHandicap(gedict_t *p);
 qbool SetHandicap(gedict_t *p, int nhdc);
 void changelevel(const char *name);
 char* Get_PowerupsStr(void);
+char* NoKnockbackStr(void);
 int Get_Powerups(void);
 
 char* count_s(int cnt);
