@@ -359,6 +359,64 @@ static void BotLookAlongTravel(gedict_t *self)
 			+ diff * min(1, LOOK_EASE * g_globalvars.frametime);
 }
 
+// players' average hit rates in 4on4 demos; rockets and grenades are left out, as their hits
+//   depend on range and splash more than aim
+#define HITRATE_WEAPONS 5
+#define HITRATE_INTERVAL 2		// seconds between corrections
+#define HITRATE_SHOTS 10		// shots needed since the last correction
+static const int hitrate_items[HITRATE_WEAPONS] = { IT_SHOTGUN, IT_SUPER_SHOTGUN, IT_NAILGUN, IT_SUPER_NAILGUN, IT_LIGHTNING };
+static const int hitrate_wp[HITRATE_WEAPONS] = { wpSG, wpSSG, wpNG, wpSNG, wpLG };
+static const float hitrate_target[HITRATE_WEAPONS] = { 0.39, 0.38, 0.23, 0.17, 0.32 };
+
+// scale for the aim error with the weapon in hand, so the bot hits about as often as players do
+//   (times its aim_hitrate skill) at whatever range it fights
+static float HitRateScale(gedict_t *self)
+{
+	int i;
+
+	if (!self->fb.skill.aim_hitrate)
+	{
+		return 1;
+	}
+
+	if (g_globalvars.time >= self->fb.hitrate_time)
+	{
+		self->fb.hitrate_time = g_globalvars.time + HITRATE_INTERVAL;
+		for (i = 0; i < HITRATE_WEAPONS; ++i)
+		{
+			int hits = self->ps.wpn[hitrate_wp[i]].hits;
+			int attacks = self->ps.wpn[hitrate_wp[i]].attacks;
+
+			// stats start again with each match
+			if (!self->fb.hitrate_scale[i] || (attacks < self->fb.hitrate_attacks[i]))
+			{
+				self->fb.hitrate_scale[i] = 1;
+				self->fb.hitrate_hits[i] = hits;
+				self->fb.hitrate_attacks[i] = attacks;
+			}
+			else if (attacks - self->fb.hitrate_attacks[i] >= HITRATE_SHOTS)
+			{
+				float target = min(hitrate_target[i] * self->fb.skill.aim_hitrate, 0.95);
+				float rate = (float)(hits - self->fb.hitrate_hits[i]) / (attacks - self->fb.hitrate_attacks[i]);
+
+				self->fb.hitrate_scale[i] = bound(0.5, self->fb.hitrate_scale[i] * exp(0.8 * (rate - target) / target), 8);
+				self->fb.hitrate_hits[i] = hits;
+				self->fb.hitrate_attacks[i] = attacks;
+			}
+		}
+	}
+
+	for (i = 0; i < HITRATE_WEAPONS; ++i)
+	{
+		if (((int)self->s.v.weapon == hitrate_items[i]) && self->fb.hitrate_scale[i])
+		{
+			return self->fb.hitrate_scale[i];
+		}
+	}
+
+	return 1;
+}
+
 // Called after desired angles have been set to aim at the player
 static void BotsModifyAimAtPlayerLogic(gedict_t *self)
 {
@@ -411,6 +469,13 @@ static void BotsModifyAimAtPlayerLogic(gedict_t *self)
 	{
 		yaw_rnd = self->fb.last_rndaim[YAW];
 		pitch_rnd = self->fb.last_rndaim[PITCH];
+	}
+
+	{
+		float scale = HitRateScale(self);
+
+		pitch_rnd *= scale;
+		yaw_rnd *= scale;
 	}
 
 	self->fb.desired_angle[PITCH] = bound(-70, self->fb.desired_angle[PITCH] + pitch_rnd, 80);

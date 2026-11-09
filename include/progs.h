@@ -536,6 +536,7 @@ typedef struct fb_botskill_s {
 	qbool use_rocketjumps;
 	float combat_jump_chance;
 	float missile_dodge_time;				// minimum time in seconds before bot dodges missile
+	float aim_hitrate;						// players' hit rates are scaled by this to give the bot's aim, 0 for a fixed aim error
 
 	qbool customised;						// if set, customised file
 
@@ -757,6 +758,10 @@ typedef struct fb_entvars_s {
 	// Aiming
 	float last_rndaim[2];
 	float last_rndaim_time;
+	float hitrate_scale[5];						// how much the aim error is scaled with each weapon to reach its hit rate
+	int hitrate_hits[5];
+	int hitrate_attacks[5];
+	float hitrate_time;
 	float min_fire_time;						// time before bot will fire
 	float min_move_time;						// time before bot will move (used off spawn)
 
