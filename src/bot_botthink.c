@@ -129,6 +129,9 @@ static void TargetEnemyLogic(gedict_t *self)
 
 static void BotDodgeMovement(gedict_t *self, vec3_t dir_move, float dodge_factor)
 {
+	float amount;
+	vec3_t dodged;
+
 	if (dodge_factor)
 	{
 		if (dodge_factor < 0)
@@ -141,8 +144,19 @@ static void BotDodgeMovement(gedict_t *self, vec3_t dir_move, float dodge_factor
 		}
 
 		trap_makevectors(self->s.v.v_angle);
-		VectorMA(dir_move, g_random() * self->fb.skill.dodge_amount * dodge_factor,
-					g_globalvars.v_right, dir_move);
+		amount = g_random() * self->fb.skill.dodge_amount * dodge_factor;
+		VectorMA(dir_move, amount, g_globalvars.v_right, dodged);
+		if (BotDeadlyEdgeAhead(self, dodged, 64))
+		{
+			// the other way, or not at all
+			VectorMA(dir_move, -amount, g_globalvars.v_right, dodged);
+			if (BotDeadlyEdgeAhead(self, dodged, 64))
+			{
+				return;
+			}
+		}
+
+		VectorCopy(dodged, dir_move);
 	}
 }
 
