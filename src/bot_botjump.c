@@ -454,6 +454,12 @@ void CheckCombatJump(gedict_t *self)
 		return;
 	}
 
+	// players jump between shots, hardly ever while holding fire
+	if (self->fb.firing)
+	{
+		return;
+	}
+
 	// Now just down to bot characteristics
 	SetJumpFlag(self, (g_random() < self->fb.skill.combat_jump_chance), "CombatJump");
 }
