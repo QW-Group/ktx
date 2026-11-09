@@ -12,6 +12,132 @@
 
 #include "g_local.h"
 
+extern gedict_t *markers[];
+
+// fighting from range: look for spots up to FIGHT_SEARCH from the bot, and accept anywhere between
+//   FIGHT_NEAREST and FIGHT_FURTHEST times the preferred distance from the enemy
+#define FIGHT_SEARCH 960
+#define FIGHT_NEAREST 0.75
+#define FIGHT_FURTHEST 1.3
+#define FIGHT_EYE 22			// eye height above origin
+#define FIGHT_ITEM 500			// closer than this to the item it wants, the bot goes and gets it
+
+static int Opponents(gedict_t *self)
+{
+	int count = 0;
+	gedict_t *p;
+
+	for (p = world; (p = find_plr(p));)
+	{
+		if ((p != self) && !SameTeam(p, self))
+		{
+			++count;
+		}
+	}
+
+	return max(count, 1);
+}
+
+// how far away players fight with each weapon in duels; with more opponents they fight closer,
+//   about 20% closer with two and not much more with four
+static float PreferredRange(gedict_t *self)
+{
+	float base = 0;
+	int n = Opponents(self);
+
+	switch ((int)self->s.v.weapon)
+	{
+		case IT_ROCKET_LAUNCHER:
+			base = 400;
+			break;
+		case IT_LIGHTNING:
+			base = 410;
+			break;
+		case IT_SHOTGUN:
+			base = 420;
+			break;
+		case IT_GRENADE_LAUNCHER:
+			base = 450;
+			break;
+		case IT_NAILGUN:
+		case IT_SUPER_NAILGUN:
+			base = 300;
+			break;
+		case IT_SUPER_SHOTGUN:
+			base = 250;
+			break;
+	}
+
+	return base * (0.75 + 0.25 / (n * n));
+}
+
+// nearest marker that can see the enemy from about the preferred distance
+static gedict_t *RangeMarker(gedict_t *self, gedict_t *enemy)
+{
+	float range = PreferredRange(self);
+	float best = FIGHT_SEARCH;
+	gedict_t *best_marker = NULL;
+	vec3_t eye;
+	int i;
+
+	if (!range)
+	{
+		return NULL;
+	}
+
+	VectorCopy(enemy->s.v.origin, eye);
+	eye[2] += FIGHT_EYE;
+	for (i = 0; i < NUMBER_MARKERS; ++i)
+	{
+		gedict_t *m = markers[i];
+		vec3_t pos;
+		float from_bot;
+
+		// a teleport marker would send the bot somewhere else
+		if (!m || streq(m->classname, "trigger_teleport"))
+		{
+			continue;
+		}
+
+		VectorAdd(m->s.v.absmin, m->s.v.view_ofs, pos);
+		from_bot = VectorDistance(pos, self->s.v.origin);
+		pos[2] += FIGHT_EYE;
+		if ((from_bot >= best) || (VectorDistance(pos, eye) < range * FIGHT_NEAREST)
+				|| (VectorDistance(pos, eye) > range * FIGHT_FURTHEST))
+		{
+			continue;
+		}
+
+		traceline(PASSVEC3(pos), PASSVEC3(eye), true, world);
+		if (g_globalvars.trace_fraction == 1)
+		{
+			best = from_bot;
+			best_marker = m;
+		}
+	}
+
+	return best_marker;
+}
+
+// keep back from a visible enemy, except when running away or about to grab an item
+static qbool HoldRange(gedict_t *self)
+{
+	gedict_t *enemy = &g_edicts[self->s.v.enemy];
+	gedict_t *goal = &g_edicts[self->s.v.goalentity];
+	qbool item_near;
+
+	// in ToT the bots are meant to swarm the player
+	if (tot_mode_enabled())
+	{
+		return false;
+	}
+
+	item_near = (goal != world) && (goal != enemy)
+			&& (VectorDistance(self->s.v.origin, goal->s.v.origin) <= FIGHT_ITEM);
+
+	return self->fb.enemy_visible && (enemy != world) && !(self->fb.state & RUNAWAY) && !item_near;
+}
+
 void DM3CampLogic(void);
 void DM4CampLogic(void);
 void DM6CampLogic(void);
@@ -354,6 +480,16 @@ void ProcessNewLinkedMarker(gedict_t *self)
 					}
 				}
 			}
+		}
+	}
+
+	if (HoldRange(self))
+	{
+		gedict_t *range = RangeMarker(self, &g_edicts[self->s.v.enemy]);
+
+		if (range)
+		{
+			goalentity_marker = range;
 		}
 	}
 
