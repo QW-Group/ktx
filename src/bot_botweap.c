@@ -129,9 +129,13 @@ static void SetFireButtonBasedOnAngles(gedict_t *self, float rel_dist)
 	float min_angle_error;
 	vec3_t angle_error;
 	int i;
+	// the view turns towards a player or a predicted spot over several frames, so compare it with
+	// the target itself
+	float *target = ((self->fb.look_object->ct == ctPlayer) || self->fb.predict_shoot) ?
+			self->fb.aim_target : self->fb.desired_angle;
 
 	risk *= risk;
-	VectorSubtract(self->fb.desired_angle, self->s.v.v_angle, angle_error);
+	VectorSubtract(target, self->s.v.v_angle, angle_error);
 
 	for (i = 0; i < 2; ++i)
 	{
