@@ -279,6 +279,19 @@ gedict_t* BotDoorButton(gedict_t *from_marker, gedict_t *to_marker, float *detou
 	return best_button;
 }
 
+// The marker after from_marker on the route to to_marker
+gedict_t* RouteNextMarker(gedict_t *from_marker, gedict_t *to_marker, qbool rl_routes)
+{
+	if (from_marker->fb.Z_ == to_marker->fb.Z_)
+	{
+		fb_subzone_t *sub = &from_marker->fb.subzones[to_marker->fb.S_];
+
+		return (rl_routes ? sub->next_marker_rj : sub->next_marker);
+	}
+
+	return ZonePathMarker(from_marker, to_marker, true, rl_routes);
+}
+
 // Follows the route from from_marker to to_marker and returns the button to press for the first
 //   door on it that holds up the path
 gedict_t* BotDoorButtonOnRoute(gedict_t *from_marker, gedict_t *to_marker, qbool rl_routes)
@@ -288,18 +301,7 @@ gedict_t* BotDoorButtonOnRoute(gedict_t *from_marker, gedict_t *to_marker, qbool
 
 	for (i = 0; m && (m != to_marker) && (i < NUMBER_MARKERS); ++i)
 	{
-		gedict_t *next;
-
-		if (m->fb.Z_ == to_marker->fb.Z_)
-		{
-			fb_subzone_t *sub = &m->fb.subzones[to_marker->fb.S_];
-
-			next = (rl_routes ? sub->next_marker_rj : sub->next_marker);
-		}
-		else
-		{
-			next = ZonePathMarker(m, to_marker, true, rl_routes);
-		}
+		gedict_t *next = RouteNextMarker(m, to_marker, rl_routes);
 
 		if (next && BotDoorHoldsUpPath(m, next))
 		{
