@@ -581,6 +581,29 @@ static qbool JumpLedgeLogic(gedict_t *self, vec3_t new_velocity)
 	return false;
 }
 
+// True if a wall ahead towards rel_pos stands above step height but not above jump height
+static qbool JumpableLedgeAhead(gedict_t *self, vec3_t rel_pos)
+{
+	vec3_t dir;
+	float feet = self->s.v.origin[2] + VEC_HULL_MIN[2];
+
+	VectorCopy(rel_pos, dir);
+	dir[2] = 0;
+	VectorNormalize(dir);
+
+	traceline(self->s.v.origin[0], self->s.v.origin[1], feet + 20, self->s.v.origin[0] + 32 * dir[0],
+				self->s.v.origin[1] + 32 * dir[1], feet + 20, true, self);
+	if (g_globalvars.trace_fraction == 1)
+	{
+		return false;
+	}
+
+	traceline(self->s.v.origin[0], self->s.v.origin[1], feet + 44, self->s.v.origin[0] + 32 * dir[0],
+				self->s.v.origin[1] + 32 * dir[1], feet + 44, true, self);
+
+	return (g_globalvars.trace_fraction == 1);
+}
+
 // Called only if current path isn't flagged as JUMP_LEDGE, but obstruction_normal still set
 static void ObstructionLogic(gedict_t *self, vec3_t new_velocity)
 {
@@ -1015,7 +1038,22 @@ void AvoidHazards(gedict_t *self)
 		{
 			return;
 		}
-		else if (g_globalvars.time > self->fb.arrow_time)
+
+		// blocked by a ledge too high to walk up, with no jump flag on the path: jump, as players do
+		if (self->fb.linked_marker && ((int)self->s.v.flags & FL_ONGROUND)
+				&& (g_globalvars.time > self->fb.arrow_time2))
+		{
+			vec3_t rel_pos;
+
+			VectorAdd(self->fb.linked_marker->s.v.absmin, self->fb.linked_marker->s.v.view_ofs, rel_pos);
+			VectorSubtract(rel_pos, self->s.v.origin, rel_pos);
+			if (JumpableLedgeAhead(self, rel_pos) && LedgeJumpLogic(self, rel_pos, new_velocity))
+			{
+				return;
+			}
+		}
+
+		if (g_globalvars.time > self->fb.arrow_time)
 		{
 			ObstructionLogic(self, new_velocity);
 		}
