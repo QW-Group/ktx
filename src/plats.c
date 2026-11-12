@@ -208,10 +208,8 @@ void plat_crush(void)
 	{
 		plat_go_up();
 	}
-	else
-	{
-		G_Error("plat_crush: bad self.state\n");
-	}
+	// STATE_TOP/STATE_BOTTOM: blocked while the server snaps the plat into its end position.
+	// It is done moving, so there is nothing to reverse.
 }
 
 void plat_use(void)
