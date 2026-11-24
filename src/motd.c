@@ -20,6 +20,8 @@
 // motd.c
 #include "g_local.h"
 
+void MOTDMenuText(gedict_t *motd, char *buf, size_t size);
+
 void PMOTDThink(void)
 {
 	int i;
@@ -61,6 +63,15 @@ void PMOTDThink(void)
 		strlcat(buf, s, sizeof(buf));
 		strlcat(buf, "\n", sizeof(buf));
 	}
+
+	// optional antilag line: k_motd_antilag "This server uses antilag" -> "... 2" / "... off"
+	if (!strnull(s = cvar_string("k_motd_antilag")))
+	{
+		i = (int)cvar("sv_antilag");
+		strlcat(buf, va("&cF65%s %s&r\n\n", s, i ? va("%d", i) : "off"), sizeof(buf));
+	}
+
+	MOTDMenuText(self, buf, sizeof(buf));
 
 	// no "welcome" - if k_motd keys is present - because admin may wanna customize this
 	if (strnull(buf))
@@ -158,4 +169,105 @@ void RemoveMOTD(void)
 			ent_remove(motd);
 		}
 	}
+}
+
+// MOTD menu: k_motd_item1..9 = "Label|https://url", or "Label" alone to close the MOTD.
+// Forward/back (arrows or W/S) moves the selection, jump confirms.
+
+static char *MOTDItem(int i)
+{
+	return cvar_string(va("k_motd_item%d", i));
+}
+
+static int MOTDItemCount(void)
+{
+	int i;
+
+	for (i = 0; i < 9 && !strnull(MOTDItem(i + 1)); i++)
+		;
+
+	return i;
+}
+
+static gedict_t *MOTDFind(gedict_t *p)
+{
+	gedict_t *motd;
+	int owner = EDICT_TO_PROG(p);
+
+	for (motd = world; (motd = find(motd, FOFCLSN, "motd"));)
+	{
+		if (owner == motd->s.v.owner)
+		{
+			return motd;
+		}
+	}
+
+	return NULL;
+}
+
+void MOTDMenuText(gedict_t *motd, char *buf, size_t size)
+{
+	int i, n = MOTDItemCount();
+	char label[64], *bar;
+
+	for (i = 0; i < n; i++)
+	{
+		strlcpy(label, MOTDItem(i + 1), sizeof(label));
+		if ((bar = strchr(label, '|')))
+		{
+			*bar = 0;
+		}
+
+		strlcat(buf, va(i == (int)motd->cnt ? "&cFD0> %s <&r\n" : "&c888%s&r\n", label), size);
+	}
+
+	if (n)
+	{
+		char *hint = cvar_string("k_motd_menu_hint");
+
+		strlcat(buf, va("&c888%s&r\n", strnull(hint) ? "(forward/back + jump)" : hint), size);
+	}
+}
+
+// called every frame from PlayerPostThink
+void MOTDMenuInput(void)
+{
+	gedict_t *motd;
+	int n, dir, jump;
+	char *url;
+
+	if (!(n = MOTDItemCount()) || !(motd = MOTDFind(self)))
+	{
+		return;
+	}
+
+	dir = (self->movement[0] > 0) ? -1 : (self->movement[0] < 0) ? 1 : 0;
+	jump = (int)self->s.v.button2;
+
+	if (dir && dir != (int)motd->count)
+	{
+		motd->cnt = ((int)motd->cnt + dir + n) % n;
+		motd->s.v.nextthink = g_globalvars.time; // redraw now
+	}
+
+	if (jump && !motd->lip)
+	{
+		url = strchr(MOTDItem((int)motd->cnt + 1), '|');
+		// the url goes into a stuffcmd, so refuse anything that could break out of the quotes
+		if (url && !strnull(url + 1) && !strpbrk(url + 1, "\"; \n\r"))
+		{
+			G_sprint(self, PRINT_HIGH, "&c08FLink:&r %s\n", url + 1);
+			stuffcmd(self, "openurl \"%s\"\n", url + 1);
+		}
+		else
+		{
+			ent_remove(motd);
+			G_centerprint(self, "%s", "");
+
+			return;
+		}
+	}
+
+	motd->count = dir;
+	motd->lip = jump;
 }
