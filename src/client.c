@@ -49,6 +49,7 @@ void PlayerStats(void);
 void ExitCaptain(void);
 void CheckFinishCaptain(void);
 void MakeMOTD(void);
+void MOTDMenuInput(void);
 void ImpulseCommands(void);
 void StartDie(void);
 void ZeroFpsStats(void);
@@ -4571,6 +4572,7 @@ void PlayerPostThink(void)
 	}
 #endif
 
+	MOTDMenuInput();
 	W_WeaponFrame();
 
 	race_player_post_think();
