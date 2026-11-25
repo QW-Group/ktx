@@ -469,6 +469,8 @@ char* make_dots(char *dots, size_t dots_len, int cmd_max_len, char *cmd);
 //	antilag.c
 //
 extern float time_corrected;
+void WPredict_Initialize(void);
+void WPredict_SendDefinitionsTo(gedict_t *player);
 void antilag_lagmove(antilag_t *data, float goal_time);
 void antilag_lagmove_all(gedict_t *e, float goal_time);
 void antilag_lagmove_all_hitscan(gedict_t *e);

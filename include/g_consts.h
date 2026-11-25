@@ -174,6 +174,9 @@
 #define MSG_ONE							1			// reliable to one (msg_entity)
 #define MSG_ALL							2			// reliable to all
 #define MSG_INIT						3			// write to the init string
+#define MSG_ONE_NORECORD				6	// reliable to one, excluded from MVD
+
+#define EZCSQC_WEAPONDEF				4
 
 // message levels
 #define PRINT_LOW						0			// pickup messages
@@ -211,6 +214,7 @@
 #define	SVC_UPDATEENTERTIME				37
 #define SVC_MUZZLEFLASH					39
 #define SVC_UPDATEUSERINFO				40
+#define SVC_EZCSQC_SETUP				77
 
 #define TE_SPIKE						0
 #define TE_SUPERSPIKE					1
