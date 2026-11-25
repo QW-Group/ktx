@@ -13,7 +13,6 @@
  *                usercmd durations. Drives the state machine exclusively.
  *   time         interpolated server time. Drives projectile flight and the
  *                extrapolation of server-sent projectiles.
-
  *   cltime       real client time, which never stops. Drives everything the
  *                player sees directly: trail spacing, the view model blend,
  *                grenade spin and the beam.

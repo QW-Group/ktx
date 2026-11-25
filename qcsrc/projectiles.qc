@@ -105,8 +105,6 @@ static float Projectile_TrailEffect(float is_grenade)
 	return particleeffectnum(is_grenade ? "TR_GRENADE" : "TR_ROCKET");
 }
 
-// Every projectile has its trail origin seeded when it is created, so this only
-// ever continues one.
 /*
  * What kind of projectile a model is, and the trail and tumble that come with
  * that. The model's own flags say which, so this is the same answer for one we
@@ -128,6 +126,8 @@ static void Projectile_Classify(entity e)
 		e.trail_fx = Projectile_TrailEffect(FALSE);
 }
 
+// Every projectile has its trail origin seeded when it is created, so this only
+// ever continues one.
 static void Projectile_EmitTrail(void)
 {
 	if (!self.trail_fx)
