@@ -108,12 +108,19 @@ void WeaponState_Discard(void)
  * that belongs to the previous life, and the server throws away attacks for a
  * moment after spawning, so we do the same. Called once the timing fields are
  * read: the guard runs off the clock in this snapshot, not the one it replaces.
+ *
+ * The server counts that moment from the weapon clock at the spawn. It sets
+ * attack_finished to the same value, and nothing can move it while attacks are
+ * being thrown away, so that is where the spawn time is read from. A snapshot
+ * that only arrives after the player has fired carries a later attack_finished;
+ * its own clock is the earlier of the two then, and the guard is over anyway.
  */
 static void WeaponState_NoteGeneration(float generation)
 {
 	if (weapon_generation >= 0 && generation != weapon_generation)
 	{
-		respawn_guard_until = ws_server.client_time + RESPAWN_GUARD;
+		respawn_guard_until = min(ws_server.attack_finished, ws_server.client_time)
+			+ RESPAWN_GUARD;
 		WeaponState_ResetLightning();
 	}
 

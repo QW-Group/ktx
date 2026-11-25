@@ -1289,6 +1289,7 @@ typedef struct gedict_s
 	struct antilag_s *antilag_data;
 	int weapon_index;
 	float client_time;
+	float client_spawn_time;	// client_time when the player was last spawned
 	float client_lastupdated;
 	float client_nextthink;
 	func_t client_think;

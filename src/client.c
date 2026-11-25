@@ -2107,6 +2107,7 @@ void PutClientInServer(void)
 	W_SetCurrentAmmo();
 
 	self->attack_finished = self->client_time;
+	self->client_spawn_time = self->client_time;
 	self->th_pain = player_pain;
 	self->th_die = PlayerDie;
 

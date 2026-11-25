@@ -3159,7 +3159,9 @@ qbool can_prewar(qbool fire)
  */
 void W_WeaponFrame(void)
 {
-	if ((self->spawn_time + 0.05) > g_globalvars.time)
+	// Measured on the player's weapon clock like every other weapon delay, so
+	// that a predicting client can tell exactly when it ends.
+	if ((self->client_spawn_time + 0.05) > self->client_time)
 	{
 		// Backup usercmds may carry old weapon impulses; preserve only usable selections.
 		if ((((int)self->s.v.impulse >= 1) && ((int)self->s.v.impulse <= 8)) || (int)self->s.v.impulse == 22)
