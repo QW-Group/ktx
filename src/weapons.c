@@ -80,6 +80,8 @@ void W_FireAxe(void)
 	vec3_t source, dest;
 	vec3_t org;
 
+	antilag_lagmove_all_hitscan(self);
+
 	WS_Mark(self, wpAXE);
 
 	self->ps.wpn[wpAXE].attacks++;
@@ -95,6 +97,7 @@ void W_FireAxe(void)
 	traceline(PASSVEC3(source), PASSVEC3(dest), false, self);
 	if (g_globalvars.trace_fraction == 1.0)
 	{
+		antilag_unmove_all();
 		return;
 	}
 
@@ -152,6 +155,8 @@ void W_FireAxe(void)
 		WriteCoord( MSG_MULTICAST, org[2]);
 		trap_multicast(PASSVEC3(org), MULTICAST_PVS);
 	}
+
+	antilag_unmove_all();
 }
 
 //============================================================================
@@ -555,6 +560,7 @@ void FireBullets(float shotcount, vec3_t dir, float spread_x, float spread_y, fl
 	qbool classic_shotgun = cvar("k_classic_shotgun");
 	qbool non_random_bullets = (k_yawnmode
 			|| (!match_in_progress && self && (self->ct == ctPlayer) && iKey(self, "nrb")));
+	qbool do_antilag = (self->ct == ctPlayer); // hacky check
 
 	trap_makevectors(self->s.v.v_angle);
 	VectorScale(g_globalvars.v_forward, 10, tmp);
@@ -564,6 +570,11 @@ void FireBullets(float shotcount, vec3_t dir, float spread_x, float spread_y, fl
 
 	ClearMultiDamage();
 	multi_damage_type = deathtype;
+
+	if (do_antilag)
+	{
+		antilag_lagmove_all_hitscan(self);
+	}
 
 	if (cvar("k_instagib"))
 	{
@@ -726,6 +737,11 @@ void FireBullets(float shotcount, vec3_t dir, float spread_x, float spread_y, fl
 		shotcount = shotcount - 1;
 	}
 
+	if (do_antilag)
+	{
+		antilag_unmove_all();
+	}
+
 	ApplyMultiDamage();
 	if (!classic_shotgun)
 	{
@@ -844,7 +860,9 @@ void W_FireShotgun(void)
 	aim(dir);
 	if (cvar("k_instagib"))
 	{
+		antilag_lagmove_all_hitscan(self); // we can do the antilag check out here in instagib since knockback doesn't matter
 		FireInstaBullet(dir, dtSG);
+		antilag_unmove_all();
 	}
 	else
 	{
@@ -1131,7 +1149,18 @@ void LightningHit(gedict_t *from, float damage)
  */
 void LightningDamage(vec3_t p1, vec3_t p2, gedict_t *from, float damage)
 {
+	qbool do_antilag = (from->ct == ctPlayer);	// hacky check
+	if (do_antilag)
+	{
+		antilag_lagmove_all_hitscan(from);
+	}
+
 	traceline(PASSVEC3(p1), PASSVEC3(p2), false, from);
+
+	if (do_antilag)
+	{
+		antilag_unmove_all();
+	}
 
 	if (PROG_TO_EDICT(g_globalvars.trace_ent)->s.v.takedamage)
 	{
@@ -1211,7 +1240,9 @@ void W_FireLightning(void)
 					return;
 				}
 
+				antilag_lagmove_all_hitscan(self);
 				T_RadiusDamage(self, self, 35 * cells, world, dtLG_DIS);
+				antilag_unmove_all();
 
 				return;
 			}
@@ -1228,7 +1259,9 @@ void W_FireLightning(void)
 				return;
 			}
 
+			antilag_lagmove_all_hitscan(self);
 			T_RadiusDamage(self, self, 35 * cells, world, dtLG_DIS);
+			antilag_unmove_all();
 
 			return;
 		}

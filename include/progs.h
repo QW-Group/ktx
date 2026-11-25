@@ -773,6 +773,9 @@ typedef struct fb_entvars_s {
 } fb_entvars_t;
 #endif
 
+#define ANTILAG_REWIND_MAXHITSCAN 0.250
+#define ANTILAG_MAX_PREDICTION	  0.02
+#define ANTILAG_MAX_XERP		  0.02
 #define ANTILAG_MAXSTATES 40
 #define ANTILAG_MAXEDICTS 256
 

@@ -1917,6 +1917,7 @@ void StartFrame(int time)
 
 	WillPause();
 
+	time_corrected = time;
 	antilag_updateworld();
 }
 
