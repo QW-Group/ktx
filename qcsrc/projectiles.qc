@@ -32,14 +32,16 @@ enum
 .vector	s_origin;
 .vector	s_velocity;
 /*
- * When that position was received, on our clock.
+ * The server time that position is for, as stamped by the server.
  *
- * The payload also carries the server's own timestamp, but that is the mod's
- * clock and shares no epoch with anything csqc can read, so subtracting one
- * from the other yields nonsense. Treating the moment the update arrives as
- * the moment it describes costs at most the packet's age and cannot drift.
+ * This relies on the accurate-timings protocol extension, which makes `time`
+ * run on the server's clock. `time` is interpolated between the last two
+ * server frames, so a fresh update is stamped slightly ahead of it and the
+ * interval since the sample is negative for a moment. That is left as it is:
+ * the projectile is drawn just short of the sample, in step with every other
+ * entity the engine interpolates.
  */
-.float	s_recv;
+.float	s_time;
 
 .float	owner_num;		// entity number of the player who fired
 .float	is_local;		// our own prediction, not an entity the server sent
@@ -233,21 +235,41 @@ static void Projectile_Bounce(entity e, float dt, float spin)
 	e.sim_origin = org;
 }
 
-// Step the grenade simulation up to the present.
+/*
+ * Take a grenade back along its arc, for a sample stamped ahead of `time`.
+ * dt is negative. The step is at most a server frame, so it is one straight
+ * move with no bounce; the trace only keeps it out of the world.
+ */
+static void Projectile_Rewind(entity e, float dt)
+{
+	if (e.at_rest)
+		return;
+
+	e.velocity_z -= 0.5 * dt * sv_gravity;
+
+	traceline(e.sim_origin, e.sim_origin + e.velocity * dt, MOVE_NOMONSTERS, e);
+	e.sim_origin = trace_endpos;
+
+	e.velocity_z -= 0.5 * dt * sv_gravity;
+}
+
+// Bring the grenade simulation to the present.
 static void Projectile_Advance(float spin)
 {
-	float dt = max(0, time - self.sim_time);
+	float dt = time - self.sim_time;
 
 	self.sim_time = time;
 
 	if (dt > 0)
 		Projectile_Bounce(self, dt, spin);
+	else if (dt < 0)
+		Projectile_Rewind(self, dt);
 }
 
 // Where a straight-line projectile is now, carried on from its last sample.
 static vector Projectile_LinearOrigin(entity e)
 {
-	return e.s_origin + e.s_velocity * (time - e.s_recv);
+	return e.s_origin + e.s_velocity * (time - e.s_time);
 }
 
 // Ease out whatever disagreement was left when we took over a prediction.
@@ -366,7 +388,7 @@ static float Projectile_Predraw(void)
 		self.debug_count++;
 		print(sprintf("proj: %s #%g at %s age %g\n",
 		              self.is_local ? "local" : "server",
-		              self.entnum, vtos(self.origin), time - self.s_recv));
+		              self.entnum, vtos(self.origin), time - self.s_time));
 	}
 
 	// Our own projectile starts inside our own face; drawing it there only
@@ -445,7 +467,7 @@ float Projectile_SpawnLocal(float widx, float a, float frame, float ping,
 
 	// The server advances a newly spawned missile by one frame before anyone
 	// sees it, so it left the muzzle that long ago.
-	proj.s_recv = time - NEWMIS_STEP;
+	proj.s_time = time - NEWMIS_STEP;
 
 	Projectile_Classify(proj);
 
@@ -584,8 +606,7 @@ void Projectile_Parse(float isnew)
 	{
 		self.s_origin = Projectile_ReadVector();
 		self.s_velocity = Projectile_ReadVector();
-		readfloat();	// the server's own clock; see .s_recv
-		self.s_recv = time;
+		self.s_time = readfloat();
 		had_origin = TRUE;
 	}
 
@@ -627,7 +648,7 @@ void Projectile_Parse(float isnew)
 		 */
 		self.sim_origin = self.s_origin;
 		self.velocity = self.s_velocity;
-		self.sim_time = self.s_recv;
+		self.sim_time = self.s_time;
 		self.at_rest = vlen(self.s_velocity) < 1;
 		self.avelocity = self.at_rest ? '0 0 0' : GRENADE_SPIN;
 
