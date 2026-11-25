@@ -219,6 +219,24 @@ void WeaponState_Parse(float isnew)
 // being shown.
 // ==========================================================================
 
+/*
+ * How much the player holds of an ammo pool. Written out per pool because
+ * version 6 bytecode cannot index an array inside a struct with a variable.
+ */
+static float WeaponState_Ammo(float pool)
+{
+	if (pool == AMMO_SHELLS)
+		return ws_predicted.ammo[AMMO_SHELLS];
+	if (pool == AMMO_NAILS)
+		return ws_predicted.ammo[AMMO_NAILS];
+	if (pool == AMMO_ROCKETS)
+		return ws_predicted.ammo[AMMO_ROCKETS];
+	if (pool == AMMO_CELLS)
+		return ws_predicted.ammo[AMMO_CELLS];
+
+	return ws_predicted.ammo[AMMO_NONE];
+}
+
 // Whether the player could switch to this weapon: they have to be carrying it
 // and hold enough of what it fires.
 static float WeaponState_CanSelect(float idx)
@@ -226,7 +244,7 @@ static float WeaponState_CanSelect(float idx)
 	if (!(Player_Items() & weapons[idx].itemflag))
 		return FALSE;
 
-	return ws_predicted.ammo[weapons[idx].ammo] >= weapons[idx].ammo_min;
+	return WeaponState_Ammo(weapons[idx].ammo) >= weapons[idx].ammo_min;
 }
 
 enum
@@ -271,15 +289,16 @@ static float WeaponState_Switch(float impulse)
  * The lightning gun ticks every 100 ms but its sounds repeat far more slowly,
  * so lg_twidth holds the next client_time either may be heard at.
  */
-static void WeaponState_PlaySounds(anim_t *anim)
+static void WeaponState_PlaySounds(float idx, float a)
 {
-	float flags = anim->flags;
+	anim_t anim = weapons[idx].anim[a];
+	float flags = anim.flags;
 	float chan = (flags & ANIM_SOUNDAUTO) ? CHAN_AUTO : CHAN_WEAPON;
 
 	if ((flags & ANIM_LTIME) && ws_predicted.client_time < lg_twidth)
 		return;
 
-	Sound_PlayPredicted(anim->sound, chan);
+	Sound_PlayPredicted(anim.sound, chan);
 
 	if (flags & ANIM_SOUND2)
 	{
@@ -291,13 +310,13 @@ static void WeaponState_PlaySounds(anim_t *anim)
 		{
 			if (ws_predicted.client_time >= lg_twidth)
 			{
-				Sound_PlayPredicted(anim->sound2, CHAN_WEAPON);
+				Sound_PlayPredicted(anim.sound2, CHAN_WEAPON);
 				lg_twidth = ws_predicted.client_time + LG_SOUND_WINDOW;
 			}
 		}
 		else
 		{
-			Sound_PlayPredicted(anim->sound2, CHAN_WEAPON);
+			Sound_PlayPredicted(anim.sound2, CHAN_WEAPON);
 		}
 	}
 
@@ -309,12 +328,12 @@ static void WeaponState_PlaySounds(anim_t *anim)
 // played them for: replay walks the same frames again every time we draw.
 static void WeaponState_PlayEffects(float idx, float a)
 {
-	anim_t *anim = &weapons[idx].anim[a];
-	float flags = anim->flags;
+	anim_t anim = weapons[idx].anim[a];
+	float flags = anim.flags;
 
 	if (frame_may_sound && (flags & ANIM_SOUND))
 	{
-		WeaponState_PlaySounds(anim);
+		WeaponState_PlaySounds(idx, a);
 		last_sound_frame = max(last_sound_frame, replay_frame);
 	}
 
@@ -386,15 +405,15 @@ static void WeaponState_Enter(float a, float buttons)
 		return;
 	}
 
-	anim_t *anim = &weapons[idx].anim[a];
-	float flags = anim->flags;
+	anim_t anim = weapons[idx].anim[a];
+	float flags = anim.flags;
 
 	// The idle state ends the animation.
 	if (a == 0 && (flags & ANIM_DEFAULT))
 	{
 		WeaponState_Unschedule();
-		if (anim->frame >= 0)
-			ws_predicted.frame = anim->frame;
+		if (anim.frame >= 0)
+			ws_predicted.frame = anim.frame;
 		return;
 	}
 
@@ -410,9 +429,9 @@ static void WeaponState_Enter(float a, float buttons)
 		 * weapon has an idle state to fall back to. Lightning's state 0 is an
 		 * attack entry rather than an idle one, so it simply stops.
 		 */
-		if (weapons[idx].anim[anim->alt].flags & ANIM_DEFAULT)
+		if (weapons[idx].anim[anim.alt].flags & ANIM_DEFAULT)
 		{
-			WeaponState_Enter(anim->alt, buttons);
+			WeaponState_Enter(anim.alt, buttons);
 		}
 		else
 		{
@@ -423,7 +442,7 @@ static void WeaponState_Enter(float a, float buttons)
 
 	WeaponState_PlayEffects(WeaponState_FiredAs(idx, flags), a);
 
-	WeaponState_SetFrame(anim->frame);
+	WeaponState_SetFrame(anim.frame);
 
 	if (flags & ANIM_ATTACK)
 	{
@@ -434,10 +453,10 @@ static void WeaponState_Enter(float a, float buttons)
 				+ Weapon_AttackTime(idx, ws_predicted.predflags);
 	}
 
-	ws_predicted.client_thinkindex = anim->next;
+	ws_predicted.client_thinkindex = anim.next;
 
-	if (anim->len)
-		ws_predicted.client_nextthink = ws_predicted.client_time + anim->len;
+	if (anim.len)
+		ws_predicted.client_nextthink = ws_predicted.client_time + anim.len;
 	else
 		ws_predicted.client_nextthink = 0;
 }
@@ -466,22 +485,35 @@ static void WeaponState_Think(float buttons)
 	ws_predicted.client_time = held;
 }
 
+// x modulo 4, for a whole number that is not negative.
+static float WeaponState_Mod4(float x)
+{
+	return x - floor(x / 4) * 4;
+}
+
 /*
  * The axe alternates between two swing animations. The server picks one of its
  * four with a hash of the fire time rather than a random number, so we can
  * reach the same answer; W_AxeSwing() in the server's weapons.c is the other
  * copy. Its odd picks are the second chain here.
  *
- * Everything after the multiply has to be integer arithmetic, and that takes
- * care: a bare literal is a float, and an int combined with one is converted
- * and handed to a float builtin. Hence the casts on every constant.
+ * The server does this with integers: the time in milliseconds, plus itself
+ * shifted right by 2, 5 and 9, and the low two bits of the sum. Version 6
+ * bytecode has no integers, so the shifts are divisions that are floored, which
+ * is exact for a whole number divided by a power of two. Each term is reduced
+ * modulo 4 before they are added, so the sum stays small enough to be exact
+ * however long the player has been connected.
  */
 static float WeaponState_AxeEntry(void)
 {
-	int ms = (int)(ws_predicted.client_time * 1000);
-	int pick = (ms + (ms >> (int)2) + (ms >> (int)5) + (ms >> (int)9)) & (int)3;
+	float ms = floor(ws_predicted.client_time * 1000);
+	float pick;
 
-	if (pick & (int)1)
+	pick = WeaponState_Mod4(ms) + WeaponState_Mod4(floor(ms / 4))
+		+ WeaponState_Mod4(floor(ms / 32)) + WeaponState_Mod4(floor(ms / 512));
+	pick = WeaponState_Mod4(pick);
+
+	if (pick == 1 || pick == 3)
 		return 5;
 
 	return 1;
@@ -490,7 +522,7 @@ static float WeaponState_AxeEntry(void)
 static void WeaponState_Attack(float buttons)
 {
 	float idx = ws_predicted.weapon_index;
-	anim_t *entry = &weapons[idx].anim[0];
+	anim_t entry = weapons[idx].anim[0];
 
 	if (ws_predicted.client_time < ws_predicted.attack_finished)
 		return;
@@ -500,11 +532,11 @@ static void WeaponState_Attack(float buttons)
 	// State 0 is where every weapon is entered: the idle state it returns to
 	// between shots, and the one it fires from. Not being an attack entry means
 	// this weapon does not fire at all.
-	if (!(entry->flags & ANIM_ATTACK))
+	if (!(entry.flags & ANIM_ATTACK))
 		return;
 
 	// Lightning has no idle state, so firing starts at state 0 itself.
-	if (!(entry->flags & ANIM_DEFAULT))
+	if (!(entry.flags & ANIM_DEFAULT))
 	{
 		WeaponState_Enter(0, buttons);
 		return;
@@ -513,7 +545,7 @@ static void WeaponState_Attack(float buttons)
 	if (weapons[idx].itemflag == IT_AXE)
 		WeaponState_Enter(WeaponState_AxeEntry(), buttons);
 	else
-		WeaponState_Enter(entry->next, buttons);
+		WeaponState_Enter(entry.next, buttons);
 
 	ws_predicted.attack_finished = ws_predicted.client_time
 		+ Weapon_AttackTime(idx, ws_predicted.predflags);

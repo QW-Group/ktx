@@ -2,8 +2,8 @@
 
 #define CSQC
 
-// pointers, integers and the struct tables need FTE's instruction set
-#pragma target fte
+// plain version 6 bytecode, which the VM of every client runs
+#pragma target id
 
 fteextensions.qc
 

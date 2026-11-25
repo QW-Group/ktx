@@ -2418,8 +2418,9 @@ int W_CheckNoAmmo(void)
  *
  * A predicting client has to reach the same answer, so this is a hash of the
  * player's weapon clock and not a random number. It sticks to arithmetic that
- * comes out the same in QuakeC: one single-precision multiply, then integers
- * that stay far from overflow. qcsrc/weapon_state.qc has the other copy.
+ * QuakeC can reproduce with floats alone: one single-precision multiply, then
+ * shifts and a mask on a whole number. qcsrc/weapon_state.qc has the other
+ * copy.
  */
 static int W_AxeSwing(float client_time)
 {

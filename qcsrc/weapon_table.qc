@@ -337,14 +337,14 @@ void Weapon_PrecacheAll(void)
 
 		for (float a = 0; a < weapons[w].anim_count; a++)
 		{
-			anim_t *anim = &weapons[w].anim[a];
+			anim_t anim = weapons[w].anim[a];
 
-			if (anim->sound != "")
-				precache_sound(anim->sound);
-			if (anim->sound2 != "")
-				precache_sound(anim->sound2);
-			if (anim->proj_model != "")
-				precache_model(anim->proj_model);
+			if (anim.sound != "")
+				precache_sound(anim.sound);
+			if (anim.sound2 != "")
+				precache_sound(anim.sound2);
+			if (anim.proj_model != "")
+				precache_model(anim.proj_model);
 		}
 	}
 }
