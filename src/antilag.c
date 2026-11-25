@@ -868,7 +868,6 @@ void antilag_lagmove_all_proj(gedict_t *owner, gedict_t *e)
 	 * from the same native newmis phase, so the authoritative projectile must be
 	 * advanced by the full input-to-server time up to the projectile horizon.
 	 */
-	// ms -= (ms < ANTILAG_MAX_PREDICTION ? (1 / 77.0) : ANTILAG_MAX_PREDICTION);
 
 	/* A one-frame ping has no meaningful catch-up beyond the native newmis step. */
 	if (ms <= (1 / 77.0))
@@ -904,7 +903,6 @@ void antilag_lagmove_all_proj(gedict_t *owner, gedict_t *e)
 		VectorCopy(list->owner->s.v.velocity, list->held_velocity);
 	}
 
-	///*
 	VectorCopy(owner->s.v.origin, old_org);
 	antilag_lagmove_all_nohold(owner, ms, true);
 	VectorSubtract(owner->s.v.origin, old_org, old_org);
@@ -912,7 +910,6 @@ void antilag_lagmove_all_proj(gedict_t *owner, gedict_t *e)
 	trap_setorigin(NUM_FOR_EDICT(e), PASSVEC3(old_org));
 	VectorCopy(e->s.v.origin, e->oldangles); // store for later maybe
 	VectorCopy(owner->antilag_data->held_origin, owner->s.v.origin);
-	//*/
 
 	VectorCopy(e->s.v.origin, e->oldangles); // store for later maybe
 	e->s.v.armorvalue = ms;
@@ -956,7 +953,6 @@ void antilag_lagmove_all_proj(gedict_t *owner, gedict_t *e)
 			e->s.v.nextthink -= step_time;
 		}
 
-		// antilag_lagmove_all_nohold(owner, (g_globalvars.time - current_time), false);
 		antilag_lagmove_all_playeronly(owner, (g_globalvars.time - current_time));
 		traceline(PASSVEC3(e->s.v.origin), e->s.v.origin[0] + e->s.v.velocity[0] * step_time,
 				e->s.v.origin[1] + e->s.v.velocity[1] * step_time, e->s.v.origin[2] + e->s.v.velocity[2] * step_time,
@@ -966,19 +962,15 @@ void antilag_lagmove_all_proj(gedict_t *owner, gedict_t *e)
 
 		if (g_globalvars.trace_fraction < 1 || g_globalvars.trace_startsolid)
 		{
-			// if (g_globalvars.trace_ent)
-			//{
 			other = PROG_TO_EDICT(g_globalvars.trace_ent);
 			self = e;
 			self->s.v.flags = ((int)self->s.v.flags) | FL_GODMODE;
 			((void (*)(void))(self->touch))();
 			break;
-			//}
 		}
 
 		current_time += step_time;
 	}
-	//
 
 	self = oself;
 
@@ -1029,7 +1021,6 @@ void antilag_lagmove_all_proj_bounce(gedict_t *owner, gedict_t *e)
 		VectorCopy(list->owner->s.v.velocity, list->held_velocity);
 	}
 
-	///*
 	VectorCopy(owner->s.v.origin, old_org);
 	antilag_lagmove_all_nohold(owner, ms, true);
 	VectorSubtract(owner->s.v.origin, old_org, old_org);
@@ -1037,7 +1028,6 @@ void antilag_lagmove_all_proj_bounce(gedict_t *owner, gedict_t *e)
 	trap_setorigin(NUM_FOR_EDICT(e), PASSVEC3(old_org));
 	VectorCopy(e->s.v.origin, e->oldangles); // store for later maybe
 	VectorCopy(owner->antilag_data->held_origin, owner->s.v.origin);
-	//*/
 
 	e->s.v.armorvalue = ms;
 
@@ -1084,7 +1074,6 @@ void antilag_lagmove_all_proj_bounce(gedict_t *owner, gedict_t *e)
 		}
 		current_time += step_time;
 	}
-	//
 
 	self = oself;
 

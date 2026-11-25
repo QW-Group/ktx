@@ -671,7 +671,7 @@ void FireBullets(float shotcount, vec3_t dir, float spread_x, float spread_y, fl
 	qbool classic_shotgun = cvar("k_classic_shotgun");
 	qbool non_random_bullets = (k_yawnmode
 			|| (!match_in_progress && self && (self->ct == ctPlayer) && iKey(self, "nrb")));
-	qbool do_antilag = (self->ct == ctPlayer); // hacky check
+	qbool do_antilag = (self->ct == ctPlayer); // monsters fire through here too
 
 	trap_makevectors(self->s.v.v_angle);
 	VectorScale(g_globalvars.v_forward, 10, tmp);
@@ -1365,7 +1365,7 @@ void LightningHit(gedict_t *from, float damage)
  */
 void LightningDamage(vec3_t p1, vec3_t p2, gedict_t *from, float damage)
 {
-	qbool do_antilag = (from->ct == ctPlayer);	// hacky check
+	qbool do_antilag = (from->ct == ctPlayer); // monsters fire through here too
 	if (do_antilag)
 	{
 		antilag_lagmove_all_hitscan(from);
