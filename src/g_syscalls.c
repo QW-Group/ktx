@@ -543,7 +543,7 @@ intptr_t trap_SetSendNeeded(intptr_t subject, intptr_t flags, intptr_t to)
 	return syscall(G_SETSENDNEEDED, subject, flags, to);
 }
 
-intptr_t trap_SetLastRuntime(intptr_t edn)
+intptr_t trap_SkipEntityPhysics(intptr_t edn)
 {
-	return syscall(G_SETLASTRUNTIME, edn);
+	return syscall(G_SKIPENTITYPHYSICS, edn);
 }

@@ -48,9 +48,9 @@ static float antilag_current_ping(gedict_t *e)
 
 static void antilag_mark_projectile_runtime(gedict_t *e)
 {
-	if (HAVEEXTENSION(G_SETLASTRUNTIME))
+	if (HAVEEXTENSION(G_SKIPENTITYPHYSICS))
 	{
-		trap_SetLastRuntime(NUM_FOR_EDICT(e));
+		trap_SkipEntityPhysics(NUM_FOR_EDICT(e));
 	}
 }
 

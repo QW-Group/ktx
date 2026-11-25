@@ -686,7 +686,7 @@ static qbool G_InitExtensions(void)
 		{"GetExtFieldPtr",		G_GETEXTFIELDPTR},
 		{"setsendneeded",		G_SETSENDNEEDED},
 		{"railtrail",			G_RAILTRAIL},
-					{"SetLastRuntime", G_SETLASTRUNTIME},
+					{"SkipEntityPhysics", G_SKIPENTITYPHYSICS},
 	};
 	int i;
 	for (i = 0; i < sizeof(exttraps)/sizeof(exttraps[0]); i++)
