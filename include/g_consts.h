@@ -174,8 +174,10 @@
 #define MSG_ONE							1			// reliable to one (msg_entity)
 #define MSG_ALL							2			// reliable to all
 #define MSG_INIT						3			// write to the init string
+#define MSG_CSQC						5	// for csqc
 #define MSG_ONE_NORECORD				6	// reliable to one, excluded from MVD
 
+#define EZCSQC_WEAPONINFO				1
 #define EZCSQC_WEAPONDEF				4
 
 // message levels

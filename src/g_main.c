@@ -62,6 +62,12 @@ field_t expfields[] =
 #ifndef FTESV
 	{ "mod_admin", 		FOFS(k_admin), 		F_INT },
 	{ "teleported", 	FOFS(teleported), 	F_INT },
+				{"attack_finished", FOFS(attack_finished), F_FLOAT},
+				{"client_time", FOFS(client_time), F_FLOAT},
+				{"client_nextthink", FOFS(client_nextthink), F_FLOAT},
+				{"client_thinkindex", FOFS(client_thinkindex), F_FLOAT},
+				{"client_ping", FOFS(client_ping), F_FLOAT},
+				{"client_predflags", FOFS(client_predflags), F_FLOAT},
 #endif
 	{ NULL }
 };
@@ -522,6 +528,7 @@ void G_InitGame(int levelTime, int randomSeed)
 	cvar_set("qwm_platform", QW_PLATFORM_SHORT);
 	cvar_set("qwm_builddate", MOD_BUILD_DATE);
 	cvar_set("qwm_homepage", MOD_URL);
+	cvar_set("qwm_ezcsqc", "1");
 
 	sv_extensions = cvar("sv_mod_extensions");
 }

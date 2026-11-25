@@ -329,6 +329,7 @@ void WriteEntity(int to, gedict_t *ed);
 void WriteByte(int to, int data);
 void WriteShort(int to, int data);
 void WriteLong(int to, int data);
+void WriteFloat(int to, float data);
 void WriteString(int to, char *data);
 void WriteAngle(int to, float data);
 void WriteCoord(int to, float data);
@@ -468,6 +469,11 @@ char* make_dots(char *dots, size_t dots_len, int cmd_max_len, char *cmd);
 //
 //	antilag.c
 //
+#define PRDFL_MIDAIR   1
+#define PRDFL_COILGUN  2
+#define PRDFL_YAWNMODE 4
+#define PRDFL_FORCEOFF 255
+
 extern float time_corrected;
 void WPredict_Initialize(void);
 void WPredict_SendDefinitionsTo(gedict_t *player);

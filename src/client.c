@@ -50,6 +50,7 @@ void ExitCaptain(void);
 void CheckFinishCaptain(void);
 void MakeMOTD(void);
 void ImpulseCommands(void);
+void WeaponPrediction_ResetBaseline(void);
 void StartDie(void);
 void ZeroFpsStats(void);
 void item_megahealth_rot(void);
@@ -60,6 +61,18 @@ void item_megahealth_rot(void);
 float WO_GetSpawnRadius(vec3_t origin);
 
 extern int g_matchstarttime;
+
+static float CurrentClientPing(void)
+{
+	char *ping = ezinfokey(self, "ping_current");
+
+	if (!strnull(ping))
+	{
+		return atof(ping);
+	}
+
+	return atof(ezinfokey(self, "ping"));
+}
 
 void CheckAll(void)
 {
@@ -935,6 +948,8 @@ void k_respawn(gedict_t *p, qbool body)
 	SetRespawnParms();
 	// respawn
 	PutClientInServer();
+	self->weapon_generation = (self->weapon_generation % 15) + 1;
+	WeaponPrediction_ResetBaseline();
 
 	// Keep intentional weapon-select respawn commands, but drop stale/invalid backups.
 	if (((respawn_impulse >= 1) && (respawn_impulse <= 8)) || respawn_impulse == 22)
@@ -1617,6 +1632,257 @@ qbool CanConnect(void)
 	return true;
 }
 
+/*
+ * Whether this client can make use of the weapon state.
+ *
+ * Running csqc is the whole of it for a client using the csprogs this server
+ * ships: the weapon definitions are compiled into it. A native EZCSQC client
+ * receives its definitions in a setup message instead and cannot decode a
+ * weapon index until it has them, so it still has to acknowledge that first.
+ * Waiting also means its revision is known by the time anything is written.
+ */
+static qbool WeaponPrediction_ClientReady(gedict_t *p)
+{
+	if (!iKey(p, "csqcactive"))
+	{
+		return false;
+	}
+
+	return !iKey(p, "ezcsqc") || iKey(p, "ezcsqc_ready");
+}
+
+qbool WeaponPrediction_SendEntity(int sendflags)
+{
+	gedict_t *wep = self;
+	gedict_t *owner = PROG_TO_EDICT(wep->s.v.owner);
+
+	if (owner != other)
+	{
+		return false;
+	}
+
+	if (!WeaponPrediction_ClientReady(owner))
+	{
+		return false;
+	}
+
+	/*
+	 * The mirror fields are updated before SetSendNeeded(), so a late first
+	 * callback can otherwise look like a tiny delta. Force one complete
+	 * owner baseline the first time this CSQC entity is actually serialized.
+	 */
+	if (!wep->cnt)
+	{
+		sendflags |= WEAPONINFO_INDEX | WEAPONINFO_AMMO_SHELLS | WEAPONINFO_AMMO_NAILS | WEAPONINFO_AMMO_ROCKETS | WEAPONINFO_AMMO_CELLS | WEAPONINFO_ATTACK | WEAPONINFO_TIMING | WEAPONINFO_PRED_PING;
+		wep->cnt = 1;
+	}
+
+	sendflags &= WEAPONINFO_INDEX | WEAPONINFO_AMMO_SHELLS | WEAPONINFO_AMMO_NAILS | WEAPONINFO_AMMO_ROCKETS | WEAPONINFO_AMMO_CELLS | WEAPONINFO_ATTACK | WEAPONINFO_TIMING | WEAPONINFO_PRED_PING;
+
+	WriteByte(MSG_CSQC, EZCSQC_WEAPONINFO);
+	WriteByte(MSG_CSQC, sendflags);
+
+	if (sendflags & WEAPONINFO_INDEX)
+	{
+		WriteByte(MSG_CSQC, owner->s.v.impulse);
+		/*
+		 * The respawn generation rides in the weapon index's upper four bits.
+		 * Everything decodes that except a native EZCSQC client announcing
+		 * revision 1, which predates the generation and reads the byte as a
+		 * plain index; it would misread every weapon after the first respawn.
+		 * A csqc client sends no revision at all, and its csprogs always
+		 * decodes the generation, so the absence of "ezcsqc" means packed.
+		 */
+		if (!iKey(owner, "ezcsqc") || iKey(owner, "ezcsqc_ready") >= 2)
+		{
+			WriteByte(MSG_CSQC, (owner->weapon_generation << WEAPONINFO_GENERATION_SHIFT) | ((int)owner->weapon_index & WEAPONINFO_WEAPON_MASK));
+		}
+		else
+		{
+			WriteByte(MSG_CSQC, owner->weapon_index);
+		}
+	}
+	if (sendflags & WEAPONINFO_AMMO_SHELLS)
+	{
+		WriteByte(MSG_CSQC, owner->s.v.ammo_shells);
+	}
+	if (sendflags & WEAPONINFO_AMMO_NAILS)
+	{
+		WriteByte(MSG_CSQC, owner->s.v.ammo_nails);
+	}
+	if (sendflags & WEAPONINFO_AMMO_ROCKETS)
+	{
+		WriteByte(MSG_CSQC, owner->s.v.ammo_rockets);
+	}
+	if (sendflags & WEAPONINFO_AMMO_CELLS)
+	{
+		WriteByte(MSG_CSQC, owner->s.v.ammo_cells);
+	}
+
+	if (sendflags & WEAPONINFO_ATTACK)
+	{
+		WriteFloat(MSG_CSQC, owner->attack_finished);
+		WriteFloat(MSG_CSQC, owner->client_nextthink);
+		WriteByte(MSG_CSQC, owner->client_thinkindex);
+	}
+
+	if (sendflags & WEAPONINFO_TIMING)
+	{
+		WriteFloat(MSG_CSQC, owner->client_time);
+		WriteByte(MSG_CSQC, owner->s.v.weaponframe);
+	}
+
+	if (sendflags & WEAPONINFO_PRED_PING)
+	{
+		WriteByte(MSG_CSQC, owner->client_predflags);
+		WriteByte(MSG_CSQC, owner->client_ping);
+	}
+
+	return true;
+}
+
+void WeaponPrediction_CreateEnt(void);
+
+void WeaponPrediction_MarkSendFlags(void)
+{
+	gedict_t *wep = self->weapon_pred;
+	int sendflags = WEAPONINFO_TIMING;
+
+	// Map/mode reloads can leave the player without a valid weapon-info sidecar.
+	if (!wep || wep->s.v.owner != EDICT_TO_PROG(self) || wep->SendEntity != (func_t)WeaponPrediction_SendEntity)
+	{
+		self->weapon_pred = NULL;
+		WeaponPrediction_CreateEnt();
+		wep = self->weapon_pred;
+		if (!wep)
+		{
+			return;
+		}
+	}
+
+	if (!wep->cnt2 && iKey(self, "ezcsqc"))
+	{
+		WPredict_SendDefinitionsTo(self);
+		wep->cnt2 = 1;
+	}
+
+	if (!WeaponPrediction_ClientReady(self))
+	{
+		return;
+	}
+
+	if (wep->s.v.impulse != self->s.v.impulse || wep->s.v.weapon != self->weapon_index)
+	{
+		sendflags |= WEAPONINFO_INDEX;
+		wep->s.v.impulse = self->s.v.impulse;
+		wep->s.v.weapon = self->weapon_index;
+	}
+
+	if (wep->s.v.ammo_shells != self->s.v.ammo_shells)
+	{
+		sendflags |= WEAPONINFO_AMMO_SHELLS;
+		wep->s.v.ammo_shells = self->s.v.ammo_shells;
+	}
+	if (wep->s.v.ammo_nails != self->s.v.ammo_nails)
+	{
+		sendflags |= WEAPONINFO_AMMO_NAILS;
+		wep->s.v.ammo_nails = self->s.v.ammo_nails;
+	}
+	if (wep->s.v.ammo_rockets != self->s.v.ammo_rockets)
+	{
+		sendflags |= WEAPONINFO_AMMO_ROCKETS;
+		wep->s.v.ammo_rockets = self->s.v.ammo_rockets;
+	}
+	if (wep->s.v.ammo_cells != self->s.v.ammo_cells)
+	{
+		sendflags |= WEAPONINFO_AMMO_CELLS;
+		wep->s.v.ammo_cells = self->s.v.ammo_cells;
+	}
+
+	if (wep->attack_finished != self->attack_finished || wep->client_think != self->client_think || wep->client_nextthink != self->client_nextthink)
+	{
+		sendflags |= WEAPONINFO_ATTACK;
+		wep->attack_finished = self->attack_finished;
+		wep->client_think = self->client_think;
+		wep->client_nextthink = self->client_nextthink;
+	}
+
+	if (wep->client_predflags != self->client_predflags || wep->client_ping != self->client_ping)
+	{
+		sendflags |= WEAPONINFO_PRED_PING;
+		wep->client_predflags = self->client_predflags;
+		wep->client_ping = self->client_ping;
+	}
+
+	trap_SetSendNeeded(NUM_FOR_EDICT(wep), sendflags, NUM_FOR_EDICT(self));
+}
+
+void WeaponPrediction_ResetBaseline(void)
+{
+	gedict_t *wep = self->weapon_pred;
+
+	if (!wep || !WeaponPrediction_ClientReady(self))
+	{
+		return;
+	}
+
+	// A full baseline starts a new client prediction generation after respawn.
+	wep->s.v.impulse = self->s.v.impulse;
+	wep->s.v.weapon = self->weapon_index;
+	wep->s.v.ammo_shells = self->s.v.ammo_shells;
+	wep->s.v.ammo_nails = self->s.v.ammo_nails;
+	wep->s.v.ammo_rockets = self->s.v.ammo_rockets;
+	wep->s.v.ammo_cells = self->s.v.ammo_cells;
+	wep->attack_finished = self->attack_finished;
+	wep->client_think = self->client_think;
+	wep->client_nextthink = self->client_nextthink;
+	wep->client_predflags = self->client_predflags;
+	wep->client_ping = self->client_ping;
+	SetSendNeeded(wep, SENDFLAGS_ALL, NUM_FOR_EDICT(self));
+}
+
+void WeaponPrediction_Cleanup(void)
+{
+	if (self->weapon_pred != NULL)
+	{
+		ent_remove(self->weapon_pred);
+		self->weapon_pred = NULL;
+	}
+}
+
+void WeaponPrediction_CreateEnt(void)
+{
+	gedict_t *wep_values = spawn();
+
+	wep_values->s.v.owner = EDICT_TO_PROG(self);
+	/* Force the first delta pass to include all baseline weapon state. */
+	wep_values->s.v.impulse = -1;
+	wep_values->s.v.weapon = -1;
+	wep_values->s.v.ammo_shells = -1;
+	wep_values->s.v.ammo_nails = -1;
+	wep_values->s.v.ammo_rockets = -1;
+	wep_values->s.v.ammo_cells = -1;
+	wep_values->attack_finished = -1;
+	wep_values->client_think = -1;
+	wep_values->client_nextthink = -1;
+	wep_values->client_predflags = -1;
+	wep_values->client_ping = -1;
+	wep_values->cnt = 0;
+	wep_values->cnt2 = 0;
+	ExtFieldSetSendEntity(wep_values, (func_t)WeaponPrediction_SendEntity);
+	ExtFieldSetPvsFlags(wep_values, 3);
+	if (iKey(self, "ezcsqc"))
+	{
+		WPredict_SendDefinitionsTo(self);
+		wep_values->cnt2 = 1;
+	}
+	if (WeaponPrediction_ClientReady(self))
+	{
+		SetSendNeeded(wep_values, 0xFFFFFF, NUM_FOR_EDICT(self));
+	}
+	self->weapon_pred = wep_values;
+}
+
 ////////////////
 // GlobalParams:
 // time
@@ -1793,6 +2059,7 @@ void ClientConnect(void)
 	SendSpecInfo(NULL, self); // get all spectator info
 
 	self->antilag_data = antilag_create_player(self);
+	WeaponPrediction_CreateEnt();
 
 	MakeMOTD();
 
@@ -3058,6 +3325,7 @@ void ClientDisconnect(void)
 	set_important_fields(self); // set classname == "" and etc
 
 	antilag_delete_player(self);
+	WeaponPrediction_Cleanup();
 
 // s: added conditional function call here
 	if (self->k_kicking)
@@ -3739,6 +4007,7 @@ void PlayerPreThink(void)
 		BackFromLag();
 	}
 
+	self->client_predflags = 0;
 	self->client_time += g_globalvars.frametime;
 	self->client_lastupdated = g_globalvars.time;
 	time_corrected = g_globalvars.time;
@@ -4604,7 +4873,72 @@ void PlayerPostThink(void)
 
 	W_WeaponFrame();
 
+	// Antilag and Weapon Prediction
 	antilag_log(self, self->antilag_data);
+	if (cvar("sv_antilag") == 1)
+	{
+		self->client_ping = CurrentClientPing();
+		if (cvar("k_midair") && (self->super_damage_finished > g_globalvars.time - (self->client_ping) / 1000))
+		{
+			self->client_predflags = (int)self->client_predflags | PRDFL_MIDAIR;
+		}
+
+		self->client_ping = min(self->client_ping, ANTILAG_REWIND_MAXPROJECTILE * 1000);
+	}
+	else
+	{
+		self->client_ping = 0;
+	}
+
+	// Yawn mode retimes the SSG and speeds up nails; a predicting client has no
+	// other way to see a plain mod cvar.
+	if (k_yawnmode)
+	{
+		self->client_predflags = (int)self->client_predflags | PRDFL_YAWNMODE;
+	}
+
+	if (cvar("k_instagib") && cvar("k_instagib_custom_models"))
+	{
+		self->client_predflags = (int)self->client_predflags | PRDFL_COILGUN;
+		if (cvar("k_instagib") == 3)
+		{
+			self->client_predflags = (int)self->client_predflags | PRDFL_MIDAIR;
+		}
+	}
+
+	// disable weapon prediction when tracking another player
+	if (self->trackent)
+	{
+		self->client_predflags = PRDFL_FORCEOFF;
+	}
+	// can't predict hook reliably, so just force prediction off for now
+	else if (self->s.v.weapon == IT_HOOK)
+	{
+		self->client_predflags = PRDFL_FORCEOFF;
+	}
+	else if (!readytostart())
+	{
+		self->client_predflags = PRDFL_FORCEOFF;
+	}
+	else if (!CA_can_fire(self))
+	{
+		self->client_predflags = PRDFL_FORCEOFF;
+	}
+	else if ((cvar("k_clan_arena") == 2) && ca_round_pause && self->in_play)
+	{
+		self->client_predflags = PRDFL_FORCEOFF;
+	}
+	else if ((match_in_progress == 1) || !can_prewar(true))
+	{
+		self->client_predflags = PRDFL_FORCEOFF;
+	}
+	// disable LG prediction when underwater to avoid weird shit
+	else if ((self->s.v.weapon == IT_LIGHTNING) && (self->s.v.waterlevel > 1))
+	{
+		self->client_predflags = PRDFL_FORCEOFF;
+	}
+
+	WeaponPrediction_MarkSendFlags();
 
 	race_player_post_think();
 

@@ -800,6 +800,18 @@ typedef struct fb_entvars_s {
 #define WEAPONDEF_FLAGS				 (1 << 1)
 #define WEAPONDEF_ANIM				 (1 << 2)
 
+#define WEAPONINFO_INDEX			 (1 << 0)
+#define WEAPONINFO_AMMO_SHELLS		 (1 << 1)
+#define WEAPONINFO_AMMO_NAILS		 (1 << 2)
+#define WEAPONINFO_AMMO_ROCKETS		 (1 << 3)
+#define WEAPONINFO_AMMO_CELLS		 (1 << 4)
+#define WEAPONINFO_ATTACK			 (1 << 5)
+#define WEAPONINFO_TIMING			 (1 << 6)
+#define WEAPONINFO_PRED_PING		 (1 << 7)
+/* EZCSQC version 2 packs respawn generation above the four-bit weapon index. */
+#define WEAPONINFO_WEAPON_MASK		0x0f
+#define WEAPONINFO_GENERATION_SHIFT 4
+
 typedef struct weppredanim_s
 {
 	signed char mdlframe;
@@ -1314,11 +1326,16 @@ typedef struct gedict_s
 
 // { antilag
 	struct antilag_s *antilag_data;
+	int weapon_index;
 	float client_time;
 	float client_lastupdated;
 	float client_nextthink;
 	func_t client_think;
 	float client_thinkindex;
+	float client_ping;
+	float client_predflags;
+	struct gedict_s *weapon_pred;
+	int weapon_generation;
 // }
 
 // { hiprot fields
