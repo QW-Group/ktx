@@ -1710,13 +1710,19 @@ qbool WeaponPrediction_SendEntity(int sendflags)
 
 void WeaponPrediction_CreateEnt(void);
 
+// Whether the player's weapon-info entity is still theirs. Map and mode reloads
+// can leave the pointer behind while the edict has become something else.
+static qbool WeaponPrediction_EntValid(gedict_t *wep)
+{
+	return wep && (wep->s.v.owner == EDICT_TO_PROG(self)) && (wep->SendEntity == (func_t)WeaponPrediction_SendEntity);
+}
+
 void WeaponPrediction_MarkSendFlags(void)
 {
 	gedict_t *wep = self->weapon_pred;
 	int sendflags = WEAPONINFO_TIMING;
 
-	// Map/mode reloads can leave the player without a valid weapon-info sidecar.
-	if (!wep || wep->s.v.owner != EDICT_TO_PROG(self) || wep->SendEntity != (func_t)WeaponPrediction_SendEntity)
+	if (!WeaponPrediction_EntValid(wep))
 	{
 		self->weapon_pred = NULL;
 		WeaponPrediction_CreateEnt();
@@ -1782,7 +1788,7 @@ void WeaponPrediction_ResetBaseline(void)
 {
 	gedict_t *wep = self->weapon_pred;
 
-	if (!wep || !WeaponPrediction_ClientReady(self))
+	if (!WeaponPrediction_EntValid(wep) || !WeaponPrediction_ClientReady(self))
 	{
 		return;
 	}
@@ -1804,11 +1810,12 @@ void WeaponPrediction_ResetBaseline(void)
 
 void WeaponPrediction_Cleanup(void)
 {
-	if (self->weapon_pred != NULL)
+	if (WeaponPrediction_EntValid(self->weapon_pred))
 	{
 		ent_remove(self->weapon_pred);
-		self->weapon_pred = NULL;
 	}
+
+	self->weapon_pred = NULL;
 }
 
 void WeaponPrediction_CreateEnt(void)
