@@ -913,14 +913,17 @@ void SP_info_player_deathmatch(void)
 void k_respawn(gedict_t *p, qbool body)
 {
 	gedict_t *swap = self;
+	int respawn_impulse;
 
 	self = p; // warning
+	respawn_impulse = (int)self->s.v.impulse;
 
 	self->s.v.deadflag = DEAD_RESPAWNABLE;
 	self->wreg_attack = 0;
 	self->s.v.button0 = 0;
 	self->s.v.button1 = 0;
 	self->s.v.button2 = 0;
+	self->s.v.impulse = 0;
 
 	// make a copy of the dead body for appearances sake
 	if (body)
@@ -932,6 +935,15 @@ void k_respawn(gedict_t *p, qbool body)
 	SetRespawnParms();
 	// respawn
 	PutClientInServer();
+
+	// Keep intentional weapon-select respawn commands, but drop stale/invalid backups.
+	if (((respawn_impulse >= 1) && (respawn_impulse <= 8)) || respawn_impulse == 22)
+	{
+		if (W_CanSwitch(respawn_impulse, false))
+		{
+			self->s.v.impulse = respawn_impulse;
+		}
+	}
 
 	self = swap;
 }

@@ -3047,6 +3047,14 @@ void W_WeaponFrame(void)
 {
 	if ((self->spawn_time + 0.05) > g_globalvars.time)
 	{
+		// Backup usercmds may carry old weapon impulses; preserve only usable selections.
+		if ((((int)self->s.v.impulse >= 1) && ((int)self->s.v.impulse <= 8)) || (int)self->s.v.impulse == 22)
+		{
+			if (!W_CanSwitch((int)self->s.v.impulse, false))
+			{
+				self->s.v.impulse = 0;
+			}
+		}
 		return; // discard +attack till 50 ms after respawn, like ktpro 
 	}
 
