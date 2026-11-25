@@ -442,7 +442,7 @@ float Projectile_SpawnLocal(float widx, float a, float frame, float ping,
 	if (weapons[widx].anim[a].proj_model == "")
 		return FALSE;
 
-	makevectors(input_angles);
+	makevectors(Weapon_AimAngles(widx, input_angles));
 
 	off = Weapon_ProjectileOffset(widx, predflags, weapons[widx].anim[a].proj_off);
 	speed = Weapon_ProjectileSpeedScale(widx, predflags);

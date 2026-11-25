@@ -144,6 +144,9 @@ weapon_t weapons[9] =
 	},
 
 	// 6: grenade launcher. Grenades leave from the player origin with no offset.
+	// Outside yawn mode the server adds a random 10 units a second of spread,
+	// which cannot be predicted and is not: it is under a unit of travel by the
+	// time the server's grenade takes over.
 	{
 		"progs/v_rock.mdl", 0.6, 6, IT_GRENADE_LAUNCHER, AMMO_ROCKETS, 1, 7,
 		{
@@ -298,6 +301,19 @@ vector Weapon_ProjectileOffset(float idx, float predflags, vector off)
 	}
 
 	return off;
+}
+
+/*
+ * The view angles a weapon is fired along. The server never throws a grenade
+ * steeper than 70 degrees up, so that on a server which lets the view pitch
+ * further it still goes up and not behind the player.
+ */
+vector Weapon_AimAngles(float idx, vector angles)
+{
+	if (weapons[idx].itemflag == IT_GRENADE_LAUNCHER && angles_x < -70)
+		angles_x = -70;
+
+	return angles;
 }
 
 void Weapon_PrecacheAll(void)
