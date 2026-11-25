@@ -133,6 +133,17 @@ qbool SendEntity_Projectile(int sendflags)
 }
 
 /*
+ * Whether a newly fired projectile still exists. The antilag catch-up can run
+ * it into something before its fire function has finished with it. Every
+ * projectile sets voided when it explodes, just before it is removed, and the
+ * engine does not touch that field, so it says so on any engine.
+ */
+static qbool ProjectileIsLive(gedict_t *projectile)
+{
+	return projectile && (projectile != world) && !projectile->voided;
+}
+
+/*
  * Hand a new projectile to CSQC. Only KTX's own antilag needs that: a client
  * predicts its projectiles and takes the server's one over from the prediction.
  * In the other modes projectiles stay ordinary entities.
@@ -144,7 +155,7 @@ static void ScheduleProjectileSendIfLive(gedict_t *projectile)
 		return;
 	}
 
-	if (!projectile || projectile == world || !projectile->s.v.modelindex)
+	if (!ProjectileIsLive(projectile) || !projectile->s.v.modelindex)
 	{
 		return;
 	}
@@ -1325,7 +1336,10 @@ void W_FireRocket(void)
 	ScheduleProjectileSendIfLive(newmis);
 
 #ifdef BOT_SUPPORT
-	BotsRocketSpawned(newmis);
+	if (ProjectileIsLive(newmis))
+	{
+		BotsRocketSpawned(newmis);
+	}
 #endif
 
 	if (cvar("sv_antilag") == 1)
@@ -1703,7 +1717,10 @@ void W_FireGrenade(void)
 	ScheduleProjectileSendIfLive(newmis);
 
 #ifdef BOT_SUPPORT
-	BotsGrenadeSpawned(newmis);
+	if (ProjectileIsLive(newmis))
+	{
+		BotsGrenadeSpawned(newmis);
+	}
 #endif
 
 	// we don't want to do newmis stuff, antilag 1 takes care of it for us

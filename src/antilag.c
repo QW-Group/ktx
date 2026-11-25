@@ -1060,6 +1060,12 @@ void antilag_lagmove_all_proj_bounce(gedict_t *owner, gedict_t *e)
 			break;
 		}
 
+		// it hit a player and exploded: the entity is gone
+		if (e->voided)
+		{
+			break;
+		}
+
 		step_time = min(step_time, remaining);
 		if (step_time <= 0)
 		{
