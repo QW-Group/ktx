@@ -467,23 +467,21 @@ static void WeaponState_Think(float buttons)
 }
 
 /*
- * The axe alternates between two swing animations. The server picks with a hash
- * of the fire time rather than a random number, so we can usually reach the same
- * answer.
+ * The axe alternates between two swing animations. The server picks one of its
+ * four with a hash of the fire time rather than a random number, so we can
+ * reach the same answer; W_AxeSwing() in the server's weapons.c is the other
+ * copy. Its odd picks are the second chain here.
  *
- * Usually, not always: the server evaluates this in double precision and QuakeC
- * has only floats, so late in a long match the product loses enough precision to
- * truncate to a different integer. The cost is that the swing occasionally pops
- * to the other chain when the snapshot lands, which is cosmetic.
+ * Everything after the multiply has to be integer arithmetic, and that takes
+ * care: a bare literal is a float, and an int combined with one is converted
+ * and handed to a float builtin. Hence the casts on every constant.
  */
 static float WeaponState_AxeEntry(void)
 {
-	float t = ws_predicted.client_time;
-	float r;
+	int ms = (int)(ws_predicted.client_time * 1000);
+	int pick = (ms + (ms >> (int)2) + (ms >> (int)5) + (ms >> (int)9)) & (int)3;
 
-	r = fabs((((int)(t * 931.75) << 11) + ((int)t >> 6)) % 1000) / 1000;
-
-	if ((r >= 0.25 && r < 0.5) || r >= 0.75)
+	if (pick & (int)1)
 		return 5;
 
 	return 1;

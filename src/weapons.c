@@ -2384,10 +2384,26 @@ int W_CheckNoAmmo(void)
  An attack impulse can be triggered now
  ============
  */
+/*
+ * Which of the four swing animations an axe attack at this time shows.
+ *
+ * A predicting client has to reach the same answer, so this is a hash of the
+ * player's weapon clock and not a random number. It sticks to arithmetic that
+ * comes out the same in QuakeC: one single-precision multiply, then integers
+ * that stay far from overflow. qcsrc/weapon_state.qc has the other copy.
+ */
+static int W_AxeSwing(float client_time)
+{
+	// volatile, so that the product is rounded to a float before it is
+	// truncated, also on a build that keeps intermediates in wider registers
+	volatile float scaled = client_time * 1000.0f;
+	int ms = (int)scaled;
+
+	return (ms + (ms >> 2) + (ms >> 5) + (ms >> 9)) & 3;
+}
+
 void W_Attack(void)
 {
-	float r;
-
 	if (!W_CheckNoAmmo())
 	{
 		return;
@@ -2418,23 +2434,23 @@ void W_Attack(void)
 				sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
 			}
 
-			// dubious axe RNG to make it predictable
-			r = fabs((((int)(self->client_time * 931.75) << 11) + ((int)(self->client_time) >> 6)) % 1000) / 1000;
-			if (r < 0.25)
+			switch (W_AxeSwing(self->client_time))
 			{
-				player_axe1();
-			}
-			else if (r < 0.5)
-			{
-				player_axeb1();
-			}
-			else if (r < 0.75)
-			{
-				player_axec1();
-			}
-			else
-			{
-				player_axed1();
+				case 0:
+					player_axe1();
+					break;
+
+				case 1:
+					player_axeb1();
+					break;
+
+				case 2:
+					player_axec1();
+					break;
+
+				default:
+					player_axed1();
+					break;
 			}
 
 			break;
