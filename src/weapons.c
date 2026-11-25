@@ -3081,7 +3081,7 @@ void can_prewar_msg(char *msg)
 
 // Why the player may not fire before the match, or NULL if they may.
 // If fire == false the question is about jumping.
-static char *prewar_denied(qbool fire)
+char *prewar_denied(qbool fire)
 {
 	if (match_in_progress == 2)
 	{

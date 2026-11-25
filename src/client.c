@@ -43,6 +43,7 @@ vec3_t VEC_HULL2_MAX =
 int modelindex_eyes, modelindex_player, vwep_index;
 
 qbool can_prewar(qbool fire);
+char *prewar_denied(qbool fire);
 void IdlebotCheck(void);
 void CheckAll(void);
 void PlayerStats(void);
@@ -4891,7 +4892,7 @@ void PlayerPostThink(void)
 	{
 		self->client_predflags = PRDFL_FORCEOFF;
 	}
-	else if ((match_in_progress == 1) || !can_prewar(true))
+	else if ((match_in_progress == 1) || prewar_denied(true))
 	{
 		self->client_predflags = PRDFL_FORCEOFF;
 	}
