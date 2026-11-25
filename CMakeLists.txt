@@ -15,6 +15,9 @@ option(FTESV "Build with FTE extensions support" OFF)
 # CSQC support: the client-side QuakeC (csprogs.dat) that predicts weapons, and sv_antilag 1, KTX's own lag
 # compensation, which is only offered together with it. Building csprogs.dat needs fteqcc, see cmake/fteqcc.cmake.
 option(CSQC_SUPPORT "Build with CSQC support (csprogs.dat and sv_antilag 1)" ON)
+# csprogs.dat is the same file whatever the mod is built for, so a build that gets it from elsewhere can leave it
+# out, and then needs no fteqcc. The csprogs target alone builds it without building the mod.
+option(BUILD_CSPROGS "Compile csprogs.dat in this build, which needs fteqcc" ON)
 # Build with AddressSanitizer and UndefinedBehaviorSanitizer, for debugging only.
 option(SANITIZE "Build with -fsanitize=address,undefined" OFF)
 
@@ -160,6 +163,8 @@ endif()
 # compiled in the build directory, into csprogs.dat beside the mod.
 if(CSQC_SUPPORT)
 	target_compile_definitions(${PROJECT_NAME} PRIVATE CSQC_SUPPORT=1)
+endif()
+if(CSQC_SUPPORT AND BUILD_CSPROGS)
 	include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/fteqcc.cmake")
 	file(GLOB CSPROGS_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/qcsrc/*.qc"
 		"${CMAKE_CURRENT_SOURCE_DIR}/qcsrc/progs.src")
