@@ -153,6 +153,7 @@ intptr_t trap_MapExtFieldPtr(const char *fieldname);
 intptr_t trap_SetExtFieldPtr(gedict_t *ed, intptr_t fieldref, intptr_t *data, intptr_t size);
 intptr_t trap_GetExtFieldPtr(gedict_t *ed, intptr_t fieldref, intptr_t *data, intptr_t size);
 intptr_t trap_SetSendNeeded(intptr_t subject, intptr_t flags, intptr_t to);
+intptr_t trap_SetLastRuntime(intptr_t edn);
 
 // Checks for server support before call
 void ExtFieldSetAlpha(gedict_t *ed, float alpha);

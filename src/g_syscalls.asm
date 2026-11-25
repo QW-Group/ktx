@@ -121,3 +121,4 @@ equ		trap_SetExtFieldPtr    -267
 equ		trap_GetExtFieldPtr    -268
 equ		trap_SetSendNeeded     -269
 equ		trap_railtrail         -270
+equ		trap_SetLastRuntime    -271
