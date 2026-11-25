@@ -1332,7 +1332,6 @@ void W_FireRocket(void)
 	newmis->rad_time = g_globalvars.time;
 
 	antilag_lagmove_all_proj(self, newmis);
-	antilag_unmove_all();
 	ScheduleProjectileSendIfLive(newmis);
 
 #ifdef BOT_SUPPORT
@@ -1713,7 +1712,6 @@ void W_FireGrenade(void)
 	VectorCopy(newmis->s.v.origin, newmis->pos1);
 
 	antilag_lagmove_all_proj_bounce(self, newmis);
-	antilag_unmove_all();
 	ScheduleProjectileSendIfLive(newmis);
 
 #ifdef BOT_SUPPORT
@@ -1957,7 +1955,6 @@ void W_FireSuperSpikes(void)
 	WriteByte( MSG_ONE, SVC_SMALLKICK);
 
 	antilag_lagmove_all_proj(self, newmis);
-	antilag_unmove_all();
 	ScheduleProjectileSendIfLive(newmis);
 
 	if (cvar("sv_antilag") == 1)
@@ -2024,7 +2021,6 @@ void W_FireSpikes(float ox)
 	WriteByte( MSG_ONE, SVC_SMALLKICK);
 
 	antilag_lagmove_all_proj(self, newmis);
-	antilag_unmove_all();
 	ScheduleProjectileSendIfLive(newmis);
 
 	if (cvar("sv_antilag") == 1)

@@ -162,13 +162,14 @@ static int antilag_check_new_projectile_spawn_touch(gedict_t *owner, gedict_t *e
 	fraction = Physics_PushEntity(PASSVEC3(push), false);
 	self = old_self;
 
-	if (fraction < 1 || g_globalvars.trace_startsolid)
+	// FL_GODMODE only tells the touch function that the hit came from the
+	// catch-up. Take it off again unless the projectile is gone.
+	if (!e->voided)
 	{
-		return true;
+		e->s.v.flags = original_flags;
 	}
 
-	e->s.v.flags = original_flags;
-	return false;
+	return (fraction < 1 || g_globalvars.trace_startsolid);
 }
 
 void Physics_PushEntityTrace(float push_x, float push_y, float push_z)
@@ -207,7 +208,10 @@ float Physics_PushEntity(float push_x, float push_y, float push_z, int failonsta
 		if (self->s.v.solid >= SOLID_TRIGGER && (!((int)self->s.v.flags & FL_ONGROUND) || (self->s.v.groundentity != g_globalvars.trace_ent)))
 		{
 			other = PROG_TO_EDICT(g_globalvars.trace_ent);
-			((void (*)(void))(self->touch))();
+			if (self->touch)
+			{
+				((void (*)(void))(self->touch))();
+			}
 		}
 	}
 
@@ -258,7 +262,7 @@ void Physics_Bounce(float dt)
 
 	if ((int)self->s.v.flags & FL_ONGROUND)
 	{
-		if (self->s.v.velocity[2] >= 1 / 32)
+		if (self->s.v.velocity[2] >= 1.0f / 32)
 		{
 			self->s.v.flags = (int)self->s.v.flags & ~FL_ONGROUND;
 		}
@@ -285,7 +289,8 @@ void Physics_Bounce(float dt)
 	for (bump = 0; bump < MAX_CLIP_PLANES && movetime > 0; ++bump)
 	{
 		vec3_t move;
-		float d, bouncefac = 0.5, bouncestp = 60 / 100;
+		// comes to rest below 60 units a second at normal gravity, as in the engine
+		float d, bouncefac = 0.5, bouncestp = 60.0f / 800;
 
 		VectorScale(self->s.v.velocity, movetime, move);
 		Physics_PushEntity(PASSVEC3(move), false);
@@ -373,6 +378,10 @@ void antilag_log(gedict_t *e, antilag_t *antilag)
 // Pool slots below this belong to players, indexed by edict number. The rest
 // are handed out to movers in the order they register.
 #define ANTILAG_WORLD_BASE 64
+
+// The furthest a projectile travels in one step of its catch-up, in units.
+#define ANTILAG_PROJ_STEP	8
+#define ANTILAG_BOUNCE_STEP 32
 
 // Forget everything, for a new map. The module can stay loaded between maps,
 // and the lists would otherwise still name the previous map's entities.
@@ -545,7 +554,9 @@ void antilag_lagmove(antilag_t *data, float goal_time)
 
 		under_time = data->rewind_time[old_seek];
 		over_time = data->rewind_time[seek];
-		frac = (goal_time - over_time) / (under_time - over_time);
+		// 2 sends an entity with nothing logged around the goal to the branch
+		// that works from the present
+		frac = (under_time > over_time) ? ((goal_time - over_time) / (under_time - over_time)) : 2;
 
 		if (frac <= 1)
 		{
@@ -611,7 +622,7 @@ void antilag_getorigin(antilag_t *data, float goal_time)
 
 	under_time = data->rewind_time[old_seek];
 	over_time = data->rewind_time[seek];
-	frac = (goal_time - over_time) / (under_time - over_time);
+	frac = (under_time > over_time) ? ((goal_time - over_time) / (under_time - over_time)) : 2;
 	owner = data->owner;
 
 	if (frac <= 1)
@@ -908,20 +919,22 @@ void antilag_lagmove_all_proj(gedict_t *owner, gedict_t *e)
 	VectorSubtract(owner->s.v.origin, old_org, old_org);
 	VectorAdd(e->s.v.origin, old_org, old_org);
 	trap_setorigin(NUM_FOR_EDICT(e), PASSVEC3(old_org));
-	VectorCopy(e->s.v.origin, e->oldangles); // store for later maybe
-	VectorCopy(owner->antilag_data->held_origin, owner->s.v.origin);
+	VectorCopy(e->s.v.origin, e->oldangles); // where the catch-up starts from
+	if (owner->antilag_data != NULL)
+	{
+		trap_setorigin(NUM_FOR_EDICT(owner), PASSVEC3(owner->antilag_data->held_origin));
+	}
 
-	VectorCopy(e->s.v.origin, e->oldangles); // store for later maybe
 	e->s.v.armorvalue = ms;
 
 	oself = self;
 	antilag_mark_projectile_runtime(e);
 
 	step_time = min(cvar("sv_mintic"), ms);
-	if (step_time * VectorLength(e->s.v.velocity) > 3)
+	if (step_time * VectorLength(e->s.v.velocity) > ANTILAG_PROJ_STEP)
 	{
 		// step size * velocity can't be more than player hitbox width, we don't want any shenanigans
-		step_time = 8 / VectorLength(e->s.v.velocity);
+		step_time = ANTILAG_PROJ_STEP / VectorLength(e->s.v.velocity);
 	}
 
 	current_time = g_globalvars.time - ms;
@@ -964,8 +977,18 @@ void antilag_lagmove_all_proj(gedict_t *owner, gedict_t *e)
 		{
 			other = PROG_TO_EDICT(g_globalvars.trace_ent);
 			self = e;
-			self->s.v.flags = ((int)self->s.v.flags) | FL_GODMODE;
-			((void (*)(void))(self->touch))();
+			if (self->touch)
+			{
+				// tells the touch function that the hit came from the catch-up
+				self->s.v.flags = ((int)self->s.v.flags) | FL_GODMODE;
+				((void (*)(void))(self->touch))();
+
+				if (!e->voided)
+				{
+					e->s.v.flags = ((int)e->s.v.flags) & ~FL_GODMODE;
+				}
+			}
+
 			break;
 		}
 
@@ -1026,8 +1049,11 @@ void antilag_lagmove_all_proj_bounce(gedict_t *owner, gedict_t *e)
 	VectorSubtract(owner->s.v.origin, old_org, old_org);
 	VectorAdd(e->s.v.origin, old_org, old_org);
 	trap_setorigin(NUM_FOR_EDICT(e), PASSVEC3(old_org));
-	VectorCopy(e->s.v.origin, e->oldangles); // store for later maybe
-	VectorCopy(owner->antilag_data->held_origin, owner->s.v.origin);
+	VectorCopy(e->s.v.origin, e->oldangles); // where the catch-up starts from
+	if (owner->antilag_data != NULL)
+	{
+		trap_setorigin(NUM_FOR_EDICT(owner), PASSVEC3(owner->antilag_data->held_origin));
+	}
 
 	e->s.v.armorvalue = ms;
 
@@ -1036,10 +1062,10 @@ void antilag_lagmove_all_proj_bounce(gedict_t *owner, gedict_t *e)
 	self = e;
 
 	step_time = min(cvar("sv_mintic"), ms);
-	if (step_time * VectorLength(e->s.v.velocity) > 32)
+	if (step_time * VectorLength(e->s.v.velocity) > ANTILAG_BOUNCE_STEP)
 	{
 		// step size * velocity can't be more than player hitbox width, we don't want any shenanigans
-		step_time = 32 / VectorLength(e->s.v.velocity);
+		step_time = ANTILAG_BOUNCE_STEP / VectorLength(e->s.v.velocity);
 	}
 
 	current_time = g_globalvars.time - ms;
