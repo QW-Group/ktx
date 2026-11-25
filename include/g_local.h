@@ -474,6 +474,23 @@ char* make_dots(char *dots, size_t dots_len, int cmd_max_len, char *cmd);
 #define PRDFL_YAWNMODE 4
 #define PRDFL_FORCEOFF 255
 
+/*
+ * CSQC stats the mod publishes. The engine reserves 0..31 for itself and hands
+ * mods 32..127; the csprogs reads the same numbers, so keep this in step with
+ * qcsrc/defs.qc.
+ *
+ * Gravity is not otherwise reachable from csqc: the client knows it, having
+ * been sent the movevars at connect, but no builtin surfaces them to QuakeC.
+ */
+#define STAT_KTX_GRAVITY 32
+
+// value type for trap_clientstat/trap_pointerstat, following FTE's etype codes
+#define KTXSTAT_FLOAT 2
+
+extern float stat_sv_gravity;
+void KTX_RegisterStats(void);
+void KTX_UpdateStats(void);
+
 extern float time_corrected;
 void WPredict_Initialize(void);
 void WPredict_SendDefinitionsTo(gedict_t *player);
