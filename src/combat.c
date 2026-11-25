@@ -1277,6 +1277,12 @@ void T_RadiusDamage_Ignore2(gedict_t *inflictor, gedict_t *attacker, float damag
 		deathType_t dtype)
 {
 	gedict_t *head;
+
+	if (isRACE())
+	{
+		return;
+	}
+
 	head = trap_findradius(world, inflictor->s.v.origin, damage + 40);
 
 	while (head)

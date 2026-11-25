@@ -235,6 +235,7 @@ void W_FireAxe(void)
 		if (isRACE() && (PROG_TO_EDICT(g_globalvars.trace_ent)->ct == ctPlayer)
 				&& (self != PROG_TO_EDICT(g_globalvars.trace_ent)))
 		{
+			antilag_unmove_all();
 			return;
 		}
 
@@ -1114,6 +1115,18 @@ void T_MissileExplode_Antilag(void)
 				trap_setorigin(NUM_FOR_EDICT(self), PASSVEC3(trav_off));
 			}
 		}
+	}
+
+	// Racers are not solid, so the search below would not find the owner. Do
+	// what T_RadiusDamage() does in race.
+	if (isRACE())
+	{
+		own->s.v.solid = SOLID_BBOX;
+		T_RadiusDamageApply(self, own, own, 120, dtRL);
+		own->s.v.solid = SOLID_NOT;
+		ent_remove(self);
+
+		return;
 	}
 
 	// this is awful, but it's the easiest way to exactly replicate the crappy findradius cropping of the splash radius
