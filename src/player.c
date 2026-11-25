@@ -139,9 +139,14 @@ void muzzleflash(void)
 	trap_multicast(PASSVEC3(self->s.v.origin), MULTICAST_PVS);
 }
 
-void player_dummyanim(void)
-{
-}
+/*
+ * A weapon animation runs on the player's weapon clock, through client_think
+ * and client_nextthink, and not through the entity's think. Each of its steps
+ * still takes the think away from player_stand1() and player_run(), which
+ * would reset the view weapon frame, and leaves it unscheduled: with nextthink
+ * at zero the engine calls nothing. The animation ends in player_run(), which
+ * puts a real think back.
+ */
 
 void player_chain1(void)
 {
@@ -221,8 +226,8 @@ void player_shot1(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 2;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 1;
 	muzzleflash();
@@ -235,8 +240,8 @@ void player_shot2(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 3;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 2;
 }
@@ -248,8 +253,8 @@ void player_shot3(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 4;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 3;
 }
@@ -261,8 +266,8 @@ void player_shot4(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 5;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 	self->s.v.weaponframe = 4;
 }
 
@@ -273,8 +278,8 @@ void player_shot5(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 6;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 5;
 }
@@ -287,8 +292,8 @@ void player_shot6(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 0;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 6;
 }
@@ -300,8 +305,8 @@ void player_axe1(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 2;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 1;
 }
@@ -313,8 +318,8 @@ void player_axe2(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 3;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 2;
 }
@@ -326,8 +331,8 @@ void player_axe3(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 4;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 3;
 	W_FireAxe();
@@ -341,8 +346,8 @@ void player_axe4(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 0;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 4;
 }
@@ -354,8 +359,8 @@ void player_axeb1(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 2;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 5;
 }
@@ -367,8 +372,8 @@ void player_axeb2(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 3;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 6;
 }
@@ -380,8 +385,8 @@ void player_axeb3(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 4;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 7;
 	W_FireAxe();
@@ -395,8 +400,8 @@ void player_axeb4(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 0;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 8;
 }
@@ -408,8 +413,8 @@ void player_axec1(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 2;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 1;
 }
@@ -421,8 +426,8 @@ void player_axec2(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 3;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 2;
 }
@@ -434,8 +439,8 @@ void player_axec3(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 4;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 3;
 	W_FireAxe();
@@ -449,8 +454,8 @@ void player_axec4(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 0;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 4;
 }
@@ -462,8 +467,8 @@ void player_axed1(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 2;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 5;
 }
@@ -475,8 +480,8 @@ void player_axed2(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 3;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 6;
 }
@@ -488,8 +493,8 @@ void player_axed3(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 4;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 7;
 	W_FireAxe();
@@ -503,26 +508,13 @@ void player_axed4(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 0;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 8;
 }
 
 //============================================================================
-
-// this shit present in ktpro, but test does't show why we need this, because 99.9% of time diff is just 0
-void set_idealtime(void)
-{
-	float diff = self->s.v.ltime - g_globalvars.time;
-
-	if (diff < -0.05)
-	{
-		diff = -0.05;
-	}
-
-	self->s.v.nextthink = self->s.v.ltime = g_globalvars.time + diff + 0.1;
-}
 
 void player_nail1(void)
 {
@@ -531,8 +523,8 @@ void player_nail1(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 2;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	if (!self->s.v.button0 || intermission_running || self->s.v.impulse)
 	{
@@ -542,7 +534,6 @@ void player_nail1(void)
 		return;
 	}
 
-	set_idealtime();
 	muzzleflash();
 
 	self->s.v.weaponframe = self->s.v.weaponframe + 1;
@@ -564,8 +555,8 @@ void player_nail2(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 1;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	if (!self->s.v.button0 || intermission_running || self->s.v.impulse)
 	{
@@ -575,7 +566,6 @@ void player_nail2(void)
 		return;
 	}
 
-	set_idealtime();
 	muzzleflash();
 
 	self->s.v.weaponframe = self->s.v.weaponframe + 1;
@@ -599,8 +589,8 @@ void player_light1(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 2;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	if (!self->s.v.button0 || intermission_running || self->s.v.impulse)
 	{
@@ -615,7 +605,6 @@ void player_light1(void)
 		return;
 	}
 
-	set_idealtime();
 	muzzleflash();
 
 	self->s.v.weaponframe = self->s.v.weaponframe + 1;
@@ -636,8 +625,8 @@ void player_light2(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 1;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	if (!self->s.v.button0 || intermission_running || self->s.v.impulse)
 	{
@@ -652,7 +641,6 @@ void player_light2(void)
 		return;
 	}
 
-	set_idealtime();
 	muzzleflash();
 
 	self->s.v.weaponframe = self->s.v.weaponframe + 1;
@@ -674,8 +662,8 @@ void player_rocket1(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 2;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 1;
 	muzzleflash();
@@ -688,8 +676,8 @@ void player_rocket2(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 3;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 2;
 }
@@ -701,8 +689,8 @@ void player_rocket3(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 4;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 3;
 }
@@ -714,8 +702,8 @@ void player_rocket4(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 5;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 4;
 }
@@ -727,8 +715,8 @@ void player_rocket5(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 6;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 5;
 }
@@ -741,8 +729,8 @@ void player_rocket6(void)
 	self->client_nextthink = self->client_time + 0.1;
 	self->client_thinkindex = 0;
 
-	self->think = (func_t)player_dummyanim;
-	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->think = (func_t)SUB_Null;
+	self->s.v.nextthink = 0;
 
 	self->s.v.weaponframe = 6;
 }

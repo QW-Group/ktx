@@ -2499,12 +2499,10 @@ void W_Attack(void)
 			break;
 
 		case IT_NAILGUN:
-			self->s.v.ltime = g_globalvars.time;
 			player_nail1();
 			break;
 
 		case IT_SUPER_NAILGUN:
-			self->s.v.ltime = g_globalvars.time;
 			player_nail1();
 			break;
 
@@ -2543,7 +2541,6 @@ void W_Attack(void)
 		case IT_LIGHTNING:
 			self->attack_finished = self->client_time + 0.1;
 			sound(self, CHAN_AUTO, "weapons/lstart.wav", 1, ATTN_NORM);
-			self->s.v.ltime = g_globalvars.time;
 			player_light1();
 			break;
 
