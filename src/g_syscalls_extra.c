@@ -102,6 +102,17 @@ void ExtFieldSetSendEntity(gedict_t *ed, func_t callback)
 	}
 }
 
+// Whether ExtFieldSetSendEntity() can take effect on this engine.
+qbool ExtFieldCanSetSendEntity(void)
+{
+	if (!field_ref_sendentity && HAVEEXTENSION(G_MAPEXTFIELDPTR) && HAVEEXTENSION(G_SETEXTFIELDPTR))
+	{
+		field_ref_sendentity = trap_MapExtFieldPtr("SendEntity");
+	}
+
+	return field_ref_sendentity || HAVEEXTENSION(G_SETEXTFIELD);
+}
+
 void ExtFieldSetPvsFlags(gedict_t *ed, float pvsflags)
 {
 	if (!field_ref_pvsflags && HAVEEXTENSION(G_MAPEXTFIELDPTR) && HAVEEXTENSION(G_SETEXTFIELDPTR))

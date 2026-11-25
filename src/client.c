@@ -1812,8 +1812,21 @@ void WeaponPrediction_Cleanup(void)
 
 void WeaponPrediction_CreateEnt(void)
 {
-	gedict_t *wep_values = spawn();
+	gedict_t *wep_values;
 
+	/*
+	 * The entity only exists to be sent through CSQC. Without the means to do
+	 * that it would also never pass for valid in
+	 * WeaponPrediction_MarkSendFlags(), which would then spawn a new one on
+	 * every frame.
+	 */
+	if (!ExtFieldCanSetSendEntity() || !HAVEEXTENSION(G_SETSENDNEEDED))
+	{
+		self->weapon_pred = NULL;
+		return;
+	}
+
+	wep_values = spawn();
 	wep_values->s.v.owner = EDICT_TO_PROG(self);
 	/* Force the first delta pass to include all baseline weapon state. */
 	wep_values->s.v.impulse = -1;

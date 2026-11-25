@@ -160,6 +160,7 @@ void ExtFieldSetAlpha(gedict_t *ed, float alpha);
 float ExtFieldGetAlpha(gedict_t *ed);
 void ExtFieldSetColorMod(gedict_t *ed, float r, float g, float b);
 void ExtFieldSetSendEntity(gedict_t *ed, func_t callback);
+qbool ExtFieldCanSetSendEntity(void);
 void ExtFieldSetPvsFlags(gedict_t *ed, float pvsflags);
 void SetSendNeeded(gedict_t *ed, int sendflags, int unicast);
 
