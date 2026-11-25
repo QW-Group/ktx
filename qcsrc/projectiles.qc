@@ -44,6 +44,7 @@ enum
 .float	s_time;
 
 .float	owner_num;		// entity number of the player who fired
+.float	sv_effects;		// the server's effect bits (SVEF_*), not the engine's
 .float	is_local;		// our own prediction, not an entity the server sent
 
 .float	endtime;		// server time a local projectile gives up at
@@ -266,6 +267,55 @@ static void Projectile_Advance(float spin)
 		Projectile_Rewind(self, dt);
 }
 
+/*
+ * The glow the server asked for with its effect bits. The engine lights an
+ * ordinary entity that carries them, but leaves one drawn from here alone, so
+ * this follows what it does there: the largest radius of the bits that are
+ * set, the tints added up, and the plain colour only when there is no tint.
+ */
+static void Projectile_EffectLight(void)
+{
+	float fx = self.sv_effects;
+	float tinted = fx & (SVEF_RED | SVEF_GREEN | SVEF_BLUE);
+	float radius = 0;
+	vector colour = '0 0 0';
+
+	if (fx & SVEF_BRIGHTLIGHT)
+	{
+		radius = max(radius, EFFECT_BRIGHT_RADIUS);
+		if (!tinted)
+			colour += EFFECT_LIGHT_PLAIN;
+	}
+
+	if (fx & SVEF_DIMLIGHT)
+	{
+		radius = max(radius, EFFECT_LIGHT_RADIUS);
+		if (!tinted)
+			colour += EFFECT_LIGHT_PLAIN;
+	}
+
+	if (fx & SVEF_BLUE)
+	{
+		radius = max(radius, EFFECT_LIGHT_RADIUS);
+		colour += EFFECT_LIGHT_BLUE;
+	}
+
+	if (fx & SVEF_RED)
+	{
+		radius = max(radius, EFFECT_LIGHT_RADIUS);
+		colour += EFFECT_LIGHT_RED;
+	}
+
+	if (fx & SVEF_GREEN)
+	{
+		radius = max(radius, EFFECT_LIGHT_RADIUS);
+		colour += EFFECT_LIGHT_GREEN;
+	}
+
+	if (radius)
+		dynamiclight_add(self.origin, radius, colour);
+}
+
 // Where a straight-line projectile is now, carried on from its last sample.
 static vector Projectile_LinearOrigin(entity e)
 {
@@ -408,6 +458,8 @@ static float Projectile_Predraw(void)
 		                 ROCKET_LIGHT_COLOUR);
 	}
 
+	Projectile_EffectLight();
+
 	return PREDRAW_AUTOADD;
 }
 
@@ -463,6 +515,7 @@ float Projectile_SpawnLocal(float widx, float a, float frame, float ping,
 	proj.owner_num = player_localentnum;
 	proj.velocity = vel;
 	proj.angles = vectoangles(vel);
+	proj.sv_effects = Weapon_ProjectileEffects(widx, predflags);
 	proj.endtime = time + max(ping + TRAIL_PERIOD, LOCAL_MIN_LIFETIME);
 
 	// The server advances a newly spawned missile by one frame before anyone
@@ -615,7 +668,7 @@ void Projectile_Parse(float isnew)
 		// Set the model by name so its flags come with it; those tell us
 		// whether this is a rocket or a grenade.
 		setmodel(self, modelnameforindex(readshort()));
-		self.effects = readshort();
+		self.sv_effects = readshort();
 
 		Projectile_Classify(self);
 	}

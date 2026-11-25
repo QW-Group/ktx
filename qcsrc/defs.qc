@@ -56,6 +56,18 @@ enumflags
 	PROJECTILE_SPAWN_ORIGIN
 };
 
+/*
+ * Effect bits as the server sends them with a projectile. These are
+ * QuakeWorld's numbers, which are not the engine's EF_* in every case: green is
+ * 2 here, and bits 16 and 32 mean something else to the engine. So they are
+ * kept apart from the entity's own .effects.
+ */
+const float SVEF_GREEN			= 2;
+const float SVEF_BRIGHTLIGHT	= 4;
+const float SVEF_DIMLIGHT		= 8;
+const float SVEF_BLUE			= 64;
+const float SVEF_RED			= 128;
+
 // server prediction flags
 enumflags
 {
@@ -157,6 +169,14 @@ const float LOCAL_MIN_LIFETIME	= 0.05;	// a prediction lasts at least this long
 
 const float ROCKET_LIGHT_RADIUS	= 200;
 const vector ROCKET_LIGHT_COLOUR	= '0.4 0.2 0.05';
+
+// Lights for the effect bits on a projectile, see Projectile_EffectLight.
+const float EFFECT_LIGHT_RADIUS		= 200;
+const float EFFECT_BRIGHT_RADIUS	= 400;	// SVEF_BRIGHTLIGHT
+const vector EFFECT_LIGHT_PLAIN		= '0.4 0.2 0.1';	// bright or dim, no tint
+const vector EFFECT_LIGHT_RED		= '0.6 0.1 0.1';
+const vector EFFECT_LIGHT_GREEN		= '0.1 0.6 0.1';
+const vector EFFECT_LIGHT_BLUE		= '0.1 0.1 0.6';
 
 const float SOUND_TOKEN_TTL		= 1.0;	// unmatched suppression tokens expire
 const float MAX_SOUND_TOKENS	= 8;

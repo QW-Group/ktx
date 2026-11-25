@@ -291,6 +291,16 @@ float Weapon_ProjectileSpeedScale(float idx, float predflags)
 	return 1;
 }
 
+// The effect bits the server puts on a projectile. In midair mode a quad-boosted
+// rocket glows blue.
+float Weapon_ProjectileEffects(float idx, float predflags)
+{
+	if (weapons[idx].itemflag == IT_ROCKET_LAUNCHER && (predflags & PRDFL_MIDAIR))
+		return SVEF_BLUE;
+
+	return 0;
+}
+
 // Yawn mode fires nails straight down the middle instead of alternating.
 vector Weapon_ProjectileOffset(float idx, float predflags, vector off)
 {
