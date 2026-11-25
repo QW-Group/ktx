@@ -882,6 +882,7 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 
 	// figure momentum add
 	if ((inflictor != world)
+			&& (targ->teleport_time < time_corrected || targ == attacker)
 			&& ((targ->s.v.movetype == MOVETYPE_WALK)
 					|| (k_bloodfest && ((int)targ->s.v.flags & FL_MONSTER))))
 	{
