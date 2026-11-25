@@ -129,8 +129,18 @@ qbool SendEntity_Projectile(int sendflags)
 	return true;
 }
 
+/*
+ * Hand a new projectile to CSQC. Only KTX's own antilag needs that: a client
+ * predicts its projectiles and takes the server's one over from the prediction.
+ * In the other modes projectiles stay ordinary entities.
+ */
 static void ScheduleProjectileSendIfLive(gedict_t *projectile)
 {
+	if (cvar("sv_antilag") != 1)
+	{
+		return;
+	}
+
 	if (!projectile || projectile == world || !projectile->s.v.modelindex)
 	{
 		return;
@@ -143,6 +153,11 @@ static void ScheduleProjectileSendIfLive(gedict_t *projectile)
 void UpdateProjectileSendNeeded(void)
 {
 	gedict_t *projectile;
+
+	if (cvar("sv_antilag") != 1)
+	{
+		return;
+	}
 
 	for (projectile = world; (projectile = nextent(projectile));)
 	{
