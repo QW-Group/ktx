@@ -777,6 +777,7 @@ typedef struct fb_entvars_s {
 #define ANTILAG_REWIND_MAXPROJECTILE 0.080
 #define ANTILAG_MAX_PREDICTION		 0.02
 #define ANTILAG_MAX_XERP			 0.02
+#define ANTILAG_NEWMIS_TIME			 0.05 // the flight the engine gives a new missile at once
 #define ANTILAG_MAXSTATES 40
 #define ANTILAG_MAXEDICTS 256
 #define SENDFLAGS_ALL				 0xFFFFFF

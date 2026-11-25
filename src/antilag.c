@@ -14,6 +14,7 @@ antilag_t ANTILAG_MEMPOOL[ANTILAG_MAXEDICTS];
 antilag_t *antilag_list_players;
 antilag_t *antilag_list_world;
 float antilag_nextthink_world;
+static float antilag_physics_time; // when the engine last ran its physics pass
 vec3_t antilag_origin;
 vec3_t antilag_retvec;
 float time_corrected;
@@ -99,6 +100,36 @@ static void antilag_mark_projectile_runtime(gedict_t *e)
 	}
 }
 
+/*
+ * How long the first push of a new projectile lasts.
+ *
+ * The engine gives a new missile 0.05 s of flight, and the catch-up does that
+ * itself. With SkipEntityPhysics the engine then leaves the projectile alone
+ * for the rest of the frame. Without it, this frame's physics pass still moves
+ * the projectile, by the time since the last pass, so that much of the push is
+ * left for the engine to do.
+ */
+static float antilag_newmis_time(void)
+{
+	float pending, maxtic;
+
+	if (HAVEEXTENSION(G_SKIPENTITYPHYSICS))
+	{
+		return ANTILAG_NEWMIS_TIME;
+	}
+
+	pending = max(0, g_globalvars.time - antilag_physics_time);
+
+	// the engine never runs a pass longer than this
+	maxtic = cvar("sv_maxtic");
+	if (maxtic > 0)
+	{
+		pending = min(pending, maxtic);
+	}
+
+	return max(0, ANTILAG_NEWMIS_TIME - pending);
+}
+
 static int antilag_check_new_projectile_spawn_touch(gedict_t *owner, gedict_t *e, float rewind_time)
 {
 	vec3_t push;
@@ -120,7 +151,7 @@ static int antilag_check_new_projectile_spawn_touch(gedict_t *owner, gedict_t *e
 		 * Classic newmis performs an immediate 0.05s authoritative sweep.
 		 * The client has a separate 0.02s render lookahead; keep that visual.
 		 */
-		VectorMA(push, 0.05, e->s.v.velocity, push);
+		VectorMA(push, antilag_newmis_time(), e->s.v.velocity, push);
 	}
 
 	antilag_lagmove_all_playeronly(owner, rewind_time);
@@ -352,6 +383,7 @@ void antilag_reset(void)
 	antilag_list_players = NULL;
 	antilag_list_world = NULL;
 	antilag_nextthink_world = 0;
+	antilag_physics_time = 0;
 }
 
 static void antilag_unlink(antilag_t **list, antilag_t *data)
@@ -442,9 +474,12 @@ void antilag_delete_world(gedict_t *e)
 	e->antilag_data = NULL;
 }
 
+// Called at the start of every physics pass.
 void antilag_updateworld(void)
 {
 	antilag_t *list;
+
+	antilag_physics_time = g_globalvars.time;
 
 	if (g_globalvars.time < antilag_nextthink_world)
 	{
@@ -947,7 +982,6 @@ void antilag_lagmove_all_proj(gedict_t *owner, gedict_t *e)
 void antilag_lagmove_all_proj_bounce(gedict_t *owner, gedict_t *e)
 {
 	float ms = antilag_current_ping_msec(owner) / 1000;
-	const float newmis_time = 0.05;
 	float step_time, current_time;
 	antilag_t *list;
 	vec3_t old_org;
@@ -1014,7 +1048,7 @@ void antilag_lagmove_all_proj_bounce(gedict_t *owner, gedict_t *e)
 	if (newmis == e)
 	{
 		antilag_lagmove_all_playeronly(owner, ms);
-		Physics_Bounce(newmis_time);
+		Physics_Bounce(antilag_newmis_time());
 	}
 
 	// actual step through
