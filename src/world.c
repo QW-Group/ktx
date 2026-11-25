@@ -1829,6 +1829,7 @@ void check_fcheck(void);
 void CheckTeamStatus(void);
 void SendSpecInfo(void);
 void DoMVDAutoTrack(void);
+void antilag_updateworld(void);
 
 void FixNoSpecs(void);
 
@@ -1915,6 +1916,8 @@ void StartFrame(int time)
 	TeamplayGameTick();
 
 	WillPause();
+
+	antilag_updateworld();
 }
 
 // Check the same spawnflags as items only visible in DM for monsters as well.

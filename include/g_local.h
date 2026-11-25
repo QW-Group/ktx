@@ -464,6 +464,15 @@ qbool socd_movement_assisted(gedict_t *p);
 char* make_dots(char *dots, size_t dots_len, int cmd_max_len, char *cmd);
 
 //
+//	antilag.c
+//
+antilag_t *antilag_create_player(gedict_t *e);
+antilag_t *antilag_create_world(gedict_t *e);
+void antilag_delete_player(gedict_t *e);
+void antilag_delete_world(gedict_t *e);
+void antilag_log(gedict_t *e, antilag_t *antilag);
+
+//
 // subs.c
 void SUB_CalcMove(vec3_t tdest, float tspeed, void (*func)(void));
 void SUB_CalcMoveEnt(gedict_t *ent, vec3_t tdest, float tspeed, void (*func)(void));
