@@ -968,6 +968,47 @@ void T_InstaKickback(void)
 	ent_remove(self);
 }
 
+void T_MissileExplode_Antilag(void)
+{
+	gedict_t *own = PROG_TO_EDICT(self->s.v.owner);
+	gedict_t *trace_hit;
+	gedict_t *head;
+	vec3_t trav_off;
+
+	if ((int)self->s.v.flags & FL_GODMODE)
+	{
+		traceline(PASSVEC3(self->oldangles), PASSVEC3(self->s.v.origin), true, self);
+		trap_setorigin(NUM_FOR_EDICT(self), PASSVEC3(g_globalvars.trace_endpos));
+
+		trace_hit = self->oldenemy;
+		if (trace_hit != NULL)
+		{
+			if (trace_hit->antilag_data != NULL && trace_hit->s.v.solid == SOLID_BSP)
+			{
+				// add platform travel velocity * delay to the rocket position
+				// this is a hack that could misbehave in certain circumstances
+				VectorScale(trace_hit->s.v.velocity, self->gravity + 0.040, trav_off);
+				VectorAdd(self->s.v.origin, trav_off, trav_off);
+				trap_setorigin(NUM_FOR_EDICT(self), PASSVEC3(trav_off));
+			}
+		}
+	}
+
+	// this is awful, but it's the easiest way to exactly replicate the crappy findradius cropping of the splash radius
+	head = trap_findradius(world, self->s.v.origin, 160);
+
+	while (head)
+	{
+		if (head == own)
+		{
+			T_RadiusDamageApply(self, own, head, 120, dtRL);
+		}
+
+		head = trap_findradius(head, self->s.v.origin, 160);
+	}
+	ent_remove(self);
+}
+
 void T_MissileTouch(void)
 {
 	float damg;
@@ -1027,7 +1068,59 @@ void T_MissileTouch(void)
 
 	// don't do radius damage to the other, because all the damage
 	// was done in the impact
-	T_RadiusDamage(self, PROG_TO_EDICT(self->s.v.owner), 120, other, dtRL);
+	if (cvar("sv_antilag") == 1) // if this is an anti lag rocket, ignore our owner
+	{
+		float delay;
+		vec3_t diff, traveled;
+		gedict_t *local_explosion;
+		gedict_t *oself;
+
+		T_RadiusDamage_Ignore2(self, PROG_TO_EDICT(self->s.v.owner), 120, other, PROG_TO_EDICT(self->s.v.owner), dtRL);
+		local_explosion = spawn();
+
+		VectorSubtract(self->s.v.origin, self->oldangles, diff);
+
+		trap_setorigin(NUM_FOR_EDICT(local_explosion), PASSVEC3(self->s.v.origin));
+		VectorCopy(self->oldangles, local_explosion->oldangles);
+		local_explosion->s.v.owner = self->s.v.owner;
+		local_explosion->oldenemy = other;
+
+		if ((int)self->s.v.flags & FL_GODMODE)
+		{
+			delay = (vlen(diff) / vlen(self->s.v.velocity));
+			local_explosion->s.v.flags = (int)self->s.v.flags | FL_GODMODE;
+			delay -= 0.038;
+		}
+		else
+		{
+			VectorScale(self->s.v.velocity, g_globalvars.time - self->rad_time, traveled);
+			VectorAdd(self->oldangles, traveled, self->oldangles);
+			VectorSubtract(self->s.v.origin, self->oldangles, diff);
+
+			delay = (vlen(diff) / vlen(self->s.v.velocity));
+			delay -= 0.038;
+		}
+
+		local_explosion->gravity = g_globalvars.time - time_corrected;
+
+		if (delay > 0.013)
+		{
+			local_explosion->s.v.nextthink = g_globalvars.time + delay;
+			local_explosion->think = (func_t)T_MissileExplode_Antilag;
+		}
+		else
+		{
+			delay = 0;
+			oself = self;
+			self = local_explosion;
+			T_MissileExplode_Antilag();
+			self = oself;
+		}
+	}
+	else
+	{
+		T_RadiusDamage(self, PROG_TO_EDICT(self->s.v.owner), 120, other, dtRL);
+	}
 
 //  sound (self, CHAN_WEAPON, "weapons/r_exp3.wav", 1, ATTN_NORM);
 	normalize(self->s.v.velocity, tmp);
@@ -1110,10 +1203,20 @@ void W_FireRocket(void)
 
 	// midair 
 	VectorCopy(self->s.v.origin, newmis->s.v.oldorigin);
+	newmis->rad_time = g_globalvars.time;
+
+	antilag_lagmove_all_proj(self, newmis);
+	antilag_unmove_all();
 
 #ifdef BOT_SUPPORT
 	BotsRocketSpawned(newmis);
 #endif
+
+	if (cvar("sv_antilag") == 1)
+	{
+		g_globalvars.newmis = EDICT_TO_PROG(world);
+		newmis = world;
+	}
 }
 
 /*
@@ -1478,9 +1581,19 @@ void W_FireGrenade(void)
 	setsize(newmis, 0, 0, 0, 0, 0, 0);
 	setorigin(newmis, PASSVEC3(self->s.v.origin));
 
+	antilag_lagmove_all_proj_bounce(self, newmis);
+	antilag_unmove_all();
+
 #ifdef BOT_SUPPORT
 	BotsGrenadeSpawned(newmis);
 #endif
+
+	// we don't want to do newmis stuff, antilag 1 takes care of it for us
+	if (cvar("sv_antilag") == 1)
+	{
+		g_globalvars.newmis = EDICT_TO_PROG(world);
+		newmis = world;
+	}
 }
 
 //=============================================================================
@@ -1706,6 +1819,15 @@ void W_FireSuperSpikes(void)
 	setsize(newmis, 0, 0, 0, 0, 0, 0);
 	g_globalvars.msg_entity = EDICT_TO_PROG(self);
 	WriteByte( MSG_ONE, SVC_SMALLKICK);
+
+	antilag_lagmove_all_proj(self, newmis);
+	antilag_unmove_all();
+
+	if (cvar("sv_antilag") == 1)
+	{
+		g_globalvars.newmis = EDICT_TO_PROG(world);
+		newmis = world;
+	}
 }
 
 void W_FireSpikes(float ox)
@@ -1763,6 +1885,15 @@ void W_FireSpikes(float ox)
 
 	g_globalvars.msg_entity = EDICT_TO_PROG(self);
 	WriteByte( MSG_ONE, SVC_SMALLKICK);
+
+	antilag_lagmove_all_proj(self, newmis);
+	antilag_unmove_all();
+
+	if (cvar("sv_antilag") == 1)
+	{
+		g_globalvars.newmis = EDICT_TO_PROG(world);
+		newmis = world;
+	}
 }
 
 /*

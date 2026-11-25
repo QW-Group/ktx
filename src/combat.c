@@ -1271,6 +1271,23 @@ void T_RadiusDamage(gedict_t *inflictor, gedict_t *attacker, float damage, gedic
 	}
 }
 
+void T_RadiusDamage_Ignore2(gedict_t *inflictor, gedict_t *attacker, float damage, gedict_t *ignore, gedict_t *ignore2,
+		deathType_t dtype)
+{
+	gedict_t *head;
+	head = trap_findradius(world, inflictor->s.v.origin, damage + 40);
+
+	while (head)
+	{
+		if (head != ignore && head != ignore2)
+		{
+			T_RadiusDamageApply(inflictor, attacker, head, damage, dtype);
+		}
+
+		head = trap_findradius(head, inflictor->s.v.origin, damage + 40);
+	}
+}
+
 /*
  ============
  T_BeamDamage

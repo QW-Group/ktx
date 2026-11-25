@@ -471,6 +471,8 @@ extern float time_corrected;
 void antilag_lagmove(antilag_t *data, float goal_time);
 void antilag_lagmove_all(gedict_t *e, float goal_time);
 void antilag_lagmove_all_hitscan(gedict_t *e);
+void antilag_lagmove_all_proj(gedict_t *owner, gedict_t *e);
+void antilag_lagmove_all_proj_bounce(gedict_t *owner, gedict_t *e);
 void antilag_unmove_specific(gedict_t *ent);
 void antilag_unmove_all(void);
 antilag_t *antilag_create_player(gedict_t *e);
@@ -601,6 +603,10 @@ qbool CanDamage(gedict_t *targ, gedict_t *inflictor);
 void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float damage);
 void T_RadiusDamage(gedict_t *inflictor, gedict_t *attacker, float damage, gedict_t *ignore,
 					deathType_t dtype);
+void T_RadiusDamage_Ignore2(gedict_t *inflictor, gedict_t *attacker, float damage, gedict_t *ignore,
+		gedict_t *ignore2, deathType_t dtype);
+void T_RadiusDamageApply(gedict_t *inflictor, gedict_t *attacker, gedict_t *head, float damage,
+		deathType_t dtype);
 void T_BeamDamage(gedict_t *attacker, float damage);
 
 //items.c
