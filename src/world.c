@@ -1955,7 +1955,7 @@ void StartFrame(int time)
 
 	WillPause();
 
-	time_corrected = time;
+	time_corrected = g_globalvars.time;
 	antilag_updateworld();
 }
 
