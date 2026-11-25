@@ -159,6 +159,9 @@ void ent_remove(gedict_t *t)
 		G_Error("remove client");
 	}
 
+	// a removed mover must not stay on the list of entities to rewind
+	antilag_delete_world(t);
+
 	trap_remove(NUM_FOR_EDICT(t));
 }
 

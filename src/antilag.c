@@ -307,6 +307,11 @@ void Physics_Bounce(float dt)
 
 void antilag_log(gedict_t *e, antilag_t *antilag)
 {
+	if (antilag == NULL)
+	{
+		return;
+	}
+
 	// stop extremely fast logging
 	if (g_globalvars.time - antilag->rewind_time[antilag->rewind_seek] < 0.01)
 	{
@@ -334,80 +339,107 @@ void antilag_log(gedict_t *e, antilag_t *antilag)
 	}
 }
 
+// Pool slots below this belong to players, indexed by edict number. The rest
+// are handed out to movers in the order they register.
+#define ANTILAG_WORLD_BASE 64
+
+// Forget everything, for a new map. The module can stay loaded between maps,
+// and the lists would otherwise still name the previous map's entities.
+void antilag_reset(void)
+{
+	memset(ANTILAG_MEMPOOL, 0, sizeof(ANTILAG_MEMPOOL));
+	ANTILAG_MEMPOOL_WORLDSEEK = 0;
+	antilag_list_players = NULL;
+	antilag_list_world = NULL;
+	antilag_nextthink_world = 0;
+}
+
+static void antilag_unlink(antilag_t **list, antilag_t *data)
+{
+	if (data->prev != NULL)
+	{
+		data->prev->next = data->next;
+	}
+	else if (*list == data)
+	{
+		*list = data->next;
+	}
+
+	if (data->next != NULL)
+	{
+		data->next->prev = data->prev;
+	}
+
+	data->prev = NULL;
+	data->next = NULL;
+}
+
+static void antilag_link(antilag_t **list, antilag_t *data)
+{
+	if (*list != NULL)
+	{
+		data->next = *list;
+		(*list)->prev = data;
+	}
+
+	*list = data;
+}
+
 antilag_t *antilag_create_player(gedict_t *e)
 {
 	antilag_t *new_datastruct = &ANTILAG_MEMPOOL[NUM_FOR_EDICT(e)];
+
+	// A slot that is still linked would take the rest of the list with it.
+	antilag_delete_player(e);
+
 	memset(new_datastruct, 0, sizeof(antilag_t));
-	new_datastruct->prev = NULL;
-	new_datastruct->next = NULL;
 	new_datastruct->owner = e;
-
-	if (antilag_list_players != NULL)
-	{
-		new_datastruct->next = antilag_list_players;
-		antilag_list_players->prev = new_datastruct;
-	}
-
-	antilag_list_players = new_datastruct;
+	antilag_link(&antilag_list_players, new_datastruct);
 
 	return new_datastruct;
 }
 
 void antilag_delete_player(gedict_t *e)
 {
-	antilag_t *data = e->antilag_data;
-	if (data->prev != NULL)
+	if (e->antilag_data == NULL)
 	{
-		data->prev->next = data->next;
-	}
-	else if (antilag_list_players == data)
-	{
-		antilag_list_players = data->next;
+		return;
 	}
 
-	if (data->next != NULL)
-	{
-		data->next->prev = data->prev;
-	}
+	antilag_unlink(&antilag_list_players, e->antilag_data);
+	e->antilag_data = NULL;
 }
 
+// Returns NULL when the pool is full; the mover is then never rewound.
 antilag_t *antilag_create_world(gedict_t *e)
 {
-	antilag_t *new_datastruct = &ANTILAG_MEMPOOL[64 + ANTILAG_MEMPOOL_WORLDSEEK];
-	memset(new_datastruct, 0, sizeof(antilag_t));
-	ANTILAG_MEMPOOL_WORLDSEEK++;
+	antilag_t *new_datastruct;
 
-	new_datastruct->prev = NULL;
-	new_datastruct->next = NULL;
-	new_datastruct->owner = e;
-
-	if (antilag_list_world != NULL)
+	if (ANTILAG_WORLD_BASE + ANTILAG_MEMPOOL_WORLDSEEK >= ANTILAG_MAXEDICTS)
 	{
-		new_datastruct->next = antilag_list_world;
-		antilag_list_world->prev = new_datastruct;
+		return NULL;
 	}
 
-	antilag_list_world = new_datastruct;
+	new_datastruct = &ANTILAG_MEMPOOL[ANTILAG_WORLD_BASE + ANTILAG_MEMPOOL_WORLDSEEK];
+	ANTILAG_MEMPOOL_WORLDSEEK++;
+
+	memset(new_datastruct, 0, sizeof(antilag_t));
+	new_datastruct->owner = e;
+	antilag_link(&antilag_list_world, new_datastruct);
 
 	return new_datastruct;
 }
 
+// The slot is not handed out again before the next map.
 void antilag_delete_world(gedict_t *e)
 {
-	antilag_t *data = e->antilag_data;
-	if (data->prev != NULL)
+	if (e->antilag_data == NULL)
 	{
-		data->prev->next = data->next;
-	}
-	else if (antilag_list_world == data)
-	{
-		antilag_list_world = data->next;
+		return;
 	}
 
-	if (data->next != NULL)
-	{
-		data->next->prev = data->prev;
-	}
+	antilag_unlink(&antilag_list_world, e->antilag_data);
+	e->antilag_data = NULL;
 }
 
 void antilag_updateworld(void)

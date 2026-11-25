@@ -501,6 +501,7 @@ void antilag_lagmove_all_proj(gedict_t *owner, gedict_t *e);
 void antilag_lagmove_all_proj_bounce(gedict_t *owner, gedict_t *e);
 void antilag_unmove_specific(gedict_t *ent);
 void antilag_unmove_all(void);
+void antilag_reset(void);
 antilag_t *antilag_create_player(gedict_t *e);
 antilag_t *antilag_create_world(gedict_t *e);
 void antilag_delete_player(gedict_t *e);

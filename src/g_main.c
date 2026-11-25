@@ -511,6 +511,8 @@ void G_InitGame(int levelTime, int randomSeed)
 
 	race_init();
 
+	antilag_reset();
+
 	// put mod version in serverinfo
 	localcmd("serverinfo \"%s\" \"%s\"\n", MOD_SERVERINFO_MOD_KEY, MOD_VERSION);
 
