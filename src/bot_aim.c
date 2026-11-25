@@ -380,7 +380,7 @@ static void BotsModifyAimAtPlayerLogic(gedict_t *self)
 	threshold_time =
 			self->fb.firing ?
 					((int)self->s.v.weapon & (IT_LIGHTNING | IT_EITHER_NAILGUN) ?
-							self->s.v.nextthink : self->attack_finished) - g_globalvars.frametime :
+							self->s.v.nextthink : (g_globalvars.time + (self->attack_finished - self->client_time))) - g_globalvars.frametime :
 					self->fb.last_rndaim_time + 0.3;
 
 	if (g_globalvars.time > threshold_time)

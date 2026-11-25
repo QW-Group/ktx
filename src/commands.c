@@ -5014,7 +5014,7 @@ void kfjump(void)
 		return;
 	}
 
-	if (g_globalvars.time < self->attack_finished)
+	if (self->client_time < self->attack_finished)
 	{
 		return; // sanity
 	}
@@ -5039,7 +5039,7 @@ void krjump(void)
 		return;
 	}
 
-	if (g_globalvars.time < self->attack_finished)
+	if (self->client_time < self->attack_finished)
 	{
 		return; // sanity
 	}

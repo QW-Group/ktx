@@ -1798,7 +1798,7 @@ void W_FireSuperSpikes(void)
 	self->ps.wpn[wpSNG].attacks++;
 
 	sound(self, CHAN_WEAPON, "weapons/spike2.wav", 1, ATTN_NORM);
-	self->attack_finished = g_globalvars.time + 0.2;
+	self->attack_finished = self->client_time + 0.2;
 
 	if (match_in_progress == 2)
 	{
@@ -1866,7 +1866,7 @@ void W_FireSpikes(float ox)
 	self->ps.wpn[wpNG].attacks++;
 
 	sound(self, CHAN_WEAPON, "weapons/rocket1i.wav", 1, ATTN_NORM);
-	self->attack_finished = g_globalvars.time + 0.2;
+	self->attack_finished = self->client_time + 0.2;
 
 	if (match_in_progress == 2)
 	{
@@ -2275,13 +2275,13 @@ void W_Attack(void)
 		case IT_AXE:
 			if (self->ctf_flag & CTF_RUNE_HST)
 			{
-				self->attack_finished = g_globalvars.time + 0.5
+				self->attack_finished = self->client_time + 0.5
 						- (cvar("k_ctf_rune_power_hst") / 10);
 				HasteSound(self);
 			}
 			else
 			{
-				self->attack_finished = g_globalvars.time + 0.5;
+				self->attack_finished = self->client_time + 0.5;
 			}
 
 			// crt - no axe sound for spec
@@ -2314,7 +2314,7 @@ void W_Attack(void)
 			player_shot1();
 			if (self->ctf_flag & CTF_RUNE_HST)
 			{
-				self->attack_finished = g_globalvars.time + 0.5
+				self->attack_finished = self->client_time + 0.5
 						- (cvar("k_ctf_rune_power_hst") / 10);
 				HasteSound(self);
 			}
@@ -2322,15 +2322,15 @@ void W_Attack(void)
 			{
 				if (cvar("k_instagib") == 1)
 				{
-					self->attack_finished = g_globalvars.time + 1.2;
+					self->attack_finished = self->client_time + 1.2;
 				}
 				else if (cvar("k_instagib") == 2)
 				{
-					self->attack_finished = g_globalvars.time + 0.7;
+					self->attack_finished = self->client_time + 0.7;
 				}
 				else
 				{
-					self->attack_finished = g_globalvars.time + 0.5;
+					self->attack_finished = self->client_time + 0.5;
 				}
 			}
 
@@ -2341,13 +2341,13 @@ void W_Attack(void)
 			player_shot1();
 			if (self->ctf_flag & CTF_RUNE_HST)
 			{
-				self->attack_finished = g_globalvars.time + 0.5
+				self->attack_finished = self->client_time + 0.5
 						- (cvar("k_ctf_rune_power_hst") / 20);
 				HasteSound(self);
 			}
 			else
 			{
-				self->attack_finished = g_globalvars.time + (k_yawnmode ? 0.8 : 0.7);
+				self->attack_finished = self->client_time + (k_yawnmode ? 0.8 : 0.7);
 			}
 
 			W_FireSuperShotgun();
@@ -2367,13 +2367,13 @@ void W_Attack(void)
 			player_rocket1();
 			if (self->ctf_flag & CTF_RUNE_HST)
 			{
-				self->attack_finished = g_globalvars.time + 0.5
+				self->attack_finished = self->client_time + 0.5
 						- (cvar("k_ctf_rune_power_hst") / 10);
 				HasteSound(self);
 			}
 			else
 			{
-				self->attack_finished = g_globalvars.time + 0.6;
+				self->attack_finished = self->client_time + 0.6;
 			}
 
 			W_FireGrenade();
@@ -2383,20 +2383,20 @@ void W_Attack(void)
 			player_rocket1();
 			if (self->ctf_flag & CTF_RUNE_HST)
 			{
-				self->attack_finished = g_globalvars.time + 0.5
+				self->attack_finished = self->client_time + 0.5
 						- (cvar("k_ctf_rune_power_hst") / 20);
 				HasteSound(self);
 			}
 			else
 			{
-				self->attack_finished = g_globalvars.time + 0.8;
+				self->attack_finished = self->client_time + 0.8;
 			}
 
 			W_FireRocket();
 			break;
 
 		case IT_LIGHTNING:
-			self->attack_finished = g_globalvars.time + 0.1;
+			self->attack_finished = self->client_time + 0.1;
 			sound(self, CHAN_AUTO, "weapons/lstart.wav", 1, ATTN_NORM);
 			self->s.v.ltime = g_globalvars.time;
 			player_light1();
@@ -2412,7 +2412,7 @@ void W_Attack(void)
 				player_chain1();
 			}
 
-			self->attack_finished = g_globalvars.time + 0.1;
+			self->attack_finished = self->client_time + 0.1;
 			break;
 	}
 }
@@ -2536,7 +2536,7 @@ qbool W_ChangeWeapon(int wp)
 {
 	int it, am, fl = 0;
 
-	if ((g_globalvars.time < self->attack_finished) && wp != 22)
+	if ((self->client_time < self->attack_finished) && wp != 22)
 	{
 		return false;
 	}
@@ -2672,7 +2672,7 @@ qbool CycleWeaponCommand(void)
 {
 	int i, it, am;
 
-	if (g_globalvars.time < self->attack_finished)
+	if (self->client_time < self->attack_finished)
 	{
 		return false;
 	}
@@ -2771,7 +2771,7 @@ qbool CycleWeaponReverseCommand(void)
 {
 	int i, it, am;
 
-	if (g_globalvars.time < self->attack_finished)
+	if (self->client_time < self->attack_finished)
 	{
 		return false;
 	}
@@ -3083,7 +3083,7 @@ void W_WeaponFrame(void)
 		return;
 	}
 
-	if (g_globalvars.time < self->attack_finished)
+	if (self->client_time < self->attack_finished)
 	{
 		return;
 	}

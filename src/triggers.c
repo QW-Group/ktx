@@ -567,7 +567,7 @@ void teleport_player(gedict_t *player, vec3_t origin, vec3_t angles, int flags)
 		if ((player->s.v.weapon == IT_HOOK) && player->hook_out)
 		{
 			GrappleReset(player->hook);
-			player->attack_finished = g_globalvars.time + 0.25;
+			player->attack_finished = player->client_time + 0.25;
 		}
 
 		player->s.v.fixangle = 1;	// turn this way immediately

@@ -442,7 +442,7 @@ static qbool PreWarBlockFiring(gedict_t *self)
 		gedict_t *enemy = &g_edicts[self->s.v.enemy];
 		qbool enemy_is_world = self->s.v.enemy && enemy->ct == ctNone;
 		qbool looking_at_enemy = enemy == self->fb.look_object;
-		qbool enemy_attacked = self->s.v.enemy && g_globalvars.time < enemy->attack_finished + 0.5;
+		qbool enemy_attacked = self->s.v.enemy && enemy->client_time < enemy->attack_finished + 0.5;
 		qbool debugging_door = (self->fb.debug_path && enemy_is_world);
 
 		// Don't fire at other bots
@@ -476,7 +476,7 @@ static qbool PreWarBlockFiring(gedict_t *self)
 
 qbool AttackFinished(gedict_t *self)
 {
-	if (g_globalvars.time < self->attack_finished)
+	if (self->client_time < self->attack_finished)
 	{
 		if ((int)self->s.v.weapon & (IT_LIGHTNING | IT_EITHER_NAILGUN))
 		{
@@ -724,7 +724,7 @@ static int DesiredWeapon(void)
 	qbool shaft_available = false;
 	qbool avoid_rockets = false;
 	qbool firing_lg = self->fb.firing && self->s.v.weapon == IT_LIGHTNING && self->s.v.ammo_cells
-			&& g_globalvars.time < self->attack_finished;
+			&& self->client_time < self->attack_finished;
 
 	if (TP_CouldDamageTeammate(self))
 	{
