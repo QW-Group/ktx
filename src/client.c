@@ -4866,10 +4866,6 @@ void PlayerPostThink(void)
 	if (cvar("k_instagib") && cvar("k_instagib_custom_models"))
 	{
 		self->client_predflags = (int)self->client_predflags | PRDFL_COILGUN;
-		if (cvar("k_instagib") == 3)
-		{
-			self->client_predflags = (int)self->client_predflags | PRDFL_MIDAIR;
-		}
 	}
 
 	// disable weapon prediction when tracking another player

@@ -95,7 +95,7 @@ weapon_t weapons[9] =
 		"progs/v_shot.mdl", 0.5, 2, IT_SHOTGUN, AMMO_SHELLS, 1, 7,
 		{
 			{ 0, ANIM_DEFAULT | ANIM_ATTACK, "", "", "", '0 0 0', '0 0 0', 1, 0, 0 },
-			{ 1, ANIM_MUZZLEFLASH | ANIM_SOUND, "weapons/guncock.wav", "", "", '0 0 0', '0 0 0', 2, 0, 0.1 },
+			{ 1, ANIM_SOUND, "weapons/guncock.wav", "", "", '0 0 0', '0 0 0', 2, 0, 0.1 },
 			{ 2, 0, "", "", "", '0 0 0', '0 0 0', 3, 0, 0.1 },
 			{ 3, 0, "", "", "", '0 0 0', '0 0 0', 4, 0, 0.1 },
 			{ 4, 0, "", "", "", '0 0 0', '0 0 0', 5, 0, 0.1 },
@@ -109,7 +109,7 @@ weapon_t weapons[9] =
 		"progs/v_shot2.mdl", 0.7, 3, IT_SUPER_SHOTGUN, AMMO_SHELLS, 2, 7,
 		{
 			{ 0, ANIM_DEFAULT | ANIM_ATTACK, "", "", "", '0 0 0', '0 0 0', 1, 0, 0 },
-			{ 1, ANIM_MUZZLEFLASH | ANIM_SOUND, "weapons/shotgn2.wav", "", "", '0 0 0', '0 0 0', 2, 0, 0.1 },
+			{ 1, ANIM_SOUND, "weapons/shotgn2.wav", "", "", '0 0 0', '0 0 0', 2, 0, 0.1 },
 			{ 2, 0, "", "", "", '0 0 0', '0 0 0', 3, 0, 0.1 },
 			{ 3, 0, "", "", "", '0 0 0', '0 0 0', 4, 0, 0.1 },
 			{ 4, 0, "", "", "", '0 0 0', '0 0 0', 5, 0, 0.1 },
@@ -124,9 +124,9 @@ weapon_t weapons[9] =
 		"progs/v_nail.mdl", 0.2, 4, IT_NAILGUN, AMMO_NAILS, 1, 3,
 		{
 			{ 0, ANIM_DEFAULT | ANIM_ATTACK, "", "", "", '0 0 0', '0 0 0', 1, 0, 0 },
-			{ -8, ANIM_MUZZLEFLASH | ANIM_SOUND | ANIM_PROJECTILE | ANIM_ATTACK | ANIM_BRANCH,
+			{ -8, ANIM_SOUND | ANIM_PROJECTILE | ANIM_ATTACK | ANIM_BRANCH,
 			  "weapons/rocket1i.wav", "", "progs/spike.mdl", '0 1000 0', '4 0 16', 2, 0, 0.1 },
-			{ -8, ANIM_MUZZLEFLASH | ANIM_SOUND | ANIM_PROJECTILE | ANIM_ATTACK | ANIM_BRANCH,
+			{ -8, ANIM_SOUND | ANIM_PROJECTILE | ANIM_ATTACK | ANIM_BRANCH,
 			  "weapons/rocket1i.wav", "", "progs/spike.mdl", '0 1000 0', '-4 0 16', 1, 0, 0.1 }
 		}
 	},
@@ -136,9 +136,9 @@ weapon_t weapons[9] =
 		"progs/v_nail2.mdl", 0.2, 5, IT_SUPER_NAILGUN, AMMO_NAILS, 2, 3,
 		{
 			{ 0, ANIM_DEFAULT | ANIM_ATTACK, "", "", "", '0 0 0', '0 0 0', 1, 0, 0 },
-			{ -8, ANIM_MUZZLEFLASH | ANIM_SOUND | ANIM_PROJECTILE | ANIM_ATTACK | ANIM_BRANCH,
+			{ -8, ANIM_SOUND | ANIM_PROJECTILE | ANIM_ATTACK | ANIM_BRANCH,
 			  "weapons/spike2.wav", "", "progs/s_spike.mdl", '0 1000 0', '0 0 16', 2, 0, 0.1 },
-			{ -8, ANIM_MUZZLEFLASH | ANIM_SOUND | ANIM_PROJECTILE | ANIM_ATTACK | ANIM_BRANCH,
+			{ -8, ANIM_SOUND | ANIM_PROJECTILE | ANIM_ATTACK | ANIM_BRANCH,
 			  "weapons/spike2.wav", "", "progs/s_spike.mdl", '0 1000 0', '0 0 16', 1, 0, 0.1 }
 		}
 	},
@@ -148,7 +148,7 @@ weapon_t weapons[9] =
 		"progs/v_rock.mdl", 0.6, 6, IT_GRENADE_LAUNCHER, AMMO_ROCKETS, 1, 7,
 		{
 			{ 0, ANIM_DEFAULT | ANIM_ATTACK, "", "", "", '0 0 0', '0 0 0', 1, 0, 0 },
-			{ 1, ANIM_MUZZLEFLASH | ANIM_SOUND | ANIM_PROJECTILE,
+			{ 1, ANIM_SOUND | ANIM_PROJECTILE,
 			  "weapons/grenade.wav", "", "progs/grenade.mdl", '0 600 200', '0 0 0', 2, 0, 0.1 },
 			{ 2, 0, "", "", "", '0 0 0', '0 0 0', 3, 0, 0.1 },
 			{ 3, 0, "", "", "", '0 0 0', '0 0 0', 4, 0, 0.1 },
@@ -164,7 +164,7 @@ weapon_t weapons[9] =
 		"progs/v_rock2.mdl", 0.8, 7, IT_ROCKET_LAUNCHER, AMMO_ROCKETS, 1, 7,
 		{
 			{ 0, ANIM_DEFAULT | ANIM_ATTACK, "", "", "", '0 0 0', '0 0 0', 1, 0, 0 },
-			{ 1, ANIM_MUZZLEFLASH | ANIM_SOUND | ANIM_PROJECTILE,
+			{ 1, ANIM_SOUND | ANIM_PROJECTILE,
 			  "weapons/sgun1.wav", "", "progs/missile.mdl", '0 1000 0', '0 8 16', 2, 0, 0.1 },
 			{ 2, 0, "", "", "", '0 0 0', '0 0 0', 3, 0, 0.1 },
 			{ 3, 0, "", "", "", '0 0 0', '0 0 0', 4, 0, 0.1 },
@@ -183,9 +183,9 @@ weapon_t weapons[9] =
 		{
 			{ 0, ANIM_ATTACK | ANIM_SOUND | ANIM_SOUND2 | ANIM_SOUNDAUTO | ANIM_LGBEAM,
 			  "weapons/lstart.wav", "weapons/lhit.wav", "", '0 0 0', '0 0 0', 1, 0, 0.1 },
-			{ -4, ANIM_MUZZLEFLASH | ANIM_SOUND | ANIM_LGBEAM | ANIM_LTIME | ANIM_ATTACK | ANIM_BRANCH,
+			{ -4, ANIM_SOUND | ANIM_LGBEAM | ANIM_LTIME | ANIM_ATTACK | ANIM_BRANCH,
 			  "weapons/lhit.wav", "", "", '0 0 0', '0 0 0', 2, 0, 0.1 },
-			{ -4, ANIM_MUZZLEFLASH | ANIM_SOUND | ANIM_LGBEAM | ANIM_LTIME | ANIM_ATTACK | ANIM_BRANCH,
+			{ -4, ANIM_SOUND | ANIM_LGBEAM | ANIM_LTIME | ANIM_ATTACK | ANIM_BRANCH,
 			  "weapons/lhit.wav", "", "", '0 0 0', '0 0 0', 1, 0, 0.1 }
 		}
 	}

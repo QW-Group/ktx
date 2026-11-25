@@ -115,7 +115,6 @@ enumflags
 	ANIM_SOUND,			// play .sound on entering this state
 	ANIM_PROJECTILE,	// spawn a predicted projectile on entering
 	ANIM_LGBEAM,		// draw the predicted lightning beam
-	ANIM_MUZZLEFLASH,	// muzzle flash (server-side only, no csqc effect)
 	ANIM_DEFAULT,		// the idle state; where a finished animation lands
 	ANIM_ATTACK,		// firing state: sets attack_finished
 	ANIM_BRANCH,		// re-tests +attack on entry, exits to .alt
