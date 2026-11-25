@@ -1,7 +1,5 @@
 ../build/csprogs.dat
 
-#define CSQC
-
 // plain version 6 bytecode, which the VM of every client runs
 #pragma target id
 
