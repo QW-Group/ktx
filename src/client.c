@@ -940,14 +940,15 @@ void k_respawn(gedict_t *p, qbool body)
 	self->weapon_generation = (self->weapon_generation % 15) + 1;
 	WeaponPrediction_ResetBaseline();
 
-	// Keep intentional weapon-select respawn commands, but drop stale/invalid backups.
-	if (((respawn_impulse >= 1) && (respawn_impulse <= 8)) || respawn_impulse == 22)
+	// Put the pending impulse back, unless it selects a weapon (1 to 8, or 22
+	// for the hook) that the player cannot switch to now: that choice was made
+	// for the inventory of the life before.
+	if ((((respawn_impulse >= 1) && (respawn_impulse <= 8)) || (respawn_impulse == 22)) && !W_CanSwitch(respawn_impulse, false))
 	{
-		if (W_CanSwitch(respawn_impulse, false))
-		{
-			self->s.v.impulse = respawn_impulse;
-		}
+		respawn_impulse = 0;
 	}
+
+	self->s.v.impulse = respawn_impulse;
 
 	self = swap;
 }
