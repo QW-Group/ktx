@@ -52,10 +52,14 @@ float Pred_ProjectilesEnabled(void)
 /*
  * Whether the server is letting us predict this weapon state at all.
  *
- * Instagib's coilgun replaces the shotgun's model, sound and refire delay, but
- * the flag does not say which instagib mode is running and the delays differ
- * between them. Guessing would desync the animation and play the wrong sound
- * alongside the server's, so we stand aside and let the engine draw the gun.
+ * Instagib's coilgun changes the shotgun's refire delay, and on servers with
+ * custom models its model and sound too. The flag is set in every instagib
+ * mode but does not say which, and the delays differ between them. Guessing
+ * would desync the animation, so we stand aside and let the engine draw the
+ * gun.
+ *
+ * The server also switches prediction off entirely for a player holding the
+ * haste rune, whose refire depends on a server cvar.
  */
 float Pred_ServerAllows(float predflags)
 {

@@ -4865,7 +4865,10 @@ void PlayerPostThink(void)
 		self->client_predflags = (int)self->client_predflags | PRDFL_YAWNMODE;
 	}
 
-	if (cvar("k_instagib") && cvar("k_instagib_custom_models"))
+	// Instagib retimes the shotgun by its mode, and with custom models also
+	// replaces its model and sound. The flag says none of that, so a predicting
+	// client stands aside.
+	if (cvar("k_instagib"))
 	{
 		self->client_predflags = (int)self->client_predflags | PRDFL_COILGUN;
 	}
@@ -4877,6 +4880,11 @@ void PlayerPostThink(void)
 	}
 	// can't predict hook reliably, so just force prediction off for now
 	else if (self->s.v.weapon == IT_HOOK)
+	{
+		self->client_predflags = PRDFL_FORCEOFF;
+	}
+	// the haste rune shortens every refire by an amount set with a cvar
+	else if (self->ctf_flag & CTF_RUNE_HST)
 	{
 		self->client_predflags = PRDFL_FORCEOFF;
 	}
