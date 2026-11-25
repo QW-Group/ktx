@@ -126,10 +126,12 @@ void ExtFieldSetPvsFlags(gedict_t *ed, float pvsflags)
 
 void SetSendNeeded(gedict_t *ed, int sendflags, int unicast)
 {
-	if (!HAVEEXTENSION(G_SETSENDNEEDED))
+	if (HAVEEXTENSION(G_SETSENDNEEDED))
+	{
+		trap_SetSendNeeded(NUM_FOR_EDICT(ed), sendflags, unicast);
+	}
+	else if (cvar("developer"))
 	{
 		G_bprint(PRINT_HIGH, "SetSendNeeded needs support in server\n");
-		return;
 	}
-	trap_SetSendNeeded(NUM_FOR_EDICT(ed), sendflags, unicast);
 }

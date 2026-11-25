@@ -1774,7 +1774,7 @@ void WeaponPrediction_MarkSendFlags(void)
 		wep->client_ping = self->client_ping;
 	}
 
-	trap_SetSendNeeded(NUM_FOR_EDICT(wep), sendflags, NUM_FOR_EDICT(self));
+	SetSendNeeded(wep, sendflags, NUM_FOR_EDICT(self));
 }
 
 void WeaponPrediction_ResetBaseline(void)
