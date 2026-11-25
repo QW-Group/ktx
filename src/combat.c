@@ -881,8 +881,10 @@ void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float dam
 	}
 
 	// figure momentum add
+	// With KTX's antilag a shot is judged at an earlier time. A target that has
+	// teleported since then is no longer where it was hit, so it is not pushed.
 	if ((inflictor != world)
-			&& (targ->teleport_time < time_corrected || targ == attacker)
+			&& ((cvar("sv_antilag") != 1) || (targ->teleport_time < time_corrected) || (targ == attacker))
 			&& ((targ->s.v.movetype == MOVETYPE_WALK)
 					|| (k_bloodfest && ((int)targ->s.v.flags & FL_MONSTER))))
 	{
