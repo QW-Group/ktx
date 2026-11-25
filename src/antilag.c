@@ -38,6 +38,22 @@ static qbool antilag_engine_has_rewind(void)
 	return supported;
 }
 
+/*
+ * Whether the engine answers the "*ping_current" info key, asked for the same
+ * reason as "*antilag_rewind" above.
+ */
+static qbool antilag_engine_has_current_ping(void)
+{
+	static int supported = -1;
+
+	if (supported < 0)
+	{
+		supported = streq(ezinfokey(world, "\\*ping_current"), "yes");
+	}
+
+	return supported;
+}
+
 static qbool antilag_current_rewind(gedict_t *e, float *ms)
 {
 	char *rewind;
@@ -57,16 +73,22 @@ static qbool antilag_current_rewind(gedict_t *e, float *ms)
 	return true;
 }
 
-static float antilag_current_ping(gedict_t *e)
+// The player's ping in milliseconds: for the last command when the engine can
+// tell, otherwise its average over recent frames.
+float antilag_current_ping_msec(gedict_t *e)
 {
-	char *ping = ezinfokey(e, "ping_current");
+	char *ping;
 
-	if (!strnull(ping))
+	if (antilag_engine_has_current_ping())
 	{
-		return atof(ping) / 1000;
+		ping = ezinfokey(e, "*ping_current");
+		if (!strnull(ping))
+		{
+			return atof(ping);
+		}
 	}
 
-	return atof(ezinfokey(e, "ping")) / 1000;
+	return atof(ezinfokey(e, "ping"));
 }
 
 static void antilag_mark_projectile_runtime(gedict_t *e)
@@ -734,7 +756,7 @@ void antilag_lagmove_all_hitscan(gedict_t *e)
 
 	if (!antilag_current_rewind(e, &ms))
 	{
-		ms = antilag_current_ping(e);
+		ms = antilag_current_ping_msec(e) / 1000;
 		ms -= (ms < ANTILAG_MAX_PREDICTION ? (1 / 77.0) : ANTILAG_MAX_PREDICTION);
 	}
 
@@ -752,7 +774,7 @@ void antilag_lagmove_all_hitscan(gedict_t *e)
 
 void antilag_lagmove_all_proj(gedict_t *owner, gedict_t *e)
 {
-	float ms = antilag_current_ping(owner);
+	float ms = antilag_current_ping_msec(owner) / 1000;
 	float step_time, current_time;
 	antilag_t *list;
 	vec3_t old_org;
@@ -892,7 +914,7 @@ void antilag_lagmove_all_proj(gedict_t *owner, gedict_t *e)
 
 void antilag_lagmove_all_proj_bounce(gedict_t *owner, gedict_t *e)
 {
-	float ms = antilag_current_ping(owner);
+	float ms = antilag_current_ping_msec(owner) / 1000;
 	const float newmis_time = 0.05;
 	float step_time, current_time;
 	antilag_t *list;

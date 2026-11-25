@@ -493,6 +493,7 @@ void KTX_UpdateStats(void);
 
 extern float time_corrected;
 void UpdateProjectileSendNeeded(void);
+float antilag_current_ping_msec(gedict_t *e);
 void antilag_lagmove(antilag_t *data, float goal_time);
 void antilag_lagmove_all(gedict_t *e, float goal_time);
 void antilag_lagmove_all_hitscan(gedict_t *e);
