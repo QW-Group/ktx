@@ -191,7 +191,9 @@ const float BEAM_SERVER_HOLD	= 0.15;	// treat the server's beam as live this lon
 //
 // Named to match ezQuake so a player's existing settings carry over.
 // The tri-state ones are: 0 off, 1 only when the server runs antilag,
-// 2 force on regardless.
+// 2 force on regardless. Projectiles are the exception: without the server's
+// antilag there is nothing for a predicted one to hand over to, so for
+// cl_predict_projectiles 2 does the same as 1.
 // ==========================================================================
 
 var float autocvar_cl_nopred_weapon			= 0;
