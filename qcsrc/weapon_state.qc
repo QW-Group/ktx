@@ -15,6 +15,7 @@ typedef struct
 	float	frame;
 	float	predflags;
 	float	ping;
+	float	nails_spent;	// by shots replayed on top of the snapshot; never sent
 } wstate_t;
 
 wstate_t	ws_server;		// the last snapshot the server sent
@@ -326,6 +327,48 @@ static void WeaponState_PlayEffects(float idx, float a)
 	}
 }
 
+/*
+ * The weapon whose shot a firing state produces, which is not always the one in
+ * hand. The super nailgun spends two nails a shot; with a single nail left the
+ * server fires that one as the nailgun would, with its sound, its spike and its
+ * alternating muzzle offset.
+ *
+ * The snapshot's nail count does not include shots still being replayed, so
+ * those are counted here. That assumes shots cost ammo, which they do not
+ * before a match or in deathmatch 4; there the count is high enough for the
+ * few replayed shots not to matter.
+ */
+static float WeaponState_FiredAs(float idx, float flags)
+{
+	float item = weapons[idx].itemflag;
+	float nails, nailgun;
+
+	if (!(flags & ANIM_PROJECTILE))
+		return idx;
+	if (item != IT_NAILGUN && item != IT_SUPER_NAILGUN)
+		return idx;
+
+	nails = ws_predicted.ammo[AMMO_NAILS] - ws_predicted.nails_spent;
+
+	if (item == IT_SUPER_NAILGUN && nails >= 2)
+	{
+		ws_predicted.nails_spent += 2;
+		return idx;
+	}
+
+	ws_predicted.nails_spent += 1;
+
+	if (item == IT_SUPER_NAILGUN)
+	{
+		nailgun = Weapon_ForItem(IT_NAILGUN);
+
+		if (nailgun)
+			return nailgun;
+	}
+
+	return idx;
+}
+
 static void WeaponState_Enter(float a, float buttons)
 {
 	float idx = ws_predicted.weapon_index;
@@ -371,7 +414,7 @@ static void WeaponState_Enter(float a, float buttons)
 		return;
 	}
 
-	WeaponState_PlayEffects(idx, a);
+	WeaponState_PlayEffects(WeaponState_FiredAs(idx, flags), a);
 
 	WeaponState_SetFrame(anim->frame);
 

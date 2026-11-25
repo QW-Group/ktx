@@ -251,6 +251,18 @@ float Weapon_ForImpulse(float impulse)
 	return 0;
 }
 
+// The weapon an item bit stands for, or 0 when the table has none for it.
+float Weapon_ForItem(float item)
+{
+	for (float i = 1; i < weapons.length; i++)
+	{
+		if (Weapon_Valid(i) && weapons[i].itemflag == item)
+			return i;
+	}
+
+	return 0;
+}
+
 // Refire delay. Yawn mode slows the super shotgun; the lightning gun ignores
 // the table entirely.
 float Weapon_AttackTime(float idx, float predflags)
