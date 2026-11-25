@@ -178,6 +178,7 @@
 #define MSG_ONE_NORECORD				6	// reliable to one, excluded from MVD
 
 #define EZCSQC_WEAPONINFO				1
+#define EZCSQC_PROJECTILE				2
 #define EZCSQC_WEAPONDEF				4
 
 // message levels

@@ -70,6 +70,99 @@ void W_Precache(void)
 void W_FireSpikes(float ox);
 void W_FireLightning(void);
 
+qbool SendEntity_Projectile(int sendflags)
+{
+	// Any client running csqc runs the csprogs this server ships, so it speaks
+	// this schema; a native EZCSQC client reports the same through "csqcactive".
+	if (!iKey(other, "csqcactive"))
+	{
+		return false;
+	}
+
+	WriteByte(MSG_CSQC, EZCSQC_PROJECTILE);
+
+	if (self->pos1[0] == 0 && self->pos1[1] == 0 && self->pos1[2] == 0)
+	{
+		sendflags &= ~PROJECTILE_SPAWN_ORIGIN;
+	}
+
+	WriteByte(MSG_CSQC, sendflags);
+
+	if (sendflags & PROJECTILE_ORIGIN)
+	{
+		WriteCoord(MSG_CSQC, self->s.v.origin[0]);
+		WriteCoord(MSG_CSQC, self->s.v.origin[1]);
+		WriteCoord(MSG_CSQC, self->s.v.origin[2]);
+
+		WriteCoord(MSG_CSQC, self->s.v.velocity[0]);
+		WriteCoord(MSG_CSQC, self->s.v.velocity[1]);
+		WriteCoord(MSG_CSQC, self->s.v.velocity[2]);
+
+		WriteFloat(MSG_CSQC, g_globalvars.time);
+	}
+
+	if (sendflags & PROJECTILE_MODEL)
+	{
+		WriteShort(MSG_CSQC, self->s.v.modelindex);
+		WriteShort(MSG_CSQC, self->s.v.effects);
+	}
+
+	if (sendflags & PROJECTILE_ANGLES)
+	{
+		WriteAngle(MSG_CSQC, self->s.v.angles[0]);
+		WriteAngle(MSG_CSQC, self->s.v.angles[1]);
+		WriteAngle(MSG_CSQC, self->s.v.angles[2]);
+	}
+
+	if (sendflags & PROJECTILE_OWNER)
+	{
+		WriteEntity(MSG_CSQC, PROG_TO_EDICT(self->s.v.owner)); // we only care about the owner if it's a player, otherwise world
+	}
+
+	if (sendflags & PROJECTILE_SPAWN_ORIGIN)
+	{
+		WriteCoord(MSG_CSQC, self->pos1[0]);
+		WriteCoord(MSG_CSQC, self->pos1[1]);
+		WriteCoord(MSG_CSQC, self->pos1[2]);
+	}
+
+	return true;
+}
+
+static void ScheduleProjectileSendIfLive(gedict_t *projectile)
+{
+	if (!projectile || projectile == world || !projectile->s.v.modelindex)
+	{
+		return;
+	}
+
+	ExtFieldSetSendEntity(projectile, (func_t)SendEntity_Projectile);
+	SetSendNeeded(projectile, PROJECTILE_INITIAL, 0);
+}
+
+void UpdateProjectileSendNeeded(void)
+{
+	gedict_t *projectile;
+
+	for (projectile = world; (projectile = nextent(projectile));)
+	{
+		if (!projectile->isMissile || !projectile->s.v.modelindex || !projectile->SendEntity)
+		{
+			continue;
+		}
+
+		/*
+		 * Grenades bounce under full server physics. The initial CSQC snapshot is
+		 * not enough for clients to reproduce that path, so keep live grenades
+		 * corrected with authoritative origin/velocity/time updates.
+		 */
+		if (streq(projectile->classname, "grenade"))
+		{
+			SetSendNeeded(projectile, PROJECTILE_ORIGIN, 0);
+		}
+	}
+}
+
 /*
  ================
  W_FireAxe
@@ -1200,6 +1293,7 @@ void W_FireRocket(void)
 	setorigin(newmis, self->s.v.origin[0] + g_globalvars.v_forward[0] * 8,
 				self->s.v.origin[1] + g_globalvars.v_forward[1] * 8,
 				self->s.v.origin[2] + g_globalvars.v_forward[2] * 8 + 16);
+	VectorCopy(newmis->s.v.origin, newmis->pos1);
 
 	// midair 
 	VectorCopy(self->s.v.origin, newmis->s.v.oldorigin);
@@ -1207,6 +1301,7 @@ void W_FireRocket(void)
 
 	antilag_lagmove_all_proj(self, newmis);
 	antilag_unmove_all();
+	ScheduleProjectileSendIfLive(newmis);
 
 #ifdef BOT_SUPPORT
 	BotsRocketSpawned(newmis);
@@ -1580,9 +1675,11 @@ void W_FireGrenade(void)
 	setmodel(newmis, "progs/grenade.mdl");
 	setsize(newmis, 0, 0, 0, 0, 0, 0);
 	setorigin(newmis, PASSVEC3(self->s.v.origin));
+	VectorCopy(newmis->s.v.origin, newmis->pos1);
 
 	antilag_lagmove_all_proj_bounce(self, newmis);
 	antilag_unmove_all();
+	ScheduleProjectileSendIfLive(newmis);
 
 #ifdef BOT_SUPPORT
 	BotsGrenadeSpawned(newmis);
@@ -1625,6 +1722,7 @@ void launch_spike(vec3_t org, vec3_t dir)
 	setmodel(newmis, "progs/spike.mdl");
 	setsize(newmis, 0, 0, 0, 0, 0, 0);
 	setorigin(newmis, PASSVEC3(org));
+	VectorCopy(newmis->s.v.origin, newmis->pos1);
 
 	// Yawnmode: spikes velocity is 1800 instead of 1000
 	// - Molgrum
@@ -1822,6 +1920,7 @@ void W_FireSuperSpikes(void)
 
 	antilag_lagmove_all_proj(self, newmis);
 	antilag_unmove_all();
+	ScheduleProjectileSendIfLive(newmis);
 
 	if (cvar("sv_antilag") == 1)
 	{
@@ -1888,6 +1987,7 @@ void W_FireSpikes(float ox)
 
 	antilag_lagmove_all_proj(self, newmis);
 	antilag_unmove_all();
+	ScheduleProjectileSendIfLive(newmis);
 
 	if (cvar("sv_antilag") == 1)
 	{

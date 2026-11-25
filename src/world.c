@@ -1916,6 +1916,8 @@ void StartFrame(int time)
 
 	TeamplayGameTick();
 
+	UpdateProjectileSendNeeded();
+
 	WillPause();
 
 	time_corrected = time;

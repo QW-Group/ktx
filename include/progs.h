@@ -812,6 +812,13 @@ typedef struct fb_entvars_s {
 #define WEAPONINFO_WEAPON_MASK		0x0f
 #define WEAPONINFO_GENERATION_SHIFT 4
 
+#define PROJECTILE_ORIGIN			(1 << 0)
+#define PROJECTILE_MODEL			(1 << 1)
+#define PROJECTILE_ANGLES			(1 << 2)
+#define PROJECTILE_OWNER			(1 << 3)
+#define PROJECTILE_SPAWN_ORIGIN		(1 << 4)
+#define PROJECTILE_INITIAL			(PROJECTILE_ORIGIN | PROJECTILE_MODEL | PROJECTILE_ANGLES | PROJECTILE_OWNER | PROJECTILE_SPAWN_ORIGIN)
+
 typedef struct weppredanim_s
 {
 	signed char mdlframe;
