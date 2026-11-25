@@ -1573,6 +1573,16 @@ void FixRules(void)
 
 	FixYawnMode(); // yawn mode
 
+#ifndef CSQC_SUPPORT
+	// KTX's own antilag advances a new projectile by the shooter's latency,
+	// which needs the csprogs to predict it on the client. This build has none,
+	// so fall back to the engine's antilag.
+	if (cvar("sv_antilag") == 1)
+	{
+		cvar_fset("sv_antilag", 2);
+	}
+#endif
+
 	k_maxspeed = cvar("sv_maxspeed");
 
 	FixCmdFloodProtect(); // cmd flood protect

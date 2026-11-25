@@ -1370,6 +1370,22 @@ void hookcrhook(void)
 
 // { antilag vote feature
 
+// The antilag mode a vote switches to: off, KTX's own, the engine's, and round
+// again. KTX's own is left out of a build without CSQC support.
+static int antilag_next_mode(int mode)
+{
+	mode++;
+
+#ifndef CSQC_SUPPORT
+	if (mode == 1)
+	{
+		mode = 2;
+	}
+#endif
+
+	return (mode > 2) ? 0 : mode;
+}
+
 void vote_check_antilag(void)
 {
 	int veto;
@@ -1393,11 +1409,7 @@ void vote_check_antilag(void)
 		vote_clear(OV_ANTILAG);
 
 		// toggle antilag mode.
-		new_antilag_value = cvar("sv_antilag") + 1;
-		if (new_antilag_value > 2)
-		{
-			new_antilag_value = 0;
-		}
+		new_antilag_value = antilag_next_mode(cvar("sv_antilag"));
 		trap_cvar_set_float("sv_antilag", (float)(new_antilag_value));
 
 		if (veto)
@@ -1442,11 +1454,7 @@ void antilag(void)
 
 	self->v.antilag = !self->v.antilag;
 
-	antilag_new_value = cvar("sv_antilag") + 1;
-	if (antilag_new_value > 2)
-	{
-		antilag_new_value = 0;
-	}
+	antilag_new_value = antilag_next_mode(cvar("sv_antilag"));
 
 	G_bprint(
 			2,

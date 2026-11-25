@@ -12,6 +12,9 @@ option(BOT_SUPPORT "Build with bot support" ON)
 # Option for FTE extensions. We also have some basic support for FTE which does not controlled by this setting.
 # This is en example and extensions unused for now, so its turned off by default. Also turning it ON makes binary incompatibe with MVDSV.
 option(FTESV "Build with FTE extensions support" OFF)
+# CSQC support: the client-side QuakeC (csprogs.dat) that predicts weapons, and sv_antilag 1, KTX's own lag
+# compensation, which is only offered together with it. Building csprogs.dat needs fteqcc, see cmake/fteqcc.cmake.
+option(CSQC_SUPPORT "Build with CSQC support (csprogs.dat and sv_antilag 1)" ON)
 # Build with AddressSanitizer and UndefinedBehaviorSanitizer, for debugging only.
 option(SANITIZE "Build with -fsanitize=address,undefined" OFF)
 
@@ -155,17 +158,20 @@ endif()
 # Build the client-side QuakeC (qcsrc) that the server hands to CSQC-capable
 # clients, with fteqcc, which is found or built (cmake/fteqcc.cmake). It is
 # compiled in the build directory, into csprogs.dat beside the mod.
-include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/fteqcc.cmake")
-file(GLOB CSPROGS_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/qcsrc/*.qc"
-	"${CMAKE_CURRENT_SOURCE_DIR}/qcsrc/progs.src")
-add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/csprogs.dat"
-	COMMAND "${CMAKE_COMMAND}" "-DFTEQCC=${KTX_FTEQCC_EXE}" "-DSRC=${CMAKE_CURRENT_SOURCE_DIR}/qcsrc"
-		"-DOUT=${CMAKE_CURRENT_BINARY_DIR}" -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/csprogs.cmake"
-	DEPENDS ${CSPROGS_SOURCES} "${KTX_FTEQCC_EXE}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/csprogs.cmake"
-	COMMENT "Compiling csprogs.dat"
-	VERBATIM
-	)
-add_custom_target(csprogs ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/csprogs.dat")
+if(CSQC_SUPPORT)
+	target_compile_definitions(${PROJECT_NAME} PRIVATE CSQC_SUPPORT=1)
+	include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/fteqcc.cmake")
+	file(GLOB CSPROGS_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/qcsrc/*.qc"
+		"${CMAKE_CURRENT_SOURCE_DIR}/qcsrc/progs.src")
+	add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/csprogs.dat"
+		COMMAND "${CMAKE_COMMAND}" "-DFTEQCC=${KTX_FTEQCC_EXE}" "-DSRC=${CMAKE_CURRENT_SOURCE_DIR}/qcsrc"
+			"-DOUT=${CMAKE_CURRENT_BINARY_DIR}" -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/csprogs.cmake"
+		DEPENDS ${CSPROGS_SOURCES} "${KTX_FTEQCC_EXE}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/csprogs.cmake"
+		COMMENT "Compiling csprogs.dat"
+		VERBATIM
+		)
+	add_custom_target(csprogs ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/csprogs.dat")
+endif()
 if(FTESV)
 	target_compile_definitions(${PROJECT_NAME} PRIVATE FTESV=1)
 endif()
@@ -229,6 +235,9 @@ set(QVM_COMPILER "q3lcc")
 set(QVM_C_FLAGS -DQ3_VM -S -Wf-target=bytecode -Wf-g)
 if(BOT_SUPPORT)
 	set(QVM_C_FLAGS ${QVM_C_FLAGS} -DBOT_SUPPORT=1)
+endif()
+if(CSQC_SUPPORT)
+	set(QVM_C_FLAGS ${QVM_C_FLAGS} -DCSQC_SUPPORT=1)
 endif()
 set(QVM_INCDIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 

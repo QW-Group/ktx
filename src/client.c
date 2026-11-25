@@ -1821,6 +1821,7 @@ void WeaponPrediction_Cleanup(void)
 
 void WeaponPrediction_CreateEnt(void)
 {
+#ifdef CSQC_SUPPORT
 	gedict_t *wep_values;
 
 	/*
@@ -1857,6 +1858,10 @@ void WeaponPrediction_CreateEnt(void)
 		SetSendNeeded(wep_values, 0xFFFFFF, NUM_FOR_EDICT(self));
 	}
 	self->weapon_pred = wep_values;
+#else
+	// a build without CSQC support sends nothing
+	self->weapon_pred = NULL;
+#endif
 }
 
 ////////////////
