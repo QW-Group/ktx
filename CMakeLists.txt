@@ -152,21 +152,20 @@ if(BOT_SUPPORT)
 	target_compile_definitions(${PROJECT_NAME} PRIVATE BOT_SUPPORT=1)
 endif()
 
-# Build the client-side QuakeC the server hands to CSQC-capable clients. This
-# needs fteqcc from FTE, which most people will not have, so it is optional:
-# without it the server still builds and simply serves no csprogs.
-find_program(FTEQCC NAMES fteqcc fteqcc64)
-if(FTEQCC)
-	add_custom_target(csprogs ALL
-		COMMAND ${FTEQCC} -srcfile progs.src -O2 -Wall
-		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/qcsrc"
-		BYPRODUCTS "${CMAKE_CURRENT_SOURCE_DIR}/build/csprogs.dat"
-		COMMENT "Compiling csprogs.dat"
-		VERBATIM
-		)
-else()
-	message(STATUS "fteqcc not found, skipping csprogs.dat")
-endif()
+# Build the client-side QuakeC (qcsrc) that the server hands to CSQC-capable
+# clients, with fteqcc, which is found or built (cmake/fteqcc.cmake). It is
+# compiled in the build directory, into csprogs.dat beside the mod.
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/fteqcc.cmake")
+file(GLOB CSPROGS_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/qcsrc/*.qc"
+	"${CMAKE_CURRENT_SOURCE_DIR}/qcsrc/progs.src")
+add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/csprogs.dat"
+	COMMAND "${CMAKE_COMMAND}" "-DFTEQCC=${KTX_FTEQCC_EXE}" "-DSRC=${CMAKE_CURRENT_SOURCE_DIR}/qcsrc"
+		"-DOUT=${CMAKE_CURRENT_BINARY_DIR}" -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/csprogs.cmake"
+	DEPENDS ${CSPROGS_SOURCES} "${KTX_FTEQCC_EXE}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/csprogs.cmake"
+	COMMENT "Compiling csprogs.dat"
+	VERBATIM
+	)
+add_custom_target(csprogs ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/csprogs.dat")
 if(FTESV)
 	target_compile_definitions(${PROJECT_NAME} PRIVATE FTESV=1)
 endif()
