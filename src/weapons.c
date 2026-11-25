@@ -1181,10 +1181,15 @@ void T_MissileTouch(void)
 	// was done in the impact
 	if (cvar("sv_antilag") == 1) // if this is an anti lag rocket, ignore our owner
 	{
-		float delay;
+		float delay, speed;
 		vec3_t diff, traveled;
 		gedict_t *local_explosion;
 		gedict_t *oself;
+		// The catch-up leaves the rocket's start position in oldangles, and the
+		// delay below is measured from it. A rocket that was not caught up, fired
+		// in another antilag mode or by a monster, has none and is not ahead of
+		// anything.
+		qbool caught_up = !VectorCompareF(self->oldangles, 0, 0, 0);
 
 		T_RadiusDamage_Ignore2(self, PROG_TO_EDICT(self->s.v.owner), 120, other, PROG_TO_EDICT(self->s.v.owner), dtRL);
 		local_explosion = spawn();
@@ -1198,19 +1203,17 @@ void T_MissileTouch(void)
 
 		if ((int)self->s.v.flags & FL_GODMODE)
 		{
-			delay = (vlen(diff) / vlen(self->s.v.velocity));
 			local_explosion->s.v.flags = (int)self->s.v.flags | FL_GODMODE;
-			delay -= 0.038;
 		}
 		else
 		{
 			VectorScale(self->s.v.velocity, g_globalvars.time - self->rad_time, traveled);
 			VectorAdd(self->oldangles, traveled, self->oldangles);
 			VectorSubtract(self->s.v.origin, self->oldangles, diff);
-
-			delay = (vlen(diff) / vlen(self->s.v.velocity));
-			delay -= 0.038;
 		}
+
+		speed = vlen(self->s.v.velocity);
+		delay = (caught_up && (speed > 0)) ? ((vlen(diff) / speed) - 0.038) : 0;
 
 		local_explosion->gravity = g_globalvars.time - time_corrected;
 
