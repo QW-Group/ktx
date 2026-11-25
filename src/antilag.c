@@ -494,6 +494,15 @@ void antilag_updateworld(void)
 	}
 }
 
+/*
+ * Move an entity to where it was at goal_time.
+ *
+ * The caller must have stored the entity's present origin and velocity in
+ * held_origin and held_velocity. Where the goal lies past the newest logged
+ * position, the answer is worked out from the present, and the entity's own
+ * origin is no use for that: the projectile catch-up rewinds the same entity
+ * once per step, so it has usually been moved already.
+ */
 void antilag_lagmove(antilag_t *data, float goal_time)
 {
 	float seek_time, under_time, over_time, frac;
@@ -555,7 +564,7 @@ void antilag_lagmove(antilag_t *data, float goal_time)
 			frac = (goal_time - over_time) / (g_globalvars.time - over_time);
 			frac = min(frac, 1);
 
-			VectorSubtract(owner->s.v.origin, data->rewind_origin[data->rewind_seek], diff);
+			VectorSubtract(data->held_origin, data->rewind_origin[data->rewind_seek], diff);
 
 			if (VectorLength(diff) > 48) // whoops, maybe we teleported?
 			{
@@ -569,7 +578,7 @@ void antilag_lagmove(antilag_t *data, float goal_time)
 	}
 	else // we need to extrapolate to make up for bad connection
 	{
-		VectorMA(data->owner->s.v.origin, min(goal_time - data->owner->client_lastupdated, ANTILAG_MAX_XERP), data->owner->s.v.velocity, lerp_origin);
+		VectorMA(data->held_origin, min(goal_time - data->owner->client_lastupdated, ANTILAG_MAX_XERP), data->held_velocity, lerp_origin);
 	}
 
 	trap_setorigin(NUM_FOR_EDICT(owner), PASSVEC3(lerp_origin));
