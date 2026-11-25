@@ -152,6 +152,22 @@ set_target_properties(${PROJECT_NAME}
 if(BOT_SUPPORT)
 	target_compile_definitions(${PROJECT_NAME} PRIVATE BOT_SUPPORT=1)
 endif()
+
+# Build the client-side QuakeC the server hands to CSQC-capable clients. This
+# needs fteqcc from FTE, which most people will not have, so it is optional:
+# without it the server still builds and simply serves no csprogs.
+find_program(FTEQCC NAMES fteqcc fteqcc64)
+if(FTEQCC)
+	add_custom_target(csprogs ALL
+		COMMAND ${FTEQCC} -srcfile progs.src -O2 -Wall
+		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/qcsrc"
+		BYPRODUCTS "${CMAKE_CURRENT_SOURCE_DIR}/build/csprogs.dat"
+		COMMENT "Compiling csprogs.dat"
+		VERBATIM
+		)
+else()
+	message(STATUS "fteqcc not found, skipping csprogs.dat")
+endif()
 if(FTESV)
 	target_compile_definitions(${PROJECT_NAME} PRIVATE FTESV=1)
 endif()
