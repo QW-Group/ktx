@@ -44,6 +44,8 @@ void player_stand1(void)
 	self->s.v.frame = 17;
 	self->think = (func_t) player_stand1;
 	self->s.v.nextthink = g_globalvars.time + 0.1;
+	self->client_nextthink = 0;
+	self->client_thinkindex = 0;
 
 	self->s.v.weaponframe = 0;
 
