@@ -21,10 +21,33 @@ float time_corrected;
 void antilag_lagmove_all_playeronly(gedict_t *e, float ms);
 float Physics_PushEntity(float push_x, float push_y, float push_z, int failonstartsolid);
 
+/*
+ * Whether the engine answers the "*antilag_rewind" info key. An engine that
+ * does not would look the name up in the player's own userinfo instead, so the
+ * key must not be read without asking first.
+ */
+static qbool antilag_engine_has_rewind(void)
+{
+	static int supported = -1;
+
+	if (supported < 0)
+	{
+		supported = streq(ezinfokey(world, "\\*antilag_rewind"), "yes");
+	}
+
+	return supported;
+}
+
 static qbool antilag_current_rewind(gedict_t *e, float *ms)
 {
-	char *rewind = ezinfokey(e, "antilag_rewind");
+	char *rewind;
 
+	if (!antilag_engine_has_rewind())
+	{
+		return false;
+	}
+
+	rewind = ezinfokey(e, "*antilag_rewind");
 	if (strnull(rewind))
 	{
 		return false;
