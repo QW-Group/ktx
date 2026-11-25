@@ -182,11 +182,10 @@ void WeaponState_Parse(float isnew)
 	WeaponState_RecoverAxeChain();
 
 	/*
-	 * Say once, when the first snapshot lands, that prediction is live. The
-	 * server prints the same for a native client when it acknowledges the
-	 * weapon definitions, and nothing else would tell the player the csprogs is
-	 * doing anything. Receiving this at all means the server has accepted us as
-	 * a predicting client, which is the whole of the handshake we have.
+	 * Say once, when the first snapshot lands, that prediction is live; nothing
+	 * else would tell the player the csprogs is doing anything. Receiving this
+	 * at all means the server has accepted us as a predicting client, which is
+	 * the whole of the handshake we have.
 	 */
 	if (!ws_have_state)
 		print("\nCSQC Antilag ready\n");

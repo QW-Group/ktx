@@ -1,8 +1,6 @@
 /*
- * The weapon definitions, transcribed from WPredict_Initialize() in
- * src/weaponpred_defs.c. This is the same data the server exports over the wire
- * to native EZCSQC clients, which cannot run mod code; we are mod code, so we
- * carry it directly. Keep the two in step.
+ * The weapon definitions. The server does not send these, so keep them in step
+ * with its weapon code.
  *
  * Each weapon is an animation state machine. The server tells us which state is
  * scheduled next (client_thinkindex) and when it runs (client_nextthink); we

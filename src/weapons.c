@@ -73,7 +73,7 @@ void W_FireLightning(void);
 qbool SendEntity_Projectile(int sendflags)
 {
 	// Any client running csqc runs the csprogs this server ships, so it speaks
-	// this schema; a native EZCSQC client reports the same through "csqcactive".
+	// this schema.
 	if (!iKey(other, "csqcactive"))
 	{
 		return false;

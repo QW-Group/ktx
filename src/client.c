@@ -1636,19 +1636,11 @@ qbool CanConnect(void)
  * Whether this client can make use of the weapon state.
  *
  * Running csqc is the whole of it for a client using the csprogs this server
- * ships: the weapon definitions are compiled into it. A native EZCSQC client
- * receives its definitions in a setup message instead and cannot decode a
- * weapon index until it has them, so it still has to acknowledge that first.
- * Waiting also means its revision is known by the time anything is written.
+ * ships: the weapon definitions are compiled into it.
  */
 static qbool WeaponPrediction_ClientReady(gedict_t *p)
 {
-	if (!iKey(p, "csqcactive"))
-	{
-		return false;
-	}
-
-	return !iKey(p, "ezcsqc") || iKey(p, "ezcsqc_ready");
+	return iKey(p, "csqcactive");
 }
 
 qbool WeaponPrediction_SendEntity(int sendflags)
@@ -1685,22 +1677,8 @@ qbool WeaponPrediction_SendEntity(int sendflags)
 	if (sendflags & WEAPONINFO_INDEX)
 	{
 		WriteByte(MSG_CSQC, owner->s.v.impulse);
-		/*
-		 * The respawn generation rides in the weapon index's upper four bits.
-		 * Everything decodes that except a native EZCSQC client announcing
-		 * revision 1, which predates the generation and reads the byte as a
-		 * plain index; it would misread every weapon after the first respawn.
-		 * A csqc client sends no revision at all, and its csprogs always
-		 * decodes the generation, so the absence of "ezcsqc" means packed.
-		 */
-		if (!iKey(owner, "ezcsqc") || iKey(owner, "ezcsqc_ready") >= 2)
-		{
-			WriteByte(MSG_CSQC, (owner->weapon_generation << WEAPONINFO_GENERATION_SHIFT) | ((int)owner->weapon_index & WEAPONINFO_WEAPON_MASK));
-		}
-		else
-		{
-			WriteByte(MSG_CSQC, owner->weapon_index);
-		}
+		// The respawn generation rides in the weapon index's upper four bits.
+		WriteByte(MSG_CSQC, (owner->weapon_generation << WEAPONINFO_GENERATION_SHIFT) | ((int)owner->weapon_index & WEAPONINFO_WEAPON_MASK));
 	}
 	if (sendflags & WEAPONINFO_AMMO_SHELLS)
 	{
@@ -1758,12 +1736,6 @@ void WeaponPrediction_MarkSendFlags(void)
 		{
 			return;
 		}
-	}
-
-	if (!wep->cnt2 && iKey(self, "ezcsqc"))
-	{
-		WPredict_SendDefinitionsTo(self);
-		wep->cnt2 = 1;
 	}
 
 	if (!WeaponPrediction_ClientReady(self))
@@ -1868,14 +1840,8 @@ void WeaponPrediction_CreateEnt(void)
 	wep_values->client_predflags = -1;
 	wep_values->client_ping = -1;
 	wep_values->cnt = 0;
-	wep_values->cnt2 = 0;
 	ExtFieldSetSendEntity(wep_values, (func_t)WeaponPrediction_SendEntity);
 	ExtFieldSetPvsFlags(wep_values, 3);
-	if (iKey(self, "ezcsqc"))
-	{
-		WPredict_SendDefinitionsTo(self);
-		wep_values->cnt2 = 1;
-	}
 	if (WeaponPrediction_ClientReady(self))
 	{
 		SetSendNeeded(wep_values, 0xFFFFFF, NUM_FOR_EDICT(self));

@@ -492,8 +492,6 @@ void KTX_RegisterStats(void);
 void KTX_UpdateStats(void);
 
 extern float time_corrected;
-void WPredict_Initialize(void);
-void WPredict_SendDefinitionsTo(gedict_t *player);
 void UpdateProjectileSendNeeded(void);
 void antilag_lagmove(antilag_t *data, float goal_time);
 void antilag_lagmove_all(gedict_t *e, float goal_time);

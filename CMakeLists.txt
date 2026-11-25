@@ -137,7 +137,6 @@ set(SRC_COMMON
 	"${DIR_SRC}/triggers.c"
 	"${DIR_SRC}/vip.c"
 	"${DIR_SRC}/vote.c"
-	"${DIR_SRC}/weaponpred_defs.c"
 	"${DIR_SRC}/weapons.c"
 	"${DIR_SRC}/world.c"
 	)

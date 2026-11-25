@@ -107,9 +107,7 @@ const float TRACE_WORLD_ONLY	= 254;
 // ==========================================================================
 // Weapon definition flags
 //
-// These mirror the server's WEPPREDANIM_* bits. The server also has a
-// MOREBYTES marker that only exists to frame its byte stream; it has no
-// meaning here and is deliberately absent.
+// Set on the animation states in weapon_table.qc.
 // ==========================================================================
 
 enumflags
