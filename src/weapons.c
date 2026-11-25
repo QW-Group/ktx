@@ -81,6 +81,9 @@ qbool SendEntity_Projectile(int sendflags)
 
 	WriteByte(MSG_CSQC, EZCSQC_PROJECTILE);
 
+	// A first send arrives with every bit set, also those that mean nothing here.
+	sendflags &= PROJECTILE_INITIAL;
+
 	if (self->pos1[0] == 0 && self->pos1[1] == 0 && self->pos1[2] == 0)
 	{
 		sendflags &= ~PROJECTILE_SPAWN_ORIGIN;
