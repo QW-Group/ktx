@@ -123,7 +123,7 @@ jobs:
       - name: Build
         run: |
           ./build_cmake.sh csprogs
-          mv build/csprogs/csprogs.dat ..
+          mv build/csprogs/csprogs.dat build/csprogs/csprogs.lno ..
         working-directory: ktx
 
       - uses: actions/upload-artifact@v4
@@ -258,12 +258,12 @@ jobs:
           # releases:
           #  upload/releases/latest/$os/$arch/$filename
           #  upload/releases/$tag/$os/$arch/$filename
-          # csprogs.dat is the same for every $os and $arch, and goes beside
-          # their directories:
-          #  upload/snapshots/latest/csprogs.dat
-          #  upload/snapshots/$prefix_csprogs.dat
-          #  upload/releases/latest/csprogs.dat
-          #  upload/releases/$tag/csprogs.dat
+          # csprogs.dat and csprogs.lno are the same for every $os and $arch,
+          # and go beside their directories:
+          #  upload/snapshots/latest/csprogs.{dat,lno}
+          #  upload/snapshots/$prefix_csprogs.{dat,lno}
+          #  upload/releases/latest/csprogs.{dat,lno}
+          #  upload/releases/$tag/csprogs.{dat,lno}
           
           upload_dir="$(pwd)/upload"
           if [[ $GITHUB_REF == refs/tags/* ]]; then
