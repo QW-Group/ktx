@@ -70,6 +70,128 @@ void W_Precache(void)
 void W_FireSpikes(float ox);
 void W_FireLightning(void);
 
+qbool SendEntity_Projectile(int sendflags)
+{
+	// Any client running csqc runs the csprogs this server ships, so it speaks
+	// this schema.
+	if (!iKey(other, "csqcactive"))
+	{
+		return false;
+	}
+
+	WriteByte(MSG_CSQC, EZCSQC_PROJECTILE);
+
+	// A first send arrives with every bit set, also those that mean nothing here.
+	sendflags &= PROJECTILE_INITIAL;
+
+	if (self->pos1[0] == 0 && self->pos1[1] == 0 && self->pos1[2] == 0)
+	{
+		sendflags &= ~PROJECTILE_SPAWN_ORIGIN;
+	}
+
+	WriteByte(MSG_CSQC, sendflags);
+
+	if (sendflags & PROJECTILE_ORIGIN)
+	{
+		WriteCoord(MSG_CSQC, self->s.v.origin[0]);
+		WriteCoord(MSG_CSQC, self->s.v.origin[1]);
+		WriteCoord(MSG_CSQC, self->s.v.origin[2]);
+
+		WriteCoord(MSG_CSQC, self->s.v.velocity[0]);
+		WriteCoord(MSG_CSQC, self->s.v.velocity[1]);
+		WriteCoord(MSG_CSQC, self->s.v.velocity[2]);
+
+		WriteFloat(MSG_CSQC, g_globalvars.time);
+	}
+
+	if (sendflags & PROJECTILE_MODEL)
+	{
+		WriteShort(MSG_CSQC, self->s.v.modelindex);
+		WriteShort(MSG_CSQC, self->s.v.effects);
+	}
+
+	if (sendflags & PROJECTILE_ANGLES)
+	{
+		WriteAngle(MSG_CSQC, self->s.v.angles[0]);
+		WriteAngle(MSG_CSQC, self->s.v.angles[1]);
+		WriteAngle(MSG_CSQC, self->s.v.angles[2]);
+	}
+
+	if (sendflags & PROJECTILE_OWNER)
+	{
+		WriteEntity(MSG_CSQC, PROG_TO_EDICT(self->s.v.owner)); // we only care about the owner if it's a player, otherwise world
+	}
+
+	if (sendflags & PROJECTILE_SPAWN_ORIGIN)
+	{
+		WriteCoord(MSG_CSQC, self->pos1[0]);
+		WriteCoord(MSG_CSQC, self->pos1[1]);
+		WriteCoord(MSG_CSQC, self->pos1[2]);
+	}
+
+	return true;
+}
+
+/*
+ * Whether a newly fired projectile still exists. The antilag catch-up can run
+ * it into something before its fire function has finished with it. Every
+ * projectile sets voided when it explodes, just before it is removed, and the
+ * engine does not touch that field, so it says so on any engine.
+ */
+static qbool ProjectileIsLive(gedict_t *projectile)
+{
+	return projectile && (projectile != world) && !projectile->voided;
+}
+
+/*
+ * Hand a new projectile to CSQC. Only KTX's own antilag needs that: a client
+ * predicts its projectiles and takes the server's one over from the prediction.
+ * In the other modes projectiles stay ordinary entities.
+ */
+static void ScheduleProjectileSendIfLive(gedict_t *projectile)
+{
+	if (cvar("sv_antilag") != 1)
+	{
+		return;
+	}
+
+	if (!ProjectileIsLive(projectile) || !projectile->s.v.modelindex)
+	{
+		return;
+	}
+
+	ExtFieldSetSendEntity(projectile, (func_t)SendEntity_Projectile);
+	SetSendNeeded(projectile, PROJECTILE_INITIAL, 0);
+}
+
+void UpdateProjectileSendNeeded(void)
+{
+	gedict_t *projectile;
+
+	if (cvar("sv_antilag") != 1)
+	{
+		return;
+	}
+
+	for (projectile = world; (projectile = nextent(projectile));)
+	{
+		if (!projectile->isMissile || !projectile->s.v.modelindex || !projectile->SendEntity)
+		{
+			continue;
+		}
+
+		/*
+		 * Grenades bounce under full server physics. The initial CSQC snapshot is
+		 * not enough for clients to reproduce that path, so keep live grenades
+		 * corrected with authoritative origin/velocity/time updates.
+		 */
+		if (streq(projectile->classname, "grenade"))
+		{
+			SetSendNeeded(projectile, PROJECTILE_ORIGIN, 0);
+		}
+	}
+}
+
 /*
  ================
  W_FireAxe
@@ -79,6 +201,8 @@ void W_FireAxe(void)
 {
 	vec3_t source, dest;
 	vec3_t org;
+
+	antilag_lagmove_all_hitscan(self);
 
 	WS_Mark(self, wpAXE);
 
@@ -95,6 +219,7 @@ void W_FireAxe(void)
 	traceline(PASSVEC3(source), PASSVEC3(dest), false, self);
 	if (g_globalvars.trace_fraction == 1.0)
 	{
+		antilag_unmove_all();
 		return;
 	}
 
@@ -110,6 +235,7 @@ void W_FireAxe(void)
 		if (isRACE() && (PROG_TO_EDICT(g_globalvars.trace_ent)->ct == ctPlayer)
 				&& (self != PROG_TO_EDICT(g_globalvars.trace_ent)))
 		{
+			antilag_unmove_all();
 			return;
 		}
 
@@ -152,6 +278,8 @@ void W_FireAxe(void)
 		WriteCoord( MSG_MULTICAST, org[2]);
 		trap_multicast(PASSVEC3(org), MULTICAST_PVS);
 	}
+
+	antilag_unmove_all();
 }
 
 //============================================================================
@@ -555,6 +683,7 @@ void FireBullets(float shotcount, vec3_t dir, float spread_x, float spread_y, fl
 	qbool classic_shotgun = cvar("k_classic_shotgun");
 	qbool non_random_bullets = (k_yawnmode
 			|| (!match_in_progress && self && (self->ct == ctPlayer) && iKey(self, "nrb")));
+	qbool do_antilag = (self->ct == ctPlayer); // monsters fire through here too
 
 	trap_makevectors(self->s.v.v_angle);
 	VectorScale(g_globalvars.v_forward, 10, tmp);
@@ -564,6 +693,11 @@ void FireBullets(float shotcount, vec3_t dir, float spread_x, float spread_y, fl
 
 	ClearMultiDamage();
 	multi_damage_type = deathtype;
+
+	if (do_antilag)
+	{
+		antilag_lagmove_all_hitscan(self);
+	}
 
 	if (cvar("k_instagib"))
 	{
@@ -726,6 +860,11 @@ void FireBullets(float shotcount, vec3_t dir, float spread_x, float spread_y, fl
 		shotcount = shotcount - 1;
 	}
 
+	if (do_antilag)
+	{
+		antilag_unmove_all();
+	}
+
 	ApplyMultiDamage();
 	if (!classic_shotgun)
 	{
@@ -844,7 +983,9 @@ void W_FireShotgun(void)
 	aim(dir);
 	if (cvar("k_instagib"))
 	{
+		antilag_lagmove_all_hitscan(self); // we can do the antilag check out here in instagib since knockback doesn't matter
 		FireInstaBullet(dir, dtSG);
+		antilag_unmove_all();
 	}
 	else
 	{
@@ -950,6 +1091,59 @@ void T_InstaKickback(void)
 	ent_remove(self);
 }
 
+void T_MissileExplode_Antilag(void)
+{
+	gedict_t *own = PROG_TO_EDICT(self->s.v.owner);
+	gedict_t *trace_hit;
+	gedict_t *head;
+	vec3_t trav_off;
+
+	if ((int)self->s.v.flags & FL_GODMODE)
+	{
+		traceline(PASSVEC3(self->oldangles), PASSVEC3(self->s.v.origin), true, self);
+		trap_setorigin(NUM_FOR_EDICT(self), PASSVEC3(g_globalvars.trace_endpos));
+
+		trace_hit = self->oldenemy;
+		if (trace_hit != NULL)
+		{
+			if (trace_hit->antilag_data != NULL && trace_hit->s.v.solid == SOLID_BSP)
+			{
+				// add platform travel velocity * delay to the rocket position
+				// this is a hack that could misbehave in certain circumstances
+				VectorScale(trace_hit->s.v.velocity, self->gravity + 0.040, trav_off);
+				VectorAdd(self->s.v.origin, trav_off, trav_off);
+				trap_setorigin(NUM_FOR_EDICT(self), PASSVEC3(trav_off));
+			}
+		}
+	}
+
+	// Racers are not solid, so the search below would not find the owner. Do
+	// what T_RadiusDamage() does in race.
+	if (isRACE())
+	{
+		own->s.v.solid = SOLID_BBOX;
+		T_RadiusDamageApply(self, own, own, 120, dtRL);
+		own->s.v.solid = SOLID_NOT;
+		ent_remove(self);
+
+		return;
+	}
+
+	// this is awful, but it's the easiest way to exactly replicate the crappy findradius cropping of the splash radius
+	head = trap_findradius(world, self->s.v.origin, 160);
+
+	while (head)
+	{
+		if (head == own)
+		{
+			T_RadiusDamageApply(self, own, head, 120, dtRL);
+		}
+
+		head = trap_findradius(head, self->s.v.origin, 160);
+	}
+	ent_remove(self);
+}
+
 void T_MissileTouch(void)
 {
 	float damg;
@@ -1009,7 +1203,62 @@ void T_MissileTouch(void)
 
 	// don't do radius damage to the other, because all the damage
 	// was done in the impact
-	T_RadiusDamage(self, PROG_TO_EDICT(self->s.v.owner), 120, other, dtRL);
+	if (cvar("sv_antilag") == 1) // if this is an anti lag rocket, ignore our owner
+	{
+		float delay, speed;
+		vec3_t diff, traveled;
+		gedict_t *local_explosion;
+		gedict_t *oself;
+		// The catch-up leaves the rocket's start position in oldangles, and the
+		// delay below is measured from it. A rocket that was not caught up, fired
+		// in another antilag mode or by a monster, has none and is not ahead of
+		// anything.
+		qbool caught_up = !VectorCompareF(self->oldangles, 0, 0, 0);
+
+		T_RadiusDamage_Ignore2(self, PROG_TO_EDICT(self->s.v.owner), 120, other, PROG_TO_EDICT(self->s.v.owner), dtRL);
+		local_explosion = spawn();
+
+		VectorSubtract(self->s.v.origin, self->oldangles, diff);
+
+		trap_setorigin(NUM_FOR_EDICT(local_explosion), PASSVEC3(self->s.v.origin));
+		VectorCopy(self->oldangles, local_explosion->oldangles);
+		local_explosion->s.v.owner = self->s.v.owner;
+		local_explosion->oldenemy = other;
+
+		if ((int)self->s.v.flags & FL_GODMODE)
+		{
+			local_explosion->s.v.flags = (int)self->s.v.flags | FL_GODMODE;
+		}
+		else
+		{
+			VectorScale(self->s.v.velocity, g_globalvars.time - self->rad_time, traveled);
+			VectorAdd(self->oldangles, traveled, self->oldangles);
+			VectorSubtract(self->s.v.origin, self->oldangles, diff);
+		}
+
+		speed = vlen(self->s.v.velocity);
+		delay = (caught_up && (speed > 0)) ? ((vlen(diff) / speed) - 0.038) : 0;
+
+		local_explosion->gravity = g_globalvars.time - time_corrected;
+
+		if (delay > 0.013)
+		{
+			local_explosion->s.v.nextthink = g_globalvars.time + delay;
+			local_explosion->think = (func_t)T_MissileExplode_Antilag;
+		}
+		else
+		{
+			delay = 0;
+			oself = self;
+			self = local_explosion;
+			T_MissileExplode_Antilag();
+			self = oself;
+		}
+	}
+	else
+	{
+		T_RadiusDamage(self, PROG_TO_EDICT(self->s.v.owner), 120, other, dtRL);
+	}
 
 //  sound (self, CHAN_WEAPON, "weapons/r_exp3.wav", 1, ATTN_NORM);
 	normalize(self->s.v.velocity, tmp);
@@ -1089,13 +1338,27 @@ void W_FireRocket(void)
 	setorigin(newmis, self->s.v.origin[0] + g_globalvars.v_forward[0] * 8,
 				self->s.v.origin[1] + g_globalvars.v_forward[1] * 8,
 				self->s.v.origin[2] + g_globalvars.v_forward[2] * 8 + 16);
+	VectorCopy(newmis->s.v.origin, newmis->pos1);
 
 	// midair 
 	VectorCopy(self->s.v.origin, newmis->s.v.oldorigin);
+	newmis->rad_time = g_globalvars.time;
+
+	antilag_lagmove_all_proj(self, newmis);
+	ScheduleProjectileSendIfLive(newmis);
 
 #ifdef BOT_SUPPORT
-	BotsRocketSpawned(newmis);
+	if (ProjectileIsLive(newmis))
+	{
+		BotsRocketSpawned(newmis);
+	}
 #endif
+
+	if (cvar("sv_antilag") == 1)
+	{
+		g_globalvars.newmis = EDICT_TO_PROG(world);
+		newmis = world;
+	}
 }
 
 /*
@@ -1131,7 +1394,18 @@ void LightningHit(gedict_t *from, float damage)
  */
 void LightningDamage(vec3_t p1, vec3_t p2, gedict_t *from, float damage)
 {
+	qbool do_antilag = (from->ct == ctPlayer); // monsters fire through here too
+	if (do_antilag)
+	{
+		antilag_lagmove_all_hitscan(from);
+	}
+
 	traceline(PASSVEC3(p1), PASSVEC3(p2), false, from);
+
+	if (do_antilag)
+	{
+		antilag_unmove_all();
+	}
 
 	if (PROG_TO_EDICT(g_globalvars.trace_ent)->s.v.takedamage)
 	{
@@ -1211,7 +1485,9 @@ void W_FireLightning(void)
 					return;
 				}
 
+				antilag_lagmove_all_hitscan(self);
 				T_RadiusDamage(self, self, 35 * cells, world, dtLG_DIS);
+				antilag_unmove_all();
 
 				return;
 			}
@@ -1228,7 +1504,9 @@ void W_FireLightning(void)
 				return;
 			}
 
+			antilag_lagmove_all_hitscan(self);
 			T_RadiusDamage(self, self, 35 * cells, world, dtLG_DIS);
+			antilag_unmove_all();
 
 			return;
 		}
@@ -1444,10 +1722,24 @@ void W_FireGrenade(void)
 	setmodel(newmis, "progs/grenade.mdl");
 	setsize(newmis, 0, 0, 0, 0, 0, 0);
 	setorigin(newmis, PASSVEC3(self->s.v.origin));
+	VectorCopy(newmis->s.v.origin, newmis->pos1);
+
+	antilag_lagmove_all_proj_bounce(self, newmis);
+	ScheduleProjectileSendIfLive(newmis);
 
 #ifdef BOT_SUPPORT
-	BotsGrenadeSpawned(newmis);
+	if (ProjectileIsLive(newmis))
+	{
+		BotsGrenadeSpawned(newmis);
+	}
 #endif
+
+	// we don't want to do newmis stuff, antilag 1 takes care of it for us
+	if (cvar("sv_antilag") == 1)
+	{
+		g_globalvars.newmis = EDICT_TO_PROG(world);
+		newmis = world;
+	}
 }
 
 //=============================================================================
@@ -1479,6 +1771,7 @@ void launch_spike(vec3_t org, vec3_t dir)
 	setmodel(newmis, "progs/spike.mdl");
 	setsize(newmis, 0, 0, 0, 0, 0, 0);
 	setorigin(newmis, PASSVEC3(org));
+	VectorCopy(newmis->s.v.origin, newmis->pos1);
 
 	// Yawnmode: spikes velocity is 1800 instead of 1000
 	// - Molgrum
@@ -1652,7 +1945,7 @@ void W_FireSuperSpikes(void)
 	self->ps.wpn[wpSNG].attacks++;
 
 	sound(self, CHAN_WEAPON, "weapons/spike2.wav", 1, ATTN_NORM);
-	self->attack_finished = g_globalvars.time + 0.2;
+	self->attack_finished = self->client_time + 0.2;
 
 	if (match_in_progress == 2)
 	{
@@ -1673,6 +1966,15 @@ void W_FireSuperSpikes(void)
 	setsize(newmis, 0, 0, 0, 0, 0, 0);
 	g_globalvars.msg_entity = EDICT_TO_PROG(self);
 	WriteByte( MSG_ONE, SVC_SMALLKICK);
+
+	antilag_lagmove_all_proj(self, newmis);
+	ScheduleProjectileSendIfLive(newmis);
+
+	if (cvar("sv_antilag") == 1)
+	{
+		g_globalvars.newmis = EDICT_TO_PROG(world);
+		newmis = world;
+	}
 }
 
 void W_FireSpikes(float ox)
@@ -1711,7 +2013,7 @@ void W_FireSpikes(float ox)
 	self->ps.wpn[wpNG].attacks++;
 
 	sound(self, CHAN_WEAPON, "weapons/rocket1i.wav", 1, ATTN_NORM);
-	self->attack_finished = g_globalvars.time + 0.2;
+	self->attack_finished = self->client_time + 0.2;
 
 	if (match_in_progress == 2)
 	{
@@ -1730,6 +2032,15 @@ void W_FireSpikes(float ox)
 
 	g_globalvars.msg_entity = EDICT_TO_PROG(self);
 	WriteByte( MSG_ONE, SVC_SMALLKICK);
+
+	antilag_lagmove_all_proj(self, newmis);
+	ScheduleProjectileSendIfLive(newmis);
+
+	if (cvar("sv_antilag") == 1)
+	{
+		g_globalvars.newmis = EDICT_TO_PROG(world);
+		newmis = world;
+	}
 }
 
 /*
@@ -1816,6 +2127,7 @@ void W_SetCurrentAmmo(void)
 		case IT_AXE:
 			self->s.v.currentammo = 0;
 			self->weaponmodel = "progs/v_axe.mdl";
+			self->weapon_index = 1;
 			self->s.v.weaponframe = 0;
 			if (vw_enabled)
 			{
@@ -1835,6 +2147,7 @@ void W_SetCurrentAmmo(void)
 				self->weaponmodel = "progs/v_shot.mdl";
 			}
 
+			self->weapon_index = 2;
 			self->s.v.weaponframe = 0;
 			items |= IT_SHELLS;
 			if (vw_enabled)
@@ -1847,6 +2160,7 @@ void W_SetCurrentAmmo(void)
 		case IT_SUPER_SHOTGUN:
 			self->s.v.currentammo = self->s.v.ammo_shells;
 			self->weaponmodel = "progs/v_shot2.mdl";
+			self->weapon_index = 3;
 			self->s.v.weaponframe = 0;
 			items |= IT_SHELLS;
 			if (vw_enabled)
@@ -1859,6 +2173,7 @@ void W_SetCurrentAmmo(void)
 		case IT_NAILGUN:
 			self->s.v.currentammo = self->s.v.ammo_nails;
 			self->weaponmodel = "progs/v_nail.mdl";
+			self->weapon_index = 4;
 			self->s.v.weaponframe = 0;
 			items |= IT_NAILS;
 			if (vw_enabled)
@@ -1871,6 +2186,7 @@ void W_SetCurrentAmmo(void)
 		case IT_SUPER_NAILGUN:
 			self->s.v.currentammo = self->s.v.ammo_nails;
 			self->weaponmodel = "progs/v_nail2.mdl";
+			self->weapon_index = 5;
 			self->s.v.weaponframe = 0;
 			items |= IT_NAILS;
 			if (vw_enabled)
@@ -1890,6 +2206,7 @@ void W_SetCurrentAmmo(void)
 				self->s.v.currentammo = self->s.v.ammo_rockets;
 			}
 			self->weaponmodel = "progs/v_rock.mdl";
+			self->weapon_index = 6;
 			self->s.v.weaponframe = 0;
 			items |= IT_ROCKETS;
 			if (vw_enabled)
@@ -1902,6 +2219,7 @@ void W_SetCurrentAmmo(void)
 		case IT_ROCKET_LAUNCHER:
 			self->s.v.currentammo = self->s.v.ammo_rockets;
 			self->weaponmodel = "progs/v_rock2.mdl";
+			self->weapon_index = 7;
 			self->s.v.weaponframe = 0;
 			items |= IT_ROCKETS;
 			if (vw_enabled)
@@ -1914,6 +2232,7 @@ void W_SetCurrentAmmo(void)
 		case IT_LIGHTNING:
 			self->s.v.currentammo = self->s.v.ammo_cells;
 			self->weaponmodel = "progs/v_light.mdl";
+			self->weapon_index = 8;
 			self->s.v.weaponframe = 0;
 			items |= IT_CELLS;
 			if (vw_enabled)
@@ -1934,6 +2253,7 @@ void W_SetCurrentAmmo(void)
 				self->weaponmodel = "progs/v_axe.mdl";
 			}
 
+			self->weapon_index = 0;
 			self->s.v.weaponframe = 0;
 			if (vw_enabled)
 			{
@@ -1945,6 +2265,7 @@ void W_SetCurrentAmmo(void)
 		default:
 			self->s.v.currentammo = 0;
 			self->weaponmodel = "";
+			self->weapon_index = 0;
 			self->s.v.weaponframe = 0;
 			self->vw_index = 0;
 			break;
@@ -2092,10 +2413,27 @@ int W_CheckNoAmmo(void)
  An attack impulse can be triggered now
  ============
  */
+/*
+ * Which of the four swing animations an axe attack at this time shows.
+ *
+ * A predicting client has to reach the same answer, so this is a hash of the
+ * player's weapon clock and not a random number. It sticks to arithmetic that
+ * QuakeC can reproduce with floats alone: one single-precision multiply, then
+ * shifts and a mask on a whole number. qcsrc/weapon_state.qc has the other
+ * copy.
+ */
+static int W_AxeSwing(float client_time)
+{
+	// volatile, so that the product is rounded to a float before it is
+	// truncated, also on a build that keeps intermediates in wider registers
+	volatile float scaled = client_time * 1000.0f;
+	int ms = (int)scaled;
+
+	return (ms + (ms >> 2) + (ms >> 5) + (ms >> 9)) & 3;
+}
+
 void W_Attack(void)
 {
-	float r;
-
 	if (!W_CheckNoAmmo())
 	{
 		return;
@@ -2111,13 +2449,13 @@ void W_Attack(void)
 		case IT_AXE:
 			if (self->ctf_flag & CTF_RUNE_HST)
 			{
-				self->attack_finished = g_globalvars.time + 0.5
+				self->attack_finished = self->client_time + 0.5
 						- (cvar("k_ctf_rune_power_hst") / 10);
 				HasteSound(self);
 			}
 			else
 			{
-				self->attack_finished = g_globalvars.time + 0.5;
+				self->attack_finished = self->client_time + 0.5;
 			}
 
 			// crt - no axe sound for spec
@@ -2126,22 +2464,23 @@ void W_Attack(void)
 				sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
 			}
 
-			r = g_random();
-			if (r < 0.25)
+			switch (W_AxeSwing(self->client_time))
 			{
-				player_axe1();
-			}
-			else if (r < 0.5)
-			{
-				player_axeb1();
-			}
-			else if (r < 0.75)
-			{
-				player_axec1();
-			}
-			else
-			{
-				player_axed1();
+				case 0:
+					player_axe1();
+					break;
+
+				case 1:
+					player_axeb1();
+					break;
+
+				case 2:
+					player_axec1();
+					break;
+
+				default:
+					player_axed1();
+					break;
 			}
 
 			break;
@@ -2150,7 +2489,7 @@ void W_Attack(void)
 			player_shot1();
 			if (self->ctf_flag & CTF_RUNE_HST)
 			{
-				self->attack_finished = g_globalvars.time + 0.5
+				self->attack_finished = self->client_time + 0.5
 						- (cvar("k_ctf_rune_power_hst") / 10);
 				HasteSound(self);
 			}
@@ -2158,15 +2497,15 @@ void W_Attack(void)
 			{
 				if (cvar("k_instagib") == 1)
 				{
-					self->attack_finished = g_globalvars.time + 1.2;
+					self->attack_finished = self->client_time + 1.2;
 				}
 				else if (cvar("k_instagib") == 2)
 				{
-					self->attack_finished = g_globalvars.time + 0.7;
+					self->attack_finished = self->client_time + 0.7;
 				}
 				else
 				{
-					self->attack_finished = g_globalvars.time + 0.5;
+					self->attack_finished = self->client_time + 0.5;
 				}
 			}
 
@@ -2177,25 +2516,23 @@ void W_Attack(void)
 			player_shot1();
 			if (self->ctf_flag & CTF_RUNE_HST)
 			{
-				self->attack_finished = g_globalvars.time + 0.5
+				self->attack_finished = self->client_time + 0.5
 						- (cvar("k_ctf_rune_power_hst") / 20);
 				HasteSound(self);
 			}
 			else
 			{
-				self->attack_finished = g_globalvars.time + (k_yawnmode ? 0.8 : 0.7);
+				self->attack_finished = self->client_time + (k_yawnmode ? 0.8 : 0.7);
 			}
 
 			W_FireSuperShotgun();
 			break;
 
 		case IT_NAILGUN:
-			self->s.v.ltime = g_globalvars.time;
 			player_nail1();
 			break;
 
 		case IT_SUPER_NAILGUN:
-			self->s.v.ltime = g_globalvars.time;
 			player_nail1();
 			break;
 
@@ -2203,13 +2540,13 @@ void W_Attack(void)
 			player_rocket1();
 			if (self->ctf_flag & CTF_RUNE_HST)
 			{
-				self->attack_finished = g_globalvars.time + 0.5
+				self->attack_finished = self->client_time + 0.5
 						- (cvar("k_ctf_rune_power_hst") / 10);
 				HasteSound(self);
 			}
 			else
 			{
-				self->attack_finished = g_globalvars.time + 0.6;
+				self->attack_finished = self->client_time + 0.6;
 			}
 
 			W_FireGrenade();
@@ -2219,22 +2556,21 @@ void W_Attack(void)
 			player_rocket1();
 			if (self->ctf_flag & CTF_RUNE_HST)
 			{
-				self->attack_finished = g_globalvars.time + 0.5
+				self->attack_finished = self->client_time + 0.5
 						- (cvar("k_ctf_rune_power_hst") / 20);
 				HasteSound(self);
 			}
 			else
 			{
-				self->attack_finished = g_globalvars.time + 0.8;
+				self->attack_finished = self->client_time + 0.8;
 			}
 
 			W_FireRocket();
 			break;
 
 		case IT_LIGHTNING:
-			self->attack_finished = g_globalvars.time + 0.1;
+			self->attack_finished = self->client_time + 0.1;
 			sound(self, CHAN_AUTO, "weapons/lstart.wav", 1, ATTN_NORM);
-			self->s.v.ltime = g_globalvars.time;
 			player_light1();
 			break;
 
@@ -2248,7 +2584,7 @@ void W_Attack(void)
 				player_chain1();
 			}
 
-			self->attack_finished = g_globalvars.time + 0.1;
+			self->attack_finished = self->client_time + 0.1;
 			break;
 	}
 }
@@ -2372,7 +2708,7 @@ qbool W_ChangeWeapon(int wp)
 {
 	int it, am, fl = 0;
 
-	if ((g_globalvars.time < self->attack_finished) && wp != 22)
+	if ((self->client_time < self->attack_finished) && wp != 22)
 	{
 		return false;
 	}
@@ -2508,7 +2844,7 @@ qbool CycleWeaponCommand(void)
 {
 	int i, it, am;
 
-	if (g_globalvars.time < self->attack_finished)
+	if (self->client_time < self->attack_finished)
 	{
 		return false;
 	}
@@ -2607,7 +2943,7 @@ qbool CycleWeaponReverseCommand(void)
 {
 	int i, it, am;
 
-	if (g_globalvars.time < self->attack_finished)
+	if (self->client_time < self->attack_finished)
 	{
 		return false;
 	}
@@ -2804,71 +3140,57 @@ void can_prewar_msg(char *msg)
 	}
 }
 
-// if fire == false then can_prewar is called for jump
-qbool can_prewar(qbool fire)
+// Why the player may not fire before the match, or NULL if they may.
+// If fire == false the question is about jumping.
+char *prewar_denied(qbool fire)
 {
-	int k_prewar;
-
 	if (match_in_progress == 2)
 	{
-		return true;  // u can fire/jump
+		return NULL;
 	}
 
-	k_prewar = cvar("k_prewar");
-
-	switch (k_prewar)
+	switch ((int)cvar("k_prewar"))
 	{
 		case 1:
-			goto captains;
-			// probably u can fire/jump
+			break;
 
 		case 2:
-			if (self->ready)
+			if (!self->ready)
 			{
-				goto captains;
+				return fire ? "type ready to enable fire" : "type ready to enable jumps";
 			}
 
-			// probably u can jump/fire if ready
-			if (fire)
-			{
-				can_prewar_msg(redtext("type ready to enable fire"));
-			}
-			else
-			{
-				can_prewar_msg(redtext("type ready to enable jumps"));
-			}
-
-			return false; // u can't fire/jump if _not_ ready
+			break;
 
 		case 0:
 		default:
 			if (fire)
-			{  // u can't fire
-				can_prewar_msg(redtext("can't fire, prewar is disabled"));
-
-				return false;
+			{
+				return "can't fire, prewar is disabled";
 			}
 
-			goto captains;
-			// probably u can jump
+			break;
 	}
 
-captains:
-
-	if (k_captains != 2)
+	if (fire && (k_captains == 2))
 	{
-		return true; // u can fire/jump
+		return "can't fire until in captains mode";
 	}
 
-	if (fire)
+	return NULL;
+}
+
+// if fire == false then can_prewar is called for jump
+qbool can_prewar(qbool fire)
+{
+	char *why = prewar_denied(fire);
+
+	if (why)
 	{
-		// u can't fire
-		can_prewar_msg(redtext("can't fire until in captains mode"));
-
-		return false;
+		can_prewar_msg(redtext(why));
 	}
 
-	return true; // u can jump
+	return !why;
 }
 
 /*
@@ -2880,8 +3202,18 @@ captains:
  */
 void W_WeaponFrame(void)
 {
-	if ((self->spawn_time + 0.05) > g_globalvars.time)
+	// Measured on the player's weapon clock like every other weapon delay, so
+	// that a predicting client can tell exactly when it ends.
+	if ((self->client_spawn_time + 0.05) > self->client_time)
 	{
+		// Backup usercmds may carry old weapon impulses; preserve only usable selections.
+		if ((((int)self->s.v.impulse >= 1) && ((int)self->s.v.impulse <= 8)) || (int)self->s.v.impulse == 22)
+		{
+			if (!W_CanSwitch((int)self->s.v.impulse, false))
+			{
+				self->s.v.impulse = 0;
+			}
+		}
 		return; // discard +attack till 50 ms after respawn, like ktpro 
 	}
 
@@ -2916,10 +3248,11 @@ void W_WeaponFrame(void)
 
 	if (!race_weapon_allowed(self))
 	{
+		self->client_predflags = PRDFL_FORCEOFF;
 		return;
 	}
 
-	if (g_globalvars.time < self->attack_finished)
+	if (self->client_time < self->attack_finished)
 	{
 		return;
 	}

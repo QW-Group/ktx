@@ -292,6 +292,7 @@ void RaceCountdownChange(float t)
 // hard coded default settings for RACE
 static char race_settings[] =
 	"sv_silentrecord 1\n"
+		"sv_antilag 0\n"
 	"deathmatch 4\n"
 	"srv_practice_mode 1\n"
 	"lock_practice 1\n"

@@ -102,6 +102,37 @@ jobs:
             qwprogs.*
           compression-level: 9
 
+  # csprogs.dat is the same file for every target, so it is built once, here.
+  csprogs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container:
+      image: "debian:stable"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: ktx
+
+      - name: Prepare Build Environemnt
+        run: |
+          apt-get -qq update
+          apt-get -qq install build-essential cmake ninja-build git
+
+      # No fteqcc is installed, so the build fetches and builds the one it pins.
+      - name: Build
+        run: |
+          ./build_cmake.sh csprogs
+          mv build/csprogs/csprogs.dat build/csprogs/csprogs.lno ..
+        working-directory: ktx
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: csprogs
+          path: |
+            csprogs.*
+          compression-level: 9
+
   verify-macos:
     runs-on: macos-latest
     timeout-minutes: 10
@@ -113,7 +144,7 @@ jobs:
 
       - name: Build
         run: |
-          cmake -B builddir -S . -G Xcode -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DSANITIZE=ON
+          cmake -B builddir -S . -G Xcode -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DSANITIZE=ON -DBUILD_CSPROGS=OFF
           cmake --build builddir --config Release --parallel
 
   verify-msvc:
@@ -127,7 +158,7 @@ jobs:
 
       - name: Build
         run: |
-          cmake -B builddir -S . -G "Visual Studio 18 2026"
+          cmake -B builddir -S . -G "Visual Studio 18 2026" -DBUILD_CSPROGS=OFF
           cmake --build builddir --config Release --parallel
 
   verify-no-bot-support:
@@ -141,11 +172,25 @@ jobs:
 
       - name: Build
         run: |
-          cmake -B builddir -S . -DBOT_SUPPORT=OFF
+          cmake -B builddir -S . -DBOT_SUPPORT=OFF -DBUILD_CSPROGS=OFF
+          cmake --build builddir --config Release --parallel
+
+  verify-no-csqc-support:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: ammaraskar/gcc-problem-matcher@0.3.0
+
+      - name: Build
+        run: |
+          cmake -B builddir -S . -DCSQC_SUPPORT=OFF
           cmake --build builddir --config Release --parallel
 
   upload:
-    needs: build
+    needs: [build, csprogs]
     timeout-minutes: 10
     runs-on: ubuntu-latest
     if: github.repository == 'QW-Group/ktx' && ((github.event_name == 'push' && github.ref == 'refs/heads/master') || github.event_name == 'release')
@@ -168,13 +213,13 @@ jobs:
         run: |
           dist_dir=$(pwd)/dist
           mkdir $dist_dir
-          find qwprogs* -type f -exec sha256sum {} \; > "${dist_dir}/checksums.txt"
+          find qwprogs* csprogs -type f -exec sha256sum {} \; > "${dist_dir}/checksums.txt"
 
           # Reset timestamp to time of tag
-          find qwprogs* -print0 | xargs -0r touch --date="${RELEASE_DATE}"
+          find qwprogs* csprogs -print0 | xargs -0r touch --date="${RELEASE_DATE}"
           touch --date="${RELEASE_DATE}" "${dist_dir}/checksums.txt"
 
-          for target in qwprogs*; do
+          for target in qwprogs* csprogs; do
             (cd $target; zip -o -9 "${dist_dir}/${target}.zip" *)
           done
           echo "GITHUB_ARTIFACTS=$dist_dir" >> $GITHUB_ENV
@@ -213,6 +258,12 @@ jobs:
           # releases:
           #  upload/releases/latest/$os/$arch/$filename
           #  upload/releases/$tag/$os/$arch/$filename
+          # csprogs.dat and csprogs.lno are the same for every $os and $arch,
+          # and go beside their directories:
+          #  upload/snapshots/latest/csprogs.{dat,lno}
+          #  upload/snapshots/$prefix_csprogs.{dat,lno}
+          #  upload/releases/latest/csprogs.{dat,lno}
+          #  upload/releases/$tag/csprogs.{dat,lno}
           
           upload_dir="$(pwd)/upload"
           if [[ $GITHUB_REF == refs/tags/* ]]; then
@@ -240,6 +291,15 @@ jobs:
             (cd "${main_target_dir}" && md5sum * > "${prefix}qwprogs.md5")
             (cd "${latest_target_dir}" && md5sum * > "qwprogs.md5")
           done
+
+          mkdir -p "${main_dir}" "${latest_dir}"
+          for src in $(find csprogs -type f); do
+            filename=$(basename "${src}")
+            cp "${src}" "${main_dir}/${prefix}${filename}"
+            cp "${src}" "${latest_dir}/${filename}"
+          done
+          (cd "${main_dir}" && md5sum "${prefix}"csprogs.* > "${prefix}csprogs.md5")
+          (cd "${latest_dir}" && md5sum csprogs.* > "csprogs.md5")
 
           # Reset timestamp to time of tag
           find "${upload_dir}" -print0 | xargs -0r touch --date="${RELEASE_DATE}"

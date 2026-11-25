@@ -773,6 +773,53 @@ typedef struct fb_entvars_s {
 } fb_entvars_t;
 #endif
 
+#define ANTILAG_REWIND_MAXHITSCAN	 0.250
+#define ANTILAG_REWIND_MAXPROJECTILE 0.080
+#define ANTILAG_MAX_PREDICTION		 0.02
+#define ANTILAG_MAX_XERP			 0.02
+#define ANTILAG_NEWMIS_TIME			 0.05 // the flight the engine gives a new missile at once
+#define ANTILAG_MAXSTATES 40
+#define ANTILAG_MAXEDICTS 256
+#define SENDFLAGS_ALL				 0xFFFFFF
+
+#define WEAPONINFO_INDEX			 (1 << 0)
+#define WEAPONINFO_AMMO_SHELLS		 (1 << 1)
+#define WEAPONINFO_AMMO_NAILS		 (1 << 2)
+#define WEAPONINFO_AMMO_ROCKETS		 (1 << 3)
+#define WEAPONINFO_AMMO_CELLS		 (1 << 4)
+#define WEAPONINFO_ATTACK			 (1 << 5)
+#define WEAPONINFO_TIMING			 (1 << 6)
+#define WEAPONINFO_PRED_PING		 (1 << 7)
+/* The respawn generation is packed above the four-bit weapon index. */
+#define WEAPONINFO_WEAPON_MASK		0x0f
+#define WEAPONINFO_GENERATION_SHIFT 4
+
+#define PROJECTILE_ORIGIN			(1 << 0)
+#define PROJECTILE_MODEL			(1 << 1)
+#define PROJECTILE_ANGLES			(1 << 2)
+#define PROJECTILE_OWNER			(1 << 3)
+#define PROJECTILE_SPAWN_ORIGIN		(1 << 4)
+#define PROJECTILE_INITIAL			(PROJECTILE_ORIGIN | PROJECTILE_MODEL | PROJECTILE_ANGLES | PROJECTILE_OWNER | PROJECTILE_SPAWN_ORIGIN)
+
+struct gedict_s;
+typedef struct antilag_s
+{
+	vec3_t rewind_origin[ANTILAG_MAXSTATES];
+	vec3_t rewind_velocity[ANTILAG_MAXSTATES];
+	vec3_t rewind_platform_offset[ANTILAG_MAXSTATES];
+	int rewind_platform_edict[ANTILAG_MAXSTATES];
+	float rewind_time[ANTILAG_MAXSTATES];
+	int rewind_seek;
+
+	vec3_t held_origin;
+	vec3_t held_velocity;
+
+	struct gedict_s *owner;
+
+	struct antilag_s *prev;
+	struct antilag_s *next;
+} antilag_t;
+
 //typedef (void(*)(gedict_t *)) one_edict_func;
 typedef struct gedict_s
 {
@@ -1236,6 +1283,21 @@ typedef struct gedict_s
 
 // {
 	qbool spawn_effect_queued;
+// }
+
+// { antilag
+	struct antilag_s *antilag_data;
+	int weapon_index;
+	float client_time;
+	float client_spawn_time;	// client_time when the player was last spawned
+	float client_lastupdated;
+	float client_nextthink;
+	func_t client_think;
+	float client_thinkindex;
+	float client_ping;
+	float client_predflags;
+	struct gedict_s *weapon_pred;
+	int weapon_generation;
 // }
 
 // { hiprot fields

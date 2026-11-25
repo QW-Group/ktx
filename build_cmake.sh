@@ -15,6 +15,7 @@ DEFAULT_PLATFORMS=(
 	windows-x64
 	windows-x86
 	qvm
+	csprogs
 )
 PLATFORMS=("${@:-${DEFAULT_PLATFORMS[@]}}")
 
@@ -47,11 +48,15 @@ for name in "${PLATFORMS[@]}"; do
 	mkdir -p "${P}"
 	case "${name}" in
 	"qvm" ) # Build QVM library.
-		cmake -B "${P}" -S . ${BOT_SUPPORT} ${BUILD}
+		cmake -B "${P}" -S . ${BOT_SUPPORT} ${BUILD} -DBUILD_CSPROGS=OFF
 		cmake --build "${P}" --target qvm ${V}
 	;;
-	* ) # Build native library.
-		cmake -B "${P}" -S . ${BOT_SUPPORT} ${BUILD} -DCMAKE_TOOLCHAIN_FILE="tools/cross-cmake/${name}.cmake"
+	"csprogs" ) # Build csprogs.dat, which is the same for every platform, and nothing else.
+		cmake -B "${P}" -S . ${BUILD}
+		cmake --build "${P}" --target csprogs ${V}
+	;;
+	* ) # Build native library. csprogs.dat is left to the "csprogs" platform.
+		cmake -B "${P}" -S . ${BOT_SUPPORT} ${BUILD} -DBUILD_CSPROGS=OFF -DCMAKE_TOOLCHAIN_FILE="tools/cross-cmake/${name}.cmake"
 		cmake --build "${P}" ${V}
 	;;
 	esac

@@ -159,6 +159,9 @@ void ent_remove(gedict_t *t)
 		G_Error("remove client");
 	}
 
+	// a removed mover must not stay on the list of entities to rewind
+	antilag_delete_world(t);
+
 	trap_remove(NUM_FOR_EDICT(t));
 }
 
@@ -1032,6 +1035,13 @@ void WriteLong(int to, int data)
 	trap_WriteLong(to, data);
 }
 
+void WriteFloat(int to, float data)
+{
+	int send_data;
+	memcpy(&send_data, &data, sizeof(send_data));
+	trap_WriteLong(to, send_data);
+}
+
 void WriteString(int to, char *data)
 {
 	trap_WriteString(to, data);
@@ -1852,6 +1862,21 @@ char* Allowed(float f)
 char* OnOff(float f)
 {
 	return (f ? "on" : "off");
+}
+
+char *AntilagModeString(float f)
+{
+	char *new_antilag_string = "'0 - disabled'";
+	if (f == 1)
+	{
+		new_antilag_string = "'1 - KTX'";
+	}
+	else if (f == 2)
+	{
+		new_antilag_string = "'2 - MVDSV'";
+	}
+
+	return new_antilag_string;
 }
 
 // { some scores stuff

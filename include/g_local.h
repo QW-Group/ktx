@@ -223,6 +223,7 @@ enum
 	G_GETEXTFIELDPTR,
 	G_SETSENDNEEDED,
 	G_RAILTRAIL,
+	G_SKIPENTITYPHYSICS,
 	G_EXTENSIONS_LAST
 };
 extern qbool haveextensiontab[G_EXTENSIONS_LAST-G_EXTENSIONS_FIRST];
@@ -328,6 +329,7 @@ void WriteEntity(int to, gedict_t *ed);
 void WriteByte(int to, int data);
 void WriteShort(int to, int data);
 void WriteLong(int to, int data);
+void WriteFloat(int to, float data);
 void WriteString(int to, char *data);
 void WriteAngle(int to, float data);
 void WriteCoord(int to, float data);
@@ -392,6 +394,7 @@ char* Enabled(float f);
 char* Allows(float f);
 char* Allowed(float f);
 char* OnOff(float f);
+char *AntilagModeString(float f);
 
 int get_scores1(void);
 int get_scores2(void);
@@ -462,6 +465,48 @@ qbool socd_movement_assisted(gedict_t *p);
 // Work around for the fact that QVM dos not support ".*s" in printf() family functions.
 // It retuns dots array filled with dots, amount of dots depends of how long cmd name and longest cmd name.
 char* make_dots(char *dots, size_t dots_len, int cmd_max_len, char *cmd);
+
+//
+//	antilag.c
+//
+#define PRDFL_MIDAIR   1
+#define PRDFL_COILGUN  2
+#define PRDFL_YAWNMODE 4
+#define PRDFL_FORCEOFF 255
+
+/*
+ * CSQC stats the mod publishes. The engine reserves 0..31 for itself and hands
+ * mods 32..127; the csprogs reads the same numbers, so keep this in step with
+ * qcsrc/defs.qc.
+ *
+ * Gravity is not otherwise reachable from csqc: the client knows it, having
+ * been sent the movevars at connect, but no builtin surfaces them to QuakeC.
+ */
+#define STAT_KTX_GRAVITY 32
+
+// value type for trap_clientstat/trap_pointerstat, following FTE's etype codes
+#define KTXSTAT_FLOAT 2
+
+extern float stat_sv_gravity;
+void KTX_RegisterStats(void);
+void KTX_UpdateStats(void);
+
+extern float time_corrected;
+void UpdateProjectileSendNeeded(void);
+float antilag_current_ping_msec(gedict_t *e);
+void antilag_lagmove(antilag_t *data, float goal_time);
+void antilag_lagmove_all(gedict_t *e, float goal_time);
+void antilag_lagmove_all_hitscan(gedict_t *e);
+void antilag_lagmove_all_proj(gedict_t *owner, gedict_t *e);
+void antilag_lagmove_all_proj_bounce(gedict_t *owner, gedict_t *e);
+void antilag_unmove_specific(gedict_t *ent);
+void antilag_unmove_all(void);
+void antilag_reset(void);
+antilag_t *antilag_create_player(gedict_t *e);
+antilag_t *antilag_create_world(gedict_t *e);
+void antilag_delete_player(gedict_t *e);
+void antilag_delete_world(gedict_t *e);
+void antilag_log(gedict_t *e, antilag_t *antilag);
 
 //
 // subs.c
@@ -585,6 +630,10 @@ qbool CanDamage(gedict_t *targ, gedict_t *inflictor);
 void T_Damage(gedict_t *targ, gedict_t *inflictor, gedict_t *attacker, float damage);
 void T_RadiusDamage(gedict_t *inflictor, gedict_t *attacker, float damage, gedict_t *ignore,
 					deathType_t dtype);
+void T_RadiusDamage_Ignore2(gedict_t *inflictor, gedict_t *attacker, float damage, gedict_t *ignore,
+		gedict_t *ignore2, deathType_t dtype);
+void T_RadiusDamageApply(gedict_t *inflictor, gedict_t *attacker, gedict_t *head, float damage,
+		deathType_t dtype);
 void T_BeamDamage(gedict_t *attacker, float damage);
 
 //items.c

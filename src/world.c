@@ -209,6 +209,8 @@ void SP_worldspawn(void)
 		trap_cvar_set("sv_gravity", "800");
 	}
 
+	KTX_RegisterStats();
+
 // the area based ambient sounds MUST be the first precache_sounds
 
 // player precaches     
@@ -1571,6 +1573,16 @@ void FixRules(void)
 
 	FixYawnMode(); // yawn mode
 
+#ifndef CSQC_SUPPORT
+	// KTX's own antilag advances a new projectile by the shooter's latency,
+	// which needs the csprogs to predict it on the client. This build has none,
+	// so fall back to the engine's antilag.
+	if (cvar("sv_antilag") == 1)
+	{
+		cvar_fset("sv_antilag", 2);
+	}
+#endif
+
 	k_maxspeed = cvar("sv_maxspeed");
 
 	FixCmdFloodProtect(); // cmd flood protect
@@ -1829,11 +1841,46 @@ void check_fcheck(void);
 void CheckTeamStatus(void);
 void SendSpecInfo(void);
 void DoMVDAutoTrack(void);
+void antilag_updateworld(void);
 
 void FixNoSpecs(void);
 
+/*
+ * Values published to a predicting client as CSQC stats.
+ *
+ * The engine resolves the pointer once and then reads through it every frame
+ * while building each client's stats, so this has to be a global that outlives
+ * registration and is kept current. Registration is dropped whenever the progs
+ * are loaded, so it happens per map, from worldspawn.
+ */
+float stat_sv_gravity;
+
+void KTX_RegisterStats(void)
+{
+	if (!HAVEEXTENSION(G_POINTERSTAT))
+	{
+		return;
+	}
+
+	KTX_UpdateStats();
+
+	trap_pointerstat(STAT_KTX_GRAVITY, KTXSTAT_FLOAT, &stat_sv_gravity);
+}
+
+void KTX_UpdateStats(void)
+{
+	if (!HAVEEXTENSION(G_POINTERSTAT))
+	{
+		return;
+	}
+
+	stat_sv_gravity = cvar("sv_gravity");
+}
+
 void StartFrame(int time)
 {
+	KTX_UpdateStats();
+
 	framecount++;
 
 	if (framecount == 1)
@@ -1914,7 +1961,12 @@ void StartFrame(int time)
 
 	TeamplayGameTick();
 
+	UpdateProjectileSendNeeded();
+
 	WillPause();
+
+	time_corrected = g_globalvars.time;
+	antilag_updateworld();
 }
 
 // Check the same spawnflags as items only visible in DM for monsters as well.

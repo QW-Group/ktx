@@ -94,4 +94,6 @@ void SP_func_bob(void)
 
 	self->think = (func_t) func_bob_timer;
 	self->s.v.nextthink = g_globalvars.time + 0.1 + self->delay;
+
+	self->antilag_data = antilag_create_world(self);
 }

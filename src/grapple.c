@@ -61,15 +61,15 @@ void GrappleReset(gedict_t *rhook)
 
 	if (cvar("k_ctf_hookstyle") == 1)
 	{
-		owner->attack_finished = (self->ctf_flag & CTF_RUNE_HST) ? 
-			g_globalvars.time + ((HOOK_FIRE_RATE / 2) / cvar("k_ctf_rune_power_hst")) : g_globalvars.time + (HOOK_FIRE_RATE / 2);
+		// attack_finished runs on the owner's weapon clock, unlike hook_reset_time
+		owner->attack_finished = (self->ctf_flag & CTF_RUNE_HST) ? owner->client_time + ((HOOK_FIRE_RATE / 2) / cvar("k_ctf_rune_power_hst")) : owner->client_time + (HOOK_FIRE_RATE / 2);
 		owner->hook_reset_time = (self->ctf_flag & CTF_RUNE_HST) ? 
 			g_globalvars.time + (HOOK_FIRE_RATE / cvar("k_ctf_rune_power_hst")) : g_globalvars.time + HOOK_FIRE_RATE;
 	}
 
 	else
 	{
-		owner->attack_finished = g_globalvars.time;
+		owner->attack_finished = owner->client_time;
 		owner->hook_reset_time = g_globalvars.time;
 	}
 

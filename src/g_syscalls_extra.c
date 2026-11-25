@@ -102,6 +102,17 @@ void ExtFieldSetSendEntity(gedict_t *ed, func_t callback)
 	}
 }
 
+// Whether ExtFieldSetSendEntity() can take effect on this engine.
+qbool ExtFieldCanSetSendEntity(void)
+{
+	if (!field_ref_sendentity && HAVEEXTENSION(G_MAPEXTFIELDPTR) && HAVEEXTENSION(G_SETEXTFIELDPTR))
+	{
+		field_ref_sendentity = trap_MapExtFieldPtr("SendEntity");
+	}
+
+	return field_ref_sendentity || HAVEEXTENSION(G_SETEXTFIELD);
+}
+
 void ExtFieldSetPvsFlags(gedict_t *ed, float pvsflags)
 {
 	if (!field_ref_pvsflags && HAVEEXTENSION(G_MAPEXTFIELDPTR) && HAVEEXTENSION(G_SETEXTFIELDPTR))
@@ -126,10 +137,12 @@ void ExtFieldSetPvsFlags(gedict_t *ed, float pvsflags)
 
 void SetSendNeeded(gedict_t *ed, int sendflags, int unicast)
 {
-	if (!HAVEEXTENSION(G_SETSENDNEEDED))
+	if (HAVEEXTENSION(G_SETSENDNEEDED))
+	{
+		trap_SetSendNeeded(NUM_FOR_EDICT(ed), sendflags, unicast);
+	}
+	else if (cvar("developer"))
 	{
 		G_bprint(PRINT_HIGH, "SetSendNeeded needs support in server\n");
-		return;
 	}
-	trap_SetSendNeeded(NUM_FOR_EDICT(ed), sendflags, unicast);
 }

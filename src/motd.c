@@ -31,7 +31,7 @@ void PMOTDThink(void)
 	if ((self->attack_finished < g_globalvars.time) // expired
 			|| (!k_matchLess && match_in_progress)  // non matchless and (match has began or countdown)
 			|| (k_matchLess && match_in_progress == 1) // matchless and countdown
-			|| (PROG_TO_EDICT(self->s.v.owner)->attack_finished > g_globalvars.time)) // player fire something, so he wanna play, not reading motd
+			|| (PROG_TO_EDICT(self->s.v.owner)->attack_finished > PROG_TO_EDICT(self->s.v.owner)->client_time)) // player fire something, so he wanna play, not reading motd
 	{
 		if (self->attack_finished < g_globalvars.time)
 		{

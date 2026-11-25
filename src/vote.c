@@ -1370,6 +1370,22 @@ void hookcrhook(void)
 
 // { antilag vote feature
 
+// The antilag mode a vote switches to: off, KTX's own, the engine's, and round
+// again. KTX's own is left out of a build without CSQC support.
+static int antilag_next_mode(int mode)
+{
+	mode++;
+
+#ifndef CSQC_SUPPORT
+	if (mode == 1)
+	{
+		mode = 2;
+	}
+#endif
+
+	return (mode > 2) ? 0 : mode;
+}
+
 void vote_check_antilag(void)
 {
 	int veto;
@@ -1388,16 +1404,19 @@ void vote_check_antilag(void)
 
 	if (veto || !get_votes_req(OV_ANTILAG, true))
 	{
+		int new_antilag_value;
+
 		vote_clear(OV_ANTILAG);
 
 		// toggle antilag mode.
-		trap_cvar_set_float("sv_antilag", (float)(cvar("sv_antilag") ? 0 : 2));
+		new_antilag_value = antilag_next_mode(cvar("sv_antilag"));
+		trap_cvar_set_float("sv_antilag", (float)(new_antilag_value));
 
 		if (veto)
 		{
 			G_bprint(
 					2, "%s\n",
-					redtext(va("Antilag mode %s by admin veto", OnOff(2 == cvar("sv_antilag")))));
+					redtext(va("Antilag mode %s by admin veto", AntilagModeString(new_antilag_value))));
 		}
 		else
 		{
@@ -1405,18 +1424,18 @@ void vote_check_antilag(void)
 					2,
 					"%s\n",
 					redtext(va("Antilag mode %s by majority vote",
-								OnOff(2 == cvar("sv_antilag")))));
+							AntilagModeString(new_antilag_value))));
 		}
 	}
 }
 
 void antilag(void)
 {
-	int votes;
+	int votes, antilag_new_value;
 
 	if (match_in_progress)
 	{
-		G_sprint(self, 2, "%s mode %s\n", redtext("Antilag"), OnOff(2 == cvar("sv_antilag")));
+		G_sprint(self, 2, "%s mode %s\n", redtext("Antilag"), AntilagModeString(cvar("sv_antilag")));
 
 		return;
 	}
@@ -1435,12 +1454,14 @@ void antilag(void)
 
 	self->v.antilag = !self->v.antilag;
 
+	antilag_new_value = antilag_next_mode(cvar("sv_antilag"));
+
 	G_bprint(
 			2,
 			"%s %s!%s\n",
 			self->netname,
 			(self->v.antilag ?
-					redtext(va("votes for antilag %s", OnOff(!(2 == cvar("sv_antilag"))))) :
+					redtext(va("votes for antilag %s", AntilagModeString(antilag_new_value))) :
 					redtext(va("withdraws %s antilag vote", g_his(self)))),
 			((votes = get_votes_req(OV_ANTILAG, true)) ? va(" (%d)", votes) : ""));
 
