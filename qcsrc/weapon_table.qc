@@ -178,11 +178,15 @@ weapon_t weapons[9] =
 	// so firing starts there; states 1 and 2 loop while +attack is held. Its
 	// refire is fixed at LG_ATTACK_TIME rather than the table's attack_time,
 	// matching the server's own special case.
+	//
+	// The server fires the first bolt in the frame the trigger is pulled, by
+	// running its state 1 straight away. State 0 stands for both: it shows
+	// frame 1 and hands over to state 2.
 	{
 		"progs/v_light.mdl", 0.1, 8, IT_LIGHTNING, AMMO_CELLS, 1, 3,
 		{
-			{ 0, ANIM_ATTACK | ANIM_SOUND | ANIM_SOUND2 | ANIM_SOUNDAUTO | ANIM_LGBEAM,
-			  "weapons/lstart.wav", "weapons/lhit.wav", "", '0 0 0', '0 0 0', 1, 0, 0.1 },
+			{ 1, ANIM_ATTACK | ANIM_SOUND | ANIM_SOUND2 | ANIM_SOUNDAUTO | ANIM_LGBEAM,
+			  "weapons/lstart.wav", "weapons/lhit.wav", "", '0 0 0', '0 0 0', 2, 0, 0.1 },
 			{ -4, ANIM_SOUND | ANIM_LGBEAM | ANIM_LTIME | ANIM_ATTACK | ANIM_BRANCH,
 			  "weapons/lhit.wav", "", "", '0 0 0', '0 0 0', 2, 0, 0.1 },
 			{ -4, ANIM_SOUND | ANIM_LGBEAM | ANIM_LTIME | ANIM_ATTACK | ANIM_BRANCH,

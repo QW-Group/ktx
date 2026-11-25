@@ -597,7 +597,7 @@ void player_light1(void)
 	self->s.v.frame = 105;
 	self->client_think = (func_t)player_light2;
 	self->client_nextthink = self->client_time + 0.1;
-	self->client_thinkindex = 1;
+	self->client_thinkindex = 2;
 
 	self->think = (func_t)player_dummyanim;
 	self->s.v.nextthink = g_globalvars.time + 0.1;

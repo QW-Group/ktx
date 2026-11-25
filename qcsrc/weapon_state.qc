@@ -377,7 +377,7 @@ static void WeaponState_Enter(float a, float buttons)
 
 	if (flags & ANIM_ATTACK)
 	{
-		if ((flags & ANIM_BRANCH) && weapons[idx].itemflag == IT_LIGHTNING)
+		if (weapons[idx].itemflag == IT_LIGHTNING)
 			ws_predicted.attack_finished = ws_predicted.client_time + LG_ATTACK_TIME;
 		else
 			ws_predicted.attack_finished = ws_predicted.client_time
