@@ -2290,7 +2290,8 @@ void W_Attack(void)
 				sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
 			}
 
-			r = g_random();
+			// dubious axe RNG to make it predictable
+			r = fabs((((int)(self->client_time * 931.75) << 11) + ((int)(self->client_time) >> 6)) % 1000) / 1000;
 			if (r < 0.25)
 			{
 				player_axe1();

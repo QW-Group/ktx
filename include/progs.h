@@ -1269,6 +1269,9 @@ typedef struct gedict_s
 	struct antilag_s *antilag_data;
 	float client_time;
 	float client_lastupdated;
+	float client_nextthink;
+	func_t client_think;
+	float client_thinkindex;
 // }
 
 // { hiprot fields

@@ -4555,6 +4555,17 @@ void PlayerPostThink(void)
 		return;
 	}
 
+	if (self->client_nextthink && self->client_time >= self->client_nextthink)
+	{
+		float held_client_time = self->client_time;
+
+		self->client_time = self->client_nextthink;
+		self->client_nextthink = 0;
+		((void (*)(void))(self->client_think))();
+
+		self->client_time = held_client_time;
+	}
+
 //team
 
 // WaterMove function call moved here from PlayerPreThink to avoid
