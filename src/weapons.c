@@ -3079,71 +3079,57 @@ void can_prewar_msg(char *msg)
 	}
 }
 
-// if fire == false then can_prewar is called for jump
-qbool can_prewar(qbool fire)
+// Why the player may not fire before the match, or NULL if they may.
+// If fire == false the question is about jumping.
+static char *prewar_denied(qbool fire)
 {
-	int k_prewar;
-
 	if (match_in_progress == 2)
 	{
-		return true;  // u can fire/jump
+		return NULL;
 	}
 
-	k_prewar = cvar("k_prewar");
-
-	switch (k_prewar)
+	switch ((int)cvar("k_prewar"))
 	{
 		case 1:
-			goto captains;
-			// probably u can fire/jump
+			break;
 
 		case 2:
-			if (self->ready)
+			if (!self->ready)
 			{
-				goto captains;
+				return fire ? "type ready to enable fire" : "type ready to enable jumps";
 			}
 
-			// probably u can jump/fire if ready
-			if (fire)
-			{
-				can_prewar_msg(redtext("type ready to enable fire"));
-			}
-			else
-			{
-				can_prewar_msg(redtext("type ready to enable jumps"));
-			}
-
-			return false; // u can't fire/jump if _not_ ready
+			break;
 
 		case 0:
 		default:
 			if (fire)
-			{  // u can't fire
-				can_prewar_msg(redtext("can't fire, prewar is disabled"));
-
-				return false;
+			{
+				return "can't fire, prewar is disabled";
 			}
 
-			goto captains;
-			// probably u can jump
+			break;
 	}
 
-captains:
-
-	if (k_captains != 2)
+	if (fire && (k_captains == 2))
 	{
-		return true; // u can fire/jump
+		return "can't fire until in captains mode";
 	}
 
-	if (fire)
+	return NULL;
+}
+
+// if fire == false then can_prewar is called for jump
+qbool can_prewar(qbool fire)
+{
+	char *why = prewar_denied(fire);
+
+	if (why)
 	{
-		// u can't fire
-		can_prewar_msg(redtext("can't fire until in captains mode"));
-
-		return false;
+		can_prewar_msg(redtext(why));
 	}
 
-	return true; // u can jump
+	return !why;
 }
 
 /*
